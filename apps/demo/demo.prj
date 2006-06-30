@@ -5,6 +5,9 @@ order2=0
 order3=0
 order4=0
 order5=0
+order6=0
+order7=0
+order8=0
 [projectoptions]
 options=39
  [projectoptionsfo]
@@ -80,14 +83,18 @@ exceptclassnames=1
  EconvertError
 exceptignore=1
  0
-modulenames=0
-moduletypes=0
-modulefiles=0
+modulenames=1
+ MAINFO
+moduletypes=1
+ TMAINFO
+modulefiles=1
+ main.mfm
 mainfile=demo.pas
 targetfile=demo${EXEEXT}
 messageoutputfile=
 copymessages=0
 closemessages=1
+checkmethods=1
 makecommand=${COMPILER}
 debugcommand=${DEBUGGER}
 debugoptions=
@@ -165,6 +172,8 @@ editfontheight=0
 editfontwidth=0
 editfontextraspace=0
 editfontantialiased=1
+backupfilecount=2
+encoding=0
 newprojectfiles=4
  ${TEMPLATEDIR}default/project.pas
  ${TEMPLATEDIR}default/main.pas
@@ -200,6 +209,7 @@ newsubfoform=${TEMPLATEDIR}default/subform.mfm
 stoponexception=0
 activateonbreak=1
 showconsole=0
+externalconsole=0
 [breakpoints]
 on=0
 path=0
@@ -220,23 +230,22 @@ files=
  a=0,4132,0,Files
  )
 [layout]
-windowlayout=249
+windowlayout=243
  [mainfo]
- stackedunder=mainfo.panel1
+ stackedunder=componentpalettefo
  x=4
  y=24
  cx=286
  cy=74
  wsize=0
- active=0
+ active=1
  visible=1
  [mainfo.basedock]
  splitdir=2
  useroptions=5616
  [mainfo.openfile]
  filenames=0
- lastdir=
- filefilterindex=2
+ filefilterindex=0
  filecolwidth=174
  [actionsmo.watchesonact]
  checked=1
@@ -258,12 +267,12 @@ windowlayout=249
  visible=1
  x=0
  y=0
- cx=284
+ cx=286
  cy=34
  [componentpalettefo]
  splitdir=0
  useroptions=15
- stackedunder=mainfo
+ stackedunder=
  parent=
  x=335
  y=24
@@ -288,24 +297,18 @@ windowlayout=249
  useroptions=783
  stackedunder=objectinspectorfo
  parent=
- x=242
- y=20
- cx=778
- cy=221
+ x=510
+ y=325
+ cx=310
+ cy=245
  wsize=0
  active=0
  visible=0
  [watchfo.grid]
  width0=13
- values1=3
-  
-  
-  
+ values1=0
  width1=152
- values2=3
-  
-  
-  
+ values2=0
  [watchfo.watchon]
  [watchfo.expression]
  [watchfo.watcheson]
@@ -315,16 +318,16 @@ windowlayout=249
  useroptions=527
  stackedunder=disassfo
  parent=
- x=548
- y=66
- cx=471
- cy=471
+ x=687
+ y=71
+ cx=319
+ cy=519
  wsize=0
  active=0
  visible=0
  [objectinspectorfo.grid]
- width0=171
- width1=284
+ width0=114
+ width1=189
  [breakpointsfo]
  splitdir=0
  useroptions=527
@@ -344,8 +347,8 @@ windowlayout=249
  useroptions=527
  stackedunder=stackfo
  parent=
- x=537
- y=26
+ x=497
+ y=136
  cx=483
  cy=210
  wsize=0
@@ -371,10 +374,10 @@ windowlayout=249
  useroptions=527
  stackedunder=cpufo
  parent=
- x=313
- y=99
- cx=663
- cy=504
+ x=407
+ y=349
+ cx=254
+ cy=180
  wsize=0
  active=0
  visible=0
@@ -395,17 +398,17 @@ windowlayout=249
  useroptions=527
  stackedunder=targetconsolefo
  parent=
- x=548
+ x=181
  y=115
- cx=369
- cy=198
+ cx=736
+ cy=455
  [cpufo]
  splitdir=0
  useroptions=527
  stackedunder=threadsfo
  parent=
- x=378
- y=20
+ x=192
+ y=451
  cx=257
  cy=188
  wsize=0
@@ -438,7 +441,7 @@ windowlayout=249
  [targetconsolefo]
  splitdir=0
  useroptions=1
- stackedunder=componentpalettefo
+ stackedunder=mainfo.panel1
  parent=
  x=116
  y=297
@@ -446,11 +449,11 @@ windowlayout=249
  cy=347
  wsize=0
  active=0
- visible=1
+ visible=0
  [mainfo.panel1]
  splitdir=2
  useroptions=2047
- stackedunder=
+ stackedunder=formdesignerfo
  parent=
  x=4
  y=201
@@ -470,15 +473,25 @@ tabstops=4
 finddtext=
 findhistory=0
 findoptions=1
-editpos=0
-sourcefiles=0
-ismoduletexts=0
-modules=0
-visiblemodules=0
+editpos=2
+ 0,-1073741823
+ 0,0
+bookmarks0=0
+bookmarks1=0
+sourcefiles=2
+ demo.pas
+ main.pas
+ismoduletexts=2
+ 0
+ 0
+modules=1
+ main.mfm
+visiblemodules=1
+ 1
 [sourcefo.tabwidget]
 tabsize=134
 firsttab=0
-index=-1
+index=1
 [components]
 [selecteditpage]
 colwidth=100
@@ -489,3 +502,6 @@ cy=0
 [progparams]
 parameters=
 workingdirectory=
+envvarons=0
+envvarnames=0
+envvarvalues=0
