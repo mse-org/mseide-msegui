@@ -1,0 +1,19 @@
+BPLFILES = \
+  linmsedesignutils
+FILES= \
+  msesyntaxedit\
+  mseformdatatools\
+  msedesignintf\
+  msegdbutils\
+  msepropertyeditors\
+  msecomponenteditors\
+  mseimagelisteditor_mfm\
+  mseimagelisteditor\
+  msestringlisteditor\
+  msestringlisteditor_mfm\
+  msedoublestringlisteditor\
+  msedoublestringlisteditor_mfm\
+  msesyntaxpainter\
+  mseparser\
+
+

@@ -1,0 +1,35 @@
+caseinsensitive
+addkeywordchars 
+ '()<>='
+styles
+ default ''
+ words 'b'
+ comment 'i' cl_dkblue
+ option 'b' cl_dkblue
+ string '' cl_dkblue
+
+keyworddefs objecttext
+ 'END' 'END>' 'INHERITED' 'INLINE' 'ITEM' 'OBJECT'
+keyworddefs operators
+ '(' ')' '<' '>' '='
+
+scope string string
+ endtokens
+  '''' ''
+
+scope string1 string
+ calltokens
+  '''' string
+ endtokens
+  ' ' ''
+
+scope main
+
+ keywords words
+  objecttext
+  operators
+
+ calltokens
+  '''' string
+  '#' string1
+

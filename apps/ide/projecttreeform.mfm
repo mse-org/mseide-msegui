@@ -1,0 +1,126 @@
+object projecttreefo: tprojecttreefo
+  optionswidget = [ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_destroywidgets, ow_hinton, ow_autoscale]
+  bounds_x = 263
+  bounds_y = 431
+  bounds_cx = 286
+  bounds_cy = 201
+  frame.grip_size = 10
+  frame.dummy = 0
+  visible = False
+  container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_mousetransparent, ow_destroywidgets, ow_autoscale]
+  container.bounds_cx = 276
+  container.bounds_cy = 201
+  container.frame.dummy = 0
+  dragdock.splitter_size = 0
+  dragdock.optionsdock = [od_savepos, od_canmove, od_canfloat, od_candock]
+  options = [fo_savepos, fo_savestate]
+  statfile = mainfo.projectstatfile
+  caption = 'project'
+  oncreate = projecttreefooncreate
+  onloaded = projecttreefoonloaded
+  ondestroy = projecttreefoondestroy
+  onstatupdate = projecttreeonupdatestat
+  moduleclassname = 'tdockform'
+  object grid: twidgetgrid
+    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_focusbackonesc, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+    bounds_cx = 276
+    bounds_cy = 201
+    frame.dummy = 0
+    anchors = []
+    optionsgrid = [og_colsizing, og_focuscellonenter, og_colchangeontabkey, og_autopopup]
+    datacols.count = 2
+    datacols.items = <    
+      item
+        linecolorfix = -1610612733
+        width = 141
+        options = [co_readonly, co_savevalue]
+        oncellevent = projecteditoncellevent
+        widgetname = 'projectedit'
+        data = (
+          dl_custom
+          (          )
+        )
+      end    
+      item
+        linecolorfix = -1610612733
+        width = 129
+        options = [co_fill, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
+        widgetname = 'edit'
+        data = (
+          dl_custom
+          (          )
+        )
+      end>
+    datarowheight = 18
+    drag.onbeforedragbegin = gridondragbegin
+    drag.onbeforedragdrop = gridonderagdrop
+    drag.onafterdragover = gridondragover
+    reffontheight = 16
+    object projectedit: ttreeitemedit
+      optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+      bounds_cx = 141
+      bounds_cy = 18
+      color = -1879048185
+      frame.levelo = 0
+      frame.colorclient = -2147483646
+      frame.localprops = [frl_levelo, frl_colorclient]
+      frame.dummy = 0
+      taborder = 1
+      onpopup = projecteditonpopup
+      visible = False
+      optionsedit = [oe_readonly, oe_undoonesc, oe_checkmrcancel, oe_exitoncursor, oe_locate, oe_savevalue, oe_savestate]
+      onchange = projecteditonchange
+      itemlist.onstatreaditem = projecteditonstatreaditem
+      onupdaterowvalues = projecteditonupdaterowvalues
+      fieldedit = edit
+      options = [teo_treecolnavig, teo_keyrowmoving]
+      oncheckrowmove = itemoncheckrowmove
+      reffontheight = 16
+    end
+    object edit: trecordfieldedit
+      optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+      bounds_x = 142
+      bounds_cx = 129
+      bounds_cy = 18
+      color = -1879048185
+      frame.levelo = 0
+      frame.colorclient = -2147483645
+      frame.localprops = [frl_levelo, frl_colorclient]
+      frame.dummy = 0
+      visible = False
+      reffontheight = 16
+    end
+  end
+  object unitpopup: tpopupmenu
+    menu.action = addunitfileact
+    menu.submenu.count = 2
+    menu.submenu.items = <    
+      item
+        action = addunitfileact
+      end    
+      item
+        action = removeunitfileact
+        onexecute = removeunitfileonexecute
+      end>
+    onupdate = unitpopuponupdate
+    left = 32
+    top = 40
+  end
+  object addunitfileact: taction
+    caption = '&Add Unit'
+    onexecute = addunitfileonexecute
+    left = 32
+    top = 72
+  end
+  object unitfiledialog: tfiledialog
+    controller.historymaxcount = 0
+    left = 144
+    top = 40
+  end
+  object removeunitfileact: taction
+    caption = '&Remove Unit'
+    onexecute = removeunitfileonexecute
+    left = 32
+    top = 96
+  end
+end

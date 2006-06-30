@@ -1,0 +1,44 @@
+object messagefo: tmessagefo
+  optionswidget = [ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_destroywidgets, ow_hinton, ow_autoscale]
+  bounds_x = 100
+  bounds_y = 100
+  bounds_cx = 491
+  bounds_cy = 317
+  frame.grip_size = 10
+  frame.grip_options = [go_closebutton, go_fixsizebutton, go_topbutton]
+  frame.dummy = 0
+  visible = False
+  container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_mousetransparent, ow_destroywidgets, ow_autoscale]
+  container.bounds_cx = 481
+  container.bounds_cy = 317
+  container.frame.dummy = 0
+  dragdock.caption = 'Messages'
+  dragdock.optionsdock = [od_savepos, od_canmove, od_canfloat, od_candock, od_propsize]
+  statfile = mainfo.projectstatfile
+  moduleclassname = 'tdockform'
+  object messages: tstringgrid
+    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_focusbackonesc, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+    bounds_cx = 481
+    bounds_cy = 317
+    frame.dummy = 0
+    anchors = []
+    font.name = 'stf_default'
+    font.options = [foo_antialiased]
+    font.dummy = 0
+    datacols.count = 1
+    datacols.linewidth = 0
+    datacols.items = <    
+      item
+        linecolorfix = -1610612733
+        width = 3000
+        options = [co_readonly, co_focusselect]
+        colorselect = 16777088
+        optionsedit = []
+      end>
+    rowcountmax = 5000
+    datarowlinewidth = 0
+    datarowheight = 14
+    oncellevent = messagesoncellevent
+    reffontheight = 14
+  end
+end

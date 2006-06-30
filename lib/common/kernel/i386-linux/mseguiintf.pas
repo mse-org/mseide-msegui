@@ -1,0 +1,4774 @@
+{ MSEgui Copyright (c) 1999-2006 by Martin Schreiber
+
+    See the file COPYING.MSE, included in this distribution,
+    for details about the copyright.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+}
+unit mseguiintf; //i386-linux
+
+{$ifdef FPC}{$mode objfpc}{$h+}{$INTERFACES CORBA}{$GOTO ON}{$endif}
+
+interface
+
+uses
+ Xlib,msetypes,msegui,msegraphics,msegraphutils,mseevent,msepointer,mseguiglob,
+ msethread{$ifdef FPC},x,xutil,dynlibs{$endif},libc,msesysintf,msestockobjects,msestrings;
+
+{$ifdef FPC}
+{$ifdef LINUX}
+{$ifdef msedebug}
+var
+ _IO_stdin: P_IO_FILE; cvar;        //avoid link errors if rtl is compiled with stabs info
+ _IO_stdout: P_IO_FILE; cvar;
+ _IO_stderr: P_IO_FILE; cvar;
+ __malloc_initialized : longint;cvar;
+ h_errno : longint;cvar;
+{$endif}
+{$endif}
+{$endif}
+
+{ $define smdebug}
+
+{$include ../mseguiintf.inc}
+
+{$define hassm}
+
+{$ifndef hassm}
+ { $define hassaveyourself}
+{$endif}
+
+const
+ {$ifdef FPC}
+// threadslib = 'pthread';
+ Xlibmodulename = 'X11';
+ {$endif}
+ sXlib = Xlibmodulename;
+ pixel0 = $000000;
+ pixel1 = $ffffff;
+type
+  Bool = integer;
+  XID = type Cardinal;
+
+function msedisplay: pdisplay;
+function msevisual: pvisual;
+function rootwindow(id: winidty = 0): winidty;
+function defaultscreen: pscreen;
+
+type
+ _XIM = record end;
+ XIM = ^_XIM;
+ _XIC = record end;
+ XIC = ^_XIC;
+ dword = longword;
+  VisualID = dword;
+  Visual = record
+    ext_data: PXExtData;  { hook for extension to hang data  }
+    visualid: VisualID;   { visual id of this visual  }
+    _class: Longint;
+    red_mask: Cardinal;
+    green_mask: Cardinal;
+    blue_mask: Cardinal;
+    bits_per_rgb: Longint;
+    map_entries: Longint;
+  end;
+  msepvisual = ^visual;
+  
+  PXWMHints = ^XWMHints;
+  XWMHints = record
+    flags: Longint;  { marks which fields in this structure are defined  }
+    input: Bool;     { does this application rely on the window manager to get keyboard input?  }
+    initial_state: Longint;  { see below  }
+    icon_pixmap: xid;     { pixmap to be used as icon  }
+    icon_window: xid;     { window to be used as icon  }
+    icon_x: Longint;         { initial position of icon  }
+    icon_y: Longint;
+    icon_mask: xid;       { icon mask bitmap  }
+    window_group: XID;       { id of related window group }
+    { this structure may be extended in the future  }
+  end;
+
+{ definition for flags of XWMHints  }
+const
+  InputHint = 1 shl 0;
+  StateHint = 1 shl 1;
+  IconPixmapHint = 1 shl 2;
+  IconWindowHint = 1 shl 3;
+  IconPositionHint = 1 shl 4;
+  IconMaskHint = 1 shl 5;
+  WindowGroupHint = 1 shl 6;
+  AllHints = (((((InputHint or StateHint) or IconPixmapHint) or IconWindowHint)
+    or IconPositionHint) or IconMaskHint) or WindowGroupHint;
+  XUrgencyHint = 1 shl 8;
+  
+function XSetWMHints(Display: PDisplay; W: xid; WMHints: PXWMHints): Longint; cdecl;
+                              external sXLib name 'XSetWMHints';
+function XSetForeground(Display: PDisplay; GC: TGC; Foreground: Cardinal): longint; cdecl;
+                              external sXLib name 'XSetForeground';
+      //bug in borland Xlib.pas
+procedure XDrawImageString(Display: PDisplay; D: TDrawable; GC: TGC;
+  X, Y: Integer; S: PChar; Len: Integer); cdecl;
+                              external sXLib name 'XDrawImageString';
+procedure XDrawImageString16(Display: PDisplay; D: TDrawable; GC: TGC;
+  X, Y: Integer; S: Pxchar2b; Len: Integer); cdecl;
+                              external sXLib name 'XDrawImageString16';
+procedure XDrawString16(Display: PDisplay; D: TDrawable; GC: TGC;
+  X, Y: Integer; S: Pxchar2b; Len: Integer); cdecl;
+                              external sXLib name 'XDrawString16';
+function XOpenIM(Display: PDisplay; rdb: PXrmHashBucketRec;
+             res_name: pchar; res_class: pchar): XIM; cdecl;
+                              external sXLib name 'XOpenIM';
+function XCloseIM(IM: XIM): TStatus; cdecl;
+                              external sXLib name 'XCloseIM';
+function XCreateIC(IM: XIM): XIC; cdecl; varargs;
+                              external sXLib name 'XCreateIC';
+procedure XDestroyIC(IC: XIC); cdecl;
+                              external sXLib name 'XDestroyIC';
+function XSetLocaleModifiers(modifier_list: pchar): pchar; cdecl;
+                              external sXLib name 'XSetLocaleModifiers';
+function XSetICValues(IC: XIC): PChar; cdecl; varargs;
+                              external sXLib name 'XSetICValues';
+procedure XSetICFocus(IC: XIC); cdecl;
+                              external sXLib name 'XSetICFocus';
+procedure XUnsetICFocus(IC: XIC); cdecl;
+                              external sXLib name 'XUnsetICFocus';
+function XwcLookupString(IC: XIC; Event: PXKeyPressedEvent;
+  BufferReturn: Pwidechar; WCharsBuffer: Longint; KeySymReturn: PKeySym;
+  StatusReturn: PStatus): Longint; cdecl;
+                              external sXLib name 'XwcLookupString';
+function Xutf8LookupString(IC: XIC; Event: PXKeyPressedEvent;
+  BufferReturn: Pchar; CharsBuffer: Longint; KeySymReturn: PKeySym;
+  StatusReturn: PStatus): Longint; cdecl;
+                              external sXLib name 'Xutf8LookupString';
+function XCreateImage(Display: PDisplay; Visual: msePVisual; Depth: Cardinal;
+  Format: Longint; Offset: Longint; Data: PChar; Width, Height: Cardinal;
+  BitmapPad: Longint; BytesPerLine: Longint): PXImage; cdecl;
+                              external sXLib name 'XCreateImage';
+
+
+implementation
+
+uses
+ msebits,msekeyboard,sysutils,msesysutils,msefileutils,msedatalist,
+ xrender,xft{$ifdef hassm},sm,ice{$endif};
+ 
+var
+ pixmapcount: integer;
+ 
+type
+ tsimplebitmap1 = class(tsimplebitmap);
+
+{$ifdef FPC}
+ {$macro on}
+ {$define xchar2b:=txchar2b}
+ {$define xcharstruct:=txcharstruct}
+ {$define xfontstruct:=txfontstruct}
+ {$define xfontprop:=txfontprop}
+ {$define xpoint:=txpoint}
+ {$define xgcvalues:=txgcvalues}
+ {$define region:=tregion}
+ {$define ximage:=tximage}
+ {$define xwindowattributes:=txwindowattributes}
+ {$define xclientmessageevent:=txclientmessageevent}
+ {$define xtype:=_type}
+ {$define xrectangle:=txrectangle}
+ {$define keysym:=tkeysym}
+ {$define xsetwindowattributes:=txsetwindowattributes}
+ {$define xwindowchanges:=txwindowchanges}
+ {$define xevent:=txevent}
+ {$define xfunction:=_function}
+ {$define xwindow:=window}
+ {$define xlookupkeysym_:=xlookupkeysymval}
+ {$define c_class:= _class}
+ {$define xtextproperty:= txtextproperty}
+{$endif}
+
+const
+ x_copyarea = 62;
+ IsUnmapped = 0;
+ IsUnviewable = 1;
+ IsViewable = 2;
+ wholecircle = 360*64;
+
+ defaultfontnames: defaultfontnamesty =
+  //stf_default  stf_menu    stf_prop      stf_fixed,
+      ('',          '',  'Helvetica',      'Courier',
+  //stf_swiss    stf_roman          stf_courier
+      'Arial', 'Times New Roman', 'Courier New');
+
+ xftdefaultfontnames: defaultfontnamesty =
+  //stf_default  stf_menu    stf_prop      stf_fixed,
+      ('',          '',  'sans',      'fixed',
+  //stf_swiss    stf_roman          stf_courier
+      'Arial', 'serif', 'Courier New');
+
+ capstyles: array[capstylety] of integer = (capbutt,capround,capprojecting);
+ joinstyles: array[joinstylety] of integer = (joinmiter,joinround,joinbevel);
+
+{ definitions for initial window state  }
+{ for windows that are not mapped  }
+  WithdrawnState = 0;
+  {$EXTERNALSYM WithdrawnState}
+{ most applications want to start this way  }
+  NormalState = 1;
+  {$EXTERNALSYM NormalState}
+{ application wants to start as an icon  }
+  IconicState = 3;
+  {$EXTERNALSYM IconicState}
+{ Obsolete states no longer defined by ICCCM }
+{ don't know or care  }
+  DontCareState = 0;
+  {$EXTERNALSYM DontCareState}
+{ application wants to start zoomed  }
+  ZoomState = 2;
+  {$EXTERNALSYM ZoomState}
+{ application believes it is seldom used;  }
+  InactiveState = 4;
+  {$EXTERNALSYM InactiveState}
+
+type
+
+ //from region.h
+ box = record
+  x1,x2,y1,y2: smallint
+ end;
+ pbox = ^box;
+ XRegion = record
+    size: integer;
+    numRects: integer;
+    rects: pbox;
+    extents: box;
+ end;
+ pxregion = ^xregion;
+
+ xftstatety = (xfts_clipregionvalid{,xfts_colorvalid});
+ xftstatesty = set of xftstatety;
+ x11gcty = record
+  gcdrawingflags: drawingflagsty;
+  gcrasterop: rasteropty;
+  gcclipregion: regionty;
+  xftdraw: pxftdraw;
+  xftcolor: txftcolor;
+  xftbackgroundcolor: txftcolor;
+  xftfont: pxftfont;
+  xftstate: xftstatesty;
+  platformdata: array[12..23] of cardinal; //platform dependent
+ end;
+
+ fontmatrixmodety = (fmm_fix,fmm_linear,fmm_matrix);
+ x11fontdataty = record
+  infopo: pxfontstruct;
+  matrixmode: fontmatrixmodety;
+  defaultwidth: integer;
+  rowlength: word;
+  platformdata: array[4..15] of cardinal; //plattform dependent
+ end;
+{$ifdef FPC}
+ Colormap = TXID;
+ Atom = type Cardinal;
+ Cursor = TXID;
+ wchar_t = longword;
+ pwchar_t = ^wchar_t;
+ ppwchar_t = ^pwchar_t;
+{$endif}
+ atomarty = array of atom;
+
+const
+ mouseeventmask = buttonpressmask or buttonreleasemask or pointermotionmask;
+
+ //from keysymdef.h
+ XK_BackSpace =     $FF08; //* back space, back char */
+ XK_Tab =           $FF09;
+ XK_Linefeed =      $FF0A; //* Linefeed, LF */
+ XK_Clear =         $FF0B;
+ XK_Return =        $FF0D; //* Return, enter */
+ XK_Pause =         $FF13; //* Pause, hold */
+ XK_Scroll_Lock =   $FF14;
+ XK_Sys_Req =       $FF15;
+ XK_Escape =        $FF1B;
+ XK_Delete =        $FFFF; //* Delete, rubout */
+
+//* Cursor control & motion */
+ XK_Home =          $FF50;
+ XK_Left =          $FF51; //* Move left, left arrow */
+ XK_Up =            $FF52; //* Move up, up arrow */
+ XK_Right =         $FF53; //* Move right, right arrow */
+ XK_Down =          $FF54; //* Move down, down arrow */
+ XK_Prior =         $FF55; //* Prior, previous */
+ XK_Page_Up =       $FF55;
+ XK_Next =          $FF56; //* Next */
+ XK_Page_Down =     $FF56;
+ XK_End =           $FF57; //* EOL */
+ XK_Begin =         $FF58; //* BOL */
+
+//* Misc Functions */
+ XK_Select =        $FF60; //* Select, mark */
+ XK_Print =         $FF61;
+ XK_Execute =       $FF62; //* Execute, run, do */
+ XK_Insert =        $FF63; //* Insert, insert here */
+ XK_Undo =          $FF65; //* Undo, oops */
+ XK_Redo =          $FF66; //* redo, again */
+ XK_Menu =          $FF67;
+ XK_Find =          $FF68; //* Find, search */
+ XK_Cancel =        $FF69; //* Cancel, stop, abort, exit */
+ XK_Help =          $FF6A; //* Help */
+ XK_Break =         $FF6B;
+ XK_Mode_switch =   $FF7E; //* Character set switch */
+ XK_script_switch = $FF7E; //* Alias for mode_switch */
+ XK_Num_Lock =      $FF7F;
+
+//* Keypad Functions, keypad numbers cleverly chosen to map to ascii */
+ XK_KP_Space =      $FF80; //* space */
+ XK_KP_Tab =        $FF89;
+ XK_KP_Enter =      $FF8D; //* enter */
+ XK_KP_F1 =         $FF91; //* PF1, KP_A, ... */
+ XK_KP_F2 =         $FF92;
+ XK_KP_F3 =         $FF93;
+ XK_KP_F4 =         $FF94;
+ XK_KP_Home =       $FF95;
+ XK_KP_Left =       $FF96;
+ XK_KP_Up =         $FF97;
+ XK_KP_Right =      $FF98;
+ XK_KP_Down =       $FF99;
+ XK_KP_Prior =      $FF9A;
+ XK_KP_Page_Up =    $FF9A;
+ XK_KP_Next =       $FF9B;
+ XK_KP_Page_Down =  $FF9B;
+ XK_KP_End =        $FF9C;
+ XK_KP_Begin =      $FF9D;
+ XK_KP_Insert =     $FF9E;
+ XK_KP_Delete =     $FF9F;
+ XK_KP_Equal =      $FFBD; //* equals */
+ XK_KP_Multiply =   $FFAA;
+ XK_KP_Add =        $FFAB;
+ XK_KP_Separator =  $FFAC; //* separator, often comma */
+ XK_KP_Subtract =   $FFAD;
+ XK_KP_Decimal =    $FFAE;
+ XK_KP_Divide =     $FFAF;
+
+ XK_KP_0 =          $FFB0;
+ XK_KP_1 =          $FFB1;
+ XK_KP_2 =          $FFB2;
+ XK_KP_3 =          $FFB3;
+ XK_KP_4 =          $FFB4;
+ XK_KP_5 =          $FFB5;
+ XK_KP_6 =          $FFB6;
+ XK_KP_7 =          $FFB7;
+ XK_KP_8 =          $FFB8;
+ XK_KP_9 =          $FFB9;
+
+ XK_F1 =            $FFBE;
+ XK_F35 =           $FFE0;
+
+//* Modifiers */
+ XK_Shift_L =       $FFE1; //* Left shift */
+ XK_Shift_R =       $FFE2; //* Right shift */
+ XK_Control_L =     $FFE3; //* Left control */
+ XK_Control_R =     $FFE4; //* Right control */
+ XK_Caps_Lock =     $FFE5; //* Caps lock */
+ XK_Shift_Lock =    $FFE6; //* Shift lock */
+
+ XK_Meta_L =        $FFE7; //* Left meta */
+ XK_Meta_R =        $FFE8; //* Right meta */
+ XK_Alt_L =         $FFE9; //* Left alt */
+ XK_Alt_R =         $FFEA; //* Right alt */
+ XK_Super_L =       $FFEB; //* Left super */
+ XK_Super_R =       $FFEC; //* Right super */
+ XK_Hyper_L =       $FFED; //* Left hyper */
+ XK_Hyper_R =       $FFEE; //* Right hyper */
+
+ //ISO 9995 Function and Modifier Keys
+ //Byte 3 = 0xFE
+
+ XK_ISO_Left_Tab =                $FE20;
+ XK_ISO_Move_Line_Up =            $FE21;
+ XK_ISO_Move_Line_Down =          $FE22;
+ XK_ISO_Partial_Line_Up =         $FE23;
+ XK_ISO_Partial_Line_Down =       $FE24;
+ XK_ISO_Partial_Space_Left =      $FE25;
+ XK_ISO_Partial_Space_Right =     $FE26;
+ XK_ISO_Set_Margin_Left =         $FE27;
+ XK_ISO_Set_Margin_Right =        $FE28;
+ XK_ISO_Release_Margin_Left =     $FE29;
+ XK_ISO_Release_Margin_Right =    $FE2A;
+ XK_ISO_Release_Both_Margins =    $FE2B;
+ XK_ISO_Fast_Cursor_Left =        $FE2C;
+ XK_ISO_Fast_Cursor_Right =       $FE2D;
+ XK_ISO_Fast_Cursor_Up =          $FE2E;
+ XK_ISO_Fast_Cursor_Down =        $FE2F;
+ XK_ISO_Continuous_Underline =    $FE30;
+ XK_ISO_Discontinuous_Underline = $FE31;
+ XK_ISO_Emphasize =               $FE32;
+ XK_ISO_Center_Object =           $FE33;
+ XK_ISO_Enter =                   $FE34;
+
+ //from cursorfont.h
+ XC_num_glyphs =         154;
+ XC_X_cursor =             0;
+ XC_arrow =                2;
+ XC_based_arrow_down =     4;
+ XC_based_arrow_up =       6;
+ XC_boat =                 8;
+ XC_bogosity =            10;
+ XC_bottom_left_corner =  12;
+ XC_bottom_right_corner = 14;
+ XC_bottom_side =         16;
+ XC_bottom_tee =          18;
+ XC_box_spiral =          20;
+ XC_center_ptr =          22;
+ XC_circle =              24;
+ XC_clock =               26;
+ XC_coffee_mug =          28;
+ XC_cross =               30;
+ XC_cross_reverse =       32;
+ XC_crosshair =           34;
+ XC_diamond_cross =       36;
+ XC_dot =                 38;
+ XC_dotbox =              40;
+ XC_double_arrow =        42;
+ XC_draft_large =         44;
+ XC_draft_small =         46;
+ XC_draped_box =          48;
+ XC_exchange =            50;
+ XC_fleur =               52;
+ XC_gobbler =             54;
+ XC_gumby =               56;
+ XC_hand1 =               58;
+ XC_hand2 =               60;
+ XC_heart =               62;
+ XC_icon =                64;
+ XC_iron_cross =          66;
+ XC_left_ptr =            68;
+ XC_left_side =           70;
+ XC_left_tee =            72;
+ XC_leftbutton =          74;
+ XC_ll_angle =            76;
+ XC_lr_angle =            78;
+ XC_man =                 80;
+ XC_middlebutton =        82;
+ XC_mouse =               84;
+ XC_pencil =              86;
+ XC_pirate =              88;
+ XC_plus =                90;
+ XC_question_arrow =      92;
+ XC_right_ptr =           94;
+ XC_right_side =          96;
+ XC_right_tee =           98;
+ XC_rightbutton =        100;
+ XC_rtl_logo =           102;
+ XC_sailboat =           104;
+ XC_sb_down_arrow =      106;
+ XC_sb_h_double_arrow =  108;
+ XC_sb_left_arrow =      110;
+ XC_sb_right_arrow =     112;
+ XC_sb_up_arrow =        114;
+ XC_sb_v_double_arrow =  116;
+ XC_shuttle =            118;
+ XC_sizing =             120;
+ XC_spider =             122;
+ XC_spraycan =           124;
+ XC_star =               126;
+ XC_target =             128;
+ XC_tcross =             130;
+ XC_top_left_arrow =     132;
+ XC_top_left_corner =    134;
+ XC_top_right_corner =   136;
+ XC_top_side =           138;
+ XC_top_tee =            140;
+ XC_trek =               142;
+ XC_ul_angle =           144;
+ XC_umbrella =           146;
+ XC_ur_angle =           148;
+ XC_watch =              150;
+ XC_xterm =              152;
+
+ {
+ cursorshapety = (cr_default,
+             cr_none,cr_arrow,cr_cross,cr_wait,cr_ibeam,
+             cr_sizever,cr_sizehor,cr_sizebdiag,cr_sizefdiag,cr_sizeall,
+             cr_splitv,cr_splith,cr_pointinghand,cr_forbidden,cr_drag,
+             cr_topleftcorner,cr_bottomleftcorner,
+             cr_bottomrightcorner,cr_toprightcorner,
+             cr_res0,cr_res1,cr_res2,cr_res3,cr_res4,cr_res5,cr_res6,cr_res7,
+             cr_user);
+  }
+ defaultshape = xc_left_ptr;
+ standardcursors: array[cursorshapety] of cardinal = (
+      defaultshape,defaultshape,xc_left_ptr,xc_crosshair,xc_watch,xc_xterm,
+      xc_sb_v_double_arrow,xc_sb_h_double_arrow,xc_top_right_corner,xc_bottom_right_corner,xc_fleur,
+      xc_sb_v_double_arrow,xc_sb_h_double_arrow,xc_hand2,xc_circle,xc_sailboat,
+      xc_top_left_corner,xc_bottom_left_corner,
+      xc_bottom_right_corner,xc_top_right_corner,
+      defaultshape,defaultshape,defaultshape,defaultshape,
+      defaultshape,defaultshape,defaultshape,defaultshape,
+      defaultshape);
+ {
+ copymodety = (cpm_copy,cpm_or,cpm_xor,cpm_and,
+               cpm_notcopy,cpm_notor,cpm_notxor,cpm_notand,
+               cpm_not,cpm_clear,cpm_set,cpm_nop,
+               cpm_andnot,cpm_ornot,cpm_nand,cpm_nor);
+ }
+
+{
+procedure XDrawImageString; external sXLib name 'XDrawImageString';
+procedure XDrawImageString16; external sXLib name 'XDrawImageString16';
+procedure XDrawString16; external sXLib name 'XDrawString16';
+function  XSetForeground; external sXLib name 'XSetForeground';
+function XOpenIM; external sXLib name 'XOpenIM';
+function XCloseIM; external sXLib name 'XCloseIM';
+function XCreateIC; external sXLib name 'XCreateIC';
+procedure XDestroyIC; external sXLib name 'XDestroyIC';
+function XSetLocaleModifiers; external sXLib name 'XSetLocaleModifiers';
+function XSetICValues; external sXLib name 'XSetICValues';
+procedure XSetICFocus; external sXLib name 'XSetICFocus';
+procedure XUnsetICFocus; external sXLib name 'XUnsetICFocus';
+function XwcLookupString; external sXLib name 'XwcLookupString';
+function XCreateImage;  external sXLib name 'XCreateImage';
+}
+type
+ wmprotocolty = (wm_delete_window
+  {$ifdef hassaveyourself},wm_save_yourself{$endif});
+ XErrorHandler = function (Display: PDisplay; ErrorEvent: PXErrorEvent):
+    Longint; cdecl;
+ wmstatety = (wms_none,wms_withdrawn,wms_normal,wms_iconic);
+
+var
+ appdisp: pdisplay;
+ appid: winidty;
+ defscreen: pscreen;
+ defvisual: msepvisual;
+ defdepth: integer;
+ istruecolor: boolean;
+ xredmask,xgreenmask,xbluemask: cardinal;
+ xredshift,xgreenshift,xblueshift: integer;
+ xredshiftleft,xgreenshiftleft,xblueshiftleft: boolean;
+ defcolormap: colormap;
+ hasxrender: boolean;
+ hasxft: boolean;
+ screenrenderpictformat,bitmaprenderpictformat,alpharenderpictformat: pxrenderpictformat;
+
+ rootid: winidty;
+ atomatom: atom;
+ mseclientmessageatom,{timeratom,wakeupatom,}
+ wmprotocolsatom,wmstateatom,wmnameatom,wmclassatom: atom;
+ wmclientleaderatom: atom;
+ wmprotocols: array[wmprotocolty] of atom;
+ clipboardatom: atom;
+ windowatom,stringatom: atom;
+ targetsatom: atom;
+ convertselectionpropertyatom: atom;
+
+ {$ifdef hassm}
+type
+ sminfoty = record
+  iceconnection: iceconn;
+  smconnection: smcconn;
+  fd: integer;
+  shutdown: boolean;
+  shutdownpending: boolean;
+  interactstyle: integer;
+  interactwaiting,interactgranted: boolean;
+ end;
+ psminfoty = ^sminfoty;
+var
+ sminfo: sminfoty;
+ {$endif}
+ 
+ {$ifdef hassaveyourself}
+ wmcommandatom: atom;
+ saveyourselfwindow: integer;
+ {$endif}
+ 
+type
+ netatomty = (net_supported,net_workarea,
+       net_wm_state,
+       net_wm_state_maximized_vert,net_wm_state_maximized_horz,
+       net_none);
+ netwmstateoperationty = (nso_remove,nso_add,nso_toggle);
+const
+ netatomnames: array[netatomty] of string = ('_NET_SUPPORTED','_NET_WORKAREA',
+       '_NET_WM_STATE',
+       '_NET_WM_STATE_MAXIMIZED_VERT','_NET_WM_STATE_MAXIMIZED_HORZ',
+       '');
+ needednetatom = netatomty(ord(high(netatomty))-1);
+var
+ netatoms: array[netatomty] of atom;
+ netsupported: boolean;
+ netsupportedatom: atom;
+
+ sigtimerbefore: sighandler_t;
+ sigtermbefore: sighandler_t;
+ timerevent: boolean;
+ terminated: boolean;
+// cursorshape: cursorshapety;
+ screencursor: cursor;
+ im: xim;
+ ic: xic;
+ errorhandlerbefore: xerrorhandler;
+ lasteventtime: cardinal;
+ lastshiftstate: shiftstatesty;
+ clipboard: msestring;
+
+function gui_getdefaultfontnames: defaultfontnamesty;
+begin
+ if hasxft then begin
+  result:= xftdefaultfontnames;
+ end
+ else begin
+  result:= defaultfontnames;
+ end;
+end;
+
+function gui_canstackunder: boolean;
+begin
+ result:= false; //found no solution to restack windows in kde
+//result:= true;
+end;
+
+function gui_copytoclipboard(const value: msestring): guierrorty;
+begin
+ clipboard:= value;
+ xsetselectionowner(appdisp,clipboardatom,appid,lasteventtime);
+ result:= gue_ok;
+end;
+
+function gui_pastefromclipboard(out value: msestring): guierrorty;
+const
+ transferbuffersize = 1024 div 4; //1kb
+var
+ event: xevent;
+ po1: pchar;
+ acttype: atom;
+ actformat: cardinal;
+ nitems: cardinal;
+ bytesafter: cardinal;
+ charoffset: integer;
+ longoffset: integer;
+ clipboardowner: cardinal;
+ time1: cardinal;
+ value1: string;
+begin
+ result:= gue_clipboard;
+ clipboardowner:= xgetselectionowner(appdisp,clipboardatom);
+ if clipboardowner = appid then begin
+  value:= clipboard;
+  result:= gue_ok;
+ end
+ else begin
+  value:= '';
+  if clipboardowner <> none then begin
+   charoffset:= 1;
+   longoffset:= 0;
+   repeat      //remove pending notifications
+   until not (xcheckwindowevent(appdisp,appid,propertychangemask,@event)
+              {$ifndef FPC} <> 0{$endif});
+   xdeleteproperty(appdisp,appid,convertselectionpropertyatom);
+   xconvertselection(appdisp,clipboardatom,stringatom,convertselectionpropertyatom,
+                        appid,lasteventtime);
+   time1:= timestep(2000000); //2 sec
+   repeat
+    if xcheckwindowevent(appdisp,appid,propertychangemask,@event)
+              {$ifndef FPC} = 0 {$endif} then begin
+     if timeout(time1) then begin
+      exit;
+     end;
+     sleep(50);
+    end
+    else begin
+     with event.xproperty do begin
+      if later(lasteventtime,time) then begin
+       if (atom = convertselectionpropertyatom) then begin
+        if state = propertynewvalue then begin
+         bytesafter:= 0;
+         value1:= ''; //todo: get msestring
+         repeat
+          if xgetwindowproperty(appdisp,appid,convertselectionpropertyatom,
+               longoffset,transferbuffersize,{$ifdef FPC} true{$else}1{$endif},
+              anypropertytype,@acttype,@actformat,@nitems,@bytesafter,@po1) = success then begin
+           if (acttype = stringatom) and (actformat = 8) then begin
+            if nitems > 0 then begin
+             setlength(value1,cardinal(length(value1)) + nitems );
+             move(po1^,value1[charoffset],nitems);
+             inc(charoffset,nitems);
+             inc(longoffset,nitems div 4); //32 bit
+             result:= gue_ok;
+            end;
+           end
+           else begin
+            bytesafter:= 0;
+            result:= gue_clipboard;
+           end;
+           xfree(po1);
+          end
+          else begin
+           if timeout(time1) then begin
+            exit;
+           end;
+          end;
+         until bytesafter = 0;
+         value:= value1;
+         break;
+        end;
+       end
+       else begin
+//        if atom = none then begin
+//         break;
+//        end;
+       end;
+      end;
+     end;
+    end;
+    result:= gue_ok;
+   until false;
+  end;
+ end;
+end;
+
+function gui_canpastefromclipboard: boolean;
+begin
+ result:= xgetselectionowner(appdisp,clipboardatom) <> none;
+end;
+
+type
+ ucs4string = array of wchar_t;
+
+function msestringtoucs4string(const value: msestring): ucs4string;
+var
+ po1: pmsechar;
+ po2: pwchar_t;
+begin
+ setlength(result,length(value)+1);
+ po1:= pmsechar(value);
+ po2:= pwchar_t(result);
+ while true do begin
+  {$ifdef FPC} {$checkpointer off} {$endif} //po1 can be in textsegment
+  po2^:= ord(po1^);
+  if po1^ = #0 then begin
+   break;
+  end;
+  {$ifdef FPC} {$checkpointer default} {$endif}
+  inc(po1);
+  inc(po2);
+ end;
+end;
+
+procedure setstringproperty(id: winidty; prop: atom; value: string);
+begin
+ xchangeproperty(appdisp,id,prop,stringatom,8,propmodereplace,pbyte(pchar(value)),length(value)+1);
+end;
+
+procedure setwinidproperty(id: winidty; prop: atom; value: winidty);
+begin
+ xchangeproperty(appdisp,id,prop,windowatom,32,propmodereplace,@value,1);
+end;
+
+function readlongproperty(id: winidty; name: atom; count: cardinal; var value): boolean;
+var
+ actualtype: atom;
+ actualformat: integer;
+ nitems: cardinal;
+ bytesafter: cardinal;
+ prop: pchar;
+begin
+ result:= false;
+ if xgetwindowproperty(appdisp,id,name,0,count,{$ifdef FPC}false{$else}0{$endif},
+        anypropertytype,@actualtype,@actualformat,@nitems,@bytesafter,@prop) = success then begin
+  if nitems = count then begin
+ {$ifdef FPC} {$checkpointer off} {$endif}
+   move(prop^,value,integer(nitems)*actualformat div 8);
+ {$ifdef FPC} {$checkpointer default} {$endif}
+   result:= true;
+  end;
+  xfree(prop);
+ end;
+end;
+
+function readatomproperty(id: winidty; name: atom; var value: atomarty): boolean;
+var
+ actualtype: atom;
+ actualformat: integer;
+ nitems: cardinal;
+ bytesafter: cardinal;
+ prop: pchar;
+begin
+ result:= false;
+ if xgetwindowproperty(appdisp,id,name,0,10000,{$ifdef FPC}false{$else}0{$endif},
+   atomatom,@actualtype,@actualformat,@nitems,@bytesafter,@prop) = success then begin
+  if actualtype = atomatom then begin
+   setlength(value,nitems);
+   if nitems > 0 then begin
+ {$ifdef FPC} {$checkpointer off} {$endif}
+    move(prop^,value[0],integer(nitems)*actualformat div 8);
+ {$ifdef FPC} {$checkpointer default} {$endif}
+   end;
+   result:= true;
+  end;
+  xfree(prop);
+ end;
+end;
+
+function stringtotextproperty(const value: msestring; out textproperty: xtextproperty): boolean;
+var
+ list: array[0..0] of ucs4string;
+begin
+ list[0]:= msestringtoucs4string(value);
+ result:= xwctextlisttotextproperty(appdisp,@list,1,xstdicctextstyle,@textproperty) >= 0;
+ if not result then begin
+  fillchar(result,0,sizeof(result));
+ end;
+end;
+
+function getwmstate(id: winidty): wmstatety;
+type
+ wmstatety = record
+  state: longword;
+  icon: winidty;
+ end;
+ pwmstatety = ^wmstatety;
+
+var
+ typeatom: atom;
+ format: longint;
+ itemcount: longint;
+ po1: pwmstatety;
+ bytesafterreturn: longword;
+
+begin
+ result:= wms_none;
+ if xgetwindowproperty(appdisp,id,wmstateatom,0,2,
+      {$ifdef FPC}false{$else}0{$endif},wmstateatom,@typeatom,@format,
+      @itemcount,@bytesafterreturn,@po1) = success then begin
+{$ifdef FPC} {$checkpointer off} {$endif}
+  if (format = 32) and (itemcount = 2) then begin
+   {$ifdef FPC}longword{$else}byte{$endif}(result):= po1^.state + longword(wms_withdrawn);
+  end;
+{$ifdef FPC} {$checkpointer default} {$endif}
+  xfree(po1);
+ end;
+end;
+
+function rootwindow(id: winidty = 0): winidty;
+var
+ x,y: integer;
+ width,height,border,depth: cardinal;
+begin
+ if id <> 0 then begin
+  if xgetgeometry(appdisp,id,@result,@x,@y,@width,@height,@border,@depth) <> 0 then begin
+   exit;
+  end;
+ end;
+ result:= rootid;
+end;
+
+function gui_getwindowsize(id: winidty): windowsizety;
+var
+ state: wmstatety;
+ atomar: atomarty;
+ int1: integer;
+begin
+ state:= getwmstate(id);
+ case state of
+  wms_iconic: begin
+   result:= wsi_minimized;
+  end;
+  else begin
+   result:= wsi_normal;
+   if netsupported and readatomproperty(id,netatoms[net_wm_state],atomar) then begin
+    for int1:= 0 to high(atomar) do begin
+     if (atomar[int1] = netatoms[net_wm_state_maximized_vert]) or
+        (atomar[int1] = netatoms[net_wm_state_maximized_horz]) then begin
+      result:= wsi_maximized;
+      break;
+     end;
+    end;
+   end;
+  end;
+ end;
+end;
+
+function changenetwmstate(id: winidty; const operation: netwmstateoperationty;
+                  const value1: netatomty; const value2: netatomty = net_none): boolean;
+var
+ xevent: xclientmessageevent;
+begin
+ result:= false;
+ if netsupported then begin
+  fillchar(xevent,sizeof(xevent),0);
+  with xevent do begin
+   xtype:= clientmessage;
+   display:= appdisp;
+   xwindow:= id;
+   format:= 32;
+   message_type:= netatoms[net_wm_state];
+   data.l[0]:= ord(operation);
+   data.l[1]:= netatoms[value1];
+   data.l[2]:= netatoms[value2];
+   if xsendevent(appdisp,rootwindow(id),{$ifdef FPC}false{$else}0{$endif},
+            substructurenotifymask or substructureredirectmask,@xevent) <> 0 then begin
+    result:= true;
+   end;
+  end;
+ end;
+end;
+
+function gui_setwindowstate(id: winidty; size: windowsizety; visible: boolean): guierrorty;
+begin
+ result:= gue_ok;
+ case size of
+  wsi_minimized: begin
+   if xiconifywindow(appdisp,id,0) = 0 then begin
+    result:= gue_show;
+   end;
+  end;
+  wsi_maximized: begin
+   changenetwmstate(id,nso_add,
+                 net_wm_state_maximized_horz,net_wm_state_maximized_vert);
+   if visible then begin
+    xmapwindow(appdisp,id);
+   end;
+  end
+  else begin
+   changenetwmstate(id,nso_remove,
+                 net_wm_state_maximized_horz,net_wm_state_maximized_vert);
+   if visible then begin
+    xmapwindow(appdisp,id);
+   end;
+  end;
+ end;
+end;
+
+procedure freetextproperty(const value: xtextproperty);
+begin
+ xfree(value.value);
+end;
+
+function gui_setwindowcaption(id: winidty; const caption: msestring): guierrorty;
+var
+ textprop: xtextproperty;
+begin
+ if stringtotextproperty(caption,textprop) then begin
+  xsetwmname(appdisp,id,@textprop);
+  freetextproperty(textprop);
+  result:= gue_ok;
+ end
+ else begin
+  result:= gue_characterencoding;
+ end;
+end;
+
+function gui_setwindowicon(id: winidty; const icon,mask: pixmapty): guierrorty;
+var
+ hints: pxwmhints;
+begin
+{$ifdef FPC}{$checkpointer off}{$endif}
+ hints:= pxwmhints(xgetwmhints(appdisp,id));
+ if hints = nil then begin
+  hints:= pxwmhints(xallocwmhints);
+ end;
+ with hints^ do begin
+  icon_pixmap:= icon;
+  icon_mask:= mask;
+  updatebit(cardinal(flags),2,icon <> 0); //iconpixmaphint
+  updatebit(cardinal(flags),5,mask <> 0); //iconmaskhint
+ end;
+ xsetwmhints(appdisp,id,hints);
+ xfree(hints);
+{$ifdef FPC}{$checkpointer default}{$endif}
+ result:= gue_ok;
+end;
+
+function gui_setapplicationicon(const icon,mask: pixmapty): guierrorty;
+begin
+ result:= gue_ok;
+end;
+
+function XDestroyImage(Image: PXImage): Longint;
+begin
+{$ifdef FPC} {$checkpointer off} {$endif}
+  Result := Image^.f.destroy_image(Image);
+{$ifdef FPC} {$checkpointer default} {$endif}
+end;
+
+function getwindowstack(const id: winidty): winidarty;
+var
+ parent,root: winidty;
+ ca1: cardinal;
+ children: pwindow;
+ count: integer;
+begin
+ result:= nil;
+ count:= 0;
+ additem(integerarty(result),id,count);
+ parent:= id;
+ repeat
+  if (xquerytree(appdisp,parent,@root,@parent,@children,@ca1) <> 0) then begin
+   if children <> nil then begin
+    xfree(children);
+   end;
+  end
+  else begin
+   break;
+  end;
+  additem(integerarty(result),parent,count);
+ until (parent = root);
+ setlength(result,count);
+end;
+
+function toplevelwindow(const id: winidty): winidty;
+var
+ ar1: winidarty;
+begin
+ ar1:= getwindowstack(id);
+ if high(ar1) > 0 then begin
+  result:= ar1[high(ar1)-1];
+ end
+ else begin
+  result:= 0;
+ end;
+end;
+
+function gui_getzorder(const ids: winidarty; out zorders: integerarty): guierrorty;
+var
+ ar1: winidararty;
+ int1,int2,int3: integer;
+ bo1: boolean;
+ parent,root: winidty;
+ ca1: cardinal;
+ children: pwindow;
+
+begin
+{$ifdef FPC} {$checkpointer off} {$endif}
+ setlength(zorders,length(ids));
+ if high(ids) > 0 then begin
+  setlength(ar1,length(ids));
+  for int1:= 0 to high(ids) do begin
+   ar1[int1]:= getwindowstack(ids[int1]);
+  end;
+  if high(ar1[0]) > 0 then begin
+   int2:= 0;
+   bo1:= false;
+   repeat                    //find common ancestor
+    inc(int2);
+    int3:= ar1[0][high(ar1[0])-int2];
+    for int1:= 1 to high(ar1) do begin
+     if (int2 > high(ar1[int1])) or (integer(ar1[int1][high(ar1[int1])-int2]) <> int3) then begin
+      bo1:= true;
+      break;
+     end;
+    end;
+   until bo1;
+   if (xquerytree(appdisp,ar1[0][high(ar1[0])-(int2-1)],@root,@parent,@children,@ca1) <> 0) then begin
+    for int1:= 0 to ca1 - 1 do begin
+     for int3:= 0 to high(ids) do begin
+      if integer(ar1[int3][high(ar1[int3])-int2]) = pintegeraty(children)^[int1] then begin
+       zorders[int3]:= int1;
+       break;
+      end;
+     end;
+    end;
+    if children <> nil then begin
+     xfree(children);
+    end;
+   end;
+  end;
+ end;
+{$ifdef FPC} {$checkpointer default} {$endif}
+ result:= gue_ok;
+end;
+
+function gui_raisewindow(id: winidty): guierrorty;
+begin
+// xraisewindow(appdisp,toplevelwindow(id));
+ xraisewindow(appdisp,id);
+ result:= gue_ok;
+end;
+
+function gui_lowerwindow(id: winidty): guierrorty;
+begin
+ xlowerwindow(appdisp,id);
+ result:= gue_ok;
+end;
+
+function stackwindow(id: winidty; predecessor: winidty; stackmode: integer): guierrorty;
+var
+ changes: xwindowchanges;
+ ar1: winidarty;
+ int1: integer;
+ idindex,pindex: integer;
+
+begin
+ if predecessor = 0 then begin
+  result:= gui_raisewindow(id);
+ end
+ else begin
+  if id <> predecessor then begin
+   if gui_canstackunder then begin
+    changes.sibling:= toplevelwindow(predecessor);
+    changes.stack_mode:= stackmode;
+    xconfigurewindow(appdisp,toplevelwindow(id),cwsibling or cwstackmode,@changes);
+   end
+   else begin
+    application.sortzorder;
+    ar1:= application.winidar;
+    idindex:= -1;
+    pindex:= -1;
+    for int1:= high(ar1) downto 0 do begin
+     if ar1[int1] = id then begin
+      idindex:= int1;
+      break;
+     end;
+    end;
+    for int1:= high(ar1) downto 0 do begin
+     if ar1[int1] = predecessor then begin
+      pindex:= int1;
+      break;
+     end;
+    end;
+    if (idindex >= 0) and (pindex >= 0) then begin
+     if not (
+      (stackmode = above) and (pindex < high(ar1)) and (ar1[pindex+1] = id) or
+      (stackmode <> above) and (pindex > 0) and (ar1[pindex-1] = id)
+       ) then begin
+      deleteitem(integerarty(ar1),idindex);
+      if idindex < pindex then begin
+       dec(pindex);
+      end;
+      if stackmode = above then begin
+       insertitem(integerarty(ar1),pindex+1,id);
+      end
+      else begin
+       insertitem(integerarty(ar1),pindex,id);
+       dec(pindex);
+      end;
+      if pindex < 0 then begin
+       pindex:= 0;
+      end;
+      for int1:= pindex to high(ar1) do begin
+       xraisewindow(appdisp,ar1[int1]);
+      end;
+     end;
+    end;
+   { //code below does not work because wm takes no notice about the new stacking order
+    if xgetwindowattributes(appdisp,changes.sibling,@attributes1) <> 0 then begin
+     changes.sibling:= toplevelwindow(predecessor);
+     changes.stack_mode:= stackmode;
+     id1:= toplevelwindow(id);
+     if xgetwindowattributes(appdisp,id1,@attributes2) <> 0 then begin
+      attributes3.override_redirect:= 1;
+      if attributes1.override_redirect = 0 then begin
+       xchangewindowattributes(appdisp,changes.sibling,cwoverrideredirect,@attributes3);
+      end;
+      if attributes2.override_redirect = 0 then begin
+       xchangewindowattributes(appdisp,id1,cwoverrideredirect,@attributes3);
+      end;
+      xconfigurewindow(appdisp,id1,cwsibling or cwstackmode,@changes);
+      attributes3.override_redirect:= 0;
+      if attributes1.override_redirect = 0 then begin
+       xchangewindowattributes(appdisp,changes.sibling,cwoverrideredirect,@attributes3);
+      end;
+      if attributes2.override_redirect = 0 then begin
+       xchangewindowattributes(appdisp,id1,cwoverrideredirect,@attributes3);
+      end;
+     end;
+     application.sortzorder;
+     ar1:= application.winidar;
+     for int1:= 0 to high(ar1) do begin
+      if (ar1[int1] = id) or (ar1[int1] = predecessor) then begin
+       for int2:= int1 to high(ar1) do begin
+        xraisewindow(appdisp,ar1[int1]);
+       end;
+       break;
+      end;
+     end;
+    end;
+    }
+   end;
+  end;
+  result:= gue_ok;
+ end;
+end;
+
+function gui_stackunderwindow(id: winidty; predecessor: winidty): guierrorty;
+begin
+ result:= stackwindow(id,predecessor,below);
+end;
+
+function gui_stackoverwindow(id: winidty; predecessor: winidty): guierrorty;
+begin
+ result:= stackwindow(id,predecessor,above);
+end;
+
+function gui_getscreensize: sizety;
+begin
+{$ifdef FPC} {$checkpointer off} {$endif}
+ result.cx:= defscreen^.width;
+ result.cy:= defscreen^ .height;
+{$ifdef FPC} {$checkpointer default} {$endif}
+end;
+
+function gui_getworkarea(id: winidty): rectty;
+var
+ bo1: boolean;
+begin
+ bo1:= false;
+ if netsupported then begin
+  bo1:= readlongproperty(rootwindow(id),netatoms[net_workarea],4,result);
+ end;
+ if not bo1 then begin
+  result:= makerect(nullpoint,gui_getscreensize);
+ end;
+end;
+
+function gui_setmainthread: guierrorty; //set mainthread to currentthread
+begin
+ //not used in linux-x11
+ result:= gue_ok;
+end;
+
+function gui_getpointerpos: pointty;
+var
+ ca1: cardinal;
+begin
+ xquerypointer(appdisp,rootid,@ca1,@ca1,@result.x,@result.y,@ca1,@ca1,@ca1);
+end;
+
+function gui_setpointerpos(const pos: pointty): guierrorty;
+begin
+ xwarppointer(appdisp,none,rootid,0,0,0,0,pos.x,pos.y);
+ result:= gue_ok;
+end;
+
+function gui_movepointer(const dist: pointty): guierrorty;
+begin
+ xwarppointer(appdisp,rootid,none,0,0,0,0,dist.x,dist.y);
+ result:= gue_ok;
+end;
+
+var
+ pointergrabbed: boolean;
+ grabwinid: winidty;
+ 
+function gui_grabpointer(id: winidty): guierrorty;
+begin
+ xflush(appdisp);
+ if xgrabpointer(appdisp,id,{$ifdef FPC}false{$else}0{$endif},
+           mouseeventmask,grabmodeasync,grabmodeasync,
+           none,none,currenttime) = grabsuccess then begin
+  result:= gue_ok;
+  pointergrabbed:= true;
+  grabwinid:= id;
+ end
+ else begin
+  result:= gue_capturemouse;
+ end;
+end;
+
+function gui_ungrabpointer: guierrorty;
+begin
+ xungrabpointer(appdisp,currenttime);
+ result:= gue_ok;
+ pointergrabbed:= false; 
+end;
+
+function gui_allocimagemem(length: integer): pcardinalaty;
+begin
+ if length = 0 then begin
+  result:= nil;
+ end
+ else begin
+  getmem(result,length * sizeof(cardinal));
+ end;
+end;
+
+procedure gui_freeimagemem(data: pcardinalaty);
+begin
+ freemem(data);
+end;
+
+function gui_pixmaptoimage(pixmap: pixmapty; out image: imagety;
+                       gchandle: cardinal): gdierrorty;
+var
+ info: pixmapinfoty;
+ ximage: pximage;
+ po1: pcardinal;
+ po2: pbyte;
+ int1,int2: integer;
+ wordmax: integer;
+begin
+ info.handle:= pixmap;
+ result:= gui_getpixmapinfo(info);
+ if result = gde_ok then begin
+  image.size:= info.size;
+  image.pixels:= nil;
+  if info.depth = 1 then begin //monochrome
+   image.monochrome:= true;
+   ximage:= xgetimage(appdisp,pixmap,0,0,info.size.cx,info.size.cy,1,xypixmap);
+   if ximage = nil then begin
+    result:= gde_image;
+    exit;
+   end;
+ {$ifdef FPC} {$checkpointer off} {$endif}
+   with ximage^ do begin
+    wordmax:= (image.size.cx + 31) div 32;
+    image.length:= wordmax * image.size.cy;
+    image.pixels:= gui_allocimagemem(image.length);
+    po1:= @image.pixels^[0];
+    po2:= pbyte(data);
+    if bitmap_pad = 32 then begin
+     move(po2^,po1^,image.size.cy * bytes_per_line);
+    end
+    else begin
+     for int1:= 0 to image.size.cy - 1 do begin
+      move(po2^,po1^,bytes_per_line);
+      inc(po2,bytes_per_line);
+      inc(po1,wordmax);
+     end;
+    end;
+    if byte_order <> lsbfirst then begin
+     case bitmap_unit of
+      32: begin
+       for int1:= 0 to image.length - 1 do begin
+        swapbytes1(image.pixels^[int1]);
+       end;
+      end;
+      16: begin
+       for int1:= 0 to image.length*2-1 do begin
+        swapbytes1(pwordaty(image.pixels)^[int1]);
+       end;
+      end;
+     end;
+    end;
+    if bitmap_bit_order <> lsbfirst then begin
+     po2:= @image.pixels^[0];
+     for int1:= 0 to image.length*4-1 do begin
+      po2^:= bitreverse[po2^];
+      inc(po2);
+     end;
+    end;
+   end;
+ {$ifdef FPC} {$checkpointer default} {$endif}
+  end
+  else begin
+   image.monochrome:= false;
+   image.length:= image.size.cx * image.size.cy;
+   ximage:= xgetimage(appdisp,pixmap,0,0,info.size.cx,info.size.cy,$ffffffff,zpixmap);
+   if ximage = nil then begin
+    result:= gde_image;
+    exit;
+   end;
+   image.pixels:= gui_allocimagemem(image.length);
+
+ //todo: optimize
+
+   po1:= @image.pixels[0];
+   for int1:= 0 to info.size.cy - 1 do begin
+    for int2:= 0 to info.size.cx - 1 do begin
+ {$ifdef FPC} {$checkpointer off} {$endif}
+     po1^:= gui_pixeltorgb(ximage^.f.get_pixel(ximage,int2,int1));
+ {$ifdef FPC} {$checkpointer default} {$endif}
+     inc(po1);
+    end;
+   end;
+  end;
+  xdestroyimage(ximage);
+ end;
+end;
+
+function gui_imagetopixmap(const image: imagety; out pixmap: pixmapty;
+                         gchandle: cardinal): gdierrorty;
+var
+ ximage: pximage;
+ po1: prgbtriplety;
+ po2: pchar;
+ gc: tgc;
+ int1,int2: integer;
+begin
+ result:= gde_ok;
+ po2:= nil;
+ if image.monochrome then begin
+  ximage:= XCreateImage(appdisp,nil,1,xypixmap,0,nil,
+                                 image.size.cx,image.size.cy,32,0);
+  if ximage = nil then begin
+   result:= gde_image;
+   exit;
+  end;
+{$ifdef FPC} {$checkpointer off} {$endif}
+  with ximage^ do begin
+   bitmap_bit_order:= LSBFirst;
+   byte_order:= lsbfirst;
+   bitmap_unit:= 32;
+   data:= @image.pixels[0];
+  end;
+{$ifdef FPC} {$checkpointer default} {$endif}
+ end
+ else begin
+  ximage:= XCreateImage(appdisp,defvisual,defdepth,zpixmap,0,nil,
+                 image.size.cx,image.size.cy,32,0);
+  if ximage = nil then begin
+   result:= gde_image;
+   exit;
+  end;
+{$ifdef FPC} {$checkpointer off} {$endif}
+  with ximage^ do begin
+  {
+   bitmap_bit_order:= LSBFirst;
+   byte_order:= lsbfirst;
+   bitmap_unit:= 32;
+   red_mask:= redmask;
+   green_mask:= greenmask;
+   blue_mask:= bluemask;
+   data:= @image.pixels[0];
+   }
+   getmem(po2,image.size.cy * bytes_per_line);
+   data:= po2;
+   po1:= @image.pixels^[0];
+   for int1:= 0 to image.size.cy - 1 do begin
+    for int2:= 0 to image.size.cx - 1 do begin
+     f.put_pixel(ximage,int2,int1,gui_rgbtopixel(cardinal(po1^)));
+     inc(po1);
+    end;
+   end;
+  end;
+{$ifdef FPC} {$checkpointer default} {$endif}
+ end;
+ pixmap:= gui_createpixmap(image.size,0,image.monochrome);
+ gc:= xcreategc(appdisp,pixmap,0,nil);
+ xsetgraphicsexposures(appdisp,gc,{$ifdef FPC}false{$else}0{$endif});
+ xputimage(appdisp,pixmap,gc,ximage,0,0,0,0,image.size.cx,image.size.cy);
+ xfreegc(appdisp,gc);
+{$ifdef FPC} {$checkpointer off} {$endif}
+ ximage^.data:= nil;
+{$ifdef FPC} {$checkpointer default} {$endif}
+ xdestroyimage(ximage);
+ if po2 <> nil then begin
+  freemem(po2);
+ end;
+end;
+
+function gui_createpixmap(const size: sizety; winid: winidty = 0;
+                          monochrome: boolean = false; copyfrom: pixmapty = 0): pixmapty;
+var
+ gc: tgc;
+begin
+ inc(pixmapcount);
+ if winid = 0 then begin
+  winid:= rootid;
+ end;
+ if monochrome then begin
+  result:= xcreatepixmap(appdisp,winid,size.cx,size.cy,1);
+ end
+ else begin
+  result:= xcreatepixmap(appdisp,winid,size.cx,size.cy,defdepth);
+ end;
+ if copyfrom <> 0 then begin
+  gc:= xcreategc(appdisp,result,0,nil);
+  xcopyarea(appdisp,copyfrom,result,gc,0,0,size.cx,size.cy,0,0);
+  xfreegc(appdisp,gc);
+ end;
+end;
+
+function gui_freepixmap(pixmap: pixmapty): gdierrorty;
+begin
+ dec(pixmapcount);
+ if xfreepixmap(appdisp,pixmap) <> success then begin
+  result:= gde_pixmap;
+ end
+ else begin
+  result:= gde_ok;
+ end;
+end;
+
+function gui_createbitmapfromdata(const size: sizety; datapo: pbyte;
+                   msbitfirst: boolean = false; dwordaligned: boolean = false;
+                   bottomup: boolean = false): pixmapty;
+var
+ image: ximage;
+ gc: tgc;
+ po1,po2: pbyte;
+ int1: integer;
+
+begin
+// result:= xcreatebitmapfromdata(appdisp,rootid,datapo,size.cx,size.cy);
+ inc(pixmapcount);
+ result:= XCreatePixmap(appdisp,rootid,size.cx,size.cy,1);
+ if result <> 0 then begin
+  gc:= XCreateGC(appdisp,result,0,nil);
+  if gc = nil then begin
+   xfreepixmap(appdisp,result);
+   result:= 0;
+  end
+  else begin
+   with image do begin
+    width:= size.cx;
+    height:= size.cy;
+    depth:= 1;
+    bits_per_pixel:= 1;
+    xoffset:= 0;
+    format:= XYPixmap;
+    byte_order:= LSBFirst;
+    bitmap_unit:= 8;
+    if msbitfirst then begin
+     bitmap_bit_order:= mSBFirst;
+    end
+    else begin
+     bitmap_bit_order:= lSBFirst;
+    end;
+    if dwordaligned then begin
+     bitmap_pad:= 32;
+     bytes_per_line:= ((size.cx+31) div 32)*4;
+    end
+    else begin
+     bitmap_pad:= 8;
+     bytes_per_line:= (size.cx+7) div 8;
+    end;
+    if bottomup then begin
+     getmem(po1,bytes_per_line*size.cy);
+     data:= pchar(po1);
+     po2:= pbyte(pchar(datapo)+bytes_per_line*(size.cy-1));
+     for int1:= 0 to size.cy - 1 do begin
+      move(po2^,po1^,bytes_per_line);
+      inc(po1,bytes_per_line);
+      dec(po2,bytes_per_line);
+     end;
+     XPutImage(appdisp,result,gc,@image,0,0,0,0,size.cx,size.cy);
+     freemem(data);
+    end
+    else begin
+     data:= pchar(datapo);
+     XPutImage(appdisp,result,gc,@image,0,0,0,0,size.cx,size.cy);
+    end;
+   end;
+   XFreeGC(appdisp, gc);
+  end;
+ end;
+end;
+
+function gui_getpixmapinfo(var info: pixmapinfoty): gdierrorty;
+var
+ ca1: cardinal;
+begin
+ with info do begin
+  if xgetgeometry(appdisp,handle,@ca1,@ca1,@ca1,@size.cx,@size.cy,@ca1,@depth) = 0 then begin
+   result:= gde_pixmap;
+  end
+  else begin
+   result:= gde_ok;
+  end;
+ end;
+end;
+
+function gui_windowvisible(id: winidty): boolean;
+var
+ attributes: xwindowattributes;
+begin
+ xgetwindowattributes(appdisp,id,@attributes);
+ result:= attributes.map_state = isviewable;
+end;
+
+function waitfordecoration(id: winidty; raiseexception: boolean = true): boolean;
+var
+ int1: integer;
+begin
+ int1:= 0;
+ result:= false;
+ repeat
+  if gui_windowvisible(id) then begin
+   result:= true;
+   break;
+  end;
+  xflush(appdisp);    //windowmanager has to work
+  sleep(5*int1);
+  inc(int1);
+ until (int1 > 45);
+ if raiseexception and not result then begin
+  raise exception.Create('not decorated');
+ end;
+end;
+
+function hasoverrideredirect(const id: winidty): boolean;
+var
+ attributes: xwindowattributes;
+begin
+ xgetwindowattributes(appdisp,id,@attributes);
+ result:= (attributes.override_redirect {$ifndef FPC}<> 0{$endif});
+end;
+
+function gui_showwindow(id: winidty): guierrorty;
+var
+ min,max: sizety;
+ rect1: rectty;
+ transientfor: winidty;
+ bo1: boolean;
+begin
+ xmapwindow(appdisp,id);
+ result:= gue_ok;
+ rect1:= nullrect;
+ application.checkwindowrect(id,rect1);
+ min:= rect1.size;
+ rect1.cx:= bigint;
+ rect1.cy:= bigint;
+ application.checkwindowrect(id,rect1);
+ max:= rect1.size;
+ if max.cx = bigint then begin
+  max.cx:= 0;
+ end;
+ if max.cy = bigint then begin
+  max.cy:= 0;
+ end;
+ if (max.cx <> 0) or (max.cy <> 0) or (min.cx <> 0) or (min.cy <> 0) then begin
+  waitfordecoration(id);
+  gui_setsizeconstraints(id,min,max);
+ end;
+ transientfor:= 0;
+ bo1:= xgettransientforhint(appdisp,id,@transientfor) <> 0;
+ if hasoverrideredirect(id) or bo1 then begin
+  waitfordecoration(id);
+  if (transientfor = 0) or (transientfor = rootwindow) then begin
+   xraisewindow(appdisp,id);
+  end
+  else begin
+   waitfordecoration(transientfor);
+   gui_stackunderwindow(transientfor,id);
+//   wins[0]:= toplevelwindow(id);
+//   wins[1]:= toplevelwindow(transientfor);
+//   xrestackwindows(appdisp,@wins[0],2);
+  end;
+ end;
+end;
+
+function gui_setwindowfocus(id: winidty): guierrorty;
+begin
+ waitfordecoration(id);
+ xsetinputfocus(appdisp,id,reverttoparent,currenttime);
+ result:= gue_ok;
+end;
+
+function gui_setcursorshape(winid: winidty; shape: cursorshapety): guierrorty;
+begin
+ result:= gue_ok;
+ if winid = 0 then begin
+  winid:= rootwindow;
+ end;
+// if cursorshape <> shape then begin
+  if screencursor <> 0 then begin
+   xfreecursor(appdisp,screencursor);
+  end;
+  screencursor:= xcreatefontcursor(appdisp,standardcursors[shape]);
+  if screencursor <> 0 then begin
+//   cursorshape:= shape;
+   xdefinecursor(appdisp,winid,screencursor);
+   xflush(appdisp);
+  end
+  else begin
+   result:= gue_cursor;
+  end;
+// end;
+end;
+
+procedure sigtimer(SigNum: Integer); cdecl;
+begin
+ timerevent:= true;
+end;
+
+procedure sigterminate(SigNum: Integer); cdecl;
+begin
+ terminated:= true;
+end;
+
+function gui_postevent(event: tevent): guierrorty;
+var
+ xevent: xclientmessageevent;
+begin
+ fillchar(xevent,sizeof(xevent),0);
+ with xevent do begin
+  xtype:= clientmessage;
+  format:= 32;
+  message_type:= mseclientmessageatom;
+  data.l[0]:= integer(event);
+ end;
+ if xsendevent(appdisp,appid,{$ifdef FPC}false{$else}0{$endif},0,@xevent) = 0 then begin
+  result:= gue_postevent;
+ end
+ else begin
+  xflush(appdisp);
+  result:= gue_ok;
+ end;
+end;
+
+function settimer1(us: cardinal): guierrorty;
+               //send et_timer event after delay of us (micro seconds)
+var
+ timerval: itimerval;
+begin
+ fillchar(timerval,sizeof(timerval),0);
+ timerval.it_value.tv_usec:= us;
+ if libc.setitimer(itimer_real,{$ifdef FPC}@{$endif}timerval,nil) = 0 then begin
+  result:= gue_ok;
+ end
+ else begin
+  result:= gue_timer;
+ end;
+end;
+
+function gui_settimer(us: cardinal): guierrorty;
+begin
+ if us = 0 then begin
+  us:= 1;
+ end;
+ result:= settimer1(us);
+end;
+
+function recttoxrect(const rect: rectty): xrectangle;
+begin
+ with rect do begin
+  result.x:= x;
+  result.y:= y;
+  result.width:= cx;
+  result.height:= cy;
+ end;
+end;
+
+function createregion: regionty; overload;
+begin
+ result:= regionty(xcreateregion());
+end;
+
+function createregion(const rect: rectty): regionty; overload;
+var
+ rect1: xrectangle;
+begin
+ result:= regionty(xcreateregion);
+ rect1:= recttoxrect(rect);
+ xunionrectwithregion(@rect1,region(result),region(result));
+end;
+
+procedure gui_createemptyregion(var drawinfo: drawinfoty);
+begin
+ with drawinfo.regionoperation do begin
+  dest:= createregion;
+ end;
+end;
+
+procedure gui_createrectregion(var drawinfo: drawinfoty);
+begin
+ with drawinfo.regionoperation do begin
+  dest:= createregion(rect);
+ end;
+end;
+
+procedure gui_createrectsregion(var drawinfo: drawinfoty);
+var
+ int1: integer;
+ rect1: xrectangle;
+begin
+ with drawinfo.regionoperation do begin
+  dest:= createregion;
+  for int1:= 0 to rectscount - 1 do begin
+   rect1:= recttoxrect(rectspo^[int1]);
+   xunionrectwithregion(@rect1,region(dest),region(dest));
+  end;
+ end;
+end;                           
+
+procedure gui_destroyregion(var drawinfo: drawinfoty);
+begin
+ with drawinfo.regionoperation do begin
+  if source <> 0 then begin
+   xdestroyregion(region(source));
+  end;
+ end;
+end;
+
+procedure gui_regionisempty(var drawinfo: drawinfoty);
+begin
+ with drawinfo.regionoperation do begin
+  dest:= xemptyregion(region(source));
+  if dest <> 0 then begin
+   dest:= 1;
+  end;
+ end;
+end;
+
+procedure gui_regionclipbox(var drawinfo: drawinfoty);
+var
+ rect1: xrectangle;
+begin
+ with drawinfo.regionoperation do begin
+  xclipbox(region(source),@rect1);
+  rect.x:= rect1.x;
+  rect.y:= rect1.y;
+  rect.cx:= rect1.width;
+  rect.cy:= rect1.height;
+ end;
+end;
+
+procedure gui_copyregion(var drawinfo: drawinfoty);
+begin
+ with drawinfo.regionoperation do begin
+  if source = 0 then begin
+   dest:= 0;
+  end
+  else begin
+   dest:= cardinal(xcreateregion);
+   xunionregion(region(dest),region(source),region(dest));
+  end;
+ end;
+end;
+
+procedure gui_moveregion(var drawinfo: drawinfoty);
+begin
+ with drawinfo.regionoperation do begin
+  xoffsetregion(region(source),rect.x,rect.y);
+ end;
+end;
+
+procedure gui_regsubrect(var drawinfo: drawinfoty);
+var
+ reg1: region;
+begin
+ with drawinfo.regionoperation do begin
+  reg1:= region(createregion(rect));
+  xsubtractregion(region(dest),reg1,region(dest));
+  xdestroyregion(reg1);
+ end;
+end;
+
+procedure gui_regintersectrect(var drawinfo: drawinfoty);
+var
+ reg1: region;
+begin
+ with drawinfo.regionoperation do begin
+  reg1:= region(createregion(rect));
+  xintersectregion(region(dest),reg1,region(dest));
+  xdestroyregion(reg1);
+ end;
+end;
+
+procedure gui_regintersectregion(var drawinfo: drawinfoty);
+begin
+ with drawinfo.regionoperation do begin
+  xintersectregion(region(dest),region(source),region(dest));
+ end;
+end;
+
+procedure gui_regaddrect(var drawinfo: drawinfoty);
+var
+ rect1: xrectangle;
+begin
+ with drawinfo.regionoperation do begin
+  rect1:= recttoxrect(rect);
+  xunionrectwithregion(@rect1,region(dest),region(dest));
+ end;
+end;
+
+procedure gui_regaddregion(var drawinfo: drawinfoty);
+begin
+ with drawinfo.regionoperation do begin
+  xunionregion(region(dest),region(source),region(dest));
+ end;
+end;
+
+procedure gui_regsubregion(var drawinfo: drawinfoty);
+begin
+ with drawinfo.regionoperation do begin
+  xsubtractregion(region(dest),region(source),region(dest));
+ end;
+end;
+
+function gui_rgbtopixel(rgb: cardinal): pixelty;
+begin                                           //todo: speedup
+// if istruecolor then begin
+  if xredshiftleft then begin
+   result:= ((rgb and redmask) shl xredshift) and xredmask;
+  end
+  else begin
+   result:= ((rgb and redmask) shr xredshift) and xredmask;
+  end;
+  if xgreenshiftleft then begin
+   result:= result or (((rgb and greenmask) shl xgreenshift) and xgreenmask);
+  end
+  else begin
+   result:= result or (((rgb and greenmask) shr xgreenshift) and xgreenmask);
+  end;
+  if xblueshiftleft then begin
+   result:= result or (((rgb and bluemask) shl xblueshift) and xbluemask);
+  end
+  else begin
+   result:= result or (((rgb and bluemask) shr xblueshift) and xbluemask);
+  end;
+// end;
+end;
+
+function gui_pixeltorgb(pixel: cardinal): cardinal;
+begin
+// if istruecolor then begin
+  if xredshiftleft then begin
+   result:= (pixel and xredmask) shr xredshift;
+  end
+  else begin
+   result:= (pixel and xredmask) shl xredshift;
+  end;
+  if xgreenshiftleft then begin
+   result:= result or ((pixel and xgreenmask) shr xgreenshift);
+  end
+  else begin
+   result:= result or ((pixel and xgreenmask) shl xgreenshift);
+  end;
+  if xblueshiftleft then begin
+   result:= result or ((pixel and xbluemask) shr xblueshift);
+  end
+  else begin
+   result:= result or ((pixel and xbluemask) shl xblueshift);
+  end;
+// end;
+end;
+
+function xtomousebutton(button: cardinal): mousebuttonty;
+begin
+ case button of
+  button1: result:= mb_left;
+  button2: result:= mb_middle;
+  button3: result:= mb_right;
+  else result:= mb_none;
+ end;
+end;
+
+function xtoshiftstate(shiftstate: cardinal): shiftstatesty;
+begin
+ result:= [];
+ if shiftstate and button1mask <> 0 then include(result,ss_left);
+ if shiftstate and button2mask <> 0 then include(result,ss_middle);
+ if shiftstate and button3mask <> 0 then include(result,ss_right);
+ if shiftstate and shiftmask <> 0 then include(result,ss_shift);
+ if shiftstate and controlmask <> 0 then include(result,ss_ctrl);
+ if shiftstate and mod1mask <> 0 then include(result,ss_alt);
+end;
+
+var
+ messcount: integer;
+
+procedure freeclientevents;
+var
+ xev: xevent;
+begin
+ while xpending(appdisp) > 0 do begin
+  xnextevent(appdisp,@xev);
+  with xev.xclient do begin
+   if (xtype = clientmessage) and (display = appdisp) and
+           (message_type = mseclientmessageatom) then begin
+    tevent(data.l[0]).free;
+   end;
+  end;
+ end;
+end;
+
+function gui_hasevent: boolean;
+begin
+ result:= xpending(appdisp) > 0;
+end;
+
+function xkeytokey(key: keysym): keyty;
+begin
+ if (key >= $61) and (key <= $7a) then begin //a..z
+  result:= keyty(key - $20); //A..Z
+ end
+ else begin
+  case key of
+   xk_backspace: result:= key_backspace;
+   xk_tab: result:= key_tab;
+   xk_iso_left_tab: result:= key_backtab;
+//   xk_linefeed: result:= key_linefeed;
+//   xk_clear: result:= key_clear;
+   xk_return: result:= key_return;
+   xk_pause: result:= key_pause;
+   xk_scroll_lock: result:= key_scrolllock;
+   xk_sys_req: result:= key_sysreq;
+   xk_escape: result:= key_escape;
+   xk_delete: result:= key_delete;
+   xk_home: result:= key_home;
+   xk_left: result:= key_left;
+   xk_up: result:= key_up;
+   xk_right: result:= key_right;
+   xk_down: result:= key_down;
+//   xk_prior: result:= key_prior;
+   xk_page_up: result:= key_pageup;
+//   xk_next: result:= key_next;
+   xk_page_down: result:= key_pagedown;
+   xk_end: result:= key_end;
+//   xk_begin: result:= key_begin;
+
+//   xk_select: result:= key_select;
+   xk_print: result:= key_print;
+//   xk_execute: result:= key_execute;
+   xk_insert: result:= key_insert;
+//   xk_undo: result:= key_undo;
+//   xk_redo: result:= key_redo;
+   xk_menu: result:= key_menu;
+//   xk_find: result:= key_find;
+//   xk_cancel: result:= key_cancel;
+   xk_help: result:= key_help;
+   xk_break: result:= key_pause; //key_break;
+//   xk_mode_switch: result:= key_modeswitch;
+//   xk_script_switch: result:= key_scriptswitch;
+   xk_num_lock: result:= key_numlock;
+
+   xk_kp_space: result:= key_space;
+   xk_kp_tab: result:= key_tab;
+   xk_kp_enter: result:= key_enter;
+   xk_kp_f1: result:= key_f1;
+   xk_kp_f2: result:= key_f2;
+   xk_kp_f3: result:= key_f3;
+   xk_kp_f4: result:= key_f4;
+   xk_kp_home: result:= key_home;
+   xk_kp_left: result:= key_left;
+   xk_kp_up: result:= key_up;
+   xk_kp_right: result:= key_right;
+   xk_kp_down: result:= key_down;
+//   xk_kp_prior: result:= key_prior;
+   xk_kp_page_up: result:= key_pageup;
+//   xk_kp_next: result:= key_next;
+   xk_kp_page_down: result:= key_pagedown;
+   xk_kp_end: result:= key_end;
+//   xk_kp_begin: result:= key_begin;
+   xk_kp_insert: result:= key_insert;
+   xk_kp_delete: result:= key_delete;
+   xk_kp_equal: result:= key_equal;
+   xk_kp_multiply: result:= key_asterisk;
+   xk_kp_add: result:= key_plus;
+   xk_kp_separator: result:= key_comma;
+   xk_kp_subtract: result:= key_minus;
+   xk_kp_decimal: result:= key_period;
+   xk_kp_divide: result:= key_slash;
+   xk_kp_0..xk_kp_9: result:= keyty(cardinal(key_0) + key - xk_kp_0);
+
+   xk_f1..xk_f35: result:= keyty(cardinal(key_f1) + key - xk_f1);
+
+   xk_shift_l: result:= key_shift;
+   xk_shift_r: result:= key_shift;
+   xk_control_l: result:= key_control;
+   xk_control_r: result:= key_control;
+   xk_caps_lock: result:= key_capslock;
+//   xk_shift_lock: result:= key_shift_lock;
+
+   xk_meta_l: result:= key_meta;
+   xk_meta_r: result:= key_meta;
+   xk_alt_l: result:= key_alt;
+   xk_alt_r: result:= key_alt;
+   xk_super_l: result:= key_super_l;
+   xk_super_r: result:= key_super_r;
+   xk_hyper_l: result:= key_hyper_l;
+   xk_hyper_r: result:= key_hyper_r;
+
+   else result:= keyty(key);
+  end;
+ end;
+end;
+
+function pchartomsestring(value: pchar; len: integer): msestring;
+var
+ int1: integer;
+ buffer: cardinalarty;
+begin
+ setlength(buffer,len);
+ int1:= mbsnrtowcs(pointer(buffer),@value,len,len,nil);
+ if int1 > 0 then begin
+  setlength(result,int1);
+  for int1:= 0 to int1-1 do begin
+   result[int1+1]:= msechar(buffer[int1]);
+  end;
+ end
+ else begin
+  setlength(result,0);
+ end;
+end;
+
+function ucs4stringtomsestring(const source: cardinalarty): msestring;
+var
+ int1: integer;
+begin
+ setlength(result,length(source));
+ for int1:= 0 to length(source)-1 do begin
+  result[int1+1]:= msechar(source[int1]);
+ end;
+end;
+
+function getrootpath(id: winidty; out rootpath: cardinalarty): boolean;
+var
+ root,parent: {$ifdef FPC}twindow{$else}xlib.twindow{$endif};
+ children: pwindow;
+ count: integer;
+ ca1: cardinal;
+
+begin
+ result:= false;
+ setlength(rootpath,5);
+ rootpath[0]:= id;
+ count:= 1; //reserve for root
+ repeat
+  if xquerytree(appdisp,id,@root,@parent,@children,@ca1) = 0 then begin
+   exit;
+  end;
+  if children <> nil then begin
+   xfree(children);
+  end;
+  if count >= length(rootpath)  then begin
+   setlength(rootpath,count+5);
+  end;
+  rootpath[count]:= parent;
+  id:= parent;
+  inc(count);
+ until parent = root;
+ setlength(rootpath,count);
+ result:= true;
+end;
+
+function getrootoffset(const id: winidty; out offset: pointty): boolean;
+var
+ int1: integer;
+ rootpath: cardinalarty;
+ ax,ay: integer;
+ width,height,border: cardinal;
+ ca1: cardinal;
+
+
+begin
+ result:= getrootpath(id,rootpath);
+ if result then begin
+  result:= false;
+  offset:= nullpoint;
+  for int1:= 0 to length(rootpath) - 3 do begin
+   if xgetgeometry(appdisp,rootpath[int1],@ca1,@ax,@ay,@width,@height,@border,@ca1) = 0 then begin
+    exit;
+   end;
+   with offset do begin
+    inc(x,ax);
+    inc(x,border);
+    inc(y,ay);
+    inc(y,border);
+   end;
+  end;
+ end;
+ result:= true;
+end;
+
+function settransientforhint(id,transientfor: winidty): guierrorty;
+begin
+ if transientfor = 0 then begin
+  xsettransientforhint(appdisp,id,rootwindow{0});
+ end
+ else begin
+//  xsettransientforhint(appdisp,id,toplevelwindow(transientfor));
+  xsettransientforhint(appdisp,id,transientfor);
+ end;
+ result:= gue_ok;
+end;
+
+function gui_settransientfor(id: winidty; transientfor: winidty): guierrorty;
+var
+ attributes: xwindowattributes;
+begin
+ result:= settransientforhint(id,transientfor);
+ if result = gue_ok then begin
+  if xgetwindowattributes(appdisp,id,@attributes) <> 0 then begin
+   if attributes.override_redirect{$ifndef FPC} <> 0 {$endif}then begin
+    gui_stackunderwindow(transientfor,id);
+   end;
+  end;
+ end;
+end;
+
+function gui_windowatpos(const pos: pointty): winidty;
+var
+ int1: integer;
+ id: winidty;
+begin
+ id:= rootwindow;
+ repeat
+  result:= id;
+  if longint(xtranslatecoordinates(appdisp,rootwindow,id,
+         pos.x,pos.y,@int1,@int1,@id)) = 0 then begin
+   result:= 0;
+   exit;
+  end;
+ until id = none;
+end;
+
+function gui_setwindowgroup(id,group: winidty): guierrorty;
+var
+ wmhints: pxwmhints;
+begin
+{$ifdef FPC}{$checkpointer off}{$endif}
+ wmhints:= pxwmhints(xgetwmhints(appdisp,id));
+ if wmhints = nil then begin
+  wmhints:= pxwmhints(xallocwmhints);
+ end;
+ with wmhints^ do begin
+  window_group:= group;
+  flags:= flags or windowgrouphint;
+  xsetwmhints(appdisp,id,wmhints);
+ end;
+ xfree(wmhints);
+{$ifdef FPC}{$checkpointer default}{$endif}
+ setwinidproperty(id,wmclientleaderatom,group);
+ result:= gue_ok;
+end;
+
+function gui_createwindow(const rect: rectty; const options: internalwindowoptionsty;
+                               out id: winidty): guierrorty;
+var
+ attributes: xsetwindowattributes;
+ valuemask: longword;
+ width,height: integer;
+begin
+ valuemask:= 0;
+ if wo_popup in options.options then begin
+  attributes.override_redirect:= {$ifdef FPC}true{$else}1{$endif};
+  valuemask:= valuemask or cwoverrideredirect;
+ end;
+ if (wo_popup in options.options) and (options.transientfor <> 0) then begin
+  xraisewindow(appdisp,options.transientfor);
+    //transientforhint not used by overrideredirect
+ end;
+ if rect.cx <= 0 then begin
+  width:= 1;
+ end
+ else begin
+  width:= rect.cx;
+ end;
+ if rect.cy <= 0 then begin
+  height:= 1;
+ end
+ else begin
+  height:= rect.cy;
+ end;
+ id:= xcreatewindow(appdisp,rootid,rect.x,rect.y,width,height,0,
+     copyfromparent,copyfromparent,xlib.pvisual(copyfromparent),
+     valuemask,@attributes);
+ if id = 0 then begin
+  result:= gue_createwindow;
+  exit;
+ end;
+ if (options.transientfor <> 0) or
+         (options.options * [wo_popup,wo_message] <> []) then begin
+  settransientforhint(id,options.transientfor);
+ end;
+ with options do begin
+  if icon <> 0 then begin
+   gui_setwindowicon(id,icon,iconmask);
+  end;
+ end;
+ if options.setgroup then begin
+  if options.groupleader = 0 then begin
+   gui_setwindowgroup(id,id);
+  end
+  else begin
+   gui_setwindowgroup(id,options.groupleader);
+  end;
+ end;
+ if options.pos <> wp_default then begin
+  gui_reposwindow(id,rect);
+ end;
+ result:= gue_ok;
+ xselectinput(appdisp,id,
+		      KeyPressMask or KeyReleaseMask or
+                      buttonpressmask or buttonreleasemask or
+                      pointermotionmask or
+//		      KeymapStateMask or
+		      EnterWindowMask or LeaveWindowMask or
+		      FocusChangeMask or PropertyChangeMask or
+                      exposuremask or structurenotifymask);
+ xsetwmprotocols(appdisp,id,@wmprotocols[low(wmprotocolty)],
+             integer(high(wmprotocolty))+1);
+ setstringproperty(id,wmclassatom,filename(sys_getapplicationpath)+#0+application.applicationname);
+end;
+
+function gui_getwindowrect(id: winidty; out rect: rectty): guierrorty;
+var
+ int1: integer;
+begin
+ with rect do begin
+  if xgetgeometry(appdisp,id,@int1,@x,@y,@cx,@cy,@int1,@int1) = 0 then begin
+   result:= gue_error;
+  end
+  else begin
+   result:= gue_ok;
+  end;
+ end;
+end;
+
+function gui_reposwindow(id: winidty; const rect: rectty): guierrorty;
+var
+ changes: xwindowchanges;
+ sizehints: pxsizehints;
+ int1: integer;
+
+begin
+// result:= gue_resizewindow;
+ fillchar(changes,sizeof(changes),0);
+ changes.x:= rect.x;
+ changes.y:= rect.y;
+ if rect.cx <= 0 then begin
+  changes.width:= 1;
+ end
+ else begin
+  changes.width:= rect.cx;
+ end;
+ if rect.cy <= 0 then begin
+  changes.height:= 1;
+ end
+ else begin
+  changes.height:= rect.cy;
+ end;
+// if not getrootoffset(id,offset) then begin
+//  exit;
+// end;
+// dec(changes.x,offset.x);
+// dec(changes.y,offset.y);
+ if not hasoverrideredirect(id) then begin
+  sizehints:= xallocsizehints;
+  {$ifdef FPC} {$checkpointer off} {$endif}
+  xgetwmnormalhints(appdisp,id,sizehints,@int1);
+  with sizehints^ do begin
+   flags:= flags or pposition or psize or usposition or ussize or pbasesize or
+                       pwingravity;
+   x:= changes.x;
+   y:= changes.y;
+   width:= changes.width;
+   height:= changes.height;
+   base_width:= width;
+   base_height:= height;
+   win_gravity:= staticgravity;
+  end;
+ {$ifdef FPC} {$checkpointer default} {$endif}
+// xsetnormalhints(appdisp,id,sizehints);
+  xsetwmnormalhints(appdisp,id,sizehints);
+  xfree(sizehints);
+ end;
+ xconfigurewindow(appdisp,id,cwx or cwy or cwwidth or cwheight,@changes);
+ result:= gue_ok;
+end;
+
+function gui_setsizeconstraints(id: winidty; const min,max: sizety): guierrorty;
+var
+ sizehints: pxsizehints;
+ int1: integer;
+begin
+ sizehints:= xallocsizehints;
+ {$ifdef FPC} {$checkpointer off} {$endif}
+ xgetwmnormalhints(appdisp,id,sizehints,@int1);
+ with sizehints^ do begin
+  flags:= flags or pminsize or pmaxsize;
+  min_width:= min.cx;
+  min_height:= min.cy;
+  if max.cx = 0 then begin
+   max_width:= 30000;
+  end
+  else begin
+   max_width:= max.cx;
+  end;
+  if max.cy = 0 then begin
+   max_height:= 30000;
+  end
+  else begin
+   max_height:= max.cy;
+  end;
+ end;
+ {$ifdef FPC} {$checkpointer default} {$endif}
+// xsetnormalhints(appdisp,id,sizehints);
+ xsetwmnormalhints(appdisp,id,sizehints);
+ xfree(sizehints);
+ result:= gue_ok;
+end;
+
+function gui_destroywindow(id: winidty): guierrorty;
+begin
+ {$ifdef hassaveyourself}
+ if id <> saveyourselfwindow then begin
+  xdestroywindow(appdisp,id);
+ end;
+ {$else}
+  xdestroywindow(appdisp,id);
+ {$endif}
+ result:= gue_ok;
+end;
+
+function gui_hidewindow(id: winidty): guierrorty;
+begin
+ xunmapwindow(appdisp,id);
+ result:= gue_ok;
+end;
+
+function gui_creategc(paintdevice: paintdevicety; ispixmap: boolean; var gc: gcty): guierrorty;
+begin
+ if paintdevice = 0 then begin
+  paintdevice:= rootwindow;
+ end;
+ gc.handle:= cardinal(xcreategc(appdisp,paintdevice,0,nil));
+ if gc.handle = 0 then begin
+  result:= gue_creategc;
+ end
+ else begin
+  xsetgraphicsexposures(appdisp,tgc(gc.handle),{$ifdef FPC}false{$else}0{$endif});
+  with x11gcty(gc.platformdata) do begin
+   //nothing to do, gc is nulled
+  end;
+  result:= gue_ok;
+ end;
+end;
+
+var
+ XftDrawDestroy: procedure(draw:PXftDraw); cdecl;
+ XftDrawSetClipRectangles: function (draw:PXftDraw; xOrigin:longint;
+         yOrigin:longint; rects:PXRectangle; n:longint):TFcBool;cdecl;
+ XftDrawCreate: function(dpy:PDisplay; drawable:TDrawable; visual:PVisual;
+       colormap:TColormap): PXftDraw;cdecl;
+ XftDrawSetClip: function(draw:PXftDraw; r:TRegion):TFcBool;cdecl;
+ XftTextExtents16: procedure(dpy:PDisplay; pub:PXftFont;
+  _string: pwidechar{PFcChar16}; len:longint; extents:PXGlyphInfo);cdecl;
+ XftFontOpenName: function(dpy:PDisplay; screen:longint; name:Pchar):PXftFont;cdecl;
+ XftFontClose: procedure(dpy:PDisplay; pub:PXftFont);cdecl;
+ XftDrawString16: procedure(draw:PXftDraw; color:PXftColor; pub:PXftFont; 
+           x:longint; y:longint; _string:pwidechar; len:longint);cdecl;
+ XftDefaultHasRender: function(dpy:PDisplay):TFcBool;cdecl;
+ XftGetVersion: function():longint;cdecl;
+ XftInit: function(config:Pchar):TFcBool;cdecl;
+ XftInitFtLibrary: function ():TFcBool;cdecl;
+
+{$ifndef FPC}
+type
+ tlibhandle = longword;
+{$endif}
+
+function getxftlib: boolean;
+var
+ libhandle: tlibhandle;
+begin
+ result:= false;
+ libhandle:= loadlibrary('libXft.so');
+ if libhandle <> 0 then begin
+  {$ifdef FPC}pointer({$endif}XftDrawDestroy{$ifdef FPC}){$endif}:=
+     getprocaddress(libhandle,'XftDrawDestroy');
+  if {$ifndef FPC}@{$endif}XftDrawDestroy = nil then exit;
+  {$ifdef FPC}pointer({$endif}XftDrawSetClipRectangles{$ifdef FPC}){$endif}:=
+     getprocaddress(libhandle,'XftDrawSetClipRectangles');
+  if {$ifndef FPC}@{$endif}XftDrawSetClipRectangles = nil then exit;
+  {$ifdef FPC}pointer({$endif}XftDrawCreate{$ifdef FPC}){$endif}:=
+     getprocaddress(libhandle,'XftDrawCreate');
+  if {$ifndef FPC}@{$endif}XftDrawCreate = nil then exit;
+  {$ifdef FPC}pointer({$endif}XftDrawSetClip{$ifdef FPC}){$endif}:=
+     getprocaddress(libhandle,'XftDrawSetClip');
+  if {$ifndef FPC}@{$endif}XftDrawSetClip = nil then exit;
+  {$ifdef FPC}pointer({$endif}XftTextExtents16{$ifdef FPC}){$endif}:=
+     getprocaddress(libhandle,'XftTextExtents16');
+  if {$ifndef FPC}@{$endif}XftTextExtents16 = nil then exit;
+  {$ifdef FPC}pointer({$endif}XftFontOpenName{$ifdef FPC}){$endif}:=
+     getprocaddress(libhandle,'XftFontOpenName');
+  if {$ifndef FPC}@{$endif}XftFontOpenName = nil then exit;
+  {$ifdef FPC}pointer({$endif}XftFontClose{$ifdef FPC}){$endif}:=
+     getprocaddress(libhandle,'XftFontClose');
+  if {$ifndef FPC}@{$endif}XftFontClose = nil then exit;
+  {$ifdef FPC}pointer({$endif}XftDrawString16{$ifdef FPC}){$endif}:=
+     getprocaddress(libhandle,'XftDrawString16');
+  if {$ifndef FPC}@{$endif}XftDrawString16 = nil then exit;
+  {$ifdef FPC}pointer({$endif}XftDefaultHasRender{$ifdef FPC}){$endif}:=
+     getprocaddress(libhandle,'XftDefaultHasRender');
+  if {$ifndef FPC}@{$endif}XftDefaultHasRender = nil then exit;
+  {$ifdef FPC}pointer({$endif}XftGetVersion{$ifdef FPC}){$endif}:=
+     getprocaddress(libhandle,'XftGetVersion');
+  if {$ifndef FPC}@{$endif}XftGetVersion = nil then exit;
+  {$ifdef FPC}pointer({$endif}XftInit{$ifdef FPC}){$endif}:=
+     getprocaddress(libhandle,'XftInit');
+  if {$ifndef FPC}@{$endif}XftGetVersion = nil then exit;
+  {$ifdef FPC}pointer({$endif}XftInitFtLibrary{$ifdef FPC}){$endif}:=
+     getprocaddress(libhandle,'XftInitFtLibrary');
+  if {$ifndef FPC}@{$endif}XftInitFtLibrary = nil then exit;
+
+  result:= true;
+ end;
+end;
+
+var
+ XRenderSetPictureClipRectangles: procedure(dpy:PDisplay; picture:TPicture;
+            xOrigin:longint; yOrigin:longint; rects:PXRectangle; n:longint);
+           cdecl;
+ XRenderCreatePicture: function(dpy:PDisplay; drawable:TDrawable;
+      format:PXRenderPictFormat; valuemask:dword;
+      attributes:PXRenderPictureAttributes):TPicture;cdecl;
+ XRenderFillRectangle: procedure(dpy:PDisplay; op:longint; dst:TPicture;
+              color:PXRenderColor; x:longint;
+              y:longint; width:dword; height:dword);cdecl;
+ XRenderSetPictureTransform: procedure(dpy:PDisplay; picture:TPicture; transform:PXTransform);
+          cdecl;
+ XRenderFreePicture: procedure(dpy:PDisplay; picture:TPicture);
+                 cdecl;
+ XRenderComposite: procedure(dpy:PDisplay; op:longint; src:TPicture; mask:TPicture; dst:TPicture;
+              src_x:longint; src_y:longint; mask_x:longint; mask_y:longint; dst_x:longint;
+              dst_y:longint; width:dword; height:dword);cdecl;
+ XRenderQueryExtension: function(dpy: PDisplay; event_basep: Pinteger;
+                  error_basep: Pinteger): TBool;cdecl;
+ XRenderFindVisualFormat: function(dpy:PDisplay; visual:PVisual):PXRenderPictFormat;cdecl;
+ XRenderFindStandardFormat:  function(dpy:PDisplay;
+              format:longint):PXRenderPictFormat; cdecl;
+
+function getxrenderlib: boolean;
+var
+ libhandle: tlibhandle;
+begin
+ result:= false;
+ libhandle:= loadlibrary('libXrender.so');
+ if libhandle <> 0 then begin
+  {$ifdef FPC}pointer({$endif}XRenderSetPictureClipRectangles{$ifdef FPC}){$endif}:=
+     getprocaddress(libhandle,'XRenderSetPictureClipRectangles');
+  if {$ifndef FPC}@{$endif}XRenderSetPictureClipRectangles = nil then exit;
+  {$ifdef FPC}pointer({$endif}XRenderCreatePicture{$ifdef FPC}){$endif}:=
+     getprocaddress(libhandle,'XRenderCreatePicture');
+  if {$ifndef FPC}@{$endif}XRenderCreatePicture = nil then exit;
+  {$ifdef FPC}pointer({$endif}XRenderFillRectangle{$ifdef FPC}){$endif}:=
+     getprocaddress(libhandle,'XRenderFillRectangle');
+  if {$ifndef FPC}@{$endif}XRenderFillRectangle = nil then exit;
+  {$ifdef FPC}pointer({$endif}XRenderSetPictureTransform{$ifdef FPC}){$endif}:=
+     getprocaddress(libhandle,'XRenderSetPictureTransform');
+  if {$ifndef FPC}@{$endif}XRenderSetPictureTransform = nil then exit;
+  {$ifdef FPC}pointer({$endif}XRenderFreePicture{$ifdef FPC}){$endif}:=
+     getprocaddress(libhandle,'XRenderFreePicture');
+  if {$ifndef FPC}@{$endif}XRenderFreePicture = nil then exit;
+  {$ifdef FPC}pointer({$endif}XRenderComposite{$ifdef FPC}){$endif}:=
+     getprocaddress(libhandle,'XRenderComposite');
+  if {$ifndef FPC}@{$endif}XRenderComposite = nil then exit;
+  {$ifdef FPC}pointer({$endif}XRenderQueryExtension{$ifdef FPC}){$endif}:=
+     getprocaddress(libhandle,'XRenderQueryExtension');
+  if {$ifndef FPC}@{$endif}XRenderQueryExtension = nil then exit;
+  {$ifdef FPC}pointer({$endif}XRenderFindVisualFormat{$ifdef FPC}){$endif}:=
+     getprocaddress(libhandle,'XRenderFindVisualFormat');
+  if {$ifndef FPC}@{$endif}XRenderFindVisualFormat = nil then exit;
+  {$ifdef FPC}pointer({$endif}XRenderFindStandardFormat{$ifdef FPC}){$endif}:=
+     getprocaddress(libhandle,'XRenderFindStandardFormat');
+  if {$ifndef FPC}@{$endif}XRenderFindStandardFormat = nil then exit;
+
+  result:= true;
+ end;
+end;
+
+//function gui_destroygc(winid: winidty; var gc: gcty): guierrorty;
+procedure gui_destroygc(var drawinfo: drawinfoty);
+begin
+ with drawinfo do begin
+  with x11gcty(gc.platformdata) do begin
+   if xftdraw <> nil then begin
+    xftdrawdestroy(xftdraw);
+   end;
+  end;
+  xfreegc(appdisp,tgc(gc.handle));
+ end;
+end;
+
+procedure setregion(var gc: gcty; const aregion: region;
+                 const pic: tpicture = 0; const draw: pxftdraw = nil);
+var
+ po1,rectspo: pxrectangle;
+ boxpo: pbox;
+ int1: integer;
+begin
+ {$ifdef FPC} {$checkpointer off} {$endif}
+ with pxregion(aregion)^ do begin
+  if numrects > 0 then begin
+   boxpo:= rects;
+   getmem(rectspo,numrects*sizeof(xrectangle));
+   po1:= rectspo;
+   for int1:= numrects - 1 downto 0 do begin
+    rectspo^.x:= boxpo^.x1;
+    rectspo^.y:= boxpo^.y1;
+    rectspo^.width:= boxpo^.x2-boxpo^.x1;
+    rectspo^.height:= boxpo^.y2-boxpo^.y1;
+    inc(boxpo);
+    inc(rectspo);
+   end;
+   if pic <> 0 then begin
+    xrendersetpicturecliprectangles(appdisp,pic,gc.cliporigin.x,gc.cliporigin.y,po1,numrects);
+   end
+   else begin
+    if draw <> nil then begin
+     xftdrawsetcliprectangles(draw,gc.cliporigin.x,gc.cliporigin.y,po1,numrects);
+    end
+    else begin
+     xsetcliprectangles(appdisp,tgc(gc.handle),gc.cliporigin.x,gc.cliporigin.y,po1,numrects,yxbanded);
+    end;
+   end;
+   freemem(po1);
+  end
+  else begin
+   if pic <> 0 then begin
+    xrendersetpicturecliprectangles(appdisp,pic,gc.cliporigin.x,gc.cliporigin.y,nil,0);
+   end
+   else begin
+    if draw <> nil then begin
+     xftdrawsetcliprectangles(draw,gc.cliporigin.x,gc.cliporigin.y,nil,0);
+    end
+    else begin
+     xsetcliprectangles(appdisp,tgc(gc.handle),gc.cliporigin.x,gc.cliporigin.y,nil,0,yxbanded);
+    end;
+   end;
+  end;
+ end;
+ {$ifdef FPC} {$checkpointer default} {$endif}
+end;
+
+procedure checkxftdraw(var drawinfo: drawinfoty);
+begin
+ with x11gcty(drawinfo.gc.platformdata) do begin
+  if xftdraw = nil then begin
+   xftdraw:= xftdrawcreate(appdisp,drawinfo.paintdevice,xlib.pvisual(defvisual),0);
+  end;
+  if not (xfts_clipregionvalid in xftstate) then begin
+   if gcclipregion = 0 then begin
+    xftdrawsetclip(xftdraw,nil);
+   end
+   else begin
+    setregion(drawinfo.gc,region(gcclipregion),0,xftdraw);
+   end;
+   include(xftstate,xfts_clipregionvalid);
+  end;
+ end;
+end;
+
+function colortorendercolor(const avalue: rgbtriplety): txrendercolor; overload;
+begin
+ with result do begin
+  red:= avalue.red shl 8;
+  green:= avalue.green shl 8;
+  blue:= avalue.blue shl 8;
+  alpha:= $ffff;
+ end;
+end;
+
+function colortorendercolor(const avalue: colorty): txrendercolor; overload;
+begin
+ result:= colortorendercolor(colortorgb(avalue));
+end;
+
+procedure gui_changegc(var drawinfo: drawinfoty);
+var
+ xmask: cardinal;
+ xvalues: xgcvalues;
+ agc: tgc;
+ int1: integer;
+
+begin
+ xmask:= 0;
+ with drawinfo.gcvalues^,drawinfo.gc,x11gcty(platformdata) do begin
+  agc:= tgc(handle);
+  if gvm_rasterop in mask then begin
+   xmask:= xmask or gcfunction;
+   xvalues.xfunction:= integer(rasterop);
+   gcrasterop:= rasterop;
+  end;
+  if gvm_linewidth in mask then begin
+   xmask:= xmask or gclinewidth;
+   xvalues.line_width:= lineinfo.width;
+  end;
+  if gvm_dashes in mask then begin
+   with lineinfo do begin
+    int1:= length(dashes);
+    if int1 <> 0 then begin
+     if dashes[int1] = #0 then begin
+      dec(int1);
+      xvalues.line_style:= linedoubledash;
+     end
+     else begin
+      xvalues.line_style:= lineonoffdash;
+     end;
+     xsetdashes(appdisp,agc,0,@lineinfo.dashes[1],int1);
+    end
+    else begin
+     xvalues.line_style:= linesolid;
+    end;
+   end;
+   xmask:= xmask or gclinestyle;
+  end;
+  if gvm_capstyle in mask then begin
+   xvalues.cap_style:= capstyles[lineinfo.capstyle];
+   xmask:= xmask or gccapstyle;
+  end;
+  if gvm_joinstyle in mask then begin
+   xvalues.join_style:= joinstyles[lineinfo.joinstyle];
+   xmask:= xmask or gcjoinstyle;
+  end;
+  if gvm_font in mask then begin
+   if hasxft then begin
+    xftfont:= pxftfont(font);
+   end
+   else begin
+    xmask:= xmask or gcfont;
+    xvalues.font:= font;
+   end;
+  end;
+  if gvm_backgroundcolor in mask then begin
+   xmask:= xmask or gcbackground;
+   xvalues.background:= backgroundcolor;
+   if hasxft then begin
+    xftbackgroundcolor.pixel:= backgroundcolor;
+    xftbackgroundcolor.color:= colortorendercolor(drawinfo.abackgroundcolor);
+   end;
+  end;
+  if gvm_foregroundcolor in mask then begin
+   xmask:= xmask or gcforeground;
+   xvalues.foreground:= foregroundcolor;
+   xvalues.fill_style:= fillsolid;
+   if hasxft then begin
+    xftcolor.pixel:= foregroundcolor;
+    xftcolor.color:= colortorendercolor(drawinfo.aforegroundcolor);
+   end;
+  end;
+  if gvm_brushorigin in mask then begin
+   xmask:= xmask or gctilestipxorigin or gctilestipyorigin;
+   xvalues.ts_x_origin:= brushorigin.x;
+   xvalues.ts_y_origin:= brushorigin.y;
+  end;
+
+  if drawingflagsty((cardinal(drawingflags) xor cardinal(gcdrawingflags)))
+           * fillmodeinfoflags <> [] then begin
+   xmask:= xmask or gcfillstyle;
+   if df_brush in drawingflags then begin
+    if df_monochrome in drawingflags then begin
+     if df_opaque in drawingflags then begin
+      xvalues.fill_style:= fillopaquestippled;
+     end
+     else begin
+      xvalues.fill_style:= fillstippled;
+     end;
+    end
+    else begin
+     xvalues.fill_style:= filltiled;
+    end;
+   end
+   else begin
+    xvalues.fill_style:= fillsolid;
+   end;
+  end;
+
+  gcdrawingflags:= drawingflags;
+  if gvm_brush in mask then begin
+   if df_monochrome in drawingflags then begin
+    xvalues.stipple:= brush;
+    xmask:= xmask or gcstipple;
+   end
+   else begin
+    xvalues.tile:= brush;
+    xmask:= xmask or gctile;
+   end;
+  end;
+  if xmask <> 0 then begin
+   xchangegc(appdisp,agc,xmask,@xvalues);
+  end;
+  if gvm_clipregion in mask then begin
+   exclude(xftstate,xfts_clipregionvalid);
+   gcclipregion:= clipregion;
+   if clipregion = 0 then begin
+    xsetclipmask(appdisp,agc,none);
+   end
+   else begin
+    setregion(drawinfo.gc,region(clipregion));
+//    xsetregion(appdisp,agc,region(clipregion));
+   end;
+  end;
+ end;
+end;
+
+function getmatrixcharstruct(char: msechar; const fontdata: x11fontdataty): pxcharstruct;
+type
+ xchar2b = record
+  byte2: byte; //lsb
+  byte1: byte; //msb
+ end;
+
+begin
+{$ifdef FPC} {$checkpointer off} {$endif}
+ with fontdata,infopo^ do begin
+  if (xchar2b(char).byte1 >= min_byte1) and (xchar2b(char).byte1 <= max_byte1) and
+   (xchar2b(char).byte2 >= min_char_or_byte2) and
+   (xchar2b(char).byte2 <= max_char_or_byte2) then begin
+   result:= pxcharstruct(pchar(per_char) +
+             ((xchar2b(char).byte1 - min_byte1) * rowlength +
+              (xchar2b(char).byte2 - min_char_or_byte2)
+             ) * sizeof(xcharstruct));
+  end
+  else begin
+   result:= nil;
+  end;
+ end;
+{$ifdef FPC} {$checkpointer default} {$endif}
+end;
+
+function gui_getchar16widths(var drawinfo: drawinfoty): gdierrorty;
+var
+ int1,int2: integer;
+ char: word;
+ po1: pmsechar;
+ po2: pinteger;
+ charstructpo: pxcharstruct;
+ glyphinfo: txglyphinfo;
+
+begin
+ with drawinfo.getchar16widths do begin
+  po1:= text;
+  po2:= resultpo;
+{$ifdef FPC} {$checkpointer off} {$endif}
+  with datapo^,x11fontdataty(platformdata),infopo^ do begin
+   if hasxft then begin
+    for int1:= 0 to count - 1 do begin //todo: optimize
+     xfttextextents16(appdisp,pxftfont(font),po1,1,@glyphinfo);
+     po2^:= glyphinfo.xoff;
+     inc(po1);
+     inc(po2);
+    end;
+   end
+   else begin
+    case matrixmode of
+     fmm_linear: begin
+      for int1:= 0 to count - 1 do begin
+       char:= word(po1^);
+       if (char >= min_char_or_byte2) and (char <= max_char_or_byte2) then begin
+        po2^:= pxcharstruct(pchar(per_char) +
+                   (char - min_char_or_byte2)*sizeof(xcharstruct))^.width;
+       end
+       else begin
+        po2^:= defaultwidth;
+       end;
+       inc(po1);
+       inc(po2);
+      end;
+     end;
+     fmm_matrix: begin
+      for int1:= 0 to count -1 do begin
+       charstructpo:= getmatrixcharstruct(po1^,x11fontdataty(datapo^.platformdata));
+       if charstructpo <> nil then begin
+        po2^:= charstructpo^.width;
+        if po2^ = 0 then begin
+         po2^:= defaultwidth;
+        end;
+       end
+       else begin
+        po2^:= defaultwidth;
+       end;
+       inc(po1);
+       inc(po2);
+      end;
+     end;
+     else begin //fm_fix
+      int2:= max_bounds.width;
+      for int1:= 0 to count - 1 do begin
+       po2^:= int2;
+       inc(po2);
+      end;
+     end;
+    end;
+   end;
+  end;
+{$ifdef FPC} {$checkpointer default} {$endif}
+ end;
+ result:= gde_ok;
+end;
+
+function gui_getfontmetrics(var drawinfo: drawinfoty): gdierrorty;
+var
+ po1: pxcharstruct;
+ glyphinfo: txglyphinfo;
+begin
+ with drawinfo.getfontmetrics do begin
+{$ifdef FPC} {$checkpointer off} {$endif}
+  with datapo^,x11fontdataty(platformdata),infopo^ do begin
+   if hasxft then begin
+    xfttextextents16(appdisp,pxftfont(font),@char,1,@glyphinfo);
+    with resultpo^ do begin
+     width:= glyphinfo.xoff;
+     leftbearing:= glyphinfo.x;
+     rightbearing:= glyphinfo.xoff-glyphinfo.width+glyphinfo.x;
+    end;
+   end
+   else begin
+    case matrixmode of
+     fmm_linear: begin
+      if (word(char) >= min_char_or_byte2) and (word(char) <= max_char_or_byte2) then begin
+       po1:= pxcharstruct(pchar(per_char) +
+                  (word(char) - min_char_or_byte2)*sizeof(xcharstruct));
+      end
+      else begin
+       po1:= pxcharstruct(pchar(per_char) +
+                  (default_char - min_char_or_byte2)*sizeof(xcharstruct));
+      end;
+     end;
+     fmm_matrix: begin
+      po1:= getmatrixcharstruct(char,x11fontdataty(datapo^.platformdata));
+      if po1 = nil then begin
+       po1:= getmatrixcharstruct(msechar(default_char),x11fontdataty(datapo^.platformdata));
+       if po1 = nil then begin
+        with resultpo^ do begin
+         width:= 0;
+         leftbearing:= 0;
+         rightbearing:= 0;
+        end;
+       end;
+      end;
+     end;
+     else begin //fm_fix
+      po1:= @max_bounds;
+     end;
+    end;
+    with resultpo^ do begin
+     width:= po1^.width;
+     leftbearing:= po1^.lbearing;
+     rightbearing:= width - po1^.rbearing;
+    end;
+   end;
+  end;
+ end;
+{$ifdef FPC} {$checkpointer default} {$endif}
+ result:= gde_ok;
+end;
+
+function gui_gettext16width(var drawinfo: drawinfoty): integer;
+var
+ int1: integer;
+ char: word;
+ charstructpo: pxcharstruct;
+ glyphinfo: txglyphinfo;
+begin
+ result:= 0;
+{$ifdef FPC} {$checkpointer off} {$endif}
+ with drawinfo.gettext16width do begin
+  with datapo^,x11fontdataty(platformdata),infopo^ do begin
+   if hasxft then begin
+    xfttextextents16(appdisp,pxftfont(font),pmsechar(text),length(text),@glyphinfo);
+    result:= glyphinfo.xoff;
+   end
+   else begin
+    case matrixmode of
+     fmm_linear: begin
+      for int1:= 1 to length(text) do begin
+       char:= word(text[int1]);
+       if (char >= min_char_or_byte2) and (char <= max_char_or_byte2) then begin
+        inc(result,pxcharstruct(pchar(per_char) +
+                   (char - min_char_or_byte2)*sizeof(xcharstruct))^.width);
+       end
+       else begin
+        inc(result,defaultwidth);
+       end;
+      end;
+     end;
+     fmm_matrix: begin
+      for int1:= 1 to length(text) do begin
+       charstructpo:= getmatrixcharstruct(text[int1],x11fontdataty(datapo^.platformdata));
+       if charstructpo <> nil then begin
+        inc(result,charstructpo^.width);
+       end
+       else begin
+        inc(result,defaultwidth);
+       end;
+      end;
+     end;
+     else begin //fm_fix
+      result:= max_bounds.width * length(text);
+     end;
+    end;
+   end;
+  end;
+ end;
+{$ifdef FPC} {$checkpointer default} {$endif}
+end;
+
+function getcharstruct(const fontdata: fontdataty; char: msechar): pxcharstruct;
+begin
+{$ifdef FPC} {$checkpointer off} {$endif}
+ result:= nil;
+ with fontdata,x11fontdataty(platformdata),infopo^ do begin
+  case matrixmode of
+   fmm_linear: begin
+    if (word(char) >= min_char_or_byte2) and (word(char) <= max_char_or_byte2) then begin
+     result:= pxcharstruct(pchar(per_char) +
+                 (word(char) - min_char_or_byte2)*sizeof(xcharstruct));
+    end;
+   end;
+   fmm_matrix: begin
+    result:= getmatrixcharstruct(char,x11fontdataty(fontdata.platformdata));
+   end;
+   else begin //fmm_fix
+    result:= @infopo^.max_bounds;
+   end;
+  end;
+ end;
+{$ifdef FPC} {$checkpointer default} {$endif}
+end;
+
+type
+ fontpropertiesty = (
+     FOUNDRY,FAMILY_NAME,WEIGHT_NAME,SLANT,SETWIDTH_NAME,ADD_STYLE_NAME,
+     PIXEL_SIZE,POINT_SIZE,RESOLUTION_X,RESOLUTION_Y,SPACING,AVERAGE_WIDTH,
+     CHARSET_REGISTRY,CHARSET_ENCODING,{QUAD_WIDTH,RESOLUTION,}MIN_SPACE,
+     NORM_SPACE,MAX_SPACE,END_SPACE,SUPERSCRIPT_X,SUPERSCRIPT_Y,SUBSCRIPT_X,
+     SUBSCRIPT_Y,UNDERLINE_POSITION,UNDERLINE_THICKNESS,STRIKEOUT_ASCENT,
+     STRIKEOUT_DESCENT,ITALIC_ANGLE,X_HEIGHT,WEIGHT,FACE_NAME,{FULL_NAME,}
+     FONT,COPYRIGHT,AVG_CAPITAL_WIDTH,AVG_LOWERCASE_WIDTH,RELATIVE_SETWIDTH,
+     RELATIVE_WEIGHT,CAP_HEIGHT,SUPERSCRIPT_SIZE,FIGURE_WIDTH,SUBSCRIPT_SIZE,
+     SMALL_CAP_SIZE,NOTICE,DESTINATION,FONT_TYPE,FONT_VERSION,RASTERIZER_NAME,
+     RASTERIZER_VERSION,RAW_ASCENT,RAW_DESCENT,AXIS_NAMES,AXIS_LIMITS,
+     AXIS_TYPES,fpnone);
+
+ fontpropty = record
+  name: string; isstring: boolean;
+ end;
+
+ intfontproparty = array[fontpropertiesty] of integer;
+ strfontproparty = array[fontpropertiesty] of string;
+
+ const
+ fontpropertynames: array[fontpropertiesty] of fontpropty = (
+     (name: 'FOUNDRY'; isstring: true),
+     (name: 'FAMILY_NAME'; isstring: true),
+     (name: 'WEIGHT_NAME'; isstring: true),
+     (name: 'SLANT'; isstring: true),
+     (name: 'SETWIDTH_NAME'; isstring: true),
+     (name: 'ADD_STYLE_NAME'; isstring: true),
+     (name: 'PIXEL_SIZE'),
+     (name: 'POINT_SIZE'),
+     (name: 'RESOLUTION_X'),
+     (name: 'RESOLUTION_Y'),
+     (name: 'SPACING'; isstring: true),
+     (name: 'AVERAGE_WIDTH'),
+     (name: 'CHARSET_REGISTRY'; isstring: true),
+     (name: 'CHARSET_ENCODING'; isstring: true),
+     {'QUAD_WIDTH','RESOLUTION',}
+     (name: 'MIN_SPACE'),
+     (name: 'NORM_SPACE'),
+     (name: 'MAX_SPACE'),
+     (name: 'END_SPACE'),
+     (name: 'SUPERSCRIPT_X'),
+     (name: 'SUPERSCRIPT_Y'),
+     (name: 'SUBSCRIPT_X'),
+     (name: 'SUBSCRIPT_Y'),
+     (name: 'UNDERLINE_POSITION'),
+     (name: 'UNDERLINE_THICKNESS'),
+     (name: 'STRIKEOUT_ASCENT'),
+     (name: 'STRIKEOUT_DESCENT'),
+     (name: 'ITALIC_ANGLE'),
+     (name: 'X_HEIGHT'),
+     (name: 'WEIGHT'),
+     (name: 'FACE_NAME'; isstring: true),
+     {'FULL_NAME',}
+     (name: 'FONT'; isstring: true),
+     (name: 'COPYRIGHT'; isstring: true),
+     (name: 'AVG_CAPITAL_WIDTH'),
+     (name: 'AVG_LOWERCASE_WIDTH'),
+     (name: 'RELATIVE_SETWIDTH'),
+     (name: 'RELATIVE_WEIGHT'),
+     (name: 'CAP_HEIGHT'),
+     (name: 'SUPERSCRIPT_SIZE'),
+     (name: 'FIGURE_WIDTH'),
+     (name: 'SUBSCRIPT_SIZE'),
+     (name: 'SMALL_CAP_SIZE'),
+     (name: 'NOTICE'; isstring: true),
+     (name: 'DESTINATION'),
+     (name: 'FONT_TYPE'; isstring: true),
+     (name: 'FONT_VERSION'; isstring: true),
+     (name: 'RASTERIZER_NAME'; isstring: true),
+     (name: 'RASTERIZER_VERSION'; isstring: true),
+     (name: 'RAW_ASCENT'),
+     (name: 'RAW_DESCENT'),
+     (name: 'AXIS_NAMES'; isstring: true),
+     (name: 'AXIS_LIMITS'; isstring: true),
+     (name: 'AXIS_TYPES'; isstring: true),
+     (name: '')
+     );
+
+type
+ fontpropinfoty = record
+  foundry: string;
+  family_name: string;
+  weight_name: string;
+  slant: string;
+  setwidth_name: string;
+  add_style_name: string;
+  pixel_size: integer;
+  point_size: integer;
+  resolution_x: integer;
+  resolution_y: integer;
+  spacing: string;
+  average_width: integer;
+  charset_registry: string;
+  charset_encodeing: string;
+  min_space: integer;
+  norm_space: integer;
+  max_space: integer;
+  end_space: integer;
+  superscript_x: integer;
+  superscript_y: integer;
+  subscript_x: integer;
+  subscript_y: integer;
+  underline_position: integer;
+  underline_thickness: integer;
+  strikeout_ascent: integer;
+  strikeout_descent: integer;
+  italic_angle: integer;
+  x_height: integer;
+  weight: integer;
+  face_name: string;
+  font: string;
+  copyright: string;
+  avg_capital_width: integer;
+  avg_lowercase_width: integer;
+  relative_setwidth: integer;
+  relative_weight: integer;
+  cap_height: integer;
+  superscript_size: integer;
+  figure_width: integer;
+  subscript_size: integer;
+  small_cap_size: integer;
+  notice: string;
+  destination: integer;
+  font_type: string;
+  font_version: string;
+  rasterizer_name: string;
+  rasterizer_version: string;
+  raw_ascent: integer;
+  raw_descent: integer;
+  axis_names: string;
+  axis_limits: string;
+  axis_types: string;
+  dummy: integer;
+ end;
+
+var
+ fontpropertyatoms: array[fontpropertiesty] of atom;
+ 
+procedure getfontproperties(var fontstruct: xfontstruct; var propinfo: fontpropinfoty);
+
+ procedure setproperty(const prop: xfontprop);
+
+ var
+  propnum: fontpropertiesty;
+  po: pchar;
+
+ begin //setproperty
+   with prop do begin
+    for propnum:= low(fontpropertiesty) to high(fontpropertiesty) do begin
+     if name = fontpropertyatoms[propnum] then begin
+      break;
+     end;
+    end;
+    if propnum < fpnone then begin
+     if fontpropertynames[propnum].isstring then begin
+      if prop.card32 = 0 then begin
+       strfontproparty(propinfo)[propnum]:= '';
+      end
+      else begin
+       po:= xgetatomname(appdisp,prop.card32);
+       strfontproparty(propinfo)[propnum]:= po;
+       xfree(po);
+      end;
+     end
+     else begin
+      intfontproparty(propinfo)[propnum]:= prop.card32;
+     end;
+    end;
+   end;
+  end;
+var
+ int1: integer;
+ po: pxfontprop;
+
+begin //getfontproperties
+ with fontstruct do begin
+  po:= properties;
+  for int1:= 0 to n_properties - 1 do begin
+   setproperty(po^);
+   inc(po);
+  end;
+ end;
+end;
+
+type
+ fontnamety = (
+      fn_foundry,fn_family_name,fn_weight_name,fn_slant,fn_setwidth_name,
+      fn_addstyle_name,fn_pixel_size,fn_point_size,fn_resolution_x,
+      fn_resolution_y,fn_spacing,fn_average_width,fn_charset_registry,
+      fn_encoding);
+ fontinfoty = array[fontnamety] of string;
+var
+ defaultfontinfo: fontinfoty;
+ simpledefaultfont: boolean;
+ hasdefaultfontarg: boolean;//true if -fn
+ noxft: boolean; 
+
+function fontinfotoxlfdname(const info: fontinfoty): string;
+var
+ en1: fontnamety;
+begin
+ result:= '';
+ for en1:= low(fontnamety) to high(fontnamety) do begin
+  result:= result + '-' + info[en1];
+ end;
+end;
+
+procedure initdefaultfont;
+var
+ int1,int2: integer;
+ str1: string;
+ av: pcharpoaty;
+ ac: pinteger;
+ ar1: stringarty;
+ en1: fontnamety;
+begin
+ ar1:= nil; //compiler warning
+ simpledefaultfont:= false;
+ for en1:= low(fontnamety) to high(fontnamety) do begin
+  defaultfontinfo[en1]:= '*';
+ end;
+ defaultfontinfo[fn_family_name]:= 'helvetica';
+ defaultfontinfo[fn_weight_name]:= 'medium';
+ defaultfontinfo[fn_slant]:= 'r';
+ defaultfontinfo[fn_pixel_size]:= '12';
+ defaultfontinfo[fn_charset_registry]:= 'iso10646';
+ defaultfontinfo[fn_encoding]:= '1';
+ ac:= {$ifdef FPC}@argc{$else}@argcount{$endif};
+ av:= pcharpoaty({$ifdef FPC}argv{$else}argvalues{$endif});
+ for int1:= ac^ - 1 downto 1 do begin
+  if (av^[int1] = '-fn') or (av^[int1] = '-font') then begin
+   hasdefaultfontarg:= true;
+   if int1 < ac^ - 1 then begin
+    str1:= av^[int1+1];
+    if (length(str1) > 0) then begin
+     if str1[1] = '-' then begin
+      ar1:= splitstring(str1,'-');
+      for int2:= 1 to high(ar1) do begin
+       str1:= trim(ar1[int2]);
+       if str1 <> '*' then begin
+        defaultfontinfo[fontnamety(int2-1)]:= str1;
+       end;
+       if int2 = ord(high(fontnamety)) then begin
+        break;
+       end;
+      end;
+      noxft:=
+       (high(ar1) > ord(high(fontnamety))+1) and
+             (ar1[ord(high(fontnamety))+2] ='noxft');
+     end
+     else begin
+      defaultfontinfo[fn_family_name]:= str1;
+      simpledefaultfont:= true;
+     end;
+     dec(ac^,2); //remove font arguments
+     if int1 < ac^ then begin
+      move(av^[int1+2],av^[int1],(ac^-int1)*sizeof(av^[0]));
+     end;
+     av^[ac^]:= nil;
+    end;
+   end;
+   break;
+  end;
+ end;
+end;
+
+function gui_getfont(var drawinfo: drawinfoty): boolean;
+
+ procedure getfontdata(po: pxfontstruct);
+ var
+  charstructpo: pxcharstruct;
+ begin
+{$ifdef FPC} {$checkpointer off} {$endif}
+  with drawinfo.getfont,fontdata^,x11fontdataty(platformdata) do begin
+   font:= po^.fid;
+   ascent:= po^.ascent;
+   descent:= po^.descent;
+   linespacing:= ascent + descent;
+   caretshift:= 0;
+   infopo:= po;
+   with po^ do begin
+    if per_char = nil then begin
+     matrixmode:= fmm_fix;
+    end
+    else begin
+     if (min_byte1 = 0) and (max_byte1 = 0) then begin
+      matrixmode:= fmm_linear;
+     end
+     else begin
+      matrixmode:= fmm_matrix;
+      rowlength:= max_char_or_byte2 - min_char_or_byte2 + 1;
+     end;
+    end;
+    charstructpo:= getcharstruct(fontdata^,msechar(default_char));
+    if charstructpo <> nil then begin
+     defaultwidth:= charstructpo^.width;
+    end; //0 otherwise
+   end;
+{$ifdef FPC} {$checkpointer default} {$endif}
+  end;
+ end;
+
+ procedure getxftfontdata(po: pxftfont);
+ begin
+{$ifdef FPC} {$checkpointer off} {$endif}
+  with drawinfo.getfont.fontdata^,x11fontdataty(platformdata) do begin
+   font:= cardinal(po);
+   ascent:= po^.ascent;
+   descent:= po^.descent;
+//   linespacing:= ascent + descent;
+   linespacing:= po^.height;
+   caretshift:= 0;
+   infopo:= nil;
+  end;
+{$ifdef FPC} {$checkpointer default} {$endif}
+ end;
+
+var
+ po1: pxfontstruct;
+ po2: pxftfont;
+ fontinfo: fontinfoty;
+ ar1: stringarty;
+ str1: string;
+ int1: integer;
+
+begin
+ ar1:= nil; //compiler warning;
+ fontinfo:= defaultfontinfo;
+ with drawinfo.getfont.fontdata^ do begin
+  if height <> 0 then begin
+   fontinfo[fn_pixel_size]:= inttostr(height);
+  end;
+  if width <> 0 then begin
+   fontinfo[fn_average_width]:= inttostr(width);
+  end;
+  if charset <> '' then begin
+   ar1:= splitstring(charset,'-');
+   fontinfo[fn_charset_registry]:= ar1[0];
+   if high(ar1) > 0 then begin
+    fontinfo[fn_encoding]:= ar1[1];
+   end;
+  end;
+  if name <> '' then begin
+   fontinfo[fn_family_name]:= name;
+  end
+  else begin
+  end;
+  if fs_bold in style then begin
+   fontinfo[fn_weight_name]:= 'bold';
+  end;
+  if fs_italic in style then begin
+   fontinfo[fn_slant]:= 'i';
+  end;
+  if hasxft then begin
+   str1:= '';
+   if (familyoptions = []) then begin
+    if (pitchoptions = []) and (fontinfo[fn_family_name] <> '*') then begin
+     str1:= str1 + ':family=' + fontinfo[fn_family_name];
+    end;
+   end
+   else begin
+    if foo_helvetica in familyoptions then begin
+     str1:= str1 + ':family=sans';
+    end
+    else begin
+     if foo_roman in familyoptions then begin
+      str1:= str1 + ':family=serif';
+     end
+     else begin
+      if foo_decorative in familyoptions then begin
+      end
+      else begin
+       if foo_script in familyoptions then begin
+       end;
+      end;
+     end;
+    end;
+   end;
+   if fs_bold in style then begin
+    str1:= str1 + ':bold';
+   end;
+   if fs_italic in style then begin
+    str1:= str1 + ':italic';
+   end;
+   if fontinfo[fn_pixel_size] <> '*' then begin
+    str1:= str1 + ':pixelsize=' + fontinfo[fn_pixel_size];
+   end;
+   if fontinfo[fn_average_width] <> '*' then begin
+    try
+     int1:= (strtoint(fontinfo[fn_average_width]) + 5) div 10;
+     str1:= str1 + ':charwidth='+inttostr(int1);
+    except
+    end;
+   end;
+   if foo_fixed in pitchoptions then begin
+    str1:= str1 + ':mono';
+   end;
+   if foo_proportional in pitchoptions then begin
+    str1:= str1 + ':proportional';
+   end;
+   if foo_antialiased in antialiasedoptions then begin
+    str1:= str1 + ':antialias=1';
+   end;
+   if foo_nonantialiased in antialiasedoptions then begin
+    str1:= str1 + ':antialias=0';
+   end;
+   if fontinfo[fn_charset_registry] <> '*' then begin
+    str1:= str1 + ':encoding=' + fontinfo[fn_charset_registry];
+    if fontinfo[fn_encoding] <> '*' then begin
+     str1:= str1 +'-'+fontinfo[fn_encoding];
+    end;
+   end;
+//   po2:= xftfontopenxlfd(appdisp,xdefaultscreen(appdisp),
+//            pchar(fontinfotoxlfdname(fontinfo)));
+   po2:= xftfontopenname(appdisp,xdefaultscreen(appdisp),pchar(str1));
+   if po2 <> nil then begin
+    result:= true;
+  {$ifdef FPC} {$checkpointer off} {$endif}
+    getxftfontdata(po2);
+  {$ifdef FPC} {$checkpointer default} {$endif}
+   end
+   else begin
+    result:= false;
+   end;
+  end
+  else begin
+   po1:=  xloadqueryfont(appdisp,pchar(fontinfotoxlfdname(fontinfo)));
+   if po1 = nil then begin
+    if fs_italic in style then begin
+     fontinfo[fn_slant]:= 'o';
+     po1:=  xloadqueryfont(appdisp,pchar(fontinfotoxlfdname(fontinfo)));
+     fontinfo[fn_slant]:= 'i';
+    end;
+    if po1 = nil then begin
+     if (name <> '') and (style * [fs_italic,fs_bold] = []) and (charset <> '') and
+           (height = 0) then begin
+      po1:= xloadqueryfont(appdisp,pchar(name));
+     end;
+     if po1 = nil then begin
+      if simpledefaultfont then begin
+       po1:= xloadqueryfont(appdisp,pchar(fontinfo[fn_family_name]));
+      end;
+      if po1 = nil then begin
+       fontinfo[fn_family_name]:= 'fixed';
+       po1:=  xloadqueryfont(appdisp,pchar(fontinfotoxlfdname(fontinfo)));
+       if po1 = nil then begin
+        po1:= xloadqueryfont(appdisp,'fixed');
+       end;
+      end;
+     end;
+    end;
+   end;
+   if po1 <> nil then begin
+  {$ifdef FPC} {$checkpointer off} {$endif}
+    getfontdata(po1);
+  {$ifdef FPC} {$checkpointer default} {$endif}
+    result:= true;
+   end
+   else begin
+    result:= false;
+   end;
+  end;
+ end;
+end;
+
+procedure gui_freefontdata(const data: fontdataty);
+begin
+ if hasxft then begin
+  xftfontclose(appdisp,pxftfont(data.font));
+ end
+ else begin
+  with x11fontdataty(data.platformdata) do begin
+   xfreefontinfo(nil,infopo,1);
+ //  freemem(infopo);
+   xunloadfont(appdisp,data.font);
+  end;
+ end;
+end;
+
+procedure transformpoints(var drawinfo: drawinfoty; const aclose: boolean);
+var
+ po1: ppointty;
+ po2: pxpoint;
+ int1: integer;
+begin
+ with drawinfo,drawinfo.points do begin
+  int1:= count;
+  if aclose then begin
+   inc(int1);
+  end;
+  allocbuffer(buffer,int1*sizeof(xpoint));
+  int1:= count;
+  po1:= points;
+  po2:= buffer.buffer;
+  with origin do begin
+   while int1 > 0 do begin
+    po2^.x:= po1^.x + x;
+    po2^.y:= po1^.y + y;
+    inc(po1);
+    inc(po2);
+    dec(int1);
+   end;
+  end;
+  if aclose then begin
+   move(buffer.buffer^,(pchar(buffer.buffer)+count*sizeof(xpoint))^,sizeof(xpoint));
+  end;
+ end;
+end;
+
+procedure transformpos(var drawinfo: drawinfoty);
+begin
+ with drawinfo,drawinfo.pos do begin
+  allocbuffer(buffer,sizeof(xpoint));
+  with pxpoint(buffer.buffer)^ do begin
+   x:= pos^.x + origin.x;
+   y:= pos^.y + origin.y;
+  end;
+ end;
+end;
+
+function transformtext16pos(var drawinfo: drawinfoty): pxchar2b;
+var
+ po1: pword;
+ po2: pword;
+ int1: integer;
+begin
+ with drawinfo,drawinfo.text16pos do begin
+  allocbuffer(buffer,sizeof(xpoint)+count*2);
+  with pxpoint(buffer.buffer)^ do begin
+   x:= pos^.x + origin.x;
+   y:= pos^.y + origin.y;
+  end;
+  po1:= pword(text);
+  result:= pxchar2b(pchar(buffer.buffer) + sizeof(xpoint));
+  po2:= pword(result);
+  for int1:= count-1 downto 0 do begin
+   po2^:= (po1^ shl 8) or (po1^ shr 8); //simply swap bytes
+   inc(po1);
+   inc(po2);
+  end;
+ end;
+end;
+
+function gui_movewindowrect(id: winidty; const dist: pointty; const rect: rectty): guierrorty;
+var
+ gc: tgc;
+begin
+ gc:= xcreategc(appdisp,id,0,nil);
+ if gc <> nil then begin
+  xcopyarea(appdisp,id,id,gc,rect.x,rect.y,rect.cx,rect.cy,rect.x+dist.x,rect.y+dist.y);
+  xfreegc(appdisp,gc);
+  result:= gue_ok;
+ end
+ else begin
+  result:= gue_scroll;
+ end;
+end;
+
+const
+ unitytransform: txtransform = ((65536,0,0),
+                                (0,65536,0),
+                                (0,0,65536));
+
+function createalphapicture(const size: sizety): tpicture;
+var
+ attributes: txrenderpictureattributes;
+ pixmap: pixmapty;
+begin
+ pixmap:= xcreatepixmap(appdisp,0,size.cx,size.cy,8);
+ result:= xrendercreatepicture(appdisp,pixmap,alpharenderpictformat,0,@attributes);
+ xfreepixmap(appdisp,pixmap);
+end;
+
+function createcolorpicture(const acolor: colorty): tpicture;
+var
+ attributes: txrenderpictureattributes;
+ col: txrendercolor;
+ pixmap: pixmapty;
+begin
+ pixmap:= gui_createpixmap(makesize(1,1));
+ attributes._repeat:= 1;
+ result:= xrendercreatepicture(appdisp,pixmap,screenrenderpictformat,cprepeat,@attributes);
+ col:= colortorendercolor(acolor);
+ xrenderfillrectangle(appdisp,pictopsrc,result,@col,0,0,1,1);
+ xfreepixmap(appdisp,pixmap);
+end;
+
+function createmaskpicture(const acolor: rgbtriplety): tpicture; overload;
+var
+ attributes: txrenderpictureattributes;
+ col: txrendercolor;
+ pixmap: pixmapty;
+begin
+ pixmap:= gui_createpixmap(makesize(1,1));
+ attributes._repeat:= 1;
+ attributes.component_alpha:= 1;
+ result:= xrendercreatepicture(appdisp,pixmap,screenrenderpictformat,
+       cprepeat or cpcomponentalpha,@attributes);
+ col:= colortorendercolor(acolor);
+ xrenderfillrectangle(appdisp,pictopsrc,result,@col,0,0,1,1);
+ gui_freepixmap(pixmap);
+end;
+
+function createmaskpicture(const amask: tsimplebitmap): tpicture; overload;
+var
+ attributes: txrenderpictureattributes;
+ handle1: pixmapty;
+begin
+ result:= 0;
+ if amask <> nil then begin
+  handle1:= tsimplebitmap1(amask).handle;
+  if handle1 <> 0 then begin
+   attributes.component_alpha:= 1;
+   result:= xrendercreatepicture(appdisp,tsimplebitmap1(amask).handle,
+        screenrenderpictformat,cpcomponentalpha,@attributes);
+  end;
+ end;
+end;
+
+procedure gui_copyarea(var drawinfo: drawinfoty);
+
+const
+ sourceformats = cpclipmask or cpclipxorigin or cpclipyorigin;
+ destformats = cpgraphicsexposure;
+
+var
+ amask: pixmapty;
+ xvalues: xgcvalues;
+ pixmap: pixmapty;
+ pixmapgc: tgc;
+ maskgc: gcty;
+ bitmap: pixmapty;
+ bitmapgc: tgc;
+ int1: integer;
+ spic,dpic,cpic,maskpic: tpicture;
+ sattributes: txrenderpictureattributes;
+ dattributes: txrenderpictureattributes;
+ transform: txtransform;
+ ax,ay: integer;
+ aformat: pxrenderpictformat;
+ color1: txrendercolor;
+ pixmap1: pixmapty;
+ areg: region;
+ arect: xrectangle;
+ needstransform: boolean;
+ pictop: integer;
+ colormask: boolean;
+ bo1: boolean;
+
+begin
+ with drawinfo,copyarea,sourcerect^,gc,x11gcty(platformdata) do begin
+  needstransform:= (alignment * [al_stretchx,al_stretchy] <> []) and
+            ((destrect^.cx <> sourcerect^.cx) or
+            (destrect^.cy <> sourcerect^.cy)) and
+            (destrect^.cx > 0) and (destrect^.cy > 0);
+  colormask:= (mask <> nil) and not mask.monochrome;
+//  inc(destrect^.cx);
+  if hasxrender and (needstransform or (cardinal(transparency) <> 0) or
+      colormask) then begin
+   if needstransform then begin
+//    pictop:= pictopover;
+    pictop:= pictopsrc;
+    transform:= unitytransform;
+    transform[0,0]:= cx * 65536 div destrect^.cx;
+    transform[1,1]:= cy * 65536 div destrect^.cy;
+    if cx > 0 then begin
+     ax:= (x * destrect^.cx + cx div 2) div cx; //round
+    end
+    else begin
+     ax:= x * 65536; //very big
+    end;
+    if cy > 0 then begin
+     ay:= (y * destrect^.cy + cy div 2) div cy; //round
+    end
+    else begin
+     ay:= y * 65536; //very big
+    end;
+   end
+   else begin
+    pictop:= pictopsrc;
+    ax:= x;
+    ay:= y;
+   end;
+   if (cardinal(transparency) <> 0) and not colormask then begin
+    maskpic:= createmaskpicture(rgbtriplety(cardinal(transparency) xor $ffffff));
+    pictop:= pictopover;
+   end
+   else begin
+    if colormask then begin
+     maskpic:= createmaskpicture(mask);
+     if needstransform then begin
+      xrendersetpicturetransform(appdisp,maskpic,@transform);
+     end;
+     pictop:= pictopover;
+    end
+    else begin
+     pictop:= pictopover; //pictopsrc is unreliable!?
+     maskpic:= 0;
+    end;
+   end;
+   with sattributes do begin
+    clip_x_origin:= ax;
+    clip_y_origin:= ay;
+    if (mask <> nil) and not colormask then begin
+     clip_mask:= tsimplebitmap1(mask).handle;
+//     clip_mask:= 0;
+    end
+    else begin
+     clip_mask:= 0;
+    end;
+   end;
+   with dattributes do begin
+    graphics_exposures:= 0;
+   end;
+   if df_colorconvert in gc.drawingflags then begin
+    if df_canvasismonochrome in gc.drawingflags then begin
+     if maskpic <> 0 then begin
+      xrenderfreepicture(appdisp,maskpic);
+     end;
+     exit; //not supported;         //todo !!!
+    end
+    else begin //monochrome -> color
+     spic:= xrendercreatepicture(appdisp,source^.paintdevice,bitmaprenderpictformat,
+                      sourceformats,@sattributes);
+     dpic:= xrendercreatepicture(appdisp,paintdevice,screenrenderpictformat,
+                      destformats,@dattributes);
+     cpic:= createcolorpicture(aforegroundcolor);
+     if gcclipregion <> 0 then begin
+      setregion(gc,region(gcclipregion),dpic);
+     end;
+     if needstransform then begin
+      xrendersetpicturetransform(appdisp,spic,@transform);
+     end;
+     xrendercomposite(appdisp,pictop,cpic,spic,dpic,0,0,ax,ay,destrect^.x,destrect^.y,
+                        destrect^.cx,destrect^.cy);
+     xrenderfreepicture(appdisp,cpic);
+     if df_opaque in gc.drawingflags then begin
+      xvalues.xfunction:= gxxor;
+      xvalues.foreground:= $ffffffff;
+      bitmapgc:= xcreategc(appdisp,source^.paintdevice,gcforeground or gcfunction,@xvalues);
+      xfillrectangle(appdisp,source^.paintdevice,bitmapgc,x,y,cx,cy);
+      cpic:= createcolorpicture(abackgroundcolor);
+      xrendercomposite(appdisp,pictop,cpic,spic,dpic,0,0,ax,ay,destrect^.x,destrect^.y,
+                         destrect^.cx,destrect^.cy);
+      xrenderfreepicture(appdisp,cpic);
+      xfillrectangle(appdisp,source^.paintdevice,bitmapgc,x,y,cx,cy);
+      xfreegc(appdisp,bitmapgc);
+     end;
+    end;
+   end
+   else begin
+    if df_canvasismonochrome in gc.drawingflags then begin
+     aformat:= bitmaprenderpictformat;
+    end
+    else begin
+     aformat:= screenrenderpictformat;
+    end;
+    dpic:= xrendercreatepicture(appdisp,paintdevice,aformat,destformats,
+               @dattributes);
+    spic:= xrendercreatepicture(appdisp,source^.paintdevice,aformat,
+               sourceformats,@sattributes);
+    if gcclipregion <> 0 then begin
+     setregion(gc,region(gcclipregion),dpic);
+    end;
+    if needstransform then begin
+     xrendersetpicturetransform(appdisp,spic,@transform);
+    end;
+    xrendercomposite(appdisp,pictop,spic,maskpic,dpic,ax,ay,0,0,destrect^.x,destrect^.y,
+                       destrect^.cx,destrect^.cy);
+   end;
+   if maskpic <> 0 then begin
+    xrenderfreepicture(appdisp,maskpic);
+   end;
+   xrenderfreepicture(appdisp,spic);
+   xrenderfreepicture(appdisp,dpic);
+  end
+  else begin
+   if copymode <> gcrasterop then begin
+    xsetfunction(appdisp,tgc(gc.handle),integer(copymode));
+   end;
+   if mask <> nil then begin
+    amask:= tsimplebitmap1(mask).handle;
+    if gcclipregion <> 0 then begin
+     pixmap:= gui_createpixmap(size,0,true);
+     maskgc.handle:= cardinal(xcreategc(appdisp,pixmap,0,@xvalues));
+//xsetforeground(appdisp,tgc(maskgc.handle),$1);
+//xfillrectangle(appdisp,mask,tgc(maskgc.handle),0,0,100,100);
+ //    pixmapgc:= xcreategc(appdisp,pixmap,0,@xvalues);
+     xfillrectangle(appdisp,pixmap,tgc(maskgc.handle),0,0,cx,cy);
+     maskgc.cliporigin:= subpoint(cliporigin,destrect^.pos);
+     setregion(maskgc,region(gcclipregion));
+ //    xsetregion(appdisp,pixmapgc,region(gcclipregion));    //??? cliporigin gc?
+ //    xvalues.clip_x_origin:= -dest^.x+;
+ //    xvalues.clip_y_origin:= -dest^.y;
+ //    xchangegc(appdisp,pixmapgc,gcclipxorigin or gcclipyorigin,@xvalues);
+     xcopyarea(appdisp,amask,pixmap,tgc(maskgc.handle),x,y,cx,cy,0,0);
+//     xsetclipmask(appdisp,tgc(gc.handle),pixmap);
+     xvalues.clip_x_origin:= destrect^.x;
+     xvalues.clip_y_origin:= destrect^.y;
+     xvalues.clip_mask:= pixmap;
+     xchangegc(appdisp,tgc(gc.handle),gcclipxorigin or gcclipyorigin or
+                  gcclipmask,@xvalues);
+     xfreegc(appdisp,tgc(maskgc.handle));
+     xflushgc(appdisp,tgc(gc.handle)); //aquire pixmap
+     xfreepixmap(appdisp,pixmap);
+    {
+     xvalues.xfunction:= gxand;
+     pixmapgc:= xcreategc(appdisp,xvalues.clip_mask,gcfunction,@xvalues);
+     xcopyarea(appdisp,mask,xvalues.clip_mask,pixmapgc,0,0,cx,cy,0,0);
+     xfreegc(appdisp,pixmapgc);
+     }
+    end
+    else begin
+//     xsetclipmask(appdisp,tgc(gc.handle),mask);
+     xvalues.clip_mask:= amask;
+     xvalues.clip_x_origin:= destrect^.x - x;
+     xvalues.clip_y_origin:= destrect^.y - y;
+     xchangegc(appdisp,tgc(gc.handle),gcclipxorigin or gcclipyorigin or
+                      gcclipmask,@xvalues);
+    end;
+   end;
+   if df_colorconvert in gc.drawingflags then begin
+    xvalues.graphics_exposures:= {$ifdef FPC}false{$else}0{$endif};
+    if df_canvasismonochrome in gc.drawingflags then begin
+                        //convert to monochrome
+     pixmap:= gui_createpixmap(size);
+     if pixmap = 0 then begin
+      exit;
+     end;
+     pixmapgc:= xcreategc(appdisp,pixmap,gcgraphicsexposures,@xvalues);
+     if pixmapgc <> nil then begin
+      xcopyarea(appdisp,source^.paintdevice,pixmap,pixmapgc,x,y,cx,cy,0,0);
+      xvalues.foreground:= transparentcolor;
+      xvalues.xfunction:= integer(rop_xor);
+      xchangegc(appdisp,pixmapgc,gcforeground or gcfunction,@xvalues);
+      xfillrectangle(appdisp,pixmap,pixmapgc,0,0,cx,cy);
+      bitmap:= gui_createpixmap(size,0,true);
+      if bitmap <> 0 then begin
+       xvalues.foreground:= pixel0;
+       bitmapgc:= xcreategc(appdisp,bitmap,
+                         gcforeground or gcgraphicsexposures,@xvalues);
+       if bitmapgc <> nil then begin
+        xfillrectangle(appdisp,bitmap,bitmapgc,0,0,cx,cy);
+        xvalues.xfunction:= integer(rop_or);
+        xvalues.background:= pixel0;
+        xvalues.foreground:= pixel1;
+        xchangegc(appdisp,bitmapgc,gcfunction or gcforeground or
+                gcbackground,@xvalues);
+        for int1:= 0 to defdepth - 1 do begin
+         xcopyplane(appdisp,pixmap,bitmap,bitmapgc,0,0,cx,cy,
+                        0,0,1 shl int1);
+        end;
+        xcopyarea(appdisp,bitmap,paintdevice,tgc(gc.handle),0,0,cx,cy,destrect^.x,destrect^.y);
+        xfreegc(appdisp,bitmapgc);
+       end;
+       xfreepixmap(appdisp,bitmap)
+      end;
+      xfreegc(appdisp,pixmapgc);
+     end;
+     xfreepixmap(appdisp,pixmap);
+    end
+    else begin
+            //convert from monochrome
+     pixmapgc:= xcreategc(appdisp,paintdevice,0,nil);
+     if pixmapgc <> nil then begin
+      xcopygc(appdisp,tgc(gc.handle),gcfunction or gcplanemask or gcsubwindowmode or
+                gcgraphicsexposures or gcclipxorigin or
+                gcclipyorigin or gcclipmask or gcforeground or gcbackground,pixmapgc);
+      with xvalues do begin
+       stipple:= source^.paintdevice;
+       ts_x_origin:= destrect^.x-x;
+       ts_y_origin:= destrect^.y-y;
+       if df_opaque in gc.drawingflags then begin
+        fill_style:= fillopaquestippled;
+       end
+       else begin
+        fill_style:= fillstippled;
+       end;
+      end;
+      xchangegc(appdisp,pixmapgc,gcfillstyle or gcstipple or
+                       gctilestipxorigin or gctilestipyorigin,@xvalues);
+      xfillrectangle(appdisp,paintdevice,pixmapgc,destrect^.x,destrect^.y,cx,cy);
+      xfreegc(appdisp,pixmapgc);
+     end;
+    end;
+   end
+   else begin
+    xcopyarea(appdisp,source^.paintdevice,paintdevice,tgc(gc.handle),
+                            x,y,cx,cy,destrect^.x,destrect^.y);
+   end;
+   if mask <> nil then begin
+    xvalues.clip_x_origin:= 0;
+    xvalues.clip_y_origin:= 0;
+    xchangegc(appdisp,tgc(gc.handle),gcclipxorigin or gcclipyorigin,@xvalues);
+   end;
+   if copymode <> gcrasterop then begin
+    xsetfunction(appdisp,tgc(gc.handle),integer(gcrasterop));
+   end;
+  end;
+ end;
+end;
+
+procedure gui_drawlines(var drawinfo: drawinfoty);
+var
+ int1: integer;
+begin
+ with drawinfo,drawinfo.points do begin
+  transformpoints(drawinfo,closed);
+  int1:= count;
+  if closed then begin
+   inc(int1);
+  end;
+  xdrawlines(appdisp,paintdevice,tgc(gc.handle),buffer.buffer,int1,coordmodeorigin);
+ end;
+end;
+
+procedure gui_drawlinesegments(var drawinfo: drawinfoty);
+begin
+ transformpoints(drawinfo,false);
+ with drawinfo,drawinfo.points do begin
+  xdrawsegments(appdisp,paintdevice,tgc(gc.handle),buffer.buffer,count div 2);
+ end;
+end;
+
+procedure gui_drawellipse(var drawinfo: drawinfoty);
+begin
+ with drawinfo,drawinfo.rect.rect^ do begin
+  xdrawarc(appdisp,paintdevice,tgc(gc.handle),
+   x+origin.x-cx div 2,y+origin.y - cy div 2,cx,cy,0,wholecircle);
+ end;
+end;
+
+procedure gui_drawarc(var drawinfo: drawinfoty);
+const
+ angscale = 64*360/(2*pi);
+begin
+ with drawinfo,drawinfo.arc,rect^ do begin
+  xdrawarc(appdisp,paintdevice,tgc(gc.handle),
+   x+origin.x-cx div 2,y+origin.y - cy div 2,cx,cy,
+   round(startang*angscale),round(extentang*angscale));
+ end;
+end;
+
+procedure gui_drawstring16(var drawinfo: drawinfoty);
+var
+ po1: pxchar2b;
+ xvalues: xgcvalues;
+ glyphinfo: txglyphinfo;
+begin
+ with drawinfo,drawinfo.text16pos do begin
+  if hasxft then begin
+ {$ifdef FPC}{$checkpointer off}{$endif}
+   checkxftdraw(drawinfo);
+   transformpos(drawinfo);
+   with pxpoint(buffer.buffer)^ do begin
+    with x11gcty(gc.platformdata) do begin
+     if df_opaque in gc.drawingflags then begin
+      xfttextextents16(appdisp,xftfont,text,count,@glyphinfo);
+//      xftdrawrect(xftdraw,@xftbackgroundcolor,x-glyphinfo.x,y-xftfont^.ascent,
+//              glyphinfo.width,xftfont^.ascent+xftfont^.descent);
+                   //unreliable!?
+      xvalues.foreground:= xftbackgroundcolor.pixel;
+      xchangegc(appdisp,tgc(gc.handle),gcforeground,@xvalues);
+      xfillrectangle(appdisp,paintdevice,tgc(gc.handle),x{-glyphinfo.x},y-xftfont^.ascent,
+              glyphinfo.xoff,xftfont^.ascent+xftfont^.descent);
+      xvalues.foreground:= xftcolor.pixel;
+      xchangegc(appdisp,tgc(gc.handle),gcforeground,@xvalues);
+     end;
+     xftdrawstring16(xftdraw,@xftcolor,xftfont,x,y,text,count);
+    end;
+   end
+{$ifdef FPC}{$checkpointer default}{$endif}
+  end
+  else begin
+   po1:= transformtext16pos(drawinfo); //swap bytes
+   with pxpoint(buffer.buffer)^ do begin
+    if df_opaque in gc.drawingflags then begin
+     xdrawimagestring16(appdisp,paintdevice,tgc(gc.handle),x,y,po1,count);
+    end
+    else begin
+     xdrawstring16(appdisp,paintdevice,tgc(gc.handle),x,y,po1,count);
+    end;
+   end;
+  end;
+ end;
+end;
+
+procedure gui_setcliporigin(var drawinfo: drawinfoty);
+begin
+ with drawinfo,gc do begin
+  xsetcliporigin(appdisp,tgc(handle),cliporigin.x,cliporigin.y);
+ end;
+end;
+
+procedure gui_fillrect(var drawinfo: drawinfoty);
+var
+ points1: array[0..3] of xpoint;
+ x1,y1: smallint;
+begin
+ with drawinfo,drawinfo.rect.rect^ do begin
+  x1:= x+origin.x;
+  y1:= y+origin.y;
+  points1[0].x:= x1;
+  points1[0].y:= y1;
+  points1[1].y:= y1;
+  points1[3].x:= x1;
+  inc(x1,cx);
+  inc(y1,cy);
+  points1[1].x:= x1;
+  points1[2].x:= x1;
+  points1[2].y:= y1;
+  points1[3].y:= y1;
+  xfillpolygon(appdisp,paintdevice,tgc(gc.handle),@points1[0],4,complex,coordmodeorigin);
+//  xfillrectangle(appdisp,paintdevice,tgc(gc.handle),
+//   x+origin.x,y+origin.y,smallint(cx),smallint(cy)); //does not work with negative cx,cy
+ end;
+end;
+
+procedure gui_fillelipse(var drawinfo: drawinfoty);
+begin
+ with drawinfo,drawinfo.rect.rect^ do begin
+  xfillarc(appdisp,paintdevice,tgc(gc.handle),
+   x+origin.x-cx div 2,y+origin.y - cy div 2,cx,cy,0,wholecircle);
+ end;
+end;
+
+procedure gui_fillpolygon(var drawinfo: drawinfoty);
+begin
+ transformpoints(drawinfo,false);
+ with drawinfo,drawinfo.points do begin
+  xfillpolygon(appdisp,paintdevice,tgc(gc.handle),buffer.buffer,
+          count,complex,coordmodeorigin);
+ end;
+end;
+
+procedure gui_beep;
+begin
+ xbell(appdisp,0);
+end;
+
+function gui_flushgdi: guierrorty;
+begin
+ xflush(appdisp);
+ result:= gue_ok;
+end;
+
+function msedisplay: pdisplay;
+begin
+ result:= appdisp;
+end;
+
+function msevisual: pvisual;
+begin
+ result:= pvisual(defvisual);
+end;
+
+function defaultscreen: pscreen;
+begin
+ result:= defscreen;
+end;
+
+{$ifdef hassm}
+//callbacks
+procedure icewatch(_iceConn: IceConn; clientData: IcePointer;
+                     opening: Bool; var watchData: IcePointer); cdecl;
+begin
+ with psminfoty(clientdata)^ do begin
+  if iceconnection = nil then begin
+   iceconnection:= _iceconn;
+  end;
+  if _iceconn = iceconnection then begin
+   if (opening <> 0) then begin
+    fd:= iceconnectionnumber(_iceconn);
+   end
+   else begin
+    fd:= -1;
+   end;
+  end;
+ end;
+end;
+
+procedure SmcSaveYourself(_smcConn: SmcConn; clientData: pointer;
+                        saveType: integer; ashutdown: bool;
+                        ainteractStyle: integer; fast: bool); cdecl;
+begin
+ with psminfoty(clientdata)^ do begin
+  if (ashutdown <> 0) then begin
+   shutdown:= true;
+   interactstyle:= ainteractstyle;
+  end
+  else begin
+   smcsaveyourselfdone(_smcconn,1);
+  end;
+ end;
+end; 
+     
+procedure SmcDie(_smcConn: SmcConn; clientData: pointer); cdecl;
+begin
+end;
+
+procedure SmcSaveComplete(_smcConn: SmcConn; clientData: pointer); cdecl;
+begin
+end;
+
+procedure SmcShutdownCancelled(_smcConn: SmcConn;
+                               clientData: pointer); cdecl;
+begin
+ with psminfoty(clientdata)^ do begin
+  shutdown:= false;
+  shutdownpending:= false;
+ end;
+end;
+
+procedure interact(_smcConn: SmcConn; clientData: SmPointer); cdecl;
+begin
+ with psminfoty(clientdata)^ do begin
+  interactgranted:= true;
+ end;
+end;
+
+{$endif}
+
+procedure gui_cancelshutdown;
+begin
+ {$ifdef hassm}
+ with sminfo do begin
+{$ifdef smdebug}
+  writeln('gui_cancelshutdown ',shutdown,shutdownpending,
+                  interactwaiting,interactgranted);
+{$endif}
+  if shutdown and shutdownpending and interactgranted then begin
+   smcinteractdone(smconnection,1);
+{$ifdef smdebug}
+   writeln('gui_cancelshutdown smcinteractdone');
+{$endif}
+   smcsaveyourselfdone(smconnection,1);
+{$ifdef smdebug}
+   writeln('gui_cancelshutdown smcsaveyourselfdone');
+{$endif}
+   interactwaiting:= false;
+   interactgranted:= false;
+  end;
+ end;
+ {$endif}
+end;
+
+function gui_getevent: tevent;
+var
+ xev: xevent;
+ w: winidty;
+ eventkind: eventkindty;
+ akey: keysym;
+ buffer: string;
+ icstatus: tstatus;
+ chars: msestring;
+ int1: integer;
+ event: xevent;
+ fdsetr,fdsete: tfdset;
+ str1: string;
+ {$ifdef hassm}
+ int2: integer;
+ {$endif}
+
+begin
+ while true do begin
+  if gui_hasevent then begin
+   break;
+  end;
+  fd_zero(fdsetr);
+  fd_set(xconnectionnumber(appdisp),fdsetr);
+{$ifdef hassm}
+  if sminfo.fd > 0 then begin
+   fd_set(sminfo.fd,fdsetr);
+  end;
+{$endif}
+  if not timerevent and not terminated then begin
+   repeat
+    if not application.unlock then begin
+     guierror(gue_notlocked);
+    end;
+    fdsete:= fdsetr;
+    int1:= select(fd_setsize,@fdsetr,nil,@fdsete,nil);
+    application.lock;
+   until (int1 <> -1) or timerevent or terminated;
+ {$ifdef hassm}
+   if (int1 > 0) and fd_isset(sminfo.fd,fdsetr) then begin
+    iceprocessmessages(sminfo.iceconnection,nil,int2);
+    with sminfo do begin
+     if shutdown then begin
+      if not shutdownpending then begin
+       interactgranted:= false;
+       shutdownpending:= true;
+       if (interactstyle = sminteractstyleerrors) or 
+            (interactstyle = sminteractstyleany) then begin
+        if SmcInteractRequest(smconnection,smdialognormal,
+                 {$ifdef FPC}@{$endif}interact,@sminfo) = 0 then begin
+{$ifdef smdebug}
+         writeln('gui_getevent SmcInteractRequest');
+{$endif}
+         terminated:= true;
+        end
+        else begin
+         interactwaiting:= true;
+        end;
+       end
+       else begin
+        interactwaiting:= false;
+        terminated:= true;
+       end;
+      end
+      else begin
+       if interactwaiting and interactgranted then begin
+        terminated:= true;
+        interactwaiting:= false;
+       end;
+      end;
+     end;
+    end;
+   end;
+{$endif}
+  end;
+  if timerevent then begin
+   application.postevent(tevent.create(ek_timer));
+   timerevent:= false;
+  end;
+  if terminated then begin
+   application.postevent(tevent.create(ek_terminate));
+   terminated:= false;
+  end;
+ end;
+ result:= nil;
+ if not gui_hasevent then begin
+  exit;
+ end;
+ xnextevent(appdisp,@xev);
+ if longint(xfilterevent(@xev,none)) <> 0 then begin
+  exit;
+ end;
+ if xev.xany.xwindow = appid then begin
+  if (xev.xtype = selectionclear) then begin
+   if xev.xselectionclear.selection = clipboardatom then begin
+    clipboard:= '';
+    exit;
+   end;
+  end
+  else begin
+   if xev.xtype = selectionrequest then begin
+    with xev.xselectionrequest do begin
+     if selection = clipboardatom then begin
+      event.xtype:= selectionnotify;
+      event.xselection.requestor:= requestor;
+      event.xselection.selection:= clipboardatom;
+      if {$ifdef FPC}_property{$else}xproperty{$endif} = none then begin
+       {$ifdef FPC}_property{$else}xproperty{$endif}:= target;
+      end;
+      event.xselection.target:= target;
+      event.xselection.{$ifdef FPC}_property{$else}xproperty{$endif}:= {$ifdef FPC}_property{$else}xproperty{$endif};
+      if target = targetsatom then begin
+       xchangeproperty(appdisp,requestor,{$ifdef FPC}_property{$else}xproperty{$endif},target,32,
+                  propmodereplace,@stringatom,1);
+      end
+      else begin
+       if target = stringatom then begin
+        str1:= clipboard;
+        xchangeproperty(appdisp,requestor,{$ifdef FPC}_property{$else}xproperty{$endif},target,8,
+                  propmodereplace,pbyte(pchar(str1)),length(clipboard));
+       end
+       else begin
+        event.xselection.{$ifdef FPC}_property{$else}xproperty{$endif}:= none;
+       end;
+      end;
+      xsendevent(appdisp,requestor,{$ifdef FPC}false{$else}0{$endif},0,@event);
+      exit;
+     end;
+    end;
+   end;
+  end;
+ end;
+ case xev.xtype of
+  clientmessage: begin
+   with xev.xclient do begin
+    if display = appdisp then begin
+     if message_type = mseclientmessageatom then begin
+      result:= tevent(data.l[0]);
+     end
+     else begin
+      if message_type = wmprotocolsatom then begin
+       if cardinal(data.l[0]) = wmprotocols[wm_delete_window] then begin
+        result:= twindowevent.create(ek_close,xwindow);
+{$ifdef hassaveyourself}
+       end
+       else begin
+        if cardinal(data.l[0]) = wmprotocols[wm_save_yourself] then begin
+         result:= tevent.create(ek_terminate);
+         saveyourselfwindow:= window;
+        end;
+       end;
+{$else}
+       end;
+{$endif}
+      end;
+     end;
+    end;
+   end;
+  end;
+  enternotify: begin
+   with xev.xcrossing do begin
+    result:= twindowevent.create(ek_enterwindow,xwindow);
+   end;
+  end;
+  leavenotify: begin
+   with xev.xcrossing do begin
+    if mode = notifynormal then begin //??
+     result:= twindowevent.create(ek_leavewindow,xwindow);
+    end;
+   end;
+  end;
+  motionnotify: begin
+   with xev.xmotion do begin
+    lasteventtime:= time;
+    result:= tmouseevent.create(xwindow,false,mb_none,
+                makepoint(x,y),xtoshiftstate(state),time*1000);
+   end;
+  end;
+  keypress: begin
+   with xev.xkey do begin
+    lasteventtime:= time;
+    lastshiftstate:= xtoshiftstate(state);
+    setlength(buffer,20);
+    int1:= xutf8lookupstring(ic,@xev.xkey,@buffer[1],length(buffer),@akey,@icstatus);
+    setlength(buffer,int1);
+    if icstatus = xbufferoverflow then begin
+     xutf8lookupstring(ic,@xev.xkey,@buffer[1],length(buffer),@akey,@icstatus);
+    end;
+    chars:= utf8tostring(buffer);
+    case icstatus of
+     xlookupnone: exit;
+     xlookupchars: akey:= 0;
+     xlookupkeysym_: chars:= '';
+    end;
+    result:= tkeyevent.create(xwindow,false,xkeytokey(akey),lastshiftstate,chars);
+   end;
+  end;
+  keyrelease: begin
+   with xev.xkey do begin
+    lasteventtime:= time;
+    lastshiftstate:= xtoshiftstate(state);
+    xlookupstring(@xev.xkey,nil,0,@akey,nil);
+    result:= tkeyevent.create(xwindow,true,xkeytokey(akey),lastshiftstate,'');
+   end;
+  end;
+  buttonpress,buttonrelease: begin
+   with xev.xbutton do begin
+    lasteventtime:= time;
+    if button = 4 then begin
+     if xev.xtype = buttonpress then begin
+      result:= tkeyevent.create(xwindow,false,key_wheelup,lastshiftstate,chars);
+     end;
+    end
+    else begin
+     if button = 5 then begin
+      if xev.xtype = buttonpress then begin
+       result:= tkeyevent.create(xwindow,false,key_wheeldown,lastshiftstate,chars);
+      end;
+     end
+     else begin
+      result:= tmouseevent.create(xwindow,xtype = buttonrelease,xtomousebutton(button),
+                makepoint(x,y),xtoshiftstate(state),time*1000);
+     end;
+    end;
+   end;
+  end;
+  mapnotify: begin
+   with xev.xmap do begin
+    result:= twindowevent.create(ek_show,xwindow);
+   end;
+  end;
+  unmapnotify: begin
+   with xev.xunmap do begin
+    result:= twindowevent.create(ek_hide,xwindow);
+   end;
+  end;
+  focusin,focusout: begin
+   with xev.xfocus do begin
+    if xtype = focusin then begin
+     eventkind:= ek_focusin;
+     xseticvalues(ic,pchar(xnfocuswindow),window,nil);
+     xseticfocus(ic);
+    end
+    else begin
+     eventkind:= ek_focusout;
+     xunseticfocus(ic);
+    end;
+    if mode <> notifypointer then begin
+     result:= twindowevent.create(eventkind,window);
+    end;
+   end;
+  end;
+  expose: begin
+   with xev.xexpose do begin
+    result:= twindowrectevent.create(ek_expose,xwindow,makerect(x,y,width,height));
+   end;
+  end;
+  graphicsexpose: begin
+   with xev.xgraphicsexpose do begin
+    result:= twindowrectevent.create(ek_expose,drawable,makerect(x,y,width,height));
+   end;
+  end;
+  configurenotify: begin
+   with xev.xconfigure do begin
+    w:= xwindow;
+    while longint(xchecktypedwindowevent(appdisp,w,configurenotify,@xev))
+                  <> 0 do begin end;
+//    if not getrootoffset(w,po1) then begin
+//     exit;
+//    end;
+//    result:= twindowrectevent.create(et_configure,xwindow,rect(x+po1.x,y+po1.y,width,height));
+    result:= twindowrectevent.create(ek_configure,xwindow,makerect(x,y,width,height));
+   end;
+  end;
+  destroynotify: begin
+   with xev.xdestroywindow do begin
+    result:= twindowevent.create(ek_destroy,xwindow);
+   end;
+  end;
+ end;
+end;
+
+function errorhandler(Display: PDisplay; ErrorEvent: PXErrorEvent):
+    Longint; cdecl;
+const
+ buflen = 256;
+var
+ buffer: array[0..buflen] of char;
+begin
+ xgeterrortext(display,errorevent^.error_code,@buffer,buflen);
+  sys_errorout('X Error: '+ pchar(@buffer) + '  '+inttostr(errorevent^.error_code)+
+       lineend +'  Major opcode:  '+inttostr(errorevent^.request_code)+lineend);
+ result:= 0;
+end;
+
+function gui_init: guierrorty;
+label
+ error;
+var
+ fontpropnames: strfontproparty;
+ propnum: fontpropertiesty;
+ attrib: xsetwindowattributes;
+ netnum: netatomty;
+ int1,int2: integer;
+{$ifdef hassm}
+ smcb: smccallbacks;
+ clientid: pchar;
+ smerror: array[0..255] of char;
+{$endif}
+
+begin
+ {$ifdef hassm} 
+  //todo: error handling
+ if sminfo.smconnection = nil then begin
+  if iceaddconnectionwatch({$ifdef FPC}@{$endif}icewatch,@sminfo) <> 0 then begin
+   with smcb do begin
+    save_yourself.callback:= {$ifdef FPC}@{$endif}SmcSaveYourself;
+    save_yourself.client_data:= @sminfo;
+    die.callback:= {$ifdef FPC}@{$endif}SmcDie;
+    die.client_data:= @sminfo;
+    save_complete.callback:= {$ifdef FPC}@{$endif}SmcSaveComplete;
+    save_complete.client_data:= @sminfo;
+    shutdown_cancelled.callback:= {$ifdef FPC}@{$endif}SmcShutdownCancelled;
+    shutdown_cancelled.client_data:= @sminfo;
+   end;
+   
+   sminfo.smconnection:= smcopenconnection(nil,nil,SmProtoMajor,SmProtoMinor,
+       SmcSaveYourselfProcMask or SmcDieProcMask or SmcSaveCompleteProcMask or
+       SmcShutdownCancelledProcMask,smcb,nil,clientid,sizeof(smerror),@smerror);
+   if clientid <> nil then begin
+    xfree(clientid);
+   end;
+  end;
+ end;
+ {$endif}
+ {$ifdef hassaveyourself}
+ saveyourselfwindow:= 0;
+ {$endif}
+ lasteventtime:= currenttime;
+ setlocale(lc_all,'');
+ xsetlocalemodifiers(pchar('@im=local'));
+// cursorshape:= cursorshapety(-1);
+ terminated:= false;
+ result:= gue_nodisplay;
+ timerevent:= false;
+ sigtimerbefore:= signal(sigalrm,{$ifdef FPC}@{$endif}sigtimer);
+ sigtermbefore:= signal(sigterm,{$ifdef FPC}@{$endif}sigterminate);
+ appdisp:= xopendisplay(nil);
+ if appdisp = nil then begin
+  goto error;
+ end;
+ im:= xopenim(appdisp,nil,nil,nil);
+ if im = nil then begin
+  result:= gue_inputmanager;
+  goto error;
+ end;
+ ic:= xcreateic(im,pchar(xninputstyle),ximstatusnothing or ximpreeditnothing,nil);
+ if ic = nil then begin
+  result:= gue_inputcontext;
+  goto error;
+ end;
+ defscreen:= xdefaultscreenofdisplay(appdisp);
+ rootid:= xrootwindowofscreen(defscreen);
+ defvisual:= msepvisual(xdefaultvisualofscreen(defscreen));
+ defdepth:= xdefaultdepthofscreen(defscreen);
+ attrib.event_mask:= propertychangemask;
+ appid:= xcreatewindow(appdisp,rootid,0,0,200,200,0,
+              0,inputonly,xlib.pvisual(copyfromparent),cweventmask,@attrib);
+ if appid = 0 then begin
+  result:= gue_createwindow;
+  goto error;
+ end;
+ {$ifdef FPC} {$checkpointer off} {$endif}
+ istruecolor:= defvisual^._class = truecolor;
+ {$ifdef FPC} {$checkpointer default} {$endif}
+ if istruecolor then begin
+ {$ifdef FPC} {$checkpointer off} {$endif}
+  xredmask:= defvisual^.red_mask;
+  xgreenmask:= defvisual^.green_mask;
+  xbluemask:= defvisual^.blue_mask;
+ {$ifdef FPC} {$checkpointer default} {$endif}
+  xredshift:= highestbit(xredmask)-(redshift+7);
+  if xredshift < 0 then begin
+   xredshiftleft:= false;
+   xredshift:= -xredshift;
+  end
+  else begin
+   xredshiftleft:= true;
+  end;
+  xgreenshift:= highestbit(xgreenmask)-(greenshift+7);
+  if xgreenshift < 0 then begin
+   xgreenshiftleft:= false;
+   xgreenshift:= -xgreenshift;
+  end
+  else begin
+   xgreenshiftleft:= true;
+  end;
+  xblueshift:= highestbit(xbluemask)-(blueshift+7);
+  if xblueshift < 0 then begin
+   xblueshiftleft:= false;
+   xblueshift:= -xblueshift;
+  end
+  else begin
+   xblueshiftleft:= true;
+  end;
+ end
+ else begin
+  result:= gue_notruecolor;
+  goto error;
+ end;
+
+ hasxrender:= hasxrender and (xrenderqueryextension(msedisplay,@int1,@int2) <> 0);
+ if hasxrender then begin
+  screenrenderpictformat:= xrenderfindvisualformat(appdisp,pvisual(defvisual));
+  bitmaprenderpictformat:= xrenderfindstandardformat(appdisp,pictstandarda1);
+  alpharenderpictformat:= xrenderfindstandardformat(appdisp,pictstandarda8);
+ end;
+ if not noxft then begin
+  hasxft:= hasxft and xftdefaulthasrender(appdisp) and (xftgetversion() >= 20000);
+  if hasxft then begin
+   hasxft:= xftinit(nil);
+   if hasxft then begin
+    hasxft:= xftinitftlibrary();
+    if hasxft and not hasdefaultfontarg then begin
+     defaultfontinfo[fn_family_name]:= 'sans';
+    end;
+   end;
+  end;
+ end;
+ defcolormap:= xdefaultcolormapofscreen(defscreen);
+ atomatom:= xinternatom(appdisp,'ATOM',
+          {$ifdef FPC}true{$else}1{$endif});
+ mseclientmessageatom:= xinternatom(appdisp,'mseclientmessage',
+          {$ifdef FPC}false{$else}0{$endif});
+ wmprotocolsatom:= xinternatom(appdisp,'WM_PROTOCOLS',
+           {$ifdef FPC}false{$else}0{$endif});
+ wmnameatom:= xinternatom(appdisp,'WM_NAME',
+           {$ifdef FPC}false{$else}0{$endif});
+ wmclassatom:= xinternatom(appdisp,'WM_CLASS',
+           {$ifdef FPC}false{$else}0{$endif});
+ wmprotocols[wm_delete_window]:= xinternatom(appdisp,'WM_DELETE_WINDOW',
+           {$ifdef FPC}false{$else}0{$endif});
+{$ifdef hassaveyourself}
+ wmprotocols[wm_save_yourself]:= xinternatom(appdisp,'WM_SAVE_YOURSELF',
+           {$ifdef FPC}false{$else}0{$endif});
+ wmcommandatom:= xinternatom(appdisp,'WM_COMMAND',
+           {$ifdef FPC}false{$else}0{$endif});
+{$endif}
+ wmstateatom:= xinternatom(appdisp,'WM_STATE',
+           {$ifdef FPC}false{$else}0{$endif});
+ wmclientleaderatom:= xinternatom(appdisp,'WM_CLIENT_LEADER',
+           {$ifdef FPC}false{$else}0{$endif});
+ clipboardatom:= xinternatom(appdisp,'CLIPBOARD',
+           {$ifdef FPC}false{$else}0{$endif});
+ windowatom:= xinternatom(appdisp,'WINDOW',
+           {$ifdef FPC}false{$else}0{$endif});
+ stringatom:= xinternatom(appdisp,'STRING',
+           {$ifdef FPC}false{$else}0{$endif});
+ targetsatom:= xinternatom(appdisp,'TARGETS',
+           {$ifdef FPC}false{$else}0{$endif});
+ convertselectionpropertyatom:= xinternatom(appdisp,'mseconvselprop',
+           {$ifdef FPC}false{$else}0{$endif});
+
+ netsupportedatom:= xinternatom(appdisp,'_NET_SUPPORTED',
+           {$ifdef FPC}false{$else}0{$endif});
+
+ for propnum:= low(fontpropertiesty) to high(fontpropertiesty) do begin
+  fontpropnames[propnum]:= fontpropertynames[propnum].name;
+ end;
+
+ xinternatoms(appdisp,@fontpropnames[low(fontpropertiesty)],
+          integer(high(fontpropertiesty)),{$ifdef FPC}true{$else}1{$endif},
+          @fontpropertyatoms[low(fontpropertiesty)]);
+
+ fillchar(netatoms,sizeof(netatoms),0);               //check _net_
+ xinternatoms(appdisp,@netatomnames[low(netatomty)],
+          integer(high(netatomty)),{$ifdef FPC}true{$else}1{$endif},
+          @netatoms[low(netatomty)]);
+ netsupported:= true;
+ for netnum:= low(netatomty) to needednetatom do begin
+  if netatoms[netnum] = 0 then begin
+   netsupported:= false;
+   break;
+  end;
+ end;
+
+ result:= gue_ok;
+//xsynchronize(appdisp,{$ifdef FPC}true{$else}1{$endif});
+ errorhandlerbefore:= xseterrorhandler({$ifdef FPC}@{$endif}errorhandler);
+ exit;
+error:
+ deinit;
+end;
+
+function gui_deinit: guierrorty;
+begin
+ clipboard:= '';
+ result:= gue_ok;
+ settimer1(0); //kill timer
+ terminated:= true;
+ freeclientevents;
+{$ifdef hassm}
+ with sminfo do begin
+  if smconnection <> nil then begin
+   if shutdown and shutdownpending then begin
+    if interactwaiting and interactgranted then begin
+     smcinteractdone(smconnection,0);
+{$ifdef smdebug}
+     writeln('gui_deinit smcinteractdone');
+{$endif}
+    end;
+    smcsaveyourselfdone(smconnection,1);
+{$ifdef smdebug}
+    writeln('gui_deinit saveyourselfdone');
+{$endif}
+   end;
+   iceremoveconnectionwatch({$ifdef FPC}@{$endif}icewatch,@sminfo);
+{$ifdef smdebug}
+   writeln('gui_deinit iceremoveconnectionwatch');
+{$endif}
+   smccloseconnection(sminfo.smconnection,0,nil);
+{$ifdef smdebug}
+   writeln('gui_deinit smccloseconnection');
+{$endif}
+   fillchar(sminfo,sizeof(sminfo),0);
+  end;
+ end;
+{$endif}
+{$ifdef hassaveyourself}
+ if saveyourselfwindow <> 0 then begin
+  setstringproperty(saveyourselfwindow,wmcommandatom,'');
+ end;
+{$endif}
+ if appid <> 0 then begin
+  xdestroywindow(appdisp,appid);
+  appid:= 0;
+ end;
+ if screencursor <> 0 then begin
+  xfreecursor(appdisp,screencursor);
+  screencursor:= 0;
+ end;
+ if ic <> nil then begin
+  xdestroyic(ic);
+  ic:= nil;
+ end;
+ if im <> nil then begin
+  xcloseim(im);
+  im:= nil;
+ end;
+ if appdisp <> nil then begin
+  xclosedisplay(appdisp);
+  appdisp:= nil;
+ end;
+ signal(sigalrm,sigtimerbefore);
+ xseterrorhandler(errorhandlerbefore);
+end;
+
+const
+ gdifunctions: gdifunctionaty = (
+   {$ifdef FPC}@{$endif}gui_destroygc,
+   {$ifdef FPC}@{$endif}gui_changegc,
+   {$ifdef FPC}@{$endif}gui_drawlines,
+   {$ifdef FPC}@{$endif}gui_drawlinesegments,
+   {$ifdef FPC}@{$endif}gui_drawellipse,
+   {$ifdef FPC}@{$endif}gui_drawarc,
+   {$ifdef FPC}@{$endif}gui_fillrect,
+   {$ifdef FPC}@{$endif}gui_fillelipse,
+   {$ifdef FPC}@{$endif}gui_fillpolygon,
+//   {$ifdef FPC}@{$endif}gui_drawstring,
+   {$ifdef FPC}@{$endif}gui_drawstring16,
+   {$ifdef FPC}@{$endif}gui_setcliporigin,
+   {$ifdef FPC}@{$endif}gui_createemptyregion,
+   {$ifdef FPC}@{$endif}gui_createrectregion,
+   {$ifdef FPC}@{$endif}gui_createrectsregion,
+   {$ifdef FPC}@{$endif}gui_destroyregion,
+   {$ifdef FPC}@{$endif}gui_copyregion,
+   {$ifdef FPC}@{$endif}gui_moveregion,
+   {$ifdef FPC}@{$endif}gui_regionisempty,
+   {$ifdef FPC}@{$endif}gui_regionclipbox,
+   {$ifdef FPC}@{$endif}gui_regsubrect,
+   {$ifdef FPC}@{$endif}gui_regsubregion,
+   {$ifdef FPC}@{$endif}gui_regaddrect,
+   {$ifdef FPC}@{$endif}gui_regaddregion,
+   {$ifdef FPC}@{$endif}gui_regintersectrect,
+   {$ifdef FPC}@{$endif}gui_regintersectregion
+ );
+{
+procedure gui_gdifunc(const func: gdifuncty; var drawinfo: drawinfoty);
+begin
+ gdifunctions[func](drawinfo);
+end; 
+}
+function gui_getgdifuncs: pgdifunctionaty;
+begin
+ result:= @gdifunctions;
+end;
+ 
+var
+ debugungrabbed: boolean;
+ 
+procedure GUI_DEBUGBEGIN;
+begin
+ if pointergrabbed then begin
+  debugungrabbed:= true;
+  gui_ungrabpointer;
+  xflush(appdisp);
+ end;
+end;
+
+procedure GUI_DEBUGEND;
+begin
+ if debugungrabbed then begin
+  gui_grabpointer(grabwinid);
+  debugungrabbed:= false;
+ end;
+end;
+  
+initialization
+ hasxft:= getxftlib;
+ hasxrender:= getxrenderlib;
+ initdefaultfont;
+end.
+

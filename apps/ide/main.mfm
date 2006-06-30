@@ -1,0 +1,835 @@
+object mainfo: tmainfo
+  bounds_x = 66
+  bounds_y = 204
+  bounds_cx = 587
+  bounds_cy = 138
+  visible = False
+  container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_subfocus, ow_mousetransparent, ow_destroywidgets, ow_autoscale]
+  container.bounds_y = 18
+  container.bounds_cx = 587
+  container.bounds_cy = 120
+  container.frame.framei_left = 0
+  container.frame.framei_top = 0
+  container.frame.framei_right = 0
+  container.frame.framei_bottom = 0
+  container.frame.localprops = [frl_fileft, frl_fitop, frl_firight, frl_fibottom]
+  container.frame.sbhorz.options = [sbo_moveauto, sbo_showauto]
+  container.frame.sbvert.options = [sbo_moveauto, sbo_showauto]
+  container.frame.dummy = 0
+  container.onchildscaled = onscale
+  optionswindow = [wo_groupleader]
+  mainmenu = mainmenu1
+  options = [fo_main, fo_terminateonclose, fo_globalshortcuts, fo_savepos, fo_savestate]
+  statfile = projectstatfile
+  caption = 'MSEide'
+  icon.transparency = -2147483648
+  oncreate = mainfooncreate
+  onloaded = mainonloaded
+  ondestroy = mainfoondestroy
+  onclosequery = mainfoonclosequery
+  onwindowactivechanged = mainonactivewindowchanged
+  onwindowdestroyed = mainonwindowdestroyed
+  onterminatequery = mainfoonterminate
+  onchildscaled = onscale
+  Left = 8
+  Top = 80
+  moduleclassname = 'tmseform'
+  object basedock: tdockpanel
+    optionswidget = [ow_background, ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_autoscale]
+    bounds_y = 21
+    bounds_cx = 587
+    bounds_cy = 99
+    anchors = [an_left, an_top, an_right, an_bottom]
+    dragdock.optionsdock = [od_acceptsdock, od_splitvert, od_splithorz, od_tabed, od_proportional, od_background]
+    statfile = projectstatfile
+    icon.transparency = -2147483648
+  end
+  object statdisp: tstringdisp
+    optionswidget = [ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+    bounds_y = 1
+    bounds_cx = 587
+    frame.dummy = 0
+    anchors = [an_top]
+    taborder = 1
+    font.name = 'stf_default'
+    font.options = [foo_antialiased]
+    font.dummy = 0
+    options = [dwo_hintclippedtext]
+    reffontheight = 16
+  end
+  object gdb: tgdbmi
+    onevent = gdbonevent
+    Left = 328
+    Top = 24
+  end
+  object mainstatfile: tstatfile
+    filename = 'mseide.sta'
+    filedir = '"~/.mseide"'
+    onstatupdate = mainstatfileonupdatestat
+    Left = 32
+    Top = 24
+  end
+  object mainmenu1: tmainmenu
+    menu.submenu.count = 7
+    menu.submenu.items = <
+      item
+        submenu.count = 10
+        submenu.items = <
+          item
+            submenu.count = 4
+            submenu.items = <
+              item
+                submenu.count = 5
+                submenu.items = <
+                  item
+                    caption = '&Mainform'
+                    state = [as_localcaption, as_localonexecute]
+                    onexecute = newformonexecute
+                  end
+                  item
+                    caption = '&Simple Form'
+                    state = [as_localcaption, as_localtag, as_localonexecute]
+                    options = [mao_shortcutcaption, mao_asyncexecute]
+                    tag = 1
+                    onexecute = newformonexecute
+                  end
+                  item
+                    caption = '&Docking Form'
+                    state = [as_localcaption, as_localtag, as_localonexecute]
+                    options = [mao_shortcutcaption, mao_asyncexecute]
+                    tag = 2
+                    onexecute = newformonexecute
+                  end
+                  item
+                    caption = 'D&atamodule'
+                    state = [as_localcaption, as_localtag, as_localonexecute]
+                    options = [mao_shortcutcaption, mao_asyncexecute]
+                    tag = 3
+                    onexecute = newformonexecute
+                  end
+                  item
+                    caption = 'S&ubform'
+                    state = [as_localcaption, as_localtag, as_localonexecute]
+                    tag = 4
+                    onexecute = newformonexecute
+                  end>
+                caption = '&Form'
+                state = [as_localcaption]
+              end
+              item
+                caption = '&Unit'
+                state = [as_localcaption, as_localonexecute]
+                onexecute = newunitonexecute
+              end
+              item
+                caption = '&Program'
+                state = [as_localcaption, as_localonexecute]
+                onexecute = newprogramonexecute
+              end
+              item
+                caption = '&Textfile'
+                state = [as_localcaption, as_localonexecute]
+                options = [mao_shortcutcaption, mao_asyncexecute]
+                onexecute = newtextfileonexecute
+              end>
+            caption = '&New'
+            state = [as_localcaption]
+          end
+          item
+            action = actionsmo.opensource
+          end
+          item
+            action = actionsmo.save
+          end
+          item
+            action = actionsmo.saveas
+          end
+          item
+            action = actionsmo.saveall
+          end
+          item
+            action = actionsmo.close
+          end
+          item
+            action = actionsmo.closeall
+          end
+          item
+            options = [mao_separator, mao_shortcutcaption]
+          end
+          item
+            action = actionsmo.print
+          end
+          item
+            caption = 'E&xit'
+            state = [as_localcaption, as_localonexecute]
+            options = [mao_shortcutcaption, mao_asyncexecute]
+            onexecute = exitonexecute
+          end>
+        caption = '&File'
+        state = [as_localcaption]
+      end
+      item
+        submenu.count = 5
+        submenu.items = <
+          item
+            action = actionsmo.line
+          end
+          item
+            action = actionsmo.find
+          end
+          item
+            action = actionsmo.repeatfind
+          end
+          item
+            action = actionsmo.replace
+          end
+          item
+            action = actionsmo.findinfile
+          end>
+        caption = '&Search'
+        state = [as_localcaption]
+      end
+      item
+        submenu.count = 12
+        submenu.items = <
+          item
+            action = actionsmo.undo
+          end
+          item
+            action = actionsmo.redo
+          end
+          item
+            options = [mao_separator, mao_shortcutcaption]
+          end
+          item
+            action = actionsmo.copy
+          end
+          item
+            action = actionsmo.cut
+          end
+          item
+            action = actionsmo.paste
+          end
+          item
+            action = actionsmo.delete
+          end
+          item
+            options = [mao_separator, mao_shortcutcaption]
+          end
+          item
+            action = actionsmo.indent
+          end
+          item
+            action = actionsmo.unindent
+          end
+          item
+            options = [mao_separator, mao_shortcutcaption]
+          end
+          item
+            action = actionsmo.selecteditpage
+          end>
+        caption = '&Edit'
+        state = [as_localcaption]
+      end
+      item
+        submenu.count = 20
+        submenu.items = <
+          item
+            caption = 'En&vironment'
+            state = [as_localcaption, as_localonexecute]
+            onexecute = parametersonexecute
+          end
+          item
+            caption = 'Restart Debugger'
+            state = [as_localcaption, as_localonexecute]
+            onexecute = startgdbonexecute
+          end
+          item
+            action = actionsmo.attachprocess
+          end
+          item
+            action = actionsmo.detachtarget
+          end
+          item
+            options = [mao_separator, mao_shortcutcaption]
+          end
+          item
+            action = actionsmo.continue
+          end
+          item
+            action = actionsmo.reset
+          end
+          item
+            action = actionsmo.interrupt
+          end
+          item
+            action = actionsmo.step
+          end
+          item
+            action = actionsmo.stepi
+          end
+          item
+            action = actionsmo.next
+          end
+          item
+            action = actionsmo.nexti
+          end
+          item
+            action = actionsmo.finish
+          end
+          item
+            options = [mao_separator, mao_shortcutcaption]
+          end
+          item
+            action = actionsmo.bkptsonact
+            state = [as_checked, as_localchecked]
+            options = [mao_checkbox, mao_shortcutcaption]
+          end
+          item
+            action = actionsmo.togglebkpt
+          end
+          item
+            action = actionsmo.togglebkptenable
+          end
+          item
+            options = [mao_separator, mao_shortcutcaption]
+          end
+          item
+            action = actionsmo.watchesonact
+            state = [as_checked, as_localchecked]
+            options = [mao_checkbox, mao_shortcutcaption]
+          end
+          item
+            action = actionsmo.bluedotsonact
+            caption = '&Exec line hint on'
+            state = [as_checked, as_localchecked, as_localcaption]
+            options = [mao_checkbox, mao_shortcutcaption]
+          end>
+        caption = '&Target'
+        state = [as_localcaption]
+      end
+      item
+        submenu.count = 20
+        submenu.items = <
+          item
+            submenu.count = 2
+            submenu.items = <
+              item
+                caption = '&Component Palette'
+                state = [as_checked, as_localchecked, as_localcaption, as_localimagelist, as_localimagenr, as_localonexecute]
+                imagelist = vievmenuicons
+                imagenr = 1
+                onexecute = viewcomponentpaletteonexecute
+              end
+              item
+                caption = '&Debugger'
+                state = [as_localcaption, as_localimagelist, as_localimagenr, as_localonexecute]
+                imagelist = vievmenuicons
+                imagenr = 2
+                onexecute = viewdebuggertoolbaronexecute
+              end>
+            caption = 'T&oolbars'
+            state = [as_localcaption, as_localimagelist]
+            imagelist = vievmenuicons
+          end
+          item
+            submenu.count = 2
+            submenu.items = <
+              item
+                options = [mao_separator, mao_shortcutcaption]
+              end
+              item
+                caption = '&New Panel'
+                state = [as_localcaption, as_localonexecute]
+                onexecute = newpanelonexecute
+              end>
+            caption = '&Panels'
+            name = 'panels'
+            state = [as_localcaption, as_localimagelist, as_localimagenr]
+            imagelist = vievmenuicons
+            imagenr = 0
+          end
+          item
+            caption = '&Messages'
+            state = [as_localcaption, as_localimagelist, as_localimagenr, as_localonexecute]
+            options = [mao_shortcutcaption, mao_asyncexecute]
+            imagelist = vievmenuicons
+            imagenr = 4
+            onexecute = viewmessagesonexecute
+          end
+          item
+            caption = 'So&urce'
+            state = [as_localcaption, as_localimagelist, as_localimagenr, as_localonexecute]
+            options = [mao_shortcutcaption, mao_asyncexecute]
+            imagelist = vievmenuicons
+            imagenr = 5
+            onexecute = viewsourceonexecute
+          end
+          item
+            caption = '&Find results'
+            state = [as_localcaption, as_localimagelist, as_localonexecute]
+            imagelist = vievmenuicons
+            onexecute = viewfindresults
+          end
+          item
+            caption = 'Object &Inspector'
+            state = [as_localcaption, as_localimagelist, as_localimagenr, as_localonexecute]
+            imagelist = vievmenuicons
+            imagenr = 14
+            onexecute = viewobjectinspectoronexecute
+          end
+          item
+            options = [mao_separator, mao_shortcutcaption]
+          end
+          item
+            caption = '&Watches'
+            state = [as_localcaption, as_localimagelist, as_localimagenr, as_localonexecute]
+            options = [mao_shortcutcaption, mao_asyncexecute]
+            imagelist = vievmenuicons
+            imagenr = 8
+            onexecute = viewwatchesonexecute
+          end
+          item
+            caption = '&Stack'
+            state = [as_localcaption, as_localimagelist, as_localimagenr, as_localonexecute]
+            options = [mao_shortcutcaption, mao_asyncexecute]
+            imagelist = vievmenuicons
+            imagenr = 9
+            onexecute = viewstackonexecute
+          end
+          item
+            caption = '&Threads'
+            state = [as_localcaption, as_localimagelist, as_localimagenr, as_localonexecute]
+            imagelist = vievmenuicons
+            imagenr = 10
+            onexecute = viewthreadsonexecute
+          end
+          item
+            caption = '&CPU'
+            state = [as_localcaption, as_localimagelist, as_localimagenr, as_localonexecute]
+            imagelist = vievmenuicons
+            imagenr = 11
+            onexecute = viewcpuonexecute
+          end
+          item
+            caption = '&Assembler'
+            state = [as_localcaption, as_localimagelist, as_localimagenr, as_localonexecute]
+            imagelist = vievmenuicons
+            imagenr = 12
+            onexecute = viewassembleronexecute
+          end
+          item
+            caption = 'Console'
+            state = [as_localcaption, as_localimagelist, as_localimagenr, as_localonexecute]
+            imagelist = vievmenuicons
+            imagenr = 13
+            onexecute = viewconsoleonexecute
+          end
+          item
+            options = [mao_separator, mao_shortcutcaption]
+          end
+          item
+            caption = '&Breakpoints'
+            state = [as_localcaption, as_localimagelist, as_localimagenr, as_localonexecute]
+            options = [mao_shortcutcaption, mao_asyncexecute]
+            imagelist = vievmenuicons
+            imagenr = 6
+            onexecute = viewbreakpointsonexecute
+          end
+          item
+            caption = 'Wa&tchpoints'
+            state = [as_localcaption, as_localimagelist, as_localimagenr, as_localonexecute]
+            imagelist = vievmenuicons
+            imagenr = 7
+            onexecute = viewwatchpointsonexecute
+          end
+          item
+            options = [mao_separator, mao_shortcutcaption]
+          end
+          item
+            caption = 'Toggle Form/Inspector'
+            state = [as_localcaption, as_localshortcut, as_localonexecute]
+            options = [mao_shortcutcaption, mao_asyncexecute]
+            shortcut = 4154
+            onexecute = toggleobjectinspectoronexecute
+          end
+          item
+            action = actionsmo.toggleformunit
+            caption = 'Toggle Form/Unit'
+            state = [as_localcaption]
+            options = [mao_shortcutcaption, mao_asyncexecute]
+          end
+          item
+            name = 'formmenuitemstart'
+            options = [mao_separator, mao_shortcutcaption]
+          end>
+        caption = '&View'
+        name = 'view'
+        state = [as_localcaption]
+      end
+      item
+        submenu.count = 19
+        submenu.items = <
+          item
+            action = actionsmo.makeact
+            state = [as_localtag]
+            tag = 1
+          end
+          item
+            action = actionsmo.makeact
+            caption = '&Build'
+            state = [as_localcaption, as_localtag]
+            tag = 2
+          end
+          item
+            action = actionsmo.makeact
+            caption = 'Make &1'
+            state = [as_localcaption, as_localtag]
+            tag = 4
+          end
+          item
+            action = actionsmo.makeact
+            caption = 'Make &2'
+            state = [as_localcaption, as_localtag]
+            tag = 8
+          end
+          item
+            action = actionsmo.makeact
+            caption = 'Make &3'
+            state = [as_localcaption, as_localtag]
+            tag = 16
+          end
+          item
+            action = actionsmo.makeact
+            caption = 'Make &4'
+            state = [as_localcaption, as_localtag]
+            tag = 32
+          end
+          item
+            action = actionsmo.abortmake
+          end
+          item
+            options = [mao_separator, mao_shortcutcaption]
+          end
+          item
+            caption = '&Options'
+            state = [as_localcaption, as_localonexecute]
+            onexecute = projectoptionsonexecute
+          end
+          item
+            caption = '&Tree'
+            state = [as_localcaption, as_localonexecute]
+            onexecute = viewprojectonexecute
+          end
+          item
+            caption = '&Source'
+            state = [as_localcaption, as_localonexecute]
+            onexecute = viewprojectsourceonexecute
+          end
+          item
+            options = [mao_separator, mao_shortcutcaption]
+          end
+          item
+            submenu.count = 3
+            submenu.items = <
+              item
+                caption = '&Empty'
+                state = [as_localcaption, as_localonexecute]
+                onexecute = newemptyprojectexe
+              end
+              item
+                caption = 'From &Template'
+                state = [as_localcaption, as_localonexecute]
+                onexecute = newprojectonexecute
+              end
+              item
+                caption = 'From &Program'
+                state = [as_localcaption, as_localonexecute]
+                onexecute = newprojectfromprogramexe
+              end>
+            caption = 'New'
+            state = [as_localcaption]
+          end
+          item
+            caption = 'Open'
+            state = [as_localcaption, as_localonexecute]
+            onexecute = openprojectonexecute
+          end
+          item
+            caption = 'Open copy'
+            state = [as_localcaption, as_localonexecute]
+            onexecute = openprojectcopyexecute
+          end
+          item
+            caption = 'Save'
+            state = [as_localcaption, as_localonexecute]
+            onexecute = projectsaveonexecute
+          end
+          item
+            caption = 'Save as'
+            state = [as_localcaption, as_localonexecute]
+            onexecute = saveprojectasonexecute
+          end
+          item
+            caption = 'Save as copy'
+            state = [as_localcaption, as_localonexecute]
+            onexecute = saveprojectcopyexecute
+          end
+          item
+            caption = 'Close'
+            name = 'close'
+            state = [as_localcaption, as_localonexecute]
+            onexecute = closeprojectactonexecute
+          end>
+        caption = '&Project'
+        name = 'project'
+        state = [as_localcaption]
+      end
+      item
+        submenu.count = 2
+        submenu.items = <
+          item
+            caption = '&About'
+            state = [as_localcaption, as_localonexecute]
+            onexecute = aboutonexecute
+          end
+          item
+            caption = '&Configure MSEide'
+            state = [as_localcaption, as_localonexecute]
+            onexecute = configureexecute
+          end>
+        caption = 'Sett&ings'
+        state = [as_localcaption, as_localonexecute]
+        onexecute = aboutonexecute
+      end>
+    onupdate = mainmenuonupdate
+    Left = 247
+    Top = 60
+  end
+  object openfile: tfiledialog
+    statfile = projectstatfile
+    controller.filterlist.data = (
+      (
+        'Source'
+        '"*.pp" "*.pas" "*.inc" "*.dpr"')
+      (
+        'Forms'
+        '*.mfm')
+      (
+        'All Files'
+        '*'))
+    controller.options = [fdo_checkexist]
+    controller.captionopen = 'Open file'
+    controller.captionsave = 'Save file as'
+    Left = 144
+    Top = 28
+  end
+  object projectstatfile: tstatfile
+    filename = 'status.sta'
+    Left = 16
+    Top = 56
+  end
+  object sysenv: tsysenvmanager
+    Left = 16
+    Top = 80
+  end
+  object vievmenuicons: timagelist
+    count = 15
+    transparentcolor = -2147483648
+    Left = 408
+    Top = 28
+    image = {
+      00000000020000004000000040000000C0150000000000000000000000000000
+      00000000000000000000000000000000000000004B605D0146615E010000FF03
+      22444401254A42011B3C35011D3529010000FF0112322C01072D22014E716501
+      506B60010000FF02804CF010D0D0D010804CF010213B3701233F3B01374B4A01
+      0000FF013050540129474401FFFFFF016E787201404F48010000FF0109281E01
+      172E2601FFFFFF0238544B010000FF01804CF006F8FCF80680808001F8FCF803
+      D0D0D010804CF010C0C8C7011C2A28013D4E4D014A5D5B01CFD4CC0116171001
+      B1B6B101FFFFFF01142F27010A271F01FFFFFF023A585301385B5501294D4301
+      365D5201804CF001F8FCF801E0E0E004F8FCF801E0E0E00580808001F8FCF801
+      E0E0E002D0D0D010804CF010D4CCCD015C6160018B979701697471012B413C02
+      B1AEAB01FFFFFF01193C2E0102261801FFFFFF01999D9D0161837D0120453F01
+      0B3026012E4E4501804CF001F8FCF801E0E0E004F8FCF801E0E0E00580808001
+      F8FCF801E0E0E002D0D0D00600FC0001D0D0D009804CF010B9B9B501B8B9B701
+      C6C9C60197979401FFFFFF01909C99017F8C8901B6B6B201919C9201636B6201
+      FFFFFF015E776E01215A3D01A2A9A801204438010000FF01804CF001F8FCF801
+      00000002E0E0E002F8FCF801E0E0E00580808001F8FCF801E0E0E002D0D0D006
+      00FC0003D0D0D007804CF0018080800FAEB4B3019CA8AA01BCC2C001C1C6C201
+      FFFFFF02434F4C01A9AFAD01C9C5C301FFFFFF01CDD0CB01CCCAC2015B936901
+      34CFB0010000FF02804CF001F8FCF801E0E0E004F8FCF801E0E0E00580808001
+      F8FCF801E0E0E002D0D0D00600FC0004D0D0D006804CF00180808001E0E0E002
+      D8DCD801A8A8A801B0B0B001E0E0E004C8C8C801D0D0D001E0E0E002F8FCF801
+      0000FF015B686F01778A8901515F5B0156646001FFFFFF019499940100FFFF01
+      000000019AA3A70100FFFF01BDBEBA0138684001355941010000FF02804CF001
+      F8FCF801E0E0E00100FCF801E0E0E00600FCF801E0E0E005D0D0D00600FC0005
+      D0D0D005804CF00180808001E0E0E002080C0801C8C8C801B8BCB80100040001
+      E0E0E00290909001B8BCB801888C8801E0E0E002F8FCF8010000FF0253676401
+      6874700157636001818A8801FFFFFF016B767B016A7D90016B7E8C0100FFFF01
+      9C9C960113352601052222010000FF02804CF001F8FCF80100FCF802E0E0E006
+      00FCF802E0E0E004D0D0D00600FC0006D0D0D004804CF00180808001E0E0E002
+      585C5801E0E0E00248484801E0E0E004888C8801E0E0E002F8FCF80122343101
+      28383601FFFFFF02778A890100FFFF024450560100FFFF02000000022E393301
+      0E2222011E4A410100282001804CF001F8FCF80100FCF802E0E0E00600FCF802
+      E0E0E004D0D0D00600FC0007D0D0D003804CF00180808001E0E0E001D0D0D001
+      90949001E0E0E00280808001E0E0E004888C8801E0E0E002F8FCF80130363501
+      FFFFFF042B4C3A0100FFFF013F484A0100FFFF0143505D0100FFFF02FFFFFF02
+      3260570133655B01804CF001F8FCF801E0E0E00100FCF801E0E0E00260E84801
+      E0E0E00300FCF801E0E0E005D0D0D00600FC0006D0D0D004804CF00180808001
+      E0E0E001D0D4D00190949001E0E0E00280808001E0E0E004888C8801E0E0E002
+      F8FCF8011F2E2A01192922013F4847013D4B49013C413F01B2AFAB0158636101
+      969E9D0100FFFF01626C6C016267680178817E01ACADA701FFFFFF03804CF001
+      F8FCF801E0E0E00460E84802E0E0E00560E84802E0E0E001D0D0D00600FC0005
+      D0D0D005804CF00180808001E0E0E00250505001E0E0E00238383801E0E0E004
+      888C8801E0E0E002F8FCF8010000FF010F261E01283B3701354A4A01646B6801
+      C5C4C0012A3735017981800100FFFF028B8B8B0169747001707A72018A938901
+      FFFFFF01AEB0AA01804CF001F8FCF8010000F802E0E0E00160E84803E0E0E001
+      0000F80360E84804D0D0D00600FC0004D0D0D006804CF00180808001E0E0E002
+      00040001A8ACA801989C980100000001E0E0E002B8BCB80278787801B8BCB801
+      E0E0E001F8FCF8010000FF0330585601253C3101293E3501101D1A0163696701
+      FFFFFF0161706C01686B680182928A01113328010D392B0104221701051E1401
+      804CF001F8FCF8010000F802E0E0E0050000F803E0E0E004D0D0D00600FC0003
+      D0D0D007804CF00180808001E0E0E003D0D0D001D0D4D001E0E0E008F8FCF801
+      0000FF041F382A0129403601020D0A01A3A4A201FFFFFF01808B88016B716E01
+      021A12010000FF0301190E01804CF001F8FCF8010000F802E0E0E0050000F803
+      E0E0E004D0D0D00600FC000100800001D0D0D008804CF001F8FCF80F0000FF05
+      1C3C350118322C019BA29F01B0AEAD0144534F01FFFFFF0104160F0103221701
+      0000FF03804CF001F8FCF8018080800ED0D0D00600800001D0D0D009804CF010
+      0000FF02CFD4D30126373001193A3401193B34010F362D0169777301A0ABA801
+      0F2B2501FFFFFF01080F0A010000FF011B493C010000FF02804CF010D0D0D010
+      804CF010E0E0E010804CF010E0E0E021F8FCF80F804CF002E0E0E00A804CF004
+      E0E0E021F8FCF80DE0E0E00180808001804CF002A8ECE80100000001A8ECE807
+      E0E0E001A8ECE801804CF003E0E0E01678787801363636010404040118181801
+      C0C0C001E0E0E006F8FCF80DE0E0E00180808001804CF002A8ECE80100000002
+      A8ECE80100000002A8ECE80100000001A8ECE801E0E0E001A8ECE802804CF002
+      E0E0E015C9C9C90100000001010101011C1C1C01010101010B0B0B01B4B4B401
+      E0E0E005F8FCF801D8DCD801C8C8C801F8FCF803E8ECE801D8D8D801F8FCF801
+      D8DCD801C8C8C803B8B8B80180808001804CF002A8ECE80980808004804CF001
+      E0E0E015D4D4D401E0E0E00400000002E0E0E005F8FCF801585C580100000001
+      F8FCF8036060600140444001F8FCF801585C58010000000108080802282C2801
+      80808001804CF002A8ECE80100000001A8ECE80A80808001804CF001E0E0E006
+      C5C5E4016262F1011313FC016262F101E0E0E00CC5C5E4016262F1011313FC01
+      6262F10100000002E0E0E005F8FCF801585C580140444001888C8801F8FCF801
+      A0A0A0013030300140444001F8FCF801585C5801383C3801F8FCF802E0E0E001
+      80808001804CF002A8ECE80C80808001804CF001E0E0E005C5C5E4010000FF05
+      C5C5E401E0E0E009C5C5E4010000FF0300008101000006019898B001E0E0E005
+      F8FCF801585C580140444001282C2801F8FCF801404040019090900140444001
+      F8FCF801585C5801383C3801F8F8F802D8DCD80180808001804CF002A8ECE80C
+      80808001804CF001E0E0E0056262F1010000FF056262F101E0E0E0096262F101
+      0000FF0200008001000000010000AC016262F101E0E0E005F8FCF801585C5801
+      4044400160646001686C680150505001F8FCF80140444001F8FCF801585C5801
+      30343001D8D8D802C8CCC80180808001804CF002A8ECE80100000007A8ECE801
+      00000001A8ECE80280808001804CF001E0E0E0051313FC010000FF051313FC01
+      E0E0E0091313FC010000FF010000FC01000000010000A0010000FF011313FC01
+      E0E0E005F8FCF801585C580140444001C0C4C00110141001B0B0B001F8FCF801
+      40444001F8FCF801585C5801383C3801F8FCF802E0E0E00180808001804CF002
+      A8ECE80C80808001804CF001E0E0E0056262F1010000FF056262F101E0E0E009
+      6262F1010000FF010000DA01000007010000FD010000FF016262F101E0E0E005
+      F8FCF801585C580140444001F8FCF801F8F8F801F8FCF80240444001F8FCF801
+      585C580130343001D0D4D002B8BCB80180808001804CF002A8ECE80100000001
+      A8ECE80A80808001804CF001E0E0E0060000FF049C9CE901E0E0E00B0000FF01
+      0000CB01000013010000FF019C9CE901E0E0E006F8FCF801585C580140444001
+      F8FCF80440444001F8FCF801585C5801000000030808080180808001804CF002
+      A8ECE80100000004A8ECE80100000005A8ECE80180808001804CF001E0E0E006
+      C5C5E4016262F1011313FC016262F101E0E0E00CC5C5E4016262F1011313F901
+      6262F101E0E0E007F8FCF80DE0E0E00180808001804CF002A8ECE80C80808001
+      804CF001E0E0E017A3A3A30103030301E0E0E008F8FCF80DE0E0E00180808001
+      804CF002A8ECE80100000001A8ECE80A80808001804CF001E0E0E017A1A1A101
+      00000001E0E0E008F8FCF801E0E0E00D80808001804CF002A8ECE80C80808001
+      804CF001E0E0E0218080800F804CF0028080800D804CF001E0E0E020804CF010
+      E0E0E020804CF020E0E0E020804CF020E0E0E0050000FF01E0E0E01A804CF020
+      E0E0E0040000FF0300000005E0E0E00C00C47301E0E0E007804CF0118080800F
+      E0E0E0030000FF01E0E0E0010000FF01E0E0E00300000005E0E0E00483818301
+      E0E0E00D804CF0018080800F804CF00180808001E0E0E002A8A8A801888C8801
+      D8DCD801E0E0E001D8DCD801A8A8A801A0A0A001D8DCD801E0E0E003F8FCF801
+      E0E0E0030000FF01E0E0E00E83818301E0E0E00700C47301E0E0E005804CF001
+      80808001E0E0E002D8DCD801A8A8A801B0B0B001E0E0E004C8C8C801D0D0D001
+      E0E0E002F8FCF801804CF00180808001E0E0E002D8DCD801E0E0E00100000001
+      888C8802D8DCD801B8BCB80100000001E0E0E003F8FCF801E0E0E0030000FF01
+      E0E0E00E83818302E0E0E00983818301E0E0E002804CF00180808001E0E0E002
+      080C0801C8C8C801B8BCB80100040001E0E0E00290909001B8BCB801888C8801
+      E0E0E002F8FCF801804CF00180808001E0E0E00400040001888C8801E0E0E002
+      D0D0D00100040001E0E0E003F8FCF801E0E0E0030000FF01E0E0E00E83818301
+      FFFFFF0100C47301E0E0E00200C47302E0E0E00200C4730183818302E0E0E002
+      804CF00180808001E0E0E002585C5801E0E0E00248484801E0E0E004888C8801
+      E0E0E002F8FCF801804CF00180808001E0E0E00340444001C8CCC801E0E0E003
+      28282801C8CCC801E0E0E003F8FCF801E0E0E00D0000FF01E0E0E00483818302
+      00C473018381830200C473028381830200C4730183818302E0E0E002804CF001
+      80808001E0E0E001D0D0D00190949001E0E0E00280808001E0E0E004888C8801
+      E0E0E002F8FCF801804CF00180808001E0E0E002B0B4B00100000001E0E0E003
+      B0B4B001C0C0C001E0E0E004F8FCF801E0E0E00D0000FF01E0E0E00483818302
+      00C473018381830200C473028381830200C4730183818302E0E0E002804CF001
+      80808001E0E0E001D0D4D00190949001E0E0E00280808001E0E0E004888C8801
+      E0E0E002F8FCF801804CF00180808001E0E0E002C8CCC801A0A4A001E0E0E003
+      C8CCC801D8DCD801E0E0E004F8FCF801E0E0E00D0000FF01E0E0E00483818302
+      00C47301E0E0E00200C47302E0E0E00200C473018381830100000001E0E0E002
+      804CF00180808001E0E0E00250505001E0E0E00238383801E0E0E004888C8801
+      E0E0E002F8FCF801804CF00180808001E0E0E002A8A8A80138383801E0E0E003
+      A8A8A801D0D4D001E0E0E004F8FCF801E0E0E008000000040000FF01E0E0E005
+      83818302E0E0E00983818301E0E0E002804CF00180808001E0E0E00200040001
+      A8ACA801989C980100000001E0E0E002B8BCB80278787801B8BCB801E0E0E001
+      F8FCF801804CF00180808001E0E0E00DF8FCF801E0E0E00800000003E0E0E007
+      83818301E0E0E00D804CF00180808001E0E0E003D0D0D001D0D4D001E0E0E008
+      F8FCF801804CF001F8FCF80FE0E0E01283818301E0E0E00D804CF001F8FCF80F
+      804CF010E0E0E020804CF020E0E0E020804CF020E0E0E010C0C0C010E0E0E010
+      804CF002E0E0E00A804CF004E0E0E001F8FCF80FC0C0C010E0E0E010804CF002
+      A8ECE809E0E0E001A8ECE801804CF003E0E0E001F8FCF80DE0E0E00180808001
+      C0C0C00200FFFF04C0C0C00AE0E0E00678787801303430010004000118181801
+      C0C0C001E0E0E005804CF002A8ECE809E0E0E001A8ECE802804CF002E0E0E001
+      F8FCF80DE0E0E00180808001C0C0C00200FFFF05C0C0C009E0E0E005C8C8C801
+      00000002181C18010000000108080801B0B4B001E0E0E004804CF002A8ECE809
+      80808004804CF001E0E0E001F8FCF804F8F8F801A0A0A001A8A8A801F8FCF803
+      00000002F8FCF801E0E0E00180808001C0C0C00200FFFF05C0C0C009E0E0E005
+      D0D4D001E0E0E00400000002E0E0E004804CF002A8ECE80C80808001804CF001
+      E0E0E001F8FCF803B0B0B0011818180130343001282C280148484801F8FCF805
+      E0E0E00180808001C0C0C00200FFFF05C0C0C009E0E0E006C0C4E0016060F001
+      1010F8016060F00100000002E0E0E004804CF002A8ECE801A8E4E80108101001
+      283C380140545001A8E8E801A8ECE8017098980100000002A8ECE80280808001
+      804CF001E0E0E001F8FCF803383C3801F8FCF809E0E0E00180808001C0C0C003
+      00FFFF03C0C0C0050000FF02C0C0C003E0E0E005C0C4E0010000F80300008001
+      000000019898B001E0E0E004804CF002A8ECE8016080800198D0D001A8ECE801
+      0004000170989801A8ECE80180B4B00190C8C80100000001A8ECE80280808001
+      804CF001E0E0E001F8FCF802E8ECE80198989801F8FCF809E0E0E00180808001
+      C0C0C00B0000FF02C0C0C003E0E0E0056060F0010000F8020000800100000001
+      0000A8016060F001E0E0E004804CF002A8E8E80100040001A8ECE80258787801
+      10181801A8ECE80300000001A8ECE80280808001804CF001E0E0E001F8FCF802
+      D0D0D001B0B4B001F8FCF809E0E0E00180808001C0C0C00A0000FF04C0C0C002
+      E0E0E0051010F8010000F802000000010000A0010000F8011010F801E0E0E004
+      804CF002A0DCD80100000001A8ECE8026088880100080801A8ECE80300000001
+      A8ECE80280808001804CF001E0E0E001F8FCF802F0F0F001888C8801F8FCF809
+      E0E0E00180808001C0C0C0090000FF06C0C0C001E0E0E0056060F0010000F801
+      0000D801000000010000F8026060F001E0E0E004804CF002A8E8E80100080801
+      A8ECE80250707001101C2001A8ECE80300000001A8ECE80280808001804CF001
+      E0E0E001F8FCF803080C080148484801F8FCF801F8F8F80130303001F8F8F801
+      F8FCF804E0E0E00180808001C0C0C002FF000005C0C0C0010000FF08E0E0E006
+      0000F8010000C801000010010000F801989CE801E0E0E005804CF002A8ECE801
+      28383801A8ECE802283C380138505001A8ECE80300000001A8ECE80280808001
+      804CF001E0E0E001F8FCF803D0D4D001404040010808080100000001787C7801
+      F8FCF805E0E0E00180808001C0C0C002FF000005C0C0C0010000FF08E0E0E006
+      C0C4E0016060F0011010F8016060F001E0E0E006804CF002A8ECE80200040001
+      0810100160808001A8ECE80280ACA80100000003405C580180808001804CF001
+      E0E0E001F8FCF80900000001F8FCF80200000001E0E0E00180808001C0C0C002
+      FF000005C0C0C009E0E0E007A0A0A00100000001E0E0E007804CF002A8ECE802
+      A0D8D80188C0C001A8ECE80880808001804CF001E0E0E001F8FCF80DE0E0E001
+      80808001C0C0C002FF000005C0C0C009E0E0E007A0A0A00100000001E0E0E007
+      804CF002A8ECE80C80808001804CF001E0E0E001F8FCF801E0E0E00D80808001
+      C0C0C002FF000005C0C0C009E0E0E010804CF0028080800D804CF001E0E0E001
+      8080800FC0C0C002FF000005C0C0C009E0E0E010E33D0000FFFF0000F77DC0FF
+      FFFF0000FFFFFEFFFFFF0000FFFFFEFFFFFF0000FF7FFEFFFFFFFEFFFF3FFEFF
+      FFFFFEFFFE3FFEFFFFFFFEFFFC3FFEFFFFFFFEFFFFFFFEFFFFFFFEFFFFFFFEFF
+      FFFFFEFFFFFFFEFFFFFFFEFFFEFFFEFFFFFFFEFFF8FFFEFFFFFFFEFFF08FFEFF
+      FFFFFEFFE01FFEFFFFFF0000FC2F0000FFFF0000FFFF000000000000FFFFFC0F
+      00000000FFFFFC1F0000C007FFFFFC3F0000E00FFFFFFC7F0000200CFFFFFC7F
+      C003C00FFFFFFC7FE00FE00FFFFFFC7FE00FE00FFFFFFC7FE00FE00FFFFFFC7F
+      E00FE00FFFFFFC7FC007C007FFFFFC7FC003C003FFFFFC7F00008001FFFFFC7F
+      00008001FFFFFC7F00000000FFFFFC7F00000000000000000000000000000000
+      0000000000002000000000000000F00F00010000FEFF283E0400FEFFFEFF0800
+      0404FEFFFEFF08000C20FEFFFEFF08009C39FEFFFEFF0020FC3FFEFFFEFF0020
+      FC3FFEFFFEFF00209C39FEFFFEFF001F0C20FEFFFEFF00070400FEFFFEFF0000
+      0400FEFF000000000000000000000000000000000000FFFF0000FFFFFC0FFFFF
+      0000FFFFFC1FFFFF3C00FFFFFC3FFFFF7C00FFFFFC7FFFFF7C00FFFFFC7FFFFF
+      7C00FFFFFC7FFFFF3818FFFFFC7FFFFF0018FFFFFC7FFFFF003CFFFFFC7FFFFF
+      007EFFFFFC7FFFFF7CFFFFFFFC7FFFFF7CFFFFFFFC7FFFFF7C00FFFFFC7FFFFF
+      7C00FFFFFC7FFFFF7C00FFFFFC7FFFFF7C00FFFF}
+  end
+end

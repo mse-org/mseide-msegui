@@ -1,0 +1,103 @@
+object finddialogfo: tfinddialogfo
+  bounds_x = 319
+  bounds_y = 205
+  bounds_cx = 331
+  bounds_cy = 116
+  visible = False
+  container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_mousetransparent, ow_destroywidgets]
+  container.bounds_cx = 331
+  container.bounds_cy = 116
+  container.frame.dummy = 0
+  options = [fo_closeonesc, fo_autoreadstat, fo_autowritestat, fo_savepos]
+  statfile = statfile1
+  caption = 'Find Text'
+  icon.transparency = -2147483648
+  moduleclassname = 'tmseform'
+  object findtext: thistoryedit
+    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+    bounds_x = 8
+    bounds_y = 5
+    bounds_cx = 316
+    bounds_cy = 40
+    frame.caption = 'Text to &find'
+    frame.dummy = 0
+    frame.outerframe = (
+      0
+      18
+      0
+      0)
+    anchors = [an_left, an_top, an_right]
+    optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_resetselectonexit, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_savevalue, oe_savestate]
+    dropdown.options = [deo_keydropdown, deo_autosavehistory]
+    reffontheight = 16
+  end
+  object cancel: tbutton
+    bounds_x = 272
+    bounds_y = 80
+    bounds_cx = 50
+    bounds_cy = 20
+    anchors = [an_top, an_right]
+    taborder = 5
+    caption = '&Cancel'
+    modalresult = mr_cancel
+  end
+  object casesensitive: tbooleanedit
+    bounds_x = 8
+    bounds_y = 55
+    bounds_cx = 94
+    bounds_cy = 18
+    frame.caption = 'case&sensitive'
+    frame.dummy = 0
+    frame.outerframe = (
+      0
+      2
+      81
+      3)
+    taborder = 1
+  end
+  object wholeword: tbooleanedit
+    bounds_x = 104
+    bounds_y = 55
+    bounds_cx = 86
+    bounds_cy = 18
+    frame.caption = '&whole word'
+    frame.dummy = 0
+    frame.outerframe = (
+      0
+      2
+      73
+      3)
+    taborder = 2
+  end
+  object selectedonly: tbooleanedit
+    bounds_x = 192
+    bounds_y = 55
+    bounds_cx = 95
+    bounds_cy = 18
+    frame.caption = 'select&ed only'
+    frame.dummy = 0
+    frame.outerframe = (
+      0
+      2
+      82
+      3)
+    taborder = 3
+    statfile = statfile1
+  end
+  object tbutton2: tbutton
+    bounds_x = 216
+    bounds_y = 80
+    bounds_cx = 50
+    bounds_cy = 20
+    anchors = [an_top, an_right]
+    taborder = 4
+    state = [as_default, as_localdefault, as_localcaption]
+    caption = '&OK'
+    modalresult = mr_ok
+  end
+  object statfile1: tstatfile
+    filename = 'finddialogfo.sta'
+    options = [sfo_memory]
+    Left = 112
+  end
+end

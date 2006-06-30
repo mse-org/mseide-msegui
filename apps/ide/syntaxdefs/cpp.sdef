@@ -1,0 +1,80 @@
+styles
+ default ''
+ words 'b'
+ comment 'i' cl_blue
+ macros 'b' cl_blue
+ string '' cl_blue
+
+keyworddefs cpp
+  '__asm' '_asm' 'asm' 'auto' 'break' 'case' 'catch' 'cdecl' 'char' 'class' 'const' words
+  'continue' '__cs' '_cs' 'default' 'delete' 'do' 'double' '__ds' '_ds' 'else' words
+  'enum' 'extern' '__far' '_far' 'far' '__fastcall' '_fastcall' 'fastcall' '__finally' words
+  'float' 'for' 'friend' 'goto' 'huge' '__huge' '_huge' 'if' '__import' 'inline' words
+  'int' 'interrupt' '__interrupt' '_interrupt' '__loaddds' '_loadds' 'long' 'near' words
+  '_near' '__near' 'new' 'operator' '__pascal' '_pascal' 'pascal' 'private' 'protected' words
+  'public' 'register' 'return' '__rtti' '__saveregs' '_saveregs' '__seg' '_seg' 'short' words
+  'signed' 'sizeof' '__ss' '_ss' 'static' '__stdcall' '_stdcall' 'struct' 'switch' words
+  'template' 'this' '__thread' 'throw' '__try' 'try' 'typedef' 'union' 'unsigned' words
+  'virtual' 'void' 'volatile' 'while' words
+
+scope escapechar string
+ endtokens
+# return on any char
+
+scope string string
+ calltokens
+  '\' escapechar
+ endtokens
+  '"'
+
+scope string1 string
+ calltokens
+  '\' escapechar
+ endtokens
+  ''''
+
+scope comment1 comment
+ endtokens
+  '*/'
+
+scope comment2 comment
+ endtokens
+  ''
+
+scope macros macros
+
+ jumptokens
+  '/*' comment1
+  '//' comment2
+
+ endtokens
+  ''
+scope block
+ keywords
+  cpp
+
+ calltokens
+  '/*' comment1
+  '//' comment2
+  '#' macros
+  '"' string
+  '''' string1
+  '{' block words
+
+ endtokens
+  '}' words
+
+scope main
+
+ keywords words
+  cpp
+
+ calltokens
+  '/*' comment1
+  '//' comment2
+  '#' macros
+  '"' string
+  '''' string1
+  '{' block words
+
+

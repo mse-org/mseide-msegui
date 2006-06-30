@@ -1,0 +1,104 @@
+object stackfo: tstackfo
+  optionswidget = [ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_destroywidgets, ow_hinton, ow_autoscale]
+  bounds_x = 407
+  bounds_y = 349
+  bounds_cx = 254
+  bounds_cy = 180
+  frame.grip_size = 10
+  frame.grip_options = [go_closebutton, go_fixsizebutton, go_topbutton]
+  frame.dummy = 0
+  popupmenu = tpopupmenu1
+  visible = False
+  container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_mousetransparent, ow_destroywidgets, ow_autoscale]
+  container.bounds_cx = 244
+  container.bounds_cy = 180
+  container.frame.framei_right = 0
+  container.frame.localprops = [frl_firight]
+  container.frame.dummy = 0
+  dragdock.splitter_size = 0
+  dragdock.caption = 'Stack'
+  dragdock.optionsdock = [od_savepos, od_canmove, od_canfloat, od_candock, od_propsize]
+  options = [fo_savepos, fo_savestate]
+  statfile = mainfo.projectstatfile
+  caption = 'Stack'
+  icon.transparentcolor = -2147483648
+  icon.options = [bmo_masked]
+  icon.image = {
+    00000000020000001800000018000000BC000000000000000000000000000000
+    0000000000000000000000000000000000000000E0E0E0370000F801E0E0E017
+    0000F802E0E0E0140000F80500000008E0E0E00A0000F801E0E0E0020000F802
+    E0E0E0130000F801E0E0E0020000F801E0E0E00500000007E0E0E0080000F801
+    E0E0E0170000F801E0E0E00500000008E0E0E00A0000F801E0E0E0170000F801
+    E0E0E0180000F80EE0E0E0180000F801E0E0E0170000F801E0E0E00E00000006
+    E0E0E0030000F801E0E0E0170000F801E0E0E010000000060000F801E0E0E029
+    00000004E0E0E02A00000006E0E0E050000000FF000000FF800000FF800100FF
+    E0FF03FF900100FF90E00FFF100000FF10FC03FF100000FF100000FFE0FF07FF
+    000008FF000008FF00FC08FF000008FF00F007FF000000FF00F000FF000000FF
+    00FC00FF000000FF000000FF000000FF
+  }
+  onshow = stackfoonshow
+  onchildscaled = formonchildscaled
+  moduleclassname = 'tdockform'
+  object grid: tstringgrid
+    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_focusbackonesc, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+    bounds_y = 20
+    bounds_cx = 244
+    bounds_cy = 160
+    frame.localprops = [frl_levelo, frl_colorclient]
+    frame.dummy = 0
+    anchors = [an_top, an_bottom]
+    taborder = 2
+    datacols.count = 5
+    datacols.items = <    
+      item
+        color = -2147483646
+        width = 31
+        options = [co_readonly, co_nofocus, co_focusselect, co_rowselect, co_savestate]
+        textflags = [tf_xcentered, tf_right, tf_ycentered]
+      end    
+      item
+        width = 54
+        options = [co_readonly, co_focusselect, co_rowselect, co_fill]
+        colorselect = -1879048185
+        optionsedit = [scoe_eatreturn, scoe_homeonenter]
+      end    
+      item
+        options = [co_invisible, co_savestate]
+        optionsedit = [scoe_eatreturn]
+      end    
+      item
+        options = [co_invisible, co_savestate]
+      end    
+      item
+        options = [co_invisible, co_savestate]
+      end>
+    datarowheight = 18
+    oncellevent = gridoncellevent
+    reffontheight = 16
+  end
+  object filedisp: tstringdisp
+    bounds_x = 71
+    bounds_cx = 172
+    frame.dummy = 0
+    anchors = [an_left, an_top, an_right]
+    taborder = 1
+    reffontheight = 16
+  end
+  object address: tstringdisp
+    bounds_x = 1
+    bounds_cx = 70
+    frame.dummy = 0
+    textflags = [tf_xcentered, tf_ycentered]
+    reffontheight = 16
+  end
+  object tpopupmenu1: tpopupmenu
+    menu.submenu.count = 1
+    menu.submenu.items = <    
+      item
+        caption = 'Copy to clipboard'
+        onexecute = copytoclipboard
+      end>
+    left = 48
+    top = 56
+  end
+end

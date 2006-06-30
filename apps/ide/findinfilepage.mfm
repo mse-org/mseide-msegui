@@ -1,0 +1,105 @@
+object findinfilepagefo: tfindinfilepagefo
+  bounds_x = 382
+  bounds_y = 163
+  bounds_cx = 573
+  bounds_cy = 310
+  visible = False
+  container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_mousetransparent, ow_destroywidgets, ow_autoscale]
+  container.bounds_cx = 573
+  container.bounds_cy = 310
+  container.frame.dummy = 0
+  icon.transparency = -2147483648
+  onchildscaled = childscaled
+  moduleclassname = 'tmseform'
+  object grid: twidgetgrid
+    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_focusbackonesc, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+    bounds_y = 24
+    bounds_cx = 571
+    bounds_cy = 284
+    frame.dummy = 0
+    anchors = [an_left, an_top, an_right, an_bottom]
+    taborder = 1
+    fixcols.count = 1
+    fixcols.items = <
+      item
+        width = 38
+        textflags = [tf_right, tf_ycentered]
+        numstart = 1
+        numstep = 1
+      end>
+    rowcount = 1
+    datacols.count = 1
+    datacols.items = <
+      item
+        width = 1500
+        options = [co_readonly, co_fill]
+        widthmin = 1500
+        widgetname = 'foundlist'
+      end>
+    datarowheight = 15
+    reffontheight = 13
+    object foundlist: ttextedit
+      optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+      bounds_cx = 1500
+      bounds_cy = 15
+      color = -1879048185
+      visible = False
+      marginlinecolor = -2147483648
+      oncellevent = foundlistoncellevent
+      reffontheight = 13
+    end
+  end
+  object filename: tstringdisp
+    bounds_x = 1
+    bounds_cx = 406
+    bounds_cxmin = 140
+    frame.dummy = 0
+    anchors = [an_left, an_top, an_right]
+    taborder = 3
+    textflags = [tf_ycentered, tf_ellipseleft]
+  end
+  object foundcount: tintegerdisp
+    bounds_x = 407
+    bounds_cx = 44
+    frame.dummy = 0
+    anchors = [an_top, an_right]
+    taborder = 2
+  end
+  object cancel: tbutton
+    bounds_x = 453
+    bounds_y = 1
+    bounds_cx = 50
+    bounds_cy = 18
+    anchors = [an_top, an_right]
+    taborder = 5
+    state = [as_disabled, as_localdisabled, as_localcaption, as_localonexecute]
+    caption = 'Cancel'
+    onexecute = cancelonexecute
+  end
+  object again: tbutton
+    bounds_x = 503
+    bounds_y = 1
+    bounds_cx = 50
+    bounds_cy = 18
+    anchors = [an_top, an_right]
+    taborder = 4
+    caption = 'again'
+    onexecute = againonexecute
+  end
+  object closepage: tstockglyphbutton
+    bounds_x = 553
+    bounds_y = 1
+    bounds_cx = 18
+    bounds_cy = 18
+    anchors = [an_top, an_right]
+    glyph = stg_checked
+    onexecute = closebuonexecute
+  end
+  object thread: tthreadcomp
+    onstart = threadonstart
+    onexecute = threadonexecute
+    onterminate = threadonterminate
+    Left = 16
+    Top = 72
+  end
+end

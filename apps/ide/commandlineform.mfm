@@ -1,0 +1,28 @@
+object commandlinefo: tcommandlinefo
+  bounds_x = 241
+  bounds_y = 310
+  bounds_cx = 542
+  bounds_cy = 100
+  container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_subfocus, ow_mousetransparent, ow_destroywidgets, ow_autoscale]
+  container.bounds_cx = 542
+  container.bounds_cy = 100
+  container.frame.dummy = 0
+  options = [fo_screencentered, fo_closeonesc, fo_autoreadstat, fo_autowritestat, fo_savepos, fo_savestate]
+  caption = 'Commandline'
+  icon.transparency = -2147483648
+  moduleclassname = 'tmseform'
+  object disp: tmemoedit
+    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+    bounds_cx = 542
+    bounds_cy = 100
+    frame.framei_left = 3
+    frame.framei_top = 3
+    frame.framei_right = 3
+    frame.framei_bottom = 3
+    frame.localprops = [frl_colorclient]
+    frame.dummy = 0
+    anchors = []
+    optionsedit = [oe_readonly, oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_linebreak, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_keyexecute, oe_savevalue, oe_savestate]
+    reffontheight = 13
+  end
+end

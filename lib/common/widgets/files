@@ -1,0 +1,20 @@
+BPLFILES = \
+  linmseguiwidgets
+FILES= \
+  msedock\
+  msesplitter\
+  mseeditglob\
+  msesimplewidgets \
+  msegrids \
+  mseinplaceedit\
+  mseforms \
+  mseobjectpicker \
+  mseimage \
+  msetoolbar \
+  msetabs \
+  msedispwidgets \
+  
+  
+
+
+

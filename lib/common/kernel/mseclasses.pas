@@ -1,0 +1,2801 @@
+{ MSEgui Copyright (c) 1999-2006 by Martin Schreiber
+
+    See the file COPYING.MSE, included in this distribution,
+    for details about the copyright.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+}
+unit mseclasses;
+
+{$ifdef FPC}{$mode objfpc}{$h+}{$INTERFACES CORBA}{$endif}
+
+interface
+uses
+ classes,mseguiglob,mseevent,msetypes,msestrings,sysutils,typinfo,mselist,
+ msegraphutils;
+
+{ $define debugobjectlink}
+
+{$ifdef FPC}
+ {$interfaces corba}
+const
+ s_ok = 0;
+{$endif}
+const
+ moduleclassnamename = 'moduleclassname';
+ compilerdefaults =
+     '{$ifdef FPC}{$mode objfpc}{$h+}{$INTERFACES CORBA}{$endif}';
+
+type
+ notifyeventty = procedure (const sender: tobject) of object;
+ componenteventty = procedure (const acomponent: tcomponent) of object;
+ checkeventty = function (const sender: tobject): boolean of object;
+ eventeventty = procedure (const sender: tobject; const aevent: tobjectevent) of object;
+ asynceventeventty = procedure (const sender: tobject; var atag: integer) of object;
+
+ booleanchangedeventty = procedure (const sender: tobject;
+                            const avalue: boolean) of object;
+ stringchangedeventty = procedure (const sender: tobject;
+                            const avalue: msestring) of object;
+ integerchangedeventty = procedure (const sender: tobject;
+                            const avalue: integer) of object;
+ realchangedeventty = procedure (const sender: tobject;
+                            const avalue: realty) of object;
+
+ getintegereventty = function :integer of object;
+ setbooleaneventty = procedure(const sender: tobject; var avalue: boolean;
+                          var accept: boolean) of object;
+ setstringeventty = procedure(const sender: tobject; var avalue: msestring;
+                          var accept: boolean) of object;
+ setansistringeventty = procedure(const sender: tobject; var avalue: ansistring;
+                          var accept: boolean) of object;
+ setintegereventty = procedure(const sender: tobject; var avalue: integer;
+                          var accept: boolean) of object;
+ setrealeventty = procedure(const sender: tobject; var avalue: realty;
+                          var accept: boolean) of object;
+ setdatetimeeventty = procedure(const sender: tobject; var avalue: tdatetime;
+                          var accept: boolean) of object;
+
+ persistentarty = array of tpersistent;
+ pesistentclassty = class of tpersistent;
+ 
+ componentarty = array of tcomponent;
+ componentclassty = class of tcomponent;
+
+ propinfopoarty = array of ppropinfo;
+
+ tvirtualpersistent = class(tpersistent)
+  public
+   constructor create; virtual;
+ end;
+ virtualpersistentclassty = class of tvirtualpersistent;
+
+ townedpersistent = class(tvirtualpersistent)
+  protected
+   fowner: tobject;
+  public
+   constructor create(aowner: tobject); reintroduce; virtual;
+ end;
+
+ tlinkedobject = class;
+
+ linkinfoty = record
+  source: pointer; //iobjectlink
+  dest: pointer;   //iobjectlink
+  refcount: integer;
+  valuepo: pointer;
+  interfacetype: pointer;
+ end;
+ plinkinfoty = ^linkinfoty;
+
+ linkinfaty = array[0..0] of linkinfoty;
+ plinkinfaty = ^linkinfaty;
+
+ plinkedobject = ^tlinkedobject;
+ tmsecomponent = class;
+ pmsecomponent = ^tmsecomponent;
+ pobjectlinker = ^tobjectlinker;
+ tlinkedpersistent = class;
+ plinkedpersistent = ^tlinkedpersistent;
+
+ objectlinkprocty = procedure(const info: linkinfoty) of object;
+
+ tobjectlinker = class(trecordlist)
+  private
+   fonevent: objectlinkeventty;
+   fownerintf: pointer; //iobjectlink;
+   finstancepo: pobjectlinker;
+   fnopack: integer;
+   procedure dopack;
+   procedure removelink(var item: linkinfoty; destroyed: boolean);
+  protected
+   function isempty(var item): boolean; override;
+   function findsource(const item: linkinfoty): integer;
+  public
+   {$ifdef debugobjectlink}
+   debugon: boolean;
+   {$endif}
+   constructor create(const owner: iobjectlink; onevent: objectlinkeventty);
+   destructor destroy; override;
+   procedure link(const source,dest: iobjectlink; valuepo: pointer = nil;
+                ainterfacetype: pointer = nil; once: boolean = false); overload;
+   procedure link(const dest: tmsecomponent; valuepo: pointer = nil;
+                ainterfacetype: pointer = nil; once: boolean = false); overload;
+   procedure unlink(const source,dest: iobjectlink; valuepo: pointer = nil); overload;
+   procedure unlink(const dest: tmsecomponent; valuepo: pointer = nil); overload;
+
+   procedure setlinkedvar(const linkintf: iobjectlink; const source: tlinkedobject;
+                         var dest: tlinkedobject); overload;
+   procedure setlinkedvar(const linkintf: iobjectlink; const source: tlinkedpersistent;
+                         var dest: tlinkedpersistent); overload;
+   procedure setlinkedvar(const linkintf: iobjectlink; const source: tmsecomponent;
+                         var dest: tmsecomponent); overload;
+   procedure sendevent(event: objecteventty);
+   procedure objevent(const sender: iobjectlink; const event: objecteventty);
+   procedure forall(proc: objectlinkprocty; ainterfacetype: pointer);
+ end;
+
+ tlinkedobject = class(tnullinterfacedobject,iobjectlink)
+  private
+  protected
+   fobjectlinker: tobjectlinker;
+   function getobjectlinker: tobjectlinker;
+   procedure objectevent(const sender: tobject; const event: objecteventty); virtual;
+   procedure setlinkedvar(const source: tmsecomponent; var dest: tmsecomponent;
+              const linkintf: iobjectlink = nil); overload;
+   procedure setlinkedvar(const source: tlinkedobject; var dest: tlinkedobject;
+              const linkintf: iobjectlink = nil); overload;
+    //iobjectlink
+   procedure link(const source,dest: iobjectlink; valuepo: pointer = nil;
+                   ainterfacetype: pointer = nil; once: boolean = false);
+   procedure unlink(const source,dest: iobjectlink; valuepo: pointer = nil);
+   procedure objevent(const sender: iobjectlink; const event: objecteventty);
+   function getinstance: tobject;
+ public
+   destructor destroy; override;
+//   property objectlinker: tobjectlinker read getobjectlinker;
+ end;
+
+ tnullinterfacedobject = class(tobject)
+  protected
+   function _addref: integer; stdcall;
+   function _release: integer; stdcall;
+   function QueryInterface(const IID: TGUID; out Obj): HResult; stdcall;
+ end;
+
+ tnullinterfacedpersistent = class(tvirtualpersistent)
+  protected
+   function _addref: integer; stdcall;
+   function _release: integer; stdcall;
+   function QueryInterface(const IID: TGUID; out Obj): HResult; stdcall;
+ end;
+
+ toptionalpersistent = class(tnullinterfacedpersistent)
+  private
+   procedure readdummy(reader: treader);
+   procedure writedummy(writer: twriter);
+  protected
+   procedure defineproperties(filer : tfiler); override;
+ end;
+
+ tlinkedpersistent = class(tnullinterfacedpersistent,iobjectlink)
+  private
+  protected
+   fobjectlinker: tobjectlinker;
+   function getobjectlinker: tobjectlinker;
+   procedure objectevent(const sender: tobject; const event: objecteventty); virtual;
+   procedure setlinkedvar(const source: tmsecomponent; var dest: tmsecomponent;
+              const linkintf: iobjectlink = nil); overload;
+   procedure setlinkedvar(const source: tlinkedobject; var dest: tlinkedobject;
+              const linkintf: iobjectlink = nil); overload;
+    //iobjectlink
+   procedure link(const source,dest: iobjectlink; valuepo: pointer = nil;
+                   ainterfacetype: pointer = nil; once: boolean = false);
+   procedure unlink(const source,dest: iobjectlink; valuepo: pointer = nil);
+   procedure objevent(const sender: iobjectlink; const event: objecteventty);
+   function getinstance: tobject; virtual;
+
+ public
+   destructor destroy; override;
+ end;
+
+ teventpersistent = class(tlinkedpersistent,ievent)
+  protected
+   procedure receiveevent(const event: tobjectevent); virtual;
+  public
+ end;
+
+ townedeventpersistent = class(tlinkedpersistent)
+  protected
+   fowner: tobject;
+  public
+   constructor create(aowner: tobject); reintroduce; virtual;
+ end;
+
+ teventobject = class(tlinkedobject,ievent)
+  protected
+   procedure receiveevent(const event: tobjectevent); virtual;
+  public
+ end;
+
+ componenteventstatety = (ces_processed,ces_callchildren);
+ componenteventstatesty = set of componenteventstatety;
+
+ tcomponentevent = class(tobjectevent)
+  private
+   fsender: tobject;
+  public
+   state: componenteventstatesty;
+   tag: integer;
+   constructor create(const asender: tobject; const atag: integer = 0; const callchildren: boolean = true);
+                    overload;
+   property sender: tobject read fsender;
+ end;
+
+ componentstylety = (cs_ismodule);
+ componentstylesty = set of componentstylety;
+
+ createprocty = procedure of object;
+
+ tmsecomponent = class(tcomponent,ievent)
+  private
+   procedure readmoduleclassname(reader: treader);
+   procedure writemoduleclassname(writer: twriter);
+  protected
+   fmsecomponentstyle: componentstylesty;
+   fobjectlinker: tobjectlinker;
+   factualclassname: pshortstring;
+   function getobjectlinker: tobjectlinker;
+   procedure objectevent(const sender: tobject; const event: objecteventty); virtual;
+   procedure loaded; override;
+   procedure sendchangeevent;
+   function linkcount: integer;
+   function canevent(const event: tmethod): boolean;
+   function candestroyevent(const event: tmethod): boolean;
+
+    //iobjectlink
+   procedure link(const source,dest: iobjectlink; valuepo: pointer = nil;
+               ainterfacetype: pointer = nil; once: boolean = false);
+   procedure unlink(const source,dest: iobjectlink; valuepo: pointer = nil); virtual;
+   procedure objevent(const sender: iobjectlink; const event: objecteventty); virtual;
+   function getinstance: tobject;
+     //ievent
+   procedure receiveevent(const event: tobjectevent); virtual;
+
+   procedure designselected(const selected: boolean); virtual;
+   procedure setlinkedvar(const source: tmsecomponent; var dest: tmsecomponent;
+              const linkintf: iobjectlink = nil); overload;
+   procedure setlinkedvar(const source: tlinkedobject; var dest: tlinkedobject;
+              const linkintf: iobjectlink = nil); overload;
+   procedure writestate(writer: twriter); override;
+   function getactualclassname: string;
+   class function getmoduleclassname: string; virtual;
+   procedure defineproperties(filer: tfiler); override;
+   procedure componentevent(const event: tcomponentevent); virtual;
+
+  public
+   destructor destroy; override;
+   {$ifdef FPC}
+   procedure setinline(value: boolean);
+   procedure setancestor(value: boolean);
+   {$endif}
+   procedure setoptionalobject(const value: tpersistent; var instance;
+                        createproc: createprocty);
+   procedure getoptionalobject(const instance: tobject; createproc: createprocty);
+   function getcorbainterface(const aintf: ptypeinfo; out obj) : boolean;
+//   function getcorbainterface(const aintf: tguid; out obj) : boolean;
+   procedure initnewcomponent; virtual;
+   function checkowned(component: tcomponent): boolean; 
+                 //true if component is owned or self
+   function checkowner(component: tcomponent): boolean; 
+                 //true if component is owner or self
+   function rootowner: tcomponent;
+   function getrootcomponentpath: componentarty;
+
+   procedure sendcomponentevent(const event: tcomponentevent);
+                  //event will be destroyed if not async
+   procedure sendrootcomponentevent(const event: tcomponentevent);
+                  //event will be destroyed if not async
+
+   property moduleclassname: string read getmoduleclassname;
+   property actualclassname: string read getactualclassname;
+ end;
+
+ msecomponentclassty = class of tmsecomponent;
+
+ tlinkedqueue = class(tpointerqueue,iobjectlink)
+  private
+   fobjectlinker: tobjectlinker;
+   fainstance: tobject;
+   fownsobjects: boolean;
+   function getitems(const index: integer): iobjectlink;
+   procedure setitems(const index: integer; const Value: iobjectlink);
+   procedure objectevent(const sender: tobject; const event: objecteventty);
+    //iobjectlink
+   procedure link(const source,dest: iobjectlink; valuepo: pointer = nil;
+                      ainterfacetype: pointer = nil; once: boolean = false);
+   procedure unlink(const source,dest: iobjectlink; valuepo: pointer = nil);
+   procedure objevent(const sender: iobjectlink; const event: objecteventty);
+   function getinstance: tobject;
+  protected
+   procedure finalizeitem(var item: pointer); override;
+  public
+   constructor create(aownsobjects: boolean);
+   destructor destroy; override;
+   function add(value: iobjectlink): integer;
+   procedure insert(const index: integer; const value: iobjectlink); reintroduce;
+   function getfirst: iobjectlink;
+   function getlast: iobjectlink;
+   procedure sendchangenotification(sender: tobject);
+   property items[const index: integer]: iobjectlink read getitems write setitems; default;
+   property ownsobjects: boolean read fownsobjects write fownsobjects;
+ end;
+
+ tlinkedobjectqueue = class(tlinkedqueue,iobjectlink)
+  private
+  protected
+   function getitems(const index: integer): tlinkedobject;
+   procedure setitems(const index: integer; const Value: tlinkedobject);
+  public
+   function add(value: tlinkedobject): integer;
+   procedure insert(const index: integer; const value: tlinkedobject); reintroduce;
+   function getfirst: tlinkedobject;
+   function getlast: tlinkedobject;
+   property items[const index: integer]: tlinkedobject read getitems write setitems; default;
+ end;
+
+ tpersistentqueue = class(tlinkedqueue,iobjectlink)
+  private
+   function getitems(const index: integer): tlinkedpersistent;
+   procedure setitems(const index: integer; const Value: tlinkedpersistent);
+  protected
+  public
+   procedure add(value: tlinkedpersistent);
+   procedure insert(const index: integer; const value: tlinkedpersistent); reintroduce;
+   function getfirst: tlinkedpersistent;
+   function getlast: tlinkedpersistent;
+   property items[const index: integer]: tlinkedpersistent read getitems write setitems; default;
+ end;
+
+ tcomponentqueue = class(tlinkedqueue,iobjectlink)
+  private
+   function getitems(const index: integer): tmsecomponent;
+   procedure setitems(const index: integer; const Value: tmsecomponent);
+  protected
+  public
+   procedure add(value: tmsecomponent);
+   procedure insert(const index: integer; const value: tmsecomponent); reintroduce;
+   function getfirst: tmsecomponent;
+   function getlast: tmsecomponent;
+   property items[const index: integer]: tmsecomponent read getitems write setitems; default;
+ end;
+
+ tobjectlinkrecordlist = class(trecordlist,iobjectlink)
+  private
+    //iobjectlink
+   procedure link(const source,dest: iobjectlink; valuepo: pointer = nil;
+                      ainterfacetype: pointer = nil; once: boolean = false);
+   procedure unlink(const source,dest: iobjectlink; valuepo: pointer = nil);
+   procedure objevent(const sender: iobjectlink; const event: objecteventty);
+   function getinstance: tobject;
+  protected
+   fobjectlinker: tobjectlinker;
+   procedure finalizerecord(var item); override;
+   procedure dounlink(var item); virtual; abstract;
+   procedure itemdestroyed(const sender: iobjectlink); virtual; abstract;
+  public
+   constructor create(recordsize: integer; aoptions: recordliststatesty = []);
+   destructor destroy; override;
+ end;
+
+ objectdataty = record
+  size: integer;
+  data: array[0..0] of byte;
+ end;
+ pobjectdataty = ^objectdataty;
+
+ tpersistenttemplate = class(tlinkedpersistent)
+  private
+   fonchange: notifyeventty;
+   fowner: tmsecomponent;
+  protected
+   procedure changed;
+   function getinfosize: integer; virtual; abstract;
+   function getinfoad: pointer; virtual; abstract;
+   procedure copyinfo(const source: tpersistenttemplate); virtual;
+   procedure assignto(dest: tpersistent); override;
+   procedure doassignto(dest: tpersistent); virtual; abstract;
+  public
+   constructor create(const owner: tmsecomponent; const onchange: notifyeventty);
+                 reintroduce; virtual;
+   procedure assign(source: tpersistent); override;
+ end;
+
+ templateclassty = class of tpersistenttemplate;
+
+ ttemplatecontainer = class(tmsecomponent)
+  protected
+   ftemplate: tpersistent;
+   procedure assignto(dest: tpersistent); override;
+   function gettemplateclass: templateclassty; virtual; abstract;
+   procedure templatechanged(const sender: tobject);
+  public
+   constructor create(aowner: tcomponent); override;
+   destructor destroy; override;
+ end;
+
+ tmsedatamodule = class(tmsecomponent)
+  private
+   fsize: sizety;
+   procedure writesize(writer: twriter);
+   procedure readsize(reader: treader);
+  protected
+   procedure getchildren(proc: tgetchildproc; root: tcomponent); override;
+   class function getmoduleclassname: string; override;
+   procedure defineproperties(filer: tfiler); override;
+  public
+   constructor create(aowner: tcomponent); overload; override;
+   constructor create(aowner: tcomponent; load: boolean); reintroduce; overload;
+   property size: sizety read fsize write fsize;
+ end;
+ datamoduleclassty = class of tmsedatamodule;
+ 
+function ownernamepath(const acomponent: tcomponent): string; 
+                     //namepath from root to acomponent separated by '.'
+
+function getpropinfoar(const obj: tobject): propinfopoarty;
+
+procedure createmodule(aowner: tcomponent; instanceclass: msecomponentclassty; var reference);
+procedure registerobjectdata(datapo: pobjectdataty; 
+                 objectclass: tpersistentclass; name: string = ''); overload;
+procedure registerobjectdata(datapo: pobjectdataty; 
+                 const objectclassname: string; const name: string = ''); overload;
+                 //language overrides
+procedure unregisterobjectdata(const objectclassname: string; const name: string = '');
+                 //language overrides
+procedure resetchangedmodules;
+procedure reloadchangedmodules;
+
+procedure createobjectlinker(const owner: iobjectlink; onevent: objectlinkeventty;
+                                  var instance: tobjectlinker);
+ //sets finstancepo
+procedure getoptionalobject(const componentstate: tcomponentstate;
+                       const instance: tobject; createproc: createprocty); overload;
+procedure setoptionalobject(const componentstate: tcomponentstate;
+                  const value: tpersistent; var instance;
+                    createproc: createprocty); overload;
+procedure setlinkedcomponent(const sender: iobjectlink; const source: tmsecomponent;
+                      var instance: tmsecomponent; ainterfacetype: pointer = nil);
+procedure reloadmsecomponent(Instance: tcomponent);
+function initmsecomponent(instance: tcomponent; rootancestor: tclass): boolean;
+procedure loadmsemodule(const instance: tmsecomponent; aclass: tclass);
+function copycomponent(const source: tcomponent; const aowner: tcomponent = nil;
+              const onfindancestor: tfindancestorevent = nil;
+              const onfindcomponentclass: tfindcomponentclassevent = nil;
+              const oncreatecomponent: tcreatecomponentevent = nil): tcomponent;
+                //copy by stream.writecomponent, readcomponent
+procedure refreshancestor(const descendent,newancestor,oldancestor: tcomponent;
+              const revert: boolean;
+              const onfindancestor: tfindancestorevent = nil;
+              const onfindcomponentclass: tfindcomponentclassevent = nil;
+              const oncreatecomponent: tcreatecomponentevent = nil;
+              const onfindmethod: tfindmethodevent = nil;
+              const sourcemethodtab: pointer = nil;
+              const destmethodtab: pointer = nil);
+
+function issubcomponent(const root,child: tcomponent): boolean;
+function findcomponentbynamepath(const namepath: string): tcomponent;
+
+
+procedure lockfindglobalcomponent;   //switch of findglobalcomponent
+procedure unlockfindglobalcomponent; //switch on findglobalcomponent
+function findglobalcomponentlocked: boolean;
+
+function getenumnames(const atypeinfo: ptypeinfo): msestringarty;
+function getcorbainterface(const aobject: tobject; const aintf: ptypeinfo;
+                       out obj) : boolean;
+
+function checkcanevent(const acomponent: tcomponent; const event: tmethod): boolean;
+
+procedure readstringar(const reader: treader; out ar: stringarty);
+procedure writestringar(const writer: twriter; const ar: stringarty);
+
+function createmsedatamodule(const aclass: tclass;
+                    const aclassname: pshortstring): tmsecomponent;
+function swapmethodtable(const instance: tobject; const newtable: pointer): pointer;
+                    
+implementation
+uses
+{$ifdef debugobjectlink}
+ msegui,mseformatstr,
+{$endif}
+{$ifdef mswindows}
+ windows,
+{$endif}
+ msestream,msesys,msedatalist;
+
+type
+ {$ifdef FPC}
+ TComponentcracker = class(TPersistent)
+ private
+   FOwner: TComponent;
+   FName: TComponentName;
+   FTag: Longint;
+   FComponents: TList;
+   FFreeNotifies: TList;
+   FDesignInfo: Longint;
+   FVCLComObject: Pointer;
+   FComponentState: TComponentState;
+ end;
+ {$endif}
+ tpersistent1 = class(tpersistent);
+ tcomponent1 = class(tcomponent);
+
+ tobjectdatastream = class(tcustommemorystream)
+  public
+   constructor create(data: pobjectdataty);
+   function Write(const Buffer; Count: Longint): Longint; override;
+ end;
+
+ objectdatainfoty = record
+  objectclass: tclass;
+  objectdata: pobjectdataty;
+  langobjectdata: pobjectdataty;
+  name: string;
+  changed: boolean;
+ end;
+
+ pobjectdatainfoty = ^objectdatainfoty;
+
+ tobjectdatainfolist = class(trecordlist)    //todo: hashed or ordered list for speedup
+  protected
+   procedure finalizerecord(var item); override;
+   procedure copyrecord(var item); override;
+  public
+   constructor create;
+   function itempo(const index: integer): pobjectdatainfoty;
+   procedure add(const value: objectdatainfoty);
+   function find(aclass: tclass; aname: string): pobjectdatainfoty; overload;
+   function find(aclassname: string; aname: string): pobjectdatainfoty; overload;
+   procedure resetchanged;
+   procedure reloadchanged;
+ end;
+
+ tmodulelist = class(tcomponentqueue)
+  protected
+   flocked: integer;
+   function findmodulebyname(const name: string): tcomponent;
+//   procedure findmethod(Reader: TReader; const MethodName: string;
+//      var Address: Pointer; var Error: Boolean);
+         //does not work because method.data is not writable
+ end;
+
+var
+ objectdatalist: tobjectdatainfolist;
+ fmodules: tmodulelist;
+
+function swapmethodtable(const instance: tobject; const newtable: pointer): pointer;
+var
+ {$ifdef mswindows}
+ ca1: cardinal;
+ {$endif}
+ methodtabpo: ppointer;
+begin
+ methodtabpo:= ppointer(pchar(instance.classtype)+vmtmethodtable);
+ {$ifdef mswindows}
+ virtualprotect(methodtabpo,sizeof(pointer),page_readwrite,{$ifdef FPC}@{$endif}ca1);
+ {$endif}
+ result:= methodtabpo^;
+ methodtabpo^:= newtable;
+ {$ifdef mswindows}
+ virtualprotect(methodtabpo,sizeof(pointer),ca1,nil);
+ {$endif}
+end;
+
+function checkcanevent(const acomponent: tcomponent; const event: tmethod): boolean;
+begin
+ result:= (event.code <> nil) and (acomponent <> nil) and (event.data <> nil) and
+            (acomponent.componentstate * [csloading,csdesigning,csdestroying] = []);
+end;
+
+procedure writestringar(const writer: twriter; const ar: stringarty);
+var
+ int1: integer;
+begin
+ writer.writelistbegin;
+ for int1:= 0 to high(ar) do begin
+  writer.writestring(ar[int1]);
+ end;
+ writer.writelistend;
+end;
+
+procedure readstringar(const reader: treader; out ar: stringarty);
+var
+ int1: integer;
+begin
+ int1:= 0;
+ ar:= nil;
+ reader.readlistbegin;
+ while not reader.endoflist do begin
+  additem(ar,reader.readstring,int1);
+ end;
+ reader.readlistend;
+ setlength(ar,int1);
+end;
+
+procedure lockfindglobalcomponent;   //switch of findglobalcomponent
+begin
+ inc(fmodules.flocked);
+end;
+
+procedure unlockfindglobalcomponent; //switch on findglobalcomponent
+begin
+ dec(fmodules.flocked);
+end;
+
+function findglobalcomponentlocked: boolean;
+begin
+ result:= fmodules.flocked <> 0;
+end;
+
+function ownernamepath(const acomponent: tcomponent): string;
+var
+ comp: tcomponent;
+begin
+ with acomponent do begin
+  result:= name;
+  comp:= owner;
+  while comp <> nil do begin
+   if comp.Name <> '' then begin
+    result:= comp.Name + '.' + result;
+   end;
+   comp:= comp.Owner;
+  end;
+ end;
+end;
+
+function getpropinfoar(const obj: tobject): propinfopoarty;
+var
+ po: ptypeinfo;
+ po1: ptypedata;
+begin
+ if obj <> nil then begin
+  po:= obj.classinfo;
+  po1:= gettypedata(po);
+  setlength(result,po1^.PropCount);
+  getpropinfos(po,pointer(result));
+ end
+ else begin
+  result:= nil;
+ end;
+end;
+
+function getenumnames(const atypeinfo: ptypeinfo): msestringarty;
+var
+ typedata1: ptypedata;
+ int1,int2: integer;
+begin
+ typedata1:= gettypedata(atypeinfo);
+ with typedata1^ do begin
+  setlength(result,maxvalue-minvalue+1);
+  int2:= 0;
+  for int1:= MinValue to MaxValue do begin
+   result[int2]:= getenumname(atypeinfo,int1);
+   inc(int2);
+  end;
+ end;
+end;
+
+function copycomponent(const source: tcomponent; const aowner: tcomponent = nil;
+              const onfindancestor: tfindancestorevent = nil;
+              const onfindcomponentclass: tfindcomponentclassevent = nil;
+              const oncreatecomponent: tcreatecomponentevent = nil): tcomponent;
+                //copy by stream.writecomponent, readcomponent
+var
+ stream: tmemorystream;
+ writer: twriter;
+ reader: treader;
+begin
+ result:= tcomponent(source.NewInstance);
+ try
+  if csdesigning in source.componentstate then begin
+   tcomponent1(result).setdesigning(true);
+//   result.name:= source.name;
+  end;
+  result.Create(aowner);
+  stream:= tmemorystream.Create;
+  try
+   writer:= twriter.Create(stream,4096);
+   try
+    writer.OnFindAncestor:= onfindancestor;
+    writer.Writerootcomponent(source);
+   finally
+    writer.Free;
+   end;
+   stream.Position:= 0;
+   reader:= treader.Create(stream,4096);
+   try
+    reader.OnFindComponentClass:= onfindcomponentclass;
+    reader.OnCreateComponent:= oncreatecomponent;
+//    reader.ancestor:= aancestor;
+    reader.ReadrootComponent(result);
+   finally
+    reader.free;
+   end;
+  finally
+   stream.Free;
+  end;
+ except
+  result.free;
+  raise;
+ end;
+ if source is tmsecomponent then begin
+  tmsecomponent(result).factualclassname:= tmsecomponent(source).factualclassname;
+ end;
+end;
+
+{$define d ebugsubmodule}
+const
+ skipmark = 'h71%z/ur';
+ 
+type 
+ trefresheventhandler = class(tcomponent)
+  private
+   fcomponentar: componentarty;
+   procedure onsetname(reader: treader; component: tcomponent; var aname: string);
+   procedure onerror(reader: treader; const message: string; var handled: boolean);
+  protected
+   procedure notification(acomponent: tcomponent; operation: toperation);
+                               override;        
+  public
+   destructor destroy; override;
+ end;
+
+ trefreshexception = class(exception)
+ end;
+  
+destructor trefresheventhandler.destroy;
+var
+ int1: integer;
+begin
+ for int1:= 0 to high(fcomponentar) do begin
+  fcomponentar[int1].free; //FPC does not free the component
+ end;
+ inherited;
+end;
+
+procedure trefresheventhandler.notification(acomponent: tcomponent; operation: toperation);
+begin
+ if (operation = opremove) then begin
+  removeitem(pointerarty(fcomponentar),acomponent);
+ end;
+ inherited;
+end;
+
+procedure trefresheventhandler.onerror(reader: treader; const message: string;
+                        var handled: boolean);
+begin
+ if message = skipmark then begin
+  handled:= true;
+ end;
+end;
+
+procedure trefresheventhandler.onsetname(reader: treader; 
+                                    component: tcomponent; var aname: string);
+begin
+ if (component.owner <> nil) and (csinline in component.owner.componentstate) and
+        not(csancestor in component.componentstate) then begin
+  additem(pointerarty(fcomponentar),component);
+  component.freenotification(self);
+  raise trefreshexception.create(skipmark);
+ end;
+end;
+
+
+procedure refreshancestor(const descendent,newancestor,oldancestor: tcomponent;
+              const revert: boolean; 
+              const onfindancestor: tfindancestorevent = nil;
+              const onfindcomponentclass: tfindcomponentclassevent = nil;
+              const oncreatecomponent: tcreatecomponentevent = nil;
+              const onfindmethod: tfindmethodevent = nil;
+              const sourcemethodtab: pointer = nil;
+              const destmethodtab: pointer = nil);
+var
+ stream1,stream2: tmemorystream;
+ writer: twriter;
+ reader: treader;
+ comp1: tcomponent;
+ comp2: tcomponent;
+ int1: integer;
+ eventhandler: trefresheventhandler;
+ inl,anc: boolean;
+ tabbefore: pointer;
+ {$ifdef debugsubmodule}
+ stream3: ttextstream;
+ {$endif}
+begin
+ {$ifdef debugsubmodule}
+  writeln('descendent: '+ descendent.name + ' newancestor: '+
+         newancestor.name + ' oldancestor: '+oldancestor.name);
+ stream3:= ttextstream.create;
+ {$endif}
+ eventhandler:= trefresheventhandler.create(nil);
+ stream1:= tmemorystream.Create;
+ stream2:= tmemorystream.Create;
+ try
+  writer:= twriter.Create(stream1,4096);
+  if destmethodtab <> nil then begin
+   tabbefore:= swapmethodtable(descendent,destmethodtab);
+  end;
+  try
+   writer.OnFindAncestor:= onfindancestor;
+   writer.WriteDescendent(descendent,oldancestor); //changes from oldancestor
+  finally
+   if destmethodtab <> nil then begin
+    swapmethodtable(descendent,tabbefore);
+   end;
+   writer.Free;
+  end;
+ {$ifdef debugsubmodule}
+   stream1.position:= 0;
+   objectbinarytotext(stream1,stream3);
+   stream3.position:= 0;
+   writeln('changes oldancestor->descendent');
+   stream3.writetotext(output);
+ {$endif}
+ {
+  comp1:= copycomponent(newancestor,nil,onfindancestor,onfindcomponentclass,
+                         oncreatecomponent);
+  writer:= twriter.Create(stream2,4096);
+  try
+   writer.OnFindAncestor:= onfindancestor;
+   tmsecomponent(comp1).SetInline(true);
+   tcomponent1(comp1).SetAncestor(true);
+   writer.WriteDescendent(comp1,descendent); //new state
+  finally
+   writer.Free;
+   comp1.Free;
+  end;
+}
+  writer:= twriter.Create(stream2,4096);
+  inl:= csinline in newancestor.componentstate;
+  anc:= csancestor in newancestor.componentstate;
+  tmsecomponent(newancestor).SetInline(true);
+  tcomponent1(newancestor).SetAncestor(true);
+  if sourcemethodtab <> nil then begin
+   tabbefore:= swapmethodtable(newancestor,sourcemethodtab);
+  end;
+  try
+   writer.OnFindAncestor:= onfindancestor;
+   writer.WriteDescendent(newancestor,descendent); //new state
+  finally
+   tmsecomponent(newancestor).SetInline(inl);
+   tcomponent1(newancestor).SetAncestor(anc);
+   if sourcemethodtab <> nil then begin
+    swapmethodtable(newancestor,tabbefore);
+   end;
+   writer.Free;
+  end;
+ {$ifdef debugsubmodule}
+   stream2.position:= 0;
+   stream3.setsize(0);
+   objectbinarytotext(stream2,stream3);
+   stream3.position:= 0;
+   writeln('changes descendent->newancestor');
+   stream3.writetotext(output);
+ {$endif}
+  stream1.Position:= 0;
+  stream2.Position:= 0;
+  reader:= treader.create(stream2,4096);  //new state
+  if destmethodtab <> nil then begin
+   tabbefore:= swapmethodtable(descendent,destmethodtab);
+  end;
+  try
+   reader.OnFindComponentClass:= onfindcomponentclass;
+   reader.OnCreateComponent:= oncreatecomponent;
+   reader.onfindmethod:= onfindmethod;
+//   reader.onsetname:= {$ifdef FPC}@{$endif}eventhandler.onsetname;
+//   reader.onerror:= {$ifdef FPC}@{$endif}eventhandler.onerror;
+   reader.ReadRootComponent(descendent);
+  finally
+   if destmethodtab <> nil then begin
+    swapmethodtable(descendent,tabbefore);
+   end;
+   reader.free;
+  end;
+  if not revert then begin
+   reader:= treader.create(stream1,4096);  //restore old changes
+   if destmethodtab <> nil then begin
+    tabbefore:= swapmethodtable(descendent,destmethodtab);
+   end;
+   try
+    reader.OnFindComponentClass:= onfindcomponentclass;
+    reader.OnCreateComponent:= oncreatecomponent;
+    reader.onfindmethod:= onfindmethod;
+    reader.onsetname:= {$ifdef FPC}@{$endif}eventhandler.onsetname;
+    reader.onerror:= {$ifdef FPC}@{$endif}eventhandler.onerror;
+    reader.ReadRootComponent(descendent);
+    for int1:= descendent.componentcount - 1 downto 0 do begin
+     comp2:= descendent.components[int1];
+     if not (cssubcomponent in comp2.componentstyle) and 
+                   (newancestor.findcomponent(comp2.name) = nil) then begin
+      comp2.free;     //remove deleted components
+     end;
+    end;
+   finally
+    if destmethodtab <> nil then begin
+     swapmethodtable(descendent,tabbefore);
+    end;
+    reader.free;
+   end;
+  end;
+ finally
+  stream1.Free;
+  stream2.Free;
+  {$ifdef debugsubmodule}
+  stream3.free;
+  {$endif}
+  eventhandler.free;
+ end;
+end;
+
+function issubcomponent(const root,child: tcomponent): boolean;
+var
+ comp: tcomponent;
+begin
+ result:= false;
+ comp:= child.Owner;
+ while comp <> nil do begin
+  if comp = root then begin
+   result:= true;
+   break;
+  end;
+  comp:= comp.Owner;
+ end;
+end;
+
+procedure createmodule(aowner: tcomponent; instanceclass: msecomponentclassty;
+                                    var reference);
+var
+ instance: tmsecomponent;
+begin
+ instance := tmsecomponent(instanceclass.newinstance);
+ if fmodules = nil then begin
+  fmodules:= tmodulelist.create(false);
+ end;
+ fmodules.add(instance);
+ tmsecomponent(reference):= instance;
+ try
+  instance.create(aowner);
+ except
+  tcomponent(reference) := nil;
+  raise;
+ end;
+end;
+
+type
+{$ifdef FPC}
+ tasinheritedobjectreader = class(tbinaryobjectreader)
+  protected
+   procedure begincomponent(var flags: tfilerflags; var achildpos: Integer;
+      var compclassName, compname: string); override;
+ end;
+
+ tasinheritedreader = class(treader)
+  protected
+   function createdriver(stream: tstream; bufsize: integer): tabstractobjectreader; override;
+ end;
+
+procedure tasinheritedobjectreader.begincomponent(var flags: tfilerflags;
+        var achildpos: Integer; var compclassName, compname: string);
+begin
+ inherited;
+ include(flags,ffinherited);
+end;
+
+function tasinheritedreader.createdriver(stream: tstream;
+                   bufsize: integer): tabstractobjectreader;
+begin
+ result:= tasinheritedobjectreader.create(stream, bufsize);
+end;
+
+{$else}
+ tasinheritedreader = class(treader)
+  public
+   procedure readprefix(var flags: tfilerflags; var achildpos: integer); override;
+ end;
+
+procedure tasinheritedreader.readprefix(var flags: tfilerflags; var achildpos: integer);
+begin
+ inherited;
+ include(flags,ffinherited);
+end;
+
+{$endif}
+
+procedure loadmodule(const instance: tcomponent;
+                        const po1: pobjectdatainfoty; asinherited: boolean);
+var
+ stream: tobjectdatastream;
+ reader: treader;
+ po2: pobjectdataty;
+begin
+ po2:= po1^.langobjectdata;
+ if po2 = nil then begin
+  po2:= po1^.objectdata;
+ end;
+ stream:= tobjectdatastream.create(po2);
+ try
+  globalnamespace.beginwrite;
+  if asinherited then begin
+   reader := tasinheritedreader.create(stream, 4096);
+  end
+  else begin
+   reader := treader.create(stream, 4096);
+  end;
+  try
+   if fmodules <> nil then begin
+//      reader.onfindmethod:= fmodules.findmethod;
+       //does not work because method.data is not writable
+   end;
+   reader.readrootcomponent(instance);
+  finally
+    reader.free;
+  end;
+ finally
+  globalnamespace.endwrite;
+  stream.free;
+ end;
+end;
+
+function initmsecomponent(instance: tcomponent; rootancestor: tclass): boolean;
+var                                //!!!!todo: evaluate rootancestor
+ po1: pobjectdatainfoty;
+ classty: tclass;
+
+begin
+ result:= false;
+ if objectdatalist <> nil then begin
+  classty:= instance.classtype;
+  po1:= objectdatalist.find(classty,instance.name);
+  if (po1 <> nil) then begin
+   begingloballoading;
+   try
+    loadmodule(instance,po1,false);
+    notifygloballoading;
+   finally
+    endgloballoading;
+   end;
+   result:= true;
+  end;
+ end;
+end;
+
+procedure reloadmsecomponent(Instance: tcomponent);
+var
+ po1: pobjectdatainfoty;
+
+begin
+ po1:= objectdatalist.find(instance.classtype,instance.name);
+ if po1 = nil then begin
+  po1:= objectdatalist.find(instance.classtype,'');
+ end;
+ loadmodule(instance,po1,true);
+end;
+
+procedure registerclassproperties(aclass: tclass);
+type
+  PFieldClassTable = ^TFieldClassTable;
+  TFieldClassTable = packed record
+    Count: Smallint;
+    {$ifdef FPC}
+    fClasses: array[0..8191] of TPersistentClass;
+    {$else}
+    fClasses: array[0..8191] of ^TPersistentClass;
+    {$endif}
+  end;
+
+{$ifdef FPC}
+ pfieldtable = ^tfieldtable;
+ TFieldTable = packed record
+   FieldCount: Word;
+   ClassTable: Pointer;
+   { Fields: array[Word] of TFieldInfo;  Elements have variant size! }
+ end;
+
+function getfieldclasstable(aclass: tclass): pfieldclasstable;
+begin
+ {$ifdef FPC} {$checkpointer off} {$endif}
+ result:= pfieldclasstable(PFieldTable((Pointer(aclass) + vmtFieldTable)^)^.classtable);
+ {$ifdef FPC} {$checkpointer default} {$endif}
+end;
+{$else}
+function GetFieldClassTable(AClass: TClass): PFieldClassTable; assembler;
+asm
+        MOV     EAX,[EAX].vmtFieldTable
+        OR      EAX,EAX
+        JE      @@1
+        MOV     EAX,[EAX+2].Integer
+@@1:
+end;
+{$endif}
+
+var
+ int1: integer;
+ fieldclasstab: pfieldclasstable;
+
+begin
+ {$ifdef FPC} {$checkpointer off} {$endif}
+  fieldclasstab:= getfieldclasstable(aclass);
+  if fieldclasstab <> nil then begin
+   with fieldclasstab^ do begin
+    for int1:= 0 to count - 1 do begin
+     {$ifdef FPC}
+     classes.registerclass(fclasses[int1]);
+     registerclassproperties(fclasses[int1]);
+     {$else}
+     classes.registerclass(fclasses[int1]^);
+     registerclassproperties(fclasses[int1]^);
+     {$endif}
+              //register classes of subproperties
+    end;
+   end;
+  end;
+end;
+
+procedure loadmsemodule(const instance: tmsecomponent; aclass: tclass);
+begin
+  registerclassproperties(instance.classtype);
+  if not initmsecomponent(instance,aclass) then begin
+   if not initinheritedcomponent(instance, aclass) then begin
+    guierror(gue_resnotfound,instance);
+   end;
+  end;
+ {$ifdef FPC} {$checkpointer default} {$endif}
+end;
+
+ { tmodulelist}
+{
+procedure tmodulelist.findmethod(Reader: TReader; const MethodName: string;
+                       var Address: Pointer; var Error: Boolean);
+var                           //does not work because method.data is not writable
+ comp1: tcomponent;
+ str1: string;
+ po1,po2: pchar;
+begin
+ if error and (methodname <> '') then begin
+  po1:= pchar(pointer(methodname));
+  po2:= strscan(po1,'.');
+  if po2 <> nil then begin
+   setstring(str1,po1,po2-po1);
+   comp1:= findmodulebyname(str1);
+   if comp1 <> nil then begin
+    address:= comp1.MethodAddress(copy(methodname,po2-po1+2,bigint))
+   end;
+   error:= address = nil;
+  end;
+ end;
+end;
+}
+function tmodulelist.findmodulebyname(const name: string): tcomponent;
+var
+ int1: integer;
+ comp1: tcomponent;
+begin
+ result:= nil;
+ if (self <> nil) and (flocked = 0) then begin
+  for int1:= 0 to count - 1 do begin
+   comp1:= items[int1];
+   if stricomp(pchar(comp1.name),pchar(name)) = 0 then begin
+    result:= comp1;
+    break;
+   end;
+  end;
+ end;
+end;
+
+{ tobjectdatastream}
+
+constructor tobjectdatastream.create(data: pobjectdataty);
+begin
+ inherited create;
+ {$ifdef FPC} {$checkpointer off} {$endif}
+ setpointer(@data^.data,data^.size);
+ {$ifdef FPC} {$checkpointer default} {$endif}
+end;
+
+function tobjectdatastream.Write(const Buffer; Count: Integer): Longint;
+begin
+ result:= 0;
+ raise exception.Create('readonly.');
+end;
+
+{ tobjectdatainfolist}
+
+constructor tobjectdatainfolist.create;
+begin
+ inherited create(sizeof(objectdatainfoty),[rels_needsfinalize,rels_needscopy]);
+end;
+
+function tobjectdatainfolist.find(aclass: tclass; aname: string): pobjectdatainfoty;
+var
+ int1: integer;
+begin
+ aname:= uppercase(aname);
+ result:= pobjectdatainfoty(fdata);
+ for int1:= 0 to fcount -1 do begin                           
+  if (result^.objectclass = aclass) and (result^.name = aname) then begin
+   exit;
+  end;
+  inc(result);
+ end;
+ result:= nil;
+end;
+
+function tobjectdatainfolist.find(aclassname: string; aname: string): pobjectdatainfoty;
+var
+ int1: integer;
+begin
+ aname:= uppercase(aname);
+ aclassname:= uppercase(aclassname);
+ result:= pobjectdatainfoty(fdata);
+ for int1:= 0 to fcount -1 do begin                           
+  if (stringicomp1(result^.objectclass.classname,aclassname) = 0) and 
+                       (result^.name = aname) then begin
+   exit;
+  end;
+  inc(result);
+ end;
+ result:= nil;
+end;
+
+
+function tobjectdatainfolist.itempo(const index: integer): pobjectdatainfoty;
+begin
+ result:= pobjectdatainfoty(getitempo(index));
+end;
+
+procedure tobjectdatainfolist.add(const value: objectdatainfoty);
+begin
+ inherited add(value);
+end;
+
+procedure tobjectdatainfolist.copyrecord(var item);
+begin
+ with objectdatainfoty(item) do begin
+  reallocstring(name);
+ end;
+end;
+
+procedure tobjectdatainfolist.finalizerecord(var item);
+begin
+ finalize(objectdatainfoty(item));
+end;
+
+procedure tobjectdatainfolist.resetchanged;
+var
+ int1: integer;
+ po1: pobjectdatainfoty;
+begin
+ po1:= pobjectdatainfoty(fdata);
+ for int1:= 0 to count - 1 do begin
+  po1^.changed:= false;
+  inc(po1);
+ end;
+end;
+
+procedure tobjectdatainfolist.reloadchanged;
+var
+ int1: integer;
+ int2: integer;
+ po1: pobjectdatainfoty;
+ comp1: tcomponent;
+begin
+ if fmodules <> nil then begin
+  po1:= pobjectdatainfoty(fdata);
+  for int1:= 0 to count - 1 do begin
+   if po1^.changed then begin
+    for int2:= 0 to fmodules.count - 1 do begin
+     comp1:= fmodules[int2];
+     with comp1 do begin
+      if (classtype = po1^.objectclass) and (po1^.name = '') or 
+                (stringicomp1(name,po1^.name) = 0) then begin
+       comp1.name:= '';
+       loadmodule(comp1,po1,true);
+      end;
+     end;
+    end;
+    po1^.changed:= false;
+   end;
+   inc(po1);
+  end;
+ end;
+end;
+
+procedure registerobjectdata(datapo: pobjectdataty; 
+            objectclass: tpersistentclass; name: string = '');
+var
+ info: objectdatainfoty;
+begin
+ if objectdatalist = nil then begin
+  objectdatalist:= tobjectdatainfolist.create;
+ end;
+ fillchar(info,sizeof(info),0);
+ info.objectclass:= objectclass;
+ info.objectdata:= datapo;
+ info.name:= uppercase(name);
+ objectdatalist.add(info);
+ classes.registerclass(objectclass);
+end;
+
+procedure registerobjectdata(datapo: pobjectdataty; 
+                 const objectclassname: string; const name: string = '');
+var
+ po1: pobjectdatainfoty;
+begin
+ if objectdatalist <> nil then begin
+  po1:= objectdatalist.find(objectclassname,name);
+  if po1 <> nil then begin
+   po1^.langobjectdata:= datapo;
+   po1^.changed:= true;
+  end;
+ end;
+end;
+
+procedure unregisterobjectdata(const objectclassname: string; const name: string = '');
+var
+ po1: pobjectdatainfoty;
+begin
+ if objectdatalist <> nil then begin
+  po1:= objectdatalist.find(objectclassname,name);
+  if po1 <> nil then begin
+   po1^.langobjectdata:= nil;
+   po1^.changed:= true;
+  end;
+ end;
+end;
+
+procedure resetchangedmodules;
+begin
+ if objectdatalist <> nil then begin
+  objectdatalist.resetchanged;
+ end;
+end;
+
+procedure reloadchangedmodules;
+begin
+ if objectdatalist <> nil then begin
+  objectdatalist.reloadchanged;
+ end;
+end;
+
+procedure getoptionalobject(const componentstate: tcomponentstate;
+                       const instance: tobject; createproc: createprocty);
+begin
+ if (instance = nil) and (csreading{csloading} in componentstate) then begin
+  createproc;
+ end;
+end;
+
+procedure setoptionalobject(const componentstate: tcomponentstate;
+                  const value: tpersistent; var instance; createproc: createprocty);
+begin
+ if value <> nil then begin
+  if tpersistent(instance) = nil then begin
+   createproc;
+  end;
+  if not (csdesigning in componentstate) then begin
+   tpersistent(instance).assign(value);
+  end;
+ end
+ else begin
+  freeandnil(tpersistent(instance));
+ end;
+end;
+
+procedure setlinkedcomponent(const sender: iobjectlink; const source: tmsecomponent;
+                      var instance: tmsecomponent; ainterfacetype: pointer = nil);
+begin
+ if source <> nil then begin
+  sender.link(sender,ievent(source),@instance,ainterfacetype);
+ end;
+ if instance <> nil then begin
+  sender.unlink(sender,ievent(instance),@instance);
+ end;
+ instance:= source;
+end;
+
+procedure createobjectlinker(const owner: iobjectlink; onevent: objectlinkeventty;
+                                  var instance: tobjectlinker);
+ //sets finstancepo
+begin
+ if instance = nil then begin
+  instance:= tobjectlinker.create(owner,onevent);
+  instance.finstancepo:= @instance;
+ end;
+end;
+
+{ townedpersistent }
+
+constructor townedpersistent.create(aowner: tobject);
+begin
+ fowner:= aowner;
+ inherited create;
+end;
+
+{ tobjectlinker }
+
+{$ifdef debugobjectlink}
+
+procedure getdebugtext(owner: tobjectlinker; const source,dest:iobjectlink;
+                         valuepo: pointer);
+
+ procedure intftext(aintf: iobjectlink);
+ var
+  obj1: tobject;
+ begin
+  if aintf = nil then begin
+   write('<nil>');
+  end
+  else begin
+   obj1:= iobjectlink(aintf).getinstance;
+   write(hextostr(cardinal(aintf),8) + ' ' + hextostr(cardinal(obj1),8));
+   if obj1 <> nil then begin
+    write(' '+obj1.classname);
+   end;
+   if obj1 is tcomponent then begin
+    write(' '+tcomponent(obj1).Name);
+   end
+   else begin
+    if obj1 is twindow then begin
+     write(' '+twindow(obj1).owner.Name);
+    end;
+   end
+  end;
+ end;
+
+begin
+ if rels_destroying in owner.fstate then begin
+  write('*');
+ end
+ else begin
+  write(' ');
+ end;
+ write('v:'+ hextostr(cardinal(valuepo),8));
+ write(' o:');intftext(iobjectlink(owner.fownerintf));
+ write(' s:');intftext(source);
+ write(' d:');intftext(dest);
+ writeln;
+end;
+{$endif}
+
+constructor tobjectlinker.create(const owner: iobjectlink; onevent: objectlinkeventty);
+begin
+{$ifdef debugobjectlink}
+ writeln('create o: ' + hextostr(cardinal(owner),8));
+{$endif}
+ pointer(fownerintf):= pointer(owner);
+ fonevent:= onevent;
+ inherited create(sizeof(linkinfoty));
+end;
+
+destructor tobjectlinker.destroy;
+var
+ po1: pointer;
+ po2: plinkinfoty;
+ int1: integer;
+begin
+{$ifdef debugobjectlink}
+ writeln('destroy o: ' + hextostr(cardinal(fownerintf),8));
+{$endif}
+ include(fstate,rels_destroying);
+ po2:= datapo;
+ for int1:= 0 to count - 1 do begin
+  with po2^ do begin
+   po1:= dest;
+   if po1 <> nil then begin
+{$ifdef debugobjectlink}
+   write('destrev');getdebugtext(self,iobjectlink(source),iobjectlink(dest),valuepo);
+{$endif}
+    dest:= nil;
+    if source = nil then begin
+     iobjectlink(po1).objevent(iobjectlink(fownerintf),oe_destroyed);
+     if valuepo <> nil then begin
+      pobject(valuepo)^:= nil;
+     end;
+    end
+    else begin
+     iobjectlink(po1).unlink(nil,iobjectlink(source),valuepo);
+    end;
+   end;
+  end;
+  inc(po2);
+ end;
+ pointer(fownerintf):= nil;
+ inherited;
+end;
+
+procedure tobjectlinker.sendevent(event: objecteventty);
+var
+ int1: integer;
+begin
+ if event <> oe_destroyed then begin
+  inc(fnopack);
+  try
+   int1:= 0;
+   while int1 < count do begin
+    with plinkinfaty(fdata)^[int1] do begin
+     if dest <> nil then begin
+      iobjectlink(dest).objevent(iobjectlink(fownerintf),event);
+     end;
+    end;
+    inc(int1);
+   end;
+  finally
+   dec(fnopack);
+  end;
+ end;
+end;
+
+procedure tobjectlinker.dopack;
+begin
+ if (fnopack = 0) and not (rels_destroying in fstate) then begin
+  pack;
+  if (count = 0) and (finstancepo <> nil) {$ifdef debugobjectlink}
+            and not debugon {$endif} then begin
+   freeandnil(finstancepo^);
+  end;
+ end;
+end;
+
+procedure tobjectlinker.removelink(var item: linkinfoty; destroyed: boolean);
+var
+ int1: integer;
+ po1: plinkinfoty;
+begin
+ po1:= plinkinfoty(fdata);
+ for int1:= 0 to count - 1 do begin
+  with po1^ do begin
+   if (dest <> nil) and (dest = item.dest) and
+        (destroyed or (valuepo = item.valuepo) and (source = item.source)) then begin
+    if refcount = 0 then begin
+     dest:= nil;
+    end
+    else begin
+     dec(refcount);
+    end;
+   end;
+  end;
+  inc(po1);
+ end;
+end;
+
+function tobjectlinker.findsource(const item: linkinfoty): integer;
+var
+ int1: integer;
+ po1: plinkinfoty;
+begin
+ result:= -1;
+ po1:= plinkinfoty(fdata);
+ for int1:= 0 to fcount - 1 do begin
+  with po1^do begin
+   if source = item.source then begin
+    result:= int1;
+    break;
+   end;
+  end;
+  inc(po1);
+ end;
+end;
+
+procedure tobjectlinker.link(const source,dest: iobjectlink; valuepo: pointer = nil;
+                                  ainterfacetype: pointer = nil; once: boolean = false);
+var
+ info: linkinfoty;
+ int1: integer;
+ po1: plinkinfoty;
+ bo1: boolean;
+begin
+ if not (rels_destroying in fstate) then begin
+{$ifdef debugobjectlink}
+  write('link  ');getdebugtext(self,source,dest,valuepo);
+{$endif}
+  fillchar(info,sizeof(info),0);
+  info.source:= pointer(source);
+  info.dest:= pointer(dest);
+  info.valuepo:= valuepo;
+  info.interfacetype:= ainterfacetype;
+  if not (once and (findsource(info) >= 0)) then begin
+   bo1:= false;
+   po1:= datapo;
+   for int1:= 0 to count - 1 do begin
+    with po1^ do begin
+     if (dest = info.dest) and (source = info.source) and
+        (valuepo = info.valuepo) and (interfacetype = info.interfacetype) then begin
+      inc(refcount);
+      bo1:= true;
+      break;
+     end
+    end;
+    inc(po1);
+   end;
+   if not bo1 then begin
+    add(info);
+   end;
+   if source <> nil then begin
+    dest.link(nil,source,valuepo,ainterfacetype);
+   end;
+  end;
+ end;
+end;
+
+procedure tobjectlinker.link(const dest: tmsecomponent; valuepo: pointer = nil;
+                ainterfacetype: pointer = nil; once: boolean = false);
+begin
+ if dest <> nil then begin
+  link(iobjectlink(fownerintf),ievent(dest),valuepo,ainterfacetype,once);
+ end;
+end;
+
+procedure tobjectlinker.unlink(const source,dest: iobjectlink; valuepo: pointer = nil);
+var
+ info: linkinfoty;
+begin
+{$ifdef debugobjectlink}
+  write('unlink');getdebugtext(self,source,dest,valuepo);
+{$endif}
+ info.source:= pointer(source);
+ info.dest:= pointer(dest);
+ info.valuepo:= valuepo;
+ removelink(info,false);
+ if source <> nil then begin
+  dest.unlink(nil,source,valuepo);
+ end;
+ dopack;
+end;
+
+procedure tobjectlinker.unlink(const dest: tmsecomponent; valuepo: pointer = nil);
+begin
+ if dest <> nil then begin
+  unlink(iobjectlink(fownerintf),ievent(dest),valuepo);
+ end;
+end;
+
+procedure tobjectlinker.setlinkedvar(const linkintf: iobjectlink; const source: tlinkedobject;
+                         var dest: tlinkedobject);
+begin
+ if source <> nil then begin
+  link(linkintf,iobjectlink(source),@dest);
+ end;
+ if dest <> nil then begin
+  unlink(linkintf,iobjectlink(dest),@dest);
+ end;
+ dest:= source;
+end;
+
+procedure tobjectlinker.setlinkedvar(const linkintf: iobjectlink; const source: tlinkedpersistent;
+                         var dest: tlinkedpersistent);
+begin
+ if source <> nil then begin
+  link(linkintf,iobjectlink(source),@dest);
+ end;
+ if dest <> nil then begin
+  unlink(linkintf,iobjectlink(dest),@dest);
+ end;
+ dest:= source;
+end;
+
+procedure tobjectlinker.setlinkedvar(const linkintf: iobjectlink; const source: tmsecomponent;
+                         var dest: tmsecomponent);
+begin
+ if source <> nil then begin
+  link(linkintf,ievent(source),@dest);
+ end;
+ if dest <> nil then begin
+  unlink(linkintf,ievent(dest),@dest);
+ end;
+ dest:= source;
+end;
+
+function tobjectlinker.isempty(var item): boolean;
+begin
+ with linkinfoty(item) do begin
+  result:= dest = nil;
+ end;
+end;
+
+procedure tobjectlinker.objevent(const sender: iobjectlink;
+              const event: objecteventty);
+var
+ info: linkinfoty;
+begin
+ if event = oe_destroyed then begin
+  inc(fnopack); 
+  info.dest:= pointer(sender);
+  info.valuepo:= nil;
+  removelink(info,true);
+ end;
+ if assigned(fonevent) and not (rels_destroying in fstate) then begin
+  fonevent(sender.getinstance,event);
+ end;
+ if event = oe_destroyed then begin
+  dec(fnopack); 
+  dopack;
+ end;
+end;
+
+procedure tobjectlinker.forall(proc: objectlinkprocty; ainterfacetype: pointer);
+var
+ po1: plinkinfoty;
+ int1: integer;
+
+begin
+ po1:= plinkinfoty(fdata);
+ for int1:= 0 to fcount - 1 do begin
+  if (po1^.dest <> nil) and (po1^.source = nil) and (ainterfacetype = po1^.interfacetype) then begin
+   proc(po1^);
+  end;
+  inc(po1);
+ end;
+end;
+
+{ tlinkedobject }
+
+destructor tlinkedobject.destroy;
+begin
+ inherited;
+ fobjectlinker.free;
+end;
+
+function tlinkedobject.getobjectlinker: tobjectlinker;
+begin
+ createobjectlinker(self,{$ifdef FPC}@{$endif}objectevent,fobjectlinker);
+ result:= fobjectlinker;
+end;
+
+procedure tlinkedobject.objectevent(const sender: tobject; const event: objecteventty);
+begin
+ //dummy
+end;
+
+procedure tlinkedobject.setlinkedvar(const source: tmsecomponent; var dest: tmsecomponent;
+              const linkintf: iobjectlink = nil);
+begin
+ if linkintf = nil then begin
+  getobjectlinker.setlinkedvar(iobjectlink(self),source,dest);
+ end
+ else begin
+  getobjectlinker.setlinkedvar(linkintf,source,dest);
+ end;
+end;
+
+procedure tlinkedobject.setlinkedvar(const source: tlinkedobject; var dest: tlinkedobject;
+              const linkintf: iobjectlink = nil);
+begin
+ if linkintf = nil then begin
+  getobjectlinker.setlinkedvar(iobjectlink(self),source,dest);
+ end
+ else begin
+  getobjectlinker.setlinkedvar(linkintf,source,dest);
+ end;
+end;
+
+procedure tlinkedobject.link(const source,dest: iobjectlink; valuepo: pointer = nil;
+                              ainterfacetype: pointer = nil; once: boolean = false);
+begin
+ getobjectlinker.link(source,dest,valuepo,ainterfacetype,once);
+end;
+
+procedure tlinkedobject.unlink(const source,dest: iobjectlink; valuepo: pointer = nil);
+begin
+ getobjectlinker.unlink(source,dest,valuepo);
+end;
+
+procedure tlinkedobject.objevent(const sender: iobjectlink; const event: objecteventty);
+begin
+ getobjectlinker.objevent(sender,event);
+end;
+
+function tlinkedobject.getinstance: tobject;
+begin
+ result:= self;
+end;
+
+{ tnullinterfacedobject }
+
+function tnullinterfacedobject._addref: integer; stdcall;
+begin
+ result:= -1;
+end;
+
+function tnullinterfacedobject._release: integer; stdcall;
+begin
+ result:= -1;
+end;
+
+function tnullinterfacedobject.QueryInterface(const IID: TGUID;
+  out Obj): HResult; stdcall;
+begin
+ if GetInterface(IID, Obj) then begin
+   Result:=0
+ end
+ else begin
+  result:= integer(e_nointerface);
+ end;
+end;
+
+{ tnullinterfacedpersistent }
+
+function tnullinterfacedpersistent._addref: integer; stdcall;
+begin
+ result:= -1;
+end;
+
+function tnullinterfacedpersistent._release: integer; stdcall;
+begin
+ result:= -1;
+end;
+
+function tnullinterfacedpersistent.QueryInterface(const IID: TGUID;
+  out Obj): HResult; stdcall;
+begin
+ if GetInterface(IID, Obj) then begin
+   Result:=0
+ end
+ else begin
+  result:= integer(e_nointerface);
+ end;
+end;
+
+{ toptionalpersistent }
+
+procedure toptionalpersistent.readdummy(reader: treader);
+begin
+ reader.readinteger;
+end;
+
+procedure toptionalpersistent.writedummy(writer: twriter);
+begin
+ writer.writeinteger(0);
+end;
+
+procedure toptionalpersistent.defineproperties(filer: tfiler);
+begin
+ inherited;
+ filer.defineproperty('dummy',{$ifdef FPC}@{$endif}readdummy,
+            {$ifdef FPC}@{$endif}writedummy,true);
+ //to create optional instance
+end;
+
+{ tlinkedpersistent }
+
+destructor tlinkedpersistent.destroy;
+begin
+ inherited;
+ fobjectlinker.Free;
+end;
+
+function tlinkedpersistent.getobjectlinker: tobjectlinker;
+begin
+ if fobjectlinker = nil then begin
+  createobjectlinker(iobjectlink(self),{$ifdef FPC}@{$endif}objectevent,fobjectlinker);
+ end;
+ result:= fobjectlinker;
+end;
+
+procedure tlinkedpersistent.objectevent(const sender: tobject;
+  const event: objecteventty);
+begin
+ //dummy
+end;
+
+procedure tlinkedpersistent.setlinkedvar(const source: tmsecomponent; var dest: tmsecomponent;
+              const linkintf: iobjectlink = nil);
+begin
+ if linkintf = nil then begin
+  getobjectlinker.setlinkedvar(iobjectlink(self),source,dest);
+ end
+ else begin
+  getobjectlinker.setlinkedvar(linkintf,source,dest);
+ end;
+end;
+
+procedure tlinkedpersistent.setlinkedvar(const source: tlinkedobject; var dest: tlinkedobject;
+              const linkintf: iobjectlink = nil);
+begin
+ if linkintf = nil then begin
+  getobjectlinker.setlinkedvar(iobjectlink(self),source,dest);
+ end
+ else begin
+  getobjectlinker.setlinkedvar(linkintf,source,dest);
+ end;
+end;
+
+procedure tlinkedpersistent.link(const source,dest: iobjectlink; valuepo: pointer = nil;
+                     ainterfacetype: pointer = nil; once: boolean = false);
+begin
+ getobjectlinker.link(source,dest,valuepo,ainterfacetype,once);
+end;
+
+procedure tlinkedpersistent.unlink(const source,dest: iobjectlink; valuepo: pointer = nil);
+begin
+ getobjectlinker.unlink(source,dest,valuepo);
+end;
+
+procedure tlinkedpersistent.objevent(const sender: iobjectlink; const event: objecteventty);
+begin
+ getobjectlinker.objevent(sender,event);
+end;
+
+function tlinkedpersistent.getinstance: tobject;
+begin
+ result:= self;
+end;
+
+{ teventobject }
+
+procedure teventobject.receiveevent(const event: tobjectevent);
+begin
+ //dummy
+end;
+
+{ tcomponentevent }
+
+constructor tcomponentevent.create(const asender: tobject; const atag: integer = 0;
+          const callchildren: boolean = true);
+begin
+ inherited create(ek_component,nil);
+ fsender:= asender;
+ tag:= atag;
+ if callchildren then begin
+  state:= [ces_callchildren];
+ end;
+end;
+
+ { tmsecomponent }
+
+destructor tmsecomponent.destroy;
+begin
+ inherited;
+ fobjectlinker.free;
+end;
+
+function tmsecomponent.getobjectlinker: tobjectlinker;
+begin
+ if fobjectlinker = nil then begin
+  createobjectlinker(ievent(self),{$ifdef FPC}@{$endif}objectevent,fobjectlinker);
+ end;
+ result:= fobjectlinker;
+end;
+
+procedure tmsecomponent.initnewcomponent;
+begin
+ //dummy
+end;
+
+function tmsecomponent.checkowned(component: tcomponent): boolean;
+begin
+ result:= false;
+ while component <> nil do begin
+  if component = self then begin
+   result:= true;
+   break;
+  end;
+  component:= component.Owner;
+ end;
+end;
+
+function tmsecomponent.checkowner(component: tcomponent): boolean;
+var
+ comp1: tcomponent;
+begin
+ result:= false;
+ comp1:= self;
+ while comp1 <> nil do begin
+  if comp1 = component then begin
+   result:= true;
+   break;
+  end;
+  comp1:= comp1.Owner;
+ end;
+end;
+
+function tmsecomponent.rootowner: tcomponent;
+
+begin
+ result:= owner;
+ if result <> nil then begin
+  while result.owner <> nil do begin
+   result:= result.Owner;
+  end;
+ end;
+end;
+
+function tmsecomponent.getrootcomponentpath: componentarty;
+var
+ count: integer;
+ comp: tcomponent;
+begin
+ result:= nil;
+ count:= 0;
+ comp:= self;
+ while comp <> nil do begin
+  if length(result) <= count then begin
+   setlength(result,length(result)+32);
+  end;
+  result[count]:= comp;
+  inc(count);
+  comp:= comp.owner;
+ end;
+ setlength(result,count);
+end;
+
+procedure tmsecomponent.setlinkedvar(const source: tmsecomponent;
+                   var dest: tmsecomponent; const linkintf: iobjectlink = nil);
+begin
+ if linkintf = nil then begin
+  getobjectlinker.setlinkedvar(ievent(self),source,dest);
+ end
+ else begin
+  getobjectlinker.setlinkedvar(linkintf,source,dest);
+ end;
+end;
+
+procedure tmsecomponent.setlinkedvar(const source: tlinkedobject;
+                   var dest: tlinkedobject; const linkintf: iobjectlink = nil);
+begin
+ if linkintf = nil then begin
+  getobjectlinker.setlinkedvar(ievent(self),source,dest);
+ end
+ else begin
+  getobjectlinker.setlinkedvar(linkintf,source,dest);
+ end;
+end;
+
+function tmsecomponent.linkcount: integer;
+begin
+ if fobjectlinker = nil then begin
+  result:= 0;
+ end
+ else begin
+  result:= fobjectlinker.count;
+ end;
+end;
+
+function tmsecomponent.canevent(const event: tmethod): boolean;
+begin
+ result:= (event.code <> nil) and (event.data <> nil) and
+            (componentstate * [csloading,csdesigning,csdestroying] = []);
+end;
+
+function tmsecomponent.candestroyevent(const event: tmethod): boolean;
+begin
+ result:= (event.code <> nil) and (event.data <> nil) and
+            (componentstate * [csloading,csdesigning] = []);
+end;
+
+{$ifdef FPC}
+{
+procedure tmsecomponent.setsubcomponent(avalue: boolean); //todo remove for 1.99 !!!!!
+begin
+end;
+}
+{
+function tmsecomponent._addref: integer; stdcall;
+begin
+ result:= -1;
+end;
+
+function tmsecomponent._release: integer; stdcall;
+begin
+ result:= -1;
+end;
+
+function tmsecomponent.QueryInterface(const IID: TGUID; out Obj): HResult; stdcall;
+begin
+ if GetInterface(IID, Obj) then begin
+   Result:=0
+ end
+ else begin
+  result:= integer(e_nointerface);//hresult(e_nointerface);
+ end;
+end;
+}
+procedure tmsecomponent.setinline(value: boolean);
+begin
+ with tcomponentcracker(self) do begin
+  if value then begin
+   include(fcomponentstate,csinline);
+  end
+  else begin
+   exclude(fcomponentstate,csinline);
+  end;
+ end;
+end;
+
+procedure tmsecomponent.setancestor(value: boolean);
+begin
+ inherited setancestor(value);
+end;
+
+{$endif FPC}
+
+function getcorbainterface(const aobject: tobject; const aintf: ptypeinfo;
+                                   out obj) : boolean;
+var
+ intf1: pinterfaceentry;
+ typedata1: ptypedata;
+begin
+// result:= getinterface(aintf,obj);
+ typedata1:= gettypedata(aintf);
+ {$ifdef FPC}
+ intf1:= aobject.getinterfaceentrybystr(pshortstring(
+        @typedata1^.rawintfunit+length(typedata1^.rawintfunit)+1)^);
+ {$else}
+ intf1:= aobject.getinterfaceentry(typedata1^.guid);
+ {$endif}
+ if intf1 <> nil then begin
+  {$ifdef FPC}
+  pointer(obj):= pointer(aobject) + intf1^.ioffset;
+  {$else}
+  pointer(obj):= pointer(integer(aobject) + intf1^.ioffset);
+  {$endif}
+  result:= true;
+ end
+ else begin
+  pointer(obj):= nil;
+  result:= false;
+ end;
+end;
+
+//function tmsecomponent.getcorbainterface(const aintf: tguid; out obj) : boolean;
+function tmsecomponent.getcorbainterface(const aintf: ptypeinfo; out obj) : boolean;
+begin
+ result:= mseclasses.getcorbainterface(self,aintf,obj);
+end;
+
+procedure tmsecomponent.link(const source,dest: iobjectlink; valuepo: pointer = nil;
+                            ainterfacetype: pointer = nil; once: boolean = false);
+begin
+ getobjectlinker.link(source,dest,valuepo,ainterfacetype,once);
+end;
+
+procedure tmsecomponent.unlink(const source,dest: iobjectlink; valuepo: pointer = nil);
+begin
+ getobjectlinker.unlink(source,dest,valuepo);
+end;
+
+procedure tmsecomponent.objevent(const sender: iobjectlink;
+                 const event: objecteventty);
+begin
+ getobjectlinker.objevent(sender,event);
+end;
+
+function tmsecomponent.getinstance: tobject;
+begin
+ result:= self;
+end;
+
+procedure tmsecomponent.receiveevent(const event: tobjectevent);
+begin
+ //dummy
+end;
+
+procedure tmsecomponent.componentevent(const event: tcomponentevent);
+var
+ int1: integer;
+ comp1: tcomponent;
+begin
+ with event do begin
+  if ces_callchildren in state then begin
+   for int1:= 0 to componentcount - 1 do begin
+    if ces_processed in state then begin
+     break;
+    end;
+    comp1:= components[int1];
+    if comp1 is tmsecomponent then begin
+     tmsecomponent(comp1).componentevent(event);
+    end;
+   end;
+  end;
+ end;
+end;
+
+procedure tmsecomponent.sendcomponentevent(const event: tcomponentevent);
+begin
+ try
+  componentevent(event);
+ finally
+  if event.kind = ek_none then begin
+   event.Free;
+  end;
+ end;
+end;
+
+procedure tmsecomponent.sendrootcomponentevent(const event: tcomponentevent);
+                  //event will be destroyed
+var
+ int1: integer;
+ ar1: componentarty;
+begin
+ ar1:= getrootcomponentpath;
+ for int1:= high(ar1) downto 0 do begin
+  if ar1[int1] is tmsecomponent then begin
+   tmsecomponent(ar1[int1]).sendcomponentevent(event);
+   break;
+  end;
+ end;
+end;
+
+procedure tmsecomponent.getoptionalobject(const instance: tobject; createproc: createprocty);
+begin
+ mseclasses.getoptionalobject(componentstate,instance,createproc);
+end;
+{
+procedure tmsecomponent.getoptionalobject(var instance; instanceclass: tclass);
+begin
+ mseclasses.getoptionalobject(componentstate,instance,instanceclass);
+end;
+}
+procedure tmsecomponent.setoptionalobject(const value: tpersistent; 
+              var instance; createproc: createprocty);
+begin
+ mseclasses.setoptionalobject(componentstate,value,instance,createproc);
+end;
+{
+procedure tmsecomponent.setoptionalobject(const value: tpersistent; var instance;
+                         instanceclass: tclass);
+begin
+ mseclasses.setoptionalobject(componentstate,value,instance,instanceclass);
+end;
+}
+procedure tmsecomponent.loaded;
+begin
+ inherited;
+ sendchangeevent;
+end;
+
+procedure tmsecomponent.objectevent(const sender: tobject;
+         const event: objecteventty);
+begin
+ //dummy
+end;
+
+procedure tmsecomponent.sendchangeevent;
+begin
+ if (fobjectlinker <> nil) and not (csloading in componentstate) then begin
+  fobjectlinker.sendevent(oe_changed);
+ end;
+end;
+
+procedure tmsecomponent.designselected(const selected: boolean);
+begin
+ //dummy
+end;
+
+procedure tmsecomponent.defineproperties(filer: tfiler);
+begin
+ inherited;
+ filer.defineproperty(moduleclassnamename,
+           {$ifdef FPC}@{$endif}readmoduleclassname,
+           {$ifdef FPC}@{$endif}writemoduleclassname,
+                  (cs_ismodule in fmsecomponentstyle) and (filer.Root = self));
+end;
+
+function tmsecomponent.getactualclassname: string;
+begin
+ if factualclassname <> nil then begin
+  result:= factualclassname^;
+ end
+ else begin
+  result:= classname;
+ end;
+end;
+
+class function tmsecomponent.getmoduleclassname: string;
+begin
+ result:= tmsecomponent.classname;
+end;
+
+function setclassname(const instance: tobject;
+                   const aclassname: pshortstring): pshortstring;
+var
+ classnamepo: ppointer;
+ ca1: cardinal;
+begin
+ if aclassname = nil then begin
+  result:= nil;
+ end
+ else begin
+  classnamepo:= ppointer(pchar(instance.classtype)+vmtclassname);
+  {$ifdef mswindows}
+  virtualprotect(classnamepo,sizeof(pointer),page_readwrite,{$ifdef FPC}@{$endif}ca1);
+  {$endif}
+  result:= classnamepo^;
+  classnamepo^:= aclassname;
+  {$ifdef mswindows}
+  virtualprotect(classnamepo,sizeof(pointer),ca1,nil);
+  {$endif}
+ end;
+end;
+
+procedure tmsecomponent.writestate(writer: twriter);
+var
+ classnamebefore: pshortstring;
+begin
+ classnamebefore:= setclassname(self,factualclassname);
+ try
+  inherited;
+ finally
+  setclassname(self,classnamebefore);
+ end;
+end;
+
+procedure tmsecomponent.readmoduleclassname(reader: treader);
+begin
+ reader.ReadString; //dummy
+end;
+
+procedure tmsecomponent.writemoduleclassname(writer: twriter);
+begin
+ writer.WriteString(getmoduleclassname);
+end;
+
+{ tlinkedqueue }
+
+constructor tlinkedqueue.create(aownsobjects: boolean);
+begin
+ fownsobjects:= aownsobjects;
+ fobjectlinker:= tobjectlinker.create(iobjectlink(self),{$ifdef FPC}@{$endif}objectevent);
+ inherited create;
+end;
+
+destructor tlinkedqueue.destroy;
+begin
+ include(fobjectlinker.fstate,rels_destroying);
+ inherited;
+ fobjectlinker.Free;
+end;
+
+function tlinkedqueue.add(value: iobjectlink): integer;
+begin
+ result:= inherited add(pointer(value));
+ fobjectlinker.link(iobjectlink(self),value);
+end;
+
+function tlinkedqueue.getfirst: iobjectlink;
+begin
+ result:= iobjectlink(inherited getfirst);
+ fobjectlinker.unlink(iobjectlink(self),result);
+end;
+
+function tlinkedqueue.getlast: iobjectlink;
+begin
+ result:= iobjectlink(inherited getlast);
+ fobjectlinker.unlink(iobjectlink(self),result);
+end;
+
+function tlinkedqueue.getitems(const index: integer): iobjectlink;
+begin
+ result:= iobjectlink(inherited getitems(index));
+end;
+
+procedure tlinkedqueue.insert(const index: integer;
+  const value: iobjectlink);
+begin
+ inherited insert(index,pointer(value));
+ fobjectlinker.link(iobjectlink(self),value);
+end;
+
+procedure tlinkedqueue.setitems(const index: integer;
+  const Value: iobjectlink);
+begin
+ fobjectlinker.unlink(iobjectlink(self),getitems(index));
+ inherited setitems(index,pointer(value));
+ fobjectlinker.link(iobjectlink(self),value);
+end;
+
+procedure tlinkedqueue.objectevent(const sender: tobject;
+  const event: objecteventty);
+begin
+// if event = oe_destroyed then begin
+//  remove(sender);
+// end;
+end;
+
+procedure tlinkedqueue.link(const source,dest: iobjectlink; valuepo: pointer = nil;
+                            ainterfacetype: pointer = nil; once: boolean = false);
+begin
+ fobjectlinker.link(source,dest,valuepo,ainterfacetype,once);
+end;
+
+procedure tlinkedqueue.unlink(const source,dest: iobjectlink; valuepo: pointer = nil);
+begin
+ fobjectlinker.unlink(source,dest,valuepo);
+end;
+
+procedure tlinkedqueue.objevent(const sender: iobjectlink; const event: objecteventty);
+begin
+ fobjectlinker.objevent(sender,event);
+ if event = oe_destroyed then begin
+  inc(fnofinalize);
+  try
+   remove(pointer(sender));
+  finally
+   dec(fnofinalize);
+  end;
+ end;
+end;
+
+function tlinkedqueue.getinstance: tobject;
+begin
+ result:= fainstance;
+end;
+
+procedure tlinkedqueue.finalizeitem(var item: pointer);
+begin
+ fobjectlinker.unlink(iobjectlink(self),iobjectlink(item));
+ if fownsobjects then begin
+  iobjectlink(item).getinstance.Free;
+ end;
+ inherited;
+end;
+
+procedure tlinkedqueue.sendchangenotification(sender: tobject);
+begin
+ fainstance:= sender;
+ fobjectlinker.sendevent(oe_changed);
+ fainstance:= nil;
+end;
+
+{ tlinkedobjectqueue }
+
+function tlinkedobjectqueue.add(value: tlinkedobject): integer;
+begin
+ result:= inherited add(iobjectlink(value));
+end;
+
+function tlinkedobjectqueue.getfirst: tlinkedobject;
+begin
+ result:= tlinkedobject(inherited getfirst.getinstance);
+end;
+
+function tlinkedobjectqueue.getlast: tlinkedobject;
+begin
+ result:= tlinkedobject(inherited getlast.getinstance);
+end;
+
+function tlinkedobjectqueue.getitems(const index: integer): tlinkedobject;
+begin
+ result:= tlinkedobject(inherited getitems(index).getinstance);
+end;
+
+procedure tlinkedobjectqueue.insert(const index: integer;
+  const value: tlinkedobject);
+begin
+ inherited insert(index,iobjectlink(value));
+end;
+
+procedure tlinkedobjectqueue.setitems(const index: integer;
+  const Value: tlinkedobject);
+begin
+ inherited setitems(index,iobjectlink(value));
+end;
+
+{ tpersistentqueue }
+
+procedure tpersistentqueue.add(value: tlinkedpersistent);
+begin
+ inherited add(iobjectlink(value));
+end;
+
+function tpersistentqueue.getfirst: tlinkedpersistent;
+begin
+ result:= tlinkedpersistent(inherited getfirst.getinstance);
+end;
+
+function tpersistentqueue.getlast: tlinkedpersistent;
+begin
+ result:= tlinkedpersistent(inherited getlast.getinstance);
+end;
+
+function tpersistentqueue.getitems(const index: integer): tlinkedpersistent;
+begin
+ result:= tlinkedpersistent(inherited getitems(index).getinstance);
+end;
+
+procedure tpersistentqueue.insert(const index: integer;
+                const value: tlinkedpersistent);
+begin
+ inherited insert(index,iobjectlink(value));
+end;
+
+procedure tpersistentqueue.setitems(const index: integer;
+                const Value: tlinkedpersistent);
+begin
+ inherited setitems(index,iobjectlink(value));
+end;
+
+{ tcomponentqueue }
+
+procedure tcomponentqueue.add(value: tmsecomponent);
+begin
+ inherited add(ievent(value));
+end;
+
+function tcomponentqueue.getfirst: tmsecomponent;
+begin
+ result:= tmsecomponent(inherited getfirst.getinstance);
+end;
+
+function tcomponentqueue.getlast: tmsecomponent;
+begin
+ result:= tmsecomponent(inherited getlast.getinstance);
+end;
+
+function tcomponentqueue.getitems(const index: integer): tmsecomponent;
+begin
+ result:= tmsecomponent(inherited getitems(index).getinstance);
+end;
+
+procedure tcomponentqueue.insert(const index: integer;
+  const value: tmsecomponent);
+begin
+ inherited insert(index,ievent(value));
+end;
+
+procedure tcomponentqueue.setitems(const index: integer;
+  const Value: tmsecomponent);
+begin
+ inherited setitems(index,ievent(value));
+end;
+
+ { tobjectlinkrecordlist }
+
+constructor tobjectlinkrecordlist.create(recordsize: integer; aoptions: recordliststatesty = []);
+begin
+ inherited create(recordsize,aoptions+[rels_needsfinalize]);
+ fobjectlinker:= tobjectlinker.create(iobjectlink(self),nil);
+end;
+
+destructor tobjectlinkrecordlist.destroy;
+begin
+ inherited;
+ fobjectlinker.free;
+end;
+
+procedure tobjectlinkrecordlist.finalizerecord(var item);
+begin
+// if fnounlink = 0 then begin
+  dounlink(item)
+// end;
+end;
+
+function tobjectlinkrecordlist.getinstance: tobject;
+begin
+ result:= self;
+end;
+
+procedure tobjectlinkrecordlist.link(const source, dest: iobjectlink; valuepo,
+  ainterfacetype: pointer; once: boolean);
+begin
+ fobjectlinker.link(source,dest,valuepo,ainterfacetype,once);
+end;
+
+procedure tobjectlinkrecordlist.objevent(const sender: iobjectlink;
+  const event: objecteventty);
+begin
+ fobjectlinker.objevent(sender,event);
+ if event = oe_destroyed then begin
+//  inc(fnounlink);
+//  try
+   itemdestroyed(sender);
+//  finally
+//   dec(fnounlink);
+//  end;
+ end;
+end;
+
+procedure tobjectlinkrecordlist.unlink(const source, dest: iobjectlink;
+  valuepo: pointer);
+begin
+ fobjectlinker.unlink(source,dest,valuepo);
+end;
+
+{ tvirtualpersistent }
+
+constructor tvirtualpersistent.create;
+begin
+ inherited;
+end;
+
+{ townedeventpersistent }
+
+constructor townedeventpersistent.create(aowner: tobject);
+begin
+ fowner:= aowner;
+ inherited create;
+end;
+
+{ teventpersistent }
+
+procedure teventpersistent.receiveevent(const event: tobjectevent);
+begin
+ //dummy
+end;
+
+{ tpersistenttemplate }
+
+constructor tpersistenttemplate.create(const owner: tmsecomponent;
+                      const onchange: notifyeventty);
+begin
+ fowner:= owner;
+ fonchange:= onchange;
+end;
+
+procedure tpersistenttemplate.changed;
+begin
+ if assigned(fonchange) and not (csloading in fowner.componentstate) then begin
+  fonchange(self);
+ end;
+end;
+
+procedure tpersistenttemplate.copyinfo(const source: tpersistenttemplate);
+begin
+ //dummy
+end;
+
+procedure tpersistenttemplate.assignto(dest: tpersistent);
+begin
+ doassignto(dest);
+end;
+
+procedure tpersistenttemplate.assign(source: tpersistent);
+begin
+ if source is classtype then begin
+  move(tpersistenttemplate(source).getinfoad^,getinfoad^,getinfosize);
+  copyinfo(tpersistenttemplate(source));
+  changed;
+ end
+ else begin
+  inherited;
+ end;
+end;
+
+{ ttemplatecontainer }
+
+constructor ttemplatecontainer.create(aowner: tcomponent);
+begin
+ ftemplate:= gettemplateclass.create(self,{$ifdef FPC}@{$endif}templatechanged);
+ inherited;
+end;
+
+destructor ttemplatecontainer.destroy;
+begin
+ inherited;
+ ftemplate.free;
+end;
+
+procedure ttemplatecontainer.assignto(dest: tpersistent);
+begin
+ tpersistent1(ftemplate).assignto(dest);
+end;
+
+procedure ttemplatecontainer.templatechanged(const sender: tobject);
+begin
+ sendchangeevent;
+end;
+
+function findmodulebyname(const name: string): tcomponent;
+begin
+ result:= fmodules.findmodulebyname(name);
+end;
+
+function findcomponentbynamepath(const namepath: string): tcomponent;
+var
+ ar1: stringarty;
+ int1: integer;
+begin
+ result:= nil;
+ ar1:= splitstring(namepath,'.');
+ if high(ar1) >= 0 then begin
+  result:= fmodules.findmodulebyname(ar1[0]);
+  for int1:= 1 to high(ar1) do begin
+   if result = nil then begin
+    break;
+   end;
+   result:= result.FindComponent(ar1[int1]);
+  end;
+ end;
+end;
+
+function createmsedatamodule(const aclass: tclass;
+                     const aclassname: pshortstring): tmsecomponent;
+begin
+ result:= datamoduleclassty(aclass).create(nil,false);
+ result.factualclassname:= aclassname;
+end;
+
+{ tmsedatamodule }
+
+constructor tmsedatamodule.create(aowner: tcomponent);
+begin
+ create(aowner,true);
+end;
+
+constructor tmsedatamodule.create(aowner: tcomponent; load: boolean);
+begin
+ include(fmsecomponentstyle,cs_ismodule);
+ designinfo:= 100+(100 shl 16);
+ inherited create(aowner);
+ if load and not (csdesigning in componentstate) then begin
+  loadmsemodule(self,tmsedatamodule);
+ end;
+end;
+
+
+procedure tmsedatamodule.getchildren(proc: tgetchildproc;
+  root: tcomponent);
+var
+ int1: integer;
+ component: tcomponent;
+begin
+ if root = self then begin
+  for int1 := 0 to componentcount - 1 do begin
+   component := components[int1];
+   if not component.hasparent then begin
+    proc(component);
+   end;
+  end;
+ end;
+end;
+
+class function tmsedatamodule.getmoduleclassname: string;
+begin
+// result:= tmsedatamodule.ClassName;
+ //bug in dcc32: tmsedatamodule is replaced by self
+ result:= 'tmsedatamodule';
+end;
+
+procedure tmsedatamodule.writesize(writer: twriter);
+begin
+ with writer do begin
+  writelistbegin;
+  writeinteger(fsize.cx);
+  writeinteger(fsize.cy);
+  writelistend;
+ end;
+end;
+
+procedure tmsedatamodule.readsize(reader: treader);
+begin
+ with reader do begin
+  readlistbegin;
+  fsize.cx:= readinteger;
+  fsize.cy:= readinteger;
+  readlistend;
+ end;
+end;
+
+procedure tmsedatamodule.defineproperties(filer: tfiler);
+begin
+ inherited;
+ filer.defineproperty('size',{$ifdef FPC}@{$endif}readsize,
+                       {$ifdef FPC}@{$endif}writesize, true);  
+end;
+
+initialization
+{$ifdef FPC}
+ registerinitcomponenthandler(tcomponent,@initmsecomponent);
+{$endif}
+ registerfindglobalcomponentproc({$ifdef FPC}@{$endif}findmodulebyname);
+finalization
+ freeandnil(fmodules);
+{$ifdef FPC}
+// unregisterinitcomponenthandler(tcomponent,@initmsecomponent);
+{$endif}
+ unregisterfindglobalcomponentproc({$ifdef FPC}@{$endif}findmodulebyname);
+ freeandnil(objectdatalist);
+end.

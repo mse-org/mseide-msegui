@@ -1,0 +1,208 @@
+object imagelisteditorfo: timagelisteditorfo
+  bounds_x = 220
+  bounds_y = 325
+  bounds_cx = 304
+  bounds_cy = 347
+  container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_mousetransparent, ow_destroywidgets, ow_autoscale]
+  container.bounds_cx = 304
+  container.bounds_cy = 347
+  container.frame.dummy = 0
+  options = [fo_closeonesc, fo_autoreadstat, fo_autowritestat, fo_savepos, fo_savestate]
+  statfile = statfile1
+  caption = 'Imagelisteditor'
+  icon.transparency = -2147483648
+  moduleclassname = 'tmseform'
+  object add: tbutton
+    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
+    bounds_x = 80
+    bounds_y = 322
+    bounds_cx = 50
+    bounds_cy = 20
+    anchors = [an_left, an_bottom]
+    caption = 'add'
+    onexecute = addonexecute
+  end
+  object cancel: tbutton
+    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
+    bounds_x = 192
+    bounds_y = 322
+    bounds_cx = 50
+    bounds_cy = 20
+    anchors = [an_left, an_bottom]
+    taborder = 2
+    caption = 'cancel'
+    modalresult = mr_cancel
+  end
+  object ok: tbutton
+    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
+    bounds_x = 248
+    bounds_y = 322
+    bounds_cx = 50
+    bounds_cy = 20
+    anchors = [an_left, an_bottom]
+    taborder = 3
+    caption = 'OK'
+    modalresult = mr_ok
+  end
+  object clear: tbutton
+    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
+    bounds_x = 136
+    bounds_y = 322
+    bounds_cx = 50
+    bounds_cy = 20
+    anchors = [an_left, an_bottom]
+    taborder = 1
+    caption = 'clear'
+    onexecute = clearonexecute
+  end
+  object disp: tlistview
+    optionswidget = [ow_mousefocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_focusbackonesc, ow_destroywidgets, ow_fontglyphheight]
+    bounds_cx = 304
+    bounds_cy = 284
+    frame.dummy = 0
+    anchors = [an_top, an_bottom]
+    taborder = 7
+    cellheight = 54
+    optionsgrid = [og_focuscellonenter, og_rotaterow, og_autopopup]
+    options = [lvo_mousemoving, lvo_keymoving, lvo_horz, lvo_drawfocus, lvo_focusselect, lvo_mouseselect, lvo_keyselect, lvo_multiselect]
+    itemlist.captionpos = cp_bottom
+    itemlist.imagelist = imagelist
+    itemlist.imagewidth = 16
+    itemlist.imageheight = 16
+    onitemevent = disponitemevent
+    onitemsmoved = disponitemsmoved
+    reffontheight = 16
+  end
+  object stretch: tbooleanedit
+    bounds_x = 8
+    bounds_y = 323
+    bounds_cx = 55
+    bounds_cy = 18
+    frame.caption = 'stretch'
+    frame.dummy = 0
+    frame.outerframe = (
+      0
+      2
+      42
+      3)
+    anchors = [an_left, an_bottom]
+    taborder = 6
+    statfile = statfile1
+    value = True
+  end
+  object masked: tbooleanedit
+    bounds_x = 8
+    bounds_y = 294
+    bounds_cx = 62
+    bounds_cy = 18
+    frame.caption = 'masked'
+    frame.dummy = 0
+    frame.outerframe = (
+      0
+      2
+      49
+      3)
+    anchors = [an_left, an_bottom]
+    taborder = 4
+    value = True
+  end
+  object transparentcolor: tcoloredit
+    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+    bounds_x = 80
+    bounds_y = 291
+    bounds_cx = 213
+    bounds_cy = 22
+    frame.caption = 'Transparent color'
+    frame.captionpos = cp_right
+    frame.button.width = 13
+    frame.dummy = 0
+    frame.outerframe = (
+      0
+      0
+      107
+      0)
+    anchors = [an_left, an_bottom]
+    taborder = 5
+    statfile = statfile1
+    value = -2147483647
+    valuedefault = -2147483648
+    buttonellipse.width = 13
+    buttonellipse.imagenr = 17
+    dropdown.options = [deo_autodropdown, deo_keydropdown]
+    dropdown.cols.count = 1
+    dropdown.cols.items = <
+      item
+        data = (
+          'cl_0'
+          'cl_1'
+          'cl_black'
+          'cl_dkgray'
+          'cl_gray'
+          'cl_ltgray'
+          'cl_white'
+          'cl_red'
+          'cl_green'
+          'cl_blue'
+          'cl_cyan'
+          'cl_magenta'
+          'cl_yellow'
+          'cl_dkred'
+          'cl_dkgreen'
+          'cl_dkblue'
+          'cl_dkcyan'
+          'cl_dkmagenta'
+          'cl_dkyellow'
+          'cl_ltred'
+          'cl_ltgreen'
+          'cl_ltblue'
+          'cl_ltcyan'
+          'cl_ltmagenta'
+          'cl_ltyellow'
+          'cl_dkshadow'
+          'cl_shadow'
+          'cl_mid'
+          'cl_light'
+          'cl_highlight'
+          'cl_background'
+          'cl_foreground'
+          'cl_active'
+          'cl_noedit'
+          'cl_text'
+          'cl_selectedtext'
+          'cl_selectedtextbackground'
+          'cl_infobackground'
+          'cl_glyph'
+          'cl_none'
+          'cl_default'
+          'cl_parent'
+          'cl_transparent'
+          'cl_brush'
+          'cl_brushcanvas')
+      end>
+    dropdown.itemindex = 40
+    reffontheight = 16
+  end
+  object imagelist: timagelist
+    transparentcolor = -2147483647
+    Left = 24
+    Top = 176
+  end
+  object filedialog: tfiledialog
+    statfile = statfile1
+    controller.filterlist.data = (
+      (
+        'Bitmaps'
+        '*.bmp')
+      (
+        'all'
+        '*'))
+    Left = 112
+    Top = 176
+  end
+  object statfile1: tstatfile
+    filename = 'imagelisteditor'
+    options = [sfo_memory]
+    Left = 200
+    Top = 176
+  end
+end

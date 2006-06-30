@@ -1,0 +1,99 @@
+object targetconsolefo: ttargetconsolefo
+  optionswidget = [ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_destroywidgets, ow_hinton, ow_autoscale]
+  bounds_x = 205
+  bounds_y = 367
+  bounds_cx = 368
+  bounds_cy = 137
+  frame.grip_size = 10
+  frame.grip_options = [go_closebutton, go_fixsizebutton, go_topbutton]
+  frame.dummy = 0
+  popupmenu = tpopupmenu1
+  visible = False
+  container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_mousetransparent, ow_destroywidgets, ow_autoscale]
+  container.bounds_cx = 358
+  container.bounds_cy = 137
+  container.frame.dummy = 0
+  statfile = mainfo.projectstatfile
+  caption = 'Target console'
+  icon.transparentcolor = -2147483648
+  icon.options = [bmo_masked]
+  icon.image = {
+    0000000002000000180000001800000078030000000000000000000000000000
+    0000000000000000000000000000000000000000E0E0E019F8FCF816E0E0E002
+    F8FCF801C8CCC81480808001E0E0E002F8FCF801C8CCC801F8FCF812E0E0E001
+    80808001E0E0E002F8FCF801C8CCC801F8FCF812E0E0E00180808001E0E0E002
+    F8FCF801C8CCC801F8FCF80B00000002F8FCF80300000002E0E0E00180808001
+    E0E0E002F8FCF801C8CCC801F8FCF805C8C8C801E0E0E001F8FCF80600000001
+    F8FCF80100000001F8FCF802E0E0E00180808001E0E0E002F8FCF801C8CCC801
+    F8FCF804B8B8B8010000000128282801F8FCF80700000001F8FCF803E0E0E001
+    80808001E0E0E002F8FCF801C8CCC801F8FCF804585858014040400100000001
+    C0C4C001F8FCF80600000001F8FCF803E0E0E00180808001E0E0E002F8FCF801
+    C8CCC801F8FCF803E8ECE80108080801B0B4B0014044400160646001F8FCF806
+    00000001F8FCF803E0E0E00180808001E0E0E002F8FCF801C8CCC801F8FCF803
+    9094900118181801F8FCF801A0A4A001080C0801F0F4F001F8FCF80500000001
+    F8FCF803E0E0E00180808001E0E0E002F8FCF801C8CCC801F8FCF80330343001
+    70747001F8FCF801F0F4F001080C0801A0A0A001F8FCF80500000001F8FCF803
+    E0E0E00180808001E0E0E002F8FCF801C8CCC801F8FCF802D0D0D00100000001
+    D0D0D001F8FCF80260646001383C3801F8FCF80500000001F8FCF803E0E0E001
+    80808001E0E0E002F8FCF801C8CCC801F8FCF802707070010000000138383803
+    2024200100000001D8DCD801F8FCF80400000001F8FCF803E0E0E00180808001
+    E0E0E002F8FCF801C8CCC801F8FCF801F8F8F8011014100160606001989C9804
+    20202001787C7801F8FCF80400000001F8FCF803E0E0E00180808001E0E0E002
+    F8FCF801C8CCC801F8FCF801A8ACA80100000001E0E4E001F8FCF804787C7801
+    181C1801F8FCF80400000001F8FCF803E0E0E00180808001E0E0E002F8FCF801
+    C8CCC801F8FCF801484C480140404001F8FCF805D8D8D80100000001B8B8B801
+    F8FCF80300000001F8FCF803E0E0E00180808001E0E0E002F8FCF801C8CCC801
+    F8FCF80D00000001F8FCF80100000001F8FCF802E0E0E00180808001E0E0E002
+    F8FCF801C8CCC801F8FCF80B00000002F8FCF80300000002E0E0E00180808001
+    E0E0E002F8FCF801C8CCC801F8FCF812E0E0E00180808001E0E0E002F8FCF801
+    C8CCC801F8FCF812E0E0E00180808001E0E0E002F8FCF801E0E0E01480808001
+    E0E0E00280808016E0E0E01900000000FEFF7F00FEFF7FBFFEFF5F08FEFF5F00
+    FEFF5F00FEFD5F00FEFF5F00FEFF5F00FEFF5F00FEFF5F00FEFF5F03FEFF5F00
+    FEFF5F00FEFF5FBFFEFF5F08FEFF5F00FEFF5F03FEFF5F40FEFF5F00FEFF5F00
+    02004000FEFF7F0000000000
+  }
+  onidle = targetconsoleonidle
+  onshow = tartgetconsoleonshow
+  moduleclassname = 'tdockform'
+  object grid: twidgetgrid
+    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_focusbackonesc, ow_destroywidgets, ow_fontlineheight, ow_autoscale]
+    bounds_cx = 358
+    bounds_cy = 137
+    frame.dummy = 0
+    anchors = []
+    font.name = 'stf_fixed'
+    font.dummy = 0
+    optionsgrid = [og_focuscellonenter, og_autofirstrow, og_colchangeontabkey, og_autopopup]
+    rowcountmax = 5000
+    datacols.count = 1
+    datacols.items = <    
+      item
+        width = 3000
+        options = [co_fill, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
+        widthmin = 3000
+        widgetname = 'terminal'
+      end>
+    datarowlinewidth = 0
+    datarowheight = 16
+    reffontheight = 14
+    object terminal: tterminal
+      optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontlineheight, ow_autoscale]
+      bounds_cx = 3000
+      bounds_cy = 16
+      visible = False
+      onsendtext = sendtext
+      reffontheight = 14
+    end
+  end
+  object tpopupmenu1: tpopupmenu
+    menu.submenu.count = 1
+    menu.submenu.items = <    
+      item
+        caption = 'Clear'
+        state = [as_localcaption, as_localonexecute]
+        onexecute = clearexe
+      end>
+    left = 88
+    top = 48
+  end
+end

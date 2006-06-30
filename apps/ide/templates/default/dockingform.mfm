@@ -1,0 +1,13 @@
+object ${%FORMNAME%}: t${%FORMNAME%}
+  container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_subfocus, ow_mousetransparent, ow_destroywidgets, ow_autoscale]
+  container.bounds_cx = 445
+  container.bounds_cy = 354
+  container.frame.dummy = 0
+  optionswidget = [ow_arrowfocus, ow_subfocus, ow_destroywidgets, ow_hinton, ow_autoscale]
+  bounds_x = 100
+  bounds_y = 100
+  bounds_cx = 445
+  bounds_cy = 354
+  color = -1879048187
+  moduleclassname = 'tdockform'
+end

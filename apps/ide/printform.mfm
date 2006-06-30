@@ -1,0 +1,300 @@
+object printfo: tprintfo
+  bounds_x = 166
+  bounds_y = 216
+  bounds_cx = 392
+  bounds_cy = 281
+  visible = False
+  container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_subfocus, ow_mousetransparent, ow_destroywidgets, ow_autoscale]
+  container.bounds_cx = 392
+  container.bounds_cy = 281
+  container.frame.dummy = 0
+  options = [fo_screencentered, fo_closeonesc, fo_autoreadstat, fo_autowritestat, fo_savepos, fo_savestate]
+  statfile = tstatfile1
+  caption = 'Print File'
+  icon.transparency = -2147483648
+  onidle = printidle
+  moduleclassname = 'tmseform'
+  object ok: tbutton
+    bounds_x = 264
+    bounds_y = 232
+    bounds_cx = 50
+    bounds_cy = 22
+    anchors = [an_top, an_right]
+    state = [as_default, as_localdefault, as_localcaption, as_localonexecute]
+    caption = '&Ok'
+    onexecute = runonexecute
+  end
+  object cancel: tbutton
+    bounds_x = 328
+    bounds_y = 232
+    bounds_cx = 50
+    bounds_cy = 22
+    anchors = [an_top, an_right]
+    taborder = 1
+    caption = 'Cancel'
+    onexecute = cancelexec
+  end
+  object firstpage: trealedit
+    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+    bounds_x = 16
+    bounds_y = 6
+    bounds_cx = 68
+    bounds_cy = 40
+    frame.caption = '&First Page'
+    frame.dummy = 0
+    frame.outerframe = (
+      0
+      18
+      0
+      0)
+    taborder = 2
+    statfile = tstatfile1
+    optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_eatreturn, oe_resetselectonexit, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_keyexecute, oe_checkvaluepaststatread, oe_savevalue, oe_savestate]
+    onsetvalue = firstpagesetvalue
+    formatedit = '0'
+    formatdisp = '0'
+    reffontheight = 16
+    val = 1.000000000000000000
+    mi = 1.000000000000000000
+    ma = 100000.000000000000000000
+  end
+  object lastpage: trealedit
+    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+    bounds_x = 104
+    bounds_y = 6
+    bounds_cx = 68
+    bounds_cy = 40
+    frame.caption = '&Last Page'
+    frame.dummy = 0
+    frame.outerframe = (
+      0
+      18
+      0
+      0)
+    taborder = 3
+    statfile = tstatfile1
+    optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_eatreturn, oe_resetselectonexit, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_keyexecute, oe_checkvaluepaststatread, oe_savevalue, oe_savestate]
+    onsetvalue = lastpagesetvalue
+    formatedit = '0'
+    formatdisp = '0'
+    reffontheight = 16
+    ma = 100000.000000000000000000
+  end
+  object linenum: tbooleanedit
+    bounds_x = 112
+    bounds_y = 65
+    bounds_cx = 67
+    bounds_cy = 35
+    frame.caption = 'Print line'#10'&numbers'
+    frame.dummy = 0
+    frame.outerframe = (
+      0
+      11
+      54
+      11)
+    taborder = 7
+    statfile = tstatfile1
+    optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_eatreturn, oe_resetselectonexit, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_keyexecute, oe_checkvaluepaststatread, oe_savevalue, oe_savestate]
+  end
+  object fontsize: trealedit
+    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+    bounds_x = 16
+    bounds_y = 54
+    bounds_cx = 82
+    bounds_cy = 40
+    frame.caption = 'Font &size (Pt)'
+    frame.dummy = 0
+    frame.outerframe = (
+      0
+      18
+      14
+      0)
+    taborder = 6
+    statfile = tstatfile1
+    optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_eatreturn, oe_resetselectonexit, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_keyexecute, oe_checkvaluepaststatread, oe_savevalue, oe_savestate]
+    formatedit = '0.0'
+    formatdisp = '0.0'
+    scale = 3.527780000000000000
+    reffontheight = 16
+    val = 35.277800000000000000
+    mi = 21.166700000000000000
+    ma = 49.388900000000000000
+  end
+  object titlefont: tstringedit
+    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+    bounds_x = 16
+    bounds_y = 118
+    bounds_cx = 361
+    bounds_cy = 40
+    frame.caption = '&Title font'
+    frame.dummy = 0
+    frame.outerframe = (
+      0
+      18
+      0
+      0)
+    anchors = [an_left, an_top, an_right]
+    taborder = 10
+    statfile = tstatfile1
+    optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_eatreturn, oe_resetselectonexit, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_keyexecute, oe_checkvaluepaststatread, oe_savevalue, oe_savestate]
+    value = 'Helvetica'
+    onsetvalue = titlefosetvalue
+    reffontheight = 16
+  end
+  object sourcefont: tstringedit
+    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+    bounds_x = 16
+    bounds_y = 166
+    bounds_cx = 361
+    bounds_cy = 40
+    frame.caption = 'So&urce font'
+    frame.dummy = 0
+    frame.outerframe = (
+      0
+      18
+      0
+      0)
+    anchors = [an_left, an_top, an_right]
+    taborder = 11
+    statfile = tstatfile1
+    optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_eatreturn, oe_resetselectonexit, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_keyexecute, oe_checkvaluepaststatread, oe_savevalue, oe_savestate]
+    value = 'Courier'
+    onsetvalue = sourcefosetvalue
+    reffontheight = 16
+  end
+  object colorset: tbooleanedit
+    bounds_x = 192
+    bounds_y = 74
+    bounds_cx = 47
+    bounds_cy = 18
+    frame.caption = '&Color'
+    frame.dummy = 0
+    frame.outerframe = (
+      0
+      2
+      34
+      3)
+    taborder = 8
+    statfile = tstatfile1
+    optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_eatreturn, oe_resetselectonexit, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_keyexecute, oe_checkvaluepaststatread, oe_savevalue, oe_savestate]
+  end
+  object tpagesizeselector1: tpagesizeselector
+    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+    bounds_x = 184
+    bounds_y = 6
+    bounds_cx = 79
+    bounds_cy = 40
+    frame.caption = 'Paper size'
+    frame.dummy = 0
+    frame.outerframe = (
+      0
+      18
+      0
+      0)
+    taborder = 4
+    dropdown.cols.count = 1
+    dropdown.cols.items = <
+      item
+        data = (
+          'User'
+          'A0'
+          'A1'
+          'A2'
+          'A3'
+          'A4'
+          'A5'
+          'A6'
+          'A7'
+          'A8'
+          'A9'
+          'B0'
+          'B1'
+          'B2'
+          'B3'
+          'B4'
+          'B5'
+          'B6'
+          'B7'
+          'B8'
+          'B9'
+          'B10'
+          'C5E'
+          'Comm10E'
+          'DLE'
+          'Executive'
+          'Folio'
+          'Ledger'
+          'Legal'
+          'Letter'
+          'Tabloid')
+      end>
+    dropdown.itemindex = 5
+    dropdown.width = 180
+    printer = printer
+    reffontheight = 16
+  end
+  object tpageorientationselector1: tpageorientationselector
+    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+    bounds_x = 275
+    bounds_y = 6
+    bounds_cx = 105
+    bounds_cy = 40
+    frame.caption = 'Paper orientation'
+    frame.dummy = 0
+    frame.outerframe = (
+      0
+      18
+      3
+      0)
+    taborder = 5
+    dropdown.cols.count = 1
+    dropdown.cols.items = <
+      item
+        data = (
+          'Portrait'
+          'Landscape')
+      end>
+    dropdown.itemindex = 0
+    printer = printer
+    reffontheight = 16
+  end
+  object rotate: tbooleanedit
+    bounds_x = 283
+    bounds_y = 74
+    bounds_cx = 86
+    bounds_cy = 18
+    frame.caption = 'Rotate CCW'
+    frame.dummy = 0
+    frame.outerframe = (
+      0
+      2
+      73
+      3)
+    taborder = 9
+    statfile = tstatfile1
+    optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_eatreturn, oe_resetselectonexit, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_keyexecute, oe_checkvaluepaststatread, oe_savevalue, oe_savestate]
+  end
+  object printer: tpostscriptprinter
+    onpagestart = pronpagestart
+    pa_width = 210.000000000000000000
+    pa_height = 297.000000000000000000
+    pa_size = sps_a4
+    pa_orientation = pao_portrait
+    pa_frameleft = 10.000000000000000000
+    pa_frametop = 10.000000000000000000
+    pa_frameright = 10.000000000000000000
+    pa_framebottom = 10.000000000000000000
+    ppmm = 10.000000000000000000
+    printcommand = 'lp -'
+    colorspace = cos_rgb
+    statfile = tstatfile1
+    Left = 184
+    Top = 96
+  end
+  object tstatfile1: tstatfile
+    filename = 'printer.sta'
+    options = [sfo_memory]
+    Left = 80
+    Top = 112
+  end
+end

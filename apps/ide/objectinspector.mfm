@@ -1,0 +1,217 @@
+object objectinspectorfo: tobjectinspectorfo
+  optionswidget = [ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_destroywidgets, ow_hinton, ow_autoscale]
+  bounds_x = 354
+  bounds_y = 403
+  bounds_cx = 254
+  bounds_cy = 248
+  frame.grip_size = 10
+  frame.grip_options = [go_closebutton, go_fixsizebutton, go_topbutton]
+  frame.dummy = 0
+  visible = False
+  container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_mousetransparent, ow_destroywidgets, ow_autoscale]
+  container.bounds_cx = 244
+  container.bounds_cy = 248
+  container.frame.dummy = 0
+  container.onchildscaled = objectinspectoronchildscaled
+  dragdock.splitter_size = 0
+  dragdock.caption = 'Objectinspector'
+  dragdock.optionsdock = [od_savepos, od_canmove, od_canfloat, od_candock, od_propsize]
+  options = [fo_savepos, fo_savestate]
+  statfile = mainfo.projectstatfile
+  caption = 'Object Inspector'
+  icon.transparentcolor = -2147483648
+  icon.options = [bmo_masked]
+  icon.image = {
+    00000000020000001800000018000000CC000000000000000000000000000000
+    0000000000000000000000000000000000000000C0C0C03400FCF804C0C0C013
+    00FCF806C0C0C01100FCF808C0C0C01000FCF808C0C0C01000FCF808C0C0C010
+    00FCF808C0C0C01100FCF806C0C0C0080000F801C0C0C00A00FCF804C0C0C008
+    0000F803C0C0C0150000F803C0C0C0140000F805C0C0C0120000F807C0C0C010
+    0000F809C0C0C00F0000F809C0C0C004F8000008C0C0C0020000F80BC0C0C003
+    F8000008C0C0C0020000F80BC0C0C003F8000008C0C0C010F8000008C0C0C010
+    F8000008C0C0C010F8000008C0C0C010F8000008C0C0C010F8000008C0C0C026
+    0000000000000000F00000BFF8010008FC030000FC030000FC030000FC030000
+    F8010200F00007000000070000800F0300C01F0000E03F0000E03FBFFCF37F08
+    FCF37F00FC030003FC030040FC030000FC030000FC030000FC03000000000000
+  }
+  oncreate = tmseformcreate
+  onloaded = objectinspectorfoonloaded
+  onchildscaled = objectinspectoronchildscaled
+  left = 239
+  top = 180
+  moduleclassname = 'tdockform'
+  object compselector: tdropdownlistedit
+    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+    bounds_y = 1
+    bounds_cx = 220
+    bounds_cy = 20
+    frame.dummy = 0
+    anchors = [an_left, an_top, an_right]
+    taborder = 2
+    onsetvalue = compselectoronsetvalue
+    dropdown.options = [deo_selectonly, deo_autodropdown, deo_keydropdown]
+    dropdown.cols.count = 1
+    dropdown.cols.items = <    
+      item
+      end>
+    onbeforedropdown = compselectorbeforedropdown
+    reffontheight = 14
+  end
+  object grid: twidgetgrid
+    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_focusbackonesc, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+    bounds_y = 24
+    bounds_cx = 244
+    bounds_cy = 224
+    frame.localprops = [frl_levelo, frl_colorclient]
+    frame.dummy = 0
+    anchors = [an_top, an_bottom]
+    taborder = 1
+    popupmenu = tpopupmenu1
+    optionsgrid = [og_colsizing, og_colmoving, og_focuscellonenter, og_colchangeontabkey]
+    rowcolors.count = 1
+    rowcolors.items = (
+      16777202
+    )
+    rowfonts.count = 6
+    rowfonts.items = <    
+      item
+        name = 'stf_default'
+        dummy = 0
+      end    
+      item
+        color = 32768
+        name = 'stf_default'
+        dummy = 0
+      end    
+      item
+        color = 32768
+        name = 'stf_default'
+        dummy = 0
+      end    
+      item
+        color = -1610612723
+        name = 'stf_default'
+        dummy = 0
+      end    
+      item
+        style = [fs_bold]
+        name = 'stf_default'
+        dummy = 0
+      end    
+      item
+        style = [fs_bold]
+        name = 'stf_default'
+        dummy = 0
+      end>
+    datacols.count = 2
+    datacols.items = <    
+      item
+        linecolor = -1610612731
+        linecolorfix = -1610612733
+        width = 90
+        options = [co_readonly, co_drawfocus, co_proportional, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
+        onshowhint = col0onshowhint
+        widgetname = 'props'
+      end    
+      item
+        linecolorfix = -1610612733
+        width = 148
+        rowfontoffset = 4
+        options = [co_fill, co_savestate, co_rowfont, co_zebracolor]
+        onshowhint = col1onshowhint
+        widgetname = 'values'
+      end>
+    datarowlinecolor = -1610612731
+    datarowheight = 16
+    statfile = mainfo.projectstatfile
+    onrowsdatachanged = gridrowsdatachanged
+    oncellevent = gridcellevent
+    drag.onbeforedragbegin = gridondragbegin
+    drag.onbeforedragover = gridondragover
+    drag.onbeforedragdrop = gridondragdrop
+    reffontheight = 14
+    object props: ttreeitemedit
+      optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+      bounds_cx = 90
+      bounds_cy = 16
+      color = -1879048185
+      frame.levelo = 0
+      frame.colorclient = -2147483646
+      frame.localprops = [frl_levelo, frl_colorclient]
+      frame.dummy = 0
+      taborder = 1
+      onpopup = propsonpopup
+      visible = False
+      optionsedit = [oe_readonly, oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_resetselectonexit, oe_locate, oe_savestate]
+      onupdaterowvalues = propupdaterowvalue
+      options = [teo_treecolnavig, teo_keyrowmoving]
+      oncheckrowmove = propsoncheckrowmove
+      reffontheight = 14
+    end
+    object values: tmbdropdownitemedit
+      optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight]
+      bounds_x = 91
+      bounds_cx = 148
+      bounds_cy = 16
+      color = -1879048185
+      frame.levelo = 0
+      frame.colorclient = -2147483646
+      frame.localprops = [frl_levelo, frl_colorclient]
+      frame.button.width = 15
+      frame.button.color = -1879048187
+      frame.buttons.count = 2
+      frame.buttons.items = <      
+        item
+          width = 15
+          color = -1879048187
+        end      
+        item
+          width = 15
+          visible = False
+          color = -1879048187
+          imagenr = 17
+        end>
+      frame.dummy = 0
+      visible = False
+      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_forcereturncheckvalue, oe_eatreturn, oe_resetselectonexit, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_savestate]
+      font.name = 'stf_default'
+      font.dummy = 0
+      onsetvalue = valuessetvalue
+      onmouseevent = valuesonmouseevent
+      onkeydown = valueskeydown
+      onbuttonaction = valuesbuttonaction
+      onupdaterowvalues = valueupdaterowvalue
+      dropdown.options = [deo_autodropdown, deo_keydropdown]
+      dropdown.cols.count = 1
+      dropdown.cols.items = <      
+        item
+        end>
+      dropdown.dropdownrowcount = 16
+      onbeforedropdown = valuesbeforedropdown
+      reffontheight = 14
+    end
+  end
+  object compedit: tbutton
+    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+    bounds_x = 223
+    bounds_y = 2
+    bounds_cx = 19
+    bounds_cy = 18
+    anchors = [an_top, an_right]
+    state = [as_disabled, as_localdisabled, as_localcaption, as_localonexecute]
+    caption = 'ED'
+    onexecute = compeditonexecute
+    reffontheight = 14
+  end
+  object tpopupmenu1: tpopupmenu
+    menu.submenu.count = 1
+    menu.submenu.items = <    
+      item
+        caption = 'Collapse tree'
+        state = [as_localcaption, as_localonexecute]
+        onexecute = collapseexe
+      end>
+    left = 112
+    top = 80
+  end
+end

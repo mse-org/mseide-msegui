@@ -1,0 +1,102 @@
+object threadsfo: tthreadsfo
+  options = [fo_savepos, fo_savestate]
+  statfile = mainfo.projectstatfile
+  caption = 'Threads'
+  icon.transparentcolor = -2147483648
+  icon.options = [bmo_masked]
+  icon.image = {
+    0000000002000000180000001800000034020000000000000000000000000000
+    0000000000000000000000000000000000000000E0E0E03A00C47001E0E0E018
+    00C47001E0E0E01800C47001E0E0E01800C47001E0E0E00D80808001E0E0E00A
+    00C47001E0E0E00580808001E0E0E00680808001E0E0E00B00C47001E0E0E004
+    80808001E0E0E00680808002E0E0E00B00C47001E0E0E00280808002E0E0E006
+    80808002E0E0E00C00C47001E0E0E00180808002E0E0E00680808001F8FCF801
+    8080800100C47001E0E0E00100C47001E0E0E00100C47001E0E0E00100C47001
+    E0E0E00100C47001E0E0E00100C4700280808003E0E0E0068080800300C47001
+    E0E0E00100C47001E0E0E00100C47001E0E0E00100C47001E0E0E00100C47001
+    E0E0E00100C4700280808001F8FCF80180808001E0E0E0068080800300C47001
+    8080800100C470018080800100C470018080800100C470018080800100C47001
+    8080800100C4700280808003E0E0E0068080800300C470018080800100C47001
+    8080800100C470018080800100C470018080800100C470018080800100C47002
+    80808003E0E0E00680808001000000018080800100C47001E0E0E00100C47001
+    E0E0E00100C47001E0E0E00100C47001E0E0E00100C47001E0E0E00100C47002
+    80808003E0E0E0068080800300C47001E0E0E00100C47001E0E0E00100C47001
+    E0E0E00100C47001E0E0E00100C47001E0E0E00100C470028080800100000001
+    80808001E0E0E00680808002E0E0E00E80808002E0E0E00680808002E0E0E00E
+    80808002E0E0E00680808001E0E0E01080808001E0E0E00680808001E0E0E010
+    80808001E0E0E063000000BF000000080004000000080003001000BF00200008
+    0840100808801000180019BF18001A0378551F0078551F00F8FF1FBFF8FF1F08
+    78551F0078551F0318001840180018000800100808001000000000BF00000008
+    0000000000000000
+  }
+  onshow = threadsfoonshow
+  dragdock.caption = 'Threads'
+  dragdock.optionsdock = [od_canmove, od_canfloat, od_candock, od_propsize, od_savepos]
+  frame.grip_size = 10
+  frame.grip_options = [go_closebutton, go_fixsizebutton, go_topbutton]
+  container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_mousetransparent, ow_destroywidgets]
+  container.bounds_cx = 339
+  container.bounds_cy = 276
+  visible = False
+  optionswidget = [ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_destroywidgets, ow_hinton, ow_autoscale]
+  bounds_x = 37
+  bounds_y = 270
+  bounds_cx = 349
+  bounds_cy = 276
+  color = -1879048187
+  frame.grip_size = 10
+  frame.grip_options = [go_closebutton, go_fixsizebutton, go_topbutton]
+  moduleclassname = 'tdockform'
+  object grid: tstringgrid
+    datacols.optionsedit = [scoe_eatreturn]
+    datacols.options = [co_readonly, co_focusselect, co_rowselect, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
+    datacols.count = 3
+    datacols.items = <    
+      item
+        textflags = [tf_right, tf_ycentered]
+        textflagsactive = [tf_right, tf_ycentered]
+        options = [co_readonly, co_focusselect, co_rowselect, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
+      end    
+      item
+        textflags = [tf_xcentered, tf_ycentered]
+        options = [co_readonly, co_focusselect, co_rowselect, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
+        width = 56
+      end    
+      item
+        options = [co_readonly, co_focusselect, co_rowselect, co_fill, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
+        width = 201
+      end>
+    fixcols.count = 1
+    fixcols.items = <    
+      item
+        numstart = 1
+        numstep = 1
+        width = 24
+        color = -2147483646
+      end>
+    fixrows.count = 1
+    fixrows.items = <    
+      item
+        height = 18
+        captions.count = 3
+        captions.items = <        
+          item
+            caption = 'ID'
+          end        
+          item
+            caption = 'State'
+          end        
+          item
+            caption = 'Location'
+            textflags = [tf_ycentered]
+          end>
+      end>
+    datarowheight = 18
+    oncellevent = gridoncellevent
+    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_focusbackonesc, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+    bounds_cx = 339
+    bounds_cy = 276
+    anchors = []
+    reffontheight = 16
+  end
+end

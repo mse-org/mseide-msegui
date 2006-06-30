@@ -1,0 +1,65 @@
+caseinsensitive
+styles
+ default ''
+ words 'b'
+ comment 'i' cl_dkblue
+ option 'b' cl_dkblue
+ string '' cl_dkblue
+
+keyworddefs pascal
+ 'ABSOLUTE' 'ABSTRACT' 'AND' 'ARRAY' 'AS' 'ASM' 'ASSEMBLER' 'BEGIN'
+ 'BREAK' 'CASE' 'CDECL' 'CLASS' 'CONST' 'CONSTRUCTOR'
+ 'CONTINUE' 'DEFAULT' 'DESTRUCTOR' 'DISPOSE' 'DIV' 'DO' 'DOWNTO'
+ 'ELSE' 'END' 'EXCEPT' 'EXIT' 'EXPORT' 'EXPORTS' 'EXTERNAL' 'FAIL'
+ 'FALSE' 'FAR' 'FILE' 'FINALIZATION' 'FINALLY' 'FOR' 'FORWARD' 'FUNCTION' 'GOTO' 'IF'
+ 'IMPLEMENTATION' 'IN' 'INDEX' 'INHERITED'
+ 'INITIALIZATION' 'INLINE' 'INTERFACE' 'INTERRUPT' 'IS' 'LABEL' 'LIBRARY'
+ 'MOD' 'NEW' 'NIL' 'NODEFAULT' 'NOT' 'OBJECT'
+ 'OF' 'ON' 'OPERATOR' 'OR' 'OUT' 'OTHERWISE' 'PACKED' 'POPSTACK' 'PRIVATE' 
+ 'PROCEDURE' 'PROGRAM' 'PROPERTY' 'PROTECTED'
+ 'PUBLIC' 'PUBLISHED' 'RAISE' 'READ' 'RECORD' 'REINTRODUCE' 'REPEAT' 
+ 'RESOURCESTRING'
+ 'SELF' 'SET' 'SHL' 'SHR'
+ 'STDCALL' 'STORED' 'THEN' 'THREADVAR' 'TO' 'TRUE' 'TRY' 'TYPE' 'UNIT' 'UNTIL'
+ 'USES' 'VAR' 'VIRTUAL' 'WHILE' 'WITH' 'WRITE' 'XOR'
+ 'OVERLOAD' 'OVERRIDE'
+
+scope option option
+ endtokens
+  '}'
+  
+scope comment1 comment
+ endtokens
+  '}'
+
+scope comment2 comment
+ endtokens
+  ''
+
+scope comment3 comment
+ endtokens
+  '*)'
+  
+scope string string
+ endtokens
+  '''' ''
+
+scope string1 string
+ calltokens
+  '''' string
+ endtokens
+  ' ' ''
+
+scope main
+
+ keywords words
+  pascal
+
+ calltokens
+  '{$' option
+  '{' comment1
+  '//' comment2
+  '(*' comment3
+  '''' string
+  '#' string1
+

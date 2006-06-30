@@ -1,0 +1,61 @@
+BPLFILES = \
+  linmseguikernel
+  
+VPATH = linux
+
+FILES = \
+  linux/msesysintf \
+  linux/mseguiintf \
+  linux/xrender \
+  linux/xft \
+  msegraphics\
+  msetypes\
+  msearrayprops\
+  mseguiglob\
+  msedate\
+  mseerror\
+  mseformatstr\
+  msegraphutils\
+  msebitmap\
+  msepointer\
+  mseevent\
+  msetimer\
+  mseclasses\
+  msefileutils\
+  msesys\
+  msekeyboard\
+  msebits\
+  msestockobjects\
+  msestockobjects_mfm\
+  msedrawtext\
+  mserichstring\
+  msethread\
+  mseguithread\
+  msewidgets\
+  msegui\
+  mselist\
+  msereal\
+  msestreaming\
+  msestrings\
+  msescrollbar\
+  mseshapes\
+  mseactions\
+  msedatalist\
+  msestream\
+  msepipestream\
+  msemenus \
+  msemenuwidgets \
+  msesealcrypt\
+  msestat\
+  msehash\
+  msesysutils\
+  msedrag\
+
+
+
+
+
+
+
+
+

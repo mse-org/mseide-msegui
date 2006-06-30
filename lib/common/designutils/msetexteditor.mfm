@@ -1,0 +1,158 @@
+object msetexteditorfo: tmsetexteditorfo
+  bounds_x = 79
+  bounds_y = 219
+  bounds_cx = 369
+  bounds_cy = 268
+  visible = False
+  container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_subfocus, ow_mousetransparent, ow_destroywidgets, ow_autoscale]
+  container.bounds_cx = 369
+  container.bounds_cy = 268
+  container.frame.dummy = 0
+  statfile = tstatfile1
+  moduleclassname = 'tmseform'
+  object ok: tbutton
+    bounds_x = 248
+    bounds_y = 240
+    bounds_cx = 50
+    bounds_cy = 22
+    anchors = [an_right, an_bottom]
+    state = [as_localcaption]
+    caption = '&OK'
+    modalresult = mr_ok
+  end
+  object cancel: tbutton
+    bounds_x = 312
+    bounds_y = 240
+    bounds_cx = 50
+    bounds_cy = 22
+    anchors = [an_right, an_bottom]
+    taborder = 1
+    state = [as_localcaption]
+    caption = '&Cancel'
+    modalresult = mr_cancel
+  end
+  object grid: twidgetgrid
+    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_focusbackonesc, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+    bounds_cx = 369
+    bounds_cy = 234
+    frame.dummy = 0
+    anchors = [an_top, an_bottom]
+    taborder = 2
+    popupmenu = tpopupmenu1
+    optionsgrid = [og_focuscellonenter, og_autofirstrow, og_autoappend, og_colchangeontabkey, og_autopopup]
+    fixcols.count = 1
+    fixcols.items = <    
+      item
+        linewidth = 0
+        width = 20
+        numstart = 1
+        numstep = 1
+      end>
+    datacols.count = 1
+    datacols.items = <    
+      item
+        width = 2000
+        options = [co_leftbuttonfocusonly, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
+        widgetname = 'textedit'
+      end>
+    datarowlinewidth = 0
+    datarowheight = 16
+    reffontheight = 14
+    object textedit: tsyntaxedit
+      optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontlineheight, ow_autoscale]
+      bounds_cx = 2000
+      bounds_cy = 16
+      visible = False
+      optionsedit = [oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_linebreak, oe_eatreturn, oe_keyexecute, oe_savevalue, oe_savestate]
+      oneditnotifcation = editnotify
+      reffontheight = 14
+    end
+  end
+  object linedisp: tstringdisp
+    bounds_x = 8
+    bounds_y = 242
+    bounds_cx = 76
+    frame.dummy = 0
+    anchors = [an_left, an_bottom]
+    taborder = 4
+    textflags = [tf_xcentered, tf_ycentered]
+    reffontheight = 14
+  end
+  object test: tbutton
+    bounds_x = 184
+    bounds_y = 240
+    bounds_cx = 50
+    bounds_cy = 22
+    anchors = [an_right, an_bottom]
+    taborder = 3
+    state = [as_disabled, as_invisible, as_localdisabled, as_localinvisible, as_localcaption, as_localonexecute]
+    caption = '&Test'
+    onexecute = testexe
+  end
+  object tpopupmenu1: tpopupmenu
+    menu.submenu.count = 8
+    menu.submenu.items = <    
+      item
+        caption = '&Undo'
+        name = 'undo'
+        state = [as_localcaption, as_localonexecute]
+        onexecute = undoexe
+      end    
+      item
+        caption = '&Redo'
+        name = 'redo'
+        state = [as_localcaption, as_localonexecute]
+        onexecute = redoexe
+      end    
+      item
+        caption = '&Copy'
+        name = 'copy'
+        state = [as_localcaption, as_localshortcut, as_localonexecute]
+        shortcut = 16451
+        onexecute = copyexe
+      end    
+      item
+        caption = 'Cu&t'
+        name = 'cut'
+        state = [as_localcaption, as_localshortcut, as_localonexecute]
+        shortcut = 16472
+        onexecute = cutexe
+      end    
+      item
+        caption = '&Paste'
+        name = 'paste'
+        state = [as_localcaption, as_localshortcut, as_localonexecute]
+        shortcut = 16470
+        onexecute = pasteexe
+      end    
+      item
+        options = [mao_separator, mao_shortcutcaption]
+      end    
+      item
+        caption = '&Load file'
+        state = [as_localcaption, as_localonexecute]
+        onexecute = loadfileexe
+      end    
+      item
+        caption = '&Save file'
+        state = [as_localcaption, as_localonexecute]
+        onexecute = savefileexe
+      end>
+    onupdate = popupuponupdate
+    left = 80
+    top = 64
+  end
+  object filedialog: tfiledialog
+    statfile = tstatfile1
+    controller.captionopen = 'Load file'
+    controller.captionsave = 'Save file'
+    left = 80
+    top = 104
+  end
+  object tstatfile1: tstatfile
+    filename = 'texteditor.sta'
+    options = [sfo_memory]
+    left = 80
+    top = 152
+  end
+end

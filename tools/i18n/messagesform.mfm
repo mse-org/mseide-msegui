@@ -1,0 +1,41 @@
+object messagesfo: tmessagesfo
+  bounds_x = 298
+  bounds_y = 263
+  bounds_cx = 421
+  bounds_cy = 234
+  visible = False
+  container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_subfocus, ow_mousetransparent, ow_destroywidgets, ow_autoscale]
+  container.bounds_cx = 421
+  container.bounds_cy = 234
+  container.frame.dummy = 0
+  options = [fo_closeonesc, fo_autoreadstat, fo_autowritestat, fo_savepos, fo_savestate]
+  onclosequery = formclosquery
+  moduleclassname = 'tmseform'
+  object twidgetgrid1: twidgetgrid
+    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_focusbackonesc, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+    bounds_cx = 421
+    bounds_cy = 234
+    frame.dummy = 0
+    anchors = []
+    datacols.count = 1
+    datacols.options = [co_fill, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
+    datacols.items = <    
+      item
+        width = 1024
+        options = [co_fill, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
+        widthmin = 1024
+        widgetname = 'messages'
+      end>
+    datarowlinewidth = 0
+    datarowheight = 19
+    reffontheight = 16
+    object messages: tterminal
+      optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontlineheight, ow_autoscale]
+      bounds_cx = 1024
+      bounds_cy = 19
+      visible = False
+      options = [teo_readonly]
+      reffontheight = 17
+    end
+  end
+end

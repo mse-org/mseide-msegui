@@ -1,0 +1,325 @@
+object breakpointsfo: tbreakpointsfo
+  optionswidget = [ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_destroywidgets, ow_hinton, ow_autoscale]
+  bounds_x = 107
+  bounds_y = 404
+  bounds_cx = 477
+  bounds_cy = 128
+  frame.grip_size = 10
+  frame.grip_options = [go_closebutton, go_fixsizebutton, go_topbutton]
+  frame.dummy = 0
+  visible = False
+  container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_mousetransparent, ow_destroywidgets, ow_autoscale]
+  container.bounds_cx = 467
+  container.bounds_cy = 128
+  container.frame.dummy = 0
+  dragdock.splitter_size = 0
+  dragdock.optionsdock = [od_savepos, od_canmove, od_canfloat, od_candock, od_propsize]
+  options = [fo_savepos, fo_savestate]
+  statfile = mainfo.projectstatfile
+  caption = 'Breakpoints'
+  icon.transparentcolor = -2147483648
+  icon.options = [bmo_masked]
+  icon.image = {
+    00000000020000001800000018000000B4000000000000000000000000000000
+    0000000000000000000000000000000000000000E0E0E0B1C0C4E0016060F001
+    1010F8026060F001C0C4E001E0E0E011989CE8010000F806989CE801E0E0E00F
+    C0C4E0010000F808C0C4E001E0E0E00E6060F0010000F8086060F001E0E0E00E
+    1010F8010000F8081010F801E0E0E00E1010F8010000F8081010F801E0E0E00E
+    6060F0010000F8086060F001E0E0E00EC0C4E0010000F808C0C4E001E0E0E00F
+    989CE8010000F806989CE801E0E0E011C0C4E0016060F0011010F8026060F001
+    C0C4E001E0E0E0B1000000BF000000080000000000000002000000BF00000008
+    00000008007E000000FF00BF80FF010280FF010080FF010080FF01BF80FF0108
+    80FF010000FF0002007E0040000000000000000800000000000000BF00000008
+    0000000000000000
+  }
+  onshow = breakpointsonshow
+  moduleclassname = 'tdockform'
+  object grid: twidgetgrid
+    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_focusbackonesc, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+    bounds_y = 24
+    bounds_cx = 467
+    bounds_cy = 104
+    frame.dummy = 0
+    anchors = [an_top, an_bottom]
+    taborder = 1
+    popupmenu = gripopup
+    optionsgrid = [og_colsizing, og_rowmoving, og_keyrowmoving, og_rowinserting, og_rowdeleting, og_focuscellonenter, og_autofirstrow, og_autoappend, og_colchangeontabkey, og_autopopup]
+    fixrows.count = 1
+    fixrows.items = <    
+      item
+        height = 18
+        captions.count = 9
+        captions.items = <        
+          item
+            caption = 'on'
+            textflags = []
+          end        
+          item
+            caption = 'File'
+            textflags = []
+          end        
+          item
+            textflags = []
+          end        
+          item
+            caption = 'Line Nr.'
+            textflags = []
+          end        
+          item
+            textflags = []
+          end        
+          item
+            caption = 'Count'
+            textflags = []
+          end        
+          item
+            caption = 'Ignore'
+            textflags = []
+          end        
+          item
+            textflags = []
+          end        
+          item
+            caption = 'Condition'
+            textflags = []
+          end>
+      end>
+    datacols.count = 10
+    datacols.items = <    
+      item
+        linecolorfix = -1610612733
+        width = 16
+        options = [co_drawfocus, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
+        widgetname = 'bkpton'
+        data = (
+          dl_integer
+          (          )
+        )
+      end    
+      item
+        linecolorfix = -1610612733
+        width = 158
+        options = [co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
+        widgetname = 'filename'
+        data = (
+          dl_msestring
+          (          )
+        )
+      end    
+      item
+        linecolorfix = -1610612733
+        options = [co_invisible, co_savevalue]
+        widgetname = 'path'
+        data = (
+          dl_msestring
+          (          )
+        )
+      end    
+      item
+        linecolorfix = -1610612733
+        options = [co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
+        widgetname = 'line'
+        data = (
+          dl_integer
+          (          )
+        )
+      end    
+      item
+        linecolorfix = -1610612733
+        width = 19
+        options = [co_invisible, co_savevalue]
+        widgetname = 'bkptno'
+        data = (
+          dl_integer
+          (          )
+        )
+      end    
+      item
+        color = -1879048185
+        linecolorfix = -1610612733
+        width = 31
+        options = [co_readonly, co_nofocus, co_savevalue, co_savestate]
+        widgetname = 'count'
+        data = (
+          dl_integer
+          (          )
+        )
+      end    
+      item
+        linecolorfix = -1610612733
+        width = 30
+        options = [co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
+        widgetname = 'ignore'
+        data = (
+          dl_integer
+          (          )
+        )
+      end    
+      item
+        linecolorfix = -1610612733
+        width = 7
+        options = [co_readonly, co_nofocus, co_fixwidth, co_savestate]
+        widgetname = 'conderr'
+        data = (
+          dl_integer
+          (          )
+        )
+      end    
+      item
+        linecolorfix = -1610612733
+        width = 200
+        options = [co_fill, co_savevalue, co_savestate]
+        widthmin = 200
+        widgetname = 'condition'
+        data = (
+          dl_msestring
+          (          )
+        )
+      end    
+      item
+        options = [co_invisible, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
+        widgetname = 'flags'
+        data = (
+          dl_integer
+          (          )
+        )
+      end>
+    datarowheight = 18
+    onrowsdeleting = gridonrowsdeleting
+    onrowsdeleted = gridonrowsdeleted
+    oncellevent = gridoncellevent
+    reffontheight = 16
+    object bkpton: tbooleanedit
+      bounds_cx = 16
+      bounds_cy = 18
+      taborder = 1
+      visible = False
+      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_eatreturn, oe_resetselectonexit, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_savestate]
+      ondataentered = ondataentered
+      onsetvalue = ononsetvalue
+      valuedefault = True
+    end
+    object filename: tstringedit
+      optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+      bounds_x = 17
+      bounds_cx = 158
+      bounds_cy = 18
+      taborder = 2
+      visible = False
+      ondataentered = ondataenterednewbkpt
+      onsetvalue = filenameonsetvalue
+      reffontheight = 16
+    end
+    object path: tstringedit
+      optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+      bounds_x = 176
+      bounds_cx = 50
+      bounds_cy = 18
+      taborder = 3
+      visible = False
+      reffontheight = 16
+    end
+    object line: tintegeredit
+      optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+      bounds_x = 227
+      bounds_cx = 50
+      bounds_cy = 18
+      taborder = 4
+      visible = False
+      ondataentered = ondataenterednewbkpt
+      onsetvalue = lineonsetvalue
+      min = 1
+      reffontheight = 16
+    end
+    object bkptno: tintegeredit
+      optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+      bounds_x = 278
+      bounds_cx = 19
+      bounds_cy = 18
+      taborder = 5
+      visible = False
+      reffontheight = 16
+    end
+    object count: tintegeredit
+      optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+      bounds_x = 298
+      bounds_cx = 31
+      bounds_cy = 18
+      taborder = 6
+      visible = False
+      optionsedit = [oe_readonly, oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_eatreturn, oe_resetselectonexit, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_savevalue, oe_savestate]
+      reffontheight = 16
+    end
+    object ignore: tintegeredit
+      optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+      bounds_x = 330
+      bounds_cx = 30
+      bounds_cy = 18
+      taborder = 7
+      visible = False
+      ondataentered = ondataentered
+      onsetvalue = ignoreonsetvalue
+      reffontheight = 16
+    end
+    object conderr: tdataicon
+      bounds_x = 361
+      bounds_cx = 7
+      bounds_cy = 18
+      taborder = 8
+      visible = False
+      optionsedit = [oe_readonly, oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_eatreturn, oe_resetselectonexit, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_savestate]
+      imagelist = actionsmo.buttonicons
+      imageoffset = 10
+    end
+    object condition: tstringedit
+      optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+      bounds_x = 369
+      bounds_cx = 200
+      bounds_cy = 18
+      taborder = 9
+      visible = False
+      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_eatreturn, oe_resetselectonexit, oe_autoselect, oe_autoselectonfirstclick, oe_trimright, oe_trimleft, oe_autopopupmenu, oe_savevalue, oe_savestate]
+      ondataentered = ondataentered
+      onsetvalue = conditiononsetvalue
+      reffontheight = 16
+    end
+    object flags: tintegeredit
+      optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+      bounds_x = 570
+      bounds_cx = 50
+      bounds_cy = 18
+      visible = False
+      reffontheight = 16
+    end
+  end
+  object bkptson: tbooleanedit
+    bounds_x = 8
+    bounds_y = 3
+    bounds_cx = 104
+    bounds_cy = 18
+    frame.caption = 'Breakpoints on'
+    frame.dummy = 0
+    frame.outerframe = (
+      0
+      2
+      91
+      3
+    )
+    statfile = mainfo.projectstatfile
+    optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_eatreturn, oe_resetselectonexit, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_checkvaluepaststatread, oe_savevalue, oe_savestate]
+    onchange = bkptsononchange
+    onsetvalue = bkptsononsetvalue
+    value = True
+  end
+  object gripopup: tpopupmenu
+    menu.submenu.count = 1
+    menu.submenu.items = <    
+      item
+        caption = 'Delete all'
+        onexecute = deleteallexecute
+      end>
+    menu.name = 'gridpopup'
+    left = 168
+    top = 16
+  end
+end

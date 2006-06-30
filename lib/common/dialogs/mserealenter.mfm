@@ -1,0 +1,55 @@
+object realenterfo: trealenterfo
+  bounds_x = 395
+  bounds_y = 323
+  bounds_cx = 233
+  bounds_cy = 88
+  bounds_cymin = 75
+  visible = False
+  container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_subfocus, ow_mousetransparent, ow_destroywidgets, ow_autoscale]
+  container.bounds_cx = 233
+  container.bounds_cy = 88
+  container.frame.dummy = 0
+  options = [fo_screencentered, fo_closeonesc, fo_autoreadstat, fo_autowritestat]
+  icon.transparency = -2147483648
+  moduleclassname = 'tmseform'
+  object value: trealedit
+    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+    bounds_x = 8
+    bounds_y = 60
+    bounds_cx = 100
+    bounds_cy = 22
+    frame.dummy = 0
+    anchors = [an_left, an_bottom]
+    optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_resetselectonexit, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_savevalue, oe_savestate]
+    reffontheight = 16
+  end
+  object lab: tlabel
+    bounds_x = 8
+    bounds_y = 8
+    bounds_cx = 217
+    bounds_cy = 47
+    anchors = [an_left, an_top, an_right, an_bottom]
+    taborder = 3
+  end
+  object ok: tbutton
+    bounds_x = 120
+    bounds_y = 60
+    bounds_cx = 50
+    bounds_cy = 22
+    anchors = [an_left, an_bottom]
+    taborder = 1
+    state = [as_default, as_localdefault, as_localcaption]
+    caption = '&OK'
+    modalresult = mr_ok
+  end
+  object cancel: tbutton
+    bounds_x = 176
+    bounds_y = 60
+    bounds_cx = 50
+    bounds_cy = 22
+    anchors = [an_left, an_bottom]
+    taborder = 2
+    caption = '&Cancel'
+    modalresult = mr_cancel
+  end
+end

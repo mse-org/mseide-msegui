@@ -1,0 +1,82 @@
+object mainfo: tmainfo
+  bounds_x = 291
+  bounds_y = 247
+  bounds_cx = 403
+  bounds_cy = 196
+  container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_subfocus, ow_mousetransparent, ow_destroywidgets, ow_autoscale]
+  container.bounds_cx = 403
+  container.bounds_cy = 196
+  container.frame.dummy = 0
+  optionswindow = [wo_groupleader]
+  options = [fo_main, fo_terminateonclose, fo_autoreadstat, fo_autowritestat, fo_savepos, fo_savestate]
+  onloaded = formonloaded
+  moduleclassname = 'tmseform'
+  object disp1: tstringdisp
+    bounds_x = 16
+    bounds_y = 70
+    bounds_cx = 372
+    bounds_cy = 38
+    frame.caption = 'Text of resource string 1'
+    frame.dummy = 0
+    frame.outerframe = (
+      0
+      18
+      0
+      0
+    )
+    taborder = 4
+  end
+  object disp2: tstringdisp
+    bounds_x = 16
+    bounds_y = 126
+    bounds_cx = 372
+    bounds_cy = 38
+    frame.caption = 'Text of resource string 2'
+    frame.dummy = 0
+    frame.outerframe = (
+      0
+      18
+      0
+      0
+    )
+    taborder = 3
+  end
+  object default: tbutton
+    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_autoscale]
+    bounds_x = 16
+    bounds_y = 24
+    bounds_cx = 114
+    bounds_cy = 30
+    caption = 'Default'
+    font.height = 18
+    font.name = 'stf_default'
+    font.dummy = 0
+    onexecute = defaultexe
+  end
+  object deutsch: tbutton
+    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_autoscale]
+    bounds_x = 144
+    bounds_y = 24
+    bounds_cx = 114
+    bounds_cy = 30
+    taborder = 1
+    caption = 'Deutsch'
+    font.height = 14
+    font.name = 'stf_default'
+    font.dummy = 0
+    onexecute = deutschexe
+  end
+  object francais: tbutton
+    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_autoscale]
+    bounds_x = 272
+    bounds_y = 24
+    bounds_cx = 114
+    bounds_cy = 30
+    taborder = 2
+    caption = 'Fran'#231'ais'
+    font.height = 14
+    font.name = 'stf_default'
+    font.dummy = 0
+    onexecute = francaisexe
+  end
+end

@@ -1,0 +1,86 @@
+object disassfo: tdisassfo
+  optionswidget = [ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_destroywidgets, ow_hinton, ow_autoscale]
+  bounds_x = 162
+  bounds_y = 502
+  bounds_cx = 564
+  bounds_cy = 210
+  frame.grip_size = 10
+  frame.grip_options = [go_closebutton, go_fixsizebutton, go_topbutton]
+  frame.dummy = 0
+  visible = False
+  container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_mousetransparent, ow_destroywidgets, ow_autoscale]
+  container.bounds_cx = 554
+  container.bounds_cy = 210
+  container.frame.dummy = 0
+  dragdock.splitter_size = 0
+  dragdock.caption = 'Assembler'
+  dragdock.optionsdock = [od_canmove, od_canfloat, od_candock, od_propsize, od_savepos]
+  options = [fo_savepos, fo_savestate]
+  statfile = mainfo.projectstatfile
+  caption = 'Assembler'
+  icon.transparentcolor = -2147483648
+  icon.options = [bmo_masked]
+  icon.transparency = -2147483648
+  icon.image = {
+    0000000002000000180000001800000040030000000000000000000000000000
+    0000000000000000000000000000000000000000804CF01AE0E0E00F804CF009
+    E0E0E001A8ECE80DE0E0E001A8ECE801804CF008E0E0E001A8ECE80DE0E0E001
+    A8ECE802804CF007E0E0E001A8ECE80DE0E0E001A8ECE803804CF006E0E0E001
+    A8ECE80DE0E0E001A8ECE804804CF005E0E0E001A8ECE80D80808006804CF004
+    E0E0E001A8ECE81280808001804CF004E0E0E001A8ECE802A8E8E80180B4B001
+    6894900188B8B801A8ECE80698D0D00188BCB801A0D8D801A8ECE80380808001
+    804CF004E0E0E001A8ECE801A8E4E8013044400108101001283C380108080801
+    40545001A8E8E801A8ECE80270989801101410010000000268949001A8ECE803
+    80808001804CF004E0E0E001A8ECE801608080010810100198D0D001A8ECE801
+    90C4C0010004000170989801A8ECE80280B4B0017098980190C8C80100000001
+    68949001A8ECE80380808001804CF004E0E0E001A8ECE801202C280148606001
+    A8ECE803384C480130444001A8ECE8050000000168949001A8ECE80380808001
+    804CF004E0E0E001A8E8E80100040001688C9001A8ECE8035878780110181801
+    A8ECE8050000000168949001A8ECE80380808001804CF004E0E0E001A0DCD801
+    00000001709CA001A8ECE8036088880100080801A8ECE8050000000168949001
+    A8ECE80380808001804CF004E0E0E001A0E0E00100000001709C9801A8ECE803
+    6084880108080801A8ECE8050000000168949001A8ECE80380808001804CF004
+    E0E0E001A8E8E8010008080160888801A8ECE80350707001101C2001A8ECE805
+    0000000168949001A8ECE80380808001804CF004E0E0E001A8ECE80128383801
+    38545001A8ECE803283C380138505001A8ECE8050000000168949001A8ECE803
+    80808001804CF004E0E0E001A8ECE801709898010004000180B4B001A8ECE801
+    78A4A0010000000180B0B001A8ECE802A0E0E00190C4C8020000000158808001
+    90C4C80198D4D001A8ECE80180808001804CF004E0E0E001A8ECE802506C6801
+    00040001081010010004000160808001A8ECE80380ACA80100000005405C5801
+    A8ECE80180808001804CF004E0E0E001A8ECE803A0D8D80188C0C001A0DCE001
+    A8ECE80C80808001804CF004E0E0E001A8ECE81280808001804CF004E0E0E001
+    A8ECE81280808001804CF00480808014804CF01A00000008FCFF0100FCFF03BF
+    FCFF0708FCFF0F08FCFF1F00FCFF3F08FCFF3F08FCFF3F08FCFF3F08FCFF3FBF
+    FCFF3F08FCFF3F03FCFF3F08FCFF3FBFFCFF3F08FCFF3F00FCFF3F03FCFF3F40
+    FCFF3F00FCFF3FBFFCFF3F00FCFF3F0000000000}
+  onshow = disassfoonshow
+  moduleclassname = 'tdockform'
+  object grid: tstringgrid
+    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_focusbackonesc, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+    bounds_cx = 554
+    bounds_cy = 210
+    frame.dummy = 0
+    anchors = []
+    optionsgrid = [og_colsizing, og_colchangeontabkey, og_autopopup]
+    datacols.count = 2
+    datacols.options = [co_readonly, co_drawfocus, co_savestate]
+    datacols.items = <
+      item
+        width = 76
+        options = [co_readonly, co_drawfocus, co_savestate, co_rowcolor]
+        optionsedit = [scoe_eatreturn]
+      end
+      item
+        width = 472
+        options = [co_readonly, co_drawfocus, co_fill, co_savestate, co_rowcolor]
+        optionsedit = [scoe_eatreturn]
+      end>
+    rowcount = 0
+    rowcolors.count = 2
+    rowcolors.items = (
+      14745599
+      16777184)
+    datarowheight = 18
+    reffontheight = 16
+  end
+end

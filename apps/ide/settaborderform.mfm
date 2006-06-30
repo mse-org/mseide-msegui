@@ -1,0 +1,145 @@
+object settaborderfo: tsettaborderfo
+  bounds_x = 471
+  bounds_y = 402
+  bounds_cx = 292
+  bounds_cy = 205
+  container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_subfocus, ow_mousetransparent, ow_destroywidgets, ow_autoscale]
+  container.bounds_cx = 292
+  container.bounds_cy = 205
+  container.frame.dummy = 0
+  options = [fo_closeonesc, fo_autoreadstat, fo_autowritestat, fo_savepos]
+  statfile = statfile1
+  caption = 'Set Tab Order'
+  icon.transparency = -2147483648
+  onloaded = formonloaded
+  onclosequery = formonclosequery
+  onmouseevent = formmouseevent
+  moduleclassname = 'tmseform'
+  object grid: twidgetgrid
+    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_focusbackonesc, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+    bounds_y = 29
+    bounds_cx = 290
+    bounds_cy = 150
+    bounds_cymin = 100
+    frame.dummy = 0
+    anchors = [an_left, an_top, an_right, an_bottom]
+    optionsgrid = [og_rowmoving, og_keyrowmoving, og_focuscellonenter, og_colchangeontabkey, og_autopopup]
+    fixcols.count = 1
+    fixcols.items = <
+      item
+        width = 32
+        numstep = 1
+      end>
+    rowcount = 0
+    datacols.count = 2
+    datacols.items = <
+      item
+        width = 201
+        options = [co_focusselect, co_fill, co_savevalue, co_savestate]
+        colorselect = -1879048185
+        widgetname = 'wname'
+      end
+      item
+        options = [co_invisible, co_savevalue, co_savestate]
+        widgetname = 'windex'
+      end>
+    datarowheight = 15
+    onrowsmoved = gridonrowsmoved
+    oncellevent = gridoncellevent
+    reffontheight = 13
+    object wname: tstringedit
+      optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+      bounds_cx = 201
+      bounds_cy = 15
+      color = -1879048185
+      frame.levelo = 0
+      frame.colorclient = -2147483646
+      frame.localprops = [frl_levelo, frl_colorclient]
+      frame.dummy = 0
+      taborder = 1
+      visible = False
+      reffontheight = 13
+    end
+    object windex: tintegeredit
+      optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+      bounds_x = 202
+      bounds_cx = 50
+      bounds_cy = 15
+      frame.levelo = 0
+      frame.colorclient = -2147483646
+      frame.localprops = [frl_levelo, frl_colorclient]
+      frame.dummy = 0
+      visible = False
+      reffontheight = 13
+    end
+  end
+  object ok: tbutton
+    bounds_x = 37
+    bounds_y = 183
+    bounds_cx = 47
+    bounds_cy = 20
+    anchors = [an_left, an_bottom]
+    taborder = 4
+    state = [as_default, as_localdefault, as_localcaption]
+    caption = 'OK'
+    modalresult = mr_ok
+  end
+  object cancel: tbutton
+    bounds_x = 92
+    bounds_y = 183
+    bounds_cx = 47
+    bounds_cy = 20
+    anchors = [an_left, an_bottom]
+    taborder = 5
+    state = [as_localcaption]
+    caption = 'Cancel'
+    modalresult = mr_cancel
+  end
+  object mousetaborder: tintegeredit
+    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+    bounds_x = 3
+    bounds_y = 4
+    bounds_cx = 60
+    bounds_cy = 17
+    frame.captionpos = cp_right
+    frame.dummy = 0
+    taborder = 1
+    onsetvalue = mousetaborderonsetvalue
+    reffontheight = 13
+  end
+  object start: tbutton
+    bounds_x = 69
+    bounds_y = 4
+    bounds_cx = 50
+    bounds_cy = 20
+    taborder = 2
+    state = [as_localcaption, as_localonexecute]
+    caption = '&Start'
+    onexecute = startexecute
+  end
+  object stop: tbutton
+    bounds_x = 125
+    bounds_y = 4
+    bounds_cx = 48
+    bounds_cy = 20
+    taborder = 3
+    state = [as_disabled, as_localdisabled, as_localcaption, as_localonexecute]
+    caption = 'St&op'
+    onexecute = stopexecute
+  end
+  object tlabel1: tlabel
+    bounds_x = 176
+    bounds_y = 5
+    bounds_cx = 98
+    bounds_cy = 18
+    taborder = 6
+    caption = 'Mouse click'
+    reffontheight = 13
+  end
+  object statfile1: tstatfile
+    filename = 'settaborderfo.sta'
+    options = [sfo_memory]
+    Left = 80
+    Top = 8
+  end
+end

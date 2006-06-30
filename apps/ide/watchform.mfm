@@ -1,0 +1,181 @@
+object watchfo: twatchfo
+  optionswidget = [ow_tabfocus, ow_subfocus, ow_destroywidgets]
+  bounds_x = 510
+  bounds_y = 325
+  bounds_cx = 310
+  bounds_cy = 245
+  frame.grip_size = 10
+  frame.grip_options = [go_closebutton, go_fixsizebutton, go_topbutton]
+  frame.dummy = 0
+  visible = False
+  container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_subfocus, ow_mousetransparent, ow_destroywidgets, ow_autoscale]
+  container.bounds_cx = 300
+  container.bounds_cy = 245
+  container.frame.dummy = 0
+  dragdock.splitter_size = 0
+  dragdock.caption = 'Watches'
+  dragdock.optionsdock = [od_canmove, od_canfloat, od_candock, od_propsize, od_savepos, od_proportional]
+  options = [fo_savepos, fo_savestate]
+  statfile = mainfo.projectstatfile
+  caption = 'Watches'
+  icon.transparentcolor = -2147483648
+  icon.options = [bmo_masked]
+  icon.transparency = -2147483648
+  icon.image = {
+    000000000200000018000000180000007C020000000000000000000000000000
+    0000000000000000000000000000000000000000804CF09180808016804CF002
+    80808001E0E0E003D8DCD801A8A8A801888C8801A0A0A001D8DCD801E0E0E002
+    D8DCD801A8A8A801888C8801A0A0A001D8DCD801E0E0E005F8FCF801804CF002
+    80808001E0E0E003181C1801101410013034300108080801282C2801D0D4D001
+    E0E0E001181C1801101410013034300108080801282C2801D0D4D001E0E0E004
+    F8FCF801804CF00280808001E0E0E003888C8801D8DCD801E0E0E001B8BCB801
+    00000001888C8801E0E0E001888C8801D8DCD801E0E0E001B8BCB80100000001
+    888C8801E0E0E004F8FCF801804CF00280808001E0E0E006D0D0D00100040001
+    888C8801E0E0E004D0D0D00100040001888C8801E0E0E004F8FCF801804CF002
+    80808001E0E0E005D8D8D801383C380128282801D8D8D801E0E0E003D8D8D801
+    383C380128282801D8D8D801E0E0E004F8FCF801804CF00280808001E0E0E005
+    4044400128282801C8CCC801E0E0E0044044400128282801C8CCC801E0E0E005
+    F8FCF801804CF00280808001E0E0E004B0B4B00100000001C0C0C001E0E0E004
+    B0B4B00100000001C0C0C001E0E0E006F8FCF801804CF00280808001E0E0E004
+    A0A0A00100000001D8DCD801E0E0E004A0A0A00100000001D8DCD801E0E0E006
+    F8FCF801804CF00280808001E0E0E004C8CCC801A0A4A001D8DCD801E0E0E004
+    C8CCC801A0A4A001D8DCD801E0E0E006F8FCF801804CF00280808001E0E0E004
+    A8A8A80138383801D0D4D001E0E0E004A8A8A80138383801D0D4D001E0E0E006
+    F8FCF801804CF00280808001E0E0E0049094900100000001D0D0D001E0E0E004
+    9094900100000001D0D0D001E0E0E006F8FCF801804CF00280808001E0E0E014
+    F8FCF801804CF002F8FCF816804CF061000000BF000000080000000000000003
+    0000000000000008FEFF7F08FEFF7F00FEFF7FBFFEFF7F03FEFF7F00FEFF7F00
+    FEFF7FBFFEFF7F08FEFF7F00FEFF7F03FEFF7F40FEFF7F00FEFF7F08FEFF7F00
+    000000BF000000080000000000000000}
+  moduleclassname = 'tdockform'
+  object grid: twidgetgrid
+    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_focusbackonesc, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+    bounds_y = 24
+    bounds_cx = 300
+    bounds_cy = 221
+    frame.dummy = 0
+    anchors = [an_top, an_bottom]
+    taborder = 1
+    popupmenu = gripopup
+    optionsgrid = [og_colsizing, og_rowmoving, og_keyrowmoving, og_rowinserting, og_rowdeleting, og_focuscellonenter, og_autofirstrow, og_autoappend, og_autopopup]
+    fixcols.count = 1
+    fixcols.items = <
+      item
+        width = 18
+        numstart = 1
+        numstep = 1
+      end>
+    fixrows.count = 1
+    fixrows.items = <
+      item
+        height = 18
+        captions.count = 3
+        captions.items = <
+          item
+            caption = 'A'
+            textflags = []
+          end
+          item
+            caption = 'Expression'
+            textflags = []
+          end
+          item
+            caption = 'Result'
+            textflags = []
+          end>
+        hints.count = 1
+        hints.items = (
+          'Active')
+      end>
+    rowcount = 0
+    rowfonts.count = 1
+    rowfonts.items = <
+      item
+        color = -1610612729
+        name = 'stf_default'
+        dummy = 0
+      end>
+    datacols.count = 3
+    datacols.items = <
+      item
+        width = 13
+        options = [co_drawfocus, co_savestate, co_rowcolor, co_zebracolor]
+        widgetname = 'watchon'
+      end
+      item
+        width = 152
+        options = [co_savevalue, co_savestate]
+        widgetname = 'expression'
+      end
+      item
+        width = 109
+        options = [co_fill, co_savevalue, co_rowfont]
+        widthmin = 50
+        oncellevent = resultcellevent
+        widgetname = 'expresult'
+      end>
+    datarowheight = 18
+    statfile = mainfo.projectstatfile
+    reffontheight = 16
+    object watchon: tbooleanedit
+      bounds_cy = 18
+      visible = False
+      statfile = mainfo.projectstatfile
+      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_eatreturn, oe_resetselectonexit, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_savestate]
+      ondataentered = expressionondataentered
+      value = True
+      valuedefault = True
+    end
+    object expression: tstringedit
+      optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+      bounds_x = 14
+      bounds_cx = 152
+      bounds_cy = 18
+      taborder = 2
+      visible = False
+      statfile = mainfo.projectstatfile
+      ondataentered = expressionondataentered
+      reffontheight = 16
+    end
+    object expresult: tstringedit
+      optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+      bounds_x = 167
+      bounds_cx = 109
+      bounds_cy = 18
+      taborder = 1
+      visible = False
+      onsetvalue = expresultonsetvalue
+      reffontheight = 16
+    end
+  end
+  object watcheson: tbooleanedit
+    bounds_x = 8
+    bounds_y = 3
+    bounds_cx = 84
+    bounds_cy = 18
+    frame.caption = 'Watches on'
+    frame.dummy = 0
+    frame.outerframe = (
+      0
+      2
+      71
+      3)
+    statfile = mainfo.projectstatfile
+    optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_eatreturn, oe_resetselectonexit, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_checkvaluepaststatread, oe_savevalue, oe_savestate]
+    onchange = watchesononchange
+    onsetvalue = watchesononsetvalue
+    value = True
+  end
+  object gripopup: tpopupmenu
+    menu.submenu.count = 1
+    menu.submenu.items = <
+      item
+        caption = 'Delete all'
+        onexecute = deletallexecute
+      end>
+    menu.name = 'gridpopup'
+    menu.onexecute = deletallexecute
+    Left = 168
+    Top = 16
+  end
+end

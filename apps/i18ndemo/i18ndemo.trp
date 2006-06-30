@@ -1,0 +1,73 @@
+[projectfo.projectstat]
+colwidths=2
+ 60
+ 56
+[projectfo]
+stackedunder=mainfo
+x=43
+y=43
+cx=721
+cy=321
+wsize=0
+active=0
+visible=0
+[projectfo.impexpencoding]
+value=1
+[projectfo.grid]
+values0=2
+ main.rst
+ mainfo
+width0=72
+values1=2
+ main.rst
+ main.mfm
+values2=2
+ 3
+ 0
+width2=183
+[projectfo.datafilename]
+filenames=1
+ i18ndemo.trd
+lastdir=/home/mse/proj/msegui/trunk/apps/i18ndemo/
+filefilterindex=3
+filecolwidth=174
+[projectfo.grid2]
+values0=2
+ de
+ fr
+width0=102
+values1=2
+ ./de/
+ ./fr/
+[projectfo.makecommand]
+value=${COMPILER} -Fu${MSELIBDIR}i18n -FE.. -FU. ${LIBFILE}
+[projectfo.makeon]
+value=1
+[projectfo.impexpfiledialog]
+filenames=1
+ /home/mse/proj/msegui/trunk/apps/i18ndemo/test.csv
+lastdir=/home/mse/proj/msegui/trunk/apps/i18ndemo/
+filefilterindex=0
+filecolwidth=174
+[mainfo]
+stackedunder=
+x=518
+y=230
+cx=425
+cy=221
+[mainfo.grid]
+width0=97
+width1=50
+width2=20
+width3=69
+width4=75
+width5=60
+width6=56
+[mainfo.flat]
+value=0
+[mainfo.stringonly]
+value=0
+[mainfo.nont]
+value=1
+[mainfo.ntonly]
+value=0

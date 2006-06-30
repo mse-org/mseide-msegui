@@ -1,0 +1,191 @@
+object filedialogfo: Tfiledialogfo
+  optionswidget = [ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_destroywidgets, ow_hinton]
+  bounds_x = 218
+  bounds_y = 197
+  bounds_cx = 580
+  bounds_cy = 307
+  bounds_cxmin = 360
+  bounds_cymin = 150
+  visible = False
+  container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_mousetransparent, ow_destroywidgets, ow_autoscale]
+  container.bounds_cx = 580
+  container.bounds_cy = 307
+  container.frame.dummy = 0
+  container.onchildscaled = foonchildscaled
+  options = [fo_screencentered, fo_closeonesc, fo_autoreadstat, fo_autowritestat]
+  onkeydown = listviewonkeydown
+  onchildscaled = foonchildscaled
+  left = 239
+  top = 138
+  moduleclassname = 'tmseform'
+  object listview: tfilelistview
+    optionswidget = [ow_mousefocus, ow_arrowfocus, ow_focusbackonesc, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+    bounds_y = 26
+    bounds_cx = 580
+    bounds_cy = 226
+    frame.dummy = 0
+    anchors = [an_top, an_bottom]
+    taborder = 8
+    onkeydown = listviewonkeydown
+    datarowlinecolor = -1610612731
+    datacollinecolor = -1610612731
+    cellwidth = 174
+    cellheight = 15
+    optionsgrid = [og_colsizing, og_focuscellonenter]
+    options = [lvo_readonly, lvo_drawfocus, lvo_mouseselect, lvo_keyselect, lvo_multiselect, lvo_casesensitive]
+    itemlist.imagewidth = 16
+    itemlist.imageheight = 16
+    cellwidthmin = 50
+    onselectionchanged = listviewselectionchanged
+    onitemevent = listviewitemevent
+    filelist.options = [flo_sortname, flo_sorttype]
+    onlistread = listviewonlistread
+    reffontheight = 14
+  end
+  object ok: tbutton
+    optionswidget = [ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+    bounds_x = 447
+    bounds_y = 285
+    bounds_cx = 51
+    bounds_cy = 20
+    anchors = [an_right, an_bottom]
+    taborder = 3
+    state = [as_default, as_localdefault, as_localcaption, as_localonexecute]
+    caption = '&Ok'
+    onexecute = okonexecute
+    reffontheight = 14
+  end
+  object cancel: tbutton
+    optionswidget = [ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+    bounds_x = 512
+    bounds_y = 285
+    bounds_cx = 50
+    bounds_cy = 20
+    anchors = [an_right, an_bottom]
+    taborder = 4
+    state = [as_localcaption]
+    caption = '&Cancel'
+    modalresult = mr_cancel
+    reffontheight = 14
+  end
+  object createdir: tbutton
+    optionswidget = [ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+    bounds_x = 527
+    bounds_y = 3
+    bounds_cx = 50
+    bounds_cy = 20
+    anchors = [an_top, an_right]
+    taborder = 7
+    state = [as_localcaption, as_localonexecute]
+    caption = '&New dir'
+    onexecute = createdironexecute
+    reffontheight = 14
+  end
+  object up: tbutton
+    optionswidget = [ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+    bounds_x = 471
+    bounds_y = 3
+    bounds_cx = 50
+    bounds_cy = 20
+    anchors = [an_top, an_right]
+    taborder = 6
+    state = [as_localcaption, as_localonexecute]
+    caption = '&Up'
+    onexecute = upaction
+    reffontheight = 14
+  end
+  object filename: thistoryedit
+    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+    bounds_y = 259
+    bounds_cx = 430
+    bounds_cy = 20
+    frame.caption = '&Name'
+    frame.captionpos = cp_right
+    frame.dummy = 0
+    frame.outerframe = (
+      0
+      0
+      36
+      0
+    )
+    anchors = [an_left, an_right, an_bottom]
+    optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_resetselectonexit, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_keyexecute, oe_savevalue, oe_savestate]
+    onsetvalue = filenamesetvalue
+    dropdown.dropdownrowcount = 10
+    dropdown.options = [deo_keydropdown]
+    dropdown.cols.count = 1
+    dropdown.cols.items = <    
+      item
+        textflags = [tf_ycentered, tf_noselect, tf_ellipseleft]
+      end>
+    reffontheight = 14
+  end
+  object filter: tdropdownlistedit
+    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+    bounds_y = 284
+    bounds_cx = 423
+    bounds_cy = 20
+    frame.caption = '&Filter'
+    frame.captionpos = cp_right
+    frame.dummy = 0
+    frame.outerframe = (
+      0
+      0
+      29
+      0
+    )
+    anchors = [an_left, an_right, an_bottom]
+    taborder = 2
+    ondataentered = filepathentered
+    onsetvalue = filteronsetvalue
+    dropdown.cols.count = 2
+    dropdown.cols.items = <    
+      item
+      end    
+      item
+        options = [co_readonly, co_invisible, co_focusselect, co_fill]
+      end>
+    dropdown.valuecol = 1
+    onafterclosedropdown = filteronafterclosedropdown
+    reffontheight = 14
+  end
+  object dir: tdirdropdownedit
+    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+    bounds_x = 1
+    bounds_y = 2
+    bounds_cx = 461
+    bounds_cy = 20
+    frame.caption = '&Dir'
+    frame.captionpos = cp_right
+    frame.dummy = 0
+    frame.outerframe = (
+      0
+      0
+      18
+      0
+    )
+    anchors = [an_left, an_top, an_right]
+    taborder = 5
+    ondataentered = filepathentered
+    dropdown.options = [deo_selectonly, deo_keydropdown]
+    onsetvalue = dironsetvalue
+    reffontheight = 14
+  end
+  object showhidden: tbooleanedit
+    bounds_x = 448
+    bounds_y = 260
+    bounds_cx = 112
+    bounds_cy = 16
+    frame.caption = 'Show hidden files'
+    frame.dummy = 0
+    frame.outerframe = (
+      0
+      1
+      99
+      2
+    )
+    anchors = [an_right, an_bottom]
+    taborder = 1
+    onsetvalue = showhiddenonsetvalue
+  end
+end

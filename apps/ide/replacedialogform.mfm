@@ -1,0 +1,151 @@
+object replacedialogfo: treplacedialogfo
+  optionswidget = [ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_destroywidgets, ow_hinton, ow_autoscale]
+  bounds_x = 142
+  bounds_y = 302
+  bounds_cx = 421
+  bounds_cy = 163
+  container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_subfocus, ow_mousetransparent, ow_destroywidgets, ow_autoscale]
+  container.bounds_cx = 421
+  container.bounds_cy = 163
+  container.frame.dummy = 0
+  options = [fo_freeonclose, fo_closeonesc, fo_autoreadstat, fo_autowritestat, fo_savepos]
+  statfile = statfile1
+  icon.transparency = -2147483648
+  moduleclassname = 'tmseform'
+  object findtext: thistoryedit
+    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+    bounds_x = 8
+    bounds_y = 6
+    bounds_cx = 404
+    bounds_cy = 40
+    frame.caption = 'Text to &find'
+    frame.dummy = 0
+    frame.outerframe = (
+      0
+      18
+      0
+      0)
+    anchors = [an_left, an_top, an_right]
+    dropdown.options = [deo_keydropdown, deo_autosavehistory]
+    dropdown.cols.count = 1
+    dropdown.cols.items = <
+      item
+      end>
+    reffontheight = 16
+  end
+  object replacetext: thistoryedit
+    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+    bounds_x = 8
+    bounds_y = 46
+    bounds_cx = 404
+    bounds_cy = 40
+    frame.caption = '&Replace with'
+    frame.dummy = 0
+    frame.outerframe = (
+      0
+      18
+      0
+      0)
+    anchors = [an_left, an_top, an_right]
+    taborder = 1
+    statfile = statfile1
+    dropdown.options = [deo_keydropdown, deo_autosavehistory]
+    dropdown.cols.count = 1
+    dropdown.cols.items = <
+      item
+      end>
+    reffontheight = 16
+  end
+  object casesensitive: tbooleanedit
+    bounds_x = 8
+    bounds_y = 95
+    bounds_cx = 94
+    bounds_cy = 18
+    frame.caption = '&casesensitive'
+    frame.dummy = 0
+    frame.outerframe = (
+      0
+      2
+      81
+      3)
+    taborder = 2
+  end
+  object wholeword: tbooleanedit
+    bounds_x = 112
+    bounds_y = 95
+    bounds_cx = 86
+    bounds_cy = 18
+    frame.caption = '&whole word'
+    frame.dummy = 0
+    frame.outerframe = (
+      0
+      2
+      73
+      3)
+    taborder = 3
+  end
+  object tintegerbutton1: tbutton
+    bounds_x = 8
+    bounds_y = 123
+    bounds_cx = 74
+    bounds_cy = 20
+    taborder = 6
+    caption = '&Replace'
+    modalresult = mr_ok
+  end
+  object tintegerbutton2: tbutton
+    bounds_x = 88
+    bounds_y = 123
+    bounds_cx = 74
+    bounds_cy = 20
+    taborder = 7
+    caption = 'Replace &all'
+    modalresult = mr_all
+  end
+  object selectedonly: tbooleanedit
+    bounds_x = 208
+    bounds_y = 95
+    bounds_cx = 95
+    bounds_cy = 18
+    frame.caption = 'select&ed only'
+    frame.dummy = 0
+    frame.outerframe = (
+      0
+      2
+      82
+      3)
+    taborder = 4
+    statfile = statfile1
+  end
+  object tintegerbutton3: tbutton
+    bounds_x = 168
+    bounds_y = 123
+    bounds_cx = 74
+    bounds_cy = 20
+    taborder = 8
+    state = [as_default, as_localdefault, as_localcaption]
+    caption = '&Cancel'
+    modalresult = mr_cancel
+  end
+  object promptonreplace: tbooleanedit
+    bounds_x = 312
+    bounds_y = 95
+    bounds_cx = 107
+    bounds_cy = 18
+    frame.caption = '&prompt on rep.'
+    frame.dummy = 0
+    frame.outerframe = (
+      0
+      2
+      94
+      3)
+    taborder = 5
+    statfile = statfile1
+    value = True
+  end
+  object statfile1: tstatfile
+    filename = 'replacedialogfo.sta'
+    options = [sfo_memory]
+    Left = 112
+  end
+end

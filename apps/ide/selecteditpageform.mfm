@@ -1,0 +1,56 @@
+object selecteditpagefo: tselecteditpagefo
+  bounds_x = 160
+  bounds_y = 124
+  bounds_cx = 704
+  bounds_cy = 473
+  container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_mousetransparent, ow_destroywidgets, ow_autoscale]
+  container.bounds_cx = 704
+  container.bounds_cy = 473
+  container.frame.dummy = 0
+  options = [fo_screencentered, fo_closeonesc, fo_autoreadstat, fo_autowritestat, fo_savepos, fo_savestate]
+  caption = 'Select edit page (Ctrl S)'
+  icon.transparentcolor = -2147483648
+  icon.transparency = -2147483648
+  onloaded = fooncreate
+  onchildscaled = formonchildscaled
+  moduleclassname = 'tmseform'
+  object list: tlistview
+    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_focusbackonesc, ow_destroywidgets, ow_multiplehint]
+    bounds_cx = 704
+    bounds_cy = 451
+    frame.colorclient = -1879048187
+    frame.dummy = 0
+    anchors = [an_top, an_bottom]
+    datarowlinewidth = 0
+    datacollinewidth = 0
+    cellwidth = 100
+    cellheight = 20
+    cellframe.leveli = 1
+    cellframe.dummy = 0
+    optionsgrid = [og_colsizing, og_focuscellonenter, og_colchangeontabkey, og_rotaterow, og_autopopup]
+    options = [lvo_readonly, lvo_drawfocus, lvo_mousemovefocus, lvo_focusselect, lvo_mouseselect]
+    onitemevent = doonitemevent
+  end
+  object pathdisp: tstringdisp
+    optionswidget = [ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+    bounds_y = 452
+    bounds_cx = 650
+    frame.dummy = 0
+    anchors = [an_left, an_right, an_bottom]
+    taborder = 2
+    textflags = [tf_ycentered, tf_ellipseleft]
+    reffontheight = 16
+  end
+  object openfilebutton: tbutton
+    optionswidget = [ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+    bounds_x = 652
+    bounds_y = 452
+    bounds_cx = 50
+    bounds_cy = 20
+    anchors = [an_right, an_bottom]
+    taborder = 1
+    caption = '&open'
+    onexecute = openfileonexecute
+    reffontheight = 16
+  end
+end

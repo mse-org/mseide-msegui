@@ -1,0 +1,18 @@
+BPLFILES = \
+  linmsedialogs
+FILES= \
+  msedialog\
+  msefiledialog_mfm\
+  msefiledialog\
+  msestringenter\
+  msestringenter_mfm\
+  mserealenter\
+  mserealenter_mfm\
+  mseintegerenter\
+  mseintegerenter_mfm\
+  msedirtree\
+  msedirtree_mfm\
+  msefiledialogres\
+  msefiledialogres_mfm\
+  msecolordialog\
+  msecolordialog_mfm\

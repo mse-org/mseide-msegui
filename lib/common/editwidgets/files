@@ -1,0 +1,16 @@
+BPLFILES = \
+  linmseguieditwidgets
+FILES= \
+  msedropdownlist\
+  mseedit\
+  msegraphedits\
+  msedataedits\
+  mselistbrowser\
+  msedatanodes\
+  msewidgetgrid\
+  msetextedit\
+  mseterminal\
+
+
+
+

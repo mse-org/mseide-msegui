@@ -1,0 +1,8 @@
+BPLFILES = \
+  linmseserialcomm
+FILES= \
+  msecommtimer\
+  msecommport\
+  msecommutils\
+
+

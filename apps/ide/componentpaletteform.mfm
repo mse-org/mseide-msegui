@@ -1,0 +1,81 @@
+object componentpalettefo: tcomponentpalettefo
+  bounds_x = 131
+  bounds_y = 289
+  bounds_cx = 738
+  bounds_cy = 69
+  frame.grip_size = 10
+  frame.grip_options = [go_closebutton, go_fixsizebutton, go_topbutton]
+  frame.dummy = 0
+  visible = False
+  container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_subfocus, ow_mousetransparent, ow_destroywidgets, ow_autoscale]
+  container.bounds_cx = 728
+  container.bounds_cy = 69
+  container.frame.dummy = 0
+  container.onchildscaled = componentgrouponchildscaled
+  dragdock.caption = 'Component Palette'
+  dragdock.optionsdock = [od_savepos, od_canmove, od_canfloat, od_candock]
+  options = [fo_savepos, fo_savestate]
+  statfile = mainfo.projectstatfile
+  icon.transparentcolor = -2147483648
+  icon.options = [bmo_masked]
+  icon.image = {
+    0000000002000000180000001800000074020000000000000000000000000000
+    0000000000000000000000000000000000000000804CF021F8FCF80980808001
+    F8FCF805804CF001F8FCF80780808001F8FCF801E0E0E00880808001F8FCF801
+    E0E0E004804CF001F8FCF801E0E0E00680808001F8FCF801E0E0E00880808001
+    F8FCF801E0E0E004804CF001F8FCF801E0E0E00680808001F8FCF801E0E0E008
+    80808001F8FCF801E0E0E004804CF001F8FCF801E0E0E00680808001F8FCF801
+    E0E0E00100000002E0E0E00200000001E0E0E00280808001F8FCF801E0E0E001
+    00000001E0E0E002804CF001F8FCF801E0E0E00100000003E0E0E00280808001
+    F8FCF801E0E0E00880808001F8FCF801E0E0E004804CF001F8FCF801E0E0E006
+    80808001F8FCF801E0E0E00880808001F8FCF801E0E0E004804CF001F8FCF801
+    E0E0E00680808001F8FCF80F804CF001F8FCF801E0E0E00200FCF801E0E0E00A
+    00FCF801E0E0E008804CF001F8FCF801E0E0E00100FCF803E0E0E00800FCF803
+    E0E0E007804CF001F8FCF80100FCF805E0E0E00600FCF805E0E0E006804CF001
+    F8FCF801E0E0E00100FCF803E0E0E00800FCF803E0E0E007804CF001F8FCF801
+    E0E0E00200FCF801E0E0E00460E84801E0E0E00500FCF801E0E0E00460E84801
+    E0E0E003804CF001F8FCF801E0E0E00660E84803E0E0E00860E84803E0E0E002
+    804CF001F8FCF801E0E0E00660E84803E0E0E00860E84803E0E0E002804CF001
+    F8FCF8010000F804E0E0E00160E84805E0E0E0010000F804E0E0E00160E84805
+    E0E0E001804CF001F8FCF8010000F804E0E0E0070000F804E0E0E007804CF001
+    F8FCF8010000F804E0E0E0070000F804E0E0E007804CF001F8FCF8010000F804
+    E0E0E0070000F804E0E0E007804CF001F8FCF801E0E0E016804CF001F8FCF801
+    80808016804CF0300000000900FEFF09FEFFFFBFFEFFFF08FEFFFFBFFEFFFF00
+    FEFFFFBFFEFFFFB7FEFFFF00FEFFFFBFFEFFFF00FEFFFF02FEFFFF00FEFFFF00
+    FEFFFFBFFEFFFF08FEFFFF00FEFFFF02FEFFFF40FEFFFF00FEFFFFB7FEFFFFB7
+    000000BF00000008
+  }
+  onstatread = foonreadstat
+  onchildscaled = componentgrouponchildscaled
+  moduleclassname = 'tdockform'
+  object componentpalette: ttoolbar
+    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_hinton]
+    bounds_y = 26
+    bounds_cx = 728
+    bounds_cy = 30
+    frame.dummy = 0
+    anchors = [an_top, an_bottom]
+    taborder = 1
+    buttons.width = 26
+    buttons.height = 26
+    options = [tbo_dragsource, tbo_dragdest]
+    onbuttonchanged = componentpalettebuttonchanged
+    drag.onafterdragdrop = componentpalettedragdrop
+    left = 128
+    top = 8
+  end
+  object componentpages: ttabbar
+    optionswidget = [ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+    bounds_cx = 728
+    bounds_cy = 20
+    bounds_cymin = 20
+    frame.dummy = 0
+    anchors = [an_top]
+    statfile = mainfo.projectstatfile
+    onactivetabchange = componentpagesactivetabchange
+    options = [tabo_dragsource, tabo_dragdest]
+    left = 128
+    top = 72
+    reffontheight = 16
+  end
+end

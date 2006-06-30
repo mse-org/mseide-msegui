@@ -1,0 +1,144 @@
+object formdesignerfo: Tformdesignerfo
+  optionswidget = [ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_destroywidgets, ow_hinton, ow_autoscale]
+  bounds_x = 100
+  bounds_y = 100
+  bounds_cx = 500
+  bounds_cy = 300
+  visible = False
+  container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_mousetransparent, ow_destroywidgets, ow_autoscale]
+  container.bounds_cx = 500
+  container.bounds_cy = 300
+  container.frame.dummy = 0
+  container.oncalcminscrollsize = calcscrollsize
+  icon.transparentcolor = -2147483648
+  icon.options = [bmo_masked]
+  icon.image = {
+    0000000002000000180000001800000078010000000000000000000000000000
+    0000000000000000000000000000000000000000804CF019F8FCF816804CF002
+    F8FCF801F8000010F8FCF801C0C0C00380808001804CF002F8FCF801F8000010
+    F8FCF801C0C0C00100000001C0C0C00180808001804CF002F8FCF801F8000010
+    F8FCF801C0C0C00380808001804CF002F8FCF80180808010F8FCF80180808004
+    804CF002F8FCF801C0C0C01480808001804CF002F8FCF801C0C0C01480808001
+    804CF002F8FCF801C0C0C01480808001804CF002F8FCF801C0C0C01480808001
+    804CF002F8FCF801C0C0C01480808001804CF002F8FCF801C0C0C01480808001
+    804CF002F8FCF801C0C0C01480808001804CF002F8FCF801C0C0C01480808001
+    804CF002F8FCF801C0C0C01480808001804CF002F8FCF801C0C0C01480808001
+    804CF002F8FCF801C0C0C01480808001804CF002F8FCF801C0C0C01480808001
+    804CF002F8FCF801C0C0C01480808001804CF002F8FCF801C0C0C01480808001
+    804CF002F8FCF801C0C0C01480808001804CF002F8FCF801C0C0C01480808001
+    804CF00280808016804CF01900000009FEFF7F08FEFF7FBFFEFF7F08FEFF7FBF
+    FEFF7F00FEFF7FBFFEFF7FB7FEFF7F00FEFF7FBFFEFF7F00FEFF7F03FEFF7F00
+    FEFF7F00FEFF7FBFFEFF7F08FEFF7F00FEFF7F03FEFF7F40FEFF7F00FEFF7F00
+    FEFF7FB7FEFF7FBF00000008
+  }
+  onclose = formdeonclose
+  left = 239
+  top = 180
+  moduleclassname = 'tmseform'
+  object popupme: tpopupmenu
+    menu.submenu.count = 18
+    menu.submenu.items = <    
+      item
+        caption = 'Show objectinspector'
+        state = [as_localcaption, as_localonexecute]
+        onexecute = doshowobjectinspector
+      end    
+      item
+        caption = 'Show componentpalette'
+        state = [as_localcaption, as_localonexecute]
+        onexecute = doshowcomponentpalette
+      end    
+      item
+        caption = 'Show as Text'
+        state = [as_localcaption, as_localonexecute]
+        options = [mao_shortcutcaption, mao_asyncexecute]
+        onexecute = doshowastext
+      end    
+      item
+        options = [mao_separator, mao_shortcutcaption]
+      end    
+      item
+        caption = 'Copy Component(s) (Ctrl+C)'
+        name = 'copy'
+        state = [as_localcaption, as_localonexecute]
+        onexecute = copyexe
+      end    
+      item
+        caption = 'Cut Component(s)(Ctrl+X)'
+        name = 'cut'
+        state = [as_localcaption, as_localonexecute]
+        options = [mao_shortcutcaption, mao_asyncexecute]
+        onexecute = cutexe
+      end    
+      item
+        caption = 'Paste Component(s) (Ctrl+V)'
+        name = 'paste'
+        state = [as_localcaption, as_localonexecute]
+        onexecute = pasteexe
+      end    
+      item
+        caption = 'Delete Component(s) (Del)'
+        name = 'delete'
+        state = [as_localcaption, as_localonexecute]
+        options = [mao_shortcutcaption, mao_asyncexecute]
+        onexecute = deleteexe
+      end    
+      item
+        caption = 'Undelete Component(s)'
+        name = 'undelete'
+        state = [as_localcaption, as_localonexecute]
+        onexecute = undeleteexe
+      end    
+      item
+        options = [mao_separator, mao_shortcutcaption]
+      end    
+      item
+        caption = 'Edit Component'
+        name = 'editcomp'
+        state = [as_localcaption, as_localonexecute]
+        onexecute = doeditcomponent
+      end    
+      item
+        caption = 'Bring to Front'
+        name = 'bringtofro'
+        state = [as_localcaption, as_localonexecute]
+        onexecute = dobringtofront
+      end    
+      item
+        caption = 'Send to Back'
+        name = 'sendtoba'
+        state = [as_localcaption, as_localonexecute]
+        onexecute = dosendtoback
+      end    
+      item
+        caption = 'Set Tab Order'
+        name = 'settabord'
+        state = [as_localcaption, as_localonexecute]
+        onexecute = dosettaborder
+      end    
+      item
+        caption = 'Sync. to Font Height'
+        name = 'synctofo'
+        state = [as_localcaption, as_localonexecute]
+        onexecute = dosyncfontheight
+      end    
+      item
+        options = [mao_separator, mao_shortcutcaption]
+      end    
+      item
+        caption = 'Revert to inherited'
+        name = 'revert'
+        state = [as_localcaption, as_localonexecute]
+        options = [mao_shortcutcaption, mao_asyncexecute]
+        onexecute = revertexe
+      end    
+      item
+        caption = 'Insert Submodule'
+        name = 'insertsub'
+        state = [as_localcaption, as_localonexecute]
+        onexecute = doinsertsubmodule
+      end>
+    left = 48
+    top = 40
+  end
+end

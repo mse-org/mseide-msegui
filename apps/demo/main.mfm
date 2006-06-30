@@ -1,0 +1,25 @@
+object mainfo: tmainfo
+  optionswidget = [ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_destroywidgets, ow_hinton, ow_autoscale]
+  bounds_x = 153
+  bounds_y = 240
+  bounds_cx = 341
+  bounds_cy = 166
+  container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_mousetransparent, ow_destroywidgets, ow_autoscale]
+  container.bounds_cx = 341
+  container.bounds_cy = 166
+  container.frame.dummy = 0
+  options = [fo_main, fo_terminateonclose, fo_autoreadstat, fo_autowritestat, fo_savepos, fo_savestate]
+  icon.transparency = -2147483648
+  moduleclassname = 'tmseform'
+  object tbutton1: tbutton
+    optionswidget = [ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+    bounds_x = 144
+    bounds_y = 72
+    bounds_cx = 50
+    bounds_cy = 22
+    caption = 'Exit'
+    font.dummy = 0
+    onexecute = exitonexecute
+    reffontheight = 16
+  end
+end

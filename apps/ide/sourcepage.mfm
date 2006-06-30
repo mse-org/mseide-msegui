@@ -1,0 +1,121 @@
+object sourcepage: tsourcepage
+  bounds_x = 192
+  bounds_y = 245
+  bounds_cx = 311
+  bounds_cy = 228
+  color = -2147483645
+  visible = False
+  container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_subfocus, ow_mousetransparent, ow_destroywidgets, ow_autoscale]
+  container.bounds_cx = 311
+  container.bounds_cy = 228
+  container.frame.dummy = 0
+  icon.transparentcolor = -2147483648
+  oncreate = sourcefooncreate
+  onloaded = sourcefoonloaded
+  ondestroy = sourcefoondestroy
+  onshow = sourcefoonshow
+  onhide = sourcefoondeactivate
+  moduleclassname = 'tmseform'
+  object grid: twidgetgrid
+    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_mousewheel, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+    bounds_cx = 311
+    bounds_cy = 206
+    frame.dummy = 0
+    anchors = [an_top, an_bottom]
+    optionsgrid = [og_focuscellonenter, og_autofirstrow]
+    rowcolors.count = 4
+    rowcolors.items = (
+      14745599
+      65535
+      16711680
+      -2147483646
+    )
+    datacols.count = 2
+    datacols.items = <    
+      item
+        linecolor = -1610612732
+        width = 15
+        options = [co_nofocus, co_nohscroll, co_rowcolor]
+        oncellevent = icononcellevent
+        widgetname = 'dataicon'
+      end    
+      item
+        width = 2000
+        options = [co_leftbuttonfocusonly, co_savestate, co_rowcolor, co_mousescrollrow]
+        onchange = textchanged
+        widgetname = 'edit'
+      end>
+    datarowlinewidth = 0
+    datarowheight = 16
+    onrowsinserted = gridonrowsinserted
+    onrowsdeleted = gridonrowsdeleted
+    oncellevent = gridoncellevent
+    reffontheight = 16
+    object dataicon: tdataicon
+      bounds_x = 2
+      bounds_y = 2
+      bounds_cx = 15
+      bounds_cy = 16
+      taborder = 1
+      visible = False
+      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_eatreturn, oe_resetselectonexit, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_savestate]
+      valuedefault = -2147483648
+      min = -1
+      max = 2
+      imagenums.count = 14
+      imagenums.items = (
+        0
+        1
+        2
+        3
+        4
+        5
+        6
+        7
+        8
+        9
+        10
+        11
+        12
+        13
+      )
+    end
+    object edit: tsyntaxedit
+      optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontlineheight]
+      bounds_cx = 2000
+      bounds_cy = 16
+      visible = False
+      font.name = 'mseide_source'
+      font.dummy = 0
+      optionsedit = [oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_linebreak, oe_eatreturn, oe_keyexecute, oe_savestate]
+      tabulators.ppmm = 3
+      onfontchanged = editonfontchanged
+      onmodifiedchanged = editonmodifiedchanged
+      ontextmouseevent = editontextmouseevent
+      oneditnotifcation = editoneditnotification
+      oncellevent = editoncellevent
+      maxundocount = 10000
+      reffontheight = 19
+    end
+  end
+  object linedisp: tstringdisp
+    bounds_y = 207
+    bounds_cx = 68
+    frame.dummy = 0
+    anchors = [an_left, an_bottom]
+    taborder = 2
+    textflags = [tf_xcentered, tf_ycentered]
+    reffontheight = 16
+  end
+  object pathdisp: tstringdisp
+    bounds_x = 68
+    bounds_y = 207
+    bounds_cx = 243
+    frame.dummy = 0
+    anchors = [an_left, an_right, an_bottom]
+    taborder = 1
+    textflags = [tf_ycentered, tf_ellipseleft]
+    options = [dwo_hintclippedtext]
+    reffontheight = 16
+  end
+end
