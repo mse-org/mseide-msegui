@@ -966,25 +966,27 @@ var
 
 begin
  result:= emptysourcepos;
- designer.getmethodinfo(amethod,moduleinfo,methodinfo);
- if moduleinfo <> nil then begin
-  unitinfo:= updateformunit(moduleinfo^.filename,false);
-  if unitinfo <> nil then begin
-   classinfo1:= unitinfo^.classinfolist.finditembyname(
-           moduleinfo^.moduleclassname,true);
-   if classinfo1 <> nil then begin
-    procedureinfo:= classinfo1^.procedurelist.finditembyname(methodinfo^.name);
-    if procedureinfo <> nil then begin
-     with procedureinfo^do begin
-      if imp and (impheaderendpos.filenum > 0) then begin
-       result:= impheaderendpos;
-      end
-      else begin
-       if intendpos.filenum > 0 then begin
-        result:= intendpos;
+ if amethod.code <> nil then begin
+  designer.getmethodinfo(amethod,moduleinfo,methodinfo);
+  if moduleinfo <> nil then begin
+   unitinfo:= updateformunit(moduleinfo^.filename,false);
+   if unitinfo <> nil then begin
+    classinfo1:= unitinfo^.classinfolist.finditembyname(
+            moduleinfo^.moduleclassname,true);
+    if classinfo1 <> nil then begin
+     procedureinfo:= classinfo1^.procedurelist.finditembyname(methodinfo^.name);
+     if procedureinfo <> nil then begin
+      with procedureinfo^do begin
+       if imp and (impheaderendpos.filenum > 0) then begin
+        result:= impheaderendpos;
        end
        else begin
-        result:= impheaderendpos;
+        if intendpos.filenum > 0 then begin
+         result:= intendpos;
+        end
+        else begin
+         result:= impheaderendpos;
+        end;
        end;
       end;
      end;
