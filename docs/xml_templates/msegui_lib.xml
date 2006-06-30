@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="ISO8859-1"?>
+<fpdoc-descriptions>
+<package name="msegui">
+<short>MSE GUI Component Library</short>
+<descr>
+<p>
+The MSE GUI Component Library is a set of visual components to create GUI applications for Window and Linux.
+No huge toolkits ( Qt,Gtk,.. ) required - the internal Win32 GUI ( Windows ) and XLibs ( Linux ) are used to draw widgets.
+It is tightly bound with FPC, not a Delphi clone but more likely Delphi redesign and extention for particular people needs.
+</p>
+</descr>
+</package>
+</fpdoc-descriptions>
