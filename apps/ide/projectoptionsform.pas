@@ -170,6 +170,8 @@ type
    dmake4on: tbooleanedit;
    dmakeon: tbooleanedit;
    duniton: tbooleanedit;
+   gridsizex: tintegeredit;
+   gridsizey: tintegeredit;
    make1on: tbooleanedit;
    make2on: tbooleanedit;
    make3on: tbooleanedit;
@@ -178,12 +180,14 @@ type
    makeoptions: tstringedit;
    makeoptionsgrid: twidgetgrid;
    makesplitter: tsplitter;
+   showgrid: tbooleanedit;
    sighandle: tbooleanedit;
    signalgrid: twidgetgrid;
    signame: tselector;
    signum: tintegeredit;
    signumto: tintegeredit;
    sigstop: tbooleanedit;
+   snaptogrid: tbooleanedit;
    sourcedirgrid: twidgetgrid;
    sourcedirs: tfilenameedit;
    statfile1: tstatfile;
@@ -243,8 +247,6 @@ type
    newprojectfilesdest: tstringedit;
    loadprojectfile: tbooleanedit;
    dobjon: tbooleanedit;
-   showgrid: tbooleanedit;
-   snaptogrid: tbooleanedit;
    showconsole: tbooleanedit;
    exceptignore: tbooleanedit;
    debugtarget: tfilenameedit;
@@ -252,12 +254,10 @@ type
    checkmethods: tbooleanedit;
    externalconsole: tbooleanedit;
    tgroupbox1: tgroupbox;
-   gridsizex: tintegeredit;
    backupfilecount: tintegeredit;
-   tintegeredit2: tintegeredit;
-   gridsizey: tintegeredit;
    debugoptions: tstringedit;
    exceptclassnames: tstringedit;
+   tintegeredit2: tintegeredit;
    ttabpage1: ttabpage;
    macrogrid: twidgetgrid;
    selectactivegroupgrid: twidgetgrid;

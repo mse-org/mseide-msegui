@@ -161,7 +161,7 @@ type
    procedure doundelete;
    procedure dodelete;
    procedure dopaste;
-   procedure docopy;
+   procedure docopy(const noclear: boolean);
    procedure docut;
    procedure recalcclientsize;
   protected
@@ -869,17 +869,19 @@ begin
  end;
 end;
 
-procedure tdesignwindow.docopy;
+procedure tdesignwindow.docopy(const noclear: boolean);
 begin
  fselections.remove(module);
  fselections.copytoclipboard;
- fselections.clear;
- selectcomponent(module);
+ if not noclear then begin
+  fselections.clear;
+  selectcomponent(module);
+ end;
 end;
 
 procedure tdesignwindow.docut;
 begin
- docopy;
+ docopy(true);
  dodelete;
 end;
 
@@ -1025,11 +1027,11 @@ begin
     if shiftstate = [ss_ctrl] then begin
      include(eventstate,es_processed);
      case key of
-      key_c,key_x: begin
-       docopy;
-       if key = key_x then begin
-        dodelete;
-       end;
+      key_c: begin
+       docopy(false);
+      end;
+      key_x: begin
+       docut;
       end;
       key_v: begin
        dopaste;
@@ -2032,7 +2034,7 @@ end;
 
 procedure tformdesignerfo.copyexe(const sender: TObject);
 begin
- tdesignwindow(twidget(tmenuitem(sender).owner.owner).window).docopy;
+ tdesignwindow(twidget(tmenuitem(sender).owner.owner).window).docopy(false);
 end;
 
 procedure tformdesignerfo.pasteexe(const sender: TObject);

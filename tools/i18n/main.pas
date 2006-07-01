@@ -709,10 +709,12 @@ end;
 
 procedure tmainfo.readprojectdata;
 begin
- try
-  doread(ttextdatastream.Create(projectfo.datafilename.value),ce_utf8n);
- except
-  application.handleexception(self);
+ if projectfo.datafilename.value <> '' then begin
+  try
+   doread(ttextdatastream.Create(projectfo.datafilename.value),ce_utf8n);
+  except
+   application.handleexception(self);
+  end;
  end;
 end;
 
