@@ -173,6 +173,7 @@ end;
 procedure tmainfo.tmainfoonloaded(const sender: tobject);
 begin
  mainstatfile.readstat;
+ show;
 end;
 
 procedure tmainfo.tmainfoondestroy(const sender: tobject);

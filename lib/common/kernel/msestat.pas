@@ -1100,7 +1100,7 @@ end;
 
 procedure tstatwriter.writestat(const intf: istatfile);
 begin
- if intf <> nil then begin
+ if (intf <> nil) and (fstream <> nil) then begin
   writesection(varname(intf));
   intf.dostatwrite(self);
  end;
