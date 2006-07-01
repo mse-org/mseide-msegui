@@ -927,8 +927,7 @@ begin
  end;
  if (flayout.menu.count > 0) and (flayout.activeitem < 0) then begin
   internalsetactiveitem(0,aclicked,true);
-  show(true,nil);
-  if fprevpopup = nil then begin
+  if (show(true,nil) <> mr_windowdestroyed) and (fprevpopup = nil) then begin
    flayout.menu.owner.checkexec;
   end;
  end;
