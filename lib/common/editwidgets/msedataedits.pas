@@ -3607,10 +3607,12 @@ var
  dat1: tdatetime;
 begin
  result:= tpopupcalendarfo.create(nil,fdropdown);
- try
-  dat1:= strtodate(atext);
- except
-  dat1:= now;
+ dat1:= now;
+ if trim(atext) <> '' then begin
+  try
+   dat1:= strtodate(atext);
+  except
+  end;
  end;
  tpopupcalendarfo(result).value:= dat1;
 end;

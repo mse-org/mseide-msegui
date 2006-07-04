@@ -5061,7 +5061,7 @@ begin
  internalupdatelayout;
  fnumoffset:= getnumoffset;
  saveindex:= -1;
- if fgridframewidth > 0 then begin
+ if fgridframewidth <> 0 then begin
   saveindex:= acanvas.save;
  end;
  acanvas.move(pointty(tframe1(fframe).fi.innerframe.topleft));
@@ -5153,7 +5153,7 @@ begin
    acanvas.intersectcliprect(adatarect);
    if not acanvas.clipregionisempty then begin //draw horz lines datacols
     int2:= ffixcols.ffirstsize + datacols.ftotsize +
-                   fscrollrect.x + ffirstnohscroll - 1;
+                   fscrollrect.x + ffirstnohscroll{ - 1};
     if ffirstnohscroll > 0 then begin
      int3:= ffixcols.ffirstsize;
     end

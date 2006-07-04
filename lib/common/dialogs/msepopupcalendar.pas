@@ -6,7 +6,7 @@ uses
  msegraphics,mseeditglob,msetypes,msedropdownlist,msetimer,msesimplewidgets;
  
 const
- popupcalendarwidth = 231;
+ popupcalendarwidth = 233;
  
 type
  tcalendarcontroller = class(tdropdownwidgetcontroller)
