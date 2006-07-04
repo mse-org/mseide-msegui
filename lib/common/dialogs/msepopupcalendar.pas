@@ -49,7 +49,7 @@ type
 implementation
 uses
  msepopupcalendar_mfm,sysutils,dateutils,msedrawtext,msestrings,mseevent,
- msekeyboard;
+ msekeyboard,mseguiglob;
  
 { tcalendarcontroller }
 
@@ -166,10 +166,20 @@ begin
       include(eventstate,es_processed);
       case key of
        key_pagedown,key_wheeldown: begin
-        moup(nil);
+        if shiftstate = [ss_ctrl] then begin
+         yearup(nil);
+        end
+        else begin
+         moup(nil);
+        end;
        end;
        key_pageup,key_wheelup: begin
-        modown(nil);
+        if shiftstate = [ss_ctrl] then begin
+         yeardown(nil);
+        end
+        else begin
+         modown(nil);
+        end;        
        end;
        key_up: begin
         if cell.row = 0 then begin

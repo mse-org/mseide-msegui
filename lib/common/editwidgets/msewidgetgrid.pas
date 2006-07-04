@@ -730,7 +730,7 @@ begin
     widget1:= fintf.getwidget;
     with widget1 do begin
      visible:= true;
-     if ((selectaction = fca_focusin) or (selectaction = fca_entergrid)) and
+     if (selectaction in [fca_focusin,fca_entergrid,fca_focusinshift]) and
                  canfocus and fgrid.entered then begin
       setfocus(fgrid.active);
      end;

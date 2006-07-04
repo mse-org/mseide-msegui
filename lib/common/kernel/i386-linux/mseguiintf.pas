@@ -608,7 +608,7 @@ var
  ic: xic;
  errorhandlerbefore: xerrorhandler;
  lasteventtime: cardinal;
- lastshiftstate: shiftstatesty;
+// lastshiftstate: shiftstatesty;
  clipboard: msestring;
 
 function gui_getdefaultfontnames: defaultfontnamesty;
@@ -1935,7 +1935,9 @@ begin
  end;
 end;
 
-function xtoshiftstate(shiftstate: cardinal): shiftstatesty;
+function xtoshiftstate(const shiftstate: cardinal;
+                       const key: keyty; const button: mousebuttonty;
+                       const up: boolean): shiftstatesty;
 begin
  result:= [];
  if shiftstate and button1mask <> 0 then include(result,ss_left);
@@ -1944,6 +1946,16 @@ begin
  if shiftstate and shiftmask <> 0 then include(result,ss_shift);
  if shiftstate and controlmask <> 0 then include(result,ss_ctrl);
  if shiftstate and mod1mask <> 0 then include(result,ss_alt);
+ case key of
+  key_shift: if up then exclude(result,ss_shift) else include(result,ss_shift);
+  key_control: if up then exclude(result,ss_ctrl) else include(result,ss_ctrl);
+  key_alt: if up then exclude(result,ss_alt) else include(result,ss_alt);
+ end;
+ case button of
+  mb_left: if up then exclude(result,ss_left) else include(result,ss_left);
+  mb_middle: if up then exclude(result,ss_middle) else include(result,ss_middle);
+  mb_right: if up then exclude(result,ss_right) else include(result,ss_right);
+ end;
 end;
 
 var
@@ -4165,7 +4177,10 @@ var
  {$ifdef hassm}
  int2: integer;
  {$endif}
-
+ shiftstate1: shiftstatesty;
+ key1: keyty;
+ button1: mousebuttonty;
+ 
 begin
  while true do begin
   if gui_hasevent then begin
@@ -4324,13 +4339,12 @@ begin
    with xev.xmotion do begin
     lasteventtime:= time;
     result:= tmouseevent.create(xwindow,false,mb_none,
-                makepoint(x,y),xtoshiftstate(state),time*1000);
+                makepoint(x,y),xtoshiftstate(state,key_none,mb_none,false),time*1000);
    end;
   end;
   keypress: begin
    with xev.xkey do begin
     lasteventtime:= time;
-    lastshiftstate:= xtoshiftstate(state);
     setlength(buffer,20);
     int1:= xutf8lookupstring(ic,@xev.xkey,@buffer[1],length(buffer),@akey,@icstatus);
     setlength(buffer,int1);
@@ -4343,34 +4357,39 @@ begin
      xlookupchars: akey:= 0;
      xlookupkeysym_: chars:= '';
     end;
-    result:= tkeyevent.create(xwindow,false,xkeytokey(akey),lastshiftstate,chars);
+    key1:= xkeytokey(akey);
+    shiftstate1:= xtoshiftstate(state,key1,mb_none,false);
+    result:= tkeyevent.create(xwindow,false,key1,shiftstate1,chars);
    end;
   end;
   keyrelease: begin
    with xev.xkey do begin
     lasteventtime:= time;
-    lastshiftstate:= xtoshiftstate(state);
     xlookupstring(@xev.xkey,nil,0,@akey,nil);
-    result:= tkeyevent.create(xwindow,true,xkeytokey(akey),lastshiftstate,'');
+    key1:= xkeytokey(akey);
+    shiftstate1:= xtoshiftstate(state,key1,mb_none,true);
+    result:= tkeyevent.create(xwindow,true,key1,shiftstate1,'');
    end;
   end;
   buttonpress,buttonrelease: begin
    with xev.xbutton do begin
     lasteventtime:= time;
+    button1:= xtomousebutton(button);
+    shiftstate1:= xtoshiftstate(state,key_none,button1,xev.xtype=buttonrelease);
     if button = 4 then begin
      if xev.xtype = buttonpress then begin
-      result:= tkeyevent.create(xwindow,false,key_wheelup,lastshiftstate,chars);
+      result:= tkeyevent.create(xwindow,false,key_wheelup,shiftstate1,chars);
      end;
     end
     else begin
      if button = 5 then begin
       if xev.xtype = buttonpress then begin
-       result:= tkeyevent.create(xwindow,false,key_wheeldown,lastshiftstate,chars);
+       result:= tkeyevent.create(xwindow,false,key_wheeldown,shiftstate1,chars);
       end;
      end
      else begin
-      result:= tmouseevent.create(xwindow,xtype = buttonrelease,xtomousebutton(button),
-                makepoint(x,y),xtoshiftstate(state),time*1000);
+      result:= tmouseevent.create(xwindow,xtype = buttonrelease,button1,
+                makepoint(x,y),shiftstate1,time*1000);
      end;
     end;
    end;

@@ -250,7 +250,7 @@ type
    filter: tdropdownlistedit;
    dir: tdirdropdownedit;
    procedure createdironexecute(const sender: TObject);
-   procedure listviewselectionchanged(const sender: TObject);
+   procedure listviewselectionchanged(const sender: tcustomlistview);
    procedure listviewitemevent(const sender: tcustomlistview;
      const index: Integer; var info: celleventinfoty);
    procedure listviewonkeydown(const sender: twidget; var info: keyeventinfoty);
@@ -802,7 +802,7 @@ begin
  end;
 end;
 
-procedure Tfiledialogfo.listviewselectionchanged(const sender: TObject);
+procedure tfiledialogfo.listviewselectionchanged(const sender: tcustomlistview);
 var
  ar1: msestringarty;
 begin
