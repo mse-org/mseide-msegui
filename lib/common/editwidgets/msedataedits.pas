@@ -777,7 +777,7 @@ type
    property kind;
  end;
 
- tcalendardatetimeedit = class(tdatetimeedit,idropdownwidget)
+ tcustomcalendardatetimeedit = class(tcustomdatetimeedit,idropdownwidget)
   private
    fdropdown: tcalendarcontroller;
    procedure setframe(const avalue: tdropdownbuttonframe);
@@ -795,11 +795,23 @@ type
    function getdropdowntext(const awidget: twidget): msestring;
   public
    constructor create(aowner: tcomponent); override;
+   property dropdown: tcalendarcontroller read fdropdown write fdropdown;
   published
    property frame: tdropdownbuttonframe read getframe write setframe;
-   property dropdown: tcalendarcontroller read fdropdown write fdropdown;
  end;
   
+ tcalendardatetimeedit = class(tcustomcalendardatetimeedit)
+  published
+   property onsetvalue;
+   property value stored false;
+   property formatedit;
+   property formatdisp;
+   property min stored false;
+   property max stored false;
+   property kind;
+   property dropdown;
+ end;
+ 
 implementation
 uses
  sysutils,msereal,msekeyboard,msebits,msepointer,msestreaming,msestockobjects;
@@ -3529,30 +3541,30 @@ begin
           cmprealty(fmax,0.99*bigreal) < 0);
 end;
 
-{ tcalendardatetimeedit }
+{ tcustomcalendardatetimeedit }
 
-constructor tcalendardatetimeedit.create(aowner: tcomponent);
+constructor tcustomcalendardatetimeedit.create(aowner: tcomponent);
 begin
  inherited;
  fdropdown:= tcalendarcontroller.create(idropdownwidget(self));
 end;
 
-procedure tcalendardatetimeedit.setframe(const avalue: tdropdownbuttonframe);
+procedure tcustomcalendardatetimeedit.setframe(const avalue: tdropdownbuttonframe);
 begin
  inherited setframe(avalue);
 end;
 
-function tcalendardatetimeedit.getframe: tdropdownbuttonframe;
+function tcustomcalendardatetimeedit.getframe: tdropdownbuttonframe;
 begin
  result:= tdropdownbuttonframe(inherited getframe);
 end;
 
-procedure tcalendardatetimeedit.createframe;
+procedure tcustomcalendardatetimeedit.createframe;
 begin
  fdropdown.createframe;
 end;
 
-procedure tcalendardatetimeedit.dokeydown(var info: keyeventinfoty);
+procedure tcustomcalendardatetimeedit.dokeydown(var info: keyeventinfoty);
 begin
  fdropdown.dokeydown(info);
  if not (es_processed in info.eventstate) then begin
@@ -3560,13 +3572,13 @@ begin
  end;
 end;
 
-procedure tcalendardatetimeedit.mouseevent(var info: mouseeventinfoty);
+procedure tcustomcalendardatetimeedit.mouseevent(var info: mouseeventinfoty);
 begin
  tcustombuttonframe(fframe).mouseevent(info);
  inherited;
 end;
 
-procedure tcalendardatetimeedit.setoptionsedit(const avalue: optionseditty);
+procedure tcustomcalendardatetimeedit.setoptionsedit(const avalue: optionseditty);
 begin
  inherited;
  if fdropdown <> nil then begin
@@ -3574,23 +3586,23 @@ begin
  end;
 end;
 
-procedure tcalendardatetimeedit.buttonaction(var action: buttonactionty;
+procedure tcustomcalendardatetimeedit.buttonaction(var action: buttonactionty;
                const buttonindex: integer);
 begin
  //dummy
 end;
 
-procedure tcalendardatetimeedit.dobeforedropdown;
+procedure tcustomcalendardatetimeedit.dobeforedropdown;
 begin
  //dummy
 end;
 
-procedure tcalendardatetimeedit.doafterclosedropdown;
+procedure tcustomcalendardatetimeedit.doafterclosedropdown;
 begin
  //dummy
 end;
 
-function tcalendardatetimeedit.createdropdownwidget(const atext: msestring): twidget;
+function tcustomcalendardatetimeedit.createdropdownwidget(const atext: msestring): twidget;
 var
  dat1: tdatetime;
 begin
@@ -3603,7 +3615,7 @@ begin
  tpopupcalendarfo(result).value:= dat1;
 end;
 
-function tcalendardatetimeedit.getdropdowntext(const awidget: twidget): msestring;
+function tcustomcalendardatetimeedit.getdropdowntext(const awidget: twidget): msestring;
 begin
  result:= text;
 end;

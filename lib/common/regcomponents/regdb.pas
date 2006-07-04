@@ -100,7 +100,7 @@ begin
       tdbmemoedit,tdbstringedit,tdbdropdownlistedit,tdbbooleantextedit,
       tdbkeystringedit,tdbkeystringeditdb,tdbkeystringeditlb,
       tdbintegeredit,tdbenumedit,tdbenumeditdb,tdbenumeditlb,
-      tdbdataicon,tdbrealedit,tdbdatetimeedit,
+      tdbdataicon,tdbrealedit,tdbdatetimeedit,tdbcalendardatetimeedit,
       tdbbooleanedit,tdbbooleaneditradio,
       tdbwidgetgrid,tdbstringgrid,
       

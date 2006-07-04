@@ -534,6 +534,47 @@ type
    property onsetvalue;
  end;
 
+ tdbcalendardatetimeedit = class(tcustomcalendardatetimeedit,idbeditfieldlink,idbeditinfo)
+  private
+   fdatalink: teditwidgetdatalink;
+   function getdatafield: string;
+   procedure setdatafield(const avalue: string);
+   function getdatasource: tdatasource;
+   procedure setdatasource(const avalue: tdatasource);
+  protected
+
+   function nullcheckneeded(const newfocus: twidget): boolean; override;
+   procedure griddatasourcechanged; override;
+   function getgriddatasource: tdatasource;
+   function createdatalist(const sender: twidgetcol): tdatalist; override;
+   procedure modified; override;
+   function getoptionsedit: optionseditty; override;
+
+   function getrowdatapo(const info: cellinfoty): pointer; override;
+   //idbeditfieldlink
+   procedure valuetofield;
+   procedure fieldtovalue;
+   //idbeditinfo
+   procedure getfieldtypes(out propertynames: stringarty;
+                          out fieldtypes: fieldtypesarty);
+  public
+   constructor create(aowner: tcomponent); override;
+   destructor destroy; override;
+   function checkvalue(const quiet: boolean = false): boolean; override;
+   property datalink: teditwidgetdatalink read fdatalink;
+  published
+   property datafield: string read getdatafield write setdatafield;
+   property datasource: tdatasource read getdatasource write setdatasource;
+
+   property min stored false;
+   property max stored false;
+   property formatedit;
+   property formatdisp;
+   property kind;
+   property onsetvalue;
+   property dropdown;
+ end;
+ 
  tcustomdbenumedit = class(tcustomenumedit,idbeditfieldlink,idbeditinfo)
   private
    fdatalink: teditwidgetdatalink;
@@ -2941,6 +2982,123 @@ begin
 end;
 
 function tdbdatetimeedit.nullcheckneeded(const newfocus: twidget): boolean;
+begin
+ result:= inherited nullcheckneeded(newfocus) and fdatalink.nullcheckneeded;
+end;
+
+{ tdbcalendardatetimeedit }
+
+constructor tdbcalendardatetimeedit.create(aowner: tcomponent);
+begin
+ fdatalink:= teditwidgetdatalink.Create(idbeditfieldlink(self));
+ inherited;
+end;
+
+destructor tdbcalendardatetimeedit.destroy;
+begin
+ inherited;
+ fdatalink.free;
+end;
+
+function tdbcalendardatetimeedit.getdatafield: string;
+begin
+ result:= fdatalink.fieldname;
+end;
+
+procedure tdbcalendardatetimeedit.setdatafield(const avalue: string);
+begin
+ fdatalink.fieldname:= avalue;
+end;
+
+function tdbcalendardatetimeedit.getdatasource: tdatasource;
+begin
+ result:= fdatalink.datasource;
+end;
+
+procedure tdbcalendardatetimeedit.setdatasource(const avalue: tdatasource);
+begin
+ fdatalink.setwidgetdatasource(avalue);
+end;
+
+function tdbcalendardatetimeedit.checkvalue(const quiet: boolean = false): boolean;
+begin
+ result:= inherited checkvalue(quiet) and fdatalink.dataentered;
+end;
+
+procedure tdbcalendardatetimeedit.modified;
+begin
+ fdatalink.modified;
+ inherited;
+end;
+
+function tdbcalendardatetimeedit.getoptionsedit: optionseditty;
+begin
+ result:= inherited getoptionsedit;
+ fdatalink.updateoptionsedit(result);
+end;
+
+procedure tdbcalendardatetimeedit.valuetofield;
+begin
+ if value = 0 then begin
+  fdatalink.field.clear;
+ end
+ else begin
+  fdatalink.field.asdatetime:= value;
+ end;
+end;
+
+procedure tdbcalendardatetimeedit.fieldtovalue;
+var
+ da1: tdatetime;
+begin
+ if fdatalink.field.isnull then begin
+  value:= 0;
+ end
+ else begin
+  da1:= fdatalink.field.asdatetime;
+//  if da1 = 0 then begin
+//   da1:= nulltime;
+//  end;
+  value:= da1;
+ end;
+end;
+ 
+function tdbcalendardatetimeedit.getrowdatapo(const info: cellinfoty): pointer;
+begin
+ with info do begin
+  if griddatalink <> nil then begin
+   result:= tgriddatalink(griddatalink).getdatetimebuffer(fdatalink.field,cell.row);
+  end
+  else begin
+   result:= nil;
+  end;
+ end;
+end;
+
+function tdbcalendardatetimeedit.createdatalist(const sender: twidgetcol): tdatalist;
+begin
+ result:= nil;
+end;
+
+procedure tdbcalendardatetimeedit.griddatasourcechanged;
+begin
+ fdatalink.griddatasourcechanged;
+end;
+
+function tdbcalendardatetimeedit.getgriddatasource: tdatasource;
+begin
+ result:= tcustomdbwidgetgrid(fgridintf.getcol.grid).datasource;
+end;
+
+procedure tdbcalendardatetimeedit.getfieldtypes(out propertynames: stringarty; 
+                    out fieldtypes: fieldtypesarty);
+begin
+ propertynames:= nil;
+ setlength(fieldtypes,1);
+ fieldtypes[0]:= datetimefields;
+end;
+
+function tdbcalendardatetimeedit.nullcheckneeded(const newfocus: twidget): boolean;
 begin
  result:= inherited nullcheckneeded(newfocus) and fdatalink.nullcheckneeded;
 end;
