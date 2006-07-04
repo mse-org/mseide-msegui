@@ -1,9 +1,5 @@
 object msepopupcalendarfo: tpopupcalendarfo
   optionswindow = [wo_popup, wo_buttonendmodal]
-  font.height = 12
-  font.name = 'stf_default'
-  font.options = [foo_helvetica]
-  font.dummy = 0
   options = [fo_freeonclose, fo_closeonesc, fo_autoreadstat, fo_autowritestat, fo_savepos, fo_savestate]
   onaftercreate = aftercreate
   container.frame.localprops = [frl_framewidth]
@@ -73,9 +69,7 @@ object msepopupcalendarfo: tpopupcalendarfo
         focusrectdist = 1
         ondrawcell = drawcell
         font.color = -1610612729
-        font.height = 12
         font.name = 'stf_default'
-        font.options = [foo_helvetica]
         font.dummy = 0
         options = [co_readonly, co_drawfocus, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
         linecolor = -1610612729
@@ -135,7 +129,7 @@ object msepopupcalendarfo: tpopupcalendarfo
     frame.dummy = 0
     anchors = [an_left, an_right, an_bottom]
     taborder = 6
-    reffontheight = 16
+    reffontheight = 13
   end
   object monthdisp: tdatetimedisp
     format = 'mmmm'
@@ -150,7 +144,7 @@ object msepopupcalendarfo: tpopupcalendarfo
     bounds_cy = 22
     color = -1610612730
     taborder = 5
-    reffontheight = 16
+    reffontheight = 13
   end
   object yeardisp: tdatetimedisp
     format = 'yyyy'
@@ -164,7 +158,7 @@ object msepopupcalendarfo: tpopupcalendarfo
     bounds_cy = 22
     color = -1610612730
     taborder = 4
-    reffontheight = 16
+    reffontheight = 13
   end
   object tstockglyphbutton1: tstockglyphbutton
     glyph = stg_arrowupsmall

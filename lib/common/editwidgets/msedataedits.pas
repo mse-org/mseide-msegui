@@ -3539,7 +3539,7 @@ end;
 
 procedure tcalendardatetimeedit.setframe(const avalue: tdropdownbuttonframe);
 begin
- inherited;
+ inherited setframe(avalue);
 end;
 
 function tcalendardatetimeedit.getframe: tdropdownbuttonframe;
