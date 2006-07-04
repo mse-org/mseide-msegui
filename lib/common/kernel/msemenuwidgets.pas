@@ -1287,7 +1287,7 @@ begin
  end;
  inherited;
  if value < 0 then begin
-  focusback;
+  focusback(factivewindowbefore <> nil);
   if factivewindowbefore <> fwindow then begin
    if (fstackedoverbefore <> nil) and fstackedoverbefore.visible then begin
     setlength(ar1,2);

@@ -5,7 +5,6 @@ object ${%FORMNAME%}: t${%FORMNAME%}
   container.bounds_cx = 403
   container.bounds_cy = 280
   container.frame.dummy = 0
-  optionswidget = [ow_arrowfocus, ow_subfocus, ow_destroywidgets, ow_hinton, ow_autoscale]
   bounds_x = 290
   bounds_y = 234
   bounds_cx = 403

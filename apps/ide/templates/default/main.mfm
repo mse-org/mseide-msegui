@@ -1,15 +1,13 @@
 object mainfo: tmainfo
-  optionswindow = [wo_groupleader]
-  options = [fo_main, fo_terminateonclose, fo_autoreadstat, fo_autowritestat, fo_savepos, fo_savestate]
-  container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_subfocus, ow_mousetransparent, ow_destroywidgets, ow_autoscale]
-  container.bounds_cx = 403
-  container.bounds_cy = 280
-  container.frame.dummy = 0
-  optionswidget = [ow_arrowfocus, ow_subfocus, ow_destroywidgets, ow_hinton, ow_autoscale]
   bounds_x = 291
   bounds_y = 247
   bounds_cx = 403
   bounds_cy = 280
-  color = -1879048187
+  container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_subfocus, ow_mousetransparent, ow_destroywidgets, ow_autoscale]
+  container.bounds_cx = 403
+  container.bounds_cy = 280
+  container.frame.dummy = 0
+  optionswindow = [wo_groupleader]
+  options = [fo_main, fo_terminateonclose, fo_autoreadstat, fo_autowritestat, fo_savepos, fo_savestate]
   moduleclassname = 'tmseform'
 end

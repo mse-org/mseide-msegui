@@ -203,10 +203,14 @@ type
    procedure setvalue(const avalue: tdatetime);
    procedure setformat(const avalue: string);
    procedure setkind(const avalue: datetimekindty);
+   procedure readvalue(reader: treader);
+   procedure writevalue(writer: twriter);
   protected
    procedure valuechanged; override;
    function getvaluetext: msestring; override;
+   procedure defineproperties(filer: tfiler); override;
   public
+   constructor create(aowner: tcomponent); override;
    property value: tdatetime read fvalue write setvalue;
   published
    property format: string read fformat write setformat;
@@ -216,7 +220,7 @@ type
 
  tdatetimedisp = class(tcustomdatetimedisp)
   published
-   property value;
+   property value stored false;
  end;
   
  tcustombooleandisp = class(tdispwidget)
@@ -248,7 +252,7 @@ type
 
 implementation
 uses
- sysutils,msereal,math,msestreaming;
+ sysutils,msereal,math,msestreaming,msedate;
 
 { tdispframe }
 
@@ -513,6 +517,12 @@ end;
 
 { tcustomdatetimedisp }
 
+constructor tcustomdatetimedisp.create(aowner: tcomponent);
+begin
+ fvalue:= emptydatetime;
+ inherited;
+end;
+
 procedure tcustomdatetimedisp.setvalue(const avalue: tdatetime);
 begin
  if fvalue <> avalue then begin
@@ -551,6 +561,25 @@ begin
   fkind:= avalue;
   formatchanged;
  end;
+end;
+
+procedure tcustomdatetimedisp.readvalue(reader: treader);
+begin
+ value:= readrealty(reader);
+end;
+
+procedure tcustomdatetimedisp.writevalue(writer: twriter);
+begin
+ writerealty(writer,fvalue);
+end;
+
+procedure tcustomdatetimedisp.defineproperties(filer: tfiler);
+begin
+ inherited;
+ filer.DefineProperty('val',
+             {$ifdef FPC}@{$endif}readvalue,
+             {$ifdef FPC}@{$endif}writevalue,
+          not isemptydatetime(fvalue));
 end;
 
 { tcustombooleandisp }

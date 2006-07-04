@@ -1,9 +1,7 @@
 object ${%FORMNAME%}: t${%FORMNAME%}
-  container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_subfocus, ow_mousetransparent, ow_destroywidgets, ow_autoscale]
   container.bounds_cx = 100
   container.bounds_cy = 100
   container.frame.dummy = 0
-  optionswidget = [ow_arrowfocus, ow_subfocus, ow_destroywidgets, ow_hinton, ow_autoscale]
   bounds_x = 337
   bounds_y = 266
   bounds_cx = 100

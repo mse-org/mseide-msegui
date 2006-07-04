@@ -709,14 +709,14 @@ begin
       include(fstate,gs_childmousecaptured);
      end; 
     end;
-    if (newcell.row < 0) then begin
+//    if (newcell.row < 0) then begin
      if (activewidgetbefore <> nil) then begin
       if activewidgetbefore.focused then begin
        fcontainer1.setfocus(active);
       end;
       activewidgetbefore.visible:= false;
      end;
-    end;
+//    end;
     inherited;
    end
    else begin

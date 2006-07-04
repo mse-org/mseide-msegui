@@ -24,7 +24,7 @@ type
 
 const
  defaultformoptions = [fo_autoreadstat,fo_autowritestat,fo_savepos,fo_savestate];
- defaultformwidgetoptions = defaultoptionswidget - [ow_mousefocus,ow_tabfocus] +
+ defaultformwidgetoptions = (defaultoptionswidget - [ow_mousefocus,ow_tabfocus]) +
    [ow_subfocus,ow_hinton];
 
 type
@@ -1002,7 +1002,7 @@ begin
   if floaded <> nil then begin
    bo1:= floaded.IndexOf(fscrollbox) < 0;
    if bo1 then begin
-    floaded.Add(fscrollbox);
+    floaded.add(fscrollbox);
     tcomponentcracker(fscrollbox).FComponentState:=
      tcomponentcracker(fscrollbox).FComponentState + [csreading,csloading];
    end;
@@ -1016,7 +1016,12 @@ end;
 
 procedure tcustommseform.insertwidget(const widget: twidget; const apos: pointty);
 begin
- fscrollbox.insertwidget(widget,subpoint(apos,fscrollbox.fwidgetrect.pos));
+ if not (csloading in widget.componentstate) then begin
+  fscrollbox.insertwidget(widget,subpoint(apos,fscrollbox.fwidgetrect.pos));
+ end
+ else begin
+  fscrollbox.insertwidget(widget,apos);
+ end;
 end;
 
 function tcustommseform.getcontainer: twidget;

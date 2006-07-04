@@ -468,8 +468,8 @@ type
    //idropdown
    procedure dobeforedropdown; virtual;
    procedure doafterclosedropdown; virtual;
-   function setdropdowntext(const value: msestring; const docheckvalue: boolean;
-                            const canceled: boolean): boolean;
+//   function setdropdowntext(const value: msestring; const docheckvalue: boolean;
+//                            const canceled: boolean): boolean;
    function getdropdownitems: tdropdowncols;
   public
    constructor create(aowner: tcomponent); override;
@@ -2476,7 +2476,7 @@ procedure tdropdownitemedit.setdropdown(const Value: tcustomdropdownlistcontroll
 begin
  fdropdown.assign(Value);
 end;
-
+{
 function tdropdownitemedit.setdropdowntext(const value: msestring;
               const docheckvalue: boolean;const canceled: boolean): boolean;
 begin
@@ -2491,7 +2491,7 @@ begin
   end;
  end;
 end;
-
+}
 { tmbdropdownitemedit }
 
 function tmbdropdownitemedit.getframe: tdropdownmultibuttonframe;

@@ -533,6 +533,8 @@ end;
 
 destructor tcustomdropdowncontroller.destroy;
 begin
+ application.unregisteronapplicationactivechanged(
+           {$ifdef FPC}@{$endif}applicationactivechanged);
  getdropdownwidget.Free;
  inherited;
 end;
@@ -685,13 +687,6 @@ begin
  end;
 end;
 
-{ tdropdowncontroller }
-
-function tdropdowncontroller.getbuttonframeclass: dropdownbuttonframeclassty;
-begin
- result:= tdropdownbuttonframe;
-end;
-
 procedure tcustomdropdowncontroller.objectevent(const sender: tobject;
   const event: objecteventty);
 begin
@@ -736,6 +731,13 @@ begin
  end;
 end;
 
+{ tdropdowncontroller }
+
+function tdropdowncontroller.getbuttonframeclass: dropdownbuttonframeclassty;
+begin
+ result:= tdropdownbuttonframe;
+end;
+
 { tdropdownwidgetcontroller }
 
 constructor tdropdownwidgetcontroller.create(const intf: idropdownwidget);
@@ -776,6 +778,11 @@ begin
     fdropdownwidget.bounds_cy:= fbounds_cy;
    end;
    updatedropdownpos;
+   fdropdownwidget.window.winid; //update window.options
+   if wo_popup in fdropdownwidget.window.options then begin
+    application.registeronapplicationactivechanged(
+            {$ifdef FPC}@{$endif}applicationactivechanged);
+   end;
    try
     if fdropdownwidget.show(true,fintf.getwidget.window) = mr_ok then begin
      setdropdowntext(idropdownwidget(fintf).getdropdowntext(fdropdownwidget),true,false);

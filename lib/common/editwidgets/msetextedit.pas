@@ -1368,6 +1368,9 @@ begin
      feditor.moveindex(feditor.curindex,
                   selectaction in [fca_focusinshift,fca_focusinrepeater],true{false});
      fcolindex:= int1; //restore
+     if selectaction = fca_focusinrepeater then begin
+      setclientclick;
+     end;
     end;
     cek_mousemove,cek_mousepark,cek_buttonpress,cek_buttonrelease: begin
      if cell.row >= 0 then begin
@@ -1376,6 +1379,8 @@ begin
              (info.mouseeventinfopo^.shiftstate = [ss_left]) then begin
        fcolindex:= textinfo.pos.col;
        fgridintf.getcol.grid.focuscell(cell,fca_focusinshift);
+       
+       setclientclick;
        exit;
       end;
       if not bo1 then begin

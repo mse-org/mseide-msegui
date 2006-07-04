@@ -35,8 +35,8 @@ begin
  registercomponents('Edit',[tedit,tslider,tbooleanedit,tbooleaneditradio,
    tintegerbutton,tdataicon,tpointeredit,
    tstringedit,tdropdownlistedit,thistoryedit,thexstringedit,tmemoedit,
-   tintegeredit,trealedit,tdatetimeedit,tkeystringedit,tenumedit,tenumtypeedit,
-   tselector,
+   tintegeredit,trealedit,tdatetimeedit,tcalendardatetimeedit,tkeystringedit,
+   tenumedit,tenumtypeedit,tselector,
    {tstringlistedit,}
    tlistview,titemedit,tdropdownitemedit,tmbdropdownitemedit,ttreeitemedit,
    trecordfieldedit,

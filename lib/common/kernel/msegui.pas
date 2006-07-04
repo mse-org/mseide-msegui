@@ -748,6 +748,7 @@ type
 
    procedure updatemousestate(const apos: pointty); virtual;
                                    //updates fstate about mouseposition
+   procedure setclientclick; //grabs mouse and sets clickflags
 
    procedure registerchildwidget(const child: twidget); virtual;
    procedure unregisterchildwidget(const child: twidget); virtual;
@@ -866,7 +867,8 @@ type
    function setfocus(aactivate: boolean = true): boolean; //true if ok
    procedure nextfocus; //sets inputfocus to then next appropriate widget
    function nexttaborder(down: boolean = false): twidget;
-   function focusback: boolean; //false if focus not changed
+   function focusback(const aactivate: boolean = true): boolean;
+                               //false if focus not changed
 
    function parentcolor: colorty;
    function actualcolor: colorty; virtual;
@@ -1196,6 +1198,7 @@ type
    procedure registermovenotification(sender: iobjectlink);
    procedure unregistermovenotification(sender: iobjectlink);
 
+   property options: windowoptionsty read foptions;
    property owner: twidget read fowner;
    property focusedwidget: twidget read ffocusedwidget;
    property transientfor: twindow read ftransientfor;
@@ -5453,9 +5456,7 @@ begin
      if button = mb_left then begin
       include(fwidgetstate,ws_clicked);
      end;
-     if app <> nil then begin
-      app.capturemouse(self,true);
-     end;
+     app.capturemouse(self,true);
      if isclientmouseevent(info) then begin
       include(fwidgetstate,ws_clientmousecaptured);
       clientmouseevent(info);
@@ -5493,6 +5494,12 @@ begin
    end;
   end;
  end;
+end;
+
+procedure twidget.setclientclick;
+begin
+ app.capturemouse(self,true);
+ fwidgetstate:= fwidgetstate + [ws_clicked,ws_clientmousecaptured];
 end;
 
 procedure twidget.clientmouseevent(var info: mouseeventinfoty);
@@ -5824,17 +5831,17 @@ begin
  end;
 end;
 
-function twidget.focusback: boolean;
+function twidget.focusback(const aactivate: boolean = true): boolean;
 begin
  if fparentwidget <> nil then begin
   with fparentwidget do begin
    if (ffocusedchildbefore <> nil) and (ffocusedchildbefore <> self) and 
                  (ffocusedchildbefore.canfocus) then begin
-    ffocusedchildbefore.setfocus;
+    ffocusedchildbefore.setfocus(aactivate);
     result:= true;
    end
    else begin
-    result:= focusback;
+    result:= focusback(aactivate);
    end;
   end;
  end

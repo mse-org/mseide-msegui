@@ -388,7 +388,8 @@ type
  tdatacol = class;
 
  celleventty = procedure(const sender: tobject; var info: celleventinfoty) of object;
- drawcelleventty = procedure(const sender: tcol; const canvas: tcanvas) of object;
+ drawcelleventty = procedure(const sender: tcol; const canvas: tcanvas;
+                          const cellinfo: cellinfoty) of object;
  showcolhinteventty = procedure(const sender: tdatacol; const arow: integer;
                            var info: hintinfoty) of object;
 
@@ -3436,11 +3437,8 @@ end;
 procedure tdrawcol.drawcell(const canvas: tcanvas);
 begin
  inherited;
- with cellinfoty(canvas.drawinfopo^) do begin
-  canvas.fillrect(inflaterect(makerect(nullpoint,rect.size),-2),cl_red);
- end;
- if assigned(fondrawcell) then begin
-  fondrawcell(self,canvas);
+ if fgrid.canevent(tmethod(fondrawcell)) then begin
+  fondrawcell(self,canvas,cellinfoty(canvas.drawinfopo^));
  end;
 end;
 
