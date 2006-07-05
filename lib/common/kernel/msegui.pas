@@ -6152,11 +6152,15 @@ begin
    dist:= -dist;
   end;
   if dist < 0 then begin
-   if direction in [gd_right,gd_left] then begin
-    dist:= dist + fparentwidget.clientwidth + fparentwidget.framewidth.cx;
-   end
-   else begin
-    dist:= dist + fparentwidget.clientheight + fparentwidget.framewidth.cy;
+   if sender.fparentwidget <> nil then begin
+    with sender.fparentwidget do begin
+     if direction in [gd_right,gd_left] then begin
+      dist:= dist + clientwidth + framewidth.cx;
+     end
+     else begin
+      dist:= dist + clientheight + framewidth.cy;
+     end;
+    end;
    end;
   end;
   if dist < 0 then begin
