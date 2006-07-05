@@ -1,6 +1,9 @@
 MSEide+MSEgui version history
 
-2006-07-05 Flag twidget.optionswidget ow_parenttabfocus
+2006-07-05 tinplaceedit.lasttextclipped.
+2006-07-05 Default of tgroupbox.optionswidget + 
+ [ow_arrrowfocusin,ow_arrowfocusout,ow_parenttabfocus,ow_subfocus].
+2006-07-05 Flag twidget.optionswidget ow_parenttabfocus.
 2006-07-04 tdbcalendardatetimeedit.
 2006-07-04 tcalendardatetimeedit.
 

@@ -171,6 +171,7 @@ type
    property sellength: halfinteger read fsellength write setsellength;
    property curindex: integer read fcurindex write setcurindex;
    property caretpos: pointty read fcaretpos;
+   function lasttextclipped: boolean; //result of last drawing
    function textclipped: boolean;
    function mousepostotextindex(const apos: pointty): integer;
 
@@ -704,6 +705,11 @@ function tinplaceedit.textclipped: boolean;
 begin
  msedrawtext.textrect(fowner.getcanvas,finfo);
  result:= not rectinrect(finfo.res,fowner.innerclientrect);
+end;
+
+function tinplaceedit.lasttextclipped: boolean;
+begin
+ result:= not rectinrect(finfo.res,finfo.clip);
 end;
 
 function tinplaceedit.mousepostotextindex(const apos: pointty): integer;

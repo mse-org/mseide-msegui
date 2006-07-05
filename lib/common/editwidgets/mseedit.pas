@@ -323,6 +323,7 @@ type
  twidget1 = class(twidget);
  tdatacol1 = class(tdatacol);
  tcustombuttonframe1 = class(tcustombuttonframe);
+ tinplaceedit1 = class(tinplaceedit);
 
 { teditframe }
 

@@ -503,6 +503,11 @@ begin
  end;
 end;
 
+function tlistitem.captionclipped: boolean;
+begin
+ result:= ns_captionclipped in fstate;
+end;
+
 procedure tlistitem.updatecellzone(const pos: pointty; var zone: cellzonety);
 begin
  with fowner.fintf.getlayoutinfo^ do begin
@@ -723,11 +728,6 @@ begin
  else begin
   dostatread(tstatreader(filer));
  end;
-end;
-
-function tlistitem.captionclipped: boolean;
-begin
- result:= ns_captionclipped in fstate;
 end;
 
 { tcustomitemlist }

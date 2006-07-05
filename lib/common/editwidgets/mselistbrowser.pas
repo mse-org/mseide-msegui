@@ -2155,7 +2155,15 @@ procedure titemedit.dopaint(const acanvas: tcanvas);
 begin
  inherited;
  if fvalue <> nil then begin
-  fvalue.drawimage(acanvas);
+  with tlistitem1(fvalue) do begin
+   drawimage(acanvas);
+   if feditor.lasttextclipped then begin
+    include(fstate,ns_captionclipped);
+   end
+   else begin
+    exclude(fstate,ns_captionclipped);
+   end;
+  end;
  end;
 end;
 

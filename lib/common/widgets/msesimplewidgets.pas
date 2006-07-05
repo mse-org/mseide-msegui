@@ -205,7 +205,7 @@ type
   published
    property levelo default -1;
    property leveli default 1;
-   property captiondist default - 4;
+   property captiondist default - 7;
    property captionoffset default 4;
  end;
 
@@ -223,11 +223,19 @@ type
    property onchildscaled: notifyeventty read fonchildscaled write fonchildscaled;
  end;
 
+const
+ defaultgroupboxoptionswidget = defaultoptionswidget + 
+        [ow_arrowfocusin,ow_arrowfocusout,ow_parenttabfocus,ow_subfocus];
+ 
+type
  tgroupbox = class(tscalingwidget)
   protected
    procedure createframe; override;
   public
+   constructor create(aowner: tcomponent); override;
    procedure initnewcomponent; override;
+  published
+   property optionswidget default defaultgroupboxoptionswidget;
  end;
 
  tscrollbox = class(tscalingwidget)
@@ -694,7 +702,7 @@ begin
  inherited;
  fi.levelo:= -1;
  fi.leveli:= 1;
- captiondist:= -4;
+ captiondist:= -7;
  captionoffset:= 4;
 end;
 
@@ -719,6 +727,12 @@ begin
 end;
 
 { tgroupbox }
+
+constructor tgroupbox.create(aowner: tcomponent);
+begin
+ inherited;
+ optionswidget:= defaultgroupboxoptionswidget;
+end;
 
 procedure tgroupbox.initnewcomponent;
 begin
