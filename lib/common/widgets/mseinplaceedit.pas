@@ -973,7 +973,7 @@ begin
       end;
       key_left: begin
        if (fsellength = length(finfo.text.text)) and (shiftstate <> [ss_shift]) or
-           (fcurindex = 0) or
+           (fcurindex = 0) and ((fsellength = 0) or (shiftstate <> [ss_shift])) or
  {          ((fsellength = 0) or (shiftstate <> [ss_shift])) and}
             (opt1 * [oe_readonly,oe_caretonreadonly] =
                   [oe_readonly]) then begin
@@ -995,7 +995,10 @@ begin
       end;
       key_right: begin
        if (fsellength = length(finfo.text.text)) and (shiftstate <> [ss_shift]) or
-           (fcurindex = length(finfo.text.text)) or
+         (fcurindex = length(finfo.text.text)) and 
+           ((shiftstate <> [ss_shift]) or (fsellength = 0) or 
+            (fsellength = length(finfo.text.text)) and (oe_autoselect in opt1)
+           ) or
   {         ((fsellength = 0) or (shiftstate <> [ss_shift])) and}
                (opt1 * [oe_readonly,oe_caretonreadonly] =
                   [oe_readonly]) then begin
