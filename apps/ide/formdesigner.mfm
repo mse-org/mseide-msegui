@@ -2,11 +2,11 @@ object formdesignerfo: Tformdesignerfo
   optionswidget = [ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_destroywidgets, ow_hinton, ow_autoscale]
   bounds_x = 4
   bounds_y = 100
-  bounds_cx = 1016
+  bounds_cx = 287
   bounds_cy = 300
   visible = False
   container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_mousetransparent, ow_destroywidgets, ow_autoscale]
-  container.bounds_cx = 1016
+  container.bounds_cx = 287
   container.bounds_cy = 300
   container.frame.dummy = 0
   container.oncalcminscrollsize = calcscrollsize

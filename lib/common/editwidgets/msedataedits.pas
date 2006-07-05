@@ -3392,7 +3392,7 @@ begin
    end;
   end
   else begin
-   if (dat1 < fmin) or (dat1 > fmax) then begin
+   if (cmprealty(fmin,dat1) > 0) or (cmprealty(fmax,dat1) < 0) then begin
     rangeerror(fmin,fmax,quiet);
     accept:= false;
    end;
