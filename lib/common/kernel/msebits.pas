@@ -123,7 +123,7 @@ procedure swapbytes1(var value: cardinal); overload;
 procedure swaprgb1(var value: cardinal);
 function swaprgb(const value: cardinal): cardinal;
 
-function roundint(value: integer; step: integer): integer;
+function roundint(const value: integer; const step: integer): integer;
 
 implementation
 
@@ -384,9 +384,15 @@ end;
 
 
 
-function roundint(value: integer; step: integer): integer;
+function roundint(const value: integer; const step: integer): integer;
+var
+ int1: integer;
 begin
- result:= ((value + step div 2) div step) * step;
+ int1:= step div 2;
+ if value < 0 then begin
+  int1:= -int1;
+ end;
+ result:= ((value + int1) div step) * step;
 end;
 
 procedure swaprgb1(var value: cardinal);
