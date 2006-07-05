@@ -32,7 +32,7 @@ const
 
 type
  optionwidgetty = (ow_background,ow_top,ow_noautosizing,
-                   ow_mousefocus,ow_tabfocus,ow_arrowfocus,
+                   ow_mousefocus,ow_tabfocus,ow_parenttabfocus,ow_arrowfocus,
                    ow_arrowfocusin,ow_arrowfocusout,
                    ow_subfocus, //reflects focus to children
                    ow_focusbackonesc,
@@ -830,6 +830,7 @@ type
            const windowevent: boolean): modalresultty; virtual;
    procedure internalhide(const windowevent: boolean);
    function getnextfocus: twidget;
+   function cantabfocus: boolean;
    function getdisprect: rectty; virtual; 
                 //origin pos, clamped in view by activate
 
@@ -866,7 +867,11 @@ type
    function canfocus: boolean; virtual;
    function setfocus(aactivate: boolean = true): boolean; //true if ok
    procedure nextfocus; //sets inputfocus to then next appropriate widget
-   function nexttaborder(down: boolean = false): twidget;
+   function findtabfocus(const ataborder: integer): twidget;
+                       //nil if can not focus
+   function firsttabfocus: twidget;
+   function lasttabfocus: twidget;
+   function nexttaborder(const down: boolean = false): twidget;
    function focusback(const aactivate: boolean = true): boolean;
                                //false if focus not changed
 
@@ -5708,26 +5713,60 @@ begin
  end;
 end;
 
-function twidget.nexttaborder(down: boolean = false): twidget;
+function twidget.cantabfocus: boolean;
+begin
+ result:= (ow_tabfocus in foptionswidget) and
+           (fwidgetstate * focusstates = focusstates);
+end;
 
- function findtabwidget(taborder: integer): twidget;
- var
-  int1: integer;
-  widget: twidget;
- begin
-  result:= nil;
-  for int1:= 0 to fparentwidget.widgetcount - 1 do begin
-   widget:= fparentwidget.widgets[int1];
-   if widget.ftaborder = taborder then begin
-    if (ow_tabfocus in widget.foptionswidget) and
-           (widget.fwidgetstate * focusstates = focusstates) then begin
-     result:= widget;
-    end;
-    break;
-   end;
+function twidget.firsttabfocus: twidget;
+var
+ ar1: widgetarty;
+ int1: integer;
+begin
+ result:= nil;
+ ar1:= gettaborderedwidgets;
+ for int1:= 0 to high(ar1) do begin
+  if ar1[int1].cantabfocus then begin
+   result:= ar1[int1];
+   break;
   end;
  end;
+end;
 
+function twidget.lasttabfocus: twidget;
+var
+ ar1: widgetarty;
+ int1: integer;
+begin
+ result:= nil;
+ ar1:= gettaborderedwidgets;
+ for int1:= high(ar1) downto 0 do begin
+  if ar1[int1].cantabfocus then begin
+   result:= ar1[int1];
+   break;
+  end;
+ end;
+end;
+
+function twidget.findtabfocus(const ataborder: integer): twidget;
+var
+ int1: integer;
+begin
+ result:= nil;
+ for int1:= 0 to high(fwidgets) do begin
+  if (fwidgets[int1].ftaborder = ataborder) then begin
+   if fwidgets[int1].cantabfocus then begin
+    result:= fwidgets[int1];
+   end;
+   break;
+  end;
+ end;
+end;
+
+function twidget.nexttaborder(const down: boolean = false): twidget;
+label
+ doreturn;
 var
  int1: integer;
 begin
@@ -5737,20 +5776,48 @@ begin
   if down then begin
    repeat
     dec(int1);
-    if int1 < 0 then begin
-     int1:= fparentwidget.widgetcount - 1;
+    with fparentwidget do begin
+     if int1 < 0 then begin
+      if (ow_parenttabfocus in foptionswidget) and 
+                         (fparentwidget <> nil) then begin
+       result:= nexttaborder(down);
+       if result <> nil then begin
+        goto doreturn;
+       end;
+      end;
+      int1:= high(fwidgets);
+     end;
+     result:= findtabfocus(int1);
     end;
-    result:= findtabwidget(int1);
    until (result <> nil) or (int1 = ftaborder);
   end
   else begin
    repeat
     inc(int1);
-    if int1 >= fparentwidget.widgetcount then begin
-     int1:= 0;
+    with fparentwidget do begin
+     if int1 >= widgetcount then begin
+      if (ow_parenttabfocus in foptionswidget) and 
+                         (fparentwidget <> nil) then begin
+       result:= nexttaborder(down);
+       if result <> nil then begin
+        goto doreturn;
+       end;
+      end;
+      int1:= 0;
+     end;
+     result:= findtabfocus(int1);
     end;
-    result:= findtabwidget(int1);
    until (result <> nil) or (int1 = ftaborder);
+  end;
+ end;
+
+doreturn:
+ if (result <> nil) and (ow_parenttabfocus in result.foptionswidget) then begin
+  if down then begin
+   result:= result.lasttabfocus;
+  end
+  else begin
+   result:= result.firsttabfocus;
   end;
  end;
 end;
