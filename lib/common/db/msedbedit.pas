@@ -2922,7 +2922,7 @@ end;
 
 procedure tdbdatetimeedit.valuetofield;
 begin
- if value = 0 then begin
+ if value = emptydatetime then begin
   fdatalink.field.clear;
  end
  else begin
@@ -3039,7 +3039,7 @@ end;
 
 procedure tdbcalendardatetimeedit.valuetofield;
 begin
- if value = 0 then begin
+ if value = emptydatetime then begin
   fdatalink.field.clear;
  end
  else begin
