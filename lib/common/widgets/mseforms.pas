@@ -392,7 +392,8 @@ uses
  sysutils,mselist,mseguiintf,typinfo,msekeyboard,msebits;
 const
  containercommonflags: optionswidgetty = 
-            [ow_arrowfocus,ow_arrowfocusin,ow_arrowfocusout,ow_destroywidgets{,
+            [ow_arrowfocus,ow_arrowfocusin,ow_arrowfocusout,ow_destroywidgets,
+             ow_parenttabfocus{,
              ow_subfocus,ow_mousefocus,ow_tabfocus}];
  
 type

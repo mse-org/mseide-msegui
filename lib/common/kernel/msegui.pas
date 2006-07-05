@@ -5814,10 +5814,10 @@ begin
 doreturn:
  if (result <> nil) and (ow_parenttabfocus in result.foptionswidget) then begin
   if down then begin
-   result:= result.lasttabfocus;
+   result:= result.container.lasttabfocus;
   end
   else begin
-   result:= result.firsttabfocus;
+   result:= result.container.firsttabfocus;
   end;
  end;
 end;
@@ -6123,6 +6123,7 @@ const
 var
  rect1,rect2: rectty;
  dist: integer;
+ widget1: twidget;
 begin
  with info do begin
   rect1:= navigrect;
@@ -6152,8 +6153,13 @@ begin
    dist:= -dist;
   end;
   if dist < 0 then begin
-   if sender.fparentwidget <> nil then begin
-    with sender.fparentwidget do begin
+   widget1:= sender.fparentwidget;
+   while (ow_arrowfocusout in widget1.foptionswidget) and 
+                        (widget1.fparentwidget <> nil) do begin
+    widget1:= widget1.fparentwidget;
+   end;
+   if widget1 <> nil then begin
+    with widget1 do begin
      if direction in [gd_right,gd_left] then begin
       dist:= dist + clientwidth + framewidth.cx;
      end
