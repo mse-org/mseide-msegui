@@ -122,6 +122,8 @@ begin
         tdbfieldnamepropertyeditor);
  registerpropertyeditor(typeinfo(string),nil,'keyfield',
         tdbfieldnamepropertyeditor);
+ registerpropertyeditor(typeinfo(string),tgriddatalink,'',
+        tdbfieldnamepropertyeditor);
  registerpropertyeditor(typeinfo(tdbfieldnamearrayprop),nil,'',
         tdbfieldnamearraypropertyeditor);
  registerpropertyeditor(typeinfo(tpersistentfields),nil,'',

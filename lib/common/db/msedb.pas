@@ -1424,21 +1424,20 @@ end;
 
 { tfielddatalink }
 
-procedure tfielddatalink.SetFieldName(const Value: string);
+procedure tfielddatalink.setfieldname(const Value: string);
 begin
-  if FFieldName <> Value then
-  begin
-    FFieldName :=  Value;
-    UpdateField;
-  end;
+ if ffieldname <> value then begin
+  ffieldname :=  value;
+  updatefield;
+ end;
 end; 
 
-procedure tfielddatalink.SetField(Value: TField);
+procedure tfielddatalink.setfield(value: tfield);
 begin
- if FField <> Value then begin
-  FField := Value;
-  EditingChanged;
-  RecordChanged(nil);
+ if ffield <> value then begin
+  ffield := value;
+  editingchanged;
+  recordchanged(nil);
  end;
 end;
 
@@ -1448,7 +1447,7 @@ begin
   setfield(datasource.dataset.fieldbyname(ffieldname));
  end
  else begin
-  SetField(nil);
+  setfield(nil);
  end;
 end;
 

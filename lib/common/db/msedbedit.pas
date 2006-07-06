@@ -720,7 +720,7 @@ type
  updaterowdataeventty = procedure(const sender: tcustomgrid; 
                         const arow: integer; const adataset: tdataset)of object;
   
- tgriddatalink = class(tmsedatalink,ievent)
+ tgriddatalink = class(tfielddatalink,ievent,idbeditinfo)
   private
    fgrid: tcustomgrid;
    factiverecordbefore: integer;
@@ -735,12 +735,16 @@ type
    fonupdaterowdata: updaterowdataeventty;
    fnullchecking: integer;
    fobjectlinker: tobjectlinker;
+   fcolordatalink: tfielddatalink;
+   ffontdatalink: tfielddatalink;
    procedure checkscroll;
    procedure checkscrollbar;
    function getfirstrecord: integer;
    procedure doupdaterowdata(const row: integer);
    procedure beginnullchecking;
    procedure endnullchecking;
+   procedure setdatafield(const avalue: string);
+   function getdatafield: string;
    
    function getobjectlinker: tobjectlinker;
     //iobjectlink
@@ -751,11 +755,15 @@ type
    function getinstance: tobject;
      //ievent
    procedure receiveevent(const event: tobjectevent);
+     //idbeditinfo
+   function getdatasource: tdatasource;
+   procedure getfieldtypes(out propertynames: stringarty;
+                          out fieldtypes: fieldtypesarty);
   protected
    function checkvalue: boolean;
    procedure updatelayout;
    procedure updaterowcount;
-   procedure recordchanged(Field: TField); override;
+   procedure recordchanged(afield: tfield); override;
    procedure datasetchanged; override;
    procedure datasetscrolled(distance: integer); override;
    procedure activechanged; override;
@@ -776,13 +784,13 @@ type
    constructor create(const aowner: tcustomgrid);
    destructor destroy; override;
    property firstrecord: integer read getfirstrecord;
-   function getdisplaytextbuffer(const field: tfield; const row: integer): pointer;
-   function getstringbuffer(const field: tfield; const row: integer): pointer;
-   function getdisplaystringbuffer(const field: tfield; const row: integer): pointer;
-   function getbooleanbuffer(const field: tfield; const row: integer): pointer;
-   function getintegerbuffer(const field: tfield; const row: integer): pointer;
-   function getrealtybuffer(const field: tfield; const row: integer): pointer;
-   function getdatetimebuffer(const field: tfield; const row: integer): pointer;
+   function getdisplaytextbuffer(const afield: tfield; const row: integer): pointer;
+   function getstringbuffer(const afield: tfield; const row: integer): pointer;
+   function getdisplaystringbuffer(const afield: tfield; const row: integer): pointer;
+   function getbooleanbuffer(const afield: tfield; const row: integer): pointer;
+   function getintegerbuffer(const afield: tfield; const row: integer): pointer;
+   function getrealtybuffer(const afield: tfield; const row: integer): pointer;
+   function getdatetimebuffer(const afield: tfield; const row: integer): pointer;
    procedure painted;
    procedure loaded;
    function moveby(distance: integer): integer; override;
@@ -790,11 +798,16 @@ type
    property options: griddatalinkoptionsty read foptions write foptions default [];
    property onupdaterowdata: updaterowdataeventty read fonupdaterowdata 
                                 write fonupdaterowdata;
+   property datafield: string read getdatafield 
+                                       write setdatafield;
+             //integer field, selects grid rowcolor (field value and $ff) and
+             //grid rowfont ((fieldvalue shr 8) and $ff). 
+             // $xxff = default color, $ffxx = default font.
  end;
 
  tdropdownlistdatalink = class(tgriddatalink)
   protected
-   procedure recordchanged(Field: TField); override;
+   procedure recordchanged(afield: tfield); override;
  end;
  
  tdbdropdownlist = class(tdropdownlist)
@@ -3489,7 +3502,7 @@ end;
 
 { tdropdownlistdatalink }
 
-procedure tdropdownlistdatalink.recordchanged(Field: TField);
+procedure tdropdownlistdatalink.recordchanged(afield: tfield);
 begin
  inherited;
  with tdbdropdownlist(fgrid) do begin
@@ -4004,167 +4017,210 @@ begin
  fobjectlinker.free;
 end;
 
+procedure tgriddatalink.setdatafield(const avalue: string);
+begin
+ fieldname:= avalue;
+end;
+
+function tgriddatalink.getdatafield: string;
+begin
+ result:= fieldname;
+end;
+
 function tgriddatalink.getfirstrecord: integer;
 begin
  result:= inherited firstrecord;
 end;
 
 procedure tgriddatalink.doupdaterowdata(const row: integer);
+
+ procedure fieldtorowstate(const arow: integer);
+ var
+  int1: integer;
+ begin
+  if field.isnull then begin
+   fgrid.rowcolorstate[arow]:= -1;
+   fgrid.rowfontstate[arow]:= -1;
+  end
+  else begin
+   int1:= field.asinteger;
+   fgrid.rowcolorstate[arow]:= rowstatenumty(int1 and $ff);
+   fgrid.rowfontstate[arow]:= rowstatenumty((int1 shr 8) and $ff);
+  end;
+ end;
+ 
 var
  int1,int2: integer;
  dataset1: tdataset;
 begin
- if assigned(fonupdaterowdata) and 
-      (fgrid.componentstate * [csloading,csdesigning,csdestroying] = []) then begin
+ if (fgrid.componentstate * [csloading,csdesigning,csdestroying] = []) then begin
   dataset1:= dataset;
-  if dataset <> nil then begin
-   if row >= 0 then begin
-    fonupdaterowdata(fgrid,row,dataset1);
-   end
-   else begin
-    int2:= activerecord;
-    try
-     for int1:= 0 to fgrid.rowhigh do begin
-      activerecord:= int1;
-      fonupdaterowdata(fgrid,int1,dataset1);
+  if dataset1 <> nil then begin
+   if field <> nil then begin
+    if row >= 0 then begin
+     fieldtorowstate(row);
+    end
+    else begin
+     int2:= activerecord;
+     try
+      for int1:= 0 to fgrid.rowhigh do begin
+       activerecord:= int1;
+       fieldtorowstate(int1);
+      end;
+     finally
+      activerecord:= int2;
      end;
-    finally
-     activerecord:= int2;
     end;
    end;
-  end;  
- end; 
+   if assigned(fonupdaterowdata) then begin
+    if row >= 0 then begin
+     fonupdaterowdata(fgrid,row,dataset1);
+    end
+    else begin
+     int2:= activerecord;
+     try
+      for int1:= 0 to fgrid.rowhigh do begin
+       activerecord:= int1;
+       fonupdaterowdata(fgrid,int1,dataset1);
+      end;
+     finally
+      activerecord:= int2;
+     end;
+    end;
+   end; 
+  end;
+ end;
 end;
 
-function tgriddatalink.getstringbuffer(const field: tfield;
+function tgriddatalink.getstringbuffer(const afield: tfield;
                       const row: integer): pointer;
 var
  int1: integer;
 begin
  result:= nil;
- if active and (field <> nil) then begin
+ if active and (afield <> nil) then begin
   int1:= activerecord;
   activerecord:= row;
-  if not field.isnull then begin
+  if not afield.isnull then begin
    result:= @fstringbuffer;
    if utf8 then begin
-    fstringbuffer:= utf8tostring(field.asstring);
+    fstringbuffer:= utf8tostring(afield.asstring);
    end
    else begin
-    fstringbuffer:= field.asstring;
+    fstringbuffer:= afield.asstring;
    end;
   end;
   activerecord:= int1;
  end;
 end;
 
-function tgriddatalink.getdisplaystringbuffer(const field: tfield;
+function tgriddatalink.getdisplaystringbuffer(const afield: tfield;
                       const row: integer): pointer;
 var
  int1: integer;
 begin
  result:= nil;
- if active and (field <> nil) then begin
+ if active and (afield <> nil) then begin
   int1:= activerecord;
   activerecord:= row;
-  if not field.isnull then begin
+  if not afield.isnull then begin
    result:= @fstringbuffer;
    if utf8 then begin
-    fstringbuffer:= utf8tostring(field.displaytext);
+    fstringbuffer:= utf8tostring(afield.displaytext);
    end
    else begin
-    fstringbuffer:= field.displaytext;
+    fstringbuffer:= afield.displaytext;
    end;
   end;
   activerecord:= int1;
  end;
 end;
 
-function tgriddatalink.getdisplaytextbuffer(const field: tfield;
+function tgriddatalink.getdisplaytextbuffer(const afield: tfield;
                       const row: integer): pointer;
 var
  int1: integer;
 begin
  result:= nil;
- if active and (field <> nil) then begin
+ if active and (afield <> nil) then begin
   int1:= activerecord;
   activerecord:= row;
-  if not field.isnull then begin
+  if not afield.isnull then begin
    result:= @fstringbuffer;
    if utf8 then begin
-    fstringbuffer:= utf8tostring(field.displaytext);
+    fstringbuffer:= utf8tostring(afield.displaytext);
    end
    else begin
-    fstringbuffer:= field.displaytext;
+    fstringbuffer:= afield.displaytext;
    end;
   end;
   activerecord:= int1;
  end;
 end;
 
-function tgriddatalink.getbooleanbuffer(const field: tfield; 
+function tgriddatalink.getbooleanbuffer(const afield: tfield; 
                                              const row: integer): pointer;
 var
  int1: integer;
 begin
  result:= nil;
- if active and (field <> nil) then begin
+ if active and (afield <> nil) then begin
   int1:= activerecord;
   activerecord:= row;
-  if not field.isnull then begin
+  if not afield.isnull then begin
    result:= @fintegerbuffer;
-   fintegerbuffer:= integer(field.asboolean);
+   fintegerbuffer:= integer(afield.asboolean);
   end;
   activerecord:= int1;
  end;
 end;
 
-function tgriddatalink.getintegerbuffer(const field: tfield;
+function tgriddatalink.getintegerbuffer(const afield: tfield;
                      const row: integer): pointer;
 var
  int1: integer;
 begin
  result:= nil;
- if active and (field <> nil) then begin
+ if active and (afield <> nil) then begin
   int1:= activerecord;
   activerecord:= row;
-  if not field.isnull then begin
+  if not afield.isnull then begin
    result:= @fintegerbuffer;
-   fintegerbuffer:= field.asinteger;
+   fintegerbuffer:= afield.asinteger;
   end;
   activerecord:= int1;
  end;
 end;
 
-function tgriddatalink.getrealtybuffer(const field: tfield; 
+function tgriddatalink.getrealtybuffer(const afield: tfield; 
                                              const row: integer): pointer;
 var
  int1: integer;
 begin
  result:= nil;
- if active and (field <> nil) then begin
+ if active and (afield <> nil) then begin
   int1:= activerecord;
   activerecord:= row;
-  if not field.isnull then begin
+  if not afield.isnull then begin
    result:= @frealtybuffer;
-   frealtybuffer:= field.asfloat;
+   frealtybuffer:= afield.asfloat;
   end;
   activerecord:= int1;
  end;
 end;
 
-function tgriddatalink.getdatetimebuffer(const field: tfield;
+function tgriddatalink.getdatetimebuffer(const afield: tfield;
                                               const row: integer): pointer;
 var
  int1: integer;
 begin
  result:= nil;
- if active and (field <> nil) then begin
+ if active and (afield <> nil) then begin
   int1:= activerecord;
   activerecord:= row;
-  if not field.isnull then begin
+  if not afield.isnull then begin
    result:= @frealtybuffer;
-   frealtybuffer:= field.asdatetime;
+   frealtybuffer:= afield.asdatetime;
 //   if frealtybuffer = 0 then begin
 //    frealtybuffer:= nulltime;
 //   end;
@@ -4314,7 +4370,7 @@ begin
  fgrid.frame.sbvert.value:= rea1;
 end;
 
-procedure tgriddatalink.recordchanged(Field: TField);
+procedure tgriddatalink.recordchanged(afield: tfield);
 begin
  checkscroll;
  fgrid.invalidaterow(activerecord);
@@ -4328,7 +4384,7 @@ begin
  end;
  fgrid.invalidaterow(factiverecordbefore);
  factiverecordbefore:= activerecord;
- if field = nil then begin
+ if afield = nil then begin
   updaterowcount;
   checkscrollbar;
  end;
@@ -4442,7 +4498,7 @@ end;
 
 procedure tgriddatalink.dodeleterow;
 begin
- if active and askok('Delete record?','Confirm') then begin
+ if active and askok('Delete record?','Confirmation') then begin
   dataset.delete;
  end;
 end;
@@ -4591,6 +4647,19 @@ begin
   tcustomgrid1(fgrid).endnonullcheck;
   endnullchecking;
  end;
+end;
+
+function tgriddatalink.getdatasource: tdatasource;
+begin
+ result:= datasource;
+end;
+
+procedure tgriddatalink.getfieldtypes(out propertynames: stringarty;
+               out fieldtypes: fieldtypesarty);
+begin
+ propertynames:= nil;
+ setlength(fieldtypes,1);
+ fieldtypes[0]:= integerfields;
 end;
 
 { tdbwidgetindicatorcol }
@@ -6379,5 +6448,4 @@ begin
  end;
 end;
 
-{ tdbbooleantextedit }
 end.
