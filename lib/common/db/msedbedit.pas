@@ -2775,6 +2775,7 @@ end;
 
 constructor tdbrealedit.create(aowner: tcomponent);
 begin
+ fisdb:= true;
  fdatalink:= teditwidgetdatalink.Create(idbeditfieldlink(self));
  inherited;
 end;
@@ -2887,6 +2888,7 @@ end;
 constructor tdbdatetimeedit.create(aowner: tcomponent);
 begin
  fdatalink:= teditwidgetdatalink.Create(idbeditfieldlink(self));
+ fisdb:= true;
  inherited;
 end;
 
@@ -3003,6 +3005,7 @@ end;
 
 constructor tdbcalendardatetimeedit.create(aowner: tcomponent);
 begin
+ fisdb:= true;
  fdatalink:= teditwidgetdatalink.Create(idbeditfieldlink(self));
  inherited;
 end;

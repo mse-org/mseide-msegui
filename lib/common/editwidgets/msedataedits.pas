@@ -680,6 +680,7 @@ type
    procedure setgridvalues(const Value: realarty);
    procedure setscale(const Value: real);
   protected
+   fisdb: boolean;
    procedure texttovalue(var accept: boolean; const quiet: boolean); override;
    function datatotext(const data): msestring; override;
    function createdatalist(const sender: twidgetcol): tdatalist; override;
@@ -741,6 +742,7 @@ type
    procedure readmax(reader: treader);
    procedure writemax(writer: twriter);
   protected
+   fisdb: boolean;
    procedure texttovalue(var accept: boolean; const quiet: boolean); override;
    function datatotext(const data): msestring; override;
    function createdatalist(const sender: twidgetcol): tdatalist; override;
@@ -3182,9 +3184,11 @@ begin
   if (fscale <> 0) and not isemptyreal(rea1) then begin
    rea1:= rea1*fscale;
   end;
-  if (cmprealty(fmin,rea1) > 0) or (cmprealty(fmax,rea1) < 0) then begin
-   rangeerror(fmin,fmax,quiet);
-   accept:= false;
+  if not (fisdb and isemptyreal(rea1)) then begin
+   if (cmprealty(fmin,rea1) > 0) or (cmprealty(fmax,rea1) < 0) then begin
+    rangeerror(fmin,fmax,quiet);
+    accept:= false;
+   end;
   end;
   if accept then begin
    if not quiet and canevent(tmethod(fonsetvalue)) then begin
@@ -3365,7 +3369,8 @@ begin
  end;
 end;
 
-procedure tcustomdatetimeedit.texttovalue(var accept: boolean; const quiet: boolean);
+procedure tcustomdatetimeedit.texttovalue(var accept: boolean; 
+                                                 const quiet: boolean);
 var
  dat1: tdatetime;
  str1: string;
@@ -3383,18 +3388,20 @@ begin
  end;
  if accept then begin
   dat1:= checkkind(dat1);
-  if fkind = dtk_time then begin
-   if isemptydatetime(fmax) and not isemptydatetime(dat1) or
-        not isemptydatetime(fmin) and (dat1 < frac(fmin)) or 
-                   (dat1 > frac(fmax)) then begin
-    rangeerror(fmin,fmax,quiet);
-    accept:= false;
-   end;
-  end
-  else begin
-   if (cmprealty(fmin,dat1) > 0) or (cmprealty(fmax,dat1) < 0) then begin
-    rangeerror(fmin,fmax,quiet);
-    accept:= false;
+  if not (fisdb and isemptydatetime(dat1)) then begin
+   if fkind = dtk_time then begin
+    if isemptydatetime(fmax) and not isemptydatetime(dat1) or
+         not isemptydatetime(fmin) and (dat1 < frac(fmin)) or 
+                    (dat1 > frac(fmax)) then begin
+     rangeerror(fmin,fmax,quiet);
+     accept:= false;
+    end;
+   end
+   else begin
+    if (cmprealty(fmin,dat1) > 0) or (cmprealty(fmax,dat1) < 0) then begin
+     rangeerror(fmin,fmax,quiet);
+     accept:= false;
+    end;
    end;
   end;
   if accept then begin
