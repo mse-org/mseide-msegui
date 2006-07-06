@@ -300,7 +300,6 @@ type
  tdbintegeredit = class(tcustomintegeredit,idbeditfieldlink,idbeditinfo)
   private
    fdatalink: teditwidgetdatalink;
-   fisnull: boolean;
    function getdatafield: string;
    procedure setdatafield(const avalue: string);
    function getdatasource: tdatasource;
@@ -2382,16 +2381,8 @@ end;
 
 procedure tdbintegeredit.texttovalue(var accept: boolean; const quiet: boolean);
 begin
- if text = '' then begin
-  text:= '0';
-  fisnull:= true;
-  inherited;
-  text:= '';
- end
- else begin
-  fisnull:= false;
-  inherited;
- end;
+ fisnull:= text = '';
+ inherited;
 end;
 
 procedure tdbintegeredit.valuetofield;

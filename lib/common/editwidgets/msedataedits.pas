@@ -418,6 +418,7 @@ type
    function getgridvalues: integerarty;
    procedure setgridvalues(const Value: integerarty);
   protected
+   fisnull: boolean; //used in tdbintegeredit
    procedure texttovalue(var accept: boolean; const quiet: boolean); override;
    function datatotext(const data): msestring; override;
    function createdatalist(const sender: twidgetcol): tdatalist; override;
@@ -2429,23 +2430,30 @@ procedure tcustomintegeredit.texttovalue(var accept: boolean; const quiet: boole
 var
  int1: integer;
 begin
- try
-  int1:= strtointvalue(feditor.text,fbase);
- except
-  formaterror(quiet);
-  accept:= false
+ if fisnull then begin
+  int1:= 0;
+ end
+ else begin
+  try
+   int1:= strtointvalue(feditor.text,fbase);
+  except
+   formaterror(quiet);
+   accept:= false
+  end;
  end;
  if accept then begin
-  if fmax < fmin then begin //unsigned
-   if (cardinal(int1) < cardinal(fmin)) or (cardinal(int1) > cardinal(fmax)) then begin
-    rangeerror(fmin,fmax,quiet);
-    accept:= false;
-   end;
-  end
-  else begin
-   if (int1 < fmin) or (int1 > fmax) then begin
-    rangeerror(fmin,fmax,quiet);
-    accept:= false;
+  if not fisnull then begin
+   if fmax < fmin then begin //unsigned
+    if (cardinal(int1) < cardinal(fmin)) or (cardinal(int1) > cardinal(fmax)) then begin
+     rangeerror(fmin,fmax,quiet);
+     accept:= false;
+    end;
+   end
+   else begin
+    if (int1 < fmin) or (int1 > fmax) then begin
+     rangeerror(fmin,fmax,quiet);
+     accept:= false;
+    end;
    end;
   end;
   if accept then begin
