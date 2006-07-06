@@ -1677,6 +1677,7 @@ var
  int1: integer;
  field1: tfield;
 begin
+ tdataset(fowner).active:= false; //avoid later calls from fowner
  for int1:= 0 to high(flinkedfields) do begin
   flinkedfields[int1].setdsintf(nil);
  end;
