@@ -3,15 +3,22 @@ unit msepopupcalendar;
 interface
 uses
  msegui,mseclasses,mseforms,msegraphutils,msegrids,msedispwidgets,classes,
- msegraphics,mseeditglob,msetypes,msedropdownlist,msetimer,msesimplewidgets;
+ msegraphics,mseeditglob,msetypes,msedropdownlist,msetimer,msesimplewidgets,
+ mseinplaceedit,mseevent;
  
 const
  popupcalendarwidth = 233;
  
 type
+ idropdowncalendar = interface(idropdownwidget)
+ end;
+ 
  tcalendarcontroller = class(tdropdownwidgetcontroller)
+  protected
+   procedure editnotification(var info: editnotificationinfoty); override;
+   procedure dropdownkeydown(var info: keyeventinfoty);
   public
-   constructor create(const intf: idropdownwidget);
+   constructor create(const intf: idropdowncalendar);
   published
    property bounds_cx default popupcalendarwidth;
  end;
@@ -40,6 +47,10 @@ type
    fcontroller: tcalendarcontroller;
    procedure setvalue(const avalue: tdatetime);
    function isinvalidcell(const acell: gridcoordty): boolean;
+  protected
+   procedure dokeydown(var info: keyeventinfoty); override;
+   procedure doactivate; override;
+   procedure dodeactivate; override;
   public
    constructor create(const aowner: tcomponent; 
                                   const acontroller: tcalendarcontroller);
@@ -48,15 +59,40 @@ type
  
 implementation
 uses
- msepopupcalendar_mfm,sysutils,dateutils,msedrawtext,msestrings,mseevent,
+ msepopupcalendar_mfm,sysutils,dateutils,msedrawtext,msestrings,
  msekeyboard,mseguiglob;
  
 { tcalendarcontroller }
 
-constructor tcalendarcontroller.create(const intf: idropdownwidget);
+constructor tcalendarcontroller.create(const intf: idropdowncalendar);
 begin
  inherited;
+ fforcecaret:= true;
  bounds_cx:= popupcalendarwidth;
+end;
+
+procedure tcalendarcontroller.editnotification(var info: editnotificationinfoty);
+begin
+ inherited;
+ if fdropdownwidget <> nil then begin
+  case info.action of
+   ea_textedited: begin
+    try
+     tpopupcalendarfo(fdropdownwidget).value:= strtodatetime(fintf.geteditor.text);    
+    except
+    end;    
+   end
+  end;
+ end;
+end;
+
+procedure tcalendarcontroller.dropdownkeydown(var info: keyeventinfoty);
+var
+ editor1: tinplaceedit;
+ str1: msestring;
+begin
+ editor1:= fintf.geteditor;
+ editor1.dokeydown(info);
 end;
 
 { tpopupcalendarfo }
@@ -226,6 +262,26 @@ end;
 procedure tpopupcalendarfo.yeardown(const sender: TObject);
 begin
  value:= incmonth(fvalue,-12);
+end;
+
+procedure tpopupcalendarfo.dokeydown(var info: keyeventinfoty);
+begin
+ inherited;
+ if not (es_processed in info.eventstate) then begin 
+  fcontroller.dropdownkeydown(info);
+ end;
+end;
+
+procedure tpopupcalendarfo.doactivate;
+begin
+ inherited;
+ fcontroller.dropdownactivated;
+end;
+
+procedure tpopupcalendarfo.dodeactivate;
+begin
+ inherited;
+ fcontroller.dropdowndeactivated;
 end;
 
 end.

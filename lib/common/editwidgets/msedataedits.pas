@@ -780,7 +780,7 @@ type
    property kind;
  end;
 
- tcustomcalendardatetimeedit = class(tcustomdatetimeedit,idropdownwidget)
+ tcustomcalendardatetimeedit = class(tcustomdatetimeedit,idropdowncalendar)
   private
    fdropdown: tcalendarcontroller;
    procedure setframe(const avalue: tdropdownbuttonframe);
@@ -790,6 +790,7 @@ type
    procedure dokeydown(var info: keyeventinfoty); override;
    procedure mouseevent(var info: mouseeventinfoty); override;
    procedure setoptionsedit(const avalue: optionseditty); override;
+   procedure editnotification(var info: editnotificationinfoty); override;
    //idropdownwidget
    procedure buttonaction(var action: buttonactionty; const buttonindex: integer);
    procedure dobeforedropdown;
@@ -3561,7 +3562,7 @@ end;
 constructor tcustomcalendardatetimeedit.create(aowner: tcomponent);
 begin
  inherited;
- fdropdown:= tcalendarcontroller.create(idropdownwidget(self));
+ fdropdown:= tcalendarcontroller.create(idropdowncalendar(self));
 end;
 
 procedure tcustomcalendardatetimeedit.setframe(const avalue: tdropdownbuttonframe);
@@ -3635,6 +3636,14 @@ end;
 function tcustomcalendardatetimeedit.getdropdowntext(const awidget: twidget): msestring;
 begin
  result:= text;
+end;
+
+procedure tcustomcalendardatetimeedit.editnotification(var info: editnotificationinfoty);
+begin
+ if fdropdown <> nil then begin
+  fdropdown.editnotification(info);
+ end;
+ inherited;
 end;
 
 end.

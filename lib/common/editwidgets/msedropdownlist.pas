@@ -104,8 +104,8 @@ type
  end;
 
  idropdownlistcontroller = interface(idropdowncontroller)
-  procedure listactivated;
-  procedure listdeactivated;
+  procedure dropdownactivated;
+  procedure dropdowndeactivated;
   procedure itemselected(const index: integer);
   procedure dropdownkeydown(var info: keyeventinfoty);
  end;
@@ -227,6 +227,7 @@ type
   protected
    fintf: idropdown;
    foptions: dropdowneditoptionsty;
+   fforcecaret: boolean;
    procedure applicationactivechanged(const avalue: boolean); virtual;
    function getbuttonframeclass: dropdownbuttonframeclassty; virtual;
    procedure updatedropdownpos;
@@ -249,6 +250,8 @@ type
    procedure dropdown; virtual;
    procedure canceldropdown;
    procedure createframe; virtual;
+   procedure dropdownactivated;
+   procedure dropdowndeactivated;
    procedure dokeydown(var info: keyeventinfoty);
    procedure editnotification(var info: editnotificationinfoty); virtual;
    function dataselected: boolean;
@@ -266,10 +269,10 @@ type
 
  tdropdownwidgetcontroller = class(tdropdowncontroller)
   private
-   fdropdownwidget: twidget;
    fbounds_cy: integer;
    fbounds_cx: integer;
   protected
+   fdropdownwidget: twidget;
    procedure internaldropdown; override;
    procedure receiveevent(const event: tobjectevent); override;
    function getdropdownwidget: twidget; override;
@@ -308,8 +311,6 @@ type
    procedure selectnone; override;
    
    //idropdownlist
-   procedure listactivated;
-   procedure listdeactivated;
    procedure itemselected(const index: integer); virtual;
              //-2 -> no selection, -1 -> cancel
    procedure dropdownkeydown(var info: keyeventinfoty);
@@ -731,6 +732,20 @@ begin
  end;
 end;
 
+procedure tcustomdropdowncontroller.dropdownactivated;
+begin
+ if fforcecaret then begin
+  fintf.geteditor.doactivate;
+ end;
+end;
+
+procedure tcustomdropdowncontroller.dropdowndeactivated;
+begin
+ if fforcecaret then begin
+  fintf.geteditor.dodeactivate;
+ end;
+end;
+
 { tdropdowncontroller }
 
 function tdropdowncontroller.getbuttonframeclass: dropdownbuttonframeclassty;
@@ -783,11 +798,15 @@ begin
     application.registeronapplicationactivechanged(
             {$ifdef FPC}@{$endif}applicationactivechanged);
    end;
+   if fforcecaret then begin
+    fintf.geteditor.forcecaret:= true;
+   end;
    try
     if fdropdownwidget.show(true,fintf.getwidget.window) = mr_ok then begin
      setdropdowntext(idropdownwidget(fintf).getdropdowntext(fdropdownwidget),true,false);
     end;
    finally
+    fintf.geteditor.forcecaret:= false;
     doafterclosedropdown;
    end;
 //   setlinkedvar(nil,tmsecomponent(fdropdownwidget));
@@ -818,6 +837,7 @@ end;
 
 constructor tcustomdropdownlistcontroller.create(const intf: idropdownlist);
 begin
+ fforcecaret:= true;
  fcols:= getdropdowncolsclass.create(self);
  fcols.onitemchange:= {$ifdef FPC}@{$endif}itemchanged;
  fcols.fitemindex:= -1;
@@ -991,16 +1011,6 @@ begin
    end;
   end;
  end;
-end;
-
-procedure tcustomdropdownlistcontroller.listactivated;
-begin
- fintf.geteditor.doactivate;
-end;
-
-procedure tcustomdropdownlistcontroller.listdeactivated;
-begin
- fintf.geteditor.dodeactivate;
 end;
 
 procedure tcustomdropdownlistcontroller.itemselected(const index: integer);
@@ -1179,13 +1189,13 @@ procedure tdropdownlist.doactivate;
 begin
  capturemouse;
  inherited;
- fcontroller.listactivated;
+ fcontroller.dropdownactivated;
 end;
 
 procedure tdropdownlist.dodeactivate;
 begin
  inherited;
- fcontroller.listdeactivated;
+ fcontroller.dropdowndeactivated;
 end;
 
 procedure tdropdownlist.dokeydown(var info: keyeventinfoty);
