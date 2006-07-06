@@ -69,7 +69,11 @@ type
    procedure internalopen; override;
    procedure internalclose; override;
    procedure internalinsert; override;
+   {$ifdef fpc204}
+   procedure applyrecupdate(updatekind: tupdatekind); override;
+   {$else}
    function applyrecupdate(updatekind: tupdatekind): boolean; override;
+   {$endif}
    function  getcanmodify: boolean; override;
    function  getfieldclass(fieldtype: tfieldtype): tfieldclass; override;
        //idscontroller
@@ -442,7 +446,13 @@ begin
  end;
 end;
 
+{$ifdef fpc204}
+procedure tmsesqlquery.applyrecupdate(updatekind: tupdatekind);
+var
+ result: boolean;
+{$else}
 function tmsesqlquery.applyrecupdate(updatekind: tupdatekind): boolean;
+{$endif}
 
  procedure doupdate;
  var

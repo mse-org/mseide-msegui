@@ -6119,23 +6119,34 @@ end;
 
 function twidget.navigdistance(var info: naviginfoty): integer;
 const
- dirweighting = 25;
+ dirweightings = 20;
+ dirweightingg = 30;
 var
  rect1,rect2: rectty;
  dist: integer;
  widget1: twidget;
+ dwp,dwm: integer;
+ int1: integer;
 begin
  with info do begin
   rect1:= navigrect;
   rect2:= startingrect;
   translateclientpoint1(rect2.pos,nil,self);
+  if direction in [gd_right,gd_down] then begin
+   dwp:= dirweightings;
+   dwm:= -dirweightingg;
+  end
+  else begin
+   dwp:= dirweightingg;
+   dwm:= -dirweightings;
+  end;
   if direction in [gd_right,gd_left] then begin
    if (rect2.y >= rect1.y) and (rect2.y < rect1.y + rect1.cy) or
         (rect1.y >= rect2.y) and (rect1.y < rect2.y + rect2.cy) then begin
     result:= 0;
    end
    else begin
-    result:= abs(rect1.y + rect1.cy div 2 - rect2.y + rect2.cy div 2)*(dirweighting);
+    result:= rect1.y + rect1.cy div 2 - (rect2.y + rect2.cy div 2);
    end;
    dist:= (rect1.x + rect1.cx div 2) - (rect2.x + rect2.cx div 2);
   end
@@ -6145,9 +6156,15 @@ begin
     result:= 0;
    end
    else begin
-    result:= abs(rect1.x + rect1.cx div 2 - rect2.x + rect2.cx div 2)*(dirweighting);
+    result:= rect1.x + rect1.cx div 2 - (rect2.x + rect2.cx div 2);
    end;
    dist:= (rect1.y + rect1.cy div 2) - (rect2.y + rect2.cy div 2);
+  end;
+  if result < 0 then begin
+   result:= result * dwm;
+  end
+  else begin
+   result:= result * dwp;
   end;
   if direction in [gd_left,gd_up] then begin
    dist:= -dist;
