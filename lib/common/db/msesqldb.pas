@@ -12,7 +12,10 @@ unit msesqldb;
 interface
 uses
  classes,db,sqldb,msedb,mseclasses,msetypes,mseguiglob;
- 
+{$ifdef fpc204}
+ {$define fpc203}
+{$endif}
+  
 type
 
  TUpdateAction = (uaFail, uaAbort, uaSkip, uaRetry, uaApplied);
@@ -195,6 +198,22 @@ uses
  msestrings,dbconst,msesysutils,typinfo;
  
 type 
+ {$ifdef fpc204}
+  TSQLQuerycracker = class (Tbufdataset)
+  private
+    FCursor              : TSQLCursor;
+    FUpdateable          : boolean;
+    FTableName           : string;
+    FSQL                 : TStringList;
+    FUpdateSQL,
+    FInsertSQL,
+    FDeleteSQL           : TStringList;
+    FIsEOF               : boolean;
+    FLoadingFieldDefs    : boolean;
+    FIndexDefs           : TIndexDefs;
+    FReadOnly            : boolean;
+  end;
+ {$else}
   TSQLQuerycracker = class (Tbufdataset)
   private
     FCursor              : TSQLCursor;
@@ -205,15 +224,8 @@ type
     FLoadingFieldDefs    : boolean;
     FIndexDefs           : TIndexDefs;
     FReadOnly            : boolean;
-    FUpdateMode          : TUpdateMode;
-    FParams              : TParams;
-    FusePrimaryKeyAsKey  : Boolean;
-    FSQLBuf              : String;
-    FFromPart            : String;
-    FWhereStartPos       : integer;
-    FWhereStopPos        : integer;
-    FParseSQL            : boolean;
   end;
+  {$endif}
   
 { tmsesqltransaction }
 
