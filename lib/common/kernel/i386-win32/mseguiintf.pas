@@ -3306,11 +3306,11 @@ begin
    shiftstate:= wheelkeystatetoshiftstate(wparam);
    inc(mousewheelpos,smallint(hiword(wparam)));
    while mousewheelpos >= wheelstep do begin
-    eventlist.add(tkeyevent.create(ahwnd,false,key_wheelup,shiftstate,''));
+    eventlist.add(tkeyevent.create(ahwnd,false,key_wheelup,key_wheelup,shiftstate,''));
     dec(mousewheelpos,wheelstep);
    end;
    while mousewheelpos <= -wheelstep do begin
-    eventlist.add(tkeyevent.create(ahwnd,false,key_wheeldown,shiftstate,''));
+    eventlist.add(tkeyevent.create(ahwnd,false,key_wheeldown,key_wheeldown,shiftstate,''));
     inc(mousewheelpos,wheelstep);
    end;
   end;
@@ -3349,6 +3349,7 @@ begin
    }
    shiftstate:= winkeystatetoshiftstate(lparam);
    eventlist.add(tkeyevent.create(ahwnd,false,winkeytokey(wparam,shiftstate),
+                    key_none, ////////////dummy
                      shiftstate,msestring(charbuffer)));
    setlength(charbuffer,0);
    result:= 0;
@@ -3357,6 +3358,7 @@ begin
   wm_keyup,wm_syskeyup: begin
    shiftstate:= winkeystatetoshiftstate(lparam);
    eventlist.add(tkeyevent.create(ahwnd,true,winkeytokey(wparam,shiftstate),
+                       key_none, ////////////dummy
                       shiftstate,''));
   end;
  end;
