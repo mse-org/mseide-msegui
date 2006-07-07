@@ -57,7 +57,7 @@ type
  pmouseeventinfoty = ^mouseeventinfoty;
 
  keyeventinfoty = record
-  key: keyty;
+  key,keynomod: keyty;
   chars: msestring;
   shiftstate: shiftstatesty;
   eventstate: eventstatesty;

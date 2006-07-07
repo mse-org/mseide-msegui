@@ -1257,11 +1257,13 @@ type
   private
   public
    fkey: keyty;
+   fkeynomod: keyty;
    fchars: msestring;
    fbutton: mousebuttonty;
    fshiftstate: shiftstatesty;
-   constructor create(winid: winidty; release: boolean;
-                  key: keyty; shiftstate: shiftstatesty; chars: msestring);
+   constructor create(const winid: winidty; const release: boolean;
+                  const key,keynomod: keyty; const shiftstate: shiftstatesty;
+                  const chars: msestring);
  end;
 
  tresizeevent = class(tobjectevent)
@@ -8821,8 +8823,9 @@ end;
 
 { tkeyevent }
 
-constructor tkeyevent.create(winid: winidty; release: boolean;
-                  key: keyty; shiftstate: shiftstatesty; chars: msestring);
+constructor tkeyevent.create(const winid: winidty; const release: boolean;
+                  const key,keynomod: keyty; const shiftstate: shiftstatesty;
+                  const chars: msestring);
 var
  eventkind1: eventkindty;
 begin
@@ -9181,6 +9184,7 @@ begin
    fillchar(info,sizeof(info),0);
    with info do begin
     key:= fkey;
+    keynomod:= fkeynomod;
     case key of
      key_shift: shift:= [ss_shift];
      key_alt: shift:= [ss_alt];

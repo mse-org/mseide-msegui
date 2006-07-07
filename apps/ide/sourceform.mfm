@@ -1,5 +1,22 @@
 object sourcefo: tsourcefo
   optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_destroywidgets]
+  bounds_x = 96
+  bounds_y = 116
+  bounds_cx = 433
+  bounds_cy = 327
+  frame.grip_size = 10
+  frame.grip_options = [go_closebutton, go_fixsizebutton, go_topbutton]
+  frame.dummy = 0
+  visible = False
+  container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_mousetransparent, ow_destroywidgets, ow_autoscale]
+  container.bounds_cx = 423
+  container.bounds_cy = 327
+  container.frame.sbhorz.options = [sbo_moveauto, sbo_showauto]
+  container.frame.sbvert.options = [sbo_moveauto, sbo_showauto]
+  container.frame.dummy = 0
+  dragdock.splitter_size = 0
+  dragdock.caption = 'Source'
+  dragdock.optionsdock = [od_savepos, od_canmove, od_canfloat, od_candock, od_propsize]
   options = [fo_savepos, fo_savestate]
   statfile = mainfo.projectstatfile
   caption = '<none>'
@@ -31,33 +48,13 @@ object sourcefo: tsourcefo
   onclosequery = sourcefoonclosequery
   onidle = formonidle
   onactivate = sourcefoonactivate
-  dragdock.splitter_size = 0
-  dragdock.caption = 'Source'
-  dragdock.optionsdock = [od_savepos, od_canmove, od_canfloat, od_candock, od_propsize]
-  frame.grip_size = 10
-  frame.grip_options = [go_closebutton, go_fixsizebutton, go_topbutton]
-  frame.dummy = 0
-  container.frame.sbhorz.options = [sbo_moveauto, sbo_showauto]
-  container.frame.sbvert.options = [sbo_moveauto, sbo_showauto]
-  container.frame.dummy = 0
-  container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_mousetransparent, ow_destroywidgets, ow_autoscale]
-  container.bounds_cx = 423
-  container.bounds_cy = 327
-  container.frame.sbhorz.options = [sbo_moveauto, sbo_showauto]
-  container.frame.sbvert.options = [sbo_moveauto, sbo_showauto]
-  container.frame.dummy = 0
-  visible = False
-  optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_destroywidgets]
-  bounds_x = 96
-  bounds_y = 116
-  bounds_cx = 433
-  bounds_cy = 327
-  color = -1879048187
-  frame.grip_size = 10
-  frame.grip_options = [go_closebutton, go_fixsizebutton, go_topbutton]
-  frame.dummy = 0
   moduleclassname = 'tdockform'
   object tabwidget: ttabwidget
+    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_subfocus, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+    bounds_cx = 423
+    bounds_cy = 327
+    anchors = []
+    popupmenu = formpopup
     activepageindex = -1
     onactivepagechanged = tabwidgetonactivepagechanged
     onpageremoved = tabwidgetpageremoved
@@ -68,38 +65,31 @@ object sourcefo: tsourcefo
     tab_frame.dummy = 0
     tab_size = 104
     tab_sizemin = 60
-    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_subfocus, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
-    bounds_cx = 423
-    bounds_cy = 327
-    anchors = []
-    popupmenu = formpopup
-    reffontheight = 16
+    reffontheight = 14
     object tstockglyphbutton1: tstockglyphbutton
-      glyph = stg_arrowleft
-      action = navigbackact
-      colorglyph = -1610612727
-      onexecute = navigback
-      state = [as_disabled, as_localimagelist, as_localimagenr, as_localcolorglyph, as_localonexecute]
-      optionswidget = [ow_destroywidgets]
       optionswidget = [ow_destroywidgets]
       bounds_x = 383
       bounds_cx = 20
       bounds_cy = 20
       anchors = [an_top, an_right]
       taborder = 2
+      state = [as_disabled, as_localimagelist, as_localimagenr, as_localcolorglyph, as_localonexecute]
+      glyph = stg_arrowleft
+      action = navigbackact
+      colorglyph = -1610612727
+      onexecute = navigback
     end
     object tstockglyphbutton2: tstockglyphbutton
-      glyph = stg_arrowright
-      action = navigforwardact
-      colorglyph = -1610612727
-      state = [as_disabled, as_localimagelist, as_localimagenr, as_localcolorglyph]
-      optionswidget = [ow_destroywidgets]
       optionswidget = [ow_destroywidgets]
       bounds_x = 403
       bounds_cx = 20
       bounds_cy = 20
       anchors = [an_top, an_right]
       taborder = 1
+      state = [as_disabled, as_localimagelist, as_localimagenr, as_localcolorglyph]
+      glyph = stg_arrowright
+      action = navigforwardact
+      colorglyph = -1610612727
     end
   end
   object syntaxpainter: tsyntaxpainter
@@ -339,7 +329,8 @@ object sourcefo: tsourcefo
         submenu.items = <        
           item
             caption = 'Bookmark &0'
-            state = [as_localcaption, as_localonexecute]
+            state = [as_localcaption, as_localshortcut, as_localonexecute]
+            shortcut = 24624
             onexecute = setbmexec
           end        
           item

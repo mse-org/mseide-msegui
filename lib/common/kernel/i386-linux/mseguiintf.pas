@@ -4161,7 +4161,23 @@ begin
  {$endif}
 end;
 
+function getkeynomod(const xev: txkeyevent): keyty;
+var
+ keysym1: pkeysym;
+ int1: integer;
+begin
+ result:= key_none;
+ {$ifdef fpc} {$checkpointer off} {$endif}
+ keysym1:= xgetkeyboardmapping(appdisp,xev.keycode,1,@int1);
+ if keysym1 <> nil then begin
+  result:= xkeytokey(keysym1^);
+  xfree(keysym1);
+ end;
+ {$ifdef fpc} {$checkpointer default} {$endif}
+end;
+
 function gui_getevent: tevent;
+
 var
  xev: xevent;
  w: winidty;
@@ -4180,7 +4196,7 @@ var
  shiftstate1: shiftstatesty;
  key1: keyty;
  button1: mousebuttonty;
- 
+  
 begin
  while true do begin
   if gui_hasevent then begin
@@ -4359,7 +4375,7 @@ begin
     end;
     key1:= xkeytokey(akey);
     shiftstate1:= xtoshiftstate(state,key1,mb_none,false);
-    result:= tkeyevent.create(xwindow,false,key1,shiftstate1,chars);
+    result:= tkeyevent.create(xwindow,false,key1,getkeynomod(xev.xkey),shiftstate1,chars);
    end;
   end;
   keyrelease: begin
@@ -4368,7 +4384,7 @@ begin
     xlookupstring(@xev.xkey,nil,0,@akey,nil);
     key1:= xkeytokey(akey);
     shiftstate1:= xtoshiftstate(state,key1,mb_none,true);
-    result:= tkeyevent.create(xwindow,true,key1,shiftstate1,'');
+    result:= tkeyevent.create(xwindow,true,key1,getkeynomod(xev.xkey),shiftstate1,'');
    end;
   end;
   buttonpress,buttonrelease: begin
@@ -4378,13 +4394,13 @@ begin
     shiftstate1:= xtoshiftstate(state,key_none,button1,xev.xtype=buttonrelease);
     if button = 4 then begin
      if xev.xtype = buttonpress then begin
-      result:= tkeyevent.create(xwindow,false,key_wheelup,shiftstate1,chars);
+      result:= tkeyevent.create(xwindow,false,key_wheelup,key_wheelup,shiftstate1,chars);
      end;
     end
     else begin
      if button = 5 then begin
       if xev.xtype = buttonpress then begin
-       result:= tkeyevent.create(xwindow,false,key_wheeldown,shiftstate1,chars);
+       result:= tkeyevent.create(xwindow,false,key_wheeldown,key_wheeldown,shiftstate1,chars);
       end;
      end
      else begin
