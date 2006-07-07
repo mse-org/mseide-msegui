@@ -68,7 +68,15 @@ const
   #1057#1082#1086#1087#1080#1088#1086#1074#1072#1090#1100 , 
                                               //sc_Copy   // hotkeys=> Skopirovat`
   #1042#1099#1088#1077#1079#1072#1090#1100 ,  //sc_Cut    // => Vyrezat`
-  #1042#1089#1090#1072#1074#1080#1090#1100    //sc_Paste /// => Vstavit`
+  #1042#1089#1090#1072#1074#1080#1090#1100,    //sc_Paste /// => Vstavit`
+  '&Dir',               //sc_Dir               /// 
+  '&Up',                //sc_Up                 //
+  '&New dir',           //sc_New_dir            // hotkeys
+  '&Name',              //sc_Name               //
+  '&Show hidden files', //sc_Show_hidden_files  //
+  '&Filter',            //sc_Filter            /// 
+  'Save',               //sc_save 
+  'Open'                //sc_open
   );
     
 initialization

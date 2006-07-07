@@ -59,7 +59,15 @@ const
   '&R'#252'ckg'#228'ngig',   //sc_Undo  ///
   '&Kopieren',               //sc_Copy   // hotkeys
   '&Ausschneiden',           //sc_Cut    //
-  '&Einf'#252'gen'           //sc_Paste ///
+  '&Einf'#252'gen',          //sc_Paste ///
+  '&Dir',               //sc_Dir               /// 
+  '&Auf',               //sc_Up                 //
+  'Dir &neu',           //sc_New_dir            // hotkeys
+  'N&ame',              //sc_Name               //
+  '&Verst.Dat.anzeigen',//sc_Show_hidden_files  //
+  '&Filter',            //sc_Filter            ///   
+  'Speichern',          //sc_save 
+  #214'ffnen'           //sc_open
   );
     
 initialization

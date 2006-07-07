@@ -103,7 +103,15 @@ const
   '&Undo',              //sc_Undo  ///
   '&Copy',              //sc_Copy   // hotkeys
   'Cu&t',               //sc_Cut    //
-  '&Paste'              //sc_Paste ///
+  '&Paste',             //sc_Paste ///
+  '&Dir',               //sc_Dir               /// 
+  '&Up',                //sc_Up                 //
+  '&New dir',           //sc_New_dir            // hotkeys
+  '&Name',              //sc_Name               //
+  '&Show hidden files', //sc_Show_hidden_files  //
+  '&Filter',            //sc_Filter            /// 
+  'Save',               //sc_save 
+  'Open'                //sc_open
   );
 
 procedure registerlangconsts(const name: string; const stockcaption: stockcaptionty;

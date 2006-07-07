@@ -267,6 +267,7 @@ type
    procedure foonchildscaled(const sender: TObject);
    procedure showhiddenonsetvalue(const sender: TObject; var avalue: Boolean; 
                   var accept: Boolean);
+   procedure aftercreate(const sender: TObject);
   private
     { Private declarations }
    fselectednames: filenamearty;
@@ -317,7 +318,8 @@ procedure updatefileinfo(const item: tlistitem; const info: fileinfoty;
 implementation
 uses
  msefiledialog_mfm,sysutils,mseguiglob,msebits,
- msestringenter,msedirtree,msefiledialogres,mseeditglob,msekeyboard;
+ msestringenter,msedirtree,msefiledialogres,mseeditglob,msekeyboard,
+ msestockobjects;
 
 procedure getfileicon(const info: fileinfoty; out imagelist: timagelist; out imagenr: integer);
 begin
@@ -466,11 +468,13 @@ var
 begin
  dialog:= tfiledialogfo.create(nil);
  if acaption = '' then begin
-  if fdo_save in aoptions then begin
-   str1:= 'Save';
-  end
-  else begin
-   str1:= 'Open';
+  with stockobjects do begin
+   if fdo_save in aoptions then begin
+    str1:= captions[sc_save];
+   end
+   else begin
+    str1:= captions[sc_open];
+   end;
   end;
  end
  else begin
@@ -1052,6 +1056,20 @@ begin
   listview.excludeattrib:= listview.excludeattrib + [fa_hidden];
  end;
  listview.readlist;
+end;
+
+procedure tfiledialogfo.aftercreate(const sender: TObject);
+begin
+ with stockobjects do begin
+  dir.frame.caption:= captions[sc_dir];
+  up.caption:= captions[sc_up];
+  createdir.caption:= captions[sc_new_dir];
+  filename.frame.caption:= captions[sc_name];
+  filter.frame.caption:= captions[sc_filter];
+  showhidden.frame.caption:= captions[sc_show_hidden_files];
+  ok.caption:= modalresulttext[mr_ok];
+  cancel.caption:= modalresulttext[mr_cancel];  
+ end;
 end;
 
 { tfiledialogcontroller }

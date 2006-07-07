@@ -1,7 +1,7 @@
 object filedialogfo: Tfiledialogfo
   optionswidget = [ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_destroywidgets, ow_hinton]
-  bounds_x = 218
-  bounds_y = 197
+  bounds_x = 241
+  bounds_y = 20
   bounds_cx = 580
   bounds_cy = 307
   bounds_cxmin = 360
@@ -13,6 +13,7 @@ object filedialogfo: Tfiledialogfo
   container.frame.dummy = 0
   container.onchildscaled = foonchildscaled
   options = [fo_screencentered, fo_closeonesc, fo_autoreadstat, fo_autowritestat]
+  onaftercreate = aftercreate
   onkeydown = listviewonkeydown
   onchildscaled = foonchildscaled
   left = 239
@@ -44,9 +45,9 @@ object filedialogfo: Tfiledialogfo
   end
   object ok: tbutton
     optionswidget = [ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
-    bounds_x = 447
+    bounds_x = 439
     bounds_y = 285
-    bounds_cx = 51
+    bounds_cx = 67
     bounds_cy = 20
     anchors = [an_right, an_bottom]
     taborder = 3
@@ -59,7 +60,7 @@ object filedialogfo: Tfiledialogfo
     optionswidget = [ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
     bounds_x = 512
     bounds_y = 285
-    bounds_cx = 50
+    bounds_cx = 66
     bounds_cy = 20
     anchors = [an_right, an_bottom]
     taborder = 4
@@ -70,9 +71,9 @@ object filedialogfo: Tfiledialogfo
   end
   object createdir: tbutton
     optionswidget = [ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
-    bounds_x = 527
+    bounds_x = 511
     bounds_y = 3
-    bounds_cx = 50
+    bounds_cx = 66
     bounds_cy = 20
     anchors = [an_top, an_right]
     taborder = 7
@@ -83,9 +84,9 @@ object filedialogfo: Tfiledialogfo
   end
   object up: tbutton
     optionswidget = [ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
-    bounds_x = 471
+    bounds_x = 439
     bounds_y = 3
-    bounds_cx = 50
+    bounds_cx = 66
     bounds_cy = 20
     anchors = [an_top, an_right]
     taborder = 6
@@ -96,8 +97,9 @@ object filedialogfo: Tfiledialogfo
   end
   object filename: thistoryedit
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+    bounds_x = 1
     bounds_y = 259
-    bounds_cx = 430
+    bounds_cx = 407
     bounds_cy = 20
     frame.caption = '&Name'
     frame.captionpos = cp_right
@@ -105,7 +107,7 @@ object filedialogfo: Tfiledialogfo
     frame.outerframe = (
       0
       0
-      36
+      37
       0
     )
     anchors = [an_left, an_right, an_bottom]
@@ -122,8 +124,9 @@ object filedialogfo: Tfiledialogfo
   end
   object filter: tdropdownlistedit
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+    bounds_x = 1
     bounds_y = 284
-    bounds_cx = 423
+    bounds_cx = 400
     bounds_cy = 20
     frame.caption = '&Filter'
     frame.captionpos = cp_right
@@ -131,7 +134,7 @@ object filedialogfo: Tfiledialogfo
     frame.outerframe = (
       0
       0
-      29
+      30
       0
     )
     anchors = [an_left, an_right, an_bottom]
@@ -153,7 +156,7 @@ object filedialogfo: Tfiledialogfo
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
     bounds_x = 1
     bounds_y = 2
-    bounds_cx = 461
+    bounds_cx = 422
     bounds_cy = 20
     frame.caption = '&Dir'
     frame.captionpos = cp_right
@@ -161,27 +164,28 @@ object filedialogfo: Tfiledialogfo
     frame.outerframe = (
       0
       0
-      18
+      19
       0
     )
     anchors = [an_left, an_top, an_right]
     taborder = 5
+    textflags = [tf_ycentered, tf_noselect, tf_ellipseleft]
     ondataentered = filepathentered
     dropdown.options = [deo_selectonly, deo_keydropdown]
     onsetvalue = dironsetvalue
     reffontheight = 14
   end
   object showhidden: tbooleanedit
-    bounds_x = 448
+    bounds_x = 440
     bounds_y = 260
-    bounds_cx = 112
+    bounds_cx = 113
     bounds_cy = 16
-    frame.caption = 'Show hidden files'
+    frame.caption = '&Show hidden files'
     frame.dummy = 0
     frame.outerframe = (
       0
       1
-      99
+      100
       2
     )
     anchors = [an_right, an_bottom]

@@ -40,7 +40,7 @@ type
  optiongridty = (og_colsizing,og_colmoving,og_keycolmoving,
                  og_rowsizing,og_rowmoving,og_keyrowmoving,
                  og_rowinserting,og_rowdeleting,og_selectedrowsdeleting,
-                 og_focuscellonenter,
+                 og_focuscellonenter,og_containerfocusbackonesc,
                  og_autofirstrow,og_autoappend,og_appendempty,
                  og_savestate,og_sorted,
                  og_colchangeontabkey,og_rotaterow,
@@ -7382,7 +7382,9 @@ end;
 
 procedure tcustomgrid.doexit;
 begin
- focuscell(invalidcell,fca_exitgrid);
+ if not (csdestroying in componentstate) then begin
+  focuscell(invalidcell,fca_exitgrid);
+ end;
  inherited;
 end;
 

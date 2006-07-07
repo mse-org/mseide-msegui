@@ -190,6 +190,7 @@ type
    factivewidget: twidget;
    function getgriddatalink: pointer; virtual;
    procedure setoptionswidget(const avalue: optionswidgetty); override;
+   procedure setoptionsgrid(const avalue: optionsgridty); override;
    procedure dofocus; override;
    procedure unregisterchildwidget(const child: twidget); override;
    function createdatacols: tdatacols; override;
@@ -1561,14 +1562,30 @@ begin
  fcontainer2:= tcontainer.create(self);
  fcontainer3:= tbottomcontainer.create(self);
  inherited;
+ setoptionsgrid(foptionsgrid); //synchronize container
 // fcontainer.Name:= 'container';
 end;
 
 destructor tcustomwidgetgrid.destroy;
 begin
  fcontainer1.free;
- fcontainer2.free;
+ freeandnil(fcontainer2);
  fcontainer3.free;
+ inherited;
+end;
+
+procedure tcustomwidgetgrid.setoptionsgrid(const avalue: optionsgridty);
+begin
+ if fcontainer2 <> nil then begin
+  with fcontainer2 do begin
+   if og_containerfocusbackonesc in avalue then begin
+    optionswidget:= optionswidget + [ow_focusbackonesc];
+   end
+   else begin
+    optionswidget:= optionswidget - [ow_focusbackonesc];
+   end;
+  end;
+ end;
  inherited;
 end;
 
