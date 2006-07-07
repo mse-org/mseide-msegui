@@ -3241,18 +3241,30 @@ begin
 end;
 
 procedure tcustomrealedit.defineproperties(filer: tfiler);
+var
+ bo1,bo2,bo3: boolean;
 begin
  inherited;
+ if filer.ancestor <> nil then begin
+  with tcustomrealedit(filer.ancestor) do begin
+   bo1:= self.fvalue <> fvalue;
+   bo2:= self.fmin <> fmin;
+   bo3:= self.fmax <> fmax;
+  end;
+ end
+ else begin
+  bo1:= not isemptyreal(fvalue);
+  bo2:= not isemptyreal(fmin);
+  bo3:= cmprealty(fmax,0.99*bigreal) < 0;
+ end;
+ 
  filer.DefineProperty('val',
              {$ifdef FPC}@{$endif}readvalue,
-             {$ifdef FPC}@{$endif}writevalue,
-          not isemptyreal(fvalue));
+             {$ifdef FPC}@{$endif}writevalue,bo1);
  filer.DefineProperty('mi',{$ifdef FPC}@{$endif}readmin,
-          {$ifdef FPC}@{$endif}writemin,
-          not isemptyreal(fmin));
+          {$ifdef FPC}@{$endif}writemin,bo2);
  filer.DefineProperty('ma',{$ifdef FPC}@{$endif}readmax,
-          {$ifdef FPC}@{$endif}writemax,
-          cmprealty(fmax,0.99*bigreal) < 0);
+          {$ifdef FPC}@{$endif}writemax,bo3);
 end;
 
 procedure tcustomrealedit.readstatvalue(const reader: tstatreader);
@@ -3543,18 +3555,30 @@ begin
 end;
 
 procedure tcustomdatetimeedit.defineproperties(filer: tfiler);
+var
+ bo1,bo2,bo3: boolean;
 begin
  inherited;
+ if filer.ancestor <> nil then begin
+  with tcustomdatetimeedit(filer.ancestor) do begin
+   bo1:= self.fvalue <> fvalue;
+   bo2:= self.fmin <> fmin;
+   bo3:= self.fmax <> fmax;
+  end;
+ end
+ else begin
+  bo1:= not isemptyreal(fvalue);
+  bo2:= not isemptyreal(fmin);
+  bo3:= cmprealty(fmax,0.99*bigreal) < 0;
+ end;
+ 
  filer.DefineProperty('val',
              {$ifdef FPC}@{$endif}readvalue,
-             {$ifdef FPC}@{$endif}writevalue,
-          not isemptydatetime(fvalue));
+             {$ifdef FPC}@{$endif}writevalue,bo1);
  filer.DefineProperty('mi',{$ifdef FPC}@{$endif}readmin,
-          {$ifdef FPC}@{$endif}writemin,
-          not isemptydatetime(fmin));
+          {$ifdef FPC}@{$endif}writemin,bo2);
  filer.DefineProperty('ma',{$ifdef FPC}@{$endif}readmax,
-          {$ifdef FPC}@{$endif}writemax,
-          cmprealty(fmax,0.99*bigreal) < 0);
+          {$ifdef FPC}@{$endif}writemax,bo3);
 end;
 
 { tcustomcalendardatetimeedit }

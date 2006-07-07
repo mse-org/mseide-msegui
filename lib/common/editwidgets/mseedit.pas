@@ -1088,10 +1088,18 @@ begin
 end;
 
 procedure tcustomedit.defineproperties(filer: tfiler);
+var
+ bo1: boolean;
 begin
  inherited;
+ if filer.ancestor <> nil then begin
+  bo1:= tcustomedit(filer.ancestor).passwordchar <> passwordchar;
+ end
+ else begin
+  bo1:= passwordchar <> #0;
+ end;
  filer.defineproperty('pwchar',{$ifdef FPC}@{$endif}readpwchar,
-                         {$ifdef FPC}@{$endif}writepwchar,passwordchar <> #0);
+                                   {$ifdef FPC}@{$endif}writepwchar,bo1);
 end;
 
 end.

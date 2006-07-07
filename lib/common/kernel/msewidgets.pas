@@ -1437,11 +1437,18 @@ begin
 end;
 
 procedure tcustomcaptionframe.defineproperties(filer: tfiler);
+var
+ bo1: boolean;
 begin
  inherited;
+ if filer.ancestor <> nil then begin
+  bo1:= not frameisequal(fouterframe,tcustomcaptionframe(filer.ancestor).fouterframe);
+ end
+ else begin
+  bo1:= not isnullframe(fouterframe);
+ end;
  filer.DefineProperty('outerframe',{$ifdef FPC}@{$endif}readouterframe,
-                  {$ifdef FPC}@{$endif}writeouterframe,
-                                not isnullframe(fouterframe));
+                  {$ifdef FPC}@{$endif}writeouterframe,bo1);
 end;
 
 procedure tcustomcaptionframe.readouterframe(reader: treader);

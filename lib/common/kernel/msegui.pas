@@ -7206,11 +7206,18 @@ begin
 end;
 
 procedure twidget.defineproperties(filer: tfiler);
+var
+ bo1: boolean;
 begin
  inherited;
+ if filer.ancestor <> nil then begin
+  bo1:= twidget(filer.ancestor).ffontheight <> ffontheight;
+ end
+ else begin
+  bo1:= foptionswidget * [ow_fontglyphheight,ow_fontlineheight] <> [];
+ end;
  filer.DefineProperty('reffontheight',{$ifdef FPC}@{$endif}readfontheight,
-           {$ifdef FPC}@{$endif}writefontheight,
-              foptionswidget * [ow_fontglyphheight,ow_fontlineheight] <> []);
+           {$ifdef FPC}@{$endif}writefontheight,bo1);
 end;
 {
 procedure twidget.writestate(writer: twriter);

@@ -482,10 +482,18 @@ begin
 end;
 
 procedure tcustomrealdisp.defineproperties(filer: tfiler);
+var
+ bo1: boolean;
 begin
  inherited;
- filer.DefineProperty('val',{$ifdef FPC}@{$endif}readvalue,{$ifdef FPC}@{$endif}writevalue,
-          not isemptyreal(fvalue));
+ if filer.ancestor <> nil then begin
+  bo1:= tcustomrealdisp(filer.ancestor).fvalue <> fvalue;
+ end
+ else  begin
+  bo1:= not isemptyreal(fvalue);
+ end;
+ filer.DefineProperty('val',{$ifdef FPC}@{$endif}readvalue,
+          {$ifdef FPC}@{$endif}writevalue,bo1);
 end;
 
 function tcustomrealdisp.getvaluetext: msestring;
@@ -574,12 +582,19 @@ begin
 end;
 
 procedure tcustomdatetimedisp.defineproperties(filer: tfiler);
+var
+ bo1: boolean;
 begin
  inherited;
+ if filer.ancestor <> nil then begin
+  bo1:= tcustomdatetimedisp(filer.ancestor).fvalue <> fvalue;
+ end
+ else  begin
+  bo1:= not isemptydatetime(fvalue);
+ end;
  filer.DefineProperty('val',
              {$ifdef FPC}@{$endif}readvalue,
-             {$ifdef FPC}@{$endif}writevalue,
-          not isemptydatetime(fvalue));
+             {$ifdef FPC}@{$endif}writevalue,bo1);
 end;
 
 { tcustombooleandisp }
