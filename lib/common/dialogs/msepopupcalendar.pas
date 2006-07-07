@@ -52,16 +52,56 @@ type
    procedure doactivate; override;
    procedure dodeactivate; override;
   public
-   constructor create(const aowner: tcomponent; 
+   constructor create(const aowner: tcomponent;
                                   const acontroller: tcalendarcontroller);
    property value: tdatetime read fvalue write setvalue;
  end;
- 
+
 implementation
 uses
- msepopupcalendar_mfm,sysutils,dateutils,msedrawtext,msestrings,
+ msepopupcalendar_mfm,sysutils,{$ifndef linux}
+                                 dateutils,
+                               {$else}
+                                {$ifdef FPC}dateutils,{$endif}
+                               {$endif}
+ msedrawtext,msestrings,
  msekeyboard,mseguiglob;
- 
+
+ {$ifdef linux}
+ {$ifndef FPC}
+          //copied from dateutil.inc
+
+Function DayOf(const AValue: TDateTime): Word;
+
+Var
+  Y,M : Word;
+
+begin
+  DecodeDate(AValue,Y,M,Result);
+end;
+
+Function DaysBetween(const ANow, AThen: TDateTime): Integer;
+begin
+  Result:=Trunc(Abs(ANow-AThen));
+end;
+
+Function DaysInMonth(const AValue: TDateTime): Word;
+
+Var
+  Y,M,D : Word;
+
+begin
+  Decodedate(AValue,Y,M,D);
+  Result:=MonthDays[IsLeapYear(Y),M];
+end;
+
+Function IncDay(const AValue: TDateTime; const ANumberOfDays: Integer): TDateTime;
+begin
+  Result:=AValue+ANumberOfDays;  //1899 step?
+end;
+ {$endif}
+{$endif}
+
 { tcalendarcontroller }
 
 constructor tcalendarcontroller.create(const intf: idropdowncalendar);

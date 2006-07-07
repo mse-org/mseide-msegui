@@ -4110,7 +4110,7 @@ begin
   end;
  end;
 end; 
-     
+
 procedure SmcDie(_smcConn: SmcConn; clientData: pointer); cdecl;
 begin
 end;
@@ -4161,7 +4161,8 @@ begin
  {$endif}
 end;
 
-function getkeynomod(const xev: txkeyevent): keyty;
+function getkeynomod(const xev: {$ifdef FPC}txkeyevent{$else}
+                              xkeyevent{$endif}): keyty;
 var
  keysym1: pkeysym;
  int1: integer;
