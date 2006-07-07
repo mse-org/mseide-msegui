@@ -66,7 +66,7 @@ uses
 
 constructor tcalendarcontroller.create(const intf: idropdowncalendar);
 begin
- inherited;
+ inherited create(intf);
  fforcecaret:= true;
  bounds_cx:= popupcalendarwidth;
 end;
