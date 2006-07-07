@@ -1106,7 +1106,14 @@ begin
     if sourcefo.findbookmark(ord(key) - ord(key_0)) then begin 
      include(eventstate,es_processed);
     end;    
-   end;
+   end
+   else begin
+    if (shiftstate = [ss_ctrl,ss_shift]) and 
+         (keynomod >= key_0) and (keynomod <= key_9) then begin
+     sourcefo.setbookmark(self,info.cell.row,ord(keynomod) - ord(key_0));
+     include(eventstate,es_processed);
+    end;
+   end;     
   end;
  end;
 end;

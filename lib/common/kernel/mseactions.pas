@@ -213,8 +213,8 @@ uses
  msebits,sysutils,typinfo;
 
 const
- letterkeycount = ord('z') - ord('a');
- cipherkeycount = ord('9') - ord('0');
+ letterkeycount = ord('z') - ord('a') + 1;
+ cipherkeycount = ord('9') - ord('0') + 1;
  functionkeycount = 12;
  misckeycount = ord(key_sysreq) - ord(key_escape) + 1;
  cursorkeycount = ord(key_pagedown) - ord(key_home) + 1;
@@ -257,8 +257,8 @@ var
 begin
  result:= false;
  with info do begin
-  if not (as_disabled in state) and
-         not (es_processed in keyinfo.eventstate) then begin
+  if (shortcut <> 0) and not (as_disabled in state) and
+                         not (es_processed in keyinfo.eventstate) then begin
    key:= getshortcutcode(keyinfo);
    if key = shortcut then begin
     doactionexecute(sender,info);
@@ -427,15 +427,22 @@ end;
 
 function getshortcutcode(const info: keyeventinfoty): shortcutty;
 begin
- result:= ord(info.key);
- if ss_shift in info.shiftstate then begin
-  result:= result or key_modshift;
- end;
- if ss_ctrl in info.shiftstate then begin
-  result:= result or key_modctrl;
- end;
- if ss_alt in info.shiftstate then begin
-  result:= result or key_modalt;
+ with info do begin
+  if (key >= key_0) and (key <= key_9) then begin
+   result:= ord(info.keynomod);
+  end
+  else begin   
+   result:= ord(info.key);
+  end;
+  if ss_shift in info.shiftstate then begin
+   result:= result or key_modshift;
+  end;
+  if ss_ctrl in info.shiftstate then begin
+   result:= result or key_modctrl;
+  end;
+  if ss_alt in info.shiftstate then begin
+   result:= result or key_modalt;
+  end;
  end;
 end;
 

@@ -137,6 +137,8 @@ type
    property items[const index: integer]: tsourcepage read getitems;
    property naviglist: tnaviglist read fnaviglist;
    function findbookmark(const bookmarknum: integer): boolean;
+   procedure setbookmark(const apage: tsourcepage; const arow: integer;
+                            const bookmarknum: integer);
     //true if found
 
    function gettextstream(const filename: filenamety; forwrite: boolean): ttextstream;
@@ -1035,18 +1037,32 @@ begin
  activepage.asyncevent(integer(spat_showasform));
 end;
 
+procedure tsourcefo.setbookmark(const apage: tsourcepage; const arow: integer;
+                                  const bookmarknum: integer);
+var
+ int1: integer;
+ page1: tsourcepage;
+ bo1: boolean;
+begin
+ if bookmarknum >= 0 then begin
+  bo1:= (arow >= 0) and (bookmarknum >= 0);
+  for int1:= 0 to self.count - 1 do begin
+   page1:= items[int1];
+   if bo1 and (page1 = apage) and (page1.findbookmark(bookmarknum) = arow) then begin
+    page1.clearbookmark(bookmarknum);
+    exit;
+   end;
+   page1.clearbookmark(bookmarknum);
+  end;
+ end;
+ apage.setbookmark(arow,bookmarknum);
+end;
+
 procedure tsourcefo.setbmexec(const sender: TObject);
 var
  int1: integer;
 begin
- with tmenuitem(sender) do begin
-  if tag >= 0 then begin
-   for int1:= 0 to self.count - 1 do begin
-    self.items[int1].clearbookmark(tag);
-   end;
-  end;
-  activepage.setbookmark(-1,tag);
- end;
+ setbookmark(activepage,-1,tmenuitem(sender).tag);
 end;
 
 function tsourcefo.findbookmark(const bookmarknum: integer): boolean;

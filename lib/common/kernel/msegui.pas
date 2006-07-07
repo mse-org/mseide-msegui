@@ -8836,6 +8836,7 @@ begin
   eventkind1:= ek_keypress;
  end;
  inherited create(eventkind1,winid);
+ fkeynomod:= keynomod;
  fkey:= key;
  fchars:= chars;
  fshiftstate:= shiftstate;

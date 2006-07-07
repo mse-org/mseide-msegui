@@ -3188,6 +3188,7 @@ var
  button: mousebuttonty;
  po1: pointty;
  shiftstate: shiftstatesty;
+ key1: keyty;
 begin
  result:= 1;
  case msg of
@@ -3333,33 +3334,18 @@ begin
    exit;
   end;
   wm_keydown,wm_syskeydown: begin
-  {
-   setlength(chars,256);
-   int1:= tounicode(wparam,lparam shr 16,keystate,pointer(chars)^,256,0);
-   if int1 > 0 then begin
-    setlength(chars,int1);
-   end
-   else begin
-    setlength(chars,0);
-   end;
    shiftstate:= winkeystatetoshiftstate(lparam);
-   eventlist.add(tkeyevent.create(ahwnd,false,winkeytokey(wparam,shiftstate),
-                     shiftstate,chars));
-   setlength(chars,0);
-   }
-   shiftstate:= winkeystatetoshiftstate(lparam);
-   eventlist.add(tkeyevent.create(ahwnd,false,winkeytokey(wparam,shiftstate),
-                    key_none, ////////////dummy
-                     shiftstate,msestring(charbuffer)));
+   key1:= winkeytokey(wparam,shiftstate);
+   eventlist.add(tkeyevent.create(ahwnd,false,key1,key1,shiftstate,
+                                    msestring(charbuffer)));
    setlength(charbuffer,0);
    result:= 0;
    exit;
   end;
   wm_keyup,wm_syskeyup: begin
    shiftstate:= winkeystatetoshiftstate(lparam);
-   eventlist.add(tkeyevent.create(ahwnd,true,winkeytokey(wparam,shiftstate),
-                       key_none, ////////////dummy
-                      shiftstate,''));
+   key1:= winkeytokey(wparam,shiftstate);
+   eventlist.add(tkeyevent.create(ahwnd,true,key1,key1,shiftstate,''));
   end;
  end;
  if iswin95 then begin
