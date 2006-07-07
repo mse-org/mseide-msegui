@@ -169,6 +169,8 @@ type
   descendent,ancestor: tmsecomponent
  end;
  pancestorinfoty = ^ancestorinfoty;
+ ancestorinfoaty = array[0..0] of ancestorinfoty;
+ pancestorinfoaty = ^ancestorinfoaty;
 
  tancestorlist = class(tobjectlinkrecordlist)
   private
@@ -230,7 +232,8 @@ type
    procedure modulemodified(const amodule: pmoduleinfoty);
    procedure revert(const info: pancestorinfoty; const module: pmoduleinfoty);
   public
-   procedure add(const instance,ancestor: tmsecomponent; const submodulelist: tsubmodulelist);
+   procedure add(const instance,ancestor: tmsecomponent;
+                                         const submodulelist: tsubmodulelist);
    function getclassname(const comp: tcomponent): string;
                    //returns submodule or root classname if appropriate
  end;
@@ -2175,6 +2178,10 @@ end;
 function tdesigner.getreferencingmodulenames(const amodule: pmoduleinfoty): stringarty;
 var
  int1,int2: integer;
+ po1: pancestorinfoaty;
+ str1: string;
+ po2: pmoduleinfoty;
+ bo1: boolean;
 begin
  result:= nil;
  for int1:= 0 to fmodules.count - 1 do begin
@@ -2182,6 +2189,27 @@ begin
    for int2:= 0 to high(referencedmodules) do begin
     if referencedmodules[int2] = amodule^.instance.Name then begin
      additem(result,instance.name);
+    end;
+   end;
+  end;
+ end;
+ po1:= fdescendentinstancelist.datapo;
+ for int1:= 0 to fdescendentinstancelist.count - 1 do begin
+  with po1^[int1] do begin
+   if ancestor = amodule^.instance then begin
+    po2:= fmodules.findmodulebycomponent(descendent);
+    if po2 <> nil then begin
+     str1:= po2^.instance.name;
+     bo1:= false;
+     for int2:= high(result) downto 0 do begin
+      if result[int2] = str1 then begin
+       bo1:= true;
+       break;
+      end;
+     end;
+     if not bo1 then begin
+      additem(result,str1);
+     end;
     end;
    end;
   end;
