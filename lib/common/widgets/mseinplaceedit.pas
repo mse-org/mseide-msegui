@@ -973,10 +973,12 @@ begin
       end;
       key_left: begin
        if (fsellength = length(finfo.text.text)) and (shiftstate <> [ss_shift]) or
-           (fcurindex = 0) and ((fsellength = 0) or (shiftstate <> [ss_shift])) or
- {          ((fsellength = 0) or (shiftstate <> [ss_shift])) and}
-            (opt1 * [oe_readonly,oe_caretonreadonly] =
-                  [oe_readonly]) then begin
+           (fcurindex = 0) and 
+             ((fsellength = 0) or (shiftstate <> [ss_shift]) or
+              (ies_istextedit in fstate)
+             ) or
+           (opt1 * [oe_readonly,oe_caretonreadonly] =
+                   [oe_readonly]) then begin
         actioninfo.dir:= gd_left;
         if checkaction(actioninfo) then begin
          if not(oe_exitoncursor in opt1) then begin
@@ -997,10 +999,11 @@ begin
        if (fsellength = length(finfo.text.text)) and (shiftstate <> [ss_shift]) or
          (fcurindex = length(finfo.text.text)) and 
            ((shiftstate <> [ss_shift]) or (fsellength = 0) or 
-            (fsellength = length(finfo.text.text)) and (oe_autoselect in opt1)
+            (ies_istextedit in fstate) or
+            (fsellength = length(finfo.text.text)) and (oe_autoselect in opt1) and
+               (shiftstate <> [ss_shift])
            ) or
-  {         ((fsellength = 0) or (shiftstate <> [ss_shift])) and}
-               (opt1 * [oe_readonly,oe_caretonreadonly] =
+         (opt1 * [oe_readonly,oe_caretonreadonly] =
                   [oe_readonly]) then begin
         actioninfo.dir:= gd_right;
         if checkaction(actioninfo) then begin
