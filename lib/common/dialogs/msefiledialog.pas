@@ -268,6 +268,7 @@ type
    procedure showhiddenonsetvalue(const sender: TObject; var avalue: Boolean; 
                   var accept: Boolean);
    procedure aftercreate(const sender: TObject);
+   procedure dirshowhint(const sender: TObject; var info: hintinfoty);
   private
     { Private declarations }
    fselectednames: filenamearty;
@@ -1069,6 +1070,14 @@ begin
   showhidden.frame.caption:= captions[sc_show_hidden_files];
   ok.caption:= modalresulttext[mr_ok];
   cancel.caption:= modalresulttext[mr_cancel];  
+ end;
+end;
+
+procedure tfiledialogfo.dirshowhint(const sender: TObject;
+               var info: hintinfoty);
+begin
+ if dir.editor.textclipped then begin
+  info.caption:= dir.value;
  end;
 end;
 
