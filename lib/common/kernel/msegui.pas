@@ -19,7 +19,7 @@ uses
  msebitmap,msearrayprops;
 
 const
- mseguiversiontext = '0.9';
+ mseguiversiontext = '0.9a';
  
  defaultwidgetcolor = cl_default;
  defaulttoplevelwidgetcolor = cl_background;
