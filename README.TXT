@@ -25,7 +25,6 @@ IDE is under GPL, library under modified LGPL like FPC-RTL.
 
 Installation:
 *************
-
 1. Download and install FPC 2.0.2, you can get it from http://www.freepascal.org/download.html
 2. Download src and bin zip's.
 3. Extract them to a directory of your choice ('yourdirectory') .
@@ -41,9 +40,13 @@ If you wish to to compile the IDE:
 1. In 'Project'-'Open' select 'yourdirectory/msegui/apps/ide/mseide.prj'.
 2. 'Target'-'Continue'.
 
+Debugging
+*********
+Breakpoints don't work on win32 in units compiled with -CX 
+(create smartlinked units).
+
 How to add custom components to MSEide
 **************************************
-
 There is a project 'apps/myide/mymseide.prj' as a demo.
 Start MSEide, open project 'apps/myide/mymseide.prj', 'Project'-'Build', 'Target'-'Continue',
 the IDE with the new component 'tmybutton' will be compiled and
@@ -67,7 +70,6 @@ If you want add custom icons to your components:
  
 How to run i18ndemo
 *******************
-
 - Start MSEide version 0.9.
 - 'Project'-'Open'-'yourdirectory/msegui/apps/i18ndemo/i18ndemo.prj'.
 - 'Project'-'Make' to create the rst files.
@@ -84,7 +86,6 @@ In MSEi18n:
 
 FPC patches
 ***********
-
 In patch_fpc_2_0_3 are the needed modified FPC files for MSEgui 
 and FPC 2.0.3.
 There are some fixes to let the FPC compiler work with -Fcutf8,
@@ -96,7 +97,6 @@ FPC 2.0.2 and FPC 2.0.3.
 
 SQLite
 ******
-
 To install SQLite support into the IDE compile the ide with -dmse_with_sqlite
 (experimental, needs installed libsqlite3.so (linux) or sqlite3.dll (win32)
 on your system.
