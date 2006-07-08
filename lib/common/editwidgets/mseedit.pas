@@ -220,6 +220,7 @@ type
    fontextedited: texteditedeventty;
    ftextflags: textflagsty;
    ftextflagsactive: textflagsty;
+   fonkeydown: keyeventty;
    function getmaxlength: integer;
    function getpasswordchar: msechar;
    procedure setmaxlength(const Value: integer);
@@ -297,6 +298,7 @@ type
    property caretwidth: integer read getcaretwidth write setcaretwidth default defaultcaretwidth;
    property onchange: notifyeventty read fonchange write fonchange;
    property ontextedited: texteditedeventty read fontextedited write fontextedited;
+   property onkeydown: keyeventty read fonkeydown write fonkeydown;
   published
    property cursor default cr_ibeam;
  end;
@@ -313,6 +315,7 @@ type
    property caretwidth;
    property onchange;
    property ontextedited;
+   property onkeydown;
  end;
 
 implementation
@@ -803,8 +806,15 @@ end;
 
 procedure tcustomedit.dokeydown(var info: keyeventinfoty);
 begin
- feditor.dokeydown(info);
- inherited;
+ if canevent(tmethod(fonkeydown)) then begin
+  fonkeydown(self,info);
+ end;
+ if not (es_processed in info.eventstate) then begin
+  feditor.dokeydown(info);
+  if not (es_processed in info.eventstate) then begin
+   inherited;
+  end;
+ end;
 end;
 
 procedure tcustomedit.clientmouseevent(var info: mouseeventinfoty);

@@ -129,6 +129,7 @@ type
    property ontextedited;
    property oncheckvalue: checkvalueeventty read foncheckvalue write foncheckvalue;
    property ondataentered: notifyeventty read fondataentered write fondataentered;
+   property onkeydown;
  end;
 
  tcustomstringedit = class(tdataedit)

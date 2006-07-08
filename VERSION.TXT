@@ -1,5 +1,6 @@
 MSEide+MSEgui version history
 
+2006-07-08 tcustomedit.onkeydown.
 2006-07-07 Field keyeventty.keynomod, holds unmodified key.
 2006-07-06 property tgriddatalink.datafield, sets tcustomgrid.rowcolorstate and 
  rowfontstate according to tgriddadalink.field.asinteger.

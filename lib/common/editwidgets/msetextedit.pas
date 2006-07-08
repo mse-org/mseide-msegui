@@ -245,6 +245,7 @@ type
    property encoding;
    property textflags;
    property textflagsactive;
+   property onkeydown;
    property statfile;
    property statvarname;
    property marginlinepos;
