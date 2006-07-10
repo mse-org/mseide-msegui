@@ -53,7 +53,9 @@ type
    fcontroller: tdscontroller;
    fstate: sqlquerystatesty;
    fonapplyrecupdate: applyrecupdateeventty;
+   {$ifndef fpc204}
    fonupdateerror: updateerroreventty;
+   {$endif}
    fwantedreadonly: boolean;
    procedure setcontroller(const avalue: tdscontroller);
    procedure setactive(value : boolean); {override;}
@@ -96,7 +98,7 @@ type
    procedure DoAfterOpen; override;
    procedure DoAfterPost; override;
    procedure DoAfterScroll; override;
- {$ifdef v203}
+ {$ifdef fpc203}
    procedure DoAfterRefresh; override;
  {$endif}
    procedure DoBeforeCancel; override;
@@ -107,7 +109,7 @@ type
    procedure DoBeforeOpen; override;
    procedure DoBeforePost; override;
    procedure DoBeforeScroll; override;
-  {$ifdef v203}
+  {$ifdef fpc203}
    procedure DoBeforeRefresh; override;
   {$endif}
    procedure DoOnCalcFields; override;
@@ -131,8 +133,10 @@ type
    property Active: boolean read getactive write setactive;
    property onapplyrecupdate: applyrecupdateeventty read fonapplyrecupdate
                                   write setonapplyrecupdate;
+   {$ifndef fpc204}
    property onupdateerror: updateerroreventty read fonupdateerror
                                write fonupdateerror;
+   {$endif fc204}
    property ParseSQL: boolean read getparsesql write setparsesql default true;
    property ReadOnly: boolean read getreadonly write setreadonly default false;
    property UpdateMode default upWhereKeyOnly;
@@ -212,6 +216,20 @@ type
     FLoadingFieldDefs    : boolean;
     FIndexDefs           : TIndexDefs;
     FReadOnly            : boolean;
+    FUpdateMode          : TUpdateMode;
+    FParams              : TParams;
+    FusePrimaryKeyAsKey  : Boolean;
+    FSQLBuf              : String;
+    FFromPart            : String;
+    FWhereStartPos       : integer;
+    FWhereStopPos        : integer;
+    FParseSQL            : boolean;
+    FMasterLink          : TMasterParamsDatalink;
+//    FSchemaInfo          : TSchemaInfo;
+
+    FUpdateQry,
+    FDeleteQry,
+    FInsertQry           : TSQLQuery;
   end;
  {$else}
   TSQLQuerycracker = class (Tbufdataset)
@@ -346,9 +364,35 @@ begin
 end;
 
 procedure tmsesqlquery.internalopen;
+
+{$ifdef fpc204}
+ procedure initmodifyquery(var aquery: tsqlquery; const asql: tstringlist);
+ begin
+  if aquery = nil then begin
+   aquery:= tsqlquery.create(nil);
+   with aquery do begin
+    parsesql:= false;
+    database:= self.database;
+    transaction:= self.transaction;
+    sql.Assign(asql);
+   end;
+  end;
+ end;
+{$endif}
+
 begin
  inherited;
  bindfields(true);
+ {$ifdef fpc204}     //queries are nil if not defaultfields
+ with tsqlquerycracker(self) do begin
+  if fupdateable then begin
+   initmodifyquery(fdeleteqry,deletesql);
+   initmodifyquery(fupdateqry,updatesql);
+   initmodifyquery(finsertqry,insertsql);
+  end;
+ end;
+ {$endif}
+  
 end;
 
 procedure tmsesqlquery.internalclose;
@@ -459,12 +503,34 @@ begin
 end;
 
 {$ifdef fpc204}
+
 procedure tmsesqlquery.applyrecupdate(updatekind: tupdatekind);
 var
- result: boolean;
-{$else}
+ bo1: boolean;
+ str1: string;
+begin
+ if sqs_userapplayrecupdate in fstate then begin
+  bo1:= false;
+  fonapplyrecupdate(self,updatekind,str1,bo1);
+  if not bo1 then begin
+   if str1 = '' then begin
+    inherited;
+   end
+   else begin
+{$ifdef debugsqlquery}  
+    debugwriteln(getenumname(typeinfo(tupdatekind),ord(updatekind))+' '+str1);
+{$endif}  
+    tsqlconnection(database).executedirect(str1,tsqltransaction(transaction));
+   end;
+  end;
+ end
+ else begin
+  inherited;
+ end;
+end;
+
+{$else fpc204}
 function tmsesqlquery.applyrecupdate(updatekind: tupdatekind): boolean;
-{$endif}
 
  procedure doupdate;
  var
@@ -532,6 +598,7 @@ begin //applyrecupdate
   until result;
  end;
 end;
+{$endif fpc204}
 
 procedure tmsesqlquery.applyupdates;
 begin
@@ -700,7 +767,7 @@ begin
   inherited;
  end;
 end;
-{$ifdef v203}
+{$ifdef fpc204}
 procedure tmsesqlquery.DoAfterRefresh;
 begin
  if not (csdesigning in componentstate) then begin
@@ -763,7 +830,7 @@ begin
   inherited;
  end;
 end;
-{$ifdef v203}
+{$ifdef fpc204}
 procedure tmsesqlquery.DoBeforeRefresh;
 begin
  if not (csdesigning in componentstate) then begin

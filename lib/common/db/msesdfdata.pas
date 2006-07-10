@@ -43,7 +43,7 @@ type
    procedure DoAfterOpen; override;
    procedure DoAfterPost; override;
    procedure DoAfterScroll; override;
-   {$ifdef v203}
+   {$ifdef fpc204}
    procedure DoAfterRefresh; override;
    {$endif}
    procedure DoBeforeCancel; override;
@@ -54,7 +54,7 @@ type
    procedure DoBeforeOpen; override;
    procedure DoBeforePost; override;
    procedure DoBeforeScroll; override;
-   {$ifdef v203}
+   {$ifdef fpc204}
    procedure DoBeforeRefresh; override;
    {$endif}
    procedure DoOnCalcFields; override;
@@ -106,7 +106,7 @@ type
    procedure DoAfterOpen; override;
    procedure DoAfterPost; override;
    procedure DoAfterScroll; override;
-   {$ifdef v203}
+   {$ifdef fpc204}
    procedure DoAfterRefresh; override;
    {$endif}
    procedure DoBeforeCancel; override;
@@ -117,7 +117,7 @@ type
    procedure DoBeforeOpen; override;
    procedure DoBeforePost; override;
    procedure DoBeforeScroll; override;
-   {$ifdef v203}
+   {$ifdef fpc204}
    procedure DoBeforeRefresh; override;
    {$endif}
    procedure DoOnCalcFields; override;
@@ -315,7 +315,7 @@ begin
   inherited;
  end;
 end;
-{$ifdef v203}
+{$ifdef fpc204}
 procedure tmsefixedformatdataset.DoAfterRefresh;
 begin
  if not (csdesigning in componentstate) then begin
@@ -378,7 +378,7 @@ begin
   inherited;
  end;
 end;
-{$ifdef v203}
+{$ifdef fpc204}
 procedure tmsefixedformatdataset.DoBeforeRefresh;
 begin
  if not (csdesigning in componentstate) then begin
@@ -572,7 +572,7 @@ begin
   inherited;
  end;
 end;
-{$ifdef v203}
+{$ifdef fpc204}
 procedure tmsesdfdataset.DoAfterRefresh;
 begin
  if not (csdesigning in componentstate) then begin
@@ -635,7 +635,7 @@ begin
   inherited;
  end;
 end;
-{$ifdef v203}
+{$ifdef fpc204}
 procedure tmsesdfdataset.DoBeforeRefresh;
 begin
  if not (csdesigning in componentstate) then begin

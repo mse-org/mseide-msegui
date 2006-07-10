@@ -297,8 +297,8 @@ procedure Ansi2UCS4Move(source:pchar;var dest:UCS4String;len:SizeInt);
             end;
           else
             begin
-              raise EConvertError.Create('iconv error '+IntToStr(fpgetCerrno));
               unlockiconv(lock_ansi2ucs4);
+              raise EConvertError.Create('iconv error '+IntToStr(fpgetCerrno));
             end;
         end;
       end;

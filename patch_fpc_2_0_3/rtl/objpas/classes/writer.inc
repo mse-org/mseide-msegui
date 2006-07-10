@@ -758,29 +758,6 @@ begin
 //              AncestorObj := nil;
         end else
           AncestorObj := nil;
-{
-write('objvalue ',ptrint(objvalue));
-if objvalue = nil then begin
- write(' <nil>');
-end
-else begin
- write(' <'+objvalue.classname+'>');
- if objvalue is tcomponent then begin
-  write(' '+tcomponent(objvalue).name);
- end;
-end; 
-write(' ancestorobj ',ptrint(ancestorobj));
-if ancestorobj = nil then begin
- write(' <nil>');
-end
-else begin
- write(' <'+ancestorobj.classname+'>');
- if ancestorobj is tcomponent then begin
-  write(' '+tcomponent(ancestorobj).name);
- end;
-end; 
-writeln;
-}
         if not Assigned(ObjValue) then
         begin
           if ObjValue <> AncestorObj then
