@@ -51,7 +51,6 @@ type
    procedure DoBeforeScroll; override;
 
    procedure DoBeforeRefresh; override;
-   {$endif}
    procedure DoOnCalcFields; override;
    procedure DoOnNewRecord; override;
 

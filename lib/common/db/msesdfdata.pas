@@ -377,7 +377,7 @@ begin
   inherited;
  end;
 end;
-{$endif}
+
 procedure tmsefixedformatdataset.DoOnCalcFields;
 begin
  if not (csdesigning in componentstate) then begin
