@@ -12,13 +12,10 @@ unit msesqldb;
 interface
 uses
  classes,db,sqldb,msedb,mseclasses,msetypes,mseguiglob;
-{$ifdef fpc204}
- {$define fpc203}
-{$endif}
   
 type
 
- TUpdateAction = (uaFail, uaAbort, uaSkip, uaRetry, uaApplied);
+// TUpdateAction = (uaFail, uaAbort, uaSkip, uaRetry, uaApplied);
 
  tmsesqltransaction = class(tsqltransaction)
   private
@@ -53,9 +50,6 @@ type
    fcontroller: tdscontroller;
    fstate: sqlquerystatesty;
    fonapplyrecupdate: applyrecupdateeventty;
-   {$ifndef fpc204}
-   fonupdateerror: updateerroreventty;
-   {$endif}
    fwantedreadonly: boolean;
    procedure setcontroller(const avalue: tdscontroller);
    procedure setactive(value : boolean); {override;}
@@ -74,11 +68,7 @@ type
    procedure internalopen; override;
    procedure internalclose; override;
    procedure internalinsert; override;
-   {$ifdef fpc204}
    procedure applyrecupdate(updatekind: tupdatekind); override;
-   {$else}
-   function applyrecupdate(updatekind: tupdatekind): boolean; override;
-   {$endif}
    function  getcanmodify: boolean; override;
    function  getfieldclass(fieldtype: tfieldtype): tfieldclass; override;
        //idscontroller
@@ -98,9 +88,7 @@ type
    procedure DoAfterOpen; override;
    procedure DoAfterPost; override;
    procedure DoAfterScroll; override;
- {$ifdef fpc203}
    procedure DoAfterRefresh; override;
- {$endif}
    procedure DoBeforeCancel; override;
    procedure DoBeforeClose; override;
    procedure DoBeforeDelete; override;
@@ -109,9 +97,7 @@ type
    procedure DoBeforeOpen; override;
    procedure DoBeforePost; override;
    procedure DoBeforeScroll; override;
-  {$ifdef fpc203}
    procedure DoBeforeRefresh; override;
-  {$endif}
    procedure DoOnCalcFields; override;
    procedure DoOnNewRecord; override;
    
@@ -133,10 +119,6 @@ type
    property Active: boolean read getactive write setactive;
    property onapplyrecupdate: applyrecupdateeventty read fonapplyrecupdate
                                   write setonapplyrecupdate;
-   {$ifndef fpc204}
-   property onupdateerror: updateerroreventty read fonupdateerror
-                               write fonupdateerror;
-   {$endif fc204}
    property ParseSQL: boolean read getparsesql write setparsesql default true;
    property ReadOnly: boolean read getreadonly write setreadonly default false;
    property UpdateMode default upWhereKeyOnly;
@@ -202,7 +184,6 @@ uses
  msestrings,dbconst,msesysutils,typinfo;
  
 type 
- {$ifdef fpc204}
   TSQLQuerycracker = class (Tbufdataset)
   private
     FCursor              : TSQLCursor;
@@ -231,19 +212,6 @@ type
     FDeleteQry,
     FInsertQry           : TSQLQuery;
   end;
- {$else}
-  TSQLQuerycracker = class (Tbufdataset)
-  private
-    FCursor              : TSQLCursor;
-    FUpdateable          : boolean;
-    FTableName           : string;
-    FSQL                 : TStringList;
-    FIsEOF               : boolean;
-    FLoadingFieldDefs    : boolean;
-    FIndexDefs           : TIndexDefs;
-    FReadOnly            : boolean;
-  end;
-  {$endif}
   
 { tmsesqltransaction }
 
@@ -365,7 +333,6 @@ end;
 
 procedure tmsesqlquery.internalopen;
 
-{$ifdef fpc204}
  procedure initmodifyquery(var aquery: tsqlquery; const asql: tstringlist);
  begin
   if aquery = nil then begin
@@ -378,21 +345,18 @@ procedure tmsesqlquery.internalopen;
    end;
   end;
  end;
-{$endif}
 
 begin
  inherited;
  bindfields(true);
- {$ifdef fpc204}     //queries are nil if not defaultfields
+     //queries are nil if not defaultfields
  with tsqlquerycracker(self) do begin
   if fupdateable then begin
    initmodifyquery(fdeleteqry,deletesql);
    initmodifyquery(fupdateqry,updatesql);
    initmodifyquery(finsertqry,insertsql);
   end;
- end;
- {$endif}
-  
+ end;  
 end;
 
 procedure tmsesqlquery.internalclose;
@@ -502,8 +466,6 @@ begin
  end;
 end;
 
-{$ifdef fpc204}
-
 procedure tmsesqlquery.applyrecupdate(updatekind: tupdatekind);
 var
  bo1: boolean;
@@ -528,77 +490,6 @@ begin
   inherited;
  end;
 end;
-
-{$else fpc204}
-function tmsesqlquery.applyrecupdate(updatekind: tupdatekind): boolean;
-
- procedure doupdate;
- var
-  str1: string;
- begin
-  result:= false;
-  str1:= '';
-  try
-   if sqs_userapplayrecupdate in fstate then begin
-    fonapplyrecupdate(self,updatekind,str1,result);
-   end;
-   if not result then begin
-    if str1 = '' then begin
-     str1:= recupdatesql(updatekind);
-    end;
-{$ifdef debugsqlquery}  
-    debugwriteln(getenumname(typeinfo(tupdatekind),ord(updatekind))+' '+str1);
-{$endif}  
-    tsqlconnection(database).executedirect(str1,tsqltransaction(transaction));
-    result:= true;
-   end;
-  except
-   on edatabaseerror do 
-    begin
-     result:= false;
-    end;
-   else raise;
-  end;
- end;
- 
-var
- upact: tupdateaction;
- 
-begin //applyrecupdate
- if sqs_updateabort in fstate then begin
-  result:= false;
- end
- else begin
-  repeat
-   doupdate;
-   if not result and assigned(fonupdateerror) and 
-                         not (csdesigning in componentstate) then begin
-    upact:= uafail;
-    fonupdateerror(self,updatekind,upact);
-    case upact of
-     uaskip: begin
-       break;
-     end;
-     uaretry: begin
-     end;
-     uaapplied: begin
-      result:= true;
-      break;
-     end;
-     uaabort: begin
-      include(fstate,sqs_updateabort);
-      break;
-     end;
-     else raise edatabaseerror.create('Recupdate error'); //uafail
-    end;
-   end
-   else begin
-    break;
-   end;
-  until result;
- end;
-end;
-{$endif fpc204}
 
 procedure tmsesqlquery.applyupdates;
 begin
@@ -767,14 +658,14 @@ begin
   inherited;
  end;
 end;
-{$ifdef fpc204}
+
 procedure tmsesqlquery.DoAfterRefresh;
 begin
  if not (csdesigning in componentstate) then begin
   inherited;
  end;
 end;
-{$endif}
+
 procedure tmsesqlquery.DoBeforeCancel;
 begin
  if not (csdesigning in componentstate) then begin
@@ -830,14 +721,14 @@ begin
   inherited;
  end;
 end;
-{$ifdef fpc204}
+
 procedure tmsesqlquery.DoBeforeRefresh;
 begin
  if not (csdesigning in componentstate) then begin
   inherited;
  end;
 end;
-{$endif}
+
 procedure tmsesqlquery.DoOnCalcFields;
 begin
  if not (csdesigning in componentstate) then begin

@@ -39,9 +39,7 @@ type
    procedure DoAfterOpen; override;
    procedure DoAfterPost; override;
    procedure DoAfterScroll; override;
-   {$ifdef fpc204}
    procedure DoAfterRefresh; override;
-   {$endif}
    procedure DoBeforeCancel; override;
    procedure DoBeforeClose; override;
    procedure DoBeforeDelete; override;
@@ -50,9 +48,7 @@ type
    procedure DoBeforeOpen; override;
    procedure DoBeforePost; override;
    procedure DoBeforeScroll; override;
-   {$ifdef fpc204}
    procedure DoBeforeRefresh; override;
-   {$endif}
    procedure DoOnCalcFields; override;
    procedure DoOnNewRecord; override;
 
@@ -233,14 +229,14 @@ begin
   inherited;
  end;
 end;
-{$ifdef fpc204}
+
 procedure tmsememdataset.DoAfterRefresh;
 begin
  if not (csdesigning in componentstate) then begin
   inherited;
  end;
 end;
-{$endif}
+
 procedure tmsememdataset.DoBeforeCancel;
 begin
  if not (csdesigning in componentstate) then begin
@@ -296,14 +292,14 @@ begin
   inherited;
  end;
 end;
-{$ifdef fpc204}
+
 procedure tmsememdataset.DoBeforeRefresh;
 begin
  if not (csdesigning in componentstate) then begin
   inherited;
  end;
 end;
-{$endif}
+
 procedure tmsememdataset.DoOnCalcFields;
 begin
  if not (csdesigning in componentstate) then begin
