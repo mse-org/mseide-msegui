@@ -4790,8 +4790,8 @@ begin
  if pointergrabbed then begin
   debugungrabbed:= true;
   gui_ungrabpointer;
-  xflush(appdisp);
  end;
+ xflush(appdisp);
 end;
 
 procedure GUI_DEBUGEND;
