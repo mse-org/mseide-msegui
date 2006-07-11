@@ -109,7 +109,7 @@ type
    function locate(const key: string; const field: tfield; 
                  const options: locateoptionsty = []): locateresultty;
    procedure appendrecord(const values: array of const);
-   procedure applyupdates; override;
+   procedure applyupdates(maxerror: integer); override;
    procedure cancel; override;
    procedure cancelupdates; override;
    function moveby(const distance: integer): integer;
@@ -491,7 +491,7 @@ begin
  end;
 end;
 
-procedure tmsesqlquery.applyupdates;
+procedure tmsesqlquery.applyupdates(maxerror: integer);
 begin
  disablecontrols;
  try

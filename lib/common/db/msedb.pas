@@ -1504,7 +1504,7 @@ end;
 function tactivatorcontroller.setactive(const value: boolean): boolean;
 begin
  factive:= value;
- result:= floaded;
+ result:= floaded or not (csloading in fowner.componentstate);
 end;
 
 procedure tactivatorcontroller.loaded;
