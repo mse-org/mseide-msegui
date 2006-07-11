@@ -1,5 +1,8 @@
 MSEide+MSEgui version history
 
+2006-07-11 tcustomlookupbuffer.lookuptext and lookupfloat.
+2006-07-10 Switch to FPC 2.0.4, support for 2.0.2 and 2.0.3 removed.
+
 Version 0.9a
 2006-07-08 tcustomedit.onkeydown.
 2006-07-07 Field keyeventty.keynomod, holds unmodified key.

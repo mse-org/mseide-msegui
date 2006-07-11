@@ -145,6 +145,11 @@ type
                             const caseinsensitive: boolean): integerarty;
    function textar(const fieldno: integer): msestringarty;
    
+   function lookuptext(const integerfieldno,textfieldno,lookupvalue: integer): msestring;
+                           //'' if not found
+   function lookupfloat(const integerfieldno,floatfieldno,lookupvalue: integer): realty;
+                           //emptyreal if not found
+                           
    function count: integer; virtual;
    property fieldcounttext: integer read getfieldcounttext
                                         write setfieldcounttext;
@@ -741,6 +746,32 @@ begin
  inherited;
  if not fbuffervalid then begin
   changed;
+ end;
+end;
+
+function tcustomlookupbuffer.lookuptext(const integerfieldno: integer;
+               const textfieldno: integer; const lookupvalue: integer): msestring;
+var
+ int1: integer;
+begin
+ if findphys(integerfieldno,lookupvalue,int1) then begin
+  result:= textvaluephys(textfieldno,int1);
+ end
+ else begin
+  result:= '';
+ end;
+end;
+
+function tcustomlookupbuffer.lookupfloat(const integerfieldno: integer;
+               const floatfieldno: integer; const lookupvalue: integer): realty;
+var
+ int1: integer;
+begin
+ if findphys(floatfieldno,lookupvalue,int1) then begin
+  result:= floatvaluephys(floatfieldno,int1);
+ end
+ else begin
+  result:= emptyreal;
  end;
 end;
 
