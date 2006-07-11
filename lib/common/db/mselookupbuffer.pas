@@ -145,9 +145,14 @@ type
                             const caseinsensitive: boolean): integerarty;
    function textar(const fieldno: integer): msestringarty;
    
-   function lookuptext(const integerfieldno,textfieldno,lookupvalue: integer): msestring;
+   function lookupinteger(const integerkeyfieldno,integerfieldno,
+                                keyvalue: integer): integer;
+                           //0 if not found
+   function lookuptext(const integerkeyfieldno,textfieldno,
+                                keyvalue: integer): msestring;
                            //'' if not found
-   function lookupfloat(const integerfieldno,floatfieldno,lookupvalue: integer): realty;
+   function lookupfloat(const integerkeyfieldno,floatfieldno,
+                                keyvalue: integer): realty;
                            //emptyreal if not found
                            
    function count: integer; virtual;
@@ -749,12 +754,26 @@ begin
  end;
 end;
 
-function tcustomlookupbuffer.lookuptext(const integerfieldno: integer;
-               const textfieldno: integer; const lookupvalue: integer): msestring;
+function tcustomlookupbuffer.lookupinteger(const integerkeyfieldno,integerfieldno,
+                                keyvalue: integer): integer;
+                           //0 if not found
 var
  int1: integer;
 begin
- if findphys(integerfieldno,lookupvalue,int1) then begin
+ if findphys(integerkeyfieldno,keyvalue,int1) then begin
+  result:= integervaluephys(integerfieldno,int1);
+ end
+ else begin
+  result:= 0;
+ end;
+end;
+
+function tcustomlookupbuffer.lookuptext(const integerkeyfieldno: integer;
+               const textfieldno: integer; const keyvalue: integer): msestring;
+var
+ int1: integer;
+begin
+ if findphys(integerkeyfieldno,keyvalue,int1) then begin
   result:= textvaluephys(textfieldno,int1);
  end
  else begin
@@ -762,12 +781,12 @@ begin
  end;
 end;
 
-function tcustomlookupbuffer.lookupfloat(const integerfieldno: integer;
-               const floatfieldno: integer; const lookupvalue: integer): realty;
+function tcustomlookupbuffer.lookupfloat(const integerkeyfieldno: integer;
+               const floatfieldno: integer; const keyvalue: integer): realty;
 var
  int1: integer;
 begin
- if findphys(floatfieldno,lookupvalue,int1) then begin
+ if findphys(floatfieldno,keyvalue,int1) then begin
   result:= floatvaluephys(floatfieldno,int1);
  end
  else begin
