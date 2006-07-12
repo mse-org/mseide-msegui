@@ -156,11 +156,13 @@ type
    ffirstpage: integer;
    flastpage: integer;
    fpagenumber: integer;
-   findent: integer;
+   findentx: integer;
+   findenty: integer;
    fprintorientation: pageorientationty;
    procedure setcolorspace(const avalue: colorspacety);
    function getliney: integer;
    procedure setprintorientation(const avalue: pageorientationty);
+   procedure setliney(const avalue: integer);
   protected
 //   fgcoffset: pointty;
    fgcoffsetx: real;
@@ -204,7 +206,8 @@ type
 
    procedure writeln(const avalue: msestring = ''); overload;
    procedure writeln(const avalue: richstringty); overload;
-   property indent: integer read findent write findent;
+   property indentx: integer read findentx write findentx;
+   property indenty: integer read findenty write findenty;
    property headerheight: integer read fheaderheight write fheaderheight;
                  //pixels
    property footerheight: integer read ffooterheight write ffooterheight;
@@ -212,7 +215,7 @@ type
    property linenumber: integer read flinenumber;
    property pagelinenumber: integer read fpagelinenumber;
    function remaininglines: integer;
-   property liney: integer read getliney;
+   property liney: integer read getliney write setliney;
    function lineheight: integer; //pixels
 
    procedure nextpage;
@@ -759,7 +762,7 @@ procedure tprintercanvas.writeln(const avalue: richstringty);
 begin
  checknextpage;
  if avalue.text <> '' then begin
-  drawtext(avalue,makerect(findent,fliney + fheaderheight,0,0));
+  drawtext(avalue,makerect(findentx,fliney + fheaderheight + findenty,0,0));
  end;
  inc(fpagelinenumber);
  inc(flinenumber);
@@ -778,7 +781,7 @@ end;
 function tprintercanvas.remaininglines: integer;
 begin
  checkgcstate([cs_gc]); //init all values
- result:= (fclientsize.cy - fheaderheight - ffooterheight - fliney) div lineheight;
+ result:= (fclientsize.cy - fheaderheight - ffooterheight - fliney - findenty) div lineheight;
 end;
 
 procedure tprintercanvas.nextpage;
@@ -805,6 +808,12 @@ function tprintercanvas.getliney: integer;
 begin
  checknextpage;
  result:= fliney + fheaderheight;
+end;
+
+procedure tprintercanvas.setliney(const avalue: integer);
+begin
+ checknextpage;
+ fliney:= avalue - fheaderheight;
 end;
 
 procedure tprintercanvas.setprintorientation(const avalue: pageorientationty);
