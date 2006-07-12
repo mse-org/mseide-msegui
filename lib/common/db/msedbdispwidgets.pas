@@ -3,7 +3,7 @@ unit msedbdispwidgets;
 interface
 uses
  db,classes,msesimplewidgets,msedb,msetypes,mseclasses,mseguiglob,
- msedispwidgets,msestrings;
+ msedispwidgets,msestrings,mselookupbuffer;
  
 type 
 
@@ -55,9 +55,9 @@ type
    procedure setdatasource(const avalue: tdatasource);
      //idbeditinfo
    procedure getfieldtypes(out propertynames: stringarty;
-                          out fieldtypes: fieldtypesarty);
+                          out fieldtypes: fieldtypesarty); virtual;
      //idbdispfieldlink
-   procedure fieldtovalue;
+   procedure fieldtovalue; virtual;
    procedure setnullvalue;
   public
    constructor create(aowner: tcomponent); override;
@@ -68,6 +68,24 @@ type
    property datasource: tdatasource read getdatasource write setdatasource;
  end;
   
+ tdbstringdisplb = class(tdbstringdisp,idbeditinfo,idbdispfieldlink)
+  private
+   flookupbuffer: tcustomlookupbuffer;
+   flookupkeyfieldno: integer;
+   flookupvaluefieldno: integer;   
+   procedure setlookupbuffer(const avalue: tcustomlookupbuffer);
+     //idbeditinfo
+   procedure getfieldtypes(out propertynames: stringarty;
+                          out fieldtypes: fieldtypesarty); override;
+     //idbdispfieldlink
+   procedure fieldtovalue; override;
+  public
+  published
+   property lookupbuffer: tcustomlookupbuffer read flookupbuffer write setlookupbuffer;
+   property lookupkeyfieldno: integer read flookupkeyfieldno write flookupkeyfieldno default 0;
+   property lookupvaluefieldno: integer read flookupvaluefieldno write flookupvaluefieldno default 0;
+ end;
+ 
  tdbintegerdisp = class(tcustomintegerdisp,idbeditinfo,idbdispfieldlink)
   private
    fdatalink: tdispfielddatalink;
@@ -80,7 +98,7 @@ type
    procedure getfieldtypes(out propertynames: stringarty;
                           out fieldtypes: fieldtypesarty);
      //idbdispfieldlink
-   procedure fieldtovalue;
+   procedure fieldtovalue; virtual;
    procedure setnullvalue;
   protected
    function getvaluetext: msestring; override;
@@ -91,6 +109,21 @@ type
   published
    property datafield: string read getdatafield write setdatafield;
    property datasource: tdatasource read getdatasource write setdatasource;
+ end;
+ 
+ tdbintegerdisplb = class(tdbintegerdisp,idbeditinfo,idbdispfieldlink)
+  private
+   flookupbuffer: tcustomlookupbuffer;
+   flookupkeyfieldno: integer;
+   flookupvaluefieldno: integer;   
+   procedure setlookupbuffer(const avalue: tcustomlookupbuffer);
+     //idbdispfieldlink
+   procedure fieldtovalue; override;
+  public
+  published
+   property lookupbuffer: tcustomlookupbuffer read flookupbuffer write setlookupbuffer;
+   property lookupkeyfieldno: integer read flookupkeyfieldno write flookupkeyfieldno default 0;
+   property lookupvaluefieldno: integer read flookupvaluefieldno write flookupvaluefieldno default 0;
  end;
  
  tdbbooleandisp = class(tcustombooleandisp,idbeditinfo,idbdispfieldlink)
@@ -127,9 +160,9 @@ type
    procedure setdatasource(const avalue: tdatasource);
      //idbeditinfo
    procedure getfieldtypes(out propertynames: stringarty;
-                          out fieldtypes: fieldtypesarty);
+                          out fieldtypes: fieldtypesarty); virtual;
      //idbdispfieldlink
-   procedure fieldtovalue;
+   procedure fieldtovalue; virtual;
    procedure setnullvalue;
   public
    constructor create(aowner: tcomponent); override;
@@ -138,6 +171,24 @@ type
   published
    property datafield: string read getdatafield write setdatafield;
    property datasource: tdatasource read getdatasource write setdatasource;
+ end;
+  
+ tdbrealdisplb = class(tdbrealdisp,idbeditinfo,idbdispfieldlink)
+  private
+   flookupbuffer: tcustomlookupbuffer;
+   flookupkeyfieldno: integer;
+   flookupvaluefieldno: integer;   
+   procedure setlookupbuffer(const avalue: tcustomlookupbuffer);
+     //idbeditinfo
+   procedure getfieldtypes(out propertynames: stringarty;
+                          out fieldtypes: fieldtypesarty); override;
+     //idbdispfieldlink
+   procedure fieldtovalue; override;
+  public
+  published
+   property lookupbuffer: tcustomlookupbuffer read flookupbuffer write setlookupbuffer;
+   property lookupkeyfieldno: integer read flookupkeyfieldno write flookupkeyfieldno default 0;
+   property lookupvaluefieldno: integer read flookupvaluefieldno write flookupvaluefieldno default 0;
  end;
  
  tdbdatetimedisp = class(tcustomdatetimedisp,idbeditinfo,idbdispfieldlink)
@@ -149,9 +200,9 @@ type
    procedure setdatasource(const avalue: tdatasource);
      //idbeditinfo
    procedure getfieldtypes(out propertynames: stringarty;
-                          out fieldtypes: fieldtypesarty);
+                          out fieldtypes: fieldtypesarty); virtual;
      //idbdispfieldlink
-   procedure fieldtovalue;
+   procedure fieldtovalue; virtual;
    procedure setnullvalue;
   public
    constructor create(aowner: tcomponent); override;
@@ -160,6 +211,24 @@ type
   published
    property datafield: string read getdatafield write setdatafield;
    property datasource: tdatasource read getdatasource write setdatasource;
+ end;
+ 
+ tdbdatetimedisplb = class(tdbdatetimedisp,idbeditinfo,idbdispfieldlink)
+  private
+   flookupbuffer: tcustomlookupbuffer;
+   flookupkeyfieldno: integer;
+   flookupvaluefieldno: integer;   
+   procedure setlookupbuffer(const avalue: tcustomlookupbuffer);
+     //idbeditinfo
+   procedure getfieldtypes(out propertynames: stringarty;
+                          out fieldtypes: fieldtypesarty); override;
+     //idbdispfieldlink
+   procedure fieldtovalue; override;
+  public
+  published
+   property lookupbuffer: tcustomlookupbuffer read flookupbuffer write setlookupbuffer;
+   property lookupkeyfieldno: integer read flookupkeyfieldno write flookupkeyfieldno default 0;
+   property lookupvaluefieldno: integer read flookupvaluefieldno write flookupvaluefieldno default 0;
  end;
  
 implementation
@@ -295,6 +364,38 @@ begin
  value:= '';
 end;
 
+{ tdbstringdisplb }
+
+procedure tdbstringdisplb.getfieldtypes(out propertynames: stringarty; 
+                    out fieldtypes: fieldtypesarty);
+begin
+ propertynames:= nil;
+ setlength(fieldtypes,1);
+ fieldtypes[0]:= integerfields;
+end;
+
+procedure tdbstringdisplb.fieldtovalue;
+var
+ int1: integer;
+begin
+ if flookupbuffer <> nil then begin
+  if flookupbuffer.findphys(flookupkeyfieldno,datalink.field.asinteger,int1) then begin
+   value:= flookupbuffer.textvaluephys(flookupvaluefieldno,int1);
+  end
+  else begin
+   setnullvalue;
+  end;
+ end
+ else begin
+  setnullvalue;
+ end;
+end;
+
+procedure tdbstringdisplb.setlookupbuffer(const avalue: tcustomlookupbuffer);
+begin
+ setlinkedvar(avalue,tmsecomponent(flookupbuffer));
+end;
+
 { tdbintegerdisp }
 
 constructor tdbintegerdisp.create(aowner: tcomponent);
@@ -357,6 +458,31 @@ begin
  else begin
   result:= '';
  end;
+end;
+
+{ tdbintegerdisplb }
+
+procedure tdbintegerdisplb.fieldtovalue;
+var
+ int1: integer;
+begin
+ if flookupbuffer <> nil then begin
+  if flookupbuffer.findphys(flookupkeyfieldno,datalink.field.asinteger,int1) then begin
+   fisnotnull:= true;
+   value:= flookupbuffer.integervaluephys(flookupvaluefieldno,int1);
+  end
+  else begin
+   setnullvalue;
+  end;
+ end
+ else begin
+  setnullvalue;
+ end;
+end;
+
+procedure tdbintegerdisplb.setlookupbuffer(const avalue: tcustomlookupbuffer);
+begin
+ setlinkedvar(avalue,tmsecomponent(flookupbuffer));
 end;
 
 { tdbbooleandisp }
@@ -475,6 +601,38 @@ begin
  value:= emptyreal;
 end;
 
+{ tdbrealdisplb }
+
+procedure tdbrealdisplb.getfieldtypes(out propertynames: stringarty; 
+                    out fieldtypes: fieldtypesarty);
+begin
+ propertynames:= nil;
+ setlength(fieldtypes,1);
+ fieldtypes[0]:= integerfields;
+end;
+
+procedure tdbrealdisplb.fieldtovalue;
+var
+ int1: integer;
+begin
+ if flookupbuffer <> nil then begin
+  if flookupbuffer.findphys(flookupkeyfieldno,datalink.field.asinteger,int1) then begin
+   value:= flookupbuffer.floatvaluephys(flookupvaluefieldno,int1);
+  end
+  else begin
+   setnullvalue;
+  end;
+ end
+ else begin
+  setnullvalue;
+ end;
+end;
+
+procedure tdbrealdisplb.setlookupbuffer(const avalue: tcustomlookupbuffer);
+begin
+ setlinkedvar(avalue,tmsecomponent(flookupbuffer));
+end;
+
 { tdbdatetimedisp }
 
 constructor tdbdatetimedisp.create(aowner: tcomponent);
@@ -531,6 +689,38 @@ end;
 procedure tdbdatetimedisp.setnullvalue;
 begin
  value:= emptydatetime;
+end;
+
+{ tdbdatetimedisplb }
+
+procedure tdbdatetimedisplb.getfieldtypes(out propertynames: stringarty; 
+                    out fieldtypes: fieldtypesarty);
+begin
+ propertynames:= nil;
+ setlength(fieldtypes,1);
+ fieldtypes[0]:= integerfields;
+end;
+
+procedure tdbdatetimedisplb.fieldtovalue;
+var
+ int1: integer;
+begin
+ if flookupbuffer <> nil then begin
+  if flookupbuffer.findphys(flookupkeyfieldno,datalink.field.asinteger,int1) then begin
+   value:= flookupbuffer.floatvaluephys(flookupvaluefieldno,int1);
+  end
+  else begin
+   setnullvalue;
+  end;
+ end
+ else begin
+  setnullvalue;
+ end;
+end;
+
+procedure tdbdatetimedisplb.setlookupbuffer(const avalue: tcustomlookupbuffer);
+begin
+ setlinkedvar(avalue,tmsecomponent(flookupbuffer));
 end;
 
 end.

@@ -1,5 +1,6 @@
 MSEide+MSEgui version history
 
+2006-07-12 tdbstringdisplb, tdbintegerdisplb, tdbrealdisplb, tdbdatetimedisplb.
 2006-07-11 tcustomlookupbuffer.lookupinteger, lookuptext and lookupfloat.
 2006-07-10 Switch to FPC 2.0.4, support for 2.0.2 and 2.0.3 removed.
 

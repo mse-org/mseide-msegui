@@ -94,7 +94,9 @@ begin
       tmsebinaryfield,tmsebytesfield,tmsevarbytesfield,
       tmsebcdfield,tmseblobfield,tmsememofield,tmsegraphicfield,
       tdblabel,tdbstringdisp,tdbintegerdisp,tdbbooleandisp,
-      tdbrealdisp,tdbdatetimedisp,tfieldparamlink]);
+      tdbrealdisp,tdbdatetimedisp,
+      tdbstringdisplb,tdbintegerdisplb,tdbrealdisplb,tdbdatetimedisplb,
+      tfieldparamlink]);
  registercomponents('Db',[
       tenumeditdb,tkeystringeditdb,tenumeditlb,tkeystringeditlb,
       tdbmemoedit,tdbstringedit,tdbdropdownlistedit,tdbbooleantextedit,
