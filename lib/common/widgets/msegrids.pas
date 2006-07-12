@@ -5312,7 +5312,7 @@ end;
 
 procedure tcustomgrid.setrowcountmax(const Value: integer);
 begin
- if (value < frowcount) and (value <> 0) then begin
+ if (value < frowcount) {and (value <> 0)} then begin
   rowcount:= value;
  end;
  if value <> frowcountmax then begin

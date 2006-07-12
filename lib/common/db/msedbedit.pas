@@ -1029,8 +1029,8 @@ type
    property optionsgrid;
    property fixcols;
    property fixrows;
-   property rowcount;
-   property rowcountmax;
+//   property rowcount;
+//   property rowcountmax;
    property font;
    property gridframecolor;
    property gridframewidth;
@@ -1234,8 +1234,8 @@ type
    property datalink;
    property fixcols;
    property fixrows;
-   property rowcount;
-   property rowcountmax;
+//   property rowcount;
+//   property rowcountmax;
    property gridframecolor;
    property gridframewidth;
    property rowcolors;
