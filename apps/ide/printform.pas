@@ -74,7 +74,7 @@ begin
      font.height:= round(fontsize.value);
      headerheight:= round(fontsize.value*5/3);
      if linenum.value then begin
-      indent:= round(4*fontsize.value);
+      indentx:= round(4*fontsize.value);
      end;
      font1.assign(font);
      font1.name:= titlefont.value;
