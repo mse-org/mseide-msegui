@@ -2357,7 +2357,7 @@ var
 begin
  result:= nil;
  count:= 0;
- for int1:= 0 to length(str)-1 do begin
+ for int1:= 1 to length(str) do begin
   if str[int1] = achar then begin
    additem(result,int1,count);
   end;
