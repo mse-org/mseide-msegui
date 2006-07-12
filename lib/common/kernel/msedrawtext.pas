@@ -48,6 +48,7 @@ type
    fpos: real;
    procedure setkind(const avalue: tabulatorkindty);
    procedure setpos(const avalue: real);
+  public
   published
    property kind: tabulatorkindty read fkind write setkind default tak_left;
    property pos: real read fpos write setpos;
@@ -65,6 +66,7 @@ type
    function getitems(const index: integer): ttabulatoritem;
    procedure setitems(const index: integer; const avalue: ttabulatoritem);
    procedure setdefaultdist(const avalue: real);
+   function getpos(const index: integer): integer;
   protected
    procedure dochange(const index: integer); override;
    procedure changed(const sender: ttabulatoritem);
@@ -79,6 +81,7 @@ type
       //pixel per millimeter
    property defaultdist: real read fdefaultdist write setdefaultdist; //0 -> none
    property items[const index: integer]: ttabulatoritem read getitems write setitems; default;
+   property pos[const index: integer]: integer read getpos;
  end;
 
  ttabulators = class(tcustomtabulators)
@@ -1019,6 +1022,31 @@ procedure tcustomtabulators.setdefaultdist(const avalue: real);
 begin
  fdefaultdist:= avalue;
  dochange(-1);
+end;
+
+function tcustomtabulators.getpos(const index: integer): integer;
+var
+ int1: integer;
+begin
+ checkuptodate;
+ if index <= high(ftabs) then begin
+  result:= ftabs[index].pos;
+ end
+ else begin
+  if length(ftabs) > 0 then begin
+   if fdefaultdist > 0 then begin
+    int1:= trunc(ftabs[high(ftabs)].pos/fdefaultdist);
+   end
+   else begin
+    result:= ftabs[high(ftabs)].pos;
+    exit;
+   end;
+  end
+  else begin
+   int1:= 0;
+  end;
+  result:= round((int1 + index - high(ftabs)) * fdefaultdist);
+ end;
 end;
 
 end.
