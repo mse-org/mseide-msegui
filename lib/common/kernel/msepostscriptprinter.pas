@@ -735,8 +735,8 @@ end;
 function tpostscriptcanvas.posstring(const apos: pointty): string;
 begin
  result:= 
-  psrealtostr(apos.x*fgcscale+fgcoffsetx)+' '+
-  psrealtostr(fgcoffsety-apos.y*fgcscale);
+  psrealtostr(apos.x*fgcscale+foriginx)+' '+
+  psrealtostr(foriginy-apos.y*fgcscale);
 end;
 
 function tpostscriptcanvas.getcolorstring(const acolor: colorty): string;
@@ -930,13 +930,13 @@ begin
    str1:= str1 + 'currentpoint pop '; //oldx (llx)
   end
   else begin //defaulttab
-   str1:= str1 + psrealtostr(fgcoffsetx)+' '+psrealtostr(tabdist) + ' tab ';
+   str1:= str1 + psrealtostr(foriginx)+' '+psrealtostr(tabdist) + ' tab ';
                  //tabbedx (llx)
   end;
-  str1:= str1 + psrealtostr(fgcoffsety-(dest.y+dest.cy)*fgcscale)+
+  str1:= str1 + psrealtostr(foriginy-(dest.y+dest.cy)*fgcscale)+
                       //llx,lly
    ' 1 index '+       //llx,lly,urx
-   psrealtostr(fgcoffsety-(dest.y)*fgcscale)+' '; //llx,lly,urx,ury
+   psrealtostr(foriginy-(dest.y)*fgcscale)+' '; //llx,lly,urx,ury
  end;
  str1:= str1+alignmentsubs[
        tftopa[{$ifdef FPC}longword{$else}word{$endif}(flags) and

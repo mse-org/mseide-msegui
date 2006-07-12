@@ -168,6 +168,7 @@ type
    fgcoffsetx: real;
    fgcoffsety: real;
    fgcscale: real;
+   foriginx,foriginy: real;
    fscale: real;
    foffset: pointty;
    fclientsize: sizety;
@@ -180,6 +181,7 @@ type
    fprinter: tprinter;
    fcolorspace: colorspacety;
    procedure initgcstate; override;
+   procedure checkgcstate(state: canvasstatesty); override;
    procedure updatescale; virtual;
    procedure updateframe;
    procedure beginpage; virtual;
@@ -530,6 +532,7 @@ end;
 procedure tprintercanvas.updatescale;
 begin
  if not (csloading in fprinter.componentstate) then begin
+  exclude(fstate,cs_origin);
   with fprinter do begin
    fgcscale:= mmtoprintscale/fppmm; //map to printerunits
 
@@ -562,6 +565,17 @@ begin
    fclientsize.cy:= fsize.cy - round((fpa_frametop+fpa_framebottom)*fppmm);
   end;
  end;
+end;
+
+procedure tprintercanvas.checkgcstate(state: canvasstatesty);
+begin
+ if not (cs_origin in fstate) then begin
+  with fprinter do begin
+   foriginx:= fgcoffsetx + mmtoprintscale * (origin.x/fppmm);
+   foriginy:= fgcoffsety - mmtoprintscale * (origin.y/fppmm);
+  end;
+ end;
+ inherited;
 end;
 
 procedure tprintercanvas.updateframe;
@@ -781,7 +795,8 @@ end;
 function tprintercanvas.remaininglines: integer;
 begin
  checkgcstate([cs_gc]); //init all values
- result:= (fclientsize.cy - fheaderheight - ffooterheight - fliney - findenty) div lineheight;
+ result:= (fclientsize.cy - fheaderheight - ffooterheight - fliney - findenty -
+                            origin.y) div lineheight;
 end;
 
 procedure tprintercanvas.nextpage;

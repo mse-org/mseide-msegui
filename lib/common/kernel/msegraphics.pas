@@ -633,7 +633,6 @@ type
    fintf: pointer; //icanvas;
    fvaluestack: canvasvaluestackty;
    gcbackgroundcolor,gcforegroundcolor: colorty;
-   fstate: canvasstatesty;
    fdefaultfont: fontnumty;
    fcliporigin: pointty;
    procedure adjustrectar(po: prectty; count: integer);
@@ -672,6 +671,7 @@ type
    procedure initregreg(const adest: regionty; const asource: regionty);
    procedure updatecliporigin(const Value: pointty);
   protected
+   fstate: canvasstatesty;
    fsize: sizety;
    fvaluepo: canvasvaluespoty;
    fdrawinfo: drawinfoty;
@@ -685,7 +685,7 @@ type
    procedure finalizegcstate; virtual;
    function getgdifuncs: pgdifunctionaty; virtual;
    procedure checkrect(const rect: rectty);
-   procedure checkgcstate(state: canvasstatesty);
+   procedure checkgcstate(state: canvasstatesty); virtual;
    procedure checkregionstate;  //copies region if necessary
    procedure gdi(const func: gdifuncty);
    procedure init;
