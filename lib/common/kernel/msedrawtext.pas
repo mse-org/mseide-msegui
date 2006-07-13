@@ -367,6 +367,12 @@ begin
         if nexttab <= high(tabs) then begin
          charwidths[int1-1]:= tabs[nexttab].pos - awidth;
          additem(lineinfos[high(lineinfos)].tabchars,int1);
+        end
+        else begin
+         if rea1 > 0 then begin
+          charwidths[int1-1]:= round(ceil(awidth / rea1)*rea1) - awidth;
+          additem(lineinfos[high(lineinfos)].tabchars,int1);
+         end;
         end;
        end
        else begin
