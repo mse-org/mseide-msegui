@@ -57,6 +57,7 @@ begin
       lastpage:= round(self.lastpage.value)-1;
      end;
      started:= true;
+     beginprint(getprintcommand);
      if colorset.value then begin
       colorspace:= cos_rgb;
      end
@@ -69,7 +70,6 @@ begin
      else begin
       printorientation:= pao_portrait;
      end;      
-     beginprint(getprintcommand);
      font.name:= sourcefont.value;
      font.height:= round(fontsize.value);
      headerheight:= round(fontsize.value*5/3);

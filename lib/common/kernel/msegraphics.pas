@@ -627,7 +627,7 @@ type
 
  gdiintffuncty = procedure (func: gdifuncty; var drawinfo: drawinfoty);
 
- tcanvas = class
+ tcanvas = class(tpersistent)
   private
    fuser: tobject;
    fintf: pointer; //icanvas;
@@ -712,7 +712,7 @@ type
    procedure initdrawinfo(var adrawinfo: drawinfoty);
    function active: boolean;
 
-   procedure reset; //clears savestack, origin and clipregion
+   procedure reset; virtual;//clears savestack, origin and clipregion
    function save: integer; //returns actual saveindex
    function restore(index: integer = -1): integer; //-1 -> pop from stack
                      //returns actual saveindex
@@ -2705,7 +2705,8 @@ procedure tcanvas.init;
  end;
 
 begin
- reset;
+ restore(0); 
+// reset;
  initvalues(fvaluestack.stack[0]);
  initvalues(fvaluestack.stack[1]);
 end;

@@ -68,6 +68,7 @@ const
   
 type
  tprinter = class;
+ tcustomprintercanvas = class;
  tprintercanvas = class;
  printereventty = procedure(const sender: tprinter) of object;
 
@@ -102,14 +103,15 @@ type
    procedure setpa_frametop(const avalue: real);
    procedure setpa_frameright(const avalue: real);
    procedure setpa_framebottom(const avalue: real);
-   function getcolorspace: colorspacety;
-   procedure setcolorspace(const avalue: colorspacety);
+//   function getcolorspace: colorspacety;
+//   procedure setcolorspace(const avalue: colorspacety);
    procedure setstatfile(const avalue: tstatfile);
    procedure setpa_size(const avalue: stdpagesizety);
    procedure setpa_width(const avalue: real);
    procedure setpa_height(const avalue: real);
    procedure pagesizechanged;
    procedure setpa_orientation(const avalue: pageorientationty);
+   procedure setcanvas(const avalue: tprintercanvas);
   protected
    fcanvas: tprintercanvas;
    procedure loaded; override;
@@ -128,8 +130,8 @@ type
    procedure beginprint(const astream: ttextstream); overload;
     //printer owns the stream
    procedure endprint;
-   property canvas: tprintercanvas read fcanvas;
   published
+   property canvas: tprintercanvas read fcanvas write setcanvas;
    property onpagestart: printereventty read fonpagestart write fonpagestart;
    property onpageend: printereventty read fonpageend write fonpageend;
    property pa_width: real read fpa_width write setpa_width; 
@@ -144,12 +146,12 @@ type
    property tabulators: tprintertabulators read ftabulators write settabulators;
    property ppmm: real read fppmm write setppmm; //pixel per mm, default 10
    property printcommand: string read fprintcommand write fprintcommand;
-   property colorspace: colorspacety read getcolorspace write setcolorspace;
+//   property colorspace: colorspacety read getcolorspace write setcolorspace;
    property statfile: tstatfile read fstatfile write setstatfile;
    property statvarname: msestring read fstatvarname write fstatvarname;
  end;
  
- tprintercanvas = class(tcanvas)
+ tcustomprintercanvas = class(tcanvas)
   private
    fheaderheight: integer;
    ffooterheight: integer;
@@ -195,6 +197,8 @@ type
   public
    constructor create(const user: tprinter; const intf: icanvas);
    
+   procedure reset; override;
+   
    //if cy of destrect = 0 and tf_ycentered in textflags -> place on baseline
    procedure drawtext(var info: drawtextinfoty); overload;
    procedure drawtext(const atext: richstringty;
@@ -227,17 +231,27 @@ type
    function active: boolean; //true if firstpage <= pagenumber <= flastpage
       
    property title: msestring read ftitle write ftitle;
+                            //used as print job lable
    property clientsize: sizety read fclientsize;
    property colorspace: colorspacety read fcolorspace write setcolorspace;
    property pagenumber: integer read fpagenumber;
    property firstpage: integer read ffirstpage write ffirstpage default 0;
    property lastpage: integer read flastpage write flastpage default bigint;
    
-   property printorientation: pageorientationty read fprintorientation write setprintorientation;
+   property printorientation: pageorientationty read fprintorientation 
+                write setprintorientation default pao_portrait;
    
    //dashes unit is 0.1mm
  end;
 
+ tprintercanvas = class(tcustomprintercanvas)
+  published
+   property font;
+   property printorientation;
+   property colorspace;
+   property title;
+ end;
+ 
  tprintervalueselector = class(tcustomselector)
   private
    fprinter: tprinter;
@@ -340,7 +354,7 @@ begin
   pip1.free;
   raise;
  end;
- setstream(pip1);
+ beginprint(pip1);
 end;
 
 procedure tprinter.beginprint(const astream: ttextstream);
@@ -451,8 +465,7 @@ begin
  fpa_framebottom:= avalue;
  fcanvas.updateframe;
 end;
-
-
+{
 function tprinter.getcolorspace: colorspacety;
 begin
  result:= fcanvas.colorspace;
@@ -462,7 +475,7 @@ procedure tprinter.setcolorspace(const avalue: colorspacety);
 begin
  fcanvas.colorspace:= avalue;
 end;
-
+}
 procedure tprinter.dostatread(const reader: tstatreader);
 begin
  with reader do begin
@@ -476,8 +489,8 @@ begin
   fpa_frametop:= readreal('frametop',fpa_frametop);
   fpa_frameright:= readreal('frameright',fpa_frameright);
   fpa_framebottom:= readreal('framebottom',fpa_framebottom);
-  colorspace:= colorspacety(readinteger('colorspace',ord(colorspace),0,
-                     ord(high(colorspacety))));
+  fcanvas.colorspace:= colorspacety(readinteger('colorspace',
+                           ord(fcanvas.colorspace),0,ord(high(colorspacety))));
   printcommand:= readstring('printcommand',printcommand);
  end;
 end;
@@ -493,7 +506,7 @@ begin
   writereal('frametop',fpa_frametop);
   writereal('frameright',fpa_frameright);
   writereal('framebottom',fpa_framebottom);
-  writeinteger('colorspace',ord(colorspace));
+  writeinteger('colorspace',ord(fcanvas.colorspace));
   writestring('printcommand',printcommand);
  end;
 end;
@@ -516,23 +529,36 @@ begin
  setstatfilevar(istatfile(self),avalue,fstatfile);
 end;
 
-{ tprintercanvas }
+procedure tprinter.setcanvas(const avalue: tprintercanvas);
+begin
+ fcanvas.assign(avalue);
+end;
 
-constructor tprintercanvas.create(const user: tprinter; const intf: icanvas);
+{ tcustomprintercanvas }
+
+constructor tcustomprintercanvas.create(const user: tprinter; const intf: icanvas);
 begin
  fprinter:= user;
  flastpage:= bigint;
  inherited create(user,intf);
 end;
 
-procedure tprintercanvas.initgcstate;
+procedure tcustomprintercanvas.initgcstate;
 begin
  fpagelinenumber:= 0;
  fliney:= 0;
  inherited;
 end;
 
-procedure tprintercanvas.updatescale;
+procedure tcustomprintercanvas.reset;
+begin
+ restore(1); //do not change the streamed values
+ save;
+ clipregion:= 0;
+ origin:= nullpoint;
+end;
+
+procedure tcustomprintercanvas.updatescale;
 begin
  if not (csloading in fprinter.componentstate) then begin
   exclude(fstate,cs_origin);
@@ -570,7 +596,7 @@ begin
  end;
 end;
 
-procedure tprintercanvas.checkgcstate(state: canvasstatesty);
+procedure tcustomprintercanvas.checkgcstate(state: canvasstatesty);
 begin
  if not (cs_origin in fstate) then begin
   with fprinter do begin
@@ -581,12 +607,12 @@ begin
  inherited;
 end;
 
-procedure tprintercanvas.updateframe;
+procedure tcustomprintercanvas.updateframe;
 begin
  updatescale;
 end;
 
-procedure tprintercanvas.beginpage;
+procedure tcustomprintercanvas.beginpage;
 begin
  fpagelinenumber:= 0;
  fliney:= 0;
@@ -597,7 +623,7 @@ begin
  end;
 end;
 
-procedure tprintercanvas.endpage;
+procedure tcustomprintercanvas.endpage;
 begin
  with fprinter do begin
   if canevent(tmethod(fonpageend)) then begin
@@ -606,7 +632,7 @@ begin
  end;
 end;
 
-procedure tprintercanvas.drawtext(var info: drawtextinfoty);
+procedure tcustomprintercanvas.drawtext(var info: drawtextinfoty);
 var
  afontnum: integer;
  tab1: tcustomtabulators;
@@ -707,7 +733,7 @@ begin
  restore;
 end;
 
-procedure tprintercanvas.drawtext(const atext: richstringty;
+procedure tcustomprintercanvas.drawtext(const atext: richstringty;
                    const adest: rectty; aflags: textflagsty = [];
                    afont: tfont = nil; atabulators: ttabulators = nil);
 var
@@ -724,7 +750,7 @@ begin
  drawtext(info);
 end;
 
-procedure tprintercanvas.drawtext(const atext: richstringty;
+procedure tcustomprintercanvas.drawtext(const atext: richstringty;
                    const adest,aclip: rectty; aflags: textflagsty = [];
                    afont: tfont = nil; atabulators: ttabulators = nil);
 var
@@ -742,7 +768,7 @@ begin
  drawtext(info);
 end;
 
-procedure tprintercanvas.drawtext(const atext: msestring;
+procedure tcustomprintercanvas.drawtext(const atext: msestring;
                    const adest: rectty; aflags: textflagsty = [];
                    afont: tfont = nil; atabulators: ttabulators = nil);
 var
@@ -759,14 +785,14 @@ begin
  drawtext(info);
 end;
 
-procedure tprintercanvas.checknextpage;
+procedure tcustomprintercanvas.checknextpage;
 begin
  if remaininglines <= 0 then begin
   nextpage;
  end;
 end;
 
-procedure tprintercanvas.writeln(const avalue: msestring = '');
+procedure tcustomprintercanvas.writeln(const avalue: msestring = '');
 var
  rstr1: richstringty;
 begin
@@ -775,7 +801,7 @@ begin
  writeln(rstr1);
 end;
 
-procedure tprintercanvas.internalwriteln(const avalue: richstringty);
+procedure tcustomprintercanvas.internalwriteln(const avalue: richstringty);
 begin
  checknextpage;
  if avalue.text <> '' then begin
@@ -786,7 +812,7 @@ begin
  fliney:= fliney + lineheight;
 end;
 
-procedure tprintercanvas.writeln(const avalue: richstringty);
+procedure tcustomprintercanvas.writeln(const avalue: richstringty);
 var
  ar1: richstringarty;
  int1: integer;
@@ -797,7 +823,7 @@ begin
  end;
 end;
 
-procedure tprintercanvas.writelines(const alines: msestringarty);
+procedure tcustomprintercanvas.writelines(const alines: msestringarty);
 var
  int1: integer;
  rstr1: richstringty;
@@ -809,7 +835,7 @@ begin
  end;
 end;
 
-procedure tprintercanvas.writelines(const alines: richstringarty);
+procedure tcustomprintercanvas.writelines(const alines: richstringarty);
 var
  int1: integer;
 begin
@@ -818,7 +844,7 @@ begin
  end;
 end;
 
-function tprintercanvas.lineheight: integer;
+function tcustomprintercanvas.lineheight: integer;
 begin
  result:= font.height;
  if result = 0 then begin
@@ -827,21 +853,21 @@ begin
  result:= result + font.extraspace;
 end;
 
-function tprintercanvas.remaininglines: integer;
+function tcustomprintercanvas.remaininglines: integer;
 begin
  checkgcstate([cs_gc]); //init all values
  result:= (fclientsize.cy - fheaderheight - ffooterheight - fliney - findenty -
                             origin.y) div lineheight;
 end;
 
-procedure tprintercanvas.nextpage;
+procedure tcustomprintercanvas.nextpage;
 begin
  endpage;
  inc(fpagenumber);
  beginpage;
 end;
 
-procedure tprintercanvas.setcolorspace(const avalue: colorspacety);
+procedure tcustomprintercanvas.setcolorspace(const avalue: colorspacety);
 begin
  if fcolorspace <> avalue then begin
   fcolorspace:= avalue;
@@ -849,24 +875,24 @@ begin
  end;
 end;
 
-function tprintercanvas.active: boolean;
+function tcustomprintercanvas.active: boolean;
 begin
  result:= (fpagenumber >= ffirstpage) and (fpagenumber <= flastpage);
 end;
 
-function tprintercanvas.getliney: integer;
+function tcustomprintercanvas.getliney: integer;
 begin
  checknextpage;
  result:= fliney + fheaderheight;
 end;
 
-procedure tprintercanvas.setliney(const avalue: integer);
+procedure tcustomprintercanvas.setliney(const avalue: integer);
 begin
  checknextpage;
  fliney:= avalue - fheaderheight;
 end;
 
-procedure tprintercanvas.setprintorientation(const avalue: pageorientationty);
+procedure tcustomprintercanvas.setprintorientation(const avalue: pageorientationty);
 begin
  if avalue <> fprintorientation then begin
   fprintorientation:= avalue;

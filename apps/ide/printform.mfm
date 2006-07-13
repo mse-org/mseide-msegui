@@ -31,22 +31,24 @@ object printfo: tprintfo
     bounds_cy = 22
     anchors = [an_top, an_right]
     taborder = 1
+    state = [as_localcaption, as_localonexecute]
     caption = 'Cancel'
     onexecute = cancelexec
   end
   object firstpage: trealedit
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
     bounds_x = 16
-    bounds_y = 6
+    bounds_y = 5
     bounds_cx = 68
-    bounds_cy = 40
+    bounds_cy = 41
     frame.caption = '&First Page'
     frame.dummy = 0
     frame.outerframe = (
       0
-      18
+      19
       0
-      0)
+      0
+    )
     taborder = 2
     statfile = tstatfile1
     optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_eatreturn, oe_resetselectonexit, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_keyexecute, oe_checkvaluepaststatread, oe_savevalue, oe_savestate]
@@ -54,23 +56,24 @@ object printfo: tprintfo
     formatedit = '0'
     formatdisp = '0'
     reffontheight = 16
-    val = 1.000000000000000000
-    mi = 1.000000000000000000
-    ma = 100000.000000000000000000
+    val = 1
+    mi = 1
+    ma = 100000
   end
   object lastpage: trealedit
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
     bounds_x = 104
-    bounds_y = 6
+    bounds_y = 5
     bounds_cx = 68
-    bounds_cy = 40
+    bounds_cy = 41
     frame.caption = '&Last Page'
     frame.dummy = 0
     frame.outerframe = (
       0
-      18
+      19
       0
-      0)
+      0
+    )
     taborder = 3
     statfile = tstatfile1
     optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_eatreturn, oe_resetselectonexit, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_keyexecute, oe_checkvaluepaststatread, oe_savevalue, oe_savestate]
@@ -78,20 +81,21 @@ object printfo: tprintfo
     formatedit = '0'
     formatdisp = '0'
     reffontheight = 16
-    ma = 100000.000000000000000000
+    ma = 100000
   end
   object linenum: tbooleanedit
     bounds_x = 112
-    bounds_y = 65
-    bounds_cx = 67
-    bounds_cy = 35
+    bounds_y = 66
+    bounds_cx = 68
+    bounds_cy = 34
     frame.caption = 'Print line'#10'&numbers'
     frame.dummy = 0
     frame.outerframe = (
       0
+      10
+      55
       11
-      54
-      11)
+    )
     taborder = 7
     statfile = tstatfile1
     optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_eatreturn, oe_resetselectonexit, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_keyexecute, oe_checkvaluepaststatread, oe_savevalue, oe_savestate]
@@ -99,40 +103,42 @@ object printfo: tprintfo
   object fontsize: trealedit
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
     bounds_x = 16
-    bounds_y = 54
+    bounds_y = 53
     bounds_cx = 82
-    bounds_cy = 40
+    bounds_cy = 41
     frame.caption = 'Font &size (Pt)'
     frame.dummy = 0
     frame.outerframe = (
       0
-      18
+      19
       14
-      0)
+      0
+    )
     taborder = 6
     statfile = tstatfile1
     optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_eatreturn, oe_resetselectonexit, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_keyexecute, oe_checkvaluepaststatread, oe_savevalue, oe_savestate]
     formatedit = '0.0'
     formatdisp = '0.0'
-    scale = 3.527780000000000000
+    scale = 3.52778
     reffontheight = 16
-    val = 35.277800000000000000
-    mi = 21.166700000000000000
-    ma = 49.388900000000000000
+    val = 35.277799999999999
+    mi = 21.166699999999999
+    ma = 49.3889
   end
   object titlefont: tstringedit
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
     bounds_x = 16
-    bounds_y = 118
+    bounds_y = 117
     bounds_cx = 361
-    bounds_cy = 40
+    bounds_cy = 41
     frame.caption = '&Title font'
     frame.dummy = 0
     frame.outerframe = (
       0
-      18
+      19
       0
-      0)
+      0
+    )
     anchors = [an_left, an_top, an_right]
     taborder = 10
     statfile = tstatfile1
@@ -144,16 +150,17 @@ object printfo: tprintfo
   object sourcefont: tstringedit
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
     bounds_x = 16
-    bounds_y = 166
+    bounds_y = 165
     bounds_cx = 361
-    bounds_cy = 40
+    bounds_cy = 41
     frame.caption = 'So&urce font'
     frame.dummy = 0
     frame.outerframe = (
       0
-      18
+      19
       0
-      0)
+      0
+    )
     anchors = [an_left, an_top, an_right]
     taborder = 11
     statfile = tstatfile1
@@ -165,15 +172,16 @@ object printfo: tprintfo
   object colorset: tbooleanedit
     bounds_x = 192
     bounds_y = 74
-    bounds_cx = 47
+    bounds_cx = 48
     bounds_cy = 18
     frame.caption = '&Color'
     frame.dummy = 0
     frame.outerframe = (
       0
       2
-      34
-      3)
+      35
+      3
+    )
     taborder = 8
     statfile = tstatfile1
     optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_eatreturn, oe_resetselectonexit, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_keyexecute, oe_checkvaluepaststatread, oe_savevalue, oe_savestate]
@@ -181,19 +189,20 @@ object printfo: tprintfo
   object tpagesizeselector1: tpagesizeselector
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
     bounds_x = 184
-    bounds_y = 6
+    bounds_y = 5
     bounds_cx = 79
-    bounds_cy = 40
+    bounds_cy = 41
     frame.caption = 'Paper size'
     frame.dummy = 0
     frame.outerframe = (
       0
-      18
+      19
       0
-      0)
+      0
+    )
     taborder = 4
     dropdown.cols.count = 1
-    dropdown.cols.items = <
+    dropdown.cols.items = <    
       item
         data = (
           'User'
@@ -226,7 +235,8 @@ object printfo: tprintfo
           'Ledger'
           'Legal'
           'Letter'
-          'Tabloid')
+          'Tabloid'
+        )
       end>
     dropdown.itemindex = 5
     dropdown.width = 180
@@ -236,23 +246,25 @@ object printfo: tprintfo
   object tpageorientationselector1: tpageorientationselector
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
     bounds_x = 275
-    bounds_y = 6
+    bounds_y = 5
     bounds_cx = 105
-    bounds_cy = 40
+    bounds_cy = 41
     frame.caption = 'Paper orientation'
     frame.dummy = 0
     frame.outerframe = (
       0
-      18
+      19
       3
-      0)
+      0
+    )
     taborder = 5
     dropdown.cols.count = 1
-    dropdown.cols.items = <
+    dropdown.cols.items = <    
       item
         data = (
           'Portrait'
-          'Landscape')
+          'Landscape'
+        )
       end>
     dropdown.itemindex = 0
     printer = printer
@@ -261,40 +273,40 @@ object printfo: tprintfo
   object rotate: tbooleanedit
     bounds_x = 283
     bounds_y = 74
-    bounds_cx = 86
+    bounds_cx = 87
     bounds_cy = 18
     frame.caption = 'Rotate CCW'
     frame.dummy = 0
     frame.outerframe = (
       0
       2
-      73
-      3)
+      74
+      3
+    )
     taborder = 9
     statfile = tstatfile1
     optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_eatreturn, oe_resetselectonexit, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_keyexecute, oe_checkvaluepaststatread, oe_savevalue, oe_savestate]
   end
   object printer: tpostscriptprinter
+    canvas.font.dummy = 0
     onpagestart = pronpagestart
-    pa_width = 210.000000000000000000
-    pa_height = 297.000000000000000000
+    pa_width = 210
+    pa_height = 297
     pa_size = sps_a4
-    pa_orientation = pao_portrait
-    pa_frameleft = 10.000000000000000000
-    pa_frametop = 10.000000000000000000
-    pa_frameright = 10.000000000000000000
-    pa_framebottom = 10.000000000000000000
-    ppmm = 10.000000000000000000
+    pa_frameleft = 10
+    pa_frametop = 10
+    pa_frameright = 10
+    pa_framebottom = 10
+    ppmm = 10
     printcommand = 'lp -'
-    colorspace = cos_rgb
     statfile = tstatfile1
-    Left = 184
-    Top = 96
+    left = 184
+    top = 96
   end
   object tstatfile1: tstatfile
     filename = 'printer.sta'
     options = [sfo_memory]
-    Left = 80
-    Top = 112
+    left = 80
+    top = 112
   end
 end

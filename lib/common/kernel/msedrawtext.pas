@@ -247,6 +247,9 @@ var
 
 begin
  tabs:= nil; //compiler warning
+ if info.font <> nil then begin
+  canvas.font:= info.font;
+ end;
  with info,canvas,layoutinfo do begin
   tcanvas1(canvas).checkgcstate([cs_gc]);
   canvas.initdrawinfo(drawinfo);
@@ -488,9 +491,9 @@ begin
    aindex:= 0;
    exit;
   end;
-  if info.font <> nil then begin
-   canvas.font:= info.font;
-  end;
+//  if info.font <> nil then begin
+//   canvas.font:= info.font;
+//  end;
   layouttext(canvas,info,layoutinfo);
   if pos.y < res.y then begin
    result:= false;
@@ -537,9 +540,9 @@ var
  int1,int2,int3: integer;
 begin
  with info,layoutinfo do begin
-  if info.font <> nil then begin
-   canvas.font:= info.font;
-  end;
+//  if info.font <> nil then begin
+//   canvas.font:= info.font;
+//  end;
   layouttext(canvas,info,layoutinfo);
   if aindex > length(text.text) then begin
    aindex:= length(text.text);
@@ -723,9 +726,6 @@ begin                  //drawtext
   if text.text = '' then begin
    exit;
   end;
-  if info.font <> nil then begin
-   canvas.font:= info.font;
-  end;
   defaultcolor:= font.color;
   defaultbackgroundcolor:= font.backgroundcolor;
   fontstylebefore:= font.style;
@@ -891,9 +891,9 @@ procedure textrect(const canvas: tcanvas; var info: drawtextinfoty);
 var
  layoutinfo: layoutinfoty;
 begin
- if info.font <> nil then begin
-  canvas.font:= info.font;
- end;
+// if info.font <> nil then begin
+//  canvas.font:= info.font;
+// end;
  layouttext(canvas,info,layoutinfo);
 end;
 
