@@ -16,7 +16,7 @@ unit msedrawtext;
 interface
 uses
  Classes,msegraphics,mserichstring,msegraphutils,msearrayprops,
-        mseclasses,msestrings;
+        mseclasses,msestrings,msetypes;
 
 const
  defaultppmm = 3;      //3 pixel per mm
@@ -100,6 +100,23 @@ type
   res: rectty;
  end;
 
+ lineinfoty = record
+  liindex,licount: integer;
+  listartx: integer;
+  liwidth: integer;
+  tabchars: integerarty;
+ end;
+ lineinfoarty = array of lineinfoty;
+
+ layoutinfoty = record
+  charwidths: integerarty;
+  lineinfos: lineinfoarty;
+  ascent,descent,lineheight,
+  underline,strikeout: integer;
+  starty: integer;
+  height: integer;
+ end;
+ 
 function checktextflags(old,new: textflagsty): textflagsty;
 
 procedure drawtext(const canvas: tcanvas; var info: drawtextinfoty); overload;
@@ -110,6 +127,18 @@ procedure drawtext(const canvas: tcanvas; const text: richstringty;
                    const dest,clip: rectty; flags: textflagsty = [];
                    font: tfont = nil; tabulators: tcustomtabulators = nil); overload;
 procedure drawtext(const canvas: tcanvas; const text: msestring;
+                   const dest: rectty; flags: textflagsty = [];
+                   font: tfont = nil; tabulators: tcustomtabulators = nil); overload;
+procedure layouttext(const canvas: tcanvas; var info: drawtextinfoty;
+                               out layoutinfo: layoutinfoty); overload;
+procedure layouttext(const canvas: tcanvas; var info: drawtextinfoty;
+                               out lines: richstringarty); overload;
+procedure layouttext(const canvas: tcanvas; const text: richstringty;
+                   out lines: richstringarty;
+                   const dest: rectty; flags: textflagsty = [];
+                   font: tfont = nil; tabulators: tcustomtabulators = nil); overload;
+procedure layouttext(const canvas: tcanvas; const text: msestring;
+                   out lines: msestringarty;
                    const dest: rectty; flags: textflagsty = [];
                    font: tfont = nil; tabulators: tcustomtabulators = nil); overload;
 
@@ -137,27 +166,10 @@ function textindextopos(const canvas: tcanvas; var info: drawtextinfoty;
 
 implementation
 uses
- mseguiintf,msebits,msedatalist,msetypes,math;
+ mseguiintf,msebits,msedatalist,math;
 
 type
  tcanvas1 = class(tcanvas);
-
- lineinfoty = record
-  liindex,licount: integer;
-  listartx: integer;
-  liwidth: integer;
-  tabchars: integerarty;
- end;
- lineinfoarty = array of lineinfoty;
-
- layoutinfoty = record
-  charwidths: integerarty;
-  lineinfos: lineinfoarty;
-  ascent,descent,lineheight,
-  underline,strikeout: integer;
-  starty: integer;
-  height: integer;
- end;
 
 function checktextflags(old,new: textflagsty): textflagsty;
 const
@@ -411,6 +423,54 @@ begin
     end;
    end;
   end;
+ end;
+end;
+
+procedure layouttext(const canvas: tcanvas; var info: drawtextinfoty;
+                               out lines: richstringarty);
+var
+ la1: layoutinfoty;
+ int1: integer;
+begin
+ layouttext(canvas,info,la1);
+ setlength(lines,length(la1.lineinfos)); 
+ for int1:= 0 to high(lines) do begin
+  with la1.lineinfos[int1] do begin
+   lines[int1]:= richcopy(info.text,liindex,licount);
+  end;
+ end;
+end;
+
+procedure layouttext(const canvas: tcanvas; const text: richstringty;
+                   out lines: richstringarty;
+                   const dest: rectty; flags: textflagsty = [];
+                   font: tfont = nil; tabulators: tcustomtabulators = nil);
+var
+ info: drawtextinfoty;
+begin
+ info.text:= text;
+ info.dest:= dest;
+ info.flags:= flags - [tf_clipo];
+ info.font:= font;
+ info.tabulators:= tabulators;
+ layouttext(canvas,info,lines);
+end;
+
+procedure layouttext(const canvas: tcanvas; const text: msestring;
+                   out lines: msestringarty;
+                   const dest: rectty; flags: textflagsty = [];
+                   font: tfont = nil; tabulators: tcustomtabulators = nil);
+var
+ rstr1: richstringty;
+ ar1: richstringarty;
+ int1: integer;
+begin
+ rstr1.format:= nil;
+ rstr1.text:= text;
+ layouttext(canvas,rstr1,ar1,dest,flags,font,tabulators);
+ setlength(lines,length(ar1));
+ for int1:= 0 to high(ar1) do begin
+  lines[int1]:= ar1[int1].text;
  end;
 end;
 
@@ -792,10 +852,8 @@ procedure drawtext(const canvas: tcanvas; const text: richstringty;
 var
  info: drawtextinfoty;
 begin
-// info.canvas:= canvas;
  info.text:= text;
  info.dest:= dest;
-// info.clip:= dest;
  info.flags:= flags - [tf_clipo];
  info.font:= font;
  info.tabulators:= tabulators;
