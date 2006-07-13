@@ -1177,6 +1177,7 @@ type
    procedure widgetpainted(const canvas: tcanvas);
    function nullcheckneeded(const newfocus: twidget): boolean;
    function nonullcheck: boolean;
+   function getgrid: tcustomwidgetgrid;
    
    procedure setoptions(const avalue: dbstringgridoptionsty);
    procedure checkautofields;
@@ -5483,6 +5484,11 @@ procedure tcustomdbstringgrid.loaded;
 begin
  inherited;
  fdatalink.loaded;
+end;
+
+function tcustomdbstringgrid.getgrid: tcustomwidgetgrid;
+begin
+ result:= nil;
 end;
 
 { tlbdropdowncol }

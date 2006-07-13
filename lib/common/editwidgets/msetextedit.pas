@@ -20,7 +20,7 @@ uses
 const
  defaulttexteditoptions =  (defaultoptionsedit + [oe_linebreak]) -
               [oe_autoselect,oe_autoselectonfirstclick,oe_endonenter,
-               oe_resetselectonexit,oe_undoonesc];
+               oe_resetselectonexit,oe_undoonesc,oe_shiftreturn];
  texteditminimalframe: framety = (left: 1; top: 0; right: 1; bottom: 0);
  defaulttexteditwidgetoptions = 
          (defaulteditwidgetoptions - [ow_fontglyphheight]) + [ow_fontlineheight];
@@ -491,6 +491,9 @@ procedure tcustomtextedit.initgridwidget;
 begin
  optionswidget:= optionswidget - [ow_autoscale];
  frame:= nil;
+ with fgridintf.grid do begin
+  optionsgrid:= optionsgrid + [og_autofirstrow];
+ end;
 end;
 
 procedure tcustomtextedit.sortfunc(const l, r; var result: integer);

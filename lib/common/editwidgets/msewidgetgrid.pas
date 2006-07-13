@@ -19,8 +19,10 @@ uses
 type
 
  twidgetcol = class;
-
+ tcustomwidgetgrid = class;
+ 
  iwidgetgrid = interface(inullinterface)
+  function getgrid: tcustomwidgetgrid;
   function getcol: twidgetcol;
   procedure getdata(index: integer; var dest);
   procedure setdata(index: integer; const source; const noinvalidate: boolean = false);
@@ -33,6 +35,7 @@ type
   procedure widgetpainted(const canvas: tcanvas);
   function nullcheckneeded(const newfocus: twidget): boolean;
   function nonullcheck: boolean;
+  property grid: tcustomwidgetgrid read getgrid;
  end;
 
  igridwidget = interface(inullinterface) ['{CB4BC9B0-A6C2-4929-9E5F-92406B6617B4}']
@@ -72,6 +75,7 @@ type
    procedure writedata(writer: twriter);
   protected
     //iwidgetgrid
+   function getgrid: tcustomwidgetgrid;
    function getcol: twidgetcol;
    procedure getdata(aindex: integer; var dest);
    procedure setdata(aindex: integer; const source; const noinvalidate: boolean = false);
@@ -113,8 +117,6 @@ type
    property datalist stored false;
  end;
 
- tcustomwidgetgrid = class;
- 
  twidgetfixrow = class(tfixrow)
  end;
   
@@ -1170,6 +1172,11 @@ end;
 function twidgetcol.nonullcheck: boolean;
 begin
  result:= tcustomgrid1(fgrid).fnonullcheck > 0;
+end;
+
+function twidgetcol.getgrid: tcustomwidgetgrid;
+begin
+ result:= tcustomwidgetgrid(fgrid);
 end;
 
 { twidgetcols }
