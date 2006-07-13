@@ -539,6 +539,7 @@ type
    function getniltext: string; virtual;
    function getinstance: tpersistent; virtual;
    function getdefaultstate: propertystatesty; override;
+   procedure setvalue(const value: msestring); override;
   public
    function getvalue: msestring; override;
    procedure edit; override;
@@ -2461,6 +2462,13 @@ begin
  end
  else begin
   result:= inherited getvalue;
+ end;
+end;
+
+procedure toptionalpersistentarraypropertyeditor.setvalue(const value: msestring);
+begin
+ if getordvalue <> 0 then begin
+  inherited;
  end;
 end;
 

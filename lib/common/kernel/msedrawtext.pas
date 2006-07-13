@@ -131,16 +131,12 @@ procedure drawtext(const canvas: tcanvas; const text: msestring;
                    font: tfont = nil; tabulators: tcustomtabulators = nil); overload;
 procedure layouttext(const canvas: tcanvas; var info: drawtextinfoty;
                                out layoutinfo: layoutinfoty); overload;
-procedure layouttext(const canvas: tcanvas; var info: drawtextinfoty;
-                               out lines: richstringarty); overload;
-procedure layouttext(const canvas: tcanvas; const text: richstringty;
-                   out lines: richstringarty;
-                   const dest: rectty; flags: textflagsty = [];
-                   font: tfont = nil; tabulators: tcustomtabulators = nil); overload;
-procedure layouttext(const canvas: tcanvas; const text: msestring;
-                   out lines: msestringarty;
-                   const dest: rectty; flags: textflagsty = [];
-                   font: tfont = nil; tabulators: tcustomtabulators = nil); overload;
+function breaklines(const canvas: tcanvas; 
+                         var info: drawtextinfoty): richstringarty; overload;
+function breaklines(const canvas: tcanvas; const text: richstringty;
+                   const width: integer; font: tfont = nil): richstringarty overload;
+function breaklines(const canvas: tcanvas; const text: msestring;
+                   const width: integer; font: tfont = nil): msestringarty; overload;
 
 procedure textrect(const canvas: tcanvas; var info: drawtextinfoty); overload;
                          //result in info.res
@@ -188,8 +184,8 @@ begin
               {$ifdef FPC}longword{$else}word{$endif}(ellipsemask)));
 end;
 
-procedure layouttext(const canvas: tcanvas; var info: drawtextinfoty;
-                               out layoutinfo: layoutinfoty);
+procedure layouttext(const canvas: tcanvas; var info: drawtextinfoty; 
+                              out layoutinfo: layoutinfoty);
 var
  drawinfo: drawinfoty;
  awidth: integer;
@@ -435,40 +431,38 @@ begin
  end;
 end;
 
-procedure layouttext(const canvas: tcanvas; var info: drawtextinfoty;
-                               out lines: richstringarty);
+function breaklines(const canvas: tcanvas; 
+                        var info: drawtextinfoty): richstringarty;
 var
  la1: layoutinfoty;
  int1: integer;
 begin
  layouttext(canvas,info,la1);
- setlength(lines,length(la1.lineinfos)); 
- for int1:= 0 to high(lines) do begin
+ setlength(result,length(la1.lineinfos)); 
+ for int1:= 0 to high(result) do begin
   with la1.lineinfos[int1] do begin
-   lines[int1]:= richcopy(info.text,liindex,licount);
+   result[int1]:= richcopy(info.text,liindex,licount);
   end;
  end;
 end;
 
-procedure layouttext(const canvas: tcanvas; const text: richstringty;
-                   out lines: richstringarty;
-                   const dest: rectty; flags: textflagsty = [];
-                   font: tfont = nil; tabulators: tcustomtabulators = nil);
+function breaklines(const canvas: tcanvas; const text: richstringty;
+                   const width: integer; font: tfont = nil): richstringarty;
 var
  info: drawtextinfoty;
 begin
  info.text:= text;
- info.dest:= dest;
- info.flags:= flags - [tf_clipo];
+ info.dest.pos:= nullpoint;
+ info.dest.cx:= width;
+ info.dest.cy:= bigint;
+ info.flags:= [tf_wordbreak];
  info.font:= font;
- info.tabulators:= tabulators;
- layouttext(canvas,info,lines);
+ info.tabulators:= nil;
+ result:= breaklines(canvas,info);
 end;
 
-procedure layouttext(const canvas: tcanvas; const text: msestring;
-                   out lines: msestringarty;
-                   const dest: rectty; flags: textflagsty = [];
-                   font: tfont = nil; tabulators: tcustomtabulators = nil);
+function breaklines(const canvas: tcanvas; const text: msestring;
+                   const width: integer; font: tfont = nil): msestringarty;
 var
  rstr1: richstringty;
  ar1: richstringarty;
@@ -476,10 +470,10 @@ var
 begin
  rstr1.format:= nil;
  rstr1.text:= text;
- layouttext(canvas,rstr1,ar1,dest,flags,font,tabulators);
- setlength(lines,length(ar1));
+ ar1:= breaklines(canvas,rstr1,width,font);
+ setlength(result,length(ar1));
  for int1:= 0 to high(ar1) do begin
-  lines[int1]:= ar1[int1].text;
+  result[int1]:= ar1[int1].text;
  end;
 end;
 

@@ -5569,7 +5569,7 @@ end;
 
 procedure twidget.setclientwidth(const avalue: integer);
 begin
- setclientsize(makesize(avalue,getclientsize.cx));
+ setclientsize(makesize(avalue,getclientsize.cy));
 end;
 
 function twidget.getclientheight: integer;

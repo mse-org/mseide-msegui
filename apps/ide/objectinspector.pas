@@ -985,6 +985,7 @@ procedure tobjectinspectorfo.propertymodified(const sender: tpropertyeditor);
   props1: propinstancearty;
   comps: componentarty;
  begin
+  props1:= nil; //compiler warning
   inc(fchanging);
   try
    comps:= sender.propowner;
