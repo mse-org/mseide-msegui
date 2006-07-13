@@ -191,6 +191,7 @@ type
                         const tabdist: real); virtual; abstract;
        //tabdist < 0 -> lastx                 
    procedure checknextpage;
+   procedure internalwriteln(const avalue: richstringty);
   public
    constructor create(const user: tprinter; const intf: icanvas);
    
@@ -208,6 +209,8 @@ type
 
    procedure writeln(const avalue: msestring = ''); overload;
    procedure writeln(const avalue: richstringty); overload;
+   procedure writelines(const alines: msestringarty); overload;
+   procedure writelines(const alines: richstringarty); overload;
    property indentx: integer read findentx write findentx;
    property indenty: integer read findenty write findenty;
    property headerheight: integer read fheaderheight write fheaderheight;
@@ -772,7 +775,7 @@ begin
  writeln(rstr1);
 end;
 
-procedure tprintercanvas.writeln(const avalue: richstringty);
+procedure tprintercanvas.internalwriteln(const avalue: richstringty);
 begin
  checknextpage;
  if avalue.text <> '' then begin
@@ -781,6 +784,38 @@ begin
  inc(fpagelinenumber);
  inc(flinenumber);
  fliney:= fliney + lineheight;
+end;
+
+procedure tprintercanvas.writeln(const avalue: richstringty);
+var
+ ar1: richstringarty;
+ int1: integer;
+begin
+ ar1:= breakrichlines(avalue);
+ for int1:= 0 to high(ar1) do begin
+  internalwriteln(ar1[int1]);
+ end;
+end;
+
+procedure tprintercanvas.writelines(const alines: msestringarty);
+var
+ int1: integer;
+ rstr1: richstringty;
+begin
+ rstr1.format:= nil;
+ for int1:= 0 to high(alines) do begin
+  rstr1.text:= alines[int1];
+  internalwriteln(rstr1);
+ end;
+end;
+
+procedure tprintercanvas.writelines(const alines: richstringarty);
+var
+ int1: integer;
+begin
+ for int1:= 0 to high(alines) do begin
+  internalwriteln(alines[int1]);
+ end;
 end;
 
 function tprintercanvas.lineheight: integer;

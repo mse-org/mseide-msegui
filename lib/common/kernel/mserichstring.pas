@@ -152,6 +152,7 @@ function uniquerichstringty(const value: richstringty): richstringty;
 procedure additem(const value: richstringty; var dest: richstringarty;
                              var count: integer; step: integer = 32); overload;
 function splitrichstring(const avalue: richstringty; const separator: msechar): richstringarty;
+function breakrichlines(const source: richstringty): richstringarty;
 
 procedure captiontorichstring(const caption: captionty; var dest: richstringty);
 //procedure captiontorichstring(const caption: captionty; out result: richstringty);
@@ -184,6 +185,19 @@ begin
    result[int1+1]:= richcopy(avalue,ar1[int1]+1,ar1[int1+1]-ar1[int1]-1);
   end;
   result[high(result)]:= richcopy(avalue,ar1[high(ar1)]+1,bigint);
+ end;
+end;
+
+function breakrichlines(const source: richstringty): richstringarty;
+var
+ int1,int2: integer;
+begin
+ result:= splitrichstring(source,c_linefeed);
+ for int1:= 0 to high(result) do begin
+  int2:= length(result[int1].text);
+  if (int2 > 0) and (result[int1].text[int2] = c_return) then begin
+   setlength(result[int1].text,int2-1);
+  end;
  end;
 end;
 
