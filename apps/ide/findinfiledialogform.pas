@@ -38,6 +38,7 @@ type
    cancel: tbutton;
    procedure dironbeforeexecute(const sender: tfiledialogcontroller;
                    var dialogkind: filedialogkindty; var aresult: modalresultty);
+   procedure dirshowhint(const sender: TObject; var info: hintinfoty);
   private
    procedure valuestoinfo(out info: findinfileinfoty);
    procedure infotovalues(const info: findinfileinfoty);
@@ -121,6 +122,14 @@ begin
   dir.value:= directory;
   mask.value:= filemask;
   subdirs.value:= fifo_subdirs in options;
+ end;
+end;
+
+procedure tfindinfiledialogfo.dirshowhint(const sender: TObject;
+               var info: hintinfoty);
+begin
+ if dir.editor.textclipped then begin
+  info.caption:= dir.value;
  end;
 end;
 

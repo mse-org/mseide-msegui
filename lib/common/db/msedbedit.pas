@@ -793,6 +793,7 @@ type
    procedure painted;
    procedure loaded;
    function moveby(distance: integer): integer; override;
+   function rowtorecno(const row: integer): integer;
   published
    property options: griddatalinkoptionsty read foptions write foptions default [];
    property onupdaterowdata: updaterowdataeventty read fonupdaterowdata 
@@ -4326,10 +4327,26 @@ end;
 function tgriddatalink.arecord: integer;
 begin
  if fdscontroller <> nil then begin
-  result:= fdscontroller.recno;
+  result:= fdscontroller.recnonullbased;
  end
  else begin
   result:= dataset.recno;
+ end;
+end;
+
+function tgriddatalink.rowtorecno(const row: integer): integer;
+begin
+ if active then begin
+  if fdscontroller <> nil then begin
+   result:= fdscontroller.recnonullbased - fdscontroller.recnooffset;
+  end
+  else begin
+   result:= dataset.recno;
+  end;
+  result:=  result + row - activerecord;
+ end
+ else begin
+  result:= -1;
  end;
 end;
 

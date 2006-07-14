@@ -541,7 +541,8 @@ type
    
    procedure dataevent(const event: tdataevent; const info: ptrint);
    procedure cancel;
-   function recno: integer;
+   function recnonullbased: integer; //null based
+   property recnooffset: integer read frecnooffset;
    function moveby(const distance: integer): integer;
    procedure internalinsert;
    function assql(const avalue: msestring): string; overload;
@@ -1922,7 +1923,7 @@ begin
  result:= msefieldtypeclasses[tfieldtypetotypety[fieldtype]];
 end;
 
-function tdscontroller.recno: integer;
+function tdscontroller.recnonullbased: integer;
 begin
  with tdataset1(fowner) do begin
   if not frecnovalid then begin

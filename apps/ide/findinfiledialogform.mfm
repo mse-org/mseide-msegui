@@ -1,4 +1,5 @@
 object findinfileadialogfo: tfindinfiledialogfo
+  optionswidget = [ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_mousewheel, ow_destroywidgets, ow_hinton, ow_autoscale]
   bounds_x = 268
   bounds_y = 415
   bounds_cx = 331
@@ -16,19 +17,24 @@ object findinfileadialogfo: tfindinfiledialogfo
   object findtext: thistoryedit
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
     bounds_x = 8
-    bounds_y = 8
+    bounds_y = 7
     bounds_cx = 316
-    bounds_cy = 40
+    bounds_cy = 41
     frame.caption = '&Text to find'
     frame.dummy = 0
     frame.outerframe = (
       0
-      18
+      19
       0
-      0)
+      0
+    )
     anchors = [an_left, an_top, an_right]
     statfile = statfile1
     dropdown.options = [deo_autosavehistory]
+    dropdown.cols.count = 1
+    dropdown.cols.items = <    
+      item
+      end>
     reffontheight = 16
   end
   object ok: tbutton
@@ -49,87 +55,96 @@ object findinfileadialogfo: tfindinfiledialogfo
     bounds_cy = 20
     anchors = [an_top, an_right]
     taborder = 9
+    state = [as_localcaption]
     caption = 'Cancel'
     modalresult = mr_cancel
   end
   object casesensitive: tbooleanedit
     bounds_x = 8
     bounds_y = 55
-    bounds_cx = 94
+    bounds_cx = 95
     bounds_cy = 18
     frame.caption = 'c&asesensitive'
     frame.dummy = 0
     frame.outerframe = (
       0
       2
-      81
-      3)
+      82
+      3
+    )
     taborder = 1
     statfile = statfile1
   end
   object wholeword: tbooleanedit
-    bounds_x = 128
+    bounds_x = 160
     bounds_y = 55
-    bounds_cx = 86
+    bounds_cx = 87
     bounds_cy = 18
     frame.caption = '&whole word'
     frame.dummy = 0
     frame.outerframe = (
       0
       2
-      73
-      3)
+      74
+      3
+    )
     taborder = 2
     statfile = statfile1
   end
   object indirectories: tbooleaneditradio
     bounds_x = 8
     bounds_y = 79
-    bounds_cx = 139
+    bounds_cx = 140
     bounds_cy = 18
     frame.caption = 'Search in &directories'
     frame.dummy = 0
     frame.outerframe = (
       0
       2
-      126
-      3)
+      127
+      3
+    )
     taborder = 3
     statfile = statfile1
     value = True
   end
   object inopenfiles: tbooleaneditradio
     Tag = 1
-    bounds_x = 128
+    bounds_x = 160
     bounds_y = 79
-    bounds_cx = 151
+    bounds_cx = 152
     bounds_cy = 18
     frame.caption = 'Search in all &open files'
     frame.dummy = 0
     frame.outerframe = (
       0
       2
-      138
-      3)
+      139
+      3
+    )
     taborder = 4
     statfile = statfile1
   end
   object dir: tfilenameedit
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
     bounds_x = 8
-    bounds_y = 112
+    bounds_y = 111
     bounds_cx = 316
-    bounds_cy = 40
+    bounds_cy = 41
     frame.caption = '&Directory'
+    frame.button.imagenr = 17
     frame.dummy = 0
     frame.outerframe = (
       0
-      18
+      19
       0
-      0)
+      0
+    )
     anchors = [an_left, an_top, an_right]
     taborder = 5
+    onshowhint = dirshowhint
     statfile = statfile1
+    textflags = [tf_ycentered, tf_noselect, tf_ellipseleft]
     controller.options = [fdo_directory]
     controller.onbeforeexecute = dironbeforeexecute
     reffontheight = 16
@@ -137,42 +152,48 @@ object findinfileadialogfo: tfindinfiledialogfo
   object mask: thistoryedit
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
     bounds_x = 8
-    bounds_y = 160
+    bounds_y = 159
     bounds_cx = 316
-    bounds_cy = 40
+    bounds_cy = 41
     frame.caption = '&File Mask'
     frame.dummy = 0
     frame.outerframe = (
       0
-      18
+      19
       0
-      0)
+      0
+    )
     anchors = [an_left, an_top, an_right]
     taborder = 6
     statfile = statfile1
     value = '"*.pas" "*.pp" "*.inc"'
     dropdown.options = [deo_autosavehistory]
+    dropdown.cols.count = 1
+    dropdown.cols.items = <    
+      item
+      end>
     reffontheight = 16
   end
   object subdirs: tbooleanedit
     bounds_x = 8
     bounds_y = 215
-    bounds_cx = 148
+    bounds_cx = 149
     bounds_cy = 18
     frame.caption = '&Include subdirectories'
     frame.dummy = 0
     frame.outerframe = (
       0
       2
-      135
-      3)
+      136
+      3
+    )
     taborder = 7
     statfile = statfile1
   end
   object statfile1: tstatfile
     filename = 'findinfiledialogfo.sta'
     options = [sfo_memory]
-    Left = 248
-    Top = 72
+    left = 248
+    top = 72
   end
 end
