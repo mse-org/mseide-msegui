@@ -1,5 +1,5 @@
 object doublestringlisteditor: tdoublestringlisteditor
-  optionswidget = [ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_destroywidgets, ow_hinton, ow_autoscale]
+  optionswidget = [ow_arrowfocus, ow_subfocus, ow_destroywidgets, ow_hinton, ow_autoscale]
   bounds_x = 130
   bounds_y = 203
   bounds_cx = 338
@@ -18,7 +18,8 @@ object doublestringlisteditor: tdoublestringlisteditor
     bounds_y = 160
     bounds_cx = 50
     bounds_cy = 22
-    taborder = 2
+    taborder = 3
+    state = [as_default, as_localdefault, as_localcaption]
     caption = '&OK'
     modalresult = mr_ok
     reffontheight = 16
@@ -29,50 +30,48 @@ object doublestringlisteditor: tdoublestringlisteditor
     bounds_y = 160
     bounds_cx = 50
     bounds_cy = 22
-    taborder = 3
+    state = [as_localcaption]
     caption = '&Cancel'
     modalresult = mr_cancel
     reffontheight = 16
   end
   object grid: twidgetgrid
-    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_focusbackonesc, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_focusbackonesc, ow_mousewheel, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
     bounds_x = 8
     bounds_y = 8
     bounds_cx = 320
     bounds_cy = 140
     frame.dummy = 0
     anchors = [an_left, an_top, an_right, an_bottom]
-    taborder = 1
-    optionsgrid = [og_colsizing, og_rowmoving, og_rowinserting, og_rowdeleting]
+    taborder = 2
+    optionsgrid = [og_colsizing, og_rowmoving, og_keyrowmoving, og_rowinserting, og_rowdeleting, og_focuscellonenter, og_autofirstrow, og_autoappend]
     fixcols.count = 1
-    fixcols.items = <
+    fixcols.items = <    
       item
         width = 31
         numstep = 1
       end>
     fixrows.count = 1
-    fixrows.items = <
+    fixrows.items = <    
       item
         height = 18
         captions.count = 2
-        captions.items = <
+        captions.items = <        
           item
             caption = 'a'
             textflags = []
-          end
+          end        
           item
             caption = 'b'
             textflags = []
           end>
       end>
-    rowcount = 0
     datacols.count = 2
-    datacols.items = <
+    datacols.items = <    
       item
         width = 142
-        options = [co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
         widgetname = 'texta'
-      end
+      end    
       item
         width = 140
         options = [co_fill, co_savevalue]
@@ -87,6 +86,7 @@ object doublestringlisteditor: tdoublestringlisteditor
       bounds_cy = 18
       frame.levelo = 0
       frame.colorclient = -2147483646
+      frame.localprops = [frl_levelo, frl_colorclient]
       frame.dummy = 0
       taborder = 1
       visible = False
@@ -99,6 +99,7 @@ object doublestringlisteditor: tdoublestringlisteditor
       bounds_cy = 18
       frame.levelo = 0
       frame.colorclient = -2147483646
+      frame.localprops = [frl_levelo, frl_colorclient]
       frame.dummy = 0
       visible = False
       reffontheight = 16
@@ -108,7 +109,7 @@ object doublestringlisteditor: tdoublestringlisteditor
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
     bounds_x = 36
     bounds_y = 160
-    bounds_cx = 110
+    bounds_cx = 111
     bounds_cy = 22
     frame.caption = 'Rowcount'
     frame.captionpos = cp_right
@@ -116,8 +117,10 @@ object doublestringlisteditor: tdoublestringlisteditor
     frame.outerframe = (
       0
       0
-      60
-      0)
+      61
+      0
+    )
+    taborder = 1
     onsetvalue = rowcountonsetvalue
     reffontheight = 16
   end
