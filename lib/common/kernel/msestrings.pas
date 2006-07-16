@@ -359,6 +359,8 @@ function parsecommandline(const s: pchar): stringarty;
 
 function stringtoutf8(const value: msestring): utf8string;
 function utf8tostring(const value: utf8string): msestring;
+function stringtolatin1(const value: msestring): string;
+function latin1tostring(const value: string): msestring;
 
 type
 // getkeystringfuncty = function (const index: integer;
@@ -560,6 +562,26 @@ begin
   inc(po1);
  end;
  setlength(result,po1-pmsechar(pointer(result)));
+end;
+
+function stringtolatin1(const value: msestring): string;
+var
+ int1: integer;
+begin
+ setlength(result,length(value));
+ for int1:= 1 to length(result) do begin
+  result[int1]:= char(value[int1]);
+ end;
+end;
+
+function latin1tostring(const value: string): msestring;
+var
+ int1: integer;
+begin
+ setlength(result,length(value));
+ for int1:= 1 to length(result) do begin
+  result[int1]:= widechar(value[int1]);
+ end;
 end;
 
 function psubstr(const start,stop: pchar): string;

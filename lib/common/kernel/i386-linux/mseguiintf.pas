@@ -15,13 +15,15 @@ interface
 
 uses
  Xlib,msetypes,msegui,msegraphics,msegraphutils,mseevent,msepointer,mseguiglob,
- msethread{$ifdef FPC},x,xutil,dynlibs{$endif},libc,msesysintf,msestockobjects,msestrings;
+ msethread{$ifdef FPC},x,xutil,dynlibs{$endif},libc,msesysintf,msestockobjects,
+ msestrings;
 
 {$ifdef FPC}
 {$ifdef LINUX}
 {$ifdef msedebug}
 var
- _IO_stdin: P_IO_FILE; cvar;        //avoid link errors if rtl is compiled with stabs info
+ _IO_stdin: P_IO_FILE; cvar;       
+  //avoid link errors if rtl is compiled with stabs info
  _IO_stdout: P_IO_FILE; cvar;
  _IO_stderr: P_IO_FILE; cvar;
  __malloc_initialized : longint;cvar;
@@ -273,7 +275,10 @@ type
  pwchar_t = ^wchar_t;
  ppwchar_t = ^pwchar_t;
 {$endif}
+ patom = ^atom;
  atomarty = array of atom;
+ atomaty = array[0..0] of atom;
+ patomaty = ^atomaty;
 
 const
  mouseeventmask = buttonpressmask or buttonreleasemask or pointermotionmask;
@@ -556,7 +561,7 @@ var
  wmclientleaderatom: atom;
  wmprotocols: array[wmprotocolty] of atom;
  clipboardatom: atom;
- windowatom,stringatom: atom;
+ windowatom,stringatom,utf8_stringatom: atom;
  targetsatom: atom;
  convertselectionpropertyatom: atom;
 
@@ -637,91 +642,123 @@ end;
 function gui_pastefromclipboard(out value: msestring): guierrorty;
 const
  transferbuffersize = 1024 div 4; //1kb
-var
- event: xevent;
- po1: pchar;
- acttype: atom;
- actformat: cardinal;
- nitems: cardinal;
- bytesafter: cardinal;
- charoffset: integer;
- longoffset: integer;
+var 
  clipboardowner: cardinal;
- time1: cardinal;
  value1: string;
+  
+ function getdata(const target: atom; const resulttarget: atom): guierrorty;
+ var
+  event: xevent;
+  po1: pchar;
+  acttype: atom;
+  actformat: cardinal;
+  nitems: cardinal;
+  bytesafter: cardinal;
+  charoffset: integer;
+  longoffset: integer;
+  time1: cardinal;
+  int1: integer;
+ begin
+  result:= gue_clipboard;
+  charoffset:= 1;
+  longoffset:= 0;
+  repeat      //remove pending notifications
+  until not (xcheckwindowevent(appdisp,appid,propertychangemask,@event)
+             {$ifndef FPC} <> 0{$endif});
+  xdeleteproperty(appdisp,appid,convertselectionpropertyatom);
+  xconvertselection(appdisp,clipboardatom,target,convertselectionpropertyatom,
+                       appid,lasteventtime);
+  time1:= timestep(2000000); //2 sec
+  repeat
+   if xcheckwindowevent(appdisp,appid,propertychangemask,@event)
+             {$ifndef FPC} = 0 {$endif} then begin
+    if timeout(time1) then begin
+     exit;
+    end;
+    sleep(50);
+   end
+   else begin
+    with event.xproperty do begin
+     if later(lasteventtime,time) then begin
+      if (atom = convertselectionpropertyatom) then begin
+       if state = propertynewvalue then begin
+        bytesafter:= 0;
+        value1:= ''; //todo: get msestring
+        repeat
+         if xgetwindowproperty(appdisp,appid,convertselectionpropertyatom,
+              longoffset,transferbuffersize,{$ifdef FPC} true{$else}1{$endif},
+             anypropertytype,@acttype,@actformat,@nitems,@bytesafter,@po1) = success then begin
+          if (acttype = resulttarget) then begin
+           int1:= (actformat div 8) * nitems; //bytecount
+           if nitems > 0 then begin
+            setlength(value1,cardinal(length(value1)) + int1 );
+            move(po1^,value1[charoffset],int1);
+            inc(charoffset,int1);
+            inc(longoffset,int1 div 4); //32 bit
+            result:= gue_ok;
+           end;
+          end
+          else begin
+           bytesafter:= 0;
+           result:= gue_clipboard;
+          end;
+          xfree(po1);
+         end
+         else begin
+          if timeout(time1) then begin
+           exit;
+          end;
+         end;
+        until bytesafter = 0;
+        break;
+       end;
+      end
+      else begin
+//        if atom = none then begin
+//         break;
+//        end;
+      end;
+     end;
+    end;
+   end;
+  until false;
+ end;
+
+var
+ int1: integer; 
+ po1: patomaty;
+ atom1: atom;
+ 
 begin
- result:= gue_clipboard;
  clipboardowner:= xgetselectionowner(appdisp,clipboardatom);
  if clipboardowner = appid then begin
   value:= clipboard;
   result:= gue_ok;
  end
  else begin
+  result:= gue_clipboard;
   value:= '';
   if clipboardowner <> none then begin
-   charoffset:= 1;
-   longoffset:= 0;
-   repeat      //remove pending notifications
-   until not (xcheckwindowevent(appdisp,appid,propertychangemask,@event)
-              {$ifndef FPC} <> 0{$endif});
-   xdeleteproperty(appdisp,appid,convertselectionpropertyatom);
-   xconvertselection(appdisp,clipboardatom,stringatom,convertselectionpropertyatom,
-                        appid,lasteventtime);
-   time1:= timestep(2000000); //2 sec
-   repeat
-    if xcheckwindowevent(appdisp,appid,propertychangemask,@event)
-              {$ifndef FPC} = 0 {$endif} then begin
-     if timeout(time1) then begin
-      exit;
-     end;
-     sleep(50);
-    end
-    else begin
-     with event.xproperty do begin
-      if later(lasteventtime,time) then begin
-       if (atom = convertselectionpropertyatom) then begin
-        if state = propertynewvalue then begin
-         bytesafter:= 0;
-         value1:= ''; //todo: get msestring
-         repeat
-          if xgetwindowproperty(appdisp,appid,convertselectionpropertyatom,
-               longoffset,transferbuffersize,{$ifdef FPC} true{$else}1{$endif},
-              anypropertytype,@acttype,@actformat,@nitems,@bytesafter,@po1) = success then begin
-           if (acttype = stringatom) and (actformat = 8) then begin
-            if nitems > 0 then begin
-             setlength(value1,cardinal(length(value1)) + nitems );
-             move(po1^,value1[charoffset],nitems);
-             inc(charoffset,nitems);
-             inc(longoffset,nitems div 4); //32 bit
-             result:= gue_ok;
-            end;
-           end
-           else begin
-            bytesafter:= 0;
-            result:= gue_clipboard;
-           end;
-           xfree(po1);
-          end
-          else begin
-           if timeout(time1) then begin
-            exit;
-           end;
-          end;
-         until bytesafter = 0;
-         value:= value1;
-         break;
-        end;
-       end
-       else begin
-//        if atom = none then begin
-//         break;
-//        end;
-       end;
-      end;
+   result:= getdata(targetsatom,atomatom);
+   if result = gue_ok then begin
+    po1:= pointer(value1);
+    atom1:= stringatom;
+    for int1:= 0 to length(value1) div sizeof(atom) do begin
+     if po1^[int1] = utf8_stringatom then begin
+      atom1:= utf8_stringatom;
+      break;
      end;
     end;
-    result:= gue_ok;
-   until false;
+    result:= getdata(atom1,atom1);
+    if result = gue_ok then begin
+     if atom1 = utf8_stringatom then begin
+      value:= utf8tostring(value1);
+     end
+     else begin
+      value:= latin1tostring(value1);
+     end;
+    end;
+   end;
   end;
  end;
 end;
@@ -809,6 +846,18 @@ begin
  end;
 end;
 
+function stringtotextproperty(const value: msestring; 
+                               out textproperty: xtextproperty): boolean;
+var
+ list: array[0..0] of utf8string;
+begin
+ list[0]:= stringtoutf8(value);
+ result:= xutf8textlisttotextproperty(appdisp,@list,1,xstdicctextstyle,@textproperty) >= 0;
+ if not result then begin
+  fillchar(textproperty,0,sizeof(textproperty));
+ end;
+end;
+{
 function stringtotextproperty(const value: msestring; out textproperty: xtextproperty): boolean;
 var
  list: array[0..0] of ucs4string;
@@ -816,10 +865,10 @@ begin
  list[0]:= msestringtoucs4string(value);
  result:= xwctextlisttotextproperty(appdisp,@list,1,xstdicctextstyle,@textproperty) >= 0;
  if not result then begin
-  fillchar(result,0,sizeof(result));
+  fillchar(textproperty,0,sizeof(textproperty));
  end;
 end;
-
+}
 function getwmstate(id: winidty): wmstatety;
 type
  wmstatety = record
@@ -4197,6 +4246,7 @@ var
  shiftstate1: shiftstatesty;
  key1: keyty;
  button1: mousebuttonty;
+ atomar: array[0..1] of atom;
   
 begin
  while true do begin
@@ -4293,14 +4343,21 @@ begin
       event.xselection.target:= target;
       event.xselection.{$ifdef FPC}_property{$else}xproperty{$endif}:= {$ifdef FPC}_property{$else}xproperty{$endif};
       if target = targetsatom then begin
+       atomar[0]:= stringatom;
+       atomar[1]:= utf8_stringatom;
        xchangeproperty(appdisp,requestor,{$ifdef FPC}_property{$else}xproperty{$endif},target,32,
-                  propmodereplace,@stringatom,1);
+                  propmodereplace,@atomar,2);
       end
       else begin
-       if target = stringatom then begin
-        str1:= clipboard;
+       if (target = stringatom) or (target = utf8_stringatom) then begin
+        if target = utf8_stringatom then begin
+         str1:= stringtoutf8(clipboard);
+        end
+        else begin
+         str1:= stringtolatin1(clipboard);
+        end;
         xchangeproperty(appdisp,requestor,{$ifdef FPC}_property{$else}xproperty{$endif},target,8,
-                  propmodereplace,pbyte(pchar(str1)),length(clipboard));
+                  propmodereplace,pbyte(pchar(str1)),length(str1));
        end
        else begin
         event.xselection.{$ifdef FPC}_property{$else}xproperty{$endif}:= none;
@@ -4642,6 +4699,8 @@ begin
  windowatom:= xinternatom(appdisp,'WINDOW',
            {$ifdef FPC}false{$else}0{$endif});
  stringatom:= xinternatom(appdisp,'STRING',
+           {$ifdef FPC}false{$else}0{$endif});
+ utf8_stringatom:= xinternatom(appdisp,'UTF8_STRING',
            {$ifdef FPC}false{$else}0{$endif});
  targetsatom:= xinternatom(appdisp,'TARGETS',
            {$ifdef FPC}false{$else}0{$endif});
