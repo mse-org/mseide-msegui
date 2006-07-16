@@ -104,7 +104,9 @@ const
   AllHints = (((((InputHint or StateHint) or IconPixmapHint) or IconWindowHint)
     or IconPositionHint) or IconMaskHint) or WindowGroupHint;
   XUrgencyHint = 1 shl 8;
-  
+type
+   TXICCEncodingStyle = (XStringStyle,XCompoundTextStyle,XTextStyle,
+     XStdICCTextStyle,XUTF8StringStyle);
 function XSetWMHints(Display: PDisplay; W: xid; WMHints: PXWMHints): Longint; cdecl;
                               external sXLib name 'XSetWMHints';
 function XSetForeground(Display: PDisplay; GC: TGC; Foreground: Cardinal): longint; cdecl;
@@ -148,6 +150,9 @@ function XCreateImage(Display: PDisplay; Visual: msePVisual; Depth: Cardinal;
   Format: Longint; Offset: Longint; Data: PChar; Width, Height: Cardinal;
   BitmapPad: Longint; BytesPerLine: Longint): PXImage; cdecl;
                               external sXLib name 'XCreateImage';
+function Xutf8TextListToTextProperty(para1:PDisplay; para2:PPchar; para3: integer;
+            para4:TXICCEncodingStyle; para5:PXTextProperty): integer;cdecl;
+                     external sXLib name 'Xutf8TextListToTextProperty';
 
 
 implementation
@@ -691,7 +696,7 @@ var
           if (acttype = resulttarget) then begin
            int1:= (actformat div 8) * nitems; //bytecount
            if nitems > 0 then begin
-            setlength(value1,cardinal(length(value1)) + int1 );
+            setlength(value1,length(value1) + int1 );
             move(po1^,value1[charoffset],int1);
             inc(charoffset,int1);
             inc(longoffset,int1 div 4); //32 bit
