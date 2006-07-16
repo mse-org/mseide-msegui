@@ -86,15 +86,6 @@ In MSEi18n:
 
 FPC patches
 ***********
-In patch_fpc_2_0_3 are the needed modified FPC files for MSEgui 
-and FPC 2.0.3 rev. 3515.
-There are some fixes to let the FPC compiler work with -Fcutf8,
-and some hotfixes for DB-issues.
-In lib/common/kernel/i386-linux is the modified file cwstring.pp
-to get thread safe unicode<>locale text conversion on linux.
-With the original FPC file there can be destroyed source files with
-FPC 2.0.2 and FPC 2.0.3.
-
 In patch_fpc_2_0_4 are the needed modified FPC files for MSEgui 
 and FPC 2.0.4 rc1:
 - Fix to let the compiler work with -Fcutf8.
