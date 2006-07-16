@@ -2219,6 +2219,7 @@ end;
 destructor tdbmemoedit.destroy;
 begin
  inherited;
+ fdatalink.free;
 end;
 
 function tdbmemoedit.getdatafield: string;
