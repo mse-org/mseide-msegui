@@ -11,7 +11,7 @@ type
  fieldtypesarty = array of fieldtypesty;
 const
  textfields = [ftstring,ftfixedchar,ftwidestring];
- memofields = [ftblob,ftmemo];
+ memofields = textfields+[ftblob,ftmemo];
  integerfields = [ftsmallint,ftinteger,ftword];
  booleanfields = [ftboolean,ftstring,ftfixedchar];
  realfields = [ftfloat,ftcurrency];

@@ -341,7 +341,7 @@ function tcustomlookupbuffer.internalfind(const avalue; var index: integerarty;
                 compfunc: arraysortcomparety; const filter: lbfiltereventty;
                 out aindex: integer): boolean;   //true if exact
 var
- int1,int2: integer;
+ int1: integer;
  bo1: boolean;
 begin
  result:= findarrayvalue(avalue,data,index,compfunc,itemsize,aindex);
@@ -1189,7 +1189,6 @@ var
  integerf: array of tfield;
  realf: array of tfield;
  ar3: stringarty;
- ar4: msestringarty;
  int1,int2: integer;
  utf8: boolean;
 begin
