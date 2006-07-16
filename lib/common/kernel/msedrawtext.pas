@@ -134,7 +134,7 @@ procedure layouttext(const canvas: tcanvas; var info: drawtextinfoty;
 function breaklines(const canvas: tcanvas; 
                          var info: drawtextinfoty): richstringarty; overload;
 function breaklines(const canvas: tcanvas; const text: richstringty;
-                   const width: integer; font: tfont = nil): richstringarty overload;
+                   const width: integer; font: tfont = nil): richstringarty; overload;
 function breaklines(const canvas: tcanvas; const text: msestring;
                    const width: integer; font: tfont = nil): msestringarty; overload;
 
