@@ -50,19 +50,23 @@ type
   data: realarty;
  end;
  floatindexinfoarty = array of floatindexinfoty;
- 
+
+ lookupbufferstatety = (lbs_changed,lbs_buffervalid);
+ lookupbufferstatesty = set of lookupbufferstatety;
+  
  tcustomlookupbuffer = class(tmsecomponent)
   private
    ftextdata: stringindexinfoarty;
    fintegerdata: integerindexinfoarty;
    ffloatdata: floatindexinfoarty;
-   fbuffervalid: boolean;
+ //  fbuffervalid: boolean;
+   fstate: lookupbufferstatesty;
    fcount: integer;
    fupdating: integer;
    procedure checkindex(const index: integer);
-   function getfieldcounttext: integer;
-   function getfieldcountinteger: integer;
-   function getfieldcountfloat: integer;
+   function getfieldcounttext: integer; virtual;
+   function getfieldcountinteger: integer; virtual;
+   function getfieldcountfloat: integer; virtual;
    function internalfind(const avalue; var index: integerarty;
                 var data; const itemsize: integer;
                 compfunc: arraysortcomparety; const filter: lbfiltereventty;
@@ -204,6 +208,9 @@ type
   protected
    procedure clearbuffer; override;
    procedure loaded; override;
+   function getfieldcounttext: integer; override;
+   function getfieldcountinteger: integer; override;
+   function getfieldcountfloat: integer; override;
    procedure setfieldcounttext(const avalue: integer); override;
    procedure setfieldcountinteger(const avalue: integer); override;
    procedure setfieldcountfloat(const avalue: integer); override;
@@ -264,7 +271,8 @@ end;
 
 procedure tcustomlookupbuffer.invalidatebuffer;
 begin
- fbuffervalid:= false;
+ exclude(fstate,lbs_buffervalid);
+// fbuffervalid:= false;
 end;
 
 procedure tcustomlookupbuffer.clearbuffer;
@@ -291,18 +299,20 @@ begin
   end;
  end;
  fcount:= 0;
- fbuffervalid:= false;
+ exclude(fstate,lbs_buffervalid);
+// fbuffervalid:= false;
  changed;
 end;
 
 procedure tcustomlookupbuffer.loadbuffer;
 begin
- fbuffervalid:= true;
+ include(fstate,lbs_buffervalid);
+// fbuffervalid:= true;
 end;
 
 procedure tcustomlookupbuffer.checkbuffer;
 begin
- if not fbuffervalid then begin
+ if not (lbs_buffervalid in fstate) then begin
   loadbuffer;
  end;
 end;
@@ -382,9 +392,6 @@ end;
 
 function tcustomlookupbuffer.find(const fieldno: integer; const avalue: integer;
              out aindex: integer; const filter: lbfiltereventty = nil): boolean;
-var
- int1,int2: integer;
- bo1: boolean;
 begin
  checkbuffer;
  checkarrayindex(fintegerdata,fieldno);
@@ -719,7 +726,13 @@ end;
 procedure tcustomlookupbuffer.changed;
 begin
  if fupdating = 0 then begin
-  sendchangeevent;
+  if csloading in componentstate then begin
+   include(fstate,lbs_changed);
+  end
+  else begin
+   exclude(fstate,lbs_changed);
+   sendchangeevent;
+  end;
  end;
 end;
 
@@ -742,14 +755,15 @@ begin
    end;
   end;
   fcount:= avalue;
-  fbuffervalid:= false;
+  exclude(fstate,lbs_buffervalid);
+//  fbuffervalid:= false;
  end;
 end;
 
 procedure tcustomlookupbuffer.loaded;
 begin
  inherited;
- if not fbuffervalid then begin
+ if not (lbs_buffervalid in fstate) or (lbs_changed in fstate) then begin
   changed;
  end;
 end;
@@ -951,15 +965,25 @@ end;
 
 procedure tcustomdblookupbuffer.loaded;
 begin
- if not fbuffervalid then begin
+ if not (lbs_buffervalid in fstate) then begin
   clearbuffer;
  end;
  inherited;
 end;
 
+function tcustomdblookupbuffer.getfieldcounttext: integer;
+begin
+ result:= ftextfields.count;
+end;
+
 procedure tcustomdblookupbuffer.setfieldcounttext(const avalue: integer);
 begin
  readonlyprop;
+end;
+
+function tcustomdblookupbuffer.getfieldcountinteger: integer;
+begin
+ result:= fintegerfields.count;
 end;
 
 procedure tcustomdblookupbuffer.setfieldcountinteger(const avalue: integer);
@@ -970,6 +994,11 @@ end;
 procedure tcustomdblookupbuffer.setfieldcountfloat(const avalue: integer);
 begin
  readonlyprop;
+end;
+
+function tcustomdblookupbuffer.getfieldcountfloat: integer;
+begin
+ result:= floatfields.count;
 end;
 
 function tcustomdblookupbuffer.count: integer;
@@ -1009,10 +1038,14 @@ end;
 procedure tlookupbufferfieldsdatalink.activechanged;
 begin
  inherited;
- if fowner.fbuffervalid and 
-   not (olbdb_closedataset in tcustomdblookupbuffer(fowner).foptionsdb) then begin
-  fowner.fbuffervalid:= false;
-  fowner.changed;
+ with tcustomdblookupbuffer(fowner) do begin
+  if active or 
+    not active and (lbs_buffervalid in fstate) and 
+                       not (olbdb_closedataset in foptionsdb) then begin
+   exclude(fstate,lbs_buffervalid);
+//  fowner.fbuffervalid:= false;
+   fowner.changed;
+  end;
  end;
 end;
 
@@ -1039,10 +1072,12 @@ begin
  try
   clearbuffer;
   datas:= fdatalink.dataset;
-  fbuffervalid:= true;
-  
-  if fdatalink.active or 
-          (olbdb_closedataset in foptionsdb) and (datas <> nil) then begin
+  if (datas <> nil) and 
+       (datas.active or 
+        (olbdb_closedataset in foptionsdb) and
+               not (csloading in datas.componentstate)) then begin
+   include(fstate,lbs_buffervalid);
+//   fbuffervalid:= true; 
    utf8:= fdatalink.utf8;
    bo1:= fdatalink.active;
    application.beginwait;
@@ -1130,8 +1165,9 @@ end;
 procedure tlookupbuffermemodatalink.recordchanged(field: tfield);
 begin
  with fowner do begin
-  if (fupdating = 0) and fbuffervalid then begin
-   fbuffervalid:= false;
+  if (fupdating = 0) and (lbs_buffervalid in fstate) then begin
+   exclude(fstate,lbs_buffervalid);
+//   fbuffervalid:= false;
    changed;
   end;
  end;
@@ -1208,7 +1244,8 @@ begin
    setcount(int2+1);
   end;
  finally
-  fbuffervalid:= true;
+  include(fstate,lbs_buffervalid);
+//  fbuffervalid:= true;
   endupdate;
  end;
 end;

@@ -4855,7 +4855,9 @@ begin
   debugungrabbed:= true;
   gui_ungrabpointer;
  end;
- xflush(appdisp);
+ if appdisp <> nil then begin
+  xflush(appdisp);
+ end;
 end;
 
 procedure GUI_DEBUGEND;

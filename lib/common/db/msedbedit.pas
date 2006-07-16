@@ -5656,6 +5656,12 @@ begin
   with tdataedit1(fintf.getwidget) do begin
    if fgridintf <> nil then begin
     fgridintf.getcol.changed;
+    if csdesigning in componentstate then begin
+  {$ifdef FPC} {$checkpointer off} {$endif}
+     feditor.text:= datatotext(nil^);
+  {$ifdef FPC} {$checkpointer default} {$endif}
+    end;
+    feditor.text:= datatotext(nil^);
    end
    else begin
  {$ifdef FPC} {$checkpointer off} {$endif}
