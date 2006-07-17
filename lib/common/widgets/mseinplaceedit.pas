@@ -116,7 +116,6 @@ type
    procedure deletechar; virtual;
    procedure deleteback; virtual;
    procedure internaldelete(start,len,startindex: integer; selected: boolean); virtual;
-   function selectedtext: string;
    function checkaction(const aaction: editactionty): boolean; overload;
    function checkaction(var info: editnotificationinfoty): boolean; overload;
    procedure enterchars(const chars: msestring); virtual;
@@ -169,6 +168,7 @@ type
    property insertstate: boolean read getinsertstate write setinsertstate;
    property selstart: integer read fselstart write setselstart;
    property sellength: halfinteger read fsellength write setsellength;
+   function selectedtext: msestring;
    property curindex: integer read fcurindex write setcurindex;
    property caretpos: pointty read fcaretpos;
    function lasttextclipped: boolean; //result of last drawing
@@ -1536,7 +1536,7 @@ begin
  end;
 end;
 
-function tinplaceedit.selectedtext: string;
+function tinplaceedit.selectedtext: msestring;
 begin
  if fsellength > 0 then begin
   result:= copy(finfo.text.text,fselstart+1,fsellength);

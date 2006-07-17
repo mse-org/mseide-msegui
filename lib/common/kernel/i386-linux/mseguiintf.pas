@@ -151,8 +151,11 @@ function XCreateImage(Display: PDisplay; Visual: msePVisual; Depth: Cardinal;
   BitmapPad: Longint; BytesPerLine: Longint): PXImage; cdecl;
                               external sXLib name 'XCreateImage';
 function Xutf8TextListToTextProperty(para1:PDisplay; para2:PPchar; para3: integer;
-            para4:TXICCEncodingStyle; para5:PXTextProperty): integer;cdecl;
+            para4:TXICCEncodingStyle; para5:PXTextProperty): integer; cdecl;
                      external sXLib name 'Xutf8TextListToTextProperty';
+function Xutf8TextPropertyToTextList(para1:PDisplay; para2:PXTextProperty;
+            para3:PPPchar; para4: pinteger): integer; cdecl;
+                     external sXlib name 'Xutf8TextPropertyToTextList';
 
 
 implementation
@@ -566,7 +569,7 @@ var
  wmclientleaderatom: atom;
  wmprotocols: array[wmprotocolty] of atom;
  clipboardatom: atom;
- windowatom,stringatom,utf8_stringatom: atom;
+ windowatom,stringatom,utf8_stringatom,compound_textatom,textatom: atom;
  targetsatom: atom;
  convertselectionpropertyatom: atom;
 
@@ -650,52 +653,63 @@ const
 var 
  clipboardowner: cardinal;
  value1: string;
+ nitems1: integer;
+ acttype: atom;
+ actformat: cardinal;
   
  function getdata(const target: atom; const resulttarget: atom): guierrorty;
  var
   event: xevent;
   po1: pchar;
-  acttype: atom;
-  actformat: cardinal;
   nitems: cardinal;
   bytesafter: cardinal;
   charoffset: integer;
   longoffset: integer;
   time1: cardinal;
   int1: integer;
+  bo1: boolean;
  begin
   result:= gue_clipboard;
   charoffset:= 1;
   longoffset:= 0;
+  xdeleteproperty(appdisp,appid,convertselectionpropertyatom);
   repeat      //remove pending notifications
   until not (xcheckwindowevent(appdisp,appid,propertychangemask,@event)
              {$ifndef FPC} <> 0{$endif});
-  xdeleteproperty(appdisp,appid,convertselectionpropertyatom);
   xconvertselection(appdisp,clipboardatom,target,convertselectionpropertyatom,
                        appid,lasteventtime);
   time1:= timestep(2000000); //2 sec
+  bo1:= true;
   repeat
    if xcheckwindowevent(appdisp,appid,propertychangemask,@event)
              {$ifndef FPC} = 0 {$endif} then begin
     if timeout(time1) then begin
      exit;
     end;
-    sleep(50);
+    if bo1 then begin
+     bo1:= false;
+     sleep(0);
+    end
+    else begin
+     sleep(20);
+    end;
    end
    else begin
     with event.xproperty do begin
      if later(lasteventtime,time) then begin
       if (atom = convertselectionpropertyatom) then begin
        if state = propertynewvalue then begin
+        nitems1:= 0;
         bytesafter:= 0;
-        value1:= ''; //todo: get msestring
+        value1:= '';
         repeat
          if xgetwindowproperty(appdisp,appid,convertselectionpropertyatom,
               longoffset,transferbuffersize,{$ifdef FPC} true{$else}1{$endif},
              anypropertytype,@acttype,@actformat,@nitems,@bytesafter,@po1) = success then begin
-          if (acttype = resulttarget) then begin
+          if (resulttarget = 0) or (acttype = resulttarget) then begin
            int1:= (actformat div 8) * nitems; //bytecount
            if nitems > 0 then begin
+            inc(nitems1,nitems);
             setlength(value1,length(value1) + int1 );
             move(po1^,value1[charoffset],int1);
             inc(charoffset,int1);
@@ -717,11 +731,6 @@ var
         until bytesafter = 0;
         break;
        end;
-      end
-      else begin
-//        if atom = none then begin
-//         break;
-//        end;
       end;
      end;
     end;
@@ -730,9 +739,12 @@ var
  end;
 
 var
- int1: integer; 
+ int1,int2: integer; 
  po1: patomaty;
+ atoms1: array[0..3] of atom;
  atom1: atom;
+ po2: ppchar;
+ prop1: xtextproperty;
  
 begin
  clipboardowner:= xgetselectionowner(appdisp,clipboardatom);
@@ -747,20 +759,51 @@ begin
    result:= getdata(targetsatom,atomatom);
    if result = gue_ok then begin
     po1:= pointer(value1);
-    atom1:= stringatom;
-    for int1:= 0 to length(value1) div sizeof(atom) do begin
-     if po1^[int1] = utf8_stringatom then begin
-      atom1:= utf8_stringatom;
+    atom1:= 0;
+    atoms1[0]:= utf8_stringatom; //preferred
+    atoms1[1]:= compound_textatom;
+    atoms1[2]:= textatom;
+    atoms1[3]:= stringatom;
+    for int2:= low(atoms1) to high(atoms1) do begin
+     for int1:= 0 to (length(value1) div sizeof(atom)) - 1 do begin
+      if po1^[int1] = atoms1[int2] then begin
+       atom1:= atoms1[int2];
+       break;
+      end;
+     end;
+     if atom1 <> 0 then begin
       break;
      end;
     end;
-    result:= getdata(atom1,atom1);
-    if result = gue_ok then begin
-     if atom1 = utf8_stringatom then begin
-      value:= utf8tostring(value1);
-     end
-     else begin
-      value:= latin1tostring(value1);
+    if atom1 <> 0 then begin
+     result:= getdata(atom1,0);
+     if result = gue_ok then begin      
+      if acttype = utf8_stringatom then begin
+        value:= utf8tostring(value1);
+      end
+      else begin
+       if acttype = textatom then begin
+        value:= value1; //current locale
+       end
+       else begin
+        if acttype = compound_textatom then begin
+         with prop1 do begin
+          value:= pointer(value1);
+          encoding:= acttype;
+          format:= actformat;
+          nitems:= nitems1;
+         end;
+         xutf8textpropertytotextlist(appdisp,@prop1,@po2,@int1);
+         if int1 >= 1 then begin
+          value:= utf8tostring(string(po2^));
+         end;
+         xfreestringlist(po2);
+        end
+        else begin
+         value:= latin1tostring(value1);
+        end;
+       end;
+      end;
      end;
     end;
    end;
@@ -851,17 +894,18 @@ begin
  end;
 end;
 
-function stringtotextproperty(const value: msestring; 
+function stringtotextproperty(const value: msestring; const style: txiccencodingstyle;
                                out textproperty: xtextproperty): boolean;
 var
  list: array[0..0] of utf8string;
 begin
  list[0]:= stringtoutf8(value);
- result:= xutf8textlisttotextproperty(appdisp,@list,1,xstdicctextstyle,@textproperty) >= 0;
+ result:= xutf8textlisttotextproperty(appdisp,@list,1,style,@textproperty) >= 0;
  if not result then begin
   fillchar(textproperty,0,sizeof(textproperty));
  end;
 end;
+
 {
 function stringtotextproperty(const value: msestring; out textproperty: xtextproperty): boolean;
 var
@@ -1002,7 +1046,7 @@ function gui_setwindowcaption(id: winidty; const caption: msestring): guierrorty
 var
  textprop: xtextproperty;
 begin
- if stringtotextproperty(caption,textprop) then begin
+ if stringtotextproperty(caption,xstdicctextstyle,textprop) then begin
   xsetwmname(appdisp,id,@textprop);
   freetextproperty(textprop);
   result:= gue_ok;
@@ -4251,7 +4295,9 @@ var
  shiftstate1: shiftstatesty;
  key1: keyty;
  button1: mousebuttonty;
- atomar: array[0..1] of atom;
+ atomar: array[0..4] of atom;
+ textprop: xtextproperty;
+ bo1: boolean;
   
 begin
  while true do begin
@@ -4346,26 +4392,56 @@ begin
        {$ifdef FPC}_property{$else}xproperty{$endif}:= target;
       end;
       event.xselection.target:= target;
-      event.xselection.{$ifdef FPC}_property{$else}xproperty{$endif}:= {$ifdef FPC}_property{$else}xproperty{$endif};
+      event.xselection.{$ifdef FPC}_property{$else}xproperty{$endif}:= 
+                               {$ifdef FPC}_property{$else}xproperty{$endif};
       if target = targetsatom then begin
-       atomar[0]:= stringatom;
-       atomar[1]:= utf8_stringatom;
-       xchangeproperty(appdisp,requestor,{$ifdef FPC}_property{$else}xproperty{$endif},target,32,
-                  propmodereplace,@atomar,2);
+       atomar[0]:= utf8_stringatom;
+       atomar[1]:= compound_textatom;
+       atomar[2]:= stringatom;
+       atomar[3]:= textatom;
+       atomar[4]:= targetsatom;
+       xchangeproperty(appdisp,requestor,
+          {$ifdef FPC}_property{$else}xproperty{$endif},atomatom,32,
+                  propmodereplace,@atomar[0],5);
       end
       else begin
-       if (target = stringatom) or (target = utf8_stringatom) then begin
-        if target = utf8_stringatom then begin
+       bo1:= true;
+       if target = utf8_stringatom then begin
          str1:= stringtoutf8(clipboard);
-        end
-        else begin
-         str1:= stringtolatin1(clipboard);
-        end;
-        xchangeproperty(appdisp,requestor,{$ifdef FPC}_property{$else}xproperty{$endif},target,8,
-                  propmodereplace,pbyte(pchar(str1)),length(str1));
        end
        else begin
-        event.xselection.{$ifdef FPC}_property{$else}xproperty{$endif}:= none;
+        if target = stringatom then begin
+         str1:= stringtolatin1(clipboard);
+        end
+        else begin
+         if target =  textatom then begin
+          str1:= clipboard; //current locale
+         end
+         else begin
+          bo1:= false;
+          if target = compound_textatom then begin
+           if stringtotextproperty(clipboard,xcompoundtextstyle,textprop) then begin
+            with textprop do begin
+             xchangeproperty(appdisp,requestor,
+                   {$ifdef FPC}_property{$else}xproperty{$endif},encoding,format,
+                   propmodereplace,value,nitems);
+             xfree(value);
+            end;
+           end
+           else begin
+            event.xselection.{$ifdef FPC}_property{$else}xproperty{$endif}:= none;
+           end;
+          end
+          else begin
+           event.xselection.{$ifdef FPC}_property{$else}xproperty{$endif}:= none;
+          end;
+         end;
+        end;
+       end;
+       if bo1 then begin
+        xchangeproperty(appdisp,requestor,
+                 {$ifdef FPC}_property{$else}xproperty{$endif},target,8,
+                  propmodereplace,pbyte(pchar(str1)),length(str1));
        end;
       end;
       xsendevent(appdisp,requestor,{$ifdef FPC}false{$else}0{$endif},0,@event);
@@ -4704,6 +4780,10 @@ begin
  windowatom:= xinternatom(appdisp,'WINDOW',
            {$ifdef FPC}false{$else}0{$endif});
  stringatom:= xinternatom(appdisp,'STRING',
+           {$ifdef FPC}false{$else}0{$endif});
+ textatom:= xinternatom(appdisp,'TEXT',
+           {$ifdef FPC}false{$else}0{$endif});
+ compound_textatom:= xinternatom(appdisp,'COMPOUND_TEXT',
            {$ifdef FPC}false{$else}0{$endif});
  utf8_stringatom:= xinternatom(appdisp,'UTF8_STRING',
            {$ifdef FPC}false{$else}0{$endif});

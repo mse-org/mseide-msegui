@@ -88,8 +88,8 @@ FPC patches
 ***********
 In patch_fpc_2_0_4 are the needed modified FPC files for MSEgui 
 and FPC 2.0.4 rc1:
-- Fix to let the compiler work with -Fcutf8.
-- Faster conversion ansistring <> widestring on linux.
+- Fix to let the compiler work with -Fcutf8 (FPC bug 6865).
+- Faster conversion ansistring <> widestring on linux (FPC bug 6873).
 - Fix for FPC bug 6898 (AV in TSQLQuery).
 - Fix for FPC bug 6988 (Twriter.WriteDescendent with component properties).
 
