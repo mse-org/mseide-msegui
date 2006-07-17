@@ -21,6 +21,7 @@ object objectinspectorfo: tobjectinspectorfo
   caption = 'Object Inspector'
   icon.transparentcolor = -2147483648
   icon.options = [bmo_masked]
+  icon.transparency = -2147483648
   icon.image = {
     00000000020000001800000018000000CC000000000000000000000000000000
     0000000000000000000000000000000000000000C0C0C03400FCF804C0C0C013
@@ -176,12 +177,12 @@ object objectinspectorfo: tobjectinspectorfo
       optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_forcereturncheckvalue, oe_eatreturn, oe_resetselectonexit, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_savestate]
       font.name = 'stf_default'
       font.dummy = 0
+      onkeydown = valueskeydown
       onsetvalue = valuessetvalue
       onmouseevent = valuesonmouseevent
-      onkeydown = valueskeydown
       onbuttonaction = valuesbuttonaction
       onupdaterowvalues = valueupdaterowvalue
-      dropdown.options = [deo_autodropdown, deo_keydropdown]
+      dropdown.options = [deo_autodropdown, deo_keydropdown, deo_cliphint]
       dropdown.cols.count = 1
       dropdown.cols.items = <      
         item

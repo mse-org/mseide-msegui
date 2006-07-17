@@ -129,7 +129,8 @@ type
                         deo_autodropdown,
                         deo_keydropdown,//shift down starts dropdown
                         deo_casesensitive,
-                        deo_sorted,deo_disabled,deo_autosavehistory);
+                        deo_sorted,deo_disabled,deo_autosavehistory,
+                        deo_cliphint);
  dropdowneditoptionsty = set of dropdowneditoptionty;
 
 const
@@ -1344,13 +1345,27 @@ begin
 end;
 
 procedure tdropdownlist.docellevent(var info: celleventinfoty);
+var
+ hintinfo: hintinfoty;
 begin
- if iscellclick(info,[ccr_buttonpress]){false) or (info.eventkind = cek_keypress) and
-  (info.keyeventinfopo^.key = key_return)} then begin
-  itemselected(info.cell.row);
- end
- else begin
-  inherited;
+ with info do begin
+  if iscellclick(info,[ccr_buttonpress]){false) or (info.eventkind = cek_keypress) and
+   (info.keyeventinfopo^.key = key_return)} then begin
+   itemselected(cell.row);
+  end
+  else begin
+   if (deo_cliphint in fcontroller.foptions) and 
+           (eventkind = cek_firstmousepark) and
+            textclipped(cell) then begin
+    application.inithintinfo(hintinfo,self);
+    hintinfo.caption:= self[cell.col][cell.row];
+    application.showhint(self,hintinfo);
+    include(mouseeventinfopo^.eventstate,es_processed);
+   end
+   else begin
+    inherited;
+   end;
+  end;
  end;
 end;
 

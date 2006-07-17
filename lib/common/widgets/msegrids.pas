@@ -5825,7 +5825,7 @@ begin
          end
          else begin
           focuscell(fmousecell);
-          include(info.eventstate,es_processed);
+//          include(info.eventstate,es_processed);
          end;
         end;
        end;
