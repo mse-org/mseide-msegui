@@ -728,33 +728,42 @@ type
               //cl_default -> backgroundcolor
               atransparency: colorty = cl_none);
 
-   procedure drawpoint(const point: pointty; acolor: colorty = cl_default);
-   procedure drawpoints(const apoints: array of pointty; acolor: colorty = cl_default;
-                               first: integer = 0; acount: integer = -1); //-1 -> all
+   procedure drawpoint(const point: pointty; const acolor: colorty = cl_default);
+   procedure drawpoints(const apoints: array of pointty; 
+                          const acolor: colorty = cl_default;
+                          first: integer = 0; acount: integer = -1); //-1 -> all
 
-   procedure drawline(const startpoint,endpoint: pointty; acolor: colorty = cl_default);
+   procedure drawline(const startpoint,endpoint: pointty; const acolor: colorty = cl_default);
    procedure drawlinesegments(const apoints: array of segmentty;
-                         acolor: colorty = cl_default);
+                         const acolor: colorty = cl_default);
    procedure drawlines(const apoints: array of pointty; const aclosed: boolean; 
                        const acolor: colorty = cl_default;
                        const first: integer = 0; const acount: integer = -1);
                                                           //-1 -> all
-   procedure drawrect(const arect: rectty; acolor: colorty = cl_default);
-   procedure drawcross(const arect: rectty; acolor: colorty = cl_default;
-                alignment: alignmentsty = [al_xcentered,al_ycentered]);
+   procedure drawvect(const startpoint: pointty; const direction: graphicdirectionty;
+                      const length: integer; const acolor: colorty = cl_default);
+                                                           overload;
+   procedure drawvect(const startpoint: pointty; const direction: graphicdirectionty;
+                      const length: integer; out endpoint: pointty;
+                      const acolor: colorty = cl_default); overload;
+                      
+   procedure drawrect(const arect: rectty; const acolor: colorty = cl_default);
+   procedure drawcross(const arect: rectty; const acolor: colorty = cl_default;
+                   const alignment: alignmentsty = [al_xcentered,al_ycentered]);
 
-   procedure drawellipse(const def: rectty; acolor: colorty = cl_default);
+   procedure drawellipse(const def: rectty; const acolor: colorty = cl_default);
                              //def.pos = center, def.cx = width, def.cy = height
    procedure drawarc(const def: rectty; const startang,extentang: real; 
-                              acolor: colorty = cl_default);
+                              const acolor: colorty = cl_default);
                              //def.pos = center, def.cx = width, def.cy = height
-                             //startang,extentang in radiant (2*pi = 360? CCW) 
+                             //startang,extentang in radiant (2*pi = 360? CCW)
 
-   procedure fillrect(const arect: rectty; acolor: colorty = cl_default); overload;
-   procedure fillellipse(const def: rectty; acolor: colorty = cl_default); overload;
-   procedure fillpolygon(const apoints: array of pointty; acolor: colorty = cl_default); overload;
+   procedure fillrect(const arect: rectty; const acolor: colorty = cl_default); overload;
+   procedure fillellipse(const def: rectty; const acolor: colorty = cl_default); overload;
+   procedure fillpolygon(const apoints: array of pointty; 
+                         const acolor: colorty = cl_default); overload;
    procedure drawframe(const arect: rectty; awidth: integer = -1;
-                   acolor: colorty = cl_default);
+                   const acolor: colorty = cl_default);
                     //no dashes, awidth < 0 -> inside frame,!
    procedure drawxorframe(const arect: rectty; const awidth: integer = -1;
                            const abrush: tsimplebitmap = nil); overload;
@@ -773,7 +782,7 @@ type
    function createregion(const asource: regionty): regionty; overload;
    function createregion(const arect: rectty): regionty; overload;
    function createregion(const rects: array of rectty): regionty; overload;
-   function createregion(frame: rectty; inflate: integer): regionty; overload;
+   function createregion(frame: rectty; const inflate: integer): regionty; overload;
    procedure destroyregion(region: regionty);
                    //all boundaries of regionrects are clipped to
                    // -$8000..$7fff in device space
@@ -3191,7 +3200,7 @@ begin
               acopymode,atransparentcolor,nil,[],nullpoint,atransparency);
 end;
 
-procedure tcanvas.drawpoints(const apoints: array of pointty; acolor: colorty;
+procedure tcanvas.drawpoints(const apoints: array of pointty; const acolor: colorty;
                    first, acount: integer);
 var
  int1,int2: integer;
@@ -3225,7 +3234,7 @@ begin
  end;
 end;
 
-procedure tcanvas.drawpoint(const point: pointty; acolor: colorty = cl_default);
+procedure tcanvas.drawpoint(const point: pointty; const acolor: colorty = cl_default);
 begin
  drawpoints(point,acolor,0,1);
 end;
@@ -3259,7 +3268,7 @@ begin
  end;
 end;
 
-procedure tcanvas.drawrect(const arect: rectty; acolor: colorty = cl_default);
+procedure tcanvas.drawrect(const arect: rectty; const acolor: colorty = cl_default);
 begin
  with arect do begin
   drawlines([pos,makepoint(x+cx,y),makepoint(x+cx,y+cy),makepoint(x,y+cy)],
@@ -3267,8 +3276,8 @@ begin
  end;
 end;
 
-procedure tcanvas.drawcross(const arect: rectty; acolor: colorty = cl_default;
-                alignment: alignmentsty = [al_xcentered,al_ycentered]);
+procedure tcanvas.drawcross(const arect: rectty; const acolor: colorty = cl_default;
+                const alignment: alignmentsty = [al_xcentered,al_ycentered]);
 var
  ar1: segmentarty;
 begin
@@ -3292,7 +3301,7 @@ begin
 end;
 
 procedure tcanvas.drawlinesegments(const apoints: array of segmentty;
-               acolor: colorty = cl_default);
+               const acolor: colorty = cl_default);
 begin
  if checkforeground(acolor,true) then begin
   with fdrawinfo.points do begin
@@ -3304,12 +3313,41 @@ begin
 end;
 
 procedure tcanvas.drawline(const startpoint,endpoint: pointty;
-          acolor: colorty = cl_default);
+          const acolor: colorty = cl_default);
 begin
  drawlinesegments([segment(startpoint,endpoint)],acolor);
 end;
 
-procedure tcanvas.drawellipse(const def: rectty; acolor: colorty = cl_default);
+procedure tcanvas.drawvect(const startpoint: pointty; const direction: graphicdirectionty;
+                      const length: integer; out endpoint: pointty;
+                      const acolor: colorty = cl_default);
+var
+ endpoint1: pointty;
+begin
+ endpoint1:= startpoint;
+ case direction of
+  gd_right: inc(endpoint1.x,length);
+  gd_up: dec(endpoint1.y,length);
+  gd_left: dec(endpoint1.x,length);
+  gd_down: inc(endpoint1.y,length);
+  else begin
+   endpoint:= endpoint1;
+   exit;
+  end;
+ end;
+ drawlinesegments([segment(startpoint,endpoint1)],acolor);
+ endpoint:= endpoint1;
+end;
+
+procedure tcanvas.drawvect(const startpoint: pointty; const direction: graphicdirectionty;
+                      const length: integer; const acolor: colorty = cl_default);
+var
+ po1: pointty;
+begin
+ drawvect(startpoint,direction,length,po1,acolor);
+end;
+
+procedure tcanvas.drawellipse(const def: rectty; const acolor: colorty = cl_default);
                              //def.pos = center, def.cx = width, def.cy = height
 begin
  if checkforeground(acolor,true) then begin
@@ -3319,7 +3357,7 @@ begin
 end;
 
 procedure tcanvas.drawarc(const def: rectty; const startang,extentang: real; 
-                              acolor: colorty = cl_default);
+                              const acolor: colorty = cl_default);
 begin
  if checkforeground(acolor,true) then begin
   fdrawinfo.arc.rect:= @def;
@@ -3329,7 +3367,7 @@ begin
  end;
 end;
 
-procedure tcanvas.fillrect(const arect: rectty; acolor: colorty = cl_default);
+procedure tcanvas.fillrect(const arect: rectty; const acolor: colorty = cl_default);
 begin
  if checkforeground(acolor,false) then begin
   with fdrawinfo.rect do begin
@@ -3339,7 +3377,7 @@ begin
  end;
 end;
 
-procedure tcanvas.fillellipse(const def: rectty; acolor: colorty = cl_default);
+procedure tcanvas.fillellipse(const def: rectty; const acolor: colorty = cl_default);
 begin
  if checkforeground(acolor,false) then begin
   with fdrawinfo.rect do begin
@@ -3349,7 +3387,7 @@ begin
  end;
 end;
 
-procedure tcanvas.fillpolygon(const apoints: array of pointty; acolor: colorty);
+procedure tcanvas.fillpolygon(const apoints: array of pointty; const acolor: colorty);
 begin
  if checkforeground(acolor,false) then begin
   with fdrawinfo.points do begin
@@ -3477,7 +3515,8 @@ begin
  end;
 end;
 
-procedure tcanvas.drawframe(const arect: rectty; awidth: integer; acolor: colorty);
+procedure tcanvas.drawframe(const arect: rectty; awidth: integer;
+                                 const acolor: colorty);
 var
  rect1,rect2: rectty;
 // po1: pointty;
@@ -3645,7 +3684,7 @@ begin
  end;
 end;
 
-function tcanvas.createregion(frame: rectty; inflate: integer): regionty;
+function tcanvas.createregion(frame: rectty; const inflate: integer): regionty;
           //frame
 var
  reg1: regionty;
