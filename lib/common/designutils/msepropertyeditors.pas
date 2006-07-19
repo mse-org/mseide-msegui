@@ -2339,8 +2339,10 @@ end;
 
 procedure tarrayelementeditor.dodelete(const sender: tobject);
 begin
- tarrayprop(fparenteditor.getordvalue).delete(findex);
- fparenteditor.modified;
+ if askyesno('Do you wish to delete '+getvalue+'?','CONFIRMATION') then begin
+  tarrayprop(fparenteditor.getordvalue).delete(findex);
+  fparenteditor.modified;
+ end;
 end;
 
 procedure tarrayelementeditor.doinsert(const sender: tobject);
