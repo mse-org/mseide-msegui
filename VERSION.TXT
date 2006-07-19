@@ -1,5 +1,7 @@
 MSEide+MSEgui version history
 
+2007-07-19 tmsecomponent.helpcontext.
+2007-07-19 tapplication.helpcontext.
 2007-07-18 tcanvas.drawvect.
 2007-07-13 msedrawtext.breaklines.
 2006-07-12 tdbstringdisplb, tdbintegerdisplb, tdbrealdisplb, tdbdatetimedisplb.

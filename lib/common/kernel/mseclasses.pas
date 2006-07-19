@@ -241,6 +241,7 @@ type
 
  tmsecomponent = class(tcomponent,ievent)
   private
+   fhelpcontext: msestring;
    procedure readmoduleclassname(reader: treader);
    procedure writemoduleclassname(writer: twriter);
   protected
@@ -254,6 +255,7 @@ type
    function linkcount: integer;
    function canevent(const event: tmethod): boolean;
    function candestroyevent(const event: tmethod): boolean;
+   function gethelpcontext: msestring; virtual;
 
     //iobjectlink
    procedure link(const source,dest: iobjectlink; valuepo: pointer = nil;
@@ -301,6 +303,8 @@ type
 
    property moduleclassname: string read getmoduleclassname;
    property actualclassname: string read getactualclassname;
+  published
+   property helpcontext: msestring read gethelpcontext write fhelpcontext;
  end;
 
  msecomponentclassty = class of tmsecomponent;
@@ -2341,6 +2345,21 @@ end;
 procedure tmsecomponent.writemoduleclassname(writer: twriter);
 begin
  writer.WriteString(getmoduleclassname);
+end;
+
+function tmsecomponent.gethelpcontext: msestring;
+begin
+ if componentstate * [csloading,cswriting,csdesigning] = [] then begin
+  if fhelpcontext = '' then begin
+   result:= ownernamepath(self);
+  end
+  else begin
+   result:= fhelpcontext;
+  end;
+ end
+ else begin
+  result:= fhelpcontext;
+ end;
 end;
 
 { tlinkedqueue }

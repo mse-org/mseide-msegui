@@ -1386,6 +1386,9 @@ type
    procedure hidehint;
    function hintedwidget: twidget; //last hinted widget
    function activehintedwidget: twidget; //nil if no hint active
+   
+   function helpcontext: msestring;
+                //returns helpcontext of active widget, '' if none;
    function running: boolean; //true if eventloop entered
    function screensize: sizety;
    function workarea(awindow: twindow): rectty;
@@ -10706,6 +10709,16 @@ begin
  end
  else begin
   result:= fhintedwidget;
+ end;
+end;
+
+function tapplication.helpcontext: msestring;
+begin
+ if activewidget = nil then begin
+  result:= '';
+ end
+ else begin
+  result:= activewidget.helpcontext;
  end;
 end;
 
