@@ -8294,8 +8294,8 @@ end;
 procedure twindow.doshortcut(var info: keyeventinfoty; const sender: twidget);
 begin
  if not (es_broadcast in info.eventstate) then begin
-  if not (es_processed in info.eventstate) and not (tws_localshortcuts in fstate) and
-                        not (tws_modal in fstate) then begin
+  if not (es_processed in info.eventstate) and not (tws_localshortcuts in fstate){ and
+                        not (tws_modal in fstate)} then begin
    app.checkshortcut(self,sender,info);
   end
  end
