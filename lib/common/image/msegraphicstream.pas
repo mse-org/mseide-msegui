@@ -220,7 +220,7 @@ begin
  if aformatlabel = '' then begin
   for int1:= 0 to high(formats) do begin
    with formats[int1] do begin
-    if readproc <> nil then begin
+    if assigned(readproc) then begin
      if readproc(source,index,adest) then begin
       exit;
      end;
@@ -234,7 +234,7 @@ begin
   for int1:= 0 to high(formats) do begin
    with formats[int1] do begin 
     if (formatlabel = aformatlabel) then begin
-     if (readproc <> nil) then begin
+     if assigned(readproc) then begin
       int2:= int1;
      end;
      break;
@@ -261,7 +261,7 @@ begin
  for int1:= 0 to high(formats) do begin
   with formats[int1] do begin 
    if (formatlabel = aformatlabel) then begin
-    if (writeproc <> nil) then begin
+    if assigned(writeproc) then begin
      int2:= int1;
     end;
     break;

@@ -999,6 +999,7 @@ var
  bo1: boolean;
 begin
  include(fscrollbox.fwidgetstate,ws_loadlock);
+ bo1:= false;
  with treadercracker(reader) do begin
   if floaded <> nil then begin
    bo1:= floaded.IndexOf(fscrollbox) < 0;
