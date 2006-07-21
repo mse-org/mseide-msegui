@@ -3809,7 +3809,8 @@ begin
      pictop:= pictopover;
     end
     else begin
-     pictop:= pictopover; //pictopsrc is unreliable!?
+//     pictop:= pictopover; //pictopsrc is unreliable!?
+     pictop:= pictopsrc; 
      maskpic:= 0;
     end;
    end;
