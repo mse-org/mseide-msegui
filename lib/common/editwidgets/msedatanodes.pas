@@ -13,7 +13,7 @@ unit msedatanodes;
 
 interface
 uses
- msegraphutils,msedrawtext,msegraphics,msedatalist,mseguiglob,msebitmap,
+ classes,msegraphutils,msedrawtext,msegraphics,msedatalist,mseguiglob,msebitmap,
  mseclasses,mseevent,msegrids,msetypes,msestrings,mseinplaceedit,msestat;
 
 type
@@ -67,6 +67,7 @@ type
   procedure itemcountchanged;
   function getcolorglyph: colorty;
   procedure updateitemvalues(const index: integer; const count: integer);
+  function getcomponentstate: tcomponentstate;
  end;
 
  tcustomitemlist = class;
@@ -365,7 +366,7 @@ type
 implementation
 
 uses
- msestockobjects,classes,{$ifdef FPCc}rtlconst{$else}rtlconsts{$endif},
+ msestockobjects,{$ifdef FPCc}rtlconst{$else}rtlconsts{$endif},
            sysutils,msebits,msesysintf;
 
 { tlistitem }
@@ -842,7 +843,7 @@ procedure tcustomitemlist.setimagelist(const Value: timagelist);
 begin
  if fimagelist <> value then begin
   setlinkedcomponent(iobjectlink(self),value,tmsecomponent(fimagelist));
-  if fimagelist <> nil then begin
+  if (fimagelist <> nil) and (csdesigning in fintf.getcomponentstate) then begin
    fimagesize:= fimagelist.size;
   end;
   invalidate;

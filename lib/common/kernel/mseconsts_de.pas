@@ -67,8 +67,18 @@ const
   '&Verst.Dat.anzeigen',//sc_Show_hidden_files  //
   '&Filter',            //sc_Filter            ///   
   'Speichern',          //sc_save 
-  #214'ffnen'           //sc_open
-  );
+  #214'ffnen',           //sc_open
+  'Grafik Format nicht unterstützt', //sc_graphic_not_supported
+  'Grafik Format Fehler', //sc_graphic_format_error
+  'MS Bitmap',            //sc_MS_Icon
+  'MS Icon',              //sc_MS_Icon
+  'JPEG Bild',            //sc_JPEG_Image 
+  'PNG Bild',             //sc_PNG_Image
+  'XPM Bild',             //sc_XPM_Image
+  'PNM Bild',             //sc_PNM_Image
+  'TARGA Bild',           //sc_TARGA_image
+  'Alle'                  //sc_All
+);
     
 initialization
  registerlangconsts(langnames[la_de],de_stockcaption,de_modalresulttext,

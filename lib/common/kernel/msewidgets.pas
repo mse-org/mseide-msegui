@@ -3183,6 +3183,7 @@ procedure tmessagewidget.updatewindowinfo(var info: windowinfoty);
 begin
  inherited;
  info.options:= [wo_message];
+ window.localshortcuts:= true;
 end;
 
 { tcustomthumbtrackscrollframe }

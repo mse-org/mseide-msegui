@@ -650,7 +650,10 @@ uses
  msestringlisteditor,msedoublestringlisteditor,msereallisteditor,
  mseintegerlisteditor,
  msecolordialog,
- mseshapes,msestockobjects,msetexteditor;
+ mseshapes,msestockobjects,msetexteditor,
+ msegraphicstream,
+ mseformatbmpico{$ifdef FPC},mseformatjpg,mseformatpng,
+ mseformatpnm,mseformattga,mseformatxpm{$endif};
 
 const
  methodsortlevel = 100;
@@ -2887,12 +2890,15 @@ var
  bmp: tmaskedbitmap;
  str1: filenamety;
  int1: integer;
+ ar1: stringarty;
 begin
- str1:= '*.bmp';
- if filedialog(str1,[],'',['*.bmp'],['Bitmaps']) = mr_ok then begin
+ str1:= '';
+ int1:= 0;
+ if filedialog(str1,[],'',graphicfilefilternames,graphicfilemasks,
+                  '',@int1) = mr_ok then begin
   bmp:= tmaskedbitmap.create(false);
   try
-   bmp.readimagefile(str1);
+   bmp.loadfromfile(str1,graphicfilefilterlabel(int1));
    for int1:= 0 to high(fprops) do begin
     tmaskedbitmap(getordvalue(int1)).assign(bmp);
    end;

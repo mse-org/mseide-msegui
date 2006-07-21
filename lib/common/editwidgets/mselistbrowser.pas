@@ -105,6 +105,7 @@ type
    procedure itemcountchanged;
    function getcolorglyph: colorty;
    procedure updateitemvalues(const index: integer; const acount: integer);
+   function getcomponentstate: tcomponentstate;
 
   public
    constructor create(const alistview: tcustomlistview);
@@ -671,6 +672,11 @@ end;
 procedure titemviewlist.updateitemvalues(const index: integer; const acount: integer);
 begin
  //dummy
+end;
+
+function titemviewlist.getcomponentstate: tcomponentstate;
+begin
+ result:= flistview.componentstate;
 end;
 
 function titemviewlist.getoncreateitem: createlistitemeventty;

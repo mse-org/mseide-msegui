@@ -60,7 +60,11 @@ type             //  0         1               2
                     sc_Undo,sc_copy,sc_cut,sc_paste,
                     sc_Dir,sc_Up,sc_New_dir,sc_Name,
                     sc_Show_hidden_files,sc_Filter,
-                    sc_Save,sc_Open 
+                    sc_Save,sc_Open,
+                    sc_graphic_format_not_supported,sc_graphic_format_error,
+                    sc_MS_Bitmap,sc_MS_Icon,sc_JPEG_Image,sc_PNG_Image,
+                    sc_XPM_Image,sc_PNM_Image,sc_TARGA_image,
+                    sc_All
                     );
  
  tstockobjects = class

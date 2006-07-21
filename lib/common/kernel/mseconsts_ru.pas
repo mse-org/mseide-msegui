@@ -76,7 +76,17 @@ const
   #1055#1086#1082#1072#1079'. &'#1089#1082#1088#1099#1090'. '#1092#1072#1081#1083#1099 , //sc_Show_hidden_files => Pokaz. skryt. faily
   '&'#1060#1080#1083#1100#1090#1088 ,             //sc_Filter   => Fil`tr
   #1057#1086#1093#1088#1072#1085#1080#1090#1100 , //sc_save     =>  Sohranit`
-  #1054#1090#1082#1088#1099#1090#1100             //sc_open     =>  Otkryt`
+  #1054#1090#1082#1088#1099#1090#1100,            //sc_open     =>  Otkryt`
+  'Graphic format not supported', //sc_graphic_not_supported
+  'Graphic format error',         //sc_graphic_format_error
+  'MS Bitmap',          //sc_MS_Bitmap
+  'MS Icon',            //sc_MS_Icon
+  'JPEG Image',         //sc_JPEG_Image 
+  'PNG Image',          //sc_PNG_Image
+  'XPM Image',          //sc_XPM_Image
+  'PNM Image',          //sc_PNM_Image
+  'TARGA Image',        //sc_TARGA_image
+  'All'                 //sc_All
   );
     
 initialization

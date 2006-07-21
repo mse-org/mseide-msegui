@@ -241,13 +241,13 @@ type
 
  tmsecomponent = class(tcomponent,ievent)
   private
-   fhelpcontext: msestring;
    procedure readmoduleclassname(reader: treader);
    procedure writemoduleclassname(writer: twriter);
   protected
    fmsecomponentstyle: componentstylesty;
    fobjectlinker: tobjectlinker;
    factualclassname: pshortstring;
+   fhelpcontext: msestring;
    function getobjectlinker: tobjectlinker;
    procedure objectevent(const sender: tobject; const event: objecteventty); virtual;
    procedure loaded; override;

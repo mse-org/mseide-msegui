@@ -1,4 +1,5 @@
 object imagelisteditorfo: timagelisteditorfo
+  optionswidget = [ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_mousewheel, ow_destroywidgets, ow_hinton, ow_autoscale]
   bounds_x = 220
   bounds_y = 325
   bounds_cx = 304
@@ -7,7 +8,7 @@ object imagelisteditorfo: timagelisteditorfo
   container.bounds_cx = 304
   container.bounds_cy = 347
   container.frame.dummy = 0
-  options = [fo_closeonesc, fo_autoreadstat, fo_autowritestat, fo_savepos, fo_savestate]
+  options = [fo_closeonesc, fo_localshortcuts, fo_autoreadstat, fo_autowritestat, fo_savepos, fo_savestate]
   statfile = statfile1
   caption = 'Imagelisteditor'
   icon.transparency = -2147483648
@@ -19,6 +20,7 @@ object imagelisteditorfo: timagelisteditorfo
     bounds_cx = 50
     bounds_cy = 20
     anchors = [an_left, an_bottom]
+    state = [as_localcaption, as_localonexecute]
     caption = 'add'
     onexecute = addonexecute
   end
@@ -30,6 +32,7 @@ object imagelisteditorfo: timagelisteditorfo
     bounds_cy = 20
     anchors = [an_left, an_bottom]
     taborder = 2
+    state = [as_localcaption]
     caption = 'cancel'
     modalresult = mr_cancel
   end
@@ -41,6 +44,7 @@ object imagelisteditorfo: timagelisteditorfo
     bounds_cy = 20
     anchors = [an_left, an_bottom]
     taborder = 3
+    state = [as_localcaption]
     caption = 'OK'
     modalresult = mr_ok
   end
@@ -52,6 +56,7 @@ object imagelisteditorfo: timagelisteditorfo
     bounds_cy = 20
     anchors = [an_left, an_bottom]
     taborder = 1
+    state = [as_localcaption, as_localonexecute]
     caption = 'clear'
     onexecute = clearonexecute
   end
@@ -68,7 +73,7 @@ object imagelisteditorfo: timagelisteditorfo
     itemlist.captionpos = cp_bottom
     itemlist.imagelist = imagelist
     itemlist.imagewidth = 16
-    itemlist.imageheight = 16
+    itemlist.imageheight = 32
     onitemevent = disponitemevent
     onitemsmoved = disponitemsmoved
     reffontheight = 16
@@ -76,15 +81,16 @@ object imagelisteditorfo: timagelisteditorfo
   object stretch: tbooleanedit
     bounds_x = 8
     bounds_y = 323
-    bounds_cx = 55
+    bounds_cx = 56
     bounds_cy = 18
     frame.caption = 'stretch'
     frame.dummy = 0
     frame.outerframe = (
       0
       2
-      42
-      3)
+      43
+      3
+    )
     anchors = [an_left, an_bottom]
     taborder = 6
     statfile = statfile1
@@ -93,15 +99,16 @@ object imagelisteditorfo: timagelisteditorfo
   object masked: tbooleanedit
     bounds_x = 8
     bounds_y = 294
-    bounds_cx = 62
+    bounds_cx = 63
     bounds_cy = 18
     frame.caption = 'masked'
     frame.dummy = 0
     frame.outerframe = (
       0
       2
-      49
-      3)
+      50
+      3
+    )
     anchors = [an_left, an_bottom]
     taborder = 4
     value = True
@@ -110,7 +117,7 @@ object imagelisteditorfo: timagelisteditorfo
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
     bounds_x = 80
     bounds_y = 291
-    bounds_cx = 213
+    bounds_cx = 214
     bounds_cy = 22
     frame.caption = 'Transparent color'
     frame.captionpos = cp_right
@@ -119,8 +126,9 @@ object imagelisteditorfo: timagelisteditorfo
     frame.outerframe = (
       0
       0
-      107
-      0)
+      108
+      0
+    )
     anchors = [an_left, an_bottom]
     taborder = 5
     statfile = statfile1
@@ -130,7 +138,7 @@ object imagelisteditorfo: timagelisteditorfo
     buttonellipse.imagenr = 17
     dropdown.options = [deo_autodropdown, deo_keydropdown]
     dropdown.cols.count = 1
-    dropdown.cols.items = <
+    dropdown.cols.items = <    
       item
         data = (
           'cl_0'
@@ -177,32 +185,26 @@ object imagelisteditorfo: timagelisteditorfo
           'cl_parent'
           'cl_transparent'
           'cl_brush'
-          'cl_brushcanvas')
+          'cl_brushcanvas'
+        )
       end>
     dropdown.itemindex = 40
     reffontheight = 16
   end
   object imagelist: timagelist
     transparentcolor = -2147483647
-    Left = 24
-    Top = 176
+    left = 24
+    top = 176
   end
   object filedialog: tfiledialog
     statfile = statfile1
-    controller.filterlist.data = (
-      (
-        'Bitmaps'
-        '*.bmp')
-      (
-        'all'
-        '*'))
-    Left = 112
-    Top = 176
+    left = 112
+    top = 176
   end
   object statfile1: tstatfile
     filename = 'imagelisteditor'
     options = [sfo_memory]
-    Left = 200
-    Top = 176
+    left = 200
+    top = 176
   end
 end

@@ -696,6 +696,7 @@ type
    fdefaultfocuschild: twidget;
 
    procedure defineproperties(filer: tfiler); override;
+   function gethelpcontext: msestring; override;
 
    function navigstartrect: rectty; virtual; //org = clientpos
    function navigrect: rectty; virtual;      //org = clientpos
@@ -7660,6 +7661,28 @@ begin
    result:= fwidgets[int1].findtagwidget(atag,aclass);
    if result <> nil then begin
     exit;
+   end;
+  end;
+ end;
+end;
+
+function twidget.gethelpcontext: msestring;
+var
+ widget1: twidget;
+begin
+ result:= fhelpcontext;
+ if result = '' then begin
+  if componentstate * [csloading,cswriting,csdesigning] = [] then begin
+   widget1:= fparentwidget;
+   while widget1 <> nil do begin
+    result:= widget1.fhelpcontext;
+    if result <> '' then begin
+     break;
+    end;
+    widget1:= widget1.fparentwidget;
+   end;
+   if result = '' then begin
+    result:= ownernamepath(self);
    end;
   end;
  end;

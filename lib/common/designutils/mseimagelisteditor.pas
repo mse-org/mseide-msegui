@@ -46,7 +46,7 @@ function editimagelist(aimagelist: timagelist): modalresultty;
 implementation
 uses
  mseimagelisteditor_mfm,msetypes,msegraphutils,sysutils,
- msekeyboard,msedatanodes,msefileutils;
+ msekeyboard,msedatanodes,msefileutils,msegraphicstream;
 
 function editimagelist(aimagelist: timagelist): modalresultty;
 var
@@ -76,6 +76,8 @@ var
  int1: integer;
 begin
  filedialog.controller.filename:= filedialog.controller.lastdir;
+ filedialog.controller.filterlist.asarraya:= graphicfilefilternames;
+ filedialog.controller.filterlist.asarrayb:= graphicfilemasks;
  if filedialog.execute = mr_ok then begin
   unquotefilename(filedialog.controller.filename,ar1);
   bmp:= tmaskedbitmap.create(false);
@@ -83,7 +85,8 @@ begin
   bmp1:= nil;
   try
    for int1:= 0 to high(ar1) do begin
-    bmp.readimagefile(ar1[int1]);
+    bmp.loadfromfile(ar1[int1],
+               graphicformatlabels[filedialog.controller.filterindex]);
     if not bmp.masked then begin
      bmp.transparentcolor:= transparentcolor.value;
     end;

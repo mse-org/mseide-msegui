@@ -111,8 +111,19 @@ const
   '&Show hidden files', //sc_Show_hidden_files  //
   '&Filter',            //sc_Filter            /// 
   'Save',               //sc_save 
-  'Open'                //sc_open
-  );
+  'Open',               //sc_open
+  'Graphic format not supported', //sc_graphic_not_supported
+  'Graphic format error', //sc_graphic_format_error
+  'MS Bitmap',          //sc_MS_Bitmap
+  'MS Icon',            //sc_MS_Icon
+  'JPEG Image',         //sc_JPEG_Image 
+  'PNG Image',          //sc_PNG_Image
+  'XPM Image',          //sc_XPM_Image
+  'PNM Image',          //sc_PNM_Image
+  'TARGA Image',        //sc_TARGA_image
+  'All'                 //sc_All
+
+                       );
 
 procedure registerlangconsts(const name: string; const stockcaption: stockcaptionty;
             const modalresulttext: defaultmodalresulttextty;
