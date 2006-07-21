@@ -213,6 +213,7 @@ type
 
    procedure writeln(const avalue: msestring = ''); overload;
    procedure writeln(const avalue: richstringty); overload;
+   procedure writelines(const alines: array of msestring); overload;
    procedure writelines(const alines: msestringarty); overload;
    procedure writelines(const alines: richstringarty); overload;
    property indentx: integer read findentx write findentx;
@@ -820,6 +821,18 @@ begin
  ar1:= breakrichlines(avalue);
  for int1:= 0 to high(ar1) do begin
   internalwriteln(ar1[int1]);
+ end;
+end;
+
+procedure tcustomprintercanvas.writelines(const alines: array of msestring);
+var
+ int1: integer;
+ rstr1: richstringty;
+begin
+ rstr1.format:= nil;
+ for int1:= 0 to high(alines) do begin
+  rstr1.text:= alines[int1];
+  internalwriteln(rstr1);
  end;
 end;
 
