@@ -3207,7 +3207,7 @@ begin
     end;
    end;
   end;
-  if not fi.image.isempty then begin
+  if fi.image.hasimage then begin
    fi.image.paint(canvas,rect);
    if fao_alphafadeimage in fi.options then begin
     doalphablend(canvas);

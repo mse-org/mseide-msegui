@@ -68,6 +68,7 @@ type
    procedure loaddata(const asize: sizety; data: pbyte;
              msbitfirst: boolean = false; dwordaligned: boolean = false;
              bottomup: boolean = false); virtual; //calls change
+   function hasimage: boolean;
    procedure paint(const acanvas: tcanvas; const dest: rectty;
                    const asource: rectty; const aalignment: alignmentsty = [];
                          const aforegroundcolor: colorty = cl_default;
@@ -1057,6 +1058,19 @@ begin
   end;
  end;
  inherited;
+end;
+
+function tbitmap.hasimage: boolean;
+var
+ bmp1: tbitmapcomp;
+begin
+ bmp1:= getsource;
+ if bmp1 <> nil then begin
+  result:= not bmp1.bitmap.isempty;
+ end
+ else begin
+  result:= isempty;
+ end;
 end;
 
 { tmaskedbitmap }
