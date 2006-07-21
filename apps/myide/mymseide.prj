@@ -5,8 +5,10 @@ order2=0
 order3=0
 order4=0
 order5=0
+order6=0
+order7=0
+order8=0
 [projectoptions]
-projectdir=/home/mse/proj/msegui/trunk/apps/myide
 findinfiledialog=33
  [findinfileadialogfo]
  stackedunder=
@@ -82,7 +84,7 @@ options=41
  width0=47
  values1=1
   EconvertError
- width1=766
+ width1=764
 programparameters=15
  [programparametersfo]
  stackedunder=
@@ -133,17 +135,15 @@ exceptclassnames=1
  EconvertError
 exceptignore=1
  0
-modulenames=1
- FINDINFILEPAGEFO
-moduletypes=1
- TFINDINFILEPAGEFO
-modulefiles=1
- /home/mse/proj/msegui/trunk/apps/ide/findinfilepage.mfm
+modulenames=0
+moduletypes=0
+modulefiles=0
 mainfile=../ide/mseide.pas
 targetfile=mymseide${EXEEXT}
 messageoutputfile=
 copymessages=0
 closemessages=1
+checkmethods=1
 makecommand=${COMPILER}
 debugcommand=${DEBUGGER}
 debugoptions=
@@ -175,28 +175,14 @@ sourcedirs=4
  ${MSELIBDIR}*/
  ../ide/
  ./
-unitdirs=11
- ${MSELIBDIR}widgets/
- ${MSELIBDIR}sysutils/
- ${MSELIBDIR}serialcomm/
- ${MSELIBDIR}regcomponents/
+unitdirs=4
  ${MSELIBDIR}kernel/$TARGET/
  ${MSELIBDIR}kernel/
- ${MSELIBDIR}editwidgets/
- ${MSELIBDIR}dialogs/
- ${MSELIBDIR}designutils/
- ${MSELIBDIR}db/
+ ${MSELIBDIR}*/
  ../ide/
-unitdirson=11
- 65599
- 65599
- 65599
- 65599
+unitdirson=4
  65599
  196671
- 65599
- 65599
- 65599
  65599
  65599
 sourcefilemasks=2
@@ -220,6 +206,8 @@ editfontheight=0
 editfontwidth=0
 editfontextraspace=0
 editfontantialiased=1
+backupfilecount=2
+encoding=0
 newprojectfiles=4
  ${TEMPLATEDIR}default/project.pas
  ${TEMPLATEDIR}default/main.pas
@@ -255,6 +243,7 @@ newsubfoform=${TEMPLATEDIR}default/subform.mfm
 stoponexception=0
 activateonbreak=1
 showconsole=0
+externalconsole=0
 [breakpoints]
 on=0
 path=0
@@ -291,13 +280,6 @@ windowlayout=239
  [mainfo.openfile]
  filenames=0
  lastdir=
- filehistory=6
-  /G:/msegui/trunk/lib/common/kernel/i386-win32/Kopie von mseguiintf.pas
-  /G:/msegui/trunk/lib/common/kernel/i386-win32/mseguiintf.pas
-  /G:/test1/main.pas
-  /G:/msegui/trunk/lib/common/widgets/msegrids.pas
-  /G:/msegui/trunk/lib/common/editwidgets/msedataedits.pas
-  /D:/fixes_2_0/rtl/i386/i386.inc
  filefilterindex=2
  filecolwidth=174
  [actionsmo.watchesonact]
@@ -321,18 +303,18 @@ windowlayout=239
  x=0
  y=0
  cx=286
- cy=34
+ cy=38
  [componentpalettefo]
  splitdir=0
  useroptions=15
- stackedunder=mainfo
+ stackedunder=
  parent=
  x=335
  y=24
  cx=440
  cy=129
  wsize=0
- active=0
+ active=1
  visible=1
  [componentpalettefo.componentpages]
  activetab=5
@@ -350,8 +332,8 @@ windowlayout=239
  useroptions=783
  stackedunder=objectinspectorfo
  parent=
- x=660
- y=237
+ x=510
+ y=325
  cx=310
  cy=245
  wsize=0
@@ -371,16 +353,16 @@ windowlayout=239
  useroptions=527
  stackedunder=cpufo
  parent=
- x=632
- y=79
- cx=330
- cy=471
+ x=670
+ y=179
+ cx=316
+ cy=484
  wsize=0
  active=0
  visible=0
  [objectinspectorfo.grid]
- width0=118
- width1=196
+ width0=113
+ width1=187
  [breakpointsfo]
  splitdir=0
  useroptions=527
@@ -400,8 +382,8 @@ windowlayout=239
  useroptions=527
  stackedunder=stackfo
  parent=
- x=120
- y=368
+ x=537
+ y=26
  cx=483
  cy=210
  wsize=0
@@ -428,28 +410,28 @@ windowlayout=239
  stackedunder=watchfo
  parent=
  x=407
- y=230
- cx=613
- cy=299
+ y=349
+ cx=254
+ cy=180
  wsize=0
  active=0
  visible=0
  [projecttreefo]
  splitdir=0
  useroptions=15
- stackedunder=findinfilefo
+ stackedunder=targetconsolefo
  parent=
- x=263
- y=431
- cx=286
- cy=201
+ x=321
+ y=101
+ cx=698
+ cy=413
  wsize=0
  active=0
  visible=0
  [findinfilefo]
  splitdir=0
  useroptions=527
- stackedunder=formdesignerfo
+ stackedunder=watchpointsfo
  parent=
  x=548
  y=115
@@ -494,7 +476,7 @@ windowlayout=239
  [targetconsolefo]
  splitdir=0
  useroptions=1
- stackedunder=componentpalettefo
+ stackedunder=mainfo
  parent=
  x=116
  y=297
@@ -506,7 +488,7 @@ windowlayout=239
  [mainfo.panel1]
  splitdir=2
  useroptions=2047
- stackedunder=
+ stackedunder=componentpalettefo
  parent=
  x=4
  y=126
@@ -526,25 +508,15 @@ tabstops=4
 finddtext=
 findhistory=0
 findoptions=0
-editpos=2
- 0,-1073741823
- 18,223
-bookmarks0=0
-bookmarks1=0
-sourcefiles=2
- /home/mse/proj/msegui/trunk/apps/ide/main.pas
- /home/mse/proj/msegui/trunk/apps/ide/findinfilepage.pas
-ismoduletexts=2
- 0
- 0
-modules=1
- /home/mse/proj/msegui/trunk/apps/ide/findinfilepage.mfm
-visiblemodules=1
- -1
+editpos=0
+sourcefiles=0
+ismoduletexts=0
+modules=0
+visiblemodules=0
 [sourcefo.tabwidget]
 tabsize=102
 firsttab=0
-index=1
+index=-1
 [components]
 [selecteditpage]
 colwidth=100

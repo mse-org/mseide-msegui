@@ -5,8 +5,11 @@ order2=0
 order3=0
 order4=0
 order5=0
+order6=0
+order7=0
+order8=0
 [projectoptions]
-options=39
+options=41
  [projectoptionsfo]
  stackedunder=
  x=151
@@ -14,6 +17,7 @@ options=39
  cx=821
  cy=572
  [projectoptionsfo.tabwidget]
+ firsttab=0
  index=3
  [projectoptionsfo.macrogrid]
  width0=13
@@ -40,12 +44,13 @@ options=39
  x=0
  y=161
  [projectoptionsfo.ttabwidget1]
+ firsttab=0
  index=0
  [projectoptionsfo.exceptionsgrid]
  width0=47
  values1=1
   EconvertError
- width1=766
+ width1=764
 sigsettings=27
  1,1,T,F
  3,3,T,F
@@ -88,6 +93,7 @@ targetfile=i18ndemo${EXEEXT}
 messageoutputfile=
 copymessages=0
 closemessages=1
+checkmethods=1
 makecommand=${COMPILER}
 debugcommand=${DEBUGGER}
 debugoptions=
@@ -118,29 +124,13 @@ sourcedirs=3
  ${MSELIBDIR}kernel/$TARGET/
  ${MSELIBDIR}*/
  ./
-unitdirs=11
- ${MSELIBDIR}i18n/
- ${MSELIBDIR}widgets/
- ${MSELIBDIR}sysutils/
- ${MSELIBDIR}serialcomm/
- ${MSELIBDIR}regcomponents/
+unitdirs=3
  ${MSELIBDIR}kernel/$TARGET/
  ${MSELIBDIR}kernel/
- ${MSELIBDIR}editwidgets/
- ${MSELIBDIR}dialogs/
- ${MSELIBDIR}designutils/
- ${MSELIBDIR}db/
-unitdirson=11
- 65599
- 65599
- 65599
- 65599
- 65599
+ ${MSELIBDIR}*/
+unitdirson=3
  65599
  196671
- 65599
- 65599
- 65599
  65599
 sourcefilemasks=3
  "*.pas" "*.dpr" "*.pp" "*.inc"
@@ -165,6 +155,8 @@ editfontheight=0
 editfontwidth=0
 editfontextraspace=0
 editfontantialiased=1
+backupfilecount=2
+encoding=0
 newprojectfiles=4
  ${TEMPLATEDIR}default/project.pas
  ${TEMPLATEDIR}default/main.pas
@@ -200,6 +192,7 @@ newsubfoform=${TEMPLATEDIR}default/subform.mfm
 stoponexception=0
 activateonbreak=1
 showconsole=0
+externalconsole=0
 [breakpoints]
 on=0
 path=0
@@ -220,7 +213,7 @@ files=
  a=0,4132,0,Files
  )
 [layout]
-windowlayout=249
+windowlayout=247
  [mainfo]
  stackedunder=mainfo.panel1
  x=4
@@ -258,8 +251,8 @@ windowlayout=249
  visible=1
  x=0
  y=0
- cx=284
- cy=34
+ cx=286
+ cy=38
  [componentpalettefo]
  splitdir=0
  useroptions=15
@@ -288,22 +281,20 @@ windowlayout=249
  useroptions=783
  stackedunder=objectinspectorfo
  parent=
- x=242
- y=20
- cx=778
- cy=221
+ x=510
+ y=325
+ cx=310
+ cy=245
  wsize=0
  active=0
  visible=0
  [watchfo.grid]
  width0=13
- values1=3
-  
+ values1=2
   
   
  width1=152
- values2=3
-  
+ values2=2
   
   
  [watchfo.watchon]
@@ -315,16 +306,16 @@ windowlayout=249
  useroptions=527
  stackedunder=disassfo
  parent=
- x=548
- y=66
- cx=471
- cy=471
+ x=670
+ y=179
+ cx=316
+ cy=484
  wsize=0
  active=0
  visible=0
  [objectinspectorfo.grid]
- width0=171
- width1=284
+ width0=113
+ width1=187
  [breakpointsfo]
  splitdir=0
  useroptions=527
@@ -371,10 +362,10 @@ windowlayout=249
  useroptions=527
  stackedunder=cpufo
  parent=
- x=313
- y=99
- cx=663
- cy=504
+ x=407
+ y=349
+ cx=254
+ cy=180
  wsize=0
  active=0
  visible=0
@@ -383,10 +374,10 @@ windowlayout=249
  useroptions=15
  stackedunder=findinfilefo
  parent=
- x=263
- y=431
- cx=286
- cy=201
+ x=321
+ y=101
+ cx=698
+ cy=413
  wsize=0
  active=0
  visible=0
@@ -404,8 +395,8 @@ windowlayout=249
  useroptions=527
  stackedunder=threadsfo
  parent=
- x=378
- y=20
+ x=192
+ y=451
  cx=257
  cy=188
  wsize=0
@@ -457,7 +448,7 @@ windowlayout=249
  cx=734
  cy=491
  wsize=0
- active=0
+ active=1
  visible=1
 [edit]
 hintwidth=0
@@ -495,4 +486,3 @@ envvarnames=1
  LD_LIBRARY_PATH
 envvarvalues=1
  .
-

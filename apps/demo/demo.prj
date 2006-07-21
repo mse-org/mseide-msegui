@@ -9,7 +9,7 @@ order6=0
 order7=0
 order8=0
 [projectoptions]
-options=39
+options=41
  [projectoptionsfo]
  stackedunder=
  x=151
@@ -17,6 +17,7 @@ options=39
  cx=821
  cy=572
  [projectoptionsfo.tabwidget]
+ firsttab=0
  index=3
  [projectoptionsfo.macrogrid]
  width0=13
@@ -43,12 +44,13 @@ options=39
  x=0
  y=161
  [projectoptionsfo.ttabwidget1]
+ firsttab=0
  index=0
  [projectoptionsfo.exceptionsgrid]
  width0=47
  values1=1
   EconvertError
- width1=766
+ width1=764
 sigsettings=27
  1,1,T,F
  3,3,T,F
@@ -88,7 +90,7 @@ modulenames=1
 moduletypes=1
  TMAINFO
 modulefiles=1
- main.mfm
+ demo/main.mfm
 mainfile=demo.pas
 targetfile=demo${EXEEXT}
 messageoutputfile=
@@ -125,30 +127,14 @@ sourcedirs=3
  ${MSELIBDIR}kernel/$TARGET/
  ${MSELIBDIR}*/
  ./
-unitdirs=11
- ${MSELIBDIR}i18n/
- ${MSELIBDIR}widgets/
- ${MSELIBDIR}sysutils/
- ${MSELIBDIR}serialcomm/
- ${MSELIBDIR}regcomponents/
+unitdirs=3
  ${MSELIBDIR}kernel/$TARGET/
  ${MSELIBDIR}kernel/
- ${MSELIBDIR}editwidgets/
- ${MSELIBDIR}dialogs/
- ${MSELIBDIR}designutils/
- ${MSELIBDIR}db/
-unitdirson=11
- 65599
- 65599
- 65599
- 65599
- 65599
- 65599
- 196671
- 65599
- 65599
- 65599
- 65599
+ ${MSELIBDIR}*/
+unitdirson=3
+ 983103
+ 983103
+ 983103
 sourcefilemasks=3
  "*.pas" "*.dpr" "*.pp" "*.inc"
  "*.c" "*.cc" "*.h"
@@ -232,7 +218,7 @@ files=
 [layout]
 windowlayout=243
  [mainfo]
- stackedunder=componentpalettefo
+ stackedunder=
  x=4
  y=24
  cx=286
@@ -245,6 +231,7 @@ windowlayout=243
  useroptions=5616
  [mainfo.openfile]
  filenames=0
+ lastdir=
  filefilterindex=0
  filecolwidth=174
  [actionsmo.watchesonact]
@@ -268,11 +255,11 @@ windowlayout=243
  x=0
  y=0
  cx=286
- cy=34
+ cy=38
  [componentpalettefo]
  splitdir=0
  useroptions=15
- stackedunder=
+ stackedunder=mainfo
  parent=
  x=335
  y=24
@@ -318,16 +305,16 @@ windowlayout=243
  useroptions=527
  stackedunder=disassfo
  parent=
- x=687
- y=71
- cx=319
- cy=519
+ x=670
+ y=179
+ cx=316
+ cy=484
  wsize=0
  active=0
  visible=0
  [objectinspectorfo.grid]
- width0=114
- width1=189
+ width0=113
+ width1=187
  [breakpointsfo]
  splitdir=0
  useroptions=527
@@ -347,8 +334,8 @@ windowlayout=243
  useroptions=527
  stackedunder=stackfo
  parent=
- x=497
- y=136
+ x=537
+ y=26
  cx=483
  cy=210
  wsize=0
@@ -386,22 +373,22 @@ windowlayout=243
  useroptions=15
  stackedunder=findinfilefo
  parent=
- x=263
- y=431
- cx=286
- cy=201
+ x=321
+ y=101
+ cx=698
+ cy=413
  wsize=0
  active=0
  visible=0
  [findinfilefo]
  splitdir=0
  useroptions=527
- stackedunder=targetconsolefo
+ stackedunder=mainfo.panel1
  parent=
- x=181
+ x=548
  y=115
- cx=736
- cy=455
+ cx=369
+ cy=198
  [cpufo]
  splitdir=0
  useroptions=527
@@ -441,7 +428,7 @@ windowlayout=243
  [targetconsolefo]
  splitdir=0
  useroptions=1
- stackedunder=mainfo.panel1
+ stackedunder=watchpointsfo
  parent=
  x=116
  y=297
