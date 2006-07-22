@@ -305,7 +305,7 @@ function checkshortcut(var info: keyeventinfoty; const caption: richstringty;
                          const checkalt: boolean): boolean;
 begin
  with info do begin
-  if not (es_processed in eventstate) and 
+  if (eventstate * [es_processed,es_modal] = []) and 
     (not checkalt and (shiftstate -[ss_alt] = []) or (shiftstate = [ss_alt])) and
                          (length(info.chars) > 0) then begin
    result:= isshortcut(info.chars[1],caption);

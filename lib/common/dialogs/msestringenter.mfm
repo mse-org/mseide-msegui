@@ -1,4 +1,5 @@
 object stringenterfo: tstringenterfo
+  optionswidget = [ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_mousewheel, ow_destroywidgets, ow_hinton, ow_autoscale]
   bounds_x = 340
   bounds_y = 323
   bounds_cx = 343
@@ -10,19 +11,19 @@ object stringenterfo: tstringenterfo
   container.bounds_cx = 343
   container.bounds_cy = 88
   container.frame.dummy = 0
-  options = [fo_screencentered, fo_closeonesc, fo_autoreadstat, fo_autowritestat]
+  options = [fo_screencentered, fo_closeonesc, fo_localshortcuts, fo_autoreadstat, fo_autowritestat]
   icon.transparency = -2147483648
   moduleclassname = 'tmseform'
   object value: tstringedit
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
     bounds_x = 8
-    bounds_y = 60
+    bounds_y = 62
     bounds_cx = 210
-    bounds_cy = 22
+    bounds_cy = 20
     frame.dummy = 0
     anchors = [an_left, an_right, an_bottom]
     optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_resetselectonexit, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_savevalue, oe_savestate]
-    reffontheight = 16
+    reffontheight = 14
   end
   object lab: tlabel
     bounds_x = 8
@@ -31,30 +32,32 @@ object stringenterfo: tstringenterfo
     bounds_cy = 47
     anchors = [an_left, an_top, an_right, an_bottom]
     taborder = 3
+    reffontheight = 14
   end
   object ok: tbutton
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
     bounds_x = 230
-    bounds_y = 60
+    bounds_y = 62
     bounds_cx = 50
-    bounds_cy = 22
+    bounds_cy = 20
     anchors = [an_right, an_bottom]
     taborder = 1
     state = [as_default, as_localdefault, as_localcaption]
     caption = '&OK'
     modalresult = mr_ok
-    reffontheight = 16
+    reffontheight = 14
   end
   object cancel: tbutton
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
     bounds_x = 286
-    bounds_y = 60
+    bounds_y = 62
     bounds_cx = 50
-    bounds_cy = 22
+    bounds_cy = 20
     anchors = [an_right, an_bottom]
     taborder = 2
+    state = [as_localcaption]
     caption = '&Cancel'
     modalresult = mr_cancel
-    reffontheight = 16
+    reffontheight = 14
   end
 end

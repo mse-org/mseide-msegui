@@ -9,7 +9,7 @@ object findinfileadialogfo: tfindinfiledialogfo
   container.bounds_cx = 331
   container.bounds_cy = 249
   container.frame.dummy = 0
-  options = [fo_closeonesc, fo_autoreadstat, fo_autowritestat, fo_savepos]
+  options = [fo_closeonesc, fo_localshortcuts, fo_autoreadstat, fo_autowritestat, fo_savepos]
   statfile = statfile1
   caption = 'Find Text in Files'
   icon.transparency = -2147483648
@@ -17,14 +17,14 @@ object findinfileadialogfo: tfindinfiledialogfo
   object findtext: thistoryedit
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
     bounds_x = 8
-    bounds_y = 7
+    bounds_y = 9
     bounds_cx = 316
-    bounds_cy = 41
+    bounds_cy = 37
     frame.caption = '&Text to find'
     frame.dummy = 0
     frame.outerframe = (
       0
-      19
+      17
       0
       0
     )
@@ -35,7 +35,7 @@ object findinfileadialogfo: tfindinfiledialogfo
     dropdown.cols.items = <    
       item
       end>
-    reffontheight = 16
+    reffontheight = 14
   end
   object ok: tbutton
     bounds_x = 200
@@ -61,48 +61,48 @@ object findinfileadialogfo: tfindinfiledialogfo
   end
   object casesensitive: tbooleanedit
     bounds_x = 8
-    bounds_y = 55
-    bounds_cx = 95
-    bounds_cy = 18
+    bounds_y = 56
+    bounds_cx = 90
+    bounds_cy = 16
     frame.caption = 'c&asesensitive'
     frame.dummy = 0
     frame.outerframe = (
       0
+      1
+      77
       2
-      82
-      3
     )
     taborder = 1
     statfile = statfile1
   end
   object wholeword: tbooleanedit
     bounds_x = 160
-    bounds_y = 55
-    bounds_cx = 87
-    bounds_cy = 18
+    bounds_y = 56
+    bounds_cx = 79
+    bounds_cy = 16
     frame.caption = '&whole word'
     frame.dummy = 0
     frame.outerframe = (
       0
+      1
+      66
       2
-      74
-      3
     )
     taborder = 2
     statfile = statfile1
   end
   object indirectories: tbooleaneditradio
     bounds_x = 8
-    bounds_y = 79
-    bounds_cx = 140
-    bounds_cy = 18
+    bounds_y = 80
+    bounds_cx = 128
+    bounds_cy = 16
     frame.caption = 'Search in &directories'
     frame.dummy = 0
     frame.outerframe = (
       0
+      1
+      115
       2
-      127
-      3
     )
     taborder = 3
     statfile = statfile1
@@ -111,16 +111,16 @@ object findinfileadialogfo: tfindinfiledialogfo
   object inopenfiles: tbooleaneditradio
     Tag = 1
     bounds_x = 160
-    bounds_y = 79
-    bounds_cx = 152
-    bounds_cy = 18
+    bounds_y = 80
+    bounds_cx = 139
+    bounds_cy = 16
     frame.caption = 'Search in all &open files'
     frame.dummy = 0
     frame.outerframe = (
       0
+      1
+      126
       2
-      139
-      3
     )
     taborder = 4
     statfile = statfile1
@@ -128,15 +128,15 @@ object findinfileadialogfo: tfindinfiledialogfo
   object dir: tfilenameedit
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
     bounds_x = 8
-    bounds_y = 111
+    bounds_y = 113
     bounds_cx = 316
-    bounds_cy = 41
+    bounds_cy = 37
     frame.caption = '&Directory'
     frame.button.imagenr = 17
     frame.dummy = 0
     frame.outerframe = (
       0
-      19
+      17
       0
       0
     )
@@ -147,19 +147,19 @@ object findinfileadialogfo: tfindinfiledialogfo
     textflags = [tf_ycentered, tf_noselect, tf_ellipseleft]
     controller.options = [fdo_directory]
     controller.onbeforeexecute = dironbeforeexecute
-    reffontheight = 16
+    reffontheight = 14
   end
   object mask: thistoryedit
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
     bounds_x = 8
-    bounds_y = 159
+    bounds_y = 161
     bounds_cx = 316
-    bounds_cy = 41
+    bounds_cy = 37
     frame.caption = '&File Mask'
     frame.dummy = 0
     frame.outerframe = (
       0
-      19
+      17
       0
       0
     )
@@ -172,20 +172,20 @@ object findinfileadialogfo: tfindinfiledialogfo
     dropdown.cols.items = <    
       item
       end>
-    reffontheight = 16
+    reffontheight = 14
   end
   object subdirs: tbooleanedit
     bounds_x = 8
-    bounds_y = 215
-    bounds_cx = 149
-    bounds_cy = 18
+    bounds_y = 216
+    bounds_cx = 135
+    bounds_cy = 16
     frame.caption = '&Include subdirectories'
     frame.dummy = 0
     frame.outerframe = (
       0
+      1
+      122
       2
-      136
-      3
     )
     taborder = 7
     statfile = statfile1

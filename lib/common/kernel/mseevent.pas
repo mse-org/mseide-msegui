@@ -44,7 +44,8 @@ const
  mouseposevents = [ek_buttonpress,ek_buttonrelease,ek_mousemove,ek_mousepark];
 
 type
- eventstatety = (es_processed,es_child,es_broadcast,es_drag,es_reflected,es_nofocus);
+ eventstatety = (es_processed,es_child,es_broadcast,es_modal,es_drag,
+                 es_reflected,es_nofocus);
  eventstatesty = set of eventstatety;
  mouseeventinfoty = record
   eventkind: eventkindty;

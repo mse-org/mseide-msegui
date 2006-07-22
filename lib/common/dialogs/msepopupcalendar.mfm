@@ -1,11 +1,14 @@
 object msepopupcalendarfo: tpopupcalendarfo
-  optionswindow = [wo_popup, wo_buttonendmodal]
-  options = [fo_freeonclose, fo_closeonesc, fo_autoreadstat, fo_autowritestat, fo_savepos, fo_savestate]
-  onaftercreate = aftercreate
-  container.frame.localprops = [frl_framewidth]
-  container.frame.sbhorz.options = [sbo_thumbtrack, sbo_moveauto]
-  container.frame.sbvert.options = [sbo_thumbtrack, sbo_moveauto]
-  container.frame.dummy = 0
+  bounds_x = 337
+  bounds_y = 284
+  bounds_cx = 233
+  bounds_cy = 179
+  frame.framewidth = 1
+  frame.colorframe = -1610612734
+  frame.localprops = [frl_framewidth, frl_colorframe]
+  frame.dummy = 0
+  anchors = [an_left, an_top, an_bottom]
+  visible = False
   container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_subfocus, ow_mousetransparent, ow_destroywidgets, ow_autoscale]
   container.bounds_x = 1
   container.bounds_y = 1
@@ -15,67 +18,68 @@ object msepopupcalendarfo: tpopupcalendarfo
   container.frame.sbhorz.options = [sbo_thumbtrack, sbo_moveauto]
   container.frame.sbvert.options = [sbo_thumbtrack, sbo_moveauto]
   container.frame.dummy = 0
-  visible = False
-  optionswidget = [ow_arrowfocus, ow_subfocus, ow_mousewheel, ow_destroywidgets, ow_hinton, ow_autoscale]
-  bounds_x = 337
-  bounds_y = 284
-  bounds_cx = 233
-  bounds_cy = 179
-  color = -1879048187
-  frame.framewidth = 1
-  frame.colorframe = -1610612734
-  frame.localprops = [frl_framewidth, frl_colorframe]
-  frame.dummy = 0
-  anchors = [an_left, an_top, an_bottom]
+  optionswindow = [wo_popup, wo_buttonendmodal]
+  options = [fo_freeonclose, fo_closeonesc, fo_localshortcuts, fo_autoreadstat, fo_autowritestat, fo_savepos, fo_savestate]
+  icon.transparency = -2147483648
+  onaftercreate = aftercreate
   moduleclassname = 'tmseform'
   object grid: tdrawgrid
+    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_focusbackonesc, ow_mousewheel, ow_destroywidgets, ow_fontglyphheight]
+    bounds_y = 22
+    bounds_cx = 233
+    bounds_cy = 156
+    frame.levelo = 0
+    frame.framewidth = 1
+    frame.colorframe = -1610612733
+    frame.sbvert.options = [sbo_thumbtrack]
+    frame.sbhorz.options = [sbo_thumbtrack]
+    frame.localprops = [frl_levelo, frl_leveli, frl_framewidth, frl_colorframe, frl_fileft, frl_fitop, frl_firight, frl_fibottom]
+    frame.dummy = 0
+    anchors = [an_left, an_top, an_right]
+    taborder = 6
+    datacols.count = 7
     datacols.width = 32
     datacols.options = [co_readonly, co_drawfocus, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
-    datacols.width = 32
-    datacols.linecolor = -1610612733
-    datacols.count = 7
     datacols.items = <    
       item
+        options = [co_readonly, co_drawfocus, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
         focusrectdist = 1
         ondrawcell = drawcell
-        options = [co_readonly, co_drawfocus, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
       end    
       item
+        options = [co_readonly, co_drawfocus, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
         focusrectdist = 1
         ondrawcell = drawcell
-        options = [co_readonly, co_drawfocus, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
       end    
       item
+        options = [co_readonly, co_drawfocus, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
         focusrectdist = 1
         ondrawcell = drawcell
-        options = [co_readonly, co_drawfocus, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
       end    
       item
+        options = [co_readonly, co_drawfocus, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
         focusrectdist = 1
         ondrawcell = drawcell
-        options = [co_readonly, co_drawfocus, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
       end    
       item
+        options = [co_readonly, co_drawfocus, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
         focusrectdist = 1
         ondrawcell = drawcell
-        options = [co_readonly, co_drawfocus, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
       end    
       item
+        options = [co_readonly, co_drawfocus, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
         focusrectdist = 1
         ondrawcell = drawcell
-        options = [co_readonly, co_drawfocus, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
       end    
       item
+        linewidth = 0
+        options = [co_readonly, co_drawfocus, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
         focusrectdist = 1
         ondrawcell = drawcell
         font.color = -1610612729
         font.name = 'stf_default'
         font.dummy = 0
-        options = [co_readonly, co_drawfocus, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
-        linewidth = 0
       end>
-    fixcols.linecolor = -1610612734
-    fixrows.linecolor = -1610612734
     fixrows.count = 1
     fixrows.items = <    
       item
@@ -101,100 +105,68 @@ object msepopupcalendarfo: tpopupcalendarfo
     gridframecolor = -2147483645
     datarowheight = 21
     oncellevent = cellevent
-    frame.levelo = 0
-    frame.framewidth = 1
-    frame.colorframe = -1610612733
-    frame.sbvert.options = [sbo_thumbtrack]
-    frame.sbhorz.options = [sbo_thumbtrack]
-    frame.localprops = [frl_levelo, frl_leveli, frl_framewidth, frl_colorframe, frl_fileft, frl_fitop, frl_firight, frl_fibottom]
-    frame.dummy = 0
-    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_focusbackonesc, ow_mousewheel, ow_destroywidgets, ow_fontglyphheight]
-    bounds_y = 22
-    bounds_cx = 233
-    bounds_cy = 156
-    frame.levelo = 0
-    frame.framewidth = 1
-    frame.colorframe = -1610612733
-    frame.sbvert.options = [sbo_thumbtrack]
-    frame.sbhorz.options = [sbo_thumbtrack]
-    frame.localprops = [frl_levelo, frl_leveli, frl_framewidth, frl_colorframe, frl_fileft, frl_fitop, frl_firight, frl_fibottom]
-    frame.dummy = 0
-    anchors = [an_left, an_top, an_right]
-    taborder = 6
-    reffontheight = 16
+    reffontheight = 14
   end
   object monthdisp: tdatetimedisp
-    format = 'mmmm'
-    textflags = [tf_xcentered, tf_right, tf_ycentered]
-    bounds_cx = 137
-    bounds_cy = 22
-    textflags = [tf_xcentered, tf_right, tf_ycentered]
-    optionswidget = [ow_mousewheel, ow_destroywidgets, ow_fontglyphheight]
     optionswidget = [ow_mousewheel, ow_destroywidgets, ow_fontglyphheight]
     bounds_x = 83
     bounds_cx = 137
     bounds_cy = 22
     color = -1610612730
     taborder = 5
-    reffontheight = 16
+    textflags = [tf_xcentered, tf_right, tf_ycentered]
+    format = 'mmmm'
+    reffontheight = 14
   end
   object yeardisp: tdatetimedisp
-    format = 'yyyy'
-    textflags = [tf_xcentered, tf_right, tf_ycentered]
-    bounds_cx = 72
-    bounds_cy = 22
-    textflags = [tf_xcentered, tf_right, tf_ycentered]
-    optionswidget = [ow_mousewheel, ow_destroywidgets, ow_fontglyphheight]
     optionswidget = [ow_mousewheel, ow_destroywidgets, ow_fontglyphheight]
     bounds_cx = 72
     bounds_cy = 22
     color = -1610612730
     taborder = 4
-    reffontheight = 16
+    textflags = [tf_xcentered, tf_right, tf_ycentered]
+    format = 'yyyy'
+    reffontheight = 14
   end
   object tstockglyphbutton1: tstockglyphbutton
-    glyph = stg_arrowupsmall
-    onexecute = moup
-    state = [as_localimagelist, as_localimagenr, as_localonexecute]
-    optionswidget = [ow_mousewheel, ow_destroywidgets, ow_autoscale]
     optionswidget = [ow_mousewheel, ow_destroywidgets, ow_autoscale]
     bounds_x = 220
     bounds_cx = 11
     bounds_cy = 11
     taborder = 3
+    state = [as_localimagelist, as_localimagenr, as_localonexecute]
+    glyph = stg_arrowupsmall
+    onexecute = moup
   end
   object tstockglyphbutton2: tstockglyphbutton
-    glyph = stg_arrowdownsmall
-    onexecute = modown
-    state = [as_localimagelist, as_localimagenr, as_localonexecute]
-    optionswidget = [ow_mousewheel, ow_destroywidgets, ow_autoscale]
     optionswidget = [ow_mousewheel, ow_destroywidgets, ow_autoscale]
     bounds_x = 220
     bounds_y = 11
     bounds_cx = 11
     bounds_cy = 11
     taborder = 1
+    state = [as_localimagelist, as_localimagenr, as_localonexecute]
+    glyph = stg_arrowdownsmall
+    onexecute = modown
   end
   object tstockglyphbutton3: tstockglyphbutton
-    glyph = stg_arrowupsmall
-    onexecute = yearup
-    state = [as_localimagelist, as_localimagenr, as_localonexecute]
-    optionswidget = [ow_mousewheel, ow_destroywidgets, ow_autoscale]
     optionswidget = [ow_mousewheel, ow_destroywidgets, ow_autoscale]
     bounds_x = 72
     bounds_cx = 11
     bounds_cy = 11
     taborder = 2
+    state = [as_localimagelist, as_localimagenr, as_localonexecute]
+    glyph = stg_arrowupsmall
+    onexecute = yearup
   end
   object tstockglyphbutton4: tstockglyphbutton
-    glyph = stg_arrowdownsmall
-    onexecute = yeardown
-    state = [as_localimagelist, as_localimagenr, as_localonexecute]
-    optionswidget = [ow_mousewheel, ow_destroywidgets, ow_autoscale]
     optionswidget = [ow_mousewheel, ow_destroywidgets, ow_autoscale]
     bounds_x = 72
     bounds_y = 11
     bounds_cx = 11
     bounds_cy = 11
+    state = [as_localimagelist, as_localimagenr, as_localonexecute]
+    glyph = stg_arrowdownsmall
+    onexecute = yeardown
   end
 end

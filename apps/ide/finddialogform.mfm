@@ -1,4 +1,5 @@
 object finddialogfo: tfinddialogfo
+  optionswidget = [ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_mousewheel, ow_destroywidgets, ow_hinton, ow_autoscale]
   bounds_x = 319
   bounds_y = 205
   bounds_cx = 331
@@ -8,7 +9,7 @@ object finddialogfo: tfinddialogfo
   container.bounds_cx = 331
   container.bounds_cy = 116
   container.frame.dummy = 0
-  options = [fo_closeonesc, fo_autoreadstat, fo_autowritestat, fo_savepos]
+  options = [fo_closeonesc, fo_localshortcuts, fo_autoreadstat, fo_autowritestat, fo_savepos]
   statfile = statfile1
   caption = 'Find Text'
   icon.transparency = -2147483648
@@ -16,20 +17,24 @@ object finddialogfo: tfinddialogfo
   object findtext: thistoryedit
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
     bounds_x = 8
-    bounds_y = 5
+    bounds_y = 6
     bounds_cx = 316
-    bounds_cy = 40
+    bounds_cy = 37
     frame.caption = 'Text to &find'
     frame.dummy = 0
     frame.outerframe = (
       0
-      18
+      17
       0
-      0)
+      0
+    )
     anchors = [an_left, an_top, an_right]
     optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_resetselectonexit, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_savevalue, oe_savestate]
-    dropdown.options = [deo_keydropdown, deo_autosavehistory]
-    reffontheight = 16
+    dropdown.cols.count = 1
+    dropdown.cols.items = <    
+      item
+      end>
+    reffontheight = 14
   end
   object cancel: tbutton
     bounds_x = 272
@@ -38,49 +43,53 @@ object finddialogfo: tfinddialogfo
     bounds_cy = 20
     anchors = [an_top, an_right]
     taborder = 5
+    state = [as_localcaption]
     caption = '&Cancel'
     modalresult = mr_cancel
   end
   object casesensitive: tbooleanedit
     bounds_x = 8
-    bounds_y = 55
-    bounds_cx = 94
-    bounds_cy = 18
+    bounds_y = 56
+    bounds_cx = 90
+    bounds_cy = 16
     frame.caption = 'case&sensitive'
     frame.dummy = 0
     frame.outerframe = (
       0
+      1
+      77
       2
-      81
-      3)
+    )
     taborder = 1
   end
   object wholeword: tbooleanedit
     bounds_x = 104
-    bounds_y = 55
-    bounds_cx = 86
-    bounds_cy = 18
+    bounds_y = 56
+    bounds_cx = 79
+    bounds_cy = 16
     frame.caption = '&whole word'
     frame.dummy = 0
     frame.outerframe = (
       0
+      1
+      66
       2
-      73
-      3)
+    )
     taborder = 2
   end
   object selectedonly: tbooleanedit
     bounds_x = 192
-    bounds_y = 55
-    bounds_cx = 95
-    bounds_cy = 18
+    bounds_y = 56
+    bounds_cx = 88
+    bounds_cy = 16
     frame.caption = 'select&ed only'
     frame.dummy = 0
     frame.outerframe = (
       0
+      1
+      75
       2
-      82
-      3)
+    )
     taborder = 3
     statfile = statfile1
   end
@@ -98,6 +107,6 @@ object finddialogfo: tfinddialogfo
   object statfile1: tstatfile
     filename = 'finddialogfo.sta'
     options = [sfo_memory]
-    Left = 112
+    left = 112
   end
 end

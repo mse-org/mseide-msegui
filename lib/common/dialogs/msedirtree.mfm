@@ -10,7 +10,8 @@ object dirtreefo: tdirtreefo
   container.bounds_cy = 203
   container.frame.dummy = 0
   optionswindow = [wo_popup, wo_buttonendmodal]
-  options = [fo_closeonesc, fo_autoreadstat, fo_autowritestat]
+  options = [fo_closeonesc, fo_localshortcuts, fo_autoreadstat, fo_autowritestat]
+  icon.transparency = -2147483648
   moduleclassname = 'tmseform'
   object grid: twidgetgrid
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_focusbackonesc, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]

@@ -1258,7 +1258,8 @@ procedure tmainmenuwidget.doshortcut(var info: keyeventinfoty;
 begin
  inherited;
  if not (es_processed in info.eventstate) and (info.shiftstate = [ss_alt]) and
-                  not(csdesigning in componentstate) then begin
+                  not(csdesigning in componentstate) and 
+                  not (es_modal in info. eventstate) then begin
   dokeydown(info);
  end;
 end;

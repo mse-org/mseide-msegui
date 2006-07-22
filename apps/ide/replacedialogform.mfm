@@ -1,5 +1,5 @@
 object replacedialogfo: treplacedialogfo
-  optionswidget = [ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_destroywidgets, ow_hinton, ow_autoscale]
+  optionswidget = [ow_arrowfocus, ow_subfocus, ow_destroywidgets, ow_hinton, ow_autoscale]
   bounds_x = 142
   bounds_y = 302
   bounds_cx = 421
@@ -8,80 +8,82 @@ object replacedialogfo: treplacedialogfo
   container.bounds_cx = 421
   container.bounds_cy = 163
   container.frame.dummy = 0
-  options = [fo_freeonclose, fo_closeonesc, fo_autoreadstat, fo_autowritestat, fo_savepos]
+  options = [fo_freeonclose, fo_closeonesc, fo_localshortcuts, fo_autoreadstat, fo_autowritestat, fo_savepos]
   statfile = statfile1
   icon.transparency = -2147483648
   moduleclassname = 'tmseform'
   object findtext: thistoryedit
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
     bounds_x = 8
-    bounds_y = 6
+    bounds_y = 7
     bounds_cx = 404
-    bounds_cy = 40
+    bounds_cy = 37
     frame.caption = 'Text to &find'
     frame.dummy = 0
     frame.outerframe = (
       0
-      18
+      17
       0
-      0)
+      0
+    )
     anchors = [an_left, an_top, an_right]
-    dropdown.options = [deo_keydropdown, deo_autosavehistory]
     dropdown.cols.count = 1
-    dropdown.cols.items = <
+    dropdown.cols.items = <    
       item
       end>
-    reffontheight = 16
+    reffontheight = 14
   end
   object replacetext: thistoryedit
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
     bounds_x = 8
-    bounds_y = 46
+    bounds_y = 47
     bounds_cx = 404
-    bounds_cy = 40
+    bounds_cy = 37
     frame.caption = '&Replace with'
     frame.dummy = 0
     frame.outerframe = (
       0
-      18
+      17
       0
-      0)
+      0
+    )
     anchors = [an_left, an_top, an_right]
     taborder = 1
     statfile = statfile1
-    dropdown.options = [deo_keydropdown, deo_autosavehistory]
     dropdown.cols.count = 1
-    dropdown.cols.items = <
+    dropdown.cols.items = <    
       item
       end>
-    reffontheight = 16
+    reffontheight = 14
   end
   object casesensitive: tbooleanedit
     bounds_x = 8
-    bounds_y = 95
-    bounds_cx = 94
-    bounds_cy = 18
+    bounds_y = 96
+    bounds_cx = 90
+    bounds_cy = 16
     frame.caption = '&casesensitive'
     frame.dummy = 0
     frame.outerframe = (
       0
+      1
+      77
       2
-      81
-      3)
+    )
     taborder = 2
   end
   object wholeword: tbooleanedit
     bounds_x = 112
-    bounds_y = 95
-    bounds_cx = 86
-    bounds_cy = 18
+    bounds_y = 96
+    bounds_cx = 79
+    bounds_cy = 16
     frame.caption = '&whole word'
     frame.dummy = 0
     frame.outerframe = (
       0
+      1
+      66
       2
-      73
-      3)
+    )
     taborder = 3
   end
   object tintegerbutton1: tbutton
@@ -90,6 +92,7 @@ object replacedialogfo: treplacedialogfo
     bounds_cx = 74
     bounds_cy = 20
     taborder = 6
+    state = [as_localcaption]
     caption = '&Replace'
     modalresult = mr_ok
   end
@@ -99,21 +102,23 @@ object replacedialogfo: treplacedialogfo
     bounds_cx = 74
     bounds_cy = 20
     taborder = 7
+    state = [as_localcaption]
     caption = 'Replace &all'
     modalresult = mr_all
   end
   object selectedonly: tbooleanedit
     bounds_x = 208
-    bounds_y = 95
-    bounds_cx = 95
-    bounds_cy = 18
+    bounds_y = 96
+    bounds_cx = 88
+    bounds_cy = 16
     frame.caption = 'select&ed only'
     frame.dummy = 0
     frame.outerframe = (
       0
+      1
+      75
       2
-      82
-      3)
+    )
     taborder = 4
     statfile = statfile1
   end
@@ -129,16 +134,17 @@ object replacedialogfo: treplacedialogfo
   end
   object promptonreplace: tbooleanedit
     bounds_x = 312
-    bounds_y = 95
-    bounds_cx = 107
-    bounds_cy = 18
+    bounds_y = 96
+    bounds_cx = 93
+    bounds_cy = 16
     frame.caption = '&prompt on rep.'
     frame.dummy = 0
     frame.outerframe = (
       0
+      1
+      80
       2
-      94
-      3)
+    )
     taborder = 5
     statfile = statfile1
     value = True
@@ -146,6 +152,6 @@ object replacedialogfo: treplacedialogfo
   object statfile1: tstatfile
     filename = 'replacedialogfo.sta'
     options = [sfo_memory]
-    Left = 112
+    left = 112
   end
 end
