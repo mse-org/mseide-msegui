@@ -20,7 +20,8 @@ uses
 //non native pointersize and byte endian for remote debugging
 
 type
- gdbresultty = (gdb_ok,gdb_error,gdb_timeout,gdb_dataerror,gdb_message,gdb_running);
+ gdbresultty = (gdb_ok,gdb_error,gdb_timeout,gdb_dataerror,gdb_message,gdb_running,
+                gdb_writeerror);
 
  sigflagty = (sfl_internal,sfl_stop,sfl_handle);
  sigflagsty = set of sigflagty;
@@ -28,7 +29,8 @@ type
 
 const
  gdberrortexts: array[gdbresultty] of string =
-          ('','Error','Timeout','Dataerror','Message','Target running');
+          ('','Error','Timeout','Data error','Message','Target running',
+           'Write error');
  niltext = 'nil';
 
 type
@@ -47,7 +49,8 @@ const
  defaultsynctimeout = 2000000; //2 seconds
 type
  valuekindty = (vk_value,vk_tuple,vk_list);
- gdbeventkindty = (gek_done,gek_error,gek_running,gek_stopped,gek_targetoutput);
+ gdbeventkindty = (gek_done,gek_error,gek_running,gek_stopped,gek_targetoutput,
+                                          gek_writeerror);
 
  resultinfoty = record
   variablename: string;
@@ -258,7 +261,7 @@ type
    procedure receiveevent(const event: tobjectevent); override;
    procedure doevent(const token: cardinal; const eventkind: gdbeventkindty;
                        const values: resultinfoarty);
-   procedure internalcommand(acommand: string);
+   function internalcommand(acommand: string): boolean;
    function synccommand(const acommand: string; atimeout: integer = defaultsynctimeout): gdbresultty;
    function clicommand(const acommand: string; list: boolean = false;
                               timeout: integer = defaultsynctimeout): gdbresultty;
@@ -1012,7 +1015,7 @@ begin
     gek_running: begin
      include(fstate,gs_running);
     end;
-    gek_error: begin
+    gek_error,gek_writeerror: begin
      getstringvalue(values,'msg',stopinfo.messagetext);
     end;
    end;
@@ -1053,7 +1056,7 @@ begin
    doevent(token,gek_stopped,values);
   end
   else begin
-   if assigned(fonevent) and 
+   if assigned(fonevent) and (eventkind = gek_writeerror) or
       not ((eventkind = gek_stopped) and (gs_interrupted in fstate)) and
       not ((eventkind = gek_running) and (gs_restarted in fstate)) and
       not ((eventkind = gek_error) and (fsyncsequence <> 0) and
@@ -1285,15 +1288,26 @@ begin
 end;
 {$endif}
 
-procedure tgdbmi.internalcommand(acommand: string);
+function tgdbmi.internalcommand(acommand: string): boolean;
+var
+ ar1: resultinfoarty;
 begin
+ result:= false;
  checkactive;
  fgdbfrom.responseflag:= false;
  try
   fgdbto.writeln(inttostr(fsequence)+acommand);
+  result:= true;
  except
   closegdb;
-  raise;
+  setlength(ar1,1);
+  with ar1[0] do begin
+   variablename:= 'msg';
+   valuekind:= vk_value;
+   value:= 'Can not write to gdb.';
+  end;
+  doevent(fsequence,gek_writeerror,ar1);
+//  raise;
  end;
  inc(fsequence);
  if fsequence = 0 then begin
@@ -1320,7 +1334,10 @@ begin
  fsyncsequence:= fsequence;
  exclude(fstate,gs_syncack);
  include(fstate,gs_syncget);
- internalcommand(acommand);
+ if not internalcommand(acommand) then begin
+  result:= gdb_writeerror;
+  exit;
+ end;
  timestamp:= timestep(atimeout); //max delay
  int1:= application.unlockall;
  try

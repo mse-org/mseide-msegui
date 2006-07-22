@@ -130,13 +130,15 @@ const
               //[[text,font,scale],...]-> cx or
               //[[text],...]-> cx
               //calc stringwidth
+'currentfont exch'+
 ' 0 exch'+
 ' {dup length 4 eq {0 3 getinterval} if'+nl+  //remove color
 '  dup length 3 eq'+ //array,arraylength = 3
  ' {aload pop selectfont}'+
  ' {aload pop}'+
   ' ifelse stringwidth pop add'+
-  '} forall'+nl+
+  '} forall'+
+' exch setfont'+nl+
 '} bind def'+nl+
 
 '/s {'+nl+    //[[text,font,scale,color],...]-> cx
@@ -868,7 +870,7 @@ var
  colorchanged: boolean;
  
 begin
- if not active then begin
+ if not active {or (text.text = '')} then begin
   exit;
  end;
  colorchanged:= false;

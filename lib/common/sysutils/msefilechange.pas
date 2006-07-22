@@ -147,6 +147,9 @@ begin
  end;
 end;
 
+const
+ notifyflags = DN_MODIFY or DN_CREATE or DN_DELETE or DN_RENAME or DN_ATTRIB;
+ 
 function adddir(const sender: tdirchangethread; const name: filenamety): integer;
 var
  flags: longword;
@@ -158,8 +161,7 @@ begin
    sa_sigaction:= @DirChanged;
    sa_flags := SA_SIGINFO or SA_RESTART;
   end;
-  Flags:= DN_MODIFY or DN_CREATE or DN_DELETE or DN_RENAME or DN_ATTRIB
-                    or DN_MULTISHOT;
+  Flags:= notifyflags;
   if not((sigactionex(dirinfosig,action, nil) = 0) and
     (fcntl(result, F_SETSIG, dirinfosig) = 0) and
         (fcntl(result, F_NOTIFY, Flags) = 0)) then begin
@@ -232,6 +234,9 @@ var
  str1: string;
  aevent: tfilechangeevent;
 begin
+ {$ifdef linux}
+ fcntl(fdirhandle,F_NOTIFY,notifyflags);
+ {$endif}
  for int1:= 0 to length(ffileinfos) - 1 do begin
   with ffileinfos[int1] do begin
    if isroot then begin

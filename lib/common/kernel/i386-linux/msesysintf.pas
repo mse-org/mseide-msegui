@@ -181,6 +181,8 @@ function  msetcsetattr(filedes: longint; when: longint;
          var msetermios: termiosty): longint;cdecl;external clib name 'tcsetattr';
 function sigactionex(SigNum: Integer; var Action: TSigActionex; OldAction: PSigAction): Integer;
 
+procedure setcloexec(const fd: integer);
+
 implementation
 uses
  sysutils,msefileutils;
@@ -370,8 +372,11 @@ procedure initmutex(out mutex: pthread_mutex_t);
 var
  attr: tmutexattribute;
 begin
- attr.__mutexkind:= recursive;
+ pthread_mutexattr_init(attr);
+ pthread_mutexattr_settype(@attr,recursive);
+// attr.__mutexkind:= recursive;
  pthread_mutex_init(@mutex,@attr);
+ pthread_mutexattr_destroy(attr);
 end;
 
 procedure destroymutex(var mutex: pthread_mutex_t);
@@ -421,6 +426,17 @@ begin
  end;
 end;
 
+procedure setcloexec(const fd: integer);
+var
+ flags: integer;
+begin
+ flags:= fcntl(fd,f_getfd); 
+ if flags <> -1 then begin
+  flags:= flags or fd_cloexec;
+  fcntl(fd,f_setfd,flags)
+ end;
+end;
+
 function sys_openfile(const path: msestring; const openmode: fileopenmodety;
           const accessmode: fileaccessmodesty;
           const rights: filerightsty; out handle: integer): syserrorty;
@@ -437,6 +453,7 @@ begin
  handle:= Integer(libc.open(PChar(str1), openmodes[openmode],
         {$ifdef FPC}[{$endif}getfilerights(rights){$ifdef FPC}]{$endif}));
  if handle >= 0 then begin
+  setcloexec(handle);
   result:= sye_ok;
  end
  else begin

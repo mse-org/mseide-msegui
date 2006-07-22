@@ -488,16 +488,19 @@ begin
 
  if topipe <> nil then begin
   openpipe(topipehandles);
-  topipe^:= topipehandles.WriteDes;
+  setcloexec(topipehandles.writedes);
+  topipe^:= topipehandles.writedes;
  end;
  if frompipe <> nil then begin
   openpipe(frompipehandles);
-  frompipe^:= frompipehandles.readDes;
+  setcloexec(topipehandles.readdes);
+  frompipe^:= frompipehandles.readdes;
  end;
  if errorpipe <> nil then begin
   if errorpipe <> frompipe then begin
    openpipe(errorpipehandles);
-   errorpipe^:= errorpipehandles.readDes;
+   setcloexec(topipehandles.readdes);
+   errorpipe^:= errorpipehandles.readdes;
   end;
  end;
  procid:= libc.vfork;
@@ -631,7 +634,8 @@ var
  int1: integer;
 begin
  int1:= kill(handle,sigterm);
- if (int1 <> 0) and (errno <> esrch) then raise eoserror.create(''); //sigterm nicht moeglich
+ if (int1 <> 0) and (errno <> esrch) then raise eoserror.create(''); 
+             //sigterm nicht moeglich
  if waitpid(handle,@result,0) = -1 then raise eoserror.create('');
 end;
 

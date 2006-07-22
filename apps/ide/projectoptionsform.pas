@@ -651,21 +651,14 @@ begin
   additem(sourcedirs,'${MSELIBDIR}kernel/$TARGET/');
   sourcedirs:= reversearray(sourcedirs);
   unitdirs:= nil;
-  additem(unitdirs,'${MSELIBDIR}db/');
-  additem(unitdirs,'${MSELIBDIR}designutils/');
-  additem(unitdirs,'${MSELIBDIR}dialogs/');
-  additem(unitdirs,'${MSELIBDIR}editwidgets/');
+  additem(unitdirs,'${MSELIBDIR}*/');
   additem(unitdirs,'${MSELIBDIR}kernel/');
   additem(unitdirs,'${MSELIBDIR}kernel/$TARGET/');
-  additem(unitdirs,'${MSELIBDIR}regcomponents/');
-  additem(unitdirs,'${MSELIBDIR}serialcomm/');
-  additem(unitdirs,'${MSELIBDIR}sysutils/');
-  additem(unitdirs,'${MSELIBDIR}widgets/');
   setlength(unitdirson,length(unitdirs));
   for int1:= 0 to high(unitdirson) do begin
    unitdirson[int1]:= unitson;
   end;
-  unitdirson[4]:= unitson + $20000; //kernel include
+  unitdirson[1]:= unitson + $20000; //kernel include
   unitdirs:= reversearray(unitdirs);
   unitdirson:= reversearray(unitdirson);
   makecommand:= '${COMPILER}';

@@ -760,7 +760,7 @@ begin
    cleardebugdisp;
    setstattext('*** Running ***',mtk_running);
   end;
-  gek_error: begin
+  gek_error,gek_writeerror: begin
    setstattext('GDB: '+stopinfo.messagetext,mtk_error);
   end;
   gek_targetoutput: begin
