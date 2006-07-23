@@ -632,7 +632,8 @@ begin
  end;
 end;
 
-function tpostscriptcanvas.checkfont(const afont: fontnumty; const acodepage: integer): integer;
+function tpostscriptcanvas.checkfont(const afont: fontnumty;
+                                     const acodepage: integer): integer;
 var
  int1,int2: integer;
  bo1: boolean;
@@ -1034,29 +1035,41 @@ end;
 
 function tpostscriptcanvas.registermap(const acodepage: integer): string;
 
- procedure defpage(const avalue: encodingty);
+ procedure defpage(const glyphnames: string);
  begin
-  with avalue do begin
-   fstream.write('/'+result+' ['+nl+glyphnames+'] def'+nl);
-  end;
+  fstream.write('/'+result+' ['+nl+glyphnames+'] def'+nl);
  end;
  
 var
  map1: unicodepagety;
+ str1: string;
+ int1,int2,int3: integer;
 begin
  result:= '';
  for map1:= low(unicodepagety) to high(unicodepagety) do begin
   with encodings[map1] do begin
    if codepage = acodepage then begin
     result:= name;
-    defpage(encodings[map1]);
+    defpage(encodings[map1].glyphnames);
     break;
    end;
   end;
  end;
  if result = '' then begin
-  result:= undefmap.name;
-  defpage(undefmap);
+  result:= 'E'+hextostr(acodepage,2);
+  int3:= 256*acodepage;
+  str1:= '';
+  for int1:= 0 to 31 do begin
+   for int2:= 0 to 7 do begin
+    str1:= str1 + '/uni'+hextostr(int3,4)+',';
+    inc(int3);
+   end;
+   if int1 = 31 then begin
+    setlength(str1,length(str1)-1);  //remove last comma
+   end;
+   str1:= str1 + nl;
+  end;
+  defpage(str1);
  end;
 end;
 

@@ -6,7 +6,8 @@ uses
  msestrings;
  
 type
- unicodepagety = (ucp_00,ucp_01,ucp_02,ucp_03,ucp_04,ucp_1e,ucp_20,ucp_21,ucp22);
+ unicodepagety = (ucp_00,ucp_01,ucp_02,ucp_03,ucp_04,ucp_1e,
+                  ucp_20,ucp_21,ucp_22,ucp_25);
  encodingty = record
   codepage: integer;
   name: string;
@@ -365,9 +366,46 @@ const
 '/uni22E8,/uni22E9,/uni22EA,/uni22EB,/uni22EC,/uni22ED,/uni22EE,/uni22EF,'+nl+ //E8
 '/uni22F0,/uni22F1,/uni22F2,/uni22F3,/uni22F4,/uni22F5,/uni22F6,/uni22F7,'+nl+ //F0
 '/uni22F8,/uni22F9,/uni22FA,/uni22FB,/uni22FC,/uni22FD,/uni22FE,/uni22FF'+nl //F8
+  ),
+  (
+  codepage: $25;
+  name: 'E25';         //box drawing
+  glyphnames:
+'/uni2500,/uni2501,/uni2502,/uni2503,/uni2504,/uni2505,/uni2506,/uni2507,'+nl+ //00
+'/uni2508,/uni2509,/uni250A,/uni250B,/uni250C,/uni250D,/uni250E,/uni250F,'+nl+ //08
+'/uni2510,/uni2511,/uni2512,/uni2513,/uni2514,/uni2515,/uni2516,/uni2517,'+nl+ //10
+'/uni2518,/uni2519,/uni251A,/uni251B,/uni251C,/uni251D,/uni251E,/uni251F,'+nl+ //18
+'/uni2520,/uni2521,/uni2522,/uni2523,/uni2524,/uni2525,/uni2526,/uni2527,'+nl+ //20
+'/uni2528,/uni2529,/uni252A,/uni252B,/uni252C,/uni252D,/uni252E,/uni252F,'+nl+ //28
+'/uni2530,/uni2531,/uni2532,/uni2533,/uni2534,/uni2535,/uni2536,/uni2537,'+nl+ //30
+'/uni2538,/uni2539,/uni253A,/uni253B,/uni253C,/uni253D,/uni253E,/uni253F,'+nl+ //38
+'/uni2540,/uni2541,/uni2542,/uni2543,/uni2544,/uni2545,/uni2546,/uni2547,'+nl+ //40
+'/uni2548,/uni2549,/uni254A,/uni254B,/uni254C,/uni254D,/uni254E,/uni254F,'+nl+ //48
+'/uni2550,/uni2551,/uni2552,/uni2553,/uni2554,/uni2555,/uni2556,/uni2557,'+nl+ //50
+'/uni2558,/uni2559,/uni255A,/uni255B,/uni255C,/uni255D,/uni255E,/uni255F,'+nl+ //58
+'/uni2560,/uni2561,/uni2562,/uni2563,/uni2564,/uni2565,/uni2566,/uni2567,'+nl+ //60
+'/uni2568,/uni2569,/uni256A,/uni256B,/uni256C,/uni256D,/uni256E,/uni256F,'+nl+ //68
+'/uni2570,/uni2571,/uni2572,/uni2573,/uni2574,/uni2575,/uni2576,/uni2577,'+nl+ //70
+'/uni2578,/uni2579,/uni257A,/uni257B,/uni257C,/uni257D,/uni257E,/uni257F,'+nl+ //78
+'/uni2580,/uni2581,/uni2582,/uni2583,/uni2584,/uni2585,/uni2586,/uni2587,'+nl+ //80
+'/uni2588,/uni2589,/uni258A,/uni258B,/uni258C,/uni258D,/uni258E,/uni258F,'+nl+ //88
+'/uni2590,/uni2591,/uni2592,/uni2593,/uni2594,/uni2595,/uni2596,/uni2597,'+nl+ //90
+'/uni2598,/uni2599,/uni259A,/uni259B,/uni259C,/uni259D,/uni259E,/uni259F,'+nl+ //98
+'/a73,/uni25A1,/uni25A2,/uni25A3,/uni25A4,/uni25A5,/uni25A6,/uni25A7,'+nl+ //A0
+'/uni25A8,/uni25A9,/uni25AA,/uni25AB,/uni25AC,/uni25AD,/uni25AE,/uni25AF,'+nl+ //A8
+'/uni25B0,/uni25B1,/a76,/uni25B3,/uni25B4,/uni25B5,/uni25B6,/uni25B7,'+nl+ //B0
+'/uni25B8,/uni25B9,/uni25BA,/uni25BB,/a77,/uni25BD,/uni25BE,/uni25BF,'+nl+ //B8
+'/uni25C0,/uni25C1,/uni25C2,/uni25C3,/uni25C4,/uni25C5,/a78,/uni25C7,'+nl+ //C0
+'/uni25C8,/uni25C9,/lozenge,/uni25CB,/uni25CC,/uni25CD,/uni25CE,/a71,'+nl+ //C8
+'/uni25D0,/uni25D1,/uni25D2,/uni25D3,/uni25D4,/uni25D5,/uni25D6,/a81,'+nl+ //D0
+'/uni25D8,/uni25D9,/uni25DA,/uni25DB,/uni25DC,/uni25DD,/uni25DE,/uni25DF,'+nl+ //D8
+'/uni25E0,/uni25E1,/uni25E2,/uni25E3,/uni25E4,/uni25E5,/uni25E6,/uni25E7,'+nl+ //E0
+'/uni25E8,/uni25E9,/uni25EA,/uni25EB,/uni25EC,/uni25ED,/uni25EE,/uni25EF,'+nl+ //E8
+'/uni25F0,/uni25F1,/uni25F2,/uni25F3,/uni25F4,/uni25F5,/uni25F6,/uni25F7,'+nl+ //F0
+'/uni25F8,/uni25F9,/uni25FA,/uni25FB,/uni25FC,/uni25FD,/uni25FE,/uni25FF'+nl //F8
   )
  );
-   
+{   
  undefmap: encodingty = (
   codepage: -1;
   name: 'Exx';
@@ -405,6 +443,6 @@ const
 '/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef '+nl+      //f0 
 '/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef '+nl       //f8
  );
-
+}
 implementation
 end.
