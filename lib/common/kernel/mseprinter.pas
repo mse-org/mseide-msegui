@@ -216,8 +216,11 @@ type
    procedure writelines(const alines: array of msestring); overload;
    procedure writelines(const alines: msestringarty); overload;
    procedure writelines(const alines: richstringarty); overload;
+   
    property indentx: integer read findentx write findentx;
+                 //pixels
    property indenty: integer read findenty write findenty;
+                 //pixels
    property headerheight: integer read fheaderheight write fheaderheight;
                  //pixels
    property footerheight: integer read ffooterheight write ffooterheight;

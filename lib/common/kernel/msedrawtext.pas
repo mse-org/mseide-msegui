@@ -162,7 +162,7 @@ function textindextopos(const canvas: tcanvas; var info: drawtextinfoty;
 
 implementation
 uses
- mseguiintf,msebits,msedatalist,math;
+ mseguiintf,msebits,msedatalist,math,msereal;
 
 type
  tcanvas1 = class(tcanvas);
@@ -961,6 +961,9 @@ procedure ttabulatoritem.setpos(const avalue: real);
 begin
  if fpos <> avalue then begin
   fpos:= avalue;
+  if isemptyreal(fpos) then begin
+   fpos:= 0;
+  end;
   tcustomtabulators(fowner).changed(self);
  end;
 end;
@@ -1079,6 +1082,9 @@ end;
 procedure tcustomtabulators.setdefaultdist(const avalue: real);
 begin
  fdefaultdist:= avalue;
+ if isemptyreal(fdefaultdist) or (fdefaultdist < 0) then begin
+  fdefaultdist:= 0;
+ end;
  dochange(-1);
 end;
 

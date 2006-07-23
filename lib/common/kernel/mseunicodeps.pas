@@ -6,7 +6,7 @@ uses
  msestrings;
  
 type
- unicodepagety = (ucp_00,ucp_01,ucp_02,ucp_03,ucp_04,ucp_1e,ucp_20);
+ unicodepagety = (ucp_00,ucp_01,ucp_02,ucp_03,ucp_04,ucp_1e,ucp_20,ucp_21,ucp22);
  encodingty = record
   codepage: integer;
   name: string;
@@ -206,130 +206,6 @@ const
 '/uni04F0 /uni04F1 /uni04F2 /uni04F3 /uni04F4 /uni04F5 /uni04F6 /uni04F7'+nl+//f0
 '/uni04F8 /uni04F9 /uni04FA /uni04FB /uni04FC /uni04FD /uni04FE /uni04FF'+nl //f8
   
-{  
-'/.notdef /afii10023 /afii10051 /afii10052 /afii10053 /afii10054 /afii10055 /afii10056'+nl+  //00
-'/afii10057 /afii10058 /afii10059 /afii10060 /afii10061 /.notdef /afii10062 /afii10145'+nl+  //08
-'/afii10017 /afii10018 /afii10019 /afii10020 /afii10021 /afii10022 /afii10024 /afii10025'+nl+//10
-'/afii10026 /afii10027 /afii10028 /afii10029 /afii10030 /afii10031 /afii10032 /afii10033'+nl+//18
-'/afii10034 /afii10035 /afii10036 /afii10037 /afii10038 /afii10039 /afii10040 /afii10041'+nl+//20
-'/afii10042 /afii10043 /afii10044 /afii10045 /afii10046 /afii10047 /afii10048 /afii10049'+nl+//28
-'/afii10065 /afii10066 /afii10067 /afii10068 /afii10069 /afii10070 /afii10072 /afii10073'+nl+//30
-'/afii10074 /afii10075 /afii10076 /afii10077 /afii10078 /afii10079 /afii10080 /afii10081'+nl+//38
-'/afii10082 /afii10083 /afii10084 /afii10085 /afii10086 /afii10087 /afii10088 /afii10089'+nl+//40
-'/afii10090 /afii10091 /afii10092 /afii10093 /afii10094 /afii10095 /afii10096 /afii10097'+nl+//48
-'/.notdef /afii10071 /afii10099 /afii10100 /afii10101 /afii10102 /afii10103 /afii10104'+nl+  //50
-'/afii10105 /afii10106 /afii10107 /afii10108 /afii10109 /.notdef /afii10110 /afii10193'+nl+  //58
-'/Omegacyrillic /omegacyrillic /afii10146 /afii10194 /Eiotifiedcyrillic /eiotifiedcyrillic '+
-        '/Yuslittlecyrillic /yuslittlecyrillic'+nl+                                          //60
-'/Yuslittleiotifiedcyrillic /yuslittleiotifiedcyrillic /Yusbigcyrillic /yusbigcyrillic /Yusbigiotifiedcyrillic '+
-            '/yusbigiotifiedcyrillic /Ksicyrillic /ksicyrillic'+nl+                          //68
-'/Psicyrillic /psicyrillic /afii10147 /afii10195 /afii10148 /afii10196 '+
-             '/Izhitsadblgravecyrillic /izhitsadblgravecyrillic'+nl+                         //70  
-'/Ukcyrillic /ukcyrillic /Omegaroundcyrillic /omegaroundcyrillic '+
-          '/Omegatitlocyrillic /omegatitlocyrillic /Otcyrillic /otcyrillic'+nl+              //78
-'/Koppacyrillic /koppacyrillic /thousandcyrillic /titlocyrilliccmb /palatalizationcyrilliccmb '+
-             '/dasiapneumatacyrilliccmb /psilipneumatacyrilliccmb /.notdef'+nl+              //80
-'/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef'+nl+                //88
-'/afii10050 /afii10098 /Ghestrokecyrillic /ghestrokecyrillic /Ghemiddlehookcyrillic '+
-           '/ghemiddlehookcyrillic /Zhedescendercyrillic /zhedescendercyrillic'+nl+          //90 
-'/Zedescendercyrillic /zedescendercyrillic /Kadescendercyrillic /kadescendercyrillic /Kaverticalstrokecyrillic '+
-              '/kaverticalstrokecyrillic /Kastrokecyrillic /kastrokecyrillic'+nl+            //98
-'/Kabashkircyrillic /kabashkircyrillic /Endescendercyrillic /endescendercyrillic /Enghecyrillic '+
-          '/enghecyrillic /Pemiddlehookcyrillic /pemiddlehookcyrillic'+nl+                   //a0 
-'/Haabkhasiancyrillic /haabkhasiancyrillic /Esdescendercyrillic /esdescendercyrillic /Tedescendercyrillic '+
-         '/tedescendercyrillic /Ustraightcyrillic /ustraightcyrillic'+nl+                    //a8
-'/Ustraightstrokecyrillic /ustraightstrokecyrillic /Hadescendercyrillic /hadescendercyrillic /Tetsecyrillic '+
-          '/tetsecyrillic /Chedescendercyrillic /chedescendercyrillic'+nl+                   //b0
-'/Cheverticalstrokecyrillic /cheverticalstrokecyrillic /Shhacyrillic /shhacyrillic /Cheabkhasiancyrillic '+
-    '/cheabkhasiancyrillic /Chedescenderabkhasiancyrillic /chedescenderabkhasiancyrillic'+nl+//b8   
-'/palochkacyrillic /Zhebrevecyrillic /zhebrevecyrillic /Kahookcyrillic /kahookcyrillic '+
-          '/.notdef /.notdef /Enhookcyrillic'+nl+                                            //c0 
-'/enhookcyrillic /.notdef /.notdef /Chekhakassiancyrillic /chekhakassiancyrillic '+
-                 '/.notdef /.notdef /.notdef'+nl+                                            //c8
-'/Abrevecyrillic /abrevecyrillic /Adieresiscyrillic /adieresiscyrillic /Aiecyrillic '+
-       '/aiecyrillic /Iebrevecyrillic /iebrevecyrillic'+nl+                                  //d0
-'/Schwacyrillic /afii10846 /Schwadieresiscyrillic /schwadieresiscyrillic /Zhedieresiscyrillic '+
-          '/zhedieresiscyrillic /Zedieresiscyrillic /zedieresiscyrillic'+nl+                 //d8
-'/Dzeabkhasiancyrillic /dzeabkhasiancyrillic /Imacroncyrillic /imacroncyrillic /Idieresiscyrillic '+
-           '/idieresiscyrillic /Odieresiscyrillic /odieresiscyrillic' +nl+                   //e0
-'/Obarredcyrillic /obarredcyrillic /Obarreddieresiscyrillic /obarreddieresiscyrillic '+
-                '/.notdef /.notdef /Umacroncyrillic /umacroncyrillic'+nl+                    //e8 
-'/Udieresiscyrillic /udieresiscyrillic /Uhungarumlautcyrillic /uhungarumlautcyrillic /Chedieresiscyrillic '+
-       '/chedieresiscyrillic /.notdef /.notdef'+nl+                                          //f0
-'/Yerudieresiscyrillic /yerudieresiscyrillic /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef'+nl
-                                                                                             //f8  
-}                                 
-{  
-'/.notdef /Iocyrillic /Djecyrillic /Gjecyrillic /Ecyrillic /Dzecyrillic /Icyrillic /Yicyrillic'+nl+
-                                                                                     //00
-'/Jecyrillic /Ljecyrillic /Njecyrillic /Tshecyrillic /Kjecyrillic /.notdef /Ushortcyrillic /Dzhecyrillic'+nl+
-                                                                                     //08
-'/Acyrillic /Becyrillic /Vecyrillic /Gecyrillic /Decyrillic /Iecyrillic /Zhecyrillic /Zecyrillic'+nl+
-                                                                                     //10
-'/Iicyrillic /Iishortcyrillic /Kacyrillic /Elcyrillic /Emcyrillic /Encyrillic /Ocyrillic /Pecyrillic'+nl+
-                                                                                     //18
-'/Ercyrillic /Escyrillic /Tecyrillic /Ucyrillic /Efcyrillic /Khacyrillic /Tsecyrillic /Checyrillic'+nl+
-                                                                                     //20
-'/Shacyrillic /Shchacyrillic /Hardsigncyrillic /Yericyrillic /Softsigncyrillic '+
-         '/Ereversedcyrillic /IUcyrillic /IAcyrillic'+nl+
-                                                                                     //28
-'/acyrillic /becyrillic /vecyrillic /gecyrillic /decyrillic /iecyrillic /zhecyrillic /zecyrillic'+nl+
-                                                                                     //30
-'/iicyrillic /iishortcyrillic /kacyrillic /elcyrillic /emcyrillic /encyrillic /ocyrillic /pecyrillic'+nl+
-                                                                                     //38
-'/ercyrillic /escyrillic /tecyrillic /ucyrillic /efcyrillic /khacyrillic /tsecyrillic /checyrillic'+nl+
-                                                                                     //40
-'/shacyrillic /shchacyrillic /hardsigncyrillic /yericyrillic /softsigncyrillic '+
-           '/ereversedcyrillic /iucyrillic /iacyrillic'+nl+
-                                                                                     //48 
-'/.notdef /iocyrillic /djecyrillic /gjecyrillic /ecyrillic /dzecyrillic /icyrillic /yicyrillic'+nl+
-                                                                                     //50
-'/jecyrillic /ljecyrillic /njecyrillic /tshecyrillic /kjecyrillic /.notdef /ushortcyrillic /dzhecyrillic'+nl+
-                                                                                     //58
-'/Omegacyrillic /omegacyrillic /Yatcyrillic /yatcyrillic '+
-     '/Eiotifiedcyrillic /eiotifiedcyrillic /Yuslittlecyrillic /yuslittlecyrillic'+nl+
-                                                                                     //60
-'/Yuslittleiotifiedcyrillic /yuslittleiotifiedcyrillic /Yusbigcyrillic '+
-     '/yusbigcyrillic /Yusbigiotifiedcyrillic /yusbigiotifiedcyrillic /Ksicyrillic /ksicyrillic'+nl+
-                                                                                     //68
-'/Psicyrillic /psicyrillic /Fitacyrillic /fitacyrillic /Izhitsacyrillic '+
-     '/izhitsacyrillic /Izhitsadblgravecyrillic /izhitsadblgravecyrillic'+nl+        //70
-
-'/Ukcyrillic /ukcyrillic /Omegaroundcyrillic /omegaroundcyrillic /Omegatitlocyrillic '+
-     '/omegatitlocyrillic /Otcyrillic /otcyrillic'+nl+                               //78
-'/Koppacyrillic /koppacyrillic /thousandcyrillic /titlocyrilliccmb /palatalizationcyrilliccmb '+
-     '/dasiapneumatacyrilliccmb /psilipneumatacyrilliccmb /.notdef'+nl+              //80
-'/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef'+nl+        //88
-'/Gheupturncyrillic /gheupturncyrillic /Ghestrokecyrillic /ghestrokecyrillic /Ghemiddlehookcyrillic '+
-       '/ghemiddlehookcyrillic /Zhedescendercyrillic /zhedescendercyrillic'+nl+      //90
-'/Zedescendercyrillic /zedescendercyrillic /Kadescendercyrillic /kadescendercyrillic /Kaverticalstrokecyrillic '+
-          '/kaverticalstrokecyrillic /Kastrokecyrillic /kastrokecyrillic'+nl+        //98
-'/Kabashkircyrillic /kabashkircyrillic /Endescendercyrillic /endescendercyrillic '+
-     '/Enghecyrillic /enghecyrillic /Pemiddlehookcyrillic /pemiddlehookcyrillic'+nl+ //a0 
-'/Haabkhasiancyrillic /haabkhasiancyrillic /Esdescendercyrillic /esdescendercyrillic /Tedescendercyrillic '+
-     '/tedescendercyrillic /Ustraightcyrillic /ustraightcyrillic'+nl+                //a8
-'/Ustraightstrokecyrillic /ustraightstrokecyrillic /Hadescendercyrillic /hadescendercyrillic '+
-    '/Tetsecyrillic /tetsecyrillic /Chedescendercyrillic /chedescendercyrillic'+nl+  //b0
-'/Cheverticalstrokecyrillic /cheverticalstrokecyrillic /Shhacyrillic /shhacyrillic /Cheabkhasiancyrillic '+
-    '/cheabkhasiancyrillic /Chedescenderabkhasiancyrillic /chedescenderabkhasiancyrillic'+nl+
-                                                                                     //b8 
-'/palochkacyrillic /Zhebrevecyrillic /zhebrevecyrillic /Kahookcyrillic /kahookcyrillic '+
-         '/.notdef /.notdef /Enhookcyrillic'+nl+                                      //c0
-'/enhookcyrillic /.notdef /.notdef /Chekhakassiancyrillic /chekhakassiancyrillic /.notdef /.notdef /.notdef'+nl+
-                                                                                     //c8
-'/Abrevecyrillic /abrevecyrillic /Adieresiscyrillic /adieresiscyrillic /Aiecyrillic '+
-        '/aiecyrillic /Iebrevecyrillic /iebrevecyrillic'+nl+                         //d0  
-'/Schwacyrillic /schwacyrillic /Schwadieresiscyrillic /schwadieresiscyrillic /Zhedieresiscyrillic /zhedieresiscyrillic '+
-          '/Zedieresiscyrillic /zedieresiscyrillic'+nl+                              //d8
-'/Dzeabkhasiancyrillic /dzeabkhasiancyrillic /Imacroncyrillic /imacroncyrillic /Idieresiscyrillic /idieresiscyrillic '
-             +'/Odieresiscyrillic /odieresiscyrillic'+nl+                            //e0
-'/Obarredcyrillic /obarredcyrillic /Obarreddieresiscyrillic /obarreddieresiscyrillic /.notdef '+
-       '/.notdef /Umacroncyrillic /umacroncyrillic'+nl+                              //e8
-'/Udieresiscyrillic /udieresiscyrillic /Uhungarumlautcyrillic /uhungarumlautcyrillic '+
-         '/Chedieresiscyrillic /chedieresiscyrillic /.notdef /.notdef'+nl+           //f0
-'/Yerudieresiscyrillic /yerudieresiscyrillic /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef'+nl
-                                                                                     //f8
-}                                                                                     
    ),                                                                                     
   (
   codepage: $1E;
@@ -415,8 +291,82 @@ const
 '/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef '+nl+       //e8
 '/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef '+nl+       //fo
 '/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef '+nl        //f8
+  ),
+  (
+  codepage: $21;
+  name: 'E21';         //letterlike symbols
+  glyphnames:
+'/uni2100,/uni2101,/uni2102,/uni2103,/uni2104,/uni2105,/uni2106,/uni2107,'+nl+ //00
+'/uni2108,/uni2109,/uni210A,/uni210B,/uni210C,/uni210D,/uni210E,/uni210F,'+nl+ //08
+'/uni2110,/Ifraktur,/uni2112,/uni2113,/uni2114,/uni2115,/uni2116,/uni2117,'+nl+ //10
+'/weierstrass,/uni2119,/uni211A,/uni211B,/Rfraktur,/uni211D,/uni211E,/uni211F,'+nl+ //18
+'/uni2120,/uni2121,/uni2122,/uni2123,/uni2124,/uni2125,/Omega,/uni2127,'+nl+ //20
+'/uni2128,/uni2129,/uni212A,/uni212B,/uni212C,/uni212D,/uni212E,/uni212F,'+nl+ //28
+'/uni2130,/uni2131,/uni2132,/uni2133,/uni2134,/aleph,/uni2136,/uni2137,'+nl+ //30
+'/uni2138,/uni2139,/uni213A,/uni213B,/uni213C,/uni213D,/uni213E,/uni213F,'+nl+ //38
+'/uni2140,/uni2141,/uni2142,/uni2143,/uni2144,/uni2145,/uni2146,/uni2147,'+nl+ //40
+'/uni2148,/uni2149,/uni214A,/uni214B,/uni214C,/uni214D,/uni214E,/uni214F,'+nl+ //48
+'/uni2150,/uni2151,/uni2152,/uni2153,/uni2154,/uni2155,/uni2156,/uni2157,'+nl+ //50
+'/uni2158,/uni2159,/uni215A,/uni215B,/uni215C,/uni215D,/uni215E,/uni215F,'+nl+ //58
+'/uni2160,/uni2161,/uni2162,/uni2163,/uni2164,/uni2165,/uni2166,/uni2167,'+nl+ //60
+'/uni2168,/uni2169,/uni216A,/uni216B,/uni216C,/uni216D,/uni216E,/uni216F,'+nl+ //68
+'/uni2170,/uni2171,/uni2172,/uni2173,/uni2174,/uni2175,/uni2176,/uni2177,'+nl+ //70
+'/uni2178,/uni2179,/uni217A,/uni217B,/uni217C,/uni217D,/uni217E,/uni217F,'+nl+ //78
+'/uni2180,/uni2181,/uni2182,/uni2183,/uni2184,/uni2185,/uni2186,/uni2187,'+nl+ //80
+'/uni2188,/uni2189,/uni218A,/uni218B,/uni218C,/uni218D,/uni218E,/uni218F,'+nl+ //88
+'/arrowleft,/arrowup,/a161,/arrowdown,/a163,/a164,/uni2196,/uni2197,'+nl+ //90
+'/uni2198,/uni2199,/uni219A,/uni219B,/uni219C,/uni219D,/uni219E,/uni219F,'+nl+ //98
+'/uni21A0,/uni21A1,/uni21A2,/uni21A3,/uni21A4,/uni21A5,/uni21A6,/uni21A7,'+nl+ //A0
+'/uni21A8,/uni21A9,/uni21AA,/uni21AB,/uni21AC,/uni21AD,/uni21AE,/uni21AF,'+nl+ //A8
+'/uni21B0,/uni21B1,/uni21B2,/uni21B3,/uni21B4,/carriagereturn,/uni21B6,/uni21B7,'+nl+ //B0
+'/uni21B8,/uni21B9,/uni21BA,/uni21BB,/uni21BC,/uni21BD,/uni21BE,/uni21BF,'+nl+ //B8
+'/uni21C0,/uni21C1,/uni21C2,/uni21C3,/uni21C4,/uni21C5,/uni21C6,/uni21C7,'+nl+ //C0
+'/uni21C8,/uni21C9,/uni21CA,/uni21CB,/uni21CC,/uni21CD,/uni21CE,/uni21CF,'+nl+ //C8
+'/arrowdblleft,/arrowdblup,/arrowdblright,/arrowdbldown,/arrowdblboth,/uni21D5,/uni21D6,/uni21D7,'+nl+ //D0
+'/uni21D8,/uni21D9,/uni21DA,/uni21DB,/uni21DC,/uni21DD,/uni21DE,/uni21DF,'+nl+ //D8
+'/uni21E0,/uni21E1,/uni21E2,/uni21E3,/uni21E4,/uni21E5,/uni21E6,/uni21E7,'+nl+ //E0
+'/uni21E8,/uni21E9,/uni21EA,/uni21EB,/uni21EC,/uni21ED,/uni21EE,/uni21EF,'+nl+ //E8
+'/uni21F0,/uni21F1,/uni21F2,/uni21F3,/uni21F4,/uni21F5,/uni21F6,/uni21F7,'+nl+ //F0
+'/uni21F8,/uni21F9,/uni21FA,/uni21FB,/uni21FC,/uni21FD,/uni21FE,/uni21FF'+nl //F8
+  ),
+  (
+  codepage: $22;
+  name: 'E22';         //mathematical operators
+  glyphnames:
+'/universal,/uni2201,/partialdiff,/existential,/uni2204,/emptyset,/Delta,/gradient,'+nl+ //00
+'/element,/notelement,/uni220A,/suchthat,/uni220C,/uni220D,/uni220E,/product,'+nl+ //08
+'/uni2210,/summation,/minus,/uni2213,/uni2214,/fraction,/uni2216,/asteriskmath,'+nl+ //10
+'/uni2218,/periodcentered,/radical,/uni221B,/uni221C,/proportional,/infinity,/uni221F,'+nl+ //18
+'/angle,/uni2221,/uni2222,/uni2223,/uni2224,/uni2225,/uni2226,/logicaland,'+nl+ //20
+'/logicalor,/intersection,/union,/integral,/uni222C,/uni222D,/uni222E,/uni222F,'+nl+ //28
+'/uni2230,/uni2231,/uni2232,/uni2233,/therefore,/uni2235,/uni2236,/uni2237,'+nl+ //30
+'/uni2238,/uni2239,/uni223A,/uni223B,/similar,/uni223D,/uni223E,/uni223F,'+nl+ //38
+'/uni2240,/uni2241,/uni2242,/uni2243,/uni2244,/congruent,/uni2246,/uni2247,'+nl+ //40
+'/approxequal,/uni2249,/uni224A,/uni224B,/uni224C,/uni224D,/uni224E,/uni224F,'+nl+ //48
+'/uni2250,/uni2251,/uni2252,/uni2253,/uni2254,/uni2255,/uni2256,/uni2257,'+nl+ //50
+'/uni2258,/uni2259,/uni225A,/uni225B,/uni225C,/uni225D,/uni225E,/uni225F,'+nl+ //58
+'/notequal,/equivalence,/uni2262,/uni2263,/lessequal,/greaterequal,/uni2266,/uni2267,'+nl+ //60
+'/uni2268,/uni2269,/uni226A,/uni226B,/uni226C,/uni226D,/uni226E,/uni226F,'+nl+ //68
+'/uni2270,/uni2271,/uni2272,/uni2273,/uni2274,/uni2275,/uni2276,/uni2277,'+nl+ //70
+'/uni2278,/uni2279,/uni227A,/uni227B,/uni227C,/uni227D,/uni227E,/uni227F,'+nl+ //78
+'/uni2280,/uni2281,/propersubset,/propersuperset,/notsubset,/uni2285,/reflexsubset,/reflexsuperset,'+nl+ //80
+'/uni2288,/uni2289,/uni228A,/uni228B,/uni228C,/uni228D,/uni228E,/uni228F,'+nl+ //88
+'/uni2290,/uni2291,/uni2292,/uni2293,/uni2294,/circleplus,/uni2296,/circlemultiply,'+nl+ //90
+'/uni2298,/uni2299,/uni229A,/uni229B,/uni229C,/uni229D,/uni229E,/uni229F,'+nl+ //98
+'/uni22A0,/uni22A1,/uni22A2,/uni22A3,/uni22A4,/perpendicular,/uni22A6,/uni22A7,'+nl+ //A0
+'/uni22A8,/uni22A9,/uni22AA,/uni22AB,/uni22AC,/uni22AD,/uni22AE,/uni22AF,'+nl+ //A8
+'/uni22B0,/uni22B1,/uni22B2,/uni22B3,/uni22B4,/uni22B5,/uni22B6,/uni22B7,'+nl+ //B0
+'/uni22B8,/uni22B9,/uni22BA,/uni22BB,/uni22BC,/uni22BD,/uni22BE,/uni22BF,'+nl+ //B8
+'/uni22C0,/uni22C1,/uni22C2,/uni22C3,/uni22C4,/dotmath,/uni22C6,/uni22C7,'+nl+ //C0
+'/uni22C8,/uni22C9,/uni22CA,/uni22CB,/uni22CC,/uni22CD,/uni22CE,/uni22CF,'+nl+ //C8
+'/uni22D0,/uni22D1,/uni22D2,/uni22D3,/uni22D4,/uni22D5,/uni22D6,/uni22D7,'+nl+ //D0
+'/uni22D8,/uni22D9,/uni22DA,/uni22DB,/uni22DC,/uni22DD,/uni22DE,/uni22DF,'+nl+ //D8
+'/uni22E0,/uni22E1,/uni22E2,/uni22E3,/uni22E4,/uni22E5,/uni22E6,/uni22E7,'+nl+ //E0
+'/uni22E8,/uni22E9,/uni22EA,/uni22EB,/uni22EC,/uni22ED,/uni22EE,/uni22EF,'+nl+ //E8
+'/uni22F0,/uni22F1,/uni22F2,/uni22F3,/uni22F4,/uni22F5,/uni22F6,/uni22F7,'+nl+ //F0
+'/uni22F8,/uni22F9,/uni22FA,/uni22FB,/uni22FC,/uni22FD,/uni22FE,/uni22FF'+nl //F8
   )
-  );
+ );
    
  undefmap: encodingty = (
   codepage: -1;

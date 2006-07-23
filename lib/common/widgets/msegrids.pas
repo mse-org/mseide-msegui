@@ -5520,12 +5520,18 @@ begin
  end
  else begin
   if fnoinvalidate = 0 then begin
-//   incrementarraylength(pointer(finvalidatedcells),typeinfo(gridcoordty));
-   incrementarraylength(pointer(finvalidatedcells),typeinfo(gridcoordarty));
-   finvalidatedcells[high(finvalidatedcells)]:=
-                         makegridcoord(sender.colindex,row);
+   if not (gs_invalidated in fstate) then begin
+    if high(finvalidatedcells) > 20 then begin
+     include(fstate,gs_invalidated);
+     finvalidatedcells:= nil;
+    end
+    else begin
+     incrementarraylength(pointer(finvalidatedcells),typeinfo(gridcoordarty));
+     finvalidatedcells[high(finvalidatedcells)]:=
+                          makegridcoord(sender.colindex,row);
+    end;
+   end;
   end;
-// include(fstate,gs_invalidated);
  end;
 end;
 
@@ -8168,6 +8174,7 @@ begin
     rowcount:= int2;
    end;
   end;
+  checksort;
   if gs_invalidated in fstate then begin
    invalidate;
    finvalidatedcells:= nil;
