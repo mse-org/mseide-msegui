@@ -836,6 +836,7 @@ type
                 default js_miter;
 
    property paintdevice: paintdevicety read fdrawinfo.paintdevice;
+   property gchandle: cardinal read getgchandle;
  end;
 
  pixmapstatety = (pms_monochrome,pms_ownshandle,pms_maskvalid);
