@@ -37,7 +37,6 @@ type
    function isfontstored: Boolean;
    procedure setfont(const Value: tframefont);
    function getfont: tframefont;
-   procedure createfont;
    procedure setcaptionpos(const Value: captionposty);
    procedure setcaptiondist(const Value: integer);
    procedure setcaptionoffset(const Value: integer);
@@ -57,6 +56,7 @@ type
   public
    constructor create(const intf: iframe);
    destructor destroy; override;
+   procedure createfont;
    procedure dopaintframe(const canvas: tcanvas; const rect: rectty); override;
    procedure updatemousestate(const sender: twidget; const apos: pointty); override;
    function pointincaption(const point: pointty): boolean; override;
@@ -361,7 +361,7 @@ type
    procedure clientmouseevent(var info: mouseeventinfoty); override;
    procedure showhint(var info: hintinfoty); override;
    procedure dopopup(var amenu: tpopupmenu; var mouseinfo: mouseeventinfoty); virtual;
-   procedure createframe; override;
+   procedure createframe1; override;
    procedure enabledchanged; override;
    property frame: tcaptionframe read getframe write setframe;
    property face: tface read getface write setface;
@@ -509,7 +509,7 @@ type
    function getframe: tscrollframe;
    procedure setframe(const Value: tscrollframe);
   protected
-   procedure createframe; override;
+   procedure createframe1; override;
    procedure mouseevent(var info: mouseeventinfoty); override;
    procedure scrollevent(sender: tcustomscrollbar; event: scrolleventty); virtual;
   public
@@ -572,11 +572,11 @@ type
    procedure sizechanged; override;
    procedure minscrollsizechanged;
    procedure dofontheightdelta(var delta: integer); override;
-   procedure createframe; override;
+   procedure createframe1; override;
    procedure doscroll(const dist: pointty); override;
    procedure mouseevent(var info: mouseeventinfoty); override;
    procedure writestate(writer: twriter); override;
-   procedure createface; override;
+   procedure createface1; override;
    function calcminscrollsize: sizety; override;
    procedure setclientsize(const asize: sizety); override;
    procedure loaded; override;
@@ -2651,7 +2651,7 @@ begin
  end;
 end;
 
-procedure tactionwidget.createframe;
+procedure tactionwidget.createframe1;
 begin
  tcaptionframe.create(iframe(self));
 end;
@@ -2939,11 +2939,11 @@ end;
 constructor tscrollingwidget.create(aowner: tcomponent);
 begin
  inherited;
- createframe;
+ createframe1;
  setstaticframe(true);
 end;
 
-procedure tscrollingwidget.createframe;
+procedure tscrollingwidget.createframe1;
 begin
  tscrollboxframe.create(iframe(self),self);
 end;
@@ -2991,7 +2991,7 @@ begin
  inherited;
 end;
 
-procedure tscrollingwidget.createface;
+procedure tscrollingwidget.createface1;
 begin
  tscrollface.create(twidget(self));
 end;
@@ -3079,10 +3079,10 @@ end;
 constructor tscrollbarwidget.create(aowner: tcomponent);
 begin
  inherited;
- createframe;
+ createframe1;
 end;
 
-procedure tscrollbarwidget.createframe;
+procedure tscrollbarwidget.createframe1;
 begin
  tscrollframe.create(self,iscrollbar(self));
 end;
@@ -3148,7 +3148,7 @@ var
 begin
  fcaption:= info.caption;
  inherited create(aowner,transientfor);
- createframe;
+ createframe1;
  fframe.levelo:= 1;
  fframe.framei_left:= 1;
  fframe.framei_top:= 1;

@@ -42,7 +42,7 @@ type
    function getframe: tellipsebuttonframe;
    procedure setframe(const avalue: tellipsebuttonframe);
   protected
-   procedure createframe; override;
+   procedure createframe1; override;
    procedure dokeydown(var info: keyeventinfoty); override;
    procedure mouseevent(var info: mouseeventinfoty); override;
     //ibutton
@@ -105,10 +105,10 @@ end;
 constructor tdialogstringedit.create(aowner: tcomponent);
 begin
  inherited;
- createframe;
+ createframe1;
 end;
 
-procedure tdialogstringedit.createframe;
+procedure tdialogstringedit.createframe1;
 begin
  tellipsebuttonframe.create(iframe(self),ibutton(self));
 end;

@@ -285,7 +285,7 @@ type
   protected
    procedure mouseevent(var info: mouseeventinfoty); override;
    procedure updatewindowinfo(var info: windowinfoty); override;
-   procedure createframe; override;
+   procedure createframe1; override;
    //idockcontroller
    function checkdock(var info: draginfoty): boolean;
    function getbuttonrects(const index: dockbuttonrectty): rectty;
@@ -2629,7 +2629,7 @@ begin
  end;
 end;
 
-procedure tdockpanel.createframe;
+procedure tdockpanel.createframe1;
 begin
  tgripframe.create(iframe(self),fdragdock);
 end;

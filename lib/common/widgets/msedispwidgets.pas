@@ -76,7 +76,7 @@ type
    procedure dopaint(const canvas: tcanvas); override;
    procedure clientrectchanged; override;
    procedure fontchanged; override;
-   procedure createframe; override;
+   procedure createframe1; override;
    procedure loaded; override;
    procedure showhint(var info: hintinfoty); override;
   public
@@ -279,7 +279,7 @@ end;
 procedure tdispwidget.initnewcomponent;
 begin
  inherited;
- createframe;
+ createframe1;
  synctofontheight;
 end;
 
@@ -310,7 +310,7 @@ begin
  invalidate;
 end;
 
-procedure tdispwidget.createframe;
+procedure tdispwidget.createframe1;
 begin
  tdispframe.create(iframe(self));
 end;

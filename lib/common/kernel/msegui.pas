@@ -26,7 +26,7 @@ const
  hintdelaytime = 500000; //us
  defaulthintshowtime = 3000000; //us
  mouseparktime = 500000; //us
- defaultdblclicktime = 500000; //us
+ defaultdblclicktime = 400000; //us
 
  mousebuttons = [ss_left,ss_right,ss_middle];
 
@@ -753,9 +753,6 @@ type
 
    procedure registerchildwidget(const child: twidget); virtual;
    procedure unregisterchildwidget(const child: twidget); virtual;
-   procedure createframe; virtual;
-   procedure createface; virtual;
-   procedure createfont;
    function isfontstored: Boolean;
    procedure setfont(const avalue: twidgetfont);
    function getfont: twidgetfont;
@@ -846,12 +843,18 @@ type
    procedure setbottom(const avalue: integer);
    function ownswindow1: boolean;    //does not check winid
 
+   procedure createframe1; virtual;
+   procedure createface1; virtual;
+   procedure createfont1;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
    procedure afterconstruction; override;
    procedure initnewcomponent; override;
-
+   procedure createframe;
+   procedure createface;
+   procedure createfont;
+   
    function widgetstate: widgetstatesty;                 //iframe
    property widgetstate1: widgetstates1ty read fwidgetstate1;
    function hasparent: boolean; override;               //tcomponent
@@ -3570,6 +3573,27 @@ begin
  synctofontheight;
 end;
 
+procedure twidget.createframe;
+begin
+ if fframe = nil then begin
+  createframe1;
+ end;
+end;
+
+procedure twidget.createface;
+begin
+ if fface = nil then begin
+  createface1;
+ end;
+end;
+
+procedure twidget.createfont;
+begin
+ if ffont = nil then begin
+  createfont1;
+ end;
+end;
+
 function twidget.widgetcount: integer;
 begin
  result:= length(fwidgets);
@@ -5125,7 +5149,7 @@ begin
  end;
 end;
 
-procedure twidget.createframe;
+procedure twidget.createframe1;
 begin
  tframe.create(self);
 end;
@@ -5201,7 +5225,7 @@ begin
  end;
 end;
 
-procedure twidget.createface;
+procedure twidget.createface1;
 begin
  tface.create(self);
 end;
@@ -7397,7 +7421,7 @@ begin       //!!!!todo
  end;
 end;
 
-procedure twidget.createfont;
+procedure twidget.createfont1;
 begin
  if ffont = nil then begin
   ffont:= twidgetfont.create;
@@ -7423,7 +7447,7 @@ end;
 
 function twidget.getfont: twidgetfont;
 begin
- getoptionalobject(ffont,{$ifdef FPC}@{$endif}createfont);
+ getoptionalobject(ffont,{$ifdef FPC}@{$endif}createfont1);
  if ffont <> nil then begin
   result:= ffont;
  end
@@ -7455,14 +7479,14 @@ end;
 procedure twidget.setfont(const avalue: twidgetfont);
 begin
  if avalue <> ffont then begin
-  setoptionalobject(avalue,ffont,{$ifdef FPC}@{$endif}createfont);
+  setoptionalobject(avalue,ffont,{$ifdef FPC}@{$endif}createfont1);
   fontchanged;
  end;
 end;
 
 function twidget.getframe: tcustomframe;
 begin
- getoptionalobject(fframe,{$ifdef FPC}@{$endif}createframe);
+ getoptionalobject(fframe,{$ifdef FPC}@{$endif}createframe1);
  result:= fframe;
 end;
 
@@ -7474,13 +7498,13 @@ begin
   end;
  end
  else begin
-  setoptionalobject(avalue,fframe,{$ifdef FPC}@{$endif}createframe);
+  setoptionalobject(avalue,fframe,{$ifdef FPC}@{$endif}createframe1);
  end;
 end;
 
 function twidget.getface: tcustomface;
 begin
- getoptionalobject(fface,{$ifdef FPC}@{$endif}createface);
+ getoptionalobject(fface,{$ifdef FPC}@{$endif}createface1);
  result:= fface;
 end;
 
@@ -7492,7 +7516,7 @@ begin
   end;
  end
  else begin
-  setoptionalobject(avalue,fface,{$ifdef FPC}@{$endif}createface);
+  setoptionalobject(avalue,fface,{$ifdef FPC}@{$endif}createface1);
  end;
  invalidate;
 end;

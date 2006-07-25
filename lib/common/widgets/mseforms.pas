@@ -280,7 +280,7 @@ type
    function getframe: tgripframe;
    procedure setframe(const avalue: tgripframe);
   protected
-   procedure createframe; override;
+   procedure createframe1; override;
    procedure updateoptions; override;
    function getoptions: formoptionsty; override;
    procedure statreading; override;
@@ -1270,7 +1270,7 @@ begin
  inherited setframe(avalue);
 end;
 
-procedure tcustomdockform.createframe;
+procedure tcustomdockform.createframe1;
 begin
  tgripframe.create(iframe(self),fdragdock);
 end;

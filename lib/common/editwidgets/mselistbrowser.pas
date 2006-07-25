@@ -413,7 +413,7 @@ type
    procedure dokeydown(var info: keyeventinfoty); override;
 
    procedure getitemvalues; virtual;
-   procedure createframe; override;
+   procedure createframe1; override;
 
    //ibuttonaction
    procedure buttonaction(var action: buttonactionty;
@@ -463,7 +463,7 @@ type
    procedure setframe(const Value: tdropdownbuttonframe);
    function getdropdowncontrollerclass: dropdownlistcontrollerclassty; virtual;
    procedure dokeydown(var info: keyeventinfoty); override;
-   procedure createframe; override;
+   procedure createframe1; override;
 
    procedure editnotification(var info: editnotificationinfoty); override;
    //idropdown
@@ -2268,7 +2268,7 @@ begin
  result:= fvalue;
 end;
 
-procedure titemedit.createframe;
+procedure titemedit.createframe1;
 begin
  tcustombuttonframe.create(self,ibutton(self));
 end;
@@ -2422,7 +2422,7 @@ begin
  result:= tdropdownlistcontroller;
 end;
 
-procedure tdropdownitemedit.createframe;
+procedure tdropdownitemedit.createframe1;
 begin
  fdropdown.createframe;
 end;

@@ -64,7 +64,7 @@ type
    
    function getoptionsedit: optionseditty; virtual;
    procedure loaded; override;
-   procedure createframe; override;
+   procedure createframe1; override;
 
    function getgridintf: iwidgetgrid;
    procedure checkgrid;
@@ -720,7 +720,7 @@ begin
  fcolorglyph:= cl_glyph;
 end;
 
-procedure tgraphdataedit.createframe;
+procedure tgraphdataedit.createframe1;
 begin
  tgrapheditframe.create(iframe(self));
 end;
@@ -843,7 +843,7 @@ end;
 procedure tgraphdataedit.initnewcomponent;
 begin
  inherited;
- createframe;
+ createframe1;
 end;
 
 function tgraphdataedit.getstatvarname: msestring;

@@ -74,7 +74,7 @@ type
    procedure dokeydown(var info: keyeventinfoty); override;
    procedure childdeactivated(const sender: tpopupmenuwidget); virtual;
    procedure fontchanged; override;
-   procedure createframe; override;
+   procedure createframe1; override;
   public
    constructor create(instance: ppopupmenuwidget;
        const amenu: tmenuitem; const transientfor: twindow;
@@ -108,7 +108,7 @@ type
    procedure activatemenu(keymode: boolean; aclicked: boolean); override;
    procedure deactivatemenu; override;
    procedure selectmenu; override;
-   procedure createframe; override;
+   procedure createframe1; override;
   public
    procedure loaded; override;
    procedure release; override;
@@ -528,7 +528,7 @@ begin
  end;
  initlayoutinfo(self,flayout,amenu,[],cl_black);
  inherited create(aowner,transientfor);
- createframe;
+ createframe1;
  if menucomp <> nil then begin
   assigntemplate(menucomp.template);
  end
@@ -566,7 +566,7 @@ begin
  inherited;
 end;
 
-procedure tpopupmenuwidget.createframe;
+procedure tpopupmenuwidget.createframe1;
 begin
  inherited;
  fframe.levelo:= 1;
@@ -577,17 +577,17 @@ begin
  with ftemplates do begin
   if frame <> nil then begin
    if fframe = nil then begin
-    createframe;
+    createframe1;
    end;
    fframe.assign(frame);
   end
   else begin
    freeandnil(fframe); //restore original values
-   createframe;
+   createframe1;
   end;
   if face <> nil then begin
    if fface = nil then begin
-    createface;
+    createface1;
    end;
    fface.assign(face);
   end
@@ -1187,7 +1187,7 @@ begin
  create(aowner,amenu.menu);
 end;
 
-procedure tmainmenuwidget.createframe;
+procedure tmainmenuwidget.createframe1;
 begin
  inherited;
  fframe.levelo:= 0;

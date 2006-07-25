@@ -1090,7 +1090,7 @@ type
    procedure dofontheightdelta(var delta: integer); override;
    procedure fontchanged; override;
    procedure clientrectchanged; override;
-   procedure createframe; override;
+   procedure createframe1; override;
    function getscrollrect: rectty;
    procedure setscrollrect(const rect: rectty);
    function scrollcaret: boolean; virtual;
@@ -4770,7 +4770,7 @@ begin
  fzebra_step:= 2;
 
  inherited;
- createframe;
+ createframe1;
  fobjectpicker:= tobjectpicker.create(iobjectpicker(self));
  foptionswidget:= defaultgridwidgetoptions;
  exclude(fstate,gs_updatelocked);
@@ -5454,7 +5454,7 @@ begin
  end;
 end;
 
-procedure tcustomgrid.createframe;
+procedure tcustomgrid.createframe1;
 begin
  tgridframe.create(iframe(self),self,iautoscrollframe(self));
 end;

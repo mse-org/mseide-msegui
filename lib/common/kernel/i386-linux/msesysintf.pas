@@ -373,7 +373,7 @@ var
  attr: tmutexattribute;
 begin
  pthread_mutexattr_init(attr);
- pthread_mutexattr_settype(@attr,recursive);
+ pthread_mutexattr_settype(attr,recursive);
 // attr.__mutexkind:= recursive;
  pthread_mutex_init(@mutex,@attr);
  pthread_mutexattr_destroy(attr);

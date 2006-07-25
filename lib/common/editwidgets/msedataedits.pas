@@ -198,7 +198,7 @@ type
   protected
    procedure setupeditor; override;
    procedure editnotification(var info: editnotificationinfoty); override;
-   procedure createframe; override;
+   procedure createframe1; override;
    procedure mouseevent(var info: mouseeventinfoty); override;
    procedure dokeydown(var info: keyeventinfoty); override;
            //iscrollbar
@@ -267,7 +267,7 @@ type
    procedure setframe(const avalue: tdropdownbuttonframe);
   protected
    fdropdown: tcustomdropdowncontroller;
-   procedure createframe; override;
+   procedure createframe1; override;
    procedure dokeydown(var info: keyeventinfoty); override;
    procedure mouseevent(var info: mouseeventinfoty); override;
    procedure editnotification(var info: editnotificationinfoty); override;
@@ -787,7 +787,7 @@ type
    procedure setframe(const avalue: tdropdownbuttonframe);
    function getframe: tdropdownbuttonframe;
   protected
-   procedure createframe; override;
+   procedure createframe1; override;
    procedure dokeydown(var info: keyeventinfoty); override;
    procedure mouseevent(var info: mouseeventinfoty); override;
    procedure setoptionsedit(const avalue: optionseditty); override;
@@ -1694,7 +1694,7 @@ begin
  fcreated:= true;
 end;
 
-procedure tcustommemoedit.createframe;
+procedure tcustommemoedit.createframe1;
 begin
  tscrolleditframe.create(iframe(self),iscrollbar(self));
  with frame do begin
@@ -2168,7 +2168,7 @@ begin
  inherited setframe(avalue);
 end;
 
-procedure tcustomdropdownedit.createframe;
+procedure tcustomdropdownedit.createframe1;
 begin
  fdropdown.createframe;
 end;
@@ -3600,7 +3600,7 @@ begin
  result:= tdropdownbuttonframe(inherited getframe);
 end;
 
-procedure tcustomcalendardatetimeedit.createframe;
+procedure tcustomcalendardatetimeedit.createframe1;
 begin
  fdropdown.createframe;
 end;

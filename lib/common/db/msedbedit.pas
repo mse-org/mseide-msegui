@@ -814,7 +814,7 @@ type
   private
    fdatalink: tdropdownlistdatalink;
   protected
-   procedure createframe; override;
+   procedure createframe1; override;
    procedure createdatacol(const index: integer; out item: tdatacol); override;
    procedure initcols(const acols: tdropdowncols); override;
    procedure docellevent(var info: celleventinfoty); override;
@@ -995,7 +995,7 @@ type
   protected
    function getgriddatalink: pointer; override;
    procedure setoptionsgrid(const avalue: optionsgridty); override;
-   procedure createframe; override;
+   procedure createframe1; override;
    function createfixcols: tfixcols; override;
    procedure updatelayout; override;
    procedure initcellinfo(var info: cellinfoty); override;
@@ -1187,7 +1187,7 @@ type
   protected
    procedure setoptionsgrid(const avalue: optionsgridty); override;
    procedure doasyncevent(var atag: integer); override;
-   procedure createframe; override;
+   procedure createframe1; override;
    function getoptionsedit: optionseditty; override;
    function createfixcols: tfixcols; override;
    function createdatacols: tdatacols; override;
@@ -1305,7 +1305,7 @@ type
    procedure findnext(var recno: integer);
    function getrecno(const aindex: integer): integer;
    procedure dorowcountchanged(const countbefore,newcount: integer); override;
-   procedure createframe; override;
+   procedure createframe1; override;
    procedure createdatacol(const index: integer; out item: tdatacol); override;
    procedure initcols(const acols: tdropdowncols); override;
    procedure docellevent(var info: celleventinfoty); override;
@@ -3556,7 +3556,7 @@ begin
  fdatalink.MoveBy(-1);
 end;
 
-procedure tdbdropdownlist.createframe;
+procedure tdbdropdownlist.createframe1;
 begin
  tdbgridframe.create(iframe(self),self,iautoscrollframe(self));
 end;
@@ -4809,7 +4809,7 @@ begin
  inherited setoptionsgrid(avalue - [og_sorted]);
 end;
 
-procedure tcustomdbwidgetgrid.createframe;
+procedure tcustomdbwidgetgrid.createframe1;
 begin
  tdbgridframe.create(iframe(self),self,iautoscrollframe(self));
 end;
@@ -5258,7 +5258,7 @@ begin
  result:= fnonullcheck > 0;
 end;
 
-procedure tcustomdbstringgrid.createframe;
+procedure tcustomdbstringgrid.createframe1;
 begin
  tdbgridframe.create(iframe(self),self,iautoscrollframe(self));
 end;
@@ -6269,7 +6269,7 @@ begin
  end;
 end;
 
-procedure tlbdropdownlist.createframe;
+procedure tlbdropdownlist.createframe1;
 begin
  tdbgridframe.create(iframe(self),self,iautoscrollframe(self));
 end;
