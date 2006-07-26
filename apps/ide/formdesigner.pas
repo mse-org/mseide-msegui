@@ -316,7 +316,7 @@ var
  end;
  
 begin
- isdatamodule:= not (module is tmseform);
+ isdatamodule:= not (module is twidget);
  toplevel:= true;
  result:= checkcomponent(module,pos);
  if result = module then begin
