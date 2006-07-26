@@ -830,6 +830,7 @@ begin
  stream2:= tmemorystream.Create;
  try
   writer:= twriter.Create(stream1,4096);
+  tabbefore:= nil; //compiler warning
   if destmethodtab <> nil then begin
    tabbefore:= swapmethodtable(descendent,destmethodtab);
   end;
