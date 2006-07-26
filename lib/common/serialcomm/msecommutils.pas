@@ -15,7 +15,7 @@ interface
 uses
  msedataedits,msecommport,msetypes,msedatalist,Classes,mseclasses,msedropdownlist;
 type
- setcommnreventty =  procedure(sender: tobject; var avalue: commnrty;
+ setcommnreventty =  procedure(const sender: tobject; var avalue: commnrty;
                           var accept: boolean) of object;
 
  tcommselector = class(tcustomselector)
