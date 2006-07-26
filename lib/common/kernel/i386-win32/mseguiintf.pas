@@ -2742,20 +2742,32 @@ var
  bo1: boolean;
 begin
  transformpoints(drawinfo,false);
- with drawinfo do begin
-  bo1:= checkgc(gc,[gcf_foregroundpenvalid,gcf_selectforegroundpen]);
-  if ((win32gcty(gc.platformdata).peninfo.width <= 1) or
-          (win32gcty(gc.platformdata).peninfo.capstyle = cs_butt)) and (points.count > 0) then begin
-   po1:= @pointarty(buffer.buffer)[points.count-1]; //endpoint
-   if (po1^.x <> pointarty(buffer.buffer)[0].x) or
-          (po1^.y <> pointarty(buffer.buffer)[0].y) then  begin
-    adjustlineend(po1);
+ with drawinfo,points do begin
+  if closed then begin
+   bo1:= checkgc(gc,[gcf_foregroundpenvalid,gcf_selectforegroundpen,
+                        gcf_selectnullbrush]);
+   windows.polygon(gc.handle,buffer.buffer^,count);
+   if bo1 then begin
+    checkgc2(gc);
+    windows.polygon(gc.handle,buffer.buffer^,count);
    end;
-  end;
-  windows.polyline(gc.handle,buffer.buffer^,points.count);
-  if bo1 then begin
-   checkgc2(gc);
-   windows.polyline(gc.handle,buffer.buffer^,points.count);
+  end
+  else begin
+   bo1:= checkgc(gc,[gcf_foregroundpenvalid,gcf_selectforegroundpen]);
+   if ((win32gcty(gc.platformdata).peninfo.width <= 1) or
+           (win32gcty(gc.platformdata).peninfo.capstyle = cs_butt)) and 
+           (count > 0) then begin
+    po1:= @pointarty(buffer.buffer)[count-1]; //endpoint
+    if (po1^.x <> pointarty(buffer.buffer)[0].x) or
+           (po1^.y <> pointarty(buffer.buffer)[0].y) then  begin
+     adjustlineend(po1);
+    end;
+   end;
+   windows.polyline(gc.handle,buffer.buffer^,count);
+   if bo1 then begin
+    checkgc2(gc);
+    windows.polyline(gc.handle,buffer.buffer^,count);
+   end;
   end;
  end;
 end;
