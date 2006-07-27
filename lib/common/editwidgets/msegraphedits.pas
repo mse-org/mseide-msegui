@@ -1411,8 +1411,9 @@ begin
   int2:= 0;
   for int1:= 0 to high(result) do begin
    widget1:= twidget1(fparentwidget).fwidgets[int1];
-   if (widget1 is tbooleanedit) and (tbooleanedit(widget1).fgroup = self.fgroup)  then begin
-    result[int2]:= tbooleanedit(widget1);
+   if (widget1 is tcustombooleanedit) and 
+      (tcustombooleanedit(widget1).fgroup = self.fgroup)  then begin
+    result[int2]:= tcustombooleanedit(widget1);
     inc(int2);
    end;
   end;
@@ -1429,7 +1430,8 @@ begin
  if fparentwidget <> nil then begin
   for int1:= 0 to fparentwidget.widgetcount - 1 do begin
    widget1:= twidget1(fparentwidget).fwidgets[int1];
-   if (widget1 is tbooleanedit) and (tbooleanedit(widget1).fgroup = self.fgroup) and
+   if (widget1 is tcustombooleanedit) and 
+         (tcustombooleanedit(widget1).fgroup = self.fgroup) and
           (widget1.tag = atag) then begin
     result:= tbooleanedit(widget1);
     break;
@@ -1490,7 +1492,7 @@ begin
  if fparentwidget <> nil then begin
   for int1:= 0 to fparentwidget.widgetcount - 1 do begin
    widget:= fparentwidget.widgets[int1];
-   if (widget is tbooleaneditradio) and
+   if (widget is tcustombooleaneditradio) and
         (tcustombooleaneditradio(widget).fgroup = fgroup) and
          tcustombooleaneditradio(widget).value then begin
     inc(int2);

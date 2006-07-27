@@ -1377,7 +1377,7 @@ begin
        if fasplitdir = sd_none then begin
         fasplitdir:= fsplitdir;
        end;
-       if not widget.checkdescendant(widget1) and idockcontroller(fintf).checkdock(info) and
+       if not widget.checkdescendent(widget1) and idockcontroller(fintf).checkdock(info) and
                     docheckdock(info) then begin
         accept:= true;
 //        rect1:= makerect(addpoint(widget.screenpos,
@@ -1419,7 +1419,7 @@ begin
         count1:= length(checksplit);
         fsplitdir:= sd1;
         if (widget.parentwidget <> container1) and
-                    not widget1.checkdescendant(ftabwidget) then begin
+                    not widget1.checkdescendent(ftabwidget) then begin
          inc(count1);
         end;
         findex:= count1-1;

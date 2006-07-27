@@ -895,7 +895,7 @@ begin
    with fselections do begin
     if count = 1 then begin
      widget1:= twidget(items[0]);
-     if (widget1 is twidget) and form.checkdescendant(widget1) then begin
+     if (widget1 is twidget) and form.checkdescendent(widget1) then begin
       clear;
       pastefromclipboard(module,widget1,{$ifdef FPC}@{$endif}doinitcomponent);
       updateselections;
@@ -1063,7 +1063,7 @@ begin
   itembyname('paste').enabled:= true;
   itembyname('editcomp').enabled:= designer.componentcanedit;
   bo1:= not((fselections.count <> 1) or not(fselections.items[0] is twidget) or
-           not fowner.checkdescendant(twidget(fselections.items[0])));
+           not fowner.checkdescendent(twidget(fselections.items[0])));
   itembyname('insertsub').enabled:= bo1;
   itembyname('revert').enabled:= (fselections.count = 1) and 
           (fselections[0].componentstate * [csinline,csancestor] <> []);

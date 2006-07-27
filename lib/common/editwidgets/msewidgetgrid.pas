@@ -1166,7 +1166,7 @@ end;
 function twidgetcol.nullcheckneeded(const newfocus: twidget): boolean;
 begin
  result:= (tcustomgrid1(fgrid).fnonullcheck = 0) and 
-                       (fgrid.entered or not fgrid.checkdescendant(newfocus));
+                       (fgrid.entered or not fgrid.checkdescendent(newfocus));
 end;
 
 function twidgetcol.nonullcheck: boolean;
@@ -1697,7 +1697,7 @@ begin
   cell1:= cellatpos(po1);
   if (cell1.row <> invalidaxis) and (cell1.col <> invalidaxis) and 
             (cell1.row < 0) then begin
-   if not checkdescendant(awidget) then begin //new insert
+   if not checkdescendent(awidget) then begin //new insert
     exclude(twidget1(awidget).foptionswidget,ow_autoscale);
    end;
    if cell1.col >= 0 then begin
@@ -1709,7 +1709,7 @@ begin
   end
   else begin
    if (cell1.col >= 0) or (cell1.col = invalidaxis) then begin
-    if not checkdescendant(awidget) then begin //new insert
+    if not checkdescendent(awidget) then begin //new insert
      if not awidget.getcorbainterface(typeinfo(igridwidget),intf) then begin
  //   if not widget.getcorbainterface(igridwidget,intf) then begin
       error(gre_invalidwidget);

@@ -146,6 +146,7 @@ type
  twindow1 = class(twindow);
  tmsecomponent1 = class(tmsecomponent);
  tframetemplate1 = class(tframetemplate);
+ tcustomframe1 = class(tcustomframe);
 
 function showpopupmenu(const menu: tmenuitem; const transientfor: twidget;
                  const pos: rectty; const dir: graphicdirectionty;
@@ -569,7 +570,7 @@ end;
 procedure tpopupmenuwidget.createframe1;
 begin
  inherited;
- fframe.levelo:= 1;
+ tcustomframe1(fframe).fi.levelo:= 1; //do not set localprops
 end;
 
 procedure tpopupmenuwidget.updatetemplates;
@@ -1190,7 +1191,7 @@ end;
 procedure tmainmenuwidget.createframe1;
 begin
  inherited;
- fframe.levelo:= 0;
+ tcustomframe1(fframe).fi.levelo:= 0; //do not set localprops
 end;
 
 procedure tmainmenuwidget.loaded;

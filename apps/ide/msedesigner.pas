@@ -231,6 +231,8 @@ type
   protected
    procedure modulemodified(const amodule: pmoduleinfoty);
    procedure revert(const info: pancestorinfoty; const module: pmoduleinfoty);
+   procedure setnodefaultpos(const aroot: twidget);
+   procedure restorepos(const aroot: twidget);
   public
    procedure add(const instance,ancestor: tmsecomponent;
                                          const submodulelist: tsubmodulelist);
@@ -590,7 +592,7 @@ begin
  if po1 <> nil then begin
   comp:= po1^.ancestor;
   po1^.ancestor:= nil;
-  comp.Free;
+  comp.Free;  
   po1^.ancestor:= fdesigner.copycomponent(amodule,amodule);
   fobjectlinker.link(po1^.ancestor);
  end;
@@ -938,6 +940,36 @@ begin
    end;
   end;
   result:= comp.ClassName;
+ end;
+end;
+
+procedure tdescendentinstancelist.setnodefaultpos(const aroot: twidget);
+var
+ po1: pancestorinfoty;
+ int1: integer;
+begin
+ po1:= datapo;
+ for int1:= 0 to fcount - 1 do begin
+  if (po1^.descendent is twidget) and 
+                      twidget(po1^.descendent).checkancestor(aroot) then begin
+   twidget1(po1^.ancestor).fwidgetrect.pos:= makepoint(-bigint,-bigint);
+  end;
+  inc(po1);
+ end;
+end;
+
+procedure tdescendentinstancelist.restorepos(const aroot: twidget);
+var
+ po1: pancestorinfoty;
+ int1: integer;
+begin
+ po1:= datapo;
+ for int1:= 0 to fcount - 1 do begin
+  if (po1^.descendent is twidget) and 
+                      twidget(po1^.descendent).checkancestor(aroot) then begin
+   twidget1(po1^.ancestor).fwidgetrect.pos:= nullpoint;
+  end;
+  inc(po1);
  end;
 end;
 
@@ -1817,10 +1849,17 @@ procedure tdesigner.findmethod(Reader: TReader; const aMethodName: string;
   var Address: Pointer; var Error: Boolean);
 var
  method: tmethod;
+ po1: pmethodinfoty;
 begin
  if error then begin
-  method:= createmethod(amethodname,nil,nil);
-  address:= method.code;
+  po1:= floadingmodulepo^.methods.findmethodbyname(amethodname);
+  if po1 = nil then begin
+   method:= createmethod(amethodname,nil,nil);
+   address:= method.code;
+  end
+  else begin
+   address:= po1^.address;
+  end;
   error:= false;
  end;
 end;
@@ -2735,11 +2774,14 @@ procedure tdesigner.writemodule(const amodule: pmoduleinfoty;
                                      const astream: tstream);
 var
  writer1: twriter;
+ ar1: pointarty;
+ int1: integer;
 begin
  buildmethodtable(amodule);
  with amodule^ do begin
   if instance is twidget then begin
    twidget1(instance).fwidgetrect.pos:= designform.pos;
+   fdescendentinstancelist.setnodefaultpos(twidget(instance));
   end
   else begin
    setcomponentpos(instance,designform.pos);
@@ -2752,6 +2794,7 @@ begin
    writer1.free;
    releasemethodtable(amodule);
    if instance is twidget then begin
+    fdescendentinstancelist.restorepos(twidget(instance));
     twidget1(instance).fwidgetrect.pos:= nullpoint;
    end;
   end;

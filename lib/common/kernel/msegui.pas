@@ -933,7 +933,7 @@ type
                    const state: widgetstatesty): twidget; overload;
    property taborderedwidgets: widgetarty read gettaborderedwidgets;
    function findtagwidget(const atag: integer; const aclass: widgetclassty): twidget;
-              //returns first matching descendant
+              //returns first matching descendent
 
    property container: twidget read getcontainer;
    function childrencount: integer; virtual;
@@ -946,8 +946,8 @@ type
    property focusedchildbefore: twidget read ffocusedchildbefore;
 
    function mouseeventwidget(const info: mouseeventinfoty): twidget;
-   function checkdescendant(widget: twidget): boolean;
-                    //true if widget is descendant or self
+   function checkdescendent(widget: twidget): boolean;
+                    //true if widget is descendent or self
    function checkancestor(widget: twidget): boolean;
                     //true if widget is ancestor or self
    function containswidget(awidget: twidget): boolean;
@@ -984,8 +984,8 @@ type
    property size: sizety read fwidgetrect.size write setsize;
    property minsize: sizety read fminsize write setminsize;
    property maxsize: sizety read fmaxsize write setmaxsize;
-   property bounds_x: integer read fwidgetrect.x write setbounds_x default 0;
-   property bounds_y: integer read fwidgetrect.y write setbounds_y default 0;
+   property bounds_x: integer read fwidgetrect.x write setbounds_x nodefault;
+   property bounds_y: integer read fwidgetrect.y write setbounds_y nodefault;
    property bounds_cx: integer read fwidgetrect.cx write setbounds_cx
                   {default defaultwidgetwidth} stored true;
    property bounds_cy: integer read fwidgetrect.cy write setbounds_cy
@@ -5387,7 +5387,7 @@ begin
  if (app <> nil) then begin
   if force or (app.fclientmousewidget = self) or
     (app.cursorshape = cr_default) and
-      checkdescendant(app.fclientmousewidget) then begin
+      checkdescendent(app.fclientmousewidget) then begin
    widget:= self;
    repeat
     cursor1:= widget.fcursor;
@@ -5665,7 +5665,7 @@ begin
  end;
 end;
 
-function twidget.checkdescendant(widget: twidget): boolean;
+function twidget.checkdescendent(widget: twidget): boolean;
 begin
  result:= false;
  while widget <> nil do begin
@@ -5717,7 +5717,7 @@ begin
   end;
   if widget1 <> nil then begin
    widget1.setfocus(aactivate);
-   result:= checkdescendant(window.ffocusedwidget);
+   result:= checkdescendent(window.ffocusedwidget);
   end;
  end;
 end;
@@ -6010,7 +6010,7 @@ begin
   if ownswindow1 then begin
    fwindow.hide(windowevent);
   end;
-  if (fwindow <> nil) and checkdescendant(fwindow.focusedwidget) then begin
+  if (fwindow <> nil) and checkdescendent(fwindow.focusedwidget) then begin
    nextfocus;
   end;
  end;
@@ -6728,7 +6728,7 @@ end;
 
 function twidget.hascaret: boolean;
 begin
- result:= (app <> nil) and checkdescendant(app.fcaretwidget)
+ result:= (app <> nil) and checkdescendent(app.fcaretwidget)
 end;
 
 procedure twidget.getcaret;
@@ -7138,7 +7138,7 @@ end;
 function twidget.canparentclose(const newfocus: twidget): boolean;
                    //window.focusedwidget is first checked
 begin
- if checkdescendant(window.focusedwidget) then begin
+ if checkdescendent(window.focusedwidget) then begin
   result:= window.focusedwidget.canclose(newfocus);
   if not result then begin
    exit;
@@ -7595,7 +7595,7 @@ begin
   window.bringtofront;
  end;
  show;
- if not checkdescendant(window.ffocusedwidget) then begin
+ if not checkdescendent(window.ffocusedwidget) then begin
   setfocus;
  end
  else begin
@@ -7675,7 +7675,8 @@ var
 begin
  result:= nil;
  for int1:= 0 to high(fwidgets) do begin
-  if (fwidgets[int1].tag = atag) and (fwidgets[int1] is aclass) then begin
+  if (fwidgets[int1].tag = atag) and 
+         ((aclass = nil) or (fwidgets[int1] is aclass)) then begin
    result:= fwidgets[int1];
    exit;
   end;
@@ -8060,7 +8061,7 @@ begin
  fmodalresult:= mr_none;
  with app do begin
   if (fmousecapturewidget <> nil) and
-         not fowner.checkdescendant(fmousecapturewidget) then begin
+         not fowner.checkdescendent(fmousecapturewidget) then begin
    fmousecapturewidget.releasemouse;
   end;
   if fmodalwindow = nil then begin
@@ -8272,7 +8273,7 @@ begin
     exit;
    end;
 //   if (widget = nil) or not widget.containswidget(widget1) then begin
-    while (widget1 <> nil) and (widget1 <> widget) and not widget1.checkdescendant(widget) do begin
+    while (widget1 <> nil) and (widget1 <> widget) and not widget1.checkdescendent(widget) do begin
      widget1.internaldodeactivate;
      if ffocuscount <> focuscountbefore then begin
       exit;
