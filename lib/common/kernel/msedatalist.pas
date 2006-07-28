@@ -623,6 +623,8 @@ procedure reorderarray(const destorderlist: integerarty;
 function cmparray(const a,b: msestringarty): boolean;
                //true if equal
 
+function opentodynarray(const items: array of widestring): msestringarty;
+
 procedure readstringar(const reader: treader; out avalue: stringarty);
 procedure writestringar(const writer: twriter; const avalue: stringarty);
 
@@ -636,6 +638,16 @@ function newidentnum(const count: integer; getfunc: getintegeritemfuncty): integ
 implementation
 uses
  rtlconsts,msestreaming,msesys,msestat;
+
+function opentodynarray(const items: array of widestring): msestringarty;
+var
+ int1: integer;
+begin
+ setlength(result,length(items));
+ for int1:= 0 to high(items) do begin
+  result[int1]:= items[int1];
+ end;
+end;
 
 procedure readstringar(const reader: treader; out avalue: stringarty);
 var

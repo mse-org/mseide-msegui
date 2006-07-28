@@ -308,6 +308,7 @@ type
  end;
 
  msecomponentclassty = class of tmsecomponent;
+ msecomponentarty = array of tmsecomponent;
 
  tlinkedqueue = class(tpointerqueue,iobjectlink)
   private
@@ -579,6 +580,7 @@ type
 var
  objectdatalist: tobjectdatainfolist;
  fmodules: tmodulelist;
+ fmodulestoregister: msecomponentarty;
 
 function swapmethodtable(const instance: tobject; const newtable: pointer): pointer;
 var
@@ -970,7 +972,9 @@ begin
  if fmodules = nil then begin
   fmodules:= tmodulelist.create(false);
  end;
- fmodules.add(instance);
+ additem(pointerarty(fmodulestoregister),instance);
+// fmodules.add(instance); //not before completely loaded, 
+                        //submodules call globalfixupreferences
  tmsecomponent(reference):= instance;
  try
   instance.create(aowner);
@@ -1069,9 +1073,14 @@ begin
    begingloballoading;
    try
     loadmodule(instance,po1,false);
+    if finditem(pointerarty(fmodulestoregister),instance) >= 0 then begin
+     fmodules.add(tmsecomponent(instance));
+     globalfixupreferences;
+    end;
     notifygloballoading;
    finally
     endgloballoading;
+    removeitem(pointerarty(fmodulestoregister),instance);
    end;
    result:= true;
   end;

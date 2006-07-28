@@ -88,6 +88,7 @@ type
   modified: boolean;
   referencedmodules: stringarty;
   methodtablebefore: pointer;
+  resolved: boolean;
  end;
  pmoduleinfoty = ^moduleinfoty;
  moduleinfopoarty = array of pmoduleinfoty;
@@ -134,7 +135,7 @@ type
   protected
    function newmodule(const afilename: msestring;
                 const amoduleclassname,ainstancevarname,
-                     designmoduleclassname: string): pmoduleinfoty;
+                     designmoduleclassname: string): tmoduleinfo;
    function findmethodbyname(const name: string; const atype: ptypeinfo;
                                const amodule: tmsecomponent): tmethod;
    function findmethodname(const method: tmethod; const comp: tcomponent): string;
@@ -1321,6 +1322,7 @@ end;
 
 destructor tmoduleinfo.destroy;
 begin
+ inherited;
  with info do begin
   freeandnil(methods);
   freeandnil(components);
@@ -1449,6 +1451,9 @@ begin
  for int1:= 0 to fcount-1 do begin
   with tmoduleinfo(iobjectlink(po1^[int1]).getinstance) do begin
    if info.instance.classtype = aclass then begin
+    if not info.resolved then begin
+     exit;
+    end;
     result:= info.instance;
     break;
    end;
@@ -1457,17 +1462,17 @@ begin
 end;
 
 function tmodulelist.newmodule(const afilename: msestring;
-         const amoduleclassname,ainstancevarname,designmoduleclassname: string): pmoduleinfoty;
+         const amoduleclassname,ainstancevarname,
+                                designmoduleclassname: string): tmoduleinfo;
 var
- moduleinfo: tmoduleinfo;
+ po1: pmoduleinfoty;
 begin
- result:= findmodule(afilename);
- if result <> nil then begin
-  delete(findmodule(result));
+ po1:= findmodule(afilename);
+ if po1 <> nil then begin
+  delete(findmodule(po1));
  end;
- moduleinfo:= tmoduleinfo.create(fdesigner);
- result:= @moduleinfo.info;
- with moduleinfo.info do begin
+ result:= tmoduleinfo.create(fdesigner);
+ with result.info do begin
   filename:= afilename;
   instancevarname:= ainstancevarname;
   moduleclassname:= amoduleclassname;
@@ -1475,11 +1480,11 @@ begin
    instance:= createdesignmodule(designmoduleclassname,@moduleclassname);
    tcomponent1(instance).setdesigning(true{$ifndef FPC},true{$endif});
   except
-   moduleinfo.Free;
+   result.Free;
    raise;
   end;
  end;
- add(moduleinfo);
+// add(moduleinfo);
 end;
 
 function tmodulelist.findmethodbyname(const name: string; 
@@ -2529,6 +2534,7 @@ function tdesigner.loadformfile(filename: msestring): pmoduleinfoty;
 var
  module: tmsecomponent;
  loadedsubmodulesindex: integer;
+ moduleinfo: tmoduleinfo;
   
  procedure dodelete;
  var
@@ -2538,7 +2544,8 @@ var
   for int1:= high(floadedsubmodules) downto loadedsubmodulesindex+1 do begin
    removefixupreferences(floadedsubmodules[int1],'');
   end;
-  fmodules.delete(fmodules.findmodule(result)); //remove added module
+//  fmodules.delete(fmodules.findmodule(result)); //remove added module
+  moduleinfo.free;
   module.Free;
   module:= nil;
   result:= nil;
@@ -2557,6 +2564,7 @@ var
  res1: modalresultty;
  bo1: boolean;
  loadingdesignerbefore: tdesigner;
+ loadingmodulepobefore: pmoduleinfoty;
 
 begin //loadformfile
  filename:= filepath(filename);
@@ -2609,12 +2617,16 @@ begin //loadformfile
      begingloballoading;
      try
       try
-       result:= fmodules.newmodule(filename,moduleclassname1,modulename,designmoduleclassname);
+       moduleinfo:= fmodules.newmodule(filename,moduleclassname1,modulename,
+       designmoduleclassname);
+       fmodules.add(moduleinfo);
+       result:= @moduleinfo.info;
        module:= result^.instance;
        stream2.Position:= 0;
        reader:= treader.Create(stream2,4096);
        loadedsubmodulesindex:= high(floadedsubmodules);
        inc(fformloadlevel);
+       loadingmodulepobefore:= floadingmodulepo;
        try
         floadingmodulepo:= result;
         lockfindglobalcomponent;
@@ -2678,11 +2690,14 @@ begin //loadformfile
           raise exception.Create('Unresolved reference to '+wstr1+'.');
          end;
          rootnames.free;
+         result^.resolved:= true;
+//         fmodules.add(moduleinfo);
         except
          dodelete;
          raise;
         end;
        finally
+        floadingmodulepo:= loadingmodulepobefore;
         setlength(floadedsubmodules,loadedsubmodulesindex+1);
                      //remove info
         dec(fformloadlevel);

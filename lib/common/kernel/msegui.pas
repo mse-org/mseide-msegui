@@ -114,7 +114,8 @@ const
 type
 
  framelocalpropty = (frl_levelo,frl_leveli,frl_framewidth,frl_colorframe,
-                     frl_fileft,frl_fitop,frl_firight,frl_fibottom,frl_colorclient);
+                     frl_fileft,frl_fitop,frl_firight,frl_fibottom,frl_colorclient,
+                     frl_nodisable);
  framelocalpropsty = set of framelocalpropty;
 
 const
@@ -2457,11 +2458,25 @@ begin
 end;
 
 procedure tcustomframe.setlocalprops(const avalue: framelocalpropsty);
+var
+ widget1: twidget;
 begin
  if flocalprops <> avalue then begin
   flocalprops:= avalue;
   if ftemplate <> nil then begin
    settemplateinfo(ftemplate.template.fi);
+  end;
+  if not (frl_nodisable in flocalprops) then begin
+   widget1:= fintf.getwidget;
+   if not (csloading in widget1.componentstate) and not widget1.isenabled then begin
+    setdisabled(true);
+   end
+   else begin
+    setdisabled(false);
+   end;
+  end
+  else begin
+   setdisabled(false);
   end;
  end;
 end;
@@ -4309,9 +4324,13 @@ end;
 procedure twidget.enabledchanged;
 var
  int1: integer;
+ bo1: boolean;
 begin
  if fframe <> nil then begin
-  fframe.setdisabled(not enabled);
+  bo1:= isenabled;
+  if bo1 or not (frl_nodisable in fframe.flocalprops) then begin
+   fframe.setdisabled(not bo1);
+  end;
  end;
  for int1:= 0 to widgetcount - 1 do begin
   widgets[int1].enabledchanged;

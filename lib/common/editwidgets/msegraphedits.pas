@@ -1185,7 +1185,7 @@ begin
   bo1:= boolean(value);
  end;
  if bo1 then begin
-   stockobjects.paintglyph(getglyph,canvas,rect,not enabled,fcolorglyph);
+   stockobjects.paintglyph(getglyph,canvas,rect,not isenabled,fcolorglyph);
  end;
 end;
 

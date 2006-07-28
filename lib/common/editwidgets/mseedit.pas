@@ -933,7 +933,7 @@ end;
 procedure tcustomedit.updatetextflags;
 begin
  if not (csloading in componentstate) then begin
-  if enabled or (oe_nogray in foptionsedit) then begin
+  if isenabled or (oe_nogray in foptionsedit) then begin
    feditor.textflags:= ftextflags;
    feditor.textflagsactive:= ftextflagsactive;
   end

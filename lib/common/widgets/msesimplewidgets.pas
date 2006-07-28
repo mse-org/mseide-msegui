@@ -172,21 +172,30 @@ type
    property onexecute;
  end;
 
+ labeloptionty = (lao_nogray);
+ labeloptionsty = set of labeloptionty;
+ 
  tcustomlabel = class(tpublishedwidget)
   private
    fcaption: richstringty;
+   factualtextflags: textflagsty;
    ftextflags: textflagsty;
+   foptions: labeloptionsty;
    procedure setcaption(const Value: msestring);
    function getcaption: msestring;
+   procedure updatetextflags;
    procedure settextflags(const Value: textflagsty);
+   procedure setoptions(const avalue: labeloptionsty);
   protected
    procedure dopaint(const canvas: tcanvas); override;
+   procedure enabledchanged; override;
   public
    constructor create(aowner: tcomponent); override;
    procedure synctofontheight; override;
    property caption: msestring read getcaption write setcaption;
    property font: twidgetfont read getfont write setfont stored isfontstored;
    property textflags: textflagsty read ftextflags write settextflags default defaultlabeltextflags;
+   property options: labeloptionsty read foptions write setoptions default [];
  end;
 
  tlabel = class(tcustomlabel)
@@ -195,6 +204,7 @@ type
    property caption;
    property font;
    property textflags;
+   property options;
    property bounds_cx default defaultlabelwidgetwidth;
    property bounds_cy default defaultlabelwidgetheight;
  end;
@@ -668,7 +678,7 @@ end;
 procedure tcustomlabel.dopaint(const canvas: tcanvas);
 begin
  inherited;
- drawtext(canvas,fcaption,innerclientrect,ftextflags,font);
+ drawtext(canvas,fcaption,innerclientrect,factualtextflags,font);
 end;
 
 function tcustomlabel.getcaption: msestring;
@@ -686,6 +696,7 @@ procedure tcustomlabel.settextflags(const Value: textflagsty);
 begin
  if ftextflags <> value then begin
   ftextflags:= Value;
+  updatetextflags;
   invalidate;
  end;
 end;
@@ -693,6 +704,34 @@ end;
 procedure tcustomlabel.synctofontheight;
 begin
  syncsinglelinefontheight;
+end;
+
+procedure tcustomlabel.updatetextflags;
+begin
+ if not (csloading in componentstate) then begin
+  if isenabled or (lao_nogray in foptions) then begin
+   factualtextflags:= ftextflags;
+  end
+  else begin
+   factualtextflags:= ftextflags + [tf_grayed];
+  end;
+ end;
+end;
+
+procedure tcustomlabel.enabledchanged;
+begin
+ inherited;
+ updatetextflags;
+ invalidate;
+end;
+
+procedure tcustomlabel.setoptions(const avalue: labeloptionsty);
+begin
+ if foptions <> avalue then begin
+  foptions:= avalue;
+  updatetextflags;
+  invalidate;
+ end;
 end;
 
 { tgroupboxframe }

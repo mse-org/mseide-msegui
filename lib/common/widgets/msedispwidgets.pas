@@ -61,14 +61,17 @@ type
    property template;
  end;
 
- dispwidgetoptionty = (dwo_hintclippedtext);
+ dispwidgetoptionty = (dwo_hintclippedtext,dwo_nogray);
  dispwidgetoptionsty = set of dispwidgetoptionty;
  
  tdispwidget = class(tpublishedwidget)
   private
    finfo: drawtextinfoty;
    foptions: dispwidgetoptionsty;
+   ftextflags: textflagsty;
+   procedure updatetextflags;
    procedure settextflags(const value: textflagsty);
+   procedure setoptions(const avalue: dispwidgetoptionsty);
   protected
    procedure valuechanged; virtual;
    procedure formatchanged;
@@ -79,6 +82,7 @@ type
    procedure createframe1; override;
    procedure loaded; override;
    procedure showhint(var info: hintinfoty); override;
+   procedure enabledchanged; override;
   public
    constructor create(aowner: tcomponent); override;
    procedure initnewcomponent; override;
@@ -87,10 +91,10 @@ type
    property bounds_cx default defaultdispwidgetwidth;
    property bounds_cy default defaultdispwidgetheight;
    property font: twidgetfont read getfont write setfont stored isfontstored;
-   property textflags: textflagsty read finfo.flags write settextflags
+   property textflags: textflagsty read ftextflags write settextflags
                 default defaultdisptextflags;
    property optionswidget default defaultdispwidgetoptions;
-   property options: dispwidgetoptionsty read foptions write foptions default [];
+   property options: dispwidgetoptionsty read foptions write setoptions default [];
  end;
 
  tcustomstringdisp = class(tdispwidget)
@@ -285,8 +289,9 @@ end;
 
 procedure tdispwidget.settextflags(const value: textflagsty);
 begin
- if finfo.flags <> value then begin
-  finfo.flags:= value;
+ if ftextflags <> value then begin
+  ftextflags:= value;
+  updatetextflags;
   invalidate;
  end;
 end;
@@ -347,6 +352,34 @@ end;
 procedure tdispwidget.synctofontheight;
 begin
  syncsinglelinefontheight;
+end;
+
+procedure tdispwidget.updatetextflags;
+begin
+ if not (csloading in componentstate) then begin
+  if isenabled or (dwo_nogray in foptions) then begin
+   finfo.flags:= ftextflags;
+  end
+  else begin
+   finfo.flags:= ftextflags + [tf_grayed];
+  end;
+ end;
+end;
+
+procedure tdispwidget.enabledchanged;
+begin
+ inherited;
+ updatetextflags;
+ invalidate;
+end;
+
+procedure tdispwidget.setoptions(const avalue: dispwidgetoptionsty);
+begin
+ if foptions <> avalue then begin
+  foptions:= avalue;
+  updatetextflags;
+  invalidate;
+ end;
 end;
 
 { tcustomstringdisp }
