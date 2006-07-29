@@ -8299,16 +8299,22 @@ begin
   focuscountbefore:= ffocuscount;
   widget1:= ffocusedwidget;
   if widget1 <> nil then begin
-   if not widget1.canclose(widget) then begin
-    exit;
+   if not (csdestroying in widget1.componentstate) then begin
+    if not widget1.canclose(widget) then begin
+     exit;
+    end;
+    ffocusedwidget:= nil;
+    widget1.internaldodefocus;
+    if ffocuscount <> focuscountbefore then begin
+     exit;
+    end;
+   end
+   else begin
+    ffocusedwidget:= nil;
    end;
-   ffocusedwidget:= nil;
-   widget1.internaldodefocus;
-   if ffocuscount <> focuscountbefore then begin
-    exit;
-   end;
-//   if (widget = nil) or not widget.containswidget(widget1) then begin
-    while (widget1 <> nil) and (widget1 <> widget) and not widget1.checkdescendent(widget) do begin
+   while (widget1 <> nil) and (widget1 <> widget) and 
+               not widget1.checkdescendent(widget) do begin
+    if not (csdestroying in widget1.componentstate) then begin
      widget1.internaldodeactivate;
      if ffocuscount <> focuscountbefore then begin
       exit;
@@ -8317,10 +8323,10 @@ begin
      if ffocuscount <> focuscountbefore then begin
       exit;
      end;
-     widget1:= widget1.fparentwidget;
     end;
+    widget1:= widget1.fparentwidget;
    end;
-//  end;
+  end;
   ffocusedwidget:= widget;
   if widget <> nil then begin
    widgetar:= widget.getrootwidgetpath;

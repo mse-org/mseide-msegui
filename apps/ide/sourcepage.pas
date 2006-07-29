@@ -516,7 +516,8 @@ var
  page1: tsourcepage;
  
 begin
- if iscellclick(info,[ccr_nokeyreturn,ccr_dblclick]) and (dataicon[info.cell.row] >= 0) then begin
+ if iscellclick(info,[ccr_nokeyreturn,ccr_dblclick]) and 
+                          (dataicon[info.cell.row] >= 0) then begin
   breakpointsfo.showbreakpoint(filepath,info.cell.row + 1,true);
  end;
  case info.eventkind of
@@ -608,7 +609,7 @@ begin
      breakpointsfo.addbreakpoint(bpinfo);
     end;
     bkpts_normal,bkpts_disabled,bkpts_error: begin
-     if isdblclicked(info.mouseeventinfopo^) then begin
+     if iscellclick(info,[ccr_dblclick]) then begin
       breakpointsfo.deletebreakpoint(bpinfo);
      end
      else begin

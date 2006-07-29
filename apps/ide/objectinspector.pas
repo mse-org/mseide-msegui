@@ -515,7 +515,7 @@ end;
 procedure tobjectinspectorfo.valuesonmouseevent(const sender: twidget; 
               var info: mouseeventinfoty);
 begin
- if isdblclick(info) then begin
+ if sender.isdblclick(info) then begin
   with tpropertyitem(props.item) do begin
    if feditor is tmethodpropertyeditor then begin
     if not values.edited or values.checkvalue then begin
