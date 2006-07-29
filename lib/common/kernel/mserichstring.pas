@@ -27,7 +27,7 @@ type
               ni_underline=ord(fs_underline),ni_strikeout=ord(fs_strikeout),
               ni_selected=ord(fs_selected),
               //same order as in fontstylety
-                 ni_fontcolor,ni_backgroundcolor,ni_delete);
+                 ni_fontcolor,ni_colorbackground,ni_delete);
  newinfosty = set of newinfoty;
 
 const
@@ -36,7 +36,7 @@ const
 
 type
  charstylety = record
-  fontcolor,backgroundcolor: pcolorty;
+  fontcolor,colorbackground: pcolorty;
   fontstyle: fontstylesty;
  end;
  pcharstylety = ^charstylety;
@@ -112,9 +112,9 @@ type
    procedure clear; override;
    function add(const value: charstylety): integer; overload;
    function add(style: fontstylesty = []; fontcolor: pcolorty = nil;
-                       backgroundcolor: pcolorty = nil): integer; overload;
+                       colorbackground: pcolorty = nil): integer; overload;
    function add(const value: string): integer; overload;
-                //'bius' fontcolor backgroundcolor
+                //'bius' fontcolor colorbackground
    property items[index: integer]: charstylety read Getitems write Setitems; default;
  end;
 
@@ -122,7 +122,7 @@ type
 function setfontcolor(var formats: formatinfoarty; aindex: integer; len: halfinteger;
                     colorpo: pcolorty): boolean;
                                  //true if changed
-function setbackgroundcolor(var formats: formatinfoarty; aindex: integer; len: halfinteger;
+function setcolorbackground(var formats: formatinfoarty; aindex: integer; len: halfinteger;
                     colorpo: pcolorty): boolean;
                                  //true if changed
 
@@ -394,11 +394,11 @@ begin
     else begin
      include(newinfos,ni_fontcolor);
     end;
-    if style.backgroundcolor = bacopo then begin
-     exclude(newinfos,ni_backgroundcolor);
+    if style.colorbackground = bacopo then begin
+     exclude(newinfos,ni_colorbackground);
     end
     else begin
-     include(newinfos,ni_backgroundcolor);
+     include(newinfos,ni_colorbackground);
     end;
     fontstylesdelta:= fontstylesty(
      {$ifdef FPC}longword{$else}byte{$endif}(fontstyles) xor
@@ -409,8 +409,8 @@ begin
     if ni_fontcolor in newinfos then begin
      focopo:= style.fontcolor;
     end;
-    if ni_backgroundcolor in newinfos then begin
-     bacopo:= style.backgroundcolor;
+    if ni_colorbackground in newinfos then begin
+     bacopo:= style.colorbackground;
     end;
     fontstyles:= fontstylesty({$ifdef FPC}longword{$else}byte{$endif}(fontstyles) xor
             {$ifdef FPC}longword{$else}byte{$endif}(fontstylesdelta) and
@@ -444,9 +444,9 @@ function setfontinfolen(var formats: formatinfoarty; aindex: integer; len: halfi
    result:= result or (style.fontcolor <> astyle.fontcolor);
    style.fontcolor:= astyle.fontcolor;
   end;
-  if ni_backgroundcolor in flags then begin
-   result:= result or (style.backgroundcolor <> astyle.backgroundcolor);
-   style.backgroundcolor:= astyle.backgroundcolor;
+  if ni_colorbackground in flags then begin
+   result:= result or (style.colorbackground <> astyle.colorbackground);
+   style.colorbackground:= astyle.colorbackground;
   end;
   afontstyle:= style.fontstyle;
   style.fontstyle:= style.fontstyle -
@@ -489,14 +489,14 @@ begin
  result:= setfontinfolen(formats,aindex,len,style,[ni_fontcolor]);
 end;
 
-function setbackgroundcolor(var formats: formatinfoarty; aindex: integer; len: halfinteger;
+function setcolorbackground(var formats: formatinfoarty; aindex: integer; len: halfinteger;
                                         colorpo: pcolorty): boolean;
      //true if changed
 var
  style: charstylety;
 begin
- style.backgroundcolor:= colorpo;
- result:= setfontinfolen(formats,aindex,len,style,[ni_backgroundcolor]);
+ style.colorbackground:= colorpo;
+ result:= setfontinfolen(formats,aindex,len,style,[ni_colorbackground]);
 end;
 
 procedure setselected(var text: richstringty; start,len: halfinteger);
@@ -527,7 +527,7 @@ function setcharstyle(var formats: formatinfoarty;
                                   //true if changed
 begin
  result:= setfontinfolen(formats,aindex,len,style,
-     [ni_fontcolor,ni_backgroundcolor,ni_bold,ni_italic,ni_underline,ni_strikeout]);
+     [ni_fontcolor,ni_colorbackground,ni_bold,ni_italic,ni_underline,ni_strikeout]);
 end;
 
 function getcharstyle(const formats: formatinfoarty; aindex: integer): charstylety;
@@ -566,7 +566,7 @@ function isequalformatinfo(const a,b: formatinfoty): boolean;
 begin
  result:= (a.index = b.index) and (a.newinfos = b.newinfos) and
   (a.style.fontcolor = b.style.fontcolor) and
-  (a.style.backgroundcolor = b.style.backgroundcolor) and
+  (a.style.colorbackground = b.style.colorbackground) and
   (a.style.fontstyle = b.style.fontstyle);
 end;
 
@@ -718,7 +718,7 @@ begin
    with res.format[0] do begin
     newinfos:= [];
     if style.fontcolor <> nil then include(newinfos,ni_fontcolor);
-    if style.backgroundcolor <> nil then include(newinfos,ni_backgroundcolor);
+    if style.colorbackground <> nil then include(newinfos,ni_colorbackground);
     if fs_bold in style.fontstyle then include(newinfos,ni_bold);
     if fs_italic in style.fontstyle then include(newinfos,ni_italic);
     if fs_underline in style.fontstyle then include(newinfos,ni_underline);
@@ -802,13 +802,13 @@ begin
 end;
 
 function tcharstyledatalist.add(style: fontstylesty = []; fontcolor: pcolorty = nil;
-                      backgroundcolor: pcolorty = nil): integer;
+                      colorbackground: pcolorty = nil): integer;
 var
  value: charstylety;
 begin
  value.fontstyle:= style;
  value.fontcolor:= fontcolor;
- value.backgroundcolor:= backgroundcolor;
+ value.colorbackground:= colorbackground;
  result:= add(value);
 end;
 
@@ -838,8 +838,8 @@ function tcharstyledatalist.add(const value: string): integer;
       if fontcolor = po1 then begin
        fontcolor:= pointer(int1);
       end;
-      if backgroundcolor = po1 then begin
-       backgroundcolor:= pointer(int1);
+      if colorbackground = po1 then begin
+       colorbackground:= pointer(int1);
       end;
      end;
     end;
@@ -853,8 +853,8 @@ function tcharstyledatalist.add(const value: string): integer;
       if fontcolor = pointer(int1) then begin
        fontcolor:= po1;
       end;
-      if backgroundcolor = pointer(int1) then begin
-       backgroundcolor:= po1;
+      if colorbackground = pointer(int1) then begin
+       colorbackground:= po1;
       end;
      end;
     end;
@@ -889,7 +889,7 @@ begin
   include(st.fontstyle,fs_strikeout);
  end;
  st.fontcolor:= getcolor(str2);
- st.backgroundcolor:= getcolor(str3);
+ st.colorbackground:= getcolor(str3);
  result:= add(st);
 end;
 

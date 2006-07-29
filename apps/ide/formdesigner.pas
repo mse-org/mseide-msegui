@@ -146,6 +146,7 @@ type
    fshowgrid: boolean;
    fdelobjs: objinfoarty;
    fclipinitcomps: boolean;
+   fclickedcompbefore: tcomponent;
    procedure drawgrid(const canvas: tcanvas);
    procedure hidexorpic(const canvas: tcanvas);
    procedure showxorpic(const canvas: tcanvas);
@@ -1230,10 +1231,17 @@ var
  area1: areaty;
  clipo: pointty;
  isinpaintrect: boolean;
+ ss1: shiftstatesty;
 label
  1;
 begin
+ if info.eventkind in [ek_mouseleave,ek_mouseenter] then begin
+  fclickedcompbefore:= nil;
+  exit;
+ end;
+ checkmousewidget(info,capture);
  with info do begin
+  ss1:= shiftstate * shiftstatesmask;
   isinpaintrect:= pointinrect(pos,fowner.container.paintrect);
   clipo:= fowner.container.clientpos;
   subpoint1(pos,clipo);
@@ -1241,19 +1249,19 @@ begin
   if eventkind in [ek_buttonpress,ek_buttonrelease] then begin
    fmousepos:= pos;
   end;
+  component:= nil;
   if not (es_processed in eventstate) then begin
    bo1:= false;
    if (eventkind = ek_buttonpress) and (button = mb_left) then begin
     fpickpos:= pos;
-    if (shiftstate = [ss_left]) or (shiftstate = [ss_left,ss_ctrl]) or 
-                (shiftstate = [ss_left,ss_double]) then begin
+    if (ss1 = [ss_left]) or (ss1 = [ss_left,ss_ctrl]) or 
+                (ss1 = [ss_left,ss_double]) then begin
      factarea:= fselections.getareainfo(pos,factcompindex);
      if factcompindex >= 0 then begin
       fsizerect:= fselections.itempo(factcompindex)^.rect;
       factsizerect:= fsizerect;
      end;
      if (factarea in [ar_component,ar_none]) then begin
-      component:= nil;
       if isinpaintrect then begin
        component:= componentatpos(fowner,module,pos);
        if (component = nil) then begin
@@ -1266,7 +1274,8 @@ begin
        end;
       end;
       if component <> nil then begin
-       if (component = module) and (ss_double in shiftstate) and isinpaintrect then begin
+       if (component = module) and (fclickedcompbefore = module) and
+                  (ss_double in shiftstate) and isinpaintrect then begin
         mainfo.loadsourcebyform(fdesigner.actmodulepo^.filename,true);
         include(eventstate,es_processed);
         goto 1;
@@ -1275,7 +1284,7 @@ begin
         factarea:= ar_none;
        end;
        bo1:= true;
-       if ss_ctrl in shiftstate then begin
+       if ss_ctrl in ss1 then begin
         selectcomponent(component,sm_flip);
        end
        else begin
@@ -1288,6 +1297,7 @@ begin
       else begin
        factarea:= ar_none;
       end;
+      fclickedcompbefore:= component;
      end
      else begin
       fowner.capturemouse;
@@ -1304,7 +1314,7 @@ begin
     if ((area1 < firsthandle) or (area1 > lasthandle)) and
        ((factarea < firsthandle) or (factarea > lasthandle)) and 
        not (fdesigner.hascurrentcomponent and (eventkind = ek_buttonpress) and 
-           (button = mb_left) and (shiftstate = [ss_left])) then begin
+           (button = mb_left) and (ss1 = [ss_left])) then begin
      addpoint1(pos,clipo);
      inherited;
      subpoint1(pos,clipo);
@@ -1322,7 +1332,7 @@ begin
    end;
    if not (es_processed in eventstate) then begin
     if (eventkind = ek_buttonpress) and (button = mb_left) then begin
-     if shiftstate = [ss_left] then begin
+     if ss1 = [ss_left] then begin
       if isinpaintrect then begin
        component:= fdesigner.CreateCurrentComponent(module);
       end;
@@ -1332,7 +1342,7 @@ begin
       end;
      end
      else begin
-      if (shiftstate = [ss_left,ss_shift]) and isinpaintrect then begin
+      if (ss1 = [ss_left,ss_shift]) and isinpaintrect then begin
        factarea:= ar_selectrect;
        fxorpicoffset:= pos;
        if form <> nil then begin

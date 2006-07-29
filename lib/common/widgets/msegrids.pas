@@ -1573,7 +1573,7 @@ begin
       if button = mb_left then begin
        if ((ccr_buttonpress in restrictions) and (eventkind = ek_buttonpress) or
           not (ccr_buttonpress in restrictions) and (eventkind = ek_buttonrelease)) and
-           (info.mouseeventinfopo^.shiftstate * shiftstatemask = []) then begin
+           (info.mouseeventinfopo^.shiftstate * keyshiftstatesmask = []) then begin
         if ccr_dblclick in restrictions then begin
          result:= ss_double in info.mouseeventinfopo^.shiftstate;
         end
@@ -5698,11 +5698,11 @@ var
       if (info.shiftstate * [ss_left,ss_middle,ss_right] = [ss_left])
                   {(info.button = mb_left)} and
              (co_mouseselect in fdatacols[fmousecell.col].foptions) then begin
-       if (info.shiftstate * shiftstatemask = [ss_shift]) then begin
+       if (info.shiftstate * keyshiftstatesmask = [ss_shift]) then begin
         action:= fca_selectend;
        end
        else begin
-        if info.shiftstate * shiftstatemask = [ss_ctrl] then begin
+        if info.shiftstate * keyshiftstatesmask = [ss_ctrl] then begin
          if (info.button = mb_left) or (fmousecell.col <> ffocusedcell.col) or
                    (fmousecell.row <> ffocusedcell.row) then begin
           action:= fca_reverse;

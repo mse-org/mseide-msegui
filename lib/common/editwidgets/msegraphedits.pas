@@ -154,6 +154,7 @@ type
    function createdatalist(const sender: twidgetcol): tdatalist; override;
    function getdatatyp: datatypty; override;
    procedure dopaint(const canvas: tcanvas); override;
+   procedure initnewcomponent; override;
   public
    property value: pointer read fvalue write setvalue default nil;
    property gridvalue[const index: integer]: pointer
@@ -2001,6 +2002,11 @@ end;
 procedure tpointeredit.dopaint(const canvas: tcanvas);
 begin
  //dummy
+end;
+
+procedure tpointeredit.initnewcomponent;
+begin
+ //do nothing
 end;
 
 end.

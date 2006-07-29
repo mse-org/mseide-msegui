@@ -78,7 +78,7 @@ begin
 //    stopexecute(nil);
    end
    else begin
-    if (button = mb_left) and (shiftstate * shiftstatemask = []) then begin
+    if (button = mb_left) and (shiftstate * keyshiftstatesmask = []) then begin
      widget1:= fparent.childatpos(translatewidgetpoint(pos,self,fparent),false);
      if widget1 <> nil then begin
       int2:= -1;

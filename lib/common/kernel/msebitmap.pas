@@ -48,8 +48,8 @@ type
    procedure updatealignment(const dest,source: rectty;
                const alignment: alignmentsty; out newdest,newsource: rectty;
                out tileorigin: pointty);
-   procedure setbackgroundcolor(const Value: colorty);
-   procedure setforegroundcolor(const Value: colorty);
+   procedure setcolorbackground(const Value: colorty);
+   procedure setcolorforeground(const Value: colorty);
   protected
    function getasize: sizety; virtual;
    procedure destroyhandle; override;
@@ -71,31 +71,31 @@ type
    function hasimage: boolean;
    procedure paint(const acanvas: tcanvas; const dest: rectty;
                    const asource: rectty; const aalignment: alignmentsty = [];
-                         const aforegroundcolor: colorty = cl_default;
-                         const abackgroundcolor: colorty = cl_default;
+                         const acolorforeground: colorty = cl_default;
+                         const acolorbackground: colorty = cl_default;
                       //used for monochrome bitmaps,
-                      //cl_default-> acanvas.color, acanvas.backgroundcolor
+                      //cl_default-> acanvas.color, acanvas.colorbackground
                          const atransparency: colorty = cl_default
                       //cl_default-> self.transparency
                    );
                            overload;
    procedure paint(const acanvas: tcanvas; const dest: pointty;
-                         const aforegroundcolor: colorty = cl_default;
-                         const abackgroundcolor: colorty = cl_default); overload;
+                         const acolorforeground: colorty = cl_default;
+                         const acolorbackground: colorty = cl_default); overload;
                  //useses self.size and self.alignment
    procedure paint(const acanvas: tcanvas; const dest: pointty;
                           const aalignment: alignmentsty;
-                          const aforegroundcolor: colorty = cl_default;
-                          const abackgroundcolor: colorty = cl_default); overload;
+                          const acolorforeground: colorty = cl_default;
+                          const acolorbackground: colorty = cl_default); overload;
                  //useses self.size
    procedure paint(const acanvas: tcanvas; const dest: rectty;
-                         const aforegroundcolor: colorty = cl_default;
-                         const abackgroundcolor: colorty = cl_default); overload;
+                         const acolorforeground: colorty = cl_default;
+                         const acolorbackground: colorty = cl_default); overload;
                  //useses self.size and self.alignment
    procedure paint(const acanvas: tcanvas; const dest: rectty;
                           const aalignment: alignmentsty;
-                          const aforegroundcolor: colorty = cl_default;
-                          const abackgroundcolor: colorty = cl_default); overload;
+                          const acolorforeground: colorty = cl_default;
+                          const acolorbackground: colorty = cl_default); overload;
                  //useses self.size
 
    procedure init(const acolor: colorty); override;
@@ -104,11 +104,11 @@ type
    property pixel[const index: pointty]: colorty read getpixel write setpixel;
    property pixels[const x,y: integer]: colorty read getpixels write setpixels;
    property scanline[index: integer]: pointer read getscanline;
-   property foregroundcolor: colorty read fforegroundcolor write setforegroundcolor default cl_black;
+   property colorforeground: colorty read fcolorforeground write setcolorforeground default cl_black;
                  //used for monochrome -> color conversion
-   property backgroundcolor: colorty read fbackgroundcolor write setbackgroundcolor default cl_white;
+   property colorbackground: colorty read fcolorbackground write setcolorbackground default cl_white;
                  //used for monochrome -> color conversion,
-                 //backgroundcolor for color -> monochrome conversion
+                 //colorbackground for color -> monochrome conversion
    property alignment: alignmentsty read falignment write setalignment default [];
    property transparency: colorty read ftransparency write settransparency default cl_none;
    property onchange: notifyeventty read fonchange write fonchange;
@@ -135,7 +135,7 @@ type
    fsource: tbitmapcomp;
    fobjectlinker: tobjectlinker;
    foptions: bitmapoptionsty;
-   fmaskforegroundcolor,fmaskbackgroundcolor: colorty;
+   fmaskcolorforeground,fmaskcolorbackground: colorty;
    procedure checkmask;
    procedure freemask;
    procedure settransparentcolor(const Value: colorty);
@@ -155,7 +155,7 @@ type
    fmask: tbitmap;
    function getasize: sizety; override;
    procedure createmask(const acolormask: boolean); virtual;
-   function getconverttomonochromebackgroundcolor: colorty; override;
+   function getconverttomonochromecolorbackground: colorty; override;
    procedure releasehandle; override;
    procedure acquirehandle; override;
    procedure destroyhandle; override;
@@ -187,19 +187,19 @@ type
    property mask: tbitmap read getmask1 write setmask;
    property masked: boolean read getmasked write setmasked default false;
    property colormask: boolean read getcolormask write setcolormask default false;
-   property maskforegroundcolor: colorty read fmaskforegroundcolor 
-                    write fmaskforegroundcolor default $ffffff;
+   property maskcolorforeground: colorty read fmaskcolorforeground 
+                    write fmaskcolorforeground default $ffffff;
                     //used to init colormask
-   property maskbackgroundcolor: colorty read fmaskbackgroundcolor 
-                    write fmaskbackgroundcolor default $000000;
+   property maskcolorbackground: colorty read fmaskcolorbackground 
+                    write fmaskcolorbackground default $000000;
                      //used to convert monchrome mask to colormask
   published
    property transparentcolor: colorty read ftransparentcolor write settransparentcolor
                 default cl_default;
    property options: bitmapoptionsty read getoptions write setoptions default [];
    property source: tbitmapcomp read fsource write setsource;
-   property foregroundcolor;
-   property backgroundcolor;
+   property colorforeground;
+   property colorbackground;
    property alignment;
    property transparency;
  end;
@@ -397,8 +397,8 @@ end;
 
 procedure tbitmap.paint(const acanvas: tcanvas; const dest: rectty;
                   const asource: rectty; const aalignment: alignmentsty = [];
-                         const aforegroundcolor: colorty = cl_default;
-                         const abackgroundcolor: colorty = cl_default;
+                         const acolorforeground: colorty = cl_default;
+                         const acolorbackground: colorty = cl_default;
                          const atransparency: colorty = cl_default);
 var
  bmp: tbitmap;
@@ -438,9 +438,9 @@ begin
      canvas2:= amask.canvas;
     end;
     with acanvas do begin
-     col1:= backgroundcolor;
+     col1:= colorbackground;
      col2:= color;
-     backgroundcolor:= cl_transparent;
+     colorbackground:= cl_transparent;
      color:= cl_white;
 //     copyarea(canvas2,rect2,addpoint(rect1.pos,makepoint(1,1)),acanvas.rasterop);
      inc(rect1.x);
@@ -458,29 +458,29 @@ begin
      tcanvas1(acanvas).internalcopyarea(canvas2,rect2,
                rect1,acanvas.rasterop,cl_default,amask{maskpx,maskgchandle},aalignment,po1,transp);
      color:= col2;
-     backgroundcolor:= col1;
+     colorbackground:= col1;
     end;
    end
    else begin
     if monochrome then begin
      col1:= acanvas.color;
-     col2:= acanvas.backgroundcolor;
-     if aforegroundcolor <> cl_default then begin
-      acanvas.color:= aforegroundcolor;
+     col2:= acanvas.colorbackground;
+     if acolorforeground <> cl_default then begin
+      acanvas.color:= acolorforeground;
      end
      else begin
-      acanvas.color:= fforegroundcolor;
+      acanvas.color:= fcolorforeground;
      end;
-     if abackgroundcolor <> cl_default then begin
-      acanvas.backgroundcolor:= abackgroundcolor;
+     if acolorbackground <> cl_default then begin
+      acanvas.colorbackground:= acolorbackground;
      end
      else begin
-      acanvas.backgroundcolor:= fbackgroundcolor;
+      acanvas.colorbackground:= fcolorbackground;
      end;
      tcanvas1(acanvas).internalcopyarea(bmp.canvas,rect2,
                rect1,acanvas.rasterop,cl_default,amask,aalignment,po1,transp);
      acanvas.color:= col1;
-     acanvas.backgroundcolor:= col2;
+     acanvas.colorbackground:= col2;
     end
     else begin
      tcanvas1(acanvas).internalcopyarea(bmp.canvas,rect2,
@@ -495,8 +495,8 @@ end;
 {
 procedure tbitmap.paint(const acanvas: tcanvas; const dest: rectty;
                const asource: rectty; const aalignment: alignmentsty = [];
-                         const aforegroundcolor: colorty = cl_default;
-                         const abackgroundcolor: colorty = cl_default);
+                         const acolorforeground: colorty = cl_default;
+                         const acolorbackground: colorty = cl_default);
 var
  rect1,rect2: rectty;
  col1,col2: colorty;
@@ -506,34 +506,34 @@ begin
   updatealignment(dest,asource,aalignment,rect1,rect2,po1);
   if monochrome and (al_grayed in aalignment) then begin
    with acanvas do begin
-    col1:= backgroundcolor;
+    col1:= colorbackground;
     col2:= color;
-    backgroundcolor:= cl_transparent;
+    colorbackground:= cl_transparent;
     color:= cl_white;
     copyarea(canvas,rect2,addpoint(rect1.pos,makepoint(1,1)),acanvas.rasterop);
     color:= cl_dkgray;
     copyarea(canvas,rect2,rect1.pos,acanvas.rasterop);
     color:= col2;
-    backgroundcolor:= col1;
+    colorbackground:= col1;
    end;
   end
   else begin
    if monochrome and
-    ((aforegroundcolor <> cl_default) or (abackgroundcolor <> cl_default)) then begin
+    ((acolorforeground <> cl_default) or (acolorbackground <> cl_default)) then begin
     col1:= acanvas.color;
-    col2:= acanvas.backgroundcolor;
-    if aforegroundcolor <> cl_default then begin
-     acanvas.color:= aforegroundcolor;
+    col2:= acanvas.colorbackground;
+    if acolorforeground <> cl_default then begin
+     acanvas.color:= acolorforeground;
     end;
-    if abackgroundcolor <> cl_default then begin
-     acanvas.backgroundcolor:= abackgroundcolor;
+    if acolorbackground <> cl_default then begin
+     acanvas.colorbackground:= acolorbackground;
     end;
     acanvas.copyarea(canvas,rect2,rect1.pos,acanvas.rasterop);
-    if aforegroundcolor <> cl_default then begin
+    if acolorforeground <> cl_default then begin
      acanvas.color:= col1;
     end;
-    if abackgroundcolor <> cl_default then begin
-     acanvas.backgroundcolor:= col2;
+    if acolorbackground <> cl_default then begin
+     acanvas.colorbackground:= col2;
     end;
    end
    else begin
@@ -544,44 +544,44 @@ begin
 end;
 }
 procedure tbitmap.paint(const acanvas: tcanvas; const dest: rectty;
-                         const aforegroundcolor: colorty = cl_default;
-                         const abackgroundcolor: colorty = cl_default);
+                         const acolorforeground: colorty = cl_default;
+                         const acolorbackground: colorty = cl_default);
 begin
  with tcanvas1(canvas).fvaluepo^.origin do begin
   paint(acanvas,dest,makerect(makepoint(-x,-y),getasize),falignment,
-               aforegroundcolor,abackgroundcolor);
+               acolorforeground,acolorbackground);
  end;
 end;
 
 procedure tbitmap.paint(const acanvas: tcanvas; const dest: rectty;
                          const aalignment: alignmentsty;
-                         const aforegroundcolor: colorty = cl_default;
-                         const abackgroundcolor: colorty = cl_default);
+                         const acolorforeground: colorty = cl_default;
+                         const acolorbackground: colorty = cl_default);
 begin
  with tcanvas1(canvas).fvaluepo^.origin do begin
   paint(acanvas,dest,makerect(makepoint(-x,-y),getasize),aalignment,
-               aforegroundcolor,abackgroundcolor);
+               acolorforeground,acolorbackground);
  end;
 end;
 
 procedure tbitmap.paint(const acanvas: tcanvas; const dest: pointty;
-                         const aforegroundcolor: colorty = cl_default;
-                         const abackgroundcolor: colorty = cl_default);
+                         const acolorforeground: colorty = cl_default;
+                         const acolorbackground: colorty = cl_default);
 begin
  with tcanvas1(canvas).fvaluepo^.origin do begin
   paint(acanvas,makerect(dest,fsize),makerect(makepoint(-x,-y),getasize),
-            falignment,aforegroundcolor,abackgroundcolor);
+            falignment,acolorforeground,acolorbackground);
  end;
 end;
 
 procedure tbitmap.paint(const acanvas: tcanvas; const dest: pointty;
                          const aalignment: alignmentsty;
-                         const aforegroundcolor: colorty = cl_default;
-                         const abackgroundcolor: colorty = cl_default);
+                         const acolorforeground: colorty = cl_default;
+                         const acolorbackground: colorty = cl_default);
 begin
  with tcanvas1(canvas).fvaluepo^.origin do begin
   paint(acanvas,makerect(dest,getasize),makerect(makepoint(-x,-y),getasize),
-            aalignment,aforegroundcolor,abackgroundcolor);
+            aalignment,acolorforeground,acolorbackground);
  end;
 end;
 
@@ -631,13 +631,13 @@ begin
    if value then begin
     bmp:= tsimplebitmap.create(true);
     bmp.size:= fsize;
-    bmp.canvas.copyarea(canvas,makerect(nullpoint,fsize),nullpoint,rop_copy,fbackgroundcolor);
+    bmp.canvas.copyarea(canvas,makerect(nullpoint,fsize),nullpoint,rop_copy,fcolorbackground);
    end
    else begin
     bmp:= tsimplebitmap.create(false);
     bmp.size:= fsize;
-    bmp.canvas.backgroundcolor:= fbackgroundcolor;
-    bmp.canvas.color:= fforegroundcolor;
+    bmp.canvas.colorbackground:= fcolorbackground;
+    bmp.canvas.color:= fcolorforeground;
     bmp.canvas.copyarea(canvas,makerect(nullpoint,fsize),nullpoint);
    end;
 
@@ -963,18 +963,18 @@ begin
  end;
 end;
 
-procedure tbitmap.setbackgroundcolor(const Value: colorty);
+procedure tbitmap.setcolorbackground(const Value: colorty);
 begin
- if fbackgroundcolor <> value then begin
-  fbackgroundcolor := Value;
+ if fcolorbackground <> value then begin
+  fcolorbackground := Value;
   change;
  end;
 end;
 
-procedure tbitmap.setforegroundcolor(const Value: colorty);
+procedure tbitmap.setcolorforeground(const Value: colorty);
 begin
- if fforegroundcolor <> value then begin
-  fforegroundcolor := Value;
+ if fcolorforeground <> value then begin
+  fcolorforeground := Value;
   change;
  end;
 end;
@@ -1051,8 +1051,8 @@ procedure tbitmap.assign(source: tpersistent);
 begin
  if source is tbitmap then begin
   with tbitmap(source) do begin
-   self.fforegroundcolor:= foregroundcolor;
-   self.fbackgroundcolor:= backgroundcolor;
+   self.fcolorforeground:= colorforeground;
+   self.fcolorbackground:= colorbackground;
    self.falignment:= alignment;
    self.ftransparency:= transparency;
   end;
@@ -1078,8 +1078,8 @@ end;
 constructor tmaskedbitmap.create(amonochrome: boolean);
 begin
  ftransparentcolor:= cl_default;
- fmaskbackgroundcolor:= $000000;
- fmaskforegroundcolor:= $ffffff;
+ fmaskcolorbackground:= $000000;
+ fmaskcolorforeground:= $ffffff;
  inherited;
 end;
 
@@ -1110,8 +1110,8 @@ begin
  if fmask = nil then begin
   fmask:= tbitmap.create(true);
   with fmask do begin
-   fforegroundcolor:= fmaskforegroundcolor;
-   fbackgroundcolor:= fmaskbackgroundcolor;
+   fcolorforeground:= fmaskcolorforeground;
+   fcolorbackground:= fmaskcolorbackground;
   end;
  end
  else begin
@@ -1133,7 +1133,7 @@ begin
     fmask.init(cl_1);
    end
    else begin
-    fmask.init(fmaskforegroundcolor);
+    fmask.init(fmaskcolorforeground);
    end;
   end;
   if bo1 then begin
@@ -1143,10 +1143,10 @@ begin
  end;
 end;
 
-function tmaskedbitmap.getconverttomonochromebackgroundcolor: colorty;
+function tmaskedbitmap.getconverttomonochromecolorbackground: colorty;
 begin
  if ftransparentcolor = cl_none then begin
-  result:= inherited getconverttomonochromebackgroundcolor;
+  result:= inherited getconverttomonochromecolorbackground;
  end
  else begin
   if (ftransparentcolor = cl_default) and not isempty then begin
@@ -1320,13 +1320,13 @@ begin
    end
    else begin
     if colormask then begin
-     fmask.init(fmaskbackgroundcolor);
+     fmask.init(fmaskcolorbackground);
     end
     else begin
      fmask.init(cl_0);
     end;
     fmask.copyarea(value,makerect(nullpoint,fsize),nullpoint,rop_copy,false,
-             fmaskforegroundcolor,fmaskbackgroundcolor);
+             fmaskcolorforeground,fmaskcolorbackground);
 //    fmask.canvas.copyarea(value.canvas,makerect(nullpoint,fsize),nullpoint,
 //             rop_copy,ftransparentcolor);
    end;
@@ -1797,11 +1797,11 @@ begin
     end
     else begin
      fbitmap.mask.canvas.fillrect(makerect(po1,fsize),
-                          fbitmap.fmaskbackgroundcolor);
+                          fbitmap.fmaskcolorbackground);
     end;
    end;
    fbitmap.mask.copyarea(image.mask,rect1,po1,rop_copy,false,
-           fbitmap.fmaskforegroundcolor,fbitmap.fmaskbackgroundcolor);
+           fbitmap.fmaskcolorforeground,fbitmap.fmaskcolorbackground);
   end
   else begin
    if fbitmap.mask.monochrome then begin
@@ -1809,7 +1809,7 @@ begin
    end
    else begin
     fbitmap.mask.canvas.fillrect(makerect(po1,rect1.size),
-                         fbitmap.fmaskforegroundcolor);
+                         fbitmap.fmaskcolorforeground);
    end;
   end;
  end
@@ -1874,10 +1874,10 @@ begin
   dest.copyarea(fbitmap,rect1,nullpoint,rop_copy,masked and not dest.masked);
   if masked and dest.masked then begin
    dest.mask.copyarea(fbitmap.fmask,rect1,nullpoint,rop_copy,false,
-               dest.fmaskforegroundcolor,dest.fmaskbackgroundcolor);
+               dest.fmaskcolorforeground,dest.fmaskcolorbackground);
   end;
   if dest.masked and not masked then begin
-   dest.mask.init(dest.fmaskbackgroundcolor);
+   dest.mask.init(dest.fmaskcolorbackground);
   end;
  end;
 end;

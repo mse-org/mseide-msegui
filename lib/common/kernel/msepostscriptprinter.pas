@@ -707,8 +707,8 @@ begin
     fstream.write(str1);
    end;
   end;
-  if gvm_foregroundcolor in mask then begin
-   fstream.write(setcolorstring(aforegroundcolor)+nl);
+  if gvm_colorforeground in mask then begin
+   fstream.write(setcolorstring(acolorforeground)+nl);
   end;
   if gvm_font in mask then begin
    selectfont(fontnum,0);
@@ -984,7 +984,7 @@ begin
    str1:= str1 + ' closepath';
   end;
   if (length(dashes) > 0) and (dashes[length(dashes)] = #0) then begin
-   str1:= str1 + ' gsave [] 0 setdash ' + setcolorstring(fdrawinfo.abackgroundcolor) +
+   str1:= str1 + ' gsave [] 0 setdash ' + setcolorstring(fdrawinfo.acolorbackground) +
              ' stroke grestore'
    
   end;

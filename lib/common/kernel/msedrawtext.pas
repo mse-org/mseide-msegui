@@ -575,7 +575,7 @@ end;
 procedure drawtext(const canvas: tcanvas; var info: drawtextinfoty);
 const
  stopmask = [ni_bold,ni_italic,ni_underline,ni_strikeout,ni_selected,
-             ni_fontcolor,ni_backgroundcolor];
+             ni_fontcolor,ni_colorbackground];
  fonthandlemask = [ni_bold,ni_italic];
  fontstylemask = [ni_bold,ni_italic,ni_underline,ni_strikeout];
 
@@ -585,7 +585,7 @@ var
  infoindexbefore,charindexbefore: integer;
  last: boolean;
  count: integer;
- defaultcolor,defaultbackgroundcolor: colorty;
+ defaultcolor,defaultcolorbackground: colorty;
  afontstyle,fontstylebefore: fontstylesty;
  grayed: boolean;
  formatactive: boolean;
@@ -617,10 +617,10 @@ var
        for int2:= int2 to tabchars[int4] - 1 do begin
         inc(x,charwidths[int2]);
        end;
-       if font.backgroundcolor <> cl_transparent then begin
+       if font.colorbackground <> cl_transparent then begin
         int3:= charwidths[tabchars[int4] - 1];
         fillrect(makerect(x - int3,pos.y-font.ascent,int3,
-                      font.ascent+font.descent),font.backgroundcolor);
+                      font.ascent+font.descent),font.colorbackground);
        end;
        int2:= tabchars[int4];
        pos.x:= x;
@@ -670,7 +670,7 @@ var
    if (ni_selected in newinfos) then begin
     if (fs_selected in style.fontstyle) and not (tf_noselect in flags) then begin
      font.color:= cl_selectedtext;
-     font.backgroundcolor:= cl_selectedtextbackground;
+     font.colorbackground:= cl_selectedtextbackground;
     end
     else begin
      if style.fontcolor = nil then begin
@@ -679,11 +679,11 @@ var
      else begin
       font.color:= style.fontcolor^;
      end;
-     if style.backgroundcolor = nil then begin
-      font.backgroundcolor:= defaultbackgroundcolor;
+     if style.colorbackground = nil then begin
+      font.colorbackground:= defaultcolorbackground;
      end
      else begin
-      font.backgroundcolor:= style.backgroundcolor^;
+      font.colorbackground:= style.colorbackground^;
      end;
     end;
    end;
@@ -696,12 +696,12 @@ var
       font.color:= style.fontcolor^;
      end;
     end;
-    if ni_backgroundcolor in newinfos then begin
-     if style.backgroundcolor = nil then begin
-      font.backgroundcolor:= defaultbackgroundcolor;
+    if ni_colorbackground in newinfos then begin
+     if style.colorbackground = nil then begin
+      font.colorbackground:= defaultcolorbackground;
      end
      else begin
-      font.backgroundcolor:= style.backgroundcolor^;
+      font.colorbackground:= style.colorbackground^;
      end;
     end;
    end;
@@ -727,7 +727,7 @@ begin                  //drawtext
    exit;
   end;
   defaultcolor:= font.color;
-  defaultbackgroundcolor:= font.backgroundcolor;
+  defaultcolorbackground:= font.colorbackground;
   fontstylebefore:= font.style;
   afontstyle:= fontstylebefore;
   layouttext(canvas,info,layoutinfo);
@@ -790,7 +790,7 @@ begin                  //drawtext
     inc(pos.y,layoutinfo.lineheight);
    end;
    font.color:= defaultcolor;
-   font.backgroundcolor:= defaultbackgroundcolor;
+   font.colorbackground:= defaultcolorbackground;
    font.style:= fontstylebefore;
   end
   else begin

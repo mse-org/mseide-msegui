@@ -2691,7 +2691,6 @@ begin //loadformfile
          end;
          rootnames.free;
          result^.resolved:= true;
-//         fmodules.add(moduleinfo);
         except
          dodelete;
          raise;

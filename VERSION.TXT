@@ -1,5 +1,7 @@
 MSEide+MSEgui version history
 
+2007-07-29 foregroundcolor renamed to colorforeground.
+2007-07-29 backgroundcolor renamed to colorbackground.
 2007-07-22 Property tfilenamedit.dialogkind removed,
  use controller.options fdo_save.
 2007-07-19 tmsecomponent.helpcontext.

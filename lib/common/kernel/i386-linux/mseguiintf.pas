@@ -261,7 +261,7 @@ type
   gcclipregion: regionty;
   xftdraw: pxftdraw;
   xftcolor: txftcolor;
-  xftbackgroundcolor: txftcolor;
+  xftcolorbackground: txftcolor;
   xftfont: pxftfont;
   xftstate: xftstatesty;
   platformdata: array[12..23] of cardinal; //platform dependent
@@ -2814,21 +2814,21 @@ begin
     xvalues.font:= font;
    end;
   end;
-  if gvm_backgroundcolor in mask then begin
+  if gvm_colorbackground in mask then begin
    xmask:= xmask or gcbackground;
-   xvalues.background:= backgroundcolor;
+   xvalues.background:= colorbackground;
    if hasxft then begin
-    xftbackgroundcolor.pixel:= backgroundcolor;
-    xftbackgroundcolor.color:= colortorendercolor(drawinfo.abackgroundcolor);
+    xftcolorbackground.pixel:= colorbackground;
+    xftcolorbackground.color:= colortorendercolor(drawinfo.acolorbackground);
    end;
   end;
-  if gvm_foregroundcolor in mask then begin
+  if gvm_colorforeground in mask then begin
    xmask:= xmask or gcforeground;
-   xvalues.foreground:= foregroundcolor;
+   xvalues.foreground:= colorforeground;
    xvalues.fill_style:= fillsolid;
    if hasxft then begin
-    xftcolor.pixel:= foregroundcolor;
-    xftcolor.color:= colortorendercolor(drawinfo.aforegroundcolor);
+    xftcolor.pixel:= colorforeground;
+    xftcolor.color:= colortorendercolor(drawinfo.acolorforeground);
    end;
   end;
   if gvm_brushorigin in mask then begin
@@ -3840,7 +3840,7 @@ begin
                       sourceformats,@sattributes);
      dpic:= xrendercreatepicture(appdisp,paintdevice,screenrenderpictformat,
                       destformats,@dattributes);
-     cpic:= createcolorpicture(aforegroundcolor);
+     cpic:= createcolorpicture(acolorforeground);
      if gcclipregion <> 0 then begin
       setregion(gc,region(gcclipregion),dpic);
      end;
@@ -3855,7 +3855,7 @@ begin
       xvalues.foreground:= $ffffffff;
       bitmapgc:= xcreategc(appdisp,source^.paintdevice,gcforeground or gcfunction,@xvalues);
       xfillrectangle(appdisp,source^.paintdevice,bitmapgc,x,y,cx,cy);
-      cpic:= createcolorpicture(abackgroundcolor);
+      cpic:= createcolorpicture(acolorbackground);
       xrendercomposite(appdisp,pictop,cpic,spic,dpic,0,0,ax,ay,destrect^.x,destrect^.y,
                          destrect^.cx,destrect^.cy);
       xrenderfreepicture(appdisp,cpic);
@@ -4072,10 +4072,10 @@ begin
     with x11gcty(gc.platformdata) do begin
      if df_opaque in gc.drawingflags then begin
       xfttextextents16(appdisp,xftfont,text,count,@glyphinfo);
-//      xftdrawrect(xftdraw,@xftbackgroundcolor,x-glyphinfo.x,y-xftfont^.ascent,
+//      xftdrawrect(xftdraw,@xftcolorbackground,x-glyphinfo.x,y-xftfont^.ascent,
 //              glyphinfo.width,xftfont^.ascent+xftfont^.descent);
                    //unreliable!?
-      xvalues.foreground:= xftbackgroundcolor.pixel;
+      xvalues.foreground:= xftcolorbackground.pixel;
       xchangegc(appdisp,tgc(gc.handle),gcforeground,@xvalues);
       xfillrectangle(appdisp,paintdevice,tgc(gc.handle),x{-glyphinfo.x},y-xftfont^.ascent,
               glyphinfo.xoff,xftfont^.ascent+xftfont^.descent);

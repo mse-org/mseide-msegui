@@ -19,12 +19,12 @@ type
  timage = class(tscrollingwidget)
   private
    fbitmap: tmaskedbitmap;
-   fforegroundcolor: colorty;
-   fbackgroundcolor: colorty;
+   fcolorforeground: colorty;
+   fcolorbackground: colorty;
    procedure setbitmap(const Value: tmaskedbitmap);
    procedure bitmapchanged(const sender: tobject);
-   procedure setbackgroundcolor(const Value: colorty);
-   procedure setforegroundcolor(const Value: colorty);
+   procedure setcolorbackground(const Value: colorty);
+   procedure setcolorforeground(const Value: colorty);
   protected
    procedure dopaint(const canvas: tcanvas); override;
    function calcminscrollsize: sizety; override;
@@ -34,10 +34,10 @@ type
    procedure changed;
   published
    property bitmap: tmaskedbitmap read fbitmap write setbitmap;
-   property foregroundcolor: colorty read fforegroundcolor //for monochrome bitmaps
-                  write setforegroundcolor default cl_black;
-   property backgroundcolor: colorty read fbackgroundcolor //for monochrome bitmaps
-                  write setbackgroundcolor default cl_white;
+   property colorforeground: colorty read fcolorforeground //for monochrome bitmaps
+                  write setcolorforeground default cl_black;
+   property colorbackground: colorty read fcolorbackground //for monochrome bitmaps
+                  write setcolorbackground default cl_white;
  end;
 
 implementation
@@ -48,8 +48,8 @@ uses
 
 constructor timage.create(aowner: tcomponent);
 begin
- fforegroundcolor:= cl_black;
- fbackgroundcolor:= cl_white;
+ fcolorforeground:= cl_black;
+ fcolorbackground:= cl_white;
  fbitmap:= tmaskedbitmap.create(false);
  fbitmap.onchange:= {$ifdef FPC}@{$endif}bitmapchanged;
  inherited;
@@ -73,12 +73,12 @@ var
 begin
  inherited;
  col1:= canvas.color;
- col2:= canvas.backgroundcolor;
- canvas.color:= fforegroundcolor;
- canvas.backgroundcolor:= fbackgroundcolor;
+ col2:= canvas.colorbackground;
+ canvas.color:= fcolorforeground;
+ canvas.colorbackground:= fcolorbackground;
  fbitmap.paint(canvas,makerect(nullpoint,clientsize));
  canvas.color:= col1;
- canvas.backgroundcolor:= col2;
+ canvas.colorbackground:= col2;
 end;
 
 procedure timage.setbitmap(const Value: tmaskedbitmap);
@@ -92,18 +92,18 @@ begin
 // invalidate;
 end;
 
-procedure timage.setbackgroundcolor(const Value: colorty);
+procedure timage.setcolorbackground(const Value: colorty);
 begin
- if fbackgroundcolor <> value then begin
-  fbackgroundcolor := Value;
+ if fcolorbackground <> value then begin
+  fcolorbackground := Value;
   changed;
  end;
 end;
 
-procedure timage.setforegroundcolor(const Value: colorty);
+procedure timage.setcolorforeground(const Value: colorty);
 begin
- if fforegroundcolor <> value then begin
-  fforegroundcolor := Value;
+ if fcolorforeground <> value then begin
+  fcolorforeground := Value;
   changed;
  end;
 end;

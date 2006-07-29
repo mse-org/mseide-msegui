@@ -22,8 +22,8 @@ var
 const
 // pixel0 = $000000;
 // pixel1 = $ffffff;
- pixel0 = $ffffff;   //select backgroundcolor
- pixel1 = $000000;   //select foregroundcolor
+ pixel0 = $ffffff;   //select colorbackground
+ pixel1 = $000000;   //select colorforeground
 
 {$include ../mseguiintf.inc}
 
@@ -117,7 +117,7 @@ const
                 $09,$09,$09,$09,
                 $09,$09,$09,$09);
 
- secondrasterops2: array[rasteropty] of byte = //backgroundcolor = $000000,
+ secondrasterops2: array[rasteropty] of byte = //colorbackground = $000000,
                ($0f,$0f,$0f,$0f,               //textcolor = $ffffff, or
                 $0f,$0f,$0f,$0f,
                 $0f,$0f,$0f,$0f,
@@ -1580,13 +1580,13 @@ end;
 procedure gui_changegc(var drawinfo: drawinfoty);
 begin
  with drawinfo.gcvalues^,drawinfo.gc,win32gcty(platformdata) do begin
-  if gvm_backgroundcolor in mask then begin
+  if gvm_colorbackground in mask then begin
    exclude(flags,gcf_backgroundbrushvalid);
-   backgroundcol:= backgroundcolor;
+   backgroundcol:= colorbackground;
   end;
-  if gvm_foregroundcolor in mask then begin
+  if gvm_colorforeground in mask then begin
    flags:= flags - [gcf_colorbrushvalid,gcf_foregroundpenvalid];
-   foregroundcol:= foregroundcolor;
+   foregroundcol:= colorforeground;
   end;
   if mask * [gvm_linewidth,gvm_dashes,gvm_capstyle,gvm_joinstyle] <> [] then begin
    flags:= flags - [gcf_foregroundpenvalid];

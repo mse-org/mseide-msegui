@@ -140,8 +140,8 @@ const
  cl_glyph =                  cl_mapped + 13;
  cl_lastmapped =             cl_mapped + 14;
 
- cl_0 =                      cl_namedrgb + 0; //select backgroundcolor for monochrome bitmaps
- cl_1 =                      cl_namedrgb + 1; //select foregroundcolor
+ cl_0 =                      cl_namedrgb + 0; //select colorbackground for monochrome bitmaps
+ cl_1 =                      cl_namedrgb + 1; //select colorforeground
  cl_black =                  cl_namedrgb + 2;
  cl_dkgray =                 cl_namedrgb + 3;
  cl_gray =                   cl_namedrgb + 4;
@@ -264,9 +264,9 @@ const
 type
  canvasstatety =
   (cs_regioncopy,cs_clipregion,cs_origin,cs_gc,
-   cs_abackgroundcolor,cs_aforegroundcolor,cs_color,cs_backgroundcolor,
+   cs_acolorbackground,cs_acolorforeground,cs_color,cs_colorbackground,
    cs_dashes,cs_linewidth,cs_capstyle,cs_joinstyle,
-   cs_fonthandle,cs_font,cs_fontcolor,cs_fontbackgroundcolor,
+   cs_fonthandle,cs_font,cs_fontcolor,cs_fontcolorbackground,
    cs_rasterop,cs_brush,cs_brushorigin,
    cs_painted{,cs_monochrome});
  canvasstatesty = set of canvasstatety;
@@ -304,7 +304,7 @@ type
  fontinfoty = record
   handles: array[0..fontstylehandlemask] of fontnumty;
   color: colorty;
-  backgroundcolor: colorty;
+  colorbackground: colorty;
   style: fontstylesty;
   height: integer;
   width: integer;
@@ -330,8 +330,8 @@ type
    fonchange: notifyeventty;
    function getextraspace: integer;
    procedure setextraspace(const avalue: integer);
-   procedure setbackgroundcolor(const Value: colorty);
-   function getbackgroundcolor: colorty;
+   procedure setcolorbackground(const Value: colorty);
+   function getcolorbackground: colorty;
    procedure setcolor(const Value: colorty);
    function getcolor: colorty;
    procedure setheight(const avalue: integer);
@@ -392,8 +392,8 @@ type
 
   published
    property color: colorty read getcolor write setcolor default cl_black;
-   property backgroundcolor: colorty read getbackgroundcolor
-                 write setbackgroundcolor default cl_transparent;
+   property colorbackground: colorty read getcolorbackground
+                 write setcolorbackground default cl_transparent;
    property height: integer read getheight write setheight default 0;
    property width: integer read getwidth write setwidth default 0;
                   //avg. character width in 1/10 pixel, 0 = default
@@ -511,7 +511,7 @@ type
   rectscount: integer;
  end;
  
- gcvaluemaskty = (gvm_clipregion,gvm_backgroundcolor,gvm_foregroundcolor,
+ gcvaluemaskty = (gvm_clipregion,gvm_colorbackground,gvm_colorforeground,
                   gvm_dashes,gvm_linewidth,gvm_capstyle,gvm_joinstyle,
                   gvm_font,gvm_brush,gvm_brushorigin,gvm_rasterop);
  gcvaluemasksty = set of gcvaluemaskty;
@@ -526,8 +526,8 @@ type
  gcvaluesty = record
   mask: gcvaluemasksty;
   clipregion: regionty;
-  backgroundcolor: pixelty;
-  foregroundcolor: pixelty;
+  colorbackground: pixelty;
+  colorforeground: pixelty;
   font: fontty;
   fontnum: fontnumty;
   brush: pixmapty;
@@ -542,7 +542,7 @@ type
   gc: gcty;
   paintdevice: paintdevicety;
   origin: pointty;
-  abackgroundcolor,aforegroundcolor: colorty;
+  acolorbackground,acolorforeground: colorty;
   gcvalues: pgcvaluesty; //valid in gui_changegc
   case integer of
    0: (rect: rectinfoty);
@@ -585,7 +585,7 @@ type
   clipregion: regionty;
   color: colorty;
   rasterop: rasteropty;
-  backgroundcolor: colorty;
+  colorbackground: colorty;
   font: fontinfoty;
   brush: tsimplebitmap;
   lineinfo: lineinfoty;
@@ -632,7 +632,7 @@ type
    fuser: tobject;
    fintf: pointer; //icanvas;
    fvaluestack: canvasvaluestackty;
-   gcbackgroundcolor,gcforegroundcolor: colorty;
+   gccolorbackground,gccolorforeground: colorty;
    fdefaultfont: fontnumty;
    fcliporigin: pointty;
    procedure adjustrectar(po: prectty; count: integer);
@@ -655,8 +655,8 @@ type
    procedure setbrush(const Value: tsimplebitmap);
    function getbrushorigin: pointty;
    procedure setbrushorigin(const Value: pointty);
-   function getbackgroundcolor: colorty;
-   procedure setbackgroundcolor(const Value: colorty);
+   function getcolorbackground: colorty;
+   procedure setcolorbackground(const Value: colorty);
    function getrasterop: rasteropty;
    procedure setrasterop(const Value: rasteropty);
    function getdashes: dashesstringty;
@@ -725,7 +725,7 @@ type
               const adestpoint: pointty; acopymode: rasteropty = rop_copy;
               atransparentcolor: colorty = cl_default;
               //atransparentcolor used for convert color to monochrome
-              //cl_default -> backgroundcolor
+              //cl_default -> colorbackground
               atransparency: colorty = cl_none);
 
    procedure drawpoint(const point: pointty; const acolor: colorty = cl_default);
@@ -820,8 +820,8 @@ type
                   //canvas owns the region!
 
    property color: colorty read getcolor write setcolor default cl_black;
-   property backgroundcolor: colorty read getbackgroundcolor
-              write setbackgroundcolor default cl_transparent;
+   property colorbackground: colorty read getcolorbackground
+              write setcolorbackground default cl_transparent;
    property rasterop: rasteropty read getrasterop write setrasterop default rop_copy;
    property font: tfont read ffont write setfont;
    property brush: tsimplebitmap read getbrush write setbrush;
@@ -869,8 +869,8 @@ type
    fhandle: pixmapty;
    fsize: sizety;
    fstate: pixmapstatesty;
-   fbackgroundcolor: colorty;
-   fforegroundcolor: colorty;
+   fcolorbackground: colorty;
+   fcolorforeground: colorty;
    fdefaultcliporigin: pointty;
    procedure creategc;
    procedure internaldestroyhandle;
@@ -882,7 +882,7 @@ type
    property handle: pixmapty read gethandle write sethandle;
    function getmonochrome: boolean;
    procedure setmonochrome(const avalue: boolean);
-   function getconverttomonochromebackgroundcolor: colorty; virtual;
+   function getconverttomonochromecolorbackground: colorty; virtual;
    function getmask: tsimplebitmap; virtual;
 //   function getmaskhandle(var gchandle: cardinal): pixmapty; virtual;
                   //gc handle is invalid if result = 0,
@@ -907,11 +907,11 @@ type
    procedure copyarea(asource: tsimplebitmap; const asourcerect: rectty;
               const adestpoint: pointty; acopymode: rasteropty = rop_copy;
               masked: boolean = true;
-              aforegroundcolor: colorty = cl_default; //cl_default -> asource.foregroundcolor
+              acolorforeground: colorty = cl_default; //cl_default -> asource.colorforeground
                     //used for monochrome -> color conversion
-              abackgroundcolor: colorty = cl_default;//cl_default -> asource.backgroundcolor
+              acolorbackground: colorty = cl_default;//cl_default -> asource.colorbackground
                     //used for monochrome -> color conversion or
-                    //backgroundcolor for color -> monochrome conversion
+                    //colorbackground for color -> monochrome conversion
               atransparency: colorty = cl_none);
 //   procedure stretch(const source: tsimplebitmap; const asize: sizety);
 
@@ -939,9 +939,9 @@ const
   {$warnings on}
  {$endif}
  changedmask = [cs_clipregion,cs_origin,cs_rasterop,
-                cs_abackgroundcolor,cs_aforegroundcolor,
-                cs_color,cs_backgroundcolor,
-                cs_fonthandle,cs_font,cs_fontcolor,cs_fontbackgroundcolor,
+                cs_acolorbackground,cs_acolorforeground,
+                cs_color,cs_colorbackground,
+                cs_fonthandle,cs_font,cs_fontcolor,cs_fontcolorbackground,
                 cs_brush,cs_brushorigin] + linecanvasstates;
 
  defaultframecolors: framecolorinfoty =
@@ -1705,8 +1705,8 @@ begin
  if monochrome then begin
   include(fstate,pms_monochrome);
  end;
- fbackgroundcolor:= cl_white;
- fforegroundcolor:= cl_black;
+ fcolorbackground:= cl_white;
+ fcolorforeground:= cl_black;
 end;
 
 destructor tsimplebitmap.destroy;
@@ -1736,9 +1736,9 @@ begin
  result:= pms_monochrome in fstate;
 end;
 
-function tsimplebitmap.getconverttomonochromebackgroundcolor: colorty;
+function tsimplebitmap.getconverttomonochromecolorbackground: colorty;
 begin
- result:= fbackgroundcolor;
+ result:= fcolorbackground;
 end;
 
 procedure tsimplebitmap.setmonochrome(const avalue: boolean);
@@ -1760,13 +1760,13 @@ begin
     bmp:= tsimplebitmap.create(true);
     bmp.size:= fsize;
     bmp.canvas.copyarea(canvas,makerect(nullpoint,fsize),nullpoint,rop_copy,
-       getconverttomonochromebackgroundcolor);
+       getconverttomonochromecolorbackground);
    end
    else begin
     bmp:= tsimplebitmap.create(false);
     bmp.size:= fsize;
-    bmp.canvas.backgroundcolor:= fbackgroundcolor;
-    bmp.canvas.color:= fforegroundcolor;
+    bmp.canvas.colorbackground:= fcolorbackground;
+    bmp.canvas.color:= fcolorforeground;
     bmp.canvas.copyarea(canvas,makerect(nullpoint,fsize),nullpoint);
    end;
    ahandle:= bmp.fhandle;
@@ -1998,11 +1998,11 @@ end;
 procedure tsimplebitmap.copyarea(asource: tsimplebitmap; const asourcerect: rectty;
               const adestpoint: pointty; acopymode: rasteropty = rop_copy;
               masked: boolean = true;
-              aforegroundcolor: colorty = cl_default; //cl_default -> asource.foregroundcolor
+              acolorforeground: colorty = cl_default; //cl_default -> asource.colorforeground
                     //used if asource is monchrome
-              abackgroundcolor: colorty = cl_default;//cl_default -> asource.backgroundcolor
+              acolorbackground: colorty = cl_default;//cl_default -> asource.colorbackground
                     //used if asource is monchrome or
-                    //backgroundcolor for color -> monochrome conversion
+                    //colorbackground for color -> monochrome conversion
               atransparency: colorty = cl_none);
 var
  bo1,bo2: boolean;
@@ -2021,17 +2021,17 @@ begin
   asource.canvas.save;
   asource.canvas.origin:= nullpoint;
  end;
- if aforegroundcolor = cl_default then begin
-  canvas.color:= asource.fforegroundcolor;
+ if acolorforeground = cl_default then begin
+  canvas.color:= asource.fcolorforeground;
  end
  else begin
-  canvas.color:= aforegroundcolor;
+  canvas.color:= acolorforeground;
  end;
- if abackgroundcolor = cl_default then begin
-  canvas.backgroundcolor:= asource.fbackgroundcolor;
+ if acolorbackground = cl_default then begin
+  canvas.colorbackground:= asource.fcolorbackground;
  end
  else begin
-  canvas.backgroundcolor:= abackgroundcolor;
+  canvas.colorbackground:= acolorbackground;
  end;
  {
  if masked then begin
@@ -2172,9 +2172,9 @@ begin
   finfopo:= @finfo;
  end;
  finfopo^.color:= cl_black;
- finfopo^.backgroundcolor:= cl_transparent;
+ finfopo^.colorbackground:= cl_transparent;
  updatehandlepo;
- dochanged([cs_fontcolor,cs_fontbackgroundcolor]);
+ dochanged([cs_fontcolor,cs_fontcolorbackground]);
 end;
 
 destructor tfont.destroy;
@@ -2289,17 +2289,17 @@ begin
  end;
 end;
 
-procedure tfont.setbackgroundcolor(const Value: colorty);
+procedure tfont.setcolorbackground(const Value: colorty);
 begin
- if finfopo^.backgroundcolor <> value then begin
-  finfopo^.backgroundcolor := Value;
-  dochanged([cs_fontbackgroundcolor]);
+ if finfopo^.colorbackground <> value then begin
+  finfopo^.colorbackground := Value;
+  dochanged([cs_fontcolorbackground]);
  end;
 end;
 
-function tfont.getbackgroundcolor: colorty;
+function tfont.getcolorbackground: colorty;
 begin
- result:= finfopo^.backgroundcolor;
+ result:= finfopo^.colorbackground;
 end;
 
 procedure tfont.setcolor(const Value: colorty);
@@ -2319,9 +2319,9 @@ begin
   if source is tfont then begin
    changed:= [];
    with tfont(source) do begin
-    if finfopo^.backgroundcolor <> self.finfopo^.backgroundcolor then begin
-     self.finfopo^.backgroundcolor:= finfopo^.backgroundcolor;
-     include(changed,cs_fontbackgroundcolor);
+    if finfopo^.colorbackground <> self.finfopo^.colorbackground then begin
+     self.finfopo^.colorbackground:= finfopo^.colorbackground;
+     include(changed,cs_fontcolorbackground);
     end;
     if finfopo^.color <> self.finfopo^.color then begin
      self.finfopo^.color:= finfopo^.color;
@@ -2637,8 +2637,8 @@ end;
 }
 procedure tcanvas.initgcstate;
 begin
- gcbackgroundcolor:= cl_none;
- gcforegroundcolor:= cl_none;
+ gccolorbackground:= cl_none;
+ gccolorforeground:= cl_none;
  gcfonthandle1:= 0;
  fstate:= fstate - changedmask;
 end;
@@ -2700,15 +2700,15 @@ procedure tcanvas.init;
   with values do begin
    if icanvas(fintf).getmonochrome then begin
     color:= cl_1;
-    backgroundcolor:= cl_0;
+    colorbackground:= cl_0;
     font.color:= cl_1;
-    font.backgroundcolor:= cl_transparent;
+    font.colorbackground:= cl_transparent;
    end
    else begin
     color:= cl_black;
-    backgroundcolor:= cl_transparent;
+    colorbackground:= cl_transparent;
     font.color:= cl_black;
-    font.backgroundcolor:= cl_transparent;
+    font.colorbackground:= cl_transparent;
    end;
    rasterop:= rop_copy;
   end;
@@ -2884,14 +2884,14 @@ begin
  with fdrawinfo,gc do begin
   drawingflags:= drawingflags - fillmodeinfoflags;
 
-  if (cs_aforegroundcolor in state) then begin
-   bo1:= (aforegroundcolor = cl_brushcanvas);
-   if ((aforegroundcolor = cl_brush) or bo1) and (fvaluepo^.brush <> nil) then begin
+  if (cs_acolorforeground in state) then begin
+   bo1:= (acolorforeground = cl_brushcanvas);
+   if ((acolorforeground = cl_brush) or bo1) and (fvaluepo^.brush <> nil) then begin
     include(drawingflags,df_brush);
    end;
 //   if not (df_brush in drawingflags) and (cs_monochrome in fstate) and
-//         ((aforegroundcolor <> cl_1) or (then begin
-   if aforegroundcolor <> gcforegroundcolor then begin
+//         ((acolorforeground <> cl_1) or (then begin
+   if acolorforeground <> gccolorforeground then begin
     if df_brush in drawingflags then begin
      if not (cs_brushorigin in fstate) then begin
       include(fstate,cs_brushorigin);
@@ -2903,14 +2903,14 @@ begin
       values.brush:= handle;
       if getmonochrome then begin
        include(drawingflags,df_monochrome);
-       include(state,cs_abackgroundcolor);
+       include(state,cs_acolorbackground);
        if bo1 then begin //use canvas colors
-        aforegroundcolor:= fvaluepo^.color;
-        abackgroundcolor:= fvaluepo^.backgroundcolor;
+        acolorforeground:= fvaluepo^.color;
+        acolorbackground:= fvaluepo^.colorbackground;
        end
        else begin       //use brush colors
-        aforegroundcolor:= fforegroundcolor;
-        abackgroundcolor:= fbackgroundcolor;
+        acolorforeground:= fcolorforeground;
+        acolorbackground:= fcolorbackground;
        end;
       end
       else begin
@@ -2920,20 +2920,20 @@ begin
      include(fstate,cs_brush);
     end;
    end;
-   if aforegroundcolor <> gcforegroundcolor then begin
+   if acolorforeground <> gccolorforeground then begin
     if drawingflags * [df_brush,df_monochrome] <> [df_brush] then begin
-     include(values.mask,gvm_foregroundcolor);
-     values.foregroundcolor:= colortopixel(aforegroundcolor);
+     include(values.mask,gvm_colorforeground);
+     values.colorforeground:= colortopixel(acolorforeground);
     end;
-    gcforegroundcolor:= aforegroundcolor;
+    gccolorforeground:= acolorforeground;
    end;
   end;
-  if (cs_abackgroundcolor in state) and (abackgroundcolor <> gcbackgroundcolor) then begin
-   include(values.mask,gvm_backgroundcolor);
-   values.backgroundcolor:= colortopixel(abackgroundcolor);
-   gcbackgroundcolor:= abackgroundcolor;
+  if (cs_acolorbackground in state) and (acolorbackground <> gccolorbackground) then begin
+   include(values.mask,gvm_colorbackground);
+   values.colorbackground:= colortopixel(acolorbackground);
+   gccolorbackground:= acolorbackground;
   end;
-  if gcbackgroundcolor = cl_transparent then begin
+  if gccolorbackground = cl_transparent then begin
    exclude(drawingflags,df_opaque);
   end
   else begin
@@ -2978,23 +2978,23 @@ function tcanvas.checkforeground(acolor: colorty; lineinfo: boolean): boolean;
 begin
  with fdrawinfo do begin
   if (acolor = cl_default) or (acolor = cl_parent) then begin
-   aforegroundcolor:= fvaluepo^.color;
+   acolorforeground:= fvaluepo^.color;
   end
   else begin
-   aforegroundcolor:= acolor;
+   acolorforeground:= acolor;
   end;
-  if aforegroundcolor <> cl_transparent then begin
+  if acolorforeground <> cl_transparent then begin
    if lineinfo then begin
     if length(dashes) > 0 then begin
-     abackgroundcolor:= fvaluepo^.backgroundcolor;
-     checkgcstate([cs_aforegroundcolor,cs_abackgroundcolor]+linecanvasstates);
+     acolorbackground:= fvaluepo^.colorbackground;
+     checkgcstate([cs_acolorforeground,cs_acolorbackground]+linecanvasstates);
     end
     else begin
-     checkgcstate([cs_aforegroundcolor]+linecanvasstates);
+     checkgcstate([cs_acolorforeground]+linecanvasstates);
     end;
    end
    else begin
-    checkgcstate([cs_aforegroundcolor]);
+    checkgcstate([cs_acolorforeground]);
    end;
    result:= true;
   end
@@ -3082,14 +3082,14 @@ begin
           [df_canvasismonochrome] <> [] then begin //different colorformat
    include(gc.drawingflags,df_colorconvert);
    with fdrawinfo,gc do begin
-    aforegroundcolor:= fvaluepo^.color;
+    acolorforeground:= fvaluepo^.color;
     if not (df_canvasismonochrome in gc.drawingflags) then begin //monochrome to color
-     abackgroundcolor:= fvaluepo^.backgroundcolor;
-     checkgcstate([cs_aforegroundcolor,cs_abackgroundcolor]);
+     acolorbackground:= fvaluepo^.colorbackground;
+     checkgcstate([cs_acolorforeground,cs_acolorbackground]);
     end
     else begin
      if atransparentcolor = cl_default then begin                //color to monochrome
-      transparentcolor:= colortopixel(fvaluepo^.backgroundcolor);
+      transparentcolor:= colortopixel(fvaluepo^.colorbackground);
      end
      else begin
       transparentcolor:= colortopixel(atransparentcolor);
@@ -3427,16 +3427,16 @@ begin
     afontnum:= gethandleforcanvas(self);
     afonthandle1:= afontnum;
 //    afonthandle:= getfontdata(afontnum)^.font;
-    aforegroundcolor:= color;
-    abackgroundcolor:= backgroundcolor;
+    acolorforeground:= color;
+    acolorbackground:= colorbackground;
    end;
   end
   else begin
    afonthandle1:= ffont.gethandle;
 //   afonthandle:= ffont.getdatapo^.font;
    with fvaluepo^.font do begin
-    aforegroundcolor:= color;
-    abackgroundcolor:= backgroundcolor;
+    acolorforeground:= color;
+    acolorbackground:= colorbackground;
    end;
   end;
   with fdrawinfo.text16pos do begin
@@ -3446,18 +3446,18 @@ begin
    if grayed then begin
     inc(pos^.x);
     inc(pos^.y);
-    aforegroundcolor:= cl_white;
-    abackgroundcolor:= cl_transparent;
-    checkgcstate([cs_font,cs_aforegroundcolor,cs_abackgroundcolor]);
+    acolorforeground:= cl_white;
+    acolorbackground:= cl_transparent;
+    checkgcstate([cs_font,cs_acolorforeground,cs_acolorbackground]);
     gdi(gdi_drawstring16);
     dec(pos^.x);
     dec(pos^.y);
-    aforegroundcolor:= cl_dkgray;
-    checkgcstate([cs_aforegroundcolor]);
+    acolorforeground:= cl_dkgray;
+    checkgcstate([cs_acolorforeground]);
     gdi(gdi_drawstring16);
    end
    else begin
-    checkgcstate([cs_font,cs_aforegroundcolor,cs_abackgroundcolor]);
+    checkgcstate([cs_font,cs_acolorforeground,cs_acolorbackground]);
     gdi(gdi_drawstring16);
    end;
   end;
@@ -3979,16 +3979,16 @@ begin
  end;
 end;
 
-function tcanvas.getbackgroundcolor: colorty;
+function tcanvas.getcolorbackground: colorty;
 begin
- result:= fvaluepo^.backgroundcolor;
+ result:= fvaluepo^.colorbackground;
 end;
 
-procedure tcanvas.setbackgroundcolor(const Value: colorty);
+procedure tcanvas.setcolorbackground(const Value: colorty);
 begin
- if fvaluepo^.backgroundcolor <> value then begin
-  fvaluepo^.backgroundcolor:= value;
-  valuechanged(cs_backgroundcolor);
+ if fvaluepo^.colorbackground <> value then begin
+  fvaluepo^.colorbackground:= value;
+  valuechanged(cs_colorbackground);
  end;
 end;
 

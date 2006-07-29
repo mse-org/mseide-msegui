@@ -2304,7 +2304,7 @@ object mainfo: tmainfo
     frame.caption = 'Caption botto&mright'
     frame.captionpos = cp_bottomright
     frame.font.color = 8876645
-    frame.font.backgroundcolor = 13418736
+    frame.font.colorbackground = 13418736
     frame.font.name = 'stf_default'
     frame.font.dummy = 0
     frame.dummy = 0

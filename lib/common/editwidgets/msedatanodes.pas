@@ -1615,7 +1615,7 @@ begin
  inherited;
  with info do begin
   if (eventkind = ek_buttonpress) and
-        (shiftstate * shiftstatemask = []) and (button = mb_left) and
+        (shiftstate * keyshiftstatesmask = []) and (button = mb_left) and
     pointinrect(makepoint(pos.x-levelshift,pos.y),fowner.fintf.getlayoutinfo^.expandboxrect) then begin
    expanded:= not expanded;
    include(eventstate,es_processed);

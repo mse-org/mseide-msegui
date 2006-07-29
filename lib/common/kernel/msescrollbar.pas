@@ -536,7 +536,7 @@ begin
    drawtoolbutton(canvas,areas[bu1]);
   end;
   if fcolorpattern <> cl_none then begin
-   backgroundcolor:= col1;
+   colorbackground:= col1;
    brush:= stockobjects.bitmaps[stb_dens50];
    if fclickedarea = sba_start then begin
     color:= cl_black;

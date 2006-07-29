@@ -657,10 +657,10 @@ begin
   afonthandle1:= tfont1(font).gethandle;
 //   afonthandle:= tfont1(font).getdatapo^.font;
   with fvaluepo^.font do begin
-   aforegroundcolor:= color;
-   abackgroundcolor:= backgroundcolor;
+   acolorforeground:= color;
+   acolorbackground:= colorbackground;
   end;
-  checkgcstate([cs_font,cs_aforegroundcolor,cs_abackgroundcolor]);
+  checkgcstate([cs_font,cs_acolorforeground,cs_acolorbackground]);
  end;
  with info do begin
   if countchars(text.text,c_tab) = 0 then begin
@@ -887,7 +887,7 @@ procedure tcustomprintercanvas.setcolorspace(const avalue: colorspacety);
 begin
  if fcolorspace <> avalue then begin
   fcolorspace:= avalue;
-  valueschanged([cs_color,cs_backgroundcolor]);
+  valueschanged([cs_color,cs_colorbackground]);
  end;
 end;
 

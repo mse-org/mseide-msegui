@@ -32,11 +32,12 @@ type
  shiftstatesty = set of shiftstatety;
 
 const
- shiftstatemask = [ss_shift,ss_alt,ss_ctrl];
+// shiftstatemask = [ss_shift,ss_alt,ss_ctrl];
  sizingtol = 2; //+- pixel
  sizingwidth = 2*sizingtol;                                        
  keyshiftstatesmask: shiftstatesty = [ss_shift,ss_alt,ss_ctrl];
  buttonshiftstatesmask: shiftstatesty = [ss_left,ss_right,ss_middle,ss_double];
+ shiftstatesmask = [ss_shift,ss_alt,ss_ctrl,ss_left,ss_right,ss_middle];
 // keybuttonshiftstatesmask: shiftstatesty = [ss_shift,ss_alt,ss_ctrl,
 //                   ss_left,ss_right,ss_middle,ss_double];
 

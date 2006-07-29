@@ -398,10 +398,10 @@ begin
        end;
       end;
      end;
-     col2:= maskbackgroundcolor;
-     maskbackgroundcolor:= 0;
+     col2:= maskcolorbackground;
+     maskcolorbackground:= 0;
      colormask:= coloralpha;
-     maskbackgroundcolor:= col2;
+     maskcolorbackground:= col2;
     end;
    end;
    change;

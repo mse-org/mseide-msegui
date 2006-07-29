@@ -1172,6 +1172,7 @@ type
                        //clipped by paintrect of sender.parentwidget
    procedure mouseparked;
    procedure movewindowrect(const dist: pointty; const rect: rectty); virtual;
+   procedure checkmousewidget(const info: mouseeventinfoty; var capture: twidget);
    procedure dispatchmouseevent(var info: mouseeventinfoty; capture: twidget); virtual;
    procedure dispatchkeyevent(const eventkind: eventkindty; var info: keyeventinfoty); virtual;
    procedure sizechanged; virtual;
@@ -1315,6 +1316,9 @@ type
    fcursorshape: cursorshapety;
    feventlooping: integer;
 //   facursorshape: cursorshapety;
+   fbuttonpresswidgetbefore: twidget;
+   fbuttonreleasewidgetbefore: twidget;
+   factmousewindow: twindow;
    function getterminated: boolean;
    procedure setterminated(const Value: boolean);
    procedure invalidated;
@@ -1445,6 +1449,8 @@ type
    property applicationname: msestring read fapplicationname write fapplicationname;
    property thread: threadty read fthread;
 
+   property buttonpresswidgetbefore: twidget read fbuttonpresswidgetbefore;
+   property buttonreleasewidgetbefore: twidget read fbuttonreleasewidgetbefore;
    property dblclicktime: integer read fdblclicktime write fdblclicktime default
                  defaultdblclicktime; //us
    property onexception: exceptioneventty read fonexception write fonexception;
@@ -1598,7 +1604,6 @@ type
    fhinttimer: tsimpletimer;
    fmouseparktimer: tsimpletimer;
    fmouseparkeventinfo: mouseeventinfoty;
-   factmousewindow: twindow;
    ftimestampbefore: cardinal;
    flastbuttonpress: mousebuttonty;
    flastbuttonpresstimestamp: cardinal;
@@ -1614,7 +1619,7 @@ type
    procedure unsetwindowfocus(winid: winidty);
    procedure registerwindow(window: twindow);
    procedure unregisterwindow(window: twindow);
-   procedure widgetdestroyed(widget: twidget);
+   procedure widgetdestroyed(const widget: twidget);
 
    procedure processexposeevent(event: twindowrectevent);
    procedure processconfigureevent(event: twindowrectevent);
@@ -6435,7 +6440,8 @@ function twidget.isdblclick(const info: mouseeventinfoty): boolean;
 begin
  with info do begin
   result:= (button = mb_left) and pointinrect(pos,clientrect) and
-       (eventkind = ek_buttonrelease) and (ss_double in shiftstate);
+       (eventkind = ek_buttonpress) and (ss_double in shiftstate) and 
+        (app.fbuttonpresswidgetbefore = self);
  end;
 end;
 
@@ -6444,7 +6450,9 @@ function twidget.isdblclicked(const info: mouseeventinfoty): boolean;
    // and timedlay to last same buttonevent is short
 begin
  with info do begin
-  result:= (button = mb_left) and (ss_double in shiftstate);
+  result:= (button = mb_left) and (ss_double in shiftstate) and 
+    ((eventkind = ek_buttonpress) and (app.fbuttonpresswidgetbefore = self) or
+     (eventkind = ek_buttonrelease) and (app.fbuttonreleasewidgetbefore = self));
  end;
 end;
 
@@ -8212,12 +8220,7 @@ begin
  dispatchmouseevent(info,app.fmousecapturewidget);
 end;
 
-procedure twindow.dispatchmouseevent(var info: mouseeventinfoty;
-                           capture: twidget);
-var
- posbefore: pointty;
- int1: integer;
- po1: peventaty;
+procedure twindow.checkmousewidget(const info: mouseeventinfoty; var capture: twidget);
 begin
  if capture = nil then begin
   capture:= fowner.mouseeventwidget(info);
@@ -8226,6 +8229,19 @@ begin
   end;
  end;
  app.setmousewidget(capture);
+end;
+
+procedure twindow.dispatchmouseevent(var info: mouseeventinfoty;
+                           capture: twidget);
+var
+ posbefore: pointty;
+ int1: integer;
+ po1: peventaty;
+begin
+ if info.eventkind in [ek_mouseenter,ek_mouseleave] then begin
+  exit;
+ end;
+ checkmousewidget(info,capture);
  if capture <> nil then begin
   with capture do begin
    subpoint1(info.pos,rootpos);
@@ -9072,10 +9088,16 @@ end;
 procedure tinternalapplication.processwindowcrossingevent(event: twindowevent);
 var
  window: twindow;
+ info: mouseeventinfoty;
 begin
  if findwindow(event.fwinid,window) then begin
   if event.kind = ek_leavewindow then begin
    fmouseparktimer.enabled:= false;
+   if factmousewindow <> nil then begin
+    fillchar(info,sizeof(info),0);
+    info.eventkind:= ek_mouseleave;
+    factmousewindow.dispatchmouseevent(info,nil);
+   end;
    factmousewindow:= nil;
    if fmousecapturewidget = nil then begin
     setmousewidget(nil);
@@ -9114,6 +9136,7 @@ var
  abspos: pointty;
  int1: integer;
  bo1: boolean;
+ ek1: eventkindty;
 begin
  with event do begin
   if findwindow(fwinid,window) then begin
@@ -9169,6 +9192,12 @@ begin
     end;
    end;
    fmouseparkeventinfo:= info;
+   if factmousewindow <> window then begin
+    ek1:= info.eventkind;
+    info.eventkind:= ek_mouseenter;
+    window.dispatchmouseevent(info,nil);
+    info.eventkind:= ek1;
+   end;
    factmousewindow:= window;
    fmouseparktimer.interval:= -mouseparktime;
    fmouseparktimer.enabled:= true;
@@ -9210,12 +9239,14 @@ begin
    window.dispatchmouseevent(info,fmousecapturewidget);
    if (ftimestamp <> 0) and (fbutton <> mb_none) then begin
     if kind = ek_buttonpress then begin
+     fbuttonpresswidgetbefore:= fmousewidget;
      ftimestampbefore:= flastbuttonpresstimestamp;
      flastbuttonpress:= fbutton;
      flastbuttonpresstimestamp:= ftimestamp;
     end
     else begin
      if kind = ek_buttonrelease then begin
+      fbuttonreleasewidgetbefore:= fmousewidget;
       ftimestampbefore:= flastbuttonreleasetimestamp;
       flastbuttonrelease:= fbutton;
       flastbuttonreleasetimestamp:= ftimestamp;
@@ -10004,7 +10035,7 @@ begin
  end;
 end;
 
-procedure tinternalapplication.widgetdestroyed(widget: twidget);
+procedure tinternalapplication.widgetdestroyed(const widget: twidget);
 begin
  if fmousecapturewidget = widget then begin
   capturemouse(nil,false);
@@ -10021,6 +10052,12 @@ begin
  end;
  if fclientmousewidget = widget then begin
   fclientmousewidget:= nil;
+ end;
+ if fbuttonpresswidgetbefore = widget then begin
+  fbuttonpresswidgetbefore:= nil;
+ end;
+ if fbuttonreleasewidgetbefore = widget then begin
+  fbuttonreleasewidgetbefore:= nil;
  end;
 end;
 
