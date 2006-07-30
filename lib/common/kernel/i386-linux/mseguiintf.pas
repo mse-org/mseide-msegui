@@ -53,6 +53,8 @@ const
 type
   Bool = integer;
   XID = type Cardinal;
+  TXICCEncodingStyle = (XStringStyle,XCompoundTextStyle,XTextStyle,
+     XStdICCTextStyle,XUTF8StringStyle);
 
 function msedisplay: pdisplay;
 function msevisual: pvisual;
@@ -64,6 +66,7 @@ type
  XIM = ^_XIM;
  _XIC = record end;
  XIC = ^_XIC;
+ ppucs4char = ^pucs4char;
  dword = longword;
   VisualID = dword;
   Visual = record
@@ -104,9 +107,11 @@ const
   AllHints = (((((InputHint or StateHint) or IconPixmapHint) or IconWindowHint)
     or IconPositionHint) or IconMaskHint) or WindowGroupHint;
   XUrgencyHint = 1 shl 8;
+  {
 type
    TXICCEncodingStyle = (XStringStyle,XCompoundTextStyle,XTextStyle,
      XStdICCTextStyle,XUTF8StringStyle);
+  }
 function XSetWMHints(Display: PDisplay; W: xid; WMHints: PXWMHints): Longint; cdecl;
                               external sXLib name 'XSetWMHints';
 function XSetForeground(Display: PDisplay; GC: TGC; Foreground: Cardinal): longint; cdecl;
@@ -139,24 +144,29 @@ procedure XSetICFocus(IC: XIC); cdecl;
 procedure XUnsetICFocus(IC: XIC); cdecl;
                               external sXLib name 'XUnsetICFocus';
 function XwcLookupString(IC: XIC; Event: PXKeyPressedEvent;
-  BufferReturn: Pwidechar; WCharsBuffer: Longint; KeySymReturn: PKeySym;
+  BufferReturn: Pucs4char; WCharsBuffer: Longint; KeySymReturn: PKeySym;
   StatusReturn: PStatus): Longint; cdecl;
                               external sXLib name 'XwcLookupString';
 function Xutf8LookupString(IC: XIC; Event: PXKeyPressedEvent;
   BufferReturn: Pchar; CharsBuffer: Longint; KeySymReturn: PKeySym;
   StatusReturn: PStatus): Longint; cdecl;
                               external sXLib name 'Xutf8LookupString';
+function XwcTextListToTextProperty(para1:PDisplay; para2:PPucs4Char;
+           para3: integer; para4:TXICCEncodingStyle;
+           para5:PXTextProperty): integer;cdecl;
+                              external sXLib name 'XwcTextListToTextProperty';
 function XCreateImage(Display: PDisplay; Visual: msePVisual; Depth: Cardinal;
   Format: Longint; Offset: Longint; Data: PChar; Width, Height: Cardinal;
   BitmapPad: Longint; BytesPerLine: Longint): PXImage; cdecl;
                               external sXLib name 'XCreateImage';
+{ xwc function seems to be more stable
 function Xutf8TextListToTextProperty(para1:PDisplay; para2:PPchar; para3: integer;
             para4:TXICCEncodingStyle; para5:PXTextProperty): integer; cdecl;
                      external sXLib name 'Xutf8TextListToTextProperty';
+}
 function Xutf8TextPropertyToTextList(para1:PDisplay; para2:PXTextProperty;
             para3:PPPchar; para4: pinteger): integer; cdecl;
                      external sXlib name 'Xutf8TextPropertyToTextList';
-
 
 implementation
 
@@ -745,7 +755,7 @@ var
  atom1: atom;
  po2: ppchar;
  prop1: xtextproperty;
- 
+
 begin
  clipboardowner:= xgetselectionowner(appdisp,clipboardatom);
  if clipboardowner = appid then begin
@@ -895,24 +905,27 @@ begin
 end;
 
 function stringtotextproperty(const value: msestring; const style: txiccencodingstyle;
-                               out textproperty: xtextproperty): boolean;
+                                  out textproperty: xtextproperty): boolean;
 var
- list: array[0..0] of utf8string;
+ list: array[0..0] of ucs4string;
 begin
- list[0]:= stringtoutf8(value);
- result:= xutf8textlisttotextproperty(appdisp,@list,1,style,@textproperty) >= 0;
+ list[0]:= msestringtoucs4string(value);
+ result:= xwctextlisttotextproperty(appdisp,@list,1,style,@textproperty) >= 0;
  if not result then begin
   fillchar(textproperty,0,sizeof(textproperty));
  end;
 end;
 
 {
-function stringtotextproperty(const value: msestring; out textproperty: xtextproperty): boolean;
+function stringtotextproperty(const value: msestring; const style: txiccencodingstyle;
+                               out textproperty: xtextproperty): boolean;
 var
- list: array[0..0] of ucs4string;
+ list: array[0..0] of pchar;
+ str1: utf8string;
 begin
- list[0]:= msestringtoucs4string(value);
- result:= xwctextlisttotextproperty(appdisp,@list,1,xstdicctextstyle,@textproperty) >= 0;
+ str1:= stringtoutf8(value);
+ list[0]:= pchar(str1);
+ result:= xutf8textlisttotextproperty(appdisp,@list,1,style,@textproperty) >= 0;
  if not result then begin
   fillchar(textproperty,0,sizeof(textproperty));
  end;
