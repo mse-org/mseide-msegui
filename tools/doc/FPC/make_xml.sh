@@ -46,7 +46,8 @@ function do_it () {
 
 # if docs dir does not exist then to create it  
   xml_dir="${fpc_doc_root}/xml/$ref"
-  [ -d $xml_dir ] || mkdir -p -- $xml_dir || exit 0
+  rm -rf -- $xml_dir
+  mkdir -p -- $xml_dir || exit 0
   cp -f -- $this_dir/../xml_templates/${xml_descr}.xml $xml_dir/
 
   for dir in $1; do

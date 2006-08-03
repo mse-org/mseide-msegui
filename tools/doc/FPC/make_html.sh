@@ -44,8 +44,9 @@ function do_it () {
   }
   html_dir=${fpc_doc_root}/html/$1
   
-# if docs dir does not exist then to create it
-  [ -d $html_dir ] || mkdir -p -- $html_dir || exit 0
+# recreating the HTML dir to empty its contents
+  rm -rf -- $html_dir
+  mkdir -p -- $html_dir || exit 0
 # cp -f -- $this_dir/../xml_templates/$2.xml.start $xml_dir/$2.xml
 
 # create description file list

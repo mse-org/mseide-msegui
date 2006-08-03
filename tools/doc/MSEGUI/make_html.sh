@@ -45,8 +45,9 @@ function do_it () {
   }
   html_dir=${msegui_doc_root}/html/$1
   
-# if docs dir does not exist then to create it
-  [ -d $html_dir ] || mkdir -p -- $html_dir || exit 0
+# recreating the HTML doc dir to empty its contents
+  rm -rf -- $html_dir
+  mkdir -p -- $html_dir || exit 0
 
 # create description file list
   DescrFiles=`find $xml_dir -name *.xml`

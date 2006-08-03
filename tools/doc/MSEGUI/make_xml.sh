@@ -51,8 +51,9 @@ function do_it () {
 #   where to put output XML files
     xml_dir=`echo $dir | awk -v R1="${msegui_src_dir}/" -v R2="$msegui_doc_root/xml/" '{ gsub(R1,R2,$0); print $0; }'`
     
-#   if docs dir does not exist then to create it
-    [ -d $xml_dir ] || mkdir -p -- $xml_dir || exit 0
+#   recreating the XML dir to empty its contents
+    rm -rf -- $xml_dir
+    mkdir -p -- $xml_dir || exit 0
     
     inc_dirs1="-Fi./ -Fi${dir} $3"
     tmp=`echo -e $dir | awk -v R=${msegui_src_dir}/$2/ '{ gsub(R,"",$0); print $0; }'`
