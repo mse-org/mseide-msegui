@@ -928,6 +928,7 @@ end;
 function sys_opendirstream(var stream: dirstreamty): syserrorty;
 var
  wo1: longword;
+ int1: integer;
 // ar1: msestringarty;
 begin
  with stream,dirstreamwin32ty(platformdata) do begin
@@ -991,8 +992,10 @@ begin
     {$endif}
    end;
    if handle = invalid_handle_value then begin
-    if getlasterror <> error_file_not_found then begin
+    int1:= getlasterror;
+    if int1 <> error_file_not_found then begin
      dispose(finddatapo);
+     setlasterror(int1);
      result:= syelasterror;
     end;
    end

@@ -1242,13 +1242,16 @@ type
                        const position: cellpositionty = cep_nearest;
                        const noxshift: boolean = false): pointty;
                                     //returns shifted amount
-   function showcaretrect(const arect: rectty; const aframe: tcustomframe): pointty; overload;
+   function showcaretrect(const arect: rectty;
+                               const aframe: tcustomframe): pointty; overload;
    function showcaretrect(const arect: rectty; const aframe: framety): pointty; overload;
    function showcellrect(const rect: rectty;
                    const origin: cellinnerlevelty = cil_paint): pointty;
    procedure showcell(const cell: gridcoordty; 
-          const position: cellpositionty = cep_nearest); 
-                                    //scrolls cell in view
+                      const position: cellpositionty = cep_nearest;
+                      const force: boolean = false); 
+               //scrolls cell in view, force true -> if scrollbar clicked also
+   procedure showlastrow;
    procedure scrollrows(const step: integer);
    procedure scrollleft;
    procedure scrollright;
@@ -6669,30 +6672,38 @@ begin
 end;
 
 procedure tcustomgrid.showcell(const cell: gridcoordty;
-                     const position: cellpositionty = cep_nearest);
+                     const position: cellpositionty = cep_nearest;
+                     const force: boolean = false);
 var
  coord1: gridcoordty;
  rect1: rectty;
  po1: pointty;
 begin
- coord1:= cell;
- with coord1 do begin
-  if col >= fdatacols.count then begin
-   col:= fdatacols.count - 1;
+ if force or not (frame.sbvert.clicked or frame.sbvert.clicked) then begin
+  coord1:= cell;
+  with coord1 do begin
+   if col >= fdatacols.count then begin
+    col:= fdatacols.count - 1;
+   end;
+   if row >= frowcount then begin
+    row:= frowcount-1;
+   end;
+   rect1:= cellrect(coord1); //updatelayout
+   po1:= calcshowshift(rect1,position);
+   if (col < 0) or (co_nohscroll in fdatacols[col].foptions){noscrollingcol} then begin
+    po1.x:= 0;
+   end;
+   if coord1.row < 0 then begin
+    po1.y:= 0;
+   end;
+   tgridframe(fframe).scrollpos:= addpoint(tgridframe(fframe).scrollpos,po1);
   end;
-  if row >= frowcount then begin
-   row:= frowcount-1;
-  end;
-  rect1:= cellrect(coord1); //updatelayout
-  po1:= calcshowshift(rect1,position);
-  if (col < 0) or (co_nohscroll in fdatacols[col].foptions){noscrollingcol} then begin
-   po1.x:= 0;
-  end;
-  if coord1.row < 0 then begin
-   po1.y:= 0;
-  end;
-  tgridframe(fframe).scrollpos:= addpoint(tgridframe(fframe).scrollpos,po1);
  end;
+end;
+
+procedure tcustomgrid.showlastrow;
+begin
+ showcell(makegridcoord(col,rowhigh));
 end;
 
 function tcustomgrid.cellrect(const cell: gridcoordty;

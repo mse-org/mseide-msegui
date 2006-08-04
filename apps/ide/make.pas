@@ -212,9 +212,10 @@ begin
  end;
  with messagefo.messages do begin
   datacols[0].readpipe(str1);
-  if not (frame.sbvert.clicked or frame.sbvert.clicked) then begin
-   showcell(makegridcoord(0,bigint));
-  end;
+  showlastrow;
+//  if not (frame.sbvert.clicked or frame.sbvert.clicked) then begin
+//   showcell(makegridcoord(0,bigint));
+//  end;
  end;
  if fmessagefile <> nil then begin
   fmessagefile.writestr(str1);

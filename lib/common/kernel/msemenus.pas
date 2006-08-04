@@ -201,8 +201,8 @@ type
    procedure objectevent(const sender: tobject; const event: objecteventty); override;
   public
    constructor create(aowner: tcomponent); overload; override;
-   constructor createtransient(atransientfor: twidget;
-                  amouseinfopo: pmouseeventinfoty); overload;
+   constructor createtransient(const atransientfor: twidget;
+                  const amouseinfopo: pmouseeventinfoty); overload;
    destructor destroy; override;
    function checkexec: boolean;
    procedure assign(source: tpersistent); override;
@@ -314,8 +314,8 @@ begin
  fmenu:= tmenuitem.create(nil,self);
 end;
 
-constructor tcustommenu.createtransient(atransientfor: twidget;
-                        amouseinfopo: pmouseeventinfoty);
+constructor tcustommenu.createtransient(const atransientfor: twidget;
+                        const amouseinfopo: pmouseeventinfoty);
 begin
  create(nil);
  ftransient:= true;
@@ -1131,7 +1131,8 @@ begin
  end;
 end;
 
-class procedure tpopupmenu.additems(var amenu: tpopupmenu; const atransientfor: twidget;
+class procedure tpopupmenu.additems(var amenu: tpopupmenu;
+                 const atransientfor: twidget;
                  var mouseinfo: mouseeventinfoty;
                  const captions: array of msestring;
                             //if index > count -> index:= count
@@ -1178,9 +1179,16 @@ class procedure tpopupmenu.additems(var amenu: tpopupmenu; const atransientfor: 
                  const aseparator: boolean = true);
 var
  bo1: boolean;
+ widget1: twidget;
 begin
  items.fmouseinfopo:= @mouseinfo;
- items.doupdate;
+ widget1:= items.ftransientfor;
+ items.ftransientfor:= atransientfor;
+ try
+  items.doupdate;
+ finally
+  items.ftransientfor:= widget1;
+ end;
  bo1:= (amenu = nil) or amenu.ftransient;
  additems(amenu,atransientfor,mouseinfo,items.fmenu.fsubmenu,aseparator,
             mo_insertfirst in items.foptions);

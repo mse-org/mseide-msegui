@@ -9629,7 +9629,8 @@ begin       //eventloop
     end;
     if not gui_hasevent then begin
      try
-      if not (aps_activewindowchecked in fstate) then begin
+      if (amodalwindow = nil) and 
+                         not (aps_activewindowchecked in fstate) then begin
        include(fstate,aps_activewindowchecked);
        checkactivewindow;
       end;
