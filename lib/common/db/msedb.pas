@@ -388,6 +388,7 @@ type
    procedure activechanged; override;
    function getdataset: tdataset;
    function getutf8: boolean;
+   function  GetActiveRecord: Integer; override;
   public
    function moveby(distance: integer): integer; override;
    property dataset: tdataset read getdataset;
@@ -1420,6 +1421,16 @@ begin
   else begin
    result:= inherited moveby(distance);
   end;
+ end;
+end;
+
+function tmsedatalink.GetActiveRecord: Integer;
+begin
+ if (dataset = nil) or (csdestroying in dataset.componentstate) then begin
+  result:= -1;
+ end
+ else begin
+  result:= inherited getactiverecord;
  end;
 end;
 
