@@ -152,7 +152,7 @@ function Xutf8LookupString(IC: XIC; Event: PXKeyPressedEvent;
   StatusReturn: PStatus): Longint; cdecl;
                               external sXLib name 'Xutf8LookupString';
 function XwcTextListToTextProperty(para1:PDisplay; para2:PPucs4Char;
-           para3: integer; para4:TXICCEncodingStyle;
+           para3: integer; para4: integer{TXICCEncodingStyle};
            para5:PXTextProperty): integer;cdecl;
                               external sXLib name 'XwcTextListToTextProperty';
 function XCreateImage(Display: PDisplay; Visual: msePVisual; Depth: Cardinal;
@@ -910,7 +910,7 @@ var
  list: array[0..0] of ucs4string;
 begin
  list[0]:= msestringtoucs4string(value);
- result:= xwctextlisttotextproperty(appdisp,@list,1,style,@textproperty) >= 0;
+ result:= xwctextlisttotextproperty(appdisp,@list,1,ord(style),@textproperty) >= 0;
  if not result then begin
   fillchar(textproperty,0,sizeof(textproperty));
  end;
