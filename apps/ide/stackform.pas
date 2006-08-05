@@ -87,8 +87,8 @@ begin
  with info do begin
   case eventkind of
    cek_enter: begin
-    filedisp.value:= grid[2][cell.row]+':'+grid[3][cell.row];
-    address.value:= grid[4][cell.row];
+    filedisp.value:= self.grid[2][cell.row]+':'+self.grid[3][cell.row];
+    address.value:= self.grid[4][cell.row];
     if (cellbefore.row >= 0) and (cellbefore.row <> newcell.row) then begin
      mainfo.stackframechanged(newcell.row);
     end;

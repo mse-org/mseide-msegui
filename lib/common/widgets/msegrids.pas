@@ -156,24 +156,23 @@ type
                       fca_reverse,fca_focusin,fca_focusinforce,
                       fca_focusinshift,fca_focusinrepeater,fca_setfocusedcell,
                       fca_selectstart,fca_selectend);
-
+ tcustomgrid = class;
  celleventinfoty = record
   cell: gridcoordty;
+  grid: tcustomgrid;
   case eventkind: celleventkindty of
    cek_exit,cek_enter:
     (cellbefore,newcell: gridcoordty; selectaction: focuscellactionty);
    cek_select:
     (selected: boolean; accept: boolean);
    cek_mousemove,cek_mousepark,cek_firstmousepark,cek_buttonpress,cek_buttonrelease:
-    (zone: cellzonety; mouseeventinfopo: pmouseeventinfoty; gridmousepos: pointty;
-     othercellclicked: boolean);
+    (zone: cellzonety; mouseeventinfopo: pmouseeventinfoty; gridmousepos: pointty);
    cek_keydown,cek_keyup:
     (keyeventinfopo: pkeyeventinfoty);
  end;
 
 
 type
- tcustomgrid = class;
  tgridarrayprop = class;
 
  tcellframe = class(tframe)
@@ -986,6 +985,7 @@ type
    frowfonts: trowfontarrayprop;
    fmouseparkcell: gridcoordty;
    fclickedcell: gridcoordty;
+   fclickedcellbefore: gridcoordty;
 
    fstatfile: tstatfile;
    fstatvarname: msestring;
@@ -1578,12 +1578,16 @@ begin
           not (ccr_buttonpress in restrictions) and (eventkind = ek_buttonrelease)) and
            (info.mouseeventinfopo^.shiftstate * keyshiftstatesmask = []) then begin
         if ccr_dblclick in restrictions then begin
-         result:= ss_double in info.mouseeventinfopo^.shiftstate;
+         result:= (ss_double in info.mouseeventinfopo^.shiftstate) and 
+                   (grid.fclickedcellbefore.row = cell.row) and 
+                   (grid.fclickedcellbefore.col = cell.col);
         end
         else begin
          result:= true;
         end;
-        if (eventkind = ek_buttonrelease) and othercellclicked then begin
+        if (eventkind = ek_buttonrelease) and 
+              ((grid.fclickedcell.row <> cell.row) or 
+               (grid.fclickedcell.col <> cell.col)) then begin
          result:= false;
         end;
        end;
@@ -3117,9 +3121,7 @@ begin
     subpoint1(info.pos,po1);
     cellinfo.zone:= cz_none;
     updatecellzone(info.pos,cellinfo.zone);
-    othercellclicked:= (gs_cellclicked in fgrid.fstate) and 
-          ((fgrid.fclickedcell.row <> acell.row) or 
-          (fgrid.fclickedcell.col <> acell.col));
+    grid:= fgrid;
     fgrid.docellevent(cellinfo);
    finally
     addpoint1(info.pos,po1);
@@ -5792,9 +5794,11 @@ begin
      checkfocuscell;
      if (mousewidgetbefore = application.mousewidget) and 
                       //not interrupted by beginmodal
-        (button = mb_left) and isdatacell(ffocusedcell) and 
-              gridcoordisequal(fmousecell,ffocusedcell) then begin
+        (button = mb_left) and isdatacell(fmousecell)
+               {and isdatacell(ffocusedcell) and 
+              gridcoordisequal(fmousecell,ffocusedcell)} then begin
       include(fstate,gs_cellclicked);
+      fclickedcellbefore:= fclickedcell;
       fclickedcell:= fmousecell;
      end;                
     end;
