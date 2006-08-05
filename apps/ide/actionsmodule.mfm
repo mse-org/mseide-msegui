@@ -228,6 +228,7 @@ object actionsmo: tactionsmo
     count = 15
     width = 24
     height = 24
+    transparentcolor = -2147483648
     left = 160
     top = 136
     image = {

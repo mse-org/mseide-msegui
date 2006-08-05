@@ -3232,7 +3232,7 @@ const
  buflen = 100;
   
 var
- ios: termiosty;
+ ios: termios{ty};
  
 begin
  pty:= invalidfilehandle;
@@ -3263,7 +3263,7 @@ end;
 
 procedure tpseudoterminal.closeinp;
 var
- ios: termiosty;
+ ios: termios{ty};
 begin
  finput.terminate;
  if finput.active then begin
@@ -3278,7 +3278,7 @@ end;
 
 procedure tpseudoterminal.restart;
 var
- ios: termiosty;
+ ios: termios{ty};
 begin
  closeinp;
  if foutput.handle <> invalidfilehandle then begin

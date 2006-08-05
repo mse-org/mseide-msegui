@@ -75,7 +75,9 @@ const
 
 type
  commnrty = (cnr_1,cnr_2,cnr_3,cnr_4,cnr_5,cnr_6,cnr_7,cnr_8,cnr_9);
- commbaudratety = (cbr_1200,cbr_2400,cbr_4800,cbr_9600,cbr_19200);
+ commbaudratety = (cbr_50,cbr_75,cbr_110,cbr_134,cbr_150,cbr_200,cbr_300,cbr_600,
+                   cbr_1200,cbr_1800,cbr_2400,cbr_4800,cbr_9600,cbr_19200,
+                   cbr_38400,cbr_57600,cbr_115200);
  commstopbitty = (csb_1,csb_2);
  commparityty = (cpa_none,cpa_odd,cpa_even);
 
@@ -85,13 +87,26 @@ const
                                         'ttyS6','ttyS7','ttyS8','ttyS9');
  invalidfilehandle = cardinal(-1);
  infinitemse = cardinal(-1);
+ B57600 =   $1001; //0010001
+ B115200 =  $1002; //0010002
+ commbaudflags: array[commbaudratety] of integer =
+                     (B50,B75,B110,B134,B150,B200,B300,B600,
+                      B1200,B1800,B2400,B4800,B9600,B19200,
+                      B38400,B57600,B115200);
  {$else}
  commname: array[commnrty] of string = ('COM1','COM2','COM3','COM4','COM5',
                                         'COM6','COM7','COM8','COM9');  
  invalidfilehandle = INVALID_HANDLE_VALUE;
  infinitemse = INFINITE;
  {$endif}
- commbittime: array[commbaudratety] of real = (1/1200,1/2400,1/4800,1/9600,1/19200);
+ commbittime: array[commbaudratety] of real = 
+          (1/50,1/75,1/110,1/134,1/150,1/200,1/300,1/600,
+           1/1200,1/1800,1/2400,1/4800,1/9600,1/19200,
+           1/38400,1/57600,1/115200);
+ commbaudrates: array[commbaudratety] of integer = (
+           50,75,110,134,150,200,300,600,  
+           1200,1800,2400,4800,9600,19200,
+           38400,57600,115200);
 
 type
 
@@ -708,9 +723,8 @@ const
  lflagoff = ISIG or ICANON or XCASE or ECHO or ECHOE or ECHOK or ECHONL or
             NOFLSH or TOSTOP or ECHOCTL or ECHOPRT or ECHOKE or IEXTEN;
  lflagon = 0;
- baudflags: array[commbaudratety] of cardinal = (B1200,B2400,B4800,B9600,B19200);
 var
- info: termiosty;
+ info: termios{ty};
  {$else}
 var
  int1: integer;
@@ -758,7 +772,14 @@ const           // fuer tdcb.flags
  );
 
 {$endif}
-begin
+
+ procedure raiseerror;
+ begin
+  close;
+  syserror(syelasterror,'trs232: Can not set port mode.');
+ end;
+ 
+begin       //open
  close;
  {$ifdef LINUX}
  fhandle:= libc.open(PChar('/dev/'+commname[fcommnr]), o_rdwr or o_nonblock
@@ -782,8 +803,12 @@ begin
   info.c_cc[VMIN]:= #0;
   info.c_cc[VTIME]:= #0;
 
-  info.c_cflag:= info.c_cflag or baudflags[fbaud] or CS8;
-  msetcsetattr(fhandle,TCSANOW,info);
+  info.c_cflag:= info.c_cflag {or baudflags[fbaud]} or CS8;
+  cfsetispeed(info,commbaudflags[fbaud]);
+  cfsetospeed(info,commbaudflags[fbaud]);
+  if msetcsetattr(fhandle,TCSANOW,info) <> 0 then begin
+   raiseerror;
+  end;
   reset;
  end;
  {$else}
@@ -812,6 +837,8 @@ begin
    dcb.flags:= fbinary+fdtrcontrolenable+frtscontroldisable;
    timer:= tmmtimermse.create;
   end;
+  dcb.baudrate:= commbaudrates[fbaud];
+  {
   case fbaud of
    cbr_1200: dcb.baudrate:= 1200;
    cbr_2400: dcb.baudrate:= 2400;
@@ -819,6 +846,7 @@ begin
    cbr_9600: dcb.baudrate:= 9600;
    cbr_19200: dcb.baudrate:= 19200;
   end;
+  }
 //  bitzeit:= 1/dcb.BaudRate;
 //  int1:= 10; //minimale anzahl bit
   if self.faparity <> cpa_none then begin
@@ -836,7 +864,9 @@ begin
    cpa_odd: dcb.parity:= oddparity;
    cpa_even: dcb.parity:= evenparity;
   end;
-  setcommstate(fhandle,dcb);
+  if not setcommstate(fhandle,dcb) then begin
+   raiseerror;
+  end;
   reset;
  end;
  {$endif}

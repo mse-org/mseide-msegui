@@ -159,9 +159,9 @@ type
   clib = libcmodulename;
 {$endif}
 
+{
 const
    NCCS = 32;
-
 type
    termiosty = record
         c_iflag : tcflag_t;
@@ -173,12 +173,12 @@ type
         c_ispeed : speed_t;
         c_ospeed : speed_t;
      end;
-     
+}     
 function gettimeofday(__tv:Ptimeval; __tz:ptimezone):longint;cdecl;external clib name 'gettimeofday';
 function  msetcgetattr(filedes: longint;
-         var msetermios: termiosty): longint;cdecl;external clib name 'tcgetattr';
+         var msetermios: termios{ty}): longint;cdecl;external clib name 'tcgetattr';
 function  msetcsetattr(filedes: longint; when: longint;
-         var msetermios: termiosty): longint;cdecl;external clib name 'tcsetattr';
+         var msetermios: termios{ty}): longint;cdecl;external clib name 'tcsetattr';
 function sigactionex(SigNum: Integer; var Action: TSigActionex; OldAction: PSigAction): Integer;
 
 procedure setcloexec(const fd: integer);
