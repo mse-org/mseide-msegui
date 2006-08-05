@@ -753,7 +753,7 @@ function confirmsavechangedfile(const filename: filenamety;
 begin
  if multiple then begin
   modalresult:= showmessage('File '+filename+' is modified. Save?','Confirmation',
-                  [mr_yes,mr_no,mr_all,mr_noall,mr_cancel],mr_yes);
+                  [mr_yes,mr_all,mr_no,mr_noall,mr_cancel],mr_yes);
  end
  else begin
   modalresult:= showmessage('File '+filename+' is modified. Save?','Confirmation',
