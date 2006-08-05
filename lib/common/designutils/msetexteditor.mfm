@@ -5,10 +5,13 @@ object msetexteditorfo: tmsetexteditorfo
   bounds_cy = 268
   visible = False
   container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_subfocus, ow_mousetransparent, ow_destroywidgets, ow_autoscale]
+  container.bounds_x = 0
+  container.bounds_y = 0
   container.bounds_cx = 369
   container.bounds_cy = 268
   container.frame.dummy = 0
   statfile = tstatfile1
+  icon.transparency = -2147483648
   moduleclassname = 'tmseform'
   object ok: tbutton
     bounds_x = 248
@@ -33,6 +36,8 @@ object msetexteditorfo: tmsetexteditorfo
   end
   object grid: twidgetgrid
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_focusbackonesc, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+    bounds_x = 0
+    bounds_y = 0
     bounds_cx = 369
     bounds_cy = 234
     frame.dummy = 0
@@ -52,31 +57,35 @@ object msetexteditorfo: tmsetexteditorfo
     datacols.items = <    
       item
         width = 2000
-        options = [co_leftbuttonfocusonly, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
+        options = [co_leftbuttonfocusonly, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_mousescrollrow]
         widgetname = 'textedit'
       end>
     datarowlinewidth = 0
-    datarowheight = 16
-    reffontheight = 14
+    datarowheight = 18
+    reffontheight = 16
     object textedit: tsyntaxedit
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontlineheight, ow_autoscale]
+      bounds_x = 0
+      bounds_y = 0
       bounds_cx = 2000
-      bounds_cy = 16
+      bounds_cy = 18
       visible = False
       optionsedit = [oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_linebreak, oe_eatreturn, oe_keyexecute, oe_savevalue, oe_savestate]
+      marginlinecolor = -2147483648
       oneditnotifcation = editnotify
-      reffontheight = 14
+      reffontheight = 16
     end
   end
   object linedisp: tstringdisp
     bounds_x = 8
-    bounds_y = 242
+    bounds_y = 240
     bounds_cx = 76
+    bounds_cy = 22
     frame.dummy = 0
     anchors = [an_left, an_bottom]
     taborder = 4
     textflags = [tf_xcentered, tf_ycentered]
-    reffontheight = 14
+    reffontheight = 16
   end
   object test: tbutton
     bounds_x = 184
@@ -146,6 +155,7 @@ object msetexteditorfo: tmsetexteditorfo
     statfile = tstatfile1
     controller.captionopen = 'Load file'
     controller.captionsave = 'Save file'
+    dialogkind = fdk_none
     left = 80
     top = 104
   end
