@@ -10,6 +10,7 @@
 unit mseprocutils;
 
 {$ifdef FPC}{$mode objfpc}{$h+}{$INTERFACES CORBA}{$endif}
+{$ifndef FPC}{$ifdef linux} {$define UNIX} {$endif}{$endif}
 
 interface
 uses
@@ -58,7 +59,7 @@ function execwaitmse(const commandline: string): integer;
 procedure killprocess(handle: integer);
 function terminateprocess(handle: integer): integer;
            //sendet sigterm, bringt exitresult
- {$ifdef linux}
+ {$ifdef UNIX}
 type
  procinfoty = record
   pid: integer;
@@ -354,7 +355,7 @@ end;
 
 {$endif}
 
-{$ifdef linux}
+{$ifdef UNIX}
 function getprocessexitcode(prochandle: integer; out exitcode: integer;
                                const timeoutus: cardinal = 0): boolean;
                  //true if ok, close handle

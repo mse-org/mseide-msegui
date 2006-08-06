@@ -10,6 +10,7 @@
 unit msepipestream;
 
 {$ifdef FPC}{$mode objfpc}{$h+}{$INTERFACES CORBA}{$endif}
+{$ifndef FPC}{$ifdef linux} {$define UNIX} {$endif}{$endif}
 
 interface
 
@@ -120,7 +121,7 @@ type
 
 implementation
 uses
-  {$ifdef linux}libc, {$else}windows, {$endif}
+  {$ifdef UNIX}libc, {$else}windows, {$endif}
  msegui,msesysintf,sysutils,msesysutils;
 
 { tpipewriter }
@@ -541,7 +542,7 @@ begin
  fpipereader.overloadsleepus:= avalue;
 end;
 
-{$ifdef linux}
+{$ifdef UNIX}
 var
  sigpipebefore: tsignalhandler;
 initialization

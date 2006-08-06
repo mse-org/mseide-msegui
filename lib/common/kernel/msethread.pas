@@ -10,10 +10,11 @@
 unit msethread;
 
 {$ifdef FPC}{$mode objfpc}{$h+}{$INTERFACES CORBA}{$endif}
+{$ifndef FPC}{$ifdef linux} {$define UNIX} {$endif}{$endif}
 
 interface
 uses
- {$ifdef FPC}{$ifdef linux}cthreads,{$endif}{$endif}Classes,mseclasses,mselist,mseevent,msesys,msetypes;
+ {$ifdef FPC}{$ifdef UNIX}cthreads,{$endif}{$endif}Classes,mseclasses,mselist,mseevent,msesys,msetypes;
 
 type
  tmsethread = class;

@@ -10,6 +10,7 @@
 unit msesysenv;
 
 {$ifdef FPC}{$mode objfpc}{$h+}{$INTERFACES CORBA}{$endif}
+{$ifndef FPC}{$ifdef linux} {$define UNIX} {$endif}{$endif}
 
 interface
 uses
@@ -215,7 +216,7 @@ function expandmacros(const value: msestring; const macros:macroinfoarty;
  
 implementation
 uses
- msesysutils,RTLConsts,msestream,msesys{$ifdef linux},libc{$endif};
+ msesysutils,RTLConsts,msestream,msesys{$ifdef UNIX},libc{$endif};
  
 function expandmacros(const value: msestring; const macros:macroinfoarty;
                  const caseinsensitive: boolean = true): msestring;
@@ -732,7 +733,7 @@ var
 var
  int1: integer;
  str1: string;
- {$ifdef linux}
+ {$ifdef UNIX}
  po1: pchar;
  {$endif}
 begin            //init

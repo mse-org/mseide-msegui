@@ -1,5 +1,6 @@
 unit msei18nutils;
 {$ifdef FPC}{$mode objfpc}{$h+}{$INTERFACES CORBA}{$endif}
+{$ifndef FPC}{$ifdef linux} {$define UNIX} {$endif}{$endif}
 
 interface
 uses
@@ -19,7 +20,7 @@ procedure unregisterresourcestrings(datapo: pointer); cdecl;
 
 implementation
 uses
- {$ifdef FPC}dynlibs,{$ifdef linux}dl,{$endif}{$endif}sysutils,mseclasses,
+ {$ifdef FPC}dynlibs,{$ifdef UNIX}dl,{$endif}{$endif}sysutils,mseclasses,
                            mselist,msestrings,msegui;
  
 type
@@ -176,7 +177,7 @@ begin
    end
    else begin
    {$ifdef FPC} 
-    {$ifdef linux}
+    {$ifdef UNIX}
     raise exception.create(dlerror);
     {$else}
     raise exception.create('Library not found.');

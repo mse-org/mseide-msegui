@@ -10,6 +10,7 @@
 unit mseguiintf; //i386-linux
 
 {$ifdef FPC}{$mode objfpc}{$h+}{$INTERFACES CORBA}{$GOTO ON}{$endif}
+{$ifndef FPC}{$ifdef linux} {$define UNIX} {$endif}{$endif}
 
 interface
 
@@ -19,7 +20,7 @@ uses
  msestrings;
 
 {$ifdef FPC}
-{$ifdef LINUX}
+{$ifdef UNIX}
 {$ifdef msedebug}
 var
  _IO_stdin: P_IO_FILE; cvar;       

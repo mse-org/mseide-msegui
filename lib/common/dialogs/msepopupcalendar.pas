@@ -1,5 +1,6 @@
 unit msepopupcalendar;
 {$ifdef FPC}{$mode objfpc}{$h+}{$INTERFACES CORBA}{$endif}
+{$ifndef FPC}{$ifdef linux} {$define UNIX} {$endif}{$endif}
 interface
 uses
  msegui,mseclasses,mseforms,msegraphutils,msegrids,msedispwidgets,classes,
@@ -59,16 +60,16 @@ type
 
 implementation
 uses
- msepopupcalendar_mfm,sysutils,{$ifndef linux}
+ msepopupcalendar_mfm,sysutils,{$ifndef UNIX}
                                  dateutils,
                                {$else}
                                 {$ifdef FPC}dateutils,{$endif}
-                               {$endif}
+                               {$endif} //kylix compatibility
  msedrawtext,msestrings,
  msekeyboard,mseguiglob;
 
- {$ifdef linux}
- {$ifndef FPC}
+ {$ifdef UNIX}
+ {$ifndef FPC} //kylix compatibility
           //copied from dateutil.inc
 
 Function DayOf(const AValue: TDateTime): Word;

@@ -10,6 +10,7 @@
 unit msestream;   
 
 {$ifdef FPC}{$mode objfpc}{$h+}{$INTERFACES CORBA}{$endif}
+{$ifndef FPC}{$ifdef linux} {$define UNIX} {$endif}{$endif}
 
 // {$WARN SYMBOL_PLATFORM off}
 interface
@@ -249,7 +250,7 @@ implementation
 uses
  msefileutils,msebits,{msegui,}mseformatstr,sysconst,msesysutils,msesysintf,
  msedatalist,mseclasses,
-        {$ifdef LINUX} libc,
+        {$ifdef UNIX} libc,
         {$else} windows,
         {$endif}
   rtlconsts;
@@ -316,7 +317,7 @@ begin
  raise exception.Create('Streamerror!');
 end;
 
- {$ifdef LINUX}
+ {$ifdef UNIX}
 procedure setfilenonblock(handle: integer; value: boolean);
 var
  int1: integer;

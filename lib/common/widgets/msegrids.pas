@@ -171,8 +171,6 @@ type
     (keyeventinfopo: pkeyeventinfoty);
  end;
 
-
-type
  tgridarrayprop = class;
 
  tcellframe = class(tframe)

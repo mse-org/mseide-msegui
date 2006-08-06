@@ -869,7 +869,7 @@ begin
      rect1:= edit.textpostomouserect(ffindpos);
      if prompt then begin
       res1:= showmessage('Do you wish to to replace this occurence?','',
-       [mr_yes,mr_no,mr_all,mr_cancel],rect1,grid,cp_bottomleft,res1);
+       [mr_yes,mr_all,mr_no,mr_cancel],rect1,grid,cp_bottomleft,res1);
      end
      else begin
       res1:= mr_yes;

@@ -10,6 +10,7 @@
 unit msegdbutils;
 
 {$ifdef FPC}{$mode objfpc}{$h+}{$INTERFACES CORBA}{$endif}
+{$ifndef FPC}{$ifdef linux} {$define UNIX} {$endif}{$endif}
 
 interface
 uses
@@ -182,7 +183,7 @@ type
  end;
  threadinfoarty = array of threadinfoty;
 
-{$ifdef linux}
+{$ifdef UNIX}
  tpseudoterminal = class
   private
    fdevicename: string;
@@ -204,7 +205,7 @@ type
    fpointersize: integer;
    fgdbto: tpipewriter;
    fgdbfrom,fgdberror: tpipereader;
-   {$ifdef linux}
+   {$ifdef UNIX}
    ftargetterminal: tpseudoterminal;
    {$endif}
    fgdb: integer; //processhandle
@@ -248,7 +249,7 @@ type
    function getattached: boolean;
    procedure setignoreexceptionclasses(const avalue: stringarty);
   protected
-   {$ifdef linux}
+   {$ifdef UNIX}
    procedure targetfrom(const sender: tpipereader);
    {$endif}
    procedure gdbfrom(const sender: tpipereader);
@@ -457,7 +458,7 @@ implementation
 uses
  sysutils,mseformatstr,mseprocutils,msesysutils,msefileutils,
  msebits,msesys,msesysintf
-        {$ifdef linux},libc{$else},windows{$endif};
+        {$ifdef UNIX},libc{$else},windows{$endif};
 
 const                                      
  stopreasons: array[stopreasonty] of string = 
@@ -597,7 +598,7 @@ begin
  fgdb:= invalidprochandle;
  fguiintf:= true;
  fsourcefiles:= thashedmsestrings.create;
- {$ifdef linux}
+ {$ifdef UNIX}
  ftargetterminal:= tpseudoterminal.create;
  ftargetterminal.input.oninputavailable:= {$ifdef FPC}@{$endif}targetfrom;
  {$endif}
@@ -609,7 +610,7 @@ begin
  closegdb;
  inherited;
  fsourcefiles.free;
- {$ifdef linux}
+ {$ifdef UNIX}
  ftargetterminal.free;
  {$endif}
 end;
@@ -662,7 +663,7 @@ begin
 end;
 
 procedure tgdbmi.startgdb(commandline: string);
-{$ifdef linux}
+{$ifdef UNIX}
 var
  bo1: boolean;
  str1: string;
@@ -683,7 +684,7 @@ begin
  if fgdb <> invalidprochandle then begin
   clicommand('set breakpoint pending on');
   clicommand('set height 0');
-  {$ifdef linux}
+  {$ifdef UNIX}
   bo1:= true;  
   if synccommand('-gdb-show inferior-tty') = gdb_ok then begin
    if getstringvalue(fsyncvalues,'value',str1) and (str1 <> '') then begin
@@ -1006,7 +1007,7 @@ begin
       if stopinfo.reason = sr_startup then begin
        fprocid:= 0;
        getprocid(fprocid);
-       {$ifdef linux}
+       {$ifdef UNIX}
        ftargetterminal.restart;
        {$endif}
       end;
@@ -1279,7 +1280,7 @@ begin
  until not bo1;
 end;
 
-{$ifdef linux}
+{$ifdef UNIX}
 procedure tgdbmi.targetfrom(const sender: tpipereader);
 begin
  if not sender.eof then begin
@@ -1506,7 +1507,7 @@ begin
  if str1 <> '' then begin
   try
    ca1:= strtointvalue(str1);
-   {$ifdef linux}
+   {$ifdef UNIX}
    ca1:= ca1+1; // todo: breakpoint at entrypoint does not work sometimes?
    {$endif}
    if synccommand('-break-insert -t *'+hextocstr(ca1,8)) <> gdb_ok then begin
@@ -3207,7 +3208,7 @@ end;
 procedure tgdbmi.targetwriteln(const avalue: string);
 begin
  if running then begin
-  {$ifdef linux}
+  {$ifdef UNIX}
   ftargetterminal.output.writeln(avalue);
   {$else}
   fgdbto.writeln(avalue);
@@ -3215,7 +3216,7 @@ begin
  end;
 end;
 
-{$ifdef linux}
+{$ifdef UNIX}
 { tpseudoterminal }
 
 constructor tpseudoterminal.create;
@@ -3294,6 +3295,6 @@ begin
  end;
 end;
 
-{$endif linux}
+{$endif unix}
  
 end.

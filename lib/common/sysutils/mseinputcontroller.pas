@@ -10,6 +10,7 @@
 unit mseinputcontroller;
 
 {$ifdef FPC}{$mode objfpc}{$h+}{$INTERFACES CORBA}{$endif}
+{$ifndef FPC}{$ifdef linux} {$define UNIX} {$endif}{$endif}
 
 interface
 
@@ -71,7 +72,7 @@ type
 implementation
 uses
  msegui,
-{$ifdef LINUX}
+{$ifdef UNIX}
  Libc;
 {$else}
  msesysutils;

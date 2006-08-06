@@ -10,13 +10,14 @@
 unit msecommtimer;
 
 {$ifdef FPC}{$mode objfpc}{$h+}{$INTERFACES CORBA}{$endif}
+{$ifndef FPC}{$ifdef linux} {$define UNIX} {$endif}{$endif}
 
 interface
 uses
  {$ifdef mswindows}
  windows,{$ifndef FPC}mmsystem,{$endif}
  {$endif}
- {$ifdef LINUX}
+ {$ifdef UNIX}
  Libc,
  {$endif}
  Classes;

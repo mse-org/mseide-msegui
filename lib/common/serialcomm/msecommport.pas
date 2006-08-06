@@ -10,6 +10,7 @@
 unit msecommport;
 
 {$ifdef FPC}{$mode objfpc}{$h+}{$INTERFACES CORBA}{$endif}
+{$ifndef FPC}{$ifdef linux} {$define UNIX} {$endif}{$endif}
 
 interface
 uses {$ifdef mswindows} windows,{$ifndef FPC} mmsystem,{$endif}
@@ -82,7 +83,7 @@ type
  commparityty = (cpa_none,cpa_odd,cpa_even);
 
 const
- {$ifdef LINUX}
+ {$ifdef UNIX}
  commname: array[commnrty] of string = ('ttyS0','ttyS1','ttyS3','ttyS4','ttyS5',
                                         'ttyS6','ttyS7','ttyS8','ttyS9');
  invalidfilehandle = cardinal(-1);
@@ -351,7 +352,7 @@ function asciitobin(chars: string): string;
 
 implementation
 uses
- {$ifdef LINUX} kernelioctl, {$endif}
+ {$ifdef UNIX} kernelioctl, {$endif}
  sysutils,msegui,msesysintf,msesysutils;
 
 const
@@ -480,7 +481,7 @@ begin
 end;
 
 function gettickus: longword; //laufzeit in us
- {$ifdef LINUX}
+ {$ifdef UNIX}
 var
  t1: timeval;
 begin
@@ -650,7 +651,7 @@ end;
 procedure trs232.reset;
 begin
  if opened then begin
- {$ifdef LINUX}
+ {$ifdef UNIX}
   ioctl(fhandle,TCFLSH,{$ifdef FPC}[{$endif}2{$ifdef FPC}]{$endif}); //input und output flushen
  {$else}
   purgecomm(fhandle,PURGE_TXABORT+PURGE_RXABORT+PURGE_TXCLEAR+PURGE_RXCLEAR);
@@ -661,7 +662,7 @@ end;
 procedure trs232.resetinput;
 begin
  if opened then begin
- {$ifdef LINUX}
+ {$ifdef UNIX}
   ioctl(fhandle,TCFLSH,{$ifdef FPC}[{$endif}0{$ifdef FPC}]{$endif}); //input flushen
  {$else}
   purgecomm(fhandle,PURGE_RXABORT+PURGE_RXCLEAR);
@@ -672,7 +673,7 @@ end;
 procedure trs232.resetoutput;
 begin
  if opened then begin
- {$ifdef LINUX}
+ {$ifdef UNIX}
   ioctl(fhandle,TCFLSH,{$ifdef FPC}[{$endif}1{$ifdef FPC}]{$endif}); //output flushen
  {$else}
   purgecomm(fhandle,PURGE_TXABORT+PURGE_TXCLEAR);
@@ -683,7 +684,7 @@ end;
 procedure trs232.close;
 begin
  if opened then begin
- {$ifdef LINUX}
+ {$ifdef UNIX}
   __close(fhandle);
  {$else}
  closehandle(fhandle);
@@ -709,7 +710,7 @@ begin
 end;
 
 function trs232.open: boolean;
-{$ifdef LINUX}
+{$ifdef UNIX}
 const
  iflagoff = BRKINT or INPCK or ISTRIP or IGNCR or INLCR or ICRNL or IUCLC or
             IXON or IXANY or IXOFF or IMAXBEL;
@@ -781,7 +782,7 @@ const           // fuer tdcb.flags
  
 begin       //open
  close;
- {$ifdef LINUX}
+ {$ifdef UNIX}
  fhandle:= libc.open(PChar('/dev/'+commname[fcommnr]), o_rdwr or o_nonblock
              {,FileAccessRights});
  if integer(fhandle) >= 0 then begin
@@ -880,7 +881,7 @@ var
 {$endif}
 begin
  if opened then begin
- {$ifdef LINUX}
+ {$ifdef UNIX}
   flags:= TIOCM_RTS;
   if active then begin
    ioctl(fhandle,TIOCMBIS,@flags);
@@ -908,7 +909,7 @@ var
  ca1: cardinal;
  {$endif}
 begin
- {$ifdef LINUX}
+ {$ifdef UNIX}
  ioctl(fhandle,tcsbrk,{$ifdef FPC}[{$endif}-1{$ifdef FPC}]{$endif});
  result:= true;
  {$else}
@@ -950,7 +951,7 @@ function trs232.writestring(const dat: string; timeout: cardinal = 0;
   // waitforeot -> warten auf uebertragungsende, bei halbduplex sowiso
 var
  len: cardinal;
- {$ifdef LINUX}
+ {$ifdef UNIX}
  timed: boolean;
  int1: integer;
  ca1: cardinal;
@@ -980,7 +981,7 @@ begin
 //   usleep(frtstimevor);
    {$endif}
   end;
-  {$ifdef LINUX}
+  {$ifdef UNIX}
   timed:= defaulttimeout(timeout,len,timeout);
   time:= timestep(timeout);
   po:= @dat[1];
@@ -1042,7 +1043,7 @@ function trs232.readbuffer(anzahl: integer; out dat;
 var
  po: ^byte;
  int1: integer;
- {$ifdef LINUX}
+ {$ifdef UNIX}
  time: longword;
  {$else}
  time: longword;
@@ -1057,7 +1058,7 @@ begin
    timed:= defaulttimeout(timeout,anzahl,timeout);
    time:= timestep(timeout);
    while true do begin
-   {$ifdef LINUX}
+   {$ifdef UNIX}
     int1:= __read(fhandle,po^,anzahl);
    {$else}
     bo1:= windows.readfile(fhandle,po^,anzahl,longword(int1),@overlapped);
@@ -1088,7 +1089,7 @@ begin
  end;
 end;
 {$if 0=1}
-{$ifdef linux}
+{$ifdef UNIX}
 function trs232.readbuffer(anzahl: integer; out dat;
                        timeout: cardinal = 0): integer;
             //list daten, bringt anzahl gelesene zeichen timeout in us 0 -> 2*uebertragungszeit
@@ -1156,7 +1157,7 @@ begin
   end;
  end;
 end;
-{$endif} //not linux
+{$endif} //not unix
 {$ifend}
 
 

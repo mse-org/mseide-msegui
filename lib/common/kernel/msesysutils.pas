@@ -10,6 +10,7 @@
 unit msesysutils;
 
 {$ifdef FPC}{$mode objfpc}{$h+}{$INTERFACES CORBA}{$endif}
+{$ifndef FPC}{$ifdef linux} {$define UNIX} {$endif}{$endif}
 
 interface
 uses
@@ -86,7 +87,7 @@ begin
 end;
 
 
- {$ifdef LINUX}
+ {$ifdef UNIX}
 
 function timestamp: cardinal;
 var
@@ -105,7 +106,7 @@ begin
  until timeout(time);
 end;
 
-{$endif linux}
+{$endif unix}
 
 {$ifdef mswindows}
 
@@ -207,7 +208,7 @@ begin
  if newline then begin
   value:= value + lineend;
  end;
- {$ifdef linux}
+ {$ifdef UNIX}
   __write(1,pointer(value)^,length(value));
  {$else}
   if getstdhandle(std_output_handle) <= 0 then begin
@@ -226,7 +227,7 @@ begin
  if newline then begin
   value:= value + lineend;
  end;
- {$ifdef linux}
+ {$ifdef UNIX}
   __write(2,pointer(value)^,length(value));
  {$else}
   if getstdhandle(std_error_handle) <= 0 then begin

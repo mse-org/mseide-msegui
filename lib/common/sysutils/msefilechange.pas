@@ -10,6 +10,7 @@
 unit msefilechange;
 
 {$ifdef FPC}{$mode objfpc}{$h+}{$INTERFACES CORBA}{$endif}
+{$ifndef FPC}{$ifdef linux} {$define UNIX} {$endif}{$endif}
 
 interface
 
@@ -17,7 +18,7 @@ uses
  mseclasses,SysUtils,msethread,msefileutils,msesys,
  msetypes,msestrings,classes,msegui,mseevent;
 
-{$ifdef linux}
+{$ifdef UNIX}
 const
  sigpuffermask = 32-1; //maximale anzahl pending notifications
 {$endif}
@@ -67,7 +68,7 @@ type
     dirdescriptors: integerarty;
 {$endif}
     fdirs: array of tdirinfo;
-{$ifdef linux}
+{$ifdef UNIX}
     fsigqueue: array[0..sigpuffermask] of integer;
     fsiginpo,fsigoutpo: integer;
     procedure changesignal(const afd: integer);
@@ -134,7 +135,7 @@ begin
  result:= fchangethread;
 end;
 
-{$ifdef linux}
+{$ifdef UNIX}
 var
  dirinfosig: integer;
 
@@ -171,7 +172,7 @@ begin
  end;
 end;
 
-{$ENDIF linux}
+{$ENDIF unix}
 
 { tdirinfo }
 
@@ -234,7 +235,7 @@ var
  str1: string;
  aevent: tfilechangeevent;
 begin
- {$ifdef linux}
+ {$ifdef UNIX}
  fcntl(fdirhandle,F_NOTIFY,notifyflags);
  {$endif}
  for int1:= 0 to length(ffileinfos) - 1 do begin
@@ -317,7 +318,7 @@ begin
  unlock;
 end;
 
-{$ifdef linux}
+{$ifdef UNIX}
 procedure tdirchangethread.changesignal(const afd: integer);
 var
  int1: integer;
@@ -387,7 +388,7 @@ begin
   end;
  end;
 end;
-{$else}    //linux
+{$else}    //unix
 var
  int1: integer;
 begin
@@ -471,7 +472,7 @@ begin
   if cardinal(fd) <> invalid_handle_value then begin
    setlength(dirdescriptors,int1+2);
    dirdescriptors[int1+1]:= fd;
-{$else linux}
+{$else unix}
   fd:= adddir(self,apath);
   if fd >= 0 then begin
 {$endif}
@@ -644,12 +645,12 @@ begin
 end;
 
 initialization
-{$ifdef linux}
+{$ifdef UNIX}
  dirinfosig:= sigrtmin + 10;
  if dirinfosig > sigrtmax then begin
   dirinfosig:= sigrtmax;
  end;
-{$endif linux}
+{$endif unix}
 finalization
  freeandnil(fchangethread);
 end.
