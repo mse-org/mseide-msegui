@@ -1177,7 +1177,8 @@ type
    procedure dispatchkeyevent(const eventkind: eventkindty; var info: keyeventinfoty); virtual;
    procedure sizechanged; virtual;
    procedure poschanged; virtual;
-   procedure internalactivate(windowevent: boolean);
+   procedure internalactivate(const windowevent: boolean;
+                                 const force: boolean = false);
    procedure setzorder(const value: integer);
   public
    constructor create(aowner: twidget);
@@ -7889,11 +7890,13 @@ begin
  end;
 end;
 
-procedure twindow.internalactivate(windowevent: boolean);
+procedure twindow.internalactivate(const windowevent: boolean;
+                         const force: boolean = false);
 
  procedure setwinfoc;
  begin
-  if (ftransientfor <> nil) and (app.ffocuslockwindow = nil) and (wo_popup in foptions) then begin
+  if (ftransientfor <> nil) and (force or (app.ffocuslockwindow = nil)) and 
+                                (wo_popup in foptions) then begin
    app.ffocuslockwindow:= self;
    app.ffocuslocktransientfor:= ftransientfor;
   end;
@@ -7912,7 +7915,7 @@ begin
  show(windowevent);
  widgetar:= nil; //compilerwarning
  if  activewindowbefore <> self then begin
-  if (app.fmodalwindow = nil) or (app.fmodalwindow = self) or 
+  if force or (app.fmodalwindow = nil) or (app.fmodalwindow = self) or 
                         (ftransientfor = app.fmodalwindow) then begin
    if (ffocusedwidget = nil) and fowner.canfocus then begin
     fowner.setfocus;
@@ -8270,7 +8273,8 @@ begin
  end;
 end;
 
-procedure twindow.dispatchkeyevent(const eventkind: eventkindty; var info: keyeventinfoty);
+procedure twindow.dispatchkeyevent(const eventkind: eventkindty;
+                                       var info: keyeventinfoty);
 begin
  if ffocusedwidget <> nil then begin
   case eventkind of
@@ -9851,8 +9855,7 @@ begin
    guierror(gue_recursivemodal,self,fowner.name);
   end;
   include(fstate,tws_modal);
-  sender.activate;
-//  gui_setwindowfocus(winid);
+  sender.internalactivate(false,true);
  end;
  bo1:= unlock;
  try
@@ -9863,7 +9866,6 @@ begin
   end;
   if window1 <> nil then begin
    window1.activate;
-//   gui_setwindowfocus(window1.winid);
    setlinkedvar(nil,tlinkedobject(window1));
   end;
  end;
