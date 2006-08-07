@@ -184,6 +184,13 @@ uses
  msestrings,dbconst,msesysutils,typinfo;
  
 type 
+  TBufDatasetcracker = class(TDBDataSet)
+  private
+    FCurrentRecBuf  : PBufRecLinkItem;
+    FLastRecBuf     : PBufRecLinkItem;
+    FFirstRecBuf    : PBufRecLinkItem;
+  end;
+  
   TSQLQuerycracker = class (Tbufdataset)
   private
     FCursor              : TSQLCursor;
@@ -362,6 +369,7 @@ end;
 procedure tmsesqlquery.internalclose;
 begin
  inherited;
+ tbufdatasetcracker(self).ffirstrecbuf:= nil;
  bindfields(false);
 end;
 
