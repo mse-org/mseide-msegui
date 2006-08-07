@@ -3704,7 +3704,7 @@ const
    {$ifdef FPC}@{$endif}gui_regaddregion,
    {$ifdef FPC}@{$endif}gui_regintersectrect,
    {$ifdef FPC}@{$endif}gui_regintersectregion,
-   {$ifdef FPC}@{$endif}gui_copyarea,
+   {$ifdef FPC}@{$endif}gui_copyarea
  );
 
 function gui_getgdifuncs: pgdifunctionaty;

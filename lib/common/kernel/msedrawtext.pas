@@ -399,7 +399,7 @@ begin
           end;
           tak_decimal: begin
            charwidths[int1-1]:= tabs[nexttab].pos - awidth - 
-                                   tabitemwidth(int1,decimalseparator);
+                                   tabitemwidth(int1,widechar(decimalseparator));
           end;
           else begin //tak_left
            charwidths[int1-1]:= tabs[nexttab].pos - awidth;
