@@ -26,9 +26,6 @@ type
    //icanvas
    procedure gcneeded(const sender: tcanvas);
    function getmonochrome: boolean;
-   function getsize: sizety;
-  protected
-   fsize: sizety; 
   public
    constructor create(aowner: tcomponent); override;
    property canvas: tpostscriptcanvas read getcanvas;
@@ -489,6 +486,11 @@ begin
  gdierror(gde_notimplemented);
 end;
    
+procedure gui_copyarea(var drawinfo: drawinfoty);
+begin
+ gdierror(gde_notimplemented);
+end;
+   
 const
  gdifunctions: gdifunctionaty = (
    {$ifdef FPC}@{$endif}gui_destroygc,
@@ -516,7 +518,8 @@ const
    {$ifdef FPC}@{$endif}gui_regaddrect,
    {$ifdef FPC}@{$endif}gui_regaddregion,
    {$ifdef FPC}@{$endif}gui_regintersectrect,
-   {$ifdef FPC}@{$endif}gui_regintersectregion
+   {$ifdef FPC}@{$endif}gui_regintersectregion,
+   {$ifdef FPC}@{$endif}gui_copyarea
  );
 
 function psrealtostr(const avalue: real): string;
@@ -1120,11 +1123,6 @@ end;
 function tpostscriptprinter.getmonochrome: boolean;
 begin
  result:= false;
-end;
-
-function tpostscriptprinter.getsize: sizety;
-begin
- result:= fsize;
 end;
 
 end.

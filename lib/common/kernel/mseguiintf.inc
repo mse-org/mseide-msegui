@@ -86,7 +86,7 @@ function gui_imagetopixmap(const image: imagety; out pixmap: pixmapty; gchandle:
 function gui_allocimagemem(length: integer): pcardinalaty;
 procedure gui_freeimagemem(data: pcardinalaty);
 
-procedure gui_copyarea(var drawinfo: drawinfoty);
+//procedure gui_copyarea(var drawinfo: drawinfoty);
 
 procedure gui_beep;
 function gui_copytoclipboard(const value: widestring): guierrorty;

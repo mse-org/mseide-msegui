@@ -4928,7 +4928,8 @@ const
    {$ifdef FPC}@{$endif}gui_regaddrect,
    {$ifdef FPC}@{$endif}gui_regaddregion,
    {$ifdef FPC}@{$endif}gui_regintersectrect,
-   {$ifdef FPC}@{$endif}gui_regintersectregion
+   {$ifdef FPC}@{$endif}gui_regintersectregion,
+   {$ifdef FPC}@{$endif}gui_copyarea
  );
 {
 procedure gui_gdifunc(const func: gdifuncty; var drawinfo: drawinfoty);

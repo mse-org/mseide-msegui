@@ -573,7 +573,8 @@ type
               gdi_regionisempty,gdi_regionclipbox,
               gdi_regsubrect,gdi_regsubregion,
               gdi_regaddrect,gdi_regaddregion,gdi_regintersectrect,
-              gdi_regintersectregion);
+              gdi_regintersectregion,
+              gdi_copyarea);
 
  gdifunctionaty = array[gdifuncty] of gdifunctionty;
  pgdifunctionaty = ^gdifunctionaty;
@@ -3172,7 +3173,8 @@ begin
       bo1:= false;
       drect.cx:= srect.cx;
      end;
-     gui_copyarea(fdrawinfo);
+     gdi(gdi_copyarea);
+//     gui_copyarea(fdrawinfo);
      inc(drect.x,srect.cx);
      srect.cx:= stepx;
      srect.x:= sourcex;
@@ -3185,7 +3187,8 @@ begin
   end;
  end
  else begin
-  gui_copyarea(fdrawinfo);
+  gdi(gdi_copyarea);
+//  gui_copyarea(fdrawinfo);
  end;
  if amask <> nil then begin
   exclude(fstate,cs_clipregion);

@@ -122,7 +122,9 @@ type
    procedure statreading;
    procedure statread;
    function getstatvarname: msestring;
-   
+
+   //icanvas   
+   function getsize: sizety;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -536,6 +538,11 @@ end;
 procedure tprinter.setcanvas(const avalue: tprintercanvas);
 begin
  fcanvas.assign(avalue);
+end;
+
+function tprinter.getsize: sizety;
+begin
+ result:= fcanvas.fsize;
 end;
 
 { tcustomprintercanvas }
