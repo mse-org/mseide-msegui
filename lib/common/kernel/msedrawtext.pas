@@ -80,7 +80,8 @@ type
    property ppmm: real read fppmm write setppmm;
       //pixel per millimeter
    property defaultdist: real read fdefaultdist write setdefaultdist; //0 -> none
-   property items[const index: integer]: ttabulatoritem read getitems write setitems; default;
+   property items[const index: integer]: ttabulatoritem read getitems 
+                       write setitems; default;
    property pos[const index: integer]: integer read getpos;
  end;
 
@@ -91,7 +92,6 @@ type
  end;
  
  drawtextinfoty = record
-//  canvas: tcanvas;
   text: richstringty;
   dest,clip: rectty;
   flags: textflagsty;
@@ -162,7 +162,7 @@ function textindextopos(const canvas: tcanvas; var info: drawtextinfoty;
 
 implementation
 uses
- mseguiintf,msebits,msedatalist,math,msereal;
+ mseguiintf,msebits,msedatalist,math,msereal,sysutils;
 
 type
  tcanvas1 = class(tcanvas);
@@ -233,13 +233,38 @@ var
   end;
  end;
 
+ function tabitemwidth(const charindex: integer;
+                       const stopchar: msechar): integer;
+ var
+  po1: pinteger;
+  po2: pmsechar;
+ begin
+  result:= 0;
+  po1:= @pointer(layoutinfo.charwidths[charindex]);
+  po2:= @info.text.text[charindex+1];
+  while true do begin
+   case po2^ of 
+    ' ',c_tab,c_return,c_linefeed,#0: begin
+     break;
+    end;
+    else begin
+     if po2^ = stopchar then begin
+      break;
+     end;
+     result:= result + po1^;
+     inc(po1);
+     inc(po2);
+    end;
+   end;
+  end;
+ end;
 var
  int1,int2,int3,int4: integer;
  textlen: integer;
  style1: fontstylesty;
- tabs: tabulatorarty;
  nexttab: integer;
  rea1: real;
+ tabs: tabulatorarty;
 
 begin
  tabs:= nil; //compiler warning
@@ -249,7 +274,6 @@ begin
  with info,canvas,layoutinfo do begin
   tcanvas1(canvas).checkgcstate([cs_gc]);
   canvas.initdrawinfo(drawinfo);
-//  font.gethandleforcanvas(canvas);
   ascent:= font.ascent;
   descent:= font.descent;
   lineheight:= font.lineheight;
@@ -350,8 +374,10 @@ begin
     nexttab:= -1;
     while int1 <= textlen do begin
      if not checklinebreak(int1) then begin 
-      if info.text.text[int1] = c_tab then begin //todo: evaluate tab kind
+      if info.text.text[int1] = c_tab then begin
        if tabs <> nil then begin
+        inc(nexttab);
+        {
         int4:= nexttab+1;
         nexttab:= bigint;
         for int4:= int4 to high(tabs) do begin
@@ -360,8 +386,25 @@ begin
           break;
          end;
         end;
-        if nexttab <= high(tabs) then begin
-         charwidths[int1-1]:= tabs[nexttab].pos - awidth;
+        }
+        if nexttab < info.tabulators.count then begin
+         case tabs[nexttab].kind of
+          tak_right: begin
+           charwidths[int1-1]:= tabs[nexttab].pos - awidth - 
+                                   tabitemwidth(int1,#0);
+          end;
+          tak_centered: begin
+           charwidths[int1-1]:= tabs[nexttab].pos - awidth - 
+                                   tabitemwidth(int1,#0) div 2;
+          end;
+          tak_decimal: begin
+           charwidths[int1-1]:= tabs[nexttab].pos - awidth - 
+                                   tabitemwidth(int1,decimalseparator);
+          end;
+          else begin //tak_left
+           charwidths[int1-1]:= tabs[nexttab].pos - awidth;
+          end;
+         end;
          additem(lineinfos[high(lineinfos)].tabchars,int1);
         end
         else begin
@@ -372,8 +415,10 @@ begin
         end;
        end
        else begin
-        charwidths[int1-1]:= round(floor((awidth+rea1+0.1)/rea1)*rea1) - awidth;
-        additem(lineinfos[high(lineinfos)].tabchars,int1);
+        if rea1 > 0 then begin
+         charwidths[int1-1]:= round(floor((awidth+rea1+0.1)/rea1)*rea1) - awidth;
+         additem(lineinfos[high(lineinfos)].tabchars,int1);
+        end;
        end;
       end;
       inc(awidth,charwidths[int1-1]);

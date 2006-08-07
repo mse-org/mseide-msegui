@@ -1338,13 +1338,6 @@ begin
  result:= (fgridintf = nil) and inherited needsfocuspaint;
 end;
 
-{
-procedure tdataedit.updatecellzone(const pos: pointty; var result: cellzonety);
-begin
- //dummy
-end;
-}
-
 function tdataedit.getgridintf: iwidgetgrid;
 begin
  result:= fgridintf;
@@ -1372,20 +1365,13 @@ begin
  checkgrid;
  fgridintf.setdata(index,value);
 end;
-{
-function tdataedit.gridvalueempty(const row: integer): boolean;
-begin
- checkvalue;
- result:= fgridintf.empty(row);
-end;
-}
+
 procedure tdataedit.internalfillcol(const value);
 begin
  checkgrid;
  with tdatalist1(fgridintf.getcol.datalist) do begin
   tdatalist1(fgridintf.getcol.datalist).internalfill(count,value);
  end;
-// fgridintf.getcol.changed;
 end;
 
 procedure tdataedit.internalassigncol(const value);
