@@ -1,0 +1,589 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<title>Справочные таблицы</title>
+<meta http-equiv="Content-Type" content="text/html; charset=windows-1251">
+<link href="usedstyles.css" rel="stylesheet" type="text/css">
+</head>
+
+<body>
+<h3 align="center">Справочные таблицы </h3>
+<p>Справочники представаляют собой простые таблицы ( &quot;planets&quot;, &quot;continents&quot;, &quot;countries&quot;, &quot;features&quot; и &quot;occupations&quot;) , состоящие, как правило, из :</p>
+<ul>
+  <li>ключевое поле : {имя_справочника}_id </li>
+  <li>поле названия : descr</li>
+  <li>и необязательных ссылок на ключевые поля других справочников:</li>
+</ul>
+<p>Для редактирования таблиц, содержащих ссылки на друге таблицы, в предыдущей части проекта мы использовали отдельную форму ( &quot;editfo&quot; ). </p>
+<p>Также объединим  просмотр данных с их редактированием ( так называемое &quot;in-place editing&quot;, как в MicroSoft Excel &amp; Access ), для чего идеально подходят табличные MSEgui-компоненты - &quot;tdbwidgetgrid&quot; ( которые в деталях будут рассмотрены в следующих главах ) . </p>
+<p>Здесь же, вследствие похожести таблиц, а также их группировки по назначению ( справочники ) - напрашивается унификация их редактирования. В чем эта унификация может заключаться ?</p>
+<ul>
+  <li>одинаковая форма редактирования</li>
+  <li>максимум одинаковых компонентов
+    <ul>
+      <li>различия между удобно ограничить внутри некой редактируемой таблицы (g rid ) : </li>
+      <li>есть особый табличный компонент - &quot;tdbwidgetgrid&quot;, который :
+        <ul>
+          <li>позволяет, если нужно, сформировать столбцы из компонентов типа &quot;tdbenumeditlb&quot; т.п., в свою очередь связанных с &quot;tdblookupbuffer&quot;, тем самым позволяя редактировать ссылки на другие таблицы через названия этих ссылок </li>
+        </ul>
+      </li>
+      <li>работа с таблицей требует одного &quot;DataSource&quot;-компонента для всех столбцов, и, выполнив это условие, мы можем :<ul>
+        <li>держать один едиственный &quot;DataSource&quot;-компонент, и, чтобы переключиться  на обслуживание кокретного справочника - достаточно просто присвоить   этому компоненту ссылку на &quot;DataSource&quot; этого справочника </li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+  <li>одинаковая обработка событий
+    <ul>
+      <li>всю работу с БД можно замкнуть на  собственный переназначаемый &quot;DataSource&quot;-компонент ( см. выше ) , ведь, зная &quot;datasource&quot;, можно по цепочке узнать и &quot;dataset&quot;, и &quot;transaction&quot; и &quot;database&quot;, то есть - иметь весь нужный сервис </li>
+    </ul>
+  </li>
+</ul>
+<p>Под эти пункты просто идеально подходит механизм так называемых субмодулей. Итак, начнем.</p>
+<h4 align="center"><a name="submodule"></a></h4>
+<h4 align="center">Субмодуль <br>
+как средство унификации интерфейса <br>
+и алгоритма обработки событий </h4>
+<p>File-&gt;New-&gt;Form-&gt;SimpleForm : </p>
+<ul>
+  <li>на запрос - сохранить под именем &quot;commonrefseditform&quot;</li>
+  <li>anchors : установить все в &quot;false&quot;</li>
+  <li>растянуть до размера примерно 400х300</li>
+  <li>уронить на форму  компонент &quot;Widgets-&gt;tbutton&quot;, и растиражировать его до шести кнопок :
+    <ul>
+      <li>выбрать кнопку</li>
+      <li>по щелку правой кнопкой ( или комбинацией клавиш &quot;Ctrl+C&quot; ) -&gt; CopyComponent(s)</li>
+      <li>щелкнуть в пустом месте формы</li>
+    </ul>
+  втавить скопированный компонент : 
+  <ul>
+    <ul>
+      <li>по щелку правой кнопкой ( или комбинацией клавиш &quot;Ctrl+V&quot; ) -&gt; PasteComponent(s)</li>
+      </ul>
+    </ul>
+  </li>
+  <li>уронить на форму четыре компонента &quot;GUI-&gt;taction&quot;, и по очереди их настроить :
+    <ul>
+      <li>(1)
+:        
+  <ul>
+          <li>Name:= actSaveAll</li>
+          <li>onexecute:= saveallexecute</li>
+          <li>state
+            <ul>
+              <li>as_disabled:= true </li>
+            </ul>
+          </li>
+        </ul>
+      </li>
+      <li>(2) :
+        <ul>
+          <li>Name:= actUndoAll</li>
+          <li>onexecute:= undoallexecute</li>
+          <li>state
+              <ul>
+                <li>as_disabled:= true </li>
+              </ul>
+          </li>
+        </ul>
+      </li>
+      <li>(3) :
+        <ul>
+          <li>Name:= actUndo</li>
+          <li>onexecute:= undoexecute</li>
+          <li>state
+            <ul>
+              <li>as_disabled:= true </li>
+            </ul>
+          </li>
+        </ul>
+      </li>
+      <li>(4) :
+        <ul>
+          <li>Name:= actAdd</li>
+          <li>onexecute:= addexecute</li>
+        </ul>
+      </li>
+      <li>(5) :
+        <ul>
+          <li>Name:= actDelete</li>
+          <li>onexecute:= deleteexecute</li>
+          <li>state
+            <ul>
+              <li>as_disabled:= true </li>
+            </ul>
+          </li>
+        </ul>
+        <blockquote>
+          <p>Примечание:</p>
+          <ul>
+            <li class="style1">первоначальный запрет ( &quot;as_disabled = true&quot; ) у всех &quot;taction&quot;, кроме &quot;actAdd&quot; -  потому, что добавить можно всегда, а вот сохранять, отменять или удалять имеет смысл  только если есть реальный &quot;материал&quot; для этих операций; <br>
+            короче, будем разрешать действия только тогда, когда в них есть смысл;<br>
+            плюс такой подход избаляет от необходимости внутренних проверок &quot;можно-или-нельзя&quot; внутри процедур сохранения, отмены или удаления<br>
+            </li>
+            <li class="style1">установка всех &quot;anchor&quot; формы &quot;commonrefseditfo&quot; в &quot;false&quot; сделана для того, чтобы эта форма, будучи вложенной, не пыталась адаптрироваться под размер контейнера ( наоборот - сам  контейнер  должен быть расширен, что вместить  эту форму ) <br>
+            </li>
+            <li class="style1">&quot;actClose&quot; - проверит, готова ли форма к закрытию ( во всех ли внутренних компонентах содержатся правильные значения ), и, если готова - закроет форму, с кодом возврата &quot;mr_windowclosed&quot;; данный код возврата также стыкуется с закрытие формы нажатие на клавишу &quot;Esc&quot;, см. далее <br>
+            </li>
+            <li class="style1">&quot;actSaveAll&quot; - инциирует запись изменений в БД, позволяет это делать многократно, пока форма не закрыта ( &quot;actClose&quot; ) <br>
+            </li>
+            <li class="style1">&quot;actUndoAll&quot; - инициирует отмену всех изменений, сделаных после открытия формы или последней операции &quot;SaveAll&quot;<br>
+            </li>
+            <li class="style1">&quot;actUndo&quot;
+                <ul>
+                  <li> инициирует отмену изменений текущей выбрарной записи, пока эти изменения не записаны &quot;SaveAll&quot;</li>
+                  <li>имеет смысл только для измененных ( не добавленных ) записей ( добавленные лучше удалять, см. ниже ) <br>
+                  </li>
+                </ul>
+            </li>
+            <li class="style1">&quot;actDelete&quot;              <ul>
+                <li>инициируцет удаление текущей выбранной записи (как первоначально выбранной, так и добавленной псоле открытия формы ) <br>
+                </li>
+              </ul>
+            </li>
+          </ul>
+        </blockquote>
+      </li>
+    </ul>
+  </li>
+</ul>
+<ul>
+  <li>настроим  кнопки :
+    <ul>
+      <li>(1) :
+        <ul>
+          <li>Name:= btnSaveAll</li>
+          <li>Caption:= Save All </li>
+          <li>action:= actSaveAll</li>
+        </ul>
+      </li>
+      <li>(2) :
+        <ul>
+          <li>Name:= btnUnDoAll</li>
+          <li>Caption:= UnDo All</li>
+          <li>action:= actUnDoAll</li>
+        </ul>
+      </li>
+      <li>(3) :
+        <ul>
+          <li>Name:= btnUnDo</li>
+          <li>Caption:= UnDo</li>
+          <li>action:= actUnDo</li>
+        </ul>
+        (4) :
+        <ul>
+          <li>Name:= btnAdd</li>
+          <li>Caption:= Add</li>
+          <li>action:= actAdd</li>
+        </ul>
+        (5) :
+        <ul>
+          <li>Name:= btnDelete</li>
+          <li>Caption:= Delete</li>
+          <li>action:= actDelete</li>
+        </ul>
+      </li>
+      <li>(6) :
+        <ul>
+          <li>Name:= btnClose</li>
+          <li>Caption:= Ok</li>
+          <li>modalresult:= mr_windowclosed <span class="style1">//  код завершения,который потом будем проверять</span></li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+</ul>
+<ul>
+  <blockquote>
+    <p>Опять кнопки - значит, опять зададим им наш &quot;кнопочный&quot; стиль : </p>
+    <p>удерживая клавишу &quot;Ctrl&quot;, выбираем все кнопки ( &quot;btnSave&quot; ... &quot;btnCancel&quot; ) , идем в редактор свойств : </p>
+    <blockquote>
+      <p>frame-&gt;[...]</p>
+      <ul>
+        <li>template:= mainfo.ftButtons</li>
+      </ul>
+    </blockquote>
+    <p>Все кнопки окрасились в светло-желтый цвет, исправим цвета согласно приянтых соглашений ( см . главы &quot;Просмотр&quot; и &quot;Редактирование&quot; ) .</p>
+
+        <div class="dark_stripe">
+          <p>btnSaveAll :</p>
+          <blockquote>
+            <p> - кнопка сохранения - новая категория : новый цвет - светлая магента ( G:=200, R/B:= 255 ) </p>
+          </blockquote>
+          <ul>
+            <li>frame
+              <ul>
+                <li>colorclient -&gt; [...]
+                  <ul>
+                    <li> red:= 255 </li>
+                    <li>green:= 200 </li>
+                    <li>blue:= 255 </li>
+                  </ul>
+                </li>
+              </ul>
+            </li>
+          </ul>
+        </div>
+        <div class="light_stripe">
+          <p>btnUnDoAll </p>
+          <blockquote>
+            <p> - кнопка отмены - новая категория : новый цвет - почти белый (cl_highlight) </p>
+            <p>frame </p>
+            <ul>
+              <li>colorclient:= cl_highlight</li>
+            </ul>
+          </blockquote>
+        </div>
+        <div class="light_stripe">
+          <div class="dark_stripe">
+              <p>btnUnDo </p>
+              <blockquote>
+              <p> - тоже кнопка отмены  :  цвет - тоже почти белый (cl_highlight) </p>
+              <p>frame </p>
+              <ul>
+                <li>colorclient:= cl_highlight</li>
+              </ul>
+              </blockquote>
+          </div>
+          <p>btnAdd </p>
+          <blockquote>
+          <p> - кнопка добавления : цвет - светло-синий ( B:=255, R/G:= 200 ) </p>
+          <p>frame </p>
+          <ul>
+            <li>colorclient -&gt; [...]
+                <ul>
+                  <li> red:= 200</li>
+                  <li>green:= 200 </li>
+                  <li>blue:= 255 </li>
+                </ul>
+            </li>
+          </ul>
+          </blockquote>
+        </div>
+        <div class="light_stripe">
+          <div class="dark_stripe">
+              <p>btnDelete </p>
+              <blockquote>
+                <p> - кнопка удаления : цвет - светло-красный ( R:=255, G/B:= 200 ) </p>
+                <p>frame </p>
+                <ul>
+                  <li>colorclient -&gt; [...]
+                      <ul>
+                        <li> red:= 255 </li>
+                        <li>green:= 200 </li>
+                        <li>blue:= 200</li>
+                      </ul>
+                  </li>
+                </ul>
+              </blockquote>
+          </div>
+          <p>btnClose</p>
+          <blockquote>
+            <p>- кнопка подтверждения : цвет - светлый циан (cl_ltcyan) </p>
+            <p>frame </p>
+            <ul>
+              <li>colorclient:= cl_ltcyan</li>
+            </ul>
+          </blockquote>
+        </div>
+        <blockquote>
+        <p>&nbsp;</p>
+        <p>Примечания :</p>
+      <ul>
+            <li class="style1">кнопки (1)...(5) призваны активизировать соответствующие &quot;taction&quot;<br>
+            </li>
+            <li class="style1">обратите внимание, что запрещение &quot;taction&quot; автоматически запрещает связанные с ними компоненты, в нашем случае - &quot;tbutton&quot;<br>
+            </li>
+            <li class="style1">данным кнопкам не назначены клавиатурные аселераторы ( &quot;&amp;&quot; в свойствах &quot;caption&quot; ) - потому, что они мешались бы с табличным редактированием </li>
+          </ul>
+    </blockquote>
+  </blockquote>
+</ul>
+<p>Также полезно показать пользователю. какие записи он изменил и какие - нет, а если &quot;да&quot; - то каким образом. Сделаем это через выделение цветом строк в таблице ( которая будет на форме, в корую будет вставлен наш субмодуль ). Но подсказать, какой цвет что означает - лучше на субмодуле, чтобы потом была унификация этих цветов во всех справочниках - и планет, и контнентов, и... </p>
+<p>Роняем с палитры &quot;Widget&quot; :</p>
+<p>tlabel (1) </p>
+<ul>
+  <li>Name:= lblAddedLegend </li>
+  <li>frame -&gt; [...]
+    <ul>
+      <li>caption:= added</li>
+      <li>captionpos:= cp_right</li>
+      <li>captiondist:= 10</li>
+      <li>colorclient -&gt; [..]
+ // бледно-оранжевый
+   <ul>
+          <li>red:= 255 </li>
+          <li>green:= 192 </li>
+          <li>blue:= 0</li>
+        </ul>
+      </li>
+      <li>leveli:= -2 // утопить внутрь </li>
+    </ul>
+  </li>
+</ul>
+<p>tlabel (2)  </p>
+<ul>
+  <li>Name:= lblChangedLegend </li>
+  <li>frame -&gt; [...]
+    <ul>
+      <li>caption:= changed </li>
+      <li>captionpos:= cp_right</li>
+      <li>captiondist:= 10</li>
+      <li>colorclient:= cl_green // салатный </li>
+      <li>leveli:= -2 // утопить внутрь </li>
+    </ul>
+  </li>
+</ul>
+<blockquote>
+  <p>Примечания : </p>
+  <ul>
+    <li class="style1">Раскраску строк реализовать в субмодуле не получится - потому что таблица (с этими строками) будет каждая своя для каждого справочника ( планет, ... ) . </li>
+  </ul>
+  <p>&nbsp;</p>
+</blockquote>
+<p>Теперь добавим интерфейс к БД : </p>
+<ul>
+  <li>уронить на форму  компонент    &quot;DB-&gt;tmsedatasource&quot; :
+    <ul>
+      <li>Name:= dsContents</li>
+      <li>OnDataChange:= contentschange </li>
+    </ul>
+    <blockquote>
+      <p class="source">procedure tcommonrefeditfo.contentschange(<br>
+&nbsp;        Sender: TObject; <br>
+&nbsp;&nbsp;Field: TField);<br>
+        begin<br>
+
+&nbsp;with ((sender as tdatasource).dataset) as tsqlquery do begin<br>
+&nbsp;&nbsp;actDelete.enabled:= recordcount &gt; 0;<br>
+&nbsp;&nbsp;actUnDoAll.enabled:= changecount &gt; 0;<br>
+&nbsp;&nbsp;actSaveAll.enabled:= changecount &gt; 0;<br>
+ &nbsp;&nbsp;// actUnDo.enabled:= updatestatus =  usModified; // пока отключено <br>
+&nbsp;end;<br>
+  end;</p>
+      <p>Примечания : </p>
+      <ul>
+        <li class="style1"><span class="source">&quot;// actUnDo.enabled</span>.. &quot; - данный комментарий не дает включить обработку события <span class="source">&quot;actUnDo&quot; </span>( данный обработчик вызывает <span class="source">&quot;{tmsesqlquery}.cancelupdate&quot;</span>, см. ниже, который пока работает некорректно - недоделка по части &quot;FreePascal&quot; ) ; как только <span class="source">&quot;cancelupdate</span>&quot; будет починена - данный комментарий можно будет убрать <br>
+        </li>
+        <li class="style1">приведение типа <span class="style2">&quot;((sender as tdatasource).dataset) as tmsesqlquery&quot; </span>необходимо для доступа к   последней  версии &quot;changеcount&quot; , унаследованной от компонента &quot;tгbufdataset&quot; <br>
+        </li>
+        <li class="style1">данная процедура разрешает или запрещает, по ситуации после всех манипуляций, соответствующие &quot;taction&quot; :</li>
+      </ul>
+      <blockquote class="style1">
+        <ul>
+          <li>есть в первоначальной выборке хоть что-то осталось ( <span class="style2">&lt;tsqlquery&gt;.recordcount &gt; 0 )(</span> есть что удалять ) -&gt; разрешаем удаление ( Delete ) <br>
+          </li>
+          <li>есть состояние выборки отличается от первоначального
+( <span class="style2">&lt;tsqlquery&gt;.changecount &gt; 0</span> )              
+            <ul>
+                <li>можно откатиться к первоначальному -&gt; разрешим откат  ( UnDoAll ) </li>
+                <li>можно принять  изменения -&gt; разрешим сохранение ( SaveAll )<br>
+                </li>
+            </ul>
+          </li>
+          <li>если текущая запись отредактирована <span class="style2">( updatestatus = usModified ) - </span>ее можно откатить ( UnDo ) </li>
+        </ul>
+      </blockquote>
+    </blockquote>
+  </li>
+  <li>описать процедуры, приписанные к &quot;taction&quot; :
+    <br>    
+    <ul>
+      <li>
+        <div class="dark_stripe">saveallexecute
+          <blockquote>
+            <p><span class="source">procedure tcommonrefseditfo.saveallexecute(const sender: TObject);<br>
+              begin<br>
+  &nbsp;if parentwidget.container.canclose(nil) then begin<br>
+&nbsp;&nbsp;// подключиться к запросу  <br>
+  &nbsp;&nbsp;with dsContents.dataset as tmsesqlquery do begin<br>
+  &nbsp;&nbsp;&nbsp;applyupdates; // записать изменения в БД <br>
+  &nbsp;&nbsp;&nbsp;(transaction as tmsesqltransaction).commit; // и подтвердить эту запись <br>
+  &nbsp;&nbsp;&nbsp;active:= true; // перечитать обновленное содержимое БД <br>
+  &nbsp;&nbsp;end;<br>
+  &nbsp;end;<br>
+        end;</span></p>
+            <p>Все изменения записываются в БД.</p>
+            <p>Примечания :</p>
+            <ul>
+              <li class="style1">приведение типа <span class="style2">&quot;(transaction as tmsesqltransaction)&quot; </span>нужно для доступа к <span class="style2">&quot;tsqltransaction.Commit&quot;<br>
+              </span></li>
+              <li class="style1">&quot;<span class="source">parentwidget.container.canclose(nil)&quot;</span> просит форму ( <span class="source">parentwidget.container </span>) , в которую будет вставлен наш субмодуль &quot;Проверь, все ли твои данные готовы для  записи в БД ? &quot;, &quot;Автоматически заверши редактирование и запиши все, что можно, в буфер&quot; и &quot;Покажи пользователю его ошибки&quot;<br>
+              ( все компоненты для редактирования будут находиться на той форме <span class="source">( </span>доступной как<span class="source"> &quot;parentwidget.container&quot; </span>) , а не в самом субмодуле ) </li>
+            </ul>
+            <p>&nbsp;</p>
+          </blockquote>
+        </div>
+      </li>
+        <li>
+          <div class="light_stripe">.
+  undoallexecute 
+            <blockquote>
+              <p class="source">procedure tcommonrefseditfo.undoexecute(const sender: TObject);<br>
+      begin<br>
+&nbsp;(dsContents.dataset as tmsesqlquery).cancelupdates;<br>
+      end;</p>
+              <p>Отменяются все изменения. <br>
+                <br>
+              </p>
+            </blockquote>
+          </div>
+        </li>
+        <div class="dark_stripe"><li>undoexecute </li>
+            <blockquote>
+            <p class="source">procedure tcommonrefseditfo.undoexecute(const sender: TObject);<br>
+              begin<br>
+          &nbsp;// (dsContents.dataset as tmsesqlquery).cancelupdate;<br>
+              end;</p>
+            <p>Отменяются изменения только в текущей выбранной записи. </p>
+            <p>Примечания :</p>
+            <ul>
+              <li><span class="style1">как видите, полезный код закомментирован - до тех пор, пока не будет реализована рабочая версия <span class="style2">&quot;cancelupdate&quot;</span></span> <span class="style1">в &quot;FreePascal&quot; ( см. также описание &quot;actUndo&quot; )</span><br>
+              </li>
+            </ul>
+            </blockquote>
+        </div>
+      <li>
+        <div class="light_stripe">addexecute 
+          <blockquote>
+  <p class="source">procedure tcommonrefseditfo.addexecute(const sender: TObject);<br>
+                begin<br>
+&nbsp;if parentwidget.canparentclose(nil) then begin<br>
+&nbsp;&nbsp;dsContents.dataset.append;<br>
+&nbsp;end;<br>
+        end;</p>
+  <p>Добавляется новая ( пустая ) запись, подлежащая дальнейшему редактированию. </p>
+  <p>Примечания :</p>
+  <ul>
+    <li><span class="source style1">проверка &quot;parentwidget.canparentclose(nil)</span><span class="style1">&quot; в форме, использующей наш субмодуль, инициирует проверку ( и, если все нормально - запись в буфер) последнего изменения   данных без явной на то команды ( вроде нажатия &quot;Enter&quot; в конце редактирования  ); нужна именно на случай, если пользователь забыл сделать эти действия ( нормальное явление ! ), и пытается перейти на другую строку таблицы или на другой компонент редактирования, добавить новую запись и т.п.;<br>
+      короче, пока не будут исправлены ошибки в текущей записи - не даст ничего делать !<br>
+    </span>    </li>
+  </ul>
+          </blockquote>
+        </div>
+      </li>
+        <div class="dark_stripe">
+              <ul>
+                  <li>deleteexecute
+                      <blockquote>
+                          <p class="source">procedure tcommonrefseditfo.deleteexecute(const sender: TObject);<br>
+                          begin<br>
+&nbsp;dsContents.dataset.delete;<br>
+                        end</p>
+                        <p>Удаляется текущая выбранная запись.</p>
+                      </blockquote>
+                  </li>
+              </ul>
+        </div>
+    </ul>
+    <blockquote>
+      <p>&nbsp;</p>
+      <p>Изменения в секциях &quot;uses&quot; ( добавлены &quot;db&quot; и &quot;msesqldb&quot; ) : </p>
+      <blockquote>
+        <p class="source">interface<br>
+&nbsp;uses<br>
+&nbsp;msegui,mseclasses,mseforms,msesimplewidgets,mseactions,msedb,<br>
+&nbsp;db // предоставляет &quot;tfield&quot;<br>
+          ;</p>
+        <p class="source">    ...</p>
+        <p class="source">    uses<br>
+&nbsp;commonrefseditform_mfm,<br>
+&nbsp;msesqldb // предоставляет &quot;tmsesqlquery&quot;<br>
+          ;</p>
+      </blockquote>
+      <p>Примечания :
+      </p>
+      <ul class="style1">
+        <li>Конструкция<span class="style2"> &quot;parentwidget.container.canclose(nil)</span>&quot; относится к механизму субмодулей и будет рассмотрена позже <br>
+        </li>
+        <li> приведение типа <span class="style2">&quot;dsContents.dataset as tmsesqlquery&quot; </span>нужно для доступа к последним версиям <span class="style2">&quot;applyupdates&quot;</span> и <span class="style2">&quot;transaction&quot;</span>, унаследованным от компонентов<span class="style2"> &quot;tbufdataset&quot;, &quot;tdbdataset&quot; и &quot;tsqlquery&quot; <br>
+        </span></li>
+        <li><span class="style2">&quot;append&quot; </span>и<span class="style2"> &quot;delete&quot; </span>не требуют приведения типа, так как относятся напрямую к компоненту &quot;<span class="style2">tdataset</span>&quot; <br>
+        </li>
+        <li>последнии версии&quot; означает - последние переопределеные в цепочке виртальных методов</li>
+      </ul>
+    </blockquote>
+  </li>
+</ul>
+<p>Теперь запретим закрытие формы без полной ясности относительно - все ли изменения данных сохраненены ( или отменены ) . Удобнее всего это сделать в процедуре проверки правильности данных, автоматически вызываемой при закрытии формы ( а также явно, через вызов &quot;canclose&quot;- при желании кое-что допроверить ) :</p>
+<p>commonrefseditfo</p>
+<ul>
+  <li>onclosequery:= commonrefseditfoclosequery</li>
+</ul>
+<blockquote>
+  <p><span class="source">procedure tcommonrefseditfo.commonrefseditfoclosequery(<br>
+&nbsp; const sender: tcustommseform;<br>
+&nbsp;&nbsp;var amodalresult: modalresultty);<br>
+    begin<br>
+&nbsp;with dsContents.dataset as tmsesqlquery do begin<br>
+&nbsp;&nbsp;// есть измеменения, но команды на их сохранение - не было <br>
+  </span><span class="source">
+&nbsp;&nbsp;if (not isexpected) and (changecount &gt; 0) then begin<br>
+&nbsp;&nbsp;&nbsp;// говорим &quot;Нужно кое-что доделать&quot; <br>
+  </span><span class="source">
+&nbsp;&nbsp;&nbsp;showmessage(<br>
+&nbsp;&nbsp;&nbsp;&nbsp;'There are unsaved changes in the table. Fix them !',<br>
+&nbsp;&nbsp;&nbsp;&nbsp;'Unsaved changes',<br>
+&nbsp;&nbsp;&nbsp;&nbsp;[mr_ok]<br>
+&nbsp;&nbsp;&nbsp;);<br>
+&nbsp;&nbsp;&nbsp;// отказываем форме в закрытии, чтобы <br>
+&nbsp;&nbsp;&nbsp;// пользователь вернулся в нее и закончил недоделанное <br>
+&nbsp;&nbsp;&nbsp;amodalresult:= mr_none;<br>
+&nbsp;&nbsp;end;<br>
+&nbsp;end;<br>
+  end;</span> </p>
+  <p><span class="source">&quot;(not isexpected)&quot; </span>- проверка флажковой переменной (см. ниже). Если &quot;<span class="source">isexpected</span> = true&quot;, то идет автоматическая проверка по сценарию ( запущенная кнопками &quot;Save All&quot; или &quot;Add&quot; ), поэтому пользователя мучать не надо.</p>
+  <p>Если же &quot;<span class="source">isexpected</span> = false&quot;, это значит, что процедура вызывана прямым закрытием формы ( или непрямым - например, через завершение приложения), без должного внимания к измененным данным. Вот и привлекаем это внимание - через <span class="source">&quot;showmessage&quot; </span>! </p>
+</blockquote>
+<p>Дополнительные модификации файла &quot;commonrefseditform.pas&quot; - добавление <span class="source">&quot;msewidgets</span>&quot; в секцию &quot;uses&quot; , переменная под флаг &quot;<span class="source">isexpected</span>&quot;, и управление этим флагом : </p>
+<blockquote>
+  <p>i<span class="source">mplementation</span></p>
+  <p class="source">uses<br>
+    &nbsp;commonrefseditform_mfm,<br>
+    &nbsp;msesqldb, // предоставляет &quot;tmsesqlquery&quot;<br>
+    &nbsp;msewidgets // предоставляет &quot;showmessage&quot;<br>
+    ;</p>
+  <p class="source">var<br>
+&nbsp;    // флаг-признак использования кнопок&quot;SaveAll&quot; или &quot;Add&quot;<br>
+&nbsp;isexpected : boolean;</p>
+  <p class="source">// слегка модифицированная процедура<br>
+    //    <br>
+    procedure tcommonrefseditfo.saveallexecute(<br>
+&nbsp;const sender: TObject);<br>
+    begin<br>
+    &nbsp;// чтобы 
+    не было ругани в &quot;onclosequery&quot; <br>
+&nbsp;isexpected:= true;<br>
+&nbsp;if parentwidget.container.canclose(nil) then begin<br>
+&nbsp;&nbsp;with dsContents.dataset as tmsesqlquery do begin<br>
+&nbsp;&nbsp;&nbsp;applyupdates;<br>
+&nbsp;&nbsp;&nbsp;(transaction as tmsesqltransaction).commit;<br>
+&nbsp;&nbsp;&nbsp;active:= true;<br>
+&nbsp;&nbsp;end;<br>
+&nbsp;end;<br>
+&nbsp;// несохраненные данные - опять ненормальное явление <br>
+&nbsp;isexpected:= false; <br>
+  end;</p>
+  <p>и аналогично</p>
+  <p class="source">procedure tcommonrefseditfo.addexecute(<br>
+&nbsp;    const sender: TObject);<br>
+    begin<br>
+&nbsp;isexpected:= true;<br>
+&nbsp;if parentwidget.canparentclose(nil) then begin<br>
+&nbsp;&nbsp;dsContents.dataset.append;<br>
+&nbsp;end;<br>
+&nbsp;isexpected:= false;<br>
+end;</p>
+  <p>Примечания :</p>
+  <ul>
+    <li class="style1">здесь <span class="source">&quot;parentwidget.container.canclose(nil)&quot;</span> и <span class="source">&quot;parentwidget.canparentclose(nil)&quot;</span> вызовут неявным образом <span class="source">&quot;tcommonrefseditfo.commonrefseditfoclosequery&quot;</span>, за которой и останется последнее слово - заставить пользователя продолжить редактирование, или закрыть форму </li>
+  </ul>
+</blockquote>
+<p>Итоговый вид формы &quot;commonrefeditfo&quot; с компонентами :</p>
+<p align="center"><img src="images/commonrefseditfo.png" width="408" height="351"> </p>
+<p>&nbsp;</p>
+<p>Теперь эта форма, в качестве субмодуля ( submodule ) может использоваться как каркас для построения однотипных редакторов таблиц. Как это сделать - см . далее .</p>
+<p>&nbsp;</p>
+</body>
+</html>

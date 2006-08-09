@@ -1,0 +1,456 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<title>Справочник планет</title>
+<meta http-equiv="Content-Type" content="text/html; charset=windows-1251">
+<link href="usedstyles.css" rel="stylesheet" type="text/css">
+</head>
+
+<body>
+<h3 align="center">Справочник планет</h3>
+<p>File-&gt;New-&gt;Form-&gt;Simple Form</p>
+<ul>
+  <li>на запрос - coхранить под именем &quot;planetseditform.pas&quot; </li>
+</ul>
+<p>что автоматически создает форму &quot;planetseditfo&quot;.</p>
+<p>Прикажем этoй форме отображаться в центе экрана ( не в дизайне, а во время работы программы ) : </p>
+<ul>
+  <li>planetseditfo-&gt;options-&gt;fo_screencentered:= true </li>
+</ul>
+<p>Назначим ей заголовок, отличающий о прочих справочников :</p>
+<ul>
+  <li>planetseditfo-&gt;caption:= Planets&nbsp;editor</li>
+</ul>
+<p>Если форма чаще всего выводится только для просмотра, то удобно закрывать ее нажатием клавиши &quot;Esc&quot; ( как мы уже сделали с &quot;editform&quot; ) , установив, например : </p>
+<blockquote>
+  <p>planetseditfo-&gt;options-&gt;fo_closeonesc:= true </p>
+</blockquote>
+<p>Но здесь это будет неуместно ( потому что редактирование справочников - серьезная и редко-выпоняемая работа ), поэтому оставим по-умолчанию :</p>
+<blockquote>
+  <p>fo_closeonesc:= false</p>
+</blockquote>
+<p>Далее вставим каркас редактора справочников (форму &quot;commonrefseditfo&quot; ) :</p>
+<ul>
+  <li>переключиться из режима редактирования исходного текста в режим отображения формы - нажав &quot;F12&quot;<br>
+  </li>
+  <li>выбрать маленькую форму &quot;planetseditfo&quot;<br>
+  </li>
+  <li>по щелку правой кнопки мыши - выбрать &quot;Insert submodule&quot; ( &quot;Вставит субмодуль&quot; ) , и далее, в появившемся списке, выбрать строку с &quot;commonrefseditfo.mfm&quot;<br>
+  </li>
+  <li>растянуть маленькую форму так, чтобы исчезли полосы прокрутки и эта форма стала выглядеть в точности так же, как &quot;commonrefseditfo&quot;</li>
+</ul>
+<p>Примечания :</p>
+<ul>
+  <li class="style1">с этого момента оригинальную форму &quot;planetseditfo&quot; выбрать не так-то просто - ведь вместо нее теперь представляется вложенная &quot;commonrefseditfo&quot;. Сделать это можно через редактор свойств - выбрать &quot;planetseditfo (tplanetseditfo)&quot; в выпадающем списке</li>
+</ul>
+<p>Теперь будем адаптировать каркас редактора к конкретному редактору - редактору списка планет.</p>
+<p>Щелкаем по середине гибрида &quot;planetseditfo+commonrefseditfo&quot;, чтобы выбрать его, и роняем на него тот единственный компонент, которым будут различаться различные редакторы справочников :</p>
+<p>DB -&gt; tdbwidgetgrid</p>
+<ul>
+  <li>Name:= grdPlanets</li>
+  <li>DataSource:= refsdatamo.dsPlanets</li>
+  <li>anchors
+      <ul>
+        <li>an_left:= true</li>
+        <li>an_top:= true </li>
+        <li>an_right:= true </li>
+      </ul>
+  </li>
+</ul>
+<blockquote>
+  <p>Примечание : </p>
+  <ul>
+    <li class="style1">в принципе , и &quot;tdbwidgetgrid&quot; можно было бы сделать общим для всех справочников - но тогда пришлось бы настраивать столбцы, заголовки и т.п. не визуально, а в коде, что есть полная бессмыслица</li>
+  </ul>
+</blockquote>
+<p>Теперь переключаем этот пустой &quot;DataSource&quot; на реальный источник данных ( здесь - данные о планетах ) : </p>
+<ul>
+  <li>выбираем в редакторе свойств &quot;planetseditfo (tplanetseditfo)&quot;, и прописываем обработчики событий создания и удаления этой формы : <br>
+      <ul>
+        <li>planetseditfo <br>
+            <ul>
+              <li>oncreate:= planetseditfocreated </li>
+            </ul>
+            <blockquote>
+              <p><span class="source">procedure tplanetseditfo.planetseditformcreated(<br>
+            const sender: TObject);<br>
+            begin<br>
+&nbsp;application.createdatamodule(trefsdatamo, refsdatamo);<br>
+&nbsp;commonrefseditfo1.dsContents.dataset := grdPlanets.datasource.dataset;<br>
+            end;</span></p>
+              <p>что создает &quot;DataModule&quot;, в котором определен интересующий нас запрос списка планет ( qryPlanets-&gt;dsPlanets ), причем сам этот запрос автоматически выполняется ( если установлено &quot;Active:= true&quot; во время дизайна самого &quot;DataModule&quot; ) , и в конце говорим нашему переключаемому &quot;DataSource&quot; - &quot;теперь у тебя есть данные - список планет&quot; ( ведь <span class="source">&quot;grdPlanets.datasource.dataset</span>&quot; во время дизайна установлен как &quot;refsdatamo.dsPlanets&quot; ) </p>
+              <p>Примечания :</p>
+              <ul>
+                <li class="style1"><span class="style2">&quot;commonrefseditfo1&quot;</span> - автоматически сгенерированное имя экземпляра вставленного субмодуля ( см. файл &quot;planetseditform.pas&quot;, описание класса &quot;tplaneteditfo&quot;) , то есть мезанизм субмодулей реализован не через наследование (исходного кода), а через агрегирование ( бинарного кода ) - что намного эффективнее с точки зрения памяти<br>
+                </li>
+                <li class="style1">назначение<span class="style2"> &quot;commonrefseditfo1.dsContents.dataset&quot; </span>тут же заполнит компоненты, увязанные с &quot;dsContents&quot;, в нашем случае - табличный компонент &quot;grdPlanets&quot;, плюс &quot;dsContents&quot; теперь может обрабатывать события , связанные с &quot;refsdatamo.dsPlanets&quot;</li>
+              </ul>
+            </blockquote>
+            <ul>
+              <li></li>
+            </ul>
+            ondestroy:= planetseditfodestroyed
+            <blockquote>
+              <p class="source">procedure tplanetseditfo.planetseditformdestroyed(<br>
+            const sender: TObject);<br>
+            begin<br>
+&nbsp;refsdatamo.free;<br>
+            end;</p>
+              <p>здесь - обычное освобождение памяти от отработавшего объекта.</p>
+              <p>И не забудем включить в &quot;uses&quot; секцию &quot;implementation&quot; файла &quot;planetseditform.pas&quot; модуль &quot;refsdatamodule&quot; :</p>
+              <blockquote>
+                <p class="source">implementation<br>
+                    <br>
+              uses<br>
+&nbsp;&nbsp;planetseditform_mfm,<br>
+&nbsp;&nbsp;// предоставляет тип &quot;trefsdatamo&quot; и объект &quot;refsdatamo&quot; <br>
+&nbsp;&nbsp;refsdatamodule <br>
+              ; </p>
+              </blockquote>
+            </blockquote>
+        </li>
+      </ul>
+  </li>
+</ul>
+<p>Так как данные представлены выборкой из одной таблицы БД ( &quot;planets&quot; ) , обновление данных может делаться чере автоматичскую генерацию SQL-запросов. Но чтобы это работало правильно, нужно подготовить к этому саму выборку данных ( определенную в &quot;refsdatamo&quot; ).</p>
+<p>Переключаемся на отображение формы &quot;refsdatamo&quot; :</p>
+<p>выбираем &quot;qryPlanets&quot;</p>
+<ul>
+  <li>установить по цепочке (Active:= false ) -&gt; ( UsePrimaryKeyAsKey := false ) -&gt; (Active:= true )</li>
+  <li>controller </li>
+  <ul>
+    <li>fields.count-&gt;[...]
+        <ul>
+          <li>перенести все &quot;FieldDefs&quot; -&gt; &quot;Fields &quot; </li>
+        </ul>
+    </li>
+    <li>fields
+        <ul>
+          <li>item 0 ( где &quot;FieldName&quot; = &quot;id&quot; )
+              <ul>
+                <li>ProviderFlags
+                    <ul>
+                      <li>pfInKey:= true</li>
+                      <li>остальные := false</li>
+                    </ul>
+                </li>
+              </ul>
+          </li>
+          <li>item 1 ( где &quot;FieldName&quot; = &quot;descr&quot; )
+              <ul>
+                <li>ProviderFlags
+                    <ul>
+                      <li>pfInUpdate:= true</li>
+                      <li>остальные := false</li>
+                    </ul>
+                </li>
+              </ul>
+          </li>
+        </ul>
+    </li>
+  </ul>
+</ul>
+<p>Примечания :</p>
+<ul>
+  <li class="style1">чтобы вставка новых записей ( SQL INSERT-команды ) была корректной, нужно предварительно решить, как гарантировать уникальную нумерацию новых строк, для этого есть следующие способы :
+      <OL>
+        <BR>
+        <li> использовать сервис автонумерации ( counter/autoincrement, "default nextval('some_sequence')", OID-поле, .. ) БД, для чего нужно избежать явной нумерации - после вызове метода "{dataset}.append", добавляющего новую строку с начальными пустыми значениями, не задавать никакого значения для поля уникального ключа таблицы ( с нашем случае - поле "id" ), тогда это поле будет расценено как NULL и не будет включено а автогенерируемую SQL INSERT-команду; <br>
+          в данном проекте мы поступили именено таким образом <br>
+        </li>
+        <li> cамим позаботиться о нумерации - но тогда придется отказаться от автогенерации SQL-команд, и описать нужную SQL-команду (причем - и INSERT, и UPDATE, и DELETE ) в обработчике "onapplyrecupdate", см.главу "Редактирование данных", а уже в самом обработчике есть разные варианты рассчета нового значения ключевого поля :
+            <ul>
+            <ul>
+              <li> внутри самой программы, вроде "{dataset}.last; last_id= fldPlanetId; inc(last_id);" - здесь "last_id" - внутренняя переменная, а "{dataset}" должен быть упорядочен по-возрастанию поля, увязаного с "fldPlanetId" ( здесь - "id" ) <br>
+              </li>
+              <li> как подзапрос внутри SQL INSERT-команды, вроде ".. (SELECT max(id)+1 FROM planets ), .. " - если такой систаксис позволяется сервером БД </li>
+            </ul>
+      </OL>
+      <br>
+      Примечания :
+      <ul>
+        <li>OID-поля - сугубо для внутреннего примемнения, их значения могут меняться после UPDATE-операций и потому не должны использоваться для ссылок между таблицами ! </li>
+      </ul>
+  </li>
+  <br>
+  <li class="style1">перенос &quot;FieldDefs -&gt; Fields&quot; нужен для доступа к &quot;ProviderFlags&quot; <br>
+  </li>
+  <li class="style1">&quot;UsePrimaryKeyAsKey := false&quot; означает полностью ручной контроль над ( ProviderFlags-&gt;pfInKey:= true ) ; <br>
+  </li>
+  <li class="style1"> смысл опции (UsePrimaryKeyAsKey:=true) - попытаться найти ключевые поля средствами драйвера БД, и, если таковые найдены - назначить им &quot;pfInKey:= true&quot;, при успехе это позволило бы обойтись без переноса &quot;FieldDefs&quot; -&gt; &quot;Fields &quot;; <br>
+    но это значит - попасть в зависимость от наличия ( отстуствия ) индексов в БД, версии сервера БД и т.п. - поэтому пока откажемся от этой услуги, и укажем все нужные &quot;pfInKey&quot; вручную <br>
+  </li>
+  <li class="style1">&quot;pfInKey&quot; -&gt; данное поле содержит ключи строк выборки из БД и будет использоваться для точного определения места изменений ( через WHERE-конструкции SQL-запросов )<br>
+  </li>
+  <li class="style1">&quot;pfInUpdate&quot; -&gt; последнее значения данное поля должно включаться в SQL-команды на обновление <br>
+  </li>
+  <li class="style1">&quot;pfInKey&quot; и &quot;pfInUpdate&quot; имеют смысл только в режиме автогенерации SQL-запросов, то есть - если в родительском объекте &quot;tmsesqlquery&quot; не определен пользовательский обработчик для &quot;onapplyrecupdate&quot; </li>
+</ul>
+<p>Теперь опишем столбцы grdPlanets, подлежащие просмотру и редактированию. Для начала заглянем на предыдущий шаг:</p>
+<ul>
+  <li>поле &quot;id&quot; ( ключ таблицы ) -&gt; нет смысла отображать иначе как для нумерации строк
+      <ul>
+        <li>но эта нумерация может быть с пропусками (в случае удаления записей ) , поэтому для нумерации надежнее испльзовать сервис автонумерации табличных компонентов <br>
+        </li>
+      </ul>
+  </li>
+  <li>поле &quot;descr&quot; ( название планеты ) -&gt; полезная информация, поэтому назначим это поле соответствующему столбцу &quot;grdPlanets&quot;
+      <ul>
+        <li>это поле - текстовое, поэтоу для его редактирования подходит компонент &quot;DB-&gt;tdbstringedit&quot;</li>
+      </ul>
+  </li>
+</ul>
+<p>Уронить с палитры &quot;DB&quot; на &quot;grdPlanets&quot; компонент </p>
+<p>tdbstringedit :</p>
+<ul>
+  <li>Name:= seName </li>
+  <li>optionsedit
+      <ul>
+        <li>oe_notnull:= true</li>
+        <li>oe_autopost:= true </li>
+      </ul>
+  </li>
+  <li>datafield:= descr </li>
+</ul>
+<p>Примечания :</p>
+<ul>
+  <li class="style1">&quot;oe_notnull&quot; -&gt; не позволять закрыть форму, если здесь - пустое значение; нужно потому, что при содании БД полю &quot;desc&quot; было назначено ограничение &quot;NOT NULL&quot; <br>
+  </li>
+  <li class="style1">&quot;oe_autopost&quot; -&gt; фиксировать изменения при первой возможности ( при нажатии &quot;Enter&quot; и т.п. ) , нужно, если мы хотим оперативно отслеживать состояние редактирования - как раз наш случай </li>
+</ul>
+<p>Теперь мы видим нужные данные - то есть компонент &quot;tdbwidgetgrid&quot; построил для нас таблицу из субкомпонетов &quot;tdbstringedit&quot; ( могут быть и другие -&quot; tdbbooleanedit&quot;, &quot;tdbenumeditlb&quot; и т.д. ). В случае &quot;tdbenumeditlb&quot; можно, оставаясь в рамках запроса к одной таблице - редактировать ссылки на другие таблицы. <br>
+  Автоматически установленное свойство <span class="source">&quot;DataSource:= refsdatamo.dsPlanets&quot;</span> объекта &quot;seName&quot; унаследовано от родительского объекта &quot;grdPlanets&quot;. Менять его нет смысла - все равно будет проигнорировано . <br>
+  Также, &quot;grdPlanets-&gt;datacols.count&quot; увеличился на &quot;1&quot; (то есть произошло автоматическое добавление столбца, в нашем случае &quot;Item 0&quot; ) . </p>
+<p>grdPlanets : </p>
+<ul>
+  <li>datacols
+      <ul>
+        <li>item 0
+            <ul>
+              <li>options
+                  <ul>
+                    <li>co_fill:= true </li>
+                  </ul>
+              </li>
+              <li>frame -&gt; [...]
+                  <ul>
+                    <li>framei
+                        <ul>
+                          <li>left:= 10 </li>
+                        </ul>
+                    </li>
+                  </ul>
+              </li>
+            </ul>
+        </li>
+      </ul>
+  </li>
+</ul>
+<p>Включим автонумерацию строк таблицы :</p>
+<p>grdPlanets :</p>
+<ul>
+  <li>fixcols
+      <ul>
+        <li>item (-1)
+            <ul>
+              <li>numstart:= 1</li>
+              <li>numstep:= 1 </li>
+            </ul>
+        </li>
+      </ul>
+  </li>
+</ul>
+<p>и нарисуем заголовок таблицы :</p>
+<p>grdPlanets</p>
+<ul>
+  <li>fixrows
+      <ul>
+        <li>item (-1)
+            <ul>
+              <li>captionsfix-&gt;AppendItem
+                  <ul>
+                    <li>item 0
+                        <ul>
+                          <li>caption:= #8470 // знак нумерации ( &quot;№&quot; ) </li>
+                          <li>расширить примерно под три цифры </li>
+                        </ul>
+                    </li>
+                  </ul>
+              </li>
+              <li>captions-&gt;AppendItem
+                  <ul>
+                    <li>item 0
+                        <ul>
+                          <li>caption:= Country&nbsp;name </li>
+                        </ul>
+                    </li>
+                  </ul>
+              </li>
+              <li>color:= cl_ltgreen </li>
+            </ul>
+        </li>
+      </ul>
+  </li>
+</ul>
+<p>Если в таблице ожидается не более 1000 записей ( 99% для списка планет ) , то можно разрешить точную синхронизацию вертикальной прокрутки с содержимым БД : </p>
+<p>grdPlanets : </p>
+<ul>
+  <li>datalink
+      <ul>
+        <li>options
+            <ul>
+              <li>gdo_propscrollbar:= true </li>
+              <li>gdo_thumtrack:= true </li>
+            </ul>
+        </li>
+      </ul>
+  </li>
+</ul>
+<p>&nbsp;</p>
+<p>Примечания :</p>
+<ul>
+  <li class="style1">доступ к значениям ячеек &quot;grdPlanets&quot; : seName[{номер строки, &gt;=0}] , тип данных - тот же, что у &quot;seName&quot;, то есть - &quot;msestring&quot;.</li>
+</ul>
+<p>Теперь реализуем цветовое выделение строк ( чтобы пользователь сразу видел - где исходные данные, а где те, что он сам навводил ), под которое и сделаны цветные полоски слева о кнопки &quot;Close&quot; ( cм. выше ) . Назначаем то же набор цветов, что и на полосках : </p>
+<p>grdPlanets :</p>
+<ul>
+  <li>rowcolors-&gt;AddItem
+      <ul>
+        <li>item 0:= [..] // бледно-оранжевый
+            <ul>
+              <li>red:= 255 </li>
+              <li>green:= 192 </li>
+              <li>blue:= 0 </li>
+            </ul>
+        </li>
+        <li>item 1:= cl_green // салатный </li>
+      </ul>
+  </li>
+</ul>
+<p>и прописываем код выбора нужного цвета из этого набора, через специальный обработчик события :</p>
+<p>grdPlanets :</p>
+<ul>
+  <li>datalink
+      <ul>
+        <li>onupdaterowdata:= grdplanetsupdaterowdata </li>
+      </ul>
+  </li>
+</ul>
+<p>и код этой процедуры : </p>
+<blockquote>
+  <p class="source">procedure tplanetseditfo.grdplanetsupdaterowdata(<br>
+&nbsp;const sender: tcustomgrid;<br>
+&nbsp;const arow: Integer; const adataset: TDataSet);<br>
+    begin<br>
+&nbsp;// анализ типа обновления записи <br>
+&nbsp;case adataset.updatestatus of<br>
+&nbsp;&nbsp;usInserted: // это - новая запись<br>
+&nbsp;&nbsp;&nbsp;// подкрасить цветом, 1-м по порядку в &quot;rowcolors&quot;<br>
+&nbsp;&nbsp;&nbsp;sender.rowcolorstate[arow]:= 0; <br>
+&nbsp;&nbsp;usModified: // это - запись, измененная с момента вызова формы <br>
+&nbsp;&nbsp;&nbsp;// подкрасить цветом, 2-м по порядку в &quot;rowcolors&quot; <br>
+&nbsp;&nbsp;&nbsp;sender.rowcolorstate[arow]:= 1;<br>
+&nbsp;// это - нетронутая (или удаленная ? )запись <br>
+&nbsp;// ( но удаленые мы все равно не сможем увидеть )<br>
+&nbsp;else // нетронутая запись<br>
+&nbsp;&nbsp;sender.rowcolorstate[arow]:= 255; // убрать подкраску <br>
+&nbsp;end;<br>
+    end;</p>
+</blockquote>
+<p>и не забудьте добавить нужные &quot;unit&quot; -ы в секцию &quot;interface -&gt; uses&quot; :</p>
+<blockquote>
+  <p class="source">interface<br>
+&nbsp;uses<br>
+&nbsp;msegui,mseclasses,mseforms,commonrefseditform,msedbedit,<br>
+&nbsp;msegrids, // обеспечивает &quot;tcustomgrid&quot;<br>
+&nbsp;db // обеспечивает &quot;tdataset&quot;<br>
+    ;</p>
+  <p class="source"><a name="calling_way"></a></p>
+</blockquote>
+<h4 align="center">Способ вызова <br>
+формы просмотра-редактирования</h4>
+<p>Так как такого рода редактирование требуется нечасто, то этот вызов можно спрятать подальше, чтобы не мешался - куда-нибудь в основное меню. Но, на случай, если вдруг понадобится несколько способов вызова, или из нескольких форм - опять задействуем компонент &quot;taction&quot;.</p>
+<p>Переключаемся на дизайн &quot;mainfo&quot; ( файл &quot;main.pas&quot; ). Роняем в любом незарисованном месте &quot;mainfo&quot; с палитры &quot;GUI&quot; : </p>
+<p>taction :</p>
+<ul>
+  <li>Name:= actPlanetsEdit </li>
+  <li>onexecute:= planetseditexecute</li>
+</ul>
+<blockquote>
+  <p class="source">procedure tmainfo.planetseditexecute(const sender: TObject);<br>
+    begin<br>
+&nbsp;try<br>
+&nbsp;&nbsp;// отобразить форму редактора планет <br>
+&nbsp; application.createform(tplanetseditfo, planetseditfo);<br>
+&nbsp;&nbsp;// если эта форма закрыта ожидаемым образом<br>
+&nbsp;&nbsp;// ( кнопкой с кодом &quot;mr_windowclosed&quot; )<br>
+&nbsp;&nbsp;if planetseditfo.show(true) = mr_windowclosed then begin<br>
+&nbsp;&nbsp;&nbsp;// при необходимости - освежаем данные о персоналиях <br>
+&nbsp;&nbsp;&nbsp;// с учетом изменений в планетах <br>
+&nbsp;&nbsp; qryPersons.active:= true; <br>
+&nbsp;&nbsp;end;<br>
+&nbsp;finally<br>
+&nbsp;&nbsp;planetseditfo.free; // удаляем форму редактора из памяти<br>
+&nbsp;end;<br>
+    end;</p>
+</blockquote>
+<p>&nbsp; </p>
+<p> Теперь настроим вызов &quot;actPlanetsEdit&quot; из основного меню. Выделим для вызова редакторов справочников новый раздел меню - &quot;Edit&quot; . </p>
+<p>mainfo : </p>
+<ul>
+  <li>mnuMain
+      <ul>
+        <li>menu
+            <ul>
+              <li>submenu
+                  <ul>
+                    <li>item 0 -&gt; AppendItem ( между &quot;File&quot; и &quot;Help&quot; )
+                <ul>
+                  <li>item 1
+                      <ul>
+                        <li>caption:= Ed&amp;it.. </li>
+                        <li>submenu -&gt; AppendItem
+                            <ul>
+                              <li>item 0
+                                  <ul>
+                                    <li>caption:= &amp;Planets..</li>
+                                    <li>action:= actPlanetsEdit</li>
+                                  </ul>
+                              </li>
+                            </ul>
+                        </li>
+                      </ul>
+                  </li>
+                </ul>
+                    </li>
+                  </ul>
+              </li>
+            </ul>
+        </li>
+      </ul>
+  </li>
+</ul>
+<p>Не забудьте добавить ссылку на файл &quot;planetseditform&quot; в секцию &quot;interface&quot; файла &quot;main.pas&quot; :</p>
+<blockquote>
+  <p class="source">interface<br>
+      <br>
+    uses<br>
+&nbsp;msegui,mseclasses,mseforms,msepqconnection,msesqldb,msedb,<br>
+&nbsp;msedbedit,mseactions,msesimplewidgets,msemenus,db,msegrids,<br>
+&nbsp;planetseditform<br>
+    ;</p>
+</blockquote>
+<p>Примечания : </p>
+<ul>
+  <li class="style1">знак &quot;&amp;&quot; в &quot; Ed&amp;it.. &quot; стоит не перед &quot;E&quot;, а перед &quot;i&quot; - потому, что &quot;&amp;E&quot; уже используется на той же форме ( &quot;mainfo&quot; ) , см. кнопку &quot;btnEdit&quot;</li>
+</ul>
+<p>Финальный вид формы редактора списка планет :</p>
+<p>в дизайне :</p>
+<p align="center"><img src="images/planetseditfo_design.png" width="411" height="349"></p>
+<p>и во время работы программы: </p>
+<p align="center"><img src="images/planetseditfo_runtime.png" width="453" height="351"> </p>
+<p>&nbsp;</p>
+<p>Следующие справочники (континенты, страны, ... ), вследствие применения субмодуля &quot;commonrefeditform&quot; , будут практически аналогичны - потому будут описаны кратко, но с детализацией отличий . </p>
+</body>
+</html>

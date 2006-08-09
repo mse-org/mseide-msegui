@@ -1,0 +1,176 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<title>Создание БД</title>
+<meta http-equiv="Content-Type" content="text/html; charset=windows-1251">
+<link href="usedstyles.css" rel="stylesheet" type="text/css">
+</head>
+
+<body>
+<p> В виде готовых файлов  ( чтобы не было проблем с окончаниями строк, правами на запуск и т.п) - скачайте и распакуйте архивный файл <a href="db_setup/db_setup.tgz" title="db_setup.tgz">db_setup.tgz</a>. </p>
+<h3 align="center">&nbsp;</h3>
+<h3 align="center">Пояснения</h3>
+<h5>Содержимое файла &quot;setup.sh&quot; : </h5>
+<blockquote>
+  <div class="dark_stripe">
+    <p class="source">&nbsp;</p>
+    <p class="source">#!/bin/sh
+    </p>
+    <p class="source"># DB SERVER = PostgreSQL<br>
+      # dbname = serious_matters</p>
+    <p class="source">dropdb -Upostgres serious_matters<br>
+      createdb -Upostgres -E UNICODE serious_matters<br>
+      <br>
+      psql -Upostgres -f ./tables.sql -d serious_matters<br>
+      <br>
+    exit 0</p>
+    <p class="source">&nbsp;</p>
+  </div>
+</blockquote>
+<p>Данный скрипт : </p>
+<ul>
+  <li>пересоздает ( с промежуточным удалением !!! ) базу данных &quot;serious_matters&quot; с внутренним форматом хранения данных UNICODE ( реально - UTF8  ), что позволит получать одни и те же символы даже пользователям с различными клиентскими кодиовками )<br>
+  </li>
+  <li>последовательно выполняет SQL-команды, содержащиеся в файле &quot;tables.sql&quot;</li>
+</ul>
+<h5>&nbsp;</h5>
+<h5>И содержимое файла &quot;tables.sql&quot; : </h5>
+<blockquote>
+  <div class="light_stripe">
+    <p class="source">&nbsp;</p>
+    <p class="source">SET CLIENT_ENCODING TO 'UTF8';<br>
+      SET DATESTYLE TO 'German';</p>
+    <p class="source">---------------------------------------------------------<br>
+      create sequence feature_id_seq;<br>
+      create table features (<br>
+      id integer default nextval('feature_id_seq'),<br>
+      descr text not null<br>
+      );</p>
+    <p class="source">insert into features (descr) values ('nasty');<br>
+      insert into features (descr) values ('ill');<br>
+      insert into features (descr) values ('tender');</p>
+    <p class="source">insert into features (descr) values ('bizzare');<br>
+      insert into features (descr) values ('atrocious');<br>
+      insert into features (descr) values ('cunny');</p>
+    <p class="source">insert into features (descr) values ('reliable');<br>
+      insert into features (descr) values ('hard-working');<br>
+      insert into features (descr) values ('lazy');</p>
+    <p class="source">insert into features (descr) values ('nice');<br>
+      insert into features (descr) values ('sexy');<br>
+      insert into features (descr) values ('disgusting');</p>
+    <p class="source">insert into features (descr) values ('traitrous');<br>
+      insert into features (descr) values ('smart');<br>
+      insert into features (descr) values ('dumb');</p>
+    <p class="source">insert into features (descr) values ('mad');<br>
+      insert into features (descr) values ('volatile');<br>
+      insert into features (descr) values ('right');<br>
+      ---------------------------------------------------------<br>
+      create sequence occupation_id_seq;<br>
+      create table occupations (<br>
+      id integer default nextval('occupation_id_seq'),<br>
+      descr text not null<br>
+      );</p>
+    <p class="source">insert into occupations (descr) values ('precident');<br>
+      insert into occupations (descr) values ('pirate');<br>
+      insert into occupations (descr) values ('just good guy');</p>
+    <p class="source">insert into occupations (descr) values ('a bad guy');<br>
+      insert into occupations (descr) values ('actress/actor');<br>
+      insert into occupations (descr) values ('producer');</p>
+    <p class="source">insert into occupations (descr) values ('singer');<br>
+      insert into occupations (descr) values ('mus.band');<br>
+      insert into occupations (descr) values ('vampire');</p>
+    <p class="source">insert into occupations (descr) values ('sportsman');<br>
+      ---------------------------------------------------------<br>
+      create sequence planet_id_seq;<br>
+      create table planets (<br>
+      id integer default nextval('planet_id_seq'),<br>
+      descr text not null<br>
+      );<br>
+      insert into planets (descr) values ('Earth');<br>
+      insert into planets (descr) values ('Mars');<br>
+      insert into planets (descr) values ('Merqury');<br>
+      insert into planets (descr) values ('Pluton');<br>
+      insert into planets (descr) values ('Jupiter');<br>
+      insert into planets (descr) values ('Faeton');<br>
+      ---------------------------------------------------------<br>
+      create sequence continent_id_seq;<br>
+      create table continents (<br>
+      id integer default nextval('continent_id_seq'),<br>
+      planet_id integer,<br>
+      descr text not null<br>
+      );</p>
+    <p class="source">insert into continents (planet_id,descr) values (1,'Africa');<br>
+      insert into continents (planet_id,descr) values (1,'Gondvana');<br>
+      insert into continents (planet_id,descr) values (1,'Antartica');<br>
+      insert into continents (planet_id,descr) values (1,'N.America');<br>
+      insert into continents (planet_id,descr) values (1,'Asia');<br>
+      insert into continents (planet_id,descr) values (1,'Europe');<br>
+      ---------------------------------------------------------<br>
+      create sequence country_id_seq;<br>
+      create table countries (<br>
+      id integer default nextval('country_id_seq'),<br>
+      continent_id integer,<br>
+      descr text not null<br>
+      );</p>
+    <p class="source">insert into countries (continent_id, descr) values (4,'USA');<br>
+      insert into countries (continent_id, descr) values (5,'Iraqe');<br>
+      insert into countries (continent_id, descr) values (6,'Finland');<br>
+      insert into countries (continent_id, descr) values (6,'Sweeden');<br>
+      insert into countries (continent_id, descr) values (6,'Germany');<br>
+      insert into countries (continent_id, descr) values (5,'Uzbekistan');<br>
+      ---------------------------------------------------------<br>
+      create sequence person_id_seq;<br>
+      <br>
+      create table persons (<br>
+    &nbsp;id integer default nextval('person_id_seq'),<br>
+    &nbsp;feature_id integer,<br>
+    &nbsp;occupation_id integer,<br>
+    &nbsp;country_id integer,<br>
+    &nbsp;descr text not null, <br>
+    &nbsp;sexual_potention float,<br>
+    &nbsp;photo bytea,<br>
+    &nbsp;if_happy boolean,<br>
+    &nbsp;dateofbirth date<br>
+      );<br>
+      </p>
+    <p class="source">insert into persons (feature_id, occupation_id,country_id,descr,sexual_potention) values (5,2,NULL,'F.Dreik',NULL);<br>
+      insert into persons (feature_id, occupation_id,country_id,descr,sexual_potention,dateofbirth) values (5,2,NULL,'c.Morgan',100.0,'29.12.1800');<br>
+      insert into persons (feature_id, occupation_id,country_id,descr,sexual_potention) values (18,2,NULL,'J.Blud', 0.0);</p>
+    <p class="source">insert into persons (feature_id, occupation_id,country_id,descr,sexual_potention) values (NULL,NULL,NULL,'R.Reighan',NULL);<br>
+      insert into persons (feature_id, occupation_id,country_id,descr,sexual_potention) values (NULL,NULL,NULL,'J.Bush',NULL);<br>
+      insert into persons (feature_id, occupation_id,country_id,descr,sexual_potention) values (NULL,NULL,NULL,'S.Hussein',NULL);</p>
+    <p class="source">insert into persons (feature_id, occupation_id,country_id,descr,sexual_potention) values (NULL,NULL,NULL,'I.Ghandy',NULL);<br>
+      insert into persons (feature_id, occupation_id,country_id,descr,sexual_potention) values (NULL,NULL,NULL,'J.Lopes',NULL);<br>
+      insert into persons (feature_id, occupation_id,country_id,descr,sexual_potention,if_happy,dateofbirth) values (10,5,2,'Sh.Fenn', 99.2,'t','01.03.1960');</p>
+    <p class="source">insert into persons (feature_id, occupation_id,country_id,descr,sexual_potention) values (NULL,NULL,NULL,'H.Berry',NULL);<br>
+      insert into persons (feature_id, occupation_id,country_id,descr,sexual_potention,if_happy) values (NULL,NULL,NULL,'H.Ford',NULL,'f');<br>
+      insert into persons (feature_id, occupation_id,country_id,descr,sexual_potention) values (NULL,NULL,NULL,'B.Willis',99.6);</p>
+    <p class="source">insert into persons (feature_id, occupation_id,country_id,descr,sexual_potention) values (NULL,NULL,NULL,'Ch.Theron',NULL);<br>
+      insert into persons (feature_id, occupation_id,country_id,descr,sexual_potention) values (NULL,NULL,NULL,'J.Kameron',NULL);<br>
+      insert into persons (feature_id, occupation_id,country_id,descr,sexual_potention) values (NULL,NULL,NULL,'ABBA',NULL);</p>
+    <p class="source">insert into persons (feature_id, occupation_id,country_id,descr,sexual_potention) values (NULL,NULL,NULL,'The Rasmus',NULL);<br>
+      insert into persons (feature_id, occupation_id,country_id,descr,sexual_potention) values (NULL,NULL,NULL,'Halloween',NULL);<br>
+      insert into persons (feature_id, occupation_id,country_id,descr,sexual_potention) values (NULL,NULL,NULL,'WhiteSnake',NULL);</p>
+    <p class="source">insert into persons (feature_id, occupation_id,country_id,descr,sexual_potention) values (3,9,NULL,'g.Drakula',100.0);<br>
+      insert into persons (feature_id, occupation_id,country_id,descr,sexual_potention) values (NULL,NULL,NULL,'W.Hewston',NULL);<br>
+      insert into persons (feature_id, occupation_id,country_id,descr,sexual_potention) values (NULL,NULL,NULL,'M.Schumaher',NULL);</p>
+    <p class="source">insert into persons (feature_id, occupation_id,country_id,descr,sexual_potention) values (NULL,NULL,NULL,'I.Karimov',NULL);<br>
+      ---------------------------------------------------------<br>
+      DROP USER worldadmin;<br>
+      CREATE USER worldadmin WITH ENCRYPTED PASSWORD 'all';<br>
+      <br>
+      GRANT ALL PRIVILEGES ON <br>
+      &nbsp;persons,person_id_seq,<br>
+      &nbsp;features,feature_id_seq,<br>
+      &nbsp;occupations,occupation_id_seq,<br>
+      &nbsp;planets,planet_id_seq,<br>
+      &nbsp;continents,continent_id_seq,<br>
+      &nbsp;countries,country_id_seq<br>
+      TO worldadmin;</p>
+    <p class="source">&nbsp;</p>
+  </div>
+</blockquote>
+<p>Здесь, по порядку - создаются рабочие таблицы, автонумераторы для эмуляции полей-счетчиков, пользователь &quot;worldadmin&quot; с паролем &quot;all&quot;, и этому пользователю даются необходимые для просмотра и редактирования данных полномочия. Также выполняется первичное заполнение рабочих таблиц начальными данными. </p>
+</body>
+</html>

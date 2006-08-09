@@ -1,0 +1,88 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html>
+<head>
+<title>Постановка задачи</title>
+<meta http-equiv="Content-Type" content="text/html; charset=windows-1251" />
+<link href="usedstyles.css" rel="stylesheet" type="text/css" />
+</head>
+<body bgcolor="#FFFFFF" class="Normal"> 
+<h2 align="center">Постановка задачи</h2> 
+<p>Задача - ведение базы данным по известным ( в космическом масштабе ) персонам, а именно слудующих их атрибутов: </p> 
+<ol>
+  <li> Descr&nbsp;&nbsp;-&gt; имя и т.п. </li>
+  <li> Feature&nbsp;&nbsp; -&gt; преобладающая черта характера </li>
+  <li> Occupation &nbsp;-&gt; род деятльности </li>
+  <li> Country&nbsp;&nbsp;-&gt; где проживает </li>
+  <li> Sexual_potention&nbsp;&nbsp;-&gt; процент сексуальности </li>
+  <li> Photo&nbsp;&nbsp;-&gt; фотография </li>
+  <li>dateofbirth -&gt; дата рождения </li>
+  <li>If_happy&nbsp;&nbsp;-&gt; счастлив ли по жизни </li>
+</ol>
+<p>Для этого создается таблица “persons” ( в формате команд PostgreSQL ): </p> 
+<blockquote> 
+  <p class="source">create sequence person_id_seq; -- эмулятор поля-счетчика <br />
+    <br /> 
+    create table persons ( <br /> 
+    &nbsp;id integer default nextval('person_id_seq'), <br /> 
+    &nbsp;feature_id integer, <br /> 
+    &nbsp;occupation_id integer, <br /> 
+    &nbsp;country_id integer, <br /> 
+    &nbsp;descr text not null, <br /> 
+    &nbsp;sexual_potention float, <br /> 
+    &nbsp;photo bytea, <br /> 
+  &nbsp;if_happy boolean,<br />
+&nbsp;dateofbirth date <br />
+    ); </p>
+</blockquote> 
+<p>Пункты 2)..4) должны содержать выбираемые значения, поэтому на них ведутся справочные таблицы: </p> 
+<p>Черты характера : </p> 
+<blockquote> 
+  <p class="source">create sequence feature_id_seq;<br />
+    <br /> 
+    create table features ( <br /> 
+    &nbsp;id integer default nextval('feature_id_seq'), <br /> 
+    &nbsp;descr text not null <br /> 
+  ); </p> 
+</blockquote> 
+<p>Рода деятельности : </p> 
+<blockquote> 
+  <p class="source">create sequence occupation_id_seq;<br />
+    <br /> 
+    create table occupations ( <br /> 
+    &nbsp;id integer default nextval('occupation_id_seq'), <br /> 
+    &nbsp;descr text not null <br /> 
+  ); </p> 
+</blockquote> 
+<p>Страны : </p> 
+<blockquote> 
+  <p class="source">create table countries (<br />
+    <br /> 
+    id integer default nextval('country_id_seq'), <br /> 
+    &nbsp;continent_id integer, <br /> 
+    &nbsp;descr text not null <br /> 
+  ); </p> 
+</blockquote> 
+<p>Так как стран во вселенной может быть очень много, то придется их классифицировать на </p> 
+<p>континенты : </p> 
+<blockquote> 
+  <p class="source">create sequence continent_id_seq;<br />
+    <br /> 
+    create table continents ( <br /> 
+    &nbsp;id integer default nextval('continent_id_seq'), <br /> 
+    &nbsp;planet_id integer, <br /> 
+    &nbsp;descr text not null <br /> 
+  ); </p> 
+</blockquote> 
+<p>а континенты, в свою очередь -  на  планеты : </p> 
+<blockquote> 
+  <p class="source">create sequence planet_id_seq;<br />
+    <br /> 
+    create table planets ( <br /> 
+    &nbsp;id integer default nextval('planet_id_seq'), <br /> 
+    &nbsp;descr text not null <br /> 
+  ); </p>
+</blockquote> 
+<p>Автоматизированная подготовка БД  к работе -  смотрите  главу <a href="db_setup.html" title="Создание БД"> Создание БД</a>. </p>
+<p>&nbsp;</p>
+</body>
+</html>

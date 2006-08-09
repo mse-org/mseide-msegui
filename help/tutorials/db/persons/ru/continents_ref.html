@@ -1,0 +1,373 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML>
+<HEAD>
+<TITLE>Справочник континентов</TITLE>
+<META NAME="Generator" CONTENT="EditPlus">
+<META NAME="Author" CONTENT="">
+<META NAME="Keywords" CONTENT="">
+<META NAME="Description" CONTENT="">
+<link href="usedstyles.css" rel="stylesheet" type="text/css">
+<meta http-equiv="Content-Type" content="text/html; charset=windows-1251">
+</HEAD>
+
+<BODY>
+<h3 align="center">Справочник континентов </h3>
+<p>Создаем новую форму : </p>
+<blockquote>
+  <p>File -> New -> Form -> Simple Form -&gt; </p>
+</blockquote>
+<p>&#1053;&#1072; &#1079;&#1072;&#1087;&#1088;&#1086;&#1089; &#1080;&#1084;&#1077;&#1085;&#1080; &#1092;&#1072;&#1081;&#1083;&#1072; - вводим &quot;continentseditform&quot; и подтверждаем -> автоматически создается форма : </p>
+<p>"continentseditfo" </p>
+<ul>
+  <li>caption := Continents editor </li>
+  <li>options ->    <ul>
+      <li>fo_screencentered:= true </li>
+      </ul>
+  </li>
+  <li>bounds -> 
+    <ul>
+      <li>"cx" и "cy" - как "planetseditfo"</li>
+    </ul>
+  </li>
+  <li>oncreate := continentseditfocreated
+    <blockquote>
+      <p class="source">procedure tcontinentseditfo.continentseditfocreated(<br>
+&nbsp; const sender: TObject);<br>
+        begin<br>
+&nbsp;application.createdatamodule(trefsdatamo, refsdatamo);<br>
+&nbsp;commonrefseditfo1.dsContents.dataset := grdContinents.datasource.dataset;<br>
+      end;</p>
+    </blockquote>
+  </li>
+  <li>ondestroy:= continentseditfodestroyed
+    <blockquote>
+      <p class="source">procedure tcontinentseditfo.continentseditfodestroyed(<br>
+&nbsp;        const sender: TObject);<br>
+        begin<br>
+&nbsp;refsdatamo.free;<br>
+      end;</p>
+    </blockquote>
+  </li>
+</ul>
+<blockquote>
+  <p>Не забудем включить в &quot;uses&quot; секцию &quot;implementation&quot; файла &quot;continentseditform.pas&quot; модуль &quot;refsdatamodule&quot; :</p>
+  <blockquote>
+    <p class="source">implementation<br>
+        <br>
+      uses<br>
+&nbsp;&nbsp;continentseditform_mfm,<br>
+&nbsp;&nbsp;// предоставляет тип &quot;trefsdatamo&quot; и объект &quot;refsdatamo&quot; <br>
+&nbsp;&nbsp;refsdatamodule <br>
+      ; </p>
+  </blockquote>
+</blockquote>
+<p><u>Переключаемся на отображение формы &quot;refsdatamo&quot;</u> и выбираем &quot;qryContinents&quot; : </p>
+<ul>
+  <li>установить по цепочке (Active:= false ) -&gt; ( UsePrimaryKeyAsKey := false ) -&gt; (Active:= true )</li>
+  <li>controller </li>
+  <ul>
+    <li>fields.count-&gt;[...]
+        <ul>
+          <li>перенести все &quot;FieldDefs&quot; -&gt; &quot;Fields &quot; </li>
+        </ul>
+    </li>
+    <li>fields
+        <ul>
+          <li>item 0 ( где &quot;FieldName&quot; = &quot;id&quot; )
+              <ul>
+                <li>ProviderFlags
+                    <ul>
+                      <li>pfInKey:= true</li>
+                      <li>остальные := false</li>
+                    </ul>
+                </li>
+              </ul>
+          </li>
+          <li>item 1 ( где &quot;FieldName&quot; = &quot;planet_id&quot; )
+            <ul>
+              <li>ProviderFlags
+                  <ul>
+                    <li>pfInUpdate:= true</li>
+                    <li>остальные := false</li>
+                  </ul>
+              </li>
+            </ul>
+          </li>
+          <li>item 2 ( где &quot;FieldName&quot; = &quot;descr&quot; )
+            <ul>
+              <li>ProviderFlags
+                  <ul>
+                    <li>pfInUpdate:= true</li>
+                    <li>остальные := false</li>
+                  </ul>
+              </li>
+            </ul>
+          </li>
+        </ul>
+    </li>
+  </ul>
+</ul>
+<p>&nbsp;</p>
+<p><u>Вновь возращаемся на форму "continentseditfo"</u> ( выбрав файл &quot;continentseditform.pas&quot;, и далее, если необходимо - нажав &quot;F12&quot; ).</p>
+<p>&#1065;&#1077;&#1083;&#1082;&#1085;&#1091;&#1074; &#1085;&#1072; &#1092;&#1086;&#1088;&#1084;&#1077; &#1087;&#1088;&#1072;&#1074;&#1086;&#1081; &#1082;&#1085;&#1086;&#1087;&#1082;&#1086;&#1081;, &#1086;&#1090;&#1082;&#1088;&#1099;&#1090;&#1100; &#1084;&#1077;&#1085;&#1102;, &#1080;, &#1082;&#1086;&#1084;&#1072;&#1085;&#1076;&#1086;&#1081; &quot;Insert submodule&quot; - &#1074;&#1089;&#1090;&#1072;&#1074;&#1080;&#1090;&#1100; &#1074; &#1092;&#1086;&#1088;&#1084;&#1091; &#1089;&#1091;&#1073;&#1084;&#1086;&#1076;&#1091;&#1083;&#1100; &quot;commonrefseditform&quot; . &#1055;&#1088;&#1080; &#1085;&#1077;&#1086;&#1073;&#1093;&#1086;&#1076;&#1080;&#1084;&#1086;&#1089;&#1090;&#1080; - подогнать  &#1088;&#1072;&#1079;&#1084;&#1077;&#1088;, &#1095;&#1090;&#1086;&#1073;&#1099; &#1080;&#1089;&#1095;&#1077;&#1079;&#1083;&#1080; &#1087;&#1086;&#1083;&#1086;&#1089;&#1099; &#1087;&#1088;&#1086;&#1082;&#1088;&#1091;&#1090;&#1082;&#1080;. </p>
+<p>Уронить на "continentseditfo" &#1082;&#1086;&#1084;&#1087;&#1086;&#1085;&#1077;&#1085;&#1090;  DB -> tdbwidgetgrid, &#1080; &#1091;&#1089;&#1090;&#1072;&#1085;&#1086;&#1074;&#1080;&#1090;&#1100; &#1076;&#1083;&#1103; &#1085;&#1077;&#1075;&#1086;   место и размер как у  "planetseditfo -> grdPlanets" : </p>
+<p>name := grdContinents  </p>
+<ul>
+  <li>datasource := refsdatamo.dsContinents </li>
+  <li>anchors
+    <ul>
+      <li>an_left:= true </li>
+      <li>an_top:= true </li>
+      <li>an_right:= true </li>
+    </ul>
+  </li>
+  <li>fixrows -> 
+    <ul>
+      <li>item(-1) ->          <ul>
+            <li>color:= cl_ltgreen </li>
+            <li>captions
+                      -&gt; Additem -> 
+                      <ul>
+                        <li>item 0 ->                            <ul>
+                              <li>caption:= Continent name</li>
+                            </ul>
+                        </li>
+                        <li> item 1 ->                            <ul>
+                              <li>caption:= Planet name </li>
+                            </ul>
+                        </li>
+                      </ul>
+            </li>
+            <li>captionsfix
+                    -&gt; Additem -> 
+                    <ul>
+                      <li>item  0 ->                          <ul>
+                            <li>caption:= #8470 </li>
+                          </ul>
+                      </li>
+                    </ul>
+            </li>
+      </ul>
+      </li>
+    </ul>
+  </li>
+  <li>fixcols -> 
+    <ul>
+      <li>item(-1) ->        <ul>
+          <li>numstart:= 1 </li>
+          <li>numstep:= 1 </li>
+          <li>растянуть примерно под 3 цифры</li>
+            </ul>
+      </li>
+    </ul>
+  </li>
+  <li>rowcolors-&gt;AddItem
+    <ul>
+      <li>item 0:= [..] // бледно-оранжевый
+                <ul>
+                  <li>red:= 255 </li>
+                    <li>green:= 192 </li>
+                    <li>blue:= 0 </li>
+                </ul>
+      </li>
+            <li>item 1:= cl_green // салатный </li>
+    </ul>
+  </li>
+  <li>datalink ->    <ul>
+      <li>options
+          <ul>
+            <li>gdo_propscrollbar:= true </li>
+            <li>gdo_thumbtracking:= true </li>
+          </ul>
+      </li>
+      <li>onupdaterowdata:= grdcontinenetsupdaterowdata
+          <blockquote>
+            <p class="source">procedure tcontinentseditfo.grdcontinentsupdaterowdata(<br>
+&nbsp;const sender: tcustomgrid;<br>
+&nbsp;const arow: Integer; const adataset: TDataSet);<br>
+              begin<br>
+&nbsp;case adataset.updatestatus of<br>
+&nbsp;&nbsp;usInserted: sender.rowcolorstate[arow]:= 0; <br>
+&nbsp;&nbsp;usModified:&nbsp;sender.rowcolorstate[arow]:= 1;<br>
+&nbsp;else<br>
+&nbsp;&nbsp;sender.rowcolorstate[arow]:= 255;<br>
+&nbsp;end;<br>
+              end;</p>
+          </blockquote>
+          <p>и не забудьте добавить нужные &quot;unit&quot; -ы в секцию &quot;interface -&gt; uses&quot; :</p>
+          <blockquote>
+            <p class="source">interface<br>
+&nbsp;uses<br>
+&nbsp;msegui,mseclasses,mseforms,commonrefseditform,msedbedit,<br>
+&nbsp;msegrids,<br>
+&nbsp;db<br>
+              ;</p>
+          </blockquote>
+      </li>
+  </ul>
+  </li>
+</ul>
+<p><u>Теперь создадим и опишем столбцы &quot;grdContinents&quot;, подлежащие просмотру и редактированию. </u></p>
+<p>Уронить на &quot;grdContinents" &#1082;&#1086;&#1084;&#1087;&#1086;&#1085;&#1077;&#1085;&#1090; 
+  DB -> tdbstringedit :</p>
+<p>name:= seContinent  </p>
+<ul>
+  <li>datafield:= descr</li>
+  <li>optionsedit
+    <ul>
+      <li>oe_notnull:= true </li>
+      <li>oe_autopost:= true </li>
+    </ul>
+  </li>
+  <li>растянуть примерно на половину свободной ширины "grdContinents"</li>
+</ul>
+<p>&#1053;&#1072;&#1089;&#1090;&#1088;&#1086;&#1080;&#1090;&#1100; &#1087;&#1086;&#1103;&#1074;&#1080;&#1074;&#1096;&#1080;&#1081;&#1089;&#1103; столбец таблицы</p>
+<p>grdContinents : </p>
+<ul>
+  <li>datacols ->
+    <ul>
+      <li> item 0
+        <ul>
+          <li>options              <ul>
+                <li>co_proportional:= true </li>
+                    </ul>
+          </li>
+          <li>frame -> [..]
+              <ul>
+                <li>framei
+                    <ul>
+                      <li>left:= 10</li>
+                    </ul>
+                </li>
+              </ul>
+          </li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+</ul>
+<p>Уронить на "grdContinents" &#1082;&#1086;&#1084;&#1087;&#1086;&#1085;&#1077;&#1085;&#1090; DB -> tdbenumeditlb : </p>
+<p>name:= lbnePlanet </p>
+<ul>
+  <li>datafield:= planet_id</li>
+  <li>optionsedit<ul><li>oe_autopost:= true </li>
+      </ul>
+  </li>
+  <li>dropdown ->    <ul>
+      <li>lookupbuffer := refsdatamo.lbufPlanets</li>
+      </ul>
+  </li>
+</ul>
+<blockquote>
+  <p>Примечания :</p>
+  <ul>
+    <li><span class="style1">данный компонент :
+      <br>      
+      </span>
+      <ul class="style1">
+        <li>берет список значений &quot;refsdatamo.lbufPlanets&quot; ( заполняемый по результатам запроса к таблице планет ( refsdatamo.dsPlanets-&gt;qryPlanets ) )<br>
+        </li>
+        <li>выбирает в нем самый первый текстовый столбец ( textfields[0] = &quot;descr&quot; = названия планет ), и значениями из этого столбца заполняет выпадающий список<br>
+        </li>
+        <li>по текущему значению &quot;planet_id&quot; ( каждого из континентов ) выборки из таблицы континентов ( refsdatamo.dsContinents-&gt;qryContinents ) находит  название планеты в выпадающем списке и отображает его <br>
+        </li>
+        <li>при выборе в выпадающем списке находит соответствующее этому выбору значение в самом первом целочисленном столбце ( integerfields[0] = &quot;id&quot; = ключи планет ) <br>
+        </li>
+        <li>записывает найденное  значение в поле &quot;planet_id&quot; выборки из таблицы континентов</li>
+      </ul>
+      <p class="style1">Таким образом осуществлена синхронизация выборок из 2-х таблиц ( планет и континентов ) , причем - без 2-табличного ( read-only ) запроса, что позволило нам воспользоваться средствами автоматической генерации SQL-запросов на изменения данных </p>
+    </li>
+  </ul>
+</blockquote>
+<p>&#1053;&#1072;&#1089;&#1090;&#1088;&#1086;&#1080;&#1090;&#1100; &#1087;&#1086;&#1103;&#1074;&#1080;&#1074;&#1096;&#1080;&#1081;&#1089;&#1103; столбец таблицы </p>
+<p>grdContinents : </p>
+<ul>
+  <li>datacols ->    <ul>
+      <li>item 1 
+        <ul>
+          <li>options ->              <ul>
+                <li>co_fill:= true </li>
+              </ul>
+          </li>
+          <li>frame -> [..]
+              <ul>
+                <li>framei
+                    <ul>
+                      <li> left:= 10 </li>
+                    </ul>
+                </li>
+              </ul>
+          </li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+</ul>
+<p>&nbsp;</p>
+<p><u>Осталось сделать вызов &quot;continentseditfo&quot; через главное меню программы.</u></p>
+<p>Переключиться на дизайн &quot;mainfo&quot; ( файл &quot;main.pas&quot; ). </p>
+<p>Уронить в любом незарисованном месте &quot;mainfo&quot; компонент &quot;GUI -&gt; taction&quot; :</p>
+<p>Name:= actContinentsEdit </p>
+<ul>
+  <li>onexecute:= continentseditexecute</li>
+</ul>
+<blockquote>
+  <p class="source">procedure tmainfo.continentseditexecute(const sender: TObject);<br>
+    begin<br>
+&nbsp;try<br>
+
+&nbsp; application.createform(tcontinentseditfo, continentseditfo);<br>
+&nbsp;&nbsp;if continentseditfo.show(true) = mr_windowclosed then begin<br>
+&nbsp;&nbsp; qryPersons.active:= true; <br>
+&nbsp;&nbsp;end;<br>
+&nbsp;finally<br>
+&nbsp;&nbsp;continentseditfo.free;<br>
+&nbsp;end;<br>
+    end;</p>
+  <p>Не забудьте добавить ссылку на файл &quot;continentseditform&quot; в секцию &quot;interface&quot; файла &quot;main.pas&quot; :</p>
+  <blockquote>
+    <p class="source">interface<br>
+      <br>
+      uses<br>
+&nbsp;msegui,mseclasses,mseforms,msepqconnection,msesqldb,msedb,<br>
+&nbsp;msedbedit,mseactions,msesimplewidgets,msemenus,db,msegrids,<br>
+&nbsp;planetseditform,<br>
+&nbsp;continentseditform<br>
+  ;</p>
+  </blockquote>
+</blockquote>
+<p>Настроить вызов &quot;actContinentsEdit&quot; из основного меню формы приложения ( mainfo ): </p>
+<p>mnuMain :
+</p>
+<ul>
+  <li>menu
+      <ul>
+        <li>submenu
+            <ul>
+              <li>item 1
+                  <ul>
+                    <li>submenu -&gt; AppendItem
+                        <ul>
+                          <li>item 1
+                              <ul>
+                                <li>caption:= &amp;Continents..</li>
+                                <li>action:= actContinentsEdit</li>
+                              </ul>
+                          </li>
+                        </ul>
+                    </li>
+                  </ul>
+              </li>
+            </ul>
+        </li>
+      </ul>
+  </li>
+</ul>
+<p>Финальный вид формы редактора списка континентов :</p>
+<p>в дизайне :</p>
+<p align="center"><img src="images/continentseditfo_design.png" width="410" height="350"></p>
+<p>и во время работы программы: </p>
+<p align="center"><img src="images/continentseditfo_runtime.png" width="411" height="350"></p>
+<p align="left">Единственное существенное отличие данного ( континенты -&gt; continentseditform ) справочника от вышерассмотренного ( планеты -&gt; planetseditform ) - наличие второго столбца в таблице, отображение и редактирование в котором сделано с использованием выпадающего списка ( предоставляемого  компонентом &quot;tdbenumeditlb&quot; ) . </p>
+</BODY>
+</HTML>

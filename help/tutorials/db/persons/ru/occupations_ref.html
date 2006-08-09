@@ -1,0 +1,305 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<title>Справочник профессий</title>
+<meta http-equiv="Content-Type" content="text/html; charset=windows-1251">
+<link href="usedstyles.css" rel="stylesheet" type="text/css">
+</head>
+
+<body>
+<h3 align="center">Справочник профессий </h3>
+<p>Создаем новую форму : </p>
+<blockquote>
+  <p>File -> New -> Form -> Simple Form -&gt; </p>
+</blockquote>
+<p>&#1053;&#1072; &#1079;&#1072;&#1087;&#1088;&#1086;&#1089; &#1080;&#1084;&#1077;&#1085;&#1080; &#1092;&#1072;&#1081;&#1083;&#1072; - вводим &quot;occupationseditform&quot; и подтверждаем -> автоматически создается форма : </p>
+<p>"occupationseditfo" </p>
+<ul>
+  <li>caption := Occupations editor </li>
+  <li>options ->
+      <ul>
+        <li>fo_screencentered:= true </li>
+      </ul>
+  </li>
+  <li>bounds ->
+      <ul>
+        <li>"cx" и "cy" - как "planetseditfo"</li>
+      </ul>
+  </li>
+  <li>oncreate := occupationseditfocreated
+      <blockquote>
+        <p class="source">procedure toccupationseditfo.occupationseditfocreated(<br>
+&nbsp; const sender: TObject);<br>
+        begin<br>
+&nbsp;application.createdatamodule(trefsdatamo, refsdatamo);<br>
+&nbsp;commonrefseditfo1.dsContents.dataset := grdOccupations.datasource.dataset;<br>
+        end;</p>
+      </blockquote>
+  </li>
+  <li>ondestroy:= occupationseditfodestroyed
+      <blockquote>
+        <p class="source">procedure toccupationseditfo.occupationseditfodestroyed(<br>
+&nbsp; const sender: TObject);<br>
+        begin<br>
+&nbsp;refsdatamo.free;<br>
+        end;</p>
+      </blockquote>
+  </li>
+</ul>
+<blockquote>
+  <p>Не забудем включить в &quot;uses&quot; секцию &quot;implementation&quot; файла &quot;occupationseditform.pas&quot; модуль &quot;refsdatamodule&quot; :</p>
+  <blockquote>
+    <p class="source">implementation<br>
+        <br>
+      uses<br>
+&nbsp;&nbsp;occupationseditform_mfm,<br>
+&nbsp;&nbsp;// предоставляет тип &quot;trefsdatamo&quot; и объект &quot;refsdatamo&quot; <br>
+&nbsp;&nbsp;refsdatamodule <br>
+      ; </p>
+  </blockquote>
+</blockquote>
+<p><u>Переключаемся на отображение формы &quot;refsdatamo&quot;</u> и выбираем &quot;qryOccupations&quot; : </p>
+<ul>
+  <li>установить по цепочке (Active:= false ) -&gt; ( UsePrimaryKeyAsKey := false ) -&gt; (Active:= true )</li>
+  <li>controller </li>
+  <ul>
+    <li>fields.count-&gt;[...]
+        <ul>
+          <li>перенести все &quot;FieldDefs&quot; -&gt; &quot;Fields &quot; </li>
+        </ul>
+    </li>
+    <li>fields
+        <ul>
+          <li>item 0 ( где &quot;FieldName&quot; = &quot;id&quot; )
+              <ul>
+                <li>ProviderFlags
+                    <ul>
+                      <li>pfInKey:= true</li>
+                      <li>остальные := false</li>
+                    </ul>
+                </li>
+              </ul>
+          </li>
+          <li>item 1 ( где &quot;FieldName&quot; = &quot;descr&quot; )
+              <ul>
+                <li>ProviderFlags
+                    <ul>
+                      <li>pfInUpdate:= true</li>
+                      <li>остальные := false</li>
+                    </ul>
+                </li>
+              </ul>
+          </li>
+        </ul>
+    </li>
+  </ul>
+</ul>
+<p>&nbsp;</p>
+<p><u>Вновь возращаемся на форму "occupationseditfo"</u> ( выбрав файл &quot;occupationseditform.pas&quot;, и далее, если необходимо - нажав &quot;F12&quot; ).</p>
+<p>&#1065;&#1077;&#1083;&#1082;&#1085;&#1091;&#1074; &#1085;&#1072; &#1092;&#1086;&#1088;&#1084;&#1077; &#1087;&#1088;&#1072;&#1074;&#1086;&#1081; &#1082;&#1085;&#1086;&#1087;&#1082;&#1086;&#1081;, &#1086;&#1090;&#1082;&#1088;&#1099;&#1090;&#1100; &#1084;&#1077;&#1085;&#1102;, &#1080;, &#1082;&#1086;&#1084;&#1072;&#1085;&#1076;&#1086;&#1081; &quot;Insert submodule&quot; - &#1074;&#1089;&#1090;&#1072;&#1074;&#1080;&#1090;&#1100; &#1074; &#1092;&#1086;&#1088;&#1084;&#1091; &#1089;&#1091;&#1073;&#1084;&#1086;&#1076;&#1091;&#1083;&#1100; &quot;commonrefseditform&quot; . &#1055;&#1088;&#1080; &#1085;&#1077;&#1086;&#1073;&#1093;&#1086;&#1076;&#1080;&#1084;&#1086;&#1089;&#1090;&#1080; - подогнать &#1088;&#1072;&#1079;&#1084;&#1077;&#1088;, &#1095;&#1090;&#1086;&#1073;&#1099; &#1080;&#1089;&#1095;&#1077;&#1079;&#1083;&#1080; &#1087;&#1086;&#1083;&#1086;&#1089;&#1099; &#1087;&#1088;&#1086;&#1082;&#1088;&#1091;&#1090;&#1082;&#1080;. </p>
+<p>Уронить на "occupationseditfo" &#1082;&#1086;&#1084;&#1087;&#1086;&#1085;&#1077;&#1085;&#1090; DB -> tdbwidgetgrid, &#1080; &#1091;&#1089;&#1090;&#1072;&#1085;&#1086;&#1074;&#1080;&#1090;&#1100; &#1076;&#1083;&#1103; &#1085;&#1077;&#1075;&#1086; место и размер как у "planetseditfo -> grdPlanets" : </p>
+<p>name := grdOccupations</p>
+<ul>
+  <li>datasource := refsdatamo.dsOccupations</li>
+  <li>anchors
+      <ul>
+        <li>an_left:= true </li>
+        <li>an_top:= true </li>
+        <li>an_right:= true </li>
+      </ul>
+  </li>
+  <li>fixrows ->
+      <ul>
+        <li>item(-1) ->
+            <ul>
+              <li>color:= cl_ltgreen </li>
+              <li>captions -&gt; Additem ->
+                  <ul>
+                    <li>item 0 ->
+                        <ul>
+                          <li>caption:= Occupation name</li>
+                        </ul>
+                    </li>
+                  </ul>
+              </li>
+              <li>captionsfix -&gt; Additem ->
+                  <ul>
+                    <li>item 0 ->
+                        <ul>
+                          <li>caption:= #8470 </li>
+                        </ul>
+                    </li>
+                  </ul>
+              </li>
+            </ul>
+        </li>
+      </ul>
+  </li>
+  <li>fixcols ->
+      <ul>
+        <li>item(-1) ->
+            <ul>
+              <li>numstart:= 1 </li>
+              <li>numstep:= 1 </li>
+              <li>растянуть примерно под 3 цифры</li>
+            </ul>
+        </li>
+      </ul>
+  </li>
+  <li>rowcolors-&gt;AddItem
+      <ul>
+        <li>item 0:= [..] // бледно-оранжевый
+            <ul>
+              <li>red:= 255 </li>
+              <li>green:= 192 </li>
+              <li>blue:= 0 </li>
+            </ul>
+        </li>
+        <li>item 1:= cl_green // салатный </li>
+      </ul>
+  </li>
+  <li>datalink ->
+      <ul>
+        <li>options
+            <ul>
+              <li>gdo_propscrollbar:= true </li>
+              <li>gdo_thumbtracking:= true </li>
+            </ul>
+        </li>
+        <li>onupdaterowdata:= grdoccupationsupdaterowdata
+            <blockquote>
+              <p class="source">procedure toccupationseditfo.grdoccupationsupdaterowdata(<br>
+&nbsp;const sender: tcustomgrid;<br>
+&nbsp;const arow: Integer; const adataset: TDataSet);<br>
+            begin<br>
+&nbsp;case adataset.updatestatus of<br>
+&nbsp;&nbsp;usInserted: sender.rowcolorstate[arow]:= 0; <br>
+&nbsp;&nbsp;usModified:&nbsp;sender.rowcolorstate[arow]:= 1;<br>
+&nbsp;else<br>
+&nbsp;&nbsp;sender.rowcolorstate[arow]:= 255;<br>
+&nbsp;end;<br>
+            end;</p>
+            </blockquote>
+            <p>и не забудьте добавить нужные &quot;unit&quot; -ы в секцию &quot;interface -&gt; uses&quot; :</p>
+            <blockquote>
+              <p class="source">interface<br>
+&nbsp;uses<br>
+&nbsp;msegui,mseclasses,mseforms,commonrefseditform,msedbedit,<br>
+&nbsp;msegrids,<br>
+&nbsp;db<br>
+            ;</p>
+            </blockquote>
+        </li>
+      </ul>
+  </li>
+</ul>
+<p>&nbsp;</p>
+<p><u>Теперь создадим и опишем столбцы &quot;grdOccupations&quot;, подлежащие просмотру и редактированию. </u></p>
+<p>Уронить на &quot;grdOccupations" &#1082;&#1086;&#1084;&#1087;&#1086;&#1085;&#1077;&#1085;&#1090; DB -> tdbstringedit :</p>
+<p>name:= seFeature</p>
+<ul>
+  <li>datafield:= descr</li>
+  <li>optionsedit
+      <ul>
+        <li>oe_notnull:= true </li>
+        <li>oe_autopost:= true </li>
+      </ul>
+  </li>
+</ul>
+<p>&#1053;&#1072;&#1089;&#1090;&#1088;&#1086;&#1080;&#1090;&#1100; &#1087;&#1086;&#1103;&#1074;&#1080;&#1074;&#1096;&#1080;&#1081;&#1089;&#1103; столбец таблицы</p>
+<p>grdOccupations : </p>
+<ul>
+  <li>datacols ->
+      <ul>
+        <li> item 0
+            <ul>
+              <li>options
+                  <ul>
+                    <li>co_proportional:= fill</li>
+                  </ul>
+              </li>
+              <li>frame -> [..]
+                  <ul>
+                    <li>framei
+                        <ul>
+                          <li>left:= 10</li>
+                        </ul>
+                    </li>
+                  </ul>
+              </li>
+            </ul>
+        </li>
+      </ul>
+  </li>
+</ul>
+<p>&nbsp;</p>
+<p><u>Осталось сделать вызов &quot;occupationseditfo&quot; через главное меню программы.</u></p>
+<p>Переключиться на дизайн &quot;mainfo&quot; ( файл &quot;main.pas&quot; ). </p>
+<p>Уронить в любом незарисованном месте &quot;mainfo&quot; компонент &quot;GUI -&gt; taction&quot; :</p>
+<p>Name:= actOccupationsEdit </p>
+<ul>
+  <li>onexecute:= occupationseditexecute</li>
+</ul>
+<blockquote>
+  <p class="source">procedure tmainfo.occupationseditexecute(const sender: TObject);<br>
+    begin<br>
+&nbsp;try<br>
+&nbsp; application.createform(toccupationseditfo, occupationseditfo);<br>
+&nbsp;&nbsp;if occupationseditfo.show(true) = mr_windowclosed then begin<br>
+&nbsp;&nbsp; qryPersons.active:= true; <br>
+&nbsp;&nbsp;end;<br>
+&nbsp;finally<br>
+&nbsp;&nbsp;occupationseditfo.free;<br>
+&nbsp;end;<br>
+    end;</p>
+  <p>Не забудьте добавить ссылку на файл &quot;occupationseditform&quot; в секцию &quot;interface&quot; файла &quot;main.pas&quot; :</p>
+  <blockquote>
+    <p class="source">interface<br>
+        <br>
+      uses<br>
+&nbsp;msegui,mseclasses,mseforms,msepqconnection,msesqldb,msedb,<br>
+&nbsp;msedbedit,mseactions,msesimplewidgets,msemenus,db,msegrids,<br>
+&nbsp;planetseditform,<br>
+&nbsp;continentseditform,<br>
+&nbsp;countrieseditform,<br>
+&nbsp;featureseditform,<br>
+&nbsp;occupationseditform<br>
+      ;</p>
+  </blockquote>
+</blockquote>
+<p>Настроить вызов &quot;actOccupationsEdit&quot; из основного меню формы приложения ( mainfo ): </p>
+<p>mnuMain : </p>
+<ul>
+  <li>menu
+      <ul>
+        <li>submenu
+            <ul>
+              <li>item 1
+                  <ul>
+                    <li>submenu -&gt; AppendItem
+                        <ul>
+                          <li>item 1
+                              <ul>
+                                <li>caption:= &amp;Occupations..</li>
+                                <li>action:= actOccupationsEdit</li>
+                              </ul>
+                          </li>
+                        </ul>
+                    </li>
+                  </ul>
+              </li>
+            </ul>
+        </li>
+      </ul>
+  </li>
+</ul>
+<p>Финальный вид формы редактора списка профессий :</p>
+<p>в дизайне :</p>
+<p align="center"><img src="images/occupationseditfo_design.png" width="408" height="349"></p>
+<p>и во время работы программы: </p>
+<p align="center"><img src="images/occupationseditfo_runtime.png" width="408" height="349"></p>
+<p align="left">Данный ( черты характера -&gt; occupationseditform ) справочник - почти полный аналог вышерассмотренного справочника планет.</p>
+<p align="left">&nbsp;</p>
+</body>
+</html>

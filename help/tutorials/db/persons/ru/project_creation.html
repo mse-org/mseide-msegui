@@ -1,0 +1,44 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<title>Создание проекта</title>
+<meta http-equiv="Content-Type" content="text/html; charset=windows-1251">
+<link href="usedstyles.css" rel="stylesheet" type="text/css">
+</head>
+<body bgcolor="#FFFFFF" class="Normal"> 
+<h2 align="center" >Создание проекта</h2> 
+<ol> 
+  <li> Выбор типа проекта =&gt; GUI :  </li> 
+  <blockquote>
+    <p>Project -&gt; New -&gt;From Template -&gt; default.prj </p>
+  </blockquote>
+  <li> Появляется диалог “ NewProject ”, в котором указываем метсонахождение нового проекта : </li>
+</ol> 
+<blockquote> 
+  <p > идем в домашниий каталог ( чтобы иметь права на запись ), создаем там новый каталог ( кнопка &quot;NewDir&quot; справа-сверху диалога) с  именем, отражающим назначение проекта - &quot;persons&quot;, а в поле “ Name ” - впишем имя для нового проекта, пусть останется тем же, что и название каталога : </p> 
+  <blockquote> 
+    <p class="source">persons </p> 
+  </blockquote> 
+  <p >и жмем &laquo;ОК&raquo; -&gt; появляется окно исходных файлов, с открытым стартовым файлом проекта ( <span class="source">persons.pas</span> ) , в котором видим, что запуск приложения начнется с создания и отображения некой “<span class="source">mainfo</span>” типа “<span class="source">tmainfo</span>”. </p> 
+</blockquote> 
+<p >Теперь приступим к дизайну этой “mainfo”. Она уже создана, чтобы ее увидеть: </p> 
+<blockquote> 
+  <p >Меню -&gt; View -&gt; выбираем &quot;main.mfm&quot; -&gt; видим пустую форму </p> 
+</blockquote> 
+<p >Далее, что переключаться между дизайном формы и ее полезным кодом – будем использовать клавишу F12. Подсказка – чтобы отобразить редактор свойств – нажать F11 . </p> 
+<p >Следующая установка задает кодировку текста, используемую при сохранении/загрузке исходных файлов на диск:: </p> 
+<p >Project -&gt; Options -&gt; Editor -&gt; Encoding : </p> 
+<ul> 
+  <li> Locale : &nbsp;&nbsp;без перекодировки ( по умолчанию ) </li> 
+  <li> utf8 : &nbsp;&nbsp;&nbsp;&nbsp;в перекодировкой в UTF -8 </li> 
+</ul> 
+<p >Если у вас в коде будут текстовые константы с кодами символов, отличными от ASCII (32..127), например, текты сообщений на русском языке – используйте “utf8”, иначе, в различного рода сообщениях – получите кракозябры. Однако, чтобы это работало – нужно сказать компилятору FreePascal , что наши исходные тексты закодированы именно в “utf8”, для это: </p> 
+<blockquote> 
+  <p >Project -&gt; Options -&gt; Make -&gt; Make options -&gt; 1- я строка : добавьте ключ компиляции “-<span class="source">Fcutf8</span>” </p> 
+  <p>Не забудьте, что может потребоваться наложение патча на FreePascal, исправляющего ошибки в “utf8”-поддержке, см. <a href="prepare_steps.html#fpc_fixes" title="dfgd">Устранение ошибок “Free Pascal Compiler”</a></p>
+</blockquote> 
+<p>Кстати, если не-ASCII коды будут использваться только в свойствах, настраиваемых через PropertyEditor – необходимость в &laquo; utf8&raquo; отпадает ( потому, что внутреннее продставление  текста в таких свойствах - 2-байтная кодировка символов ). <br> 
+</p>
+</body>
+</html>

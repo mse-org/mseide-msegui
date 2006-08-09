@@ -1,0 +1,92 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<title>Подсистема помощи</title>
+<meta http-equiv="Content-Type" content="text/html; charset=windows-1251">
+<link href="usedstyles.css" rel="stylesheet" type="text/css">
+</head>
+
+<body>
+<h3 align="center"><a name="about_dialogue"></a></h3>
+<h3 align="center">Показ данных о программе <br>
+  ( &quot;About the program..&quot; ) </h3>
+<p>Если не нужно никакого украшательства, то для этой цели - более чем достаточно вывести диалоговое окно &quot;ShowMessage&quot;. <br>
+  По  порядку :</p>
+<p>Возвращаемся на &quot;mainfo&quot; ( файл &quot;mainform.pas ) .</p>
+<p>Роняем на форму компонент GUI-&gt;taction :</p>
+<p>name:= actShowAbout </p>
+<ul>
+  <li>onexecute:= showaboutexecute</li>
+</ul>
+<blockquote>
+  <p class="source">procedure tmainfo.showaboutexecute(const sender: TObject);<br>
+    begin<br>
+&nbsp;showmessage(<br>
+&nbsp;&nbsp;lineend +<br>
+&nbsp;&nbsp;'The Galaxy Data Keeper'+ #174 +&nbsp;lineend + <br>
+&nbsp;&nbsp;lineend + <br>
+&nbsp;&nbsp;'This extremely useful program is designed' + lineend +<br>
+&nbsp;&nbsp;'for keeping data on creatures widely-known' + lineend + <br>
+&nbsp;&nbsp;'in our galaxy.' + lineend +<br>
+&nbsp;&nbsp;lineend + <br>
+&nbsp;&nbsp;'Authors:' +&nbsp;lineend + <br>
+&nbsp;&nbsp;lineend +<br>
+&nbsp;&nbsp;' Bill Mad,' + lineend +<br>
+&nbsp;&nbsp;' Susan Bitch,' + lineend +<br>
+&nbsp;&nbsp;' Freddie Krugger' + lineend +<br>
+&nbsp;&nbsp;lineend +<br>
+&nbsp;&nbsp;'2006, Almalyk city, UZ'+ lineend,<br>
+&nbsp;&nbsp;'About program',<br>
+&nbsp;&nbsp;[mr_ok], // с единственной кнопкой &quot;OK&quot;<br>
+&nbsp;&nbsp;mr_ok, // и по-умолчанию, само-собой,  будет эта же кнопка<br>
+&nbsp;&nbsp;[],<br>
+&nbsp;&nbsp;150 // ширина - как минимум 150 экранных единиц<br>
+);<br>
+  end;</p>
+  <p>Примечания: </p>
+  <ul>
+    <li><span class="source">&quot;lineend&quot;</span> - код перевода строки, автоматически настраиваемый на DOS/UNIX-вараинт    </li>
+    <li>#174 : UNICODE-код значка "copyright registered" ( &reg; ) </li>
+  </ul>
+  <p>Не забудем прописать &quot;msestrings&quot; ( описывающий  <span class="source">&quot;lineend&quot;</span> ) в секции &quot;uses&quot; файла &quot;main.pas&quot; : </p>
+  <p class="source">implementation<br>
+    <br>
+    uses<br>
+&nbsp;main_mfm,<br>
+&nbsp;editform,<br>
+&nbsp;msewidgets, // for askyesno,<br>
+&nbsp;msestrings // for lineend <br>
+;</p>
+</blockquote>
+<p>И прописываем вызов &quot;actShowAbout&quot; из подраздела &quot;Help&quot; основного меню программы :</p>
+<p>mnuMain : </p>
+<ul>
+  <li>menu
+      <ul>
+        <li>submenu
+            <ul>
+              <li>item 2
+                <ul>
+                    <li>submenu -&gt; AppendItem
+                        <ul>
+                          <li>item 0
+                            <ul>
+                                <li>caption:= &amp;About Program..</li>
+                                <li>action:= actShowAbout</li>
+                              </ul>
+                          </li>
+                        </ul>
+                    </li>
+                  </ul>
+              </li>
+            </ul>
+        </li>
+      </ul>
+  </li>
+</ul>
+<p>Данный диалог, будучи вызван, выглядит следующим образом :</p>
+<p align="center"><img src="images/about_dialogue.png" width="299" height="320"> </p>
+<p>&nbsp;</p>
+</body>
+</html>

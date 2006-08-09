@@ -1,0 +1,154 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<title>Основная форма, запуск и завершение приложения</title>
+<meta http-equiv="Content-Type" content="text/html; charset=windows-1251">
+<link href="usedstyles.css" rel="stylesheet" type="text/css">
+</head>
+<body bgcolor="#FFFFFF" class="Normal"> 
+<h2 align="center">Основная форма, <br>
+запуск и завершение приложения</h2> 
+<p>Надпись в заголовке основного окна программы, во время ее выполнения: </p> 
+<blockquote> 
+  <p>Mainfo.caption:= “The Galaxy Data Keeper” </p> 
+</blockquote> 
+<p>Далее, это – способ завершения программы, а также вывод подсказки. В любой нормальной программе, эти операции инициируются из основного меню, а также специальной копками или клавишами. Раз у нас несколько возможных мест – опишем само действие, а уже потом привяжемся к нему в нужных местах. </p> 
+<p>Для описания действий есть компонент “taction”. Поэтому уроним (GUI -&gt; taction) на нашу форму и назовем его &quot;actExit&quot; , и назначим ему исполняемый код: </p> 
+<blockquote> 
+  <p>свойство &laquo;onexecute&raquo;: пишем название процедуры “ appexit ”, жмем “ Enter ” и дважды кликаем мышью, что переносит нас в сам код добавленной процедуры, вставляем туда команду на завершение программы, получая </p> 
+  <blockquote> 
+    <p class="source">procedure tmainfo.appexit(const sender: TObject); <br> 
+      begin <br> 
+&nbsp;&nbsp;application.terminated:= true; <br> 
+      end; </p> 
+  </blockquote> 
+  <p>И назначаем данному действию “горячую” комбинацию клавиш: </p> 
+  <blockquote> 
+    <p>Shortcut:= Ctrl+Q </p> 
+  </blockquote> 
+</blockquote> 
+<p>&nbsp;</p>
+<p>Далее роняем на форму компоненты : </p>
+<p>Widget-&gt;tbutton  : </p>
+<ul>
+  <li>Name:= btnExit </li>
+  <li>Caption:= Ex&amp;it </li>
+  <li>Action:= actExit </li>
+</ul>
+<p>это будет кнопка для завершения программы.</p>
+<p>Примечание :</p>
+<ul>
+  <li><span class="style1">назначить кнопке &quot;btnExit&quot; завершение программы можно и другим образом :
+    </span>
+    <ul class="style1">
+      <li>убедиться, что &quot;mainfo-&gt;options-&gt;fo_terminateonclose:= true&quot;</li>
+      <li>назначить кнопке &quot;btnExit&quot; код завершения &quot;btnExit-&gt;modalresult:= mr_windowclosed&quot;</li>
+    </ul>
+    <p class="style1">то есть нажатие данной кнопки вызывает закрытие окна ( формы ) , на которой кнопка расположена ( mainfo ) , а закрытие формы - автоматически завершает работу приложения; но здесь мы это способ не применяем, потому что закрытие приложения - привязано к &quot;taction&quot; .</p>
+  </li>
+</ul>
+<p>Далее роняем заготовку главного меню программы : </p>
+<blockquote>
+  <p>Widget-&gt;tmainmenu : </p>
+  <ul>
+    <li>Name:= mnuMain </li>
+    <li>Menu-&gt;submenu.count -&gt;(RightClick)-&gt;AddItem
+      <ul>
+        <li>&nbsp;&nbsp;Item0 :
+            <ul>
+              <li>caption:= &amp;File <br>
+&nbsp;&nbsp;submenu.count -&gt; (RightClick) -&gt;AddItem
+            <ul>
+              <li>&nbsp;&nbsp;item0:
+                  <ul>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;caption:= E&amp;xit </li>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;action:= actExit </li>
+                  </ul>
+              </li>
+            </ul>
+              </li>
+              <li>&nbsp;&nbsp;Item1:
+                  <ul>
+                    <li>&nbsp;&nbsp;&nbsp;&nbsp;Caption:= &amp;Help </li>
+                  </ul>
+              </li>
+            </ul>
+        </li>
+      </ul>
+    </li>
+  </ul>
+</blockquote>
+<p>Говорим форме &quot;используй это меню&quot; : </p> 
+<blockquote>
+  <p>Mainfo</p>
+  <blockquote>
+    <p>menu:= mnuMain </p>
+  </blockquote>
+</blockquote>
+<p>и сразу видим, что &quot;File&quot; и &quot;Help&quot; в меню - очень близко друг к другу. Поэтому далее роняем компонент, управляющий стилем рамок, границ, отступов и зазоров : </p>
+<blockquote>
+  <p>GUI-&gt;tframecomp (1) : </p>
+  <ul>
+    <li>Name:= ftMainMenuItem</li>
+    <li>Template
+      <ul>
+        <li>framei:
+          <ul>
+            <li>Left:= 10 </li>
+            <li>Right:= 50 </li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+  </ul>
+</blockquote>
+<p>и с его помощью раздвигаем пункты в полосе меню : </p> 
+<blockquote>
+  <p>mnuMain </p>
+  <ul>
+    <li>itemframetemplate:= ftMainMenuItems</li>
+  </ul>
+</blockquote>
+<p>Теперь можно попробовать меню – как во время работы программы. Обратите внимание на название горячей комбинации ( Ctrl+Q , а также подчеркнутую “x” в “Exit” – там, где в “caption” стоит “&amp;” ) </p> 
+<p>Можно даже запустить нашу программу (нажав F9 ), и убедиться, что меню работает, а также в том, что программа может быть завершена задуманным образом. </p> 
+<p>Во время работы можно менять размер окна программы, при этом “btnExit” остается на прежнем месте, а лучше бы она держалась за нижний правый угол окна программы: </p> 
+<blockquote> 
+  <p>btnExit</p>
+  <ul>
+    <li>anchors:
+        <ul>
+          <li>an_top:= false </li>
+          <li>an_left:= false </li>
+          <li>an_right:= true </li>
+          <li>an_bottom:= true </li>
+        </ul>
+    </li>
+  </ul>
+</blockquote> 
+<p>Кнопка &quot;btnExit&quot; может показаться малозаметной. Выделим ее рельефом и цветом. <br>
+Условимся, что цвет кнопок закрытия (Close), завершения(Exit) и отмены (Cancel) - светло-желтый. <br>
+Опять роням компонент
+управления стилем границ :</p>
+<blockquote>
+  <p>GUI-&gt;tframecomp (2) : </p>
+  <ul>
+    <li>Name:= ftButtons</li>
+    <li>Template<ul>
+      <li>colorclient:= cl_ltyellow // цвет фона внутренней зоны - светло-желтый</li>
+        <li>leveli:= 2 // внутренную зону приподнять на 2 единицы </li>
+        <li>levelo:= -1 // все целиком - опустить на 1 единицу </li>
+      </ul>
+    </li>
+  </ul>
+  <p>Теперь назначим кнопке &quot;btnExit&quot; вышесозданный &quot;стиль&quot; :</p>
+  <blockquote>
+    <p>btnExit-&gt;frame-&gt;[...] :</p>
+    <ul>
+      <li>template:= ftButtons </li>
+    </ul>
+  </blockquote>
+  <p>и видим, как это стиль сразу отразился на кнопке.</p>
+</blockquote>
+</body>
+</html>

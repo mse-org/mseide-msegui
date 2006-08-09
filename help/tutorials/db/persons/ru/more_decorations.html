@@ -1,0 +1,51 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<title>Декоративные доработки</title>
+<meta http-equiv="Content-Type" content="text/html; charset=windows-1251">
+<link href="usedstyles.css" rel="stylesheet" type="text/css">
+</head>
+
+<body>
+<h3 align="center"><a name="main_menu"></a></h3>
+<h3 align="center">Основное меню</h3>
+<p>Дл начала - возвращаемся на &quot;mainfo&quot; ( файл &quot;mainform.pas ) .</p>
+<p>Чтобы полоса меню не слишком прижималась к заголовку основного окна программы :</p>
+<ul>
+  <li>mainfo -&gt; ftMainMenuItem -&gt; template -&gt; framei -&gt; top:=5</li>
+</ul>
+<p>Другой шрифт меню, и чуть поменьше размером :</p>
+<ul>
+  <li>mainfo -&gt; mnuMain -&gt; menu -&gt; font
+    <ul>
+      <li>height:= 13</li>
+      <li>name:= stf_helvetica</li>
+    </ul>
+  </li>
+</ul>
+<blockquote>
+  <p>Здесь можете экпериментировать, пока не добьетесь желаемого вида, причем &quot;name&quot; ( название шрифта ) не обязательно выбирать из списка -  можно напрямую впечатать ( регист букв не учитывается ) нужное имя, если такой шрифт реально установлен в системе - &quot;Arial&quot;, &quot;Times New Roman&quot;, &quot;tahoma&quot;, и т.п. Изменения будут видны сразу по ходу, поэтому  это - хороший способ узнать, какие шрифты видят MSEgui-программы ( точнее, FreeTtype-библиотека ) </p>
+</blockquote>
+<p>&nbsp;</p>
+<p>Теперь увеличим расстояния пунктов меню между собой и границами выпадающего списка пунктов. Роняем на форму компонент GUI-&gt;tframecomp :</p>
+<p>name:= ftMainMenuPopupItem </p>
+<ul>
+  <li>template -&gt; framei
+    <ul>
+      <li>bottom:= 1 </li>
+      <li>left:= 10 </li>
+      <li>right:= 2 </li>
+      <li>top:= 1 </li>
+    </ul>
+  </li>
+</ul>
+<p>и назначает элементам выпадающего списка использовать данные настройки :</p>
+<ul>
+  <li>mainfo -&gt; mnuMain -&gt; popupitemframetemplate:= ftMainMenuPopupItem </li>
+</ul>
+<p>Видоизмененое меню выглядит следующим образом ( на моем экране с моими шрифтами ) :</p>
+<p align="center"><img src="images/mainmenu_changed.png" width="233" height="148"></p>
+<p>&nbsp; </p>
+</body>
+</html>

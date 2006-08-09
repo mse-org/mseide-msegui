@@ -1,0 +1,448 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<title>Просмотр данных</title>
+<meta http-equiv="Content-Type" content="text/html; charset=windows-1251">
+<link href="usedstyles.css" rel="stylesheet" type="text/css">
+</head>
+<body bgcolor="#FFFFFF" class="Normal"> 
+<h3 align="center">Просмотр данных <br>
+об уже внесенных персонах </h3> 
+<p>Основную форму – в фокус ( жмем F12) . Растягиваем ее до размера примерно 700x400. Активизируем палитру компонентов :</p>
+<blockquote>
+  <p>меню -&gt; View -&gt; Toolbars -&gt; Components palette . </p>
+</blockquote>
+<h4 align="left">Соединяемся с БД </h4>
+<p>Выбираем вкладку &quot;DB&quot; палитры, и роняем в левый нижний угол формы четыре компонента: &laquo;tmsepqconnection&raquo;, &laquo;tmsesqltranaction&raquo;, &laquo;tmsesqlquery&raquo; и &laquo;tmsedatasource&raquo;. Эти компоненты – расширенно-исправленные версии соответствующих компонентов [SQL]DB из библиотеки FCL компилятора &quot;FreePascal&quot;. Далее выполняем настройку,  выбирая каждый компонент и вызывая ( клавишей F11 ) для него редактор свойств : </p> 
+<div class="dark_stripe">
+  <p>1) tmsesqltranaction </p>
+  <ul>
+    <li>Name := trans. </li>
+  </ul>
+</div>
+<p>&nbsp;</p>
+<div class="light_stripe">
+  <p>2) Tmsepqconnection: </p>
+  <ul>
+    <li>Name := conn </li>
+    <li>Hostname := localhost </li>
+    <li>Databasename := serious_matters </li>
+    <li>Username := worldadmin </li>
+    <li>Password := all </li>
+  </ul>
+  <blockquote>
+    <p>Необязательно, см &laquo;Создание БД&raquo; выше: </p>
+  <blockquote>
+      <p>Params -&gt; options='--СLIENT_ENCODING=koi8' </p>
+    </blockquote>
+  </blockquote>
+  <ul>
+    <li>Transaction := выбираем “trans” </li>
+  <li>Options := <br>
+    (pq_usesqvepoints:= true, pq_closetransactionfail:= false) если версия сервера PosgreSQL &gt;= 8.0<br>
+    или<br> 
+    (pq_usesqvepoints:= false, pq_closetransactionfail:= true) если версия сервера PosgreSQL &lt; 8.0
+    <blockquote>
+      <p>Примечание: </p>
+      <ul>
+        <li>эти настройки спасут нас от возни с отключением/подключение соединения при ошибках БД во время дизайна, например – если ошибемся с текстом SQL-запроса, см. ниже. </li>
+      </ul>
+    </blockquote>
+    </li>
+  </ul>
+</div>
+<p>&nbsp;</p>
+<p>Делаем Connected := true , если все нормально с правами доступа к БД и нигде нет опечатки, то все пройдет гладко. </p>
+<h4 align="left">Выбираем из БД дaнные для просмотра</h4>
+<p>Теперь о подзадаче – чтобы выбрать правильные компоненты для размещения на форме. </p> 
+<p>Весьма вероятно, что мы просто захотим посмотреть данные и ничего не будем редактировать, соответственно – нам ничего не нужно будет знать о типах просматриваемых данных . Поэтому можно обойтись сложным запросом, объединяющим сразу несколько таблиц, но зато дающим полностью готовый к отображению набор данных. </p> 
+<div class="dark_stripe">
+  <p>3) tmsesqlquery : </p>
+  <ul>
+    <li>Name := qryPersons </li>
+    <li>Database := conn </li>
+    <li>UpdateMode := upWhereKeyOnly ( с таблицами всегда лучше работать через ключевые поля ) </li>
+  </ul>
+  <blockquote>
+    <p>Необязательно: </p>
+    <ul>
+      <li class="style3">UsePrimaryKeyAsKey := false ( потому что мы не создавали в БД явных уникальных ключей ) </li>
+    </ul>
+  </blockquote>
+  <ul>
+    <li>SQL -&gt; щелкаем по троеточию, и откроется редактор SQL _запросов, в котором печатаем:
+      <blockquote>
+        <p class="source">select <br>
+        &nbsp;a.descr, <br>
+        &nbsp;a.sexual_potention, <br>
+        &nbsp;a.photo, <br>
+        &nbsp;b.descr as country, <br>
+        &nbsp;c.descr as occupation, <br>
+        &nbsp;d.descr as feature, <br>
+      &nbsp;a.if_happy,<br>
+      &nbsp;a.dateofbirth
+        <br>
+          from persons a left outer join <br>
+        &nbsp;countries b on a.country_id=b.id left outer join <br>
+        &nbsp;occupations c on a.occupation_id=c.id left outer join <br>
+        &nbsp;features d on a.feature_id=d.id <br>
+          order by a.id; </p>
+      </blockquote>
+    </li>
+  </ul>
+  <blockquote>
+    <p>Почему LEFT OUTER JOIN, а не привычный WHERE ? Потому что по некоторым персонам нет данных по стране обитания и т.п. В этом случае, при использовании WHERE – такие персоны воообще бы не попали в выборку. То есть - мы избежали нежелательноо фильтрующего эффекта WHERE . </p>
+  <p>Щелкаем на &laquo; Test &raquo;, если нигде не ошиблись – получаем подтверждение ( Test Ok ), и можем закрыватьSQL-редактор (щелкнув “ OK ” ) . Свойство &laquo;Active&raquo; должно самоустановиться в &laquo;true&raquo;. </p>
+  <p>Примечание: </p>
+  <blockquote>
+    <p>Если появляется сообщение &laquo; Operation can' t be performed on active dataset &raquo; - временно установите“Active := false“. Причина этого сообщения – вы заказали операцию, требующую обновления информации о схеме БД (структуре таблиц, наличии индексов и т.п.) </p>
+    <p>&nbsp;</p>
+  </blockquote>
+  </blockquote>
+</div>
+<div class="light_stripe">
+  <p>4) tmsedatasource : </p>
+  <ul>
+    <li>Name := dsPersons </li>
+    <li>Dataset := qryPersons </li>
+  </ul>
+</div>
+<h4 align="left">&nbsp;</h4>
+<h4 align="left">Анализируем, что конкретно хотим (и можем) отобразить </h4>
+<ul>
+  <li>d.descr as feature ( string ) &nbsp;&nbsp;-&gt; а вот само значение – на показ ! </li>
+  <li>c.descr as occupation &nbsp;&nbsp;(string) -&gt; само значение – на показ ! </li>
+  <li>b.descr as country ( string ) &nbsp;&nbsp;-&gt; само значение – на показ ! </li>
+  <li>a.descr ( string ) &nbsp;&nbsp;&nbsp;&nbsp;-&gt; имя, фамилия и т.п. – на показ ! </li>
+  <li>a.sexual_potention ( float ) &nbsp;&nbsp;-&gt; прямое значение ( проценты ) – на показ ! </li>
+  <li>a.photo ( blob ) &nbsp;&nbsp;&nbsp;&nbsp;-&gt; не ссылка, но так просто так картинку не отобразишь - оставим на &laquo;потом&raquo; </li>
+  <li>a.if_happy ( boolean ) &nbsp;&nbsp;&nbsp;&nbsp;-&gt; прямое значение (да/нет ) – на показ ! </li>
+  <li>a.dateofbirth ( date ) &nbsp;&nbsp;&nbsp;&nbsp;-&gt; прямое значение ( дата  ) – на показ ! </li>
+</ul>
+<p>Итого, для показа нам нужны поля: </p> 
+<blockquote>
+  <p>a.descr, d.descr=feature, c.descr=occupation, b.descr=country, a.sexual_potention, a.if_happy, a.dateofbirth</p>
+</blockquote>
+<p>а в сумме: </p>
+<blockquote>
+  <p>4 string , 1 float,  1 boolean и 1 date, а всего 4+1+1+1=7 полей. </p>
+</blockquote>
+<h4>Отображаем выбранные дaнные </h4>
+<p>Логично предположить, что в таблице нам нужно показать значения именно вышеописанных 7-ми полей, а это значит, что таблица должна содержать 7 столбцов. </p> 
+<p>Раз тип данных нас не интересует – то можно отобразить их унифицированно, как один тип – строковый. Для это идеально подходит табличный компонент “ tdbstringgrid ”. </p> 
+<p>Роняем на форму “ tdbstringgrid ” и растягиваем его почти в полную ширину, оставляя по высоте сверху и снизу примерно по 1/7 высоты формы. </p> 
+<p>Назначим самый левый столбец для автонумерации строк таблица, начиная с &quot;1&quot; :</p>
+<blockquote>
+  <p>grdPersons-&gt;fixcols-&gt;item (-1)</p>
+  <ul>
+    <li>numstart:= 1 // начиная с &quot;1&quot; </li>
+    <li>numstep:= 1 // с шагом &quot;1&quot; </li>
+  </ul>
+  <p>расширяем его еще под один-два символа ( чтобы вместил номра больше 99 ), и назначаем ему заголовок - знак &quot;&#8470&quot; или, если такой символ не поддерживается шрифтом - большая английская &quot;N&quot; </p>
+  <p>GrdPersons -&gt; foxrows -&gt; item (-1) -&gt; captionsfix -&gt; Append Item </p>
+  <ul>
+    <li>item 0
+      <ul>
+        <li>Caption:= #8470 // UNICODE-код символа &quot;знак &#8470&quot;</li>
+      </ul>
+    </li>
+  </ul>
+</blockquote>
+<p>Теперь смотрим, какие столбцы из результатов запроса нам нужны. </p>
+<p>Предварительно устанавливаем “qryPersons.active:= true”, чтобы видеть последующие назначения. </p> 
+<ul>
+  <li>Name := grdPersons </li>
+  <li>Datasource := dsPersons // появляются заголовки строк </li>
+  <li>Datacols.count-&gt;AddItem 
+    <ul>
+      <li>&nbsp;&nbsp;Item 0: 
+        <ul>
+          <li>&nbsp;&nbsp;&nbsp;&nbsp;Datafiled := descr </li>
+        </ul>
+      </li>
+      <li>&nbsp;&nbsp;Item 1: 
+        <ul>
+          <li>&nbsp;&nbsp;&nbsp;&nbsp;Datafiled := country </li>
+        </ul>
+      </li>
+      <li>&nbsp;&nbsp;Item 2: 
+        <ul>
+          <li>&nbsp;&nbsp;&nbsp;&nbsp;Datafiled := occupation </li>
+        </ul>
+      </li>
+      <li>&nbsp;&nbsp;Item 3: 
+        <ul>
+          <li>&nbsp;&nbsp;&nbsp;&nbsp;Datafiled := feature </li>
+        </ul>
+      </li>
+      <li>&nbsp;&nbsp;Item 4: 
+        <ul>
+          <li>&nbsp;&nbsp;&nbsp;&nbsp;Datafiled := sexual_potention </li>
+        </ul>
+      </li>
+      <li>&nbsp;&nbsp;Item 5: 
+        <ul>
+          <li>&nbsp;&nbsp;&nbsp;&nbsp;Datafiled := dateofbirth</li>
+        </ul>
+      </li>
+      <li>&nbsp;&nbsp;Item 6: 
+        <ul>
+          <li>&nbsp;&nbsp;&nbsp;&nbsp;Datafiled := if _ happy </li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+</ul>
+<p>Теперь растягиваем столбцы так, чтобы они заняли всю ширину таблицы, оствив небольшой запас справа. Зачем запас ? Чтобы закрыть его с абсолютной точностью – автоматически. </p> 
+<ul>
+  <ul>
+    <li>Item 6: 
+      <ul>
+        <li>&nbsp;&nbsp;Options : 
+          <ul>
+            <li>&nbsp;&nbsp;&nbsp;&nbsp;Co _ fill := true </li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+  </ul>
+</ul>
+<p>Так как мы не собираемся сейчас ничего редактировать – уберем даже иллюзию редактирования: </p>
+<blockquote>
+  <p>Datacols.count -&gt; options: oo_readonly:= true </p>
+</blockquote>
+<p>Но оставим возможность выбирать части отдельные символы с использованием мыши: </p> 
+<blockquote>
+  <p>Datacols.count - &gt; optionsedit -&gt; csoe_caretonreadonly:= true </p>
+</blockquote>
+<p>Примечание: </p> 
+<ul>
+  <li>&nbsp;<span class="style3">Работа с клипбоардом ( Ctrl+C, Ctrl+V и т.д. ) доступна по умолчанию </span></li>
+</ul>
+<p>Если нам не нравится, что вертикальный скроллинг слишком груб – включим мягкий скроллинг: </p> 
+<blockquote>
+  <p>Datalink-&gt;options: </p>
+  <ul>
+    <li>&nbsp;&nbsp;Gdo_propscrollbar:= true </li>
+    <li>&nbsp;&nbsp;Gdo_thumbtrack:= true </li>
+  </ul>
+</blockquote>
+<p>Но учтите, что на больших таблицах мягкий скроллинг может быть очень медленным. </p> 
+<p>Теперь осталось озаглавить столбцы. </p> 
+<p>GrdPersons -&gt; foxrows -&gt; item (-1) -&gt; captions -&gt; Append Item </p> 
+<ul>
+  <li>Item 0: 
+    <ul>
+      <li>Caption := Name </li>
+    </ul>
+  </li>
+  <li>Item 1: 
+    <ul>
+      <li>Caption := Country </li>
+    </ul>
+  </li>
+  <li>Item 2: 
+    <ul>
+      <li>Caption := Occupation </li>
+    </ul>
+  </li>
+  <li>Item 3: 
+    <ul>
+      <li>Caption := Feature </li>
+    </ul>
+  </li>
+  <li>Item 4: 
+    <ul>
+      <li>Caption := Sexual#r#npotention </li>
+    </ul>
+  </li>
+  <li> Item 5
+    <ul>
+      <li>Caption:= Date of#r#nbirth </li>
+    </ul>
+  </li>
+  <li>Item 6: 
+    <ul>
+      <li>Caption := Happy ? </li>
+    </ul>
+  </li>
+</ul>
+<blockquote>
+  <p>Примечания :</p>
+  <ul>
+    <li class="style3">#r и #n - коды &quot;возврат каретки&quot; и &quot;перевод строки&quot; соответственно, используются для принудительного переноса следующих за ними символов на новую строку ( чтобы получить многострочный заголовок ) ;<br>
+      мы используем оба этих кода - для подстраховки, на случай запуска в среде DOS/Windows , ожидающей именно пары  кодов</li>
+  </ul>
+  <p>Растянем заголовок таблицы по высоте так, чтобы 2-строчные заглавия полностью в нее поместились, с небольшим запасом.</p>
+  <p>И, наконец, выделим заголовок таблицы - цветом и рельефом : </p>
+  <blockquote>
+    <p>GrdPersons -&gt; foxrows -&gt; item (-1) -&gt; frame :</p>
+    <ul>
+      <li>colorclient:= cl_ltgreen // светло-зеленый фон заголовка </li>
+      <li>leveli:= -1 // внутреннюю кромку обрамления - опустить </li>
+      <li>levelo:= 1 // а внешнюю - наоборот поднять </li>
+    </ul>
+  </blockquote>
+</blockquote>
+<h4>Чуток косметики</h4>
+<p>Мы видим, что столбец “ Sex . potention “ отображает числовые значения, которые принято выравнивать по правой границе: </p> 
+<blockquote>
+  <p>GrdPersons -&gt; datacols -&gt; item 4 -&gt; textflags -&gt; tf_right:= true </p>
+</blockquote>
+<p>И столбцы &laquo;Date of birth&raquo; и &laquo;Happy ?&raquo; лучше смотрятся выровненными по центру : </p> 
+<blockquote>
+  <p>GrdPersons -&gt; datacols -&gt;</p>
+  <ul>
+    <li> item 5 -&gt; textflags -&gt; tf_xcentered:= true</li>
+    <li>item 6 -&gt; textflags -&gt; tf_xcentered:= true</li>
+  </ul>
+</blockquote>
+<p>Также мы видим, что значения во всех столбцах – слишком близко к линиям сетки. Сделаем отступы около 5-ти экранных единиц вкаждом столбце : </p> 
+<blockquote>
+  <p>GrdPersons -&gt; Datacols -&gt; </p>
+  <ul>
+    <li>Item 0 .. item 3 -&gt; frame -&gt; [..] -&gt; framei : &nbsp;&nbsp;
+      <ul>
+        <li>left:= 5 </li>
+      </ul>
+    </li>
+    <li> item 4 -&gt; frame -&gt; [..] -&gt; framei :
+      <ul>
+        <li>right := 5 // не “ left ”, так как имеет правое выравнивание </li>
+      </ul>
+    </li>
+  </ul>
+</blockquote>
+<p>&quot;item 5&quot; и &quot;item 6 &quot; не трогаем, так как они - центрированы и потому не имеют отступов </p> 
+<p>А что делать, если нам не нравятся варианты столбца &laquo; Happy ?&raquo;, и мы хотим , например – “ Yes / No ”, а если нет данных – то знак вопроса &laquo;?&raquo;. Есть несколько способов, но для текущего состояния проекта проще всего это сделать на уровне SQL -запроса - вместо &laquo; a . if _ happy &raquo; написать условную конструцию &laquo;case when a.if_happy = ‘t' then ‘Yes' when a.if_happy = ‘f' then ‘No' else ‘?' end as if_happy&raquo;. SQL- запрос принимает следующий вид : </p> 
+<blockquote>
+  <p class="source">select <br>
+    &nbsp;a.descr, <br>
+    &nbsp;a.sexual_potention, <br>
+    &nbsp;a.photo, <br>
+    &nbsp;b.descr as country, <br>
+    &nbsp;c.descr as occupation, <br>
+    &nbsp;d.descr as feature, <br>
+    &nbsp;case <br>
+    &nbsp;&nbsp;when a.if_happy = 't' then 'Yes' <br>
+    &nbsp;&nbsp;when a.if_happy = 'f' then 'No' <br>
+    &nbsp;&nbsp;else '?' <br>
+    &nbsp;end as if_happy,<br>
+    &nbsp;a.dateofbirth<br>
+    from persons a left outer join <br>
+    &nbsp;countries b on a.country_id=b.id left outer join <br>
+    &nbsp;occupations c on a.occupation_id=c.id left outer join <br>
+    &nbsp;features d on a.feature_id=d.id <br>
+    order by a.id; </p>
+</blockquote>
+<p>Также при изменении размера окна программы наша таблица остается неизменной – а лучше бы она раздвигалась вслед за окном, сохраняя неизменными все отступы: </p> 
+<blockquote>
+  <p>grdPersons -&gt; anchors: </p>
+  <ul>
+    <li>an_top:= true </li>
+    <li>an_left:= true </li>
+    <li>an_right:= true </li>
+    <li>an_bottom:= true </li>
+  </ul>
+</blockquote>
+<p>Но и это не все – теперь наша таблица отслеживает размеры окна программ, но только за счет расширения последнего столбца (который с опцией &laquo;fill&raquo;). Решить эту прооблему помогает опция &laquo; propoprtional &raquo; столбцов таблицы: </p> 
+<blockquote>
+  <p>grdPersons -&gt; datacols -&gt; options : co _ proportional := true </p>
+</blockquote>
+<p>Установка этой опции сбрасывает опцию &laquo;fill&raquo; каждого из столбцов ( реально используемую последним столбцом) , поэтому восстановим ее. </p> 
+<blockquote>
+  <p>grdPersons -&gt; datacols -&gt; Item6 –&gt; options: co_fill:= true </p>
+</blockquote>
+<p>Теперь мы хотим видеть номера строк (и соостветсвено – сколько всего строк ) , для это используе фиксированный столбец слева: </p> 
+<blockquote>
+  <p>grdPersons -&gt; fixcols -&gt; Item -1 : numstart:= 1, numstep:= 1 </p>
+</blockquote>
+<p>Полезно также подсвечивать некоторым цветом </p> 
+<blockquote>
+  <p>grdPersons -&gt; datacols -&gt; colorselect : &lt;выбираем понравившийся цвет &gt; </p>
+</blockquote>
+<p>текущую выбраную ячейку таблицы </p> 
+<blockquote>
+  <p>grdPersons -&gt; datacols -&gt; options : co_focusselect:= true </p>
+</blockquote>
+<p>или даже целиком выбрранную строку </p> 
+<blockquote>
+  <p>grdPersons -&gt; datacols -&gt; options : co_focusselect:= true, co_rowselect:= true </p>
+</blockquote>
+<p>Есть одна потенциальная некрасивость. Некоторые значения “ sexual _ potention ” могут отображаться некорректно – вместо одной-двух цифр после десятичной точки этих цифр может быть много. Причина – конвертирование из числа с плавающей точкой в тестовую строку, выполняемое с промежуточным преобразованием чисел - одна из застарелых ошибок “ Free Pascal ”. Для решения этой проблемы используем средства для работы с полями БД:</p> 
+<p>qryPersons -&gt; AfterOpen -&gt; personsafteropen -&gt; вставляем код : </p>
+<blockquote>
+  <p class="source">procedure tmainfo.personsafteropen(DataSet: TDataSet);<br>
+    begin <br>
+    (dataset.fieldbyname('sexual_potention') as tmsefloatfield).displayformat:= '##.##'; <br>
+    end; </p>
+  <p>То есть – после выборки данных ( и формирования полей ! ) дать команду, как отображать поле“sexual_potention&quot;  . “##.##“ означает - не более 2-ч цифр &laquo;до&raquo; и 2-х цифр &laquo;после&raquo; десятичного разделителя ( в зависмости от системной локали - не обязательно &quot;точки&quot; ), и будет использовано при прорисовке столбцов таблицы. </p>
+</blockquote>
+<blockquote>
+  <p>также потребуется включить &quot;db&quot; в &quot;interface&quot;-секцию : </p>
+  <p class="source">interface<br>
+&nbsp;uses<br>
+&nbsp;msegui,mseclasses,mseforms,msemenus,msesimplewidgets,msepqconnection,msesqldb,<br>
+&nbsp;msedb,msedbedit,mseactions, <br>
+&nbsp;db // описание &quot;TDataSet&quot;<br>
+    ;</p>
+</blockquote>
+<p>Единственный минус этого способа – его эффект не виден во время дизайна. Есть и другое решение – использовать постоянные ( persistent ) поля, он будет рассмотрен ниже, в данном же случае – является излишним. </p>
+<p>Итак, в дизайне имеем следующий вид: </p>
+<p align="center"><img src="images/viewapp_design.png" width="695" height="452"></p>
+<p>а запустив программу: </p>
+<p align="center"><img src="images/viewapp_runtime.png" width="695" height="452"></p>
+<p align="left">&nbsp;</p>
+<p align="left">Примечания :</p>
+<ul>
+  <li class="style3">значения дат  в столбце &quot;Date od birth&quot; отображаются в соответствии с константой &quot;ShortDateFormat&quot;, автоматически настраиваемой на текущую системную локаль ( на рисунке - 'dd.mm.yyyy' для локали 'ru_RU' ); поэтому изменения формата даты, сделанные на сервере БД, никак не отразятся на виде этих дат в таблицах MSEgui-приложений </li>
+</ul>
+<p>Мелкие штрихи : </p>
+<ul>
+  <li>чтобы увидеть очень длинные имена ( поле &quot;descr&quot; ) в таблице &quot;grdPersons&quot;, не помещающиеся в столбец &quot;Name&quot;, есть варианты :
+    <br>      
+    <ol>
+      <li>разрешить менять ширину столбцов :
+          <ul>
+            <li>grdPersons-&gt;optionsgrid-&gt;og_colsizing:= true <br>
+            </li>
+          </ul>
+      </li>
+      <li>во время работы - выбрать нужную ячейку таблицы, далее перемещаться внутри этой ячейки, чтобы увидеть закрытые части имени <br>
+      </li>
+      <li></li>
+    </ol>
+      показывать имя в всплывающей подсказке ( hint ) , когда указатель мыши зайдет в ячейку : </li>
+  <ol start="3">
+    <ul>
+      <li>grdPersons-&gt;datacols-&gt;item 0-&gt; onshowhint:= shownamehint<br>
+          <br>
+          <span class="source">procedure tmainfo.shownamehint(<br>
+&nbsp; const sender: tdatacol; <br>
+&nbsp;&nbsp;const arow: Integer;<br>
+&nbsp;&nbsp;var info: hintinfoty);<br>
+        begin<br>
+&nbsp;info.caption:= grdPersons[sender.colindex][arow];<br>
+        end; </span><br>
+      </li>
+    </ul>
+    <p>Примечания :</p>
+    <ul>
+      <li>содержимое табличного компонента &quot;t(db)stringgrid&quot; ( в нашем случае - &quot;grdPersons&quot; ) доступно извне как -2-мерный массив строк ( <span class="source">grdPersons[column][row]</span> ) , для чтения и для записи </li>
+      <li>&quot;<span class="source">var info: hintinfoty</span>&quot; - &quot;call-back&quot; параметр, предварительно созданный, с начальными значениями, которые можно изменить, что мы и сделали ( изменили &quot;caption&quot; = текст сообщения ) <br>
+      </li>
+    </ul>
+  </ol>
+  <li>чтобы при запуске программы была автоматически выбрана первая строка таблицы - достаточно установить свойство
+:<br>    
+    <ul>
+      <li>grdPersons-&gt;TabOrder:= 0 </li>
+    </ul>
+    <blockquote>
+      <p>это значение автоматически сфокусирует приложение на &quot;grdPersons&quot;</p>
+    </blockquote>
+  </li>
+</ul>
+</body>
+</html>

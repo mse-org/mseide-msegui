@@ -1,0 +1,1839 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<title>Редактирование данных о персонах</title>
+<meta http-equiv="Content-Type" content="text/html; charset=windows-1251">
+<link href="usedstyles.css" rel="stylesheet" type="text/css">
+</head>
+<body bgcolor="#FFFFFF" class="Normal"> 
+<h3 align="center">Если мы хотим редактировать данные, <br>
+а не только просматривать</h3> 
+<p>Редактируется, как правило, одна таблица, остальные же таблицы в лучшем случае поставляют для нее данные в виде ссылок.</p>
+<p>Видоизменяем запрос, так как для редактирования нам нужны значения ссылок на другие таблицы, а также нужно знать ключи  строк самой редактируемой таблицы ( чтобы случайно не спутать строки  при изменениях ) :</p>
+<p>Меняем : </p>
+<p> <strong>qryPersons -&gt; SQL</strong>:= <br>
+  <span class="source">&nbsp;a.id, /* ключевой столбец */<br>
+  &nbsp;a.feature_id,<br>
+  &nbsp;a.occupation_id,<br>
+  &nbsp;a.country_id,<br>
+  &nbsp;a.descr,<br>
+  &nbsp;a.sexual_potention ,<br>
+  &nbsp;a.photo,<br>
+  &nbsp;b.descr as country,<br>
+  &nbsp;c.descr as occupation,<br>
+  &nbsp;d.descr as feature,<br>
+  &nbsp;a.if_happy,<br>
+   &nbsp;a.dateofbirth</span><span class="source"><br>
+from persons a left outer join <br>
+&nbsp;countries b on a.country_id=b.id left outer join <br>
+&nbsp;occupations c on a.occupation_id=c.id left outer join <br>
+&nbsp;features d on a.feature_id=d.id <br>
+order by a.id;</span></p>
+<p>Щелкаем на &quot;<strong>Test</strong>&quot; -&gt; должно быть &quot;ОК&quot; .</p>
+<p>Итого - добавлены поля:</p>
+<table width="75%"  border="1">
+  <tr>
+    <td width="24%" class="source">a.id</td>
+    <td width="76%">ключ  редактируемой таблицы ( persons ) </td>
+  </tr>
+  <tr>
+    <td class="source">a.feature_id</td>
+    <td> ссылка на таблицу &quot;features&quot;</td>
+  </tr>
+  <tr>
+    <td class="source">a.occupation_id</td>
+    <td>ссылка на таблицу &quot;occupations&quot;</td>
+  </tr>
+  <tr>
+    <td class="source">a.country_id</td>
+    <td>ссылка на таблицу &quot;countries&quot;</td>
+  </tr>
+</table>
+<p>Эти поля - целочисленные ( integer ), ибо почти 100% именно такими являются номера строк таблиц. </p>
+<p>Отображать будем те же поля, что и ранее:</p>
+<ul>
+  <li>d.descr as feature ( string ) </li>
+  <li>c.descr as occupation &nbsp;&nbsp;(string)</li>
+  <li>b.descr as country ( string ) </li>
+  <li>a.descr ( string ) </li>
+  <li>a.sexual_potention ( float ) </li>
+  <li>a.photo ( blob ) &nbsp;</li>
+  <li>a.if_happy ( boolean ) </li>
+  <li>a.dateofbirth ( date ) </li>
+</ul>
+<p>Непосредственно редактироваться не будут только поля : </p>
+<ul>
+  <li><strong>a.id </strong>- так как используется только для нахождения строки редактирумой таблицы (определения места радактирования ) , а при вставке новых записей - будет использоваться счетчик <span class="source">&quot;person_id_seq&quot;</span>, предоставленный базой данных и привязанный к даному полю ( см. скрипт создания БД ) </li>
+  <li><strong>a.photo</strong> - так как пока нет средств редактирования графических данных, взятых прямо из БД </li>
+</ul>
+<p><a name="changes_for_editing"></a></p>
+<h4 align="center">Видоизменение  программы просмотра под возможное редактирование</h4>
+<p>Выключаем запрос, так как меняется схема данных :</p>
+<blockquote>
+  <p><strong>qryPersons.active:= false</strong></p>
+</blockquote>
+<p>и назначаем их persistent-полями типа &quot;1&quot; (ненастраиваемыми):</p>
+<p><strong>QryPersons-&gt;controller-&gt;fields.count-&gt;[...]</strong> -&gt; открывается диалог, в котором - по очереди из незатененных ( доступных ) полей справа, выбираем &quot;<strong>id</strong>&quot; и &quot;<strong>photo</strong>&quot; и жмем кнопку со стрелкой влево (переносим поля из автосоздаваемых ( “<strong>fielddefs</strong>” ) в разряд постоянных – “<strong>fields</strong>” ), и закрываем диалог.</p>
+<p>Остальные поля будут учавствовать в отображении и редактировании, поэтому  для облегчения жизни ( чтобы работать с ними не в коде, а через дизайнер ) - сделаем их persistent-полями типа &quot;2&quot; ( визуально-настраиваемыми ) :</p>
+<p>Роняем эти поля из палитры DBF на “<strong>grdPerson</strong>” , под названиями состветствующих столбцов таблицы : </p>
+<table width="95%"  border="1">
+  <tr>
+    <th><div align="center">Тип в DBF-палитре</div></th>
+    <th>Свойство &quot;FieldName&quot;</th>
+    <th><div align="center">Свойство &quot;name&quot;</div></th>
+    <th>Поле в запросе ( для справки ) </th>
+  </tr>
+  <tr>
+    <td width="24%"><div align="center">Tmsedtringfield </div></td>
+    <td width="24%"> feature</td>
+    <td width="25%"><div align="center">fldFeature</div></td>
+    <td width="28%">d.descr as feature</td>
+  </tr>
+  <tr>
+    <td><div align="center">Tmsedtringfield</div></td>
+    <td> occupation</td>
+    <td><div align="center">fldOccupation</div></td>
+    <td>c.descr as occupation</td>
+  </tr>
+  <tr>
+    <td><div align="center">Tmsedtringfield</div></td>
+    <td> country </td>
+    <td><div align="center">fldCountry</div></td>
+    <td>b.descr as country </td>
+  </tr>
+  <tr>
+    <td><div align="center">Tmsedtringfield</div></td>
+    <td>descr</td>
+    <td><div align="center">fldName</div></td>
+    <td>a.descr</td>
+  </tr>
+  <tr>
+    <td><div align="center">Tmsefloatfield</div></td>
+    <td>sexual_potention</td>
+    <td><div align="center">fldSexPotention</div></td>
+    <td>a.sexual_potention</td>
+  </tr>
+  <tr>
+    <td><div align="center">Tmsebooleanfield</div></td>
+    <td>if_happy </td>
+    <td><div align="center">fldHappy</div></td>
+    <td>a.if_happy </td>
+  </tr>
+  <tr>
+    <td><div align="center">Tmsedatefield</div></td>
+    <td>dateofbirth</td>
+    <td><div align="center">fldDateOfBirth</div></td>
+    <td>a.dateofbirth</td>
+  </tr>
+  <tr>
+    <td><div align="center">Tmselongintfield</div></td>
+    <td><span class="source">feature_id</span></td>
+    <td><div align="center">fldFeatureId</div></td>
+    <td><span class="source">a.feature_id</span></td>
+  </tr>
+  <tr>
+    <td><div align="center">Tmselongintfield</div></td>
+    <td><span class="source">occupation_id</span></td>
+    <td><div align="center">fldOccupationId</div></td>
+    <td><span class="source">a.occupation_id</span></td>
+  </tr>
+  <tr>
+    <td><div align="center">Tmselongintfield</div></td>
+    <td><span class="source">country_id</span></td>
+    <td><div align="center">fldCountryId</div></td>
+    <td><span class="source">a.country_id</span></td>
+  </tr>
+</table>
+<p>Свойство &quot;<strong>Dataset:= qryPersons</strong>&quot; у всех этих полей, поля нужно настраивать поочередно. </p>
+<p>Также:</p>
+<ul>
+  <li>установим &quot;<strong>fldHappy.DisplayValues:= Yes;No</strong>&quot; - теперь  нет необходимости в конструкции &quot;<strong>case when... end</strong>&quot; в SQL-запросе</li>
+<li>установим &quot;<strong>fldSexPotention.DisplayFormat:=####.####</strong>&quot; - теперь нет необходимости в отбработчике &quot;<strong>personsafteropen</strong>&quot; - удалим его из свойств &quot;<strong>qryPersons</strong>&quot;, а также из файла &quot;<strong>main.pas</strong>&quot;</li>
+</ul>
+<p>Примечания :</p>
+<ul>
+  <li class="style1">по идее, у всех полей из вышеприведенной таблице нужно установить &quot;ProviderFlags-&gt;pfInWhere:= false&quot;, чтобы при автосоздании запросов на изменение данных, значения этих полей не включались в WHERE-фильтры SQL-запросов, но в данном случае это не нужно, так как :
+    <ul><li>автосоздание запросов неприменимо из-за много-табличной природы выборки &quot;qryPersons&quot;
+          </li>
+      <li>&quot;qryPersons.UpdateMode:= upWhereKeyOnly&quot;, то есть дана прямая команда строить WHERE-фильтры только из полей с &quot;ProviderFlags-&gt;pfInKey:= true&quot;</li>
+  </ul>
+  </li>
+</ul>
+<ul>
+  <li class="style1"><span class="source">&quot;####.####&quot;</span> здесь - на самом деле аналогично  присвоению в коде <span class="source">&quot;DisplayFormat='##.##'&quot;</span> из главы &quot;Отображение данных&quot;. Присвоение в коде  делается без удвоения числа <span class="source">&quot;#&quot;</span>, при назначении же через редактор свойств это удвоение нужно потому, что одиночный ( без обрамления в '' ) символ <span class="source">&quot;#&quot;</span> в языке &quot;Pascal&quot; используется как префикс кодов символов;<br>
+  зато можно вставлять в  формат коды сиволов, например <span class="source">&quot;#n&quot;</span> ( или <span class="source">&quot;#13&quot;</span> ) - символ перевода строки , причем в этом месте будет реально выполнен перевод строки ( полный формат для этого случая будет <span class="source">&quot;####.#####n&quot;</span> ) <br>
+  </li>
+  <li class="style1"><span class="style3">&quot;fldDateOfBirth .DisplayFormat&quot;</span> оставляем пустым, чтобы автоматически использовался адаптированный к текущей системной локали &quot;ShortDateFormat &quot; ( см. главу &quot;Отображение данных&quot; ) </li>
+</ul>
+<p>Теперь можно включить запрос :</p>
+<blockquote>
+  <p><strong>qryPersons.active:= true </strong></p>
+</blockquote>
+<p>чтобы увидеть появившиеся данные в таблице. Если теперь запустить программу  (через F9), то увидим, что она пока ничем не отличается от предыдущей прораммы просмотра. Но зато мы сейчас включили в программу точки редактирования - модифицировали запрос и создали persistent-поля.</p>
+<p><a name="editing_step1"></a></p>
+<h4 align="center">Реализация редактирования</h4>
+<p>Каждую из записей можно :</p>
+<ol>
+  <li>редактировать</li>
+  <li>добавлять</li>
+  <li>удалять </li>
+</ol>
+<p>Инициировать эти действия будем : </p>
+<ol>
+  <li>специальными кпонками</li>
+  <li>popup-menu </li>
+  <li>клавиатурными комбинациями </li>
+<li>Контексными клавишами </li>
+</ol>
+<p>Раз у нас три способа инициирования, значит - опять понадобятся &quot;taction&quot;. Уроним на таблицу три компонента &quot;GUI -&gt; taction&quot; :<br>
+</p>
+<table width="95%"  border="1">
+  <tr>
+    <th width="47%">Name</th>
+    <th width="53%"><div align="center">onexecute</div></th>
+  </tr>
+  <tr>
+    <td>actEdit</td>
+    <td><div align="center">editformshow</div></td>
+  </tr>
+  <tr>
+    <td>actAdd</td>
+    <td><div align="center">addformshow</div></td>
+  </tr>
+  <tr>
+    <td>actDelete</td>
+    <td><div align="center">deleterecord</div></td>
+  </tr>
+</table>
+<p>Для реализации способа (1) -   увеличим место внизу формы,  уроним туда уроним три кнопки (Widget -&gt; tbutton ), и увяжем их с &quot;taction&quot; :</p>
+<table width="95%"  border="1">
+  <tr>
+    <th><div align="center">Name</div></th>
+    <th><div align="center">Action</div></th>
+    <th><p align="center">Caption</p>
+    </th>
+  </tr>
+  <tr>
+    <td><div align="center">btnEdit</div></td>
+    <td><div align="center">actEdit</div></td>
+    <td><div align="center">&amp;Edit..</div></td>
+  </tr>
+  <tr>
+    <td><div align="center">btnAdd</div></td>
+    <td><div align="center">actAdd</div></td>
+    <td><div align="center">&amp;Add..</div></td>
+  </tr>
+  <tr>
+    <td><div align="center">btnDelete</div></td>
+    <td><div align="center">actDelete</div></td>
+    <td><div align="center">&amp;Delete..</div></td>
+  </tr>
+</table>
+<p>Свойство <strong>'anchor</strong>&quot; всех трех кнопок установим <strong>[an_bottom:= true, an_right:= true, </strong>остальные<strong> - false]</strong>, чтобы эти кнопки держались первоначального зазора с нижним краем формы при изменении ее размера. </p>
+<p>Назначим новым кнопкам ранее принятый &quot;кнопочный&quot; стиль :</p>
+<blockquote>
+  <p>удерживая клавишу &quot;Ctrl&quot;, выбираем все три кнопки &quot;btnEdit&quot;, &quot;btnAdd&quot; и &quot;btnDelete&quot;, далее идем в редактор свойств :</p>
+  <blockquote>
+    <p>frame-&gt;[...]</p>
+    <ul>
+      <li>template:= ftButtons </li>
+    </ul>
+  </blockquote>
+  <p>видим, что у всех кнопок появился заметный бордюрчик, плюс все они кнопки окрасились с один цвет (светло-желтый, назначенный кнопкам &quot;закрыть/отменить/завершить&quot; ). Исправим это, приняв, что :</p>
+  <ul>
+    <li>цвет кнопок &quot;редактировать&quot; ( Edit ) -&gt; светло-зеленый (cl_ltgreen)</li>
+    <li>цвет нопок &quot;добавить&quot; ( &quot;Add&quot; или &quot;Append&quot; ) -&gt; светло-синий (cl_ltblue) </li>
+    <li>цвет нопок &quot;удалить&quot; ( Delete ) -&gt; светло-красный (cl_ltred) </li>
+  </ul>
+  <div class="dark_stripe">
+    <div class="light_stripe">
+      <div class="dark_stripe">
+        <p>btnEdit : </p>
+        <ul>
+          <li>template
+            <ul>
+              <li>colorclient:= cl_ltgreen</li>
+            </ul>
+            <blockquote>
+              <p>выглядит темноватым, поэтому выберем не из палитры, а через диалог :</p>
+            </blockquote>
+            <ul>
+              <li>colorclient -&gt; [...]
+                  <ul>
+                    <li>red:= 200</li>
+                    <li>green:= 255</li>
+                    <li>blue:= 200   </li>
+                  </ul>
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+      <p>btnAdd : </p>
+      <ul>
+        <li>template
+            <ul>
+              <li>colorclient:= cl_ltblue</li>
+            </ul>
+            <blockquote>
+              <p>тоже выглядит темноватым, поэтому выберем не из палитры, а через диалог :</p>
+            </blockquote>
+            <ul>
+              <li>colorclient -&gt; [...]
+                  <ul>
+                    <li>red:= 200</li>
+                    <li>green:= 200</li>
+                    <li>blue:= 255</li>
+                  </ul>
+              </li>
+            </ul>
+        </li>
+      </ul>
+    </div>
+    <p>btnDelete : </p>
+    <ul>
+      <li>template
+          <ul>
+            <li>colorclient:= cl_ltred</li>
+          </ul>
+          <blockquote>
+            <p>тоже выглядит темноватым, поэтому выберем не из палитры, а через диалог :</p>
+          </blockquote>
+          <ul>
+            <li>colorclient -&gt; [...]
+                <ul>
+                  <li>red:= 255</li>
+                  <li>green:= 200</li>
+                  <li>blue:= 200 </li>
+                </ul>
+            </li>
+          </ul>
+      </li>
+    </ul>
+  </div>
+</blockquote>
+<p>Примечания : </p>
+<ul>
+  <li class="style1">необязательные двоеточия в конце свойста &quot;caption&quot; удобны просто для информирования пользователя :<br> 
+    &quot;Не бойся попробовать здесь - это  ведь действие будет выполнено не сразу и молча, а через дополнительные диалоги, запросы и формы !&quot;</li>
+</ul>
+<p>Для реализации способа (2) - уроним на таблицу компонент : </p>
+<p>Widget-&gt; tpopupmenu</p>
+<ul>
+  <li>name:= pupMenu</li>
+  <li>menu -&gt; submenu -&gt; AppendItem
+    <ul>
+      <li>item 0 :
+          <ul>
+            <li>caption:= &amp;Edit&nbsp;record..</li>
+            <li>action:= actEdit   </li>
+          </ul>
+      </li>
+      <li>item 1      </li>
+    </ul>
+    <ul>
+    <ul>
+      <li>caption:= &amp;Add&nbsp;record..</li>
+      <li>action:= actAdd</li>
+      </ul>
+  <li>item2
+    <ul>
+      <li>caption:= &amp;Delete&nbsp;record..</li>
+    <li>action:= actDelete</li>
+    </ul>
+  </li>
+    </ul>
+  </li>
+</ul>
+<p>и скажем таблице &quot;при клике правой кнопкой - вызывай это меню&quot; :</p>
+<blockquote>
+  <p>grdPersons.popupmenu:= pupPersons </p>
+</blockquote>
+<p>Для реализации способа (3) - просто назначим свойство &quot;shortcut&quot; объектов &quot;taction&quot; :</p>
+<ul>
+  <li>actEdit -&gt; shortcut:= Ctrl+E </li>
+  <li>actAdd -&gt; shortcut:= Ctrl+Insert </li>
+  <li>actDelete -&gt; shortcut:= Ctrl+Delete </li>
+</ul>
+<p>Способ (4) у нас  уже реализован - см. буквы после &quot;&amp;&quot; в свойствах &quot;caption&quot;.</p>
+<p><a name="editform"></a></p>
+<h4 align="center">Специальная форма для редактирования и добавления </h4>
+<p>А теперь, по порядку:
+    
+Так как имеющаяся таблица позволяет только просматривать данные, 
+    то для их изменения будем использовать отдельную форму = редактор записи.  </p>
+<p> File -&gt; New -&gt; Form -&gt; Simple Form : сохранить файл под именен "editform" -&gt; создается "<strong>editfo</strong>" типа "teditfo". "<strong>Editfo</strong>" нельзя переименовывать. <br>
+</p>
+<p>В нижнюю часть этой формы роняем две кнопки "Widgets-&gt;tbutton" :</p>
+<p> 
+    Левая кнопка:  </p>
+<ul>
+  <li>name = btnOk
+      //  frame.template = mainfo.ftButtons </li>
+  <li>caption = '&amp;OK' </li>
+  <li>modalresult = mr_ok</li>
+</ul>
+<p>Правая кнопка:  </p>
+<ul>
+  <li>name = btnCancel
+      //  frame.template = mainfo.ftButtons </li>
+  <li>caption = '&amp;Cancel' </li>
+  <li>modalresult = mr_cancel </li>
+</ul>
+<p>Раз появились новые кнопки - значит, пора им назначить наш &quot;кнопочный&quot; стиль. Кнопка &quot;btnCance&quot;, как кнопка отмены должна иметь светло-желтый цвет ( по-умолчанию для кнопок ), а кнопка  &quot;btnOk&quot; ( кнопка готовности/подтверждения ) - пусть будет светло-цианового цвета :</p>
+<blockquote>
+  <p>btnOk : </p>
+  <ul>
+    <li>frame-&gt;[...]</li>
+    <li>template:= mainfo.ftButtons</li>
+    <li>colorclient:= cl_ltcyan </li>
+  </ul>
+  <p>btnCancel : </p>
+  <ul>
+    <li>frame-&gt;[...]</li>
+    <li>template:= mainfo.ftButtons </li>
+  </ul>
+  <p>Примечания :</p>
+  <ul>
+    <li class="style1">обратите внимание, что мы прописали кнопочный стиль, созданный и описанный на другой форме ! </li>
+  </ul>
+</blockquote>
+<p>Непустые значения "modalresult" говорят о том, 
+      что щелчок на такой кнопке закрывает форму, 
+      после чего функция показа формы <strong>&lt;Форма&gt;.show(<span class="source">true</span>)</strong> ( будет использована ниже по тексту ) вернет соответствующее 
+      значение "<strong>mr_ok</strong>" или "<strong>mr_cancel</strong>", которое затем можно использовать для принятия 
+      решения.</p>
+<p>Добавление новой записи может быть реализовано как добавление ( append ) пустой записи с последующим редактированием ее полей,  то есть - мы можем использовать одну и ту же форму для редактирования и добавления данных . </p>
+<p>Эта форма должна показываться по команде на редактирование ( или добавление ) - в методах объектов &quot;<strong>actEdit</strong>&quot; и &quot;<strong>actAdd</strong>&quot; , находящихся на основной форме &quot;<strong>mainfo</strong>&quot;:</p>
+<p>Изменения в файле &quot;main.pas&quot;</p>
+<blockquote>
+  <p class="source">procedure tmainfo.editformshow(const sender: TObject);<br>
+    begin<br>
+&nbsp;try<br>
+&nbsp;&nbsp;with qryPersons do begin <br>
+    &nbsp;&nbsp;&nbsp;edit; // переводим &quot;qryPerson&quot; в режим редактирования текущей записи <br>
+&nbsp;&nbsp;&nbsp;application.createform(teditfo,editfo); // модальный показ &quot;editfo&quot;<br>
+&nbsp;&nbsp;&nbsp;// показать, что именно редактирование, а не добавление <br>
+&nbsp;&nbsp;&nbsp;editfo.caption:= ' Editing a person =&gt; '+ fldName.asstring; <br>
+    <br>
+&nbsp;&nbsp;&nbsp;case editfo.show(true) of <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mr_ok: begin // &quot;editfo&quot; закрыта кнопкой с кодом &quot;mr_ok&quot;<br>
+&nbsp; &nbsp;&nbsp;&nbsp;// здесь будет код записи в БД + первыборки <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;end else begin // &quot;editfo&quot; закрыта кнопкой с кодом, отличным от &quot;mr_ok&quot;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;cancel; // отказаться от подготовленных к записи в БД изменений <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;end;<br>
+&nbsp;&nbsp;&nbsp;end;<br>
+    <br>
+&nbsp; end;<br>
+&nbsp;finally<br>
+&nbsp;&nbsp;editfo.free; // при любом исходе - удалить &quot;editfo&quot; из памяти <br>
+&nbsp;end;<br>
+  end;</p>
+  <p class="source">// добавить метод через двойной клик в поле &quot;actAdd-&gt;onexecute&quot;<br>
+    // Процедура добавления новой записи :<br>
+    // <br>
+    procedure tmainfo.addformshow(const sender: TObject);<br>
+    begin<br>
+    <br>
+&nbsp;try<br>
+&nbsp;&nbsp;with qryPersons do begin<br>
+    // вставить в редактируемую таблицу пустую строку, <br>
+    // и тут же войти в режим ее редактирования<br>
+&nbsp;&nbsp;&nbsp;append; <br>
+&nbsp;&nbsp;&nbsp;application.createform(teditfo,editfo);<br>
+&nbsp;&nbsp;&nbsp;editfo.caption:= ' Adding a new person';<br>
+    <br>
+&nbsp;&nbsp;&nbsp;case editfo.show(true) of <br>
+&nbsp;&nbsp;&nbsp;&nbsp;mr_ok: begin<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// здесь будет код записи в БД + первыборки<br>
+    &nbsp;&nbsp;&nbsp;&nbsp; end else begin<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; cancel; // отказаться от добавления<br>
+
+&nbsp;&nbsp;&nbsp;&nbsp; end;&nbsp;&nbsp;&nbsp;&nbsp; <br>
+&nbsp;&nbsp;&nbsp; end;<br>
+    <br>
+&nbsp;&nbsp;&nbsp;end;<br>
+&nbsp;&nbsp;finally<br>
+&nbsp;&nbsp;&nbsp;editfo.free;<br>
+&nbsp;&nbsp;end;<br>
+    <br>
+    end;</p>
+  <p>&nbsp;</p>
+</blockquote>
+<p>Как видно, эти две процедуры отличаются только :</p>
+<ul>
+  <li>первой операцией с таблицей :
+    <br>      
+    <ul>
+      <li>редактирование : <span class="source">qryPersons.edit;</span></li>
+      <li>добавление : <span class="source">qryPersons.append.<br>
+      </span></li>
+      </ul>
+  </li>
+  <li> подсказкой о том, что мы именно делаем<span class="source"> - editfo.caption</span></li>
+</ul>
+<p>Удаление текущей записи не требует никаких дополнительных форм - достаточно обойтись выводом диалога для подтверждения решения на удаление. Поэтому - еще изменения в файле &quot;main.pas&quot; : </p>
+<blockquote>
+  <p class="source">implementation</p>
+  <p class="source">uses <br>
+&nbsp; main_mfm,<br>
+&nbsp;&nbsp;editform, // для доступа к &quot;editfo&quot;<br>
+&nbsp;&nbsp;msewidgets // чтобы можно было использовать диалоги &quot;showmessage&quot;, &quot;askyesno&quot;, ..<br>
+    ;</p>
+  <p class="source">...( процедуры редактирования и добавления ) </p>
+  <p class="source">procedure tmainfo.deleteprson(const sender: TObject);<br>
+    begin<br>
+&nbsp;if askyesno('Are you a nut ???','Deletion request',mr_no,200) then begin<br>
+&nbsp;&nbsp;with qryPersons do begin<br>
+
+&nbsp;&nbsp;&nbsp;delete; <br>
+&nbsp;&nbsp;end;<br>
+&nbsp;end;<br>
+  end;</p>
+</blockquote>
+<p><a name="editing_ways"></a></p>
+<h4 align="center">Способы  непосредственного редактирования текущей записи </h4>
+<p>Сервис редактирования полей текущей записи базовой таблицы ("persons") обеспечивается следующими
+  компонентами палитры "DB" :</p>
+<ol>
+  <li> текcтовые поля ( вроде "descr" ) -&gt; через компонент "tdbstringedit"</li>
+  <li> логические поля ( вроде "if_happy" ) -&gt; через компоненты &quot;tdbbooleantextedit&quot; л"tdbbooleanedit"</li>
+  <li> целочисленные поля ( нет в нашей задаче ) -&gt; через компонент "tdbintegeredit"</li>
+  <li> поля для значений с плавающей точкой ( вроде "sexual_potention" ) -&gt; через компонент "tdbstringedit"</li>
+  <li> ссылки на строки в других таблицах ( вроде "country_id" ) -&gt; &quot;tdbenumeditlb&quot; и &quot;tenumeditlb&quot;</li>
+  <li> .. другие пока не рассматриваем ..</li>
+</ol>
+<p>Примечание: </p>
+<blockquote>
+  <p class="style1"> Когда следует использовать числовые поля вместо строковых ( ведь и числа, и буквы,  по своей природе - символы ) ? 
+            Ответ - тогда, когда их значения могут быть использованы в арифметических выражениях.</p>
+</blockquote>
+<p>Перечисленные компоненты напрямую меняют значение соответствующего поля строки БД.
+        Но бывает и другая потребность - загрузить список значений из БД, но, после выбора в списке -  
+        не записывать выбранное значение  обратно в БД, а использовать по другому - в процедуре фильтрации, и т.п. 
+        Пример такого компонента - &quot;tenumeditlb&quot;. Это  компонент у нас будет использован для сужения 
+        поиска страны по выбранному атрибуту "континент".</p>
+<p>Компоненты "tdbenumeditlb" и "tenumeditlb" (как и все с именами типа 
+"t..(datatype)lb" ) нуждаются в специальном компоненте для хранения списков значений - 
+          так называемых  "lookup buffers". Если такой "buffer" заполняется из БД - это компонент "tdblookupbuffer", 
+    а если вручную - "tlookupbuffer" . <br>
+  Очень важный сервис этих "буферов" - синхронизированность нескольких 
+          столбцов данных, даже разного типа, что позволяет выбрать, например, текстовый столбец для заполнения списка 
+          текстовых значений ( названий стран и т.п.), а в момент выбора в этом списке - зафиксировать 
+          соответствующий выбранному названию станы ключ строки в таблице стран, и т.п.</p>
+<h4 class="style6"><a name="data_module"></a></h4>
+<h4 align="center" class="style6">Data Module</h4>
+<p>Теперь надо решить - откуда брать данные для заполнения этих "буферов" ( список атрибутов ), Неплохо бы также предусмотреть возможность редактирования содержимого этих списков - для каждого из которых потребуется своя отдельная форма. <br>
+Итого, получается, что одни и те данные могут потребоваться в разных местах программы, а именно - в виде списков для редактирования данных о персоне (в таблице "persons" ), и в виде таблиц для редактирования самих списков. Поэтому эти списочные данные : </p>
+<ol>
+  <li> удобнее сделать глобально-доступными; </li>
+  <li> выбирать нужно один раз и в одном месте, чтобы изменения в результате редактирования тут же стали бы видны в местах просмотра.</li>
+</ol>
+<p>Для этих целей идеально подходят так называемые "data modules". </p>
+<p>File -&gt; New -&gt; Form -&gt; Data Module : сохранить файл под именен "refsdatamodule" -&gt; создается "<strong>refsdatamo</strong>" типа "trefsdatamo". "<strong>refdatamo</strong>" нельзя переименовывать. </p>
+<p>Далее - набросать на форму дата-модуля следующие компоненты с палитры "DB" : </p>
+<h5 align="left">Список планет </h5>
+<div class="light_stripe">
+  <p>tmsesqlquery (1) :    </p>
+  <ul>
+    <li>Name = qryPlanets </li>
+    <li>Database = mainfo.conn </li>
+    <li>SQL = 'select * from planets order by id; </li>
+    <li>UsePrimaryKeyAsKey = False </li>
+    <li>controller.fields.fields =&gt; "Append Item"    <ul>
+        <li> item 0
+          <ul>
+            <li>FieldName = 'id' </li>
+            <li>ProviderFlags = [pfInKey]</li>
+          </ul>
+        </li>
+        <li>item 1
+          <ul>
+            <li>FieldName = 'descr' </li>
+          </ul>
+        </li>
+        </ul>
+    ProviderFlags = [pfInUpdate]</li>
+    <li>Active = True	</li>
+  </ul>
+</div>
+<div class="dark_stripe">
+  <p>tmsedatasource (1) : </p>
+  <ul>
+    <li>Name = dsPlanets </li>
+    <li>DataSet = qryPlanets </li>
+  </ul>
+</div>
+<div class="light_stripe">
+  <p>tdblookupbuffer (1) :    </p>
+  <ul>
+    <li>Name = lbufPlanets </li>
+    <li>datasource = dsPlanets </li>
+    <li>textfields.items
+      <ul>
+        <li>item 0  = 'descr' // список названий планет </li>
+      </ul>
+    </li>
+    <li>integerfields.items
+      <ul>
+        <li> item 0 = 'id' &nbsp;&nbsp;&nbsp;// список номеров планет </li>
+      </ul>
+    </li>
+  </ul>
+</div>
+<h5>&nbsp;</h5>
+<h5>Список континентов </h5>
+<div class="dark_stripe">
+  <p>tmsesqlquery (2) :    </p>
+  <ul>
+    <li>Name =  qryContinents </li>
+    <li>BeforeOpen = qrycontinentsbeforeopen // EVENT PROCESSING ! </li>
+    <li>Database = mainfo.conn </li>
+    <li>SQL = 'select * from continents order by id;' </li>
+    <li>UsePrimaryKeyAsKey = False  </li>
+    <li>controller.fields.fields =&gt; "Append item"    <ul>
+        <li>item 0
+          <ul>
+              <li>FieldName = 'id' </li>
+              <li>ProviderFlags = [pfInKey] </li>
+          </ul>
+        </li>
+        <li> item 1
+          <ul>
+            <li> FieldName = 'planet_id' </li>
+            <li>ProviderFlags = [pfInUpdate]</li>
+          </ul>
+        </li>
+        <li> item 2
+          <ul>
+            <li>FieldName = 'descr'</li>
+            <li>ProviderFlags = [pfInUpdate]</li>
+          </ul>
+        </li>
+    </ul>
+    </li>
+    <li>Active = True</li>
+  </ul>
+</div>
+<blockquote>
+  <p>&nbsp;</p>
+  <p>Следующий код - для гарантии того, что данные о планетах будут доступны перед выборкой данных о континентах ( описания континентов содержат сссылки на планеты ) : </p>
+  <p class="style1">Установить &quot;refsdatamodule.pas-&gt; qryContinents -&gt; beforeopen:= <span class="source">qrycontinentsbeforeopen</span>&quot;, и описать код : </p>
+  <p class="source">procedure trefsdatamo.qrycontinentsbeforeopen(DataSet: TDataSet);<br>
+&nbsp;&nbsp;&nbsp;begin qryPlanets.active:= true;<br>
+    end;</p>
+  <p class="style1">Это код нужен в том случае, если список планет  может измениться во время использования списка континентов (предусмотрено редактирование планет).</p>
+</blockquote>
+<div class="light_stripe">
+  <p>tmsedatasource (2) :</p>
+  <ul>
+    <li>Name  = dsContinents </li>
+    <li>DataSet = qryContinents </li>
+  </ul>
+</div>
+<p>&nbsp;</p>
+<div class="dark_stripe">
+  <p>tdblookupbuffer (2) :</p>
+  <ul>
+    <li>Name = lbufContinents</li>
+    <li>datasource = dsContinents</li>
+    <li>textfields.items =&gt; "Append Item"    <ul>
+        <li> item 0 = 'descr'  // список названий континентов </li>
+      </ul>
+    </li>
+    <li>integerfields.items =&gt; "Append Item"    <ul>
+        <li> item 0 = 'id'  // список номеров континентов </li>
+        <li>item 1 = 'planet_id' // ссылки на таблицу &quot;planets&quot; </li>
+    </ul>
+    </li>
+  </ul>
+</div>
+<p>&nbsp;</p>
+<p>Несколько слов о &quot;lbufContinents&quot; :</p>
+<ul>
+  <li class="style1">&quot;integerfields&quot; содержит дополнительное поле &quot;planet_id&quot;, по которому будет выполнять отфильтрофка по планете</li>
+</ul>
+<blockquote>&nbsp;</blockquote>
+<h5>Список стран </h5>
+<div class="light_stripe">
+  <p>tmsesqlquery (3) :</p>
+  <ul>
+    <li>Name = qryCountries</li>
+    <li>BeforeOpen = qrycountriesbeforeopen // EVENT PROCESSING !</li>
+    <li>Database = mainfo.conn</li>
+    <li>SQL = 'select * from countries order by id;'</li>
+    <li>UsePrimaryKeyAsKey = False</li>
+    <li>controller.fields.fields =&gt; "Append Item"    <ul>
+        <li>item 0
+          <ul>
+            <li> FieldName = 'id'</li>
+            <li>ProviderFlags = [pfInKey]</li>
+          </ul>
+        </li>
+        <li>item 1
+          <ul>
+            <li>FieldName = 'continent_id'</li>
+            <li>ProviderFlags = [pfInUpdate]</li>
+          </ul>
+        </li>
+        <li> item 2
+          <ul>
+            <li>FieldName = 'descr'</li>
+            <li>ProviderFlags = [pfInUpdate]</li>
+          </ul>
+        </li>
+        </ul>
+    </li>
+    <li>Active = True</li>
+  </ul>
+</div>
+<blockquote>
+  <p class="style1">&nbsp;</p>
+  <p class="style1">Следующий код - для гарантии того, что данные о континентах будут доступны перед выборкой данных о странах ( описания стран содержат сссылки на континенты ) : </p>
+  <blockquote>
+    <p class="style1">Установить &quot;refsdatamodule.pas-&gt; qryCountries -&gt; beforeopen:= <span class="source">qrycountriesbeforeopen</span>&quot;, и описать код : </p>
+    <p class="source">procedure trefsdatamo.qrycountriesbeforeopen(DataSet: TDataSet); <br>
+&nbsp;&nbsp; begin qryContinents.active:= true; <br>
+      end;</p>
+  </blockquote>
+  <p class="style1">Этот код нужен в том случае, если список континентов может измениться во время использования списка стран ( если предусмотрено редактирование планет ).</p>
+  <p class="style1"> Используемый как параметр тип &quot;TDataSet&quot;
+  определен в файле &quot;db.pp&quot; из комплекта FPC, поэтому этот файл нужно добавить  в &quot;refsdatamodule.pas&quot; -&gt; interface -&gt; uses :</p>
+  <blockquote>
+    <p class="source">interface<br>
+&nbsp;&nbsp;uses<br>
+&nbsp;&nbsp;msegui,mseclasses,mseforms,msesqldb,msedb,mselookupbuffer,<br>
+&nbsp;&nbsp;db<br>
+    ; </p>
+  </blockquote>
+  <p class="style1">Почему &quot;interface&quot; часть ? Потому что &quot;refsdatamodule -&gt; qryCountries -&gt; beforeopen&quot; добавила объявление &quot;qrycountriesbeforeopen&quot; сперва в <strong>interface</strong>-часть refdatamodule.pas </p>
+</blockquote>
+<div class="dark_stripe">
+  <p>tmsedatasource (3) :</p>
+  <ul>
+    <li>Name = dsCountries</li>
+    <li>DataSet = qryCountries</li>
+  </ul>
+</div>
+<p>&nbsp;</p>
+<div class="light_stripe">
+  <p>tdblookupbuffer (3) :</p>
+  <ul>
+    <li>Name = lbufCountries</li>
+    <li>datasource = dsCountries</li>
+    <li>textfields.items =&gt; "Append Item"    <ul>
+        <li>item 0 = 'descr' // список названий стран</li>
+      </ul>
+    </li>
+    <li>
+      <div align="left"> integerfields.items =&gt; "Append Item"      <ul>
+          <li> item 0 = 'id' // список номеров стран </li>
+          <li>item 1 = 'continent_id // ссылки на таблицу &quot;continents&quot; </li>
+        </ul>
+      </div>
+    </li>
+  </ul>
+</div>
+<p>&nbsp;</p>
+<p>Несколько слов о &quot;lbufCountries&quot; :</p>
+<ul>
+  <li class="style1">&quot;integerfields&quot; содержит  дополнительное поле &quot;continent_id&quot;, по которому будет выполнять отфильтрофка по континенту </li>
+</ul>
+<blockquote>&nbsp;</blockquote>
+<h5>Список профессий </h5>
+<div class="light_stripe">
+  <div class="dark_stripe">
+    <p>  tmsesqlquery (4) :</p>
+    <ul>
+      <li>Name  = qryOccupations</li>
+      <li>Database = mainfo.conn</li>
+      <li>SQL = 'select * from occupations order by id;'</li>
+      <li>UsePrimaryKeyAsKey = False</li>
+      <li>controller.fields.fields =&gt; "Append Item"    <ul>
+          <li>item 0
+            <ul>
+              <li> FieldName = 'id' </li>
+              <li>ProviderFlags = [pfInKey]</li>
+            </ul>
+          </li>
+          <li> item 1
+            <ul>
+              <li> FieldName = 'descr'</li>
+              <li>ProviderFlags = [pfInUpdate]</li>
+            </ul>
+          </li>
+          <li> Active = True</li>
+        </ul>
+      </li>
+    </ul>
+  </div>
+  <p>tmsedatasource (4) :</p>
+  <ul>
+    <li>Name = dsOccupations</li>
+    <li>DataSet = qryOccupations</li>
+  </ul>
+</div>
+<p>&nbsp;</p>
+<div class="dark_stripe">
+  <p>tdblookupbuffer (4) :</p>
+  <ul>
+    <li>Name = lbufOccupations</li>
+    <li>datasource = dsOccupations</li>
+    <li>textfields.items =&gt; "Append Item"    <ul>
+        <li> item 0 = 'descr' // список названий профессий </li>
+      </ul>
+    </li>
+    <li> integerfields.items =&gt; "Append Item"
+      <ul>
+        <li>item 0 = 'id' // список номеров профессий </li>
+      </ul>
+    </li>
+  </ul>
+</div>
+<p>&nbsp;</p>
+<h5>Список черт характера </h5>
+<div class="light_stripe">
+  <p>  tmsesqlquery (5) :</p>
+  <ul>
+    <li>Name = qryFeatures</li>
+    <li>Database = mainfo.conn</li>
+    <li>SQL = 'select * from features order by id;'</li>
+    <li>UsePrimaryKeyAsKey = False</li>
+    <li>controller.fields.fields =&gt; "Append Item"    <ul>
+        <li> item 0
+          <ul>
+            <li> FieldName = 'id'</li>
+            <li>ProviderFlags = [pfInKey]</li>
+          </ul>
+        </li>
+        <li> item 1
+          <ul>
+            <li> FieldName = 'descr'</li>
+            <li>ProviderFlags = [pfInUpdate]</li>
+          </ul>
+        </li>
+        </ul>
+    </li>
+    <li> Active = True</li>
+  </ul>
+</div>
+<p>&nbsp;</p>
+<div class="dark_stripe">
+  <p>tmsedatasource (5) :</p>
+  <ul>
+    <li>Name  = dsFeatures</li>
+    <li>DataSet = qryFeatures</li>
+  </ul>
+</div>
+<p>&nbsp;</p>
+<div class="light_stripe">
+  <p>tdblookupbuffer (5) :</p>
+  <ul>
+    <li>Name = lbufFeatures</li>
+    <li>datasource = dsFeatures</li>
+    <li>textfields.items =&gt; "Append Item"    <ul>
+        <li> item 0 = 'descr'</li>
+      </ul>
+    </li>
+    <li> integerfields.items =&gt; "Append Item"    <ul>
+        <li> item 0 = 'id'</li>
+      </ul>
+    </li>
+  </ul>
+</div>
+<p>&nbsp;</p>
+<p>Примечания :</p>
+<blockquote>
+  <p><span class="style1"><strong>pfInKey</strong> -&gt; нужно для автоматической записи ВСЕЙ отредактированной строки в БД; данный параметр говорит &quot;данное поле несет в себе ключ ( или один из ключей строки), то есть однозначно ее идентифицирует&quot; ; смысл - чтобы не испортить другую строку, нужно всегда знть, где находишься </span></p>
+  <p class="style1"><strong>pfInUpdate</strong> -&gt; нужно для  записи нового значения данного поля в момент автоматической записи всей строки, иначе изменения при редактировании будут проигнорированы </p>
+  <p class="style1"><strong>UsePrimaryKeyAsKey</strong>:<strong>=False</strong> -&gt; приказ не пытаться автоматически определить поле с уникальным ключом, ведь мы сами указываем ключевое поле, см. <strong>pfInKey</strong></p>
+  <p class="style1"><strong>integerfields.* </strong>-&gt; поля с ключами и ссылками на ключи </p>
+  <p class="style1"><strong>textfields.* </strong>-&gt; поля с текстовыми значениями, связанные с ключевыми полями </p>
+  <p class="style1"><strong>&quot;... order by id&quot;</strong> во всех запросах - чтобы гарантировать прежний порядок записей после редактирования ( иначе сервер БД может дать порядок по времени изменения ) </p>
+  <p class="style1">&nbsp;</p>
+</blockquote>
+<p>Готовый &quot;<strong>refsdatamo</strong>&quot; выглядит следующим образом : </p>
+<p align="center"><img src="images/datamodule1.png" width="424" height="214"></p>
+<p>&nbsp;</p>
+<p>Теперь нужно решить, в какой момент создавать этот &quot;datamodule&quot; во время работы готового приложения, иначе размещенные на нем компоненты будут недоступны. Налицо два варианта :</p>
+<ol>
+  <li>сразу при запуске приложения -  проще, но может без необходимости отъесть память, если не планируется никакого редактирования<br>
+  </li>
+  <li>по мере необходимости - при редактировании данных, использующем его компоненты, при этом подразумевается, что этот &quot;datamodule&quot; будет удаляться сразу, как только станет ненужным.</li>
+</ol>
+<p>Мы будем использовать вариант (2) как более &quot;продвинутый&quot;. </p>
+<p> Сразу видно, что &quot;datamodule&quot; должен создаваться для целей  редактирования/добавления с использованием формы &quot;<strong>editfo</strong>&quot;, то есть непосредственно перед созданием &quot;<strong>editfo</strong>&quot;</p>
+<blockquote>
+  <p class="style1">Установить &quot;editform.pas-&gt;editfo-&gt;oncreate:= editfocreated&quot;, и описать  код : </p>
+  <p class="source">procedure teditfo.editfocreated(const sender: TObject);<br>
+    begin<br>
+  &nbsp;&nbsp;application.createdatamodule(trefsdatamo, refsdatamo);<br>
+  end;</p>
+</blockquote>
+<p>и удаляться из  памяти сразу вслед за освобождением формы :</p>
+<blockquote>
+  <p class="style1">Установить &quot;editform.pas-&gt;editfo-&gt;ondestroy:= editfodestroyed&quot;, и описать код : </p>
+  <p class="source">procedure teditfo.editfodestroyed(const sender: TObject);<br>
+    begin<br>
+    &nbsp;&nbsp;refsdatamo.free;<br>
+  end;</p>
+</blockquote>
+<p>Не забудьте включить &quot;refsdatamodule&quot; в &quot;editform.pas&quot; -&gt; implementation -&gt; uses :</p>
+<blockquote>
+  <p class="source">uses<br>
+&nbsp;&nbsp;editform_mfm,<br>
+&nbsp;&nbsp;refsdatamodule<br>
+    ; </p>
+</blockquote>
+<p>Если все "qry(*).Active:=true" отработали нормально - возвращаемся на "editfo". <br>
+<a name="editing_components"></a></p>
+<h4 align="center">Компоненты для редактирования полей</h4>
+<p>Уроним на &quot;editfo&quot; компоненты, предназначенные для редактирования 
+отдельных полей текущей записи БД.</p>
+<div class="dark_stripe">
+  <div class="light_stripe">
+    <div class="dark_stripe">
+      <p>tdbstringedit (1) </p>
+      <ul>
+        <li>Name:= seName</li>
+        <li>frame
+            <ul>
+              <li>caption = 'Name' </li>
+              <li>captionpos = cp_left </li>
+              <li>captiondist = 15 </li>
+            </ul>
+        </li>
+        <li>datasource = mainfo.dsPersons</li>
+        <li>datafield = 'descr' </li>
+      </ul>
+    </div>
+    <p></p>
+    <p>tenumeditlb (1) </p>
+    <ul>
+      <li>Name:= cbPlanets</li>
+      <li>frame
+        <ul>
+          <li>caption = 'Planet'</li>
+        </ul>
+      </li>
+      <li>onsetvalue = othercontinent </li>
+      <li>dropdown
+        <ul>
+          <li>lookupbuffer = refsdatamo.lbufContinents </li>
+          <li>keyfieldno: = 0 // refsdatamo.lbufPlanets's integerfields[0]</li>
+          <li>cols
+    // какой из textfields[i] заносить в выпадающий список
+            <ul>
+              <li>item 0
+                <ul>
+                  <li>fieldno:= 0 // refsdatamo.lbufPlanets's textfields[0] </li>
+                </ul>
+              </li>
+            </ul>
+          </li>
+          <li>valuecol:= 0 // аналогично &quot;keyfieldno&quot;</li>
+        </ul>
+      </li>
+    </ul>
+  </div>
+  <p>tenumeditlb (2) </p>
+  <ul>
+    <li>Name:=  cbContinents</li>
+    <li>frame
+      <ul>
+        <li>caption = 'Continent'</li>
+      </ul>
+    </li>
+    <li>onsetvalue = othercontinent </li>
+    <li>dropdown
+      <ul>
+        <li>lookupbuffer = refsdatamo.lbufContinents</li>
+        <li>keyfieldno: = 0 // refsdatamo.lbufContinents's integerfields[0]</li>
+        <li>cols
+          <ul>
+            <li>item 0
+              <ul>
+                <li>fieldno:= 0 // refsdatamo.lbufContinents's textfields[0]</li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+        <li>onfilter = continentsfilter</li>
+      </ul>
+    valuecol:= 0 // аналогично &quot;keyfieldno&quot;</li>
+  </ul>
+</div>
+<p>&nbsp;</p>
+<div class="light_stripe">
+  <div class="dark_stripe">
+    <div class="light_stripe">
+      <p>tdbenumeditlb (1)   </p>
+      <ul>
+        <li>Name:= cbCountries</li>
+        <li>frame
+          <ul>
+            <li>caption = 'Country' </li>
+            <li>captionpos = cp_left </li>
+            <li>captiondist = 15 </li>
+          </ul>
+        </li>
+        <li>ondataentered = countryentered </li>
+        <li>datafield = 'country_id' </li>
+        <li>datasource = mainfo.dsPersons </li>
+        <li>dropdown
+          <ul>
+            <li>lookupbuffer = refsdatamo.lbufCountries </li>
+            <li>optionslb = [olb_copyitems] </li>
+            <li>keyfieldno: = 0 // refsdatamo.lbufCountries's integerfields[0]</li>
+            <li>cols
+              <ul>
+                <li>item 0
+                  <ul>
+                    <li>fieldno:= 0 // refsdatamo.lbufCountries's textfields[0]</li>
+                  </ul>
+                </li>
+              </ul>
+            </li>
+            <li>onfilter = countriesfilter</li>
+          </ul>
+        </li>
+      </ul>
+    </div>
+    <p>tdbenumeditlb (2) </p>
+    <ul>
+      <li>Name:= cbOccupations</li>
+      <li>frame
+        <ul>
+          <li>caption = 'Occupation' </li>
+          <li>captionpos = cp_left </li>
+          <li>captiondist = 15 </li>
+        </ul>
+      </li>
+      <li>ondataentered = occupationentered </li>
+      <li>datafield = 'occupation_id' </li>
+      <li>datasource = mainfo.dsPersons </li>
+      <li>dropdown
+        <ul>
+          <li>lookupbuffer = refsdatamo.lbufOccupations </li>
+          <li>keyfieldno: = 0 // refsdatamo.lbufOccupations's integerfields[0]    
+          </li>
+        </ul>
+      </li>
+      <ul>
+        <li>cols
+        </li>
+      </ul>
+      <ul>
+        <ul>
+          <li>item 0
+              <ul>
+                <li>fieldno:= 0 // refsdatamo.lbufOccupations's textfields[0]</li>
+              </ul>
+          </li>
+        </ul>
+      </ul>
+    </ul>
+  </div>
+  <item   end>
+  
+<p>tdbenumeditlb (3) </p>
+  <ul>
+    <li>Name:= cbFeatures</li>
+    <li>frame
+      <ul>
+        <li>caption = 'Feature' </li>
+        <li>captionpos = cp_left </li>
+        <li>captiondist = 15 </li>
+      </ul>
+    </li>
+    <li>ondataentered = featureentered </li>
+    <li>datafield = 'feature_id' </li>
+    <li>datasource = mainfo.dsPersons </li>
+    <li>dropdown
+      <ul>
+        <li>lookupbuffer = refsdatamo.lbufFeatures </li>
+        <li>cols
+          <ul>
+            <li>item 0          </li>
+          </ul>
+        </li>
+      </ul>
+    fieldno:= 0 // refsdatamo.lbufFeatures's textfields[0]</li>
+  </ul>
+</div>
+<item  end>
+
+<p>&nbsp;</p>
+<p>Примечания :</p>
+<ul>
+  <li class="style1">Отличия настроек &quot;<strong>tdbenumeditlb</strong>&quot; и &quot;<strong>tenumeditlb</strong>&quot;: 
+    <ul>
+      <li><strong>tenumeditlb</strong> -&gt; выходное значение находится в свойстве &quot;<strong>&lt;tenumeditlb&gt;.value</strong>&quot;; по этой причине у этих компонентов должно быть правильно выставлено свойство &quot;<strong>&lt;dropdown&gt;.valuecol</strong>&quot; </li>
+      <li><strong>tdbenumeditlb</strong> -&gt; выбранное  значение напрямую пишется в поле БД &quot;<strong>&lt;datasource&gt;.&lt;datafield&gt;</strong>&quot;; но свойства &quot;<strong>value</strong>&quot; и &quot;<strong>valuecol</strong>&quot; также могут использоватьс</li>
+    </ul>
+  </li>
+</ul>
+  <p>&nbsp;</p>
+  <div class="dark_stripe">
+      <p>tdbrealedit (1) </p>
+      <ul>
+      <li>Name:= reSexPotention</li>
+      <li>frame
+      </li>
+      <ul>
+        <li>caption = 'Sex. potention' </li>
+        <li>captionpos = cp_left </li>
+        <li>captiondist = 15 </li>
+      </ul>
+      <li>datasource = mainfo.dsPersons</li>
+      <li>datafield = 'sexual_potention' </li>
+      <li>formatdisp:= '####.####' </li>
+      <li>formatedit:= '####.####' </li>
+      </ul>
+    <blockquote>
+    <p>Примечания : </p>
+    <ul>
+      <li class="style1">&quot;formatdisp&quot; ( показ ) и &quot;formatedit&quot; ( подсветка ввода ) на самом деле - &quot;##.##&quot;, что, согласно синтаксису функции &quot;Format&quot; , означает &quot;число с плавающей точкой  не более более &quot;2-х цифр до&quot; и &quot;2-х цифр после&quot; десятичного разделителя, с принудительным округлением&quot;. То есть количество &quot;#&quot; должно быть удвоено - потому что одинарный символ &quot;#&quot; в языке &quot;Pascal&quot; начинает код символа ( вроде кода #32, обозначающего пробел ) . </li>
+    </ul>
+    <p>Если предыдущее значение было пустое, то пользователь может не знать, в каких единицах измеряется значение,и каой диапазон значений допустим. Поэтому подкажем, для чего уроним справа от reSexPotention : </p>
+    <div class="light_stripe">
+      <p>Widget-&gt;tlabel (1) :</p>
+      <ul>
+        <li> Name:= lblSexPotentionHint</li>
+        <li>Caption:= (0..100) % </li>
+      </ul>
+    </div>
+    </blockquote>
+    <p>&nbsp;</p>
+      <p>&nbsp;</p>
+  </div>
+  <div class="light_stripe">
+      <p>tdbcalendardatetimedit (1) </p>
+      <ul>
+      <li>Name:= cdeDateOfBirth</li>
+      <li>frame </li>
+      <ul>
+        <li>caption = 'Date of birth' </li>
+        <li>captionpos = cp_left </li>
+        <li>captiondist = 15 </li>
+      </ul>
+      <li>datasource = mainfo.dsPersons</li>
+      <li>datafield = 'dateofbirth' </li>
+      </ul>
+    <blockquote>
+    <p>Примечания :</p>
+    <ul>
+      <li class="style1">&quot;cdeDateOfBirth&quot; позволяет как вводтить дату напрямую, так и выбирать из выпадающего календаря <br>
+      </li>
+      <li class="style1">&quot;formatdisp&quot; и &quot;formatedit&quot; оставляем пуcтыми, чтобы опять-таки при внутренних преобразованиях использовался &quot;ShortDateFormat&quot; (см. выше ) <br>
+      </li>
+      <li class="style1">значения дат допускают неточное ( сокращенное ) соответствие формату - и день, и месяц, и год могут быть введены (1..2) цифрами, для чего во время внутренного преобразования будут применены некоторые допущения, вплоть до очень удобных упрощений вроде :
+        <ul>
+          <li>20 -&gt; 20-е число текущего месяца</li>
+          <li>20.1 -&gt; 20-е января текущего года</li>
+  <li>20.1.6 -&gt; 20 января 2006 года <br>
+          </li>
+        </ul>
+      </li>
+      <li class="style1">вследствие особенностей внутреннего представления дат в &quot;FreePascal&quot; версий до 2.4.х, минимальное корректное значение даты равно  30.12.1899; <br>
+        начиная с версий 2.4.0-rc1, минимальная дата ограничивается не вынужденным лимитом, а автопереводом сокращенного формата ( см. выше, например - к значению года меньше 100 автоматически прибавляется 2000 ) , и равна 01.01.0100<br>
+      </li>
+      <li class="style1">если допускается пустое значение даты - оставьте свойство &quot;min&quot; также пустым<br>
+      </li>
+      <li class="style1">свойство &quot;мах&quot; не должно оставаться пустым - иначе любая дата будет считаться неверной <br>
+      </li>
+      <li class="style1">пробел в поле ввода даты, после нажатия &quot;Enter&quot; ,превращается в текущую дату<br>
+      </li>
+      <li class="style1">для вывода календаря без помощи мыши - используейте  комбинацию &quot;Shift+Enter &quot; </li>
+    </ul>
+    <blockquote>
+      <p>Чтобы пользователь знал правильный формат ввода даты ( если старое значение пустое и потому негде подсмотреть ) , покажем ему этот формат.<br>
+        Уроним справа от cdeDateOfBirth :</p>
+    </blockquote>
+      <div class="dark_stripe">
+        <p>Widget-&gt;tlabel (2) :</p>
+        <ul>
+          <li>Name:= lblDateFormatHint</li>
+        </ul>
+        <blockquote>
+        <blockquote>
+          <p>Примечания :</p>
+          <ul>
+            <li class="style1">Так как, в отличие от &quot;lblSexPotentionHint&quot;, невозможно  прописать ( run-time ) значение константы &quot;ShortDateFormat&quot; в &quot;lblDateFormatHint.caption&quot; используя редактор свойств ( design-time ) , придется это сделать в коде при открытии формы &quot;editfo&quot; - будет сделано позже, вместе с другими операциями </li>
+          </ul>
+        </blockquote>
+      </div>				  		
+        <p>&nbsp;</p>
+    </blockquote>
+		  <br>
+</div>
+  <div class="dark_stripe">
+      <p>tdbbooleantextedit (1) </p>
+      <ul>
+      <li>Name:= beHappy</li>
+      <li>frame </li>
+      <ul>
+        <li>caption = 'Happy ?' </li>
+        <li>captionpos = cp_left </li>
+        <li>captiondist = 15 </li>
+      </ul>
+      <li>datasource = mainfo.dsPersons</li>
+      <li>datafield = 'if_happy' </li>
+      <li>text
+        <ul>
+          <li>false:= 'Увы :(' </li>
+          <li>true:= 'Уще как :)'</li>
+        </ul>
+      </li>
+      </ul>
+    <p>Несколько слов о &quot;beHappy&quot; : </p>
+    <blockquote>
+    <ul>
+      <li class="style1"> это - особый тип компонента для отображений значений типа &quot;да/нет&quot; плюс пустое значение для  &quot;неизвестно&quot;; в нашем случае такие неизвестные значения допускаются, поэтому использование другого компонента - с только 2-мя состояниями ( &quot;tdbboleanedit&quot; ) было бы некорректно <br>
+      </li>
+      <li class="style1">свойства text_(false/true) позволяют переопределить текст значений по своем усмотрению
+        <ul>
+          <li>есть еще один способ подмены текста булевых( логических ) значений в ячейках таблиц типа &quot;tgbstringgrid&quot;, как наша таблица &quot;grdPersons&quot; - он  контроллируется настройками поля БД, с которым связан данный компонент, в данном случае &quot;mainfo.dsPersons-&gt;if_happy&quot;:
+            <ul>
+              <li>переходим на форму &quot;mainfo&quot; (файл &quot;main.pas&quot; ) , выбираем это поле ( &quot;fldHappy&quot; ) , и прописываем, через &quot;;&quot;, в &quot;DisplayValues&quot; более понятную нам пару - путь даже &quot;Еще как :);Увы :(&quot; 
+              , чтобы этот ект выглядел одинаково и на &quot;grdPersons&quot;, и на форме редактирования &quot;editfo&quot; ;<br>
+              может быть, придется чуть увеличить размер последнего столбца &quot;grdPersons&quot;<br>
+              [ для &quot;неизвестно&quot; такой подмены не предусмотрено ] </li>
+            </ul>
+          </li>
+        </ul>
+      </li>
+    </ul>
+    </blockquote>
+    <p>&nbsp;</p>
+  </div>
+  <p>Примечания :</p>
+<ul>
+  <li class="style1">Обратите внимание, что описания компонентов задаются не отдельными &quot;<strong>tlabel</strong>&quot;, а свойствами &quot;<strong>&lt;frame&gt;.caption</strong>&quot;, где:
+      <ul>
+        <li>caption:= 'Country' -&gt; само описание </li>
+        <li>captionpos = cp_left -&gt; выводить слева от компонента или &quot;cp_topleft&quot; - сверху слева, и т.п. </li>
+        <li>captiondist = 15 -&gt; с зазором 15 пикселов <br>
+        </li>
+      </ul>
+  </li>
+  <li><span class="style1">облегчить выравнивание компонентов с &quot;captionpos = cp_left&quot; можно следующим образом : </span>
+      <ul>
+        <li class="style1">расставить сами компоненты и выровнять по левой границе </li>
+        <li class="style1">назначить &quot;caption:= &lt;Описание&gt;&quot; каждого из компонентов, но не трогать &quot;captionpos&quot; и &quot;captiondist&quot;</li>
+        <li class="style1">выбрать все выравниваемые компонеты, удерживая клавишу &quot;Ctrl&quot;</li>
+        <li class="style1">в редакторе свойств - выставить &quot;captionpos = cp_left&quot; и &quot;captiondist = 15&quot; , это изменение отразится на всех выбранных компонентах </li>
+        <li class="style1">левой кнопкой мыши переместить всю выбранную группу так, чтобы она поместилась на форме вместе с описаниями <br>
+        </li>
+      </ul>
+  </li>
+</ul>
+<p>Общий вид формы &quot;editfo&quot; с компонентами :</p>
+<p align="center"><img src="images/editform_design.png" width="388" height="363"></p>
+<p>Теперь можно запустить нашу программу и протестировать форму &quot;edotfo&quot;, она будет выглядеть следующим образом :</p>
+<p align="center"><img src="images/editform_runtime.png" width="388" height="363"></p>
+<p align="left">Теперь, если быть внимательным, можно заметить одну особенность - изменения артибутов &quot;Name&quot;, &quot;Sex.potention&quot; и &quot;Happy ?&quot; тут же отражаются также и в таблице  просмотра ( &quot;grdPersons&quot; ) , в отличие от остальных атрибутов. Почему ? Потому что эти значения этих атрибутов напрямую связаны с полями выборки, формирующей &quot;grdPersons&quot; - &quot;qryPersons&quot;, и поэтому редактируются также напрямую. Атрибуты же &quot;Country&quot; &amp; &quot;Occupation&quot; &amp; &quot;Feature&quot; редактируются через замену ссылок на ключи других таблиц, поэтому, делая выбор в списке &quot;Country&quot;, мы меняем значение поля &quot;country_id&quot; выборки &quot;qryPersons&quot;, но не поля &quot;country&quot;, отображаемого в &quot;grdPersons&quot;. Чтобы изменить &quot;country&quot; синхронно с &quot;country_id&quot;, нужен код :</p>
+<p align="left"> editform-&gt;cbCountries -&gt;ondataentered:= countryentered : </p>
+<blockquote>
+  <p align="left" class="source">procedure teditfo.countryentered(const sender: TObject);<br>
+    begin<br>
+&nbsp;&nbsp;    mainfo.fldCountry.value:= cbCountries.text;<br>
+end; </p>
+</blockquote>
+<p align="left">editform-&gt;cbOccupations -&gt;ondataentered:= occupationentered : </p>
+<blockquote>
+  <p align="left" class="source">procedure teditfo.occupationentered(const sender: TObject);<br>
+    begin<br>
+&nbsp;&nbsp; mainfo.fldOccupation.value:= cbOccupations.text;<br>
+    end; </p>
+</blockquote>
+<p align="left">editform-&gt;cbFeatures -&gt;ondataentered:= featureentered : </p>
+<blockquote>
+  <p align="left" class="source">procedure teditfo.featureentered(const sender: TObject);<br>
+    begin<br>
+&nbsp;&nbsp; mainfo.fldFeature.value:= cbFeatures.text;<br>
+    end; </p>
+</blockquote>
+<p align="left">То есть напрямую корректируется выборка &quot;qryPersons&quot;, а уже по ней перерисовывается связанная таблица &quot;grdPersons&quot;. </p>
+<p align="left">Не забудьте вставить &quot;main&quot; в секцию &quot;uses&quot; файла &quot;editform.pas&quot; , чтобы видеть &quot;main&quot; :</p>
+<blockquote>
+  <p align="left" class="source">implementation<br>
+    <br>
+    uses<br>
+&nbsp;&nbsp;editform_mfm,<br>
+&nbsp;&nbsp;refsdatamodule,<br>
+&nbsp;&nbsp;main<br>
+  ;</p>
+</blockquote>
+<p align="left">Примечание:</p>
+<ul>
+  <li>в принципе, этот синхронизм не так уж и нужен - потому, что &quot;grdPersons&quot;, во время редактирования, почти полностью закрывается формой редактирования &quot;editfo&quot; - тот же эффект будет достигнут после  записи изменений в БД с последующим перезапросом - уже с обновленными ( синхронизироваными ) значениями &quot;country_id&quot; и &quot;country&quot; и т.д.</li>
+</ul>
+<p align="left">Далее, мы видим списки &quot;Planets&quot; &amp; &quot;Continents&quot;, выбор в которых нигде не отражается. И вообще - зачем они нужны ? В качестве фильтров - чтобы сузить выбор стран, ведь стран в галактике может быть необозримое множество ! <br>
+  Ни в таблице &quot;persons&quot;, ни в самой выборке &quot;qryPesrons&quot; нет данных ни о планетах, ни о континентах - только ключи таблицы стран. Зато в таблице стран &quot;countries&quot; есть ссылки на ключи таблицы континентов &quot;continents&quot;, а таблице континетов - есть ссылки на на ключи таблицы планет &quot;planets&quot;. Вот и используем эту цепочку ключей :</p>
+<p align="left">editform-&gt;cbPlanets  -&gt;onsetvalue:= planetchanged : </p>
+<blockquote>
+  <p align="left" class="source">procedure teditfo.planetchanged(const sender:TObject; var avalue:Integer;var accept:Boolean);<br>
+    begin<br> 
+    // если выбрана реально другая планета
+    <br>
+&nbsp;if avalue &lt;&gt; (sender as tenumeditlb).value then begin<br>
+&nbsp;&nbsp;cbContinents.value:= -1; // отменить выбор в списке континентов<br>
+    <br> 
+    // и страну теперь нужно выбирать по-новой <br>
+&nbsp;&nbsp;mainfo.fldCountry.clear;  // автоматически отменит выбор в списке стран <br>
+    //
+    (сервис компонента TDB ENUMEDITLB)<br>
+&nbsp;&nbsp;mainfo.fldCountryId.clear;<br>
+&nbsp;end;<br>
+    end;<br>
+  </p>
+</blockquote>
+<p align="left">editform-&gt;cbPlanets -&gt;onsetvalue:= planetchanged : </p>
+<blockquote>
+  <p align="left" class="source">procedure teditfo.continentchanged( const sender:TObject; var avalue:Integer;var accept:Boolean );<br>
+    begin<br>
+    // если выбран реально другой континент<br>
+&nbsp;if avalue &lt;&gt; (sender as tenumeditlb).value then begin<br>
+&nbsp;&nbsp;mainfo.fldCountry.clear; // страну теперь нужно выбирать по-новой<br>
+&nbsp;&nbsp;mainfo.fldCountryId.clear;<br>
+&nbsp;end;<br>
+    end;</p>
+</blockquote>
+<p>Примечания :</p>
+<ul>
+  <li>обратите внимание, что <span class="source">&quot;cbContinents.value:= -1&quot; </span>здесь необязательно, так как сброс выбора в списке произойдет при установке пустого значения ( операция &quot;&lt;field&gt;.clear&quot; ) в связаном (datasource+datafiled) поле.<br>
+  </li>
+  <li>почему мы использовали именно событие &quot;onsetvalue&quot; :
+    <ul>
+      <li>потому что по его входным параметрам можно определить предыдущее и новое значение, чтобы обнаружить реальное изменение выбора, а не просто сам факт выбора</li>
+      <li>Для справки : </li>
+      <li>ondataentered - срабатывает сразу по фиксации  нового значения в &quot;value &quot;</li>
+      <li>onchange - срабатывает при любом изменении текста, включая присвоение <br>
+        <br>
+      <span class="source">&lt;component&gt;.value:= &lt;new_value&gt;<br>
+      </span></li>
+      <li>onsetvalue - срабатывает между ручным изменением текста и записью этого изменения в свойство &quot;value&quot;, таким образом позволяя сделать откат </li>
+      <li>ontextedited - срабатывает при ручном редактировании  текста, позволяя на лету подкорректировать это текст <br>
+      </li>
+    </ul>
+  </li>
+  <li><span class="source">( mainfo.fldCountryId.clear</span> &amp; <span class="source">mainfo.fldCountry.clear ) - </span>идут в одной связке &quot;ключ страны + название страны&quot;, поэтому и сбпасываются + корректируются вместе </li>
+</ul>
+<p>Все бы хорошо, но при открытии формы редактирования &quot;editfo&quot; списки планет и континентов остаются невыбранными, даже если в редактируемой записи задана страна ( которая приписана к неким континенту и планете ). Надо бы синхронизировать списки планет и континентов по этому начальному значению  страны :</p>
+<blockquote>
+  <p class="source">procedure teditfo.editfocreate(const sender: TObject);<br>
+    var<br>
+&nbsp;int1: integer;<br>
+    begin<br>
+&nbsp;application.createdatamodule(trefsdatamo, refsdatamo);<br>
+    <br>
+    // начальная синхронизация континента по стране <br>
+&nbsp;if refsdatamo.lbufCountries.findphys(0,integer(cbCountries.value),int1) then begin<br>
+&nbsp;&nbsp;cbContinents.value:= refsdatamo.lbufCountries.integervaluephys(1,int1);<br>
+&nbsp;end;</p>
+  <p class="source">// и  синхронизация планеты по синхронизированному континенту <br>
+&nbsp;if refsdatamo.lbufContinents.findphys(0,integer(cbContinents.value),int1) then begin<br>
+&nbsp;&nbsp;cbPlanets.value:= refsdatamo.lbufContinents.integervaluephys(1,int1);<br>
+&nbsp;end;<br> 
+// показать правильный формат даты
+<br>
+&nbsp;lblDateFormatHint.caption:= '( ' + uppercase(ShortDateFormat) + ' )'; <br>
+    <br>
+    end;</p>
+</blockquote>
+<p>Примечания :</p>
+<ul>
+  <li><span class="source">refsdatamo.lbufCountries.findphys(0,integer(cbCountries.value),int1);</span>
+    <br>    
+    <ul>
+      <li>находит и запоминает в переменной &quot;int1&quot; физический номер записи в буфере списка стран, соотвествующий начальному значению страны<br>
+      </li>
+      <li>0 = номер того столбца из &quot;integercols&quot;, где хранятся ключи стран <br>
+      </li>
+      <li>приведение типа <span class="source">&quot;integer(cbCountries.value)</span>&quot; нужно для того, чтобы вызвать версию <span class="source">&quot;findphys</span>&quot; именно для &quot;integer&quot;-аргумента<br>
+      </li>
+    </ul>
+  </li>
+  <li><span class="source">cbContinents.value:= refsdatamo.lbufCountries.integervaluephys(1,int1);</span>
+    <br>    
+    <ul>
+      <li>читает из списка стран, из найденной выше строки, значение 2-го столбца ( ключ в таблице континентов ), 
+      и по нему делает выбор в списке континентов<br>
+      </li>
+      <li>1 = номер того столбца из &quot;integercols&quot;, где хранятся ключи континентов <br>
+      </li>
+    </ul>
+  </li>
+  <li>аналогично для планет - но, вместо страны, отталкиваясь от континента <br>
+  </li>
+  <li><span class="source">&quot;lblDateFormatHint.caption:=...&quot; </span>- команда для показа пользователю правильного формата даты ( см. выше, описание &quot;lblDateFormatHint&quot; ) </li>
+</ul>
+<p>Теперь непосредственно сама фильтрация. Выбирая планету и/или континент, мы будем сужать список стран в списке для выбора. Для фильтрации удобно применить свойство &quot;onfilter&quot; компонентов с выпадающими списками :</p>
+<p>editform =&gt; 
+cbContinents -&gt; dropdown -&gt; onfilter:= continentsfilter :</p>
+<blockquote>
+  <p class="source">procedure teditfo.continentsfilter(const sender: tcustomlookupbuffer;<br>
+    &nbsp;&nbsp;const physindex: Integer; var valid: Boolean);<br>
+    begin<br>
+    <br>
+    &nbsp;valid:= <br>
+    &nbsp;&nbsp;(cbPlanets.value = -1) <br>
+    &nbsp;or <br>
+    &nbsp;&nbsp;(sender.integervalue[1,physindex] = cbPlanets.value);<br>
+    <br>
+    end;</p>
+</blockquote>
+<p>editform =&gt; cbCountries -&gt; dropdown -&gt; onfilter:= countriesfilter :</p>
+<blockquote>
+  <p class="source">procedure teditfo.countriesfilter(const sender: tcustomlookupbuffer;<br>
+    &nbsp;&nbsp;const physindex: Integer; var valid: Boolean);<br>
+    begin</p>
+  <p class="source"> &nbsp;if cbPlanets.value = -1 then begin<br>
+    &nbsp;&nbsp;if cbContinents.value = -1 then begin<br>
+    &nbsp;&nbsp;&nbsp;valid:= true;<br>
+    &nbsp;&nbsp;end else begin<br>
+    &nbsp;&nbsp;&nbsp;valid:= sender.integervalue[1,physindex] = cbContinents.value;<br>
+    &nbsp;&nbsp;end;<br>
+    &nbsp;end else begin<br>
+    &nbsp;&nbsp;if cbContinents.value = -1 then begin<br>
+    &nbsp;&nbsp;&nbsp;valid:= false;<br>
+    &nbsp;&nbsp;end else begin<br>
+    &nbsp;&nbsp;&nbsp;valid:= sender.integervalue[1,physindex] = cbContinents.value;<br>
+    &nbsp;&nbsp;end;<br>
+    &nbsp;end;<br>
+    <br>
+    end;</p>
+  <p>Примечания : </p>
+  <ul>
+      <li>обработчик &quot;onfilter&quot; вызывается в момент открытия выпадающего списка, и поочередно проверяет все значения, которыми этот список должен быть заполнен, на соответствие некоторому критерию, реализуемому в коде обработчика
+        <br>        
+        <ul>
+          <li>устанавливая <span class="source">&quot;valid:= true;&quot;</span> перед выходом из обработчика, мы разрешаем данному значению быть помещенным в список, и наоборот<br>
+          </li>
+          <li><span class="source">&quot;valid:= sender.integervalue[1,physindex] = cbContinents.value;&quot; </span>означает &quot;если данном узначению страны сопоставлен код континента (<span class="source"> {sender = lbufCountries}.integervalue [ 1 /* номер столба с кодами континентов */, physindex ]</span> ), равный тому коду, что выбран через список континентов ( <span class="source">cbContinents.value</span> ) - проспустить данную страну в список стран&quot; </li>
+        </ul>
+    </li>
+  </ul>
+</blockquote>
+<p>Конечно, не забудьте добавить модуль &quot;mselookupbuffer&quot;, описывающий &quot;<span class="source">tcustomlookupbuffer</span>&quot;, в &quot;uses&quot;-секцию &quot;editform&quot; : </p>
+<blockquote>
+  <p class="source">interface<br>
+    <br>
+  uses<br>
+  &nbsp;msegui,mseclasses,mseforms,msesimplewidgets,msedbedit,<br>
+&nbsp;mselookupbuffer; </p>
+</blockquote>
+<p align="left">Теперь, запустив приложение, мы можем редактировать, добавлять и удалять записи из таблицы &quot;persons&quot;. </p>
+<p align="left">Важно предотвратить попытки записи в БД заведомо некорректных значений, иначе программа может аварийно завершиться. Пример - поля БД с атрибутами &quot;NOT NULL&quot;, в случае нашего проекта -  &quot;descr&quot;-поля всех таблиц. Поэтому запретим оставлять пустые значения в компонентах, связанных с полями &quot;descr&quot; :</p>
+<blockquote>
+  <p align="left">editform-&gt;seName -&gt;optionsedit -&gt; oe_notnull:= true</p>
+</blockquote>
+<p align="left">Теперь, при закрытии формы &quot;editfo&quot;, этот компонент будет проверен на предмет пустой строки.</p>
+<p align="left">Примечания:</p>
+<ul>
+  <li class="style1">в общем случае &quot;пустая строка&quot; не эквивалентна &quot;NULL&quot;-значению в БД, но  по-другому проверку тут не сделаешь</li>
+</ul>
+<p align="left">Далее, атрибут &quot;Sex.potention&quot; измеряется в процентах - потому должен быть в границах (0..100) % . Также покажем,  какой десятичный разделитель должен использоваться в текущей локали. Обеспечим это :</p>
+<p align="left">editform -&gt;reSexPotention-&gt;oncheckalue:= sexpotentioncheckvalue : </p>
+<blockquote>
+  <p align="left" class="source">procedure teditfo.sexpotentioncheckvalue(const sender: tdataedit;<br>
+    &nbsp;&nbsp;const quiet: Boolean; var accept: Boolean);<br>
+    var<br>
+    &nbsp;f1: double;<br>
+    begin<br>
+    &nbsp;try<br>
+&nbsp;    // сделать тестовое значение доступым для арифметических операциий<br>
+&nbsp;&nbsp;// - числовым <br>
+&nbsp;&nbsp;f1:= StrToFloat(sender.text); <br>
+&nbsp;&nbsp;if (f1 &lt; 0) or (f1 &gt; 100) then begin // затем проверить  диапазон <br>
+&nbsp;&nbsp;&nbsp;// если выход за границы - отказать <br>
+&nbsp;&nbsp;&nbsp;accept:= false; <br>
+&nbsp;&nbsp;&nbsp;// и ругнуться <br>
+&nbsp;&nbsp;&nbsp;showmessage('Percent of people sexual potention should be ' +<br>
+&nbsp;&nbsp;    'in range 0..100','Invalid Input',150);<br>
+&nbsp;&nbsp;end;<br>
+&nbsp;except <br>
+&nbsp;&nbsp;on EConvertError do begin // чтобы не вылететь на неверном формате <br>
+&nbsp;&nbsp;&nbsp;//  пустое значение - разрешить <br>
+&nbsp;&nbsp;&nbsp;if sender.text &lt;&gt; '' then <br>
+&nbsp;&nbsp;&nbsp;&nbsp;// но про неверный формат - сказать <br>
+&nbsp;&nbsp;&nbsp;&nbsp;accept:= false; <br>
+&nbsp;&nbsp;&nbsp;&nbsp;showmessage('Percent value 0..100% step 0'+ <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;DecimalSeparator +<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'01 expected here','Invalid Input',150);<br>
+&nbsp;&nbsp;&nbsp;end;<br>
+&nbsp;&nbsp;end;<br>
+&nbsp;end;<br>
+  end;</p>
+</blockquote>
+<p align="left">Пояснения к коду :</p>
+<ul>
+  <li class="style1">установка &quot;accept := false&quot; возвращает пользователя к месту ошибки, и не разрешит закрыть форму &quot;editfo&quot; до тех пор, пока ошибка не будет устранена. <br>
+  </li>
+  <li class="style1">запрет закрытия формы до устранения ошибки ( пока &quot;accept&quot; не станет &quot;true&quot; ) управляется опцией &quot;reSexPotention -&gt; optionsedit -&gt; oe_closequery:= true&quot;<br>
+  </li>
+  <li class="style1">неверное значение все же принимается при нажатие кнопки &quot;Cancel&quot;, с присвoенным ей кодом закрытия формы &quot;rm_cancel &quot; ( в нашем случае - когда &quot;reSexPotention -&gt; optionsedit -&gt; oe_checkrmcancel:= true&quot; ) , но это ( да и все другие измененные или добавленные ) значение будет сброшено командой отката изменений текущей записи &quot;qryPerson.cancel&quot;, вызванной в &quot;tmainfo.editformshow&quot;
+    <ul>
+      <li>&quot;qryPerson.cancel&quot; также удаляет новую пустую запись, через редактирование которой реализовано добавление<br> 
+      </li>
+    </ul>
+  </li>
+  <li class="style1"><span class="source">DecimalSeparator - </span>встроенная константа языка FreePascal, автоматически адаптирует к  текущей системной локали </li>
+</ul>
+<p align="left">Да, не забудьте подкорректировать секции &quot;uses&quot; файла &quot;editform&quot; : </p>
+<blockquote>
+  <p align="left" class="source">interface<br>
+    uses<br>
+  &nbsp;&nbsp;msegui,mseclasses,mseforms,msesimplewidgets,msedbedit,<br>
+  &nbsp;&nbsp;mselookupbuffer,<br>
+  &nbsp;&nbsp;msedataedits; // импорт &quot;tdataedit&quot;<br>
+  // ..
+  </p>
+  <p align="left" class="source">implementation<br>
+    uses<br>
+    &nbsp;&nbsp;editform_mfm,<br>
+    &nbsp;&nbsp;refsdatamodule,<br>
+    &nbsp;&nbsp;main,<br>
+    &nbsp;&nbsp;sysutils, // импорт &quot;StrToFloat&quot;<br>
+    &nbsp;&nbsp;msewidgets // импорт &quot;ShowMessage&quot;<br>
+    ;</p>
+</blockquote>
+<p align="left">Осталось одно &quot;но&quot; - перезапустив пограмму, мы убедимся, что наша работа пропала даром - опять видим &quot;старые&quot; данные. А все потому, что наши изменения делались не в БД, а во временном буфере редактирования. Поэтому переходим к следующему этапу. </p>
+<p align="left"><a name="changes_fixage"></a></p>
+<h4 align="center">Фиксация изменений, добавлений и удалений в БД </h4>
+<p>Добавим сюда же возможность откатить измеениния до их фиксациив БД.</p>
+<p>Компонент &quot;TBufDataSet&quot; предоставляет следующий сервис по обмену между буфером редактирования и БД :</p>
+<ul>
+  <li> CancelUpdates -&gt; окатить несохраненные изменения </li>
+  <li>ApplyUpdates-&gt; записать несохраненные изменения в БД, причем в пакетном режиме - все записи по-очереди
+, когда  для каждой из записей :
+    <ul>
+      <li>анализируется тип обновления - добавление/изменение или удаление, и в зависимости от этого типа, возможны два варианта продолжения:
+        <ol>
+          <li>автоматическая генерация и выполнение SQL-команды 
+            <ul>
+              <li>возможна, когда редактируемый  запрос выл обращен к одной таблице, а также есть возможность однозначно определить местоположение в запросе, через:
+                <ul>
+                  <li>автоматически найденный индекс -&gt; опция &quot;UsePrimaryKeyAsKey&quot;
+            - вряд ли
+            стоит надеяться </li>
+                  <li>так называемые &quot;ProviderFlags&quot; отдельных стобцов запроса :
+                    <ul>
+                      <li>&quot;pfInKey&quot; и &quot;pfInWhere&quot; -&gt; включать данный столбец в WHERE-фильтры SQL -команд</li>
+                    </ul>
+                  </li>
+                </ul>
+              </li>
+              <li>будет ли конкретный столбец включаться в SET -секцию сгенерированных &quot;UPDATE&quot; SQL-команд - определяется &quot;ProviderFlag&quot;-ом &quot;pfInUpdate&quot;</li>
+            </ul>
+          </li>
+          <li>самостоятельное написание SQL-команды, отталкиваясь от известного типа обновления :
+          </li>
+        </ol>
+        <ul>
+          <ul>
+            <li>выполняется внутри специально отбработчика события &quot;onapplyrecupdate&quot;, наличие этого обработчика выключает автогнерацию (см. выше ) </li>
+            <li>является наиболее гибким, так как позволяет
+              <ul>
+                <li> обновлять запросы, обращенные к нескольким таблицам, БД-функциям, views, и прочим &quot;read-only&quot; БД-объектам </li>
+                <li>использовать промежуточные команды, временные таблицы и.т.п.</li>
+              </ul>
+            </li>
+          </ul>
+        </ul>
+      </li>
+    </ul>
+  </li>
+</ul>
+<p>&nbsp;</p>
+<blockquote>
+  <blockquote>
+    <blockquote>
+      <p>В нашем случае данные в таблице &quot;grdPersons&quot; получены из много-табличного запроса, поэтому по-любому будем использовать способ (2) .</p>
+    </blockquote>
+  </blockquote>
+</blockquote>
+<p>mainfo -&gt; qryPersons</p>
+<blockquote>
+  <p>делаем Active:=false, чтобы избежать кое-какой ругани </p>
+</blockquote>
+<ul>
+  <li>UsePrimaryKeyAsKey:= false</li>
+  <li>onapplyrecupdate:= personsupdate</li>
+  <li>controller -&gt; fields = &quot;&lt;id&gt;&lt;tmsefield&gt;&quot; -&gt; DeleteItem // освободить под  &quot;fldPersonId&quot;, см ниже</li>
+</ul>
+<blockquote>
+  <p>Уронить на &quot;mainfo&quot;, где-нибудь под компонент &quot;trans&quot;, с палитры &quot;DBF&quot; : </p>
+  <blockquote>
+    <p>DBF-&gt;tmselongintfield :</p>
+    <ul>
+      <li>Name:= fldPersonId </li>
+      <li>DataSet:= qryPersons</li>
+      <li>FieldName:= id </li>
+    </ul>
+    <p>Примечание :</p>
+    <ul>
+      <li class="style1"> &quot;fldPersonId&quot; как отдельный компонент имеет смысл при многократном обращении к значению поля. Более привычный способ &quot;qryPersons.fieldbyname('id')&quot; здесь оказывается менее эффективным, так как подразумевает поиск поля по имени среди списка полей при каждом обращении </li>
+    </ul>
+  </blockquote>
+  <p>и возвращаем &quot;qryPersons.Active:=true&quot;</p>
+</blockquote>
+<p>и описываем  код &quot;personsupdate&quot; :</p>
+<blockquote>
+  <p class="source">procedure tmainfo.personsupdate(<br>
+    &nbsp;const sender: tmsesqlquery;<br>
+    &nbsp;const updatekind: TUpdateKind; <br>
+    &nbsp;var asql: AnsiString;<br>
+    &nbsp;var done: Boolean);<br>
+    begin<br>
+    &nbsp;with qryPersons do begin<br>
+&nbsp;    case updatekind of     // анализируется тип обновления <br>
+    &nbsp;&nbsp;&nbsp;ukModify: begin // изменение текущей записи <br>
+    &nbsp;&nbsp;&nbsp;&nbsp;asql:= 'update persons set '+<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'descr=' + fldName.assql +<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;',country_id=' + fldCountryId.assql +<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;',feature_id=' + fldFeatureId.assql +<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;',occupation_id=' + fldOccupationId.assql +<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;',sexual_potention=' + fldSexPotention.assql +  <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;',if_happy=' + fldHappy.assql + <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;',dateofbirth=' + fldDateOfBirth.assql + <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' where id='+ fldPersonId.assql + ';';<br>
+&nbsp;&nbsp;&nbsp;end;    <br>
+&nbsp;&nbsp;&nbsp;ukInsert: begin // добавление новой записи <br>
+&nbsp;&nbsp;&nbsp;&nbsp;asql:= 'insert into persons (' +<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'id' +<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;',descr' +<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;',country_id' +<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;',feature_id' +<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;',occupation_id' +<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;',sexual_potention' +<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;',if_happy' +<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;',dateofbirth' +<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;') values (' + <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'nextval('+ #39 + 'person_id_seq' + #39 + ')' +<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;',' + fldName.assql +<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;',' + fldCountryId.assql +<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;',' + fldFeatureId.assql +<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;',' + fldOccupationId.assql +<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;',' + fldSexPotention.assql + <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;',' + fldHappy.assql + <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;',' + fldDateOfBirth.assql + <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;')';<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;writeln(asql);<br>
+&nbsp;&nbsp;&nbsp;end;<br>
+&nbsp;&nbsp;&nbsp;ukDelete: begin // удаление текущей записи <br>
+&nbsp;&nbsp;&nbsp;&nbsp;asql:= 'delete from persons where id=' + fldPersonId.assql;<br>
+&nbsp;&nbsp;&nbsp;end;<br>
+&nbsp;&nbsp;end;<br>
+&nbsp;end;<br>
+  end;</p>
+</blockquote>
+<p>То есть видим формирование обычной SQL-команды. Чтобы эта команда реально выполнилась,  нужно всего лишь вызвать метод &quot;qryPersons.ApplyUpdates&quot; - который сформирует и выполнит такие же команды последовательно для всех &quot;нуждающихся&quot; записей. </p>
+<p> Но и это нет все ! Все SQL-команды, начиная с первичной выборки данных, выполняются в режиме неявной транзакции. Поэтому, чтобы зафиксировать данные в БД, нужно эту транзакцию подтвердить ( &quot;Commit&quot; ). Далее, после подтверждения транзакции, первичная выборка сбрасывается и связанные с ней компоненты очищаются (что 100% правильно - ведь теперь содержимое БД может не совпадать со &quot;старыми&quot; значениями компонентов ) . Никаких проблем - нужно просто переустановить свойство &quot;Active:= true&quot; у сброшенных выборок, в нашем случае - у &quot;qryPersons&quot;.</p>
+<p>Еще один побочный эффект - сброс так называемых закладок ( &quot;bookmark&quot; ) , поэтому после повторной загрузки данных номер текущей строки также будет сброшен. Поэтому, если мы хотим восстановить местонахождение после обновления данных - нужно сделать это в коде (через специальную переменную для хранения ключа текущей записи таблицы &quot;persons&quot;, вместе с кодом сохранения и воостановления этого ключа ).</p>
+<blockquote>
+  <p class="style2">Примечание:</p>
+  <ul>
+    <li class="style1">ключ текущей записи в идеале - значение уникального поля таблицы, в нашем случае - поле &quot;id&quot;.</li>
+  </ul>
+</blockquote>
+<p>Добавим эту переменную в секцию  <span class="source">&quot;implementation</span>&quot;  файла &quot;main.pas&quot;</p>
+<blockquote>
+  <p class="source">var<br>
+&nbsp;prevkey: integer ; // переменная для хранения ключа текущей строки &quot;qryPersons&quot;</p>
+</blockquote>
+<p class="source"></p>
+<p>В коде ( обновление + перевыборка ) данных делаются через добавление вызовов &quot;ApplyUpdates&quot;, &quot;Commit&quot; и &quot;Active:=true&quot; в процедуры &quot;editformshow&quot;, &quot;addformshow&quot; и &quot;deleterecord&quot; в файле &quot;main&quot;, и эти процедуры принимают следующий вид : </p>
+<div class="dark_stripe">
+  <p>editformshow :</p>
+  <blockquote>
+    <p class="source">procedure tmainfo.editformshow (const sender: TObject);<br>
+      begin<br>
+  &nbsp;try<br>
+  &nbsp;&nbsp;with qryPersons do begin<br>
+  &nbsp;&nbsp;&nbsp;// запомнить позицию на случай отказа от изменений  <br>
+  &nbsp;&nbsp;&nbsp;prevkey:= fldPersonId.asinteger;<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;edit; // войти в режим редактирования текущей записи<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;application.createform(teditfo,editfo);<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;editfo.caption:= ' Editing a person =&gt; '+ fldName.asstring;<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;case editfo.show(true) of <br>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mr_ok: begin // если форма редактирования закрыта кнопкой &quot;Ok&quot;, то <br>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; applyupdates; // сформировать и выполнить SQL-команду на обновление, <br>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; trans.commit; // подтвердить эту SQL-команду,<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; active:= true; // перечитать обновленное содержимое БД<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;locate(prevkey, fldPersonId); // и вернуться на прежнюю позицию<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;end else begin<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;cancel; // отказаться от записи в БД <br>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;end;<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;end;<br>
+&nbsp;    end;<br>
+    &nbsp;&nbsp;finally<br>
+    &nbsp;&nbsp;&nbsp;editfo.free;<br>
+    &nbsp;&nbsp;end;<br>
+      end;</p>
+    <p>Примечания :</p>
+    <ul>
+      <li class="style1">&quot;editfo.caption:= ' Editing a person =&gt; '+ fldName.asstring;&quot; - показывает детали по форме ( изменение данных и по какой персоне ) </li>
+    </ul>
+    <p class="source">&nbsp; </p>
+  </blockquote>
+</div>
+<div class="light_stripe">
+  <p>addformshow : </p>
+  <blockquote>
+    <p class="source">procedure tmainfo.addformshow(const sender: TObject);<br>
+      begin<br>
+&nbsp;try<br>
+&nbsp;&nbsp;with qryPersons do begin<br>
+&nbsp;&nbsp;&nbsp;// запомнить позицию на случай отказа от изменений<br>
+&nbsp;&nbsp;&nbsp;prevkey:= fldPersonId.asinteger; <br>
+&nbsp;&nbsp;&nbsp;// создать новую запись, сделать ее текущей <br>
+&nbsp;&nbsp;&nbsp;// и войти в режим ее радактирования<br>
+&nbsp;&nbsp;&nbsp;append; <br>
+&nbsp;&nbsp;&nbsp;application.createform(teditfo,editfo);<br>
+&nbsp;&nbsp;&nbsp;editfo.caption:= ' Adding a new person';<br>
+  <br>
+&nbsp;&nbsp;&nbsp;case editfo.show(true) of <br>
+  &nbsp;&nbsp;&nbsp;&nbsp;mr_ok: begin // если форма редактирования закрыта кнопкой &quot;Ok&quot;, то <br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;applyupdates; // сформировать и выполнить SQL-команду на добавление, <br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;trans.commit; // подтвердить эту  SQL-команду,<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;active:= true; // перечитать обновленное содержимое БД<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;last; // и встать на добавленную запись<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;end else begin // если же кнопкой &quot;Cancel&quot;, то <br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;cancel; // отказаться от записи в БД <br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;locate(prevkey, fldPersonId); // и вернуться на предыдущую позицию<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;end;<br>
+  &nbsp;&nbsp;&nbsp;end;<br>
+    <br>
+&nbsp;  end;<br>
+  &nbsp;finally<br>
+  &nbsp;&nbsp;editfo.free;<br>
+  &nbsp;end;<br>
+    end;</p>
+    <p>Примечания :</p>
+    <ul>
+      <li class="style1">&quot;<span class="style3">editfo.caption:= ' Adding a new person'</span>;&quot; - показывает, что данная форма - не для редактирования, а именно для добавления новой песоналии</li>
+    </ul>
+    <p class="source style1">&nbsp;</p>
+  </blockquote>
+</div>
+<div class="dark_stripe">
+  <p>deleterecord : </p>
+  <blockquote>
+    <p><span class="source">procedure tmainfo.deleterecord(const sender: TObject);<br>
+      var<br>
+    &nbsp;recnum: integer;<br>
+      begin<br>
+    &nbsp;if askyesno('Are you a nut ???','Deletion request',mr_no,200) then begin<br>
+    &nbsp;&nbsp;with qryPersons do begin<br>
+    &nbsp;&nbsp;&nbsp;recnum:= recno;<br>
+    &nbsp;&nbsp;&nbsp;delete; // пометить текущую запись на удаление<br>
+    &nbsp;&nbsp;&nbsp;applyupdates; // сформировать и выполнить SQL-команду на удаление, <br>
+    &nbsp;&nbsp;&nbsp;trans.commit; // подтвердить эту  SQL-команду,<br>
+    &nbsp;&nbsp; active:= true; // перечитать обновленное содержимое БД<br>
+    &nbsp;&nbsp;&nbsp;if recno &gt; 0 then <br>
+&nbsp;&nbsp;&nbsp;&nbsp;    recno:= recnum - 1; // и встать на запись, последннюю перед удаленной <br>
+    &nbsp;end;<br>
+    end;</span></p>
+    <p>Обратите внимание, что в этой процедуре вместо ключа строки ( <span class="source">prevkey</span> ) используется значение &quot;<span class="source"><strong>qryPersons.RecNo</strong></span>&quot; - номер строки в таблице ( фиксируемый во внутренней переменной &quot;<span class="source"><strong>recnum</strong></span>&quot;. Почему ? Потому что поле &quot;id' после удаления записи уже не будет содержать искомого значения. </p>
+    <p><br>
+    </p>
+  </blockquote>
+</div>
+<p>Обратите также внимание на ( необязательные ) замены, связанные с введением компонента &quot;fldPersonId&quot; :</p>
+<ul>
+  <li>prevkey:= fieldbyname('id').asinteger -&gt; prevkey:= fldPersonId.asinteger</li>
+  <li>locate(prevkey, fieldbyname('id') ) -&gt; locate(prevkey, fldPersonId)</li>
+</ul>
+<p>Все - теперь можно   запустить программу, она полностью функциональна. </p>
+<p>Некоторые мелкие штрихи :</p>
+<ul>
+  <li>чтобы заставить кнопку быть &quot;по-умолчанию&quot; ( срабатывать при нажатии &quot;Enter&quot;  сразу пооле открытия формы ), и вообще назначить порядок перехода между компонентами при завершении в каждом из них -&gt; используйте свойство &quot;TabOrder&quot; ( &gt;=0 ), причем меньшие значения имеют больший приоритет.</li>
+  <li>чтобы форма &quot;editfo&quot; закрывалась при нажатии клавиши &quot;Esc&quot; ( удобно, если не используется мышь) :
+    <blockquote>
+      <p>editfo-&gt;options-&gt;fo_closeonesc:= true </p>
+    </blockquote>
+  </li>
+  <li>чтобы нужная нам форма выводилась в центре экрана ( удобно, если разрешение экрана может меняться ) :
+    <blockquote>
+      <p>editfo-&gt;options-&gt;fo_screencentered:= true </p>
+    </blockquote>
+  </li>
+  <li>чтобы вызывать форму редактирования &quot;editfo&quot; при двойном щелчке мыши по строке :
+    <ul>
+      <li>mainform-&gt;grdPersons-&gt;oncellevent:= personsevent :
+        <p class="source">procedure tmainfo.personsevent(<br>
+&nbsp;          const sender: TObject;<br>
+          &nbsp;&nbsp;var info: celleventinfoty);<br>
+          begin
+          <br>
+          &nbsp;if (cek_buttonrelease = info.eventkind) and <br>
+          &nbsp;&nbsp;&nbsp;&nbsp;(sender as twidget).isdblclick(info.mouseeventinfopo^) then <br>
+          &nbsp;begin<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;actEdit.execute;<br>
+          &nbsp;end;<br>
+          end;</p>
+      </li>
+    </ul>
+    <blockquote>
+      <p>то есть анализируем факт отпускания мыши в пределах &quot;grdPersons&quot;, и если этот факт соответствует двойному щелку левой кнопокой - напрямую запускаем действие, назначенное компоненту &quot;actEdit&quot; </p>
+      <p>или еще более упрощенный ( рекомендуемый ) вариант :</p>
+      <blockquote>
+        <p class="source"><span class="source">procedure tmainfo.personsevent(<br>
+&nbsp; const sender: TObject;<br>
+&nbsp;&nbsp;var info: celleventinfoty);<br>
+          begin <br>
+          </span>&nbsp;if iscellclick( info,[ccr_dblclick] ) then begin<br>
+&nbsp;&nbsp;actEdit.execute;<br>
+&nbsp;end; <br>
+          
+end; </p>
+      </blockquote>
+      <p>и (для справки) совсем низкоуровневый код : </p>
+      <blockquote>
+        <p> <span class="source">with info,mouseeventinfopo^ do begin<br>
+           &nbsp;if (cek_buttonrelease = info.eventkind ) and <br>
+           &nbsp;&nbsp;&nbsp;&nbsp;(ss_double in shiftstate) and<br>
+           &nbsp;&nbsp;&nbsp;&nbsp;(button = mb_left) <br>
+           &nbsp;then begin<br>
+           &nbsp;&nbsp;actEdit.execute; <br>
+           &nbsp;end;<br>
+           end;</span><br>
+        </p>
+      </blockquote>
+      <p>Примечания :</p>
+      <ul>
+        <li class="style1"><span class="source">&quot;iscellclick&quot;</span> удобна еще и тем, что, по умолчанию, нажатие &quot;Enter&quot; эквивалентно двойному щелчку ( отключить это поведение можно, включив  ограничение <span class="source">&quot;ccr_nokeyreturn</span>&quot; в &quot;[..]&quot; списке) <br>
+        </li>
+        <li class="style1">вот  мы увидели еще один вариант активизации компонентов типа &quot;taction&quot; - через прямой вызов &quot;execute&quot;, и получили еще одно подтверждение большого удобства и гибкости &quot;taction&quot;<br>
+        </li>
+        <li class="style1">по умолчанию интервал обнаружения двойного щелчка в &quot;MSEgui&quot; равен 0.4 сек, весьма сильно отличающееся от значения  0.2 сек, принятому по умолчанию в среде X11 ; данный интервал можно изменить следующим способом :
+          <br>          
+          <blockquote>
+            <p>в самой MSEgui-программе -  в стартовом файле проекта :</p>
+            <p class="source">// измеряется в (1/1.000.000) секунды <br>
+              application.dblclicktime:= 200000;<br>
+  application.createform(tmainfo,mainfo);<br>
+  application.run;</p>
+            <p>Примечание :</p>
+            <ul>
+              <li>в принципе, данную настройку можно задавать и менять в любом месте программы <br>
+              </li>
+              <li>MSEgui использует собственный алгоритм для исключения неверной интерпретации &quot;двойного щелчка &quot; в случаях, когда указатель мыши за время между щелчками успевает переместиться на другой визуальный компонент ( или ячейку таблицы ), причем данный алгоритм не зависит от ожидаемого интервала между щелчками . <br>
+                Поэтому <span class="source">&quot;application.dblclicktime&quot;</span> может принимать весьма большие значения без каких-либо проблем, и пользователю не нужно торопиться со щелчками.                <br>
+              Единственное , о чем в этом случае надо помнить - для таблиц используйте именно<span class="source"> &quot;iscellclick( info,[ccr_dblclick]&quot;, </span>так как только здесь выполняется проверка на перемещение в соседние ячейки таблицы </li>
+            </ul>
+          </blockquote>
+        </li>
+      </ul>
+    </blockquote>
+  </li>
+</ul>
+<p>Все, теперь мы можем просматривать и редактировать данные о галактических персоналиях - их именах, местожительстве, чертах характера и т.д. <br>
+  Но что делать, если в нашей галатике открыта новая планета, и на ней тоже обнаружены разумные существа ? Или какая-то злобная цивилизация распылила одну из наших планет на атомы ? Или некие революционеры захватили власть и первым делом переименовали свою планету ?  Или в нашей галактике наконец-то  изжиты некие омеризительные черты характера ? <br>
+  Правильно, нужно иметь сервис по редактированию  планет ( заодно -  континетов и стран на этих планетах ) . Аналогично касается черт характера и  родов деятельности. </p>
+<p> Поэтому переходим на  следующий этап - просмотр и редактирование справочных таблиц. </p>
+</body>
+</html>

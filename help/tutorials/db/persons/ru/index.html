@@ -1,0 +1,80 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<title>A database project example (  FPC + MSEgui )</title>
+<meta http-equiv="Content-Type" content="text/html; charset=windows-1251">
+<link href="usedstyles.css" rel="stylesheet" type="text/css">
+</head>
+
+<body>
+<h2 align="center">Содержание</h2>
+<p>&nbsp;</p>
+<ol start="1">
+  <li><a href="task_setting_up.html">Постановка задачи - ведение  базы данных по известным персоналиям нашей галактики</a></li>
+  <li><a href="prepare_steps.html">Подготовительные шаги </a>
+    <ol start="1">
+      <li><a href="prepare_steps.html#fpc_fixes">Устранение ошибок “Free Pascal Compiler” (FPC) и пересборка MSEgui/ide</a></li>
+      <li><a href="prepare_steps.html#display_requirements">Требования к видео-подсистеме</a></li>
+      <li><a href="prepare_steps.html#libs_check" title="Проверка системы на наличие библиотек, используемых MSEgui, в контексте нашего проекта">Проверка системы на наличие библиотек, используемых MSEgui, в контексте  проекта</a></li>
+      <li><a href="prepare_steps.html#fonts_check" title="Проверка системы на наличие шрифтов, используемых MSEgui ">Проверка системы на наличие шрифтов, используемых MSEgui</a></li>
+      <li><a href="prepare_steps.html#about_printing" title="Несколько слов о печати">Несколько слов о печати</a></li>
+    </ol>
+  
+  <li><a href="project_creation.html" title="Создание проекта ">Создание проекта </a></li>
+  <li><a href="project_base.html" title="Основная форма, запуск и завершение приложения">Основная форма, запуск и завершение приложения</a></li>
+  <li><a href="view_project.html" title="Сервис отображения данных">Просмотр  ранее внесенных данных о персонах</a></li>
+  <li><a href="edit_project.html" title="Редактирование, добавление и удаление данных">Редактирование, добавление и удаление данных о персонах</a>
+    <ol>
+      <li><a href="edit_project.html#changes_for_editing" title="Видоизменение программы просмотра под возможное редактирование">Видоизменение программы просмотра под возможное редактирование</a></li>
+      <li><a href="edit_project.html#editing_step1" title="Реализация редактирования">Реализация редактирования</a>
+        <ol>
+          <li><a href="edit_project.html#editform" title="Специальная форма для редактирования и добавления">Редактирование и добавление с использованием отдельной формы</a></li>
+          <li><a href="edit_project.html#editing_ways" title="Способы непосредственного редактирования текущей записи">Способы непосредственного редактирования текущей записи</a> </li>
+          <li><a href="edit_project.html#data_module" title="Data Module">Data Module</a></li>
+          <li><a href="edit_project.html#editing_components" title="Компоненты для редактирования полей">Компоненты для редактирования полей</a></li>
+          <li><a href="edit_project.html#changes_fixage" title="Фиксация изменений, добавлений и удалений в БД ">Фиксация изменений, добавлений и удалений в БД </a></li>
+        </ol>
+      </li>
+    </ol>
+  </li>
+  <li><a href="ref_tables.html" title="Справочные таблицы ">Справочные таблицы</a>
+    <ol>
+      <li><a href="ref_tables.html#submodule" title="Субмодуль для общности интерфейса и обработки событий">Субмодуль как средство унификации  интерфейса и алгоритма обработки событий</a></li>
+      <li><a href="planets_ref.html" title="Справочник планет">Справочник планет</a>
+        <ol>
+          <li><a href="planets_ref.html#calling_way" title="Способ вызова редактора справочника">Вызова формы просмотра-редактирования из главного меню</a></li>
+        </ol>
+      </li>
+      <li><a href="continents_ref.html" title="Справочник континентов">Справочник континентов</a></li>
+      <li><a href="countries_ref.html" title="Справочник стран ">Справочник стран </a></li>
+      <li><a href="occupations_ref.html" title="Справочник профессий">Справочник профессий ( родов деятельности )</a></li>
+      <li><a href="features_ref.html" title="Справочник черт характера">Справочник черт характера</a></li>
+    </ol>
+  </li>
+  <li>Вызов помощи по программе
+    <ol>
+      <li><a href="help_subsystem.html#about_dialogue" title="Показ "О программе" и копирайта">Показ информации "О программе"</a></li>
+      <li>Контекстная помощь ( будет  ) </li>
+    </ol>
+  </li>
+  <li>Распечатка  данных о персонах (  скоро будет ) </li>
+  <li><a href="exe_squeezing.html" title="Уменьшение размера исполняемого файла программы">Уменьшение размера исполняемого файла программы</a></li>
+  <li>Приложения
+    <ol>
+      <li><a href="db_setup.html" title="Скрипты для создания и первичного наполнения базы данных">Скрипты для создания и первичного наполнения базы данных</a></li>
+      <li><a href="prepare_steps.html#fontmap_scripts" title="Скрипты для генерации файлов алиасов для "ghostscript"">Скрипты для генерации файлов алиасов для "GhostScript"</a></li>
+      <li><a href="more_decorations.html" title="Некоторые декоративные измемения ">Некоторые декоративные изменения </a>
+        <ol>
+          <li><a href="more_decorations.html#main_menu" title="Основное меню">Основное меню</a></li>
+        </ol>
+      </li>
+      <li><a href="files_info.html" title="Готовый проект в виде исходников ">Готовый проект в виде исходников </a></li>
+    </ol>
+  </li>
+</ol>
+  <blockquote>
+    <p>&nbsp;</p>
+  </blockquote>
+</body>
+</html>

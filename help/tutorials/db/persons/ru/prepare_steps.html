@@ -1,0 +1,381 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<title>Подготовительные шаги</title>
+<meta http-equiv="Content-Type" content="text/html; charset=windows-1251">
+<link href="usedstyles.css" rel="stylesheet" type="text/css">
+</head>
+<body bgcolor="#FFFFFF" class="Normal"> 
+<h2 align="center"><a name="fpc_fixes"></a></h2>
+<h2 align="center">Устранение ошибок “Free Pascal Compiler” (FPC) и пересборка &quot;MSEgui/ide&quot; </h2>
+<p>Этот шаг нужен, чтобы избежать некоторых странностей (а то и серьезных ошибок вроде <span class="source">&quot;SegmentationFault&quot;</span> и <span class="source">&quot;AccessViolation</span>&quot; ), а также если планируется использование не-ASCII –кодов в исходных текстах (см. дальше ) . Команда FPC - в курсе, но на данный момент не успела включить данные исправления в стабильный ( 2.0. x ) бранч FPC-проекта. </p> 
+<p>Короче, если у вас версия &quot;FreePascal 2.0.4-rc1&quot; и позднее - файлы из каталога &laquo;<span class="source">patch_fpc_2_0_4</span>&raquo; ( пакет исходников MSEgui + MSEide ) переписать поверх соответствующих файлов исходников FPC , </p> 
+<p>Перейти в каталог <span class="source">&quot;$fpc_source_dir/fcl</span>&quot; , выполнить “<span class="source">make clean</span>”, затем “<span class="source">make</span>”, затем - переписать пересозданные unit -ы из “<span class="source">$fpc_source_dir/fcl/units/</span>” поверх соответствующих unit -ов в каталоге бинарников FPC (обычно <span class="source">/usr/lib/fpc/$fpc_version/units/i386-linux/fcl/</span> ). Теперь пересобрать "MSEgui/ide" из исходников, чтобы также отразить сделанные изменения. </p>
+<p>Примечания :</p>
+<ul>
+  <li>последняя стабильная  версия &quot;FreePascal&quot; ( 2.0.4-rc1 - на момент написания данного руководства ), доступна на <a href="http://svn.freepascal.org/svn/fpc/branches/fixes_2_0 " title="http://svn.freepascal.org/svn/fpc/branches/fixes_2_0 ">http://svn.freepascal.org/svn/fpc/branches/fixes_2_0 </a><br>    
+    <ul>
+      <li>для  версий FreePascal ниже 2.0.4 :
+        <br>        
+        <ul>
+          <li> с файлами из &laquo;<span class="source">patch_fpc_2_0_4</span>&raquo; - ничего не делать !<br>
+          </li>
+          <li>некоторые операции по части поддержки БД могут выполняться некорректно, поэтому лучше обновиться как минимум до 2.0.4-rc1<br>
+            <br>
+      </li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+  <li>самые свежая  версия &quot;MSEide+MSEgui&quot; -  доступна в виде каталога исходных файлов  на <a href="https://svn.sourceforge.net/svnroot/mseide-msegui/trunk">https://svn.sourceforge.net/svnroot/mseide-msegui/trunk</a>, а в виде прекомпилированных бинарных файлов и/или архивов исходных файлов - по адресу <a href="http://sourceforge.net/project/showfiles.php?group_id=165409">http://sourceforge.net/project/showfiles.php?group_id=165409</a>, см. последние версии
+    <br>    
+    <ul>
+      <li>если хотите исправить ошибки &quot;FreePascal&quot; ( см. &laquo;<span class="source">patch_fpc_2_0_4</span>&raquo; ), то вариант &quot;MSEgui+IDE&quot; в виде исходных файлов Вам понадобится по-любому <br>
+      </li>
+      <li>версия с SVN-trunk предназначена только для сборки под &quot;FreePascal&quot; версий 2.0.4-rc1 и позднее</li>
+    </ul>
+  </li>
+</ul>
+<p><br>
+  <a name="display_requirements"></a> </p>
+<h2 align="center"> Требования к видео-подсистеме</h2>
+<p align="left">Чтобы MSEide и приложения на базе MSEgui вообще стартовали , дисплей должен находиться в так называемом &quot;TrueColor&quot; режиме. Для этого есть следующие варианты:</p>
+<ol type="1">
+  <li>установить глубину цвета 15bpp, 16bpp или 24bpp -&gt; &quot;TrueColor&quot; по умолчанию </li>
+  <li>установить глубину цвета 8bpp и дополнительно поместить в подсекцию &quot;Display&quot; файла &quot;XF86Config-4&quot;, описывающую данную глубину, опцию :  </li>
+</ol>
+<ul>
+  <blockquote>
+    <p class="source">Visual&nbsp;&nbsp;&nbsp;&quot;TrueColor&quot;</p>
+    <p align="left">которая переназначает прежнее умолчание для 8bpp ( &quot;PseudoColor&quot; )</p>
+  </blockquote>
+</ul>
+<p align="left">Примечания :</p>
+<ul>
+  <li class="style1">если установлены 8bpp или 15bpp, то переходные ( пастельные, вокруг серого ) цвета могу оказаться искаженными. <br>
+    Особенно это касается режимов    15bpp.<br>
+  В принципе, в MSEgui-программах это можно поправить, но зачем - если другие X11-программы все равно останутся с неправильными цветами. </li>
+</ul>
+<p><a name="libs_check"></a></p>
+<h2 align="center"> Проверка системы на наличие библиотек, <br>
+  используемых MSEgui, <br>
+в контексте нашего проекта </h2>
+<p><span class="source">/usr/lib/libXft.so</span> &nbsp;&nbsp;–&gt; если хотим антиалиасинг, автозамену и т.п. шрифтов – короче, весь сервис библотеки FreeType </p> 
+<p>Примечание: </p> 
+<blockquote> 
+  <p>Чтобы вся эта красота реально заработала – нужно установить TTF -шрифты, идеально подходят FreeSans , FreeSerif и FreeMono (пакет “<span class="source">ttf-freefont</span>” ) </p> 
+</blockquote> 
+<p><span class="source">/usr/lib/libXrender.so</span> &nbsp;&nbsp;-&gt; нужна, если будем использовать картинки, цветовые градиенты и т.п. ( MSEide использует таковые – например, для рисования градиентов в палитре цветов ) </p> 
+<p><span class="source">/usr/lib/libpq.so</span> &nbsp;&nbsp;&nbsp;&nbsp;-&gt; через нее будем работать с PostgreSQL -сервером </p> 
+<p><span class="source">/usr/X11R6/lib/libX11.so</span> и <span class="source">/usr/X11R6/lib/libICE.so</span> –&gt; их наличие обязательно (они 100% есть, если нормально работают Иксы ) ! </p> 
+<p>Если перечисленных библиотек нет, то : </p> 
+<ol> 
+  <li> установите соответствующие пакеты; </li> 
+  <li> создайте символические линки от более детализированых имен файлов, например: </li> 
+</ol> 
+<blockquote> 
+  <p class="source"> # ln –s /usr/lib/libXrender.so.1 /usr/lib/libXrender.so </p> 
+</blockquote> 
+<p>и от имени “root” выполните команду “<span class="source">ldconfig</span>”. </p> 
+<p align="center"><strong><span style="font-size:14pt;"><a name="fonts_check"></a></span></strong></p>
+<h2 align="center"><strong></strong><span style="">Проверка системы на наличие шрифтов, <br>
+используемых MSEgui </span></h2>
+<p>Так как MSEgui внутри использует юникод, он может работать в любой национальной среде ( см. системную переменную “LANG” ), при условии, что в системе установлены шрифты с кодировкой ISO 10646-1, в которых представлены символы национального алфавита системы ( см. первую, до точки, часть значения “LANG”, у меня это “ru_RU” ). Опять-таки, проще всего этого добиться, установив те же “ttf-freefonts”. </p> 
+<p>Для подстраховки по части кодировок лучше импортировать эти шрифты из сервера шрифтов, так как этот сервер умеет на лету генерировать нужные кодировки: </p> 
+<ul> 
+  <li> установить пакет &laquo;xfstt&raquo; ( сервер TrueType-шрифтов ) </li> 
+  <li> в секцию ( /etc/X11/XF86Config-4: Files ) дописать импорт шрифтов из &laquo;xfstt&raquo; : &nbsp;&nbsp; 
+    <blockquote> 
+      <p class="source">FontPath &nbsp;&nbsp;&quot;unix/:7101&quot;</p> 
+    </blockquote> 
+  </li> 
+  <li> сказать серверу XFSTT , какие кодировки генерировать, для чего в <span class="source">/etc/init.d/xfstt</span> , в конце секции анализа конфигурации, вписать строку :
+    <blockquote> 
+      <p class="source">userarg=&quot;$userarg --encoding iso8859-1,koi8-r,windows-1251,iso10646-1,symbol-0&quot;</p> 
+    </blockquote> 
+  </li> 
+  <li> перезапустить &laquo;xfstt&raquo; ( <span class="source">/etc/init.d/xfstt restart</span> ), а затем и все X11- сессии ( Ctrl+Alt+BackSpace в каждой из сессий ) </li> 
+</ul> 
+<p>Примечание: </p> 
+<blockquote> 
+<p>использование "$userarg" - лишь один из способов ( использованый в Debian Linux ) для передачи параметров команжной строки в запускаемый сервер ( демон ) "xfstt", в другом Linux-дистрибутиве может понадобиться другой способ</p>
+ <p>параметр "--encoding" задает, шрифты в каких кодировках сгенерировать, причем каждый шрифт занимает   память, поэтому будем минималистами - зададим минимально необходимый набор кодировок для отображения стандартных X11-программ ( iso8859-1 ), стандартно русифицированных программ ( koi8-r), MSEgui-программ ( iso10646-1 ) и символов вроде стрелок, курсоров и и т.п. ( symbol-0 ); кодировка "windows-1251" здесь - на случай чтения  русских MSWord-файлов в среде OpenOffice/StarOffice/KWord </p>
+  <p>&laquo;xfstt&raquo; при запуске ищет TrueType-шрифты в каталоге и подкаталогах “<span class="source">/usr/share/fonts/truetype/</span>*” - находит, строит кэш, генерирует кодировки и подгружает - независимо от базовой конфигурации X11. </p> 
+  <p>Поэтому добавить другой комплект TTF-шрифтов просто – скопируйте, например, шрифты от MicroSoft – в каталог “<span class="source">/usr/share/fonts/truetype/microsoft/</span>”, и выполните в нем команды &laquo;<span class="source">mkfontscale `pwd`</span>&raquo;, &laquo;<span class="source">mkfontdir `pwd`</span>&raquo; и &laquo;<span class="source">fс-cache `pwd`</span>&raquo; ( эти команды нужны, чтобы информация о новых шрифтах стала доступна для &quot;X11&quot; и &quot;FreeType&quot;  ). </p> 
+  <p>Прямая ссылка на “<span class="source">/usr/share/fonts/truetype/</span> ”( и подкаталоги ) в (<span class="source">/etc/X11/XF86Config-4: Files</span> ) может быть удалена. </p> 
+</blockquote> 
+<p><a name="about_printing"></a></p>
+<h2 align="center"> Несколько слов о печати </h2>
+<p>В Линуксе для печати из GUI -приложений используeтся <span class="source">&quot;GhostScript&quot;</span> – просто потому, что он умеет переводить полученные задания в формате PS ( PostScript ) на &laquo;язык&raquo; конкретного принтера (не обязательно поддерживающего PS ). </p> 
+<p>Чтобы использовать одни и те же шрифты для отображения и печати – нужно сказать &quot;GhostScript&quot; , где находятся отображаемые шрифты. </p> 
+<p>Команда печати выглядит примерно так: </p> 
+<blockquote> 
+  <p class="source">сat &lt;file_to_print&gt;.ps | \<br> 
+    gs -I/usr/share/fonts/truetype/ -q -sDEVICE=epson -dBATCH -dNOPAUSE -dSAFER \<br> 
+    -sOutputFile=- - | lpr -Plp</p> 
+</blockquote> 
+<p>где: </p> 
+<p>&quot;<span class="source">сat &lt;file_to_print&gt;.ps</span>&quot; – может быть заменено потоком данных для распечатки (в формате PS ) </p> 
+<p><span class="source">&quot;-I/usr/share/fonts/truetype/&quot;</span> - нужно, если в файле печати есть ссылки на шрифты из этого каталога (и его подкаталогов) </p> 
+<p><span class="source">&quot;-sDEVICE=epson&quot;</span> – переводить в формат для распечатки на 9-игольчатом принтере системы команд “Epson” </p> 
+<p>( список поддерживаемых принтеров можно узнать командой &laquo;<span class="source">gs --help</span>&raquo;, см. &laquo;Available devices&raquo; ) </p> 
+<p><span class="source">&quot;lp -Plp</span>&quot; – печатать через LPD/LPRng-спулер, у которого использовать очередь печати “lp”, которая, кстати не должна делать прогон страницы ( PS -файл обычно содержит такую команду) </p> 
+<p>Местоположение TrueType -шрифтов можно также указать через <span class="source">“~/.bash_profile</span>”, добавив строку: </p> 
+<blockquote>
+  <p><span class="source">export GS_FONTPATH=/usr/share/fonts/truetype/: $GS_FONTPATH</span> </p>
+</blockquote>
+<p>Кстати , GhostScript сам просканирует подкаталоги &laquo;<span class="source">/usr/share/fonts/truetype/*</span>&raquo; в поиске шрифтов . </p> 
+<p>Но просто информации о каталоге недостаточно, чтобы GhostScript смог использовать TTF -шрифты, ведь он не понимает их имена. Придется использовать алиасы – см. файл </p>
+<blockquote>
+  <p class="source">/usr/share/gs[-afpl,-esp]/&lt;ver&gt;/lib/Fontmap.GS</p>
+</blockquote>
+<p><a name="fontmap_scripts"></a></p>
+<p>Пример скрипта для автоматизации рутинной задачи генерации алиасов ( причем эти алиасы должны соответствоать аналогичным в &quot;FreeType&quot; - иначе будут расхождения вида на экране и на бумаге ) - см. в архиве <a href="gsfonts_setup/xft2gs.tgz" title="xft2gs.tgz">xft2gs.tgz</a>, файл &quot;<strong>do_xft.sh</strong>&quot;. В этом архиве также находятся :</p>
+<ul>
+  <li><strong>Fontmap.GS.xft</strong> - сгенерированный этим скриптом фрагмент для добавления в &quot;Fontmap.GS&quot; на вашем рабочем месте <br>
+  </li>
+  <li><strong>fonts.conf</strong> - файл конфигурации &quot;FreeType&quot; ( /etc/fonts/fonts.conf ), с добавлением алиаса для шрифта &quot;fixed&quot; ( используется в &quot;MSEide&quot; ) </li>
+</ul>
+<p>Запускать &quot;<strong>do_xft.sh</strong>&quot; ( и включать новое содержимое &quot;Fontmap.GS.xft&quot; в &quot;Fontmap.GS&quot; ) следует после изменения в секциях &quot;<strong>&lt;alias&gt;..&lt; prefer&gt;</strong>&quot; файла &quot;/etc/fonts/fonts.conf&quot;.<br>
+Правило – если алиасы в файле &quot;Fontmap.GS&quot; пересекаются ( переопределяются ), то задействуется самый последний вариант.</p>
+<p>Настройки ( через переменные внутри файла ) по умолчанию &quot;<strong>do_xft.sh</strong>&quot; достаточны даже для того, чтобы &quot;GhostScript&quot; понимал разные варианты именования некоторых шрифтов, например - &quot;Times&quot;, &quot;Times New&quot;, &quot;Times New Roman&quot;, &quot;TimesNew Roman&quot;, &quot;TimesNewRoman&quot; - все будут одинаковым образом обработаны, если реально представлены одним и тем же файлом шрифта. Но работает этот <br>
+  механизм не всегда, и слава богу - лучше всегда знать, какой шрифт реально используется, поэтому<br>
+  <u>единственно надежный способ задания имени шрифта - его точная нотация, с соблюдением всех пробелов и регистра букв</u> 
+  <br>
+  -  настоятельно Вам рекомендую всегда делать  именно так ( точные названия шрифтов, понимаемые &quot;GhostScript&quot; -  см. левый столбец в файле &quot;Fontmap.GS&quot; ).<br>
+  <br>
+Также, с этими настройками <u><strong>не нужно</strong></u> добавлять <span class="source">&quot;export GS_FONTPATH</span>=..&quot; в ваш <span class="source">&quot;~/.bash_profile&quot;</span> (см. выше ), так как будут использованы полные пути к файлам шрифтов.</p>
+<p>Запускать &quot;<strong>do_xft.sh</strong>&quot; следует от имени пользователя, который будет реально печатать ( чтобы учесть его собственные шрифты - в домашнем каталоге ) , а уже добавлять к &quot;Fontmap.GS&quot; придется, став суперпользователем ( root ) . Также, данный скрипт подразумевает использование TrueType-шрифтов. </p>
+<p>Опять-таки – почему использовать в PostScript не привычные PS (Type1–шрифты), а именно TrueType ( TTF ) ? Просто потому, что TTF-шрифты содержат в себе начертания символов практически всех европейских языков, нужно лишь сказать &laquo;используй такой-то код для начертания такой-то буквы&raquo; . Задания печати ( в формате PS ), генерируемые MSEgui компонентом &laquo;tpostscriptprinter&raquo;, содержат в себе таблицы перекодировки – что позволяет распечатать практически любые ( хоть китайские – лишь бы были в шрифте ! ) символы, вне зависимости от системной кодировки. </p>
+<blockquote>
+  <p><u>Общее правило при подготовке печати - всегда указывайте в программе максимально детализированное имя шрифты - &quot;Times New Roman&quot; и т.п., чтобы потом, из-за возможных различий в алиасах шрифтов, не получилось  расхождений при печати той же информации на другом рабочем месте. <br>
+  Легче установить на другом рабочем месте нужный шрифт, чем возиться с алиасами </u><strong>!</strong></p>
+</blockquote>
+<p>Примечания : </p>
+<p>Поведение &quot;GhostScript&quot; при получении неправильного или неизвестного имени шрифта, или когда файл шрифта недоступен на файловой системе - неоднозначно. Он может прекратить работу, а может и продолжить, заменив неверный шрифт на умолчание, как правило - шрифт &quot;Helvetica&quot; ( если шрифт 
+по-умолчанию доступен, то, как правило - происходит 2-й вариант ) </p>
+<p>Формат названия шрифта, генерируемого &quot;MSEgui&quot; в заданиях для печати :</p>
+<ul>
+  <li>{font name with spaces and correct letter casing}[-[Bold[Italic]]</li>
+</ul>
+<blockquote>
+  <p>где : </p>
+  <ul>
+    <li>tprintercanvas.font.name: =&gt; {font name with spaces and correct letter casing}<br>
+    </li>
+    <li>tprintercanvas.font.style:= [fs_bold, fs_italic] =&gt; [-[Bold[Italic]]</li>
+  </ul>
+  <p>и именно для такого формата ( <span class="source">&quot;Times New Roman-BoldItalic&quot;</span>, и т.п. ) в файле &quot;Fontmap.GS&quot; должны быть подготовлены корректные алиасы. </p>
+</blockquote>
+<p>Какие шрифты по умолчанию используют MSEgui-программы ? Комплект &quot;Fixed&quot;, &quot;Helvetica&quot;, &quot;Sans&quot;, &quot;Serif&quot;, &quot;Courier New&quot; и &quot;Mono&quot;, назначенный группе встроенных ( stock ) объектов, доступных каждому MSEgui-приложению . <br>
+При заказе  шрифтов библиотека &quot;FreeType&quot; обращается к своему партнеру - библиотеке &quot;FontConfig&quot;, которая, в свою очередь, анализирует системные настройки шрифтов - файл &quot;/etc/fonts/fonts.conf&quot; .</p>
+<p>В этом файле нас интересуют секции :</p>
+<h4>A. Безусловная замена шрифта : </h4>
+<div class="dark_stripe">
+  <blockquote>
+    <p class="source">&lt;!--<br>
+      Accept deprecated 'mono' alias, replacing it with 'monospace'<br>
+      --&gt;<br>
+&lt;match target=&quot;pattern&quot;&gt;<br>
+&lt;test qual=&quot;any&quot; name=&quot;family&quot;&gt;<br>
+&lt;string&gt;mono&lt;/string&gt;<br>
+&lt;/test&gt;<br>
+&lt;edit name=&quot;family&quot; mode=&quot;assign&quot;&gt;<br>
+&lt;string&gt;monospace&lt;/string&gt;<br>
+&lt;/edit&gt;<br>
+&lt;/match&gt;</p>
+  </blockquote>
+  <p>То есть вместо  шрифта &quot;Mono&quot; следует искать шрифт &quot;Monospace&quot;.</p>
+  <div class="light_stripe">
+    <p>&nbsp; </p>
+    <p>!!! <strong>Сразу вслед этой секцией - добавим запись, ожидаемую &quot;MSEide&quot;</strong> : </p>
+    <blockquote>
+      <p><span class="source">&lt;match target=&quot;pattern&quot;&gt;<br>
+&lt;test qual=&quot;any&quot; name=&quot;family&quot;&gt;<br>
+&lt;string&gt;fixed&lt;/string&gt;<br>
+&lt;/test&gt;<br>
+&lt;edit name=&quot;family&quot; mode=&quot;assign&quot;&gt;<br>
+&lt;string&gt;monospace&lt;/string&gt;<br>
+&lt;/edit&gt;<br>
+&lt;/match&gt;</span></p>
+      <p>Это будет  алиас для шрифта &quot;fixed&quot;.</p>
+      <p>&nbsp;</p>
+    </blockquote>
+  </div>
+  <p>&nbsp;</p>
+</div>
+<div class="light_stripe">
+  <p class="source">&lt;!--<br>
+    Accept alternate 'sans serif' spelling, replacing it with 'sans-serif'<br>
+    --&gt;<br>
+&lt;match target=&quot;pattern&quot;&gt;<br>
+&lt;test qual=&quot;any&quot; name=&quot;family&quot;&gt;<br>
+&lt;string&gt;sans serif&lt;/string&gt;<br>
+&lt;/test&gt;<br>
+&lt;edit name=&quot;family&quot; mode=&quot;assign&quot;&gt;<br>
+&lt;string&gt;sans-serif&lt;/string&gt;<br>
+&lt;/edit&gt;<br>
+&lt;/match&gt;</p>
+  <p>То есть вместо шрифта &quot;sans serif&quot; следует искать шрифт &quot;sans-serif&quot;.</p>
+</div>
+<div class="dark_stripe">
+  <p class="source">&lt;!--<br>
+    Accept deprecated 'sans' alias, replacing it with 'sans-serif'<br>
+    --&gt;<br>
+&lt;match target=&quot;pattern&quot;&gt;<br>
+&lt;test qual=&quot;any&quot; name=&quot;family&quot;&gt;<br>
+&lt;string&gt;sans&lt;/string&gt;<br>
+&lt;/test&gt;<br>
+&lt;edit name=&quot;family&quot; mode=&quot;assign&quot;&gt;<br>
+&lt;string&gt;sans-serif&lt;/string&gt;<br>
+&lt;/edit&gt;<br>
+&lt;/match&gt;</p>
+  <p>То есть вместо шрифта &quot;sans&quot; следует искать опять-таки шрифт &quot;sans-serif&quot;.</p>
+</div>
+<h4>&nbsp;</h4>
+<h4>B. Варианты, в порядке убывания предпочтения</h4>
+<div class="light_stripe">
+  <p class="source">&lt;!--<br>
+    Provide required aliases for standard names<br>
+    --&gt;<br>
+&lt;alias&gt;<br>
+&lt;family&gt;serif&lt;/family&gt;<br>
+&lt;prefer&gt;<br>
+&lt;family&gt;Bitstream Vera Serif&lt;/family&gt;<br>
+&lt;family&gt;Times New Roman&lt;/family&gt;<br> 
+    ...
+    <br>
+&lt;family&gt;Nimbus Roman No9 L&lt;/family&gt;<br>
+&lt;family&gt;Times&lt;/family&gt;<br> 
+    ...
+    <br>
+&lt;family&gt;FreeSerif&lt;/family&gt;<br>
+&lt;/prefer&gt;<br>
+&lt;/alias&gt;<br>
+  </p>
+  <p>То есть при нескольких вариантах выбора шрифта <span class="source">&quot;serif&quot; - </span>начинать с <span class="source">&quot;Bitstream Vera Serif&quot; </span>( комплект <span class="source">&quot;fonts-bitstream&quot;</span> ), затем - <span class="source">&quot;Times New Roman&quot; </span>( шрифт от <span class="source">&quot;MicroSoft&quot;</span> ),<span class="source"> &quot;</span><span class="source">Nimbus Roman No9 L&quot;</span> (Type1-шрифт от &quot;Adobe&quot;, входит в комплект GhostScript ), <span class="source">&quot;Times&quot;</span> ( bitmap-шрифт их комплекта XWindows) и <span class="source">&quot;FreeSerif</span> &quot;
+  (шрифт из комплекта “<span class="source">ttf-freefont</span>” ) . </p>
+</div>
+<div class="dark_stripe">
+  <p class="source"><br>
+&lt;alias&gt;<br>
+&lt;family&gt;sans-serif&lt;/family&gt;<br>
+&lt;prefer&gt;<br>
+&lt;family&gt;Bitstream Vera Sans&lt;/family&gt;<br>
+&lt;family&gt;Verdana&lt;/family&gt;<br>
+&lt;family&gt;Arial&lt;/family&gt;<br>
+    ... <br>
+&lt;family&gt;Nimbus Sans L&lt;/family&gt;<br>
+&lt;family&gt;Helvetica&lt;/family&gt;<br>
+    ... <br>
+&lt;family&gt;FreeSans&lt;/family&gt;<br>
+&lt;/prefer&gt;<br>
+&lt;/alias&gt;<br>
+  </p>
+  <p>То есть при нескольких вариантах выбора шрифта <span class="source">&quot;sans-serif&quot; - </span>начинать с <span class="source">&quot;Bitstream Vera Sans&quot; </span>( комплект <span class="source">&quot;fonts-bitstream&quot;</span> ), затем - <span class="source">&quot;Verdana&quot;</span> и <span class="source">&quot;Arial&quot; </span>( шрифты от <span class="source">&quot;MicroSoft&quot;</span> ),<span class="source"> &quot;</span><span class="source">Nimbus Sans L&quot;</span> (Type1-шрифт от &quot;Adobe&quot;, входит в комплект GhostScript ), <span class="source">&quot;Helvetica&quot;</span> ( bitmap-шрифт их комплекта XWindows) и <span class="source">&quot;FreeSans</span>&quot; (шрифт из комплекта “<span class="source">ttf-freefont</span>” ) . </p>
+  <p>&nbsp; </p>
+</div>
+<div class="light_stripe">
+  <p class="source">&lt;alias&gt;<br>
+&lt;family&gt;monospace&lt;/family&gt;<br>
+&lt;prefer&gt;<br>
+&lt;family&gt;Bitstream Vera Sans Mono&lt;/family&gt;<br>
+&lt;family&gt;Andale Mono&lt;/family&gt;<br>
+&lt;family&gt;Courier New&lt;/family&gt;<br>
+    ...
+    <br>
+&lt;family&gt;Nimbus Mono L&lt;/family&gt;<br>
+&lt;family&gt;Courier&lt;/family&gt;<br>
+    ...
+    <br>
+&lt;family&gt;FreeMono&lt;/family&gt;<br>
+&lt;/prefer&gt;<br>
+&lt;/alias&gt;</p>
+  <p>То есть при нескольких вариантах выбора шрифта <span class="source">&quot;monospace&quot; - </span>начинать с <span class="source">&quot;Bitstream Vera Sans Mono&quot; </span>( комплект <span class="source">&quot;fonts-bitstream&quot;</span> ), затем - <span class="source">&quot;Andale Mono&quot; </span>и <span class="source">&quot;Courier New&quot; </span>( шрифты от <span class="source">&quot;MicroSoft&quot;</span> ),<span class="source"> &quot;</span><span class="source">Nimbus Mono L&quot;</span> ( Type1-шрифт от &quot;Adobe&quot;, входит в комплект GhostScript ), <span class="source">&quot;Courier&quot;</span> ( bitmap-шрифт их комплекта XWindows) и <span class="source">&quot;FreeMono</span>&quot; (шрифт из комплекта “<span class="source">ttf-freefont</span>” ) . </p>
+</div>
+<p>То есть, если в системе установлены все вышеперечисленные комплекты шрифтов, то шрифты “<span class="source">ttf-freefont</span>” останутся незадействованными. Шрифты<span class="source"> &quot;fonts-bitstream&quot; </span>на системе с русской локалью будут отсечены из-за их базового языка ( <span class="source">lang=en </span>) , следовательно - будут задействованы MicroSoft-шрифты. </p>
+<p> Если мы хотим, чтобы в &quot;MSEgui&quot; ( и прочих программах, ориентированных на &quot;FreeType&quot; ) были задействованы шрифты “<span class="source">ttf-freefont</span>”, придется вручную переместить строку <span class="source">&quot;&lt;family&gt;FreeSerif&lt;/family&gt;&quot;</span> выше строки <span class="source">&quot;&lt;family&gt;Times New Roman&lt;/family&gt;&quot;,</span> и так далее для остальных шрифтов.</p>
+<p> Кстати, скрипт &quot;<strong>do_xft.sh</strong>&quot; ( см. выше ) принимает в рассчет данный приоритет шрифтов и для самых приоритетных шрифтов  создает самые короткие алиасы .</p>
+<p>Примечание :</p>
+<ul>
+  <li>если Вы работаете в Win-32 и установили &quot;GhostScript + GV&quot;, версии для &quot;Windows&quot;, Вам все равно потребуется файл &quot;Fontmap&quot; ( &quot;Fontmap.GS&quot;, но с убранным расширением ), который должен находиться в каталоге &quot;${WINDIR}/Fonts/&quot;. Содержимое данного файла придется генерировать в Linux, включив каталог &quot;${WINDIR}/Fonts/&quot; в список каталогов шрифтов &quot;Linux&quot;<br>    
+    <ul>
+      <li>в &quot;Fontmap&quot; информацию о путях к файлам шрифтов придется удалить -  либо вручную, либо подправив внутреннюю переменную &quot;SHORTPATHS&quot; скрипта <span class="source">&quot;<strong>do_xft.sh</strong>&quot;</span>, установив ее в &quot;1&quot; <br>
+      </li>
+    </ul>
+  </li>
+  <li>никто не заставляет ставить ни &quot;Microsoft&quot;, ни &quot;FreeFont&quot; шрифты - вполне можно обойтись Type1-шрифтами от &quot;Adobe&quot;,  да еще при том, что для них подходит неизмененный &quot;Fontmap.gs&quot; ;<br>
+    но в этих шрифтах намного меньше кодировок и символов, нужна возня с X11-алиасами для нормальной работы не-FreeType программ, и т.д., короче, по моему опыту - много ненужной возни ;<br>
+  </li>
+  <li>если в системе установлены Type1-шрифты, то они безусловно захватывают на себя FreeType-алиасы &quot;Times&quot;, &quot;Helvetica&quot; и &quot;Courier &quot; , что может создать нестыковку с модифицированным &quot;Fontmap.GS&quot; ; чтобы это предотвратить, удалите из &quot;/etc/fonts/fonts.conf&quot; следующую секцию :
+    <blockquote>
+      <p class="source">&lt;!--<br>
+        URW provides metric and shape compatible fonts for these 3 Adobe families<br>
+        Mark these as effective replacements by binding the replacement<br>
+        family names strongly<br>
+        --&gt;<br>
+&lt;match target=&quot;pattern&quot;&gt;<br>
+&lt;test name=&quot;family&quot;&gt;&lt;string&gt;Times&lt;/string&gt;&lt;/test&gt;<br>
+&lt;edit name=&quot;family&quot; mode=&quot;append&quot; binding=&quot;same&quot;&gt;<br>
+&lt;string&gt;Nimbus Roman No9 L&lt;/string&gt;<br>
+&lt;/edit&gt;<br>
+&lt;/match&gt;<br>
+&lt;match target=&quot;pattern&quot;&gt;<br>
+&lt;test name=&quot;family&quot;&gt;&lt;string&gt;Helvetica&lt;/string&gt;&lt;/test&gt;<br>
+&lt;edit name=&quot;family&quot; mode=&quot;append&quot; binding=&quot;same&quot;&gt;<br>
+&lt;string&gt;Nimbus Sans L&lt;/string&gt;<br>
+&lt;/edit&gt;<br>
+&lt;/match&gt;<br>
+&lt;match target=&quot;pattern&quot;&gt;<br>
+&lt;test name=&quot;family&quot;&gt;&lt;string&gt;Courier&lt;/string&gt;&lt;/test&gt;<br>
+&lt;edit name=&quot;family&quot; mode=&quot;append&quot; binding=&quot;same&quot;&gt;<br>
+&lt;string&gt;Nimbus Mono L&lt;/string&gt;<br>
+&lt;/edit&gt;<br>
+&lt;/match&gt;</p>
+    </blockquote>
+  </li>
+</ul>
+<blockquote>
+  <p>и перезапусите X11 ( чтобы изменения &quot;fonts.conf&quot; ) вступили в действие. </p>
+</blockquote>
+<p>Может встать вопрос - какой комплект TrueType-шрифтов следует выбрать - &quot;FreeFonts&quot;, &quot;MicroSoft&quot;, &quot;BitStream&quot; и т.п. ? А может вообще ограничиться Type1-шрифтами ( *.pfa/pfb). Могу только сослаться на собственный опыт :</p>
+<ul>
+  <li> шрифты от MicroSoft дают прекрасные отпечатки и на больших, и на малых размерах, практически не требуют подстройки параметров FreeType-библиотеки ( см. ниже ), однако при том же заданом размере шрифты отображают несколько укрупненные литеры, нормально это или нет - неизвестно, можно поэкперименировать с DPI-параметром (96..120) в настройках XFSTT-сервера <br>
+  </li>
+  <li> прочие шрифты - для нормального вида требуют донастройки FreeType-библиотеки :
+    <ul>
+      <li> чтобы убрать цветные ореолы -> включить "autihinting" -> создать линк  : <br>
+        <br>
+        &quot;/etc/fonts/conf.d/32-autohint.conf&quot;, указывающий на &quot;/etc/fonts/conf.d/autohint.conf&quot; <br>
+      </li>
+      <li> чтобы повысить резкость прорисовки -> включить субпиксельную отрисовку пикселов -> создать линк : <br>
+        <br>
+      &quot;/etc/fonts/conf.d/31-sub-pixel.conf&quot;, указывающий на  &quot;/etc/fonts/conf.d/sub-pixel.conf &quot;
+      <blockquote>
+        <p class="style1">Параметр "rgb" в этом файле определяет порядок (слева направо) цветов в цветовых триадах, образующих отдельные пикселы, и может отличаться в разных моделях мониторов. Виден под лупой, имеет наибольший эффект для монитров с триадами, расположенными в одну линию - например, жидокристалиических. Если реальный порядок цветов отличается от "rgb", можно его указать в этом параметре. </p>
+      </blockquote>
+      </li>
+    </ul>
+  </li>
+</ul>
+<blockquote>
+  <blockquote>
+<p>И все равно мелкие ( < 8 ) размеры шрифтов могут прорисовываться с разрывами, особено если включена субпиксельная прорисовка </p>
+  </blockquote>
+</blockquote>
+<p>Примечания :
+</p>
+<ul>
+  <li class="style1">Чтобы немасштабируемые ( не-TrueType/Type1 ) шрифты не вклинились в список шрифтов и не помешали бы выбору корректного масштабируемого шрифта, можно исключить их не-TrueType/Type1-шрифты из обработки в FreeType-библиотеке : 
+    <blockquote>
+      <p>создать линк &quot;/etc/fonts/conf.d/30-no-bitmap.conf&quot;, указывающий на  &quot;/etc/fonts/conf.d/no-bitmap.conf&quot; </p>
+    </blockquote>
+  </li>
+  <li class="style1">Файлы в каталоге "/etc/fonts/conf.d/*" будут обработаны в порядке возрастания цифр в начале имени ( цифры не должны повторяться, без цифр - вообще не будет обработан )
+    </p>
+    .</li>
+</ul>
+<p>&nbsp; </p>
+</body>
+</html>

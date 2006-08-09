@@ -1,0 +1,11 @@
+.source {
+	font-family: "Courier New", Courier, mono;
+	font-size: 90%;
+}
+.light_stripe {
+	background-color: #FFFFCC;
+}
+.dark_stripe {
+	background-color: #E0E0E0;
+}
+
