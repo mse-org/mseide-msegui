@@ -43,6 +43,7 @@ type
 
  psalignty = (pa_center,pa_lefttop,pa_top,pa_righttop,pa_right,
                 pa_rightbottom,pa_bottom,pa_leftbottom,pa_left);
+ pslevelty = (psl_1,psl_2,psl_3);
 
  tpostscriptcanvas = class(tprintercanvas)
   private
@@ -52,6 +53,7 @@ type
    fmapnames: array[0..255] of string;
    factfont,factcodepage: integer;
    fstarted: boolean;
+   fpslevel: pslevelty;
   protected
    function getgdifuncs: pgdifunctionaty; override;
    procedure updatescale; override;
@@ -104,6 +106,9 @@ type
                  //returns mapname ('E00' for latin 1)  
    procedure checkmap(const acodepage: integer);
   public
+   constructor create(const user: tprinter; const intf: icanvas);
+  published
+   property pslevel: pslevelty read fpslevel write fpslevel default psl_2;
  end;
  
 implementation
@@ -552,6 +557,12 @@ begin
 end;
 
 { tpostscriptcanvas }
+
+constructor tpostscriptcanvas.create(const user: tprinter; const intf: icanvas);
+begin
+ fpslevel:= psl_2;
+ inherited;
+end;
 
 function tpostscriptcanvas.getgdifuncs: pgdifunctionaty;
 begin
@@ -1338,43 +1349,141 @@ const
  imagepatname = 'impat';
 var
  image: imagety;
- ar1: bytearty;
- str1: string;
- components: integer;
- rowbytes: integer;
- masked: boolean;
-begin
- with fdrawinfo,copyarea do begin
-  masked:= (mask <> nil) and mask.monochrome;
-  if masked then begin
-   if not (createpattern(sourcerect^,destrect^,acolorbackground,acolorforeground,
-                  source^.paintdevice,source^.gc.handle,imagepatname) and 
-         (gui_pixmaptoimage(tsimplebitmap1(mask).handle,image,
-                                  mask.canvas.gchandle) = gde_ok)) then begin
-    exit;
-   end;
-   convertmono(sourcerect^,image,ar1,rowbytes);
-   str1:= 'gsave setpattern /picstr '+inttostr(rowbytes)+' string def ';
-//   str1:= str1+'fill pop'; //does not work without for GS 7.07
-   str1:= str1 + rectscalestring(destrect^) + nl;
-   str1:= str1 +
-       inttostr(sourcerect^.size.cx) + ' ' + inttostr(sourcerect^.size.cy);
-   str1:= str1 + ' true ';
-   str1:= str1 + imagematrixstring(sourcerect^.size)+nl+
-  '{currentfile picstr readhexstring pop} ';
-   str1:= str1 + 'imagemask' + nl;
-   gui_freeimagemem(image.pixels);
-   fstream.write(str1);
-   writebinhex(ar1);
-   str1:= '/picstr null def /'+imagepatname+' null def grestore'+nl;
-   fstream.write(str1);
+ 
+ function imagedict: string;
+ begin
+  with fdrawinfo.copyarea.sourcerect^ do begin
+   result:= '<< /ImageType 1 /Width '+inttostr(size.cx)+
+   ' /Height '+inttostr(size.cy)+' /ImageMatrix '+imagematrixstring(size)+nl+
+   '/DataSource {currentfile picstr readhexstring pop}'+nl+
+   '/BitsPerComponent ';
+  end;
+  if image.monochrome then begin
+   result:= result+'1 ';
   end
   else begin
-   with source^ do begin
-    if df_canvasispixmap in gc.drawingflags then begin
+   result:= result+'8 ';
+  end;
+  result:= result+'/Decode ';
+  if image.monochrome then begin
+   result:= result + '[1 0] ';
+  end
+  else begin
+   if colorspace = cos_gray then begin
+    result:= result + '[0 1] ';
+   end
+   else begin
+    result:= result + '[0 1 0 1 0 1] ';
+   end;
+  end;
+  if al_intpol in fdrawinfo.copyarea.alignment then begin
+   result:= result + '/Interpolate true ';
+  end;
+  result:= result + '>>'+nl;
+ end;
+
+var 
+ ar1,ar2,ar3: bytearty;
+ str1: string;
+ components: integer;
+ rowbytes,maskrowbytes: integer;
+ masked: boolean;
+ po1,po2,po3: pbyte;
+ int1: integer;
+ 
+begin
+ with fdrawinfo,copyarea do begin
+  if not (df_canvasispixmap in source^.gc.drawingflags) then begin
+   exit;
+  end;
+  masked:= (mask <> nil) and mask.monochrome;
+  if masked then begin
+   if fpslevel >= psl_3 then begin
+    with source^ do begin
+     if gui_pixmaptoimage(tsimplebitmap1(mask).handle,image,
+                                   mask.canvas.gchandle) <> gde_ok then begin
+      exit;
+     end;
+     convertmono(sourcerect^,image,ar2,maskrowbytes);
+     gui_freeimagemem(image.pixels);
      if gui_pixmaptoimage(paintdevice,image,gc.handle) <> gde_ok then begin
       exit;
      end
+    end;
+    if image.monochrome then begin
+     convertmono(sourcerect^,image,ar3,rowbytes);
+    end
+    else begin
+     if colorspace = cos_gray then begin
+      convertgray(sourcerect^,image,ar3,rowbytes);
+     end
+     else begin
+      convertrgb(sourcerect^,image,ar3,rowbytes);
+     end;
+    end;
+    gui_freeimagemem(image.pixels);
+    setlength(ar1,length(ar2)+length(ar3));
+    po1:= pointer(ar1);
+    po2:= pointer(ar2);
+    po3:= pointer(ar3);
+    for int1:= image.size.cy - 1 downto 0 do begin
+     system.move(po2^,po1^,maskrowbytes);
+     inc(po1,maskrowbytes);
+     inc(po2,maskrowbytes);
+     system.move(po3^,po1^,rowbytes);
+     inc(po1,rowbytes);
+     inc(po3,rowbytes);
+    end;
+    rowbytes:= rowbytes + maskrowbytes;
+    str1:= 'gsave /picstr '+inttostr(rowbytes)+' string def ';
+    str1:= str1 + rectscalestring(destrect^) + nl;
+    str1:= str1 + '/imdict '+imagedict+' def ';
+    with sourcerect^ do begin
+     str1:= str1 + '/madict  << /ImageType 1 /Width '+inttostr(size.cx)+
+     ' /Height '+inttostr(size.cy)+' /ImageMatrix '+imagematrixstring(size)+nl+
+     '/BitsPerComponent 1 /Decode [1 0] ';
+    end;
+    if al_intpol in alignment then begin
+     str1:= str1 +  '/Interpolate true ';
+    end;
+    str1:= str1 + ' >> def'+nl+
+    '<< /ImageType 3 /DataDict imdict /MaskDict madict /InterleaveType 2 >>'+nl;
+    if image.monochrome then begin
+     str1:= str1 + 'imagemask';
+    end
+    else begin
+     str1:= str1 + 'image';
+    end;
+   end
+   else begin
+    if not (createpattern(sourcerect^,destrect^,acolorbackground,acolorforeground,
+                   source^.paintdevice,source^.gc.handle,imagepatname) and 
+          (gui_pixmaptoimage(tsimplebitmap1(mask).handle,image,
+                                   mask.canvas.gchandle) = gde_ok)) then begin
+     exit;
+    end;
+    convertmono(sourcerect^,image,ar1,rowbytes);
+    gui_freeimagemem(image.pixels);
+    str1:= 'gsave setpattern /picstr '+inttostr(rowbytes)+' string def ';
+ //   str1:= str1+'fill pop'; //does not work without for GS 7.07
+    str1:= str1 + rectscalestring(destrect^) + nl;
+    str1:= str1 +
+        inttostr(sourcerect^.size.cx) + ' ' + inttostr(sourcerect^.size.cy);
+    str1:= str1 + ' true ';
+    str1:= str1 + imagematrixstring(sourcerect^.size)+nl+
+   '{currentfile picstr readhexstring pop} ';
+    str1:= str1 + 'imagemask' + nl;
+    fstream.write(str1);
+    writebinhex(ar1);
+    str1:= '/picstr null def /'+imagepatname+' null def grestore'+nl;
+    fstream.write(str1);
+    exit;
+   end;
+  end
+  else begin
+   with source^ do begin
+    if gui_pixmaptoimage(paintdevice,image,gc.handle) <> gde_ok then begin
+     exit;
     end;
    end;
    components:= 1;
@@ -1400,34 +1509,49 @@ begin
     end;
     str1:= str1 + setcolorstring(acolorforeground) + nl;
    end;
-   str1:= str1 +
-        inttostr(sourcerect^.size.cx) + ' ' + inttostr(sourcerect^.size.cy);
-   if image.monochrome then begin
-    str1:= str1 + ' true ';
-   end
-   else begin
-    str1:= str1 + ' 8';
-   end;
-   str1:= str1 + imagematrixstring(sourcerect^.size)+nl+
-   '{currentfile picstr readhexstring pop} ';
-   if image.monochrome then begin
-    str1:= str1 + 'imagemask';
-   end
-   else begin
-    if colorspace = cos_gray then begin
-     str1:= str1 + 'image';
+   if fpslevel >= psl_2 then begin
+    str1:= str1 + imagedict;
+    if image.monochrome then begin
+     str1:= str1 + 'imagemask';
     end
     else begin
-     str1:= str1 + 'false 3 colorimage';
+     str1:= str1 + 'image';
+    end;
+   end
+   else begin
+    with sourcerect^ do begin
+     str1:= str1 +
+          inttostr(size.cx) + ' ' + inttostr(size.cy);
+     if image.monochrome then begin
+      str1:= str1 + ' true ';
+     end
+     else begin
+      str1:= str1 + ' 8';
+     end;
+     str1:= str1 + imagematrixstring(size)+nl+
+     '{currentfile picstr readhexstring pop} ';
+    end;
+    if image.monochrome then begin
+     str1:= str1 + 'imagemask';
+    end
+    else begin
+     if colorspace = cos_gray then begin
+      str1:= str1 + 'image';
+     end
+     else begin
+      str1:= str1 + 'false 3 colorimage';
+     end;
     end;
    end;
-   str1:= str1+nl;
-   fstream.write(str1);
-   writebinhex(ar1);
-   str1:= '/picstr null def grestore'+nl;
-   fstream.write(str1);
   end;
  end;
+ fstream.write(str1+nl);
+ writebinhex(ar1);
+ str1:= '/picstr null def grestore ';
+ if masked then begin
+  str1:= str1 + '/imdict null def /madict null def';
+ end;
+ fstream.write(str1+nl);
 end;
 
 procedure tpostscriptcanvas.endpage;
