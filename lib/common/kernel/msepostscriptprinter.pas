@@ -80,20 +80,22 @@ type
                    fontneeded: boolean = false; const acolor: colorty = cl_none): string;
    function createpattern(const sourcerect,destrect: rectty; 
                    const acolorbackground,acolorforeground: colorty;
-                   const pixmap: pixmapty; const agchandle: cardinal): boolean;
+                   const pixmap: pixmapty; const agchandle: cardinal;
+                   const patname: string): boolean;
               //true if ok
    procedure handlepoly(const points: ppointty; const lastpoint: integer;
                      const closed: boolean; const fill: boolean);
    procedure handleellipse(const rect: rectty; const fill: boolean);
    procedure ps_drawstring16;
-   procedure ps_destroygc(var drawinfo: drawinfoty);
-   procedure ps_changegc(var drawinfo: drawinfoty);
-   procedure ps_drawlines(var drawinfo: drawinfoty);
-   procedure ps_drawlinesegments(var drawinfo: drawinfoty);
+   procedure ps_drawarc;
+   procedure ps_destroygc;
+   procedure ps_changegc;
+   procedure ps_drawlines;
+   procedure ps_drawlinesegments;
    
-   procedure ps_fillpolygon(var drawinfo: drawinfoty);
-   procedure ps_fillrect(var drawinfo: drawinfoty);
-   procedure ps_copyarea(var drawinfo: drawinfoty);
+   procedure ps_fillpolygon;
+   procedure ps_fillrect;
+   procedure ps_copyarea;
    procedure textout(const text: richstringty; const dest: rectty;
                         const flags: textflagsty; const tabdist: real); override;
    procedure beginpage; override;
@@ -111,6 +113,7 @@ uses
 type
  tsimplebitmap1 = class(tsimplebitmap); 
 const
+ radtodeg = 360/(2*pi);
  nl = lineend;  
  preamble = 
 '/rf {'+nl+        //register font: alias,encoding,origname->
@@ -376,24 +379,24 @@ type
 procedure gui_destroygc(var drawinfo: drawinfoty);
 begin
  try
-  postscriptgcty(drawinfo.gc.platformdata).canvas.ps_destroygc(drawinfo);
+  postscriptgcty(drawinfo.gc.platformdata).canvas.ps_destroygc;
  except //trap for stream write errors
  end;
 end;
  
 procedure gui_changegc(var drawinfo: drawinfoty);
 begin
- postscriptgcty(drawinfo.gc.platformdata).canvas.ps_changegc(drawinfo);
+ postscriptgcty(drawinfo.gc.platformdata).canvas.ps_changegc;
 end;
 
 procedure gui_drawlines(var drawinfo: drawinfoty);
 begin
- postscriptgcty(drawinfo.gc.platformdata).canvas.ps_drawlines(drawinfo);
+ postscriptgcty(drawinfo.gc.platformdata).canvas.ps_drawlines;
 end;
 
 procedure gui_drawlinesegments(var drawinfo: drawinfoty);
 begin
- postscriptgcty(drawinfo.gc.platformdata).canvas.ps_drawlinesegments(drawinfo);
+ postscriptgcty(drawinfo.gc.platformdata).canvas.ps_drawlinesegments;
 end;
 
 procedure gui_drawellipse(var drawinfo: drawinfoty);
@@ -404,12 +407,12 @@ end;
 
 procedure gui_drawarc(var drawinfo: drawinfoty);
 begin
- gdierror(gde_notimplemented);
+ postscriptgcty(drawinfo.gc.platformdata).canvas.ps_drawarc;
 end;
 
 procedure gui_fillrect(var drawinfo: drawinfoty);
 begin
- postscriptgcty(drawinfo.gc.platformdata).canvas.ps_fillrect(drawinfo);
+ postscriptgcty(drawinfo.gc.platformdata).canvas.ps_fillrect;
 end;
 
 procedure gui_fillelipse(var drawinfo: drawinfoty);
@@ -420,7 +423,7 @@ end;
 
 procedure gui_fillpolygon(var drawinfo: drawinfoty);
 begin
- postscriptgcty(drawinfo.gc.platformdata).canvas.ps_fillpolygon(drawinfo);
+ postscriptgcty(drawinfo.gc.platformdata).canvas.ps_fillpolygon;
 end;
 
 procedure gui_drawstring16(var drawinfo: drawinfoty);
@@ -509,7 +512,7 @@ end;
    
 procedure gui_copyarea(var drawinfo: drawinfoty);
 begin
- postscriptgcty(drawinfo.gc.platformdata).canvas.ps_copyarea(drawinfo);
+ postscriptgcty(drawinfo.gc.platformdata).canvas.ps_copyarea;
 end;
    
 const
@@ -704,19 +707,19 @@ begin
  end;
 end;
 
-procedure tpostscriptcanvas.ps_destroygc(var drawinfo: drawinfoty);
+procedure tpostscriptcanvas.ps_destroygc;
 begin
  endpage;
  fstream.write(
   '%%Pages: '+inttostr(fps_pagenumber)+nl);
 end;
 
-procedure tpostscriptcanvas.ps_changegc(var drawinfo: drawinfoty);
+procedure tpostscriptcanvas.ps_changegc;
 var
  str1: string;
  int1,int2: integer;
 begin
- with drawinfo,gcvalues^ do begin
+ with fdrawinfo,gcvalues^ do begin
   if gvm_dashes in mask then begin
    int2:= length(lineinfo.dashes);
    if int2 > 0 then begin
@@ -1049,7 +1052,7 @@ begin
   end
   else begin
    str1:= str1 + 'matrix currentmatrix '+ posstring(pos) + ' translate '+nl+
-    sizestring(size)+' scale 0 0 0.5 0 360 arc setmatrix ';
+              sizestring(size)+' scale 0 0 0.5 0 360 arc setmatrix ';
   end;
  end;
  str1:= str1 + 'closepath ';
@@ -1062,18 +1065,40 @@ begin
  fstream.write(str1+nl);
 end;
 
-procedure tpostscriptcanvas.ps_drawlines(var drawinfo: drawinfoty);
+procedure tpostscriptcanvas.ps_drawarc;
+var
+ str1: string;
 begin
- with drawinfo.points do begin
+ with fdrawinfo.arc,rect^ do begin
+  str1:= 'newpath ';
+  if cy = cx then begin
+   str1:= str1+posstring(pos)+' '+diststring(cx div 2)+' '+
+     psrealtostr(startang*radtodeg)+' '+psrealtostr((startang+extentang)*radtodeg)+
+     ' arc ';
+  end
+  else begin
+   str1:= str1 + 'matrix currentmatrix '+ posstring(pos) + ' translate '+nl+
+              sizestring(size)+' scale 0 0 0.5 '+
+     psrealtostr(startang*radtodeg)+' '+psrealtostr((startang+extentang)*radtodeg)+
+      ' arc setmatrix ';
+  end;
+ end;
+ str1:= str1 + strokestr;
+ fstream.write(str1+nl);
+end;
+
+procedure tpostscriptcanvas.ps_drawlines;
+begin
+ with fdrawinfo.points do begin
   handlepoly(points,count-1,closed,false);
  end;
 end;
 
-procedure tpostscriptcanvas.ps_drawlinesegments(var drawinfo: drawinfoty);
+procedure tpostscriptcanvas.ps_drawlinesegments;
 var
  int1: integer;
 begin
- with drawinfo.points do begin
+ with fdrawinfo.points do begin
   for int1:= 0 to count div 2 - 1 do begin
    handlepoly(points,1,false,false);
    inc(points,2);
@@ -1081,18 +1106,18 @@ begin
  end;
 end;
 
-procedure tpostscriptcanvas.ps_fillpolygon(var drawinfo: drawinfoty);
+procedure tpostscriptcanvas.ps_fillpolygon;
 begin
- with drawinfo.points do begin
+ with fdrawinfo.points do begin
   handlepoly(points,count-1,true,true);
  end;
 end;
 
-procedure tpostscriptcanvas.ps_fillrect(var drawinfo: drawinfoty);
+procedure tpostscriptcanvas.ps_fillrect;
 var
  points1: array[0..3] of pointty;
 begin
- with drawinfo.rect.rect^ do begin
+ with fdrawinfo.rect.rect^ do begin
   points1[0].x:= x;
   points1[0].y:= y;
   points1[1].x:= x+cx;
@@ -1238,7 +1263,8 @@ end;
 
 function tpostscriptcanvas.createpattern(const sourcerect,destrect: rectty;
                    const acolorbackground,acolorforeground: colorty;
-                   const pixmap: pixmapty; const agchandle: cardinal): boolean;
+                   const pixmap: pixmapty; const agchandle: cardinal;
+                   const patname: string): boolean;
          //returns pattern dict on ps stack
 var
  ar1: bytearty;
@@ -1265,8 +1291,12 @@ begin
   end;
  end;
  gui_freeimagemem(image.pixels);
- str1:= '/patdat '+inttostr(rowbytes*image.size.cy)+' string def'+nl+
-        'currentfile patdat readhexstring'+nl;
+ if length(ar1) > 60000 then begin
+  result:= false;
+  exit;
+ end;
+ str1:= '/'+patname+' '+inttostr(rowbytes*image.size.cy)+' string def'+nl+
+        'currentfile '+patname+' readhexstring'+nl;
  fstream.write(str1);
  writebinhex(ar1);
  str1:= 'pop pop gsave '+rectscalestring(destrect)+nl+
@@ -1287,7 +1317,7 @@ begin
  else begin
   str1:= str1 + ' 8';
  end;
- str1:= str1 + imagematrixstring(sourcerect.size)+ ' patdat ';
+ str1:= str1 + imagematrixstring(sourcerect.size)+ ' '+patname+' ';
  if image.monochrome then begin
   str1:= str1 + 'imagemask';
  end
@@ -1303,29 +1333,29 @@ begin
  fstream.write(str1);
 end;
   
-procedure tpostscriptcanvas.ps_copyarea(var drawinfo: drawinfoty);
+procedure tpostscriptcanvas.ps_copyarea;
+const
+ imagepatname = 'impat';
 var
  image: imagety;
- 
-var
  ar1: bytearty;
  str1: string;
  components: integer;
  rowbytes: integer;
  masked: boolean;
 begin
- with drawinfo,copyarea do begin
+ with fdrawinfo,copyarea do begin
   masked:= (mask <> nil) and mask.monochrome;
   if masked then begin
    if not (createpattern(sourcerect^,destrect^,acolorbackground,acolorforeground,
-                  source^.paintdevice,source^.gc.handle) and 
+                  source^.paintdevice,source^.gc.handle,imagepatname) and 
          (gui_pixmaptoimage(tsimplebitmap1(mask).handle,image,
                                   mask.canvas.gchandle) = gde_ok)) then begin
     exit;
    end;
    convertmono(sourcerect^,image,ar1,rowbytes);
    str1:= 'gsave setpattern /picstr '+inttostr(rowbytes)+' string def ';
-   str1:= str1+'fill '; //does not work without
+//   str1:= str1+'fill pop'; //does not work without for GS 7.07
    str1:= str1 + rectscalestring(destrect^) + nl;
    str1:= str1 +
        inttostr(sourcerect^.size.cx) + ' ' + inttostr(sourcerect^.size.cy);
@@ -1336,7 +1366,7 @@ begin
    gui_freeimagemem(image.pixels);
    fstream.write(str1);
    writebinhex(ar1);
-   str1:= '/picstr null def grestore'+nl;
+   str1:= '/picstr null def /'+imagepatname+' null def grestore'+nl;
    fstream.write(str1);
   end
   else begin
