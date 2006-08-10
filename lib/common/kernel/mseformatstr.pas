@@ -132,12 +132,9 @@ var
  defaultformatsettings: tformatsettings; //mit '.' als dezitrenner
 {$endif}
 
-implementation
-
-uses
- sysconst,msedate,msereal,Math;
-
 const
+ charhex: array[0..15] of char = 
+          ('0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F');
  hexchars: array[char] of byte = (
   $80,$80,$80,$80,$80,$80,$80,$80,$80,$80,$80,$80,$80,$80,$80,$80, //0
   $80,$80,$80,$80,$80,$80,$80,$80,$80,$80,$80,$80,$80,$80,$80,$80, //1
@@ -155,6 +152,11 @@ const
   $80,$80,$80,$80,$80,$80,$80,$80,$80,$80,$80,$80,$80,$80,$80,$80, //d
   $80,$80,$80,$80,$80,$80,$80,$80,$80,$80,$80,$80,$80,$80,$80,$80, //e
   $80,$80,$80,$80,$80,$80,$80,$80,$80,$80,$80,$80,$80,$80,$80,$80);//f
+  
+implementation
+
+uses
+ sysconst,msedate,msereal,Math;
 
 function cstringtostringvar(var inp: pchar): string;
 

@@ -757,7 +757,7 @@ type
    procedure drawarc(const def: rectty; const startang,extentang: real; 
                               const acolor: colorty = cl_default);
                              //def.pos = center, def.cx = width, def.cy = height
-                             //startang,extentang in radiant (2*pi = 360? CCW)
+                             //startang,extentang in radiant (2*pi = 360deg CCW)
 
    procedure fillrect(const arect: rectty; const acolor: colorty = cl_default); overload;
    procedure fillellipse(const def: rectty; const acolor: colorty = cl_default); overload;

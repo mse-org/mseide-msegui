@@ -1400,7 +1400,7 @@ begin
 end;
 
 function gui_pixmaptoimage(pixmap: pixmapty; out image: imagety;
-                       gchandle: cardinal): gdierrorty;
+                                      gchandle: cardinal): gdierrorty;
 var
  info: pixmapinfoty;
  ximage: pximage;

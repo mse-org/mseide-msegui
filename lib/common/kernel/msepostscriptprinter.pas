@@ -65,18 +65,35 @@ type
    procedure definefont(const adata: fontnumty; const acodepage: integer);
    procedure setpslinewidth(const avalue: integer);
    function posstring(const apos: pointty): string;
+   function diststring(const adist: integer): string;
+   function sizestring(const asize: sizety): string;
+   function strokestr: string;
+   function rectscalestring(const arect: rectty): string; 
+                 //transform unity cell to arect
+   function imagematrixstring(const asize: sizety): string;
+   
    function getcolorstring(const acolor: colorty): string;
    function setcolorstring(const acolor: colorty): string;
+   procedure writebinhex(const data: bytearty);
    function psencode(const text: pchar; const count: integer): string;
    function getshowstring(const avalue: pmsechar; const count: integer;
                    fontneeded: boolean = false; const acolor: colorty = cl_none): string;
+   function createpattern(const sourcerect,destrect: rectty; 
+                   const acolorbackground,acolorforeground: colorty;
+                   const pixmap: pixmapty; const agchandle: cardinal): boolean;
+              //true if ok
+   procedure handlepoly(const points: ppointty; const lastpoint: integer;
+                     const closed: boolean; const fill: boolean);
+   procedure handleellipse(const rect: rectty; const fill: boolean);
    procedure ps_drawstring16;
    procedure ps_destroygc(var drawinfo: drawinfoty);
    procedure ps_changegc(var drawinfo: drawinfoty);
    procedure ps_drawlines(var drawinfo: drawinfoty);
    procedure ps_drawlinesegments(var drawinfo: drawinfoty);
-   procedure ps_drawpoly(const points: ppointty; const lastpoint: integer;
-                     const closed: boolean);
+   
+   procedure ps_fillpolygon(var drawinfo: drawinfoty);
+   procedure ps_fillrect(var drawinfo: drawinfoty);
+   procedure ps_copyarea(var drawinfo: drawinfoty);
    procedure textout(const text: richstringty; const dest: rectty;
                         const flags: textflagsty; const tabdist: real); override;
    procedure beginpage; override;
@@ -89,8 +106,10 @@ type
  
 implementation
 uses
- msegui,mseguiglob,msesys,sysutils,msedatalist,mseformatstr,mseunicodeps;
- 
+ msegui,mseguiglob,msesys,sysutils,msedatalist,mseformatstr,mseunicodeps,
+ mseguiintf,msebits;
+type
+ tsimplebitmap1 = class(tsimplebitmap); 
 const
  nl = lineend;  
  preamble = 
@@ -379,7 +398,8 @@ end;
 
 procedure gui_drawellipse(var drawinfo: drawinfoty);
 begin
- gdierror(gde_notimplemented);
+ postscriptgcty(drawinfo.gc.platformdata).canvas.handleellipse(
+                        drawinfo.rect.rect^,false);
 end;
 
 procedure gui_drawarc(var drawinfo: drawinfoty);
@@ -389,17 +409,18 @@ end;
 
 procedure gui_fillrect(var drawinfo: drawinfoty);
 begin
- gdierror(gde_notimplemented);
+ postscriptgcty(drawinfo.gc.platformdata).canvas.ps_fillrect(drawinfo);
 end;
 
 procedure gui_fillelipse(var drawinfo: drawinfoty);
 begin
- gdierror(gde_notimplemented);
+ postscriptgcty(drawinfo.gc.platformdata).canvas.handleellipse(
+                        drawinfo.rect.rect^,true);
 end;
 
 procedure gui_fillpolygon(var drawinfo: drawinfoty);
 begin
- gdierror(gde_notimplemented);
+ postscriptgcty(drawinfo.gc.platformdata).canvas.ps_fillpolygon(drawinfo);
 end;
 
 procedure gui_drawstring16(var drawinfo: drawinfoty);
@@ -488,7 +509,7 @@ end;
    
 procedure gui_copyarea(var drawinfo: drawinfoty);
 begin
- gdierror(gde_notimplemented);
+ postscriptgcty(drawinfo.gc.platformdata).canvas.ps_copyarea(drawinfo);
 end;
    
 const
@@ -745,6 +766,16 @@ begin
   psrealtostr(foriginy-apos.y*fgcscale);
 end;
 
+function tpostscriptcanvas.diststring(const adist: integer): string;
+begin
+ result:= psrealtostr(adist*fgcscale);
+end;
+
+function tpostscriptcanvas.sizestring(const asize: sizety): string;
+begin
+ result:= psrealtostr(asize.cx*fgcscale)+' '+psrealtostr(asize.cy*fgcscale);
+end;
+
 function tpostscriptcanvas.getcolorstring(const acolor: colorty): string;
 var
  co1: rgbtriplety;
@@ -972,8 +1003,19 @@ begin
  fstream.write(psrealtostr(rea1)+' setlinewidth'+nl);
 end;
 
-procedure tpostscriptcanvas.ps_drawpoly(const points: ppointty; 
-             const lastpoint: integer; const closed: boolean);
+function tpostscriptcanvas.strokestr: string;
+begin
+ if (length(dashes) > 0) and (dashes[length(dashes)] = #0) then begin
+  result:= 'gsave [] 0 setdash ' + setcolorstring(fdrawinfo.acolorbackground) +
+           ' stroke grestore stroke'; //draw background 
+ end
+ else begin
+  result:= 'stroke';
+ end;
+end;
+
+procedure tpostscriptcanvas.handlepoly(const points: ppointty; 
+             const lastpoint: integer; const closed: boolean; const fill: boolean);
 var
  int1: integer;
  str1: string;
@@ -986,20 +1028,44 @@ begin
   if closed then begin
    str1:= str1 + ' closepath';
   end;
-  if (length(dashes) > 0) and (dashes[length(dashes)] = #0) then begin
-   str1:= str1 + ' gsave [] 0 setdash ' + setcolorstring(fdrawinfo.acolorbackground) +
-             ' stroke grestore'
-   
+  if fill then begin
+   str1:= str1 + ' fill';
+  end
+  else begin
+   str1:= str1 + ' '+strokestr;
   end;
-  str1:= str1 + ' stroke'+nl;
-  fstream.write(str1);
+  fstream.write(str1+nl);
  end;
+end;
+
+procedure tpostscriptcanvas.handleellipse(const rect: rectty; const fill: boolean);
+var
+ str1: string;
+begin
+ with rect do begin
+  str1:= 'newpath ';
+  if cy = cx then begin
+   str1:= str1+posstring(pos)+' '+diststring(cx div 2)+' 0 360 arc ';
+  end
+  else begin
+   str1:= str1 + 'matrix currentmatrix '+ posstring(pos) + ' translate '+nl+
+    sizestring(size)+' scale 0 0 0.5 0 360 arc setmatrix ';
+  end;
+ end;
+ str1:= str1 + 'closepath ';
+ if fill then begin
+  str1:= str1 + 'fill';
+ end
+ else begin
+  str1:= str1 + strokestr;
+ end;
+ fstream.write(str1+nl);
 end;
 
 procedure tpostscriptcanvas.ps_drawlines(var drawinfo: drawinfoty);
 begin
  with drawinfo.points do begin
-  ps_drawpoly(points,count-1,closed);
+  handlepoly(points,count-1,closed,false);
  end;
 end;
 
@@ -1009,8 +1075,327 @@ var
 begin
  with drawinfo.points do begin
   for int1:= 0 to count div 2 - 1 do begin
-   ps_drawpoly(points,1,false);
+   handlepoly(points,1,false,false);
    inc(points,2);
+  end;
+ end;
+end;
+
+procedure tpostscriptcanvas.ps_fillpolygon(var drawinfo: drawinfoty);
+begin
+ with drawinfo.points do begin
+  handlepoly(points,count-1,true,true);
+ end;
+end;
+
+procedure tpostscriptcanvas.ps_fillrect(var drawinfo: drawinfoty);
+var
+ points1: array[0..3] of pointty;
+begin
+ with drawinfo.rect.rect^ do begin
+  points1[0].x:= x;
+  points1[0].y:= y;
+  points1[1].x:= x+cx;
+  points1[1].y:= y;
+  points1[2].x:= x+cx;
+  points1[2].y:= y+cy;
+  points1[3].x:= x;
+  points1[3].y:= y+cy;
+  handlepoly(@points1,high(points1),true,true);
+ end;
+end;
+
+procedure tpostscriptcanvas.writebinhex(const data: bytearty);
+var
+ int1,int2,int3: integer;
+ po1: pbyte;
+ po2: pchar;
+ str1: string;
+begin
+ po1:= pointer(data);
+ int2:= length(data);
+ setlength(str1,80);
+ repeat
+  int1:= 40;
+  if int1 > int2 then begin
+   int1:= int2;
+   setlength(str1,2*int1);
+  end;
+  po2:= pchar(str1);
+  for int3:= int1 - 1 downto 0 do begin
+   po2^:= charhex[po1^ shr 4];
+   inc(po2);
+   po2^:= charhex[po1^ and $0f];
+   inc(po2);
+   inc(po1);
+  end;
+  dec(int2,40);
+  fstream.writeln(str1);
+ until int2 <= 0;
+end;
+
+function tpostscriptcanvas.rectscalestring(const arect: rectty): string; 
+                 //transform unity cell to arect
+begin
+ with arect do begin
+  result:= psrealtostr(x*fgcscale+foriginx)+' '+
+           psrealtostr(foriginy-(y+cy-1)*fgcscale)+' translate '+ 
+           psrealtostr(cx*fgcscale)+' '+psrealtostr(cy*fgcscale)+' scale';
+ end;
+end;
+
+function tpostscriptcanvas.imagematrixstring(const asize: sizety): string;
+var
+ str1: string;
+begin
+ with asize do begin
+  str1:= inttostr(cy);
+  result:= '['+inttostr(cx)+' 0 0 -'+str1+' 0 '+str1+']';
+ end;
+end;
+
+const
+ unityrectpath = 'newpath 0 0 moveto 1 0 lineto 1 1 lineto 0 1 lineto closepath';
+ 
+procedure convertrgb(const sourcerect: rectty; const image: imagety;
+                     out data: bytearty; out rowbytes: integer);
+var
+ po1: prgbtriplety;
+ po2: pbyte;
+ int1,int2: integer;
+begin
+ with sourcerect do begin
+  rowbytes:= cx*3;
+  setlength(data,rowbytes*cy);
+  po2:= pointer(data);
+  for int1:= y to y + cy - 1 do begin
+   po1:= @image.pixels^[int1*image.size.cx+x];
+   for int2:= x to x + cx - 1 do begin
+    po2^:= po1^.red;
+    inc(po2);
+    po2^:= po1^.green;
+    inc(po2);
+    po2^:= po1^.blue;
+    inc(po2);
+    inc(po1);
+   end;
+  end;
+ end;
+end;
+
+procedure convertgray(const sourcerect: rectty; const image: imagety;
+                     out data: bytearty; out rowbytes: integer);
+var
+ po1: prgbtriplety;
+ po2: pbyte;
+ int1,int2: integer;
+begin
+ with sourcerect do begin
+  rowbytes:= cx;
+  setlength(data,rowbytes*cy);
+  po2:= pointer(data);
+  for int1:= y to y + cy - 1 do begin
+   po1:= @image.pixels^[int1*image.size.cx+x];
+   for int2:= x to x + cx - 1 do begin
+    po2^:= (po1^.red + po1^.green + po1^.blue) div 3;
+    inc(po2);
+    inc(po1);
+   end;
+  end;
+ end;
+end;
+
+procedure convertmono(const sourcerect: rectty; const image: imagety;
+                      out data: bytearty; out rowbytes: integer);
+var
+ sourcerowstep: integer;
+ rowshiftleft,rowshiftright: integer;
+ po1,po2: pbyte;
+ int1,int2: integer;
+begin
+ with sourcerect do begin
+  rowbytes:= (cx + 7) div 8;
+  setlength(data,rowbytes*cy);
+  rowshiftleft:= x and $7;
+  rowshiftright:= 8-rowshiftleft;
+  sourcerowstep:= ((image.size.cx + 31) div 32)*4;
+  po1:= @pbyteaty(image.pixels)^[y * sourcerowstep + x div 8];
+  sourcerowstep:= sourcerowstep - rowbytes + 1;
+  po2:= pointer(data);
+  for int1:= cy - 1 downto 0 do begin
+   for int2:= rowbytes - 2 downto 0 do begin
+    po2^:= (po1^ shl rowshiftleft);
+    inc(po1);
+    po2^:= bitreverse[po2^ or (po1^ shr rowshiftright)];
+    inc(po2);
+   end;
+   po2^:= bitreverse[po1^ shl rowshiftleft];
+   inc(po2);
+   inc(po1,sourcerowstep);
+  end;
+ end;
+end;
+
+function tpostscriptcanvas.createpattern(const sourcerect,destrect: rectty;
+                   const acolorbackground,acolorforeground: colorty;
+                   const pixmap: pixmapty; const agchandle: cardinal): boolean;
+         //returns pattern dict on ps stack
+var
+ ar1: bytearty;
+ str1: string;
+ components: integer;
+ rowbytes: integer;
+ image: imagety;
+begin
+ result:= gui_pixmaptoimage(pixmap,image,agchandle) = gde_ok;
+ if not result then begin
+  exit;
+ end;
+ components:= 1;
+ if image.monochrome then begin
+  convertmono(sourcerect,image,ar1,rowbytes);
+ end
+ else begin
+  if colorspace = cos_gray then begin
+   convertgray(sourcerect,image,ar1,rowbytes);
+  end
+  else begin
+   components:= 3;
+   convertrgb(sourcerect,image,ar1,rowbytes);
+  end;
+ end;
+ gui_freeimagemem(image.pixels);
+ str1:= '/patdat '+inttostr(rowbytes*image.size.cy)+' string def'+nl+
+        'currentfile patdat readhexstring'+nl;
+ fstream.write(str1);
+ writebinhex(ar1);
+ str1:= 'pop pop gsave '+rectscalestring(destrect)+nl+
+'<< /PatternType 1 /PaintType 1 /TilingType 1 /BBox [0 0 1 1] /XStep 1 /YStep 1'+nl+ 
+'/PaintProc {' + nl;
+ if image.monochrome then begin
+  if acolorbackground <> cl_transparent then begin
+   str1:= str1 + unityrectpath + nl + 
+         setcolorstring(acolorbackground) + ' fill ';   
+  end;
+  str1:= str1 + setcolorstring(acolorforeground) + nl;
+ end;
+ str1:= str1 +
+      inttostr(sourcerect.size.cx) + ' ' + inttostr(sourcerect.size.cy);
+ if image.monochrome then begin
+  str1:= str1 + ' true ';
+ end
+ else begin
+  str1:= str1 + ' 8';
+ end;
+ str1:= str1 + imagematrixstring(sourcerect.size)+ ' patdat ';
+ if image.monochrome then begin
+  str1:= str1 + 'imagemask';
+ end
+ else begin
+  if colorspace = cos_gray then begin
+   str1:= str1 + 'image';
+  end
+  else begin
+   str1:= str1 + 'false 3 colorimage';
+  end;
+ end;
+ str1:= str1+' } bind >> matrix makepattern grestore'+nl;
+ fstream.write(str1);
+end;
+  
+procedure tpostscriptcanvas.ps_copyarea(var drawinfo: drawinfoty);
+var
+ image: imagety;
+ 
+var
+ ar1: bytearty;
+ str1: string;
+ components: integer;
+ rowbytes: integer;
+ masked: boolean;
+begin
+ with drawinfo,copyarea do begin
+  masked:= (mask <> nil) and mask.monochrome;
+  if masked then begin
+   if not (createpattern(sourcerect^,destrect^,acolorbackground,acolorforeground,
+                  source^.paintdevice,source^.gc.handle) and 
+         (gui_pixmaptoimage(tsimplebitmap1(mask).handle,image,
+                                  mask.canvas.gchandle) = gde_ok)) then begin
+    exit;
+   end;
+   convertmono(sourcerect^,image,ar1,rowbytes);
+   str1:= 'gsave setpattern /picstr '+inttostr(rowbytes)+' string def ';
+   str1:= str1+'fill '; //does not work without
+   str1:= str1 + rectscalestring(destrect^) + nl;
+   str1:= str1 +
+       inttostr(sourcerect^.size.cx) + ' ' + inttostr(sourcerect^.size.cy);
+   str1:= str1 + ' true ';
+   str1:= str1 + imagematrixstring(sourcerect^.size)+nl+
+  '{currentfile picstr readhexstring pop} ';
+   str1:= str1 + 'imagemask' + nl;
+   gui_freeimagemem(image.pixels);
+   fstream.write(str1);
+   writebinhex(ar1);
+   str1:= '/picstr null def grestore'+nl;
+   fstream.write(str1);
+  end
+  else begin
+   with source^ do begin
+    if df_canvasispixmap in gc.drawingflags then begin
+     if gui_pixmaptoimage(paintdevice,image,gc.handle) <> gde_ok then begin
+      exit;
+     end
+    end;
+   end;
+   components:= 1;
+   if image.monochrome then begin
+    convertmono(sourcerect^,image,ar1,rowbytes);
+   end
+   else begin
+    if colorspace = cos_gray then begin
+     convertgray(sourcerect^,image,ar1,rowbytes);
+    end
+    else begin
+     components:= 3;
+     convertrgb(sourcerect^,image,ar1,rowbytes);
+    end;
+   end;
+   gui_freeimagemem(image.pixels);
+   str1:= 'gsave /picstr '+inttostr(rowbytes)+' string def ';
+   str1:= str1 + rectscalestring(destrect^) + nl;
+   if image.monochrome then begin
+    if acolorbackground <> cl_transparent then begin
+     str1:= str1 + unityrectpath + nl + 
+           setcolorstring(acolorbackground) + ' fill ';   
+    end;
+    str1:= str1 + setcolorstring(acolorforeground) + nl;
+   end;
+   str1:= str1 +
+        inttostr(sourcerect^.size.cx) + ' ' + inttostr(sourcerect^.size.cy);
+   if image.monochrome then begin
+    str1:= str1 + ' true ';
+   end
+   else begin
+    str1:= str1 + ' 8';
+   end;
+   str1:= str1 + imagematrixstring(sourcerect^.size)+nl+
+   '{currentfile picstr readhexstring pop} ';
+   if image.monochrome then begin
+    str1:= str1 + 'imagemask';
+   end
+   else begin
+    if colorspace = cos_gray then begin
+     str1:= str1 + 'image';
+    end
+    else begin
+     str1:= str1 + 'false 3 colorimage';
+    end;
+   end;
+   str1:= str1+nl;
+   fstream.write(str1);
+   writebinhex(ar1);
+   str1:= '/picstr null def grestore'+nl;
+   fstream.write(str1);
   end;
  end;
 end;

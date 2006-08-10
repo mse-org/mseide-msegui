@@ -88,6 +88,8 @@ type
  ppointeraty = ^pointeraty;
  charpoaty = array[0..0] of pchar;
  pcharpoaty = ^charpoaty;
+ byteaty = array[0..0] of byte;
+ pbyteaty = ^byteaty;
  wordaty = array[0..0] of word;
  pwordaty = ^wordaty;
  integeraty = array[0..0] of integer;
