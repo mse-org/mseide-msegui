@@ -424,7 +424,7 @@ type
   handle: cardinal;
   drawingflags: drawingflagsty;
   cliporigin: pointty;
-  platformdata: array[0..23] of cardinal; //plattform dependent
+  platformdata: array[0..23] of cardinal; //platform dependent
  end;
  gcpoty = ^gcty;
 
@@ -434,11 +434,11 @@ type
  end;
 
  pdrawinfoty = ^drawinfoty;
- rectinfoty = record
-  rect: prectty;
- end;
- arcinfoty = record
-  rect: prectty;
+ rectinfoty = record         ///
+  rect: prectty;              //
+ end;                         // same layout!
+ arcinfoty = record           //
+  rect: prectty;             ///
   startang: real;
   extentang: real;
   pieslice: boolean;

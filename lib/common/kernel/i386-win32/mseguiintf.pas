@@ -260,7 +260,7 @@ type
   bmicolors: array[0..1] of trgbquad;
  end;
 
- shapety = (fs_copyarea,fs_rect,fs_ellipse,fs_polygon);
+ shapety = (fs_copyarea,fs_rect,fs_ellipse,fs_arc,fs_polygon);
 
  bitmapinfoty = packed record
   bmiheader: bitmapinfoheader;
@@ -2119,8 +2119,25 @@ begin
  end;
 end;
 
+procedure getarcinfo(const info: drawinfoty; 
+                    out xstart,ystart,xend,yend: integer);
+var
+ stopang: real;
+begin
+ with info,arc,rect^ do begin
+  stopang:= (startang+extentang);
+  xstart:= (round(cos(startang)*cx) div 2) + x + origin.x;
+  ystart:= (round(-sin(startang)*cy) div 2) + y + origin.y;
+  xend:= (round(cos(stopang)*cx) div 2) + x + origin.x;
+  yend:= (round(-sin(stopang)*cy) div 2) + y + origin.y;
+ end;
+end;
+
 procedure fill(var drawinfo: drawinfoty; shape: shapety);
 
+var
+ xstart,ystart,xend,yend: integer; 
+ 
  procedure fill1( adc: hdc; arop: rasteropty);
  begin
   with drawinfo do begin
@@ -2174,6 +2191,16 @@ procedure fill(var drawinfo: drawinfoty; shape: shapety);
       windows.ellipse(adc,left,top,right,bottom);
      end;
     end;
+    fs_arc: begin
+     with trect(buffer.buffer^) do begin
+      if arc.pieslice then begin
+       windows.pie(adc,left,top,right,bottom,xstart,ystart,xend,yend);
+      end
+      else begin
+       windows.chord(adc,left,top,right,bottom,xstart,ystart,xend,yend);
+      end;
+     end;
+    end;
     fs_polygon: begin
      windows.Polygon(adc,buffer.buffer^,points.count);
     end;
@@ -2189,6 +2216,9 @@ var
  dc1: hdc;
 
 begin
+ if shape = fs_arc then begin
+  getarcinfo(drawinfo,xstart,ystart,xend,yend);
+ end;
  with drawinfo do begin
   with gc,win32gcty(platformdata) do begin
    if (drawingflags * [df_monochrome,df_opaque,df_brush] = [df_monochrome,df_brush]) then begin
@@ -2346,6 +2376,16 @@ begin
        windows.ellipse(gc.handle,left,top,right,bottom);
       end;
      end;
+     fs_arc: begin
+      with trect(buffer.buffer^) do begin
+       if arc.pieslice then begin
+        windows.pie(gc.handle,left,top,right,bottom,xstart,ystart,xend,yend);
+       end
+       else begin
+        windows.chord(gc.handle,left,top,right,bottom,xstart,ystart,xend,yend);
+       end;
+      end;
+     end;
      fs_polygon: begin
       windows.Polygon(gc.handle,buffer.buffer^,points.count);
      end;
@@ -2369,6 +2409,8 @@ end;
 
 procedure gui_fillarc(var drawinfo: drawinfoty);
 begin
+ transformellipseinfo(drawinfo);
+ fill(drawinfo,fs_arc);
 end;
 
 procedure gui_fillpolygon(var drawinfo: drawinfoty);
@@ -2837,14 +2879,9 @@ procedure gui_drawarc(var drawinfo: drawinfoty);
 var                         //todo: optimize
  bo1: boolean;
  xstart,ystart,xend,yend: integer;
- stopang: real;
 begin
+ getarcinfo(drawinfo,xstart,ystart,xend,yend);
  with drawinfo,arc,rect^ do begin
-  stopang:= (startang+extentang);
-  xstart:= (round(cos(startang)*cx) div 2) + x + origin.x;
-  ystart:= (round(-sin(startang)*cy) div 2) + y + origin.y;
-  xend:= (round(cos(stopang)*cx) div 2) + x + origin.x;
-  yend:= (round(-sin(stopang)*cy) div 2) + y + origin.y;
   if (xstart = xend) and (ystart = yend) and (abs(extentang) < 1) then begin
    checkgc(gc,[gcf_foregroundpenvalid,gcf_selectforegroundpen,gcf_selectnullbrush]);
    movetoex(gc.handle,xstart,ystart,nil);
