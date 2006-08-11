@@ -1399,6 +1399,8 @@ type
    
    function helpcontext: msestring;
                 //returns helpcontext of active widget, '' if none;
+   function mousehelpcontext: msestring;
+                //returns helpcontext of mouse widget, '' if none;
    function running: boolean; //true if eventloop entered
    function screensize: sizety;
    function workarea(awindow: twindow): rectty;
@@ -10839,6 +10841,16 @@ begin
  end
  else begin
   result:= activewidget.helpcontext;
+ end;
+end;
+
+function tapplication.mousehelpcontext: msestring;
+begin
+ if mousewidget = nil then begin
+  result:= '';
+ end
+ else begin
+  result:= mousewidget.helpcontext;
  end;
 end;
 
