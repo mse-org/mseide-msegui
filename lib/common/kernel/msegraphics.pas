@@ -706,6 +706,7 @@ type
    function getgchandle: cardinal;
    procedure fillarc(const def: rectty; const startang,extentang: real; 
                               const acolor: colorty; const pieslice: boolean);
+   procedure getarcinfo(out startpo,endpo: pointty);
   public
    drawinfopo: pointer; //used to transport additional drawing information
    constructor create(const user: tobject; const intf: icanvas);
@@ -763,14 +764,20 @@ type
                              //def.pos = center, def.cx = width, def.cy = height
                              //startang,extentang in radiant (2*pi = 360deg CCW)
 
-   procedure fillrect(const arect: rectty; const acolor: colorty = cl_default); overload;
-   procedure fillellipse(const def: rectty; const acolor: colorty = cl_default); overload;
+   procedure fillrect(const arect: rectty; const acolor: colorty = cl_default;
+                      const linecolor: colorty = cl_none); overload;
+   procedure fillellipse(const def: rectty; const acolor: colorty = cl_default;
+                        const linecolor: colorty = cl_none); overload;
    procedure fillarcchord(const def: rectty; const startang,extentang: real; 
-                              const acolor: colorty = cl_default);
+                              const acolor: colorty = cl_default;
+                              const linecolor: colorty = cl_none);
    procedure fillarcpieslice(const def: rectty; const startang,extentang: real; 
-                              const acolor: colorty = cl_default);
+                            const acolor: colorty = cl_default;
+                            const linecolor: colorty = cl_none);
    procedure fillpolygon(const apoints: array of pointty; 
-                         const acolor: colorty = cl_default); overload;
+                         const acolor: colorty = cl_default;
+                         const linecolor: colorty = cl_none); overload;
+                         
    procedure drawframe(const arect: rectty; awidth: integer = -1;
                    const acolor: colorty = cl_default);
                     //no dashes, awidth < 0 -> inside frame,!
@@ -3379,7 +3386,8 @@ begin
  end;
 end;
 
-procedure tcanvas.fillrect(const arect: rectty; const acolor: colorty = cl_default);
+procedure tcanvas.fillrect(const arect: rectty; const acolor: colorty = cl_default;
+                           const linecolor: colorty = cl_none);
 begin
  if checkforeground(acolor,false) then begin
   with fdrawinfo.rect do begin
@@ -3387,15 +3395,22 @@ begin
   end;
   gdi(gdi_fillrect);
  end;
+ if (linecolor <> cl_none) then begin
+  drawrect(arect,linecolor);
+ end;
 end;
 
-procedure tcanvas.fillellipse(const def: rectty; const acolor: colorty = cl_default);
+procedure tcanvas.fillellipse(const def: rectty; const acolor: colorty = cl_default;
+                              const linecolor: colorty = cl_none);
 begin
  if checkforeground(acolor,false) then begin
   with fdrawinfo.rect do begin
    rect:= @def;
   end;
   gdi(gdi_fillelipse);
+ end;
+ if (linecolor <> cl_none) then begin
+  drawellipse(def,linecolor);
  end;
 end;
 
@@ -3412,19 +3427,49 @@ begin
  end;
 end;
 
+procedure tcanvas.getarcinfo(out startpo,endpo: pointty);
+var
+ stopang: real;
+begin
+ with fdrawinfo,arc,rect^ do begin
+  stopang:= (startang+extentang);
+  startpo.x:= (round(cos(startang)*cx) div 2) + x;
+  startpo.y:= (round(-sin(startang)*cy) div 2) + y;
+  endpo.x:= (round(cos(stopang)*cx) div 2) + x;
+  endpo.y:= (round(-sin(stopang)*cy) div 2) + y;
+ end;
+end;
+
 procedure tcanvas.fillarcchord(const def: rectty; const startang: real;
-               const extentang: real; const acolor: colorty = cl_default);
+               const extentang: real; const acolor: colorty = cl_default;
+               const linecolor: colorty = cl_none);
+var
+ startpo,endpo: pointty;
 begin
  fillarc(def,startang,extentang,acolor,false);
+ if (linecolor <> cl_none) then begin
+  getarcinfo(startpo,endpo);
+  drawline(startpo,endpo,linecolor);
+  drawarc(def,startang,extentang,linecolor);
+ end;
 end;
 
 procedure tcanvas.fillarcpieslice(const def: rectty; const startang: real;
-               const extentang: real; const acolor: colorty = cl_default);
+               const extentang: real; const acolor: colorty = cl_default;
+                const linecolor: colorty = cl_none);
+var
+ startpo,endpo: pointty;
 begin
  fillarc(def,startang,extentang,acolor,true);
+ if (linecolor <> cl_none) then begin
+  getarcinfo(startpo,endpo);
+  drawlines([startpo,def.pos,endpo],false,linecolor);
+  drawarc(def,startang,extentang,linecolor);
+ end;
 end;
 
-procedure tcanvas.fillpolygon(const apoints: array of pointty; const acolor: colorty);
+procedure tcanvas.fillpolygon(const apoints: array of pointty; const acolor: colorty;
+                              const linecolor: colorty = cl_none);
 begin
  if checkforeground(acolor,false) then begin
   with fdrawinfo.points do begin
@@ -3432,6 +3477,9 @@ begin
    count:= length(apoints);
   end;
   gdi(gdi_fillpolygon);
+ end;
+ if (linecolor <> cl_none) then begin
+  drawlines(apoints,true,linecolor);
  end;
 end;
 {

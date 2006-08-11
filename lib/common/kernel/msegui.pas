@@ -43,7 +43,7 @@ type
                    //create fonthighdelta and childscaled events
                    ow_fontlineheight, 
                    //track font.linespacing,
-                   //create fonthighdelta and hildscaled events
+                   //create fonthighdelta and childscaled events
                    ow_autoscale //synchronizes bounds_cy with fontheightdelta
                    );
  optionswidgetty = set of optionwidgetty;
