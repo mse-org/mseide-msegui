@@ -502,7 +502,7 @@ procedure tsqlquerysqlpropertyeditor.doafterclosequery(
                  var amodalresult: modalresultty);
 begin
  if amodalresult = mr_canclose then begin
-  tmsesqlquery(fcomponent).active:= true;
+  tmsesqlquery(fprops[0].instance).active:= true;
  end;
 end;
 
@@ -513,7 +513,7 @@ end;
 
 function tsqlquerysqlpropertyeditor.getutf8: boolean;
 begin
- result:= dso_utf8 in tmsesqlquery(fcomponent).controller.options;
+ result:= dso_utf8 in tmsesqlquery(fprops[0].instance).controller.options;
 end;
 
 initialization

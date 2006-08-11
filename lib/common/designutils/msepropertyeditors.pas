@@ -39,7 +39,8 @@ type
 
  propertystatety = (ps_expanded,ps_subproperties,ps_volatile,
                    ps_refresh, //needs refresh by modified
-                   ps_valuelist,ps_dialog,ps_sortlist,ps_owned,ps_noadditems,
+                   ps_valuelist,ps_dialog,ps_sortlist,ps_owned,
+                   ps_noadditems,ps_nodeleteitems,
                    ps_isordprop,ps_modified,ps_candefault,ps_component,ps_subprop,
                    ps_local);  //do not display foreign components
  propertystatesty = set of propertystatety;
@@ -2370,9 +2371,11 @@ begin
      {$ifdef FPC}@{$endif}doappend,{$ifdef FPC}@{$endif}dodelete]);
  end
  else begin
-  tpopupmenu.additems(amenu,atransientfor,mouseinfo,
+  if not (ps_nodeleteitems in fparenteditor.fstate) then begin
+   tpopupmenu.additems(amenu,atransientfor,mouseinfo,
      ['Delete Item'],[],[],
      [{$ifdef FPC}@{$endif}dodelete]);
+  end;
  end;
  inherited;
 end;

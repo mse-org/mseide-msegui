@@ -64,8 +64,8 @@ end;
 procedure tgridpropseditor.itemmoved(const source,dest: integer);
 begin
  inherited;
- if fcomponent is tcustomgrid then begin
-  tcustomgrid(fcomponent).layoutchanged;
+ if fprops[0].instance is tcustomgrid then begin
+  tcustomgrid(fprops[0].instance).layoutchanged;
  end;
 end;
 

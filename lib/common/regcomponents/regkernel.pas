@@ -109,8 +109,8 @@ end;
 
 function tbounds_xeditor.getvalue: msestring;
 begin
- if fcomponent = fmodule then begin
-  result:= inttostr(twidget(fcomponent).screenpos.x);
+ if fprops[0].instance = fmodule then begin
+  result:= inttostr(twidget(fprops[0].instance).screenpos.x);
  end
  else begin
   result:= inherited getvalue;
@@ -119,7 +119,7 @@ end;
 
 procedure tbounds_xeditor.setvalue(const value: msestring);
 begin
- if fcomponent = fmodule then begin
+ if fprops[0].instance = fmodule then begin
   fdesigner.setmodulex(fmodule,strtoint(value));
  end
  else begin
@@ -131,8 +131,8 @@ end;
 
 function tbounds_yeditor.getvalue: msestring;
 begin
- if fcomponent = fmodule then begin
-  result:= inttostr(twidget(fcomponent).screenpos.y);
+ if fprops[0].instance = fmodule then begin
+  result:= inttostr(twidget(fprops[0].instance).screenpos.y);
  end
  else begin
   result:= inherited getvalue;
@@ -141,7 +141,7 @@ end;
 
 procedure tbounds_yeditor.setvalue(const value: msestring);
 begin
- if fcomponent = fmodule then begin
+ if fprops[0].instance = fmodule then begin
   fdesigner.setmoduley(fmodule,strtoint(value));
  end
  else begin
@@ -149,67 +149,23 @@ begin
  end;
 end;
 
-{ tbounds_cxeditor }
-{
-function tbounds_cxeditor.getvalue: msestring;
-begin
- if fcomponent = fmodule then begin
-  result:= inttostr(twidget(fcomponent).bounds_cx);
- end
- else begin
-  result:= inherited getvalue;
- end;
-end;
-
-procedure tbounds_cxeditor.setvalue(const value: msestring);
-begin
- if fcomponent = fmodule then begin
-  fdesigner.setmodulecx(fmodule,strtoint(value));
- end
- else begin
-  inherited;
- end;
-end;
-}
-{ tbounds_cyeditor }
-{
-function tbounds_cyeditor.getvalue: msestring;
-begin
- if fcomponent = fmodule then begin
-  result:= inttostr(twidget(fcomponent).bounds_cy);
- end
- else begin
-  result:= inherited getvalue;
- end;
-end;
-
-procedure tbounds_cyeditor.setvalue(const value: msestring);
-begin
- if fcomponent = fmodule then begin
-  fdesigner.setmodulecy(fmodule,strtoint(value));
- end
- else begin
-  inherited;
- end;
-end;
-}
 { tframepropertyeditor }
 
 procedure tframepropertyeditor.edit;
 begin
  inherited;
- if fcomponent is twidget then begin
-  twidget1(fcomponent).clientrectchanged;
+ if fprops[0].instance is twidget then begin
+  twidget1(fprops[0].instance).clientrectchanged;
  end;
 end;
 
 
 { tactivatorclientspropertyeditor }
 
-
 function tactivatorclientspropertyeditor.getdefaultstate: propertystatesty;
 begin
- result:= [ps_subproperties];
+ result:= inherited getdefaultstate + 
+         [ps_subproperties,ps_noadditems,ps_nodeleteitems{,ps_volatile}];
 end;
 
 function tactivatorclientspropertyeditor.getvalue: msestring;
@@ -227,7 +183,7 @@ var
  int1: integer;
  ar1: stringarty;
 begin
- with tactivator1(fcomponent) do begin
+ with tactivator1(fprops[0].instance) do begin
   updateorder;
   fclientnames:= nil;
   ar1:= getclientnames;
@@ -247,7 +203,8 @@ end;
 procedure tactivatorclientspropertyeditor.itemmoved(const source: integer;
                         const dest: integer);
 begin
- moveitem(tactivator1(fcomponent).fclients,source,dest);
+ moveitem(tactivator1(fprops[0].instance).fclients,source,dest);
+ modified;
 end;
 
 function tactivatorclientspropertyeditor.allequal: boolean;
