@@ -96,6 +96,7 @@ type
    procedure ps_drawlinesegments;
    
    procedure ps_fillpolygon;
+   procedure ps_fillarc;
    procedure ps_fillrect;
    procedure ps_copyarea;
    procedure textout(const text: richstringty; const dest: rectty;
@@ -426,6 +427,11 @@ begin
                         drawinfo.rect.rect^,true);
 end;
 
+procedure gui_fillarc(var drawinfo: drawinfoty);
+begin
+ postscriptgcty(drawinfo.gc.platformdata).canvas.ps_fillarc;
+end;
+
 procedure gui_fillpolygon(var drawinfo: drawinfoty);
 begin
  postscriptgcty(drawinfo.gc.platformdata).canvas.ps_fillpolygon;
@@ -530,6 +536,7 @@ const
    {$ifdef FPC}@{$endif}gui_drawarc,
    {$ifdef FPC}@{$endif}gui_fillrect,
    {$ifdef FPC}@{$endif}gui_fillelipse,
+   {$ifdef FPC}@{$endif}gui_fillarc,
    {$ifdef FPC}@{$endif}gui_fillpolygon,
 //   {$ifdef FPC}@{$endif}gui_drawstring,
    {$ifdef FPC}@{$endif}gui_drawstring16,
@@ -1095,6 +1102,31 @@ begin
   end;
  end;
  str1:= str1 + strokestr;
+ fstream.write(str1+nl);
+end;
+
+procedure tpostscriptcanvas.ps_fillarc;
+var
+ str1: string;
+begin
+ with fdrawinfo.arc,rect^ do begin
+  str1:= 'newpath ';
+  if pieslice then begin
+   str1:= str1+posstring(pos)+' moveto ';
+  end;
+  if cy = cx then begin
+   str1:= str1+posstring(pos)+' '+diststring(cx div 2)+' '+
+     psrealtostr(startang*radtodeg)+' '+psrealtostr((startang+extentang)*radtodeg)+
+     ' arc ';
+  end
+  else begin
+   str1:= str1 + 'matrix currentmatrix '+ posstring(pos) + ' translate '+nl+
+              sizestring(size)+' scale 0 0 0.5 '+
+     psrealtostr(startang*radtodeg)+' '+psrealtostr((startang+extentang)*radtodeg)+
+      ' arc setmatrix ';
+  end;
+ end;
+ str1:= str1 + 'closepath fill';
  fstream.write(str1+nl);
 end;
 

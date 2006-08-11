@@ -4060,9 +4060,10 @@ begin
  end;
 end;
 
-procedure gui_drawarc(var drawinfo: drawinfoty);
 const
  angscale = 64*360/(2*pi);
+ 
+procedure gui_drawarc(var drawinfo: drawinfoty);
 begin
  with drawinfo,drawinfo.arc,rect^ do begin
   xdrawarc(appdisp,paintdevice,tgc(gc.handle),
@@ -4151,6 +4152,24 @@ begin
  with drawinfo,drawinfo.rect.rect^ do begin
   xfillarc(appdisp,paintdevice,tgc(gc.handle),
    x+origin.x-cx div 2,y+origin.y - cy div 2,cx,cy,0,wholecircle);
+ end;
+end;
+
+procedure gui_fillarc(var drawinfo: drawinfoty);
+var
+ xvalues: xgcvalues;
+begin
+ with drawinfo,drawinfo.arc,rect^ do begin
+  if pieslice then begin
+   xvalues.arc_mode:= arcpieslice;
+  end
+  else begin
+   xvalues.arc_mode:= arcchord;
+  end;
+  xchangegc(appdisp,tgc(gc.handle),gcarcmode,@xvalues);
+  xfillarc(appdisp,paintdevice,tgc(gc.handle),
+   x+origin.x-cx div 2,y+origin.y - cy div 2,cx,cy,
+   round(startang*angscale),round(extentang*angscale));
  end;
 end;
 
@@ -4911,6 +4930,7 @@ const
    {$ifdef FPC}@{$endif}gui_drawarc,
    {$ifdef FPC}@{$endif}gui_fillrect,
    {$ifdef FPC}@{$endif}gui_fillelipse,
+   {$ifdef FPC}@{$endif}gui_fillarc,
    {$ifdef FPC}@{$endif}gui_fillpolygon,
 //   {$ifdef FPC}@{$endif}gui_drawstring,
    {$ifdef FPC}@{$endif}gui_drawstring16,

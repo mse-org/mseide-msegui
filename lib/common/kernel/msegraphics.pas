@@ -441,6 +441,7 @@ type
   rect: prectty;
   startang: real;
   extentang: real;
+  pieslice: boolean;
  end;
  posinfoty = record          ///
   pos: ppointty;              //
@@ -566,7 +567,8 @@ type
  gdifuncty = (gdi_destroygc,gdi_changegc,
               gdi_drawlines,gdi_drawlinesegments,gdi_drawellipse,gdi_drawarc,
               gdi_fillrect,
-              gdi_fillelipse,gdi_fillpolygon,{gdi_drawstring,}gdi_drawstring16,
+              gdi_fillelipse,gdi_fillarc,gdi_fillpolygon,{gdi_drawstring,}
+              gdi_drawstring16,
               gdi_setcliporigin,
               gdi_createemptyregion,gdi_createrectregion,gdi_createrectsregion,
               gdi_destroyregion,gdi_copyregion,gdi_moveregion,
@@ -702,6 +704,8 @@ type
    procedure setcliporigin(const Value: pointty);
                //value not saved!
    function getgchandle: cardinal;
+   procedure fillarc(const def: rectty; const startang,extentang: real; 
+                              const acolor: colorty; const pieslice: boolean);
   public
    drawinfopo: pointer; //used to transport additional drawing information
    constructor create(const user: tobject; const intf: icanvas);
@@ -761,6 +765,10 @@ type
 
    procedure fillrect(const arect: rectty; const acolor: colorty = cl_default); overload;
    procedure fillellipse(const def: rectty; const acolor: colorty = cl_default); overload;
+   procedure fillarcchord(const def: rectty; const startang,extentang: real; 
+                              const acolor: colorty = cl_default);
+   procedure fillarcpieslice(const def: rectty; const startang,extentang: real; 
+                              const acolor: colorty = cl_default);
    procedure fillpolygon(const apoints: array of pointty; 
                          const acolor: colorty = cl_default); overload;
    procedure drawframe(const arect: rectty; awidth: integer = -1;
@@ -3389,6 +3397,31 @@ begin
   end;
   gdi(gdi_fillelipse);
  end;
+end;
+
+procedure tcanvas.fillarc(const def: rectty; const startang: real;
+                          const extentang: real; const acolor: colorty;
+                          const pieslice: boolean);
+begin
+ if checkforeground(acolor,false) then begin
+  fdrawinfo.arc.rect:= @def;
+  fdrawinfo.arc.startang:= startang;
+  fdrawinfo.arc.extentang:= extentang;
+  fdrawinfo.arc.pieslice:= pieslice;
+  gdi(gdi_fillarc);
+ end;
+end;
+
+procedure tcanvas.fillarcchord(const def: rectty; const startang: real;
+               const extentang: real; const acolor: colorty = cl_default);
+begin
+ fillarc(def,startang,extentang,acolor,false);
+end;
+
+procedure tcanvas.fillarcpieslice(const def: rectty; const startang: real;
+               const extentang: real; const acolor: colorty = cl_default);
+begin
+ fillarc(def,startang,extentang,acolor,true);
 end;
 
 procedure tcanvas.fillpolygon(const apoints: array of pointty; const acolor: colorty);

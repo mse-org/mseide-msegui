@@ -2367,6 +2367,10 @@ begin
  fill(drawinfo,fs_ellipse);
 end;
 
+procedure gui_fillarc(var drawinfo: drawinfoty);
+begin
+end;
+
 procedure gui_fillpolygon(var drawinfo: drawinfoty);
 begin
  transformpoints(drawinfo,false);
@@ -3686,6 +3690,7 @@ const
    {$ifdef FPC}@{$endif}gui_drawarc,
    {$ifdef FPC}@{$endif}gui_fillrect,
    {$ifdef FPC}@{$endif}gui_fillelipse,
+   {$ifdef FPC}@{$endif}gui_fillarc,
    {$ifdef FPC}@{$endif}gui_fillpolygon,
 //   {$ifdef FPC}@{$endif}gui_drawstring,
    {$ifdef FPC}@{$endif}gui_drawstring16,
