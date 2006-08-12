@@ -86,7 +86,7 @@ const
 type
  filedialogoptionty = (fdo_save,fdo_dispname,fdo_dispnoext,
                        fdo_directory,fdo_file,
-                       fdo_absolute,fdo_relative,
+                       fdo_absolute,fdo_relative,fdo_quotesingle,
                        fdo_link, //links lastdir of controllers with same group
                        fdo_checkexist,fdo_acceptempty,fdo_chdir);
  filedialogoptionsty = set of filedialogoptionty;
@@ -516,7 +516,17 @@ begin
            filterindex,
            filter,colwidth,includeattrib,excludeattrib,history,historymaxcount);
  if result = mr_ok then begin
-  afilename:= quotefilename(ar1);
+  if (high(ar1) > 0) or (fdo_quotesingle in aoptions) then begin 
+   afilename:= quotefilename(ar1);
+  end
+  else begin
+   if high(ar1) = 0 then begin
+    afilename:= ar1[0];
+   end
+   else begin
+    afilename:= '';
+   end;
+  end;
  end;
 end;
 
@@ -1188,9 +1198,9 @@ begin
   result:= filedialog1(fo,ffilenames,ara,arb,
         @ffilterindex,@ffilter,@fcolwidth,finclude,
             fexclude,po1,fhistorymaxcount,acaption,aoptions,fdefaultext);
- if assigned(fonafterexecute) then begin
-  fonafterexecute(self,result);
- end;
+  if assigned(fonafterexecute) then begin
+   fonafterexecute(self,result);
+  end;
  {$ifdef FPC} {$checkpointer default} {$endif}
   if result = mr_ok then begin
    flastdir:= fo.dir.value;
@@ -1270,7 +1280,17 @@ end;
 
 function tfiledialogcontroller.getfilename: filenamety;
 begin
- result:= quotefilename(ffilenames);
+ if (high(ffilenames) > 0) or (fdo_quotesingle in foptions) then begin
+  result:= quotefilename(ffilenames);
+ end
+ else begin
+  if high(ffilenames) = 0 then begin
+   result:= ffilenames[0];
+  end
+  else begin
+   result:= '';
+  end;
+ end;
 end;
 
 procedure tfiledialogcontroller.setfilename(const Value: filenamety);
