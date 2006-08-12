@@ -1568,6 +1568,7 @@ begin
 end;
 
 function gui_pidtowinid(const pids: integerarty): winidty;
+begin
  result:= 0;
 end;
 
