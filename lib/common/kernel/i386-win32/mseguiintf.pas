@@ -1567,6 +1567,10 @@ begin
  result:= gui_setwindowicon(applicationwindow,icon,mask);
 end;
 
+function gui_pidtowinid(const pids: integerarty): winidty;
+ result:= 0;
+end;
+
 function gui_rgbtopixel(rgb: cardinal): pixelty;
 begin
  result:= swaprgb(rgb);

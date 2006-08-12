@@ -117,9 +117,9 @@ type
    procedure writeln(const value: stringarty);  overload;
 
    function readln: boolean; overload;
-   function readln(var value: string): boolean; overload;       //!!!!todo fpbug 3221
+   function readln(out value: string): boolean; overload;      
            //true wenn zeile vollstaendig, sonst eof erreicht
-   function readln(var value: msestring): boolean; overload;       //!!!!todo fpbug 3221
+   function readln(out value: msestring): boolean; overload;       
            //true wenn zeile vollstaendig, sonst eof erreicht
    function readln(out value: integer): boolean; overload;
            //true wenn zeile vollstaendig, sonst eof erreicht
@@ -1065,13 +1065,13 @@ begin
  result:= readstrln(str1);
 end;
 
-function ttextstream.readln(var value: string): boolean;
+function ttextstream.readln(out value: string): boolean;
 begin
  result:= readstrln(value);
  value:= decode(value);
 end;
 
-function ttextstream.readln(var value: msestring): boolean;
+function ttextstream.readln(out value: msestring): boolean;
 var
  str1: string;
 begin

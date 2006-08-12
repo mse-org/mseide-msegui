@@ -2359,17 +2359,7 @@ end;
 
 function tmsecomponent.gethelpcontext: msestring;
 begin
- if componentstate * [csloading,cswriting,csdesigning] = [] then begin
-  if fhelpcontext = '' then begin
-   result:= ownernamepath(self);
-  end
-  else begin
-   result:= fhelpcontext;
-  end;
- end
- else begin
-  result:= fhelpcontext;
- end;
+ result:= fhelpcontext;
 end;
 
 { tlinkedqueue }

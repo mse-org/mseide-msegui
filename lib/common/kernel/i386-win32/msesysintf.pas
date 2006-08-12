@@ -164,6 +164,11 @@ begin
 end;
 }
 
+function sys_getprocesses: procitemarty;
+begin
+ result:= nil;
+end;
+
 procedure sys_usleep(const us: cardinal);
 begin
  sleep(us div 1000);

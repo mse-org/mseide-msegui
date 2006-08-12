@@ -13,6 +13,7 @@ procedure sys_setlasterror(const avalue: integer);
 function sys_geterrortext(aerror: integer): string;
 function sys_gettimeus: cardinal;
                //systemtime in microseconds, origin undefined
+function sys_getprocesses: procitemarty;
 
 //function sys_towupper(char: widechar): widechar;
 //function sys_toupper(char: char): char;

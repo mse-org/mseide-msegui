@@ -28,6 +28,8 @@ type
  {$endif}
  winidty = cardinal;
  winidarty = array of winidty;
+ winidaty = array[0..0] of winidty;
+ pwinidaty = ^winidaty;
  winidararty = array of winidarty;
 
  preal = ^real;

@@ -13,7 +13,8 @@ unit msesysintf; //i386-linux
 
 interface
 uses
- msesetlocale,{$ifdef FPC}cthreads,cwstring,{$endif}msetypes,msesys,libc,msestrings;
+ msesetlocale,{$ifdef FPC}cthreads,cwstring,{$endif}msetypes,msesys,libc,
+ msestrings,msestream;
 
 {$ifdef msedebug}
 var                         //!!!!todo: link with correct location
@@ -301,6 +302,39 @@ type
 function sys_getprintcommand: string;
 begin
  result:= 'lp -';
+end;
+
+function sys_getprocesses: procitemarty;
+var
+ filelist: tfiledatalist;
+ int1,int2: integer;
+ stream: ttextstream;
+ str1: string;
+begin
+ filelist:= tfiledatalist.create;
+ filelist.adddirectory('/proc',fil_name,nil,[fa_dir]);
+ setlength(result,filelist.count);
+ int2:= 0;
+ for int1:= 0 to filelist.count - 1 do begin
+  with filelist[int1] do begin
+   if (name[1] >= '0') and (name[1] <= '9') then begin
+    stream:= ttextstream.create('/proc/'+name+'/stat',fm_read);
+    try
+     stream.readln(str1);
+     with result[int2] do begin
+      if libc.sscanf(pchar(str1),'%d (%*a[^)]) %*c %d',
+     {$ifdef FPC}[{$endif}@pid,@ppid{$ifdef FPC}]{$endif}) = 2 then begin
+       inc(int2);
+      end;
+     end;
+    finally
+     stream.free;
+    end;
+   end;
+  end;
+ end; 
+ filelist.free;
+ setlength(result,int2);
 end;
 
 procedure sys_usleep(const us: cardinal);

@@ -1,4 +1,12 @@
-{msegui Copyright (c) 1999-2006 by Martin Schreiber, all rights reserved.}
+{ MSEgui Copyright (c) 1999-2006 by Martin Schreiber
+
+    See the file COPYING.MSE, included in this distribution,
+    for details about the copyright.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+}
 function gui_init: guierrorty;
 function gui_deinit: guierrorty;
 procedure gui_cancelshutdown;
@@ -48,6 +56,7 @@ function gui_setwindowstate(id: winidty; size: windowsizety; visible: boolean): 
 function gui_setwindowcaption(id: winidty; const caption: widestring): guierrorty;
 function gui_setwindowicon(id: winidty; const icon,mask: pixmapty): guierrorty;
 function gui_setapplicationicon(const icon,mask: pixmapty): guierrorty;
+function gui_pidtowinid(const pids: integerarty): winidty;
 
 function gui_setcursorshape(winid: winidty; shape: cursorshapety): guierrorty;
 function gui_getpointerpos: pointty;

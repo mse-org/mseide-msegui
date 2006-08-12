@@ -556,7 +556,7 @@ type
   {$ifdef hassaveyourself},wm_save_yourself{$endif});
  XErrorHandler = function (Display: PDisplay; ErrorEvent: PXErrorEvent):
     Longint; cdecl;
- wmstatety = (wms_none,wms_withdrawn,wms_normal,wms_iconic);
+ wmstatety = (wms_none,wms_withdrawn,wms_normal,wms_invalid,wms_iconic);
 
 var
  appdisp: pdisplay;
@@ -580,7 +580,7 @@ var
  wmclientleaderatom: atom;
  wmprotocols: array[wmprotocolty] of atom;
  clipboardatom: atom;
- windowatom,stringatom,utf8_stringatom,compound_textatom,textatom: atom;
+ cardinalatom,windowatom,stringatom,utf8_stringatom,compound_textatom,textatom: atom;
  targetsatom: atom;
  convertselectionpropertyatom: atom;
 
@@ -609,14 +609,16 @@ type
  netatomty = (net_supported,net_workarea,
        net_wm_state,
        net_wm_state_maximized_vert,net_wm_state_maximized_horz,
+       net_wm_pid,
        net_none);
  netwmstateoperationty = (nso_remove,nso_add,nso_toggle);
 const
  netatomnames: array[netatomty] of string = ('_NET_SUPPORTED','_NET_WORKAREA',
        '_NET_WM_STATE',
        '_NET_WM_STATE_MAXIMIZED_VERT','_NET_WM_STATE_MAXIMIZED_HORZ',
-       '');
- needednetatom = netatomty(ord(high(netatomty))-1);
+       '_NET_WM_PID', //not needed
+       ''); 
+ needednetatom = netatomty(ord(high(netatomty))-2);
 var
  netatoms: array[netatomty] of atom;
  netsupported: boolean;
@@ -860,6 +862,11 @@ begin
  xchangeproperty(appdisp,id,prop,windowatom,32,propmodereplace,@value,1);
 end;
 
+procedure setcardinalproperty(id: winidty; prop: atom; value: cardinal);
+begin
+ xchangeproperty(appdisp,id,prop,cardinalatom,32,propmodereplace,@value,1);
+end;
+
 function readlongproperty(id: winidty; name: atom; count: cardinal; var value): boolean;
 var
  actualtype: atom;
@@ -1094,6 +1101,56 @@ end;
 function gui_setapplicationicon(const icon,mask: pixmapty): guierrorty;
 begin
  result:= gue_ok;
+end;
+
+function gui_pidtowinid(const pids: integerarty): winidty;
+
+ function scanchildren(const aparent: winidty): boolean;
+ 
+  function checkpid(const apid: integer): boolean;
+  var
+   int1: integer;
+  begin
+   result:= false;
+   for int1:= 0 to high(pids) do begin
+    if pids[int1] = apid then begin
+     result:= true;
+     break;
+    end;
+   end;
+  end;
+  
+ var
+  parent,root: winidty;
+  ca1: cardinal;
+  children: pwindow;
+  int1: integer;
+  id1: winidty;
+ begin
+  result:= (gui_windowvisible(aparent) or (getwmstate(aparent) = wms_iconic)) and
+           readlongproperty(aparent,netatoms[net_wm_pid],1,int1) and 
+                           checkpid(int1);
+  if result then begin
+   gui_pidtowinid:= aparent;
+  end
+  else begin 
+   if (xquerytree(appdisp,aparent,@root,@parent,@children,@ca1) <> 0) and 
+       (children <> nil) then begin
+    for int1:= integer(ca1)-1 downto 0 do begin
+     if scanchildren(pwinidaty(children)^[int1]) then begin
+      break;
+     end;
+    end;
+    xfree(children);
+   end;
+  end;
+ end;
+  
+begin
+ result:= 0;
+ if (netatoms[net_wm_pid] <> 0) then begin
+  scanchildren(rootwindow);
+ end;
 end;
 
 function XDestroyImage(Image: PXImage): Longint;
@@ -1747,6 +1804,10 @@ begin
 //   wins[1]:= toplevelwindow(transientfor);
 //   xrestackwindows(appdisp,@wins[0],2);
   end;
+ end;
+ if netatoms[net_wm_pid] <> 0 then begin
+  waitfordecoration(id);
+  setcardinalproperty(toplevelwindow(id),netatoms[net_wm_pid],getpid);
  end;
 end;
 
@@ -2405,7 +2466,11 @@ begin
                       exposuremask or structurenotifymask);
  xsetwmprotocols(appdisp,id,@wmprotocols[low(wmprotocolty)],
              integer(high(wmprotocolty))+1);
- setstringproperty(id,wmclassatom,filename(sys_getapplicationpath)+#0+application.applicationname);
+ setstringproperty(id,wmclassatom,
+      filename(sys_getapplicationpath)+#0+application.applicationname);
+ if netatoms[net_wm_pid] <> 0 then begin
+  setcardinalproperty(id,netatoms[net_wm_pid],getpid);
+ end;
 end;
 
 function gui_getwindowrect(id: winidty; out rect: rectty): guierrorty;
@@ -4810,6 +4875,8 @@ begin
  wmclientleaderatom:= xinternatom(appdisp,'WM_CLIENT_LEADER',
            {$ifdef FPC}false{$else}0{$endif});
  clipboardatom:= xinternatom(appdisp,'CLIPBOARD',
+           {$ifdef FPC}false{$else}0{$endif});
+ cardinalatom:= xinternatom(appdisp,'CARDINAL',
            {$ifdef FPC}false{$else}0{$endif});
  windowatom:= xinternatom(appdisp,'WINDOW',
            {$ifdef FPC}false{$else}0{$endif});

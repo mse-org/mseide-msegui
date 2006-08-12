@@ -570,7 +570,13 @@ procedure quicksortarray(var asortlist; const acompare: arraysortcomparety;
                             asize,alength: integer; order: boolean;
                             out aindexlist: integerarty);
                             //asortlist = array of type
-                            
+
+function findarrayitem(const item; const ar;
+               compare: arraysortcomparety; size: integer;
+               out foundindex: integer): boolean;
+           //ar = array of type
+           //true if exact else next bigger
+           //for compare: l is item, r are tablevalues
 procedure sortarray(var sortlist; compare: arraysortcomparety;
                              size: integer); overload;
          //sortlist = array of type
@@ -1246,6 +1252,16 @@ begin
    dec(foundindex);
   end;
  end;
+end;
+
+function findarrayitem(const item; const ar;
+               compare: arraysortcomparety; size: integer;
+               out foundindex: integer): boolean;
+           //ar = array of type
+           //true if exact else next bigger
+           //for compare: l is item, r are tablevalues
+begin
+ result:= findarrayvalue(item,ar,length(pointerarty(ar)),compare,size,foundindex);
 end;
 
 function findarrayvalue(const item; const items; const index: integerarty;

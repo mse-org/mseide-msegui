@@ -277,7 +277,8 @@ begin
  foptionswidget:= defaultdispwidgetoptions;
  fwidgetrect.cx:= defaultdispwidgetwidth;
  fwidgetrect.cy:= defaultdispwidgetheight;
- finfo.flags:= defaultdisptextflags;
+ ftextflags:= defaultdisptextflags;
+ finfo.flags:= ftextflags;
 end;
 
 procedure tdispwidget.initnewcomponent;

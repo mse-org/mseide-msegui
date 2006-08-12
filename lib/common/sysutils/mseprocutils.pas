@@ -24,7 +24,7 @@ type
   readdes: integer;
   writedes: integer;
  end;
-
+ 
 function getprocessexitcode(prochandle: integer; out exitcode: integer;
                               const timeoutus: cardinal = 0): boolean;
                  //true if ok, close handle
@@ -59,6 +59,14 @@ function execwaitmse(const commandline: string): integer;
 procedure killprocess(handle: integer);
 function terminateprocess(handle: integer): integer;
            //sendet sigterm, bringt exitresult
+           
+function getprocesstree: procitemarty;
+function getprocesschildren(const pid: integer): integerarty;
+function getallprocesschildren(const pid: integer): integerarty;
+function activateprocesswindow(const procid: integer; 
+                    const araise: boolean = true): boolean;
+         //true if ok
+
  {$ifdef UNIX}
 type
  procinfoty = record
@@ -117,7 +125,95 @@ type
 
 implementation
 uses 
- {$ifdef mswindows}windows{$else}libc{$endif},msesysintf,msestrings;
+ {$ifdef mswindows}windows{$else}libc{$endif},msesysintf,msestrings,msedatalist,
+ mseguiintf,mseguiglob;
+
+function compprocitem(const l,r): integer;
+begin
+ result:= procitemty(l).pid - procitemty(r).pid;
+end;
+
+function findprocitem(const l,r): integer;
+begin
+ result:= integer(l) - procitemty(r).pid;
+end;
+
+function getprocesstree: procitemarty;
+var
+ int1,int2: integer;
+begin
+ result:= sys_getprocesses;
+ sortarray(result,{$ifdef FPC}@{$endif}compprocitem,sizeof(procitemty));
+ for int1:= 0 to high(result) do begin
+  if findarrayitem(result[int1].ppid,result,{$ifdef FPC}@{$endif}findprocitem,
+                sizeof(procitemty),int2) then begin
+   additem(result[int2].children,result[int1].pid);
+  end;
+ end;
+end;
+
+function getprocesschildren(const pid: integer): integerarty;
+var
+ ar1: procitemarty;
+ int2: integer;
+begin
+ ar1:= getprocesstree;
+ if findarrayitem(pid,ar1,{$ifdef FPC}@{$endif}findprocitem,
+                sizeof(procitemty),int2) then begin
+  result:= ar1[int2].children;
+ end
+ else begin
+  result:= nil;
+ end;
+end;
+
+function getallprocesschildren(const pid: integer): integerarty;
+var
+ ar1: procitemarty;
+ 
+ procedure addproc(const pid: integer);
+ var
+  int1,int2: integer;
+ begin
+  if findarrayitem(pid,ar1,{$ifdef FPC}@{$endif}findprocitem,
+                sizeof(procitemty),int2) then begin
+   stackarray(ar1[int2].children,getallprocesschildren);
+   for int1:= 0 to high(ar1[int2].children) do begin
+    addproc(ar1[int2].children[int1]);
+   end;
+  end;
+ end;
+  
+var
+ int2: integer;
+begin
+ ar1:= getprocesstree;
+ setlength(result,1);
+ result[0]:= pid;
+ addproc(pid);
+end;
+
+function activateprocesswindow(const procid: integer; 
+                    const araise: boolean = true): boolean;
+         //true if ok
+var
+ winid: winidty;
+ ar1: integerarty;
+begin
+ result:= false;
+ ar1:= getallprocesschildren(procid);
+ winid:= gui_pidtowinid(ar1);
+ if winid <> 0 then begin
+  if gui_showwindow(winid) = gue_ok then begin
+   if araise and (gui_raisewindow(winid) <> gue_ok) then begin
+    exit;
+   end;
+   if gui_setwindowfocus(winid) = gue_ok then begin
+    result:= true;
+   end;
+  end;
+ end;
+end;
 
 procedure execerror(const errno: integer; const commandline: string);
 begin
@@ -670,7 +766,7 @@ begin
   fillchar(result,sizeof(result),0);
   stream.readln(str1);
   with result do begin
-   sscanf(pchar(str1),'%d (%a[^)]) %c %d %d %d %d %d %lu %lu '+
+   libc.sscanf(pchar(str1),'%d (%a[^)]) %c %d %d %d %d %d %lu %lu '+
     '%lu %lu %lu %lu %lu %ld %ld %ld %ld %ld %ld %lu %lu %ld %lu %lu %lu %lu %lu '+
     '%lu %lu %lu %lu %lu %lu %lu %lu %d %d',
     {$ifdef FPC}[{$endif}
@@ -716,7 +812,7 @@ begin
     {$ifdef FPC}]{$endif}
                    );
    comm:= string(commpo);
-   freemem(commpo);
+   libc.free(commpo);
   end;
  finally
   stream.Free;

@@ -7736,9 +7736,6 @@ begin
     end;
     widget1:= widget1.fparentwidget;
    end;
-   if result = '' then begin
-    result:= ownernamepath(self);
-   end;
   end;
  end;
 end;

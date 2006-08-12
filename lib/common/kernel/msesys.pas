@@ -19,6 +19,12 @@ type
  threadty = cardinal;
  internalthreadprocty = function(): integer of object;
 
+ procitemty = record
+  pid,ppid: integer;
+  children: integerarty;
+ end;
+ procitemarty = array of procitemty;
+ 
  threadinfoty = record
   id: threadty;
   threadproc: internalthreadprocty;
