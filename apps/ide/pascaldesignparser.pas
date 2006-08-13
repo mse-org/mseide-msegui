@@ -1711,6 +1711,9 @@ end;
 
 procedure tpascaldesignparser.parseimplementation;
 
+var
+ procnestinglevel: integer;
+ 
  procedure parseprocedure(const akind: tmethodkind);
  var
   classname,procname: lstringty;
@@ -1736,93 +1739,97 @@ procedure tpascaldesignparser.parseimplementation;
    end;
 
  begin
-  lasttoken;
-  pos1:= sourcepos;
-  nexttoken;
-  if getname(procname) then begin
-   if checkoperator('.') then begin
-    classname:= procname;
-    getname(procname);
-    po1:= funitinfopo^.classinfolist.finditembyname(classname,false);
-    if (po1 <> nil) and isemptysourcepos(po1^.procimpstart) then begin
-     po1^.procimpstart:= pos1;
-    end;
-   end
-   else begin
-    po1:= nil;
-   end;
-   methodinfo.kind:= akind;
-   if parseprocparams(akind,methodinfo.params) then begin
-    if po1 <> nil then begin
-     po3:= funitinfopo^.deflist.beginnode(
-               lstringtostring(classname)+'.'+lstringtostring(procname)+
-                    mangleprocparams(methodinfo),
-                           syk_classprocimp,pos1,sourcepos);
-     deflist1:= po3^.deflist;
-     po2:= po1^.procedurelist.finditembyuppername(procname,methodinfo);
-     if po2 = nil then begin
-      po2:= po1^.procedurelist.newitem;
-      setprocinfo(po2);
+  if procnestinglevel < 32 then begin
+   inc(procnestinglevel);
+   lasttoken;
+   pos1:= sourcepos;
+   nexttoken;
+   if getname(procname) then begin
+    if checkoperator('.') then begin
+     classname:= procname;
+     getname(procname);
+     po1:= funitinfopo^.classinfolist.finditembyname(classname,false);
+     if (po1 <> nil) and isemptysourcepos(po1^.procimpstart) then begin
+      po1^.procimpstart:= pos1;
      end;
-     if po2 <> nil then begin
-      po2^.impheaderstartpos:= pos1;
-      po2^.impheaderendpos:= sourcepos;
-     end;
-     po3^.procindex:= po2^.b.index;
-     deflist1.fparentscope:= po1^.deflist;
     end
     else begin
-     po2:= funitinfopo^.procedurelist.finditembyuppername(procname,methodinfo);
-     if po2 = nil then begin
-      po2:= funitinfopo^.procedurelist.newitem;
-      setprocinfo(po2)
-     end;
-     po3:= funitinfopo^.deflist.beginnode(
-               lstringtostring(procname)+mangleprocparams(methodinfo),
-               syk_procimp1,pos1,sourcepos);
-     deflist1:= po3^.deflist;
-     po3^.procindex:= po2^.b.index;
-     po2:= nil;
+     po1:= nil;
     end;
-    while not eof do begin
-     if getident(aident) then begin
-      case pascalidentty(aident) of
-       id_var: begin
-        parsevar;
-       end;
-       id_const: begin
-        parseconst;
-       end;
-       id_procedure: begin
-        parseprocedure(mkprocedure);
-       end;
-       id_function: begin
-        parseprocedure(mkfunction);
-       end;
-       id_begin: begin
-        parseprocedurebody;
-        break;
-       end;
-       else begin
-        break;
-       end;
+    methodinfo.kind:= akind;
+    if parseprocparams(akind,methodinfo.params) then begin
+     if po1 <> nil then begin
+      po3:= funitinfopo^.deflist.beginnode(
+                lstringtostring(classname)+'.'+lstringtostring(procname)+
+                     mangleprocparams(methodinfo),
+                            syk_classprocimp,pos1,sourcepos);
+      deflist1:= po3^.deflist;
+      po2:= po1^.procedurelist.finditembyuppername(procname,methodinfo);
+      if po2 = nil then begin
+       po2:= po1^.procedurelist.newitem;
+       setprocinfo(po2);
       end;
+      if po2 <> nil then begin
+       po2^.impheaderstartpos:= pos1;
+       po2^.impheaderendpos:= sourcepos;
+      end;
+      po3^.procindex:= po2^.b.index;
+      deflist1.fparentscope:= po1^.deflist;
      end
      else begin
-      nexttoken;
+      po2:= funitinfopo^.procedurelist.finditembyuppername(procname,methodinfo);
+      if po2 = nil then begin
+       po2:= funitinfopo^.procedurelist.newitem;
+       setprocinfo(po2)
+      end;
+      po3:= funitinfopo^.deflist.beginnode(
+                lstringtostring(procname)+mangleprocparams(methodinfo),
+                syk_procimp1,pos1,sourcepos);
+      deflist1:= po3^.deflist;
+      po3^.procindex:= po2^.b.index;
+      po2:= nil;
      end;
-    end;
-    checkoperator(';');
-    checknewline;
-    pos1:= sourcepos;
-    funitinfopo^.deflist.endnode(pos1);
-    if po1 <> nil then begin
-     po1^.procimpend:= pos1;
-     if po2 <> nil then begin
-      po2^.impendpos:= po1^.procimpend;
+     while not eof do begin
+      if getident(aident) then begin
+       case pascalidentty(aident) of
+        id_var: begin
+         parsevar;
+        end;
+        id_const: begin
+         parseconst;
+        end;
+        id_procedure: begin
+         parseprocedure(mkprocedure);
+        end;
+        id_function: begin
+         parseprocedure(mkfunction);
+        end;
+        id_begin: begin
+         parseprocedurebody;
+         break;
+        end;
+        else begin
+         break;
+        end;
+       end;
+      end
+      else begin
+       nexttoken;
+      end;
+     end;
+     checkoperator(';');
+     checknewline;
+     pos1:= sourcepos;
+     funitinfopo^.deflist.endnode(pos1);
+     if po1 <> nil then begin
+      po1^.procimpend:= pos1;
+      if po2 <> nil then begin
+       po2^.impendpos:= po1^.procimpend;
+      end;
      end;
     end;
    end;
+   dec(procnestinglevel);
   end;
  end;
 
@@ -1842,6 +1849,7 @@ begin
  finterface:= false;
  fimplementation:= true;
  funitinfopo^.implementationstart:= sourcepos;
+ procnestinglevel:= 0;
  while not eof do begin
   if getident(aident) then begin;
    case pascalidentty(aident) of

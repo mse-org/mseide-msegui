@@ -23,7 +23,7 @@ var
 
 implementation
 uses
- sysutils,windows,msebits,msefileutils,mseguiintf;
+ sysutils,windows,msebits,msefileutils,mseguiintf,msedatalist;
 
 //todo: correct unicode implementation, long filepaths, stubs for win95
 
@@ -38,8 +38,8 @@ const
  FILE_ATTRIBUTE_OFFLINE              = $00001000;
  {$endif}
  filetimeoffset = -109205.0;
-type
 
+type
  win32threadinfoty = record
   handle: cardinal;
   platformdata: array[1..3] of cardinal;
@@ -126,6 +126,36 @@ type
   drivenum: integer; //for root directory
   platformdata: array[4..7] of cardinal;
  end;
+ 
+const
+ TH32CS_SNAPHEAPLIST = $00000001;
+ TH32CS_SNAPPROCESS  = $00000002;
+ TH32CS_SNAPTHREAD   = $00000004;
+ TH32CS_SNAPMODULE   = $00000008;
+ TH32CS_SNAPALL      = TH32CS_SNAPHEAPLIST or TH32CS_SNAPPROCESS or 
+                       TH32CS_SNAPTHREAD or TH32CS_SNAPMODULE;
+ TH32CS_INHERIT      = $80000000;
+type
+ PROCESSENTRY32 = record
+  dwSize: DWORD;
+  cntUsage: DWORD;
+  th32ProcessID: DWORD;
+  th32DefaultHeapID: pointer;
+  th32ModuleID: DWORD;
+  cntThreads: DWORD;
+  th32ParentProcessID: DWORD;
+  pcPriClassBase: LONG;
+  dwFlags: DWORD;
+  szExeFile: array[0..MAX_PATH-1] of char;
+ end;
+ PPROCESSENTRY32 = ^PROCESSENTRY32;
+ 
+function CreateToolhelp32Snapshot(dwFlags: dword; th32ProcessId: dword): thandle;
+              stdcall; external kernel32 name 'CreateToolhelp32Snapshot';
+function Process32First(hSnapshot: thandle; lppe: PPROCESSENTRY32): BOOL;
+              stdcall; external kernel32 name 'Process32First';
+function Process32Next(hSnapshot: thandle; lppe: PPROCESSENTRY32): BOOL;
+              stdcall; external kernel32 name 'Process32Next';
 
 function sys_getprintcommand: string;
 begin
@@ -165,8 +195,28 @@ end;
 }
 
 function sys_getprocesses: procitemarty;
+var
+ int1: integer;
+ th: thandle;
+ info: processentry32;
 begin
  result:= nil;
+ th:= createtoolhelp32snapshot(th32cs_snapprocess,0);
+ int1:= 0;
+ if th <> invalid_handle_value then begin
+  info.dwsize:= sizeof(info);
+  if process32first(th,@info) then begin
+   repeat
+    additem(result,typeinfo(procitemarty),int1);
+    with result[int1-1] do begin
+     pid:= info.th32processid;
+     ppid:= info.th32parentprocessid;
+    end;
+   until not process32next(th,@info);
+  end;
+  closehandle(th);
+  setlength(result,int1);
+ end;
 end;
 
 procedure sys_usleep(const us: cardinal);

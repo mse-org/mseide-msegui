@@ -1818,6 +1818,11 @@ begin
  result:= gue_ok;
 end;
 
+function gui_setappfocus(id: winidty): guierrorty;
+begin
+ result:= gui_setwindowfocus(id);
+end;
+
 function gui_setcursorshape(winid: winidty; shape: cursorshapety): guierrorty;
 begin
  result:= gue_ok;

@@ -208,7 +208,7 @@ begin
    if araise and (gui_raisewindow(winid) <> gue_ok) then begin
     exit;
    end;
-   if gui_setwindowfocus(winid) = gue_ok then begin
+   if gui_setappfocus(winid) = gue_ok then begin
     result:= true;
    end;
   end;

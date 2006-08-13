@@ -267,17 +267,18 @@ type
   col0: cardinal;
   col1: cardinal;
  end;
+ 
 {$ifdef FPC}
 function GetNextWindow(hWnd: HWND; uCmd: UINT): HWND; stdcall;
-             external 'user32' name 'GetWindow';
+             external user32 name 'GetWindow';
 function CreateRectRgnIndirect(const _para1:tRECT):HRGN; stdcall;
-             external 'gdi32' name 'CreateRectRgnIndirect';
+             external gdi32 name 'CreateRectRgnIndirect';
 function winFillRect(hDC:HDC; const lprc:tRECT; hbr:HBRUSH):longint; stdcall;
-             external 'user32' name 'FillRect';
+             external user32 name 'FillRect';
 function winScrollWindowEx(hWnd: HWND; dx, dy: Integer;
              prcScroll, prcClip: PRect;
              hrgnUpdate: HRGN; prcUpdate: PRect; flags: UINT): BOOL; stdcall;
-             external 'user32' name 'ScrollWindowEx';
+             external user32 name 'ScrollWindowEx';
 
 function PeekMessage(var lpMsg: TMsg; hWnd: HWND;
   wMsgFilterMin, wMsgFilterMax, wRemoveMsg: UINT): BOOL; stdcall;
@@ -287,7 +288,7 @@ function TranslateMessage(const lpMsg: TMsg): BOOL; stdcall;
 function DispatchMessage(const lpMsg: TMsg): Longint; stdcall;
              external user32 name 'DispatchMessageA';
 {$endif}
-
+             
 function getapplicationwindow: hwnd;
 begin
  result:= applicationwindow;
@@ -766,6 +767,24 @@ begin
  windows.SetFocus(id);
  result:= gue_ok;
 end;
+
+function gui_setappfocus(id: winidty): guierrorty;
+var
+ selfthread,otherthread: integer;
+begin
+ result:= gue_error;
+ selfthread:= getcurrentthreadid;
+ otherthread:= getwindowthreadprocessid(id,nil);
+ if otherthread <> 0 then begin
+  if attachthreadinput(selfthread,otherthread,true) then begin
+   if windows.setfocus(id) <> 0 then begin
+    result:= gue_ok;
+   end;
+   attachthreadinput(selfthread,otherthread,false)
+  end;
+ end;
+end;
+
 const
  curwidth = 32;
  curheight = 32;
@@ -1567,9 +1586,41 @@ begin
  result:= gui_setwindowicon(applicationwindow,icon,mask);
 end;
 
-function gui_pidtowinid(const pids: integerarty): winidty;
+type
+ pidinfoty = record
+  pids: integerarty;
+  winid: winidty;
+ end;
+ ppidinfoty = ^pidinfoty;
+
+function checkproc(awinid: winidty; po: ptrint): bool; stdcall;
+var
+ pid: integer;
+ int1: integer;
 begin
- result:= 0;
+ result:= true;
+ if getwindowlong(awinid,gwl_style) and windows.ws_visible <> 0 then begin 
+  getwindowthreadprocessid(awinid,@pid);
+  with ppidinfoty(po)^ do begin
+   for int1:= 0 to high(pids) do begin
+    if pids[int1] = pid then begin
+     result:= false;
+     winid:= awinid;
+     break;
+    end;
+   end;
+  end;
+ end;
+end;
+
+function gui_pidtowinid(const pids: integerarty): winidty;
+var
+ info: pidinfoty;
+begin
+ info.pids:= pids;
+ info.winid:= 0;
+ enumwindows(@checkproc,ptrint(@info));
+ result:= info.winid;
 end;
 
 function gui_rgbtopixel(rgb: cardinal): pixelty;
@@ -3523,8 +3574,8 @@ begin
  str1:= application.applicationname;
 // id:= windows.CreateWindow(widgetclassname,pchar(str1),ws_overlappedwindow,
 //                   0,0,0,0,0,0,hinstance,nil);
- id:= windows.CreateWindowex(ws_ex_appwindow,widgetclassname,pchar(str1),ws_overlappedwindow,
-                   0,0,0,0,0,0,hinstance,nil);
+ id:= windows.CreateWindowex(ws_ex_appwindow,widgetclassname,pchar(str1),
+        ws_overlappedwindow,0,0,0,0,0,0,hinstance,nil);
  if id = 0 then begin
   result:= gue_createwindow;
  end
