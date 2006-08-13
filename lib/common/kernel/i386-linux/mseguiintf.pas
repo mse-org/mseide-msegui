@@ -1105,6 +1105,9 @@ end;
 
 function gui_pidtowinid(const pids: integerarty): winidty;
 
+var
+ level: integer;
+ 
  function scanchildren(const aparent: winidty): boolean;
  
   function checkpid(const apid: integer): boolean;
@@ -1126,28 +1129,36 @@ function gui_pidtowinid(const pids: integerarty): winidty;
   children: pwindow;
   int1: integer;
   id1: winidty;
+  ar1: atomarty;
  begin
-  result:= (gui_windowvisible(aparent) or (getwmstate(aparent) = wms_iconic)) and
-           readlongproperty(aparent,netatoms[net_wm_pid],1,int1) and 
-                           checkpid(int1);
-  if result then begin
+  result:= false;
+  if (gui_windowvisible(aparent) or (getwmstate(aparent) = wms_iconic)) and
+   readlongproperty(aparent,netatoms[net_wm_pid],1,int1) and checkpid(int1) then begin
+   result:= true;
    gui_pidtowinid:= aparent;
   end
   else begin 
-   if (xquerytree(appdisp,aparent,@root,@parent,@children,@ca1) <> 0) and 
-       (children <> nil) then begin
-    for int1:= integer(ca1)-1 downto 0 do begin
-     if scanchildren(pwinidaty(children)^[int1]) then begin
-      break;
+   if not netsupported or 
+            not readatomproperty(aparent,netatoms[net_wm_state],ar1) then begin
+     //no wm toplevel window
+    if (xquerytree(appdisp,aparent,@root,@parent,@children,@ca1) <> 0) and 
+        (children <> nil) then begin
+     inc(level);
+     for int1:= integer(ca1)-1 downto 0 do begin
+      if scanchildren(pwinidaty(children)^[int1]) then begin
+       break;
+      end;
      end;
+     dec(level);
+     xfree(children);
     end;
-    xfree(children);
    end;
   end;
  end;
   
 begin
  result:= 0;
+ level:= 0;
  if (netatoms[net_wm_pid] <> 0) then begin
   scanchildren(rootwindow);
  end;
@@ -1804,10 +1815,6 @@ begin
 //   wins[1]:= toplevelwindow(transientfor);
 //   xrestackwindows(appdisp,@wins[0],2);
   end;
- end;
- if netatoms[net_wm_pid] <> 0 then begin
-  waitfordecoration(id);
-  setcardinalproperty(toplevelwindow(id),netatoms[net_wm_pid],getpid);
  end;
 end;
 
