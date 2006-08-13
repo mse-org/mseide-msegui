@@ -136,6 +136,9 @@ const
                        TH32CS_SNAPTHREAD or TH32CS_SNAPMODULE;
  TH32CS_INHERIT      = $80000000;
 type
+ {$ifndef FPC}
+ LONG = integer;
+ {$endif}
  PROCESSENTRY32 = record
   dwSize: DWORD;
   cntUsage: DWORD;

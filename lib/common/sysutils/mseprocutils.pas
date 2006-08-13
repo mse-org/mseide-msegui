@@ -177,7 +177,7 @@ var
  begin
   if findarrayitem(pid,ar1,{$ifdef FPC}@{$endif}findprocitem,
                 sizeof(procitemty),int2) then begin
-   stackarray(ar1[int2].children,getallprocesschildren);
+   stackarray(ar1[int2].children,result);
    for int1:= 0 to high(ar1[int2].children) do begin
     addproc(ar1[int2].children[int1]);
    end;

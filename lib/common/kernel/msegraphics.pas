@@ -3468,7 +3468,8 @@ begin
  end;
 end;
 
-procedure tcanvas.fillpolygon(const apoints: array of pointty; const acolor: colorty;
+procedure tcanvas.fillpolygon(const apoints: array of pointty;
+                              const acolor: colorty = cl_default; 
                               const linecolor: colorty = cl_none);
 begin
  if checkforeground(acolor,false) then begin
