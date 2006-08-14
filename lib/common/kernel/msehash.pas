@@ -82,7 +82,7 @@ type
    procedure add(const keys: array of string;
                    startindex: pointer = pointer($00000001)); overload;
                              //data = arrayindex + startindex
-   procedure delete(const key: lstringty); virtual; overload;
+   procedure delete(const key: lstringty); overload; virtual;
    procedure delete(const key: string); overload;
    function find(const key: string): pointer; overload;     //casesensitive
    function find(const key: lstringty): pointer; overload;  //casesensitive
