@@ -896,7 +896,7 @@ end;
 
 procedure tmainfo.startgdbonexecute(const sender: tobject);
 begin
- gdb.startgdb(tosysfilepath(projectoptions.texp.debugcommand)+ ' ' + 
+ gdb.startgdb(tosysfilepath(quotefilename(projectoptions.texp.debugcommand))+ ' ' + 
                          projectoptions.texp.debugoptions);
  updatesigsettings;
  cleardebugdisp;

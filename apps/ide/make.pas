@@ -82,7 +82,7 @@ var
  wstr1: filenamety;
 begin
  with projectoptions,texp do begin
-  str3:= tosysfilepath(makecommand);
+  str3:= quotefilename(tosysfilepath(makecommand));
   str1:= str3;
   if targetfile <> '' then begin
    str1:= str1 + ' -o'+filename(targetfile);
