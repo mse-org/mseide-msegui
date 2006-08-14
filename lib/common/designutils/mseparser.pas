@@ -13,7 +13,7 @@ unit mseparser;
 
 interface
 uses
- Classes,msetypes,msestrings,msestream,mselist;
+ Classes,msetypes,msestrings,msestream,mselist,msehash;
 
 const
  maxincludelevel = 32;
@@ -54,11 +54,13 @@ type
  end;
  ptokenty = ^tokenty;
  tokenarty = array of tokenty;
+ {
  tokensequencety = record
   token: ptokenty;
   count: integer;
+  index: integer;
  end;
-
+ }
  charsetty = set of char;
  tscanner = class
   private
@@ -220,7 +222,8 @@ type
    function getorignamenoident(out value: lstringty): boolean;
 
    function testname(const atoken: tokenty; const aname: string): boolean;
-   function testnames(const atoken: tokenty; const anames: array of string): boolean;
+   function testnames(const atoken: tokenty; 
+                                     const anames: array of string): integer;
 
    function getoperator: char;                   //#0 if none
    function testoperator(op: char): boolean;
@@ -315,16 +318,25 @@ type
   'read','write','stored','default','nodefault');
 
 type
+ tdefineslist = class(thashedstrings);
+ defstatety = (def_none,def_skip);
+ 
  tpascalparser = class(tparser)
+  private
+   fdefines: tdefineslist;
+   fdefstate: defstatety;
+   fdefstates: integerarty;
+   fdefstatecount: integer;
   protected
    function getscannerclass: scannerclassty; override;
 
   public
    constructor create(const afilelist: tmseindexednamelist); overload;
+   destructor destroy; override;
    procedure initidents; override;
    function getvaluestring(var value: string): valuekindty; override;
    function skipcomment: boolean; override; //does not skip whitespace
-   procedure decodecompilerswitch(const tokens: tokensequencety);
+//   procedure decodecompilerswitch(const tokens: tokensequencety);
    procedure parsecompilerswitch;
    function getpascalstring(var value: string): boolean; //true if ok
    function concatpascalstring(var value: string): boolean; 
@@ -1231,16 +1243,16 @@ begin
  result:= (atoken.kind = tk_name) and (lstringcomp(atoken.value,aname) = 0);
 end;
 
-function tparser.testnames(const atoken: tokenty; const anames: array of string): boolean;
+function tparser.testnames(const atoken: tokenty;
+                                          const anames: array of string): integer;
 var
  int1: integer;
 begin
- result:= (atoken.kind = tk_name);
- if result then begin
-  result:= false;
+ result:= -1;
+ if atoken.kind = tk_name then begin
   for int1:= 0 to high(anames) do begin
    if (lstringcomp(atoken.value,anames[int1]) = 0) then begin
-    result:= true;
+    result:= int1;
     break;
    end;
   end;
@@ -1556,76 +1568,149 @@ end;
 }
 { tpascalparser }
 
-procedure tpascalparser.decodecompilerswitch(const tokens: tokensequencety);
-begin
- //dummy
-end;
-
+type
+ cskwordty = (cskw_i,cskw_include,cskw_define,cskw_undef,cskw_ifdef,cskw_ifndef,
+              cskw_else,cskw_endif);
+const
+ cskwords: array[cskwordty] of string = 
+                  ('I','INCLUDE','DEFINE','UNDEF','IFDEF','IFNDEF',
+                   'ELSE','ENDIF');
+                  
 procedure tpascalparser.parsecompilerswitch;
+
+ procedure skiprest;
+ begin
+  while (fto^.kind <> tk_fileend1) and
+     not((fto^.kind = tk_operator) and (fto^.op = '}')) do begin
+   nexttoken;
+  end;
+  nexttoken; //skip '}'
+ end;
+ 
+ procedure skipskip;
+ begin
+  repeat
+   if not skipcomment then begin
+    nexttoken;
+   end;
+  until (fto^.kind = tk_fileend1) or (fdefstate <> def_skip);
+ end;
+ 
 var
- seq1: tokensequencety;
  int1,int2: integer;
  str1: string;
  filename: filenamety;
  anum: cardinal;
  startpos,endpos: sourceposty;
+ lstr1: lstringty;
 begin
  anum:= ftokennum;
- if testnames(fto^,['I','INCLUDE']) then begin
-  startpos:= sourcepos;
-  nexttoken;
-  if checkoperator('''') then begin
-   lasttoken;
-   if getpascalstring(str1) then begin
-    try
-     filename:= pascalstringtostring(str1);
-    except
+ int1:= testnames(fto^,cskwords);
+ if int1 >= 0 then begin
+  if int1 > 1 then begin
+   nexttoken;
+  end;
+  case cskwordty(int1) of
+   cskw_ifdef,cskw_ifndef: begin
+    additem(fdefstates,integer(fdefstate),fdefstatecount);
+    if fdefstate <> def_skip then begin
+     if not (getname(lstr1) and 
+                       ((fdefines.find(lstr1) <> nil) xor 
+                        (cskwordty(int1) = cskw_ifndef))) then begin
+      fdefstate:= def_skip;
+      skiprest;
+      skipskip;
+     end
+     else begin
+      skiprest;
+     end;
+    end
+    else begin
+     skiprest;
     end;
    end;
-  end
-  else begin
-   str1:= '';
-   skipwhitespaceonly;
-   while not(fto^.kind in [tk_fileend1,tk_newline,tk_whitespace]) and
-      not((fto^.kind = tk_operator) and (fto^.op = '}')) do begin
-    str1:= str1 + getorigtoken;
+   cskw_else: begin
+    skiprest;
+    if fdefstate = def_skip then begin
+     if (fdefstatecount = 0) or 
+             (defstatety(fdefstates[fdefstatecount-1]) <> def_skip) then begin
+      fdefstate:= def_none;
+     end;
+    end
+    else begin
+     fdefstate:= def_skip;
+     skipskip;
+    end;
    end;
-   filename:= str1;
-  end;
-  if findoperator('}') then begin
-   endpos:= lasttokenpos;
-  end
-  else begin
-   endpos:= sourcepos;
-  end;
-  if filename <> '' then begin
-   int2:= includefile(filename,startpos,sourcepos);
-   if int2 >= 0 then begin
-    for int1:= anum + 1 to ftokennum - 1 do begin
-     fscanner.ftokens[int1].kind:= tk_whitespace;
+   cskw_endif: begin
+    if fdefstatecount > 0 then begin
+     dec(fdefstatecount);
+     fdefstate:= defstatety(fdefstates[fdefstatecount]);
     end;
-    with fscanner.ftokens[anum] do begin
-     kind:= tk_include;
-     filenr:= int2;
+    skiprest;
+   end;
+   else begin
+    if fdefstate <> def_skip then begin 
+     case cskwordty(int1) of
+      cskw_i,cskw_include: begin
+       startpos:= sourcepos;
+       nexttoken;
+       if checkoperator('''') then begin
+        lasttoken;
+        if getpascalstring(str1) then begin
+         try
+          filename:= pascalstringtostring(str1);
+         except
+         end;
+        end;
+       end
+       else begin
+        str1:= '';
+        skipwhitespaceonly;
+        while not(fto^.kind in [tk_fileend1,tk_newline,tk_whitespace]) and
+           not((fto^.kind = tk_operator) and (fto^.op = '}')) do begin
+         str1:= str1 + getorigtoken;
+        end;
+        filename:= str1;
+       end;
+       if findoperator('}') then begin
+        endpos:= lasttokenpos;
+       end
+       else begin
+        endpos:= sourcepos;
+       end;
+       if filename <> '' then begin
+        int2:= includefile(filename,startpos,sourcepos);
+        if int2 >= 0 then begin
+         for int1:= anum + 1 to ftokennum - 1 do begin
+          fscanner.ftokens[int1].kind:= tk_whitespace;
+         end;
+         with fscanner.ftokens[anum] do begin
+          kind:= tk_include;
+          filenr:= int2;
+         end;
+         enterinclude(int2);
+        end;
+       end;
+      end;
+      cskw_define: begin
+       str1:= getname;
+       if str1 <> '' then begin
+        fdefines.add(str1);
+       end;
+      end;
+      cskw_undef: begin
+       if getname(lstr1) then begin
+        fdefines.delete(lstr1);
+       end;
+      end;
+     end;
     end;
-    enterinclude(int2);
    end;
   end;
  end
  else begin
-  with seq1 do begin
-   token:= fto;
-   count:= 0;
-   while (fto^.kind <> tk_fileend1) and
-      not((fto^.kind = tk_operator) and (fto^.op = '}')) do begin
-    inc(count);
-    nexttoken;
-   end;
-   nexttoken; //skip '}'
-   if count > 0 then begin
-    decodecompilerswitch(seq1);
-   end;
-  end;
+  skiprest;
  end;
 end;
 
@@ -1775,6 +1860,13 @@ constructor tpascalparser.create(const afilelist: tmseindexednamelist);
 begin
  inherited;
  flastvalidident:= lastpascalnormalident;
+ fdefines:= tdefineslist.create;
+end;
+
+destructor tpascalparser.destroy;
+begin
+ fdefines.free;
+ inherited;
 end;
 
 function tpascalparser.checkclassident(const ident: pascalidentty): boolean;

@@ -72,7 +72,8 @@ type
    fcount: integer;
    function getbucketcount: integer;
    procedure setbucketcount(const Value: integer);
-   function internalfind(const key: string): pdatastringty;
+   function internalfind(const key: string): pdatastringty; overload;
+   function internalfind(const key: lstringty): pdatastringty; overload;
   public
    constructor create;
    procedure clear; virtual;
@@ -81,7 +82,8 @@ type
    procedure add(const keys: array of string;
                    startindex: pointer = pointer($00000001)); overload;
                              //data = arrayindex + startindex
-   procedure delete(const key: string); virtual;
+   procedure delete(const key: lstringty); virtual; overload;
+   procedure delete(const key: string); overload;
    function find(const key: string): pointer; overload;     //casesensitive
    function find(const key: lstringty): pointer; overload;  //casesensitive
    function findi(const key: string): pointer; overload;    //caseinsensitive
@@ -142,7 +144,7 @@ type
    destructor destroy; override;
    procedure clear; override;
    procedure add(const key: string; aobject: tobject);
-   procedure delete(const key: string); override;
+   procedure delete(const key: lstringty); override;
    function find(const key: string): tobject; overload;
    function find(const key: lstringty): tobject; overload;
    function findi(const key: string): tobject; overload;
@@ -424,7 +426,7 @@ var
  freefound: boolean;
 begin
  if data = nil then begin
-  raise exception.create('nil not alowed.');
+  raise exception.create('nil not allowed.');
  end;
  inc(fcount);
  po:= @fbuckets[stringhash(key) and fmask];
@@ -445,6 +447,7 @@ begin
  po1^.key:= key;
  po1^.data:= data;
 end;
+
 procedure thashedstrings.add(const keys: array of string;
                  startindex:  pointer = pointer($00000001));
 var
@@ -490,7 +493,7 @@ begin
  end;
 end;
 
-function thashedstrings.find(const key: lstringty): pointer;
+function thashedstrings.internalfind(const key: lstringty): pdatastringty;
 var
  po: stringbucketpoty;
  po1: pdatastringty;
@@ -508,13 +511,26 @@ begin
       int2:= key.len;
      end;
      if strlcomp(key.po,pointer(po1^.key),int2) = 0 then begin
-      result:= po1^.data;
+      result:= po1;
       break;
      end;
     end;
     inc(po1)
    end;
   end;
+ end;
+end;
+
+function thashedstrings.find(const key: lstringty): pointer;
+var
+ po1: pdatastringty;
+begin
+ po1:= internalfind(key);
+ if po1 <> nil then begin
+  result:= po1^.data;
+ end
+ else begin
+  result:= nil;
  end;
 end;
 
@@ -552,17 +568,27 @@ begin
  end;
 end;
 
-procedure thashedstrings.delete(const key: string);
+procedure thashedstrings.delete(const key: lstringty);
 var
  po1: pdatastringty;
 begin
- repeat
+ while true do begin
   po1:= internalfind(key);
-  if po1 <> nil then begin
-   po1^.key:= '';
-   dec(fcount);
+  if po1 = nil then begin
+   break;
   end;
- until po1 = nil;
+  po1^.key:= '';
+  dec(fcount);
+ end;
+end;
+
+procedure thashedstrings.delete(const key: string);
+var
+ lstr1: lstringty;
+begin
+ lstr1.len:= length(key);
+ lstr1.po:= pointer(key);
+ delete(lstr1);
 end;
 
 function thashedstrings.getbucketcount: integer;
@@ -771,7 +797,7 @@ begin
  inherited add(key,aobject);
 end;
 
-procedure thashedstringobjects.delete(const key: string);
+procedure thashedstringobjects.delete(const key: lstringty);
 var
  po1: pdatastringty;
 begin
