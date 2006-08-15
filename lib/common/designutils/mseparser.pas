@@ -327,12 +327,15 @@ type
    fdefstate: defstatety;
    fdefstates: integerarty;
    fdefstatecount: integer;
+   fstartdefines: stringarty;
   protected
    function getscannerclass: scannerclassty; override;
+   
 
   public
    constructor create(const afilelist: tmseindexednamelist); overload;
    destructor destroy; override;
+   procedure clear; override;
    procedure initidents; override;
    function getvaluestring(var value: string): valuekindty; override;
    function skipcomment: boolean; override; //does not skip whitespace
@@ -348,6 +351,7 @@ type
    function checkclassident(const ident: pascalidentty): boolean; //true if ok
    function getpropertyident: pascalidentty;      //-1 if none
    function checkpropertyident(const ident: pascalidentty): boolean; //true if ok
+   property startdefines: stringarty read fstartdefines write fstartdefines;
  end;
 
  tcparser = class(tparser)
@@ -1867,6 +1871,20 @@ destructor tpascalparser.destroy;
 begin
  fdefines.free;
  inherited;
+end;
+
+procedure tpascalparser.clear;
+var
+ int1: integer;
+begin
+ inherited;
+ fdefstate:= def_none;
+ fdefstates:= nil;
+ fdefstatecount:= 0;
+ fdefines.clear;
+ for int1:= 0 to high(fstartdefines) do begin
+  fdefines.add(uppercase(fstartdefines[int1]));
+ end;
 end;
 
 function tpascalparser.checkclassident(const ident: pascalidentty): boolean;

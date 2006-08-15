@@ -22,7 +22,8 @@ interface
 uses
  mseforms,msefiledialog,msegui,msestat,msetabs,msesimplewidgets,msetypes,
  msestrings,msedataedits,msetextedit,msegraphedits,msewidgetgrid,msegrids,
- msesplitter,msesysenv,msegdbutils,msedispwidgets,msesys;
+ msesplitter,msesysenv,msegdbutils,msedispwidgets,msesys,mseclasses,
+ msegraphutils;
 
 const
  defaultsourceprintfont = 'Courier';
@@ -60,6 +61,7 @@ type
   debugoptions: filenamety;
   debugtarget: filenamety;
   sourcedirs: msestringarty;
+  defines: msestringarty;
   unitdirs: msestringarty;
   makeoptions: msestringarty;
   syntaxdeffiles: msestringarty;
@@ -113,6 +115,7 @@ type
   backupfilecount: integer;
   encoding: integer;
 
+  defineson: longboolarty;
   exceptclassnames: msestringarty;
   exceptignore: longboolarty;
   
@@ -253,11 +256,13 @@ type
    encoding: tenumedit;
    checkmethods: tbooleanedit;
    externalconsole: tbooleanedit;
+   defon: tbooleanedit;
    tgroupbox1: tgroupbox;
    backupfilecount: tintegeredit;
    debugoptions: tstringedit;
    exceptclassnames: tstringedit;
    tintegeredit2: tintegeredit;
+   def: tstringedit;
    ttabpage1: ttabpage;
    macrogrid: twidgetgrid;
    selectactivegroupgrid: twidgetgrid;
@@ -273,9 +278,11 @@ type
    ttabpage6: ttabpage;
    ttabpage7: ttabpage;
    ttabpage8: ttabpage;
+   ttabpage9: ttabpage;
    ttabwidget1: ttabwidget;
    twidgetgrid1: twidgetgrid;
    exceptionsgrid: twidgetgrid;
+   twidgetgrid2: twidgetgrid;
    unitdirgrid: twidgetgrid;
    unitdirs: tfilenameedit;
    makepage: ttabpage;
@@ -334,7 +341,7 @@ uses
  selecteditpageform,programparametersform,sourceupdate,mseedit,msegraphics,
  msedesigner,panelform,watchpointsform,commandlineform,msestream,
  componentpaletteform,mserichstring,msesettings,formdesigner,
- msestringlisteditor,msetexteditor,msecolordialog,msepropertyeditors,msegraphutils
+ msestringlisteditor,msetexteditor,msecolordialog,msepropertyeditors
  {$ifdef FPC},msedbfieldeditor{$endif};
 
 type
@@ -494,6 +501,7 @@ begin
    li.expandmacros(debugoptions);
    li.expandmacros(debugtarget);
    li.expandmacros(sourcedirs);
+   li.expandmacros(defines);
    li.expandmacros(unitdirs);
    li.expandmacros(makeoptions);
    li.expandmacros(syntaxdeffiles);
@@ -650,6 +658,8 @@ begin
   additem(sourcedirs,'${MSELIBDIR}*/');
   additem(sourcedirs,'${MSELIBDIR}kernel/$TARGET/');
   sourcedirs:= reversearray(sourcedirs);
+  defines:= nil;
+  defineson:= nil;
   unitdirs:= nil;
   additem(unitdirs,'${MSELIBDIR}*/');
   additem(unitdirs,'${MSELIBDIR}kernel/');
@@ -827,6 +837,8 @@ begin
   updatevalue('macrogroup',macrogroup,0,5);
   updatevalue('groupcomments',groupcomments);
   updatevalue('sourcedirs',sourcedirs);
+  updatevalue('defines',defines);
+  updatevalue('defineson',defineson);
   updatevalue('unitdirs',unitdirs);
   updatevalue('unitdirson',unitdirson);
   updatevalue('sourcefilemasks',sourcefilemasks);
@@ -1032,6 +1044,8 @@ begin
   fo.sourcedirs.gridvalues:= reversearray(sourcedirs);
   fo.grid[0].datalist.asarray:= sourcefilemasks;
   fo.grid[1].datalist.asarray:= syntaxdeffiles;
+  fo.def.gridvalues:= defines;
+  fo.defon.gridvalues:= defineson;
   fo.stoponexception.value:= stoponexception;
   fo.activateonbreak.value:= activateonbreak;
   fo.showconsole.value:= showconsole;
@@ -1147,6 +1161,8 @@ begin
   end;
   storemacros(fo);
   sourcedirs:= reversearray(fo.sourcedirs.gridvalues);
+  defines:= fo.def.gridvalues;
+  defineson:= fo.defon.gridvalues;
   sourcefilemasks:= fo.grid[0].datalist.asarray;
   syntaxdeffiles:= fo.grid[1].datalist.asarray;
   stoponexception:= fo.stoponexception.value;

@@ -1,7 +1,7 @@
 object projectoptionsfo: tprojectoptionsfo
   optionswidget = [ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_destroywidgets, ow_hinton]
-  bounds_x = 147
-  bounds_y = 95
+  bounds_x = 182
+  bounds_y = 106
   bounds_cx = 629
   bounds_cy = 572
   visible = False
@@ -31,7 +31,7 @@ object projectoptionsfo: tprojectoptionsfo
     frame.dummy = 0
     anchors = [an_top, an_bottom]
     taborder = 1
-    activepageindex = 3
+    activepageindex = 4
     tab_frame.dummy = 0
     tab_size = 20
     statfile = statfile1
@@ -864,6 +864,7 @@ object projectoptionsfo: tprojectoptionsfo
       frame.dummy = 0
       anchors = [an_top, an_bottom]
       taborder = 6
+      visible = False
       caption = '&Make'
       onchildscaled = makepageonchildscaled
       object makegroupbox: tgroupbox
@@ -1512,7 +1513,6 @@ object projectoptionsfo: tprojectoptionsfo
       frame.dummy = 0
       anchors = [an_left, an_top, an_right, an_bottom]
       taborder = 4
-      visible = False
       caption = '&Debugger'
       onchildscaled = debuggeronchildscaled
       object stoponexception: tbooleanedit
@@ -1613,6 +1613,7 @@ object projectoptionsfo: tprojectoptionsfo
         bounds_cy = 334
         anchors = [an_left, an_top, an_right, an_bottom]
         taborder = 7
+        activepageindex = 1
         tab_frame.dummy = 0
         tab_size = 20
         statfile = statfile1
@@ -1624,7 +1625,8 @@ object projectoptionsfo: tprojectoptionsfo
           bounds_cy = 314
           frame.dummy = 0
           anchors = [an_left, an_top, an_right, an_bottom]
-          taborder = 3
+          taborder = 4
+          visible = False
           caption = 'Source &directories'
           reffontheight = 16
           object sourcedirgrid: twidgetgrid
@@ -1673,6 +1675,81 @@ object projectoptionsfo: tprojectoptionsfo
             end
           end
         end
+        object ttabpage9: ttabpage
+          bounds_x = 0
+          bounds_y = 20
+          bounds_cx = 625
+          bounds_cy = 314
+          frame.dummy = 0
+          anchors = [an_left, an_top, an_right, an_bottom]
+          taborder = 1
+          caption = 'Defi&nes'
+          reffontheight = 16
+          object twidgetgrid2: twidgetgrid
+            optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_focusbackonesc, ow_mousewheel, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+            bounds_x = 0
+            bounds_y = 0
+            bounds_cx = 625
+            bounds_cy = 314
+            frame.dummy = 0
+            anchors = []
+            optionsgrid = [og_keyrowmoving, og_rowinserting, og_rowdeleting, og_focuscellonenter, og_autofirstrow, og_autoappend, og_colchangeontabkey, og_autopopup]
+            fixrows.count = 1
+            fixrows.items = <            
+              item
+                height = 18
+                captions.count = 2
+                captions.items = <                
+                  item
+                    caption = 'on'
+                  end                
+                  item
+                    caption = 'Space separated defines for {$ifdef}'
+                  end>
+              end>
+            datacols.count = 2
+            datacols.items = <            
+              item
+                width = 22
+                options = [co_drawfocus, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
+                widgetname = 'defon'
+              end            
+              item
+                width = 597
+                options = [co_fill, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
+                onshowhint = colonshowhint
+                widgetname = 'def'
+              end>
+            datarowheight = 18
+            reffontheight = 16
+            object defon: tbooleanedit
+              optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_mousewheel, ow_destroywidgets]
+              bounds_x = 0
+              bounds_y = 0
+              bounds_cx = 22
+              bounds_cy = 18
+              frame.levelo = 0
+              frame.colorclient = -2147483645
+              frame.localprops = [frl_levelo, frl_colorclient]
+              frame.dummy = 0
+              taborder = 1
+              valuedefault = True
+            end
+            object def: tstringedit
+              optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_mousewheel, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+              bounds_x = 23
+              bounds_y = 0
+              bounds_cx = 597
+              bounds_cy = 18
+              frame.levelo = 0
+              frame.colorclient = -2147483645
+              frame.localprops = [frl_levelo, frl_colorclient]
+              frame.dummy = 0
+              visible = False
+              reffontheight = 16
+            end
+          end
+        end
         object ttabpage7: ttabpage
           bounds_x = 0
           bounds_y = 20
@@ -1680,7 +1757,7 @@ object projectoptionsfo: tprojectoptionsfo
           bounds_cy = 314
           frame.dummy = 0
           anchors = [an_left, an_top, an_right, an_bottom]
-          taborder = 2
+          taborder = 3
           visible = False
           caption = '&Signals'
           reffontheight = 16
@@ -1820,7 +1897,7 @@ object projectoptionsfo: tprojectoptionsfo
           bounds_cy = 314
           frame.dummy = 0
           anchors = [an_left, an_top, an_right, an_bottom]
-          taborder = 1
+          taborder = 2
           visible = False
           caption = '&Exceptions'
           reffontheight = 16

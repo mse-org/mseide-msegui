@@ -1294,7 +1294,8 @@ var
   with info do begin
    if (dragobject^ is ttagdragobject) and (dragobject^.sender = self) and
     ((tabo_dragdest in foptions) or (csdesigning in componentstate)) then begin
-    int1:= tabatpos(pos,tabo_dragdestenabledonly in foptions);
+    int1:= tabatpos(pos,(tabo_dragdestenabledonly in foptions) and 
+                            not(csdesigning in componentstate));
     result:= (ttagdragobject(dragobject^).tag <> int1) and
                 ((int1 >= 0) {or (csdesigning in componentstate)});
    end
@@ -1892,6 +1893,7 @@ begin
   if value >= 0 then begin
    defaultfocuschild:= items[value];
    with items[value] do begin
+    bringtofront; //needed in design mode where all widgets are visible
     visible:= true;
     if self.entered and canfocus then begin
      setfocus;

@@ -2384,7 +2384,7 @@ begin
  id:= rootwindow;
  repeat
   result:= id;
-  if longint(xtranslatecoordinates(appdisp,rootwindow,id,
+  if longint(xtranslatecoordinates(appdisp,rootwindow,result,
          pos.x,pos.y,@int1,@int1,@id)) = 0 then begin
    result:= 0;
    exit;

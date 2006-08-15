@@ -5260,6 +5260,7 @@ end;
 function twidget.widgetatpos(var info: widgetatposinfoty): twidget;
 var
  int1: integer;
+ astate: widgetstatesty;
 begin
  result:= nil;
  with info do begin
@@ -5269,7 +5270,14 @@ begin
   end
   else begin
    updatemousestate(info.pos);
-   if parentstate * fwidgetstate <> parentstate then begin
+   astate:= fwidgetstate;
+   if isvisible then begin
+    include(astate,ws_visible);
+   end;
+   if csdesigning in componentstate then begin
+    include(astate,ws_enabled);
+   end;
+   if parentstate * astate <> parentstate then begin
     exit;
    end;
   end;
@@ -5285,7 +5293,7 @@ begin
     end;
    end;
   end;
-  if childstate * fwidgetstate = childstate then begin
+  if childstate * astate = childstate then begin
    result:= self;
   end;
  end;

@@ -1864,6 +1864,9 @@ var
  scanner: tpascalscanner;
  parser: tpascaldesignparser;
  infile: ttextstream;
+ int1,int2,int3: integer;
+ ar1: stringarty;
+ ar3: msestringarty;
 begin
  if not infopo^.interfacecompiled or
        not infopo^.implementationcompiled and not interfaceonly then begin
@@ -1884,6 +1887,21 @@ begin
                interfaceonly);
    try
     parser.includefiledirs:= projectoptions.texp.sourcedirs;
+    ar1:= nil;
+    int3:= 0;
+    for int1:= 0 to high(projectoptions.texp.defines) do begin
+     if int1 > high(projectoptions.defineson) then begin
+      break;
+     end;
+     if projectoptions.defineson[int1] then begin
+      ar3:= splitstring(projectoptions.texp.defines[int1],' ');
+      for int2:= 0 to high(ar3) do begin
+       additem(ar1,string(ar3[int2]),int3);
+      end;
+     end;
+    end;
+    setlength(ar1,int3);
+    parser.startdefines:= ar1;
     parser.scanner:= scanner;
     if infopo^.unitname <> '' then begin
      funitinfolist.fnamelist.add(infopo^.unitname,infopo);
