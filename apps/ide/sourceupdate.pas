@@ -1894,7 +1894,7 @@ begin
       break;
      end;
      if projectoptions.defineson[int1] then begin
-      ar3:= splitstring(projectoptions.texp.defines[int1],' ');
+      ar3:= splitstring(projectoptions.texp.defines[int1],msechar(' '));
       for int2:= 0 to high(ar3) do begin
        additem(ar1,string(ar3[int2]),int3);
       end;
