@@ -78,17 +78,17 @@ end;
 function buildmakecommandline(const atag: integer): string;
 var
  int1,int2: integer;
- str1,str2,str3: string;
+ str1,str2,str3: msestring;
  wstr1: filenamety;
 begin
  with projectoptions,texp do begin
   str3:= quotefilename(tosysfilepath(makecommand));
   str1:= str3;
   if targetfile <> '' then begin
-   str1:= str1 + ' -o'+filename(targetfile);
+   str1:= str1 + ' '+quotefilename('-o'+filename(targetfile));
    wstr1:= removelastpathsection(targetfile);
    if wstr1 <> '' then begin
-    str1:= str1 + ' -FE'+tosysfilepath(wstr1);
+    str1:= str1 + ' '+quotefilename('-FE'+tosysfilepath(wstr1));
    end;
   end;
   int2:= high(unitdirs);
@@ -101,16 +101,16 @@ begin
          (unitdirs[int1] <> '') then begin
     str2:= tosysfilepath(trim(unitdirs[int1]));
     if unitdirson[int1] and $10000 <> 0 then begin
-     str1:= str1 + ' ' + '-Fu'+str2;
+     str1:= str1 + ' ' + quotefilename('-Fu'+str2);
     end;
     if unitdirson[int1] and $20000 <> 0 then begin
-     str1:= str1 + ' ' + '-Fi'+str2;
+     str1:= str1 + ' ' + quotefilename('-Fi'+str2);
     end;
     if unitdirson[int1] and $40000 <> 0 then begin
-     str1:= str1 + ' ' + '-Fl'+str2;
+     str1:= str1 + ' ' + quotefilename('-Fl'+str2);
     end;
     if unitdirson[int1] and $80000 <> 0 then begin
-     str1:= str1 + ' ' + '-Fo'+str2;
+     str1:= str1 + ' ' + quotefilename('-Fo'+str2);
     end;
    end;
   end;
@@ -120,7 +120,7 @@ begin
     str1:= str1 + ' ' + makeoptions[int1];
    end;
   end;
-  str1:= str1 + ' ' + tosysfilepath(mainfile);
+  str1:= str1 + ' ' + quotefilename(tosysfilepath(mainfile));
  end;
  result:= str1;
 end;
