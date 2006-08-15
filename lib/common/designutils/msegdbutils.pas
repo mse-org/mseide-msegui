@@ -1393,7 +1393,7 @@ end;
 
 function tgdbmi.togdbfilepath(const filename: filenamety): filenamety;
 begin
- result:= tosysfilepath(filepath(filename));
+ result:= quotefilename(tosysfilepath(filepath(filename)));
  {$ifdef mswindows}
  replacechar1(result,msechar('\'),msechar('/'));
  {$endif}
