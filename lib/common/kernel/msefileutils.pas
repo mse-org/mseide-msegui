@@ -1056,7 +1056,8 @@ procedure splitfilepath(const path: filenamety;
 var
  str1: filenamety;
 begin
- str1:= unquotefilename(filepath(path,fk_default,true));
+// str1:= unquotefilename(filepath(path,fk_default,true));
+ str1:= filepath(path,fk_default,true);
  if (str1 = '') or (str1[length(str1)] = '/') then begin
   directory:= str1;
   filename:= '';
