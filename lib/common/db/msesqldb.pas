@@ -68,6 +68,7 @@ type
    procedure internalopen; override;
    procedure internalclose; override;
    procedure internalinsert; override;
+   procedure internalpost; override;
    procedure applyrecupdate(updatekind: tupdatekind); override;
    function  getcanmodify: boolean; override;
    function  getfieldclass(fieldtype: tfieldtype): tfieldclass; override;
@@ -189,6 +190,15 @@ type
     FCurrentRecBuf  : PBufRecLinkItem;
     FLastRecBuf     : PBufRecLinkItem;
     FFirstRecBuf    : PBufRecLinkItem;
+    FBRecordCount   : integer;
+
+    FPacketRecords  : integer;
+    FRecordSize     : Integer;
+    FNullmaskSize   : byte;
+    FOpen           : Boolean;
+    FUpdateBuffer   : TRecordsUpdateBuffer;
+    FCurrentUpdateBuffer : integer;
+
   end;
   
   TSQLQuerycracker = class (Tbufdataset)
@@ -748,6 +758,19 @@ procedure tmsesqlquery.DoOnNewRecord;
 begin
  if not (csdesigning in componentstate) then begin
   inherited;
+ end;
+end;
+
+procedure tmsesqlquery.internalpost;
+begin        //workaround for FPC bug 7266
+ with tbufdatasetcracker(self) do begin
+  if (state = dsinsert) and (ffirstrecbuf = flastrecbuf) then begin
+   setbookmarkdata(activebuffer,@ffirstrecbuf);
+   inherited;
+  end
+  else begin
+   inherited;
+  end;
  end;
 end;
 

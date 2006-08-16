@@ -779,6 +779,7 @@ type
    function getzebrastart: integer;
    procedure gridinvalidate;
    function arecord: integer;
+   function hasdata: boolean;
   public
    constructor create(const aowner: tcustomgrid);
    destructor destroy; override;
@@ -4089,13 +4090,18 @@ begin
  end;
 end;
 
+function tgriddatalink.hasdata: boolean;
+begin
+ result:= active and (recordcount > 0);
+end;
+
 function tgriddatalink.getstringbuffer(const afield: tfield;
                       const row: integer): pointer;
 var
  int1: integer;
 begin
  result:= nil;
- if active and (afield <> nil) then begin
+ if (afield <> nil) and hasdata then begin
   int1:= activerecord;
   activerecord:= row;
   if not afield.isnull then begin
@@ -4117,7 +4123,7 @@ var
  int1: integer;
 begin
  result:= nil;
- if active and (afield <> nil) then begin
+ if (afield <> nil) and hasdata then begin
   int1:= activerecord;
   activerecord:= row;
   if not afield.isnull then begin
@@ -4139,7 +4145,7 @@ var
  int1: integer;
 begin
  result:= nil;
- if active and (afield <> nil) then begin
+ if (afield <> nil) and hasdata then begin
   int1:= activerecord;
   activerecord:= row;
   if not afield.isnull then begin
@@ -4161,7 +4167,7 @@ var
  int1: integer;
 begin
  result:= nil;
- if active and (afield <> nil) then begin
+ if (afield <> nil) and hasdata then begin
   int1:= activerecord;
   activerecord:= row;
   if not afield.isnull then begin
@@ -4178,7 +4184,7 @@ var
  int1: integer;
 begin
  result:= nil;
- if active and (afield <> nil) then begin
+ if (afield <> nil) and hasdata then begin
   int1:= activerecord;
   activerecord:= row;
   if not afield.isnull then begin
@@ -4195,7 +4201,7 @@ var
  int1: integer;
 begin
  result:= nil;
- if active and (afield <> nil) then begin
+ if (afield <> nil) and hasdata then begin
   int1:= activerecord;
   activerecord:= row;
   if not afield.isnull then begin
@@ -4212,7 +4218,7 @@ var
  int1: integer;
 begin
  result:= nil;
- if active and (afield <> nil) then begin
+ if (afield <> nil) and hasdata then begin
   int1:= activerecord;
   activerecord:= row;
   if not afield.isnull then begin
