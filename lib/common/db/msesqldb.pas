@@ -110,6 +110,7 @@ type
    function locate(const key: string; const field: tfield; 
                  const options: locateoptionsty = []): locateresultty;
    procedure appendrecord(const values: array of const);
+   procedure post; override;
    procedure applyupdates(maxerror: integer); override;
    procedure cancel; override;
    procedure cancelupdates; override;
@@ -509,6 +510,14 @@ begin
  end;
 end;
 
+procedure tmsesqlquery.post;
+begin
+ inherited;
+ if dso_autoapply in fcontroller.options then begin
+  applyupdates;
+ end;
+end;
+
 procedure tmsesqlquery.applyupdates(maxerror: integer);
 begin
  disablecontrols;
@@ -519,6 +528,9 @@ begin
   enablecontrols;
  end;
  dataevent(dedatasetchange,0);
+ if (dso_autocommitret in fcontroller.options) and (transaction <> nil) then begin
+  tsqltransaction(transaction).commitretaining;
+ end;
 end;
 
 function tmsesqlquery.getreadonly: boolean;

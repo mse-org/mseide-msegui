@@ -498,7 +498,7 @@ type
   function getcontroller: tdscontroller;
  end;
 
- datasetoptionty = (dso_utf8);
+ datasetoptionty = (dso_utf8,dso_autoapply,dso_autocommitret);
  datasetoptionsty = set of datasetoptionty;
  
 const

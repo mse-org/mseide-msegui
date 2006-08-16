@@ -793,6 +793,8 @@ type
    function getdatetimebuffer(const afield: tfield; const row: integer): pointer;
    procedure painted;
    procedure loaded;
+   procedure beforefocuscell(const cell: gridcoordty;
+                             const selectaction: focuscellactionty);
    function moveby(distance: integer): integer; override;
    function rowtorecno(const row: integer): integer;
   published
@@ -1010,6 +1012,8 @@ type
    procedure doinsertrow(const sender: tobject); override;
    procedure doappendrow(const sender: tobject); override;
    procedure dodeleterow(const sender: tobject); override;
+   procedure beforefocuscell(const cell: gridcoordty;
+                             const selectaction: focuscellactionty); override;
 
   public
    constructor create(aowner: tcomponent); override;
@@ -1205,6 +1209,8 @@ type
    procedure doinsertrow(const sender: tobject); override;
    procedure doappendrow(const sender: tobject); override;
    procedure dodeleterow(const sender: tobject); override;
+   procedure beforefocuscell(const cell: gridcoordty;
+                             const selectaction: focuscellactionty); override;
 
   public
    constructor create(aowner: tcomponent); override;
@@ -4681,6 +4687,15 @@ begin
  fieldtypes[0]:= integerfields;
 end;
 
+procedure tgriddatalink.beforefocuscell(const cell: gridcoordty;
+                             const selectaction: focuscellactionty);
+begin
+ if (selectaction = fca_entergrid) and (recordcount = 0) and active and
+                (og_autofirstrow in fgrid.optionsgrid) then begin
+  dataset.insert;
+ end;
+end;
+
 { tdbwidgetindicatorcol }
 
 constructor tdbwidgetindicatorcol.create(const agrid: tcustomgrid;
@@ -4937,6 +4952,12 @@ end;
 function tcustomdbwidgetgrid.getgriddatalink: pointer;
 begin
  result:= fdatalink;
+end;
+
+procedure tcustomdbwidgetgrid.beforefocuscell(const cell: gridcoordty;
+                             const selectaction: focuscellactionty);
+begin
+ fdatalink.beforefocuscell(cell,selectaction);
 end;
 
 { tstringcoldatalink }
@@ -5513,6 +5534,12 @@ end;
 function tcustomdbstringgrid.getgrid: tcustomwidgetgrid;
 begin
  result:= nil;
+end;
+
+procedure tcustomdbstringgrid.beforefocuscell(const cell: gridcoordty;
+                             const selectaction: focuscellactionty);
+begin
+ fdatalink.beforefocuscell(cell,selectaction);
 end;
 
 { tlbdropdowncol }

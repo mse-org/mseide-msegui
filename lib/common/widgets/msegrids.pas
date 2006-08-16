@@ -1149,6 +1149,8 @@ type
    function nextfocusablecol(acol: integer; const aleft: boolean = false): integer;
    procedure checkcellvalue(var accept: boolean); virtual; 
                    //store edited value to grid
+   procedure beforefocuscell(const cell: gridcoordty;
+                             const selectaction: focuscellactionty); virtual;
 
    //iscrollbar
    procedure scrollevent(sender: tcustomscrollbar; event: scrolleventty); virtual;
@@ -5981,6 +5983,12 @@ begin
  end;
 end;
 
+procedure tcustomgrid.beforefocuscell(const cell: gridcoordty;
+                             const selectaction: focuscellactionty);
+begin
+ //dummy
+end;
+
 function tcustomgrid.focuscell(cell: gridcoordty;
                        selectaction: focuscellactionty): boolean;
 
@@ -6103,11 +6111,11 @@ function tcustomgrid.focuscell(cell: gridcoordty;
   end;
  end;
 
- function isappend: boolean;
+ function isappend(const arow: integer): boolean;
  begin
   result:= not (gs_isdb in fstate) and 
-      ((og_autoappend in foptionsgrid) and (cell.row >= frowcount) or
-       (cell.row = 0) and (frowcount = 0) and (og_autofirstrow in foptionsgrid));
+      ((og_autoappend in foptionsgrid) and (arow >= frowcount) or
+       (arow = 0) and (frowcount = 0) and (og_autofirstrow in foptionsgrid));
  end;
 
 var
@@ -6119,6 +6127,7 @@ var
  nullchecklocked: boolean;
  
 begin     //focuscell
+ beforefocuscell(cell,selectaction);
  result:= false;
  exclude(fstate,gs_mousecellredirected);
  nullchecklocked:= false;
@@ -6162,7 +6171,7 @@ begin     //focuscell
      exit;
     end;
    end;
-   if (cell.row >= frowcount) and not isappend then begin
+   if (cell.row >= frowcount) and not isappend(cell.row) then begin
     cell.row:= frowcount - 1;
     if cell.row < 0 then begin
      if selectaction = fca_entergrid then begin
@@ -6208,7 +6217,7 @@ begin     //focuscell
     end;
    end;
  
-   if isappend then begin
+   if isappend(cell.row) then begin
     if (frowcount = 0) or (og_appendempty in foptionsgrid) or
             not fdatacols.rowempty(frowcount-1) then begin
  //    if not (og_appendempty in foptionsgrid) then begin

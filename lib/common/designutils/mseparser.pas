@@ -358,7 +358,7 @@ type
   protected
    function getscannerclass: scannerclassty; override;
   public
-   constructor create(const afilelist: tmseindexednamelist);
+   constructor create(const afilelist: tmseindexednamelist); override;
    procedure initidents; override;
    function getvaluestring(var value: string): valuekindty; override;
    function skipcomment: boolean; override; //does not skip whitespace
@@ -388,7 +388,7 @@ type
 
  tresstringlistparser = class(tcparser)
   public
-   constructor create(const afilelist: tmseindexednamelist);
+   constructor create(const afilelist: tmseindexednamelist); override;
    procedure getconsts(var ar: constinfoarty);
  end;
  
