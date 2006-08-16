@@ -189,7 +189,7 @@ type
    function getscannerclass: scannerclassty; virtual;
 
   public
-   constructor create(const afilelist: tmseindexednamelist); overload;
+   constructor create(const afilelist: tmseindexednamelist); overload; virtual;
    constructor create(const afilelist: tmseindexednamelist; const atext: string); overload;
    destructor destroy; override;
 
@@ -333,7 +333,7 @@ type
    
 
   public
-   constructor create(const afilelist: tmseindexednamelist); overload;
+   constructor create(const afilelist: tmseindexednamelist); override;
    destructor destroy; override;
    procedure clear; override;
    procedure initidents; override;
@@ -1862,9 +1862,9 @@ end;
 
 constructor tpascalparser.create(const afilelist: tmseindexednamelist);
 begin
+ fdefines:= tdefineslist.create;
  inherited;
  flastvalidident:= lastpascalnormalident;
- fdefines:= tdefineslist.create;
 end;
 
 destructor tpascalparser.destroy;

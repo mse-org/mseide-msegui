@@ -191,7 +191,7 @@ type
  statreadeventty = procedure(const sender: tobject; const reader: tstatreader) of object;
  statwriteeventty = procedure(const sender: tobject; const writer: tstatwriter) of object;
 
- statfileoptionty = (sfo_memory);
+ statfileoptionty = (sfo_memory,sfo_savedata);
  statfileoptionsty = set of statfileoptionty;
 
  tstatfile = class(tmsecomponent,istatfile)
@@ -220,6 +220,7 @@ type
    procedure setstatfile(const Value: tstatfile);
    procedure setfilename(const avalue: filenamety);
    procedure setfiledir(const avalue: filenamety);
+   procedure setoptions(avalue: statfileoptionsty);
   protected
    //istatfile
    procedure dostatread(const reader: tstatreader);
@@ -236,7 +237,7 @@ type
    property filename: filenamety read ffilename write setfilename nodefault;
    property filedir: filenamety read ffiledir write setfiledir;
    property encoding: charencodingty read fencoding write fencoding default ce_utf8n;
-   property options: statfileoptionsty read foptions write foptions default [];
+   property options: statfileoptionsty read foptions write setoptions default [];
    property statfile: tstatfile read fstatfile write setstatfile;
             //filename is stored in linked statfile, dostatread and dostatwrite are
             //called by linked statfile
@@ -1328,9 +1329,31 @@ begin
 end;
 
 procedure tstatfile.dostatread(const reader: tstatreader);
+var
+ ar1,ar2: stringarty;
+ stream1: ttextstream;
 begin
  if reader <> areader then begin
-  filename:= reader.readstring('filename',ffilename);
+  if not (sfo_memory in foptions) then begin
+   filename:= reader.readstring('filename',ffilename);
+  end
+  else begin
+   if sfo_savedata in foptions then begin
+    stream1:= memorystatstreams.open(ffilename,fm_read);
+    try
+     ar2:= stream1.readstrings;
+    finally
+     stream1.free;
+    end;
+    ar1:= reader.readarray('data',ar2);
+    stream1:= memorystatstreams.open(ffilename,fm_create);
+    try
+     stream1.writestrings(ar1);     
+    finally
+     stream1.free;
+    end;
+   end;
+  end;
   statread;
  end
  else begin
@@ -1344,12 +1367,28 @@ begin
 end;
 
 procedure tstatfile.dostatwrite(const writer: tstatwriter);
+var
+ ar1: stringarty;
+ stream1: ttextstream;
 begin
- if writer <> awriter then begin
-  writer.writestring('filename',ffilename);
-  if ffilename <> '' then begin
-   writestat;
+ if (writer <> awriter) then begin
+  if not (sfo_memory in foptions) then begin
+   writer.writestring('filename',ffilename);
+  end
+  else begin
+   if sfo_savedata in foptions then begin
+    stream1:= memorystatstreams.open(ffilename,fm_read);
+    try
+     ar1:= stream1.readstrings;     
+    finally
+     stream1.free;
+    end;
+    writer.writearray('data',ar1);
+   end;
   end;
+//  if ffilename <> '' then begin
+//   writestat;
+//  end;
  end
  else begin
   if assigned(fonstatupdate) then begin
@@ -1533,6 +1572,14 @@ procedure tstatfile.setfiledir(const avalue: filenamety);
 begin
  floadedfile:= '';
  ffiledir:= avalue;
+end;
+
+procedure tstatfile.setoptions(avalue: statfileoptionsty);
+begin
+ if not (sfo_memory in avalue) then begin
+  exclude(avalue,sfo_savedata);
+ end;
+ foptions:= avalue;
 end;
 
 { tmemorytextstream }
