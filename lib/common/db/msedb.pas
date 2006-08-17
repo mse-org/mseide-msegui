@@ -13,7 +13,7 @@ const
  textfields = [ftstring,ftfixedchar,ftwidestring];
  memofields = textfields+[ftblob,ftmemo];
  integerfields = [ftsmallint,ftinteger,ftword];
- booleanfields = [ftboolean,ftstring,ftfixedchar];
+ booleanfields = [ftboolean,ftstring,ftfixedchar]+integerfields;
  realfields = [ftfloat,ftcurrency];
  datetimefields = [ftdate,fttime,ftdatetime];
  stringfields = textfields + integerfields + booleanfields +
@@ -165,6 +165,8 @@ type
    procedure setasmsestring(const avalue: msestring);
   protected
    function HasParent: Boolean; override;
+   function getasboolean: boolean; override;
+   procedure setasboolean(avalue: boolean); override;
   public
    function assql: string;
    property asmsestring: msestring read getasmsestring write setasmsestring;
@@ -178,6 +180,8 @@ type
    procedure setasmsestring(const avalue: msestring);
   protected
    function HasParent: Boolean; override;
+   function getasboolean: boolean; override;
+   procedure setasboolean(avalue: boolean); override;
   public
    function assql: string;
    property asmsestring: msestring read getasmsestring write setasmsestring;
@@ -191,6 +195,8 @@ type
    procedure setasmsestring(const avalue: msestring);
   protected
    function HasParent: Boolean; override;
+   function getasboolean: boolean; override;
+   procedure setasboolean(avalue: boolean); override;
   public
    function assql: string;
    property asmsestring: msestring read getasmsestring write setasmsestring;
@@ -204,6 +210,8 @@ type
    procedure setasmsestring(const avalue: msestring);
   protected
    function HasParent: Boolean; override;
+   function getasboolean: boolean; override;
+   procedure setasboolean(avalue: boolean); override;
   public
    function assql: string;
    property asmsestring: msestring read getasmsestring write setasmsestring;
@@ -546,6 +554,7 @@ type
    property recnooffset: integer read frecnooffset;
    function moveby(const distance: integer): integer;
    procedure internalinsert;
+   procedure closequery;
    function assql(const avalue: msestring): string; overload;
    function assql(const avalue: integer): string; overload;
    function assql(const avalue: realty): string; overload;
@@ -1006,6 +1015,21 @@ begin
  result:= asstring;
 end;
 
+function tmselongintfield.getasboolean: boolean;
+begin
+ result:= asinteger <> 0;
+end;
+
+procedure tmselongintfield.setasboolean(avalue: boolean);
+begin
+ if avalue then begin
+  asinteger:= 1;
+ end
+ else begin
+  asinteger:= 0;
+ end;
+end;
+
 { tmselargeintfield }
 
 function tmselargeintfield.HasParent: Boolean;
@@ -1026,6 +1050,21 @@ end;
 function tmselargeintfield.getasmsestring: msestring;
 begin
  result:= asstring;
+end;
+
+function tmselargeintfield.getasboolean: boolean;
+begin
+ result:= asinteger <> 0;
+end;
+
+procedure tmselargeintfield.setasboolean(avalue: boolean);
+begin
+ if avalue then begin
+  asinteger:= 1;
+ end
+ else begin
+  asinteger:= 0;
+ end;
 end;
 
 { tmsesmallintfield }
@@ -1050,6 +1089,21 @@ begin
  result:= asstring;
 end;
 
+function tmsesmallintfield.getasboolean: boolean;
+begin
+ result:= asinteger <> 0;
+end;
+
+procedure tmsesmallintfield.setasboolean(avalue: boolean);
+begin
+ if avalue then begin
+  asinteger:= 1;
+ end
+ else begin
+  asinteger:= 0;
+ end;
+end;
+
 { tmsewordfield }
 
 function tmsewordfield.HasParent: Boolean;
@@ -1070,6 +1124,21 @@ end;
 function tmsewordfield.getasmsestring: msestring;
 begin
  result:= asstring;
+end;
+
+function tmsewordfield.getasboolean: boolean;
+begin
+ result:= asinteger <> 0;
+end;
+
+procedure tmsewordfield.setasboolean(avalue: boolean);
+begin
+ if avalue then begin
+  asinteger:= 1;
+ end
+ else begin
+  asinteger:= 0;
+ end;
 end;
 
 { tmseautoincfield }
@@ -2108,6 +2177,15 @@ begin
  end
  else begin
   result:= encodesqltime(avalue);
+ end;
+end;
+
+procedure tdscontroller.closequery;
+begin
+ with tdataset(fowner) do begin;
+  if state in dseditmodes then begin
+   post;
+  end;
  end;
 end;
 

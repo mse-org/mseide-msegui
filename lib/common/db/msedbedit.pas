@@ -4600,11 +4600,12 @@ end;
 
 function tgriddatalink.moveby(distance: integer): integer;
 begin
+ result:= 0;
  if fnullchecking = 0 then begin
   beginnullchecking;
   try
    if checkvalue then begin
-    inherited;
+    result:= inherited moveby(distance);
    end
    else begin
     tcustomgrid1(fgrid).beginnonullcheck;
