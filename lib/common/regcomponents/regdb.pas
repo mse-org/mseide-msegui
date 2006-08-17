@@ -160,7 +160,7 @@ var
 begin
  result:= inherited getdefaultstate;
  if fremote <> nil then begin
-  obj1:= tobject(fremote.getparenteditor.getordvalue);
+  obj1:= tobject(tpropertyeditor1(fremote.getparenteditor).getordvalue);
   if obj1 <> nil then begin
    getcorbainterface(obj1,typeinfo(idbparaminfo),fdbparaminfointf);
   end;
@@ -197,7 +197,7 @@ var
 begin
  result:= inherited getdefaultstate;
  if fremote <> nil then begin
-  obj1:= tobject(fremote.getparenteditor.getordvalue);
+  obj1:= tobject(tpropertyeditor1(fremote.getparenteditor).getordvalue);
   if obj1 <> nil then begin
    getcorbainterface(obj1,typeinfo(idbeditinfo),fdbeditinfointf);
   end;
