@@ -1397,7 +1397,7 @@ type
    function hintedwidget: twidget; //last hinted widget
    function activehintedwidget: twidget; //nil if no hint active
    
-   function helpcontext: msestring;
+   function activehelpcontext: msestring;
                 //returns helpcontext of active widget, '' if none;
    function mousehelpcontext: msestring;
                 //returns helpcontext of mouse widget, '' if none;
@@ -10834,7 +10834,7 @@ begin
  end;
 end;
 
-function tapplication.helpcontext: msestring;
+function tapplication.activehelpcontext: msestring;
 begin
  if activewidget = nil then begin
   result:= '';

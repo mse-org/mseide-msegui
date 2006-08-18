@@ -201,6 +201,7 @@ constructor teventqueue.create(aownsobjects: boolean);
 begin
  sys_semcreate(fsem,0);
  sys_mutexcreate(fmutex);
+ inherited;
 end;
 
 destructor teventqueue.destroy;
