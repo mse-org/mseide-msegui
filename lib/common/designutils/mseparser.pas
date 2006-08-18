@@ -1642,8 +1642,10 @@ begin
      end;
     end
     else begin
-     fdefstate:= def_skip;
-     skipskip;
+     if fdefstatecount > 0 then begin
+      fdefstate:= def_skip;
+      skipskip;
+     end;
     end;
    end;
    cskw_endif: begin

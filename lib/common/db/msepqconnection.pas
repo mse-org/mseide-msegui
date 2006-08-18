@@ -211,13 +211,13 @@ end;
 
 function tmsepqconnection.readsequence(const sequencename: string): string;
 begin
- result:= '';
+ result:= 'select nextval(''' +sequencename+''') as res;';
 end;
 
 function tmsepqconnection.writesequence(const sequencename: string;
                const avalue: largeint): string;
 begin
- result:= '';
+ result:= 'select setval(''' +sequencename+''','+inttostr(avalue)+');';
 end;
 
 end.

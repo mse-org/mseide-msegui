@@ -375,6 +375,7 @@ type
    sourcefilename: filenamety;
    implementationstart: sourceposty;
    implementationend: sourceposty;
+   unitend: sourceposty;
    initializationstart: sourceposty;
    finalizationstart: sourceposty;
    sourceend: sourceposty;
@@ -1844,7 +1845,8 @@ var
 
 var
  aident: integer;
-
+ pos1: sourceposty;
+ 
 begin
  finterface:= false;
  fimplementation:= true;
@@ -1905,6 +1907,7 @@ begin
    nexttoken;
   end;
  end;
+ funitinfopo^.unitend:= sourcepos;
 end;
 
 procedure tpascaldesignparser.parse;
@@ -1933,6 +1936,7 @@ begin
 //   sourcefilename: filenamety;
   implementationstart.filenum:= 0;
   implementationend.filenum:= 0;
+  unitend.filenum:= 0;
   initializationstart.filenum:= 0;
   finalizationstart.filenum:= 0;
   sourceend.filenum:= 0;
