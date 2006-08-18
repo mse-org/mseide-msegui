@@ -20,7 +20,7 @@ const
  defaultpqconnectionoptionsty = [pqco_usesavepoint];
  
 type 
- tmsepqconnection = class(tpqconnection)
+ tmsepqconnection = class(tpqconnection,idbcontroller)
   private
    fcontroller: tdbcontroller;
    foptions: pqconnectionoptionsty;
@@ -39,6 +39,10 @@ type
    procedure rollbackretaining(trans : tsqlhandle); override;
    procedure execute(cursor: tsqlcursor; atransaction: tsqltransaction; 
                             aparams: tparams); override;
+   //idbcontroller
+   function readsequence(const sequencename: string): string;
+   function writesequence(const sequencename: string;
+                    const avalue: largeint): string;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -60,7 +64,7 @@ constructor tmsepqconnection.create(aowner: tcomponent);
 begin
  foptions:= defaultpqconnectionoptionsty;
  inherited;
- fcontroller:= tdbcontroller.create(self);
+ fcontroller:= tdbcontroller.create(self,idbcontroller(self));
 end;
 
 destructor tmsepqconnection.destroy;
@@ -203,6 +207,17 @@ const
 begin
  foptions:= pqconnectionoptionsty(
           setsinglebit(longword(avalue),longword(foptions),longword(mask)));
+end;
+
+function tmsepqconnection.readsequence(const sequencename: string): string;
+begin
+ result:= '';
+end;
+
+function tmsepqconnection.writesequence(const sequencename: string;
+               const avalue: largeint): string;
+begin
+ result:= '';
 end;
 
 end.

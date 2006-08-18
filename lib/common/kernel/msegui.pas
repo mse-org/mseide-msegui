@@ -5767,12 +5767,7 @@ begin
   window.setfocusedwidget(self);
     //call updaterootwidget
   if aactivate then begin
-//   if window.canactivate then begin
-    window.activate;
-//   end
-//   else begin
-//    app.postevent(tobjectevent.create(ek_activate,ievent(self)));
-//   end;
+   window.activate;
   end;
   result:= window.ffocusedwidget = self;
  end;

@@ -11,10 +11,10 @@ unit msemysql40conn;
 {$ifdef FPC}{$mode objfpc}{$h+}{$INTERFACES CORBA}{$endif}
 interface
 uses
- classes,mysql40conn,msestrings,msedb;
+ db,classes,mysql40conn,msestrings,msedb;
  
 type
- tmsemysql40connection = class(tmysql40connection)
+ tmsemysql40connection = class(tmysql40connection,idbcontroller)
   private
    fcontroller: tdbcontroller;
    function getdatabasename: filenamety;
@@ -23,6 +23,11 @@ type
    procedure setcontroller(const avalue: tdbcontroller);
    function getconnected: boolean;
    procedure setconnected(const avalue: boolean);
+  protected
+   //idbcontroller
+   function readsequence(const sequencename: string): string;
+   function writesequence(const sequencename: string;
+                    const avalue: largeint): string;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -41,7 +46,7 @@ uses
 constructor tmsemysql40connection.create(aowner: tcomponent);
 begin
  inherited;
- fcontroller:= tdbcontroller.create(self);
+ fcontroller:= tdbcontroller.create(self,idbcontroller(self));
 end;
 
 destructor tmsemysql40connection.destroy;
@@ -81,6 +86,17 @@ begin
  if fcontroller.setactive(avalue) then begin
   inherited connected:= avalue;
  end;
+end;
+
+function tmsemysql40connection.readsequence(const sequencename: string): string;
+begin
+ result:= '';
+end;
+
+function tmsemysql40connection.writesequence(const sequencename: string;
+               const avalue: largeint): string;
+begin
+ result:= '';
 end;
 
 end.

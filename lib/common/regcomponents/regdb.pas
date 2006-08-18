@@ -96,7 +96,7 @@ begin
       tdblabel,tdbstringdisp,tdbintegerdisp,tdbbooleandisp,
       tdbrealdisp,tdbdatetimedisp,
       tdbstringdisplb,tdbintegerdisplb,tdbrealdisplb,tdbdatetimedisplb,
-      tfieldparamlink]);
+      tfieldparamlink,tsequencelink]);
  registercomponents('Db',[
       tenumeditdb,tkeystringeditdb,tenumeditlb,tkeystringeditlb,
       tdbmemoedit,tdbstringedit,tdbdropdownlistedit,tdbbooleantextedit,

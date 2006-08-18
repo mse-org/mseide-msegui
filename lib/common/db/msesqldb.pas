@@ -181,6 +181,28 @@ type
                                   write fonaftersetparam;
  end;
  
+ tsequencelink = class(tmsecomponent)
+  private
+   fsequencename: string;
+   fdatabase: tdatabase;
+   fdbintf: idbcontroller;
+   procedure checkintf;
+   procedure setdatabase(const avalue: tdatabase);
+   procedure setsequencename(const avalue: string);
+   function getaslargeint: largeint;
+   procedure setaslargeint(const avalue: largeint);
+   function getasinteger: integer;
+   procedure setasinteger(const avalue: integer);
+  protected
+   procedure notification(acomponent: tcomponent; operation: toperation); override;
+  public
+   property aslargeint: largeint read getaslargeint write setaslargeint;
+   property asinteger: integer read getasinteger write setasinteger;
+  published
+   property database: tdatabase read fdatabase write setdatabase;
+   property sequencename: string read fsequencename write setsequencename;
+ end;
+ 
 implementation
 uses
  msestrings,dbconst,msesysutils,typinfo;
@@ -895,6 +917,78 @@ procedure tfieldparamlink.getfieldtypes(out propertynames: stringarty;
 begin
  propertynames:= nil;
  fieldtypes:= nil;
+end;
+
+{ tsequencelink }
+
+procedure tsequencelink.setdatabase(const avalue: tdatabase);
+begin
+ if fdatabase <> avalue then begin
+  fdbintf:= nil;
+  if fdatabase <> nil then begin
+   fdatabase.removefreenotification(self);
+  end;
+  if avalue <> nil then begin
+   avalue.freenotification(self);
+   mseclasses.getcorbainterface(avalue,typeinfo(idbcontroller),fdbintf);
+  end;
+  fdatabase:= avalue;
+ end;
+end;
+
+procedure tsequencelink.setsequencename(const avalue: string);
+begin
+ fsequencename:= avalue;
+end;
+
+procedure tsequencelink.notification(acomponent: tcomponent;
+               operation: toperation);
+begin
+ inherited;
+ if (acomponent = fdatabase) and (operation = opremove) then begin
+  fdatabase:= nil;
+ end;
+end;
+
+procedure tsequencelink.checkintf;
+begin
+ if fdbintf = nil then begin
+  raise edatabaseerror.create('Database has no idscontroller interface.');
+ end;
+end;
+
+function tsequencelink.getaslargeint: largeint;
+var                       //todo: optimize
+ ds1: tsqlquery;
+begin
+ checkintf;
+ ds1:= tsqlquery.create(nil);
+ try
+  ds1.parsesql:= false;
+  ds1.sql.add(fdbintf.readsequence(fsequencename));
+  ds1.database:= fdatabase;
+  ds1.active:= true;
+  result:= ds1.fields[0].aslargeint;
+ finally
+  ds1.free;
+ end;
+end;
+
+procedure tsequencelink.setaslargeint(const avalue: largeint);
+begin
+ checkintf;
+ fdbintf.executedirect(
+   fdbintf.writesequence(fsequencename,avalue));
+end;
+
+function tsequencelink.getasinteger: integer;
+begin
+ result:= getaslargeint;
+end;
+
+procedure tsequencelink.setasinteger(const avalue: integer);
+begin
+ setaslargeint(avalue); 
 end;
 
 end.

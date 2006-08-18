@@ -11,9 +11,9 @@ unit mseodbcconn;
 {$ifdef FPC}{$mode objfpc}{$h+}{$INTERFACES CORBA}{$endif}
 interface
 uses
- classes,odbcconn,msestrings,msedb;
+ db,classes,odbcconn,msestrings,msedb;
 type
- tmseodbcconnection = class(todbcconnection)
+ tmseodbcconnection = class(todbcconnection,idbcontroller)
   private
    fcontroller: tdbcontroller;
    function getdatabasename: filenamety;
@@ -22,6 +22,11 @@ type
    procedure setcontroller(const avalue: tdbcontroller);
    function getconnected: boolean;
    procedure setconnected(const avalue: boolean);
+  protected
+   //idbcontroller
+   function readsequence(const sequencename: string): string;
+   function writesequence(const sequencename: string;
+                    const avalue: largeint): string;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -40,7 +45,7 @@ uses
 constructor tmseodbcconnection.create(aowner: tcomponent);
 begin
  inherited;
- fcontroller:= tdbcontroller.create(self);
+ fcontroller:= tdbcontroller.create(self,idbcontroller(self));
 end;
 
 destructor tmseodbcconnection.destroy;
@@ -80,6 +85,17 @@ begin
  if fcontroller.setactive(avalue) then begin
   inherited connected:= avalue;
  end;
+end;
+
+function tmseodbcconnection.readsequence(const sequencename: string): string;
+begin
+ result:= '';
+end;
+
+function tmseodbcconnection.writesequence(const sequencename: string;
+               const avalue: largeint): string;
+begin
+ result:= '';
 end;
 
 end.

@@ -11,9 +11,9 @@ unit mseibconnection;
 {$ifdef FPC}{$mode objfpc}{$h+}{$INTERFACES CORBA}{$endif}
 interface
 uses
- classes,ibconnection,msestrings,msedb;
+ db,classes,ibconnection,msestrings,msedb;
 type
- tmseibconnection = class(tibconnection)
+ tmseibconnection = class(tibconnection,idbcontroller)
   private
    fcontroller: tdbcontroller;
    function getdatabasename: filenamety;
@@ -22,6 +22,11 @@ type
    procedure setcontroller(const avalue: tdbcontroller);
    function getconnected: boolean;
    procedure setconnected(const avalue: boolean);
+   
+   //idbcontroller
+   function readsequence(const sequencename: string): string;
+   function writesequence(const sequencename: string;
+                    const avalue: largeint): string;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -33,14 +38,14 @@ type
  
 implementation
 uses
- msefileutils;
+ msefileutils,sysutils;
 
 { tmseibconnection }
 
 constructor tmseibconnection.create(aowner: tcomponent);
 begin
  inherited;
- fcontroller:= tdbcontroller.create(self);
+ fcontroller:= tdbcontroller.create(self,idbcontroller(self));
 end;
 
 destructor tmseibconnection.destroy;
@@ -80,6 +85,17 @@ begin
  if fcontroller.setactive(avalue) then begin
   inherited connected:= avalue;
  end;
+end;
+
+function tmseibconnection.readsequence(const sequencename: string): string;
+begin
+ result:= 'select gen_id('+sequencename+',1) as res from RDB$DATABASE;';
+end;
+
+function tmseibconnection.writesequence(const sequencename: string;
+               const avalue: largeint): string;
+begin
+ result:= 'set generator '+sequencename+' to '+inttostr(avalue)+';';
 end;
 
 end.

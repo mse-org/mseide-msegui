@@ -3812,6 +3812,7 @@ end;
 
 procedure GUI_DEBUGBEGIN;
 begin
+// setactivewindow(0);
 end;
 
 procedure GUI_DEBUGEND;

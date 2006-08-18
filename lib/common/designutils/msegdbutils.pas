@@ -386,7 +386,6 @@ type
    procedure targetwriteln(const avalue: string); 
                //sends text to target if running
 
-
    procedure debugbegin; //calls GUI_DEBUGBEGIN in target
    procedure debugend;   //calls GUI_DEBUGEND in target,
                          //automatically on every target start
@@ -457,7 +456,7 @@ implementation
 
 uses
  sysutils,mseformatstr,mseprocutils,msesysutils,msefileutils,
- msebits,msesys,msesysintf
+ msebits,msesys,msesysintf,mseguiintf
         {$ifdef UNIX},libc{$else},windows{$endif};
 
 const                                      

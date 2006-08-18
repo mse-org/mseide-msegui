@@ -388,7 +388,7 @@ type
    property DataSet;
    property ProviderFlags default defaultproviderflags;
  end;
- 
+
  tmsedatalink = class(tdatalink)
   private
   protected
@@ -573,18 +573,27 @@ type
   public
    constructor create(const aowner: tdbtransaction);
  end;
- 
+
+ idbcontroller = interface(inullinterface)
+          ['{B26D004A-7FEE-44F2-9919-3B8612BDD598}']
+  function readsequence(const sequencename: string): string;
+  function writesequence(const sequencename: string;
+                    const avalue: largeint): string;
+  procedure ExecuteDirect(SQL : String);
+ end;
+  
  tdbcontroller = class(tactivatorcontroller)
   private
    fdatabasename: filenamety;
+   fintf: idbcontroller;
   protected
    procedure setowneractive(const avalue: boolean); override;
   public
-   constructor create(const aowner: tdatabase);
+   constructor create(const aowner: tdatabase; const aintf: idbcontroller);
    function getdatabasename: filenamety;
    procedure setdatabasename(const avalue: filenamety);
  end;
- 
+  
 function fieldclasstoclasstyp(const fieldclass: fieldclassty): fieldclasstypety;
 function fieldtosql(const field: tfield): string;
 function fieldtooldsql(const field: tfield): string;
@@ -595,7 +604,8 @@ function getasmsestring(const field: tfield; const utf8: boolean): msestring;
 
 implementation
 uses
- rtlconsts,msefileutils,typinfo,sysutils,dbconst,msedatalist,mseformatstr,msereal;
+ rtlconsts,msefileutils,typinfo,sysutils,dbconst,msedatalist,mseformatstr,
+ msereal;
 type
  tdataset1 = class(tdataset);
 {
@@ -2203,8 +2213,9 @@ end;
 
 { tdbcontroller }
 
-constructor tdbcontroller.create(const aowner: tdatabase);
+constructor tdbcontroller.create(const aowner: tdatabase; const aintf: idbcontroller);
 begin
+ fintf:= aintf;
  inherited create(aowner);
 end;
 
