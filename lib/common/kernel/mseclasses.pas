@@ -326,6 +326,7 @@ type
    function getinstance: tobject;
   protected
    procedure finalizeitem(var item: pointer); override;
+   procedure linkdestroyed(const alink: iobjectlink); virtual;
   public
    constructor create(aownsobjects: boolean);
    destructor destroy; override;
@@ -473,7 +474,7 @@ procedure setoptionalobject(const componentstate: tcomponentstate;
                     createproc: createprocty); overload;
 procedure setlinkedcomponent(const sender: iobjectlink; const source: tmsecomponent;
                       var instance: tmsecomponent; ainterfacetype: pointer = nil);
-procedure reloadmsecomponent(Instance: tcomponent);
+procedure reloadmsecomponent(Instance: tmsecomponent);
 function initmsecomponent(instance: tcomponent; rootancestor: tclass): boolean;
 procedure loadmsemodule(const instance: tmsecomponent; aclass: tclass);
 function copycomponent(const source: tcomponent; const aowner: tcomponent = nil;
@@ -576,10 +577,16 @@ type
 //      var Address: Pointer; var Error: Boolean);
          //does not work because method.data is not writable
  end;
-
+ 
+ tloadedlist = class(tcomponent)
+  protected
+   procedure notification(acomponent: tcomponent; operation: toperation); override;
+ end;
+ 
 var
  objectdatalist: tobjectdatainfolist;
  fmodules: tmodulelist;
+ floadedlist: tloadedlist;
  fmodulestoregister: msecomponentarty;
 
 function swapmethodtable(const instance: tobject; const newtable: pointer): pointer;
@@ -1030,6 +1037,7 @@ var
  stream: tobjectdatastream;
  reader: treader;
  po2: pobjectdataty;
+ intf: iobjectlink;
 begin
  po2:= po1^.langobjectdata;
  if po2 = nil then begin
@@ -1057,6 +1065,10 @@ begin
   globalnamespace.endwrite;
   stream.free;
  end;
+ if floadedlist = nil then begin
+  floadedlist:= tloadedlist.create(nil);
+ end;
+ instance.freenotification(floadedlist);
 end;
 
 function initmsecomponent(instance: tcomponent; rootancestor: tclass): boolean;
@@ -1087,7 +1099,7 @@ begin
  end;
 end;
 
-procedure reloadmsecomponent(Instance: tcomponent);
+procedure reloadmsecomponent(Instance: tmsecomponent);
 var
  po1: pobjectdatainfoty;
 
@@ -1210,6 +1222,17 @@ begin
  end;
 end;
 
+{ tloadedlist }
+
+procedure tloadedlist.notification(acomponent: tcomponent;
+               operation: toperation);
+begin
+ inherited;
+ if operation = opremove then begin
+  removefixupreferences(acomponent,'');
+ end;
+end;
+
 { tobjectdatastream}
 
 constructor tobjectdatastream.create(data: pobjectdataty);
@@ -1305,7 +1328,7 @@ var
  int1: integer;
  int2: integer;
  po1: pobjectdatainfoty;
- comp1: tcomponent;
+ comp1: tmsecomponent;
 begin
  if fmodules <> nil then begin
   po1:= pobjectdatainfoty(fdata);
@@ -2439,6 +2462,7 @@ procedure tlinkedqueue.objevent(const sender: iobjectlink; const event: objectev
 begin
  fobjectlinker.objevent(sender,event);
  if event = oe_destroyed then begin
+  linkdestroyed(sender);
   inc(fnofinalize);
   try
    remove(pointer(sender));
@@ -2467,6 +2491,11 @@ begin
  fainstance:= sender;
  fobjectlinker.sendevent(oe_changed);
  fainstance:= nil;
+end;
+
+procedure tlinkedqueue.linkdestroyed(const alink: iobjectlink);
+begin
+ //dummy
 end;
 
 { tlinkedobjectqueue }
@@ -2812,6 +2841,7 @@ initialization
  registerfindglobalcomponentproc({$ifdef FPC}@{$endif}findmodulebyname);
 finalization
  freeandnil(fmodules);
+ freeandnil(floadedlist);
 {$ifdef FPC}
 // unregisterinitcomponenthandler(tcomponent,@initmsecomponent);
 {$endif}
