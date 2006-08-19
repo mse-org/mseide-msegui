@@ -1260,9 +1260,9 @@ function getmodulename(const aname,suffix: string): string;
 var
  int1: integer;
 begin
- int1:= system.pos(suffix,aname);
- if (int1 <> 0) and (int1 = length(aname)-length(suffix)+1) then begin
-  result:= copy(aname,1,length(aname)-length(suffix)) + copy(suffix,1,2);
+ int1:= length(aname) - length(suffix);
+ if (int1 >= 0) and (strcomp(pchar(aname)+int1,pchar(suffix)) = 0) then begin
+  result:= copy(aname,1,int1) + copy(suffix,1,2);
  end
  else begin
   result:= aname+copy(suffix,1,2);
