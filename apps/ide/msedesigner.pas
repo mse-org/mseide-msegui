@@ -257,7 +257,7 @@ type
    fsubmoduleinfopo: pmoduleinfoty;
    fsubmodulelist: tsubmodulelist;
    fdescendentinstancelist: tdescendentinstancelist;
-   fdesignfiles: tmseindexednamelist;
+   fdesignfiles: tindexedfilenamelist;
    fongetmodulenamefile: getmoduleeventty;
    fongetmoduletypefile: getmoduletypeeventty;
    fnotifymodule: tmsecomponent;
@@ -379,7 +379,7 @@ type
    property modules: tmodulelist read getmodules;
 
    property objformat: objformatty read fobjformat write fobjformat default of_default;
-   property designfiles: tmseindexednamelist read fdesignfiles;
+   property designfiles: tindexedfilenamelist read fdesignfiles;
 
    property ongetmodulenamefile: getmoduleeventty read fongetmodulenamefile
                    write fongetmodulenamefile;
@@ -1663,7 +1663,7 @@ begin
  fmodules:= tmodulelist.create(self);
  fsubmodulelist:= tsubmodulelist.create(self);
  fdescendentinstancelist:= tdescendentinstancelist.create(self);
- fdesignfiles:= tmseindexednamelist.create;
+ fdesignfiles:= tindexedfilenamelist.create;
  ondesignchanged:= {$ifdef FPC}@{$endif}componentmodified;
  onfreedesigncomponent:= {$ifdef FPC}@{$endif}deletecomponent;
 end;

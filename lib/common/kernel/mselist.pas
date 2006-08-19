@@ -212,17 +212,24 @@ type
    function getcompareproc: compareprocty; override;
   public
    constructor create;
-   function add(const avalue: msestring): integer;
+   function add(const avalue: msestring): integer; virtual;
          //returns id
-   function find(const avalue: msestring): integer;
+   function find(const avalue: msestring): integer; virtual;
          //returns id, -1 if not found
    function getname(const id: integer): msestring;
  end;
 
+ tindexedfilenamelist = class(tmseindexednamelist)
+  public
+   function add(const avalue: msestring): integer; override;
+         //returns id
+   function find(const avalue: msestring): integer; override;
+         //returns id, -1 if not found
+ end;
  
 implementation
 uses
- rtlconsts,msebits,msedatalist;
+ rtlconsts,msebits,msedatalist,msesysintf;
 const
  growstep = 32;
 
@@ -1330,6 +1337,28 @@ begin
  end
  else begin
   result:= fidnames[id];
+ end;
+end;
+
+{ tindexedfilenamelist }
+
+function tindexedfilenamelist.add(const avalue: msestring): integer;
+begin
+ if sys_filesystemiscaseinsensitive then begin
+  result:= inherited add(mselowercase(avalue));
+ end
+ else begin
+  inherited;
+ end;
+end;
+
+function tindexedfilenamelist.find(const avalue: msestring): integer;
+begin
+ if sys_filesystemiscaseinsensitive then begin
+  result:= inherited find(mselowercase(avalue));
+ end
+ else begin
+  inherited;
  end;
 end;
 
