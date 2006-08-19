@@ -1071,6 +1071,9 @@ begin
  instance.freenotification(floadedlist);
 end;
 
+var
+ moduleloadlevel: integer;
+ 
 function initmsecomponent(instance: tcomponent; rootancestor: tclass): boolean;
 var                                //!!!!todo: evaluate rootancestor
  po1: pobjectdatainfoty;
@@ -1082,16 +1085,24 @@ begin
   classty:= instance.classtype;
   po1:= objectdatalist.find(classty,instance.name);
   if (po1 <> nil) then begin
-   begingloballoading;
+   inc(moduleloadlevel);
+   if moduleloadlevel = 1 then begin
+    begingloballoading;
+   end;
    try
     loadmodule(instance,po1,false);
     if finditem(pointerarty(fmodulestoregister),instance) >= 0 then begin
      fmodules.add(tmsecomponent(instance));
      globalfixupreferences;
     end;
-    notifygloballoading;
+    if moduleloadlevel = 1 then begin
+     notifygloballoading;
+    end;
    finally
-    endgloballoading;
+    dec(moduleloadlevel);
+    if moduleloadlevel = 0 then begin
+     endgloballoading;
+    end;
     removeitem(pointerarty(fmodulestoregister),instance);
    end;
    result:= true;
