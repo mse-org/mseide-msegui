@@ -1170,13 +1170,11 @@ begin
    bo1:= true;
   end;
  end;
- with unitinfopo^.unitend do begin
-  if line = pos1.line then begin
-   dec(pos1.line);    //no 'end.'
-   dec(pos1.pos.row);
-   if pos1.pos.row < 0 then begin
-    exit; //invalid
-   end;
+ if issamesourcepos(unitinfopo^.unitend,pos1) then begin
+  dec(pos1.line);    //no 'end.'
+  dec(pos1.pos.row);
+  if pos1.pos.row < 0 then begin
+   exit; //invalid
   end;
  end;
  if bo1 then begin
