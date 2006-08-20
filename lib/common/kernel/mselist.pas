@@ -1348,7 +1348,7 @@ begin
   result:= inherited add(mselowercase(avalue));
  end
  else begin
-  inherited;
+  result:= inherited add(avalue);
  end;
 end;
 
@@ -1358,7 +1358,7 @@ begin
   result:= inherited find(mselowercase(avalue));
  end
  else begin
-  inherited;
+  result:= inherited find(avalue);
  end;
 end;
 
