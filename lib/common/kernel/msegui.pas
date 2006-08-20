@@ -1054,6 +1054,8 @@ type
 
    function indexofwidget(const awidget: twidget): integer;
 
+   procedure changedirection(const avalue: graphicdirectionty;
+                                            var dest: graphicdirectionty); virtual;
    procedure placexorder(const startx: integer; const dist: array of integer;
                 const awidgets: array of twidget;
                 const endmargin: integer = minint);
@@ -3653,6 +3655,22 @@ begin
  end;
 end;
 
+procedure twidget.changedirection(const avalue: graphicdirectionty;
+                                               var dest: graphicdirectionty);
+var
+ dir1: graphicdirectionty;
+ int1: integer;
+begin
+ dir1:= dest;
+ dest := avalue;
+ if (componentstate * [csdesigning,csloading] = [csdesigning]) and
+    ((dir1 in [gd_right,gd_left]) xor (avalue in [gd_right,gd_left])) then begin
+  int1:= bounds_cy;
+  bounds_cy:= bounds_cx;
+  bounds_cx:= int1;
+ end;
+end;
+ 
 procedure twidget.placexorder(const startx: integer; const dist: array of integer;
                 const awidgets: array of twidget; const endmargin: integer = minint);
                //origin = clientpos, endmargin by size adjust of widgets 

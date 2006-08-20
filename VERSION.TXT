@@ -1,13 +1,15 @@
 MSEide+MSEgui version history
 
-2007-07-29 foregroundcolor renamed to colorforeground.
-2007-07-29 backgroundcolor renamed to colorbackground.
-2007-07-22 Property tfilenamedit.dialogkind removed,
+2006-08-20 tprogressbar.
+2006-08-18 tsequencelink.
+2006-07-29 foregroundcolor renamed to colorforeground.
+2006-07-29 backgroundcolor renamed to colorbackground.
+2006-07-22 Property tfilenamedit.dialogkind removed,
  use controller.options fdo_save.
-2007-07-19 tmsecomponent.helpcontext.
-2007-07-19 tapplication.helpcontext.
-2007-07-18 tcanvas.drawvect.
-2007-07-13 msedrawtext.breaklines.
+2006-07-19 tmsecomponent.helpcontext.
+2006-07-19 tapplication.helpcontext.
+2006-07-18 tcanvas.drawvect.
+2006-07-13 msedrawtext.breaklines.
 2006-07-12 tdbstringdisplb, tdbintegerdisplb, tdbrealdisplb, tdbdatetimedisplb.
 2006-07-11 tcustomlookupbuffer.lookupinteger, lookuptext and lookupfloat.
 2006-07-10 Switch to FPC 2.0.4, support for 2.0.2 and 2.0.3 removed.

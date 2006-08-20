@@ -554,7 +554,7 @@ type
    property recnooffset: integer read frecnooffset;
    function moveby(const distance: integer): integer;
    procedure internalinsert;
-   procedure closequery;
+   procedure closequery(var amodalresult: modalresultty);
    function assql(const avalue: msestring): string; overload;
    function assql(const avalue: integer): string; overload;
    function assql(const avalue: realty): string; overload;
@@ -2190,12 +2190,17 @@ begin
  end;
 end;
 
-procedure tdscontroller.closequery;
+procedure tdscontroller.closequery(var amodalresult: modalresultty);
 begin
- with tdataset(fowner) do begin;
-  if state in dseditmodes then begin
-   post;
+ try
+  with tdataset(fowner) do begin;
+   if state in dseditmodes then begin
+    post;
+   end;
   end;
+ except
+  amodalresult:= mr_exception;
+  application.handleexception(nil);
  end;
 end;
 

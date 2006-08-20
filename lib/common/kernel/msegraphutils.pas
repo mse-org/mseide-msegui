@@ -126,9 +126,18 @@ function segment(const a,b: pointty): segmentty;
 
 procedure vectortoline(const vector: graphicvectorty; out a,b: pointty);
 
+function rotatedirection(const olddest,newvalue,
+                            oldvalue: graphicdirectionty): graphicdirectionty;
+
 implementation
 uses
  SysUtils;
+
+function rotatedirection(const olddest,newvalue,
+                    oldvalue: graphicdirectionty): graphicdirectionty;
+begin
+ result:= graphicdirectionty(((ord(olddest)+ord(newvalue)-ord(oldvalue)) and $3));
+end;
 
 procedure shiftinrect(var rect: rectty; const outerrect: rectty);
 var

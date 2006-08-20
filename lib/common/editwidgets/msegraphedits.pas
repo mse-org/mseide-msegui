@@ -15,7 +15,8 @@ interface
 uses
  msegui,mseguiglob,msescrollbar,Classes,msegraphutils,msegraphics,mseevent,
  msewidgets,mseeditglob,msestockobjects,msestat,mseclasses,msesimplewidgets,
- msegrids,msewidgetgrid,msedatalist,msebitmap,msetypes,msestrings,msearrayprops;
+ msegrids,msewidgetgrid,msedatalist,msebitmap,msetypes,msestrings,msearrayprops,
+ msedrawtext;
 
 const
  defaultsliderwidth = 200;
@@ -193,16 +194,36 @@ type
    property face: tface read fface write setface;
  end;
 
- tslider = class(tgraphdataedit,iscrollbar)
+ trealgraphdataedit = class(tgraphdataedit)
   private
-   fscrollbar: tsliderscrollbar;
    fonsetvalue: setrealeventty;
    fvalue: realty;
    fdirection: graphicdirectionty;
-   fupdating: boolean;
-   procedure setscrollbar(const Value: tsliderscrollbar);
    procedure setvalue(const avalue: realty);
    procedure setdirection(const avalue: graphicdirectionty);
+  protected
+   function createdatalist(const sender: twidgetcol): tdatalist; override;
+   function getdatatyp: datatypty; override;
+   procedure valuetogrid(const arow: integer); override;
+   procedure gridtovalue(const arow: integer); override;
+   procedure internalcheckvalue(var avalue; var accept: boolean); override;
+   procedure readstatvalue(const reader: tstatreader); override;
+   procedure writestatvalue(const writer: tstatwriter); override;
+  public
+   constructor create(aowner: tcomponent); override;
+  published
+   property bounds_cx default defaultsliderwidth;
+   property bounds_cy default defaultsliderheight;
+   property value: realty read fvalue write setvalue;
+   property onsetvalue: setrealeventty read fonsetvalue write fonsetvalue;
+   property direction: graphicdirectionty read fdirection write setdirection default gd_right;
+ end;
+ 
+ tslider = class(trealgraphdataedit,iscrollbar)
+  private
+   fscrollbar: tsliderscrollbar;
+   fupdating: boolean;
+   procedure setscrollbar(const avalue: tsliderscrollbar);
   protected
    procedure clientrectchanged; override;
    procedure dopaint(const acanvas: tcanvas); override;
@@ -212,27 +233,65 @@ type
    procedure doexit; override;
    procedure scrollevent(sender: tcustomscrollbar; event: scrolleventty);
 
-   function createdatalist(const sender: twidgetcol): tdatalist; override;
-   function getdatatyp: datatypty; override;
-   procedure valuetogrid(const arow: integer); override;
-   procedure gridtovalue(const arow: integer); override;
-   procedure internalcheckvalue(var avalue; var accept: boolean); override;
-   procedure readstatvalue(const reader: tstatreader); override;
-   procedure writestatvalue(const writer: tstatwriter); override;
    procedure dochange; override;
-   procedure paintglyph(const canvas: tcanvas; const value; const rect: rectty); override;
+   procedure paintglyph(const canvas: tcanvas; 
+                  const avalue; const rect: rectty); override;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
+   procedure changedirection(const avalue: graphicdirectionty;
+                                            var dest: graphicdirectionty); override;
   published
-   property bounds_cx default defaultsliderwidth;
-   property bounds_cy default defaultsliderheight;
    property scrollbar: tsliderscrollbar read fscrollbar write setscrollbar;
-   property value: realty read fvalue write setvalue;
-   property onsetvalue: setrealeventty read fonsetvalue write fonsetvalue;
-   property direction: graphicdirectionty read fdirection write setdirection default gd_right;
  end;
 
+const
+ defaultbarcolor = cl_ltblue;
+ 
+type
+ tbarface = class(tface)
+  public
+   constructor create(const intf: iface);
+ end;
+
+ tprogressbar = class(trealgraphdataedit,iface)
+  private
+   fbar_face: tbarface;
+   fbarrect: rectty;
+   fscale: real;
+   fformat: string;
+   ftextflags: textflagsty;
+   procedure setvalue(const avalue: realty);
+   procedure setbar_face(const avalue: tbarface);
+   procedure updatebarrect(const avalue: real; out dest: rectty);
+   procedure updatebar;
+   procedure setscale(const avalue: real);
+   procedure setformat(const avalue: string);
+   procedure settextflags(const avalue: textflagsty);
+  protected
+   procedure clientrectchanged; override;
+   procedure dochange; override;
+   procedure paintglyph(const canvas: tcanvas; 
+                  const avalue; const rect: rectty); override;
+   procedure createframe1; override;
+  public
+   constructor create(aowner: tcomponent); override;
+   destructor destroy; override;
+   procedure changedirection(const avalue: graphicdirectionty;
+                                            var dest: graphicdirectionty); override;
+  published
+   property value: realty read fvalue write setvalue;  
+          //threadsave, range 0 .. 1.0
+   property optionswidget default defaultoptionswidgetnofocus;
+   property bar_face: tbarface read fbar_face write setbar_face;
+   property scale: real read fscale write setscale; //default 0.01
+   property format: string read fformat write setformat; 
+                   //default '0%', '' for no numeric
+   property textflags: textflagsty read ftextflags write settextflags default 
+                              [tf_ycentered,tf_xcentered];
+   property font: twidgetfont read getfont write setfont stored isfontstored;
+ end;
+ 
  ttogglegraphdataedit = class(tgraphdataedit)
   private
    foptions: buttonoptionsty;
@@ -488,7 +547,7 @@ type
  
 implementation
 uses
- mseshapes,SysUtils,msekeyboard,msebits;
+ mseshapes,SysUtils,msekeyboard,msebits,msereal,msedispwidgets,mseformatstr;
 
 type
  tcustomframe1 = class(tcustomframe);
@@ -550,6 +609,75 @@ begin
  inherited;
 end;
 
+{ trealgraphdataedit }
+
+constructor trealgraphdataedit.create(aowner: tcomponent);
+begin
+ inherited;
+ size:= makesize(defaultsliderwidth,defaultsliderheight);
+end;
+
+procedure trealgraphdataedit.setvalue(const avalue: realty);
+begin
+ if fvalue <> avalue then begin
+  if isemptyreal(avalue) then begin
+   fvalue:= 0;
+  end
+  else begin
+   fvalue:= avalue;
+  end;
+  valuechanged;
+ end;
+end;
+
+function trealgraphdataedit.createdatalist(const sender: twidgetcol): tdatalist;
+begin
+ result:= trealdatalist.create;
+end;
+
+function trealgraphdataedit.getdatatyp: datatypty;
+begin
+ result:= dl_real;
+end;
+
+procedure trealgraphdataedit.internalcheckvalue(var avalue; var accept: boolean);
+begin
+ if canevent(tmethod(fonsetvalue)) then begin
+  fonsetvalue(self,realty(avalue),accept);
+ end;
+ if accept then begin
+  value:= realty(avalue);
+ end;
+end;
+
+procedure trealgraphdataedit.valuetogrid(const arow: integer);
+begin
+ fgridintf.setdata(arow,fvalue);
+end;
+
+procedure trealgraphdataedit.gridtovalue(const arow: integer);
+begin
+ fgridintf.getdata(arow,fvalue);
+ inherited;
+end;
+
+procedure trealgraphdataedit.readstatvalue(const reader: tstatreader);
+begin
+ value:= reader.readreal(valuevarname,fvalue);
+end;
+
+procedure trealgraphdataedit.writestatvalue(const writer: tstatwriter);
+begin
+ writer.writereal(valuevarname,fvalue);
+end;
+
+procedure trealgraphdataedit.setdirection(const avalue: graphicdirectionty);
+begin
+ if fdirection <> avalue then begin
+  changedirection(avalue,fdirection);
+ end;
+end;
+
 { tslider }
 
 constructor tslider.create(aowner: tcomponent);
@@ -563,6 +691,19 @@ end;
 destructor tslider.destroy;
 begin
  fscrollbar.Free;
+ inherited;
+end;
+
+procedure tslider.paintglyph(const canvas: tcanvas; const avalue;
+  const rect: rectty);
+begin
+ //dummy
+end;
+
+procedure tslider.changedirection(const avalue: graphicdirectionty;
+                                            var dest: graphicdirectionty);
+begin
+ fscrollbar.direction:= avalue;
  inherited;
 end;
 
@@ -629,87 +770,15 @@ begin
  inherited;
 end;
 
-procedure tslider.setscrollbar(const Value: tsliderscrollbar);
+procedure tslider.setscrollbar(const avalue: tsliderscrollbar);
 begin
- fscrollbar.Assign(Value);
-end;
-
-procedure tslider.setvalue(const avalue: realty);
-begin
- fvalue:= avalue;
- valuechanged;
+ fscrollbar.assign(avalue);
 end;
 
 procedure tslider.dochange;
 begin
- if fscrollbar.value <> fvalue then begin
-  fscrollbar.value:= fvalue;
- end;
-end;
-
-function tslider.createdatalist(const sender: twidgetcol): tdatalist;
-begin
- result:= trealdatalist.create;
-end;
-
-function tslider.getdatatyp: datatypty;
-begin
- result:= dl_real;
-end;
-
-procedure tslider.internalcheckvalue(var avalue; var accept: boolean);
-begin
- if canevent(tmethod(fonsetvalue)) then begin
-  fonsetvalue(self,realty(avalue),accept);
- end;
- if accept then begin
-  value:= realty(avalue);
- end;
-end;
-
-procedure tslider.valuetogrid(const arow: integer);
-begin
- fgridintf.setdata(arow,fvalue);
-end;
-
-procedure tslider.gridtovalue(const arow: integer);
-begin
- fgridintf.getdata(arow,fvalue);
+ fscrollbar.value:= fvalue;
  inherited;
-end;
-
-procedure tslider.readstatvalue(const reader: tstatreader);
-begin
- value:= reader.readreal(valuevarname,fvalue);
-end;
-
-procedure tslider.writestatvalue(const writer: tstatwriter);
-begin
- writer.writereal(valuevarname,fvalue);
-end;
-
-procedure tslider.paintglyph(const canvas: tcanvas; const value;
-  const rect: rectty);
-begin
- //dummy
-end;
-
-procedure tslider.setdirection(const avalue: graphicdirectionty);
-var
- dir1: graphicdirectionty;
- int1: integer;
-begin
- if fdirection <> avalue then begin
-  fscrollbar.direction:= avalue;
-  dir1:= fdirection;
-  fdirection := avalue;
-  if (componentstate * [csdesigning,csloading] = [csdesigning]) and
-          ((dir1 in [gd_right,gd_left]) xor (avalue in [gd_right,gd_left])) then begin
-   int1:= bounds_cy;
-   bounds_cy:= bounds_cx;
-   bounds_cx:= int1;
-  end;
- end;
 end;
 
 { tgraphdataedit }
@@ -2007,6 +2076,159 @@ end;
 procedure tpointeredit.initnewcomponent;
 begin
  //do nothing
+end;
+
+{ tbarface }
+
+constructor tbarface.create(const intf: iface);
+begin
+ inherited;
+ with fade_color do begin
+  count:= 2;
+  items[0]:= defaultbarcolor;
+  items[1]:= defaultbarcolor;
+ end;
+ with fade_pos do begin
+  items[0]:= 0;
+  items[1]:= 1;
+ end;
+end;
+
+{ tprogressbar }
+
+constructor tprogressbar.create(aowner: tcomponent);
+begin
+ fbar_face:= tbarface.create(iface(self));
+ fformat:= '0%';
+ fscale:= 0.01;
+ ftextflags:= [tf_ycentered,tf_xcentered];
+ inherited;
+ optionswidget:= defaultoptionswidgetnofocus;
+end;
+
+destructor tprogressbar.destroy;
+begin
+ inherited;
+ fbar_face.free;
+end;
+
+procedure tprogressbar.setvalue(const avalue: realty);
+begin
+ if not (csloading in componentstate) then begin
+  application.lock;
+  try
+   inherited;
+  finally
+   application.unlock;
+  end;
+ end
+ else begin
+  inherited;
+ end;
+end;
+
+procedure tprogressbar.setbar_face(const avalue: tbarface);
+begin
+ fbar_face.assign(avalue);
+end;
+
+procedure tprogressbar.updatebarrect(const avalue: real; out dest: rectty);
+var
+ int1: integer;
+begin
+ dest:= innerclientrect;
+ if fdirection in [gd_up,gd_down] then begin
+  int1:= round(avalue*dest.cy);
+  if fdirection = gd_up then begin
+   dest.y:= dest.cy - int1;
+  end;
+  dest.cy:= int1;
+ end
+ else begin
+  int1:= round(avalue*dest.cx);
+  if fdirection = gd_left then begin
+   dest.x:= dest.cx - int1;
+  end;
+  dest.cx:= int1;
+ end;
+end;
+
+procedure tprogressbar.updatebar;
+begin
+ updatebarrect(fvalue,fbarrect);
+end;
+
+procedure tprogressbar.clientrectchanged;
+begin
+ inherited;
+ updatebar;
+end;
+
+procedure tprogressbar.dochange;
+begin
+ updatebar;
+ inherited;
+end;
+
+procedure tprogressbar.changedirection(const avalue: graphicdirectionty;
+               var dest: graphicdirectionty);
+begin
+ fbar_face.fade_direction:= rotatedirection(fbar_face.fade_direction,avalue,dest);
+ inherited;
+ updatebar;
+end;
+
+procedure tprogressbar.paintglyph(const canvas: tcanvas; const avalue;
+               const rect: rectty);
+var
+ po1: prectty;
+ rect1: rectty;
+ str1: string;
+ rea1: real;
+begin
+ if @avalue = nil then begin
+  po1:= @fbarrect;
+ end
+ else begin
+  po1:= @rect1;
+  updatebarrect(real(avalue),rect1);  
+ end;
+ canvas.save;
+ canvas.intersectcliprect(po1^);
+ fbar_face.paint(canvas,rect);
+ canvas.restore;
+ if fformat <> '' then begin
+  if fscale <>  0 then begin
+   rea1:= fvalue/scale;
+  end
+  else begin
+   rea1:= fvalue;
+  end;
+  drawtext(canvas,realtytostr(rea1,fformat),rect,ftextflags,ffont);
+ end;
+end;
+
+procedure tprogressbar.createframe1;
+begin
+ tdispframe.create(self);
+end;
+
+procedure tprogressbar.setscale(const avalue: real);
+begin
+ fscale:= avalue;
+ formatchanged;
+end;
+
+procedure tprogressbar.setformat(const avalue: string);
+begin
+ fformat:= avalue;
+ formatchanged;
+end;
+
+procedure tprogressbar.settextflags(const avalue: textflagsty);
+begin
+ ftextflags:= avalue;
+ formatchanged;
 end;
 
 end.

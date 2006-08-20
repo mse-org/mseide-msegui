@@ -32,7 +32,7 @@ type
                         
 procedure Register;
 begin
- registercomponents('Edit',[tedit,tslider,tbooleanedit,tbooleaneditradio,
+ registercomponents('Edit',[tedit,tslider,tprogressbar,tbooleanedit,tbooleaneditradio,
    tintegerbutton,tdataicon,tpointeredit,
    tstringedit,tdropdownlistedit,thistoryedit,thexstringedit,tmemoedit,
    tintegeredit,trealedit,tdatetimeedit,tcalendardatetimeedit,tkeystringedit,

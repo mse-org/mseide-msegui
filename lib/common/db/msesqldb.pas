@@ -136,7 +136,7 @@ type
  setparameventty = procedure(const sender: tfieldparamlink;
                         var done: boolean) of object;  
                         
- tparamdatalink = class(tfielddatalink)
+ tparamsourcedatalink = class(tfielddatalink)
   private
    fowner: tfieldparamlink;
   protected
@@ -144,10 +144,10 @@ type
   public
    constructor create(const aowner: tfieldparamlink);
  end;
- 
+  
  tfieldparamlink = class(tmsecomponent,idbeditinfo,idbparaminfo)
   private
-   fdatalink: tparamdatalink;
+   fsourcedatalink: tparamsourcedatalink;
    fdatasource: tdatasource;
    fparamname: string;
    fonsetparam: setparameventty;
@@ -808,15 +808,15 @@ begin        //workaround for FPC bug 7266
  end;
 end;
 
-{ tparamdatalink }
+{ tparamsourcedatalink }
 
-constructor tparamdatalink.create(const aowner: tfieldparamlink);
+constructor tparamsourcedatalink.create(const aowner: tfieldparamlink);
 begin
  fowner:= aowner;
  inherited create;
 end;
 
-procedure tparamdatalink.recordchanged(afield: tfield);
+procedure tparamsourcedatalink.recordchanged(afield: tfield);
 var
  bo1: boolean;
 begin
@@ -842,7 +842,7 @@ end;
 
 constructor tfieldparamlink.create(aowner: tcomponent);
 begin
- fdatalink:= tparamdatalink.create(self);
+ fsourcedatalink:= tparamsourcedatalink.create(self);
  fdatasource:= tdatasource.create(nil);
  inherited;
 end;
@@ -850,38 +850,38 @@ end;
 destructor tfieldparamlink.destroy;
 begin
  inherited;
- fdatalink.free;
+ fsourcedatalink.free;
  fdatasource.free;
 end;
 
 function tfieldparamlink.getdatafield: string;
 begin
- result:= fdatalink.fieldname;
+ result:= fsourcedatalink.fieldname;
 end;
 
 procedure tfieldparamlink.setdatafield(const avalue: string);
 begin
- fdatalink.fieldname:= avalue;
+ fsourcedatalink.fieldname:= avalue;
 end;
 
 function tfieldparamlink.getdatasource: tdatasource;
 begin
- result:= fdatalink.datasource;
+ result:= fsourcedatalink.datasource;
 end;
 
 procedure tfieldparamlink.setdatasource(const avalue: tdatasource);
 begin
- fdatalink.datasource:= avalue;
+ fsourcedatalink.datasource:= avalue;
 end;
 
 function tfieldparamlink.getvisualcontrol: boolean;
 begin
- result:= fdatalink.visualcontrol;
+ result:= fsourcedatalink.visualcontrol;
 end;
 
 procedure tfieldparamlink.setvisualcontrol(const avalue: boolean);
 begin
- fdatalink.visualcontrol:= avalue;
+ fsourcedatalink.visualcontrol:= avalue;
 end;
 
 function tfieldparamlink.getdestdataset: tsqlquery;
@@ -909,7 +909,7 @@ end;
 
 function tfieldparamlink.field: tfield;
 begin
- result:= fdatalink.field;
+ result:= fsourcedatalink.field;
 end;
 
 procedure tfieldparamlink.getfieldtypes(out propertynames: stringarty; 
