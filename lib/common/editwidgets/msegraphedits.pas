@@ -2155,7 +2155,9 @@ end;
 
 procedure tprogressbar.updatebar;
 begin
- updatebarrect(fvalue,fbarrect);
+ if not isemptyreal(fvalue) then begin  
+  updatebarrect(fvalue,fbarrect);
+ end;
 end;
 
 procedure tprogressbar.clientrectchanged;
@@ -2191,6 +2193,9 @@ begin
  end
  else begin
   po1:= @rect1;
+  if isemptyreal(real(avalue)) then begin
+   exit;
+  end;
   updatebarrect(real(avalue),rect1);  
  end;
  canvas.save;
