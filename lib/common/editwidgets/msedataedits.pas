@@ -1205,7 +1205,9 @@ begin
    feditor.sellength:= 0;
    feditor.curindex:= bigint;
   end;
-  modified;
+  if not (ws_loadedproc in fwidgetstate) then begin
+   modified;
+  end;
   dochange;
  end;
 end;
