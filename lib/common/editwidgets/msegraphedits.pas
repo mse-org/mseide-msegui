@@ -78,7 +78,7 @@ type
    procedure dopaint(const canvas: tcanvas); override;
    function needsfocuspaint: boolean; override;
    procedure internalcheckvalue(var avalue; var accept: boolean); virtual; abstract;
-   procedure paintglyph(const canvas: tcanvas; const value; const rect: rectty);
+   procedure paintglyph(const canvas: tcanvas; const avalue; const arect: rectty);
                  virtual; abstract;
    procedure dofontheightdelta(var delta: integer); override;
    //igridwidget
@@ -235,7 +235,7 @@ type
 
    procedure dochange; override;
    procedure paintglyph(const canvas: tcanvas; 
-                  const avalue; const rect: rectty); override;
+                  const avalue; const arect: rectty); override;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -254,25 +254,39 @@ type
    constructor create(const intf: iface);
  end;
 
+ tprogressbar = class;
+  
+ tbarframe = class(tframe)
+  private
+   fowner: tprogressbar;
+  public
+   constructor create(const aowner: tprogressbar);
+ end;
+
  tprogressbar = class(trealgraphdataedit,iface)
   private
    fbar_face: tbarface;
-   fbarrect: rectty;
+   fbar_frame: tbarframe;
+   ffacerect: rectty;
+   fframebarrect: rectty;
+   ffacebarrect: rectty;
    fscale: real;
    fformat: string;
    ftextflags: textflagsty;
    procedure setvalue(const avalue: realty);
    procedure setbar_face(const avalue: tbarface);
-   procedure updatebarrect(const avalue: real; out dest: rectty);
+   procedure updatebarrect(const avalue: real; const arect: rectty;
+                    out facedest,framebardest,facebardest: rectty);
    procedure updatebar;
    procedure setscale(const avalue: real);
    procedure setformat(const avalue: string);
    procedure settextflags(const avalue: textflagsty);
+   procedure setbar_frame(const avalue: tbarframe);
   protected
    procedure clientrectchanged; override;
    procedure dochange; override;
    procedure paintglyph(const canvas: tcanvas; 
-                  const avalue; const rect: rectty); override;
+                  const avalue; const arect: rectty); override;
    procedure createframe1; override;
   public
    constructor create(aowner: tcomponent); override;
@@ -284,6 +298,7 @@ type
           //threadsave, range 0 .. 1.0
    property optionswidget default defaultoptionswidgetnofocus;
    property bar_face: tbarface read fbar_face write setbar_face;
+   property bar_frame: tbarframe read fbar_frame write setbar_frame;
    property scale: real read fscale write setscale; //default 0.01
    property format: string read fformat write setformat; 
                    //default '0%', '' for no numeric
@@ -334,7 +349,7 @@ type
    function createdatalist(const sender: twidgetcol): tdatalist; override;
    function getdatatyp: datatypty; override;
    procedure togglevalue; override;
-   procedure paintglyph(const canvas: tcanvas; const value; const rect: rectty);
+   procedure paintglyph(const canvas: tcanvas; const avalue; const arect: rectty);
                  override;
    procedure internalcheckvalue(var avalue; var accept: boolean); override;
    procedure readstatvalue(const reader: tstatreader); override;
@@ -520,7 +535,7 @@ type
   protected
    procedure setnullvalue;
    procedure paintglyph(const canvas: tcanvas; const avalue;
-           const rect: rectty); override;
+           const arect: rectty); override;
    procedure objectevent(const sender: tobject;
                              const event: objecteventty); override;
   public
@@ -695,7 +710,7 @@ begin
 end;
 
 procedure tslider.paintglyph(const canvas: tcanvas; const avalue;
-  const rect: rectty);
+                                   const arect: rectty);
 begin
  //dummy
 end;
@@ -827,7 +842,8 @@ end;
 
 procedure tgraphdataedit.dochange;
 begin
- if canevent(tmethod(fonchange)) then begin
+ if not (ws_loadedproc in fwidgetstate) and 
+                   canevent(tmethod(fonchange)) then begin
   fonchange(self);
  end;
  invalidate;
@@ -845,17 +861,19 @@ end;
 
 procedure tgraphdataedit.valuechanged;
 begin
- if (fgridintf <> nil) and not (csdesigning in componentstate) then begin
-  valuetogrid(fgridintf.getrow);
+ if not (csloading in componentstate) then begin
+  if (fgridintf <> nil) and not (csdesigning in componentstate) then begin
+   valuetogrid(fgridintf.getrow);
+  end;
+  dochange;
  end;
- dochange;
 end;
 
 procedure tgraphdataedit.drawcell(const canvas: tcanvas);
 begin
  with cellinfoty(canvas.drawinfopo^) do begin
   if datapo <> nil then begin
-   paintglyph(canvas,datapo^,rect);
+   paintglyph(canvas,datapo^,innerrect);
   end;
  end;
 end;
@@ -1136,7 +1154,13 @@ end;
 procedure tgraphdataedit.loaded;
 begin
  inherited;
- formatchanged;
+ include(fwidgetstate,ws_loadedproc);
+ try
+  valuechanged;
+  formatchanged;
+ finally
+  exclude(fwidgetstate,ws_loadedproc);
+ end;
 end;
 
 procedure tgraphdataedit.gridvaluechanged(const index: integer);
@@ -1243,19 +1267,19 @@ begin
  result:= stg_checked;
 end;
 
-procedure tcustombooleanedit.paintglyph(const canvas: tcanvas; const value;
-  const rect: rectty);
+procedure tcustombooleanedit.paintglyph(const canvas: tcanvas; const avalue;
+                               const arect: rectty);
 var
  bo1: boolean;
 begin
- if @value = nil then begin
+ if @avalue = nil then begin
   bo1:= fvalue;
  end
  else begin
-  bo1:= boolean(value);
+  bo1:= boolean(avalue);
  end;
  if bo1 then begin
-   stockobjects.paintglyph(getglyph,canvas,rect,not isenabled,fcolorglyph);
+   stockobjects.paintglyph(getglyph,canvas,arect,not isenabled,fcolorglyph);
  end;
 end;
 
@@ -1974,7 +1998,7 @@ begin
 end;
 
 procedure tcustomdataicon.paintglyph(const canvas: tcanvas; const avalue;
-  const rect: rectty);
+                                          const arect: rectty);
 var
  int1,int2: integer;
  po1: pintegeraty;
@@ -1989,7 +2013,7 @@ begin
   if (int1 >= 0) then begin
    int1:= int1 + fimageoffset;
    if (int1 < fimagelist.count) and (int1 >= 0) then begin
-    fimagelist.paint(canvas,rect,int1,[al_ycentered,al_xcentered]);
+    fimagelist.paint(canvas,arect,int1,[al_ycentered,al_xcentered]);
    end;
   end
   else begin
@@ -1997,7 +2021,7 @@ begin
     po1:= pintegeraty(tarrayprop1(fimagenums).getdatapo^);
     for int2:= 0 to fimagenums.count-1 do begin
      if int1 and bits[int2] <> 0 then begin
-      fimagelist.paint(canvas,rect,po1^[int2],[al_ycentered,al_xcentered]);
+      fimagelist.paint(canvas,arect,po1^[int2],[al_ycentered,al_xcentered]);
      end;
     end;
    end;
@@ -2084,14 +2108,18 @@ constructor tbarface.create(const intf: iface);
 begin
  inherited;
  with fade_color do begin
-  count:= 2;
+  count:= 1;
   items[0]:= defaultbarcolor;
-  items[1]:= defaultbarcolor;
  end;
- with fade_pos do begin
-  items[0]:= 0;
-  items[1]:= 1;
- end;
+end;
+
+{ tbarframe }
+
+constructor tbarframe.create(const aowner: tprogressbar);
+begin
+ fowner:= aowner;
+ fstate:= [fs_nowidget,fs_nosetinstance];
+ inherited create(iframe(aowner));
 end;
 
 { tprogressbar }
@@ -2099,6 +2127,7 @@ end;
 constructor tprogressbar.create(aowner: tcomponent);
 begin
  fbar_face:= tbarface.create(iface(self));
+ fbar_frame:= tbarframe.create(self);
  fformat:= '0%';
  fscale:= 0.01;
  ftextflags:= [tf_ycentered,tf_xcentered];
@@ -2110,6 +2139,7 @@ destructor tprogressbar.destroy;
 begin
  inherited;
  fbar_face.free;
+ fbar_frame.free;
 end;
 
 procedure tprogressbar.setvalue(const avalue: realty);
@@ -2132,32 +2162,52 @@ begin
  fbar_face.assign(avalue);
 end;
 
-procedure tprogressbar.updatebarrect(const avalue: real; out dest: rectty);
+procedure tprogressbar.updatebarrect(const avalue: real; const arect: rectty;
+                              out facedest,framebardest,facebardest: rectty);
 var
- int1: integer;
+ int1,int2,int3: integer;
 begin
- dest:= innerclientrect;
- if fdirection in [gd_up,gd_down] then begin
-  int1:= round(avalue*dest.cy);
-  if fdirection = gd_up then begin
-   dest.y:= dest.cy - int1;
-  end;
-  dest.cy:= int1;
+ if isemptyreal(avalue) then begin
+  facedest:= nullrect;
+  framebardest:= nullrect;
+  facebardest:= nullrect;
  end
  else begin
-  int1:= round(avalue*dest.cx);
-  if fdirection = gd_left then begin
-   dest.x:= dest.cx - int1;
+  with fbar_frame do begin
+   facedest.x:= arect.x + fi.innerframe.left;  //origin = paintpos
+   facedest.y:= arect.y + fi.innerframe.top;
+   int2:= (finnerframe.left+finnerframe.right);
+   int3:= (finnerframe.top+finnerframe.bottom);
+   facedest.cx:= arect.cx - int2;
+   facedest.cy:= arect.cy - int3;
   end;
-  dest.cx:= int1;
+//  facedest:= deflaterect(arect,fbar_frame.innerframe);
+//  facedest.pos:= pointty(fbar_frame.fi.innerframe.topleft);
+                    //origin = paintpos
+  framebardest:= arect;
+  if fdirection in [gd_right,gd_left] then begin
+   int1:= round(avalue*facedest.cx) + int2;
+   if fdirection = gd_left then begin
+    inc(framebardest.x,framebardest.cx - int1);
+   end;
+   framebardest.cx:= int1;
+  end
+  else begin
+   int1:= round(avalue*facedest.cy) + int3;
+   if fdirection = gd_up then begin
+    inc(framebardest.y,framebardest.cy - int1);
+   end;
+   framebardest.cy:= int1;
+  end;
+  facebardest:= deflaterect(framebardest,fbar_frame.innerframe);
+  subpoint1(facebardest.pos,pointty(fbar_frame.fpaintframe.topleft));
+                                 //origin = paintpos
  end;
 end;
 
 procedure tprogressbar.updatebar;
 begin
- if not isemptyreal(fvalue) then begin  
-  updatebarrect(fvalue,fbarrect);
- end;
+ updatebarrect(fvalue,innerclientrect,ffacerect,fframebarrect,ffacebarrect);
 end;
 
 procedure tprogressbar.clientrectchanged;
@@ -2176,40 +2226,44 @@ procedure tprogressbar.changedirection(const avalue: graphicdirectionty;
                var dest: graphicdirectionty);
 begin
  fbar_face.fade_direction:= rotatedirection(fbar_face.fade_direction,avalue,dest);
+ fbar_frame.changedirection(avalue,dest);
  inherited;
  updatebar;
 end;
 
 procedure tprogressbar.paintglyph(const canvas: tcanvas; const avalue;
-               const rect: rectty);
+                                         const arect: rectty);
 var
- po1: prectty;
- rect1: rectty;
+ po1,po2,po3: prectty;
+ rect1,rect2,rect3: rectty;
  str1: string;
  rea1: real;
 begin
  if @avalue = nil then begin
-  po1:= @fbarrect;
+  po1:= @ffacerect;
+  po2:= @fframebarrect;
+  po3:= @ffacebarrect;
+  rea1:= fvalue;
  end
  else begin
   po1:= @rect1;
-  if isemptyreal(real(avalue)) then begin
-   exit;
-  end;
-  updatebarrect(real(avalue),rect1);  
+  po2:= @rect2;
+  po3:= @rect3;
+  rea1:= real(avalue);
+  updatebarrect(real(avalue),arect,rect1,rect2,rect3);  
  end;
- canvas.save;
- canvas.intersectcliprect(po1^);
- fbar_face.paint(canvas,rect);
- canvas.restore;
- if fformat <> '' then begin
-  if fscale <>  0 then begin
-   rea1:= fvalue/scale;
-  end
-  else begin
-   rea1:= fvalue;
+ if not isemptyreal(rea1) then begin
+  canvas.save;
+  fbar_frame.paint(canvas,po2^); //moves origin to paintrect and sets cliprect
+  canvas.intersectcliprect(po3^);
+  fbar_face.paint(canvas,po1^);
+  canvas.restore;
+  if fformat <> '' then begin
+   if fscale <> 0 then begin
+    rea1:= rea1/scale;
+   end;
+   drawtext(canvas,realtytostr(rea1,fformat),arect,ftextflags,ffont);
   end;
-  drawtext(canvas,realtytostr(rea1,fformat),rect,ftextflags,ffont);
  end;
 end;
 
@@ -2234,6 +2288,11 @@ procedure tprogressbar.settextflags(const avalue: textflagsty);
 begin
  ftextflags:= avalue;
  formatchanged;
+end;
+
+procedure tprogressbar.setbar_frame(const avalue: tbarframe);
+begin
+ fbar_frame.assign(avalue);
 end;
 
 end.

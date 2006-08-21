@@ -1074,7 +1074,13 @@ end;
 procedure tdataedit.loaded;
 begin
  inherited;
- formatchanged;
+ include(fwidgetstate,ws_loadedproc);
+ try
+  valuechanged;
+  formatchanged;
+ finally
+  exclude(fwidgetstate,ws_loadedproc);
+ end;
 end;
 
 procedure tdataedit.fontchanged;
@@ -1185,21 +1191,23 @@ end;
 
 procedure tdataedit.valuechanged;
 begin
- if (fgridintf <> nil) and not (csdesigning in componentstate) then begin
-  valuetogrid(fgridintf.getrow);
+ if not (csloading in componentstate) then begin
+  if (fgridintf <> nil) and not (csdesigning in componentstate) then begin
+   valuetogrid(fgridintf.getrow);
+  end;
+  {$ifdef FPC} {$checkpointer off} {$endif}
+  feditor.text:= datatotext(nil^);
+  {$ifdef FPC} {$checkpointer default} {$endif}
+  if focused then begin
+   feditor.initfocus;
+  end
+  else begin
+   feditor.sellength:= 0;
+   feditor.curindex:= bigint;
+  end;
+  modified;
+  dochange;
  end;
- {$ifdef FPC} {$checkpointer off} {$endif}
- feditor.text:= datatotext(nil^);
- {$ifdef FPC} {$checkpointer default} {$endif}
- if focused then begin
-  feditor.initfocus;
- end
- else begin
-  feditor.sellength:= 0;
-  feditor.curindex:= bigint;
- end;
- modified;
- dochange;
 end;
 
 procedure tdataedit.texttodata(const atext: msestring; var data);

@@ -74,7 +74,7 @@ type
  framestatety = (fs_sbhorzon,fs_sbverton,fs_sbhorzfix,fs_sbvertfix,
                  fs_sbhorztop,fs_sbvertleft,
                  fs_sbleft,fs_sbtop,fs_sbright,fs_sbbottom,
-                 fs_nowidget,fs_disabled,fs_captiondistouter,
+                 fs_nowidget,fs_nosetinstance,fs_disabled,fs_captiondistouter,
                  fs_drawfocusrect,fs_paintrectfocus,
                  fs_captionfocus,fs_rectsvalid);
  framestatesty = set of framestatety;
@@ -199,6 +199,7 @@ type
    fouterframe: framety;
    fpaintframedelta: framety;
    fpaintframe: framety;
+   finnerframe: framety;
    fpaintrect: rectty;
    fclientrect: rectty;          //origin = fpaintrect.pos
    finnerclientrect: rectty;     //origin = fpaintrect.pos
@@ -221,7 +222,7 @@ type
    procedure updatewidgetstate; virtual;
    procedure updatemousestate(const sender: twidget; const apos: pointty); virtual;
   public
-   constructor create(const intf: iframe); reintroduce; //sets owner.fframe
+   constructor create(const intf: iframe); reintroduce;
    destructor destroy; override;
    procedure assign(source: tpersistent); override;
 
@@ -236,6 +237,8 @@ type
    function pointincaption(const point: pointty): boolean; virtual;
                                      //origin = widgetrect
    procedure initgridframe; virtual;
+   procedure changedirection(const oldvalue: graphicdirectionty;
+                                            const newvalue: graphicdirectionty);
 
    property levelo: integer read fi.levelo write setlevelo
                      stored islevelostored default 0;
@@ -2321,7 +2324,9 @@ end;
 constructor tcustomframe.create(const intf: iframe);
 begin
  fintf:= intf;
- fintf.setframeinstance(self);
+ if not (fs_nosetinstance in fstate) then begin
+  fintf.setframeinstance(self);
+ end;
 // owner.fframe:= self;
  fi.colorclient:= cl_transparent;
  fi.colorframe:= cl_transparent;
@@ -2425,6 +2430,7 @@ begin
  getpaintframe(fpaintframedelta);
  fpaintframe:= addframe(fpaintframedelta,fouterframe);
  addframe1(fpaintframe,fwidth);
+ finnerframe:= addframe(fpaintframe,fi.innerframe);
  fpaintrect.pos:= pointty(fpaintframe.topleft);
  fpaintrect.size:= fintf.getwidgetrect.size;
  fpaintrect.cx:= fpaintrect.cx - fpaintframe.left - fpaintframe.right;
@@ -2769,6 +2775,23 @@ end;
 function tcustomframe.iscolorclientstored: boolean;
 begin
  result:= (ftemplate = nil) or (frl_colorclient in flocalprops);
+end;
+
+procedure tcustomframe.changedirection(const oldvalue: graphicdirectionty;
+               const newvalue: graphicdirectionty);
+var
+ int1,int2: integer;
+ fra1: framety;
+begin
+ int2:= ord(oldvalue)-ord(newvalue);
+ for int1:= 0 to 3 do begin
+  pintegeraty(@fra1)^[int1]:= 
+         pintegeraty(@fi.innerframe)^[(int1+int2) and $3];
+ end;
+ framei_left:= fra1.left;
+ framei_top:= fra1.top;
+ framei_right:= fra1.right;
+ framei_bottom:= fra1.bottom;
 end;
 
 { tframetemplate }
@@ -3661,6 +3684,12 @@ var
  dir1: graphicdirectionty;
  int1: integer;
 begin
+ if fface <> nil then begin
+  fface.fade_direction:= rotatedirection(fface.fade_direction,avalue,dest);
+ end;
+ if fframe <> nil then begin
+  fframe.changedirection(avalue,dest);
+ end;
  dir1:= dest;
  dest := avalue;
  if (componentstate * [csdesigning,csloading] = [csdesigning]) and

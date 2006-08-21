@@ -968,7 +968,8 @@ end;
 
 procedure tcustomedit.dochange;
 begin
- if canevent(tmethod(fonchange)) then begin
+ if not (ws_loadedproc in fwidgetstate) and 
+                  canevent(tmethod(fonchange)) then begin
   fonchange(self);
  end;
 end;
