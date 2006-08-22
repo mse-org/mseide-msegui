@@ -1069,7 +1069,7 @@ begin
   result:= not bmp1.bitmap.isempty;
  end
  else begin
-  result:= isempty;
+  result:= not isempty;
  end;
 end;
 
