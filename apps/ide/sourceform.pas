@@ -1074,6 +1074,7 @@ begin
   with items[int1] do begin
    int2:= findbookmark(bookmarknum);
    if int2 >= 0 then begin
+    grid.showcell(makegridcoord(invalidaxis,int2),cep_rowcenteredif);
     edit.editpos:= makegridcoord(0,int2);
     activate;
     result:= true;

@@ -34,7 +34,7 @@ type
                 co_savevalue,co_savestate,
                 co_rowfont,co_rowcolor,co_zebracolor,
                 co_nosort,co_sortdescent,co_norearange,
-                co_cancopy,co_canpaste,co_mousescrollrow
+                co_cancopy,co_canpaste,co_mousescrollrow,co_rowdatachange
                 );
  coloptionsty = set of coloptionty;
  optiongridty = (og_colsizing,og_colmoving,og_keycolmoving,
@@ -48,7 +48,7 @@ type
                  og_mousescrollcol);
  optionsgridty = set of optiongridty;
 
- pickobjectkindty = (pok_fixcolsize,pok_fixcol,pok_datacolsize,pok_datacol,
+ pickobjectkindty = (pok_none,pok_fixcolsize,pok_fixcol,pok_datacolsize,pok_datacol,
                    pok_fixrowsize,pok_fixrow,pok_datarowsize,pok_datarow);
 
  stringcoleditoptionty = (
@@ -86,7 +86,8 @@ const
  pickobjectstep = integer(high(pickobjectkindty)) + 1;
  layoutchangedcoloptions: coloptionsty = [co_fill,co_proportional,co_invisible,
  co_nohscroll];
- notfixcoloptions = [co_fixwidth,co_fixpos,co_fill,co_proportional,co_nohscroll];
+ notfixcoloptions = [co_fixwidth,co_fixpos,co_fill,co_proportional,co_nohscroll,
+                     co_rowdatachange];
  defaultoptionsgrid = [og_autopopup,og_colchangeontabkey,og_focuscellonenter];
 
  mousescrolldist = 5;
@@ -124,7 +125,7 @@ type
       gs_sortvalid,gs_cellentered,gs_cellclicked,gs_emptyrowremoved,
       gs_rowcountinvalid,
       gs_scrollup,gs_scrolldown,gs_scrollleft,gs_scrollright,
-      gs_selectionchanged,gs_invalidated,{gs_rowappended,}
+      gs_selectionchanged,gs_rowdatachanged,gs_invalidated,{gs_rowappended,}
       gs_mouseentered,gs_childmousecaptured,
       gs_mousecellredirected,gs_restorerow,gs_cellexiting,gs_rowremoving,
       gs_needszebraoffset, //has zebrastep or autonumcol
@@ -165,7 +166,8 @@ type
     (cellbefore,newcell: gridcoordty; selectaction: focuscellactionty);
    cek_select:
     (selected: boolean; accept: boolean);
-   cek_mousemove,cek_mousepark,cek_firstmousepark,cek_buttonpress,cek_buttonrelease:
+   cek_mousemove,cek_mousepark,cek_firstmousepark,
+   cek_buttonpress,cek_buttonrelease:
     (zone: cellzonety; mouseeventinfopo: pmouseeventinfoty; gridmousepos: pointty);
    cek_keydown,cek_keyup:
     (keyeventinfopo: pkeyeventinfoty);
@@ -194,9 +196,11 @@ type
   font: tfont;
   selected: boolean;
   notext: boolean;
+  ismousecell: boolean;
   datapo: pointer;
   griddatalink: pointer;
  end;
+ pcellinfoty = ^cellinfoty;
 
  tgridpropfont = class(tparentfont)
   public
@@ -436,6 +440,7 @@ type
                      const aowner: tgridarrayprop); override;
    destructor destroy; override;
 
+   procedure cellchanged(const row: integer); override;
    function canfocus(const abutton: mousebuttonty): boolean; virtual;
    procedure updatecellzone(const pos: pointty; var result: cellzonety); virtual;
    property datalist: tdatalist read fdata;
@@ -954,6 +959,7 @@ type
    flastvisiblerow: integer;
    fupdating: integer;
    fnullchecking: integer;
+   frowdatachanging: integer;
    fnoshowcaretrect: integer;
    finvalidatedcells: gridcoordarty;
 
@@ -1071,6 +1077,7 @@ type
    procedure initeventinfo(const cell: gridcoordty; eventkind: celleventkindty;
                  out info: celleventinfoty);
    procedure invalidate;
+   procedure invalidatesinglecell(const cell: gridcoordty);
    function checkinvalidate: boolean;
    function docheckcellvalue: boolean;
    procedure removeappendedrow;
@@ -1088,7 +1095,7 @@ type
    procedure dofontheightdelta(var delta: integer); override;
    procedure fontchanged; override;
    procedure clientrectchanged; override;
-   procedure createframe1; override;
+   procedure internalcreateframe; override;
    function getscrollrect: rectty;
    procedure setscrollrect(const rect: rectty);
    function scrollcaret: boolean; virtual;
@@ -2163,6 +2170,8 @@ begin
     fcellinfo.cell.row:= int1;
     fcellinfo.selected:= getselected(int1);
     fcellinfo.notext:= false;
+    fcellinfo.ismousecell:= (fgrid.fmousecell.col = fcellinfo.cell.col) and 
+                              (fgrid.fmousecell.row = int1);
     saveindex:= canvas.save;
     if fcellinfo.selected then begin
      if (selectedcolor1 <> cl_none) then begin
@@ -3418,7 +3427,8 @@ end;
 
 procedure tdatacol.dostatread(const reader: tstatreader);
 begin
- if (fdata <> nil)  and (co_savevalue in foptions) then begin
+ if (fdata <> nil) and (co_savevalue in foptions) and 
+            not (gs_isdb in fgrid.fstate) then begin
   reader.readdatalist(getdatastatname,fdata);
  end;
  if co_savestate in foptions then begin
@@ -3429,11 +3439,26 @@ end;
 procedure tdatacol.dostatwrite(const writer: tstatwriter);
 begin
  inherited;
- if (fdata <> nil) and (co_savevalue in foptions) then begin
+ if (fdata <> nil) and (co_savevalue in foptions) and 
+           not (gs_isdb in fgrid.fstate) then begin
   writer.writedatalist(getdatastatname,fdata);
  end;
  if co_savestate in foptions then begin
   writer.writeinteger('width'+inttostr(ident),fwidth);
+ end;
+end;
+
+procedure tdatacol.cellchanged(const row: integer);
+begin
+ inherited;
+ if (co_rowdatachange in foptions) and (fgrid.frowdatachanging = 0) then begin
+                                          //no recursion
+  if row < 0 then begin
+   fgrid.rowdatachanged(0,fgrid.frowcount);
+  end
+  else begin
+   fgrid.rowdatachanged(row);
+  end;
  end;
 end;
 
@@ -4421,22 +4446,24 @@ begin
   for int1:= 0 to count - 1 do begin
    cols[int1].dostatread(reader);
   end;
-  int2:= 0;
-  for int1:= 0 to count - 1 do begin
-   with cols[int1] do begin
-    if (fdata <> nil) and (fdata.count > int2) then begin
-     int2:= fdata.count;
+  if not (gs_isdb in fgrid.fstate) then begin
+   int2:= 0;
+   for int1:= 0 to count - 1 do begin
+    with cols[int1] do begin
+     if (fdata <> nil) and (fdata.count > int2) then begin
+      int2:= fdata.count;
+     end;
     end;
    end;
-  end;
-  for int1:= 0 to count - 1 do begin
-   with cols[int1] do begin
-    if (fdata <> nil) then begin
-     fdata.count:= int2;
+   for int1:= 0 to count - 1 do begin
+    with cols[int1] do begin
+     if (fdata <> nil) then begin
+      fdata.count:= int2;
+     end;
     end;
    end;
+   fgrid.rowcount:= int2;
   end;
-  fgrid.rowcount:= int2;
  finally
   fgrid.endupdate;
  end;
@@ -4775,7 +4802,7 @@ begin
  fzebra_step:= 2;
 
  inherited;
- createframe1;
+ internalcreateframe;
  fobjectpicker:= tobjectpicker.create(iobjectpicker(self));
  foptionswidget:= defaultgridwidgetoptions;
  exclude(fstate,gs_updatelocked);
@@ -4833,7 +4860,20 @@ end;
 procedure tcustomgrid.rowdatachanged(const index: integer;
                 const count: integer = 1);
 begin
- dorowsdatachanged(index,count);
+ if not (csloading in componentstate) then begin
+  if fupdating = 0 then begin
+   exclude(fstate,gs_rowdatachanged);
+   inc(frowdatachanging);
+   try
+    dorowsdatachanged(index,count);
+   finally
+    dec(frowdatachanging);
+   end;
+  end
+  else begin
+   include(fstate,gs_rowdatachanged);
+  end;
+ end;
 end;
 
 procedure tcustomgrid.internalselectionchanged;
@@ -5459,7 +5499,7 @@ begin
  end;
 end;
 
-procedure tcustomgrid.createframe1;
+procedure tcustomgrid.internalcreateframe;
 begin
  tgridframe.create(iframe(self),self,iautoscrollframe(self));
 end;
@@ -5494,6 +5534,13 @@ begin
  if (cell.row < 0) or 
       (cell.row >= ffirstvisiblerow) and (cell.row <= flastvisiblerow) then begin
   invalidaterect(cellrect(cell));
+ end;
+end;
+
+procedure tcustomgrid.invalidatesinglecell(const cell: gridcoordty);
+begin
+ if (cell.row <> invalidaxis) and (cell.col <> invalidaxis) then begin
+  invalidatecell(cell);
  end;
 end;
 
@@ -5674,7 +5721,8 @@ procedure tcustomgrid.clientmouseevent(var info: mouseeventinfoty);
    if fmouseeventcol < fdatacols.count then begin
     fillchar(info1,sizeof(info1),0);
     info1.eventkind:= ek_clientmouseleave;
-    fdatacols[fmouseeventcol].clientmouseevent(makegridcoord(fmouseeventcol,-1),info1);
+    fdatacols[fmouseeventcol].clientmouseevent(makegridcoord(fmouseeventcol,-1),
+                       info1);
     fmouseeventcol:= -1;
    end;
   end;
@@ -5768,7 +5816,13 @@ begin
                            not(csdesigning in componentstate) then begin
   with info do begin
    if eventkind in mouseposevents then  begin
+    coord1:= fmousecell;
     cellkind:= cellatpos(pos,fmousecell);
+    if (coord1.col <> fmousecell.col) or 
+            (coord1.row <> fmousecell.row) then begin
+     invalidatesinglecell(coord1);
+     invalidatesinglecell(fmousecell);
+    end;
     if (fmousecell.row <> fmouseparkcell.row) or 
                               (fmousecell.col <> fmouseparkcell.col) then begin
      fmouseparkcell:= invalidcell;
@@ -5781,14 +5835,10 @@ begin
     ek_clientmouseenter: begin
      include(fstate,gs_mouseentered);
     end;
-    {
-    ek_mousecaptureend: begin
-     if (gs_cellclicked in fstate) then begin
-      killrepeater;
-      exclude(fstate,gs_cellclicked);
-     end;
+    ek_clientmouseleave: begin
+     invalidatesinglecell(fmousecell);
+     fmousecell:= invalidcell;
     end;
-    }
     ek_buttonpress: begin
      mousewidgetbefore:= application.mousewidget;
      checkfocuscell;
@@ -6141,7 +6191,7 @@ begin     //focuscell
    exit;
   end;
   if (cell.row <> ffocusedcell.row) and (ffocusedcell.row >= 0) and 
-           (fnocheckvalue = 0) and 
+           (fnocheckvalue = 0) and container.entered and
             not container.canclose(window.focusedwidget) then begin
    exit;        //for not null check in twidgetgrid
   end;
@@ -7612,6 +7662,7 @@ begin
  end
  else begin
   result:= false;
+  fpickkind:= pok_none;
  end;
 end;
 
@@ -8217,6 +8268,9 @@ begin
     finvalidatedcells:= nil;
    end;
   end;
+  if gs_rowdatachanged in fstate then begin
+   rowdatachanged(0,frowcount);
+  end; 
   if gs_selectionchanged in fstate then begin
    internalselectionchanged;
   end;

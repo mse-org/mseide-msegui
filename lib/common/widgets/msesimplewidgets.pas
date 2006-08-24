@@ -240,7 +240,7 @@ const
 type
  tgroupbox = class(tscalingwidget)
   protected
-   procedure createframe1; override;
+   procedure internalcreateframe; override;
   public
    constructor create(aowner: tcomponent); override;
    procedure initnewcomponent; override;
@@ -253,7 +253,7 @@ type
    function getframe: tscrollboxframe;
    procedure setframe(const value: tscrollboxframe);
   protected
-   procedure createframe1; override;
+   procedure internalcreateframe; override;
    procedure widgetregionchanged(const sender: twidget); override;
    procedure mouseevent(var info: mouseeventinfoty); override;
   public
@@ -297,7 +297,7 @@ type
   protected
    fdragcontroller: tdragcontroller;
 //   finvisiblebuttons: stepkindsty;
-   procedure createframe1; override;
+   procedure internalcreateframe; override;
    procedure widgetregionchanged(const sender: twidget); override;
    procedure clientmouseevent(var info: mouseeventinfoty); override;
    procedure mouseevent(var info: mouseeventinfoty); override;
@@ -776,10 +776,10 @@ end;
 procedure tgroupbox.initnewcomponent;
 begin
  inherited;
- createframe1;
+ internalcreateframe;
 end;
 
-procedure tgroupbox.createframe1;
+procedure tgroupbox.internalcreateframe;
 begin
  tgroupboxframe.create(iframe(self));
 end;
@@ -789,10 +789,10 @@ end;
 constructor tscrollbox.create(aowner: tcomponent);
 begin
  inherited;
- createframe1;
+ internalcreateframe;
 end;
 
-procedure tscrollbox.createframe1;
+procedure tscrollbox.internalcreateframe;
 begin
  tscrollboxframe.create(iframe(self),self);
 end;
@@ -824,7 +824,7 @@ end;
 constructor tcustomstepbox.create(aowner: tcomponent);
 begin
  inherited;
- createframe1;
+ internalcreateframe;
  if fdragcontroller = nil then begin
   fdragcontroller:= tdragcontroller.create(idragcontroller(self));
  end;
@@ -837,7 +837,7 @@ begin
  inherited;
 end;
 
-procedure tcustomstepbox.createframe1;
+procedure tcustomstepbox.internalcreateframe;
 begin
  tstepboxframe.create(iframe(self),istepbar(self));
 end;

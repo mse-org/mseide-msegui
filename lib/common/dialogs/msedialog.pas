@@ -37,12 +37,12 @@ type
    property button: tframebutton read getbutton write setbutton;
  end;
 
- tdialogstringedit = class(tstringedit,ibutton)
+ tcustomdialogstringed = class(tstringedit,ibutton)
   private
    function getframe: tellipsebuttonframe;
    procedure setframe(const avalue: tellipsebuttonframe);
   protected
-   procedure createframe1; override;
+   procedure internalcreateframe; override;
    procedure dokeydown(var info: keyeventinfoty); override;
    procedure mouseevent(var info: mouseeventinfoty); override;
     //ibutton
@@ -54,11 +54,36 @@ type
    function iskeyexecute(const info: keyeventinfoty): boolean; virtual;
   public
    constructor create(aowner: tcomponent); override;
-  published 
-   //frame is allready published in tedit -> double streamed on fpc
    property frame: tellipsebuttonframe read getframe write setframe;
  end;
 
+ tdialogstringed = class(tcustomdialogstringed)
+  published
+   property frame;
+   property passwordchar;
+   property maxlength;
+   property value;
+   property onsetvalue;
+ end;
+
+ tcustomdialogstringedit = class; 
+ dialogexeceventty = procedure(const sender: tcustomdialogstringedit;
+            var avalue:msestring; var modresult: modalresultty) of object;
+                                       //default mr_ok 
+ tcustomdialogstringedit = class(tcustomdialogstringed)
+  private
+   fonexecute: dialogexeceventty;
+  protected
+   function execute(var avalue: msestring): boolean; override;
+  public
+   property onexecute: dialogexeceventty read fonexecute write fonexecute;
+ end;
+
+ tdialogstringedit = class(tcustomdialogstringedit)
+  published
+   property onexecute;
+ end;
+ 
 implementation
 uses
  msestockobjects,msekeyboard,mseguiglob,mseeditglob;
@@ -92,9 +117,9 @@ begin
  buttons[0].assign(avalue);
 end;
 
-{ tdialogstringedit }
+{ tcustomdialogstringed }
 
-procedure tdialogstringedit.buttonaction(var action: buttonactionty;
+procedure tcustomdialogstringed.buttonaction(var action: buttonactionty;
   const buttonindex: integer);
 begin
  if action = ba_click then begin
@@ -102,28 +127,28 @@ begin
  end;
 end;
 
-constructor tdialogstringedit.create(aowner: tcomponent);
+constructor tcustomdialogstringed.create(aowner: tcomponent);
 begin
  inherited;
- createframe1;
+ internalcreateframe;
 end;
 
-procedure tdialogstringedit.createframe1;
+procedure tcustomdialogstringed.internalcreateframe;
 begin
  tellipsebuttonframe.create(iframe(self),ibutton(self));
 end;
 
-function tdialogstringedit.execute(var avalue: msestring): boolean;
+function tcustomdialogstringed.execute(var avalue: msestring): boolean;
 begin
  result:= false;
 end;
 
-procedure tdialogstringedit.setexecresult(var avalue: msestring);
+procedure tcustomdialogstringed.setexecresult(var avalue: msestring);
 begin
  text:= avalue;
 end;
 
-procedure tdialogstringedit.internalexecute;
+procedure tcustomdialogstringed.internalexecute;
 var
  str1: msestring;
 begin
@@ -134,13 +159,13 @@ begin
  end;
 end;
 
-procedure tdialogstringedit.mouseevent(var info: mouseeventinfoty);
+procedure tcustomdialogstringed.mouseevent(var info: mouseeventinfoty);
 begin
  inherited;
  tcustombuttonframe(fframe).mouseevent(info);
 end;
 
-function tdialogstringedit.iskeyexecute(const info: keyeventinfoty): boolean;
+function tcustomdialogstringed.iskeyexecute(const info: keyeventinfoty): boolean;
 
 begin
  with info do begin
@@ -148,7 +173,7 @@ begin
  end;
 end;
 
-procedure tdialogstringedit.dokeydown(var info: keyeventinfoty);
+procedure tcustomdialogstringed.dokeydown(var info: keyeventinfoty);
 begin
  with info do begin
   if iskeyexecute(info) then begin
@@ -161,14 +186,30 @@ begin
  end;
 end;
 
-function tdialogstringedit.getframe: tellipsebuttonframe;
+function tcustomdialogstringed.getframe: tellipsebuttonframe;
 begin
  result:= tellipsebuttonframe(inherited getframe);
 end;
 
-procedure tdialogstringedit.setframe(const avalue: tellipsebuttonframe);
+procedure tcustomdialogstringed.setframe(const avalue: tellipsebuttonframe);
 begin
  inherited setframe(avalue);
+end;
+
+{ tcustomdialogstringedit }
+
+function tcustomdialogstringedit.execute(var avalue: msestring): boolean;
+var
+ mr1: modalresultty;
+begin
+ if canevent(tmethod(fonexecute)) then begin
+  mr1:= mr_ok;
+  fonexecute(self,avalue,mr1);
+  result:= mr1 = mr_ok;
+ end
+ else begin
+  result:= false;
+ end;
 end;
 
 end.

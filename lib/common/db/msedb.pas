@@ -2195,7 +2195,7 @@ begin
  try
   with tdataset(fowner) do begin;
    if state in dseditmodes then begin
-    post;
+    checkbrowsemode;
    end;
   end;
  except

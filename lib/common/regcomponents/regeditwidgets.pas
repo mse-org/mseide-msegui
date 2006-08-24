@@ -17,7 +17,7 @@ implementation
 uses
  Classes,mseedit,msedataedits,msegraphedits,{msestringlistedit,}mselistbrowser,
  msewidgetgrid,msetextedit,msedesignintf,regeditwidgets_bmp,msepropertyeditors,
- msedropdownlist,mseterminal,msedrawtext,msedatanodes;
+ msedropdownlist,mseterminal,msedrawtext,msedatanodes,msedialog;
 
 type
  tdropdowncolpropertyeditor = class(tarraypropertyeditor)
@@ -32,9 +32,11 @@ type
                         
 procedure Register;
 begin
- registercomponents('Edit',[tedit,tslider,tprogressbar,tbooleanedit,tbooleaneditradio,
-   tintegerbutton,tdataicon,tpointeredit,
-   tstringedit,tdropdownlistedit,thistoryedit,thexstringedit,tmemoedit,
+ registercomponents('Edit',[tedit,tslider,tprogressbar,
+   tbooleanedit,tbooleaneditradio,
+   tdatabutton,tstockglyphdatabutton,tdataicon,tpointeredit,
+   tstringedit,tdropdownlistedit,thistoryedit,tdialogstringedit,
+   thexstringedit,tmemoedit,
    tintegeredit,trealedit,tdatetimeedit,tcalendardatetimeedit,tkeystringedit,
    tenumedit,tenumtypeedit,tselector,
    {tstringlistedit,}

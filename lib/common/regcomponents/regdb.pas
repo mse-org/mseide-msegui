@@ -99,10 +99,12 @@ begin
       tfieldparamlink,tsequencelink]);
  registercomponents('Db',[
       tenumeditdb,tkeystringeditdb,tenumeditlb,tkeystringeditlb,
-      tdbmemoedit,tdbstringedit,tdbdropdownlistedit,tdbbooleantextedit,
+      tdbmemoedit,tdbstringedit,tdbdropdownlistedit,tdbdialogstringedit,
+      tdbbooleantextedit,
       tdbkeystringedit,tdbkeystringeditdb,tdbkeystringeditlb,
       tdbintegeredit,tdbenumedit,tdbenumeditdb,tdbenumeditlb,
-      tdbdataicon,tdbrealedit,tdbdatetimeedit,tdbcalendardatetimeedit,
+      tdbdataicon,tdbdatabutton,tdbrealedit,tdbdatetimeedit,
+      tdbcalendardatetimeedit,
       tdbbooleanedit,tdbbooleaneditradio,
       tdbwidgetgrid,tdbstringgrid,
       

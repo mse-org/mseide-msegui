@@ -74,7 +74,7 @@ type
    procedure dokeydown(var info: keyeventinfoty); override;
    procedure childdeactivated(const sender: tpopupmenuwidget); virtual;
    procedure fontchanged; override;
-   procedure createframe1; override;
+   procedure internalcreateframe; override;
   public
    constructor create(instance: ppopupmenuwidget;
        const amenu: tmenuitem; const transientfor: twindow;
@@ -108,7 +108,7 @@ type
    procedure activatemenu(keymode: boolean; aclicked: boolean); override;
    procedure deactivatemenu; override;
    procedure selectmenu; override;
-   procedure createframe1; override;
+   procedure internalcreateframe; override;
   public
    procedure loaded; override;
    procedure release; override;
@@ -529,7 +529,7 @@ begin
  end;
  initlayoutinfo(self,flayout,amenu,[],cl_black);
  inherited create(aowner,transientfor);
- createframe1;
+ internalcreateframe;
  if menucomp <> nil then begin
   assigntemplate(menucomp.template);
  end
@@ -567,7 +567,7 @@ begin
  inherited;
 end;
 
-procedure tpopupmenuwidget.createframe1;
+procedure tpopupmenuwidget.internalcreateframe;
 begin
  inherited;
  tcustomframe1(fframe).fi.levelo:= 1; //do not set localprops
@@ -578,17 +578,17 @@ begin
  with ftemplates do begin
   if frame <> nil then begin
    if fframe = nil then begin
-    createframe1;
+    internalcreateframe;
    end;
    fframe.assign(frame);
   end
   else begin
    freeandnil(fframe); //restore original values
-   createframe1;
+   internalcreateframe;
   end;
   if face <> nil then begin
    if fface = nil then begin
-    createface1;
+    internalcreateface;
    end;
    fface.assign(face);
   end
@@ -1188,7 +1188,7 @@ begin
  create(aowner,amenu.menu);
 end;
 
-procedure tmainmenuwidget.createframe1;
+procedure tmainmenuwidget.internalcreateframe;
 begin
  inherited;
  tcustomframe1(fframe).fi.levelo:= 0; //do not set localprops

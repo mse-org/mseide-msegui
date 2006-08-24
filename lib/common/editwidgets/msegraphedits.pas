@@ -16,7 +16,7 @@ uses
  msegui,mseguiglob,msescrollbar,Classes,msegraphutils,msegraphics,mseevent,
  msewidgets,mseeditglob,msestockobjects,msestat,mseclasses,msesimplewidgets,
  msegrids,msewidgetgrid,msedatalist,msebitmap,msetypes,msestrings,msearrayprops,
- msedrawtext;
+ msedrawtext,mseshapes;
 
 const
  defaultsliderwidth = 200;
@@ -65,7 +65,7 @@ type
    
    function getoptionsedit: optionseditty; virtual;
    procedure loaded; override;
-   procedure createframe1; override;
+   procedure internalcreateframe; override;
 
    function getgridintf: iwidgetgrid;
    procedure checkgrid;
@@ -87,7 +87,7 @@ type
    function getdatatyp: datatypty; virtual; abstract;
    function getdefaultvalue: pointer; virtual;
    function getrowdatapo(const info: cellinfoty): pointer; virtual;
-   procedure setgridintf(const intf: iwidgetgrid);
+   procedure setgridintf(const intf: iwidgetgrid); virtual;
    function getcellframe: framety; virtual;
    procedure drawcell(const canvas: tcanvas);
    procedure valuetogrid(const row: integer); virtual; abstract;
@@ -287,7 +287,7 @@ type
    procedure dochange; override;
    procedure paintglyph(const canvas: tcanvas; 
                   const avalue; const arect: rectty); override;
-   procedure createframe1; override;
+   procedure internalcreateframe; override;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -311,9 +311,10 @@ type
   private
    foptions: buttonoptionsty;
   protected
+   fcheckcaption: boolean;
    procedure togglevalue; virtual; abstract;
    procedure mouseevent(var info: mouseeventinfoty); override;
-   procedure dokeydown(var info: keyeventinfoty); override;
+   procedure dokeyup(var info: keyeventinfoty); override;
    procedure doshortcut(var info: keyeventinfoty; const sender: twidget); override;
   public
    constructor create(aowner: tcomponent); override;
@@ -432,55 +433,6 @@ type
    property group;
  end;
 
- tintegerbutton = class(tbutton,igridwidget,istatfile) //!!!!todo
-  private
-   foptionsedit: optionseditty;
-   fstatvarname: msestring;
-   fstatfile: tstatfile;
-   function getoptionsedit: optionseditty;
-   procedure setoptionsedit(const avalue: optionseditty);
-   procedure setstatfile(const Value: tstatfile);
-  protected
-   fgridintf: iwidgetgrid;
-   procedure dofontheightdelta(var delta: integer); override;
-   //igridwidget
-   procedure setfirstclick;
-   function createdatalist(const sender: twidgetcol): tdatalist; virtual;
-   function getdatatyp: datatypty;
-   function getinitvalue: pointer;
-   function getdefaultvalue: pointer;
-   function getrowdatapo(const info: cellinfoty): pointer; virtual;
-   procedure setgridintf(const intf: iwidgetgrid);
-   function getcellframe: framety; virtual;
-   procedure drawcell(const canvas: tcanvas);
-//   procedure updatecellzone(const pos: pointty; var result: cellzonety);
-   procedure valuetogrid(const row: integer); virtual;
-   procedure gridtovalue(const row: integer); virtual;
-   procedure docellevent(const ownedcol: boolean; var info: celleventinfoty); virtual;
-   procedure sortfunc(const l,r; var result: integer); virtual;
-   procedure gridvaluechanged(const index: integer); virtual;
-   procedure updatecoloptions(var aoptions: coloptionsty);
-   procedure statdataread; virtual;
-   procedure griddatasourcechanged;
- //   function gridvalueempty(const row: integer): boolean;
-   //istatfile
-   procedure dostatread(const reader: tstatreader);
-   procedure dostatwrite(const writer: tstatwriter);
-   procedure statreading;
-   procedure statread;
-   function getstatvarname: msestring;
-  public
-   constructor create(aowner: tcomponent); override;
-   function col: twidgetcol;
-   function checkvalue: boolean;
-   procedure initgridwidget; virtual;
-  published
-   property optionsedit: optionseditty read getoptionsedit write foptionsedit
-                              default defaultoptionsedit;
-   property statfile: tstatfile read fstatfile write setstatfile;
-   property statvarname: msestring read getstatvarname write fstatvarname;
- end;
-
  tcustomintegergraphdataedit = class(ttogglegraphdataedit)
   private
    fvalue: integer;
@@ -520,6 +472,108 @@ type
    property max: integer read fmax write fmax default 0; //checked by togglevalue
  end;
 
+ tcustomdatabutton = class;
+ 
+ tvaluefacearrayprop = class(tpersistentarrayprop)
+  private
+   fowner: tcustomdatabutton;
+  protected
+   function getitems(const index: integer): tface;
+   procedure createitem(const index: integer; out item: tpersistent); override;
+  public
+   constructor create(const aowner: tcustomdatabutton);
+   property items[const index: integer]: tface read getitems; default;
+ end;
+ 
+ tcustomdatabutton = class(tcustomintegergraphdataedit)
+  private
+   fonexecute: notifyeventty;
+   fvaluefaces: tvaluefacearrayprop;
+   fcaption: captionty;
+   procedure setcolorglyph(const avalue: colorty);
+   procedure setvaluefaces(const avalue: tvaluefacearrayprop);
+   procedure setcaption(const avalue: captionty);
+   procedure setcaptionpos(const avalue: captionposty);
+   procedure setimagelist(const avalue: timagelist);
+   procedure setimagenr(const avalue: integer);
+  protected
+   finfo: shapeinfoty;
+   procedure setnullvalue;
+   procedure doexecute; virtual;
+   procedure togglevalue; override;
+   procedure statechanged; override;
+   procedure mouseevent(var info: mouseeventinfoty); override;
+   procedure dokeydown(var info: keyeventinfoty); override;
+   procedure dokeyup(var info: keyeventinfoty); override;
+   procedure clientrectchanged; override;
+   procedure paintglyph(const canvas: tcanvas; const avalue;
+                    const arect: rectty); override;
+   procedure internalcreateframe; override;
+   procedure setgridintf(const intf: iwidgetgrid); override;
+   function checkfocusshortcut(var info: keyeventinfoty): boolean; override;
+  public
+   constructor create(aowner: tcomponent); override;
+   destructor destroy; override;
+   procedure initgridwidget; override;
+   procedure initnewcomponent; override;
+   property optionswidget default defaultoptionswidget - [ow_mousefocus];
+   property valuefaces: tvaluefacearrayprop read fvaluefaces write setvaluefaces;
+   property font: twidgetfont read getfont write setfont stored isfontstored;
+   property caption: captionty read fcaption write setcaption;
+   property captionpos: captionposty read finfo.captionpos write setcaptionpos
+                              default cp_center;
+   property imagelist: timagelist read finfo.imagelist write setimagelist;
+   property imagenr: integer read finfo.imagenr 
+                                         write setimagenr default -1;
+   property options;
+   property onexecute: notifyeventty read fonexecute write fonexecute;
+   property onsetvalue;
+   property value default -1;
+   property valuedefault default -1;
+   property min default -1; 
+   property max default 0;
+ end;
+
+ tdatabutton = class(tcustomdatabutton)
+  published
+   property optionswidget;
+   property valuefaces;
+   property font;
+   property caption;
+   property captionpos;
+   property imagelist;
+   property imagenr;
+   property options;
+   property onexecute;
+   property onsetvalue;
+   property value;
+   property valuedefault;
+   property min; 
+   property max;
+ end;
+
+ tstockglyphdatabutton = class(tcustomdatabutton)
+  private
+   fglyph: stockglyphty;
+   procedure setglyph(const avalue: stockglyphty);
+  public
+   constructor create(aowner: tcomponent); override;
+  published
+   property glyph: stockglyphty read fglyph write setglyph default stg_none;
+   property optionswidget;
+   property valuefaces;
+   property font;
+   property caption;
+   property captionpos;
+   property options;
+   property onexecute;
+   property onsetvalue;
+   property value;
+   property valuedefault;
+   property min; 
+   property max;
+ end; 
+ 
  tcustomdataicon = class(tcustomintegergraphdataedit)
  //if value = -1 then blank else
  // if value < 0 then imagenums[0..30] are painted if bit[0..30] is 1
@@ -562,7 +616,7 @@ type
  
 implementation
 uses
- mseshapes,SysUtils,msekeyboard,msebits,msereal,msedispwidgets,mseformatstr;
+ SysUtils,msekeyboard,msebits,msereal,msedispwidgets,mseformatstr,mserichstring;
 
 type
  tcustomframe1 = class(tcustomframe);
@@ -805,7 +859,7 @@ begin
  fcolorglyph:= cl_glyph;
 end;
 
-procedure tgraphdataedit.createframe1;
+procedure tgraphdataedit.internalcreateframe;
 begin
  tgrapheditframe.create(iframe(self));
 end;
@@ -857,16 +911,6 @@ end;
 function tgraphdataedit.getcellframe: framety;
 begin
  result:= getinnerstframe;
-end;
-
-procedure tgraphdataedit.valuechanged;
-begin
- if not (csloading in componentstate) then begin
-  if (fgridintf <> nil) and not (csdesigning in componentstate) then begin
-   valuetogrid(fgridintf.getrow);
-  end;
-  dochange;
- end;
 end;
 
 procedure tgraphdataedit.drawcell(const canvas: tcanvas);
@@ -931,7 +975,7 @@ end;
 procedure tgraphdataedit.initnewcomponent;
 begin
  inherited;
- createframe1;
+ internalcreateframe;
 end;
 
 function tgraphdataedit.getstatvarname: msestring;
@@ -1141,6 +1185,16 @@ begin
  }
 end;
 
+procedure tgraphdataedit.valuechanged;
+begin
+ if not (csloading in componentstate) then begin
+  if (fgridintf <> nil) and not (csdesigning in componentstate) then begin
+   valuetogrid(fgridintf.getrow);
+  end;
+  dochange;
+ end;
+end;
+
 procedure tgraphdataedit.formatchanged;
 begin
  if not (csloading in componentstate) then begin
@@ -1191,7 +1245,7 @@ begin
  inherited;
 end;
 
-procedure ttogglegraphdataedit.dokeydown(var info: keyeventinfoty);
+procedure ttogglegraphdataedit.dokeyup(var info: keyeventinfoty);
 begin
  with info do begin
   if not (oe_readonly in getoptionsedit) and (key = key_space) and
@@ -1209,6 +1263,9 @@ begin
                and checkfocusshortcut(info) then begin
   include(info.eventstate,es_processed);
   togglevalue;
+  if (bo_focusonshortcut in foptions) and canfocus then begin
+   setfocus;
+  end;
  end;
  if not (es_processed in info .eventstate) then begin
   inherited;
@@ -1218,7 +1275,7 @@ end;
 procedure ttogglegraphdataedit.mouseevent(var info: mouseeventinfoty);
 begin
  if not (oe_readonly in getoptionsedit) and not (csdesigning in componentstate) and
-         iswidgetclick(info,true) and (bo_executeonclick in foptions) then begin
+         iswidgetclick(info,fcheckcaption) and (bo_executeonclick in foptions) then begin
   include(info.eventstate,es_processed);
   togglevalue;
  end;
@@ -1248,6 +1305,7 @@ end;
 
 constructor tcustombooleanedit.create(aowner: tcomponent);
 begin
+ fcheckcaption:= true;
  inherited;
  size:= makesize(defaultboxsize,defaultboxsize);
 end;
@@ -1667,194 +1725,6 @@ begin
  end;
 end;
 
-{ tintegerbutton }
-
-constructor tintegerbutton.create(aowner: tcomponent);
-begin
- foptionsedit:= defaultoptionsedit;
- inherited;
-end;
-
-procedure tintegerbutton.drawcell(const canvas: tcanvas);
-var
- statebefore: shapestatesty;
-begin
- statebefore:= finfo.state;
- finfo.state:= finfo.state - [ss_focused,ss_clicked,ss_mouse];
- drawbutton(canvas,finfo);
- finfo.state:= statebefore;
-end;
-{
-procedure tintegerbutton.updatecellzone(const pos: pointty; var result: cellzonety);
-begin
- //dummy
-end;
-}
-function tintegerbutton.createdatalist(const sender: twidgetcol): tdatalist;
-begin
- result:= tgridintegerdatalist.create(sender);
-end;
-
-procedure tintegerbutton.setfirstclick;
-begin
- //dummy
-end;
-
-function tintegerbutton.getdefaultvalue: pointer;
-begin
- result:= nil;
-end;
-
-function tintegerbutton.getrowdatapo(const info: cellinfoty): pointer;
-begin
- result:= nil;
-end;
-
-function tintegerbutton.getinitvalue: pointer;
-begin
- result:= nil;
-end;
-
-function tintegerbutton.getoptionsedit: optionseditty;
-begin
- result := foptionsedit;
-end;
-
-procedure tintegerbutton.setoptionsedit(const avalue: optionseditty);
-begin
- if foptionsedit <> avalue then begin
-  foptionsedit:= avalue;
-  if fgridintf <> nil then begin
-   fgridintf.updateeditoptions(foptionsedit);
-  end;
- end;
-end;
-
-procedure tintegerbutton.gridtovalue(const row: integer);
-begin
-
-end;
-
-procedure tintegerbutton.initgridwidget;
-begin
- if fframe <> nil then begin
-  with fframe do begin
-   leveli:= 0;
-   levelo:= 0;
-  end;
- end;
- color:= cl_default;
- optionswidget:= optionswidget - [ow_autoscale];
-end;
-
-procedure tintegerbutton.setgridintf(const intf: iwidgetgrid);
-begin
- fgridintf:= intf;
-end;
-
-function tintegerbutton.getcellframe: framety;
-begin
- result:= getinnerstframe;
-end;
-
-function tintegerbutton.col: twidgetcol;
-begin
- if fgridintf = nil then begin
-  result:= nil;
- end
- else begin
-  result:= fgridintf.getcol;
- end;
-end;
-
-procedure tintegerbutton.valuetogrid(const row: integer);
-begin
-
-end;
-
-function tintegerbutton.getstatvarname: msestring;
-begin
- result:= fstatvarname;
-end;
-
-procedure tintegerbutton.setstatfile(const Value: tstatfile);
-begin
- setstatfilevar(istatfile(self),value,fstatfile);
-end;
-
-procedure tintegerbutton.dostatread(const reader: tstatreader);
-begin
-
-end;
-
-procedure tintegerbutton.statreading;
-begin
- //dummy
-end;
-
-procedure tintegerbutton.statread;
-begin
- if oe_checkvaluepaststatread in foptionsedit then begin
-  checkvalue;
- end;
-end;
-
-procedure tintegerbutton.dostatwrite(const writer: tstatwriter);
-begin
-
-end;
-
-function tintegerbutton.checkvalue: boolean;
-begin
- result:= false; //todo!!!!!!!
-end;
-
-procedure tintegerbutton.sortfunc(const l, r; var result: integer);
-begin
- tdatalist1(twidgetcol1(fgridintf.getcol).fdata).compare(l,r,result);
-end;
-{
-function tintegerbutton.gridvalueempty(const row: integer): boolean;
-begin
- result:= fgridintf.empty(row);
-end;
-}
-procedure tintegerbutton.docellevent(const ownedcol: boolean; var info: celleventinfoty);
-begin
- //dummy
-end;
-
-procedure tintegerbutton.gridvaluechanged(const index: integer);
-begin
- //dummy
-end;
-
-procedure tintegerbutton.updatecoloptions(var aoptions: coloptionsty);
-begin
- coloptionstoeditoptions(aoptions,foptionsedit);
-end;
-
-procedure tintegerbutton.statdataread;
-begin
- //dummy
-end;
-
-procedure tintegerbutton.griddatasourcechanged;
-begin
- //dummy
-end;
-
-procedure tintegerbutton.dofontheightdelta(var delta: integer);
-begin
- inherited;
- gridwidgetfontheightdelta(self,fgridintf,delta);
-end;
-
-function tintegerbutton.getdatatyp: datatypty;
-begin
- result:= dl_integer;
-end;
-
 { tcustomintegergraphdataedit }
 
 procedure tcustomintegergraphdataedit.internalcheckvalue(var avalue;
@@ -1964,6 +1834,256 @@ end;
 procedure tcustomintegergraphdataedit.setgridvalues(const Value: integerarty);
 begin
  tintegerdatalist(fgridintf.getcol.datalist).asarray:= value;
+end;
+
+{ tvaluefacearrayprop }
+
+constructor tvaluefacearrayprop.create(const aowner: tcustomdatabutton);
+begin
+ fowner:= aowner;
+ inherited create(nil);
+end;
+
+procedure tvaluefacearrayprop.createitem(const index: integer;
+               out item: tpersistent);
+begin
+ item:= tface.create(iface(fowner));
+end;
+
+function tvaluefacearrayprop.getitems(const index: integer): tface;
+begin
+ result:= tface(inherited getitems(index));
+end;
+
+{ tcustomdatabutton }
+
+constructor tcustomdatabutton.create(aowner: tcomponent);
+begin
+ foptions:= defaultbuttonoptions;
+ inherited;
+ finfo.imagenr:= -1;
+ fvalue:= -1;
+ fvaluedefault:= -1;
+ fmin:= -1;
+ fmax:= 0;
+ fvaluefaces:= tvaluefacearrayprop.create(self);
+ optionswidget:= defaultoptionswidget - [ow_mousefocus];
+ finfo.dim:= innerclientrect;
+ finfo.color:= cl_transparent;
+ finfo.colorglyph:= cl_black;
+ finfo.state:= finfo.state + [ss_showfocusrect,ss_showdefaultrect];
+ include(fwidgetstate,ws_nodesignframe);
+ size:= makesize(defaultbuttonwidth,defaultbuttonheight);
+end;
+
+destructor tcustomdatabutton.destroy;
+begin
+ fvaluefaces.free;
+ inherited;
+end;
+
+procedure tcustomdatabutton.initnewcomponent;
+begin
+ //dummy
+end;
+
+procedure tcustomdatabutton.clientrectchanged;
+begin
+ inherited;
+ finfo.dim:= innerclientrect;
+end;
+
+procedure tcustomdatabutton.doexecute;
+begin
+ if canevent(tmethod(fonexecute)) then begin
+  fonexecute(self);
+ end;
+end;
+
+procedure tcustomdatabutton.mouseevent(var info: mouseeventinfoty);
+begin
+ inherited;
+ if not (csdesigning in componentstate) {and 
+        not (es_processed in info.eventstate)} then begin
+  subpoint1(info.pos,paintpos);
+  try
+   updatemouseshapestate(finfo,info,self,nil,bo_executeonclick in foptions);
+  finally
+   addpoint1(info.pos,paintpos);
+  end;
+ end;
+end;
+
+procedure tcustomdatabutton.dokeydown(var info: keyeventinfoty);
+begin
+ inherited;
+ if (info.shiftstate = []) and (bo_executeonkey in foptions) then begin
+  if (info.key = key_space) then begin
+   include(finfo.state,ss_clicked);
+   invalidaterect(finfo.dim);
+  end
+  else begin
+   if info.key = key_return then begin
+    include(info.eventstate,es_processed);
+    togglevalue;
+   end;
+  end;
+ end;
+end;
+
+procedure tcustomdatabutton.dokeyup(var info: keyeventinfoty);
+begin
+ inherited;
+ if (info.key = key_space) and (ss_clicked in finfo.state) then begin
+  exclude(finfo.state,ss_clicked);
+  invalidaterect(finfo.dim);
+ end;
+end;
+
+procedure tcustomdatabutton.statechanged;
+begin
+ inherited;
+ updatewidgetshapestate(finfo,self);
+end;
+
+procedure tcustomdatabutton.setcolorglyph(const avalue: colorty);
+begin
+ if finfo.colorglyph <> avalue then begin
+  finfo.colorglyph := avalue;
+  formatchanged;
+ end;
+end;
+
+procedure tcustomdatabutton.paintglyph(const canvas: tcanvas; const avalue;
+               const arect: rectty);
+               
+ function actualface(const aindex: integer): tface;
+ begin
+  if (aindex >= 0) and (aindex < fvaluefaces.count) then begin
+   result:= fvaluefaces[aindex];
+  end
+  else begin
+   result:= nil;
+  end;
+ end;
+ 
+var
+ statebefore: shapestatesty;
+ dimbefore: rectty;
+begin
+ finfo.colorglyph:= fcolorglyph;
+ if (@avalue <> nil) then begin
+  finfo.face:= actualface(integer(avalue));
+  statebefore:= finfo.state;
+  dimbefore:= finfo.dim;
+  finfo.dim:= arect;
+  finfo.state:= finfo.state - [ss_focused,ss_clicked,ss_mouse];
+  if pcellinfoty(canvas.drawinfopo)^.ismousecell then begin
+   include(finfo.state,ss_mouse);
+  end;
+  drawbutton(canvas,finfo);
+  finfo.state:= statebefore;
+  finfo.dim:= dimbefore;
+ end
+ else begin
+  finfo.face:= actualface(fvalue);
+  drawbutton(canvas,finfo);
+ end;
+end;
+
+procedure tcustomdatabutton.internalcreateframe;
+begin
+ tcaptionframe.create(iframe(self));
+end;
+
+procedure tcustomdatabutton.initgridwidget;
+begin
+ inherited;
+ if fgridintf <> nil then begin
+  with fgridintf.getcol do begin
+   if self.color = cl_default then begin
+    color:= cl_parent;
+   end
+   else begin
+    color:= self.color;
+   end;
+   options:= options - [co_drawfocus];
+  end;
+ end;
+end;
+
+procedure tcustomdatabutton.setvaluefaces(const avalue: tvaluefacearrayprop);
+begin
+ fvaluefaces.assign(avalue);
+end;
+
+procedure tcustomdatabutton.setcaption(const avalue: captionty);
+begin
+ fcaption:= avalue;
+ captiontorichstring(fcaption,finfo.caption);
+ formatchanged;
+end;
+
+procedure tcustomdatabutton.setcaptionpos(const avalue: captionposty);
+begin
+ if avalue <> finfo.captionpos then begin
+  finfo.captionpos:= avalue;
+  formatchanged;
+ end;
+end;
+
+procedure tcustomdatabutton.setimagelist(const avalue: timagelist);
+begin
+ setlinkedvar(avalue,tmsecomponent(finfo.imagelist));
+ formatchanged;
+end;
+
+procedure tcustomdatabutton.setimagenr(const avalue: integer);
+begin
+ if avalue <> finfo.imagenr then begin
+  finfo.imagenr:= avalue;
+  formatchanged;
+ end;
+end;
+
+procedure tcustomdatabutton.setnullvalue;
+begin
+ value:= -1;
+end;
+
+procedure tcustomdatabutton.setgridintf(const intf: iwidgetgrid);
+begin
+ inherited;
+ exclude(finfo.state,ss_showdefaultrect);
+end;
+
+function tcustomdatabutton.checkfocusshortcut(var info: keyeventinfoty): boolean;
+begin
+ result:= inherited checkfocusshortcut(info) or 
+         mserichstring.checkshortcut(info,finfo.caption,true);
+end;
+
+procedure tcustomdatabutton.togglevalue;
+begin
+ inherited;
+ if window.candefocus then begin
+  doexecute;
+ end;
+end;
+
+{ tstockglyphdatabutton }
+
+constructor tstockglyphdatabutton.create(aowner: tcomponent);
+begin
+ inherited;
+ imagelist:= stockobjects.glyphs;
+ glyph:= stg_none;
+end;
+
+procedure tstockglyphdatabutton.setglyph(const avalue: stockglyphty);
+begin
+ fglyph:= avalue;
+ imagenr:= ord(avalue);
 end;
 
 { tcustomdataicon }
@@ -2267,7 +2387,7 @@ begin
  end;
 end;
 
-procedure tprogressbar.createframe1;
+procedure tprogressbar.internalcreateframe;
 begin
  tdispframe.create(self);
 end;

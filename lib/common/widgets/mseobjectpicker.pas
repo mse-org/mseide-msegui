@@ -87,6 +87,7 @@ begin
    if info.button = mb_left then begin
     fobjects:= nil;
     exclude(fstate,ops_moving);
+    fintf.getcursorshape(info.pos,shape); //refresh positioninfo
     fintf.getpickobjects(makerect(info.pos,nullsize),fobjects);
     fpickpos:= info.pos;
     fpickoffset:= nullpoint;

@@ -73,13 +73,16 @@ type
    flookupbuffer: tcustomlookupbuffer;
    flookupkeyfieldno: integer;
    flookupvaluefieldno: integer;   
+   fkeyvalue: integer;
    procedure setlookupbuffer(const avalue: tcustomlookupbuffer);
      //idbeditinfo
    procedure getfieldtypes(out propertynames: stringarty;
                           out fieldtypes: fieldtypesarty); override;
      //idbdispfieldlink
    procedure fieldtovalue; override;
+   procedure setkeyvalue(const avalue: integer);
   public
+   property keyvalue: integer read fkeyvalue write setkeyvalue;
   published
    property lookupbuffer: tcustomlookupbuffer read flookupbuffer write setlookupbuffer;
    property lookupkeyfieldno: integer read flookupkeyfieldno write flookupkeyfieldno default 0;
@@ -116,10 +119,13 @@ type
    flookupbuffer: tcustomlookupbuffer;
    flookupkeyfieldno: integer;
    flookupvaluefieldno: integer;   
+   fkeyvalue: integer;
    procedure setlookupbuffer(const avalue: tcustomlookupbuffer);
      //idbdispfieldlink
    procedure fieldtovalue; override;
+   procedure setkeyvalue(const avalue: integer);
   public
+   property keyvalue: integer read fkeyvalue write setkeyvalue;
   published
    property lookupbuffer: tcustomlookupbuffer read flookupbuffer write setlookupbuffer;
    property lookupkeyfieldno: integer read flookupkeyfieldno write flookupkeyfieldno default 0;
@@ -178,13 +184,16 @@ type
    flookupbuffer: tcustomlookupbuffer;
    flookupkeyfieldno: integer;
    flookupvaluefieldno: integer;   
+   fkeyvalue: integer;
    procedure setlookupbuffer(const avalue: tcustomlookupbuffer);
      //idbeditinfo
    procedure getfieldtypes(out propertynames: stringarty;
                           out fieldtypes: fieldtypesarty); override;
      //idbdispfieldlink
    procedure fieldtovalue; override;
+   procedure setkeyvalue(const avalue: integer);
   public
+   property keyvalue: integer read fkeyvalue write setkeyvalue;
   published
    property lookupbuffer: tcustomlookupbuffer read flookupbuffer write setlookupbuffer;
    property lookupkeyfieldno: integer read flookupkeyfieldno write flookupkeyfieldno default 0;
@@ -375,11 +384,22 @@ begin
 end;
 
 procedure tdbstringdisplb.fieldtovalue;
+begin
+ keyvalue:= datalink.field.asinteger;
+end;
+
+procedure tdbstringdisplb.setlookupbuffer(const avalue: tcustomlookupbuffer);
+begin
+ setlinkedvar(avalue,tmsecomponent(flookupbuffer));
+end;
+
+procedure tdbstringdisplb.setkeyvalue(const avalue: integer);
 var
  int1: integer;
 begin
+ fkeyvalue:= avalue;
  if flookupbuffer <> nil then begin
-  if flookupbuffer.findphys(flookupkeyfieldno,datalink.field.asinteger,int1) then begin
+  if flookupbuffer.findphys(flookupkeyfieldno,fkeyvalue,int1) then begin
    value:= flookupbuffer.textvaluephys(flookupvaluefieldno,int1);
   end
   else begin
@@ -389,11 +409,6 @@ begin
  else begin
   setnullvalue;
  end;
-end;
-
-procedure tdbstringdisplb.setlookupbuffer(const avalue: tcustomlookupbuffer);
-begin
- setlinkedvar(avalue,tmsecomponent(flookupbuffer));
 end;
 
 { tdbintegerdisp }
@@ -463,11 +478,22 @@ end;
 { tdbintegerdisplb }
 
 procedure tdbintegerdisplb.fieldtovalue;
+begin
+ keyvalue:= datalink.field.asinteger;
+end;
+
+procedure tdbintegerdisplb.setlookupbuffer(const avalue: tcustomlookupbuffer);
+begin
+ setlinkedvar(avalue,tmsecomponent(flookupbuffer));
+end;
+
+procedure tdbintegerdisplb.setkeyvalue(const avalue: integer);
 var
  int1: integer;
 begin
+ fkeyvalue:= avalue;
  if flookupbuffer <> nil then begin
-  if flookupbuffer.findphys(flookupkeyfieldno,datalink.field.asinteger,int1) then begin
+  if flookupbuffer.findphys(flookupkeyfieldno,fkeyvalue,int1) then begin
    fisnotnull:= true;
    value:= flookupbuffer.integervaluephys(flookupvaluefieldno,int1);
   end
@@ -478,11 +504,6 @@ begin
  else begin
   setnullvalue;
  end;
-end;
-
-procedure tdbintegerdisplb.setlookupbuffer(const avalue: tcustomlookupbuffer);
-begin
- setlinkedvar(avalue,tmsecomponent(flookupbuffer));
 end;
 
 { tdbbooleandisp }
@@ -612,11 +633,22 @@ begin
 end;
 
 procedure tdbrealdisplb.fieldtovalue;
+begin
+ keyvalue:= datalink.field.asinteger;
+end;
+
+procedure tdbrealdisplb.setlookupbuffer(const avalue: tcustomlookupbuffer);
+begin
+ setlinkedvar(avalue,tmsecomponent(flookupbuffer));
+end;
+
+procedure tdbrealdisplb.setkeyvalue(const avalue: integer);
 var
  int1: integer;
 begin
+ fkeyvalue:= avalue;
  if flookupbuffer <> nil then begin
-  if flookupbuffer.findphys(flookupkeyfieldno,datalink.field.asinteger,int1) then begin
+  if flookupbuffer.findphys(flookupkeyfieldno,fkeyvalue,int1) then begin
    value:= flookupbuffer.floatvaluephys(flookupvaluefieldno,int1);
   end
   else begin
@@ -626,11 +658,6 @@ begin
  else begin
   setnullvalue;
  end;
-end;
-
-procedure tdbrealdisplb.setlookupbuffer(const avalue: tcustomlookupbuffer);
-begin
- setlinkedvar(avalue,tmsecomponent(flookupbuffer));
 end;
 
 { tdbdatetimedisp }

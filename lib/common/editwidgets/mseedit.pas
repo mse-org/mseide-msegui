@@ -243,7 +243,7 @@ type
    function geteditor: tinplaceedit;
    function geteditfont: tfont; virtual;
    procedure setupeditor; virtual;
-   procedure createframe1; override;
+   procedure internalcreateframe; override;
    procedure clientrectchanged; override;
    procedure fontchanged; override;
    procedure enabledchanged; override;
@@ -910,7 +910,7 @@ begin
  feditor.passwordchar:= value;
 end;
 
-procedure tcustomedit.createframe1;
+procedure tcustomedit.internalcreateframe;
 begin
  teditframe.create(self);
 end;
@@ -990,7 +990,7 @@ end;
 
 procedure tcustomedit.initnewcomponent;
 begin
- createframe1;
+ internalcreateframe;
  inherited;
 end;
 

@@ -847,9 +847,9 @@ type
    procedure setbottom(const avalue: integer);
    function ownswindow1: boolean;    //does not check winid
 
-   procedure createframe1; virtual;
-   procedure createface1; virtual;
-   procedure createfont1;
+   procedure internalcreateframe; virtual;
+   procedure internalcreateface; virtual;
+   procedure internalcreatefont;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -960,12 +960,11 @@ type
    procedure insertwidget(const awidget: twidget; const apos: pointty); overload; virtual;
                  //widget can be child
 
-   function iswidgetclick(const info: mouseeventinfoty; caption: boolean = false): boolean;
+   function iswidgetclick(const info: mouseeventinfoty; const caption: boolean = false): boolean;
    //true if eventtype = et_butonrelease, button is mb_left, clicked and pos in clientrect
    //or in frame.caption if caption = true, origin = pos
    function isclick(const info: mouseeventinfoty): boolean;
    //true if eventtype = et_butonrelease, button is mb_left, clicked and pos in clientrect
-   //origin = paintrect.pos
    function isdblclick(const info: mouseeventinfoty): boolean;
    //true if eventtype = et_butonpress, button is mb_left, pos in clientrect
    // and timedlay to last buttonpress is short
@@ -3624,21 +3623,21 @@ end;
 procedure twidget.createframe;
 begin
  if fframe = nil then begin
-  createframe1;
+  internalcreateframe;
  end;
 end;
 
 procedure twidget.createface;
 begin
  if fface = nil then begin
-  createface1;
+  internalcreateface;
  end;
 end;
 
 procedure twidget.createfont;
 begin
  if ffont = nil then begin
-  createfont1;
+  internalcreatefont;
  end;
 end;
 
@@ -5223,7 +5222,7 @@ begin
  end;
 end;
 
-procedure twidget.createframe1;
+procedure twidget.internalcreateframe;
 begin
  tframe.create(self);
 end;
@@ -5299,7 +5298,7 @@ begin
  end;
 end;
 
-procedure twidget.createface1;
+procedure twidget.internalcreateface;
 begin
  tface.create(self);
 end;
@@ -6478,6 +6477,19 @@ begin
  end;
 end;
 
+function twidget.iswidgetclick(const info: mouseeventinfoty;
+                     const caption: boolean = false): boolean;
+   //true if eventtype = et_butonrelease, button is mb_left, clicked and pos in clientrect
+   //or in frame.caption if caption = true
+begin
+ with info do begin
+  result:= (button = mb_left) and (ws_clicked in fwidgetstate) and
+           (eventkind = ek_buttonrelease) and
+      (pointinrect(pos,paintrect) or
+           caption and (fframe <> nil) and fframe.pointincaption(info.pos));
+ end;
+end;
+
 function twidget.isclick(const info: mouseeventinfoty): boolean;
    //true if eventtype = et_butonrelease, button is mb_left, clicked and pos in clientrect
 begin
@@ -6514,19 +6526,6 @@ begin
  with info do begin
   result:= (eventkind = ek_buttonpress) and
               (button = mb_left) and pointinrect(pos,clientrect);
- end;
-end;
-
-function twidget.iswidgetclick(const info: mouseeventinfoty;
-                     caption: boolean = false): boolean;
-   //true if eventtype = et_butonrelease, button is mb_left, clicked and pos in clientrect
-   //or in frame.caption if caption = true
-begin
- with info do begin
-  result:= (button = mb_left) and (ws_clicked in fwidgetstate) and
-           (eventkind = ek_buttonrelease) and
-      (pointinrect(pos,paintrect) or
-           caption and (fframe <> nil) and fframe.pointincaption(info.pos));
  end;
 end;
 
@@ -7501,7 +7500,7 @@ begin       //!!!!todo
  end;
 end;
 
-procedure twidget.createfont1;
+procedure twidget.internalcreatefont;
 begin
  if ffont = nil then begin
   ffont:= twidgetfont.create;
@@ -7527,7 +7526,7 @@ end;
 
 function twidget.getfont: twidgetfont;
 begin
- getoptionalobject(ffont,{$ifdef FPC}@{$endif}createfont1);
+ getoptionalobject(ffont,{$ifdef FPC}@{$endif}internalcreatefont);
  if ffont <> nil then begin
   result:= ffont;
  end
@@ -7559,14 +7558,14 @@ end;
 procedure twidget.setfont(const avalue: twidgetfont);
 begin
  if avalue <> ffont then begin
-  setoptionalobject(avalue,ffont,{$ifdef FPC}@{$endif}createfont1);
+  setoptionalobject(avalue,ffont,{$ifdef FPC}@{$endif}internalcreatefont);
   fontchanged;
  end;
 end;
 
 function twidget.getframe: tcustomframe;
 begin
- getoptionalobject(fframe,{$ifdef FPC}@{$endif}createframe1);
+ getoptionalobject(fframe,{$ifdef FPC}@{$endif}internalcreateframe);
  result:= fframe;
 end;
 
@@ -7578,13 +7577,13 @@ begin
   end;
  end
  else begin
-  setoptionalobject(avalue,fframe,{$ifdef FPC}@{$endif}createframe1);
+  setoptionalobject(avalue,fframe,{$ifdef FPC}@{$endif}internalcreateframe);
  end;
 end;
 
 function twidget.getface: tcustomface;
 begin
- getoptionalobject(fface,{$ifdef FPC}@{$endif}createface1);
+ getoptionalobject(fface,{$ifdef FPC}@{$endif}internalcreateface);
  result:= fface;
 end;
 
@@ -7596,7 +7595,7 @@ begin
   end;
  end
  else begin
-  setoptionalobject(avalue,fface,{$ifdef FPC}@{$endif}createface1);
+  setoptionalobject(avalue,fface,{$ifdef FPC}@{$endif}internalcreateface);
  end;
  invalidate;
 end;

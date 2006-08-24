@@ -361,7 +361,7 @@ type
    procedure clientmouseevent(var info: mouseeventinfoty); override;
    procedure showhint(var info: hintinfoty); override;
    procedure dopopup(var amenu: tpopupmenu; var mouseinfo: mouseeventinfoty); virtual;
-   procedure createframe1; override;
+   procedure internalcreateframe; override;
    procedure enabledchanged; override;
    property frame: tcaptionframe read getframe write setframe;
    property face: tface read getface write setface;
@@ -509,7 +509,7 @@ type
    function getframe: tscrollframe;
    procedure setframe(const Value: tscrollframe);
   protected
-   procedure createframe1; override;
+   procedure internalcreateframe; override;
    procedure mouseevent(var info: mouseeventinfoty); override;
    procedure scrollevent(sender: tcustomscrollbar; event: scrolleventty); virtual;
   public
@@ -572,11 +572,11 @@ type
    procedure sizechanged; override;
    procedure minscrollsizechanged;
    procedure dofontheightdelta(var delta: integer); override;
-   procedure createframe1; override;
+   procedure internalcreateframe; override;
    procedure doscroll(const dist: pointty); override;
    procedure mouseevent(var info: mouseeventinfoty); override;
    procedure writestate(writer: twriter); override;
-   procedure createface1; override;
+   procedure internalcreateface; override;
    function calcminscrollsize: sizety; override;
    procedure setclientsize(const asize: sizety); override;
    procedure loaded; override;
@@ -1058,7 +1058,7 @@ begin
  finfo.color:= cl_transparent;
  finfo.colorglyph:= cl_black;
  finfo.doexecute:= {$ifdef FPC}@{$endif}doshapeexecute;
- include(finfo.state,ss_showfocusrect);
+ finfo.state:= finfo.state+[ss_showfocusrect,ss_showdefaultrect];
 end;
 
 procedure tactionsimplebutton.clientrectchanged;
@@ -2657,7 +2657,7 @@ begin
  end;
 end;
 
-procedure tactionwidget.createframe1;
+procedure tactionwidget.internalcreateframe;
 begin
  tcaptionframe.create(iframe(self));
 end;
@@ -2945,11 +2945,11 @@ end;
 constructor tscrollingwidget.create(aowner: tcomponent);
 begin
  inherited;
- createframe1;
+ internalcreateframe;
  setstaticframe(true);
 end;
 
-procedure tscrollingwidget.createframe1;
+procedure tscrollingwidget.internalcreateframe;
 begin
  tscrollboxframe.create(iframe(self),self);
 end;
@@ -2997,7 +2997,7 @@ begin
  inherited;
 end;
 
-procedure tscrollingwidget.createface1;
+procedure tscrollingwidget.internalcreateface;
 begin
  tscrollface.create(twidget(self));
 end;
@@ -3085,10 +3085,10 @@ end;
 constructor tscrollbarwidget.create(aowner: tcomponent);
 begin
  inherited;
- createframe1;
+ internalcreateframe;
 end;
 
-procedure tscrollbarwidget.createframe1;
+procedure tscrollbarwidget.internalcreateframe;
 begin
  tscrollframe.create(self,iscrollbar(self));
 end;
@@ -3154,7 +3154,7 @@ var
 begin
  fcaption:= info.caption;
  inherited create(aowner,transientfor);
- createframe1;
+ internalcreateframe;
  fframe.levelo:= 1;
  fframe.framei_left:= 1;
  fframe.framei_top:= 1;

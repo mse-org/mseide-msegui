@@ -674,6 +674,9 @@ begin
  if not (csdesigning in componentstate) then begin
   inherited;
  end;
+ if dso_autoapply in fcontroller.options then begin
+  applyupdates;
+ end;
 end;
 
 procedure tmsesqlquery.DoAfterEdit;

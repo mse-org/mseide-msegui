@@ -17,7 +17,8 @@ uses
  db,classes,mseguiglob,mseclasses,msegui,msetoolbar,mseeditglob,
  msewidgetgrid,msedatalist,msetypes,msegrids,msegraphics,mseevent,msekeyboard,
  msegraphedits,msestrings,sqldb,msegraphutils,mselist,msedropdownlist,
- msescrollbar,msedataedits,msewidgets,msearrayprops,msedb,mselookupbuffer;
+ msescrollbar,msedataedits,msewidgets,msearrayprops,msedb,mselookupbuffer,
+ msedialog;
 
 type
 
@@ -178,6 +179,44 @@ type
    property onsetvalue;
  end;
 
+ tdbdialogstringedit = class(tcustomdialogstringedit,idbeditfieldlink,idbeditinfo)
+  private
+   fdatalink: teditwidgetdatalink;
+   function getdatafield: string;
+   procedure setdatafield(const avalue: string);
+   function getdatasource: tdatasource;
+   procedure setdatasource(const avalue: tdatasource);
+  protected
+
+   function nullcheckneeded(const newfocus: twidget): boolean; override;
+   procedure griddatasourcechanged; override;
+   function getgriddatasource: tdatasource;
+   function createdatalist(const sender: twidgetcol): tdatalist; override;
+   procedure modified; override;
+   function getoptionsedit: optionseditty; override;
+
+   function getrowdatapo(const info: cellinfoty): pointer; override;
+   //idbeditfieldlink
+   procedure valuetofield;
+   procedure fieldtovalue;
+   //idbeditinfo
+   procedure getfieldtypes(out propertynames: stringarty;
+                          out fieldtypes: fieldtypesarty);
+  public
+   constructor create(aowner: tcomponent); override;
+   destructor destroy; override;
+   function checkvalue(const quiet: boolean = false): boolean; override;
+   property datalink: teditwidgetdatalink read fdatalink;
+  published
+   property datafield: string read getdatafield write setdatafield;
+   property datasource: tdatasource read getdatasource write setdatasource;
+
+   property passwordchar;
+   property maxlength;
+   property onsetvalue;
+   property onexecute;
+ end;
+ 
  tcustomdbdropdownlistedit = class(tcustomdropdownlistedit,idbeditfieldlink,idbeditinfo)
   private
    fdatalink: teditwidgetdatalink;
@@ -416,6 +455,50 @@ type
    property imagenums;
  end;
 
+ tdbdatabutton = class(tcustomdatabutton,idbeditfieldlink,idbeditinfo)
+  private
+   fdatalink: teditwidgetdatalink;
+   function getdatafield: string;
+   procedure setdatafield(const avalue: string);
+   function getdatasource: tdatasource;
+   procedure setdatasource(const avalue: tdatasource);
+  protected
+
+   procedure griddatasourcechanged; override;
+   function getgriddatasource: tdatasource;
+   function createdatalist(const sender: twidgetcol): tdatalist; override;
+   function checkvalue(const quiet: boolean = false): boolean; reintroduce;
+   function docheckvalue(var avalue): boolean; override;
+   function getoptionsedit: optionseditty; override;
+
+   function getrowdatapo(const info: cellinfoty): pointer; override;
+   //idbeditfieldlink
+   procedure valuetofield;
+   procedure fieldtovalue;
+   //idbeditinfo
+   procedure getfieldtypes(out propertynames: stringarty;
+                          out fieldtypes: fieldtypesarty);
+  public
+   constructor create(aowner: tcomponent); override;
+   destructor destroy; override;
+   property datalink: teditwidgetdatalink read fdatalink;
+  published
+   property datafield: string read getdatafield write setdatafield;
+   property datasource: tdatasource read getdatasource write setdatasource;
+   property optionswidget;
+   property valuefaces;
+   property font;
+   property caption;
+   property captionpos;
+   property imagelist;
+   property imagenr;
+   property options;
+   property onexecute;
+   property onsetvalue;
+   property min; 
+   property max;
+ end;
+ 
  tdbbooleaneditradio = class(tcustombooleaneditradio,idbeditfieldlink,idbeditinfo)
   private
    fdatalink: teditwidgetdatalink;
@@ -762,8 +845,6 @@ type
    function checkvalue: boolean;
    procedure updatelayout;
    procedure updaterowcount;
-   procedure recordchanged(afield: tfield); override;
-   procedure datasetchanged; override;
    procedure datasetscrolled(distance: integer); override;
    procedure activechanged; override;
    procedure updatedata; override;
@@ -791,6 +872,10 @@ type
    function getintegerbuffer(const afield: tfield; const row: integer): pointer;
    function getrealtybuffer(const afield: tfield; const row: integer): pointer;
    function getdatetimebuffer(const afield: tfield; const row: integer): pointer;
+
+   procedure recordchanged(afield: tfield); override;
+   procedure datasetchanged; override;
+
    procedure painted;
    procedure loaded;
    procedure beforefocuscell(const cell: gridcoordty;
@@ -817,7 +902,7 @@ type
   private
    fdatalink: tdropdownlistdatalink;
   protected
-   procedure createframe1; override;
+   procedure internalcreateframe; override;
    procedure createdatacol(const index: integer; out item: tdatacol); override;
    procedure initcols(const acols: tdropdowncols); override;
    procedure docellevent(var info: celleventinfoty); override;
@@ -998,7 +1083,7 @@ type
   protected
    function getgriddatalink: pointer; override;
    procedure setoptionsgrid(const avalue: optionsgridty); override;
-   procedure createframe1; override;
+   procedure internalcreateframe; override;
    function createfixcols: tfixcols; override;
    procedure updatelayout; override;
    procedure initcellinfo(var info: cellinfoty); override;
@@ -1192,7 +1277,7 @@ type
   protected
    procedure setoptionsgrid(const avalue: optionsgridty); override;
    procedure doasyncevent(var atag: integer); override;
-   procedure createframe1; override;
+   procedure internalcreateframe; override;
    function getoptionsedit: optionseditty; override;
    function createfixcols: tfixcols; override;
    function createdatacols: tdatacols; override;
@@ -1312,7 +1397,7 @@ type
    procedure findnext(var recno: integer);
    function getrecno(const aindex: integer): integer;
    procedure dorowcountchanged(const countbefore,newcount: integer); override;
-   procedure createframe1; override;
+   procedure internalcreateframe; override;
    procedure createdatacol(const index: integer; out item: tdatacol); override;
    procedure initcols(const acols: tdropdowncols); override;
    procedure docellevent(var info: celleventinfoty); override;
@@ -2002,6 +2087,112 @@ begin
  result:= inherited nullcheckneeded(newfocus) and fdatalink.nullcheckneeded;
 end;
 
+{ tdbdialogstringedit }
+
+constructor tdbdialogstringedit.create(aowner: tcomponent);
+begin
+ fdatalink:= teditwidgetdatalink.Create(idbeditfieldlink(self));
+ inherited;
+end;
+
+destructor tdbdialogstringedit.destroy;
+begin
+ inherited;
+ fdatalink.free;
+end;
+
+function tdbdialogstringedit.getdatafield: string;
+begin
+ result:= fdatalink.fieldname;
+end;
+
+procedure tdbdialogstringedit.setdatafield(const avalue: string);
+begin
+ fdatalink.fieldname:= avalue;
+end;
+
+function tdbdialogstringedit.getdatasource: tdatasource;
+begin
+ result:= fdatalink.datasource;
+end;
+
+procedure tdbdialogstringedit.setdatasource(const avalue: tdatasource);
+begin
+ fdatalink.setwidgetdatasource(avalue);
+end;
+
+function tdbdialogstringedit.checkvalue(const quiet: boolean = false): boolean;
+begin
+ result:= inherited checkvalue(quiet) and fdatalink.dataentered;
+end;
+
+procedure tdbdialogstringedit.modified;
+begin
+ fdatalink.Modified;
+ inherited;
+end;
+
+function tdbdialogstringedit.getoptionsedit: optionseditty;
+begin
+ result:= inherited getoptionsedit;
+ fdatalink.updateoptionsedit(result);
+end;
+
+procedure tdbdialogstringedit.valuetofield;
+begin
+ if value = '' then begin
+  fdatalink.field.clear;
+ end
+ else begin
+  fdatalink.asmsestring:= value;
+ end;
+end;
+
+procedure tdbdialogstringedit.fieldtovalue;
+begin
+ value:= fdatalink.asmsestring;
+end;
+
+function tdbdialogstringedit.getrowdatapo(const info: cellinfoty): pointer;
+begin
+ with info do begin
+  if griddatalink <> nil then begin
+   result:= tgriddatalink(griddatalink).getstringbuffer(fdatalink.field,cell.row);
+  end
+  else begin
+   result:= nil;
+  end;
+ end;
+end;
+
+function tdbdialogstringedit.createdatalist(const sender: twidgetcol): tdatalist;
+begin
+ result:= nil;
+end;
+
+procedure tdbdialogstringedit.griddatasourcechanged;
+begin
+ fdatalink.griddatasourcechanged;
+end;
+
+function tdbdialogstringedit.getgriddatasource: tdatasource;
+begin
+ result:= tcustomdbwidgetgrid(fgridintf.getcol.grid).datasource;
+end;
+
+procedure tdbdialogstringedit.getfieldtypes(out propertynames: stringarty; 
+                    out fieldtypes: fieldtypesarty);
+begin
+ propertynames:= nil;
+ setlength(fieldtypes,1);
+ fieldtypes[0]:= textfields;
+end;
+
+function tdbdialogstringedit.nullcheckneeded(const newfocus: twidget): boolean;
+begin
+ result:= inherited nullcheckneeded(newfocus) and fdatalink.nullcheckneeded;
+end;
+
 { tcustomdbdropdownedit }
 
 constructor tcustomdbdropdownlistedit.create(aowner: tcomponent);
@@ -2652,6 +2843,114 @@ begin
 end;
 
 procedure tdbdataicon.getfieldtypes(out propertynames: stringarty; 
+                    out fieldtypes: fieldtypesarty);
+begin
+ propertynames:= nil;
+ setlength(fieldtypes,1);
+ fieldtypes[0]:= integerfields;
+end;
+
+{ tdbdatabutton }
+
+constructor tdbdatabutton.create(aowner: tcomponent);
+begin
+ fdatalink:= teditwidgetdatalink.Create(idbeditfieldlink(self));
+ inherited;
+end;
+
+destructor tdbdatabutton.destroy;
+begin
+ inherited;
+ fdatalink.free;
+end;
+
+function tdbdatabutton.getdatafield: string;
+begin
+ result:= fdatalink.fieldname;
+end;
+
+procedure tdbdatabutton.setdatafield(const avalue: string);
+begin
+ fdatalink.fieldname:= avalue;
+end;
+
+function tdbdatabutton.getdatasource: tdatasource;
+begin
+ result:= fdatalink.datasource;
+end;
+
+procedure tdbdatabutton.setdatasource(const avalue: tdatasource);
+begin
+ fdatalink.setwidgetdatasource(avalue);
+end;
+
+function tdbdatabutton.checkvalue(const quiet: boolean = false): boolean;
+begin
+ result:= false;
+ //dummy
+end;
+
+function tdbdatabutton.docheckvalue(var avalue): boolean;
+var
+ widget: twidget;
+ int1: integer;
+begin
+ result:= inherited docheckvalue(avalue);
+ if result then begin
+  fdatalink.modified;
+  result:= fdatalink.dataentered;
+ end;
+end;
+
+function tdbdatabutton.getoptionsedit: optionseditty;
+begin
+ result:= inherited getoptionsedit;
+ fdatalink.updateoptionsedit(result);
+end;
+
+procedure tdbdatabutton.valuetofield;
+begin
+ if value = -1 then begin
+  fdatalink.field.clear;
+ end
+ else begin
+  fdatalink.field.asinteger:= value;
+ end;
+end;
+
+procedure tdbdatabutton.fieldtovalue;
+begin
+ value:= fdatalink.field.asinteger;
+end;
+
+function tdbdatabutton.getrowdatapo(const info: cellinfoty): pointer;
+begin
+ with info do begin
+  if griddatalink <> nil then begin
+   result:= tgriddatalink(griddatalink).getintegerbuffer(fdatalink.field,cell.row);
+  end
+  else begin
+   result:= nil;
+  end;
+ end;
+end;
+
+function tdbdatabutton.createdatalist(const sender: twidgetcol): tdatalist;
+begin
+ result:= nil;
+end;
+
+procedure tdbdatabutton.griddatasourcechanged;
+begin
+ fdatalink.griddatasourcechanged;
+end;
+
+function tdbdatabutton.getgriddatasource: tdatasource;
+begin
+ result:= tcustomdbwidgetgrid(fgridintf.getcol.grid).datasource;
+end;
+
+procedure tdbdatabutton.getfieldtypes(out propertynames: stringarty; 
                     out fieldtypes: fieldtypesarty);
 begin
  propertynames:= nil;
@@ -3563,7 +3862,7 @@ begin
  fdatalink.MoveBy(-1);
 end;
 
-procedure tdbdropdownlist.createframe1;
+procedure tdbdropdownlist.internalcreateframe;
 begin
  tdbgridframe.create(iframe(self),self,iautoscrollframe(self));
 end;
@@ -4057,7 +4356,8 @@ var
  int1,int2: integer;
  dataset1: tdataset;
 begin
- if (fgrid.componentstate * [csloading,csdesigning,csdestroying] = []) then begin
+ if (fgrid.componentstate * [csloading,csdesigning,csdestroying] = []) and 
+                 (row < fgrid.rowcount) then begin
   dataset1:= dataset;
   if dataset1 <> nil then begin
    if field <> nil then begin
@@ -4562,8 +4862,8 @@ begin
  if not fgridinvalidated then begin
   fgrid.invalidate;
   fgridinvalidated:= true;
+  application.postevent(tobjectevent.create(ek_dbupdaterowdata,ievent(self)));
  end;
- doupdaterowdata(-1);
 end;
 
 procedure tgriddatalink.painted;
@@ -4653,8 +4953,13 @@ end;
 
 procedure tgriddatalink.receiveevent(const event: tobjectevent);
 begin
- if event.kind = ek_dbedit then begin
-  edit;
+ case event.kind of
+  ek_dbedit: begin
+   edit;
+  end;
+  ek_dbupdaterowdata: begin
+   doupdaterowdata(-1);
+  end;
  end;
 end;
 
@@ -4831,7 +5136,7 @@ begin
  inherited setoptionsgrid(avalue - [og_sorted]);
 end;
 
-procedure tcustomdbwidgetgrid.createframe1;
+procedure tcustomdbwidgetgrid.internalcreateframe;
 begin
  tdbgridframe.create(iframe(self),self,iautoscrollframe(self));
 end;
@@ -5286,7 +5591,7 @@ begin
  result:= fnonullcheck > 0;
 end;
 
-procedure tcustomdbstringgrid.createframe1;
+procedure tcustomdbstringgrid.internalcreateframe;
 begin
  tdbgridframe.create(iframe(self),self,iautoscrollframe(self));
 end;
@@ -6303,7 +6608,7 @@ begin
  end;
 end;
 
-procedure tlbdropdownlist.createframe1;
+procedure tlbdropdownlist.internalcreateframe;
 begin
  tdbgridframe.create(iframe(self),self,iautoscrollframe(self));
 end;

@@ -26,7 +26,8 @@ type
 
                  ss_clicked,ss_mouse,ss_moveclick,ss_focused,
                  ss_horz,ss_vert,ss_opposite,
-                 ss_widgetorg,ss_showfocusrect,ss_flat,ss_checkbutton,
+                 ss_widgetorg,ss_showfocusrect,ss_showdefaultrect,ss_flat,
+                 ss_checkbutton,
                  ss_submenu);
  shapestatesty = set of shapestatety;
 
@@ -478,7 +479,7 @@ begin
     level:= -1;
    end;
    clientrect:= dim;
-   if (state * [ss_focused,ss_showfocusrect] = [ss_focused,ss_showfocusrect]) or
+   if (state * [ss_focused,ss_showdefaultrect] = [ss_focused,ss_showdefaultrect]) or
           (state * [ss_disabled,ss_default] = [ss_default]) then begin
     canvas.drawframe(clientrect,-1,cl_black);
     inflaterect1(clientrect,-1);

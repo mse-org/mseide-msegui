@@ -1,5 +1,6 @@
 MSEide+MSEgui version history
-
+2006-08-24 tintegerbutton renamed to tdatabutton, tdbdatabutton,
+ tdialogstringedit, tdbdialogstringedit.
 2006-08-20 tprogressbar.
 2006-08-18 tsequencelink.
 2006-07-29 foregroundcolor renamed to colorforeground.

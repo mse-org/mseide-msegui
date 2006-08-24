@@ -176,6 +176,7 @@ type
    fcontainer1: twidget;
    fcontainer2: twidget;
    fcontainer3: twidget;
+   fwidgetdummy: twidget;
    fmousefocusedcell: gridcoordty;
    fmouseactivewidget: twidget;
    function getdatacols: twidgetcols;
@@ -357,6 +358,13 @@ type
  end;
  
  tbottomcontainer = class(tfixcontainer)
+ end;
+ 
+ twidgetdummy = class(twidget)
+  protected
+   fgrid: tcustomwidgetgrid;
+  public
+   constructor create(aowner: tcustomwidgetgrid); reintroduce;
  end;
  
  tcontainer = class(twidget)
@@ -715,7 +723,7 @@ begin
 //    if (newcell.row < 0) then begin
      if (activewidgetbefore <> nil) then begin
       if activewidgetbefore.focused then begin
-       fcontainer1.setfocus(active);
+       fwidgetdummy.setfocus(active);
       end;
       activewidgetbefore.visible:= false;
      end;
@@ -734,7 +742,7 @@ begin
     with widget1 do begin
      visible:= true;
      if (selectaction in [fca_focusin,fca_entergrid,fca_focusinshift]) and
-                 canfocus and fgrid.entered then begin
+                 canfocus and fgrid.container.entered then begin
       setfocus(fgrid.active);
      end;
     end;
@@ -943,7 +951,8 @@ begin
  end;
 end;
 
-procedure twidgetcol.setdata(aindex: integer; const source; const noinvalidate: boolean = false);
+procedure twidgetcol.setdata(aindex: integer; const source;
+                             const noinvalidate: boolean = false);
 begin
  if fdata <> nil then begin
   if aindex = -1 then begin
@@ -954,6 +963,9 @@ begin
     fdata.beginupdate;
    end;
    tdatalist1(fdata).setdata(aindex,source);
+   if (aindex = twidgetgrid(fgrid).ffocusedcell.row) and (fintf <> nil) then begin
+    fintf.gridtovalue(aindex);
+   end;
    if noinvalidate then begin
     fdata.decupdate;
     if (not fdata.updating) and assigned(fonchange) then begin
@@ -1476,6 +1488,20 @@ begin
  end;
 end;
 }
+
+{ twidgetdummy }
+
+constructor twidgetdummy.create(aowner: tcustomwidgetgrid);
+begin
+ fgrid:= aowner;
+ inherited create(nil{aowner});
+ foptionswidget:= [];
+ include(fwidgetstate,ws_nopaint);
+ exclude(fwidgetstate,ws_iswidget);
+ widgetrect:= nullrect;
+ parentwidget:= aowner.fcontainer2;
+end;
+
 { tcontainer }
 
 constructor tcontainer.create(aowner: tcustomwidgetgrid);
@@ -1568,6 +1594,7 @@ begin
  fcontainer1:= ttopcontainer.create(self);
  fcontainer2:= tcontainer.create(self);
  fcontainer3:= tbottomcontainer.create(self);
+ fwidgetdummy:= twidgetdummy.create(self);
  inherited;
  setoptionsgrid(foptionsgrid); //synchronize container
 // fcontainer.Name:= 'container';
@@ -1575,6 +1602,7 @@ end;
 
 destructor tcustomwidgetgrid.destroy;
 begin
+ fwidgetdummy.free;
  fcontainer1.free;
  freeandnil(fcontainer2);
  fcontainer3.free;

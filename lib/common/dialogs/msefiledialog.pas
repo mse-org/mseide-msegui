@@ -205,7 +205,7 @@ type
    property dialogkind: filedialogkindty read fdialogkind write fdialogkind default fdk_open;
  end;
 
- tfilenameedit = class(tdialogstringedit)
+ tfilenameedit = class(tdialogstringed)
   private
    fcontroller: tfiledialogcontroller;
 //   fdialogkind: filedialogkindty;

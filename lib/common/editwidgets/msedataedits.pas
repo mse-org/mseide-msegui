@@ -198,7 +198,7 @@ type
   protected
    procedure setupeditor; override;
    procedure editnotification(var info: editnotificationinfoty); override;
-   procedure createframe1; override;
+   procedure internalcreateframe; override;
    procedure mouseevent(var info: mouseeventinfoty); override;
    procedure dokeydown(var info: keyeventinfoty); override;
            //iscrollbar
@@ -267,7 +267,7 @@ type
    procedure setframe(const avalue: tdropdownbuttonframe);
   protected
    fdropdown: tcustomdropdowncontroller;
-   procedure createframe1; override;
+   procedure internalcreateframe; override;
    procedure dokeydown(var info: keyeventinfoty); override;
    procedure mouseevent(var info: mouseeventinfoty); override;
    procedure editnotification(var info: editnotificationinfoty); override;
@@ -787,7 +787,7 @@ type
    procedure setframe(const avalue: tdropdownbuttonframe);
    function getframe: tdropdownbuttonframe;
   protected
-   procedure createframe1; override;
+   procedure internalcreateframe; override;
    procedure dokeydown(var info: keyeventinfoty); override;
    procedure mouseevent(var info: mouseeventinfoty); override;
    procedure setoptionsedit(const avalue: optionseditty); override;
@@ -921,7 +921,7 @@ var
 begin
  result:= true;
  if not (csdesigning in componentstate) and (oe_closequery in foptionsedit) then begin
-  if (oe_notnull in foptionsedit)and (fnullchecking = 0) and 
+  if (oe_notnull in foptionsedit) and (fnullchecking = 0) and 
                  nullcheckneeded(newfocus) and isempty(text) then begin
    widget1:= window.focusedwidget;
    result:= checkvalue;
@@ -1478,13 +1478,18 @@ end;
 
 function tdataedit.nullcheckneeded(const newfocus: twidget): boolean;
 begin
- if fgridintf = nil then begin
-  result:= (newfocus = nil) or (newfocus.parentwidget <> parentwidget);
+ if newfocus = self then begin
+  result:= false;
  end
  else begin
-  result:= (edited and (oe_autopost in foptionsedit)){ and 
-                         not (fgridintf.nonullcheck)} or 
-             fgridintf.nullcheckneeded(newfocus);
+  if fgridintf = nil then begin
+   result:= (newfocus = nil) or (newfocus.parentwidget <> parentwidget);
+  end
+  else begin
+   result:= (edited and (oe_autopost in foptionsedit)){ and 
+                          not (fgridintf.nonullcheck)} or 
+              fgridintf.nullcheckneeded(newfocus);
+  end;
  end;
 end;
 
@@ -1690,7 +1695,7 @@ begin
  fcreated:= true;
 end;
 
-procedure tcustommemoedit.createframe1;
+procedure tcustommemoedit.internalcreateframe;
 begin
  tscrolleditframe.create(iframe(self),iscrollbar(self));
  with frame do begin
@@ -2164,7 +2169,7 @@ begin
  inherited setframe(avalue);
 end;
 
-procedure tcustomdropdownedit.createframe1;
+procedure tcustomdropdownedit.internalcreateframe;
 begin
  fdropdown.createframe;
 end;
@@ -3596,7 +3601,7 @@ begin
  result:= tdropdownbuttonframe(inherited getframe);
 end;
 
-procedure tcustomcalendardatetimeedit.createframe1;
+procedure tcustomcalendardatetimeedit.internalcreateframe;
 begin
  fdropdown.createframe;
 end;

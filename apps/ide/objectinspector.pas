@@ -935,14 +935,14 @@ var
  scrpos: integer;
 begin
  saveproppath;
- grid.beginupdate;
+// grid.beginupdate;
  scrpos:= grid.frame.scrollpos_y;
  try
   grid.defocusrow;
   readprops(factmodule,factcomps);
  finally
   frereadprops:= false;
-  grid.endupdate;
+//  grid.endupdate;
  end;
  grid.frame.scrollpos_y:= scrpos;
  grid.showcell(grid.focusedcell);
