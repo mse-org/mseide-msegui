@@ -14,7 +14,7 @@ unit msesplitter;
 interface
 uses
  msegui,msewidgets,mseobjectpicker,classes,msegraphutils,msepointer,msetypes,msestrings,
- msegraphics,mseevent,msestat,msestockobjects,mseclasses;
+ msegraphics,mseevent,msestat,msestockobjects,mseclasses,msesimplewidgets;
 type
 
  splitteroptionty = (spo_hmove,spo_hprop,spo_vmove,spo_vprop);
@@ -28,7 +28,7 @@ const
  updatepropeventtag = 0;
 
 type
- tsplitter = class(tpublishedwidget,iobjectpicker,istatfile)
+ tsplitter = class(tscalingwidget,iobjectpicker,istatfile)
   private
    fobjectpicker: tobjectpicker;
    foptions: splitteroptionsty;
@@ -42,14 +42,14 @@ type
    fcolorgrip: colorty;
    fgrip: stockbitmapty;
    fonupdatelayout: notifyeventty;
-   procedure setstatfile(const Value: tstatfile);
-   procedure setlinkbottom(const Value: twidget);
-   procedure setlinkleft(const Value: twidget);
-   procedure setlinkright(const Value: twidget);
-   procedure setlinktop(const Value: twidget);
+   procedure setstatfile(const avalue: tstatfile);
+   procedure setlinkbottom(const avalue: twidget);
+   procedure setlinkleft(const avalue: twidget);
+   procedure setlinkright(const avalue: twidget);
+   procedure setlinktop(const avalue: twidget);
    procedure setpickoffset(const aoffset: pointty);
-   procedure setcolorgrip(const Value: colorty);
-   procedure setgrip(const Value: stockbitmapty);
+   procedure setcolorgrip(const avalue: colorty);
+   procedure setgrip(const avalue: stockbitmapty);
   protected
    function clippoint(const aoffset: pointty): pointty;
    procedure mouseevent(var info: mouseeventinfoty); override;
@@ -93,6 +93,48 @@ type
    property onupdatelayout: notifyeventty read fonupdatelayout write fonupdatelayout;
  end;
 
+ tspacer = class(tscalingwidget)
+  private
+   flinkleft: twidget;
+   flinktop: twidget;
+   flinkright: twidget;
+   flinkbottom: twidget;
+   fupdating: integer;
+   foffset_left: integer;
+   foffset_top: integer;
+   foffset_right: integer;
+   foffset_bottom: integer;
+   procedure setlinkleft(const avalue: twidget);
+   procedure setlinktop(const avalue: twidget);
+   procedure setlinkright(const avalue: twidget);
+   procedure setlinkbottom(const avalue: twidget);
+   procedure updatespace;
+   procedure setoffset_left(const avalue: integer);
+   procedure setoffset_top(const avalue: integer);
+   procedure setoffset_right(const avalue: integer);
+   procedure setoffset_bottom(const avalue: integer);
+  protected
+   procedure loaded; override;
+   procedure parentwidgetregionchanged(const sender: twidget); override;
+  public
+   constructor create(aowner: tcomponent); override;
+  published
+   property linkleft: twidget read flinkleft write setlinkleft;
+   property linktop: twidget read flinktop write setlinktop;
+   property linkright: twidget read flinkright write setlinkright;
+   property linkbottom: twidget read flinkbottom write setlinkbottom;
+   property offset_left: integer read foffset_left 
+                                    write setoffset_left default 0;
+   property offset_top: integer read foffset_top 
+                                    write setoffset_top default 0;
+   property offset_right: integer read foffset_right 
+                                    write setoffset_right default 0;
+   property offset_bottom: integer read foffset_bottom 
+                                    write setoffset_bottom default 0;
+   property optionswidget default defaultoptionswidgetnofocus;
+   property visible default false;
+ end;
+ 
 implementation
 uses
  mseguiglob;
@@ -296,9 +338,9 @@ begin
  setpickoffset(offset);
 end;
 
-procedure tsplitter.setstatfile(const Value: tstatfile);
+procedure tsplitter.setstatfile(const avalue: tstatfile);
 begin
- setstatfilevar(istatfile(self),value,fstatfile);
+ setstatfilevar(istatfile(self),avalue,fstatfile);
 end;
 
    //istatfile
@@ -346,24 +388,24 @@ begin
  result:= fstatvarname;
 end;
 
-procedure tsplitter.setlinkbottom(const Value: twidget);
+procedure tsplitter.setlinkbottom(const avalue: twidget);
 begin
- setlinkedvar(Value,tmsecomponent(flinkbottom));
+ setlinkedvar(avalue,tmsecomponent(flinkbottom));
 end;
 
-procedure tsplitter.setlinkleft(const Value: twidget);
+procedure tsplitter.setlinkleft(const avalue: twidget);
 begin
- setlinkedvar(Value,tmsecomponent(flinkleft));
+ setlinkedvar(avalue,tmsecomponent(flinkleft));
 end;
 
-procedure tsplitter.setlinkright(const Value: twidget);
+procedure tsplitter.setlinkright(const avalue: twidget);
 begin
- setlinkedvar(Value,tmsecomponent(flinkright));
+ setlinkedvar(avalue,tmsecomponent(flinkright));
 end;
 
-procedure tsplitter.setlinktop(const Value: twidget);
+procedure tsplitter.setlinktop(const avalue: twidget);
 begin
- setlinkedvar(Value,tmsecomponent(flinktop));
+ setlinkedvar(avalue,tmsecomponent(flinktop));
 end;
 
 procedure tsplitter.poschanged;
@@ -428,18 +470,18 @@ begin
  end;
 end;
 
-procedure tsplitter.setcolorgrip(const Value: colorty);
+procedure tsplitter.setcolorgrip(const avalue: colorty);
 begin
- if fcolorgrip <> value then begin
-  fcolorgrip:= Value;
+ if fcolorgrip <> avalue then begin
+  fcolorgrip:= avalue;
   invalidate;
  end;
 end;
 
-procedure tsplitter.setgrip(const Value: stockbitmapty);
+procedure tsplitter.setgrip(const avalue: stockbitmapty);
 begin
- if fgrip <> value then begin
-  fgrip:= Value;
+ if fgrip <> avalue then begin
+  fgrip:= avalue;
   invalidate;
  end;
 end;
@@ -455,6 +497,121 @@ begin
   end;
 //  stockobjects.bitmaps[fgrip].paint(acanvas,clientrect,
 //         [al_xcentered,al_ycentered,al_tiled],fcolorgrip,cl_transparent);
+ end;
+end;
+
+{ tspacer }
+
+constructor tspacer.create(aowner: tcomponent);
+begin
+ inherited;
+ foptionswidget:= defaultoptionswidgetnofocus;
+ fwidgetstate:= fwidgetstate - (defaultwidgetstates-defaultwidgetstatesinvisible);
+end;
+
+procedure tspacer.setlinkleft(const avalue: twidget);
+begin
+ setlinkedvar(avalue,tmsecomponent(flinkleft));
+ updatespace;
+end;
+
+procedure tspacer.setlinktop(const avalue: twidget);
+begin
+ setlinkedvar(avalue,tmsecomponent(flinktop));
+ updatespace;
+end;
+
+procedure tspacer.setlinkright(const avalue: twidget);
+begin
+ setlinkedvar(avalue,tmsecomponent(flinkright));
+ updatespace;
+end;
+
+procedure tspacer.setlinkbottom(const avalue: twidget);
+begin
+ setlinkedvar(avalue,tmsecomponent(flinkbottom));
+ updatespace;
+end;
+
+procedure tspacer.setoffset_left(const avalue: integer);
+begin
+ foffset_left:= avalue;
+ updatespace;
+end;
+
+procedure tspacer.setoffset_top(const avalue: integer);
+begin
+ foffset_top:= avalue;
+ updatespace;
+end;
+
+procedure tspacer.setoffset_right(const avalue: integer);
+begin
+ foffset_right:= avalue;
+ updatespace;
+end;
+
+procedure tspacer.setoffset_bottom(const avalue: integer);
+begin
+ foffset_bottom:= avalue;
+ updatespace;
+end;
+
+procedure tspacer.updatespace;
+var
+ po1: pointty;
+ rect1: rectty;
+begin
+ if (componentstate * [csloading,csdestroying] = []) and 
+    (fparentwidget <> nil) and (fupdating = 0) then begin
+  inc(fupdating);
+  try  
+   po1:= pos;
+   if flinkleft <> nil then begin
+    po1.x:= flinkleft.bounds_x + flinkleft.bounds_cx + foffset_left;
+   end;
+   if flinktop <> nil then begin
+    po1.y:= flinktop.bounds_y + flinktop.bounds_cy + foffset_top;
+   end;
+   pos:= po1;
+   addpoint1(po1,pointty(size));
+   po1.x:= po1.x + foffset_right;
+   po1.y:= po1.y + foffset_bottom;
+   if flinkright <> nil then begin
+    rect1:= flinkright.widgetrect;
+    if an_right in flinkright.anchors then begin
+     rect1.cx:= rect1.cx + (rect1.x - po1.x);
+    end;
+    rect1.pos.x:= po1.x;
+    flinkright.widgetrect:= rect1;
+   end;
+   if flinkbottom <> nil then begin
+    rect1:= flinkbottom.widgetrect;
+    if an_bottom in flinkbottom.anchors then begin
+     rect1.cy:= rect1.cy + (rect1.y - po1.y);
+    end;
+    rect1.pos.y:= po1.y;
+    flinkbottom.widgetrect:= rect1;
+   end;
+  finally
+   dec(fupdating);
+  end;
+ end;
+end;
+
+procedure tspacer.loaded;
+begin
+ inherited;
+ updatespace;
+end;
+
+procedure tspacer.parentwidgetregionchanged(const sender: twidget);
+begin
+ inherited;
+ if (sender <> nil) and ((sender = flinkleft) or (sender = flinktop) or
+                         (sender = flinkright) or (sender = flinkbottom) or
+                         (sender = self)) then begin
+  updatespace;
  end;
 end;
 

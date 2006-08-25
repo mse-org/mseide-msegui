@@ -213,21 +213,35 @@ type
   public
    constructor create(const intf: iframe);
   published
+   property framei_left default 2;
+   property framei_top default 2;
+   property framei_right default 2;
+   property framei_bottom default 2;
    property levelo default -1;
    property leveli default 1;
    property captiondist default - 7;
    property captionoffset default 4;
  end;
 
+ optionscalety = (osc_expandx,osc_shrinkx,osc_expandy,osc_shrinky);
+ optionsscalety = set of optionscalety;
+ 
  tscalingwidget = class(tpublishedwidget)
   private
    fonfontheightdelta: fontheightdeltaeventty;
    fonchildscaled: notifyeventty;
+   foptionsscale: optionsscalety;
+   fscaling: integer;
+   procedure setoptionsscale(const avalue: optionsscalety);
   protected
+   procedure updateoptionsscale;
+   procedure dochildscaled(const sender: twidget);
    procedure dofontheightdelta(var delta: integer); override;
+   procedure widgetregionchanged(const sender: twidget); override;
+   procedure clientrectchanged; override;
   public
-   procedure dochildscaled(const sender: twidget); override;
   published
+   property optionsscale: optionsscalety read foptionsscale write setoptionsscale;
    property onfontheightdelta: fontheightdeltaeventty read fonfontheightdelta
                      write fonfontheightdelta;
    property onchildscaled: notifyeventty read fonchildscaled write fonchildscaled;
@@ -741,6 +755,10 @@ begin
  inherited;
  fi.levelo:= -1;
  fi.leveli:= 1;
+ fi.innerframe.left:= 2;
+ fi.innerframe.top:= 2;
+ fi.innerframe.right:= 2;
+ fi.innerframe.bottom:= 2;
  captiondist:= -7;
  captionoffset:= 4;
 end;
@@ -763,6 +781,68 @@ begin
   fonfontheightdelta(self,delta);
  end;
  inherited;
+end;
+
+procedure tscalingwidget.setoptionsscale(const avalue: optionsscalety);
+begin
+ if foptionsscale <> avalue then begin
+  foptionsscale:= avalue;
+  updateoptionsscale;
+ end;
+end;
+
+procedure tscalingwidget.updateoptionsscale;
+var
+ size1,size2,size3: sizety;
+begin
+ if foptionsscale * [osc_expandx,osc_expandy,
+                    osc_shrinkx,osc_shrinky] <> [] then begin
+  if (componentstate * [csloading,csdestroying] = []) and 
+                    (fscaling = 0) then begin
+   inc(fscaling);
+   try
+    size1:= calcminscrollsize;
+    size2:= paintsize;
+    size3.cx:= size1.cx - size2.cx;
+    size3.cy:= size1.cy - size2.cy;
+    if not (osc_expandx in foptionsscale) then begin
+     if size3.cx > 0 then begin
+      size3.cx:= 0;
+     end;
+    end;
+    if not (osc_expandy in foptionsscale) then begin
+     if size3.cy > 0 then begin
+      size3.cy:= 0;
+     end;
+    end;
+    if not (osc_shrinkx in foptionsscale) then begin
+     if size3.cx < 0 then begin
+      size3.cx:= 0;
+     end;
+    end;
+    if not (osc_shrinky in foptionsscale) then begin
+     if size3.cy < 0 then begin
+      size3.cy:= 0;
+     end;
+    end;
+    size:= addsize(size,size3);
+   finally
+    dec(fscaling)
+   end;
+  end;
+ end;
+end;
+
+procedure tscalingwidget.widgetregionchanged(const sender: twidget);
+begin
+ inherited;
+ updateoptionsscale;
+end;
+
+procedure tscalingwidget.clientrectchanged;
+begin
+ inherited;
+ updateoptionsscale;
 end;
 
 { tgroupbox }

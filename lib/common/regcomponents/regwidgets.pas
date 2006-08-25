@@ -17,7 +17,8 @@ implementation
 uses
  sysutils,classes,msesimplewidgets,msegrids,msemenus,mseimage,msedispwidgets,
  msetoolbar,msetabs,msedesignintf,msepropertyeditors,regwidgets_bmp,
- msesplitter,msedock,mseforms,mseclasses,typinfo,msestrings,msearrayprops;
+ msesplitter,msedock,mseforms,mseclasses,typinfo,msestrings,msearrayprops,
+ msegui;
  
 type
  tpropertyeditor1 = class(tpropertyeditor);
@@ -46,12 +47,28 @@ begin
   tbytestringdisp,tbooleandisp,
   tgroupbox,tscrollbox,tstepbox,tdockpanel,tdockhandle,tmseformwidget,
   tdockformwidget,
-  tsplitter,ttoolbar,{tdocktoolbar,}ttabbar,ttabwidget,ttabpage]);
+  tsplitter,tspacer,ttoolbar,{tdocktoolbar,}ttabbar,ttabwidget,ttabpage]);
  registerpropertyeditor(typeinfo(tcellframe),nil,'',
                             toptionalclasspropertyeditor);
  registerpropertyeditor(typeinfo(tdatacols),nil,'',tgridpropseditor);
  registerpropertyeditor(typeinfo(tfixcols),nil,'',tfixgridpropseditor);
  registerpropertyeditor(typeinfo(tfixrows),nil,'',tfixgridpropseditor);
+ registerpropertyeditor(typeinfo(twidget),tsplitter,'linkleft',
+                                 tsisterwidgetpropertyeditor);
+ registerpropertyeditor(typeinfo(twidget),tsplitter,'linktop',
+                                 tsisterwidgetpropertyeditor);
+ registerpropertyeditor(typeinfo(twidget),tsplitter,'linkright',
+                                 tsisterwidgetpropertyeditor);
+ registerpropertyeditor(typeinfo(twidget),tsplitter,'linkbottom',
+                                 tsisterwidgetpropertyeditor);
+ registerpropertyeditor(typeinfo(twidget),tspacer,'linkleft',
+                                 tsisterwidgetpropertyeditor);
+ registerpropertyeditor(typeinfo(twidget),tspacer,'linktop',
+                                 tsisterwidgetpropertyeditor);
+ registerpropertyeditor(typeinfo(twidget),tspacer,'linkright',
+                                 tsisterwidgetpropertyeditor);
+ registerpropertyeditor(typeinfo(twidget),tspacer,'linkbottom',
+                                 tsisterwidgetpropertyeditor);
  
  registerunitgroup(['msegrids'],['msegui','msegraphutils','mseclasses']);
  registerunitgroup(['msewidgetgrid'],['msedataedits',

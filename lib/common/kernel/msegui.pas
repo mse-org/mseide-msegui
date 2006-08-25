@@ -101,6 +101,7 @@ type
 
 const
  defaultwidgetstates = [ws_visible,ws_enabled,ws_iswidget,ws_isvisible];
+ defaultwidgetstatesinvisible = [ws_enabled,ws_iswidget];
  focusstates = [ws_visible,ws_enabled];
  defaultoptionswidget = [ow_mousefocus,ow_tabfocus,ow_arrowfocus,ow_mousewheel,
                          ow_destroywidgets,ow_autoscale];
@@ -764,6 +765,7 @@ type
    procedure fontchanged; virtual;
 
    procedure parentclientrectchanged; virtual;
+   procedure parentwidgetregionchanged(const sender: twidget); virtual;
    procedure widgetregionchanged(const sender: twidget); virtual;
    procedure statechanged; virtual; //enabled,active,visible
    procedure enabledchanged; virtual;
@@ -4837,10 +4839,22 @@ begin
  canvas.restore;
 end;
 
+procedure twidget.parentwidgetregionchanged(const sender: twidget);
+begin
+ //dummy
+end;
+
 procedure twidget.widgetregionchanged(const sender: twidget);
+var
+ int1: integer;
 begin
  widgetregioninvalid;
  invalidaterect(sender.fwidgetrect,org_widget);
+ if componentstate * [csloading,csdestroying] = [] then begin
+  for int1:= 0 to high(fwidgets) do begin
+   fwidgets[int1].parentwidgetregionchanged(sender);
+  end;
+ end;
 end;
 
 procedure twidget.addopaquechildren(var region: regionty);

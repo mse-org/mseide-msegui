@@ -1,4 +1,7 @@
 MSEide+MSEgui version history
+2006-08-25 Property tscalingwidget.optionsscale, osc_expandx,osc_expandy,
+ osc_shrinkx,osc_shrinky, used in tgroupbox and tscrollbox.
+ tspacer.
 2006-08-24 tintegerbutton renamed to tdatabutton, tdbdatabutton,
  tdialogstringedit, tdbdialogstringedit.
 2006-08-20 tprogressbar.

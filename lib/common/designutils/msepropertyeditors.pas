@@ -285,7 +285,14 @@ type
    procedure setvalue(const value: msestring); override;
    function getvalues: msestringarty; override;
  end;
- 
+
+ tsisterwidgetpropertyeditor = class(tcomponentpropertyeditor)
+  protected
+   function getdefaultstate: propertystatesty; override;
+  public
+   function getvalues: msestringarty; override;
+ end;
+  
  tlocalcomponentpropertyeditor = class(tcomponentpropertyeditor)
   protected
    function getdefaultstate: propertystatesty; override;
@@ -1850,10 +1857,8 @@ end;
 
 function tcomponentpropertyeditor.getvalues: msestringarty;
 var
- ar1: componentarty;
  co1: tcomponent;
 begin
- ar1:= nil; //compiler warning
  if issubcomponent then begin
   result:= inherited getvalues;
  end
@@ -1893,6 +1898,44 @@ begin
   end;
   setordvalue(cardinal(comp));
  end;
+end;
+
+{ tsisterwidgetpropertyeditor }
+
+function tsisterwidgetpropertyeditor.getvalues: msestringarty;
+var
+ co1: tcomponent;
+ ar1: componentarty;
+ widget1: twidget;
+ int1: integer;
+begin
+ ar1:= nil; //compiler warning
+ if issubcomponent then begin
+  result:= inherited getvalues;
+ end
+ else begin
+  result:= nil;
+  widget1:= twidget(fcomponent).parentwidget;
+  if widget1 <> nil then begin
+   ar1:= fdesigner.getcomponentlist(tcomponentclass(typedata^.classtype));
+   for int1:= 0 to high(ar1) do begin
+    if (twidget(ar1[int1]).parentwidget <> widget1) or 
+                  (ar1[int1] = fcomponent) then begin
+     ar1[int1]:= nil;
+    end;
+   end;
+   for int1:= 0 to high(ar1) do begin
+    if ar1[int1] <> nil then begin
+     additem(result,msestring(ar1[int1].name));
+    end;
+   end;
+  end;
+ end;
+end;
+
+function tsisterwidgetpropertyeditor.getdefaultstate: propertystatesty;
+begin
+ result:= inherited getdefaultstate + [ps_sortlist];
 end;
 
 { tlocalcomponentpropertyeditor }

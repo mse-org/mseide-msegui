@@ -150,13 +150,22 @@ type
    function textar(const fieldno: integer): msestringarty;
    
    function lookupinteger(const integerkeyfieldno,integerfieldno,
-                                keyvalue: integer): integer;
+                                keyvalue: integer): integer; overload;
+                           //0 if not found
+   function lookupinteger(const stringkeyfieldno,integerfieldno: integer;
+                         const keyvalue: msestring): integer; overload;
                            //0 if not found
    function lookuptext(const integerkeyfieldno,textfieldno,
-                                keyvalue: integer): msestring;
+                                keyvalue: integer): msestring; overload;
+                           //'' if not found
+   function lookuptext(const stringkeyfieldno,textfieldno: integer;
+                      const keyvalue: msestring): msestring; overload;
                            //'' if not found
    function lookupfloat(const integerkeyfieldno,floatfieldno,
-                                keyvalue: integer): realty;
+                                keyvalue: integer): realty; overload;
+                           //emptyreal if not found
+   function lookupfloat(const stringkeyfieldno,floatfieldno: integer;
+                                keyvalue: msestring): realty; overload;
                            //emptyreal if not found
                            
    function count: integer; virtual;
@@ -782,6 +791,20 @@ begin
  end;
 end;
 
+function tcustomlookupbuffer.lookupinteger(const stringkeyfieldno: integer;
+               const integerfieldno: integer;
+               const keyvalue: msestring): integer;
+var
+ int1: integer;
+begin
+ if findphys(stringkeyfieldno,keyvalue,int1,false) then begin
+  result:= integervaluephys(integerfieldno,int1);
+ end
+ else begin
+  result:= 0;
+ end;
+end;
+
 function tcustomlookupbuffer.lookuptext(const integerkeyfieldno: integer;
                const textfieldno: integer; const keyvalue: integer): msestring;
 var
@@ -795,12 +818,40 @@ begin
  end;
 end;
 
+function tcustomlookupbuffer.lookuptext(const stringkeyfieldno: integer;
+               const textfieldno: integer;
+               const keyvalue: msestring): msestring;
+var
+ int1: integer;
+begin
+ if findphys(stringkeyfieldno,keyvalue,int1,false) then begin
+  result:= textvaluephys(textfieldno,int1);
+ end
+ else begin
+  result:= '';
+ end;
+end;
+
 function tcustomlookupbuffer.lookupfloat(const integerkeyfieldno: integer;
                const floatfieldno: integer; const keyvalue: integer): realty;
 var
  int1: integer;
 begin
- if findphys(floatfieldno,keyvalue,int1) then begin
+ if findphys(integerkeyfieldno,keyvalue,int1) then begin
+  result:= floatvaluephys(floatfieldno,int1);
+ end
+ else begin
+  result:= emptyreal;
+ end;
+end;
+
+
+function tcustomlookupbuffer.lookupfloat(const stringkeyfieldno: integer;
+               const floatfieldno: integer; keyvalue: msestring): realty;
+var
+ int1: integer;
+begin
+ if findphys(stringkeyfieldno,keyvalue,int1,false) then begin
   result:= floatvaluephys(floatfieldno,int1);
  end
  else begin
