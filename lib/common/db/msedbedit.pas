@@ -4996,7 +4996,7 @@ end;
 procedure tgriddatalink.beforefocuscell(const cell: gridcoordty;
                              const selectaction: focuscellactionty);
 begin
- if (selectaction = fca_entergrid) and (recordcount = 0) and active and
+ if (selectaction = fca_entergrid) and active and (recordcount = 0) and
                 (og_autofirstrow in fgrid.optionsgrid) then begin
   dataset.insert;
  end;

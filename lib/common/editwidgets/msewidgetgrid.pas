@@ -1591,11 +1591,11 @@ end;
 constructor tcustomwidgetgrid.create(aowner: tcomponent);
 begin
  fmousefocusedcell.col:= -1;
+ inherited;
  fcontainer1:= ttopcontainer.create(self);
  fcontainer2:= tcontainer.create(self);
  fcontainer3:= tbottomcontainer.create(self);
  fwidgetdummy:= twidgetdummy.create(self);
- inherited;
  setoptionsgrid(foptionsgrid); //synchronize container
 // fcontainer.Name:= 'container';
 end;
