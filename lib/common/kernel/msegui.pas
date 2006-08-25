@@ -4382,8 +4382,13 @@ var
  int1: integer;
  bo1: boolean;
 begin
+ bo1:= isenabled;
+ if not bo1 then begin
+  if focused then begin
+   window.setfocusedwidget(nil);
+  end;
+ end;   
  if fframe <> nil then begin
-  bo1:= isenabled;
   if bo1 or not (frl_nodisable in fframe.flocalprops) then begin
    fframe.setdisabled(not bo1);
   end;
@@ -8369,6 +8374,9 @@ begin
     if not widget1.canclose(widget) then begin
      exit;
     end;
+    if (ffocuscount <> focuscountbefore) then begin
+     exit;
+    end;
     ffocusedwidget:= nil;
     widget1.internaldodefocus;
     if ffocuscount <> focuscountbefore then begin
@@ -8392,6 +8400,9 @@ begin
     end;
     widget1:= widget1.fparentwidget;
    end;
+  end;
+  if (widget <> nil) and not widget.canfocus then begin
+   exit;
   end;
   ffocusedwidget:= widget;
   if widget <> nil then begin

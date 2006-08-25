@@ -174,9 +174,11 @@ var
  statebefore: shapestatesty;
  int1: integer;
  po1: pshapeinfoty;
+ bo1: boolean;
 
 begin
  result:= false;
+ bo1:= (widget = nil) or widget.isenabled;
  with info,mouseevent do begin
   statebefore:= state;
   if es_drag in eventstate then begin
@@ -184,7 +186,7 @@ begin
    updateshapemoveclick(infoarpo,false);
   end
   else begin
-   if not (ss_invisible in state) then begin
+   if not (ss_invisible in state) and bo1 then begin
     case eventkind of
      ek_clientmouseleave,ek_mouseleave: begin
       if (eventkind = ek_mouseleave) or not (ss_widgetorg in state) then begin

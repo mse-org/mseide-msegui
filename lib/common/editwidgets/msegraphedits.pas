@@ -2066,7 +2066,7 @@ end;
 procedure tcustomdatabutton.togglevalue;
 begin
  inherited;
- if window.candefocus then begin
+ if window.candefocus and isenabled then begin
   doexecute;
  end;
 end;

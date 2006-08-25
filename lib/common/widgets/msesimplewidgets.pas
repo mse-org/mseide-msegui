@@ -386,7 +386,7 @@ begin
      (finfo.state * [ss_invisible,ss_disabled,ss_default] = [ss_default]) and
        (info.key = key_return) and (info.shiftstate = []) then begin
    include(info.eventstate,es_processed);
-   if (fmodalresult = mr_cancel) or window.candefocus then begin
+   if (fmodalresult = mr_cancel) or window.candefocus and isenabled then begin
     doexecute;
    end
    else begin
