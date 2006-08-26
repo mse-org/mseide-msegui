@@ -61,6 +61,10 @@ type
    procedure setparsesql(const avalue: boolean);
    function recupdatesql(updatekind : tupdatekind): string;
    function getcontroller: tdscontroller;
+   function getindexdefs: TIndexDefs;
+   procedure setindexdefs(const avalue: TIndexDefs);
+   function getetstatementtype: TStatementType;
+   procedure setstatementtype(const avalue: TStatementType);
   protected
    procedure updateindexdefs; override;
    procedure sqlonchange(sender: tobject);
@@ -125,6 +129,11 @@ type
    property ReadOnly: boolean read getreadonly write setreadonly default false;
    property UpdateMode default upWhereKeyOnly;
    property UsePrimaryKeyAsKey default true;
+   property IndexDefs : TIndexDefs read getindexdefs write setindexdefs;
+               //must be writable because it is streamed
+   property StatementType : TStatementType read getetstatementtype 
+                                  write setstatementtype;
+               //must be writable because it was streamed in FPC 2.0.4
  end;
 
  idbparaminfo = interface(inullinterface)['{D0EDEE1E-A4CC-DA11-9F9B-00C0CA1308FF}']
@@ -308,6 +317,16 @@ destructor tmsesqlquery.destroy;
 begin
  fcontroller.free;
  inherited;
+end;
+
+function tmsesqlquery.getindexdefs: TIndexDefs;
+begin
+ result:= inherited indexdefs;
+end;
+
+procedure tmsesqlquery.setindexdefs(const avalue: TIndexDefs);
+begin
+ inherited indexdefs.assign(avalue);
 end;
 
 procedure tmsesqlquery.updateindexdefs;
@@ -809,6 +828,16 @@ begin        //workaround for FPC bug 7266
    inherited;
   end;
  end;
+end;
+
+function tmsesqlquery.getetstatementtype: TStatementType;
+begin
+ result:= inherited statementtype;
+end;
+
+procedure tmsesqlquery.setstatementtype(const avalue: TStatementType);
+begin
+ //dummy
 end;
 
 { tparamsourcedatalink }
