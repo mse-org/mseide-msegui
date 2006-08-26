@@ -225,50 +225,54 @@ begin
  if not (spo_vmove in foptions) then begin
   result.y:= 0;
  end;
- if flinkleft <> nil then begin
-  with twidget1(flinkleft) do begin
-   if fwidgetrect.cx + result.x < bounds_cxmin then begin
-    result.x:= bounds_cxmin - fwidgetrect.cx;
+ if flinkleft <> flinkright then begin
+  if (flinkleft <> nil)  then begin
+   with twidget1(flinkleft) do begin
+    if fwidgetrect.cx + result.x < bounds_cxmin then begin
+     result.x:= bounds_cxmin - fwidgetrect.cx;
+    end;
+    if bounds_cxmax > 0 then begin
+     if fwidgetrect.cx + result.x > bounds_cxmax then begin
+      result.x:= bounds_cxmax - fwidgetrect.cx;
+     end;
+    end;
    end;
-   if bounds_cxmax > 0 then begin
-    if fwidgetrect.cx + result.x > bounds_cxmax then begin
-     result.x:= bounds_cxmax - fwidgetrect.cx;
+  end;
+  if flinkright <> nil then begin
+   with twidget1(flinkright) do begin
+    if fwidgetrect.cx - result.x < bounds_cxmin then begin
+     result.x:= - (bounds_cxmin - fwidgetrect.cx);
+    end;
+    if bounds_cxmax > 0 then begin
+     if fwidgetrect.cx - result.x > bounds_cxmax then begin
+      result.x:= - (bounds_cxmax - fwidgetrect.cx);
+     end;
     end;
    end;
   end;
  end;
- if flinktop <> nil then begin
-  with twidget1(flinktop) do begin
-   if fwidgetrect.cy + result.y < bounds_cymin then begin
-    result.y:= bounds_cymin - fwidgetrect.cy;
-   end;
-   if bounds_cymax > 0 then begin
-    if fwidgetrect.cy + result.y > bounds_cymax then begin
-     result.y:= bounds_cymax - fwidgetrect.cy;
+ if flinktop <> flinkbottom then begin
+  if (flinktop <> nil) then begin
+   with twidget1(flinktop) do begin
+    if fwidgetrect.cy + result.y < bounds_cymin then begin
+     result.y:= bounds_cymin - fwidgetrect.cy;
+    end;
+    if bounds_cymax > 0 then begin
+     if fwidgetrect.cy + result.y > bounds_cymax then begin
+      result.y:= bounds_cymax - fwidgetrect.cy;
+     end;
     end;
    end;
   end;
- end;
- if flinkright <> nil then begin
-  with twidget1(flinkright) do begin
-   if fwidgetrect.cx - result.x < bounds_cxmin then begin
-    result.x:= - (bounds_cxmin - fwidgetrect.cx);
-   end;
-   if bounds_cxmax > 0 then begin
-    if fwidgetrect.cx - result.x > bounds_cxmax then begin
-     result.x:= - (bounds_cxmax - fwidgetrect.cx);
+  if flinkbottom <> nil then begin
+   with twidget1(flinkbottom) do begin
+    if fwidgetrect.cy - result.y < bounds_cymin then begin
+     result.y:= - (bounds_cymin - fwidgetrect.cy);
     end;
-   end;
-  end;
- end;
- if flinkbottom <> nil then begin
-  with twidget1(flinkbottom) do begin
-   if fwidgetrect.cy - result.y < bounds_cymin then begin
-    result.y:= - (bounds_cymin - fwidgetrect.cy);
-   end;
-   if bounds_cymax > 0 then begin
-    if fwidgetrect.cy - result.y > bounds_cymax then begin
-     result.y:= - (bounds_cymax - fwidgetrect.cy);
+    if bounds_cymax > 0 then begin
+     if fwidgetrect.cy - result.y > bounds_cymax then begin
+      result.y:= - (bounds_cymax - fwidgetrect.cy);
+     end;
     end;
    end;
   end;
@@ -291,30 +295,40 @@ procedure tsplitter.updatelinkedwidgets(const delta: pointty);
 var
  rect1: rectty;
 begin
- if flinkleft <> nil then begin
-  flinkleft.bounds_cx:= flinkleft.bounds_cx + delta.x;
- end;
- if flinkright <> nil then begin
-  rect1:= twidget1(flinkright).fwidgetrect;
-  rect1.x:= rect1.x + delta.x;
-//  if an_right in flinkbottom.anchors then begin
+ if flinkleft = flinkright then begin
+  if flinkright <> nil then begin
+   flinkright.bounds_x:= flinkright.bounds_x + delta.x;
+  end;
+ end
+ else begin
+  if flinkleft <> nil then begin
+   flinkleft.bounds_cx:= flinkleft.bounds_cx + delta.x;
+  end;
+  if flinkright <> nil then begin
+   rect1:= twidget1(flinkright).fwidgetrect;
+   rect1.x:= rect1.x + delta.x;
    rect1.cx:= rect1.cx - delta.x;
-//  end;
-  flinkright.widgetrect:= rect1;
+   flinkright.widgetrect:= rect1;
+  end;
  end;
- if flinktop <> nil then begin
-  flinktop.bounds_cy:= flinktop.bounds_cy + delta.y;
- end;
- if flinkbottom <> nil then begin
-  rect1:= twidget1(flinkbottom).fwidgetrect;
-  rect1.y:= rect1.y + delta.y;
-//  if an_bottom in flinkbottom.anchors then begin
+ if flinktop = flinkbottom then begin
+  if flinkbottom <> nil then begin
+   flinkbottom.bounds_y:= flinkbottom.bounds_y + delta.y;
+  end;
+ end
+ else begin
+  if flinktop <> nil then begin
+   flinktop.bounds_cy:= flinktop.bounds_cy + delta.y;
+  end;
+  if flinkbottom <> nil then begin
+   rect1:= twidget1(flinkbottom).fwidgetrect;
+   rect1.y:= rect1.y + delta.y;
    rect1.cy:= rect1.cy - delta.y;
-//  end;
-  flinkbottom.widgetrect:= rect1;
- end;
- if canevent(tmethod(fonupdatelayout)) then begin
-  fonupdatelayout(self);
+   flinkbottom.widgetrect:= rect1;
+  end;
+  if canevent(tmethod(fonupdatelayout)) then begin
+   fonupdatelayout(self);
+  end;
  end;
 end;
 
