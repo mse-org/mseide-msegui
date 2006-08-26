@@ -214,6 +214,7 @@ type
    procedure childmouseevent(const sender: twidget; var info: mouseeventinfoty); override;
    procedure clientmouseevent(var info: mouseeventinfoty); override;
    procedure dokeydown(var info: keyeventinfoty); override;
+   procedure doexit; override;
 
    function getcontainer: twidget; override;
    function getchildwidgets(const index: integer): twidget; override;
@@ -2275,6 +2276,13 @@ end;
 function tcustomwidgetgrid.getgriddatalink: pointer;
 begin
  result:= nil;
+end;
+
+procedure tcustomwidgetgrid.doexit;
+begin
+ if canclose(nil) then begin
+  inherited;
+ end;
 end;
 
 end.

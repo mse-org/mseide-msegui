@@ -5946,7 +5946,8 @@ begin
      mouseleavecol;
     end;
     fmouseeventcol:= fmousecell.col;
-    if not (es_processed in info.eventstate) then begin
+    if not (es_processed in info.eventstate) and 
+              (fmousecell.col >= 0) then begin //ek_clientmouseleave otherwise
      coord1:= ffocusedcell;
      fdatacols[fmousecell.col].clientmouseevent(fmousecell,info);
      if not gridcoordisequal(ffocusedcell,coord1) then begin

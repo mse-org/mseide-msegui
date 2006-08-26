@@ -250,6 +250,7 @@ type
 
    function getoptionsedit: optionseditty; virtual;//iedit
    procedure setoptionsedit(const avalue: optionseditty); virtual;
+   procedure updateoptions; virtual;
    procedure editnotification(var info: editnotificationinfoty); virtual;
      //interface to inplaceedit
    procedure dokeydown(var info: keyeventinfoty); override;
@@ -846,9 +847,17 @@ begin
  result:= foptionsedit;
 end;
 
+procedure tcustomedit.updateoptions;
+begin
+ //dummy
+end;
+
 procedure tcustomedit.setoptionsedit(const avalue: optionseditty);
 begin
- foptionsedit:= avalue;
+ if foptionsedit <> avalue then begin
+  foptionsedit:= avalue;
+  updateoptions;
+ end;
 end;
 
 function tcustomedit.geteditfont: tfont;

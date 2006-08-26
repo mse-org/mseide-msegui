@@ -754,6 +754,7 @@ type
    procedure defineproperties(filer: tfiler); override;
    procedure readstatvalue(const reader: tstatreader); override;
    procedure writestatvalue(const writer: tstatwriter); override;
+   function isempty (const atext: msestring): boolean; override;
   public
    constructor create(aowner: tcomponent); override;
    procedure fillcol(const value: tdatetime);
@@ -790,7 +791,7 @@ type
    procedure internalcreateframe; override;
    procedure dokeydown(var info: keyeventinfoty); override;
    procedure mouseevent(var info: mouseeventinfoty); override;
-   procedure setoptionsedit(const avalue: optionseditty); override;
+   procedure updateoptions; override;
    procedure editnotification(var info: editnotificationinfoty); override;
    //idropdownwidget
    procedure buttonaction(var action: buttonactionty; const buttonindex: integer);
@@ -3583,6 +3584,11 @@ begin
           {$ifdef FPC}@{$endif}writemax,bo3);
 end;
 
+function tcustomdatetimeedit.isempty(const atext: msestring): boolean;
+begin
+ result:= (atext <> ' ') and inherited isempty(atext);
+end;
+
 { tcustomcalendardatetimeedit }
 
 constructor tcustomcalendardatetimeedit.create(aowner: tcomponent);
@@ -3620,7 +3626,7 @@ begin
  inherited;
 end;
 
-procedure tcustomcalendardatetimeedit.setoptionsedit(const avalue: optionseditty);
+procedure tcustomcalendardatetimeedit.updateoptions;
 begin
  inherited;
  if fdropdown <> nil then begin

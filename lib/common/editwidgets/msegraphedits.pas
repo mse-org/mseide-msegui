@@ -64,6 +64,7 @@ type
    fgridintf: iwidgetgrid;
    
    function getoptionsedit: optionseditty; virtual;
+   procedure updateoptions; virtual;
    procedure loaded; override;
    procedure internalcreateframe; override;
 
@@ -1123,6 +1124,11 @@ begin
  result := foptionsedit;
 end;
 
+procedure tgraphdataedit.updateoptions;
+begin
+ //dummy
+end;
+
 procedure tgraphdataedit.setoptionsedit(const avalue: optionseditty);
 begin
  if foptionsedit <> avalue then begin
@@ -1130,6 +1136,7 @@ begin
   if fgridintf <> nil then begin
    fgridintf.updateeditoptions(foptionsedit);
   end;
+  updateoptions;
  end;
 end;
 
@@ -2066,9 +2073,9 @@ end;
 procedure tcustomdatabutton.togglevalue;
 begin
  inherited;
- if window.candefocus and isenabled then begin
-  doexecute;
- end;
+// if window.candefocus and isenabled then begin
+ doexecute;
+// end;
 end;
 
 { tstockglyphdatabutton }

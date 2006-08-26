@@ -112,6 +112,7 @@ type
   procedure fieldtovalue;
   procedure setnullvalue;
   function getoptionsedit: optionseditty;
+  procedure updateoptions; //for readonlystate
  end;
 
  tgriddatalink = class;
@@ -126,7 +127,7 @@ type
    function canmodify: boolean;
    procedure setediting(avalue: boolean);
   protected
-   procedure dataevent(event: tdataevent; info: integer); override;
+   procedure activechanged; override;
    procedure editingchanged; override;
    procedure focuscontrol(afield: tfieldref); override;
    procedure recordchanged(afield: tfield); override;
@@ -1183,6 +1184,7 @@ type
    procedure valuetofield;
    procedure fieldtovalue;
    procedure setnullvalue;
+   procedure updateoptions;
   public
    constructor create(const agrid: tcustomgrid; 
                          const aowner: tgridarrayprop); override;
@@ -1537,7 +1539,7 @@ type
  
 implementation
 uses
- msestockobjects,mseshapes,msereal,mseactions,rtlconsts,msedrawtext;
+ msestockobjects,mseshapes,msereal,mseactions,rtlconsts,msedrawtext,sysutils;
 
 type
  tcomponent1 = class(tcomponent);
@@ -1826,7 +1828,6 @@ begin
  end;
 end;
 
-
 function teditwidgetdatalink.edit: Boolean;
 begin
  if canmodify then begin
@@ -1868,6 +1869,13 @@ end;
 procedure teditwidgetdatalink.editingchanged;
 begin
  setediting(inherited editing and canmodify);
+ fintf.updateoptions;
+end;
+
+procedure teditwidgetdatalink.activechanged;
+begin
+ fintf.updateoptions;
+ inherited;
 end;
 
 procedure teditwidgetdatalink.focuscontrol(afield: tfieldref);
@@ -1913,12 +1921,11 @@ end;
 
 procedure teditwidgetdatalink.updatedata;
 begin
- if (fintf.edited and fintf.checkvalue) or fmodified then begin
-         //left to right evaluation needed
-//  if ffield <> nil then begin
-//   fintf.valuetofield;
-//  end;
-  FModified := False;
+ if fintf.getwidget.canclose(nil) then begin
+  fmodified:= false;
+ end
+ else begin
+  raise eabort.create('');
  end;
 end;
 
@@ -1957,23 +1964,6 @@ begin
  if datasource <> datasource1 then begin
   datasource:= datasource1;
  end;
-end;
-
-procedure teditwidgetdatalink.dataevent(event: tdataevent; info: integer);
-begin
- inherited;
- {$ifndef FPC}
- {
- if Event = deDisabledStateChange then begin
-  if Boolean(Info) then begin
-   UpdateField;
-  end
-  else begin
-   FField := nil;
-  end;
- end;
- }
- {$endif}
 end;
 
 function teditwidgetdatalink.nullcheckneeded: boolean;
@@ -4968,12 +4958,17 @@ begin
  beginnullchecking;
  tcustomgrid1(fgrid).beginnonullcheck;
  try 
+  if checkvalue then begin
+   inherited;
+  end;
+{
   if not checkvalue then begin
    application.postevent(tobjectevent.create(ek_dbedit,ievent(self)));
   end
   else begin
    inherited;
   end;
+}
  finally
   tcustomgrid1(fgrid).endnonullcheck;
   endnullchecking;
@@ -5351,6 +5346,11 @@ begin
 end;
 
 procedure tdbstringcol.initfocus;
+begin
+ //dummy
+end;
+
+procedure tdbstringcol.updateoptions;
 begin
  //dummy
 end;

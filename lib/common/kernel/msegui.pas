@@ -1297,7 +1297,8 @@ type
 
  tapplication = class(tmsecomponent)
   private
-   fwindows: tpointerlist;
+//   fwindows: tpointerlist;
+   fwindows: windowarty;
    factivewindow: twindow;
    fwantedactivewindow: twindow; //set by twindow.activate if modal
    ffocuslockwindow: twindow;
@@ -1428,6 +1429,8 @@ type
       //lowest visible window in stackorder, calls sortzorder
    function topwindow: twindow;
       //highest visible window in stackorder, calls sortzorder
+   function candefocus: boolean;
+      //checks candefocus of all windows
 
    procedure registeronterminated(const method: notifyeventty);
    procedure unregisteronterminated(const method: notifyeventty);
@@ -8086,8 +8089,8 @@ begin
      exclude(fstate,tws_windowvisible);
      include(fstate,tws_grouphidden);
      include(fstate,tws_groupminimized);
-     for int1:= 0 to app.fwindows.count - 1 do begin
-      window1:= twindow(app.fwindows[int1]);
+     for int1:= 0 to high(app.fwindows) do begin
+      window1:= app.fwindows[int1];
       if (window1 <> self) and (window1.fwinid <> 0) and 
                         gui_windowvisible(window1.fwinid) then begin
        with window1 do begin
@@ -8130,8 +8133,8 @@ begin
     end;
     exclude(fstate,tws_grouphidden);
     exclude(fstate,tws_groupminimized);
-    for int1:= 0 to app.fwindows.count - 1 do begin
-     window1:= twindow(app.fwindows[int1]);
+    for int1:= 0 to high(app.fwindows) do begin
+     window1:= app.fwindows[int1];
      if window1 <> self then begin
       with window1 do begin
        if tws_grouphidden in fstate then begin
@@ -9034,7 +9037,7 @@ begin
  fonactivechangelist:= tonactivechangelist.create;
  fonwindowdestroyedlist:= tonwindoweventlist.create;
  fonapplicationactivechangedlist:= tonapplicationactivechangedlist.create;
- fwindows:= tpointerlist.create;
+// fwindows:= tpointerlist.create;
  feventlist:= tobjectqueue.create(true);
  fcaret:= tcaret.create;
  fmouse:= tmouse.create(imouse(self));
@@ -9049,8 +9052,8 @@ begin
  while componentcount > 0 do begin
   components[0].free;  //destroy loaded forms
  end;
- while fwindows.Count > 0 do begin
-  twindow(fwindows[0]).fowner.free;
+ while high(fwindows) >= 0 do begin
+  fwindows[0].fowner.free;
  end;
  inherited;
  fmouseparktimer.free;
@@ -9059,7 +9062,7 @@ begin
  freeandnil(fcaret);
  deinitialize;
  fmouse.free;
- fwindows.free;
+// fwindows.free;
  feventlist.free;
  fonidlelist.free;
  fonterminatedlist.free;
@@ -9522,11 +9525,10 @@ procedure tinternalapplication.registerwindow(window: twindow);
 begin
  lock;
  try
-  if fwindows.indexof(window) >= 0 then begin
+  if finditem(pointerarty(fwindows),window) >= 0 then begin
    guierror(gue_alreadyregistered,window.fowner.name);
   end;
-//  window.checkwindow(false); //create window
-  fwindows.add(window);
+  additem(pointerarty(fwindows),window);
   exclude(fstate,aps_zordervalid);
  finally
   unlock;
@@ -9537,7 +9539,7 @@ procedure tinternalapplication.unregisterwindow(window: twindow);
 begin
  lock;
  try
-  fwindows.extract(window);
+  removeitem(pointerarty(fwindows),window);
   if window.fwinid = fmousewinid then begin
    fmousewinid:= 0;
   end;
@@ -9577,9 +9579,9 @@ var
  int1: integer;
 begin
  include(info.eventstate,es_broadcast);
- for int1:= fwindows.count - 1 downto 0 do begin
-  if fwindows[int1] <> pointer(sender) then begin
-   twindow(fwindows[int1]).doshortcut(info,awidget);
+ for int1:= high(fwindows) downto 0 do begin
+  if fwindows[int1] <> sender then begin
+   fwindows[int1].doshortcut(info,awidget);
    if (es_processed in info.eventstate) then begin
     break;
    end;
@@ -9599,16 +9601,16 @@ begin
    fmainwindow.fowner.activate;
   end
   else begin
-   for int1:= 0 to fwindows.Count - 1 do begin
-    with twindow(fwindows[int1]).fowner do begin
+   for int1:= 0 to high(fwindows) do begin
+    with fwindows[int1].fowner do begin
      if visible then begin
       activate;
       break;
      end;
     end;
    end;
-   if (factivewindow = nil) and (fwindows.Count > 0) then begin
-    twindow(fwindows[0]).fowner.activate;
+   if (factivewindow = nil) and (high(fwindows) >= 0) then begin
+    fwindows[0].fowner.activate;
    end;
   end;
  end;
@@ -9692,10 +9694,10 @@ begin       //eventloop
     repeat
      bo1:= false;
      exclude(fstate,aps_invalidated);
-     for int1:= 0 to fwindows.Count - 1 do begin
+     for int1:= 0 to high(fwindows) do begin
       exclude(fstate,aps_invalidated);
       try
-       bo1:= twindow(fwindows[int1]).internalupdate or bo1;
+       bo1:= fwindows[int1].internalupdate or bo1;
       except
        handleexception(self);
       end;
@@ -10312,11 +10314,9 @@ end;
 function tapplication.grabpointer(const id: winidty): boolean;
 var
  int1: integer;
- po1: pwindowaty;
 begin
- po1:= pwindowaty(fwindows.datapo);
- for int1:= 0 to fwindows.count - 1 do begin
-  with po1^[int1] do begin
+ for int1:= 0 to high(fwindows) do begin
+  with fwindows[int1] do begin
    if fwinid <> id then begin
     exclude(fstate,tws_grab);
    end;
@@ -10338,12 +10338,10 @@ end;
 function tapplication.ungrabpointer: boolean;
 var
  int1: integer;
- po1: pwindowaty;
 begin
  result:= false;
- po1:= pwindowaty(fwindows.datapo);
- for int1:= 0 to fwindows.count - 1 do begin
-  if tws_grab in po1^[int1].fstate then begin
+ for int1:= 0 to high(fwindows) do begin
+  if tws_grab in fwindows[int1].fstate then begin
    exit;
   end;
  end;
@@ -10582,9 +10580,9 @@ var
  int1: integer;
 begin
  result:= false;
- for int1:= 0 to fwindows.count - 1 do begin
-  window:= twindow(fwindows[int1]);
-  if window.fwinid = id then begin
+ for int1:= 0 to high(fwindows) do begin
+  if fwindows[int1].fwinid = id then begin
+   window:= fwindows[int1];
    result:= true;
    exit;
   end;
@@ -10689,12 +10687,9 @@ end;
 
 function tapplication.windowar: windowarty;
 begin
- if fwindows.count > 0 then begin
-  setlength(result,fwindows.count);
-  move(fwindows.datapo^,result[0],length(result)*sizeof(pointer));
- end
- else begin
-  result:= nil;
+ setlength(result,length(fwindows));
+ if result <> nil then begin
+  move(fwindows[0],result[0],length(result)*sizeof(pointer));
  end;
 end;
 
@@ -10712,12 +10707,13 @@ end;
 
 function tapplication.getwindows(const index: integer): twindow;
 begin
- result:= twindow(fwindows[index]);
+ checkarrayindex(fwindows,index);
+ result:= fwindows[index];
 end;
 
 function tapplication.windowcount: integer;
 begin
- result:= fwindows.count;
+ result:= length(fwindows);
 end;
 
 function cmpwindowvisibility(const l,r): integer;
@@ -10751,8 +10747,10 @@ begin
   if high(ar1) >= 0 then begin
    gui_getzorder(ar1,ar2);
    sortarray(ar2,ar3);
-   fwindows.order(ar3);
-   fwindows.sort({$ifdef FPC}@{$endif}cmpwindowvisibility);
+   orderarray(ar3,pointerarty(fwindows));
+   sortarray(pointerarty(fwindows),{$ifdef FPC}@{$endif}cmpwindowvisibility);
+//   fwindows.order(ar3);
+//   fwindows.sort({$ifdef FPC}@{$endif}cmpwindowvisibility);
   end;
   include(fstate,aps_zordervalid);
  end;
@@ -10971,8 +10969,8 @@ begin
  if value <> nil then begin
   if value.fowner.isgroupleader then begin
    id:= value.winid;
-   for int1:= 0 to fwindows.count - 1 do begin
-    with twindow(fwindows[int1]) do begin
+   for int1:= 0 to high(fwindows) do begin
+    with fwindows[int1] do begin
      if fwinid <> 0 then begin
       gui_setwindowgroup(fwinid,id);
      end;
@@ -11141,6 +11139,19 @@ end;
 procedure tapplication.langchanged;
 begin
  //todo: refresh widgets
+end;
+
+function tapplication.candefocus: boolean;
+var
+ int1: integer;
+begin
+ result:= true;
+ for int1:= 0 to high(fwindows) do begin
+  if not fwindows[int1].candefocus then begin
+   result:= false;
+   break;
+  end;
+ end;
 end;
 
 initialization
