@@ -31,7 +31,7 @@ object projectoptionsfo: tprojectoptionsfo
     frame.dummy = 0
     anchors = [an_top, an_bottom]
     taborder = 1
-    activepageindex = 4
+    activepageindex = 3
     tab_frame.dummy = 0
     tab_size = 20
     statfile = statfile1
@@ -136,7 +136,7 @@ object projectoptionsfo: tprojectoptionsfo
           bounds_x = 0
           bounds_y = 0
           bounds_cy = 18
-          taborder = 1
+          taborder = 2
           visible = False
           optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_eatreturn, oe_resetselectonexit, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_savestate]
           value = True
@@ -147,7 +147,7 @@ object projectoptionsfo: tprojectoptionsfo
           bounds_x = 14
           bounds_y = 0
           bounds_cy = 18
-          taborder = 2
+          taborder = 3
           visible = False
           optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_eatreturn, oe_resetselectonexit, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_savestate]
           value = True
@@ -158,7 +158,7 @@ object projectoptionsfo: tprojectoptionsfo
           bounds_x = 28
           bounds_y = 0
           bounds_cy = 18
-          taborder = 3
+          taborder = 4
           visible = False
           optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_eatreturn, oe_resetselectonexit, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_savestate]
           value = True
@@ -169,7 +169,7 @@ object projectoptionsfo: tprojectoptionsfo
           bounds_x = 42
           bounds_y = 0
           bounds_cy = 18
-          taborder = 4
+          taborder = 5
           visible = False
           optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_eatreturn, oe_resetselectonexit, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_savestate]
           value = True
@@ -180,7 +180,7 @@ object projectoptionsfo: tprojectoptionsfo
           bounds_x = 56
           bounds_y = 0
           bounds_cy = 18
-          taborder = 5
+          taborder = 6
           visible = False
           optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_eatreturn, oe_resetselectonexit, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_savestate]
           value = True
@@ -191,7 +191,7 @@ object projectoptionsfo: tprojectoptionsfo
           bounds_x = 70
           bounds_y = 0
           bounds_cy = 18
-          taborder = 6
+          taborder = 7
           visible = False
           optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_eatreturn, oe_resetselectonexit, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_savestate]
           value = True
@@ -203,7 +203,7 @@ object projectoptionsfo: tprojectoptionsfo
           bounds_y = 0
           bounds_cx = 146
           bounds_cy = 18
-          taborder = 7
+          taborder = 8
           visible = False
           optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_eatreturn, oe_resetselectonexit, oe_endonenter, oe_autopopupmenu, oe_savestate]
           reffontheight = 16
@@ -287,7 +287,7 @@ object projectoptionsfo: tprojectoptionsfo
           bounds_y = 0
           bounds_cx = 14
           bounds_cy = 18
-          taborder = 1
+          taborder = 2
           visible = False
           optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_eatreturn, oe_resetselectonexit, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_savestate]
           ondataentered = acttiveselectondataentered
@@ -376,7 +376,7 @@ object projectoptionsfo: tprojectoptionsfo
           bounds_y = 0
           bounds_cx = 98
           bounds_cy = 18
-          taborder = 1
+          taborder = 2
           visible = False
           reffontheight = 16
         end
@@ -386,7 +386,7 @@ object projectoptionsfo: tprojectoptionsfo
           bounds_y = 0
           bounds_cx = 476
           bounds_cy = 18
-          taborder = 2
+          taborder = 3
           onshowhint = hintexpandedmacros
           visible = False
           reffontheight = 16
@@ -864,7 +864,6 @@ object projectoptionsfo: tprojectoptionsfo
       frame.dummy = 0
       anchors = [an_top, an_bottom]
       taborder = 6
-      visible = False
       caption = '&Make'
       onchildscaled = makepageonchildscaled
       object makegroupbox: tgroupbox
@@ -878,7 +877,7 @@ object projectoptionsfo: tprojectoptionsfo
         object makeoptionsgrid: twidgetgrid
           optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_focusbackonesc, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
           bounds_x = 0
-          bounds_y = 14
+          bounds_y = 16
           bounds_cx = 625
           bounds_cy = 125
           bounds_cymin = 40
@@ -976,7 +975,7 @@ object projectoptionsfo: tprojectoptionsfo
             bounds_x = 0
             bounds_y = 0
             bounds_cy = 18
-            taborder = 1
+            taborder = 2
             visible = False
             optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_eatreturn, oe_resetselectonexit, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_savestate]
             valuedefault = True
@@ -986,7 +985,7 @@ object projectoptionsfo: tprojectoptionsfo
             bounds_x = 14
             bounds_y = 0
             bounds_cy = 18
-            taborder = 2
+            taborder = 3
             visible = False
             optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_eatreturn, oe_resetselectonexit, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_savestate]
             valuedefault = True
@@ -996,7 +995,7 @@ object projectoptionsfo: tprojectoptionsfo
             bounds_x = 28
             bounds_y = 0
             bounds_cy = 18
-            taborder = 3
+            taborder = 4
             visible = False
             optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_eatreturn, oe_resetselectonexit, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_savestate]
             valuedefault = True
@@ -1006,7 +1005,7 @@ object projectoptionsfo: tprojectoptionsfo
             bounds_x = 42
             bounds_y = 0
             bounds_cy = 18
-            taborder = 4
+            taborder = 5
             visible = False
             optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_eatreturn, oe_resetselectonexit, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_savestate]
             valuedefault = True
@@ -1016,7 +1015,7 @@ object projectoptionsfo: tprojectoptionsfo
             bounds_x = 56
             bounds_y = 0
             bounds_cy = 18
-            taborder = 5
+            taborder = 7
             visible = False
             optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_eatreturn, oe_resetselectonexit, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_savestate]
             valuedefault = True
@@ -1046,7 +1045,7 @@ object projectoptionsfo: tprojectoptionsfo
         object makesplitter: tsplitter
           optionswidget = [ow_mousefocus, ow_destroywidgets, ow_autoscale]
           bounds_x = 0
-          bounds_y = 139
+          bounds_y = 141
           bounds_cx = 625
           bounds_cy = 3
           anchors = [an_top]
@@ -1059,9 +1058,9 @@ object projectoptionsfo: tprojectoptionsfo
         object unitdirgrid: twidgetgrid
           optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_focusbackonesc, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
           bounds_x = 0
-          bounds_y = 162
+          bounds_y = 144
           bounds_cx = 625
-          bounds_cy = 138
+          bounds_cy = 158
           bounds_cymin = 40
           frame.caption = 'Unit, include and library &directories'
           frame.captionoffset = 3
@@ -1188,7 +1187,7 @@ object projectoptionsfo: tprojectoptionsfo
             bounds_x = 0
             bounds_y = 0
             bounds_cy = 18
-            taborder = 1
+            taborder = 2
             visible = False
             optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_eatreturn, oe_resetselectonexit, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_savestate]
             valuedefault = True
@@ -1198,7 +1197,7 @@ object projectoptionsfo: tprojectoptionsfo
             bounds_x = 14
             bounds_y = 0
             bounds_cy = 18
-            taborder = 2
+            taborder = 3
             visible = False
             optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_eatreturn, oe_resetselectonexit, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_savestate]
             valuedefault = True
@@ -1208,7 +1207,7 @@ object projectoptionsfo: tprojectoptionsfo
             bounds_x = 28
             bounds_y = 0
             bounds_cy = 18
-            taborder = 3
+            taborder = 4
             visible = False
             optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_eatreturn, oe_resetselectonexit, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_savestate]
             valuedefault = True
@@ -1218,7 +1217,7 @@ object projectoptionsfo: tprojectoptionsfo
             bounds_x = 42
             bounds_y = 0
             bounds_cy = 18
-            taborder = 4
+            taborder = 6
             visible = False
             optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_eatreturn, oe_resetselectonexit, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_savestate]
             valuedefault = True
@@ -1228,7 +1227,7 @@ object projectoptionsfo: tprojectoptionsfo
             bounds_x = 56
             bounds_y = 0
             bounds_cy = 18
-            taborder = 6
+            taborder = 7
             visible = False
             optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_eatreturn, oe_resetselectonexit, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_savestate]
             valuedefault = True
@@ -1238,7 +1237,7 @@ object projectoptionsfo: tprojectoptionsfo
             bounds_x = 70
             bounds_y = 0
             bounds_cy = 18
-            taborder = 7
+            taborder = 8
             visible = False
             optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_eatreturn, oe_resetselectonexit, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_savestate]
             valuedefault = True
@@ -1248,7 +1247,7 @@ object projectoptionsfo: tprojectoptionsfo
             bounds_x = 85
             bounds_y = 0
             bounds_cy = 18
-            taborder = 8
+            taborder = 9
             visible = False
             optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_eatreturn, oe_resetselectonexit, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_savestate]
             valuedefault = True
@@ -1258,7 +1257,7 @@ object projectoptionsfo: tprojectoptionsfo
             bounds_x = 99
             bounds_y = 0
             bounds_cy = 18
-            taborder = 9
+            taborder = 10
             visible = False
             optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_eatreturn, oe_resetselectonexit, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_savestate]
             valuedefault = True
@@ -1268,7 +1267,7 @@ object projectoptionsfo: tprojectoptionsfo
             bounds_x = 113
             bounds_y = 0
             bounds_cy = 18
-            taborder = 10
+            taborder = 11
             visible = False
             optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_eatreturn, oe_resetselectonexit, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_savestate]
             valuedefault = True
@@ -1513,6 +1512,7 @@ object projectoptionsfo: tprojectoptionsfo
       frame.dummy = 0
       anchors = [an_left, an_top, an_right, an_bottom]
       taborder = 4
+      visible = False
       caption = '&Debugger'
       onchildscaled = debuggeronchildscaled
       object stoponexception: tbooleanedit
@@ -1732,7 +1732,8 @@ object projectoptionsfo: tprojectoptionsfo
               frame.colorclient = -2147483645
               frame.localprops = [frl_levelo, frl_colorclient]
               frame.dummy = 0
-              taborder = 1
+              taborder = 2
+              visible = False
               valuedefault = True
             end
             object def: tstringedit
@@ -1829,7 +1830,7 @@ object projectoptionsfo: tprojectoptionsfo
               bounds_y = 0
               bounds_cx = 32
               bounds_cy = 18
-              taborder = 2
+              taborder = 3
               visible = False
               optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_eatreturn, oe_resetselectonexit, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_keyexecute, oe_savestate]
               value = True
@@ -1840,7 +1841,7 @@ object projectoptionsfo: tprojectoptionsfo
               bounds_y = 0
               bounds_cx = 43
               bounds_cy = 18
-              taborder = 3
+              taborder = 4
               visible = False
               optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_eatreturn, oe_resetselectonexit, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_keyexecute, oe_savestate]
             end
@@ -1850,7 +1851,7 @@ object projectoptionsfo: tprojectoptionsfo
               bounds_y = 0
               bounds_cx = 50
               bounds_cy = 18
-              taborder = 4
+              taborder = 5
               visible = False
               max = 255
               reffontheight = 16
@@ -1947,7 +1948,7 @@ object projectoptionsfo: tprojectoptionsfo
               frame.colorclient = -2147483645
               frame.localprops = [frl_levelo, frl_colorclient]
               frame.dummy = 0
-              taborder = 1
+              taborder = 2
               visible = False
               optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_eatreturn, oe_resetselectonexit, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_keyexecute, oe_savestate]
             end
@@ -2121,7 +2122,7 @@ object projectoptionsfo: tprojectoptionsfo
               frame.colorclient = -2147483645
               frame.localprops = [frl_levelo, frl_colorclient]
               frame.dummy = 0
-              taborder = 2
+              taborder = 3
               visible = False
               optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_eatreturn, oe_resetselectonexit, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_keyexecute, oe_savestate]
             end
@@ -2136,7 +2137,7 @@ object projectoptionsfo: tprojectoptionsfo
               frame.localprops = [frl_levelo, frl_colorclient]
               frame.button.imagenr = 17
               frame.dummy = 0
-              taborder = 3
+              taborder = 4
               onshowhint = hintexpandedmacros
               visible = False
               controller.ongetfilename = expandfilename

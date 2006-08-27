@@ -17,11 +17,13 @@ uses
  msegraphics,mseevent,msestat,msestockobjects,mseclasses,msesimplewidgets;
 type
 
- splitteroptionty = (spo_hmove,spo_hprop,spo_vmove,spo_vprop);
+ splitteroptionty = (spo_hmove,spo_hprop,spo_vmove,spo_vprop,
+                     spo_dockleft,spo_docktop,spo_dockright,spo_dockbottom);
  splitteroptionsty = set of splitteroptionty;
 
 const
- defaultsplitteroptions = [];
+ docksplitteroptions = [spo_dockleft,spo_docktop,spo_dockright,spo_dockbottom];
+ defaultsplitteroptions = docksplitteroptions;
  defaultsplittercolor = cl_light;
  defaultsplittercolorgrip = cl_shadow;
  defaultsplittergrip = stb_dens25;
@@ -42,6 +44,7 @@ type
    fcolorgrip: colorty;
    fgrip: stockbitmapty;
    fonupdatelayout: notifyeventty;
+   fupdating: integer;
    procedure setstatfile(const avalue: tstatfile);
    procedure setlinkbottom(const avalue: twidget);
    procedure setlinkleft(const avalue: twidget);
@@ -57,6 +60,10 @@ type
    procedure parentclientrectchanged; override;
    procedure doasyncevent(var atag: integer); override;
    procedure dopaint(const acanvas: tcanvas); override;
+   procedure parentwidgetregionchanged(const sender: twidget); override;
+   procedure loaded; override;
+   procedure updatedock;
+   procedure updatelinkedwidgets(const delta: pointty);
 
    //istatfile
    procedure dostatread(const reader: tstatreader);
@@ -72,7 +79,6 @@ type
    procedure endpickmove(const apos,offset: pointty; const objects: integerarty);
    procedure paintxorpic(const canvas: tcanvas; const apos,offset: pointty;
                  const objects: integerarty);
-   procedure updatelinkedwidgets(const delta: pointty);
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -295,40 +301,45 @@ procedure tsplitter.updatelinkedwidgets(const delta: pointty);
 var
  rect1: rectty;
 begin
- if flinkleft = flinkright then begin
-  if flinkright <> nil then begin
-   flinkright.bounds_x:= flinkright.bounds_x + delta.x;
+ inc(fupdating);
+ try
+  if flinkleft = flinkright then begin
+   if flinkright <> nil then begin
+    flinkright.bounds_x:= flinkright.bounds_x + delta.x;
+   end;
+  end
+  else begin
+   if flinkleft <> nil then begin
+    flinkleft.bounds_cx:= flinkleft.bounds_cx + delta.x;
+   end;
+   if flinkright <> nil then begin
+    rect1:= twidget1(flinkright).fwidgetrect;
+    rect1.x:= rect1.x + delta.x;
+    rect1.cx:= rect1.cx - delta.x;
+    flinkright.widgetrect:= rect1;
+   end;
   end;
- end
- else begin
-  if flinkleft <> nil then begin
-   flinkleft.bounds_cx:= flinkleft.bounds_cx + delta.x;
+  if flinktop = flinkbottom then begin
+   if flinkbottom <> nil then begin
+    flinkbottom.bounds_y:= flinkbottom.bounds_y + delta.y;
+   end;
+  end
+  else begin
+   if flinktop <> nil then begin
+    flinktop.bounds_cy:= flinktop.bounds_cy + delta.y;
+   end;
+   if flinkbottom <> nil then begin
+    rect1:= twidget1(flinkbottom).fwidgetrect;
+    rect1.y:= rect1.y + delta.y;
+    rect1.cy:= rect1.cy - delta.y;
+    flinkbottom.widgetrect:= rect1;
+   end;
+   if canevent(tmethod(fonupdatelayout)) then begin
+    fonupdatelayout(self);
+   end;
   end;
-  if flinkright <> nil then begin
-   rect1:= twidget1(flinkright).fwidgetrect;
-   rect1.x:= rect1.x + delta.x;
-   rect1.cx:= rect1.cx - delta.x;
-   flinkright.widgetrect:= rect1;
-  end;
- end;
- if flinktop = flinkbottom then begin
-  if flinkbottom <> nil then begin
-   flinkbottom.bounds_y:= flinkbottom.bounds_y + delta.y;
-  end;
- end
- else begin
-  if flinktop <> nil then begin
-   flinktop.bounds_cy:= flinktop.bounds_cy + delta.y;
-  end;
-  if flinkbottom <> nil then begin
-   rect1:= twidget1(flinkbottom).fwidgetrect;
-   rect1.y:= rect1.y + delta.y;
-   rect1.cy:= rect1.cy - delta.y;
-   flinkbottom.widgetrect:= rect1;
-  end;
-  if canevent(tmethod(fonupdatelayout)) then begin
-   fonupdatelayout(self);
-  end;
+ finally
+  dec(fupdating);
  end;
 end;
 
@@ -337,7 +348,12 @@ var
  po1: pointty;
 begin
  po1:= clippoint(aoffset);
- self.pos:= addpoint(self.pos,po1);
+ inc(fupdating);
+ try
+  self.pos:= addpoint(self.pos,po1);
+ finally
+  dec(fupdating);
+ end;
  updatelinkedwidgets(po1);
 end;
 
@@ -405,21 +421,25 @@ end;
 procedure tsplitter.setlinkbottom(const avalue: twidget);
 begin
  setlinkedvar(avalue,tmsecomponent(flinkbottom));
+ updatedock;
 end;
 
 procedure tsplitter.setlinkleft(const avalue: twidget);
 begin
  setlinkedvar(avalue,tmsecomponent(flinkleft));
+ updatedock;
 end;
 
 procedure tsplitter.setlinkright(const avalue: twidget);
 begin
  setlinkedvar(avalue,tmsecomponent(flinkright));
+ updatedock;
 end;
 
 procedure tsplitter.setlinktop(const avalue: twidget);
 begin
  setlinkedvar(avalue,tmsecomponent(flinktop));
+ updatedock;
 end;
 
 procedure tsplitter.poschanged;
@@ -509,8 +529,57 @@ begin
    color:= fcolorgrip;
    fillrect(innerclientrect,cl_brushcanvas);
   end;
-//  stockobjects.bitmaps[fgrip].paint(acanvas,clientrect,
-//         [al_xcentered,al_ycentered,al_tiled],fcolorgrip,cl_transparent);
+ end;
+end;
+
+procedure tsplitter.parentwidgetregionchanged(const sender: twidget);
+begin
+ inherited;
+ if (sender <> nil) and ((sender = flinkleft) or (sender = flinktop) or
+                         (sender = flinkright) or (sender = flinkbottom) or
+                         (sender = self)) then begin
+  updatedock;
+ end;
+end;
+
+procedure tsplitter.loaded;
+begin
+ inherited;
+ updatedock;
+end;
+
+procedure tsplitter.updatedock;
+var
+ po1: pointty;
+ rect1: rectty;
+begin
+ if (componentstate * [csloading,csdestroying] = []) and 
+             (foptions * docksplitteroptions <> []) and
+             (fparentwidget <> nil) and (fupdating = 0) then begin
+  inc(fupdating);
+  try  
+   if flinkleft <> nil then begin
+    flinkleft.bounds_cx:= bounds_x - flinkleft.bounds_x;
+   end;
+   if flinktop <> nil then begin
+    flinktop.bounds_cy:= bounds_y - flinktop.bounds_y;
+   end;
+   po1:= addpoint(pos,pointty(size));
+   if flinkright <> nil then begin
+    rect1:= flinkright.widgetrect;
+    rect1.cx:= rect1.cx + (rect1.x - po1.x);
+    rect1.pos.x:= po1.x;
+    flinkright.widgetrect:= rect1;
+   end;
+   if flinkbottom <> nil then begin
+    rect1:= flinkbottom.widgetrect;
+    rect1.cy:= rect1.cy + (rect1.y - po1.y);
+    rect1.pos.y:= po1.y;
+    flinkbottom.widgetrect:= rect1;
+   end;
+  finally
+   dec(fupdating);
+  end;
  end;
 end;
 

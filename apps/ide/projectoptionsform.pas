@@ -1378,8 +1378,8 @@ procedure tprojectoptionsfo.makepageonchildscaled(const sender: TObject);
 var
  int1: integer;
 begin
- placeyorder(0,[0],[mainfile,targetfile,makecommand,messageoutputfile,defaultmake,
-                  makegroupbox],0);
+ placeyorder(0,[0],[mainfile,targetfile,makecommand,messageoutputfile,
+                    defaultmake,makegroupbox],0);
  int1:= makesplitter.bounds_y;
  placeyorder(0,[0],[makeoptionsgrid,makesplitter,unitdirgrid],0);
  makesplitter.move(makepoint(0,int1-makesplitter.bounds_y)); //restore stat value
