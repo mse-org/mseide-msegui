@@ -557,25 +557,41 @@ begin
              (foptions * docksplitteroptions <> []) and
              (fparentwidget <> nil) and (fupdating = 0) then begin
   inc(fupdating);
+  po1:= addpoint(pos,pointty(size));
   try  
-   if flinkleft <> nil then begin
-    flinkleft.bounds_cx:= bounds_x - flinkleft.bounds_x;
+   if flinkleft = flinkbottom then begin
+    if flinkleft <> nil then begin
+     flinkleft.widgetrect:= makerect(bounds_x,flinkleft.bounds_y,bounds_cx,
+                                         flinkleft.bounds_cy);
+    end;
+   end
+   else begin
+    if flinkleft <> nil then begin
+     flinkleft.bounds_cx:= bounds_x - flinkleft.bounds_x;
+    end;
+    if flinkright <> nil then begin
+     rect1:= flinkright.widgetrect;
+     rect1.cx:= rect1.cx + (rect1.x - po1.x);
+     rect1.pos.x:= po1.x;
+     flinkright.widgetrect:= rect1;
+    end;
    end;
-   if flinktop <> nil then begin
-    flinktop.bounds_cy:= bounds_y - flinktop.bounds_y;
-   end;
-   po1:= addpoint(pos,pointty(size));
-   if flinkright <> nil then begin
-    rect1:= flinkright.widgetrect;
-    rect1.cx:= rect1.cx + (rect1.x - po1.x);
-    rect1.pos.x:= po1.x;
-    flinkright.widgetrect:= rect1;
-   end;
-   if flinkbottom <> nil then begin
-    rect1:= flinkbottom.widgetrect;
-    rect1.cy:= rect1.cy + (rect1.y - po1.y);
-    rect1.pos.y:= po1.y;
-    flinkbottom.widgetrect:= rect1;
+   if flinktop = flinkbottom then begin
+    if flinktop <> nil then begin
+     flinktop.widgetrect:= makerect(flinktop.bounds_x,bounds_y,
+                                       flinktop.bounds_cx,bounds_cy);
+    end;
+   end
+   else begin
+    if flinktop <> nil then begin
+     flinktop.bounds_cy:= bounds_y - flinktop.bounds_y;
+    end;
+    if flinkbottom <> nil then begin
+     rect1:= flinkbottom.widgetrect;
+     rect1.cy:= rect1.cy + (rect1.y - po1.y);
+     rect1.pos.y:= po1.y;
+     flinkbottom.widgetrect:= rect1;
+    end;
    end;
   finally
    dec(fupdating);
