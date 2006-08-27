@@ -21,8 +21,11 @@ type
  end;
  
  tlookupbufferfieldsdatalink = class(tlookupbufferdatalink)
+  private
+   procedure datachanged;
   protected
    procedure activechanged; override;
+   procedure updatedata; override;
   public
    constructor create(const aowner: tcustomdblookupbuffer);
  end;
@@ -197,7 +200,7 @@ type
    property fieldcountfloat;
  end;
 
- lbdboptionty = (olbdb_closedataset);
+ lbdboptionty = (olbdb_closedataset,oldb_invalidateonupdatedata);
  lbdboptionsty = set of lbdboptionty; 
  
  tcustomdblookupbuffer = class(tcustomlookupbuffer)
@@ -1086,17 +1089,29 @@ begin
  inherited create(aowner);
 end;
 
-procedure tlookupbufferfieldsdatalink.activechanged;
+procedure tlookupbufferfieldsdatalink.datachanged;
 begin
- inherited;
  with tcustomdblookupbuffer(fowner) do begin
   if active or 
     not active and (lbs_buffervalid in fstate) and 
                        not (olbdb_closedataset in foptionsdb) then begin
    exclude(fstate,lbs_buffervalid);
-//  fowner.fbuffervalid:= false;
-   fowner.changed;
+   changed;
   end;
+ end;
+end;
+
+procedure tlookupbufferfieldsdatalink.activechanged;
+begin
+ inherited;
+ datachanged;
+end;
+
+procedure tlookupbufferfieldsdatalink.updatedata;
+begin
+ inherited;
+ if oldb_invalidateonupdatedata in tcustomdblookupbuffer(fowner).foptionsdb then begin
+  datachanged;
  end;
 end;
 
