@@ -12,9 +12,9 @@ type
 const
  textfields = [ftstring,ftfixedchar,ftwidestring];
  memofields = textfields+[ftblob,ftmemo];
- integerfields = [ftsmallint,ftinteger,ftword];
- booleanfields = [ftboolean,ftstring,ftfixedchar]+integerfields;
- realfields = [ftfloat,ftcurrency];
+ integerfields = [ftsmallint,ftinteger,ftword,ftbcd];
+ booleanfields = [ftboolean,ftstring,ftfixedchar]+integerfields-[ftbcd];
+ realfields = [ftfloat,ftcurrency,ftbcd];
  datetimefields = [ftdate,fttime,ftdatetime];
  stringfields = textfields + integerfields + booleanfields +
                 realfields + datetimefields;
