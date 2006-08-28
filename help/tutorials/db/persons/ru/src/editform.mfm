@@ -1,0 +1,276 @@
+object editfo: teditfo
+  bounds_x = 79
+  bounds_y = 171
+  bounds_cx = 379
+  bounds_cy = 334
+  container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_subfocus, ow_mousetransparent, ow_destroywidgets, ow_autoscale]
+  container.bounds_cx = 379
+  container.bounds_cy = 334
+  container.frame.dummy = 0
+  options = [fo_screencentered, fo_closeonesc, fo_autoreadstat, fo_autowritestat, fo_savepos, fo_savestate]
+  icon.transparency = -2147483648
+  oncreate = editfocreated
+  ondestroyed = editfodestroyed
+  moduleclassname = 'tmseform'
+  object btnOk: tbutton
+    bounds_x = 152
+    bounds_y = 296
+    bounds_cx = 90
+    bounds_cy = 30
+    frame.colorclient = -1610612714
+    frame.localprops = [frl_colorclient]
+    frame.template = mainfo.ftButtons
+    frame.dummy = 0
+    taborder = 7
+    state = [as_localcaption]
+    caption = '&Ok'
+    modalresult = mr_ok
+  end
+  object btnCancel: tbutton
+    bounds_x = 312
+    bounds_y = 296
+    bounds_cx = 58
+    bounds_cy = 30
+    frame.template = mainfo.ftButtons
+    frame.dummy = 0
+    taborder = 8
+    state = [as_localcaption]
+    caption = '&Cancel'
+    modalresult = mr_cancel
+  end
+  object seName: tdbstringedit
+    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+    bounds_x = 12
+    bounds_y = 16
+    bounds_cx = 328
+    bounds_cy = 22
+    frame.caption = 'Name'
+    frame.captionpos = cp_left
+    frame.captiondist = 15
+    frame.dummy = 0
+    frame.outerframe = (
+      52
+      0
+      0
+      0
+    )
+    optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_notnull, oe_autopopupmenu, oe_keyexecute, oe_savevalue, oe_savestate]
+    datafield = 'descr'
+    datasource = mainfo.dsPersons
+    reffontheight = 16
+  end
+  object cbPlanets: tenumeditlb
+    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+    bounds_x = 16
+    bounds_y = 45
+    bounds_cx = 148
+    bounds_cy = 41
+    frame.caption = 'Planet'
+    frame.dummy = 0
+    frame.outerframe = (
+      0
+      19
+      0
+      0
+    )
+    taborder = 9
+    onsetvalue = planetchanged
+    dropdown.lookupbuffer = refsdatamo.lbufPlanets
+    dropdown.cols.count = 1
+    dropdown.cols.items = <    
+      item
+      end>
+    reffontheight = 16
+  end
+  object cbContinents: tenumeditlb
+    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+    bounds_x = 184
+    bounds_y = 45
+    bounds_cx = 156
+    bounds_cy = 41
+    frame.caption = 'Continent'
+    frame.dummy = 0
+    frame.outerframe = (
+      0
+      19
+      0
+      0
+    )
+    taborder = 10
+    onsetvalue = continentchanged
+    dropdown.lookupbuffer = refsdatamo.lbufContinents
+    dropdown.cols.count = 1
+    dropdown.cols.items = <    
+      item
+      end>
+    dropdown.onfilter = continentsfilter
+    reffontheight = 16
+  end
+  object cbCountries: tdbenumeditlb
+    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+    bounds_x = 47
+    bounds_y = 96
+    bounds_cx = 301
+    bounds_cy = 22
+    frame.caption = 'Country'
+    frame.captionpos = cp_left
+    frame.captiondist = 15
+    frame.dummy = 0
+    frame.outerframe = (
+      65
+      0
+      0
+      0
+    )
+    taborder = 1
+    ondataentered = countryentered
+    datafield = 'country_id'
+    datasource = mainfo.dsPersons
+    dropdown.lookupbuffer = refsdatamo.lbufCountries
+    dropdown.cols.count = 1
+    dropdown.cols.items = <    
+      item
+      end>
+    dropdown.onfilter = countriesfilter
+    reffontheight = 16
+  end
+  object cbOccupations: tdbenumeditlb
+    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+    bounds_x = 26
+    bounds_y = 128
+    bounds_cx = 322
+    bounds_cy = 22
+    frame.caption = 'Occupation'
+    frame.captionpos = cp_left
+    frame.captiondist = 15
+    frame.dummy = 0
+    frame.outerframe = (
+      86
+      0
+      0
+      0
+    )
+    taborder = 2
+    ondataentered = occupationentered
+    datafield = 'occupation_id'
+    datasource = mainfo.dsPersons
+    dropdown.lookupbuffer = refsdatamo.lbufOccupations
+    dropdown.cols.count = 1
+    dropdown.cols.items = <    
+      item
+      end>
+    reffontheight = 16
+  end
+  object cbFeatures: tdbenumeditlb
+    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+    bounds_x = 48
+    bounds_y = 160
+    bounds_cx = 300
+    bounds_cy = 22
+    frame.caption = 'Feature'
+    frame.captionpos = cp_left
+    frame.captiondist = 15
+    frame.dummy = 0
+    frame.outerframe = (
+      64
+      0
+      0
+      0
+    )
+    taborder = 3
+    ondataentered = featureentered
+    datafield = 'feature_id'
+    datasource = mainfo.dsPersons
+    dropdown.lookupbuffer = refsdatamo.lbufFeatures
+    dropdown.cols.count = 1
+    dropdown.cols.items = <    
+      item
+      end>
+    reffontheight = 16
+  end
+  object reSexPotention: tdbrealedit
+    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+    bounds_x = 4
+    bounds_y = 192
+    bounds_cx = 160
+    bounds_cy = 22
+    frame.caption = 'Sex. potention'
+    frame.captionpos = cp_left
+    frame.captiondist = 15
+    frame.dummy = 0
+    frame.outerframe = (
+      108
+      0
+      0
+      0
+    )
+    taborder = 4
+    oncheckvalue = sexpotentioncheckvalue
+    datafield = 'sexual_potention'
+    datasource = mainfo.dsPersons
+    formatedit = '##.##'
+    formatdisp = '##.##'
+    reffontheight = 16
+  end
+  object beHappy: tdbbooleantextedit
+    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+    bounds_x = 45
+    bounds_y = 256
+    bounds_cx = 167
+    bounds_cy = 22
+    frame.caption = 'Happy ?'
+    frame.captionpos = cp_left
+    frame.captiondist = 15
+    frame.dummy = 0
+    frame.outerframe = (
+      67
+      0
+      0
+      0
+    )
+    taborder = 6
+    text_false = #1059#1074#1099
+    text_true = #1045#1097#1077' '#1082#1072#1082
+    datafield = 'if_happy'
+    datasource = mainfo.dsPersons
+    reffontheight = 16
+  end
+  object lblDateFormatHint: tlabel
+    bounds_x = 224
+    bounds_y = 224
+    bounds_cy = 26
+    taborder = 12
+    reffontheight = 16
+  end
+  object lblSexPotentionHint: tlabel
+    bounds_x = 176
+    bounds_y = 192
+    bounds_cx = 68
+    bounds_cy = 26
+    taborder = 11
+    caption = '(0..100) %'
+    reffontheight = 16
+  end
+  object cdeDateOfBirth: tdbcalendardatetimeedit
+    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_mousewheel, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+    bounds_x = 18
+    bounds_y = 224
+    bounds_cx = 194
+    bounds_cy = 22
+    frame.caption = 'Date of birth'
+    frame.captionpos = cp_left
+    frame.captiondist = 15
+    frame.dummy = 0
+    frame.outerframe = (
+      94
+      0
+      0
+      0
+    )
+    taborder = 5
+    datafield = 'dateofbirth'
+    datasource = mainfo.dsPersons
+    reffontheight = 16
+    ma = 73050
+  end
+end
