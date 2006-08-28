@@ -1096,10 +1096,13 @@ begin
      globalfixupreferences;
     end;
     if moduleloadlevel = 1 then begin
+     moduleloadlevel:= 0;  //allow loading of forms in loaded procedure
      notifygloballoading;
     end;
    finally
-    dec(moduleloadlevel);
+    if moduleloadlevel > 0 then begin
+     dec(moduleloadlevel);
+    end;
     if moduleloadlevel = 0 then begin
      endgloballoading;
     end;
