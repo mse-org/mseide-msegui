@@ -82,6 +82,8 @@ type
    procedure paintglyph(const canvas: tcanvas; const avalue; const arect: rectty);
                  virtual; abstract;
    procedure dofontheightdelta(var delta: integer); override;
+   
+   procedure updatereadonlystate; virtual;
    //igridwidget
    procedure setfirstclick;
    function createdatalist(const sender: twidgetcol): tdatalist; virtual; abstract;
@@ -1243,6 +1245,11 @@ procedure tgraphdataedit.griddatasourcechanged;
 begin
  //dummy
 end; 
+
+procedure tgraphdataedit.updatereadonlystate;
+begin
+ //dummy
+end;
 
 { ttogglegraphdataedit}
 

@@ -45,6 +45,7 @@ type
    procedure internalcreateframe; override;
    procedure dokeydown(var info: keyeventinfoty); override;
    procedure mouseevent(var info: mouseeventinfoty); override;
+   procedure updatereadonlystate; override;
     //ibutton
    procedure buttonaction(var action: buttonactionty; const buttonindex: integer);
 
@@ -136,6 +137,7 @@ end;
 procedure tcustomdialogstringed.internalcreateframe;
 begin
  tellipsebuttonframe.create(iframe(self),ibutton(self));
+ updatereadonlystate;
 end;
 
 function tcustomdialogstringed.execute(var avalue: msestring): boolean;
@@ -194,6 +196,18 @@ end;
 procedure tcustomdialogstringed.setframe(const avalue: tellipsebuttonframe);
 begin
  inherited setframe(avalue);
+end;
+
+procedure tcustomdialogstringed.updatereadonlystate;
+begin
+ inherited;
+ if fframe <> nil then begin
+  with frame do begin
+   if buttons.count > 0 then begin
+    frame.buttons[0].enabled:= not (oe_readonly in getoptionsedit);
+   end;
+  end;
+ end;
 end;
 
 { tcustomdialogstringedit }

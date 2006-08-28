@@ -112,7 +112,7 @@ type
   procedure fieldtovalue;
   procedure setnullvalue;
   function getoptionsedit: optionseditty;
-  procedure updateoptions; //for readonlystate
+  procedure updatereadonlystate;
  end;
 
  tgriddatalink = class;
@@ -1184,7 +1184,7 @@ type
    procedure valuetofield;
    procedure fieldtovalue;
    procedure setnullvalue;
-   procedure updateoptions;
+   procedure updatereadonlystate;
   public
    constructor create(const agrid: tcustomgrid; 
                          const aowner: tgridarrayprop); override;
@@ -1869,12 +1869,12 @@ end;
 procedure teditwidgetdatalink.editingchanged;
 begin
  setediting(inherited editing and canmodify);
- fintf.updateoptions;
+ fintf.updatereadonlystate;
 end;
 
 procedure teditwidgetdatalink.activechanged;
 begin
- fintf.updateoptions;
+ fintf.updatereadonlystate;
  inherited;
 end;
 
@@ -2183,7 +2183,7 @@ begin
  result:= inherited nullcheckneeded(newfocus) and fdatalink.nullcheckneeded;
 end;
 
-{ tcustomdbdropdownedit }
+{ tcustomdbdropdownlistedit }
 
 constructor tcustomdbdropdownlistedit.create(aowner: tcomponent);
 begin
@@ -5350,7 +5350,7 @@ begin
  //dummy
 end;
 
-procedure tdbstringcol.updateoptions;
+procedure tdbstringcol.updatereadonlystate;
 begin
  //dummy
 end;

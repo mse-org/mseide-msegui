@@ -273,9 +273,9 @@ type
    procedure editnotification(var info: editnotificationinfoty); override;
    function createdropdowncontroller: tcustomdropdowncontroller; virtual;
    procedure texttovalue(var accept: boolean; const quiet: boolean); override;
-   procedure setoptionsedit(const avalue: optionseditty); override;
    function getcellframe: framety; override;
    procedure dohide; override;
+   procedure updatereadonlystate; override;
    //idropdown
    procedure buttonaction(var action: buttonactionty; const buttonindex: integer); virtual;
    procedure dobeforedropdown; virtual;
@@ -791,8 +791,8 @@ type
    procedure internalcreateframe; override;
    procedure dokeydown(var info: keyeventinfoty); override;
    procedure mouseevent(var info: mouseeventinfoty); override;
-   procedure updateoptions; override;
    procedure editnotification(var info: editnotificationinfoty); override;
+   procedure updatereadonlystate; override;
    //idropdownwidget
    procedure buttonaction(var action: buttonactionty; const buttonindex: integer);
    procedure dobeforedropdown;
@@ -2147,14 +2147,6 @@ begin
  end;
 end;
 
-procedure tcustomdropdownedit.setoptionsedit(const avalue: optionseditty);
-begin
- inherited;
- if fdropdown <> nil then begin
-  fdropdown.updatereadonlystate;
- end;
-end;
-
 function tcustomdropdownedit.getcellframe: framety;
 begin
  result:= subframe(getinnerstframe,tcustombuttonframe(fframe).buttonframe);
@@ -2179,6 +2171,14 @@ procedure tcustomdropdownedit.dohide;
 begin
  fdropdown.canceldropdown;
  inherited;
+end;
+
+procedure tcustomdropdownedit.updatereadonlystate;
+begin
+ inherited;
+ if fdropdown <> nil then begin
+  fdropdown.updatereadonlystate;
+ end;
 end;
 
 
@@ -3626,14 +3626,6 @@ begin
  inherited;
 end;
 
-procedure tcustomcalendardatetimeedit.updateoptions;
-begin
- inherited;
- if fdropdown <> nil then begin
-  fdropdown.updatereadonlystate;
- end;
-end;
-
 procedure tcustomcalendardatetimeedit.buttonaction(var action: buttonactionty;
                const buttonindex: integer);
 begin
@@ -3676,6 +3668,14 @@ begin
   fdropdown.editnotification(info);
  end;
  inherited;
+end;
+
+procedure tcustomcalendardatetimeedit.updatereadonlystate;
+begin
+ inherited;
+ if fdropdown <> nil then begin
+  fdropdown.updatereadonlystate;
+ end;
 end;
 
 end.

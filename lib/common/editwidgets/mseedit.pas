@@ -250,7 +250,7 @@ type
 
    function getoptionsedit: optionseditty; virtual;//iedit
    procedure setoptionsedit(const avalue: optionseditty); virtual;
-   procedure updateoptions; virtual;
+   procedure updatereadonlystate; virtual;
    procedure editnotification(var info: editnotificationinfoty); virtual;
      //interface to inplaceedit
    procedure dokeydown(var info: keyeventinfoty); override;
@@ -847,16 +847,11 @@ begin
  result:= foptionsedit;
 end;
 
-procedure tcustomedit.updateoptions;
-begin
- //dummy
-end;
-
 procedure tcustomedit.setoptionsedit(const avalue: optionseditty);
 begin
  if foptionsedit <> avalue then begin
   foptionsedit:= avalue;
-  updateoptions;
+  updatereadonlystate;
  end;
 end;
 
@@ -1120,6 +1115,11 @@ begin
  end;
  filer.defineproperty('pwchar',{$ifdef FPC}@{$endif}readpwchar,
                                    {$ifdef FPC}@{$endif}writepwchar,bo1);
+end;
+
+procedure tcustomedit.updatereadonlystate;
+begin
+ //dummy
 end;
 
 end.

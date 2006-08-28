@@ -559,6 +559,7 @@ begin
   buttons.count:= 1;
   setactivebutton(0);
  end;
+ updatereadonlystate;
 end;
 
 procedure tcustomdropdowncontroller.setoptions(const Value: dropdowneditoptionsty);
