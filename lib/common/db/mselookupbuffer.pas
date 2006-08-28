@@ -1138,11 +1138,11 @@ begin
  try
   clearbuffer;
   datas:= fdatalink.dataset;
+  include(fstate,lbs_buffervalid);
   if (datas <> nil) and 
        (datas.active or 
         (olbdb_closedataset in foptionsdb) and
                not (csloading in datas.componentstate)) then begin
-   include(fstate,lbs_buffervalid);
 //   fbuffervalid:= true; 
    utf8:= fdatalink.utf8;
    bo1:= fdatalink.active;

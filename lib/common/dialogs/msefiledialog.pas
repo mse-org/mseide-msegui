@@ -268,7 +268,7 @@ type
    procedure foonchildscaled(const sender: TObject);
    procedure showhiddenonsetvalue(const sender: TObject; var avalue: Boolean; 
                   var accept: Boolean);
-   procedure aftercreate(const sender: TObject);
+   procedure formoncreate(const sender: TObject);
    procedure dirshowhint(const sender: TObject; var info: hintinfoty);
   private
     { Private declarations }
@@ -1070,7 +1070,7 @@ begin
  listview.readlist;
 end;
 
-procedure tfiledialogfo.aftercreate(const sender: TObject);
+procedure tfiledialogfo.formoncreate(const sender: TObject);
 begin
  with stockobjects do begin
   dir.frame.caption:= captions[sc_dir];

@@ -8,13 +8,15 @@ object filedialogfo: Tfiledialogfo
   bounds_cymin = 150
   visible = False
   container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_mousetransparent, ow_destroywidgets, ow_autoscale]
+  container.bounds_x = 0
+  container.bounds_y = 0
   container.bounds_cx = 580
   container.bounds_cy = 307
   container.frame.dummy = 0
   container.onchildscaled = foonchildscaled
   options = [fo_screencentered, fo_closeonesc, fo_localshortcuts, fo_autoreadstat, fo_autowritestat]
   icon.transparency = -2147483648
-  onaftercreate = aftercreate
+  oncreate = formoncreate
   onkeydown = listviewonkeydown
   onchildscaled = foonchildscaled
   left = 239
@@ -22,6 +24,7 @@ object filedialogfo: Tfiledialogfo
   moduleclassname = 'tmseform'
   object listview: tfilelistview
     optionswidget = [ow_mousefocus, ow_arrowfocus, ow_focusbackonesc, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+    bounds_x = 0
     bounds_y = 26
     bounds_cx = 580
     bounds_cy = 226

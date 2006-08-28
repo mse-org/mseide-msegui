@@ -48,7 +48,7 @@ type
  tcustommseform = class(tcustomeventwidget,istatfile,idockcontroller)
   private
    foncreate: notifyeventty;
-   fonaftercreate: notifyeventty;
+//   fonaftercreate: notifyeventty;
    fondestroyed: notifyeventty;
    fonloaded: notifyeventty;
    fondestroy: notifyeventty;
@@ -164,7 +164,7 @@ type
    property icon: tmaskedbitmap read ficon write seticon;
 
    property oncreate: notifyeventty read foncreate write foncreate;
-   property onaftercreate: notifyeventty read fonaftercreate write fonaftercreate;
+//   property onaftercreate: notifyeventty read fonaftercreate write fonaftercreate;
    property onloaded: notifyeventty read fonloaded write fonloaded;
    property ondestroy: notifyeventty read fondestroy write fondestroy;
    property ondestroyed: notifyeventty read fondestroyed write fondestroyed;
@@ -214,7 +214,7 @@ type
    property icon;
 
    property oncreate;
-   property onaftercreate;
+//   property onaftercreate;
    property onloaded;
    property ondestroy;
    property ondestroyed;
@@ -312,7 +312,7 @@ type
    property icon;
 
    property oncreate;
-   property onaftercreate;
+//   property onaftercreate;
    property onloaded;
    property ondestroy;
    property ondestroyed;
@@ -694,14 +694,14 @@ begin
  if (fo_screencentered in foptions) and not (csdesigning in componentstate) then begin
   window.windowpos:= wp_screencentered;
  end;
- if assigned(foncreate) and not(csdesigning in componentstate) then begin
-  foncreate(self);
- end;
+// if assigned(foncreate) and not(csdesigning in componentstate) then begin
+//  foncreate(self);
+// end;
  inherited;
  updateoptions;
  updatemainmenutemplates;
- if canevent(tmethod(fonaftercreate)) then begin
-  fonaftercreate(self);
+ if canevent(tmethod(foncreate)) then begin
+  foncreate(self);
  end;
  application.postevent(tobjectevent.create(ek_loaded,ievent(self)));
 end;

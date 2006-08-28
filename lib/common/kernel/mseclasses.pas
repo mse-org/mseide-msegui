@@ -435,16 +435,26 @@ type
  tmsedatamodule = class(tmsecomponent)
   private
    fsize: sizety;
+   foncreate: notifyeventty;
+   fondestroy: notifyeventty;
+   fondestroyed: notifyeventty;
    procedure writesize(writer: twriter);
    procedure readsize(reader: treader);
   protected
    procedure getchildren(proc: tgetchildproc; root: tcomponent); override;
    class function getmoduleclassname: string; override;
    procedure defineproperties(filer: tfiler); override;
+   procedure loaded; override;
+   procedure beforedestruction; override;
   public
    constructor create(aowner: tcomponent); overload; override;
    constructor create(aowner: tcomponent; load: boolean); reintroduce; overload;
+   destructor destroy; override;
    property size: sizety read fsize write fsize;
+  published
+   property oncreate: notifyeventty read foncreate write foncreate;
+   property ondestroy: notifyeventty read fondestroy write fondestroy;
+   property ondestroyed: notifyeventty read fondestroyed write fondestroyed;
  end;
  datamoduleclassty = class of tmsedatamodule;
  
@@ -2846,6 +2856,33 @@ begin
  inherited;
  filer.defineproperty('size',{$ifdef FPC}@{$endif}readsize,
                        {$ifdef FPC}@{$endif}writesize, true);  
+end;
+
+procedure tmsedatamodule.loaded;
+begin
+ inherited;
+ if canevent(tmethod(foncreate)) then begin
+  foncreate(self);
+ end;
+end;
+
+destructor tmsedatamodule.destroy;
+var
+ bo1: boolean;
+begin
+ bo1:= csdesigning in componentstate;
+ inherited; //csdesigningflag is removed
+ if not bo1 and candestroyevent(tmethod(fondestroyed)) then begin
+  fondestroyed(self);
+ end;
+end;
+
+procedure tmsedatamodule.beforedestruction;
+begin
+ inherited;
+ if candestroyevent(tmethod(fondestroy)) then begin
+  fondestroy(self);
+ end;
 end;
 
 initialization

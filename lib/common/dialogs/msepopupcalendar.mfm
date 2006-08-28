@@ -21,10 +21,11 @@ object msepopupcalendarfo: tpopupcalendarfo
   optionswindow = [wo_popup, wo_buttonendmodal]
   options = [fo_freeonclose, fo_closeonesc, fo_localshortcuts, fo_autoreadstat, fo_autowritestat, fo_savepos, fo_savestate]
   icon.transparency = -2147483648
-  onaftercreate = aftercreate
+  oncreate = formoncreate
   moduleclassname = 'tmseform'
   object grid: tdrawgrid
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_focusbackonesc, ow_mousewheel, ow_destroywidgets, ow_fontglyphheight]
+    bounds_x = 0
     bounds_y = 22
     bounds_cx = 233
     bounds_cy = 156
@@ -110,6 +111,7 @@ object msepopupcalendarfo: tpopupcalendarfo
   object monthdisp: tdatetimedisp
     optionswidget = [ow_mousewheel, ow_destroywidgets, ow_fontglyphheight]
     bounds_x = 83
+    bounds_y = 0
     bounds_cx = 137
     bounds_cy = 22
     color = -1610612730
@@ -120,6 +122,8 @@ object msepopupcalendarfo: tpopupcalendarfo
   end
   object yeardisp: tdatetimedisp
     optionswidget = [ow_mousewheel, ow_destroywidgets, ow_fontglyphheight]
+    bounds_x = 0
+    bounds_y = 0
     bounds_cx = 72
     bounds_cy = 22
     color = -1610612730
@@ -131,6 +135,7 @@ object msepopupcalendarfo: tpopupcalendarfo
   object tstockglyphbutton1: tstockglyphbutton
     optionswidget = [ow_mousewheel, ow_destroywidgets, ow_autoscale]
     bounds_x = 220
+    bounds_y = 0
     bounds_cx = 11
     bounds_cy = 11
     taborder = 3
@@ -152,6 +157,7 @@ object msepopupcalendarfo: tpopupcalendarfo
   object tstockglyphbutton3: tstockglyphbutton
     optionswidget = [ow_mousewheel, ow_destroywidgets, ow_autoscale]
     bounds_x = 72
+    bounds_y = 0
     bounds_cx = 11
     bounds_cy = 11
     taborder = 2

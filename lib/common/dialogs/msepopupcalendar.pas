@@ -32,7 +32,7 @@ type
    tstockglyphbutton3: tstockglyphbutton;
    tstockglyphbutton4: tstockglyphbutton;
    yeardisp: tdatetimedisp;
-   procedure aftercreate(const sender: TObject);
+   procedure formoncreate(const sender: TObject);
    procedure drawcell(const sender: tcol; const canvas: tcanvas;
                                const cellinfo: cellinfoty);
    procedure cellevent(const sender: TObject; var info: celleventinfoty);
@@ -145,7 +145,7 @@ begin
  inherited create(aowner);
 end;
 
-procedure tpopupcalendarfo.aftercreate(const sender: TObject);
+procedure tpopupcalendarfo.formoncreate(const sender: TObject);
 var
  int1: integer;
 begin
