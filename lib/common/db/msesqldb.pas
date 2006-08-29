@@ -35,7 +35,7 @@ type
 
  tmsesqlquery = class;
  
- sqlquerystatety = (sqs_userapplayrecupdate,sqs_updateabort);
+ sqlquerystatety = (sqs_userapplayrecupdate,sqs_updateabort,sqs_updateerror);
  sqlquerystatesty = set of sqlquerystatety;
  applyrecupdateeventty = 
      procedure(const sender: tmsesqlquery; const updatekind: tupdatekind;
@@ -65,6 +65,8 @@ type
    procedure setindexdefs(const avalue: TIndexDefs);
    function getetstatementtype: TStatementType;
    procedure setstatementtype(const avalue: TStatementType);
+   procedure internalApplyUpdates(MaxErrors: Integer);
+                    //for workarounds
   protected
    procedure updateindexdefs; override;
    procedure sqlonchange(sender: tobject);
@@ -115,7 +117,7 @@ type
                  const options: locateoptionsty = []): locateresultty;
    procedure appendrecord(const values: array of const);
    procedure post; override;
-   procedure applyupdates(maxerror: integer); override;
+   procedure applyupdates(maxerrors: integer); override;
    procedure cancel; override;
    procedure cancelupdates; override;
    function moveby(const distance: integer): integer;
@@ -531,23 +533,28 @@ var
  bo1: boolean;
  str1: string;
 begin
- if sqs_userapplayrecupdate in fstate then begin
-  bo1:= false;
-  fonapplyrecupdate(self,updatekind,str1,bo1);
-  if not bo1 then begin
-   if str1 = '' then begin
-    inherited;
-   end
-   else begin
-{$ifdef debugsqlquery}  
-    debugwriteln(getenumname(typeinfo(tupdatekind),ord(updatekind))+' '+str1);
-{$endif}  
-    tsqlconnection(database).executedirect(str1,tsqltransaction(transaction));
+ try
+  if sqs_userapplayrecupdate in fstate then begin
+   bo1:= false;
+   fonapplyrecupdate(self,updatekind,str1,bo1);
+   if not bo1 then begin
+    if str1 = '' then begin
+     inherited;
+    end
+    else begin
+ {$ifdef debugsqlquery}  
+     debugwriteln(getenumname(typeinfo(tupdatekind),ord(updatekind))+' '+str1);
+ {$endif}  
+     tsqlconnection(database).executedirect(str1,tsqltransaction(transaction));
+    end;
    end;
+  end
+  else begin
+   inherited;
   end;
- end
- else begin
-  inherited;
+ except
+  include(fstate,sqs_updateerror);
+  raise;
  end;
 end;
 
@@ -559,16 +566,88 @@ begin
  end;
 end;
 
-procedure tmsesqlquery.applyupdates(maxerror: integer);
+procedure tmsesqlquery.internalApplyUpdates(MaxErrors: Integer);
+
+var SaveBookmark : pchar;
+    r            : Integer;
+    FailedCount  : integer;
+    EUpdErr      : EUpdateError;
+    Response     : TResolverResponse;
+    StoreRecBuf  : PBufRecLinkItem;
+
+begin
+ with tbufdatasetcracker(self) do begin
+  CheckBrowseMode;
+
+  StoreRecBuf := FCurrentRecBuf;
+  try
+   r := 0;
+   FailedCount := 0;
+   Response := rrApply;
+   while (r < Length(FUpdateBuffer)) and (Response <> rrAbort) do begin
+    if assigned(FUpdateBuffer[r].BookmarkData) then begin
+     InternalGotoBookmark(@FUpdateBuffer[r].BookmarkData);
+     Resync([rmExact,rmCenter]);
+     Response := rrApply;
+     try
+      ApplyRecUpdate(FUpdateBuffer[r].UpdateKind);
+     except
+      on E: EDatabaseError do begin
+       Inc(FailedCount);
+       if failedcount > word(MaxErrors) then begin
+        Response := rrAbort
+       end
+       else begin
+        Response := rrSkip;
+       end;
+       EUpdErr := EUpdateError.Create(SOnUpdateError,E.Message,0,0,E);
+       if assigned(OnUpdateError) then begin
+        OnUpdateError(Self,Self,EUpdErr,FUpdateBuffer[r].UpdateKind,Response);
+       end
+       else begin
+        if Response = rrAbort then begin
+         Raise EUpdErr
+        end;
+       end;
+       eupderr.free;
+      end
+      else begin
+       raise;
+      end;
+     end;
+     if response = rrApply then begin
+      FreeRecordBuffer(FUpdateBuffer[r].OldValuesBuffer);
+      FUpdateBuffer[r].BookmarkData := nil;
+     end
+    end;
+    inc(r);
+   end;
+   if failedcount = 0 then begin
+    SetLength(FUpdateBuffer,0);
+   end;
+  finally 
+   FCurrentRecBuf := StoreRecBuf;
+   Resync([]);
+  end;
+ end;
+end;
+
+procedure tmsesqlquery.applyupdates(maxerrors: integer);
+var
+ bm1: pchar;
 begin
  disablecontrols;
  try
-  exclude(fstate,sqs_updateabort);
-  inherited;
+  fstate:= fstate - [sqs_updateabort,sqs_updateerror];
+  internalapplyupdates(maxerrors);
  finally
+  if (sqs_updateerror in fstate) and 
+              (dso_cancelupdatesonerror in fcontroller.options) then begin
+   cancelupdates;
+  end;
   enablecontrols;
+  dataevent(dedatasetchange,0);
  end;
- dataevent(dedatasetchange,0);
  if (dso_autocommitret in fcontroller.options) and (transaction <> nil) then begin
   tsqltransaction(transaction).commitretaining;
  end;
