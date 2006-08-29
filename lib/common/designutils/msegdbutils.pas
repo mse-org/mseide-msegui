@@ -930,6 +930,7 @@ var
  str1,str2: string;
  {$ifdef mswindows}
  threadids: integerarty;
+ mstr1: filenamety;
  {$endif}
 
 begin
@@ -944,7 +945,7 @@ begin
      if finterruptthreadid <> 0 then begin
       if getthreadidlist(threadids) = gdb_ok then begin
        if high(threadids) > 0 then begin
-        if threadselect(threadids[1]) = gdb_ok then begin
+        if threadselect(threadids[1],mstr1,int1) = gdb_ok then begin
          setlength(values,3);
          with values[0] do begin
           variablename:= 'reason';
