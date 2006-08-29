@@ -394,7 +394,8 @@ type
    function started: boolean; //target active, run command applied or attached
    property running: boolean read getrunning; //target running
 
-   function threadselect(const aid: integer): gdbresultty;
+   function threadselect(const aid: integer; out filename: filenamety; 
+                                             out line: integer): gdbresultty;
    function getthreadidlist(out idlist: integerarty): gdbresultty;
    function getthreadinfolist(out infolist: threadinfoarty): gdbresultty;
 
@@ -683,6 +684,7 @@ begin
  if fgdb <> invalidprochandle then begin
   clicommand('set breakpoint pending on');
   clicommand('set height 0');
+  clicommand('set width 0');
   {$ifdef UNIX}
   bo1:= true;  
   if synccommand('-gdb-show inferior-tty') = gdb_ok then begin
@@ -2484,9 +2486,20 @@ begin
  end;
 end;
 
-function tgdbmi.threadselect(const aid: integer): gdbresultty;
+function tgdbmi.threadselect(const aid: integer; out filename: filenamety; 
+                                             out line: integer): gdbresultty;
+var
+ str1: string;
 begin
+ filename:= '';
+ line:= 0;
  result:= synccommand('-thread-select ' + inttostr(aid));
+ if result = gdb_ok then begin
+  if getstringvalue(fsyncvalues,'file',str1) then begin
+   filename:= str1;
+  end;  
+  getintegervalue(fsyncvalues,'line',line);
+ end;
 end;
 
 function tgdbmi.getthreadidlist(out idlist: integerarty): gdbresultty;
@@ -2542,6 +2555,12 @@ begin
      except
       exit;
      end;
+     if ar1[1] = 'Thread' then begin
+      ar1:= copy(ar1,2,bigint);
+      if high(ar1) < 2 then begin
+       exit;
+      end;
+     end;
      threadid:= 0;
      ar2:= splitstring(ar1[2],'.');
      if high(ar2) > 0 then begin
@@ -2551,9 +2570,21 @@ begin
       end;
      end
      else begin
-      try
-       threadid:= strtohex(ar1[2]);
-      except
+      if (high(ar1) > 1) and (ar1[1] = '(LWP') then begin
+       try
+        threadid:= strtoint(copy(ar1[2],1,length(ar1[2])-1));
+       except
+       end;
+//       int3:= threadid;
+//       threadid:= id;
+//       id:= int3;
+//       ar1:= copy(ar1,2,bigint);
+      end
+      else begin
+       try
+        threadid:= strtohex(ar1[2]);
+       except
+       end;
       end;
      end;
      if high(ar1) >= 3 then begin

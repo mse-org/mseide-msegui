@@ -100,10 +100,16 @@ begin
  case info.eventkind of
   cek_enter: begin
    if (frefreshedrow <> info.cell.row) and
-         (gdb.threadselect(fids[info.cell.row]) = gdb_ok) then begin
+         (gdb.threadselect(fids[info.cell.row],
+                  stopinfo.filename,stopinfo.line) = gdb_ok) then begin
     refresh;
     stackfo.refresh;
     mainfo.refreshframe;
+    if stopinfo.filename <> '' then begin
+     stopinfo.filedir:= '';
+     sourcefo.locate(stopinfo);
+    end;
+{
     if gdb.getsourcename(wstr1) = gdb_ok then begin
      with stopinfo do begin
       splitfilepath(wstr1,filedir,filename);
@@ -113,6 +119,7 @@ begin
       end;
      end;
     end;
+}
    end;
   end;
  end;
