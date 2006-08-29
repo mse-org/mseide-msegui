@@ -27,7 +27,7 @@ uses
  msegraphutils,typinfo,msedock,sysutils,msesysenv,msestrings,
  msepostscriptprinter;
 const
- versiontext = '1.0x';
+ versiontext = '0.9b';
  idecaption = 'MSEide';
 type
  envvarty = (env_vargroup,env_np);

@@ -1,8 +1,8 @@
 MSEide+MSEgui Pascal Cross Platform GUI Development System.
-Version 0.9
+Version 0.9b
 
-- Compiles with FPC 2.0.2
-- Tested on i386-linux SuSE 9.0,9.2,10.0 and i386-win32 98 and 2000.
+- Compiles with FPC 2.0.4
+- Tested on i386-linux SuSE 9.0,9.2,10.1 and i386-win32 98 and 2000.
 - Links to xlib and gdi32, no external widget library needed.
 - Internal character encoding is UCS2.
 - Uses anti aliased fonts on Linux (Xft).
@@ -17,7 +17,7 @@ IDE:
 - Source code navigation with support for include files.
 - Code completion for classes.
 - Integrated visual form designer with source code update for components and 
-events.
+  events.
 - Flexible and handy build system with switchable macros.
 
 License:
@@ -25,13 +25,15 @@ IDE is under GPL, library under modified LGPL like FPC-RTL.
 
 Installation:
 *************
-1. Download and install FPC 2.0.2, you can get it from http://www.freepascal.org/download.html
+1. Download and install FPC 2.0.4, you can get it from 
+   http://www.freepascal.org/download.html
 2. Download src and bin zip's.
 3. Extract them to a directory of your choice ('yourdirectory') .
 4. Run 'yourdirectory/bin/i386-linux/mseide' on linux or 
-'yourdirectory\bin\i386-win32\mseide.exe' on windows.
+   'yourdirectory\bin\i386-win32\mseide.exe' on windows.
 5. In 'Settings'-'Configure MSEide'-'${MSEDIR}' select 'yourdirectory/msegui'.
-5a. On windows you have to setup ${COMPILER} (ppc386.exe) and ${DEBUGGER} (gdb.exe).
+5a. On windows you have to setup ${COMPILER} (ppc386.exe) and 
+    ${DEBUGGER} (gdb.exe).
 6. In 'Project'-'Open' select 'yourdirectory/msegui/apps/demo/demo.prj'.
 7. 'Target'-'Continue'.
 
@@ -48,10 +50,11 @@ Breakpoints don't work on win32 in units compiled with -CX
 How to add custom components to MSEide
 **************************************
 There is a project 'apps/myide/mymseide.prj' as a demo.
-Start MSEide, open project 'apps/myide/mymseide.prj', 'Project'-'Build', 'Target'-'Continue',
+Start MSEide, open project 'apps/myide/mymseide.prj', 'Project'-'Build',
+'Target'-'Continue',
 the IDE with the new component 'tmybutton' will be compiled and
 started in the the debugger.
-Binaryname is 'mymseide' (linux) or 'mymseide.exe' (win32).
+Binary name is 'mymseide' (linux) or 'mymseide.exe' (win32).
 
 If you wish to do it from scratch:
 
@@ -70,7 +73,7 @@ If you want add custom icons to your components:
  
 How to run i18ndemo
 *******************
-- Start MSEide version 0.9.
+- Start MSEide version 0.9b.
 - 'Project'-'Open'-'yourdirectory/msegui/apps/i18ndemo/i18ndemo.prj'.
 - 'Project'-'Make' to create the rst files.
 - 'Project'-'Open'-'yourdirectory/msegui/tools/i18n/msei18n.prj'.
@@ -83,15 +86,6 @@ In MSEi18n:
  - Close MSEi18n.
 - 'Project'-'Open'-'yourdirectory/msegui/apps/i18ndemo/i18ndemo.prj'.
 - 'Target'-'Continue'.
-
-FPC patches
-***********
-In patch_fpc_2_0_4 are the needed modified FPC files for MSEgui 
-and FPC 2.0.4 rc1:
-- Fix to let the compiler work with -Fcutf8 (FPC bug 6865).
-- Faster conversion ansistring <> widestring on linux (FPC bug 6873).
-- Fix for FPC bug 6898 (AV in TSQLQuery).
-- Fix for FPC bug 6988 (Twriter.WriteDescendent with component properties).
 
 SQLite
 ******

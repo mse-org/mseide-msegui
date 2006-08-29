@@ -1,29 +1,33 @@
 object programparametersfo: tprogramparametersfo
+  optionswidget = [ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_mousewheel, ow_destroywidgets, ow_hinton, ow_autoscale]
   bounds_x = 272
   bounds_y = 243
   bounds_cx = 328
   bounds_cy = 348
   visible = False
   container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_mousetransparent, ow_destroywidgets, ow_autoscale]
+  container.bounds_x = 0
+  container.bounds_y = 0
   container.bounds_cx = 328
   container.bounds_cy = 348
   container.frame.dummy = 0
   options = [fo_closeonesc, fo_autoreadstat, fo_autowritestat, fo_savepos]
   statfile = statfile1
   caption = 'Target environment'
+  icon.transparency = -2147483648
   moduleclassname = 'tmseform'
   object workingdirectory: tfilenameedit
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
     bounds_x = 2
-    bounds_y = 8
+    bounds_y = 7
     bounds_cx = 324
-    bounds_cy = 40
+    bounds_cy = 41
     frame.caption = '&Working directory'
     frame.button.imagenr = 17
     frame.dummy = 0
     frame.outerframe = (
       0
-      18
+      19
       0
       0
     )
@@ -50,20 +54,21 @@ object programparametersfo: tprogramparametersfo
     bounds_cx = 50
     bounds_cy = 20
     anchors = [an_right, an_bottom]
+    state = [as_localcaption]
     caption = 'Cancel'
     modalresult = mr_cancel
   end
   object parameters: thistoryedit
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
     bounds_x = 2
-    bounds_y = 56
+    bounds_y = 55
     bounds_cx = 324
-    bounds_cy = 40
+    bounds_cy = 41
     frame.caption = '&Parameters'
     frame.dummy = 0
     frame.outerframe = (
       0
-      18
+      19
       0
       0
     )
@@ -79,14 +84,14 @@ object programparametersfo: tprogramparametersfo
   object twidgetgrid1: twidgetgrid
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_focusbackonesc, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
     bounds_x = 2
-    bounds_y = 110
+    bounds_y = 109
     bounds_cx = 324
-    bounds_cy = 196
+    bounds_cy = 197
     frame.caption = 'Environment variables'
     frame.dummy = 0
     frame.outerframe = (
       0
-      18
+      19
       0
       0
     )
@@ -110,6 +115,7 @@ object programparametersfo: tprogramparametersfo
           end>
       end>
     datacols.count = 3
+    datacols.options = [co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
     datacols.items = <    
       item
         width = 20
@@ -118,33 +124,21 @@ object programparametersfo: tprogramparametersfo
       end    
       item
         width = 103
-        options = [co_proportional, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
+        options = [co_proportional, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
         widgetname = 'envvarname'
       end    
       item
         width = 194
-        options = [co_fill, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
+        options = [co_fill, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
         widgetname = 'envvarvalue'
       end>
     datarowheight = 18
     statfile = statfile1
     reffontheight = 16
     object envvaron: tbooleanedit
+      bounds_x = 0
+      bounds_y = 0
       bounds_cx = 20
-      bounds_cy = 18
-      frame.levelo = 0
-      frame.colorclient = -2147483645
-      frame.localprops = [frl_levelo, frl_colorclient]
-      frame.dummy = 0
-      taborder = 1
-      visible = False
-      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_eatreturn, oe_resetselectonexit, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_keyexecute, oe_savestate]
-      valuedefault = True
-    end
-    object envvarname: tstringedit
-      optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
-      bounds_x = 21
-      bounds_cx = 103
       bounds_cy = 18
       frame.levelo = 0
       frame.colorclient = -2147483645
@@ -152,11 +146,28 @@ object programparametersfo: tprogramparametersfo
       frame.dummy = 0
       taborder = 2
       visible = False
+      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_eatreturn, oe_resetselectonexit, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_keyexecute, oe_savestate]
+      valuedefault = True
+    end
+    object envvarname: tstringedit
+      optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+      bounds_x = 21
+      bounds_y = 0
+      bounds_cx = 103
+      bounds_cy = 18
+      frame.levelo = 0
+      frame.colorclient = -2147483645
+      frame.localprops = [frl_levelo, frl_colorclient]
+      frame.dummy = 0
+      taborder = 3
+      visible = False
+      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_keyexecute, oe_savestate]
       reffontheight = 16
     end
     object envvarvalue: tstringedit
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight]
       bounds_x = 125
+      bounds_y = 0
       bounds_cx = 194
       bounds_cy = 18
       frame.levelo = 0
@@ -164,6 +175,7 @@ object programparametersfo: tprogramparametersfo
       frame.localprops = [frl_levelo, frl_colorclient]
       frame.dummy = 0
       visible = False
+      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_keyexecute, oe_savestate]
       reffontheight = 16
     end
   end

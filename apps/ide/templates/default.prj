@@ -478,6 +478,3 @@ cy=0
 [progparams]
 parameters=
 workingdirectory=
-envvarons=0
-envvarnames=0
-envvarvalues=0
