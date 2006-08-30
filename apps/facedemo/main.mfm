@@ -1,9 +1,10 @@
 object mainfo: tmainfo
-  bounds_x = 93
-  bounds_y = 52
+  bounds_x = 91
+  bounds_y = 53
   bounds_cx = 638
   bounds_cy = 334
   container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_subfocus, ow_mousetransparent, ow_destroywidgets, ow_autoscale]
+  container.bounds_x = 0
   container.bounds_y = 32
   container.bounds_cx = 638
   container.bounds_cy = 302
@@ -11,6 +12,7 @@ object mainfo: tmainfo
   container.frame.leveli = 1
   container.frame.framewidth = 1
   container.frame.colorframe = 13092491
+  container.frame.localprops = [frl_levelo, frl_leveli, frl_framewidth, frl_colorframe]
   container.frame.dummy = 0
   container.face.image.alignment = [al_tiled]
   container.face.image.transparency = 8421504
@@ -2146,15 +2148,18 @@ object mainfo: tmainfo
     DBDBDB02D8D8D801FEFEFE01FFFFFF01D9D9D901DBDBDB01DEDEDE01D7D7D701
     DBDBDB01D9D9D901DADADA08D9D9D901A9A9A902D8D8D801A8A8A801D8D8D801
     DBDBDB01DCDCDC01DBDBDB01D7D7D701DCDCDC01D6D6D601DCDCDC01DEDEDE01
-    D8D8D801DBDBDB01DADADA06}
+    D8D8D801DBDBDB01DADADA06
+  }
   container.face.fade_pos.count = 2
   container.face.fade_pos.items = (
-    0.000000000000000000
-    1.000000000000000000)
+    0
+    1
+  )
   container.face.fade_color.count = 2
   container.face.fade_color.items = (
     15590106
-    11906751)
+    11906751
+  )
   container.face.fade_transparency = -2147483648
   container.face.dummy = 0
   container.taborder = 1
@@ -2168,9 +2173,9 @@ object mainfo: tmainfo
   object tstringedit1: tstringedit
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
     bounds_x = 107
-    bounds_y = 38
+    bounds_y = 37
     bounds_cx = 100
-    bounds_cy = 46
+    bounds_cy = 47
     color = -2147483645
     frame.leveli = 1
     frame.framewidth = 2
@@ -2179,21 +2184,23 @@ object mainfo: tmainfo
     frame.font.color = 29539
     frame.font.name = 'stf_default'
     frame.font.dummy = 0
+    frame.localprops = [frl_leveli, frl_framewidth, frl_colorclient]
     frame.dummy = 0
     frame.outerframe = (
       0
-      18
+      19
       0
-      0)
+      0
+    )
     statfile = tstatfile1
     reffontheight = 16
   end
   object tstringedit2: tstringedit
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
     bounds_x = 262
-    bounds_y = 38
+    bounds_y = 37
     bounds_cx = 100
-    bounds_cy = 46
+    bounds_cy = 47
     color = -2147483645
     frame.leveli = 1
     frame.framewidth = 2
@@ -2204,21 +2211,25 @@ object mainfo: tmainfo
     frame.font.style = [fs_bold]
     frame.font.name = 'stf_default'
     frame.font.dummy = 0
+    frame.localprops = [frl_leveli, frl_framewidth, frl_colorclient]
     frame.dummy = 0
     frame.outerframe = (
       0
-      18
+      19
       0
-      0)
+      0
+    )
     face.image.transparency = -2147483648
     face.fade_pos.count = 2
     face.fade_pos.items = (
-      0.000000000000000000
-      1.000000000000000000)
+      0
+      1
+    )
     face.fade_color.count = 2
     face.fade_color.items = (
       12378329
-      10592767)
+      10592767
+    )
     face.fade_transparency = 10526880
     face.dummy = 0
     taborder = 1
@@ -2227,9 +2238,9 @@ object mainfo: tmainfo
   end
   object tstringedit3: tstringedit
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
-    bounds_x = 23
+    bounds_x = 21
     bounds_y = 112
-    bounds_cx = 181
+    bounds_cx = 183
     bounds_cy = 34
     color = -2147483645
     frame.levelo = 3
@@ -2242,21 +2253,25 @@ object mainfo: tmainfo
     frame.font.style = [fs_bold, fs_italic]
     frame.font.name = 'stf_default'
     frame.font.dummy = 0
+    frame.localprops = [frl_levelo, frl_leveli, frl_framewidth, frl_colorclient]
     frame.dummy = 0
     frame.outerframe = (
-      81
+      83
       0
       0
-      0)
+      0
+    )
     face.image.transparency = -2147483648
     face.fade_pos.count = 2
     face.fade_pos.items = (
-      0.000000000000000000
-      1.000000000000000000)
+      0
+      1
+    )
     face.fade_color.count = 2
     face.fade_color.items = (
       -1610612730
-      -1610612731)
+      -1610612731
+    )
     face.fade_direction = gd_up
     face.fade_transparency = 8421504
     face.dummy = 0
@@ -2269,7 +2284,7 @@ object mainfo: tmainfo
     bounds_x = 261
     bounds_y = 177
     bounds_cx = 100
-    bounds_cy = 52
+    bounds_cy = 53
     color = -2147483645
     frame.levelo = -3
     frame.leveli = 1
@@ -2280,12 +2295,14 @@ object mainfo: tmainfo
     frame.font.color = 12419927
     frame.font.name = 'stf_default'
     frame.font.dummy = 0
+    frame.localprops = [frl_levelo, frl_leveli, frl_framewidth, frl_colorclient]
     frame.dummy = 0
     frame.outerframe = (
       0
       0
       0
-      18)
+      19
+    )
     taborder = 6
     statfile = tstatfile1
     reffontheight = 16
@@ -2295,7 +2312,7 @@ object mainfo: tmainfo
     bounds_x = 83
     bounds_y = 176
     bounds_cx = 121
-    bounds_cy = 52
+    bounds_cy = 53
     color = -2147483645
     frame.levelo = 3
     frame.leveli = -1
@@ -2307,12 +2324,14 @@ object mainfo: tmainfo
     frame.font.colorbackground = 13418736
     frame.font.name = 'stf_default'
     frame.font.dummy = 0
+    frame.localprops = [frl_levelo, frl_leveli, frl_framewidth, frl_colorclient]
     frame.dummy = 0
     frame.outerframe = (
       21
       0
       0
-      18)
+      19
+    )
     taborder = 5
     statfile = tstatfile1
     reffontheight = 16
@@ -2321,7 +2340,7 @@ object mainfo: tmainfo
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
     bounds_x = 261
     bounds_y = 113
-    bounds_cx = 182
+    bounds_cx = 181
     bounds_cy = 34
     color = -2147483645
     frame.levelo = -3
@@ -2334,21 +2353,25 @@ object mainfo: tmainfo
     frame.font.style = [fs_italic]
     frame.font.name = 'stf_default'
     frame.font.dummy = 0
+    frame.localprops = [frl_levelo, frl_leveli, frl_framewidth, frl_colorclient]
     frame.dummy = 0
     frame.outerframe = (
       0
       0
-      82
-      0)
+      81
+      0
+    )
     face.image.transparency = -2147483648
     face.fade_pos.count = 2
     face.fade_pos.items = (
-      0.000000000000000000
-      1.000000000000000000)
+      0
+      1
+    )
     face.fade_color.count = 2
     face.fade_color.items = (
       -1610612730
-      -1610612731)
+      -1610612731
+    )
     face.fade_direction = gd_up
     face.fade_transparency = 8421504
     face.dummy = 0
@@ -2369,6 +2392,7 @@ object mainfo: tmainfo
     frame.framei_left = 4
     frame.framei_right = 4
     frame.colorclient = -2147483645
+    frame.localprops = [frl_levelo, frl_leveli, frl_framewidth, frl_fileft, frl_firight, frl_colorclient]
     frame.dummy = 0
     face.options = [fao_alphafadeimage]
     face.image.transparentcolor = -2147483648
@@ -3112,9 +3136,9 @@ object mainfo: tmainfo
       070080FFFF7F00E0FFFFFFFFFFFEF4000F0000FFFFEF00F8FFFFFBFFF7FEF400
       1F0000FFFF3F00FFFFFFFFFFFFFEF4003F0000FEFF3FF0FFFF7FFFFFFFFEF400
       FF0000FCFF5FFDFFFFFFFFFFFFFEF400FF0000F8FF0FFFFFFFEFFFFF0F000000
-      FF0000F0FFEFFFFFFFFBFFFF0F000000FF0100C0FFF1FFFFFFFEFFFF4BDD6108
+      FF0000F0FFEFFFFFFFFBFFFF0F000000FF0100C0FFF1FFFFFFFEFFFF1BD26D08
       FF01000000F8FFFFBFFFFFFF0F000000FF07000000FCFFFFF7FFFFFF9FF5FFBF
-      FF03000000FFFFFFFCFFFFFF47DD6108FF07000080FFFFCFFFFFFFFF0F000000
+      FF03000000FFFFFFFCFFFFFF17D26D08FF07000080FFFFCFFFFFFFFF0F000000
       FE0F0000E0FFFFFEFFFFFFFFFFFEF400FF1F0000F0FFEFFFFFFFFFFF3F6A4900
       FD1F0000FAFFFFFFFFFFFFFF0F000000FF1F0000FCFFFFFFFFFFFFFF0F000000
       FF3F0000FFFFFFFFFFFFFFFF0F000000FFFF0180FFFFFFFFFFFFFFFFEFFCFFFF
@@ -3123,7 +3147,7 @@ object mainfo: tmainfo
       FFFFFFFFFFFDFFFFFFFEFFFFFFFEF400FFBFFFFFFFFFFF7FFFFBFFFFFFFEF400
       FFFFFEFFFFFFFFFFFFFFFFFF0F000000FFFFFFFF7FFFFFFFFFFFFFFF0F000000
       FFFFDFFFFFFFFFFFFFFFFFFF0F000000FFFF7FFFFFFFFFDFFFFFFFFFFFFEF400
-      FFFFFFFFFFFFFFFFFFFFFFFFDF761B00C5FFFFEFF7FFFFFFFFFFEF7F90F5FFBF
+      FFFFFFFFFFFFFFFFFFFFFFFF5F761B00C5FFFFEFF7FFFFFFFFFFEF7F90F5FFBF
       FFFEFFFFFFFFFFFFFFFFFFFF0F000000FFFFFFFFFFFFFFFFFFFFFFFF0F000000
       FFF7FFFFFFFFFFDFFFFDFFFFFFFEF400FFEFFFFFFFFFFFFFFF81FFFFFFFEF400
       FFDFFFFFFFFFFFFFFF01F4FFFFFEF400FFFFFFFFFFFFFFFFFF0100FCFFFEF400
@@ -3132,25 +3156,28 @@ object mainfo: tmainfo
       00F8FFFFFFFEFFFFFF000000E0EDDB0000848FFFFFFDFFFF7F00000070724C00
       000000FAFFFFFFFF3F000000706D4400000000F0FFFBFFFF3F000000706D4400
       000000E0FFFBFFFF5F00000070663C00000000C0FFFBFFFF1F000000706D4400
-      000000A0FFFFFFFF1F000000E073F00800000080FFFFFFFF1F000000206A1A40
-      00000000FFFFFFFF1F00000050D7EF0800000000FFFFFFFF3F00000060A3E002
+      000000A0FFFFFFFF1F00000010A8C40800000080FFFFFFFF1F000000206A1A40
+      00000000FFFFFFFF1F000000800BC40800000000FFFFFFFF3F000000A0142001
       00000000FEFFFFFF3F0000000000000000000000FEFFFFFF3F00000000000000
-      00000000FEFFFFFF3F00000060A3E00200000000FCFFFFFF7F000000C07DD708
-      00000000FCFFFFFF3F00000000000000}
+      00000000FEFFFFFF3F000000A014200100000000FCFFFFFF7F0000000062C108
+      00000000FCFFFFFF3F00000000000000
+    }
     face.fade_pos.count = 5
     face.fade_pos.items = (
-      0.000000000000000000
-      0.200000000000000000
-      0.500000000000000000
-      0.800000000000000000
-      1.000000000000000000)
+      0
+      0.2
+      0.5
+      0.8
+      1
+    )
     face.fade_color.count = 5
     face.fade_color.items = (
       16777215
       8421504
       4210752
       8421504
-      16777215)
+      16777215
+    )
     face.fade_direction = gd_up
     face.fade_transparency = -2147483648
     face.dummy = 0
@@ -3171,6 +3198,7 @@ object mainfo: tmainfo
     frame.framei_left = 4
     frame.framei_right = 4
     frame.colorclient = -2147483645
+    frame.localprops = [frl_levelo, frl_leveli, frl_framewidth, frl_fileft, frl_firight, frl_colorclient]
     frame.dummy = 0
     face.options = [fao_alphafadeimage]
     face.image.alignment = [al_xcentered, al_ycentered, al_tiled]
@@ -3268,17 +3296,20 @@ object mainfo: tmainfo
       A5A5A5019C9C9C01949494019C9C9C02A5A5A502BDBDBD01B5B5B502C6C6C601
       BDBDBD02B5B5B501DEDEDE01CECECE019C9C9C0194949401D6D6D601B5B5B504
       A5A5A502949494019C9C9C0294949401B5B5B5029C9C9C01CECECE01DEDEDE09
-      CECECE01A5A5A501B5B5B501DEDEDE03CECECE01A5A5A502DEDEDE0AB5B5B502}
+      CECECE01A5A5A501B5B5B501DEDEDE03CECECE01A5A5A502DEDEDE0AB5B5B502
+    }
     face.fade_pos.count = 3
     face.fade_pos.items = (
-      0.000000000000000000
-      0.500000000000000000
-      1.000000000000000000)
+      0
+      0.5
+      1
+    )
     face.fade_color.count = 3
     face.fade_color.items = (
       16777215
       0
-      16777215)
+      16777215
+    )
     face.fade_transparency = -2147483648
     face.dummy = 0
     taborder = 7
@@ -3289,65 +3320,81 @@ object mainfo: tmainfo
     template.image.transparency = -2147483648
     template.fade_pos.count = 2
     template.fade_pos.items = (
-      0.000000000000000000
-      1.000000000000000000)
+      0
+      1
+    )
     template.fade_color.count = 2
     template.fade_color.items = (
       -1610612731
-      -1610612732)
+      -1610612732
+    )
     template.fade_direction = gd_down
     template.fade_transparency = -2147483648
-    Left = 16
-    Top = 72
+    left = 16
+    top = 72
   end
   object mainmenu1: tmainmenu
     menu.submenu.count = 4
-    menu.submenu.items = <
+    menu.submenu.items = <    
       item
         submenu.count = 4
-        submenu.items = <
+        submenu.items = <        
           item
             submenu.count = 6
-            submenu.items = <
+            submenu.items = <            
               item
                 caption = 'ewrgqeg qewr '
-              end
+                state = [as_localcaption]
+              end            
               item
                 caption = 'qer qwetr'
-              end
+                state = [as_localcaption]
+              end            
               item
                 caption = 'uzkme56are'
-              end
+                state = [as_localcaption]
+              end            
               item
                 caption = 'w435 ertrh46'
-              end
+                state = [as_localcaption]
+              end            
               item
                 caption = '4w5gbsgfdbsw'
-              end
+                state = [as_localcaption]
+              end            
               item
                 caption = 'aerga aerg345 '
+                state = [as_localcaption]
               end>
             caption = '&1111111111'
-          end
+            state = [as_localcaption]
+          end        
           item
             caption = '&22222222'
-          end
+            state = [as_localcaption]
+          end        
           item
             caption = '&333333333'
-          end
+            state = [as_localcaption]
+          end        
           item
             caption = '&4444444444'
+            state = [as_localcaption]
           end>
         caption = '&Aaaaaaa'
-      end
+        state = [as_localcaption]
+      end    
       item
         caption = '&Bbbbbb'
-      end
+        state = [as_localcaption]
+      end    
       item
         caption = '&Cccccccc'
-      end
+        state = [as_localcaption]
+      end    
       item
         caption = '&Ddddd'
+        state = [as_localcaption]
       end>
     frametemplate = mainmenuframe
     facetemplate = buttonface1
@@ -3356,13 +3403,13 @@ object mainfo: tmainfo
     popupframetemplate = popupframe
     popupitemframetemplate = popupitemframe
     popupitemfacetemplate = buttonface2
-    Left = 24
-    Top = 40
+    left = 24
+    top = 40
   end
   object mainmenuframe: tframecomp
     template.leveli = 1
-    Left = 144
-    Top = 36
+    left = 144
+    top = 36
   end
   object mainmenuitemframe: tframecomp
     template.levelo = -1
@@ -3372,41 +3419,43 @@ object mainfo: tmainfo
     template.framei_top = 2
     template.framei_right = 2
     template.framei_bottom = 2
-    Left = 288
-    Top = 36
+    left = 288
+    top = 36
   end
   object buttonface2: tfacecomp
     template.image.transparency = -2147483648
     template.fade_pos.count = 2
     template.fade_pos.items = (
-      0.000000000000000000
-      1.000000000000000000)
+      0
+      1
+    )
     template.fade_color.count = 2
     template.fade_color.items = (
       -1610612731
-      -1610612732)
+      -1610612732
+    )
     template.fade_direction = gd_up
     template.fade_transparency = -2147483648
-    Left = 16
-    Top = 104
+    left = 16
+    top = 104
   end
   object popupitemframe: tframecomp
     template.levelo = -1
     template.leveli = 1
     template.framei_top = 1
     template.framei_bottom = 1
-    Left = 442
-    Top = 63
+    left = 442
+    top = 63
   end
   object popupframe: tframecomp
     template.levelo = 2
     template.framewidth = 1
-    Left = 443
-    Top = 35
+    left = 443
+    top = 35
   end
   object tstatfile1: tstatfile
     filename = 'status.sta'
-    Left = 19
-    Top = 195
+    left = 19
+    top = 195
   end
 end
