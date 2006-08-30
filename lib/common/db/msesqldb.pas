@@ -636,6 +636,7 @@ procedure tmsesqlquery.applyupdates(maxerrors: integer);
 var
  bm1: pchar;
 begin
+ checkbrowsemode;
  disablecontrols;
  try
   fstate:= fstate - [sqs_updateabort,sqs_updateerror];
