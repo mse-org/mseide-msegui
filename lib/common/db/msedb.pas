@@ -473,6 +473,9 @@ const
       
 type      
  tmsedatasource = class(tdatasource)
+  protected
+   Procedure DoDataChange (Info : Pointer); override;
+   Procedure DoStateChange; override;
  end;
  
  tpersistentfields = class(tpersistentarrayprop,ipersistentfieldsinfo)
@@ -2239,6 +2242,22 @@ procedure tdbcontroller.setdatabasename(const avalue: filenamety);
 begin
  fdatabasename:= tomsefilepath(avalue);
  tdatabase(fowner).databasename:= tosysfilepath(filepath(avalue,fk_default,true));
+end;
+
+{ tmsedatasource }
+
+procedure tmsedatasource.DoDataChange(Info: Pointer);
+begin
+ if not (csdesigning in componentstate) then begin
+  inherited;
+ end;
+end;
+
+procedure tmsedatasource.DoStateChange;
+begin
+ if not (csdesigning in componentstate) then begin
+  inherited;
+ end;
 end;
 
 end.
