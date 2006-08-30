@@ -1,4 +1,6 @@
 MSEide+MSEgui version history
+
+Version 0.9b
 2006-08-27 tsplitter.options spo_dockleft,spo_docktop,spo_dockright,
  spo_dockbottom, default on.
 2006-08-25 Property tscalingwidget.optionsscale, osc_expandx,osc_expandy,
