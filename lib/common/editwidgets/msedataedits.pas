@@ -986,6 +986,7 @@ begin
  if fframe <> nil then begin
   fframe.initgridframe;
  end;
+ synctofontheight;
 end;
 
 procedure tdataedit.editnotification(var info: editnotificationinfoty);

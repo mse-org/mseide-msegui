@@ -34,9 +34,17 @@ const
  
 type
 
+ dbnavigatoroptionty = (dno_confirmdelete);
+ dbnavigatoroptionsty = set of dbnavigatoroptionty;
+
+const
+ defaultdbnavigatoroptions = [dno_confirmdelete];
+ 
+type  
  idbnaviglink = interface(inullinterface)
   procedure setactivebuttons(const abuttons: dbnavigbuttonsty);
   function getwidget: twidget;
+  function getnavigoptions: dbnavigatoroptionsty;
  end;
 
  tnavigdatalink = class(tmsedatalink)
@@ -58,17 +66,20 @@ type
    fdatalink: tnavigdatalink;
    fvisiblebuttons: dbnavigbuttonsty;
    fshortcuts: array[dbnavigbuttonty] of shortcutty;
+   foptions: dbnavigatoroptionsty;
    function getdatasource: tdatasource;
    procedure setdatasource(const Value: tdatasource);
    procedure setvisiblebuttons(const avalue: dbnavigbuttonsty);
    function getcolorglyph: colorty;
    procedure setcolorglyph(const avalue: colorty);
   protected
-   procedure setactivebuttons(const abuttons: dbnavigbuttonsty);
    procedure doexecute(const sender: tobject);
    procedure loaded; override;
    procedure doshortcut(var info: keyeventinfoty; const sender: twidget); override;
    procedure doasyncevent(var atag: integer); override;
+   //idbnaviglink
+   procedure setactivebuttons(const abuttons: dbnavigbuttonsty);
+   function getnavigoptions: dbnavigatoroptionsty;
   public
    destructor destroy; override; 
    constructor create(aowner: tcomponent); override;
@@ -99,6 +110,8 @@ type
                   write fshortcuts[dbnb_cancel] default ord(key_none);
    property shortcut_refresh: shortcutty read fshortcuts[dbnb_refresh]
                   write fshortcuts[dbnb_refresh] default ord(key_none);
+   property options: dbnavigatoroptionsty read foptions write foptions 
+                  default defaultdbnavigatoroptions;
  end;
 
  idbeditfieldlink = interface(inullinterface)
@@ -1572,6 +1585,13 @@ begin
  end;
 end;
 
+function confirmdeleterecord: boolean;
+begin
+ with stockobjects do begin
+  result:= askok(captions[sc_Delete_record],captions[sc_confirmation])
+ end;
+end;
+
 { tnavigdatalink }
 
 constructor tnavigdatalink.Create(const intf: idbnaviglink);
@@ -1665,7 +1685,12 @@ begin
       insert;
      end;
     end;
-    dbnb_delete: delete;
+    dbnb_delete: begin
+     if not (dno_confirmdelete in fintf.getnavigoptions) or 
+                        confirmdeleterecord then begin
+      delete;
+     end;
+    end;
     dbnb_edit: edit;
     dbnb_post: post;
     dbnb_cancel: cancel;
@@ -1681,6 +1706,7 @@ constructor tdbnavigator.create(aowner: tcomponent);
 var
  int1: integer;
 begin
+ foptions:= defaultdbnavigatoroptions;
  fvisiblebuttons:= alldbnavigbuttons;
  fshortcuts[dbnb_first]:= key_modctrl + ord(key_pageup);
  fshortcuts[dbnb_prior]:= ord(key_pageup);
@@ -1809,6 +1835,11 @@ begin
  with ttoolbutton(sender) do begin
   fdatalink.execbutton(dbnavigbuttonty(tag));
  end;
+end;
+
+function tdbnavigator.getnavigoptions: dbnavigatoroptionsty;
+begin
+ result:= foptions;
 end;
 
 { teditwidgetdatalink }
@@ -4813,7 +4844,7 @@ end;
 
 procedure tgriddatalink.dodeleterow;
 begin
- if active and askok('Delete record?','Confirmation') then begin
+ if active and confirmdeleterecord then begin
   dataset.delete;
  end;
 end;

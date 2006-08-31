@@ -259,7 +259,7 @@ type
   protected
    fowner: tobject;
    procedure createitem(const index: integer; out item: tpersistent); override;
-   constructor internalcreate(const aowner: tobject;
+   procedure internalcreate(const aowner: tobject;
                            aclasstype: virtualpersistentclassty);
   public
    constructor create(const aowner: tobject; aclasstype: ownedpersistentclassty); virtual;
@@ -1418,17 +1418,17 @@ end;
 
 { townedpersistentarrayprop }
 
-constructor townedpersistentarrayprop.internalcreate(const aowner: tobject;
-                     aclasstype: virtualpersistentclassty);
-begin
- fowner:= aowner;
- inherited create(aclasstype);
-end;
-
 constructor townedpersistentarrayprop.create(const aowner: tobject;
                             aclasstype: ownedpersistentclassty);
 begin
  internalcreate(aowner,aclasstype);
+end;
+
+procedure townedpersistentarrayprop.internalcreate(const aowner: tobject;
+                     aclasstype: virtualpersistentclassty);
+begin
+ fowner:= aowner;
+ inherited create(aclasstype);
 end;
 
 procedure townedpersistentarrayprop.createitem(const index: integer;

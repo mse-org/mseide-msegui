@@ -4,7 +4,8 @@ unit msedb;
 interface
 
 uses
- classes,db,mseclasses,mseguiglob,msestrings,msetypes,msearrayprops,msegui;
+ classes,db,mseclasses,mseguiglob,msestrings,msetypes,msearrayprops,msegui,
+ msestockobjects;
  
 type
  fieldtypesty = set of tfieldtype;

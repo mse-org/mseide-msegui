@@ -121,7 +121,9 @@ const
   'XPM Image',          //sc_XPM_Image
   'PNM Image',          //sc_PNM_Image
   'TARGA Image',        //sc_TARGA_image
-  'All'                 //sc_All
+  'All',                //sc_All
+  'Confirmation',       //sc_Confirmation
+  'Delete record?'      //sc_Delete_record
 
                        );
 

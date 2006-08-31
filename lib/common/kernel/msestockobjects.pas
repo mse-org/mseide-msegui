@@ -64,7 +64,8 @@ type             //  0         1               2
                     sc_graphic_format_not_supported,sc_graphic_format_error,
                     sc_MS_Bitmap,sc_MS_Icon,sc_JPEG_Image,sc_PNG_Image,
                     sc_XPM_Image,sc_PNM_Image,sc_TARGA_image,
-                    sc_All
+                    sc_All,
+                    sc_Confirmation,sc_Delete_record
                     );
  
  tstockobjects = class

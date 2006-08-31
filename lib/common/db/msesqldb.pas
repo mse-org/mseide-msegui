@@ -191,12 +191,24 @@ type
    property onaftersetparam: notifyeventty read fonaftersetparam
                                   write fonaftersetparam;
  end;
+
+ tsequencelink = class;
  
- tsequencelink = class(tmsecomponent)
+ tsequencedatalink = class(tfielddatalink)
+  private
+   fowner: tsequencelink;
+  protected
+   procedure updatedata; override;
+  public
+   constructor create(const aowner: tsequencelink);
+ end;
+  
+ tsequencelink = class(tmsecomponent,idbeditinfo)
   private
    fsequencename: string;
    fdatabase: tdatabase;
    fdbintf: idbcontroller;
+   fdatalink: tfielddatalink;
    procedure checkintf;
    procedure setdatabase(const avalue: tdatabase);
    procedure setsequencename(const avalue: string);
@@ -204,13 +216,24 @@ type
    procedure setaslargeint(const avalue: largeint);
    function getasinteger: integer;
    procedure setasinteger(const avalue: integer);
+   function getdatasource: tdatasource;
+   procedure setdatasource(const avalue: tdatasource);
+   function getdatafield: string;
+   procedure setdatafield(const avalue: string);
+   //idbeditinfo
+   procedure getfieldtypes(out propertynames: stringarty;
+                          out fieldtypes: fieldtypesarty);
   protected
    procedure notification(acomponent: tcomponent; operation: toperation); override;
   public
+   constructor create(aowner: tcomponent); override;
+   destructor destroy; override;
    property aslargeint: largeint read getaslargeint write setaslargeint;
    property asinteger: integer read getasinteger write setasinteger;
   published
    property database: tdatabase read fdatabase write setdatabase;
+   property datasource: tdatasource read getdatasource write setdatasource;
+   property datafield: string read getdatafield write setdatafield;
    property sequencename: string read fsequencename write setsequencename;
  end;
  
@@ -1031,7 +1054,41 @@ begin
  fieldtypes:= nil;
 end;
 
+{ tsequencedatalink }
+
+constructor tsequencedatalink.create(const aowner: tsequencelink);
+begin
+ fowner:= aowner;
+ inherited create;
+end;
+
+procedure tsequencedatalink.updatedata;
+begin
+ inherited;
+ if (field <> nil) and field.isnull and (dataset <> nil) and 
+                                               (dataset.modified) then begin
+  if field is tlargeintfield then begin
+   field.aslargeint:= fowner.aslargeint;
+  end
+  else begin
+   field.asinteger:= fowner.asinteger;
+  end;
+ end;
+end;
+
 { tsequencelink }
+
+constructor tsequencelink.create(aowner: tcomponent);
+begin
+ fdatalink:= tsequencedatalink.create(self);
+ inherited;
+end;
+
+destructor tsequencelink.destroy;
+begin
+ inherited;
+ fdatalink.free;
+end;
 
 procedure tsequencelink.setdatabase(const avalue: tdatabase);
 begin
@@ -1101,6 +1158,38 @@ end;
 procedure tsequencelink.setasinteger(const avalue: integer);
 begin
  setaslargeint(avalue); 
+end;
+
+function tsequencelink.getdatasource: tdatasource;
+begin
+ result:= fdatalink.datasource;
+end;
+
+procedure tsequencelink.setdatasource(const avalue: tdatasource);
+begin
+ fdatalink.datasource:= avalue;
+ if (csdesigning in componentstate) and (fdatabase = nil) and 
+      (fdatalink.dataset is tdbdataset) then begin
+  database:= tdbdataset(fdatalink.dataset).database;
+ end;
+end;
+
+function tsequencelink.getdatafield: string;
+begin
+ result:= fdatalink.fieldname;
+end;
+
+procedure tsequencelink.setdatafield(const avalue: string);
+begin
+ fdatalink.fieldname:= avalue;
+end;
+
+procedure tsequencelink.getfieldtypes(out propertynames: stringarty;
+               out fieldtypes: fieldtypesarty);
+begin
+ propertynames:= nil;
+ setlength(fieldtypes,1);
+ fieldtypes[0]:= integerfields;
 end;
 
 end.

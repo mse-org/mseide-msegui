@@ -7449,8 +7449,8 @@ end;
 
 procedure tcustomgrid.initnewcomponent;
 begin
- inherited;
  ffixrows.count:= 1;
+ inherited;
 end;
 
 procedure tcustomgrid.loaded;

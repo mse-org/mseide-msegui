@@ -1526,7 +1526,7 @@ end;
 
 procedure tcontainer.widgetregionchanged(const sender: twidget);
 var
- int1,int2,int3: integer;
+ int1,int2,int3,int4: integer;
  po1: pointty;
  rect1: rectty;
 begin
@@ -1546,6 +1546,7 @@ begin
     end
    end;  
    if int3 >= 0 then begin
+    int4:= sender.bounds_cy; //updatelayout modifies widgetrect
     rect1:= cellrect(makegridcoord(0,0));
     po1:= translatepaintpoint(nullpoint,sender,fgrid);
     int2:= datacols.count;
@@ -1563,8 +1564,9 @@ begin
     end;
     inc(flayoutupdating);
     try
+     sender.bounds_cy:= int4;
+     datarowheight:= int4;
      datacols[int3].width:= sender.bounds_cx;
-     datarowheight:= sender.bounds_cy;
      layoutchanged;
      if int3 <> int2 then begin
       movecol(int3,int2);
@@ -1740,7 +1742,6 @@ begin
    if (cell1.col >= 0) or (cell1.col = invalidaxis) then begin
     if not checkdescendent(awidget) then begin //new insert
      if not awidget.getcorbainterface(typeinfo(igridwidget),intf) then begin
- //   if not widget.getcorbainterface(igridwidget,intf) then begin
       error(gre_invalidwidget);
      end;
      if cell1.col < 0 then begin

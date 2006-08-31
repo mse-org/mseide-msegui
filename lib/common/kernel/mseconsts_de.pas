@@ -68,7 +68,7 @@ const
   '&Filter',            //sc_Filter            ///   
   'Speichern',          //sc_save 
   #214'ffnen',           //sc_open
-  'Grafik Format nicht unterstützt', //sc_graphic_not_supported
+  'Grafik Format nicht unterst'#252'tzt', //sc_graphic_not_supported
   'Grafik Format Fehler', //sc_graphic_format_error
   'MS Bitmap',            //sc_MS_Icon
   'MS Icon',              //sc_MS_Icon
@@ -77,7 +77,9 @@ const
   'XPM Bild',             //sc_XPM_Image
   'PNM Bild',             //sc_PNM_Image
   'TARGA Bild',           //sc_TARGA_image
-  'Alle'                  //sc_All
+  'Alle',                 //sc_All
+  'Best'#228'tigung',     //sc_Confirmation
+  'Datensatz l'#246'schen?' //sc_Delete_record
 );
     
 initialization

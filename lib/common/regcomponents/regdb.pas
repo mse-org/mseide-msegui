@@ -79,10 +79,14 @@ type
  end;
 
  tsqlquerysqlpropertyeditor = class(tsqlpropertyeditor)
+  private
+   factivebefore: boolean;
   protected
    procedure doafterclosequery(var amodalresult: modalresultty); override;
    function gettestbutton: boolean; override;
    function getutf8: boolean; override;
+  public
+   procedure edit; override;
  end;
   
 procedure Register;
@@ -516,6 +520,15 @@ end;
 function tsqlquerysqlpropertyeditor.getutf8: boolean;
 begin
  result:= dso_utf8 in tmsesqlquery(fprops[0].instance).controller.options;
+end;
+
+procedure tsqlquerysqlpropertyeditor.edit;
+begin
+ factivebefore:= tmsesqlquery(fprops[0].instance).active;
+ inherited;
+ if not factivebefore then begin
+  tmsesqlquery(fprops[0].instance).active:= false;
+ end;
 end;
 
 initialization
