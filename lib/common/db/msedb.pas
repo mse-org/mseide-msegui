@@ -23,7 +23,8 @@ const
  
 type
  locateresultty = (loc_timeout,loc_notfound,loc_ok); 
- locateoptionty = (loo_caseinsensitive,loo_partialkey,loo_noforeward,loo_nobackward);
+ locateoptionty = (loo_caseinsensitive,loo_partialkey,
+                        loo_noforeward,loo_nobackward);
  locateoptionsty = set of locateoptionty;
  fieldarty = array of tfield;
 
@@ -239,6 +240,8 @@ type
    procedure setasmsestring(const avalue: msestring);
   protected
    function HasParent: Boolean; override;
+   function getasfloat: double; override;
+   procedure setasfloat(avalue: double); override;
   public
    function assql: string;
    property asmsestring: msestring read getasmsestring write setasmsestring;
@@ -278,6 +281,8 @@ type
    procedure setasmsestring(const avalue: msestring);
   protected
    function HasParent: Boolean; override;
+   function getasdatetime: tdatetime; override;
+   procedure setasdatetime(avalue: tdatetime); override;
   public
    function assql: string;
    property asmsestring: msestring read getasmsestring write setasmsestring;
@@ -290,6 +295,8 @@ type
    function getasmsestring: msestring;
    procedure setasmsestring(const avalue: msestring);
   protected
+   function getasdatetime: tdatetime; override;
+   procedure setasdatetime(avalue: tdatetime); override;
    function HasParent: Boolean; override;
   public
    function assql: string;
@@ -303,6 +310,8 @@ type
    function getasmsestring: msestring;
    procedure setasmsestring(const avalue: msestring);
   protected
+   function getasdatetime: tdatetime; override;
+   procedure setasdatetime(avalue: tdatetime); override;
    function HasParent: Boolean; override;
   public
    function assql: string;
@@ -414,12 +423,42 @@ type
    procedure updatefield;
    function getasmsestring: msestring;
    procedure setasmsestring(const avalue: msestring);
+   procedure checkfield;
+   function GetAsBoolean: Boolean;
+   procedure SetAsBoolean(const avalue: Boolean);
+   function GetAsCurrency: Currency;
+   procedure SetAsCurrency(const avalue: Currency);
+   function GetAsDateTime: TDateTime;
+   procedure SetAsDateTime(const avalue: TDateTime);
+   function GetAsFloat: Double;
+   procedure SetAsFloat(const avalue: Double);
+   function GetAsLongint: Longint;
+   procedure SetAsLongint(const avalue: Longint);
+   function GetAsLargeInt: LargeInt;
+   procedure SetAsLargeInt(const avalue: LargeInt);
+   function GetAsInteger: Integer;
+   procedure SetAsInteger(const avalue: Integer);
+   function GetAsString: string;
+   procedure SetAsString(const avalue: string);
+   function GetAsVariant: variant;
+   procedure SetAsVariant(const avalue: variant);
   protected
    procedure activechanged; override;
    procedure layoutchanged; override;
   public
+   function assql: string;
    property field: tfield read ffield;
    property fieldname: string read ffieldname write setfieldname;
+   
+   property AsBoolean: Boolean read GetAsBoolean write SetAsBoolean;
+   property AsCurrency: Currency read GetAsCurrency write SetAsCurrency;
+   property AsDateTime: TDateTime read GetAsDateTime write SetAsDateTime;
+   property AsFloat: Double read GetAsFloat write SetAsFloat;
+   property AsLongint: Longint read GetAsLongint write SetAsLongint;
+   property AsLargeInt: LargeInt read GetAsLargeInt write SetAsLargeInt;
+   property AsInteger: Integer read GetAsInteger write SetAsInteger;
+   property AsString: string read GetAsString write SetAsString;
+   property AsVariant: variant read GetAsVariant write SetAsVariant;
    property asmsestring: msestring read getasmsestring write setasmsestring;
    function msedisplaytext: msestring;
  end;
@@ -546,10 +585,10 @@ type
                       const acancelresync: boolean = true);
    destructor destroy; override;
    function locate(const key: integer; const field: tfield;
-                       const options: locateoptionsty): locateresultty;
+                       const options: locateoptionsty = []): locateresultty;
                        overload;
    function locate(const key: msestring; const field: tfield; 
-                 const options: locateoptionsty): locateresultty; overload;
+                 const options: locateoptionsty = []): locateresultty; overload;
    procedure appendrecord(const values: array of const);
    procedure getfieldclass(const fieldtype: tfieldtype; out result: tfieldclass);
    
@@ -1200,6 +1239,26 @@ begin
  result:= asstring;
 end;
 
+function tmsefloatfield.getasfloat: double;
+begin
+ if isnull then begin
+  result:= emptyreal;
+ end
+ else begin
+  result:= inherited getasfloat;
+ end;
+end;
+
+procedure tmsefloatfield.setasfloat(avalue: double);
+begin
+ if isemptyreal(avalue) then begin
+  clear;
+ end
+ else begin
+  inherited;
+ end;
+end;
+
 { tmsecurrencyfield }
 
 function tmsecurrencyfield.HasParent: Boolean;
@@ -1266,6 +1325,26 @@ begin
  result:= asstring;
 end;
 
+function tmsedatetimefield.getasdatetime: tdatetime;
+begin
+ if isnull then begin
+  result:= emptydatetime;
+ end
+ else begin
+  result:= inherited getasdatetime;
+ end;
+end;
+
+procedure tmsedatetimefield.setasdatetime(avalue: tdatetime);
+begin
+ if isemptydatetime(avalue) then begin
+  clear;
+ end
+ else begin
+  inherited;
+ end;
+end;
+
 { tmsedatefield }
 
 function tmsedatefield.HasParent: Boolean;
@@ -1288,6 +1367,26 @@ begin
  result:= asstring;
 end;
 
+function tmsedatefield.getasdatetime: tdatetime;
+begin
+ if isnull then begin
+  result:= emptydatetime;
+ end
+ else begin
+  result:= inherited getasdatetime;
+ end;
+end;
+
+procedure tmsedatefield.setasdatetime(avalue: tdatetime);
+begin
+ if isemptydatetime(avalue) then begin
+  clear;
+ end
+ else begin
+  inherited;
+ end;
+end;
+
 { tmsetimefield }
 
 function tmsetimefield.HasParent: Boolean;
@@ -1308,6 +1407,26 @@ end;
 function tmsetimefield.getasmsestring: msestring;
 begin
  result:= asstring;
+end;
+
+function tmsetimefield.getasdatetime: tdatetime;
+begin
+ if isnull then begin
+  result:= emptydatetime;
+ end
+ else begin
+  result:= inherited getasdatetime;
+ end;
+end;
+
+procedure tmsetimefield.setasdatetime(avalue: tdatetime);
+begin
+ if isemptydatetime(avalue) then begin
+  clear;
+ end
+ else begin
+  inherited;
+ end;
 end;
 
 { tmsebinaryfield }
@@ -1589,6 +1708,126 @@ begin
  end;
 end;
 
+function tfielddatalink.assql: string;
+begin
+ result:= fieldtosql(ffield);
+end;
+
+procedure tfielddatalink.checkfield;
+begin
+ if ffield = nil then begin
+  raise exception.create('Field is nil.');
+ end;
+end;
+
+function tfielddatalink.GetAsBoolean: Boolean;
+begin
+ checkfield;
+ result:= field.asboolean;
+end;
+
+procedure tfielddatalink.SetAsBoolean(const avalue: Boolean);
+begin
+ checkfield;
+ field.asboolean:= avalue;
+end;
+
+function tfielddatalink.GetAsCurrency: Currency;
+begin
+ checkfield;
+ result:= field.ascurrency;
+end;
+
+procedure tfielddatalink.SetAsCurrency(const avalue: Currency);
+begin
+ checkfield;
+ field.ascurrency:= avalue;
+end;
+
+function tfielddatalink.GetAsDateTime: TDateTime;
+begin
+ checkfield;
+ result:= field.asdatetime;
+end;
+
+procedure tfielddatalink.SetAsDateTime(const avalue: TDateTime);
+begin
+ checkfield;
+ field.asdatetime:= avalue;
+end;
+
+function tfielddatalink.GetAsFloat: Double;
+begin
+ checkfield;
+ result:= field.asfloat;
+end;
+
+procedure tfielddatalink.SetAsFloat(const avalue: Double);
+begin
+ checkfield;
+ field.asfloat:= avalue;
+end;
+
+function tfielddatalink.GetAsLongint: Longint;
+begin
+ checkfield;
+ result:= field.aslongint;
+end;
+
+procedure tfielddatalink.SetAsLongint(const avalue: Longint);
+begin
+ checkfield;
+ field.aslongint:= avalue;
+end;
+
+function tfielddatalink.GetAsLargeInt: LargeInt;
+begin
+ checkfield;
+ result:= field.aslargeint;
+end;
+
+procedure tfielddatalink.SetAsLargeInt(const avalue: LargeInt);
+begin
+ checkfield;
+ field.aslargeint:= avalue;
+end;
+
+function tfielddatalink.GetAsInteger: Integer;
+begin
+ checkfield;
+ result:= field.asinteger;
+end;
+
+procedure tfielddatalink.SetAsInteger(const avalue: Integer);
+begin
+ checkfield;
+ field.asinteger:= avalue;
+end;
+
+function tfielddatalink.GetAsString: string;
+begin
+ checkfield;
+ result:= field.asstring;
+end;
+
+procedure tfielddatalink.SetAsString(const avalue: string);
+begin
+ checkfield;
+ field.asstring:= avalue;
+end;
+
+function tfielddatalink.GetAsVariant: variant;
+begin
+ checkfield;
+ result:= field.asvariant;
+end;
+
+procedure tfielddatalink.SetAsVariant(const avalue: variant);
+begin
+ checkfield;
+ field.asvariant:= avalue;
+end;
+
 { tactivatorcontroller }
 
 constructor tactivatorcontroller.create(const aowner: tcomponent);
@@ -1606,7 +1845,10 @@ end;
 procedure tactivatorcontroller.loaded;
 begin
  floaded:= true;
- if factivator = nil then begin
+ if (factivator = nil) or factivator.activated then begin
+  if factivator <> nil then begin
+   factive:= true; //activated
+  end;
   if csdesigning in fowner.componentstate then begin
    try
     setowneractive(factive);
@@ -1632,10 +1874,12 @@ begin
   case event of
    oe_activate: begin
     floaded:= true;
-    setowneractive(true);
+    factive:= true;
+    setowneractive(factive);
    end;
    oe_deactivate: begin
-    setowneractive(false);
+    factive:= false;
+    setowneractive(factive);
    end;
   end;
  end;
@@ -1802,7 +2046,7 @@ begin
 end;
 
 function tdscontroller.locate(const key: integer; const field: tfield;
-                              const options: locateoptionsty): locateresultty;
+                              const options: locateoptionsty = []): locateresultty;
 var
  bm: string;
 begin
@@ -1843,7 +2087,7 @@ begin
 end;
 
 function tdscontroller.locate(const key: msestring; const field: tfield;
-                         const options: locateoptionsty): locateresultty;
+                         const options: locateoptionsty = []): locateresultty;
 var
  int2: integer;
  str1,str2,bm: string;

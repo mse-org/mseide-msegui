@@ -2043,7 +2043,7 @@ end;
 
 procedure tdbstringedit.modified;
 begin
- fdatalink.Modified;
+ fdatalink.modified;
  inherited;
 end;
 

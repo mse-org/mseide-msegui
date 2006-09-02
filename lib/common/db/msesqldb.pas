@@ -48,7 +48,7 @@ type
   private
    fsqlonchangebefore: tnotifyevent;
    fcontroller: tdscontroller;
-   fstate: sqlquerystatesty;
+   fmstate: sqlquerystatesty;
    fonapplyrecupdate: applyrecupdateeventty;
    fwantedreadonly: boolean;
    procedure setcontroller(const avalue: tdscontroller);
@@ -454,10 +454,10 @@ procedure tmsesqlquery.setonapplyrecupdate(const avalue: applyrecupdateeventty);
 begin
  checkinactive;
  if assigned(avalue) and not (csdesigning in componentstate) then begin
-  include(fstate,sqs_userapplayrecupdate);
+  include(fmstate,sqs_userapplayrecupdate);
  end
  else begin
-  exclude(fstate,sqs_userapplayrecupdate);
+  exclude(fmstate,sqs_userapplayrecupdate);
  end;
  fonapplyrecupdate:= avalue;
  if not assigned(avalue) and not inherited parsesql then begin
@@ -468,7 +468,7 @@ end;
 function tmsesqlquery.getcanmodify: Boolean;
 begin
  result:= inherited getcanmodify or not readonly and 
-               (sqs_userapplayrecupdate in fstate);
+               (sqs_userapplayrecupdate in fmstate);
 end;
 
 function tmsesqlquery.recupdatesql(updatekind: tupdatekind): string;
@@ -557,7 +557,7 @@ var
  str1: string;
 begin
  try
-  if sqs_userapplayrecupdate in fstate then begin
+  if sqs_userapplayrecupdate in fmstate then begin
    bo1:= false;
    fonapplyrecupdate(self,updatekind,str1,bo1);
    if not bo1 then begin
@@ -576,7 +576,7 @@ begin
    inherited;
   end;
  except
-  include(fstate,sqs_updateerror);
+  include(fmstate,sqs_updateerror);
   raise;
  end;
 end;
@@ -662,10 +662,10 @@ begin
  checkbrowsemode;
  disablecontrols;
  try
-  fstate:= fstate - [sqs_updateabort,sqs_updateerror];
+  fmstate:= fmstate - [sqs_updateabort,sqs_updateerror];
   internalapplyupdates(maxerrors);
  finally
-  if (sqs_updateerror in fstate) and 
+  if (sqs_updateerror in fmstate) and 
               (dso_cancelupdatesonerror in fcontroller.options) then begin
    cancelupdates;
   end;

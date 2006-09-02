@@ -146,7 +146,7 @@ uses
  mseedit,msedrawtext,msebits,msedatalist,msestream;
 
 const
- pascaldelims = msestring(' :;+-*/(),=' + c_linefeed + c_return + c_tab);
+ pascaldelims = msestring(' :;+-*/(),=<>' + c_linefeed + c_return + c_tab);
  bmbitshift = 4;
  bmbitmask = integer($3ff0);
 

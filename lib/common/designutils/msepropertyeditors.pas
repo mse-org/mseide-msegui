@@ -279,6 +279,7 @@ type
   protected
    function issubcomponent(const index: integer = 0): boolean;
    function getdefaultstate: propertystatesty; override;
+   procedure checkcomponent(const avalue: tcomponent); virtual;
   public
    function allequal: boolean; override;
    function getvalue: msestring; override;
@@ -1891,6 +1892,7 @@ begin
     if (comp = nil) or not comp.InheritsFrom(gettypedata(ftypeinfo)^.classtype) then begin
      properror;
     end;
+    checkcomponent(comp);
    end
    else begin
     exit;
@@ -1898,6 +1900,11 @@ begin
   end;
   setordvalue(cardinal(comp));
  end;
+end;
+
+procedure tcomponentpropertyeditor.checkcomponent(const avalue: tcomponent);
+begin
+ //dummy
 end;
 
 { tsisterwidgetpropertyeditor }

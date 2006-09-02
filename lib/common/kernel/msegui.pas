@@ -555,6 +555,7 @@ type
    fonbeforedeactivate: notifyeventty;
    fonafterdeactivate: notifyeventty;
    factive: boolean;
+   factivated: boolean;
    procedure readclientnames(reader: treader);
    procedure writeclientnames(writer: twriter);
    function getclients: integer;
@@ -583,11 +584,12 @@ type
                     var dest: tactivator);
    procedure activateclients;
    procedure deactivateclients;
+   property activated: boolean read factivated;
   published
    property clients: integer read getclients write setclients; 
                                   //hook for object inspector
    property options: activatoroptionsty read foptions write setoptions;
-   property active: boolean read factive write setactive stored false;
+   property active: boolean read factive write setactive;
    property onbeforeactivate: notifyeventty read fonbeforeactivate
                            write fonbeforeactivate;
    property onafteractivate: notifyeventty read fonafteractivate 
@@ -2049,7 +2051,7 @@ end;
 procedure tguicomponent.loaded;
 begin
  inherited;
- if factivator = nil then begin
+ if (factivator = nil) or factivator.activated then begin
   doactivated;
  end;
 end;
@@ -2158,20 +2160,22 @@ end;
 procedure tactivator.loaded;
 begin
  inherited;
- if avo_activateonloaded in foptions then begin
-  if csdesigning in componentstate then begin
-   try
+ if not (csdesigning in componentstate) or factive then begin
+  if avo_activateonloaded in foptions then begin   
+   if csdesigning in componentstate then begin
+    try
+     activateclients;
+    except
+     application.handleexception(self);
+    end;
+   end
+   else begin
     activateclients;
-   except
-    application.handleexception(self);
-   end;
-  end
-  else begin
-   activateclients;
-  end;   
- end;
- if avo_activatedelayed in foptions then begin
-  asyncevent;
+   end;   
+  end;
+  if avo_activatedelayed in foptions then begin
+   asyncevent;
+  end;
  end;
 end;
 
@@ -2255,6 +2259,7 @@ var
  int1: integer;
 begin
  factive:= true;
+ factivated:= true;
  if canevent(tmethod(fonbeforeactivate)) then begin
   fonbeforeactivate(self);
  end;
@@ -2289,11 +2294,18 @@ end;
 procedure tactivator.setactive(const avalue: boolean);
 begin
  if avalue <> factive then begin
-  if avalue then begin
-   activateclients;
+  if componentstate * [csloading,csdesigning] = [csloading,csdesigning] then begin
+   factive:= avalue;
   end
   else begin
-   deactivateclients;
+   if not (csloading in componentstate) then begin
+    if avalue then begin
+     activateclients;
+    end
+    else begin
+     deactivateclients;
+    end;
+   end;
   end;
  end;
 end;

@@ -974,6 +974,11 @@ begin
     end;
    end;
   end;
+ end
+ else begin
+  if assigned(fonchange) then begin
+   fonchange(self);
+  end;
  end;
 end;
 

@@ -334,9 +334,9 @@ begin
     rect1.cy:= rect1.cy - delta.y;
     flinkbottom.widgetrect:= rect1;
    end;
-   if canevent(tmethod(fonupdatelayout)) then begin
-    fonupdatelayout(self);
-   end;
+  end;
+  if canevent(tmethod(fonupdatelayout)) then begin
+   fonupdatelayout(self);
   end;
  finally
   dec(fupdating);
@@ -373,7 +373,6 @@ begin
  setstatfilevar(istatfile(self),avalue,fstatfile);
 end;
 
-   //istatfile
 procedure tsplitter.dostatread(const reader: tstatreader);
 var
  po1,po2: pointty;

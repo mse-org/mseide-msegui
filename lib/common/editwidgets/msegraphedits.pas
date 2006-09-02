@@ -1947,11 +1947,11 @@ end;
 
 procedure tcustomdatabutton.dokeyup(var info: keyeventinfoty);
 begin
- inherited;
  if (info.key = key_space) and (ss_clicked in finfo.state) then begin
   exclude(finfo.state,ss_clicked);
   invalidaterect(finfo.dim);
  end;
+ inherited;
 end;
 
 procedure tcustomdatabutton.statechanged;

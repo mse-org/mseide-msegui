@@ -71,8 +71,15 @@ type
   protected
    function getdefaultstate: propertystatesty; override;
    function getvalues: msestringarty; override;
+  public
+   procedure setvalue(const value: msestring); override;
  end;
 
+ tfielddatasetpropertyeditor = class(tcomponentpropertyeditor)
+  protected
+   procedure checkcomponent(const avalue: tcomponent); override;
+ end;
+ 
  tsqlpropertyeditor = class(ttextstringspropertyeditor)
   protected
    function getsyntaxindex: integer; override;
@@ -138,6 +145,8 @@ begin
         tpersistentfieldspropertyeditor);
  registerpropertyeditor(typeinfo(string),tfield,'FieldName',
         tfieldfieldnamepropertyeditor);
+ registerpropertyeditor(typeinfo(tcomponent),tfield,'Dataset',
+        tfielddatasetpropertyeditor);
  registerpropertyeditor(typeinfo(string),tfieldparamlink,'paramname',
         tdbparamnamepropertyeditor);
  registerpropertyeditor(typeinfo(tstringlist),nil,'SQL',
@@ -370,6 +379,33 @@ begin
    end;
   end;
  end;
+end;
+
+procedure tfieldfieldnamepropertyeditor.setvalue(const value: msestring);
+var
+ ds: tdataset;
+begin
+ ds:= tfield(fprops[0].instance).dataset;
+ if (ds <> nil) and (ds.findfield(value) <> nil) then begin
+  raise exception.create('Field '''+value+''' exists in '+ds.name+'.');
+ end;
+ inherited;
+end;
+
+{ tfielddatasetpropertyeditor }
+
+procedure tfielddatasetpropertyeditor.checkcomponent(const avalue: tcomponent);
+var
+ str1: string;
+begin
+ if avalue is tdataset then begin
+  str1:= tfield(fprops[0].instance).fieldname;
+  with tdataset(avalue) do begin
+   if findfield(str1) <> nil then begin
+    raise exception.create('Field '''+str1+''' exists in '+name+'.');
+   end;
+  end;
+ end;  
 end;
 
 const
