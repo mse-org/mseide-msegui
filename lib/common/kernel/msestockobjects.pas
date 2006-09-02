@@ -239,8 +239,8 @@ end;
 { tstockobjects }
 
 constructor tstockobjects.create;
-var
- modalresult: modalresultty;
+//var
+// modalresult: modalresultty;
 begin
  {
  for modalresult:= low(modalresultty) to high(modalresultty) do begin

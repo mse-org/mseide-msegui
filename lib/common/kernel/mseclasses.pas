@@ -445,11 +445,11 @@ type
    class function getmoduleclassname: string; override;
    procedure defineproperties(filer: tfiler); override;
    procedure loaded; override;
-   procedure beforedestruction; override;
   public
    constructor create(aowner: tcomponent); overload; override;
    constructor create(aowner: tcomponent; load: boolean); reintroduce; overload;
    destructor destroy; override;
+   procedure beforedestruction; override;
    property size: sizety read fsize write fsize;
   published
    property oncreate: notifyeventty read foncreate write foncreate;
@@ -829,7 +829,7 @@ var
  stream1,stream2: tmemorystream;
  writer: twriter;
  reader: treader;
- comp1: tcomponent;
+// comp1: tcomponent;
  comp2: tcomponent;
  int1: integer;
  eventhandler: trefresheventhandler;
@@ -1047,7 +1047,7 @@ var
  stream: tobjectdatastream;
  reader: treader;
  po2: pobjectdataty;
- intf: iobjectlink;
+// intf: iobjectlink;
 begin
  po2:= po1^.langobjectdata;
  if po2 = nil then begin
@@ -2364,7 +2364,7 @@ function setclassname(const instance: tobject;
                    const aclassname: pshortstring): pshortstring;
 var
  classnamepo: ppointer;
- ca1: cardinal;
+// ca1: cardinal;
 begin
  if aclassname = nil then begin
   result:= nil;

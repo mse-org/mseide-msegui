@@ -1128,7 +1128,7 @@ var
   ca1: cardinal;
   children: pwindow;
   int1: integer;
-  id1: winidty;
+//  id1: winidty;
   ar1: atomarty;
  begin
   result:= false;

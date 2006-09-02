@@ -6266,7 +6266,7 @@ var
  dist: integer;
  widget1: twidget;
  dwp,dwm: integer;
- int1: integer;
+// int1: integer;
 begin
  with info do begin
   rect1:= navigrect;
@@ -9678,7 +9678,7 @@ var
  int1: integer;
  bo1: boolean;
  window: twindow;
- po1,po2: ^twindowevent;
+ po1{,po2}: ^twindowevent;
  waitcountbefore: integer;
  ar1: integerarty;
  
