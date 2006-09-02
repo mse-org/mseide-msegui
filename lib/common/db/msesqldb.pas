@@ -230,6 +230,7 @@ type
    destructor destroy; override;
    property aslargeint: largeint read getaslargeint write setaslargeint;
    property asinteger: integer read getasinteger write setasinteger;
+   function assql: string;
   published
    property database: tdatabase read fdatabase write setdatabase;
    property datasource: tdatasource read getdatasource write setdatasource;
@@ -239,7 +240,7 @@ type
  
 implementation
 uses
- msestrings,dbconst,msesysutils,typinfo;
+ msestrings,dbconst,msesysutils,typinfo,sysutils;
  
 type 
   TBufDatasetcracker = class(TDBDataSet)
@@ -1190,6 +1191,11 @@ begin
  propertynames:= nil;
  setlength(fieldtypes,1);
  fieldtypes[0]:= integerfields;
+end;
+
+function tsequencelink.assql: string;
+begin
+ result:= inttostr(aslargeint);
 end;
 
 end.
