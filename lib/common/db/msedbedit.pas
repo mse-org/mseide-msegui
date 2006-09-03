@@ -3444,6 +3444,7 @@ end;
 
 constructor tcustomdbenumedit.create(aowner: tcomponent);
 begin
+ fisdb:= true;
  fdatalink:= teditwidgetdatalink.create(idbeditfieldlink(self));
  inherited;
 end;

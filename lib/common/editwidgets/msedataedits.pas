@@ -529,6 +529,7 @@ type
   protected
    fonsetvalue1: setintegereventty;
    fvalue1: integer;
+   fisdb: boolean;
    procedure setvalue(const avalue: integer);
    function createdatalist(const sender: twidgetcol): tdatalist; override;
    function getdatatyp: datatypty; override;
@@ -1310,7 +1311,7 @@ var
 begin
  text:= '';
  bo1:= true;
- texttovalue(bo1,false);
+ texttovalue(bo1,true); //sevalue call
 end;
 
 procedure tdataedit.setfirstclick;
@@ -1485,7 +1486,12 @@ begin
  end
  else begin
   if fgridintf = nil then begin
-   result:= (newfocus = nil) or (newfocus.parentwidget <> parentwidget);
+   if fparentwidget = nil then begin
+    result:= not checkdescendent(newfocus);
+   end
+   else begin
+    result:= not fparentwidget.checkdescendent(newfocus);
+   end;
   end
   else begin
    result:= (edited and (oe_autopost in foptionsedit)){ and 
@@ -2865,7 +2871,7 @@ begin
    end;
   end;
  end;
- if (int1 < fmin) or (int1 > fmax) then begin
+ if not (fisdb and (int1 = -1)) and (int1 < fmin) or (int1 > fmax) then begin
   rangeerror(fmin,fmax,quiet);
   accept:= false;
  end;

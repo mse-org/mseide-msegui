@@ -448,7 +448,8 @@ end;
 constructor tnumdisp.create(aowner: tcomponent);
 begin
  inherited;
- finfo.flags:= defaultnumdisptextflags;
+ ftextflags:= defaultnumdisptextflags;
+ finfo.flags:= ftextflags;
 end;
 
 { tcustomintegerdisp }
