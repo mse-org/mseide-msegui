@@ -81,6 +81,8 @@ type
      //idbdispfieldlink
    procedure fieldtovalue; override;
    procedure setkeyvalue(const avalue: integer);
+  protected
+   procedure objectevent(const sender: tobject; const event: objecteventty); override;
   public
    property keyvalue: integer read fkeyvalue write setkeyvalue;
   published
@@ -124,6 +126,8 @@ type
      //idbdispfieldlink
    procedure fieldtovalue; override;
    procedure setkeyvalue(const avalue: integer);
+  protected
+   procedure objectevent(const sender: tobject; const event: objecteventty); override;
   public
    property keyvalue: integer read fkeyvalue write setkeyvalue;
   published
@@ -192,6 +196,8 @@ type
      //idbdispfieldlink
    procedure fieldtovalue; override;
    procedure setkeyvalue(const avalue: integer);
+  protected
+   procedure objectevent(const sender: tobject; const event: objecteventty); override;
   public
    property keyvalue: integer read fkeyvalue write setkeyvalue;
   published
@@ -235,6 +241,8 @@ type
      //idbdispfieldlink
    procedure fieldtovalue; override;
    procedure setkeyvalue(const avalue: integer);
+  protected
+   procedure objectevent(const sender: tobject; const event: objecteventty); override;
   public
    property keyvalue: integer read fkeyvalue write setkeyvalue;
   published
@@ -414,6 +422,15 @@ begin
  end;
 end;
 
+procedure tdbstringdisplb.objectevent(const sender: tobject;
+               const event: objecteventty);
+begin
+ inherited;
+ if (event = oe_changed) and (sender = flookupbuffer) then begin
+  fdatalink.recordchanged(nil);
+ end;
+end;
+
 { tdbintegerdisp }
 
 constructor tdbintegerdisp.create(aowner: tcomponent);
@@ -506,6 +523,15 @@ begin
  end
  else begin
   setnullvalue;
+ end;
+end;
+
+procedure tdbintegerdisplb.objectevent(const sender: tobject;
+               const event: objecteventty);
+begin
+ inherited;
+ if (event = oe_changed) and (sender = flookupbuffer) then begin
+  fdatalink.recordchanged(nil);
  end;
 end;
 
@@ -663,6 +689,15 @@ begin
  end;
 end;
 
+procedure tdbrealdisplb.objectevent(const sender: tobject;
+               const event: objecteventty);
+begin
+ inherited;
+ if (event = oe_changed) and (sender = flookupbuffer) then begin
+  fdatalink.recordchanged(nil);
+ end;
+end;
+
 { tdbdatetimedisp }
 
 constructor tdbdatetimedisp.create(aowner: tcomponent);
@@ -756,6 +791,15 @@ begin
  end
  else begin
   setnullvalue;
+ end;
+end;
+
+procedure tdbdatetimedisplb.objectevent(const sender: tobject;
+               const event: objecteventty);
+begin
+ inherited;
+ if (event = oe_changed) and (sender = flookupbuffer) then begin
+  fdatalink.recordchanged(nil);
  end;
 end;
 
