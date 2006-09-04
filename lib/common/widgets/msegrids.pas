@@ -448,7 +448,7 @@ type
    procedure dostatread(const reader: tstatreader); override;
    procedure dostatwrite(const writer: tstatwriter); override;
    property selected[const row: integer]: boolean read getselected write setselected;
-             //row -1 -> whole col
+             //row < 0 -> whole col
    property cellorigin: pointty read getcellorigin;    //org = grid.paintpos
   published
    property options default defaultdatacoloptions;
@@ -812,8 +812,8 @@ type
    function selectedcellcount: integer;
    property selectedcells: gridcoordarty read getselectedcells write setselectedcells;
    property selected[const cell: gridcoordty]: boolean read Getselected write Setselected;
-               //col = -1 and row = -1 -> whole grid, col = -1 -> whole col,
-               //row = -1 -> whole row
+               //col < 0 and row < 0 -> whole grid, col < 0 -> whole col,
+               //row = < 0 -> whole row
    procedure setselectedrange(const rect: gridrectty; const value: boolean;
              const calldoselectcell: boolean = false); overload; virtual;
   published
@@ -4233,7 +4233,17 @@ end;
 
 function tdatacols.getselected(const cell: gridcoordty): boolean;
 begin
- result:= cols[cell.col].getselected(cell.row);
+ if cell.col >= 0 then begin
+  result:= cols[cell.col].getselected(cell.row);
+ end
+ else begin
+  if cell.row >= 0 then begin
+   result:= (frowstate.getitempo(cell.row)^.selected and wholerowselectedmask <> 0);
+  end
+  else begin
+   result:= false;
+  end;
+ end;
 end;
 
 procedure tdatacols.setselected(const cell: gridcoordty; const Value: boolean);
