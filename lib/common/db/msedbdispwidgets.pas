@@ -426,7 +426,7 @@ procedure tdbstringdisplb.objectevent(const sender: tobject;
                const event: objecteventty);
 begin
  inherited;
- if (event = oe_changed) and (sender = flookupbuffer) then begin
+ if (event in [oe_changed,oe_connect]) and (sender = flookupbuffer) then begin
   fdatalink.recordchanged(nil);
  end;
 end;
@@ -530,7 +530,7 @@ procedure tdbintegerdisplb.objectevent(const sender: tobject;
                const event: objecteventty);
 begin
  inherited;
- if (event = oe_changed) and (sender = flookupbuffer) then begin
+ if (event in [oe_changed,oe_connect]) and (sender = flookupbuffer) then begin
   fdatalink.recordchanged(nil);
  end;
 end;
@@ -693,7 +693,7 @@ procedure tdbrealdisplb.objectevent(const sender: tobject;
                const event: objecteventty);
 begin
  inherited;
- if (event = oe_changed) and (sender = flookupbuffer) then begin
+ if (event in [oe_changed,oe_connect]) and (sender = flookupbuffer) then begin
   fdatalink.recordchanged(nil);
  end;
 end;
@@ -798,7 +798,7 @@ procedure tdbdatetimedisplb.objectevent(const sender: tobject;
                const event: objecteventty);
 begin
  inherited;
- if (event = oe_changed) and (sender = flookupbuffer) then begin
+ if (event in [oe_changed,oe_connect]) and (sender = flookupbuffer) then begin
   fdatalink.recordchanged(nil);
  end;
 end;

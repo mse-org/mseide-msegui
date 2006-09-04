@@ -148,8 +148,8 @@ type
    procedure dostatwrite(const writer: tstatwriter); override;
   public
    constructor create(aowner: tcustomlistview);
-   procedure setselectedrange(const rect: gridrectty; value: boolean;
-             calldoselectcell: boolean = false); overload; override;
+   procedure setselectedrange(const rect: gridrectty; const value: boolean;
+                         const calldoselectcell: boolean = false); overload; override;
  end;
 
  itemeventty = procedure(const sender: tcustomlistview; const index: integer;
@@ -845,8 +845,8 @@ begin
  end;
 end;
 
-procedure tlistcols.setselectedrange(const rect: gridrectty; value,
-  calldoselectcell: boolean);
+procedure tlistcols.setselectedrange(const rect: gridrectty; const value: boolean;
+                      const calldoselectcell: boolean = false);
 var
  int1,int2: integer;
 begin
@@ -857,7 +857,7 @@ begin
   end;
   if calldoselectcell and value then begin
    for int1:= int1 to int2 do begin
-    selectcell(indextocell(int1),value,false);
+    selectcell(indextocell(int1),csm_select{value,false});
    end;
   end
   else begin
@@ -875,11 +875,18 @@ procedure tlistcols.changeselectedrange(const start,oldend,newend: gridcoordty;
  procedure select(start,stop: integer; value: boolean);
  var
   int1: integer;
+  mo1: cellselectmodety;
  begin
   with tcustomlistview(fgrid) do begin
    if calldoselectcell then begin
+    if value then begin
+     mo1:= csm_select;
+    end
+    else begin
+     mo1:= csm_deselect;
+    end;
     for int1:= start to stop do begin
-     selectcell(indextocell(int1),value,false);
+     selectcell(indextocell(int1),mo1{value,false});
     end;
    end
    else begin

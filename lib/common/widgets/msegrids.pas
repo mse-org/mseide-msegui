@@ -172,6 +172,7 @@ type
    cek_keydown,cek_keyup:
     (keyeventinfopo: pkeyeventinfoty);
  end;
+ pcelleventinfoty = ^celleventinfoty;
 
  tgridarrayprop = class;
 
@@ -813,8 +814,8 @@ type
    property selected[const cell: gridcoordty]: boolean read Getselected write Setselected;
                //col = -1 and row = -1 -> whole grid, col = -1 -> whole col,
                //row = -1 -> whole row
-   procedure setselectedrange(const rect: gridrectty; value: boolean;
-             calldoselectcell: boolean = false); overload; virtual;
+   procedure setselectedrange(const rect: gridrectty; const value: boolean;
+             const calldoselectcell: boolean = false); overload; virtual;
   published
    property width;
    property colorselect;
@@ -938,6 +939,7 @@ type
  end;
 
  cellinnerlevelty = (cil_all,cil_noline,cil_paint,cil_inner);
+ cellselectmodety = (csm_select,csm_deselect,csm_reverse);
 
  gridnotifyeventty = procedure(const sender: tcustomgrid) of object;
  griddataeventty = procedure(const sender: tcustomgrid; const aindex: integer) of object;
@@ -1131,6 +1133,8 @@ type
    procedure dorowsdatachanged(const index,count: integer); virtual;
    procedure dorowcountchanged(const countbefore,newcount: integer); virtual;
    procedure docellevent(var info: celleventinfoty); virtual;
+   procedure cellmouseevent(const acell: gridcoordty; var info: mouseeventinfoty;
+                                const acellinfopo: pcelleventinfoty = nil);
    procedure dofocusedcellposchanged; virtual;
 
    function internalsort(sortfunc: gridsorteventty; var refindex: integer): boolean;
@@ -1231,8 +1235,8 @@ type
    procedure invalidatecell(const cell: gridcoordty);
    procedure invalidatefocusedcell;
    procedure invalidaterow(const arow: integer);
-   function selectcell(const cell: gridcoordty; avalue: boolean; 
-                     flip: boolean): boolean;  //true if accepted
+   function selectcell(const cell: gridcoordty; 
+                          const amode: cellselectmodety): boolean;  //true if accepted
    function getselectedrange: gridrectty;
    function getselectedrows: integerarty;
 
@@ -3099,13 +3103,68 @@ begin
  end;
 end;
 
-procedure tdatacol.clientmouseevent(const acell: gridcoordty; 
-                                              var info: mouseeventinfoty);
+procedure tcustomgrid.cellmouseevent(const acell: gridcoordty; 
+                    var info: mouseeventinfoty; const acellinfopo: pcelleventinfoty = nil);
 var
  event: celleventkindty;
  cellinfo: celleventinfoty;
  po1: pointty;
+ cellinfopo: pcelleventinfoty;
 begin
+ cellinfopo:= acellinfopo;
+ if cellinfopo = nil then begin
+  cellinfopo:= @cellinfo;
+ end;
+ fillchar(cellinfopo^,sizeof(cellinfo),0);
+ with cellinfopo^ do begin
+  mouseeventinfopo:= @info;
+  cell:= acell;
+  grid:= self;
+  gridmousepos:= info.pos;
+  case info.eventkind of
+   ek_mousemove: eventkind:= cek_mousemove;
+   ek_mousepark: eventkind:= cek_mousepark;
+   ek_buttonpress: eventkind:= cek_buttonpress;
+   ek_buttonrelease: eventkind:= cek_buttonrelease;
+   ek_clientmouseleave: eventkind:= cek_mouseleave;
+  end;
+  if (acellinfopo = nil) and (eventkind <> cek_none) then begin
+   po1:= cellrect(cellinfo.cell).pos;
+   try
+    subpoint1(info.pos,po1);
+    docellevent(cellinfopo^);
+   finally
+    addpoint1(info.pos,po1);
+   end;
+  end;
+ end;
+end;
+
+procedure tdatacol.clientmouseevent(const acell: gridcoordty; 
+                                              var info: mouseeventinfoty);
+var
+// event: celleventkindty;
+ cellinfo: celleventinfoty;
+ po1: pointty;
+begin
+ if info.eventkind = ek_clientmouseleave then begin
+  fgrid.cellmouseevent(acell,info,nil);
+ end
+ else begin
+  fgrid.cellmouseevent(acell,info,@cellinfo);
+  if cellinfo.eventkind <> cek_none then begin
+   po1:= fgrid.cellrect(cellinfo.cell).pos;
+   try
+    subpoint1(info.pos,po1);
+    updatecellzone(info.pos,cellinfo.zone);
+    fgrid.docellevent(cellinfo);
+   finally
+    addpoint1(info.pos,po1);
+   end;
+  end;
+ end;
+  
+{
  fillchar(cellinfo,sizeof(cellinfo),0);
  with cellinfo do begin
   mouseeventinfopo:= @info;
@@ -3137,6 +3196,7 @@ begin
    end;
   end;
  end;
+ }
 end;
 
 function tdatacol.getselected(const row: integer): boolean;
@@ -3358,7 +3418,7 @@ begin
  if (co_focusselect in
    coloptionsty((longword(optionsbefore) xor longword(foptions)) and longword(value))) and
    (fgrid.ffocusedcell.col = findex) and (fgrid.ffocusedcell.row >= 0) then begin
-    fgrid.selectcell(makegridcoord(findex,fgrid.ffocusedcell.row),true,false);
+    fgrid.selectcell(makegridcoord(findex,fgrid.ffocusedcell.row),csm_select{true,false});
  end;
 end;
 
@@ -4267,15 +4327,22 @@ begin
  setselected(invalidcell,false);
 end;
 
-procedure tdatacols.setselectedrange(const rect: gridrectty; value: boolean;
-                        calldoselectcell: boolean = false);
+procedure tdatacols.setselectedrange(const rect: gridrectty; const value: boolean;
+                        const calldoselectcell: boolean = false);
 var
  int1,int2: integer;
+ mo1: cellselectmodety;
 begin
  if calldoselectcell then begin
+  if value then begin
+   mo1:= csm_select;
+  end
+  else begin
+   mo1:= csm_deselect;
+  end;
   for int1:= rect.col to rect.col + rect.colcount - 1 do begin
    for int2:= rect.row to rect.row + rect.rowcount - 1 do begin
-    fgrid.selectcell(makegridcoord(int1,int2),value,false);
+    fgrid.selectcell(makegridcoord(int1,int2),mo1{value,false});
    end;
   end;
  end
@@ -5957,6 +6024,9 @@ begin
    end
    else begin
     mouseleavecol;
+    if not (es_processed in info.eventstate) then begin
+     cellmouseevent(fmousecell,info);
+    end;
    end;
   end;
  end;
@@ -6004,20 +6074,26 @@ begin
  //dummy
 end;
 
-function tcustomgrid.selectcell(const cell: gridcoordty; avalue: boolean; flip: boolean): boolean;
+function tcustomgrid.selectcell(const cell: gridcoordty; const amode: cellselectmodety
+                                        {avalue: boolean; flip: boolean}): boolean;
  //calls onselectcell
 var
  info: celleventinfoty;
 begin
  initeventinfo(cell,cek_select,info);
  info.accept:= true;
- if flip then begin
-  info.selected:= not fdatacols.selected[cell];
- end
- else begin
-  info.selected:= avalue;
+ case amode of 
+  csm_reverse: begin
+   info.selected:= not fdatacols.selected[cell];
+  end;
+  csm_select: begin
+   info.selected:= true;
+  end;
+  else begin
+   info.selected:= false;
+  end;
  end;
- if flip or (info.selected <> fdatacols.selected[cell]) then begin
+ if (amode = csm_reverse) or (info.selected <> fdatacols.selected[cell]) then begin
   docellevent(info);
   result:= info.accept;
   if result then begin
@@ -6115,16 +6191,16 @@ function tcustomgrid.focuscell(cell: gridcoordty;
      end;
      startanchors;
      if isdatacell(cell) and (co_focusselect in fdatacols[cell.col].foptions) then begin
-      selectcell(cell,true,false);
+      selectcell(cell,csm_select{true,false});
      end;
     end;
     fca_reverse: begin
-     selectcell(cell,false,true);
+     selectcell(cell,csm_reverse{false,true});
      startanchors;
     end;
     fca_selectstart: begin
      fdatacols.selected[invalidcell]:= false;
-     selectcell(cell,true,false);
+     selectcell(cell,csm_select{true,false});
      startanchors;
     end;
     fca_selectend: begin
@@ -7144,6 +7220,7 @@ procedure tcustomgrid.dokeydown(var info: keyeventinfoty);
 var
  action: focuscellactionty;
  focusbefore: gridcoordty;
+ mo1: cellselectmodety;
 begin
  if canevent(tmethod(fonkeydown)) then begin
   fonkeydown(self,info);
@@ -7317,7 +7394,13 @@ begin
      if (info.key = key_space) and
           (foptions * [co_keyselect,co_multiselect] = [co_keyselect,co_multiselect]) and
       ((info.shiftstate = [ss_shift]) or (info.shiftstate = [ss_ctrl])) then begin
-      selectcell(ffocusedcell,true,(info.shiftstate = [ss_ctrl]));
+      if info.shiftstate = [ss_ctrl] then begin
+       mo1:= csm_reverse;
+      end
+      else begin
+       mo1:= csm_select;
+      end;
+      selectcell(ffocusedcell,mo1{true,(info.shiftstate = [ss_ctrl])});
       include(info.eventstate,es_processed);
      end;
     end;

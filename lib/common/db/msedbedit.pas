@@ -6024,7 +6024,8 @@ procedure tlbdropdownlistcontroller.objectevent(const sender: tobject;
              const event: objecteventty);
 begin
  inherited;
- if (event = oe_changed) and (sender = flookupbuffer) then begin
+ if (event in [oe_changed,oe_connect]) and (sender = flookupbuffer) then begin
+// if (event = oe_changed) and (sender = flookupbuffer) then begin
   with tdataedit1(fintf.getwidget) do begin
    if fgridintf <> nil then begin
     fgridintf.getcol.changed;

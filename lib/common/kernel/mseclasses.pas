@@ -1687,6 +1687,7 @@ begin
    end;
    if source <> nil then begin
     dest.link(nil,source,valuepo,ainterfacetype);
+    source.objevent(dest,oe_connect);
    end;
   end;
  end;
@@ -1724,40 +1725,49 @@ begin
  end;
 end;
 
-procedure tobjectlinker.setlinkedvar(const linkintf: iobjectlink; const source: tlinkedobject;
-                         var dest: tlinkedobject);
+procedure tobjectlinker.setlinkedvar(const linkintf: iobjectlink; 
+                  const source: tlinkedobject; var dest: tlinkedobject);
+var
+ ba: tlinkedobject;
 begin
+ ba:= dest;
+ dest:= source;
  if source <> nil then begin
   link(linkintf,iobjectlink(source),@dest);
  end;
- if dest <> nil then begin
-  unlink(linkintf,iobjectlink(dest),@dest);
+ if ba <> nil then begin
+  unlink(linkintf,iobjectlink(ba),@dest);
  end;
- dest:= source;
 end;
 
-procedure tobjectlinker.setlinkedvar(const linkintf: iobjectlink; const source: tlinkedpersistent;
-                         var dest: tlinkedpersistent);
+procedure tobjectlinker.setlinkedvar(const linkintf: iobjectlink; 
+                  const source: tlinkedpersistent; var dest: tlinkedpersistent);
+var
+ ba: tlinkedpersistent;
 begin
+ ba:= dest;
+ dest:= source;
  if source <> nil then begin
   link(linkintf,iobjectlink(source),@dest);
  end;
- if dest <> nil then begin
-  unlink(linkintf,iobjectlink(dest),@dest);
+ if ba <> nil then begin
+  unlink(linkintf,iobjectlink(ba),@dest);
  end;
- dest:= source;
 end;
 
-procedure tobjectlinker.setlinkedvar(const linkintf: iobjectlink; const source: tmsecomponent;
-                         var dest: tmsecomponent);
+procedure tobjectlinker.setlinkedvar(const linkintf: iobjectlink; 
+              const source: tmsecomponent; var dest: tmsecomponent);
+var
+ ba: tmsecomponent;
 begin
+ ba:= dest;
+ dest:= source;
  if source <> nil then begin
   link(linkintf,ievent(source),@dest);
  end;
- if dest <> nil then begin
-  unlink(linkintf,ievent(dest),@dest);
+ if ba <> nil then begin
+  unlink(linkintf,ievent(ba),@dest);
  end;
- dest:= source;
 end;
 
 function tobjectlinker.isempty(var item): boolean;
