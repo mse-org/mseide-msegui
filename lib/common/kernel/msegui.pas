@@ -4062,6 +4062,13 @@ begin
    end;
   end;
  end;
+ if componentstate * [csloading,csdestroying] = [] then begin
+//  sizechanged;
+//  poschanged;
+  fontchanged;
+  colorchanged;
+  enabledchanged; //-> statechanged
+ end;
 end;
 
 procedure twidget.checkwidgetsize(var size: sizety);
@@ -4317,19 +4324,14 @@ begin
  try
   exclude(fwidgetstate1,ws1_widgetregionvalid);
   inherited;
-//  if fparentwidget = nil then begin
-//   parentfontchanged;
-//  end;
   sortzorder;
   updatetaborder(nil);
-//  invalidatewidget;
   if fframe <> nil then begin
    fframe.parentfontchanged;
   end;
   sizechanged;
   poschanged;
   fontchanged;
-//  updatefontheight;
   colorchanged;
   enabledchanged; //-> statechanged
   if ownswindow1 and (ws_visible in fwidgetstate) and

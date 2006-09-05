@@ -1334,7 +1334,7 @@ begin
     if (eventkind = ek_buttonpress) and (button = mb_left) then begin
      if ss1 = [ss_left] then begin
       if isinpaintrect then begin
-       component:= fdesigner.CreateCurrentComponent(module);
+       component:= fdesigner.createcurrentcomponent(module);
       end;
       if component <> nil then begin
        placecomponent(component,pos);
