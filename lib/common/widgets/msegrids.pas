@@ -29,7 +29,7 @@ type
                 co_focusselect, co_mouseselect, co_keyselect,
          //     lvo_multiselect,lvo_resetselectonexit
                 co_multiselect, co_resetselectonexit, co_rowselect,
-                
+
                 co_fixwidth,co_fixpos,co_fill,co_proportional,co_nohscroll,
                 co_savevalue,co_savestate,
                 co_rowfont,co_rowcolor,co_zebracolor,
@@ -42,7 +42,7 @@ type
  
 const
  fixcoloptionsshift = ord(co_rowfont);
- fixcoloptionsmask = [co_rowfont,co_rowcolor,co_zebracolor];
+ fixcoloptionsmask:coloptionsty = [co_rowfont,co_rowcolor,co_zebracolor];
  defaultfixcoloptions = [];
  
 type
@@ -3818,11 +3818,15 @@ begin
 end;
 
 procedure tfixcol.setoptionsfix(const avalue: fixcoloptionsty);
+
 begin
  foptionsfix:= avalue;
  inherited options:= coloptionsty(
-               replacebits(longword(avalue) shl fixcoloptionsshift,
-                     longword(foptions),longword(fixcoloptionsmask)));
+               replacebits(cardinal(
+                 {$ifndef FPC}byte({$endif}avalue{$ifndef FPC}){$endif})
+                            shl cardinal(fixcoloptionsshift),
+                     cardinal(foptions),
+                     cardinal(fixcoloptionsmask)));
 end;
 
 procedure tfixcol.drawcell(const canvas: tcanvas);
