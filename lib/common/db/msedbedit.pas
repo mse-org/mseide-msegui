@@ -4626,6 +4626,11 @@ begin
  checkscroll;
  gridinvalidate;
  checkscrollbar;
+ if active then begin
+  dataevent(dedatasetchange,0); //force tdatalink.calcrange
+  fgrid.focuscell(makegridcoord(fgrid.col,activerecord));
+  factiverecordbefore:= activerecord;
+ end;
 end;
 
 procedure tgriddatalink.checkscroll;

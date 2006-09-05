@@ -37,6 +37,16 @@ type
                 co_cancopy,co_canpaste,co_mousescrollrow,co_rowdatachange
                 );
  coloptionsty = set of coloptionty;
+ fixcoloptionty = (fco_rowfont,fco_rowcolor,fco_zebracolor);
+ fixcoloptionsty = set of fixcoloptionty;
+ 
+const
+ fixcoloptionsshift = ord(co_rowfont);
+ fixcoloptionsmask = [co_rowfont,co_rowcolor,co_zebracolor];
+ defaultfixcoloptions = [];
+ 
+type
+// fixcoloptions = (fco_
  optiongridty = (og_colsizing,og_colmoving,og_keycolmoving,
                  og_rowsizing,og_rowmoving,og_keyrowmoving,
                  og_rowinserting,og_rowdeleting,og_selectedrowsdeleting,
@@ -548,6 +558,7 @@ type
    fnumstart: integer;
    fnumstep: integer;
    fcaptions: tmsestringdatalist;
+   foptionsfix: fixcoloptionsty;
    procedure settextflags(const Value: textflagsty);
    procedure setnumstart(const Value: integer);
    procedure setnumstep(const Value: integer);
@@ -555,6 +566,7 @@ type
    function getcaptions: tmsestringdatalist;
    function iscaptionsstored: Boolean;
    procedure captionchanged(sender: tdatalist; aindex: integer);
+   procedure setoptionsfix(const avalue: fixcoloptionsty);
   protected
    ftextinfo: drawtextinfoty;
    procedure updatelayout; override;
@@ -579,6 +591,9 @@ type
    property captions: tmsestringdatalist
               read getcaptions write setcaptions stored iscaptionsstored;
    property color default cl_parent;
+   property colorselect;
+   property options: fixcoloptionsty read foptionsfix write setoptionsfix 
+                       default defaultfixcoloptions;
    property font;
  end;
 
@@ -3788,6 +3803,7 @@ end;
 constructor tfixcol.create(const agrid: tcustomgrid; 
                                const aowner: tgridarrayprop);
 begin
+ foptionsfix:= defaultfixcoloptions;
  ftextinfo.flags:= defaultfixcoltextflags;
  fcaptions:= tmsestringdatalist.create;
  fcaptions.onitemchange:= {$ifdef FPC}@{$endif}captionchanged;
@@ -3799,6 +3815,14 @@ destructor tfixcol.destroy;
 begin
  inherited;
  fcaptions.Free;
+end;
+
+procedure tfixcol.setoptionsfix(const avalue: fixcoloptionsty);
+begin
+ foptionsfix:= avalue;
+ inherited options:= coloptionsty(
+               replacebits(longword(avalue) shl fixcoloptionsshift,
+                     longword(foptions),longword(fixcoloptionsmask)));
 end;
 
 procedure tfixcol.drawcell(const canvas: tcanvas);
