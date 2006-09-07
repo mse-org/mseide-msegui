@@ -2374,7 +2374,9 @@ function setclassname(const instance: tobject;
                    const aclassname: pshortstring): pshortstring;
 var
  classnamepo: ppointer;
-// ca1: cardinal;
+ {$ifdef mswindows}
+ ca1: cardinal;
+ {$endif}
 begin
  if aclassname = nil then begin
   result:= nil;
