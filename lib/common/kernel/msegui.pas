@@ -4020,7 +4020,6 @@ begin
    end;
    if (fwindow <> nil) and ownswindow1 then begin
     newpos:= translatewidgetpoint(fwidgetrect.pos,nil,value);
-//    newpos:= subpoint(fwidgetrect.pos,value.rootwidget.fwidgetrect.pos);
     fwindow.fowner:= nil;
     freeandnil(fwindow);
    end
@@ -4031,9 +4030,6 @@ begin
   else begin
    newpos:= addpoint(rootwidget.fwidgetrect.pos,rootpos);
    fcolor:= translatecolor(fcolor);
-//   if fcolor = cl_parent then begin
-//    fcolor:= actualcolor;
-//   end;
   end;
 
   if fparentwidget <> nil then begin
@@ -4047,12 +4043,8 @@ begin
    exit;                   //interrupt
   end;
   fparentwidget:= Value;
-//  initparentclientrect;
   fwidgetrect.pos:= newpos;
   if fparentwidget <> nil then begin
-//   if not (csloading in componentstate) then begin
-//    addpoint1(fwidgetrect.pos,fparentwidget.clientwidgetpos);
-//   end;
    fparentwidget.registerchildwidget(self);
    parentclientrectchanged;
   end

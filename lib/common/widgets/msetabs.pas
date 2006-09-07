@@ -351,9 +351,11 @@ type
    function getstatvarname: msestring;
 
    //iobjectpicker
-   function getcursorshape(const apos: pointty; var shape: cursorshapety): boolean;
+   function getcursorshape(const apos: pointty;  const shiftstate: shiftstatesty;
+                                var shape: cursorshapety): boolean;
     //true if found
-   procedure getpickobjects(const rect: rectty; var objects: integerarty);
+   procedure getpickobjects(const rect: rectty;  const shiftstate: shiftstatesty;
+                                var objects: integerarty);
    procedure beginpickmove(const objects: integerarty);
    procedure endpickmove(const apos,offset: pointty; const objects: integerarty);
    procedure paintxorpic(const canvas: tcanvas; const apos,offset: pointty;
@@ -2165,7 +2167,8 @@ begin
 end;
 
    //iobjectpicker
-function ttabwidget.getcursorshape(const apos: pointty; var shape: cursorshapety): boolean;
+function ttabwidget.getcursorshape(const apos: pointty;  const shiftstate: shiftstatesty;
+                                var shape: cursorshapety): boolean;
     //true if found
 begin
  result:= checktabsizingpos(apos);
@@ -2179,7 +2182,8 @@ begin
  end
 end;
 
-procedure ttabwidget.getpickobjects(const rect: rectty; var objects: integerarty);
+procedure ttabwidget.getpickobjects(const rect: rectty;  const shiftstate: shiftstatesty;
+                                 var objects: integerarty);
 begin
  if checktabsizingpos(rect.pos) then begin
   setlength(objects,1);

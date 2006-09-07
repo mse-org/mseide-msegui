@@ -37,16 +37,18 @@ type
                 co_cancopy,co_canpaste,co_mousescrollrow,co_rowdatachange
                 );
  coloptionsty = set of coloptionty;
- fixcoloptionty = (fco_rowfont,fco_rowcolor,fco_zebracolor);
+ fixcoloptionty = (fco_mousefocus,fco_mouseselect,
+                     fco_rowfont,fco_rowcolor,fco_zebracolor);
  fixcoloptionsty = set of fixcoloptionty;
+ fixrowoptionty = (fro_mousefocus,fro_mouseselect);
+ fixrowoptionsty = set of fixrowoptionty;
  
 const
- fixcoloptionsshift = ord(co_rowfont);
+ fixcoloptionsshift = ord(co_rowfont)-ord(fco_rowfont);
  fixcoloptionsmask:coloptionsty = [co_rowfont,co_rowcolor,co_zebracolor];
  defaultfixcoloptions = [];
  
 type
-// fixcoloptions = (fco_
  optiongridty = (og_colsizing,og_colmoving,og_keycolmoving,
                  og_rowsizing,og_rowmoving,og_keyrowmoving,
                  og_rowinserting,og_rowdeleting,og_selectedrowsdeleting,
@@ -234,9 +236,11 @@ type
    procedure setlinewidth(const Value: integer);
    procedure setlinecolor(const Value: colorty);
    procedure setlinecolorfix(const Value: colorty);
+   procedure setcolorselect(const Value: colorty);
    function islinewidthstored: boolean;
    function islinecolorstored: boolean;
    function islinecolorfixstored: boolean;
+   function iscolorselectstored : boolean;
   protected
    flinepos: integer;
    flinewidth: integer;
@@ -249,6 +253,7 @@ type
    fface: tcellface;
    fcellinfo: cellinfoty;
    foptions: coloptionsty;
+   fcolorselect: colorty;
    procedure updatelayout; virtual;
    procedure changed; virtual;
    procedure updatecellrect;
@@ -294,6 +299,8 @@ type
                    stored islinecolorstored;
    property linecolorfix: colorty read flinecolorfix write setlinecolorfix 
                    stored islinecolorfixstored default defaultfixlinecolor;
+   property colorselect: colorty read fcolorselect write setcolorselect
+                  stored iscolorselectstored default cl_default;
  end;
 
  gridpropclassty = class of tgridprop;
@@ -336,7 +343,6 @@ type
    frowfontoffset: integer;
    frowcoloroffset: integer;
    function getcolindex: integer;
-   procedure setcolorselect(const Value: colorty);
    procedure setfocusrectdist(const avalue: integer);
    procedure updatepropwidth;
    procedure setrowcoloroffset(const Value: integer);
@@ -345,13 +351,11 @@ type
    function iswidthstored: boolean;
    function isoptionsstored: boolean;
    function isfocusrectdiststored: boolean;
-   function iscolorselectstored : boolean;
 
   protected
    fwidth: integer;
    fpropwidth: real;
    fstate: colstatesty;
-   fcolorselect: colorty;
    ffontselect: tcolselectfont;
    ffocusrectdist: integer;
    function getselected(const row: integer): boolean; virtual;
@@ -390,8 +394,6 @@ type
    function actualfont: tfont; virtual;
    property colindex: integer read getcolindex;
   published
-   property colorselect: colorty read fcolorselect write setcolorselect
-                  stored iscolorselectstored default cl_default;
    property width: integer read fwidth write setwidth stored iswidthstored;
    property rowcoloroffset: integer read frowcoloroffset write setrowcoloroffset default 0;
    property rowfontoffset: integer read frowfontoffset write setrowfontoffset default 0;
@@ -464,7 +466,6 @@ type
    property options default defaultdatacoloptions;
    property widthmin: integer read fwidthmin write setwidthmin default 1;
    property widthmax: integer read fwidthmax write setwidthmax default 0;
-   property colorselect;
    property name: string read fname write fname;
    property onchange: notifyeventty read fonchange write fonchange;
    property oncellevent: celleventty read foncellevent write foncellevent;
@@ -529,7 +530,6 @@ type
    property optionsedit: stringcoleditoptionsty read foptionsedit write foptionsedit
                stored isoptionseditstored default defaultstringcoleditoptions;
    property font;
-   property colorselect;
    property datalist: tmsestringdatalist read getdatalist write setdatalist;
    property fontselect: tcolselectfont read getfontselect write
                      setfontselect stored isfontselectstored;
@@ -544,7 +544,6 @@ type
    property textflagsactive;
    property optionsedit;
    property font;
-   property colorselect;
    property datalist;
    property fontselect;
    property onsetvalue;
@@ -591,7 +590,6 @@ type
    property captions: tmsestringdatalist
               read getcaptions write setcaptions stored iscaptionsstored;
    property color default cl_parent;
-   property colorselect;
    property options: fixcoloptionsty read foptionsfix write setoptionsfix 
                        default defaultfixcoloptions;
    property font;
@@ -648,6 +646,7 @@ type
    fcaptions: tcolheaders;
    fcaptionsfix: tcolheaders;
    fhints: tmsestringarrayprop;
+   foptionsfix: fixrowoptionsty;
    procedure setheight(const Value: integer);
    function getrowindex: integer;
    procedure captionchanged(const sender: tarrayprop; const aindex: integer);
@@ -684,6 +683,7 @@ type
    property hints: tmsestringarrayprop read fhints write sethints;
    property font;
    property linecolor default defaultfixlinecolor;
+   property options: fixrowoptionsty read foptionsfix write foptionsfix;
  end;
 
  tgridarrayprop = class(tindexpersistentarrayprop)
@@ -694,9 +694,11 @@ type
    flinewidth: integer;
    flinecolor: colorty;
    flinecolorfix: colorty;
+   fcolorselect: colorty;
    procedure setlinewidth(const Value: integer);
    procedure setlinecolor(const Value: colorty);
    procedure setlinecolorfix(const Value: colorty);
+   procedure setcolorselect(const avalue: colorty);
   protected
    fgrid: tcustomgrid;
    procedure updatelayout; virtual;
@@ -724,18 +726,18 @@ type
                 write setlinecolor;
    property linecolorfix: colorty read flinecolorfix
                 write setlinecolorfix default defaultfixlinecolor;
- end;
+   property colorselect: colorty read fcolorselect write setcolorselect
+              default cl_default;
+end;
 
  tcols = class(tgridarrayprop)
   private
    fwidth: integer;
    foptions: coloptionsty;
-   fcolorselect: colorty;
    ffocusrectdist: integer;
    function getcols(const index: integer): tcol;
    procedure setwidth(const value: integer);
    procedure setoptions(const Value: coloptionsty);
-   procedure setcolorselect(const avalue: colorty);
    procedure setfocusrectdist(const avalue: integer);
   protected
    function getclientsize: integer; override;
@@ -758,8 +760,6 @@ type
   published
    property width: integer read fwidth
                 write setwidth default griddefaultcolwidth;
-   property colorselect: colorty read fcolorselect write setcolorselect
-              default cl_default;
  end;
 
  rowstatety = record
@@ -833,7 +833,6 @@ type
              const calldoselectcell: boolean = false); overload; virtual;
   published
    property width;
-   property colorselect;
    property options default defaultdatacoloptions;
    property linewidth;
    property linecolor default defaultdatalinecolor;
@@ -955,6 +954,7 @@ type
 
  cellinnerlevelty = (cil_all,cil_noline,cil_paint,cil_inner);
  cellselectmodety = (csm_select,csm_deselect,csm_reverse);
+ selectcellmodety = (scm_cell,scm_row,scm_col);
 
  gridnotifyeventty = procedure(const sender: tcustomgrid) of object;
  griddataeventty = procedure(const sender: tcustomgrid; const aindex: integer) of object;
@@ -1183,8 +1183,10 @@ type
 
    //idragcontroller
    //iobjectpicker
-   function getcursorshape(const apos: pointty; var shape: cursorshapety): boolean;
-   procedure getpickobjects(const rect: rectty; var objects: integerarty);
+   function getcursorshape(const apos: pointty;  const shiftstate: shiftstatesty;
+                                    var shape: cursorshapety): boolean;
+   procedure getpickobjects(const rect: rectty;  const shiftstate: shiftstatesty;
+                                    var objects: integerarty);
    procedure beginpickmove(const objects: integerarty);
    procedure endpickmove(const apos,offset: pointty; const objects: integerarty);
    procedure paintxorpic(const canvas: tcanvas; const apos,offset: pointty;
@@ -1256,7 +1258,8 @@ type
    function getselectedrows: integerarty;
 
    function focuscell(cell: gridcoordty;
-                   selectaction: focuscellactionty = fca_focusin): boolean; 
+                   selectaction: focuscellactionty = fca_focusin;
+                   const selectmode: selectcellmodety = scm_cell): boolean; 
                                                //true if ok
    function focusedcellvalid: boolean;
    function scrollingcol: boolean;   //true if focusedcolvalid and no co_nohscroll
@@ -1725,6 +1728,7 @@ constructor tgridprop.create(const agrid: tcustomgrid;
 begin
  fgrid:= agrid;
  fcolor:= cl_default;
+ fcolorselect:= aowner.fcolorselect;
  flinecolor:= aowner.linecolor;
  flinecolorfix:= aowner.linecolorfix;
  flinewidth:= aowner.linewidth;
@@ -1789,9 +1793,22 @@ begin
  end;
 end;
 
+procedure tgridprop.setcolorselect(const Value: colorty);
+begin
+ if value <> fcolorselect then begin
+  fcolorselect := Value;
+  changed;
+ end;
+end;
+
 function tgridprop.islinecolorfixstored: Boolean;
 begin
  result:= flinecolorfix <> tgridarrayprop(prop).flinecolorfix;
+end;
+
+function tgridprop.iscolorselectstored: boolean;
+begin
+ result:= fcolorselect <> tgridarrayprop(fowner).fcolorselect;
 end;
 
 function tgridprop.getframe: tcellframe;
@@ -2017,7 +2034,6 @@ end;
 constructor tcol.create(const agrid: tcustomgrid; const aowner: tgridarrayprop);
 begin
  inherited create(agrid,aowner);
- fcolorselect:= tcols(aowner).fcolorselect;
  ffocusrectdist:= tcols(aowner).ffocusrectdist;
  fwidth:= tcols(aowner).fwidth;
  foptions:= tcols(aowner).foptions;
@@ -2327,14 +2343,6 @@ begin
  end;
 end;
 
-procedure tcol.setcolorselect(const Value: colorty);
-begin
- if value <> fcolorselect then begin
-  fcolorselect := Value;
-  changed;
- end;
-end;
-
 procedure tcol.setfocusrectdist(const avalue: integer);
 begin
  if ffocusrectdist <> avalue then begin
@@ -2357,11 +2365,6 @@ end;
 function tcol.isfocusrectdiststored: boolean;
 begin
  result:= ffocusrectdist <> tcols(fowner).ffocusrectdist;
-end;
-
-function tcol.iscolorselectstored: boolean;
-begin
- result:= fcolorselect <> tcols(fowner).fcolorselect;
 end;
 
 procedure tcol.updatelayout;
@@ -2626,6 +2629,7 @@ var
 var
  linewidthbefore: integer;
  linecolor1: colorty;
+ color1: colorty;
  
  procedure paintcols(const range: rangety);
  var
@@ -2644,11 +2648,21 @@ var
      end;
     end;
     if bo1 then begin
+     fcellinfo.color:= color1;
      if fix then begin
       fcellinfo.cell.col:= -int1-1;
      end
      else begin
       fcellinfo.cell.col:= int1;
+      if (fcolorselect <> cl_none) and 
+                    (cos_selected in fgrid.fdatacols[int1].fstate) then begin
+       if fcolorselect <> cl_default then begin
+        fcellinfo.color:= fcolorselect;
+       end
+       else begin
+        fcellinfo.color:= defaultselectedcellcolor;
+       end;
+      end;
      end;
      updatecellrect;
      ftextinfo.dest:= fcellinfo.innerrect;
@@ -2683,10 +2697,10 @@ begin
   end;
   canvas.drawinfopo:= @fcellinfo;
   if fcolor <> cl_default then begin
-   fcellinfo.color:= fcolor;
+   color1:= fcolor;
   end
   else begin
-   fcellinfo.color:= fgrid.actualcolor;
+   color1:= fgrid.actualcolor;
   end;
   po1:= canvas.origin;
   linewidthbefore:= canvas.linewidth;
@@ -2804,6 +2818,7 @@ begin
  fgrid:= aowner;
  flinewidth:= defaultgridlinewidth;
  flinecolorfix:= defaultfixlinecolor;
+ fcolorselect:= cl_default;
  inherited create(self,aclasstype);
 end;
 
@@ -2839,6 +2854,18 @@ begin
   flinecolorfix := Value;
   for int1:= 0 to count - 1 do begin
    tgridprop(items[int1]).linecolorfix:= value;
+  end;
+ end;
+end;
+
+procedure tgridarrayprop.setcolorselect(const avalue: colorty);
+var
+ int1: integer;
+begin
+ if fcolorselect <> avalue then begin
+  fcolorselect:= avalue;
+  for int1:= 0 to count - 1 do begin
+   tgridprop(items[int1]).colorselect:= avalue;
   end;
  end;
 end;
@@ -3948,7 +3975,6 @@ end;
 constructor tcols.create(aowner: tcustomgrid; aclasstype: gridpropclassty);
 begin
  fwidth:= griddefaultcolwidth;
- fcolorselect:= cl_default;
  inherited;
 end;
 
@@ -4047,18 +4073,6 @@ begin
   for int1:= 0 to count - 1 do begin
    tcol(items[int1]).options:= coloptionsty(replacebits(longword(value),
                   longword(tcol(items[int1]).options),mask));
-  end;
- end;
-end;
-
-procedure tcols.setcolorselect(const avalue: colorty);
-var
- int1: integer;
-begin
- if fcolorselect <> avalue then begin
-  fcolorselect:= avalue;
-  for int1:= 0 to count - 1 do begin
-   tcol(items[int1]).colorselect:= avalue;
   end;
  end;
 end;
@@ -4260,6 +4274,8 @@ begin
 end;
 
 function tdatacols.getselected(const cell: gridcoordty): boolean;
+var
+ int1: integer;
 begin
  if cell.col >= 0 then begin
   result:= cols[cell.col].getselected(cell.row);
@@ -4269,7 +4285,13 @@ begin
    result:= (frowstate.getitempo(cell.row)^.selected and wholerowselectedmask <> 0);
   end
   else begin
-   result:= false;
+   result:= true;
+   for int1:= 0 to count - 1 do begin
+    if not (cos_selected in cols[int1].fstate) then begin
+     result:= false;
+     break;
+    end;
+   end;
   end;
  end;
 end;
@@ -5837,12 +5859,34 @@ var
  cellkind: cellkindty;
 
  procedure checkfocuscell;
+ 
+ function getfocusact(const canselect: boolean): focuscellactionty;
+ begin
+  result:= fca_focusin;
+  if canselect then begin
+   if info.shiftstate * keyshiftstatesmask = [ss_shift] then begin
+    result:= fca_selectend;
+   end
+   else begin
+    if info.eventkind = ek_buttonpress then begin
+     result:= fca_reverse;
+    end;
+   end;
+   {
+   else begin
+    if info.shiftstate * keyshiftstatesmask = [ss_ctrl] then begin
+     result:= fca_reverse;
+    end;
+   end;
+   }
+  end;
+ end;
+ 
  var
   po1: pointty;
   action: focuscellactionty;
   bo1: boolean;
- begin
-//  po1:= tgridframe(fframe).scrollpos;
+ begin      //checkfocuscell
   po1:= fscrollrect.pos;
   action:= fca_focusin;
   case cellkind of
@@ -5897,8 +5941,48 @@ var
      end;
     end;
    end;
-   ck_fixcol,ck_fixrow: begin
-    showcell(fmousecell);
+   ck_fixcol: begin
+    with fixcols[fmousecell.col] do begin
+     if (fco_mousefocus in options) then begin
+      if (fmousecell.row <> ffocusedcell.row) or 
+                             (info.eventkind = ek_buttonpress) then begin
+       focuscell(makegridcoord(col,fmousecell.row),
+                getfocusact(fco_mouseselect in options),scm_row);
+      end;
+     end
+     else begin
+      if (info.eventkind = ek_buttonpress) and 
+           (fco_mouseselect in fixcols[fmousecell.col].options) then begin
+       fdatacols.selected[fmousecell]:= not fdatacols.selected[fmousecell];
+      end;
+      showcell(fmousecell);
+     end;
+    end;
+   end;
+   ck_fixrow: begin
+    with fixrows[fmousecell.row] do begin
+     if (fro_mousefocus in options) then begin
+      if (fmousecell.col <> ffocusedcell.col) or 
+                   (info.eventkind = ek_buttonpress) then begin
+       focuscell(makegridcoord(fmousecell.col,row),
+                            getfocusact(fro_mouseselect in options),scm_col);
+      end;
+     end
+     else begin
+      if (info.eventkind = ek_buttonpress) and 
+         (fro_mouseselect in fixrows[fmousecell.row].options) then begin
+       fdatacols.selected[fmousecell]:= not fdatacols.selected[fmousecell];
+      end;
+      showcell(fmousecell);
+     end;
+    end;
+   end;
+   ck_fixcolrow: begin
+    if (info.eventkind = ek_buttonpress) and 
+         (fro_mouseselect in fixrows[fmousecell.row].options) and
+     (fco_mouseselect in fixcols[fmousecell.col].options) then begin
+     fdatacols.selected[fmousecell]:= not fdatacols.selected[fmousecell];
+    end;
    end;
   end;
   addpoint1(info.pos,subpoint(tgridframe(fframe).scrollpos,po1));
@@ -6154,8 +6238,8 @@ begin
  //dummy
 end;
 
-function tcustomgrid.focuscell(cell: gridcoordty;
-                       selectaction: focuscellactionty): boolean;
+function tcustomgrid.focuscell(cell: gridcoordty; selectaction: focuscellactionty;
+          const selectmode: selectcellmodety = scm_cell): boolean;
 
  procedure doselectaction;
 
@@ -6218,7 +6302,27 @@ function tcustomgrid.focuscell(cell: gridcoordty;
     end;
    end;
   end;
+  
+  procedure doselectcell(const mode: cellselectmodety);
+  begin
+   case selectmode of
+    scm_row: begin
+     selectcell(makegridcoord(invalidaxis,cell.row),mode);
+    end;
+    scm_col: begin
+     selectcell(makegridcoord(cell.col,invalidaxis),mode);
+    end;
+    else begin
+     selectcell(cell,mode);
+    end;
+   end;      
+  end;
 
+var
+ cells,celle: gridcoordty;
+ rect1: gridrectty;
+ int1: integer;
+ 
  begin //doselectaction
   beginupdate;
   try
@@ -6229,16 +6333,16 @@ function tcustomgrid.focuscell(cell: gridcoordty;
      end;
      startanchors;
      if isdatacell(cell) and (co_focusselect in fdatacols[cell.col].foptions) then begin
-      selectcell(cell,csm_select{true,false});
+      doselectcell(csm_select);
      end;
     end;
     fca_reverse: begin
-     selectcell(cell,csm_reverse{false,true});
+     doselectcell(csm_reverse);
      startanchors;
     end;
     fca_selectstart: begin
      fdatacols.selected[invalidcell]:= false;
-     selectcell(cell,csm_select{true,false});
+     doselectcell(csm_select);
      startanchors;
     end;
     fca_selectend: begin
@@ -6247,15 +6351,58 @@ function tcustomgrid.focuscell(cell: gridcoordty;
       fstartanchor:= ffocusedcell;
      end;
      if fstartanchor.col >= 0 then begin
+      cells:= fstartanchor;
+      celle:= cell;
+      case selectmode of
+       scm_row: begin
+        cells.col:= 0;
+        celle.col:= fdatacols.count - 1;
+       end;
+       scm_col: begin
+        cells.row:= 0;
+        celle.row:= rowhigh;
+       end;
+      end;
       if fendanchor.col >= 0 then begin
+       case selectmode of
+        scm_row: begin
+         celle.col:= cells.col;
+        end;
+        scm_col: begin
+         celle.row:= cells.row;
+        end;
+       end;
        if gs_islist in fstate then begin
         fdatacols.changeselectedrange(fstartanchor,fendanchor,cell,true);
        end
-       else begin
-        if ((cell.col >= fstartanchor.col) xor (fendanchor.col >= fstartanchor.col)) or
-         ((cell.row >= fstartanchor.row) xor (fendanchor.row >= fstartanchor.row)) then begin
+       else begin //todo: optimize for selectmode <> scm_cell
+        if (selectmode <> scm_cell) or ((cell.col >= fstartanchor.col) xor 
+                    (fendanchor.col >= fstartanchor.col)) or
+                                     ((cell.row >= fstartanchor.row) xor 
+                   (fendanchor.row >= fstartanchor.row)) then begin
+         rect1:= makegridrect(celle,cells);
          fdatacols.selected[invalidcell]:= false;
-         fdatacols.setselectedrange(makegridrect(fstartanchor,cell),true,true);
+         fdatacols.setselectedrange(rect1,true,true);
+         case selectmode of
+          scm_row: begin
+           beginupdate;
+           rect1.col:= invalidaxis;
+           for int1:= rect1.rowcount - 1 downto 0 do begin
+            fdatacols.selected[rect1.pos]:= true;
+            inc(rect1.row);
+           end;  
+           endupdate;
+          end;
+          scm_col: begin
+           beginupdate;
+           rect1.row:= invalidaxis;
+           for int1:= rect1.colcount - 1 downto 0 do begin
+            fdatacols.selected[rect1.pos]:= true;
+            inc(rect1.col);
+           end;  
+           endupdate;
+          end;
+         end;
         end
         else begin
          changeselectedrange(false);
@@ -6265,7 +6412,7 @@ function tcustomgrid.focuscell(cell: gridcoordty;
        end;
       end
       else begin
-       fdatacols.setselectedrange(makegridrect(fstartanchor,cell),true,true);
+       fdatacols.setselectedrange(makegridrect(cells,celle),true,true);
       end;
      end;
      fendanchor:= cell;
@@ -6310,8 +6457,8 @@ begin     //focuscell
             not container.canclose(window.focusedwidget) then begin
    exit;        //for not null check in twidgetgrid
   end;
-  if (selectaction in [fca_focusin,fca_focusinrepeater,fca_focusinforce]) and ((cell.col < 0) or
-                not fdatacols[cell.col].canfocus(mb_none)) then begin
+  if (selectaction in [fca_focusin,fca_focusinrepeater,fca_focusinforce]) and 
+      ((cell.col < 0) or  not fdatacols[cell.col].canfocus(mb_none)) then begin
    selectaction:= fca_setfocusedcell;
   end;
   if selectaction = fca_entergrid then begin
@@ -7604,7 +7751,8 @@ begin
  inherited;
 end;
 
-procedure tcustomgrid.getpickobjects(const rect: rectty; var objects: integerarty);
+procedure tcustomgrid.getpickobjects(const rect: rectty;  const shiftstate: shiftstatesty;
+                                              var objects: integerarty);
 var
  cellkind: cellkindty;
  cell: gridcoordty;
@@ -7732,6 +7880,9 @@ var
  end;
 
 begin
+ if shiftstate <> [ss_left] then begin
+  exit;
+ end;
  setlength(objects,1);
  objects[0]:= -1; //none
  with rect do begin
@@ -7768,12 +7919,14 @@ begin
  end;
 end;
 
-function tcustomgrid.getcursorshape(const apos: pointty;
+function tcustomgrid.getcursorshape(const apos: pointty; const shiftstate: shiftstatesty;
                      var shape: cursorshapety): boolean;
 var
  objects: integerarty;
 begin
- getpickobjects(makerect(apos,nullsize),objects);
+ if shiftstate = [] then begin
+  getpickobjects(makerect(apos,nullsize),[ss_left],objects);
+ end;
  if length(objects) > 0 then begin
   fpickkind:= pickobjectkindty(objects[0] mod pickobjectstep);
   case fpickkind of

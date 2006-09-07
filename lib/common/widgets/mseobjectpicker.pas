@@ -34,9 +34,11 @@ type
 
  iobjectpicker = interface(inullinterface)
   function getwidget: twidget;
-  function getcursorshape(const pos: pointty; var shape: cursorshapety): boolean;
+  function getcursorshape(const pos: pointty; const shiftstate: shiftstatesty; 
+                                    var shape: cursorshapety): boolean;
    //true if found
-  procedure getpickobjects(const rect: rectty; var objects: integerarty);
+  procedure getpickobjects(const rect: rectty;  const shiftstate: shiftstatesty;
+                                    var objects: integerarty);
   procedure beginpickmove(const objects: integerarty);
   procedure endpickmove(const pos,offset: pointty; const objects: integerarty);
   procedure paintxorpic(const canvas: tcanvas; const pos,offset: pointty;
@@ -87,8 +89,8 @@ begin
    if info.button = mb_left then begin
     fobjects:= nil;
     exclude(fstate,ops_moving);
-    fintf.getcursorshape(info.pos,shape); //refresh positioninfo
-    fintf.getpickobjects(makerect(info.pos,nullsize),fobjects);
+    fintf.getcursorshape(info.pos,info.shiftstate,shape); //refresh positioninfo
+    fintf.getpickobjects(makerect(info.pos,nullsize),info.shiftstate,fobjects);
     fpickpos:= info.pos;
     fpickoffset:= nullpoint;
     if length(fobjects) > 0 then begin
@@ -124,7 +126,7 @@ begin
    end
    else begin
     shape:= fintf.getwidget.cursor;
-    if fintf.getcursorshape(info.pos,shape) then begin
+    if fintf.getcursorshape(info.pos,info.shiftstate,shape) then begin
      include(info.eventstate,es_processed);
      include(fstate,ops_cursorchanged);
      application.cursorshape:= shape;

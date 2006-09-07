@@ -14,7 +14,7 @@ unit msesplitter;
 interface
 uses
  msegui,msewidgets,mseobjectpicker,classes,msegraphutils,msepointer,msetypes,msestrings,
- msegraphics,mseevent,msestat,msestockobjects,mseclasses,msesimplewidgets;
+ msegraphics,mseevent,msestat,msestockobjects,mseclasses,msesimplewidgets,mseguiglob;
 type
 
  splitteroptionty = (spo_hmove,spo_hprop,spo_vmove,spo_vprop,
@@ -73,8 +73,10 @@ type
    function getstatvarname: msestring;
 
    //iobjectpicker
-   function getcursorshape(const apos: pointty; var shape: cursorshapety): boolean;
-   procedure getpickobjects(const rect: rectty; var objects: integerarty);
+   function getcursorshape(const apos: pointty; const shiftstate: shiftstatesty;
+                                           var shape: cursorshapety): boolean;
+   procedure getpickobjects(const rect: rectty; const shiftstate: shiftstatesty;
+                                           var objects: integerarty);
    procedure beginpickmove(const objects: integerarty);
    procedure endpickmove(const apos,offset: pointty; const objects: integerarty);
    procedure paintxorpic(const canvas: tcanvas; const apos,offset: pointty;
@@ -142,8 +144,6 @@ type
  end;
  
 implementation
-uses
- mseguiglob;
 
 type
  twidget1 = class(twidget);
@@ -180,7 +180,7 @@ begin
  //dummy
 end;
 
-function tsplitter.getcursorshape(const apos: pointty;
+function tsplitter.getcursorshape(const apos: pointty; const shiftstate: shiftstatesty;
   var shape: cursorshapety): boolean;
 begin
  result:= not (csdesigning in componentstate) and
@@ -205,7 +205,7 @@ begin
  end;
 end;
 
-procedure tsplitter.getpickobjects(const rect: rectty;
+procedure tsplitter.getpickobjects(const rect: rectty; const shiftstate: shiftstatesty;
   var objects: integerarty);
 begin
  if (foptions * [spo_hmove,spo_vmove] <> []) and
