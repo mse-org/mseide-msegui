@@ -6238,7 +6238,8 @@ begin
  //dummy
 end;
 
-function tcustomgrid.focuscell(cell: gridcoordty; selectaction: focuscellactionty;
+function tcustomgrid.focuscell(cell: gridcoordty;
+          selectaction: focuscellactionty = fca_focusin;
           const selectmode: selectcellmodety = scm_cell): boolean;
 
  procedure doselectaction;
