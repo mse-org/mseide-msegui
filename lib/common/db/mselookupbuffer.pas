@@ -3,7 +3,7 @@ unit mselookupbuffer;
 interface
 
 uses
- classes,db,msedb,msetypes,msestrings,mseclasses,msearrayprops,mselist;
+ classes,db,msedb,msetypes,msestrings,mseclasses,msearrayprops,mselist,msegui;
  
 type
 
@@ -54,10 +54,13 @@ type
  end;
  floatindexinfoarty = array of floatindexinfoty;
 
- lookupbufferstatety = (lbs_changed,lbs_buffervalid);
+ lookupbufferstatety = (lbs_changed,lbs_buffervalid,lbs_changeeventposted);
  lookupbufferstatesty = set of lookupbufferstatety;
-  
- tcustomlookupbuffer = class(tmsecomponent)
+
+const
+ changeeventtag = 85839;
+type   
+ tcustomlookupbuffer = class(tguicomponent)
   private
    ftextdata: stringindexinfoarty;
    fintegerdata: integerindexinfoarty;
@@ -82,6 +85,8 @@ type
    procedure invalidatebuffer;
    procedure readonlyprop;
    procedure changed;
+   procedure asyncchanged; //calls changed by postevent
+   procedure doasyncevent(var atag: integer); override;
    procedure setcount(const avalue: integer);
    procedure loaded; override;
    function checkfilter(const filter: lbfiltereventty; 
@@ -264,7 +269,7 @@ type
   
 implementation
 uses
- msegui,msedatalist,rtlconsts,sysutils,msereal;
+ msedatalist,rtlconsts,sysutils,msereal;
  
 type 
  tarrayprop1 = class(tarrayprop);
@@ -748,6 +753,23 @@ begin
  end;
 end;
 
+procedure tcustomlookupbuffer.doasyncevent(var atag: integer);
+begin
+ inherited;
+ if atag = changeeventtag then begin
+  exclude(fstate,lbs_changeeventposted);
+  changed;
+ end;
+end;
+
+procedure tcustomlookupbuffer.asyncchanged;
+begin
+ if not (lbs_changeeventposted in fstate) then begin
+  include(fstate,lbs_changeeventposted);
+  asyncevent(changeeventtag);
+ end;
+end;
+
 procedure tcustomlookupbuffer.setcount(const avalue: integer);
 var
  int1: integer;
@@ -1096,7 +1118,7 @@ begin
     not active and (lbs_buffervalid in fstate) and 
                        not (olbdb_closedataset in foptionsdb) then begin
    exclude(fstate,lbs_buffervalid);
-   changed;
+   asyncchanged;
   end;
  end;
 end;
