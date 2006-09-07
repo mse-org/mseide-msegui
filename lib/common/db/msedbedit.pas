@@ -830,6 +830,7 @@ type
    foptions: griddatalinkoptionsty;
    fonupdaterowdata: updaterowdataeventty;
    fnullchecking: integer;
+   fdatasetchangedlock: integer;
    fobjectlinker: tobjectlinker;
    fcolordatalink: tfielddatalink;
    ffontdatalink: tfielddatalink;
@@ -4596,12 +4597,14 @@ var
  bo1: boolean;
  state1: tdatasetstate;
 begin
- if recordcount > fgrid.rowcount then begin
-  updaterowcount;  //for append
+ if fdatasetchangedlock = 0 then begin
+  if recordcount > fgrid.rowcount then begin
+   updaterowcount;  //for append
+  end;
+  inherited;
+ // updaterowcount;
+  gridinvalidate;
  end;
- inherited;
-// updaterowcount;
- gridinvalidate;
 end;
 
 procedure tgriddatalink.datasetscrolled(distance: integer);
@@ -4627,8 +4630,15 @@ begin
  gridinvalidate;
  checkscrollbar;
  if active then begin
-  dataevent(dedatasetchange,0); //force tdatalink.calcrange
-  fgrid.focuscell(makegridcoord(fgrid.col,activerecord));
+  inc(fdatasetchangedlock);
+  try
+   dataevent(dedatasetchange,0); //force tdatalink.calcrange
+  finally
+   dec(fdatasetchangedlock);
+  end;
+  if fgrid.rowcount > 0 then begin
+   fgrid.focuscell(makegridcoord(fgrid.col,activerecord));
+  end;
   factiverecordbefore:= activerecord;
  end;
 end;
