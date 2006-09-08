@@ -267,7 +267,7 @@ end;
 procedure tdispfielddatalink.recordchanged(afield: tfield);
 begin
  if (afield = nil) or (afield = field) then begin
-  if field <> nil then begin
+  if active and (field <> nil) and not (dataset.eof and dataset.bof) then begin
    if field.isnull then begin
     fintf.setnullvalue;
    end

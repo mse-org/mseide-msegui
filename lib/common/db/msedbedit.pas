@@ -1929,7 +1929,7 @@ begin
   if (fbeginedit = 0) and (frecordchange = 0) then begin
    inc(frecordchange);
    try
-    if field <> nil then begin
+    if (field <> nil) and active and not (dataset.eof and dataset.bof) then begin
      if field.isnull then begin
       fintf.setnullvalue;
      end
