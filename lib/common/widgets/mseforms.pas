@@ -18,8 +18,9 @@ uses
 
 type
  formoptionty = (fo_main,fo_terminateonclose,fo_freeonclose,fo_defaultpos,fo_screencentered,
-                    fo_closeonesc,fo_globalshortcuts,fo_localshortcuts,
-                    fo_autoreadstat,fo_autowritestat,fo_savepos,fo_savestate);
+               fo_closeonesc,fo_cancelonesc,fo_closeonenter,fo_closeonf10,
+               fo_globalshortcuts,fo_localshortcuts,
+               fo_autoreadstat,fo_autowritestat,fo_savepos,fo_savestate);
  formoptionsty = set of formoptionty;
 
 const
@@ -781,13 +782,24 @@ end;
 
 procedure tcustommseform.setoptions(const Value: formoptionsty);
 const
- mask: formoptionsty = [fo_screencentered,fo_defaultpos];
+ mask1: formoptionsty = [fo_screencentered,fo_defaultpos];
+ mask2: formoptionsty = [fo_closeonesc,fo_cancelonesc];
+var
+ opt1: formoptionsty;
 begin
  if foptions <> value then begin
+  opt1:= formoptionsty(setsinglebit(
+       {$ifdef FPC}longword{$else}word{$endif}(value),
+       {$ifdef FPC}longword{$else}word{$endif}(foptions),
+       {$ifdef FPC}longword{$else}word{$endif}(mask2)));
   foptions:= formoptionsty(setsinglebit(
        {$ifdef FPC}longword{$else}word{$endif}(value),
        {$ifdef FPC}longword{$else}word{$endif}(foptions),
-       {$ifdef FPC}longword{$else}word{$endif}(mask)));
+       {$ifdef FPC}longword{$else}word{$endif}(mask1)));
+  foptions:= formoptionsty(replacebits(
+       {$ifdef FPC}longword{$else}word{$endif}(opt1),
+       {$ifdef FPC}longword{$else}word{$endif}(foptions),
+       {$ifdef FPC}longword{$else}word{$endif}(mask2)));
   updateoptions;
  end;
 end;
@@ -1105,10 +1117,29 @@ procedure tcustommseform.dokeydown(var info: keyeventinfoty);
 begin
  inherited;
  with info do begin
-  if not (es_processed in eventstate) and (fo_closeonesc in foptions) and
-   (key = key_escape) and (shiftstate = []) then begin
+  if not (es_processed in eventstate) and (shiftstate = []) and
+   (((fo_closeonesc in foptions) or (fo_cancelonesc in foptions)) and 
+     (key = key_escape) or
+     (fo_closeonf10 in foptions) and (key = key_f10) or
+     (fo_closeonenter in foptions) and 
+              ((key = key_enter) or (key = key_return)))  then begin
    include(eventstate,es_processed);
-   window.close
+   if key = key_f10 then begin
+    window.modalresult:= mr_f10;
+   end
+   else begin
+    if key = key_escape then begin
+     if fo_cancelonesc in foptions then begin
+      window.modalresult:= mr_cancel;
+     end
+     else begin
+      window.modalresult:= mr_escape;
+     end;
+    end
+    else begin
+     window.modalresult:= mr_ok;
+    end;
+   end;
   end;
  end;
 end;

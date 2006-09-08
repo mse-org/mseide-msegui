@@ -17,7 +17,8 @@ uses
 
 type
 
- optioneditty = (oe_readonly,oe_undoonesc,oe_closequery,oe_checkmrcancel,
+ optioneditty = (oe_readonly,oe_undoonesc,
+                    oe_closequery,oe_checkmrcancel,
                     oe_exitoncursor,oe_nogray,
                     oe_linebreak, 
                        // if oe_shiftreturn -> shift key_return inserts linebreak

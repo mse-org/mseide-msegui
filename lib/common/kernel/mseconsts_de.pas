@@ -20,6 +20,8 @@ const
   '',            //mr_canclose
   '',            //mr_windowclosed
   '',            //mr_windowdestroyed
+  '',            //mr_escape
+  '',            //mr_f10
   '',            //mr_exception
   '&Abbrechen',  //mr_cancel
   '&Abbrechen',  //mr_abort
@@ -36,6 +38,8 @@ const
   '',           //mr_canclose
   '',           //mr_windowclosed
   '',           //mr_windowdestroyed
+  '',           //mr_escape
+  '',           //mr_f10
   '',           //mr_exception
   'Abbrechen',  //mr_cancel
   'Abbrechen',  //mr_abort

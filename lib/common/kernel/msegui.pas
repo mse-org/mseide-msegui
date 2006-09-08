@@ -80,6 +80,7 @@ type
  framestatesty = set of framestatety;
 
  modalresultty = (mr_none,mr_canclose,mr_windowclosed,mr_windowdestroyed,
+                  mr_escape,mr_f10, 
                   mr_exception,
                   mr_cancel,mr_abort,mr_ok,mr_yes,mr_no,mr_all,mr_noall,mr_ignore);
  modalresultsty = set of modalresultty;

@@ -25,6 +25,8 @@ const
   '',                                             //mr_canclose => Mozhno zakryt`
   '',                                             //mr_windowclosed => Okno zakryto
   '',                                             //mr_windowdestroyed => Okno udaleno
+  '',                                             //mr_escape
+  '',                                             //mr_f10
   '',                                             //mr_exception => Neozhidannaya situatsiya
   '&'#1054#1090#1084#1077#1085#1080#1090#1100 ,   //mr_cancel => &Otmenit`
   '&'#1055#1088#1077#1088#1074#1072#1090#1100 ,   //mr_abort => &Prervat`
@@ -41,6 +43,8 @@ const
   '',                                             //mr_canclose
   '',                                             //mr_windowclosed
   '',                                             //mr_windowdestroyed
+  '',                                             //mr_escape
+  '',                                             //mr_f10
   #1053#1077#1086#1078#1080#1076#1072#1085#1085#1072#1103' '#1089#1080#1090#1091#1072#1094#1080#1103 , //mr_exception
   #1054#1090#1084#1077#1085#1080#1090#1100 ,      //mr_cancel => Otmenit`
   #1055#1088#1077#1088#1074#1072#1090#1100 ,      //mr_abort => Prervat`

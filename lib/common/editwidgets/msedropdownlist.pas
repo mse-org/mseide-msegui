@@ -1003,7 +1003,8 @@ begin
      (key = key_right) then begin
    with fdropdownlist do begin
     if (row >= 0) then begin
-     str1:= fdropdownlist[fvaluecol][row];
+//     str1:= fdropdownlist[fvaluecol][row];
+     str1:= tstringcol1(fdropdownlist[fvaluecol]).getrowtext(row);
      if length(str1) > editor1.curindex then begin
       editor1.text:= copy(str1,1,editor1.curindex+1);
       editor1.curindex:= editor1.curindex + 1;
@@ -1203,10 +1204,6 @@ end;
 procedure tdropdownlist.dokeydown(var info: keyeventinfoty);
 begin
  with info do begin
-//  if (key = key_home) or (key = key_end) then begin
-//   include(eventstate,es_processed);
-//  end
-//  else begin
    if shiftstate = [] then begin
     include(eventstate,es_processed);
     case key of
@@ -1217,7 +1214,6 @@ begin
       else begin
        itemselected(ffocusedcell.row);
       end;
-//      release;
      end;
      key_up,key_down: begin
       if (focusedcell.row < 0) and (frowcount > 0) then begin
@@ -1247,11 +1243,7 @@ begin
      inherited;
     end;
    end;
-//   if not (es_processed in info.eventstate) then begin
-//   fintf.dropdownkeydown(info);
-//   end;
   end;
-// end;
 end;
 
 procedure tdropdownlist.mouseevent(var info: mouseeventinfoty);
