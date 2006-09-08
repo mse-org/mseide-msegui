@@ -4054,13 +4054,13 @@ begin
     window.show(false);
    end;
   end;
- end;
- if componentstate * [csloading,csdestroying] = [] then begin
-//  sizechanged;
-//  poschanged;
-  fontchanged;
-  colorchanged;
-  enabledchanged; //-> statechanged
+  if componentstate * [csloading,csdestroying] = [] then begin
+ //  sizechanged;
+ //  poschanged;
+   fontchanged;
+   colorchanged;
+   enabledchanged; //-> statechanged
+  end;
  end;
 end;
 
