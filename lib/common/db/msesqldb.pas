@@ -84,6 +84,7 @@ type
    procedure inheritedcancel;
    function inheritedmoveby(const distance: integer): integer;  
    procedure inheritedinternalinsert;
+   procedure inheritedinternalopen;
    
    procedure dataevent(event: tdataevent; info: ptrint); override;
    
@@ -416,6 +417,11 @@ begin
  result:= inherited active;
 end;
 
+procedure tmsesqlquery.inheritedinternalopen;
+begin
+ inherited internalopen;
+end;
+
 procedure tmsesqlquery.internalopen;
 
  procedure initmodifyquery(var aquery: tsqlquery; const asql: tstringlist);
@@ -432,7 +438,7 @@ procedure tmsesqlquery.internalopen;
  end;
 
 begin
- inherited;
+ fcontroller.internalopen;
  bindfields(true);
      //queries are nil if not defaultfields
  with tsqlquerycracker(self) do begin

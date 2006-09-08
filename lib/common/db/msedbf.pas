@@ -26,12 +26,14 @@ type
    procedure inheritedcancel;
    function inheritedmoveby(const distance: integer): integer;
    procedure inheritedinternalinsert;
+   procedure inheritedinternalopen;
   protected
    procedure setactive (value : boolean); {override;}
    function getactive: boolean;
    procedure loaded; override;
    function  getfieldclass(fieldtype: tfieldtype): tfieldclass; override;
    procedure dataevent(event: tdataevent; info: ptrint); override;
+   procedure internalopen; override;
    procedure internalinsert; override;
 
    procedure DoAfterCancel; override;
@@ -337,6 +339,16 @@ begin
  if not (csdesigning in componentstate) then begin
   inherited;
  end;
+end;
+
+procedure tmsedbf.inheritedinternalopen;
+begin
+ inherited internalopen;
+end;
+
+procedure tmsedbf.internalopen;
+begin
+ fcontroller.internalopen;
 end;
 
 end.

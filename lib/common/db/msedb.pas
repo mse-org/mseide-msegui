@@ -542,6 +542,7 @@ type
   procedure inheritedcancel;
   function inheritedmoveby(const distance: integer): integer;
   procedure inheritedinternalinsert;
+  procedure inheritedinternalopen;
  end;
 
  igetdscontroller = interface(inullinterface)
@@ -576,6 +577,7 @@ type
    foptions: datasetoptionsty;
    procedure setfields(const avalue: tpersistentfields);
    function getcontroller: tdscontroller;
+   procedure updatelinkedfields;
   protected
    procedure setowneractive(const avalue: boolean); override;
    procedure fielddestroyed(const sender: ifieldcomponent);
@@ -598,6 +600,7 @@ type
    property recnooffset: integer read frecnooffset;
    function moveby(const distance: integer): integer;
    procedure internalinsert;
+   procedure internalopen;
    procedure closequery(var amodalresult: modalresultty);
    function assql(const avalue: msestring): string; overload;
    function assql(const avalue: integer): string; overload;
@@ -2288,11 +2291,31 @@ begin
  result:= frecno;
 end;
 
-procedure tdscontroller.dataevent(const event: tdataevent; const info: ptrint);
+procedure tdscontroller.updatelinkedfields;
 var
  int1: integer;
  intf1: ifieldcomponent;
  field1: tfield;
+begin
+ with tdataset(fowner) do begin
+  for int1:= 0 to fields.count - 1 do begin
+   field1:= fields[int1];
+   if getcorbainterface(field1,typeinfo(ifieldcomponent),intf1) and 
+       (finditem(pointerarty(flinkedfields),intf1) < 0) then begin
+    additem(pointerarty(flinkedfields),intf1);
+    intf1.setdsintf(idsfieldcontroller(self));
+   end;
+  end;
+  for int1:= high(flinkedfields) downto 0 do begin
+   if fields.indexof(flinkedfields[int1].getinstance) < 0 then begin
+    flinkedfields[int1].setdsintf(nil);
+    deleteitem(pointerarty(flinkedfields),int1);
+   end;
+  end;       
+ end;
+end;
+
+procedure tdscontroller.dataevent(const event: tdataevent; const info: ptrint);
 begin
  case event of
   dedatasetscroll: begin
@@ -2303,22 +2326,7 @@ begin
    frecnovalid:= false;
   end;
   defieldlistchange: begin
-   with tdataset(fowner) do begin
-    for int1:= 0 to fields.count - 1 do begin
-     field1:= fields[int1];
-     if getcorbainterface(field1,typeinfo(ifieldcomponent),intf1) and 
-         (finditem(pointerarty(flinkedfields),intf1) < 0) then begin
-      additem(pointerarty(flinkedfields),intf1);
-      intf1.setdsintf(idsfieldcontroller(self));
-     end;
-    end;
-   end;
-   for int1:= high(flinkedfields) downto 0 do begin
-    if fields.indexof(flinkedfields[int1].getinstance) < 0 then begin
-     flinkedfields[int1].setdsintf(nil);
-     deleteitem(pointerarty(flinkedfields),int1);
-    end;
-   end;       
+   updatelinkedfields;
   end;
  end;
  if not fmovebylock or (event <> dedatasetchange) then begin
@@ -2372,6 +2380,12 @@ procedure tdscontroller.internalinsert;
 begin
  finsertbm:= tdataset(fowner).bookmark;
  fintf.inheritedinternalinsert;
+end;
+
+procedure tdscontroller.internalopen;
+begin
+ updatelinkedfields;
+ fintf.inheritedinternalopen;
 end;
 
 function tdscontroller.getcontroller: tdscontroller;
