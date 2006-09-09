@@ -249,6 +249,7 @@ type
    procedure enabledchanged; override;
 
    function getoptionsedit: optionseditty; virtual;//iedit
+   function hasselection: boolean; virtual;
    procedure setoptionsedit(const avalue: optionseditty); virtual;
    procedure updatereadonlystate; virtual;
    procedure editnotification(var info: editnotificationinfoty); virtual;
@@ -1120,6 +1121,11 @@ end;
 procedure tcustomedit.updatereadonlystate;
 begin
  //dummy
+end;
+
+function tcustomedit.hasselection: boolean;
+begin
+ result:= false;
 end;
 
 end.

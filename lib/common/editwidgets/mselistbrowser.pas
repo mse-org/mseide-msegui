@@ -230,6 +230,7 @@ type
   //iedit
    function getoptionsedit: optionseditty;
    procedure editnotification(var info: editnotificationinfoty);
+   function hasselection: boolean;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -1788,6 +1789,11 @@ begin
  else begin
   result:= nil;
  end;
+end;
+
+function tcustomlistview.hasselection: boolean;
+begin
+ result:= false;
 end;
 
 { tcustomitemeditlist }

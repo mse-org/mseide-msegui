@@ -61,31 +61,31 @@ object msetexteditorfo: tmsetexteditorfo
         widgetname = 'textedit'
       end>
     datarowlinewidth = 0
-    datarowheight = 18
-    reffontheight = 16
+    datarowheight = 15
+    reffontheight = 13
     object textedit: tsyntaxedit
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontlineheight, ow_autoscale]
       bounds_x = 0
       bounds_y = 0
       bounds_cx = 2000
-      bounds_cy = 18
+      bounds_cy = 15
       visible = False
       optionsedit = [oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_linebreak, oe_eatreturn, oe_keyexecute, oe_savevalue, oe_savestate]
       marginlinecolor = -2147483648
       oneditnotifcation = editnotify
-      reffontheight = 16
+      reffontheight = 13
     end
   end
   object linedisp: tstringdisp
     bounds_x = 8
-    bounds_y = 240
+    bounds_y = 243
     bounds_cx = 76
-    bounds_cy = 22
+    bounds_cy = 19
     frame.dummy = 0
     anchors = [an_left, an_bottom]
     taborder = 4
     textflags = [tf_xcentered, tf_ycentered]
-    reffontheight = 16
+    reffontheight = 13
   end
   object test: tbutton
     bounds_x = 184

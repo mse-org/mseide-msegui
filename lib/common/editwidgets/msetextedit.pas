@@ -176,7 +176,7 @@ type
    function appendrow(const atext: msestring): integer; overload;
    function appendrow(const atext: richstringty): integer; overload;
 
-   function hasselection: boolean;
+   function hasselection: boolean; override;
    function selectedtext: msestring;
 
    property optionsedit default defaulttexteditoptions;

@@ -48,6 +48,7 @@ type
           var info: editnotificationinfoty) of object;
 
  iedit = interface
+  function hasselection: boolean;
   function getoptionsedit: optionseditty;
   procedure editnotification(var info: editnotificationinfoty);
  end;
@@ -820,7 +821,7 @@ begin
    finished:= false;
    case key of
     key_c: begin
-     if fsellength > 0 then begin
+     if (fsellength > 0) or fintf.hasselection then begin
       copytoclipboard;
       finished:= true;
      end;
@@ -832,7 +833,7 @@ begin
      end;
     end;
     key_x: begin
-     if canedit and (fsellength > 0) then begin
+     if canedit and ((fsellength > 0) or fintf.hasselection) then begin
       cuttoclipboard;
       finished:= true;
      end;
@@ -1540,6 +1541,9 @@ function tinplaceedit.selectedtext: msestring;
 begin
  if fsellength > 0 then begin
   result:= copy(finfo.text.text,fselstart+1,fsellength);
+ end
+ else begin
+  result:= '';
  end;
 end;
 

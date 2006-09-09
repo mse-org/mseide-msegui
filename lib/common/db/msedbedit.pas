@@ -2000,7 +2000,7 @@ end;
 
 function teditwidgetdatalink.nullcheckneeded: boolean;
 begin
- result:= editing;
+ result:= editing and (dataset.modified or (dataset.state <> dsinsert));
 end;
 
 { tdbstringedit }

@@ -1456,6 +1456,7 @@ end;
   //iedit
    function getoptionsedit: optionseditty; virtual;
    procedure editnotification(var info: editnotificationinfoty); virtual;
+   function hasselection: boolean;
 
    procedure focusedcellchanged; override;
      //interface to inplaceedit
@@ -9513,6 +9514,11 @@ begin
   end;
   stringcoltooptionsedit(foptionsedit,result);
  end;
+end;
+
+function tcustomstringgrid.hasselection: boolean;
+begin
+ result:= false;
 end;
 
 function tcustomstringgrid.getitems(const cell: gridcoordty): msestring;

@@ -743,7 +743,9 @@ begin
     with widget1 do begin
      visible:= true;
      if {(selectaction in [fca_focusin,fca_entergrid,fca_focusinshift]) and}
-                 canfocus and fgrid.container.entered then begin
+        canfocus and tcustomwidgetgrid(fgrid).entered and 
+          not (tcustomwidgetgrid(fgrid).fcontainer1.entered or 
+               tcustomwidgetgrid(fgrid).fcontainer3.entered) then begin
       setfocus(fgrid.active);
      end;
     end;
@@ -2036,7 +2038,8 @@ end;
 procedure tcustomwidgetgrid.clientmouseevent(var info: mouseeventinfoty);
 begin
  inherited;
- if (info.eventkind = ek_buttonpress) and {entered} (factivewidget <> nil) then begin
+ if (info.eventkind = ek_buttonpress) and 
+                    (factivewidget <> nil) and entered then begin
   include(info.eventstate,es_nofocus); //do not set focus to grid
  end;
  if (info.eventkind = ek_buttonrelease) and (info.button = mb_left) and 
