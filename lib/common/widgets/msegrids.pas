@@ -794,6 +794,7 @@ end;
    procedure setselected(const cell: gridcoordty; const Value: boolean);
    procedure roworderinvalid;
   protected
+   procedure move(const curindex,newindex: integer); override;
    procedure rearange(const list: tintegerdatalist); override;
    procedure setcount1(acount: integer; doinit: boolean); override;
    procedure setrowcountmax(const value: integer);
@@ -1015,6 +1016,7 @@ end;
 
    fmouserefpos: pointty;
 
+   fnewrowcol: integer;
    procedure setframe(const avalue: tgridframe);
    function getframe: tgridframe;
    procedure setstatfile(const Value: tstatfile);
@@ -1139,7 +1141,7 @@ end;
    function endanchor: gridcoordty;
 
    procedure doselectionchanged; virtual;
-   procedure colmoved(const fromindex,toindex: integer); virtual;
+   procedure docolmoved(const fromindex,toindex: integer); virtual;
    procedure dorowsmoved(const fromindex,toindex,count: integer); virtual;
    procedure dorowsinserting(var index,count: integer); virtual;
    procedure dorowsinserted(const index,count: integer); virtual;
@@ -1337,6 +1339,8 @@ end;
 
    property sortcol: integer read fsortcol write setsortcol default -1;
                                       //-1 -> all
+   property newrowcol: integer read fnewrowcol write fnewrowcol default -1;
+                                      //-1 -> actual
 
    property statfile: tstatfile read fstatfile write setstatfile;
    property statvarname: msestring read getstatvarname write fstatvarname;
@@ -1400,6 +1404,8 @@ end;
    property gridframewidth;
    property rowcolors;
    property rowfonts;
+   property sortcol;
+   property newrowcol;
    property zebra_color;
    property zebra_start;
    property zebra_height;
@@ -1497,6 +1503,8 @@ end;
    property gridframewidth;
    property rowcolors;
    property rowfonts;
+   property sortcol;
+   property newrowcol;
    property zebra_color;
    property zebra_start;
    property zebra_height;
@@ -4621,6 +4629,19 @@ begin
  frowstate.rearange(list);
 end;
 
+procedure tdatacols.move(const curindex: integer; const newindex: integer);
+begin
+ inherited;
+ with fgrid do begin
+  if fnewrowcol = curindex then begin
+   fnewrowcol:= newindex;
+  end;
+  if fsortcol = curindex then begin
+   fsortcol:= newindex;
+  end;
+ end;
+end;
+
 { tdrawcols }
 
 constructor tdrawcols.create(aowner: tcustomgrid);
@@ -4920,6 +4941,7 @@ begin
 
  fgridframecolor:= cl_black;
  fsortcol:= -1;
+ fnewrowcol:= -1;
 
  fdatacols:= createdatacols;
  ffixcols:= createfixcols;
@@ -6534,10 +6556,10 @@ begin     //focuscell
    if isappend(cell.row) then begin
     if (frowcount = 0) or (og_appendempty in foptionsgrid) or
             not fdatacols.rowempty(frowcount-1) then begin
- //    if not (og_appendempty in foptionsgrid) then begin
- //     include(fstate,gs_rowappended);
- //    end;
      cell.row:= frowcount;
+     if fnewrowcol >= 0 then begin
+      cell.col:= fnewrowcol;
+     end;
      rowcount:= frowcount + 1;
     end
     else begin
@@ -8279,7 +8301,7 @@ begin
   ffixrows.movecol(curindex,newindex);
  end;
  endupdate;
- colmoved(curindex,newindex);
+ docolmoved(curindex,newindex);
  if colbefore <> ffocusedcell.col then begin
   dofocusedcellposchanged;
  end;
@@ -8557,7 +8579,7 @@ begin
  end;
 end;
 
-procedure tcustomgrid.colmoved(const fromindex, toindex: integer);
+procedure tcustomgrid.docolmoved(const fromindex, toindex: integer);
 begin
  if canevent(tmethod(foncolmoved)) then begin
   foncolmoved(self,fromindex,toindex,1);
@@ -8987,12 +9009,20 @@ begin
 end;
 
 procedure tcustomgrid.appinsrow(index: integer);
+var
+ int1: integer;
 begin
  if index < 0 then begin
   index:= 0;
  end;
  insertrow(index);
- focuscell(makegridcoord(ffocusedcell.col,index));
+ if fnewrowcol < 0 then begin
+  int1:= ffocusedcell.col;
+ end
+ else begin
+  int1:= fnewrowcol;
+ end;
+ focuscell(makegridcoord(int1,index));
 end;
 
 procedure tcustomgrid.doinsertrow(const sender: tobject);

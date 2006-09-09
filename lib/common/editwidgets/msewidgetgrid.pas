@@ -245,6 +245,8 @@ type
    property gridframewidth;
    property rowcolors;
    property rowfonts;
+   property sortcol;
+   property newrowcol;
    property zebra_color;
    property zebra_start;
    property zebra_height;

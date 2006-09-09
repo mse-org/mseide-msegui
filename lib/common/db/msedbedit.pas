@@ -1142,6 +1142,8 @@ type
    property gridframewidth;
    property rowcolors;
    property rowfonts;
+//   property sortcol;
+   property newrowcol;
    property zebra_color;
    property zebra_start;
    property zebra_height;
@@ -4840,6 +4842,11 @@ procedure tgriddatalink.doinsertrow;
 begin
  if active and checkvalue then begin
   dataset.insert;
+  with fgrid do begin
+   if newrowcol >= 0 then begin
+    focuscell(makegridcoord(newrowcol,row));
+   end;
+  end;
  end;
 end;
 
@@ -4854,6 +4861,11 @@ begin
   end
   else begin
    dataset.append;
+  end;
+  with fgrid do begin
+   if newrowcol >= 0 then begin
+    focuscell(makegridcoord(newrowcol,row));
+   end;
   end;
  end;
 end;
@@ -4871,6 +4883,11 @@ begin
   moveby(1);
   if (og_autoappend in tcustomgrid1(fgrid).foptionsgrid) and active and eof then begin
    dataset.append;
+   with fgrid do begin
+    if newrowcol >= 0 then begin
+     focuscell(makegridcoord(newrowcol,row));
+    end;
+   end;
   end;
  end;
 end;
