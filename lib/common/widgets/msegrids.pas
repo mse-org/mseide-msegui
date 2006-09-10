@@ -786,6 +786,8 @@ end;
   private
    frowstate: trowstatelist;
    fselectedrow: integer; //-1 none, -2 more than one
+   fsortcol: integer;
+   fnewrowcol: integer;
    function getcols(const index: integer): tdatacol;
    procedure setcols(const index: integer; const Value: tdatacol);
    function getselectedcells: gridcoordarty;
@@ -793,7 +795,11 @@ end;
    function getselected(const cell: gridcoordty): boolean;
    procedure setselected(const cell: gridcoordty; const Value: boolean);
    procedure roworderinvalid;
+   procedure checkindexrange;
+   procedure setsortcol(const avalue: integer);
+   procedure setnewrowcol(const avalue: integer);
   protected
+   procedure dosizechanged; override;
    procedure move(const curindex,newindex: integer); override;
    procedure rearange(const list: tintegerdatalist); override;
    procedure setcount1(acount: integer; doinit: boolean); override;
@@ -833,6 +839,10 @@ end;
    procedure setselectedrange(const rect: gridrectty; const value: boolean;
              const calldoselectcell: boolean = false); overload; virtual;
   published
+   property sortcol: integer read fsortcol write setsortcol default -1;
+                                      //-1 -> all
+   property newrowcol: integer read fnewrowcol write setnewrowcol default -1;
+                                      //-1 -> actual
    property width;
    property options default defaultdatacoloptions;
    property linewidth;
@@ -1002,7 +1012,6 @@ end;
    fonselectionchanged: notifyeventty;
    fgridframecolor: colorty;
    fgridframewidth: integer;
-   fsortcol: integer;
    frowcolors: tcolorarrayprop;
    frowfonts: trowfontarrayprop;
    fmouseparkcell: gridcoordty;
@@ -1016,7 +1025,6 @@ end;
 
    fmouserefpos: pointty;
 
-   fnewrowcol: integer;
    procedure setframe(const avalue: tgridframe);
    function getframe: tgridframe;
    procedure setstatfile(const Value: tstatfile);
@@ -1043,7 +1051,6 @@ end;
                out cell: gridcoordty; out col: tcol; out row: tfixrow);
    procedure setgridframecolor(const Value: colorty);
    procedure setgridframewidth(const Value: integer);
-   procedure setsortcol(const Value: integer);
    procedure setrowcolors(const Value: tcolorarrayprop);
    procedure setrowfonts(const Value: trowfontarrayprop);
    function getrowcolorstate(index: integer): rowstatenumty;
@@ -1337,11 +1344,6 @@ end;
    property zebra_height: integer read fzebra_height write setzebra_height default 0;
    property zebra_step: integer read fzebra_step write setzebra_step default 2;
 
-   property sortcol: integer read fsortcol write setsortcol default -1;
-                                      //-1 -> all
-   property newrowcol: integer read fnewrowcol write fnewrowcol default -1;
-                                      //-1 -> actual
-
    property statfile: tstatfile read fstatfile write setstatfile;
    property statvarname: msestring read getstatvarname write fstatvarname;
 
@@ -1404,8 +1406,6 @@ end;
    property gridframewidth;
    property rowcolors;
    property rowfonts;
-   property sortcol;
-   property newrowcol;
    property zebra_color;
    property zebra_start;
    property zebra_height;
@@ -1503,8 +1503,6 @@ end;
    property gridframewidth;
    property rowcolors;
    property rowfonts;
-   property sortcol;
-   property newrowcol;
    property zebra_color;
    property zebra_start;
    property zebra_height;
@@ -4144,6 +4142,8 @@ end;
 constructor tdatacols.create(aowner: tcustomgrid; aclasstype: gridpropclassty);
 begin
  fselectedrow:= -1;
+ fsortcol:= -1;
+ fnewrowcol:= -1;
  frowstate:= trowstatelist.create;
  inherited;
  flinecolor:= defaultdatalinecolor;
@@ -4245,6 +4245,35 @@ begin
   end;
  end;
  updatedatastate;
+end;
+
+procedure tdatacols.checkindexrange;
+begin
+ if not (csloading in fgrid.componentstate) then begin
+  if fsortcol >= count then begin
+   fsortcol:= count - 1;
+  end;
+  if fnewrowcol >= count then begin
+   fnewrowcol:= count - 1;
+  end;
+ end;
+end;
+
+procedure tdatacols.setsortcol(const avalue: integer);
+begin
+ if fsortcol <> avalue then begin
+  fsortcol := avalue;
+  checkindexrange;
+  fgrid.sortchanged;
+ end;
+end;
+
+procedure tdatacols.setnewrowcol(const avalue: integer);
+begin
+ if fnewrowcol <> avalue then begin
+  fnewrowcol := avalue;
+  checkindexrange;
+ end;
 end;
 
 procedure tdatacols.moverow(const fromindex, toindex: integer; const acount: integer = 1);
@@ -4526,7 +4555,7 @@ procedure tdatacols.sortfunc(sender: tcustomgrid; const index1,
 var
  int1: integer;
 begin
- if sender.fsortcol < 0 then begin
+ if fsortcol < 0 then begin
   for int1:= 0 to count-1 do begin
    with cols[int1] do begin
     if not(co_nosort in foptions) then begin
@@ -4542,7 +4571,7 @@ begin
   end;
  end
  else begin
-  with cols[sender.fsortcol] do begin
+  with cols[fsortcol] do begin
    if not(co_nosort in foptions) then begin
     sortcompare(index1,index2,result);
     if co_sortdescent in foptions then begin
@@ -4640,6 +4669,12 @@ begin
    fsortcol:= newindex;
   end;
  end;
+end;
+
+procedure tdatacols.dosizechanged;
+begin
+ checkindexrange;
+ inherited;
 end;
 
 { tdrawcols }
@@ -4940,8 +4975,6 @@ begin
  fdatarowheight:= griddefaultrowheight;
 
  fgridframecolor:= cl_black;
- fsortcol:= -1;
- fnewrowcol:= -1;
 
  fdatacols:= createdatacols;
  ffixcols:= createfixcols;
@@ -6557,8 +6590,8 @@ begin     //focuscell
     if (frowcount = 0) or (og_appendempty in foptionsgrid) or
             not fdatacols.rowempty(frowcount-1) then begin
      cell.row:= frowcount;
-     if fnewrowcol >= 0 then begin
-      cell.col:= fnewrowcol;
+     if fdatacols.fnewrowcol >= 0 then begin
+      cell.col:= fdatacols.fnewrowcol;
      end;
      rowcount:= frowcount + 1;
     end
@@ -7748,6 +7781,7 @@ end;
 procedure tcustomgrid.loaded;
 begin
  inherited;
+ fdatacols.checkindexrange;
  dorowsdatachanged(0,frowcount);
 end;
 
@@ -8931,14 +8965,6 @@ begin
  end;
 end;
 
-procedure tcustomgrid.setsortcol(const Value: integer);
-begin
- if fsortcol <> value then begin
-  fsortcol := Value;
-  sortchanged;
- end;
-end;
-
 procedure tcustomgrid.setrowcolors(const Value: tcolorarrayprop);
 begin
  frowcolors.assign(Value);
@@ -9016,11 +9042,11 @@ begin
   index:= 0;
  end;
  insertrow(index);
- if fnewrowcol < 0 then begin
+ if fdatacols.fnewrowcol < 0 then begin
   int1:= ffocusedcell.col;
  end
  else begin
-  int1:= fnewrowcol;
+  int1:= fdatacols.fnewrowcol;
  end;
  focuscell(makegridcoord(int1,index));
 end;
