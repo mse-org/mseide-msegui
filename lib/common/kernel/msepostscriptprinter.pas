@@ -1635,7 +1635,7 @@ begin
   str1:= '';
   for int1:= 0 to 31 do begin
    for int2:= 0 to 7 do begin
-    str1:= str1 + '/uni'+hextostr(int3,4)+',';
+    str1:= str1 + '/uni'+hextostr(int3,4)+' ';
     inc(int3);
    end;
    if int1 = 31 then begin
