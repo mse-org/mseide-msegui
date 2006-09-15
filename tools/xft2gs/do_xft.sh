@@ -185,9 +185,7 @@ cat /tmp/fc-list.txt | egrep -v "^[ \t]*$" | awk \
   gsub(" ","-",A[2]);
   if ((( OPT3 != 1 ) && ((ft == "PSF-") || (ft == "GSF-"))) || (( OPT4 != 1 ) && (ft == "TTF-"))) {
     print "/"ft""A[2]""style"\t("A[1]")\t;"; 
-    if ( famname ~ / / ) {
-      print "("famname""fstyle")\t/"ft""A[2]""style"\t;" >> "/tmp/Fontmap.GS-2";
-    } 
+    print "("famname""fstyle")\t/"ft""A[2]""style"\t;" >> "/tmp/Fontmap.GS-2";
   }
   
 } END {
