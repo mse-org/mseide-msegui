@@ -297,112 +297,112 @@ const
   codepage: $21;
   name: 'E21';         //letterlike symbols
   glyphnames:
-'/uni2100,/uni2101,/uni2102,/centigrade,/uni2104,/afii61248,/uni2106,/uni2107,'+nl+ //00
-'/uni2108,/fahrenheit,/uni210A,/uni210B,/uni210C,/uni210D,/uni210E,/uni210F,'+nl+ //08
-'/uni2110,/Ifraktur,/uni2112,/afii61289,/uni2114,/uni2115,/afii61352,/uni2117,'+nl+ //10
-'/weierstrass,/uni2119,/uni211A,/uni211B,/Rfraktur,/uni211D,/prescription,/uni211F,'+nl+ //18
-'/uni2120,/telephone,/trademark,/uni2123,/uni2124,/uni2125,/Omega,/uni2127,'+nl+ //20
-'/uni2128,/uni2129,/uni212A,/angstrom,/uni212C,/uni212D,/estimated,/uni212F,'+nl+ //28
-'/uni2130,/uni2131,/uni2132,/uni2133,/uni2134,/aleph,/uni2136,/uni2137,'+nl+ //30
-'/uni2138,/uni2139,/uni213A,/uni213B,/uni213C,/uni213D,/uni213E,/uni213F,'+nl+ //38
-'/uni2140,/uni2141,/uni2142,/uni2143,/uni2144,/uni2145,/uni2146,/uni2147,'+nl+ //40
-'/uni2148,/uni2149,/uni214A,/uni214B,/uni214C,/uni214D,/uni214E,/uni214F,'+nl+ //48
-'/uni2150,/uni2151,/uni2152,/onethird,/twothirds,/uni2155,/uni2156,/uni2157,'+nl+ //50
-'/uni2158,/uni2159,/uni215A,/oneeighth,/threeeighths,/fiveeighths,/seveneighths,/uni215F,'+nl+ //58
-'/Oneroman,/Tworoman,/Threeroman,/Fourroman,/Fiveroman,/Sixroman,/Sevenroman,/Eightroman,'+nl+ //60
-'/Nineroman,/Tenroman,/Elevenroman,/Twelveroman,/uni216C,/uni216D,/uni216E,/uni216F,'+nl+ //68
-'/oneroman,/tworoman,/threeroman,/fourroman,/fiveroman,/sixroman,/sevenroman,/eightroman,'+nl+ //70
-'/nineroman,/tenroman,/elevenroman,/twelveroman,/uni217C,/uni217D,/uni217E,/uni217F,'+nl+ //78
-'/uni2180,/uni2181,/uni2182,/uni2183,/uni2184,/uni2185,/uni2186,/uni2187,'+nl+ //80
-'/uni2188,/uni2189,/uni218A,/uni218B,/uni218C,/uni218D,/uni218E,/uni218F,'+nl+ //88
-'/arrowleft,/arrowup,/arrowright,/arrowdown,/arrowboth,/arrowupdn,/arrowupleft,/arrowupright,'+nl+ //90
-'/arrowdownright,/arrowdownleft,/uni219A,/uni219B,/uni219C,/uni219D,/uni219E,/uni219F,'+nl+ //98
-'/uni21A0,/uni21A1,/uni21A2,/uni21A3,/uni21A4,/uni21A5,/uni21A6,/uni21A7,'+nl+ //A0
-'/arrowupdownbase,/uni21A9,/uni21AA,/uni21AB,/uni21AC,/uni21AD,/uni21AE,/uni21AF,'+nl+ //A8
-'/uni21B0,/uni21B1,/uni21B2,/uni21B3,/uni21B4,/carriagereturn,/uni21B6,/uni21B7,'+nl+ //B0
-'/uni21B8,/uni21B9,/uni21BA,/uni21BB,/harpoonleftbarbup,/uni21BD,/uni21BE,/uni21BF,'+nl+ //B8
-'/harpoonrightbarbup,/uni21C1,/uni21C2,/uni21C3,/arrowrightoverleft,/arrowupleftofdown,/arrowleftoverright,/uni21C7,'+nl+ //C0
-'/uni21C8,/uni21C9,/uni21CA,/uni21CB,/uni21CC,/arrowleftdblstroke,/uni21CE,/arrowrightdblstroke,'+nl+ //C8
-'/arrowleftdbl,/arrowdblup,/dblarrowright,/arrowdbldown,/dblarrowleft,/uni21D5,/uni21D6,/uni21D7,'+nl+ //D0
-'/uni21D8,/uni21D9,/uni21DA,/uni21DB,/uni21DC,/uni21DD,/pageup,/pagedown,'+nl+ //D8
-'/arrowdashleft,/arrowdashup,/arrowdashright,/arrowdashdown,/arrowtableft,/arrowtabright,/arrowleftwhite,/arrowupwhite,'+nl+ //E0
-'/arrowrightwhite,/arrowdownwhite,/capslock,/uni21EB,/uni21EC,/uni21ED,/uni21EE,/uni21EF,'+nl+ //E8
-'/uni21F0,/uni21F1,/uni21F2,/uni21F3,/uni21F4,/uni21F5,/uni21F6,/uni21F7,'+nl+ //F0
-'/uni21F8,/uni21F9,/uni21FA,/uni21FB,/uni21FC,/uni21FD,/uni21FE,/uni21FF,'+nl //F8
+'/uni2100 /uni2101 /uni2102 /centigrade /uni2104 /afii61248 /uni2106 /uni2107 '+nl+ //00
+'/uni2108 /fahrenheit /uni210A /uni210B /uni210C /uni210D /uni210E /uni210F '+nl+ //08
+'/uni2110 /Ifraktur /uni2112 /afii61289 /uni2114 /uni2115 /afii61352 /uni2117 '+nl+ //10
+'/weierstrass /uni2119 /uni211A /uni211B /Rfraktur /uni211D /prescription /uni211F '+nl+ //18
+'/uni2120 /telephone /trademark /uni2123 /uni2124 /uni2125 /Omega /uni2127 '+nl+ //20
+'/uni2128 /uni2129 /uni212A /angstrom /uni212C /uni212D /estimated /uni212F '+nl+ //28
+'/uni2130 /uni2131 /uni2132 /uni2133 /uni2134 /aleph /uni2136 /uni2137 '+nl+ //30
+'/uni2138 /uni2139 /uni213A /uni213B /uni213C /uni213D /uni213E /uni213F '+nl+ //38
+'/uni2140 /uni2141 /uni2142 /uni2143 /uni2144 /uni2145 /uni2146 /uni2147 '+nl+ //40
+'/uni2148 /uni2149 /uni214A /uni214B /uni214C /uni214D /uni214E /uni214F '+nl+ //48
+'/uni2150 /uni2151 /uni2152 /onethird /twothirds /uni2155 /uni2156 /uni2157 '+nl+ //50
+'/uni2158 /uni2159 /uni215A /oneeighth /threeeighths /fiveeighths /seveneighths /uni215F '+nl+ //58
+'/Oneroman /Tworoman /Threeroman /Fourroman /Fiveroman /Sixroman /Sevenroman /Eightroman '+nl+ //60
+'/Nineroman /Tenroman /Elevenroman /Twelveroman /uni216C /uni216D /uni216E /uni216F '+nl+ //68
+'/oneroman /tworoman /threeroman /fourroman /fiveroman /sixroman /sevenroman /eightroman '+nl+ //70
+'/nineroman /tenroman /elevenroman /twelveroman /uni217C /uni217D /uni217E /uni217F '+nl+ //78
+'/uni2180 /uni2181 /uni2182 /uni2183 /uni2184 /uni2185 /uni2186 /uni2187 '+nl+ //80
+'/uni2188 /uni2189 /uni218A /uni218B /uni218C /uni218D /uni218E /uni218F '+nl+ //88
+'/arrowleft /arrowup /arrowright /arrowdown /arrowboth /arrowupdn /arrowupleft /arrowupright '+nl+ //90
+'/arrowdownright /arrowdownleft /uni219A /uni219B /uni219C /uni219D /uni219E /uni219F '+nl+ //98
+'/uni21A0 /uni21A1 /uni21A2 /uni21A3 /uni21A4 /uni21A5 /uni21A6 /uni21A7 '+nl+ //A0
+'/arrowupdownbase /uni21A9 /uni21AA /uni21AB /uni21AC /uni21AD /uni21AE /uni21AF '+nl+ //A8
+'/uni21B0 /uni21B1 /uni21B2 /uni21B3 /uni21B4 /carriagereturn /uni21B6 /uni21B7 '+nl+ //B0
+'/uni21B8 /uni21B9 /uni21BA /uni21BB /harpoonleftbarbup /uni21BD /uni21BE /uni21BF '+nl+ //B8
+'/harpoonrightbarbup /uni21C1 /uni21C2 /uni21C3 /arrowrightoverleft /arrowupleftofdown /arrowleftoverright /uni21C7 '+nl+ //C0
+'/uni21C8 /uni21C9 /uni21CA /uni21CB /uni21CC /arrowleftdblstroke /uni21CE /arrowrightdblstroke '+nl+ //C8
+'/arrowleftdbl /arrowdblup /dblarrowright /arrowdbldown /dblarrowleft /uni21D5 /uni21D6 /uni21D7 '+nl+ //D0
+'/uni21D8 /uni21D9 /uni21DA /uni21DB /uni21DC /uni21DD /pageup /pagedown '+nl+ //D8
+'/arrowdashleft /arrowdashup /arrowdashright /arrowdashdown /arrowtableft /arrowtabright /arrowleftwhite /arrowupwhite '+nl+ //E0
+'/arrowrightwhite /arrowdownwhite /capslock /uni21EB /uni21EC /uni21ED /uni21EE /uni21EF '+nl+ //E8
+'/uni21F0 /uni21F1 /uni21F2 /uni21F3 /uni21F4 /uni21F5 /uni21F6 /uni21F7 '+nl+ //F0
+'/uni21F8 /uni21F9 /uni21FA /uni21FB /uni21FC /uni21FD /uni21FE /uni21FF '+nl //F8
   ),
   (
   codepage: $22;
   name: 'E22';         //mathematical operators
   glyphnames:
-'/universal,/uni2201,/partialdiff,/thereexists,/uni2204,/emptyset,/increment,/nabla,'+nl+ //00
-'/element,/notelementof,/uni220A,/suchthat,/notcontains,/uni220D,/uni220E,/product,'+nl+ //08
-'/uni2210,/summation,/minus,/minusplus,/uni2214,/divisionslash,/uni2216,/asteriskmath,'+nl+ //10
-'/uni2218,/bulletoperator,/radical,/uni221B,/uni221C,/proportional,/infinity,/rightangle,'+nl+ //18
-'/angle,/uni2221,/uni2222,/divides,/uni2224,/parallel,/notparallel,/logicaland,'+nl+ //20
-'/logicalor,/intersection,/union,/integral,/dblintegral,/uni222D,/contourintegral,/uni222F,'+nl+ //28
-'/uni2230,/uni2231,/uni2232,/uni2233,/therefore,/because,/ratio,/proportion,'+nl+ //30
-'/uni2238,/uni2239,/uni223A,/uni223B,/tildeoperator,/reversedtilde,/uni223E,/uni223F,'+nl+ //38
-'/uni2240,/uni2241,/uni2242,/asymptoticallyequal,/uni2244,/congruent,/uni2246,/uni2247,'+nl+ //40
-'/approxequal,/uni2249,/uni224A,/uni224B,/allequal,/uni224D,/uni224E,/uni224F,'+nl+ //48
-'/approaches,/geometricallyequal,/approxequalorimage,/imageorapproximatelyequal,/uni2254,/uni2255,/uni2256,/uni2257,'+nl+ //50
-'/uni2258,/uni2259,/uni225A,/uni225B,/uni225C,/uni225D,/uni225E,/uni225F,'+nl+ //58
-'/notequal,/equivalence,/notidentical,/uni2263,/lessequal,/greaterequal,/lessoverequal,/greateroverequal,'+nl+ //60
-'/uni2268,/uni2269,/muchless,/muchgreater,/uni226C,/uni226D,/notless,/notgreater,'+nl+ //68
-'/notlessnorequal,/notgreaternorequal,/lessorequivalent,/greaterorequivalent,/uni2274,/uni2275,/lessorgreater,/greaterorless,'+nl+ //70
-'/uni2278,/notgreaternorless,/precedes,/succeeds,/uni227C,/uni227D,/uni227E,/uni227F,'+nl+ //78
-'/notprecedes,/notsucceeds,/subset,/superset,/notsubset,/notsuperset,/subsetorequal,/supersetorequal,'+nl+ //80
-'/uni2288,/uni2289,/subsetnotequal,/supersetnotequal,/uni228C,/uni228D,/uni228E,/uni228F,'+nl+ //88
-'/uni2290,/uni2291,/uni2292,/uni2293,/uni2294,/pluscircle,/minuscircle,/timescircle,'+nl+ //90
-'/uni2298,/circleot,/uni229A,/uni229B,/uni229C,/uni229D,/uni229E,/uni229F,'+nl+ //98
-'/uni22A0,/uni22A1,/uni22A2,/tackleft,/tackdown,/perpendicular,/uni22A6,/uni22A7,'+nl+ //A0
-'/uni22A8,/uni22A9,/uni22AA,/uni22AB,/uni22AC,/uni22AD,/uni22AE,/uni22AF,'+nl+ //A8
-'/uni22B0,/uni22B1,/uni22B2,/uni22B3,/uni22B4,/uni22B5,/uni22B6,/uni22B7,'+nl+ //B0
-'/uni22B8,/uni22B9,/uni22BA,/uni22BB,/uni22BC,/uni22BD,/uni22BE,/righttriangle,'+nl+ //B8
-'/uni22C0,/uni22C1,/uni22C2,/uni22C3,/uni22C4,/dotmath,/uni22C6,/uni22C7,'+nl+ //C0
-'/uni22C8,/uni22C9,/uni22CA,/uni22CB,/uni22CC,/uni22CD,/curlyor,/curlyand,'+nl+ //C8
-'/uni22D0,/uni22D1,/uni22D2,/uni22D3,/uni22D4,/uni22D5,/uni22D6,/uni22D7,'+nl+ //D0
-'/uni22D8,/uni22D9,/lessequalorgreater,/greaterequalorless,/uni22DC,/uni22DD,/uni22DE,/uni22DF,'+nl+ //D8
-'/uni22E0,/uni22E1,/uni22E2,/uni22E3,/uni22E4,/uni22E5,/uni22E6,/uni22E7,'+nl+ //E0
-'/uni22E8,/uni22E9,/uni22EA,/uni22EB,/uni22EC,/uni22ED,/ellipsisvertical,/uni22EF,'+nl+ //E8
-'/uni22F0,/uni22F1,/uni22F2,/uni22F3,/uni22F4,/uni22F5,/uni22F6,/uni22F7,'+nl+ //F0
-'/uni22F8,/uni22F9,/uni22FA,/uni22FB,/uni22FC,/uni22FD,/uni22FE,/uni22FF,'+nl //F8
+'/universal /uni2201 /partialdiff /thereexists /uni2204 /emptyset /increment /nabla '+nl+ //00
+'/element /notelementof /uni220A /suchthat /notcontains /uni220D /uni220E /product '+nl+ //08
+'/uni2210 /summation /minus /minusplus /uni2214 /divisionslash /uni2216 /asteriskmath '+nl+ //10
+'/uni2218 /bulletoperator /radical /uni221B /uni221C /proportional /infinity /rightangle '+nl+ //18
+'/angle /uni2221 /uni2222 /divides /uni2224 /parallel /notparallel /logicaland '+nl+ //20
+'/logicalor /intersection /union /integral /dblintegral /uni222D /contourintegral /uni222F '+nl+ //28
+'/uni2230 /uni2231 /uni2232 /uni2233 /therefore /because /ratio /proportion '+nl+ //30
+'/uni2238 /uni2239 /uni223A /uni223B /tildeoperator /reversedtilde /uni223E /uni223F '+nl+ //38
+'/uni2240 /uni2241 /uni2242 /asymptoticallyequal /uni2244 /congruent /uni2246 /uni2247 '+nl+ //40
+'/approxequal /uni2249 /uni224A /uni224B /allequal /uni224D /uni224E /uni224F '+nl+ //48
+'/approaches /geometricallyequal /approxequalorimage /imageorapproximatelyequal /uni2254 /uni2255 /uni2256 /uni2257 '+nl+ //50
+'/uni2258 /uni2259 /uni225A /uni225B /uni225C /uni225D /uni225E /uni225F '+nl+ //58
+'/notequal /equivalence /notidentical /uni2263 /lessequal /greaterequal /lessoverequal /greateroverequal '+nl+ //60
+'/uni2268 /uni2269 /muchless /muchgreater /uni226C /uni226D /notless /notgreater '+nl+ //68
+'/notlessnorequal /notgreaternorequal /lessorequivalent /greaterorequivalent /uni2274 /uni2275 /lessorgreater /greaterorless '+nl+ //70
+'/uni2278 /notgreaternorless /precedes /succeeds /uni227C /uni227D /uni227E /uni227F '+nl+ //78
+'/notprecedes /notsucceeds /subset /superset /notsubset /notsuperset /subsetorequal /supersetorequal '+nl+ //80
+'/uni2288 /uni2289 /subsetnotequal /supersetnotequal /uni228C /uni228D /uni228E /uni228F '+nl+ //88
+'/uni2290 /uni2291 /uni2292 /uni2293 /uni2294 /pluscircle /minuscircle /timescircle '+nl+ //90
+'/uni2298 /circleot /uni229A /uni229B /uni229C /uni229D /uni229E /uni229F '+nl+ //98
+'/uni22A0 /uni22A1 /uni22A2 /tackleft /tackdown /perpendicular /uni22A6 /uni22A7 '+nl+ //A0
+'/uni22A8 /uni22A9 /uni22AA /uni22AB /uni22AC /uni22AD /uni22AE /uni22AF '+nl+ //A8
+'/uni22B0 /uni22B1 /uni22B2 /uni22B3 /uni22B4 /uni22B5 /uni22B6 /uni22B7 '+nl+ //B0
+'/uni22B8 /uni22B9 /uni22BA /uni22BB /uni22BC /uni22BD /uni22BE /righttriangle '+nl+ //B8
+'/uni22C0 /uni22C1 /uni22C2 /uni22C3 /uni22C4 /dotmath /uni22C6 /uni22C7 '+nl+ //C0
+'/uni22C8 /uni22C9 /uni22CA /uni22CB /uni22CC /uni22CD /curlyor /curlyand '+nl+ //C8
+'/uni22D0 /uni22D1 /uni22D2 /uni22D3 /uni22D4 /uni22D5 /uni22D6 /uni22D7 '+nl+ //D0
+'/uni22D8 /uni22D9 /lessequalorgreater /greaterequalorless /uni22DC /uni22DD /uni22DE /uni22DF '+nl+ //D8
+'/uni22E0 /uni22E1 /uni22E2 /uni22E3 /uni22E4 /uni22E5 /uni22E6 /uni22E7 '+nl+ //E0
+'/uni22E8 /uni22E9 /uni22EA /uni22EB /uni22EC /uni22ED /ellipsisvertical /uni22EF '+nl+ //E8
+'/uni22F0 /uni22F1 /uni22F2 /uni22F3 /uni22F4 /uni22F5 /uni22F6 /uni22F7 '+nl+ //F0
+'/uni22F8 /uni22F9 /uni22FA /uni22FB /uni22FC /uni22FD /uni22FE /uni22FF '+nl //F8
   ),
   (
   codepage: $25;
   name: 'E25';         //box drawing
   glyphnames:
-'/SF100000,/uni2501,/SF110000,/uni2503,/uni2504,/uni2505,/uni2506,/uni2507,'+nl+ //00
-'/uni2508,/uni2509,/uni250A,/uni250B,/SF010000,/uni250D,/uni250E,/uni250F,'+nl+ //08
-'/SF030000,/uni2511,/uni2512,/uni2513,/SF020000,/uni2515,/uni2516,/uni2517,'+nl+ //10
-'/SF040000,/uni2519,/uni251A,/uni251B,/SF080000,/uni251D,/uni251E,/uni251F,'+nl+ //18
-'/uni2520,/uni2521,/uni2522,/uni2523,/SF090000,/uni2525,/uni2526,/uni2527,'+nl+ //20
-'/uni2528,/uni2529,/uni252A,/uni252B,/SF060000,/uni252D,/uni252E,/uni252F,'+nl+ //28
-'/uni2530,/uni2531,/uni2532,/uni2533,/SF070000,/uni2535,/uni2536,/uni2537,'+nl+ //30
-'/uni2538,/uni2539,/uni253A,/uni253B,/SF050000,/uni253D,/uni253E,/uni253F,'+nl+ //38
-'/uni2540,/uni2541,/uni2542,/uni2543,/uni2544,/uni2545,/uni2546,/uni2547,'+nl+ //40
-'/uni2548,/uni2549,/uni254A,/uni254B,/uni254C,/uni254D,/uni254E,/uni254F,'+nl+ //48
-'/SF430000,/SF240000,/SF510000,/SF520000,/SF390000,/SF220000,/SF210000,/SF250000,'+nl+ //50
-'/SF500000,/SF490000,/SF380000,/SF280000,/SF270000,/SF260000,/SF360000,/SF370000,'+nl+ //58
-'/SF420000,/SF190000,/SF200000,/SF230000,/SF470000,/SF480000,/SF410000,/SF450000,'+nl+ //60
-'/SF460000,/SF400000,/SF540000,/SF530000,/SF440000,/uni256D,/uni256E,/uni256F,'+nl+ //68
-'/uni2570,/uni2571,/uni2572,/uni2573,/uni2574,/uni2575,/uni2576,/uni2577,'+nl+ //70
-'/uni2578,/uni2579,/uni257A,/uni257B,/uni257C,/uni257D,/uni257E,/uni257F,'+nl+ //78
-'/upblock,/uni2581,/uni2582,/uni2583,/dnblock,/uni2585,/uni2586,/uni2587,'+nl+ //80
-'/block,/uni2589,/uni258A,/uni258B,/lfblock,/uni258D,/uni258E,/uni258F,'+nl+ //88
-'/rtblock,/shadelight,/shademedium,/shadedark,/uni2594,/uni2595,/uni2596,/uni2597,'+nl+ //90
-'/uni2598,/uni2599,/uni259A,/uni259B,/uni259C,/uni259D,/uni259E,/uni259F,'+nl+ //98
-'/filledbox,/whitesquare,/uni25A2,/squarewhitewithsmallblack,/squarehorizontalfill,/squareverticalfill,/squareorthogonalcrosshatchfill,/squareupperlefttolowerrightfill,'+nl+ //A0
-'/squareupperrighttolowerleftfill,/squarediagonalcrosshatchfill,/H18543,/whitesmallsquare,/filledrect,/uni25AD,/uni25AE,/uni25AF,'+nl+ //A8
-'/uni25B0,/uni25B1,/triagup,/whiteuppointingtriangle,/blackuppointingsmalltriangle,/whiteuppointingsmalltriangle,/blackrightpointingtriangle,/whiterightpointingtriangle,'+nl+ //B0
-'/uni25B8,/whiterightpointingsmalltriangle,/triagrt,/uni25BB,/triagdn,/whitedownpointingtriangle,/uni25BE,/whitedownpointingsmalltriangle,'+nl+ //B8
-'/blackleftpointingtriangle,/whiteleftpointingtriangle,/uni25C2,/whiteleftpointingsmalltriangle,/triaglf,/uni25C5,/blackdiamond,/whitediamond,'+nl+ //C0
-'/whitediamondcontainingblacksmalldiamond,/fisheye,/lozenge,/whitecircle,/dottedcircle,/uni25CD,/bullseye,/H18533,'+nl+ //C8
-'/circlewithlefthalfblack,/circlewithrighthalfblack,/uni25D2,/uni25D3,/uni25D4,/uni25D5,/uni25D6,/uni25D7,'+nl+ //D0
-'/invbullet,/whitecircleinverse,/uni25DA,/uni25DB,/uni25DC,/uni25DD,/uni25DE,/uni25DF,'+nl+ //D8
-'/uni25E0,/uni25E1,/blacklowerrighttriangle,/blacklowerlefttriangle,/blackupperlefttriangle,/blackupperrighttriangle,/whitebullet,/uni25E7,'+nl+ //E0
-'/uni25E8,/uni25E9,/uni25EA,/uni25EB,/uni25EC,/uni25ED,/uni25EE,/largecircle,'+nl+ //E8
-'/uni25F0,/uni25F1,/uni25F2,/uni25F3,/uni25F4,/uni25F5,/uni25F6,/uni25F7,'+nl+ //F0
-'/uni25F8,/uni25F9,/uni25FA,/uni25FB,/uni25FC,/uni25FD,/uni25FE,/uni25FF,'+nl //F8
+'/SF100000 /uni2501 /SF110000 /uni2503 /uni2504 /uni2505 /uni2506 /uni2507 '+nl+ //00
+'/uni2508 /uni2509 /uni250A /uni250B /SF010000 /uni250D /uni250E /uni250F '+nl+ //08
+'/SF030000 /uni2511 /uni2512 /uni2513 /SF020000 /uni2515 /uni2516 /uni2517 '+nl+ //10
+'/SF040000 /uni2519 /uni251A /uni251B /SF080000 /uni251D /uni251E /uni251F '+nl+ //18
+'/uni2520 /uni2521 /uni2522 /uni2523 /SF090000 /uni2525 /uni2526 /uni2527 '+nl+ //20
+'/uni2528 /uni2529 /uni252A /uni252B /SF060000 /uni252D /uni252E /uni252F '+nl+ //28
+'/uni2530 /uni2531 /uni2532 /uni2533 /SF070000 /uni2535 /uni2536 /uni2537 '+nl+ //30
+'/uni2538 /uni2539 /uni253A /uni253B /SF050000 /uni253D /uni253E /uni253F '+nl+ //38
+'/uni2540 /uni2541 /uni2542 /uni2543 /uni2544 /uni2545 /uni2546 /uni2547 '+nl+ //40
+'/uni2548 /uni2549 /uni254A /uni254B /uni254C /uni254D /uni254E /uni254F '+nl+ //48
+'/SF430000 /SF240000 /SF510000 /SF520000 /SF390000 /SF220000 /SF210000 /SF250000 '+nl+ //50
+'/SF500000 /SF490000 /SF380000 /SF280000 /SF270000 /SF260000 /SF360000 /SF370000 '+nl+ //58
+'/SF420000 /SF190000 /SF200000 /SF230000 /SF470000 /SF480000 /SF410000 /SF450000 '+nl+ //60
+'/SF460000 /SF400000 /SF540000 /SF530000 /SF440000 /uni256D /uni256E /uni256F '+nl+ //68
+'/uni2570 /uni2571 /uni2572 /uni2573 /uni2574 /uni2575 /uni2576 /uni2577 '+nl+ //70
+'/uni2578 /uni2579 /uni257A /uni257B /uni257C /uni257D /uni257E /uni257F '+nl+ //78
+'/upblock /uni2581 /uni2582 /uni2583 /dnblock /uni2585 /uni2586 /uni2587 '+nl+ //80
+'/block /uni2589 /uni258A /uni258B /lfblock /uni258D /uni258E /uni258F '+nl+ //88
+'/rtblock /shadelight /shademedium /shadedark /uni2594 /uni2595 /uni2596 /uni2597 '+nl+ //90
+'/uni2598 /uni2599 /uni259A /uni259B /uni259C /uni259D /uni259E /uni259F '+nl+ //98
+'/filledbox /whitesquare /uni25A2 /squarewhitewithsmallblack /squarehorizontalfill /squareverticalfill /squareorthogonalcrosshatchfill /squareupperlefttolowerrightfill '+nl+ //A0
+'/squareupperrighttolowerleftfill /squarediagonalcrosshatchfill /H18543 /whitesmallsquare /filledrect /uni25AD /uni25AE /uni25AF '+nl+ //A8
+'/uni25B0 /uni25B1 /triagup /whiteuppointingtriangle /blackuppointingsmalltriangle /whiteuppointingsmalltriangle /blackrightpointingtriangle /whiterightpointingtriangle '+nl+ //B0
+'/uni25B8 /whiterightpointingsmalltriangle /triagrt /uni25BB /triagdn /whitedownpointingtriangle /uni25BE /whitedownpointingsmalltriangle '+nl+ //B8
+'/blackleftpointingtriangle /whiteleftpointingtriangle /uni25C2 /whiteleftpointingsmalltriangle /triaglf /uni25C5 /blackdiamond /whitediamond '+nl+ //C0
+'/whitediamondcontainingblacksmalldiamond /fisheye /lozenge /whitecircle /dottedcircle /uni25CD /bullseye /H18533 '+nl+ //C8
+'/circlewithlefthalfblack /circlewithrighthalfblack /uni25D2 /uni25D3 /uni25D4 /uni25D5 /uni25D6 /uni25D7 '+nl+ //D0
+'/invbullet /whitecircleinverse /uni25DA /uni25DB /uni25DC /uni25DD /uni25DE /uni25DF '+nl+ //D8
+'/uni25E0 /uni25E1 /blacklowerrighttriangle /blacklowerlefttriangle /blackupperlefttriangle /blackupperrighttriangle /whitebullet /uni25E7 '+nl+ //E0
+'/uni25E8 /uni25E9 /uni25EA /uni25EB /uni25EC /uni25ED /uni25EE /largecircle '+nl+ //E8
+'/uni25F0 /uni25F1 /uni25F2 /uni25F3 /uni25F4 /uni25F5 /uni25F6 /uni25F7 '+nl+ //F0
+'/uni25F8 /uni25F9 /uni25FA /uni25FB /uni25FC /uni25FD /uni25FE /uni25FF '+nl //F8
   )
  );
 {   
