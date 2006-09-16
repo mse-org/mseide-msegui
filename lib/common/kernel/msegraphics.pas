@@ -33,7 +33,7 @@ type
  pixmapty = cardinal;
 
  alignmentty = (al_xcentered,al_right,al_ycentered,al_bottom,al_grayed,
-                al_stretchx,al_stretchy,al_intpol,al_tiled);
+                al_stretchx,al_stretchy,al_fit,al_intpol,al_tiled);
  alignmentsty = set of alignmentty;
 
  drawingflagty = (df_canvasispixmap,df_canvasismonochrome,df_colorconvert,
@@ -3056,7 +3056,7 @@ begin
  end;
  rect1:= moverect(clipbox,fvaluepo^.origin);
  drect.size:= adestrect.size;
- if aalignment * [al_stretchx,al_stretchy,al_tiled] = [] then begin
+ if aalignment * [al_stretchx,al_stretchy,al_fit,al_tiled] = [] then begin
   if not msegraphutils.intersectrect(makerect(spoint,asourcerect.size),
        makerect(makepoint(0,0),icanvas(asource.fintf).getsize),srect) then begin
    exit;
@@ -3084,7 +3084,36 @@ begin
   alignment:= aalignment;
   copymode:= acopymode;
   mask:= amask;
-//  maskgchandle:= amaskgchandle;
+  if al_fit in aalignment then begin
+   alignment:= alignment + [al_stretchx,al_stretchy];
+   if (srect.cx = 0) or (srect.cy = 0) then begin
+    exit;
+   end;
+   if srect.cy * drect.cx > srect.cx * drect.cy then begin //fit vert
+    drect.cx:= (srect.cx * drect.cy) div srect.cy;
+    int1:= adestrect.cx - drect.cx;
+    if al_right in aalignment then begin
+     drect.x:= drect.x + int1;
+    end
+    else begin
+     if al_xcentered in aalignment then begin
+      drect.x:= drect.x + int1 div 2;
+     end;
+    end;
+   end
+   else begin
+    drect.cy:= (srect.cy * drect.cx) div srect.cx;
+    int1:= adestrect.cy - drect.cy;
+    if al_bottom in aalignment then begin
+     drect.y:= drect.y + int1;
+    end
+    else begin
+     if al_ycentered in aalignment then begin
+      drect.y:= drect.y + int1 div 2;
+     end;
+    end;
+   end;
+  end;
   if atransparency = cl_none then begin
    cardinal(transparency):= 0;
   end
@@ -3092,8 +3121,6 @@ begin
    transparency:= colortorgb(atransparency);
   end;
 
-//  maskrect.size:= amasksize;
-//  maskrect.pos:= adestpoint;
   if drawingflagsty((cardinal(gc.drawingflags) xor cardinal(source^.gc.drawingflags))) *
           [df_canvasismonochrome] <> [] then begin //different colorformat
    include(gc.drawingflags,df_colorconvert);
@@ -3189,21 +3216,19 @@ begin
       drect.cx:= srect.cx;
      end;
      gdi(gdi_copyarea);
-//     gui_copyarea(fdrawinfo);
      inc(drect.x,srect.cx);
      srect.cx:= stepx;
      srect.x:= sourcex;
-    until (al_stretchx in aalignment) or (drect.x >= endx{rect1.x + rect1.cx});
+    until (al_stretchx in aalignment) or (drect.x >= endx);
     inc(drect.y,srect.cy);
     srect.y:= sourcey;
     srect.cy:= stepy;
     drect.cy:= stepy;
-   until (al_stretchy in aalignment) or (drect.y >= endy{rect1.y + rect1.cy});
+   until (al_stretchy in aalignment) or (drect.y >= endy);
   end;
  end
  else begin
   gdi(gdi_copyarea);
-//  gui_copyarea(fdrawinfo);
  end;
  if amask <> nil then begin
   exclude(fstate,cs_clipregion);

@@ -896,6 +896,9 @@ var
 begin
  newdest:= dest;
  newsource:= source;
+ if al_fit in alignment then begin
+  exit;
+ end;
  if al_xcentered in alignment then begin
   newdest.x:= dest.x + (dest.cx - source.cx) div 2
  end;

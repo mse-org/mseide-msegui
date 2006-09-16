@@ -113,12 +113,14 @@ var
  size1: sizety;
 begin
  result:= inherited calcminscrollsize;
- size1:= fbitmap.size;
- if (result.cx < size1.cx) and not (al_stretchx in fbitmap.alignment) then begin
-  result.cx:= size1.cx;
- end;
- if (result.cy < size1.cy) and not (al_stretchy in fbitmap.alignment) then begin
-  result.cy:= size1.cy;
+ if not (al_fit in fbitmap.alignment) then begin
+  size1:= fbitmap.size;
+  if (result.cx < size1.cx) and not (al_stretchx in fbitmap.alignment) then begin
+   result.cx:= size1.cx;
+  end;
+  if (result.cy < size1.cy) and not (al_stretchy in fbitmap.alignment) then begin
+   result.cy:= size1.cy;
+  end;
  end;
 end;
 
