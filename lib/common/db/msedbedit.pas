@@ -4637,7 +4637,12 @@ begin
    dec(fdatasetchangedlock);
   end;
   if fgrid.rowcount > 0 then begin
-   fgrid.focuscell(makegridcoord(fgrid.col,activerecord));
+   if fgrid.col < 0 then begin
+    fgrid.focuscell(makegridcoord(fgrid.col,activerecord),fca_entergrid);
+   end
+   else begin
+    fgrid.focuscell(makegridcoord(fgrid.col,activerecord));
+   end;
   end;
   factiverecordbefore:= activerecord;
  end;
