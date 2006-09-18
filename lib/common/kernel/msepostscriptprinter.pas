@@ -79,7 +79,9 @@ type
    procedure writebinhex(const data: bytearty);
    function psencode(const text: pchar; const count: integer): string;
    function getshowstring(const avalue: pmsechar; const count: integer;
-                   fontneeded: boolean = false; const acolor: colorty = cl_none): string;
+                   fontneeded: boolean = false;
+                   const acolor: colorty = cl_none;
+                   const acolorbackground: colorty = cl_none): string;
    function createpattern(const sourcerect,destrect: rectty; 
                    const acolorbackground,acolorforeground: colorty;
                    const pixmap: pixmapty; const agchandle: cardinal;
@@ -151,37 +153,65 @@ const
 ' setfont pop'+nl+
 '} bind def'+nl+
               
-'/w {'+nl+    //[[text,font,scale,color],...]-> cx
-              //[[text,font,scale],...]-> cx or
+'/w {'+nl+    //[[text,font,scale,color,colorbackground],...]-> cx
+              //[[text,font,scale,color],...]-> cx
+              //[[text,font,scale],...]-> cx
               //[[text],...]-> cx
               //calc stringwidth
-'currentfont exch'+
-' 0 exch'+
-' {dup length 4 eq {0 3 getinterval} if'+nl+  //remove color
+' currentfont exch'+
+' 0 exch'+    //0,inputarray
+' {dup length 4 ge {0 3 getinterval} if'+nl+  //remove color
 '  dup length 3 eq'+ //array,arraylength = 3
  ' {aload pop selectfont}'+
  ' {aload pop}'+
   ' ifelse stringwidth pop add'+
-  '} forall'+
+  ' } forall'+
 ' exch setfont'+nl+
 '} bind def'+nl+
 
-'/s {'+nl+    //[[text,font,scale,color],...]-> cx
-              //[[text,font,scale],...]-> or
+'/s {'+nl+    //[[text,font,scale,color,colorbackground],...]-> cx
+              //[[text,font,scale,color],...]-> cx
+              //[[text,font,scale],...]-> cx
               //[[text],...]-> cx
               //select font, print text, ...
-' {dup length 4 eq '+
-   '{dup 3 get '+ //[text,font,scale,color],[color]
-    'dup length 3 eq '+ //[text,font,scale,color],[color],length = 3
-    '{aload pop setrgbcolor} '+
-    '{aload pop setgray} '+
-    'ifelse '+          //[text,font,scale,color] 
-    '0 3 getinterval'+  //[text,font,scale] remove color
-   '} if'+nl+  
-'  dup length 3 eq'+ //array,arraylength = 3
- ' {aload pop selectfont}'+
- ' {aload pop}'+
-  ' ifelse show'+
+' {'+
+   ' dup'+
+   ' dup length 4 ge'+ //[bak],[text,font,scale,color[,colorbackground]],length >= 4
+   ' {dup 3 get'+ //[bak],[text,font,scale,color[,colorbackground]],[color]
+    ' dup length 3 eq'+ //[text,font,scale,color[,colorbackground]],[color],length = 3
+    ' {aload pop setrgbcolor}'+
+    ' {aload pop setgray}'+
+    ' ifelse'+nl+       //[bak],[text,font,scale,color] 
+    ' 0 3 getinterval'+  //[bak],[text,font,scale] remove color
+   ' } if'+nl+  
+  ' dup length 3 eq'+ //array,arraylength = 3
+  ' {aload pop selectfont}'+
+  ' {aload pop}'+ //[bak],text
+  ' ifelse '+nl+
+  
+  ' exch dup length 5 eq'+ //text,[bak],length = 5 
+  ' {'+ //text,[text,font,scale,color,colorbackground]
+   ' [currentcolor] exch'+ //text,[colbackup],[text,font,scale,color,colorbackground]
+   ' 4 get'+ //text,[colbackup],[colorbackground]
+   ' aload pop setcolor exch'+   //[colbackup],text
+   ' dup stringwidth pop'+nl+//[colbackup],text,width
+   ' currentpoint currentpoint asc add'+nl+ //[colbackup],text,width,x,y,x,y+asc
+   ' newpath moveto'+                    //[colbackup],text,width,x,y    
+   ' 2 index 0 rlineto'+
+   ' 0 0 asc sub desc sub rlineto'+
+   ' 0 3 index sub 0 rlineto'+nl+
+   ' closepath fill'+                    //[colbackup],text,width,x,y
+   ' moveto'+                            //[colbackup],text,width 
+   ' pop'+                               //[colbackup],text
+   ' exch aload pop setcolor'+           //text 
+   ' show'+         
+  ' }'+nl+
+  ' {'+
+   ' pop'+
+   ' show'+
+  ' }'+
+  ' ifelse'+
+  
 ' } forall'+nl+
 '} bind def'+nl+
 
@@ -860,11 +890,13 @@ end;
 
 function tpostscriptcanvas.getshowstring(const avalue: pmsechar; 
           const count: integer; fontneeded: boolean = false; 
-          const acolor: colorty = cl_none): string;
+          const acolor: colorty = cl_none;
+          const acolorbackground: colorty = cl_none): string;
 var
  int1: integer;
  wo1,wo2: word;
  po1,po2: pchar;
+ colback: colorty;
  
  procedure pushsubstring;
  begin
@@ -877,12 +909,24 @@ var
   if acolor <> cl_none then begin
    result:= result+'['+getcolorstring(acolor)+']';
   end;
+  if colback <> cl_transparent then begin
+   if acolor = cl_none then begin
+    result:= result + '[currentcolor]';
+   end;
+   result:= result+'['+getcolorstring(colback)+']';
+  end;
   result:= result +']';
   po1:= po2;
  end;
  
 begin
- if acolor <> cl_none then begin
+ if acolorbackground <> cl_none then begin
+  colback:= acolorbackground;
+ end
+ else begin
+  colback:= font.colorbackground;
+ end;
+ if (acolor <> cl_none) or (colback <> cl_transparent) then begin
   fontneeded:= true;
  end;
  getmem(po1,count);
@@ -922,7 +966,7 @@ const
 var
  str1: string;
  int1,int2,int3: integer;
- co1: colorty;
+ co1,co2: colorty;
  colorchanged: boolean;
  
 begin
@@ -941,6 +985,8 @@ begin
     str1:= str1 + getshowstring(pmsechar(pointer(text.text)),index);
    end;
   end;
+  co1:= cl_none;
+  co2:= cl_none;
   for int1:= 0 to high(text.format) do begin
    with text.format[int1] do begin
     if int1 = high(text.format) then begin
@@ -969,11 +1015,16 @@ begin
        co1:= style.fontcolor^;
        colorchanged:= true;
       end;
-     end
-     else begin
-      co1:= cl_none;
      end;
-     str1:= str1 + getshowstring(pmsechar(pointer(text.text))+index,int2,true,co1);
+     if ni_colorbackground in newinfos then begin
+      if style.colorbackground = nil then begin
+       co2:= cl_none;
+      end
+      else begin
+       co2:= style.colorbackground^;
+      end;
+     end;
+     str1:= str1 + getshowstring(pmsechar(pointer(text.text))+index,int2,true,co1,co2);
     end;
    end;   
   end;
