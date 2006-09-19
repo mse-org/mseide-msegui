@@ -1654,7 +1654,7 @@ begin
   end;
   if gvm_brush in mask then begin
    flags:= flags - [gcf_patternbrushvalid];
-   bru:= brush;
+   bru:= tsimplebitmap1(brush).handle;
   end;
   if gvm_brushorigin in mask then begin
    brushorg:= brushorigin;
