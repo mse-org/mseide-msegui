@@ -2952,11 +2952,12 @@ begin
   gcdrawingflags:= drawingflags;
   if gvm_brush in mask then begin
    if df_monochrome in drawingflags then begin
-    xvalues.stipple:= brush;
+//    xvalues.stipple:= brush;
+    xvalues.stipple:= tsimplebitmap1(brush).handle;
     xmask:= xmask or gcstipple;
    end
    else begin
-    xvalues.tile:= brush;
+    xvalues.tile:= tsimplebitmap1(brush).handle;
     xmask:= xmask or gctile;
    end;
   end;

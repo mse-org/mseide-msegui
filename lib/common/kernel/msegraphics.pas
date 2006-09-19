@@ -326,7 +326,6 @@ type
    finfo: fontinfoty;
    finfopo: pfontinfoty;
    fhandlepo: ^fontnumty;
-//   fhandlecanvas: tcanvas; //canvas which last handle was created
    fonchange: notifyeventty;
    function getextraspace: integer;
    procedure setextraspace(const avalue: integer);
@@ -531,7 +530,8 @@ type
   colorforeground: pixelty;
   font: fontty;
   fontnum: fontnumty;
-  brush: pixmapty;
+//  brush: pixmapty;
+  brush: tsimplebitmap;
   brushorigin: pointty;
   rasterop: rasteropty;
   lineinfo: lineinfoty;
@@ -2916,7 +2916,8 @@ begin
      end;
      with fvaluepo^.brush do begin
       include(values.mask,gvm_brush);
-      values.brush:= handle;
+      values.brush:= fvaluepo^.brush;
+//      values.brush:= handle;
       if getmonochrome then begin
        include(drawingflags,df_monochrome);
        include(state,cs_acolorbackground);

@@ -121,6 +121,8 @@ uses
 type
  tsimplebitmap1 = class(tsimplebitmap); 
 const
+ imagepatname = 'impat';
+ patpatname = 'pat';
  radtodeg = 360/(2*pi);
  nl = lineend;  
  preamble = 
@@ -178,10 +180,11 @@ const
    ' dup'+
    ' dup length 4 ge'+ //[bak],[text,font,scale,color[,colorbackground]],length >= 4
    ' {dup 3 get'+ //[bak],[text,font,scale,color[,colorbackground]],[color]
-    ' dup length 3 eq'+ //[text,font,scale,color[,colorbackground]],[color],length = 3
-    ' {aload pop setrgbcolor}'+
-    ' {aload pop setgray}'+
-    ' ifelse'+nl+       //[bak],[text,font,scale,color] 
+    ' aload pop setcolor'+ //[bak],[text,font,scale,color[,colorbackground]]
+//    ' dup length 3 eq'+ //[text,font,scale,color[,colorbackground]],[color],length = 3
+//    ' {aload pop setrgbcolor}'+
+//    ' {aload pop setgray}'+
+//    ' ifelse'+nl+       //[bak],[text,font,scale,color] 
     ' 0 3 getinterval'+  //[bak],[text,font,scale] remove color
    ' } if'+nl+  
   ' dup length 3 eq'+ //array,arraylength = 3
@@ -781,6 +784,8 @@ begin
     str1:= str1+'] 0 setdash'+nl;
     fstream.write(str1);
    end;
+  end;
+  if gvm_brush in mask then begin
   end;
   if gvm_colorforeground in mask then begin
    fstream.write(setcolorstring(acolorforeground)+nl);
@@ -1428,8 +1433,6 @@ begin
 end;
   
 procedure tpostscriptcanvas.ps_copyarea;
-const
- imagepatname = 'impat';
 var
  image: imagety;
  
