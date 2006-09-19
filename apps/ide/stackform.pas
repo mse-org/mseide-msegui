@@ -169,7 +169,8 @@ var
 begin
  str1:= '';
  for int1:= 0 to grid.rowhigh do begin
-  str1:= str1 + grid[4][int1]+' '+filename(grid[2][int1])+':'+
+  str1:= str1 + '#'+inttostr(int1)+'  '+grid[4][int1]+' '+
+          filename(grid[2][int1])+':'+
                 grid[3][int1]+' '+grid[1][int1]+lineend;
  end;
  gui_copytoclipboard(str1);

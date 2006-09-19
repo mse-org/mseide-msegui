@@ -731,7 +731,8 @@ type
   protected
    info: drawtextinfoty;
    procedure dopaint(const canvas: tcanvas); override;
- end;
+   procedure dokeydown(var ainfo: keyeventinfoty); override;
+end;
 
 procedure copytoclipboard(const value: msestring);
 begin
@@ -1161,6 +1162,14 @@ procedure tshowmessagewidget.dopaint(const canvas: tcanvas);
 begin
  inherited;
  drawtext(canvas,info);
+end;
+
+procedure tshowmessagewidget.dokeydown(var ainfo: keyeventinfoty);
+begin
+ if (ainfo.key = key_c) and (ainfo.shiftstate = [ss_ctrl]) then begin
+  copytoclipboard(info.text.text);
+ end;
+ inherited;
 end;
 
 { tcustomcaptionframe }
