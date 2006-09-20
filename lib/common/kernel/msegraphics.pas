@@ -2915,8 +2915,10 @@ begin
       values.brushorigin:= addpoint(fvaluepo^.brushorigin,fvaluepo^.origin);
      end;
      with fvaluepo^.brush do begin
-      include(values.mask,gvm_brush);
-      values.brush:= fvaluepo^.brush;
+      if not (cs_brush in self.fstate) then begin
+       include(values.mask,gvm_brush);
+       values.brush:= fvaluepo^.brush;
+      end;
 //      values.brush:= handle;
       if getmonochrome then begin
        include(drawingflags,df_monochrome);
@@ -2943,6 +2945,7 @@ begin
      values.colorforeground:= colortopixel(acolorforeground);
     end;
     gccolorforeground:= acolorforeground;
+    include(fstate,cs_acolorforeground);
    end;
   end;
   if (cs_acolorbackground in state) and (acolorbackground <> gccolorbackground) then begin
@@ -4582,6 +4585,7 @@ begin
  if fvaluepo^.brush <> value then begin
   fvaluepo^.brush:= value;
   valuechanged(cs_brush);
+  gccolorforeground:= cl_none; //force reload
  end;
 end;
 

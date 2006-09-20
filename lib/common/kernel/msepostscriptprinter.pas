@@ -90,6 +90,7 @@ type
    procedure handlepoly(const points: ppointty; const lastpoint: integer;
                      const closed: boolean; const fill: boolean);
    procedure handleellipse(const rect: rectty; const fill: boolean);
+   procedure checkcolorspace;
    procedure ps_drawstring16;
    procedure ps_drawarc;
    procedure ps_destroygc;
@@ -250,28 +251,28 @@ const
 
 '/sr {'+ //print right text: text,llx,lly,urx,ury->
 ' cy'+          //text,llx,lly,urx,centeredy 
-' exch'+             //%text,llx,lly,newy,urx
-' 4 index'+nl+       //%text,llx,lly,newy,urx,text
-' w'+            //%text,llx,lly,newy,urx,cx
-' sub'+          //%text,llx,lly,newy,urx-cx
-' exch moveto'+      //%text,llx,lly
-' currentpoint /ay exch def /ax exch def'+ //%text,llx,lly
+' exch'+             //text,llx,lly,newy,urx
+' 4 index'+nl+       //text,llx,lly,newy,urx,text
+' w'+            //text,llx,lly,newy,urx,cx
+' sub'+          //text,llx,lly,newy,urx-cx
+' exch moveto'+      //text,llx,lly
+' currentpoint /ay exch def /ax exch def'+ //text,llx,lly
 ' pop pop s'+nl+
 '} bind def'+nl+
 
-'/sc {'+nl+     //%print center text: text,llx,lly,urx,ury ->
+'/sc {'+nl+     //print center text: text,llx,lly,urx,ury ->
 ' cy'+          //text,llx,lly,urx,centeredy 
-' 4 index'+     //%text,llx,lly,urx,centeredy,text
-' w'+           //%text,llx,lly,urx,centeredy,cx
-' 4 index'+     //%text,llx,lly,urx,centeredy,cx,llx
-' 3 index'+     //%text,llx,lly,urx,centeredy,cx,llx,urx
-' exch sub'+    //%text,llx,lly,urx,centeredy,cx,urx-llx
-' exch sub'+    //%text,llx,lly,urx,centeredy,urx-llx-cx 
-' 2 div'+       //%text,llx,lly,urx,centeredy,(urx-llx-cx)/2
-' 4 index add'+nl+ //%text,llx,lly,urx,centeredy,(urx-llx-cx)/2+llx
-' exch'+        //%text,llx,lly,urx,newx,centeredy
-' moveto'+nl+   //%text,llx,lly,urx
-' currentpoint /ay exch def /ax exch def'+ //%text,llx,lly,urx
+' 4 index'+     //text,llx,lly,urx,centeredy,text
+' w'+           //text,llx,lly,urx,centeredy,cx
+' 4 index'+     //text,llx,lly,urx,centeredy,cx,llx
+' 3 index'+     //text,llx,lly,urx,centeredy,cx,llx,urx
+' exch sub'+    //text,llx,lly,urx,centeredy,cx,urx-llx
+' exch sub'+    //text,llx,lly,urx,centeredy,urx-llx-cx 
+' 2 div'+       //text,llx,lly,urx,centeredy,(urx-llx-cx)/2
+' 4 index add'+nl+ //text,llx,lly,urx,centeredy,(urx-llx-cx)/2+llx
+' exch'+        //text,llx,lly,urx,newx,centeredy
+' moveto'+nl+   //text,llx,lly,urx
+' currentpoint /ay exch def /ax exch def'+ //text,llx,lly,urx
 ' pop pop pop s'+nl+
 ' } bind def'+nl+
 
@@ -284,91 +285,91 @@ const
 '} bind def'+nl+
 
 '/srb {'+nl+    //print rightbottom text: text,llx,lly,urx,ury ->
-' 4 index'+     //%text,llx,lly,urx,ury,text
-' w'+           //%text,llx,lly,urx,ury,cx
-' 2 index'+     //%text,llx,lly,urx,ury,cx,urx
-' exch'+        //%text,llx,lly,urx,ury,urx,cx
-' sub'+         //%text,llx,lly,urx,ury,urx-cx
-' 3 index'+     //%text,llx,lly,urx,ury,urx-cx,lly
-' desc add'+    //%text,llx,lly,urx,ury,urx-cx,lly+desc
+' 4 index'+     //text,llx,lly,urx,ury,text
+' w'+           //text,llx,lly,urx,ury,cx
+' 2 index'+     //text,llx,lly,urx,ury,cx,urx
+' exch'+        //text,llx,lly,urx,ury,urx,cx
+' sub'+         //text,llx,lly,urx,ury,urx-cx
+' 3 index'+     //text,llx,lly,urx,ury,urx-cx,lly
+' desc add'+    //text,llx,lly,urx,ury,urx-cx,lly+desc
 ' moveto'+nl+
-' currentpoint /ay exch def /ax exch def'+ //%text,llx,lly,urx,ury
+' currentpoint /ay exch def /ax exch def'+ //text,llx,lly,urx,ury
 ' pop pop pop pop s'+
 '} bind def'+nl+
 
 '/srt {'+nl+ //print righttoptext: text,llx,lly,urx,ury ->
-' 4 index'+      //%text,llx,lly,urx,ury,text
-' w'+            //%text,llx,lly,urx,ury,cx
-' 2 index'+    //%text,llx,lly,urx,ury,cx,urx
-' exch'+       //%text,llx,lly,urx,ury,urx,cx
-' sub'+        //%text,llx,lly,urx,ury,urx-cx
-' exch'+       //%text,llx,lly,urx,urx-cx,ury
-' asc sub'+    //%text,llx,lly,urx,urx-cx,ury-asc
+' 4 index'+      //text,llx,lly,urx,ury,text
+' w'+            //text,llx,lly,urx,ury,cx
+' 2 index'+    //text,llx,lly,urx,ury,cx,urx
+' exch'+       //text,llx,lly,urx,ury,urx,cx
+' sub'+        //text,llx,lly,urx,ury,urx-cx
+' exch'+       //text,llx,lly,urx,urx-cx,ury
+' asc sub'+    //text,llx,lly,urx,urx-cx,ury-asc
 ' moveto'+nl+
-' currentpoint /ay exch def /ax exch def'+ //%text,llx,lly,urx
+' currentpoint /ay exch def /ax exch def'+ //text,llx,lly,urx
 ' pop pop pop s'+
 '} bind def'+nl+
  
-'/st {'+nl+     //%print top text: text,llx,lly,urx,ury ->
-' 4 index'+     //%text,llx,lly,urx,ury,text
-' w'+           //%text,llx,lly,urx,ury,cx
-' 4 index'+     //%text,llx,lly,urx,ury,cx,llx
-' 3 index'+     //%text,llx,lly,urx,ury,cx,llx,urx
-' exch sub'+    //%text,llx,lly,urx,ury,cx,urx-llx
-' exch sub'+    //%text,llx,lly,urx,ury,urx-llx-cx 
-' 2 div'+       //%text,llx,lly,urx,ury,(urx-llx-cx)/2
-' 4 index add'+nl+//%text,llx,lly,urx,ury,(urx-llx-cx)/2+llx
-' exch'+        //%text,llx,lly,urx,newx,ury
-' asc sub'+     //%text,llx,lly,urx,newx,ury-asc
-' moveto'+      //%text,llx,lly,urx
-' currentpoint /ay exch def /ax exch def'+ //%text,llx,lly,urx
+'/st {'+nl+     //print top text: text,llx,lly,urx,ury ->
+' 4 index'+     //text,llx,lly,urx,ury,text
+' w'+           //text,llx,lly,urx,ury,cx
+' 4 index'+     //text,llx,lly,urx,ury,cx,llx
+' 3 index'+     //text,llx,lly,urx,ury,cx,llx,urx
+' exch sub'+    //text,llx,lly,urx,ury,cx,urx-llx
+' exch sub'+    //text,llx,lly,urx,ury,urx-llx-cx 
+' 2 div'+       //text,llx,lly,urx,ury,(urx-llx-cx)/2
+' 4 index add'+nl+//text,llx,lly,urx,ury,(urx-llx-cx)/2+llx
+' exch'+        //text,llx,lly,urx,newx,ury
+' asc sub'+     //text,llx,lly,urx,newx,ury-asc
+' moveto'+      //text,llx,lly,urx
+' currentpoint /ay exch def /ax exch def'+ //text,llx,lly,urx
 ' pop pop pop s'+nl+
 '} bind def'+nl+
 
-'/sb {'+nl+     //%print bottom text: text,llx,lly,urx,ury ->
-' 4 index'+     //%text,llx,lly,urx,ury,text
-' w'+           //%text,llx,lly,urx,ury,cx
-' 4 index'+     //%text,llx,lly,urx,ury,cx,llx
-' 3 index'+     //%text,llx,lly,urx,ury,cx,llx,urx
-' exch sub'+    //%text,llx,lly,urx,ury,cx,urx-llx
-' exch sub'+    //%text,llx,lly,urx,ury,urx-llx-cx 
-' 2 div'+       //%text,llx,lly,urx,ury,(urx-llx-cx)/2
-' 4 index add'+nl+ //%text,llx,lly,urx,ury,(urx-llx-cx)/2+llx
-' 3 index'+     //%text,llx,lly,urx,ury,newx,lly
-' desc add'+    //%text,llx,lly,urx,ury,newx,lly+desc
-' moveto'+      //%text,llx,lly,urx,ury
-' currentpoint /ay exch def /ax exch def'+ //%text,llx,lly,urx,ury
+'/sb {'+nl+     //print bottom text: text,llx,lly,urx,ury ->
+' 4 index'+     //text,llx,lly,urx,ury,text
+' w'+           //text,llx,lly,urx,ury,cx
+' 4 index'+     //text,llx,lly,urx,ury,cx,llx
+' 3 index'+     //text,llx,lly,urx,ury,cx,llx,urx
+' exch sub'+    //text,llx,lly,urx,ury,cx,urx-llx
+' exch sub'+    //text,llx,lly,urx,ury,urx-llx-cx 
+' 2 div'+       //text,llx,lly,urx,ury,(urx-llx-cx)/2
+' 4 index add'+nl+ //text,llx,lly,urx,ury,(urx-llx-cx)/2+llx
+' 3 index'+     //text,llx,lly,urx,ury,newx,lly
+' desc add'+    //text,llx,lly,urx,ury,newx,lly+desc
+' moveto'+      //text,llx,lly,urx,ury
+' currentpoint /ay exch def /ax exch def'+ //text,llx,lly,urx,ury
 ' pop pop pop pop s'+nl+
 '} bind def'+nl+
 
-'/ul {'+nl+ //%underline
+'/ul {'+nl+ //underline
 ' gsave'+
 ' desc 4 div setlinewidth'+
 ' 0 setlinecap'+
 ' [] 0 setdash'+
-' currentpoint'+    //%x,y
-' desc 2 div sub'+nl+  //%x,y-desc/2
-' dup'+             //%x,newy,newy
-' 2 index exch'+    //%x,newy,x,newy  
-' moveto'+          //%x,newy
-' ax exch'+         //%x,ax,newy
-' lineto stroke'+   //%x
+' currentpoint'+    //x,y
+' desc 2 div sub'+nl+  //x,y-desc/2
+' dup'+             //x,newy,newy
+' 2 index exch'+    //x,newy,x,newy  
+' moveto'+          //x,newy
+' ax exch'+         //x,ax,newy
+' lineto stroke'+   //x
 ' pop'+
 ' grestore'+
 '} bind def'+nl+
 
-'/so {'+ //%strokeout
+'/so {'+ //strokeout
 ' gsave'+
 ' desc 4 div setlinewidth'+
 ' 0 setlinecap'+
 ' [] 0 setdash'+
-' currentpoint'+nl+  //%x,y
-' asc desc add 2 div add desc sub'+ //%x,y+asc+desc/2-desc
-' dup'+             //%x,newy,newy
-' 2 index exch'+    //%x,newy,x,newy  
-' moveto'+          //%x,newy
-' ax exch'+         //%x,ax,newy
-' lineto stroke'+   //%x
+' currentpoint'+nl+  //x,y
+' asc desc add 2 div add desc sub'+ //x,y+asc+desc/2-desc
+' dup'+             //x,newy,newy
+' 2 index exch'+    //x,newy,x,newy  
+' moveto'+          //x,newy
+' ax exch'+         //x,ax,newy
+' lineto stroke'+   //x
 ' pop'+
 ' grestore'+nl+
 '} bind def'+nl+
@@ -769,6 +770,7 @@ procedure tpostscriptcanvas.ps_changegc;
 var
  str1: string;
  int1,int2: integer;
+ rect1: rectty;
 begin
  with fdrawinfo,gcvalues^ do begin
   if gvm_dashes in mask then begin
@@ -786,6 +788,13 @@ begin
    end;
   end;
   if gvm_brush in mask then begin
+   with tsimplebitmap1(brush) do begin
+    rect1:= makerect(nullpoint,size);
+    if createpattern(rect1,rect1,acolorbackground,acolorforeground,
+                   handle,canvas.gchandle,patpatname) then begin
+     fstream.write(' setpattern'+nl);
+    end;
+   end;
   end;
   if gvm_colorforeground in mask then begin
    fstream.write(setcolorstring(acolorforeground)+nl);
@@ -1432,6 +1441,14 @@ begin
  fstream.write(str1);
 end;
   
+procedure tpostscriptcanvas.checkcolorspace;
+begin
+ if not (cs_acolorforeground in fstate) then begin
+  fstream.write(setcolorstring(color)+nl); //init colorspace
+  include(fstate,cs_acolorforeground);
+ end;
+end;
+
 procedure tpostscriptcanvas.ps_copyarea;
 var
  image: imagety;
@@ -1482,6 +1499,7 @@ begin
   if not (df_canvasispixmap in source^.gc.drawingflags) then begin
    exit;
   end;
+  checkcolorspace;
   masked:= (mask <> nil) and mask.monochrome;
   if masked then begin
    if fpslevel >= psl_3 then begin

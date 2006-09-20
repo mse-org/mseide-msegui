@@ -894,7 +894,8 @@ procedure tcustomprintercanvas.setcolorspace(const avalue: colorspacety);
 begin
  if fcolorspace <> avalue then begin
   fcolorspace:= avalue;
-  valueschanged([cs_color,cs_colorbackground]);
+  exclude(fstate,cs_acolorforeground);
+//  valueschanged([cs_color,cs_colorbackground]);
  end;
 end;
 
