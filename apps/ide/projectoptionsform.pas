@@ -598,6 +598,7 @@ begin
   deletememorystatstream(stringlisteditorstatname);
   deletememorystatstream(texteditorstatname);
   deletememorystatstream(colordialogstatname);
+  deletememorystatstream(bmpfiledialogstatname);
   {$ifdef FPC}
   deletememorystatstream(dbfieldeditorstatname);
   {$endif}
@@ -793,6 +794,7 @@ begin
   updatememorystatstream('stringlisteditor',stringlisteditorstatname);
   updatememorystatstream('texteditor',texteditorstatname);
   updatememorystatstream('colordialog',colordialogstatname);
+  updatememorystatstream('bmpfiledialog',bmpfiledialogstatname);
 {$ifdef FPC}
   updatememorystatstream('dbfieldeditor',dbfieldeditorstatname);
 {$endif}

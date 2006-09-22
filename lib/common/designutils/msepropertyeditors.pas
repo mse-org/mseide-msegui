@@ -16,6 +16,9 @@ uses
  Classes,TypInfo,msedesignintf,msetypes,msestrings,sysutils,msedatalist,msemenus,
  mseevent,msegui,mseclasses,mseforms;
 
+const
+ bmpfiledialogstatname = 'bmpfile.sta';
+ 
 type
 
  tpropertyeditor = class;
@@ -662,7 +665,7 @@ uses
  mseshapes,msestockobjects,msetexteditor,
  msegraphicstream,
  mseformatbmpico{$ifdef FPC},mseformatjpg,mseformatpng,
- mseformatpnm,mseformattga,mseformatxpm{$endif};
+ mseformatpnm,mseformattga,mseformatxpm{$endif},msestat,msefileutils;
 
 const
  methodsortlevel = 100;
@@ -2944,7 +2947,40 @@ var
  str1: filenamety;
  int1: integer;
  ar1: stringarty;
+ dialog: tfiledialog;
+ statfile1: tstatfile;
 begin
+ statfile1:= tstatfile.create(nil);
+ dialog:= tfiledialog.create(nil);
+ try
+  statfile1.options:= [sfo_memory];
+  statfile1.filename:= bmpfiledialogstatname;
+  with dialog,controller do begin
+   filterlist.asarraya:= graphicfilefilternames;
+   filterlist.asarrayb:= graphicfilemasks;
+   captionopen:= 'Open image file';
+   statfile:= statfile1;
+   statfile.readstat;
+   filename:= filedir(filename);
+   if execute = mr_ok then begin
+    statfile.writestat;
+    bmp:= tmaskedbitmap.create(false);
+    try
+     bmp.loadfromfile(filename,graphicfilefilterlabel(filterindex));
+     for int1:= 0 to high(fprops) do begin
+      tmaskedbitmap(getordvalue(int1)).assign(bmp);
+     end;
+     modified;
+    finally
+     bmp.Free;
+    end;
+   end;
+  end;
+ finally
+  dialog.free;
+  statfile1.free;
+ end;
+ {
  str1:= '';
  int1:= 0;
  if filedialog(str1,[],'',graphicfilefilternames,graphicfilemasks,
@@ -2960,6 +2996,7 @@ begin
    bmp.Free;
   end;
  end;
+ }
 end;
 
 function tbitmappropertyeditor.getvalue: msestring;
