@@ -629,11 +629,12 @@ procedure reorderarray(const destorderlist: integerarty;
 function cmparray(const a,b: msestringarty): boolean;
                //true if equal
 
-function opentodynarray(const items: array of widestring): msestringarty; overload;
+function opentodynarraym(const items: array of msestring): msestringarty;
 function opentodynarrays(const items: array of string): stringarty;
-function opentodynarray(const items: array of integer): integerarty; overload;
+function opentodynarrayi(const items: array of integer): integerarty;
 function opentodynarrayr(const items: array of realty): realarty;
-function opentodynarray(const items: array of boolean): booleanarty; overload;
+function opentodynarraybo(const items: array of boolean): booleanarty;
+function opentodynarrayby(const items: array of byte): bytearty;
 
 procedure readstringar(const reader: treader; out avalue: stringarty);
 procedure writestringar(const writer: twriter; const avalue: stringarty);
@@ -649,7 +650,7 @@ implementation
 uses
  rtlconsts,msestreaming,msesys,msestat;
 
-function opentodynarray(const items: array of widestring): msestringarty;
+function opentodynarraym(const items: array of msestring): msestringarty;
 var
  int1: integer;
 begin
@@ -669,7 +670,7 @@ begin
  end;
 end;
 
-function opentodynarray(const items: array of integer): integerarty;
+function opentodynarrayi(const items: array of integer): integerarty;
 var
  int1: integer;
 begin
@@ -689,7 +690,17 @@ begin
  end;
 end;
 
-function opentodynarray(const items: array of boolean): booleanarty;
+function opentodynarraybo(const items: array of boolean): booleanarty;
+var
+ int1: integer;
+begin
+ setlength(result,length(items));
+ for int1:= 0 to high(items) do begin
+  result[int1]:= items[int1];
+ end;
+end;
+
+function opentodynarrayby(const items: array of byte): bytearty;
 var
  int1: integer;
 begin
@@ -4372,10 +4383,10 @@ var
 begin
  if fcount > 0 then begin
   normalizering;
-  result:= delim + msestring(fdatapo^) + delim;
+  result:= delim + pmsestring(fdatapo)^ + delim;
   for int1:= 1 to fcount-1 do begin
    result:= result + separator + delim +
-         pmsestring(fdatapo+int1*fsize)^ + separator;
+         pmsestring(fdatapo+int1*fsize)^ + delim;
   end;
  end
  else begin

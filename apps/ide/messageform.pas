@@ -20,18 +20,20 @@ unit messageform;
 
 interface
 uses
- msegui,mseclasses,mseforms,msegrids;
+ msegui,mseclasses,mseforms,msegrids,msemenus;
 
 type
  tmessagefo = class(tdockform)
    messages: tstringgrid;
+   tpopupmenu1: tpopupmenu;
    procedure messagesoncellevent(const sender: tobject; var info: celleventinfoty);
+   procedure copyexe(const sender: TObject);
  end;
 var
  messagefo: tmessagefo;
 implementation
 uses
- messageform_mfm,sourcepage,sourceform;
+ messageform_mfm,sourcepage,sourceform,msewidgets,msestrings;
  
 procedure tmessagefo.messagesoncellevent(const sender: tobject;
   var info: celleventinfoty);
@@ -41,6 +43,11 @@ begin
  if iscellclick(info,[ccr_dblclick]) then begin
   locateerrormessage(messagefo.messages[0][info.cell.row],page);
  end;
+end;
+
+procedure tmessagefo.copyexe(const sender: TObject);
+begin
+ copytoclipboard(messages.datacols[0].datalist.concatstring('',lineend));
 end;
 
 end.

@@ -1457,8 +1457,8 @@ end;
    procedure docellevent(var info: celleventinfoty); override;
    procedure drawfocusedcell(const canvas: tcanvas); override;
    procedure scrolled(const dist: pointty); override;
-   property cols[index: integer]: tstringcol read getcols write setcols; default;
    function getcaretcliprect: rectty; override;  //origin = clientrect.pos
+   property cols[index: integer]: tstringcol read getcols write setcols; default;
   //iedit
    function getoptionsedit: optionseditty; virtual;
    procedure editnotification(var info: editnotificationinfoty); virtual;
