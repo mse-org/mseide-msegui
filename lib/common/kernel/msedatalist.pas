@@ -632,7 +632,7 @@ function cmparray(const a,b: msestringarty): boolean;
 function opentodynarray(const items: array of widestring): msestringarty; overload;
 function opentodynarrays(const items: array of string): stringarty;
 function opentodynarray(const items: array of integer): integerarty; overload;
-function opentodynarrayr(const items: array of realty): realarty; overload;
+function opentodynarrayr(const items: array of realty): realarty;
 function opentodynarray(const items: array of boolean): booleanarty; overload;
 
 procedure readstringar(const reader: treader; out avalue: stringarty);

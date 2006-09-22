@@ -23,7 +23,7 @@ const
  bluemask = $0000ff;
  blueshift = 0;
 
- invalidgchandle = -1;
+ invalidgchandle = cardinal(-1);
  
 type
  paintdevicety = cardinal;
@@ -2669,7 +2669,12 @@ procedure tcanvas.linktopaintdevice(paintdevice: paintdevicety;
 begin
  resetpaintedflag;
  if (fdrawinfo.gc.handle <> 0) then begin
-  gdi(gdi_destroygc);
+  if fdrawinfo.gc.handle = invalidgchandle then begin
+   fdrawinfo.gc.handle:= 0;
+  end
+  else begin
+   gdi(gdi_destroygc);
+  end;
 //  gui_destroygc(fdrawinfo.paintdevice,fdrawinfo.gc);
  end;
  fdrawinfo.paintdevice:= paintdevice;

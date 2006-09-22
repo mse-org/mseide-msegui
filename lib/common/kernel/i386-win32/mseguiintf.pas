@@ -962,7 +962,8 @@ begin
  end;
 end;
 
-function gui_creategc(paintdevice: paintdevicety; ispixmap: boolean; var gc: gcty): guierrorty;
+function gui_creategc(paintdevice: paintdevicety; ispixmap: boolean; 
+                                                   var gc: gcty): guierrorty;
 begin
  if ispixmap then begin
   gc.handle:= createcompatibledc(0);
@@ -1274,6 +1275,8 @@ begin
 end;
 
 function gui_getchar16widths(var drawinfo: drawinfoty): gdierrorty;
+label
+ endlab;
 var
  int1: integer;
  po1: pmsechar;
@@ -1282,10 +1285,17 @@ var
  widths: pcharwidthsty;
  overha: integer;
  ahandle: thandle;
+ gc1: hdc;
 begin
  result:= gde_fontmetrics;
+ if drawinfo.gc.handle = invalidgchandle then begin
+  gc1:= getdc(0);  //use default dc
+ end
+ else begin
+  gc1:= drawinfo.gc.handle;
+ end;
  with drawinfo.getchar16widths do begin
-  ahandle:= selectobject(drawinfo.gc.handle,datapo^.font);
+  ahandle:= selectobject(gc1,datapo^.font);
   if ahandle <> 0 then begin
    po1:= text;
    po2:= resultpo;
@@ -1301,14 +1311,14 @@ begin
     end
     else begin
      if iswin95 then begin
-      if not getcharwidthw(drawinfo.gc.handle,wo1,wo1,po2^) then begin
-       exit;
+      if not getcharwidthw(gc1,wo1,wo1,po2^) then begin
+       goto endlab;
       end;
       dec(po2^,overha);
      end
      else begin
-      if not getcharwidth32w(drawinfo.gc.handle,wo1,wo1,po2^) then begin
-       exit;
+      if not getcharwidth32w(gc1,wo1,wo1,po2^) then begin
+       goto endlab;
       end;
      end;
     end;
@@ -1316,9 +1326,14 @@ begin
     inc(po2);
     dec(int1);
    end;
-   selectobject(drawinfo.gc.handle,ahandle);
+   selectobject(gc1,ahandle);
    result:= gde_ok;
   end;
+ end;
+
+endlab:
+ if drawinfo.gc.handle = invalidgchandle then begin
+  releasedc(0,gc1);
  end;
 end;
 

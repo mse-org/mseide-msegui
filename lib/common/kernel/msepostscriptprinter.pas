@@ -1758,6 +1758,7 @@ begin
   end;
   fillchar(gc1,sizeof(gc1),0);
   gc1.handle:= cardinal(invalidgchandle);
+//  guierror(gui_creategc(0,false,gc1),self); //get default gc for font creation on win32
   linktopaintdevice(ptrint(self),gc1,makesize(round(pa_width*fprinter.ppmm),
                        round(pa_height*fprinter.ppmm)),nullpoint);
  end;
