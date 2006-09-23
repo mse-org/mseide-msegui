@@ -770,7 +770,7 @@ procedure tpostscriptcanvas.ps_changegc;
 var
  str1: string;
  int1,int2: integer;
- rect1: rectty;
+ rect1,rect2: rectty;
 begin
  with fdrawinfo,gcvalues^ do begin
   if gvm_dashes in mask then begin
@@ -787,17 +787,24 @@ begin
     fstream.write(str1);
    end;
   end;
-  if gvm_brush in mask then begin
-   with tsimplebitmap1(brush) do begin
+  if (self.brush <> nil) and 
+            ([gvm_brush,gvm_brushorigin] * mask <> []) then begin
+   with tsimplebitmap1(self.brush) do begin
     rect1:= makerect(nullpoint,size);
-    if createpattern(rect1,rect1,acolorbackground,acolorforeground,
+    rect2:= makerect(self.brushorigin,size);
+    if createpattern(rect1,rect2,acolorbackground,acolorforeground,
                    handle,canvas.gchandle,patpatname) then begin
-     fstream.write(' setpattern'+nl);
+     fstream.write('/bru exch def'+nl);
     end;
    end;
   end;
-  if gvm_colorforeground in mask then begin
-   fstream.write(setcolorstring(acolorforeground)+nl);
+  if df_brush in gc.drawingflags then begin
+   fstream.write('bru setpattern'+nl);
+  end
+  else begin
+   if gvm_colorforeground in mask then begin
+    fstream.write(setcolorstring(acolorforeground)+nl);
+   end;
   end;
   if gvm_font in mask then begin
    selectfont(fontnum,0);
@@ -1456,7 +1463,8 @@ var
  function imagedict: string;
  begin
   with fdrawinfo.copyarea.sourcerect^ do begin
-   result:= '<< /ImageType 1 /Width '+inttostr(size.cx)+
+   result:= setcolorstring(fdrawinfo.acolorforeground)+
+   ' << /ImageType 1 /Width '+inttostr(size.cx)+
    ' /Height '+inttostr(size.cy)+' /ImageMatrix '+imagematrixstring(size)+nl+
    '/DataSource {currentfile picstr readhexstring pop}'+nl+
    '/BitsPerComponent ';
@@ -1611,7 +1619,6 @@ begin
      str1:= str1 + unityrectpath + nl + 
            setcolorstring(acolorbackground) + ' fill ';   
     end;
-    str1:= str1 + setcolorstring(acolorforeground) + nl;
    end;
    if fpslevel >= psl_2 then begin
     str1:= str1 + imagedict;
@@ -1623,6 +1630,7 @@ begin
     end;
    end
    else begin
+    str1:= str1 + setcolorstring(acolorforeground) + nl;
     with sourcerect^ do begin
      str1:= str1 +
           inttostr(size.cx) + ' ' + inttostr(size.cy);
@@ -1653,7 +1661,7 @@ begin
  writebinhex(ar1);
  str1:= '/picstr null def grestore ';
  if masked then begin
-  str1:= str1 + '/imdict null def /madict null def';
+  str1:= str1 + '/imdict null def /madict null def ';
  end;
  fstream.write(str1+nl);
 end;

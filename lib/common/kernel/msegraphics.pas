@@ -513,7 +513,8 @@ type
  
  gcvaluemaskty = (gvm_clipregion,gvm_colorbackground,gvm_colorforeground,
                   gvm_dashes,gvm_linewidth,gvm_capstyle,gvm_joinstyle,
-                  gvm_font,gvm_brush,gvm_brushorigin,gvm_rasterop);
+                  gvm_font,gvm_brush,gvm_brushorigin,gvm_rasterop,
+                  gvm_brushflag);
  gcvaluemasksty = set of gcvaluemaskty;
 
  lineinfoty = record
@@ -2873,7 +2874,7 @@ end;
 procedure tcanvas.checkgcstate(state: canvasstatesty);
 var
  values: gcvaluesty;
- bo1: boolean;
+ bo1,bo2: boolean;
 begin
  if fdrawinfo.gc.handle = 0 then begin
   icanvas(fintf).gcneeded(self);
@@ -2903,6 +2904,7 @@ begin
   include(fstate,cs_rasterop);
  end;
  with fdrawinfo,gc do begin
+  bo2:= df_brush in drawingflags;
   drawingflags:= drawingflags - fillmodeinfoflags;
 
   if (cs_acolorforeground in state) then begin
@@ -2910,15 +2912,18 @@ begin
    if ((acolorforeground = cl_brush) or bo1) and (fvaluepo^.brush <> nil) then begin
     include(drawingflags,df_brush);
    end;
+   if (df_brush in drawingflags) xor bo2 then begin
+    include(values.mask,gvm_brushflag);
+   end;
 //   if not (df_brush in drawingflags) and (cs_monochrome in fstate) and
 //         ((acolorforeground <> cl_1) or (then begin
+   if (df_brush in drawingflags) and not (cs_brushorigin in fstate) then begin
+    include(fstate,cs_brushorigin);
+    include(values.mask,gvm_brushorigin);
+    values.brushorigin:= addpoint(fvaluepo^.brushorigin,fvaluepo^.origin);
+   end;
    if acolorforeground <> gccolorforeground then begin
     if df_brush in drawingflags then begin
-     if not (cs_brushorigin in fstate) then begin
-      include(fstate,cs_brushorigin);
-      include(values.mask,gvm_brushorigin);
-      values.brushorigin:= addpoint(fvaluepo^.brushorigin,fvaluepo^.origin);
-     end;
      with fvaluepo^.brush do begin
       if not (cs_brush in self.fstate) then begin
        include(values.mask,gvm_brush);
