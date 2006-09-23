@@ -5,7 +5,7 @@ interface
 
 uses
  classes,db,mseclasses,mseguiglob,msestrings,msetypes,msearrayprops,msegui,
- msestockobjects;
+ msestockobjects,sysutils;
  
 type
  fieldtypesty = set of tfieldtype;
@@ -628,17 +628,28 @@ type
                     const avalue: largeint): string;
   procedure ExecuteDirect(SQL : String);
  end;
-  
+
+ databaseeventty = procedure(const sender: tdatabase) of object;
+ databaseerroreventty = procedure(const sender: tdatabase;
+             const aexception: exception; var handled: boolean) of object;
+ 
  tdbcontroller = class(tactivatorcontroller)
   private
    fdatabasename: filenamety;
    fintf: idbcontroller;
+   fonbeforeconnect: databaseeventty;
+   fonconnecterror: databaseerroreventty;
   protected
    procedure setowneractive(const avalue: boolean); override;
   public
    constructor create(const aowner: tdatabase; const aintf: idbcontroller);
    function getdatabasename: filenamety;
    procedure setdatabasename(const avalue: filenamety);
+  published
+   property onbeforeconnect: databaseeventty read fonbeforeconnect 
+                                   write fonbeforeconnect;  
+   property onconnecterror: databaseerroreventty read fonconnecterror 
+                                   write fonconnecterror; 
  end;
   
 function fieldclasstoclasstyp(const fieldclass: fieldclassty): fieldclasstypety;
@@ -651,7 +662,7 @@ function getasmsestring(const field: tfield; const utf8: boolean): msestring;
 
 implementation
 uses
- rtlconsts,msefileutils,typinfo,sysutils,dbconst,msedatalist,mseformatstr,
+ rtlconsts,msefileutils,typinfo,dbconst,msedatalist,mseformatstr,
  msereal;
 type
  tdataset1 = class(tdataset);
@@ -2488,8 +2499,32 @@ begin
 end;
 
 procedure tdbcontroller.setowneractive(const avalue: boolean);
+var
+ bo1: boolean;
 begin
- tdatabase(fowner).connected:= avalue;
+ if avalue then begin
+  with tdatabase(fowner) do begin
+   if checkcanevent(fowner,tmethod(fonbeforeconnect)) then begin
+    fonbeforeconnect(tdatabase(fowner));
+   end;
+   try
+    connected:= avalue;
+   except
+    on e: exception do begin
+     if checkcanevent(fowner,tmethod(fonconnecterror)) then begin
+      bo1:= false;
+      fonconnecterror(tdatabase(fowner),e,bo1);
+      if not bo1 then begin
+       raise;
+      end;
+     end;
+    end;
+   end;
+  end;
+ end
+ else begin
+  tdatabase(fowner).connected:= avalue;
+ end;
 end;
 
 function tdbcontroller.getdatabasename: filenamety;

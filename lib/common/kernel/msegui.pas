@@ -547,6 +547,9 @@ type
  activatoroptionty = (avo_activateonloaded,avo_activatedelayed,
                                     avo_deactivateonterminated);
  activatoroptionsty = set of activatoroptionty;
+ activateerroreventty = procedure(const sender: tactivator; 
+                 const aclient: tobject; const aexception: exception;
+                 var handled: boolean) of object;
  
  tactivator = class(tguicomponent)
   private
@@ -557,6 +560,7 @@ type
    fonafterdeactivate: notifyeventty;
    factive: boolean;
    factivated: boolean;
+   fonactivateerror: activateerroreventty;
    procedure readclientnames(reader: treader);
    procedure writeclientnames(writer: twriter);
    function getclients: integer;
@@ -581,8 +585,8 @@ type
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
-   class procedure addclient(const aactivator: tactivator; const aclient: iobjectlink;
-                    var dest: tactivator);
+   class procedure addclient(const aactivator: tactivator; 
+              const aclient: iobjectlink; var dest: tactivator);
    procedure activateclients;
    procedure deactivateclients;
    property activated: boolean read factivated;
@@ -593,6 +597,8 @@ type
    property active: boolean read factive write setactive;
    property onbeforeactivate: notifyeventty read fonbeforeactivate
                            write fonbeforeactivate;
+   property onactivateerror: activateerroreventty read fonactivateerror 
+                                   write fonactivateerror;                              
    property onafteractivate: notifyeventty read fonafteractivate 
                            write fonafteractivate;
    property onbeforedeactivate: notifyeventty read fonbeforedeactivate 
@@ -2258,6 +2264,7 @@ end;
 procedure tactivator.activateclients;
 var
  int1: integer;
+ bo1,bo2: boolean;
 begin
  factive:= true;
  factivated:= true;
@@ -2265,8 +2272,21 @@ begin
   fonbeforeactivate(self);
  end;
  if factive then begin
+  bo2:= canevent(tmethod(fonactivateerror));
   for int1:= 0 to high(fclients) do begin
-   iobjectlink(fclients[int1]).objevent(ievent(self),oe_activate);
+   try
+    iobjectlink(fclients[int1]).objevent(ievent(self),oe_activate);
+   except
+    on e: exception do begin
+     if bo2 then begin
+      bo1:= false;
+      fonactivateerror(self,iobjectlink(fclients[int1]).getinstance,e,bo1);
+      if not bo1 then begin
+       raise;
+      end;
+     end;
+    end;
+   end;
   end;
   if canevent(tmethod(fonafteractivate)) then begin
    fonafteractivate(self);
