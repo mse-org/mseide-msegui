@@ -149,7 +149,7 @@ end;
 
 procedure tmsedatamodule.setstatfile(const avalue: tstatfile);
 begin
- setlinkedvar(avalue,fstatfile);
+ setlinkedvar(avalue,tmsecomponent(fstatfile));
 end;
 
 end.

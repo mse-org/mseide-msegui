@@ -412,10 +412,10 @@ end;
 procedure tstatfile.updatestat(const aname: msestring; const statfiler: tstatfiler);
 begin
  if statfiler.iswriter then begin
-  writestat(name,tstatwriter(statfiler));
+  writestat(aname,tstatwriter(statfiler));
  end
  else begin
-  readstat(name,tstatreader(statfiler));
+  readstat(aname,tstatreader(statfiler));
  end;
 end;
 
