@@ -13,7 +13,7 @@ unit msestockobjects;
 
 interface
 uses
- msegraphics,msegui,msebitmap,msegraphutils,mseclasses,msestrings;
+ msegraphics,msegui,msebitmap,msegraphutils,mseclasses,msestrings,msedatamodules;
 
 const
  boxsize = 11;

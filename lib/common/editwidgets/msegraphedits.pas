@@ -14,7 +14,8 @@ unit msegraphedits;
 interface
 uses
  msegui,mseguiglob,msescrollbar,Classes,msegraphutils,msegraphics,mseevent,
- msewidgets,mseeditglob,msestockobjects,msestat,mseclasses,msesimplewidgets,
+ msewidgets,mseeditglob,msestockobjects,msestat,msestatfile,
+ mseclasses,msesimplewidgets,
  msegrids,msewidgetgrid,msedatalist,msebitmap,msetypes,msestrings,msearrayprops,
  msedrawtext,mseshapes;
 

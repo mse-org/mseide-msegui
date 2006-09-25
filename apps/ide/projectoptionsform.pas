@@ -20,7 +20,8 @@ unit projectoptionsform;
 
 interface
 uses
- mseforms,msefiledialog,msegui,msestat,msetabs,msesimplewidgets,msetypes,
+ mseforms,msefiledialog,msegui,msestat,msestatfile,msetabs,msesimplewidgets,
+ msetypes,
  msestrings,msedataedits,msetextedit,msegraphedits,msewidgetgrid,msegrids,
  msesplitter,msesysenv,msegdbutils,msedispwidgets,msesys,mseclasses,
  msegraphutils;
@@ -897,7 +898,8 @@ begin
   projecttree.updatestat(statfiler);
 
   setsection('layout');
-  updatestatfile('windowlayout',mainfo.projectstatfile);
+  mainfo.projectstatfile.updatestat('windowlayout',statfiler);
+//  updatestatfile('windowlayout',mainfo.projectstatfile);
   sourcefo.updatestat(statfiler);
   setsection('components');
   selecteditpageform.updatestat(statfiler);

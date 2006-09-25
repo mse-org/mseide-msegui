@@ -15,7 +15,7 @@ interface
 
 uses
  Classes,mseclasses,mseshapes,mserichstring,msetypes,mseguiglob,msegui,
- msebitmap,msekeyboard,mseevent,msestat,msestrings,msegraphics;
+ msebitmap,msekeyboard,mseevent,msestat,msestatfile,msestrings,msegraphics;
 
 const
  defaultactionstates = [];

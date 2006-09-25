@@ -20,7 +20,8 @@ unit replacedialogform;
 
 interface
 uses
- msegui,mseclasses,mseforms,msegraphedits,msedataedits,msesimplewidgets,msestat,
+ msegui,mseclasses,mseforms,msegraphedits,msedataedits,msesimplewidgets,
+ msestat,msestatfile,
  projectoptionsform;
 
 type

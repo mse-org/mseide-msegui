@@ -241,7 +241,7 @@ implementation
 uses
  formdesigner_mfm,mselist,msekeyboard,mseguiglob,msepointer,msebits,sysutils,
  msestockobjects,msedrawtext,selectsubmoduledialogform,mseshapes,settaborderform,
- msedatalist,objectinspector,projectoptionsform,main;
+ msedatalist,objectinspector,projectoptionsform,main,msedatamodules;
 
 type
  tcomponent1 = class(tcomponent);

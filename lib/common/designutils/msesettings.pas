@@ -2,8 +2,8 @@ unit msesettings;
 {$ifdef FPC}{$mode objfpc}{$h+}{$INTERFACES CORBA}{$endif}
 interface
 uses
- msegui,mseclasses,mseforms,msestat,msesimplewidgets,msefiledialog,msestrings,
- msesysenv,msedataedits;
+ msegui,mseclasses,mseforms,msestat,msestatfile,msesimplewidgets,msefiledialog,
+ msestrings,msesysenv,msedataedits;
 
 type
  settingsmacroty = (sma_fpcdir,sma_fpclibdir,sma_msedir,sma_mselibdir,

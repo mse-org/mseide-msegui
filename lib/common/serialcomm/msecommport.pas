@@ -17,7 +17,7 @@ uses {$ifdef mswindows} windows,{$ifndef FPC} mmsystem,{$endif}
      {$else} Libc,
      {$endif}
      Classes,msethread,mseguiglob,msecommtimer,mseevent,mseclasses,msesys,
-     msestrings,msestat;
+     msestrings,msestat,msestatfile;
 
 type
  commstatety = (

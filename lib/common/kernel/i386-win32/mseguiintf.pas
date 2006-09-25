@@ -304,6 +304,10 @@ begin
  end;
 end;
 
+function gui_regiontorects(const aregion: regionty): rectarty;
+begin
+end;
+
 function gui_getdefaultfontnames: defaultfontnamesty;
 begin
  result:= defaultfontnames;

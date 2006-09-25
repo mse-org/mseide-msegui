@@ -828,6 +828,13 @@ begin
    end;
    fstream.write(str1+' setlinejoin'+nl);
   end;
+  if gvm_clipregion in mask then begin
+   if clipregion = 0 then begin
+//    fstream.write('initclip'+nl);
+   end
+   else begin
+   end;
+  end;
  end;
 end;
 

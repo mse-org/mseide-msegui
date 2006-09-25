@@ -3,7 +3,8 @@ unit printform;
 interface
 uses
  msegui,mseclasses,mseforms,msesimplewidgets,msepostscriptprinter,mseprinter,
- msedataedits,mseguithread,msegraphedits,msestrings,msegraphics,msestat;
+ msedataedits,mseguithread,msegraphedits,msestrings,msegraphics,msestat,
+ msestatfile;
 
 type
  tprintfo = class(tmseform)

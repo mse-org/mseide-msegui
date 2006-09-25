@@ -13,10 +13,10 @@ unit msetabs;
 
 interface
 uses
- msewidgets,mseclasses,msearrayprops,classes,mseshapes,mserichstring,
- msetypes,msegraphics,msegraphutils,mseevent,mseguiglob,msegui,mseforms,
- rtlconsts,msesimplewidgets,msedrag,
- mseobjectpicker,msepointer,msestat,msestrings;
+ msewidgets,mseclasses,msearrayprops,classes,mseshapes,
+ mserichstring,msetypes,msegraphics,msegraphutils,mseevent,mseguiglob,msegui,
+ mseforms,rtlconsts,msesimplewidgets,msedrag,
+ mseobjectpicker,msepointer,msestat,msestatfile,msestrings;
 
 const
  defaulttaboptionswidget = defaultoptionswidget + [ow_subfocus,ow_fontglyphheight];

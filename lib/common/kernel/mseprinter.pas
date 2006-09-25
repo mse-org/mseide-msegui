@@ -4,8 +4,8 @@ unit mseprinter;
 interface
 uses
  mseclasses,msegraphics,msegraphutils,msestrings,msestream,msedrawtext,
- mserichstring,classes,msetypes,msestat,msedataedits,msedropdownlist,mseevent,
- mseguiglob;
+ mserichstring,classes,msetypes,msestat,msestatfile,msedataedits,msedropdownlist,
+ mseevent,mseguiglob;
  
 const
  defaultppmm = 10;

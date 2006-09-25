@@ -15,7 +15,7 @@ interface
 uses
  msegui,mseclasses,mseforms,msegraphedits,msewidgets,msesimplewidgets,
  msedataedits,msegraphics,mseguiglob,msedialog,classes,msetypes,msedropdownlist,
- msestrings,mseedit,msestat;
+ msestrings,mseedit,msestat,msestatfile;
 
 const
  colordialogstatname = 'colordialog.sta';

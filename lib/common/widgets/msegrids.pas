@@ -16,7 +16,7 @@ uses
  Classes,SysUtils,mseclasses,msegui,msegraphics,msetypes,msestrings,msegraphutils,
  msescrollbar,msearrayprops,mseguiglob,
  msedatalist,msedrawtext,msewidgets,mseevent,mseinplaceedit,mseeditglob,
- mseobjectpicker,msepointer,msetimer,msebits,msestat,msekeyboard,
+ mseobjectpicker,msepointer,msetimer,msebits,msestat,msestatfile,msekeyboard,
  msestream,msedrag,msemenus,msepipestream;
 
 type

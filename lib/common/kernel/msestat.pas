@@ -14,7 +14,7 @@ unit msestat;
 interface
 uses
  Classes,mseclasses,mselist,msestream,mseguiglob,msereal,msetypes,msestrings,
- msehash,msedatalist;
+ msehash,msedatalist,msesys{,msegui};
 
 const
  defaultstatfilename = 'status.sta';
@@ -36,7 +36,7 @@ type
   procedure statwritevalue(const aname: msestring; const writer: tstatwriter);
  end;
 
- tstatfile = class;
+// tstatfile = class;
 
  tstatfiler = class
   private
@@ -71,7 +71,7 @@ type
    procedure updatevalue(const name: msestring; const intf: istatupdatevalue); overload;
    procedure updatestat(const intf: istatfile);
    procedure updatememorystatstream(const name: msestring; const streamname: msestring);
-   procedure updatestatfile(const name: msestring; const statfile: tstatfile);
+//   procedure updatestatfile(const name: msestring; const statfile: tstatfile);
    function beginlist(const name: msestring = ''): boolean;  virtual; abstract;
    function endlist: boolean;  virtual; abstract;
  end;
@@ -139,7 +139,7 @@ type
    procedure readvalue(const name: msestring; const intf: istatupdatevalue);
    procedure readstat(const intf: istatfile);
    procedure readmemorystatstream(const name: msestring; const streamname: msestring);
-   procedure readstatfile(const name: msestring; const statfile: tstatfile);
+//   procedure readstatfile(const name: msestring; const statfile: tstatfile);
  end;
 
  recgetrecordeventty = function(const index: integer): msestring of object;
@@ -183,87 +183,8 @@ type
    procedure writevalue(const name: msestring; const intf: istatupdatevalue);
    procedure writestat(const intf: istatfile);
    procedure writememorystatstream(const name: msestring; const streamname: msestring);
-   procedure writestatfile(const name: msestring; const statfile: tstatfile);
+//   procedure writestatfile(const name: msestring; const statfile: tstatfile);
 
- end;
-
- statupdateeventty = procedure(const sender: tobject; const filer: tstatfiler) of object;
- statreadeventty = procedure(const sender: tobject; const reader: tstatreader) of object;
- statwriteeventty = procedure(const sender: tobject; const writer: tstatwriter) of object;
-
- statfileoptionty = (sfo_memory,sfo_savedata);
- statfileoptionsty = set of statfileoptionty;
-
- tstatfile = class(tmsecomponent,istatfile)
-  private
-   ffilename: filenamety;
-   ffiledir: filenamety;
-   floadedfile: filenamety;
-
-   fstatvarname: msestring;
-   fonstatupdate: statupdateeventty;
-   fonstatread: statreadeventty;
-   fonstatwrite: statwriteeventty;
-   fonstatbeforeread: notifyeventty;
-   fonstatafterread: notifyeventty;
-   fonstatbeforewrite: notifyeventty;
-   fonstatafterwrite: notifyeventty;
-   areader: tstatreader;
-   awriter: tstatwriter;
-   foptions: statfileoptionsty;
-   fencoding: charencodingty;
-   fstatfile: tstatfile;
-   procedure dolinkstatread(const info: linkinfoty);
-   procedure dolinkstatreading(const info: linkinfoty);
-   procedure dolinkstatreaded(const info: linkinfoty);
-   procedure dolinkstatwrite(const info: linkinfoty);
-   procedure setstatfile(const Value: tstatfile);
-   procedure setfilename(const avalue: filenamety);
-   procedure setfiledir(const avalue: filenamety);
-   procedure setoptions(avalue: statfileoptionsty);
-  protected
-   //istatfile
-   procedure dostatread(const reader: tstatreader);
-   procedure dostatwrite(const writer: tstatwriter);
-   procedure statreading;
-   procedure statread;
-   function getstatvarname: msestring;
-  public
-   constructor create(aowner: tcomponent); override;
-   procedure initnewcomponent; override;
-   procedure readstat(stream: ttextstream = nil);
-   procedure writestat(const stream: ttextstream = nil);
-  published
-   property filename: filenamety read ffilename write setfilename nodefault;
-   property filedir: filenamety read ffiledir write setfiledir;
-   property encoding: charencodingty read fencoding write fencoding default ce_utf8n;
-   property options: statfileoptionsty read foptions write setoptions default [];
-   property statfile: tstatfile read fstatfile write setstatfile;
-            //filename is stored in linked statfile, dostatread and dostatwrite are
-            //called by linked statfile
-   property statvarname: msestring read getstatvarname write fstatvarname;
-   property onstatupdate: statupdateeventty read fonstatupdate write fonstatupdate;
-   property onstatread: statreadeventty read fonstatread write fonstatread;
-   property onstatwrite: statwriteeventty read fonstatwrite write fonstatwrite;
-   property onstatbeforewrite: notifyeventty read fonstatbeforewrite write fonstatbeforewrite;
-   property onstatafterwrite: notifyeventty read fonstatafterwrite write fonstatafterwrite;
-   property onstatbeforeread: notifyeventty read fonstatbeforeread write fonstatbeforeread;
-   property onstatafterread: notifyeventty read fonstatafterread write fonstatafterread;
- end;
-
-procedure setstatfilevar(const sender: istatfile; const source: tstatfile;
-              var instance: tstatfile);
-procedure deletememorystatstream(const streamname: msestring);
-
-implementation
-uses
- sysutils,mseformatstr,msesys,msefileutils;
-
-type
- tdatalist1 = class(tdatalist);
- tmemorystreamcracker = class(tcustommemorystream)
-  private
-   fcapacity: longint;
  end;
 
  tmemorytextstream = class;
@@ -299,6 +220,20 @@ type
                   const openmode: fileopenmodety): ttextstream;
    procedure delete(const name: msestring);
  end;
+ 
+procedure deletememorystatstream(const streamname: msestring);
+function memorystatstreams: tmemorystreams;
+
+implementation
+uses
+ sysutils,mseformatstr,msefileutils;
+
+type
+ tdatalist1 = class(tdatalist);
+ tmemorystreamcracker = class(tcustommemorystream)
+  private
+   fcapacity: longint;
+ end;
 
 var
  fmemorystatstreams: tmemorystreams;
@@ -316,12 +251,6 @@ begin
  if fmemorystatstreams <> nil then begin
   fmemorystatstreams.delete(streamname);
  end;
-end;
-
-procedure setstatfilevar(const sender: istatfile; const source: tstatfile;
-              var instance: tstatfile);
-begin
- setlinkedcomponent(sender,source,tmsecomponent(instance),typeinfo(istatfile));
 end;
 
 { tstatfiler }                                                          
@@ -513,7 +442,7 @@ begin
   tstatreader(self).readmemorystatstream(name,streamname);
  end;
 end;
-
+{
 procedure tstatfiler.updatestatfile(const name: msestring; const statfile: tstatfile);
 begin
  if iswriter then begin
@@ -523,7 +452,7 @@ begin
   tstatreader(self).readstatfile(name,statfile);
  end;
 end;
-
+}
 function tstatfiler.varname(const intf: istatfile): msestring;
 begin
  result:= intf.getstatvarname;
@@ -616,7 +545,8 @@ begin
  end;
 end;
 
-function tstatreader.findvar(const name: msestring; var value: msestring): boolean;
+function tstatreader.findvar(const name: msestring; 
+                                         var value: msestring): boolean;
 var
  int1: integer;
  ch1: msechar;
@@ -1062,7 +992,7 @@ begin
   memorystatstreams.delete(streamname);
  end;
 end;
-
+{
 procedure tstatreader.readstatfile(const name: msestring; const statfile: tstatfile);
 var
  stream: ttextstream;
@@ -1078,7 +1008,7 @@ begin
   stream.Free;
  end;
 end;
-
+}
 { tstatwriter }
 
 constructor tstatwriter.create(const stream: ttextstream);
@@ -1297,7 +1227,7 @@ begin
   stream.Free;
  end;
 end;
-
+{
 procedure tstatwriter.writestatfile(const name: msestring; const statfile: tstatfile);
 var
  stream: ttextstream;
@@ -1313,275 +1243,7 @@ begin
   stream.Free;
  end;
 end;
-
-{ tstatfile }
-
-constructor tstatfile.create(aowner: tcomponent);
-begin
-// ffilename:= defaultstatfilename;
- fencoding:= ce_utf8n;
- inherited;
-end;
-
-procedure tstatfile.initnewcomponent;
-begin
- ffilename:= defaultstatfilename;
-end;
-
-procedure tstatfile.dostatread(const reader: tstatreader);
-var
- ar1,ar2: stringarty;
- stream1: ttextstream;
-begin
- if reader <> areader then begin
-  if not (sfo_memory in foptions) then begin
-   filename:= reader.readstring('filename',ffilename);
-  end
-  else begin
-   if sfo_savedata in foptions then begin
-    stream1:= memorystatstreams.open(ffilename,fm_read);
-    try
-     ar2:= stream1.readstrings;
-    finally
-     stream1.free;
-    end;
-    ar1:= reader.readarray('data',ar2);
-    stream1:= memorystatstreams.open(ffilename,fm_create);
-    try
-     stream1.writestrings(ar1);     
-    finally
-     stream1.free;
-    end;
-   end;
-  end;
-  statread;
- end
- else begin
-  if assigned(fonstatupdate) then begin
-   fonstatupdate(self,reader);
-  end;
-  if assigned(fonstatread) then begin
-   fonstatread(self,reader);
-  end;
- end;
-end;
-
-procedure tstatfile.dostatwrite(const writer: tstatwriter);
-var
- ar1: stringarty;
- stream1: ttextstream;
-begin
- if (writer <> awriter) then begin
-  if not (sfo_memory in foptions) then begin
-   writer.writestring('filename',ffilename);
-  end
-  else begin
-   if sfo_savedata in foptions then begin
-    stream1:= memorystatstreams.open(ffilename,fm_read);
-    try
-     ar1:= stream1.readstrings;     
-    finally
-     stream1.free;
-    end;
-    writer.writearray('data',ar1);
-   end;
-  end;
-//  if ffilename <> '' then begin
-//   writestat;
-//  end;
- end
- else begin
-  if assigned(fonstatupdate) then begin
-   fonstatupdate(self,writer);
-  end;
-  if assigned(fonstatwrite) then begin
-   fonstatwrite(self,writer);
-  end;
- end;
-end;
-
-function tstatfile.getstatvarname: msestring;
-begin
- result:= fstatvarname;
-end;
-
-procedure tstatfile.dolinkstatread(const info: linkinfoty);
-begin
- areader.readstat(istatfile(info.dest));
-end;
-
-procedure tstatfile.dolinkstatreading(const info: linkinfoty);
-begin
- istatfile(info.dest).statreading;
-end;
-
-procedure tstatfile.dolinkstatreaded(const info: linkinfoty);
-begin
- istatfile(info.dest).statread;
-end;
-
-procedure tstatfile.readstat(stream: ttextstream = nil);
-var
- stream1: ttextstream;
- ar1: filenamearty;
-begin
- if assigned(fonstatbeforeread) then begin
-  fonstatbeforeread(self);
- end;
- stream1:= stream;
- try
-  if (stream1 = nil) and (filename <> '') then begin
-   try
-    if sfo_memory in foptions then begin
-     stream1:= memorystatstreams.open(ffilename,fm_read);
-    end
-    else begin
-     unquotefilename(ffiledir,ar1);
-     if not findfile(ffilename,ar1,floadedfile) then begin
-      floadedfile:= ffilename;
-     end;
-     stream1:= ttextstream.Create(floadedfile,fm_read);
-    end;
-    stream1.encoding:= fencoding;
-   except
-    floadedfile:= '';
-   end;
-  end;
-  areader:= tstatreader.create(stream1);
-  try
-   if assigned(fonstatread) or assigned(fonstatupdate) then begin
-    areader.readstat(istatfile(self));
-   end;
-   if fobjectlinker <> nil then begin
-    fobjectlinker.forall({$ifdef FPC}@{$endif}dolinkstatreading,typeinfo(istatfile));
-    try
-     fobjectlinker.forall({$ifdef FPC}@{$endif}dolinkstatread,typeinfo(istatfile));
-    finally
-     fobjectlinker.forall({$ifdef FPC}@{$endif}dolinkstatreaded,typeinfo(istatfile));
-    end;
-    if assigned(fonstatafterread) then begin
-     fonstatafterread(self);
-    end;
-   end;
-  finally
-   areader.free;
-  end;
- finally
-  if stream = nil then begin
-   stream1.Free;
-  end;
- end;
-end;
-
-procedure tstatfile.statreading;
-begin
- //dummy
-end;
-
-procedure tstatfile.statread;
-begin
- //dummy
-end;
-
-procedure tstatfile.dolinkstatwrite(const info: linkinfoty);
-begin
- awriter.writestat(istatfile(info.dest));
-end;
-
-procedure tstatfile.writestat(const stream: ttextstream = nil);
-var
- stream1: ttextstream;
- ar1: filenamearty;
-begin
- if assigned(fonstatbeforewrite) then begin
-  fonstatbeforewrite(self);
- end;
- stream1:= stream;
- if (stream1 = nil) and (filename <> '') then begin
-  if sfo_memory in foptions then begin
-   stream1:= memorystatstreams.open(ffilename,fm_create);
-  end
-  else begin
-   if floadedfile = '' then begin
-    unquotefilename(ffiledir,ar1);
-    if not findfile(ffilename,ar1,floadedfile) then begin
-     if high(ar1) >= 0 then begin
-      floadedfile:= filepath(ar1[0],ffilename);
-     end
-     else begin
-      floadedfile:= ffilename;
-     end;
-    end;
-   end;
-   try
-    stream1:= ttextstream.Create(floadedfile,fm_create);
-   except
-    floadedfile:= '';
-    raise;
-   end;
-  end;
-  stream1.encoding:= fencoding;
- end;
- try
-  awriter:= tstatwriter.create(stream1);
-  try
-   if assigned(fonstatwrite) or assigned(fonstatupdate) then begin
-    awriter.writestat(istatfile(self));
-   end;
-   if fobjectlinker <> nil then begin
-    fobjectlinker.forall({$ifdef FPC}@{$endif}dolinkstatwrite,typeinfo(istatfile));
-   end;
-   if assigned(fonstatafterwrite) then begin
-    fonstatafterwrite(self);
-   end;
-  finally
-   awriter.free;
-  end;
- finally
-  if stream = nil then begin
-   stream1.Free;
-  end;
- end;
-end;
-
-procedure tstatfile.setstatfile(const Value: tstatfile);
-var
- sf: tstatfile;
-begin
- if fstatfile <> value then begin
-  if value <> nil then begin
-   sf:= value;
-   while sf <> nil do begin
-    if sf = self then begin
-     raise exception.Create(name+': Recursive statfile');
-    end;
-    sf:= sf.fstatfile;
-   end;
-  end;
-  setstatfilevar(istatfile(self),value,fstatfile);
- end;
-end;
-
-procedure tstatfile.setfilename(const avalue: filenamety);
-begin
- floadedfile:= '';
- ffilename:= avalue;
-end;
-
-procedure tstatfile.setfiledir(const avalue: filenamety);
-begin
- floadedfile:= '';
- ffiledir:= avalue;
-end;
-
-procedure tstatfile.setoptions(avalue: statfileoptionsty);
-begin
- if not (sfo_memory in avalue) then begin
-  exclude(avalue,sfo_savedata);
- end;
- foptions:= avalue;
-end;
-
+}
 { tmemorytextstream }
 
 constructor tmemorytextstream.create(aowner: tmemorystreams; const name: msestring;

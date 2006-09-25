@@ -15,8 +15,8 @@ unit msedrawtext;
 
 interface
 uses
- Classes,msegraphics,mserichstring,msegraphutils,msearrayprops,
-        mseclasses,msestrings,msetypes;
+ Classes,msegraphics,mserichstring,msegraphutils,
+  msearrayprops,mseclasses,msestrings,msetypes;
 
 const
  defaultppmm = 3;      //3 pixel per mm

@@ -665,7 +665,7 @@ uses
  mseshapes,msestockobjects,msetexteditor,
  msegraphicstream,
  mseformatbmpico{$ifdef FPC},mseformatjpg,mseformatpng,
- mseformatpnm,mseformattga,mseformatxpm{$endif},msestat,msefileutils;
+ mseformatpnm,mseformattga,mseformatxpm{$endif},msestat,msestatfile,msefileutils;
 
 const
  methodsortlevel = 100;

@@ -14,8 +14,8 @@ unit msedock;
 interface
 uses
  msewidgets,classes,msedrag,msegui,msegraphutils,mseevent,mseclasses,
- msegraphics,msestockobjects,mseguiglob,msestat,msepointer,msesplitter,
- msesimplewidgets,msetypes,msestrings,msebitmap;
+ msegraphics,msestockobjects,mseguiglob,msestat,msestatfile,msepointer,
+ msesplitter,msesimplewidgets,msetypes,msestrings,msebitmap;
 
 const
  defaultgripsize = 10;

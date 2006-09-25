@@ -14,7 +14,7 @@ unit msereallisteditor;
 interface
 uses
  mseforms,msedataedits,msesimplewidgets,msewidgetgrid,msegrids,msetextedit,
- msestat;
+ msestat,msestatfile;
  
 const
  reallisteditorstatname =  'reallisteditor.sta';

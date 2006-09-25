@@ -14,7 +14,7 @@ unit mseimagelisteditor;
 interface
 uses
  mseforms,msegui,msebitmap,msesimplewidgets,msegraphics,mselistbrowser,msegrids,
- msefiledialog,msestat,msestrings,msegraphedits,msecolordialog;
+ msefiledialog,msestat,msestatfile,msestrings,msegraphedits,msecolordialog;
 
 type
  timagelisteditorfo = class(tmseform)

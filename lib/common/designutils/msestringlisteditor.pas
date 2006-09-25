@@ -14,7 +14,7 @@ unit msestringlisteditor;
 interface
 uses
  mseforms,msedataedits,msesimplewidgets,msewidgetgrid,msegrids,msetextedit,
- msestat;
+ msestat,msestatfile;
  
 const
  stringlisteditorstatname =  'stringlisteditor.sta';

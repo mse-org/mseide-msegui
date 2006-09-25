@@ -13,7 +13,7 @@ unit msefiledialogres;
 
 interface
 uses
- mseclasses,msebitmap,msegui;
+ mseclasses,msebitmap,msegui,msedatamodules;
 
 type
  filedialogiconty = (fdi_dir,fdi_diropen,fdi_file);

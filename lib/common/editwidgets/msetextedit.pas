@@ -14,8 +14,8 @@ unit msetextedit;
 interface
 uses
  mseeditglob,mseedit,msewidgetgrid,classes,msedatalist,msegraphics,msestream,
- msetypes,mserichstring,msestat,mseclasses,mseinplaceedit,msegrids,mseevent,
- msegui,msegraphutils,msestrings,msedrawtext,msearrayprops;
+ msetypes,mserichstring,msestat,msestatfile,mseclasses,mseinplaceedit,msegrids,
+ mseevent,msegui,msegraphutils,msestrings,msedrawtext,msearrayprops;
 
 const
  defaulttexteditoptions =  (defaultoptionsedit + [oe_linebreak]) -

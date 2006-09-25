@@ -14,7 +14,8 @@ unit mseforms;
 interface
 uses
  msewidgets,msemenus,msegraphics,msegui,msegraphutils,mseevent,msetypes,msestrings,
- mseguiglob,msemenuwidgets,msestat,mseclasses,Classes,msedock,msebitmap;
+ mseguiglob,msemenuwidgets,msestat,msestatfile,mseclasses,Classes,msedock,
+ msebitmap;
 
 type
  formoptionty = (fo_main,fo_terminateonclose,fo_freeonclose,fo_defaultpos,fo_screencentered,
@@ -540,8 +541,7 @@ begin
  if load and not (csdesigning in componentstate) and
           (cs_ismodule in fmsecomponentstyle) then begin
   loadmsemodule(self,tcustommseform);
-  if (fstatfile <> nil) and (fo_autoreadstat in foptions) and
-            not (csdesigning in componentstate) then begin
+  if (fstatfile <> nil) and (fo_autoreadstat in foptions) then begin
    fstatfile.readstat;
   end;
  end;

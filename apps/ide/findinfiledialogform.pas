@@ -21,7 +21,7 @@ unit findinfiledialogform;
 interface
 uses
  finddialogform,findinfileform,mseforms,msedataedits,msesimplewidgets,msegraphedits,
- msefiledialog,msetypes,msegui,msestat;
+ msefiledialog,msetypes,msegui,msestat,msestatfile;
 
 type
 

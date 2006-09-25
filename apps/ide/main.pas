@@ -22,7 +22,8 @@ interface
 
 uses
  mseforms,msesimplewidgets,msegui,msegdbutils,mseactions,msedispwidgets,
- msedataedits,msestat,msemenus,msebitmap,msetoolbar,msegrids,msefiledialog,
+ msedataedits,msestat,msestatfile,msemenus,msebitmap,msetoolbar,msegrids,
+ msefiledialog,
  msetypes,sourcepage,msetabs,msedesignintf,msedesigner,classes,mseclasses,
  msegraphutils,typinfo,msedock,sysutils,msesysenv,msestrings,
  msepostscriptprinter;
@@ -240,7 +241,7 @@ uses
 
  main_mfm,sourceform,watchform,breakpointsform,stackform,
        projectoptionsform,make,mseguiglob,msewidgets,msepropertyeditors,
- skeletons,
+ skeletons,msedatamodules,
  mseformdatatools,mseshapes,msefileutils,projecttreeform,mseeditglob,
  findinfileform,formdesigner,sourceupdate,actionsmodule,programparametersform,
  objectinspector,msesysutils,msestream,msesys,cpuform,disassform,

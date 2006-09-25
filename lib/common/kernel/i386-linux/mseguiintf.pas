@@ -2765,6 +2765,30 @@ begin
  end;
 end;
 
+function gui_regiontorects(const aregion: regionty): rectarty;
+var
+ int1: integer;
+ boxpo: pbox;
+begin
+ if aregion = 0 then begin
+  result:= nil;
+ end
+ else begin
+  with pxregion(aregion)^ do begin
+   setlength(result,numrects);
+   boxpo:= rects;
+   for int1:= 0 to numrects-1 do begin
+    with boxpo^,result[int1] do begin
+     x:= x1;
+     y:= y1;
+     cx:= x2 - x1;
+     cy:= y2 - y1;
+    end;
+   end;
+  end;
+ end;
+end;
+
 procedure setregion(var gc: gcty; const aregion: region;
                  const pic: tpicture = 0; const draw: pxftdraw = nil);
 var
@@ -2787,7 +2811,8 @@ begin
     inc(rectspo);
    end;
    if pic <> 0 then begin
-    xrendersetpicturecliprectangles(appdisp,pic,gc.cliporigin.x,gc.cliporigin.y,po1,numrects);
+    xrendersetpicturecliprectangles(appdisp,pic,gc.cliporigin.x,
+                            gc.cliporigin.y,po1,numrects);
    end
    else begin
     if draw <> nil then begin

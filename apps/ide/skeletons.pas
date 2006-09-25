@@ -67,7 +67,7 @@ begin
   writeln(defaults);
   writeln('interface');
   writeln('uses');
-  writeln(' msegui,mseclasses,mseforms;');
+  writeln(' msegui,mseclasses,mseforms,msedatamodules;');
   writeln('');
   writeln('type');
   writeln(' t'+formname+' = class('+ancestor+')');

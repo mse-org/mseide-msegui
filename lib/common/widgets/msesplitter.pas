@@ -13,8 +13,9 @@ unit msesplitter;
 
 interface
 uses
- msegui,msewidgets,mseobjectpicker,classes,msegraphutils,msepointer,msetypes,msestrings,
- msegraphics,mseevent,msestat,msestockobjects,mseclasses,msesimplewidgets,mseguiglob;
+ msegui,msewidgets,mseobjectpicker,classes,msegraphutils,msepointer,msetypes,
+ msestrings,msegraphics,mseevent,msestat,msestatfile,msestockobjects,mseclasses,
+ msesimplewidgets,mseguiglob;
 type
 
  splitteroptionty = (spo_hmove,spo_hprop,spo_vmove,spo_vprop,

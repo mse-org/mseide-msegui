@@ -16,7 +16,7 @@ interface
 uses
  Classes,sysutils,msegraphics,msetypes,msestrings,mseerror,msegraphutils,
  msepointer,mseevent,msekeyboard,mseclasses,mseguiglob,mselist,msesys,msethread,
- msebitmap,msearrayprops;
+ msebitmap,msearrayprops{,msedatamodules};
 
 const
  mseguiversiontext = '1.0x';
@@ -1368,7 +1368,7 @@ type
    procedure initialize;
    procedure deinitialize;
    procedure run;
-   procedure createdatamodule(instanceclass: datamoduleclassty; var reference);
+   procedure createdatamodule(instanceclass: msecomponentclassty; var reference);
    procedure createform(instanceclass: widgetclassty; var reference);
    function trylock: boolean;
    function lock: boolean;
@@ -2186,6 +2186,13 @@ begin
  end;
 end;
 
+procedure tactivator.doterminated(const sender: tobject);
+begin
+ if avo_deactivateonterminated in foptions then begin
+  deactivateclients;
+ end;
+end;
+
 function tactivator.getclientname(const avalue: tobject;
                    const aindex: integer): string;
 begin
@@ -2340,13 +2347,6 @@ begin
                          {$ifdef FPC}longword{$else}byte{$endif}(foptions),
                          {$ifdef FPC}longword{$else}byte{$endif}(mask)));
 end;
-
-procedure tactivator.doterminated(const sender: tobject);
-begin
- deactivateclients;
-end;
-
-
 
 { tresizeevent }
 
@@ -10410,7 +10410,8 @@ begin
  end;
 end;
 
-procedure tapplication.createdatamodule(instanceclass: datamoduleclassty; var reference);
+procedure tapplication.createdatamodule(instanceclass: msecomponentclassty;
+                                                          var reference);
 begin
  mseclasses.createmodule(self,instanceclass,reference);
 end;

@@ -54,7 +54,7 @@ type
  
  tdropdowncols = class(townedpersistentarrayprop)
   private
-   fupdating: integer;
+   fupdating1: integer;
    fonitemchange: indexeventty;
    function getitems(const index: integer): tdropdowncol;
   protected
@@ -425,20 +425,20 @@ end;
 
 procedure tdropdowncols.itemchanged(sender: tdatalist; index: integer);
 begin
- if (fupdating = 0 ) and assigned(fonitemchange) then begin
+ if (fupdating1 = 0 ) and assigned(fonitemchange) then begin
   fonitemchange(sender,index);
  end;
 end;
 
 procedure tdropdowncols.beginupdate;
 begin
- inc(fupdating);
+ inc(fupdating1);
 end;
 
 procedure tdropdowncols.endupdate;
 begin
- dec(fupdating);
- if fupdating = 0 then begin
+ dec(fupdating1);
+ if fupdating1 = 0 then begin
   itemchanged(nil,-1);
  end;
 end;

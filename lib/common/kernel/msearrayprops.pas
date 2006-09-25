@@ -32,16 +32,16 @@ type
 
  tarrayprop = class(tpersistent)
   private
-   fupdating: integer;
    itemsread: boolean;
    linkedarrays: arrayproparrayty;
-   fstate: arraypropsstatesty;
    fonchange: arraychangeeventty;
    ffixcount: integer;
 //   fonsizechanged: arraysizechangeeventty;
    procedure internalinsert(const index: integer; const init: boolean);
    procedure setfixcount(const avalue: integer);
   protected
+   fstate: arraypropsstatesty;
+   fupdating: integer;
    fcountbefore: integer;
    procedure change(const index: integer); virtual;
    function getcount: integer; virtual; abstract;
@@ -264,6 +264,74 @@ type
   public
    constructor create(const aowner: tobject; aclasstype: ownedpersistentclassty); virtual;
  end;
+{
+ tindexpersistentarrayprop = class;
+
+ tindexpersistent = class(townedeventpersistent)
+  private
+   fident: integer;
+   fprop: tindexpersistentarrayprop;
+  protected
+   findex: integer;
+   procedure dostatwrite(const writer: tstatwriter); virtual;
+   procedure dostatread(const reader: tstatreader); virtual;
+  public
+   constructor create(const aowner: tobject;
+         const aprop: tindexpersistentarrayprop); reintroduce; virtual;
+   property index: integer read findex;
+   property ident: integer read fident;
+   property prop: tindexpersistentarrayprop read fprop;
+ end;
+
+ indexpersistentclassty = class of tindexpersistent;
+
+ tindexpersistentarrayprop = class(townedpersistentarrayprop)
+  private
+   fident: integer;
+   function getidents: integerarty;
+  protected
+   procedure createitem(const index: integer; out item: tpersistent); override;
+   procedure change(const index: integer); override;
+   function getidentnum(const index: integer): integer;
+   procedure dosizechanged; override;
+  public
+   constructor create(const aowner: tobject; aclasstype: indexpersistentclassty);
+                   reintroduce; virtual;
+   procedure add(const item: tindexpersistent);
+   procedure dostatwrite(const writer: tstatwriter);
+   function readorder(const reader: tstatreader): integerarty;
+   procedure dostatread(const reader: tstatreader);
+   function newident: integer;
+   property idents: integerarty read getidents;
+ end;
+}
+ ownedeventpersistentclassty = class of townedeventpersistent;
+
+ townedeventpersistentarrayprop = class(tpersistentarrayprop)
+  private
+  protected
+   fowner: tobject;
+   procedure createitem(const index: integer; out item: tpersistent); override;
+  public
+   constructor create(const aowner: tobject; aclasstype: ownedeventpersistentclassty);
+ end;
+
+ tpersistonchangearrayprop = class(tpersistentarrayprop)
+  protected
+   onchange1: notifyeventty;
+  public
+   constructor create(aclasstype: virtualpersistentclassty; aonchange: notifyeventty);
+ end;
+
+ tstringlistarrayprop = class(tpersistentarrayprop)
+  private
+   function getitems(index: integer): tstringlist; reintroduce;
+   procedure setitems(index: integer; const Value: tstringlist); reintroduce;
+  protected
+   procedure createitem(const index: integer; out item: tpersistent); override;
+  public
+   property items[index: integer]: tstringlist read getitems write setitems;
+ end;
 
  tindexpersistentarrayprop = class;
 
@@ -304,35 +372,7 @@ type
    function newident: integer;
    property idents: integerarty read getidents;
  end;
-
- ownedeventpersistentclassty = class of townedeventpersistent;
-
- townedeventpersistentarrayprop = class(tpersistentarrayprop)
-  private
-  protected
-   fowner: tobject;
-   procedure createitem(const index: integer; out item: tpersistent); override;
-  public
-   constructor create(const aowner: tobject; aclasstype: ownedeventpersistentclassty);
- end;
-
- tpersistonchangearrayprop = class(tpersistentarrayprop)
-  protected
-   onchange1: notifyeventty;
-  public
-   constructor create(aclasstype: virtualpersistentclassty; aonchange: notifyeventty);
- end;
-
- tstringlistarrayprop = class(tpersistentarrayprop)
-  private
-   function getitems(index: integer): tstringlist; reintroduce;
-   procedure setitems(index: integer; const Value: tstringlist); reintroduce;
-  protected
-   procedure createitem(const index: integer; out item: tpersistent); override;
-  public
-   property items[index: integer]: tstringlist read getitems write setitems;
- end;
-
+ 
 implementation
 
 uses

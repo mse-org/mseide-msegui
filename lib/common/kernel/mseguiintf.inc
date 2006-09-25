@@ -68,6 +68,7 @@ function gui_ungrabpointer: guierrorty;
 
 function gui_rgbtopixel(rgb: cardinal): pixelty;
 function gui_pixeltorgb(pixel: pixelty): cardinal;
+function gui_regiontorects(const aregion: regionty): rectarty;
 //procedure gui_changegc(var drawinfo: drawinfoty; const values: gcvaluesty);
 
 function gui_getdefaultfontnames: defaultfontnamesty;

@@ -3,7 +3,8 @@ unit msetexteditor;
 interface
 uses
  msegui,mseclasses,mseforms,msesimplewidgets,msewidgetgrid,msesyntaxedit,
- msemenus,msefiledialog,msestat,msesyntaxpainter,msedispwidgets,mseinplaceedit;
+ msemenus,msefiledialog,msestat,msestatfile,msesyntaxpainter,msedispwidgets,
+ mseinplaceedit;
 
 const
  texteditorstatname =  'texteditor.sta';

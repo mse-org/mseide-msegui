@@ -15,8 +15,9 @@ interface
 uses
  Classes,msegui,mseinplaceedit,mseeditglob,msegraphics,mseedit,
  msetypes,msestrings,msedatalist,
- mseguiglob,mseevent,msegraphutils,msedrawtext,msestat,mseclasses,msearrayprops,
- msegrids,msewidgetgrid,msedropdownlist,msedrag,mseforms,mseformatstr,typinfo,
+ mseguiglob,mseevent,msegraphutils,msedrawtext,msestat,msestatfile,mseclasses,
+ msearrayprops,msegrids,msewidgetgrid,msedropdownlist,msedrag,mseforms,
+ mseformatstr,typinfo,
  msescrollbar,msewidgets,msepopupcalendar;
 
 type
