@@ -305,7 +305,30 @@ begin
 end;
 
 function gui_regiontorects(const aregion: regionty): rectarty;
+var
+ int1: integer;
+ po1: prgndata;
+ po2: prect;
 begin
+ result:= nil;
+ if aregion <> 0 then begin
+  int1:= getregiondata(aregion,0,nil);
+  getmem(po1,int1);
+  if getregiondata(aregion,int1,po1) <> 0 then begin
+   setlength(result,po1^.rdh.ncount);
+   po2:= @po1^.buffer;
+   for int1:= 0 to high(result) do begin
+    with result[int1],po2^ do begin
+     x:= left;
+     y:= top;
+     cx:= right - left;
+     cy:= bottom - top;
+    end;
+    inc(po2);
+   end;
+  end;
+  freemem(po1);
+ end;
 end;
 
 function gui_getdefaultfontnames: defaultfontnamesty;
