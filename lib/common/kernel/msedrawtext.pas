@@ -771,11 +771,12 @@ begin                  //drawtext
   if text.text = '' then begin
    exit;
   end;
+  layouttext(canvas,info,layoutinfo);
   defaultcolor:= font.color;
   defaultcolorbackground:= font.colorbackground;
   fontstylebefore:= font.style;
   afontstyle:= fontstylebefore;
-  layouttext(canvas,info,layoutinfo);
+//  layouttext(canvas,info,layoutinfo);
   grayed:= tf_grayed in flags;
   with layoutinfo do begin
    underline:= descent div 2 + 1;
