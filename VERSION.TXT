@@ -1,6 +1,12 @@
 MSEide+MSEgui version history
 
 Version 0.9b
+2006-09-25 tstatfile moved to msestatfile.pas.
+ tmsedatamodule moved to msedatamodules.pas.
+ Properties tstatfile.activator, tactivator.onactvateerror,
+ tdbcontroller.onbeforeconnect, onconnecterror.
+ tpostprintprinter clipping.
+2006-09-23 tpostscriptprinter pattern support.
 2006-08-27 tsplitter.options spo_dockleft,spo_docktop,spo_dockright,
  spo_dockbottom, default on.
 2006-08-25 Property tscalingwidget.optionsscale, osc_expandx,osc_expandy,
@@ -10,6 +16,7 @@ Version 0.9b
  tdialogstringedit, tdbdialogstringedit.
 2006-08-20 tprogressbar.
 2006-08-18 tsequencelink.
+2006-08-10 tpostscriptprinter imageprinting.
 2006-07-29 foregroundcolor renamed to colorforeground.
 2006-07-29 backgroundcolor renamed to colorbackground.
 2006-07-22 Property tfilenamedit.dialogkind removed,

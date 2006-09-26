@@ -4179,6 +4179,7 @@ procedure tcanvas.checkregionstate;
 begin
  with fvaluepo^ do begin
   if clipregion = 0 then begin
+   checkgcstate([cs_gc]); //fsize must be valid
    clipregion:= createregion(makerect(nullpoint,fsize));
   end
   else begin

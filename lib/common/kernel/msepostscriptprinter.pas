@@ -68,7 +68,9 @@ type
    procedure setpslinewidth(const avalue: integer);
    function posstring(const apos: pointty): string;
    function diststring(const adist: integer): string;
+   function rectsizestring(const asize: sizety): string;
    function sizestring(const asize: sizety): string;
+   function rectstring(const arect: rectty): string;
    function strokestr: string;
    function rectscalestring(const arect: rectty): string; 
                  //transform unity cell to arect
@@ -104,6 +106,8 @@ type
    procedure ps_copyarea;
    procedure textout(const text: richstringty; const dest: rectty;
                         const flags: textflagsty; const tabdist: real); override;
+   procedure begintextclip(const arect: rectty); override;
+   procedure endtextclip; override;
    procedure beginpage; override;
    procedure endpage; override;
    function registermap(const acodepage: integer): string;
@@ -121,6 +125,9 @@ uses
  mseguiintf,msebits;
 type
  tsimplebitmap1 = class(tsimplebitmap); 
+var
+ gdifuncs: pgdifunctionaty;
+ 
 const
  imagepatname = 'impat';
  patpatname = 'pat';
@@ -483,76 +490,72 @@ end;
 
 procedure gui_createemptyregion(var drawinfo: drawinfoty);
 begin
- gdierror(gde_notimplemented);
+ gdifuncs^[gdi_createemptyregion](drawinfo);
 end;
 
 procedure gui_createrectregion(var drawinfo: drawinfoty);
 begin
- gdierror(gde_notimplemented);
+ gdifuncs^[gdi_createrectregion](drawinfo);
 end;
 
 procedure gui_createrectsregion(var drawinfo: drawinfoty);
 begin
- gdierror(gde_notimplemented);
+ gdifuncs^[gdi_createrectsregion](drawinfo);
 end;
 
 procedure gui_destroyregion(var drawinfo: drawinfoty);
 begin
- with drawinfo.regionoperation do begin
-  if source <> 0 then begin;
-   gdierror(gde_notimplemented);
-  end;
- end;
+ gdifuncs^[gdi_destroyregion](drawinfo);
 end;
 
 procedure gui_copyregion(var drawinfo: drawinfoty);
 begin
- gdierror(gde_notimplemented);
+ gdifuncs^[gdi_copyregion](drawinfo);
 end;
 
 procedure gui_moveregion(var drawinfo: drawinfoty);
 begin
- gdierror(gde_notimplemented);
+ gdifuncs^[gdi_moveregion](drawinfo);
 end;
 
 procedure gui_regionisempty(var drawinfo: drawinfoty);
 begin
- gdierror(gde_notimplemented);
+ gdifuncs^[gdi_regionisempty](drawinfo);
 end;
 
 procedure gui_regionclipbox(var drawinfo: drawinfoty);
 begin
- gdierror(gde_notimplemented);
+ gdifuncs^[gdi_regionclipbox](drawinfo);
 end;
 
 procedure gui_regsubrect(var drawinfo: drawinfoty);
 begin
- gdierror(gde_notimplemented);
+ gdifuncs^[gdi_regsubrect](drawinfo);
 end;
 
 procedure gui_regsubregion(var drawinfo: drawinfoty);
 begin
- gdierror(gde_notimplemented);
+ gdifuncs^[gdi_regsubregion](drawinfo);
 end;
 
 procedure gui_regaddrect(var drawinfo: drawinfoty);
 begin
- gdierror(gde_notimplemented);
+ gdifuncs^[gdi_regaddrect](drawinfo);
 end;
 
 procedure gui_regaddregion(var drawinfo: drawinfoty);
 begin
- gdierror(gde_notimplemented);
+ gdifuncs^[gdi_regaddregion](drawinfo);
 end;
 
 procedure gui_regintersectrect(var drawinfo: drawinfoty);
 begin
- gdierror(gde_notimplemented);
+ gdifuncs^[gdi_regintersectrect](drawinfo);
 end;
 
 procedure gui_regintersectregion(var drawinfo: drawinfoty);
 begin
- gdierror(gde_notimplemented);
+ gdifuncs^[gdi_regintersectregion](drawinfo);
 end;
    
 procedure gui_copyarea(var drawinfo: drawinfoty);
@@ -771,6 +774,7 @@ var
  str1: string;
  int1,int2: integer;
  rect1,rect2: rectty;
+ ar1: rectarty;
 begin
  with fdrawinfo,gcvalues^ do begin
   if gvm_dashes in mask then begin
@@ -829,11 +833,23 @@ begin
    fstream.write(str1+' setlinejoin'+nl);
   end;
   if gvm_clipregion in mask then begin
-   if clipregion = 0 then begin
-//    fstream.write('initclip'+nl);
-   end
-   else begin
+   str1:= 'initclip';
+   if clipregion <> 0 then begin
+    ar1:= gui_regiontorects(clipregion);
+    str1:= str1 + ' [';
+    int2:= 3;
+    for int1:= 0 to high(ar1) do begin
+     str1:= str1 + ' '+ posstring(addpoint(ar1[int1].pos,gc.cliporigin)) +
+                   ' ' + rectsizestring(ar1[int1].size);
+     dec(int2);
+     if int2 <= 0 then begin
+      int2:= 3;
+      str1:= str1 + nl;
+     end;
+    end;
+    str1:= str1 + '] rectclip';
    end;
+   fstream.write(str1+nl);
   end;
  end;
 end;
@@ -853,6 +869,21 @@ end;
 function tpostscriptcanvas.sizestring(const asize: sizety): string;
 begin
  result:= psrealtostr(asize.cx*fgcscale)+' '+psrealtostr(asize.cy*fgcscale);
+end;
+
+function tpostscriptcanvas.rectsizestring(const asize: sizety): string;
+begin
+ result:= psrealtostr(asize.cx*fgcscale)+' '+psrealtostr(-asize.cy*fgcscale);
+end;
+
+function tpostscriptcanvas.rectstring(const arect: rectty): string;
+begin
+ with arect do begin
+  result:= 
+   psrealtostr(x*fgcscale+foriginx)+' '+
+   psrealtostr(foriginy-y*fgcscale)+' '+
+   psrealtostr(cx*fgcscale)+' '+psrealtostr(-cy*fgcscale)
+ end;
 end;
 
 function tpostscriptcanvas.getcolorstring(const acolor: colorty): string;
@@ -1088,6 +1119,16 @@ begin
   str1:= str1 + ' '+setcolorstring(font.color);
  end;
  fstream.write(str1+nl);
+end;
+
+procedure tpostscriptcanvas.begintextclip(const arect: rectty);
+begin
+ fstream.write('gsave '+rectstring(arect)+' rectclip'+nl);
+end;
+
+procedure tpostscriptcanvas.endtextclip;
+begin
+ fstream.write('grestore'+nl);
 end;
 
 procedure tpostscriptcanvas.setpslinewidth(const avalue: integer);
@@ -1470,7 +1511,7 @@ var
  function imagedict: string;
  begin
   with fdrawinfo.copyarea.sourcerect^ do begin
-   result:= setcolorstring(fdrawinfo.acolorforeground)+
+   result:= setcolorstring(fdrawinfo.acolorforeground)+nl+
    ' << /ImageType 1 /Width '+inttostr(size.cx)+
    ' /Height '+inttostr(size.cy)+' /ImageMatrix '+imagematrixstring(size)+nl+
    '/DataSource {currentfile picstr readhexstring pop}'+nl+
@@ -1784,4 +1825,6 @@ begin
  result:= false;
 end;
 
+initialization
+ gdifuncs:= gui_getgdifuncs;
 end.

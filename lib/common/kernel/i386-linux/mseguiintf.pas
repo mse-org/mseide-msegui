@@ -2784,6 +2784,7 @@ begin
      cx:= x2 - x1;
      cy:= y2 - y1;
     end;
+    inc(boxpo);
    end;
   end;
  end;
@@ -5088,7 +5089,7 @@ begin
   debugungrabbed:= false;
  end;
 end;
-  
+
 initialization
  hasxft:= getxftlib;
  hasxrender:= getxrenderlib;

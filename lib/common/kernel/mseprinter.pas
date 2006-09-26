@@ -194,6 +194,8 @@ type
                         const flags: textflagsty;
                         const tabdist: real); virtual; abstract;
        //tabdist < 0 -> lastx                 
+   procedure begintextclip(const arect: rectty); virtual; abstract;
+   procedure endtextclip; virtual; abstract;
    procedure checknextpage;
    procedure internalwriteln(const avalue: richstringty);
   public
@@ -670,6 +672,14 @@ begin
   checkgcstate([cs_font,cs_acolorforeground,cs_acolorbackground]);
  end;
  with info do begin
+  if tf_clipi in flags then begin
+   begintextclip(dest);
+  end
+  else begin
+   if tf_clipo in flags then begin
+    begintextclip(clip);
+   end;
+  end;
   if countchars(text.text,c_tab) = 0 then begin
    textout(text,dest,flags,0);
   end
@@ -739,6 +749,9 @@ begin
      end;
     end;
    end;
+  end;
+  if flags * [tf_clipi,tf_clipo] <> [] then begin
+   endtextclip;
   end;
  end;
  restore;
