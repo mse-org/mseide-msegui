@@ -4636,8 +4636,8 @@ begin
   finally
    dec(fdatasetchangedlock);
   end;
-  if fgrid.rowcount > 0 then begin
-   if fgrid.col < 0 then begin
+  if (fgrid.rowcount > 0) then begin
+   if (fgrid.col < 0) and (fgrid.entered) then begin
     fgrid.focuscell(makegridcoord(fgrid.col,activerecord),fca_entergrid);
    end
    else begin
