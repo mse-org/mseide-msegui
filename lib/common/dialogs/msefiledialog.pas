@@ -275,6 +275,7 @@ type
    fselectednames: filenamearty;
    procedure updatefiltertext;
    procedure readlist;
+   procedure changedir(const adir: filenamety);
   public
    dialogoptions: filedialogoptionsty;
    defaultext: filenamety;
@@ -809,12 +810,14 @@ end;
 
 procedure Tfiledialogfo.createdironexecute(const sender: TObject);
 var
- str1: msestring;
+ mstr1: msestring;
 begin
- str1:= '';
- if stringenter(str1,'Name','Create new directory') = mr_ok then begin
-  msefileutils.createdir(filepath(listview.directory,str1,fk_file));
-  listview.readlist;
+ mstr1:= '';
+ if stringenter(mstr1,'Name','Create new directory') = mr_ok then begin
+  mstr1:= filepath(listview.directory,mstr1,fk_file);
+  msefileutils.createdir(mstr1);
+  changedir(mstr1);
+//  listview.readlist;
  end;
 end;
 
@@ -839,18 +842,24 @@ begin
  end;
 end;
 
-procedure Tfiledialogfo.listviewitemevent(const sender: tcustomlistview;
+procedure tfiledialogfo.changedir(const adir: filenamety);
+begin
+ with listview do begin
+  directory:= filepath(adir);
+  readlist;
+  if filelist.count > 0 then begin
+   focuscell(makegridcoord(0,0));
+  end;
+ end;
+end;
+
+procedure tfiledialogfo.listviewitemevent(const sender: tcustomlistview;
                 const index: Integer; var info: celleventinfoty);
 begin
  with tfilelistview(sender) do begin
   if iscellclick(info) then begin
    if filelist.isdir(index) then begin
-    directory:= filepath(directory+filelist[index].name);
-    readlist;
-    if filelist.count > 0 then begin
-     focuscell(makegridcoord(0,0));
-    end;
-//    path:= filepath(directory+filelist[index].name,mask);
+    changedir(filepath(directory+filelist[index].name));
    end
    else begin
     if info.eventkind = cek_keydown then begin
