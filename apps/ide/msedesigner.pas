@@ -1280,7 +1280,8 @@ begin
  end;
 end;
 
-procedure tcomponents.namechanged(const acomponent: tcomponent; const newname: string);
+procedure tcomponents.namechanged(const acomponent: tcomponent;
+                                            const newname: string);
 var
  po1: pcomponentinfoty;
 begin
@@ -3218,9 +3219,12 @@ begin
  end;
 end;
 
-procedure tdesigner.validaterename(const acomponent: tcomponent; const curname,NewName: string);
+procedure tdesigner.validaterename(const acomponent: tcomponent;
+                    const curname,NewName: string);
 var
  po1: pmoduleinfoty;
+ ar1: objectarty;
+ int1: integer;
 begin
  po1:= findcomponentmodule(acomponent);
  if po1 <> nil then begin
@@ -3229,7 +3233,19 @@ begin
   end;
   if acomponent.name <> newname then begin
    po1^.components.namechanged(acomponent,newname);
-   designnotifications.componentnamechanging(idesigner(self),po1^.instance,acomponent,newname);
+   designnotifications.componentnamechanging(idesigner(self),po1^.instance,
+                                      acomponent,newname);
+   if acomponent is tmsecomponent then begin
+    ar1:= tmsecomponent(acomponent).linkedobjects;
+   end
+   else begin
+    ar1:= objectarty(getlinkedcomponents(acomponent));
+   end;
+  end;
+  for int1:= 0 to high(ar1) do begin
+   if ar1[int1] is tcomponent then begin
+    componentmodified(tcomponent(ar1[int1]));
+   end;
   end;
  end;
 end;

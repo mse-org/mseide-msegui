@@ -1,12 +1,14 @@
 MSEide+MSEgui version history
 
-Version 0.9b
+2006-09-27 tmsecomponent.linkedobjects, tobjeclinker.linkedobjects.
 2006-09-25 tstatfile moved to msestatfile.pas.
  tmsedatamodule moved to msedatamodules.pas.
  Properties tstatfile.activator, tactivator.onactvateerror,
  tdbcontroller.onbeforeconnect, onconnecterror.
  tpostprintprinter clipping.
 2006-09-23 tpostscriptprinter pattern support.
+
+Version 0.9b
 2006-08-27 tsplitter.options spo_dockleft,spo_docktop,spo_dockright,
  spo_dockbottom, default on.
 2006-08-25 Property tscalingwidget.optionsscale, osc_expandx,osc_expandy,

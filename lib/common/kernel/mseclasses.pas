@@ -125,6 +125,7 @@ type
                 ainterfacetype: pointer = nil; once: boolean = false); overload;
    procedure unlink(const source,dest: iobjectlink; valuepo: pointer = nil); overload;
    procedure unlink(const dest: tmsecomponent; valuepo: pointer = nil); overload;
+   function linkedobjects: objectarty;
 
    procedure setlinkedvar(const linkintf: iobjectlink; const source: tlinkedobject;
                          var dest: tlinkedobject); overload;
@@ -295,6 +296,8 @@ type
                  //true if component is owner or self
    function rootowner: tcomponent;
    function getrootcomponentpath: componentarty;
+   function linkedobjects: objectarty;
+                 //returns items of objeclinker and free notify list
 
    procedure sendcomponentevent(const event: tcomponentevent);
                   //event will be destroyed if not async
@@ -478,6 +481,8 @@ procedure refreshancestor(const descendent,newancestor,oldancestor: tcomponent;
 
 function issubcomponent(const root,child: tcomponent): boolean;
 function findcomponentbynamepath(const namepath: string): tcomponent;
+function getlinkedcomponents(const acomponent: tcomponent): componentarty;
+                 //returns items of free notify list
 
 
 procedure lockfindglobalcomponent;   //switch of findglobalcomponent
@@ -519,6 +524,19 @@ type
    FDesignInfo: Longint;
    FVCLComObject: Pointer;
    FComponentState: TComponentState;
+ end;
+ {$else}
+ TComponent = class(TPersistent)
+ private
+   FOwner: TComponent;
+   FName: TComponentName;
+   FTag: Longint;
+   FComponents: TList;
+   FFreeNotifies: TList;
+   FDesignInfo: Longint;
+   FComponentState: TComponentState;
+
+   FVCLComObject: Pointer;
  end;
  {$endif}
  tpersistent1 = class(tpersistent);
@@ -650,6 +668,20 @@ begin
     result:= comp.Name + '.' + result;
    end;
    comp:= comp.Owner;
+  end;
+ end;
+end;
+
+function getlinkedcomponents(const acomponent: tcomponent): componentarty;
+var
+ int1: integer;
+begin
+ result:= nil;
+ with tcomponentcracker(acomponent) do begin
+  if ffreenotifies <> nil then begin
+   for int1:= 0 to ffreenotifies.count - 1 do begin
+    additem(pointerarty(result),ffreenotifies[int1]);
+   end;
   end;
  end;
 end;
@@ -1776,15 +1808,31 @@ procedure tobjectlinker.forall(proc: objectlinkprocty; ainterfacetype: pointer);
 var
  po1: plinkinfoty;
  int1: integer;
-
 begin
  po1:= plinkinfoty(fdata);
  for int1:= 0 to fcount - 1 do begin
-  if (po1^.dest <> nil) and (po1^.source = nil) and (ainterfacetype = po1^.interfacetype) then begin
+  if (po1^.dest <> nil) and (po1^.source = nil) and 
+                            (ainterfacetype = po1^.interfacetype) then begin
    proc(po1^);
   end;
   inc(po1);
  end;
+end;
+
+function tobjectlinker.linkedobjects: objectarty;
+var
+ po1: plinkinfoty;
+ int1: integer;
+begin
+ result:= nil;
+ po1:= plinkinfoty(fdata);
+ for int1:= 0 to fcount - 1 do begin
+  if (po1^.dest <> nil) and (po1^.source = nil) then begin
+   additem(pointerarty(result),iobjectlink(po1^.dest).getinstance);
+  end;
+  inc(po1);
+ end;
+ removearrayduplicates(pointerarty(result));
 end;
 
 { tlinkedobject }
@@ -2394,6 +2442,17 @@ end;
 function tmsecomponent.gethelpcontext: msestring;
 begin
  result:= fhelpcontext;
+end;
+
+function tmsecomponent.linkedobjects: objectarty;
+var
+ int1: integer;
+begin
+ result:= objectarty(getlinkedcomponents(self));
+ if fobjectlinker <> nil then begin
+  stackarray(pointerarty(fobjectlinker.linkedobjects),pointerarty(result));
+ end;
+ removearrayduplicates(pointerarty(result));
 end;
 
 { tlinkedqueue }
