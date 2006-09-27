@@ -89,6 +89,7 @@ begin
                            toptionalclasspropertyeditor);
  registerpropertyeditor(typeinfo(integer),tactivator,'clients',
                          tactivatorclientspropertyeditor);
+ registerunitgroup(['msestatfile'],['msestat']);
 end;
 
 { tactionpropertyeditor }

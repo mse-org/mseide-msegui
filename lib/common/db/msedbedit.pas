@@ -3936,6 +3936,9 @@ begin
      result:= dscontroller.locate(filter,field,
                         [loo_caseinsensitive,loo_partialkey]) = loc_ok;
     end;
+    if result then begin
+     dataset.resync([rmcenter]);
+    end;
    end;
   end;
  end;
@@ -6341,6 +6344,7 @@ function tcopydropdownlist.locate(const filter: msestring): boolean;
 var
  int1: integer;
  po1: pointer;
+ co1: gridcoordty;
 begin
  po1:= cols[0].datalist.datapo; //workaround internal error 200304235 in 2.0.2
  result:= findarrayvalue(filter,po1,rowcount,
@@ -6351,6 +6355,8 @@ begin
   result:= (int1 < rowcount) and (msecomparetextlen(filter,cols[0][int1]) = 0);
  end;
  if result then begin
+  co1:= makegridcoord(ffocusedcell.col,int1);
+  showcell(co1,cep_top);
   focuscell(makegridcoord(ffocusedcell.col,int1));
  end
  else begin
@@ -6403,9 +6409,6 @@ begin
    frame.sbvert.options:= frame.sbvert.options-[sbo_show];
    rowcount:= int1;
   end;
-  if int1 > 0 then begin
-   row:= 0;
-  end;
  end
  else begin
   if int1 > acontroller.flookupbuffer.count then begin
@@ -6413,8 +6416,13 @@ begin
    frame.sbvert.options:= frame.sbvert.options-[sbo_show];
   end;
   rowcount:= int1;
-  with frame.sbvert do begin
-   buttonlength:= 0;
+ end;
+ if rowcount > 0 then begin
+  row:= 0;
+ end;
+ with frame.sbvert do begin
+  buttonlength:= 0;
+  if acontroller.flookupbuffer.count > 0 then begin
    pagesize:= rowcount / acontroller.flookupbuffer.count;
   end;
  end;
@@ -6634,18 +6642,23 @@ procedure tlbdropdownlist.setactiverecord(const avalue: integer);
 var
  int1,int2,int3: integer;
 begin
- if (lbds_filtered in flbdstate) then begin
-  if rowcount > 0 then begin
-   for int1:= 0 to high(frecnums) do begin
-    if frecnums[int1] = avalue then begin
-     if int1 > 0 then begin
-      exclude(flbdstate,lbds_bof);
-     end; 
-     if int1 < rowhigh then begin
-      exclude(flbdstate,lbds_eof);
-     end; 
-     moveby(int1-row);
-     exit;
+ if rowcount > 0 then begin
+//  if row < 0 then begin
+//   row:= 0;
+//  end;
+  if (lbds_filtered in flbdstate) then begin
+   if ffirstrecord >= 0 then begin
+    for int1:= 0 to high(frecnums) do begin
+     if frecnums[int1] = avalue then begin
+      if int1 > 0 then begin
+       exclude(flbdstate,lbds_bof);
+      end; 
+      if int1 < rowhigh then begin
+       exclude(flbdstate,lbds_eof);
+      end; 
+      moveby(int1-row);
+      exit;
+     end;
     end;
    end;
    ffirstrecord:= avalue;
@@ -6669,10 +6682,21 @@ begin
    end;
    invalidate;
    moveby(-row);
+  end
+  else begin
+   if ffirstrecord < 0 then begin
+    ffirstrecord:= avalue;   
+    int1:= tlbdropdownlistcontroller(fcontroller).flookupbuffer.count;
+    if ffirstrecord + rowcount > int1 then begin
+     ffirstrecord:= int1 - rowcount;
+    end;
+    moveby(avalue-ffirstrecord-row);
+    invalidate;
+   end
+   else begin
+    moveby(avalue-activerecord);
+   end;
   end;
- end
- else begin
-  moveby(avalue-activerecord);
  end;
 end;
 
@@ -6737,19 +6761,21 @@ begin
     int1:= tlbdropdownlistcontroller(fcontroller).lookupbuffer.count - 1;
     if int1 >= 0 then begin
      if (lbds_filtered in flbdstate) then begin
-      if sender.value <= 0 then begin
-       moveby(minint);
-      end
-      else begin
-       if sender. value >= 1 then begin
-        moveby(maxint);
+      if event <> sbe_thumbtrack then begin
+       if sender.value <= 0 then begin
+        moveby(minint);
        end
        else begin
-        if sender.value < 0.5 then begin
-         moveby(-rowhigh);
+        if sender. value >= 1 then begin
+         moveby(maxint);
         end
         else begin
-         moveby(rowhigh);
+         if sender.value < 0.5 then begin
+          moveby(-rowhigh);
+         end
+         else begin
+          moveby(rowhigh);
+         end;
         end;
        end;
       end;
@@ -6794,6 +6820,7 @@ begin
   focuscell(makegridcoord(ffocusedcell.col,-1));
  end
  else begin
+  ffirstrecord:= -1;
   activerecord:= int1;
  end;
 end;

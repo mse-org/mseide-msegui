@@ -95,7 +95,13 @@ type
   public
    procedure edit; override;
  end;
-  
+ 
+ tonfilterpropertyeditor = class(tmethodpropertyeditor)
+  public
+   function getdefaultstate: propertystatesty; override;
+   procedure setvalue(const value: msestring); override;
+ end;
+ 
 procedure Register;
 begin
  registercomponents('Dbf',[
@@ -157,6 +163,8 @@ begin
                              tcomponentpropertyeditor);
  registerpropertyeditor(typeinfo(tdataset),tfield,'dataset',
                              tlocalcomponentpropertyeditor);
+ registerpropertyeditor(typeinfo(lbfiltereventty),tlbdropdownlistcontroller,
+                           'onfilter',tonfilterpropertyeditor);
 end;
 
 
@@ -564,6 +572,33 @@ begin
  inherited;
  if not factivebefore then begin
   tmsesqlquery(fprops[0].instance).active:= false;
+ end;
+end;
+
+{ tonfilterpropertyeditor }
+
+function tonfilterpropertyeditor.getdefaultstate: propertystatesty;
+begin
+ result:= inherited getdefaultstate + [ps_volatile];
+end;
+
+procedure tonfilterpropertyeditor.setvalue(const value: msestring);
+
+begin
+ inherited;
+ with tlbdropdownlistcontroller(fprops[0].instance) do begin
+  if not (olb_copyitems in optionslb) then begin
+   if getmethodvalue.code <> nil then begin
+    if buttonlength = 0 then begin
+     buttonlength:= -1;
+    end;
+   end
+   else begin
+    if buttonlength = -1 then begin
+     buttonlength:= 0;
+    end;
+   end;
+  end;
  end;
 end;
 

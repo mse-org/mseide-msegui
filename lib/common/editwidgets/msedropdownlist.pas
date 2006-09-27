@@ -1423,6 +1423,7 @@ function tdropdownlist.locate(const filter: msestring): boolean;
 var
  int1: integer;
  opt1: locatestringoptionsty;
+ co1: gridcoordty;
 begin
  if (rowcount > 0) and (fdatacols.count > 0) then begin
   int1:= focusedcell.row;
@@ -1435,7 +1436,9 @@ begin
   result:= locatestring(filter,{$ifdef FPC}@{$endif}getkeystring,opt1,
                 fdatacols[0].datalist.count,int1);
   if result then begin
-   focuscell(makegridcoord(ffocusedcell.col,int1));
+   co1:= makegridcoord(ffocusedcell.col,int1);
+   showcell(co1,cep_top);
+   focuscell(co1);
   end
   else begin
    focuscell(makegridcoord(ffocusedcell.col,-1));
