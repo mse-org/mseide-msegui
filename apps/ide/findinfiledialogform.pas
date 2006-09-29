@@ -48,7 +48,7 @@ function findinfiledialogexecute(var info: findinfileinfoty; const useinfo: bool
 
 implementation
 uses
- msestrings,msebits;
+ msestrings,msebits,findinfiledialogform_mfm;
 
 function findinfiledialogexecute(var info: findinfileinfoty; const useinfo: boolean): boolean;
 var
