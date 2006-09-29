@@ -128,8 +128,8 @@ procedure tosysfilepath1(var path: filenamety);
 function searchfile(const filename: filenamety; dir: boolean = false): filenamety; overload;
            //returns rootpath if file exists, '' otherwise
 function searchfile(const afilename: filenamety;
-            const adirnames: filenamearty): filenamety; overload;
-           //returns directory of first occurence in dirs, '' if none
+            const adirnames: array of filenamety): filenamety; overload;
+           //returns directory of last occurence in dirs, '' if none
            //afilename can be path and can have wildchars ('?','*'),
            //adirnames can have wildchars
 function searchfile(const afilename: filenamety;
@@ -137,7 +137,7 @@ function searchfile(const afilename: filenamety;
            //afilename must be simple filename and can have wildchars ('?','*'),
            //adirname can have wildchars
 
-function findfile(const filename: filenamety; const dirnames: filenamearty;
+function findfile(const filename: filenamety; const dirnames: array of filenamety;
                              var path: filenamety): boolean; overload;
             //true if found
 function findfile(const filename: filenamety): boolean; overload;
@@ -596,36 +596,35 @@ begin
  end;
 end;
 
-function searchfile(const afilename: filenamety; const adirnames: filenamearty): filenamety;
+function searchfile(const afilename: filenamety; 
+                         const adirnames: array of filenamety): filenamety;
            //returns directory of last occurence in dirnames, '' if none
 var
  int1: integer;
- ar1: filenamearty;
  dir1,file1: filenamety;
 begin
  result:= '';
  file1:= trim(afilename);
- if (file1 <> '') and (adirnames = nil) then begin
-  setlength(ar1,1);
+ if (file1 <> '') and (high(adirnames) < 0) then begin
+  result:= searchfile(file1,'');
  end
  else begin
-  ar1:= adirnames;
- end;
- for int1:= high(ar1) downto 0 do begin
-  if afilename = '' then begin
-   dir1:= ar1[int1];
-  end
-  else begin
-   splitfilepath(filepath(ar1[int1],afilename,fk_file,true),dir1,file1);
-  end;
-  result:= searchfile(file1,dir1);
-  if result <> '' then begin
-   break;
+  for int1:= high(adirnames) downto 0 do begin
+   if afilename = '' then begin
+    dir1:= adirnames[int1];
+   end
+   else begin
+    splitfilepath(filepath(adirnames[int1],afilename,fk_file,true),dir1,file1);
+   end;
+   result:= searchfile(file1,dir1);
+   if result <> '' then begin
+    break;
+   end;
   end;
  end;
 end;
 
-function findfile(const filename: filenamety; const dirnames: filenamearty;
+function findfile(const filename: filenamety; const dirnames: array of filenamety;
                         var path: filenamety): boolean;
             //true if found
 var

@@ -2670,13 +2670,7 @@ procedure tcanvas.linktopaintdevice(paintdevice: paintdevicety;
 begin
  resetpaintedflag;
  if (fdrawinfo.gc.handle <> 0) then begin
-  if fdrawinfo.gc.handle = invalidgchandle then begin
-   fdrawinfo.gc.handle:= 0;
-  end
-  else begin
-   gdi(gdi_destroygc);
-  end;
-//  gui_destroygc(fdrawinfo.paintdevice,fdrawinfo.gc);
+  gdi(gdi_destroygc);
  end;
  fdrawinfo.paintdevice:= paintdevice;
  fdrawinfo.gc:= gc;
