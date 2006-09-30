@@ -526,7 +526,7 @@ type
    FComponentState: TComponentState;
  end;
  {$else}
- TComponent = class(TPersistent)
+ TComponentcracker = class(TPersistent)
  private
    FOwner: TComponent;
    FName: TComponentName;
