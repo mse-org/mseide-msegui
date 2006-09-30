@@ -1114,7 +1114,7 @@ begin
   fontinfo1:= defaultfontinfo;
   with fontinfo1 do begin
    if height <> 0 then begin
-    lfheight:= height;
+    lfheight:= -height; //use character height
    end;
    if width <> 0 then begin
     lfwidth:= (width + 5) div 10;
@@ -1199,7 +1199,7 @@ begin
     font:= font1;
     ascent:= textmetricsa.tmAscent;
     descent:= textmetricsa.tmDescent;
-    linespacing:= textmetricsa.tmheight;
+    linespacing:= textmetricsa.tmheight + textmetricsa.tmexternalleading;
     overhang:= textmetricsa.tmOverhang;
     if textmetricsa.tmpitchandfamily and tmpf_truetype <> 0 then begin
      caretshift:= 0;
