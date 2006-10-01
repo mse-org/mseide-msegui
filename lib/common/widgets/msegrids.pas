@@ -133,7 +133,8 @@ const
 type
  tgridexception = class(exception);
 
- gridstatety = (gs_layoutvalid,gs_layoutupdating,gs_updatelocked,
+ gridstatety = (
+      gs_layoutvalid,gs_layoutupdating,gs_updatelocked,{gs_mousefocuslocked,}
       gs_sortvalid,gs_cellentered,gs_cellclicked,gs_emptyrowremoved,
       gs_rowcountinvalid,
       gs_scrollup,gs_scrolldown,gs_scrollleft,gs_scrollright,
@@ -6128,6 +6129,7 @@ begin
          fmouserefpos:= info.pos;
         end;
         if (distance(fmouserefpos,info.pos) > 3) and active then begin
+         fmouserefpos:= info.pos;
          if not fdatacols[fmousecell.col].canfocus(info.button) then begin
           showcell(fmousecell);
          end
