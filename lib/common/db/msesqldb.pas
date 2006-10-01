@@ -35,7 +35,8 @@ type
 
  tmsesqlquery = class;
  
- sqlquerystatety = (sqs_userapplayrecupdate,sqs_updateabort,sqs_updateerror);
+ sqlquerystatety = (sqs_userapplayrecupdate,sqs_updateabort,sqs_updateerror,
+                    sqs_calcfieldsdone);
  sqlquerystatesty = set of sqlquerystatety;
  applyrecupdateeventty = 
      procedure(const sender: tmsesqlquery; const updatekind: tupdatekind;
@@ -73,7 +74,15 @@ type
    procedure internalApplyUpdates(MaxErrors: Integer);
                     //for workarounds
    procedure cancelrecupdate(var arec: trecupdatebuffer);
+   function GetRecordUpdateBuffer : boolean;
+   function GetFieldSize(FieldDef : TFieldDef) : longint;
   protected
+   procedure ClearCalcFields(Buffer: PChar); override;
+   function  AllocRecordBuffer: PChar; override;
+   function GetFieldData(Field: TField; Buffer: Pointer): Boolean; override;
+   procedure SetFieldData(Field: TField; Buffer: Pointer); override;
+   function GetRecord(Buffer: PChar; GetMode: TGetMode;
+                  DoCheck: Boolean): TGetResult; override;
    procedure updateindexdefs; override;
    procedure sqlonchange(sender: tobject);
    procedure loaded; override;
@@ -84,6 +93,7 @@ type
    procedure applyrecupdate(updatekind: tupdatekind); override;
    function  getcanmodify: boolean; override;
    function  getfieldclass(fieldtype: tfieldtype): tfieldclass; override;
+   procedure GetCalcFields(Buffer: PChar); override;
        //idscontroller
 //   procedure inheritedresync(const mode: tresyncmode);
    procedure inheriteddataevent(const event: tdataevent; const info: ptrint);
@@ -266,6 +276,11 @@ type
     FUpdateBuffer   : TRecordsUpdateBuffer;
     FCurrentUpdateBuffer : integer;
 
+    FFieldBufPositions : array of longint;
+    
+    FAllPacketsFetched : boolean;
+    FOnUpdateError  : TResolverErrorEvent;
+
   end;
   
   TSQLQuerycracker = class (Tbufdataset)
@@ -297,6 +312,21 @@ type
     FInsertQry           : TSQLQuery;
   end;
   
+function GetFieldIsNull(NullMask : pbyte;x : longint) : boolean; //inline;
+begin
+  result := ord(NullMask[x div 8]) and (1 shl (x mod 8)) > 0
+end;
+
+procedure unSetFieldIsNull(NullMask : pbyte;x : longint); //inline;
+begin
+  NullMask[x div 8] := (NullMask[x div 8]) and not (1 shl (x mod 8));
+end;
+
+procedure SetFieldIsNull(NullMask : pbyte;x : longint); //inline;
+begin
+  NullMask[x div 8] := (NullMask[x div 8]) or (1 shl (x mod 8));
+end;
+
 { tmsesqltransaction }
 
 constructor tmsesqltransaction.create(aowner: tcomponent);
@@ -639,7 +669,7 @@ begin
   except
    on E: EDatabaseError do begin
     Inc(fFailedCount);
-    if ffailedcount > longword(MaxErrors) then begin
+    if longword(ffailedcount) > longword(MaxErrors) then begin
      Response:= rrAbort
     end
     else begin
@@ -1103,6 +1133,172 @@ end;
 procedure tmsesqlquery.setstatementtype(const avalue: TStatementType);
 begin
  //dummy
+end;
+
+function tmsesqlquery.GetRecordUpdateBuffer : boolean;
+var 
+ x: integer;
+ CurrBuff: PChar;
+
+begin
+ with tbufdatasetcracker(self) do begin
+  GetBookmarkData(ActiveBuffer,@CurrBuff);
+  if (FCurrentUpdateBuffer >= length(FUpdateBuffer)) or 
+       (FUpdateBuffer[FCurrentUpdateBuffer].BookmarkData <> CurrBuff) then begin
+   for x:= 0 to high(FUpdateBuffer) do begin
+    if FUpdateBuffer[x].BookmarkData = CurrBuff then begin
+     FCurrentUpdateBuffer:= x;
+     break;
+    end;
+   end;
+  end;
+  Result:= (FCurrentUpdateBuffer < length(FUpdateBuffer))  and 
+     (FUpdateBuffer[FCurrentUpdateBuffer].BookmarkData = CurrBuff);
+ end;
+end;
+
+function tmsesqlquery.GetFieldSize(FieldDef : TFieldDef) : longint;
+begin
+ case FieldDef.DataType of
+  ftString,ftFixedChar: result:= FieldDef.Size + 1;
+  ftSmallint,ftInteger,ftword: result:= sizeof(longint);
+  ftBoolean: result:= sizeof(wordbool);
+  ftBCD: result:= sizeof(currency);
+  ftFloat: result:= sizeof(double);
+  ftLargeInt: result:= sizeof(largeint);
+  ftTime,ftDate,ftDateTime: result:= sizeof(TDateTime)
+  else Result := 10
+ end;
+end;
+
+function tmsesqlquery.AllocRecordBuffer: PChar;
+begin
+ with tbufdatasetcracker(self) do begin
+  result := AllocMem(FRecordsize + sizeof(TBufBookmark) + calcfieldssize);
+ end;
+end;
+
+function tmsesqlquery.GetFieldData(Field: TField; Buffer: Pointer): Boolean;
+var 
+ CurrBuff : pchar;
+begin
+ Result := False;
+ with tbufdatasetcracker(self) do begin
+  if state = dscalcfields then begin
+   currbuff:= calcbuffer;
+  end
+  else begin
+   CurrBuff := ActiveBuffer;
+  end;
+  If Field.Fieldno > 0 then begin 
+        // If = 0, then calculated field or something similar
+   if state = dsOldValue then begin
+    if not GetRecordUpdateBuffer then begin
+        // There is no old value available
+     exit;
+    end;
+    currbuff := FUpdateBuffer[FCurrentUpdateBuffer].OldValuesBuffer+
+                            sizeof(TBufRecLinkItem);
+   end
+   else begin
+    if not assigned(CurrBuff) then begin
+     exit;
+    end;
+   end;
+   if GetFieldIsnull(pbyte(CurrBuff),Field.Fieldno-1) then begin
+    exit;
+   end;
+   inc(CurrBuff,FFieldBufPositions[Field.FieldNo-1]);
+   if assigned(buffer) then begin
+    Move(CurrBuff^, Buffer^, GetFieldSize(FieldDefs[Field.FieldNo-1]));
+   end;
+   Result := True;
+  end
+  else begin //calc or lookup field
+   if currbuff <> nil then begin
+    currbuff:= currbuff + FRecordsize + sizeof(TBufBookmark) + field.offset;
+    if (currbuff + field.datasize)^ <> #0 then begin
+     result:= true;
+     if buffer <> nil then begin
+      move(currbuff^,buffer^,field.datasize);
+     end;
+    end;
+   end;
+  end;
+ end;
+end;
+
+procedure tmsesqlquery.SetFieldData(Field: TField; Buffer: Pointer);
+
+var 
+ CurrBuff : pointer;
+ NullMask : pbyte;
+
+begin
+ with tbufdatasetcracker(self) do begin
+//  if not (state in [dsEdit, dsInsert, dsFilter]) then begin
+  if not (state in dswritemodes) then begin
+   DatabaseErrorFmt(SNotInEditState,[NAme],self);
+   exit;
+  end;
+  if state = dscalcfields then begin
+   currbuff:= calcbuffer;
+  end
+  else begin
+   CurrBuff := ActiveBuffer;
+  end;
+  If Field.Fieldno > 0 then begin // If = 0, then calculated field or something
+   if state = dsFilter then begin 
+    // Set the value into the 'temporary' FLastRecBuf buffer for Locate and Lookup
+      CurrBuff := pointer(FLastRecBuf) + sizeof(TBufRecLinkItem)
+   end;
+   NullMask := CurrBuff;
+   inc(CurrBuff,FFieldBufPositions[Field.FieldNo-1]);
+   if assigned(buffer) then begin
+    Move(Buffer^, CurrBuff^, GetFieldSize(FieldDefs[Field.FieldNo-1]));
+    unSetFieldIsNull(NullMask,Field.FieldNo-1);
+   end
+   else begin
+    SetFieldIsNull(NullMask,Field.FieldNo-1);
+   end;     
+   if not (State in [dsCalcFields, dsFilter, dsNewValue]) then begin
+    DataEvent(deFieldChange, Ptrint(Field));
+   end;
+  end
+  else begin //calc or lookup field
+   currbuff:= currbuff + FRecordsize + sizeof(TBufBookmark) + field.offset;
+   if buffer <> nil then begin
+    pchar(currbuff+field.datasize)^:= #1;
+    move(buffer^,currbuff^,field.datasize);
+   end
+   else begin
+    pchar(currbuff+field.datasize)^:= #0;
+   end;
+  end;
+ end;
+end;
+
+procedure tmsesqlquery.GetCalcFields(Buffer: PChar);
+begin
+ include(fmstate,sqs_calcfieldsdone);
+ inherited;
+end;
+
+function tmsesqlquery.GetRecord(Buffer: PChar; GetMode: TGetMode;
+               DoCheck: Boolean): TGetResult;
+begin
+ exclude(fmstate,sqs_calcfieldsdone);
+ result:= inherited getrecord(buffer,getmode,docheck);
+ if (result = grok) and not (sqs_calcfieldsdone in fmstate) then begin
+  getcalcfields(buffer);
+ end;
+end;
+
+procedure tmsesqlquery.ClearCalcFields(Buffer: PChar);
+begin
+ with tbufdatasetcracker(self) do begin
+  fillchar((buffer+FRecordsize + sizeof(TBufBookmark))^,calcfieldssize,0);
+ end;
 end;
 
 { tparamsourcedatalink }

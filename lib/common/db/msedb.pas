@@ -107,6 +107,7 @@ type
   protected
    function HasParent: Boolean; override;
   public
+   procedure Clear; override;
    property asmsestring: msestring read getasmsestring write setasmsestring;
   published
    property DataSet;
@@ -124,6 +125,7 @@ type
    function HasParent: Boolean; override;
   public
    destructor destroy; override;
+   procedure Clear; override;
    function assql: string;
    property asmsestring: msestring read getasmsestring write setasmsestring;
   published
@@ -143,6 +145,7 @@ type
    property asmsestring: msestring read getasmsestring write setasmsestring;
   public
    destructor destroy; override;
+   procedure Clear; override;
    function assql: string;
   published
    property DataSet;
@@ -155,6 +158,7 @@ type
   protected
    function HasParent: Boolean; override;
   public
+   procedure Clear; override;
    function assql: string;
    property asmsestring: msestring read getasmsestring write setasmsestring;
   published
@@ -170,6 +174,7 @@ type
    function getasboolean: boolean; override;
    procedure setasboolean(avalue: boolean); override;
   public
+   procedure Clear; override;
    function assql: string;
    property asmsestring: msestring read getasmsestring write setasmsestring;
   published
@@ -185,6 +190,7 @@ type
    function getasboolean: boolean; override;
    procedure setasboolean(avalue: boolean); override;
   public
+   procedure Clear; override;
    function assql: string;
    property asmsestring: msestring read getasmsestring write setasmsestring;
   published
@@ -200,6 +206,7 @@ type
    function getasboolean: boolean; override;
    procedure setasboolean(avalue: boolean); override;
   public
+   procedure Clear; override;
    function assql: string;
    property asmsestring: msestring read getasmsestring write setasmsestring;
   published
@@ -215,6 +222,7 @@ type
    function getasboolean: boolean; override;
    procedure setasboolean(avalue: boolean); override;
   public
+   procedure Clear; override;
    function assql: string;
    property asmsestring: msestring read getasmsestring write setasmsestring;
   published
@@ -228,6 +236,7 @@ type
   protected
    function HasParent: Boolean; override;
   public
+   procedure Clear; override;
    function assql: string;
    property asmsestring: msestring read getasmsestring write setasmsestring;
   published
@@ -243,6 +252,7 @@ type
    function getasfloat: double; override;
    procedure setasfloat(avalue: double); override;
   public
+   procedure Clear; override;
    function assql: string;
    property asmsestring: msestring read getasmsestring write setasmsestring;
   published
@@ -256,6 +266,7 @@ type
   protected
    function HasParent: Boolean; override;
   public
+   procedure Clear; override;
    function assql: string;
    property asmsestring: msestring read getasmsestring write setasmsestring;
   published
@@ -269,6 +280,7 @@ type
   protected
    function HasParent: Boolean; override;
   public
+   procedure Clear; override;
    function assql: string;
    property asmsestring: msestring read getasmsestring write setasmsestring;
   published
@@ -284,6 +296,7 @@ type
    function getasdatetime: tdatetime; override;
    procedure setasdatetime(avalue: tdatetime); override;
   public
+   procedure Clear; override;
    function assql: string;
    property asmsestring: msestring read getasmsestring write setasmsestring;
   published
@@ -299,6 +312,7 @@ type
    procedure setasdatetime(avalue: tdatetime); override;
    function HasParent: Boolean; override;
   public
+   procedure Clear; override;
    function assql: string;
    property asmsestring: msestring read getasmsestring write setasmsestring;
   published
@@ -314,6 +328,7 @@ type
    procedure setasdatetime(avalue: tdatetime); override;
    function HasParent: Boolean; override;
   public
+   procedure Clear; override;
    function assql: string;
    property asmsestring: msestring read getasmsestring write setasmsestring;
   published
@@ -327,6 +342,7 @@ type
   protected
    function HasParent: Boolean; override;
   public
+   procedure Clear; override;
    function assql: string;
    property asmsestring: msestring read getasmsestring write setasmsestring;
   published
@@ -340,6 +356,7 @@ type
   protected
    function HasParent: Boolean; override;
   public
+   procedure Clear; override;
    function assql: string;
    property asmsestring: msestring read getasmsestring write setasmsestring;
   published
@@ -353,6 +370,7 @@ type
   protected
    function HasParent: Boolean; override;
   public
+   procedure Clear; override;
    function assql: string;
    property asmsestring: msestring read getasmsestring write setasmsestring;
   published
@@ -366,6 +384,7 @@ type
   protected
    function HasParent: Boolean; override;
   public
+   procedure Clear; override;
    function assql: string;
    property asmsestring: msestring read getasmsestring write setasmsestring;
   published
@@ -379,6 +398,7 @@ type
   protected
    function HasParent: Boolean; override;
   public
+//   procedure Clear; override;
    function assql: string;
    property asmsestring: msestring read getasmsestring write setasmsestring;
   published
@@ -392,6 +412,7 @@ type
   protected
    function HasParent: Boolean; override;
   public
+   procedure Clear; override;
    function assql: string;
    property asmsestring: msestring read getasmsestring write setasmsestring;
   published
@@ -951,6 +972,11 @@ begin
  result:= asstring;
 end;
 
+procedure tmsefield.Clear;
+begin
+ setdata(nil);
+end;
+
 { tmsestringfield }
 
 destructor tmsestringfield.destroy;
@@ -999,6 +1025,11 @@ begin
  result:= self;
 end;
 
+procedure tmsestringfield.Clear;
+begin
+ setdata(nil);
+end;
+
 { tmsememofield }
 
 destructor tmsememofield.destroy;
@@ -1039,6 +1070,11 @@ begin
  result:= self;
 end;
 
+procedure tmsememofield.Clear;
+begin
+ setdata(nil);
+end;
+
 { tmsenumericfield }
 
 function tmsenumericfield.HasParent: Boolean;
@@ -1059,6 +1095,11 @@ end;
 function tmsenumericfield.getasmsestring: msestring;
 begin
  result:= asstring;
+end;
+
+procedure tmsenumericfield.Clear;
+begin
+ setdata(nil);
 end;
 
 { tmselongintfield }
@@ -1098,6 +1139,11 @@ begin
  end;
 end;
 
+procedure tmselongintfield.Clear;
+begin
+ setdata(nil);
+end;
+
 { tmselargeintfield }
 
 function tmselargeintfield.HasParent: Boolean;
@@ -1133,6 +1179,11 @@ begin
  else begin
   asinteger:= 0;
  end;
+end;
+
+procedure tmselargeintfield.Clear;
+begin
+ setdata(nil);
 end;
 
 { tmsesmallintfield }
@@ -1172,6 +1223,11 @@ begin
  end;
 end;
 
+procedure tmsesmallintfield.Clear;
+begin
+ setdata(nil);
+end;
+
 { tmsewordfield }
 
 function tmsewordfield.HasParent: Boolean;
@@ -1209,6 +1265,11 @@ begin
  end;
 end;
 
+procedure tmsewordfield.Clear;
+begin
+ setdata(nil);
+end;
+
 { tmseautoincfield }
 
 function tmseautoincfield.HasParent: Boolean;
@@ -1229,6 +1290,11 @@ end;
 function tmseautoincfield.getasmsestring: msestring;
 begin
  result:= asstring;
+end;
+
+procedure tmseautoincfield.Clear;
+begin
+ setdata(nil);
 end;
 
 { tmsefloatfield }
@@ -1273,6 +1339,11 @@ begin
  end;
 end;
 
+procedure tmsefloatfield.Clear;
+begin
+ setdata(nil);
+end;
+
 { tmsecurrencyfield }
 
 function tmsecurrencyfield.HasParent: Boolean;
@@ -1295,6 +1366,11 @@ begin
  result:= asstring;
 end;
 
+procedure tmsecurrencyfield.Clear;
+begin
+ setdata(nil);
+end;
+
 { tmsebooleanfield }
 
 function tmsebooleanfield.HasParent: Boolean;
@@ -1315,6 +1391,11 @@ end;
 function tmsebooleanfield.getasmsestring: msestring;
 begin
  result:= asstring;
+end;
+
+procedure tmsebooleanfield.Clear;
+begin
+ setdata(nil);
 end;
 
 { tmsedatetimefield }
@@ -1359,6 +1440,11 @@ begin
  end;
 end;
 
+procedure tmsedatetimefield.Clear;
+begin
+ setdata(nil);
+end;
+
 { tmsedatefield }
 
 function tmsedatefield.HasParent: Boolean;
@@ -1399,6 +1485,11 @@ begin
  else begin
   inherited;
  end;
+end;
+
+procedure tmsedatefield.Clear;
+begin
+ setdata(nil);
 end;
 
 { tmsetimefield }
@@ -1443,6 +1534,11 @@ begin
  end;
 end;
 
+procedure tmsetimefield.Clear;
+begin
+ setdata(nil);
+end;
+
 { tmsebinaryfield }
 
 function tmsebinaryfield.HasParent: Boolean;
@@ -1463,6 +1559,11 @@ end;
 function tmsebinaryfield.getasmsestring: msestring;
 begin
  result:= asstring;
+end;
+
+procedure tmsebinaryfield.Clear;
+begin
+ setdata(nil);
 end;
 
 { tmsebytesfield }
@@ -1487,6 +1588,11 @@ begin
  result:= asstring;
 end;
 
+procedure tmsebytesfield.Clear;
+begin
+ setdata(nil);
+end;
+
 { tmsevarbytesfield }
 
 function tmsevarbytesfield.HasParent: Boolean;
@@ -1509,6 +1615,11 @@ begin
  result:= asstring;
 end;
 
+procedure tmsevarbytesfield.Clear;
+begin
+ setdata(nil);
+end;
+
 { tmsebcdfield }
 
 function tmsebcdfield.HasParent: Boolean;
@@ -1529,6 +1640,11 @@ end;
 function tmsebcdfield.getasmsestring: msestring;
 begin
  result:= asstring;
+end;
+
+procedure tmsebcdfield.Clear;
+begin
+ setdata(nil);
 end;
 
 { tmseblobfield }
@@ -1573,6 +1689,11 @@ end;
 function tmsegraphicfield.getasmsestring: msestring;
 begin
  result:= asstring;
+end;
+
+procedure tmsegraphicfield.Clear;
+begin
+ setdata(nil);
 end;
 
 { tdbfieldnamearrayprop }
