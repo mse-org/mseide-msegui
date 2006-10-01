@@ -51,6 +51,8 @@ type
    fmstate: sqlquerystatesty;
    fonapplyrecupdate: applyrecupdateeventty;
    fwantedreadonly: boolean;
+   ffailedcount: integer;
+   fapplyindex: integer; //take care about canceled updates while applying
    procedure setcontroller(const avalue: tdscontroller);
    procedure setactive(value : boolean); {override;}
    function getactive: boolean;
@@ -65,8 +67,12 @@ type
    procedure setindexdefs(const avalue: TIndexDefs);
    function getetstatementtype: TStatementType;
    procedure setstatementtype(const avalue: TStatementType);
+   procedure afterapply;
+   procedure internalapplyupdate(const maxerrors: integer; 
+                    var arec: trecupdatebuffer; var response: tresolverresponse);
    procedure internalApplyUpdates(MaxErrors: Integer);
                     //for workarounds
+   procedure cancelrecupdate(var arec: trecupdatebuffer);
   protected
    procedure updateindexdefs; override;
    procedure sqlonchange(sender: tobject);
@@ -119,8 +125,10 @@ type
    procedure appendrecord(const values: array of const);
    procedure post; override;
    procedure applyupdates(maxerrors: integer); override;
+   procedure applyupdate; //applies current record
    procedure cancel; override;
    procedure cancelupdates; override;
+   procedure cancelupdate; //cancels current record
    function moveby(const distance: integer): integer;
   published
    property FieldDefs;
@@ -241,7 +249,7 @@ type
  
 implementation
 uses
- msestrings,dbconst,msesysutils,typinfo,sysutils;
+ msestrings,dbconst,msesysutils,typinfo,sysutils,msedatalist;
  
 type 
   TBufDatasetcracker = class(TDBDataSet)
@@ -451,10 +459,22 @@ begin
 end;
 
 procedure tmsesqlquery.internalclose;
+var
+ int1: integer;
 begin
- inherited;
- tbufdatasetcracker(self).ffirstrecbuf:= nil;
- bindfields(false);
+ with tbufdatasetcracker(self) do begin
+  for int1:= high(fupdatebuffer) downto 0 do begin
+   with fupdatebuffer[int1] do begin
+    if bookmarkdata <> nil then begin
+     freerecordbuffer(oldvaluesbuffer);
+    end;
+   end;
+  end;
+  fupdatebuffer:= nil;
+  inherited;
+  ffirstrecbuf:= nil;
+  bindfields(false);
+ end;
 end;
 
 procedure tmsesqlquery.setonapplyrecupdate(const avalue: applyrecupdateeventty);
@@ -596,69 +616,103 @@ begin
  end;
 end;
 
+procedure tmsesqlquery.internalapplyupdate(const maxerrors: integer; 
+               var arec: trecupdatebuffer; var response: tresolverresponse);
+               
+ procedure checkcancel;
+ begin
+  if dso_cancelupdateonerror in fcontroller.options then begin
+   cancelrecupdate(arec);
+   arec.bookmarkdata:= nil;
+   resync([]);
+  end;
+ end;
+ 
+var
+ EUpdErr: EUpdateError;
+
+begin
+ with arec do begin
+  Response:= rrApply;
+  try
+   ApplyRecUpdate(UpdateKind);
+  except
+   on E: EDatabaseError do begin
+    Inc(fFailedCount);
+    if ffailedcount > longword(MaxErrors) then begin
+     Response:= rrAbort
+    end
+    else begin
+     Response:= rrSkip;
+    end;
+    EUpdErr:= EUpdateError.Create(SOnUpdateError,E.Message,0,0,E);
+    if assigned(OnUpdateError) then begin
+     OnUpdateError(Self,Self,EUpdErr,UpdateKind,Response);
+    end
+    else begin
+     if Response = rrAbort then begin
+      checkcancel;
+      Raise EUpdErr;
+     end;
+    end;
+    eupderr.free;
+   end
+   else begin
+    raise;
+   end;
+  end;
+  if response = rrApply then begin
+   FreeRecordBuffer(OldValuesBuffer);
+   BookmarkData := nil;
+  end
+  else begin
+   checkcancel;
+  end;
+ end;
+end;
+
 procedure tmsesqlquery.internalApplyUpdates(MaxErrors: Integer);
 
-var SaveBookmark : pchar;
-    r            : Integer;
-    FailedCount  : integer;
-    EUpdErr      : EUpdateError;
-    Response     : TResolverResponse;
-    StoreRecBuf  : PBufRecLinkItem;
+var
+ SaveBookmark: pchar;
+//    r            : Integer;
+// FailedCount: integer;
+// EUpdErr: EUpdateError;
+ Response: TResolverResponse;
+ StoreRecBuf: PBufRecLinkItem;
 
 begin
  with tbufdatasetcracker(self) do begin
   CheckBrowseMode;
-
   StoreRecBuf := FCurrentRecBuf;
   try
-   r := 0;
-   FailedCount := 0;
+   fapplyindex := 0;
+   fFailedCount := 0;
    Response := rrApply;
-   while (r < Length(FUpdateBuffer)) and (Response <> rrAbort) do begin
-    if assigned(FUpdateBuffer[r].BookmarkData) then begin
-     InternalGotoBookmark(@FUpdateBuffer[r].BookmarkData);
-     Resync([rmExact,rmCenter]);
-     Response := rrApply;
-     try
-      ApplyRecUpdate(FUpdateBuffer[r].UpdateKind);
-     except
-      on E: EDatabaseError do begin
-       Inc(FailedCount);
-       if failedcount > word(MaxErrors) then begin
-        Response := rrAbort
-       end
-       else begin
-        Response := rrSkip;
-       end;
-       EUpdErr := EUpdateError.Create(SOnUpdateError,E.Message,0,0,E);
-       if assigned(OnUpdateError) then begin
-        OnUpdateError(Self,Self,EUpdErr,FUpdateBuffer[r].UpdateKind,Response);
-       end
-       else begin
-        if Response = rrAbort then begin
-         Raise EUpdErr
-        end;
-       end;
-       eupderr.free;
-      end
-      else begin
-       raise;
-      end;
+   while (fapplyindex <= high(FUpdateBuffer)) and (Response <> rrAbort) do begin
+    with FUpdateBuffer[fapplyindex] do begin
+     if assigned(BookmarkData) then begin
+      InternalGotoBookmark(@BookmarkData);
+      Resync([rmExact,rmCenter]);
+      internalapplyupdate(maxerrors,FUpdateBuffer[fapplyindex],response);
      end;
-     if response = rrApply then begin
-      FreeRecordBuffer(FUpdateBuffer[r].OldValuesBuffer);
-      FUpdateBuffer[r].BookmarkData := nil;
-     end
+     inc(fapplyindex);
     end;
-    inc(r);
    end;
-   if failedcount = 0 then begin
+   if ffailedcount = 0 then begin
     SetLength(FUpdateBuffer,0);
    end;
   finally 
    FCurrentRecBuf := StoreRecBuf;
    Resync([]);
   end;
+ end;
+end;
+
+procedure tmsesqlquery.afterapply;
+begin
+ if (dso_autocommitret in fcontroller.options) and (transaction <> nil) then begin
+  tsqltransaction(transaction).commitretaining;
  end;
 end;
 
@@ -679,8 +733,115 @@ begin
   enablecontrols;
   dataevent(dedatasetchange,0);
  end;
- if (dso_autocommitret in fcontroller.options) and (transaction <> nil) then begin
-  tsqltransaction(transaction).commitretaining;
+ afterapply;
+end;
+
+procedure tmsesqlquery.applyupdate; //applies current record
+var
+ response: tresolverresponse;
+ var int1: integer;
+begin
+ checkbrowsemode;
+ with tbufdatasetcracker(self) do begin
+  if (fupdatebuffer <> nil) and (fcurrentrecbuf <> nil) then begin
+   for int1:= high(fupdatebuffer) downto 0 do begin
+    if fupdatebuffer[int1].bookmarkdata = fcurrentrecbuf then begin
+     ffailedcount:= 0;
+     internalapplyupdate(0,fupdatebuffer[int1],response);
+     if response = rrapply then begin
+      afterapply;
+      deleteitem(fupdatebuffer,typeinfo(trecordsupdatebuffer),int1);
+      fcurrentupdatebuffer:= bigint; //invalid
+     end;
+    end;
+   end;
+  end;
+ end;
+end;
+
+procedure tmsesqlquery.cancelrecupdate(var arec: trecupdatebuffer);
+     //copied from bufdataset.inc
+begin
+ with tbufdatasetcracker(self),arec do begin
+  if bookmarkdata <> nil then begin
+   case updatekind of
+    ukmodify: begin
+     move(pchar(OldValuesBuffer+sizeof(TBufRecLinkItem))^,
+            pchar(BookmarkData+sizeof(TBufRecLinkItem))^,FRecordSize);
+     FreeRecordBuffer(OldValuesBuffer);
+    end;
+    ukdelete: begin
+     if assigned(PBufRecLinkItem(BookmarkData)^.prior) then  begin
+              // or else it was the first record
+      PBufRecLinkItem(BookmarkData)^.prior^.next:= BookmarkData
+     end
+     else begin
+      FFirstRecBuf:= BookmarkData;
+     end;
+     PBufRecLinkItem(BookmarkData)^.next^.prior:= BookmarkData;
+     inc(FBRecordCount);
+    end;
+    ukInsert: begin
+     if assigned(PBufRecLinkItem(BookmarkData)^.prior) then begin
+      // or else it was the first record
+      PBufRecLinkItem(BookmarkData)^.prior^.next:= 
+                           PBufRecLinkItem(BookmarkData)^.next;
+     end
+     else begin
+      FFirstRecBuf := PBufRecLinkItem(BookmarkData)^.next;
+     end;
+     PBufRecLinkItem(BookmarkData)^.next^.prior:= 
+                                   PBufRecLinkItem(BookmarkData)^.prior;
+     // resync won't work if the currentbuffer is freed...
+     if FCurrentRecBuf = BookmarkData then begin
+      FCurrentRecBuf := FCurrentRecBuf^.next;
+     end;
+     FreeRecordBuffer(BookmarkData);
+     dec(FBRecordCount);
+    end;
+   end;
+  end;
+ end;
+end;
+
+
+procedure tmsesqlquery.cancelupdates;
+var 
+ int1: integer;
+begin
+ cancel;
+ checkbrowsemode;
+ with tbufdatasetcracker(self) do begin
+  if fupdatebuffer <> nil then begin
+   for int1:= high(fupdatebuffer) downto 0 do begin
+    cancelrecupdate(fupdatebuffer[int1]);
+   end;
+   fupdatebuffer:= nil;
+   resync([]);
+  end;
+ end;
+end;
+
+procedure tmsesqlquery.cancelupdate;
+var 
+ int1: integer;
+begin
+ cancel;
+ checkbrowsemode;
+ with tbufdatasetcracker(self) do begin
+  if (fupdatebuffer <> nil) and (fcurrentrecbuf <> nil) then begin
+   for int1:= high(fupdatebuffer) downto 0 do begin
+    if fupdatebuffer[int1].bookmarkdata = fcurrentrecbuf then begin
+     cancelrecupdate(fupdatebuffer[int1]);
+     deleteitem(fupdatebuffer,typeinfo(trecordsupdatebuffer),int1);
+     if int1 <= fapplyindex then begin
+      dec(fapplyindex);
+     end;
+     resync([]);
+     break;
+    end;
+   end;
+  end;
  end;
 end;
 
@@ -725,12 +886,6 @@ end;
 procedure tmsesqlquery.cancel;
 begin
  fcontroller.cancel;
-end;
-
-procedure tmsesqlquery.cancelupdates;
-begin
- cancel;
- inherited;
 end;
 
 procedure tmsesqlquery.dataevent(event: tdataevent; info: ptrint);
