@@ -453,7 +453,8 @@ var
 begin
  str1:= path;
  if libc.__mkdir(pchar(str1),getfilerights(rights)) <> 0 then begin
-  result:= sye_createdir;
+//  result:= sye_createdir;
+ result:= syelasterror;
  end
  else begin
   result:= sye_ok;

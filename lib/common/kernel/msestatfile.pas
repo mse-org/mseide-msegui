@@ -8,7 +8,8 @@ type
  statreadeventty = procedure(const sender: tobject; const reader: tstatreader) of object;
  statwriteeventty = procedure(const sender: tobject; const writer: tstatwriter) of object;
 
- statfileoptionty = (sfo_memory,sfo_savedata,sfo_activatorread,sfo_activatorwrite);
+ statfileoptionty = (sfo_memory,sfo_createpath,sfo_savedata,sfo_activatorread,
+                     sfo_activatorwrite);
  statfileoptionsty = set of statfileoptionty;
 const
  defaultstatfileoptions = [sfo_activatorread,sfo_activatorwrite];
@@ -288,6 +289,9 @@ begin
      else begin
       floadedfile:= ffilename;
      end;
+    end;
+    if (sfo_createpath in foptions) and not findfile(floadedfile) then begin
+     createdirpath(msefileutils.filedir(floadedfile));
     end;
    end;
    try

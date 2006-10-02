@@ -150,7 +150,10 @@ function copyfile(const oldfile,newfile: filenamety;
 function renamefile(const oldname,newname: filenamety; 
                                 const canoverwrite: boolean = true): boolean;
                       //false if newname exists and not canoverwrite
-procedure createdir(const path: filenamety; const rights: filerightsty = defaultdirrights);
+procedure createdir(const path: filenamety; 
+                                 const rights: filerightsty = defaultdirrights);
+procedure createdirpath(const path: filenamety; 
+                                 const rights: filerightsty = defaultdirrights);
 function getcurrentdir: filenamety;
 procedure setcurrentdir(const path: filenamety);
 
@@ -262,10 +265,27 @@ begin
  end;
 end;
 
-procedure createdir(const path: filenamety; const rights: filerightsty = defaultdirrights);
+procedure createdir(const path: filenamety; 
+                               const rights: filerightsty = defaultdirrights);
 begin
 // syserror(sys_createdir(tosysfilepath(path)));
  syserror(sys_createdir(path,rights));
+end;
+
+procedure createdirpath(const path: filenamety; 
+                                 const rights: filerightsty = defaultdirrights);
+var
+ ar1: filenamearty;
+ mstr1: filenamety;
+ int1: integer;
+begin
+ ar1:= splitrootpath(path);
+ for int1:= 0 to high(ar1) do begin
+  mstr1:= mstr1+'/'+ar1[int1];
+  if not directoryexists(mstr1) then begin
+   createdir(mstr1,rights);
+  end;
+ end;
 end;
 
 function getcurrentdir: filenamety;
