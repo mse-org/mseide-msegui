@@ -282,7 +282,7 @@ begin
  ar1:= splitrootpath(path);
  for int1:= 0 to high(ar1) do begin
   mstr1:= mstr1+'/'+ar1[int1];
-  if not directoryexists(mstr1) then begin
+  if not finddir(mstr1) then begin
    createdir(mstr1,rights);
   end;
  end;
