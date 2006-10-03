@@ -1170,6 +1170,9 @@ begin
    bo1:= true;
   end;
  end;
+ if pos1.filenum <> unitinfopo^.unitend.filenum then begin
+  pos1:= unitinfopo^.unitend;
+ end;
  if issamesourcepos(unitinfopo^.unitend,pos1) then begin
   dec(pos1.line);    //no 'end.'
   dec(pos1.pos.row);
