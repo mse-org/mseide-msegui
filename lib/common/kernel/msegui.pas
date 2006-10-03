@@ -1458,6 +1458,7 @@ type
    procedure registeronapplicationactivechanged(const method: booleaneventty);
    procedure unregisteronapplicationactivechanged(const method: booleaneventty);
 
+   procedure terminate; //calls terminatequery
    property terminated: boolean read getterminated write setterminated;
    property caret: tcaret read fcaret;
    property mouse: tmouse read fmouse;
@@ -1670,7 +1671,7 @@ type
    procedure mouseparktimer(const sender: tobject);
   protected
    procedure flushmousemove;
-   procedure doterminate;
+   procedure doterminate(const shutdown: boolean);
    procedure doidle;
    procedure checkshortcut(const sender: twindow; const awidget: twidget;
                      var info: keyeventinfoty);
@@ -9575,13 +9576,20 @@ begin
  end;
 end;
 
-procedure tinternalapplication.doterminate;
+procedure tinternalapplication.doterminate(const shutdown: boolean);
 begin
  if fonterminatequerylist.doterminatequery then begin
-  include(fstate,aps_terminated);
+  if shutdown then begin
+   include(fstate,aps_terminated);
+  end
+  else begin
+   terminated:= true;
+  end;
  end
  else begin
-  gui_cancelshutdown;
+  if shutdown then begin
+   gui_cancelshutdown;
+  end;
  end;
 end;
 
@@ -9805,7 +9813,7 @@ begin       //eventloop
         windowdestroyed(twindowevent(event).fwinid);
        end;
        ek_terminate: begin
-        doterminate;
+        doterminate(true);
        end;
        ek_focusin: begin
         getevents;
@@ -11180,6 +11188,11 @@ begin
    break;
   end;
  end;
+end;
+
+procedure tapplication.terminate;
+begin
+ tinternalapplication(self).doterminate(false);
 end;
 
 initialization

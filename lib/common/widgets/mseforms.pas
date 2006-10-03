@@ -324,6 +324,8 @@ type
    property onwindowactivechanged;
    property onwindowdestroyed;
    property onapplicationactivechanged;
+   property onterminatequery;
+   property onterminated;
 
    property onmouseevent;
    property onclientmouseevent;
@@ -618,7 +620,7 @@ begin
     fstatfile.writestat;
    end;
    if (fo_terminateonclose in foptions) and not (csdesigning in componentstate) then begin
-    application.terminated:= true;
+    application.terminate;
    end;
    if (fo_freeonclose in foptions) and not (csdesigning in componentstate) then begin
     release;
