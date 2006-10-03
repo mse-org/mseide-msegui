@@ -621,8 +621,10 @@ begin
    end;
    if (fo_terminateonclose in foptions) and not (csdesigning in componentstate) then begin
     application.terminate;
+    result:= application.terminated;
    end;
-   if (fo_freeonclose in foptions) and not (csdesigning in componentstate) then begin
+   if result and (fo_freeonclose in foptions) and 
+             not (csdesigning in componentstate) then begin
     release;
    end;
   end;
