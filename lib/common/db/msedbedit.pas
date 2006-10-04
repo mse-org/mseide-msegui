@@ -1316,6 +1316,7 @@ type
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
+   function canclose(const newfocus: twidget): boolean; override;
    procedure rowup(const action: focuscellactionty = fca_focusin); override;
    procedure rowdown(const action: focuscellactionty = fca_focusin); override;
    procedure pageup(const action: focuscellactionty = fca_focusin); override;
@@ -5750,6 +5751,12 @@ begin
    end;
   end;
  end;
+end;
+
+function tcustomdbstringgrid.canclose(const newfocus: twidget): boolean;
+begin
+ result:= true;
+ checkcellvalue(result);
 end;
 
 procedure tcustomdbstringgrid.dopaint(const acanvas: tcanvas);
