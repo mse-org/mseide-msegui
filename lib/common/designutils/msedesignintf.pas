@@ -291,9 +291,28 @@ function getcomponentpos(const component: tcomponent): pointty;
 
 implementation
 uses
- msesysutils,msestream,msewidgets,msedatalist,rtlconsts;
-// msedesigner;
+ msesysutils,msestream,msewidgets,msedatalist,rtlconsts,msedesigner;
 type
+
+ {$ifdef FPC}
+  TFilercracker = class(TObject)
+  private
+    FRoot: TComponent;
+    FLookupRoot: TComponent;
+  end;
+  {$else}
+  TFilercracker = class(TObject)
+  private
+    FStream: TStream;
+    FBuffer: Pointer;
+    FBufSize: Integer;
+    FBufPos: Integer;
+    FBufEnd: Integer;
+    FRoot: TComponent;
+    FLookupRoot: TComponent;
+  end;
+  {$endif}
+  
  tcomponent1 = class(tcomponent);
 var
  adesignnotifications: tdesignnotifications;
@@ -765,19 +784,22 @@ var
  int1: integer;
  component: tcomponent;
  writer: twriter;
+ comp1: tcomponent;
 begin
  result:= '';
  if count > 0 then begin
   binstream:= tmemorystream.Create;
   textstream:= ttextstream.Create;
+  comp1:= tcomponent.create(nil);
   try
    for int1:= 0 to count -1 do begin
     component:= items[int1];
     if not isembedded(component) then begin
-//     binstream.WriteComponent(items[int1]);
      writer:= twriter.Create(binstream,4096);
      try
       writer.Root:= component.Owner;
+      tfilercracker(writer).flookuproot:= comp1;
+       //force qualified component names      
       {$ifndef FPC}
       writer.WriteSignature;
       {$endif}
@@ -793,10 +815,10 @@ begin
    end;
    textstream.Position:= 0;
    result:= textstream.readdatastring;
-//   msewidgets.copytoclipboard(textstream.readdatastring);
   finally
    binstream.Free;
    textstream.Free;
+   comp1.free;
   end;
  end;
 end;
@@ -861,6 +883,11 @@ begin
  factcomp:= component;
 end;
 
+function getglobalcomponent(const Name: string): TComponent;
+begin
+ result:= designer.modules.findmoduleinstancebyname(name);
+end;
+
 function tdesignerselections.pastefromobjecttext(const aobjecttext: string; 
            aowner,aparent: tcomponent; initproc: initcomponentprocty): integer;
                   //returns count of added components
@@ -884,8 +911,9 @@ begin
   textstream:= ttextstream.Create;
   comp1:= tcomponent.create(nil);
   tcomponent1(comp1).SetDesigning(true{$ifndef FPC},false{$endif});
+  lockfindglobalcomponent;
+  RegisterFindGlobalComponentProc({$ifdef FPC}@{$endif}getglobalcomponent);
   try
-   lockfindglobalcomponent;
    listend:= vanull;
    textstream.writestr(aobjecttext);
    textstream.Position:= 0;
@@ -916,6 +944,7 @@ begin
    end;
   finally
    unlockfindglobalcomponent;
+   unRegisterFindGlobalComponentProc({$ifdef FPC}@{$endif}getglobalcomponent);
    textstream.Free;
    comp1.Free;
   end;
@@ -1212,7 +1241,7 @@ end;
 
 initialization
  adesignnotifications:= tdesignnotifications.Create;
- aregisteredcomponents:= tcomponentclasslist.create;
+// aregisteredcomponents:= tcomponentclasslist.create;
 finalization
  freeandnil(adesignnotifications);
  freeandnil(aregisteredcomponents);

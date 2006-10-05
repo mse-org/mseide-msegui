@@ -118,7 +118,7 @@ var
  
 implementation
 uses
- msedrawtext,msestockobjects,msebits;
+ classes,msedrawtext,msestockobjects,msebits;
 
 procedure setchecked(var info: shapeinfoty; const value: boolean;
                       const widget: twidget);
@@ -241,7 +241,9 @@ begin
       end;
      end;
      ek_buttonpress: begin
-      if canclick and (button = mb_left) and not(ss_disabled in state) and pointinrect(pos,dim) then begin
+      if canclick and (button = mb_left) and 
+      (not(ss_disabled in state) or (csdesigning in widget.componentstate)) 
+             and pointinrect(pos,dim) then begin
        state:= state + [ss_clicked];
        updateshapemoveclick(infoarpo,true);
       end;

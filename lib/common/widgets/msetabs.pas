@@ -666,7 +666,8 @@ procedure ttab.setstate(const Value: tabstatesty);
 begin
  if fstate <> value then begin
   fstate := Value;
-  if fstate * [ts_invisible,ts_disabled] <> [] then begin
+  if (fstate * [ts_invisible,ts_disabled] <> []) and 
+       not (csdesigning in tcustomtabbar(fowner).componentstate) then begin
    exclude(fstate,ts_active);
   end;
   changed;
@@ -1632,7 +1633,8 @@ begin
    else begin
     ftabs.tabs[int1].state:= ftabs.tabs[int1].state - [ts_disabled];
    end;
-   if widget1.isvisible and widget1.enabled then begin
+   if widget1.isvisible and (widget1.enabled or 
+                    (csdesigning in widget1.componentstate)) then begin
     setactivepageindex(int1);
    end
    else begin
@@ -1862,7 +1864,8 @@ begin
  for int1:= 0 to widgetcount - 1 do begin
   widget1:= twidget1(fwidgets[int1]);
   if not (ws1_isstreamed in widget1.fwidgetstate1) and
-    ((widget1.owner = root)) and (ws_iswidget in widget1.fwidgetstate) then begin
+    (widget1.owner = root) and 
+              (ws_iswidget in widget1.fwidgetstate) then begin
    proc(widget1);
   end;
  end;
@@ -2006,7 +2009,7 @@ begin
   end;
   int1:= newindex;
   repeat
-   if items[int1].enabled then begin
+   if (items[int1].enabled) or (csdesigning in componentstate) then begin
     setactivepageindex(int1);
     break;
    end
