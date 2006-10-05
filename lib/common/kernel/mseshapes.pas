@@ -242,7 +242,8 @@ begin
      end;
      ek_buttonpress: begin
       if canclick and (button = mb_left) and 
-      (not(ss_disabled in state) or (csdesigning in widget.componentstate)) 
+      (not(ss_disabled in state) or 
+             (widget <> nil) and (csdesigning in widget.componentstate)) 
              and pointinrect(pos,dim) then begin
        state:= state + [ss_clicked];
        updateshapemoveclick(infoarpo,true);
