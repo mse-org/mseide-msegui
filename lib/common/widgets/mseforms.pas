@@ -619,8 +619,9 @@ begin
                  not (csdesigning in componentstate) then begin
     fstatfile.writestat;
    end;
-   if (fo_terminateonclose in foptions) and not (csdesigning in componentstate) then begin
-    application.terminate;
+   if (fo_terminateonclose in foptions) and not application.terminating and
+                  not (csdesigning in componentstate) then begin
+    application.terminate(window);
     result:= application.terminated;
    end;
    if result and (fo_freeonclose in foptions) and 

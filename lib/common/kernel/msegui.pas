@@ -1297,7 +1297,7 @@ type
  applicationstatety = (aps_inited,aps_running,aps_terminated,aps_mousecaptured,
                        aps_invalidated,aps_zordervalid,aps_needsupdatewindowstack,
                        aps_focused,aps_activewindowchecked,aps_exitloop,
-                       aps_active,aps_waiting);
+                       aps_active,aps_waiting,aps_terminating);
  applicationstatesty = set of applicationstatety;
 
  exceptioneventty = procedure (sender: tobject; e: exception) of object;
@@ -1458,7 +1458,9 @@ type
    procedure registeronapplicationactivechanged(const method: booleaneventty);
    procedure unregisteronapplicationactivechanged(const method: booleaneventty);
 
-   procedure terminate; //calls terminatequery
+   procedure terminate(const sender: twindow = nil); 
+        //calls canclose of all windows except sender and terminatequery
+   function terminating: boolean;
    property terminated: boolean read getterminated write setterminated;
    property caret: tcaret read fcaret;
    property mouse: tmouse read fmouse;
@@ -11190,9 +11192,29 @@ begin
  end;
 end;
 
-procedure tapplication.terminate;
+function tapplication.terminating: boolean;
 begin
- tinternalapplication(self).doterminate(false);
+ result:= aps_terminating in fstate;
+end;
+
+procedure tapplication.terminate(const sender: twindow = nil);
+var
+ int1: integer;
+begin
+ include(fstate,aps_terminating);
+ try
+  int1:= 0;
+  while int1 <= high(fwindows) do begin
+   if (fwindows[int1] <> sender) and 
+                not fwindows[int1].fowner.canparentclose(nil) then begin
+    exit;
+   end;
+   inc(int1);
+  end; 
+  tinternalapplication(self).doterminate(false);
+ finally
+  exclude(fstate,aps_terminating);
+ end;
 end;
 
 initialization

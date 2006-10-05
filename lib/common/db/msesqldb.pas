@@ -169,19 +169,28 @@ type
  tparamsourcedatalink = class(tfielddatalink)
   private
    fowner: tfieldparamlink;
+   fparamset: boolean;
   protected
    procedure recordchanged(afield: tfield); override;
   public
    constructor create(const aowner: tfieldparamlink);
+   procedure loaded;
  end;
-  
+ 
+ fieldparamlinkoptionty = (fplo_autorefresh);
+ fieldparamlinkoptionsty = set of fieldparamlinkoptionty;
+const
+ defaultfieldparamlinkoptions = [fplo_autorefresh];
+ 
+type  
  tfieldparamlink = class(tmsecomponent,idbeditinfo,idbparaminfo)
   private
    fsourcedatalink: tparamsourcedatalink;
-   fdatasource: tdatasource;
+   fdestdatasource: tdatasource;
    fparamname: string;
    fonsetparam: setparameventty;
    fonaftersetparam: notifyeventty;
+   foptions: fieldparamlinkoptionsty;
    function getdatafield: string;
    procedure setdatafield(const avalue: string);
    function getdatasource: tdatasource;
@@ -191,6 +200,7 @@ type
    function getdestdataset: tsqlquery;
    procedure setdestdataset(const avalue: tsqlquery);
   protected
+   procedure loaded; override;
    //idbeditinfo
    procedure getfieldtypes(out propertynames: stringarty;
                           out fieldtypes: fieldtypesarty);
@@ -206,6 +216,8 @@ type
                     write setvisualcontrol default false;
    property destdataset: tsqlquery read getdestdataset write setdestdataset;
    property paramname: string read fparamname write fparamname;
+   property options: fieldparamlinkoptionsty read foptions write foptions
+                      default defaultfieldparamlinkoptions;
    property onsetparam: setparameventty read fonsetparam write fonsetparam;
    property onaftersetparam: notifyeventty read fonaftersetparam
                                   write fonaftersetparam;
@@ -1313,21 +1325,38 @@ procedure tparamsourcedatalink.recordchanged(afield: tfield);
 var
  bo1: boolean;
 begin
- inherited;
- if active and (field <> nil) and
-               ((afield = nil) or (afield = self.field)) then begin
-  with fowner do begin
-   bo1:= false;
-   if assigned(fonsetparam) and not (csdesigning in componentstate) then begin
-    fonsetparam(fowner,bo1);
-   end;
-   if not bo1 and (fparamname <> '') and (fdatasource.dataset <> nil) then begin
-    fieldtoparam(self.field,param);
-   end;
-   if assigned(fonaftersetparam) and not (csdesigning in componentstate) then begin
-    fonaftersetparam(fowner);
+ if not (csloading in fowner.componentstate) then begin
+  inherited;
+  if active and (field <> nil) and
+                ((afield = nil) or (afield = self.field)) then begin
+   with fowner do begin
+    if not (csdesigning in componentstate) then begin
+     fparamset:= true;
+     bo1:= false;
+     if assigned(fonsetparam) then begin
+      fonsetparam(fowner,bo1);
+     end;
+     if not bo1 and (fparamname <> '') and (dataset <> nil) then begin
+      fieldtoparam(self.field,param);
+     end;
+     if assigned(fonaftersetparam) then begin
+      fonaftersetparam(fowner);
+     end;
+     if (fplo_autorefresh in foptions) and (destdataset <> nil) and 
+                          destdataset.active then begin
+      destdataset.active:= false;
+      destdataset.active:= true;     
+     end;
+    end;
    end;
   end;
+ end;
+end;
+
+procedure tparamsourcedatalink.loaded;
+begin
+ if not fparamset then begin
+  recordchanged(nil);
  end;
 end;
 
@@ -1335,8 +1364,9 @@ end;
 
 constructor tfieldparamlink.create(aowner: tcomponent);
 begin
+ foptions:= defaultfieldparamlinkoptions;
  fsourcedatalink:= tparamsourcedatalink.create(self);
- fdatasource:= tdatasource.create(nil);
+ fdestdatasource:= tdatasource.create(nil);
  inherited;
 end;
 
@@ -1344,7 +1374,7 @@ destructor tfieldparamlink.destroy;
 begin
  inherited;
  fsourcedatalink.free;
- fdatasource.free;
+ fdestdatasource.free;
 end;
 
 function tfieldparamlink.getdatafield: string;
@@ -1379,21 +1409,21 @@ end;
 
 function tfieldparamlink.getdestdataset: tsqlquery;
 begin
- result:= tsqlquery(fdatasource.dataset);
+ result:= tsqlquery(fdestdatasource.dataset);
 end;
 
 procedure tfieldparamlink.setdestdataset(const avalue: tsqlquery);
 begin
- fdatasource.dataset:= avalue;
+ fdestdatasource.dataset:= avalue;
 end;
 
 function tfieldparamlink.param: tparam;
 begin
- if fdatasource.dataset = nil then begin
+ if fdestdatasource.dataset = nil then begin
   databaseerror(name+': No destdataset');
  end
  else begin
-  result:= tsqlquery(fdatasource.dataset).params.findparam(fparamname);
+  result:= tsqlquery(fdestdatasource.dataset).params.findparam(fparamname);
   if result = nil then begin
    databaseerror(name+': param "'+fparamname+'" not found');
   end;
@@ -1410,6 +1440,12 @@ procedure tfieldparamlink.getfieldtypes(out propertynames: stringarty;
 begin
  propertynames:= nil;
  fieldtypes:= nil;
+end;
+
+procedure tfieldparamlink.loaded;
+begin
+ inherited;
+ fsourcedatalink.loaded;
 end;
 
 { tsequencedatalink }
