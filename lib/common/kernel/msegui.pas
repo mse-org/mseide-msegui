@@ -6131,6 +6131,9 @@ begin
   exclude(fwidgetstate,ws_visible);
   updateopaque(false);
  end;
+ if ws_visible in fwidgetstate then begin
+  exit; //show called
+ end;
  if bo1 then begin
   if fparentwidget <> nil then begin
    fparentwidget.widgetregionchanged(self);

@@ -1887,6 +1887,10 @@ begin
    value:= -1;
   end;
   if factivepageindex >= 0 then begin
+   if not canparentclose(items[factivepageindex]) then begin
+    ftabs.tabs[factivepageindex].active:= true;
+    exit;
+   end;
    int1:= factivepageindex;
    factivepageindex:= -1;
    items[int1].visible:= false;
