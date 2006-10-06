@@ -9520,7 +9520,7 @@ var
  mstr1: msestring;
  strcol: tcustomstringcol;
 begin
- if not (oe_readonly in feditor.optionsedit) and isdatacell(ffocusedcell) then begin
+ if  isdatacell(ffocusedcell) and not (oe_readonly in feditor.optionsedit) then begin
   strcol:= datacols[ffocusedcell.col];
   if cos_edited in strcol.fstate then begin
    mstr1:= feditor.text;
