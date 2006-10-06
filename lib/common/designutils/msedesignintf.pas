@@ -175,6 +175,8 @@ type
    procedure Setitems(const index: integer; const Value: tcomponent);
    procedure dosetactcomp(component: tcomponent);
    procedure doadd(component: tcomponent);
+   procedure findpastemethod(Reader: TReader;
+           const aMethodName: string; var Address: Pointer; var Error: Boolean);
   protected
    procedure dochanged; virtual;
    function getrecordsize: integer; virtual;
@@ -785,26 +787,36 @@ var
  component: tcomponent;
  writer: twriter;
  comp1: tcomponent;
+ po1: pointer;
+ modulepo: pmoduleinfoty;
 begin
  result:= '';
  if count > 0 then begin
   binstream:= tmemorystream.Create;
   textstream:= ttextstream.Create;
-  comp1:= tcomponent.create(nil);
   try
    for int1:= 0 to count -1 do begin
     component:= items[int1];
     if not isembedded(component) then begin
      writer:= twriter.Create(binstream,4096);
+     comp1:= tcomponent.create(nil);
      try
-      writer.Root:= component.Owner;
-      tfilercracker(writer).flookuproot:= comp1;
-       //force qualified component names      
-      {$ifndef FPC}
-      writer.WriteSignature;
-      {$endif}
-      writer.writecomponent(component);
+      modulepo:= designer.modules.findmodulebycomponent(component);
+      po1:= swapmethodtable(comp1,modulepo^.methods.createmethodtable);
+      try
+       writer.Root:= component.Owner;
+       tfilercracker(writer).flookuproot:= comp1;
+        //force qualified component names      
+       {$ifndef FPC}
+       writer.WriteSignature;
+       {$endif}
+       writer.writecomponent(component);
+      finally
+       swapmethodtable(comp1,po1);
+       modulepo^.methods.releasemethodtable;
+      end;
      finally
+      comp1.free;
       writer.Free;
      end;
     end;
@@ -818,7 +830,6 @@ begin
   finally
    binstream.Free;
    textstream.Free;
-   comp1.free;
   end;
  end;
 end;
@@ -888,8 +899,25 @@ begin
  result:= designer.modules.findmoduleinstancebyname(name);
 end;
 
+var
+ pastingmodulepo: pmoduleinfoty;
+ 
+procedure tdesignerselections.findpastemethod(Reader: TReader;
+           const aMethodName: string; var Address: Pointer; var Error: Boolean);
+var
+ methodinfopo: pmethodinfoty;
+begin
+ error:= false;
+ if pastingmodulepo <> nil then begin
+  methodinfopo:= pastingmodulepo^.methods.findmethodbyname(amethodname);
+  if methodinfopo <> nil then begin
+   address:= methodinfopo^.address;
+  end;
+ end;
+end;
+
 function tdesignerselections.pastefromobjecttext(const aobjecttext: string; 
-           aowner,aparent: tcomponent; initproc: initcomponentprocty): integer;
+         aowner,aparent: tcomponent; initproc: initcomponentprocty): integer;
                   //returns count of added components
 var
  binstream: tmemorystream;
@@ -900,12 +928,18 @@ var
  reader: treader;
  comp1: tcomponent;
  listend: tvaluetype;
-
+ 
 begin
  if aobjecttext = '' then begin
   result:= 0;
   exit;
  end; 
+ if aowner is tmsecomponent then begin
+  pastingmodulepo:= designer.modules.findmodule(tmsecomponent(aowner));
+ end
+ else begin
+  pastingmodulepo:= nil;
+ end;
  countbefore:= count;
  try
   textstream:= ttextstream.Create;
@@ -926,6 +960,7 @@ begin
      binstream.Position:= 0;
      reader:= treader.create(binstream,4096);
      try
+      reader.onfindmethod:= {$ifdef FPC}@{$endif}findpastemethod;
       factcomp:= nil;
       reader.Readcomponents(comp1,nil,{$ifdef FPC}@{$endif}dosetactcomp);
       if factcomp <> nil then begin
@@ -938,6 +973,9 @@ begin
      finally
       reader.Free;
      end;
+    end;
+    if pastingmodulepo <> nil then begin
+     designer.checkmethodtypes(pastingmodulepo,false,true);
     end;
    finally
     binstream.Free;

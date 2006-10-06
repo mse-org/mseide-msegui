@@ -50,13 +50,13 @@ type
    procedure deletemethod(const aadress: pointer);
    procedure addmethod(const aname: string; const aaddress: pointer;
                        const atypeinfo: ptypeinfo);
+  public
+   constructor create(adesigner: tdesigner);
+   destructor destroy; override;
    function findmethod(const aadress: pointer): pmethodinfoty;
    function findmethodbyname(const aname: string;
          const atype: ptypeinfo; out namefound: boolean): pmethodinfoty; overload;
    function findmethodbyname(const aname: string): pmethodinfoty; overload;
-  public
-   constructor create(adesigner: tdesigner);
-   destructor destroy; override;
    function createmethodtable: pointer;
    procedure releasemethodtable;
  end;
@@ -286,7 +286,6 @@ type
    procedure writemodule(const amodule: pmoduleinfoty; const astream: tstream);
    procedure notifydeleted(comp: tcomponent);
    procedure componentdestroyed(const acomponent: tcomponent; const module: pmoduleinfoty);
-   function checkmethodtypes(const amodule: pmoduleinfoty; const init: boolean): boolean;
    procedure dofixup;
    procedure buildmethodtable(const amodule: pmoduleinfoty);
    procedure releasemethodtable(const amodule: pmoduleinfoty);
@@ -308,6 +307,8 @@ type
    function checksubmodule(const ainstance: tcomponent; 
               out aancestormodule: pmoduleinfoty): boolean;
    function getreferencingmodulenames(const amodule: pmoduleinfoty): stringarty;
+   function checkmethodtypes(const amodule: pmoduleinfoty;
+            const init,quiet: boolean): boolean;
    
    //idesigner
    procedure componentmodified(const component: tobject);
@@ -2402,7 +2403,7 @@ begin
 end;
 
 function tdesigner.checkmethodtypes(const amodule: pmoduleinfoty;
-                                    const init: boolean): boolean;
+                                    const init,quiet: boolean): boolean;
                                       //false on cancel
 var
  classinf: pclassinfoty;
@@ -2424,6 +2425,7 @@ var
     tkmethod: begin
      method1:= getmethodprop(instance,ar1[int1]);
      if method1.code <> nil then begin
+      method1.data:= amodule^.instance;
       po1:= amodule^.methods.findmethod(method1.code);
       if po1 <> nil then begin
        if init then begin
@@ -2433,20 +2435,36 @@ var
         po2:= classinf^.procedurelist.finditembyname(po1^.name);
         mr1:= mr_none;
         if po2 = nil then begin
-         mr1:= askyesnocancel('Method '+amodule^.instance.name+'.'+po1^.name+' ('+
+         if quiet then begin
+          mr1:= mr_yes;
+         end
+         else begin
+          mr1:= askyesnocancel('Method '+amodule^.instance.name+'.'+po1^.name+' ('+
                  comp1.name+'.'+ar1[int1]^.name+') does not exist.'+lineend+
                  'Do you wish to delete the event?','WARNING');
+         end;
         end
         else begin
          if not parametersmatch(po1^.typeinfo,po2^.params) then begin
-          mr1:= askyesnocancel('Method '+amodule^.instance.name+'.'+po1^.name+' ('+
+          if quiet then begin
+           mr1:= mr_yes;
+          end
+          else begin
+           mr1:= askyesnocancel('Method '+amodule^.instance.name+'.'+po1^.name+' ('+
                  comp1.name+'.'+ar1[int1]^.name+') has different parameters.'+lineend+
                  'Do you wish to delete the event?','WARNING');
+          end;
          end;
         end;
         if mr1 = mr_yes then begin
          setmethodprop(instance,ar1[int1],nullmethod);
          modulechanged(amodule);
+        end
+        else begin
+         if quiet then begin
+          setmethodprop(instance,ar1[int1],method1);
+                   //refresh data pointer
+         end;
         end;
         result:= mr1 <> mr_cancel;
        end;
@@ -2710,7 +2728,7 @@ begin //loadformfile
        if result <> nil then begin
         result^.designform:= tformdesignerfo.create(nil,self);
         tformdesignerfo(result^.designform).module:= module;
-        checkmethodtypes(result,true);
+        checkmethodtypes(result,true,false);
  //       showformdesigner(result);
         result^.modified:= false;
        end;
@@ -2825,7 +2843,7 @@ var
  
 begin
  if createdatafile and projectoptions.checkmethods 
-                       and not checkmethodtypes(modulepo,false) then begin
+                       and not checkmethodtypes(modulepo,false,false) then begin
   result:= false;
   exit;
  end;
@@ -2864,7 +2882,7 @@ begin
   po1:= modules[int1];
   with po1^ do begin
    if not modified and projectoptions.checkmethods then begin
-    if not checkmethodtypes(po1,false) then begin
+    if not checkmethodtypes(po1,false,false) then begin
      result:= mr_cancel;
      exit;
     end;
