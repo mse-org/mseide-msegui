@@ -32,6 +32,7 @@ type
    foncheckvalue: checkvalueeventty;
    fedited: boolean;
    fnullchecking: integer;
+   fvaluechecking: integer;
    fstatfile: tstatfile;
    fstatvarname: msestring;
    procedure setstatfile(const Value: tstatfile);
@@ -841,26 +842,31 @@ function tdataedit.checkvalue(const quiet: boolean = false): boolean;
 begin
  result:= true;
  if not ((oe_checkmrcancel in foptionsedit) and
-             (window.modalresult = mr_cancel)) then begin
-  if canevent(tmethod(foncheckvalue)) then begin
-   foncheckvalue(self,quiet,result);
-  end;
-  if result then begin
-   if (oe_notnull in foptionsedit) and nullcheckneeded(nil) and isempty(text) then begin
-    result:= false;
-    notnullerror(quiet);
-    exit;
+             (window.modalresult = mr_cancel)) and (fvaluechecking = 0) then begin
+  inc(fvaluechecking);
+  try
+   if canevent(tmethod(foncheckvalue)) then begin
+    foncheckvalue(self,quiet,result);
    end;
-   texttovalue(result,quiet);
    if result then begin
-    fedited:= false;
-    if not quiet and canevent(tmethod(fondataentered)) then begin
-     fondataentered(self);
+    if (oe_notnull in foptionsedit) and nullcheckneeded(nil) and isempty(text) then begin
+     result:= false;
+     notnullerror(quiet);
+     exit;
     end;
-    if focused then begin
-     initfocus;
+    texttovalue(result,quiet);
+    if result then begin
+     fedited:= false;
+     if not quiet and canevent(tmethod(fondataentered)) then begin
+      fondataentered(self);
+     end;
+     if focused then begin
+      initfocus;
+     end;
     end;
    end;
+  finally
+   dec(fvaluechecking);
   end;
  end;
 end;
@@ -895,7 +901,7 @@ begin
 end;
 
 procedure tdataedit.synctofontheight;
-begin
+begin 
  inherited;
  if fgridintf <> nil then begin
   fgridintf.getcol.grid.datarowheight:= bounds_cy;

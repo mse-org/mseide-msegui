@@ -1619,11 +1619,13 @@ procedure ttabwidget.pagechanged(const sender: itabpage);
 var
  widget1: twidget1;
  int1: integer;
+ activepageindexbefore: integer;
 begin
  if not (ws_destroying in fwidgetstate) then begin
   widget1:= twidget1(sender.getwidget);
   int1:= indexof(widget1);
   if not (csloading in componentstate) then begin
+   activepageindexbefore:= factivepageindex;
    ftabs.tabs[int1].caption:= sender.getcaption;
    ftabs.tabs[int1].color:= sender.getcolortab;
    ftabs.tabs[int1].coloractive:= sender.getcoloractivetab;
@@ -1638,7 +1640,7 @@ begin
     setactivepageindex(int1);
    end
    else begin
-    if (factivepageindex = int1) and not (csdestroying in componentstate) then begin
+    if (activepageindexbefore = int1) and not (csdestroying in componentstate) then begin
      changepage(1);
     end;
    end;
