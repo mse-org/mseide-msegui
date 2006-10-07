@@ -904,10 +904,15 @@ begin
  end
  else begin
   if fintf <> nil then begin
-   info.cell.row:= aindex;
-   info.griddatalink:= tcustomwidgetgrid(fgrid).getgriddatalink;
    datatyp:= fintf.getdatatyp;
-   po1:= fintf.getrowdatapo(info);
+   if aindex >= 0 then begin
+    info.cell.row:= aindex;
+    info.griddatalink:= tcustomwidgetgrid(fgrid).getgriddatalink;
+    po1:= fintf.getrowdatapo(info);
+   end
+   else begin
+    po1:= nil;
+   end;
    case datatyp of
     dl_integer: begin
      if po1 = nil then begin

@@ -76,6 +76,8 @@ type
    procedure cancelrecupdate(var arec: trecupdatebuffer);
    function GetRecordUpdateBuffer : boolean;
    function GetFieldSize(FieldDef : TFieldDef) : longint;
+   Procedure ApplyRecUpdate1(UpdateKind : TUpdateKind);
+   
   protected
    procedure ClearCalcFields(Buffer: PChar); override;
    function  AllocRecordBuffer: PChar; override;
@@ -620,6 +622,126 @@ begin
  end;
 end;
 
+Procedure TmseSQLQuery.ApplyRecUpdate1(UpdateKind : TUpdateKind);
+
+var
+    s : string;
+
+  procedure UpdateWherePart(var sql_where : string;x : integer);
+
+  begin
+   with tsqlquerycracker(self) do begin
+    if (pfInKey in Fields[x].ProviderFlags) or
+       ((FUpdateMode = upWhereAll) and (pfInWhere in Fields[x].ProviderFlags)) or
+       ((FUpdateMode = UpWhereChanged) and (pfInWhere in Fields[x].ProviderFlags) and (fields[x].value <> fields[x].oldvalue)) then
+      sql_where := sql_where + '(' + fields[x].FieldName + '= :OLD_' + fields[x].FieldName + ') and ';
+   end;
+  end;
+
+  function ModifyRecQuery : string;
+
+  var x          : integer;
+      sql_set    : string;
+      sql_where  : string;
+
+  begin
+   with tsqlquerycracker(self) do begin
+    sql_set := '';
+    sql_where := '';
+    for x := 0 to Fields.Count -1 do
+      begin
+      UpdateWherePart(sql_where,x);
+
+      if (pfInUpdate in Fields[x].ProviderFlags) then
+        sql_set := sql_set + fields[x].FieldName + '=:' + fields[x].FieldName + ',';
+      end;
+
+    setlength(sql_set,length(sql_set)-1);
+    setlength(sql_where,length(sql_where)-5);
+    result := 'update ' + FTableName + ' set ' + sql_set + ' where ' + sql_where;
+   end;
+  end;
+
+  function InsertRecQuery : string;
+
+  var x          : integer;
+      sql_fields : string;
+      sql_values : string;
+
+  begin
+   with tsqlquerycracker(self) do begin
+    sql_fields := '';
+    sql_values := '';
+    for x := 0 to Fields.Count -1 do begin
+     with fields[x] do begin
+      if not IsNull and 
+         (pfInUpdate in ProviderFlags) then begin //fpc bug 7565
+       sql_fields := sql_fields + FieldName + ',';
+       sql_values := sql_values + ':' + FieldName + ',';
+      end;
+     end;
+    end;
+    setlength(sql_fields,length(sql_fields)-1);
+    setlength(sql_values,length(sql_values)-1);
+
+    result := 'insert into ' + FTableName + ' (' + sql_fields + ') values (' + sql_values + ')';
+   end;
+  end;
+
+  function DeleteRecQuery : string;
+
+  var x          : integer;
+      sql_where  : string;
+
+  begin
+   with tsqlquerycracker(self) do begin
+    sql_where := '';
+    for x := 0 to Fields.Count -1 do
+      UpdateWherePart(sql_where,x);
+
+    setlength(sql_where,length(sql_where)-5);
+
+    result := 'delete from ' + FTableName + ' where ' + sql_where;
+   end;
+  end;
+
+var qry : tsqlquery;
+    x   : integer;
+    Fld : TField;
+    
+begin
+ with tsqlquerycracker(self) do begin
+    case UpdateKind of
+      ukModify : begin
+                 qry := FUpdateQry;
+                 if trim(qry.sql.Text) = '' then qry.SQL.Add(ModifyRecQuery);
+                 end;
+      ukInsert : begin
+                 qry := FInsertQry;
+                 if trim(qry.sql.Text) = '' then qry.SQL.Add(InsertRecQuery);
+                 end;
+      ukDelete : begin
+                 qry := FDeleteQry;
+                 if trim(qry.sql.Text) = '' then qry.SQL.Add(DeleteRecQuery);
+                 end;
+    end;
+  with qry do
+    begin
+    for x := 0 to Params.Count-1 do with params[x] do if leftstr(name,4)='OLD_' then
+      begin
+      Fld := self.FieldByName(copy(name,5,length(name)-4));
+      AssignFieldValue(Fld,Fld.OldValue);
+      end
+    else
+      begin
+      Fld := self.FieldByName(name);
+      AssignFieldValue(Fld,Fld.Value);
+      end;
+    execsql;
+    end;
+ end;
+end;
+
 procedure tmsesqlquery.applyrecupdate(updatekind: tupdatekind);
 var
  bo1: boolean;
@@ -642,7 +764,8 @@ begin
    end;
   end
   else begin
-   inherited;
+//   inherited;
+  applyrecupdate1(updatekind);
   end;
  except
   include(fmstate,sqs_updateerror);

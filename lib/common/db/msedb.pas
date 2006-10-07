@@ -599,6 +599,10 @@ type
    procedure setfields(const avalue: tpersistentfields);
    function getcontroller: tdscontroller;
    procedure updatelinkedfields;
+   function getrecnonullbased: integer;
+   procedure setrecnonullbased(const avalue: integer);
+   function getrecno: integer;
+   procedure setrecno(const avalue: integer);
   protected
    procedure setowneractive(const avalue: boolean); override;
    procedure fielddestroyed(const sender: ifieldcomponent);
@@ -617,7 +621,9 @@ type
    
    procedure dataevent(const event: tdataevent; const info: ptrint);
    procedure cancel;
-   function recnonullbased: integer; //null based
+   property recno: integer read getrecno write setrecno;
+   property recnonullbased: integer read getrecnonullbased 
+                                       write setrecnonullbased;
    property recnooffset: integer read frecnooffset;
    function moveby(const distance: integer): integer;
    procedure internalinsert;
@@ -2397,7 +2403,7 @@ begin
  result:= msefieldtypeclasses[tfieldtypetotypety[fieldtype]];
 end;
 
-function tdscontroller.recnonullbased: integer;
+function tdscontroller.getrecnonullbased: integer;
 begin
  with tdataset1(fowner) do begin
   if not frecnovalid then begin
@@ -2421,6 +2427,27 @@ begin
   fscrollsum:= 0;
  end;
  result:= frecno;
+end;
+
+procedure tdscontroller.setrecnonullbased(const avalue: integer);
+begin
+ if not frecnovalid or (avalue <> frecno) then begin
+  tdataset1(fowner).recno:= avalue - recnooffset;
+  frecno:= avalue;
+  factiverecordbefore:= tdataset1(fowner).activerecord;
+  fscrollsum:= 0;
+  frecnovalid:= true;
+ end;
+end;
+
+function tdscontroller.getrecno: integer;
+begin
+ result:= recnonullbased - frecnooffset;
+end;
+
+procedure tdscontroller.setrecno(const avalue: integer);
+begin
+ recnonullbased:= avalue + frecnooffset;
 end;
 
 procedure tdscontroller.updatelinkedfields;

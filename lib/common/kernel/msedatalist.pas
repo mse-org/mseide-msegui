@@ -2096,6 +2096,9 @@ var
  po1: pointer;
 begin
  checkindex(index);
+ if ilo_needsfree in finternaloptions then begin
+  freedata(dest);
+ end;  
  po1:= fdatapo+index*fsize;
  move(po1^,dest,fsize);
  if ilo_needscopy in finternaloptions then begin

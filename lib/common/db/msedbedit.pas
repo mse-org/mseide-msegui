@@ -834,6 +834,8 @@ type
    fobjectlinker: tobjectlinker;
    fcolordatalink: tfielddatalink;
    ffontdatalink: tfielddatalink;
+   frowexited: integer;
+   feditingbefore: boolean;
    procedure checkscroll;
    procedure checkscrollbar;
    function getfirstrecord: integer;
@@ -4666,6 +4668,10 @@ begin
  distance:= firstrecord - ffirstrecordbefore;
  ffirstrecordbefore:= firstrecord;
  with tcustomgrid1(fgrid) do begin
+  if distance <> 0 then begin
+   inc(frowexited);
+   row:= invalidaxis;
+  end;
   if (abs(distance) >= rowcount) then begin
    gridinvalidate;
   end
@@ -4680,7 +4686,39 @@ begin
     doupdaterowdata(-1);
    end;
   end;
+  if (activerecord < rowcount) and 
+                 not (csdestroying in componentstate) then begin
+   row:= activerecord;
+  end;
  end;
+end;
+
+procedure tgriddatalink.recordchanged(afield: tfield);
+var
+ int1: integer;
+begin
+ int1:= frowexited;
+ checkscroll;
+ fgrid.invalidaterow(activerecord);
+ tcustomgrid1(fgrid).beginnonullcheck;
+ tcustomgrid1(fgrid).beginnocheckvalue;
+ try
+  if (afield = nil) and (frowexited = int1) and (feditingbefore = editing) then begin
+   fgrid.row:= invalidaxis;
+  end;
+  fgrid.row:= activerecord;
+ finally
+  tcustomgrid1(fgrid).endnonullcheck;
+  tcustomgrid1(fgrid).endnocheckvalue;
+  feditingbefore:= editing;
+ end;
+ fgrid.invalidaterow(factiverecordbefore);
+ factiverecordbefore:= activerecord;
+ if afield = nil then begin
+  updaterowcount;
+  checkscrollbar;
+ end;
+ doupdaterowdata(activerecord);
 end;
 
 function tgriddatalink.arecord: integer;
@@ -4741,27 +4779,6 @@ begin
  fgrid.frame.sbvert.value:= rea1;
 end;
 
-procedure tgriddatalink.recordchanged(afield: tfield);
-begin
- checkscroll;
- fgrid.invalidaterow(activerecord);
- tcustomgrid1(fgrid).beginnonullcheck;
- tcustomgrid1(fgrid).beginnocheckvalue;
- try
-  fgrid.row:= activerecord;
- finally
-  tcustomgrid1(fgrid).endnonullcheck;
-  tcustomgrid1(fgrid).endnocheckvalue;
- end;
- fgrid.invalidaterow(factiverecordbefore);
- factiverecordbefore:= activerecord;
- if afield = nil then begin
-  updaterowcount;
-  checkscrollbar;
- end;
- doupdaterowdata(activerecord);
-end;
-
 procedure tgriddatalink.cellevent(var info: celleventinfoty);
 var
  int1: integer;
@@ -4794,12 +4811,16 @@ begin
     sbe_thumbtrack,sbe_thumbposition: begin
      if (event <> sbe_thumbtrack) or (gdo_thumbtrack in foptions) then begin
       if self.active then begin
-       if sender.value = 0 then begin
-        dataset.first;
+       if (sender.value = 0) then begin
+        if not dataset.bof then begin
+         dataset.first;
+        end;
        end
        else begin
         if sender.value >= 1.0 then begin
-         dataset.last
+         if not dataset.eof then begin
+          dataset.last
+         end;
         end
         else begin
          if (gdo_propscrollbar in foptions) then begin
@@ -4807,11 +4828,18 @@ begin
           if int1 >= 0 then begin
            int2:= round(int1 * sender.value)+1;
                     //are recnos allways 1-based?
-           if int2 >= int1 then begin
-            dataset.last;
+           if (int2 >= int1) then begin
+            if not dataset.eof then begin
+             dataset.last;
+            end;
            end
            else begin
-            dataset.recno:= int2;
+            if dscontroller = nil then begin
+             dataset.recno:= int2;
+            end
+            else begin
+             dscontroller.recno:= int2; //use cached recno
+            end;
            end;
           end;
          end
