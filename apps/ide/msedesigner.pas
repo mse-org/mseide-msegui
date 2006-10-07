@@ -308,7 +308,8 @@ type
               out aancestormodule: pmoduleinfoty): boolean;
    function getreferencingmodulenames(const amodule: pmoduleinfoty): stringarty;
    function checkmethodtypes(const amodule: pmoduleinfoty;
-            const init,quiet: boolean): boolean;
+            const init: boolean; const quiet: tcomponent): boolean;
+               //does correct errors quiet for tmethod.data = quiet
    
    //idesigner
    procedure componentmodified(const component: tobject);
@@ -2403,7 +2404,7 @@ begin
 end;
 
 function tdesigner.checkmethodtypes(const amodule: pmoduleinfoty;
-                                    const init,quiet: boolean): boolean;
+                      const init: boolean; const quiet: tcomponent): boolean;
                                       //false on cancel
 var
  classinf: pclassinfoty;
@@ -2424,7 +2425,8 @@ var
    case ar1[int1]^.proptype^.kind of
     tkmethod: begin
      method1:= getmethodprop(instance,ar1[int1]);
-     if method1.code <> nil then begin
+     if (method1.code <> nil) and ((quiet = nil) or 
+                         (pointer(quiet) = method1.data)) then begin
       method1.data:= amodule^.instance;
       po1:= amodule^.methods.findmethod(method1.code);
       if po1 <> nil then begin
@@ -2435,7 +2437,7 @@ var
         po2:= classinf^.procedurelist.finditembyname(po1^.name);
         mr1:= mr_none;
         if po2 = nil then begin
-         if quiet then begin
+         if quiet <> nil then begin
           mr1:= mr_yes;
          end
          else begin
@@ -2446,7 +2448,7 @@ var
         end
         else begin
          if not parametersmatch(po1^.typeinfo,po2^.params) then begin
-          if quiet then begin
+          if quiet <> nil then begin
            mr1:= mr_yes;
           end
           else begin
@@ -2461,7 +2463,7 @@ var
          modulechanged(amodule);
         end
         else begin
-         if quiet then begin
+         if quiet <> nil then begin
           setmethodprop(instance,ar1[int1],method1);
                    //refresh data pointer
          end;
@@ -2728,7 +2730,7 @@ begin //loadformfile
        if result <> nil then begin
         result^.designform:= tformdesignerfo.create(nil,self);
         tformdesignerfo(result^.designform).module:= module;
-        checkmethodtypes(result,true,false);
+        checkmethodtypes(result,true,nil);
  //       showformdesigner(result);
         result^.modified:= false;
        end;
@@ -2843,7 +2845,7 @@ var
  
 begin
  if createdatafile and projectoptions.checkmethods 
-                       and not checkmethodtypes(modulepo,false,false) then begin
+                       and not checkmethodtypes(modulepo,false,nil) then begin
   result:= false;
   exit;
  end;
@@ -2882,7 +2884,7 @@ begin
   po1:= modules[int1];
   with po1^ do begin
    if not modified and projectoptions.checkmethods then begin
-    if not checkmethodtypes(po1,false,false) then begin
+    if not checkmethodtypes(po1,false,nil) then begin
      result:= mr_cancel;
      exit;
     end;

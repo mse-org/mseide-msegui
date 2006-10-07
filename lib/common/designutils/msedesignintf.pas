@@ -975,7 +975,7 @@ begin
      end;
     end;
     if pastingmodulepo <> nil then begin
-     designer.checkmethodtypes(pastingmodulepo,false,true);
+     designer.checkmethodtypes(pastingmodulepo,false,comp1);
     end;
    finally
     binstream.Free;
