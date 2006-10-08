@@ -2034,6 +2034,9 @@ begin
     end;
    end;
   until int1 = newindex;
+  if not ((items[int1].enabled) or (csdesigning in componentstate)) then begin
+   setactivepageindex(-1);
+  end;
  end;
 end;
 
