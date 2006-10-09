@@ -333,7 +333,7 @@ begin
  end;
  if not bo1 then begin
   with projecttree.units do begin
-   bo1:= dofind(modulenames,modulefilenames)
+   bo1:= dofind(modulenames,modulefilenames);
   end;
  end;
  if bo1 then begin

@@ -15,7 +15,7 @@ interface
 
 implementation
 uses
- classes,msedesignintf,db,msedbedit,typinfo,mseibconnection,msepropertyeditors,
+ dbconst,classes,msedesignintf,db,msedbedit,typinfo,mseibconnection,msepropertyeditors,
  msepqconnection,mseodbcconn,msemysql40conn,msemysql41conn,msemysql50conn,{sqldb,}
  mselookupbuffer,msesqldb,msedbf,msesdfdata,msememds,msedb,mseclasses,msetypes,
  msestrings,msedatalist,msedbfieldeditor,sysutils,msetexteditor,
@@ -101,7 +101,22 @@ type
    function getdefaultstate: propertystatesty; override;
    procedure setvalue(const value: msestring); override;
  end;
+
+ tfielddefpropertyeditor = class(tclasspropertyeditor)
+  public
+   function getvalue: msestring; override;
+ end;
  
+ tfielddefspropertyeditor = class(tcollectionpropertyeditor)
+  public
+   procedure setvalue(const value: msestring); override;
+ end;
+
+ tdatasetactivepropertyeditor = class(tbooleanpropertyeditor)
+  public
+   function getdefaultstate: propertystatesty; override;
+ end;
+   
 procedure Register;
 begin
  registercomponents('Dbf',[
@@ -165,6 +180,11 @@ begin
                              tlocalcomponentpropertyeditor);
  registerpropertyeditor(typeinfo(lbfiltereventty),tlbdropdownlistcontroller,
                            'onfilter',tonfilterpropertyeditor);
+ registerpropertyeditor(typeinfo(tfielddefs),tdataset,'',
+                              tfielddefspropertyeditor);
+ registerpropertyeditor(typeinfo(boolean),tdataset,'Active',
+                                         tdatasetactivepropertyeditor);                              
+ registerpropertyeditor(typeinfo(tfielddef),nil,'',tfielddefpropertyeditor);
 end;
 
 
@@ -599,6 +619,35 @@ begin
     end;
    end;
   end;
+ end;
+end;
+
+{ tfielddefspropertyeditor }
+
+procedure tfielddefspropertyeditor.setvalue(const value: msestring);
+var
+ int1: integer;
+begin
+ for int1:= 0 to high(fprops) do begin
+  tdataset(fprops[int1].instance).active:= false;
+ end; 
+ inherited;
+end;
+
+{ tdatasetactivepropertyeditor }
+
+function tdatasetactivepropertyeditor.getdefaultstate: propertystatesty;
+begin
+ result:= inherited getdefaultstate + [ps_volatile];
+end;
+
+{ tfielddefpropertyeditor }
+
+function tfielddefpropertyeditor.getvalue: msestring;
+begin
+ with tfielddef(fprops[0].instance) do begin
+  result:= '<'+name+'><'+
+    getenumname(typeinfo(tfieldtype),ord(datatype))+'>';
  end;
 end;
 

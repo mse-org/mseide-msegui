@@ -525,6 +525,8 @@ type
                           var mouseinfo: mouseeventinfoty); override;
  end;
  
+ collectionitemeditorclassty = class of tcollectionitemeditor;
+  
  tcollectionpropertyeditor = class(tclasspropertyeditor)
   private
    procedure doappend(const sender: tobject);
@@ -2628,11 +2630,20 @@ constructor tcollectionitemeditor.create(aindex: integer;
             const adesigner: idesigner;
             const aobjectinspector: iobjectinspector;
             const aprops: propinstancearty; atypinfo: ptypeinfo);
+var
+ props1: propinstancearty;
+ int1: integer;
 begin
+ setlength(props1,length(aprops));
+ for int1:= 0 to high(props1) do begin
+  props1[int1].propinfo:= aprops[int1].propinfo;
+  props1[int1].instance:= 
+     tcollection(aparenteditor.getordvalue(int1)).items[aindex];
+ end;
  findex:= aindex;
  fparenteditor:= aparenteditor;
  feditor:= aeditorclass.create(adesigner,aparenteditor.fmodule,
-             aparenteditor.fcomponent,aobjectinspector,aprops,atypinfo);
+             aparenteditor.fcomponent,aobjectinspector,props1,atypinfo);
  feditor.setremote(iremotepropertyeditor(self));
  inherited create(adesigner,feditor.fmodule,feditor.fcomponent,
          aobjectinspector,aprops,atypinfo);
