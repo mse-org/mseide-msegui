@@ -13,7 +13,7 @@ type
 const
  textfields = [ftstring,ftfixedchar,ftwidestring];
  memofields = textfields+[ftblob,ftmemo];
- integerfields = [ftsmallint,ftinteger,ftword,ftbcd];
+ integerfields = [ftsmallint,ftinteger,ftword,ftlargeint,ftbcd];
  booleanfields = [ftboolean,ftstring,ftfixedchar]+integerfields-[ftbcd];
  realfields = [ftfloat,ftcurrency,ftbcd];
  datetimefields = [ftdate,fttime,ftdatetime];
