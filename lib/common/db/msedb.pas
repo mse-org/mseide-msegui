@@ -110,7 +110,7 @@ type
    procedure Clear; override;
    property asmsestring: msestring read getasmsestring write setasmsestring;
   published
-   property DataSet;
+   property DataSet stored false;
    property ProviderFlags default defaultproviderflags;
  end;
  tmsestringfield = class(tstringfield,ifieldcomponent)
@@ -129,7 +129,7 @@ type
    function assql: string;
    property asmsestring: msestring read getasmsestring write setasmsestring;
   published
-   property DataSet;
+   property DataSet stored false;
    property ProviderFlags default defaultproviderflags;
  end;
  tmsememofield = class(tmemofield,ifieldcomponent)
@@ -148,7 +148,7 @@ type
    procedure Clear; override;
    function assql: string;
   published
-   property DataSet;
+   property DataSet stored false;
    property ProviderFlags default defaultproviderflags;
  end;
  tmsenumericfield = class(tnumericfield)
@@ -162,7 +162,7 @@ type
    function assql: string;
    property asmsestring: msestring read getasmsestring write setasmsestring;
   published
-   property DataSet;
+   property DataSet stored false;
    property ProviderFlags default defaultproviderflags;
  end;
  tmselongintfield = class(tlongintfield)
@@ -178,7 +178,7 @@ type
    function assql: string;
    property asmsestring: msestring read getasmsestring write setasmsestring;
   published
-   property DataSet;
+   property DataSet stored false;
    property ProviderFlags default defaultproviderflags;
  end;
  tmselargeintfield = class(tlargeintfield)
@@ -194,7 +194,7 @@ type
    function assql: string;
    property asmsestring: msestring read getasmsestring write setasmsestring;
   published
-   property DataSet;
+   property DataSet stored false;
    property ProviderFlags default defaultproviderflags;
  end;
  tmsesmallintfield = class(tsmallintfield)
@@ -210,7 +210,7 @@ type
    function assql: string;
    property asmsestring: msestring read getasmsestring write setasmsestring;
   published
-   property DataSet;
+   property DataSet stored false;
    property ProviderFlags default defaultproviderflags;
  end;
  tmsewordfield = class(twordfield)
@@ -226,7 +226,7 @@ type
    function assql: string;
    property asmsestring: msestring read getasmsestring write setasmsestring;
   published
-   property DataSet;
+   property DataSet stored false;
    property ProviderFlags default defaultproviderflags;
  end;
  tmseautoincfield = class(tautoincfield)
@@ -240,7 +240,7 @@ type
    function assql: string;
    property asmsestring: msestring read getasmsestring write setasmsestring;
   published
-   property DataSet;
+   property DataSet stored false;
    property ProviderFlags default defaultproviderflags;
  end;
  tmsefloatfield = class(tfloatfield)
@@ -256,7 +256,7 @@ type
    function assql: string;
    property asmsestring: msestring read getasmsestring write setasmsestring;
   published
-   property DataSet;
+   property DataSet stored false;
    property ProviderFlags default defaultproviderflags;
  end;
  tmsecurrencyfield = class(tcurrencyfield)
@@ -270,7 +270,7 @@ type
    function assql: string;
    property asmsestring: msestring read getasmsestring write setasmsestring;
   published
-   property DataSet;
+   property DataSet stored false;
    property ProviderFlags default defaultproviderflags;
  end;
  tmsebooleanfield = class(tbooleanfield)
@@ -284,7 +284,7 @@ type
    function assql: string;
    property asmsestring: msestring read getasmsestring write setasmsestring;
   published
-   property DataSet;
+   property DataSet stored false;
    property ProviderFlags default defaultproviderflags;
  end;
  tmsedatetimefield = class(tdatetimefield)
@@ -300,7 +300,7 @@ type
    function assql: string;
    property asmsestring: msestring read getasmsestring write setasmsestring;
   published
-   property DataSet;
+   property DataSet stored false;
    property ProviderFlags default defaultproviderflags;
  end;
  tmsedatefield = class(tdatefield)
@@ -316,7 +316,7 @@ type
    function assql: string;
    property asmsestring: msestring read getasmsestring write setasmsestring;
   published
-   property DataSet;
+   property DataSet stored false;
    property ProviderFlags default defaultproviderflags;
  end;
  tmsetimefield = class(ttimefield)
@@ -332,7 +332,7 @@ type
    function assql: string;
    property asmsestring: msestring read getasmsestring write setasmsestring;
   published
-   property DataSet;
+   property DataSet stored false;
    property ProviderFlags default defaultproviderflags;
  end;
  tmsebinaryfield = class(tbinaryfield)
@@ -346,7 +346,7 @@ type
    function assql: string;
    property asmsestring: msestring read getasmsestring write setasmsestring;
   published
-   property DataSet;
+   property DataSet stored false;
    property ProviderFlags default defaultproviderflags;
  end;
  tmsebytesfield = class(tbytesfield)
@@ -360,7 +360,7 @@ type
    function assql: string;
    property asmsestring: msestring read getasmsestring write setasmsestring;
   published
-   property DataSet;
+   property DataSet stored false;
    property ProviderFlags default defaultproviderflags;
  end;
  tmsevarbytesfield = class(tvarbytesfield)
@@ -374,7 +374,7 @@ type
    function assql: string;
    property asmsestring: msestring read getasmsestring write setasmsestring;
   published
-   property DataSet;
+   property DataSet stored false;
    property ProviderFlags default defaultproviderflags;
  end;
  tmsebcdfield = class(tbcdfield)
@@ -388,7 +388,7 @@ type
    function assql: string;
    property asmsestring: msestring read getasmsestring write setasmsestring;
   published
-   property DataSet;
+   property DataSet stored false;
    property ProviderFlags default defaultproviderflags;
  end;
  tmseblobfield = class(tblobfield)
@@ -402,7 +402,7 @@ type
    function assql: string;
    property asmsestring: msestring read getasmsestring write setasmsestring;
   published
-   property DataSet;
+   property DataSet stored false;
    property ProviderFlags default defaultproviderflags;
  end;
  tmsegraphicfield = class(tgraphicfield)
@@ -416,7 +416,7 @@ type
    function assql: string;
    property asmsestring: msestring read getasmsestring write setasmsestring;
   published
-   property DataSet;
+   property DataSet stored false;
    property ProviderFlags default defaultproviderflags;
  end;
 
