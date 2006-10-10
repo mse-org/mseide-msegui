@@ -1927,11 +1927,13 @@ begin
    end;
   end;
  end;
+ {
  with messagefo.messages do begin
   if rowcount > 0 then begin
    datacols[0][rowcount-1]:= datacols[0][rowcount-1] + statdisp.value;
   end;
  end;
+ }
 end;
 
 procedure tmainfo.domake(atag: integer);

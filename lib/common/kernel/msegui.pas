@@ -36,6 +36,7 @@ type
                    ow_arrowfocusin,ow_arrowfocusout,
                    ow_subfocus, //reflects focus to children
                    ow_focusbackonesc,
+                   ow_canclosenil, //canclose calls canclose(nil)
                    ow_mousetransparent,ow_mousewheel,ow_noscroll,ow_destroywidgets,
                    ow_hinton,ow_hintoff,ow_multiplehint,ow_timedhint,
                    ow_fontglyphheight, 
@@ -1204,6 +1205,7 @@ type
    procedure update;
    function candefocus: boolean;
    procedure nofocus;
+   property focuscount: cardinal read ffocuscount;
    function close: boolean; //true if ok
    procedure bringtofront;
    procedure sendtoback;
@@ -6015,10 +6017,15 @@ begin
   ffocusedchildbefore:= ffocusedchild;
   ffocusedchild:= nil;
   exclude(fwidgetstate,ws_entered);
-  doexit;
   if needsfocuspaint then begin
    invalidatewidget;
   end;
+  if (ow_canclosenil in foptionswidget) then begin
+   if not canclose(nil) then begin
+    exit;
+   end;
+  end;
+  doexit;
  end;
 end;
 
@@ -6141,7 +6148,8 @@ begin
   if ownswindow1 then begin
    fwindow.hide(windowevent);
   end;
-  if (fwindow <> nil) and checkdescendent(fwindow.focusedwidget) then begin
+  if (fwindow <> nil) and (fparentwidget<> nil) and 
+                            checkdescendent(fwindow.focusedwidget) then begin
    nextfocus;
    if checkdescendent(fwindow.focusedwidget) then begin
     show; //defocus was not possible

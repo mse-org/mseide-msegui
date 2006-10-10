@@ -852,6 +852,10 @@ begin
     if (oe_notnull in foptionsedit) and nullcheckneeded(nil) and isempty(text) then begin
      result:= false;
      notnullerror(quiet);
+     if fgridintf = nil then begin
+      show;
+      setfocus;
+     end;
      exit;
     end;
     texttovalue(result,quiet);
@@ -868,6 +872,57 @@ begin
   finally
    dec(fvaluechecking);
   end;
+ end;
+end;
+
+function tdataedit.canclose(const newfocus: twidget): boolean;
+var
+ widget1: twidget;
+begin
+ result:= true;
+ if not (csdesigning in componentstate) and 
+                        (oe_closequery in foptionsedit) and isenabled then begin
+  if (oe_notnull in foptionsedit) and (fnullchecking = 0) and 
+                 nullcheckneeded(newfocus) and isempty(text) then begin
+   widget1:= window.focusedwidget;
+   result:= checkvalue;
+   if not result and (widget1 = window.focusedwidget) then begin
+    inc(fnullchecking);
+    try
+     if fgridintf <> nil then begin
+      with fgridintf.getcol do begin
+       tcustomgrid1(grid).beginnullchecking;
+       try
+        grid.col:= index;
+        grid.show;
+        if {grid.canfocus and} not focused then begin
+         tcustomgrid1(grid).beginnonullcheck;
+         try
+          grid.setfocus;
+         finally
+          tcustomgrid1(grid).endnonullcheck;
+         end;
+        end;
+       finally
+        tcustomgrid1(grid).endnullchecking;
+       end;        
+      end;
+     end;
+//     show;
+//     setfocus;
+    finally
+     dec(fnullchecking);
+    end;
+   end;
+  end
+  else begin
+   if focused and fedited then begin
+    result:= checkvalue;
+   end;
+  end;
+ end;
+ if result then begin
+  result:= inherited canclose(newfocus);
  end;
 end;
 
@@ -921,56 +976,6 @@ begin
  end
  else begin
   result:= inherited actualcolor;
- end;
-end;
-
-function tdataedit.canclose(const newfocus: twidget): boolean;
-var
- widget1: twidget;
-begin
- result:= true;
- if not (csdesigning in componentstate) and (oe_closequery in foptionsedit) then begin
-  if (oe_notnull in foptionsedit) and (fnullchecking = 0) and 
-                 nullcheckneeded(newfocus) and isempty(text) then begin
-   widget1:= window.focusedwidget;
-   result:= checkvalue;
-   if not result and (widget1 = window.focusedwidget) then begin
-    inc(fnullchecking);
-    try
-     if fgridintf <> nil then begin
-      with fgridintf.getcol do begin
-       tcustomgrid1(grid).beginnullchecking;
-       try
-        grid.col:= index;
-        if grid.canfocus and not focused then begin
-         tcustomgrid1(grid).beginnonullcheck;
-         try
-          grid.setfocus;
-         finally
-          tcustomgrid1(grid).endnonullcheck;
-         end;
-        end;
-       finally
-        tcustomgrid1(grid).endnullchecking;
-       end;        
-      end;
-     end;
-     if canfocus then begin
-      setfocus;
-     end;
-    finally
-     dec(fnullchecking);
-    end;
-   end;
-  end
-  else begin
-   if focused and fedited then begin
-    result:= checkvalue;
-   end;
-  end;
- end;
- if result then begin
-  result:= inherited canclose(newfocus);
  end;
 end;
 
@@ -1493,12 +1498,15 @@ begin
  end
  else begin
   if fgridintf = nil then begin
+   result:= newfocus = nil;
+   {
    if fparentwidget = nil then begin
     result:= not checkdescendent(newfocus);
    end
    else begin
     result:= not fparentwidget.checkdescendent(newfocus);
    end;
+   }
   end
   else begin
    result:= (edited and (oe_autopost in foptionsedit)){ and 
