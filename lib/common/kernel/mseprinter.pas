@@ -130,7 +130,7 @@ type
    destructor destroy; override;
    procedure beginprint(command: string = ''); overload;
    procedure beginprint(const astream: ttextstream); overload;
-    //printer owns the stream
+    //printer owns the stream, nil -> dummy mode
    procedure endprint;
   published
    property canvas: tprintercanvas read fcanvas write setcanvas;
@@ -198,6 +198,8 @@ type
    procedure endtextclip; virtual; abstract;
    procedure checknextpage;
    procedure internalwriteln(const avalue: richstringty);
+   procedure streamwrite(const atext: string); //checks fstream = nil
+   procedure streamwriteln(const atext: string); //checks fstream = nil
   public
    constructor create(const user: tprinter; const intf: icanvas);
    
@@ -379,6 +381,15 @@ end;
 procedure tprinter.setstream(const avalue: ttextstream);
 begin
  with fcanvas do begin
+  try
+   unlink;
+  except
+  end;
+  fstream.free;
+  fstream:= avalue;
+ end;
+ {
+ with fcanvas do begin
   if fstream <> avalue then begin
    if fstream <> nil then begin
     try
@@ -390,6 +401,7 @@ begin
    fstream:= avalue;
   end;
  end;
+ }
 end;
 
 procedure tprinter.settabulators(const avalue: tprintertabulators);
@@ -656,6 +668,9 @@ var
  mstr1: msestring;
  rstr1: richstringty;
 begin
+ if fstream = nil then begin
+  exit;
+ end;
  ar1:= nil; //compiler warning
  info.res:= nullrect;
  save;
@@ -934,6 +949,20 @@ begin
  if avalue <> fprintorientation then begin
   fprintorientation:= avalue;
   updatescale;
+ end;
+end;
+
+procedure tcustomprintercanvas.streamwrite(const atext: string);
+begin
+ if fstream <> nil then begin
+  fstream.write(atext);
+ end;
+end;
+
+procedure tcustomprintercanvas.streamwriteln(const atext: string);
+begin
+ if fstream <> nil then begin
+  fstream.writeln(atext);
  end;
 end;
 

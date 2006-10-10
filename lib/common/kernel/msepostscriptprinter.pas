@@ -616,11 +616,11 @@ end;
 procedure tpostscriptcanvas.checkscale;
 begin
  if fstarted then begin
-  fstream.write('initmatrix ');
+  streamwrite('initmatrix ');
   if printorientation = pao_landscape then begin
-   fstream.write(' 90 rotate');
+   streamwrite(' 90 rotate');
   end;
-  fstream.writeln('');
+  streamwriteln('');
  end;
 end;
 
@@ -635,7 +635,7 @@ begin
   canvas:= self;
  end;
  inherited;
- fstream.write(
+ streamwrite(
 '%!PS-Adobe-3.0'+nl+
 '%%BoundingBox: '+inttostr(fboundingbox.left)+' '+
                   inttostr(fboundingbox.bottom)+' '+
@@ -695,7 +695,7 @@ begin
    additem(ffontnames,str1);
    int2:= high(ffontnames);
                   //alias,encoding,origname
-   fstream.write(encodefontname(int2,acodepage)+fmapnames[acodepage]+' ('+str1+') rf' + nl);
+   streamwrite(encodefontname(int2,acodepage)+fmapnames[acodepage]+' ('+str1+') rf' + nl);
             //register font
   end;
   setlength(ffonts,high(ffonts)+2);
@@ -742,7 +742,7 @@ begin
    end;
    if not bo1 then begin
     checkmap(acodepage);
-    fstream.write(encodefontname(namenum,acodepage)+fmapnames[acodepage]+
+    streamwrite(encodefontname(namenum,acodepage)+fmapnames[acodepage]+
            ' ('+ffontnames[namenum]+') rf' + nl);
             //register font
     additem(codepages,acodepage);
@@ -758,14 +758,14 @@ procedure tpostscriptcanvas.selectfont(const afont: fontnumty; const acodepage: 
 begin
  checkfont(afont,acodepage);
  with ffonts[factfont] do begin
-  fstream.write(encodefontname(namenum,acodepage)+scalestring+' sf'+nl);
+  streamwrite(encodefontname(namenum,acodepage)+scalestring+' sf'+nl);
  end;
 end;
 
 procedure tpostscriptcanvas.ps_destroygc;
 begin
  endpage;
- fstream.write(
+ streamwrite(
   '%%Pages: '+inttostr(fps_pagenumber)+nl);
 end;
 
@@ -788,7 +788,7 @@ begin
      str1:= str1 + psrealtostr(mmtoprintscale*(byte(lineinfo.dashes[int1])/10))+' ';
     end;
     str1:= str1+'] 0 setdash'+nl;
-    fstream.write(str1);
+    streamwrite(str1);
    end;
   end;
   if (self.brush <> nil) and 
@@ -798,16 +798,16 @@ begin
     rect2:= makerect(self.brushorigin,size);
     if createpattern(rect1,rect2,acolorbackground,acolorforeground,
                    handle,canvas.gchandle,patpatname) then begin
-     fstream.write('/bru exch def'+nl);
+     streamwrite('/bru exch def'+nl);
     end;
    end;
   end;
   if df_brush in gc.drawingflags then begin
-   fstream.write('bru setpattern'+nl);
+   streamwrite('bru setpattern'+nl);
   end
   else begin
    if gvm_colorforeground in mask then begin
-    fstream.write(setcolorstring(acolorforeground)+nl);
+    streamwrite(setcolorstring(acolorforeground)+nl);
    end;
   end;
   if gvm_font in mask then begin
@@ -822,7 +822,7 @@ begin
     cs_projecting: str1:= '2';
     else str1:= '0'; //cs_butt
    end;
-   fstream.write(str1+' setlinecap'+nl);
+   streamwrite(str1+' setlinecap'+nl);
   end;
   if gvm_joinstyle in mask then begin
    case lineinfo.joinstyle of
@@ -830,7 +830,7 @@ begin
     js_bevel: str1:= '2';
     else str1:= '0'; //js_miter
    end;
-   fstream.write(str1+' setlinejoin'+nl);
+   streamwrite(str1+' setlinejoin'+nl);
   end;
   if gvm_clipregion in mask then begin
    str1:= 'initclip';
@@ -849,7 +849,7 @@ begin
     end;
     str1:= str1 + '] rectclip';
    end;
-   fstream.write(str1+nl);
+   streamwrite(str1+nl);
   end;
  end;
 end;
@@ -1013,7 +1013,7 @@ procedure tpostscriptcanvas.ps_drawstring16;
 begin
  if active then begin
   with fdrawinfo.text16pos do begin
-   fstream.write(posstring(pos^)+' moveto ['+getshowstring(text,count)+'] s'+nl);
+   streamwrite(posstring(pos^)+' moveto ['+getshowstring(text,count)+'] s'+nl);
   end;
  end;
 end;
@@ -1118,17 +1118,17 @@ begin
  if colorchanged then begin
   str1:= str1 + ' '+setcolorstring(font.color);
  end;
- fstream.write(str1+nl);
+ streamwrite(str1+nl);
 end;
 
 procedure tpostscriptcanvas.begintextclip(const arect: rectty);
 begin
- fstream.write('gsave '+rectstring(arect)+' rectclip'+nl);
+ streamwrite('gsave '+rectstring(arect)+' rectclip'+nl);
 end;
 
 procedure tpostscriptcanvas.endtextclip;
 begin
- fstream.write('grestore'+nl);
+ streamwrite('grestore'+nl);
 end;
 
 procedure tpostscriptcanvas.setpslinewidth(const avalue: integer);
@@ -1141,7 +1141,7 @@ begin
  else begin
   rea1:= (avalue/fprinter.ppmm) * mmtoprintscale;
  end;
- fstream.write(psrealtostr(rea1)+' setlinewidth'+nl);
+ streamwrite(psrealtostr(rea1)+' setlinewidth'+nl);
 end;
 
 function tpostscriptcanvas.strokestr: string;
@@ -1175,7 +1175,7 @@ begin
   else begin
    str1:= str1 + ' '+strokestr;
   end;
-  fstream.write(str1+nl);
+  streamwrite(str1+nl);
  end;
 end;
 
@@ -1200,7 +1200,7 @@ begin
  else begin
   str1:= str1 + strokestr;
  end;
- fstream.write(str1+nl);
+ streamwrite(str1+nl);
 end;
 
 procedure tpostscriptcanvas.ps_drawarc;
@@ -1222,7 +1222,7 @@ begin
   end;
  end;
  str1:= str1 + strokestr;
- fstream.write(str1+nl);
+ streamwrite(str1+nl);
 end;
 
 procedure tpostscriptcanvas.ps_fillarc;
@@ -1247,7 +1247,7 @@ begin
   end;
  end;
  str1:= str1 + 'closepath fill';
- fstream.write(str1+nl);
+ streamwrite(str1+nl);
 end;
 
 procedure tpostscriptcanvas.ps_drawlines;
@@ -1318,7 +1318,7 @@ begin
    inc(po1);
   end;
   dec(int2,40);
-  fstream.writeln(str1);
+  streamwriteln(str1);
  until int2 <= 0;
 end;
 
@@ -1460,7 +1460,7 @@ begin
  end;
  str1:= '/'+patname+' '+inttostr(rowbytes*image.size.cy)+' string def'+nl+
         'currentfile '+patname+' readhexstring'+nl;
- fstream.write(str1);
+ streamwrite(str1);
  writebinhex(ar1);
  str1:= 'pop pop gsave '+rectscalestring(destrect)+nl+
 '<< /PatternType 1 /PaintType 1 /TilingType 1 /BBox [0 0 1 1] /XStep 1 /YStep 1'+nl+ 
@@ -1493,13 +1493,13 @@ begin
   end;
  end;
  str1:= str1+' } bind >> matrix makepattern grestore'+nl;
- fstream.write(str1);
+ streamwrite(str1);
 end;
   
 procedure tpostscriptcanvas.checkcolorspace;
 begin
  if not (cs_acolorforeground in fstate) then begin
-  fstream.write(setcolorstring(color)+nl); //init colorspace
+  streamwrite(setcolorstring(color)+nl); //init colorspace
   include(fstate,cs_acolorforeground);
  end;
 end;
@@ -1633,10 +1633,10 @@ begin
     str1:= str1 + imagematrixstring(sourcerect^.size)+nl+
    '{currentfile picstr readhexstring pop} ';
     str1:= str1 + 'imagemask' + nl;
-    fstream.write(str1);
+    streamwrite(str1);
     writebinhex(ar1);
     str1:= '/picstr null def /'+imagepatname+' null def grestore'+nl;
-    fstream.write(str1);
+    streamwrite(str1);
     exit;
    end;
   end
@@ -1705,20 +1705,20 @@ begin
    end;
   end;
  end;
- fstream.write(str1+nl);
+ streamwrite(str1+nl);
  writebinhex(ar1);
  str1:= '/picstr null def grestore ';
  if masked then begin
   str1:= str1 + '/imdict null def /madict null def ';
  end;
- fstream.write(str1+nl);
+ streamwrite(str1+nl);
 end;
 
 procedure tpostscriptcanvas.endpage;
 begin
  inherited;
  if active then begin
-  fstream.write('showpage'+nl);
+  streamwrite('showpage'+nl);
   inc(fps_pagenumber);
  end;
 end;
@@ -1729,7 +1729,7 @@ var
 begin
  if active then begin
   str1:= ' '+inttostr(fps_pagenumber+1);
-  fstream.write('%%Page:'+str1+str1+nl);
+  streamwrite('%%Page:'+str1+str1+nl);
   checkscale;
  end;
  inherited;
@@ -1739,7 +1739,7 @@ function tpostscriptcanvas.registermap(const acodepage: integer): string;
 
  procedure defpage(const glyphnames: string);
  begin
-  fstream.write('/'+result+' ['+nl+glyphnames+'] def'+nl);
+  streamwrite('/'+result+' ['+nl+glyphnames+'] def'+nl);
  end;
  
 var
@@ -1809,12 +1809,11 @@ begin
   guierror(gue_invalidcanvas);
  end;
  with tpostscriptcanvas(sender) do begin
-  if fstream = nil then begin
-   guierror(gue_invalidstream);
-  end;
+//  if fstream = nil then begin
+//   guierror(gue_invalidstream);
+//  end;
   fillchar(gc1,sizeof(gc1),0);
   gc1.handle:= cardinal(invalidgchandle);
-//  guierror(gui_creategc(0,false,gc1),self); //get default gc for font creation on win32
   linktopaintdevice(ptrint(self),gc1,makesize(round(pa_width*fprinter.ppmm),
                        round(pa_height*fprinter.ppmm)),nullpoint);
  end;
