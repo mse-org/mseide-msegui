@@ -120,6 +120,7 @@ type
 procedure Register;
 begin
  registercomponents('Dbf',[
+      tfieldparamlink,tfieldfieldlink,tsequencelink,
       tmsestringfield,tmselongintfield,tmselargeintfield,tmsesmallintfield,
       tmsewordfield,tmseautoincfield,tmsefloatfield,tmsecurrencyfield,
       tmsebooleanfield,tmsedatetimefield,tmsedatefield,tmsetimefield,
@@ -127,8 +128,8 @@ begin
       tmsebcdfield,tmseblobfield,tmsememofield,tmsegraphicfield,
       tdblabel,tdbstringdisp,tdbintegerdisp,tdbbooleandisp,
       tdbrealdisp,tdbdatetimedisp,
-      tdbstringdisplb,tdbintegerdisplb,tdbrealdisplb,tdbdatetimedisplb,
-      tfieldparamlink,tsequencelink]);
+      tdbstringdisplb,tdbintegerdisplb,tdbrealdisplb,tdbdatetimedisplb
+      ]);
  registercomponents('Db',[
       tenumeditdb,tkeystringeditdb,tenumeditlb,tkeystringeditlb,
       tdbmemoedit,tdbstringedit,tdbdropdownlistedit,tdbdialogstringedit,
@@ -155,6 +156,8 @@ begin
  registerpropertyeditor(typeinfo(tnolistdropdowncols),nil,'',
         tnolistdropdowncolpropertyeditor);
  registerpropertyeditor(typeinfo(string),nil,'datafield',
+        tdbfieldnamepropertyeditor);
+ registerpropertyeditor(typeinfo(string),tfieldfieldlink,'destdatafield',
         tdbfieldnamepropertyeditor);
  registerpropertyeditor(typeinfo(string),nil,'keyfield',
         tdbfieldnamepropertyeditor);
@@ -237,6 +240,9 @@ function tdbfieldnamepropertyeditor.getdefaultstate: propertystatesty;
 var
  datasource1: tdatasource;
  obj1: tobject;
+ ar1: stringarty;
+ ar2: fieldtypesarty;
+ int1,int2: integer;
 begin
  result:= inherited getdefaultstate;
  if fremote <> nil then begin
@@ -253,7 +259,15 @@ begin
   end;
  end;
  if fdbeditinfointf <> nil then begin
-  datasource1:= fdbeditinfointf.getdatasource;
+  fdbeditinfointf.getfieldtypes(ar1,ar2);
+  int2:= 0;
+  for int1:= 0 to high(ar1) do begin
+   if ar1[int1] = name then begin
+    int2:= int1;
+    break;
+   end;
+  end;
+  datasource1:= fdbeditinfointf.getdatasource(int2);
   if (datasource1 <> nil) and (datasource1.dataset <> nil) then begin
    result:= result + [ps_valuelist,ps_sortlist];
   end;
@@ -265,12 +279,58 @@ var
  propertynames: stringarty;
  fieldtypes: fieldtypesarty;
  ft: fieldtypesty;
- int1: integer;
- str1: string;
+ int1,int2: integer;
  ds: tdataset;
+ dataso: tdatasource;
  
 begin
  result:= nil;
+ if (fdbeditinfointf <> nil) then begin
+  int2:= 0;
+  fdbeditinfointf.getfieldtypes(propertynames,fieldtypes);
+  if high(propertynames) >= 0 then begin
+   for int1:= 0 to high(propertynames) do begin
+    if propertynames[int1] = fname then begin
+     int2:= int1;
+     break;
+    end;
+   end; 
+  end;
+  if int2 <= high(fieldtypes) then begin
+   ft:= fieldtypes[int2];
+  end
+  else begin
+   ft:= [];
+  end;
+  dataso:= fdbeditinfointf.getdatasource(int2);
+  if dataso <> nil then begin
+   ds:= dataso.dataset;
+  end
+  else begin
+   ds:= nil;
+  end;
+  if ds <> nil then begin
+   if ds.active or not ds.defaultfields then begin
+    for int1:= 0 to ds.fields.count -1 do begin
+     with ds.fields[int1] do begin
+      if (ft = []) or (datatype = ftunknown) or (datatype in ft) then begin
+       additem(result,msestring(fieldname));
+      end;
+     end;
+    end;
+   end
+   else begin
+    for int1:= 0 to ds.fielddefs.count -1 do begin
+     with ds.fielddefs[int1] do begin
+      if (ft = []) or (datatype = ftunknown) or (datatype in ft) then begin
+       additem(result,msestring(name));
+      end;
+     end;
+    end;
+   end;
+  end;
+ end;
+ {
  if (fdbeditinfointf <> nil) and (fdbeditinfointf.getdatasource <> nil) then begin
   ds:= fdbeditinfointf.getdatasource.dataset;
   if ds <> nil then begin
@@ -310,6 +370,7 @@ begin
    end;
   end;
  end;
+ }
 end;
 
 

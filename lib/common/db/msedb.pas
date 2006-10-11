@@ -36,7 +36,7 @@ type
  end;
   
  idbeditinfo = interface(inullinterface)['{E63A9950-BFAE-DA11-83DF-00C0CA1308FF}']
-  function getdatasource: tdatasource;
+  function getdatasource(const aindex: integer): tdatasource;
   procedure getfieldtypes(out apropertynames: stringarty;
                           out afieldtypes: fieldtypesarty);
     //propertynames = nil -> propertyname = 'datafield'
@@ -56,7 +56,7 @@ type
    fgetdatasource: getdatasourcefuncty;
   protected
    //idbeditinfo
-   function getdatasource: tdatasource;
+   function getdatasource(const aindex: integer): tdatasource;
    procedure getfieldtypes(out apropertynames: stringarty;
                           out afieldtypes: fieldtypesarty);
   public
@@ -679,6 +679,51 @@ type
                                    write fonconnecterror; 
  end;
   
+ tfieldfieldlink = class;
+ 
+ tfieldfielddatalink = class(tfielddatalink)
+  private
+   fdatasource: tdatasource;
+   fowner: tfieldfieldlink;
+  protected
+   procedure updatedata; override;
+  public
+   constructor create(const aowner: tfieldfieldlink);
+   destructor destroy; override;
+ end;
+
+ fieldeventty = procedure(const afieldlink: tfielddatalink) of object;
+ 
+ tfieldfieldlink = class(tmsecomponent,idbeditinfo)
+  private
+   fsourcedatalink: tfielddatalink;
+   fdestdatalink: tfieldfielddatalink;
+   fonsetvalue: fieldeventty;
+   function getdatafield: string;
+   procedure setdatafield(const avalue: string);
+   function getdatasource: tdatasource; overload;
+   function getdatasource(const aindex: integer): tdatasource; overload;
+   procedure setdatasource(const avalue: tdatasource);
+   function getdestdataset: tdataset;
+   procedure setdestdataset(const avalue: tdataset);
+   function getdestdatafield: string;
+   procedure setdestdatafield(const avalue: string);
+   //idbeditinfo
+   procedure getfieldtypes(out propertynames: stringarty;
+                          out fieldtypes: fieldtypesarty);
+  public
+   constructor create(aowner: tcomponent); override;
+   destructor destroy; override;
+   function destfield: tfield;
+   function field: tfield;
+  published
+   property datafield: string read getdatafield write setdatafield;
+   property datasource: tdatasource read getdatasource write setdatasource;
+   property destdataset: tdataset read getdestdataset write setdestdataset;
+   property destdatafield: string read getdestdatafield write setdestdatafield;
+   property onsetvalue: fieldeventty read fonsetvalue write fonsetvalue;
+ end;
+ 
 function fieldclasstoclasstyp(const fieldclass: fieldclassty): fieldclasstypety;
 function fieldtosql(const field: tfield): string;
 function fieldtooldsql(const field: tfield): string;
@@ -1712,7 +1757,7 @@ begin
  inherited create;
 end;
 
-function tdbfieldnamearrayprop.getdatasource: tdatasource;
+function tdbfieldnamearrayprop.getdatasource(const aindex: integer): tdatasource;
 begin
  result:= fgetdatasource();
 end;
@@ -2700,6 +2745,123 @@ begin
  if not (csdesigning in componentstate) then begin
   inherited;
  end;
+end;
+
+{ tfieldfielddatalink }
+
+constructor tfieldfielddatalink.create(const aowner: tfieldfieldlink);
+begin
+ fowner:= aowner;
+ inherited create;
+ fdatasource:= tdatasource.create(nil);
+ datasource:= fdatasource;
+end;
+
+destructor tfieldfielddatalink.destroy;
+begin
+ fdatasource.free;
+ inherited;
+end;
+
+procedure tfieldfielddatalink.updatedata;
+begin
+ if field <> nil then begin
+  if fowner.fsourcedatalink.field <> nil then begin
+   field.value:= fowner.fsourcedatalink.field.value;
+  end;
+  with fowner do begin
+   if canevent(tmethod(fonsetvalue)) then begin
+    fonsetvalue(self);
+   end;
+  end;
+ end;
+end;
+
+{ tfieldfieldlink }
+
+constructor tfieldfieldlink.create(aowner: tcomponent);
+begin
+ inherited;
+ fsourcedatalink:= tfielddatalink.create;
+ fdestdatalink:= tfieldfielddatalink.create(self);
+end;
+
+destructor tfieldfieldlink.destroy;
+begin
+ fsourcedatalink.free;
+ fdestdatalink.free;
+ inherited;
+end;
+
+function tfieldfieldlink.getdatafield: string;
+begin
+ result:= fsourcedatalink.fieldname;
+end;
+
+procedure tfieldfieldlink.setdatafield(const avalue: string);
+begin
+ fsourcedatalink.fieldname:= avalue;
+end;
+
+function tfieldfieldlink.getdatasource: tdatasource;
+begin
+ result:= fsourcedatalink.datasource;
+end;
+
+function tfieldfieldlink.getdatasource(const aindex: integer): tdatasource;
+begin
+ if aindex = 0 then begin
+  result:= fsourcedatalink.datasource;
+ end
+ else begin
+  result:= fdestdatalink.datasource;
+ end;  
+end;
+
+procedure tfieldfieldlink.setdatasource(const avalue: tdatasource);
+begin
+ fsourcedatalink.datasource:= avalue;
+end;
+
+function tfieldfieldlink.getdestdataset: tdataset;
+begin
+ result:= fdestdatalink.dataset;
+end;
+
+procedure tfieldfieldlink.setdestdataset(const avalue: tdataset);
+begin
+ fdestdatalink.fdatasource.dataset:= avalue;
+end;
+
+function tfieldfieldlink.getdestdatafield: string;
+begin
+ result:= fdestdatalink.fieldname;
+end;
+
+procedure tfieldfieldlink.setdestdatafield(const avalue: string);
+begin
+ fdestdatalink.fieldname:= avalue;
+end;
+
+function tfieldfieldlink.destfield: tfield;
+begin
+ result:= fdestdatalink.field;
+end;
+
+function tfieldfieldlink.field: tfield;
+begin
+ result:= fsourcedatalink.field;
+end;
+
+procedure tfieldfieldlink.getfieldtypes(out propertynames: stringarty;
+               out fieldtypes: fieldtypesarty);
+begin
+ setlength(propertynames,2);
+ propertynames[0]:= 'datafield';
+ propertynames[1]:= 'destdatafield';
+ setlength(fieldtypes,2);
+ fieldtypes[0]:= [];
+ fieldtypes[1]:= [];
 end;
 
 end.

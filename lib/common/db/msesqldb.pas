@@ -195,7 +195,7 @@ type
    foptions: fieldparamlinkoptionsty;
    function getdatafield: string;
    procedure setdatafield(const avalue: string);
-   function getdatasource: tdatasource;
+   function getdatasource: tdatasource; overload;
    procedure setdatasource(const avalue: tdatasource);
    function getvisualcontrol: boolean;
    procedure setvisualcontrol(const avalue: boolean);
@@ -204,6 +204,7 @@ type
   protected
    procedure loaded; override;
    //idbeditinfo
+   function getdatasource(const aindex: integer): tdatasource; overload;
    procedure getfieldtypes(out propertynames: stringarty;
                           out fieldtypes: fieldtypesarty);
   public
@@ -249,11 +250,12 @@ type
    procedure setaslargeint(const avalue: largeint);
    function getasinteger: integer;
    procedure setasinteger(const avalue: integer);
-   function getdatasource: tdatasource;
+   function getdatasource: tdatasource; overload;
    procedure setdatasource(const avalue: tdatasource);
    function getdatafield: string;
    procedure setdatafield(const avalue: string);
    //idbeditinfo
+   function getdatasource(const aindex: integer): tdatasource; overload;
    procedure getfieldtypes(out propertynames: stringarty;
                           out fieldtypes: fieldtypesarty);
   protected
@@ -1571,6 +1573,11 @@ begin
  fsourcedatalink.loaded;
 end;
 
+function tfieldparamlink.getdatasource(const aindex: integer): tdatasource;
+begin
+ result:= datasource;
+end;
+
 { tsequencedatalink }
 
 constructor tsequencedatalink.create(const aowner: tsequencelink);
@@ -1712,6 +1719,11 @@ end;
 function tsequencelink.assql: string;
 begin
  result:= inttostr(aslargeint);
+end;
+
+function tsequencelink.getdatasource(const aindex: integer): tdatasource;
+begin
+ result:= datasource;
 end;
 
 end.

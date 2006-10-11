@@ -24,11 +24,12 @@ type
  tdblabel = class(tcustomlabel,idbeditinfo,idbdispfieldlink)
   private
    fdatalink: tdispfielddatalink;
-   function getdatafield: string;
+   function getdatafield: string; overload;
    procedure setdatafield(const avalue: string);
    function getdatasource: tdatasource;
    procedure setdatasource(const avalue: tdatasource);
      //idbeditinfo
+   function getdatasource(const aindex: integer): tdatasource; overload;
    procedure getfieldtypes(out propertynames: stringarty;
                           out fieldtypes: fieldtypesarty);
      //idbdispfieldlink
@@ -49,11 +50,12 @@ type
  tdbstringdisp = class(tcustomstringdisp,idbeditinfo,idbdispfieldlink)
   private
    fdatalink: tdispfielddatalink;
-   function getdatafield: string;
+   function getdatafield: string; overload;
    procedure setdatafield(const avalue: string);
    function getdatasource: tdatasource;
    procedure setdatasource(const avalue: tdatasource);
      //idbeditinfo
+   function getdatasource(const aindex: integer): tdatasource; overload;
    procedure getfieldtypes(out propertynames: stringarty;
                           out fieldtypes: fieldtypesarty); virtual;
      //idbdispfieldlink
@@ -97,9 +99,10 @@ type
    fisnotnull: boolean;
    function getdatafield: string;
    procedure setdatafield(const avalue: string);
-   function getdatasource: tdatasource;
+   function getdatasource: tdatasource; overload;
    procedure setdatasource(const avalue: tdatasource);
      //idbeditinfo
+   function getdatasource(const aindex: integer): tdatasource; overload;
    procedure getfieldtypes(out propertynames: stringarty;
                           out fieldtypes: fieldtypesarty);
      //idbdispfieldlink
@@ -142,9 +145,10 @@ type
    fdatalink: tdispfielddatalink;
    function getdatafield: string;
    procedure setdatafield(const avalue: string);
-   function getdatasource: tdatasource;
+   function getdatasource: tdatasource; overload;
    procedure setdatasource(const avalue: tdatasource);
      //idbeditinfo
+   function getdatasource(const aindex: integer): tdatasource; overload;
    procedure getfieldtypes(out propertynames: stringarty;
                           out fieldtypes: fieldtypesarty);
      //idbdispfieldlink
@@ -166,10 +170,11 @@ type
    fdatalink: tdispfielddatalink;
    function getdatafield: string;
    procedure setdatafield(const avalue: string);
-   function getdatasource: tdatasource;
+   function getdatasource: tdatasource; overload;
    procedure setdatasource(const avalue: tdatasource);
      //idbeditinfo
-   procedure getfieldtypes(out propertynames: stringarty;
+    function getdatasource(const aindex: integer): tdatasource; overload;
+  procedure getfieldtypes(out propertynames: stringarty;
                           out fieldtypes: fieldtypesarty); virtual;
      //idbdispfieldlink
    procedure fieldtovalue; virtual;
@@ -211,9 +216,10 @@ type
    fdatalink: tdispfielddatalink;
    function getdatafield: string;
    procedure setdatafield(const avalue: string);
-   function getdatasource: tdatasource;
+   function getdatasource: tdatasource; overload;
    procedure setdatasource(const avalue: tdatasource);
      //idbeditinfo
+   function getdatasource(const aindex: integer): tdatasource; overload;
    procedure getfieldtypes(out propertynames: stringarty;
                           out fieldtypes: fieldtypesarty); virtual;
      //idbdispfieldlink
@@ -332,6 +338,11 @@ begin
  caption:= '';
 end;
 
+function tdblabel.getdatasource(const aindex: integer): tdatasource;
+begin
+ result:= datasource;
+end;
+
 { tdbstringdisp }
 
 constructor tdbstringdisp.create(aowner: tcomponent);
@@ -382,6 +393,11 @@ end;
 procedure tdbstringdisp.setnullvalue;
 begin
  value:= '';
+end;
+
+function tdbstringdisp.getdatasource(const aindex: integer): tdatasource;
+begin
+ result:= datasource;
 end;
 
 { tdbstringdisplb }
@@ -495,6 +511,11 @@ begin
  end;
 end;
 
+function tdbintegerdisp.getdatasource(const aindex: integer): tdatasource;
+begin
+ result:= datasource;
+end;
+
 { tdbintegerdisplb }
 
 procedure tdbintegerdisplb.fieldtovalue;
@@ -599,6 +620,11 @@ begin
  end;
 end;
 
+function tdbbooleandisp.getdatasource(const aindex: integer): tdatasource;
+begin
+ result:= datasource;
+end;
+
 { tdbrealdisp }
 
 constructor tdbrealdisp.create(aowner: tcomponent);
@@ -649,6 +675,11 @@ end;
 procedure tdbrealdisp.setnullvalue;
 begin
  value:= emptyreal;
+end;
+
+function tdbrealdisp.getdatasource(const aindex: integer): tdatasource;
+begin
+ result:= datasource;
 end;
 
 { tdbrealdisplb }
@@ -754,6 +785,11 @@ end;
 procedure tdbdatetimedisp.setnullvalue;
 begin
  value:= emptydatetime;
+end;
+
+function tdbdatetimedisp.getdatasource(const aindex: integer): tdatasource;
+begin
+ result:= datasource;
 end;
 
 { tdbdatetimedisplb }

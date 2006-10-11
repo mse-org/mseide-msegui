@@ -161,7 +161,8 @@ type
    fdatalink: teditwidgetdatalink;
    function getdatafield: string;
    procedure setdatafield(const avalue: string);
-   function getdatasource: tdatasource;
+   function getdatasource: tdatasource; overload;
+   function getdatasource(const aindex: integer): tdatasource; overload;
    procedure setdatasource(const avalue: tdatasource);
   protected
 
@@ -198,7 +199,8 @@ type
    fdatalink: teditwidgetdatalink;
    function getdatafield: string;
    procedure setdatafield(const avalue: string);
-   function getdatasource: tdatasource;
+   function getdatasource: tdatasource; overload;
+   function getdatasource(const aindex: integer): tdatasource; overload;
    procedure setdatasource(const avalue: tdatasource);
   protected
 
@@ -236,7 +238,8 @@ type
    fdatalink: teditwidgetdatalink;
    function getdatafield: string;
    procedure setdatafield(const avalue: string);
-   function getdatasource: tdatasource;
+   function getdatasource: tdatasource; overload;
+   function getdatasource(const aindex: integer): tdatasource; overload;
    procedure setdatasource(const avalue: tdatasource);
   protected
 
@@ -279,7 +282,8 @@ type
    fdatalink: teditwidgetdatalink;
    function getdatafield: string;
    procedure setdatafield(const avalue: string);
-   function getdatasource: tdatasource;
+   function getdatasource: tdatasource; overload;
+   function getdatasource(const aindex: integer): tdatasource; overload;
    procedure setdatasource(const avalue: tdatasource);
   protected
 
@@ -319,7 +323,8 @@ type
    fdatalink: teditwidgetdatalink;
    function getdatafield: string;
    procedure setdatafield(const avalue: string);
-   function getdatasource: tdatasource;
+   function getdatasource: tdatasource; overload;
+   function getdatasource(const aindex: integer): tdatasource; overload;
    procedure setdatasource(const avalue: tdatasource);
   protected
 
@@ -355,7 +360,8 @@ type
    fdatalink: teditwidgetdatalink;
    function getdatafield: string;
    procedure setdatafield(const avalue: string);
-   function getdatasource: tdatasource;
+   function getdatasource: tdatasource; overload;
+   function getdatasource(const aindex: integer): tdatasource; overload;
    procedure setdatasource(const avalue: tdatasource);
   protected
 
@@ -398,7 +404,8 @@ type
    fdatalink: teditwidgetdatalink;
    function getdatafield: string;
    procedure setdatafield(const avalue: string);
-   function getdatasource: tdatasource;
+   function getdatasource: tdatasource; overload;
+   function getdatasource(const aindex: integer): tdatasource; overload;
    procedure setdatasource(const avalue: tdatasource);
   protected
 
@@ -435,7 +442,8 @@ type
    fdatalink: teditwidgetdatalink;
    function getdatafield: string;
    procedure setdatafield(const avalue: string);
-   function getdatasource: tdatasource;
+   function getdatasource: tdatasource; overload;
+   function getdatasource(const aindex: integer): tdatasource; overload;
    procedure setdatasource(const avalue: tdatasource);
   protected
 
@@ -474,7 +482,8 @@ type
    fdatalink: teditwidgetdatalink;
    function getdatafield: string;
    procedure setdatafield(const avalue: string);
-   function getdatasource: tdatasource;
+   function getdatasource: tdatasource; overload;
+   function getdatasource(const aindex: integer): tdatasource; overload;
    procedure setdatasource(const avalue: tdatasource);
   protected
 
@@ -518,7 +527,8 @@ type
    fdatalink: teditwidgetdatalink;
    function getdatafield: string;
    procedure setdatafield(const avalue: string);
-   function getdatasource: tdatasource;
+   function getdatasource: tdatasource; overload;
+   function getdatasource(const aindex: integer): tdatasource; overload;
    procedure setdatasource(const avalue: tdatasource);
   protected
 
@@ -555,7 +565,8 @@ type
    fdatalink: teditwidgetdatalink;
    function getdatafield: string;
    procedure setdatafield(const avalue: string);
-   function getdatasource: tdatasource;
+   function getdatasource: tdatasource; overload;
+   function getdatasource(const aindex: integer): tdatasource; overload;
    procedure setdatasource(const avalue: tdatasource);
   protected
 
@@ -595,7 +606,8 @@ type
    fdatalink: teditwidgetdatalink;
    function getdatafield: string;
    procedure setdatafield(const avalue: string);
-   function getdatasource: tdatasource;
+   function getdatasource: tdatasource; overload;
+   function getdatasource(const aindex: integer): tdatasource; overload;
    procedure setdatasource(const avalue: tdatasource);
   protected
 
@@ -635,7 +647,8 @@ type
    fdatalink: teditwidgetdatalink;
    function getdatafield: string;
    procedure setdatafield(const avalue: string);
-   function getdatasource: tdatasource;
+   function getdatasource: tdatasource; overload;
+   function getdatasource(const aindex: integer): tdatasource; overload;
    procedure setdatasource(const avalue: tdatasource);
   protected
 
@@ -676,7 +689,8 @@ type
    fdatalink: teditwidgetdatalink;
    function getdatafield: string;
    procedure setdatafield(const avalue: string);
-   function getdatasource: tdatasource;
+   function getdatasource: tdatasource; overload;
+   function getdatasource(const aindex: integer): tdatasource; overload;
    procedure setdatasource(const avalue: tdatasource);
   protected
 
@@ -760,7 +774,8 @@ type
    fdatafield: string;
    procedure setdatafield(const avalue: string);
    //idbeditinfo
-   function getdatasource: tdatasource;
+//   function getdatasource: tdatasource; overload;
+   function getdatasource(const aindex: integer): tdatasource;
    procedure getfieldtypes(out propertynames: stringarty;
                           out fieldtypes: fieldtypesarty);
   published
@@ -855,7 +870,7 @@ type
      //ievent
    procedure receiveevent(const event: tobjectevent);
      //idbeditinfo
-   function getdatasource: tdatasource;
+   function getdatasource(const aindex: integer): tdatasource;
    procedure getfieldtypes(out propertynames: stringarty;
                           out fieldtypes: fieldtypesarty);
   protected
@@ -955,8 +970,9 @@ type
    foptionsdatalink: griddatalinkoptionsty;
    foptionsdb: optionsdbty;
    fbookmarks: stringarty;
-   function getdatasource: tdatasource;
-   procedure setdatasource(const avalue: tdatasource);
+   function getdatasource: tdatasource; overload;
+   function getdatasource(const aindex: integer): tdatasource; overload;
+   procedure setdatasource(const avalue: tdatasource); overload;
    procedure setkeyfield(const avalue: string);
    function getkeyfield: string;
    function getcols: tdbdropdowncols;
@@ -1185,7 +1201,8 @@ type
           //idbeditinfo
    procedure getfieldtypes(out propertynames: stringarty;
                           out fieldtypes: fieldtypesarty);
-   function getdatasource: tdatasource;
+   function getdatasource(const aindex: integer): tdatasource;
+//   function getdatasource: tdatasource;
   protected
    function getitems(aindex: integer): msestring; override;
    procedure modified; override;
@@ -2112,6 +2129,11 @@ begin
  result:= inherited nullcheckneeded(newfocus) and fdatalink.nullcheckneeded;
 end;
 
+function tdbstringedit.getdatasource(const aindex: integer): tdatasource;
+begin
+ result:= datasource;
+end;
+
 { tdbdialogstringedit }
 
 constructor tdbdialogstringedit.create(aowner: tcomponent);
@@ -2218,6 +2240,11 @@ begin
  result:= inherited nullcheckneeded(newfocus) and fdatalink.nullcheckneeded;
 end;
 
+function tdbdialogstringedit.getdatasource(const aindex: integer): tdatasource;
+begin
+ result:= datasource;
+end;
+
 { tcustomdbdropdownlistedit }
 
 constructor tcustomdbdropdownlistedit.create(aowner: tcomponent);
@@ -2322,6 +2349,11 @@ end;
 function tcustomdbdropdownlistedit.nullcheckneeded(const newfocus: twidget): boolean;
 begin
  result:= inherited nullcheckneeded(newfocus) and fdatalink.nullcheckneeded;
+end;
+
+function tcustomdbdropdownlistedit.getdatasource(const aindex: integer): tdatasource;
+begin
+ result:= datasource;
 end;
 
 { tdbkeystringedit }
@@ -2431,6 +2463,11 @@ begin
  result:= inherited nullcheckneeded(newfocus) and fdatalink.nullcheckneeded;
 end;
 
+function tdbkeystringedit.getdatasource(const aindex: integer): tdatasource;
+begin
+ result:= datasource;
+end;
+
 { tdbmemoedit }
 
 constructor tdbmemoedit.create(aowner: tcomponent);
@@ -2535,6 +2572,11 @@ end;
 function tdbmemoedit.nullcheckneeded(const newfocus: twidget): boolean;
 begin
  result:= inherited nullcheckneeded(newfocus) and fdatalink.nullcheckneeded;
+end;
+
+function tdbmemoedit.getdatasource(const aindex: integer): tdatasource;
+begin
+ result:= datasource;
 end;
 
 { tdbintegeredit }
@@ -2667,6 +2709,11 @@ begin
  result:= inherited nullcheckneeded(newfocus) and fdatalink.nullcheckneeded;
 end;
 
+function tdbintegeredit.getdatasource(const aindex: integer): tdatasource;
+begin
+ result:= datasource;
+end;
+
 { tdbbooleanedit }
 
 constructor tdbbooleanedit.create(aowner: tcomponent);
@@ -2765,6 +2812,11 @@ begin
  propertynames:= nil;
  setlength(fieldtypes,1);
  fieldtypes[0]:= booleanfields;
+end;
+
+function tdbbooleanedit.getdatasource(const aindex: integer): tdatasource;
+begin
+ result:= datasource;
 end;
 
 { tdbdataicon }
@@ -2875,6 +2927,11 @@ begin
  fieldtypes[0]:= integerfields;
 end;
 
+function tdbdataicon.getdatasource(const aindex: integer): tdatasource;
+begin
+ result:= datasource;
+end;
+
 { tdbdatabutton }
 
 constructor tdbdatabutton.create(aowner: tcomponent);
@@ -2981,6 +3038,11 @@ begin
  propertynames:= nil;
  setlength(fieldtypes,1);
  fieldtypes[0]:= integerfields;
+end;
+
+function tdbdatabutton.getdatasource(const aindex: integer): tdatasource;
+begin
+ result:= datasource;
 end;
 
 { tdbbooleaneditradio }
@@ -3096,6 +3158,11 @@ begin
  fieldtypes[0]:= booleanfields;
 end;
 
+function tdbbooleaneditradio.getdatasource(const aindex: integer): tdatasource;
+begin
+ result:= datasource;
+end;
+
 { tdbrealedit }
 
 constructor tdbrealedit.create(aowner: tcomponent);
@@ -3206,6 +3273,11 @@ end;
 function tdbrealedit.nullcheckneeded(const newfocus: twidget): boolean;
 begin
  result:= inherited nullcheckneeded(newfocus) and fdatalink.nullcheckneeded;
+end;
+
+function tdbrealedit.getdatasource(const aindex: integer): tdatasource;
+begin
+ result:= datasource;
 end;
 
 { tdbdatetimeedit }
@@ -3326,6 +3398,11 @@ begin
  result:= inherited nullcheckneeded(newfocus) and fdatalink.nullcheckneeded;
 end;
 
+function tdbdatetimeedit.getdatasource(const aindex: integer): tdatasource;
+begin
+ result:= datasource;
+end;
+
 { tdbcalendardatetimeedit }
 
 constructor tdbcalendardatetimeedit.create(aowner: tcomponent);
@@ -3444,6 +3521,11 @@ begin
  result:= inherited nullcheckneeded(newfocus) and fdatalink.nullcheckneeded;
 end;
 
+function tdbcalendardatetimeedit.getdatasource(const aindex: integer): tdatasource;
+begin
+ result:= datasource;
+end;
+
 { tcustomdbenumedit }
 
 constructor tcustomdbenumedit.create(aowner: tcomponent);
@@ -3557,6 +3639,11 @@ begin
  result:= inherited nullcheckneeded(newfocus) and fdatalink.nullcheckneeded;
 end;
 
+function tcustomdbenumedit.getdatasource(const aindex: integer): tdatasource;
+begin
+ result:= datasource;
+end;
+
 { tdbbooleantextedit }
 
 constructor tdbbooleantextedit.create(aowner: tcomponent);
@@ -3654,7 +3741,7 @@ begin
  end;
 end;
 
-function tdbdropdowncol.getdatasource: tdatasource;
+function tdbdropdowncol.getdatasource(const aindex: integer): tdatasource;
 begin
  if fowner is tdbdropdownlistcontroller then begin
   result:= tdbdropdownlistcontroller(fowner).datasource;
@@ -4125,6 +4212,11 @@ begin
  else begin
   fieldtypes[0]:= integerfields;
  end; 
+end;
+
+function tdbdropdownlistcontroller.getdatasource(const aindex: integer): tdatasource;
+begin
+ result:= datasource;
 end;
 
 { not possible, dropdownlist must work
@@ -5074,7 +5166,7 @@ begin
  end;
 end;
 
-function tgriddatalink.getdatasource: tdatasource;
+function tgriddatalink.getdatasource(const aindex: integer): tdatasource;
 begin
  result:= datasource;
 end;
@@ -5505,7 +5597,7 @@ begin
  fieldtypes[0]:= stringfields;
 end;
 
-function tdbstringcol.getdatasource: tdatasource;
+function tdbstringcol.getdatasource(const aindex: integer): tdatasource;
 begin
  result:= getgriddatasource;
 end;
