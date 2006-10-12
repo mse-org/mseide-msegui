@@ -41,6 +41,11 @@ type
    function getvalues: msestringarty; override;
  end;
  
+ tdbparampropertyeditor = class(tclasspropertyeditor)
+  public
+   function getvalue: msestring; override;
+ end;
+  
  tdbparamnamepropertyeditor = class(tstringpropertyeditor)
   protected
    fdbparaminfointf: idbparaminfo;
@@ -188,6 +193,7 @@ begin
  registerpropertyeditor(typeinfo(boolean),tdataset,'Active',
                                          tdatasetactivepropertyeditor);                              
  registerpropertyeditor(typeinfo(tfielddef),nil,'',tfielddefpropertyeditor);
+ registerpropertyeditor(typeinfo(tparam),nil,'',tdbparampropertyeditor);
 end;
 
 
@@ -709,6 +715,15 @@ begin
  with tfielddef(fprops[0].instance) do begin
   result:= '<'+name+'><'+
     getenumname(typeinfo(tfieldtype),ord(datatype))+'>';
+ end;
+end;
+
+{ tdbparampropertyeditor }
+
+function tdbparampropertyeditor.getvalue: msestring;
+begin
+ with tparam(fprops[0].instance) do begin
+  result:= '<'+name+'><'+getenumname(typeinfo(tparamtype),ord(paramtype))+'>';
  end;
 end;
 

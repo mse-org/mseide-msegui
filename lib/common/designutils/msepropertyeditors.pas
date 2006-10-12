@@ -541,7 +541,6 @@ type
    procedure dopopup(var amenu: tpopupmenu; const atransientfor: twidget;
                           var mouseinfo: mouseeventinfoty); override;
  end;
-
  
  tpersistentarraypropertyeditor = class(tarraypropertyeditor)
   protected

@@ -44,7 +44,30 @@ type
  updateerroreventty = procedure(const sender: tmsesqlquery;
                           const aupdatekind: tupdatekind;
                           var aupdateaction: tupdateaction) of object;
+                          
+ tblobbuffer = class(tmemorystream)
+  private
+   fowner: tmsesqlquery;
+   ffield: tfield;
+  public
+   constructor create(const aowner: tmsesqlquery; const afield: tfield);
+   destructor destroy; override;
+ end;
  
+ blobinfoty = record
+  field: tfield;
+  data: pointer;
+  datalength: integer;
+ end;
+ blobinfoarty = array of blobinfoty;
+
+ imsesqlconnection = interface(inullinterface)
+                ['{947B58E1-0CA4-436D-A06F-2174D8CA676F}']
+  procedure writeblob(const atransaction: tsqltransaction; const tablename: string;
+                         const ablob: blobinfoty; const aparam: tparam);
+              //returns blobid in param
+ end;
+   
  tmsesqlquery = class(tsqlquery,imselocate,idscontroller,igetdscontroller)
   private
    fsqlonchangebefore: tnotifyevent;
@@ -54,6 +77,9 @@ type
    fwantedreadonly: boolean;
    ffailedcount: integer;
    fapplyindex: integer; //take care about canceled updates while applying
+   fblobbuffer: blobinfoarty;
+   fconnintf: imsesqlconnection;
+   fblobwritten: boolean;
    procedure setcontroller(const avalue: tdscontroller);
    procedure setactive(value : boolean); {override;}
    function getactive: boolean;
@@ -72,6 +98,10 @@ type
    procedure internalapplyupdate(const maxerrors: integer; 
                     var arec: trecupdatebuffer; var response: tresolverresponse);
    procedure internalApplyUpdates(MaxErrors: Integer);
+   procedure freeblob(const ablob: blobinfoty);
+   procedure freeblobs;
+   procedure addblob(const ablob: tblobbuffer);
+   
                     //for workarounds
    procedure cancelrecupdate(var arec: trecupdatebuffer);
    function GetRecordUpdateBuffer : boolean;
@@ -142,6 +172,7 @@ type
    procedure cancelupdates; override;
    procedure cancelupdate; //cancels current record
    function moveby(const distance: integer): integer;
+   function createblobbuffer(const afield: tfield): tblobbuffer;
   published
    property FieldDefs;
    property controller: tdscontroller read fcontroller write setcontroller;
@@ -396,6 +427,7 @@ end;
 
 destructor tmsesqlquery.destroy;
 begin
+ freeblobs;
  fcontroller.free;
  inherited;
 end;
@@ -492,6 +524,9 @@ procedure tmsesqlquery.internalopen;
  end;
 
 begin
+ if database <> nil then begin
+  getcorbainterface(database,typeinfo(imsesqlconnection),fconnintf);
+ end;
  fcontroller.internalopen;
  bindfields(true);
      //queries are nil if not defaultfields
@@ -520,6 +555,7 @@ begin
   inherited;
   ffirstrecbuf:= nil;
   bindfields(false);
+  fconnintf:= nil;
  end;
 end;
 
@@ -710,6 +746,7 @@ var
 var qry : tsqlquery;
     x   : integer;
     Fld : TField;
+ int1: integer;
     
 begin
  with tsqlquerycracker(self) do begin
@@ -737,7 +774,19 @@ begin
     else
       begin
       Fld := self.FieldByName(name);
-      AssignFieldValue(Fld,Fld.Value);
+      if fld is tblobfield and (fconnintf <> nil) then begin
+       for int1:= 0 to high(fblobbuffer) do begin
+        if fblobbuffer[int1].field = fld then begin
+         fblobwritten:= true;
+         fconnintf.writeblob(tsqltransaction(transaction),ftablename,
+         fblobbuffer[int1],params[x]);
+         break;
+        end;
+       end;
+      end
+      else begin
+       AssignFieldValue(Fld,Fld.Value);
+      end;
       end;
     execsql;
     end;
@@ -887,6 +936,7 @@ procedure tmsesqlquery.applyupdates(maxerrors: integer);
 var
  bm1: pchar;
 begin
+ fblobwritten:= false;
  checkbrowsemode;
  disablecontrols;
  try
@@ -901,6 +951,10 @@ begin
   dataevent(dedatasetchange,0);
  end;
  afterapply;
+ if fblobwritten then begin
+  active:= false;
+  active:= true;
+ end;
 end;
 
 procedure tmsesqlquery.applyupdate; //applies current record
@@ -908,6 +962,7 @@ var
  response: tresolverresponse;
  var int1: integer;
 begin
+ fblobwritten:= false;
  checkbrowsemode;
  with tbufdatasetcracker(self) do begin
   if (fupdatebuffer <> nil) and (fcurrentrecbuf <> nil) then begin
@@ -923,6 +978,10 @@ begin
     end;
    end;
   end;
+ end;
+ if fblobwritten then begin
+  active:= false;
+  active:= true;
  end;
 end;
 
@@ -1438,6 +1497,48 @@ begin
  end;
 end;
 
+function tmsesqlquery.createblobbuffer(const afield: tfield): tblobbuffer;
+var
+ int1: integer;
+begin
+ for int1:= 0 to high(fblobbuffer) do begin
+  if fblobbuffer[int1].field = afield then begin
+   freeblob(fblobbuffer[int1]);
+   deleteitem(fblobbuffer,typeinfo(blobinfoarty),int1);
+  end;
+ end;
+ result:= tblobbuffer.create(self,afield);
+end;
+
+procedure tmsesqlquery.freeblob(const ablob: blobinfoty);
+begin
+ with ablob do begin
+  if datalength > 0 then begin
+   freemem(data);
+  end;
+ end;
+end;
+
+procedure tmsesqlquery.freeblobs;
+var
+ int1: integer;
+begin
+ for int1:= 0 to high(fblobbuffer) do begin
+  freeblob(fblobbuffer[int1]);
+ end;
+ fblobbuffer:= nil;
+end;
+
+procedure tmsesqlquery.addblob(const ablob: tblobbuffer);
+begin
+ setlength(fblobbuffer,high(fblobbuffer)+2);
+ with fblobbuffer[high(fblobbuffer)],ablob do begin
+  data:= memory;
+  datalength:= size;
+  field:= ffield;
+ end;
+end;
+
 { tparamsourcedatalink }
 
 constructor tparamsourcedatalink.create(const aowner: tfieldparamlink);
@@ -1724,6 +1825,23 @@ end;
 function tsequencelink.getdatasource(const aindex: integer): tdatasource;
 begin
  result:= datasource;
+end;
+
+{ tblobbuffer }
+
+constructor tblobbuffer.create(const aowner: tmsesqlquery;
+               const afield: tfield);
+begin
+ fowner:= aowner;
+ ffield:= afield;
+ inherited create;
+end;
+
+destructor tblobbuffer.destroy;
+begin
+ fowner.addblob(self);
+ setpointer(nil,0);
+ inherited;
 end;
 
 end.

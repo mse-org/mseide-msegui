@@ -729,6 +729,7 @@ function fieldtosql(const field: tfield): string;
 function fieldtooldsql(const field: tfield): string;
 function fieldchanged(const field: tfield): boolean;
 procedure fieldtoparam(const field: tfield; const param: tparam);
+procedure msestringtoparam(const avalue: msestring; const param: tparam);
 //function getasmsestring(const field: tfield): msestring;
 function getasmsestring(const field: tfield; const utf8: boolean): msestring;
 
@@ -761,6 +762,23 @@ begin
  end
  else begin
   result:= field.asstring;
+ end;
+end;
+
+procedure msestringtoparam(const avalue: msestring; const param: tparam);
+var
+ intf1: igetdscontroller;
+begin
+ with param do begin
+  if dataset <> nil then begin
+   if getcorbainterface(dataset,typeinfo(igetdscontroller),intf1) then begin
+    if dso_utf8 in intf1.getcontroller.options then begin
+     param.asstring:= stringtoutf8(avalue);
+     exit;
+    end;
+   end;
+  end;
+  param.asstring:= avalue;
  end;
 end;
 
