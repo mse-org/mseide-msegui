@@ -18,7 +18,7 @@ uses
  msewidgetgrid,msedatalist,msetypes,msegrids,msegraphics,mseevent,msekeyboard,
  msegraphedits,msestrings,sqldb,msegraphutils,mselist,msedropdownlist,
  msescrollbar,msedataedits,msewidgets,msearrayprops,msedb,mselookupbuffer,
- msedialog;
+ msedialog,mseinplaceedit;
 
 type
 
@@ -137,6 +137,7 @@ type
    fmodified: boolean;
    frecordchange: integer;
    fbeginedit: integer;
+   fmaxlength: integer;
    function canmodify: boolean;
    procedure setediting(avalue: boolean);
   protected
@@ -154,6 +155,8 @@ type
    procedure modified;
    function dataentered: boolean;
    procedure updateoptionsedit(var aoptions: optionseditty);
+   function cuttext(const atext: msestring; out maxlength: integer): boolean; 
+             //true if text to long
  end;
 
  tdbstringedit = class(tcustomstringedit,idbeditfieldlink,idbeditinfo)
@@ -166,6 +169,7 @@ type
    procedure setdatasource(const avalue: tdatasource);
   protected
 
+   procedure editnotification(var info: editnotificationinfoty); override;
    function nullcheckneeded(const newfocus: twidget): boolean; override;
    procedure griddatasourcechanged; override;
    function getgriddatasource: tdatasource;
@@ -1310,6 +1314,7 @@ type
    procedure setfieldnamedisplayfixrow(const avalue: integer);
    procedure setdatalink(const avalue: tstringgriddatalink);
   protected
+   procedure editnotification(var info: editnotificationinfoty); override;
    procedure setoptionsgrid(const avalue: optionsgridty); override;
    procedure doasyncevent(var atag: integer); override;
    procedure internalcreateframe; override;
@@ -1928,6 +1933,17 @@ procedure teditwidgetdatalink.activechanged;
 begin
  fintf.updatereadonlystate;
  inherited;
+ if active and (field <> nil) and 
+                    (field.datatype in [ftstring,ftfixedchar]) then begin
+  fmaxlength:= 0;
+//  fmaxlength:= field.size; //not used yet, problems with utf8 size
+  if fmaxlength < 0 then begin
+   fmaxlength:= 0;
+  end;
+ end
+ else begin
+  fmaxlength:= 0;
+ end;
 end;
 
 procedure teditwidgetdatalink.focuscontrol(afield: tfieldref);
@@ -2021,6 +2037,13 @@ end;
 function teditwidgetdatalink.nullcheckneeded: boolean;
 begin
  result:= editing and (dataset.modified or (dataset.state <> dsinsert));
+end;
+
+function teditwidgetdatalink.cuttext(const atext: msestring;
+               out maxlength: integer): boolean;
+begin
+ maxlength:= fmaxlength;
+ result:= (maxlength > 0) and (length(atext) > maxlength);
 end;
 
 { tdbstringedit }
@@ -2132,6 +2155,18 @@ end;
 function tdbstringedit.getdatasource(const aindex: integer): tdatasource;
 begin
  result:= datasource;
+end;
+
+procedure tdbstringedit.editnotification(var info: editnotificationinfoty);
+var
+ int1: integer;
+begin
+ inherited;
+ if info.action = ea_textedited then begin
+  if fdatalink.cuttext(text,int1) then begin
+   text:= copy(text,1,int1);
+  end;
+ end;
 end;
 
 { tdbdialogstringedit }
@@ -6043,6 +6078,17 @@ procedure tcustomdbstringgrid.beforefocuscell(const cell: gridcoordty;
                              const selectaction: focuscellactionty);
 begin
  fdatalink.beforefocuscell(cell,selectaction);
+end;
+
+procedure tcustomdbstringgrid.editnotification(var info: editnotificationinfoty);
+var
+ int1: integer;
+begin
+ inherited;
+ if isdatacell(ffocusedcell) and 
+   datacols[ffocusedcell.col].fdatalink.cuttext(feditor.text,int1) then begin
+  feditor.text:= copy(feditor.text,1,int1);
+ end;
 end;
 
 { tlbdropdowncol }
