@@ -184,7 +184,7 @@ type
    fstream: ttextstream;
    fprinter: tprinter;
    fcolorspace: colorspacety;
-   procedure initgcstate; override;
+   procedure initprinting;
    procedure checkgcstate(state: canvasstatesty); override;
    procedure updatescale; virtual;
    procedure updateframe;
@@ -369,8 +369,9 @@ end;
 
 procedure tprinter.beginprint(const astream: ttextstream);
 begin
+ endprint;
  setstream(astream);
- fcanvas.reset;
+ fcanvas.initprinting;
 end;
 
 procedure tprinter.endprint;
@@ -568,11 +569,12 @@ begin
  inherited create(user,intf);
 end;
 
-procedure tcustomprintercanvas.initgcstate;
+procedure tcustomprintercanvas.initprinting;
 begin
+ fpagenumber:= 0;
  fpagelinenumber:= 0;
  fliney:= 0;
- inherited;
+ reset;
 end;
 
 procedure tcustomprintercanvas.reset;
