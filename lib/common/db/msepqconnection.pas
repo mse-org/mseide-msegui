@@ -11,7 +11,7 @@ unit msepqconnection;
 {$ifdef FPC}{$mode objfpc}{$h+}{$INTERFACES CORBA}{$endif}
 interface
 uses
- classes,pqconnection,msestrings,msedb,msetypes,sqldb,db;
+ classes,mpqconnection,msestrings,msedb,msetypes,msqldb,db;
 type
  pqconnectionoptionty = (pqco_usesavepoint,pqco_closetransactiononfail);
  pqconnectionoptionsty = set of pqconnectionoptionty;

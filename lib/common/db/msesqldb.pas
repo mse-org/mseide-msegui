@@ -11,7 +11,7 @@ unit msesqldb;
 {$ifdef FPC}{$mode objfpc}{$h+}{$INTERFACES CORBA}{$endif}
 interface
 uses
- classes,db,sqldb,msedb,mseclasses,msetypes,mseguiglob;
+ classes,db,mbufdataset,msqldb,msedb,mseclasses,msetypes,mseguiglob;
   
 type
 
@@ -44,30 +44,7 @@ type
  updateerroreventty = procedure(const sender: tmsesqlquery;
                           const aupdatekind: tupdatekind;
                           var aupdateaction: tupdateaction) of object;
-                          
- tblobbuffer = class(tmemorystream)
-  private
-   fowner: tmsesqlquery;
-   ffield: tfield;
-  public
-   constructor create(const aowner: tmsesqlquery; const afield: tfield);
-   destructor destroy; override;
- end;
- 
- blobinfoty = record
-  field: tfield;
-  data: pointer;
-  datalength: integer;
- end;
- blobinfoarty = array of blobinfoty;
-
- imsesqlconnection = interface(inullinterface)
-                ['{947B58E1-0CA4-436D-A06F-2174D8CA676F}']
-  procedure writeblob(const atransaction: tsqltransaction; const tablename: string;
-                         const ablob: blobinfoty; const aparam: tparam);
-              //returns blobid in param
- end;
-   
+                             
  tmsesqlquery = class(tsqlquery,imselocate,idscontroller,igetdscontroller)
   private
    fsqlonchangebefore: tnotifyevent;
@@ -75,11 +52,6 @@ type
    fmstate: sqlquerystatesty;
    fonapplyrecupdate: applyrecupdateeventty;
    fwantedreadonly: boolean;
-   ffailedcount: integer;
-   fapplyindex: integer; //take care about canceled updates while applying
-   fblobbuffer: blobinfoarty;
-   fconnintf: imsesqlconnection;
-   fblobwritten: boolean;
    procedure setcontroller(const avalue: tdscontroller);
    procedure setactive(value : boolean); {override;}
    function getactive: boolean;
@@ -95,24 +67,21 @@ type
    function getetstatementtype: TStatementType;
    procedure setstatementtype(const avalue: TStatementType);
    procedure afterapply;
-   procedure internalapplyupdate(const maxerrors: integer; 
-                    var arec: trecupdatebuffer; var response: tresolverresponse);
-   procedure internalApplyUpdates(MaxErrors: Integer);
-   procedure freeblob(const ablob: blobinfoty);
-   procedure freeblobs;
-   procedure addblob(const ablob: tblobbuffer);
+//   procedure internalapplyupdate(const maxerrors: integer; 
+//                    var arec: trecupdatebuffer; var response: tresolverresponse);
+//   procedure internalApplyUpdates(MaxErrors: Integer);
    
                     //for workarounds
-   procedure cancelrecupdate(var arec: trecupdatebuffer);
+//   procedure cancelrecupdate(var arec: trecupdatebuffer);
    function GetRecordUpdateBuffer : boolean;
    function GetFieldSize(FieldDef : TFieldDef) : longint;
-   Procedure ApplyRecUpdate1(UpdateKind : TUpdateKind);
+//   Procedure ApplyRecUpdate1(UpdateKind : TUpdateKind);
    
   protected
    procedure ClearCalcFields(Buffer: PChar); override;
    function  AllocRecordBuffer: PChar; override;
-   function GetFieldData(Field: TField; Buffer: Pointer): Boolean; override;
-   procedure SetFieldData(Field: TField; Buffer: Pointer); override;
+//   function GetFieldData(Field: TField; Buffer: Pointer): Boolean; override;
+//   procedure SetFieldData(Field: TField; Buffer: Pointer); override;
    function GetRecord(Buffer: PChar; GetMode: TGetMode;
                   DoCheck: Boolean): TGetResult; override;
    procedure updateindexdefs; override;
@@ -172,7 +141,6 @@ type
    procedure cancelupdates; override;
    procedure cancelupdate; //cancels current record
    function moveby(const distance: integer): integer;
-   function createblobbuffer(const afield: tfield): tblobbuffer;
   published
    property FieldDefs;
    property controller: tdscontroller read fcontroller write setcontroller;
@@ -358,7 +326,7 @@ type
     FDeleteQry,
     FInsertQry           : TSQLQuery;
   end;
-  
+{  
 function GetFieldIsNull(NullMask : pbyte;x : longint) : boolean; //inline;
 begin
   result := ord(NullMask[x div 8]) and (1 shl (x mod 8)) > 0
@@ -373,7 +341,7 @@ procedure SetFieldIsNull(NullMask : pbyte;x : longint); //inline;
 begin
   NullMask[x div 8] := (NullMask[x div 8]) or (1 shl (x mod 8));
 end;
-
+}
 { tmsesqltransaction }
 
 constructor tmsesqltransaction.create(aowner: tcomponent);
@@ -427,7 +395,6 @@ end;
 
 destructor tmsesqlquery.destroy;
 begin
- freeblobs;
  fcontroller.free;
  inherited;
 end;
@@ -524,9 +491,6 @@ procedure tmsesqlquery.internalopen;
  end;
 
 begin
- if database <> nil then begin
-  getcorbainterface(database,typeinfo(imsesqlconnection),fconnintf);
- end;
  fcontroller.internalopen;
  bindfields(true);
      //queries are nil if not defaultfields
@@ -543,20 +507,7 @@ procedure tmsesqlquery.internalclose;
 var
  int1: integer;
 begin
- with tbufdatasetcracker(self) do begin
-  for int1:= high(fupdatebuffer) downto 0 do begin
-   with fupdatebuffer[int1] do begin
-    if bookmarkdata <> nil then begin
-     freerecordbuffer(oldvaluesbuffer);
-    end;
-   end;
-  end;
-  fupdatebuffer:= nil;
-  inherited;
-  ffirstrecbuf:= nil;
-  bindfields(false);
-  fconnintf:= nil;
- end;
+ inherited;
 end;
 
 procedure tmsesqlquery.setonapplyrecupdate(const avalue: applyrecupdateeventty);
@@ -659,7 +610,7 @@ begin
   ukdelete: result:= deleterecquery;
  end;
 end;
-
+{
 Procedure TmseSQLQuery.ApplyRecUpdate1(UpdateKind : TUpdateKind);
 
 var
@@ -747,9 +698,11 @@ var qry : tsqlquery;
     x   : integer;
     Fld : TField;
  int1: integer;
+ blobspo: pblobinfoarty;
     
 begin
  with tsqlquerycracker(self) do begin
+  blobspo:= getintblobpo;
     case UpdateKind of
       ukModify : begin
                  qry := FUpdateQry;
@@ -775,11 +728,10 @@ begin
       begin
       Fld := self.FieldByName(name);
       if fld is tblobfield and (fconnintf <> nil) then begin
-       for int1:= 0 to high(fblobbuffer) do begin
-        if fblobbuffer[int1].field = fld then begin
-         fblobwritten:= true;
+       for int1:= 0 to high(blobspo^) do begin
+        if blobspo^[int1].field = fld then begin
          fconnintf.writeblob(tsqltransaction(transaction),ftablename,
-         fblobbuffer[int1],params[x]);
+         blobspo^[int1],params[x]);
          break;
         end;
        end;
@@ -792,7 +744,7 @@ begin
     end;
  end;
 end;
-
+}
 procedure tmsesqlquery.applyrecupdate(updatekind: tupdatekind);
 var
  bo1: boolean;
@@ -816,7 +768,7 @@ begin
   end
   else begin
 //   inherited;
-  applyrecupdate1(updatekind);
+  internalapplyrecupdate(updatekind);
   end;
  except
   include(fmstate,sqs_updateerror);
@@ -831,7 +783,7 @@ begin
   applyupdates;
  end;
 end;
-
+{
 procedure tmsesqlquery.internalapplyupdate(const maxerrors: integer; 
                var arec: trecupdatebuffer; var response: tresolverresponse);
                
@@ -886,7 +838,8 @@ begin
   end;
  end;
 end;
-
+}
+{
 procedure tmsesqlquery.internalApplyUpdates(MaxErrors: Integer);
 
 var
@@ -924,7 +877,7 @@ begin
   end;
  end;
 end;
-
+}
 procedure tmsesqlquery.afterapply;
 begin
  if (dso_autocommitret in fcontroller.options) and (transaction <> nil) then begin
@@ -936,12 +889,11 @@ procedure tmsesqlquery.applyupdates(maxerrors: integer);
 var
  bm1: pchar;
 begin
- fblobwritten:= false;
  checkbrowsemode;
  disablecontrols;
  try
   fmstate:= fmstate - [sqs_updateabort,sqs_updateerror];
-  internalapplyupdates(maxerrors);
+  internalapplyupdates(maxerrors,dso_cancelupdateonerror in fcontroller.options);
  finally
   if (sqs_updateerror in fmstate) and 
               (dso_cancelupdatesonerror in fcontroller.options) then begin
@@ -951,10 +903,6 @@ begin
   dataevent(dedatasetchange,0);
  end;
  afterapply;
- if fblobwritten then begin
-  active:= false;
-  active:= true;
- end;
 end;
 
 procedure tmsesqlquery.applyupdate; //applies current record
@@ -962,14 +910,14 @@ var
  response: tresolverresponse;
  var int1: integer;
 begin
- fblobwritten:= false;
  checkbrowsemode;
  with tbufdatasetcracker(self) do begin
   if (fupdatebuffer <> nil) and (fcurrentrecbuf <> nil) then begin
    for int1:= high(fupdatebuffer) downto 0 do begin
     if fupdatebuffer[int1].bookmarkdata = fcurrentrecbuf then begin
      ffailedcount:= 0;
-     internalapplyupdate(0,fupdatebuffer[int1],response);
+     internalapplyupdate(0,dso_cancelupdateonerror in fcontroller.options,
+                      fupdatebuffer[int1],response);
      if response = rrapply then begin
       afterapply;
       deleteitem(fupdatebuffer,typeinfo(trecordsupdatebuffer),int1);
@@ -979,12 +927,8 @@ begin
    end;
   end;
  end;
- if fblobwritten then begin
-  active:= false;
-  active:= true;
- end;
 end;
-
+{
 procedure tmsesqlquery.cancelrecupdate(var arec: trecupdatebuffer);
      //copied from bufdataset.inc
 begin
@@ -992,6 +936,7 @@ begin
   if bookmarkdata <> nil then begin
    case updatekind of
     ukmodify: begin
+     freeblobs(pblobinfoarty(BookmarkData+sizeof(TBufRecLinkItem))^);
      move(pchar(OldValuesBuffer+sizeof(TBufRecLinkItem))^,
             pchar(BookmarkData+sizeof(TBufRecLinkItem))^,FRecordSize);
      FreeRecordBuffer(OldValuesBuffer);
@@ -1029,7 +974,7 @@ begin
   end;
  end;
 end;
-
+}
 
 procedure tmsesqlquery.cancelupdates;
 var 
@@ -1374,105 +1319,6 @@ begin
  end;
 end;
 
-function tmsesqlquery.GetFieldData(Field: TField; Buffer: Pointer): Boolean;
-var 
- CurrBuff : pchar;
-begin
- Result := False;
- with tbufdatasetcracker(self) do begin
-  if state = dscalcfields then begin
-   currbuff:= calcbuffer;
-  end
-  else begin
-   CurrBuff := ActiveBuffer;
-  end;
-  If Field.Fieldno > 0 then begin 
-        // If = 0, then calculated field or something similar
-   if state = dsOldValue then begin
-    if not GetRecordUpdateBuffer then begin
-        // There is no old value available
-     exit;
-    end;
-    currbuff := FUpdateBuffer[FCurrentUpdateBuffer].OldValuesBuffer+
-                            sizeof(TBufRecLinkItem);
-   end
-   else begin
-    if not assigned(CurrBuff) then begin
-     exit;
-    end;
-   end;
-   if GetFieldIsnull(pbyte(CurrBuff),Field.Fieldno-1) then begin
-    exit;
-   end;
-   inc(CurrBuff,FFieldBufPositions[Field.FieldNo-1]);
-   if assigned(buffer) then begin
-    Move(CurrBuff^, Buffer^, GetFieldSize(FieldDefs[Field.FieldNo-1]));
-   end;
-   Result := True;
-  end
-  else begin //calc or lookup field
-   if currbuff <> nil then begin
-    currbuff:= currbuff + FRecordsize + sizeof(TBufBookmark) + field.offset;
-    if (currbuff + field.datasize)^ <> #0 then begin
-     result:= true;
-     if buffer <> nil then begin
-      move(currbuff^,buffer^,field.datasize);
-     end;
-    end;
-   end;
-  end;
- end;
-end;
-
-procedure tmsesqlquery.SetFieldData(Field: TField; Buffer: Pointer);
-
-var 
- CurrBuff : pointer;
- NullMask : pbyte;
-
-begin
- with tbufdatasetcracker(self) do begin
-//  if not (state in [dsEdit, dsInsert, dsFilter]) then begin
-  if not (state in dswritemodes) then begin
-   DatabaseErrorFmt(SNotInEditState,[NAme],self);
-   exit;
-  end;
-  if state = dscalcfields then begin
-   currbuff:= calcbuffer;
-  end
-  else begin
-   CurrBuff := ActiveBuffer;
-  end;
-  If Field.Fieldno > 0 then begin // If = 0, then calculated field or something
-   if state = dsFilter then begin 
-    // Set the value into the 'temporary' FLastRecBuf buffer for Locate and Lookup
-      CurrBuff := pointer(FLastRecBuf) + sizeof(TBufRecLinkItem)
-   end;
-   NullMask := CurrBuff;
-   inc(CurrBuff,FFieldBufPositions[Field.FieldNo-1]);
-   if assigned(buffer) then begin
-    Move(Buffer^, CurrBuff^, GetFieldSize(FieldDefs[Field.FieldNo-1]));
-    unSetFieldIsNull(NullMask,Field.FieldNo-1);
-   end
-   else begin
-    SetFieldIsNull(NullMask,Field.FieldNo-1);
-   end;     
-   if not (State in [dsCalcFields, dsFilter, dsNewValue]) then begin
-    DataEvent(deFieldChange, Ptrint(Field));
-   end;
-  end
-  else begin //calc or lookup field
-   currbuff:= currbuff + FRecordsize + sizeof(TBufBookmark) + field.offset;
-   if buffer <> nil then begin
-    pchar(currbuff+field.datasize)^:= #1;
-    move(buffer^,currbuff^,field.datasize);
-   end
-   else begin
-    pchar(currbuff+field.datasize)^:= #0;
-   end;
-  end;
- end;
-end;
 
 procedure tmsesqlquery.GetCalcFields(Buffer: PChar);
 begin
@@ -1494,48 +1340,6 @@ procedure tmsesqlquery.ClearCalcFields(Buffer: PChar);
 begin
  with tbufdatasetcracker(self) do begin
   fillchar((buffer+FRecordsize + sizeof(TBufBookmark))^,calcfieldssize,0);
- end;
-end;
-
-function tmsesqlquery.createblobbuffer(const afield: tfield): tblobbuffer;
-var
- int1: integer;
-begin
- for int1:= 0 to high(fblobbuffer) do begin
-  if fblobbuffer[int1].field = afield then begin
-   freeblob(fblobbuffer[int1]);
-   deleteitem(fblobbuffer,typeinfo(blobinfoarty),int1);
-  end;
- end;
- result:= tblobbuffer.create(self,afield);
-end;
-
-procedure tmsesqlquery.freeblob(const ablob: blobinfoty);
-begin
- with ablob do begin
-  if datalength > 0 then begin
-   freemem(data);
-  end;
- end;
-end;
-
-procedure tmsesqlquery.freeblobs;
-var
- int1: integer;
-begin
- for int1:= 0 to high(fblobbuffer) do begin
-  freeblob(fblobbuffer[int1]);
- end;
- fblobbuffer:= nil;
-end;
-
-procedure tmsesqlquery.addblob(const ablob: tblobbuffer);
-begin
- setlength(fblobbuffer,high(fblobbuffer)+2);
- with fblobbuffer[high(fblobbuffer)],ablob do begin
-  data:= memory;
-  datalength:= size;
-  field:= ffield;
  end;
 end;
 
@@ -1825,23 +1629,6 @@ end;
 function tsequencelink.getdatasource(const aindex: integer): tdatasource;
 begin
  result:= datasource;
-end;
-
-{ tblobbuffer }
-
-constructor tblobbuffer.create(const aowner: tmsesqlquery;
-               const afield: tfield);
-begin
- fowner:= aowner;
- ffield:= afield;
- inherited create;
-end;
-
-destructor tblobbuffer.destroy;
-begin
- fowner.addblob(self);
- setpointer(nil,0);
- inherited;
 end;
 
 end.

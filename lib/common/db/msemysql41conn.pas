@@ -12,7 +12,7 @@ unit msemysql41conn;
 {$ifdef FPC}{$mode objfpc}{$h+}{$INTERFACES CORBA}{$endif}
 interface
 uses
- db,classes,mysql41conn,msestrings,msedb;
+ db,classes,mmysql41conn,msestrings,msedb;
  
 type
  tmsemysql41connection = class(tmysql41connection,idbcontroller)
