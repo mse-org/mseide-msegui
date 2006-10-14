@@ -214,10 +214,12 @@ procedure readgraphic1(const source: tstream; const index: integer;
                 const adest: tobject; const aformatlabel: string);
                 //index = select image in ico format
 var
- int1,int2: integer;
+ int1,int3: integer;
+ ar1: stringarty;
+ found: boolean;
 begin
- int2:= -1;
  if aformatlabel = '' then begin
+  found:= true;
   for int1:= 0 to high(formats) do begin
    with formats[int1] do begin
     if assigned(readproc) then begin
@@ -228,27 +230,31 @@ begin
     end;
    end;
   end;
-  formaterror(stockobjects.captions[sc_graphic_format_not_supported],aformatlabel);
  end
  else begin
-  for int1:= 0 to high(formats) do begin
-   with formats[int1] do begin 
-    if (formatlabel = aformatlabel) then begin
-     if assigned(readproc) then begin
-      int2:= int1;
+  found:= false;
+  ar1:= splitstring(aformatlabel,',');
+  for int3:= 0 to high(ar1) do begin
+   for int1:= 0 to high(formats) do begin
+    with formats[int1] do begin 
+     if (formatlabel = ar1[int3]) then begin
+      found:= true;
+      if assigned(readproc) then begin
+       if readproc(source,index,adest) then begin
+        exit;
+       end;
+      end;
+      break;
      end;
-     break;
     end;
    end;
   end;
-  if int2 < 0 then begin
-   formaterror(stockobjects.captions[sc_graphic_format_not_supported],aformatlabel);
-  end;
-  with formats[int2] do begin
-   if not readproc(source,index,adest) then begin
-    formaterror(stockobjects.captions[sc_graphic_format_error],aformatlabel);
-   end;
-  end;
+ end;
+ if not found then begin
+  formaterror(stockobjects.captions[sc_graphic_format_not_supported],aformatlabel);
+ end
+ else begin
+  formaterror(stockobjects.captions[sc_graphic_format_error],aformatlabel);
  end;
 end;
 

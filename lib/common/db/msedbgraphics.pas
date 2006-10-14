@@ -35,7 +35,7 @@ type
  tdbimage = class(timage,idbeditinfo,idbgraphicfieldlink)
   private
    fformat: string;
-   fdatalink: tdispfielddatalink;
+   fdatalink: tgraphicdatalink;
    function getdatafield: string; overload;
    procedure setdatafield(const avalue: string);
    function getdatasource: tdatasource;
@@ -51,7 +51,7 @@ type
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
-   property datalink: tdispfielddatalink read fdatalink;
+   property datalink: tgraphicdatalink read fdatalink;
   published
    property datafield: string read getdatafield write setdatafield;
    property datasource: tdatasource read getdatasource write setdatasource;
@@ -65,7 +65,7 @@ uses
 
 constructor tdbimage.create(aowner: tcomponent);
 begin
- fdatalink:= tdispfielddatalink.create(idbgraphicfieldlink(self));
+ fdatalink:= tgraphicdatalink.create(idbgraphicfieldlink(self));
  inherited;
 end;
 
