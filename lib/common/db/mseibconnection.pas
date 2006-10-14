@@ -170,7 +170,8 @@ procedure tmseibconnection.writeblob(const atransaction: tsqltransaction;
    CheckError('TIBConnection.writeblob', tibconnectioncracker(self).FStatus);
   end;
  end;
- 
+const
+ defsegsize = $4000; 
 var
  transactionhandle: pointer;
  blobhandle: isc_blob_handle;
@@ -191,7 +192,13 @@ begin
    check(isc_create_blob2(@fstatus,@fsqldatabasehandle,@transactionhandle,
                         @blobhandle,@blobid,0,nil));
    try
-    step:= $4000;
+    int1:= getmaxblobsize(blobhandle);
+    if (int1 <= 0) or (int1 > defsegsize) then begin
+     step:= defsegsize;
+    end
+    else begin
+     step:= int1;
+    end;
     po1:= ablob.data;
     int1:= ablob.datalength;
     while int1 > 0 do begin

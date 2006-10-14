@@ -19,6 +19,7 @@ const
  datetimefields = [ftdate,fttime,ftdatetime];
  stringfields = textfields + integerfields + booleanfields +
                 realfields + datetimefields;
+ blobfields = [ftblob,ftmemo,ftgraphic,ftstring];
  defaultproviderflags = [pfInUpdate,pfInWhere];
  
 type
@@ -401,23 +402,19 @@ type
 //   procedure Clear; override;
    function assql: string;
    property asmsestring: msestring read getasmsestring write setasmsestring;
+   procedure LoadFromFile(const FileName: filenamety);
+   procedure SaveToFile(const FileName: filenamety);
   published
    property DataSet stored false;
    property ProviderFlags default defaultproviderflags;
  end;
- tmsegraphicfield = class(tgraphicfield)
+ tmsegraphicfield = class(tmseblobfield)
   private
-   function getasmsestring: msestring;
-   procedure setasmsestring(const avalue: msestring);
+   fformat: string;
   protected
-   function HasParent: Boolean; override;
   public
-   procedure Clear; override;
-   function assql: string;
-   property asmsestring: msestring read getasmsestring write setasmsestring;
   published
-   property DataSet stored false;
-   property ProviderFlags default defaultproviderflags;
+   property format: string read fformat write fformat;
  end;
 
  tmsedatalink = class(tdatalink)
@@ -439,7 +436,6 @@ type
   private
    ffield: tfield;
    ffieldname: string;
-   procedure setfield(value: tfield);
    procedure setfieldname(const Value: string);
    procedure updatefield;
    function getasmsestring: msestring;
@@ -464,6 +460,7 @@ type
    function GetAsVariant: variant;
    procedure SetAsVariant(const avalue: variant);
   protected
+   procedure setfield(const value: tfield); virtual;
    procedure activechanged; override;
    procedure layoutchanged; override;
   public
@@ -1738,32 +1735,17 @@ begin
  result:= asstring;
 end;
 
+procedure tmseblobfield.LoadFromFile(const FileName: filenamety);
+begin
+ inherited loadfromfile(tosysfilepath(filename));
+end;
+
+procedure tmseblobfield.SaveToFile(const FileName: filenamety);
+begin
+ inherited savetofile(tosysfilepath(filename));
+end;
+
 { tmsegraphicfield }
-
-function tmsegraphicfield.HasParent: Boolean;
-begin
- result:= dataset <> nil;
-end;
-
-function tmsegraphicfield.assql: string;
-begin
- result:= fieldtosql(self);
-end;
-
-procedure tmsegraphicfield.setasmsestring(const avalue: msestring);
-begin
- asstring:= avalue;
-end;
-
-function tmsegraphicfield.getasmsestring: msestring;
-begin
- result:= asstring;
-end;
-
-procedure tmsegraphicfield.Clear;
-begin
- setdata(nil);
-end;
 
 { tdbfieldnamearrayprop }
 
@@ -1851,7 +1833,7 @@ begin
  end;
 end; 
 
-procedure tfielddatalink.setfield(value: tfield);
+procedure tfielddatalink.setfield(const value: tfield);
 begin
  if ffield <> value then begin
   ffield := value;

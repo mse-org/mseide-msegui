@@ -51,6 +51,7 @@ type
    procedure setcolorbackground(const Value: colorty);
    procedure setcolorforeground(const Value: colorty);
   protected
+   procedure setsize(const Value: sizety); override;
    function getasize: sizety; virtual;
    procedure destroyhandle; override;
    procedure createhandle(copyfrom: pixmapty); override;
@@ -1074,6 +1075,12 @@ begin
  else begin
   result:= not isempty;
  end;
+end;
+
+procedure tbitmap.setsize(const Value: sizety);
+begin
+ inherited;
+ change;
 end;
 
 { tmaskedbitmap }

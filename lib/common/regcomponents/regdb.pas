@@ -19,7 +19,7 @@ uses
  msepqconnection,mseodbcconn,msemysql40conn,msemysql41conn,msemysql50conn,{sqldb,}
  mselookupbuffer,msesqldb,msedbf,msesdfdata,msememds,msedb,mseclasses,msetypes,
  msestrings,msedatalist,msedbfieldeditor,sysutils,msetexteditor,
- msedbdispwidgets,regdb_bmp,msegui
+ msedbdispwidgets,msedbgraphics,regdb_bmp,msegui
  {$ifdef mse_with_sqlite}
  ,msesqlite3ds
  {$endif}
@@ -133,7 +133,8 @@ begin
       tmsebcdfield,tmseblobfield,tmsememofield,tmsegraphicfield,
       tdblabel,tdbstringdisp,tdbintegerdisp,tdbbooleandisp,
       tdbrealdisp,tdbdatetimedisp,
-      tdbstringdisplb,tdbintegerdisplb,tdbrealdisplb,tdbdatetimedisplb
+      tdbstringdisplb,tdbintegerdisplb,tdbrealdisplb,tdbdatetimedisplb,
+      tdbimage
       ]);
  registercomponents('Db',[
       tenumeditdb,tkeystringeditdb,tenumeditlb,tkeystringeditlb,

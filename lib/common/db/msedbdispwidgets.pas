@@ -14,8 +14,8 @@ type
  
  tdispfielddatalink = class(tfielddatalink)
   private
-   fintf: idbdispfieldlink;
   protected
+   fintf: idbdispfieldlink;
    procedure recordchanged(afield: tfield); override;
   public
    constructor create(const intf: idbdispfieldlink);
