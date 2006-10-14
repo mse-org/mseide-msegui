@@ -803,6 +803,110 @@ end;
 
 procedure TSQLQuery.SQLParser(var ASQL : string);
 
+type TParsePart = (ppStart,ppSelect,ppWhere,ppFrom,ppGroup,ppOrder,ppComment,ppBogus);
+
+Var
+  PSQL,CurrentP,
+  PhraseP, PStatementPart : pchar;
+  S                       : string;
+  ParsePart               : TParsePart;
+  StrLength               : Integer;
+
+begin
+    PSQL:=Pchar(ASQL);
+    ParsePart := ppStart;
+
+    CurrentP := PSQL-1;
+    PhraseP := PSQL;
+
+    FWhereStartPos := 0;
+    FWhereStopPos := 0;
+
+    repeat begin
+	inc(CurrentP);
+
+	if CurrentP^ in [' ',#13,#10,#9,#0,'(',')',';'] then begin { if(1) }
+	    if (CurrentP-PhraseP > 0) or (CurrentP^ in [';',#0]) then begin { if(2) }
+		strLength := CurrentP-PhraseP;
+		Setlength(S,strLength);
+		
+		if strLength > 0 then Move(PhraseP^,S[1],(strLength));
+		s := uppercase(s);
+
+		case ParsePart of
+		    ppStart  : begin
+			FCursor.FStatementType := (Database as tsqlconnection).StrToStatementType(s);
+		
+			if FCursor.FStatementType = stSelect then 
+			    ParsePart := ppSelect
+			else 
+			    break;
+			    
+			if not FParseSQL then break;
+		        PStatementPart := CurrentP;
+		    end; {ppStart}
+		    ppSelect : begin
+			if s = 'FROM' then begin
+			    ParsePart := ppFrom;
+			    PhraseP := CurrentP;
+			    PStatementPart := CurrentP;
+			end;
+		    end; {ppSelect}
+		    ppFrom   : begin
+			
+			if (s = 'WHERE') or (s = 'GROUP') or (s = 'ORDER') or (CurrentP^=#0) or (CurrentP^=';') then begin
+			    if (s = 'WHERE') then begin
+			        ParsePart := ppWhere;
+			        StrLength := PhraseP-PStatementPart;
+			    end else if (s = 'GROUP') then begin
+			        ParsePart := ppGroup;
+			        StrLength := PhraseP-PStatementPart
+			    end else if (s = 'ORDER') then begin
+			        ParsePart := ppOrder;
+			        StrLength := PhraseP-PStatementPart
+			    end else begin
+			        ParsePart := ppBogus;
+			        StrLength := CurrentP-PStatementPart;
+			    end;
+			    
+			    Setlength(FFromPart,StrLength);
+			    Move(PStatementPart^,FFromPart[1],(StrLength));
+			    FFrompart := trim(FFrompart);
+			    FWhereStartPos := PStatementPart-PSQL+StrLength+1;
+			    PStatementPart := CurrentP;
+			end;
+			
+		    end; {ppFrom}
+		    ppWhere  : begin
+			if (s = 'GROUP') or (s = 'ORDER') or (CurrentP^=#0) or (CurrentP^=';') then begin
+			    ParsePart := ppBogus;
+			    FWhereStartPos := PStatementPart-PSQL;
+				
+			    if (s = 'GROUP') or (s = 'ORDER') then
+			        FWhereStopPos := PhraseP-PSQL+1
+			    else
+			        FWhereStopPos := CurrentP-PSQL+1;
+			    end;
+			end;
+		    end; {ppWhere}
+		    
+		end; {case}
+		
+		PhraseP := CurrentP+1;
+	    end; { if(2) }
+	end; { if(1) }
+    until CurrentP^=#0; {repeat}
+
+    if (FWhereStartPos > 0) and (FWhereStopPos > 0) then begin
+	system.insert('(',ASQL,FWhereStartPos+1);
+	inc(FWhereStopPos);
+	system.insert(')',ASQL,FWhereStopPos);
+    end;
+//writeln(ASQL);
+end;
+(*
+procedure TSQLQuery.SQLParser(var ASQL : string);
+
 type TParsePart = (ppStart,ppSelect,ppWhere,ppFrom,ppOrder,ppComment,ppBogus);
 
 Var
@@ -900,7 +1004,7 @@ begin
     system.insert(')',ASQL,FWhereStopPos);
     end
 end;
-
+*)
 procedure TSQLQuery.InitUpdates(ASQL : string);
 
 
