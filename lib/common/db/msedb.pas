@@ -11,7 +11,7 @@ type
  fieldtypesty = set of tfieldtype;
  fieldtypesarty = array of fieldtypesty;
 const
- textfields = [ftstring,ftfixedchar,ftwidestring];
+ textfields = [ftstring,ftfixedchar,ftwidestring,ftmemo];
  memofields = textfields+[ftblob,ftmemo];
  integerfields = [ftsmallint,ftinteger,ftword,ftlargeint,ftbcd];
  booleanfields = [ftboolean,ftstring,ftfixedchar]+integerfields-[ftbcd];
@@ -2587,9 +2587,26 @@ begin
 end;
 
 procedure tdscontroller.internalopen;
+var
+ int1,int2: integer;
 begin
  updatelinkedfields;
  fintf.inheritedinternalopen;
+ with tdataset(fowner) do begin
+  for int1:= 0 to fields.count - 1 do begin
+   with fields[int1] do begin
+    int2:= fielddefs.indexof(fieldname);
+    if (int2 >= 0) and (datatype <> fielddefs[int2].datatype) and 
+       (fielddefs[int2].datatype <> ftunknown) then begin
+     databaseerror('Datatype mismatch dataset '''+fowner.name+''' field '''+
+      fieldname+''''+lineend+
+        'expected: '''+getenumname(typeinfo(tfieldtype),
+         ord(fielddefs[int2].datatype))+''' actual: '''+
+         getenumname(typeinfo(tfieldtype),ord(datatype))+'''.');
+    end;
+   end;
+  end;
+ end;
 end;
 
 function tdscontroller.getcontroller: tdscontroller;
