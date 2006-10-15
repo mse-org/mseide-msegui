@@ -246,6 +246,8 @@ function mseStrLIComp(const Str1, upstr: PmseChar; len: integer): Integer;
                 //ascii caseinsensitive, upstr muss upcase sein
 function StrLIComp(const Str1, upstr: PChar; len: integer): Integer;
                 //ascii caseinsensitive, upstr muss upcase sein
+function StrIComp(const Str1, upstr: PChar): Integer;
+                //ascii caseinsensitive, upstr muss upcase sein
 function startsstr(substring,s: pchar): boolean; overload;
 function startsstr(const substring,s: string): boolean; overload;
 function msestartsstr(substring,s: pmsechar): boolean; overload;
@@ -2832,6 +2834,25 @@ begin
     break;
    end;
   end;
+ end;
+ result:= shortint(by1);
+end;
+
+function StrIComp(const Str1, upstr: PChar): Integer;
+                //ascii caseinsensitive, upstr muss upcase sein
+var
+ po1,po2: pchar;
+ by1: byte;
+begin
+ by1:= 0;
+ if str1 <> upstr then begin
+  po1:= pointer(str1);
+  po2:= pointer(upstr);
+  repeat
+   by1:= ord(upperchars[po1^])-ord(po2^);
+   inc(po1);
+   inc(po2);
+  until (by1 <> 0) or (po1^ = #0);
  end;
  result:= shortint(by1);
 end;

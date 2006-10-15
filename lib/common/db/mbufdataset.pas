@@ -572,7 +572,8 @@ begin
     ftLargeInt   : result := sizeof(largeint);
     ftTime,
       ftDate,
-      ftDateTime : result := sizeof(TDateTime)
+      ftDateTime : result := sizeof(TDateTime);
+    ftmemo,ftblob: result:= fielddef.size;
   else Result := 10
   end;
 
@@ -1451,7 +1452,7 @@ var
  int1: integer;
 begin
  po1:= pbyte(fcurrentrecbuf)+sizeof(tbufreclinkitem);
- int1:= afield.index - 1;
+ int1:= afield.fieldno - 1;
  if avalue <> '' then begin
   move(avalue[1],(po1+ffieldbufpositions[int1])^,length(avalue));
   unsetfieldisnull(po1+nullmaskoffset,int1);

@@ -116,9 +116,10 @@ begin
   stream1:= tstringcopystream.create(str1);
   try
    bitmap.loadfromstream(stream1,fformat);
-  finally
-   stream1.free;
+  except
+   bitmap.clear;
   end;
+  stream1.free;
  end;
 end;
 

@@ -9,6 +9,7 @@
 }
 unit msepqconnection;
 {$ifdef FPC}{$mode objfpc}{$h+}{$INTERFACES CORBA}{$endif}
+
 interface
 uses
  classes,mpqconnection,msestrings,msedb,msetypes,msqldb,db;
@@ -48,6 +49,8 @@ type
    function readsequence(const sequencename: string): string;
    function writesequence(const sequencename: string;
                     const avalue: largeint): string;
+   function CreateBlobStream(const Field: TField; const Mode: TBlobStreamMode;
+                         const acursor: tsqlcursor): TStream; override;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -61,7 +64,7 @@ end;
  
 implementation
 uses
- msefileutils,msebits,sysutils,msedatalist;
+ msefileutils,msebits,sysutils,msedatalist,msesqldb,mbufdataset;
  
 { tmsepqconnection }
 
@@ -256,6 +259,17 @@ function tmsepqconnection.writesequence(const sequencename: string;
                const avalue: largeint): string;
 begin
  result:= 'select setval(''' +sequencename+''','+inttostr(avalue)+');';
+end;
+
+function tmsepqconnection.CreateBlobStream(const Field: TField;
+               const Mode: TBlobStreamMode; const acursor: tsqlcursor): TStream;
+begin
+ if (mode = bmwrite) and (field.dataset is tmsesqlquery) then begin
+  result:= tmbufdataset(field.dataset).createblobbuffer(field);
+ end
+ else begin
+  result:= inherited createblobstream(field,mode,acursor);
+ end;
 end;
 
 end.

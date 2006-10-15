@@ -90,7 +90,8 @@ type
     procedure AddFieldDefs(cursor:TSQLCursor; FieldDefs:TFieldDefs); override;
     function Fetch(cursor:TSQLCursor):boolean; override;
     function LoadField(cursor:TSQLCursor; FieldDef:TFieldDef; buffer:pointer):boolean; override;
-    function CreateBlobStream(Field:TField; Mode:TBlobStreamMode):TStream; override;
+    function CreateBlobStream(const Field: TField; const Mode: TBlobStreamMode;
+                 const acursor: tsqlcursor): TStream; override;
     procedure FreeFldBuffers(cursor:TSQLCursor); override;
     // - UpdateIndexDefs
     procedure UpdateIndexDefs(var IndexDefs:TIndexDefs; TableName:string); override;
@@ -642,7 +643,8 @@ begin
 //  writeln(Format('Field.Size: %d; StrLenOrInd: %d',[FieldDef.Size, StrLenOrInd]));
 end;
 
-function TODBCConnection.CreateBlobStream(Field: TField; Mode: TBlobStreamMode): TStream;
+function TODBCConnection.CreateBlobStream(const Field: TField; const Mode: TBlobStreamMode;
+                 const acursor: tsqlcursor): TStream;
 var
   ODBCCursor: TODBCCursor;
   BlobMemoryStream, BlobMemoryStreamCopy: TMemoryStream;

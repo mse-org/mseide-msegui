@@ -804,6 +804,7 @@ type
    function getdropdowntext(const awidget: twidget): msestring;
   public
    constructor create(aowner: tcomponent); override;
+   destructor destroy; override;
    property dropdown: tcalendarcontroller read fdropdown write fdropdown;
   published
    property frame: tdropdownbuttonframe read getframe write setframe;
@@ -3617,6 +3618,12 @@ constructor tcustomcalendardatetimeedit.create(aowner: tcomponent);
 begin
  inherited;
  fdropdown:= tcalendarcontroller.create(idropdowncalendar(self));
+end;
+
+destructor tcustomcalendardatetimeedit.destroy;
+begin
+ fdropdown.free;
+ inherited;
 end;
 
 procedure tcustomcalendardatetimeedit.setframe(const avalue: tdropdownbuttonframe);

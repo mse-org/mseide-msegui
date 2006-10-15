@@ -37,7 +37,7 @@ type
     Status              : array [0..19] of ISC_STATUS;
   end;
 
-  TIBConnection = class (TSQLConnection)
+  TIBConnection = class (TSQLConnection,iblobconnection)
   private
     FSQLDatabaseHandle   : pointer;
     FStatus              : array [0..19] of ISC_STATUS;
@@ -80,7 +80,16 @@ type
     procedure RollBackRetaining(trans : TSQLHandle); override;
     procedure UpdateIndexDefs(var IndexDefs : TIndexDefs;TableName : string); override;
     function GetSchemaInfoSQL(SchemaType : TSchemaType; SchemaObjectName, SchemaPattern : string) : string; override;
-    function CreateBlobStream(Field: TField; Mode: TBlobStreamMode): TStream; override;
+    function CreateBlobStream(const Field: TField; const Mode: TBlobStreamMode;
+                           const acursor: tsqlcursor): TStream; override;
+                           
+                    //iblobconnection                           
+   procedure writeblobdata(const atransaction: tsqltransaction;
+              const tablename: string; const acursor: tsqlcursor;
+              const adata: pointer; const alength: integer;
+              const afield: tfield; const aparam: tparam; out newid: string);
+   procedure setupblobdata(const afield: tfield; const acursor: tsqlcursor;
+                              const aparam: tparam);
   public
     constructor Create(AOwner : TComponent); override;
   published
@@ -649,7 +658,7 @@ begin
           {$R-}
           SetDateTime(in_sqlda^.SQLvar[SQLVarNr].SQLData, AParams[ParNr].AsDateTime, in_SQLDA^.SQLVar[SQLVarNr].SQLType);
           {$R+}
-        ftLargeInt:
+        ftLargeInt,ftblob:
           begin
           li := AParams[ParNr].AsLargeInt;
           {$R-}
@@ -732,7 +741,7 @@ begin
           end;
         ftFloat   :
           GetFloat(CurrBuff, Buffer, FieldDef);
-        ftBlob : begin  // load the BlobIb in field's buffer
+        ftBlob,ftmemo,ftgraphic: begin  // load the BlobIb in field's buffer
             FillByte(buffer^,sizeof(LargeInt),0);
             Move(CurrBuff^, Buffer^, SQLDA^.SQLVar[x].SQLLen);
          end
@@ -973,17 +982,20 @@ var
   blobInfo : array[0..50] of byte;
 
 begin
-  if isc_blob_info(@Fstatus, @blobHandle, sizeof(iscInfoBlobMaxSegment), @iscInfoBlobMaxSegment, sizeof(blobInfo) - 2, @blobInfo) <> 0 then
+  if isc_blob_info(@Fstatus, @blobHandle, sizeof(iscInfoBlobMaxSegment),
+          @iscInfoBlobMaxSegment, sizeof(blobInfo) - 2, @blobInfo) <> 0 then
     CheckError('isc_blob_info', FStatus);
   if blobInfo[0]  = isc_info_blob_max_segment then
     begin
-      result :=  isc_vax_integer(pchar(@blobInfo[3]), isc_vax_integer(pchar(@blobInfo[1]), 2));
+      result :=  isc_vax_integer(pchar(@blobInfo[3]),
+                  isc_vax_integer(pchar(@blobInfo[1]), 2));
     end
   else
      CheckError('isc_blob_info', FStatus);
 end;
 
-function TIBConnection.CreateBlobStream(Field: TField; Mode: TBlobStreamMode): TStream;
+function TIBConnection.CreateBlobStream(const Field: TField;
+          const Mode: TBlobStreamMode; const acursor: tsqlcursor): TStream;
 const
   isc_segstr_eof = 335544367; // It's not defined in ibase60 but in ibase40. Would it be better to define in ibase60?
 
@@ -1034,6 +1046,84 @@ begin
     result := mStream;
 
   end;
+end;
+
+procedure TIBConnection.writeblobdata(const atransaction: tsqltransaction;
+               const tablename: string; const acursor: tsqlcursor;
+               const adata: pointer; const alength: integer;
+               const afield: tfield; const aparam: tparam; out newid: string);
+     
+ procedure check(const ares: isc_status);
+ begin
+  if ares <> 0 then begin
+   CheckError('TIBConnection.writeblob', FStatus);
+  end;
+ end;
+const
+ defsegsize = $4000; 
+var
+ transactionhandle: pointer;
+ blobhandle: isc_blob_handle;
+ blobid: isc_quad;
+ step: word;
+ po1: pointer;
+ int1: integer;
+ str1: string;
+begin
+{
+ if alength = 0 then begin
+  aparam.clear;
+  newid:= '';
+ end
+ else begin
+ }
+  transactionhandle:= atransaction.handle;
+  blobhandle:= nil;
+  fillchar(blobid,sizeof(blobid),0);
+  check(isc_create_blob2(@fstatus,@fsqldatabasehandle,@transactionhandle,
+                       @blobhandle,@blobid,0,nil));
+  try
+   int1:= getmaxblobsize(blobhandle);
+   if (int1 <= 0) or (int1 > defsegsize) then begin
+    step:= defsegsize;
+   end
+   else begin
+    step:= int1;
+   end;
+   po1:= adata;
+   int1:= alength;
+   while int1 > 0 do begin
+    if int1 < step then begin
+     step:= int1;
+    end;
+    check(isc_put_segment(@fstatus,@blobhandle,step,po1));
+    dec(int1,step);
+    inc(po1,step);
+   end;
+   aparam.aslargeint:= int64(blobid);
+   setlength(str1,sizeof(blobid));
+   move(blobid,str1[1],sizeof(blobid));
+   newid:= str1;
+  finally
+   isc_close_blob(@fstatus,@blobhandle);
+  end;
+// end;
+end;
+
+procedure tibconnection.setupblobdata(const afield: tfield;
+                            const acursor: tsqlcursor; const aparam: tparam);
+var
+ blobid: isc_quad;
+begin
+{
+ if afield.isnull then begin
+  aparam.clear;
+ end
+ else begin
+ }
+  afield.getdata(@blobid);
+  aparam.aslargeint:= int64(blobid);
+// end; 
 end;
 
 end.

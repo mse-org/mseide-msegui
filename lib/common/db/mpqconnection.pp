@@ -32,39 +32,49 @@ type
 
   { TPQConnection }
 
-  TPQConnection = class (TSQLConnection)
+ TPQConnection = class (TSQLConnection,iblobconnection)
   private
-    FCursorCount         : word;
-    FConnectString       : string;
-    FSQLDatabaseHandle   : pointer;
-    FIntegerDateTimes    : boolean;
-    function TranslateFldType(Type_Oid : integer) : TFieldType;
+   FCursorCount         : word;
+   FConnectString       : string;
+   FSQLDatabaseHandle   : pointer;
+   FIntegerDateTimes    : boolean;
+   function TranslateFldType(Type_Oid : integer) : TFieldType;
   protected
-    procedure DoInternalConnect; override;
-    procedure DoInternalDisconnect; override;
-    function GetHandle : pointer; override;
+   procedure DoInternalConnect; override;
+   procedure DoInternalDisconnect; override;
+   function GetHandle : pointer; override;
 
-    Function AllocateCursorHandle : TSQLCursor; override;
-    Procedure DeAllocateCursorHandle(var cursor : TSQLCursor); override;
-    Function AllocateTransactionHandle : TSQLHandle; override;
+   Function AllocateCursorHandle : TSQLCursor; override;
+   Procedure DeAllocateCursorHandle(var cursor : TSQLCursor); override;
+   Function AllocateTransactionHandle : TSQLHandle; override;
 
-    procedure PrepareStatement(cursor: TSQLCursor;ATransaction : TSQLTransaction;buf : string; AParams : TParams); override;
-    procedure FreeFldBuffers(cursor : TSQLCursor); override;
-    procedure Execute(cursor: TSQLCursor;atransaction:tSQLtransaction; AParams : TParams); override;
-    procedure AddFieldDefs(cursor: TSQLCursor; FieldDefs : TfieldDefs); override;
-    function Fetch(cursor : TSQLCursor) : boolean; override;
-    procedure UnPrepareStatement(cursor : TSQLCursor); override;
-    function LoadField(cursor : TSQLCursor;FieldDef : TfieldDef;buffer : pointer) : boolean; override;
-    function GetTransactionHandle(trans : TSQLHandle): pointer; override;
-    function RollBack(trans : TSQLHandle) : boolean; override;
-    function Commit(trans : TSQLHandle) : boolean; override;
-    procedure CommitRetaining(trans : TSQLHandle); override;
-    function StartdbTransaction(trans : TSQLHandle; AParams : string) : boolean; override;
-    procedure RollBackRetaining(trans : TSQLHandle); override;
-    procedure UpdateIndexDefs(var IndexDefs : TIndexDefs;TableName : string); override;
-    function GetSchemaInfoSQL(SchemaType : TSchemaType; SchemaObjectName, SchemaPattern : string) : string; override;
+   procedure PrepareStatement(cursor: TSQLCursor;ATransaction : TSQLTransaction;buf : string; AParams : TParams); override;
+   procedure FreeFldBuffers(cursor : TSQLCursor); override;
+   procedure Execute(cursor: TSQLCursor;atransaction:tSQLtransaction; AParams : TParams); override;
+   procedure AddFieldDefs(cursor: TSQLCursor; FieldDefs : TfieldDefs); override;
+   function Fetch(cursor : TSQLCursor) : boolean; override;
+   procedure UnPrepareStatement(cursor : TSQLCursor); override;
+   function LoadField(cursor : TSQLCursor;FieldDef : TfieldDef;buffer : pointer) : boolean; override;
+   function GetTransactionHandle(trans : TSQLHandle): pointer; override;
+   function RollBack(trans : TSQLHandle) : boolean; override;
+   function Commit(trans : TSQLHandle) : boolean; override;
+   procedure CommitRetaining(trans : TSQLHandle); override;
+   function StartdbTransaction(trans : TSQLHandle; AParams : string) : boolean; override;
+   procedure RollBackRetaining(trans : TSQLHandle); override;
+   procedure UpdateIndexDefs(var IndexDefs : TIndexDefs;TableName : string); override;
+   function GetSchemaInfoSQL(SchemaType : TSchemaType; SchemaObjectName, SchemaPattern : string) : string; override;
+   function CreateBlobStream(const Field: TField; const Mode: TBlobStreamMode;
+                      const acursor: tsqlcursor): TStream; override;
+          //iblobconnection
+   procedure writeblobdata(const atransaction: tsqltransaction;
+             const tablename: string; const acursor: tsqlcursor;
+             const adata: pointer; const alength: integer;
+             const afield: tfield; const aparam: tparam;
+             out newid: string);
+   procedure setupblobdata(const afield: tfield; const acursor: tsqlcursor;
+                                   const aparam: tparam);
   public
-    constructor Create(AOwner : TComponent); override;
+   constructor Create(AOwner : TComponent); override;
   published
     property DatabaseName;
     property KeepConnection;
@@ -75,7 +85,8 @@ type
 
 implementation
 
-uses math;
+uses 
+ math,msestrings,msestream,msetypes;
 
 ResourceString
   SErrRollbackFailed = 'Rollback transaction failed';
@@ -90,6 +101,7 @@ ResourceString
 
 const Oid_Bool     = 16;
       Oid_Text     = 25;
+      Oid_bytea = 17;
       Oid_Oid      = 26;
       Oid_Name     = 19;
       Oid_Int8     = 20;
@@ -104,7 +116,11 @@ const Oid_Bool     = 16;
       oid_date      = 1082;
       oid_time      = 1083;
       oid_numeric   = 1700;
-
+      
+ inv_read =  $40000;
+ inv_write = $20000;
+ invalidoid = 0;
+ 
 constructor TPQConnection.Create(AOwner : TComponent);
 
 begin
@@ -308,6 +324,7 @@ begin
     Oid_varchar,Oid_bpchar,
     Oid_name               : Result := ftstring;
     Oid_text               : Result := ftstring;
+    Oid_bytea              : result := ftBlob;
     Oid_oid                : Result := ftInteger;
     Oid_int8               : Result := ftLargeInt;
     Oid_int4               : Result := ftInteger;
@@ -347,44 +364,44 @@ procedure TPQConnection.PrepareStatement(cursor: TSQLCursor;ATransaction : TSQLT
 
 const TypeStrings : array[TFieldType] of string =
     (
-      'Unknown',
-      'text',
-      'int',
-      'int',
-      'int',
-      'bool',
-      'float',
-      'numeric',
-      'numeric',
-      'date',
-      'time',
-      'timestamp',
-      'Unknown',
-      'Unknown',
-      'Unknown',
-      'Unknown',
-      'Unknown',
-      'Unknown',
-      'Unknown',
-      'Unknown',
-      'Unknown',
-      'Unknown',
-      'Unknown',
-      'Unknown',
-      'Unknown',
-      'int',
-      'Unknown',
-      'Unknown',
-      'Unknown',
-      'Unknown',
-      'Unknown',
-      'Unknown',
-      'Unknown',
-      'Unknown',
-      'Unknown',
-      'Unknown',
-      'Unknown',
-      'Unknown'
+      'Unknown',  //ftUnknown
+      'text',     //ftString 
+      'int',      //ftSmallint
+      'int',      //ftInteger
+      'int',      //ftWord
+      'bool',     //ftBoolean
+      'float',    //ftFloat
+      'numeric',  //ftCurrency
+      'numeric',  //ftBCD
+      'date',     //ftDate
+      'time',     //ftTime
+      'timestamp',//ftDateTime
+      'Unknown',  //ftBytes
+      'Unknown',  //ftVarBytes
+      'Unknown',  //ftAutoInc
+      'bytea',    //ftBlob
+      'text',     //ftMemo
+      'bytea',    //ftGraphic
+      'Unknown',  //ftFmtMemo
+      'Unknown',  //ftParadoxOle
+      'Unknown',  //ftDBaseOle
+      'Unknown',  //ftTypedBinary
+      'Unknown',  //ftCursor
+      'Unknown',  //ftFixedChar
+      'Unknown',  //ftWideString
+      'int',      //ftLargeint
+      'Unknown',  //ftADT
+      'Unknown',  //ftArray
+      'Unknown',  //ftReference
+      'Unknown',  //ftDataSet
+      'Unknown',  //ftOraBlob
+      'Unknown',  //ftOraClob
+      'Unknown',  //ftVariant
+      'Unknown',  //ftInterface
+      'Unknown',  //ftIDispatch
+      'Unknown',  //ftGuid
+      'Unknown',  //ftTimeStamp
+      'Unknown'   //ftFMTBcd
     );
 
 
@@ -405,20 +422,26 @@ begin
       // Only available for pq 8.0, so don't use it...
       // Res := pqprepare(tr,'prepst'+name+nr,pchar(buf),params.Count,pchar(''));
       s := 'prepare prepst'+nr+' ';
-      if Assigned(AParams) and (AParams.count > 0) then
-        begin
-        s := s + '(';
-        for i := 0 to AParams.count-1 do if TypeStrings[AParams[i].DataType] <> 'Unknown' then
-          s := s + TypeStrings[AParams[i].DataType] + ','
-        else
-          begin
-          if AParams[i].DataType = ftUnknown then DatabaseErrorFmt(SUnknownParamFieldType,[AParams[i].Name],self)
-            else DatabaseErrorFmt(SUnsupportedParameter,[Fieldtypenames[AParams[i].DataType]],self);
-          end;
-        s[length(s)] := ')';
-        buf := AParams.ParseSQL(buf,false,psPostgreSQL);
+      if Assigned(AParams) and (AParams.count > 0) then begin
+       s:= s + '(';
+       for i := 0 to AParams.count-1 do begin
+        if TypeStrings[AParams[i].DataType] <> 'Unknown' then begin
+         s:= s + TypeStrings[AParams[i].DataType] + ','
+        end
+        else begin
+         if AParams[i].DataType = ftUnknown then begin
+          DatabaseErrorFmt(SUnknownParamFieldType,[AParams[i].Name],self);
+         end
+         else begin
+          DatabaseErrorFmt(SUnsupportedParameter,
+                       [Fieldtypenames[AParams[i].DataType]],self);
+         end;
         end;
-      s := s + ' as ' + buf;
+       end;
+       s[length(s)]:= ')';
+       buf := AParams.ParseSQL(buf,false,psPostgreSQL);
+      end;
+      s:= s + ' as ' + buf;
       res := pqexec(tr.PGConn,pchar(s));
       if (PQresultStatus(res) <> PGRES_COMMAND_OK) then
         begin
@@ -459,50 +482,61 @@ end;
 
 procedure TPQConnection.Execute(cursor: TSQLCursor;atransaction:tSQLtransaction;AParams : TParams);
 
-var ar  : array of pointer;
-    i   : integer;
-    s   : string;
+var
+ ar: array of pointer;
+ i: integer;
+ s: string;
+ lengths,formats: integerarty;
 
 begin
-  with cursor as TPQCursor do
-    begin
-    if FStatementType in [stInsert,stUpdate,stDelete,stSelect] then
-      begin
-      if Assigned(AParams) and (AParams.count > 0) then
-        begin
-        setlength(ar,Aparams.count);
-        for i := 0 to AParams.count -1 do if not AParams[i].IsNull then
-          begin
-          case AParams[i].DataType of
-            ftdatetime : s := formatdatetime('YYYY-MM-DD',AParams[i].AsDateTime);
-            ftdate     : s := formatdatetime('YYYY-MM-DD',AParams[i].AsDateTime);
-          else
-            s := AParams[i].asstring;
-          end; {case}
-          GetMem(ar[i],length(s)+1);
-          StrMove(PChar(ar[i]),Pchar(s),Length(S)+1);
-          end
-        else
-          FreeAndNil(ar[i]);
-        res := PQexecPrepared(tr.PGConn,pchar('prepst'+nr),Aparams.count,@Ar[0],nil,nil,1);
-        for i := 0 to AParams.count -1 do
-          FreeMem(ar[i]);
-        end
-      else
-        res := PQexecPrepared(tr.PGConn,pchar('prepst'+nr),0,nil,nil,nil,1);
+ with cursor as TPQCursor do begin
+  if FStatementType in [stInsert,stUpdate,stDelete,stSelect] then begin
+   if Assigned(AParams) and (AParams.count > 0) then begin
+    setlength(ar,Aparams.count);
+    setlength(lengths,length(ar));
+    setlength(formats,length(ar));
+    for i := 0 to AParams.count -1 do begin
+     with AParams[i] do begin
+      if not IsNull then begin
+       case DataType of
+        ftdatetime: s:= formatdatetime('YYYY-MM-DD',AParams[i].AsDateTime);
+        ftdate: s:= formatdatetime('YYYY-MM-DD',AParams[i].AsDateTime);
+        else begin
+         s:= AParams[i].asstring;
+         if datatype = ftblob then begin
+          lengths[i]:= length(s);
+          formats[i]:= 1; //binary
+         end;
+        end;
+       end; {case}
+       GetMem(ar[i],length(s)+1);
+       StrMove(PChar(ar[i]),Pchar(s),Length(S)+1);
       end
-    else
-      begin
-      tr := TPQTrans(aTransaction.Handle);
-
-      s := statement;
-      //Should be altered, just like in TSQLQuery.ApplyRecUpdate
-      if assigned(AParams) then for i := 0 to AParams.count-1 do
-        s := stringreplace(s,':'+AParams[i].Name,AParams[i].asstring,[rfReplaceAll,rfIgnoreCase]);
-      res := pqexec(tr.PGConn,pchar(s));
+      else begin
+       FreeAndNil(ar[i]);
       end;
-    if not (PQresultStatus(res) in [PGRES_COMMAND_OK,PGRES_TUPLES_OK]) then
-      begin
+     end;
+    end;
+    res := PQexecPrepared(tr.PGConn,pchar('prepst'+nr),Aparams.count,@Ar[0],
+             pointer(lengths),pointer(formats),1);
+    for i := 0 to AParams.count -1 do begin
+     FreeMem(ar[i]);
+    end;
+   end
+   else begin
+    res := PQexecPrepared(tr.PGConn,pchar('prepst'+nr),0,nil,nil,nil,1);
+   end;
+  end
+  else begin
+    tr := TPQTrans(aTransaction.Handle);
+
+    s := statement;
+    //Should be altered, just like in TSQLQuery.ApplyRecUpdate
+    if assigned(AParams) then for i := 0 to AParams.count-1 do
+      s := stringreplace(s,':'+AParams[i].Name,AParams[i].asstring,[rfReplaceAll,rfIgnoreCase]);
+    res := pqexec(tr.PGConn,pchar(s));
+  end;
+  if not (PQresultStatus(res) in [PGRES_COMMAND_OK,PGRES_TUPLES_OK]) then begin
       s := PQerrorMessage(tr.PGConn);
       pqclear(res);
 
@@ -511,8 +545,8 @@ begin
 // The other databases also don't do this.
 //      atransaction.Rollback;
       DatabaseError(SErrExecuteFailed + ' (PostgreSQL: ' + s + ')',self);
-      end;
-    end;
+  end;
+ end;
 end;
 
 
@@ -525,26 +559,33 @@ var
   nFields   : integer;
 
 begin
-  with cursor as TPQCursor do
-    begin
-    nFields := PQnfields(Res);
-    for i := 0 to nFields-1 do
-      begin
-      size := PQfsize(Res, i);
-      fieldtype := TranslateFldType(PQftype(Res, i));
-
-      if (fieldtype = ftstring) and (size = -1) then
-        begin
-        size := pqfmod(res,i)-4;
-        if size = -5 then size := dsMaxStringSize;
-        end;
-      if fieldtype = ftdate  then
-        size := sizeof(double);
-
-      TFieldDef.Create(FieldDefs, PQfname(Res, i), fieldtype,size, False, (i + 1));
+ with tpqcursor(cursor) do begin
+  nFields:= PQnfields(Res);
+  for i:= 0 to nFields-1 do begin
+   size:= PQfsize(Res,i);
+   fieldtype:= TranslateFldType(PQftype(Res,i));
+   case fieldtype of
+    ftstring: begin
+     if size = -1 then begin
+      size:= pqfmod(res,i)-4;
+      if size = -5 then begin
+       fieldtype:= ftmemo;
+       size:= blobidsize;
+//       size:= dsMaxStringSize;
       end;
-    CurTuple := -1;
+     end;
     end;
+    ftdate: begin
+     size:= sizeof(double);
+    end;
+    ftblob,ftmemo: begin
+     size:= blobidsize;
+    end;
+   end;
+   TFieldDef.Create(FieldDefs,PQfname(Res,i),fieldtype,size,False,(i+1));
+  end;
+  CurTuple:= -1;
+ end;
 end;
 
 function TPQConnection.GetHandle: pointer;
@@ -581,7 +622,8 @@ var
   dbl           : pdouble;
   cur           : currency;
   NumericRecord : ^TNumericRecord;
-
+ int1: integer;
+ 
 begin
   with cursor as TPQCursor do
     begin
@@ -619,6 +661,12 @@ begin
           pchar(Buffer + li)^ := #0;
           i := pqfmod(res,x)-3;
           end;
+        ftblob,ftmemo: begin
+         li := pqgetlength(res,curtuple,x);
+         int1:= addblobdata(currbuff,li);
+         move(int1,buffer^,sizeof(int1));
+          //save id
+        end;
         ftdate :
           begin
           dbl := pointer(buffer);
@@ -759,5 +807,124 @@ begin
   result := s;
 end;
 
+function TPQConnection.CreateBlobStream(const Field: TField;
+        const Mode: TBlobStreamMode; const acursor: tsqlcursor): TStream;
+var
+ blobid: integer;
+ int1,int2: integer;
+ str1: string;
+ bo1: boolean;
+begin
+ result:= nil;
+ if mode = bmread then begin
+  if field.getData(@blobId) then begin
+   result:= tstringcopystream.create(acursor.fblobs[blobid]);
+  end;
+ end;
+end;
+
+procedure TPQConnection.writeblobdata(const atransaction: tsqltransaction;
+               const tablename: string; const acursor: tsqlcursor;
+               const adata: pointer; const alength: integer;
+               const afield: tfield; const aparam: tparam;
+               out newid: string);
+var
+ str1: string;
+ int1: integer;
+begin
+{
+ if alength = 0 then begin
+  aparam.clear;
+  newid:= '';
+ end
+ else begin
+ }
+  setlength(str1,alength);
+  move(adata^,str1[1],alength);
+  if afield.datatype = ftmemo then begin
+   aparam.asstring:= str1;
+  end
+  else begin
+   aparam.asblob:= str1;
+  end;
+  int1:= acursor.addblobdata(str1);
+  setlength(newid,sizeof(int1));
+  move(int1,newid[1],sizeof(int1));
+// end;
+end;
+
+procedure TPQConnection.setupblobdata(const afield: tfield; 
+                      const acursor: tsqlcursor; const aparam: tparam);
+begin
+ acursor.blobfieldtoparam(afield,aparam,afield.datatype = ftmemo);
+end;
+
+{
+procedure TPQConnection.writeblobdata(const atransaction: tsqltransaction;
+               const tablename: string; const adata: pointer;
+               const alength: integer; const aparam: tparam);
+               
+var
+ started: boolean;
+ 
+ procedure endtrans;
+ var
+  res: ppgresult;
+ begin
+  res:= pqexec(fsqldatabasehandle,'END');
+  pqclear(res);
+ end;
+ 
+ procedure doerror;
+ begin
+  if started then begin
+   endtrans;
+  end;
+  databaseerror('TPQConnection blob write error.');
+ end;
+
+ procedure checkerror(const aresult: ppgresult);
+ begin
+  if PQresultStatus(aresult) <> PGRES_COMMAND_OK then begin
+   pqclear(aresult);
+   doerror;
+  end; 
+  pqclear(aresult);
+ end;
+  
+var
+ blobid: oid;
+ fd: integer;
+ int1,int2: integer;
+begin
+ if alength = 0 then begin
+  aparam.clear;
+ end
+ else begin
+  started:= false;
+  checkerror(pqexec(fsqldatabasehandle,'BEGIN'));
+  started:= true;
+  blobid:= lo_creat(fsqldatabasehandle,inv_read or inv_write);
+  if blobid = invalidoid then begin
+   doerror;
+  end;
+  fd:= lo_open(fsqldatabasehandle,blobid,inv_write);
+  if fd = -1 then begin
+   doerror;
+  end;
+  int1:= alength;
+  while int1 > 0 do begin
+   int2:= lo_write(fsqldatabasehandle,fd,adata,int1);
+   if int2 < 0 then begin
+    doerror;
+   end;
+   dec(int1,int2);
+  end; 
+  lo_close(fsqldatabasehandle,fd);
+  endtrans;
+  aparam.asinteger:= blobid;
+ end;
+end;
+}
 
 end.

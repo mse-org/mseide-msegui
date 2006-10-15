@@ -21,7 +21,7 @@ unit msqldb;
 
 interface
 
-uses SysUtils, Classes, DB, mbufdataset;
+uses SysUtils, Classes, DB, mbufdataset, msetypes;
 
 type TSchemaType = (stNoSchema, stTables, stSysTables, stProcedures, stColumns, stProcedureParams, stIndexes, stPackages);
      TConnOption = (sqSupportParams);
@@ -44,6 +44,12 @@ type
     FPrepared      : Boolean;
     FInitFieldDef  : Boolean;
     FStatementType : TStatementType;
+    fblobs: stringarty;
+   function addblobdata(const adata: pointer; const alength: integer): integer;
+                                           overload;
+   function addblobdata(const adata: string): integer; overload;
+   procedure blobfieldtoparam(const afield: tfield; const aparam: tparam;
+                    const asstring: boolean = false);
   end;
 
 
@@ -101,7 +107,8 @@ type
     procedure RollBackRetaining(trans : TSQLHandle); virtual; abstract;
     procedure UpdateIndexDefs(var IndexDefs : TIndexDefs;TableName : string); virtual;
     function GetSchemaInfoSQL(SchemaType : TSchemaType; SchemaObjectName, SchemaPattern : string) : string; virtual;
-    function CreateBlobStream(Field: TField; Mode: TBlobStreamMode): TStream; virtual;
+    function CreateBlobStream(const Field: TField; const Mode: TBlobStreamMode;
+                 const acursor: tsqlcursor): TStream; virtual;
   public
     property Handle: Pointer read GetHandle;
     destructor Destroy; override;
@@ -159,12 +166,19 @@ type
   end;
 
 { TSQLQuery }
-
- imsesqlconnection = interface
+const
+ blobidsize = sizeof(integer);
+type
+ iblobconnection = interface
                 ['{947B58E1-0CA4-436D-A06F-2174D8CA676F}']
-  procedure writeblob(const atransaction: tsqltransaction; const tablename: string;
-                         const ablob: blobinfoty; const aparam: tparam);
-              //returns blobid in param
+  procedure writeblobdata(const atransaction: tsqltransaction;
+              const tablename: string; const acursor: tsqlcursor;
+              const adata: pointer; const alength: integer;
+              const afield: tfield;  const aparam: tparam;
+              out newid: string); //''  -> null, id binary otherwise
+              //returns blobid or data in param
+  procedure setupblobdata(const afield: tfield; const acursor: tsqlcursor;
+                              const aparam: tparam);
  end;
 
   TSQLQuery = class (Tmbufdataset)
@@ -195,7 +209,7 @@ type
     FDeleteQry,
     FInsertQry           : TSQLQuery;
 
-   fconnintf: imsesqlconnection;
+   fblobintf: iblobconnection;
    
     procedure FreeFldBuffers;
     procedure InitUpdates(ASQL : string);
@@ -472,7 +486,8 @@ begin
   DatabaseError(SMetadataUnavailable);
 end;
 
-function TSQLConnection.CreateBlobStream(Field: TField; Mode: TBlobStreamMode): TStream;
+function TSQLConnection.CreateBlobStream(const Field: TField;
+              const Mode: TBlobStreamMode; const acursor: tsqlcursor): TStream;
 
 begin
   DatabaseErrorFmt(SUnsupportedFieldType,['Blob']);
@@ -771,7 +786,10 @@ end;
 
 procedure TSQLQuery.InternalClose;
 begin
- fconnintf:= nil;
+ if fcursor <> nil then begin
+  fcursor.fblobs:= nil;
+ end;
+ fblobintf:= nil;
   if StatementType = stSelect then FreeFldBuffers;
 // Database and FCursor could be nil, for example if the database is not assigned, and .open is called
   if (not IsPrepared) and (assigned(database)) and (assigned(FCursor)) then (database as TSQLconnection).UnPrepareStatement(FCursor);
@@ -1040,7 +1058,7 @@ var tel         : integer;
     s           : string;
 begin
  if database <> nil then begin
-  getcorbainterface(database,typeinfo(imsesqlconnection),fconnintf);
+  getcorbainterface(database,typeinfo(iblobconnection),fblobintf);
  end;
   try
     Prepare;
@@ -1184,40 +1202,39 @@ begin
 end;
 
 Procedure TSQLQuery.internalApplyRecUpdate(UpdateKind : TUpdateKind);
-
 var
-    s : string;
+ s: string;
 
-  procedure UpdateWherePart(var sql_where : string;x : integer);
-
-  begin
-   if (pfInKey in Fields[x].ProviderFlags) or
-      ((FUpdateMode = upWhereAll) and (pfInWhere in Fields[x].ProviderFlags)) or
-      ((FUpdateMode = UpWhereChanged) and (pfInWhere in Fields[x].ProviderFlags) and (fields[x].value <> fields[x].oldvalue)) then
-     sql_where := sql_where + '(' + fields[x].FieldName + '= :OLD_' + fields[x].FieldName + ') and ';
+ procedure UpdateWherePart(var sql_where : string;x : integer);
+ begin
+  if (pfInKey in Fields[x].ProviderFlags) or
+     ((FUpdateMode = upWhereAll) and (pfInWhere in Fields[x].ProviderFlags)) or
+     ((FUpdateMode = UpWhereChanged) and 
+     (pfInWhere in Fields[x].ProviderFlags) and 
+     (fields[x].value <> fields[x].oldvalue)) then begin
+   sql_where := sql_where + '(' + fields[x].FieldName + 
+              '= :OLD_' + fields[x].FieldName + ') and ';
   end;
+ end;
 
-  function ModifyRecQuery : string;
-
-  var x          : integer;
-      sql_set    : string;
-      sql_where  : string;
-
-  begin
-   sql_set := '';
-   sql_where := '';
-   for x := 0 to Fields.Count -1 do
-     begin
-     UpdateWherePart(sql_where,x);
-
-     if (pfInUpdate in Fields[x].ProviderFlags) then
-       sql_set := sql_set + fields[x].FieldName + '=:' + fields[x].FieldName + ',';
-     end;
-
-   setlength(sql_set,length(sql_set)-1);
-   setlength(sql_where,length(sql_where)-5);
-   result := 'update ' + FTableName + ' set ' + sql_set + ' where ' + sql_where;
+ function ModifyRecQuery : string;
+ var 
+  x: integer;
+  sql_set: string;
+  sql_where: string;
+ begin
+  sql_set := '';
+  sql_where := '';
+  for x := 0 to Fields.Count -1 do begin
+   UpdateWherePart(sql_where,x);
+   if (pfInUpdate in Fields[x].ProviderFlags) then begin
+     sql_set := sql_set + fields[x].FieldName + '=:' + fields[x].FieldName + ',';
+   end;
   end;
+  setlength(sql_set,length(sql_set)-1);
+  setlength(sql_where,length(sql_where)-5);
+  result := 'update ' + FTableName + ' set ' + sql_set + ' where ' + sql_where;
+ end;
 
   function InsertRecQuery : string;
 
@@ -1263,6 +1280,8 @@ var qry : tsqlquery;
     Fld : TField;
  int1: integer;
  blobspo: pblobinfoarty;
+ str1: string;
+ bo1: boolean;
     
 begin
  blobspo:= getintblobpo;
@@ -1288,19 +1307,26 @@ begin
      AssignFieldValue(Fld,Fld.OldValue);
     end
     else begin
-     Fld := self.FieldByName(name);
-     if fld is tblobfield and (self.fconnintf <> nil) then begin
-      for int1:= 0 to high(blobspo^) do begin
-       if blobspo^[int1].field = fld then begin
-        self.fconnintf.writeblob(tsqltransaction(self.transaction),self.ftablename,
-        blobspo^[int1],params[x]);
-        if isnull then begin
-         self.setdatastringvalue(fld,'');
-        end
-        else begin
-         self.setdatastringvalue(fld,asstring);
+     Fld:= self.FieldByName(name);
+     if fld is tblobfield and (self.fblobintf <> nil) then begin
+      if fld.isnull then begin
+       clear;
+       datatype:= fld.datatype;
+      end
+      else begin
+       bo1:= false;
+       for int1:= 0 to high(blobspo^) do begin
+        if blobspo^[int1].field = fld then begin
+         self.fblobintf.writeblobdata(tsqltransaction(self.transaction),
+              self.ftablename,self.fcursor,
+              blobspo^[int1].data,blobspo^[int1].datalength,fld,params[x],str1);
+         self.setdatastringvalue(fld,str1);
+         bo1:= true;
+         break;
         end;
-        break;
+       end;
+       if not bo1 then begin
+        self.fblobintf.setupblobdata(fld,self.fcursor,params[x]);
        end;
       end;
      end
@@ -1470,7 +1496,7 @@ function TSQLQuery.CreateBlobStream(Field: TField; Mode: TBlobStreamMode): TStre
 begin
  result:= inherited createblobstream(field,mode);
  if result = nil then begin
-  result := (DataBase as tsqlconnection).CreateBlobStream(Field, Mode);
+  result := (DataBase as tsqlconnection).CreateBlobStream(Field,Mode,fcursor);
  end;
 end;
 
@@ -1518,6 +1544,40 @@ begin
   Inherited;
   If (Operation=opRemove) and (AComponent=DataSource) then
     DataSource:=Nil;
+end;
+
+{ TSQLCursor }
+
+function TSQLCursor.addblobdata(const adata: pointer;
+               const alength: integer): integer;
+begin
+ result:= length(fblobs);
+ setlength(fblobs,result+1);
+ setlength(fblobs[result],alength);
+ move(adata^,fblobs[result][1],alength);
+end;
+
+function TSQLCursor.addblobdata(const adata: string): integer;
+begin
+ addblobdata(pointer(adata),length(adata));
+end;
+
+procedure TSQLCursor.blobfieldtoparam(const afield: tfield;
+               const aparam: tparam; const asstring: boolean = false);
+var
+ blobid: integer;
+begin
+ if afield.getdata(@blobid) then begin
+  if asstring then begin
+   aparam.asstring:= fblobs[blobid];
+  end
+  else begin
+   aparam.asblob:= fblobs[blobid];
+  end;
+ end
+ else begin
+  aparam.clear;
+ end;
 end;
 
 end.
