@@ -205,7 +205,7 @@ type
    property dialogkind: filedialogkindty read fdialogkind write fdialogkind default fdk_open;
  end;
 
- tfilenameedit = class(tdialogstringed)
+ tcustomfilenameedit = class(tcustomdialogstringed)
   private
    fcontroller: tfiledialogcontroller;
 //   fdialogkind: filedialogkindty;
@@ -226,10 +226,20 @@ type
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
    procedure componentevent(const event: tcomponentevent); override;
-  published
    property controller: tfiledialogcontroller read fcontroller write setcontroller;
+  published
 //   property dialogkind: filedialogkindty read fdialogkind write fdialogkind default fdk_open;
  end;
+
+ tfilenameedit = class(tcustomfilenameedit)
+  published
+   property frame;
+   property passwordchar;
+   property maxlength;
+   property value;
+   property onsetvalue;
+   property controller;
+ end; 
  
  tdirdropdownedit = class(tdropdownwidgetedit)
   protected
@@ -1204,6 +1214,7 @@ begin
     system.exclude(aoptions,fdo_save);
    end;
   end;
+  fo.listview.directory:= flastdir;
   result:= filedialog1(fo,ffilenames,ara,arb,
         @ffilterindex,@ffilter,@fcolwidth,finclude,
             fexclude,po1,fhistorymaxcount,acaption,aoptions,fdefaultext);
@@ -1473,31 +1484,31 @@ begin
  inherited;
 end;
 
-{ tfilenameedit }
+{ tcustomfilenameedit }
 
-constructor tfilenameedit.create(aowner: tcomponent);
+constructor tcustomfilenameedit.create(aowner: tcomponent);
 begin
  fcontroller:= tfiledialogcontroller.create(self,{$ifdef FPC}@{$endif}formatchanged);
  inherited;
 end;
 
-destructor tfilenameedit.destroy;
+destructor tcustomfilenameedit.destroy;
 begin
  inherited;
  fcontroller.Free;
 end;
 
-function tfilenameedit.execute(var avalue: msestring): boolean;
+function tcustomfilenameedit.execute(var avalue: msestring): boolean;
 begin
  result:= fcontroller.execute(avalue);
 end;
 
-procedure tfilenameedit.setcontroller(const avalue: tfiledialogcontroller);
+procedure tcustomfilenameedit.setcontroller(const avalue: tfiledialogcontroller);
 begin
  fcontroller.assign(avalue);
 end;
 
-procedure tfilenameedit.readstatvalue(const reader: tstatreader);
+procedure tcustomfilenameedit.readstatvalue(const reader: tstatreader);
 begin
  if fgridintf <> nil then begin
   inherited;
@@ -1508,17 +1519,17 @@ begin
  end;
 end;
 
-procedure tfilenameedit.readstatstate(const reader: tstatreader);
+procedure tcustomfilenameedit.readstatstate(const reader: tstatreader);
 begin
  fcontroller.readstatstate(reader);
 end;
 
-procedure tfilenameedit.readstatoptions(const reader: tstatreader);
+procedure tcustomfilenameedit.readstatoptions(const reader: tstatreader);
 begin
  fcontroller.readstatoptions(reader);
 end;
 
-procedure tfilenameedit.writestatvalue(const writer: tstatwriter);
+procedure tcustomfilenameedit.writestatvalue(const writer: tstatwriter);
 begin
  if fgridintf <> nil then begin
   inherited;
@@ -1528,29 +1539,29 @@ begin
  end;
 end;
 
-procedure tfilenameedit.writestatstate(const writer: tstatwriter);
+procedure tcustomfilenameedit.writestatstate(const writer: tstatwriter);
 begin
  fcontroller.writestatstate(writer);
 end;
 
-procedure tfilenameedit.writestatoptions(const writer: tstatwriter);
+procedure tcustomfilenameedit.writestatoptions(const writer: tstatwriter);
 begin
  fcontroller.writestatoptions(writer);
 end;
 
-function tfilenameedit.getvaluetext: msestring;
+function tcustomfilenameedit.getvaluetext: msestring;
 begin
 // result:= filepath(fcontroller.filename);
  result:= fcontroller.filename;
 end;
 
-procedure tfilenameedit.texttovalue(var accept: boolean; const quiet: boolean);
+procedure tcustomfilenameedit.texttovalue(var accept: boolean; const quiet: boolean);
 begin
  fcontroller.filename:= text;
  inherited;
 end;
 
-procedure tfilenameedit.updatedisptext(var avalue: msestring);
+procedure tcustomfilenameedit.updatedisptext(var avalue: msestring);
 begin
  with fcontroller do begin
   if fdo_dispname in foptions then begin
@@ -1562,13 +1573,13 @@ begin
  end;
 end;
 
-procedure tfilenameedit.valuechanged;
+procedure tcustomfilenameedit.valuechanged;
 begin
  fcontroller.filename:= value;
  inherited;
 end;
 
-procedure tfilenameedit.componentevent(const event: tcomponentevent);
+procedure tcustomfilenameedit.componentevent(const event: tcomponentevent);
 begin
  fcontroller.componentevent(event);
  inherited;

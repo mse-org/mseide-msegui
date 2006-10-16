@@ -19,7 +19,7 @@ uses
  msepqconnection,mseodbcconn,msemysql40conn,msemysql41conn,msemysql50conn,{sqldb,}
  mselookupbuffer,msesqldb,msedbf,msesdfdata,msememds,msedb,mseclasses,msetypes,
  msestrings,msedatalist,msedbfieldeditor,sysutils,msetexteditor,
- msedbdispwidgets,msedbgraphics,regdb_bmp,msegui
+ msedbdispwidgets,msedbgraphics,regdb_bmp,msegui,msedbdialog
  {$ifdef mse_with_sqlite}
  ,msesqlite3ds
  {$endif}
@@ -143,7 +143,7 @@ begin
       tdbkeystringedit,tdbkeystringeditdb,tdbkeystringeditlb,
       tdbintegeredit,tdbenumedit,tdbenumeditdb,tdbenumeditlb,
       tdbdataicon,tdbdatabutton,tdbrealedit,tdbdatetimeedit,
-      tdbcalendardatetimeedit,
+      tdbcalendardatetimeedit,tdbfilenameedit,
       tdbbooleanedit,tdbbooleaneditradio,
       tdbwidgetgrid,tdbstringgrid,
       

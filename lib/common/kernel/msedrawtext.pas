@@ -221,7 +221,7 @@ var
      liwidth:= awidth;
     end;
     inc(aindex);
-    if (ch1 = c_return) and (aindex < length(info.text.text)) and
+    if (ch1 = c_return) and (aindex <= length(info.text.text)) and
             (info.text.text[aindex] = c_linefeed) then begin
      inc(aindex);
     end;
