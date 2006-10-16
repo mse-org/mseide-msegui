@@ -492,44 +492,7 @@ type
                      ft_binary,ft_bytes,ft_varbytes,
                      ft_bcd,ft_blob,ft_memo,ft_graphic);
  fieldclasstypearty = array of fieldclasstypety; 
- 
-const
-
- fieldtypeclasses: array[fieldclasstypety] of fieldclassty = 
-          (tfield,tstringfield,tnumericfield,
-           tlongintfield,tlargeintfield,tsmallintfield,
-           twordfield,tautoincfield,tfloatfield,tcurrencyfield,
-           tbooleanfield,
-           tdatetimefield,tdatefield,ttimefield,
-           tbinaryfield,tbytesfield,tvarbytesfield,
-           tbcdfield,tblobfield,tmemofield,tgraphicfield);
-
- msefieldtypeclasses: array[fieldclasstypety] of fieldclassty = 
-          (tmsefield,tmsestringfield,tmsenumericfield,
-           tmselongintfield,tmselargeintfield,tmsesmallintfield,
-           tmsewordfield,tmseautoincfield,tmsefloatfield,tmsecurrencyfield,
-           tmsebooleanfield,
-           tmsedatetimefield,tmsedatefield,tmsetimefield,
-           tmsebinaryfield,tmsebytesfield,tmsevarbytesfield,
-           tmsebcdfield,tmseblobfield,tmsememofield,tmsegraphicfield);
- tfieldtypetotypety: array[tfieldtype] of fieldclasstypety = (
-    //ftUnknown, ftString, ftSmallint, ftInteger, ftWord,
-      ft_unknown,ft_string,ft_smallint,ft_longint,ft_word,
-    //ftBoolean, ftFloat, ftCurrency, ftBCD, ftDate,  ftTime, ftDateTime,
-      ft_boolean,ft_float,ft_currency,ft_bcd,ft_date,ft_time,ft_datetime,
-    //ftBytes, ftVarBytes, ftAutoInc, ftBlob, ftMemo, ftGraphic, ftFmtMemo,
-      ft_bytes,ft_varbytes,ft_autoinc,ft_blob,ft_memo,ft_graphic,ft_memo,
-    //ftParadoxOle, ftDBaseOle, ftTypedBinary, ftCursor, ftFixedChar,
-      ft_unknown,ft_unknown,ft_unknown,ft_unknown,ft_string,
-    //ftWideString, ftLargeint, ftADT, ftArray, ftReference,
-      ft_unknown,ft_largeint,ft_unknown,ft_unknown,ft_unknown,
-    //ftDataSet, ftOraBlob, ftOraClob, ftVariant, ftInterface,
-      ft_unknown,ft_unknown,ft_unknown,ft_unknown,ft_unknown,
-    //ftIDispatch, ftGuid, ftTimeStamp, ftFMTBcd);
-      ft_unknown,ft_unknown,ft_unknown,ft_unknown
-      );
-      
-type      
+        
  tmsedatasource = class(tdatasource)
   protected
    Procedure DoDataChange (Info : Pointer); override;
@@ -574,6 +537,7 @@ type
  
 const
  defaultdscontrolleroptions = [];
+
  
 type
  fieldlinkarty = array of ifieldcomponent;
@@ -721,6 +685,69 @@ type
    property onsetvalue: fieldeventty read fonsetvalue write fonsetvalue;
  end;
  
+const
+ fieldtypeclasses: array[fieldclasstypety] of fieldclassty = 
+          (tfield,tstringfield,tnumericfield,
+           tlongintfield,tlargeintfield,tsmallintfield,
+           twordfield,tautoincfield,tfloatfield,tcurrencyfield,
+           tbooleanfield,
+           tdatetimefield,tdatefield,ttimefield,
+           tbinaryfield,tbytesfield,tvarbytesfield,
+           tbcdfield,tblobfield,tmemofield,tgraphicfield);
+
+ msefieldtypeclasses: array[fieldclasstypety] of fieldclassty = 
+          (tmsefield,tmsestringfield,tmsenumericfield,
+           tmselongintfield,tmselargeintfield,tmsesmallintfield,
+           tmsewordfield,tmseautoincfield,tmsefloatfield,tmsecurrencyfield,
+           tmsebooleanfield,
+           tmsedatetimefield,tmsedatefield,tmsetimefield,
+           tmsebinaryfield,tmsebytesfield,tmsevarbytesfield,
+           tmsebcdfield,tmseblobfield,tmsememofield,tmsegraphicfield);
+           
+ tfieldtypetotypety: array[tfieldtype] of fieldclasstypety = (
+    //ftUnknown, ftString, ftSmallint, ftInteger, ftWord,
+      ft_unknown,ft_string,ft_smallint,ft_longint,ft_word,
+    //ftBoolean, ftFloat, ftCurrency, ftBCD, ftDate,  ftTime, ftDateTime,
+      ft_boolean,ft_float,ft_currency,ft_bcd,ft_date,ft_time,ft_datetime,
+    //ftBytes, ftVarBytes, ftAutoInc, ftBlob, ftMemo, ftGraphic, ftFmtMemo,
+      ft_bytes,ft_varbytes,ft_autoinc,ft_blob,ft_memo,ft_graphic,ft_memo,
+    //ftParadoxOle, ftDBaseOle, ftTypedBinary, ftCursor, ftFixedChar,
+      ft_unknown,ft_unknown,ft_unknown,ft_unknown,ft_string,
+    //ftWideString, ftLargeint, ftADT, ftArray, ftReference,
+      ft_unknown,ft_largeint,ft_unknown,ft_unknown,ft_unknown,
+    //ftDataSet, ftOraBlob, ftOraClob, ftVariant, ftInterface,
+      ft_unknown,ft_unknown,ft_unknown,ft_unknown,ft_unknown,
+    //ftIDispatch, ftGuid, ftTimeStamp, ftFMTBcd);
+      ft_unknown,ft_unknown,ft_unknown,ft_unknown
+      );
+
+ realfcomp = [ftfloat,ftcurrency];
+ datetimefcomp = [ftdate,fttime,ftdatetime];
+ blobfcomp = [ftblob,ftgraphic,ftmemo];
+ longintfcomp = [ftsmallint,ftinteger,ftword];
+ stringfcomp = [ftstring,ftfixedchar];
+      
+ fieldcompatibility: array[tfieldtype] of fieldtypesty = (
+    //ftUnknown, ftString,    ftSmallint,    ftInteger,     ftWord,
+      [ftunknown],stringfcomp,longintfcomp,longintfcomp,longintfcomp,
+    //ftBoolean,   ftFloat, ftCurrency, ftBCD,
+      [ftboolean],realfcomp,realfcomp,[ftbcd],
+    //ftDate,        ftTime,       tDateTime,
+      datetimefcomp,datetimefcomp,datetimefcomp,
+    //ftBytes, ftVarBytes, ftAutoInc,
+      [ftbytes],[ftvarbytes],[ftautoinc],
+    // ftBlob, ftMemo, ftGraphic, ftFmtMemo,
+      blobfcomp,blobfcomp,blobfcomp,blobfcomp,
+    //ftParadoxOle, ftDBaseOle, ftTypedBinary,     ftCursor, tFixedChar,
+      [ftParadoxOle],[ftDBaseOle],[ftTypedBinary],[ftCursor],stringfcomp,
+    //ftWideString, ftLargeint, ftADT, ftArray, ftReference,
+     [ftWideString],[ftLargeint],[ftADT],[ftArray],[ftReference],
+    //ftDataSet, ftOraBlob, ftOraClob, ftVariant, ftInterface,
+      [ftDataSet],[ftOraBlob],[ftOraClob],[ftVariant],[ftInterface],
+    //ftIDispatch, ftGuid, ftTimeStamp, ftFMTBcd);
+      [ftIDispatch],[ftGuid],[ftTimeStamp],[ftFMTBcd]
+      );
+      
 function fieldclasstoclasstyp(const fieldclass: fieldclassty): fieldclasstypety;
 function fieldtosql(const field: tfield): string;
 function fieldtooldsql(const field: tfield): string;
@@ -729,7 +756,9 @@ procedure fieldtoparam(const field: tfield; const param: tparam);
 procedure msestringtoparam(const avalue: msestring; const param: tparam);
 //function getasmsestring(const field: tfield): msestring;
 function getasmsestring(const field: tfield; const utf8: boolean): msestring;
-
+function checkfieldcompatibility(const afield: tfield;
+                     const adatatype: tfieldtype): boolean;
+           //true if ok
 implementation
 uses
  rtlconsts,msefileutils,typinfo,dbconst,msedatalist,mseformatstr,
@@ -997,6 +1026,14 @@ begin
    end;
   end;
  end;
+end;
+
+function checkfieldcompatibility(const afield: tfield;
+                     const adatatype: tfieldtype): boolean;
+           //true if ok
+begin
+ result:= (afield.datatype in fieldcompatibility[adatatype]) or 
+                            (adatatype = ftunknown);
 end;
 
 procedure fieldsetmsestring(const avalue: msestring; const sender: tfield;
@@ -2596,8 +2633,8 @@ begin
   for int1:= 0 to fields.count - 1 do begin
    with fields[int1] do begin
     int2:= fielddefs.indexof(fieldname);
-    if (int2 >= 0) and (datatype <> fielddefs[int2].datatype) and 
-       (fielddefs[int2].datatype <> ftunknown) then begin
+    if (int2 >= 0) and not checkfieldcompatibility(fields[int1],
+                          fielddefs[int2].datatype) then begin
      databaseerror('Datatype mismatch dataset '''+fowner.name+''' field '''+
       fieldname+''''+lineend+
         'expected: '''+getenumname(typeinfo(tfieldtype),
