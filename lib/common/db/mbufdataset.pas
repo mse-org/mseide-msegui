@@ -1024,8 +1024,10 @@ begin
    SetLength(FUpdateBuffer,0);
   end;
  finally 
-  FCurrentRecBuf := StoreRecBuf;
-  Resync([]);
+  if active then begin
+   FCurrentRecBuf := StoreRecBuf;
+   Resync([]);
+  end;
  end;
 end;
 
