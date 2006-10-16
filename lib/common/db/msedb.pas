@@ -879,7 +879,7 @@ begin
  end
  else begin
   case field.datatype of
-   ftstring: begin
+   ftstring,ftmemo: begin
     result:= encodesqlstring(field.asstring);
    end;
    ftdate: begin

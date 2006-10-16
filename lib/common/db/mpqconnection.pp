@@ -360,7 +360,8 @@ begin
   result := TPQTrans.create;
 end;
 
-procedure TPQConnection.PrepareStatement(cursor: TSQLCursor;ATransaction : TSQLTransaction;buf : string; AParams : TParams);
+procedure TPQConnection.PrepareStatement(cursor: TSQLCursor;
+            ATransaction : TSQLTransaction;buf : string; AParams : TParams);
 
 const TypeStrings : array[TFieldType] of string =
     (
@@ -480,7 +481,8 @@ begin
 // Do nothing
 end;
 
-procedure TPQConnection.Execute(cursor: TSQLCursor;atransaction:tSQLtransaction;AParams : TParams);
+procedure TPQConnection.Execute(cursor: TSQLCursor;atransaction:tSQLtransaction;
+                           AParams : TParams);
 
 var
  ar: array of pointer;
