@@ -183,7 +183,10 @@ const
  defaultmemotextflags = (defaulttextflags - [tf_ycentered]) + [tf_wordbreak];
  defaultmemotextflagsactive = (defaulttextflagsactive - [tf_ycentered]) + 
                               [tf_wordbreak];
- defaultmemooptionsedit = defaultoptionsedit + [oe_linebreak];
+ defaultmemooptionsedit = (defaultoptionsedit - 
+         [oe_undoonesc,oe_exitoncursor,oe_shiftreturn,
+          oe_endonenter,oe_homeonenter,
+          oe_autoselect,oe_autoselectonfirstclick]) + [oe_linebreak];
  
 type
 

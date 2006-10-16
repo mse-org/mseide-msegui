@@ -1407,7 +1407,7 @@ begin
  if oe_resetselectonexit in iedit(fintf).getoptionsedit then begin
   sellength:= 0;
   resetoffset;
-  moveindex(0);
+//  moveindex(0);
  end;
  internalupdatecaret(true,true);
 end;
