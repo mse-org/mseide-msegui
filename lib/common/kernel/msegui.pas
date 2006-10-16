@@ -878,6 +878,7 @@ type
    function hascaret: boolean;
    function ownswindow: boolean;
                       //true if valid toplevelwindow with assigned winid
+   function updaterect: rectty; //invalidated area, origin = clientpos
 
    function canclose(const newfocus: twidget): boolean; virtual;
    function canparentclose(const newfocus: twidget): boolean; overload;
@@ -1223,6 +1224,8 @@ type
    function state: windowstatesty;
    function visible: boolean;
    function normalwindowrect: rectty;
+   property updateregion: regionty read fupdateregion;
+   function updaterect: rectty;
 
    procedure registermovenotification(sender: iobjectlink);
    procedure unregistermovenotification(sender: iobjectlink);
@@ -4995,6 +4998,12 @@ end;
 function twidget.ownswindow: boolean;
 begin
  result:= (fwindow <> nil) and (fwindow.fowner = self) and (fwindow.fwinid <> 0);
+end;
+
+function twidget.updaterect: rectty; //invalidated area, origin = clientpos
+begin
+ result:= window.updaterect;
+ translateclientpoint1(result.pos,rootwidget,self);
 end;
 
 function twidget.window: twindow;
@@ -8908,6 +8917,11 @@ begin
   end;
  end;
  fwindowpos := Value;
+end;
+
+function twindow.updaterect: rectty;
+begin
+ result:= fcanvas.regionclipbox(fupdateregion);
 end;
 
 { tonterminatedlist }

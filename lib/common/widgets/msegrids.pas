@@ -3301,7 +3301,7 @@ begin
     end;
    end;
   end
-  else begin
+  else begin //row < 0
    if value then begin
     if not (cos_selected in fstate) then begin
      include(fstate,cos_selected);
@@ -3318,15 +3318,16 @@ begin
      if fselectedrow >= 0 then begin
       prowstateaty(po1)^[fselectedrow].selected:= 
                prowstateaty(po1)^[fselectedrow].selected and ca1;
+      cellchanged(fselectedrow);
      end
      else begin
       for int1:= 0 to fgrid.frowcount - 1 do begin
        po1^.selected:= po1^.selected and ca1;
        inc(po1);
       end;
+      changed;
      end;
      fselectedrow:= -1;
-     changed;
      fgrid.internalselectionchanged;
     end;
    end;

@@ -4785,6 +4785,8 @@ procedure tgriddatalink.checkscroll;
 var
  rect1: rectty;
  distance: integer;
+ rowbefore: integer;
+ 
 begin
  if active and (gs_needszebraoffset in tcustomgrid1(fgrid).fstate) then begin
   fzebraoffset:= -(arecord - activerecord);
@@ -4795,6 +4797,7 @@ begin
  distance:= firstrecord - ffirstrecordbefore;
  ffirstrecordbefore:= firstrecord;
  with tcustomgrid1(fgrid) do begin
+  rowbefore:= row;
   if distance <> 0 then begin
    inc(frowexited);
    row:= invalidaxis;
@@ -4806,9 +4809,17 @@ begin
    if (distance <> 0) then begin
     if not fgridinvalidated then begin
      rect1:= fdatarecty;
-     rect1.cy:= rowcount*ystep;
-     dec(factiverecordbefore,distance);
-     scrollrect(makepoint(0,-distance*ystep),rect1,true);
+     rect1.cy:= rowhigh*ystep;
+     if rowbefore = 0 then begin
+      inc(rect1.y,ystep);
+     end;
+     if testintersectrect(rect1,updaterect) then begin
+      invalidaterect(rect1,org_client); //scrolling not possible
+     end
+     else begin
+      dec(factiverecordbefore,distance);
+      scrollrect(makepoint(0,-distance*ystep),rect1,true);
+     end;
     end;
     doupdaterowdata(-1);
    end;
