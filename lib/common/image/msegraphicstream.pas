@@ -4,7 +4,9 @@ interface
 uses
  sysutils,classes,msebitmap,msegraphics{$ifdef FPC},fpimage{$endif},msestrings,
  msetypes;
- 
+
+const
+ graphicformatdelimiter = ';'; 
 type
  egraphicformat = class(exception);
  
@@ -233,7 +235,7 @@ begin
  end
  else begin
   found:= false;
-  ar1:= splitstring(aformatlabel,',');
+  ar1:= splitstring(aformatlabel,graphicformatdelimiter);
   for int3:= 0 to high(ar1) do begin
    for int1:= 0 to high(formats) do begin
     with formats[int1] do begin 

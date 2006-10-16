@@ -2274,7 +2274,8 @@ var
        end
        else begin
         maskblt(adc,destrect^.x,destrect^.y,cx,cy,source^.gc.handle,
-                    x,y,tsimplebitmap1(mask).handle,x,y,makerop4(rasterops3[rop_nop],rasterops3[arop]));
+                    x,y,tsimplebitmap1(mask).handle,x,y,
+                    makerop4(rasterops3[rop_nop],rasterops3[arop]));
        end;
       end;
      end;
@@ -2319,7 +2320,8 @@ begin
  end;
  with drawinfo do begin
   with gc,win32gcty(platformdata) do begin
-   if (drawingflags * [df_monochrome,df_opaque,df_brush] = [df_monochrome,df_brush]) then begin
+   if (drawingflags * [df_monochrome,df_opaque,df_brush] = 
+                                          [df_monochrome,df_brush]) then begin
     if shape <> fs_rect then begin
      if shape <> fs_copyarea then begin
       checkgc(gc,[gcf_patternbrushvalid,gcf_selectnullpen]);
@@ -2656,9 +2658,28 @@ var
  int1: integer;
  colormask: tsimplebitmap1;
  bufferbmpback: hbitmap;
-
+ point1: tpoint;
+ 
 begin
  with drawinfo,copyarea,gc,win32gcty(platformdata) do begin
+  if (al_intpol in alignment) and not iswin95 then begin
+   getbrushorgex(handle,point1);
+   setstretchbltmode(handle,halftone);
+   setbrushorgex(handle,point1.x,point1.y,nil);
+  end
+  else begin
+   if al_or in alignment then begin
+    setstretchbltmode(handle,blackonwhite);
+   end
+   else begin
+    if al_and in alignment then begin
+     setstretchbltmode(handle,whiteonblack);
+    end
+    else begin
+     setstretchbltmode(handle,coloroncolor);
+    end;
+   end;
+  end;
   getclipbox(handle,trect(rect1));
   winrecttorect(rect1);
   intersectrect(destrect^,rect1,rect1);

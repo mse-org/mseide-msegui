@@ -874,9 +874,14 @@ begin
 end;
 
 procedure tbitmap.setalignment(const Value: alignmentsty);
+const
+ mask: alignmentsty = [al_intpol,al_or,al_and];
 begin
  if falignment <> value then begin
-  falignment := Value;
+  falignment:= alignmentsty(setsinglebit(
+                          {$ifdef FPC}longword{$else}word{$endif}(value),
+                          {$ifdef FPC}longword{$else}word{$endif}(falignment),
+                          {$ifdef FPC}longword{$else}word{$endif}(mask)));
   change;
  end;
 end;

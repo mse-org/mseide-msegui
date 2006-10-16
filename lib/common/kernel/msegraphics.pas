@@ -33,7 +33,8 @@ type
  pixmapty = cardinal;
 
  alignmentty = (al_xcentered,al_right,al_ycentered,al_bottom,al_grayed,
-                al_stretchx,al_stretchy,al_fit,al_intpol,al_tiled);
+                al_stretchx,al_stretchy,al_fit,al_tiled,
+                al_intpol,al_or,al_and);
  alignmentsty = set of alignmentty;
 
  drawingflagty = (df_canvasispixmap,df_canvasismonochrome,df_colorconvert,
