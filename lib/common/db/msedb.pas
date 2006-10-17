@@ -276,17 +276,25 @@ type
  end;
  tmsebooleanfield = class(tbooleanfield)
   private
+   fdisplayvalues: msestring;
+   fdisplays : array[boolean,boolean] of msestring;
+   procedure setdisplayvalues(const avalue: msestring);
    function getasmsestring: msestring;
    procedure setasmsestring(const avalue: msestring);
   protected
    function HasParent: Boolean; override;
+   function getasstring: string; override;
+   procedure setasstring(const avalue: string); override;
+   function GetDefaultWidth: Longint; override;
   public
+   constructor Create(AOwner: TComponent); override;
    procedure Clear; override;
    function assql: string;
    property asmsestring: msestring read getasmsestring write setasmsestring;
   published
    property DataSet stored false;
    property ProviderFlags default defaultproviderflags;
+   property displayvalues: msestring read fdisplayvalues write setdisplayvalues;
  end;
  tmsedatetimefield = class(tdatetimefield)
   private
@@ -1476,6 +1484,12 @@ end;
 
 { tmsebooleanfield }
 
+constructor tmsebooleanfield.Create(AOwner: TComponent);
+begin
+ inherited;
+ displayvalues:= 'True;False';
+end;
+
 function tmsebooleanfield.HasParent: Boolean;
 begin
  result:= dataset <> nil;
@@ -1487,18 +1501,80 @@ begin
 end;
 
 procedure tmsebooleanfield.setasmsestring(const avalue: msestring);
+var
+ mstr1: msestring;
 begin
- asstring:= avalue;
+ if avalue= '' then begin
+  clear;
+ end
+ else begin
+  mstr1:= mseuppercase(avalue);
+  if pos(mstr1,fdisplays[true,false]) = 1 then begin
+   asboolean:= false;
+  end
+  else begin
+   if pos(mstr1,fdisplays[true,true]) = 1 then begin
+    asboolean:= true;
+   end
+   else begin
+    DatabaseErrorFmt(SNotABoolean,[string(AValue)]);
+   end;
+  end;
+ end;
 end;
 
 function tmsebooleanfield.getasmsestring: msestring;
+var 
+ bo1: wordbool;
 begin
- result:= asstring;
+ if getdata(@bo1) then begin
+  result:= fdisplays[false,bo1]
+ end
+ else begin
+  result:='';
+ end;
 end;
 
 procedure tmsebooleanfield.Clear;
 begin
  setdata(nil);
+end;
+
+procedure tmsebooleanfield.setdisplayvalues(const avalue: msestring);
+var
+ ar1: msestringarty;
+begin
+ if fdisplayvalues <> avalue then begin
+  ar1:= splitstring(avalue,';');
+  if (high(ar1) <> 1) or (ar1[0] = ar1[1]) then begin
+   databaseerrorfmt(SInvalidDisplayValues,[string(avalue)]);
+  end;
+  fdisplayvalues:= avalue;
+    // Store display values and their uppercase equivalents;
+  fdisplays[false,true]:= ar1[0];
+  fdisplays[true,true]:= mseUpperCase(ar1[0]);
+  fdisplays[false,false]:= ar1[1];
+  fdisplays[true,false]:= mseuppercase(ar1[1]);
+  propertychanged(true);
+ end;
+end;
+
+function tmsebooleanfield.getasstring: string;
+begin
+ result:= getasmsestring;
+end;
+
+procedure tmsebooleanfield.setasstring(const avalue: string);
+begin
+ setasmsestring(avalue);
+end;
+
+function tmsebooleanfield.GetDefaultWidth: Longint;
+begin
+ result:= length(fdisplays[false,false]);
+ if result < length(fdisplays[false,true]) then begin
+  result:= length(fdisplays[false,true]);
+ end;
 end;
 
 { tmsedatetimefield }
