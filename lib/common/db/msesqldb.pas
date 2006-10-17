@@ -35,8 +35,7 @@ type
 
  tmsesqlquery = class;
  
- sqlquerystatety = (sqs_userapplayrecupdate,sqs_updateabort,sqs_updateerror,
-                    sqs_calcfieldsdone);
+ sqlquerystatety = (sqs_userapplayrecupdate,sqs_updateabort,sqs_updateerror);
  sqlquerystatesty = set of sqlquerystatety;
  applyrecupdateeventty = 
      procedure(const sender: tmsesqlquery; const updatekind: tupdatekind;
@@ -67,23 +66,8 @@ type
    function getetstatementtype: TStatementType;
    procedure setstatementtype(const avalue: TStatementType);
    procedure afterapply;
-//   procedure internalapplyupdate(const maxerrors: integer; 
-//                    var arec: trecupdatebuffer; var response: tresolverresponse);
-//   procedure internalApplyUpdates(MaxErrors: Integer);
-   
-                    //for workarounds
-//   procedure cancelrecupdate(var arec: trecupdatebuffer);
-   function GetRecordUpdateBuffer : boolean;
-   function GetFieldSize(FieldDef : TFieldDef) : longint;
-//   Procedure ApplyRecUpdate1(UpdateKind : TUpdateKind);
    
   protected
-   procedure ClearCalcFields(Buffer: PChar); override;
-   function  AllocRecordBuffer: PChar; override;
-//   function GetFieldData(Field: TField; Buffer: Pointer): Boolean; override;
-//   procedure SetFieldData(Field: TField; Buffer: Pointer); override;
-   function GetRecord(Buffer: PChar; GetMode: TGetMode;
-                  DoCheck: Boolean): TGetResult; override;
    procedure updateindexdefs; override;
    procedure sqlonchange(sender: tobject);
    procedure loaded; override;
@@ -94,9 +78,7 @@ type
    procedure applyrecupdate(updatekind: tupdatekind); override;
    function  getcanmodify: boolean; override;
    function  getfieldclass(fieldtype: tfieldtype): tfieldclass; override;
-   procedure GetCalcFields(Buffer: PChar); override;
        //idscontroller
-//   procedure inheritedresync(const mode: tresyncmode);
    procedure inheriteddataevent(const event: tdataevent; const info: ptrint);
    procedure inheritedcancel;
    function inheritedmoveby(const distance: integer): integer;  
@@ -1063,17 +1045,7 @@ procedure tmsesqlquery.dataevent(event: tdataevent; info: ptrint);
 begin
  fcontroller.dataevent(event,info);
 end;
-{
-procedure tmsesqlquery.Resync(Mode: TResyncMode);
-begin
- fcontroller.resync(mode);
-end;
 
-procedure tmsesqlquery.inheritedresync(const mode: tresyncmode);
-begin
- inherited resync(mode);
-end;
-}
 function tmsesqlquery.getcontroller: tdscontroller;
 begin
  result:= fcontroller;
@@ -1274,73 +1246,6 @@ end;
 procedure tmsesqlquery.setstatementtype(const avalue: TStatementType);
 begin
  //dummy
-end;
-
-function tmsesqlquery.GetRecordUpdateBuffer : boolean;
-var 
- x: integer;
- CurrBuff: PChar;
-
-begin
- with tbufdatasetcracker(self) do begin
-  GetBookmarkData(ActiveBuffer,@CurrBuff);
-  if (FCurrentUpdateBuffer >= length(FUpdateBuffer)) or 
-       (FUpdateBuffer[FCurrentUpdateBuffer].BookmarkData <> CurrBuff) then begin
-   for x:= 0 to high(FUpdateBuffer) do begin
-    if FUpdateBuffer[x].BookmarkData = CurrBuff then begin
-     FCurrentUpdateBuffer:= x;
-     break;
-    end;
-   end;
-  end;
-  Result:= (FCurrentUpdateBuffer < length(FUpdateBuffer))  and 
-     (FUpdateBuffer[FCurrentUpdateBuffer].BookmarkData = CurrBuff);
- end;
-end;
-
-function tmsesqlquery.GetFieldSize(FieldDef : TFieldDef) : longint;
-begin
- case FieldDef.DataType of
-  ftString,ftFixedChar: result:= FieldDef.Size + 1;
-  ftSmallint,ftInteger,ftword: result:= sizeof(longint);
-  ftBoolean: result:= sizeof(wordbool);
-  ftBCD: result:= sizeof(currency);
-  ftFloat: result:= sizeof(double);
-  ftLargeInt: result:= sizeof(largeint);
-  ftTime,ftDate,ftDateTime: result:= sizeof(TDateTime)
-  else Result := 10
- end;
-end;
-
-function tmsesqlquery.AllocRecordBuffer: PChar;
-begin
- with tbufdatasetcracker(self) do begin
-  result := AllocMem(FRecordsize + sizeof(TBufBookmark) + calcfieldssize);
- end;
-end;
-
-
-procedure tmsesqlquery.GetCalcFields(Buffer: PChar);
-begin
- include(fmstate,sqs_calcfieldsdone);
- inherited;
-end;
-
-function tmsesqlquery.GetRecord(Buffer: PChar; GetMode: TGetMode;
-               DoCheck: Boolean): TGetResult;
-begin
- exclude(fmstate,sqs_calcfieldsdone);
- result:= inherited getrecord(buffer,getmode,docheck);
- if (result = grok) and not (sqs_calcfieldsdone in fmstate) then begin
-  getcalcfields(buffer);
- end;
-end;
-
-procedure tmsesqlquery.ClearCalcFields(Buffer: PChar);
-begin
- with tbufdatasetcracker(self) do begin
-  fillchar((buffer+FRecordsize + sizeof(TBufBookmark))^,calcfieldssize,0);
- end;
 end;
 
 { tparamsourcedatalink }

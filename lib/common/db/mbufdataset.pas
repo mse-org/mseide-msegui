@@ -63,6 +63,7 @@ type
   datalength: integer;
   new: boolean;
  end;
+ pblobinfoty = ^blobinfoty;
  blobinfoarty = array of blobinfoty;
  pblobinfoarty = ^blobinfoarty;
  
@@ -133,6 +134,7 @@ type
     function  GetRecNo: Longint; override;
     function GetChangeCount: integer; virtual;
     function  AllocRecordBuffer: PChar; override;
+    procedure ClearCalcFields(Buffer: PChar); override;
     procedure FreeRecordBuffer(var Buffer: PChar); override;
     procedure InternalInitRecord(Buffer: PChar); override;
     function  GetCanModify: Boolean; override;
@@ -272,8 +274,13 @@ end;
 
 function tmbufdataset.AllocRecordBuffer: PChar;
 begin
-  result := AllocMem(FRecordsize + sizeof(TBufBookmark));
-  initrecord(result);
+ result := AllocMem(FRecordsize + sizeof(TBufBookmark) + calcfieldssize);
+ initrecord(result);
+end;
+
+procedure tmbufdataset.ClearCalcFields(Buffer: PChar);
+begin
+ fillchar((buffer+FRecordsize + sizeof(TBufBookmark))^,calcfieldssize,0);
 end;
 
 procedure tmbufdataset.FreeRecordBuffer(var Buffer: PChar);
@@ -316,18 +323,55 @@ begin
 end;
 
 function tmbufdataset.createblobbuffer(const afield: tfield): tblobbuffer;
+begin
+ result:= tblobbuffer.create(self,afield);
+end;
+
+procedure tmbufdataset.addblob(const ablob: tblobbuffer);
 var
- int1: integer;
  po1: pblobinfoarty;
+ int1,int2: integer;
+ bo1: boolean;
+ po2: pointer;
 begin
  po1:= getblobpo;
+ bo1:= false;
+ int2:= -1;
  for int1:= high(po1^) downto 0 do begin
-  if po1^[int1].field = afield then begin
-   deleteblob(po1^,int1);
-   break;
+  with po1^[int1] do begin
+   if new then begin
+    bo1:= true;
+   end;
+   if field = ablob.ffield then begin
+    int2:= int1;
+   end;
   end;
  end;
- result:= tblobbuffer.create(self,afield);
+ if not bo1 then begin //copy needed
+  po2:= pointer(po1^);
+  pointer(po1^):= nil;
+  po1^:= copy(blobinfoarty(po2));
+ end;
+ if int2 >= 0 then begin
+  deleteblob(po1^,int2);
+ end;
+ setlength(po1^,high(po1^)+2);
+ with po1^[high(po1^)],ablob do begin
+  data:= memory;
+  reallocmem(data,size);
+  datalength:= size;
+  field:= ffield;
+  new:= true;
+  if size = 0 then begin
+   setfieldisnull(pbyte(po1)+nullmaskoffset,field.fieldno-1);
+  end
+  else begin
+   unsetfieldisnull(pbyte(po1)+nullmaskoffset,field.fieldno-1);
+  end;
+  if not (State in [dsCalcFields, dsFilter, dsNewValue]) then begin
+   DataEvent(deFieldChange, Ptrint(Field));
+  end;
+ end;
 end;
 
 procedure tmbufdataset.freeblobs(var ablobs: blobinfoarty);
@@ -344,30 +388,6 @@ procedure tmbufdataset.deleteblob(var ablobs: blobinfoarty; const aindex: intege
 begin
  freeblob(ablobs[aindex]);
  deleteitem(ablobs,typeinfo(blobinfoarty),aindex); 
-end;
-
-procedure tmbufdataset.addblob(const ablob: tblobbuffer);
-var
- po1: pblobinfoarty;
-begin
- po1:= getblobpo;
- setlength(po1^,high(po1^)+2);
- ablob.capacity:= ablob.size;
- with po1^[high(po1^)],ablob do begin
-  data:= memory;
-  datalength:= size;
-  field:= ffield;
-  new:= true;
-  if size = 0 then begin
-   setfieldisnull(pbyte(po1)+nullmaskoffset,field.fieldno-1);
-  end
-  else begin
-   unsetfieldisnull(pbyte(po1)+nullmaskoffset,field.fieldno-1);
-  end;
-  if not (State in [dsCalcFields, dsFilter, dsNewValue]) then begin
-   DataEvent(deFieldChange, Ptrint(Field));
-  end;
- end;
 end;
 
 procedure tmbufdataset.InternalOpen;
@@ -469,18 +489,19 @@ begin
         end;
   end;
 
-  if Result = grOK then
-    begin
-
-    with PBufBookmark(Buffer + FRecordSize)^ do
-      begin
-      BookmarkData := FCurrentRecBuf;
-      BookmarkFlag := bfCurrent;
-      end;
-    move((pointer(FCurrentRecBuf)+sizeof(TBufRecLinkItem))^,buffer^,FRecordSize);
-    end
-  else if (Result = grError) and doCheck then
+  if Result = grOK then begin
+   with PBufBookmark(Buffer + FRecordSize)^ do  begin
+    BookmarkData := FCurrentRecBuf;
+    BookmarkFlag := bfCurrent;
+   end;
+   move((pointer(FCurrentRecBuf)+sizeof(TBufRecLinkItem))^,buffer^,FRecordSize);
+   getcalcfields(buffer);
+  end
+  else begin
+   if (Result = grError) and doCheck then begin
     DatabaseError('No record');
+   end;
+  end;
 end;
 
 function tmbufdataset.GetRecordUpdateBuffer : boolean;
@@ -1212,9 +1233,8 @@ end;
 procedure tmbufdataset.InternalInitRecord(Buffer: PChar);
 
 begin
-  FillChar(Buffer^, FRecordSize, #0);
-
-  fillchar((Buffer+nullmaskoffset)^,FNullmaskSize,255);
+ FillChar(Buffer^, FRecordSize, #0);
+ fillchar((Buffer+nullmaskoffset)^,FNullmaskSize,255);
 end;
 
 procedure tmbufdataset.SetRecNo(Value: Longint);
