@@ -387,7 +387,7 @@ end;
 
 procedure tdbstringdisp.fieldtovalue;
 begin
- value:= datalink.field.asstring;
+ value:= datalink.asmsestring;
 end;
 
 procedure tdbstringdisp.setnullvalue;

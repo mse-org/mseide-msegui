@@ -170,6 +170,7 @@ type
   private
    function getasmsestring: msestring;
    procedure setasmsestring(const avalue: msestring);
+   procedure setasenum(const avalue: integer);
   protected
    function HasParent: Boolean; override;
    function getasboolean: boolean; override;
@@ -178,6 +179,7 @@ type
    procedure Clear; override;
    function assql: string;
    property asmsestring: msestring read getasmsestring write setasmsestring;
+   property asenum: integer read getaslongint write setasenum;
   published
    property DataSet stored false;
    property ProviderFlags default defaultproviderflags;
@@ -1256,6 +1258,16 @@ begin
  setdata(nil);
 end;
 
+procedure tmselongintfield.setasenum(const avalue: integer);
+begin
+ if avalue = -1 then begin
+  clear;
+ end
+ else begin
+  asinteger:= avalue;
+ end;
+end;
+
 { tmselargeintfield }
 
 function tmselargeintfield.HasParent: Boolean;
@@ -1851,7 +1863,12 @@ end;
 
 procedure tmseblobfield.LoadFromFile(const FileName: filenamety);
 begin
- inherited loadfromfile(tosysfilepath(filename));
+ if filename = '' then begin
+  clear;
+ end
+ else begin
+  inherited loadfromfile(tosysfilepath(filename));
+ end;
 end;
 
 procedure tmseblobfield.SaveToFile(const FileName: filenamety);
