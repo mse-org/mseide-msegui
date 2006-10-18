@@ -17,7 +17,7 @@ implementation
 uses
  Classes,mseedit,msedataedits,msegraphedits,{msestringlistedit,}mselistbrowser,
  msewidgetgrid,msetextedit,msedesignintf,regeditwidgets_bmp,msepropertyeditors,
- msedropdownlist,mseterminal,msedrawtext,msedatanodes,msedialog;
+ msedropdownlist,mseterminal,msedrawtext,msedatanodes,msedialog,msestrings;
 
 type
  tdropdowncolpropertyeditor = class(tarraypropertyeditor)
@@ -30,6 +30,16 @@ type
    function getdefaultstate: propertystatesty; override;
  end;
                         
+ twidgetcolelementeditor = class(tclasselementeditor)
+  public
+   function getvalue: msestring; override;
+ end;
+ 
+ twidgetcolspropertyeditor = class(tpersistentarraypropertyeditor)
+  protected
+   function geteditorclass: propertyeditorclassty; override;
+ end;
+ 
 procedure Register;
 begin
  registercomponents('Edit',[tedit,tslider,tprogressbar,
@@ -47,6 +57,7 @@ begin
  registerpropertyeditor(ttabulators.classinfo,ttextedit,'tabulators',
             toptionalpersistentarraypropertyeditor);
  registerpropertyeditor(tcustomitemlist.classinfo,nil,'',titemlistpropertyeditor);
+ registerpropertyeditor(typeinfo(twidgetcols),nil,'',twidgetcolspropertyeditor);
 end;
 
 { tdropdowncolpropertyeditor }
@@ -61,6 +72,28 @@ end;
 function titemlistpropertyeditor.getdefaultstate: propertystatesty;
 begin
  result:= inherited getdefaultstate - [ps_dialog];
+end;
+
+{ twidgetcolelementeditor }
+
+function twidgetcolelementeditor.getvalue: msestring;
+var
+ col1: twidgetcol;
+begin
+ col1:= twidgetcol(getordvalue);
+ if col1.editwidget <> nil then begin
+  result:= '<'+col1.editwidget.name+'>';
+ end
+ else begin
+  result:= '<>';
+ end;
+end;
+
+{ twidgetcolspropertyeditor }
+
+function twidgetcolspropertyeditor.geteditorclass: propertyeditorclassty;
+begin
+ result:= twidgetcolelementeditor;
 end;
 
 initialization

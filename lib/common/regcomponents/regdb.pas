@@ -19,7 +19,7 @@ uses
  msepqconnection,mseodbcconn,msemysql40conn,msemysql41conn,msemysql50conn,{sqldb,}
  mselookupbuffer,msesqldb,msedbf,msesdfdata,msememds,msedb,mseclasses,msetypes,
  msestrings,msedatalist,msedbfieldeditor,sysutils,msetexteditor,
- msedbdispwidgets,msedbgraphics,regdb_bmp,msegui,msedbdialog
+ msedbdispwidgets,msedbgraphics,regdb_bmp,msegui,msedbdialog,msegrids
  {$ifdef mse_with_sqlite}
  ,msesqlite3ds
  {$endif}
@@ -72,6 +72,16 @@ type
    procedure edit; override;
  end;
 
+ tcolheaderelementeditor = class(tclasselementeditor)
+  public
+   function getvalue: msestring; override;
+ end;
+ 
+ tcolheaderspropertyeditor = class(tpersistentarraypropertyeditor)
+  protected
+   function geteditorclass: propertyeditorclassty; override;
+ end;
+ 
  tfieldfieldnamepropertyeditor = class(tstringpropertyeditor)
   protected
    function getdefaultstate: propertystatesty; override;
@@ -195,6 +205,7 @@ begin
                                          tdatasetactivepropertyeditor);                              
  registerpropertyeditor(typeinfo(tfielddef),nil,'',tfielddefpropertyeditor);
  registerpropertyeditor(typeinfo(tparam),nil,'',tdbparampropertyeditor);
+ registerpropertyeditor(typeinfo(tcolheaders),nil,'',tcolheaderspropertyeditor);
 end;
 
 
@@ -726,6 +737,20 @@ begin
  with tparam(fprops[0].instance) do begin
   result:= '<'+name+'><'+getenumname(typeinfo(tparamtype),ord(paramtype))+'>';
  end;
+end;
+
+{ tcolheaderelementeditor }
+
+function tcolheaderelementeditor.getvalue: msestring;
+begin
+ result:= '<'+tcolheader(getordvalue).caption+'>'{ + inherited getvalue};
+end;
+
+{ tcolheaderspropertyeditor }
+
+function tcolheaderspropertyeditor.geteditorclass: propertyeditorclassty;
+begin
+ result:= tcolheaderelementeditor;
 end;
 
 initialization
