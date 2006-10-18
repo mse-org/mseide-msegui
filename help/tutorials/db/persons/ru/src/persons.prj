@@ -7,8 +7,39 @@ order4=0
 order5=0
 order6=0
 order7=0
+order8=0
 [projectoptions]
-projectdir=/home/pochta/mseide_projects/persons.wiki
+projectdir=/home/mse/packs/standard/svn/mse/trunk/help/tutorials/db/persons/persons-15oct-1
+findinfiledialog=29
+ [findinfileadialogfo]
+ stackedunder=
+ x=260
+ y=73
+ cx=331
+ cy=249
+ [findinfileadialogfo.findtext]
+ value=fpc204
+ history=1
+  fpc204
+ [findinfileadialogfo.casesensitive]
+ value=0
+ [findinfileadialogfo.wholeword]
+ value=0
+ [findinfileadialogfo.indirectories]
+ value=1
+ [findinfileadialogfo.inopenfiles]
+ value=0
+ [findinfileadialogfo.dir]
+ filenames=0
+ lastdir=
+ filehistory=0
+ filefilterindex=0
+ filecolwidth=0
+ [findinfileadialogfo.mask]
+ value="*.pas" "*.pp" "*.inc"
+ history=0
+ [findinfileadialogfo.subdirs]
+ value=0
 finddialog=8
  [finddialogfo]
  stackedunder=
@@ -21,13 +52,13 @@ finddialog=8
 options=41
  [projectoptionsfo]
  stackedunder=
- x=0
+ x=4
  y=37
  cx=821
  cy=500
  [projectoptionsfo.tabwidget]
  firsttab=0
- index=4
+ index=3
  [projectoptionsfo.macrogrid]
  width0=13
  width1=13
@@ -60,6 +91,16 @@ options=41
  values1=1
   EconvertError
  width1=764
+settings=9
+ [settingsfo]
+ stackedunder=
+ x=100
+ y=43
+ cx=358
+ cy=531
+ wsize=0
+ active=1
+ visible=1
 stringlisteditor=6
  [stringlisteditor]
  stackedunder=
@@ -137,36 +178,12 @@ exceptclassnames=1
  EconvertError
 exceptignore=1
  0
-modulenames=9
- COMMONREFSEDITFO
- CONTINENTSEDITFO
- COUNTRIESEDITFO
- EDITFO
- FEATURESEDITFO
+modulenames=1
  MAINFO
- OCCUPATIONSEDITFO
- PLANETSEDITFO
- REFSDATAMO
-moduletypes=9
- TCOMMONREFSEDITFO
- TCONTINENTSEDITFO
- TCOUNTRIESEDITFO
- TEDITFO
- TFEATURESEDITFO
+moduletypes=1
  TMAINFO
- TOCCUPATIONSEDITFO
- TPLANETSEDITFO
- TREFSDATAMO
-modulefiles=9
- /home/pochta/mseide_projects/persons.wiki/commonrefseditform.mfm
- /home/pochta/mseide_projects/persons.wiki/continentseditform.mfm
- /home/pochta/mseide_projects/persons.wiki/countrieseditform.mfm
- /home/pochta/mseide_projects/persons.wiki/editform.mfm
- /home/pochta/mseide_projects/persons.wiki/featureseditform.mfm
- /home/pochta/mseide_projects/persons.wiki/main.mfm
- /home/pochta/mseide_projects/persons.wiki/occupationseditform.mfm
- /home/pochta/mseide_projects/persons.wiki/planetseditform.mfm
- /home/pochta/mseide_projects/persons.wiki/refsdatamodule.mfm
+modulefiles=1
+ /home/mse/packs/standard/svn/mse/trunk/help/tutorials/db/persons/persons-15oct-1/main.mfm
 mainfile=persons.pas
 targetfile=persons${EXEEXT}
 messageoutputfile=
@@ -179,7 +196,7 @@ debugoptions=
 debugtarget=
 defaultmake=1
 makeoptions=4
- -l -Mobjfpc -Sh -Fcutf8 -dfpc204
+ -l -Mobjfpc -Sh -Fcutf8
  -gl
  -B
  -OG2p3 -XX -Xs
@@ -203,29 +220,15 @@ sourcedirs=3
  ${MSELIBDIR}kernel/$TARGET/
  ${MSELIBDIR}*/
  ./
-unitdirs=11
- ${MSELIBDIR}i18n/
- ${MSELIBDIR}widgets/
- ${MSELIBDIR}sysutils/
- ${MSELIBDIR}serialcomm/
- ${MSELIBDIR}regcomponents/
+defines=0
+defineson=0
+unitdirs=3
  ${MSELIBDIR}kernel/$TARGET/
  ${MSELIBDIR}kernel/
- ${MSELIBDIR}editwidgets/
- ${MSELIBDIR}dialogs/
- ${MSELIBDIR}designutils/
- ${MSELIBDIR}db/
-unitdirson=11
- 65599
- 65599
- 65599
- 65599
- 65599
+ ${MSELIBDIR}*/
+unitdirson=3
  65599
  196671
- 65599
- 65599
- 65599
  65599
 sourcefilemasks=3
  "*.pas" "*.dpr" "*.pp" "*.inc"
@@ -313,9 +316,9 @@ files=
  a=0,4132,0,Files
  )
 [layout]
-windowlayout=252
+windowlayout=251
  [mainfo]
- stackedunder=
+ stackedunder=mainfo.panel1
  x=18
  y=24
  cx=331
@@ -327,10 +330,10 @@ windowlayout=252
  splitdir=2
  useroptions=5616
  [mainfo.openfile]
- filenames=1
-  /usr/local/lib/msegui/lib/common/kernel/i386-linux/mseguiintf.pas
- lastdir=/usr/local/lib/msegui/lib/common/kernel/i386-linux/
+ filenames=0
+ lastdir=/home/mse/packs/standard/svn/mse/trunk/help/tutorials/db/persons/persons-15oct-1/
  filehistory=10
+  /home/mse/packs/standard/svn/mse/trunk/help/tutorials/db/persons/persons-15oct-1/main.pas
   /usr/local/lib/msegui/lib/common/kernel/i386-linux/mseguiintf.pas
   /home/pochta/mseide_projects/persons.wiki/editform.mfm
   /home/pochta/mseide_projects/persons.wiki/editform.mfm-bad
@@ -340,8 +343,7 @@ windowlayout=252
   /home/pochta/mseide_projects/persons.1/continentseditform.pas
   /home/pochta/mseide_projects/persons.1/planetseditform.pas
   /home/pochta/mseide_projects/persons.1/commonrefeditform.pas
-  /home/pochta/mseide_projects/persons.1/refsdatamodule.pas
- filefilterindex=2
+ filefilterindex=0
  filecolwidth=174
  [actionsmo.watchesonact]
  checked=1
@@ -364,11 +366,11 @@ windowlayout=252
  x=0
  y=0
  cx=331
- cy=34
+ cy=38
  [componentpalettefo]
  splitdir=0
  useroptions=15
- stackedunder=objectinspectorfo
+ stackedunder=watchfo
  parent=
  x=366
  y=20
@@ -376,7 +378,7 @@ windowlayout=252
  cy=123
  wsize=0
  active=0
- visible=1
+ visible=0
  [componentpalettefo.componentpages]
  activetab=2
  [messagefo]
@@ -391,10 +393,10 @@ windowlayout=252
  [watchfo]
  splitdir=0
  useroptions=783
- stackedunder=formdesignerfo
+ stackedunder=breakpointsfo
  parent=
- x=281
- y=242
+ x=510
+ y=325
  cx=310
  cy=245
  wsize=0
@@ -424,7 +426,7 @@ windowlayout=252
  [objectinspectorfo]
  splitdir=0
  useroptions=527
- stackedunder=mainfo.panel1
+ stackedunder=targetconsolefo
  parent=
  x=444
  y=34
@@ -434,17 +436,17 @@ windowlayout=252
  active=0
  visible=1
  [objectinspectorfo.grid]
- width0=106
- width1=138
+ width0=89
+ width1=170
  [breakpointsfo]
  splitdir=0
  useroptions=527
- stackedunder=
+ stackedunder=stackfo
  parent=
- x=72
- y=226
- cx=512
- cy=309
+ x=107
+ y=404
+ cx=477
+ cy=128
  wsize=0
  active=0
  visible=0
@@ -453,7 +455,7 @@ windowlayout=252
  [watchpointsfo]
  splitdir=0
  useroptions=527
- stackedunder=
+ stackedunder=findinfilefo
  parent=
  x=317
  y=64
@@ -476,13 +478,13 @@ windowlayout=252
  [stackfo]
  splitdir=0
  useroptions=527
- stackedunder=watchfo
+ stackedunder=projecttreefo
  parent=
- x=0
- y=20
- cx=800
- cy=549
- wsize=3
+ x=407
+ y=178
+ cx=555
+ cy=479
+ wsize=0
  active=0
  visible=0
  [projecttreefo]
@@ -500,16 +502,16 @@ windowlayout=252
  [findinfilefo]
  splitdir=0
  useroptions=527
- stackedunder=threadsfo
+ stackedunder=objectinspectorfo
  parent=
- x=548
- y=115
+ x=114
+ y=171
  cx=369
  cy=198
  [cpufo]
  splitdir=0
  useroptions=527
- stackedunder=findinfilefo
+ stackedunder=threadsfo
  parent=
  x=192
  y=451
@@ -521,7 +523,7 @@ windowlayout=252
  [disassfo]
  splitdir=0
  useroptions=527
- stackedunder=targetconsolefo
+ stackedunder=watchpointsfo
  parent=
  x=162
  y=502
@@ -545,15 +547,15 @@ windowlayout=252
  [targetconsolefo]
  splitdir=0
  useroptions=1
- stackedunder=breakpointsfo
+ stackedunder=mainfo
  parent=
- x=-144
- y=222
- cx=904
- cy=347
+ x=121
+ y=136
+ cx=884
+ cy=340
  wsize=0
  active=0
- visible=0
+ visible=1
  [mainfo.panel1]
  splitdir=2
  useroptions=2047
@@ -581,84 +583,21 @@ findhistory=4
  94250
  planetcha
 findoptions=1
-editpos=10
- 0,110
- 31,283
- 0,61
+editpos=1
  0,0
- 0,0
- 6,51
- 3,34
- 16,10
- 6,47
- 15,10
 bookmarks0=0
-bookmarks1=0
-bookmarks2=0
-bookmarks3=0
-bookmarks4=0
-bookmarks5=0
-bookmarks6=0
-bookmarks7=0
-bookmarks8=0
-bookmarks9=0
-sourcefiles=10
- /home/pochta/mseide_projects/persons.wiki/commonrefseditform.pas
- /home/pochta/mseide_projects/persons.wiki/main.pas
- /home/pochta/mseide_projects/persons.wiki/editform.pas
- /home/pochta/mseide_projects/persons.wiki/refsdatamodule.pas
- /home/pochta/mseide_projects/persons.wiki/persons.pas
- /home/pochta/mseide_projects/persons.wiki/planetseditform.pas
- /home/pochta/mseide_projects/persons.wiki/continentseditform.pas
- /home/pochta/mseide_projects/persons.wiki/countrieseditform.pas
- /home/pochta/mseide_projects/persons.wiki/featureseditform.pas
- /home/pochta/mseide_projects/persons.wiki/occupationseditform.pas
-ismoduletexts=10
+sourcefiles=1
+ /home/mse/packs/standard/svn/mse/trunk/help/tutorials/db/persons/persons-15oct-1/main.pas
+ismoduletexts=1
  0
- 0
- 0
- 0
- 0
- 0
- 0
- 0
- 0
- 0
-modules=9
- /home/pochta/mseide_projects/persons.wiki/main.mfm
- /home/pochta/mseide_projects/persons.wiki/commonrefseditform.mfm
- /home/pochta/mseide_projects/persons.wiki/refsdatamodule.mfm
- /home/pochta/mseide_projects/persons.wiki/editform.mfm
- /home/pochta/mseide_projects/persons.wiki/planetseditform.mfm
- /home/pochta/mseide_projects/persons.wiki/continentseditform.mfm
- /home/pochta/mseide_projects/persons.wiki/countrieseditform.mfm
- /home/pochta/mseide_projects/persons.wiki/featureseditform.mfm
- /home/pochta/mseide_projects/persons.wiki/occupationseditform.mfm
-visiblemodules=9
- 1
- 0
- 1
- 0
- 1
- 1
- 1
- 1
+modules=1
+ /home/mse/packs/standard/svn/mse/trunk/help/tutorials/db/persons/persons-15oct-1/main.mfm
+visiblemodules=1
  1
 [sourcefo.tabwidget]
-order=10
- 3
- 6
- 8
- 9
- 0
- 1
- 2
- 4
- 5
- 7
 tabsize=200
 firsttab=0
-index=5
+index=0
 [components]
 [selecteditpage]
 colwidth=100

@@ -26,31 +26,29 @@ object refsdatamo: trefsdatamo
       end    
       item
         Name = 'descr'
-        DataType = ftString
+        DataType = ftMemo
         Precision = -1
-        Size = 8192
+        Size = 4
       end>
     controller.fields.count = 2
     controller.fields.fields = (
       (
         ft_longint
-        ft_string
+        ft_memo
       )
       <      
         item
           AlignMent = taRightJustify
           DisplayWidth = 10
           FieldName = 'id'
+          Index = 1
           ProviderFlags = [pfInKey]
-          DataSet = qryPlanets
         end      
         item
-          DisplayWidth = 8192
+          DisplayWidth = 10
           FieldName = 'descr'
-          Index = 1
-          ProviderFlags = [pfInUpdate]
-          Size = 8192
-          DataSet = qryPlanets
+          Size = 4
+          Transliterate = False
         end>
     )
     left = 16
@@ -83,40 +81,37 @@ object refsdatamo: trefsdatamo
       end    
       item
         Name = 'descr'
-        DataType = ftString
+        DataType = ftMemo
         Precision = -1
-        Size = 8192
+        Size = 4
       end>
     controller.fields.count = 3
     controller.fields.fields = (
       (
         ft_longint
         ft_longint
-        ft_string
+        ft_memo
       )
       <      
         item
           AlignMent = taRightJustify
           DisplayWidth = 10
           FieldName = 'id'
+          Index = 1
           ProviderFlags = [pfInKey]
-          DataSet = qryContinents
         end      
         item
           AlignMent = taRightJustify
           DisplayWidth = 10
           FieldName = 'planet_id'
-          Index = 1
-          ProviderFlags = [pfInUpdate]
-          DataSet = qryContinents
-        end      
-        item
-          DisplayWidth = 8192
-          FieldName = 'descr'
           Index = 2
           ProviderFlags = [pfInUpdate]
-          Size = 8192
-          DataSet = qryContinents
+        end      
+        item
+          DisplayWidth = 10
+          FieldName = 'descr'
+          Size = 4
+          Transliterate = False
         end>
     )
     left = 16
@@ -149,40 +144,37 @@ object refsdatamo: trefsdatamo
       end    
       item
         Name = 'descr'
-        DataType = ftString
+        DataType = ftMemo
         Precision = -1
-        Size = 8192
+        Size = 4
       end>
     controller.fields.count = 3
     controller.fields.fields = (
       (
         ft_longint
         ft_longint
-        ft_string
+        ft_memo
       )
       <      
         item
           AlignMent = taRightJustify
           DisplayWidth = 10
           FieldName = 'id'
+          Index = 1
           ProviderFlags = [pfInKey]
-          DataSet = qryCountries
         end      
         item
           AlignMent = taRightJustify
           DisplayWidth = 10
           FieldName = 'continent_id'
-          Index = 1
-          ProviderFlags = [pfInUpdate]
-          DataSet = qryCountries
-        end      
-        item
-          DisplayWidth = 8192
-          FieldName = 'descr'
           Index = 2
           ProviderFlags = [pfInUpdate]
-          Size = 8192
-          DataSet = qryCountries
+        end      
+        item
+          DisplayWidth = 10
+          FieldName = 'descr'
+          Size = 4
+          Transliterate = False
         end>
     )
     left = 16
@@ -208,31 +200,29 @@ object refsdatamo: trefsdatamo
       end    
       item
         Name = 'descr'
-        DataType = ftString
+        DataType = ftMemo
         Precision = -1
-        Size = 8192
+        Size = 4
       end>
     controller.fields.count = 2
     controller.fields.fields = (
       (
         ft_longint
-        ft_string
+        ft_memo
       )
       <      
         item
           AlignMent = taRightJustify
           DisplayWidth = 10
           FieldName = 'id'
+          Index = 1
           ProviderFlags = [pfInKey]
-          DataSet = qryOccupations
         end      
         item
-          DisplayWidth = 8192
+          DisplayWidth = 10
           FieldName = 'descr'
-          Index = 1
-          ProviderFlags = [pfInUpdate]
-          Size = 8192
-          DataSet = qryOccupations
+          Size = 4
+          Transliterate = False
         end>
     )
     left = 16
@@ -258,31 +248,29 @@ object refsdatamo: trefsdatamo
       end    
       item
         Name = 'descr'
-        DataType = ftString
+        DataType = ftMemo
         Precision = -1
-        Size = 8192
+        Size = 4
       end>
     controller.fields.count = 2
     controller.fields.fields = (
       (
         ft_longint
-        ft_string
+        ft_memo
       )
       <      
         item
           AlignMent = taRightJustify
           DisplayWidth = 10
           FieldName = 'id'
+          Index = 1
           ProviderFlags = [pfInKey]
-          DataSet = qryFeatures
         end      
         item
-          DisplayWidth = 8192
+          DisplayWidth = 10
           FieldName = 'descr'
-          Index = 1
-          ProviderFlags = [pfInUpdate]
-          Size = 8192
-          DataSet = qryFeatures
+          Size = 4
+          Transliterate = False
         end>
     )
     left = 16

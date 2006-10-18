@@ -22,10 +22,10 @@ type
    actAdd: taction;
    actDelete: taction;
    ftMainMenuItem: tframecomp;
-   fldName: tmsestringfield;
-   fldCountry: tmsestringfield;
-   fldOccupation: tmsestringfield;
-   fldFeature: tmsestringfield;
+   fldName1: tmsestringfield;
+   fldCountry1: tmsestringfield;
+   fldOccupation1: tmsestringfield;
+   fldFeature1: tmsestringfield;
    fldSexPotention: tmsefloatfield;
    fldHappy: tmsebooleanfield;
    fldCountryId: tmselongintfield;
@@ -42,6 +42,10 @@ type
    actOccupationsEdit: taction;
    actShowAbout: taction;
    ftMainMenuPopupItem: tframecomp;
+   fldName: tmsememofield;
+   fldCountry: tmsememofield;
+   fldOccupation: tmsememofield;
+   fldFeature: tmsememofield;
    trans: tmsesqltransaction;
    procedure appexit(const sender: TObject);
    procedure editformshow(const sender: TObject);

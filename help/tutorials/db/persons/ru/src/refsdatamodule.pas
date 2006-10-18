@@ -2,7 +2,7 @@ unit refsdatamodule;
 {$ifdef FPC}{$mode objfpc}{$h+}{$INTERFACES CORBA}{$endif}
 interface
 uses
- msegui,mseclasses,mseforms,msesqldb,msedb,mselookupbuffer,db;
+ msegui,mseclasses,mseforms,msesqldb,msedb,mselookupbuffer,msedatamodules,db;
 
 type
  trefsdatamo = class(tmsedatamodule)

@@ -1,9 +1,10 @@
 object mainfo: tmainfo
-  bounds_x = 29
-  bounds_y = 147
+  bounds_x = 35
+  bounds_y = 146
   bounds_cx = 707
   bounds_cy = 401
   container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_subfocus, ow_mousetransparent, ow_destroywidgets, ow_autoscale]
+  container.bounds_x = 0
   container.bounds_y = 22
   container.bounds_cx = 707
   container.bounds_cy = 379
@@ -11,6 +12,7 @@ object mainfo: tmainfo
   container.taborder = 1
   optionswindow = [wo_groupleader]
   mainmenu = mnuMain
+  font.dummy = 0
   options = [fo_main, fo_terminateonclose, fo_autoreadstat, fo_autowritestat, fo_savepos, fo_savestate]
   caption = 'The Galaxy Data Keeper'
   icon.transparency = -2147483648
@@ -108,7 +110,7 @@ object mainfo: tmainfo
         frame.colorclient = -1610612716
         frame.localprops = [frl_levelo, frl_leveli, frl_framewidth, frl_colorframe, frl_fitop, frl_fibottom, frl_colorclient]
         frame.dummy = 0
-        height = 38
+        height = 36
         captions.count = 7
         captions.items = <        
           item
@@ -138,9 +140,9 @@ object mainfo: tmainfo
             caption = #8470
           end>
       end>
-    datarowheight = 18
+    datarowheight = 16
     oncellevent = personsevent
-    reffontheight = 16
+    reffontheight = 14
   end
   object btnExit: tbutton
     bounds_x = 639
@@ -203,6 +205,9 @@ object mainfo: tmainfo
   object conn: tmsepqconnection
     Connected = True
     DatabaseName = 'serious_matters'
+    Params.Strings = (
+      'options=''--CLIENT_ENCODING=koi8'''
+    )
     Password = 'all'
     Transaction = trans
     UserName = 'worldadmin'
@@ -275,9 +280,9 @@ object mainfo: tmainfo
       end    
       item
         Name = 'descr'
-        DataType = ftString
+        DataType = ftMemo
         Precision = -1
-        Size = 8192
+        Size = 4
       end    
       item
         Name = 'sexual_potention'
@@ -287,26 +292,27 @@ object mainfo: tmainfo
       end    
       item
         Name = 'photo'
+        DataType = ftBlob
         Precision = -1
-        Size = 65535
+        Size = 4
       end    
       item
         Name = 'country'
-        DataType = ftString
+        DataType = ftMemo
         Precision = -1
-        Size = 8192
+        Size = 4
       end    
       item
         Name = 'occupation'
-        DataType = ftString
+        DataType = ftMemo
         Precision = -1
-        Size = 8192
+        Size = 4
       end    
       item
         Name = 'feature'
-        DataType = ftString
+        DataType = ftMemo
         Precision = -1
-        Size = 8192
+        Size = 4
       end    
       item
         Name = 'if_happy'
@@ -320,69 +326,22 @@ object mainfo: tmainfo
         Precision = -1
         Size = 8
       end>
-    controller.fields.count = 1
-    controller.fields.fields = (
-      (
-        ft_unknown
-      )
-      <      
-        item
-          DisplayWidth = 10
-          FieldName = 'photo'
-          DataSet = qryPersons
-        end>
-    )
     onapplyrecupdate = personsupdate
     left = 80
     top = 344
-    object fldName: tmsestringfield
-      DisplayWidth = 20
-      FieldName = 'descr'
-      Index = 1
-      DataSet = qryPersons
-      left = 104
-      top = 82
-    end
-    object fldCountry: tmsestringfield
-      DisplayWidth = 20
-      FieldName = 'country'
-      Index = 2
-      DataSet = qryPersons
-      left = 184
-      top = 66
-    end
-    object fldOccupation: tmsestringfield
-      DisplayWidth = 20
-      FieldName = 'occupation'
-      Index = 3
-      DataSet = qryPersons
-      left = 272
-      top = 130
-    end
-    object fldFeature: tmsestringfield
-      DisplayWidth = 20
-      FieldName = 'feature'
-      Index = 4
-      DataSet = qryPersons
-      left = 384
-      top = 58
-    end
     object fldSexPotention: tmsefloatfield
       AlignMent = taRightJustify
       DisplayWidth = 10
       FieldName = 'sexual_potention'
-      Index = 5
       DisplayFormat = '##.##'
-      DataSet = qryPersons
       left = 432
       top = 114
     end
     object fldHappy: tmsebooleanfield
       DisplayWidth = 3
       FieldName = 'if_happy'
-      Index = 6
-      DisplayValues = #229#221#197' '#203#193#203';'#245#215#217
-      DataSet = qryPersons
+      Index = 1
+      displayvalues = #1044#1072';'#1053#1077#1090
       left = 600
       top = 98
     end
@@ -390,8 +349,7 @@ object mainfo: tmainfo
       AlignMent = taRightJustify
       DisplayWidth = 10
       FieldName = 'country_id'
-      Index = 7
-      DataSet = qryPersons
+      Index = 2
       left = 176
       top = 98
     end
@@ -399,8 +357,7 @@ object mainfo: tmainfo
       AlignMent = taRightJustify
       DisplayWidth = 10
       FieldName = 'occupation_id'
-      Index = 8
-      DataSet = qryPersons
+      Index = 3
       left = 272
       top = 162
     end
@@ -408,8 +365,7 @@ object mainfo: tmainfo
       AlignMent = taRightJustify
       DisplayWidth = 10
       FieldName = 'feature_id'
-      Index = 9
-      DataSet = qryPersons
+      Index = 4
       left = 376
       top = 90
     end
@@ -417,19 +373,81 @@ object mainfo: tmainfo
       AlignMent = taRightJustify
       DisplayWidth = 10
       FieldName = 'id'
-      Index = 10
-      DataSet = qryPersons
+      Index = 5
       left = 184
       top = 336
     end
     object fldDateOfBirth: tmsedatefield
       DisplayWidth = 10
       FieldName = 'dateofbirth'
-      Index = 11
-      DataSet = qryPersons
+      Index = 6
       left = 520
       top = 72
     end
+    object fldName: tmsememofield
+      DisplayWidth = 10
+      FieldName = 'descr'
+      Index = 7
+      Size = 4
+      Transliterate = False
+      left = 80
+      top = 110
+    end
+    object fldCountry: tmsememofield
+      DisplayWidth = 10
+      FieldName = 'country'
+      Index = 8
+      Size = 4
+      Transliterate = False
+      left = 168
+      top = 118
+    end
+    object fldOccupation: tmsememofield
+      DisplayWidth = 10
+      FieldName = 'occupation'
+      Index = 9
+      Size = 4
+      Transliterate = False
+      left = 272
+      top = 182
+    end
+    object fldFeature: tmsememofield
+      DisplayWidth = 10
+      FieldName = 'feature'
+      Index = 10
+      Size = 4
+      Transliterate = False
+      left = 360
+      top = 134
+    end
+  end
+  object fldName1: tmsestringfield
+    DisplayWidth = 20
+    FieldName = 'descr'
+    Index = -1
+    left = 104
+    top = 82
+  end
+  object fldCountry1: tmsestringfield
+    DisplayWidth = 20
+    FieldName = 'country'
+    Index = -1
+    left = 184
+    top = 66
+  end
+  object fldOccupation1: tmsestringfield
+    DisplayWidth = 20
+    FieldName = 'occupation'
+    Index = -1
+    left = 272
+    top = 130
+  end
+  object fldFeature1: tmsestringfield
+    DisplayWidth = 20
+    FieldName = 'feature'
+    Index = -1
+    left = 384
+    top = 66
   end
   object dsPersons: tmsedatasource
     DataSet = qryPersons
