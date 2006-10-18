@@ -23,7 +23,8 @@ interface
 
 uses SysUtils, Classes, DB, mbufdataset, msetypes;
 
-type TSchemaType = (stNoSchema, stTables, stSysTables, stProcedures, stColumns, stProcedureParams, stIndexes, stPackages);
+type TSchemaType = (stNoSchema,stTables,stSysTables,stProcedures,stColumns,
+                    stProcedureParams,stIndexes,stPackages);
      TConnOption = (sqSupportParams);
      TConnOptions= set of TConnOption;
 
@@ -306,7 +307,7 @@ type
 
 implementation
 uses 
- dbconst,strutils,mseclasses;
+ dbconst,strutils,mseclasses,msedatalist;
 
 { TSQLConnection }
 
@@ -1282,23 +1283,31 @@ var qry : tsqlquery;
  blobspo: pblobinfoarty;
  str1: string;
  bo1: boolean;
+ freeblobar: pointerarty;
     
 begin
  blobspo:= getintblobpo;
-   case UpdateKind of
-     ukModify : begin
-                qry := FUpdateQry;
-                if trim(qry.sql.Text) = '' then qry.SQL.Add(ModifyRecQuery);
-                end;
-     ukInsert : begin
-                qry := FInsertQry;
-                if trim(qry.sql.Text) = '' then qry.SQL.Add(InsertRecQuery);
-                end;
-     ukDelete : begin
-                qry := FDeleteQry;
-                if trim(qry.sql.Text) = '' then qry.SQL.Add(DeleteRecQuery);
-                end;
+ freeblobar:= nil; //compiler warning
+ case UpdateKind of
+  ukModify: begin
+   qry:= FUpdateQry;
+   if trim(qry.sql.Text) = '' then begin
+    qry.SQL.Add(ModifyRecQuery);
    end;
+  end;
+  ukInsert: begin
+   qry:= FInsertQry;
+   if trim(qry.sql.Text) = '' then begin
+    qry.SQL.Add(InsertRecQuery);
+   end;
+  end;
+  ukDelete : begin
+   qry := FDeleteQry;
+   if trim(qry.sql.Text) = '' then begin
+    qry.SQL.Add(DeleteRecQuery);
+   end;
+  end;
+ end;
  with qry do begin
   for x := 0 to Params.Count-1 do begin
    with params[x] do begin
@@ -1320,7 +1329,10 @@ begin
          self.fblobintf.writeblobdata(tsqltransaction(self.transaction),
               self.ftablename,self.fcursor,
               blobspo^[int1].data,blobspo^[int1].datalength,fld,params[x],str1);
-         self.setdatastringvalue(fld,str1);
+         if str1 <> '' then begin
+          self.setdatastringvalue(fld,str1);
+          additem(freeblobar,fld);
+         end;
          bo1:= true;
          break;
         end;
@@ -1337,6 +1349,9 @@ begin
    end;
   end;
   execsql;
+  for int1:= high(freeblobar) downto 0 do begin
+   deleteblob(blobspo^,tfield(freeblobar[int1]));
+  end;  
  end;
 end;
 

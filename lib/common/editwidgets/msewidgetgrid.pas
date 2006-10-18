@@ -170,13 +170,20 @@ type
    constructor create(const aowner: tcustomwidgetgrid);
    property cols[const index: integer]: twidgetfixcol read getcols; default;
  end;
- 
+
+ tdummywidget = class(twidget)
+  public
+   constructor create(aowner: tcomponent); override;
+   function setfocus(aactivate: boolean = true): boolean; override;
+              //unsetsfocus if not focusable
+ end;
+  
  tcustomwidgetgrid = class(tcustomgrid)
   private
    fcontainer1: twidget;
    fcontainer2: twidget;
    fcontainer3: twidget;
-   fwidgetdummy: twidget;
+   fwidgetdummy: tdummywidget;
    fmousefocusedcell: gridcoordty;
    fmouseactivewidget: twidget;
    function getdatacols: twidgetcols;
@@ -1338,6 +1345,24 @@ begin
  end;
 end;
 
+{ tdummywidget }
+
+constructor tdummywidget.create(aowner: tcomponent);
+begin
+ inherited;
+ size:= nullsize;
+end;
+
+function tdummywidget.setfocus(aactivate: boolean = true): boolean;
+begin
+ if canfocus then begin
+  result:= inherited setfocus(aactivate);
+ end
+ else begin
+  window.nofocus;
+ end;
+end;
+
 { tfixcontainer }
 
 constructor tfixcontainer.create(aowner: tcustomwidgetgrid);
@@ -1610,7 +1635,8 @@ begin
  fcontainer1:= ttopcontainer.create(self);
  fcontainer2:= tcontainer.create(self);
  fcontainer3:= tbottomcontainer.create(self);
- fwidgetdummy:= twidgetdummy.create(self);
+ fwidgetdummy:= tdummywidget.create(self);
+ fwidgetdummy.parentwidget:= fcontainer2;
  setoptionsgrid(foptionsgrid); //synchronize container
 // fcontainer.Name:= 'container';
 end;

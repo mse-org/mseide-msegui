@@ -45,8 +45,8 @@ type
 
     procedure SetDBDialect;
     procedure AllocSQLDA(var aSQLDA : PXSQLDA;Count : integer);
-    procedure TranslateFldType(SQLType, SQLLen, SQLScale : integer; var LensSet : boolean;
-      var TrType : TFieldType; var TrLen : word);
+    procedure TranslateFldType(SQLType,sqlsubtype,SQLLen,SQLScale: integer;
+                 var LensSet: boolean; var TrType: TFieldType; var TrLen: word);
     // conversion methods
     procedure GetDateTime(CurrBuff, Buffer : pointer; AType : integer);
     procedure SetDateTime(CurrBuff: pointer; PTime : TDateTime; AType : integer);
@@ -334,8 +334,9 @@ begin
     reAllocMem(aSQLDA,0);
 end;
 
-procedure TIBConnection.TranslateFldType(SQLType, SQLLen, SQLScale : integer; var LensSet : boolean;
-  var TrType : TFieldType; var TrLen : word);
+procedure TIBConnection.TranslateFldType(SQLType,sqlsubtype,SQLLen,
+            SQLScale: integer;
+            var LensSet: boolean; var TrType: TFieldType; var TrLen: word);
 begin
   LensSet := False;
 
@@ -375,12 +376,16 @@ begin
         LensSet := true;
         TrLen := SQLLen;
       end;
-    SQL_BLOB :
-      begin
-          TrType := ftBlob;
-          LensSet := True;
-          TrLen := SQLLen;
-      end;
+    SQL_BLOB: begin
+     if sqlsubtype = isc_blob_text then begin
+      trtype:= ftmemo;
+     end
+     else begin
+      TrType := ftBlob;
+     end;
+     LensSet := True;
+     TrLen := SQLLen;
+    end;
     SQL_SHORT :
         TrType := ftInteger;
     SQL_LONG :
@@ -561,28 +566,29 @@ begin
 end;
 
 
-procedure TIBConnection.AddFieldDefs(cursor: TSQLCursor;FieldDefs : TfieldDefs);
+procedure TIBConnection.AddFieldDefs(cursor: TSQLCursor; FieldDefs: TfieldDefs);
 var
-  x         : integer;
-  lenset    : boolean;
-  TransLen  : word;
-  TransType : TFieldType;
-  FD        : TFieldDef;
+ x: integer;
+ lenset: boolean;
+ TransLen: word;
+ TransType: TFieldType;
+ FD: TFieldDef;
 
 begin
-  {$R-}
-  with cursor as TIBCursor do
-    begin
-    for x := 0 to SQLDA^.SQLD - 1 do
-      begin
-      TranslateFldType(SQLDA^.SQLVar[x].SQLType, SQLDA^.SQLVar[x].SQLLen, SQLDA^.SQLVar[x].SQLScale,
-        lenset, TransType, TransLen);
-      FD := TFieldDef.Create(FieldDefs, SQLDA^.SQLVar[x].AliasName, TransType,
-         TransLen, False, (x + 1));
-      if TransType = ftBCD then FD.precision := SQLDA^.SQLVar[x].SQLLen;
-      FD.DisplayName := SQLDA^.SQLVar[x].AliasName;
-      end;
+ {$R-}
+ with cursor as TIBCursor do begin
+  for x := 0 to SQLDA^.SQLD - 1 do begin
+   with SQLDA^.SQLVar[x] do begin
+    TranslateFldType(SQLType,sqlsubtype,SQLLen,SQLScale,lenset,TransType,TransLen);
+    FD:= TFieldDef.Create(FieldDefs,AliasName,TransType,
+               TransLen,False,(x + 1));
+    if TransType = ftBCD then begin
+     FD.precision:= SQLLen;
     end;
+    FD.DisplayName:= AliasName;
+   end;
+  end;
+ end;
   {$R+}
 end;
 
@@ -658,7 +664,7 @@ begin
           {$R-}
           SetDateTime(in_sqlda^.SQLvar[SQLVarNr].SQLData, AParams[ParNr].AsDateTime, in_SQLDA^.SQLVar[SQLVarNr].SQLType);
           {$R+}
-        ftLargeInt,ftblob:
+        ftLargeInt,ftblob,ftmemo:
           begin
           li := AParams[ParNr].AsLargeInt;
           {$R-}
@@ -1101,9 +1107,12 @@ begin
     inc(po1,step);
    end;
    aparam.aslargeint:= int64(blobid);
+   newid:= ''; //id no more usable
+   {
    setlength(str1,sizeof(blobid));
    move(blobid,str1[1],sizeof(blobid));
    newid:= str1;
+   }
   finally
    isc_close_blob(@fstatus,@blobhandle);
   end;

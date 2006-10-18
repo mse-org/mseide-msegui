@@ -127,7 +127,8 @@ type
                                        const cancelonerror: boolean);
     procedure freeblob(const ablob: blobinfoty);
     procedure freeblobs(var ablobs: blobinfoarty);
-    procedure deleteblob(var ablobs: blobinfoarty; const aindex: integer);
+    procedure deleteblob(var ablobs: blobinfoarty; const aindex: integer); overload;
+    procedure deleteblob(var ablobs: blobinfoarty; const afield: tfield); overload;
     procedure addblob(const ablob: tblobbuffer);
     
     procedure SetRecNo(Value: Longint); override;
@@ -138,7 +139,8 @@ type
     procedure FreeRecordBuffer(var Buffer: PChar); override;
     procedure InternalInitRecord(Buffer: PChar); override;
     function  GetCanModify: Boolean; override;
-    function GetRecord(Buffer: PChar; GetMode: TGetMode; DoCheck: Boolean): TGetResult; override;
+    function GetRecord(Buffer: PChar; GetMode: TGetMode;
+                                    DoCheck: Boolean): TGetResult; override;
     procedure InternalOpen; override;
     procedure InternalClose; override;
     function getnextpacket : integer;
@@ -180,7 +182,10 @@ type
     property PacketRecords : Integer read FPacketRecords write FPacketRecords default 10;
     property OnUpdateError: TResolverErrorEvent read FOnUpdateError write SetOnUpdateError;
   end;
-  
+
+const
+ intbloboffset = sizeof(tbufreclinkitem);
+   
 implementation
 uses
  dbconst,msedatalist;
@@ -261,7 +266,7 @@ function tmbufdataset.intAllocRecordBuffer: PChar;
 begin
   // Note: Only the internal buffers of TDataset provide bookmark information
   result := AllocMem(FRecordsize+sizeof(TBufRecLinkItem));
-  ppointer(result+sizeof(tbufreclinkitem))^:= nil; //blobbuffer
+  ppointer(result+intbloboffset)^:= nil; //blobbuffer
 end;
 
 procedure tmbufdataset.intFreeRecordBuffer(var Buffer: PChar);
@@ -390,6 +395,19 @@ begin
  deleteitem(ablobs,typeinfo(blobinfoarty),aindex); 
 end;
 
+procedure tmbufdataset.deleteblob(var ablobs: blobinfoarty; const afield: tfield);
+var
+ int1: integer;
+begin
+ for int1:= high(ablobs) downto 0 do begin
+  if ablobs[int1].field = afield then begin
+   freeblob(ablobs[int1]);
+   deleteitem(ablobs,typeinfo(blobinfoarty),int1); 
+   break;
+  end;
+ end;
+end;
+
 procedure tmbufdataset.InternalOpen;
 
 begin
@@ -449,7 +467,8 @@ begin
     FCurrentRecBuf := FLastRecBuf;
 end;
 
-function tmbufdataset.GetRecord(Buffer: PChar; GetMode: TGetMode; DoCheck: Boolean): TGetResult;
+function tmbufdataset.GetRecord(Buffer: PChar; GetMode: TGetMode;
+                                            DoCheck: Boolean): TGetResult;
 
 begin
   Result := grOK;
@@ -850,60 +869,67 @@ end;
 
 
 procedure tmbufdataset.ApplyRecUpdate(UpdateKind : TUpdateKind);
-
 begin
-  raise EDatabaseError.Create(SApplyRecNotSupported);
+ raise EDatabaseError.Create(SApplyRecNotSupported);
 end;
 
 procedure tmbufdataset.CancelUpdates;
-
-var r              : Integer;
-
+var
+ r: Integer;
 begin
-  CheckBrowseMode;
-
-  if Length(FUpdateBuffer) > 0 then
-    begin
-    r := Length(FUpdateBuffer) -1;
-    while r > -1 do with FUpdateBuffer[r] do
-      begin
-      if assigned(FUpdateBuffer[r].BookmarkData) then
-        begin
-        if UpdateKind = ukModify then
-          begin
-          freeblobs(pblobinfoarty(BookmarkData+sizeof(TBufRecLinkItem))^);
-          move(pchar(OldValuesBuffer+sizeof(TBufRecLinkItem))^,
-                  pchar(BookmarkData+sizeof(TBufRecLinkItem))^,FRecordSize);
-          intFreeRecordBuffer(OldValuesBuffer);
-          end
-        else if UpdateKind = ukDelete then
-          begin
-          if assigned(PBufRecLinkItem(BookmarkData)^.prior) then  // or else it was the first record
-            PBufRecLinkItem(BookmarkData)^.prior^.next := BookmarkData
-          else
-            FFirstRecBuf := BookmarkData;
-          PBufRecLinkItem(BookmarkData)^.next^.prior := BookmarkData;
-          inc(FBRecordCount);
-          end
-        else if UpdateKind = ukInsert then
-          begin
-          if assigned(PBufRecLinkItem(BookmarkData)^.prior) then // or else it was the first record
-            PBufRecLinkItem(BookmarkData)^.prior^.next := PBufRecLinkItem(BookmarkData)^.next
-          else
-            FFirstRecBuf := PBufRecLinkItem(BookmarkData)^.next;
-          PBufRecLinkItem(BookmarkData)^.next^.prior := PBufRecLinkItem(BookmarkData)^.prior;
-          // resync won't work if the currentbuffer is freed...
-          if FCurrentRecBuf = BookmarkData then FCurrentRecBuf := FCurrentRecBuf^.next;
-          intFreeRecordBuffer(BookmarkData);
-          dec(FBRecordCount);
-          end;
+ CheckBrowseMode;
+ if high(FUpdateBuffer) >= 0 then begin
+  r:= high(FUpdateBuffer);
+  while r > -1 do begin
+   with FUpdateBuffer[r] do begin
+    if assigned(FUpdateBuffer[r].BookmarkData) then begin
+     if UpdateKind = ukModify then begin
+      freeblobs(pblobinfoarty(BookmarkData+intbloboffset)^);
+      move(pchar(OldValuesBuffer+sizeof(TBufRecLinkItem))^,
+              pchar(BookmarkData+sizeof(TBufRecLinkItem))^,FRecordSize);
+      ppointer(BookmarkData+intbloboffset)^:= nil;
+      intFreeRecordBuffer(OldValuesBuffer);
+     end
+     else begin
+      if UpdateKind = ukDelete then begin
+       if assigned(PBufRecLinkItem(BookmarkData)^.prior) then  begin
+              // or else it was the first record
+         PBufRecLinkItem(BookmarkData)^.prior^.next:= BookmarkData
+       end
+       else begin
+        FFirstRecBuf := BookmarkData;
+       end;
+       PBufRecLinkItem(BookmarkData)^.next^.prior := BookmarkData;
+       inc(FBRecordCount);
+      end
+      else begin
+       if UpdateKind = ukInsert then begin
+        if assigned(PBufRecLinkItem(BookmarkData)^.prior) then begin
+                  // or else it was the first record
+         PBufRecLinkItem(BookmarkData)^.prior^.next:= 
+                                     PBufRecLinkItem(BookmarkData)^.next
+        end
+        else begin
+         FFirstRecBuf := PBufRecLinkItem(BookmarkData)^.next;
         end;
-      dec(r)
+        PBufRecLinkItem(BookmarkData)^.next^.prior:= 
+                         PBufRecLinkItem(BookmarkData)^.prior;
+                 // resync won't work if the currentbuffer is freed...
+        if FCurrentRecBuf = BookmarkData then begin
+         FCurrentRecBuf:= FCurrentRecBuf^.next;
+        end;
+        intFreeRecordBuffer(BookmarkData);
+        dec(FBRecordCount);
+       end;
       end;
-
-    SetLength(FUpdateBuffer,0);
-    Resync([]);
+     end;
+     dec(r)
     end;
+   end; 
+   SetLength(FUpdateBuffer,0);
+   Resync([]);
+  end;
+ end;
 end;
 
 procedure tmbufdataset.SetOnUpdateError(const AValue: TResolverErrorEvent);
@@ -1125,82 +1151,100 @@ begin
 end;
 }
 procedure tmbufdataset.InternalPost;
-
-Var tmpRecBuffer : PBufRecLinkItem;
-    CurrBuff     : PChar;
- po1: pblobinfoarty;
+Var
+ tmpRecBuffer: PBufRecLinkItem;
+ CurrBuff: PChar;
+ po1,po2: pblobinfoarty;
+ po3: pointer;
  int1: integer;
  bo1: boolean;
 begin
-  po1:= getblobpo;
-  bo1:= false;
-  for int1:= high(po1^) downto 0 do begin
-   if po1^[int1].new then begin
-    po1^[int1].new:= false;
-    bo1:= true;
-   end;
+ po1:= getblobpo;
+ bo1:= false;
+ for int1:= high(po1^) downto 0 do begin
+  if po1^[int1].new then begin
+   po1^[int1].new:= false;
+   bo1:= true;
   end;
-  if state = dsInsert then
-    begin
-    if GetBookmarkFlag(ActiveBuffer) = bfEOF then
-      // Append
-      FCurrentRecBuf := FLastRecBuf
-    else
-      // The active buffer is the newly created TDataset record,
-      // from which the bookmark is set to the record where the new record should be
-      // inserted
-      GetBookmarkData(ActiveBuffer,@FCurrentRecBuf);
-
-    // Create the new record buffer
-    tmpRecBuffer := FCurrentRecBuf^.prior;
-
-    FCurrentRecBuf^.prior := pointer(IntAllocRecordBuffer);
-    FCurrentRecBuf^.prior^.next := FCurrentRecBuf;
-    FCurrentRecBuf := FCurrentRecBuf^.prior;
-    If assigned(tmpRecBuffer) then // if not, it's the first record
-      begin
-      FCurrentRecBuf^.prior := tmpRecBuffer;
-      tmpRecBuffer^.next := FCurrentRecBuf
-      end
-    else
-      FFirstRecBuf := FCurrentRecBuf;
-
-    // Link the newly created record buffer to the newly created TDataset record
-    with PBufBookmark(ActiveBuffer + FRecordSize)^ do
-      begin
-      BookmarkData := FCurrentRecBuf;
-      BookmarkFlag := bfInserted;
-      end;
-      
-    inc(FBRecordCount);
-    end
-  else
+ end;
+ if state = dsInsert then begin
+  if GetBookmarkFlag(ActiveBuffer) = bfEOF then begin
+    // Append
+    FCurrentRecBuf := FLastRecBuf
+  end
+  else begin
+    // The active buffer is the newly created TDataset record,
+    // from which the bookmark is set to the record where the new record should be
+    // inserted
     GetBookmarkData(ActiveBuffer,@FCurrentRecBuf);
-
-  if not GetRecordUpdateBuffer then
-    begin
-    FCurrentUpdateBuffer := length(FUpdateBuffer);
-    SetLength(FUpdateBuffer,FCurrentUpdateBuffer+1);
-
-    FUpdateBuffer[FCurrentUpdateBuffer].BookmarkData := FCurrentRecBuf;
-
-    if state = dsEdit then
-      begin
-      // Update the oldvalues-buffer
-      FUpdateBuffer[FCurrentUpdateBuffer].OldValuesBuffer := intAllocRecordBuffer;
-      move(FCurrentRecBuf^,FUpdateBuffer[FCurrentUpdateBuffer].OldValuesBuffer^,FRecordSize+sizeof(TBufRecLinkItem));
-      FUpdateBuffer[FCurrentUpdateBuffer].UpdateKind := ukModify;
-      end
-    else
-      FUpdateBuffer[FCurrentUpdateBuffer].UpdateKind := ukInsert;
-    end;
-
-  CurrBuff := pchar(FCurrentRecBuf);
-  inc(Currbuff,sizeof(TBufRecLinkItem));
-  if bo1 then begin
-   pblobinfoarty(currbuff)^:= nil; //free old array
   end;
-  move(ActiveBuffer^,CurrBuff^,FRecordSize);
+  // Create the new record buffer
+  tmpRecBuffer := FCurrentRecBuf^.prior;
+
+  FCurrentRecBuf^.prior := pointer(IntAllocRecordBuffer);
+  FCurrentRecBuf^.prior^.next := FCurrentRecBuf;
+  FCurrentRecBuf := FCurrentRecBuf^.prior;
+  if assigned(tmpRecBuffer) then begin
+        // if not, it's the first record
+   FCurrentRecBuf^.prior := tmpRecBuffer;
+   tmpRecBuffer^.next := FCurrentRecBuf
+  end
+  else begin
+   FFirstRecBuf := FCurrentRecBuf;
+  end;
+  // Link the newly created record buffer to the newly created TDataset record
+  with PBufBookmark(ActiveBuffer + FRecordSize)^ do  begin
+   BookmarkData := FCurrentRecBuf;
+   BookmarkFlag := bfInserted;
+  end;      
+  inc(FBRecordCount);
+ end
+ else begin
+  GetBookmarkData(ActiveBuffer,@FCurrentRecBuf);
+ end;
+ if not GetRecordUpdateBuffer then begin
+  FCurrentUpdateBuffer := length(FUpdateBuffer);
+  SetLength(FUpdateBuffer,FCurrentUpdateBuffer+1);
+
+  FUpdateBuffer[FCurrentUpdateBuffer].BookmarkData := FCurrentRecBuf;
+
+  if state = dsEdit then begin
+          // Update the oldvalues-buffer
+   FUpdateBuffer[FCurrentUpdateBuffer].OldValuesBuffer := intAllocRecordBuffer;
+   move(FCurrentRecBuf^,FUpdateBuffer[FCurrentUpdateBuffer].OldValuesBuffer^,
+           FRecordSize+sizeof(TBufRecLinkItem));
+   po1:= getintblobpo;
+   if po1^ <> nil then begin
+    po2:= pblobinfoarty(FUpdateBuffer[FCurrentUpdateBuffer].OldValuesBuffer+
+                                intbloboffset);
+    pointer(po2^):= nil;
+    setlength(po2^,length(po1^));
+    for int1:= high(po1^) downto 0 do begin
+     po2^[int1]:= po1^[int1];
+     with po2^[int1] do begin
+      if datalength > 0 then begin
+       po3:= getmem(datalength);
+       move(data^,po3^,datalength);
+       data:= po3;
+      end
+      else begin
+       data:= nil;
+      end;
+     end;
+    end;
+   end;
+   FUpdateBuffer[FCurrentUpdateBuffer].UpdateKind := ukModify;
+  end
+  else begin
+   FUpdateBuffer[FCurrentUpdateBuffer].UpdateKind := ukInsert;
+  end;
+ end;
+ CurrBuff := pchar(FCurrentRecBuf);
+ inc(Currbuff,sizeof(TBufRecLinkItem));
+ if bo1 then begin
+  pblobinfoarty(currbuff)^:= nil; //free old array
+ end;
+ move(ActiveBuffer^,CurrBuff^,FRecordSize);
 end;
 
 procedure tmbufdataset.CalcRecordSize;

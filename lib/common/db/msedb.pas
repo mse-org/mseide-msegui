@@ -12,7 +12,7 @@ type
  fieldtypesarty = array of fieldtypesty;
 const
  textfields = [ftstring,ftfixedchar,ftwidestring,ftmemo];
- memofields = textfields+[ftblob,ftmemo];
+ memofields = textfields+[ftmemo];
  integerfields = [ftsmallint,ftinteger,ftword,ftlargeint,ftbcd];
  booleanfields = [ftboolean,ftstring,ftfixedchar]+integerfields-[ftbcd];
  realfields = [ftfloat,ftcurrency,ftbcd];
@@ -732,6 +732,7 @@ const
  realfcomp = [ftfloat,ftcurrency];
  datetimefcomp = [ftdate,fttime,ftdatetime];
  blobfcomp = [ftblob,ftgraphic,ftmemo];
+ memofcomp = [ftmemo];
  longintfcomp = [ftsmallint,ftinteger,ftword];
  stringfcomp = [ftstring,ftfixedchar];
       
@@ -745,7 +746,7 @@ const
     //ftBytes, ftVarBytes, ftAutoInc,
       [ftbytes],[ftvarbytes],[ftautoinc],
     // ftBlob, ftMemo, ftGraphic, ftFmtMemo,
-      blobfcomp,blobfcomp,blobfcomp,blobfcomp,
+      blobfcomp,memofcomp,blobfcomp,memofcomp,
     //ftParadoxOle, ftDBaseOle, ftTypedBinary,     ftCursor, tFixedChar,
       [ftParadoxOle],[ftDBaseOle],[ftTypedBinary],[ftCursor],stringfcomp,
     //ftWideString, ftLargeint, ftADT, ftArray, ftReference,

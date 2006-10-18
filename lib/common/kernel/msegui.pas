@@ -886,7 +886,7 @@ type
    function canparentclose: boolean; overload;
                    //newfocus = window.focusedwidget      
    function canfocus: boolean; virtual;
-   function setfocus(aactivate: boolean = true): boolean; //true if ok
+   function setfocus(aactivate: boolean = true): boolean; virtual;//true if ok
    procedure nextfocus; //sets inputfocus to then next appropriate widget
    function findtabfocus(const ataborder: integer): twidget;
                        //nil if can not focus
