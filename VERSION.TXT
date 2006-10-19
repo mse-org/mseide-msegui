@@ -1,5 +1,10 @@
 MSEide+MSEgui version history
 
+2006-10-19 oldb_invalidateonupdatedata -> olbdb_invalidateonupdatedata.
+2006-10-18 Blob suport for tmibconnection and tmpqconnection.
+2006-10-17 Calculated fields for tmbufdataset. 
+2006-10-16 tdbimage.
+2006-10-15 tfieldfieldlink.
 2006-09-27 tmsecomponent.linkedobjects, tobjeclinker.linkedobjects.
 2006-09-25 tstatfile moved to msestatfile.pas.
  tmsedatamodule moved to msedatamodules.pas.

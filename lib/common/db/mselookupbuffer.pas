@@ -205,7 +205,7 @@ type
    property fieldcountfloat;
  end;
 
- lbdboptionty = (olbdb_closedataset,oldb_invalidateonupdatedata);
+ lbdboptionty = (olbdb_closedataset,olbdb_invalidateonupdatedata);
  lbdboptionsty = set of lbdboptionty; 
  
  tcustomdblookupbuffer = class(tcustomlookupbuffer)
@@ -1132,7 +1132,7 @@ end;
 procedure tlookupbufferfieldsdatalink.updatedata;
 begin
  inherited;
- if oldb_invalidateonupdatedata in tcustomdblookupbuffer(fowner).foptionsdb then begin
+ if olbdb_invalidateonupdatedata in tcustomdblookupbuffer(fowner).foptionsdb then begin
   datachanged;
  end;
 end;

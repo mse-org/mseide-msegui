@@ -18,7 +18,6 @@ const
 // noformatsettings = 14.5;    //rtlversion
  noformatsettings = 15;    //rtlversion
  fc_keinplatzchar = '*';
-// d_leerzeichen = '?';
  nullen = '000000000000000000000000000000';
 
 type
@@ -119,13 +118,13 @@ function stringtocstring(const inp: msestring): string;
 function stringtopascalstring(const value: msestring): string;
 function pascalstringtostring(const value: string): msestring;
 
-{$ifdef FPC}
+//{$ifdef FPC}
  {$undef withformatsettings}
-{$else}
- {$if rtlversion > noformatsettings}
-  {$define withformatsettings}
- {$ifend}
-{$endif}
+//{$else}
+// {$if rtlversion > noformatsettings}
+//  {$define withformatsettings}
+// {$ifend}
+//{$endif}
 
 {$ifdef withformatsettings}
 var
@@ -1243,11 +1242,9 @@ begin
 end;
 }
 
-{$ifndef FPC}
- {$if rtlversion > noformatsettings}
+{$ifdef withformatsettings}
 initialization
  getlocaleformatsettings(0,defaultformatsettings);
  defaultformatsettings.DecimalSeparator:= '.';
- {$ifend}
 {$endif}
 end.
