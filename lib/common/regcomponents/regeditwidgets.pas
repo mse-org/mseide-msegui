@@ -17,7 +17,8 @@ implementation
 uses
  Classes,mseedit,msedataedits,msegraphedits,{msestringlistedit,}mselistbrowser,
  msewidgetgrid,msetextedit,msedesignintf,regeditwidgets_bmp,msepropertyeditors,
- msedropdownlist,mseterminal,msedrawtext,msedatanodes,msedialog,msestrings;
+ msedropdownlist,mseterminal,msedrawtext,msedatanodes,msedialog,msestrings,
+ regwidgets;
 
 type
  tdropdowncolpropertyeditor = class(tarraypropertyeditor)
@@ -30,12 +31,12 @@ type
    function getdefaultstate: propertystatesty; override;
  end;
                         
- twidgetcolelementeditor = class(tclasselementeditor)
+ twidgetcolelementeditor = class(tdatacoleditor)
   public
    function getvalue: msestring; override;
  end;
  
- twidgetcolspropertyeditor = class(tpersistentarraypropertyeditor)
+ twidgetcolspropertyeditor = class(tdatacolseditor)
   protected
    function geteditorclass: propertyeditorclassty; override;
  end;
@@ -81,11 +82,12 @@ var
  col1: twidgetcol;
 begin
  col1:= twidgetcol(getordvalue);
+ result:= inherited getvalue;
  if col1.editwidget <> nil then begin
-  result:= '<'+col1.editwidget.name+'>';
+  result:= result + '<'+col1.editwidget.name+'>';
  end
  else begin
-  result:= '<>';
+  result:= result + '<>';
  end;
 end;
 

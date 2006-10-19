@@ -1064,7 +1064,7 @@ begin
                   (application.activehintedwidget = self) then begin
        if not (ss_separator in flayout.cells[int1].state) then begin
         fhintedbutton:= int1;
-        if buttons[int1].hint <> '' then begin
+        if (buttons[int1].hint <> '') and application.active then begin
          application.showhint(self,buttons[int1].hint,gethintpos(int1),cp_bottomleft,
                         -1,[hfl_noautohidemove]);
         end

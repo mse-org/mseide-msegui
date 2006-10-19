@@ -482,6 +482,7 @@ type
    function getelementeditorclass: elementeditorclassty; virtual;
    procedure itemmoved(const source,dest: integer); virtual;
   public
+   procedure move(const curindex,newindex: integer); virtual;
    function allequal: boolean; override;
    function getvalue: msestring; override;
    procedure setvalue(const value: msestring); override;
@@ -2253,6 +2254,17 @@ begin
  modified;
 end;
 
+procedure tarraypropertyeditor.move(const curindex: integer;
+               const newindex: integer);
+var
+ int1: integer;
+begin
+ for int1:= 0 to high(fprops) do begin
+  tarrayprop(getordvalue(int1)).move(curindex,newindex);
+ end;
+ itemmoved(curindex,newindex)
+end;
+
 { tarrayelementeditor }
 
 constructor tarrayelementeditor.create(aindex: integer;
@@ -2379,12 +2391,8 @@ procedure tarrayelementeditor.dragdrop(const sender: tpropertyeditor);
 begin
  if (sender is tarrayelementeditor) and
       (tarrayelementeditor(sender).fparenteditor = fparenteditor) then begin
-  tarrayprop(fparenteditor.getordvalue).move(
-               tarrayelementeditor(sender).findex,findex);
-//  sender.modified;
-//  modified;
-  tarraypropertyeditor(fparenteditor).itemmoved(
-               tarrayelementeditor(sender).findex,findex);
+  tarraypropertyeditor(fparenteditor).move(tarrayelementeditor(sender).findex,
+                        findex);
  end;
 end;
 

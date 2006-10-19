@@ -3514,7 +3514,7 @@ begin
   foncellevent(self,info);
  end;
  if (info.eventkind = cek_firstmousepark) and
-         fgrid.canevent(tmethod(fonshowhint)) then begin
+         fgrid.canevent(tmethod(fonshowhint)) and application.active then begin
   application.inithintinfo(hintinfo,fgrid);
   fonshowhint(self,info.cell.row,hintinfo);
   application.showhint(fgrid,hintinfo);

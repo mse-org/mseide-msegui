@@ -1423,6 +1423,7 @@ type
    function mousehelpcontext: msestring;
                 //returns helpcontext of mouse widget, '' if none;
    function running: boolean; //true if eventloop entered
+   function active: boolean;
    function screensize: sizety;
    function workarea(awindow: twindow): rectty;
    function activewindow: twindow;
@@ -9693,6 +9694,7 @@ begin
   end
   else begin
    exclude(fstate,aps_active);
+   hidehint;
   end;
  end;
 end;
@@ -10639,6 +10641,11 @@ end;
 function tapplication.running: boolean;
 begin
  result:= aps_running in fstate;
+end;
+
+function tapplication.active: boolean;
+begin
+ result:= aps_active in fstate;
 end;
 
 function tapplication.findwindow(id: winidty; out window: twindow): boolean;
