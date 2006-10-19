@@ -1,5 +1,6 @@
 MSEide+MSEgui version history
 
+Version 1.0rc1
 2006-10-19 oldb_invalidateonupdatedata -> olbdb_invalidateonupdatedata.
 2006-10-18 Blob suport for tmibconnection and tmpqconnection.
 2006-10-17 Calculated fields for tmbufdataset. 
