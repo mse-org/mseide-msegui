@@ -7,8 +7,8 @@ order4=0
 order5=0
 order6=0
 order7=0
-order8=0
 [projectoptions]
+projectdir=/home/mse/packs/standard/svn/mse/trunk/apps/demo
 options=41
  [projectoptionsfo]
  stackedunder=
@@ -90,7 +90,7 @@ modulenames=1
 moduletypes=1
  TMAINFO
 modulefiles=1
- demo/main.mfm
+ /home/mse/packs/standard/svn/mse/trunk/apps/demo/main.mfm
 mainfile=demo.pas
 targetfile=demo${EXEEXT}
 messageoutputfile=
@@ -127,6 +127,8 @@ sourcedirs=3
  ${MSELIBDIR}kernel/$TARGET/
  ${MSELIBDIR}*/
  ./
+defines=0
+defineson=0
 unitdirs=3
  ${MSELIBDIR}kernel/$TARGET/
  ${MSELIBDIR}kernel/
@@ -216,15 +218,15 @@ files=
  a=0,4132,0,Files
  )
 [layout]
-windowlayout=243
+windowlayout=233
  [mainfo]
- stackedunder=
+ stackedunder=componentpalettefo
  x=4
  y=24
  cx=286
  cy=74
  wsize=0
- active=1
+ active=0
  visible=1
  [mainfo.basedock]
  splitdir=2
@@ -232,6 +234,7 @@ windowlayout=243
  [mainfo.openfile]
  filenames=0
  lastdir=
+ filehistory=0
  filefilterindex=0
  filecolwidth=174
  [actionsmo.watchesonact]
@@ -246,7 +249,7 @@ windowlayout=243
  x=0
  y=0
  cx=724
- cy=408
+ cy=491
  [debuggerfo]
  splitdir=0
  useroptions=15
@@ -255,18 +258,18 @@ windowlayout=243
  x=0
  y=0
  cx=286
- cy=38
+ cy=34
  [componentpalettefo]
  splitdir=0
  useroptions=15
- stackedunder=mainfo
+ stackedunder=
  parent=
  x=335
  y=24
  cx=440
  cy=129
  wsize=0
- active=0
+ active=1
  visible=1
  [componentpalettefo.componentpages]
  activetab=0
@@ -274,7 +277,7 @@ windowlayout=243
  splitdir=0
  useroptions=1551
  parent=mainfo.panel1.container
- visible=1
+ visible=0
  x=0
  y=411
  cx=724
@@ -467,12 +470,12 @@ bookmarks0=0
 bookmarks1=0
 sourcefiles=2
  demo.pas
- main.pas
+ /home/mse/packs/standard/svn/mse/trunk/apps/demo/main.pas
 ismoduletexts=2
  0
  0
 modules=1
- main.mfm
+ /home/mse/packs/standard/svn/mse/trunk/apps/demo/main.mfm
 visiblemodules=1
  1
 [sourcefo.tabwidget]
