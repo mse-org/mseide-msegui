@@ -600,6 +600,7 @@ type
    procedure internalinsert;
    procedure internalopen;
    procedure closequery(var amodalresult: modalresultty);
+   procedure post; //calls post if in edit or insert state
    function assql(const avalue: msestring): string; overload;
    function assql(const avalue: integer): string; overload;
    function assql(const avalue: realty): string; overload;
@@ -650,49 +651,76 @@ type
                                    write fonconnecterror; 
  end;
   
- tfieldfieldlink = class;
+ tfieldlink = class;
  
- tfieldfielddatalink = class(tfielddatalink)
+ tfieldlinkdatalink = class(tfielddatalink)
   private
    fdatasource: tdatasource;
-   fowner: tfieldfieldlink;
+   fowner: tfieldlink;
   protected
    procedure updatedata; override;
   public
-   constructor create(const aowner: tfieldfieldlink);
+   constructor create(const aowner: tfieldlink);
    destructor destroy; override;
  end;
 
- fieldeventty = procedure(const afieldlink: tfielddatalink) of object;
+ fieldeventty = procedure(const afield: tfield) of object;
  
- tfieldfieldlink = class(tmsecomponent,idbeditinfo)
+ fieldlinkoptionty = (flo_onlyifnull);
+ fieldlinkoptionsty = set of fieldlinkoptionty;
+  
+ tfieldlink = class(tmsecomponent,idbeditinfo)
   private
-   fsourcedatalink: tfielddatalink;
-   fdestdatalink: tfieldfielddatalink;
-   fonsetvalue: fieldeventty;
+   fdestdatalink: tfieldlinkdatalink;
+   fonupdatedata: fieldeventty;
+   foptions: fieldlinkoptionsty;
+   function getdataset: tdataset;
+   procedure setdataset(const avalue: tdataset);
    function getdatafield: string;
    procedure setdatafield(const avalue: string);
-   function getdatasource: tdatasource; overload;
-   function getdatasource(const aindex: integer): tdatasource; overload;
-   procedure setdatasource(const avalue: tdatasource);
-   function getdestdataset: tdataset;
-   procedure setdestdataset(const avalue: tdataset);
-   function getdestdatafield: string;
-   procedure setdestdatafield(const avalue: string);
    //idbeditinfo
    procedure getfieldtypes(out propertynames: stringarty;
                           out fieldtypes: fieldtypesarty);
+   function getdatasource(const aindex: integer): tdatasource;
+  protected
+   procedure updatedata(const afield: tfield); virtual;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
-   function destfield: tfield;
    function field: tfield;
   published
+   property dataset: tdataset read getdataset write setdataset;
    property datafield: string read getdatafield write setdatafield;
+   property options: fieldlinkoptionsty read foptions write foptions default [];
+   property onupdatedata: fieldeventty read fonupdatedata write fonupdatedata;
+ end;
+ 
+ ttimestamplink = class(tfieldlink)
+  protected
+   procedure updatedata(const afield: tfield); override;
+ end;
+   
+ tfieldfieldlink = class(tfieldlink,idbeditinfo)
+  private
+   fsourcedatalink: tfielddatalink;
+   function getsourcedatafield: string;
+   procedure setsourcedatafield(const avalue: string);
+   function getdatasource: tdatasource; overload;
+   function getdatasource(const aindex: integer): tdatasource; overload;
+   procedure setdatasource(const avalue: tdatasource);
+   //idbeditinfo
+   procedure getfieldtypes(out propertynames: stringarty;
+                          out fieldtypes: fieldtypesarty);
+  protected
+   procedure updatedata(const afield: tfield); override;
+  public
+   constructor create(aowner: tcomponent); override;
+   destructor destroy; override;
+   function sourcefield: tfield;
+  published
+   property sourcedatafield: string read getsourcedatafield 
+                             write setsourcedatafield;
    property datasource: tdatasource read getdatasource write setdatasource;
-   property destdataset: tdataset read getdestdataset write setdestdataset;
-   property destdatafield: string read getdestdatafield write setdestdatafield;
-   property onsetvalue: fieldeventty read fonsetvalue write fonsetvalue;
  end;
  
 const
@@ -2819,6 +2847,15 @@ begin
  end;
 end;
 
+procedure tdscontroller.post;
+begin
+ with tdataset(fowner) do begin;
+  if state in dseditmodes then begin
+   post;
+  end;
+ end;
+end;
+
 { ttacontroller }
 
 constructor ttacontroller.create(const aowner: tdbtransaction);
@@ -2895,9 +2932,9 @@ begin
  end;
 end;
 
-{ tfieldfielddatalink }
+{ tfieldlinkdatalink }
 
-constructor tfieldfielddatalink.create(const aowner: tfieldfieldlink);
+constructor tfieldlinkdatalink.create(const aowner: tfieldlink);
 begin
  fowner:= aowner;
  inherited create;
@@ -2905,23 +2942,78 @@ begin
  datasource:= fdatasource;
 end;
 
-destructor tfieldfielddatalink.destroy;
+destructor tfieldlinkdatalink.destroy;
 begin
  fdatasource.free;
  inherited;
 end;
 
-procedure tfieldfielddatalink.updatedata;
+procedure tfieldlinkdatalink.updatedata;
 begin
  if field <> nil then begin
-  if fowner.fsourcedatalink.field <> nil then begin
-   field.value:= fowner.fsourcedatalink.field.value;
-  end;
   with fowner do begin
-   if canevent(tmethod(fonsetvalue)) then begin
-    fonsetvalue(self);
+   if not (flo_onlyifnull in foptions) or (field.isnull) then begin
+    fowner.updatedata(field);
    end;
   end;
+ end;
+end;
+
+{ tfieldlink }
+
+constructor tfieldlink.create(aowner: tcomponent);
+begin
+ inherited;
+ fdestdatalink:= tfieldlinkdatalink.create(self);
+end;
+
+destructor tfieldlink.destroy;
+begin
+ fdestdatalink.free;
+ inherited;
+end;
+
+procedure tfieldlink.setdataset(const avalue: tdataset);
+begin
+ fdestdatalink.fdatasource.dataset:= avalue;
+end;
+
+function tfieldlink.getdataset: tdataset;
+begin
+ result:= fdestdatalink.dataset;
+end;
+
+function tfieldlink.getdatafield: string;
+begin
+ result:= fdestdatalink.fieldname;
+end;
+
+procedure tfieldlink.setdatafield(const avalue: string);
+begin
+ fdestdatalink.fieldname:= avalue;
+end;
+
+function tfieldlink.field: tfield;
+begin
+ result:= fdestdatalink.field;
+end;
+
+procedure tfieldlink.getfieldtypes(out propertynames: stringarty;
+                          out fieldtypes: fieldtypesarty);
+begin
+ propertynames:= nil;
+ fieldtypes:= nil;
+end;
+
+function tfieldlink.getdatasource(const aindex: integer): tdatasource;
+begin
+ result:= fdestdatalink.datasource;
+end;
+
+procedure tfieldlink.updatedata(const afield: tfield);
+begin
+ if canevent(tmethod(fonupdatedata)) then begin
+  fonupdatedata(afield);
  end;
 end;
 
@@ -2931,22 +3023,20 @@ constructor tfieldfieldlink.create(aowner: tcomponent);
 begin
  inherited;
  fsourcedatalink:= tfielddatalink.create;
- fdestdatalink:= tfieldfielddatalink.create(self);
 end;
 
 destructor tfieldfieldlink.destroy;
 begin
  fsourcedatalink.free;
- fdestdatalink.free;
  inherited;
 end;
 
-function tfieldfieldlink.getdatafield: string;
+function tfieldfieldlink.getsourcedatafield: string;
 begin
  result:= fsourcedatalink.fieldname;
 end;
 
-procedure tfieldfieldlink.setdatafield(const avalue: string);
+procedure tfieldfieldlink.setsourcedatafield(const avalue: string);
 begin
  fsourcedatalink.fieldname:= avalue;
 end;
@@ -2959,10 +3049,10 @@ end;
 function tfieldfieldlink.getdatasource(const aindex: integer): tdatasource;
 begin
  if aindex = 0 then begin
-  result:= fsourcedatalink.datasource;
+  result:= fdestdatalink.datasource;
  end
  else begin
-  result:= fdestdatalink.datasource;
+  result:= fsourcedatalink.datasource;
  end;  
 end;
 
@@ -2971,32 +3061,7 @@ begin
  fsourcedatalink.datasource:= avalue;
 end;
 
-function tfieldfieldlink.getdestdataset: tdataset;
-begin
- result:= fdestdatalink.dataset;
-end;
-
-procedure tfieldfieldlink.setdestdataset(const avalue: tdataset);
-begin
- fdestdatalink.fdatasource.dataset:= avalue;
-end;
-
-function tfieldfieldlink.getdestdatafield: string;
-begin
- result:= fdestdatalink.fieldname;
-end;
-
-procedure tfieldfieldlink.setdestdatafield(const avalue: string);
-begin
- fdestdatalink.fieldname:= avalue;
-end;
-
-function tfieldfieldlink.destfield: tfield;
-begin
- result:= fdestdatalink.field;
-end;
-
-function tfieldfieldlink.field: tfield;
+function tfieldfieldlink.sourcefield: tfield;
 begin
  result:= fsourcedatalink.field;
 end;
@@ -3006,10 +3071,26 @@ procedure tfieldfieldlink.getfieldtypes(out propertynames: stringarty;
 begin
  setlength(propertynames,2);
  propertynames[0]:= 'datafield';
- propertynames[1]:= 'destdatafield';
+ propertynames[1]:= 'sourcedatafield';
  setlength(fieldtypes,2);
  fieldtypes[0]:= [];
  fieldtypes[1]:= [];
+end;
+
+procedure tfieldfieldlink.updatedata(const afield: tfield);
+begin
+ if fsourcedatalink.field <> nil then begin
+  field.value:= fsourcedatalink.field.value;
+ end;
+ inherited;
+end;
+
+{ ttimestamplink }
+
+procedure ttimestamplink.updatedata(const afield: tfield);
+begin
+ afield.asdatetime:= now;
+ inherited;
 end;
 
 end.

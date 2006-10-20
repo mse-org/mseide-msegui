@@ -136,7 +136,7 @@ type
 procedure Register;
 begin
  registercomponents('Dbf',[
-      tfieldparamlink,tfieldfieldlink,tsequencelink,
+      tfieldparamlink,tfieldlink,ttimestamplink,tfieldfieldlink,tsequencelink,
       tmsestringfield,tmselongintfield,tmselargeintfield,tmsesmallintfield,
       tmsewordfield,tmseautoincfield,tmsefloatfield,tmsecurrencyfield,
       tmsebooleanfield,tmsedatetimefield,tmsedatefield,tmsetimefield,
@@ -174,7 +174,7 @@ begin
         tnolistdropdowncolpropertyeditor);
  registerpropertyeditor(typeinfo(string),nil,'datafield',
         tdbfieldnamepropertyeditor);
- registerpropertyeditor(typeinfo(string),tfieldfieldlink,'destdatafield',
+ registerpropertyeditor(typeinfo(string),tfieldfieldlink,'sourcedatafield',
         tdbfieldnamepropertyeditor);
  registerpropertyeditor(typeinfo(string),nil,'keyfield',
         tdbfieldnamepropertyeditor);
