@@ -3462,25 +3462,28 @@ procedure tdatalistpropertyeditor.closequery(const sender: tcustommseform;
                var amodalresult: modalresultty);
 var
  datalist1: tdatalist;
+ int1: integer;
 begin
  if amodalresult = mr_ok then begin
-  datalist1:= tdatalist(getordvalue);
   try
-   case formkind of
-    lfk_msestring: begin
-     tmsestringdatalist(datalist1).assign(
-                  tstringlisteditor(sender).valueedit.datalist);
+   for int1:= 0 to high (fprops) do begin
+    datalist1:= tdatalist(getordvalue(int1));
+    case formkind of
+     lfk_msestring: begin
+      tmsestringdatalist(datalist1).assign(
+                   tstringlisteditor(sender).valueedit.datalist);
+     end;
+     lfk_real: begin
+      trealdatalist(datalist1).assign(
+                    treallisteditor(sender).valueedit.griddata);
+     end;
+     lfk_integer: begin
+      tintegerdatalist(datalist1).assign(
+                    tintegerlisteditor(sender).valueedit.griddata);
+     end;
     end;
-    lfk_real: begin
-     trealdatalist(datalist1).assign(
-                   treallisteditor(sender).valueedit.griddata);
-    end;
-    lfk_integer: begin
-     tintegerdatalist(datalist1).assign(
-                   tintegerlisteditor(sender).valueedit.griddata);
-    end;
+    modified;
    end;
-   modified;
   except
    application.handleexception(nil);
    amodalresult:= mr_none;
@@ -3492,15 +3495,19 @@ end;
 
 procedure tmsestringdatalistpropertyeditor.closequery(const sender: tcustommseform;
                        var amodalresult: modalresultty);
+var
+ int1: integer;
 begin
  if amodalresult = mr_ok then begin
-  try
-   tmsestringdatalist(getordvalue).assign(
-                  tstringlisteditor(sender).valueedit.datalist);
-   modified;
-  except
-   application.handleexception(nil);
-   amodalresult:= mr_none;
+  for int1:= 0 to high(fprops) do begin
+   try
+    tmsestringdatalist(getordvalue(int1)).assign(
+                   tstringlisteditor(sender).valueedit.datalist);
+    modified;
+   except
+    application.handleexception(nil);
+    amodalresult:= mr_none;
+   end;
   end;
  end;
 end;

@@ -940,7 +940,7 @@ type
             //parentwidget.parentwidget if parentwidget has not ws_iswidget,
             //parentwidget otherwise
    property parentwidget: twidget read fparentwidget write setparentwidget;
-   function getrootwidgetpath: widgetarty;
+   function getrootwidgetpath: widgetarty; //root widget is last
    function widgetcount: integer;
    function parentwidgetindex: integer; //index in parentwidget.widgets, -1 if none
    property widgets[const index: integer]: twidget read getwidgets;

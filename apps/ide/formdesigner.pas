@@ -871,12 +871,36 @@ begin
 end;
 
 procedure tdesignwindow.docopy(const noclear: boolean);
+var
+ int1: integer;
+ widget1: twidget;
+ bo1: boolean;
 begin
  fselections.remove(module);
  fselections.copytoclipboard;
  if not noclear then begin
-  fselections.clear;
-  selectcomponent(module);
+  if form = nil then begin
+   selectcomponent(module);
+  end
+  else begin
+   widget1:= nil;
+   if (fselections.count > 0) and (fselections[0] is twidget) then begin
+    widget1:= twidget(fselections[0]).parentofcontainer;
+    for int1:= 1 to fselections.count - 1 do begin
+     if not (fselections[int1] is twidget) or 
+       (twidget(fselections[int1]).parentofcontainer <> widget1) then begin
+      widget1:= nil; //no common parent
+      break;
+     end;
+    end;
+   end;
+   if widget1 = nil then begin
+    selectcomponent(module);
+   end
+   else begin
+    selectcomponent(widget1);
+   end;
+  end;
  end;
 end;
 
