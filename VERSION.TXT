@@ -1,6 +1,6 @@
 MSEide+MSEgui version history
 
-2006-10-20 ttimestamplink, tfieldlink, tdscontroller.post.
+2006-10-20 ttimestampfieldlink, tfieldlink, tdscontroller.post.
 
 Version 1.0rc1
 2006-10-19 oldb_invalidateonupdatedata -> olbdb_invalidateonupdatedata.

@@ -136,7 +136,8 @@ type
 procedure Register;
 begin
  registercomponents('Dbf',[
-      tfieldparamlink,tfieldlink,ttimestamplink,tfieldfieldlink,tsequencelink,
+      tfieldparamlink,tfieldlink,ttimestampfieldlink,tfieldfieldlink,
+      tsequencelink,
       tmsestringfield,tmselongintfield,tmselargeintfield,tmsesmallintfield,
       tmsewordfield,tmseautoincfield,tmsefloatfield,tmsecurrencyfield,
       tmsebooleanfield,tmsedatetimefield,tmsedatefield,tmsetimefield,

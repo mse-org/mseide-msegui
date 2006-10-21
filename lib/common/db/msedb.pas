@@ -695,7 +695,7 @@ type
    property onupdatedata: fieldeventty read fonupdatedata write fonupdatedata;
  end;
  
- ttimestamplink = class(tfieldlink)
+ ttimestampfieldlink = class(tfieldlink)
   protected
    procedure updatedata(const afield: tfield); override;
  end;
@@ -3085,9 +3085,9 @@ begin
  inherited;
 end;
 
-{ ttimestamplink }
+{ ttimestampfieldlink }
 
-procedure ttimestamplink.updatedata(const afield: tfield);
+procedure ttimestampfieldlink.updatedata(const afield: tfield);
 begin
  afield.asdatetime:= now;
  inherited;
