@@ -13,7 +13,7 @@ unit mseimage;
 
 interface
 uses
- Classes,msegraphics,msegraphutils,msewidgets,msebitmap;
+ Classes,msegraphics,msegraphutils,msewidgets,msebitmap,msegui;
 
 type
  timage = class(tscrollingwidget)
@@ -38,11 +38,12 @@ type
                   write setcolorforeground default cl_black;
    property colorbackground: colorty read fcolorbackground //for monochrome bitmaps
                   write setcolorbackground default cl_white;
+   property optionswidget default defaultoptionswidgetnofocus;
  end;
 
 implementation
 uses
- mseguiintf,msegui,msebits;
+ mseguiintf,msebits;
 
 { timage }
 
@@ -53,6 +54,7 @@ begin
  fbitmap:= tmaskedbitmap.create(false);
  fbitmap.onchange:= {$ifdef FPC}@{$endif}bitmapchanged;
  inherited;
+ optionswidget:= defaultoptionswidgetnofocus;
 end;
 
 destructor timage.destroy;
