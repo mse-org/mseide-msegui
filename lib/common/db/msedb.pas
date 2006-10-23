@@ -798,10 +798,12 @@ function getasmsestring(const field: tfield; const utf8: boolean): msestring;
 function checkfieldcompatibility(const afield: tfield;
                      const adatatype: tfieldtype): boolean;
            //true if ok
+function vartorealty(const avalue: variant): realty;
+
 implementation
 uses
  rtlconsts,msefileutils,typinfo,dbconst,msedatalist,mseformatstr,
- msereal;
+ msereal,variants;
 type
  tdataset1 = class(tdataset);
 {
@@ -1073,6 +1075,16 @@ function checkfieldcompatibility(const afield: tfield;
 begin
  result:= (afield.datatype in fieldcompatibility[adatatype]) or 
                             (adatatype = ftunknown);
+end;
+
+function vartorealty(const avalue: variant): realty;
+begin
+ if varisnull(avalue) then begin
+  result:= emptyreal;
+ end
+ else begin
+  real(result):= avalue;
+ end;
 end;
 
 procedure fieldsetmsestring(const avalue: msestring; const sender: tfield;
