@@ -309,7 +309,8 @@ implementation
 uses 
  dbconst,strutils,mseclasses,msedatalist;
 
-//copied from dsparams.inc
+//copied from dsparams.inc 
+//todo: not needed for FPC 2.1.1
 
 function SkipComments(var p: PChar) : boolean;
 begin
