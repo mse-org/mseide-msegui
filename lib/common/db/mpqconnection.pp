@@ -607,7 +607,8 @@ begin
     end;
 end;
 
-function TPQConnection.LoadField(cursor : TSQLCursor;FieldDef : TfieldDef;buffer : pointer) : boolean;
+function TPQConnection.LoadField(cursor: TSQLCursor;
+                                FieldDef: TfieldDef; buffer: pointer): boolean;
 
 type TNumericRecord = record
        Digits : SmallInt;
@@ -615,7 +616,12 @@ type TNumericRecord = record
        Sign   : SmallInt;
        Scale  : Smallint;
      end;
-
+const
+ numericpos = $0000;
+ numericneg = $4000;
+ numericnan = $8000;
+ numericsigmask = $c000;
+ 
 var
   x,i           : integer;
   li            : Longint;
@@ -625,6 +631,7 @@ var
   cur           : currency;
   NumericRecord : ^TNumericRecord;
  int1: integer;
+ sint1: smallint;
  
 begin
   with cursor as TPQCursor do
@@ -692,15 +699,21 @@ begin
           NumericRecord^.Digits := BEtoN(NumericRecord^.Digits);
           NumericRecord^.Scale := BEtoN(NumericRecord^.Scale);
           NumericRecord^.Weight := BEtoN(NumericRecord^.Weight);
+          numericrecord^.sign:= beton(numericrecord^.sign);
           inc(pointer(currbuff),sizeof(TNumericRecord));
           cur := 0;
-          if (NumericRecord^.Digits = 0) and (NumericRecord^.Scale = 0) then // = NaN, which is not supported by Currency-type, so we return NULL
-            result := false
+          if numericrecord^.sign and numericnan <> 0 then begin 
+//          if (NumericRecord^.Digits = 0) and (NumericRecord^.Scale = 0) then 
+    // = NaN, which is not supported by Currency-type, so we return NULL 
+             //???? 0 in database seems to return digits and scale 0. mse
+           result := false;            //nan
+          end
           else
             begin
             for tel := 1 to NumericRecord^.Digits  do
               begin
-              cur := cur + beton(pword(currbuff)^) * intpower(10000,-(tel-1)+NumericRecord^.weight);
+              cur := cur + beton(pword(currbuff)^) * intpower(10000,-(tel-1)+
+                                           NumericRecord^.weight);
               inc(pointer(currbuff),2);
               end;
             if BEtoN(NumericRecord^.Sign) <> 0 then cur := -cur;
