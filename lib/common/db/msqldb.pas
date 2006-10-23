@@ -309,6 +309,66 @@ implementation
 uses 
  dbconst,strutils,mseclasses,msedatalist;
 
+//copied from dsparams.inc
+
+function SkipComments(var p: PChar) : boolean;
+begin
+  result := false;
+  case p^ of
+    '''': // single quote delimited string
+      begin
+        Inc(p);
+        Result := True;
+        while not (p^ in [#0, '''']) do
+        begin
+          if p^='\' then Inc(p,2) // make sure we handle \' and \\ correct
+          else Inc(p);
+        end;
+        if p^='''' then Inc(p); // skip final '
+      end;
+    '"':  // double quote delimited string
+      begin
+        Inc(p);
+        Result := True;
+        while not (p^ in [#0, '"']) do
+        begin
+          if p^='\'  then Inc(p,2) // make sure we handle \" and \\ correct
+          else Inc(p);
+        end;
+        if p^='"' then Inc(p); // skip final "
+      end;
+    '-': // possible start of -- comment
+      begin
+        Inc(p);
+        if p^='-' then // -- comment
+        begin
+          Result := True;
+          repeat // skip until at end of line
+            Inc(p);
+          until p^ in [#10, #0];
+        end
+      end;
+    '/': // possible start of /* */ comment
+      begin
+        Inc(p);
+        if p^='*' then // /* */ comment
+        begin
+          Result := True;
+          repeat
+            Inc(p);
+            if p^='*' then // possible end of comment
+            begin
+              Inc(p);
+              if p^='/' then Break; // end of comment
+            end;
+          until p^=#0;
+          if p^='/' then Inc(p); // skip final /
+        end;
+      end;
+  end; {case}
+end;
+
+
 { TSQLConnection }
 
 function TSQLConnection.StrToStatementType(s : string) : TStatementType;
@@ -844,7 +904,9 @@ begin
     repeat begin
 	inc(CurrentP);
 
-	if CurrentP^ in [' ',#13,#10,#9,#0,'(',')',';'] then begin { if(1) }
+        if SkipComments(CurrentP) then
+         if ParsePart = ppStart then PhraseP := CurrentP;
+       	if CurrentP^ in [' ',#13,#10,#9,#0,'(',')',';'] then begin { if(1) }
 	    if (CurrentP-PhraseP > 0) or (CurrentP^ in [';',#0]) then begin { if(2) }
 		strLength := CurrentP-PhraseP;
 		Setlength(S,strLength);
