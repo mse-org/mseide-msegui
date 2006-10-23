@@ -25,7 +25,11 @@ const
  pixel0 = $ffffff;   //select colorbackground
  pixel1 = $000000;   //select colorforeground
 
+{$ifdef FPC}
 {$include ../mseguiintf.inc}
+{$else}
+{$include mseguiintf.inc}
+{$endif}
 
 function getapplicationwindow: hwnd;
 

@@ -2236,7 +2236,8 @@ begin
  fmousefocusedcell:= ffocusedcell;
  fmouseactivewidget:= factivewidget;
  inherited;
- if not (gs_mousecellredirected in fstate) and 
+ if not(es_processed in info.eventstate) and 
+          not (gs_mousecellredirected in fstate) and 
                 checkreflectmouseevent(info,false) then begin
   fmousefocusedcell.col:= -1;
   releasemouse;

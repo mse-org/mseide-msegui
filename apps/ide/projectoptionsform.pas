@@ -343,7 +343,7 @@ uses
  msedesigner,panelform,watchpointsform,commandlineform,msestream,
  componentpaletteform,mserichstring,msesettings,formdesigner,
  msestringlisteditor,msetexteditor,msecolordialog,msepropertyeditors
- {$ifdef FPC},msedbfieldeditor{$endif};
+ {$ifdef FPC}{$ifndef mse_withoutdb},msedbfieldeditor{$endif}{$endif};
 
 type
 
@@ -600,9 +600,9 @@ begin
   deletememorystatstream(texteditorstatname);
   deletememorystatstream(colordialogstatname);
   deletememorystatstream(bmpfiledialogstatname);
-  {$ifdef FPC}
+  {$ifdef FPC}{$ifndef mse_withoutdb}
   deletememorystatstream(dbfieldeditorstatname);
-  {$endif}
+  {$endif}{$endif}
   modified:= false;
   sigsettings:= defaultsigsettings;
   exceptclassnames:= nil;
@@ -796,9 +796,9 @@ begin
   updatememorystatstream('texteditor',texteditorstatname);
   updatememorystatstream('colordialog',colordialogstatname);
   updatememorystatstream('bmpfiledialog',bmpfiledialogstatname);
-{$ifdef FPC}
+{$ifdef FPC}{$ifndef mse_withoutdb}
   updatememorystatstream('dbfieldeditor',dbfieldeditorstatname);
-{$endif}
+{$endif}{$endif}
   if iswriter then begin
    with tstatwriter(statfiler) do begin
     writerecordarray('sigsettings',length(sigsettings),

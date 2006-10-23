@@ -233,7 +233,8 @@ procedure handleerror(const e: exception; const text: string);
 
 implementation
 uses
- regwidgets,regeditwidgets,regkernel,regdialogs,{$ifdef FPC}regdb,{$endif}
+ regwidgets,regeditwidgets,regkernel,regdialogs,
+ {$ifdef FPC}{$ifndef mse_withoutdb}regdb,{$endif}{$endif}
  regdesignutils,regsysutils,regserialcomm,
 {$ifdef morecomponents}
 {$include regcomponents.inc}
