@@ -373,6 +373,8 @@ type
    procedure changepage(step: integer);
    procedure movepage(const curindex,newindex: integer);
    procedure add(const aitem: itabpage; const aindex: integer = bigint);
+   function pagebyname(const aname: string): twidget;
+                   //case sensitive!
                            
    property items[const index: integer]: twidget read getitems; default;
    property activepage: twidget read getactivepage write setactivepage;
@@ -2420,6 +2422,19 @@ begin
  if avalue < ftab_size then begin
   tab_size:= avalue;
  end;
+end;
+
+function ttabwidget.pagebyname(const aname: string): twidget;
+var
+ int1: integer;
+begin
+ for int1:= 0 to count - 1 do begin
+  result:= items[int1];
+  if result.name = aname then begin
+   exit;
+  end;
+ end;
+ raise exception.create('Tabpage '''+aname+''' not found.');
 end;
 
 

@@ -26,7 +26,7 @@ object findinfilepagefo: tfindinfilepagefo
     anchors = [an_left, an_top, an_right, an_bottom]
     taborder = 1
     fixcols.count = 1
-    fixcols.items = <    
+    fixcols.items = <
       item
         width = 38
         textflags = [tf_right, tf_ycentered]
@@ -35,7 +35,7 @@ object findinfilepagefo: tfindinfilepagefo
       end>
     rowcount = 1
     datacols.count = 1
-    datacols.items = <    
+    datacols.items = <
       item
         width = 1500
         options = [co_readonly, co_fill]
@@ -44,51 +44,52 @@ object findinfilepagefo: tfindinfilepagefo
         data = (
           dl_msestring
           (
-            0
-          )
-        )
+            ''))
       end>
-    datarowheight = 18
-    reffontheight = 16
+    datarowheight = 15
+    reffontheight = 13
     object foundlist: ttextedit
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
       bounds_x = 0
       bounds_y = 0
       bounds_cx = 1500
-      bounds_cy = 18
+      bounds_cy = 15
       color = -1879048185
       visible = False
       optionsedit = [oe_readonly, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_linebreak, oe_eatreturn, oe_keyexecute, oe_savestate]
+      encoding = ce_ansi
       marginlinecolor = -2147483648
       oncellevent = foundlistoncellevent
-      reffontheight = 16
+      reffontheight = 13
     end
   end
   object filename: tstringdisp
     bounds_x = 1
     bounds_y = 0
     bounds_cx = 406
+    bounds_cy = 17
     bounds_cxmin = 140
     frame.dummy = 0
     anchors = [an_left, an_top, an_right]
     taborder = 3
     textflags = [tf_ycentered, tf_ellipseleft]
-    reffontheight = 16
+    reffontheight = 13
   end
   object foundcount: tintegerdisp
     bounds_x = 407
     bounds_y = 0
     bounds_cx = 44
+    bounds_cy = 17
     frame.dummy = 0
     anchors = [an_top, an_right]
     taborder = 2
-    reffontheight = 16
+    reffontheight = 13
   end
   object cancel: tbutton
     bounds_x = 453
     bounds_y = 1
     bounds_cx = 50
-    bounds_cy = 18
+    bounds_cy = 19
     anchors = [an_top, an_right]
     taborder = 5
     state = [as_disabled, as_localdisabled, as_localcaption, as_localonexecute]
@@ -99,7 +100,7 @@ object findinfilepagefo: tfindinfilepagefo
     bounds_x = 503
     bounds_y = 1
     bounds_cx = 50
-    bounds_cy = 18
+    bounds_cy = 19
     anchors = [an_top, an_right]
     taborder = 4
     state = [as_localcaption, as_localonexecute]
@@ -110,7 +111,7 @@ object findinfilepagefo: tfindinfilepagefo
     bounds_x = 553
     bounds_y = 1
     bounds_cx = 18
-    bounds_cy = 18
+    bounds_cy = 19
     anchors = [an_top, an_right]
     state = [as_localimagelist, as_localimagenr, as_localonexecute]
     glyph = stg_checked
@@ -120,7 +121,7 @@ object findinfilepagefo: tfindinfilepagefo
     onstart = threadonstart
     onexecute = threadonexecute
     onterminate = threadonterminate
-    left = 16
-    top = 72
+    Left = 16
+    Top = 72
   end
 end

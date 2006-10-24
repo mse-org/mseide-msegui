@@ -6538,6 +6538,10 @@ begin
  if not result then begin
   result:= (int1 < rowcount) and (msecomparetextlen(filter,cols[0][int1]) = 0);
  end;
+ if not result then begin
+  inc(int1);
+  result:= (int1 < rowcount) and (msecomparetextlen(filter,cols[0][int1]) = 0);
+ end;
  if result then begin
   co1:= makegridcoord(ffocusedcell.col,int1);
   showcell(co1,cep_top);
@@ -6996,7 +7000,14 @@ begin
               tlbdropdownlistcontroller(fcontroller).fonfilter);
    if not result then begin
     result:= (int1 < flookupbuffer.count) and 
-    (msecomparetextlen(filter,flookupbuffer.textvaluelog(ffieldno,int1,true)) = 0);
+            (msecomparetextlen(filter,
+             flookupbuffer.textvaluelog(ffieldno,int1,true)) = 0);
+    if not result then begin
+     inc(int1);
+    end;
+    result:= (int1 < flookupbuffer.count) and 
+          (msecomparetextlen(filter,
+            flookupbuffer.textvaluelog(ffieldno,int1,true)) = 0);
    end;
   end;
  end;

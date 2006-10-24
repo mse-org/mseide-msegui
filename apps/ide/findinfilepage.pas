@@ -221,8 +221,8 @@ end;
 
 procedure tfindinfilepagefo.childscaled(const sender: TObject);
 begin
- placeyorder(0,[1],[filename,grid],0);
- aligny(wam_center,[filename,foundcount,cancel,again,closepage]);
+ placeyorder(0,[1],[cancel,grid],0);
+ aligny(wam_center,[cancel,filename,foundcount,again,closepage]);
 end;
 
 procedure tfindinfilepagefo.closebuonexecute(const sender: TObject);
