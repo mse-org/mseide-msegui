@@ -530,6 +530,7 @@ type
    factivator: tactivator;
    procedure setactivator(const avalue: tactivator);
   protected
+   fdesignchangedlock: integer;
    procedure receiveevent(const event: tobjectevent); override;
    procedure doasyncevent(var atag: integer); virtual;
    procedure designchanged; //for designer notify
@@ -2054,7 +2055,8 @@ end;
 
 procedure tguicomponent.designchanged; //for designer notify
 begin
- if assigned(ondesignchanged) then begin
+ if assigned(ondesignchanged) and (fdesignchangedlock = 0) and 
+       (componentstate*[csdesigning,csloading] = [csdesigning]) then begin
   ondesignchanged(self);
  end;
 end;
@@ -8042,7 +8044,7 @@ begin
   if force or (app.fmodalwindow = nil) or (app.fmodalwindow = self) or 
                         (ftransientfor = app.fmodalwindow) then begin
    if (ffocusedwidget = nil) and fowner.canfocus then begin
-    fowner.setfocus;
+    fowner.setfocus(true);
     exit;
    end;
    if activewindowbefore <> nil then begin
@@ -9749,6 +9751,7 @@ begin       //eventloop
   end;
   amodalwindow.fmodalinfopo:= @modalinfo;
   setlinkedvar(amodalwindow,tlinkedobject(fmodalwindow));
+  amodalwindow.internalactivate(false,true);
  end;
 
  lock;
@@ -9997,7 +10000,7 @@ begin
    guierror(gue_recursivemodal,self,fowner.name);
   end;
   include(fstate,tws_modal);
-  sender.internalactivate(false,true);
+//  sender.internalactivate(false,true);
  end;
  bo1:= unlock;
  try

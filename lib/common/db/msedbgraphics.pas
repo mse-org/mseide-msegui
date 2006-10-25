@@ -59,14 +59,18 @@ type
  
 implementation
 uses
- msebitmap,msestream;
+ msebitmap,msestream,msegraphics;
  
-{ tdbimage }
+type
+ tsimplebitmap1 = class(tsimplebitmap);
+ 
+ { tdbimage }
 
 constructor tdbimage.create(aowner: tcomponent);
 begin
  fdatalink:= tgraphicdatalink.create(idbgraphicfieldlink(self));
  inherited;
+ include(tsimplebitmap1(bitmap).fstate,pms_nosave);
 end;
 
 destructor tdbimage.destroy;

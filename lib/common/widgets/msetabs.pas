@@ -209,6 +209,7 @@ type
   function getcaption: msestring;
   function getcolortab: colorty;
   function getcoloractivetab: colorty;
+  procedure doselect;
  end;
 
  ttabpage = class(tscrollingwidget,itabpage)
@@ -216,6 +217,7 @@ type
    ftabwidget: ttabwidget;
    fcaption: msestring;
    fcolortab,fcoloractivetab: colorty;
+   fonselect: notifyeventty;
    function getcaption: captionty;
    procedure setcaption(const Value: captionty);
    function getcolortab: colorty;
@@ -232,6 +234,7 @@ type
    procedure enabledchanged; override;
    procedure registerchildwidget(const child: twidget); override;
    procedure designselected(const selected: boolean); override;
+   procedure doselect; virtual;
   public
    constructor create(aowner: tcomponent); override;
    function isactivepage: boolean;
@@ -246,12 +249,14 @@ type
    property optionswidget default defaulttaboptionswidget;
    property onchildscaled;
    property onfontheightdelta;
+   property onselect: notifyeventty read fonselect write fonselect;
  end;
 
  ttabform = class(tmseform,itabpage)
   private
    ftabwidget: ttabwidget;
    fcolortab,fcoloractivetab: colorty;
+   fonselect: notifyeventty;
    procedure settabwidget(const value: ttabwidget);
    function gettabwidget: ttabwidget;
    procedure changed;
@@ -264,6 +269,7 @@ type
   protected
    procedure visiblechanged; override;
    procedure setcaption(const value: msestring); override;
+   procedure doselect; virtual;
   public
    constructor create(aowner: tcomponent); override;
    function isactivepage: boolean;
@@ -274,13 +280,14 @@ type
                   write setcolortab default cl_default;
    property coloractivetab: colorty read getcolortab
                   write setcoloractivetab default cl_active;
+   property onselect: notifyeventty read fonselect write fonselect;
  end;
 
  tpagetab = class(ttab)
   private
-   fpage: twidget;
+   fpageintf: itabpage;
   public
-   constructor create(const aowner: tcustomtabbar; const apage: twidget);
+   constructor create(const aowner: tcustomtabbar; const apage: itabpage);
    function page: twidget;
  end;
 
@@ -297,11 +304,11 @@ type
    ftab_sizemax: integer;
    fstatfile: tstatfile;
    fstatvarname: msestring;
-   procedure setstatfile(const Value: tstatfile);
+   procedure setstatfile(const value: tstatfile);
    function getitems(const index: integer): twidget;
-   procedure setactivepageindex(Value: integer);
+   procedure setactivepageindex(value: integer);
    function getactivepage: twidget;
-   procedure setactivepage(const Value: twidget);
+   procedure setactivepage(const value: twidget);
    procedure updatesize(const page: twidget);
    function getoptions: tabbaroptionsty;
    procedure setoptions(const Value: tabbaroptionsty);
@@ -1497,6 +1504,13 @@ begin
  end;
 end;
 
+procedure ttabpage.doselect;
+begin
+ if canevent(tmethod(fonselect)) then begin
+  fonselect(self);
+ end;
+end;
+
 { ttabform }
 
 procedure ttabform.changed;
@@ -1576,6 +1590,13 @@ procedure ttabform.settabindex(const avalue: integer);
 begin
  if tabwidget <> nil then begin
   tabwidget.movepage(tabindex,avalue);
+ end;
+end;
+
+procedure ttabform.doselect;
+begin
+ if canevent(tmethod(fonselect)) then begin
+  fonselect(self);
  end;
 end;
 
@@ -1661,12 +1682,14 @@ procedure ttabwidget.loaded;
 var
  int1: integer;
 begin
+ inc(fdesignchangedlock);
  inherited;
  ftabs.loaded;
  updatesize(nil);
  int1:= factivepageindex;
  factivepageindex:= -1;
  activepageindex:= int1;
+ dec(fdesignchangedlock);
 end;
 
 procedure ttabwidget.updatesize(const page: twidget);
@@ -1749,7 +1772,7 @@ begin
   if aindex > count then begin
    aindex:= count;
   end;
-  tab:= tpagetab.create(ftabs,widget1);
+  tab:= tpagetab.create(ftabs,page);
   if not (csloading in componentstate) then begin
    ftabs.tabs.insert(tab,aindex);
    with widget1 do begin
@@ -1766,7 +1789,9 @@ begin
   include(widget1.fwidgetstate,ws_nodesignvisible);
   page.settabwidget(self);
   pagechanged(page);
-  activepageindex:= aindex;
+  if not (csloading in componentstate) then begin
+   activepageindex:= aindex;
+  end;
   dopageadded(widget1);
  end;
 end;
@@ -1905,6 +1930,12 @@ begin
   factivepageindex := Value;
   if value >= 0 then begin
    defaultfocuschild:= items[value];
+   if not (csloading in componentstate) then begin
+    tpagetab(ftabs.tabs[value]).fpageintf.doselect;
+    if factivepageindex <> value then begin
+     exit;
+    end;
+   end;
    with items[value] do begin
     bringtofront; //needed in design mode where all widgets are visible
     visible:= true;
@@ -1945,7 +1976,7 @@ begin
  end;
 end;
 
-procedure ttabwidget.setactivepage(const Value: twidget);
+procedure ttabwidget.setactivepage(const value: twidget);
 begin
  if value = nil then begin
   setactivepageindex(-1);
@@ -1986,6 +2017,7 @@ begin
  if canevent(tmethod(fonactivepagechanged)) then begin
   fonactivepagechanged(self);
  end;
+ designchanged;
 end;
 
 procedure ttabwidget.dopageadded(const apage: twidget);
@@ -2437,18 +2469,17 @@ begin
  raise exception.create('Tabpage '''+aname+''' not found.');
 end;
 
-
 { tpagetab }
 
-constructor tpagetab.create(const aowner: tcustomtabbar; const apage: twidget);
+constructor tpagetab.create(const aowner: tcustomtabbar; const apage: itabpage);
 begin
- fpage:= apage;
+ fpageintf:= apage;
  inherited create(aowner);
 end;
 
 function tpagetab.page: twidget;
 begin
- result:= fpage;
+ result:= fpageintf.getwidget;
 end;
 
 end.

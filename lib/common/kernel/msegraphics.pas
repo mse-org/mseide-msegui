@@ -857,7 +857,7 @@ type
    property gchandle: cardinal read getgchandle;
  end;
 
- pixmapstatety = (pms_monochrome,pms_ownshandle,pms_maskvalid);
+ pixmapstatety = (pms_monochrome,pms_ownshandle,pms_maskvalid,pms_nosave);
  pixmapstatesty = set of pixmapstatety;
 
  pixmapinfoty = record

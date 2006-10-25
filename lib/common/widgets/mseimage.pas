@@ -44,7 +44,7 @@ type
 implementation
 uses
  mseguiintf,msebits;
-
+ 
 { timage }
 
 constructor timage.create(aowner: tcomponent);

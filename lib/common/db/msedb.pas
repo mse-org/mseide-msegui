@@ -601,6 +601,7 @@ type
    procedure internalopen;
    procedure closequery(var amodalresult: modalresultty);
    procedure post; //calls post if in edit or insert state
+   function emptyinsert: boolean;
    function assql(const avalue: msestring): string; overload;
    function assql(const avalue: integer): string; overload;
    function assql(const avalue: realty): string; overload;
@@ -2864,6 +2865,17 @@ begin
  with tdataset(fowner) do begin;
   if state in dseditmodes then begin
    post;
+  end;
+ end;
+end;
+
+function tdscontroller.emptyinsert: boolean;
+begin
+ result:= false;
+ with tdataset1(fowner) do begin
+  if state = dsinsert then begin
+   DataEvent(deUpdateRecord,0);
+   result:= not modified;
   end;
  end;
 end;

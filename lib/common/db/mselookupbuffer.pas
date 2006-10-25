@@ -69,6 +69,7 @@ type
    fstate: lookupbufferstatesty;
    fcount: integer;
    fupdating: integer;
+   fonchange: notifyeventty;
    procedure checkindex(const index: integer);
    function getfieldcounttext: integer; virtual;
    function getfieldcountinteger: integer; virtual;
@@ -189,6 +190,7 @@ type
                                    read floatvaluephys;
    property textvalue[const fieldno,aindex: integer]: msestring 
                                    read textvaluephys;
+   property onchange: notifyeventty read fonchange write fonchange;
  end;
 
  tlookupbuffer = class(tcustomlookupbuffer)
@@ -203,6 +205,7 @@ type
    property fieldcounttext;
    property fieldcountinteger;
    property fieldcountfloat;
+   property onchange;
  end;
 
  lbdboptionty = (olbdb_closedataset,olbdb_invalidateonupdatedata);
@@ -248,6 +251,7 @@ type
   public
    constructor create(aowner: tcomponent); override;
   published
+   property onchange;
    property datasource;
    property textfields;
    property integerfields;
@@ -261,6 +265,7 @@ type
   public
    constructor create(aowner: tcomponent); override;
   published
+   property onchange;
    property datasource;
    property textfields;
    property integerfields;
@@ -749,6 +754,14 @@ begin
   else begin
    exclude(fstate,lbs_changed);
    sendchangeevent;
+   if canevent(tmethod(fonchange)) then begin
+    inc(fupdating);
+    try
+     fonchange(self);
+    finally
+     dec(fupdating);
+    end;
+   end;
   end;
  end;
 end;

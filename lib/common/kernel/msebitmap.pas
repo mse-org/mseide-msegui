@@ -1534,7 +1534,7 @@ begin
  inherited;
  filer.DefineBinaryProperty('image',{$ifdef FPC}@{$endif}readimage,
                                      {$ifdef FPC}@{$endif}writeimage,
-           (fsource = nil) and not isempty);
+           (fsource = nil) and not isempty and not (pms_nosave in fstate));
 end;
 
 procedure tmaskedbitmap.writeimage(stream: tstream);

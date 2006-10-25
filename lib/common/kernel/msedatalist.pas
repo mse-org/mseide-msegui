@@ -529,11 +529,20 @@ procedure insertitem(var dest: integerarty; index: integer; value: integer); ove
 procedure insertitem(var dest: realarty; index: integer; value: realty); overload;
 procedure insertitem(var dest: pointerarty; index: integer; value: pointer); overload;
 function removeitem(var dest: pointerarty; const aitem: pointer): integer;
+                                                overload;    
                         //returns removed index, -1 if none
 function finditem(const ar: pointerarty; const aitem: pointer): integer;
+                                                overload;
                            //-1 if none
 procedure moveitem(var dest: pointerarty; const sourceindex: integer;
-                       destindex: integer);
+                       destindex: integer); overload;
+function removeitem(var dest: integerarty; const aitem: integer): integer;
+                                            overload;
+                        //returns removed index, -1 if none
+function finditem(const ar: integerarty; const aitem: integer): integer;
+                                            overload; //-1 if none  
+procedure moveitem(var dest: integerarty; const sourceindex: integer;
+                       destindex: integer); overload;
 function stackarfunc(const ar1,ar2: integerarty): integerarty;
 procedure stackarray(const source: stringarty; var dest: stringarty); overload;
 procedure stackarray(const source: msestringarty; var dest: msestringarty); overload;
@@ -956,43 +965,43 @@ end;
 
 procedure additem(var dest: stringarty; const value: string);
 begin
- setlength(dest,length(dest)+1);
+ setlength(dest,high(dest)+2);
  dest[high(dest)]:= value;
 end;
 
 procedure additem(var dest: msestringarty; const value: msestring);
 begin
- setlength(dest,length(dest)+1);
+ setlength(dest,high(dest)+2);
  dest[high(dest)]:= value;
 end;
 
 procedure additem(var dest: integerarty; const value: integer);
 begin
- setlength(dest,length(dest)+1);
+ setlength(dest,high(dest)+2);
  dest[high(dest)]:= value;
 end;
 
 procedure additem(var dest: longboolarty; const value: longbool);
 begin
- setlength(dest,length(dest)+1);
+ setlength(dest,high(dest)+2);
  dest[high(dest)]:= value;
 end;
 
 procedure additem(var dest: booleanarty; const value: boolean);
 begin
- setlength(dest,length(dest)+1);
+ setlength(dest,high(dest)+2);
  dest[high(dest)]:= value;
 end;
 
 procedure additem(var dest: realarty; const value: real);
 begin
- setlength(dest,length(dest)+1);
+ setlength(dest,high(dest)+2);
  dest[high(dest)]:= value;
 end;
 
 procedure additem(var dest: pointerarty; const value: pointer);
 begin
- setlength(dest,length(dest)+1);
+ setlength(dest,high(dest)+2);
  dest[high(dest)]:= value;
 end;
 
@@ -1102,6 +1111,44 @@ begin
  po1:= dest[sourceindex];
  deleteitem(dest,sourceindex);
  insertitem(dest,destindex,po1);
+end;
+
+function removeitem(var dest: integerarty; const aitem: integer): integer;
+var
+ int1: integer;
+begin
+ result:= -1;
+ for int1:= 0 to high(dest) do begin
+  if dest[int1] = aitem then begin
+   result:= int1;
+   deleteitem(dest,int1);
+   break;
+  end;
+ end;
+end;
+
+function finditem(const ar: integerarty; const aitem: integer): integer;
+                           //-1 if none
+var
+ int1: integer;
+begin
+ result:= -1;
+ for int1:= 0 to high(ar) do begin
+  if ar[int1] = aitem then begin
+   result:= int1;
+   break;
+  end;
+ end;
+end;
+
+procedure moveitem(var dest: integerarty; const sourceindex: integer;
+                              destindex: integer);
+var
+ int1: integer;
+begin
+ int1:= dest[sourceindex];
+ deleteitem(dest,sourceindex);
+ insertitem(dest,destindex,int1);
 end;
 
 function stackarfunc(const ar1,ar2: integerarty): integerarty;
