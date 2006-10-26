@@ -397,6 +397,7 @@ type
     procedure parsevar;
     function parseclasstype: boolean;
     function parseinterfacetype: boolean;
+    function parserecord: boolean;
     function parseprocparams(const akind: tmethodkind;
                             var params: paraminfoarty): boolean;
     function parseclassprocedureheader(atoken: pascalidentty;
@@ -1497,6 +1498,28 @@ begin
  end;
 end;
 
+function tpascaldesignparser.parserecord: boolean;
+                //todo: parse subitems
+var
+ ident1: pascalidentty;
+ blocklevel: integer;
+begin
+ result:= true;
+ blocklevel:= 1;
+ while not eof and (blocklevel > 0) do begin
+  ident1:= pascalidentty(getident);
+  case ident1 of
+   id_end: begin
+    dec(blocklevel)
+   end;
+   id_begin,id_record: begin
+    inc(blocklevel)
+   end;
+  end;
+  nexttoken;
+ end;
+end;
+
 procedure tpascaldesignparser.parsetype;
 var
  statementstart: tokenidty;
@@ -1509,7 +1532,7 @@ begin
   ident1:= pascalidentty(getident);
   case ident1 of
    id_const,id_var,id_implementation,id_function,id_procedure,
-                    id_constructor,id_destructor: begin
+                    id_constructor,id_destructor,id_begin: begin
     lasttoken;
     break;
    end;
@@ -1539,7 +1562,12 @@ begin
         back;
        end;
       end;
-      id_procedure,id_function: begin //todo: parse recordtype
+      id_record: begin
+       parserecord;
+       funitinfopo^.deflist.add(lstringtostring(lstr1),syk_typedef,
+                  getsourcepos(statementstart),sourcepos);
+      end;
+      id_procedure,id_function: begin
        skipprocedureparams(ident1);
       end;
       else begin
@@ -1798,6 +1826,9 @@ var
         end;
         id_const: begin
          parseconst;
+        end;
+        id_type: begin
+         parsetype;
         end;
         id_procedure: begin
          parseprocedure(mkprocedure);
