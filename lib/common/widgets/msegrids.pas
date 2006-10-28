@@ -100,7 +100,8 @@ const
  co_nohscroll];
  notfixcoloptions = [co_fixwidth,co_fixpos,co_fill,co_proportional,co_nohscroll,
                      co_rowdatachange];
- defaultoptionsgrid = [og_autopopup,og_colchangeontabkey,og_focuscellonenter];
+ defaultoptionsgrid = [og_autopopup,og_colchangeontabkey,og_focuscellonenter,
+                                   og_mousescrollcol];
 
  mousescrolldist = 5;
  griddefaultcolwidth = 50;
@@ -114,7 +115,7 @@ const
  wholerowselectedmask = $80000000;
  defaultselectedcellcolor = cl_active;
  defaultdatacoloptions = [{co_selectedcolor,}co_savestate,co_savevalue,
-                          co_rowfont,co_rowcolor,co_zebracolor];
+                          co_rowfont,co_rowcolor,co_zebracolor,co_mousescrollrow];
  defaultfixcoltextflags = [tf_ycentered,tf_xcentered];
  defaultstringcoleditoptions = [scoe_undoonesc,scoe_autoselect,
                                   scoe_autoselectonfirstclick,scoe_eatreturn];
@@ -8264,7 +8265,7 @@ begin
    end;
   end
   else begin
-   scrollrows(-1);
+   scrollrows(1);
   end;
  end
  else begin
@@ -8275,7 +8276,7 @@ begin
     end;
    end
    else begin
-    scrollrows(1);
+    scrollrows(-1);
    end;
   end
   else begin
@@ -8286,7 +8287,7 @@ begin
      end;
     end
     else begin
-     scrollleft;
+     scrollright;
     end;
    end
    else begin
@@ -8297,7 +8298,7 @@ begin
       end;
      end
      else begin
-      scrollright;
+      scrollleft;
      end;
     end
    end;
