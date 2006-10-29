@@ -281,6 +281,8 @@ type
    procedure redo;
    function canundo: boolean;
    function canredo: boolean;
+   procedure lowercase; //selection -> lowercase;
+   procedure uppercase; //selection -> uppercase
   published
    property maxundocount: integer read getmaxundocount write
                   setmaxundocount default defaultundomaxcount;
@@ -1891,6 +1893,38 @@ begin
  internalclearselection;
  include(fstate,tes_selectinvalid);
  fselectstart:= selectstartpos;
+end;
+
+procedure tundotextedit.lowercase;
+var
+ mstr1: msestring;
+begin
+ if hasselection then begin
+  tundoinplaceedit(feditor).begingroup;
+  try
+   mstr1:= selectedtext;
+   deleteselection;
+   inserttext(mselowercase(mstr1),true);
+  finally
+   tundoinplaceedit(feditor).endgroup;
+  end;
+ end;
+end;
+
+procedure tundotextedit.uppercase;
+var
+ mstr1: msestring;
+begin
+ if hasselection then begin
+  tundoinplaceedit(feditor).begingroup;
+  try
+   mstr1:= selectedtext;
+   deleteselection;
+   inserttext(mseuppercase(mstr1),true);
+  finally
+   tundoinplaceedit(feditor).endgroup;
+  end;
+ end;
 end;
 
 end.

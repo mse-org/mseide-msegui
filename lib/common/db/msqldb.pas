@@ -21,7 +21,9 @@ unit msqldb;
 
 interface
 
-uses SysUtils, Classes, DB, mbufdataset, msetypes;
+uses SysUtils,Classes,DB, 
+         {$ifdef mse_bufdataset}msebufdataset{$else}mbufdataset{$endif},
+         msetypes;
 
 type TSchemaType = (stNoSchema,stTables,stSysTables,stProcedures,stColumns,
                     stProcedureParams,stIndexes,stPackages);
@@ -182,7 +184,8 @@ type
                               const aparam: tparam);
  end;
 
-  TSQLQuery = class (Tmbufdataset)
+  TSQLQuery = class ({$ifdef mse_bufdataset}tmsebufdataset
+                        {$else}Tmbufdataset{$endif})
   private
     FCursor              : TSQLCursor;
     FUpdateable          : boolean;
@@ -680,19 +683,24 @@ begin
 end;
 
 procedure TSQLQuery.SetDatabase(Value : TDatabase);
-
-var db : tsqlconnection;
-
+var 
+ db: tsqlconnection;
 begin
-  if (Database <> Value) then
-    begin
-    UnPrepare;
-    if assigned(FCursor) then (Database as TSQLConnection).DeAllocateCursorHandle(FCursor);
-    db := value as tsqlconnection;
-    inherited setdatabase(value);
-    if assigned(value) and (Transaction = nil) and (Assigned(db.Transaction)) then
-      transaction := Db.Transaction;
-    end;
+ if (Database <> Value) then begin
+  if (value <> nil) and not (value is tsqlconnection) then begin
+   exception.create(name+': Database must be tsqlconnection.');
+  end;
+  UnPrepare;
+  if assigned(FCursor) then begin
+   TSQLConnection(database).DeAllocateCursorHandle(FCursor);
+  end;
+  db:= value as tsqlconnection;
+  inherited setdatabase(value);
+  if assigned(value) and (Transaction = nil) and 
+                  (Assigned(db.Transaction)) then begin
+   transaction:= Db.Transaction;
+  end;
+ end;
 end;
 
 Function TSQLQuery.IsPrepared : Boolean;
@@ -821,11 +829,14 @@ end;
 
 function TSQLQuery.Fetch : boolean;
 begin
-  if not (Fcursor.FStatementType in [stSelect]) then
-    Exit;
-
-  if not FIsEof then FIsEOF := not (Database as tsqlconnection).Fetch(Fcursor);
-  Result := not FIsEOF;
+ if not (Fcursor.FStatementType in [stSelect]) then begin
+  result:= false;
+  Exit;
+ end;
+ if not FIsEof then begin
+  FIsEOF:= not tsqlconnection(database).Fetch(Fcursor);
+ end;
+ Result := not FIsEOF;
 end;
 
 procedure TSQLQuery.Execute;
@@ -838,7 +849,7 @@ end;
 function TSQLQuery.LoadField(FieldDef : TFieldDef;buffer : pointer) : boolean;
 
 begin
-  result := (Database as tSQLConnection).LoadField(FCursor,FieldDef,buffer)
+ result:= tSQLConnection(database).LoadField(FCursor,FieldDef,buffer)
 end;
 
 procedure TSQLQuery.InternalAddRecord(Buffer: Pointer; AAppend: Boolean);
@@ -1262,7 +1273,7 @@ Procedure TSQLQuery.UpdateIndexDefs;
 
 begin
   if assigned(DataBase) then
-    (DataBase as TSQLConnection).UpdateIndexDefs(FIndexDefs,FTableName);
+    TSQLConnection(database).UpdateIndexDefs(FIndexDefs,FTableName);
 end;
 
 Procedure TSQLQuery.internalApplyRecUpdate(UpdateKind : TUpdateKind);

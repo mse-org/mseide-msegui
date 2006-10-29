@@ -832,6 +832,7 @@ type
 
    function regionisempty(const region: regionty): boolean;
    function regionclipbox(const region: regionty): rectty;
+                 //returns nullrect if region = 0
 
    property origin: pointty read getorigin write setorigin;
    property clipregion: regionty {read getclipregion} write setclipregion;
@@ -3938,10 +3939,15 @@ end;
 
 function tcanvas.regionclipbox(const region: regionty): rectty;
 begin
- with fdrawinfo.regionoperation do begin
-  source:= region;
-  gdi(gdi_regionclipbox);
-  result:= rect;
+ if region <> 0 then begin
+  with fdrawinfo.regionoperation do begin
+   source:= region;
+   gdi(gdi_regionclipbox);
+   result:= rect;
+  end;
+ end
+ else begin
+  result:= nullrect;
  end;
 end;
 

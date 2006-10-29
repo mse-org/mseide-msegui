@@ -11,7 +11,8 @@ unit msesqldb;
 {$ifdef FPC}{$mode objfpc}{$h+}{$INTERFACES CORBA}{$endif}
 interface
 uses
- classes,db,mbufdataset,msqldb,msedb,mseclasses,msetypes,mseguiglob;
+ classes,db,{$ifdef mse_bufdataset}msebufdataset{$else}mbufdataset{$endif},
+                   msqldb,msedb,mseclasses,msetypes,mseguiglob;
   
 type
 
@@ -65,8 +66,7 @@ type
    procedure setindexdefs(const avalue: TIndexDefs);
    function getetstatementtype: TStatementType;
    procedure setstatementtype(const avalue: TStatementType);
-   procedure afterapply;
-   
+   procedure afterapply;   
   protected
    procedure updateindexdefs; override;
    procedure sqlonchange(sender: tobject);
@@ -117,11 +117,11 @@ type
                  const options: locateoptionsty = []): locateresultty;
    procedure appendrecord(const values: array of const);
    procedure post; override;
-   procedure applyupdates(maxerrors: integer); override;
-   procedure applyupdate; //applies current record
+   procedure applyupdates(const maxerrors: integer;
+                     const cancelonerror: boolean); override; overload;
+   procedure applyupdates(const maxerrors: integer = 0); override; overload;
+   procedure applyupdate; overload;
    procedure cancel; override;
-   procedure cancelupdates; override;
-   procedure cancelupdate; //cancels current record
    function moveby(const distance: integer): integer;
   published
    property FieldDefs;
@@ -867,26 +867,33 @@ begin
  end;
 end;
 
-procedure tmsesqlquery.applyupdates(maxerrors: integer);
+procedure tmsesqlquery.applyupdates(const maxerrors: integer;
+                const cancelonerror: boolean = false);
 var
  bm1: pchar;
 begin
- checkbrowsemode;
- disablecontrols;
  try
   fmstate:= fmstate - [sqs_updateabort,sqs_updateerror];
-  internalapplyupdates(maxerrors,dso_cancelupdateonerror in fcontroller.options);
+  inherited;
  finally
   if (sqs_updateerror in fmstate) and 
               (dso_cancelupdatesonerror in fcontroller.options) then begin
    cancelupdates;
   end;
-  enablecontrols;
-  dataevent(dedatasetchange,0);
  end;
- afterapply;
 end;
 
+procedure tmsesqlquery.applyupdates(const maxerrors: integer = 0);
+begin
+ applyupdates(maxerrors,dso_cancelupdateonerror in fcontroller.options);
+end;
+
+procedure tmsesqlquery.applyupdate;
+begin
+ inherited applyupdate(dso_cancelupdateonerror in fcontroller.options);
+end;
+
+{
 procedure tmsesqlquery.applyupdate; //applies current record
 var
  response: tresolverresponse;
@@ -910,6 +917,7 @@ begin
   end;
  end;
 end;
+}
 {
 procedure tmsesqlquery.cancelrecupdate(var arec: trecupdatebuffer);
      //copied from bufdataset.inc
@@ -957,7 +965,7 @@ begin
  end;
 end;
 }
-
+{
 procedure tmsesqlquery.cancelupdates;
 var 
  int1: integer;
@@ -974,30 +982,7 @@ begin
   end;
  end;
 end;
-
-procedure tmsesqlquery.cancelupdate;
-var 
- int1: integer;
-begin
- cancel;
- checkbrowsemode;
- with tbufdatasetcracker(self) do begin
-  if (fupdatebuffer <> nil) and (fcurrentrecbuf <> nil) then begin
-   for int1:= high(fupdatebuffer) downto 0 do begin
-    if fupdatebuffer[int1].bookmarkdata = fcurrentrecbuf then begin
-     cancelrecupdate(fupdatebuffer[int1]);
-     deleteitem(fupdatebuffer,typeinfo(trecordsupdatebuffer),int1);
-     if int1 <= fapplyindex then begin
-      dec(fapplyindex);
-     end;
-     resync([]);
-     break;
-    end;
-   end;
-  end;
- end;
-end;
-
+}
 function tmsesqlquery.getreadonly: boolean;
 begin
  result:= inherited readonly;

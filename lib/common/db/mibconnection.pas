@@ -3,7 +3,7 @@ unit mIBConnection;
 {$mode objfpc}{$H+}
 
 {$Define LinkDynamically}
-
+{$R-}
 interface
 
 uses
@@ -486,7 +486,7 @@ begin
           SQLData := AllocMem(in_SQLDA^.SQLVar[x].SQLLen);
         if (sqltype and 1) = 1 then New(SQLInd);
         end;
-      {$R+}
+//      {$R+}
       end;
     if FStatementType = stselect then
       begin
@@ -508,7 +508,7 @@ begin
           SQLData := AllocMem(SQLDA^.SQLVar[x].SQLLen);
         if (SQLType and 1) = 1 then New(SQLInd);
         end;
-      {$R+}
+//      {$R+}
       end;
     end;
 end;
@@ -542,7 +542,7 @@ begin
         end
         
       end;
-{$R+}
+//{$R+}
 end;
 
 procedure TIBConnection.FreeFldBuffers(cursor : TSQLCursor);
@@ -589,7 +589,7 @@ begin
    end;
   end;
  end;
-  {$R+}
+//  {$R+}
 end;
 
 function TIBConnection.GetHandle: pointer;
@@ -639,7 +639,7 @@ begin
           i := AParams[ParNr].AsInteger;
           {$R-}
           Move(i, in_sqlda^.SQLvar[SQLVarNr].SQLData^, in_SQLDA^.SQLVar[SQLVarNr].SQLLen);
-          {$R+}
+//          {$R+}
           end;
         ftString,ftFixedChar  :
           begin
@@ -658,29 +658,29 @@ begin
             CurrBuff := in_sqlda^.SQLvar[SQLVarNr].SQLData;
 
           Move(s[1], CurrBuff^, length(s));
-          {$R+}
+//          {$R+}
           end;
         ftDate, ftTime, ftDateTime:
           {$R-}
           SetDateTime(in_sqlda^.SQLvar[SQLVarNr].SQLData, AParams[ParNr].AsDateTime, in_SQLDA^.SQLVar[SQLVarNr].SQLType);
-          {$R+}
+//          {$R+}
         ftLargeInt,ftblob,ftmemo:
           begin
           li := AParams[ParNr].AsLargeInt;
           {$R-}
           Move(li, in_sqlda^.SQLvar[SQLVarNr].SQLData^, in_SQLDA^.SQLVar[SQLVarNr].SQLLen);
-          {$R+}
+//          {$R+}
           end;
         ftFloat:
           {$R-}
           SetFloat(in_sqlda^.SQLvar[SQLVarNr].SQLData, AParams[ParNr].AsFloat, in_SQLDA^.SQLVar[SQLVarNr].SQLLen);
-          {$R+}
+//          {$R+}
       else
         DatabaseErrorFmt(SUnsupportedParameter,[Fieldtypenames[AParams[ParNr].DataType]],self);
       end {case}
       end;
     end;
-{$R+}
+//{$R+}
 end;
 
 function TIBConnection.LoadField(cursor : TSQLCursor;FieldDef : TfieldDef;buffer : pointer) : boolean;
@@ -755,7 +755,7 @@ begin
       else result := false;
       end;
       end;
-{$R+}
+//{$R+}
     end;
 end;
 

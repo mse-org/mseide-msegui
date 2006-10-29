@@ -54,6 +54,8 @@ type
    print: taction;
    detachtarget: taction;
    attachprocess: taction;
+   lowercase: taction;
+   uppercase: taction;
    toggleformunit: taction;
    unindent: taction;
    undo: taction;
@@ -95,6 +97,9 @@ type
 
    procedure indentonexecute(const sender: TObject);
    procedure unindentonexecute(const sender: TObject);
+   procedure lowercaseexecute(const sender: TObject);
+   procedure uppercaseexecute(const sender: TObject);
+   procedure enableonselect(const sender: tcustomaction);
 
    procedure lineactonexecute(const sender: TObject);
    procedure findactonexecute(const sender: tobject);
@@ -284,6 +289,21 @@ end;
 procedure tactionsmo.unindentonexecute(const sender: TObject);
 begin
  sourcefo.activepage.edit.unindent(projectoptions.blockindent);
+end;
+
+procedure tactionsmo.lowercaseexecute(const sender: TObject);
+begin
+ sourcefo.activepage.edit.lowercase;
+end;
+
+procedure tactionsmo.uppercaseexecute(const sender: TObject);
+begin
+ sourcefo.activepage.edit.uppercase;
+end;
+
+procedure tactionsmo.enableonselect(const sender: tcustomaction);
+begin
+ sender.enabled:= sourcefo.activepage.edit.hasselection;
 end;
 
 procedure tactionsmo.lineactonexecute(const sender: TObject);
