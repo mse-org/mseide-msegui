@@ -687,6 +687,8 @@ type
    function getgridvalues: realarty;
    procedure setgridvalues(const Value: realarty);
    procedure setscale(const Value: real);
+   function getasinteger: integer;
+   procedure setasinteger(const avalue: integer);
   protected
    fisdb: boolean;
    procedure texttovalue(var accept: boolean; const quiet: boolean); override;
@@ -702,6 +704,8 @@ type
    constructor create(aowner: tcomponent); override;
    procedure fillcol(const value: realty);
    procedure assigncol(const value: trealdatalist);
+   function isnull: boolean;
+   property asinteger: integer read getasinteger write setasinteger;
    property onsetvalue: setrealeventty read fonsetvalue write fonsetvalue;
    property value: realty read fvalue write setvalue stored false;
    property formatedit: string read fformatedit write setformatedit;
@@ -765,6 +769,7 @@ type
    constructor create(aowner: tcomponent); override;
    procedure fillcol(const value: tdatetime);
    procedure assigncol(const value: trealdatalist);
+   function isnull: boolean;
    property onsetvalue: setdatetimeeventty read fonsetvalue write fonsetvalue;
    property value: tdatetime read fvalue write setvalue stored false;
    property formatedit: string read fformatedit write setformatedit;
@@ -3357,6 +3362,26 @@ begin
  internalassigncol(value);
 end;
 
+function tcustomrealedit.getasinteger: integer;
+begin
+ if isnull then begin
+  result:= 0;
+ end
+ else begin
+  result:= round(value);
+ end;
+end;
+
+procedure tcustomrealedit.setasinteger(const avalue: integer);
+begin
+ value:= avalue;
+end;
+
+function tcustomrealedit.isnull: boolean;
+begin
+ result:= isemptyreal(value);
+end;
+
 { tcustomdatetimeedit }
 
 constructor tcustomdatetimeedit.create(aowner: tcomponent);
@@ -3613,6 +3638,11 @@ end;
 function tcustomdatetimeedit.isempty(const atext: msestring): boolean;
 begin
  result:= (atext <> ' ') and inherited isempty(atext);
+end;
+
+function tcustomdatetimeedit.isnull: boolean;
+begin
+ result:= isemptydatetime(value);
 end;
 
 { tcustomcalendardatetimeedit }

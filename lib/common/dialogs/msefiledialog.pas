@@ -1138,12 +1138,18 @@ end;
 
 procedure tfiledialogcontroller.readstatstate(const reader: tstatreader);
 begin
- flastdir:= reader.readstring('lastdir',filename);
+ flastdir:= reader.readstring('lastdir',filedir(filename));
  if fhistorymaxcount > 0 then begin
   fhistory:= reader.readarray('filehistory',fhistory);
  end;
  ffilterindex:= reader.readinteger('filefilterindex',ffilterindex);
  fcolwidth:= reader.readinteger('filecolwidth',fcolwidth);
+ if fdo_chdir in foptions then begin
+  try
+   setcurrentdir(flastdir);
+  except
+  end;
+ end;
 end;
 
 procedure tfiledialogcontroller.readstatoptions(const reader: tstatreader);
@@ -1331,6 +1337,7 @@ begin
   end;
  end;
  if fdo_relative in foptions then begin
+  flastdir:= getcurrentdir;
   for int1:= 0 to high(ffilenames) do begin
    ffilenames[int1]:= relativepath(filenames[int1],'',akind);
   end;
