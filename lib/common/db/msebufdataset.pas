@@ -160,8 +160,8 @@ type
    procedure clearindex;
    procedure checkindexsize;    
    procedure appendrecord(const arecord: recordty);
-   procedure insertrecord(const arecord: recordty);
-   procedure deleterecord;    
+   procedure insertrecord(arecno: integer; const arecord: recordty);
+   procedure deleterecord(const arecno: integer);    
    procedure getnewupdatebuffer;
   protected
    fapplyindex: integer; //take care about canceled updates while applying
@@ -504,19 +504,14 @@ end;
 
 procedure tmsebufdataset.internalfirst;
 begin
- if fbrecordcount <= 0 then begin
-  frecno:= -1;
- end
- else begin
-  frecno:= 0;
- end;
+ internalsetrecno(-1);
 end;
 
 procedure tmsebufdataset.internallast;
 begin
  repeat
  until (getnextpacket < fpacketrecords) or (fpacketrecords = -1);
- frecno:= fbrecordcount-1;
+ internalsetrecno(fbrecordcount)
 end;
 
 function tmsebufdataset.getrecord(buffer: pchar; getmode: tgetmode;
@@ -919,7 +914,7 @@ begin
    end;
   end;
  end;
- deleterecord;
+ deleterecord(frecno);
 //  dec(fbrecordcount);
  fupdatebuffer[fcurrentupdatebuffer].updatekind := ukdelete;
 end;
@@ -941,14 +936,12 @@ begin
    end
    else begin
     if updatekind = ukdelete then begin
- //       inc(fbrecordcount);
- //!!!!!!!!!! todo restore record
+     insertrecord(bookmark.recno,bookmark.recordpo^);
     end
     else begin
      if updatekind = ukinsert then begin
       intfreerecord(bookmark.recordpo);
- //        dec(fbrecordcount);
- //!!!!!!!!!! todo delete record
+      deleterecord(bookmark.recno);
      end;
     end;
    end;
@@ -1216,7 +1209,7 @@ begin
  end;
  if state = dsInsert then begin
   recbuf:= intallocrecord;
-  insertrecord(recbuf^);
+  insertrecord(frecno,recbuf^);
   // Link the newly created record buffer to the newly created TDataset record
   with PBufBookmarkty(ActiveBuffer + FRecordSize)^ do  begin
    data.recordpo:= recbuf;
@@ -1529,7 +1522,7 @@ end;
 
 procedure tmsebufdataset.checkindexsize;
 begin
- if high(frecnoindex.ind) >= fbrecordcount - 1 then begin
+ if high(frecnoindex.ind) <= fbrecordcount - 1 then begin
   setlength(frecnoindex.ind,(high(frecnoindex.ind)+17)*2);
  end;
 end;
@@ -1539,16 +1532,35 @@ begin
  checkindexsize;
  frecnoindex.ind[fbrecordcount]:= @arecord;
  inc(fbrecordcount);
+ fcurrentrecord:= @arecord;
 end;
 
-procedure tmsebufdataset.insertrecord(const arecord: recordty);
+procedure tmsebufdataset.insertrecord(arecno: integer; const arecord: recordty);
 begin
+ if arecno < 0 then begin
+  arecno:= 0;
+ end;
+ insertitem(frecnoindex.ind,arecno,@arecord);
  inc(fbrecordcount);
+ if frecno > arecno then begin
+  inc(frecno);
+ end;
+ fcurrentrecord:= frecnoindex.ind[frecno];
 end;
 
-procedure tmsebufdataset.deleterecord;
+procedure tmsebufdataset.deleterecord(const arecno: integer);
 begin
+ deleteitem(frecnoindex.ind,arecno);
  dec(fbrecordcount);
+ if frecno > arecno then begin
+  dec(frecno);
+ end;
+ if frecno < 0 then begin
+  fcurrentrecord:= nil;
+ end
+ else begin
+  fcurrentrecord:= frecnoindex.ind[frecno];
+ end;
 end;
 
 procedure tmsebufdataset.clearindex;
@@ -1560,7 +1572,7 @@ end;
 procedure tmsebufdataset.internalsetrecno(const avalue: integer);
 begin
  frecno:= avalue;
- if avalue < 0 then begin
+ if (avalue < 0) or (avalue >= fbrecordcount)  then begin
   fcurrentrecord:= nil;
  end
  else begin
