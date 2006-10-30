@@ -176,8 +176,7 @@ type
    
    function CreateBlobStream(Field: TField; Mode: TBlobStreamMode): TStream; override;
    procedure internalapplyupdate(const maxerrors: integer;
-                const cancelonerror: boolean; 
-                var arec: recupdatebufferty; var response: tresolverresponse);
+                const cancelonerror: boolean; var response: tresolverresponse);
    procedure afterapply; virtual;
     procedure freeblob(const ablob: blobinfoty);
     procedure freeblobs(var ablobs: blobinfoarty);
@@ -480,6 +479,7 @@ var
  int1: integer;
 begin
  fopen:= false;
+ frecno:= -1;
  with frecnoindex do begin
   for int1:= 0 to high(ind) do begin
    intfreerecord(ind[int1]);
@@ -572,18 +572,23 @@ var
  int1: integer;
  bmda: bookmarkdataty;
 begin
- getbookmarkdata(activebuffer,@bmda);
- if (fcurrentupdatebuffer >= length(fupdatebuffer)) or 
-      (fupdatebuffer[fcurrentupdatebuffer].bookmark.recordpo <> bmda.recordpo) then begin
-  for int1:= 0 to high(fupdatebuffer) do begin
-   if fupdatebuffer[int1].bookmark.recordpo = bmda.recordpo then begin
-    fcurrentupdatebuffer:= int1;
-    break;
+ if bs_applying in fbstate then begin
+  result:= true; //fcurrentupdatebuffer is valid
+ end
+ else begin
+  getbookmarkdata(activebuffer,@bmda);
+  if (fcurrentupdatebuffer >= length(fupdatebuffer)) or 
+       (fupdatebuffer[fcurrentupdatebuffer].bookmark.recordpo <> bmda.recordpo) then begin
+   for int1:= 0 to high(fupdatebuffer) do begin
+    if fupdatebuffer[int1].bookmark.recordpo = bmda.recordpo then begin
+     fcurrentupdatebuffer:= int1;
+     break;
+    end;
    end;
   end;
+  result:= (fcurrentupdatebuffer <= high(fupdatebuffer))  and 
+         (fupdatebuffer[fcurrentupdatebuffer].bookmark.recordpo = bmda.recordpo);
  end;
- result:= (fcurrentupdatebuffer <= high(fupdatebuffer))  and 
-        (fupdatebuffer[fcurrentupdatebuffer].bookmark.recordpo = bmda.recordpo);
 end;
 
 procedure tmsebufdataset.internalsettorecord(buffer: pchar);
@@ -994,14 +999,13 @@ begin
 end;
 
 procedure tmsebufdataset.internalapplyupdate(const maxerrors: integer;
-               const cancelonerror: boolean;
-               var arec: recupdatebufferty; var response: tresolverresponse);
+               const cancelonerror: boolean; var response: tresolverresponse);
                
  procedure checkcancel;
  begin
   if cancelonerror then begin
-   cancelrecupdate(arec);
-   arec.bookmark.recordpo:= nil;
+   cancelrecupdate(fupdatebuffer[fcurrentupdatebuffer]);
+   fupdatebuffer[fcurrentupdatebuffer].bookmark.recordpo:= nil;
    resync([]);
   end;
  end;
@@ -1012,7 +1016,7 @@ var
 begin
  include(fbstate,bs_applying);
  try
-  with arec do begin
+  with fupdatebuffer[fcurrentupdatebuffer] do begin
    move(bookmark.recordpo^.header,fnewvaluebuffer^,frecordsize);
    getcalcfields(pchar(fnewvaluebuffer));
    Response:= rrApply;
@@ -1069,8 +1073,8 @@ begin
  checkbrowsemode;
  if getrecordupdatebuffer then begin
   ffailedcount:= 0;
-  internalapplyupdate(0,cancelonerror,
-                      fupdatebuffer[fcurrentupdatebuffer],response);
+  int1:= fcurrentupdatebuffer;
+  internalapplyupdate(0,cancelonerror,response);
   if response = rrapply then begin
    afterapply;
    deleteitem(fupdatebuffer,typeinfo(recupdatebufferarty),int1);
@@ -1098,8 +1102,9 @@ begin
   fFailedCount := 0;
   Response := rrApply;
   while (fapplyindex <= high(FUpdateBuffer)) and (Response <> rrAbort) do begin
-   if FUpdateBuffer[fapplyindex].Bookmark.recordpo <> nil then begin
-    internalapplyupdate(maxerrors,cancelonerror,FUpdateBuffer[fapplyindex],response);
+   fcurrentupdatebuffer:= fapplyindex;
+   if FUpdateBuffer[fcurrentupdatebuffer].Bookmark.recordpo <> nil then begin
+    internalapplyupdate(maxerrors,cancelonerror,response);
    end;
    inc(fapplyindex);
   end;

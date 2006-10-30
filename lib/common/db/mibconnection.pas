@@ -599,15 +599,15 @@ end;
 
 function TIBConnection.Fetch(cursor : TSQLCursor) : boolean;
 var
-  retcode : integer;
+ retcode: integer;
 begin
-  with cursor as TIBCursor do
-    begin
-    retcode := isc_dsql_fetch(@Status, @Statement, 1, SQLDA);
-    if (retcode <> 0) and (retcode <> 100) then
-      CheckError('Fetch', Status);
-    end;
-  Result := (retcode <> 100);
+ with TIBCursor(cursor) do begin
+  retcode:= isc_dsql_fetch(@Status,@Statement,1,SQLDA);
+  if (retcode <> 0) and (retcode <> 100) then begin
+   CheckError('Fetch',Status);
+  end;
+ end;
+ Result:= (retcode <> 100);
 end;
 
 procedure TIBConnection.SetParameters(cursor : TSQLCursor;AParams : TParams);
@@ -693,8 +693,7 @@ var
   c            : currency;
 
 begin
-  with cursor as TIBCursor do
-    begin
+ with TIBCursor(cursor) do begin
 {$R-}
     for x := 0 to SQLDA^.SQLD - 1 do
       if SQLDA^.SQLVar[x].AliasName = FieldDef.Name then break;
@@ -756,7 +755,7 @@ begin
       end;
       end;
 //{$R+}
-    end;
+ end;
 end;
 
 procedure TIBConnection.GetDateTime(CurrBuff, Buffer : pointer; AType : integer);
