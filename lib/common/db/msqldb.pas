@@ -21,9 +21,7 @@ unit msqldb;
 
 interface
 
-uses SysUtils,Classes,DB, 
-         {$ifdef mse_bufdataset}msebufdataset{$else}mbufdataset{$endif},
-         msetypes;
+uses SysUtils,Classes,DB,msebufdataset,msetypes;
 
 type TSchemaType = (stNoSchema,stTables,stSysTables,stProcedures,stColumns,
                     stProcedureParams,stIndexes,stPackages);
@@ -184,8 +182,7 @@ type
                               const aparam: tparam);
  end;
 
-  TSQLQuery = class ({$ifdef mse_bufdataset}tmsebufdataset
-                        {$else}Tmbufdataset{$endif})
+  TSQLQuery = class (tmsebufdataset)
   private
     FCursor              : TSQLCursor;
     FUpdateable          : boolean;
