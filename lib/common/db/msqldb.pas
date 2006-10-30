@@ -186,7 +186,6 @@ type
   private
     FCursor              : TSQLCursor;
     FUpdateable          : boolean;
-    FTableName           : string;
     FSQL                 : TStringList;
     FUpdateSQL,
     FInsertSQL,
@@ -194,7 +193,6 @@ type
     FIsEOF               : boolean;
     FLoadingFieldDefs    : boolean;
     FIndexDefs           : TIndexDefs;
-    FReadOnly            : boolean;
     FUpdateMode          : TUpdateMode;
     FParams              : TParams;
     FusePrimaryKeyAsKey  : Boolean;
@@ -228,6 +226,8 @@ type
     procedure ApplyFilter;
     Function AddFilter(SQLstr : string) : string;
   protected
+    FTableName           : string;
+    FReadOnly            : boolean;
     // abstract & virtual methods of TBufDataset
     function Fetch : boolean; override;
     function LoadField(FieldDef : TFieldDef;buffer : pointer) : boolean; override;

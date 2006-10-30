@@ -258,7 +258,7 @@ implementation
 uses
  msestrings,dbconst,msesysutils,typinfo,sysutils,msedatalist;
  
-type 
+//type 
 {
   TBufDatasetcracker = class(TDBDataSet)
   private
@@ -280,7 +280,8 @@ type
     FOnUpdateError  : TResolverErrorEvent;
 
   end;
- } 
+ }
+ { 
   TSQLQuerycracker = class (Tmsebufdataset)
   private
     FCursor              : TSQLCursor;
@@ -309,6 +310,7 @@ type
     FDeleteQry,
     FInsertQry           : TSQLQuery;
   end;
+  }
 {  
 function GetFieldIsNull(NullMask : pbyte;x : longint) : boolean; //inline;
 begin
@@ -476,6 +478,7 @@ procedure tmsesqlquery.internalopen;
 begin
  fcontroller.internalopen;
  bindfields(true);
+ {
      //queries are nil if not defaultfields
  with tsqlquerycracker(self) do begin
   if fupdateable then begin
@@ -484,6 +487,7 @@ begin
    initmodifyquery(finsertqry,insertsql);
   end;
  end;  
+ }
 end;
 
 procedure tmsesqlquery.internalclose;
@@ -504,7 +508,7 @@ begin
  end;
  fonapplyrecupdate:= avalue;
  if not assigned(avalue) and not inherited parsesql then begin
-  tsqlquerycracker(self).freadonly:= true;
+  freadonly:= true;
  end;
 end;
 
@@ -546,7 +550,7 @@ function tmsesqlquery.recupdatesql(updatekind: tupdatekind): string;
    end;
    setlength(sql_set,length(sql_set)-1);
    setlength(sql_where,length(sql_where)-5);
-   result:= 'update ' + tsqlquerycracker(self).ftablename + 
+   result:= 'update ' + ftablename + 
          ' set ' + sql_set + ' where ' + sql_where;
   end;
 
@@ -567,7 +571,7 @@ function tmsesqlquery.recupdatesql(updatekind: tupdatekind): string;
    end;
    setlength(sql_fields,length(sql_fields)-1);
    setlength(sql_values,length(sql_values)-1);
-   result := 'insert into ' + tsqlquerycracker(self).ftablename + 
+   result := 'insert into ' + ftablename + 
                ' (' + sql_fields + ') values (' + sql_values + ')';
   end;
 
@@ -581,7 +585,7 @@ function tmsesqlquery.recupdatesql(updatekind: tupdatekind): string;
     updatewherepart(sql_where,x);
    end;
    setlength(sql_where,length(sql_where)-5);
-   result := 'delete from ' + tsqlquerycracker(self).ftablename +
+   result := 'delete from ' + ftablename +
                      ' where ' + sql_where;
   end;
 
@@ -1003,7 +1007,7 @@ begin
    databaseerrorfmt(snoparsesql,['Updating ']);
   end;
  end;
- tsqlquerycracker(self).freadonly:= avalue;
+ freadonly:= avalue;
 end;
 
 procedure tmsesqlquery.setparsesql(const avalue: boolean);
@@ -1013,7 +1017,7 @@ begin
  bo1:= inherited readonly;
  inherited parsesql:= avalue;
  if not bo1 and assigned(fonapplyrecupdate) then begin
-  tsqlquerycracker(self).freadonly:= false;
+  freadonly:= false;
  end;
 end;
 
