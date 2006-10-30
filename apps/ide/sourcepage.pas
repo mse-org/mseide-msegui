@@ -81,6 +81,7 @@ type
    procedure showlink(const apos: gridcoordty);
    procedure showsourcehint(const apos: gridcoordty; const values: stringarty);
    procedure textnotfound;
+   procedure setsyntaxdef(const value: filenamety);
   protected
    finitialfilepath: filenamety;
    finitialeditpos: gridcoordty;
@@ -280,19 +281,24 @@ begin
  end;
 end;
 
+procedure tsourcepage.setsyntaxdef(const value: filenamety);
+begin
+ try
+  edit.setsyntaxdef(value);
+ except
+  on e: exception do begin
+   handleerror(e,'Syntaxdeffile:');
+  end;
+ end;
+end;
+
 procedure tsourcepage.loadfile(const value: filenamety);
 begin
  inc(ffileloading);
  try
   edit.loadfromfile(value);
   finitialfilepath:= edit.filename;
-  try
-   edit.setsyntaxdef(value);
-  except
-   on e: exception do begin
-    handleerror(e,'Syntaxdeffile:');
-   end;
-  end;
+  setsyntaxdef(value);
   updatebreakpointicons;
   if mainfo.gdb.execloaded and actionsmo.bluedotsonact.checked then begin
    updatedebuglines;
@@ -766,6 +772,7 @@ begin
  createbackupfile(newname,edit.filename,fbackupcreated,
                             projectoptions.backupfilecount);
  edit.savetofile(newname);
+ setsyntaxdef(newname);
 { 
 checklist:= tmsestringdatalist.create;
 checklist.loadfromfile(newname);
