@@ -9,6 +9,8 @@ object sourcefo: tsourcefo
   frame.dummy = 0
   visible = False
   container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_mousetransparent, ow_destroywidgets, ow_autoscale]
+  container.bounds_x = 0
+  container.bounds_y = 0
   container.bounds_cx = 423
   container.bounds_cy = 327
   container.frame.sbhorz.options = [sbo_moveauto, sbo_showauto]
@@ -44,13 +46,16 @@ object sourcefo: tsourcefo
     E0E0E001A8ECE81280808001804CF00480808014804CF01A00000000FCFF0100
     FCFF03BFFCFF0708FCFF0F00FCFF1F00FCFF3F00FCFF3F00FCFF3F00FCFF3F00
     FCFF3F00FCFF3F03FCFF3F00FCFF3F00FCFF3FBFFCFF3F08FCFF3F00FCFF3F03
-    FCFF3F40FCFF3F00FCFF3F00FCFF3F00FCFF3F0000000000}
+    FCFF3F40FCFF3F00FCFF3F00FCFF3F00FCFF3F0000000000
+  }
   onclosequery = sourcefoonclosequery
   onidle = formonidle
   onactivate = sourcefoonactivate
   moduleclassname = 'tdockform'
   object tabwidget: ttabwidget
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_subfocus, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+    bounds_x = 0
+    bounds_y = 0
     bounds_cx = 423
     bounds_cy = 327
     anchors = []
@@ -65,10 +70,11 @@ object sourcefo: tsourcefo
     tab_frame.dummy = 0
     tab_size = 104
     tab_sizemin = 60
-    reffontheight = 13
+    reffontheight = 16
     object tstockglyphbutton1: tstockglyphbutton
       optionswidget = [ow_destroywidgets]
       bounds_x = 383
+      bounds_y = 0
       bounds_cx = 20
       bounds_cy = 20
       anchors = [an_top, an_right]
@@ -82,6 +88,7 @@ object sourcefo: tsourcefo
     object tstockglyphbutton2: tstockglyphbutton
       optionswidget = [ow_destroywidgets]
       bounds_x = 403
+      bounds_y = 0
       bounds_cx = 20
       bounds_cy = 20
       anchors = [an_top, an_right]
@@ -96,15 +103,17 @@ object sourcefo: tsourcefo
     defdefs.data = (
       (
         '*.pas'
-        'pas.sdef'))
-    Left = 32
-    Top = 64
+        'pas.sdef'
+      )
+    )
+    left = 32
+    top = 64
   end
   object imagelist: timagelist
     count = 14
     transparentcolor = -2147483648
-    Left = 33
-    Top = 93
+    left = 33
+    top = 93
     image = {
       00000000020000004000000040000000B80B0000000000000000000000000000
       0000000000000000000000000000000000000000FFFFFFAA00000001FFFFFF3E
@@ -217,183 +226,190 @@ object sourcefo: tsourcefo
       0000E003E003E0030000E003E003E003C007E003E003E003C006E003E003E003
       C006E003E003E0034004E003E003E0034004E003E003E003C006E003E003E003
       C006E003E003E003C007E003E003E0030000E003E003E0030000E003E003E003
-      0000E003E003E0030000E003}
+      0000E003E003E0030000E003
+    }
   end
   object filechangenotifyer: tfilechangenotifyer
     onfilechanged = onfilechanged
-    Left = 32
-    Top = 168
+    left = 32
+    top = 168
   end
   object navigforwardact: taction
     state = [as_disabled]
     onexecute = navigforward
-    Left = 32
-    Top = 16
+    left = 32
+    top = 16
   end
   object navigbackact: taction
     state = [as_disabled]
     onexecute = navigback
-    Left = 32
-    Top = 40
+    left = 32
+    top = 40
   end
   object formpopup: tpopupmenu
-    menu.submenu.count = 27
-    menu.submenu.items = <
+    menu.submenu.count = 29
+    menu.submenu.items = <    
       item
         action = actionsmo.selecteditpage
         caption = 'Select Page'
         state = [as_localcaption, as_localonexecute]
         onexecute = doselectpage
-      end
+      end    
       item
         action = actionsmo.opensource
         caption = '&Open File'
         state = [as_localcaption]
-      end
+      end    
       item
         action = actionsmo.close
         caption = '&Close File'
         state = [as_localcaption]
         options = [mao_shortcutcaption, mao_asyncexecute]
-      end
+      end    
       item
         action = actionsmo.save
         caption = '&Save File'
         state = [as_localcaption]
-      end
+      end    
       item
         caption = 'Show as Form'
         name = 'showasform'
         state = [as_localcaption, as_localonexecute]
         onexecute = showasformexe
-      end
+      end    
       item
         options = [mao_separator, mao_shortcutcaption]
-      end
+      end    
       item
         action = actionsmo.delete
-      end
+      end    
       item
         action = actionsmo.cut
-      end
+      end    
       item
         action = actionsmo.copy
-      end
+      end    
       item
         action = actionsmo.paste
-      end
+      end    
       item
         options = [mao_separator, mao_shortcutcaption]
-      end
+      end    
       item
         action = actionsmo.undo
-      end
+      end    
       item
         action = actionsmo.redo
-      end
+      end    
       item
         options = [mao_separator, mao_shortcutcaption]
-      end
+      end    
       item
         action = actionsmo.indent
-      end
+      end    
       item
         action = actionsmo.unindent
-      end
+      end    
+      item
+        action = actionsmo.lowercase
+      end    
+      item
+        action = actionsmo.uppercase
+      end    
       item
         options = [mao_separator, mao_shortcutcaption]
-      end
+      end    
       item
         action = actionsmo.togglebkpt
-      end
+      end    
       item
         action = actionsmo.togglebkptenable
-      end
+      end    
       item
         caption = '&Edit breakpoint'
         name = 'editbreakpoint'
         state = [as_localcaption, as_localonexecute]
         options = [mao_shortcutcaption, mao_asyncexecute]
         onexecute = editbreakpointexec
-      end
+      end    
       item
         caption = 'Add &Watch at Cursor'
         name = 'addwatch'
         state = [as_localcaption, as_localonexecute]
         onexecute = addwatchactonexecute
-      end
+      end    
       item
         submenu.count = 11
-        submenu.items = <
+        submenu.items = <        
           item
             caption = 'Bookmark &0'
             state = [as_localcaption, as_localshortcut, as_localonexecute]
             shortcut = 24624
             onexecute = setbmexec
-          end
+          end        
           item
             caption = 'Bookmark &1'
             state = [as_localcaption, as_localshortcut, as_localtag, as_localonexecute]
             shortcut = 24625
             tag = 1
             onexecute = setbmexec
-          end
+          end        
           item
             caption = 'Bookmark &2'
             state = [as_localcaption, as_localshortcut, as_localtag, as_localonexecute]
             shortcut = 24626
             tag = 2
             onexecute = setbmexec
-          end
+          end        
           item
             caption = 'Bookmark &3'
             state = [as_localcaption, as_localshortcut, as_localtag, as_localonexecute]
             shortcut = 24627
             tag = 3
             onexecute = setbmexec
-          end
+          end        
           item
             caption = 'Bookmark &4'
             state = [as_localcaption, as_localshortcut, as_localtag, as_localonexecute]
             shortcut = 24628
             tag = 4
             onexecute = setbmexec
-          end
+          end        
           item
             caption = 'Bookmark &5'
             state = [as_localcaption, as_localshortcut, as_localtag, as_localonexecute]
             shortcut = 24629
             tag = 5
             onexecute = setbmexec
-          end
+          end        
           item
             caption = 'Bookmark &6'
             state = [as_localcaption, as_localshortcut, as_localtag, as_localonexecute]
             shortcut = 24630
             tag = 6
             onexecute = setbmexec
-          end
+          end        
           item
             caption = 'Bookmark &7'
             state = [as_localcaption, as_localshortcut, as_localtag, as_localonexecute]
             shortcut = 24631
             tag = 7
             onexecute = setbmexec
-          end
+          end        
           item
             caption = 'Bookmark &8'
             state = [as_localcaption, as_localshortcut, as_localtag, as_localonexecute]
             shortcut = 24632
             tag = 8
             onexecute = setbmexec
-          end
+          end        
           item
             caption = 'Bookmark &9'
             state = [as_localcaption, as_localshortcut, as_localtag, as_localonexecute]
             shortcut = 24633
             tag = 9
             onexecute = setbmexec
-          end
+          end        
           item
             caption = 'none'
             state = [as_localcaption, as_localtag, as_localonexecute]
@@ -403,63 +419,63 @@ object sourcefo: tsourcefo
         caption = 'Set Bookmark'
         name = 'setbm'
         state = [as_localcaption]
-      end
+      end    
       item
         submenu.count = 10
-        submenu.items = <
+        submenu.items = <        
           item
             caption = 'Bookmark &0 (Ctrl+0)'
             state = [as_localcaption, as_localonexecute]
             onexecute = findbmexec
-          end
+          end        
           item
             caption = 'Bookmark &1 (Ctrl+1)'
             state = [as_localcaption, as_localtag, as_localonexecute]
             tag = 1
             onexecute = findbmexec
-          end
+          end        
           item
             caption = 'Bookmark &2 (Ctrl+2)'
             state = [as_localcaption, as_localtag, as_localonexecute]
             tag = 2
             onexecute = findbmexec
-          end
+          end        
           item
             caption = 'Bookmark &3 (Ctrl+3)'
             state = [as_localcaption, as_localtag, as_localonexecute]
             tag = 3
             onexecute = findbmexec
-          end
+          end        
           item
             caption = 'Bookmark &4 (Ctrl+4)'
             state = [as_localcaption, as_localtag, as_localonexecute]
             tag = 4
             onexecute = findbmexec
-          end
+          end        
           item
             caption = 'Bookmark &5 (Ctrl+5)'
             state = [as_localcaption, as_localtag, as_localonexecute]
             tag = 5
             onexecute = findbmexec
-          end
+          end        
           item
             caption = 'Bookmark &6 (Ctrl+6)'
             state = [as_localcaption, as_localtag, as_localonexecute]
             tag = 6
             onexecute = findbmexec
-          end
+          end        
           item
             caption = 'Bookmark &7 (Ctrl+7)'
             state = [as_localcaption, as_localtag, as_localonexecute]
             tag = 7
             onexecute = findbmexec
-          end
+          end        
           item
             caption = 'Bookmark &8 (Ctrl+8)'
             state = [as_localcaption, as_localtag, as_localonexecute]
             tag = 8
             onexecute = findbmexec
-          end
+          end        
           item
             caption = 'Bookmark &9 (Ctrl+9)'
             state = [as_localcaption, as_localtag, as_localonexecute]
@@ -468,35 +484,35 @@ object sourcefo: tsourcefo
           end>
         caption = 'Find Bookmark'
         state = [as_localcaption]
-      end
+      end    
       item
         options = [mao_separator, mao_shortcutcaption]
-      end
+      end    
       item
         caption = 'Insert GUID'
         name = 'insgui'
         state = [as_localcaption, as_localonexecute]
         onexecute = insguiexec
-      end
+      end    
       item
         caption = 'Convert to Pascal string'
         name = 'convpas'
         state = [as_localcaption, as_localonexecute]
         onexecute = convpasex
-      end
+      end    
       item
         action = completeclassact
         caption = 'Complete Class at Cursor'
         state = [as_localcaption]
       end>
     onupdate = popupmonupdate
-    Left = 176
-    Top = 40
+    left = 176
+    top = 40
   end
   object completeclassact: taction
     caption = 'Complete class at cursor'
     onexecute = completeclassexecute
-    Left = 32
-    Top = 208
+    left = 32
+    top = 208
   end
 end

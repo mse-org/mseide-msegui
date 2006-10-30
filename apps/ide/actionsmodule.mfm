@@ -474,4 +474,18 @@ object actionsmo: tactionsmo
     left = 8
     top = 192
   end
+  object lowercase: taction
+    caption = 'Lowercase'
+    onexecute = lowercaseexecute
+    onupdate = enableonselect
+    left = 360
+    top = 176
+  end
+  object uppercase: taction
+    caption = 'Uppercase'
+    onexecute = uppercaseexecute
+    onupdate = enableonselect
+    left = 360
+    top = 200
+  end
 end
