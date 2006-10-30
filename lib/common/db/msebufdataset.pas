@@ -370,7 +370,12 @@ end;
 
 function tmsebufdataset.getintblobpo: pblobinfoarty;
 begin
- result:= @fcurrentrecord^.header.blobinfo;
+ if bs_applying in fbstate then begin
+  result:= @fnewvaluebuffer^.blobinfo;
+ end
+ else begin
+  result:= @fcurrentrecord^.header.blobinfo;
+ end;
 end;
 
 procedure tmsebufdataset.freeblob(const ablob: blobinfoty);
