@@ -122,9 +122,9 @@ type
    procedure setfilterlist(const Value: tdoublemsestringdatalist);
    procedure sethistorymaxcount(const Value: integer);
    function getfilename: filenamety;
-   procedure setfilename(const Value: filenamety);
+   procedure setfilename(const avalue: filenamety);
    procedure dochange;
-   procedure setdefaultext(const Value: filenamety);
+   procedure setdefaultext(const avalue: filenamety);
    procedure setoptions(Value: filedialogoptionsty);
    procedure checklink;
    procedure setlastdir(const avalue: filenamety);
@@ -1138,12 +1138,18 @@ end;
 
 procedure tfiledialogcontroller.readstatstate(const reader: tstatreader);
 begin
- flastdir:= reader.readstring('lastdir',filename);
+ flastdir:= reader.readstring('lastdir',filedir(filename));
  if fhistorymaxcount > 0 then begin
   fhistory:= reader.readarray('filehistory',fhistory);
  end;
  ffilterindex:= reader.readinteger('filefilterindex',ffilterindex);
  fcolwidth:= reader.readinteger('filecolwidth',fcolwidth);
+ if fdo_chdir in foptions then begin
+  try
+   setcurrentdir(flastdir);
+  except
+  end;
+ end;
 end;
 
 procedure tfiledialogcontroller.readstatoptions(const reader: tstatreader);
@@ -1214,7 +1220,12 @@ begin
     system.exclude(aoptions,fdo_save);
    end;
   end;
-  fo.listview.directory:= flastdir;
+  if fdo_relative in foptions then begin
+   fo.listview.directory:= getcurrentdir;
+  end
+  else begin
+   fo.listview.directory:= flastdir;
+  end;
   result:= filedialog1(fo,ffilenames,ara,arb,
         @ffilterindex,@ffilter,@fcolwidth,finclude,
             fexclude,po1,fhistorymaxcount,acaption,aoptions,fdefaultext);
@@ -1223,7 +1234,12 @@ begin
   end;
  {$ifdef FPC} {$checkpointer default} {$endif}
   if result = mr_ok then begin
-   flastdir:= fo.dir.value;
+   if fdo_relative in foptions then begin
+    flastdir:= getcurrentdir;
+   end
+   else begin
+    flastdir:= fo.dir.value;
+   end;
   end;
  finally
   fo.Free;
@@ -1313,12 +1329,12 @@ begin
  end;
 end;
 
-procedure tfiledialogcontroller.setfilename(const Value: filenamety);
+procedure tfiledialogcontroller.setfilename(const avalue: filenamety);
 var
  int1: integer;
  akind: filekindty;
 begin
- unquotefilename(value,ffilenames);
+ unquotefilename(avalue,ffilenames);
  if fdo_directory in foptions then begin
   akind:= fk_dir;
  end
@@ -1331,11 +1347,20 @@ begin
   end;
  end;
  if fdo_relative in foptions then begin
+  flastdir:= getcurrentdir;
   for int1:= 0 to high(ffilenames) do begin
    ffilenames[int1]:= relativepath(filenames[int1],'',akind);
   end;
  end
  else begin
+  if high(ffilenames) = 0 then begin
+   if akind = fk_dir then begin
+    flastdir:= filepath(avalue,fk_dir);
+   end
+   else begin
+    flastdir:= filedir(avalue);
+   end;
+  end;
   for int1:= 0 to high(ffilenames) do begin
    ffilenames[int1]:= filepath(filenames[int1],akind,
           not (fdo_absolute in foptions));
@@ -1364,10 +1389,10 @@ begin
  end;
 end;
 
-procedure tfiledialogcontroller.setdefaultext(const Value: filenamety);
+procedure tfiledialogcontroller.setdefaultext(const avalue: filenamety);
 begin
- if fdefaultext <> value then begin
-  fdefaultext := Value;
+ if fdefaultext <> avalue then begin
+  fdefaultext := avalue;
   dochange;
  end;
 end;
