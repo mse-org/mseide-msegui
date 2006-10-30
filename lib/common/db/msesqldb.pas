@@ -74,7 +74,7 @@ type
    procedure internalopen; override;
    procedure internalclose; override;
    procedure internalinsert; override;
-   procedure internalpost; override;
+//   procedure internalpost; override;
    procedure applyrecupdate(updatekind: tupdatekind); override;
    function  getcanmodify: boolean; override;
    function  getfieldclass(fieldtype: tfieldtype): tfieldclass; override;
@@ -259,6 +259,7 @@ uses
  msestrings,dbconst,msesysutils,typinfo,sysutils,msedatalist;
  
 type 
+{
   TBufDatasetcracker = class(TDBDataSet)
   private
     FCurrentRecBuf  : PBufRecLinkItem;
@@ -279,8 +280,8 @@ type
     FOnUpdateError  : TResolverErrorEvent;
 
   end;
-  
-  TSQLQuerycracker = class (Tbufdataset)
+ } 
+  TSQLQuerycracker = class (Tmsebufdataset)
   private
     FCursor              : TSQLCursor;
     FUpdateable          : boolean;
@@ -1209,7 +1210,7 @@ begin
   inherited;
  end;
 end;
-
+{
 procedure tmsesqlquery.internalpost;
 begin        //workaround for FPC bug 7266
  with tbufdatasetcracker(self) do begin
@@ -1222,7 +1223,7 @@ begin        //workaround for FPC bug 7266
   end;
  end;
 end;
-
+}
 function tmsesqlquery.getetstatementtype: TStatementType;
 begin
  result:= inherited statementtype;
