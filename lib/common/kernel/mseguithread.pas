@@ -30,7 +30,7 @@ type
    function getthread: teventthread;
    function getterminated: boolean;
    function threadproc(sender: tmsethread): integer;
-   procedure kill;
+   procedure terminateandwait;
    function getactive: boolean;
    procedure setactive(const Value: boolean);
   protected
@@ -72,11 +72,11 @@ end;
 
 destructor tthreadcomp.destroy;
 begin
- kill;
+ terminateandwait;
  inherited;
 end;
 
-procedure tthreadcomp.kill;
+procedure tthreadcomp.terminateandwait;
 begin
  if fthread <> nil then begin
   terminate;
@@ -88,7 +88,7 @@ end;
 
 procedure tthreadcomp.run(const adatapo: pointer = nil);
 begin
- kill;
+ terminateandwait;
  fdatapo:= adatapo;
  fthread:= teventthread.create({$ifdef FPC}@{$endif}threadproc);
 end;
@@ -179,7 +179,7 @@ begin
  if factive <> value then begin
   factive:= value;
   if not value then begin
-   kill;
+   terminateandwait;
   end
   else begin
    if componentstate * [csloading,csdesigning] = [] then begin
