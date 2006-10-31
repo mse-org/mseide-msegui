@@ -7,7 +7,7 @@ unit mIBConnection;
 interface
 
 uses
-  Classes, SysUtils, msqldb, db, math, dbconst, mbufdataset,
+  Classes, SysUtils, msqldb, db, math, dbconst, msebufdataset,
 {$IfDef LinkDynamically}
   ibase60dyn;
 {$Else}

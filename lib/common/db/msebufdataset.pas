@@ -16,7 +16,7 @@
  
 unit msebufdataset;
  
-interface
+interface 
 
 uses
  db,classes,variants,msetypes;
@@ -529,7 +529,7 @@ begin
  until (getnextpacket < fpacketrecords) or (fpacketrecords = -1);
  internalsetrecno(fbrecordcount)
 end;
-
+var testvar: pint64;
 function tmsebufdataset.getrecord(buffer: pchar; getmode: tgetmode;
                                             docheck: boolean): tgetresult;
 begin
@@ -570,7 +570,10 @@ begin
     flag:= bfcurrent;
    end;
    move(fcurrentrecord^.header,header,frecordsize);
-   getcalcfields(@header);
+if high(ffieldbufpositions) >= 7 then begin
+ testvar:= pointer(@header)+ffieldbufpositions[7];
+end;
+   getcalcfields(buffer);
   end;
  end
  else begin
@@ -784,7 +787,7 @@ begin
   exit;
  end;
  if state = dscalcfields then begin
-  currbuff:= calcbuffer;
+  currbuff:= @pdsrecordty(calcbuffer)^.header;
  end
  else begin
   if bs_applying in fbstate then begin
