@@ -381,10 +381,10 @@ end;
 function tmsebufdataset.getintblobpo: pblobinfoarty;
 begin
  if bs_applying in fbstate then begin
-  result:= @(fnewvaluebuffer^.header.blobinfo);
+  result:= @fnewvaluebuffer^.header.blobinfo;
  end
  else begin
-  result:= @(fcurrentrecord^.header.blobinfo);
+  result:= @fcurrentrecord^.header.blobinfo;
  end;
 end;
 
@@ -725,14 +725,14 @@ var
 begin
  result := false;
  if state = dscalcfields then begin
-  currbuff:= @(pdsrecordty(calcbuffer)^.header);
+  currbuff:= @pdsrecordty(calcbuffer)^.header;
  end
  else begin
   if bs_applying in fbstate then begin
-   currbuff:= @(fnewvaluebuffer^.header);
+   currbuff:= @fnewvaluebuffer^.header;
   end
   else begin
-   currbuff:= @(pdsrecordty(activebuffer)^.header);
+   currbuff:= @pdsrecordty(activebuffer)^.header;
   end;
  end;
  int1:= field.fieldno - 1;
@@ -742,7 +742,7 @@ begin
        // there is no old value available
     exit;
    end;
-   currbuff:= @(fupdatebuffer[fcurrentupdatebuffer].oldvalues^.header);
+   currbuff:= @fupdatebuffer[fcurrentupdatebuffer].oldvalues^.header;
   end
   else begin
    if not assigned(currbuff) then begin
@@ -788,18 +788,18 @@ begin
  end
  else begin
   if bs_applying in fbstate then begin
-   currbuff:= @(fnewvaluebuffer^.header);
+   currbuff:= @fnewvaluebuffer^.header;
   end
   else begin
-   currbuff:= @(pdsrecordty(activebuffer)^.header);
+   currbuff:= @pdsrecordty(activebuffer)^.header;
   end;
  end;
  int1:= field.fieldno - 1;
  if int1 >= 0 then begin // data field
   if state = dsfilter then begin 
-   currbuff:= @(ffilterbuffer^.header);
+   currbuff:= @ffilterbuffer^.header;
   end;
-  nullmask:= @(precheaderty(currbuff)^.fielddata.nullmask);
+  nullmask:= @precheaderty(currbuff)^.fielddata.nullmask;
   inc(currbuff,ffieldbufpositions[int1]);
   if assigned(buffer) then begin
    move(buffer^,currbuff^,ffieldsizes[int1]);
@@ -1112,7 +1112,7 @@ begin
      move(bookmark.recordpo^,oldvalues^,frecordsize+intheadersize);
      po1:= getintblobpo;
      if po1^ <> nil then begin
-      po2:= @(oldvalues^.header.blobinfo);
+      po2:= @oldvalues^.header.blobinfo;
       pointer(po2^):= nil;
       setlength(po2^,length(po1^));
       for int1:= high(po1^) downto 0 do begin
@@ -1403,7 +1403,12 @@ var
  po1: pbyte;
  int1: integer;
 begin
- po1:= pbyte(@(fcurrentrecord^.header));
+ if bs_applying in fbstate then begin
+  po1:= pbyte(@fupdatebuffer[fcurrentupdatebuffer].bookmark.recordpo^.header);
+ end
+ else begin
+  po1:= pbyte(@fcurrentrecord^.header);
+ end;
  int1:= afield.fieldno - 1;
  if avalue <> '' then begin
   move(avalue[1],(po1+ffieldbufpositions[int1])^,length(avalue));
