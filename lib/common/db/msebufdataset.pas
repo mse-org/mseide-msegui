@@ -1202,8 +1202,11 @@ end;
 function tmsebufdataset.GetRecNo: Longint;
 begin
  if activebuffer <> nil then begin
-  with pdsrecordty(activebuffer)^ do begin
-   result:= dsheader.bookmark.data.recno + 1;
+  with pdsrecordty(activebuffer)^.dsheader.bookmark do begin
+   result:= data.recno + 1;
+   if (state = dsinsert) and (flag = bfeof) then begin
+    inc(result); //append mode
+   end;
   end;
  end
  else begin

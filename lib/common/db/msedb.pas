@@ -2642,8 +2642,11 @@ begin
   end;
   factiverecordbefore:= activerecord;
   fscrollsum:= 0;
+  result:= frecno;
+  if (state = dsinsert) and (getbookmarkflag(activebuffer) = bfeof) then begin
+   inc(result); //append mode
+  end;
  end;
- result:= frecno;
 end;
 
 procedure tdscontroller.setrecnonullbased(const avalue: integer);
