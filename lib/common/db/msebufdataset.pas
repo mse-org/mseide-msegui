@@ -89,7 +89,7 @@ const
  recoffset = sizeof(intrecheaderty);
  intbloboffset = recoffset;
  intrecheadersize = sizeof(recordty);
- nullmaskoffset = sizeof(blobinfoty);
+// nullmaskoffset = sizeof(blobinfoty);
      
 // structure of internal recordbuffer:
 //
@@ -168,7 +168,7 @@ type
    ffailedcount: integer;
    frecno: integer; //null based
    
-   function getblobpo: pblobinfoarty;    //in tdataset buffer
+//   function getblobpo: pblobinfoarty;    //in tdataset buffer
    function getintblobpo: pblobinfoarty; //in currentrecbuf
    procedure internalcancel; override;
    procedure cancelrecupdate(var arec: recupdatebufferty);
@@ -350,24 +350,26 @@ var
 begin
  if buffer <> nil then begin
   bo1:= false;
-  for int1:= high(pblobinfoarty(buffer)^) downto 0 do begin
-   if pblobinfoarty(buffer)^[int1].new then begin
-    freeblob(pblobinfoarty(buffer)^[int1]);
-    bo1:= true;
+  with precheaderty(buffer)^ do begin
+   for int1:= high(blobinfo) downto 0 do begin
+    if blobinfo[int1].new then begin
+     freeblob(blobinfo[int1]);
+     bo1:= true;
+    end;
    end;
-  end;
-  if bo1 then begin
-   pblobinfoarty(buffer)^:= nil;
+   if bo1 then begin
+    blobinfo:= nil;
+   end;
   end;
   reallocmem(buffer,0);
  end;
 end;
-
+{
 function tmsebufdataset.getblobpo: pblobinfoarty;
 begin
  result:= pointer(activebuffer);
 end;
-
+}
 function tmsebufdataset.getintblobpo: pblobinfoarty;
 begin
  if bs_applying in fbstate then begin
@@ -394,47 +396,47 @@ end;
 
 procedure tmsebufdataset.addblob(const ablob: tblobbuffer);
 var
- po1: pblobinfoarty;
  int1,int2: integer;
  bo1: boolean;
  po2: pointer;
 begin
- po1:= getblobpo;
  bo1:= false;
  int2:= -1;
- for int1:= high(po1^) downto 0 do begin
-  with po1^[int1] do begin
-   if new then begin
-    bo1:= true;
-   end;
-   if field = ablob.ffield then begin
-    int2:= int1;
+ with precheaderty(activebuffer)^ do begin
+  for int1:= high(blobinfo) downto 0 do begin
+   with blobinfo[int1] do begin
+    if new then begin
+     bo1:= true;
+    end;
+    if field = ablob.ffield then begin
+     int2:= int1;
+    end;
    end;
   end;
- end;
- if not bo1 then begin //copy needed
-  po2:= pointer(po1^);
-  pointer(po1^):= nil;
-  po1^:= copy(blobinfoarty(po2));
- end;
- if int2 >= 0 then begin
-  deleteblob(po1^,int2);
- end;
- setlength(po1^,high(po1^)+2);
- with po1^[high(po1^)],ablob do begin
-  data:= memory;
-  reallocmem(data,size);
-  datalength:= size;
-  field:= ffield;
-  new:= true;
-  if size = 0 then begin
-   setfieldisnull(pbyte(po1)+nullmaskoffset,field.fieldno-1);
-  end
-  else begin
-   unsetfieldisnull(pbyte(po1)+nullmaskoffset,field.fieldno-1);
+  if not bo1 then begin //copy needed
+   po2:= pointer(blobinfo);
+   pointer(blobinfo):= nil;
+   blobinfo:= copy(blobinfoarty(po2));
   end;
-  if not (State in [dsCalcFields, dsFilter, dsNewValue]) then begin
-   DataEvent(deFieldChange, Ptrint(Field));
+  if int2 >= 0 then begin
+   deleteblob(blobinfo,int2);
+  end;
+  setlength(blobinfo,high(blobinfo)+2);
+  with blobinfo[high(blobinfo)],ablob do begin
+   data:= memory;
+   reallocmem(data,size);
+   datalength:= size;
+   field:= ffield;
+   new:= true;
+   if size = 0 then begin
+    setfieldisnull(fielddata.nullmask,field.fieldno-1);
+   end
+   else begin
+    unsetfieldisnull(fielddata.nullmask,field.fieldno-1);
+   end;
+   if not (State in [dsCalcFields, dsFilter, dsNewValue]) then begin
+    DataEvent(deFieldChange, Ptrint(Field));
+   end;
   end;
  end;
 end;
@@ -518,7 +520,7 @@ begin
  until (getnextpacket < fpacketrecords) or (fpacketrecords = -1);
  internalsetrecno(fbrecordcount)
 end;
-
+var testvar: integer;
 function tmsebufdataset.getrecord(buffer: pchar; getmode: tgetmode;
                                             docheck: boolean): tgetresult;
 begin
@@ -552,6 +554,7 @@ begin
   end;
  end;
  if result = grok then begin
+testvar:= length(fcurrentrecord^.header.blobinfo);
   with pbufbookmarkty(buffer + frecordsize)^ do  begin
    data.recno:= frecno;
    data.recordpo:= fcurrentrecord;
@@ -737,7 +740,8 @@ begin
     exit;
    end;
   end;
-  if getfieldisnull(pbyte(currbuff+nullmaskoffset),field.fieldno-1) then begin
+  if getfieldisnull(precheaderty(currbuff)^.fielddata.nullmask,
+                         field.fieldno-1) then begin
    exit;
   end;
   inc(currbuff,ffieldbufpositions[field.fieldno-1]);
@@ -827,7 +831,7 @@ begin
   if state = dsfilter then begin 
    currbuff:= @ffilterbuffer^.header;
   end;
-  nullmask := currbuff+nullmaskoffset;
+  nullmask:= @precheaderty(currbuff)^.fielddata.nullmask;
   inc(currbuff,ffieldbufpositions[field.fieldno-1]);
   if assigned(buffer) then begin
    move(buffer^, currbuff^, getfieldsize(fielddefs[field.fieldno-1]));
@@ -1019,7 +1023,12 @@ begin
    getcalcfields(pchar(fnewvaluebuffer));
    Response:= rrApply;
    try
-    ApplyRecUpdate(UpdateKind);
+    try
+     ApplyRecUpdate(UpdateKind);
+    finally
+     pointer(bookmark.recordpo^.header.blobinfo):= 
+         pointer(fnewvaluebuffer^.blobinfo); //update deleted blobs
+    end;
    except
     on E: EDatabaseError do begin
      Inc(fFailedCount);
@@ -1132,79 +1141,15 @@ begin
  applyupdate(false);
 end;
 
-
-{
-procedure tmsebufdataset.ApplyUpdates(MaxErrors: Integer);
-
-var SaveBookmark : pchar;
-    r            : Integer;
-    FailedCount  : integer;
-    EUpdErr      : EUpdateError;
-    Response     : TResolverResponse;
-
-begin
-  CheckBrowseMode;
-
-  // There is no bookmark available if the dataset is empty
-  if not IsEmpty then
-    GetBookmarkData(ActiveBuffer,@SaveBookmark);
-
-  r := 0;
-  FailedCount := 0;
-  Response := rrApply;
-  while (r < Length(FUpdateBuffer)) and (Response <> rrAbort) do
-    begin
-    if assigned(FUpdateBuffer[r].BookmarkData) then
-      begin
-      InternalGotoBookmark(@FUpdateBuffer[r].BookmarkData);
-      Resync([rmExact,rmCenter]);
-      Response := rrApply;
-      try
-        ApplyRecUpdate(FUpdateBuffer[r].UpdateKind);
-      except
-        on E: EDatabaseError do
-          begin
-          Inc(FailedCount);
-          if failedcount > word(MaxErrors) then Response := rrAbort
-          else Response := rrSkip;
-          EUpdErr := EUpdateError.Create(SOnUpdateError,E.Message,0,0,E);
-          if assigned(FOnUpdateError) then FOnUpdateError(Self,Self,EUpdErr,FUpdateBuffer[r].UpdateKind,Response)
-          else if Response = rrAbort then Raise EUpdErr
-          end
-        else
-          raise;
-      end;
-      if response = rrApply then
-        begin
-        intFreeRecordBuffer(FUpdateBuffer[r].OldValuesBuffer);
-        FUpdateBuffer[r].BookmarkData := nil;
-        end
-      end;
-    inc(r);
-    end;
-  if failedcount = 0 then
-    SetLength(FUpdateBuffer,0);
-
-  if not IsEmpty then
-    begin
-    InternalGotoBookMark(@SaveBookMark);
-    Resync([rmExact,rmCenter]);
-    end
-  else
-    InternalFirst;
-end;
-}
-procedure tmsebufdataset.InternalPost;
-Var
-// tmpRecBuffer: Pbufreclinkitem1;
+procedure tmsebufdataset.internalpost;
+var
  recbuf: precordty;
-// CurrBuff: PChar;
  po1,po2: pblobinfoarty;
  po3: pointer;
  int1: integer;
  bo1: boolean;
 begin
- po1:= getblobpo;
+ po1:= @precheaderty(activebuffer)^.blobinfo;
  bo1:= false;
  for int1:= high(po1^) downto 0 do begin
   if po1^[int1].new then begin
@@ -1212,31 +1157,26 @@ begin
    bo1:= true;
   end;
  end;
- if state = dsInsert then begin
+ if state = dsinsert then begin
   recbuf:= intallocrecord;
   insertrecord(frecno,recbuf^);
-  // Link the newly created record buffer to the newly created TDataset record
-  with PBufBookmarkty(ActiveBuffer + FRecordSize)^ do  begin
+  with pbufbookmarkty(activebuffer + frecordsize)^ do  begin
    data.recordpo:= recbuf;
    data.recno:= frecno;
-   Flag := bfInserted;
+   flag := bfinserted;
   end;      
-//  inc(FBRecordCount);
  end;
- if not GetRecordUpdateBuffer then begin
+ if not getrecordupdatebuffer then begin
   getnewupdatebuffer;
-  with FUpdateBuffer[FCurrentUpdateBuffer] do begin
-   Bookmark.recordpo:= fcurrentrecord;
+  with fupdatebuffer[fcurrentupdatebuffer] do begin
+   bookmark.recordpo:= fcurrentrecord;
    bookmark.recno:= frecno;
-   if state = dsEdit then begin
-           // Update the oldvalues-buffer
-    OldValues:= intAllocRecord;
-    move(bookmark.recordpo^,OldValues^,FRecordSize+recoffset);
+   if state = dsedit then begin
+    oldvalues:= intallocrecord;
+    move(bookmark.recordpo^,oldvalues^,frecordsize+recoffset);
     po1:= getintblobpo;
     if po1^ <> nil then begin
      po2:= @oldvalues^.header.blobinfo;
-//     po2:= pblobinfoarty(FUpdateBuffer[FCurrentUpdateBuffer].OldValuesBuffer+
-//                                 intbloboffset);
      pointer(po2^):= nil;
      setlength(po2^,length(po1^));
      for int1:= high(po1^) downto 0 do begin
@@ -1253,10 +1193,10 @@ begin
       end;
      end;
     end;
-    UpdateKind := ukModify;
+    updatekind := ukmodify;
    end
    else begin
-    UpdateKind := ukInsert;
+    updatekind := ukinsert;
    end;
   end;
  end;
@@ -1264,8 +1204,9 @@ begin
   if bo1 then begin
    header.blobinfo:= nil; //free old array
   end;
-  move(ActiveBuffer^,header,FRecordSize);
+  move(activebuffer^,header,frecordsize);
  end;
+testvar:= length(fcurrentrecord^.header.blobinfo);
 end;
 
 procedure tmsebufdataset.CalcRecordSize;
@@ -1299,7 +1240,7 @@ procedure tmsebufdataset.InternalInitRecord(Buffer: PChar);
 
 begin
  FillChar(Buffer^, FRecordSize, #0);
- fillchar((Buffer+nullmaskoffset)^,FNullmaskSize,255);
+ fillchar(precheaderty(Buffer)^.fielddata.nullmask,FNullmaskSize,255);
 end;
 
 procedure tmsebufdataset.SetRecNo(Value: Longint);
@@ -1477,13 +1418,13 @@ end;
 }
 procedure tmsebufdataset.internalcancel;
 var
- po1: pblobinfoarty;
  int1: integer;
 begin
- po1:= getblobpo;
- for int1:= high(po1^) downto 0 do begin
-  if po1^[int1].new then begin
-   deleteblob(po1^,int1);
+ with precheaderty(activerecord)^ do begin
+  for int1:= high(blobinfo) downto 0 do begin
+   if blobinfo[int1].new then begin
+    deleteblob(blobinfo,int1);
+   end;
   end;
  end;
 end;
@@ -1491,7 +1432,6 @@ end;
 function tmsebufdataset.CreateBlobStream(Field: TField;
                Mode: TBlobStreamMode): TStream;
 var
- po1: pblobinfoarty;
  int1: integer;
 begin
  if (mode <> bmread) and not (state in dseditmodes) then begin
@@ -1499,11 +1439,12 @@ begin
  end;  
  result:= nil;
  if mode = bmread then begin
-  po1:= getblobpo;
-  for int1:= high(po1^) downto 0 do begin
-   if po1^[int1].field = field then begin
-    result:= tblobcopy.create(po1^[int1]);
-    break;
+  with precheaderty(activebuffer)^ do begin
+   for int1:= high(blobinfo) downto 0 do begin
+    if blobinfo[int1].field = field then begin
+     result:= tblobcopy.create(blobinfo[int1]);
+     break;
+    end;
    end;
   end;
  end;
@@ -1518,10 +1459,10 @@ begin
  int1:= afield.fieldno - 1;
  if avalue <> '' then begin
   move(avalue[1],(po1+ffieldbufpositions[int1])^,length(avalue));
-  unsetfieldisnull(po1+nullmaskoffset,int1);
+  unsetfieldisnull(precheaderty(po1)^.fielddata.nullmask,int1);
  end
  else begin
-  setfieldisnull(po1+nullmaskoffset,int1);
+  setfieldisnull(precheaderty(po1)^.fielddata.nullmask,int1);
  end;
 end;
 

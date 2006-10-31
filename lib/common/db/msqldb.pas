@@ -21,7 +21,7 @@ unit msqldb;
 
 interface
 
-uses SysUtils,Classes,DB,msebufdataset,msetypes;
+uses sysutils,classes,db,msebufdataset,msetypes;
 
 type TSchemaType = (stNoSchema,stTables,stSysTables,stProcedures,stColumns,
                     stProcedureParams,stIndexes,stPackages);

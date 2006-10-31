@@ -634,7 +634,7 @@ var
  sint1: smallint;
  
 begin
-  with cursor as TPQCursor do
+  with TPQCursor(cursor) do
     begin
     for x := 0 to PQnfields(res)-1 do
       if PQfname(Res, x) = FieldDef.Name then break;
