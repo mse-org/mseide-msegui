@@ -64,7 +64,7 @@ end;
  
 implementation
 uses
- msefileutils,msebits,sysutils,msedatalist,msesqldb,mbufdataset;
+ msefileutils,msebits,sysutils,msedatalist,msesqldb,msebufdataset;
  
 { tmsepqconnection }
 
@@ -265,7 +265,7 @@ function tmsepqconnection.CreateBlobStream(const Field: TField;
                const Mode: TBlobStreamMode; const acursor: tsqlcursor): TStream;
 begin
  if (mode = bmwrite) and (field.dataset is tmsesqlquery) then begin
-  result:= tmbufdataset(field.dataset).createblobbuffer(field);
+  result:= tmsebufdataset(field.dataset).createblobbuffer(field);
  end
  else begin
   result:= inherited createblobstream(field,mode,acursor);

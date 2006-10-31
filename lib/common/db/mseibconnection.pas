@@ -11,7 +11,7 @@ unit mseibconnection;
 {$ifdef FPC}{$mode objfpc}{$h+}{$INTERFACES CORBA}{$endif}
 interface
 uses
- db,classes,mibconnection,msestrings,msedb,msesqldb,msqldb,ibase60dyn,mbufdataset;
+ db,classes,mibconnection,msestrings,msedb,msesqldb,msqldb,ibase60dyn,msebufdataset;
 type
  tmseibconnection = class(tibconnection,idbcontroller)
   private
@@ -106,7 +106,7 @@ function tmseibconnection.CreateBlobStream(const Field: TField;
                const Mode: TBlobStreamMode; const acursor: tsqlcursor): TStream;
 begin
  if (mode = bmwrite) and (field.dataset is tmsesqlquery) then begin
-  result:= tmbufdataset(field.dataset).createblobbuffer(field);
+  result:= tmsebufdataset(field.dataset).createblobbuffer(field);
  end
  else begin
   result:= inherited createblobstream(field,mode,acursor);
