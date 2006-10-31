@@ -26,14 +26,6 @@ type
  
   TResolverErrorEvent = procedure(Sender: TObject; DataSet: tmsebufdataset; E: EUpdateError;
     UpdateKind: TUpdateKind; var Response: TResolverResponse) of object;
-{
-  Pbufreclinkitem1 = ^Tbufreclinkitem1;
-  Tbufreclinkitem1 = record
-    prior   : Pbufreclinkitem1;
-    next    : Pbufreclinkitem1;
-  end;
-}
-
  
  blobinfoty = record
   field: tfield;
@@ -103,6 +95,7 @@ type
   recno: integer;
   recordpo: precordty;
  end;
+ pbookmarkdataty = ^bookmarkdataty;
  
  recupdatebufferty = record
   updatekind: tupdatekind;
@@ -1262,8 +1255,17 @@ begin
 end;
 
 function tmsebufdataset.GetRecNo: Longint;
+var
+ po1: pbookmarkdataty;
 begin
- result:= frecno + 1;
+ po1:= pbookmarkdataty(activebuffer);
+ if po1 <> nil then begin
+  inc(pointer(po1),frecordsize);
+  result:= po1^.recno+1;
+ end
+ else begin
+  result:= 0;
+ end;
 end;
 
 function tmsebufdataset.IsCursorOpen: Boolean;
