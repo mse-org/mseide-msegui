@@ -19,9 +19,18 @@ unit msebufdataset;
 interface 
 
 uses
- db,classes,variants,msetypes;
+ db,classes,variants,msetypes,msearrayprops,mseclasses;
   
-type
+const
+ defaultpacketrecords = 10;
+ integerindexfields = [ftsmallint,ftinteger,ftword,ftlargeint,ftboolean];
+ floatindexfields = [ftfloat];
+ currencyindexfields = [ftcurrency,ftbcd];
+ stringindexfields = [ftstring,ftfixedchar,ftwidestring,ftmemo];
+ indexfields =  integerindexfields+floatindexfields+currencyindexfields+
+                   stringindexfields;
+ 
+type  
  tmsebufdataset = class;
  
   TResolverErrorEvent = procedure(Sender: TObject; DataSet: tmsebufdataset; E: EUpdateError;
@@ -52,9 +61,64 @@ type
    destructor destroy; override;
  end;
 
+ indexfieldoptionty = (ifo_desc,ifo_caseinsensitive);
+ indexfieldoptionsty = set of indexfieldoptionty;
+ 
+ tindexfield = class(townedpersistent)
+  private
+   ffieldname: string;
+   foptions: indexfieldoptionsty;
+   procedure change;
+   procedure setfieldname(const avalue: string);
+   procedure setoptions(const avalue: indexfieldoptionsty);
+  published
+   property fieldname: string read ffieldname write setfieldname;
+   property options: indexfieldoptionsty read foptions write setoptions;
+ end;
+
+ localindexoptionty = (lio_desc);
+ localindexoptionsty = set of localindexoptionty;
+
+ tlocalindex = class;  
+ 
+ tindexfields = class(townedpersistentarrayprop)
+  private
+   function getitems(const index: integer): tindexfield;
+  public
+   constructor create(const aowner: tlocalindex);
+   property items[const index: integer]: tindexfield read getitems;
+ end;
+ 
+ tlocalindex = class(townedpersistent)
+  private
+   ffields: tindexfields;
+   foptions: localindexoptionsty;
+   procedure change;
+   procedure setoptions(const avalue: localindexoptionsty);
+   procedure setfields(const avalue: tindexfields);
+  public
+   constructor create(aowner: tobject); override;
+   destructor destroy; override;
+  published
+   property fields: tindexfields read ffields write setfields;
+   property options: localindexoptionsty read foptions write setoptions;
+ end;
+ 
+ tlocalindexes = class(townedpersistentarrayprop)
+  private
+   function getitems(const index: integer): tlocalindex;
+  protected
+   procedure checkinactive;
+   procedure setcount1(acount: integer; doinit: boolean); override;
+ public
+   constructor create(const aowner: tmsebufdataset);
+   property items[const index: integer]: tlocalindex read getitems;
+ end;
+ 
  indexty = record
   ind: pointerarty;
  end;
+ pindexty = ^indexty;
 
  intheaderty = record
  end;
@@ -72,7 +136,7 @@ type
    
  intrecordty = record              
   intheader: intheaderty;
-  header: recheaderty;       //<- recoffset 
+  header: recheaderty;      
  end;
  pintrecordty = ^intrecordty;
 
@@ -98,10 +162,8 @@ type
  pdsrecordty = ^dsrecordty;
  
 const
- recoffset = sizeof(intheaderty);
-// intbloboffset = recoffset;
- intheadersize = sizeof(intheaderty);
- dsheadersize = sizeof(dsheaderty);
+ intheadersize = sizeof(intrecordty.intheader);
+ dsheadersize = sizeof(dsrecordty.dsheader);
      
 // structure of internal recordbuffer:
 //                 +---------<frecordsize>---------+
@@ -153,7 +215,9 @@ type
    fnewvaluebuffer: pdsrecordty; //buffer for applyupdates
    fbstate: bufdatasetstatesty;
    
-   frecnoindex: indexty;    
+   factindexpo: pindexty;    
+   findexes: array of indexty;
+   findexlocal: tlocalindexes;
    procedure CalcRecordSize;
    function loadbuffer(var buffer: recheaderty): tgetresult;
    function GetFieldSize(FieldDef : TFieldDef) : longint;
@@ -169,6 +233,7 @@ type
    procedure insertrecord(arecno: integer; const arecord: intrecordty);
    procedure deleterecord(const arecno: integer);    
    procedure getnewupdatebuffer;
+   procedure setindexlocal(const avalue: tlocalindexes);
   protected
    fapplyindex: integer; //take care about canceled updates while applying
    ffailedcount: integer;
@@ -243,8 +308,11 @@ type
     function UpdateStatus: TUpdateStatus; override;
     property ChangeCount : Integer read GetChangeCount;
   published
-    property PacketRecords : Integer read FPacketRecords write FPacketRecords default 10;
-    property OnUpdateError: TResolverErrorEvent read FOnUpdateError write SetOnUpdateError;
+    property PacketRecords : Integer read FPacketRecords write FPacketRecords 
+                                  default defaultpacketrecords;
+    property OnUpdateError: TResolverErrorEvent read FOnUpdateError 
+                                  write SetOnUpdateError;
+    property indexlocal: tlocalindexes read findexlocal write setindexlocal;
   end;
    
 implementation
@@ -302,20 +370,22 @@ end;
 constructor tmsebufdataset.Create(AOwner : TComponent);
 begin
  frecno:= -1;
- fpacketrecords := 10;
+ fpacketrecords:= defaultpacketrecords;
+ findexlocal:= tlocalindexes.create(self);
  inherited;
  bookmarksize := sizeof(bufbookmarkty);
+end;
+
+destructor tmsebufdataset.destroy;
+begin
+ inherited destroy;
+ findexlocal.free;
 end;
 
 procedure tmsebufdataset.setpacketrecords(avalue : integer);
 begin
   if (avalue = -1) or (avalue > 0) then fpacketrecords := avalue
     else databaseerror(sinvpacketrecordsvalue);
-end;
-
-destructor tmsebufdataset.destroy;
-begin
- inherited destroy;
 end;
 
 Function tmsebufdataset.GetCanModify: Boolean;
@@ -378,6 +448,7 @@ begin
  result:= pointer(activebuffer);
 end;
 }
+
 function tmsebufdataset.getintblobpo: pblobinfoarty;
 begin
  if bs_applying in fbstate then begin
@@ -482,6 +553,8 @@ procedure tmsebufdataset.internalopen;
 
 begin
  bindfields(true); //calculate calc fields size
+ setlength(findexes,1);
+ factindexpo:= @findexes[0];
  calcrecordsize;
  femptybuffer:= intallocrecord;
  ffilterbuffer:= intallocrecord;
@@ -496,7 +569,7 @@ var
 begin
  fopen:= false;
  frecno:= -1;
- with frecnoindex do begin
+ with factindexpo^ do begin
   for int1:= 0 to high(ind) do begin
    intfreerecord(ind[int1]);
   end;
@@ -1421,16 +1494,21 @@ begin
 end; 
 
 procedure tmsebufdataset.checkindexsize;
+var
+ int1,int2: integer;
 begin
- if high(frecnoindex.ind) <= fbrecordcount - 1 then begin
-  setlength(frecnoindex.ind,(high(frecnoindex.ind)+17)*2);
+ if high(factindexpo^.ind) <= fbrecordcount - 1 then begin
+  int2:= (high(factindexpo^.ind)+17)*2;
+  for int1:= 0 to high(findexes) do begin
+   setlength(findexes[int1].ind,int2);
+  end;
  end;
 end;
 
 procedure tmsebufdataset.appendrecord(const arecord: intrecordty);
 begin
  checkindexsize;
- frecnoindex.ind[fbrecordcount]:= @arecord;
+ factindexpo^.ind[fbrecordcount]:= @arecord;
  inc(fbrecordcount);
  fcurrentrecord:= @arecord;
 end;
@@ -1441,17 +1519,17 @@ begin
  if arecno < 0 then begin
   arecno:= 0;
  end;
- insertitem(frecnoindex.ind,arecno,@arecord);
+ insertitem(factindexpo^.ind,arecno,@arecord);
  inc(fbrecordcount);
  if frecno > arecno then begin
   inc(frecno);
  end;
- fcurrentrecord:= frecnoindex.ind[frecno];
+ fcurrentrecord:= factindexpo^.ind[frecno];
 end;
 
 procedure tmsebufdataset.deleterecord(const arecno: integer);
 begin
- deleteitem(frecnoindex.ind,arecno);
+ deleteitem(factindexpo^.ind,arecno);
  dec(fbrecordcount);
  if frecno > arecno then begin
   dec(frecno);
@@ -1460,13 +1538,14 @@ begin
   fcurrentrecord:= nil;
  end
  else begin
-  fcurrentrecord:= frecnoindex.ind[frecno];
+  fcurrentrecord:= factindexpo^.ind[frecno];
  end;
 end;
 
 procedure tmsebufdataset.clearindex;
 begin
- frecnoindex.ind:= nil;
+ findexes:= nil;
+ factindexpo:= nil;
  fbrecordcount:= 0;
 end;
 
@@ -1477,7 +1556,101 @@ begin
   fcurrentrecord:= nil;
  end
  else begin
-  fcurrentrecord:= frecnoindex.ind[avalue];
+  fcurrentrecord:= factindexpo^.ind[avalue];
+ end;
+end;
+
+procedure tmsebufdataset.setindexlocal(const avalue: tlocalindexes);
+begin
+ findexlocal.assign(avalue);
+end;
+
+{ tlocalindexes }
+
+constructor tlocalindexes.create(const aowner: tmsebufdataset);
+begin
+ inherited create(aowner,tlocalindex);
+end;
+
+function tlocalindexes.getitems(const index: integer): tlocalindex;
+begin
+ result:= tlocalindex(inherited items[index]);
+end;
+
+procedure tlocalindexes.checkinactive;
+begin
+ if tmsebufdataset(fowner).active then begin
+  databaseerror(SActiveDataset,tmsebufdataset(fowner));
+ end;
+end;
+
+procedure tlocalindexes.setcount1(acount: integer; doinit: boolean);
+begin
+ checkinactive;
+ inherited;
+end;
+
+{ tlocalindex }
+
+constructor tlocalindex.create(aowner: tobject);
+begin
+ ffields:= tindexfields.create(self);
+ inherited;
+end;
+
+destructor tlocalindex.destroy;
+begin
+ ffields.free;
+ inherited;
+end;
+
+procedure tlocalindex.setfields(const avalue: tindexfields);
+begin
+ ffields.assign(avalue);
+end;
+
+procedure tlocalindex.change;
+begin
+end;
+
+procedure tlocalindex.setoptions(const avalue: localindexoptionsty);
+begin
+ if foptions <> avalue then begin
+  foptions:= avalue;
+  change;
+ end;
+end;
+
+{ tindexfields }
+
+constructor tindexfields.create(const aowner: tlocalindex);
+begin
+ inherited create(aowner,tindexfield);
+end;
+
+function tindexfields.getitems(const index: integer): tindexfield;
+begin
+ result:= tindexfield(inherited items[index]);
+end;
+
+{ tindexfield }
+
+procedure tindexfield.change;
+begin
+ tlocalindex(fowner).change;
+end;
+
+procedure tindexfield.setfieldname(const avalue: string);
+begin
+ ffieldname:= avalue;
+ change;
+end;
+
+procedure tindexfield.setoptions(const avalue: indexfieldoptionsty);
+begin
+ if foptions <> avalue then begin
+  foptions:= avalue;
+  change;
  end;
 end;
 

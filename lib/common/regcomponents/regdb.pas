@@ -20,7 +20,7 @@ uses
  mselookupbuffer,msesqldb,msedbf,msesdfdata,msememds,msedb,mseclasses,msetypes,
  msestrings,msedatalist,msedbfieldeditor,sysutils,msetexteditor,
  msedbdispwidgets,msedbgraphics,regdb_bmp,msegui,msedbdialog,msegrids,
- regwidgets
+ regwidgets,msebufdataset
  {$ifdef mse_with_sqlite}
  ,msesqlite3ds
  {$endif}
@@ -132,7 +132,37 @@ type
   protected
    function geteditorclass: propertyeditorclassty; override;  
  end;
+
+ tindexfieldnamepropertyeditor = class(tstringpropertyeditor)
+  protected
+   function getdefaultstate: propertystatesty; override;   
+   function getvalues: msestringarty; override;
+ end;
  
+ tindexfieldpropertyeditor = class(tclasselementeditor)
+  protected
+   function getdefaultstate: propertystatesty; override;
+  public
+   function getvalue: msestring; override;
+ end;
+
+ tindexfieldspropertyeditor = class(tpersistentarraypropertyeditor)
+  protected
+   function geteditorclass: propertyeditorclassty; override;
+ end;
+ 
+ tlocalindexpropertyeditor = class(tclasselementeditor)
+  protected
+   function getdefaultstate: propertystatesty; override;
+  public
+   function getvalue: msestring; override;
+ end;
+
+ tlocalindexespropertyeditor = class(tpersistentarraypropertyeditor)
+  protected
+   function geteditorclass: propertyeditorclassty; override;
+ end;
+    
 procedure Register;
 begin
  registercomponents('Dbf',[
@@ -208,6 +238,10 @@ begin
  registerpropertyeditor(typeinfo(tfielddef),nil,'',tfielddefpropertyeditor);
  registerpropertyeditor(typeinfo(tparam),nil,'',tdbparampropertyeditor);
  registerpropertyeditor(typeinfo(tdbstringcols),nil,'',tdbstringcolseditor);
+ registerpropertyeditor(typeinfo(string),tindexfield,'fieldname',
+                 tindexfieldnamepropertyeditor);
+ registerpropertyeditor(typeinfo(tindexfields),nil,'',tindexfieldspropertyeditor);
+ registerpropertyeditor(typeinfo(tlocalindexes),nil,'',tlocalindexespropertyeditor);
 end;
 
 
@@ -753,6 +787,91 @@ end;
 function tdbstringcolseditor.geteditorclass: propertyeditorclassty;
 begin
  result:= tdbstringcoleditor;
+end;
+
+{ tindexfieldnamepropertyeditor }
+
+function tindexfieldnamepropertyeditor.getdefaultstate: propertystatesty;
+begin
+ result:= inherited getdefaultstate + [ps_valuelist,ps_sortlist];
+end;
+
+function tindexfieldnamepropertyeditor.getvalues: msestringarty;
+var
+ int1: integer;
+begin
+ if high(fprops) = 0 then begin
+  with tmsebufdataset(fcomponent) do begin
+   result:= nil;
+   if active or not defaultfields then begin
+    for int1:= 0 to fields.count -1 do begin
+     with fields[int1] do begin
+      if datatype in indexfields then begin
+       additem(result,msestring(fieldname));
+      end;
+     end;
+    end;
+   end
+   else begin
+    for int1:= 0 to fielddefs.count -1 do begin
+     with fielddefs[int1] do begin
+      if (datatype in indexfields) then begin
+       additem(result,msestring(name));
+      end;
+     end;
+    end;
+   end;
+  end;
+ end;  
+end;
+
+{ tindexfieldpropertyeditor }
+
+function tindexfieldpropertyeditor.getvalue: msestring;
+begin
+ result:= '<'+tindexfield(getordvalue).fieldname+'>';
+end;
+
+function tindexfieldpropertyeditor.getdefaultstate: propertystatesty;
+begin
+ result:= inherited getdefaultstate + [ps_refresh]
+end;
+
+{ tindexfieldspropertyeditor }
+
+function tindexfieldspropertyeditor.geteditorclass: propertyeditorclassty;
+begin
+ result:= tindexfieldpropertyeditor;
+end;
+
+{ tlocalindexpropertyeditor }
+
+function tlocalindexpropertyeditor.getvalue: msestring;
+var
+ int1: integer;
+begin
+ result:= '<';
+ with tlocalindex(getordvalue).fields do begin
+  if count > 0 then begin
+   for int1:= 0 to count - 1 do begin
+    result:= result + items[int1].fieldname+',';
+   end;
+   setlength(result,length(result)-1);
+  end;
+ end;
+ result:= result + '>';
+end;
+
+function tlocalindexpropertyeditor.getdefaultstate: propertystatesty;
+begin
+ result:= inherited getdefaultstate + [ps_refresh];
+end;
+
+{ tlocalindexespropertyeditor }
+
+function tlocalindexespropertyeditor.geteditorclass: propertyeditorclassty;
+begin
+ result:= tlocalindexpropertyeditor;
 end;
 
 initialization
