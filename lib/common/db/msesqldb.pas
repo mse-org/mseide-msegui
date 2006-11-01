@@ -66,7 +66,7 @@ type
    procedure setindexdefs(const avalue: TIndexDefs);
    function getetstatementtype: TStatementType;
    procedure setstatementtype(const avalue: TStatementType);
-   procedure afterapply;   
+   procedure afterapply; override;
   protected
    procedure updateindexdefs; override;
    procedure sqlonchange(sender: tobject);
