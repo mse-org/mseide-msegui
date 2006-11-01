@@ -461,38 +461,11 @@ begin
 end;
 
 procedure tmsesqlquery.internalopen;
-
- procedure initmodifyquery(var aquery: tsqlquery; const asql: tstringlist);
- begin
-  if aquery = nil then begin
-   aquery:= tsqlquery.create(nil);
-   with aquery do begin
-    parsesql:= false;
-    database:= self.database;
-    transaction:= self.transaction;
-    sql.Assign(asql);
-   end;
-  end;
- end;
-
 begin
  fcontroller.internalopen;
- bindfields(true);
- {
-     //queries are nil if not defaultfields
- with tsqlquerycracker(self) do begin
-  if fupdateable then begin
-   initmodifyquery(fdeleteqry,deletesql);
-   initmodifyquery(fupdateqry,updatesql);
-   initmodifyquery(finsertqry,insertsql);
-  end;
- end;  
- }
 end;
 
 procedure tmsesqlquery.internalclose;
-var
- int1: integer;
 begin
  inherited;
 end;

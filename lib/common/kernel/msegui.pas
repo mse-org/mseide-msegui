@@ -3154,6 +3154,7 @@ var
     int2:= ipos;
     ipos:= round(pos);
     co1:= scalecolor(color,po1^,po2^);
+{$ifdef FPC}{$checkpointer off}{$endif} //scanline is not in heap on win32
     if reverse then begin
      for int3:= int2 downto ipos + 1 do begin
       fade^[int3]:= co1;
@@ -3170,6 +3171,7 @@ var
     fade^[ipos]:= co1;
    end;
   end;
+{$ifdef FPC}{$checkpointer default}{$endif}
  end;
 
  procedure createalphabuffer;

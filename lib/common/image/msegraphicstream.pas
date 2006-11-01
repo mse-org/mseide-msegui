@@ -375,6 +375,8 @@ begin
   with tbitmap(dest) do begin
    size:= makesize(self.width,self.height);
    hasalpha:= false;
+{$ifdef FPC}{$checkpointer off}{$endif} 
+//scanline is not in heap on win32
    for int1:= 0 to height - 1 do begin
     po1:= scanline[int1];
     for int2:= 0 to width - 1 do begin
@@ -412,6 +414,7 @@ begin
      maskcolorbackground:= col2;
     end;
    end;
+{$ifdef FPC}{$checkpointer default}{$endif}
    change;
   end;
  end;

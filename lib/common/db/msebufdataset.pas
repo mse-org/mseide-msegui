@@ -347,7 +347,7 @@ end;
 procedure tmsebufdataset.clearcalcfields(buffer: pchar);
 begin
  with pdsrecordty(buffer)^ do begin
-  fillchar((pointer(@header)+frecordsize)^,calcfieldssize,0);
+//  fillchar((pointer(@header)+frecordsize)^,calcfieldssize,0);
  end;
 end;
 
@@ -481,6 +481,7 @@ end;
 procedure tmsebufdataset.internalopen;
 
 begin
+ bindfields(true); //calculate calc fields size
  calcrecordsize;
  femptybuffer:= intallocrecord;
  ffilterbuffer:= intallocrecord;
@@ -529,7 +530,7 @@ begin
  until (getnextpacket < fpacketrecords) or (fpacketrecords = -1);
  internalsetrecno(fbrecordcount)
 end;
-var testvar: pint64;
+
 function tmsebufdataset.getrecord(buffer: pchar; getmode: tgetmode;
                                             docheck: boolean): tgetresult;
 begin
@@ -570,9 +571,6 @@ begin
     flag:= bfcurrent;
    end;
    move(fcurrentrecord^.header,header,frecordsize);
-if high(ffieldbufpositions) >= 7 then begin
- testvar:= pointer(@header)+ffieldbufpositions[7];
-end;
    getcalcfields(buffer);
   end;
  end
