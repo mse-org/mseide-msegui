@@ -19,7 +19,7 @@ unit msebufdataset;
 interface 
 
 uses
- db,classes,variants,msetypes,msearrayprops,mseclasses;
+ db,classes,variants,msetypes,msearrayprops,mseclasses,mselist;
   
 const
  defaultpacketrecords = 10;
@@ -27,113 +27,35 @@ const
  floatindexfields = [ftfloat];
  currencyindexfields = [ftcurrency,ftbcd];
  stringindexfields = [ftstring,ftfixedchar,ftwidestring,ftmemo];
- indexfields =  integerindexfields+floatindexfields+currencyindexfields+
+ indexfieldtypes =  integerindexfields+floatindexfields+currencyindexfields+
                    stringindexfields;
  
 type  
- tmsebufdataset = class;
- 
-  TResolverErrorEvent = procedure(Sender: TObject; DataSet: tmsebufdataset; E: EUpdateError;
-    UpdateKind: TUpdateKind; var Response: TResolverResponse) of object;
- 
+ fielddataty = record
+  nullmask: array[0..0] of byte; //variable length
+                                 //fielddata following
+ end;
+  
  blobinfoty = record
   field: tfield;
   data: pointer;
   datalength: integer;
   new: boolean;
  end;
+ 
  pblobinfoty = ^blobinfoty;
  blobinfoarty = array of blobinfoty;
  pblobinfoarty = ^blobinfoarty;
- 
- tblobbuffer = class(tmemorystream)
-  private
-   fowner: tmsebufdataset;
-   ffield: tfield;
-  public
-   constructor create(const aowner: tmsebufdataset; const afield: tfield);
-   destructor destroy; override;
- end;
 
- tblobcopy = class(tmemorystream)
-  public
-   constructor create(const ablob: blobinfoty);
-   destructor destroy; override;
- end;
-
- indexfieldoptionty = (ifo_desc,ifo_caseinsensitive);
- indexfieldoptionsty = set of indexfieldoptionty;
- 
- tindexfield = class(townedpersistent)
-  private
-   ffieldname: string;
-   foptions: indexfieldoptionsty;
-   procedure change;
-   procedure setfieldname(const avalue: string);
-   procedure setoptions(const avalue: indexfieldoptionsty);
-  published
-   property fieldname: string read ffieldname write setfieldname;
-   property options: indexfieldoptionsty read foptions write setoptions;
- end;
-
- localindexoptionty = (lio_desc);
- localindexoptionsty = set of localindexoptionty;
-
- tlocalindex = class;  
- 
- tindexfields = class(townedpersistentarrayprop)
-  private
-   function getitems(const index: integer): tindexfield;
-  public
-   constructor create(const aowner: tlocalindex);
-   property items[const index: integer]: tindexfield read getitems;
- end;
- 
- tlocalindex = class(townedpersistent)
-  private
-   ffields: tindexfields;
-   foptions: localindexoptionsty;
-   procedure change;
-   procedure setoptions(const avalue: localindexoptionsty);
-   procedure setfields(const avalue: tindexfields);
-  public
-   constructor create(aowner: tobject); override;
-   destructor destroy; override;
-  published
-   property fields: tindexfields read ffields write setfields;
-   property options: localindexoptionsty read foptions write setoptions;
- end;
- 
- tlocalindexes = class(townedpersistentarrayprop)
-  private
-   function getitems(const index: integer): tlocalindex;
-  protected
-   procedure checkinactive;
-   procedure setcount1(acount: integer; doinit: boolean); override;
- public
-   constructor create(const aowner: tmsebufdataset);
-   property items[const index: integer]: tlocalindex read getitems;
- end;
- 
- indexty = record
-  ind: pointerarty;
- end;
- pindexty = ^indexty;
-
- intheaderty = record
- end;
- 
- fielddataty = record
-  nullmask: array[0..0] of byte; //variable length
-                                 //fielddata following
- end;
- 
  recheaderty = record
   blobinfo: blobinfoarty;
   fielddata: fielddataty;   
  end;
  precheaderty = ^recheaderty;
    
+ intheaderty = record
+ end;
+
  intrecordty = record              
   intheader: intheaderty;
   header: recheaderty;      
@@ -179,6 +101,111 @@ const
 //
 
 type
+ indexty = record
+  ind: pointerarty;
+ end;
+ pindexty = ^indexty;
+
+ tmsebufdataset = class;
+ 
+  TResolverErrorEvent = procedure(Sender: TObject; DataSet: tmsebufdataset; E: EUpdateError;
+    UpdateKind: TUpdateKind; var Response: TResolverResponse) of object;
+  
+ tblobbuffer = class(tmemorystream)
+  private
+   fowner: tmsebufdataset;
+   ffield: tfield;
+  public
+   constructor create(const aowner: tmsebufdataset; const afield: tfield);
+   destructor destroy; override;
+ end;
+
+ tblobcopy = class(tmemorystream)
+  public
+   constructor create(const ablob: blobinfoty);
+   destructor destroy; override;
+ end;
+
+ indexfieldoptionty = (ifo_desc,ifo_caseinsensitive);
+ indexfieldoptionsty = set of indexfieldoptionty;
+ 
+ tindexfield = class(townedpersistent)
+  private
+   ffieldname: string;
+   foptions: indexfieldoptionsty;
+   procedure change;
+   procedure setfieldname(const avalue: string);
+   procedure setoptions(const avalue: indexfieldoptionsty);
+  published
+   property fieldname: string read ffieldname write setfieldname;
+   property options: indexfieldoptionsty read foptions write setoptions;
+ end;
+
+ localindexoptionty = (lio_desc);
+ localindexoptionsty = set of localindexoptionty;
+
+ tlocalindex = class;  
+ 
+ tindexfields = class(townedpersistentarrayprop)
+  private
+   function getitems(const index: integer): tindexfield;
+  public
+   constructor create(const aowner: tlocalindex); reintroduce;
+   property items[const index: integer]: tindexfield read getitems;
+ end;
+
+ intrecordpoaty = array[0..0] of pintrecordty;
+ pintrecordpoaty = ^intrecordpoaty;
+ indexfieldinfoty = record
+  comparefunc: arraysortcomparety;
+  recoffset: integer;
+  fieldindex: integer;
+  desc: boolean;
+ end;
+ indexfieldinfoarty = array of indexfieldinfoty;
+  
+ tlocalindex = class(townedpersistent)
+  private
+   ffields: tindexfields;
+   foptions: localindexoptionsty;
+   fsortarray: pintrecordpoaty;
+   findexfieldinfos: indexfieldinfoarty;
+   procedure change;
+   procedure setoptions(const avalue: localindexoptionsty);
+   procedure setfields(const avalue: tindexfields);
+   function compare(l,r: pintrecordty): integer;
+   procedure quicksort(l,r: integer);
+   procedure sort(var adata: pointerarty);
+   function getactive: boolean;
+   procedure setactive(const avalue: boolean);
+   procedure bindfields;
+   function findboundary(const arecord: pintrecordty): integer;
+                          //returns index of next bigger
+   function findrec(const arecord: pintrecordty): integer;
+                         //returns index, -1 if not found
+  public
+   constructor create(aowner: tobject); override;
+   destructor destroy; override;
+  published
+   property fields: tindexfields read ffields write setfields;
+   property options: localindexoptionsty read foptions write setoptions;
+   property active: boolean read getactive write setactive;
+ end;
+ 
+ tlocalindexes = class(townedpersistentarrayprop)
+  private
+   function getitems(const index: integer): tlocalindex;
+   procedure bindfields;
+  protected
+   procedure checkinactive;
+   procedure setcount1(acount: integer; doinit: boolean); override;
+ public
+   constructor create(const aowner: tmsebufdataset); reintroduce;
+   procedure move(const curindex,newindex: integer); override;
+   property items[const index: integer]: tlocalindex read getitems; default;
+ end;
+  
+type
  
  recupdatebufferty = record
   updatekind: tupdatekind;
@@ -189,7 +216,7 @@ type
 
  recupdatebufferarty = array of recupdatebufferty;
  
- bufdatasetstatety = (bs_applying);
+ bufdatasetstatety = (bs_applying,bs_hasindex,bs_fetchall,bs_indexvalid);
  bufdatasetstatesty = set of bufdatasetstatety;
    
  tmsebufdataset = class(TDBDataSet)
@@ -218,28 +245,36 @@ type
    factindexpo: pindexty;    
    findexes: array of indexty;
    findexlocal: tlocalindexes;
+   factindex: integer;
    procedure CalcRecordSize;
    function loadbuffer(var buffer: recheaderty): tgetresult;
    function GetFieldSize(FieldDef : TFieldDef) : longint;
    function GetRecordUpdateBuffer : boolean;
    procedure SetPacketRecords(aValue : integer);
-   procedure internalsetrecno(const avalue: integer);
    function  intallocrecord: pintrecordty;    
    procedure intfreerecord(var buffer: pintrecordty);
 
    procedure clearindex;
    procedure checkindexsize;    
-   procedure appendrecord(const arecord: intrecordty);
-   procedure insertrecord(arecno: integer; const arecord: intrecordty);
+   function appendrecord(const arecord: pintrecordty): integer;
+             //returns new recno
+   function insertrecord(arecno: integer; const arecord: pintrecordty): integer;
+             //returns new recno
    procedure deleterecord(const arecno: integer);    
    procedure getnewupdatebuffer;
    procedure setindexlocal(const avalue: tlocalindexes);
+   function insertindexrefs(const arecord: pintrecordty): integer;
+              //returns new recno of active index
+   procedure removeindexrefs(const arecord: pintrecordty);
+   procedure internalsetrecno(const avalue: integer);
+   procedure setactindex(const avalue: integer);
+   procedure checkindex;
   protected
    fapplyindex: integer; //take care about canceled updates while applying
    ffailedcount: integer;
    frecno: integer; //null based
    
-//   function getblobpo: pblobinfoarty;    //in tdataset buffer
+   procedure updatestate;
    function getintblobpo: pblobinfoarty; //in currentrecbuf
    procedure internalcancel; override;
    procedure cancelrecupdate(var arec: recupdatebufferty);
@@ -292,9 +327,13 @@ type
   {abstracts, must be overidden by descendents}
     function Fetch : boolean; virtual; abstract;
     function LoadField(FieldDef : TFieldDef;buffer : pointer) : boolean; virtual; abstract;
+   property actindex: integer read factindex write setactindex;
+   function findrec(const arecord: pintrecordty): integer;
+                         //returns index, -1 if not found
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
+    procedure resetindex; //deactivates all indexes
     function createblobbuffer(const afield: tfield): tblobbuffer;
     procedure ApplyUpdates(const maxerrors: integer = 0); virtual; overload;
     procedure ApplyUpdates(const MaxErrors: Integer;
@@ -308,7 +347,7 @@ type
     function UpdateStatus: TUpdateStatus; override;
     property ChangeCount : Integer read GetChangeCount;
   published
-    property PacketRecords : Integer read FPacketRecords write FPacketRecords 
+    property PacketRecords : Integer read FPacketRecords write setPacketRecords 
                                   default defaultpacketrecords;
     property OnUpdateError: TResolverErrorEvent read FOnUpdateError 
                                   write SetOnUpdateError;
@@ -318,7 +357,66 @@ type
 implementation
 uses
  dbconst,msedatalist,sysutils;
+ 
+function compinteger(const l,r): integer;
+begin
+ result:= integer(l) - integer(r);
+end;
 
+function compfloat(const l,r): integer;
+begin
+ result:= 0;
+ if double(l) > double(r) then begin
+  inc(result);
+ end
+ else begin
+  if double(l) < double(r) then begin
+   dec(result);
+  end;
+ end;
+end;
+
+function compcurrency(const l,r): integer;
+begin
+ result:= 0;
+ if currency(l) > currency(r) then begin
+  inc(result);
+ end
+ else begin
+  if currency(l) < currency(r) then begin
+   dec(result);
+  end;
+ end;
+end;
+
+function compstring(const l,r): integer;
+begin
+ result:= ansistrcomp(pchar(@l),pchar(@r));
+end;
+
+function compstringi(const l,r): integer;
+begin
+ result:= ansistricomp(pchar(@l),pchar(@r));
+end;
+
+type
+ fieldcomparekindty = (fct_integer,fct_float,fct_currency,fct_text);
+ fieldcompareinfoty = record
+  datatypes: set of tfieldtype;
+  compfunc: arraysortcomparety;
+  compfunci: arraysortcomparety;
+ end;
+const
+ comparefuncs: array[fieldcomparekindty] of fieldcompareinfoty = 
+  ((datatypes: integerindexfields; compfunc: @compinteger;
+                                   compfunci: @compinteger),
+   (datatypes: floatindexfields; compfunc: @compfloat;
+                                 compfunci: @compfloat),
+   (datatypes: currencyindexfields; compfunc: @compcurrency;
+                                    compfunci: @compcurrency),
+   (datatypes: stringindexfields; compfunc: @compstring;
+                                  compfunci: @compstringi));
+    
 procedure unSetFieldIsNull(NullMask : pbyte;x : longint); //inline;
 begin
   NullMask[x div 8] := (NullMask[x div 8]) and not (1 shl (x mod 8));
@@ -370,8 +468,8 @@ end;
 constructor tmsebufdataset.Create(AOwner : TComponent);
 begin
  frecno:= -1;
- fpacketrecords:= defaultpacketrecords;
  findexlocal:= tlocalindexes.create(self);
+ packetrecords:= defaultpacketrecords;
  inherited;
  bookmarksize := sizeof(bufbookmarkty);
 end;
@@ -384,8 +482,11 @@ end;
 
 procedure tmsebufdataset.setpacketrecords(avalue : integer);
 begin
-  if (avalue = -1) or (avalue > 0) then fpacketrecords := avalue
-    else databaseerror(sinvpacketrecordsvalue);
+ if (avalue = 0) then begin
+  databaseerror(sinvpacketrecordsvalue);
+ end;
+ fpacketrecords:= avalue;
+ updatestate;
 end;
 
 Function tmsebufdataset.GetCanModify: Boolean;
@@ -553,9 +654,10 @@ procedure tmsebufdataset.internalopen;
 
 begin
  bindfields(true); //calculate calc fields size
- setlength(findexes,1);
- factindexpo:= @findexes[0];
+ setlength(findexes,1+findexlocal.count);
+ factindexpo:= @findexes[factindex];
  calcrecordsize;
+ findexlocal.bindfields;
  femptybuffer:= intallocrecord;
  ffilterbuffer:= intallocrecord;
  fnewvaluebuffer:= pdsrecordty(allocrecordbuffer);
@@ -569,8 +671,8 @@ var
 begin
  fopen:= false;
  frecno:= -1;
- with factindexpo^ do begin
-  for int1:= 0 to high(ind) do begin
+ with findexes[0] do begin
+  for int1:= 0 to fbrecordcount - 1 do begin
    intfreerecord(ind[int1]);
   end;
  end;
@@ -587,6 +689,7 @@ begin
  end;
  fupdatebuffer:= nil;
  clearindex;
+ fbrecordcount:= 0;
  ffieldbufpositions:= nil;
  ffieldsizes:= nil;
  bindfields(false);
@@ -600,7 +703,7 @@ end;
 procedure tmsebufdataset.internallast;
 begin
  repeat
- until (getnextpacket < fpacketrecords) or (fpacketrecords = -1);
+ until (getnextpacket < fpacketrecords) or (bs_fetchall in fbstate);
  internalsetrecno(fbrecordcount)
 end;
 
@@ -720,50 +823,27 @@ begin
  if fallpacketsfetched then  begin
   exit;
  end;
- while ((result < fpacketrecords) or (fpacketrecords = -1)) and 
+ while ((result < fpacketrecords) or (bs_fetchall in fbstate)) and 
                              (loadbuffer(femptybuffer^.header) = grok) do begin
-  appendrecord(femptybuffer^);
+  appendrecord(femptybuffer);
   femptybuffer:= intallocrecord;
   inc(result);
  end;
-  
- {
- i := 0;
- pb := pchar(pointer(FLastRecBuf)+sizeof(Tbufreclinkitem1));
-  while ((i < FPacketRecords) or (FPacketRecords = -1)) and (loadbuffer(pb) = grOk) do
-    begin
-    FLastRecBuf^.next := pointer(IntAllocRecordBuffer);
-    appendrecord(precordty(FLastRecBuf^.next)^);
-    FLastRecBuf^.next^.prior := FLastRecBuf;
-    FLastRecBuf := FLastRecBuf^.next;
-    pb := pchar(pointer(FLastRecBuf)+sizeof(Tbufreclinkitem1));
-    inc(i);
-    end;
-//  FBRecordCount := FBRecordCount + i;
-  result := i;
-  }
 end;
 
-function tmsebufdataset.GetFieldSize(FieldDef : TFieldDef) : longint;
-
+function tmsebufdataset.getfieldsize(fielddef: tfielddef): longint;
 begin
-  case FieldDef.DataType of
-    ftString,
-      ftFixedChar: result := FieldDef.Size + 1;
-    ftSmallint,
-      ftInteger,
-      ftword     : result := sizeof(longint);
-    ftBoolean    : result := sizeof(wordbool);
-    ftBCD        : result := sizeof(currency);
-    ftFloat      : result := sizeof(double);
-    ftLargeInt   : result := sizeof(largeint);
-    ftTime,
-      ftDate,
-      ftDateTime : result := sizeof(TDateTime);
-    ftmemo,ftblob: result:= fielddef.size;
-  else Result := 10
-  end;
-
+ case fielddef.datatype of
+  ftstring,ftfixedchar: result:= fielddef.size + 1;
+  ftsmallint,ftinteger,ftword: result:= sizeof(longint);
+  ftboolean: result:= sizeof(wordbool);
+  ftbcd: result:= sizeof(currency);
+  ftfloat: result:= sizeof(double);
+  ftlargeint: result:= sizeof(largeint);
+  fttime,ftdate,ftdatetime: result:= sizeof(tdatetime);
+  ftmemo,ftblob: result:= fielddef.size;
+  else result := 10
+ end;
 end;
 
 function tmsebufdataset.loadbuffer(var buffer: recheaderty): tgetresult;
@@ -953,7 +1033,7 @@ begin
    end
    else begin
     if updatekind = ukdelete then begin
-     insertrecord(bookmark.recno,bookmark.recordpo^);
+     insertrecord(bookmark.recno,bookmark.recordpo);
     end
     else begin
      if updatekind = ukinsert then begin
@@ -1101,10 +1181,6 @@ end;
 procedure tmsebufdataset.ApplyUpdates(const MaxErrors: Integer; 
                                 const cancelonerror: boolean = false);
 var
- SaveBookmark: pchar;
-//    r            : Integer;
-// FailedCount: integer;
-// EUpdErr: EUpdateError;
  Response: TResolverResponse;
  recnobefore: integer;
 
@@ -1151,11 +1227,12 @@ end;
 
 procedure tmsebufdataset.internalpost;
 var
- recbuf: pintrecordty;
+// recbuf: pintrecordty;
  po1,po2: pblobinfoarty;
  po3: pointer;
- int1: integer;
+ int1,int2,int3: integer;
  bo1: boolean;
+ ar1: integerarty;
 begin
  with pdsrecordty(activebuffer)^ do begin
   bo1:= false;
@@ -1168,13 +1245,7 @@ begin
    end;
   end;
   if state = dsinsert then begin
-   recbuf:= intallocrecord;
-   insertrecord(frecno,recbuf^);
-   with dsheader.bookmark do  begin
-    data.recordpo:= recbuf;
-    data.recno:= frecno;
-    flag := bfinserted;
-   end;      
+   fcurrentrecord:= intallocrecord;
   end;
   if not getrecordupdatebuffer then begin
    getnewupdatebuffer;
@@ -1210,10 +1281,50 @@ begin
     end;
    end;
   end;
+  if (state = dsedit) and (bs_indexvalid in fbstate) then begin
+   setlength(ar1,findexlocal.count);
+   for int1:= high(ar1) downto 0 do begin
+    ar1[int1]:= findexlocal[int1].findboundary(fcurrentrecord);
+   end;
+  end;   
   if bo1 then begin
    fcurrentrecord^.header.blobinfo:= nil; //free old array
   end;
-  move(header,fcurrentrecord^.header,frecordsize);
+  move(header,fcurrentrecord^.header,frecordsize); //get new field values
+  if state = dsinsert then begin
+   frecno:= insertrecord(recno,fcurrentrecord);
+   with dsheader.bookmark do  begin
+    data.recordpo:= fcurrentrecord;
+    data.recno:= frecno;
+    flag := bfinserted;
+   end;      
+  end
+  else begin
+   if (state = dsedit) and (bs_indexvalid in fbstate) then begin
+    for int1:= high(ar1) downto 0 do begin
+     int2:= findexlocal[int1].findboundary(fcurrentrecord);
+     if int2 <> ar1[int1] then begin
+      with findexes[int1+1] do begin
+       for int3:= ar1[int1] - 1 downto 0 do begin
+        if ind[int3] = fcurrentrecord then begin //update indexes
+         move(ind[int3+1],ind[int3],(fbrecordcount-int3-1)*sizeof(pointer));
+         if int3 < int2 then begin
+          dec(int2);
+         end;
+         move(ind[int2],ind[int2+1],(fbrecordcount-int2-1)*sizeof(pointer));
+         ind[int2]:= fcurrentrecord;
+         if int1 = factindex - 1 then begin
+          frecno:= int2;
+         end;
+         break;
+        end;
+       end;
+      end;
+     end;
+    end;
+    dsheader.bookmark.data.recno:= frecno;
+   end;
+  end;
  end;
 end;
 
@@ -1260,10 +1371,10 @@ var
  bm: bufbookmarkty;
 begin
  checkbrowsemode;
- if value > RecordCount then  begin
+ if value > RecordCount then begin
   repeat
   until (getnextpacket < FPacketRecords) or (value <= RecordCount) or
-                        (FPacketRecords = -1);
+                        (bs_fetchall in fbstate);
  end;
  if (value > RecordCount) or (value < 1) then begin
   DatabaseError(SNoSuchRecord,self);
@@ -1499,38 +1610,115 @@ var
 begin
  if high(factindexpo^.ind) <= fbrecordcount - 1 then begin
   int2:= (high(factindexpo^.ind)+17)*2;
-  for int1:= 0 to high(findexes) do begin
-   setlength(findexes[int1].ind,int2);
+  setlength(findexes[0].ind,int2);
+  if bs_indexvalid in fbstate then begin
+   for int1:= 1 to high(findexes) do begin
+    setlength(findexes[int1].ind,int2);
+   end;
   end;
  end;
 end;
 
-procedure tmsebufdataset.appendrecord(const arecord: intrecordty);
+function tmsebufdataset.insertindexrefs(const arecord: pintrecordty): integer;
+var
+ int1,int2: integer;
 begin
- checkindexsize;
- factindexpo^.ind[fbrecordcount]:= @arecord;
- inc(fbrecordcount);
- fcurrentrecord:= @arecord;
+ result:= frecno;
+ if bs_indexvalid in fbstate then begin
+  for int1:= 1 to high(findexes) do begin
+   int2:= findexlocal[int1-1].findboundary(arecord);
+   with findexes[int1] do begin
+    if int2 < fbrecordcount then begin
+     move(ind[int2],ind[int2+1],(fbrecordcount-int2)*sizeof(pointer));
+    end;
+    ind[int2]:= arecord;
+    if int1 = factindex then begin
+     result:= int2;
+    end;
+   end;
+  end;
+ end;
 end;
 
-procedure tmsebufdataset.insertrecord(arecno: integer; 
-                       const arecord: intrecordty);
+procedure tmsebufdataset.removeindexrefs(const arecord: pintrecordty);
+var
+ int1,int2: integer;
+begin
+ if bs_indexvalid in fbstate then begin
+  for int1:= 1 to high(findexes) do begin
+   if int1 <> factindex then begin
+    int2:= findexlocal[int1-1].findrec(arecord);
+    with findexes[int1] do begin
+     move(ind[int2+1],ind[int2],(fbrecordcount-int2-1)*sizeof(pointer));
+    end;
+   end;
+  end;
+ end;
+end;
+
+function tmsebufdataset.appendrecord(const arecord: pintrecordty): integer;
+begin
+ checkindexsize;
+ findexes[0].ind[fbrecordcount]:= arecord;
+ result:= insertindexrefs(arecord);
+ if factindex = 0 then begin
+  result:= fbrecordcount;
+ end;
+ inc(fbrecordcount);
+end;
+
+function tmsebufdataset.insertrecord(arecno: integer; 
+                       const arecord: pintrecordty): integer;
 begin
  if arecno < 0 then begin
   arecno:= 0;
  end;
- insertitem(factindexpo^.ind,arecno,@arecord);
+ checkindexsize;
+ result:= insertindexrefs(arecord);
+ if factindex <> 0 then begin
+  findexes[0].ind[fbrecordcount]:= arecord; //append
+ end
+ else begin
+  result:= arecno;
+  move(findexes[0].ind[arecno],findexes[0].ind[arecno+1],
+             (fbrecordcount-arecno)*sizeof(pointer));
+  findexes[0].ind[arecno]:= arecord;           
+ end;
  inc(fbrecordcount);
  if frecno > arecno then begin
   inc(frecno);
+  fcurrentrecord:= factindexpo^.ind[frecno];
  end;
- fcurrentrecord:= factindexpo^.ind[frecno];
 end;
 
 procedure tmsebufdataset.deleterecord(const arecno: integer);
+var
+ po1: pintrecordty;
+ int1: integer;
 begin
- deleteitem(factindexpo^.ind,arecno);
+ if bs_indexvalid in fbstate then begin
+  removeindexrefs(pintrecordty(factindexpo^.ind[arecno]));
+ end;
  dec(fbrecordcount);
+ with findexes[0] do begin
+  if factindex = 0 then begin
+   int1:= arecno;
+  end
+  else begin
+   po1:= factindexpo^.ind[arecno];
+   for int1:= fbrecordcount downto 0 do begin
+    if ind[int1] = po1 then begin
+     break;
+    end;
+   end;
+  end;
+  move(ind[int1+1],ind[int1],(fbrecordcount-int1)*sizeof(pointer));
+ end;
+ if factindex <> 0 then begin
+  with factindexpo^ do begin
+   move(ind[arecno+1],ind[arecno],(fbrecordcount-arecno)*sizeof(pointer));
+  end;
+ end;
  if frecno > arecno then begin
   dec(frecno);
  end;
@@ -1542,11 +1730,21 @@ begin
  end;
 end;
 
-procedure tmsebufdataset.clearindex;
+procedure tmsebufdataset.checkindex;
+var
+ int1,int2: integer;
 begin
- findexes:= nil;
- factindexpo:= nil;
- fbrecordcount:= 0;
+ if (factindex <> 0) and not (bs_indexvalid in fbstate) then begin
+  int2:= length(findexes[0].ind);
+  for int1:= 1 to high(findexes) do begin
+   with findexes[int1] do begin
+    allocuninitedarray(int2,sizeof(pointer),ind);
+    move(findexes[0].ind[0],ind[0],fbrecordcount*sizeof(pointer));
+    findexlocal.items[int1-1].sort(ind);
+   end;
+  end;
+  include(fbstate,bs_indexvalid);
+ end;
 end;
 
 procedure tmsebufdataset.internalsetrecno(const avalue: integer);
@@ -1556,13 +1754,90 @@ begin
   fcurrentrecord:= nil;
  end
  else begin
+  checkindex;
   fcurrentrecord:= factindexpo^.ind[avalue];
  end;
+end;
+
+procedure tmsebufdataset.clearindex;
+begin
+ findexes:= nil;
+ factindexpo:= nil;
+ exclude(fbstate,bs_indexvalid);
 end;
 
 procedure tmsebufdataset.setindexlocal(const avalue: tlocalindexes);
 begin
  findexlocal.assign(avalue);
+end;
+
+procedure tmsebufdataset.updatestate;
+begin
+ if fpacketrecords < 0 then begin
+  include(fbstate,bs_fetchall);
+ end
+ else begin
+  exclude(fbstate,bs_fetchall);
+ end;
+ if findexlocal.count > 0 then begin
+  fbstate:= fbstate + [bs_hasindex,bs_fetchall];
+ end
+ else begin
+  exclude(fbstate,bs_hasindex);
+  if fpacketrecords >= 0 then begin
+   exclude(fbstate,bs_fetchall);
+  end;
+ end;
+end;
+
+procedure tmsebufdataset.setactindex(const avalue: integer);
+var
+ int1: integer;
+begin
+ if factindex <> avalue then begin
+  if active then begin
+   checkbrowsemode;
+   factindex:= avalue;
+   factindexpo:= @findexes[avalue];
+   internalsetrecno(findrec(fcurrentrecord));
+   resync([]);
+  end
+  else begin
+   factindex:= avalue;
+   factindexpo:= @findexes[avalue];
+  end;
+ end;
+end;
+
+function tmsebufdataset.findrec(const arecord: pintrecordty): integer;
+var
+ int1: integer;
+begin
+ if factindex = 0 then begin
+  result:= -1;
+  with findexes[0] do begin
+   for int1:= fbrecordcount - 1 downto 0 do begin
+    if ind[int1] = arecord then begin
+     result:= int1;
+     break;
+    end;
+   end;
+  end;  
+ end
+ else begin
+  result:= findexlocal[factindex-1].findrec(arecord);
+ end;
+end;
+
+procedure tmsebufdataset.resetindex;
+var
+ int1: integer;
+begin
+ actindex:= 0;
+ for int1:= 1 to high(findexes) do begin
+  findexes[int1].ind:= nil;
+ end;
+ exclude(fbstate,bs_indexvalid);
 end;
 
 { tlocalindexes }
@@ -1585,6 +1860,22 @@ begin
 end;
 
 procedure tlocalindexes.setcount1(acount: integer; doinit: boolean);
+begin
+ checkinactive;
+ inherited;
+ tmsebufdataset(fowner).updatestate;
+end;
+
+procedure tlocalindexes.bindfields;
+var
+ int1: integer;
+begin
+ for int1:= count - 1 downto 0 do begin
+  items[int1].bindfields;
+ end;
+end;
+
+procedure tlocalindexes.move(const curindex: integer; const newindex: integer);
 begin
  checkinactive;
  inherited;
@@ -1618,6 +1909,215 @@ begin
  if foptions <> avalue then begin
   foptions:= avalue;
   change;
+ end;
+end;
+
+function tlocalindex.compare(l,r: pintrecordty): integer;
+label
+ next;
+var
+ int1: integer;
+begin
+ result:= 0;
+ for int1:= 0 to high(findexfieldinfos) do begin
+  with findexfieldinfos[int1] do begin
+   if getfieldisnull(@l^.header.fielddata.nullmask,fieldindex) then begin
+    if getfieldisnull(@r^.header.fielddata.nullmask,fieldindex) then begin
+     goto next;
+    end
+    else begin
+     dec(result);
+    end;
+   end
+   else begin
+    if getfieldisnull(@r^.header.fielddata.nullmask,fieldindex) then begin
+     inc(result);
+    end
+    else begin    
+     result:= comparefunc((pointer(l)+recoffset)^,(pointer(r)+recoffset)^);
+    end;
+   end;
+   if desc then begin
+    result:= -result;
+   end;
+  end;
+  if result <> 0 then begin
+   break;
+  end;
+next:
+ end;
+ if lio_desc in foptions then begin
+  result:= -result;
+ end;
+end;
+
+procedure tlocalindex.quicksort(l,r: integer);
+var
+  i,j: integer;
+  p: integer;
+  int: integer;
+  po1: pintrecordty;
+begin
+ repeat
+  i:= l;
+  j:= r;
+  p:= (l + r) shr 1;
+  repeat
+   while compare(fsortarray^[i],fsortarray^[p]) < 0 do begin
+    inc(i);
+   end;
+   while compare(fsortarray^[j],fsortarray^[p]) > 0 do begin
+    dec(j);
+   end;
+   if i <= j then begin
+    po1:= fsortarray^[i];
+    fsortarray^[i]:= fsortarray^[j];
+    fsortarray^[j]:= po1;
+    if p = i then begin
+     p:= j
+    end
+    else begin
+     if p = j then begin
+      p:= i;
+     end;
+    end;
+    inc(i);
+    dec(j);
+   end;
+  until i > j;
+  if l < j then begin
+   quicksort(l,j);
+  end;
+  l:= i;
+ until i >= r;
+end;
+
+function tlocalindex.findboundary(const arecord: pintrecordty): integer;
+                          //returns index of next bigger
+var
+ int1: integer;
+ lower,upper,pivot: integer;
+begin
+ result:= -1;
+ with tmsebufdataset(fowner),findexes[findexlocal.indexof(self) + 1] do begin
+  if fbrecordcount > 0 then begin
+   int1:= 0;
+   checkindex;
+   lower:= 0;
+   upper:= fbrecordcount - 1;
+   while true do begin
+    pivot:= (upper + lower) div 2;
+    int1:= compare(arecord,ind[pivot]);
+    if upper = lower then begin
+     result:= lower;
+     break;
+    end;
+    if int1 >= 0 then begin //pivot <= rev
+     if lower = pivot then begin
+      inc(lower)
+     end
+     else begin
+      lower:= pivot;
+     end;
+    end
+    else begin
+     upper:= pivot;
+    end;
+   end;
+  end;
+  if int1 >= 0 then begin
+   inc(result);
+  end;
+ end;
+end;
+
+function tlocalindex.findrec(const arecord: pintrecordty): integer;
+var
+ int1: integer;
+begin
+ result:= -1;
+ int1:= findboundary(arecord) - 1;
+ with tmsebufdataset(fowner),findexes[findexlocal.indexof(self) + 1] do begin
+  for int1:= int1 downto 0 do begin
+   if ind[int1] = arecord then begin
+    result:= int1;
+    break;
+   end;
+  end;
+ end;
+end;
+
+procedure tlocalindex.sort(var adata: pointerarty);
+begin
+ if adata <> nil then begin
+  fsortarray:= @adata[0];
+  quicksort(0,tmsebufdataset(fowner).fbrecordcount - 1);
+ end;
+end;
+
+function tlocalindex.getactive: boolean;
+begin
+ with tmsebufdataset(fowner) do begin
+  result:= actindex = findexlocal.indexof(self) + 1;
+ end;
+end;
+
+procedure tlocalindex.setactive(const avalue: boolean);
+begin
+ with tmsebufdataset(fowner) do begin
+  if avalue then begin
+   actindex:= findexlocal.indexof(self) + 1;
+  end
+  else begin
+   if active then begin
+    actindex:= 0;
+   end;
+  end;
+ end;   
+end;
+
+procedure tlocalindex.bindfields;
+var
+ int1: integer;
+ field1: tfield;
+ kind1: fieldcomparekindty;
+begin
+ setlength(findexfieldinfos,ffields.count);
+ with tmsebufdataset(fowner) do begin
+  for int1:= 0 to high(findexfieldinfos) do begin
+   with ffields.items[int1],findexfieldinfos[int1] do begin
+    field1:= findfield(fieldname);
+    if field1 = nil then begin
+     databaseerror('Index field "'+fieldname+'" not found.',tmsebufdataset(fowner));
+    end;
+    with field1 do begin
+     if (fieldkind <> fkdata) or not (datatype in indexfieldtypes) then begin
+      databaseerror('Invalid index field "'+fieldname+'".',tmsebufdataset(fowner));
+     end;
+     for kind1:= low(fieldcomparekindty) to high(fieldcomparekindty) do begin
+      with comparefuncs[kind1] do begin
+       if datatype in datatypes then begin
+        if ifo_caseinsensitive in options then begin
+         comparefunc:= compfunci;
+        end
+        else begin
+         comparefunc:= compfunc;
+        end;
+        break;
+       end;
+      end;
+     end;
+     fieldindex:= fieldno - 1;
+     if fieldindex >= 0 then begin
+      recoffset:= ffieldbufpositions[fieldindex]+intheadersize;
+     end
+     else begin
+      recoffset:= offset; //calc field
+     end;
+     desc:= ifo_desc in foptions;
+    end;
+   end;
+  end;
  end;
 end;
 

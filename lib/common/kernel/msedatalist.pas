@@ -1385,27 +1385,27 @@ begin
   while true do begin
    int1:= (ilo + ihi) div 2;
    int2:= compare(item,(pchar(items)+index[int1]*size)^);
-    if int2 >= 0 then begin //item <= pivot
-     if int2 = 0 then begin
-      result:= true; //found
-     end;
-     if ihi = ilo then begin
-      foundindex:= ihi + 1;
-      break;
-     end;
-     if ilo = int1 then begin
-      inc(ilo);
-     end
-     else begin
-      ilo:= int1;
-     end;
+   if int2 >= 0 then begin //item <= pivot
+    if int2 = 0 then begin
+     result:= true; //found
+    end;
+    if ihi = ilo then begin
+     foundindex:= ihi + 1;
+     break;
+    end;
+    if ilo = int1 then begin
+     inc(ilo);
     end
-    else begin            //item > pivot
-     if ihi = ilo then begin
-      foundindex:= ihi;
-      break;
-     end;
-     ihi:= int1;
+    else begin
+     ilo:= int1;
+    end;
+   end
+   else begin            //item > pivot
+    if ihi = ilo then begin
+     foundindex:= ihi;
+     break;
+    end;
+    ihi:= int1;
    end;
   end;
   if result then begin

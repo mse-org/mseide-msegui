@@ -806,7 +806,7 @@ begin
    if active or not defaultfields then begin
     for int1:= 0 to fields.count -1 do begin
      with fields[int1] do begin
-      if datatype in indexfields then begin
+      if (datatype in indexfieldtypes) and (fieldkind = fkdata) then begin
        additem(result,msestring(fieldname));
       end;
      end;
@@ -815,7 +815,7 @@ begin
    else begin
     for int1:= 0 to fielddefs.count -1 do begin
      with fielddefs[int1] do begin
-      if (datatype in indexfields) then begin
+      if (datatype in indexfieldtypes) then begin
        additem(result,msestring(name));
       end;
      end;

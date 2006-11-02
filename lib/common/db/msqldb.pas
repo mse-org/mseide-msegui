@@ -246,7 +246,7 @@ type
     Procedure SetActive (Value : Boolean); override;
     procedure SetFiltered(Value: Boolean); override;
     procedure SetFilterText(const Value: string); override;
-    Function GetDataSource : TDatasource;
+    Function GetDataSource : TDatasource; override;
     Procedure SetDataSource(AValue : TDatasource); 
   public
     procedure Prepare; virtual;
@@ -545,14 +545,16 @@ end;
 function TSQLConnection.GetSchemaInfoSQL( SchemaType : TSchemaType; SchemaObjectName, SchemaPattern : string) : string;
 
 begin
-  DatabaseError(SMetadataUnavailable);
+ result:= ''; //compiler warning
+ DatabaseError(SMetadataUnavailable);
 end;
 
 function TSQLConnection.CreateBlobStream(const Field: TField;
               const Mode: TBlobStreamMode; const acursor: tsqlcursor): TStream;
 
 begin
-  DatabaseErrorFmt(SUnsupportedFieldType,['Blob']);
+ result:= nil; //compiler warning
+ DatabaseErrorFmt(SUnsupportedFieldType,['Blob']);
 end;
 
 { TSQLTransaction }
@@ -1645,7 +1647,7 @@ end;
 
 function TSQLCursor.addblobdata(const adata: string): integer;
 begin
- addblobdata(pointer(adata),length(adata));
+ result:= addblobdata(pointer(adata),length(adata));
 end;
 
 procedure TSQLCursor.blobfieldtoparam(const afield: tfield;
