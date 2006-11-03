@@ -846,7 +846,8 @@ begin
 end;
 
 function TSQLQuery.LoadField(FieldDef : TFieldDef;buffer : pointer) : boolean;
-
+var
+ str1: string;
 begin
  result:= tSQLConnection(database).LoadField(FCursor,FieldDef,buffer)
 end;
@@ -1349,9 +1350,11 @@ var
    result := 'delete from ' + FTableName + ' where ' + sql_where;
   end;
 
-var qry : tsqlquery;
-    x   : integer;
-    Fld : TField;
+var
+ qry: tsqlquery;
+ x: integer;
+ Fld : TField;
+ param1: tparam;
  int1: integer;
  blobspo: pblobinfoarty;
  str1: string;
@@ -1383,10 +1386,12 @@ begin
  end;
  with qry do begin
   for x := 0 to Params.Count-1 do begin
-   with params[x] do begin
+   param1:= params[x];
+   with param1 do begin
     if leftstr(name,4)='OLD_' then begin
-     Fld := self.FieldByName(copy(name,5,length(name)-4));
-     AssignFieldValue(Fld,Fld.OldValue);
+     Fld:= self.FieldByName(copy(name,5,length(name)-4));
+     oldfieldtoparam(fld,param1);
+//     AssignFieldValue(Fld,Fld.OldValue);
     end
     else begin
      Fld:= self.FieldByName(name);
@@ -1416,7 +1421,8 @@ begin
       end;
      end
      else begin
-      AssignFieldValue(Fld,Fld.Value);
+      fieldtoparam(fld,param1);
+//      AssignFieldValue(Fld,Fld.Value);
      end;
     end;
    end;

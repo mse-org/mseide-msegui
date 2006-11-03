@@ -901,7 +901,7 @@ type
    constructor create(const aowner: tcustomgrid);
    destructor destroy; override;
    property firstrecord: integer read getfirstrecord;
-   function getdisplaytextbuffer(const afield: tfield; const row: integer): pointer;
+//   function getdisplaytextbuffer(const afield: tfield; const row: integer): pointer;
    function getstringbuffer(const afield: tfield; const row: integer): pointer;
    function getdisplaystringbuffer(const afield: tfield; const row: integer): pointer;
    function getbooleanbuffer(const afield: tfield; const row: integer): pointer;
@@ -4590,6 +4590,9 @@ begin
   activerecord:= row;
   if not afield.isnull then begin
    result:= @fstringbuffer;
+   if afield is tmsestringfield then begin
+    fstringbuffer:= tmsestringfield(afield).asmsestring;
+   end;
    if utf8 then begin
     fstringbuffer:= utf8tostring(afield.displaytext);
    end
@@ -4600,7 +4603,7 @@ begin
   activerecord:= int1;
  end;
 end;
-
+{
 function tgriddatalink.getdisplaytextbuffer(const afield: tfield;
                       const row: integer): pointer;
 var
@@ -4622,7 +4625,7 @@ begin
   activerecord:= int1;
  end;
 end;
-
+}
 function tgriddatalink.getbooleanbuffer(const afield: tfield; 
                                              const row: integer): pointer;
 var

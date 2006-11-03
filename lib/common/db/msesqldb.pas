@@ -847,8 +847,6 @@ end;
 
 procedure tmsesqlquery.applyupdates(const maxerrors: integer;
                 const cancelonerror: boolean = false);
-var
- bm1: pchar;
 begin
  try
   fmstate:= fmstate - [sqs_updateabort,sqs_updateerror];

@@ -11,6 +11,7 @@ type
  fieldtypesty = set of tfieldtype;
  fieldtypesarty = array of fieldtypesty;
 const
+ charfields = [ftstring,ftfixedchar];
  textfields = [ftstring,ftfixedchar,ftwidestring,ftmemo];
  memofields = textfields+[ftmemo];
  integerfields = [ftsmallint,ftinteger,ftword,ftlargeint,ftbcd];
@@ -114,25 +115,47 @@ type
    property DataSet stored false;
    property ProviderFlags default defaultproviderflags;
  end;
+ 
+ tmsestringfield = class;
+ 
+ getmsestringdataty = function(const sender: tfield;
+                     out avalue: msestring): boolean of object; //false if null
+ setmsestringdataty = procedure(const sender: tfield;
+                          const avalue: msestring) of object;
+ 
  tmsestringfield = class(tstringfield,ifieldcomponent)
   private
    fdsintf: idsfieldcontroller;
+   fgetmsestringdata: getmsestringdataty;
+   fsetmsestringdata: setmsestringdataty;
+//   function getmsevalue(out avalue: msestring): boolean;
+//   procedure setmsevalue(const avalue: msestring);
    function getasmsestring: msestring;
    procedure setasmsestring(const avalue: msestring);
    //ifieldcomponent
    procedure setdsintf(const avalue: idsfieldcontroller);
    function getinstance: tfield;
   protected
+   procedure setismsestring(const getter: getmsestringdataty;
+                                             const setter: setmsestringdataty);
+
    function HasParent: Boolean; override;
+   function GetDataSize: Word; override;
+   function GetAsString: string; override;
+   function GetAsVariant: variant; override;
+   procedure SetAsString(const AValue: string); override;
+   procedure SetVarValue(const AValue: Variant); override;
   public
    destructor destroy; override;
    procedure Clear; override;
    function assql: string;
    property asmsestring: msestring read getasmsestring write setasmsestring;
+   function oldmsestring(out aisnull: boolean): msestring;
   published
    property DataSet stored false;
    property ProviderFlags default defaultproviderflags;
  end;
+ 
  tmsememofield = class(tmemofield,ifieldcomponent)
   private
    fdsintf: idsfieldcontroller;
@@ -446,6 +469,7 @@ type
   private
    ffield: tfield;
    ffieldname: string;
+   fismsestring: boolean;
    procedure setfieldname(const Value: string);
    procedure updatefield;
    function getasmsestring: msestring;
@@ -897,7 +921,7 @@ var
  po1: pchar;
 begin
  str1:= avalue;
- setlength(result,length(str1) + 2); //max;
+ setlength(result,length(str1)*2 + 2); //max
  po1:= pchar(result);
  po1^:= '''';
  inc(po1);
@@ -950,7 +974,18 @@ begin
  end
  else begin
   case field.datatype of
-   ftstring,ftmemo: begin
+   ftstring: begin
+    if not (field is tmsestringfield) or 
+         (tmsestringfield(field).fdsintf = nil) then begin
+     result:= tmsestringfield(field).assql;
+    end
+    else begin
+     with tmsestringfield(field) do begin
+      result:= fdsintf.getcontroller.assql(asmsestring);     
+     end;
+    end;
+   end;
+   ftmemo: begin
     result:= encodesqlstring(field.asstring);
    end;
    ftdate: begin
@@ -1162,12 +1197,22 @@ end;
 
 function tmsestringfield.getasmsestring: msestring;
 begin
- result:= fieldgetmsestring(self,fdsintf);
+ if assigned(fgetmsestringdata) then begin
+  fgetmsestringdata(self,result);
+ end
+ else begin
+  result:= fieldgetmsestring(self,fdsintf);
+ end;
 end;
 
 procedure tmsestringfield.setasmsestring(const avalue: msestring);
 begin
- fieldsetmsestring(avalue,self,fdsintf);
+ if assigned(fsetmsestringdata) then begin
+  fsetmsestringdata(self,avalue);
+ end
+ else begin
+  fieldsetmsestring(avalue,self,fdsintf);
+ end;
 end;
 
 procedure tmsestringfield.setdsintf(const avalue: idsfieldcontroller);
@@ -1185,6 +1230,91 @@ begin
  setdata(nil);
 end;
 
+function tmsestringfield.oldmsestring(out aisnull: boolean): msestring;
+var
+ statebefore: tdatasetstate;
+ str1: string;
+begin
+ statebefore:= tdataset1(dataset).settempstate(dsoldvalue);
+ aisnull:= getvalue(str1);
+ result:= str1;
+ tdataset1(dataset).restorestate(statebefore);
+end;
+
+procedure tmsestringfield.setismsestring(const getter: getmsestringdataty;
+                                const setter: setmsestringdataty);
+begin
+ fgetmsestringdata:= getter;
+ fsetmsestringdata:= setter;
+end;
+
+function tmsestringfield.GetDataSize: Word;
+begin
+ if assigned(fgetmsestringdata) then begin
+  result:= sizeof(msestring);
+ end
+ else begin
+  result:= inherited getdatasize;
+ end;
+end;
+
+function tmsestringfield.GetAsString: string;
+begin
+ if assigned(fgetmsestringdata) then begin
+  result:= getasmsestring;
+ end
+ else begin
+  result:= inherited getasstring;
+ end;
+end;
+
+function tmsestringfield.GetAsVariant: variant;
+var
+ mstr1: msestring;
+begin
+ if assigned(fgetmsestringdata) then begin
+  if fgetmsestringdata(self,mstr1) then begin
+   result:= mstr1;
+  end
+  else begin
+   result:= null;
+  end;
+ end
+ else begin
+  inherited getasvariant;
+ end;
+end;
+
+procedure tmsestringfield.SetAsString(const AValue: string);
+begin
+ if assigned(fsetmsestringdata) then begin
+  fsetmsestringdata(self,avalue);
+ end
+ else begin
+  inherited;
+ end;
+end;
+
+procedure tmsestringfield.SetVarValue(const AValue: Variant);
+begin
+ if assigned(fsetmsestringdata) then begin
+  fsetmsestringdata(self,avalue);
+ end
+ else begin
+  inherited;
+ end;
+end;
+{
+function tmsestringfield.getmsevalue(out avalue: msestring): boolean;
+begin
+ result:= fgetmsestringdata(self,avalue);
+end;
+
+procedure tmsestringfield.setmsevalue(const avalue: msestring);
+begin
+ fsetmsestringdata(self,avalue);
+end;
+}
 { tmsememofield }
 
 destructor tmsememofield.destroy;
@@ -2009,6 +2139,7 @@ procedure tfielddatalink.setfield(const value: tfield);
 begin
  if ffield <> value then begin
   ffield := value;
+  fismsestring:= (ffield <> nil) and (ffield is tmsestringfield);
   editingchanged;
   recordchanged(nil);
  end;
@@ -2038,31 +2169,46 @@ end;
 
 function tfielddatalink.getasmsestring: msestring;
 begin
- if utf8 then begin
-  result:= utf8tostring(field.asstring);
+ if fismsestring then begin
+  result:= tmsestringfield(ffield).asmsestring;
  end
  else begin
-  result:= field.asstring;
+  if utf8 then begin
+   result:= utf8tostring(field.asstring);
+  end
+  else begin
+   result:= field.asstring;
+  end;
  end;
 end;
 
 procedure tfielddatalink.setasmsestring(const avalue: msestring);
 begin
- if utf8 then begin
-  field.asstring:= stringtoutf8(avalue);
+ if fismsestring then begin
+  tmsestringfield(field).asmsestring:= avalue;
  end
  else begin
-  field.asstring:= avalue;
+  if utf8 then begin
+   ffield.asstring:= stringtoutf8(avalue);
+  end
+  else begin
+   ffield.asstring:= avalue;
+  end;
  end;
 end;
 
 function tfielddatalink.msedisplaytext: msestring;
 begin
- if utf8 then begin
-  result:= utf8tostring(ffield.displaytext);
+ if fismsestring then begin
+  result:= tmsestringfield(ffield).asmsestring;
  end
  else begin
-  result:= ffield.displaytext;
+  if utf8 then begin
+   result:= utf8tostring(ffield.displaytext);
+  end
+  else begin
+   result:= ffield.displaytext;
+  end;
  end;
 end;
 

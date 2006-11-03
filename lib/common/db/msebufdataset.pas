@@ -19,7 +19,7 @@ unit msebufdataset;
 interface 
 
 uses
- db,classes,variants,msetypes,msearrayprops,mseclasses,mselist;
+ db,classes,variants,msetypes,msearrayprops,mseclasses,mselist,msestrings;
   
 const
  defaultpacketrecords = 10;
@@ -216,7 +216,8 @@ type
 
  recupdatebufferarty = array of recupdatebufferty;
  
- bufdatasetstatety = (bs_applying,bs_hasindex,bs_fetchall,bs_indexvalid);
+ bufdatasetstatety = (bs_applying,bs_hasindex,bs_fetchall,bs_indexvalid,
+                      bs_editing,bs_utf8);
  bufdatasetstatesty = set of bufdatasetstatety;
    
  tmsebufdataset = class(TDBDataSet)
@@ -232,7 +233,8 @@ type
 
    FFieldBufPositions: integerarty;
    ffieldsizes: integerarty;
-   
+   fdbfieldsizes: integerarty;
+   fstringpositions: integerarty;
    FAllPacketsFetched : boolean;
    FOnUpdateError  : TResolverErrorEvent;
 
@@ -247,11 +249,16 @@ type
    findexlocal: tlocalindexes;
    factindex: integer;
    procedure CalcRecordSize;
+   procedure alignfieldpos(var avalue: integer);
    function loadbuffer(var buffer: recheaderty): tgetresult;
-   function GetFieldSize(FieldDef : TFieldDef) : longint;
+   function GetFieldSize(const FieldDef : TFieldDef; out isstring: boolean) : longint;
    function GetRecordUpdateBuffer : boolean;
    procedure SetPacketRecords(aValue : integer);
    function  intallocrecord: pintrecordty;    
+   procedure finalizestrings(var header: recheaderty);
+   procedure finalizechangedstrings(const tocompare: recheaderty; 
+                                      var tofinalize: recheaderty);
+   procedure addrefstrings(var header: recheaderty);
    procedure intfreerecord(var buffer: pintrecordty);
 
    procedure clearindex;
@@ -269,6 +276,14 @@ type
    procedure internalsetrecno(const avalue: integer);
    procedure setactindex(const avalue: integer);
    procedure checkindex;
+   
+   function getfieldbuffer(const afield: tfield;
+             out buffer: pointer): boolean; overload; //true if not null
+   function getfieldbuffer(const afield: tfield;
+             const isnull: boolean): pointer; overload;
+   function getmsestringdata(const sender: tfield; 
+                               out avalue: msestring): boolean;
+   procedure setmsestringdata(const sender: tfield; const avalue: msestring);
   protected
    fapplyindex: integer; //take care about canceled updates while applying
    ffailedcount: integer;
@@ -302,6 +317,11 @@ type
                                     DoCheck: Boolean): TGetResult; override;
     procedure InternalOpen; override;
     procedure InternalClose; override;
+    procedure clearbuffers; override;
+    procedure internalinsert; override;
+    procedure internaledit; override;
+    
+    function  GetFieldClass(FieldType: TFieldType): TFieldClass; override;
     function getnextpacket : integer;
     function GetRecordSize: Word; override;
     procedure InternalPost; override;
@@ -333,6 +353,13 @@ type
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
+
+    procedure bindfields(const bind: boolean);
+    procedure fieldtoparam(const source: tfield; const dest: tparam);
+    procedure oldfieldtoparam(const source: tfield; const dest: tparam);
+    procedure stringtoparam(const source: msestring; const dest: tparam);
+                   //takes care about utf8 conversion
+                   
     procedure resetindex; //deactivates all indexes
     function createblobbuffer(const afield: tfield): tblobbuffer;
     procedure ApplyUpdates(const maxerrors: integer = 0); virtual; overload;
@@ -356,8 +383,10 @@ type
    
 implementation
 uses
- dbconst,msedatalist,sysutils;
- 
+ dbconst,msedatalist,sysutils,msedb;
+type
+ tmsestringfield1 = class(tmsestringfield);
+  
 function compinteger(const l,r): integer;
 begin
  result:= integer(l) - integer(r);
@@ -391,12 +420,12 @@ end;
 
 function compstring(const l,r): integer;
 begin
- result:= ansistrcomp(pchar(@l),pchar(@r));
+ result:= msecomparestr(msestring(l),msestring(r));
 end;
 
 function compstringi(const l,r): integer;
 begin
- result:= ansistricomp(pchar(@l),pchar(@r));
+ result:= msecomparetext(msestring(l),msestring(r));
 end;
 
 type
@@ -496,14 +525,52 @@ end;
 
 function tmsebufdataset.intallocrecord: pintrecordty;
 begin
- result := allocmem(frecordsize+intheadersize);
+ result:= allocmem(frecordsize+intheadersize);
+ fillchar(result^,frecordsize+intheadersize,0);
+ {
  fillchar(result^,sizeof(intrecordty),0);
+ for int1:= high(fstringpositions) downto 0 do begin
+  pointer(pointer(@result^.header)+fstringpositions[int1])^):= nil;
+ end;
+ }
+end;
+
+procedure tmsebufdataset.finalizestrings(var header: recheaderty);
+var
+ int1: integer;
+begin
+ for int1:= high(fstringpositions) downto 0 do begin
+  pmsestring(pointer(@header)+fstringpositions[int1])^:= '';
+ end;
+end;
+
+procedure tmsebufdataset.finalizechangedstrings(const tocompare: recheaderty; 
+                                      var tofinalize: recheaderty);
+var
+ int1: integer;
+begin
+ for int1:= high(fstringpositions) downto 0 do begin
+  if ppointer(pointer(@tocompare)+fstringpositions[int1])^ <>
+     ppointer(pointer(@tofinalize)+fstringpositions[int1])^ then begin
+   pmsestring(pointer(@tofinalize)+fstringpositions[int1])^:= '';
+  end;
+ end;
+end;
+
+procedure tmsebufdataset.addrefstrings(var header: recheaderty);
+var
+ int1: integer;
+begin
+ for int1:= high(fstringpositions) downto 0 do begin
+  stringaddref(pmsestring(pointer(@header)+fstringpositions[int1])^);
+ end;
 end;
 
 procedure tmsebufdataset.intfreerecord(var buffer: pintrecordty);
 begin
  if buffer <> nil then begin
   freeblobs(buffer^.header.blobinfo);
+  finalizestrings(buffer^.header);
   freemem(buffer);
   buffer:= nil;
  end;
@@ -543,12 +610,6 @@ begin
   reallocmem(buffer,0);
  end;
 end;
-{
-function tmsebufdataset.getblobpo: pblobinfoarty;
-begin
- result:= pointer(activebuffer);
-end;
-}
 
 function tmsebufdataset.getintblobpo: pblobinfoarty;
 begin
@@ -651,7 +712,6 @@ begin
 end;
 
 procedure tmsebufdataset.internalopen;
-
 begin
  bindfields(true); //calculate calc fields size
  setlength(findexes,1+findexlocal.count);
@@ -661,7 +721,7 @@ begin
  femptybuffer:= intallocrecord;
  ffilterbuffer:= intallocrecord;
  fnewvaluebuffer:= pdsrecordty(allocrecordbuffer);
- fallpacketsfetched := false;
+ fallpacketsfetched:= false;
  fopen:= true;
 end;
 
@@ -678,8 +738,9 @@ begin
  end;
  intfreerecord(femptybuffer);
  intfreerecord(ffilterbuffer);
- pointer(fnewvaluebuffer^.header.blobinfo):= nil;
- freerecordbuffer(pchar(fnewvaluebuffer));
+// pointer(fnewvaluebuffer^.header.blobinfo):= nil;
+// freerecordbuffer(pchar(fnewvaluebuffer));
+ freemem(fnewvaluebuffer); //allways copied by move, needs no finalize
  for int1:= 0 to high(fupdatebuffer) do begin
   with fupdatebuffer[int1] do begin
    if bookmark.recordpo <> nil then begin
@@ -692,7 +753,29 @@ begin
  fbrecordcount:= 0;
  ffieldbufpositions:= nil;
  ffieldsizes:= nil;
+ fdbfieldsizes:= nil;
+ fstringpositions:= nil;
  bindfields(false);
+end;
+
+procedure tmsebufdataset.clearbuffers;
+begin
+ if bs_editing in fbstate then begin
+  internalcancel; //free data
+ end;
+end;
+
+procedure tmsebufdataset.internalinsert;
+begin
+ include(fbstate,bs_editing);
+ inherited;
+end;
+
+procedure tmsebufdataset.internaledit;
+begin
+ addrefstrings(pdsrecordty(activebuffer)^.header);
+ include(fbstate,bs_editing);
+ inherited;
 end;
 
 procedure tmsebufdataset.internalfirst;
@@ -831,10 +914,15 @@ begin
  end;
 end;
 
-function tmsebufdataset.getfieldsize(fielddef: tfielddef): longint;
+function tmsebufdataset.getfieldsize(const fielddef: tfielddef;
+                                         out isstring: boolean): longint;
 begin
+ isstring:= false;
  case fielddef.datatype of
-  ftstring,ftfixedchar: result:= fielddef.size + 1;
+  ftstring,ftfixedchar: begin
+   isstring:= true;
+   result:= fielddef.size + 1;
+  end;
   ftsmallint,ftinteger,ftword: result:= sizeof(longint);
   ftboolean: result:= sizeof(wordbool);
   ftbcd: result:= sizeof(currency);
@@ -842,13 +930,17 @@ begin
   ftlargeint: result:= sizeof(largeint);
   fttime,ftdate,ftdatetime: result:= sizeof(tdatetime);
   ftmemo,ftblob: result:= fielddef.size;
-  else result := 10
+  else result:= 10
  end;
 end;
 
 function tmsebufdataset.loadbuffer(var buffer: recheaderty): tgetresult;
 var
  int1: integer;
+ str1: string;
+ fielddef1: tfielddef;
+ po1: pchar;
+ po2: pmsestring;
 begin
  if not fetch then  begin
   result := greof;
@@ -858,69 +950,141 @@ begin
  pointer(buffer.blobinfo):= nil;
  fillchar(buffer.fielddata.nullmask,fnullmasksize,0);
  for int1:= 0 to fielddefs.count-1 do begin
-  if not loadfield(fielddefs[int1],
+  fielddef1:= fielddefs[int1];
+  if fielddef1.datatype in charfields then begin
+   getmem(po1,fdbfieldsizes[int1]);
+   if not loadfield(fielddefs[int1],po1) then begin
+    setfieldisnull(buffer.fielddata.nullmask,int1);
+   end
+   else begin
+    po2:= pointer(@buffer)+ffieldbufpositions[int1];
+    if bs_utf8 in fbstate then begin
+     po2^:= utf8tostring(po1);
+    end
+    else begin
+     po2^:= msestring(po1);
+    end;
+//    move(po1^,(pointer(@buffer)+ffieldbufpositions[int1])^,fdbfieldsizes[int1]);
+   end;
+   freemem(po1);
+  end
+  else begin
+   if not loadfield(fielddefs[int1],
                         pointer(@buffer)+ffieldbufpositions[int1]) then begin
-   setfieldisnull(buffer.fielddata.nullmask,int1);
+    setfieldisnull(buffer.fielddata.nullmask,int1);
+   end;
   end;
  end;
  result := grok;
 end;
 
-function tmsebufdataset.getfielddata(field: tfield; buffer: pointer;
-  nativeformat: boolean): boolean;
-begin
-  result := getfielddata(field, buffer);
+function tmsebufdataset.getfieldbuffer(const afield: tfield;
+             out buffer: pointer): boolean; //true if not null
+var
+ int1: integer;
+begin 
+ result:= false;
+ if state = dscalcfields then begin
+  buffer:= @pdsrecordty(calcbuffer)^.header;
+ end
+ else begin
+  if bs_applying in fbstate then begin
+   buffer:= @fnewvaluebuffer^.header;
+  end
+  else begin
+   buffer:= @pdsrecordty(activebuffer)^.header;
+  end;
+ end;
+ int1:= afield.fieldno - 1;
+ if int1 >= 0 then begin // data field
+  result:= false;
+  if state = dsoldvalue then begin
+   if not getrecordupdatebuffer then begin
+       // there is no old value available
+    buffer:= nil;
+    exit;
+   end;
+   buffer:= @fupdatebuffer[fcurrentupdatebuffer].oldvalues^.header;
+  end; 
+  result:= not getfieldisnull(precheaderty(buffer)^.fielddata.nullmask,int1);
+  inc(buffer,ffieldbufpositions[int1]);
+ end
+ else begin   //calc field
+  inc(buffer,frecordsize+afield.offset);
+  result:= pchar(buffer+afield.datasize)^ <> #0;
+ end;
 end;
 
 function tmsebufdataset.getfielddata(field: tfield; buffer: pointer): boolean;
 var 
- currbuff : pchar;
+ po1: pointer;
  int1: integer;
 begin
- result := false;
+ result:= getfieldbuffer(field,po1);
+ if (buffer <> nil) and result then begin 
+  move(po1^,buffer^,field.datasize);
+ end;
+end;
+
+function tmsebufdataset.getfielddata(field: tfield; buffer: pointer;
+                         nativeformat: boolean): boolean;
+begin
+ result:= getfielddata(field, buffer);
+end;
+
+function tmsebufdataset.getmsestringdata(const sender: tfield;
+               out avalue: msestring): boolean;
+var
+ po1: pointer;
+begin
+ result:= getfieldbuffer(sender,po1);
+ if result then begin
+  avalue:= msestring(po1^);
+ end
+ else begin
+  avalue:= '';
+ end;
+end;
+
+function tmsebufdataset.getfieldbuffer(const afield: tfield;
+                                         const isnull: boolean): pointer;
+var
+ int1: integer;
+begin 
+ if not (state in dswritemodes) then begin
+  databaseerrorfmt(snotineditstate,[name],self);
+ end;
  if state = dscalcfields then begin
-  currbuff:= @pdsrecordty(calcbuffer)^.header;
+  result:= @pdsrecordty(calcbuffer)^.header;
  end
  else begin
   if bs_applying in fbstate then begin
-   currbuff:= @fnewvaluebuffer^.header;
+   result:= @fnewvaluebuffer^.header;
   end
   else begin
-   currbuff:= @pdsrecordty(activebuffer)^.header;
+   result:= @pdsrecordty(activebuffer)^.header;
   end;
  end;
- int1:= field.fieldno - 1;
+ int1:= afield.fieldno - 1;
  if int1 >= 0 then begin // data field
-  if state = dsoldvalue then begin
-   if not getrecordupdatebuffer then begin
-       // there is no old value available
-    exit;
-   end;
-   currbuff:= @fupdatebuffer[fcurrentupdatebuffer].oldvalues^.header;
+  if state = dsfilter then begin 
+   result:= @ffilterbuffer^.header;
+  end;
+  if isnull then begin
+   setfieldisnull(precheaderty(result)^.fielddata.nullmask,int1);
   end
   else begin
-   if not assigned(currbuff) then begin
-    exit;
-   end;
+   unsetfieldisnull(precheaderty(result)^.fielddata.nullmask,int1);
   end;
-  if getfieldisnull(precheaderty(currbuff)^.fielddata.nullmask,int1) then begin
-   exit;
-  end;
-  inc(currbuff,ffieldbufpositions[int1]);
-  if assigned(buffer) then begin
-   move(currbuff^,buffer^,ffieldsizes[int1]);
-  end;
-  result := true;
+  inc(result,ffieldbufpositions[int1]);
  end
- else begin //calc or lookup field
-  if currbuff <> nil then begin
-   currbuff:= currbuff + frecordsize + field.offset;
-   if (currbuff + field.datasize)^ <> #0 then begin
-    result:= true;
-    if buffer <> nil then begin
-     move(currbuff^,buffer^,field.datasize);
-    end;
-   end;
+ else begin   //calc field
+  inc(result,frecordsize+afield.offset);
+  if isnull then begin
+   pchar(result+afield.datasize)^:= #0;
+  end
+  else begin
+   pchar(result+afield.datasize)^:= #1;
   end;
  end;
 end;
@@ -928,58 +1092,33 @@ end;
 procedure tmsebufdataset.setfielddata(field: tfield; buffer: pointer);
 
 var 
- currbuff: pointer;
- nullmask: pbyte;
- int1: integer;
+ po1: pointer;
 begin
-//  if not (state in [dsedit, dsinsert, dsfilter]) then begin
- if not (state in dswritemodes) then begin
-  databaseerrorfmt(snotineditstate,[name],self);
-  exit;
+ po1:= getfieldbuffer(field,buffer = nil);
+ if buffer <> nil then begin
+  move(buffer^,po1^,field.datasize);
  end;
- if state = dscalcfields then begin
-  currbuff:= @pdsrecordty(calcbuffer)^.header;
- end
- else begin
-  if bs_applying in fbstate then begin
-   currbuff:= @fnewvaluebuffer^.header;
-  end
-  else begin
-   currbuff:= @pdsrecordty(activebuffer)^.header;
-  end;
+ if (field.fieldno > 0) and not 
+                 (state in [dscalcfields,dsfilter,dsnewvalue]) then begin
+  dataevent(defieldchange, ptrint(field));
  end;
- int1:= field.fieldno - 1;
- if int1 >= 0 then begin // data field
-  if state = dsfilter then begin 
-   currbuff:= @ffilterbuffer^.header;
-  end;
-  nullmask:= @precheaderty(currbuff)^.fielddata.nullmask;
-  inc(currbuff,ffieldbufpositions[int1]);
-  if assigned(buffer) then begin
-   move(buffer^,currbuff^,ffieldsizes[int1]);
-   unsetfieldisnull(nullmask,int1);
-  end
-  else begin
-   setfieldisnull(nullmask,int1);
-  end;     
-  if not (state in [dscalcfields,dsfilter,dsnewvalue]) then begin
-   dataevent(defieldchange, ptrint(field));
-  end;
- end
- else begin //calc or lookup field
-  currbuff:= currbuff + frecordsize + field.offset;
-  if buffer <> nil then begin
-   pchar(currbuff+field.datasize)^:= #1;
-   move(buffer^,currbuff^,field.datasize);
-  end
-  else begin
-   pchar(currbuff+field.datasize)^:= #0;
-  end;
+end;
+
+procedure tmsebufdataset.setmsestringdata(const sender: tfield;
+               const avalue: msestring);
+var
+ po1: pointer;
+begin
+ po1:= getfieldbuffer(sender,false);
+ msestring(po1^):= avalue;
+ if (sender.fieldno > 0) and not 
+                 (state in [dscalcfields,dsfilter,dsnewvalue]) then begin
+  dataevent(defieldchange,ptrint(sender));
  end;
 end;
 
 procedure tmsebufdataset.setfielddata(field: tfield; buffer: pointer;
-  nativeformat: boolean);
+                                                  nativeformat: boolean);
 begin
  setfielddata(field,buffer);
 end;
@@ -1027,9 +1166,11 @@ begin
   if bookmark.recordpo <> nil then begin
    if updatekind = ukmodify then begin
     freeblobs(bookmark.recordpo^.header.blobinfo);
+    finalizestrings(bookmark.recordpo^.header);
     move(oldvalues^.header,bookmark.recordpo^.header,frecordsize);
-    pointer(bookmark.recordpo^.header.blobinfo):= nil;
-    intfreerecord(oldvalues);
+    freemem(oldvalues); //no finalize
+//    pointer(bookmark.recordpo^.header.blobinfo):= nil;
+//    intfreerecord(oldvalues);
    end
    else begin
     if updatekind = ukdelete then begin
@@ -1227,7 +1368,6 @@ end;
 
 procedure tmsebufdataset.internalpost;
 var
-// recbuf: pintrecordty;
  po1,po2: pblobinfoarty;
  po3: pointer;
  int1,int2,int3: integer;
@@ -1255,6 +1395,7 @@ begin
     if state = dsedit then begin
      oldvalues:= intallocrecord;
      move(bookmark.recordpo^,oldvalues^,frecordsize+intheadersize);
+     addrefstrings(oldvalues^.header);
      po1:= getintblobpo;
      if po1^ <> nil then begin
       po2:= @oldvalues^.header.blobinfo;
@@ -1290,6 +1431,7 @@ begin
   if bo1 then begin
    fcurrentrecord^.header.blobinfo:= nil; //free old array
   end;
+  finalizestrings(fcurrentrecord^.header);
   move(header,fcurrentrecord^.header,frecordsize); //get new field values
   if state = dsinsert then begin
    frecno:= insertrecord(recno,fcurrentrecord);
@@ -1326,21 +1468,57 @@ begin
    end;
   end;
  end;
+ exclude(fbstate,bs_editing);
+end;
+
+procedure tmsebufdataset.internalcancel;
+var
+ int1: integer;
+begin
+ with pdsrecordty(activebuffer)^,header do begin
+  finalizestrings(header);
+  for int1:= high(blobinfo) downto 0 do begin
+   if blobinfo[int1].new then begin
+    deleteblob(blobinfo,int1);
+   end;
+  end;
+ end;
+ exclude(fbstate,bs_editing);
+end;
+
+procedure tmsebufdataset.alignfieldpos(var avalue: integer);
+const
+ step = sizeof(pointer);
+begin
+ avalue:= (avalue + step - 1) and -step; //align to pointer
 end;
 
 procedure tmsebufdataset.calcrecordsize;
 var 
- x: longint;
+ int1: integer;
+ bo1: boolean;
 begin
  frecordsize:= sizeof(blobinfoarty);
  fnullmasksize:= 1+((fielddefs.count-1) div 8);
  inc(frecordsize,fnullmasksize);
+ alignfieldpos(frecordsize);
+ 
  setlength(ffieldbufpositions,fielddefs.count);
  setlength(ffieldsizes,length(ffieldbufpositions));
- for x:= 0 to high(ffieldbufpositions) do begin
-  ffieldbufpositions[x]:= frecordsize;
-  ffieldsizes[x]:= getfieldsize(fielddefs[x]);
-  inc(frecordsize,ffieldsizes[x]);
+ setlength(fdbfieldsizes,length(ffieldbufpositions));
+ fstringpositions:= nil;
+ for int1:= 0 to high(ffieldbufpositions) do begin
+  ffieldbufpositions[int1]:= frecordsize;
+  fdbfieldsizes[int1]:= getfieldsize(fielddefs[int1],bo1);
+  if bo1 then begin
+   additem(fstringpositions,frecordsize);
+   ffieldsizes[int1]:= sizeof(msestring);
+  end
+  else begin
+   ffieldsizes[int1]:= fdbfieldsizes[int1];
+  end;
+  inc(frecordsize,ffieldsizes[int1]);
+  alignfieldpos(frecordsize);
  end;
 end;
 
@@ -1549,19 +1727,6 @@ begin
   ReAllocmem(ValueBuffer,0);
 end;
 }
-procedure tmsebufdataset.internalcancel;
-var
- int1: integer;
-begin
- with pdsrecordty(activebuffer)^.header do begin
-  for int1:= high(blobinfo) downto 0 do begin
-   if blobinfo[int1].new then begin
-    deleteblob(blobinfo,int1);
-   end;
-  end;
- end;
-end;
-
 function tmsebufdataset.CreateBlobStream(Field: TField;
                Mode: TBlobStreamMode): TStream;
 var
@@ -1838,6 +2003,95 @@ begin
   findexes[int1].ind:= nil;
  end;
  exclude(fbstate,bs_indexvalid);
+end;
+
+function tmsebufdataset.GetFieldClass(FieldType: TFieldType): TFieldClass;
+begin
+ result:= msefieldtypeclasses[tfieldtypetotypety[fieldtype]];
+end;
+
+procedure tmsebufdataset.fieldtoparam(const source: tfield; const dest: tparam);
+begin
+ if source is tmsestringfield then begin
+  if source.isnull then begin
+   dest.clear;
+  end
+  else begin
+   with tmsestringfield(source) do begin
+    if bs_utf8 in fbstate then begin
+     dest.asstring:= stringtoutf8(asmsestring);
+    end
+    else begin
+     dest.asstring:= asmsestring;
+    end;
+    if fixedchar then begin
+     dest.datatype:= ftfixedchar;
+    end;
+   end;
+  end;
+ end
+ else begin
+  dest.assignfieldvalue(source,source.value);
+ end;
+end;
+
+procedure tmsebufdataset.oldfieldtoparam(const source: tfield;
+               const dest: tparam);
+var
+ bo1:boolean;
+ mstr1: msestring;
+begin
+ if source is tmsestringfield then begin
+  mstr1:= tmsestringfield(source).oldmsestring(bo1);
+  if bo1 then begin
+   dest.clear;
+  end
+  else begin
+   if bs_utf8 in fbstate then begin
+    dest.asstring:= stringtoutf8(mstr1);
+   end
+   else begin
+    dest.asstring:= mstr1;
+   end;
+   if tmsestringfield(source).fixedchar then begin
+    dest.datatype:= ftfixedchar;
+   end;
+  end;
+ end
+ else begin
+  dest.assignfieldvalue(source,source.oldvalue);
+ end;
+end;
+
+procedure tmsebufdataset.stringtoparam(const source: msestring;
+               const dest: tparam);
+begin
+ if bs_utf8 in fbstate then begin
+  dest.asstring:= stringtoutf8(source);
+ end
+ else begin
+  dest.asstring:= source;
+ end;
+end;
+
+procedure tmsebufdataset.bindfields(const bind: boolean);
+var
+ int1: integer;
+ field1: tfield;
+begin
+ for int1:= fields.count - 1 downto 0 do begin
+  field1:= fields[int1];
+  if field1 is tmsestringfield then begin
+   if bind then begin
+    tmsestringfield1(field1).setismsestring(@getmsestringdata,
+                                                  @setmsestringdata);
+   end
+   else begin
+    tmsestringfield1(field1).setismsestring(nil,nil);
+   end;
+  end; 
+ end;
+ inherited;
 end;
 
 { tlocalindexes }

@@ -361,7 +361,8 @@ function concatstrings(const source: stringarty;
 function parsecommandline(const s: pchar): stringarty;
 
 function stringtoutf8(const value: msestring): utf8string;
-function utf8tostring(const value: utf8string): msestring;
+function utf8tostring(const value: pchar): msestring; overload;
+function utf8tostring(const value: utf8string): msestring; overload;
 function stringtolatin1(const value: msestring): string;
 function latin1tostring(const value: string): msestring;
 
@@ -529,17 +530,17 @@ begin
  setlength(result,po1-pchar(pointer(result)));
 end;
 
-function utf8tostring(const value: utf8string): msestring;
+function doutf8tostring(const value: pchar; const alength: integer): msestring;
 var
  int1,int2: integer;
  by1: byte;
  po1: pmsechar;
 begin
- setlength(result,length(value)); //max
+ setlength(result,alength); //max
  po1:= pmsechar(pointer(result));
- int1:= 1;
- int2:= length(value);
- while int1 <= int2 do begin
+ int1:= 0;
+ int2:= alength;
+ while int1 < int2 do begin
   by1:= byte(value[int1]);
   inc(int1);
   if by1 < $80 then begin //1 byte
@@ -565,6 +566,16 @@ begin
   inc(po1);
  end;
  setlength(result,po1-pmsechar(pointer(result)));
+end;
+
+function utf8tostring(const value: utf8string): msestring;
+begin
+ result:= doutf8tostring(pchar(value),length(value));
+end;
+
+function utf8tostring(const value: pchar): msestring;
+begin
+ result:= doutf8tostring(pchar(value),length(value));
 end;
 
 function stringtolatin1(const value: msestring): string;
@@ -656,7 +667,8 @@ begin
    inc(po1^);
   end;
 {$else}
-  reallocstring(str); //delphi widestrings are not refcounted
+  reallocstring(str); //delphi and FPC 2.1.1 
+                      //widestrings are not refcounted on win32
 {$endif}
  end;
 end;
