@@ -897,7 +897,7 @@ var
  po1: pchar;
 begin
  str1:= avalue;
- setlength(result,length(str1) + 2); //max;
+ setlength(result,length(str1)*2 + 2); //max
  po1:= pchar(result);
  po1^:= '''';
  inc(po1);
