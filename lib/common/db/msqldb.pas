@@ -1648,7 +1648,9 @@ begin
  result:= length(fblobs);
  setlength(fblobs,result+1);
  setlength(fblobs[result],alength);
+{$ifdef FPC} {$checkpointer off} {$endif} //adata can be foreign memory
  move(adata^,fblobs[result][1],alength);
+{$ifdef FPC} {$checkpointer default} {$endif}
 end;
 
 function TSQLCursor.addblobdata(const adata: string): integer;

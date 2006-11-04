@@ -251,7 +251,7 @@ type
 
    femptybuffer: pintrecordty;
    ffilterbuffer: pintrecordty;
-   fcurrentrecord: pintrecordty;
+   fcurrentbuf: pintrecordty;
    fnewvaluebuffer: pdsrecordty; //buffer for applyupdates
    fbstate: bufdatasetstatesty;
    
@@ -674,7 +674,7 @@ begin
   result:= @fnewvaluebuffer^.header.blobinfo;
  end
  else begin
-  result:= @fcurrentrecord^.header.blobinfo;
+  result:= @fcurrentbuf^.header.blobinfo;
  end;
 end;
 
@@ -839,6 +839,10 @@ end;
 procedure tmsebufdataset.internalinsert;
 begin
  include(fbstate,bs_editing);
+ with pdsrecordty(activebuffer)^.dsheader.bookmark.data do begin
+  recno:= -1;
+  recordpo:= nil;
+ end;
  inherited;
 end;
 
@@ -897,10 +901,10 @@ begin
   with pdsrecordty(buffer)^ do begin
    with dsheader.bookmark do  begin
     data.recno:= frecno;
-    data.recordpo:= fcurrentrecord;
+    data.recordpo:= fcurrentbuf;
     flag:= bfcurrent;
    end;
-   move(fcurrentrecord^.header,header,frecordsize);
+   move(fcurrentbuf^.header,header,frecordsize);
    getcalcfields(buffer);
   end;
  end
@@ -1227,7 +1231,7 @@ begin
   getnewupdatebuffer;
   with fupdatebuffer[fcurrentupdatebuffer] do begin
    bookmark.recno:= frecno;
-   bookmark.recordpo:= fcurrentrecord;
+   bookmark.recordpo:= fcurrentbuf;
    oldvalues:= bookmark.recordpo;
   end;
  end
@@ -1287,7 +1291,7 @@ begin
  checkbrowsemode;
  if (fupdatebuffer <> nil) and (frecno >= 0) then begin
   for int1:= high(fupdatebuffer) downto 0 do begin
-   if fupdatebuffer[int1].bookmark.recordpo = fcurrentrecord then begin
+   if fupdatebuffer[int1].bookmark.recordpo = fcurrentbuf then begin
     cancelrecupdate(fupdatebuffer[int1]);
     deleteitem(fupdatebuffer,typeinfo(trecordsupdatebuffer),int1);
     if int1 <= fapplyindex then begin
@@ -1478,12 +1482,12 @@ begin
    end;
   end;
   if state = dsinsert then begin
-   fcurrentrecord:= intallocrecord;
+   fcurrentbuf:= intallocrecord;
   end;
   if not getrecordupdatebuffer then begin
    getnewupdatebuffer;
    with fupdatebuffer[fcurrentupdatebuffer] do begin
-    bookmark.recordpo:= fcurrentrecord;
+    bookmark.recordpo:= fcurrentbuf;
     bookmark.recno:= frecno;
     if state = dsedit then begin
      oldvalues:= intallocrecord;
@@ -1518,18 +1522,22 @@ begin
   if (state = dsedit) and (bs_indexvalid in fbstate) then begin
    setlength(ar1,findexlocal.count);
    for int1:= high(ar1) downto 0 do begin
-    ar1[int1]:= findexlocal[int1].findboundary(fcurrentrecord);
+    ar1[int1]:= findexlocal[int1].findboundary(fcurrentbuf);
    end;
   end;   
   if bo1 then begin
-   fcurrentrecord^.header.blobinfo:= nil; //free old array
+   fcurrentbuf^.header.blobinfo:= nil; //free old array
   end;
-  finalizestrings(fcurrentrecord^.header);
-  move(header,fcurrentrecord^.header,frecordsize); //get new field values
+  finalizestrings(fcurrentbuf^.header);
+  move(header,fcurrentbuf^.header,frecordsize); //get new field values
   if state = dsinsert then begin
-   frecno:= insertrecord(recno,fcurrentrecord);
+//   if eof then begin
+//    inc(frecno); //append
+//   end;
    with dsheader.bookmark do  begin
-    data.recordpo:= fcurrentrecord;
+    frecno:= insertrecord(frecno,fcurrentbuf);
+    fcurrentbuf:= factindexpo^.ind[frecno];
+    data.recordpo:= fcurrentbuf;
     data.recno:= frecno;
     flag := bfinserted;
    end;      
@@ -1537,17 +1545,17 @@ begin
   else begin
    if (state = dsedit) and (bs_indexvalid in fbstate) then begin
     for int1:= high(ar1) downto 0 do begin
-     int2:= findexlocal[int1].findboundary(fcurrentrecord);
+     int2:= findexlocal[int1].findboundary(fcurrentbuf);
      if int2 <> ar1[int1] then begin
       with findexes[int1+1] do begin
        for int3:= ar1[int1] - 1 downto 0 do begin
-        if ind[int3] = fcurrentrecord then begin //update indexes
+        if ind[int3] = fcurrentbuf then begin //update indexes
          move(ind[int3+1],ind[int3],(fbrecordcount-int3-1)*sizeof(pointer));
          if int3 < int2 then begin
           dec(int2);
          end;
          move(ind[int2],ind[int2+1],(fbrecordcount-int2-1)*sizeof(pointer));
-         ind[int2]:= fcurrentrecord;
+         ind[int2]:= fcurrentbuf;
          if int1 = factindex - 1 then begin
           frecno:= int2;
          end;
@@ -1875,7 +1883,7 @@ begin
   po1:= pbyte(@fupdatebuffer[fcurrentupdatebuffer].bookmark.recordpo^.header);
  end
  else begin
-  po1:= pbyte(@fcurrentrecord^.header);
+  po1:= pbyte(@fcurrentbuf^.header);
  end;
  int1:= afield.fieldno - 1;
  if avalue <> '' then begin
@@ -1967,11 +1975,11 @@ begin
              (fbrecordcount-arecno)*sizeof(pointer));
   findexes[0].ind[arecno]:= arecord;           
  end;
- inc(fbrecordcount);
- if frecno > arecno then begin
+ if (frecno > arecno) then begin
   inc(frecno);
-  fcurrentrecord:= factindexpo^.ind[frecno];
  end;
+ fcurrentbuf:= factindexpo^.ind[frecno];
+ inc(fbrecordcount);
 end;
 
 procedure tmsebufdataset.deleterecord(const arecno: integer);
@@ -2006,10 +2014,10 @@ begin
   dec(frecno);
  end;
  if frecno < 0 then begin
-  fcurrentrecord:= nil;
+  fcurrentbuf:= nil;
  end
  else begin
-  fcurrentrecord:= factindexpo^.ind[frecno];
+  fcurrentbuf:= factindexpo^.ind[frecno];
  end;
 end;
 
@@ -2034,11 +2042,11 @@ procedure tmsebufdataset.internalsetrecno(const avalue: integer);
 begin
  frecno:= avalue;
  if (avalue < 0) or (avalue >= fbrecordcount)  then begin
-  fcurrentrecord:= nil;
+  fcurrentbuf:= nil;
  end
  else begin
   checkindex;
-  fcurrentrecord:= factindexpo^.ind[avalue];
+  fcurrentbuf:= factindexpo^.ind[avalue];
  end;
 end;
 
@@ -2082,7 +2090,7 @@ begin
    checkbrowsemode;
    factindex:= avalue;
    factindexpo:= @findexes[avalue];
-   internalsetrecno(findrec(fcurrentrecord));
+   internalsetrecno(findrec(fcurrentbuf));
    resync([]);
   end
   else begin
