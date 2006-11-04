@@ -28,7 +28,7 @@ const
  integerindexfields = [ftsmallint,ftinteger,ftword,ftlargeint,ftboolean];
  floatindexfields = [ftfloat];
  currencyindexfields = [ftcurrency,ftbcd];
- stringindexfields = [ftstring,ftfixedchar,ftwidestring,ftmemo];
+ stringindexfields = [ftstring,ftfixedchar];
  indexfieldtypes =  integerindexfields+floatindexfields+currencyindexfields+
                    stringindexfields;
  dsbuffieldkinds = [fkcalculated,fklookup];
@@ -2469,11 +2469,13 @@ begin
    with ffields.items[int1],findexfieldinfos[int1] do begin
     field1:= findfield(fieldname);
     if field1 = nil then begin
-     databaseerror('Index field "'+fieldname+'" not found.',tmsebufdataset(fowner));
+     databaseerror('Index field "'+fieldname+'" not found.',
+                                                   tmsebufdataset(fowner));
     end;
     with field1 do begin
      if (fieldkind <> fkdata) or not (datatype in indexfieldtypes) then begin
-      databaseerror('Invalid index field "'+fieldname+'".',tmsebufdataset(fowner));
+      databaseerror('Invalid index field "'+fieldname+'".',
+                                                   tmsebufdataset(fowner));
      end;
      for kind1:= low(fieldcomparekindty) to high(fieldcomparekindty) do begin
       with comparefuncs[kind1] do begin
