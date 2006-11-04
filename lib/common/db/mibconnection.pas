@@ -477,7 +477,6 @@ begin
         CheckError('PrepareStatement', Status);
       if in_SQLDA^.SQLD > in_SQLDA^.SQLN then
         DatabaseError(SParameterCountIncorrect,self);
-      {$R-}
       for x := 0 to in_SQLDA^.SQLD - 1 do with in_SQLDA^.SQLVar[x] do
         begin
         if ((SQLType and not 1) = SQL_VARYING) then
@@ -486,7 +485,6 @@ begin
           SQLData := AllocMem(in_SQLDA^.SQLVar[x].SQLLen);
         if (sqltype and 1) = 1 then New(SQLInd);
         end;
-//      {$R+}
       end;
     if FStatementType = stselect then
       begin
@@ -499,7 +497,6 @@ begin
         if isc_dsql_describe(@Status, @Statement, 1, SQLDA) <> 0 then
           CheckError('PrepareSelect', Status);
         end;
-      {$R-}
       for x := 0 to SQLDA^.SQLD - 1 do with SQLDA^.SQLVar[x] do
         begin
         if ((SQLType and not 1) = SQL_VARYING) then
@@ -508,7 +505,6 @@ begin
           SQLData := AllocMem(SQLDA^.SQLVar[x].SQLLen);
         if (SQLType and 1) = 1 then New(SQLInd);
         end;
-//      {$R+}
       end;
     end;
 end;
@@ -530,7 +526,6 @@ procedure TIBConnection.FreeSQLDABuffer(var aSQLDA : PXSQLDA);
 var x : shortint;
 
 begin
-{$R-}
   if assigned(aSQLDA) then
     for x := 0 to aSQLDA^.SQLN - 1 do
       begin
@@ -542,7 +537,6 @@ begin
         end
         
       end;
-//{$R+}
 end;
 
 procedure TIBConnection.FreeFldBuffers(cursor : TSQLCursor);
@@ -575,7 +569,6 @@ var
  FD: TFieldDef;
 
 begin
- {$R-}
  with cursor as TIBCursor do begin
   for x := 0 to SQLDA^.SQLD - 1 do begin
    with SQLDA^.SQLVar[x] do begin
@@ -589,7 +582,6 @@ begin
    end;
   end;
  end;
-//  {$R+}
 end;
 
 function TIBConnection.GetHandle: pointer;
@@ -618,9 +610,9 @@ var ParNr,SQLVarNr : integer;
     li              : LargeInt;
     currbuff        : pchar;
     w               : word;
+    cur1: currency;
 
 begin
-{$R-}
   with cursor as TIBCursor do for SQLVarNr := 0 to High(ParamBinding){AParams.count-1} do
     begin
     ParNr := ParamBinding[SQLVarNr];
@@ -637,50 +629,53 @@ begin
         ftInteger :
           begin
           i := AParams[ParNr].AsInteger;
-          {$R-}
           Move(i, in_sqlda^.SQLvar[SQLVarNr].SQLData^, in_SQLDA^.SQLVar[SQLVarNr].SQLLen);
-//          {$R+}
           end;
+        ftbcd,ftcurrency: begin
+         cur1:= AParams[ParNr].ascurrency;
+         with in_sqlda^.SQLvar[SQLVarNr] do begin
+          cur1:= cur1 / intpower(10,4+SQLScale);
+          reallocmem(sqldata,sizeof(cur1));
+          move(cur1,sqldata^,sizeof(cur1));
+         end;
+        end;
         ftString,ftFixedChar  :
           begin
-          {$R-}
-          s := AParams[ParNr].AsString;
-          w := length(s);
-          if ((in_sqlda^.SQLvar[SQLVarNr].SQLType and not 1) = SQL_VARYING) then
-            begin
-            in_sqlda^.SQLvar[SQLVarNr].SQLLen := w;
-            ReAllocMem(in_sqlda^.SQLvar[SQLVarNr].SQLData,in_SQLDA^.SQLVar[SQLVarNr].SQLLen+2);
-            CurrBuff := in_sqlda^.SQLvar[SQLVarNr].SQLData;
+          s:= AParams[ParNr].AsString;
+          w:= length(s);
+          with in_sqlda^.SQLvar[SQLVarNr] do begin
+           if ((SQLType and not 1) = SQL_VARYING) then begin
+            SQLLen:= w;
+            ReAllocMem(SQLData,SQLLen+sizeof(w));
+            CurrBuff:= SQLData;
             move(w,CurrBuff^,sizeof(w));
-            inc(CurrBuff,2);
-            end
-          else
-            CurrBuff := in_sqlda^.SQLvar[SQLVarNr].SQLData;
-
-          Move(s[1], CurrBuff^, length(s));
-//          {$R+}
+            inc(CurrBuff,sizeof(w));
+           end
+           else begin
+            if w > sqllen then begin
+             w:= sqllen;
+            end;
+            CurrBuff:= SQLData;
+           end;
+          end;
+          Move(s[1],CurrBuff^,w);
           end;
         ftDate, ftTime, ftDateTime:
-          {$R-}
-          SetDateTime(in_sqlda^.SQLvar[SQLVarNr].SQLData, AParams[ParNr].AsDateTime, in_SQLDA^.SQLVar[SQLVarNr].SQLType);
-//          {$R+}
+          SetDateTime(in_sqlda^.SQLvar[SQLVarNr].SQLData, 
+               AParams[ParNr].AsDateTime, in_SQLDA^.SQLVar[SQLVarNr].SQLType);
         ftLargeInt,ftblob,ftmemo:
           begin
           li := AParams[ParNr].AsLargeInt;
-          {$R-}
-          Move(li, in_sqlda^.SQLvar[SQLVarNr].SQLData^, in_SQLDA^.SQLVar[SQLVarNr].SQLLen);
-//          {$R+}
+          Move(li, in_sqlda^.SQLvar[SQLVarNr].SQLData^,
+                        in_SQLDA^.SQLVar[SQLVarNr].SQLLen);
           end;
         ftFloat:
-          {$R-}
           SetFloat(in_sqlda^.SQLvar[SQLVarNr].SQLData, AParams[ParNr].AsFloat, in_SQLDA^.SQLVar[SQLVarNr].SQLLen);
-//          {$R+}
       else
         DatabaseErrorFmt(SUnsupportedParameter,[Fieldtypenames[AParams[ParNr].DataType]],self);
       end {case}
       end;
     end;
-//{$R+}
 end;
 
 function TIBConnection.LoadField(cursor : TSQLCursor;FieldDef : TfieldDef;buffer : pointer) : boolean;
@@ -694,7 +689,6 @@ var
 
 begin
  with TIBCursor(cursor) do begin
-{$R-}
     for x := 0 to SQLDA^.SQLD - 1 do
       if SQLDA^.SQLVar[x].AliasName = FieldDef.Name then break;
 
@@ -754,7 +748,6 @@ begin
       else result := false;
       end;
       end;
-//{$R+}
  end;
 end;
 

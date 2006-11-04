@@ -262,11 +262,13 @@ type
    procedure calcrecordsize;
    procedure alignfieldpos(var avalue: integer);
    function loadbuffer(var buffer: recheaderty): tgetresult;
-   function getfieldsize(const fielddef : tfielddef; out isstring: boolean) : longint;
-   function getrecordupdatebuffer : boolean;
-   procedure setpacketrecords(avalue : integer);
+   function getfieldsize(const fielddef: tfielddef; 
+                                   out isstring: boolean) : longint;
+   function getrecordupdatebuffer: boolean;
+   procedure setpacketrecords(avalue: integer);
    function  intallocrecord: pintrecordty;    
    procedure finalizestrings(var header: recheaderty);
+   procedure finalizecalcstrings(var header: recheaderty);
    procedure finalizechangedstrings(const tocompare: recheaderty; 
                                       var tofinalize: recheaderty);
    procedure addrefstrings(var header: recheaderty);
@@ -584,6 +586,15 @@ begin
  end;
 end;
 
+procedure tmsebufdataset.finalizecalcstrings(var header: recheaderty);
+var
+ int1: integer;
+begin
+ for int1:= high(fcalcstringpositions) downto 0 do begin
+  pmsestring(pointer(@header)+fcalcstringpositions[int1])^:= '';
+ end;
+end;
+
 procedure tmsebufdataset.finalizechangedstrings(const tocompare: recheaderty; 
                                       var tofinalize: recheaderty);
 var
@@ -651,9 +662,7 @@ begin
    if bo1 then begin
     blobinfo:= nil;
    end;
-   for int1:= high(fcalcstringpositions) downto 0 do begin
-    pmsestring(pointer(@header)+fcalcstringpositions[int1])^:= '';
-   end;
+   finalizecalcstrings(header);
   end;
   reallocmem(buffer,0);
  end;
@@ -1320,8 +1329,8 @@ var
 
 begin
  include(fbstate,bs_applying);
- try
-  with fupdatebuffer[fcurrentupdatebuffer] do begin
+ with fupdatebuffer[fcurrentupdatebuffer] do begin
+  try
    move(bookmark.recordpo^.header,fnewvaluebuffer^.header,frecordsize);
    getcalcfields(pchar(fnewvaluebuffer));
    Response:= rrApply;
@@ -1364,9 +1373,10 @@ begin
    else begin
     checkcancel;
    end;
+  finally
+   exclude(fbstate,bs_applying);
+   finalizecalcstrings(fnewvaluebuffer^.header);
   end;
- finally
-  exclude(fbstate,bs_applying);
  end;
 end;
 
@@ -2110,6 +2120,8 @@ begin
 end;
 
 procedure tmsebufdataset.fieldtoparam(const source: tfield; const dest: tparam);
+var
+ int1: integer;
 begin
  if source is tmsestringfield then begin
   if source.isnull then begin
@@ -2118,9 +2130,11 @@ begin
   else begin
    with tmsestringfield(source) do begin
     if bs_utf8 in fbstate then begin
+//     dest.asstring:= stringtoutf8(copy(asmsestring,1,size));
      dest.asstring:= stringtoutf8(asmsestring);
     end
     else begin
+//     dest.asstring:= copy(asmsestring,1,size);
      dest.asstring:= asmsestring;
     end;
     if fixedchar then begin
