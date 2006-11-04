@@ -1472,6 +1472,7 @@ var
  bo1: boolean;
  ar1: integerarty;
 begin
+ checkindex; //needed for first append
  with pdsrecordty(activebuffer)^ do begin
   bo1:= false;
   with header do begin
