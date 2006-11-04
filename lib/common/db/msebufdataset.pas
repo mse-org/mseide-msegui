@@ -2,10 +2,12 @@
     This file is part of the Free Pascal run time library.
     Copyright (c) 1999-2000 by Michael Van Canneyt, member of the
     Free Pascal development team
-
+    
+    Rewritten 2006 by Martin Schreiber
+    
     BufDataset implementation
 
-    See the file COPYING.FPC, included in this distribution,
+    See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
 
     This program is distributed in the hope that it will be useful,
@@ -29,6 +31,7 @@ const
  stringindexfields = [ftstring,ftfixedchar,ftwidestring,ftmemo];
  indexfieldtypes =  integerindexfields+floatindexfields+currencyindexfields+
                    stringindexfields;
+ dsbuffieldkinds = [fkcalculated,fklookup];
  
 type  
  fielddataty = record
@@ -92,13 +95,14 @@ const
 // intrecheaderty, |recheaderty,fielddata          |
 //                 |moved to tdataset buffer header|
 //                 |fieldoffsets are in ffieldbufpositions
-//
+//                 |                               |
 // structure of dataset recordbuffer:
-//                 +---------<frecordsize>---------+
-// dsrecheaderty,  |recheaderty,fielddata          |, calcfields
-//                 |moved to internal buffer header|
-//                 |fieldoffsets are in ffieldbufpositions
-//
+//                 +----------------------<fcalcrecordsize>----------+
+//                 +---------<frecordsize>---------+                 |
+// dsrecheaderty,  |recheaderty,fielddata          |calcfields       |
+//                 |moved to internal buffer header|                 | 
+//                 |<-field offsets are in ffieldbufpositions        |
+//                 |<-calcfield offsets are in fcalcfieldbufpositions|
 
 type
  indexty = record
@@ -220,23 +224,30 @@ type
                       bs_editing,bs_utf8);
  bufdatasetstatesty = set of bufdatasetstatety;
    
- tmsebufdataset = class(TDBDataSet)
+ tmsebufdataset = class(tdbdataset)
   private
-   FBRecordCount   : integer;
+   fbrecordcount   : integer;
 
-   FPacketRecords  : integer;
-   FRecordSize     : Integer;
-   FNullmaskSize   : byte;
-   FOpen           : Boolean;
-   FUpdateBuffer   : RecUpdateBufferarty;
-   FCurrentUpdateBuffer : integer;
+   fpacketrecords  : integer;
+   fopen           : boolean;
+   fupdatebuffer   : recupdatebufferarty;
+   fcurrentupdatebuffer : integer;
 
-   FFieldBufPositions: integerarty;
+   frecordsize: integer;
+   fnullmasksize: integer;
+   ffieldbufpositions: integerarty;
    ffieldsizes: integerarty;
    fdbfieldsizes: integerarty;
    fstringpositions: integerarty;
-   FAllPacketsFetched : boolean;
-   FOnUpdateError  : TResolverErrorEvent;
+   
+   fcalcrecordsize: integer;
+   fcalcnullmasksize: integer;
+   fcalcfieldbufpositions: integerarty;
+   fcalcfieldsizes: integerarty;
+   fcalcstringpositions: integerarty;
+   
+   fallpacketsfetched : boolean;
+   fonupdateerror  : tresolvererrorevent;
 
    femptybuffer: pintrecordty;
    ffilterbuffer: pintrecordty;
@@ -248,12 +259,12 @@ type
    findexes: array of indexty;
    findexlocal: tlocalindexes;
    factindex: integer;
-   procedure CalcRecordSize;
+   procedure calcrecordsize;
    procedure alignfieldpos(var avalue: integer);
    function loadbuffer(var buffer: recheaderty): tgetresult;
-   function GetFieldSize(const FieldDef : TFieldDef; out isstring: boolean) : longint;
-   function GetRecordUpdateBuffer : boolean;
-   procedure SetPacketRecords(aValue : integer);
+   function getfieldsize(const fielddef : tfielddef; out isstring: boolean) : longint;
+   function getrecordupdatebuffer : boolean;
+   procedure setpacketrecords(avalue : integer);
    function  intallocrecord: pintrecordty;    
    procedure finalizestrings(var header: recheaderty);
    procedure finalizechangedstrings(const tocompare: recheaderty; 
@@ -295,64 +306,65 @@ type
    procedure cancelrecupdate(var arec: recupdatebufferty);
    procedure setdatastringvalue(const afield: tfield; const avalue: string);
    
-   function CreateBlobStream(Field: TField; Mode: TBlobStreamMode): TStream; override;
+   function createblobstream(field: tfield; mode: tblobstreammode): tstream; override;
    procedure internalapplyupdate(const maxerrors: integer;
                 const cancelonerror: boolean; var response: tresolverresponse);
    procedure afterapply; virtual;
-    procedure freeblob(const ablob: blobinfoty);
-    procedure freeblobs(var ablobs: blobinfoarty);
-    procedure deleteblob(var ablobs: blobinfoarty; const aindex: integer); overload;
-    procedure deleteblob(var ablobs: blobinfoarty; const afield: tfield); overload;
-    procedure addblob(const ablob: tblobbuffer);
-    
-    procedure SetRecNo(Value: Longint); override;
-    function  GetRecNo: Longint; override;
-    function GetChangeCount: integer; virtual;
-    function  AllocRecordBuffer: PChar; override;
-    procedure ClearCalcFields(Buffer: PChar); override;
-    procedure FreeRecordBuffer(var Buffer: PChar); override;
-    procedure InternalInitRecord(Buffer: PChar); override;
-    function  GetCanModify: Boolean; override;
-    function GetRecord(Buffer: PChar; GetMode: TGetMode;
-                                    DoCheck: Boolean): TGetResult; override;
-    procedure InternalOpen; override;
-    procedure InternalClose; override;
-    procedure clearbuffers; override;
-    procedure internalinsert; override;
-    procedure internaledit; override;
-    
-    function  GetFieldClass(FieldType: TFieldType): TFieldClass; override;
-    function getnextpacket : integer;
-    function GetRecordSize: Word; override;
-    procedure InternalPost; override;
-    procedure InternalDelete; override;
-    procedure InternalFirst; override;
-    procedure InternalLast; override;
-    procedure InternalSetToRecord(Buffer: PChar); override;
-    procedure InternalGotoBookmark(ABookmark: Pointer); override;
-    procedure SetBookmarkData(Buffer: PChar; Data: Pointer); override;
-    procedure SetBookmarkFlag(Buffer: PChar; Value: TBookmarkFlag); override;
-    procedure GetBookmarkData(Buffer: PChar; Data: Pointer); override;
-    function GetBookmarkFlag(Buffer: PChar): TBookmarkFlag; override;
-    function GetFieldData(Field: TField; Buffer: Pointer;
-                        NativeFormat: Boolean): Boolean; override;
-    function GetFieldData(Field: TField; Buffer: Pointer): Boolean; override;
-    procedure SetFieldData(Field: TField; Buffer: Pointer;
-      NativeFormat: Boolean); override;
-    procedure SetFieldData(Field: TField; Buffer: Pointer); override;
-    function IsCursorOpen: Boolean; override;
-    function  GetRecordCount: Longint; override;
-    procedure ApplyRecUpdate(UpdateKind : TUpdateKind); virtual;
-    procedure SetOnUpdateError(const aValue: TResolverErrorEvent);
-  {abstracts, must be overidden by descendents}
-    function Fetch : boolean; virtual; abstract;
-    function LoadField(FieldDef : TFieldDef;buffer : pointer) : boolean; virtual; abstract;
+   procedure freeblob(const ablob: blobinfoty);
+   procedure freeblobs(var ablobs: blobinfoarty);
+   procedure deleteblob(var ablobs: blobinfoarty; const aindex: integer); overload;
+   procedure deleteblob(var ablobs: blobinfoarty; const afield: tfield); overload;
+   procedure addblob(const ablob: tblobbuffer);
+   
+   procedure setrecno(value: longint); override;
+   function  getrecno: longint; override;
+   function getchangecount: integer; virtual;
+   function  allocrecordbuffer: pchar; override;
+   procedure clearcalcfields(buffer: pchar); override;
+   procedure freerecordbuffer(var buffer: pchar); override;
+   procedure internalinitrecord(buffer: pchar); override;
+   function  getcanmodify: boolean; override;
+   function getrecord(buffer: pchar; getmode: tgetmode;
+                                   docheck: boolean): tgetresult; override;
+   procedure internalopen; override;
+   procedure internalclose; override;
+   procedure clearbuffers; override;
+   procedure internalinsert; override;
+   procedure internaledit; override;
+   
+   function  getfieldclass(fieldtype: tfieldtype): tfieldclass; override;
+   function getnextpacket : integer;
+   function getrecordsize: word; override;
+   procedure internalpost; override;
+   procedure internaldelete; override;
+   procedure internalfirst; override;
+   procedure internallast; override;
+   procedure internalsettorecord(buffer: pchar); override;
+   procedure internalgotobookmark(abookmark: pointer); override;
+   procedure setbookmarkdata(buffer: pchar; data: pointer); override;
+   procedure setbookmarkflag(buffer: pchar; value: tbookmarkflag); override;
+   procedure getbookmarkdata(buffer: pchar; data: pointer); override;
+   function getbookmarkflag(buffer: pchar): tbookmarkflag; override;
+   function getfielddata(field: tfield; buffer: pointer;
+                       nativeformat: boolean): boolean; override;
+   function getfielddata(field: tfield; buffer: pointer): boolean; override;
+   procedure setfielddata(field: tfield; buffer: pointer;
+                                    nativeformat: boolean); override;
+   procedure setfielddata(field: tfield; buffer: pointer); override;
+   function iscursoropen: boolean; override;
+   function  getrecordcount: longint; override;
+   procedure applyrecupdate(updatekind : tupdatekind); virtual;
+   procedure setonupdateerror(const avalue: tresolvererrorevent);
    property actindex: integer read factindex write setactindex;
    function findrec(const arecord: pintrecordty): integer;
                          //returns index, -1 if not found
+ {abstracts, must be overidden by descendents}
+   function fetch : boolean; virtual; abstract;
+   function loadfield(fielddef: tfielddef; buffer: pointer): boolean; 
+                                                     virtual; abstract;
   public
-    constructor Create(AOwner: TComponent); override;
-    destructor Destroy; override;
+    constructor create(aowner: tcomponent); override;
+    destructor destroy; override;
 
     procedure bindfields(const bind: boolean);
     procedure fieldtoparam(const source: tfield; const dest: tparam);
@@ -362,22 +374,22 @@ type
                    
     procedure resetindex; //deactivates all indexes
     function createblobbuffer(const afield: tfield): tblobbuffer;
-    procedure ApplyUpdates(const maxerrors: integer = 0); virtual; overload;
-    procedure ApplyUpdates(const MaxErrors: Integer;
+    procedure applyupdates(const maxerrors: integer = 0); virtual; overload;
+    procedure applyupdates(const maxerrors: integer;
                     const cancelonerror: boolean); virtual; overload;
     procedure applyupdate(const cancelonerror: boolean); virtual; overload;
     procedure applyupdate; virtual; overload;
                     //applies current record
-    procedure CancelUpdates; virtual;
+    procedure cancelupdates; virtual;
     procedure cancelupdate; virtual; //cancels current record
-//    function Locate(const keyfields: string; const keyvalues: Variant; options: TLocateOptions) : boolean; override;
-    function UpdateStatus: TUpdateStatus; override;
-    property ChangeCount : Integer read GetChangeCount;
+//    function locate(const keyfields: string; const keyvalues: variant; options: tlocateoptions) : boolean; override;
+    function updatestatus: tupdatestatus; override;
+    property changecount : integer read getchangecount;
   published
-    property PacketRecords : Integer read FPacketRecords write setPacketRecords 
+    property packetrecords : integer read fpacketrecords write setpacketrecords 
                                   default defaultpacketrecords;
-    property OnUpdateError: TResolverErrorEvent read FOnUpdateError 
-                                  write SetOnUpdateError;
+    property onupdateerror: tresolvererrorevent read fonupdateerror 
+                                  write setonupdateerror;
     property indexlocal: tlocalindexes read findexlocal write setindexlocal;
   end;
    
@@ -386,7 +398,25 @@ uses
  dbconst,msedatalist,sysutils,msedb;
 type
  tmsestringfield1 = class(tmsestringfield);
-  
+ 
+ TFieldcracker = class(TComponent)
+  private
+   FAlignMent : TAlignment;
+   FAttributeSet : String;
+   FCalculated : Boolean;
+   FConstraintErrorMessage : String;
+   FCustomConstraint : String;
+   FDataSet : TDataSet;
+//    FDataSize : Word;
+   FDataType : TFieldType;
+   FDefaultExpression : String;
+   FDisplayLabel : String;
+   FDisplayWidth : Longint;
+   FFieldKind : TFieldKind;
+   FFieldName : String;
+   FFieldNo : Longint;
+ end;
+   
 function compinteger(const l,r): integer;
 begin
  result:= integer(l) - integer(r);
@@ -445,20 +475,30 @@ const
                                     compfunci: @compcurrency),
    (datatypes: stringindexfields; compfunc: @compstring;
                                   compfunci: @compstringi));
-    
-procedure unSetFieldIsNull(NullMask : pbyte;x : longint); //inline;
+const
+ ormask:  array[0..7] of byte = (%00000001,%00000010,%00000100,%00001000,
+                                 %00010000,%00100000,%01000000,%10000000);
+ andmask: array[0..7] of byte = (%11111110,%11111101,%11111011,%11110111,
+                                 %11101111,%11011111,%10111111,%01111111);
+          
+procedure unsetfieldisnull(nullmask: pbyte; const x: integer);
+var
+ int1: integer;
 begin
-  NullMask[x div 8] := (NullMask[x div 8]) and not (1 shl (x mod 8));
+ inc(nullmask,(x shr 3));
+ nullmask^:= nullmask^ or ormask[x and 7];
 end;
 
-procedure SetFieldIsNull(NullMask : pbyte;x : longint); //inline;
+procedure setfieldisnull(nullmask: pbyte; const x: integer);
 begin
-  NullMask[x div 8] := (NullMask[x div 8]) or (1 shl (x mod 8));
+ inc(nullmask,(x shr 3));
+ nullmask^:= nullmask^ and andmask[x and 7];
 end;
 
-function GetFieldIsNull(NullMask : pbyte;x : longint) : boolean; //inline;
+function getfieldisnull(nullmask: pbyte; const x: integer): boolean;
 begin
-  result := ord(NullMask[x div 8]) and (1 shl (x mod 8)) > 0
+ inc(nullmask,(x shr 3));
+ result:= nullmask^ and ormask[x and 7] = 0;
 end;
 
 
@@ -578,14 +618,19 @@ end;
 
 function tmsebufdataset.allocrecordbuffer: pchar;
 begin
- result := allocmem(frecordsize + dsheadersize + calcfieldssize);
+ result := allocmem(dsheadersize+fcalcrecordsize);
  initrecord(result);
 end;
 
 procedure tmsebufdataset.clearcalcfields(buffer: pchar);
+var
+ int1: integer;
 begin
  with pdsrecordty(buffer)^ do begin
-//  fillchar((pointer(@header)+frecordsize)^,calcfieldssize,0);
+  for int1:= high(fcalcstringpositions) downto 0 do begin
+   pmsestring(pointer(@header)+fcalcstringpositions[int1])^:= '';
+  end;
+  fillchar((pointer(@header)+frecordsize)^,fcalcrecordsize-frecordsize,0);
  end;
 end;
 
@@ -596,7 +641,7 @@ var
 begin
  if buffer <> nil then begin
   bo1:= false;
-  with pdsrecordty(buffer)^.header do begin
+  with pdsrecordty(buffer)^,header do begin
    for int1:= high(blobinfo) downto 0 do begin
     if blobinfo[int1].new then begin
      freeblob(blobinfo[int1]);
@@ -605,6 +650,9 @@ begin
    end;
    if bo1 then begin
     blobinfo:= nil;
+   end;
+   for int1:= high(fcalcstringpositions) downto 0 do begin
+    pmsestring(pointer(@header)+fcalcstringpositions[int1])^:= '';
    end;
   end;
   reallocmem(buffer,0);
@@ -712,7 +760,16 @@ begin
 end;
 
 procedure tmsebufdataset.internalopen;
+var
+ int1: integer;
 begin
+ for int1:= 0 to fields.count - 1 do begin
+  with fields[int1] do begin
+   if (fieldkind = fkdata) and (fielddefs.indexof(fieldname) < 0) then begin
+    databaseerrorfmt(sfieldnotfound,[fieldname],self);
+   end;
+  end;
+ end;
  bindfields(true); //calculate calc fields size
  setlength(findexes,1+findexlocal.count);
  factindexpo:= @findexes[factindex];
@@ -751,10 +808,15 @@ begin
  fupdatebuffer:= nil;
  clearindex;
  fbrecordcount:= 0;
+ 
  ffieldbufpositions:= nil;
  ffieldsizes:= nil;
  fdbfieldsizes:= nil;
  fstringpositions:= nil;
+ fcalcfieldbufpositions:= nil;
+ fcalcfieldsizes:= nil;
+ fcalcstringpositions:= nil;
+ 
  bindfields(false);
 end;
 
@@ -948,7 +1010,7 @@ begin
   exit;
  end;
  pointer(buffer.blobinfo):= nil;
- fillchar(buffer.fielddata.nullmask,fnullmasksize,0);
+ fillchar(buffer.fielddata.nullmask,fnullmasksize,$ff);
  for int1:= 0 to fielddefs.count-1 do begin
   fielddef1:= fielddefs[int1];
   if fielddef1.datatype in charfields then begin
@@ -1009,9 +1071,15 @@ begin
   result:= not getfieldisnull(precheaderty(buffer)^.fielddata.nullmask,int1);
   inc(buffer,ffieldbufpositions[int1]);
  end
- else begin   //calc field
-  inc(buffer,frecordsize+afield.offset);
-  result:= pchar(buffer+afield.datasize)^ <> #0;
+ else begin   
+  int1:= -2 - int1;
+  if int1 >= 0 then begin //calc field
+   result:= not getfieldisnull(pbyte(buffer+frecordsize),int1);
+   inc(buffer,fcalcfieldbufpositions[int1]);
+  end
+  else begin
+   buffer:= nil;
+  end;
  end;
 end;
 
@@ -1078,13 +1146,19 @@ begin
   end;
   inc(result,ffieldbufpositions[int1]);
  end
- else begin   //calc field
-  inc(result,frecordsize+afield.offset);
-  if isnull then begin
-   pchar(result+afield.datasize)^:= #0;
+ else begin
+  int1:= -2 - int1;
+  if int1 >= 0 then begin //calc field
+   if isnull then begin
+    setfieldisnull(pbyte(result+frecordsize),int1);
+   end
+   else begin
+    unsetfieldisnull(pbyte(result+frecordsize),int1);
+   end;
+   inc(result,fcalcfieldbufpositions[int1]);
   end
   else begin
-   pchar(result+afield.datasize)^:= #1;
+   result:= nil;
   end;
  end;
 end;
@@ -1495,11 +1569,12 @@ end;
 
 procedure tmsebufdataset.calcrecordsize;
 var 
- int1: integer;
+ int1,int2: integer;
  bo1: boolean;
+ field1: tfield;
 begin
  frecordsize:= sizeof(blobinfoarty);
- fnullmasksize:= 1+((fielddefs.count-1) div 8);
+ fnullmasksize:= (fielddefs.count+7) div 8;
  inc(frecordsize,fnullmasksize);
  alignfieldpos(frecordsize);
  
@@ -1520,49 +1595,75 @@ begin
   inc(frecordsize,ffieldsizes[int1]);
   alignfieldpos(frecordsize);
  end;
+ int2:= 0;
+ for int1:= fields.count - 1 downto 0 do begin
+  if fields[int1].fieldkind in dsbuffieldkinds then begin
+   inc(int2);
+  end;
+ end;
+ setlength(fcalcfieldbufpositions,int2);
+ setlength(fcalcfieldsizes,int2);
+ fcalcstringpositions:= nil;
+ fcalcrecordsize:= frecordsize;
+ fcalcnullmasksize:= (int2+7) div 8;
+ inc(fcalcrecordsize,fcalcnullmasksize);
+ alignfieldpos(fcalcrecordsize);
+ int2:= 0;
+ for int1:= fields.count - 1 downto 0 do begin
+  field1:= fields[int1];
+  with field1 do begin
+   if fieldkind in dsbuffieldkinds then begin
+    tfieldcracker(field1).ffieldno:= -1 - int2;
+    fcalcfieldbufpositions[int2]:= fcalcrecordsize;
+    if field1 is tmsestringfield then begin
+     additem(fcalcstringpositions,fcalcrecordsize);
+    end;
+    fcalcfieldsizes[int2]:= datasize;
+    inc(fcalcrecordsize,fcalcfieldsizes[int2]);
+    alignfieldpos(fcalcrecordsize);
+    inc(int2);
+   end;
+  end;
+ end; 
 end;
 
-function tmsebufdataset.GetRecordSize : Word;
-
+function tmsebufdataset.getrecordsize : word;
 begin
-  result := FRecordSize;
+ result:= frecordsize;
 end;
 
-function tmsebufdataset.GetChangeCount: integer;
-
+function tmsebufdataset.getchangecount: integer;
 begin
-  result := length(FUpdateBuffer);
+ result:= length(fupdatebuffer);
 end;
 
-
-procedure tmsebufdataset.InternalInitRecord(Buffer: PChar);
+procedure tmsebufdataset.internalinitrecord(buffer: pchar);
 
 begin
  with pdsrecordty(buffer)^ do begin
-  FillChar(header, FRecordSize, #0);
-  fillchar(header.fielddata.nullmask,FNullmaskSize,255);
+  fillchar(header,fcalcrecordsize, #0);
  end;
 end;
 
-procedure tmsebufdataset.SetRecNo(Value: Longint);
+procedure tmsebufdataset.setrecno(value: longint);
 var
  bm: bufbookmarkty;
 begin
  checkbrowsemode;
- if value > RecordCount then begin
+ if value > recordcount then begin
   repeat
-  until (getnextpacket < FPacketRecords) or (value <= RecordCount) or
+  until (getnextpacket < fpacketrecords) or (value <= recordcount) or
                         (bs_fetchall in fbstate);
  end;
- if (value > RecordCount) or (value < 1) then begin
-  DatabaseError(SNoSuchRecord,self);
+ if (value > recordcount) or (value < 1) then begin
+  databaseerror(snosuchrecord,self);
  end;
  bm.data.recordpo:= nil;
  bm.data.recno:= value-1;
- GotoBookmark(@bm);
+ gotobookmark(@bm);
 end;
 
-function tmsebufdataset.GetRecNo: Longint;
+function tmsebufdataset.getrecno: longint;
 begin
  if activebuffer <> nil then begin
   with pdsrecordty(activebuffer)^.dsheader.bookmark do begin
@@ -1577,28 +1678,26 @@ begin
  end;
 end;
 
-function tmsebufdataset.IsCursorOpen: Boolean;
-
+function tmsebufdataset.iscursoropen: boolean;
 begin
- Result:= FOpen;
+ result:= fopen;
 end;
 
-Function tmsebufdataset.GetRecordCount: Longint;
-
+function tmsebufdataset.getrecordcount: longint;
 begin
- Result:= FBRecordCount;
+ result:= fbrecordcount;
 end;
 
-Function tmsebufdataset.UpdateStatus: TUpdateStatus;
-
+function tmsebufdataset.updatestatus: tupdatestatus;
 begin
- Result:= usUnmodified;
-  if GetRecordUpdateBuffer then
-    case FUpdateBuffer[FCurrentUpdateBuffer].UpdateKind of
-      ukModify : Result := usModified;
-      ukInsert : Result := usInserted;
-      ukDelete : Result := usDeleted;
-    end;
+ result:= usunmodified;
+ if getrecordupdatebuffer then begin
+  case fupdatebuffer[fcurrentupdatebuffer].updatekind of
+   ukmodify : result := usmodified;
+   ukinsert : result := usinserted;
+   ukdelete : result := usdeleted;
+  end;
+ end;
 end;
 {
 Function tmsebufdataset.Locate(const KeyFields: string; const KeyValues: Variant; options: TLocateOptions) : boolean;
@@ -1727,13 +1826,13 @@ begin
   ReAllocmem(ValueBuffer,0);
 end;
 }
-function tmsebufdataset.CreateBlobStream(Field: TField;
-               Mode: TBlobStreamMode): TStream;
+function tmsebufdataset.createblobstream(field: tfield;
+               mode: tblobstreammode): tstream;
 var
  int1: integer;
 begin
  if (mode <> bmread) and not (state in dseditmodes) then begin
-  DatabaseErrorFmt(SNotInEditState,[NAme],self);
+  databaseerrorfmt(snotineditstate,[name],self);
  end;  
  result:= nil;
  if mode = bmread then begin
