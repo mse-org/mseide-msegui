@@ -1554,7 +1554,7 @@ begin
   statementstart:= acttoken;
   ident1:= pascalidentty(getident);
   case ident1 of
-   id_const,id_var,id_implementation,id_function,id_procedure,
+   id_label,id_const,id_var,id_implementation,id_function,id_procedure,
                     id_constructor,id_destructor,id_begin: begin
     lasttoken;
     break;
