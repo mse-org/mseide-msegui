@@ -409,18 +409,26 @@ begin
 end;
 
 procedure tmbufdataset.InternalOpen;
-
+var
+ int1: integer;
 begin
-  CalcRecordSize;
+ for int1:= 0 to fields.count - 1 do begin
+  with fields[int1] do begin
+   if (fieldkind = fkdata) and (fielddefs.indexof(fieldname) < 0) then begin
+    databaseerrorfmt(sfieldnotfound,[fieldname],self);
+   end;
+  end;
+ end;
+ CalcRecordSize;
 
-  FBRecordcount := 0;
+ FBRecordcount := 0;
 
-  FFirstRecBuf := pointer(IntAllocRecordBuffer);
-  FLastRecBuf := FFirstRecBuf;
-  FCurrentRecBuf := FLastRecBuf;
+ FFirstRecBuf := pointer(IntAllocRecordBuffer);
+ FLastRecBuf := FFirstRecBuf;
+ FCurrentRecBuf := FLastRecBuf;
 
-  FAllPacketsFetched := False;
-  FOpen:=True;
+ FAllPacketsFetched := False;
+ FOpen:=True;
 end;
 
 procedure tmbufdataset.InternalClose;
