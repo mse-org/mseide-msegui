@@ -834,6 +834,7 @@ begin
  if bs_editing in fbstate then begin
   internalcancel; //free data
  end;
+ inherited;
 end;
 
 procedure tmsebufdataset.internalinsert;
@@ -2005,12 +2006,7 @@ begin
   end;
   move(ind[int1+1],ind[int1],(fbrecordcount-int1)*sizeof(pointer));
  end;
- if factindex <> 0 then begin
-  with factindexpo^ do begin
-   move(ind[arecno+1],ind[arecno],(fbrecordcount-arecno)*sizeof(pointer));
-  end;
- end;
- if frecno > arecno then begin
+ if (frecno > arecno) or (frecno >= fbrecordcount) then begin
   dec(frecno);
  end;
  if frecno < 0 then begin
