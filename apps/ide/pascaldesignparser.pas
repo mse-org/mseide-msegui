@@ -393,6 +393,7 @@ type
    protected
     function skipexpression: boolean;
     procedure parsetype;
+    procedure parselabel;
     procedure parseconst;
     procedure parsevar;
     function parseclasstype: boolean;
@@ -1520,6 +1521,28 @@ begin
  end;
 end;
 
+procedure tpascaldesignparser.parselabel;
+var
+ ident1: pascalidentty;
+begin
+ while not eof do begin
+  skipwhitespace;
+  ident1:= pascalidentty(getident);
+  case ident1 of
+   id_type,id_const,id_var,id_implementation,id_function,id_procedure,
+                    id_constructor,id_destructor,id_begin: begin
+    lasttoken;
+    break;
+   end;
+   id_label: begin
+   end;
+   else begin
+    nexttoken;
+   end;
+  end;
+ end;
+end;
+
 procedure tpascaldesignparser.parsetype;
 var
  statementstart: tokenidty;
@@ -1829,6 +1852,9 @@ var
         end;
         id_type: begin
          parsetype;
+        end;
+        id_label: begin
+         parselabel;
         end;
         id_procedure: begin
          parseprocedure(mkprocedure);
