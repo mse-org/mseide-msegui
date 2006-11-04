@@ -291,9 +291,9 @@ type
    procedure checkindex;
    
    function getfieldbuffer(const afield: tfield;
-             out buffer: pointer): boolean; overload; //true if not null
+             out buffer: pointer; out datasize: integer): boolean; overload; //true if not null
    function getfieldbuffer(const afield: tfield;
-             const isnull: boolean): pointer; overload;
+             const isnull: boolean; out datasize: integer): pointer; overload;
    function getmsestringdata(const sender: tfield; 
                                out avalue: msestring): boolean;
    procedure setmsestringdata(const sender: tfield; const avalue: msestring);
@@ -1050,7 +1050,7 @@ begin
 end;
 
 function tmsebufdataset.getfieldbuffer(const afield: tfield;
-             out buffer: pointer): boolean; //true if not null
+             out buffer: pointer; out datasize: integer): boolean; //true if not null
 var
  int1: integer;
 begin 
@@ -1079,15 +1079,18 @@ begin
   end; 
   result:= not getfieldisnull(precheaderty(buffer)^.fielddata.nullmask,int1);
   inc(buffer,ffieldbufpositions[int1]);
+  datasize:= ffieldsizes[int1];
  end
  else begin   
   int1:= -2 - int1;
   if int1 >= 0 then begin //calc field
    result:= not getfieldisnull(pbyte(buffer+frecordsize),int1);
    inc(buffer,fcalcfieldbufpositions[int1]);
+   datasize:= fcalcfieldsizes[int1];
   end
   else begin
    buffer:= nil;
+   datasize:= 0;
   end;
  end;
 end;
@@ -1095,26 +1098,27 @@ end;
 function tmsebufdataset.getfielddata(field: tfield; buffer: pointer): boolean;
 var 
  po1: pointer;
- int1: integer;
+ datasize: integer;
 begin
- result:= getfieldbuffer(field,po1);
+ result:= getfieldbuffer(field,po1,datasize);
  if (buffer <> nil) and result then begin 
-  move(po1^,buffer^,field.datasize);
+  move(po1^,buffer^,datasize);
  end;
 end;
 
 function tmsebufdataset.getfielddata(field: tfield; buffer: pointer;
                          nativeformat: boolean): boolean;
 begin
- result:= getfielddata(field, buffer);
+ result:= getfielddata(field,buffer);
 end;
 
 function tmsebufdataset.getmsestringdata(const sender: tfield;
                out avalue: msestring): boolean;
 var
  po1: pointer;
+ int1: integer;
 begin
- result:= getfieldbuffer(sender,po1);
+ result:= getfieldbuffer(sender,po1,int1);
  if result then begin
   avalue:= msestring(po1^);
  end
@@ -1124,7 +1128,7 @@ begin
 end;
 
 function tmsebufdataset.getfieldbuffer(const afield: tfield;
-                                         const isnull: boolean): pointer;
+                        const isnull: boolean; out datasize: integer): pointer;
 var
  int1: integer;
 begin 
@@ -1154,6 +1158,7 @@ begin
    unsetfieldisnull(precheaderty(result)^.fielddata.nullmask,int1);
   end;
   inc(result,ffieldbufpositions[int1]);
+  datasize:= ffieldsizes[int1];
  end
  else begin
   int1:= -2 - int1;
@@ -1165,9 +1170,11 @@ begin
     unsetfieldisnull(pbyte(result+frecordsize),int1);
    end;
    inc(result,fcalcfieldbufpositions[int1]);
+   datasize:= fcalcfieldsizes[int1];
   end
   else begin
    result:= nil;
+   datasize:= 0;
   end;
  end;
 end;
@@ -1176,10 +1183,11 @@ procedure tmsebufdataset.setfielddata(field: tfield; buffer: pointer);
 
 var 
  po1: pointer;
+ datasize: integer;
 begin
- po1:= getfieldbuffer(field,buffer = nil);
+ po1:= getfieldbuffer(field,buffer = nil,datasize);
  if buffer <> nil then begin
-  move(buffer^,po1^,field.datasize);
+  move(buffer^,po1^,datasize);
  end;
  if (field.fieldno > 0) and not 
                  (state in [dscalcfields,dsfilter,dsnewvalue]) then begin
@@ -1191,8 +1199,9 @@ procedure tmsebufdataset.setmsestringdata(const sender: tfield;
                const avalue: msestring);
 var
  po1: pointer;
+ int1: integer;
 begin
- po1:= getfieldbuffer(sender,false);
+ po1:= getfieldbuffer(sender,false,int1);
  msestring(po1^):= avalue;
  if (sender.fieldno > 0) and not 
                  (state in [dscalcfields,dsfilter,dsnewvalue]) then begin
