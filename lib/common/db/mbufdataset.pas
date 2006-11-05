@@ -610,7 +610,8 @@ function tmbufdataset.GetFieldSize(FieldDef : TFieldDef) : longint;
 begin
   case FieldDef.DataType of
     ftString,
-      ftFixedChar: result := FieldDef.Size + 1;
+      ftFixedChar: result := FieldDef.Size*3 + 1;
+                         //*3 -> reserve for multibyte encodings
     ftSmallint,
       ftInteger,
       ftword     : result := sizeof(longint);

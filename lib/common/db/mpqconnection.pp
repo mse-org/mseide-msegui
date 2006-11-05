@@ -570,6 +570,8 @@ begin
     ftstring: begin
      if size = -1 then begin
       size:= pqfmod(res,i)-4;
+// WARNING string length is actual bigger for multi byte encodings (utf8!) 
+// 5.11.2006 MSE
       if size = -5 then begin
        fieldtype:= ftmemo;
        size:= blobidsize;
@@ -634,6 +636,7 @@ var
  sint1: smallint;
  
 begin
+{$ifdef FPC}{$checkpointer off}{$endif}
   with cursor as TPQCursor do
     begin
     for x := 0 to PQnfields(res)-1 do
@@ -727,6 +730,7 @@ begin
       end;
       end;
     end;
+{$ifdef FPC}{$checkpointer default}{$endif}
 end;
 
 procedure TPQConnection.UpdateIndexDefs(var IndexDefs : TIndexDefs;TableName : string);

@@ -1135,6 +1135,8 @@ end;
 
 function tdataedit.setdropdowntext(const avalue: msestring;
                 const docheckvalue: boolean; const canceled: boolean): boolean;
+var
+ bo1: boolean;
 begin
  result:= true;
  if canceled then begin
@@ -1146,6 +1148,12 @@ begin
    result:= checkvalue;
    if not result then begin
     feditor.undo;
+   end;
+  end
+  else begin
+   if not canceled then begin
+    bo1:= true;
+    texttovalue(bo1,true);
    end;
   end;
  end;
