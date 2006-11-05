@@ -226,12 +226,11 @@ type
    
  tmsebufdataset = class(tdbdataset)
   private
-   fbrecordcount   : integer;
-
-   fpacketrecords  : integer;
-   fopen           : boolean;
-   fupdatebuffer   : recupdatebufferarty;
-   fcurrentupdatebuffer : integer;
+   fbrecordcount: integer;
+   fpacketrecords: integer;
+   fopen: boolean;
+   fupdatebuffer: recupdatebufferarty;
+   fcurrentupdatebuffer: integer;
 
    frecordsize: integer;
    fnullmasksize: integer;
@@ -247,7 +246,7 @@ type
    fcalcstringpositions: integerarty;
    
    fallpacketsfetched : boolean;
-   fonupdateerror  : tresolvererrorevent;
+   fonupdateerror: tresolvererrorevent;
 
    femptybuffer: pintrecordty;
    ffilterbuffer: pintrecordty;
@@ -365,34 +364,35 @@ type
    function loadfield(fielddef: tfielddef; buffer: pointer): boolean; 
                                                      virtual; abstract;
   public
-    constructor create(aowner: tcomponent); override;
-    destructor destroy; override;
+   constructor create(aowner: tcomponent); override;
+   destructor destroy; override;
 
-    procedure bindfields(const bind: boolean);
-    procedure fieldtoparam(const source: tfield; const dest: tparam);
-    procedure oldfieldtoparam(const source: tfield; const dest: tparam);
-    procedure stringtoparam(const source: msestring; const dest: tparam);
-                   //takes care about utf8 conversion
-                   
-    procedure resetindex; //deactivates all indexes
-    function createblobbuffer(const afield: tfield): tblobbuffer;
-    procedure applyupdates(const maxerrors: integer = 0); virtual; overload;
-    procedure applyupdates(const maxerrors: integer;
-                    const cancelonerror: boolean); virtual; overload;
-    procedure applyupdate(const cancelonerror: boolean); virtual; overload;
-    procedure applyupdate; virtual; overload;
-                    //applies current record
-    procedure cancelupdates; virtual;
-    procedure cancelupdate; virtual; //cancels current record
+   function isutf8: boolean; virtual;
+   procedure bindfields(const bind: boolean);
+   procedure fieldtoparam(const source: tfield; const dest: tparam);
+   procedure oldfieldtoparam(const source: tfield; const dest: tparam);
+   procedure stringtoparam(const source: msestring; const dest: tparam);
+                  //takes care about utf8 conversion
+                  
+   procedure resetindex; //deactivates all indexes
+   function createblobbuffer(const afield: tfield): tblobbuffer;
+   procedure applyupdates(const maxerrors: integer = 0); virtual; overload;
+   procedure applyupdates(const maxerrors: integer;
+                   const cancelonerror: boolean); virtual; overload;
+   procedure applyupdate(const cancelonerror: boolean); virtual; overload;
+   procedure applyupdate; virtual; overload;
+                   //applies current record
+   procedure cancelupdates; virtual;
+   procedure cancelupdate; virtual; //cancels current record
 //    function locate(const keyfields: string; const keyvalues: variant; options: tlocateoptions) : boolean; override;
-    function updatestatus: tupdatestatus; override;
-    property changecount : integer read getchangecount;
+   function updatestatus: tupdatestatus; override;
+   property changecount : integer read getchangecount;
   published
-    property packetrecords : integer read fpacketrecords write setpacketrecords 
-                                  default defaultpacketrecords;
-    property onupdateerror: tresolvererrorevent read fonupdateerror 
-                                  write setonupdateerror;
-    property indexlocal: tlocalindexes read findexlocal write setindexlocal;
+   property packetrecords : integer read fpacketrecords write setpacketrecords 
+                                 default defaultpacketrecords;
+   property onupdateerror: tresolvererrorevent read fonupdateerror 
+                                 write setonupdateerror;
+   property indexlocal: tlocalindexes read findexlocal write setindexlocal;
   end;
    
 implementation
@@ -778,6 +778,12 @@ begin
     databaseerrorfmt(sfieldnotfound,[fieldname],self);
    end;
   end;
+ end;
+ if isutf8 then begin
+  include(fbstate,bs_utf8);
+ end
+ else begin
+  exclude(fbstate,bs_utf8);
  end;
  bindfields(true); //calculate calc fields size
  setlength(findexes,1+findexlocal.count);
@@ -2219,6 +2225,11 @@ begin
   end; 
  end;
  inherited;
+end;
+
+function tmsebufdataset.isutf8: boolean;
+begin
+ result:= false; //default
 end;
 
 { tlocalindexes }

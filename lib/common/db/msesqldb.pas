@@ -111,6 +111,7 @@ type
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
+   function isutf8: boolean; override;
    function locate(const key: integer; const field: tfield;
                    const options: locateoptionsty = []): locateresultty;
    function locate(const key: string; const field: tfield; 
@@ -1207,6 +1208,11 @@ end;
 procedure tmsesqlquery.setstatementtype(const avalue: TStatementType);
 begin
  //dummy
+end;
+
+function tmsesqlquery.isutf8: boolean;
+begin
+ result:= dso_utf8 in fcontroller.options;
 end;
 
 { tparamsourcedatalink }
