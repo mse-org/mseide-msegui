@@ -99,7 +99,9 @@ type
     procedure UnPrepareStatement(cursor : TSQLCursor); virtual; abstract;
 
     procedure FreeFldBuffers(cursor : TSQLCursor); virtual; abstract;
-    function LoadField(cursor : TSQLCursor;FieldDef : TfieldDef;buffer : pointer) : boolean; virtual; abstract;
+    function loadfield(const cursor: tsqlcursor; const fielddef: tfielddef;
+      const buffer: pointer; var bufsize: integer): boolean; virtual; abstract;
+           //if bufsize < 0 -> buffer was to small, should be -bufsize
     function GetTransactionHandle(trans : TSQLHandle): pointer; virtual; abstract;
     function Commit(trans : TSQLHandle) : boolean; virtual; abstract;
     function RollBack(trans : TSQLHandle) : boolean; virtual; abstract;
@@ -230,7 +232,9 @@ type
     FReadOnly            : boolean;
     // abstract & virtual methods of TBufDataset
     function Fetch : boolean; override;
-    function LoadField(FieldDef : TFieldDef;buffer : pointer) : boolean; override;
+    function loadfield(const fielddef: tfielddef; const buffer: pointer;
+                     var bufsize: integer): boolean; override;
+           //if bufsize < 0 -> buffer was to small, should be -bufsize
     // abstract & virtual methods of TDataset
     procedure UpdateIndexDefs; override;
     procedure SetDatabase(Value : TDatabase); override;
@@ -845,11 +849,11 @@ begin
   (Database as tsqlconnection).execute(Fcursor,Transaction as tsqltransaction, FParams);
 end;
 
-function TSQLQuery.LoadField(FieldDef : TFieldDef;buffer : pointer) : boolean;
-var
- str1: string;
+function tsqlquery.loadfield(const fielddef: tfielddef; const buffer: pointer;
+                     var bufsize: integer): boolean;
+           //if bufsize < 0 -> buffer was to small, should be -bufsize
 begin
- result:= tSQLConnection(database).LoadField(FCursor,FieldDef,buffer)
+ result:= tSQLConnection(database).LoadField(FCursor,FieldDef,buffer,bufsize)
 end;
 
 procedure TSQLQuery.InternalAddRecord(Buffer: Pointer; AAppend: Boolean);

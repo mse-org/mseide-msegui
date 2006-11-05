@@ -89,7 +89,9 @@ type
     // - Result retrieving
     procedure AddFieldDefs(cursor:TSQLCursor; FieldDefs:TFieldDefs); override;
     function Fetch(cursor:TSQLCursor):boolean; override;
-    function LoadField(cursor:TSQLCursor; FieldDef:TFieldDef; buffer:pointer):boolean; override;
+    function loadfield(const cursor: tsqlcursor; const fielddef: tfielddef;
+      const buffer: pointer; var bufsize: integer): boolean; override;
+           //if bufsize < 0 -> buffer was to small, should be -bufsize
     function CreateBlobStream(const Field: TField; const Mode: TBlobStreamMode;
                  const acursor: tsqlcursor): TStream; override;
     procedure FreeFldBuffers(cursor:TSQLCursor); override;
@@ -522,7 +524,9 @@ begin
   Result:=Res<>SQL_NO_DATA;
 end;
 
-function TODBCConnection.LoadField(cursor: TSQLCursor; FieldDef: TFieldDef; buffer: pointer): boolean;
+function todbcconnection.loadfield(const cursor: tsqlcursor; const fielddef: tfielddef;
+      const buffer: pointer; var bufsize: integer): boolean;
+           //if bufsize < 0 -> buffer was to small, should be -bufsize
 const
   DEFAULT_BLOB_BUFFER_SIZE = 1024;
 var
@@ -543,8 +547,11 @@ begin
   // Note: optionally we can implement the use of SQLBindCol later for even more speed
   // TODO: finish this
   case FieldDef.DataType of
-    ftFixedChar,ftString: // are both mapped to TStringField
-      Res:=SQLGetData(ODBCCursor.FSTMTHandle, FieldDef.Index+1, SQL_C_CHAR, buffer, FieldDef.Size, @StrLenOrInd);
+    ftFixedChar,ftString: begin // are both mapped to TStringField
+      Res:=SQLGetData(ODBCCursor.FSTMTHandle, FieldDef.Index+1,
+            SQL_C_CHAR, buffer, FieldDef.Size, @StrLenOrInd);
+      bufsize:= strlenorind;                          //untested!!!!!!
+    end;
     ftSmallint:           // mapped to TSmallintField
       Res:=SQLGetData(ODBCCursor.FSTMTHandle, FieldDef.Index+1, SQL_C_SSHORT, buffer, SizeOf(Smallint), @StrLenOrInd);
     ftInteger,ftWord:     // mapped to TLongintField

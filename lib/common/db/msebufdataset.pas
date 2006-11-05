@@ -361,8 +361,9 @@ type
                          //returns index, -1 if not found
  {abstracts, must be overidden by descendents}
    function fetch : boolean; virtual; abstract;
-   function loadfield(fielddef: tfielddef; buffer: pointer): boolean; 
-                                                     virtual; abstract;
+   function loadfield(const fielddef: tfielddef; const buffer: pointer;
+                    var bufsize: integer): boolean; virtual; abstract;
+           //if bufsize < 0 -> buffer was to small, should be -bufsize
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -1018,10 +1019,9 @@ end;
 
 function tmsebufdataset.loadbuffer(var buffer: recheaderty): tgetresult;
 var
- int1: integer;
+ int1,int2: integer;
  str1: string;
  fielddef1: tfielddef;
- po1: pchar;
  po2: pmsestring;
 begin
  if not fetch then  begin
@@ -1033,27 +1033,32 @@ begin
  fillchar(buffer.fielddata.nullmask,fnullmasksize,$ff);
  for int1:= 0 to fielddefs.count-1 do begin
   fielddef1:= fielddefs[int1];
+  int2:= fdbfieldsizes[int1];
   if fielddef1.datatype in charfields then begin
-   getmem(po1,fdbfieldsizes[int1]);
-   if not loadfield(fielddefs[int1],po1) then begin
+   int2:= int2*3+4; //room for multibyte encodings
+   setlength(str1,int2); 
+   if not loadfield(fielddefs[int1],pointer(str1),int2) then begin
     setfieldisnull(buffer.fielddata.nullmask,int1);
    end
    else begin
+    if int2 < 0 then begin //buffer to small
+     setlength(str1,-int2);
+     loadfield(fielddefs[int1],pointer(str1),int2);
+    end;
+    setlength(str1,int2);
     po2:= pointer(@buffer)+ffieldbufpositions[int1];
     if bs_utf8 in fbstate then begin
-     po2^:= utf8tostring(po1);
+     po2^:= utf8tostring(str1);
     end
     else begin
-     po2^:= msestring(po1);
+     po2^:= msestring(str1);
     end;
-//    move(po1^,(pointer(@buffer)+ffieldbufpositions[int1])^,fdbfieldsizes[int1]);
    end;
-   freemem(po1);
   end
   else begin
    if not loadfield(fielddefs[int1],
-                        pointer(@buffer)+ffieldbufpositions[int1]) then begin
-    setfieldisnull(buffer.fielddata.nullmask,int1);
+            pointer(@buffer)+ffieldbufpositions[int1],int2) or (int2 < 0)then begin
+    setfieldisnull(buffer.fielddata.nullmask,int1);        //buffer too small
    end;
   end;
  end;

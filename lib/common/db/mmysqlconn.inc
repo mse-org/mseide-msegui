@@ -85,7 +85,9 @@ Type
     procedure Execute(cursor: TSQLCursor;atransaction:tSQLtransaction;AParams : TParams); override;
     procedure AddFieldDefs(cursor: TSQLCursor; FieldDefs : TfieldDefs); override;
     function Fetch(cursor : TSQLCursor) : boolean; override;
-    function LoadField(cursor : TSQLCursor;FieldDef : TfieldDef;buffer : pointer) : boolean; override;
+    function loadfield(const cursor: tsqlcursor; const fielddef: tfielddef;
+      const buffer: pointer; var bufsize: integer): boolean; override;
+           //if bufsize < 0 -> buffer was to small, should be -bufsize
     function GetTransactionHandle(trans : TSQLHandle): pointer; override;
     function Commit(trans : TSQLHandle) : boolean; override;
     function RollBack(trans : TSQLHandle) : boolean; override;
@@ -472,8 +474,9 @@ begin
   Result:=(C.Row<>Nil);
 end;
 
-function TConnectionName.LoadField(cursor : TSQLCursor;
-  FieldDef : TfieldDef;buffer : pointer) : boolean;
+function tconnectionname.loadfield(const cursor: tsqlcursor; const fielddef: tfielddef;
+      const buffer: pointer; var bufsize: integer): boolean;
+           //if bufsize < 0 -> buffer was to small, should be -bufsize
 
 var
   field: PMYSQL_FIELD;
@@ -491,9 +494,17 @@ begin
   Row:=C.Row;
   
   inc(Row,c.MapDSRowToMSQLRow[FieldDef.FieldNo-1]);
-  field := mysql_fetch_field_direct(C.FRES, c.MapDSRowToMSQLRow[FieldDef.FieldNo-1]);
-
-  Result := MySQLWriteData(field^.ftype, field^.length, FieldDef.DataType, Row^, Buffer);
+  field:= mysql_fetch_field_direct(C.FRES,c.MapDSRowToMSQLRow[FieldDef.FieldNo-1]);
+  if fielddef.datatype = ftstring then begin //untested !!!!!!!!!
+   if bufsize < field^.length then begin 
+    bufsize:= -field^.length;
+    exit;
+   end
+   else begin
+    bufsize:= field^.length;
+   end;
+  end;
+  Result:= MySQLWriteData(field^.ftype,field^.length,FieldDef.DataType,Row^,Buffer);
 end;
 
 function InternalStrToFloat(S: string): Extended;
@@ -608,7 +619,8 @@ begin
   Result := Result + EncodeTime(EH, EN, ES, 0);;
 end;
 
-function TConnectionName.MySQLWriteData(AType: enum_field_types;ASize: Integer; AFieldType: TFieldType;Source, Dest: PChar): Boolean;
+function TConnectionName.MySQLWriteData(AType: enum_field_types;ASize: Integer;
+                     AFieldType: TFieldType;Source, Dest: PChar): Boolean;
 
 var
   VI: Integer;

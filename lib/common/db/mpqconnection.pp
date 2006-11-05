@@ -54,7 +54,9 @@ type
    procedure AddFieldDefs(cursor: TSQLCursor; FieldDefs : TfieldDefs); override;
    function Fetch(cursor : TSQLCursor) : boolean; override;
    procedure UnPrepareStatement(cursor : TSQLCursor); override;
-   function LoadField(cursor : TSQLCursor;FieldDef : TfieldDef;buffer : pointer) : boolean; override;
+   function loadfield(const cursor: tsqlcursor; const fielddef: tfielddef;
+              const buffer: pointer; var bufsize: integer): boolean; override;
+           //if bufsize < 0 -> buffer was to small, should be -bufsize
    function GetTransactionHandle(trans : TSQLHandle): pointer; override;
    function RollBack(trans : TSQLHandle) : boolean; override;
    function Commit(trans : TSQLHandle) : boolean; override;
@@ -570,6 +572,8 @@ begin
     ftstring: begin
      if size = -1 then begin
       size:= pqfmod(res,i)-4;
+// WARNING string length is actual bigger for multi byte encodings (utf8!) 
+// 5.11.2006 MSE
       if size = -5 then begin
        fieldtype:= ftmemo;
        size:= blobidsize;
@@ -607,8 +611,10 @@ begin
     end;
 end;
 
-function TPQConnection.LoadField(cursor: TSQLCursor;
-                                FieldDef: TfieldDef; buffer: pointer): boolean;
+function tpqconnection.loadfield(const cursor: tsqlcursor;
+      const fielddef: tfielddef;
+      const buffer: pointer; var bufsize: integer): boolean;
+           //if bufsize < 0 -> buffer was to small, should be -bufsize
 
 type TNumericRecord = record
        Digits : SmallInt;
@@ -634,6 +640,7 @@ var
  sint1: smallint;
  
 begin
+{$ifdef FPC}{$checkpointer off}{$endif}
   with TPQCursor(cursor) do
     begin
     for x := 0 to PQnfields(res)-1 do
@@ -652,24 +659,35 @@ begin
       result := true;
 
       case FieldDef.DataType of
-        ftInteger, ftSmallint, ftLargeInt,ftfloat :
-          begin
-          case i of               // postgres returns big-endian numbers
-            sizeof(int64) : pint64(buffer)^ := BEtoN(pint64(CurrBuff)^);
-            sizeof(integer) : pinteger(buffer)^ := BEtoN(pinteger(CurrBuff)^);
-            sizeof(smallint) : psmallint(buffer)^ := BEtoN(psmallint(CurrBuff)^);
-          else
-            for tel := 1 to i do
-              pchar(Buffer)[tel-1] := CurrBuff[i-tel];
-          end; {case}
+        ftInteger, ftSmallint, ftLargeInt,ftfloat: begin
+         case i of               // postgres returns big-endian numbers
+          sizeof(int64) : pint64(buffer)^ := BEtoN(pint64(CurrBuff)^);
+          sizeof(integer) : pinteger(buffer)^ := BEtoN(pinteger(CurrBuff)^);
+          sizeof(smallint) : psmallint(buffer)^ := BEtoN(psmallint(CurrBuff)^);
+          else begin
+           if i > bufsize then begin
+            bufsize:= -bufsize;
+           end
+           else begin
+            for tel:= 1 to i do begin
+             pchar(Buffer)[tel-1] := CurrBuff[i-tel];
+            end;
+           end;
           end;
-        ftString  :
-          begin
-          li := pqgetlength(res,curtuple,x);
-          Move(CurrBuff^, Buffer^, li);
-          pchar(Buffer + li)^ := #0;
-          i := pqfmod(res,x)-3;
-          end;
+         end;
+        end;
+        ftString: begin
+         li:= pqgetlength(res,curtuple,x);
+         if bufsize < li then begin
+          bufsize:= -li;
+         end
+         else begin
+          bufsize:= li;
+          Move(CurrBuff^,Buffer^,li);
+         end;
+//         pchar(Buffer + li)^ := #0;
+//         i := pqfmod(res,x)-3;
+        end;
         ftblob,ftmemo: begin
          li := pqgetlength(res,curtuple,x);
          int1:= addblobdata(currbuff,li);
@@ -727,6 +745,7 @@ begin
       end;
       end;
     end;
+{$ifdef FPC}{$checkpointer default}{$endif}
 end;
 
 procedure TPQConnection.UpdateIndexDefs(var IndexDefs : TIndexDefs;TableName : string);

@@ -620,6 +620,7 @@ type
   public
    constructor create(const aowner: tobject;
          const aprop: tindexpersistentarrayprop); override;
+   destructor destroy; override;   
   published
    property caption: msestring read fcaption write setcaption;
    property textflags: textflagsty read ftextflags write settextflags default defaultcolheadertextflags;
@@ -2426,6 +2427,12 @@ constructor tcolheader.create(const aowner: tobject;
          const aprop: tindexpersistentarrayprop);
 begin
  ftextflags:= defaultcolheadertextflags;
+ inherited;
+end;
+
+destructor tcolheader.destroy;
+begin
+ ffont.free;
  inherited;
 end;
 

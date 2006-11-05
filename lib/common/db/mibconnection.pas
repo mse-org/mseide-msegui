@@ -71,7 +71,9 @@ type
     procedure Execute(cursor: TSQLCursor;atransaction:tSQLtransaction; AParams : TParams); override;
     procedure AddFieldDefs(cursor: TSQLCursor;FieldDefs : TfieldDefs); override;
     function Fetch(cursor : TSQLCursor) : boolean; override;
-    function LoadField(cursor : TSQLCursor;FieldDef : TfieldDef;buffer : pointer) : boolean; override;
+    function loadfield(const cursor: tsqlcursor; const fielddef: tfielddef;
+      const buffer: pointer; var bufsize: integer): boolean; override;
+           //if bufsize < 0 -> buffer was to small, should be -bufsize
     function GetTransactionHandle(trans : TSQLHandle): pointer; override;
     function Commit(trans : TSQLHandle) : boolean; override;
     function RollBack(trans : TSQLHandle) : boolean; override;
@@ -678,76 +680,82 @@ begin
     end;
 end;
 
-function TIBConnection.LoadField(cursor : TSQLCursor;FieldDef : TfieldDef;buffer : pointer) : boolean;
-
+function tibconnection.loadfield(const cursor: tsqlcursor; const fielddef: tfielddef;
+      const buffer: pointer; var bufsize: integer): boolean;
+           //if bufsize < 0 -> buffer was to small, should be -bufsize
 var
-  x          : integer;
-  VarcharLen : word;
-  CurrBuff     : pchar;
-  b            : longint;
-  c            : currency;
-
+ x: integer;
+ VarcharLen: word;
+ CurrBuff: pchar;
+ b: longint;
+ c: currency;
 begin
  with TIBCursor(cursor) do begin
-    for x := 0 to SQLDA^.SQLD - 1 do
-      if SQLDA^.SQLVar[x].AliasName = FieldDef.Name then break;
-
-    if SQLDA^.SQLVar[x].AliasName <> FieldDef.Name then
-      DatabaseErrorFmt(SFieldNotFound,[FieldDef.Name],self);
-    if assigned(SQLDA^.SQLVar[x].SQLInd) and (SQLDA^.SQLVar[x].SQLInd^ = -1) then
+  for x := 0 to SQLDA^.SQLD - 1 do begin
+   if SQLDA^.SQLVar[x].AliasName = FieldDef.Name then break;
+  end;
+ //todo: optimize, use fieldno?
+  if SQLDA^.SQLVar[x].AliasName <> FieldDef.Name then begin
+   DatabaseErrorFmt(SFieldNotFound,[FieldDef.Name],self);
+  end;
+  if assigned(SQLDA^.SQLVar[x].SQLInd) and 
+                     (SQLDA^.SQLVar[x].SQLInd^ = -1) then begin
       result := false
-    else
-      begin
-
-      with SQLDA^.SQLVar[x] do
-        if ((SQLType and not 1) = SQL_VARYING) then
-          begin
-          Move(SQLData^, VarcharLen, 2);
-          CurrBuff := SQLData + 2;
-          end
-        else
-          begin
-          CurrBuff := SQLData;
-          VarCharLen := SQLDA^.SQLVar[x].SQLLen;
-          end;
-
-      Result := true;
-      case FieldDef.DataType of
-        ftBCD :
-          begin
-            c := 0;
-            Move(CurrBuff^, c, SQLDA^.SQLVar[x].SQLLen);
-            c := c*intpower(10,4+SQLDA^.SQLVar[x].SQLScale);
-            Move(c, buffer^ , sizeof(c));
-          end;
-        ftInteger :
-          begin
-            b := 0;
-            Move(b, Buffer^, sizeof(longint));
-            Move(CurrBuff^, Buffer^, SQLDA^.SQLVar[x].SQLLen);
-          end;
-        ftLargeint :
-          begin
-            FillByte(buffer^,sizeof(LargeInt),0);
-            Move(CurrBuff^, Buffer^, SQLDA^.SQLVar[x].SQLLen);
-          end;
-        ftDate, ftTime, ftDateTime:
-          GetDateTime(CurrBuff, Buffer, SQLDA^.SQLVar[x].SQLType);
-        ftString  :
-          begin
-            Move(CurrBuff^, Buffer^, SQLDA^.SQLVar[x].SQLLen);
-            PChar(Buffer + VarCharLen)^ := #0;
-          end;
-        ftFloat   :
-          GetFloat(CurrBuff, Buffer, FieldDef);
-        ftBlob,ftmemo,ftgraphic: begin  // load the BlobIb in field's buffer
-            FillByte(buffer^,sizeof(LargeInt),0);
-            Move(CurrBuff^, Buffer^, SQLDA^.SQLVar[x].SQLLen);
-         end
-
-      else result := false;
-      end;
-      end;
+  end
+  else begin
+   with SQLDA^.SQLVar[x] do begin
+    if ((SQLType and not 1) = SQL_VARYING) then begin
+     Move(SQLData^,VarcharLen,2);
+     CurrBuff:= SQLData + 2;
+    end
+    else begin
+     CurrBuff:= SQLData;
+     VarCharLen:= SQLDA^.SQLVar[x].SQLLen;
+    end;
+   end;  
+   Result := true;
+   case FieldDef.DataType of
+    ftBCD: begin
+     c:= 0;
+     Move(CurrBuff^, c, SQLDA^.SQLVar[x].SQLLen);
+     c:= c*intpower(10,4+SQLDA^.SQLVar[x].SQLScale);
+     Move(c, buffer^ , sizeof(c));
+    end;
+    ftInteger: begin
+     b:= 0;
+     Move(b, Buffer^, sizeof(longint));
+     Move(CurrBuff^, Buffer^, SQLDA^.SQLVar[x].SQLLen);
+    end;
+    ftLargeint: begin
+     FillByte(buffer^,sizeof(LargeInt),0);
+     Move(CurrBuff^, Buffer^, SQLDA^.SQLVar[x].SQLLen);
+    end;
+    ftDate,ftTime,ftDateTime: begin
+      GetDateTime(CurrBuff, Buffer, SQLDA^.SQLVar[x].SQLType);
+    end;
+    ftString: begin
+     if bufsize < varcharlen then begin
+      bufsize:= -varcharlen;
+     end
+     else begin
+      bufsize:= varcharlen;
+      move(currbuff^,buffer^,varcharlen);
+     end;
+ //    Move(CurrBuff^,Buffer^,SQLDA^.SQLVar[x].SQLLen);
+ //    PChar(Buffer + VarCharLen)^ := #0;
+    end;
+    ftFloat: begin
+     GetFloat(CurrBuff, Buffer, FieldDef);
+    end;
+    ftBlob,ftmemo,ftgraphic: begin  // load the BlobIb in field's buffer
+     FillByte(buffer^,sizeof(LargeInt),0);
+     Move(CurrBuff^, Buffer^, SQLDA^.SQLVar[x].SQLLen);
+    end;
+    else begin
+     result := false;
+    end;
+   end;
+  end;
  end;
 end;
 
