@@ -138,7 +138,6 @@ type
   protected
    procedure setismsestring(const getter: getmsestringdataty;
                                              const setter: setmsestringdataty);
-
    function HasParent: Boolean; override;
    function GetDataSize: Word; override;
    function GetAsString: string; override;

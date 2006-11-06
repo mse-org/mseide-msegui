@@ -4568,11 +4568,16 @@ begin
   activerecord:= row;
   if not afield.isnull then begin
    result:= @fstringbuffer;
-   if utf8 then begin
-    fstringbuffer:= utf8tostring(afield.asstring);
+   if afield is tmsestringfield then begin
+    fstringbuffer:= tmsestringfield(afield).asmsestring;
    end
    else begin
-    fstringbuffer:= afield.asstring;
+    if utf8 then begin
+     fstringbuffer:= utf8tostring(afield.asstring);
+    end
+    else begin
+     fstringbuffer:= afield.asstring;
+    end;
    end;
   end;
   activerecord:= int1;
@@ -4592,12 +4597,14 @@ begin
    result:= @fstringbuffer;
    if afield is tmsestringfield then begin
     fstringbuffer:= tmsestringfield(afield).asmsestring;
-   end;
-   if utf8 then begin
-    fstringbuffer:= utf8tostring(afield.displaytext);
    end
    else begin
-    fstringbuffer:= afield.displaytext;
+    if utf8 then begin
+     fstringbuffer:= utf8tostring(afield.displaytext);
+    end
+    else begin
+     fstringbuffer:= afield.displaytext;
+    end;
    end;
   end;
   activerecord:= int1;

@@ -1097,7 +1097,7 @@ begin
 end;
 
 procedure tcustomdblookupbuffer.getfields(out aintegerfields,atextfields,
-                           afloatfields: fieldarty);
+        afloatfields: fieldarty);
 var
  int1: integer;
 begin
@@ -1168,6 +1168,7 @@ var
  datas: tdataset;
  utf8: boolean;
  bo1: boolean;
+ ismsestringfield: booleanarty;
 begin
  beginupdate;
  try
@@ -1190,6 +1191,10 @@ begin
       bm:= datas.bookmark;
       try
        getfields(integerf,textf,realf);
+       setlength(ismsestringfield,length(textf));
+       for int1:= high(ismsestringfield) downto 0 do begin
+        ismsestringfield[int1]:= textf[int1] is tmsestringfield;
+       end;
        datas.first;
        int3:= 0;
        int1:= 0;
@@ -1223,11 +1228,16 @@ begin
         end;
         for int4:= 0 to high(textf) do begin
          if textf[int4] <> nil then begin
-          if utf8 then begin
-           ftextdata[int4].data[int1]:= utf8tostring(textf[int4].asstring);
+          if ismsestringfield[int4] then begin
+           ftextdata[int4].data[int1]:= tmsestringfield(textf[int4]).asmsestring;
           end
           else begin
-           ftextdata[int4].data[int1]:= textf[int4].asstring;
+           if utf8 then begin
+            ftextdata[int4].data[int1]:= utf8tostring(textf[int4].asstring);
+           end
+           else begin
+            ftextdata[int4].data[int1]:= textf[int4].asstring;
+           end;
           end;
          end;
         end;

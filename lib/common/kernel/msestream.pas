@@ -215,10 +215,10 @@ type
   private
    fdata: string;
   protected
-   function write(const Buffer; Count: Longint): Longint; override;
   public
    constructor create(const adata: string);
    destructor destroy; override;
+   function write(const Buffer; Count: Longint): Longint; override;
  end;
  
 function getnextbufferline(var data: pchar; len: integer): string;
