@@ -241,6 +241,10 @@ type
    property framei_right;
    property framei_bottom;
    property caption;
+   property captionpos;
+   property captiondist;
+   property captiondistouter;
+   property captionoffset;
    property font;
    property localprops; //before template
    property template;
