@@ -26,7 +26,7 @@ uses
 const
  defaultpacketrecords = 10;
  integerindexfields = [ftsmallint,ftinteger,ftword,ftlargeint,ftboolean];
- floatindexfields = [ftfloat];
+ floatindexfields = [ftfloat,ftdatetime,ftdate,fttime];
  currencyindexfields = [ftcurrency,ftbcd];
  stringindexfields = [ftstring,ftfixedchar];
  indexfieldtypes =  integerindexfields+floatindexfields+currencyindexfields+

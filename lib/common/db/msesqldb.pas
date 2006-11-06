@@ -121,7 +121,7 @@ type
    procedure applyupdates(const maxerrors: integer;
                      const cancelonerror: boolean); override; overload;
    procedure applyupdates(const maxerrors: integer = 0); override; overload;
-   procedure applyupdate; overload;
+   procedure applyupdate; override; overload;
    procedure cancel; override;
    function moveby(const distance: integer): integer;
   published
