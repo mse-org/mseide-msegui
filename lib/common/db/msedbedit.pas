@@ -4826,7 +4826,12 @@ begin
   end;
   if (activerecord < rowcount) and 
                  not (csdestroying in componentstate) then begin
-   row:= activerecord;
+   inc(fnocheckvalue);
+   try
+    row:= activerecord;
+   finally
+    dec(fnocheckvalue);
+   end;
   end;
  end;
 end;
