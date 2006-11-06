@@ -330,7 +330,7 @@ begin
    ds:= nil;
   end;
   if ds <> nil then begin
-   if ds.active or not ds.defaultfields then begin
+   if ds.active or (ds.fields.count > 0) then begin
     for int1:= 0 to ds.fields.count -1 do begin
      with ds.fields[int1] do begin
       if (ft = []) or (datatype = ftunknown) or (datatype in ft) then begin
