@@ -398,7 +398,7 @@ type
    
 implementation
 uses
- dbconst,msedatalist,sysutils,msedb;
+ dbconst,msedatalist,sysutils,msedb,mseformatstr;
 type
  tmsestringfield1 = class(tmsestringfield);
  
@@ -1913,8 +1913,8 @@ procedure tmsebufdataset.checkindexsize;
 var
  int1,int2: integer;
 begin
- if high(factindexpo^.ind) <= fbrecordcount - 1 then begin
-  int2:= (high(factindexpo^.ind)+17)*2;
+ if high(factindexpo^.ind) <= fbrecordcount then begin
+  int2:= (fbrecordcount+16)*2;
   setlength(findexes[0].ind,int2);
   if bs_indexvalid in fbstate then begin
    for int1:= 1 to high(findexes) do begin
@@ -2032,7 +2032,7 @@ end;
 
 procedure tmsebufdataset.checkindex;
 var
- int1,int2: integer;
+ int1,int2,int3: integer;
 begin
  if (factindex <> 0) and not (bs_indexvalid in fbstate) then begin
   int2:= length(findexes[0].ind);
