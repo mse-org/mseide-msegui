@@ -364,7 +364,7 @@ begin
    ds:= nil;
   end;
   if ds <> nil then begin
-   if ds.active or not ds.defaultfields then begin
+   if ds.active or (ds.fields.count > 0) then begin
     for int1:= 0 to ds.fields.count -1 do begin
      with ds.fields[int1] do begin
       if (ft = []) or (datatype = ftunknown) or (datatype in ft) then begin
@@ -803,7 +803,7 @@ begin
  if high(fprops) = 0 then begin
   with tmsebufdataset(fcomponent) do begin
    result:= nil;
-   if active or not defaultfields then begin
+   if active or (fields.count > 0) then begin
     for int1:= 0 to fields.count -1 do begin
      with fields[int1] do begin
       if (datatype in indexfieldtypes) and (fieldkind = fkdata) then begin
