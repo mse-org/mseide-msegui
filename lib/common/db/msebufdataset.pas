@@ -756,7 +756,8 @@ begin
  deleteitem(ablobs,typeinfo(blobinfoarty),aindex); 
 end;
 
-procedure tmsebufdataset.deleteblob(var ablobs: blobinfoarty; const afield: tfield);
+procedure tmsebufdataset.deleteblob(var ablobs: blobinfoarty; 
+                                              const afield: tfield);
 var
  int1: integer;
 begin
