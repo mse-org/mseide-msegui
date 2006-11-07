@@ -68,7 +68,7 @@ const
   '&Arriba',                    //sc_Up                 //
   'N&uevo dir.',                //sc_New_dir            // hotkeys
   'N&ombre',                    //sc_Name               //
-  '&Mostrar arch. ocultos',     //sc_Show_hidden_files  //
+  '&Mostrar archivos ocultos',  //sc_Show_hidden_files  //
   '&Filtrar',                   //sc_Filter            ///   
   'Guardar',                    //sc_save 
   'Abrir',                      //sc_open
