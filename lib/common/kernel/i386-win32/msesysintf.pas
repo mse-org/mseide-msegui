@@ -813,6 +813,11 @@ begin
  end;
 end;
 
+function sys_getlangname: string;
+begin
+ result:= '';
+end;
+
 function filetimetotime(const wtime: tfiletime): tdatetime;
 begin
  with wtime do begin

@@ -87,6 +87,7 @@ function sys_readdirstream(var stream: dirstreamty; var info: fileinfoty): boole
 procedure sys_usleep(const us: cardinal);
 
 function sys_localtimeoffset: tdatetime;
+function sys_getlangname: string;
 //function sys_getlastsyserror: integer;
 function sys_getprintcommand: string;
 

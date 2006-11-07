@@ -1145,6 +1145,21 @@ begin
  result:= tm.__tm_gmtoff / (24.0*60.0*60.0);
 end;
 
+function sys_getlangname: string;
+var
+ po1: pchar;
+ ar1: stringarty;
+begin
+ po1:= setlocale(lc_messages,nil);
+ ar1:= splitstring(string(po1),'_');
+ if high(ar1) >= 0 then begin
+  result:= ar1[0];
+ end
+ else begin
+  result:= string(po1);
+ end;
+end;
+
 procedure sigtest(SigNum: Integer); cdecl;
 begin
 end;

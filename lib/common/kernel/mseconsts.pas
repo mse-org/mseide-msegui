@@ -28,7 +28,7 @@ const
  function stockcaptions(const index: stockcaptionsty): widestring;
  function uc(const index: integer): msestring; //get user caption
 
- procedure registeruserlangconsts(const name: string;
+ procedure registeruserlangconsts(name: string;
                                       const caption: array of msestring);
  procedure registerlangconsts(const name: string; const stockcaption: stockcaptionty;
             const modalresulttext: defaultmodalresulttextty;
@@ -38,7 +38,7 @@ const
 
 implementation
 uses
- sysutils;
+ sysutils,msesysintf;
  
 type
  langinfoty = record
@@ -155,7 +155,7 @@ begin
  setitem(langs[high(langs)]);
 end;
 
-procedure registeruserlangconsts(const name: string; 
+procedure registeruserlangconsts(name: string; 
                                       const caption: array of msestring);
  procedure setitem(var item: userlanginfoty);
  var
@@ -171,6 +171,7 @@ procedure registeruserlangconsts(const name: string;
 var
  int1: integer;
 begin
+ name:= lowercase(name);
  for int1:= 0 to high(userlangs) do begin
   if userlangs[int1].name = name then begin
    setitem(userlangs[int1]);
@@ -205,27 +206,41 @@ end;
 function setlangconsts(const name: string): boolean;
 var
  int1: integer;
+ bo1: boolean;
+ str1: string;
 begin
- setuserlangconsts(name);
- result:= true;
- if name = '' then begin //todo: check system lang
-  with lang do begin
-   name:= langnames[la_en];
-   stockcaption:= @en_stockcaption;
-   modalresulttext:= @en_modalresulttext;  
-   modalresulttextnoshortcut:= @en_modalresulttextnoshortcut;
-  end
+ if name = '' then begin
+  str1:= lowercase(sys_getlangname);
+  if str1 = '' then begin
+   str1:= langnames[la_en];
+  end;
  end
- else begin
-  if lang.name <> name then begin
-   for int1:= 0 to high(langs) do begin
-    if langs[int1].name = name then begin
-     lang:= langs[int1];
-     application.langchanged;
-     exit;
+ else begin  
+  str1:= lowercase(name);
+ end;
+ setuserlangconsts(str1);
+ result:= false;
+ bo1:= lang.name = '';
+ if lang.name <> str1 then begin
+  for int1:= 0 to high(langs) do begin
+   if langs[int1].name = str1 then begin
+    lang:= langs[int1];
+    result:= true;
+    break;
+   end;
+  end;
+  if bo1 then begin
+   if lang.name = '' then begin
+    with lang do begin
+     name:= langnames[la_en];
+     stockcaption:= @en_stockcaption;
+     modalresulttext:= @en_modalresulttext;  
+     modalresulttextnoshortcut:= @en_modalresulttextnoshortcut;
     end;
    end;
-   result:= false;
+  end
+  else begin
+   application.langchanged;
   end;
  end;
 end;
@@ -266,4 +281,7 @@ begin
  result:= lang.stockcaption^[index];
 end;
 
+initialization
+ registerlangconsts(langnames[la_en],en_stockcaption,en_modalresulttext,
+                               en_modalresulttextnoshortcut);
 end.
