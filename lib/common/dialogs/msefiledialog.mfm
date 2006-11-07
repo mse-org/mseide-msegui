@@ -1,8 +1,8 @@
 object filedialogfo: Tfiledialogfo
   optionswidget = [ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_destroywidgets, ow_hinton]
-  bounds_x = 241
-  bounds_y = 20
-  bounds_cx = 580
+  bounds_x = 115
+  bounds_y = 237
+  bounds_cx = 588
   bounds_cy = 307
   bounds_cxmin = 360
   bounds_cymin = 150
@@ -10,7 +10,7 @@ object filedialogfo: Tfiledialogfo
   container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_mousetransparent, ow_destroywidgets, ow_autoscale]
   container.bounds_x = 0
   container.bounds_y = 0
-  container.bounds_cx = 580
+  container.bounds_cx = 588
   container.bounds_cy = 307
   container.frame.dummy = 0
   container.onchildscaled = foonchildscaled
@@ -26,7 +26,7 @@ object filedialogfo: Tfiledialogfo
     optionswidget = [ow_mousefocus, ow_arrowfocus, ow_focusbackonesc, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
     bounds_x = 0
     bounds_y = 26
-    bounds_cx = 580
+    bounds_cx = 588
     bounds_cy = 226
     frame.dummy = 0
     anchors = [an_top, an_bottom]
@@ -49,9 +49,9 @@ object filedialogfo: Tfiledialogfo
   end
   object ok: tbutton
     optionswidget = [ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
-    bounds_x = 439
+    bounds_x = 407
     bounds_y = 283
-    bounds_cx = 67
+    bounds_cx = 86
     bounds_cy = 22
     anchors = [an_right, an_bottom]
     taborder = 3
@@ -62,9 +62,9 @@ object filedialogfo: Tfiledialogfo
   end
   object cancel: tbutton
     optionswidget = [ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
-    bounds_x = 512
+    bounds_x = 500
     bounds_y = 283
-    bounds_cx = 66
+    bounds_cx = 86
     bounds_cy = 22
     anchors = [an_right, an_bottom]
     taborder = 4
@@ -75,9 +75,9 @@ object filedialogfo: Tfiledialogfo
   end
   object createdir: tbutton
     optionswidget = [ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
-    bounds_x = 511
+    bounds_x = 499
     bounds_y = 3
-    bounds_cx = 66
+    bounds_cx = 86
     bounds_cy = 22
     anchors = [an_top, an_right]
     taborder = 7
@@ -88,9 +88,9 @@ object filedialogfo: Tfiledialogfo
   end
   object up: tbutton
     optionswidget = [ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
-    bounds_x = 439
+    bounds_x = 407
     bounds_y = 3
-    bounds_cx = 66
+    bounds_cx = 86
     bounds_cy = 22
     anchors = [an_top, an_right]
     taborder = 6
@@ -103,7 +103,7 @@ object filedialogfo: Tfiledialogfo
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
     bounds_x = 1
     bounds_y = 257
-    bounds_cx = 408
+    bounds_cx = 368
     bounds_cy = 22
     frame.caption = '&Name'
     frame.captionpos = cp_right
@@ -130,7 +130,7 @@ object filedialogfo: Tfiledialogfo
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
     bounds_x = 1
     bounds_y = 282
-    bounds_cx = 403
+    bounds_cx = 363
     bounds_cy = 22
     frame.caption = '&Filter'
     frame.captionpos = cp_right
@@ -160,7 +160,7 @@ object filedialogfo: Tfiledialogfo
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
     bounds_x = 1
     bounds_y = 2
-    bounds_cx = 391
+    bounds_cx = 351
     bounds_cy = 22
     frame.caption = '&Dir'
     frame.captionpos = cp_right
@@ -181,7 +181,7 @@ object filedialogfo: Tfiledialogfo
     reffontheight = 16
   end
   object showhidden: tbooleanedit
-    bounds_x = 440
+    bounds_x = 408
     bounds_y = 259
     bounds_cx = 123
     bounds_cy = 18
