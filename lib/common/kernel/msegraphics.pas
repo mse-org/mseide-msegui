@@ -1331,7 +1331,7 @@ begin
  if integer(font) < 0 then begin
   exit;
  end;
- if font <= cardinal(high(fonts)) then begin
+ if integer(font) <= high(fonts) then begin
   with fonts[font] do begin
    if refcount > 0 then begin
     dec(refcount);
