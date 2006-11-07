@@ -19,9 +19,9 @@ type
  pstockcaptionty = ^stockcaptionty;
  defaultmodalresulttextty = array[modalresultty] of msestring;
  pdefaultmodalresulttextty = ^defaultmodalresulttextty;
- langty = (la_none,la_en,la_de,la_ru);
+ langty = (la_none,la_en,la_de,la_ru,la_es);
 const
- langnames: array[langty] of string = ('','en','de','ru');
+ langnames: array[langty] of string = ('','en','de','ru','es');
 
  function modalresulttext(const index: modalresultty): msestring;
  function modalresulttextnoshortcut(const index: modalresultty): msestring;
