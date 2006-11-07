@@ -836,6 +836,91 @@ type
   lang: word; name: string;
  end;
 const
+{$ifndef FPC}
+     LANG_AFRIKAANS  = $36;
+     LANG_ALBANIAN   = $1c;
+     LANG_ARABIC     = $01;
+     LANG_ARMENIAN   = $2b;
+     LANG_ASSAMESE   = $4d;
+     LANG_AZERI      = $2c;
+     LANG_BASQUE     = $2d;
+     LANG_BELARUSIAN = $23;
+     LANG_BENGALI    = $45;
+     LANG_BULGARIAN  = $02;
+     LANG_CATALAN    = $03;
+     LANG_CHINESE    = $04;
+     LANG_CROATIAN   = $1a;
+     LANG_CZECH      = $05;
+     LANG_DANISH     = $06;
+     LANG_DIVEHI     = $65;
+     LANG_DUTCH      = $13;
+     LANG_ENGLISH    = $09;
+     LANG_ESTONIAN   = $25;
+     LANG_FAEROESE   = $38;
+     LANG_FARSI      = $29;
+     LANG_FINNISH    = $0b;
+     LANG_FRENCH     = $0c;
+     LANG_GALICIAN   = $56;
+     LANG_GEORGIAN   = $37;
+     LANG_GERMAN     = $07;
+     LANG_GREEK      = $08;
+     LANG_GUJARATI   = $47;
+     LANG_HEBREW     = $0d;
+     LANG_HINDI      = $39;
+     LANG_HUNGARIAN  = $0e;
+     LANG_ICELANDIC  = $0f;
+     LANG_INDONESIAN = $21;
+     LANG_ITALIAN    = $10;
+     LANG_JAPANESE   = $11;
+     LANG_KANNADA    = $4b;
+     LANG_KASHMIRI   = $60;
+     LANG_KAZAK      = $3f;
+     LANG_KONKANI    = $57;
+     LANG_KOREAN     = $12;
+     LANG_KYRGYZ     = $40;
+     LANG_LATVIAN    = $26;
+     LANG_LITHUANIAN = $27;
+     LANG_MACEDONIAN = $2f;
+     LANG_MALAY      = $3e;
+     LANG_MALAYALAM  = $4c;
+     LANG_MANIPURI   = $58;
+     LANG_MARATHI    = $4e;
+     LANG_MONGOLIAN  = $50;
+     LANG_NEPALI     = $61;
+     LANG_NORWEGIAN  = $14;
+     LANG_ORIYA      = $48;
+     LANG_POLISH     = $15;
+     LANG_PORTUGUESE = $16;
+     LANG_PUNJABI    = $46;
+     LANG_ROMANIAN   = $18;
+     LANG_RUSSIAN    = $19;
+     LANG_SANSKRIT   = $4f;
+     LANG_SERBIAN    = $1a;
+     LANG_SINDHI     = $59;
+     LANG_SLOVAK     = $1b;
+     LANG_SLOVENIAN  = $24;
+     LANG_SPANISH    = $0a;
+     LANG_SWAHILI    = $41;
+     LANG_SWEDISH    = $1d;
+     LANG_SYRIAC     = $5a;
+     LANG_TAMIL      = $49;
+     LANG_TATAR      = $44;
+     LANG_TELUGU     = $4a;
+     LANG_THAI       = $1e;
+     LANG_TURKISH    = $1f;
+     LANG_UKRAINIAN  = $22;
+     LANG_URDU       = $20;
+     LANG_UZBEK      = $43;
+     LANG_VIETNAMESE = $2a;
+
+function PRIMARYLANGID(LangId: WORD): WORD;
+begin
+  PRIMARYLANGID := LangId and $3FF;
+end;
+
+const
+{$endif}
+
  langs: array[langty] of langinfoty = (
      (lang: LANG_AFRIKAANS;  name: 'af'),
      (lang: LANG_ALBANIAN;   name: 'sq'),
