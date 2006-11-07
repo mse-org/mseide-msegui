@@ -2124,10 +2124,11 @@ begin
  end;
  clearbuffer;
  with source do begin
-  int1:= fcount*fsize;
   self.fsize:= fsize;
-  self.count:= count;
-  move(fdatapo^,self.fdatapo^,int1);
+  if fcount > 0 then begin
+   self.count:= fcount;
+   move(datapo^,self.fdatapo^,fcount*fsize);
+  end;
  end;
  change(-1);
 end;

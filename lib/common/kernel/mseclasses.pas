@@ -90,8 +90,8 @@ type
  end;
  plinkinfoty = ^linkinfoty;
 
- linkinfaty = array[0..0] of linkinfoty;
- plinkinfaty = ^linkinfaty;
+ linkinfoaty = array[0..0] of linkinfoty;
+ plinkinfoaty = ^linkinfoaty;
 
  plinkedobject = ^tlinkedobject;
  tmsecomponent = class;
@@ -1594,7 +1594,7 @@ begin
   try
    int1:= 0;
    while int1 < count do begin
-    with plinkinfaty(fdata)^[int1] do begin
+    with plinkinfoaty(fdata)^[int1] do begin
      if dest <> nil then begin
       iobjectlink(dest).objevent(iobjectlink(fownerintf),event);
      end;
@@ -1809,13 +1809,17 @@ var
  po1: plinkinfoty;
  int1: integer;
 begin
- po1:= plinkinfoty(fdata);
- for int1:= 0 to fcount - 1 do begin
-  if (po1^.dest <> nil) and (po1^.source = nil) and 
-                            (ainterfacetype = po1^.interfacetype) then begin
-   proc(po1^);
+ inc(fnopack);
+ try
+  for int1:= 0 to fcount - 1 do begin
+   po1:= @plinkinfoaty(fdata)^[int1];
+   if (po1^.dest <> nil) and (po1^.source = nil) and 
+                             (ainterfacetype = po1^.interfacetype) then begin
+    proc(po1^);
+   end;
   end;
-  inc(po1);
+ finally
+  dec(fnopack);
  end;
 end;
 
