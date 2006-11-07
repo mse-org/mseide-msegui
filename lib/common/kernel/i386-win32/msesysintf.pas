@@ -814,8 +814,116 @@ begin
 end;
 
 function sys_getlangname: string;
+type
+ langty = 
+ (L_AFRIKAANS,L_ALBANIAN,L_ARABIC,L_ARMENIAN,L_ASSAMESE,
+  L_AZERI,L_BASQUE,L_BELARUSIAN,L_BENGALI,L_BULGARIAN,
+  L_CATALAN,L_CHINESE,L_CROATIAN,L_CZECH,L_DANISH,
+  L_DIVEHI,L_DUTCH,L_ENGLISH,L_ESTONIAN,L_FAEROESE,
+  L_FARSI,L_FINNISH,L_FRENCH,L_GALICIAN,L_GEORGIAN,
+  L_GERMAN,L_GREEK,L_GUJARATI,L_HEBREW,L_HINDI,
+  L_HUNGARIAN,L_ICELANDIC,L_INDONESIAN,L_ITALIAN,
+  L_JAPANESE,L_KANNADA,L_KASHMIRI,L_KAZAK,L_KONKANI,
+  L_KOREAN,L_KYRGYZ,L_LATVIAN,L_LITHUANIAN,L_MACEDONIAN,
+  L_MALAY,L_MALAYALAM,L_MANIPURI,L_MARATHI,L_MONGOLIAN,
+  L_NEPALI,L_NORWEGIAN,L_ORIYA,L_POLISH,L_PORTUGUESE,
+  L_PUNJABI,L_ROMANIAN,L_RUSSIAN,L_SANSKRIT,L_SERBIAN,
+  L_SINDHI,L_SLOVAK,L_SLOVENIAN,L_SPANISH,L_SWAHILI,
+  L_SWEDISH,L_SYRIAC,L_TAMIL,L_TATAR,L_TELUGU,L_THAI,
+  L_TURKISH,L_UKRAINIAN,L_URDU,L_UZBEK,L_VIETNAMESE);
+  
+ langinfoty = record
+  lang: word; name: string;
+ end;
+const
+ langs: array[langty] of langinfoty = (
+     (lang: LANG_AFRIKAANS;  name: 'af'),
+     (lang: LANG_ALBANIAN;   name: 'sq'),
+     (lang: LANG_ARABIC;     name: 'ar'),
+     (lang: LANG_ARMENIAN;   name: 'hy'),
+     (lang: LANG_ASSAMESE;   name: 'as'),
+     (lang: LANG_AZERI;      name: 'az'),
+     (lang: LANG_BASQUE;     name: 'eu'),
+     (lang: LANG_BELARUSIAN; name: 'be'),
+     (lang: LANG_BENGALI;    name: 'bn'),
+     (lang: LANG_BULGARIAN;  name: 'bg'),
+     (lang: LANG_CATALAN;    name: 'ca'),
+     (lang: LANG_CHINESE;    name: 'zh'),
+     (lang: LANG_CROATIAN;   name: 'hr'),
+     (lang: LANG_CZECH;      name: 'cs'),
+     (lang: LANG_DANISH;     name: 'da'),
+     (lang: LANG_DIVEHI;     name: 'dv'),
+     (lang: LANG_DUTCH;      name: 'nl'),
+     (lang: LANG_ENGLISH;    name: 'en'),
+     (lang: LANG_ESTONIAN;   name: 'et'),
+     (lang: LANG_FAEROESE;   name: 'fo'),
+     (lang: LANG_FARSI;      name: 'fa'),
+     (lang: LANG_FINNISH;    name: 'fi'),
+     (lang: LANG_FRENCH;     name: 'fr'),
+     (lang: LANG_GALICIAN;   name: 'gl'),
+     (lang: LANG_GEORGIAN;   name: 'ka'),
+     (lang: LANG_GERMAN;     name: 'de'),
+     (lang: LANG_GREEK;      name: 'el'),
+     (lang: LANG_GUJARATI;   name: 'gu'),
+     (lang: LANG_HEBREW;     name: 'he'),
+     (lang: LANG_HINDI;      name: 'hi'),
+     (lang: LANG_HUNGARIAN;  name: 'hu'),
+     (lang: LANG_ICELANDIC;  name: 'is'),
+     (lang: LANG_INDONESIAN; name: 'id'),
+     (lang: LANG_ITALIAN;    name: 'it'),
+     (lang: LANG_JAPANESE;   name: 'ja'),
+     (lang: LANG_KANNADA;    name: 'kn'),
+     (lang: LANG_KASHMIRI;   name: '??'),
+     (lang: LANG_KAZAK;      name: 'kk'),
+     (lang: LANG_KONKANI;    name: 'kok'),
+     (lang: LANG_KOREAN;     name: 'ko'),
+     (lang: LANG_KYRGYZ;     name: 'ky'),
+     (lang: LANG_LATVIAN;    name: 'lv'),
+     (lang: LANG_LITHUANIAN; name: 'lt'),
+     (lang: LANG_MACEDONIAN; name: 'mk'),
+     (lang: LANG_MALAY;      name: 'ms'),
+     (lang: LANG_MALAYALAM;  name: 'ml'),
+     (lang: LANG_MANIPURI;   name: '??'),
+     (lang: LANG_MARATHI;    name: 'mr'),
+     (lang: LANG_MONGOLIAN;  name: 'mn'),
+     (lang: LANG_NEPALI;     name: 'ne'),
+     (lang: LANG_NORWEGIAN;  name: 'no'),
+     (lang: LANG_ORIYA;      name: 'or'),
+     (lang: LANG_POLISH;     name: 'pl'),
+     (lang: LANG_PORTUGUESE; name: 'pt'),
+     (lang: LANG_PUNJABI;    name: 'pa'),
+     (lang: LANG_ROMANIAN;   name: 'ro'),
+     (lang: LANG_RUSSIAN;    name: 'ru'),
+     (lang: LANG_SANSKRIT;   name: 'sa'),
+     (lang: LANG_SERBIAN;    name: 'sr'),
+     (lang: LANG_SINDHI;     name: '??'),
+     (lang: LANG_SLOVAK;     name: 'sk'),
+     (lang: LANG_SLOVENIAN;  name: 'sl'),
+     (lang: LANG_SPANISH;    name: 'es'),
+     (lang: LANG_SWAHILI;    name: 'sw'),
+     (lang: LANG_SWEDISH;    name: 'sv'),
+     (lang: LANG_SYRIAC;     name: 'syr'),
+     (lang: LANG_TAMIL;      name: 'ta'),
+     (lang: LANG_TATAR;      name: 'tt'),
+     (lang: LANG_TELUGU;     name: 'te'),
+     (lang: LANG_THAI;       name: 'th'),
+     (lang: LANG_TURKISH;    name: 'tr'),
+     (lang: LANG_UKRAINIAN;  name: 'uk'),
+     (lang: LANG_URDU;       name: 'ur'),
+     (lang: LANG_UZBEK;      name: 'uz'),
+     (lang: LANG_VIETNAMESE; name: 'vi'));
+var
+ id: word;
+ l1: langty;
 begin
  result:= '';
+ id:= primarylangid(getuserdefaultlangid);
+ for l1:= low(langty) to high(langty) do begin
+  if langs[l1].lang = id then begin
+   result:= langs[l1].name;
+   break;
+  end;
+ end;
 end;
 
 function filetimetotime(const wtime: tfiletime): tdatetime;
