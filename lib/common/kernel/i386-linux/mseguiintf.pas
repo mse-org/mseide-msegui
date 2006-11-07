@@ -2328,22 +2328,21 @@ var
  ax,ay: integer;
  width,height,border: cardinal;
  ca1: cardinal;
-
-
 begin
  result:= getrootpath(id,rootpath);
  if result then begin
   result:= false;
   offset:= nullpoint;
-  for int1:= 0 to length(rootpath) - 3 do begin
-   if xgetgeometry(appdisp,rootpath[int1],@ca1,@ax,@ay,@width,@height,@border,@ca1) = 0 then begin
+  for int1:= 1 to high(rootpath) - 1 do begin
+   if xgetgeometry(appdisp,rootpath[int1],@ca1,@ax,@ay,@width,
+                                         @height,@border,@ca1) = 0 then begin
     exit;
    end;
    with offset do begin
     inc(x,ax);
-    inc(x,border);
+//    inc(x,border);
     inc(y,ay);
-    inc(y,border);
+//    inc(y,border);
    end;
   end;
  end;
@@ -2488,13 +2487,15 @@ end;
 function gui_getwindowrect(id: winidty; out rect: rectty): guierrorty;
 var
  int1: integer;
+ po1: pointty;
 begin
+ result:= gue_error;
  with rect do begin
-  if xgetgeometry(appdisp,id,@int1,@x,@y,@cx,@cy,@int1,@int1) = 0 then begin
-   result:= gue_error;
-  end
-  else begin
-   result:= gue_ok;
+  if xgetgeometry(appdisp,id,@int1,@x,@y,@cx,@cy,@int1,@int1) <> 0 then begin
+   if getrootoffset(id,po1) then begin
+    addpoint1(rect.pos,po1);
+    result:= gue_ok;
+   end;
   end;
  end;
 end;
@@ -4436,6 +4437,7 @@ var
  atomar: array[0..4] of atom;
  textprop: xtextproperty;
  bo1: boolean;
+ rect1: rectty;
   
 begin
  while true do begin
@@ -4728,11 +4730,10 @@ begin
     w:= xwindow;
     while longint(xchecktypedwindowevent(appdisp,w,configurenotify,@xev))
                   <> 0 do begin end;
-//    if not getrootoffset(w,po1) then begin
-//     exit;
-//    end;
-//    result:= twindowrectevent.create(et_configure,xwindow,rect(x+po1.x,y+po1.y,width,height));
-    result:= twindowrectevent.create(ek_configure,xwindow,makerect(x,y,width,height));
+     //gnome returns a different pos on window resizing than on window moving!
+    gui_getwindowrect(w,rect1);
+    result:= twindowrectevent.create(ek_configure,xwindow,rect1);
+//    result:= twindowrectevent.create(ek_configure,xwindow,makerect(x,y,width,height));
    end;
   end;
   destroynotify: begin
