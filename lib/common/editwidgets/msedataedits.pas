@@ -520,7 +520,6 @@ type
  
  tcustomenuedit = class(tcustomdropdownlistedit)
   private
-   fvaluedefault: integer;
    fbitcount: integer;
    fbase: numbasety;
    fmin,fmax: integer;
@@ -534,6 +533,7 @@ type
   protected
    fonsetvalue1: setintegereventty;
    fvalue1: integer;
+   fvaluedefault: integer;
    fisdb: boolean;
    procedure setvalue(const avalue: integer);
    function createdatalist(const sender: twidgetcol): tdatalist; override;

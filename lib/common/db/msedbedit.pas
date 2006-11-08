@@ -3627,7 +3627,7 @@ end;
 procedure tcustomdbenumedit.fieldtovalue;
 begin
  if fdatalink.field.isnull then begin
-  value:= -1;
+  value:= fvaluedefault;
  end
  else begin
   value:= fdatalink.field.asinteger;
@@ -3638,10 +3638,15 @@ function tcustomdbenumedit.getrowdatapo(const info: cellinfoty): pointer;
 begin
  with info do begin
   if griddatalink <> nil then begin
-   result:= tgriddatalink(griddatalink).getintegerbuffer(fdatalink.field,cell.row);
+   result:= tgriddatalink(griddatalink).
+                    getintegerbuffer(fdatalink.field,cell.row);
+   if result = nil then begin
+    result:= @fvaluedefault;
+   end;
   end
   else begin
-   result:= nil;
+   result:= @fvaluedefault;
+//   result:= nil;
   end;
  end;
 end;
