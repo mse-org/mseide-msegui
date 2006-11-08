@@ -1220,6 +1220,9 @@ type
 
    procedure capturemouse;
    procedure releasemouse;
+   procedure postkeyevent(const akey: keyty; 
+        const ashiftstate: shiftstatesty = []; const release: boolean = false;
+                  const achars: msestring = '');
 
    function winid: winidty;
    function state: windowstatesty;
@@ -8927,6 +8930,14 @@ end;
 function twindow.updaterect: rectty;
 begin
  result:= fcanvas.regionclipbox(fupdateregion);
+end;
+
+procedure twindow.postkeyevent(const akey: keyty; 
+       const ashiftstate: shiftstatesty = []; const release: boolean = false;
+       const achars: msestring = '');
+begin
+ application.postevent(tkeyevent.create(winid,release,akey,akey,
+             ashiftstate,achars));
 end;
 
 { tonterminatedlist }

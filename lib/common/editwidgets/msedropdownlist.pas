@@ -15,7 +15,8 @@ interface
 uses
  mseclasses,mseedit,mseevent,mseguiglob,msegrids,msedatalist,msegui,
  mseinplaceedit,msearrayprops,classes,msegraphics,msedrawtext,msegraphutils,
- msetimer,mseforms,msetypes,msestrings,msestockobjects,msescrollbar;
+ msetimer,mseforms,msetypes,msestrings,msestockobjects,msescrollbar,
+ msekeyboard;
 
 const
  defaultdropdowncoloptions = [co_fill,co_readonly,co_focusselect,co_mousemovefocus,co_rowselect];
@@ -83,8 +84,8 @@ type
   function edited: boolean;
   procedure dobeforedropdown;
   procedure doafterclosedropdown;
-  function setdropdowntext(const avalue: msestring; 
-                 const docheckvalue: boolean; const canceled: boolean): boolean; //true if accepted
+  function setdropdowntext(const avalue: msestring; const docheckvalue: boolean;
+           const canceled: boolean; const akey: keyty): boolean; //true if accepted
   procedure buttonaction(var action: buttonactionty; const buttonindex: integer);
  end;
 
@@ -106,7 +107,7 @@ type
  idropdownlistcontroller = interface(idropdowncontroller)
   procedure dropdownactivated;
   procedure dropdowndeactivated;
-  procedure itemselected(const index: integer);
+  procedure itemselected(const index: integer; const akey: keyty);
   procedure dropdownkeydown(var info: keyeventinfoty);
  end;
 
@@ -157,7 +158,7 @@ type
    procedure killrepeater;
    procedure startrepeater(up: boolean);
    procedure setfiltertext(const Value: msestring); virtual;
-   procedure itemselected(const index: integer);
+   procedure itemselected(const index: integer; const akey: keyty);
   protected
    fcontroller: tcustomdropdownlistcontroller;
    procedure updatewindowinfo(var info: windowinfoty); override;
@@ -225,6 +226,7 @@ type
  tcustomdropdowncontroller = class(teventpersistent,ibutton,ievent,idropdowncontroller)
   private
    fdataselected: boolean;
+   fselectkey: keyty;
   protected
    fintf: idropdown;
    foptions: dropdowneditoptionsty;
@@ -240,9 +242,9 @@ type
    procedure doafterclosedropdown; virtual;
    procedure internaldropdown; virtual;
    procedure setdropdowntext(const avalue: msestring; const docheckvalue: boolean;
-                                const canceled: boolean);
+                                const canceled: boolean; const akey: keyty);
    function candropdown: boolean; virtual;
-   procedure selectnone; virtual;
+   procedure selectnone(const akey: keyty); virtual;
    //ibutton
    procedure buttonaction(var action: buttonactionty; const buttonindex: integer);
   public
@@ -309,10 +311,10 @@ type
    function getdropdownwidget: twidget; override;
    procedure itemchanged(sender: tdatalist; index: integer);
    function getdropdowncolsclass: dropdowncolsclassty; virtual;
-   procedure selectnone; override;
+   procedure selectnone(const akey: keyty); override;
    
    //idropdownlist
-   procedure itemselected(const index: integer); virtual;
+   procedure itemselected(const index: integer; const akey: keyty); virtual;
              //-2 -> no selection, -1 -> cancel
    procedure dropdownkeydown(var info: keyeventinfoty);
 
@@ -365,7 +367,7 @@ type
 
 implementation
 uses
- sysutils,msekeyboard,msewidgets,mseeditglob,mseguiintf;
+ sysutils,msewidgets,mseeditglob,mseguiintf;
 
 type
  twidget1 = class(twidget);
@@ -647,10 +649,10 @@ begin
  end;
 end;
 
-procedure tcustomdropdowncontroller.selectnone;
+procedure tcustomdropdowncontroller.selectnone(const akey: keyty);
 begin
  fdataselected:= true;
- fintf.setdropdowntext('',true,false);
+ fintf.setdropdowntext('',true,false,akey);
 end;
 
 procedure tcustomdropdowncontroller.editnotification(var info: editnotificationinfoty);
@@ -664,7 +666,7 @@ begin
            fintf.edited then begin
     if not (deo_forceselect in foptions) and (fintf.geteditor.text = '') then begin
      info.action:= ea_none;
-     selectnone;
+     selectnone(key_return);
     end
     else begin
      if candropdown then begin
@@ -720,10 +722,11 @@ begin
 end;
 
 procedure tcustomdropdowncontroller.setdropdowntext(const avalue: msestring;
-                        const docheckvalue: boolean; const canceled: boolean);
+                        const docheckvalue: boolean; const canceled: boolean;
+                        const akey: keyty);
 begin
  fdataselected:= fdataselected or docheckvalue;
- fdataselected:= fintf.setdropdowntext(avalue,docheckvalue,canceled);
+ fdataselected:= fintf.setdropdowntext(avalue,docheckvalue,canceled,akey);
 end;
 
 procedure tcustomdropdowncontroller.applicationactivechanged(const avalue: boolean);
@@ -805,7 +808,8 @@ begin
    end;
    try
     if fdropdownwidget.show(true,fintf.getwidget.window) = mr_ok then begin
-     setdropdowntext(idropdownwidget(fintf).getdropdowntext(fdropdownwidget),true,false);
+     setdropdowntext(idropdownwidget(fintf).getdropdowntext(fdropdownwidget),
+                                     true,false,fselectkey);
     end;
    finally
     fintf.geteditor.forcecaret:= false;
@@ -859,12 +863,7 @@ function tcustomdropdownlistcontroller.getdropdowncolsclass: dropdowncolsclassty
 begin
  result:= tdropdowncols;
 end;
-{
-function tcustomdropdownlistcontroller.candropdown: boolean;
-begin
- result:= fintf.geteditor.text <> '';
-end;
-}
+
 procedure tcustomdropdownlistcontroller.editnotification(
                   var info: editnotificationinfoty);
 begin
@@ -896,8 +895,9 @@ end;
 
 procedure tcustomdropdownlistcontroller.itemchanged(sender: tdatalist; index: integer);
 begin
- if (deo_selectonly in foptions) and (index = fcols.fitemindex) and (index >= 0) then begin
-  setdropdowntext(valuelist[index],false,false);
+ if (deo_selectonly in foptions) and (index = fcols.fitemindex) and 
+                           (index >= 0) then begin
+  setdropdowntext(valuelist[index],false,false,key_none);
  end;
 end;
 
@@ -948,8 +948,9 @@ begin
                    (str1 <> fdropdownitems[0][int2])) then begin
        int2:= -1;
       end;
+      fselectkey:= key_none;
       show(int1,fdropdownrowcount,int2,str1);
-      self.itemselected(int2);
+      self.itemselected(int2,fselectkey);
      end;
     finally
      fintf.geteditor.forcecaret:= false;
@@ -979,10 +980,10 @@ begin
   fcols.fitemindex:= Value;
  end;
  if fcols.fitemindex < 0 then begin
-  setdropdowntext('',false,false);
+  setdropdowntext('',false,false,key_none);
  end
  else begin
-  setdropdowntext(valuelist[fcols.fitemindex],false,false);
+  setdropdowntext(valuelist[fcols.fitemindex],false,false,key_none);
  end;
 end;
 
@@ -995,20 +996,23 @@ procedure tcustomdropdownlistcontroller.dropdownkeydown(var info: keyeventinfoty
 var
  editor1: tinplaceedit;
  str1: msestring;
+ widget1: twidget;
 begin
  editor1:= fintf.geteditor;
  editor1.dokeydown(info);
  with info do begin
-  if not (es_processed in eventstate) and (shiftstate = []) and
-     (key = key_right) then begin
-   with fdropdownlist do begin
-    if (row >= 0) then begin
-//     str1:= fdropdownlist[fvaluecol][row];
-     str1:= tstringcol1(fdropdownlist[fvaluecol]).getrowtext(row);
-     if length(str1) > editor1.curindex then begin
-      editor1.text:= copy(str1,1,editor1.curindex+1);
-      editor1.curindex:= editor1.curindex + 1;
-      include(eventstate,es_processed);
+  if not (es_processed in eventstate) and (shiftstate = []) then begin
+   case key of
+    key_right: begin
+     with fdropdownlist do begin
+      if (row >= 0) then begin
+       str1:= tstringcol1(fdropdownlist[fvaluecol]).getrowtext(row);
+       if length(str1) > editor1.curindex then begin
+        editor1.text:= copy(str1,1,editor1.curindex+1);
+        editor1.curindex:= editor1.curindex + 1;
+        include(eventstate,es_processed);
+       end;
+      end;
      end;
     end;
    end;
@@ -1016,7 +1020,8 @@ begin
  end;
 end;
 
-procedure tcustomdropdownlistcontroller.itemselected(const index: integer);
+procedure tcustomdropdownlistcontroller.itemselected(const index: integer;
+                                     const akey: keyty);
 var
  int1: integer;
 begin
@@ -1032,10 +1037,10 @@ begin
    if deo_selectonly in foptions then begin
     fcols.fitemindex:= int1;
     fcols.fkeyvalue:= '';
-    setdropdowntext('',true,false);
+    setdropdowntext('',true,false,akey);
    end
    else begin
-    setdropdowntext(fintf.geteditor.text,true,false);
+    setdropdowntext(fintf.geteditor.text,true,false,akey);
    end;
   end;
  end;
@@ -1044,7 +1049,7 @@ begin
  end;
  if int1 >= 0 then begin
   fcols.fkeyvalue:= valuelist[int1];
-  setdropdowntext(fcols.fkeyvalue,index <> - 1,index = -1);
+  setdropdowntext(fcols.fkeyvalue,index <> - 1,index = -1,akey);
  end;
 end;
 
@@ -1066,9 +1071,9 @@ begin
  //dummy
 end;
 
-procedure tcustomdropdownlistcontroller.selectnone;
+procedure tcustomdropdownlistcontroller.selectnone(const akey: keyty);
 begin
- itemselected(-2);
+ itemselected(-2,akey);
 end;
 
 procedure tcustomdropdownlistcontroller.internaldropdown;
@@ -1139,7 +1144,6 @@ begin
  frame.levelo:= 0;
  fframe.framewidth:= 1;
  fframe.colorframe:= cl_black;
-// datarowlinewidth:= acols.datarowlinewidth;
  initcols(acols);
 end;
 
@@ -1207,12 +1211,12 @@ begin
    if shiftstate = [] then begin
     include(eventstate,es_processed);
     case key of
-     key_return: begin
+     key_return,key_tab: begin
       if ffocusedcell.row < 0 then begin
-       itemselected(-2); //nil selection
+       itemselected(-2,key); //nil selection
       end
       else begin
-       itemselected(ffocusedcell.row);
+       itemselected(ffocusedcell.row,key);
       end;
      end;
      key_up,key_down: begin
@@ -1267,8 +1271,6 @@ begin
  if arowcount > frowcount then begin
   arowcount:= frowcount;
  end;
-// font.canvas:= getcanvas;
-// font.gethandleforcanvas(getcanvas);
  datarowheight:= font.lineheight;
  rect1.cy:= arowcount * ystep + fframe.paintframewidth.cy;
  widgetrect:= rect1;
@@ -1287,15 +1289,7 @@ begin
   aitemindex:= -1;
  end;
 end;
-{
-function tdropdownlist.canclose(const newfocus: twidget): boolean;
-begin
- result:= inherited canclose(newfocus);
- if result then begin
-  release;
- end;
-end;
-}
+
 procedure tdropdownlist.updatewindowinfo(var info: windowinfoty);
 begin
  inherited;
@@ -1304,37 +1298,12 @@ begin
   transientfor:= fcontroller.getwidget.window;
  end;
 end;
-{
-procedure tdropdownlist.release;
-begin
- if not (dls_closing in fdropdownstate) then begin
-  inherited;
- end;
-end;
-procedure tdropdownlist.componentevent(const event: tcomponentevent);
-begin
- if event is titemselectedevent then begin
-  try
-   fcontroller.itemselected(titemselectedevent(event).frow);
-  finally
-   inherited release;
-  end;
- end
- else begin
-  inherited;
- end;
-end;
-}
-procedure tdropdownlist.itemselected(const index: integer);
+
+procedure tdropdownlist.itemselected(const index: integer; const akey: keyty);
 begin
  fselectedindex:= index;
+ fcontroller.fselectkey:= akey;
  window.modalresult:= mr_ok;
- {
- include(fdropdownstate,dls_closing);
- hide;
- gui_flushgdi;
- postcomponentevent(titemselectedevent.create(self,index));
- }
 end;
 
 procedure tdropdownlist.docellevent(var info: celleventinfoty);
@@ -1342,9 +1311,8 @@ var
  hintinfo: hintinfoty;
 begin
  with info do begin
-  if iscellclick(info,[ccr_buttonpress]){false) or (info.eventkind = cek_keypress) and
-   (info.keyeventinfopo^.key = key_return)} then begin
-   itemselected(cell.row);
+  if iscellclick(info,[ccr_buttonpress]) then begin
+   itemselected(cell.row,key_none);
   end
   else begin
    if (deo_cliphint in fcontroller.foptions) and 
@@ -1364,7 +1332,7 @@ end;
 
 procedure tdropdownlist.canceldropdown;
 begin
- itemselected(-1); //canceled
+ itemselected(-1,key_none); //canceled
 end;
 
 procedure tdropdownlist.clientmouseevent(var info: mouseeventinfoty);
@@ -1407,15 +1375,6 @@ function tdropdownlist.getkeystring(const aindex: integer): msestring;
 begin
  with tstringcol(fdatacols[0]) do begin
   result:= items[aindex];
-  {
-  if aindex < datalist.count then begin
-   astring:= items[aindex];
-   result:= true;
-  end
-  else begin
-   result:= false;
-  end;
-  }
  end;
 end;
 
@@ -1449,89 +1408,6 @@ begin
  end;
 end;
 
-{
-function tdropdownlist.locate(const filter: msestring): boolean;
-
-var
- exact: boolean;
-
- procedure check(const index: integer);
- begin
-  if exact then begin
-   if dlo_casesensitive in foptions1 then begin
-    result:= msecomparestr(filter,tstringcol(fdatacols[0])[index]) = 0;
-   end
-   else begin
-    result:= msecomparetext(filter,tstringcol(fdatacols[0])[index]) = 0;
-   end;
-  end
-  else begin
-   if dlo_casesensitive in foptions1 then begin
-    result:= msecomparestrlen(filter,tstringcol(fdatacols[0])[index]) = 0;
-   end
-   else begin
-    result:= msecomparetextlen(filter,tstringcol(fdatacols[0])[index]) = 0;
-   end;
-  end;
-  if result then begin
-   focuscell(makegridcoord(0,index));
-  end;
- end;
-
-var
- int1,int2: integer;
-begin
- if (rowcount > 0) and (fdatacols.count > 0) then begin
-  if filter = '' then begin
-   focuscell(makegridcoord(0,0));
-   result:= true;
-  end
-  else begin
-   result:= false;
-   int1:= focusedcell.row;
-   if int1 < 0 then begin
-    int1:= 0;
-   end;
-   exact:= true;
-   for int2:= int1 to rowcount - 1 do begin
-    check(int2);
-    if result then begin
-     break;
-    end;
-   end;
-   if not result then begin
-    for int2:= int1 - 1 downto 0 do begin
-     check(int2);
-     if result then begin
-      break;
-     end;
-    end;
-    if not result then begin
-     exact:= false;
-     for int2:= int1 to rowcount - 1 do begin
-      check(int2);
-      if result then begin
-       break;
-      end;
-     end;
-     if not result then begin
-      for int2:= int1 - 1 downto 0 do begin
-       check(int2);
-       if result then begin
-        break;
-       end;
-      end;
-     end;
-    end;
-   end;
-  end;
-  if not result then begin
-   focuscell(makegridcoord(ffocusedcell.col,-1),fca_none);
-//   defocuscell;
-  end;
- end;
-end;
-}
 procedure tdropdownlist.setfiltertext(const Value: msestring);
 begin
  ffiltertext := Value;

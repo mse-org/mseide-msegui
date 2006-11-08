@@ -956,7 +956,7 @@ type
  end;
 
  idbdropdownlist = interface(idropdownlist)
-  procedure recordselected(const arecordnum: integer);
+  procedure recordselected(const arecordnum: integer; const akey: keyty);
                      //-2 = empty row, -1 = none
  end;
 
@@ -987,7 +987,7 @@ type
    function getdropdowncolsclass: dropdowncolsclassty; override;
    function  createdropdownlist: tdropdownlist; override;
    function candropdown: boolean; override;
-   procedure itemselected(const index: integer); override;
+   procedure itemselected(const index: integer; const akey: keyty); override;
    //idbeditinfo
    procedure getfieldtypes(out propertynames: stringarty;
                           out fieldtypes: fieldtypesarty);
@@ -1018,7 +1018,7 @@ type
    procedure setdropdown(const avalue: tdbdropdownlistcontroller);
   protected
    function createdropdowncontroller: tcustomdropdowncontroller; override;
-   procedure recordselected(const arecordnum: integer);
+   procedure recordselected(const arecordnum: integer; const akey: keyty);
    function datatotext(const data): msestring; override;
   published
    property dropdown: tdbdropdownlistcontroller read getdropdown write setdropdown;
@@ -1030,7 +1030,7 @@ type
    procedure setdropdown(const avalue: tdbdropdownlistcontroller);
   protected
    function createdropdowncontroller: tcustomdropdowncontroller; override;
-   procedure recordselected(const arecordnum: integer);
+   procedure recordselected(const arecordnum: integer; const akey: keyty);
    function datatotext(const data): msestring; override;
   published
    property dropdown: tdbdropdownlistcontroller read getdropdown write setdropdown;
@@ -1043,7 +1043,7 @@ type
    procedure setdropdown(const avalue: tdbdropdownlistcontroller);
   protected
    function createdropdowncontroller: tcustomdropdowncontroller; override;
-   procedure recordselected(const arecordnum: integer);
+   procedure recordselected(const arecordnum: integer; const akey: keyty);
    function datatotext(const data): msestring; override;
   published
    property dropdown: tdbdropdownlistcontroller read getdropdown write setdropdown;
@@ -1056,7 +1056,7 @@ type
    procedure setdropdown(const avalue: tdbdropdownlistcontroller);
   protected
    function createdropdowncontroller: tcustomdropdowncontroller; override;
-   procedure recordselected(const arecordnum: integer);
+   procedure recordselected(const arecordnum: integer; const akey: keyty);
    function datatotext(const data): msestring; override;
   published
    property dropdown: tdbdropdownlistcontroller read getdropdown write setdropdown;
@@ -1457,7 +1457,7 @@ type
  end;
   
  ilbdropdownlist = interface(idropdownlist)
-  procedure recordselected(const arecordnum: integer);
+  procedure recordselected(const arecordnum: integer; const akey: keyty);
                      //-2 = empty row, -1 = none
  end;
    
@@ -1503,7 +1503,7 @@ type
    function getdropdowncolsclass: dropdowncolsclassty; override;
    function createdropdownlist: tdropdownlist; override;
    function candropdown: boolean; override;
-   procedure itemselected(const index: integer); override;
+   procedure itemselected(const index: integer; const akey: keyty); override;
    procedure objectevent(const sender: tobject; const event: objecteventty); override;
   public
    constructor create(const intf: ilbdropdownlist);
@@ -1532,7 +1532,7 @@ type
    function createdropdowncontroller: tcustomdropdowncontroller; override;
    function datatotext(const data): msestring; override;
           //ilbdropdownlist
-   procedure recordselected(const arecordnum: integer);
+   procedure recordselected(const arecordnum: integer; const akey: keyty);
   published
    property dropdown: tlbdropdownlistcontroller read getdropdown write setdropdown;
  end;
@@ -1545,7 +1545,7 @@ type
    function createdropdowncontroller: tcustomdropdowncontroller; override;
    function datatotext(const data): msestring; override;
           //ilbdropdownlist
-   procedure recordselected(const arecordnum: integer);
+   procedure recordselected(const arecordnum: integer; const akey: keyty);
   published
    property dropdown: tlbdropdownlistcontroller read getdropdown write setdropdown;
  end;
@@ -1558,7 +1558,7 @@ type
    function createdropdowncontroller: tcustomdropdowncontroller; override;
    function datatotext(const data): msestring; override;
           //ilbdropdownlist
-   procedure recordselected(const arecordnum: integer);
+   procedure recordselected(const arecordnum: integer; const akey: keyty);
   published
    property dropdown: tlbdropdownlistcontroller read getdropdown write setdropdown;
  end;
@@ -1571,7 +1571,7 @@ type
    function createdropdowncontroller: tcustomdropdowncontroller; override;
    function datatotext(const data): msestring; override;
           //ilbdropdownlist
-   procedure recordselected(const arecordnum: integer);
+   procedure recordselected(const arecordnum: integer; const akey: keyty);
   published
    property dropdown: tlbdropdownlistcontroller read getdropdown write setdropdown;
  end;
@@ -4220,7 +4220,8 @@ begin
  result:= inherited candropdown and fdatalink.active;
 end;
 
-procedure tdbdropdownlistcontroller.itemselected(const index: integer);
+procedure tdbdropdownlistcontroller.itemselected(const index: integer;
+                                                          const akey: keyty);
 begin
  if index < 0 then begin
   if index = -2 then begin
@@ -4237,7 +4238,7 @@ begin
   cols.clear;
   fbookmarks:= nil;
  end;
- idbdropdownlist(fintf).recordselected(index);
+ idbdropdownlist(fintf).recordselected(index,akey);
 end;
 
 procedure tdbdropdownlistcontroller.getfieldtypes(out propertynames: stringarty; 
@@ -4296,19 +4297,25 @@ begin
  result:= tdbdropdownlistcontroller.create(idbdropdownlist(self),false);
 end;
 
-procedure tdbenumeditdb.recordselected(const arecordnum: integer);
+procedure tdbenumeditdb.recordselected(const arecordnum: integer; const akey: keyty);
+var
+ bo1: boolean;
 begin
+ bo1:= false;
  if arecordnum >= 0 then begin
   with tdbdropdownlistcontroller(fdropdown) do begin
    text:= getasmsestring(fdatalink.textfield,fdatalink.utf8);
    tdropdowncols1(fcols).fitemindex:= fdatalink.valuefield.asinteger
   end; 
-  checkvalue;
+  bo1:= checkvalue;
  end
  else begin
   if arecordnum = -2 then begin
-   checkvalue; 
+   bo1:= checkvalue; 
   end;
+ end;
+ if bo1 and (akey = key_tab) then begin
+  window.postkeyevent(akey);
  end;
 end;
 
@@ -4342,19 +4349,25 @@ begin
  result:= tdbdropdownlistcontroller.create(idbdropdownlist(self),false);
 end;
 
-procedure tenumeditdb.recordselected(const arecordnum: integer);
+procedure tenumeditdb.recordselected(const arecordnum: integer; const akey: keyty);
+var
+ bo1: boolean;
 begin
+ bo1:= false;
  if arecordnum >= 0 then begin
   with tdbdropdownlistcontroller(fdropdown) do begin
    text:= getasmsestring(fdatalink.textfield,fdatalink.utf8);
    tdropdowncols1(fcols).fitemindex:= fdatalink.valuefield.asinteger
   end; 
-  checkvalue;
+  bo1:= checkvalue;
  end
  else begin
   if arecordnum = -2 then begin
-   checkvalue; 
+   bo1:= checkvalue; 
   end;
+ end;
+ if bo1 and (akey = key_tab) then begin
+  window.postkeyevent(akey);
  end;
 end;
 
@@ -4388,20 +4401,27 @@ begin
  result:= tdbdropdownlistcontroller.create(idbdropdownlist(self),true);
 end;
 
-procedure tdbkeystringeditdb.recordselected(const arecordnum: integer);
+procedure tdbkeystringeditdb.recordselected(const arecordnum: integer;
+                                                            const akey: keyty);
+var
+ bo1: boolean;
 begin
+ bo1:= false;
  if arecordnum >= 0 then begin
   with tdbdropdownlistcontroller(fdropdown) do begin
    text:= getasmsestring(fdatalink.textfield,fdatalink.utf8);
    tdropdowncols1(fcols).fkeyvalue:= getasmsestring(fdatalink.valuefield,
                                                          fdatalink.utf8);
   end; 
-  checkvalue;
+  bo1:= checkvalue;
  end
  else begin
   if arecordnum = -2 then begin
-   checkvalue; 
+   bo1:= checkvalue; 
   end;
+ end;
+ if bo1 and (akey = key_tab) then begin
+  window.postkeyevent(akey);
  end;
 end;
 
@@ -4435,7 +4455,10 @@ begin
  result:= tdbdropdownlistcontroller.create(idbdropdownlist(self),true);
 end;
 
-procedure tkeystringeditdb.recordselected(const arecordnum: integer);
+procedure tkeystringeditdb.recordselected(const arecordnum: integer;
+                                                    const akey: keyty);
+var
+ bo1: boolean;
 begin
  if arecordnum >= 0 then begin
   with tdbdropdownlistcontroller(fdropdown) do begin
@@ -4443,12 +4466,15 @@ begin
    tdropdowncols1(fcols).fkeyvalue:= getasmsestring(fdatalink.valuefield,
                                                       fdatalink.utf8);
   end; 
-  checkvalue;
+  bo1:= checkvalue;
  end
  else begin
   if arecordnum = -2 then begin
-   checkvalue; 
+   bo1:= checkvalue; 
   end;
+ end;
+ if bo1 and (akey = key_tab) then begin
+  window.postkeyevent(akey);
  end;
 end;
 
@@ -6217,7 +6243,8 @@ begin
                  (fcols.count > 0) and inherited candropdown;
 end;
 
-procedure tlbdropdownlistcontroller.itemselected(const index: integer);
+procedure tlbdropdownlistcontroller.itemselected(const index: integer;
+                             const akey: keyty);
 var
  int1: integer;
 begin
@@ -6243,7 +6270,7 @@ begin
   cols.clear;
   flbrecnums:= nil;
  end;
- ilbdropdownlist(fintf).recordselected(int1);
+ ilbdropdownlist(fintf).recordselected(int1,akey);
 end;
 
 procedure tlbdropdownlistcontroller.setlookupbuffer(
@@ -6313,7 +6340,9 @@ begin
  result:= tlbdropdownlistcontroller.create(ilbdropdownlist(self));
 end;
 
-procedure tdbenumeditlb.recordselected(const arecordnum: integer);
+procedure tdbenumeditlb.recordselected(const arecordnum: integer; const akey: keyty);
+var
+ bo1: boolean;
 begin
  if arecordnum >= 0 then begin
   with tlbdropdownlistcontroller(fdropdown) do begin
@@ -6321,12 +6350,15 @@ begin
    tdropdowncols1(fcols).fitemindex:= 
             flookupbuffer.integervaluephys(fkeyfieldno,arecordnum);
   end; 
-  checkvalue;
+  bo1:= checkvalue;
  end
  else begin
   if arecordnum = -2 then begin
-   checkvalue; 
+   bo1:= checkvalue; 
   end;
+ end;
+ if bo1 and (akey = key_tab) then begin
+  window.postkeyevent(akey);
  end;
 end;
 
@@ -6374,7 +6406,9 @@ begin
  result:= tlbdropdownlistcontroller.create(ilbdropdownlist(self));
 end;
 
-procedure tenumeditlb.recordselected(const arecordnum: integer);
+procedure tenumeditlb.recordselected(const arecordnum: integer; const akey: keyty);
+var
+ bo1: boolean;
 begin
  if arecordnum >= 0 then begin
   with tlbdropdownlistcontroller(fdropdown) do begin
@@ -6382,12 +6416,15 @@ begin
    tdropdowncols1(fcols).fitemindex:= 
             flookupbuffer.integervaluephys(fkeyfieldno,arecordnum);
   end; 
-  checkvalue;
+  bo1:= checkvalue;
  end
  else begin
   if arecordnum = -2 then begin
-   checkvalue; 
+   bo1:= checkvalue; 
   end;
+ end;
+ if bo1 and (akey = key_tab) then begin
+  window.postkeyevent(akey);
  end;
 end;
 
@@ -6435,7 +6472,10 @@ begin
  result:= tlbdropdownlistcontroller.create(ilbdropdownlist(self));
 end;
 
-procedure tdbkeystringeditlb.recordselected(const arecordnum: integer);
+procedure tdbkeystringeditlb.recordselected(const arecordnum: integer;
+                                   const akey: keyty);
+var
+ bo1: boolean;
 begin
  if arecordnum >= 0 then begin
   with tlbdropdownlistcontroller(fdropdown) do begin
@@ -6444,12 +6484,15 @@ begin
    tdropdowncols1(fcols).fkeyvalue:= 
                            flookupbuffer.textvaluephys(fkeyfieldno,arecordnum);
   end; 
-  checkvalue;
+  bo1:= checkvalue;
  end
  else begin
   if arecordnum = -2 then begin
-   checkvalue; 
+   bo1:= checkvalue; 
   end;
+ end;
+ if bo1 and (akey = key_tab) then begin
+  window.postkeyevent(akey);
  end;
 end;
 
@@ -6498,7 +6541,10 @@ begin
  result:= tlbdropdownlistcontroller.create(ilbdropdownlist(self));
 end;
 
-procedure tkeystringeditlb.recordselected(const arecordnum: integer);
+procedure tkeystringeditlb.recordselected(const arecordnum: integer; 
+                       const akey: keyty);
+var
+ bo1: boolean;
 begin
  if arecordnum >= 0 then begin
   with tlbdropdownlistcontroller(fdropdown) do begin
@@ -6507,12 +6553,15 @@ begin
    tdropdowncols1(fcols).fkeyvalue:= 
             flookupbuffer.textvaluephys(fkeyfieldno,arecordnum);
   end; 
-  checkvalue;
+  bo1:= checkvalue;
  end
  else begin
   if arecordnum = -2 then begin
-   checkvalue; 
+   bo1:= checkvalue; 
   end;
+ end;
+ if bo1 and (akey = key_tab) then begin
+  window.postkeyevent(akey);
  end;
 end;
 

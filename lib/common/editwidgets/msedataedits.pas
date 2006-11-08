@@ -18,7 +18,7 @@ uses
  mseguiglob,mseevent,msegraphutils,msedrawtext,msestat,msestatfile,mseclasses,
  msearrayprops,msegrids,msewidgetgrid,msedropdownlist,msedrag,mseforms,
  mseformatstr,typinfo,
- msescrollbar,msewidgets,msepopupcalendar;
+ msescrollbar,msewidgets,msepopupcalendar,msekeyboard;
 
 type
  tdataedit = class;
@@ -61,7 +61,7 @@ type
    function geteditfont: tfont; override;
 
    function setdropdowntext(const avalue: msestring; const docheckvalue: boolean;
-                const canceled: boolean): boolean;
+                const canceled: boolean; const akey: keyty): boolean;
                 
    //igridwidget
    procedure setfirstclick;
@@ -832,7 +832,7 @@ type
  
 implementation
 uses
- sysutils,msereal,msekeyboard,msebits,msepointer,msestreaming,msestockobjects;
+ sysutils,msereal,msebits,msepointer,msestreaming,msestockobjects;
 
 const
  valuevarname = 'value';
@@ -1134,7 +1134,8 @@ begin
 end;
 
 function tdataedit.setdropdowntext(const avalue: msestring;
-                const docheckvalue: boolean; const canceled: boolean): boolean;
+                const docheckvalue: boolean; const canceled: boolean;
+                const akey: keyty): boolean;
 var
  bo1: boolean;
 begin
@@ -1148,6 +1149,11 @@ begin
    result:= checkvalue;
    if not result then begin
     feditor.undo;
+   end
+   else begin
+    if akey = key_tab then begin
+     window.postkeyevent(akey,[],false);
+    end;
    end;
   end
   else begin
