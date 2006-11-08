@@ -2036,11 +2036,15 @@ var
 begin
  if (factindex <> 0) and not (bs_indexvalid in fbstate) then begin
   int2:= length(findexes[0].ind);
-  for int1:= 1 to high(findexes) do begin
-   with findexes[int1] do begin
-    allocuninitedarray(int2,sizeof(pointer),ind);
-    move(findexes[0].ind[0],ind[0],fbrecordcount*sizeof(pointer));
-    findexlocal.items[int1-1].sort(ind);
+  if int2 > 0 then begin
+   for int1:= 1 to high(findexes) do begin
+    with findexes[int1] do begin
+     allocuninitedarray(int2,sizeof(pointer),ind);
+     if fbrecordcount > 0 then begin
+      move(findexes[0].ind[0],ind[0],fbrecordcount*sizeof(pointer));
+      findexlocal.items[int1-1].sort(ind);
+     end;
+    end;
    end;
   end;
   include(fbstate,bs_indexvalid);
