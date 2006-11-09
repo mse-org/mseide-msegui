@@ -18,7 +18,7 @@ uses
  mseedit,msesimplewidgets,msedataedits,msedialog,msetypes,msestrings,
  msesys,msedispwidgets,
  msedatalist,msestat,msestatfile,msebitmap,msedatanodes,msefileutils,
- msedropdownlist,mseevent,msegraphedits;
+ msedropdownlist,mseevent,msegraphedits,mseeditglob;
 
 type
 
@@ -180,12 +180,18 @@ type
                   read fonafterexecute write fonafterexecute;
  end;
 
+const
+ defaultfiledialogoptionsedit = defaultoptionsedit+
+                                  [oe_savevalue,oe_savestate,oe_saveoptions];
+ 
+type 
  tfiledialog = class(tdialog,istatfile)
   private
    fcontroller: tfiledialogcontroller;
    fstatvarname: msestring;
    fstatfile: tstatfile;
    fdialogkind: filedialogkindty;
+   foptionsedit: optionseditty;
    procedure setcontroller(const value: tfiledialogcontroller);
    procedure setstatfile(const Value: tstatfile);
   protected
@@ -206,6 +212,8 @@ type
    property statvarname: msestring read getstatvarname write fstatvarname;
    property controller: tfiledialogcontroller read fcontroller write setcontroller;
    property dialogkind: filedialogkindty read fdialogkind write fdialogkind default fdk_open;
+   property optionsedit: optionseditty read foptionsedit write foptionsedit
+                                  default defaultfiledialogoptionsedit;
  end;
 
  tcustomfilenameedit = class(tcustomdialogstringed)
@@ -334,7 +342,7 @@ procedure updatefileinfo(const item: tlistitem; const info: fileinfoty;
 implementation
 uses
  msefiledialog_mfm,sysutils,mseguiglob,msebits,
- msestringenter,msedirtree,msefiledialogres,mseeditglob,msekeyboard,
+ msestringenter,msedirtree,msefiledialogres,msekeyboard,
  msestockobjects;
 
 procedure getfileicon(const info: fileinfoty; out imagelist: timagelist; out imagenr: integer);
@@ -1453,6 +1461,7 @@ end;
 
 constructor tfiledialog.create(aowner: tcomponent);
 begin
+ foptionsedit:= defaultfiledialogoptionsedit;
  fcontroller:= tfiledialogcontroller.create(nil);
  inherited;
 end;
@@ -1480,16 +1489,28 @@ end;
 
 procedure tfiledialog.dostatread(const reader: tstatreader);
 begin
- fcontroller.readstatvalue(reader);
- fcontroller.readstatstate(reader);
- fcontroller.readstatoptions(reader);
+ if oe_savevalue in foptionsedit then begin
+  fcontroller.readstatvalue(reader);
+ end;
+ if oe_savestate in foptionsedit then begin
+  fcontroller.readstatstate(reader);
+ end;
+ if oe_saveoptions in foptionsedit then begin
+  fcontroller.readstatoptions(reader);
+ end;
 end;
 
 procedure tfiledialog.dostatwrite(const writer: tstatwriter);
 begin
- fcontroller.writestatvalue(writer);
- fcontroller.writestatstate(writer);
- fcontroller.writestatoptions(writer);
+ if oe_savevalue in foptionsedit then begin
+  fcontroller.writestatvalue(writer);
+ end;
+ if oe_savestate in foptionsedit then begin
+  fcontroller.writestatstate(writer);
+ end;
+ if oe_saveoptions in foptionsedit then begin
+  fcontroller.writestatoptions(writer);
+ end;
 end;
 
 function tfiledialog.getstatvarname: msestring;
