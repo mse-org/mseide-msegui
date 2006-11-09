@@ -312,6 +312,7 @@ type
    procedure itemchanged(sender: tdatalist; index: integer);
    function getdropdowncolsclass: dropdowncolsclassty; virtual;
    procedure selectnone(const akey: keyty); override;
+   procedure clearitemindex; //sets fcols.fitemindex to -1, no events
    
    //idropdownlist
    procedure itemselected(const index: integer; const akey: keyty); virtual;
@@ -1074,6 +1075,11 @@ end;
 procedure tcustomdropdownlistcontroller.selectnone(const akey: keyty);
 begin
  itemselected(-2,akey);
+end;
+
+procedure tcustomdropdownlistcontroller.clearitemindex;
+begin
+ fcols.fitemindex:= -1;
 end;
 
 procedure tcustomdropdownlistcontroller.internaldropdown;

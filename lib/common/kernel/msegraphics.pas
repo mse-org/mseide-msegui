@@ -995,16 +995,16 @@ function getcolorvalues: colorarty;
 function colortorgb(color: colorty): rgbtriplety;
 function colortopixel(color: colorty): pixelty;
 function rgbtocolor(const red,green,blue: integer): colorty;
+procedure setcolormapvalue(dest: colorty; const red,green,blue: integer); overload;
+procedure setcolormapvalue(const dest: colorty; const acolor: colorty); overload;
 
 var
- colormaps: array[colormapsty] of array of pixelty;
  flushgdi: boolean;
 
 implementation
 uses
  SysUtils,msegui,mseguiintf,msestreaming,mseformatstr,msestockobjects,
  msedatalist,mselist,msesys,msebits,msewidgets;
-
 const
  errortexts: array[gdierrorty] of string = (
    '',
@@ -1064,6 +1064,7 @@ type
  end;
 
 var
+ colormaps: array[colormapsty] of array of pixelty;
  fonts: array of fontdatarecty;
  lastreusedfont: integer;
  ffontaliaslist: tfontaliaslist;
@@ -1527,6 +1528,29 @@ begin
  end;
  colormaps[cm_namedrgb,integer(cardinal(cl_0)-cardinal(cl_namedrgb))]:= mseguiintf.pixel0;
  colormaps[cm_namedrgb,integer(cardinal(cl_1)-cardinal(cl_namedrgb))]:= mseguiintf.pixel1;
+end;
+
+procedure setcolormapvalue(dest: colorty; const red,green,blue: integer);
+var
+ map: colormapsty;
+begin
+ map:= colormapsty((cardinal(dest) shr speccolorshift));
+ dest:= colorty(cardinal(dest) and not speccolormask);
+ dec(map,7);
+ if (map <= cm_rgb) or (map > high(map)) or
+       (cardinal(dest) >= cardinal(mapcolorcounts[map])) then begin
+  gdierror(gde_invalidcolor,
+       hextostr(cardinal(dest)+cardinal(map) shl speccolorshift,8));
+ end;
+ colormaps[map][cardinal(dest)]:= gui_rgbtopixel(rgbtocolor(red,green,blue));
+end;
+
+procedure setcolormapvalue(const dest: colorty; const acolor: colorty);
+var
+ rgb1: rgbtriplety;
+begin
+ rgb1:= colortorgb(acolor);
+ setcolormapvalue(dest,rgb1.red,rgb1.green,rgb1.blue);
 end;
 
 procedure initfontalias;
