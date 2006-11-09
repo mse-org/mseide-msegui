@@ -995,9 +995,9 @@ function getcolorvalues: colorarty;
 function colortorgb(color: colorty): rgbtriplety;
 function colortopixel(color: colorty): pixelty;
 function rgbtocolor(const red,green,blue: integer): colorty;
-procedure setcolormapvalue(dest: colorty; const red,green,blue: integer); overload;
+procedure setcolormapvalue(index: colorty; const red,green,blue: integer); overload;
                                 //RGB values 0..255
-procedure setcolormapvalue(const dest: colorty; const acolor: colorty); overload;
+procedure setcolormapvalue(const index: colorty; const acolor: colorty); overload;
 
 var
  flushgdi: boolean;
@@ -1531,27 +1531,27 @@ begin
  colormaps[cm_namedrgb,integer(cardinal(cl_1)-cardinal(cl_namedrgb))]:= mseguiintf.pixel1;
 end;
 
-procedure setcolormapvalue(dest: colorty; const red,green,blue: integer);
+procedure setcolormapvalue(index: colorty; const red,green,blue: integer);
 var
  map: colormapsty;
 begin
- map:= colormapsty((cardinal(dest) shr speccolorshift));
- dest:= colorty(cardinal(dest) and not speccolormask);
+ map:= colormapsty((cardinal(index) shr speccolorshift));
+ index:= colorty(cardinal(index) and not speccolormask);
  dec(map,7);
  if (map <= cm_rgb) or (map > high(map)) or
-       (cardinal(dest) >= cardinal(mapcolorcounts[map])) then begin
+       (cardinal(index) >= cardinal(mapcolorcounts[map])) then begin
   gdierror(gde_invalidcolor,
-       hextostr(cardinal(dest)+cardinal(map) shl speccolorshift,8));
+       hextostr(cardinal(index)+cardinal(map) shl speccolorshift,8));
  end;
- colormaps[map][cardinal(dest)]:= gui_rgbtopixel(rgbtocolor(red,green,blue));
+ colormaps[map][cardinal(index)]:= gui_rgbtopixel(rgbtocolor(red,green,blue));
 end;
 
-procedure setcolormapvalue(const dest: colorty; const acolor: colorty);
+procedure setcolormapvalue(const index: colorty; const acolor: colorty);
 var
  rgb1: rgbtriplety;
 begin
  rgb1:= colortorgb(acolor);
- setcolormapvalue(dest,rgb1.red,rgb1.green,rgb1.blue);
+ setcolormapvalue(index,rgb1.red,rgb1.green,rgb1.blue);
 end;
 
 procedure initfontalias;
