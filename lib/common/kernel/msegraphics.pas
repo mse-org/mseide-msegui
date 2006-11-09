@@ -996,6 +996,7 @@ function colortorgb(color: colorty): rgbtriplety;
 function colortopixel(color: colorty): pixelty;
 function rgbtocolor(const red,green,blue: integer): colorty;
 procedure setcolormapvalue(dest: colorty; const red,green,blue: integer); overload;
+                                //RGB values 0..255
 procedure setcolormapvalue(const dest: colorty; const acolor: colorty); overload;
 
 var
