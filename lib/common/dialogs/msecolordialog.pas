@@ -52,6 +52,9 @@ type
    fupdating: boolean;
  end;
  
+ setcoloreventty = procedure(const sender: tobject; var avalue: colorty; 
+                          var accept: boolean) of object;               
+                          
  tcoloredit = class(tcustomenumedit)
   private
    function getvalue: colorty;
@@ -61,6 +64,8 @@ type
    function getbuttonellipse: tdropdownbutton;
    procedure setbuttonellipse(const avalue: tdropdownbutton);
    
+   function getonsetvalue: setcoloreventty;
+   procedure setonsetvalue(const avalue: setcoloreventty);
   protected
    function datatotext(const data): msestring; override;
    function createdropdowncontroller: tcustomdropdowncontroller; override;
@@ -75,6 +80,7 @@ type
                      write setvaluedefault default cl_none;
    property buttonellipse: tdropdownbutton read getbuttonellipse write setbuttonellipse;
    property dropdown;
+   property onsetvalue: setcoloreventty read getonsetvalue write setonsetvalue;
  end;
 
  tcolordropdowncontroller = class(tdropdownlistcontroller)
@@ -190,7 +196,7 @@ begin
  if (action = ba_click) and (buttonindex = 0) then begin
   co1:= value;
   if colordialog(co1) = mr_ok then begin
-   tdropdownlistcontroller(fdropdown).itemindex:= -1;
+   tcolordropdowncontroller(fdropdown).clearitemindex; 
    text:= colortostring(co1);
    checkvalue;  
   end;
@@ -242,6 +248,16 @@ begin
  with tdropdownbuttonframe(fframe) do begin
   tdropdownbutton(buttons[0]).assign(avalue);
  end;
+end;
+
+function tcoloredit.getonsetvalue: setcoloreventty;
+begin
+ result:= setcoloreventty(inherited onsetvalue);
+end;
+
+procedure tcoloredit.setonsetvalue(const avalue: setcoloreventty);
+begin
+ inherited onsetvalue:= setintegereventty(avalue);
 end;
 
 { tcolordialogfo }

@@ -51,8 +51,9 @@ type
                           var accept: boolean) of object;
  setansistringeventty = procedure(const sender: tobject; var avalue: ansistring;
                           var accept: boolean) of object;
- setintegereventty = procedure(const sender: tobject; var avalue: integer;
-                          var accept: boolean) of object;
+ setintegereventty = procedure(const sender: tobject; var avalue: integer; 
+                          var accept: boolean) of object; 
+                          //equal parameters as setcoloreventty for tcoloredit!
  setrealeventty = procedure(const sender: tobject; var avalue: realty;
                           var accept: boolean) of object;
  setdatetimeeventty = procedure(const sender: tobject; var avalue: tdatetime;
