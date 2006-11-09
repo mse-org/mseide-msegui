@@ -88,9 +88,11 @@ type
                        fdo_directory,fdo_file,
                        fdo_absolute,fdo_relative,fdo_quotesingle,
                        fdo_link, //links lastdir of controllers with same group
-                       fdo_checkexist,fdo_acceptempty,fdo_chdir);
+                       fdo_checkexist,fdo_acceptempty,fdo_chdir,fdo_savelastdir);
  filedialogoptionsty = set of filedialogoptionty;
-
+const
+ defaultfiledialogoptions = [fdo_savelastdir];
+type
  filedialogkindty = (fdk_none,fdk_open,fdk_save);
 
  tfiledialogcontroller = class;
@@ -133,8 +135,8 @@ type
    fdefaultext: filenamety;
    foptions: filedialogoptionsty;
   public
-   constructor create(const aowner: tmsecomponent = nil; const onchange: objectprocty = nil);
-                      reintroduce;
+   constructor create(const aowner: tmsecomponent = nil; 
+                    const onchange: objectprocty = nil); reintroduce;
    destructor destroy; override;
    procedure readstatvalue(const reader: tstatreader);
    procedure readstatstate(const reader: tstatreader);
@@ -150,13 +152,13 @@ type
                   dialogkind: filedialogkindty = fdk_none): boolean; overload;
    function execute(var avalue: filenamety;
                   dialogkind: filedialogkindty; acaption: msestring): boolean; overload;
-   property lastdir: filenamety read flastdir write setlastdir;
    procedure clear;
    procedure componentevent(const event: tcomponentevent);
    property history: msestringarty read fhistory write fhistory;
    property filenames: filenamearty read ffilenames write ffilenames;
   published
    property filename: filenamety read getfilename write setfilename;
+   property lastdir: filenamety read flastdir write setlastdir;
    property filter: filenamety read ffilter write ffilter;
    property filterlist: tdoublemsestringdatalist read ffilterlist write setfilterlist;
    property filterindex: integer read ffilterindex write ffilterindex default 0;
@@ -164,7 +166,8 @@ type
    property exclude: fileattributesty read fexclude write fexclude default [fa_hidden];
    property colwidth: integer read fcolwidth write fcolwidth default 0;
    property defaultext: filenamety read fdefaultext write setdefaultext;
-   property options: filedialogoptionsty read foptions write setoptions default [];
+   property options: filedialogoptionsty read foptions write setoptions 
+                                     default defaultfiledialogoptions;
    property historymaxcount: integer read fhistorymaxcount
                           write sethistorymaxcount default defaulthistorymaxcount;
    property captionopen: msestring read fcaptionopen write fcaptionopen;
@@ -1116,6 +1119,7 @@ end;
 constructor tfiledialogcontroller.create(const aowner: tmsecomponent = nil;
                                        const onchange: objectprocty = nil);
 begin
+ foptions:= defaultfiledialogoptions;
  fhistorymaxcount:= defaulthistorymaxcount;
  fowner:= aowner;
  ffilterlist:= tdoublemsestringdatalist.create;
@@ -1138,7 +1142,10 @@ end;
 
 procedure tfiledialogcontroller.readstatstate(const reader: tstatreader);
 begin
- flastdir:= reader.readstring('lastdir',filedir(filename));
+// flastdir:= reader.readstring('lastdir',filedir(filename));
+ if fdo_savelastdir in foptions then begin
+  flastdir:= reader.readstring('lastdir',flastdir);
+ end;
  if fhistorymaxcount > 0 then begin
   fhistory:= reader.readarray('filehistory',fhistory);
  end;
@@ -1163,7 +1170,9 @@ end;
 
 procedure tfiledialogcontroller.writestatstate(const writer: tstatwriter);
 begin
- writer.writemsestring('lastdir',flastdir);
+ if fdo_savelastdir in foptions then begin
+  writer.writemsestring('lastdir',flastdir);
+ end;
  if fhistorymaxcount > 0 then begin
   writer.writearray('filehistory',fhistory);
  end;
