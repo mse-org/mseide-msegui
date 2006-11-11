@@ -2032,7 +2032,7 @@ begin
    doasyncevent(int1);
   end;
   ek_component: begin
-   sendcomponentevent(event as tcomponentevent);
+   sendcomponentevent(event as tcomponentevent,false);
   end;
  end;
 end;

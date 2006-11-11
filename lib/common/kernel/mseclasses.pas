@@ -231,7 +231,8 @@ type
   public
    state: componenteventstatesty;
    tag: integer;
-   constructor create(const asender: tobject; const atag: integer = 0; const callchildren: boolean = true);
+   constructor create(const asender: tobject; const atag: integer = 0;
+                                         const callchildren: boolean = true);
                     overload;
    property sender: tobject read fsender;
  end;
@@ -300,9 +301,11 @@ type
    function linkedobjects: objectarty;
                  //returns items of objeclinker and free notify list
 
-   procedure sendcomponentevent(const event: tcomponentevent);
+   procedure sendcomponentevent(const event: tcomponentevent; 
+                                        const destroyevent: boolean = true);
                   //event will be destroyed if not async
-   procedure sendrootcomponentevent(const event: tcomponentevent);
+   procedure sendrootcomponentevent(const event: tcomponentevent;
+                                        const destroyevent: boolean = true);
                   //event will be destroyed if not async
 
    property moduleclassname: string read getmoduleclassname;
@@ -2302,28 +2305,35 @@ begin
  end;
 end;
 
-procedure tmsecomponent.sendcomponentevent(const event: tcomponentevent);
+procedure tmsecomponent.sendcomponentevent(const event: tcomponentevent;
+                         const destroyevent: boolean);
 begin
  try
   componentevent(event);
  finally
-  if event.kind = ek_none then begin
+  if destroyevent then begin
    event.Free;
   end;
  end;
 end;
 
-procedure tmsecomponent.sendrootcomponentevent(const event: tcomponentevent);
-                  //event will be destroyed
+procedure tmsecomponent.sendrootcomponentevent(const event: tcomponentevent;
+                              const destroyevent: boolean);
 var
  int1: integer;
  ar1: componentarty;
 begin
- ar1:= getrootcomponentpath;
- for int1:= high(ar1) downto 0 do begin
-  if ar1[int1] is tmsecomponent then begin
-   tmsecomponent(ar1[int1]).sendcomponentevent(event);
-   break;
+ try
+  ar1:= getrootcomponentpath;
+  for int1:= high(ar1) downto 0 do begin
+   if ar1[int1] is tmsecomponent then begin
+    tmsecomponent(ar1[int1]).sendcomponentevent(event,false);
+    break;
+   end;
+  end;
+ finally
+  if destroyevent then begin
+   event.Free;
   end;
  end;
 end;
