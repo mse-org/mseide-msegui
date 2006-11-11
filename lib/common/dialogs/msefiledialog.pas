@@ -1190,12 +1190,25 @@ end;
 
 procedure tfiledialogcontroller.writestatoptions(const writer: tstatwriter);
 begin
+ //dummy
+end;
+
+procedure tfiledialogcontroller.componentevent(const event: tcomponentevent);
+begin
+ if (fdo_link in foptions) and (event.sender <> self) and 
+                (event.sender is tfiledialogcontroller) then begin
+  with tfiledialogcontroller(event.sender) do begin
+   if fgroup = self.fgroup then begin
+    self.flastdir:= flastdir;
+   end;
+  end;
+ end;
 end;
 
 procedure tfiledialogcontroller.checklink;
 begin
  if (fdo_link in foptions) and (fowner <> nil) then begin
-  fowner.sendrootcomponentevent(tcomponentevent.create(self));
+  fowner.sendrootcomponentevent(tcomponentevent.create(self),true);
  end;
 end;
 
@@ -1438,17 +1451,6 @@ begin
  ffilenames:= nil;
  flastdir:= '';
  fhistory:= nil;
-end;
-
-procedure tfiledialogcontroller.componentevent(const event: tcomponentevent);
-begin
- if (fdo_link in foptions) and (event.sender <> self) and (event.sender is tfiledialogcontroller) then begin
-  with tfiledialogcontroller(event.sender) do begin
-   if fgroup = self.fgroup then begin
-    self.flastdir:= flastdir;
-   end;
-  end;
- end;
 end;
 
 procedure tfiledialogcontroller.setlastdir(const avalue: filenamety);

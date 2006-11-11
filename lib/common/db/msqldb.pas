@@ -1425,7 +1425,7 @@ begin
       end;
      end
      else begin
-      fieldtoparam(fld,param1);
+      self.fieldtoparam(fld,param1);
 //      AssignFieldValue(Fld,Fld.Value);
      end;
     end;

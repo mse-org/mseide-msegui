@@ -2379,6 +2379,9 @@ procedure tdatalist.getdefaultdata(var dest);
 var
  po: pointer;
 begin
+ if ilo_needsfree in finternaloptions then begin
+  freedata(dest);
+ end;
  po:= getdefault;
  if po = nil then begin
   fillchar(dest,fsize,0);
