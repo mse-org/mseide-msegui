@@ -221,7 +221,7 @@ type
  recupdatebufferarty = array of recupdatebufferty;
  
  bufdatasetstatety = (bs_applying,bs_hasindex,bs_fetchall,bs_indexvalid,
-                      bs_editing,bs_utf8);
+                      bs_editing,bs_append,bs_utf8);
  bufdatasetstatesty = set of bufdatasetstatety;
    
  tmsebufdataset = class(tdbdataset)
@@ -368,6 +368,7 @@ type
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
 
+   procedure Append;
    function isutf8: boolean; virtual;
    procedure bindfields(const bind: boolean);
    procedure fieldtoparam(const source: tfield; const dest: tparam);
@@ -849,8 +850,17 @@ procedure tmsebufdataset.internalinsert;
 begin
  include(fbstate,bs_editing);
  with pdsrecordty(activebuffer)^.dsheader.bookmark.data do begin
-  recno:= -1;
   recordpo:= nil;
+//  recno:= -1;
+  recno:= frecno;
+  {
+  if eof then begin
+   recno:= fbrecordcount //append
+  end
+  else begin
+   recno:= frecno;
+  end;
+  }
  end;
  inherited;
 end;
@@ -1583,7 +1593,8 @@ begin
    end;
   end;
  end;
- exclude(fbstate,bs_editing);
+ fbstate:= fbstate - [bs_editing,bs_append];
+// exclude(fbstate,bs_editing);
 end;
 
 procedure tmsebufdataset.internalcancel;
@@ -1598,7 +1609,8 @@ begin
    end;
   end;
  end;
- exclude(fbstate,bs_editing);
+ fbstate:= fbstate - [bs_editing,bs_append];
+// exclude(fbstate,bs_editing);
 end;
 
 procedure tmsebufdataset.alignfieldpos(var avalue: integer);
@@ -1706,16 +1718,23 @@ end;
 
 function tmsebufdataset.getrecno: longint;
 begin
+ result:= 0;
  if activebuffer <> nil then begin
   with pdsrecordty(activebuffer)^.dsheader.bookmark do begin
-   result:= data.recno + 1;
-   if (state = dsinsert) and (flag = bfeof) then begin
-    inc(result); //append mode
+   if state = dsinsert  then begin
+    if (bs_append in fbstate) or (fbrecordcount = 0) then begin
+     result:= fbrecordcount + 1;
+    end
+    else begin
+     result:= data.recno + 1;
+    end;
+   end
+   else begin
+    if fbrecordcount > 0 then begin
+     result:= data.recno + 1;
+    end;
    end;
   end;
- end
- else begin
-  result:= 0;
  end;
 end;
 
@@ -2240,6 +2259,12 @@ end;
 function tmsebufdataset.isutf8: boolean;
 begin
  result:= false; //default
+end;
+
+procedure tmsebufdataset.append;
+begin
+ include(fbstate,bs_append);
+ inherited;
 end;
 
 { tlocalindexes }

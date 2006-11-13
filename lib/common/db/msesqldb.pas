@@ -81,6 +81,7 @@ type
        //idscontroller
    procedure inheriteddataevent(const event: tdataevent; const info: ptrint);
    procedure inheritedcancel;
+   procedure inheritedpost;
    function inheritedmoveby(const distance: integer): integer;  
    procedure inheritedinternalinsert;
    procedure inheritedinternalopen;
@@ -117,13 +118,13 @@ type
    function locate(const key: string; const field: tfield; 
                  const options: locateoptionsty = []): locateresultty;
    procedure appendrecord(const values: array of const);
+   function moveby(const distance: integer): integer;
+   procedure cancel; override;
    procedure post; override;
    procedure applyupdates(const maxerrors: integer;
                      const cancelonerror: boolean); override; overload;
    procedure applyupdates(const maxerrors: integer = 0); override; overload;
    procedure applyupdate; override; overload;
-   procedure cancel; override;
-   function moveby(const distance: integer): integer;
   published
    property FieldDefs;
    property controller: tdscontroller read fcontroller write setcontroller;
@@ -739,7 +740,7 @@ end;
 
 procedure tmsesqlquery.post;
 begin
- inherited;
+ fcontroller.post;
  if dso_autoapply in fcontroller.options then begin
   applyupdates;
  end;
@@ -1208,6 +1209,11 @@ end;
 procedure tmsesqlquery.setstatementtype(const avalue: TStatementType);
 begin
  //dummy
+end;
+
+procedure tmsesqlquery.inheritedpost;
+begin
+ inherited post;
 end;
 
 function tmsesqlquery.isutf8: boolean;

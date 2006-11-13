@@ -23,6 +23,7 @@ type
    procedure inheritedresync(const mode: tresyncmode);
    procedure inheriteddataevent(const event: tdataevent; const info: ptrint);
    procedure inheritedcancel;
+   procedure inheritedpost;
    function inheritedmoveby(const distance: integer): integer;
    procedure inheritedinternalinsert;
    procedure inheritedinternalopen;
@@ -65,7 +66,8 @@ type
                  const options: locateoptionsty = []): locateresultty;
    procedure AppendRecord(const Values: array of const);
    procedure cancel; override;
-   function moveby(const distance: integer): integer;
+   procedure post; override;
+   function moveby(const distance: integer): integer;   
   published
    property controller: tdscontroller read fcontroller write setcontroller;
    property Active: boolean read getactive write setactive;
@@ -346,6 +348,16 @@ end;
 procedure tmsesqlite3dataset.internalopen;
 begin
  fcontroller.internalopen;
+end;
+
+procedure tmsesqlite3dataset.inheritedpost;
+begin
+ inherited post;
+end;
+
+procedure tmsesqlite3dataset.post;
+begin
+ fcontroller.post;
 end;
 
 end.

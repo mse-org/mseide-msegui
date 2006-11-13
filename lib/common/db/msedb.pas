@@ -554,6 +554,7 @@ type
  idscontroller = interface(inullinterface)
   procedure inheriteddataevent(const event: tdataevent; const info: ptrint);
   procedure inheritedcancel;
+  procedure inheritedpost;
   function inheritedmoveby(const distance: integer): integer;
   procedure inheritedinternalinsert;
   procedure inheritedinternalopen;
@@ -570,10 +571,11 @@ type
  
 const
  defaultdscontrolleroptions = [];
-
  
 type
  fieldlinkarty = array of ifieldcomponent;
+ dscontrollerstatety = (dscs_posting);
+ dscontrollerstatesty = set of dscontrollerstatety;
  
  tdscontroller = class(tactivatorcontroller,idsfieldcontroller)
   private
@@ -590,6 +592,7 @@ type
    finsertbm: string;
    flinkedfields: fieldlinkarty;
    foptions: datasetoptionsty;
+   fstate: dscontrollerstatesty;
    procedure setfields(const avalue: tpersistentfields);
    function getcontroller: tdscontroller;
    procedure updatelinkedfields;
@@ -624,6 +627,7 @@ type
    procedure internalopen;
    procedure closequery(var amodalresult: modalresultty);
    procedure post; //calls post if in edit or insert state
+   function posting: boolean; //true if in post procedure
    function emptyinsert: boolean;
    function assql(const avalue: msestring): string; overload;
    function assql(const avalue: integer): string; overload;
@@ -3012,7 +3016,12 @@ procedure tdscontroller.post;
 begin
  with tdataset(fowner) do begin;
   if state in dseditmodes then begin
-   post;
+   include(fstate,dscs_posting);
+   try    
+    fintf.inheritedpost;
+   finally
+    exclude(fstate,dscs_posting);
+   end;
   end;
  end;
 end;
@@ -3020,12 +3029,19 @@ end;
 function tdscontroller.emptyinsert: boolean;
 begin
  result:= false;
- with tdataset1(fowner) do begin
-  if state = dsinsert then begin
-   DataEvent(deUpdateRecord,0);
-   result:= not modified;
+ if not posting then begin
+  with tdataset1(fowner) do begin
+   if state = dsinsert then begin
+    DataEvent(deUpdateRecord,0);
+    result:= not modified;
+   end;
   end;
  end;
+end;
+
+function tdscontroller.posting: boolean;
+begin
+ result:= dscs_posting in fstate;
 end;
 
 { ttacontroller }
