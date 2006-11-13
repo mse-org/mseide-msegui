@@ -750,7 +750,7 @@ var
   writeln(atext);
   stream.position:= 0;
   teststream.size:= 0;
-  objectbinarytotext(stream,teststream);
+  objectbinarytotextmse(stream,teststream);
   teststream.position:= 0;
   teststream.writetotext(output);
  end;
@@ -2858,7 +2858,7 @@ begin
    stream2:= tmsefilestream.create(afilename,fm_create);
    try
     stream1.position:= 0;
-    objectbinarytotext(stream1,stream2);
+    objectbinarytotextmse(stream1,stream2);
    finally
     stream2.Free;
    end;
