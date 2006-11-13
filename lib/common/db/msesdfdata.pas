@@ -419,11 +419,12 @@ end;
 
 procedure tmsefixedformatdataset.post;
 begin
+ fcontroller.post;
 end;
 
 function tmsefixedformatdataset.moveby(const distance: integer): integer;
 begin
- fcontroller.post;
+ result:= fcontroller.moveby(distance);
 end;
 
 { tmsesdfdataset }
