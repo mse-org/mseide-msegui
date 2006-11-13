@@ -233,7 +233,11 @@ begin
             assigned(doexecute) then begin
         state:= state - [ss_clicked];
         result:= true; //state can be invalid after execute
+        if widget <> nil then begin //info can be invalid after execute
+         widget.invalidaterect(dim);
+        end;
         doexecute(tag,mouseevent);
+        exit;
        end
        else begin
         state:= state - [ss_clicked];
