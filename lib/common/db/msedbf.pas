@@ -24,6 +24,7 @@ type
 //   procedure inheritedresync(const mode: tresyncmode);
    procedure inheriteddataevent(const event: tdataevent; const info: ptrint);
    procedure inheritedcancel;
+   procedure inheritedpost;
    function inheritedmoveby(const distance: integer): integer;
    procedure inheritedinternalinsert;
    procedure inheritedinternalopen;
@@ -67,8 +68,9 @@ type
    function locate(const key: string; const field: tfield; 
                  const options: locateoptionsty = []): locateresultty;
    procedure AppendRecord(const Values: array of const);
-   procedure cancel; override;
    function moveby(const distance: integer): integer;
+   procedure cancel; override;
+   procedure post; override;
   published
    property FilePath: filenamety read ffilepath write setfilepath;
    property controller: tdscontroller read fcontroller write setcontroller;
@@ -349,6 +351,16 @@ end;
 procedure tmsedbf.internalopen;
 begin
  fcontroller.internalopen;
+end;
+
+procedure tmsedbf.inheritedpost;
+begin
+ inherited post;
+end;
+
+procedure tmsedbf.post;
+begin
+ fcontroller.post;
 end;
 
 end.

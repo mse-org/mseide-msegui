@@ -2036,7 +2036,9 @@ end;
 
 function teditwidgetdatalink.nullcheckneeded: boolean;
 begin
- result:= editing and (dataset.modified or (dataset.state <> dsinsert));
+ result:= editing and (dataset.modified or 
+        (dataset.state <> dsinsert) or 
+         (fdscontroller <> nil) and fdscontroller.posting);
 end;
 
 function teditwidgetdatalink.cuttext(const atext: msestring;

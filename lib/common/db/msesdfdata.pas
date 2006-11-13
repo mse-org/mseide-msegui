@@ -25,6 +25,7 @@ type
 //   procedure inheritedresync(const mode: tresyncmode);
    procedure inheriteddataevent(const event: tdataevent; const info: ptrint);
    procedure inheritedcancel;
+   procedure inheritedpost;
    function inheritedmoveby(const distance: integer): integer;
    procedure inheritedinternalinsert;
    procedure inheritedinternalopen;
@@ -69,6 +70,8 @@ type
                  const options: locateoptionsty = []): locateresultty;
    procedure AppendRecord(const Values: array of const);
    procedure cancel; override;
+   procedure post; override;
+   function moveby(const distance: integer): integer;
   published
    property FileName: filenamety read ffilename write setfilename;
    property controller: tdscontroller read fcontroller write setcontroller;
@@ -86,6 +89,7 @@ type
 //   procedure inheritedresync(const mode: tresyncmode);
    procedure inheriteddataevent(const event: tdataevent; const info: ptrint);
    procedure inheritedcancel;
+   procedure inheritedpost;
    function inheritedmoveby(const distance: integer): integer;
    procedure inheritedinternalinsert;
    procedure inheritedinternalopen;
@@ -130,6 +134,8 @@ type
                  const options: locateoptionsty= []): locateresultty;
    procedure AppendRecord(const Values: array of const);
    procedure cancel; override;
+   procedure post; override;
+  function moveby(const distance: integer): integer;
   published
    property FileName: filenamety read ffilename write setfilename;
    property controller: tdscontroller read fcontroller write setcontroller;
@@ -406,6 +412,20 @@ begin
  fcontroller.internalopen;
 end;
 
+procedure tmsefixedformatdataset.inheritedpost;
+begin
+ inherited post;
+end;
+
+procedure tmsefixedformatdataset.post;
+begin
+end;
+
+function tmsefixedformatdataset.moveby(const distance: integer): integer;
+begin
+ fcontroller.post;
+end;
+
 { tmsesdfdataset }
 
 constructor tmsesdfdataset.create(aowner: tcomponent);
@@ -671,6 +691,21 @@ end;
 procedure tmsesdfdataset.internalopen;
 begin
  fcontroller.internalopen;
+end;
+
+procedure tmsesdfdataset.inheritedpost;
+begin
+ inherited post;
+end;
+
+procedure tmsesdfdataset.post;
+begin
+ fcontroller.post;
+end;
+
+function tmsesdfdataset.moveby(const distance: integer): integer;
+begin
+ result:= fcontroller.moveby(distance);
 end;
 
 end.
