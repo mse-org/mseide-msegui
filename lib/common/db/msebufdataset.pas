@@ -284,12 +284,15 @@ type
              //returns new recno
    function insertrecord(arecno: integer; const arecord: pintrecordty): integer;
              //returns new recno
-   procedure deleterecord(const arecno: integer);    
+   procedure deleterecord(const arecno: integer); overload;
+   procedure deleterecord(const arecord: pintrecordty); overload;
    procedure getnewupdatebuffer;
    procedure setindexlocal(const avalue: tlocalindexes);
    function insertindexrefs(const arecord: pintrecordty): integer;
               //returns new recno of active index
    procedure removeindexrefs(const arecord: pintrecordty);
+   function remove0indexref(const arecord: pintrecordty): integer;
+                    //returns index
    procedure internalsetrecno(const avalue: integer);
    procedure setactindex(const avalue: integer);
    procedure checkindex;
@@ -1296,15 +1299,19 @@ begin
  setlength(fupdatebuffer,high(fupdatebuffer)+2);
  fcurrentupdatebuffer:= high(fupdatebuffer);
 end;
-
+var testvar: integer; testvar1: pointer;
 procedure tmsebufdataset.internaldelete;
 begin
  if not getrecordupdatebuffer then begin
   getnewupdatebuffer;
   with fupdatebuffer[fcurrentupdatebuffer] do begin
+testvar:= frecno;
+testvar1:= fcurrentbuf;
    bookmark.recno:= frecno;
    bookmark.recordpo:= fcurrentbuf;
    oldvalues:= bookmark.recordpo;
+testvar:= bookmark.recno;
+testvar1:= oldvalues;
   end;
  end
  else begin
@@ -1346,8 +1353,9 @@ begin
     end
     else begin
      if updatekind = ukinsert then begin
+      deleterecord(bookmark.recordpo);
       intfreerecord(bookmark.recordpo);
-      deleterecord(bookmark.recno);
+//      deleterecord(bookmark.recno);
      end;
     end;
    end;
@@ -2101,28 +2109,64 @@ begin
  inc(fbrecordcount);
 end;
 
+function tmsebufdataset.remove0indexref(const arecord: pintrecordty): integer;
+var
+ po1: pintrecordty;
+ po2: ppointer;
+ int1: integer;
+begin  
+ result:= -1;
+ dec(fbrecordcount);
+ po1:= arecord;
+ with findexes[0] do begin
+  po2:= pointer(ind) + fbrecordcount*sizeof(pointer);
+  for int1:= fbrecordcount downto 0 do begin
+   if po2^ = po1 then begin
+    result:= int1;
+    break;
+   end;
+   dec(po2);
+  end;
+  if result >= 0 then begin
+   move(ind[result+1],ind[result],(fbrecordcount-result)*sizeof(pointer));
+  end;
+ end;
+end;
+
+procedure tmsebufdataset.deleterecord(const arecord: pintrecordty);
+var
+ int1: integer;
+begin
+ if bs_indexvalid in fbstate then begin
+  int1:= factindex;
+  factindex:= 0;
+  removeindexrefs(arecord);
+  factindex:= int1;
+ end;
+ remove0indexref(arecord);
+end;
+
 procedure tmsebufdataset.deleterecord(const arecno: integer);
 var
  po1: pintrecordty;
  int1: integer;
 begin
+ po1:= factindexpo^.ind[arecno];
  if bs_indexvalid in fbstate then begin
-  removeindexrefs(pintrecordty(factindexpo^.ind[arecno]));
- end;
- dec(fbrecordcount);
- with findexes[0] do begin
-  if factindex = 0 then begin
-   int1:= arecno;
-  end
-  else begin
-   po1:= factindexpo^.ind[arecno];
-   for int1:= fbrecordcount downto 0 do begin
-    if ind[int1] = po1 then begin
-     break;
-    end;
-   end;
+  removeindexrefs(po1);
+  if factindex <> 0 then begin
+   move(factindexpo^.ind[arecno+1],factindexpo^.ind[arecno],
+              (fbrecordcount-arecno-1)*sizeof(pointer));
   end;
-  move(ind[int1+1],ind[int1],(fbrecordcount-int1)*sizeof(pointer));
+ end;
+ if factindex = 0 then begin
+  dec(fbrecordcount);
+  with findexes[0] do begin
+   move(ind[arecno+1],ind[arecno],(fbrecordcount-arecno)*sizeof(pointer));
+  end;
+ end
+ else begin
+  remove0indexref(po1);
  end;
  if (frecno > arecno) or (frecno >= fbrecordcount) then begin
   dec(frecno);
