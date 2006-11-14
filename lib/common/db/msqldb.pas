@@ -307,7 +307,7 @@ type
 
 implementation
 uses 
- dbconst,strutils,mseclasses,msedatalist;
+ dbconst,strutils,mseclasses,msedatalist,msereal;
 
 //copied from dsparams.inc 
 //todo: not needed for FPC 2.1.1
@@ -829,10 +829,22 @@ begin
 end;
 
 procedure TSQLQuery.Execute;
+var
+ int1: integer;
 begin
-  If (FParams.Count>0) and Assigned(FMasterLink) then
-    FMasterLink.CopyParamsFromMaster(False);
-  (Database as tsqlconnection).execute(Fcursor,Transaction as tsqltransaction, FParams);
+ If (FParams.Count>0) and Assigned(FMasterLink) then begin
+  FMasterLink.CopyParamsFromMaster(False);
+ end;
+ for int1:= 0 to fparams.count - 1 do begin
+  with fparams[int1] do begin
+   if not isnull and (datatype in [ftFloat,ftDate,ftTime,ftDateTime]) and
+                              isemptyreal(asfloat) then begin
+    clear;
+   end;
+  end;
+ end;
+ tsqlconnection(database).execute(Fcursor,
+                                   Transaction as tsqltransaction, FParams);
 end;
 
 function TSQLQuery.LoadField(FieldDef : TFieldDef;buffer : pointer) : boolean;
