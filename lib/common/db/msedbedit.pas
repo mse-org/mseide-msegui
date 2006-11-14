@@ -2000,6 +2000,7 @@ end;
 function teditwidgetdatalink.dataentered: boolean;
 var
  widget1: twidget;
+ bo1: boolean;
 begin
  result:= true;
  if (field <> nil) and editing then begin
@@ -2007,7 +2008,24 @@ begin
   if (oe_autopost in fintf.getoptionsedit) and active then begin
    widget1:= fintf.getwidget.parentwidget;
    if (widget1 <> nil) then begin
-    result:= widget1.canparentclose;
+    if widget1.parentwidget is tcustomgrid then begin
+     with tcustomgrid1(widget1.parentwidget) do begin
+      bo1:= fnonullcheck > 0;
+      if bo1 then begin
+       dec(fnonullcheck);   //remove colchangelock
+      end;
+     end;
+    end
+    else begin
+     bo1:= false;
+    end;
+    try
+     result:= widget1.canparentclose;
+    finally
+     if bo1 then begin
+      inc(tcustomgrid1(widget1.parentwidget).fnonullcheck);
+     end;
+    end;
    end;
    if result then begin
     dataset.post;
@@ -5246,14 +5264,6 @@ begin
   if checkvalue then begin
    inherited;
   end;
-{
-  if not checkvalue then begin
-   application.postevent(tobjectevent.create(ek_dbedit,ievent(self)));
-  end
-  else begin
-   inherited;
-  end;
-}
  finally
   tcustomgrid1(fgrid).endnonullcheck;
   endnullchecking;
