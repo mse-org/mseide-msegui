@@ -823,7 +823,7 @@ begin
    end;
    binstream.Position:= 0;
    while binstream.Position < binstream.Size do begin
-    objectbinarytotext(binstream,textstream);
+    objectbinarytotextmse(binstream,textstream);
    end;
    textstream.Position:= 0;
    result:= textstream.readdatastring;
@@ -866,7 +866,7 @@ begin
      writer.writecomponent(co1);
      freeandnil(writer);
      binstream.position:= 0;
-     objectbinarytotext(binstream,textstream);
+     objectbinarytotextmse(binstream,textstream);
      textstream.position:= 0;
      objtext:= textstream.readdatastring;
     finally

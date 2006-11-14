@@ -99,7 +99,7 @@ type
     procedure UnPrepareStatement(cursor : TSQLCursor); virtual; abstract;
 
     procedure FreeFldBuffers(cursor : TSQLCursor); virtual; abstract;
-    function loadfield(const cursor: tsqlcursor; const fielddef: tfielddef;
+    function loadfield(const cursor: tsqlcursor; const afield: tfield;
       const buffer: pointer; var bufsize: integer): boolean; virtual; abstract;
            //if bufsize < 0 -> buffer was to small, should be -bufsize
     function GetTransactionHandle(trans : TSQLHandle): pointer; virtual; abstract;
@@ -108,6 +108,8 @@ type
     function StartdbTransaction(trans : TSQLHandle; aParams : string) : boolean; virtual; abstract;
     procedure CommitRetaining(trans : TSQLHandle); virtual; abstract;
     procedure RollBackRetaining(trans : TSQLHandle); virtual; abstract;
+    function getblobdatasize: integer; virtual; abstract;
+
     procedure UpdateIndexDefs(var IndexDefs : TIndexDefs;TableName : string); virtual;
     function GetSchemaInfoSQL(SchemaType : TSchemaType; SchemaObjectName, SchemaPattern : string) : string; virtual;
     function CreateBlobStream(const Field: TField; const Mode: TBlobStreamMode;
@@ -212,6 +214,7 @@ type
 
    fblobintf: iblobconnection;
    
+//   fIsPrepared: boolean;
     procedure FreeFldBuffers;
     procedure InitUpdates(ASQL : string);
     function GetIndexDefs : TIndexDefs;
@@ -232,7 +235,8 @@ type
     FReadOnly            : boolean;
     // abstract & virtual methods of TBufDataset
     function Fetch : boolean; override;
-    function loadfield(const fielddef: tfielddef; const buffer: pointer;
+    function getblobdatasize: integer; override;
+    function loadfield(const afield: tfield; const buffer: pointer;
                      var bufsize: integer): boolean; override;
            //if bufsize < 0 -> buffer was to small, should be -bufsize
     // abstract & virtual methods of TDataset
@@ -246,7 +250,7 @@ type
     function  GetCanModify: Boolean; override;
     Procedure internalApplyRecUpdate(UpdateKind : TUpdateKind);
     procedure ApplyRecUpdate(UpdateKind : TUpdateKind); override;
-    Function IsPrepared : Boolean; virtual;
+    Function IsPrepared: Boolean; virtual;
     Procedure SetActive (Value : Boolean); override;
     procedure SetFiltered(Value: Boolean); override;
     procedure SetFilterText(const Value: string); override;
@@ -849,11 +853,11 @@ begin
   (Database as tsqlconnection).execute(Fcursor,Transaction as tsqltransaction, FParams);
 end;
 
-function tsqlquery.loadfield(const fielddef: tfielddef; const buffer: pointer;
+function tsqlquery.loadfield(const afield: tfield; const buffer: pointer;
                      var bufsize: integer): boolean;
            //if bufsize < 0 -> buffer was to small, should be -bufsize
 begin
- result:= tSQLConnection(database).LoadField(FCursor,FieldDef,buffer,bufsize)
+ result:= tSQLConnection(database).LoadField(FCursor,aField,buffer,bufsize)
 end;
 
 procedure TSQLQuery.InternalAddRecord(Buffer: Pointer; AAppend: Boolean);
@@ -1651,6 +1655,11 @@ begin
   Inherited;
   If (Operation=opRemove) and (AComponent=DataSource) then
     DataSource:=Nil;
+end;
+
+function TSQLQuery.getblobdatasize: integer;
+begin
+ result:= tsqlconnection(database).getblobdatasize;
 end;
 
 { TSQLCursor }

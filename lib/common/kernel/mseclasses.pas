@@ -505,6 +505,8 @@ procedure writestringar(const writer: twriter; const ar: stringarty);
 function createmsedatamodule(const aclass: tclass;
                     const aclassname: pshortstring): tmsecomponent;
 function swapmethodtable(const instance: tobject; const newtable: pointer): pointer;
+procedure objectbinarytotextmse(input, output: tstream);
+                //workaround for FPC bug 7813 with localized float strings
                     
 implementation
 uses
@@ -611,6 +613,26 @@ begin
  methodtabpo^:= newtable;
  {$ifdef mswindows}
  virtualprotect(methodtabpo,sizeof(pointer),ca1,nil);
+ {$endif}
+end;
+
+procedure objectbinarytotextmse(input, output: tstream);
+                //workaround for FPC bug with localized float strings
+{$ifdef FPC}
+var
+ ch1: char;
+{$endif}
+begin
+ {$ifdef FPC}
+ ch1:= decimalseparator;
+ decimalseparator:= '.';
+ try
+  objectbinarytotext(input,output);
+ finally
+  decimalseparator:= ch1;
+ end;  
+ {$else}
+  objectbinarytotext(input,output);
  {$endif}
 end;
 
@@ -875,7 +897,7 @@ begin
   end;
  {$ifdef debugsubmodule}
    stream1.position:= 0;
-   objectbinarytotext(stream1,stream3);
+   objectbinarytotextmse(stream1,stream3);
    stream3.position:= 0;
    writeln('changes oldancestor->descendent');
    stream3.writetotext(output);
@@ -916,7 +938,7 @@ begin
  {$ifdef debugsubmodule}
    stream2.position:= 0;
    stream3.setsize(0);
-   objectbinarytotext(stream2,stream3);
+   objectbinarytotextmse(stream2,stream3);
    stream3.position:= 0;
    writeln('changes descendent->newancestor');
    stream3.writetotext(output);

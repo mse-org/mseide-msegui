@@ -54,7 +54,7 @@ type
    procedure AddFieldDefs(cursor: TSQLCursor; FieldDefs : TfieldDefs); override;
    function Fetch(cursor : TSQLCursor) : boolean; override;
    procedure UnPrepareStatement(cursor : TSQLCursor); override;
-   function loadfield(const cursor: tsqlcursor; const fielddef: tfielddef;
+   function loadfield(const cursor: tsqlcursor; const afield: tfield;
               const buffer: pointer; var bufsize: integer): boolean; override;
            //if bufsize < 0 -> buffer was to small, should be -bufsize
    function GetTransactionHandle(trans : TSQLHandle): pointer; override;
@@ -67,6 +67,7 @@ type
    function GetSchemaInfoSQL(SchemaType : TSchemaType; SchemaObjectName, SchemaPattern : string) : string; override;
    function CreateBlobStream(const Field: TField; const Mode: TBlobStreamMode;
                       const acursor: tsqlcursor): TStream; override;
+   function getblobdatasize: integer; override;
           //iblobconnection
    procedure writeblobdata(const atransaction: tsqltransaction;
              const tablename: string; const acursor: tsqlcursor;
@@ -612,7 +613,7 @@ begin
 end;
 
 function tpqconnection.loadfield(const cursor: tsqlcursor;
-      const fielddef: tfielddef;
+      const afield: tfield;
       const buffer: pointer; var bufsize: integer): boolean;
            //if bufsize < 0 -> buffer was to small, should be -bufsize
 
@@ -641,110 +642,111 @@ var
  
 begin
 {$ifdef FPC}{$checkpointer off}{$endif}
-  with TPQCursor(cursor) do
-    begin
+ with TPQCursor(cursor) do begin
+  {
     for x := 0 to PQnfields(res)-1 do
       if PQfname(Res, x) = FieldDef.Name then break;
 
     if PQfname(Res, x) <> FieldDef.Name then
       DatabaseErrorFmt(SFieldNotFound,[FieldDef.Name],self);
-
-    if pqgetisnull(res,CurTuple,x)=1 then
-      result := false
-    else
-      begin
-      i := PQfsize(res, x);
-      CurrBuff := pqgetvalue(res,CurTuple,x);
-
-      result := true;
-
-      case FieldDef.DataType of
-        ftInteger, ftSmallint, ftLargeInt,ftfloat: begin
-         case i of               // postgres returns big-endian numbers
-          sizeof(int64) : pint64(buffer)^ := BEtoN(pint64(CurrBuff)^);
-          sizeof(integer) : pinteger(buffer)^ := BEtoN(pinteger(CurrBuff)^);
-          sizeof(smallint) : psmallint(buffer)^ := BEtoN(psmallint(CurrBuff)^);
-          else begin
-           if i > bufsize then begin
-            bufsize:= -bufsize;
-           end
-           else begin
-            for tel:= 1 to i do begin
-             pchar(Buffer)[tel-1] := CurrBuff[i-tel];
-            end;
-           end;
-          end;
-         end;
+}
+  x:= afield.fieldno - 1;
+  if pqgetisnull(res,CurTuple,x)=1 then begin
+   result := false
+  end
+  else begin
+   i:= PQfsize(res, x);
+   CurrBuff := pqgetvalue(res,CurTuple,x);
+   result := true;
+   case afield.DataType of
+    ftInteger, ftSmallint, ftLargeInt,ftfloat: begin
+     case i of               // postgres returns big-endian numbers
+      sizeof(int64) : pint64(buffer)^ := BEtoN(pint64(CurrBuff)^);
+      sizeof(integer) : pinteger(buffer)^ := BEtoN(pinteger(CurrBuff)^);
+      sizeof(smallint) : psmallint(buffer)^ := BEtoN(psmallint(CurrBuff)^);
+      else begin
+       if i > bufsize then begin
+        bufsize:= -bufsize;
+       end
+       else begin
+        for tel:= 1 to i do begin
+         pchar(Buffer)[tel-1] := CurrBuff[i-tel];
         end;
-        ftString: begin
-         li:= pqgetlength(res,curtuple,x);
-         if bufsize < li then begin
-          bufsize:= -li;
-         end
-         else begin
-          bufsize:= li;
-          Move(CurrBuff^,Buffer^,li);
-         end;
+       end;
+      end;
+     end;
+    end;
+    ftString: begin
+     li:= pqgetlength(res,curtuple,x);
+     if bufsize < li then begin
+      bufsize:= -li;
+     end
+     else begin
+      bufsize:= li;
+      Move(CurrBuff^,Buffer^,li);
+     end;
 //         pchar(Buffer + li)^ := #0;
 //         i := pqfmod(res,x)-3;
-        end;
-        ftblob,ftmemo: begin
-         li := pqgetlength(res,curtuple,x);
-         int1:= addblobdata(currbuff,li);
-         move(int1,buffer^,sizeof(int1));
-          //save id
-        end;
-        ftdate :
-          begin
-          dbl := pointer(buffer);
-          dbl^ := BEtoN(plongint(CurrBuff)^) + 36526;
-          i := sizeof(double);
-          end;
-        ftDateTime, fttime :
-          begin
-          pint64(buffer)^ := BEtoN(pint64(CurrBuff)^);
-          dbl := pointer(buffer);
-          if FIntegerDatetimes then dbl^ := pint64(buffer)^/1000000;
-          dbl^ := (dbl^+3.1558464E+009)/86400;  // postgres counts seconds elapsed since 1-1-2000
-          // Now convert the mathematically-correct datetime to the
-          // illogical windows/delphi/fpc TDateTime:
-          if (dbl^ <= 0) and (frac(dbl^)<0) then
-            dbl^ := trunc(dbl^)-2-frac(dbl^);
-          end;
-        ftBCD:
-          begin
-          NumericRecord := pointer(CurrBuff);
-          NumericRecord^.Digits := BEtoN(NumericRecord^.Digits);
-          NumericRecord^.Scale := BEtoN(NumericRecord^.Scale);
-          NumericRecord^.Weight := BEtoN(NumericRecord^.Weight);
-          numericrecord^.sign:= beton(numericrecord^.sign);
-          inc(pointer(currbuff),sizeof(TNumericRecord));
-          cur := 0;
-          if numericrecord^.sign and numericnan <> 0 then begin 
-//          if (NumericRecord^.Digits = 0) and (NumericRecord^.Scale = 0) then 
-    // = NaN, which is not supported by Currency-type, so we return NULL 
-             //???? 0 in database seems to return digits and scale 0. mse
-           result := false;            //nan
-          end
-          else
-            begin
-            for tel := 1 to NumericRecord^.Digits  do
-              begin
-              cur := cur + beton(pword(currbuff)^) * intpower(10000,-(tel-1)+
-                                           NumericRecord^.weight);
-              inc(pointer(currbuff),2);
-              end;
-            if BEtoN(NumericRecord^.Sign) <> 0 then cur := -cur;
-            Move(Cur, Buffer^, sizeof(currency));
-            end;
-          end;
-        ftBoolean:
-          pchar(buffer)[0] := CurrBuff[0]
-        else
-          result := false;
-      end;
-      end;
     end;
+    ftblob,ftmemo: begin
+     li := pqgetlength(res,curtuple,x);
+     int1:= addblobdata(currbuff,li);
+     move(int1,buffer^,sizeof(int1));
+      //save id
+    end;
+    ftdate: begin
+     dbl:= pointer(buffer);
+     dbl^:= BEtoN(plongint(CurrBuff)^) + 36526;
+     i:= sizeof(double);
+    end;
+    ftDateTime,fttime: begin
+     pint64(buffer)^ := BEtoN(pint64(CurrBuff)^);
+     dbl := pointer(buffer);
+     if FIntegerDatetimes then begin
+      dbl^ := pint64(buffer)^/1000000;
+     end;
+     dbl^ := (dbl^+3.1558464E+009)/86400;  // postgres counts seconds elapsed since 1-1-2000
+     // Now convert the mathematically-correct datetime to the
+     // illogical windows/delphi/fpc TDateTime:
+     if (dbl^ <= 0) and (frac(dbl^)<0) then begin
+       dbl^ := trunc(dbl^)-2-frac(dbl^);
+     end;
+    end;
+    ftBCD: begin
+     NumericRecord := pointer(CurrBuff);
+     NumericRecord^.Digits := BEtoN(NumericRecord^.Digits);
+     NumericRecord^.Scale := BEtoN(NumericRecord^.Scale);
+     NumericRecord^.Weight := BEtoN(NumericRecord^.Weight);
+     numericrecord^.sign:= beton(numericrecord^.sign);
+     inc(pointer(currbuff),sizeof(TNumericRecord));
+     cur := 0;
+     if numericrecord^.sign and numericnan <> 0 then begin 
+//          if (NumericRecord^.Digits = 0) and (NumericRecord^.Scale = 0) then 
+// = NaN, which is not supported by Currency-type, so we return NULL 
+        //???? 0 in database seems to return digits and scale 0. mse
+      result := false;            //nan
+     end
+     else begin
+      for tel := 1 to NumericRecord^.Digits  do begin
+        cur := cur + beton(pword(currbuff)^) * intpower(10000,-(tel-1)+
+                                     NumericRecord^.weight);
+        inc(pointer(currbuff),2);
+      end;
+      if BEtoN(NumericRecord^.Sign) <> 0 then begin
+       cur := -cur;
+      end;
+      Move(Cur, Buffer^, sizeof(currency));
+     end;
+    end;
+    ftBoolean: begin
+     pchar(buffer)[0] := CurrBuff[0]
+    end;
+    else begin
+      result := false;
+    end;
+   end;
+  end;
+ end;
 {$ifdef FPC}{$checkpointer default}{$endif}
 end;
 
@@ -891,6 +893,11 @@ procedure TPQConnection.setupblobdata(const afield: tfield;
                       const acursor: tsqlcursor; const aparam: tparam);
 begin
  acursor.blobfieldtoparam(afield,aparam,afield.datatype = ftmemo);
+end;
+
+function TPQConnection.getblobdatasize: integer;
+begin
+ result:= sizeof(integer);
 end;
 
 {

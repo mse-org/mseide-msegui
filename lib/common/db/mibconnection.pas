@@ -50,7 +50,8 @@ type
     // conversion methods
     procedure GetDateTime(CurrBuff, Buffer : pointer; AType : integer);
     procedure SetDateTime(CurrBuff: pointer; PTime : TDateTime; AType : integer);
-    procedure GetFloat(CurrBuff, Buffer : pointer; Field : TFieldDef);
+    procedure GetFloat(const CurrBuff,Buffer: pointer; 
+                                     const datalength: integer);
     procedure SetFloat(CurrBuff: pointer; Dbl: Double; Size: integer);
     procedure CheckError(ProcName : string; Status : array of ISC_STATUS);
     function getMaxBlobSize(blobHandle : TIsc_Blob_Handle) : longInt;
@@ -71,7 +72,7 @@ type
     procedure Execute(cursor: TSQLCursor;atransaction:tSQLtransaction; AParams : TParams); override;
     procedure AddFieldDefs(cursor: TSQLCursor;FieldDefs : TfieldDefs); override;
     function Fetch(cursor : TSQLCursor) : boolean; override;
-    function loadfield(const cursor: tsqlcursor; const fielddef: tfielddef;
+    function loadfield(const cursor: tsqlcursor; const afield: tfield;
       const buffer: pointer; var bufsize: integer): boolean; override;
            //if bufsize < 0 -> buffer was to small, should be -bufsize
     function GetTransactionHandle(trans : TSQLHandle): pointer; override;
@@ -84,6 +85,7 @@ type
     function GetSchemaInfoSQL(SchemaType : TSchemaType; SchemaObjectName, SchemaPattern : string) : string; override;
     function CreateBlobStream(const Field: TField; const Mode: TBlobStreamMode;
                            const acursor: tsqlcursor): TStream; override;
+    function getblobdatasize: integer; override;
                            
                     //iblobconnection                           
    procedure writeblobdata(const atransaction: tsqltransaction;
@@ -680,17 +682,18 @@ begin
     end;
 end;
 
-function tibconnection.loadfield(const cursor: tsqlcursor; const fielddef: tfielddef;
+function tibconnection.loadfield(const cursor: tsqlcursor; const afield: tfield;
       const buffer: pointer; var bufsize: integer): boolean;
            //if bufsize < 0 -> buffer was to small, should be -bufsize
 var
- x: integer;
+// x: integer;
  VarcharLen: word;
  CurrBuff: pchar;
  b: longint;
  c: currency;
 begin
  with TIBCursor(cursor) do begin
+ {
   for x := 0 to SQLDA^.SQLD - 1 do begin
    if SQLDA^.SQLVar[x].AliasName = FieldDef.Name then break;
   end;
@@ -698,61 +701,61 @@ begin
   if SQLDA^.SQLVar[x].AliasName <> FieldDef.Name then begin
    DatabaseErrorFmt(SFieldNotFound,[FieldDef.Name],self);
   end;
-  if assigned(SQLDA^.SQLVar[x].SQLInd) and 
-                     (SQLDA^.SQLVar[x].SQLInd^ = -1) then begin
-      result := false
-  end
-  else begin
-   with SQLDA^.SQLVar[x] do begin
+  }
+  with SQLDA^.SQLVar[afield.fieldno-1] do begin
+   if assigned(SQLInd) and (SQLInd^ = -1) then begin
+    result:= false
+   end
+   else begin
+    Result := true;
     if ((SQLType and not 1) = SQL_VARYING) then begin
      Move(SQLData^,VarcharLen,2);
      CurrBuff:= SQLData + 2;
     end
     else begin
      CurrBuff:= SQLData;
-     VarCharLen:= SQLDA^.SQLVar[x].SQLLen;
+     VarCharLen:= SQLLen;
     end;
-   end;  
-   Result := true;
-   case FieldDef.DataType of
-    ftBCD: begin
-     c:= 0;
-     Move(CurrBuff^, c, SQLDA^.SQLVar[x].SQLLen);
-     c:= c*intpower(10,4+SQLDA^.SQLVar[x].SQLScale);
-     Move(c, buffer^ , sizeof(c));
-    end;
-    ftInteger: begin
-     b:= 0;
-     Move(b, Buffer^, sizeof(longint));
-     Move(CurrBuff^, Buffer^, SQLDA^.SQLVar[x].SQLLen);
-    end;
-    ftLargeint: begin
-     FillByte(buffer^,sizeof(LargeInt),0);
-     Move(CurrBuff^, Buffer^, SQLDA^.SQLVar[x].SQLLen);
-    end;
-    ftDate,ftTime,ftDateTime: begin
-      GetDateTime(CurrBuff, Buffer, SQLDA^.SQLVar[x].SQLType);
-    end;
-    ftString: begin
-     if bufsize < varcharlen then begin
-      bufsize:= -varcharlen;
-     end
-     else begin
-      bufsize:= varcharlen;
-      move(currbuff^,buffer^,varcharlen);
+    case aField.DataType of
+     ftBCD: begin
+      c:= 0;
+      Move(CurrBuff^,c,SQLLen);
+      c:= c*intpower(10,4+SQLScale);
+      Move(c,buffer^,sizeof(c));
      end;
- //    Move(CurrBuff^,Buffer^,SQLDA^.SQLVar[x].SQLLen);
- //    PChar(Buffer + VarCharLen)^ := #0;
-    end;
-    ftFloat: begin
-     GetFloat(CurrBuff, Buffer, FieldDef);
-    end;
-    ftBlob,ftmemo,ftgraphic: begin  // load the BlobIb in field's buffer
-     FillByte(buffer^,sizeof(LargeInt),0);
-     Move(CurrBuff^, Buffer^, SQLDA^.SQLVar[x].SQLLen);
-    end;
-    else begin
-     result := false;
+     ftInteger: begin
+      b:= 0;
+      Move(b, Buffer^,sizeof(longint));
+      Move(CurrBuff^,Buffer^,SQLLen);
+     end;
+     ftLargeint: begin
+      FillByte(buffer^,sizeof(LargeInt),0);
+      Move(CurrBuff^,Buffer^,SQLLen);
+     end;
+     ftDate,ftTime,ftDateTime: begin
+      GetDateTime(CurrBuff,Buffer,SQLType);
+     end;
+     ftString: begin
+      if bufsize < varcharlen then begin
+       bufsize:= -varcharlen;
+      end
+      else begin
+       bufsize:= varcharlen;
+       move(currbuff^,buffer^,varcharlen);
+      end;
+  //    Move(CurrBuff^,Buffer^,SQLDA^.SQLVar[x].SQLLen);
+  //    PChar(Buffer + VarCharLen)^ := #0;
+     end;
+     ftFloat: begin
+      GetFloat(CurrBuff,Buffer,sqllen);
+     end;
+     ftBlob,ftmemo,ftgraphic: begin  // load the BlobIb in field's buffer
+      FillByte(buffer^,sizeof(LargeInt),0);
+      Move(CurrBuff^,Buffer^,SQLLen);
+     end;
+     else begin
+      result := false;
+     end;
     end;
    end;
   end;
@@ -956,29 +959,27 @@ begin
   end;
 end;
 
-procedure TIBConnection.GetFloat(CurrBuff, Buffer : pointer; Field : TFieldDef);
+procedure tibconnection.GetFloat(const CurrBuff,Buffer: pointer; 
+                                     const datalength: integer);
 var
-  Ext : extended;
-  Dbl : double;
-  Sin : single;
+ Ext: extended;
+ Dbl: double;
+ Sin: single;
 begin
-  case Field.Size of
-    4 :
-      begin
-        Move(CurrBuff^, Sin, 4);
-        Dbl := Sin;
-      end;
-    8 :
-      begin
-        Move(CurrBuff^, Dbl, 8);
-      end;
-    10:
-      begin
-        Move(CurrBuff^, Ext, 10);
-        Dbl := double(Ext);
-      end;
+ case datalength of
+  4: begin
+   Move(CurrBuff^, Sin, 4);
+   Dbl := Sin;
   end;
-  Move(Dbl, Buffer^, 8);
+  8: begin
+   Move(CurrBuff^, Dbl, 8);
+  end;
+  10: begin
+   Move(CurrBuff^, Ext, 10);
+   Dbl := double(Ext);
+  end;
+ end;
+ Move(Dbl,Buffer^,8);
 end;
 
 
@@ -1133,6 +1134,11 @@ begin
   afield.getdata(@blobid);
   aparam.aslargeint:= int64(blobid);
 // end; 
+end;
+
+function TIBConnection.getblobdatasize: integer;
+begin
+ result:= sizeof(isc_quad);
 end;
 
 end.

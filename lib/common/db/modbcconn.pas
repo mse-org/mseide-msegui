@@ -89,7 +89,7 @@ type
     // - Result retrieving
     procedure AddFieldDefs(cursor:TSQLCursor; FieldDefs:TFieldDefs); override;
     function Fetch(cursor:TSQLCursor):boolean; override;
-    function loadfield(const cursor: tsqlcursor; const fielddef: tfielddef;
+    function loadfield(const cursor: tsqlcursor; const afield: tfield;
       const buffer: pointer; var bufsize: integer): boolean; override;
            //if bufsize < 0 -> buffer was to small, should be -bufsize
     function CreateBlobStream(const Field: TField; const Mode: TBlobStreamMode;
@@ -524,9 +524,13 @@ begin
   Result:=Res<>SQL_NO_DATA;
 end;
 
-function todbcconnection.loadfield(const cursor: tsqlcursor; const fielddef: tfielddef;
-      const buffer: pointer; var bufsize: integer): boolean;
+function todbcconnection.loadfield(const cursor: tsqlcursor;
+       const afield: tfield; const buffer: pointer;
+       var bufsize: integer): boolean;
            //if bufsize < 0 -> buffer was to small, should be -bufsize
+ //untested!
+ //todo: blob implementing 2006-11-14 MSE
+ 
 const
   DEFAULT_BLOB_BUFFER_SIZE = 1024;
 var
@@ -540,29 +544,31 @@ var
   BlobBufferSize,BytesRead:SQLINTEGER;
   BlobMemoryStream:TMemoryStream;
   Res:SQLRETURN;
+  fno: integer;
 begin
   ODBCCursor:=cursor as TODBCCursor;
 
   // load the field using SQLGetData
   // Note: optionally we can implement the use of SQLBindCol later for even more speed
   // TODO: finish this
-  case FieldDef.DataType of
+  fno:= afield.fieldno;
+  case aField.DataType of
     ftFixedChar,ftString: begin // are both mapped to TStringField
-      Res:=SQLGetData(ODBCCursor.FSTMTHandle, FieldDef.Index+1,
-            SQL_C_CHAR, buffer, FieldDef.Size, @StrLenOrInd);
+      Res:=SQLGetData(ODBCCursor.FSTMTHandle, fno,
+            SQL_C_CHAR, buffer, aField.Size, @StrLenOrInd);
       bufsize:= strlenorind;                          //untested!!!!!!
     end;
     ftSmallint:           // mapped to TSmallintField
-      Res:=SQLGetData(ODBCCursor.FSTMTHandle, FieldDef.Index+1, SQL_C_SSHORT, buffer, SizeOf(Smallint), @StrLenOrInd);
+      Res:=SQLGetData(ODBCCursor.FSTMTHandle, fno, SQL_C_SSHORT, buffer, SizeOf(Smallint), @StrLenOrInd);
     ftInteger,ftWord:     // mapped to TLongintField
-      Res:=SQLGetData(ODBCCursor.FSTMTHandle, FieldDef.Index+1, SQL_C_SLONG, buffer, SizeOf(Longint), @StrLenOrInd);
+      Res:=SQLGetData(ODBCCursor.FSTMTHandle, fno, SQL_C_SLONG, buffer, SizeOf(Longint), @StrLenOrInd);
     ftLargeint:           // mapped to TLargeintField
-      Res:=SQLGetData(ODBCCursor.FSTMTHandle, FieldDef.Index+1, SQL_C_SBIGINT, buffer, SizeOf(Largeint), @StrLenOrInd);
+      Res:=SQLGetData(ODBCCursor.FSTMTHandle, fno, SQL_C_SBIGINT, buffer, SizeOf(Largeint), @StrLenOrInd);
     ftFloat:              // mapped to TFloatField
-      Res:=SQLGetData(ODBCCursor.FSTMTHandle, FieldDef.Index+1, SQL_C_DOUBLE, buffer, SizeOf(Double), @StrLenOrInd);
+      Res:=SQLGetData(ODBCCursor.FSTMTHandle, fno, SQL_C_DOUBLE, buffer, SizeOf(Double), @StrLenOrInd);
     ftTime:               // mapped to TTimeField
     begin
-      Res:=SQLGetData(ODBCCursor.FSTMTHandle, FieldDef.Index+1, SQL_C_TYPE_TIME, @ODBCTimeStruct, SizeOf(SQL_TIME_STRUCT), @StrLenOrInd);
+      Res:=SQLGetData(ODBCCursor.FSTMTHandle, fno, SQL_C_TYPE_TIME, @ODBCTimeStruct, SizeOf(SQL_TIME_STRUCT), @StrLenOrInd);
       if StrLenOrInd<>SQL_NULL_DATA then
       begin
         DateTime:=TimeStructToDateTime(@ODBCTimeStruct);
@@ -571,7 +577,7 @@ begin
     end;
     ftDate:               // mapped to TDateField
     begin
-      Res:=SQLGetData(ODBCCursor.FSTMTHandle, FieldDef.Index+1, SQL_C_TYPE_DATE, @ODBCDateStruct, SizeOf(SQL_DATE_STRUCT), @StrLenOrInd);
+      Res:=SQLGetData(ODBCCursor.FSTMTHandle, fno, SQL_C_TYPE_DATE, @ODBCDateStruct, SizeOf(SQL_DATE_STRUCT), @StrLenOrInd);
       if StrLenOrInd<>SQL_NULL_DATA then
       begin
         DateTime:=DateStructToDateTime(@ODBCDateStruct);
@@ -580,7 +586,7 @@ begin
     end;
     ftDateTime:           // mapped to TDateTimeField
     begin
-      Res:=SQLGetData(ODBCCursor.FSTMTHandle, FieldDef.Index+1, SQL_C_TYPE_TIMESTAMP, @ODBCTimeStampStruct, SizeOf(SQL_TIMESTAMP_STRUCT), @StrLenOrInd);
+      Res:=SQLGetData(ODBCCursor.FSTMTHandle, fno, SQL_C_TYPE_TIMESTAMP, @ODBCTimeStampStruct, SizeOf(SQL_TIMESTAMP_STRUCT), @StrLenOrInd);
       if StrLenOrInd<>SQL_NULL_DATA then
       begin
         DateTime:=TimeStampStructToDateTime(@ODBCTimeStampStruct);
@@ -588,16 +594,17 @@ begin
       end;
     end;
     ftBoolean:            // mapped to TBooleanField
-      Res:=SQLGetData(ODBCCursor.FSTMTHandle, FieldDef.Index+1, SQL_C_BIT, buffer, SizeOf(Wordbool), @StrLenOrInd);
+      Res:=SQLGetData(ODBCCursor.FSTMTHandle, fno, SQL_C_BIT, buffer, SizeOf(Wordbool), @StrLenOrInd);
     ftBytes:              // mapped to TBytesField
-      Res:=SQLGetData(ODBCCursor.FSTMTHandle, FieldDef.Index+1, SQL_C_BINARY, buffer, FieldDef.Size, @StrLenOrInd);
+      Res:=SQLGetData(ODBCCursor.FSTMTHandle, fno, SQL_C_BINARY, buffer, aField.Size, @StrLenOrInd);
     ftVarBytes:           // mapped to TVarBytesField
-      Res:=SQLGetData(ODBCCursor.FSTMTHandle, FieldDef.Index+1, SQL_C_BINARY, buffer, FieldDef.Size, @StrLenOrInd);
+      Res:=SQLGetData(ODBCCursor.FSTMTHandle, fno, SQL_C_BINARY, buffer, aField.Size, @StrLenOrInd);
     ftBlob, ftMemo:       // BLOBs
     begin
       // Try to discover BLOB data length
-      Res:=SQLGetData(ODBCCursor.FSTMTHandle, FieldDef.Index+1, SQL_C_BINARY, buffer, 0, @StrLenOrInd);
-      ODBCCheckResult(Res, SQL_HANDLE_STMT, ODBCCursor.FSTMTHandle, Format('Could not get field data for field ''%s'' (index %d).',[FieldDef.Name, FieldDef.Index+1]));
+      Res:=SQLGetData(ODBCCursor.FSTMTHandle, fno, SQL_C_BINARY, buffer, 0, @StrLenOrInd);
+      ODBCCheckResult(Res, SQL_HANDLE_STMT, ODBCCursor.FSTMTHandle, Format('Could not get field data for field ''%s'' (index %d).',
+      [aField.fieldName, fno]));
       // Read the data if not NULL
       if StrLenOrInd<>SQL_NULL_DATA then
       begin
@@ -617,8 +624,10 @@ begin
             BlobMemoryStream:=TMemoryStream.Create;
             // Retrieve data in parts (or effectively in one part if StrLenOrInd<>SQL_NO_TOTAL above)
             repeat
-              Res:=SQLGetData(ODBCCursor.FSTMTHandle, FieldDef.Index+1, SQL_C_BINARY, BlobBuffer, BlobBufferSize, @StrLenOrInd);
-              ODBCCheckResult(Res, SQL_HANDLE_STMT, ODBCCursor.FSTMTHandle, Format('Could not get field data for field ''%s'' (index %d).',[FieldDef.Name, FieldDef.Index+1]));
+              Res:=SQLGetData(ODBCCursor.FSTMTHandle, fno, SQL_C_BINARY, BlobBuffer, BlobBufferSize, @StrLenOrInd);
+              ODBCCheckResult(Res, SQL_HANDLE_STMT, ODBCCursor.FSTMTHandle,
+               Format('Could not get field data for field ''%s'' (index %d).',
+               [aField.fieldname, fno]));
               // Append data in buffer to memorystream
               if (StrLenOrInd=SQL_NO_TOTAL) or (StrLenOrInd>BlobBufferSize) then
                 BytesRead:=BlobBufferSize
@@ -642,9 +651,12 @@ begin
     end;
     // TODO: Loading of other field types
   else
-    raise EODBCException.CreateFmt('Tried to load field of unsupported field type %s',[Fieldtypenames[FieldDef.DataType]]);
+    raise EODBCException.CreateFmt('Tried to load field of unsupported field type %s',
+    [Fieldtypenames[aField.DataType]]);
   end;
-  ODBCCheckResult(Res, SQL_HANDLE_STMT, ODBCCursor.FSTMTHandle, Format('Could not get field data for field ''%s'' (index %d).',[FieldDef.Name, FieldDef.Index+1]));
+  ODBCCheckResult(Res, SQL_HANDLE_STMT, ODBCCursor.FSTMTHandle,
+   Format('Could not get field data for field ''%s'' (index %d).',
+   [aField.fieldName, fno]));
   Result:=StrLenOrInd<>SQL_NULL_DATA; // Result indicates whether the value is non-null
 
 //  writeln(Format('Field.Size: %d; StrLenOrInd: %d',[FieldDef.Size, StrLenOrInd]));

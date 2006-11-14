@@ -85,7 +85,7 @@ Type
     procedure Execute(cursor: TSQLCursor;atransaction:tSQLtransaction;AParams : TParams); override;
     procedure AddFieldDefs(cursor: TSQLCursor; FieldDefs : TfieldDefs); override;
     function Fetch(cursor : TSQLCursor) : boolean; override;
-    function loadfield(const cursor: tsqlcursor; const fielddef: tfielddef;
+    function loadfield(const cursor: tsqlcursor; const afield: tfield;
       const buffer: pointer; var bufsize: integer): boolean; override;
            //if bufsize < 0 -> buffer was to small, should be -bufsize
     function GetTransactionHandle(trans : TSQLHandle): pointer; override;
@@ -474,18 +474,22 @@ begin
   Result:=(C.Row<>Nil);
 end;
 
-function tconnectionname.loadfield(const cursor: tsqlcursor; const fielddef: tfielddef;
+function tconnectionname.loadfield(const cursor: tsqlcursor;
+              const afield: tfield;
       const buffer: pointer; var bufsize: integer): boolean;
            //if bufsize < 0 -> buffer was to small, should be -bufsize
+//untested!
+//todo: implement strings and blobs 2006-11-14 MSE
 
 var
   field: PMYSQL_FIELD;
   row : MYSQL_ROW;
   C : TCursorName;
-
+  fno: integer;
 begin
 //  Writeln('LoadFieldsFromBuffer');
   C:=Cursor as TCursorName;
+  fno:= afield.fieldno - 1;
   if C.Row=nil then
      begin
   //   Writeln('LoadFieldsFromBuffer: row=nil');
@@ -493,9 +497,9 @@ begin
      end;
   Row:=C.Row;
   
-  inc(Row,c.MapDSRowToMSQLRow[FieldDef.FieldNo-1]);
-  field:= mysql_fetch_field_direct(C.FRES,c.MapDSRowToMSQLRow[FieldDef.FieldNo-1]);
-  if fielddef.datatype = ftstring then begin //untested !!!!!!!!!
+  inc(Row,c.MapDSRowToMSQLRow[fno]);
+  field:= mysql_fetch_field_direct(C.FRES,c.MapDSRowToMSQLRow[fno]);
+  if afield.datatype = ftstring then begin //untested !!!!!!!!!
    if bufsize < field^.length then begin 
     bufsize:= -field^.length;
     exit;
@@ -504,7 +508,8 @@ begin
     bufsize:= field^.length;
    end;
   end;
-  Result:= MySQLWriteData(field^.ftype,field^.length,FieldDef.DataType,Row^,Buffer);
+  Result:= MySQLWriteData(field^.ftype,field^.length,
+       aField.DataType,Row^,Buffer);
 end;
 
 function InternalStrToFloat(S: string): Extended;

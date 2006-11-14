@@ -887,7 +887,7 @@ begin
         stream.Position:= 0;
         stream1:= tmsefilestream.Create(afilename,fm_create);
         try
-         objectbinarytotext(stream,stream1);
+         objectbinarytotextmse(stream,stream1);
         finally
          stream1.Free;
         end;
