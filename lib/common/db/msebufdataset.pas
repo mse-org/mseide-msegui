@@ -1195,7 +1195,9 @@ function tmsebufdataset.getfieldbuffer(const afield: tfield;
 var
  int1: integer;
 begin 
- if not (state in dswritemodes) then begin
+ if not ((state in dswritemodes - [dsinternalcalc]) or 
+       (afield.fieldkind = fkinternalcalc) and 
+                                (state = dsinternalcalc)) then begin
   databaseerrorfmt(snotineditstate,[name],self);
  end;
  int1:= afield.fieldno-1;
