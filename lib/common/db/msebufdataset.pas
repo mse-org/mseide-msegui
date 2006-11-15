@@ -1012,6 +1012,9 @@ begin
 end;
 
 function tmsebufdataset.getnextpacket : integer;
+var
+ state1: tdatasetstate;
+ int1: integer;
 begin
  result:= 0;
  if fallpacketsfetched then  begin
@@ -1022,6 +1025,24 @@ begin
   appendrecord(femptybuffer);
   femptybuffer:= intallocrecord;
   inc(result);
+ end;
+ if checkcanevent(self,tmethod(foninternalcalcfields)) and 
+                                     (bs_opening in fbstate) then begin
+  state1:= settempstate(dsinternalcalc);
+  include(fbstate,bs_internalcalc);
+  try
+   for int1:= 0 to fbrecordcount-1 do begin
+    frecno:= int1;
+    fcurrentbuf:= findexes[0].ind[int1];
+    foninternalcalcfields(self);
+   end;
+  finally
+   frecno:= -1;
+   fcurrentbuf:= nil;
+   fbstate:= fbstate - [bs_internalcalc,bs_opening];
+   restorestate(state1);
+  end;
+//  resync([]);
  end;
 end;
 
@@ -2401,34 +2422,12 @@ begin
 end;
 
 procedure tmsebufdataset.dataevent(event: tdataevent; info: ptrint);
-var
- state1: tdatasetstate;
- int1: integer;
 begin
  inherited;
- if checkcanevent(self,tmethod(foninternalcalcfields)) then begin
-  case event of
-   deupdaterecord: begin
+ case event of
+  deupdaterecord: begin
+   if checkcanevent(self,tmethod(foninternalcalcfields)) then begin
     foninternalcalcfields(self);
-   end;
-   deupdatestate: begin
-    if (bs_opening in fbstate) then begin
-     state1:= settempstate(dsinternalcalc);
-     include(fbstate,bs_internalcalc);
-     try
-      for int1:= 0 to fbrecordcount-1 do begin
-       frecno:= int1;
-       fcurrentbuf:= findexes[0].ind[int1];
-       foninternalcalcfields(self);
-      end;
-     finally
-      frecno:= -1;
-      fcurrentbuf:= nil;
-      fbstate:= fbstate - [bs_internalcalc,bs_opening];
-      restorestate(state1);
-     end;
-     resync([]);
-    end;
    end;
   end;
  end;
@@ -2686,7 +2685,8 @@ begin
                                                    tmsebufdataset(fowner));
     end;
     with field1 do begin
-     if (fieldkind <> fkdata) or not (datatype in indexfieldtypes) then begin
+     if not(fieldkind in [fkdata,fkinternalcalc]) or 
+                      not (datatype in indexfieldtypes) then begin
       databaseerror('Invalid index field "'+fieldname+'".',
                                                    tmsebufdataset(fowner));
      end;

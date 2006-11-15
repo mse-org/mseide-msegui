@@ -806,7 +806,8 @@ begin
    if active or (fields.count > 0) then begin
     for int1:= 0 to fields.count -1 do begin
      with fields[int1] do begin
-      if (datatype in indexfieldtypes) and (fieldkind = fkdata) then begin
+      if (datatype in indexfieldtypes) and 
+                           (fieldkind in [fkdata,fkinternalcalc]) then begin
        additem(result,msestring(fieldname));
       end;
      end;
