@@ -21,7 +21,8 @@ unit msebufdataset;
 interface 
 
 uses
- db,classes,variants,msetypes,msearrayprops,mseclasses,mselist,msestrings;
+ db,classes,variants,msetypes,msearrayprops,mseclasses,mselist,msestrings,
+ msedb;
   
 const
  defaultpacketrecords = 10;
@@ -221,11 +222,13 @@ type
 
  recupdatebufferarty = array of recupdatebufferty;
  
- bufdatasetstatety = (bs_opening,bs_applying,
+ bufdatasetstatety = (bs_opening,bs_fetching,bs_applying,
                       bs_hasindex,bs_fetchall,bs_indexvalid,
                       bs_editing,bs_append,bs_internalcalc,bs_utf8);
  bufdatasetstatesty = set of bufdatasetstatety;
    
+ internalcalcfieldseventty = procedure(const sender: tmsebufdataset;
+                                              const fetching: boolean) of object;
  tmsebufdataset = class(tdbdataset)
   private
    fbrecordcount: integer;
@@ -262,7 +265,7 @@ type
    findexes: array of indexty;
    findexlocal: tlocalindexes;
    factindex: integer;
-   foninternalcalcfields: tdatasetnotifyevent;
+   foninternalcalcfields: internalcalcfieldseventty;
    procedure calcrecordsize;
    procedure alignfieldpos(var avalue: integer);
    function loadbuffer(var buffer: recheaderty): tgetresult;
@@ -303,10 +306,10 @@ type
    function getfieldbuffer(const afield: tfield;
              const isnull: boolean; out datasize: integer): pointer; overload;
              //write
-   function getmsestringdata(const sender: tfield; 
+   function getmsestringdata(const sender: tmsestringfield; 
                                out avalue: msestring): boolean;
-   procedure setmsestringdata(const sender: tfield; const avalue: msestring);
-   procedure setoninternalcalcfields(const avalue: tdatasetnotifyevent);
+   procedure setmsestringdata(const sender: tmsestringfield; const avalue: msestring);
+   procedure setoninternalcalcfields(const avalue: internalcalcfieldseventty);
   protected
    fapplyindex: integer; //take care about canceled updates while applying
    ffailedcount: integer;
@@ -328,6 +331,7 @@ type
    procedure deleteblob(var ablobs: blobinfoarty; const afield: tfield); overload;
    procedure addblob(const ablob: tblobbuffer);
    
+   procedure setrecno1(value: longint; const nocheck: boolean);
    procedure setrecno(value: longint); override;
    function  getrecno: longint; override;
    function getchangecount: integer; virtual;
@@ -388,7 +392,7 @@ type
    procedure oldfieldtoparam(const source: tfield; const dest: tparam);
    procedure stringtoparam(const source: msestring; const dest: tparam);
                   //takes care about utf8 conversion
-                  
+
    procedure resetindex; //deactivates all indexes
    function createblobbuffer(const afield: tfield): tblobbuffer;
    procedure applyupdates(const maxerrors: integer = 0); virtual; overload;
@@ -407,14 +411,14 @@ type
                                  default defaultpacketrecords;
    property onupdateerror: tresolvererrorevent read fonupdateerror 
                                  write setonupdateerror;
-   property oninternalcalcfields: tdatasetnotifyevent read foninternalcalcfields 
-                             write setoninternalcalcfields;
+   property oninternalcalcfields: internalcalcfieldseventty 
+                      read foninternalcalcfields write setoninternalcalcfields;
    property indexlocal: tlocalindexes read findexlocal write setindexlocal;
   end;
    
 implementation
 uses
- dbconst,msedatalist,sysutils,msedb,mseformatstr;
+ dbconst,msedatalist,sysutils,mseformatstr;
 type
  tmsestringfield1 = class(tmsestringfield);
  
@@ -1014,36 +1018,40 @@ end;
 function tmsebufdataset.getnextpacket : integer;
 var
  state1: tdatasetstate;
- int1: integer;
+ int1,int2: integer;
+ recnobefore: integer;
+ bufbefore: pointer;
 begin
  result:= 0;
  if fallpacketsfetched then  begin
   exit;
  end;
+ int2:= fbrecordcount;
  while ((result < fpacketrecords) or (bs_fetchall in fbstate)) and 
                              (loadbuffer(femptybuffer^.header) = grok) do begin
   appendrecord(femptybuffer);
   femptybuffer:= intallocrecord;
   inc(result);
  end;
- if checkcanevent(self,tmethod(foninternalcalcfields)) and 
-                                     (bs_opening in fbstate) then begin
+ if checkcanevent(self,tmethod(foninternalcalcfields)) then begin
   state1:= settempstate(dsinternalcalc);
-  include(fbstate,bs_internalcalc);
+  fbstate:= fbstate + [bs_internalcalc,bs_fetching];
+  recnobefore:= frecno;
+  bufbefore:= fcurrentbuf;
   try
-   for int1:= 0 to fbrecordcount-1 do begin
+   for int1:= int2 to fbrecordcount-1 do begin
     frecno:= int1;
     fcurrentbuf:= findexes[0].ind[int1];
-    foninternalcalcfields(self);
+    foninternalcalcfields(self,true);
    end;
   finally
-   frecno:= -1;
-   fcurrentbuf:= nil;
-   fbstate:= fbstate - [bs_internalcalc,bs_opening];
+   frecno:= recnobefore;
+   fcurrentbuf:= bufbefore;
+   fbstate:= fbstate - [bs_internalcalc,bs_opening,bs_fetching];
    restorestate(state1);
   end;
-//  resync([]);
  end;
+ exclude(fbstate,bs_opening);
 end;
 
 function tmsebufdataset.getfieldsize(const datatype: tfieldtype;
@@ -1090,14 +1098,15 @@ begin
    fkdata: begin
     int2:= fdbfieldsizes[fno];
     if field1.datatype in charfields then begin
-     int2:= int2*3+4; //room for multibyte encodings
+     int2:= int2*4+4; //room for multibyte encodings
      setlength(str1,int2); 
      if not loadfield(field1,pointer(str1),int2) then begin
       setfieldisnull(buffer.fielddata.nullmask,fno);
      end
      else begin
       if int2 < 0 then begin //buffer to small
-       setlength(str1,-int2);
+       int2:= -int2;
+       setlength(str1,int2);
        loadfield(field1,pointer(str1),int2);
       end;
       setlength(str1,int2);
@@ -1107,6 +1116,9 @@ begin
       end
       else begin
        po2^:= msestring(str1);
+      end;
+      if length(po2^) > fdbfieldsizes[fno] then begin
+       setlength(po2^,fdbfieldsizes[fno]);
       end;
      end;
     end
@@ -1199,7 +1211,7 @@ begin
  result:= getfielddata(field,buffer);
 end;
 
-function tmsebufdataset.getmsestringdata(const sender: tfield;
+function tmsebufdataset.getmsestringdata(const sender: tmsestringfield;
                out avalue: msestring): boolean;
 var
  po1: pointer;
@@ -1295,7 +1307,7 @@ begin
  end;
 end;
 
-procedure tmsebufdataset.setmsestringdata(const sender: tfield;
+procedure tmsebufdataset.setmsestringdata(const sender: tmsestringfield;
                const avalue: msestring);
 var
  po1: pointer;
@@ -1303,6 +1315,10 @@ var
 begin
  po1:= getfieldbuffer(sender,false,int1);
  msestring(po1^):= avalue;
+ if (sender.characterlength > 0) and 
+                     (length(avalue) > sender.characterlength) then begin
+  setlength(msestring(po1^),sender.characterlength);
+ end;
  if (sender.fieldno > 0) and not 
                  (state in [dscalcfields,dsfilter,dsnewvalue]) then begin
   dataevent(defieldchange,ptrint(sender));
@@ -1808,7 +1824,7 @@ begin
  end;
 end;
 
-procedure tmsebufdataset.setrecno(value: longint);
+procedure tmsebufdataset.setrecno1(value: longint; const nocheck: boolean);
 var
  bm: bufbookmarkty;
 begin
@@ -1818,12 +1834,25 @@ begin
   until (getnextpacket < fpacketrecords) or (value <= recordcount) or
                         (bs_fetchall in fbstate);
  end;
+ if nocheck then begin
+  if value > fbrecordcount then begin
+   value:= fbrecordcount;
+  end;
+  if value < 1 then begin
+   exit;
+  end;
+ end;
  if (value > recordcount) or (value < 1) then begin
   databaseerror(snosuchrecord,self);
  end;
  bm.data.recordpo:= nil;
  bm.data.recno:= value-1;
  gotobookmark(@bm);
+end;
+
+procedure tmsebufdataset.setrecno(value: longint);
+begin
+ setrecno1(value,false);
 end;
 
 function tmsebufdataset.getrecno: longint;
@@ -2247,7 +2276,7 @@ end;
 
 procedure tmsebufdataset.updatestate;
 begin
- if (fpacketrecords < 0) or assigned(foninternalcalcfields) then begin
+ if (fpacketrecords < 0) {or assigned(foninternalcalcfields)} then begin
   include(fbstate,bs_fetchall);
  end
  else begin
@@ -2319,6 +2348,7 @@ end;
 procedure tmsebufdataset.fieldtoparam(const source: tfield; const dest: tparam);
 var
  int1: integer;
+ mstr1: msestring;
 begin
  if source is tmsestringfield then begin
   if source.isnull then begin
@@ -2326,13 +2356,17 @@ begin
   end
   else begin
    with tmsestringfield(source) do begin
+    mstr1:= asmsestring;
+    if length(mstr1) > characterlength then begin
+     setlength(mstr1,characterlength);
+    end;
     if bs_utf8 in fbstate then begin
 //     dest.asstring:= stringtoutf8(copy(asmsestring,1,size));
-     dest.asstring:= stringtoutf8(asmsestring);
+     dest.asstring:= stringtoutf8(mstr1);
     end
     else begin
 //     dest.asstring:= copy(asmsestring,1,size);
-     dest.asstring:= asmsestring;
+     dest.asstring:= mstr1;
     end;
     if fixedchar then begin
      dest.datatype:= ftfixedchar;
@@ -2388,16 +2422,25 @@ procedure tmsebufdataset.bindfields(const bind: boolean);
 var
  int1: integer;
  field1: tfield;
+ int2: integer;
+ fielddef1: tfielddef;
 begin
  for int1:= fields.count - 1 downto 0 do begin
   field1:= fields[int1];
   if field1 is tmsestringfield then begin
+   int2:= 0;
    if bind then begin
+    if field1.fieldkind = fkdata then begin
+     fielddef1:= fielddefs.find(field1.fieldname);
+     if fielddef1 <> nil then begin
+      int2:= fielddef1.size;
+     end;
+    end;
     tmsestringfield1(field1).setismsestring(@getmsestringdata,
-                                                  @setmsestringdata);
+                                                  @setmsestringdata,int2);
    end
    else begin
-    tmsestringfield1(field1).setismsestring(nil,nil);
+    tmsestringfield1(field1).setismsestring(nil,nil,int2);
    end;
   end; 
  end;
@@ -2415,7 +2458,8 @@ begin
  inherited;
 end;
 
-procedure tmsebufdataset.setoninternalcalcfields(const avalue: tdatasetnotifyevent);
+procedure tmsebufdataset.setoninternalcalcfields(
+            const avalue: internalcalcfieldseventty);
 begin
  foninternalcalcfields:= avalue;
  updatestate;
@@ -2427,7 +2471,7 @@ begin
  case event of
   deupdaterecord: begin
    if checkcanevent(self,tmethod(foninternalcalcfields)) then begin
-    foninternalcalcfields(self);
+    foninternalcalcfields(self,false);
    end;
   end;
  end;

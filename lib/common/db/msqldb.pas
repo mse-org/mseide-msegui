@@ -247,6 +247,7 @@ type
     procedure InternalClose; override;
     procedure InternalInitFieldDefs; override;
     procedure InternalOpen; override;
+    procedure internalrefresh; override;
     function  GetCanModify: Boolean; override;
     Procedure internalApplyRecUpdate(UpdateKind : TUpdateKind);
     procedure ApplyRecUpdate(UpdateKind : TUpdateKind); override;
@@ -884,8 +885,11 @@ begin
  end;
  fblobintf:= nil;
   if StatementType = stSelect then FreeFldBuffers;
-// Database and FCursor could be nil, for example if the database is not assigned, and .open is called
-  if (not IsPrepared) and (assigned(database)) and (assigned(FCursor)) then (database as TSQLconnection).UnPrepareStatement(FCursor);
+// Database and FCursor could be nil, for example if the database is not
+// assigned, and .open is called
+  if (not IsPrepared) and (assigned(database)) and (assigned(FCursor)) then begin
+        (database as TSQLconnection).UnPrepareStatement(FCursor);
+  end;
   if DefaultFields then
     DestroyFields;
   FIsEOF := False;
@@ -1200,7 +1204,20 @@ begin
   inherited InternalOpen;
 end;
 
-// public part
+procedure tsqlquery.internalrefresh;
+var
+ int1: integer;
+begin
+ int1:= recno;
+ disablecontrols;
+ try
+  transaction.active:= false;
+  active:= true;
+  setrecno1(int1,true);
+ finally
+  enablecontrols;
+ end;
+end;
 
 procedure TSQLQuery.ExecSQL;
 begin

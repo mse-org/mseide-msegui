@@ -66,7 +66,8 @@ type
     Procedure DeAllocateCursorHandle(var cursor : TSQLCursor); override;
     Function AllocateTransactionHandle : TSQLHandle; override;
 
-    procedure PrepareStatement(cursor: TSQLCursor;ATransaction : TSQLTransaction;buf : string; AParams : TParams); override;
+    procedure PrepareStatement(cursor: TSQLCursor; ATransaction: TSQLTransaction;
+                         buf: string; AParams: TParams); override;
     procedure UnPrepareStatement(cursor : TSQLCursor); override;
     procedure FreeFldBuffers(cursor : TSQLCursor); override;
     procedure Execute(cursor: TSQLCursor;atransaction:tSQLtransaction; AParams : TParams); override;
@@ -452,7 +453,8 @@ begin
   result := TIBTrans.create;
 end;
 
-procedure TIBConnection.PrepareStatement(cursor: TSQLCursor;ATransaction : TSQLTransaction;buf : string; AParams : TParams);
+procedure TIBConnection.PrepareStatement(cursor: TSQLCursor;
+          ATransaction : TSQLTransaction;buf : string; AParams : TParams);
 
 var dh    : pointer;
     tr    : pointer;
@@ -553,17 +555,136 @@ begin
     end;
 end;
 
-procedure TIBConnection.Execute(cursor: TSQLCursor;atransaction:tSQLtransaction; AParams : TParams);
-var tr : pointer;
+procedure TIBConnection.Execute(cursor: TSQLCursor;
+                             atransaction:tSQLtransaction; AParams : TParams);
+var 
+ tr: pointer;
 begin
-  tr := aTransaction.Handle;
-  if Assigned(APArams) and (AParams.count > 0) then SetParameters(cursor, AParams);
-  with cursor as TIBCursor do
-    if isc_dsql_execute2(@Status, @tr, @Statement, 1, in_SQLDA, nil) <> 0 then
-      CheckError('Execute', Status);
+ tr := aTransaction.Handle;
+ if Assigned(APArams) and (AParams.count > 0) then begin
+  SetParameters(cursor, AParams);
+ end;
+ with cursor as TIBCursor do begin
+  if isc_dsql_execute2(@Status,@tr,@Statement,1,in_SQLDA,nil) <> 0 then begin
+   CheckError('Execute', Status);
+  end;
+ end;
 end;
 
+type
+ tcharlenghtgetter = class
+  private
+   ftransaction: tsqltransaction;
+   fcursor: tsqlcursor;
+   fowner: tibconnection;
+   fparams: tparams;
+   frelationlen,ffieldlen: integer;
+  public
+   constructor create(const aowner: tibconnection);
+   destructor destroy; override;
+   function characterlength(const relationname,fieldname: string): integer;
+        //-maxint if invalid
+ end;
+ 
+{ tcharlenghtgetter }
 
+constructor tcharlenghtgetter.create(const aowner: tibconnection);
+begin
+ fowner:= aowner;
+ fparams:= tparams.create;
+ with tparam.create(fparams,ptoutput) do begin
+  datatype:= ftstring;
+  name:= 'RELATION';
+ end;
+ with tparam.create(fparams,ptoutput) do begin
+  datatype:= ftstring;
+  name:= 'FIELD';
+ end;
+ fcursor:= fowner.allocatecursorhandle;
+ fcursor.fstatementtype:= stselect;
+ ftransaction:= tsqltransaction.create(nil);
+ ftransaction.database:= aowner;
+ ftransaction.starttransaction;
+ fowner.preparestatement(fcursor,ftransaction,
+   'SELECT B.RDB$CHARACTER_LENGTH FROM RDB$RELATION_FIELDS A '+
+   'INNER JOIN  RDB$FIELDS B ON A.RDB$FIELD_SOURCE = B.RDB$FIELD_NAME '+
+   'WHERE (A.RDB$RELATION_NAME = :RELATION) AND (A.RDB$FIELD_NAME = :FIELD);',
+                                     fparams);
+ with tibcursor(fcursor).in_sqlda^ do begin
+  if sqld = 2 then begin
+   frelationlen:= sqlvar[0].sqllen;
+   ffieldlen:= sqlvar[1].sqllen;
+  end;
+ end;
+end;
+
+destructor tcharlenghtgetter.destroy;
+begin
+ with fowner do begin
+  try
+   freefldbuffers(fcursor);
+   unpreparestatement(fcursor);
+  finally
+   fparams.free;
+   deallocatecursorhandle(fcursor);
+   ftransaction.free;
+  end;
+ end;
+ inherited;
+end;
+
+function fixsize(const avalue: string; const alen: integer): string;
+begin
+ result:= avalue;
+ setlength(result,alen);
+ if alen > length(avalue) then begin
+  fillchar(result[length(avalue)+1],alen-length(avalue),' ');
+ end;
+end;
+
+function tcharlenghtgetter.characterlength(const relationname: string;
+               const fieldname: string): integer;
+var 
+ tr: pointer;
+begin
+ result:= -maxint;
+ fparams[0].asstring:= fixsize(relationname,frelationlen);
+ fparams[1].asstring:= fixsize(fieldname,ffieldlen);
+ fowner.SetParameters(fcursor, fparams);
+ with tibcursor(fcursor) do begin
+  tr:= ftransaction.handle;
+  if isc_dsql_execute2(@Status,@tr,@Statement,1,in_SQLDA,nil) <> 0 then begin
+   fowner.CheckError('Execute', Status);
+  end;
+  isc_dsql_set_cursor_name(@status,@statement,'charlencu',0);
+  if fowner.fetch(fcursor) then begin
+   with sqlda^ do begin
+    if sqld = 1 then begin
+     with sqlvar[0] do begin
+      if (sqltype and not 1 = sql_short) then begin
+       result:= smallint(sqldata^);
+      end;
+     end;
+    end;
+   end;
+  end; 
+  isc_dsql_free_statement(@status,@statement,DSQL_close);
+ end;
+end;
+
+function sqlvarnametostring(const avalue: pointer): string;
+type
+ sqlnamety = packed record
+  length: smallint;
+  name: array[0..31] of char;
+ end;
+begin
+ with sqlnamety(avalue^) do begin
+  setlength(result,length);
+  move(name,result[1],length);
+ end;
+end;
+  
 procedure TIBConnection.AddFieldDefs(cursor: TSQLCursor; FieldDefs: TfieldDefs);
 var
  x: integer;
@@ -571,20 +692,34 @@ var
  TransLen: word;
  TransType: TFieldType;
  FD: TFieldDef;
-
+ chlengetter: tcharlenghtgetter;
+ int1: integer;
 begin
- with cursor as TIBCursor do begin
-  for x := 0 to SQLDA^.SQLD - 1 do begin
-   with SQLDA^.SQLVar[x] do begin
-    TranslateFldType(SQLType,sqlsubtype,SQLLen,SQLScale,lenset,TransType,TransLen);
-    FD:= TFieldDef.Create(FieldDefs,AliasName,TransType,
-               TransLen,False,(x + 1));
-    if TransType = ftBCD then begin
-     FD.precision:= SQLLen;
+ chlengetter:= tcharlenghtgetter.create(self);
+ try
+  chlengetter.characterlength('TABLE1','TEXT1');
+  with tibcursor(cursor) do begin
+   for x := 0 to SQLDA^.SQLD - 1 do begin
+    with SQLDA^.SQLVar[x] do begin
+     TranslateFldType(SQLType,sqlsubtype,SQLLen,SQLScale,lenset,TransType,TransLen);
+     if transtype = ftstring then begin
+      int1:= chlengetter.characterlength(sqlvarnametostring(@relname_length),
+                 sqlvarnametostring(@sqlname_length));
+      if int1 >= 0 then begin
+       translen:= int1;
+      end;
+     end;
+     FD:= TFieldDef.Create(FieldDefs,AliasName,TransType,
+                TransLen,False,(x + 1));
+     if TransType = ftBCD then begin
+      FD.precision:= SQLLen;
+     end;
+     FD.DisplayName:= AliasName;
     end;
-    FD.DisplayName:= AliasName;
    end;
   end;
+ finally
+  chlengetter.free;
  end;
 end;
 
@@ -660,6 +795,9 @@ begin
              w:= sqllen;
             end;
             CurrBuff:= SQLData;
+            if w < sqllen then begin
+             fillchar((currbuff+w)^,sqllen-w,' ');
+            end;
            end;
           end;
           Move(s[1],CurrBuff^,w);

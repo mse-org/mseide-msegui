@@ -118,9 +118,9 @@ type
  
  tmsestringfield = class;
  
- getmsestringdataty = function(const sender: tfield;
+ getmsestringdataty = function(const sender: tmsestringfield;
                      out avalue: msestring): boolean of object; //false if null
- setmsestringdataty = procedure(const sender: tfield;
+ setmsestringdataty = procedure(const sender: tmsestringfield;
                           const avalue: msestring) of object;
  
  tmsestringfield = class(tstringfield,ifieldcomponent)
@@ -128,6 +128,7 @@ type
    fdsintf: idsfieldcontroller;
    fgetmsestringdata: getmsestringdataty;
    fsetmsestringdata: setmsestringdataty;
+   fcharacterlength: integer;
 //   function getmsevalue(out avalue: msestring): boolean;
 //   procedure setmsevalue(const avalue: msestring);
    function getasmsestring: msestring;
@@ -137,7 +138,8 @@ type
    function getinstance: tfield;
   protected
    procedure setismsestring(const getter: getmsestringdataty;
-                                             const setter: setmsestringdataty);
+                                             const setter: setmsestringdataty;
+                                             const acharacterlenght: integer);
    function HasParent: Boolean; override;
    function GetDataSize: Word; override;
    function GetAsString: string; override;
@@ -150,6 +152,7 @@ type
    function assql: string;
    property asmsestring: msestring read getasmsestring write setasmsestring;
    function oldmsestring(out aisnull: boolean): msestring;
+   property characterlength: integer read fcharacterlength;
   published
    property DataSet stored false;
    property ProviderFlags default defaultproviderflags;
@@ -1245,8 +1248,9 @@ begin
 end;
 
 procedure tmsestringfield.setismsestring(const getter: getmsestringdataty;
-                                const setter: setmsestringdataty);
+           const setter: setmsestringdataty; const acharacterlenght: integer);
 begin
+ fcharacterlength:= acharacterlenght;
  fgetmsestringdata:= getter;
  fsetmsestringdata:= setter;
 end;
