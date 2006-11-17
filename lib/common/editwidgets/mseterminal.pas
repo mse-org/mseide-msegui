@@ -14,8 +14,10 @@ unit mseterminal;
 interface
 uses
  msegrids,Classes,msestream,mseclasses,msepipestream,mseevent,mseinplaceedit,
- msetextedit,msestrings,msesys;
-
+ msetextedit,msestrings,msesys,mseeditglob;
+const
+ defaultterminaleditoptions = (defaulttexteditoptions + [oe_caretonreadonly])-
+                            [oe_linebreak];
 type
  sendtexteventty = procedure(var atext: msestring; var donotsend: boolean) of object;
  terminaloptionty = (teo_readonly);
@@ -65,7 +67,7 @@ type
 
 implementation
 uses
- msesysutils,msegui,mseprocutils,msewidgets,mseeditglob,mseguiglob,msetypes,
+ msesysutils,msegui,mseprocutils,msewidgets,mseguiglob,msetypes,
  msekeyboard,sysutils;
 
 { tterminal }
@@ -74,7 +76,7 @@ constructor tterminal.create(aowner: tcomponent);
 begin
  fprochandle:= invalidprochandle;
  inherited;
- optionsedit:= optionsedit + [oe_caretonreadonly];
+ optionsedit:= defaultterminaleditoptions;
  foutput:= tpipewriter.create;
  finput:= tpipereader.create;
  finput.oninputavailable:= {$ifdef FPC}@{$endif}doinputavailable;
