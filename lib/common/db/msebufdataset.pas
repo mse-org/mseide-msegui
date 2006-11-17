@@ -2351,11 +2351,17 @@ var
  mstr1: msestring;
 begin
  if source is tmsestringfield then begin
-  if source.isnull then begin
-   dest.clear;
-  end
-  else begin
-   with tmsestringfield(source) do begin
+  with tmsestringfield(source) do begin
+   if source.isnull then begin
+    dest.clear;
+    if fixedchar then begin
+     dest.datatype:= ftfixedchar;
+    end
+    else begin
+     dest.datatype:= ftstring;
+    end;
+   end
+   else begin
     mstr1:= asmsestring;
     if length(mstr1) > characterlength then begin
      setlength(mstr1,characterlength);
@@ -2389,6 +2395,12 @@ begin
   mstr1:= tmsestringfield(source).oldmsestring(bo1);
   if bo1 then begin
    dest.clear;
+   if tmsestringfield(source).fixedchar then begin
+    dest.datatype:= ftfixedchar;
+   end
+   else begin
+    dest.datatype:= ftstring;
+   end;
   end
   else begin
    if bs_utf8 in fbstate then begin
