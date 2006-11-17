@@ -1588,6 +1588,9 @@ begin
   setmethodvalue(method1);
  end
  else begin
+  if not isvalidident(value) then begin
+   raise exception.create('Invalid method name '''+value+'''.');
+  end;
   method1:= fdesigner.getmethod(value,fmodule,
                   fprops[0].propinfo^.proptype{$ifndef FPC}^{$endif});
   if method1.code = nil then begin //method not found
