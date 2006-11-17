@@ -54,6 +54,7 @@ type
    function waitforprocess: integer; //returns exitcode
    function exitcode: integer;
    procedure addchars(const avalue: msestring);
+   procedure addline(const avalue: msestring); //thread save
    property inputfd: integer read getinputfd write setinoutfd;
   published
    property tabulators;
@@ -211,6 +212,18 @@ begin
  end;
 end;
 
+procedure tterminal.addline(const avalue: msestring);
+begin
+ if fgridintf <> nil then begin
+  application.lock;
+  try
+   addchars(avalue+lineend);
+  finally
+   application.unlock;
+  end;
+ end;
+end;
+
 procedure tterminal.dopipebroken(const sender: tpipereader);
 begin
  if sender = finput then begin
@@ -250,6 +263,7 @@ end;
 function tterminal.waitforprocess: integer;
 begin
  result:= mseprocutils.waitforprocess(fprochandle);
+ fexitcode:= result;
  fprochandle:= invalidprochandle;
  while not (finput.eof and ferrorinput.eof) do begin
   sleep(100); //wait for last chars
