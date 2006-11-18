@@ -1232,6 +1232,7 @@ end;
    procedure endupdate;
    function calcminscrollsize: sizety; override;
    procedure layoutchanged;
+   function cellclicked: boolean;
    procedure rowdatachanged(const index: integer; const count: integer = 1);
 
    procedure rowup(const action: focuscellactionty = fca_focusin); virtual;
@@ -9150,6 +9151,11 @@ end;
 function tcustomgrid.nocheckvalue: boolean;
 begin
  result:= fnocheckvalue > 0;
+end;
+
+function tcustomgrid.cellclicked: boolean;
+begin
+ result:= gs_cellclicked in fstate;
 end;
 
 { tdrawgrid }

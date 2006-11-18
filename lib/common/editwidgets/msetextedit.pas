@@ -1382,10 +1382,9 @@ begin
      if cell.row >= 0 then begin
       mousepostotextpos1(cell.row,mouseeventinfopo^.pos,textinfo.pos,bo1);
       if (eventkind = cek_mousemove) and (cell.row <> fgridintf.getcol.grid.row) and
-             (info.mouseeventinfopo^.shiftstate = [ss_left]) then begin
+       (info.mouseeventinfopo^.shiftstate = [ss_left]) and grid.cellclicked then begin
        fcolindex:= textinfo.pos.col;
-       fgridintf.getcol.grid.focuscell(cell,fca_focusinshift);
-       
+       fgridintf.getcol.grid.focuscell(cell,fca_focusinshift);       
        setclientclick;
        exit;
       end;
