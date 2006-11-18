@@ -303,7 +303,8 @@ end;
 
 procedure tactionsmo.enableonselect(const sender: tcustomaction);
 begin
- sender.enabled:= sourcefo.activepage.edit.hasselection;
+ sender.enabled:= (sourcefo.activepage <> nil) and 
+                                      sourcefo.activepage.edit.hasselection;
 end;
 
 procedure tactionsmo.lineactonexecute(const sender: TObject);
