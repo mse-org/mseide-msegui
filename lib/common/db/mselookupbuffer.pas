@@ -1280,8 +1280,10 @@ constructor tdbmemolookupbuffer.create(aowner: tcomponent);
 begin
  fdatalink:= tlookupbuffermemodatalink.create(self);
  inherited;
+ floatfields.fieldtypes:= memofields + msedb.textfields;
  fintegerfields.fieldtypes:= memofields + msedb.textfields;
  ftextfields.fieldtypes:= memofields + msedb.textfields;
+ ffloatfields.fieldtypes:= memofields + msedb.textfields;
 end;
 
 procedure tdbmemolookupbuffer.loadbuffer;

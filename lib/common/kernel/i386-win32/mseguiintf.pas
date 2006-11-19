@@ -1261,53 +1261,75 @@ begin
 end;
 
 function gui_gettext16width(var drawinfo: drawinfoty): integer;
+label                     //todo: kerning?
+ endlab;
 var
  int1,int2: integer;
  po1: pmsechar;
  wo1: word;
  widths: pcharwidthsty;
  overha: integer;
+ fh1: hfont;
+ gc1: hdc;
 begin
  with drawinfo.gettext16width do begin
-  selectobject(drawinfo.gc.handle,datapo^.font);
-  result:= 0;
-  int1:= count;
-  po1:= text;
-  with win32fontdataty(datapo^.platformdata) do begin
-   widths:= charwidths;
-   overha:= overhang;
+  if drawinfo.gc.handle = invalidgchandle then begin
+   gc1:= getdc(0);  //use default dc
+  end
+  else begin
+   gc1:= drawinfo.gc.handle;
   end;
-  while int1 > 0 do begin
-   wo1:= word(po1^);
-   if wo1 < 256 then begin
-    inc(result,widths^[wo1]);
-   end
-   else begin
-    int2:= 0;
-    if iswin95 then begin
-     if not getcharwidthw(drawinfo.gc.handle,wo1,wo1,int2) then begin
-      result:= -1;
-      exit;
-     end;
-     dec(int2,overha);
+  fh1:= selectobject(gc1,datapo^.font);
+  if fh1 <> 0 then begin
+   result:= 0;
+   int1:= count;
+   po1:= text;
+   with win32fontdataty(datapo^.platformdata) do begin
+    widths:= charwidths;
+    overha:= overhang;
+   end;
+   while int1 > 0 do begin
+    wo1:= word(po1^);
+    if wo1 < 256 then begin
+     inc(result,widths^[wo1]);
     end
     else begin
-     if not getcharwidth32w(drawinfo.gc.handle,wo1,wo1,int2) then begin
-      result:= -1;
-      exit;
+     int2:= 0;
+     if iswin95 then begin
+      if not getcharwidthw(gc1,wo1,wo1,int2) then begin
+       result:= -1;
+       goto endlab;
+      end;
+      dec(int2,overha);
+     end
+     else begin
+      if not getcharwidth32w(gc1,wo1,wo1,int2) then begin
+       result:= -1;
+       goto endlab;
+      end;
      end;
+     inc(result,int2);
     end;
-    inc(result,int2);
+    dec(int1);
+    inc(po1);
    end;
-   dec(int1);
-   inc(po1);
+  end
+  else begin
+   result:= -1;
+  end;
+endlab:
+  if fh1 <> 0 then begin
+   selectobject(gc1,fh1);
+  end; 
+  if drawinfo.gc.handle = invalidgchandle then begin
+   releasedc(0,gc1);
   end;
  end;
 end;
 
 function gui_getchar16widths(var drawinfo: drawinfoty): gdierrorty;
-label
- endlab;
+label                        //todo: kerning?
+ endlab;        
 var
  int1: integer;
  po1: pmsechar;
@@ -1363,6 +1385,9 @@ begin
  end;
 
 endlab:
+ if ahandle <> 0 then begin
+  selectobject(gc1,ahandle);
+ end;
  if drawinfo.gc.handle = invalidgchandle then begin
   releasedc(0,gc1);
  end;
