@@ -1292,6 +1292,7 @@ begin
  inherited;
  fintegerfields.fieldtypes:= memofields + msedb.textfields;
  ftextfields.fieldtypes:= memofields + msedb.textfields;
+ ffloatfields.fieldtypes:= memofields + msedb.textfields;
 end;
 
 procedure tdbmemolookupbuffer.loadbuffer;
