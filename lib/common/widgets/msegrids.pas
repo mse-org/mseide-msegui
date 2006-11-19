@@ -7815,6 +7815,7 @@ end;
 
 procedure tcustomgrid.dodeactivate;
 begin
+ exclude(fstate,gs_cellclicked);
  if focusedcellvalid then begin
   fdatacols[ffocusedcell.col].dodeactivate;
  end;
