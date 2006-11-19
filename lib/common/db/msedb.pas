@@ -139,7 +139,7 @@ type
   protected
    procedure setismsestring(const getter: getmsestringdataty;
                                              const setter: setmsestringdataty;
-                                             const acharacterlenght: integer);
+                                             const acharacterlength: integer);
    function HasParent: Boolean; override;
    function GetDataSize: Word; override;
    function GetAsString: string; override;
@@ -1248,9 +1248,10 @@ begin
 end;
 
 procedure tmsestringfield.setismsestring(const getter: getmsestringdataty;
-           const setter: setmsestringdataty; const acharacterlenght: integer);
+           const setter: setmsestringdataty; const acharacterlength: integer);
 begin
- fcharacterlength:= acharacterlenght;
+ fcharacterlength:= acharacterlength;
+ size:= acharacterlength;
  fgetmsestringdata:= getter;
  fsetmsestringdata:= setter;
 end;
