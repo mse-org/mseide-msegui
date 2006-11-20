@@ -343,83 +343,83 @@ procedure TIBConnection.TranslateFldType(SQLType,sqlsubtype,SQLLen,
             SQLScale: integer;
             var LensSet: boolean; var TrType: TFieldType; var TrLen: word);
 begin
-  LensSet := False;
-
-  if SQLScale < 0 then
+ LensSet := False;
+ if SQLScale < 0 then begin
+  if (SQLScale >= -4) and (SQLScale <= -1) then //in [-4..-1] then
     begin
-    if (SQLScale >= -4) and (SQLScale <= -1) then //in [-4..-1] then
-      begin
-      LensSet := True;
-      TrLen := SQLLen;
-      TrType := ftBCD
-      end
-    else
-      TrType := ftFMTBcd;
+    LensSet := True;
+    TrLen := SQLLen;
+    TrType := ftBCD
     end
-  else case (SQLType and not 1) of
-    SQL_VARYING :
-      begin
-        LensSet := True;
-        TrType := ftString;
-        TrLen := SQLLen;
-      end;
-    SQL_TEXT :
-      begin
-        LensSet := True;
-        TrType := ftString;
-        TrLen := SQLLen;
-      end;
-    SQL_TYPE_DATE :
-      TrType := ftDate{Time};
-    SQL_TYPE_TIME :
-        TrType := ftDateTime;
-    SQL_TIMESTAMP :
-        TrType := ftDateTime;
-    SQL_ARRAY :
-      begin
-        TrType := ftArray;
-        LensSet := true;
-        TrLen := SQLLen;
-      end;
-    SQL_BLOB: begin
-     if sqlsubtype = isc_blob_text then begin
-      trtype:= ftmemo;
-     end
-     else begin
-      TrType := ftBlob;
-     end;
-     LensSet := True;
-     TrLen := SQLLen;
-    end;
-    SQL_SHORT :
-        TrType := ftInteger;
-    SQL_LONG :
-      begin
-        LensSet := True;
-        TrLen := 0;
-        TrType := ftInteger;
-      end;
-    SQL_INT64 :
-        TrType := ftLargeInt;
-    SQL_DOUBLE :
-      begin
-        LensSet := True;
-        TrLen := SQLLen;
-        TrType := ftFloat;
-      end;
-    SQL_FLOAT :
-      begin
-        LensSet := True;
-        TrLen := SQLLen;
-        TrType := ftFloat;
-      end
-    else
-      begin
-        LensSet := True;
-        TrLen := 0;
-        TrType := ftUnknown;
-      end;
+  else begin
+    TrType := ftFMTBcd;
   end;
+ end
+ else begin
+  LensSet:= True;
+  TrLen:= SQLLen;
+  case (SQLType and not 1) of
+   SQL_VARYING: begin
+//        LensSet := True;
+       TrType := ftString;
+//        TrLen := SQLLen;
+   end;
+   SQL_TEXT: begin
+       LensSet := True;
+       TrType := ftString;
+       TrLen := SQLLen;
+   end;
+   SQL_TYPE_DATE: begin
+     TrType:= ftDate{Time};
+   end;
+   SQL_TYPE_TIME: begin
+       TrType:= ftDateTime;
+   end;
+   SQL_TIMESTAMP: begin
+       TrType := ftDateTime;
+   end;
+   SQL_ARRAY: begin
+       TrType := ftArray;
+//        LensSet := true;
+//        TrLen := SQLLen;
+   end;
+   SQL_BLOB: begin
+    if sqlsubtype = isc_blob_text then begin
+     trtype:= ftmemo;
+    end
+    else begin
+     TrType:= ftBlob;
+    end;
+    LensSet:= True;
+    TrLen:= SQLLen;
+   end;
+   SQL_SHORT: begin
+//        TrType := ftInteger;
+    TrType:= ftsmallint;
+   end;
+   SQL_LONG: begin
+//        LensSet := True;
+//       TrLen := 0;
+    TrType:= ftInteger;
+   end;
+   SQL_INT64: begin
+       TrType:= ftLargeInt;
+   end;
+   SQL_DOUBLE: begin
+    TrType:= ftFloat;
+   end;
+   SQL_FLOAT: begin
+    LensSet:= True;
+    TrLen:= SQLLen;
+    TrType:= ftFloat;
+   end
+   else begin
+//     LensSet := True;
+    TrLen := 0;
+    TrType := ftUnknown;
+   end;
+  end;
+ end;
 end;
 
 Function TIBConnection.AllocateCursorHandle : TSQLCursor;
@@ -688,7 +688,7 @@ end;
 procedure TIBConnection.AddFieldDefs(cursor: TSQLCursor; FieldDefs: TfieldDefs);
 var
  x: integer;
- lenset: boolean;
+ lenset: boolean; //what is the use of this?
  TransLen: word;
  TransType: TFieldType;
  FD: TFieldDef;
@@ -697,7 +697,6 @@ var
 begin
  chlengetter:= tcharlenghtgetter.create(self);
  try
-  chlengetter.characterlength('TABLE1','TEXT1');
   with tibcursor(cursor) do begin
    for x := 0 to SQLDA^.SQLD - 1 do begin
     with SQLDA^.SQLVar[x] do begin
@@ -765,10 +764,11 @@ begin
       if assigned(in_sqlda^.SQLvar[SQLVarNr].SQLInd) then in_sqlda^.SQLvar[SQLVarNr].SQLInd^ := 0;
 
       case AParams[ParNr].DataType of
-        ftInteger :
+        ftInteger,ftsmallint :
           begin
           i := AParams[ParNr].AsInteger;
           Move(i, in_sqlda^.SQLvar[SQLVarNr].SQLData^, in_SQLDA^.SQLVar[SQLVarNr].SQLLen);
+   //todo: byte order?
           end;
         ftbcd,ftcurrency: begin
          cur1:= AParams[ParNr].ascurrency;
@@ -861,8 +861,8 @@ begin
       c:= c*intpower(10,4+SQLScale);
       Move(c,buffer^,sizeof(c));
      end;
-     ftInteger: begin
-      b:= 0;
+     ftInteger,ftsmallint: begin
+      b:= 0;        //todo: byte order?
       Move(b, Buffer^,sizeof(longint));
       Move(CurrBuff^,Buffer^,SQLLen);
      end;
