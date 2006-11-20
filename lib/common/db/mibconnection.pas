@@ -92,6 +92,7 @@ type
                               const aparam: tparam);
   public
     constructor Create(AOwner : TComponent); override;
+    procedure createdatabase(const asql: string);
   published
     property Dialect  : integer read FDialect write FDialect;
     property DatabaseName;
@@ -1132,6 +1133,24 @@ begin
   afield.getdata(@blobid);
   aparam.aslargeint:= int64(blobid);
 // end; 
+end;
+
+procedure TIBConnection.createdatabase(const asql: string);
+var
+ dbha: isc_db_handle = nil;
+ trha: isc_tr_handle = nil;
+ bo1: boolean;
+begin
+ bo1:= isc_dsql_execute_immediate(@fstatus,@dbha,@trha,length(asql),
+                             pchar(asql),fdialect,nil) <> 0;
+ if bo1 then begin 
+  checkerror('createdatabase',fstatus);
+ end
+ else begin
+  if dbha <> nil then begin
+   isc_detach_database(@FStatus,@dbha);
+  end;
+ end;
 end;
 
 end.
