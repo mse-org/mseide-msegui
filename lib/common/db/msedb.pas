@@ -963,6 +963,11 @@ begin
  result:= formatfloatmse(avalue,'');
 end;
 
+function encodesqlcurrency(const avalue: currency): string;
+begin
+ result:= formatfloatmse(avalue,'0.####');
+end;
+
 function encodesqlboolean(const avalue: boolean): string;
 begin
  if avalue then begin
@@ -1005,6 +1010,9 @@ begin
    end;
    ftfloat: begin
     result:= encodesqlfloat(field.asfloat);
+   end;
+   ftbcd: begin
+    result:= encodesqlcurrency(field.ascurrency);
    end;
    ftboolean: begin
     result:= encodesqlboolean(field.asboolean);
