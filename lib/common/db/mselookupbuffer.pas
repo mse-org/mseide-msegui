@@ -26,6 +26,7 @@ type
   protected
    procedure activechanged; override;
    procedure updatedata; override;
+   procedure dataevent(event: tdataevent; info: ptrint); override;
   public
    constructor create(const aowner: tcustomdblookupbuffer);
  end;
@@ -1146,6 +1147,16 @@ procedure tlookupbufferfieldsdatalink.updatedata;
 begin
  inherited;
  if olbdb_invalidateonupdatedata in tcustomdblookupbuffer(fowner).foptionsdb then begin
+  datachanged;
+ end;
+end;
+
+procedure tlookupbufferfieldsdatalink.dataevent(event: tdataevent; info: ptrint);
+begin
+ inherited;
+ if (event = decheckbrowsemode) and (info = 1) and 
+           (olbdb_invalidateonupdatedata in 
+                       tcustomdblookupbuffer(fowner).foptionsdb) then begin
   datachanged;
  end;
 end;

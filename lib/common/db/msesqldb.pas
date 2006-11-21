@@ -74,6 +74,7 @@ type
    procedure internalopen; override;
    procedure internalclose; override;
    procedure internalinsert; override;
+   procedure internaldelete; override;
 //   procedure internalpost; override;
    procedure applyrecupdate(updatekind: tupdatekind); override;
    function  getcanmodify: boolean; override;
@@ -84,6 +85,7 @@ type
    procedure inheritedpost;
    function inheritedmoveby(const distance: integer): integer;  
    procedure inheritedinternalinsert;
+   procedure inheritedinternaldelete;
    procedure inheritedinternalopen;
    
    procedure dataevent(event: tdataevent; info: ptrint); override;
@@ -740,8 +742,7 @@ end;
 
 procedure tmsesqlquery.post;
 begin
- fcontroller.post;
- if dso_autoapply in fcontroller.options then begin
+ if fcontroller.post and (dso_autoapply in fcontroller.options) then begin
   applyupdates;
  end;
 end;
@@ -1043,6 +1044,16 @@ end;
 procedure tmsesqlquery.inheritedinternalinsert;
 begin
  inherited internalinsert;
+end;
+
+procedure tmsesqlquery.internaldelete;
+begin
+ fcontroller.internaldelete;
+end;
+
+procedure tmsesqlquery.inheritedinternaldelete;
+begin
+ inherited internaldelete;
 end;
 
 procedure tmsesqlquery.DoAfterCancel;
