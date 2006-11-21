@@ -883,7 +883,8 @@ begin
   buttonheight:= acanvas.font.glyphheight + 6;
   buttonwidth:= 50;
   for int1:= 0 to ord(high(buttons)) do begin
-   int2:= acanvas.getstringwidth(stockobjects.modalresulttextnoshortcut[buttons[int1]]) + 6;
+   int2:= acanvas.getstringwidth(
+               stockobjects.modalresulttextnoshortcut[buttons[int1]]) + 10;
    if int2 > buttonwidth then begin
     buttonwidth:= int2;
    end;
