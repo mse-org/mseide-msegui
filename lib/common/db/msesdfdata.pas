@@ -28,6 +28,7 @@ type
    procedure inheritedpost;
    function inheritedmoveby(const distance: integer): integer;
    procedure inheritedinternalinsert;
+   procedure inheritedinternaldelete;
    procedure inheritedinternalopen;
   protected
    procedure setactive (value : boolean);{ override;}
@@ -37,6 +38,7 @@ type
    procedure dataevent(event: tdataevent; info: ptrint); override;
    procedure internalopen; override;
    procedure internalinsert; override;
+   procedure internaldelete; override;
 
    procedure DoAfterCancel; override;
    procedure DoAfterClose; override;
@@ -92,6 +94,7 @@ type
    procedure inheritedpost;
    function inheritedmoveby(const distance: integer): integer;
    procedure inheritedinternalinsert;
+   procedure inheritedinternaldelete;
    procedure inheritedinternalopen;
   protected
    procedure setactive (value : boolean);{ override;}
@@ -101,6 +104,7 @@ type
    procedure dataevent(event: tdataevent; info: ptrint); override;
    procedure internalopen; override;
    procedure internalinsert; override;
+   procedure internaldelete; override;
 
    procedure DoAfterCancel; override;
    procedure DoAfterClose; override;
@@ -427,6 +431,16 @@ begin
  result:= fcontroller.moveby(distance);
 end;
 
+procedure tmsefixedformatdataset.inheritedinternaldelete;
+begin
+ inherited internaldelete;
+end;
+
+procedure tmsefixedformatdataset.internaldelete;
+begin
+ fcontroller.internaldelete;
+end;
+
 { tmsesdfdataset }
 
 constructor tmsesdfdataset.create(aowner: tcomponent);
@@ -707,6 +721,16 @@ end;
 function tmsesdfdataset.moveby(const distance: integer): integer;
 begin
  result:= fcontroller.moveby(distance);
+end;
+
+procedure tmsesdfdataset.inheritedinternaldelete;
+begin
+ inherited internaldelete;
+end;
+
+procedure tmsesdfdataset.internaldelete;
+begin
+ fcontroller.internaldelete;
 end;
 
 end.

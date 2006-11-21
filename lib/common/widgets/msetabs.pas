@@ -1170,10 +1170,20 @@ end;
 
 procedure tcustomtabbar.doshortcut(var info: keyeventinfoty; const sender: twidget);
 var
- int1: integer;
+ int1,int2: integer;
 begin
  if not (csdesigning in componentstate) then begin
-  for int1:= 0 to tabs.count - 1 do begin
+  int2:= activetab + 1;
+  if int2 >= tabs.count then begin
+   int2:= 0;
+  end;
+  for int1:= int2 to tabs.count - 1 do begin
+   if es_processed in info.eventstate then begin
+    break;
+   end;
+   flayoutinfo.tabs[int1].doshortcut(info,sender);
+  end;
+  for int1:= 0 to int2 - 1 do begin
    if es_processed in info.eventstate then begin
     break;
    end;

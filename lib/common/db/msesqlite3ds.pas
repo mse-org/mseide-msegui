@@ -26,6 +26,7 @@ type
    procedure inheritedpost;
    function inheritedmoveby(const distance: integer): integer;
    procedure inheritedinternalinsert;
+   procedure inheritedinternaldelete;
    procedure inheritedinternalopen;
   protected
    procedure setactive (value : boolean);
@@ -34,6 +35,7 @@ type
    function  getfieldclass(fieldtype: tfieldtype): tfieldclass; override;
    procedure internalopen; override;
    procedure internalinsert; override;
+   procedure internaldelete; override;
 
    procedure DoAfterCancel; override;
    procedure DoAfterClose; override;
@@ -358,6 +360,16 @@ end;
 procedure tmsesqlite3dataset.post;
 begin
  fcontroller.post;
+end;
+
+procedure tmsesqlite3dataset.inheritedinternaldelete;
+begin
+ inherited internaldelete;
+end;
+
+procedure tmsesqlite3dataset.internaldelete;
+begin
+ fcontroller.internaldelete;
 end;
 
 end.

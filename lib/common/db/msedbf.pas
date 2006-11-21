@@ -27,6 +27,7 @@ type
    procedure inheritedpost;
    function inheritedmoveby(const distance: integer): integer;
    procedure inheritedinternalinsert;
+   procedure inheritedinternaldelete;
    procedure inheritedinternalopen;
   protected
    procedure setactive (value : boolean); {override;}
@@ -36,6 +37,7 @@ type
    procedure dataevent(event: tdataevent; info: ptrint); override;
    procedure internalopen; override;
    procedure internalinsert; override;
+   procedure internaldelete; override;
 
    procedure DoAfterCancel; override;
    procedure DoAfterClose; override;
@@ -361,6 +363,16 @@ end;
 procedure tmsedbf.post;
 begin
  fcontroller.post;
+end;
+
+procedure tmsedbf.inheritedinternaldelete;
+begin
+ inherited internaldelete;
+end;
+
+procedure tmsedbf.internaldelete;
+begin
+ fcontroller.internaldelete;
 end;
 
 end.

@@ -554,6 +554,7 @@ type
   function inheritedmoveby(const distance: integer): integer;
   procedure inheritedinternalinsert;
   procedure inheritedinternalopen;
+  procedure inheritedinternaldelete;
  end;
 
  igetdscontroller = interface(inullinterface)
@@ -620,9 +621,11 @@ type
    property recnooffset: integer read frecnooffset;
    function moveby(const distance: integer): integer;
    procedure internalinsert;
+   procedure internaldelete;
    procedure internalopen;
    procedure closequery(var amodalresult: modalresultty);
-   procedure post; //calls post if in edit or insert state
+   function post: boolean; //calls post if in edit or insert state,
+                           //returns false if nothing done
    function posting: boolean; //true if in post procedure
    function emptyinsert: boolean;
    function assql(const avalue: msestring): string; overload;
@@ -2876,6 +2879,12 @@ begin
  fintf.inheritedinternalinsert;
 end;
 
+procedure tdscontroller.internaldelete;
+begin
+ fintf.inheritedinternaldelete;
+ tdataset1(fowner).dataevent(decheckbrowsemode,1);
+end;
+
 procedure tdscontroller.internalopen;
 var
  int1,int2: integer;
@@ -2978,16 +2987,20 @@ begin
  end;
 end;
 
-procedure tdscontroller.post;
+function tdscontroller.post: boolean;
 begin
  with tdataset(fowner) do begin;
   if state in dseditmodes then begin
+   result:= true;
    include(fstate,dscs_posting);
    try    
     fintf.inheritedpost;
    finally
     exclude(fstate,dscs_posting);
    end;
+  end
+  else begin
+   result:= false;
   end;
  end;
 end;

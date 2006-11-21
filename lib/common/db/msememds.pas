@@ -25,6 +25,7 @@ type
    procedure inheritedpost;
    function inheritedmoveby(const distance: integer): integer;
    procedure inheritedinternalinsert;
+   procedure inheritedinternaldelete;
    procedure inheritedinternalopen;
   protected
    procedure setactive (value : boolean);{ override;}
@@ -33,6 +34,7 @@ type
    function  getfieldclass(fieldtype: tfieldtype): tfieldclass; override;
    procedure internalopen; override;
    procedure internalinsert; override;
+   procedure internaldelete; override;
 
    procedure DoAfterCancel; override;
    procedure DoAfterClose; override;
@@ -336,6 +338,16 @@ end;
 procedure tmsememdataset.post;
 begin
  fcontroller.post;
+end;
+
+procedure tmsememdataset.inheritedinternaldelete;
+begin
+ inherited internaldelete;
+end;
+
+procedure tmsememdataset.internaldelete;
+begin
+ fcontroller.internaldelete;
 end;
 
 end.
