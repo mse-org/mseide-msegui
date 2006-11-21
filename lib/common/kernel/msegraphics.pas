@@ -3625,6 +3625,7 @@ begin
   result:= 0;
  end
  else begin
+  checkgcstate([cs_gc]);
   if afont <> nil then begin //foreign font
    afontnum:= afont.gethandleforcanvas(self);
   end
