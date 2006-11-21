@@ -223,11 +223,11 @@ type
  tsequencelink = class(tmsecomponent,idbeditinfo)
   private
    fsequencename: string;
-   fdatabase: tdatabase;
+   fdatabase: tsqlconnection;
    fdbintf: idbcontroller;
    fdatalink: tfielddatalink;
    procedure checkintf;
-   procedure setdatabase(const avalue: tdatabase);
+   procedure setdatabase(const avalue: tsqlconnection);
    procedure setsequencename(const avalue: string);
    function getaslargeint: largeint;
    procedure setaslargeint(const avalue: largeint);
@@ -250,7 +250,7 @@ type
    property asinteger: integer read getasinteger write setasinteger;
    function assql: string;
   published
-   property database: tdatabase read fdatabase write setdatabase;
+   property database: tsqlconnection read fdatabase write setdatabase;
    property datasource: tdatasource read getdatasource write setdatasource;
    property datafield: string read getdatafield write setdatafield;
    property sequencename: string read fsequencename write setsequencename;
@@ -1397,7 +1397,7 @@ begin
  fdatalink.free;
 end;
 
-procedure tsequencelink.setdatabase(const avalue: tdatabase);
+procedure tsequencelink.setdatabase(const avalue: tsqlconnection);
 begin
  if fdatabase <> avalue then begin
   fdbintf:= nil;
@@ -1476,8 +1476,8 @@ procedure tsequencelink.setdatasource(const avalue: tdatasource);
 begin
  fdatalink.datasource:= avalue;
  if (csdesigning in componentstate) and (fdatabase = nil) and 
-      (fdatalink.dataset is tdbdataset) then begin
-  database:= tdbdataset(fdatalink.dataset).database;
+      (fdatalink.dataset is tsqlquery) then begin
+  database:= tsqlconnection(tsqlquery(fdatalink.dataset).database);
  end;
 end;
 

@@ -120,8 +120,9 @@ type
     procedure StartTransaction; override;
     procedure EndTransaction; override;
     property ConnOptions: TConnOptions read FConnOptions;
-    procedure ExecuteDirect(SQL : String); overload; virtual;
-    procedure ExecuteDirect(SQL : String; ATransaction : TSQLTransaction); overload; virtual;
+    procedure ExecuteDirect(const SQL : String); overload; virtual;
+    procedure ExecuteDirect(SQL : String; const ATransaction : TSQLTransaction); 
+                                                       overload; virtual;
     procedure GetTableNames(List : TStrings; SystemTables : Boolean = false); virtual;
     procedure GetProcedureNames(List : TStrings); virtual;
     procedure GetFieldNames(const TableName : string; List :  TStrings); virtual;
@@ -230,6 +231,9 @@ type
     Procedure SQLParser(var ASQL : string);
     procedure ApplyFilter;
     Function AddFilter(SQLstr : string) : string;
+   function getdatabase1: tsqlconnection;
+   procedure setdatabase1(const avalue: tsqlconnection);
+   procedure checkdatabase;
   protected
     FTableName           : string;
     FReadOnly            : boolean;
@@ -258,11 +262,12 @@ type
     Function GetDataSource : TDatasource; override;
     Procedure SetDataSource(AValue : TDatasource); 
   public
+    constructor Create(AOwner : TComponent); override;
+    destructor Destroy; override;
     procedure Prepare; virtual;
     procedure UnPrepare; virtual;
     procedure ExecSQL; virtual;
-    constructor Create(AOwner : TComponent); override;
-    destructor Destroy; override;
+    procedure executedirect(const asql: string); //uses transaction of tsqlquery
     procedure SetSchemaInfo( SchemaType : TSchemaType; SchemaObjectName, SchemaPattern : string); virtual;
     function CreateBlobStream(Field: TField; Mode: TBlobStreamMode): TStream; override;
     property Prepared : boolean read IsPrepared;
@@ -296,7 +301,8 @@ type
     property OnNewRecord;
     property OnPostError;
     property AutoCalcFields;
-    property Database;
+    property database: tsqlconnection read getdatabase1 write setdatabase1;
+//    property Database;
 
     property Transaction;
     property ReadOnly : Boolean read FReadOnly write SetReadOnly;
@@ -441,13 +447,14 @@ begin
     Transaction.EndTransaction;
 end;
 
-Procedure TSQLConnection.ExecuteDirect(SQL: String);
+Procedure TSQLConnection.ExecuteDirect(const SQL: String);
 
 begin
   ExecuteDirect(SQL,FTransaction);
 end;
 
-Procedure TSQLConnection.ExecuteDirect(SQL: String; ATransaction : TSQLTransaction);
+Procedure TSQLConnection.ExecuteDirect(SQL: String;
+                                        const ATransaction: TSQLTransaction);
 
 var Cursor : TSQLCursor;
 
@@ -686,6 +693,9 @@ end;
 Procedure TSQLQuery.SetTransaction(Value : TDBTransaction);
 
 begin
+  if (value <> nil) and not (value is tsqltransaction) then begin
+   exception.create(name+': Transaction must be tsqltransaction.');
+  end;
   UnPrepare;
   inherited;
 end;
@@ -1221,14 +1231,16 @@ end;
 
 procedure TSQLQuery.ExecSQL;
 begin
-  try
-    Prepare;
-    Execute;
-  finally
-    // FCursor has to be assigned, or else the prepare went wrong before PrepareStatment was
-    // called, so UnPrepareStatement shoudn't be called either
-    if (not IsPrepared) and (assigned(database)) and (assigned(FCursor)) then (database as TSQLConnection).UnPrepareStatement(Fcursor);
+ try
+  Prepare;
+  Execute;
+ finally
+   // FCursor has to be assigned, or else the prepare went wrong before PrepareStatment was
+   // called, so UnPrepareStatement shoudn't be called either
+  if (not IsPrepared) and (assigned(database)) and (assigned(FCursor)) then begin
+   (database as TSQLConnection).UnPrepareStatement(Fcursor);
   end;
+ end;
 end;
 
 constructor TSQLQuery.Create(AOwner : TComponent);
@@ -1689,6 +1701,29 @@ end;
 function TSQLQuery.getblobdatasize: integer;
 begin
  result:= tsqlconnection(database).getblobdatasize;
+end;
+
+function TSQLQuery.getdatabase1: tsqlconnection;
+begin
+ result:= tsqlconnection(inherited database);
+end;
+
+procedure TSQLQuery.setdatabase1(const avalue: tsqlconnection);
+begin
+ inherited database:= avalue;
+end;
+
+procedure TSQLQuery.checkdatabase;
+begin
+ if inherited database = nil then begin
+  databaseerror(serrdatabasenassigned);
+ end;
+end;
+
+procedure TSQLQuery.executedirect(const asql: string);
+begin
+ checkdatabase;
+ database.executedirect(asql,tsqltransaction(transaction)); 
 end;
 
 { TSQLCursor }
