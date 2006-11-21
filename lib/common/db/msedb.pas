@@ -128,6 +128,7 @@ type
    destructor destroy; override;
    procedure Clear; override;
    function assql: string;
+   function asoldsql: string;
    property asmsestring: msestring read getasmsestring write setasmsestring;
   published
    property DataSet stored false;
@@ -148,6 +149,7 @@ type
    destructor destroy; override;
    procedure Clear; override;
    function assql: string;
+   function asoldsql: string;
   published
    property DataSet stored false;
    property ProviderFlags default defaultproviderflags;
@@ -161,6 +163,7 @@ type
   public
    procedure Clear; override;
    function assql: string;
+   function asoldsql: string;
    property asmsestring: msestring read getasmsestring write setasmsestring;
   published
    property DataSet stored false;
@@ -178,6 +181,7 @@ type
   public
    procedure Clear; override;
    function assql: string;
+   function asoldsql: string;
    property asmsestring: msestring read getasmsestring write setasmsestring;
    property asenum: integer read getaslongint write setasenum;
   published
@@ -195,6 +199,7 @@ type
   public
    procedure Clear; override;
    function assql: string;
+   function asoldsql: string;
    property asmsestring: msestring read getasmsestring write setasmsestring;
   published
    property DataSet stored false;
@@ -211,6 +216,7 @@ type
   public
    procedure Clear; override;
    function assql: string;
+   function asoldsql: string;
    property asmsestring: msestring read getasmsestring write setasmsestring;
   published
    property DataSet stored false;
@@ -227,6 +233,7 @@ type
   public
    procedure Clear; override;
    function assql: string;
+   function asoldsql: string;
    property asmsestring: msestring read getasmsestring write setasmsestring;
   published
    property DataSet stored false;
@@ -241,6 +248,7 @@ type
   public
    procedure Clear; override;
    function assql: string;
+   function asoldsql: string;
    property asmsestring: msestring read getasmsestring write setasmsestring;
   published
    property DataSet stored false;
@@ -257,6 +265,7 @@ type
   public
    procedure Clear; override;
    function assql: string;
+   function asoldsql: string;
    property asmsestring: msestring read getasmsestring write setasmsestring;
   published
    property DataSet stored false;
@@ -271,6 +280,7 @@ type
   public
    procedure Clear; override;
    function assql: string;
+   function asoldsql: string;
    property asmsestring: msestring read getasmsestring write setasmsestring;
   published
    property DataSet stored false;
@@ -292,6 +302,7 @@ type
    constructor Create(AOwner: TComponent); override;
    procedure Clear; override;
    function assql: string;
+   function asoldsql: string;
    property asmsestring: msestring read getasmsestring write setasmsestring;
   published
    property DataSet stored false;
@@ -309,6 +320,7 @@ type
   public
    procedure Clear; override;
    function assql: string;
+   function asoldsql: string;
    property asmsestring: msestring read getasmsestring write setasmsestring;
   published
    property DataSet stored false;
@@ -325,6 +337,7 @@ type
   public
    procedure Clear; override;
    function assql: string;
+   function asoldsql: string;
    property asmsestring: msestring read getasmsestring write setasmsestring;
   published
    property DataSet stored false;
@@ -341,6 +354,7 @@ type
   public
    procedure Clear; override;
    function assql: string;
+   function asoldsql: string;
    property asmsestring: msestring read getasmsestring write setasmsestring;
   published
    property DataSet stored false;
@@ -355,6 +369,7 @@ type
   public
    procedure Clear; override;
    function assql: string;
+   function asoldsql: string;
    property asmsestring: msestring read getasmsestring write setasmsestring;
   published
    property DataSet stored false;
@@ -369,6 +384,7 @@ type
   public
    procedure Clear; override;
    function assql: string;
+   function asoldsql: string;
    property asmsestring: msestring read getasmsestring write setasmsestring;
   published
    property DataSet stored false;
@@ -383,6 +399,7 @@ type
   public
    procedure Clear; override;
    function assql: string;
+   function asoldsql: string;
    property asmsestring: msestring read getasmsestring write setasmsestring;
   published
    property DataSet stored false;
@@ -397,6 +414,7 @@ type
   public
    procedure Clear; override;
    function assql: string;
+   function asoldsql: string;
    property asmsestring: msestring read getasmsestring write setasmsestring;
   published
    property DataSet stored false;
@@ -411,6 +429,7 @@ type
   public
 //   procedure Clear; override;
    function assql: string;
+   function asoldsql: string;
    property asmsestring: msestring read getasmsestring write setasmsestring;
    procedure LoadFromFile(const FileName: filenamety);
    procedure SaveToFile(const FileName: filenamety);
@@ -1162,14 +1181,6 @@ end;
 function tmsestringfield.assql: string;
 begin
  result:= fieldtosql(self);
-{
- if isnull then begin
-  result:= 'NULL';
- end
- else begin
-  result:= ''''+asstring+'''';
- end;
- }
 end;
 
 function tmsestringfield.getasmsestring: msestring;
@@ -1197,6 +1208,11 @@ begin
  setdata(nil);
 end;
 
+
+function tmsestringfield.asoldsql: string;
+begin
+ result:= fieldtooldsql(self);
+end;
 { tmsememofield }
 
 destructor tmsememofield.destroy;
@@ -1242,6 +1258,11 @@ begin
  setdata(nil);
 end;
 
+function tmsememofield.asoldsql: string;
+begin
+ result:= fieldtooldsql(self);
+end;
+
 { tmsenumericfield }
 
 function tmsenumericfield.HasParent: Boolean;
@@ -1267,6 +1288,11 @@ end;
 procedure tmsenumericfield.Clear;
 begin
  setdata(nil);
+end;
+
+function tmsenumericfield.asoldsql: string;
+begin
+ result:= fieldtooldsql(self);
 end;
 
 { tmselongintfield }
@@ -1321,6 +1347,11 @@ begin
  end;
 end;
 
+function tmselongintfield.asoldsql: string;
+begin
+ result:= fieldtooldsql(self);
+end;
+
 { tmselargeintfield }
 
 function tmselargeintfield.HasParent: Boolean;
@@ -1361,6 +1392,11 @@ end;
 procedure tmselargeintfield.Clear;
 begin
  setdata(nil);
+end;
+
+function tmselargeintfield.asoldsql: string;
+begin
+ result:= fieldtooldsql(self);
 end;
 
 { tmsesmallintfield }
@@ -1405,6 +1441,11 @@ begin
  setdata(nil);
 end;
 
+function tmsesmallintfield.asoldsql: string;
+begin
+ result:= fieldtooldsql(self);
+end;
+
 { tmsewordfield }
 
 function tmsewordfield.HasParent: Boolean;
@@ -1447,6 +1488,11 @@ begin
  setdata(nil);
 end;
 
+function tmsewordfield.asoldsql: string;
+begin
+ result:= fieldtooldsql(self);
+end;
+
 { tmseautoincfield }
 
 function tmseautoincfield.HasParent: Boolean;
@@ -1472,6 +1518,11 @@ end;
 procedure tmseautoincfield.Clear;
 begin
  setdata(nil);
+end;
+
+function tmseautoincfield.asoldsql: string;
+begin
+ result:= fieldtooldsql(self);
 end;
 
 { tmsefloatfield }
@@ -1521,6 +1572,11 @@ begin
  setdata(nil);
 end;
 
+function tmsefloatfield.asoldsql: string;
+begin
+ result:= fieldtooldsql(self);
+end;
+
 { tmsecurrencyfield }
 
 function tmsecurrencyfield.HasParent: Boolean;
@@ -1546,6 +1602,11 @@ end;
 procedure tmsecurrencyfield.Clear;
 begin
  setdata(nil);
+end;
+
+function tmsecurrencyfield.asoldsql: string;
+begin
+ result:= fieldtooldsql(self);
 end;
 
 { tmsebooleanfield }
@@ -1643,6 +1704,11 @@ begin
  end;
 end;
 
+function tmsebooleanfield.asoldsql: string;
+begin
+ result:= fieldtooldsql(self);
+end;
+
 { tmsedatetimefield }
 
 function tmsedatetimefield.HasParent: Boolean;
@@ -1688,6 +1754,11 @@ end;
 procedure tmsedatetimefield.Clear;
 begin
  setdata(nil);
+end;
+
+function tmsedatetimefield.asoldsql: string;
+begin
+ result:= fieldtooldsql(self);
 end;
 
 { tmsedatefield }
@@ -1737,6 +1808,11 @@ begin
  setdata(nil);
 end;
 
+function tmsedatefield.asoldsql: string;
+begin
+ result:= fieldtooldsql(self);
+end;
+
 { tmsetimefield }
 
 function tmsetimefield.HasParent: Boolean;
@@ -1784,6 +1860,11 @@ begin
  setdata(nil);
 end;
 
+function tmsetimefield.asoldsql: string;
+begin
+ result:= fieldtooldsql(self);
+end;
+
 { tmsebinaryfield }
 
 function tmsebinaryfield.HasParent: Boolean;
@@ -1809,6 +1890,11 @@ end;
 procedure tmsebinaryfield.Clear;
 begin
  setdata(nil);
+end;
+
+function tmsebinaryfield.asoldsql: string;
+begin
+ result:= fieldtooldsql(self);
 end;
 
 { tmsebytesfield }
@@ -1838,6 +1924,11 @@ begin
  setdata(nil);
 end;
 
+function tmsebytesfield.asoldsql: string;
+begin
+ result:= fieldtooldsql(self);
+end;
+
 { tmsevarbytesfield }
 
 function tmsevarbytesfield.HasParent: Boolean;
@@ -1865,6 +1956,11 @@ begin
  setdata(nil);
 end;
 
+function tmsevarbytesfield.asoldsql: string;
+begin
+ result:= fieldtooldsql(self);
+end;
+
 { tmsebcdfield }
 
 function tmsebcdfield.HasParent: Boolean;
@@ -1890,6 +1986,11 @@ end;
 procedure tmsebcdfield.Clear;
 begin
  setdata(nil);
+end;
+
+function tmsebcdfield.asoldsql: string;
+begin
+ result:= fieldtooldsql(self);
 end;
 
 { tmseblobfield }
@@ -1927,6 +2028,11 @@ end;
 procedure tmseblobfield.SaveToFile(const FileName: filenamety);
 begin
  inherited savetofile(tosysfilepath(filename));
+end;
+
+function tmseblobfield.asoldsql: string;
+begin
+ result:= fieldtooldsql(self);
 end;
 
 { tmsegraphicfield }
