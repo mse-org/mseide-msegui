@@ -1171,7 +1171,10 @@ begin
   end;
  end;
  if pos1.filenum <> unitinfopo^.unitend.filenum then begin
-  pos1:= unitinfopo^.unitend;
+  pos1:= unitinfopo^.implementationend;
+  if pos1.filenum <> unitinfopo^.unitend.filenum then begin
+   pos1:= unitinfopo^.unitend;
+  end;
  end;
  if issamesourcepos(unitinfopo^.unitend,pos1) then begin
   dec(pos1.line);    //no 'end.'

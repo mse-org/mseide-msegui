@@ -4285,6 +4285,7 @@ var
  po1,po2: pchar;
  bo1: boolean;
  ch1,ch2: char;
+ wch1: widechar;
 begin
  result:= ttextstream.create; //memorystream
  po1:= datapo;
@@ -4309,8 +4310,12 @@ begin
   end;
   for int1:= 0 to fcount - 1 do begin
    int4:= length(msestring(pointer(po1)^));
-   for int3:= 0 to int4 - 1 do begin
-    (po2 + int3)^:= char(msecharaty(pointer(pointer(po1)^)^)[int3]);
+   for int3:= int4 - 1 downto 0 do begin
+    wch1:= msecharaty(pointer(pointer(po1)^)^)[int3];
+    if wch1 > #$ff then begin
+     wch1:= #$ff;
+    end;
+    (po2 + int3)^:= char(wch1);
    end;
    inc(po2,int4);
    po2^:= ch1;
