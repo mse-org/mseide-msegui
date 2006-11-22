@@ -594,6 +594,7 @@ type
  
 const
  defaultdscontrolleroptions = [];
+ de_modified = ord(high(tdataevent))+1;
  
 type
  fieldlinkarty = array of ifieldcomponent;
@@ -624,6 +625,7 @@ type
    function getrecno: integer;
    procedure setrecno(const avalue: integer);
   protected
+   procedure modified;
    procedure setowneractive(const avalue: boolean); override;
    procedure fielddestroyed(const sender: ifieldcomponent);
   public
@@ -3035,7 +3037,7 @@ end;
 procedure tdscontroller.internaldelete;
 begin
  fintf.inheritedinternaldelete;
- tdataset1(fowner).dataevent(decheckbrowsemode,1);
+ modified;
 end;
 
 procedure tdscontroller.internalopen;
@@ -3151,6 +3153,7 @@ begin
    finally
     exclude(fstate,dscs_posting);
    end;
+   self.modified;
   end
   else begin
    result:= false;
@@ -3174,6 +3177,11 @@ end;
 function tdscontroller.posting: boolean;
 begin
  result:= dscs_posting in fstate;
+end;
+
+procedure tdscontroller.modified;
+begin
+ tdataset1(fowner).dataevent(tdataevent(de_modified),0);
 end;
 
 { ttacontroller }

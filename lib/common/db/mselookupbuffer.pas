@@ -209,7 +209,7 @@ type
    property onchange;
  end;
 
- lbdboptionty = (olbdb_closedataset,olbdb_invalidateonupdatedata);
+ lbdboptionty = (olbdb_closedataset,olbdb_invalidateifmodified);
  lbdboptionsty = set of lbdboptionty; 
  
  tcustomdblookupbuffer = class(tcustomlookupbuffer)
@@ -227,7 +227,6 @@ type
    procedure fieldschanged(const sender: tarrayprop; const index: integer);
    procedure getfields(out aintegerfields,atextfields,afloatfields: fieldarty);
   protected
-   procedure clearbuffer; override;
    procedure loaded; override;
    function getfieldcounttext: integer; override;
    function getfieldcountinteger: integer; override;
@@ -238,6 +237,7 @@ type
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
+   procedure clearbuffer; override;
    function count: integer; override;
    property datasource: tdatasource read getdatasource write setdatasource;
    property textfields: tdbfieldnamearrayprop read ftextfields write settextfields;
@@ -1146,16 +1146,16 @@ end;
 procedure tlookupbufferfieldsdatalink.updatedata;
 begin
  inherited;
- if olbdb_invalidateonupdatedata in tcustomdblookupbuffer(fowner).foptionsdb then begin
-  datachanged;
- end;
+// if olbdb_invalidateonupdatedata in tcustomdblookupbuffer(fowner).foptionsdb then begin
+//  datachanged;
+// end;
 end;
 
 procedure tlookupbufferfieldsdatalink.dataevent(event: tdataevent; info: ptrint);
 begin
  inherited;
- if (event = decheckbrowsemode) and (info = 1) and 
-           (olbdb_invalidateonupdatedata in 
+ if (event = tdataevent(de_modified)) and 
+           (olbdb_invalidateifmodified in 
                        tcustomdblookupbuffer(fowner).foptionsdb) then begin
   datachanged;
  end;
