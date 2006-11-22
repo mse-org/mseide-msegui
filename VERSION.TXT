@@ -1,5 +1,6 @@
 MSEide+MSEgui version history
-
+2006-11-22 tcustomlookupbuffer.options olbdb_invalidateonupdatedata ->
+ olbdb_invalidateifmodified.
 2006-10-23 Function vartorealty.
 2006-10-20 ttimestampfieldlink, tfieldlink, tdscontroller.post.
 
