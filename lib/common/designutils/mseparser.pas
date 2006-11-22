@@ -248,7 +248,8 @@ type
    {$endif}
 
    procedure mark; //set mark in tokenstak
-   procedure back; //restore tokenstack to last mark
+   function back: boolean; 
+       //restore tokenstack to last mark, mark must be in same file, true if ok
    procedure pop;  //remove mark from tokenstack
    procedure setidents(idents: array of string);
 
@@ -517,7 +518,8 @@ procedure tscanner.scantoken;
 var
  ch1: char;
 begin
- ch1:= upcase(fpo^);
+// ch1:= upcase(fpo^);
+ ch1:= upperchars[fpo^];
  if (ch1 = ' ') or (ch1 = c_tab) then begin
   newtoken(tk_whitespace);
   repeat
@@ -1048,13 +1050,19 @@ begin
  inc(ftokenstackcount);
 end;
 
-procedure tparser.back;
+function tparser.back: boolean;
 begin
  if ftokenstackcount = 0 then begin
   internalerror;
  end;
  dec(ftokenstackcount);
- setacttoken(ftokenstack[ftokenstackcount]);
+ if fscannernum = ftokenstack[ftokenstackcount].scanner then begin
+  setacttoken(ftokenstack[ftokenstackcount]);
+  result:= true;
+ end
+ else begin
+  result:= false;
+ end;
 end;
 
 procedure tparser.pop;
