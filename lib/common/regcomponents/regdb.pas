@@ -737,7 +737,8 @@ end;
 function tdbparampropertyeditor.getvalue: msestring;
 begin
  with tparam(fprops[0].instance) do begin
-  result:= '<'+name+'><'+getenumname(typeinfo(tparamtype),ord(paramtype))+'>';
+  result:= '<'+name+'><'+getenumname(typeinfo(tfieldtype),ord(datatype))+
+      {'><'+getenumname(typeinfo(tparamtype),ord(paramtype))+}'>';
  end;
 end;
 
