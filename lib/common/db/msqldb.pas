@@ -1221,7 +1221,8 @@ begin
  int1:= recno;
  disablecontrols;
  try
-  transaction.active:= false;
+//  transaction.active:= false;
+  active:= false;
   active:= true;
   setrecno1(int1,true);
  finally
