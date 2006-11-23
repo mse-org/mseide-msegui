@@ -2896,28 +2896,33 @@ end;
 function tdscontroller.getrecnonullbased: integer;
 begin
  with tdataset1(fowner) do begin
-  if not frecnovalid then begin
-   if bof then begin
-    frecno:= 0;
-   end
-   else begin
-    if eof then begin
-     frecno:= recordcount - 1;
-    end
-    else begin
-     frecno:= recno + frecnooffset;
-    end;
-   end;
-   frecnovalid:= true;
+  if state = dsinactive then begin
+   result:= -1;
   end
   else begin
-   inc(frecno,fscrollsum + activerecord - factiverecordbefore);
-  end;
-  factiverecordbefore:= activerecord;
-  fscrollsum:= 0;
-  result:= frecno;
-  if (state = dsinsert) and (getbookmarkflag(activebuffer) = bfeof) then begin
-   inc(result); //append mode
+   if not frecnovalid then begin
+    if bof then begin
+     frecno:= 0;
+    end
+    else begin
+     if eof then begin
+      frecno:= recordcount - 1;
+     end
+     else begin
+      frecno:= recno + frecnooffset;
+     end;
+    end;
+    frecnovalid:= true;
+   end
+   else begin
+    inc(frecno,fscrollsum + activerecord - factiverecordbefore);
+   end;
+   factiverecordbefore:= activerecord;
+   fscrollsum:= 0;
+   result:= frecno;
+   if (state = dsinsert) and (getbookmarkflag(activebuffer) = bfeof) then begin
+    inc(result); //append mode
+   end;
   end;
  end;
 end;
