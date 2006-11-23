@@ -374,9 +374,6 @@ constructor tmsesqlquery.create(aowner: tcomponent);
 begin
  inherited;
 // updatemode:= upwhereall;
- if params = nil then begin
-  params:= tparams.create(self); //for 2.0.2
- end;
  fsqlonchangebefore:= sql.onchange;
  sql.onchange:= {$ifdef FPC}@{$endif}sqlonchange;
  fcontroller:= tdscontroller.create(self,idscontroller(self),-1);
