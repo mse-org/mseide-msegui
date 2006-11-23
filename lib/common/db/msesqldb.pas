@@ -377,7 +377,7 @@ begin
  end;
  fsqlonchangebefore:= sql.onchange;
  sql.onchange:= {$ifdef FPC}@{$endif}sqlonchange;
- fcontroller:= tdscontroller.create(self,idscontroller(self),-1);
+ fcontroller:= tdscontroller.create(self,idscontroller(self),-1,false);
 end;
 
 destructor tmsesqlquery.destroy;
