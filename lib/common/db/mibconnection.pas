@@ -251,7 +251,8 @@ var
   ADatabaseName : String;
 begin
 {$IfDef LinkDynamically}
-  InitialiseIBase60;
+ InitialiseIBase60;
+ try 
 {$EndIf}
   inherited dointernalconnect;
 
@@ -274,6 +275,12 @@ begin
          Length(DPB), @DPB[1]) <> 0 then
     CheckError('DoInternalConnect', FStatus);
   SetDBDialect;
+{$IfDef LinkDynamically}
+ except
+  releaseIBase60;
+  raise;
+ end;
+{$EndIf}
 end;
 
 procedure TIBConnection.DoInternalDisconnect;
@@ -1286,16 +1293,25 @@ var
  trha: isc_tr_handle = nil;
  bo1: boolean;
 begin
- bo1:= isc_dsql_execute_immediate(@fstatus,@dbha,@trha,length(asql),
-                             pchar(asql),fdialect,nil) <> 0;
- if bo1 then begin 
-  checkerror('createdatabase',fstatus);
- end
- else begin
-  if dbha <> nil then begin
-   isc_detach_database(@FStatus,@dbha);
+{$ifdef linkdynamically}
+ initialiseibase60;
+ try
+{$endif}
+  bo1:= isc_dsql_execute_immediate(@fstatus,@dbha,@trha,length(asql),
+                              pchar(asql),fdialect,nil) <> 0;
+  if bo1 then begin 
+   checkerror('createdatabase',fstatus);
+  end
+  else begin
+   if dbha <> nil then begin
+    isc_detach_database(@FStatus,@dbha);
+   end;
   end;
+{$ifdef linkdynamically}
+ finally
+  releaseibase60;
  end;
+{$endif}
 end;
 
 end.
