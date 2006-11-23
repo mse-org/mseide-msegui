@@ -235,6 +235,7 @@ type
    property linenumber: integer read flinenumber;
    property pagelinenumber: integer read fpagelinenumber;
    function remaininglines: integer;
+   function liney1: integer; //no checknextpage call
    property liney: integer read getliney write setliney;
    function lineheight: integer; //pixels
 
@@ -942,10 +943,15 @@ begin
  result:= (fpagenumber >= ffirstpage) and (fpagenumber <= flastpage);
 end;
 
+function tcustomprintercanvas.liney1: integer;
+begin
+ result:= fliney + fheaderheight;
+end;
+
 function tcustomprintercanvas.getliney: integer;
 begin
  checknextpage;
- result:= fliney + fheaderheight;
+ result:= liney1;
 end;
 
 procedure tcustomprintercanvas.setliney(const avalue: integer);
