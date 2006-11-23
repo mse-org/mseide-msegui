@@ -163,6 +163,7 @@ type
    findentx: integer;
    findenty: integer;
    fprintorientation: pageorientationty;
+   fpagechanging: integer;
    procedure setcolorspace(const avalue: colorspacety);
    function getliney: integer;
    procedure setprintorientation(const avalue: pageorientationty);
@@ -828,8 +829,15 @@ end;
 
 procedure tcustomprintercanvas.checknextpage;
 begin
- if remaininglines <= 0 then begin
-  nextpage;
+ if fpagechanging = 0 then begin
+  if remaininglines <= 0 then begin
+   inc(fpagechanging);
+   try
+    nextpage;
+   finally
+    dec(fpagechanging);
+   end;
+  end;
  end;
 end;
 
