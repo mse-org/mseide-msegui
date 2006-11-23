@@ -2992,8 +2992,14 @@ begin
 end;
 
 procedure tdscontroller.cancel;
+var
+ bo1: boolean;
 begin
  with tdataset1(fowner) do begin
+  bo1:= state = dsinsert;
+  if bo1 then begin
+   dobeforescroll;
+  end;
   if fcancelresync and (state = dsinsert) and not modified then begin
    fintf.inheritedcancel;
    try
@@ -3006,6 +3012,9 @@ begin
   end
   else begin
    fintf.inheritedcancel;
+  end;
+  if bo1 then begin
+   doafterscroll;
   end;
  end;
 end;
