@@ -2746,7 +2746,7 @@ end;
 function tdscontroller.getrecnonullbased: integer;
 begin
  with tdataset1(fowner) do begin
-  if state = dsinactive then begin
+  if bof and eof then begin
    result:= -1;
   end
   else begin
