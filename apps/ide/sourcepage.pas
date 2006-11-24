@@ -69,11 +69,13 @@ type
    fgotoline: integer;
    ffileloading: integer;
    ffileloaderror: boolean;
+   frelpath: filenamety;
    procedure setactiverow(const Value: integer);
    procedure setgdb(agdb: tgdbmi);
-   function getfilepath: filenamety;
    procedure setfilepath(const value: filenamety);
    function getfilename: filenamety;
+   function getfilepath: filenamety;
+   function getrelpath: filenamety;
    procedure find;
    procedure replace(all: boolean);
    procedure showprocheaders(const apos: gridcoordty);
@@ -129,6 +131,7 @@ type
    property activerow: integer read factiverow write setactiverow;
    property gdb: tgdbmi write setgdb;
    property filename: filenamety read getfilename;
+   property relpath: filenamety read getrelpath write frelpath;
    property filepath: filenamety read getfilepath write setfilepath;
    property filetag: cardinal read ffiletag;
  end;
@@ -211,16 +214,6 @@ begin
    end;
   end;
  end;
-end;
-
-function tsourcepage.getfilepath: filenamety;
-begin
- result:= finitialfilepath;
-end;
-
-function tsourcepage.getfilename: filenamety;
-begin
- result:= msefileutils.filename(finitialfilepath);
 end;
 
 procedure tsourcepage.sourcefoonloaded(const sender: TObject);
@@ -314,13 +307,34 @@ begin
  result:= (edit.filename = finitialfilepath) or (finitialfilepath = '');
 end;
 
+function tsourcepage.getfilepath: filenamety;
+begin
+ result:= finitialfilepath;
+end;
+
+function tsourcepage.getrelpath: filenamety;
+begin
+ if fileloaded or (frelpath = '') then begin
+  result:= relativepath(finitialfilepath,projectoptions.projectdir);
+ end
+ else begin
+  result:= frelpath;
+ end;
+end;
+
+function tsourcepage.getfilename: filenamety;
+begin
+ result:= msefileutils.filename(finitialfilepath);
+end;
+
 procedure tsourcepage.loadfile; //loads if needed
 var
  mstr1: filenamety;
  int1: integer;
 begin
  if not fileloaded then begin
-  mstr1:= relativepath(finitialfilepath,projectoptions.projectdir);
+//  mstr1:= relativepath(finitialfilepath,projectoptions.projectdir);
+  mstr1:= relpath;
   if findfile(mstr1) then begin
    mstr1:= msefileutils.filepath(mstr1);
   end
