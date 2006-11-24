@@ -35,7 +35,7 @@ type
    procedure openfileonexecute(const sender: TObject);
    procedure formonchildscaled(const sender: TObject);
   private
-   fpaths,fnames: filenamearty;
+   fpaths,frelpaths,fnames: filenamearty;
    fsortlist: integerarty;
   public
  end;
@@ -46,7 +46,8 @@ procedure updatestat(const filer: tstatfiler);
 implementation
 
 uses
- selecteditpageform_mfm,sourceform,msedatalist,msedatanodes,msegraphutils,main;
+ selecteditpageform_mfm,sourceform,msedatalist,msedatanodes,msegraphutils,main,
+ msefileutils;
 var
  colwidth: integer;
  pos: rectty;
@@ -95,7 +96,12 @@ begin
  end
  else begin
   if info.eventkind = cek_enter then begin
-   pathdisp.value:= fpaths[fsortlist[index]];
+   if findfile(frelpaths[fsortlist[index]]) then begin
+    pathdisp.value:= filepath(frelpaths[fsortlist[index]]);
+   end
+   else begin
+    pathdisp.value:= fpaths[fsortlist[index]];
+   end;
   end;
  end;
 end;
@@ -119,9 +125,11 @@ var
  int1,int2: integer;
 begin
  setlength(fpaths,sourcefo.count);
+ setlength(frelpaths,sourcefo.count);
  setlength(fnames,sourcefo.count);
  for int1:= 0 to high(fpaths) do begin
   fpaths[int1]:= sourcefo.items[int1].filepath;
+  frelpaths[int1]:= sourcefo.items[int1].relpath;
   fnames[int1]:= sourcefo.items[int1].filename;
  end;
  sortarray(fnames,sms_upi,fsortlist);

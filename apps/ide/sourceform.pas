@@ -310,7 +310,7 @@ end;
 procedure tsourcefo.updatestat(const statfiler: tstatfiler);
 var
  int1: integer;
- filenames,modulenames: filenamearty;
+ filenames,relpaths,modulenames: filenamearty;
  ismod: longboolarty;
  ar1: longboolarty;
  page1: tsourcepage1;
@@ -341,12 +341,14 @@ begin
    intar1:= tabwidget.idents;
    sortarray(intar1,intar2);
    setlength(filenames,count);  
+   setlength(relpaths,count);  
    setlength(feditposar,count); 
    setlength(fbookmarkar,count); 
    setlength(ismod,count); 
    for int1:= 0 to high(filenames) do begin
     with items[intar2[int1]] do begin
      filenames[int1]:= filepath;
+     relpaths[int1]:= relpath;
      feditposar[int1]:= edit.editpos;
      fbookmarkar[int1]:= getbookmarks;
      ismod[int1]:= ismoduletext;
@@ -382,6 +384,7 @@ begin
    end;
   end;
   updatevalue('sourcefiles',filenames);
+  updatevalue('relpaths',relpaths);
   updatevalue('ismoduletexts',ismod);
   updatevalue('modules',modulenames);
   updatevalue('visiblemodules',ar1);
@@ -392,6 +395,9 @@ begin
     page1:= tsourcepage1(createnewpage(''));
     if (page1 <> nil) then begin
      page1.finitialfilepath:= filenames[int1];
+     if int1 <= high(relpaths) then begin
+      page1.relpath:= relpaths[int1];
+     end;
      if int1 <= high(ismod) then begin
       page1.ismoduletext:= ismod[int1];
      end;
