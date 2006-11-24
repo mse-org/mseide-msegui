@@ -1497,10 +1497,23 @@ end;
 
 procedure tdataedit.docellevent(const ownedcol: boolean; var info: celleventinfoty);
 
+var
+ hintinfo: hintinfoty;
 begin
- if ownedcol and (info.eventkind = cek_enter) then begin
-  setupeditor; //setrowfont
-  feditor.initfocus;
+ if ownedcol then begin
+  if (info.eventkind = cek_enter) then begin
+   setupeditor; //setrowfont
+   feditor.initfocus; 
+  end;
+  if (oe_hintclippedtext in foptionsedit) and 
+         (info.eventkind = cek_firstmousepark) and application.active and 
+         textclipped(info.cell.row) and 
+         ((info.grid.row <> info.cell.row) or (info.grid.col <> info.cell.col)) and
+         twidget1(info.grid).getshowhint then begin
+   application.inithintinfo(hintinfo,info.grid);
+   hintinfo.caption:= datatotext(fgridintf.getcol.datalist.getitempo(info.cell.row)^);
+   application.showhint(info.grid,hintinfo);
+  end; 
  end;
 end;
 

@@ -77,7 +77,8 @@ type
                     scoe_uppercase,
                     scoe_lowercase,
                     
-                    scoe_autopost
+                    scoe_autopost,
+                    scoe_hintclippedtext
                           );
 
  stringcoleditoptionsty = set of stringcoleditoptionty;
@@ -511,6 +512,7 @@ type
    function createdatalist: tdatalist; override;
    function getrowtext(const arow: integer): msestring; virtual;
    procedure drawcell(const canvas: tcanvas); override;
+   procedure docellevent(var info: celleventinfoty); override;
    procedure updatelayout; override;
    function getinnerframe: framety; override;
    function getcursor: cursorshapety; override;
@@ -3841,6 +3843,20 @@ function tcustomstringcol.getoptionsedit: optionseditty;
 begin
  result:= [];
  stringcoltooptionsedit(foptionsedit,result);
+end;
+
+procedure tcustomstringcol.docellevent(var info: celleventinfoty);
+var
+ hintinfo: hintinfoty;
+begin
+ if (scoe_hintclippedtext in foptionsedit) and 
+        (info.eventkind = cek_firstmousepark) and application.active and 
+         fgrid.getshowhint and
+         tcustomstringgrid(fgrid).textclipped(info.cell) then begin
+  application.inithintinfo(hintinfo,fgrid);
+  hintinfo.caption:= self[info.cell.row];
+  application.showhint(fgrid,hintinfo);
+ end;
 end;
 
 { tfixcol }

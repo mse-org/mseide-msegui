@@ -263,6 +263,7 @@ type
    procedure dodefocus; override;
    procedure dopaint(const canvas: tcanvas); override;
    procedure rootchanged; override;
+   procedure showhint(var info: hintinfoty); override;
 
    procedure dochange; virtual;
    procedure dotextedited; virtual;
@@ -1126,6 +1127,15 @@ end;
 function tcustomedit.hasselection: boolean;
 begin
  result:= false;
+end;
+
+procedure tcustomedit.showhint(var info: hintinfoty);
+begin
+ if (oe_hintclippedtext in foptionsedit) and 
+                      editor.textclipped and getshowhint then begin
+  info.caption:= text;
+ end;
+ inherited;
 end;
 
 end.
