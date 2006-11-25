@@ -29,7 +29,7 @@ const
   '&Cancelar',   //mr_cancel
   '&Abortar',    //mr_abort
   '&OK',         //mr_ok
-  '&Si',         //mr_yes
+  '&S'#237,      //mr_yes
   '&No',         //mr_no
   '&Todo',       //mr_all
   'N&o todo',    //mr_noall
@@ -47,7 +47,7 @@ const
   'Cancelar',   //mr_cancel
   'Abortar',    //mr_abort
   'OK',         //mr_ok
-  'Si',         //mr_yes
+  'S'#237,      //mr_yes
   'No',         //mr_no
   'Todo',       //mr_all
   'No todo',    //mr_noall
@@ -60,19 +60,19 @@ const
   'Error de formato',           //sc_Format_error
   'Debe introducir un valor',   //sc_Value_is_required
   'Error',                      //sc_Error
-  'Min',                        //sc_Min
-  'M'#225'x',                   //sc_Max
+  'M'#237'n.',                  //sc_Min
+  'M'#225'x.',                  //sc_Max
   'Error de rango',             //sc_Range_error  
   '&Deshacer',                  //sc_Undo  ///
   '&Copiar',                    //sc_Copy   // hotkeys
   'C&ortar',                    //sc_Cut    //
   '&Pegar',                     //sc_Paste ///
   '&Directorio',                //sc_Dir               /// 
-  '&Arriba',                    //sc_Up                 //
+  '&Subir',                     //sc_Up                 //
   'N&uevo dir.',                //sc_New_dir            // hotkeys
   'N&ombre',                    //sc_Name               //
   '&Mostrar archivos ocultos',  //sc_Show_hidden_files  //
-  '&Filtrar',                   //sc_Filter            ///   
+  '&Filtro',                    //sc_Filter            ///   
   'Guardar',                    //sc_save 
   'Abrir',                      //sc_open
   'Formato gr'#225'fico no soportado', //sc_graphic_not_supported
@@ -85,8 +85,8 @@ const
   'PNM imagen',                        //sc_PNM_Image
   'TARGA imagen',                      //sc_TARGA_image
   'Todo',                              //sc_All
-  'Confirmaci'#243'n',                 //sc_Confirmation
-  'Borrar registro?'                   //sc_Delete_record
+  'Confirme',                          //sc_Confirmation
+  #191'Borrar el registro?'            //sc_Delete_record
 );
     
 initialization
