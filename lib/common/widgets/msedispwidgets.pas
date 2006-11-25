@@ -341,13 +341,11 @@ end;
 
 procedure tdispwidget.showhint(var info: hintinfoty);
 begin
- if (dwo_hintclippedtext in foptions) and textclipped(getcanvas,finfo) then begin
+ if (dwo_hintclippedtext in foptions) and getshowhint and 
+                                   textclipped(getcanvas,finfo) then begin
   info.caption:= finfo.text.text;
-  include(info.flags,hfl_show);
- end
- else begin
-  inherited;
  end;
+ inherited;
 end;
 
 procedure tdispwidget.synctofontheight;

@@ -4764,14 +4764,17 @@ function twidget.getshowhint: boolean;
 begin
  result:= (ow_hinton in foptionswidget) or
   not (ow_hintoff in foptionswidget) and
-       (fparentwidget = nil) or fparentwidget.getshowhint;
+       ((fparentwidget = nil) or fparentwidget.getshowhint);
 end;
 
 procedure twidget.showhint(var info: hintinfoty);
+var
+ mstr1: msestring;
 begin
  if getshowhint and not(csdesigning in componentstate) then begin
-  with info do begin
-   caption:= hint;
+  mstr1:= hint;
+  if mstr1 <> '' then begin
+   info.caption:= mstr1;
   end;
  end;
 end;

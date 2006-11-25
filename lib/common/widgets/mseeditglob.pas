@@ -39,6 +39,7 @@ type
                     oe_trimleft,
                     oe_uppercase,
                     oe_lowercase,
+                    oe_hintclippedtext,
 
                     oe_casesensitive,
                     oe_notnull,
