@@ -509,7 +509,8 @@ begin
  if row^ <> nil then begin
   field:= mysql_fetch_field_direct(C.FRES,c.MapDSRowToMSQLRow[fno]);
   if afield.datatype = ftstring then begin
-   alen:= strlen(row^);
+//   alen:= strlen(row^);
+   alen:= mysql_fetch_lengths(c.fres)[c.MapDSRowToMSQLRow[fno]];
    if bufsize < alen then begin 
     bufsize:= -alen;
     exit;
