@@ -191,15 +191,16 @@ begin
 end;
 
 function TConnectionName.GetAsSQLText(Field : TField) : string;
-
-var esc_str : pchar;
-
+var 
+ esc_str : pchar;
+ str1: string;
 begin
   if (not assigned(field)) or field.IsNull then Result := 'Null'
   else if field.DataType = ftString then
     begin
-    Getmem(esc_str,sizeof(field.asstring)*2+1);
-    mysql_real_escape_string(FMySQL,esc_str,pchar(field.asstring),length(field.asstring));
+    str1:= field.asstring;
+    Getmem(esc_str,length(str1)*2+1);
+    mysql_real_escape_string(FMySQL,esc_str,pchar(str1),length(str1));
     Result := '''' + esc_str + '''';
     Freemem(esc_str);
     end
@@ -207,19 +208,25 @@ begin
 end;
 
 function TConnectionName.GetAsSQLText(Param: TParam) : string;
-
-var esc_str : pchar;
-
+var 
+ esc_str : pchar;
+ str1: string;
 begin
-  if (not assigned(param)) or param.IsNull then Result := 'Null'
-  else if param.DataType =  ftString then
-    begin
-    Getmem(esc_str,sizeof(param.asstring)*2+1);
-    mysql_real_escape_string(FMySQL,esc_str,pchar(param.asstring),length(param.asstring));
-    Result := '''' + esc_str + '''';
-    Freemem(esc_str);
-    end
-  else Result := inherited GetAsSqlText(Param);
+ if (not assigned(param)) or param.IsNull then begin
+  Result:= 'Null'
+ end
+ else begin
+  if param.DataType =  ftString then begin
+   str1:= param.asstring;
+   Getmem(esc_str,length(str1)*2+1);
+   mysql_real_escape_string(FMySQL,esc_str,pchar(str1),length(str1));
+   Result:= '''' + esc_str + '''';
+   Freemem(esc_str);
+  end
+  else begin
+   Result:= inherited GetAsSqlText(Param);
+  end;
+ end;
 end;
 
 
@@ -478,38 +485,45 @@ function tconnectionname.loadfield(const cursor: tsqlcursor;
               const afield: tfield;
       const buffer: pointer; var bufsize: integer): boolean;
            //if bufsize < 0 -> buffer was to small, should be -bufsize
-//untested!
-//todo: implement strings and blobs 2006-11-14 MSE
+//todo: implement blobs 2006-11-14 MSE
 
 var
   field: PMYSQL_FIELD;
   row : MYSQL_ROW;
   C : TCursorName;
   fno: integer;
+  alen: integer;
 begin
 //  Writeln('LoadFieldsFromBuffer');
-  C:=Cursor as TCursorName;
-  fno:= afield.fieldno - 1;
-  if C.Row=nil then
-     begin
-  //   Writeln('LoadFieldsFromBuffer: row=nil');
-     MySQLError(c.FQMySQL,SErrFetchingData,Self);
-     end;
-  Row:=C.Row;
-  
-  inc(Row,c.MapDSRowToMSQLRow[fno]);
+ result:= false;
+ C:= tcursorname(Cursor);
+ fno:= afield.fieldno - 1;
+ if C.Row=nil then
+    begin
+ //   Writeln('LoadFieldsFromBuffer: row=nil');
+    MySQLError(c.FQMySQL,SErrFetchingData,Self);
+    end;
+ Row:=C.Row;
+ 
+ inc(Row,c.MapDSRowToMSQLRow[fno]);
+ if row^ <> nil then begin
   field:= mysql_fetch_field_direct(C.FRES,c.MapDSRowToMSQLRow[fno]);
-  if afield.datatype = ftstring then begin //untested !!!!!!!!!
-   if bufsize < field^.length then begin 
-    bufsize:= -field^.length;
+  if afield.datatype = ftstring then begin
+   alen:= strlen(row^);
+   if bufsize < alen then begin 
+    bufsize:= -alen;
     exit;
    end
    else begin
-    bufsize:= field^.length;
+    bufsize:= alen;
    end;
+  end
+  else begin
+   alen:= field^.length;
   end;
-  Result:= MySQLWriteData(field^.ftype,field^.length,
+  Result:= MySQLWriteData(field^.ftype,alen,
        aField.DataType,Row^,Buffer);
+ end;
 end;
 
 function InternalStrToFloat(S: string): Extended;
@@ -708,20 +722,11 @@ begin
       end;
     FIELD_TYPE_VAR_STRING, FIELD_TYPE_STRING, FIELD_TYPE_ENUM, FIELD_TYPE_SET:
       begin
-{      Write('Moving string of size ',asize,' : ');
-      P:=Source;
-      If (P<>nil) then
-        While P[0]<>#0 do
-          begin
-          Write(p[0]);
-          inc(p);
-          end;
-      Writeln;
-}      if Src<> '' then
+//      if Src<> '' then
         Move(Source^, Dest^, ASize)
-      else
-        Dest^ := #0;
-      end;
+//      else
+//        Dest^ := #0;
+     end;
   end;
   Result := True;
 end;

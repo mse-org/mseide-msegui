@@ -894,7 +894,7 @@ begin
   end;
  end;
  tsqlconnection(database).execute(Fcursor,
-                                   Transaction as tsqltransaction, FParams);
+                                   tsqltransaction(Transaction), FParams);
 end;
 
 function tsqlquery.loadfield(const afield: tfield; const buffer: pointer;
