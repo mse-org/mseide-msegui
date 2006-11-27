@@ -45,7 +45,6 @@ object projectoptionsfo: tprojectoptionsfo
       frame.dummy = 0
       anchors = [an_left, an_top, an_right, an_bottom]
       taborder = 3
-      visible = False
       caption = 'M&acros'
       onchildscaled = macronchildscaled
       object macrogrid: twidgetgrid
@@ -325,7 +324,6 @@ object projectoptionsfo: tprojectoptionsfo
       frame.dummy = 0
       anchors = [an_left, an_top, an_right, an_bottom]
       taborder = 2
-      visible = False
       caption = '&Font alias'
       object fontaliasgrid: twidgetgrid
         optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_focusbackonesc, ow_destroywidgets, ow_fontglyphheight]
@@ -411,7 +409,6 @@ object projectoptionsfo: tprojectoptionsfo
       frame.dummy = 0
       anchors = [an_left, an_top, an_right, an_bottom]
       taborder = 5
-      visible = False
       caption = '&Editor'
       reffontheight = 16
       object dispgrid: twidgetgrid
@@ -864,6 +861,7 @@ object projectoptionsfo: tprojectoptionsfo
       frame.dummy = 0
       anchors = [an_top, an_bottom]
       taborder = 6
+      visible = True
       caption = '&Make'
       onchildscaled = makepageonchildscaled
       object makegroupbox: tgroupbox
@@ -1512,7 +1510,6 @@ object projectoptionsfo: tprojectoptionsfo
       frame.dummy = 0
       anchors = [an_left, an_top, an_right, an_bottom]
       taborder = 4
-      visible = False
       caption = '&Debugger'
       onchildscaled = debuggeronchildscaled
       object stoponexception: tbooleanedit
@@ -1613,7 +1610,7 @@ object projectoptionsfo: tprojectoptionsfo
         bounds_cy = 334
         anchors = [an_left, an_top, an_right, an_bottom]
         taborder = 7
-        activepageindex = 1
+        activepageindex = 0
         tab_frame.dummy = 0
         tab_size = 20
         statfile = statfile1
@@ -1626,7 +1623,7 @@ object projectoptionsfo: tprojectoptionsfo
           frame.dummy = 0
           anchors = [an_left, an_top, an_right, an_bottom]
           taborder = 4
-          visible = False
+          visible = True
           caption = 'Source &directories'
           reffontheight = 16
           object sourcedirgrid: twidgetgrid
@@ -1759,7 +1756,6 @@ object projectoptionsfo: tprojectoptionsfo
           frame.dummy = 0
           anchors = [an_left, an_top, an_right, an_bottom]
           taborder = 3
-          visible = False
           caption = '&Signals'
           reffontheight = 16
           object signalgrid: twidgetgrid
@@ -1899,7 +1895,6 @@ object projectoptionsfo: tprojectoptionsfo
           frame.dummy = 0
           anchors = [an_left, an_top, an_right, an_bottom]
           taborder = 2
-          visible = False
           caption = '&Exceptions'
           reffontheight = 16
           object exceptionsgrid: twidgetgrid
@@ -1989,6 +1984,7 @@ object projectoptionsfo: tprojectoptionsfo
         taborder = 2
         onshowhint = hintexpandedmacros
         optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_eatreturn, oe_resetselectonexit, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_trimright, oe_trimleft, oe_autopopupmenu, oe_savevalue, oe_savestate]
+        controller.lastdir = '/home/mse/packs/standard/svn/mse/branches/fixes_1_0/apps/ide'
         controller.options = [fdo_relative]
         controller.historymaxcount = 0
         controller.ongetfilename = expandfilename
@@ -2019,7 +2015,6 @@ object projectoptionsfo: tprojectoptionsfo
       frame.dummy = 0
       anchors = [an_left, an_top, an_right, an_bottom]
       taborder = 1
-      visible = False
       caption = '&Templates'
       reffontheight = 16
       object newfile: ttabwidget
@@ -2028,8 +2023,10 @@ object projectoptionsfo: tprojectoptionsfo
         bounds_cx = 627
         bounds_cy = 522
         anchors = []
+        activepageindex = 0
         tab_frame.dummy = 0
         tab_size = 20
+        statfile = statfile1
         reffontheight = 16
         object ttabpage3: ttabpage
           bounds_x = 0
@@ -2039,6 +2036,7 @@ object projectoptionsfo: tprojectoptionsfo
           frame.dummy = 0
           anchors = [an_left, an_top, an_right, an_bottom]
           taborder = 3
+          visible = True
           caption = 'New Project'
           reffontheight = 16
           object twidgetgrid1: twidgetgrid
@@ -2169,7 +2167,6 @@ object projectoptionsfo: tprojectoptionsfo
           frame.dummy = 0
           anchors = [an_left, an_top, an_right, an_bottom]
           taborder = 2
-          visible = False
           caption = 'New File'
           reffontheight = 16
           object newprogf: tfilenameedit
@@ -2222,7 +2219,6 @@ object projectoptionsfo: tprojectoptionsfo
           frame.dummy = 0
           anchors = [an_left, an_top, an_right, an_bottom]
           taborder = 1
-          visible = False
           caption = 'New Form'
           onchildscaled = formtemplateonchildscaled
           reffontheight = 16

@@ -250,6 +250,7 @@ type
    property onchildscaled;
    property onfontheightdelta;
    property onselect: notifyeventty read fonselect write fonselect;
+   property visible default false;
  end;
 
  ttabform = class(tmseform,itabpage)
@@ -281,6 +282,7 @@ type
    property coloractivetab: colorty read getcolortab
                   write setcoloractivetab default cl_active;
    property onselect: notifyeventty read fonselect write fonselect;
+   property visible default false;
  end;
 
  tpagetab = class(ttab)
@@ -387,7 +389,8 @@ type
    property activepage: twidget read getactivepage write setactivepage;
    property idents: integerarty read getidents;
   published
-   property activepageindex: integer read factivepageindex write setactivepageindex;
+   property activepageindex: integer read factivepageindex 
+                      write setactivepageindex default -1;
    property onactivepagechanged: notifyeventty read fonactivepagechanged write fonactivepagechanged;
    property onpageadded: widgeteventty read fonpageadded write fonpageadded;
    property onpageremoved: widgeteventty read fonpageremoved write fonpageremoved;
@@ -718,7 +721,12 @@ end;
 
 procedure ttab.setactive(const Value: boolean);
 begin
- state:= fstate + [ts_active];
+ if value then begin
+  state:= fstate + [ts_active];
+ end
+ else begin
+  state:= fstate - [ts_active];
+ end;
 end;
 
 { ttabs }
@@ -1408,6 +1416,7 @@ begin
  fcoloractivetab:= cl_default;
  foptionswidget:= defaulttaboptionswidget;
  include(fwidgetstate,ws_nodesignvisible);
+ exclude(fwidgetstate,ws_visible);
 end;
 
 procedure ttabpage.changed;
@@ -1584,6 +1593,8 @@ begin
  fcolortab:= cl_default;
  fcoloractivetab:= cl_active;
  inherited create(aowner);
+ include(fwidgetstate,ws_nodesignvisible);
+ exclude(fwidgetstate,ws_visible);
 end;
 
 function ttabform.gettabindex: integer;
@@ -1675,6 +1686,9 @@ begin
    else begin
     if (activepageindexbefore = int1) and not (csdestroying in componentstate) then begin
      changepage(1);
+     if factivepageindex = activepageindexbefore then begin
+      setactivepageindex(-1); //select none
+     end;
     end;
    end;
   end
@@ -1782,6 +1796,7 @@ begin
   if aindex > count then begin
    aindex:= count;
   end;
+  widget1.visible:= false;
   tab:= tpagetab.create(ftabs,page);
   if not (csloading in componentstate) then begin
    ftabs.tabs.insert(tab,aindex);
@@ -1936,6 +1951,7 @@ begin
    if (factivepageindex <> -1) or items[int1].visible then begin
     exit;
    end;
+   ftabs.tabs[int1].active:= false; //if items[int1] was already invisible
   end;
   factivepageindex := Value;
   if value >= 0 then begin
