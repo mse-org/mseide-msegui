@@ -718,7 +718,12 @@ end;
 
 procedure ttab.setactive(const Value: boolean);
 begin
- state:= fstate + [ts_active];
+ if value then begin
+  state:= fstate + [ts_active];
+ end
+ else begin
+  state:= fstate - [ts_active];
+ end;
 end;
 
 { ttabs }
@@ -1675,6 +1680,9 @@ begin
    else begin
     if (activepageindexbefore = int1) and not (csdestroying in componentstate) then begin
      changepage(1);
+     if factivepageindex = activepageindexbefore then begin
+      setactivepageindex(-1); //select none
+     end;
     end;
    end;
   end
@@ -1782,6 +1790,7 @@ begin
   if aindex > count then begin
    aindex:= count;
   end;
+  widget1.visible:= false;
   tab:= tpagetab.create(ftabs,page);
   if not (csloading in componentstate) then begin
    ftabs.tabs.insert(tab,aindex);
@@ -1936,6 +1945,7 @@ begin
    if (factivepageindex <> -1) or items[int1].visible then begin
     exit;
    end;
+   ftabs.tabs[int1].active:= false; //if items[int1] was already invisible
   end;
   factivepageindex := Value;
   if value >= 0 then begin
