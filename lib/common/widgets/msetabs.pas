@@ -250,6 +250,7 @@ type
    property onchildscaled;
    property onfontheightdelta;
    property onselect: notifyeventty read fonselect write fonselect;
+   property visible default false;
  end;
 
  ttabform = class(tmseform,itabpage)
@@ -281,6 +282,7 @@ type
    property coloractivetab: colorty read getcolortab
                   write setcoloractivetab default cl_active;
    property onselect: notifyeventty read fonselect write fonselect;
+   property visible default false;
  end;
 
  tpagetab = class(ttab)
@@ -387,7 +389,8 @@ type
    property activepage: twidget read getactivepage write setactivepage;
    property idents: integerarty read getidents;
   published
-   property activepageindex: integer read factivepageindex write setactivepageindex;
+   property activepageindex: integer read factivepageindex 
+                      write setactivepageindex default -1;
    property onactivepagechanged: notifyeventty read fonactivepagechanged write fonactivepagechanged;
    property onpageadded: widgeteventty read fonpageadded write fonpageadded;
    property onpageremoved: widgeteventty read fonpageremoved write fonpageremoved;
@@ -1413,6 +1416,7 @@ begin
  fcoloractivetab:= cl_default;
  foptionswidget:= defaulttaboptionswidget;
  include(fwidgetstate,ws_nodesignvisible);
+ exclude(fwidgetstate,ws_visible);
 end;
 
 procedure ttabpage.changed;
@@ -1589,6 +1593,8 @@ begin
  fcolortab:= cl_default;
  fcoloractivetab:= cl_active;
  inherited create(aowner);
+ include(fwidgetstate,ws_nodesignvisible);
+ exclude(fwidgetstate,ws_visible);
 end;
 
 function ttabform.gettabindex: integer;
