@@ -358,24 +358,44 @@ function gui_copytoclipboard(const value: msestring): guierrorty;
 var
  mem: thandle;
  po1: pchar;
+ po2: pwidechar;
  str1: string;
 begin
  result:= gue_clipboard;
  if openclipboard(0) then begin
-  str1:= value;
   if emptyclipboard then begin
-   mem:= globalalloc(GMEM_MOVEABLE or GMEM_DDESHARE,length(str1)+1); //nullterminator
-   if mem <> 0 then begin
-    po1:= globallock(mem);
-    if po1 <> nil then begin
-     move(pchar(str1)^,po1^,length(str1)+1);
-     globalunlock(mem);
-     if setclipboarddata(cf_text,cardinal(mem)) <> 0 then begin
-      result:= gue_ok;
+   if iswin95 then begin
+    str1:= value;
+    mem:= globalalloc(GMEM_MOVEABLE or GMEM_DDESHARE,length(str1)+1); //nullterminator
+    if mem <> 0 then begin
+     po1:= globallock(mem);
+     if po1 <> nil then begin
+      move(pchar(str1)^,po1^,length(str1)+1);
+      globalunlock(mem);
+      if setclipboarddata(cf_text,cardinal(mem)) <> 0 then begin
+       result:= gue_ok;
+      end;
+     end
+     else begin
+      globalfree(mem);
      end;
-    end
-    else begin
-     globalfree(mem);
+    end;
+   end
+   else begin
+    mem:= globalalloc(GMEM_MOVEABLE or GMEM_DDESHARE,(length(value)+1)*2);
+                                                     //nullterminator
+    if mem <> 0 then begin
+     po2:= globallock(mem);
+     if po2 <> nil then begin
+      move(pwidechar(value)^,po2^,(length(value)+1)*2);
+      globalunlock(mem);
+      if setclipboarddata(cf_unicodetext,cardinal(mem)) <> 0 then begin
+       result:= gue_ok;
+      end;
+     end
+     else begin
+      globalfree(mem);
+     end;
     end;
    end;
   end;
@@ -391,27 +411,42 @@ end;
 function gui_pastefromclipboard(out value: msestring): guierrorty;
 var               //todo: get msechars from clipboard, win95?
  data: thandle;
- po1: pchar;
+ po1: pointer;
  str1: string;
 begin
  value:= '';
  result:= gue_clipboard;
  if openclipboard(0) then begin
-  data:= getclipboarddata(cf_text);
+  if iswin95 then begin
+   data:= getclipboarddata(cf_text);
+  end
+  else begin
+   data:= getclipboarddata(cf_unicodetext);
+  end;
   closeclipboard;
   if data <> 0 then begin
    po1:= globallock(data);
    if po1 <> nil then begin
-    setlength(str1,globalsize(data));
-    if length(str1) > 0 then begin
-     move(po1^,str1[1],length(str1));
-     result:= gue_ok;
-     setlength(str1,length(pchar(str1)));
+    if iswin95 then begin
+     setlength(str1,globalsize(data));
+     if length(str1) > 0 then begin
+      move(po1^,str1[1],length(str1));
+      result:= gue_ok;
+      setlength(str1,length(pchar(str1)));
+     end;
+     value:= str1;
+    end
+    else begin
+     setlength(value,globalsize(data) div 2);
+     if length(value) > 0 then begin
+      move(po1^,value[1],length(value)*2);
+      result:= gue_ok;
+      setlength(value,length(pwidechar(value)));
+     end;
     end;
     globalunlock(data);
    end;
   end;
-  value:= str1;
  end;
 end;
 

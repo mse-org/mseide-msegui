@@ -52,6 +52,7 @@ begin
  try
   with projectoptions do begin
    fo.parameters.value:= progparameters;
+   fo.parameters.dropdown.valuelist.asarray:= propgparamhistory;
    fo.workingdirectory.value:= progworkingdirectory;
    fo.envvaron.gridvalues:= envvarons;
    fo.envvarname.gridvalues:= envvarnames;
@@ -60,6 +61,7 @@ begin
   if fo.show(true,nil) = mr_ok then begin
    with projectoptions do begin
     progparameters:= fo.parameters.value;
+    propgparamhistory:= fo.parameters.dropdown.valuelist.asarray;
     progworkingdirectory:= fo.workingdirectory.value;
     envvarons:= fo.envvaron.gridvalues;
     envvarnames:= fo.envvarname.gridvalues;
@@ -76,6 +78,7 @@ begin
  filer.setsection('progparams');
  with projectoptions do begin
   filer.updatevalue('parameters',progparameters);
+  filer.updatevalue('progparamhistory',propgparamhistory);
   filer.updatevalue('workingdirectory',progworkingdirectory);
   filer.updatevalue('envvarons',envvarons);
   filer.updatevalue('envvarnames',envvarnames);

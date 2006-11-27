@@ -149,6 +149,7 @@ type
 
   //programparameters
   progparameters: string;
+  propgparamhistory: msestringarty;
   progworkingdirectory: filenamety;
   envvarons: longboolarty;
   envvarnames: msestringarty;

@@ -98,18 +98,18 @@ end;
 
 procedure twatchfo.refreshitem(const index: integer);
 var
- str1: string;
+ mstr1: msestring;
 begin
  if gdb.active then begin
   if watcheson.value and watchon[index] then begin
-   gdb.readpascalvariable(expression[index],str1);
-   if (expresult[index] <> str1) then begin
+   gdb.readpascalvariable(expression[index],mstr1);
+   if (expresult[index] <> mstr1) then begin
     grid.rowfontstate[index]:= 0;
    end
    else begin
     grid.rowfontstate[index]:= -1;
    end;
-   expresult[index]:= str1;
+   expresult[index]:= mstr1;
   end
   else begin
    grid.rowfontstate[index]:= -1;
