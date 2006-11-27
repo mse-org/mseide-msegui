@@ -2023,7 +2023,7 @@ object projectoptionsfo: tprojectoptionsfo
         bounds_cx = 627
         bounds_cy = 522
         anchors = []
-        activepageindex = 1
+        activepageindex = 0
         tab_frame.dummy = 0
         tab_size = 20
         statfile = statfile1
@@ -2036,6 +2036,7 @@ object projectoptionsfo: tprojectoptionsfo
           frame.dummy = 0
           anchors = [an_left, an_top, an_right, an_bottom]
           taborder = 3
+          visible = True
           caption = 'New Project'
           reffontheight = 16
           object twidgetgrid1: twidgetgrid
@@ -2166,7 +2167,6 @@ object projectoptionsfo: tprojectoptionsfo
           frame.dummy = 0
           anchors = [an_left, an_top, an_right, an_bottom]
           taborder = 2
-          visible = True
           caption = 'New File'
           reffontheight = 16
           object newprogf: tfilenameedit

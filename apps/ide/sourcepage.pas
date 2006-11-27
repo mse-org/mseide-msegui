@@ -978,8 +978,7 @@ procedure tsourcepage.editontextmouseevent(const sender: tobject;
 
 var
  po1: gridcoordty;
- str1: msestring;
- str2: string;
+ str1,str2: msestring;
  pos1: sourceposty;
 begin
  if {(info.pos.row >= 0) and} mainfo.gdb.started  then begin

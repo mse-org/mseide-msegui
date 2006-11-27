@@ -275,7 +275,7 @@ type
                             var value: resultinfoarty): boolean;
    function ispointervalue(const avalue: string;
              out pointervalue: ptrint): boolean;
-   procedure matchpascalformat(const typeinfo: string; var value: string);
+   function matchpascalformat(const typeinfo: string; const value: string): msestring;
    function getpcharvar(address: cardinal): string;
    function getpmsecharvar(address: cardinal): msestring;
    function getnumarrayvalue(const response: resultinfoarty; const aname: string;
@@ -405,7 +405,7 @@ type
                  var aresult: wordarty): gdbresultty;
    function readmemorypointer(const address: ptrint; out aresult: ptrint): gdbresultty;
 
-   function readpascalvariable(const varname: string; var aresult: string): gdbresultty;
+   function readpascalvariable(const varname: string; out aresult: msestring): gdbresultty;
    function writepascalvariable(const varname: string; const value: string;
                 var aresult: string): gdbresultty;
    function evaluateexpression(const expression: string;
@@ -2980,13 +2980,15 @@ begin
  result:= trystrtoptrint(avalue,pointervalue);
 end;
 
-procedure tgdbmi.matchpascalformat(const typeinfo: string; var value: string);
+function tgdbmi.matchpascalformat(const typeinfo: string;
+                                       const value: string): msestring;
 const
  typetoken = 'type = ';
  dynartoken = 'array [0..-1] of ';
 var
  ar1: stringarty;
- str1,str2,str3: string;
+ str1,str3: string;
+ mstr1: msestring;
  ad1,ad2,ad3: ptrint;
  res1: gdbresultty;
  int1: integer;
@@ -2999,38 +3001,38 @@ begin
     str1:= copy(ar1[0],length(typetoken)+1,length(ar1[0])-length(typetoken));
    end;
    if str1 = '^character' then begin
-    value:= getpcharvar(ad1);
+    result:= getpcharvar(ad1);
    end
    else begin
     if str1 = '^wchar' then begin
-     value:= getpmsecharvar(ad1);
+     result:= getpmsecharvar(ad1);
     end
     else begin
      if startsstr(dynartoken,str1) then begin
       if readmemorypointer(ad1,ad2) = gdb_ok then begin
        if ad2 = 0 then begin
-        value:= niltext;
+        result:= niltext;
        end
        else begin
         if readmemorypointer(ad2-4,ad3) = gdb_ok then begin
         //read arrayhigh
          str3:= '^'+copy(str1,length(dynartoken)+1,bigint)+'('+ptrinttocstr(ad2)+')[';
-         value:= '(';
+         result:= '(';
          if ad2 >= 0 then begin
           for int1:= 0 to ad3 do begin
            if length(value) > 200 then begin
-            value:= value +'...,';
+            result:= result +'...,';
             break;
            end;
-           res1:= readpascalvariable(str3+inttostr(int1)+']',str2);
-           value:= value + str2 + ',';
+           res1:= readpascalvariable(str3+inttostr(int1)+']',mstr1);
+           result:= result + mstr1 + ',';
            if res1 <> gdb_ok then begin
             break;
            end;
           end;
-          setlength(value,length(value)-1); //remove last comma
+          setlength(result,length(result)-1); //remove last comma
          end;
-         value:= value + ')';
+         result:= result + ')';
         end;
        end;
       end;
@@ -3041,9 +3043,10 @@ begin
  end;
 end;
 
-function tgdbmi.readpascalvariable(const varname: string; var aresult: string): gdbresultty;
+function tgdbmi.readpascalvariable(const varname: string; 
+                                          out aresult: msestring): gdbresultty;
 var
- str1: string;
+ str1,str2: string;
 begin
  if running then begin
   result:= gdb_running;
@@ -3052,10 +3055,10 @@ begin
  else begin
   result:= symboltype(varname,str1);
   if result = gdb_ok then begin
-   result:= evaluateexpression(varname,aresult);
+   result:= evaluateexpression(varname,str2);
    case result of
     gdb_ok: begin
-     matchpascalformat(str1,aresult);
+     aresult:= matchpascalformat(str1,str2);
     end;
     gdb_message: begin
      aresult:= errormessage;
