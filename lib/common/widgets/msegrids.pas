@@ -3857,6 +3857,7 @@ begin
   hintinfo.caption:= self[info.cell.row];
   application.showhint(fgrid,hintinfo);
  end;
+ inherited;
 end;
 
 { tfixcol }
