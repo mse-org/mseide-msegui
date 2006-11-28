@@ -46,6 +46,8 @@ Debugging
 *********
 Breakpoints don't work on win32 in units compiled with -CX 
 (create smartlinked units).
+String and dynamic array variables of units compiled with 
+-gv (Valgrind debug info) are displayed incorrect.
 
 How to add custom components to MSEide
 **************************************

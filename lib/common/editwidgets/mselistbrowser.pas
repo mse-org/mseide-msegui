@@ -29,7 +29,7 @@ type
                      lvo_drawfocus,lvo_mousemovefocus,lvo_leftbuttonfocusonly,
                      lvo_focusselect,lvo_mouseselect,lvo_keyselect,
                      lvo_multiselect,lvo_resetselectonexit,
-                     lvo_casesensitive,lvo_savevalue
+                     lvo_casesensitive,lvo_savevalue,lvo_hintclippedtext
                      );
  listviewoptionsty = set of listviewoptionty;
  filelistviewoptionty = (flvo_nodirselect,flvo_nofileselect);
@@ -131,6 +131,7 @@ type
    procedure drawcell(const acanvas: tcanvas); override;
    procedure setwidth(const Value: integer); override;
    procedure setoptions(const Value: coloptionsty); override;
+   procedure docellevent(var info: celleventinfoty); override;
   public
    constructor create(const agrid: tcustomgrid;
                          const aowner: tgridarrayprop); override;
@@ -799,6 +800,30 @@ begin
  inherited;
 end;
 
+procedure tlistcol.docellevent(var info: celleventinfoty);
+var
+ hintinfo: hintinfoty;
+ item1: tlistitem;
+begin
+ with tcustomlistview(fgrid) do begin
+  if (lvo_hintclippedtext in foptions) and 
+         (info.eventkind = cek_firstmousepark) and application.active and 
+          getshowhint and (info.cell.row >= 0) then begin
+   item1:= self[info.cell.row];
+   if item1 <> nil then begin
+    with item1 do begin
+     if captionclipped then begin
+      application.inithintinfo(hintinfo,fgrid);
+      hintinfo.caption:= caption;
+      application.showhint(fgrid,hintinfo);
+     end;
+    end;
+   end;
+  end;
+ end;
+ inherited;
+end;
+
 { tlistcols}
 
 constructor tlistcols.create(aowner: tcustomlistview);
@@ -1284,16 +1309,22 @@ end;
 procedure tcustomlistview.drawfocusedcell(const canvas: tcanvas);
 var
  po1: pointty;
- item1: tlistitem;
+ item1: tlistitem1;
 begin
  drawcellbackground(canvas);
- item1:= focuseditem;
+ item1:= tlistitem1(focuseditem);
  if item1 <> nil then begin
   item1.drawimage(canvas);
   po1:= cellrect(ffocusedcell,cil_paint).pos;
   canvas.remove(po1);
   feditor.dopaint(canvas);
   canvas.move(po1);
+  if feditor.lasttextclipped then begin
+   include(item1.fstate,ns_captionclipped);   
+  end
+  else begin
+   exclude(item1.fstate,ns_captionclipped);   
+  end;
  end;
 end;
 

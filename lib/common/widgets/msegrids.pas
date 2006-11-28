@@ -6111,6 +6111,7 @@ begin
     ek_clientmouseleave: begin
      invalidatesinglecell(fmousecell);
      fmousecell:= invalidcell;
+     fmouseparkcell:= invalidcell;
     end;
     ek_buttonpress: begin
      mousewidgetbefore:= application.mousewidget;
