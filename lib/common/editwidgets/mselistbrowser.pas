@@ -803,16 +803,20 @@ end;
 procedure tlistcol.docellevent(var info: celleventinfoty);
 var
  hintinfo: hintinfoty;
+ item1: tlistitem;
 begin
  with tcustomlistview(fgrid) do begin
   if (lvo_hintclippedtext in foptions) and 
          (info.eventkind = cek_firstmousepark) and application.active and 
           getshowhint and (info.cell.row >= 0) then begin
-   with self[info.cell.row] do begin
-    if captionclipped then begin
-     application.inithintinfo(hintinfo,fgrid);
-     hintinfo.caption:= caption;
-     application.showhint(fgrid,hintinfo);
+   item1:= self[info.cell.row];
+   if item1 <> nil then begin
+    with item1 do begin
+     if captionclipped then begin
+      application.inithintinfo(hintinfo,fgrid);
+      hintinfo.caption:= caption;
+      application.showhint(fgrid,hintinfo);
+     end;
     end;
    end;
   end;
