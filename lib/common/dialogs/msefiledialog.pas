@@ -440,7 +440,12 @@ begin
   else begin
    filename.dropdown.options:= [deo_disabled];
   end;
-  filename.value:= quotefilename(afilenames);
+  if (high(afilenames) = 0) and (fdo_directory in aoptions) then begin
+   filename.value:= filepath(afilenames[0]);
+  end
+  else begin
+   filename.value:= quotefilename(afilenames);
+  end;
   if (colwidth <> nil) and (colwidth^ <> 0) then begin
    listview.cellwidth:= colwidth^;
   end;
@@ -922,6 +927,11 @@ begin
    if esys(ex).error = sye_dirstream then begin
     listview.directory:= '';
     showerror('Can not read directory '''+ esys(ex).text+'''.','Error');
+    try
+     listview.readlist;
+    except
+     application.handleexception(self);
+    end;
    end
    else begin
     application.handleexception(self);
@@ -983,7 +993,7 @@ begin
   end;
  end;
  listview.selectednames:= fselectednames;
- end;
+end;
 
 procedure tfiledialogfo.filepathentered(const sender: tobject);
 begin
