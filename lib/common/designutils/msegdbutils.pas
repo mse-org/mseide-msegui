@@ -2994,6 +2994,7 @@ var
  int1: integer;
 begin
  ar1:= nil; //compiler warning
+ result:= value;
  if ispointervalue(value,ad1) then begin
   ar1:= breaklines(typeinfo);
   if length(ar1) > 0 then begin
