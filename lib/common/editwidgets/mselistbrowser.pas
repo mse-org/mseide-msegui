@@ -1305,16 +1305,22 @@ end;
 procedure tcustomlistview.drawfocusedcell(const canvas: tcanvas);
 var
  po1: pointty;
- item1: tlistitem;
+ item1: tlistitem1;
 begin
  drawcellbackground(canvas);
- item1:= focuseditem;
+ item1:= tlistitem1(focuseditem);
  if item1 <> nil then begin
   item1.drawimage(canvas);
   po1:= cellrect(ffocusedcell,cil_paint).pos;
   canvas.remove(po1);
   feditor.dopaint(canvas);
   canvas.move(po1);
+  if feditor.lasttextclipped then begin
+   include(item1.fstate,ns_captionclipped);   
+  end
+  else begin
+   exclude(item1.fstate,ns_captionclipped);   
+  end;
  end;
 end;
 
