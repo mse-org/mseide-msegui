@@ -29,7 +29,7 @@ type
                      lvo_drawfocus,lvo_mousemovefocus,lvo_leftbuttonfocusonly,
                      lvo_focusselect,lvo_mouseselect,lvo_keyselect,
                      lvo_multiselect,lvo_resetselectonexit,
-                     lvo_casesensitive,lvo_savevalue
+                     lvo_casesensitive,lvo_savevalue,lvo_hintclippedtext
                      );
  listviewoptionsty = set of listviewoptionty;
  filelistviewoptionty = (flvo_nodirselect,flvo_nofileselect);
@@ -131,6 +131,7 @@ type
    procedure drawcell(const acanvas: tcanvas); override;
    procedure setwidth(const Value: integer); override;
    procedure setoptions(const Value: coloptionsty); override;
+   procedure docellevent(var info: celleventinfoty); override;
   public
    constructor create(const agrid: tcustomgrid;
                          const aowner: tgridarrayprop); override;
@@ -795,6 +796,26 @@ begin
  end
  else begin
   updateselected(row);
+ end;
+ inherited;
+end;
+
+procedure tlistcol.docellevent(var info: celleventinfoty);
+var
+ hintinfo: hintinfoty;
+begin
+ with tcustomlistview(fgrid) do begin
+  if (lvo_hintclippedtext in foptions) and 
+         (info.eventkind = cek_firstmousepark) and application.active and 
+          getshowhint and (info.cell.row >= 0) then begin
+   with self[info.cell.row] do begin
+    if captionclipped then begin
+     application.inithintinfo(hintinfo,fgrid);
+     hintinfo.caption:= caption;
+     application.showhint(fgrid,hintinfo);
+    end;
+   end;
+  end;
  end;
  inherited;
 end;
