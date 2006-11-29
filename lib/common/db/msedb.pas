@@ -721,7 +721,7 @@ type
 
  fieldeventty = procedure(const afield: tfield) of object;
  
- fieldlinkoptionty = (flo_onlyifnull);
+ fieldlinkoptionty = (flo_onlyifnull,flo_notifunmodifiedinsert);
  fieldlinkoptionsty = set of fieldlinkoptionty;
   
  tfieldlink = class(tmsecomponent,idbeditinfo)
@@ -3293,10 +3293,10 @@ end;
 procedure tfieldlinkdatalink.updatedata;
 begin
  if field <> nil then begin
-  with fowner do begin
-   if not (flo_onlyifnull in foptions) or (field.isnull) then begin
-    fowner.updatedata(field);
-   end;
+  if (not (flo_onlyifnull in fowner.foptions) or (field.isnull)) and 
+     (not (flo_notifunmodifiedinsert in fowner.foptions) or 
+                       (datasource.dataset.modified)) then begin
+   fowner.updatedata(field);
   end;
  end;
 end;
