@@ -22,7 +22,7 @@ const
  defaultbuttonwidth = 50;
  defaultbuttonheight = 20;
  defaultlabeltextflags = [tf_ycentered];
- defaultlabeloptionswidget = (defaultoptionswidget + [ow_fontglyphheight]) - 
+ defaultlabeloptionswidget = (defaultoptionswidget + [ow_fontglyphheight,ow_autosize]) - 
               [ow_mousefocus,ow_tabfocus,ow_arrowfocus];
  defaultlabelwidgetwidth = 100;
  defaultlabelwidgetheight = 20;
@@ -77,6 +77,8 @@ type
   private
    fmodalresult: modalresultty;
    factioninfo: actioninfoty;
+   fautosize_cx: integer;
+   fautosize_cy: integer;
    procedure setcaption(const Value: captionty);
    function getframe: tframe;
    procedure setframe(const Value: tframe);
@@ -96,6 +98,8 @@ type
    procedure setcolorglyph(const avalue: colorty);
    function iscolorglyphstored: boolean;
    procedure setcaptionpos(const avalue: captionposty);
+   procedure setautosize_cx(const avalue: integer);
+   procedure setautosize_cy(const avalue: integer);
   protected
    function gethint: msestring; override;
    procedure sethint(const Value: msestring); override;
@@ -106,12 +110,14 @@ type
    procedure loaded; override;
    procedure enabledchanged; override;
    procedure visiblechanged; override;
+   procedure clientrectchanged; override;
    procedure doexecute; override;
    procedure doenter; override;
    procedure doexit; override;
    procedure dopaint(const canvas: tcanvas); override;
    function checkfocusshortcut(var info: keyeventinfoty): boolean; override;
    procedure doshortcut(var info: keyeventinfoty; const sender: twidget); override;
+   procedure getautopaintsize(var asize: sizety); override;
   public
    constructor create(aowner: tcomponent); override;
    procedure synctofontheight; override;
@@ -134,12 +140,16 @@ type
                                 default mr_none;
    property onexecute: notifyeventty read factioninfo.onexecute
                             write setonexecute stored isonexecutestored;
+   property autosize_cx: integer read fautosize_cx write setautosize_cx;
+   property autosize_cy: integer read fautosize_cy write setautosize_cy;
   published
    property state: actionstatesty read getstate write setstate stored isstatestored;
  end;
 
  tbutton = class(tcustombutton)
   published
+   property autosize_cx;
+   property autosize_cy;
    property action;
    property caption;
    property captionpos;
@@ -162,6 +172,8 @@ type
    constructor create(aowner: tcomponent); override;
   published
    property glyph: stockglyphty read fglyph write setglyph default stg_none;
+   property autosize_cx;
+   property autosize_cy;
    property action;
    property caption;
    property captionpos;
@@ -238,7 +250,7 @@ type
    procedure setoptionsscale(const avalue: optionsscalety);
   protected
    procedure updateoptionsscale;
-   procedure dochildscaled(const sender: twidget);
+   procedure dochildscaled(const sender: twidget); override;
    procedure dofontheightdelta(var delta: integer); override;
    procedure widgetregionchanged(const sender: twidget); override;
    procedure clientrectchanged; override;
@@ -445,6 +457,7 @@ begin
  if csdesigning in componentstate then begin
   exclude(finfo.state,ss_invisible);
  end;
+ checkautosize;
 end;
 
 function tcustombutton.getactioninfopo: pactioninfoty;
@@ -648,6 +661,57 @@ begin
  end;
  inherited;
 end;
+
+procedure tcustombutton.getautopaintsize(var asize: sizety);
+begin
+ asize:= textrect(getcanvas,finfo.caption,[],font).size;
+ if imagelist <> nil then begin
+  with imagelist do begin
+   if height > asize.cy then begin
+    asize.cy:= height;
+   end;
+   if captionpos <> cp_center then begin
+    asize.cx:= asize.cx + width;
+   end
+   else begin
+    if width > asize.cx then begin
+     asize.cx:= width;
+    end;
+   end;
+  end;
+ end;
+ inc(asize.cx,10+fautosize_cx);
+ inc(asize.cy,6+fautosize_cy);
+ if fframe <> nil then begin
+  with fframe do begin
+   asize.cx:= asize.cx + framei_left + framei_right;
+   asize.cy:= asize.cy + framei_top + framei_bottom;
+  end;
+ end;
+end;
+
+procedure tcustombutton.clientrectchanged;
+begin
+ inherited;
+ checkautosize; //for frame.framei
+end;
+
+procedure tcustombutton.setautosize_cx(const avalue: integer);
+begin
+ if fautosize_cx <> avalue then begin
+  fautosize_cx:= avalue;
+  checkautosize;
+ end;
+end;
+
+procedure tcustombutton.setautosize_cy(const avalue: integer);
+begin
+ if fautosize_cy <> avalue then begin
+  fautosize_cy:= avalue;
+  checkautosize;
+ end;
+end;
+
 {
 function tcustombutton.getobjectlink: iobjectlink;
 begin

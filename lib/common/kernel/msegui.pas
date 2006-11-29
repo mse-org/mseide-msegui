@@ -1518,6 +1518,7 @@ function translateclientrect(const rect: rectty;
     //translates from source client to dest client, to screen if dest = nil
     //source = nil -> screen
 
+procedure syncmaxautosize(const widgets: array of twidget);
 
 type
  getwidgetintegerty = function(const awidget: twidget): integer;
@@ -1863,6 +1864,39 @@ function translateclientrect(const rect: rectty;
 begin
  result:= rect;
  translateclientpoint1(result.pos,source,dest);
+end;
+
+procedure syncmaxautosize(const widgets: array of twidget);
+var
+ size1,size2: sizety;
+ int1: integer;
+ rect1: rectty;
+ po1: pointty;
+begin
+ size1:= nullsize;
+ for int1:= high(widgets) downto 0 do begin
+  widgets[int1].getautopaintsize(size2);
+  if size2.cx > size1.cx then begin
+   size1.cx:= size2.cx;
+  end;
+  if size2.cy > size1.cy then begin
+   size1.cy:= size2.cy;
+  end;
+ end;
+ for int1:= 0 to high(widgets) do begin
+  with widgets[int1] do begin
+   rect1:= fwidgetrect;
+   clientsize:= size1;
+   po1:= pos;
+   if an_right in fanchors then begin
+    dec(po1.x,fwidgetrect.cx-rect1.cx);
+   end;
+   if an_bottom in fanchors then begin
+    dec(rect1.y,fwidgetrect.cy-rect1.cy);
+   end;
+   pos:= po1;
+  end;
+ end;
 end;
 
 procedure beep;
@@ -4152,9 +4186,12 @@ procedure twidget.internalsetwidgetrect(Value: rectty; const windowevent: boolea
 var
  bo1,poscha,sizecha: boolean;
  int1: integer;
- size1: sizety;
+ size1,size2: sizety;
 begin
  if (ow_autosize in foptionswidget) and not (csloading in componentstate) then begin
+  if not windowevent then begin
+   checkwidgetsize(value.size);
+  end;
   size1:= value.size;
   if fframe <> nil then begin
    subsize1(size1,fframe.paintframewidth);
@@ -4164,17 +4201,23 @@ begin
    addsize1(size1,fframe.paintframewidth);
   end;
   subsize1(size1,value.size);
+  size2:= value.size;
   inc(value.cx,size1.cx);
   inc(value.cy,size1.cy);
+  if not windowevent then begin
+   checkwidgetsize(value.size);
+  end;
   if an_right in fanchors then begin
-   dec(value.x,size1.cx);
+   dec(value.x,value.cx-size2.cx);
   end;
   if an_bottom in fanchors then begin
-   dec(value.y,size1.cy);
+   dec(value.y,value.cy-size2.cy);
   end;
- end;
- if not windowevent then begin
-  checkwidgetsize(value.size);
+ end
+ else begin
+  if not windowevent then begin
+   checkwidgetsize(value.size);
+  end;
  end;
  poscha:= (value.x <> fwidgetrect.x) or (value.y <> fwidgetrect.y);
  sizecha:= (value.cx <> fwidgetrect.cx) or (value.cy <> fwidgetrect.cy);
@@ -7277,6 +7320,9 @@ begin
   end;
   if delta * [ow_fontlineheight,ow_fontglyphheight] <> [] then begin
    updatefontheight;
+  end;
+  if (ow_autosize in delta) and (ow_autosize in avalue) then begin
+   checkautosize;
   end;
  end;
 end;
