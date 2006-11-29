@@ -16,7 +16,7 @@ interface
 uses
  msegui,mseguiglob,msetypes,msestrings,msegraphics,mseevent,mseactions,msewidgets,
  mserichstring,mseshapes,Classes,mseclasses,msebitmap,msedrawtext,
- msedrag,msestockobjects;
+ msedrag,msestockobjects,msegraphutils;
 
 const
  defaultbuttonwidth = 50;
@@ -189,6 +189,9 @@ type
   protected
    procedure dopaint(const canvas: tcanvas); override;
    procedure enabledchanged; override;
+   procedure getautopaintsize(var asize: sizety); override;
+   procedure fontchanged; override;
+   procedure clientrectchanged; override;
   public
    constructor create(aowner: tcomponent); override;
    procedure synctofontheight; override;
@@ -336,7 +339,7 @@ type
 
 implementation
 uses
- msegraphutils,msekeyboard,sysutils;
+ msekeyboard,sysutils;
 
 { tcustombutton }
 
@@ -703,6 +706,7 @@ end;
 procedure tcustomlabel.setcaption(const Value: msestring);
 begin
  captiontorichstring(Value,fcaption);
+ checkautosize;
  invalidate;
 end;
 
@@ -746,6 +750,29 @@ begin
   updatetextflags;
   invalidate;
  end;
+end;
+
+procedure tcustomlabel.getautopaintsize(var asize: sizety);
+begin
+ asize:= textrect(getcanvas,fcaption).size;
+ if fframe <> nil then begin
+  with fframe do begin
+   asize.cx:= asize.cx + framei_left + framei_right;
+   asize.cy:= asize.cy + framei_top + framei_bottom;
+  end;
+ end;
+end;
+
+procedure tcustomlabel.fontchanged;
+begin
+ checkautosize;
+ inherited;
+end;
+
+procedure tcustomlabel.clientrectchanged;
+begin
+ inherited;
+ checkautosize; //for frame.framei
 end;
 
 { tgroupboxframe }

@@ -45,7 +45,8 @@ type
                    ow_fontlineheight, 
                    //track font.linespacing,
                    //create fonthighdelta and childscaled events
-                   ow_autoscale //synchronizes bounds_cy with fontheightdelta
+                   ow_autoscale, //synchronizes bounds_cy with fontheightdelta
+                   ow_autosize   //used in tbutton and tlabel
                    );
  optionswidgetty = set of optionwidgetty;
 
@@ -784,6 +785,8 @@ type
    procedure visiblechanged; virtual;
    procedure colorchanged; virtual;
    procedure sizechanged; virtual;
+   procedure getautopaintsize(var asize: sizety); virtual;
+   procedure checkautosize;
    procedure poschanged; virtual;
    procedure clientrectchanged; virtual;
    procedure rootchanged; virtual;
@@ -4143,7 +4146,27 @@ procedure twidget.internalsetwidgetrect(Value: rectty; const windowevent: boolea
 var
  bo1,poscha,sizecha: boolean;
  int1: integer;
+ size1: sizety;
 begin
+ if (ow_autosize in foptionswidget) and not (csloading in componentstate) then begin
+  size1:= value.size;
+  if fframe <> nil then begin
+   subsize1(size1,fframe.paintframewidth);
+  end;
+  getautopaintsize(size1);
+  if fframe <> nil then begin
+   addsize1(size1,fframe.paintframewidth);
+  end;
+  subsize1(size1,value.size);
+  inc(value.cx,size1.cx);
+  inc(value.cy,size1.cy);
+  if an_right in fanchors then begin
+   dec(value.x,size1.cx);
+  end;
+  if an_bottom in fanchors then begin
+   dec(value.y,size1.cy);
+  end;
+ end;
  if not windowevent then begin
   checkwidgetsize(value.size);
  end;
@@ -7872,6 +7895,19 @@ begin
     widget1:= widget1.fparentwidget;
    end;
   end;
+ end;
+end;
+
+procedure twidget.getautopaintsize(var asize: sizety);
+begin
+ //default
+end;
+
+procedure twidget.checkautosize;
+begin
+ if (ow_autosize in foptionswidget) and 
+         ([csloading,csdestroying] * componentstate = []) then begin
+  internalsetwidgetrect(fwidgetrect,false);
  end;
 end;
 
