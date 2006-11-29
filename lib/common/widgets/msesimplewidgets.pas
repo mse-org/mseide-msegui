@@ -235,7 +235,7 @@ type
    procedure setoptionsscale(const avalue: optionsscalety);
   protected
    procedure updateoptionsscale;
-   procedure dochildscaled(const sender: twidget);
+   procedure dochildscaled(const sender: twidget); override;
    procedure dofontheightdelta(var delta: integer); override;
    procedure widgetregionchanged(const sender: twidget); override;
    procedure clientrectchanged; override;
