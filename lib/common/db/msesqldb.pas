@@ -260,7 +260,7 @@ type
  
 implementation
 uses
- msestrings,dbconst,msesysutils,typinfo,sysutils,msedatalist;
+ msestrings,dbconst,msesysutils,typinfo,sysutils,msedatalist,msegui;
  
 //type 
 {
@@ -740,7 +740,11 @@ end;
 procedure tmsesqlquery.post;
 begin
  if fcontroller.post and (dso_autoapply in fcontroller.options) then begin
-  applyupdates;
+  try
+   applyupdates;
+  except
+   application.handleexception(self);
+  end;
  end;
 end;
 {
@@ -861,12 +865,14 @@ end;
 
 procedure tmsesqlquery.applyupdates(const maxerrors: integer = 0);
 begin
- applyupdates(maxerrors,dso_cancelupdateonerror in fcontroller.options);
+ applyupdates(maxerrors,fcontroller.options *
+      [dso_cancelupdateonerror,dso_cancelupdatesonerror] <> []);
 end;
 
 procedure tmsesqlquery.applyupdate;
 begin
- inherited applyupdate(dso_cancelupdateonerror in fcontroller.options);
+ inherited applyupdate(fcontroller.options *
+      [dso_cancelupdateonerror,dso_cancelupdatesonerror] <> []);
 end;
 
 {

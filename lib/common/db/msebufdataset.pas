@@ -1481,16 +1481,20 @@ begin
       Response:= rrSkip;
      end;
      EUpdErr:= EUpdateError.Create(SOnUpdateError,E.Message,0,0,E);
-     if assigned(OnUpdateError) then begin
-      OnUpdateError(Self,Self,EUpdErr,UpdateKind,Response);
-     end
-     else begin
-      if Response = rrAbort then begin
-       checkcancel;
-       Raise EUpdErr;
+     try
+      if checkcanevent(self,tmethod(OnUpdateError)) then begin
+       OnUpdateError(Self,Self,EUpdErr,UpdateKind,Response);
       end;
+     finally
+      if Response = rrAbort then begin
+       try
+        checkcancel;
+       finally
+        Raise EUpdErr;
+       end;
+      end;
+      eupderr.free;
      end;
-     eupderr.free;
     end
     else begin
      raise;

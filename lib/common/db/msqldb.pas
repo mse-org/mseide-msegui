@@ -1443,7 +1443,6 @@ var
     
 begin
  blobspo:= getintblobpo;
- freeblobar:= nil; //compiler warning
  case UpdateKind of
   ukModify: begin
    qry:= FUpdateQry;
@@ -1465,52 +1464,56 @@ begin
   end;
  end;
  with qry do begin
-  for x := 0 to Params.Count-1 do begin
-   param1:= params[x];
-   with param1 do begin
-    if leftstr(name,4)='OLD_' then begin
-     Fld:= self.FieldByName(copy(name,5,length(name)-4));
-     oldfieldtoparam(fld,param1);
-//     AssignFieldValue(Fld,Fld.OldValue);
-    end
-    else begin
-     Fld:= self.FieldByName(name);
-     if fld is tblobfield and (self.fblobintf <> nil) then begin
-      if fld.isnull then begin
-       clear;
-       datatype:= fld.datatype;
-      end
-      else begin
-       bo1:= false;
-       for int1:= 0 to high(blobspo^) do begin
-        if blobspo^[int1].field = fld then begin
-         self.fblobintf.writeblobdata(tsqltransaction(self.transaction),
-              self.ftablename,self.fcursor,
-              blobspo^[int1].data,blobspo^[int1].datalength,fld,params[x],str1);
-         if str1 <> '' then begin
-          self.setdatastringvalue(fld,str1);
-          additem(freeblobar,fld);
-         end;
-         bo1:= true;
-         break;
-        end;
-       end;
-       if not bo1 then begin
-        self.fblobintf.setupblobdata(fld,self.fcursor,params[x]);
-       end;
-      end;
+  freeblobar:= nil;
+  try
+   for x := 0 to Params.Count-1 do begin
+    param1:= params[x];
+    with param1 do begin
+     if leftstr(name,4)='OLD_' then begin
+      Fld:= self.FieldByName(copy(name,5,length(name)-4));
+      oldfieldtoparam(fld,param1);
+ //     AssignFieldValue(Fld,Fld.OldValue);
      end
      else begin
-      self.fieldtoparam(fld,param1);
-//      AssignFieldValue(Fld,Fld.Value);
+      Fld:= self.FieldByName(name);
+      if fld is tblobfield and (self.fblobintf <> nil) then begin
+       if fld.isnull then begin
+        clear;
+        datatype:= fld.datatype;
+       end
+       else begin
+        bo1:= false;
+        for int1:= 0 to high(blobspo^) do begin
+         if blobspo^[int1].field = fld then begin
+          self.fblobintf.writeblobdata(tsqltransaction(self.transaction),
+               self.ftablename,self.fcursor,
+               blobspo^[int1].data,blobspo^[int1].datalength,fld,params[x],str1);
+          if str1 <> '' then begin
+           self.setdatastringvalue(fld,str1);
+           additem(freeblobar,fld);
+          end;
+          bo1:= true;
+          break;
+         end;
+        end;
+        if not bo1 then begin
+         self.fblobintf.setupblobdata(fld,self.fcursor,params[x]);
+        end;
+       end;
+      end
+      else begin
+       self.fieldtoparam(fld,param1);
+ //      AssignFieldValue(Fld,Fld.Value);
+      end;
      end;
     end;
    end;
+   execsql;
+  finally
+   for int1:= high(freeblobar) downto 0 do begin
+    deleteblob(blobspo^,tfield(freeblobar[int1]));
+   end;  
   end;
-  execsql;
-  for int1:= high(freeblobar) downto 0 do begin
-   deleteblob(blobspo^,tfield(freeblobar[int1]));
-  end;  
  end;
 end;
 
