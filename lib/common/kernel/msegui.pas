@@ -236,8 +236,8 @@ type
    function paintframewidth: sizety; //widgetsize - paintsize
    function innerframewidth: sizety; //widgetsize - innersize
    function outerframe: framety;
-   function paintframe: framety;     //fouterframe + fpaintframe
-   function innerframe: framety;     //fouteerframe + fpaintframe + finnerframe
+   function paintframe: framety;     
+   function innerframe: framety;     
    function pointincaption(const point: pointty): boolean; virtual;
                                      //origin = widgetrect
    procedure initgridframe; virtual;
@@ -2706,19 +2706,23 @@ end;
 function tcustomframe.paintframewidth: sizety;
 begin
  checkstate;
- result.cx:= fouterframe.left + fpaintframe.left +
-       fpaintframe.right + fouterframe.right;
- result.cy:= fouterframe.top + fpaintframe.top +
-       fpaintframe.bottom + fouterframe.bottom;
+ result.cx:= fpaintframe.left + fpaintframe.right;
+ result.cy:= fpaintframe.top + fpaintframe.bottom;
+// result.cx:= fouterframe.left + fpaintframe.left +
+//       fpaintframe.right + fouterframe.right;
+// result.cy:= fouterframe.top + fpaintframe.top +
+//       fpaintframe.bottom + fouterframe.bottom;
 end;
 
 function tcustomframe.innerframewidth: sizety;
 begin
  checkstate;
- result.cx:= fouterframe.left + fpaintframe.left + fi.innerframe.left +
-       fpaintframe.right + fouterframe.right + fi.innerframe.right;
- result.cy:= fouterframe.top + fpaintframe.top + fi.innerframe.top +
-       fpaintframe.bottom + fouterframe.bottom + fi.innerframe.bottom;
+ result.cx:= fi.innerframe.left + fi.innerframe.right;
+ result.cy:= fi.innerframe.top + fi.innerframe.bottom;
+// result.cx:= fouterframe.left + fpaintframe.left + fi.innerframe.left +
+//       fpaintframe.right + fouterframe.right + fi.innerframe.right;
+// result.cy:= fouterframe.top + fpaintframe.top + fi.innerframe.top +
+//       fpaintframe.bottom + fouterframe.bottom + fi.innerframe.bottom;
 end;
 
 function tcustomframe.outerframe: framety;
@@ -2730,14 +2734,16 @@ end;
 function tcustomframe.paintframe: framety;
 begin
  checkstate;
- result:= addframe(fouterframe,fpaintframe);
+ result:= fpaintframe;
+// result:= addframe(fouterframe,fpaintframe);
 end;
 
 function tcustomframe.innerframe: framety;
 begin
  checkstate;
- result:= addframe(fouterframe,fpaintframe);
- addframe1(result,fi.innerframe);
+ result:= finnerframe;
+// result:= addframe(fouterframe,fpaintframe);
+// addframe1(result,fi.innerframe);
 end;
 
 procedure tcustomframe.assign(source: tpersistent);
