@@ -16,13 +16,13 @@ interface
 uses
  msegui,mseguiglob,msetypes,msestrings,msegraphics,mseevent,mseactions,msewidgets,
  mserichstring,mseshapes,Classes,mseclasses,msebitmap,msedrawtext,
- msedrag,msestockobjects;
+ msedrag,msestockobjects,msegraphutils;
 
 const
  defaultbuttonwidth = 50;
  defaultbuttonheight = 20;
  defaultlabeltextflags = [tf_ycentered];
- defaultlabeloptionswidget = (defaultoptionswidget + [ow_fontglyphheight]) - 
+ defaultlabeloptionswidget = (defaultoptionswidget + [ow_fontglyphheight,ow_autosize]) - 
               [ow_mousefocus,ow_tabfocus,ow_arrowfocus];
  defaultlabelwidgetwidth = 100;
  defaultlabelwidgetheight = 20;
@@ -77,6 +77,8 @@ type
   private
    fmodalresult: modalresultty;
    factioninfo: actioninfoty;
+   fautosize_cx: integer;
+   fautosize_cy: integer;
    procedure setcaption(const Value: captionty);
    function getframe: tframe;
    procedure setframe(const Value: tframe);
@@ -96,6 +98,8 @@ type
    procedure setcolorglyph(const avalue: colorty);
    function iscolorglyphstored: boolean;
    procedure setcaptionpos(const avalue: captionposty);
+   procedure setautosize_cx(const avalue: integer);
+   procedure setautosize_cy(const avalue: integer);
   protected
    function gethint: msestring; override;
    procedure sethint(const Value: msestring); override;
@@ -106,12 +110,14 @@ type
    procedure loaded; override;
    procedure enabledchanged; override;
    procedure visiblechanged; override;
+   procedure clientrectchanged; override;
    procedure doexecute; override;
    procedure doenter; override;
    procedure doexit; override;
    procedure dopaint(const canvas: tcanvas); override;
    function checkfocusshortcut(var info: keyeventinfoty): boolean; override;
    procedure doshortcut(var info: keyeventinfoty; const sender: twidget); override;
+   procedure getautopaintsize(var asize: sizety); override;
   public
    constructor create(aowner: tcomponent); override;
    procedure synctofontheight; override;
@@ -134,12 +140,16 @@ type
                                 default mr_none;
    property onexecute: notifyeventty read factioninfo.onexecute
                             write setonexecute stored isonexecutestored;
+   property autosize_cx: integer read fautosize_cx write setautosize_cx;
+   property autosize_cy: integer read fautosize_cy write setautosize_cy;
   published
    property state: actionstatesty read getstate write setstate stored isstatestored;
  end;
 
  tbutton = class(tcustombutton)
   published
+   property autosize_cx;
+   property autosize_cy;
    property action;
    property caption;
    property captionpos;
@@ -162,6 +172,8 @@ type
    constructor create(aowner: tcomponent); override;
   published
    property glyph: stockglyphty read fglyph write setglyph default stg_none;
+   property autosize_cx;
+   property autosize_cy;
    property action;
    property caption;
    property captionpos;
@@ -189,6 +201,9 @@ type
   protected
    procedure dopaint(const canvas: tcanvas); override;
    procedure enabledchanged; override;
+   procedure getautopaintsize(var asize: sizety); override;
+   procedure fontchanged; override;
+   procedure clientrectchanged; override;
   public
    constructor create(aowner: tcomponent); override;
    procedure synctofontheight; override;
@@ -336,7 +351,7 @@ type
 
 implementation
 uses
- msegraphutils,msekeyboard,sysutils;
+ msekeyboard,sysutils;
 
 { tcustombutton }
 
@@ -442,6 +457,7 @@ begin
  if csdesigning in componentstate then begin
   exclude(finfo.state,ss_invisible);
  end;
+ checkautosize;
 end;
 
 function tcustombutton.getactioninfopo: pactioninfoty;
@@ -645,6 +661,57 @@ begin
  end;
  inherited;
 end;
+
+procedure tcustombutton.getautopaintsize(var asize: sizety);
+begin
+ asize:= textrect(getcanvas,finfo.caption,[],font).size;
+ if imagelist <> nil then begin
+  with imagelist do begin
+   if height > asize.cy then begin
+    asize.cy:= height;
+   end;
+   if captionpos <> cp_center then begin
+    asize.cx:= asize.cx + width;
+   end
+   else begin
+    if width > asize.cx then begin
+     asize.cx:= width;
+    end;
+   end;
+  end;
+ end;
+ inc(asize.cx,10+fautosize_cx);
+ inc(asize.cy,6+fautosize_cy);
+ if fframe <> nil then begin
+  with fframe do begin
+   asize.cx:= asize.cx + framei_left + framei_right;
+   asize.cy:= asize.cy + framei_top + framei_bottom;
+  end;
+ end;
+end;
+
+procedure tcustombutton.clientrectchanged;
+begin
+ inherited;
+ checkautosize; //for frame.framei
+end;
+
+procedure tcustombutton.setautosize_cx(const avalue: integer);
+begin
+ if fautosize_cx <> avalue then begin
+  fautosize_cx:= avalue;
+  checkautosize;
+ end;
+end;
+
+procedure tcustombutton.setautosize_cy(const avalue: integer);
+begin
+ if fautosize_cy <> avalue then begin
+  fautosize_cy:= avalue;
+  checkautosize;
+ end;
+end;
+
 {
 function tcustombutton.getobjectlink: iobjectlink;
 begin
@@ -703,6 +770,7 @@ end;
 procedure tcustomlabel.setcaption(const Value: msestring);
 begin
  captiontorichstring(Value,fcaption);
+ checkautosize;
  invalidate;
 end;
 
@@ -746,6 +814,29 @@ begin
   updatetextflags;
   invalidate;
  end;
+end;
+
+procedure tcustomlabel.getautopaintsize(var asize: sizety);
+begin
+ asize:= textrect(getcanvas,fcaption).size;
+ if fframe <> nil then begin
+  with fframe do begin
+   asize.cx:= asize.cx + framei_left + framei_right;
+   asize.cy:= asize.cy + framei_top + framei_bottom;
+  end;
+ end;
+end;
+
+procedure tcustomlabel.fontchanged;
+begin
+ checkautosize;
+ inherited;
+end;
+
+procedure tcustomlabel.clientrectchanged;
+begin
+ inherited;
+ checkautosize; //for frame.framei
 end;
 
 { tgroupboxframe }
@@ -793,39 +884,49 @@ end;
 
 procedure tscalingwidget.updateoptionsscale;
 var
- size1,size2,size3: sizety;
+ size1,size2: sizety;
+ rect1: rectty;
 begin
  if foptionsscale * [osc_expandx,osc_expandy,
                     osc_shrinkx,osc_shrinky] <> [] then begin
   if (componentstate * [csloading,csdestroying] = []) and 
                     (fscaling = 0) then begin
+   
    inc(fscaling);
    try
     size1:= calcminscrollsize;
     size2:= paintsize;
-    size3.cx:= size1.cx - size2.cx;
-    size3.cy:= size1.cy - size2.cy;
+    rect1.cx:= size1.cx - size2.cx;
+    rect1.cy:= size1.cy - size2.cy;
     if not (osc_expandx in foptionsscale) then begin
-     if size3.cx > 0 then begin
-      size3.cx:= 0;
+     if rect1.cx > 0 then begin
+      rect1.cx:= 0;
      end;
     end;
     if not (osc_expandy in foptionsscale) then begin
-     if size3.cy > 0 then begin
-      size3.cy:= 0;
+     if rect1.cy > 0 then begin
+      rect1.cy:= 0;
      end;
     end;
     if not (osc_shrinkx in foptionsscale) then begin
-     if size3.cx < 0 then begin
-      size3.cx:= 0;
+     if rect1.cx < 0 then begin
+      rect1.cx:= 0;
      end;
     end;
     if not (osc_shrinky in foptionsscale) then begin
-     if size3.cy < 0 then begin
-      size3.cy:= 0;
+     if rect1.cy < 0 then begin
+      rect1.cy:= 0;
      end;
     end;
-    size:= addsize(size,size3);
+    rect1.pos:= fwidgetrect.pos;
+    if an_right in fanchors then begin
+     dec(rect1.x,rect1.cx);
+    end;
+    if an_bottom in fanchors then begin
+     dec(rect1.y,rect1.cy);
+    end;
+    addsize1(rect1.size,fwidgetrect.size);
+    internalsetwidgetrect(rect1,false);
    finally
     dec(fscaling)
    end;

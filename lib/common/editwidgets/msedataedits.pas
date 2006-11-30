@@ -2795,7 +2795,8 @@ begin
    int1:= integer(data);
   end;
   int2:= getindex(int1);
-  if (int2 = -1) or (int2 >= valuelist.count) then begin
+  if (int2 < 0) or (int2 >= valuelist.count) then begin
+//  if (int2 = -1) or (int2 >= valuelist.count) then begin
    if not (deo_selectonly in options) and (int1 <> -1) then begin
     result:= intvaluetostr(int1,fbase,fbitcount);
    end

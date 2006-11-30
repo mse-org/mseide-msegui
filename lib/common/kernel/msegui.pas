@@ -45,7 +45,8 @@ type
                    ow_fontlineheight, 
                    //track font.linespacing,
                    //create fonthighdelta and childscaled events
-                   ow_autoscale //synchronizes bounds_cy with fontheightdelta
+                   ow_autoscale, //synchronizes bounds_cy with fontheightdelta
+                   ow_autosize   //used in tbutton and tlabel
                    );
  optionswidgetty = set of optionwidgetty;
 
@@ -235,8 +236,8 @@ type
    function paintframewidth: sizety; //widgetsize - paintsize
    function innerframewidth: sizety; //widgetsize - innersize
    function outerframe: framety;
-   function paintframe: framety;     //fouterframe + fpaintframe
-   function innerframe: framety;     //fouteerframe + fpaintframe + finnerframe
+   function paintframe: framety;     
+   function innerframe: framety;     
    function pointincaption(const point: pointty): boolean; virtual;
                                      //origin = widgetrect
    procedure initgridframe; virtual;
@@ -784,6 +785,8 @@ type
    procedure visiblechanged; virtual;
    procedure colorchanged; virtual;
    procedure sizechanged; virtual;
+   procedure getautopaintsize(var asize: sizety); virtual;
+   procedure checkautosize;
    procedure poschanged; virtual;
    procedure clientrectchanged; virtual;
    procedure rootchanged; virtual;
@@ -1512,6 +1515,8 @@ function translateclientrect(const rect: rectty;
     //translates from source client to dest client, to screen if dest = nil
     //source = nil -> screen
 
+procedure syncmaxautosize(const widgets: array of twidget);
+procedure syncminframewidth(const awidth: integer; const awidgets: array of twidget);
 
 type
  getwidgetintegerty = function(const awidget: twidget): integer;
@@ -1857,6 +1862,76 @@ function translateclientrect(const rect: rectty;
 begin
  result:= rect;
  translateclientpoint1(result.pos,source,dest);
+end;
+
+procedure syncmaxautosize(const widgets: array of twidget);
+var
+ size1,size2: sizety;
+ int1: integer;
+ rect1: rectty;
+ po1: pointty;
+begin
+ size1:= nullsize;
+ for int1:= high(widgets) downto 0 do begin
+  widgets[int1].getautopaintsize(size2);
+  if size2.cx > size1.cx then begin
+   size1.cx:= size2.cx;
+  end;
+  if size2.cy > size1.cy then begin
+   size1.cy:= size2.cy;
+  end;
+ end;
+ for int1:= 0 to high(widgets) do begin
+  with widgets[int1] do begin
+   rect1:= fwidgetrect;
+   clientsize:= size1;
+   po1:= pos;
+   if an_right in fanchors then begin
+    dec(po1.x,fwidgetrect.cx-rect1.cx);
+   end;
+   if an_bottom in fanchors then begin
+    dec(rect1.y,fwidgetrect.cy-rect1.cy);
+   end;
+   pos:= po1;
+  end;
+ end;
+end;
+
+procedure syncminframewidth(const awidth: integer; const awidgets: array of twidget);
+var
+ int1,int2,int3: integer;
+ widget1: twidget;
+begin
+ if high(awidgets) >= 0 then begin
+  int2:= -bigint;
+  for int1:= high(awidgets) downto 0 do begin
+   with awidgets[int1] do begin
+    if fframe = nil then begin
+     int3:= 0;
+    end
+    else begin
+     int3:= fframe.fouterframe.left + fframe.fouterframe.right;
+    end;
+   end;
+   if int3 > int2 then begin
+    widget1:= awidgets[int1];
+    int2:= int3;
+   end;
+  end;
+ end;
+ widget1.bounds_cx:= awidth;
+ int2:= widget1.bounds_cx - int2; //min frame width
+ for int1:= 0 to high(awidgets) do begin
+  with awidgets[int1] do begin
+   if fframe = nil then begin
+    int3:= 0;
+   end
+   else begin
+    int3:= fframe.fouterframe.left + fframe.fouterframe.right;
+   end;
+   bounds_cx:= int2 + int3;
+  end;
+ end;
 end;
 
 procedure beep;
@@ -2700,19 +2775,23 @@ end;
 function tcustomframe.paintframewidth: sizety;
 begin
  checkstate;
- result.cx:= fouterframe.left + fpaintframe.left +
-       fpaintframe.right + fouterframe.right;
- result.cy:= fouterframe.top + fpaintframe.top +
-       fpaintframe.bottom + fouterframe.bottom;
+ result.cx:= fpaintframe.left + fpaintframe.right;
+ result.cy:= fpaintframe.top + fpaintframe.bottom;
+// result.cx:= fouterframe.left + fpaintframe.left +
+//       fpaintframe.right + fouterframe.right;
+// result.cy:= fouterframe.top + fpaintframe.top +
+//       fpaintframe.bottom + fouterframe.bottom;
 end;
 
 function tcustomframe.innerframewidth: sizety;
 begin
  checkstate;
- result.cx:= fouterframe.left + fpaintframe.left + fi.innerframe.left +
-       fpaintframe.right + fouterframe.right + fi.innerframe.right;
- result.cy:= fouterframe.top + fpaintframe.top + fi.innerframe.top +
-       fpaintframe.bottom + fouterframe.bottom + fi.innerframe.bottom;
+ result.cx:= finnerframe.left + finnerframe.right;
+ result.cy:= finnerframe.top + finnerframe.bottom;
+// result.cx:= fouterframe.left + fpaintframe.left + fi.innerframe.left +
+//       fpaintframe.right + fouterframe.right + fi.innerframe.right;
+// result.cy:= fouterframe.top + fpaintframe.top + fi.innerframe.top +
+//       fpaintframe.bottom + fouterframe.bottom + fi.innerframe.bottom;
 end;
 
 function tcustomframe.outerframe: framety;
@@ -2724,14 +2803,16 @@ end;
 function tcustomframe.paintframe: framety;
 begin
  checkstate;
- result:= addframe(fouterframe,fpaintframe);
+ result:= fpaintframe;
+// result:= addframe(fouterframe,fpaintframe);
 end;
 
 function tcustomframe.innerframe: framety;
 begin
  checkstate;
- result:= addframe(fouterframe,fpaintframe);
- addframe1(result,fi.innerframe);
+ result:= finnerframe;
+// result:= addframe(fouterframe,fpaintframe);
+// addframe1(result,fi.innerframe);
 end;
 
 procedure tcustomframe.assign(source: tpersistent);
@@ -3866,46 +3947,54 @@ function twidget.aligny(const mode: widgetalignmodety;
  function getrefpoint(const awidget: twidget): integer;
  begin
   with awidget do begin
+   updateroot;
    case mode of
     wam_start: begin
-     result:= fwidgetrect.y + framepos.y;
+     result:= frootpos.y + framepos.y;
     end;
     wam_center: begin
-     result:= fwidgetrect.y + framepos.y + framesize.cy div 2;
+     result:= frootpos.y + framepos.y + framesize.cy div 2;
     end;
     else begin //wam_end
-     result:= fwidgetrect.y + framepos.y + awidget.framesize.cy;
+     result:= frootpos.y + framepos.y + awidget.framesize.cy;
     end;
    end;
   end;
  end;
 
 var
- int1,int2,int3: integer;
+ ref,int1,int3: integer;
 
 begin
  if high(awidgets) >= 0 then begin
-  result:= getrefpoint(awidgets[0])
+  ref:= getrefpoint(awidgets[0]);
+  with awidgets[0] do begin
+   if fparentwidget <> nil then begin
+    result:= ref - fparentwidget.frootpos.y
+   end
+   else begin
+    result:= ref;
+   end;
+  end;
+  if high(awidgets) > 0 then begin
+   for int1:= 1 to high(awidgets) do begin
+    int3:= ref - getrefpoint(awidgets[int1]);
+    with awidgets[int1] do begin
+     if (mode = wam_start) and (an_bottom in anchors) then begin
+      bounds_cy:= bounds_cy - int3;
+     end;
+     if (mode = wam_end) and (an_top in anchors) then begin
+      bounds_cy:= bounds_cy + int3;
+     end
+     else begin
+      bounds_y:= bounds_y + int3;
+     end;
+    end; 
+   end;
+  end;
  end
  else begin
   result:= 0;
- end;
- if high(awidgets) > 0 then begin
-  int2:= result;
-  for int1:= 1 to high(awidgets) do begin
-   int3:= int2 - getrefpoint(awidgets[int1]);
-   with awidgets[int1] do begin
-    if (mode = wam_start) and (an_bottom in anchors) then begin
-     bounds_cy:= bounds_cy - int3;
-    end;
-    if (mode = wam_end) and (an_top in anchors) then begin
-     bounds_cy:= bounds_cy + int3;
-    end
-    else begin
-     bounds_y:= bounds_y + int3;
-    end;
-   end; 
-  end;
  end;
 end;
 
@@ -3915,46 +4004,54 @@ function twidget.alignx(const mode: widgetalignmodety;
  function getrefpoint(const awidget: twidget): integer;
  begin
   with awidget do begin
+   updateroot;
    case mode of
     wam_start: begin
-     result:= fwidgetrect.x + framepos.x;
+     result:= frootpos.x + framepos.x;
     end;
     wam_center: begin
-     result:= fwidgetrect.x + framepos.x + framesize.cx div 2;
+     result:= frootpos.x + framepos.x + framesize.cx div 2;
     end;
     else begin //wam_end
-     result:= fwidgetrect.x + framepos.x + awidget.framesize.cx;
+     result:= frootpos.x + framepos.x + awidget.framesize.cx;
     end;
    end;
   end;
  end;
 
 var
- int1,int2,int3: integer;
+ ref,int1,int3: integer;
 
 begin
  if high(awidgets) >= 0 then begin
-  result:= getrefpoint(awidgets[0])
- end
- else begin
-  result:= 0;
- end;
- if high(awidgets) > 0 then begin
-  int2:= result;
-  for int1:= 1 to high(awidgets) do begin
-   int3:= int2 - getrefpoint(awidgets[int1]);
-   with awidgets[int1] do begin
-    if (mode = wam_start) and (an_right in anchors) then begin
-     bounds_cx:= bounds_cx - int3;
-    end;
-    if (mode = wam_end) and (an_left in anchors) then begin
-     bounds_cx:= bounds_cx + int3;
-    end
-    else begin
-     bounds_x:= bounds_x + int3;
+  ref:= getrefpoint(awidgets[0]);
+  with awidgets[0] do begin
+   if fparentwidget <> nil then begin
+    result:= ref - fparentwidget.frootpos.x
+   end
+   else begin
+    result:= ref;
+   end;
+  end;
+  if high(awidgets) > 0 then begin
+   for int1:= 1 to high(awidgets) do begin
+    int3:= ref - getrefpoint(awidgets[int1]);
+    with awidgets[int1] do begin
+     if (mode = wam_start) and (an_right in anchors) then begin
+      bounds_cx:= bounds_cx - int3;
+     end;
+     if (mode = wam_end) and (an_left in anchors) then begin
+      bounds_cx:= bounds_cx + int3;
+     end
+     else begin
+      bounds_x:= bounds_x + int3;
+     end;
     end;
    end;
   end;
+ end
+ else begin
+  result:= 0;
  end;
 end;
 
@@ -4138,9 +4235,38 @@ procedure twidget.internalsetwidgetrect(Value: rectty; const windowevent: boolea
 var
  bo1,poscha,sizecha: boolean;
  int1: integer;
+ size1,size2: sizety;
 begin
- if not windowevent then begin
-  checkwidgetsize(value.size);
+ if (ow_autosize in foptionswidget) and not (csloading in componentstate) then begin
+  if not windowevent then begin
+   checkwidgetsize(value.size);
+  end;
+  size1:= value.size;
+  if fframe <> nil then begin
+   subsize1(size1,fframe.paintframewidth);
+  end;
+  getautopaintsize(size1);
+  if fframe <> nil then begin
+   addsize1(size1,fframe.paintframewidth);
+  end;
+  subsize1(size1,value.size);
+  size2:= value.size;
+  inc(value.cx,size1.cx);
+  inc(value.cy,size1.cy);
+  if not windowevent then begin
+   checkwidgetsize(value.size);
+  end;
+  if an_right in fanchors then begin
+   dec(value.x,value.cx-size2.cx);
+  end;
+  if an_bottom in fanchors then begin
+   dec(value.y,value.cy-size2.cy);
+  end;
+ end
+ else begin
+  if not windowevent then begin
+   checkwidgetsize(value.size);
+  end;
  end;
  poscha:= (value.x <> fwidgetrect.x) or (value.y <> fwidgetrect.y);
  sizecha:= (value.cx <> fwidgetrect.cx) or (value.cy <> fwidgetrect.cy);
@@ -7244,6 +7370,9 @@ begin
   if delta * [ow_fontlineheight,ow_fontglyphheight] <> [] then begin
    updatefontheight;
   end;
+  if (ow_autosize in delta) and (ow_autosize in avalue) then begin
+   checkautosize;
+  end;
  end;
 end;
 
@@ -7867,6 +7996,19 @@ begin
     widget1:= widget1.fparentwidget;
    end;
   end;
+ end;
+end;
+
+procedure twidget.getautopaintsize(var asize: sizety);
+begin
+ //default
+end;
+
+procedure twidget.checkautosize;
+begin
+ if (ow_autosize in foptionswidget) and 
+         ([csloading,csdestroying] * componentstate = []) then begin
+  internalsetwidgetrect(fwidgetrect,false);
  end;
 end;
 

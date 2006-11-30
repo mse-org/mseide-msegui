@@ -6,6 +6,8 @@ object dirtreefo: tdirtreefo
   bounds_cxmin = 200
   visible = False
   container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_subfocus, ow_mousetransparent, ow_destroywidgets, ow_autoscale]
+  container.bounds_x = 0
+  container.bounds_y = 0
   container.bounds_cx = 300
   container.bounds_cy = 203
   container.frame.dummy = 0
@@ -15,6 +17,8 @@ object dirtreefo: tdirtreefo
   moduleclassname = 'tmseform'
   object grid: twidgetgrid
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_focusbackonesc, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+    bounds_x = 0
+    bounds_y = 0
     bounds_cx = 300
     bounds_cy = 203
     frame.levelo = 0
@@ -31,12 +35,14 @@ object dirtreefo: tdirtreefo
         widgetname = 'treeitem'
       end>
     datarowlinewidth = 0
-    datarowheight = 15
+    datarowheight = 16
     reffontheight = 14
     object treeitem: ttreeitemedit
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+      bounds_x = 0
+      bounds_y = 0
       bounds_cx = 297
-      bounds_cy = 15
+      bounds_cy = 16
       color = -1879048185
       frame.levelo = 0
       frame.colorclient = -2147483646
