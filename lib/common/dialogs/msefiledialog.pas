@@ -14,11 +14,10 @@ unit msefiledialog;
 interface
 
 uses
- msegui,mseforms,Classes,mseclasses,msewidgets,msegrids,mselistbrowser,
- mseedit,msesimplewidgets,msedataedits,msedialog,msetypes,msestrings,
- msesys,msedispwidgets,
- msedatalist,msestat,msestatfile,msebitmap,msedatanodes,msefileutils,
- msedropdownlist,mseevent,msegraphedits,mseeditglob;
+ msegui,mseforms,Classes,mseclasses,msewidgets,msegrids,mselistbrowser,mseedit,
+ msesimplewidgets,msedataedits,msedialog,msetypes,msestrings,msesys,
+ msedispwidgets,msedatalist,msestat,msestatfile,msebitmap,msedatanodes,
+ msefileutils,msedropdownlist,mseevent,msegraphedits,mseeditglob,msesplitter;
 
 type
 
@@ -266,6 +265,11 @@ type
    ok: tbutton;
    cancel: tbutton;
    showhidden: tbooleanedit;
+   tspacer1: tspacer;
+   tspacer2: tspacer;
+   tspacer3: tspacer;
+   tspacer4: tspacer;
+   showhiddencont: tspacer;
    up: tbutton;
    createdir: tbutton;
    filename: thistoryedit;
@@ -1091,9 +1095,10 @@ end;
 
 procedure tfiledialogfo.foonchildscaled(const sender: TObject);
 begin
+// syncmaxautosize([up,createdir]);
  placeyorder(2,[2],[dir,listview,filename,filter],2);
  aligny(wam_center,[dir,up,createdir]);
- aligny(wam_center,[filename,showhidden]);
+ aligny(wam_center,[filename,showhiddencont]);
  aligny(wam_center,[filter,ok,cancel]);
  listview.synctofontheight;
 end;

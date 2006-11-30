@@ -672,7 +672,9 @@ begin
   try  
    po1:= pos;
    if spao_glueright in foptions then begin
+    if flinkright <> nil then begin
      po1.x:= flinkright.bounds_x - bounds_cx - foffset_right;
+    end;
    end
    else begin
     if flinkleft <> nil then begin

@@ -884,7 +884,8 @@ end;
 
 procedure tscalingwidget.updateoptionsscale;
 var
- size1,size2,size3: sizety;
+ size1,size2: sizety;
+ rect1: rectty;
 begin
  if foptionsscale * [osc_expandx,osc_expandy,
                     osc_shrinkx,osc_shrinky] <> [] then begin
@@ -894,29 +895,37 @@ begin
    try
     size1:= calcminscrollsize;
     size2:= paintsize;
-    size3.cx:= size1.cx - size2.cx;
-    size3.cy:= size1.cy - size2.cy;
+    rect1.cx:= size1.cx - size2.cx;
+    rect1.cy:= size1.cy - size2.cy;
     if not (osc_expandx in foptionsscale) then begin
-     if size3.cx > 0 then begin
-      size3.cx:= 0;
+     if rect1.cx > 0 then begin
+      rect1.cx:= 0;
      end;
     end;
     if not (osc_expandy in foptionsscale) then begin
-     if size3.cy > 0 then begin
-      size3.cy:= 0;
+     if rect1.cy > 0 then begin
+      rect1.cy:= 0;
      end;
     end;
     if not (osc_shrinkx in foptionsscale) then begin
-     if size3.cx < 0 then begin
-      size3.cx:= 0;
+     if rect1.cx < 0 then begin
+      rect1.cx:= 0;
      end;
     end;
     if not (osc_shrinky in foptionsscale) then begin
-     if size3.cy < 0 then begin
-      size3.cy:= 0;
+     if rect1.cy < 0 then begin
+      rect1.cy:= 0;
      end;
     end;
-    size:= addsize(size,size3);
+    rect1.pos:= fwidgetrect.pos;
+    if an_right in fanchors then begin
+     dec(rect1.x,rect1.cx);
+    end;
+    if an_bottom in fanchors then begin
+     dec(rect1.y,rect1.cy);
+    end;
+    addsize1(rect1.size,fwidgetrect.size);
+    internalsetwidgetrect(rect1,false);
    finally
     dec(fscaling)
    end;

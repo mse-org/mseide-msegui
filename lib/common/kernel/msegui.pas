@@ -2751,8 +2751,8 @@ end;
 function tcustomframe.innerframewidth: sizety;
 begin
  checkstate;
- result.cx:= fi.innerframe.left + fi.innerframe.right;
- result.cy:= fi.innerframe.top + fi.innerframe.bottom;
+ result.cx:= finnerframe.left + finnerframe.right;
+ result.cy:= finnerframe.top + finnerframe.bottom;
 // result.cx:= fouterframe.left + fpaintframe.left + fi.innerframe.left +
 //       fpaintframe.right + fouterframe.right + fi.innerframe.right;
 // result.cy:= fouterframe.top + fpaintframe.top + fi.innerframe.top +
