@@ -16,12 +16,86 @@ object filedialogfo: Tfiledialogfo
   container.onchildscaled = foonchildscaled
   options = [fo_screencentered, fo_closeonesc, fo_localshortcuts, fo_autoreadstat, fo_autowritestat]
   icon.transparency = -2147483648
-  oncreate = formoncreate
+  onloaded = formoncreate
   onkeydown = listviewonkeydown
   onchildscaled = foonchildscaled
   left = 239
   top = 138
   moduleclassname = 'tmseform'
+  object namecont: tgroupbox
+    bounds_x = 0
+    bounds_y = 232
+    bounds_cx = 482
+    bounds_cy = 50
+    anchors = [an_left, an_top, an_right]
+    visible = False
+  end
+  object bucont: tspacer
+    optionswidget = [ow_tabfocus, ow_parenttabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_mousewheel, ow_destroywidgets, ow_autoscale]
+    bounds_x = 482
+    bounds_y = 234
+    bounds_cx = 105
+    bounds_cy = 71
+    anchors = [an_right, an_bottom]
+    taborder = 5
+    visible = True
+    optionsscale = [osc_expandx, osc_shrinkx]
+    linkleft = namecont
+    options = [spao_glueright]
+    object showhidden: tbooleanedit
+      bounds_x = 6
+      bounds_y = 16
+      bounds_cx = 99
+      bounds_cy = 15
+      frame.caption = '&Show hidden files'
+      frame.dummy = 0
+      frame.outerframe = (
+        0
+        1
+        86
+        1
+      )
+      onsetvalue = showhiddenonsetvalue
+    end
+    object tspacer4: tspacer
+      bounds_x = 41
+      bounds_y = 52
+      bounds_cx = 8
+      bounds_cy = 20
+      taborder = 3
+      linkleft = ok
+      linkright = cancel
+    end
+    object cancel: tbutton
+      optionswidget = [ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale, ow_autosize]
+      bounds_x = 49
+      bounds_y = 52
+      bounds_cx = 43
+      bounds_cy = 19
+      bounds_cxmin = 35
+      anchors = [an_left, an_bottom]
+      taborder = 2
+      state = [as_localcaption]
+      caption = '&Cancel'
+      modalresult = mr_cancel
+      reffontheight = 13
+    end
+    object ok: tbutton
+      optionswidget = [ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale, ow_autosize]
+      bounds_x = 6
+      bounds_y = 52
+      bounds_cx = 35
+      bounds_cy = 19
+      bounds_cxmin = 35
+      color = -1879048187
+      anchors = [an_left, an_bottom]
+      taborder = 1
+      state = [as_default, as_localdefault, as_localcaption, as_localonexecute]
+      caption = '&Ok'
+      onexecute = okonexecute
+      reffontheight = 13
+    end
+  end
   object listview: tfilelistview
     optionswidget = [ow_mousefocus, ow_arrowfocus, ow_focusbackonesc, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
     bounds_x = 0
@@ -30,7 +104,7 @@ object filedialogfo: Tfiledialogfo
     bounds_cy = 186
     frame.dummy = 0
     anchors = [an_top, an_bottom]
-    taborder = 12
+    taborder = 9
     onkeydown = listviewonkeydown
     datarowlinecolor = -1610612731
     datacollinecolor = -1610612731
@@ -47,34 +121,6 @@ object filedialogfo: Tfiledialogfo
     onlistread = listviewonlistread
     reffontheight = 13
   end
-  object ok: tbutton
-    optionswidget = [ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale, ow_autosize]
-    bounds_x = 500
-    bounds_y = 286
-    bounds_cx = 35
-    bounds_cy = 19
-    bounds_cxmin = 35
-    anchors = [an_right, an_bottom]
-    taborder = 7
-    state = [as_default, as_localdefault, as_localcaption, as_localonexecute]
-    caption = '&Ok'
-    onexecute = okonexecute
-    reffontheight = 13
-  end
-  object cancel: tbutton
-    optionswidget = [ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale, ow_autosize]
-    bounds_x = 543
-    bounds_y = 286
-    bounds_cx = 43
-    bounds_cy = 19
-    bounds_cxmin = 35
-    anchors = [an_right, an_bottom]
-    taborder = 8
-    state = [as_localcaption]
-    caption = '&Cancel'
-    modalresult = mr_cancel
-    reffontheight = 13
-  end
   object createdir: tbutton
     optionswidget = [ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale, ow_autosize]
     bounds_x = 541
@@ -83,7 +129,7 @@ object filedialogfo: Tfiledialogfo
     bounds_cy = 19
     bounds_cxmin = 35
     anchors = [an_top, an_right]
-    taborder = 11
+    taborder = 8
     state = [as_localcaption, as_localonexecute]
     caption = '&New dir'
     onexecute = createdironexecute
@@ -97,7 +143,7 @@ object filedialogfo: Tfiledialogfo
     bounds_cy = 19
     bounds_cxmin = 35
     anchors = [an_top, an_right]
-    taborder = 10
+    taborder = 7
     state = [as_localcaption, as_localonexecute]
     caption = '&Up'
     onexecute = upaction
@@ -107,7 +153,7 @@ object filedialogfo: Tfiledialogfo
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
     bounds_x = 1
     bounds_y = 260
-    bounds_cx = 478
+    bounds_cx = 481
     bounds_cy = 19
     frame.caption = '&Name'
     frame.captionpos = cp_right
@@ -119,7 +165,7 @@ object filedialogfo: Tfiledialogfo
       0
     )
     anchors = [an_left, an_right, an_bottom]
-    taborder = 4
+    taborder = 3
     optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_resetselectonexit, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_keyexecute, oe_savevalue, oe_savestate]
     onsetvalue = filenamesetvalue
     dropdown.dropdownrowcount = 10
@@ -135,7 +181,7 @@ object filedialogfo: Tfiledialogfo
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
     bounds_x = 1
     bounds_y = 285
-    bounds_cx = 491
+    bounds_cx = 475
     bounds_cy = 19
     frame.caption = '&Filter'
     frame.captionpos = cp_right
@@ -147,7 +193,7 @@ object filedialogfo: Tfiledialogfo
       0
     )
     anchors = [an_left, an_right, an_bottom]
-    taborder = 6
+    taborder = 4
     ondataentered = filepathentered
     onsetvalue = filteronsetvalue
     dropdown.cols.count = 2
@@ -177,7 +223,7 @@ object filedialogfo: Tfiledialogfo
       0
     )
     anchors = [an_left, an_top, an_right]
-    taborder = 9
+    taborder = 6
     onshowhint = dirshowhint
     textflags = [tf_ycentered, tf_noselect, tf_ellipseleft]
     ondataentered = filepathentered
@@ -190,7 +236,7 @@ object filedialogfo: Tfiledialogfo
     bounds_y = 0
     bounds_cx = 8
     bounds_cy = 20
-    taborder = 3
+    taborder = 2
     linkleft = dir
     linkright = up
     options = [spao_glueright]
@@ -200,56 +246,9 @@ object filedialogfo: Tfiledialogfo
     bounds_y = 0
     bounds_cx = 8
     bounds_cy = 20
-    taborder = 2
+    taborder = 1
     linkleft = up
     linkright = createdir
     options = [spao_glueright]
-  end
-  object tspacer3: tspacer
-    bounds_x = 535
-    bounds_y = 280
-    bounds_cx = 8
-    bounds_cy = 20
-    taborder = 1
-    linkleft = ok
-    linkright = cancel
-    options = [spao_glueright]
-  end
-  object tspacer4: tspacer
-    bounds_x = 492
-    bounds_y = 280
-    bounds_cx = 8
-    bounds_cy = 20
-    linkleft = filter
-    linkright = ok
-    options = [spao_glueright]
-  end
-  object showhiddencont: tspacer
-    optionswidget = [ow_tabfocus, ow_parenttabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_mousewheel, ow_destroywidgets, ow_autoscale]
-    bounds_x = 479
-    bounds_y = 262
-    bounds_cx = 105
-    bounds_cy = 15
-    anchors = [an_top, an_right]
-    taborder = 5
-    visible = True
-    optionsscale = [osc_expandx, osc_shrinkx, osc_expandy, osc_shrinky]
-    linkleft = filename
-    options = [spao_glueright]
-    object showhidden: tbooleanedit
-      bounds_x = 6
-      bounds_y = 0
-      bounds_cx = 99
-      bounds_cy = 15
-      frame.caption = '&Show hidden files'
-      frame.dummy = 0
-      frame.outerframe = (
-        0
-        1
-        86
-        1
-      )
-      onsetvalue = showhiddenonsetvalue
-    end
   end
 end

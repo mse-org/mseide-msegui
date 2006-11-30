@@ -261,15 +261,15 @@ type
  end;
 
  tfiledialogfo = class(Tmseform)
+   cancel: tbutton;
    listview: tfilelistview;
    ok: tbutton;
-   cancel: tbutton;
    showhidden: tbooleanedit;
+   namecont: tgroupbox;
    tspacer1: tspacer;
    tspacer2: tspacer;
-   tspacer3: tspacer;
+   bucont: tspacer;
    tspacer4: tspacer;
-   showhiddencont: tspacer;
    up: tbutton;
    createdir: tbutton;
    filename: thistoryedit;
@@ -1098,8 +1098,9 @@ begin
 // syncmaxautosize([up,createdir]);
  placeyorder(2,[2],[dir,listview,filename,filter],2);
  aligny(wam_center,[dir,up,createdir]);
- aligny(wam_center,[filename,showhiddencont]);
+ aligny(wam_center,[filename,showhidden]);
  aligny(wam_center,[filter,ok,cancel]);
+ syncminframewidth(namecont.bounds_cx,[filename,filter]);
  listview.synctofontheight;
 end;
 

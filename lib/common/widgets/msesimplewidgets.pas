@@ -891,6 +891,7 @@ begin
                     osc_shrinkx,osc_shrinky] <> [] then begin
   if (componentstate * [csloading,csdestroying] = []) and 
                     (fscaling = 0) then begin
+   
    inc(fscaling);
    try
     size1:= calcminscrollsize;

@@ -1519,6 +1519,7 @@ function translateclientrect(const rect: rectty;
     //source = nil -> screen
 
 procedure syncmaxautosize(const widgets: array of twidget);
+procedure syncminframewidth(const awidth: integer; const awidgets: array of twidget);
 
 type
  getwidgetintegerty = function(const awidget: twidget): integer;
@@ -1895,6 +1896,43 @@ begin
     dec(rect1.y,fwidgetrect.cy-rect1.cy);
    end;
    pos:= po1;
+  end;
+ end;
+end;
+
+procedure syncminframewidth(const awidth: integer; const awidgets: array of twidget);
+var
+ int1,int2,int3: integer;
+ widget1: twidget;
+begin
+ if high(awidgets) >= 0 then begin
+  int2:= -bigint;
+  for int1:= high(awidgets) downto 0 do begin
+   with awidgets[int1] do begin
+    if fframe = nil then begin
+     int3:= 0;
+    end
+    else begin
+     int3:= fframe.fouterframe.left + fframe.fouterframe.right;
+    end;
+   end;
+   if int3 > int2 then begin
+    widget1:= awidgets[int1];
+    int2:= int3;
+   end;
+  end;
+ end;
+ widget1.bounds_cx:= awidth;
+ int2:= widget1.bounds_cx - int2; //min frame width
+ for int1:= 0 to high(awidgets) do begin
+  with awidgets[int1] do begin
+   if fframe = nil then begin
+    int3:= 0;
+   end
+   else begin
+    int3:= fframe.fouterframe.left + fframe.fouterframe.right;
+   end;
+   bounds_cx:= int2 + int3;
   end;
  end;
 end;
@@ -3914,46 +3952,54 @@ function twidget.aligny(const mode: widgetalignmodety;
  function getrefpoint(const awidget: twidget): integer;
  begin
   with awidget do begin
+   updateroot;
    case mode of
     wam_start: begin
-     result:= fwidgetrect.y + framepos.y;
+     result:= frootpos.y + framepos.y;
     end;
     wam_center: begin
-     result:= fwidgetrect.y + framepos.y + framesize.cy div 2;
+     result:= frootpos.y + framepos.y + framesize.cy div 2;
     end;
     else begin //wam_end
-     result:= fwidgetrect.y + framepos.y + awidget.framesize.cy;
+     result:= frootpos.y + framepos.y + awidget.framesize.cy;
     end;
    end;
   end;
  end;
 
 var
- int1,int2,int3: integer;
+ ref,int1,int3: integer;
 
 begin
  if high(awidgets) >= 0 then begin
-  result:= getrefpoint(awidgets[0])
+  ref:= getrefpoint(awidgets[0]);
+  with awidgets[0] do begin
+   if fparentwidget <> nil then begin
+    result:= ref - fparentwidget.frootpos.y
+   end
+   else begin
+    result:= ref;
+   end;
+  end;
+  if high(awidgets) > 0 then begin
+   for int1:= 1 to high(awidgets) do begin
+    int3:= ref - getrefpoint(awidgets[int1]);
+    with awidgets[int1] do begin
+     if (mode = wam_start) and (an_bottom in anchors) then begin
+      bounds_cy:= bounds_cy - int3;
+     end;
+     if (mode = wam_end) and (an_top in anchors) then begin
+      bounds_cy:= bounds_cy + int3;
+     end
+     else begin
+      bounds_y:= bounds_y + int3;
+     end;
+    end; 
+   end;
+  end;
  end
  else begin
   result:= 0;
- end;
- if high(awidgets) > 0 then begin
-  int2:= result;
-  for int1:= 1 to high(awidgets) do begin
-   int3:= int2 - getrefpoint(awidgets[int1]);
-   with awidgets[int1] do begin
-    if (mode = wam_start) and (an_bottom in anchors) then begin
-     bounds_cy:= bounds_cy - int3;
-    end;
-    if (mode = wam_end) and (an_top in anchors) then begin
-     bounds_cy:= bounds_cy + int3;
-    end
-    else begin
-     bounds_y:= bounds_y + int3;
-    end;
-   end; 
-  end;
  end;
 end;
 
@@ -3963,46 +4009,54 @@ function twidget.alignx(const mode: widgetalignmodety;
  function getrefpoint(const awidget: twidget): integer;
  begin
   with awidget do begin
+   updateroot;
    case mode of
     wam_start: begin
-     result:= fwidgetrect.x + framepos.x;
+     result:= frootpos.x + framepos.x;
     end;
     wam_center: begin
-     result:= fwidgetrect.x + framepos.x + framesize.cx div 2;
+     result:= frootpos.x + framepos.x + framesize.cx div 2;
     end;
     else begin //wam_end
-     result:= fwidgetrect.x + framepos.x + awidget.framesize.cx;
+     result:= frootpos.x + framepos.x + awidget.framesize.cx;
     end;
    end;
   end;
  end;
 
 var
- int1,int2,int3: integer;
+ ref,int1,int3: integer;
 
 begin
  if high(awidgets) >= 0 then begin
-  result:= getrefpoint(awidgets[0])
- end
- else begin
-  result:= 0;
- end;
- if high(awidgets) > 0 then begin
-  int2:= result;
-  for int1:= 1 to high(awidgets) do begin
-   int3:= int2 - getrefpoint(awidgets[int1]);
-   with awidgets[int1] do begin
-    if (mode = wam_start) and (an_right in anchors) then begin
-     bounds_cx:= bounds_cx - int3;
-    end;
-    if (mode = wam_end) and (an_left in anchors) then begin
-     bounds_cx:= bounds_cx + int3;
-    end
-    else begin
-     bounds_x:= bounds_x + int3;
+  ref:= getrefpoint(awidgets[0]);
+  with awidgets[0] do begin
+   if fparentwidget <> nil then begin
+    result:= ref - fparentwidget.frootpos.x
+   end
+   else begin
+    result:= ref;
+   end;
+  end;
+  if high(awidgets) > 0 then begin
+   for int1:= 1 to high(awidgets) do begin
+    int3:= ref - getrefpoint(awidgets[int1]);
+    with awidgets[int1] do begin
+     if (mode = wam_start) and (an_right in anchors) then begin
+      bounds_cx:= bounds_cx - int3;
+     end;
+     if (mode = wam_end) and (an_left in anchors) then begin
+      bounds_cx:= bounds_cx + int3;
+     end
+     else begin
+      bounds_x:= bounds_x + int3;
+     end;
     end;
    end;
   end;
+ end
+ else begin
+  result:= 0;
  end;
 end;
 
