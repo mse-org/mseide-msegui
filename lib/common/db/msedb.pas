@@ -667,6 +667,7 @@ type
    fintf: idbcontroller;
    fonbeforeconnect: databaseeventty;
    fonconnecterror: databaseerroreventty;
+   fonafterconnect: databaseeventty;
   protected
    procedure setowneractive(const avalue: boolean); override;
   public
@@ -676,6 +677,8 @@ type
   published
    property onbeforeconnect: databaseeventty read fonbeforeconnect 
                                    write fonbeforeconnect;  
+   property onafterconnect: databaseeventty read fonafterconnect 
+                                   write fonafterconnect;  
    property onconnecterror: databaseerroreventty read fonconnecterror 
                                    write fonconnecterror; 
  end;
@@ -3086,6 +3089,9 @@ begin
       end;
      end;
     end;
+   end;
+   if checkcanevent(fowner,tmethod(fonafterconnect)) then begin
+    fonafterconnect(tdatabase(fowner));
    end;
   end;
  end
