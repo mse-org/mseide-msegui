@@ -267,12 +267,14 @@ var
  comp1: tcomponent;
 begin
  result:= getcomponentrect(sender,component);
- comp1:= component;
- while (comp1 <> module) and (comp1 <> nil) do begin
-  if comp1 is twidget then begin
-   addpoint1(result.pos,twidget(comp1).pos);
+ if module is twidget then begin
+  comp1:= component;
+  while (comp1 <> module) and (comp1 <> nil) do begin
+   if comp1 is twidget then begin
+    addpoint1(result.pos,twidget(comp1).pos);
+   end;
+   comp1:= comp1.owner;
   end;
-  comp1:= comp1.owner;
  end;
 end;
 
@@ -1385,7 +1387,7 @@ begin
       firsthandle..lasthandle: begin
        if (factcompindex >= 0) and (factcompindex < fselections.count) then begin
         component:= tcomponent(fselections.itempo(factcompindex)^.selectedinfo.instance);
-        if component is twidget then begin
+        if (component is twidget) and (form <> nil) then begin
          with twidget(component) do begin
           subpoint1(factsizerect.pos,parentwidget.rootpos);
           widgetrect:= factsizerect;
@@ -1422,7 +1424,7 @@ begin
          end;
          for int1:= 0 to module.componentcount - 1 do begin
           component:= module.Components[int1];
-          if not (component is twidget) then begin
+          if (form = nil) or (not (component is twidget)) then begin
            if rectinrect(getcomponentrect1(fowner,component,module),
                                             rect1) then begin
             selectcomponent(component,selectmode);
