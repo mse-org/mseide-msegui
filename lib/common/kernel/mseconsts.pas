@@ -19,9 +19,9 @@ type
  pstockcaptionty = ^stockcaptionty;
  defaultmodalresulttextty = array[modalresultty] of msestring;
  pdefaultmodalresulttextty = ^defaultmodalresulttextty;
- langty = (la_none,la_en,la_de,la_ru,la_es);
+ langty = (la_none,la_en,la_de,la_ru,la_es,la_uzcyr);
 const
- langnames: array[langty] of string = ('','en','de','ru','es');
+ langnames: array[langty] of string = ('','en','de','ru','es','uz_cyr');
 
  function modalresulttext(const index: modalresultty): msestring;
  function modalresulttextnoshortcut(const index: modalresultty): msestring;
@@ -116,6 +116,14 @@ const
   '&Filter',            //sc_Filter            /// 
   'Save',               //sc_save 
   'Open',               //sc_open
+  'Name',                //sc_name1
+  'Create new directory',//sc_create_new_directory
+  'File',               //sc_file
+  'exists, do you want to overwrite?', //sc_exists_overwrite
+  'WARNING',               //sc_warningupper
+  'ERROR',                 //sc_errorupper
+  'does not exist',        //sc_does_not_exist
+  'Can not read directory', //sc_can_not_read_directory
   'Graphic format not supported', //sc_graphic_not_supported
   'Graphic format error', //sc_graphic_format_error
   'MS Bitmap',          //sc_MS_Bitmap

@@ -72,6 +72,14 @@ const
   '&Filter',            //sc_Filter            ///   
   'Speichern',          //sc_save 
   #214'ffnen',           //sc_open
+  'Name',                 //sc_name1
+  'Verzeichnis erstellen',//sc_create_new_directory
+  'Datei',                                     //sc_file
+  'existiert, wollen Sie '#252'berschreiben?', //sc_exists_overwrite
+  'WARNUNG',                                   //sc_warningupper
+  'FEHLER',                                    //sc_errorupper
+  'existiert nicht',                           //sc_does_not_exist
+  'Verzeichnis kann nicht gelesen werden',     //sc_can_not_read_directory
   'Grafik Format nicht unterst'#252'tzt', //sc_graphic_not_supported
   'Grafik Format Fehler', //sc_graphic_format_error
   'MS Bitmap',            //sc_MS_Icon

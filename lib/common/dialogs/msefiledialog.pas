@@ -843,11 +843,15 @@ var
  mstr1: msestring;
 begin
  mstr1:= '';
- if stringenter(mstr1,'Name','Create new directory') = mr_ok then begin
-  mstr1:= filepath(listview.directory,mstr1,fk_file);
-  msefileutils.createdir(mstr1);
-  changedir(mstr1);
+ with stockobjects do begin
+  if stringenter(mstr1,captions[sc_name1],
+               captions[sc_create_new_directory]) = mr_ok then begin
+// if stringenter(mstr1,'Name','Create new directory') = mr_ok then begin
+   mstr1:= filepath(listview.directory,mstr1,fk_file);
+   msefileutils.createdir(mstr1);
+   changedir(mstr1);
 //  listview.readlist;
+  end;
  end;
 end;
 
@@ -930,7 +934,11 @@ begin
   on ex: esys do begin
    if esys(ex).error = sye_dirstream then begin
     listview.directory:= '';
-    showerror('Can not read directory '''+ esys(ex).text+'''.','Error');
+    with stockobjects do begin
+     showerror(captions[sc_can_not_read_directory]+ ' ' + esys(ex).text,
+               captions[sc_error]);
+//     showerror('Can not read directory '''+ esys(ex).text+'''.','Error');
+    end;
     try
      listview.readlist;
     except
@@ -1070,16 +1078,26 @@ begin
     bo1:= findfile(filenames[0]);
     if fdo_save in dialogoptions then begin
      if bo1 then begin
-      if not askok('File "'+filenames[0]+
-            '" exists, do you want to overwrite?','WARNING') then begin
-       filename.setfocus;
-       exit;
+      with stockobjects do begin
+       if not askok(captions[sc_file]+' "'+filenames[0]+
+            '" '+ captions[sc_exists_overwrite],
+            captions[sc_warningupper]) then begin
+//      if not askok('File "'+filenames[0]+
+//            '" exists, do you want to overwrite?','WARNING') then begin
+        filename.setfocus;
+        exit;
+       end;
       end;
      end;
     end
     else begin
      if not bo1 then begin
-      showerror('File "'+filenames[0]+'" does not exist.');
+      with stockobjects do begin
+       showerror(captions[sc_file]+' "'+filenames[0]+'" '+
+                                        captions[sc_does_not_exist]+'.',
+                  captions[sc_errorupper]);
+      end;
+//      showerror('File "'+filenames[0]+'" does not exist.');
       filename.setfocus;
       exit;
      end;
