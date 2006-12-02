@@ -192,7 +192,7 @@ type
                     write fmaskcolorforeground default $ffffff;
                     //used to init colormask
    property maskcolorbackground: colorty read fmaskcolorbackground 
-                    write fmaskcolorbackground default $000000;
+                    write fmaskcolorbackground default $000000; //max transparent
                      //used to convert monchrome mask to colormask
   published
    property transparentcolor: colorty read ftransparentcolor write settransparentcolor
@@ -1093,7 +1093,7 @@ end;
 constructor tmaskedbitmap.create(amonochrome: boolean);
 begin
  ftransparentcolor:= cl_default;
- fmaskcolorbackground:= $000000;
+ fmaskcolorbackground:= $000000; //max transparent
  fmaskcolorforeground:= $ffffff;
  inherited;
 end;
@@ -1388,6 +1388,10 @@ begin
      self.freemask;
      if fmask <> nil then begin
       self.fmask:= tbitmap.create(fmask.monochrome);
+      with self,fmask do begin
+       fcolorforeground:= fmaskcolorforeground;
+       fcolorbackground:= fmaskcolorbackground;
+      end;
       tsimplebitmap1(self.fmask).assign1(fmask,docopy);
       include(self.fstate,pms_maskvalid);
       include(self.foptions,bmo_masked);
