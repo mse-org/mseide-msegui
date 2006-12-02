@@ -116,6 +116,14 @@ const
   '&Filter',            //sc_Filter            /// 
   'Save',               //sc_save 
   'Open',               //sc_open
+  'Name',                //sc_name1
+  'Create new directory',//sc_create_new_directory
+  'File',               //sc_file
+  'exists, do you want to overwrite?', //sc_exists_overwrite
+  'WARNING',               //sc_warningupper
+  'ERROR',                 //sc_errorupper
+  'does not exist',        //sc_does_not_exist
+  'Can not read directory', //sc_can_not_read_directory
   'Graphic format not supported', //sc_graphic_not_supported
   'Graphic format error', //sc_graphic_format_error
   'MS Bitmap',          //sc_MS_Bitmap

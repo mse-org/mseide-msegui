@@ -22,7 +22,7 @@ const
  defaultbuttonwidth = 50;
  defaultbuttonheight = 20;
  defaultlabeltextflags = [tf_ycentered];
- defaultlabeloptionswidget = (defaultoptionswidget + [ow_fontglyphheight,ow_autosize]) - 
+ defaultlabeloptionswidget = (defaultoptionswidget + [ow_fontglyphheight{,ow_autosize}]) - 
               [ow_mousefocus,ow_tabfocus,ow_arrowfocus];
  defaultlabelwidgetwidth = 100;
  defaultlabelwidgetheight = 20;

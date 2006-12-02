@@ -81,6 +81,14 @@ const
   '&'#1060#1080#1083#1100#1090#1088 ,             //sc_Filter   => Fil`tr
   #1057#1086#1093#1088#1072#1085#1080#1090#1100 , //sc_save     =>  Sohranit`
   #1054#1090#1082#1088#1099#1090#1100 ,            //sc_open     =>  Otkryt`
+  'Name',                //sc_name1
+  'Create new directory',//sc_create_new_directory
+  'File',               //sc_file
+  'exists, do you want to overwrite?', //sc_exists_overwrite
+  'WARNING',                //sc_warningupper
+  'ERROR',                  //sc_errorupper
+  'does not exist',         //sc_does_not_exist
+  'Can not read directory', //sc_can_not_read_directory
   #1043#1088#1072#1092#1080#1095#1077#1089#1082#1080#1081' '#1092#1086#1088#1084#1072#1090' '#1085#1077' '#1087#1086#1076#1076#1077#1088#1078#1080#1074#1072#1077#1090#1089#1103 , //sc_graphic_not_supported
   #1043#1088#1072#1092#1080#1095#1077#1089#1082#1080#1077' '#1076#1072#1085#1085#1099#1077' '#1085#1077' '#1089#1086#1086#1090#1074#1077#1090#1089#1090#1074#1091#1102#1090' '#1092#1086#1088#1084#1072#1090#1091 ,         //sc_graphic_format_error
   #1055#1086#1073#1080#1090#1086#1074#1099#1081' '#1086#1073#1088#1072#1079 ,          //sc_MS_Bitmap

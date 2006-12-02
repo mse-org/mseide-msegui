@@ -80,6 +80,14 @@ const
   #1060#1080#1083#1100#1090#1088 ,             //sc_Filter   => Fil`tr
   #1057#1072#1082#1083#1072#1096 , //sc_save     =>  Sohranit`
   #1054#1095#1080#1096 ,            //sc_open     =>  Otkryt`
+  'Name',                //sc_name1
+  'Create new directory',//sc_create_new_directory
+  'File',               //sc_file
+  'exists, do you want to overwrite?', //sc_exists_overwrite
+  'WARNING',                //sc_warningupper
+  'ERROR',                  //sc_errorupper
+  'does not exist',         //sc_does_not_exist
+  'Can not read directory', //sc_can_not_read_directory
   #1043#1088#1072#1092#1080#1082' '#1092#1086#1088#1084#1072#1090' '#1090#1072#1098#1084#1080#1085#1083#1072#1085#1084#1072#1075#1072#1085 , //sc_graphic_not_supported
   #1053#1086#1090#1118#1171#1088#1080' '#1075#1088#1072#1092#1080#1082' '#1092#1086#1088#1084#1072#1090#1080 ,         //sc_graphic_format_error
   'BMP-'#1088#1072#1089#1084#1080 ,          //sc_MS_Bitmap
