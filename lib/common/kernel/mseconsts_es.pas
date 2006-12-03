@@ -75,14 +75,14 @@ const
   '&Filtro',                    //sc_Filter            ///   
   'Guardar',                    //sc_save 
   'Abrir',                      //sc_open
-  'Name',                //sc_name1
-  'Create new directory',//sc_create_new_directory
-  'File',               //sc_file
-  'exists, do you want to overwrite?', //sc_exists_overwrite
-  'WARNING',                //sc_warningupper
-  'ERROR',                  //sc_errorupper
-  'does not exist',         //sc_does_not_exist
-  'Can not read directory', //sc_can_not_read_directory
+  'Nombre',                     //sc_name1
+  'Crear un directorio nuevo',  //sc_create_new_directory
+  'Archivo',                    //sc_file
+  'existe, '#191'quiere sobreescribirlo?', //sc_exists_overwrite
+  'ADVERTENCIA',                //sc_warningupper
+  'ERROR',                      //sc_errorupper
+  'no existe',                  //sc_does_not_exist
+  'No puedo leer el directorio',       //sc_can_not_read_directory
   'Formato gr'#225'fico no soportado', //sc_graphic_not_supported
   'Error de formato gr'#225'fico',     //sc_graphic_format_error
   'MS Bitmap',                         //sc_MS_Icon
