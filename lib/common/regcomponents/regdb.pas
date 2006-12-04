@@ -602,7 +602,8 @@ const
 ' ''INSERT'' ''INT'' ''INTEGER'' ''INTO'' ''IS'' ''ISOLATION'' ''ISQL'''+lineend+
 ' ''JOIN'' ''KEY'' '+lineend+
 ' ''LC_MESSAGES'' ''LC_TYPE'' ''LEFT'''+lineend+
-' ''LENGTH'' ''LEV'' ''LEVEL'' ''LIKE'' ''LOGFILE'' ''LOG_BUFFER_SIZE'''+lineend+
+' ''LENGTH'' ''LEV'' ''LEVEL'' ''LIKE'' ''LIMIT'''+lineend+
+' ''LOGFILE'' ''LOG_BUFFER_SIZE'''+lineend+
 ' ''LOG_BUF_SIZE'' '+lineend+
 ' ''LONG'' ''MANUAL'''+lineend+
 ' ''MAX'' ''MAXIMUM'' ''MAXIMUM_SEGMENT'' ''MAX_SEGMENT'' ''MERGE'''+lineend+
