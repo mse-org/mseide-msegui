@@ -769,6 +769,7 @@ begin                  //drawtext
    intersectcliprect(clip);
   end;
   if text.text = '' then begin
+   info.res:= nullrect;
    exit;
   end;
   layouttext(canvas,info,layoutinfo);
