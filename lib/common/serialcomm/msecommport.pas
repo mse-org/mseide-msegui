@@ -187,7 +187,7 @@ type
    onerror: commeventty;   //synchronized with maineventloop
    onsuccess: commeventty; //synchronized with maineventloop
    timeout: integer; //us
-   constructor create(persistent: boolean; atimeout: integer = 200000);
+   constructor create(persistent: boolean; atimeout: integer = 200000); virtual;
    destructor destroy; override;
    function state: commstatety;
    function waitfordata: boolean; //true if no error
@@ -311,6 +311,8 @@ type
    resultcode: integer; //cpf_...
  end;
 
+ asciicommeventclassty = class of tasciicommevent;
+ 
  tasciicommthread = class(tcommthread)
   private
    puffer: string;
@@ -336,6 +338,7 @@ type
    function geteorchar: char;
    procedure seteorchar(const avalue: char);
   protected
+   function geteventclass: asciicommeventclassty; virtual;
   public
    constructor create(aowner: tcomponent); override;
    function send(const commandstring: string; out answer: string;
@@ -1730,7 +1733,7 @@ begin
  if atimeout = 0 then begin
   atimeout:= ftimeout;
  end;
- ev:= tasciicommevent.create(true,atimeout);
+ ev:= geteventclass.create(true,atimeout);
  try
   ev.commandstring:= commandstring;
   tasciicommthread(fthread).postevent(ev);
@@ -1746,6 +1749,11 @@ begin
  finally
   ev.Free;
  end;
+end;
+
+function tasciicommport.geteventclass: asciicommeventclassty;
+begin
+ result:= tasciicommevent;
 end;
 
 { tasciicomevent }
