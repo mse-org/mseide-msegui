@@ -1410,7 +1410,7 @@ begin
   for int1:= high(fupdatebuffer) downto 0 do begin
    if fupdatebuffer[int1].bookmark.recordpo = fcurrentbuf then begin
     cancelrecupdate(fupdatebuffer[int1]);
-    deleteitem(fupdatebuffer,typeinfo(trecordsupdatebuffer),int1);
+    deleteitem(fupdatebuffer,typeinfo(recupdatebufferarty),int1);
     if int1 <= fapplyindex then begin
      dec(fapplyindex);
     end;
