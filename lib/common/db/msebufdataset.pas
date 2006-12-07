@@ -420,8 +420,8 @@ implementation
 uses
  dbconst,msedatalist,sysutils,mseformatstr;
 type
- tmsestringfield1 = class(tmsestringfield);
- 
+ tmsestringfield1 = class(tmsestringfield); 
+  
  TFieldcracker = class(TComponent)
   private
    FAlignMent : TAlignment;
@@ -672,8 +672,9 @@ var
  bo1: boolean;
 begin
  if buffer <> nil then begin
-  bo1:= false;
   with pdsrecordty(buffer)^,header do begin
+{ there can be copies of invalid buffers
+   bo1:= false;
    for int1:= high(blobinfo) downto 0 do begin
     if blobinfo[int1].new then begin
      freeblob(blobinfo[int1]);
@@ -683,6 +684,7 @@ begin
    if bo1 then begin
     blobinfo:= nil;
    end;
+}
    finalizecalcstrings(header);
   end;
   reallocmem(buffer,0);
@@ -1336,19 +1338,15 @@ begin
  setlength(fupdatebuffer,high(fupdatebuffer)+2);
  fcurrentupdatebuffer:= high(fupdatebuffer);
 end;
-var testvar: integer; testvar1: pointer;
+
 procedure tmsebufdataset.internaldelete;
 begin
  if not getrecordupdatebuffer then begin
   getnewupdatebuffer;
   with fupdatebuffer[fcurrentupdatebuffer] do begin
-testvar:= frecno;
-testvar1:= fcurrentbuf;
    bookmark.recno:= frecno;
    bookmark.recordpo:= fcurrentbuf;
    oldvalues:= bookmark.recordpo;
-testvar:= bookmark.recno;
-testvar1:= oldvalues;
   end;
  end
  else begin
