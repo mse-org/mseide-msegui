@@ -1917,7 +1917,8 @@ var
 begin
  state1:= fintf.getwidget.ComponentState;
  if state1 * [cswriting,csdesigning] = [] then begin
-  if not editing and not (canmodify and datasource.AutoEdit) then begin
+  if (datasource = nil) or
+          not editing and not (canmodify and datasource.AutoEdit) then begin
    include(aoptions,oe_readonly);
   end;
  end;
