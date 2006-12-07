@@ -294,6 +294,7 @@ var
  bo1: boolean;
 begin
  if buffer <> nil then begin
+ {there can be invalid copies
   bo1:= false;
   for int1:= high(pblobinfoarty(buffer)^) downto 0 do begin
    if pblobinfoarty(buffer)^[int1].new then begin
@@ -304,6 +305,7 @@ begin
   if bo1 then begin
    pblobinfoarty(buffer)^:= nil;
   end;
+  }
   ReAllocMem(Buffer,0);
  end;
 end;
