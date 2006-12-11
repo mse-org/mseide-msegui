@@ -29,7 +29,8 @@ type
     coms_timeout,             //5
     coms_exception,           //6
     coms_error,               //7
-    coms_bufferoverflow       //8
+    coms_bufferoverflow,      //8
+    coms_canceled             //9
             );
 
  errorrecty = record
@@ -50,6 +51,7 @@ const
  cpf_exception =           6;
  cpf_error =               7;
  cpf_bufferoverflow =      8;
+ cpf_canceled =            9;
  cpf_user =              100;
 
  errortexte: array[commstatety] of errorrecty =
@@ -62,7 +64,8 @@ const
    (error: cpf_timeout; text: 'timeout'),
    (error: cpf_exception; text: 'exception'),
    (error: cpf_error; text: 'error'),
-   (error: cpf_bufferoverflow; text: 'bufferoverflow')
+   (error: cpf_bufferoverflow; text: 'bufferoverflow'),
+   (error: cpf_canceled; text: 'canceled')
   );
 
  commerrors = ' 1    ok' + c_linefeed +
@@ -72,7 +75,8 @@ const
               ' 5    timeout' + c_linefeed +
               ' 6    exception' + c_linefeed +
               ' 7    error' + c_linefeed +
-              ' 8    bufferoverflow' + c_linefeed;
+              ' 8    bufferoverflow' + c_linefeed +
+              ' 9    canceled';
 
 type
  commnrty = (cnr_1,cnr_2,cnr_3,cnr_4,cnr_5,cnr_6,cnr_7,cnr_8,cnr_9);
@@ -350,13 +354,15 @@ type
 
 function checkcommport(commnr: commnrty): boolean;  //true wenn comport zur verfuegung
 function crc16(const data; len: integer): word;
-function bintoascii(bytes: string): string; // $0..$f->'A'..'Q', lsb first
-function asciitobin(chars: string): string;
+function bintoascii(const bytes: string): string; overload;
+         // $0..$f->'A'..'P', lsb first
+function bintoascii(const bytes: pchar; const len: integer): string; overload;
+function asciitobin(const chars: string): string;
 
 implementation
 uses
  {$ifdef UNIX} kernelioctl, {$endif}
- sysutils,msegui,msesysintf,msesysutils;
+ sysutils,msegui,msesysintf,msesysutils,msetypes;
 
 const
  asciipufferlaenge = 255;
@@ -543,22 +549,32 @@ begin
  result:= getbyte(char) + (getbyte(char+2) shl 8);
 end;
 
-function bintoascii(bytes: string): string;
+function bintoascii(const bytes: pchar; const len: integer): string;
 var
  int1: integer;
  po: pchar;
 begin
- setlength(result,2*length(bytes));
- po:= @result[1];
- for int1:= 1 to length(bytes) do begin
-  po^:= char((ord(bytes[int1]) and $0f) + ord('A'));
-  inc(po);
-  po^:= char((ord(bytes[int1]) shr 4) + ord('A'));
-  inc(po);
+ if len > 0 then begin
+  setlength(result,2*len);
+  po:= @result[1];
+  for int1:= 0 to len-1 do begin
+   po^:= char((pbyteaty(bytes)^[int1] and $0f) + ord('A'));
+   inc(po);
+   po^:= char((pbyteaty(bytes)^[int1] shr 4) + ord('A'));
+   inc(po);
+  end;
+ end
+ else begin
+  result:= '';
  end;
 end;
 
-function asciitobin(chars: string): string;
+function bintoascii(const bytes: string): string;
+begin
+ result:= bintoascii(pointer(bytes),length(bytes));
+end;
+
+function asciitobin(const chars: string): string;
 var
  po: pchar;
  int1: integer;

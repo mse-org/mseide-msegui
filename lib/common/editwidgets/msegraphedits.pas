@@ -24,8 +24,8 @@ const
  defaultsliderheight = 20;
  defaultboxsize = 13;
  defaultsliderscrollbaroptions = defaultscrollbaroptions + [sbo_valuekeys];
+ 
 type
-
  tgrapheditframe = class(tcustomcaptionframe)
   public
    constructor create(const intf: iframe);
@@ -277,6 +277,9 @@ type
    fscale: real;
    fformat: string;
    ftextflags: textflagsty;
+   fonfinished: progresseventty;
+   fonprogress: progresseventty;
+   fcancel: boolean;
    procedure setvalue(const avalue: realty);
    procedure setbar_face(const avalue: tbarface);
    procedure updatebarrect(const avalue: real; const arect: rectty;
@@ -296,7 +299,12 @@ type
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
    procedure changedirection(const avalue: graphicdirectionty;
-                                            var dest: graphicdirectionty); override;
+                                      var dest: graphicdirectionty); override;
+   procedure doprogress(const sender: tobject; const avalue: real;
+                                               var acancel: boolean);
+                             //threadsave
+   property cancel: boolean read fcancel write fcancel;
+                    //ored with doprogress.acancel, resetted by value:= 0.0
   published
    property value: realty read fvalue write setvalue;  
           //threadsave, range 0 .. 1.0
@@ -309,6 +317,10 @@ type
    property textflags: textflagsty read ftextflags write settextflags default 
                               [tf_ycentered,tf_xcentered];
    property font: twidgetfont read getfont write setfont stored isfontstored;
+   property onprogress: progresseventty read fonprogress write fonprogress;
+               //called from doprogress
+   property onfinished: progresseventty read fonfinished write fonfinished;
+               //called in doprogress if avalue = 1.0 or canceled
  end;
  
  ttogglegraphdataedit = class(tgraphdataedit)
@@ -2282,6 +2294,9 @@ begin
  if not (csloading in componentstate) then begin
   application.lock;
   try
+   if avalue = 0.0 then begin
+    fcancel:= false;
+   end; 
    inherited;
   finally
    application.unlock;
@@ -2428,6 +2443,24 @@ end;
 procedure tprogressbar.setbar_frame(const avalue: tbarframe);
 begin
  fbar_frame.assign(avalue);
+end;
+
+procedure tprogressbar.doprogress(const sender: tobject; const avalue: real;
+               var acancel: boolean);
+begin
+ application.lock;
+ try
+  value:= avalue;
+  acancel:= acancel or cancel;
+  if canevent(tmethod(fonprogress)) then begin
+   fonprogress(sender,avalue,acancel);
+  end;
+  if (acancel or (avalue >= 1.0)) and canevent(tmethod(fonfinished)) then begin
+   fonfinished(sender,avalue,acancel);
+  end;
+ finally
+  application.unlock;
+ end;
 end;
 
 end.

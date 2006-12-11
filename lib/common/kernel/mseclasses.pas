@@ -59,6 +59,9 @@ type
  setdatetimeeventty = procedure(const sender: tobject; var avalue: tdatetime;
                           var accept: boolean) of object;
 
+ progresseventty =  procedure(const sender: tobject; const avalue: real;
+                                               var acancel: boolean) of object;
+
  persistentarty = array of tpersistent;
  pesistentclassty = class of tpersistent;
  
