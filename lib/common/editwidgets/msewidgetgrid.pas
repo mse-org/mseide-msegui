@@ -569,7 +569,7 @@ begin
      if ffixrowwidgets[int2] <> nil then begin
       with ffixrowwidgets[int2] do begin
        parentwidget:= fgrid;
-       rect1:= fgrid.cellrect(makegridcoord(int1,int2-int3),cil_paint);
+       rect1:= fgrid.cellrect(makegridcoord(int1,int2-int3),cil_noline);
        rect1.pos:= translatewidgetpoint(addpoint(rect1.pos,fgrid.paintpos),
                               fgrid,parentwidget);
        widgetrect:= rect1;

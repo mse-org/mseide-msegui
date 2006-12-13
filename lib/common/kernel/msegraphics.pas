@@ -4683,7 +4683,7 @@ begin
 end;
 
 initialization
-{$ifdef FLUSHGDI}
+{$ifdef mse_flushgdi}
  flushgdi:= true;
 {$endif}
 finalization

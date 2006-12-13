@@ -604,7 +604,6 @@ type
    class function getinstancepo(owner: tobject): pfont; override;
  end;
 
-
  tcolheader = class(tindexpersistent)
   private
    fcaption: msestring;
@@ -1934,7 +1933,8 @@ begin
   acanvas.fillrect(makerect(nullpoint,fcellrect.size),fcellinfo.color);
  end
  else begin
-  fframe.paint(acanvas,fcellrect);
+  fframe.paint(acanvas,makerect(nullpoint,fcellrect.size));
+  //  fframe.paint(acanvas,fcellrect);
   if fframe.fi.colorclient = cl_transparent then begin
    acanvas.fillrect(makerect(nullpoint,fcellinfo.rect.size),fcellinfo.color);
   end;
@@ -2261,7 +2261,7 @@ begin
     else begin
      canvas.linewidth:= flinewidth;
     end;
-    int1:= flinepos-fcellrect.x;
+    int1:= flinepos{-fcellrect.x};
     canvas.drawline(makepoint(int1,-(ystep * (endrow-startrow+1))),
                       makepoint(int1,-1),flinecolor);
     canvas.linewidth:= linewidthbefore;
@@ -2386,7 +2386,7 @@ begin
  fcellrect.size.cx:= fwidth;
  fcellrect.y:= 0;
  if fcellinfo.cell.col <= tgridarrayprop(prop).firstoposite then begin
-  flinepos:= -((flinewidth{+1}) div 2);
+  flinepos:= -((flinewidth+1) div 2);
   fcellrect.x:= flinewidth;
  end
  else begin
@@ -2698,7 +2698,7 @@ var
        canvas.linewidth:= flinewidth;
       end;
       canvas.drawline(makepoint(fcellrect.x,flinepos),
-                        makepoint(fcellrect.x+fcellrect.cx-1,flinepos),linecolor1);
+                        makepoint(fcellrect.x+fcellrect.cx{-1},flinepos),linecolor1);
       canvas.linewidth:= linewidthbefore;
      end;
     end;
@@ -4018,27 +4018,22 @@ var
  startx,endx: integer;
  po1,po2: pointty;
  int1: integer;
-
 begin
  with info do begin
   po1:= canvas.origin;
   with canvas.clipbox do begin
-   startx:= x + po1.x;
+   startx:= x {+ po1.x};
    endx:= startx + cx;
   end;
   po2:= po1;
   for int1:= 0 to count-1 do begin
-   if po2.x >= endx then begin
-    break;
-   end;
    with tcol(items[int1]) do begin
-    if scrollables xor (co_nohscroll in foptions) then begin
-     po2.x:= fend + po1.x;
-     if po2.x >= startx then begin
-      po2.x:= fstart + po1.x;
-      canvas.origin:= po2;
-      paint(info);
-     end;
+    if (scrollables xor (co_nohscroll in foptions)) and 
+     not ((startx < fstart) and (endx < fstart) or 
+          (startx >= fend) and (endx >= fend)) then begin
+     po2.x:= fstart + po1.x;
+     canvas.origin:= po2;
+     paint(info);
     end;
    end;
   end;
@@ -4921,10 +4916,10 @@ begin
       else begin
        canvas.linewidth:= flinewidth;
       end;
-      int2:= fstart + flinepos;
+      int2:= fstart + flinepos + fcellrect.x;
       canvas.drawline(makepoint(int2,0),
            makepoint(int2,
-                      tframe1(fgrid.fframe).finnerclientrect.cy - 1),
+                      tframe1(fgrid.fframe).finnerclientrect.cy{ - 1}),
                       flinecolorfix);
       canvas.linewidth:= linewidthbefore;
      end;
@@ -5387,7 +5382,7 @@ begin
     end;
     setlength(lines,endrow-startrow+1);
     int2:= startrow * ystep - (fdatarowlinewidth + 1) div 2;
-    int3:= tframe1(fframe).finnerclientrect.cx - 1;
+    int3:= tframe1(fframe).finnerclientrect.cx{ - 1};
     for int1:= 0 to high(lines) do begin
      inc(int2,ystep);
      with lines[int1] do begin
@@ -7119,18 +7114,9 @@ end;
 function tcustomgrid.cellrect(const cell: gridcoordty;
               const innerlevel: cellinnerlevelty = cil_all): rectty;
 
- procedure updatefixx(const aprop: tgridprop);
- begin
-  with result,aprop do begin
-  end;
- end;
- 
  procedure updatex(const aprop: tgridprop);
  begin
   with result,aprop do begin
-   if innerlevel > cil_all then begin
-    dec(cx,flinewidth);
-   end;
    case innerlevel of
     cil_paint: begin
      inc(x,fcellinfo.rect.x);
@@ -7178,10 +7164,26 @@ begin  //cellrect
     with ffixrows[row] do begin
      y:= fstart;
      cy:= fend-fstart;
-     if innerlevel > cil_all then begin
+     if innerlevel = cil_noline then begin
       dec(cy,linewidth);
+      if -row > ffixrows.count - ffixrows.opositecount then begin
+       inc(y,linewidth);
+      end;
      end;
      updatey(ffixrows[row]);
+     if fframe <> nil then begin
+      with fframe do begin
+       if innerlevel >= cil_paint then begin
+        checkstate;
+        inc(x,fpaintframe.left);
+        dec(cx,fpaintframe.left + fpaintframe.right);
+       end;
+       if innerlevel >= cil_inner then begin
+        inc(x,fi.innerframe.left);
+        dec(cx,fi.innerframe.left + fi.innerframe.right);
+       end;
+      end;
+     end;
     end;
    end
    else begin //whole height
@@ -7209,9 +7211,17 @@ begin  //cellrect
   if col < 0 then begin
    if -col <= ffixcols.count then begin
     with ffixcols[col] do begin
-     x:= fstart;
-     cx:= fend-fstart;
-     updatex(ffixcols[col]);
+     x:= x + fstart;
+     cx:= cx + fend - fstart;
+     if (innerlevel = cil_noline) or isfixr and (innerlevel >= cil_noline) then begin
+      dec(cx,flinewidth);
+      if -cell.col > ffixcols.count - ffixcols.opositecount then begin
+        inc(x,flinewidth);
+      end;
+     end;
+     if not isfixr then begin
+      updatex(ffixcols[col]);
+     end;
     end;
    end
    else begin //whole width
@@ -7221,34 +7231,18 @@ begin  //cellrect
   end
   else begin
    with fdatacols[col] do begin
-    cx:= fend-fstart;
+    cx:= cx + fend-fstart;
     if co_nohscroll in foptions then begin
-     x:= fstart;
+     x:= x + fstart;
     end
     else begin
-     x:= fstart + ffixcols.ffirstsize + ffirstnohscroll + fscrollrect.x;
+     x:= x + fstart + ffixcols.ffirstsize + ffirstnohscroll + fscrollrect.x;
     end;
-    if isfixr then begin
-     if innerlevel > cil_all then begin
-      dec(cx,flinewidth);
-     end;
-     with ffixrows[cell.row] do begin
-      if fframe <> nil then begin
-       with fframe do begin
-        if innerlevel >= cil_paint then begin
-         checkstate;
-         inc(x,fpaintframe.left);
-         dec(cx,fpaintframe.left + fpaintframe.right);
-        end;
-        if innerlevel >= cil_inner then begin
-         inc(x,fi.innerframe.left);
-         dec(cx,fi.innerframe.left + fi.innerframe.right);
-        end;
-       end;
-      end;
-     end;
-    end
-    else begin
+    if (innerlevel = cil_noline) or 
+                            isfixr and (innerlevel >= cil_noline) then begin
+     dec(cx,flinewidth);
+    end;
+    if not isfixr then begin
      updatex(fdatacols[col]);
     end;
    end;
