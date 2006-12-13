@@ -694,7 +694,7 @@ type
   private
    ffirstsize: integer;
    ftotsize: integer;
-   fopositecount: integer;
+   foppositecount: integer;
    flinewidth: integer;
    flinecolor: colorty;
    flinecolorfix: colorty;
@@ -707,7 +707,7 @@ type
    fgrid: tcustomgrid;
    procedure updatelayout; virtual;
    function getclientsize: integer; virtual; abstract;
-   procedure setopositecount(const value: integer);
+   procedure setoppositecount(const value: integer);
    procedure setcount1(acount: integer; doinit: boolean); override;
    procedure countchanged; virtual;
    function scrollablecount: integer;
@@ -717,12 +717,12 @@ type
    function itematpos(const pos: integer; 
                const getscrollable: boolean = true): integer; //-1 if none
    procedure createitem(const index: integer; out item: tpersistent); override;
-   function firstoposite: integer;
+   function firstopposite: integer;
    procedure fontchanged;
   public
    constructor create(aowner: tcustomgrid; aclasstype: gridpropclassty); reintroduce;
    function fixindex(const index: integer): integer;
-   property opositecount: integer read fopositecount write setopositecount default 0;
+   property oppositecount: integer read foppositecount write setoppositecount default 0;
   published
    property linewidth: integer read flinewidth
                 write setlinewidth default defaultgridlinewidth;
@@ -903,7 +903,7 @@ end;
    property linewidth;
    property linecolor default defaultfixlinecolor;
    property linecolorfix;
-   property opositecount;
+   property oppositecount;
  end;
 
  tfixrows = class(tgridarrayprop)
@@ -924,7 +924,7 @@ end;
    property rows[const index: integer]: tfixrow read getrows write setrows; default;
                //index -1..-count
   published
-   property opositecount;
+   property oppositecount;
    property linewidth;
    property linecolor default defaultfixlinecolor;
    property linecolorfix default defaultfixlinecolor;
@@ -2385,7 +2385,7 @@ begin
  fcellrect.size.cy:= fgrid.fdatarowheight;
  fcellrect.size.cx:= fwidth;
  fcellrect.y:= 0;
- if fcellinfo.cell.col <= tgridarrayprop(prop).firstoposite then begin
+ if fcellinfo.cell.col <= tgridarrayprop(prop).firstopposite then begin
   flinepos:= -((flinewidth+1) div 2);
   fcellrect.x:= flinewidth;
  end
@@ -2744,7 +2744,7 @@ end;
 procedure tfixrow.updatelayout;
 begin
  fcellrect.size.cy:= fheight;
- if fcellinfo.cell.row <= tgridarrayprop(prop).firstoposite then begin
+ if fcellinfo.cell.row <= tgridarrayprop(prop).firstopposite then begin
   flinepos:= -((flinewidth+1) div 2);
   fcellrect.y:= flinewidth;
  end
@@ -2912,8 +2912,8 @@ end;
 
 procedure tgridarrayprop.setcount1(acount: integer; doinit: boolean);
 begin
- if acount < fopositecount then begin
-  fopositecount:= acount;
+ if acount < foppositecount then begin
+  foppositecount:= acount;
  end;
  inherited;
  countchanged;
@@ -2923,12 +2923,12 @@ procedure tgridarrayprop.updatelayout;
 var
  int1,int2,int3: integer;
 begin
- if fopositecount > count then begin
-  fopositecount:= count;
+ if foppositecount > count then begin
+  foppositecount:= count;
  end;
  int2:= 0;
  int3:= getclientsize;
- for int1:= fopositecount - 1 downto 0 do begin
+ for int1:= foppositecount - 1 downto 0 do begin
   with tgridprop(items[int1]) do begin
    fend:= int3;
    dec(int3,step);
@@ -2938,7 +2938,7 @@ begin
  end;
  ftotsize:= int2;
  int2:= 0;
- for int1:= fopositecount to count - 1 do begin
+ for int1:= foppositecount to count - 1 do begin
   with tgridprop(items[int1]) do begin
    if not (co_nohscroll in foptions) then begin
     fstart:= int2;
@@ -2951,18 +2951,18 @@ begin
  ftotsize:= ftotsize + int2;
 end;
 
-procedure tgridarrayprop.setopositecount(const value: integer);
+procedure tgridarrayprop.setoppositecount(const value: integer);
 begin
- if value <> fopositecount then begin
+ if value <> foppositecount then begin
   if csloading in fgrid.componentstate then begin
-   fopositecount:= value; //count is invalid
+   foppositecount:= value; //count is invalid
   end
   else begin
    if count < value then begin
-    fopositecount:= count;
+    foppositecount:= count;
    end
    else begin
-    fopositecount := Value;
+    foppositecount := Value;
    end;
    fgrid.layoutchanged;
   end;
@@ -3007,8 +3007,8 @@ begin
  length:= startpos + length;
  with range do begin
   scrollables:= ascrollables;
-  calcrange(fopositecount,count - 1,range1);
-  calcrange(0,fopositecount-1,range2);
+  calcrange(foppositecount,count - 1,range1);
+  calcrange(0,foppositecount-1,range2);
  end;
 end;
 
@@ -3046,9 +3046,9 @@ begin
  end;
 end;
 
-function tgridarrayprop.firstoposite: integer;
+function tgridarrayprop.firstopposite: integer;
 begin
- result:= -(count-fopositecount)-1;
+ result:= -(count-foppositecount)-1;
 end;
 
 procedure tgridarrayprop.fontchanged;
@@ -5190,7 +5190,7 @@ begin
      x:= fi.innerframe.left;
      cx:= finnerclientrect.cx;
     end;
-    if fopositecount = count then begin
+    if foppositecount = count then begin
      if self.fgridframewidth = 0 then begin
       y:= 0;
      end
@@ -5202,7 +5202,7 @@ begin
      y:= ffirstsize + fi.innerframe.top;
     end;
     cy:= fpaintrect.cy - y;
-    if fopositecount > 0 then begin
+    if foppositecount > 0 then begin
      cy:= cy - ftotsize + ffirstsize - fi.innerframe.bottom;
     end
     else begin
@@ -5231,7 +5231,7 @@ begin
      y:= fi.innerframe.top;
      cy:= finnerclientrect.cy;
     end;
-    if fopositecount = count then begin
+    if foppositecount = count then begin
      x:= ffirstnohscroll;
      if (x > 0) or (self.fgridframewidth <> 0) then begin
       inc(x,fi.innerframe.left);
@@ -5243,7 +5243,7 @@ begin
      end;
     end;
     cx:= fpaintrect.cx - x;
-    if (fopositecount > 0) then begin
+    if (foppositecount > 0) then begin
      cx:= cx - ftotsize + ffirstsize - fi.innerframe.right;
     end
     else begin
@@ -7166,7 +7166,7 @@ begin  //cellrect
      cy:= fend-fstart;
      if innerlevel = cil_noline then begin
       dec(cy,linewidth);
-      if -row > ffixrows.count - ffixrows.opositecount then begin
+      if -row > ffixrows.count - ffixrows.oppositecount then begin
        inc(y,linewidth);
       end;
      end;
@@ -7215,7 +7215,7 @@ begin  //cellrect
      cx:= cx + fend - fstart;
      if (innerlevel = cil_noline) or isfixr and (innerlevel >= cil_noline) then begin
       dec(cx,flinewidth);
-      if -cell.col > ffixcols.count - ffixcols.opositecount then begin
+      if -cell.col > ffixcols.count - ffixcols.oppositecount then begin
         inc(x,flinewidth);
       end;
      end;
@@ -7883,8 +7883,8 @@ var
     else begin
      if (csdesigning in componentstate) and not nofixed then begin
       if (pos.x <= rect1.x + sizingtol) and
-           (cell.col <> ffixcols.firstoposite + 1) then begin
-       if cell.col <= ffixcols.firstoposite then begin
+           (cell.col <> ffixcols.firstopposite + 1) then begin
+       if cell.col <= ffixcols.firstopposite then begin
         objects[0]:= -pickobjectstep * (cell.col) + integer(pok_fixcolsize);
        end
        else begin
@@ -7893,7 +7893,7 @@ var
       end
       else begin
        if (pos.x >= rect1.x + rect1.cx - sizingtol) then begin
-        if (cell.col <> ffixcols.firstoposite) then begin
+        if (cell.col <> ffixcols.firstopposite) then begin
          objects[0]:= -pickobjectstep * (cell.col) + integer(pok_fixcolsize);
         end;
        end;
@@ -7931,8 +7931,8 @@ var
     else begin
      if (csdesigning in componentstate) and not nofixed then begin
       if (pos.y <= rect1.y + sizingtol) then begin
-       if cell.row <> ffixrows.firstoposite + 1 then begin
-        if cell.row <= ffixrows.firstoposite then begin
+       if cell.row <> ffixrows.firstopposite + 1 then begin
+        if cell.row <= ffixrows.firstopposite then begin
          objects[0]:= -pickobjectstep * (cell.row) + integer(pok_fixrowsize);
         end
         else begin
@@ -7942,7 +7942,7 @@ var
       end
       else begin
        if (pos.y >= rect1.y + rect1.cy - sizingtol) and
-              (cell.row <> ffixrows.firstoposite) then begin
+              (cell.row <> ffixrows.firstopposite) then begin
          objects[0]:= -pickobjectstep * (cell.row) + integer(pok_fixrowsize);
        end
        else begin
@@ -8079,7 +8079,7 @@ begin
  decodepickobject(objects[0],kind,cell,col1,fixrow);
  case kind of
   pok_datacolsize,pok_fixcolsize: begin
-   if (kind = pok_fixcolsize) and (cell.col <= fixcols.firstoposite) then begin
+   if (kind = pok_fixcolsize) and (cell.col <= fixcols.firstopposite) then begin
     col1.width:= col1.width - offset.x;
    end
    else begin
@@ -8104,7 +8104,7 @@ begin
    end;
   end;
   pok_fixrowsize: begin
-   if cell.row <= fixrows.firstoposite then begin
+   if cell.row <= fixrows.firstopposite then begin
     fixrow.height:= fixrow.height - offset.y;
    end
    else begin
@@ -8173,7 +8173,7 @@ begin
   case kind of
    pok_datacolsize,pok_fixcolsize: begin
     if (kind = pok_fixcolsize) and (cell.col <
-                  -(fixcols.count-fixcols.fopositecount)) then begin
+                  -(fixcols.count-fixcols.foppositecount)) then begin
      int1:= offset.x+x;
     end
     else begin
@@ -8183,7 +8183,7 @@ begin
    end;
    pok_datarowsize,pok_fixrowsize: begin
     if (kind = pok_fixrowsize) and (cell.row <
-                 -(fixrows.count-fixrows.fopositecount)) then begin
+                 -(fixrows.count-fixrows.foppositecount)) then begin
      int1:= offset.y+y;
     end
     else begin

@@ -547,7 +547,7 @@ begin
         parentwidget:= fgrid;
        end
        else begin
-        if int2 >= fgrid.fixrows.opositecount then begin
+        if int2 >= fgrid.fixrows.oppositecount then begin
          parentwidget:= tcustomwidgetgrid(fgrid).fcontainer1;
         end
         else begin
