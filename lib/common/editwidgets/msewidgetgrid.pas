@@ -1390,7 +1390,7 @@ var
 begin
  inherited;
  if not (gs_layoutupdating in fgrid.fstate) and 
-     (fgrid.componentstate * [csdesigning,csloading] = 
+     (fgrid.componentstate * [csdesigning,csloading,csdestroying] = 
       [csdesigning]) and (sender <> nil) and 
          (twidget1(sender).fparentwidget = self) then begin
   with fgrid do begin
