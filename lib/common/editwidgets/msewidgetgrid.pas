@@ -569,7 +569,7 @@ begin
      if ffixrowwidgets[int2] <> nil then begin
       with ffixrowwidgets[int2] do begin
        parentwidget:= fgrid;
-       rect1:= fgrid.cellrect(makegridcoord(int1,int2-int3),cil_paint);
+       rect1:= fgrid.cellrect(makegridcoord(int1,int2-int3),cil_noline);
        rect1.pos:= translatewidgetpoint(addpoint(rect1.pos,fgrid.paintpos),
                               fgrid,parentwidget);
        widgetrect:= rect1;
@@ -1390,7 +1390,7 @@ var
 begin
  inherited;
  if not (gs_layoutupdating in fgrid.fstate) and 
-     (fgrid.componentstate * [csdesigning,csloading] = 
+     (fgrid.componentstate * [csdesigning,csloading,csdestroying] = 
       [csdesigning]) and (sender <> nil) and 
          (twidget1(sender).fparentwidget = self) then begin
   with fgrid do begin
