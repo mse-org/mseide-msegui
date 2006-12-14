@@ -157,7 +157,7 @@ type
    function getitems(const index: integer): tindexfield;
   public
    constructor create(const aowner: tlocalindex); reintroduce;
-   property items[const index: integer]: tindexfield read getitems;
+   property items[const index: integer]: tindexfield read getitems; default;
  end;
 
  intrecordpoaty = array[0..0] of pintrecordty;
@@ -2240,10 +2240,12 @@ begin
   if int2 > 0 then begin
    for int1:= 1 to high(findexes) do begin
     with findexes[int1] do begin
-     allocuninitedarray(int2,sizeof(pointer),ind);
-     if fbrecordcount > 0 then begin
-      move(findexes[0].ind[0],ind[0],fbrecordcount*sizeof(pointer));
-      findexlocal.items[int1-1].sort(ind);
+     if ind = nil then begin
+      allocuninitedarray(int2,sizeof(pointer),ind);
+      if fbrecordcount > 0 then begin
+       move(findexes[0].ind[0],ind[0],fbrecordcount*sizeof(pointer));
+       findexlocal.items[int1-1].sort(ind);
+      end;
      end;
     end;
    end;
@@ -2481,6 +2483,9 @@ end;
 
 procedure tmsebufdataset.dataevent(event: tdataevent; info: ptrint);
 begin
+ if (event = deupdatestate) and (state = dsbrowse) then begin
+  updatecursorpos; //update fcurrentbuf after open
+ end;
  inherited;
  case event of
   deupdaterecord: begin
@@ -2552,7 +2557,28 @@ begin
 end;
 
 procedure tlocalindex.change;
+var
+ int1: integer;
 begin
+ with tmsebufdataset(fowner) do begin
+  if fopen then begin
+   self.bindfields;
+   int1:= findexlocal.indexof(self) + 1;
+   with findexes[int1] do begin
+    if ind <> nil then begin
+     if factindex = int1 then begin
+      checkbrowsemode;
+     end;
+     ind:= nil;
+     exclude(fbstate,bs_indexvalid);
+     if factindex = int1 then begin
+      internalsetrecno(findrec(fcurrentbuf));
+      resync([]);
+     end;
+    end;
+   end;
+  end;
+ end;
 end;
 
 procedure tlocalindex.setoptions(const avalue: localindexoptionsty);
