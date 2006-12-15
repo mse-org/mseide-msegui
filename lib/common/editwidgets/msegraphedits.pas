@@ -506,12 +506,17 @@ type
    fonexecute: notifyeventty;
    fvaluefaces: tvaluefacearrayprop;
    fcaption: captionty;
+   fimageoffset: integer;
+   fimagenums: tintegerarrayprop;
+   fimagenr: integer;
    procedure setcolorglyph(const avalue: colorty);
    procedure setvaluefaces(const avalue: tvaluefacearrayprop);
    procedure setcaption(const avalue: captionty);
    procedure setcaptionpos(const avalue: captionposty);
    procedure setimagelist(const avalue: timagelist);
    procedure setimagenr(const avalue: integer);
+   procedure setimageoffset(const avalue: integer);
+   procedure setimagenums(const avalue: tintegerarrayprop);
   protected
    finfo: shapeinfoty;
    procedure setnullvalue;
@@ -527,6 +532,7 @@ type
    procedure internalcreateframe; override;
    procedure setgridintf(const intf: iwidgetgrid); override;
    function checkfocusshortcut(var info: keyeventinfoty): boolean; override;
+   function actualimagenr(const avalue: integer): integer;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -539,8 +545,11 @@ type
    property captionpos: captionposty read finfo.captionpos write setcaptionpos
                               default cp_center;
    property imagelist: timagelist read finfo.imagelist write setimagelist;
-   property imagenr: integer read finfo.imagenr 
+   property imagenr: integer read fimagenr 
                                          write setimagenr default -1;
+   property imageoffset: integer read fimageoffset write setimageoffset default 0;
+   property imagenums: tintegerarrayprop read fimagenums write setimagenums;
+
    property options;
    property onexecute: notifyeventty read fonexecute write fonexecute;
    property onsetvalue;
@@ -559,6 +568,8 @@ type
    property captionpos;
    property imagelist;
    property imagenr;
+   property imageoffset;
+   property imagenums;
    property options;
    property onexecute;
    property onsetvalue;
@@ -576,6 +587,7 @@ type
    constructor create(aowner: tcomponent); override;
   published
    property glyph: stockglyphty read fglyph write setglyph default stg_none;
+   property imagenums;
    property optionswidget;
    property valuefaces;
    property font;
@@ -1888,7 +1900,8 @@ constructor tcustomdatabutton.create(aowner: tcomponent);
 begin
  foptions:= defaultbuttonoptions;
  inherited;
- finfo.imagenr:= -1;
+ fimagenums:= tintegerarrayprop.create;
+ fimagenr:= -1;
  fvalue:= -1;
  fvaluedefault:= -1;
  fmin:= -1;
@@ -1906,6 +1919,7 @@ end;
 destructor tcustomdatabutton.destroy;
 begin
  fvaluefaces.free;
+ fimagenums.free;
  inherited;
 end;
 
@@ -1981,6 +1995,17 @@ begin
  end;
 end;
 
+function tcustomdatabutton.actualimagenr(const avalue: integer): integer;
+begin
+ if (avalue >= 0) and (avalue < fimagenums.count) then begin
+  result:= fimagenums[avalue];
+ end
+ else begin
+  result:= fimagenr;
+ end;
+ inc(result,fimageoffset);
+end;
+
 procedure tcustomdatabutton.paintglyph(const canvas: tcanvas; const avalue;
                const arect: rectty);
                
@@ -2008,12 +2033,14 @@ begin
   if pcellinfoty(canvas.drawinfopo)^.ismousecell then begin
    include(finfo.state,ss_mouse);
   end;
+  finfo.imagenr:= actualimagenr(integer(avalue));
   drawbutton(canvas,finfo);
   finfo.state:= statebefore;
   finfo.dim:= dimbefore;
  end
  else begin
   finfo.face:= actualface(fvalue);
+  finfo.imagenr:= actualimagenr(fvalue);
   drawbutton(canvas,finfo);
  end;
 end;
@@ -2067,8 +2094,8 @@ end;
 
 procedure tcustomdatabutton.setimagenr(const avalue: integer);
 begin
- if avalue <> finfo.imagenr then begin
-  finfo.imagenr:= avalue;
+ if avalue <> fimagenr then begin
+  fimagenr:= avalue;
   formatchanged;
  end;
 end;
@@ -2096,6 +2123,19 @@ begin
 // if window.candefocus and isenabled then begin
  doexecute;
 // end;
+end;
+
+procedure tcustomdatabutton.setimageoffset(const avalue: integer);
+begin
+ if fimageoffset <> avalue then begin
+  fimageoffset := aValue;
+  formatchanged;
+ end;
+end;
+
+procedure tcustomdatabutton.setimagenums(const avalue: tintegerarrayprop);
+begin
+ fimagenums.assign(avalue);
 end;
 
 { tstockglyphdatabutton }

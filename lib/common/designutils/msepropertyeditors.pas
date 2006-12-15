@@ -220,6 +220,7 @@ type
  tenumpropertyeditor = class(tordinalpropertyeditor)
   protected
    function getdefaultstate: propertystatesty; override;
+   function gettypeinfo: ptypeinfo; virtual;
   public
    procedure setvalue(const value: msestring); override;
    function getvalue: msestring; override;
@@ -2886,29 +2887,36 @@ end;
 
 function tenumpropertyeditor.getvalue: msestring;
 begin
- result:= getenumname(ftypeinfo,getordvalue);
+ result:= getenumname(gettypeinfo,getordvalue);
 end;
 
 procedure tenumpropertyeditor.setvalue(const value: msestring);
 begin
- setordvalue(getenumvalue(ftypeinfo,value));
+ setordvalue(getenumvalue(gettypeinfo,value));
 end;
 
 function tenumpropertyeditor.getvalues: msestringarty;
 var
  typedata1: ptypedata;
+ atypeinfo: ptypeinfo;
 begin
- typedata1:= gettypedata(ftypeinfo);
+ atypeinfo:= gettypeinfo;
+ typedata1:= gettypedata(atypeinfo);
  with typedata1^ do begin
   if minvalue < 0 then begin //for boolean
    setlength(result,2);
-   result[0]:= getenumname(ftypeinfo,0);
-   result[1]:= getenumname(ftypeinfo,1);
+   result[0]:= getenumname(atypeinfo,0);
+   result[1]:= getenumname(atypeinfo,1);
   end
   else begin
-   result:= getenumnames(ftypeinfo);
+   result:= getenumnames(atypeinfo);
   end;
  end;
+end;
+
+function tenumpropertyeditor.gettypeinfo: ptypeinfo;
+begin
+ result:= ftypeinfo;
 end;
 
 { tfontnamepropertyeditor }

@@ -18,7 +18,7 @@ uses
  Classes,mseedit,msedataedits,msegraphedits,{msestringlistedit,}mselistbrowser,
  msewidgetgrid,msetextedit,msedesignintf,regeditwidgets_bmp,msepropertyeditors,
  msedropdownlist,mseterminal,msedrawtext,msedatanodes,msedialog,msestrings,
- regwidgets;
+ regwidgets,msearrayprops,typinfo,msestockobjects;
 
 type
  tdropdowncolpropertyeditor = class(tarraypropertyeditor)
@@ -40,7 +40,18 @@ type
   protected
    function geteditorclass: propertyeditorclassty; override;
  end;
+
+ tstockglypheditor = class(tenumpropertyeditor)
+  protected
+   function gettypeinfo: ptypeinfo; override;
+ end;
  
+ tstockglypharraypropertyeditor = class(tintegerarraypropertyeditor)
+  protected
+   function geteditorclass: propertyeditorclassty; override;
+ end;
+
+  
 procedure Register;
 begin
  registercomponents('Edit',[tedit,tslider,tprogressbar,
@@ -59,6 +70,8 @@ begin
             toptionalpersistentarraypropertyeditor);
  registerpropertyeditor(tcustomitemlist.classinfo,nil,'',titemlistpropertyeditor);
  registerpropertyeditor(typeinfo(twidgetcols),nil,'',twidgetcolspropertyeditor);
+ registerpropertyeditor(typeinfo(tintegerarrayprop),tstockglyphdatabutton,'',
+              tstockglypharraypropertyeditor);
 end;
 
 { tdropdowncolpropertyeditor }
@@ -96,6 +109,20 @@ end;
 function twidgetcolspropertyeditor.geteditorclass: propertyeditorclassty;
 begin
  result:= twidgetcolelementeditor;
+end;
+
+{ tstockglypharraypropertyeditor }
+
+function tstockglypharraypropertyeditor.geteditorclass: propertyeditorclassty;
+begin
+ result:= tstockglypheditor;
+end;
+
+{ tstockglypheditor }
+
+function tstockglypheditor.gettypeinfo: ptypeinfo;
+begin
+ result:= typeinfo(stockglyphty);
 end;
 
 initialization
