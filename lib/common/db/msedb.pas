@@ -1015,7 +1015,8 @@ begin
    ftstring: begin
     if not (field is tmsestringfield) or 
          (tmsestringfield(field).fdsintf = nil) then begin
-     result:= tmsestringfield(field).assql;
+     result:= encodesqlstring(field.asstring);
+//     result:= tmsestringfield(field).assql;
     end
     else begin
      with tmsestringfield(field) do begin
