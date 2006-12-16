@@ -1,4 +1,5 @@
 MSEide+MSEgui version history
+Version 1.0rc2
 2006-11-22 tcustomlookupbuffer.options olbdb_invalidateonupdatedata ->
  olbdb_invalidateifmodified.
 2006-10-23 Function vartorealty.
