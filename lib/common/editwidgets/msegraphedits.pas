@@ -159,8 +159,8 @@ type
    function createdatalist(const sender: twidgetcol): tdatalist; override;
    function getdatatyp: datatypty; override;
    procedure dopaint(const canvas: tcanvas); override;
-   procedure initnewcomponent; override;
   public
+   procedure initnewcomponent; override;
    property value: pointer read fvalue write setvalue default nil;
    property gridvalue[const index: integer]: pointer
         read getgridvalue write setgridvalue; default;
