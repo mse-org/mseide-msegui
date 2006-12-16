@@ -150,7 +150,7 @@ uses
  mseedit,msedrawtext,msebits,msedatalist,msestream;
 
 const
- pascaldelims = msestring(' :;+-*/(),=<>' + c_linefeed + c_return + c_tab);
+ pascaldelims = msestring(' :;+-*/(){},=<>' + c_linefeed + c_return + c_tab);
  bmbitshift = 4;
  bmbitmask = integer($3ff0);
 
@@ -1020,6 +1020,12 @@ begin
      pos1.filename:= designer.designfiles.find(edit.filename);
      if findlinkdest(edit,pos1) then begin
       sourcefo.naviglist.showsource(pos1,true);
+     end;
+    end
+    else begin
+     if edit.isdblclicked(info.mouseeventinfopo^) then begin
+      edit.selectword(info.pos,pascaldelims+'.');
+      include(info.mouseeventinfopo^.eventstate,es_processed);
      end;
     end;
    end;

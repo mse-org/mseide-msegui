@@ -1549,7 +1549,8 @@ function iscellkeypress(const info: celleventinfoty;
              const shiftstatemustinclude: shiftstatesty = [];
              const shiftstatemustnotinclude: shiftstatesty = []): boolean;
 
-function iscellclick(const info: celleventinfoty; restrictions: cellclickrestrictionsty = []): boolean;
+function iscellclick(const info: celleventinfoty;
+                        restrictions: cellclickrestrictionsty = []): boolean;
 function isrowenter(const info: celleventinfoty): boolean;
 function isrowexit(const info: celleventinfoty): boolean;
 function cellkeypress(const info: celleventinfoty): keyty;

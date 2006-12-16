@@ -50,6 +50,7 @@ type
    procedure removelink;
    procedure showlink(const apos: gridcoordty;
                        const delimchars: msestring {= defaultmsedelimchars});
+   procedure selectword(const apos: gridcoordty; const delimchars: msestring);
   published
    property syntaxpainter: tsyntaxpainter read fsyntaxpainter write setsyntaxpainter;
    property defaultsyntax: boolean read fdefaultsyntax 
@@ -339,6 +340,18 @@ begin
  end;
 end;
 
+procedure tsyntaxedit.selectword(const apos: gridcoordty;
+                                            const delimchars: msestring);
+var
+ str1: msestring;
+ pos1: gridcoordty;
+begin
+ pos1:= wordatpos(apos,str1,delimchars);
+ if str1 <> '' then begin
+  setselection(pos1,makegridcoord(pos1.col+length(str1),pos1.row),true);
+ end;
+end;
+ 
 procedure tsyntaxedit.insertlinebreak;
 var
  str1: msestring;
