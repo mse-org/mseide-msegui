@@ -1315,7 +1315,8 @@ procedure ttogglegraphdataedit.mouseevent(var info: mouseeventinfoty);
 begin
  if not (oe_readonly in getoptionsedit) and not (csdesigning in componentstate) and
          iswidgetclick(info,fcheckcaption) and (bo_executeonclick in foptions) then begin
-  include(info.eventstate,es_processed);
+//  include(info.eventstate,es_processed); 
+         //twidgetgrid needs childmouseevent
   togglevalue;
  end;
  inherited;
