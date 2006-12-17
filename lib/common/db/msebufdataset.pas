@@ -195,7 +195,7 @@ type
   published
    property fields: tindexfields read ffields write setfields;
    property options: localindexoptionsty read foptions write setoptions;
-   property active: boolean read getactive write setactive;
+   property active: boolean read getactive write setactive default false;
  end;
  
  tlocalindexes = class(townedpersistentarrayprop)
@@ -818,6 +818,7 @@ begin
  femptybuffer:= intallocrecord;
  ffilterbuffer:= intallocrecord;
  fnewvaluebuffer:= pdsrecordty(allocrecordbuffer);
+ updatestate;
  fallpacketsfetched:= false;
  fopen:= true;
 end;
@@ -1588,7 +1589,7 @@ var
  po3: pointer;
  int1,int2,int3: integer;
  bo1: boolean;
- ar1: integerarty;
+ ar1,ar2,ar3: integerarty;
 begin
  checkindex; //needed for first append
  with pdsrecordty(activebuffer)^ do begin
@@ -1641,8 +1642,19 @@ begin
   end;
   if (state = dsedit) and (bs_indexvalid in fbstate) then begin
    setlength(ar1,findexlocal.count);
+   setlength(ar2,length(ar1));
+   setlength(ar3,length(ar1));
    for int1:= high(ar1) downto 0 do begin
-    ar1[int1]:= findexlocal[int1].findboundary(fcurrentbuf);
+    ar2[int1]:= findexlocal[int1].compare(fcurrentbuf,@header);
+    if ar2[int1] <> 0 then begin
+     if int1 = factindex - 1 then begin
+      ar1[int1]:= frecno + 1; //for fast find of bufpo
+     end
+     else begin
+      ar1[int1]:= findexlocal[int1].findboundary(fcurrentbuf); //old boundary
+     end;
+     ar3[int1]:= findexlocal[int1].findboundary(@header); //new boundary
+    end;
    end;
   end;   
   if bo1 then begin
@@ -1665,8 +1677,9 @@ begin
   else begin
    if (state = dsedit) and (bs_indexvalid in fbstate) then begin
     for int1:= high(ar1) downto 0 do begin
-     int2:= findexlocal[int1].findboundary(fcurrentbuf);
-     if int2 <> ar1[int1] then begin
+     if ar2[int1] <> 0 then begin // position changed
+//      int2:= findexlocal[int1].findboundary(fcurrentbuf);
+      int2:= ar3[int1]; //new boundary
       with findexes[int1+1] do begin
        for int3:= ar1[int1] - 1 downto 0 do begin
         if ind[int3] = fcurrentbuf then begin //update indexes
@@ -2675,35 +2688,27 @@ var
  int1: integer;
  lower,upper,pivot: integer;
 begin
- result:= -1;
+ result:= 0;
  with tmsebufdataset(fowner),findexes[findexlocal.indexof(self) + 1] do begin
   if fbrecordcount > 0 then begin
    int1:= 0;
    checkindex;
    lower:= 0;
    upper:= fbrecordcount - 1;
-   while true do begin
+   while lower <= upper do begin
     pivot:= (upper + lower) div 2;
     int1:= compare(arecord,ind[pivot]);
-    if upper = lower then begin
-     result:= lower;
-     break;
-    end;
     if int1 >= 0 then begin //pivot <= rev
-     if lower = pivot then begin
-      inc(lower)
-     end
-     else begin
-      lower:= pivot;
-     end;
+     lower:= pivot + 1;
     end
     else begin
      upper:= pivot;
+     if upper = lower then begin
+      break;
+     end;
     end;
    end;
-  end;
-  if int1 >= 0 then begin
-   inc(result);
+   result:= lower;
   end;
  end;
 end;
@@ -2740,13 +2745,16 @@ begin
 end;
 
 procedure tlocalindex.setactive(const avalue: boolean);
+var
+ int1: integer;
 begin
  with tmsebufdataset(fowner) do begin
+  int1:= findexlocal.indexof(self) + 1;
   if avalue then begin
-   actindex:= findexlocal.indexof(self) + 1;
+   actindex:= int1;
   end
   else begin
-   if active then begin
+   if actindex = int1 then begin
     actindex:= 0;
    end;
   end;
