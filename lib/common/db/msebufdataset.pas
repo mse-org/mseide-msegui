@@ -187,7 +187,7 @@ type
    procedure bindfields;
    function findboundary(const arecord: pintrecordty): integer;
                           //returns index of next bigger
-   function findrec(const arecord: pintrecordty): integer;
+   function findrecord(const arecord: pintrecordty): integer;
                          //returns index, -1 if not found
   public
    constructor create(aowner: tobject); override;
@@ -373,8 +373,9 @@ type
    procedure applyrecupdate(updatekind : tupdatekind); virtual;
    procedure setonupdateerror(const avalue: tresolvererrorevent);
    property actindex: integer read factindex write setactindex;
-   function findrec(const arecord: pintrecordty): integer;
+   function findrecord(arecordpo: pintrecordty): integer;
                          //returns index, -1 if not found
+
  {abstracts, must be overidden by descendents}
    function fetch : boolean; virtual; abstract;
    function getblobdatasize: integer; virtual; abstract;
@@ -1008,13 +1009,45 @@ begin
  result:= pdsrecordty(buffer)^.dsheader.bookmark.flag;
 end;
 
+function tmsebufdataset.findrecord(arecordpo: pintrecordty): integer;
+//-1 if not found
+var
+ int1: integer;
+ po1: ppointeraty;
+begin
+ if factindex = 0 then begin
+  result:= -1;
+  po1:= pointer(findexes[0].ind);
+  for int1:= fbrecordcount - 1 downto 0 do begin
+   if po1^[int1] = arecordpo then begin
+    result:= int1;
+    break;
+   end;
+  end;
+ end
+ else begin
+  result:= findexlocal[factindex-1].findrecord(arecordpo);
+ end;
+end;
+
 procedure tmsebufdataset.internalgotobookmark(abookmark: pointer);
+var
+ int1: integer;
 begin
  with pbufbookmarkty(abookmark)^.data do begin
   if (recno >= fbrecordcount) or (recno < 0) then begin
-   databaseerror('Invalid bookmark: '+inttostr(recno)+'+');
+   databaseerror('Invalid bookmark recno: '+inttostr(recno)+'.');
   end;
-  internalsetrecno(recno);
+  if (factindexpo^.ind[recno] <> recordpo) and (recordpo <> nil) then begin
+   int1:= findrecord(recordpo);
+   if int1 < 0 then begin
+    databaseerror('Invalid bookmarkdata.');
+   end;
+  end
+  else begin
+   int1:= recno;
+  end;
+  internalsetrecno(int1);
  end;
 end;
 
@@ -2130,7 +2163,7 @@ begin
  if bs_indexvalid in fbstate then begin
   for int1:= 1 to high(findexes) do begin
    if int1 <> factindex then begin
-    int2:= findexlocal[int1-1].findrec(arecord);
+    int2:= findexlocal[int1-1].findrecord(arecord);
     with findexes[int1] do begin
      move(ind[int2+1],ind[int2],(fbrecordcount-int2-1)*sizeof(pointer));
     end;
@@ -2316,33 +2349,13 @@ begin
    checkbrowsemode;
    factindex:= avalue;
    factindexpo:= @findexes[avalue];
-   internalsetrecno(findrec(fcurrentbuf));
+   internalsetrecno(findrecord(fcurrentbuf));
    resync([]);
   end
   else begin
    factindex:= avalue;
    factindexpo:= @findexes[avalue];
   end;
- end;
-end;
-
-function tmsebufdataset.findrec(const arecord: pintrecordty): integer;
-var
- int1: integer;
-begin
- if factindex = 0 then begin
-  result:= -1;
-  with findexes[0] do begin
-   for int1:= fbrecordcount - 1 downto 0 do begin
-    if ind[int1] = arecord then begin
-     result:= int1;
-     break;
-    end;
-   end;
-  end;  
- end
- else begin
-  result:= findexlocal[factindex-1].findrec(arecord);
  end;
 end;
 
@@ -2585,7 +2598,7 @@ begin
      ind:= nil;
      exclude(fbstate,bs_indexvalid);
      if factindex = int1 then begin
-      internalsetrecno(findrec(fcurrentbuf));
+      internalsetrecno(findrecord(fcurrentbuf));
       resync([]);
      end;
     end;
@@ -2713,18 +2726,20 @@ begin
  end;
 end;
 
-function tlocalindex.findrec(const arecord: pintrecordty): integer;
+function tlocalindex.findrecord(const arecord: pintrecordty): integer;
 var
  int1: integer;
+ po1: ppointeraty;
 begin
  result:= -1;
  int1:= findboundary(arecord) - 1;
- with tmsebufdataset(fowner),findexes[findexlocal.indexof(self) + 1] do begin
-  for int1:= int1 downto 0 do begin
-   if ind[int1] = arecord then begin
-    result:= int1;
-    break;
-   end;
+ with tmsebufdataset(fowner) do begin
+  po1:= pointer(findexes[findexlocal.indexof(self) + 1].ind);
+ end;
+ for int1:= int1 downto 0 do begin
+  if po1^[int1] = arecord then begin 
+   result:= int1;
+   break;
   end;
  end;
 end;
