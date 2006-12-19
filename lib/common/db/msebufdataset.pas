@@ -1036,7 +1036,7 @@ var
 begin
  with pbufbookmarkty(abookmark)^.data do begin
   if (recno >= fbrecordcount) or (recno < 0) then begin
-   databaseerror('Invalid bookmark recno: '+inttostr(recno)+'.');
+   databaseerror('Invalid bookmark recno: '+inttostr(recno)+'.'); 
   end;
   if (factindexpo^.ind[recno] <> recordpo) and (recordpo <> nil) then begin
    int1:= findrecord(recordpo);
