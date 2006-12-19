@@ -37,10 +37,10 @@ type
                 co_cancopy,co_canpaste,co_mousescrollrow,co_rowdatachange
                 );
  coloptionsty = set of coloptionty;
- fixcoloptionty = (fco_mousefocus,fco_mouseselect,
+ fixcoloptionty = (fco_invisible,fco_mousefocus,fco_mouseselect,
                      fco_rowfont,fco_rowcolor,fco_zebracolor);
  fixcoloptionsty = set of fixcoloptionty;
- fixrowoptionty = (fro_mousefocus,fro_mouseselect);
+ fixrowoptionty = (fro_invisible,fro_mousefocus,fro_mouseselect);
  fixrowoptionsty = set of fixrowoptionty;
  
 const
@@ -424,6 +424,8 @@ type
    procedure setwidthmax(const Value: integer);
    procedure setwidthmin(const Value: integer);
    function getcellorigin: pointty;
+   function getvisible: boolean;
+   procedure setvisible(const avalue: boolean);
   protected
    fdata: tdatalist;
    fname: string;
@@ -465,6 +467,7 @@ type
    property selected[const row: integer]: boolean read getselected write setselected;
              //row < 0 -> whole col
    property cellorigin: pointty read getcellorigin;    //org = grid.paintpos
+   property visible: boolean read getvisible write setvisible;
   published
    property options default defaultdatacoloptions;
    property widthmin: integer read fwidthmin write setwidthmin default 1;
@@ -570,6 +573,8 @@ type
    function iscaptionsstored: Boolean;
    procedure captionchanged(sender: tdatalist; aindex: integer);
    procedure setoptionsfix(const avalue: fixcoloptionsty);
+   function getvisible: boolean;
+   procedure setvisible(const avalue: boolean);
   protected
    ftextinfo: drawtextinfoty;
    procedure updatelayout; override;
@@ -584,6 +589,7 @@ type
    constructor create(const agrid: tcustomgrid;
                             const aowner: tgridarrayprop); override;
    destructor destroy; override;
+   property visible: boolean read getvisible write setvisible;
   published
    property linewidth;
    property linecolor default defaultfixlinecolor;
@@ -660,6 +666,9 @@ type
    procedure setcaptions(const Value: tcolheaders);
    procedure setcaptionsfix(const Value: tcolheaders);
    procedure sethints(const avalue: tmsestringarrayprop);
+   procedure setoptionsfix(const avalue: fixrowoptionsty);
+   function getvisible: boolean;
+   procedure setvisible(const avalue: boolean);
   protected
    ftextinfo: drawtextinfoty;
    procedure cellchanged(const col: integer); virtual;
@@ -676,6 +685,7 @@ type
    destructor destroy; override;
    procedure synctofontheight;
    property rowindex: integer read getrowindex;
+   property visible: boolean read getvisible write setvisible;
   published
    property height: integer read fheight write setheight;
    property textflags: textflagsty read ftextinfo.flags write settextflags
@@ -687,7 +697,7 @@ type
    property hints: tmsestringarrayprop read fhints write sethints;
    property font;
    property linecolor default defaultfixlinecolor;
-   property options: fixrowoptionsty read foptionsfix write foptionsfix;
+   property options: fixrowoptionsty read foptionsfix write setoptionsfix;
  end;
 
  tgridarrayprop = class(tindexpersistentarrayprop)
@@ -2708,38 +2718,47 @@ var
  end;
 
 begin
- with info do begin
-  if ffont = nil then begin
-   ftextinfo.font:= fgrid.getfont;
-  end
-  else begin
-   ftextinfo.font:= ffont;
+ if not (co_invisible in foptions) or 
+                            (csdesigning in fgrid.ComponentState) then begin
+  with info do begin
+   if ffont = nil then begin
+    ftextinfo.font:= fgrid.getfont;
+   end
+   else begin
+    ftextinfo.font:= ffont;
+   end;
+   canvas.drawinfopo:= @fcellinfo;
+   if fcolor <> cl_default then begin
+    color1:= fcolor;
+   end
+   else begin
+    color1:= fgrid.actualcolor;
+   end;
+   po1:= canvas.origin;
+   linewidthbefore:= canvas.linewidth;
+   if fix then begin
+    linecolor1:= flinecolorfix;
+   end
+   else begin
+    linecolor1:= flinecolor;
+   end;
+   po2.y:= po1.y+fcellrect.y;
+   paintcols(colrange.range1);
+   paintcols(colrange.range2);
+   canvas.origin:= po1;
   end;
-  canvas.drawinfopo:= @fcellinfo;
-  if fcolor <> cl_default then begin
-   color1:= fcolor;
-  end
-  else begin
-   color1:= fgrid.actualcolor;
-  end;
-  po1:= canvas.origin;
-  linewidthbefore:= canvas.linewidth;
-  if fix then begin
-   linecolor1:= flinecolorfix;
-  end
-  else begin
-   linecolor1:= flinecolor;
-  end;
-  po2.y:= po1.y+fcellrect.y;
-  paintcols(colrange.range1);
-  paintcols(colrange.range2);
-  canvas.origin:= po1;
  end;
 end;
 
 function tfixrow.step(getscrollable: boolean = true): integer;
 begin
- result:= fheight+flinewidth;
+ if (not (co_invisible in foptions) or 
+  (csdesigning in fgrid.ComponentState)) then begin
+  result:= fheight+flinewidth;
+ end
+ else begin
+  result:= 0;
+ end;
 end;
 
 procedure tfixrow.updatelayout;
@@ -2829,6 +2848,35 @@ end;
 procedure tfixrow.sethints(const avalue: tmsestringarrayprop);
 begin
  fhints.assign(avalue);
+end;
+
+procedure tfixrow.setoptionsfix(const avalue: fixrowoptionsty);
+begin
+ foptionsfix:= avalue;
+ if (fro_invisible in avalue) xor (co_invisible in foptions) then begin
+  if fro_invisible in avalue then begin
+   foptions:= foptions + [co_invisible];
+  end
+  else begin
+   foptions:= foptions - [co_invisible];
+  end;  
+  fgrid.layoutchanged;
+ end;
+end;
+
+function tfixrow.getvisible: boolean;
+begin
+ result:= not (fro_invisible in options);
+end;
+
+procedure tfixrow.setvisible(const avalue: boolean);
+begin
+ if avalue then begin
+  options:= options - [fro_invisible];
+ end
+ else begin
+  options:= options + [fro_invisible];
+ end;
 end;
 
 { tgridarrayprop }
@@ -3585,6 +3633,21 @@ begin
  end;
 end;
 
+function tdatacol.getvisible: boolean;
+begin
+ result:= not (co_invisible in foptions);
+end;
+
+procedure tdatacol.setvisible(const avalue: boolean);
+begin
+ if avalue then begin
+  options:= options - [co_invisible];
+ end
+ else begin
+  options:= options + [co_invisible];
+ end;
+end;
+
 { tdrawcol }
 
 procedure tdrawcol.drawcell(const canvas: tcanvas);
@@ -3881,15 +3944,23 @@ begin
 end;
 
 procedure tfixcol.setoptionsfix(const avalue: fixcoloptionsty);
-
+var
+ options1: coloptionsty;
 begin
  foptionsfix:= avalue;
- inherited options:= coloptionsty(
+ options1:= coloptionsty(
                replacebits(cardinal(
                  {$ifndef FPC}byte({$endif}avalue{$ifndef FPC}){$endif})
                             shl cardinal(fixcoloptionsshift),
                      cardinal(foptions),
                      cardinal(fixcoloptionsmask)));
+ if fco_invisible in avalue then begin
+  include(options1,co_invisible);
+ end
+ else begin
+  exclude(options1,co_invisible);
+ end;
+ inherited options:= options1;
 end;
 
 procedure tfixcol.drawcell(const canvas: tcanvas);
@@ -4003,6 +4074,21 @@ begin
  if not (co_norearange in foptions) and (fnumstep = 0) and
        (fcaptions.count = list.count) then begin
   fcaptions.rearange(list);
+ end;
+end;
+
+function tfixcol.getvisible: boolean;
+begin
+ result:= not (fco_invisible in options);
+end;
+
+procedure tfixcol.setvisible(const avalue: boolean);
+begin
+ if avalue then begin
+  options:= options - [fco_invisible];
+ end
+ else begin
+  options:= options + [fco_invisible];
  end;
 end;
 
@@ -5191,19 +5277,19 @@ begin
      x:= fi.innerframe.left;
      cx:= finnerclientrect.cx;
     end;
+    y:= 0;
     if foppositecount = count then begin
-     if self.fgridframewidth = 0 then begin
-      y:= 0;
-     end
-     else begin
+     if self.fgridframewidth <> 0 then begin
       y:= fi.innerframe.top;
      end;
     end
     else begin
-     y:= ffirstsize + fi.innerframe.top;
+     if (ffirstsize > 0) or (self.fgridframewidth <> 0) then begin
+      y:= ffirstsize + fi.innerframe.top;
+     end;
     end;
     cy:= fpaintrect.cy - y;
-    if foppositecount > 0 then begin
+    if (foppositecount > 0) and (ftotsize - ffirstsize > 0) then begin
      cy:= cy - ftotsize + ffirstsize - fi.innerframe.bottom;
     end
     else begin
@@ -5232,8 +5318,8 @@ begin
      y:= fi.innerframe.top;
      cy:= finnerclientrect.cy;
     end;
+    x:= ffirstnohscroll;
     if foppositecount = count then begin
-     x:= ffirstnohscroll;
      if (x > 0) or (self.fgridframewidth <> 0) then begin
       inc(x,fi.innerframe.left);
      end;
@@ -5244,7 +5330,7 @@ begin
      end;
     end;
     cx:= fpaintrect.cx - x;
-    if (foppositecount > 0) then begin
+    if (foppositecount > 0) and (ftotsize - ffirstsize > 0) then begin
      cx:= cx - ftotsize + ffirstsize - fi.innerframe.right;
     end
     else begin
