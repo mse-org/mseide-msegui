@@ -78,7 +78,7 @@ type
    function internalfind(const avalue; var index: integerarty;
                 var data; const itemsize: integer;
                 compfunc: arraysortcomparety; const filter: lbfiltereventty;
-                out aindex: integer): boolean;   //true if exact
+                out aindex: integer): boolean;//true if exact else next bigger
   protected
    procedure setfieldcounttext(const avalue: integer); virtual;
    procedure setfieldcountinteger(const avalue: integer); virtual;
@@ -107,27 +107,27 @@ type
 
    function find(const fieldno: integer; const avalue: integer;
          out aindex: integer; const filter: lbfiltereventty = nil): boolean; overload;
-              //logical index, true if exact
+              //logical index, true if found else next bigger
    function find(const fieldno: integer; const avalue: realty;
                  out aindex: integer; const filter: lbfiltereventty = nil): boolean; overload;
-              //logical index, true if exact
+              //logical index, true if found else next bigger
    function find(const fieldno: integer; const avalue: msestring;
                  out aindex: integer;
                  const caseinsensitive: boolean;
                  const filter: lbfiltereventty = nil): boolean; overload;
-              //logical index, true if exact
+              //logical index, true if found else next bigger
 
    function findphys(const fieldno: integer; const avalue: integer;
          out aindex: integer; const filter: lbfiltereventty = nil): boolean; overload;
-              //physical index, true if found
+              //physical index, true if found else next bigger
    function findphys(const fieldno: integer; const avalue: realty;
                  out aindex: integer; const filter: lbfiltereventty = nil): boolean; overload;
-              //physical index, true if found
+              //physical index, true if found else next bigger
    function findphys(const fieldno: integer; const avalue: msestring;
                  out aindex: integer;
                  const caseinsensitive: boolean;
                  const filter: lbfiltereventty = nil): boolean; overload;
-              //physical index, true if found
+              //physical index, true if found else next bigger
 
    function integervaluephys(const fieldno,aindex: integer): integer;
               //physical index
@@ -362,7 +362,7 @@ end;
 function tcustomlookupbuffer.internalfind(const avalue; var index: integerarty;
                 var data; const itemsize: integer;
                 compfunc: arraysortcomparety; const filter: lbfiltereventty;
-                out aindex: integer): boolean;   //true if exact
+                out aindex: integer): boolean; //true if found else next bigger
 var
  int1: integer;
  bo1: boolean;
@@ -504,7 +504,7 @@ end;
 
 function tcustomlookupbuffer.findphys(const fieldno: integer; const avalue: integer;
          out aindex: integer; const filter: lbfiltereventty = nil): boolean; overload;
-              //physical index, true if found
+              //physical index, true if found else next bigger
 var
  int1: integer;
 begin
@@ -519,7 +519,7 @@ end;
 
 function tcustomlookupbuffer.findphys(const fieldno: integer; const avalue: realty;
                  out aindex: integer; const filter: lbfiltereventty = nil): boolean; overload;
-              //physical index, true if found
+              //physical index, true if found else next bigger
 var
  int1: integer;
 begin
@@ -536,7 +536,7 @@ function tcustomlookupbuffer.findphys(const fieldno: integer; const avalue: mses
                  out aindex: integer;
                  const caseinsensitive: boolean;
                  const filter: lbfiltereventty = nil): boolean; overload;
-              //physical index, true if found
+              //physical index, true if found else next bigger
 var
  int1: integer;
 begin

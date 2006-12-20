@@ -26,12 +26,13 @@ uses
   
 const
  defaultpacketrecords = 10;
- integerindexfields = [ftsmallint,ftinteger,ftword,ftlargeint,ftboolean];
+ integerindexfields = [ftsmallint,ftinteger,ftword,ftboolean];
+ largeintindexfields = [ftlargeint];
  floatindexfields = [ftfloat,ftdatetime,ftdate,fttime];
  currencyindexfields = [ftcurrency,ftbcd];
  stringindexfields = [ftstring,ftfixedchar];
- indexfieldtypes =  integerindexfields+floatindexfields+currencyindexfields+
-                   stringindexfields;
+ indexfieldtypes =  integerindexfields+largeintindexfields+floatindexfields+
+                    currencyindexfields+stringindexfields;
  dsbuffieldkinds = [fkcalculated,fklookup];
  bufferfieldkinds = [fkdata];
  
@@ -114,8 +115,9 @@ type
 
  tmsebufdataset = class;
  
-  TResolverErrorEvent = procedure(Sender: TObject; DataSet: tmsebufdataset; E: EUpdateError;
-    UpdateKind: TUpdateKind; var Response: TResolverResponse) of object;
+  TResolverErrorEvent = procedure(Sender: TObject; DataSet: tmsebufdataset;
+                          E: EUpdateError; UpdateKind: TUpdateKind;
+                           var Response: TResolverResponse) of object;
   
  tblobbuffer = class(tmemorystream)
   private
@@ -164,6 +166,7 @@ type
  pintrecordpoaty = ^intrecordpoaty;
  indexfieldinfoty = record
   comparefunc: arraysortcomparety;
+  vtype: integer;
   recoffset: integer;
   fieldindex: integer;
   desc: boolean;
@@ -192,6 +195,14 @@ type
   public
    constructor create(aowner: tobject); override;
    destructor destroy; override;
+   function find(const avalues: array of const; const aisnull: array of boolean;
+                                 out abookmark: string): boolean; overload;
+                //true if found else next bigger,
+                //abookmark = '' if no bigger found
+                //string values must be msestring
+   function find(const avalues: array of const;
+                       const aisnull: array of boolean): boolean; overload;
+                //sets dataset cursor if found
   published
    property fields: tindexfields read ffields write setfields;
    property options: localindexoptionsty read foptions write setoptions;
@@ -298,7 +309,7 @@ type
                     //returns index
    procedure internalsetrecno(const avalue: integer);
    procedure setactindex(const avalue: integer);
-   procedure checkindex;
+   procedure checkindex(const force: boolean);
    
    function getfieldbuffer(const afield: tfield;
              out buffer: pointer; out datasize: integer): boolean; overload; 
@@ -419,7 +430,7 @@ type
    
 implementation
 uses
- dbconst,msedatalist,sysutils,mseformatstr;
+ dbconst,msedatalist,sysutils,mseformatstr,msereal;
 type
  tmsestringfield1 = class(tmsestringfield); 
   
@@ -444,6 +455,21 @@ type
 function compinteger(const l,r): integer;
 begin
  result:= integer(l) - integer(r);
+end;
+
+function compint64(const l,r): integer;
+begin
+ if int64(l) > int64(r) then begin
+  result:= 1;
+ end
+ else begin
+  if int64(l) = int64(r) then begin
+   result:= 0;
+  end
+  else begin
+   result:= -1;
+  end;
+ end;
 end;
 
 function compfloat(const l,r): integer;
@@ -483,21 +509,24 @@ begin
 end;
 
 type
- fieldcomparekindty = (fct_integer,fct_float,fct_currency,fct_text);
+ fieldcomparekindty = (fct_integer,fct_largeint,fct_float,fct_currency,fct_text);
  fieldcompareinfoty = record
   datatypes: set of tfieldtype;
+  cvtype: integer;
   compfunc: arraysortcomparety;
   compfunci: arraysortcomparety;
  end;
 const
  comparefuncs: array[fieldcomparekindty] of fieldcompareinfoty = 
-  ((datatypes: integerindexfields; compfunc: @compinteger;
+  ((datatypes: integerindexfields; cvtype: vtinteger; compfunc: @compinteger;
                                    compfunci: @compinteger),
-   (datatypes: floatindexfields; compfunc: @compfloat;
+   (datatypes: largeintindexfields; cvtype: vtint64; compfunc: @compint64;
+                                   compfunci: @compint64),
+   (datatypes: floatindexfields; cvtype: vtextended; compfunc: @compfloat;
                                  compfunci: @compfloat),
-   (datatypes: currencyindexfields; compfunc: @compcurrency;
+   (datatypes: currencyindexfields; cvtype: vtcurrency; compfunc: @compcurrency;
                                     compfunci: @compcurrency),
-   (datatypes: stringindexfields; compfunc: @compstring;
+   (datatypes: stringindexfields; cvtype: vtwidestring; compfunc: @compstring;
                                   compfunci: @compstringi));
 const
  ormask:  array[0..7] of byte = (%00000001,%00000010,%00000100,%00001000,
@@ -1624,7 +1653,7 @@ var
  bo1: boolean;
  ar1,ar2,ar3: integerarty;
 begin
- checkindex; //needed for first append
+ checkindex(false); //needed for first append
  with pdsrecordty(activebuffer)^ do begin
   bo1:= false;
   with header do begin
@@ -2277,11 +2306,11 @@ begin
  end;
 end;
 
-procedure tmsebufdataset.checkindex;
+procedure tmsebufdataset.checkindex(const force: boolean);
 var
  int1,int2,int3: integer;
 begin
- if (factindex <> 0) and not (bs_indexvalid in fbstate) then begin
+ if (force or (factindex <> 0)) and not (bs_indexvalid in fbstate) then begin
   int2:= length(findexes[0].ind);
   if int2 > 0 then begin
    for int1:= 1 to high(findexes) do begin
@@ -2307,7 +2336,7 @@ begin
   fcurrentbuf:= nil;
  end
  else begin
-  checkindex;
+  checkindex(false);
   fcurrentbuf:= factindexpo^.ind[avalue];
  end;
 end;
@@ -2705,7 +2734,7 @@ begin
  with tmsebufdataset(fowner),findexes[findexlocal.indexof(self) + 1] do begin
   if fbrecordcount > 0 then begin
    int1:= 0;
-   checkindex;
+   checkindex(true);
    lower:= 0;
    upper:= fbrecordcount - 1;
    while lower <= upper do begin
@@ -2800,6 +2829,7 @@ begin
      for kind1:= low(fieldcomparekindty) to high(fieldcomparekindty) do begin
       with comparefuncs[kind1] do begin
        if datatype in datatypes then begin
+        vtype:= cvtype;
         if ifo_caseinsensitive in options then begin
          comparefunc:= compfunci;
         end
@@ -2821,6 +2851,98 @@ begin
     end;
    end;
   end;
+ end;
+end;
+
+procedure paramerror;
+begin
+ databaseerror('Invalid find parameters.');
+end;
+
+function tlocalindex.find(const avalues: array of const;
+              const aisnull: array of boolean; out abookmark: string): boolean;
+var
+ int1: integer; 
+ v: tvarrec;
+ po1: pintrecordty;
+ po2: pointer;
+ bo1: boolean;
+ bm1: bookmarkdataty;
+begin
+ tmsebufdataset(fowner).checkbrowsemode;
+ if high(avalues) <> high(findexfieldinfos) then begin
+  paramerror;
+ end;
+ for int1:= high(avalues) downto 0 do begin
+  if avalues[int1].vtype <> findexfieldinfos[int1].vtype then begin
+   paramerror;
+  end;
+ end;
+ po1:= tmsebufdataset(fowner).intallocrecord;
+ for int1:= high(avalues) downto 0 do begin
+  with findexfieldinfos[int1],avalues[int1] do begin
+   po2:= pointer(po1) + recoffset;
+   bo1:= false;
+   case vtype of
+    vtinteger: begin
+     pinteger(po2)^:= vinteger;
+    end;
+    vtwidestring: begin
+     ppointer(po2)^:= vwidestring;
+     bo1:= vwidestring = nil;
+    end;
+    vtextended: begin
+     pdouble(po2)^:= vextended^;
+     bo1:= isemptyreal(pdouble(po2)^);
+    end;
+    vtcurrency: begin
+     pcurrency(po2)^:= vcurrency^;
+    end;
+    vtboolean: begin
+     pwordbool(po2)^:= vboolean;
+    end;
+    vtint64: begin
+     pint64(po2)^:= vint64^;
+    end;
+   end;
+   if int1 <= high(aisnull) then begin
+    bo1:= aisnull[int1];
+   end;
+   if not bo1 then begin
+    unsetfieldisnull(@po1^.header.fielddata.nullmask,fieldindex);
+   end; 
+  end;
+ end;
+ int1:= findboundary(po1);
+ result:= false;
+ abookmark:= '';
+ with tmsebufdataset(fowner) do begin
+  if int1 > 0 then begin
+   with findexes[findexlocal.indexof(self) + 1] do begin
+    if compare(po1,ind[int1-1]) = 0 then begin
+     result:= true;
+     dec(int1);
+    end;
+    if int1 < fbrecordcount then begin
+     bm1.recno:= int1;
+     bm1.recordpo:= ind[int1];
+     setlength(abookmark,sizeof(bm1));
+     move(bm1,abookmark[1],sizeof(bm1));
+    end;
+   end;
+  end;
+ end;
+ freemem(po1);
+end;
+
+function tlocalindex.find(const avalues: array of const;
+                       const aisnull: array of boolean): boolean;
+                //sets dataset cursor if found
+var
+ str1: string;
+begin
+ if find(avalues,aisnull,str1) then begin
+  tmsebufdataset(fowner).bookmark:= str1;
  end;
 end;
 
