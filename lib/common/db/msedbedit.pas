@@ -855,6 +855,7 @@ type
    ffontdatalink: tfielddatalink;
    frowexited: integer;
    feditingbefore: boolean;
+   finsertingbefore: boolean;
    procedure checkscroll;
    procedure checkscrollbar;
    function getfirstrecord: integer;
@@ -4763,6 +4764,11 @@ begin
   inherited;
  // updaterowcount;
   gridinvalidate;
+  bo1:= (dataset <> nil) and (dataset.state = dsinsert);
+  if bo1 and not finsertingbefore and (fgrid.datacols.newrowcol >= 0) then begin
+   fgrid.col:= fgrid.datacols.newrowcol;
+  end;
+  finsertingbefore:= bo1;
  end;
 end;
 
