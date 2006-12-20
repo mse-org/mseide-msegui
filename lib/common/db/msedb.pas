@@ -2727,19 +2727,27 @@ var
  int2: integer;
  str1,str2,bm: string;
  mstr1,mstr2: msestring;
- bo1: boolean;
+ caseinsensitive: boolean;
+ ismsestringfield: boolean;
  
- function checkcaseinsensitive: boolean;
+ function checkmsestring: boolean;
  var
   int1: integer;
  begin
-  if dso_utf8 in foptions then begin
-   mstr2:= utf8tostring(field.asstring);
+  if ismsestringfield then begin
+   mstr2:= tmsestringfield(field).asmsestring;
   end
   else begin
-   mstr2:= field.asstring;
+   if dso_utf8 in foptions then begin
+    mstr2:= utf8tostring(field.asstring);
+   end
+   else begin
+    mstr2:= field.asstring;
+   end;
   end;
-  mstr2:= mseuppercase(mstr2);      //todo: optimize
+  if caseinsensitive then begin
+   mstr2:= mseuppercase(mstr2);      //todo: optimize
+  end;
   result:= true;
   for int1:= 0 to int2 - 1 do begin
    if pmsechar(mstr1)[int1] <> pmsechar(mstr2)[int1] then begin
@@ -2770,12 +2778,18 @@ var
  end;
  
 begin
+ ismsestringfield:= field is tmsestringfield;
  with tdataset(fowner) do begin
   result:= loc_notfound;
   bm:= bookmark;
-  bo1:= loo_caseinsensitive in options;
-  if bo1 then begin 
-   mstr1:= mseuppercase(key);
+  caseinsensitive:= loo_caseinsensitive in options;
+  if caseinsensitive or ismsestringfield then begin 
+   if caseinsensitive then begin
+    mstr1:= mseuppercase(key);
+   end
+   else begin
+    mstr1:= key;
+   end;     
    if loo_partialkey in options then begin
     int2:= length(mstr1);
    end
@@ -2800,9 +2814,9 @@ begin
   disablecontrols;
   try
    if not (loo_noforeward in options) then begin
-    if bo1 then begin
+    if caseinsensitive or ismsestringfield then begin
      while not eof do begin
-      if checkcaseinsensitive then begin
+      if checkmsestring then begin
        result:= loc_ok;
        exit;
       end;
@@ -2821,9 +2835,9 @@ begin
     bookmark:= bm;
    end;
    if not (loo_nobackward in options) then begin
-    if bo1 then begin
+    if caseinsensitive or ismsestringfield then begin
      while not bof do begin
-      if checkcaseinsensitive then begin
+      if checkmsestring then begin
        result:= loc_ok;
        exit;
       end;
