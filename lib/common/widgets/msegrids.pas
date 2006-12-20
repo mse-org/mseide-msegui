@@ -1272,7 +1272,8 @@ end;
    function clippedcellrect(const cell: gridcoordty;
                  const innerlevel: cellinnerlevelty = cil_all): rectty;
                  //origin = paintrect.pos, clipped by datarect
-
+   function cellvisible(const acell: gridcoordty): boolean;
+       //returns row.visible and col.visible, independent from scrolling
    procedure invalidatecell(const cell: gridcoordty);
    procedure invalidatefocusedcell;
    procedure invalidaterow(const arow: integer);
@@ -9256,6 +9257,38 @@ end;
 function tcustomgrid.cellclicked: boolean;
 begin
  result:= gs_cellclicked in fstate;
+end;
+
+function tcustomgrid.cellvisible(const acell: gridcoordty): boolean;
+var
+ int1: integer;
+begin
+ result:= false;
+ if acell.col >= 0 then begin
+  if acell.col < fdatacols.count then begin
+   result:= fdatacols[acell.col].visible;
+  end;
+ end
+ else begin
+  int1:= ffixcols.count + acell.col;
+  if int1 < ffixcols.count then begin
+   result:= tfixcol(ffixcols.items[int1]).visible;
+  end;
+ end; 
+ if result then begin
+  if acell.row < 0 then begin
+   int1:= ffixrows.count + acell.row;
+   if int1 < ffixrows.count then begin
+    result:= tfixrow(ffixrows.items[int1]).visible;
+   end
+   else begin
+    result:= false;
+   end;
+  end
+  else begin
+   result:= acell.row < frowcount;
+  end;
+ end;
 end;
 
 { tdrawgrid }

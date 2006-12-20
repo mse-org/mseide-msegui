@@ -534,6 +534,7 @@ procedure twidgetfixrows.updatewidgetrect;
 var
  rect1: rectty;
  int1,int2,int3: integer;
+ coord1: gridcoordty;
 begin
  inc(fwidgetrectupdating);
  try
@@ -554,10 +555,17 @@ begin
          parentwidget:= tcustomwidgetgrid(fgrid).fcontainer3;
         end;
        end;
-       rect1:= fgrid.cellrect(makegridcoord(int1,int2-int3),cil_noline);
-       rect1.pos:= translatewidgetpoint(addpoint(rect1.pos,fgrid.paintpos),
-                              fgrid,parentwidget);
-       widgetrect:= rect1;
+       coord1:= makegridcoord(int1,int2-int3);
+       if fgrid.cellvisible(coord1) then begin
+        rect1:= fgrid.cellrect(coord1,cil_noline);
+        rect1.pos:= translatewidgetpoint(addpoint(rect1.pos,fgrid.paintpos),
+                               fgrid,parentwidget);
+        widgetrect:= rect1;
+        visible:= true;
+       end
+       else begin
+        visible:= false;
+       end;
       end;
      end;
     end;
@@ -569,10 +577,17 @@ begin
      if ffixrowwidgets[int2] <> nil then begin
       with ffixrowwidgets[int2] do begin
        parentwidget:= fgrid;
-       rect1:= fgrid.cellrect(makegridcoord(int1,int2-int3),cil_noline);
-       rect1.pos:= translatewidgetpoint(addpoint(rect1.pos,fgrid.paintpos),
-                              fgrid,parentwidget);
-       widgetrect:= rect1;
+       coord1:= makegridcoord(int1,int2-int3);
+       if fgrid.cellvisible(coord1) then begin
+        rect1:= fgrid.cellrect(coord1,cil_noline);
+        rect1.pos:= translatewidgetpoint(addpoint(rect1.pos,fgrid.paintpos),
+                               fgrid,parentwidget);
+        widgetrect:= rect1;
+        visible:= true;
+       end
+       else begin
+        visible:= false;
+       end;
       end;
      end;
     end;
