@@ -201,9 +201,15 @@ type
    property framei_bottom default 1;
  end;
 
- tcellface = class(tface)
+ tfixcellframe = class(tcellframe)
  end;
  
+ tcellface = class(tface)
+ end;
+
+ tfixcellface = class(tcellface)
+ end;
+  
  cellinfoty = record
   cell: gridcoordty;
   rect: rectty;
@@ -259,13 +265,13 @@ type
    fcolorselect: colorty;
    procedure updatelayout; virtual;
    procedure changed; virtual;
-   procedure updatecellrect;
+   procedure updatecellrect(const aframe: tcustomframe);
    function getinnerframe: framety; virtual;
    function step(getscrollable: boolean = true): integer; virtual; abstract;
    procedure createframe;
    procedure createface;
-   function getwidget: twidget;
     //iframe
+   function getwidget: twidget;
    procedure setframeinstance(instance: tcustomframe);
    function getwidgetrect: rectty;
    procedure setwidgetrect(const rect: rectty);
@@ -284,13 +290,15 @@ type
    
    //iface
    function translatecolor(const acolor: colorty): colorty;
+
    procedure fontchanged(const sender: tobject); virtual;
    property font: tgridpropfont read getfont write setfont stored isfontstored;
   public
    constructor create(const agrid: tcustomgrid; 
                const aowner: tgridarrayprop); reintroduce; virtual;
    destructor destroy; override;
-   procedure drawcellbackground(const acanvas: tcanvas);
+   procedure drawcellbackground(const acanvas: tcanvas;
+                 const aframe: tcustomframe; const aface: tcustomface);
    property grid: tcustomgrid read fgrid;
   published
    property color: colorty read fcolor write setcolor default cl_default;
@@ -610,7 +618,7 @@ type
    class function getinstancepo(owner: tobject): pfont; override;
  end;
 
- tcolheader = class(tindexpersistent)
+ tcolheader = class(tindexpersistent,iframe,iface)
   private
    fcaption: msestring;
    ftextflags: textflagsty;
@@ -621,9 +629,40 @@ type
    procedure setfont(const Value: tcolheaderfont);
    function isfontstored: Boolean;
    procedure createfont;
+   function getframe: tfixcellframe;
+   procedure setframe(const avalue: tfixcellframe);
+   function getface: tfixcellface;
+   procedure setface(const avalue: tfixcellface);
+   procedure createframe;
+   procedure createface;
   protected
+   fgrid: tcustomgrid;
+   fframe: tfixcellframe;
+   fface: tfixcellface;
    procedure changed;
    procedure fontchanged(const sender: tobject);
+
+    //iframe
+   function getwidget: twidget;
+   procedure setframeinstance(instance: tcustomframe);
+   function getwidgetrect: rectty;
+   procedure setwidgetrect(const rect: rectty);
+   procedure setstaticframe(value: boolean);
+   function widgetstate: widgetstatesty;
+   procedure scrollwidgets(const dist: pointty);
+   procedure clientrectchanged;
+   function getcomponentstate: tcomponentstate;
+   procedure invalidate;
+   procedure invalidatewidget;
+   procedure invalidaterect(const rect: rectty; org: originty = org_client);
+   function getframefont: tfont;
+   function getcanvas(aorigin: originty = org_client): tcanvas;
+   function canfocus: boolean;
+   function setfocus(aactivate: boolean = true): boolean;
+
+   //iface
+   function translatecolor(const acolor: colorty): colorty;
+   
   public
    constructor create(const aowner: tobject;
          const aprop: tindexpersistentarrayprop); override;
@@ -632,6 +671,8 @@ type
    property caption: msestring read fcaption write setcaption;
    property textflags: textflagsty read ftextflags write settextflags default defaultcolheadertextflags;
    property font: tcolheaderfont read getfont write setfont stored isfontstored;
+   property frame: tfixcellframe read getframe write setframe;
+   property face: tfixcellface read getface write setface;
  end;
 
  tcolheaders = class(tindexpersistentarrayprop)
@@ -1763,7 +1804,7 @@ end;
 destructor tgridprop.destroy;
 begin
  inherited;
- fframe.Free;
+ fframe.free;
  fface.free;
  ffont.free;
 end;
@@ -1847,6 +1888,7 @@ begin
  result:= fface;
 end;
 
+ //iframe
 function tgridprop.getwidget: twidget;
 begin
  result:= fgrid;
@@ -1939,26 +1981,30 @@ begin
  fgrid.invalidate;
 end;
 
-procedure tgridprop.drawcellbackground(const acanvas: tcanvas);
+procedure tgridprop.drawcellbackground(const acanvas: tcanvas;
+                const aframe: tcustomframe; const aface: tcustomface);
 begin
- if fframe = nil then begin
+ if aframe = nil then begin
   acanvas.fillrect(makerect(nullpoint,fcellrect.size),fcellinfo.color);
  end
  else begin
-  fframe.paint(acanvas,makerect(nullpoint,fcellrect.size));
+  aframe.paint(acanvas,makerect(nullpoint,fcellrect.size));
   //  fframe.paint(acanvas,fcellrect);
-  if fframe.fi.colorclient = cl_transparent then begin
+  if tframe1(aframe).fi.colorclient = cl_transparent then begin
    acanvas.fillrect(makerect(nullpoint,fcellinfo.rect.size),fcellinfo.color);
   end;
  end;
- if fface <> nil then begin
-  if fframe = nil then begin
-   fface.paint(acanvas,makerect(nullpoint,fcellinfo.rect.size));
+ if aface <> nil then begin
+  aface.paint(acanvas,makerect(nullpoint,fcellinfo.rect.size));
+  {
+  if aframe = nil then begin
+   aface.paint(acanvas,makerect(nullpoint,fcellinfo.rect.size));
   end
   else begin
-   fface.paint(acanvas,deflaterect(makerect(nullpoint,fcellinfo.rect.size),
-                   fframe.fpaintframe));
+   aface.paint(acanvas,deflaterect(makerect(nullpoint,fcellinfo.rect.size),
+                   tframe1(aframe).fpaintframe));
   end;
+  }
  end;
 end;
 
@@ -1980,13 +2026,13 @@ begin
  result:= minimalframe;
 end;
 
-procedure tgridprop.updatecellrect;
+procedure tgridprop.updatecellrect(const aframe: tcustomframe);
 begin
  fcellinfo.rect:= fcellrect;
- if fframe <> nil then begin
-  deflaterect1(fcellinfo.rect,fframe.fpaintframe);
+ if aframe <> nil then begin
+  deflaterect1(fcellinfo.rect,tframe1(aframe).fpaintframe);
 //  fcellinfo.innerrect:= deflaterect(fcellinfo.rect,fframe.fi.innerframe);
-  with fframe.fi.innerframe do begin
+  with tframe1(aframe).fi.innerframe do begin
    fcellinfo.innerrect.pos:= pointty(topleft);
    fcellinfo.innerrect.cx:= fcellinfo.rect.cx - left - right;
    fcellinfo.innerrect.cy:= fcellinfo.rect.cy - top - bottom;
@@ -2002,9 +2048,10 @@ begin
  if fframe <> nil then begin
   fframe.updatestate;
  end;
- updatecellrect;
+ updatecellrect(fframe);
 end;
 
+//iface
 function tgridprop.translatecolor(const acolor: colorty): colorty;
 begin
  result:= acolor;
@@ -2084,7 +2131,7 @@ end;
 
 procedure tcol.drawcell(const acanvas: tcanvas);
 begin
- drawcellbackground(acanvas);
+ drawcellbackground(acanvas,fframe,fface);
 end;
 
 function tcol.actualcolor: colorty;
@@ -2443,12 +2490,15 @@ constructor tcolheader.create(const aowner: tobject;
 begin
  ftextflags:= defaultcolheadertextflags;
  inherited;
+ fgrid:= tcolheaders(fowner).fgridprop.fgrid;
 end;
 
 destructor tcolheader.destroy;
 begin
- ffont.free;
  inherited;
+ ffont.free;
+ fframe.free;
+ fface.free;
 end;
 
 procedure tcolheader.changed;
@@ -2458,7 +2508,7 @@ end;
 
 function tcolheader.getfont: tcolheaderfont;
 begin
- getoptionalobject(tcolheaders(fowner).fgridprop.fgrid.componentstate,ffont,{$ifdef FPC}@{$endif}createfont);
+ getoptionalobject(fgrid.componentstate,ffont,{$ifdef FPC}@{$endif}createfont);
  if ffont <> nil then begin
   result:= ffont;
  end
@@ -2494,6 +2544,98 @@ begin
  changed;
 end;
 
+ //iframe
+function tcolheader.getwidget: twidget;
+begin
+ result:= fgrid;
+end;
+
+procedure tcolheader.setframeinstance(instance: tcustomframe);
+begin
+ fframe:= tfixcellframe(instance);
+end;
+
+function tcolheader.getwidgetrect: rectty;
+begin
+ result:= nullrect;
+// result:= fcellrect;
+end;
+
+procedure tcolheader.setwidgetrect(const rect: rectty);
+begin
+// twidget1(getwidget).setwidgetrect(rect);
+end;
+
+procedure tcolheader.setstaticframe(value: boolean);
+begin
+// twidget1(getwidget).setstaticframe(value);
+end;
+
+function tcolheader.widgetstate: widgetstatesty;
+begin
+ result:= twidget1(getwidget).widgetstate;
+end;
+
+procedure tcolheader.scrollwidgets(const dist: pointty);
+begin
+// twidget1(getwidget).scrollwidgets(dist);
+end;
+
+procedure tcolheader.clientrectchanged;
+begin
+ changed;
+// fgrid.layoutchanged;
+end;
+
+function tcolheader.getcomponentstate: tcomponentstate;
+begin
+ result:= twidget1(getwidget).getcomponentstate;
+end;
+
+procedure tcolheader.invalidate;
+begin
+ changed;
+// getwidget.invalidate;
+end;
+
+procedure tcolheader.invalidatewidget;
+begin
+ changed;
+// getwidget.invalidatewidget;
+end;
+
+procedure tcolheader.invalidaterect(const rect: rectty; org: originty = org_client);
+begin
+ changed;
+// getwidget.invalidaterect(rect,org);
+end;
+
+function tcolheader.getframefont: tfont;
+begin
+ result:= twidget1(getwidget).getfont;
+end;
+
+function tcolheader.getcanvas(aorigin: originty = org_client): tcanvas;
+begin
+ result:= getwidget.getcanvas(aorigin);
+end;
+
+function tcolheader.canfocus: boolean;
+begin
+ result:= getwidget.canfocus;
+end;
+
+function tcolheader.setfocus(aactivate: boolean = true): boolean;
+begin
+ result:= getwidget.setfocus(aactivate);
+end;
+
+//iface
+function tcolheader.translatecolor(const acolor: colorty): colorty;
+begin
+ result:= acolor;
+end;
+
 procedure tcolheader.setcaption(const avalue: msestring);
 begin
  fcaption:= avalue;
@@ -2506,6 +2648,40 @@ begin
   ftextflags := Value;
   changed;
  end;
+end;
+
+function tcolheader.getframe: tfixcellframe;
+begin
+ fgrid.getoptionalobject(fframe,{$ifdef FPC}@{$endif}createframe);
+ result:= fframe;
+end;
+
+procedure tcolheader.setframe(const avalue: tfixcellframe);
+begin
+ fgrid.setoptionalobject(avalue,fframe,{$ifdef FPC}@{$endif}createframe);
+ clientrectchanged;
+end;
+
+function tcolheader.getface: tfixcellface;
+begin
+ fgrid.getoptionalobject(fface,{$ifdef FPC}@{$endif}createface);
+ result:= fface;
+end;
+
+procedure tcolheader.setface(const avalue: tfixcellface);
+begin
+ fgrid.setoptionalobject(avalue,fface,{$ifdef FPC}@{$endif}createface);
+ fgrid.invalidate;
+end;
+
+procedure tcolheader.createframe;
+begin
+ tfixcellframe.create(iframe(self));
+end;
+
+procedure tcolheader.createface;
+begin
+ fface:= tfixcellface.create(iface(self));
 end;
 
 { tcolheaders }
@@ -2564,34 +2740,6 @@ begin
  fcaptions.free;
  fcaptionsfix.free;
  fhints.free;
-end;
-
-procedure tfixrow.drawcell(const canvas: tcanvas);
-var
- int1: integer;
-begin
- drawcellbackground(canvas);
- with cellinfoty(canvas.drawinfopo^) do begin
-  if cell.col >= 0 then begin
-   if fnumstep <> 0 then begin
-    ftextinfo.text.text:= inttostr(fnumstart+fnumstep*cell.col);
-    drawtext(canvas,ftextinfo);
-   end
-   else begin
-    if cell.col < fcaptions.count then begin
-     drawtext(canvas,fcaptions[cell.col].caption,ftextinfo.dest,
-                 fcaptions[cell.col].textflags,fcaptions[cell.col].getfont);
-    end;
-   end;
-  end
-  else begin
-   int1:= -(cell.col+1);
-   if int1 < fcaptionsfix.count then begin
-    drawtext(canvas,fcaptionsfix[int1].caption,ftextinfo.dest,
-                 fcaptionsfix[int1].textflags);
-   end;
-  end;
- end;
 end;
 
 procedure tfixrow.movecol(const curindex,newindex: integer);
@@ -2653,6 +2801,57 @@ begin
  end;
 end;
 
+procedure tfixrow.drawcell(const canvas: tcanvas);
+var
+ int1: integer;
+ frame1: tcustomframe;
+ face1: tcustomface;
+ headers1: tcolheaders;
+ procedure drawbackground(const headers: tcolheaders);
+ begin
+ end;
+
+begin
+ with cellinfoty(canvas.drawinfopo^) do begin
+  if cell.col >= 0 then begin
+   int1:= cell.col;
+   headers1:= fcaptions;
+  end
+  else begin
+   int1:= -(cell.col+1);
+   headers1:= fcaptionsfix;
+  end;
+ 
+  frame1:= fframe;
+  face1:= fface;
+  if int1 < headers1.count then begin
+   with headers1[int1] do begin
+    if fframe <> nil then begin
+     frame1:= fframe;
+     tframe1(frame1).checkstate;
+     updatecellrect(frame1);
+     ftextinfo.dest:= fcellinfo.innerrect;
+    end;
+    if fface <> nil then begin
+     face1:= fface;
+    end;
+   end;
+  end;
+  drawcellbackground(canvas,frame1,face1);
+  if fnumstep <> 0 then begin
+   ftextinfo.text.text:= inttostr(fnumstart+fnumstep*cell.col);
+   drawtext(canvas,ftextinfo);
+  end
+  else begin
+   if int1 < headers1.count then begin
+    with headers1[int1] do begin
+     drawtext(canvas,caption,ftextinfo.dest,textflags,getfont);
+    end;
+   end;
+  end;
+ end;
+end;
+
 procedure tfixrow.paint(const info: rowpaintinfoty);
 var
  po1,po2: pointty;
@@ -2695,7 +2894,7 @@ var
        end;
       end;
      end;
-     updatecellrect;
+     updatecellrect(fframe);
      ftextinfo.dest:= fcellinfo.innerrect;
      canvas.origin:= po2;
      int2:= canvas.save;
@@ -7211,6 +7410,7 @@ function tcustomgrid.cellrect(const cell: gridcoordty;
      cx:= fcellinfo.rect.cx;
     end;
     cil_inner: begin
+     inc(x,fcellinfo.rect.x);
      inc(x,fcellinfo.innerrect.x);
      cx:= fcellinfo.innerrect.cx;
     end;
@@ -7227,6 +7427,7 @@ function tcustomgrid.cellrect(const cell: gridcoordty;
      cy:= fcellinfo.rect.cy;
     end;
     cil_inner: begin
+     inc(y,fcellinfo.rect.y);
      inc(y,fcellinfo.innerrect.y);
      cy:= fcellinfo.innerrect.cy;
     end;
@@ -7359,7 +7560,9 @@ end;
 
 procedure tcustomgrid.drawcellbackground(const acanvas: tcanvas);
 begin
- fdatacols[ffocusedcell.col].drawcellbackground(acanvas);
+ with fdatacols[ffocusedcell.col] do begin
+  drawcellbackground(acanvas,fframe,fface);
+ end;
 end;
 
 procedure tcustomgrid.drawfocusedcell(const acanvas: tcanvas);
