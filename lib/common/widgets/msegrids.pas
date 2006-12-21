@@ -1941,6 +1941,8 @@ begin
   end;
  end;
  if fface <> nil then begin
+  fface.paint(acanvas,makerect(nullpoint,fcellinfo.rect.size));
+  {
   if fframe = nil then begin
    fface.paint(acanvas,makerect(nullpoint,fcellinfo.rect.size));
   end
@@ -1948,6 +1950,7 @@ begin
    fface.paint(acanvas,deflaterect(makerect(nullpoint,fcellinfo.rect.size),
                    fframe.fpaintframe));
   end;
+  }
  end;
 end;
 
@@ -7124,6 +7127,7 @@ function tcustomgrid.cellrect(const cell: gridcoordty;
      cx:= fcellinfo.rect.cx;
     end;
     cil_inner: begin
+     inc(x,fcellinfo.rect.x);
      inc(x,fcellinfo.innerrect.x);
      cx:= fcellinfo.innerrect.cx;
     end;
@@ -7140,6 +7144,7 @@ function tcustomgrid.cellrect(const cell: gridcoordty;
      cy:= fcellinfo.rect.cy;
     end;
     cil_inner: begin
+     inc(y,fcellinfo.rect.y);
      inc(y,fcellinfo.innerrect.y);
      cy:= fcellinfo.innerrect.cy;
     end;
