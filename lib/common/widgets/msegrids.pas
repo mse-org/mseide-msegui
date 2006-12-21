@@ -623,6 +623,7 @@ type
    fcaption: msestring;
    ftextflags: textflagsty;
    ffont: tcolheaderfont;
+   fcolor: colorty;
    procedure setcaption(const avalue: msestring);
    procedure settextflags(const Value: textflagsty);
    function getfont: tcolheaderfont;
@@ -635,6 +636,7 @@ type
    procedure setface(const avalue: tfixcellface);
    procedure createframe;
    procedure createface;
+   procedure setcolor(const avalue: colorty);
   protected
    fgrid: tcustomgrid;
    fframe: tfixcellframe;
@@ -668,6 +670,7 @@ type
          const aprop: tindexpersistentarrayprop); override;
    destructor destroy; override;   
   published
+   property color: colorty read fcolor write setcolor default cl_parent;
    property caption: msestring read fcaption write setcaption;
    property textflags: textflagsty read ftextflags write settextflags default defaultcolheadertextflags;
    property font: tcolheaderfont read getfont write setfont stored isfontstored;
@@ -2489,6 +2492,7 @@ constructor tcolheader.create(const aowner: tobject;
          const aprop: tindexpersistentarrayprop);
 begin
  ftextflags:= defaultcolheadertextflags;
+ fcolor:= cl_parent;
  inherited;
  fgrid:= tcolheaders(fowner).fgridprop.fgrid;
 end;
@@ -2684,6 +2688,14 @@ begin
  fface:= tfixcellface.create(iface(self));
 end;
 
+procedure tcolheader.setcolor(const avalue: colorty);
+begin
+ if fcolor <> avalue then begin
+  fcolor:= avalue;
+  changed;
+ end;
+end;
+
 { tcolheaders }
 
 constructor tcolheaders.create(const agridprop: tgridprop);
@@ -2826,6 +2838,9 @@ begin
   face1:= fface;
   if int1 < headers1.count then begin
    with headers1[int1] do begin
+    if fcolor <> cl_parent then begin
+     fcellinfo.color:= fcolor;
+    end;
     if fframe <> nil then begin
      frame1:= fframe;
      tframe1(frame1).checkstate;
