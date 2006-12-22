@@ -8018,11 +8018,14 @@ begin
  end;
  if length(objects) > 0 then begin
   fpickkind:= pickobjectkindty(objects[0] mod pickobjectstep);
+  result:= true;
   case fpickkind of
    pok_datacolsize,pok_fixcolsize: shape:= cr_sizehor;
    pok_datarowsize,pok_fixrowsize: shape:= cr_sizever;
+   else begin
+    result:= false;
+   end;
   end;
-  result:= true;
  end
  else begin
   result:= false;
