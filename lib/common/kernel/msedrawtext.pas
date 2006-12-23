@@ -758,6 +758,8 @@ var
  ellipsewidth: integer;
  int1,{int2,}int3{,int4}: integer;
  lastover: boolean;
+label
+ endlab;
 
 begin                  //drawtext
  with info,canvas do begin
@@ -770,7 +772,7 @@ begin                  //drawtext
   end;
   if text.text = '' then begin
    info.res:= nullrect;
-   exit;
+   goto endlab;
   end;
   layouttext(canvas,info,layoutinfo);
   defaultcolor:= font.color;
@@ -889,6 +891,7 @@ begin                  //drawtext
     end;
    end;
   end;
+endlab:
   restore;
  end;
 end;
