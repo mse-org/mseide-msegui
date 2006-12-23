@@ -4956,6 +4956,9 @@ begin
    if ws_opaque in fwidgetstate then begin
      canvas.fillrect(makerect(nullpoint,fwidgetrect.size),actcolor);
    end;
+   {$ifdef mse_slowdrawing}
+   sleep(500);
+   {$endif}
    canvas.font:= getfont;
    canvas.color:= actcolor;
    dopaint(canvas);

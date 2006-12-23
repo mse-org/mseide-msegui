@@ -533,12 +533,11 @@ end;
 procedure twidgetfixrows.updatewidgetrect;
 var
  rect1: rectty;
- int1,int2,int3: integer;
+ int1,int2,int4: integer;
  coord1: gridcoordty;
 begin
  inc(fwidgetrectupdating);
  try
-  int3:= fgrid.fixrows.count;
   for int1:= 0 to fgrid.datacols.count - 1 do begin
    with tcustomwidgetgrid(fgrid).datacols[int1] do begin
     for int2:= 0 to high(ffixrowwidgets) do begin
@@ -548,18 +547,26 @@ begin
         parentwidget:= fgrid;
        end
        else begin
-        if int2 >= fgrid.fixrows.oppositecount then begin
-         parentwidget:= tcustomwidgetgrid(fgrid).fcontainer1;
+        if int2 >= fgrid.fixrows.count - fgrid.fixrows.oppositecount then begin
+         parentwidget:= tcustomwidgetgrid(fgrid).fcontainer3;
         end
         else begin
-         parentwidget:= tcustomwidgetgrid(fgrid).fcontainer3;
+         parentwidget:= tcustomwidgetgrid(fgrid).fcontainer1;
         end;
        end;
-       coord1:= makegridcoord(int1,int2-int3);
+       coord1:= makegridcoord(int1,-int2-1);
        if fgrid.cellvisible(coord1) then begin
         rect1:= fgrid.cellrect(coord1,cil_noline);
         rect1.pos:= translatewidgetpoint(addpoint(rect1.pos,fgrid.paintpos),
                                fgrid,parentwidget);
+        {
+        with fgrid.fixrows[coord1.row].captions do begin
+         if int1 < count then begin
+          inc(rect1.x,items[int1].mergedx);
+          inc(rect1.cx,items[int1].mergedcx);
+         end;
+        end;
+        }
         widgetrect:= rect1;
         visible:= true;
        end
@@ -577,11 +584,20 @@ begin
      if ffixrowwidgets[int2] <> nil then begin
       with ffixrowwidgets[int2] do begin
        parentwidget:= fgrid;
-       coord1:= makegridcoord(int1,int2-int3);
+       coord1:= makegridcoord(int1,-int2-1);
        if fgrid.cellvisible(coord1) then begin
         rect1:= fgrid.cellrect(coord1,cil_noline);
         rect1.pos:= translatewidgetpoint(addpoint(rect1.pos,fgrid.paintpos),
                                fgrid,parentwidget);
+        {
+        with fgrid.fixrows[coord1.row].captionsfix do begin
+         int4:= int1 + fgrid.fixcols.count;
+         if int4 < count then begin
+          inc(rect1.x,tcolheader(fitems[int4]).mergedx);
+          inc(rect1.cx,tcolheader(fitems[int4]).mergedcx);
+         end;
+        end;
+        }
         widgetrect:= rect1;
         visible:= true;
        end
@@ -859,7 +875,7 @@ end;
 procedure twidgetcol.setfixrowwidget(const awidget: twidget;
                        const rowindex: integer);
 begin
- ffixrowwidgets[rowindex]:= awidget;
+ ffixrowwidgets[-rowindex-1]:= awidget;
  fgrid.layoutchanged;
 end;
 
@@ -1325,7 +1341,7 @@ end;
 
 procedure twidgetfixcol.setfixrowwidget(const awidget: twidget; const rowindex: integer);
 begin
- ffixrowwidgets[rowindex]:= awidget;
+ ffixrowwidgets[-rowindex-1]:= awidget;
  fgrid.layoutchanged;
 end;
 
@@ -1402,6 +1418,7 @@ end;
 procedure tfixcontainer.widgetregionchanged(const sender: twidget);
 var
  cell1: gridcoordty;
+ int1,int2: integer;
 begin
  inherited;
  if not (gs_layoutupdating in fgrid.fstate) and 
@@ -1410,12 +1427,22 @@ begin
          (twidget1(sender).fparentwidget = self) then begin
   with fgrid do begin
    cell1:= widgetcell(sender);
-   ffixrows[cell1.row].height:= sender.bounds_cy;
-   if cell1.col < 0 then begin
-    ffixcols[cell1.col].width:= sender.bounds_cx;
-   end
-   else begin
-    fdatacols[cell1.col].width:= sender.bounds_cx;
+   with ffixrows[cell1.row] do begin
+    height:= sender.bounds_cy;
+    int1:= 0;
+    if cell1.col < 0 then begin
+     int2:= ffixcols.count + cell1.col;
+     if int2 < captionsfix.count then begin
+      int1:= captionsfix[int2].mergedcx;
+     end;
+     ffixcols[cell1.col].width:= sender.bounds_cx - int1;
+    end
+    else begin
+     if cell1.col < captions.count then begin
+      int1:= captions[cell1.col].mergedcx;
+     end;
+     fdatacols[cell1.col].width:= sender.bounds_cx - int1;
+    end;
    end;
    layoutchanged;
   end;
@@ -1779,16 +1806,16 @@ begin
   internalupdatelayout;
   po1:= subpoint(apos,paintpos);
   cell1:= cellatpos(po1);
-  if (cell1.row <> invalidaxis) and (cell1.col <> invalidaxis) and 
+ if (cell1.row <> invalidaxis) and (cell1.col <> invalidaxis) and 
             (cell1.row < 0) then begin
    if not checkdescendent(awidget) then begin //new insert
     exclude(twidget1(awidget).foptionswidget,ow_autoscale);
    end;
    if cell1.col >= 0 then begin
-    datacols[cell1.col].setfixrowwidget(awidget,cell1.row+ffixrows.count);
+    datacols[cell1.col].setfixrowwidget(awidget,cell1.row);
    end
    else begin
-    fixcols[cell1.col].setfixrowwidget(awidget,cell1.row+ffixrows.count);
+    fixcols[cell1.col].setfixrowwidget(awidget,cell1.row);
    end;
   end
   else begin
@@ -1974,7 +2001,7 @@ begin
        if ar1[int2] <> nil then begin
         for int3:= 0 to high(ffixrowwidgetnames) do begin
          if str1 = ffixrowwidgetnames[int3] then begin
-          setfixrowwidget(ar1[int2],int3);
+          setfixrowwidget(ar1[int2],-int3-1);
           ffixrowwidgetnames[int3]:= '';
           ar1[int2]:= nil;
           break;
@@ -1996,7 +2023,7 @@ begin
       if str1 <> '' then begin
        for int3:= 0 to high(ffixrowwidgetnames) do begin
         if str1 = ffixrowwidgetnames[int3] then begin
-         setfixrowwidget(ar1[int2],int3);
+         setfixrowwidget(ar1[int2],-int3-1);
          ffixrowwidgetnames[int3]:= '';
          ar1[int2]:= nil;
          break;
@@ -2065,8 +2092,10 @@ begin
     with fobjectpicker do begin
      if (sender <> fcontainer2) and (sender <> self) and
             ((fpickkind = pok_datacolsize) or (eventkind <> ek_buttonpress)) then begin
+      include(fstate,gs_child);
       mouseevent(info);
-      if (fpickkind <> pok_datacolsize) then begin
+      exclude(fstate,gs_child);
+      if not (fpickkind in [pok_datacolsize,pok_datacol]) then begin
        exclude(eventstate,es_processed);
       end
       else begin
