@@ -625,6 +625,7 @@ type
    ftextflags: textflagsty;
    ffont: tcolheaderfont;
    fcolor: colorty;
+   fhint: msestring;
    fmergecols: integer;
    fmerged: boolean;
    fmergedcx: integer;
@@ -685,6 +686,7 @@ type
    property frame: tfixcellframe read getframe write setframe;
    property face: tfixcellface read getface write setface;
    property mergecols: integer read fmergecols write setmergecols default 0;
+   property hint: msestring read fhint write fhint;
  end;
 
  tcolheaders = class(tindexpersistentarrayprop)
@@ -719,7 +721,7 @@ type
    fnumstep: integer;
    fcaptions: tcolheaders;
    fcaptionsfix: tfixcolheaders;
-   fhints: tmsestringarrayprop;
+//   fhints: tmsestringarrayprop;
    foptionsfix: fixrowoptionsty;
    procedure setheight(const Value: integer);
    function getrowindex: integer;
@@ -729,7 +731,7 @@ type
    procedure settextflags(const Value: textflagsty);
    procedure setcaptions(const Value: tcolheaders);
    procedure setcaptionsfix(const Value: tfixcolheaders);
-   procedure sethints(const avalue: tmsestringarrayprop);
+//   procedure sethints(const avalue: tmsestringarrayprop);
    procedure setoptionsfix(const avalue: fixrowoptionsty);
    function getvisible: boolean;
    procedure setvisible(const avalue: boolean);
@@ -759,7 +761,7 @@ type
    property numstep: integer read fnumstep write setnumstep default 0;
    property captions: tcolheaders read fcaptions write setcaptions;
    property captionsfix: tfixcolheaders read fcaptionsfix write setcaptionsfix;
-   property hints: tmsestringarrayprop read fhints write sethints;
+//   property hints: tmsestringarrayprop read fhints write sethints;
    property font;
    property linecolor default defaultfixlinecolor;
    property options: fixrowoptionsty read foptionsfix write setoptionsfix;
@@ -2836,7 +2838,7 @@ begin
  fcaptions.onchange:= {$ifdef FPC}@{$endif}captionchanged;
  fcaptionsfix:= tfixcolheaders.create(self);
  fcaptionsfix.onchange:= {$ifdef FPC}@{$endif}captionchanged;
- fhints:= tmsestringarrayprop.create;
+// fhints:= tmsestringarrayprop.create;
  inherited create(agrid,aowner);
  fheight:= agrid.fdatarowheight;
 end;
@@ -2846,7 +2848,7 @@ begin
  inherited;
  fcaptions.free;
  fcaptionsfix.free;
- fhints.free;
+// fhints.free;
 end;
 
 procedure tfixrow.movecol(const curindex,newindex: integer);
@@ -2855,6 +2857,7 @@ var
 begin
  if (curindex >= 0) then begin
   fcaptions.movecol(curindex,newindex);
+  {
   with fhints do begin
    if (curindex < count) or (newindex < count) then begin
     int1:= curindex;
@@ -2868,6 +2871,7 @@ begin
     move(int1,newindex);
    end;
   end;
+  }
  end
  else begin
   with fcaptionsfix do begin
@@ -3188,12 +3192,12 @@ begin
   fgrid.invalidatecell(makegridcoord(col,getrowindex));
  end;
 end;
-
+{
 procedure tfixrow.sethints(const avalue: tmsestringarrayprop);
 begin
  fhints.assign(avalue);
 end;
-
+}
 procedure tfixrow.setoptionsfix(const avalue: fixrowoptionsty);
 begin
  foptionsfix:= avalue;
@@ -6624,6 +6628,7 @@ var
 
 var
  coord1: gridcoordty;
+ str1: msestring;
  hintinfo: hintinfoty;
  int1: integer;
  mousewidgetbefore: twidget;
@@ -6686,10 +6691,22 @@ begin
               ((fmousecell.row <> fmouseparkcell.row) or 
                (fmousecell.col <> fmouseparkcell.col)) then begin
         fmouseparkcell:= fmousecell;
-        if (fmouseparkcell.col >= 0) and 
-           (fmouseparkcell.col < ffixrows[fmouseparkcell.row].fhints.count) then begin
+        str1:= '';
+        with ffixrows[fmouseparkcell.row] do begin
+         if fmouseparkcell.col >= 0 then begin
+          if fmouseparkcell.col < fcaptions.count then begin
+           str1:= fcaptions[fmouseparkcell.col].hint;
+          end;
+         end
+         else begin
+          if -fmouseparkcell.row <= fcaptionsfix.count then begin
+           str1:= fcaptionsfix[fmouseparkcell.col].hint;
+          end;
+         end;
+        end;
+        if str1 <> '' then begin
          application.inithintinfo(hintinfo,self);
-         hintinfo.caption:= ffixrows[fmouseparkcell.row].fhints[fmouseparkcell.col];
+         hintinfo.caption:= str1;
          application.showhint(self,hintinfo);
         end;
        end;
