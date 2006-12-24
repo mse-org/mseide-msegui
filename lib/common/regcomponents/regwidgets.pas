@@ -68,7 +68,12 @@ type
   public
    function getvalue: msestring; override;
  end;
- 
+
+ tvolatileordinalpropertyeditor = class(tordinalpropertyeditor)
+  protected
+   function getdefaultstate: propertystatesty; override;
+ end;
+  
  tcolheaderspropertyeditor = class(tpersistentarraypropertyeditor)
   protected
    function geteditorclass: propertyeditorclassty; override;
@@ -95,7 +100,10 @@ begin
  registerpropertyeditor(typeinfo(tdatacols),nil,'',tdatacolseditor);
  registerpropertyeditor(typeinfo(tfixcols),nil,'',tfixcolseditor);
  registerpropertyeditor(typeinfo(tfixrows),nil,'',tfixgridpropseditor);
- registerpropertyeditor(typeinfo(tfixcolheaders),nil,'',tfixcolheaderspropertyeditor);
+ registerpropertyeditor(typeinfo(tfixcolheaders),nil,'',
+                             tfixcolheaderspropertyeditor);
+ registerpropertyeditor(typeinfo(integer),tcolheader,'mergecols',
+                             tvolatileordinalpropertyeditor);
  registerpropertyeditor(typeinfo(tcolheaders),nil,'',tcolheaderspropertyeditor);
  registerpropertyeditor(typeinfo(twidget),tsplitter,'linkleft',
                                  tsisterwidgetpropertyeditor);
@@ -202,6 +210,13 @@ end;
 function tcolheaderelementeditor.getvalue: msestring;
 begin
  result:= '<'+tcolheader(getordvalue).caption+'>';
+end;
+
+{ tvolatileintegerpropertyeditor }
+
+function tvolatileordinalpropertyeditor.getdefaultstate: propertystatesty;
+begin
+ result:= inherited getdefaultstate + [ps_volatile];
 end;
 
 { tcolheaderspropertyeditor }

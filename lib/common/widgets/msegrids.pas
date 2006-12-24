@@ -2729,6 +2729,10 @@ begin
  if fmergecols <> avalue then begin
   fmergecols:= avalue;
   fgrid.layoutchanged;
+  if fgrid.componentstate * [csloading,csdesigning,csdestroying] = 
+                            [csdesigning] then begin
+   fgrid.updatelayout; //check colheaders.count
+  end;
  end;
 end;
 
@@ -2772,8 +2776,18 @@ procedure tcolheaders.updatelayout(const cols: tgridarrayprop);
 var
  int1,int2,int3,int4: integer;
 begin
+ int2:= count;
  for int1:= 0 to count - 1 do begin
-  tcolheader(fitems[int1]).fmerged:= false;
+  with tcolheader(fitems[int1]) do begin
+   fmerged:= false;
+   int3:= int1 + fmergecols;
+   if int3 >= int2 then begin
+    int2:= int3 + 1;
+   end;
+  end;
+ end;
+ if int2 > count then begin
+  count:= int2;
  end;
  for int1:= 0 to count -1 do begin
   with tcolheader(fitems[int1]) do begin
