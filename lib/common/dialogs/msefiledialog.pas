@@ -1647,8 +1647,24 @@ begin
 end;
 
 procedure tcustomfilenameedit.texttovalue(var accept: boolean; const quiet: boolean);
+var
+ ar1: filenamearty;
+ mstr1: filenamety;
+ int1: integer;
 begin
- fcontroller.filename:= text;
+ if (fcontroller.defaultext <> '') then begin
+  unquotefilename(text,ar1);
+  for int1:= 0 to high(ar1) do begin
+   if not hasfileext(ar1[int1]) then begin
+    ar1[int1]:= ar1[int1] + '.'+controller.defaultext;
+   end;
+  end;
+  mstr1:= quotefilename(ar1);
+ end
+ else begin
+  mstr1:= text;
+ end;
+ fcontroller.filename:= mstr1;
  inherited;
 end;
 
