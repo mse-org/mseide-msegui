@@ -128,6 +128,7 @@ type
    procedure link(const dest: tmsecomponent; valuepo: pointer = nil;
                 ainterfacetype: pointer = nil; once: boolean = false); overload;
    procedure unlink(const source,dest: iobjectlink; valuepo: pointer = nil); overload;
+               //source = 1 -> dest destroyed
    procedure unlink(const dest: tmsecomponent; valuepo: pointer = nil); overload;
    function linkedobjects: objectarty;
 
@@ -1604,7 +1605,7 @@ begin
      end;
     end
     else begin
-     iobjectlink(po1).unlink(nil,iobjectlink(source),valuepo);
+     iobjectlink(po1).unlink(iobjectlink(pointer(1)),iobjectlink(source),valuepo);
     end;
    end;
   end;
@@ -1657,7 +1658,7 @@ begin
   with po1^ do begin
    if (dest <> nil) and (dest = item.dest) and
         (destroyed or (valuepo = item.valuepo) and (source = item.source)) then begin
-    if refcount = 0 then begin
+    if (refcount = 0) or destroyed then begin
      dest:= nil;
     end
     else begin
@@ -1744,11 +1745,16 @@ begin
 {$ifdef debugobjectlink}
   write('unlink');getdebugtext(self,source,dest,valuepo);
 {$endif}
- info.source:= pointer(source);
+ if ptrint(source) = 1 then begin
+  info.source:= nil;
+ end
+ else begin
+  info.source:= pointer(source);
+ end;
  info.dest:= pointer(dest);
  info.valuepo:= valuepo;
- removelink(info,false);
- if source <> nil then begin
+ removelink(info,ptrint(source) = 1);
+ if info.source <> nil then begin
   dest.unlink(nil,source,valuepo);
  end;
  dopack;

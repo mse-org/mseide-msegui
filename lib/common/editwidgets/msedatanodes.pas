@@ -299,6 +299,7 @@ type
    destructor destroy; override;
    procedure registerobject(const aobject: iobjectlink);
     //call objectevent method of items
+   procedure unregisterobject(const aobject: iobjectlink);
 
    function add(const aitem: tlistitem): integer; overload;
    procedure add(const aitems: msestringarty); overload;
@@ -626,8 +627,13 @@ end;
 procedure tlistitem.setimagelist(const Value: timagelist);
 begin
  if fimagelist <> value then begin
-  if (value <> nil) and (fowner <> nil) and (value <> fowner.fimagelist) then begin
-   fowner.registerobject(ievent(value));
+  if fowner <> nil then begin
+   if (fimagelist <> nil) and (fimagelist <> fowner.imagelist) then begin
+    fowner.unregisterobject(ievent(fimagelist));
+   end;
+   if (value <> nil) and (value <> fowner.fimagelist) then begin
+    fowner.registerobject(ievent(value));
+   end;
   end;
   fimagelist:= value;
   change;
@@ -686,6 +692,9 @@ end;
 procedure tlistitem.setowner(const aowner: tcustomitemlist);
 begin
  if aowner <> fowner then begin
+  if (fowner <> nil) and (fimagelist <> nil) then begin
+   fowner.unregisterobject(ievent(fimagelist));
+  end;
   fowner:= aowner;
   if (fimagelist <> nil) and (fowner <> nil) then begin
    fowner.registerobject(ievent(fimagelist));
@@ -1035,7 +1044,12 @@ end;
 
 procedure tcustomitemlist.registerobject(const aobject: iobjectlink);
 begin
- getobjectlinker.link(aobject,iobjectlink(self));
+ getobjectlinker.link(iobjectlink(self),aobject);
+end;
+
+procedure tcustomitemlist.unregisterobject(const aobject: iobjectlink);
+begin
+ getobjectlinker.unlink(iobjectlink(self),aobject);
 end;
 
 function tcustomitemlist.add(const aitem: tlistitem): integer;
