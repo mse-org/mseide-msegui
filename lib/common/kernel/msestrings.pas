@@ -186,6 +186,9 @@ function msecomparestrlen(const S1, S2: msestring): Integer;
                 //case sensitiv, beruecksichtigt nur s1 laenge
 function mseCompareTextlen(const S1, S2: msestring): Integer;
                 //case insensitiv, beruecksichtigt nur s1 laenge
+function mseissamestrlen(const apartstring,astring: msestring): boolean;
+function mseissametextlen(const apartstring,astring: msestring): boolean;
+                //case insensitive
 
 function encodesearchoptions(caseinsensitive: boolean = false;
                         wholeword: boolean = false): searchoptionsty;
@@ -3400,6 +3403,31 @@ var
 begin
  str1:= copy(s2,1,length(s1));  //todo: optimize
  result:= msecomparetext(s1,str1);
+end;
+
+function mseissamestrlen(const apartstring,astring: msestring): boolean;
+var
+ po1,po2: pmsechar;
+begin
+ result:= pointer(apartstring) = pointer(astring);
+ if not result then begin
+  po1:= pmsechar(apartstring);
+  po2:= pmsechar(astring);
+  while po1^ <> #0 do begin
+   if po1^ <> po2^ then begin
+    exit;
+   end;
+   inc(po1);
+   inc(po2);
+  end;
+ end;
+ result:= true;
+end;
+
+function mseissametextlen(const apartstring,astring: msestring): boolean;
+                //case insensitive
+begin
+ result:= mseissamestrlen(mseuppercase(apartstring),mseuppercase(astring));
 end;
 
 function mselowercase(const s: msestring): msestring;

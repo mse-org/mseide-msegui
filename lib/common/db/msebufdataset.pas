@@ -170,6 +170,8 @@ type
   recoffset: integer;
   fieldindex: integer;
   desc: boolean;
+  caseinsensitive: boolean;
+  canpartialkey: boolean;
  end;
  indexfieldinfoarty = array of indexfieldinfoty;
   
@@ -182,7 +184,7 @@ type
    procedure change;
    procedure setoptions(const avalue: localindexoptionsty);
    procedure setfields(const avalue: tindexfields);
-   function compare(l,r: pintrecordty): integer;
+   function compare(l,r: pintrecordty; const apartialkey: boolean): integer;
    procedure quicksort(l,r: integer);
    procedure sort(var adata: pointerarty);
    function getactive: boolean;
@@ -196,12 +198,13 @@ type
    constructor create(aowner: tobject); override;
    destructor destroy; override;
    function find(const avalues: array of const; const aisnull: array of boolean;
-                                 out abookmark: string): boolean; overload;
+               out abookmark: string;
+               const partialkey: boolean = false): boolean; overload;
                 //true if found else next bigger,
                 //abookmark = '' if no bigger found
                 //string values must be msestring
-   function find(const avalues: array of const;
-                       const aisnull: array of boolean): boolean; overload;
+   function find(const avalues: array of const; const aisnull: array of boolean;
+                const partialkey: boolean = false): boolean; overload;
                 //sets dataset cursor if found
   published
    property fields: tindexfields read ffields write setfields;
@@ -1707,7 +1710,7 @@ begin
    setlength(ar2,length(ar1));
    setlength(ar3,length(ar1));
    for int1:= high(ar1) downto 0 do begin
-    ar2[int1]:= findexlocal[int1].compare(fcurrentbuf,@header);
+    ar2[int1]:= findexlocal[int1].compare(fcurrentbuf,@header,false);
     if ar2[int1] <> 0 then begin
      if int1 = factindex - 1 then begin
       ar1[int1]:= frecno + 1; //for fast find of bufpo
@@ -2644,9 +2647,8 @@ begin
  end;
 end;
 
-function tlocalindex.compare(l,r: pintrecordty): integer;
-label
- next;
+function tlocalindex.compare(l,r: pintrecordty;
+                                    const apartialkey: boolean): integer;
 var
  int1: integer;
 begin
@@ -2655,7 +2657,7 @@ begin
   with findexfieldinfos[int1] do begin
    if getfieldisnull(@l^.header.fielddata.nullmask,fieldindex) then begin
     if getfieldisnull(@r^.header.fielddata.nullmask,fieldindex) then begin
-     goto next;
+     continue;
     end
     else begin
      dec(result);
@@ -2672,11 +2674,19 @@ begin
    if desc then begin
     result:= -result;
    end;
+   if result <> 0 then begin
+    if apartialkey and canpartialkey and 
+     (caseinsensitive and 
+        mseissametextlen(pmsestring(pointer(l)+recoffset)^,
+                pmsestring(pointer(r)+recoffset)^) or
+      not caseinsensitive and 
+        mseissamestrlen(pmsestring(pointer(l)+recoffset)^,
+                pmsestring(pointer(r)+recoffset)^)) then begin
+     result:= 0;
+    end;               
+    break;
+   end;
   end;
-  if result <> 0 then begin
-   break;
-  end;
-next:
  end;
  if lio_desc in foptions then begin
   result:= -result;
@@ -2695,10 +2705,10 @@ begin
   j:= r;
   p:= (l + r) shr 1;
   repeat
-   while compare(fsortarray^[i],fsortarray^[p]) < 0 do begin
+   while compare(fsortarray^[i],fsortarray^[p],false) < 0 do begin
     inc(i);
    end;
-   while compare(fsortarray^[j],fsortarray^[p]) > 0 do begin
+   while compare(fsortarray^[j],fsortarray^[p],false) > 0 do begin
     dec(j);
    end;
    if i <= j then begin
@@ -2739,7 +2749,7 @@ begin
    upper:= fbrecordcount - 1;
    while lower <= upper do begin
     pivot:= (upper + lower) div 2;
-    int1:= compare(arecord,ind[pivot]);
+    int1:= compare(arecord,ind[pivot],false);
     if int1 >= 0 then begin //pivot <= rev
      lower:= pivot + 1;
     end
@@ -2848,6 +2858,8 @@ begin
       recoffset:= offset; //calc field
      end;
      desc:= ifo_desc in foptions;
+     caseinsensitive:= ifo_caseinsensitive in foptions;
+     canpartialkey:= (vtype = vtwidestring) and (int1 = high(findexfieldinfos));
     end;
    end;
   end;
@@ -2860,7 +2872,8 @@ begin
 end;
 
 function tlocalindex.find(const avalues: array of const;
-              const aisnull: array of boolean; out abookmark: string): boolean;
+             const aisnull: array of boolean; out abookmark: string;
+             const partialkey: boolean = false): boolean;
 var
  int1: integer; 
  v: tvarrec;
@@ -2919,11 +2932,26 @@ begin
  with tmsebufdataset(fowner) do begin
   if int1 > 0 then begin
    with findexes[findexlocal.indexof(self) + 1] do begin
-    if compare(po1,ind[int1-1]) = 0 then begin
+    if compare(po1,ind[int1-1],false) = 0 then begin
      result:= true;
      dec(int1);
     end;
     if int1 < fbrecordcount then begin
+     if partialkey then begin
+      if not result then begin
+       result:= compare(po1,ind[int1],true) = 0;
+       if not result then begin
+        inc(int1);
+        if (int1 >= fbrecordcount) or 
+                       (compare(po1,ind[int1],true) <> 0) then begin
+         dec(int1);
+        end
+        else begin
+         result:= true;
+        end;
+       end;         
+      end;
+     end;          
      bm1.recno:= int1;
      bm1.recordpo:= ind[int1];
      setlength(abookmark,sizeof(bm1));
@@ -2936,12 +2964,12 @@ begin
 end;
 
 function tlocalindex.find(const avalues: array of const;
-                       const aisnull: array of boolean): boolean;
+    const aisnull: array of boolean; const partialkey: boolean = false): boolean;
                 //sets dataset cursor if found
 var
  str1: string;
 begin
- if find(avalues,aisnull,str1) then begin
+ if find(avalues,aisnull,str1,partialkey) then begin
   tmsebufdataset(fowner).bookmark:= str1;
  end;
 end;
