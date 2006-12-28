@@ -568,10 +568,11 @@ begin
         end;
         }
         widgetrect:= rect1;
-        visible:= true;
+//        visible:= true;
        end
        else begin
-        visible:= false;
+        bounds_y:= -bounds_cy;      //shift out of view
+//        visible:= false;
        end;
       end;
      end;
@@ -599,10 +600,11 @@ begin
         end;
         }
         widgetrect:= rect1;
-        visible:= true;
+//        visible:= true;
        end
        else begin
-        visible:= false;
+        bounds_y:= -bounds_cy;      //shift out of view
+//        visible:= false;
        end;
       end;
      end;
