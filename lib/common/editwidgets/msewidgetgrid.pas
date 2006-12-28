@@ -611,6 +611,22 @@ begin
     end;
    end;
   end;
+  with tcustomwidgetgrid(fgrid) do begin
+   if fcontainer1 <> nil then begin //else call from tcustomwidgetgrid.create
+    if fcontainer1.widgetcount = 0 then begin
+     exclude(twidget1(fcontainer1).foptionswidget,ow_arrowfocus);
+    end
+    else begin
+     include(twidget1(fcontainer1).foptionswidget,ow_arrowfocus);
+    end;
+    if fcontainer3.widgetcount = 0 then begin
+     exclude(twidget1(fcontainer3).foptionswidget,ow_arrowfocus);
+    end
+    else begin
+     include(twidget1(fcontainer3).foptionswidget,ow_arrowfocus);
+    end;
+   end;
+  end;
  finally
   dec(fwidgetrectupdating);
  end;
@@ -1383,6 +1399,7 @@ end;
 constructor tdummywidget.create(aowner: tcomponent);
 begin
  inherited;
+ foptionswidget:= defaultoptionswidgetnofocus; 
  size:= nullsize;
 end;
 
