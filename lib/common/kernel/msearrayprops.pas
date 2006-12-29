@@ -233,7 +233,7 @@ type
    function getsize: integer; override;
    function getdatapo: pointer; override;
    function getitemspo(const index: integer): pointer; override;
-   procedure createitem(const index: integer; out item: tpersistent); virtual;
+   procedure createitem(const index: integer; var item: tpersistent); virtual;
    procedure defineproperties(filer: tfiler); override;
    procedure readcollection(reader: treader);
    procedure writecollection(writer: twriter);
@@ -258,7 +258,7 @@ type
   private
   protected
    fowner: tobject;
-   procedure createitem(const index: integer; out item: tpersistent); override;
+   procedure createitem(const index: integer; var item: tpersistent); override;
    procedure internalcreate(const aowner: tobject;
                            aclasstype: virtualpersistentclassty);
   public
@@ -271,7 +271,7 @@ type
   private
   protected
    fowner: tobject;
-   procedure createitem(const index: integer; out item: tpersistent); override;
+   procedure createitem(const index: integer; var item: tpersistent); override;
   public
    constructor create(const aowner: tobject; aclasstype: ownedeventpersistentclassty);
  end;
@@ -288,7 +288,7 @@ type
    function getitems(index: integer): tstringlist; reintroduce;
    procedure setitems(index: integer; const Value: tstringlist); reintroduce;
   protected
-   procedure createitem(const index: integer; out item: tpersistent); override;
+   procedure createitem(const index: integer; var item: tpersistent); override;
   public
    property items[index: integer]: tstringlist read getitems write setitems;
  end;
@@ -318,7 +318,7 @@ type
    fident: integer;
    function getidents: integerarty;
   protected
-   procedure createitem(const index: integer; out item: tpersistent); override;
+   procedure createitem(const index: integer; var item: tpersistent); override;
    procedure change(const index: integer); override;
    function getidentnum(const index: integer): integer;
    procedure dosizechanged; override;
@@ -1213,7 +1213,7 @@ begin
 end;
 
 procedure tpersistentarrayprop.createitem(const index: integer;
-                  out item: tpersistent);
+                  var item: tpersistent);
 begin
  if fitemclasstype <> nil then begin
   item:= fitemclasstype.create;
@@ -1432,7 +1432,7 @@ begin
 end;
 
 procedure townedpersistentarrayprop.createitem(const index: integer;
-                  out item: tpersistent);
+                  var item: tpersistent);
 begin
  if fitemclasstype <> nil then begin
   item:= ownedpersistentclassty(fitemclasstype).create(fowner);
@@ -1452,7 +1452,7 @@ begin
 end;
 
 procedure townedeventpersistentarrayprop.createitem(const index: integer;
-  out item: tpersistent);
+                                 var item: tpersistent);
 begin
  if fitemclasstype <> nil then begin
   item:= ownedeventpersistentclassty(fitemclasstype).create(fowner);
@@ -1474,7 +1474,7 @@ end;
 { tstringlistarrayprop }
 
 procedure tstringlistarrayprop.createitem(const index: integer;
-                out item: tpersistent);
+                                                   var item: tpersistent);
 begin
  item:= tstringlist.create;
 end;
@@ -1499,7 +1499,7 @@ begin
 end;
 
 procedure tindexpersistentarrayprop.createitem(const index: integer;
-  out item: tpersistent);
+                                   var item: tpersistent);
 begin
  if fitemclasstype <> nil then begin
   item:= indexpersistentclassty(fitemclasstype).create(fowner,self);

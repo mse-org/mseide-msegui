@@ -87,7 +87,7 @@ type
    procedure setcolor(const avalue: colorty);
    procedure setcoloractive(const avalue: colorty);
   protected
-   procedure createitem(const index: integer; out item: tpersistent); override;
+   procedure createitem(const index: integer; var item: tpersistent); override;
   public
    constructor create(const aowner: tcustomtabbar; aclasstype: indexpersistentclassty);
                                          reintroduce;
@@ -210,6 +210,7 @@ type
   function getcolortab: colorty;
   function getcoloractivetab: colorty;
   procedure doselect;
+  procedure dodeselect;
  end;
 
  ttabpage = class(tscrollingwidget,itabpage)
@@ -218,6 +219,7 @@ type
    fcaption: msestring;
    fcolortab,fcoloractivetab: colorty;
    fonselect: notifyeventty;
+   fondeselect: notifyeventty;
    function getcaption: captionty;
    procedure setcaption(const Value: captionty);
    function getcolortab: colorty;
@@ -235,6 +237,7 @@ type
    procedure registerchildwidget(const child: twidget); override;
    procedure designselected(const selected: boolean); override;
    procedure doselect; virtual;
+   procedure dodeselect; virtual;
   public
    constructor create(aowner: tcomponent); override;
    function isactivepage: boolean;
@@ -250,6 +253,7 @@ type
    property onchildscaled;
    property onfontheightdelta;
    property onselect: notifyeventty read fonselect write fonselect;
+   property ondeselect: notifyeventty read fondeselect write fondeselect;
    property visible default false;
  end;
 
@@ -258,6 +262,7 @@ type
    ftabwidget: ttabwidget;
    fcolortab,fcoloractivetab: colorty;
    fonselect: notifyeventty;
+   fondeselect: notifyeventty;
    procedure settabwidget(const value: ttabwidget);
    function gettabwidget: ttabwidget;
    procedure changed;
@@ -271,6 +276,7 @@ type
    procedure visiblechanged; override;
    procedure setcaption(const value: msestring); override;
    procedure doselect; virtual;
+   procedure dodeselect; virtual;
   public
    constructor create(aowner: tcomponent); override;
    function isactivepage: boolean;
@@ -282,6 +288,7 @@ type
    property coloractivetab: colorty read getcolortab
                   write setcoloractivetab default cl_active;
    property onselect: notifyeventty read fonselect write fonselect;
+   property ondeselect: notifyeventty read fondeselect write fondeselect;
    property visible default false;
  end;
 
@@ -831,7 +838,7 @@ begin
  end;
 end;
 
-procedure ttabs.createitem(const index: integer; out item: tpersistent);
+procedure ttabs.createitem(const index: integer; var item: tpersistent);
 begin
  if item = nil then begin
   if assigned(foncreatetab) then begin
@@ -1530,6 +1537,13 @@ begin
  end;
 end;
 
+procedure ttabpage.dodeselect;
+begin
+ if canevent(tmethod(fondeselect)) then begin
+  fondeselect(self);
+ end;
+end;
+
 { ttabform }
 
 procedure ttabform.changed;
@@ -1618,6 +1632,13 @@ procedure ttabform.doselect;
 begin
  if canevent(tmethod(fonselect)) then begin
   fonselect(self);
+ end;
+end;
+
+procedure ttabform.dodeselect;
+begin
+ if canevent(tmethod(fondeselect)) then begin
+  fondeselect(self);
  end;
 end;
 
@@ -1947,6 +1968,12 @@ begin
    end;
    int1:= factivepageindex;
    factivepageindex:= -1;
+   if not (csloading in componentstate) then begin
+    tpagetab(ftabs.tabs[int1]).fpageintf.dodeselect;
+    if (factivepageindex <> -1) then begin
+     exit;
+    end;
+   end;
    items[int1].visible:= false;
    if (factivepageindex <> -1) or items[int1].visible then begin
     exit;

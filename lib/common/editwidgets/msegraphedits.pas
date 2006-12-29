@@ -495,7 +495,7 @@ type
    fowner: tcustomdatabutton;
   protected
    function getitems(const index: integer): tface;
-   procedure createitem(const index: integer; out item: tpersistent); override;
+   procedure createitem(const index: integer; var item: tpersistent); override;
   public
    constructor create(const aowner: tcustomdatabutton);
    property items[const index: integer]: tface read getitems; default;
@@ -1885,7 +1885,7 @@ begin
 end;
 
 procedure tvaluefacearrayprop.createitem(const index: integer;
-               out item: tpersistent);
+                                        var item: tpersistent);
 begin
  item:= tface.create(iface(fowner));
 end;

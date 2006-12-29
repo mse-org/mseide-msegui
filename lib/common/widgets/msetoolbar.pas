@@ -120,7 +120,7 @@ type
    procedure setface(const avalue: tface);
    procedure createface;
   protected
-   procedure createitem(const index: integer; out item: tpersistent); override;
+   procedure createitem(const index: integer; var item: tpersistent); override;
    procedure dochange(const index: integer); override;
   public
    constructor create(const aowner: tcustomtoolbar); reintroduce;
@@ -555,8 +555,7 @@ begin
  result:= items[count-1];
 end;
 
-procedure ttoolbuttons.createitem(const index: integer;
-  out item: tpersistent);
+procedure ttoolbuttons.createitem(const index: integer; var item: tpersistent);
 begin
  inherited;
  with ttoolbutton(item) do begin

@@ -1077,7 +1077,7 @@ type
    fdatalink: tgriddatalink;
    procedure setdbindicatorcol(const Value: integer);
   protected
-   procedure createitem(const index: integer; out item: tpersistent); override;
+   procedure createitem(const index: integer; var item: tpersistent); override;
    procedure setcount1(acount: integer; doinit: boolean); override;
   public
    constructor create(const aowner: tcustomwidgetgrid;
@@ -1265,7 +1265,7 @@ type
    fdatalink: tgriddatalink;
    procedure setdbindicatorcol(const Value: integer);
   protected
-   procedure createitem(const index: integer; out item: tpersistent); override;
+   procedure createitem(const index: integer; var item: tpersistent); override;
    procedure setcount1(acount: integer; doinit: boolean); override;
   public
    constructor create(const aowner: tcustomgrid;
@@ -5331,7 +5331,7 @@ begin
  inherited create(aowner);
 end;
 
-procedure tdbwidgetfixcols.createitem(const index: integer; out item: tpersistent);
+procedure tdbwidgetfixcols.createitem(const index: integer; var item: tpersistent);
 begin
  if index = fdbindicatorcol then begin
   item:= tdbwidgetindicatorcol.create(fgrid,self);
@@ -5768,7 +5768,7 @@ begin
  inherited create(aowner);
 end;
 
-procedure tdbstringfixcols.createitem(const index: integer; out item: tpersistent);
+procedure tdbstringfixcols.createitem(const index: integer; var item: tpersistent);
 begin
  if index = fdbindicatorcol then begin
   item:= tdbstringindicatorcol.create(fgrid,self);

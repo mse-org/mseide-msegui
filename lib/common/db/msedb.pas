@@ -562,7 +562,7 @@ type
    procedure setitems(const index: integer; const avalue: tfield);
    function getitems(const index: integer): tfield;
   protected
-   procedure createitem(const index: integer; out item: tpersistent); override;
+   procedure createitem(const index: integer; var item: tpersistent); override;
    procedure defineproperties(filer: tfiler); override;
   public
    constructor create(const adataset: tdataset);
@@ -2533,7 +2533,8 @@ begin
  inherited create(nil);
 end;
 
-procedure tpersistentfields.createitem(const index: integer; out item: tpersistent);
+procedure tpersistentfields.createitem(const index: integer; 
+                                                     var item: tpersistent);
 begin
  if csloading in fdataset.componentstate then begin
   item:= nil;

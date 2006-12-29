@@ -797,7 +797,7 @@ type
                  out range: cellaxisrangety; ascrollables: boolean = true);
    function itematpos(const pos: integer; 
                const getscrollable: boolean = true): integer; //-1 if none
-   procedure createitem(const index: integer; out item: tpersistent); override;
+   procedure createitem(const index: integer; var item: tpersistent); override;
 //   function firstopposite: integer;
    procedure fontchanged;
   public
@@ -890,7 +890,7 @@ end;
    procedure setcount1(acount: integer; doinit: boolean); override;
    procedure setrowcountmax(const value: integer);
    procedure rowcountchanged(const newcount: integer); override;
-   procedure createitem(const index: integer; out item: tpersistent); override;
+   procedure createitem(const index: integer; var item: tpersistent); override;
    procedure updatelayout; override;
    function colatpos(const x: integer;
                  const getscrollable: boolean = true): integer;
@@ -1043,7 +1043,7 @@ end;
   private
    fgrid: tcustomgrid;
   protected
-   procedure createitem(const index: integer; out item: tpersistent); override;
+   procedure createitem(const index: integer; var item: tpersistent); override;
   public
    constructor create(const aowner: tcustomgrid);
  end;
@@ -3332,7 +3332,7 @@ begin
  inherited;
 end;
 
-procedure tgridarrayprop.createitem(const index: integer; out item: tpersistent);
+procedure tgridarrayprop.createitem(const index: integer; var item: tpersistent);
 begin
  item:= gridpropclassty(fitemclasstype).create(fgrid,self);
 end;
@@ -4771,8 +4771,7 @@ begin
  end;
 end;
 
-procedure tdatacols.createitem(const index: integer;
-  out item: tpersistent);
+procedure tdatacols.createitem(const index: integer; var item: tpersistent);
 begin
  item:= nil;
  fgrid.createdatacol(index,tdatacol(item));
@@ -10351,7 +10350,7 @@ begin
  inherited create(nil);
 end;
 
-procedure trowfontarrayprop.createitem(const index: integer; out item: tpersistent);
+procedure trowfontarrayprop.createitem(const index: integer; var item: tpersistent);
 begin
  item:= tfont.create;
  item.Assign(stockobjects.fonts[stf_default]);

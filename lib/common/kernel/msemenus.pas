@@ -29,7 +29,7 @@ type
    function getmenuitems(index: integer): tmenuitem;
    procedure setmenuitems(index: integer; const Value: tmenuitem);
   protected
-   procedure createitem(const index: integer; out item: tpersistent); override;
+   procedure createitem(const index: integer; var item: tpersistent); override;
    procedure dosizechanged; override;
    procedure dochange(const aindex: integer); override;
    procedure receiveevent(const event: tobjectevent);
@@ -935,7 +935,7 @@ begin
  end;
 end;
 
-procedure tmenuitems.createitem(const index: integer; out item: tpersistent);
+procedure tmenuitems.createitem(const index: integer; var item: tpersistent);
 begin
  item:= tmenuitem.create(fowner,fowner.fowner);
 end;

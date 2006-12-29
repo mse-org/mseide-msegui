@@ -61,7 +61,7 @@ type
   protected
    fitemindex: integer;
    fkeyvalue: msestring;
-   procedure createitem(const index: integer; out item: tpersistent); override;
+   procedure createitem(const index: integer; var item: tpersistent); override;
    procedure itemchanged(sender: tdatalist; index: integer);
              //sender = nil -> col undefined
    function maxrowcount: integer;
@@ -408,8 +408,7 @@ begin
  result:= tdropdowncol;
 end;
 
-procedure tdropdowncols.createitem(const index: integer;
-  out item: tpersistent);
+procedure tdropdowncols.createitem(const index: integer; var item: tpersistent);
 begin
  item:= getcolclass.create(fowner);
  with tdropdowncol(item) do begin
