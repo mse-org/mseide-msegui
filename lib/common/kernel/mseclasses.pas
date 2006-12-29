@@ -1584,6 +1584,9 @@ var
  po1: pointer;
  po2: plinkinfoty;
  int1: integer;
+ {$ifndef FPC}
+ po3: pointer;
+ {$endif}
 begin
 {$ifdef debugobjectlink}
  writeln('destroy o: ' + hextostr(cardinal(fownerintf),8));
@@ -1605,7 +1608,12 @@ begin
      end;
     end
     else begin
+     {$ifdef FPC}
      iobjectlink(po1).unlink(iobjectlink(pointer(1)),iobjectlink(source),valuepo);
+     {$else}
+     po3:= pointer(1);
+     iobjectlink(po1).unlink(iobjectlink(po3),iobjectlink(source),valuepo);
+     {$endif}
     end;
    end;
   end;
