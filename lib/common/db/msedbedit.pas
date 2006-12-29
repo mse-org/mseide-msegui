@@ -4881,7 +4881,10 @@ begin
   if (afield = nil) and (frowexited = int1) and (feditingbefore = editing) then begin
    fgrid.row:= invalidaxis;
   end;
-  fgrid.row:= activerecord;
+  int1:= activerecord;
+  if int1 < fgrid.rowcount then begin
+   fgrid.row:= int1; //else empty dataset
+  end;
  finally
   tcustomgrid1(fgrid).endnonullcheck;
   tcustomgrid1(fgrid).endnocheckvalue;
