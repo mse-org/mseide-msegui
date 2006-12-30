@@ -580,7 +580,7 @@ begin
 end;
 
 type
- tcharlenghtgetter = class
+ tcharlengthgetter = class
   private
    ftransaction: tsqltransaction;
    fcursor: tsqlcursor;
@@ -594,9 +594,9 @@ type
         //-maxint if invalid
  end;
  
-{ tcharlenghtgetter }
+{ tcharlengthgetter }
 
-constructor tcharlenghtgetter.create(const aowner: tibconnection);
+constructor tcharlengthgetter.create(const aowner: tibconnection);
 begin
  fowner:= aowner;
  fparams:= tparams.create;
@@ -626,7 +626,7 @@ begin
  end;
 end;
 
-destructor tcharlenghtgetter.destroy;
+destructor tcharlengthgetter.destroy;
 begin
  with fowner do begin
   try
@@ -650,7 +650,7 @@ begin
  end;
 end;
 
-function tcharlenghtgetter.characterlength(const relationname: string;
+function tcharlengthgetter.characterlength(const relationname: string;
                const fieldname: string): integer;
 var 
  tr: pointer;
@@ -669,8 +669,11 @@ begin
    with sqlda^ do begin
     if sqld = 1 then begin
      with sqlvar[0] do begin
-      if (sqltype and not 1 = sql_short) then begin
-       result:= smallint(sqldata^);
+      if not (assigned(SQLInd) and (SQLInd^ = -1)) then begin
+                     //not null
+       if (sqltype and not 1 = sql_short) then begin
+        result:= smallint(sqldata^);
+       end;
       end;
      end;
     end;
@@ -700,10 +703,10 @@ var
  TransLen: word;
  TransType: TFieldType;
  FD: TFieldDef;
- chlengetter: tcharlenghtgetter;
+ chlengetter: tcharlengthgetter;
  int1: integer;
 begin
- chlengetter:= tcharlenghtgetter.create(self);
+ chlengetter:= tcharlengthgetter.create(self);
  try
   with tibcursor(cursor) do begin
    for x := 0 to SQLDA^.SQLD - 1 do begin
