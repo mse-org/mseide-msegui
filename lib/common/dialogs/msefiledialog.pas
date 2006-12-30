@@ -1075,7 +1075,12 @@ begin
    end;
    if (fdo_checkexist in dialogoptions) and 
        not ((filename.value = '') and (fdo_acceptempty in dialogoptions)) then begin
-    bo1:= findfile(filenames[0]);
+    if fdo_directory in dialogoptions then begin
+     bo1:= finddir(filenames[0]);
+    end
+    else begin
+     bo1:= findfile(filenames[0]);
+    end;
     if fdo_save in dialogoptions then begin
      if bo1 then begin
       with stockobjects do begin
