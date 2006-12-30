@@ -523,16 +523,17 @@ begin
     end;
 end;
 
-procedure TIBConnection.UnPrepareStatement(cursor : TSQLCursor);
-
+procedure tibconnection.unpreparestatement(cursor: tsqlcursor);
 begin
-  with cursor as TIBcursor do
-    begin
-    if isc_dsql_free_statement(@Status, @Statement, DSQL_Drop) <> 0 then
-      CheckError('FreeStatement', Status);
-    Statement := nil;
-    FPrepared := False;
-    end;
+ with tibcursor(cursor) do begin
+  if statement <> nil then begin 
+   if isc_dsql_free_statement(@status, @statement, dsql_drop) <> 0 then begin
+    checkerror('freestatement', status);
+   end;
+  end;
+  statement:= nil;
+  fprepared:= false;
+ end;
 end;
 
 procedure TIBConnection.FreeSQLDABuffer(var aSQLDA : PXSQLDA);

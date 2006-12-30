@@ -524,6 +524,14 @@ type
  iactivatorclient = interface(inullinterface)
  end;
  
+ activatoroptionty = (avo_activateonloaded,avo_activatedelayed,
+                avo_deactivateonterminated,
+                avo_handleexceptions,avo_quietexceptions);
+ activatoroptionsty = set of activatoroptionty;
+const
+ defaultactivatoroptions = [avo_handleexceptions,avo_quietexceptions];
+ 
+type
  tactivator = class;
 
  tguicomponent = class(tmsecomponent,iactivator)
@@ -547,9 +555,6 @@ type
    property activator: tactivator read factivator write setactivator;
  end;
 
- activatoroptionty = (avo_activateonloaded,avo_activatedelayed,
-                                    avo_deactivateonterminated);
- activatoroptionsty = set of activatoroptionty;
  activateerroreventty = procedure(const sender: tactivator; 
                  const aclient: tobject; const aexception: exception;
                  var handled: boolean) of object;
@@ -596,7 +601,8 @@ type
   published
    property clients: integer read getclients write setclients; 
                                   //hook for object inspector
-   property options: activatoroptionsty read foptions write setoptions;
+   property options: activatoroptionsty read foptions write setoptions 
+                    default defaultactivatoroptions;
    property active: boolean read factive write setactive;
    property onbeforeactivate: notifyeventty read fonbeforeactivate
                            write fonbeforeactivate;
@@ -2181,6 +2187,7 @@ end;
 
 constructor tactivator.create(aowner: tcomponent);
 begin
+ foptions:= defaultactivatoroptions;
  inherited;
  application.registeronterminated({$ifdef FPC}@{$endif}doterminated);
 end;
@@ -2374,10 +2381,17 @@ begin
     iobjectlink(fclients[int1]).objevent(ievent(self),oe_activate);
    except
     on e: exception do begin
+     bo1:= false;
      if bo2 then begin
-      bo1:= false;
       fonactivateerror(self,iobjectlink(fclients[int1]).getinstance,e,bo1);
-      if not bo1 then begin
+     end;
+     if not bo1 then begin
+      if avo_handleexceptions in foptions then begin
+       if not (avo_quietexceptions in foptions) then begin
+        application.showexception(e);
+       end;
+      end
+      else begin
        raise;
       end;
      end;
