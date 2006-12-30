@@ -431,7 +431,7 @@ begin
    if bo1 then begin
     result:= dwo1;
    end;
-  until bo1 or (dwo1 <> still_active);
+  until not bo1 or (dwo1 <> still_active);
   closehandle(prochandle);
  end;
 end;
