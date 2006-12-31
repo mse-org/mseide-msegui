@@ -2557,7 +2557,7 @@ begin
   result:= '<---->';
  end
  else begin
-  result:= '<' + item1.caption + '>';
+  result:= '<' + decodemsestring(item1.caption) + '>';
   if item1.name <> '' then begin
    result:= result + '<' + item1.name + '>';
   end;
