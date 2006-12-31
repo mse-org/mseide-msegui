@@ -860,27 +860,29 @@ procedure tmsebufdataset.internalclose;
 var 
  int1: integer;
 begin
- fopen:= false;
  exclude(fbstate,bs_opening);
  frecno:= -1;
- with findexes[0] do begin
-  for int1:= 0 to fbrecordcount - 1 do begin
-   intfreerecord(ind[int1]);
-  end;
- end;
- intfreerecord(femptybuffer);
- intfreerecord(ffilterbuffer);
-// pointer(fnewvaluebuffer^.header.blobinfo):= nil;
-// freerecordbuffer(pchar(fnewvaluebuffer));
- freemem(fnewvaluebuffer); //allways copied by move, needs no finalize
- for int1:= 0 to high(fupdatebuffer) do begin
-  with fupdatebuffer[int1] do begin
-   if bookmark.recordpo <> nil then begin
-    intfreerecord(oldvalues);
+ if fopen then begin
+  fopen:= false;
+  with findexes[0] do begin
+   for int1:= 0 to fbrecordcount - 1 do begin
+    intfreerecord(ind[int1]);
    end;
   end;
+  intfreerecord(femptybuffer);
+  intfreerecord(ffilterbuffer);
+ // pointer(fnewvaluebuffer^.header.blobinfo):= nil;
+ // freerecordbuffer(pchar(fnewvaluebuffer));
+  freemem(fnewvaluebuffer); //allways copied by move, needs no finalize
+  for int1:= 0 to high(fupdatebuffer) do begin
+   with fupdatebuffer[int1] do begin
+    if bookmark.recordpo <> nil then begin
+     intfreerecord(oldvalues);
+    end;
+   end;
+  end;
+  fupdatebuffer:= nil;
  end;
- fupdatebuffer:= nil;
  clearindex;
  fbrecordcount:= 0;
  

@@ -526,7 +526,8 @@ type
  
  activatoroptionty = (avo_activateonloaded,avo_activatedelayed,
                 avo_deactivateonterminated,
-                avo_handleexceptions,avo_quietexceptions);
+                avo_handleexceptions,avo_quietexceptions,
+                avo_abortonexception);
  activatoroptionsty = set of activatoroptionty;
 const
  defaultactivatoroptions = [avo_handleexceptions,avo_quietexceptions];
@@ -2394,6 +2395,9 @@ begin
       else begin
        raise;
       end;
+     end;
+     if avo_abortonexception in foptions then begin
+      break;
      end;
     end;
    end;

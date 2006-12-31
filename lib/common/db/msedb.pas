@@ -652,6 +652,7 @@ type
    procedure internaldelete;
    procedure internalopen;
    procedure closequery(var amodalresult: modalresultty);
+   function closequery: boolean; //true if ok
    function post: boolean; //calls post if in edit or insert state,
                            //returns false if nothing done
    function posting: boolean; //true if in post procedure
@@ -3173,6 +3174,15 @@ begin
   amodalresult:= mr_exception;
   application.handleexception(nil);
  end;
+end;
+
+function tdscontroller.closequery: boolean; //true if ok
+var
+ modres1: modalresultty;
+begin
+ modres1:= mr_canclose;
+ closequery(modres1);
+ result:= modres1 = mr_canclose;
 end;
 
 function tdscontroller.post: boolean;

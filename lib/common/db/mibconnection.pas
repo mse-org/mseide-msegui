@@ -673,7 +673,7 @@ begin
       if not (assigned(SQLInd) and (SQLInd^ = -1)) then begin
                      //not null
        if (sqltype and not 1 = sql_short) then begin
-        result:= smallint(sqldata^);
+        result:= psmallint(sqldata)^;
        end;
       end;
      end;
