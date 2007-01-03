@@ -206,6 +206,7 @@ type
    function find(const avalues: array of const; const aisnull: array of boolean;
                 const partialkey: boolean = false): boolean; overload;
                 //sets dataset cursor if found
+   function getbookmark(const arecno: integer): string;
   published
    property fields: tindexfields read ffields write setfields;
    property options: localindexoptionsty read foptions write setoptions;
@@ -356,6 +357,9 @@ type
    function  getcanmodify: boolean; override;
    function getrecord(buffer: pchar; getmode: tgetmode;
                                    docheck: boolean): tgetresult; override;
+   function bookmarktostring(const abookmark: bookmarkdataty): string;
+   procedure checkrecno(const avalue: integer);
+                              
    procedure internalopen; override;
    procedure internalclose; override;
    procedure clearbuffers; override;
@@ -1924,9 +1928,7 @@ begin
    exit;
   end;
  end;
- if (value > recordcount) or (value < 1) then begin
-  databaseerror(snosuchrecord,self);
- end;
+ checkrecno(value);
  bm.data.recordpo:= nil;
  bm.data.recno:= value-1;
  gotobookmark(@bm);
@@ -2556,6 +2558,19 @@ begin
  end;
 end;
 
+function tmsebufdataset.bookmarktostring(const abookmark: bookmarkdataty): string;
+begin
+ setlength(result,sizeof(abookmark));
+ move(abookmark,pointer(result)^,sizeof(abookmark));
+end;
+
+procedure tmsebufdataset.checkrecno(const avalue: integer);
+begin
+ if (avalue > recordcount) or (avalue < 1) then begin
+  databaseerror(snosuchrecord,self);
+ end;
+end;
+
 { tlocalindexes }
 
 constructor tlocalindexes.create(const aowner: tmsebufdataset);
@@ -2956,8 +2971,7 @@ begin
      end;          
      bm1.recno:= int1;
      bm1.recordpo:= ind[int1];
-     setlength(abookmark,sizeof(bm1));
-     move(bm1,abookmark[1],sizeof(bm1));
+     abookmark:= bookmarktostring(bm1);
     end;
    end;
   end;
@@ -2973,6 +2987,19 @@ var
 begin
  if find(avalues,aisnull,str1,partialkey) then begin
   tmsebufdataset(fowner).bookmark:= str1;
+ end;
+end;
+
+function tlocalindex.getbookmark(const arecno: integer): string;
+var
+ bm1: bookmarkdataty;
+begin
+ with tmsebufdataset(fowner) do begin
+  checkrecno(arecno);
+  checkindex(true);
+  bm1.recno:= arecno - 1;
+  bm1.recordpo:= findexes[findexlocal.indexof(self) + 1].ind[arecno-1];
+  result:= bookmarktostring(bm1);
  end;
 end;
 
