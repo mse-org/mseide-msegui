@@ -103,7 +103,7 @@ type
    procedure setparentwidget(const Value: twidget); override;
    function isgroupleader: boolean; override;
 
-   procedure ReadState(Reader: TReader); override;
+   procedure readstate(reader: treader); override;
    procedure loaded; override;
    procedure setoptionswidget(const avalue: optionswidgetty); override;
 
@@ -381,7 +381,8 @@ type
    class function getmoduleclassname: string; override;
   public
    constructor create(aowner: tcomponent); overload; override;
-   constructor create(aowner: tcomponent; load: boolean); reintroduce; overload;  virtual;
+   constructor create(aowner: tcomponent; load: boolean); 
+                                     reintroduce; overload; virtual;
  end;
  
  subformclassty = class of tsubform;

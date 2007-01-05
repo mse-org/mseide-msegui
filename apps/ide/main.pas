@@ -42,7 +42,7 @@ type
  messagetextkindty = (mtk_info,mtk_running,mtk_finished,mtk_error,mtk_signal);
 
  startcommandty = (sc_none,sc_step,sc_continue);
- formkindty = (fok_main,fok_simple,fok_dock,fok_data,fok_subform);
+ formkindty = (fok_main,fok_simple,fok_dock,fok_data,fok_subform,fok_report);
 
  tmainfo = class(tmseform,idesignnotification)
    gdb: tgdbmi;
@@ -234,7 +234,7 @@ procedure handleerror(const e: exception; const text: string);
 implementation
 uses
  regwidgets,regeditwidgets,regkernel,regdialogs,
- {$ifdef FPC}{$ifndef mse_withoutdb}regdb,{$endif}{$endif}
+ {$ifdef FPC}{$ifndef mse_withoutdb}regdb,regreport,{$endif}{$endif}
  regdesignutils,regsysutils,regserialcomm,
 {$ifdef morecomponents}
 {$include regcomponents.inc}
@@ -247,7 +247,8 @@ uses
  findinfileform,formdesigner,sourceupdate,actionsmodule,programparametersform,
  objectinspector,msesysutils,msestream,msesys,cpuform,disassform,
  panelform,watchpointsform,threadsform,msegraphics,targetconsole,
- debuggerform,componentpaletteform,messageform,msesettings,mseintegerenter
+ debuggerform,componentpaletteform,messageform,msesettings,mseintegerenter,
+ msereport
  {$ifdef linux} ,libc {$endif};
 
 procedure handleerror(const e: exception; const text: string);
@@ -272,6 +273,7 @@ begin
  registerdesignmoduleclass(tmseform,{$ifdef FPC}@{$endif}createmseform);
  registerdesignmoduleclass(tdockform,{$ifdef FPC}@{$endif}createmseform);
  registerdesignmoduleclass(tsubform,{$ifdef FPC}@{$endif}createsubform);
+ registerdesignmoduleclass(treport,{$ifdef FPC}@{$endif}createreport);
  registerdesignmoduleclass(tmsedatamodule,{$ifdef FPC}@{$endif}createmsedatamodule);
  designer.objformat:= of_fp;
  componentpalettefo.updatecomponentpalette(true);
@@ -1485,6 +1487,11 @@ begin
      str2:= newsubfosource;
      str3:= newsubfoform;
     end;
+    fok_report: begin
+     str2:= newreportsource;
+     str3:= newreportform;
+     str4:= 'report';
+    end;
     else begin
      str2:= '';
      str3:= '';
@@ -2080,6 +2087,5 @@ procedure tmainfo.configureexecute(const sender: TObject);
 begin
  configureide;
 end;
-
 
 end.

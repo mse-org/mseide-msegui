@@ -70,7 +70,9 @@ type
  widgetstatesty = set of widgetstatety;
  widgetstate1ty = (ws1_releasing,ws1_childscaled,
                    ws1_widgetregionvalid,ws1_rootvalid,{ws1_clientsizing,}
-                   ws1_anchorsizing,ws1_isstreamed);
+                   ws1_anchorsizing,ws1_isstreamed,
+                   ws1_noclipchildren
+                   );
  widgetstates1ty = set of widgetstate1ty;
 
  framestatety = (fs_sbhorzon,fs_sbverton,fs_sbhorzfix,fs_sbvertfix,
@@ -659,6 +661,7 @@ type
    procedure setcolor(const Value: colorty);
    function getsize: sizety;
 
+   procedure widgetregioninvalid;
    procedure updateopaque(const children: boolean);
    function invalidateneeded: boolean;
    procedure updateroot;
@@ -684,7 +687,6 @@ type
 
    function getzorder: integer;
    procedure setzorder(const value: integer);
-   procedure widgetregioninvalid;
 
    function getparentclientpos: pointty;
    procedure setparentclientpos(const avalue: pointty);
@@ -804,7 +806,7 @@ type
    procedure clampinview(const arect: rectty; const bottomright: boolean); virtual;
                     //origin paintpos
 
-   procedure internalpaint(const canvas: tcanvas);
+   procedure internalpaint(const canvas: tcanvas); virtual;
    function needsdesignframe: boolean; virtual;
    procedure dobeforepaint(const canvas: tcanvas); virtual;
    procedure dopaintbackground(const canvas: tcanvas); virtual;
@@ -1005,6 +1007,7 @@ type
    function widgetpostoclientpos(const apos: pointty): pointty;
    function widgetpostopaintpos(const apos: pointty): pointty;
    function paintpostowidgetpos(const apos: pointty): pointty;
+   procedure scale(const ascale: real); virtual;
 
    property widgetrect: rectty read getwidgetrect write setwidgetrect;
    property pos: pointty read fwidgetrect.pos write setpos;
@@ -4524,7 +4527,7 @@ begin
  bo1:= ws_opaque in fwidgetstate;
  if isvisible then begin
   include(fwidgetstate,ws_isvisible);
-  if not (ws_nopaint in fwidgetstate) and
+  if (fwidgetstate * [ws_nopaint] = [])  and
               (actualcolor <> cl_transparent) then begin
    include(fwidgetstate,ws_opaque);
   end
@@ -4966,7 +4969,7 @@ begin
   actcolor:= actualcolor;
   saveindex:= canvas.save;
   dobeforepaint(canvas);
-  if (widgetcount > 0) then begin
+  if (high(fwidgets) >= 0) and not (ws1_noclipchildren in fwidgetstate1) then begin
    updatewidgetregion;
    canvas.subclipregion(fwidgetregion);
   end;
@@ -8036,6 +8039,32 @@ begin
          ([csloading,csdestroying] * componentstate = []) then begin
   internalsetwidgetrect(fwidgetrect,false);
  end;
+end;
+
+procedure twidget.scale(const ascale: real);
+var
+ int1: integer;
+ rect1: rectty;
+begin
+ rect1:= fwidgetrect;
+ for int1:= 0 to high(fwidgets) do begin
+  fwidgets[int1].scale(ascale);
+ end;
+ with rect1 do begin
+  x:= round(x*ascale);
+  y:= round(y*ascale);
+  cx:= round(cx*ascale);
+  cy:= round(cy*ascale);
+ end;  
+ with fminsize do begin
+  cx:= round(cx*ascale);
+  cy:= round(cy*ascale);
+ end;
+ with fmaxsize do begin
+  cx:= round(cx*ascale);
+  cy:= round(cy*ascale);
+ end;
+ widgetrect:= rect1;
 end;
 
 { twindow }

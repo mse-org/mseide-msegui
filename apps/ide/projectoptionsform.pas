@@ -21,9 +21,8 @@ unit projectoptionsform;
 interface
 uses
  mseforms,msefiledialog,msegui,msestat,msestatfile,msetabs,msesimplewidgets,
- msetypes,
- msestrings,msedataedits,msetextedit,msegraphedits,msewidgetgrid,msegrids,
- msesplitter,msesysenv,msegdbutils,msedispwidgets,msesys,mseclasses,
+ msetypes,msestrings,msedataedits,msetextedit,msegraphedits,msewidgetgrid,
+ msegrids,msesplitter,msesysenv,msegdbutils,msedispwidgets,msesys,mseclasses,
  msegraphutils;
 
 const
@@ -82,6 +81,8 @@ type
   newdatamodform: filenamety;
   newsubfosource: filenamety;
   newsubfoform: filenamety;
+  newreportsource: filenamety;
+  newreportform: filenamety;
  end;
 
  projectoptionsty = record
@@ -259,6 +260,8 @@ type
    checkmethods: tbooleanedit;
    externalconsole: tbooleanedit;
    defon: tbooleanedit;
+   reportsource: tfilenameedit;
+   reportform: tfilenameedit;
    tgroupbox1: tgroupbox;
    backupfilecount: tintegeredit;
    debugoptions: tstringedit;
@@ -523,6 +526,8 @@ begin
    li.expandmacros(newdatamodform);
    li.expandmacros(newsubfosource);
    li.expandmacros(newsubfoform);
+   li.expandmacros(newreportsource);
+   li.expandmacros(newreportform);
    clearfontalias;
    for int1:= 0 to high(fontalias) do begin
     registerfontalias(fontalias[int1],fontnames[int1],fam_overwrite,fontheights[int1]);
@@ -710,6 +715,8 @@ begin
   newdatamodform:= '${TEMPLATEDIR}default/datamodule.mfm';
   newsubfosource:= '${TEMPLATEDIR}default/subform.pas';
   newsubfoform:= '${TEMPLATEDIR}default/subform.mfm';
+  newreportsource:= '${TEMPLATEDIR}default/report.pas';
+  newreportform:= '${TEMPLATEDIR}default/report.mfm';
  end;
  expandprojectmacros;
 end;
@@ -883,6 +890,8 @@ begin
   updatevalue('newdatamodform',newdatamodform);
   updatevalue('newsubfosource',newsubfosource);
   updatevalue('newsubfoform',newsubfoform);
+  updatevalue('newreportsource',newreportsource);
+  updatevalue('newreportform',newreportform);
   
   if not iswriter then begin
    if mainfo.sysenv.getintegervalue(int1,ord(env_vargroup),1,6) then begin
@@ -991,6 +1000,8 @@ begin
   fo.datamodform.value:= newdatamodform;
   fo.subfosource.value:= newsubfosource;
   fo.subfoform.value:= newsubfoform;
+  fo.reportsource.value:= newreportsource;
+  fo.reportform.value:= newreportform;
 
   fo.makecommand.value:= makecommand;
   fo.debugcommand.value:= debugcommand;
@@ -1140,6 +1151,8 @@ begin
   newdatamodform:= fo.datamodform.value;
   newsubfosource:= fo.subfosource.value;
   newsubfoform:= fo.subfoform.value;
+  newreportsource:= fo.reportsource.value;
+  newreportform:= fo.reportform.value;
   
   makecommand:= fo.makecommand.value;
   debugcommand:= fo.debugcommand.value;
@@ -1417,7 +1430,7 @@ procedure tprojectoptionsfo.formtemplateonchildscaled(const sender: TObject);
 begin
  placeyorder(0,[0],[mainfosource,mainfoform,simplefosource,simplefoform,
        dockingfosource,dockingfoform,datamodsource,datamodform,
-       subfosource,subfoform]);
+       subfosource,subfoform,reportsource,reportform]);
 end;
 
 procedure tprojectoptionsfo.encodingsetvalue(const sender: TObject;

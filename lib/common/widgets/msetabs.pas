@@ -200,11 +200,11 @@ type
    property drag: tdragcontroller read fdragcontroller write setdragcontroller;
  end;
 
- ttabwidget = class;
+ tcustomtabwidget = class;
 
  itabpage = interface(inullinterface) ['{AB1D0204-1DCB-4560-99A3-C0D6020B2EA7}']
-  procedure settabwidget(const value: ttabwidget);
-  function gettabwidget: ttabwidget;
+  procedure settabwidget(const value: tcustomtabwidget);
+  function gettabwidget: tcustomtabwidget;
   function getwidget: twidget;
   function getcaption: msestring;
   function getcolortab: colorty;
@@ -215,7 +215,7 @@ type
 
  ttabpage = class(tscrollingwidget,itabpage)
   private
-   ftabwidget: ttabwidget;
+   ftabwidget: tcustomtabwidget;
    fcaption: msestring;
    fcolortab,fcoloractivetab: colorty;
    fonselect: notifyeventty;
@@ -226,8 +226,8 @@ type
    procedure setcolortab(const avalue: colorty);
    function getcoloractivetab: colorty;
    procedure setcoloractivetab(const avalue: colorty);
-   procedure settabwidget(const value: ttabwidget);
-   function gettabwidget: ttabwidget;
+   procedure settabwidget(const value: tcustomtabwidget);
+   function gettabwidget: tcustomtabwidget;
    function gettabindex: integer;
    procedure settabindex(const avalue: integer);
   protected
@@ -238,10 +238,11 @@ type
    procedure designselected(const selected: boolean); override;
    procedure doselect; virtual;
    procedure dodeselect; virtual;
+   procedure loaded; override;
   public
    constructor create(aowner: tcomponent); override;
    function isactivepage: boolean;
-   property tabwidget: ttabwidget read ftabwidget;
+   property tabwidget: tcustomtabwidget read ftabwidget;
    property tabindex: integer read gettabindex write settabindex;
   published
    property caption: captionty read getcaption write setcaption;
@@ -259,12 +260,12 @@ type
 
  ttabform = class(tmseform,itabpage)
   private
-   ftabwidget: ttabwidget;
+   ftabwidget: tcustomtabwidget;
    fcolortab,fcoloractivetab: colorty;
    fonselect: notifyeventty;
    fondeselect: notifyeventty;
-   procedure settabwidget(const value: ttabwidget);
-   function gettabwidget: ttabwidget;
+   procedure settabwidget(const value: tcustomtabwidget);
+   function gettabwidget: tcustomtabwidget;
    procedure changed;
    function getcolortab: colorty;
    procedure setcolortab(const avalue: colorty);
@@ -277,10 +278,11 @@ type
    procedure setcaption(const value: msestring); override;
    procedure doselect; virtual;
    procedure dodeselect; virtual;
+   procedure loaded; override;
   public
    constructor create(aowner: tcomponent); override;
    function isactivepage: boolean;
-   property tabwidget: ttabwidget read ftabwidget;
+   property tabwidget: tcustomtabwidget read ftabwidget;
    property tabindex: integer read gettabindex write settabindex;
   published
    property colortab: colorty read getcolortab
@@ -300,7 +302,7 @@ type
    function page: twidget;
  end;
 
- ttabwidget = class(tpublishedwidget,iobjectpicker,istatfile)
+ tcustomtabwidget = class(tactionwidget,iobjectpicker,istatfile)
   private
    ftabs: tcustomtabbar;
    fobjectpicker: tobjectpicker;
@@ -395,7 +397,6 @@ type
    property items[const index: integer]: twidget read getitems; default;
    property activepage: twidget read getactivepage write setactivepage;
    property idents: integerarty read getidents;
-  published
    property activepageindex: integer read factivepageindex 
                       write setactivepageindex default -1;
    property onactivepagechanged: notifyeventty read fonactivepagechanged write fonactivepagechanged;
@@ -422,7 +423,51 @@ type
    property statvarname: msestring read getstatvarname write fstatvarname;
  end;
 
+ ttabwidget = class(tcustomtabwidget)
+  published
+   property optionswidget;
+   property bounds_x;
+   property bounds_y;
+   property bounds_cx;
+   property bounds_cy;
+   property bounds_cxmin;
+   property bounds_cymin;
+   property bounds_cxmax;
+   property bounds_cymax;
+   property color;
+   property cursor;
+   property frame;
+   property face;
+   property anchors;
+   property taborder;
+   property hint;
+   property popupmenu;
+   property onpopup;
+   property onshowhint;
 
+   property enabled;
+   property visible;
+ 
+   property activepageindex;
+   property onactivepagechanged;
+   property onpageadded;
+   property onpageremoved;
+   property options;
+   property font;
+   property tab_frame;
+   property tab_face;
+   property tab_color;
+   property tab_colortab;
+   property tab_coloractivetab;
+   property tab_facetab;
+   property tab_faceactivetab;
+   property tab_size;
+   property tab_sizemin;
+   property tab_sizemax;
+   property statfile;
+   property statvarname;
+ end;
+ 
 implementation
 uses
  msedrawtext,sysutils,msedatalist,msekeyboard,msestockobjects;
@@ -1422,8 +1467,15 @@ begin
  fcolortab:= cl_default;
  fcoloractivetab:= cl_default;
  foptionswidget:= defaulttaboptionswidget;
- include(fwidgetstate,ws_nodesignvisible);
  exclude(fwidgetstate,ws_visible);
+end;
+
+procedure ttabpage.loaded;
+begin
+ if fparentwidget is tcustomtabwidget then begin
+  include(fwidgetstate,ws_nodesignvisible);
+ end;
+ inherited;
 end;
 
 procedure ttabpage.changed;
@@ -1476,12 +1528,12 @@ begin
  end;
 end;
 
-function ttabpage.gettabwidget: ttabwidget;
+function ttabpage.gettabwidget: tcustomtabwidget;
 begin
  result:= ftabwidget;
 end;
 
-procedure ttabpage.settabwidget(const value: ttabwidget);
+procedure ttabpage.settabwidget(const value: tcustomtabwidget);
 begin
  ftabwidget:= value;
 end;
@@ -1546,6 +1598,22 @@ end;
 
 { ttabform }
 
+constructor ttabform.create(aowner: tcomponent);
+begin
+ fcolortab:= cl_default;
+ fcoloractivetab:= cl_active;
+ inherited create(aowner);
+ exclude(fwidgetstate,ws_visible);
+end;
+
+procedure ttabform.loaded;
+begin
+ if fparentwidget is tcustomtabwidget then begin
+  include(fwidgetstate,ws_nodesignvisible);
+ end;
+ inherited;
+end;
+
 procedure ttabform.changed;
 begin
  if ftabwidget <> nil then begin
@@ -1575,7 +1643,7 @@ begin
  changed;
 end;
 
-function ttabform.gettabwidget: ttabwidget;
+function ttabform.gettabwidget: tcustomtabwidget;
 begin
  result:= ftabwidget;
 end;
@@ -1591,7 +1659,7 @@ begin
  changed;
 end;
 
-procedure ttabform.settabwidget(const value: ttabwidget);
+procedure ttabform.settabwidget(const value: tcustomtabwidget);
 begin
  ftabwidget:= value;
 end;
@@ -1600,15 +1668,6 @@ procedure ttabform.visiblechanged;
 begin
  inherited;
  changed;
-end;
-
-constructor ttabform.create(aowner: tcomponent);
-begin
- fcolortab:= cl_default;
- fcoloractivetab:= cl_active;
- inherited create(aowner);
- include(fwidgetstate,ws_nodesignvisible);
- exclude(fwidgetstate,ws_visible);
 end;
 
 function ttabform.gettabindex: integer;
@@ -1642,9 +1701,9 @@ begin
  end;
 end;
 
-{ ttabwidget }
+{ tcustomtabwidget }
 
-constructor ttabwidget.create(aowner: tcomponent);
+constructor tcustomtabwidget.create(aowner: tcomponent);
 begin
  factivepageindex:= -1;
  ftab_sizemin:= defaulttabsizemin;
@@ -1661,26 +1720,26 @@ begin
  fobjectpicker:= tobjectpicker.create(iobjectpicker(self),org_widget);
 end;
 
-destructor ttabwidget.destroy;
+destructor tcustomtabwidget.destroy;
 begin
  fobjectpicker.free;
  ftabs.free;
  inherited;
 end;
 
-procedure ttabwidget.clear;
+procedure tcustomtabwidget.clear;
 begin
  while count > 0 do begin
   items[count-1].Free;
  end;
 end;
 
-function ttabwidget.getitems(const index: integer): twidget;
+function tcustomtabwidget.getitems(const index: integer): twidget;
 begin
  result:= tpagetab(ftabs.tabs[index]).page;
 end;
 
-procedure ttabwidget.pagechanged(const sender: itabpage);
+procedure tcustomtabwidget.pagechanged(const sender: itabpage);
 var
  widget1: twidget1;
  int1: integer;
@@ -1723,7 +1782,7 @@ begin
  end;
 end;
 
-procedure ttabwidget.loaded;
+procedure tcustomtabwidget.loaded;
 var
  int1: integer;
 begin
@@ -1737,7 +1796,7 @@ begin
  dec(fdesignchangedlock);
 end;
 
-procedure ttabwidget.updatesize(const page: twidget);
+procedure tcustomtabwidget.updatesize(const page: twidget);
 var
  rect1: rectty;
 
@@ -1807,7 +1866,7 @@ begin
  end;
 end;
 
-procedure ttabwidget.internaladd(const page: itabpage; aindex: integer);
+procedure tcustomtabwidget.internaladd(const page: itabpage; aindex: integer);
 var
  tab: tpagetab;
  widget1: twidget1;
@@ -1842,7 +1901,7 @@ begin
  end;
 end;
 
-procedure ttabwidget.internalremove(const page: itabpage);
+procedure tcustomtabwidget.internalremove(const page: itabpage);
 var
  int1: integer;
  widget1: twidget1;
@@ -1882,7 +1941,7 @@ begin
  end;
 end;
 
-procedure ttabwidget.registerchildwidget(const child: twidget);
+procedure tcustomtabwidget.registerchildwidget(const child: twidget);
 var
  intf: itabpage;
 begin
@@ -1892,12 +1951,12 @@ begin
  end;
 end;
 
-procedure ttabwidget.add(const aitem: itabpage; const aindex: integer = bigint);
+procedure tcustomtabwidget.add(const aitem: itabpage; const aindex: integer = bigint);
 begin
  internaladd(aitem,aindex);
 end;
 
-procedure ttabwidget.unregisterchildwidget(const child: twidget);
+procedure tcustomtabwidget.unregisterchildwidget(const child: twidget);
 var
  intf: itabpage;
 begin
@@ -1908,7 +1967,7 @@ begin
  end;
 end;
 
-function ttabwidget.indexof(const page: twidget): integer;
+function tcustomtabwidget.indexof(const page: twidget): integer;
 var
  int1: integer;
 begin
@@ -1921,7 +1980,7 @@ begin
  end;
 end;
 
-procedure ttabwidget.GetChildren(Proc: TGetChildProc; Root: TComponent);
+procedure tcustomtabwidget.GetChildren(Proc: TGetChildProc; Root: TComponent);
 var
  int1: integer;
  widget1: twidget1;
@@ -1946,7 +2005,7 @@ begin
  end;
 end;
 
-procedure ttabwidget.setactivepageindex(Value: integer);
+procedure tcustomtabwidget.setactivepageindex(Value: integer);
 var
  int1: integer;
 begin
@@ -2009,17 +2068,17 @@ begin
  end;
 end;
 
-procedure ttabwidget.tabchanged;
+procedure tcustomtabwidget.tabchanged;
 begin
  activepageindex:= ftabs.activetab;
 end;
 
-function ttabwidget.count: integer;
+function tcustomtabwidget.count: integer;
 begin
  result:= ftabs.tabs.count;
 end;
 
-function ttabwidget.getactivepage: twidget;
+function tcustomtabwidget.getactivepage: twidget;
 begin
  if factivepageindex >= 0 then begin
   result:= items[factivepageindex];
@@ -2029,7 +2088,7 @@ begin
  end;
 end;
 
-procedure ttabwidget.setactivepage(const value: twidget);
+procedure tcustomtabwidget.setactivepage(const value: twidget);
 begin
  if value = nil then begin
   setactivepageindex(-1);
@@ -2039,7 +2098,7 @@ begin
  end;
 end;
 
-procedure ttabwidget.clientrectchanged;
+procedure tcustomtabwidget.clientrectchanged;
 var
  size1: sizety;
 begin
@@ -2065,7 +2124,7 @@ begin
  end;
 end;
 
-procedure ttabwidget.doactivepagechanged;
+procedure tcustomtabwidget.doactivepagechanged;
 begin
  if canevent(tmethod(fonactivepagechanged)) then begin
   fonactivepagechanged(self);
@@ -2073,21 +2132,21 @@ begin
  designchanged;
 end;
 
-procedure ttabwidget.dopageadded(const apage: twidget);
+procedure tcustomtabwidget.dopageadded(const apage: twidget);
 begin
  if canevent(tmethod(fonpageadded)) then begin
   fonpageadded(self,apage);
  end;
 end;
 
-procedure ttabwidget.dopageremoved(const apage: twidget);
+procedure tcustomtabwidget.dopageremoved(const apage: twidget);
 begin
  if canevent(tmethod(fonpageremoved)) then begin
   fonpageremoved(self,apage);
  end;
 end;
 
-procedure ttabwidget.nextpage(newindex: integer; down: boolean);
+procedure tcustomtabwidget.nextpage(newindex: integer; down: boolean);
 var
  int1: integer;
 begin
@@ -2127,17 +2186,17 @@ begin
  end;
 end;
 
-procedure ttabwidget.changepage(step: integer);
+procedure tcustomtabwidget.changepage(step: integer);
 begin
  nextpage(activepageindex+step,step < 0);
 end;
 
-procedure ttabwidget.movepage(const curindex,newindex: integer);
+procedure tcustomtabwidget.movepage(const curindex,newindex: integer);
 begin
  ftabs.movetab(curindex,newindex);
 end;
 
-procedure ttabwidget.dokeydown(var info: keyeventinfoty);
+procedure tcustomtabwidget.dokeydown(var info: keyeventinfoty);
 begin
  with info do begin
   if (shiftstate = [ss_ctrl]) or (shiftstate = [ss_shift,ss_ctrl]) then begin
@@ -2160,7 +2219,7 @@ begin
  end;
 end;
 
-procedure ttabwidget.childmouseevent(const sender: twidget; var info: mouseeventinfoty);
+procedure tcustomtabwidget.childmouseevent(const sender: twidget; var info: mouseeventinfoty);
 begin
  if not ftabs.fdragcontroller.active and ((sender = self) or (sender = ftabs))  then begin
   translatewidgetpoint1(info.pos,sender,self);
@@ -2169,13 +2228,13 @@ begin
  end;
 end;
 
-procedure ttabwidget.doafterpaint(const canvas: tcanvas);
+procedure tcustomtabwidget.doafterpaint(const canvas: tcanvas);
 begin
  inherited;
  fobjectpicker.restorexorpic(canvas);
 end;
 
-procedure ttabwidget.synctofontheight;
+procedure tcustomtabwidget.synctofontheight;
 begin
  inherited;
  if not (tabo_vertical in options) then begin
@@ -2185,14 +2244,14 @@ begin
 end;
 
 
-procedure ttabwidget.dofontheightdelta(var delta: integer);
+procedure tcustomtabwidget.dofontheightdelta(var delta: integer);
 begin
  if not (tabo_vertical in options) then begin
   synctofontheight;
  end;
 end;
 
-function ttabwidget.checktabsizingpos(const apos: pointty): boolean;
+function tcustomtabwidget.checktabsizingpos(const apos: pointty): boolean;
 begin
  with ftabs,moverect(ftabs.paintrect,ftabs.fwidgetrect.pos) do begin
   if tabo_tabsizing in foptions then begin
@@ -2219,18 +2278,18 @@ begin
  end;
 end;
 
-function ttabwidget.getidents: integerarty;
+function tcustomtabwidget.getidents: integerarty;
 begin
  result:= ftabs.flayoutinfo.tabs.idents;
 end;
 
-procedure ttabwidget.setstatfile(const Value: tstatfile);
+procedure tcustomtabwidget.setstatfile(const Value: tstatfile);
 begin
  setstatfilevar(istatfile(self),value,fstatfile);
 end;
 
    //istatfile
-procedure ttabwidget.dostatread(const reader: tstatreader);
+procedure tcustomtabwidget.dostatread(const reader: tstatreader);
 begin
  ftabs.flayoutinfo.tabs.dostatread(reader);
  if tabo_tabsizing in options then begin
@@ -2240,7 +2299,7 @@ begin
  setactivepageindex(reader.readinteger('index',activepageindex,-1,count-1));
 end;
 
-procedure ttabwidget.dostatwrite(const writer: tstatwriter);
+procedure tcustomtabwidget.dostatwrite(const writer: tstatwriter);
 begin
  ftabs.flayoutinfo.tabs.dostatwrite(writer);
  if tabo_tabsizing in options then begin
@@ -2250,23 +2309,23 @@ begin
  writer.writeinteger('index',activepageindex);
 end;
 
-procedure ttabwidget.statreading;
+procedure tcustomtabwidget.statreading;
 begin
  //dummy;
 end;
 
-procedure ttabwidget.statread;
+procedure tcustomtabwidget.statread;
 begin
  //dummy;
 end;
 
-function ttabwidget.getstatvarname: msestring;
+function tcustomtabwidget.getstatvarname: msestring;
 begin
  result:= fstatvarname;
 end;
 
    //iobjectpicker
-function ttabwidget.getcursorshape(const apos: pointty;  const shiftstate: shiftstatesty;
+function tcustomtabwidget.getcursorshape(const apos: pointty;  const shiftstate: shiftstatesty;
                                 var shape: cursorshapety): boolean;
     //true if found
 begin
@@ -2281,7 +2340,7 @@ begin
  end
 end;
 
-procedure ttabwidget.getpickobjects(const rect: rectty;  const shiftstate: shiftstatesty;
+procedure tcustomtabwidget.getpickobjects(const rect: rectty;  const shiftstate: shiftstatesty;
                                  var objects: integerarty);
 begin
  if checktabsizingpos(rect.pos) then begin
@@ -2289,11 +2348,11 @@ begin
  end;
 end;
 
-procedure ttabwidget.beginpickmove(const objects: integerarty);
+procedure tcustomtabwidget.beginpickmove(const objects: integerarty);
 begin
 end;
 
-function ttabwidget.checkpickoffset(const aoffset: pointty): pointty;
+function tcustomtabwidget.checkpickoffset(const aoffset: pointty): pointty;
 begin
  result:= aoffset;
  with ftabs do begin
@@ -2330,7 +2389,7 @@ begin
  end;
 end;
 
-procedure ttabwidget.endpickmove(const apos,offset: pointty; const objects: integerarty);
+procedure tcustomtabwidget.endpickmove(const apos,offset: pointty; const objects: integerarty);
 var
  offset1: pointty;
 begin
@@ -2355,7 +2414,7 @@ begin
  end;
 end;
 
-procedure ttabwidget.paintxorpic(const canvas: tcanvas; const apos,offset: pointty;
+procedure tcustomtabwidget.paintxorpic(const canvas: tcanvas; const apos,offset: pointty;
                  const objects: integerarty);
 var
  offset1: pointty;
@@ -2381,12 +2440,12 @@ begin
  end;
 end;
 
-function ttabwidget.getoptions: tabbaroptionsty;
+function tcustomtabwidget.getoptions: tabbaroptionsty;
 begin
  result:= ftabs.options;
 end;
 
-procedure ttabwidget.setoptions(const Value: tabbaroptionsty);
+procedure tcustomtabwidget.setoptions(const Value: tabbaroptionsty);
 var
  optionsbefore: tabbaroptionsty;
 begin
@@ -2399,83 +2458,83 @@ begin
  end;
 end;
 
-function ttabwidget.gettab_color: colorty;
+function tcustomtabwidget.gettab_color: colorty;
 begin
  Result := ftabs.color;
 end;
 
-procedure ttabwidget.settab_color(const avalue: colorty);
+procedure tcustomtabwidget.settab_color(const avalue: colorty);
 begin
  ftabs.color:= avalue;
 end;
 
-function ttabwidget.gettab_frame: tstepboxframe;
+function tcustomtabwidget.gettab_frame: tstepboxframe;
 begin
  Result := ftabs.frame;
 end;
 
-procedure ttabwidget.settab_frame(const avalue: tstepboxframe);
+procedure tcustomtabwidget.settab_frame(const avalue: tstepboxframe);
 begin
  ftabs.frame:= avalue;
 end;
 
-function ttabwidget.gettab_face: tface;
+function tcustomtabwidget.gettab_face: tface;
 begin
  Result:= ftabs.face;
 end;
 
-procedure ttabwidget.settab_face(const avalue: tface);
+procedure tcustomtabwidget.settab_face(const avalue: tface);
 begin
  ftabs.face:= avalue;
 end;
 
-function ttabwidget.gettab_colortab: colorty;
+function tcustomtabwidget.gettab_colortab: colorty;
 begin
  result:= ftabs.tabs.color;
 end;
 
-procedure ttabwidget.settab_colortab(const avalue: colorty);
+procedure tcustomtabwidget.settab_colortab(const avalue: colorty);
 begin
  ftabs.tabs.color:= avalue;
 end;
 
-function ttabwidget.gettab_coloractivetab: colorty;
+function tcustomtabwidget.gettab_coloractivetab: colorty;
 begin
  result:= ftabs.tabs.coloractive;
 end;
 
-procedure ttabwidget.settab_coloractivetab(const avalue: colorty);
+procedure tcustomtabwidget.settab_coloractivetab(const avalue: colorty);
 begin
  ftabs.tabs.coloractive:= avalue;
 end;
 
-function ttabwidget.gettab_facetab: tface;
+function tcustomtabwidget.gettab_facetab: tface;
 begin
  result:= ftabs.tabs.face;
 end;
 
-procedure ttabwidget.settab_facetab(const avalue: tface);
+procedure tcustomtabwidget.settab_facetab(const avalue: tface);
 begin
  ftabs.tabs.face:= avalue;
 end;
 
-function ttabwidget.gettab_faceactivetab: tface;
+function tcustomtabwidget.gettab_faceactivetab: tface;
 begin
  result:= ftabs.tabs.faceactive;
 end;
 
-procedure ttabwidget.settab_faceactivetab(const avalue: tface);
+procedure tcustomtabwidget.settab_faceactivetab(const avalue: tface);
 begin
  ftabs.tabs.faceactive:= avalue;
 end;
 
-procedure ttabwidget.createpagetab(const sender: tcustomtabbar;
+procedure tcustomtabwidget.createpagetab(const sender: tcustomtabbar;
   const index: integer; var tab: ttab);
 begin
  tab:= tpagetab.create(sender,nil);
 end;
 
-procedure ttabwidget.settab_size(const avalue: integer);
+procedure tcustomtabwidget.settab_size(const avalue: integer);
 begin
  if ftab_size <> avalue then begin
   ftab_size:= avalue;
@@ -2493,7 +2552,7 @@ begin
  end;
 end;
 
-procedure ttabwidget.settab_sizemin(const avalue: integer);
+procedure tcustomtabwidget.settab_sizemin(const avalue: integer);
 begin
  ftab_sizemin:= avalue;
  if avalue > ftab_size then begin
@@ -2501,7 +2560,7 @@ begin
  end;
 end;
 
-procedure ttabwidget.settab_sizemax(const avalue: integer);
+procedure tcustomtabwidget.settab_sizemax(const avalue: integer);
 begin
  ftab_sizemax:= avalue;
  if avalue < ftab_size then begin
@@ -2509,7 +2568,7 @@ begin
  end;
 end;
 
-function ttabwidget.pagebyname(const aname: string): twidget;
+function tcustomtabwidget.pagebyname(const aname: string): twidget;
 var
  int1: integer;
 begin

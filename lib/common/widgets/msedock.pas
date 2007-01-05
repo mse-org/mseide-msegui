@@ -323,7 +323,7 @@ uses
 type
  twidget1 = class(twidget);
  tcustomframe1 = class(tcustomframe);
- ttabwidget1 = class(ttabwidget);
+ tcustomtabwidget1 = class(tcustomtabwidget);
 
 const
  useroptionsmask: optionsdockty = [od_fixsize,od_top,od_background];

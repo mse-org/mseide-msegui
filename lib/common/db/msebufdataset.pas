@@ -217,6 +217,8 @@ type
   private
    function getitems(const index: integer): tlocalindex;
    procedure bindfields;
+   function getactiveindex: integer;
+   procedure setactiveindex(const avalue: integer);
   protected
    procedure checkinactive;
    procedure setcount1(acount: integer; doinit: boolean); override;
@@ -224,6 +226,8 @@ type
    constructor create(const aowner: tmsebufdataset); reintroduce;
    procedure move(const curindex,newindex: integer); override;
    property items[const index: integer]: tlocalindex read getitems; default;
+   property activeindex: integer read getactiveindex write setactiveindex;
+                       //-1 > none
  end;
   
 type
@@ -2610,6 +2614,21 @@ procedure tlocalindexes.move(const curindex: integer; const newindex: integer);
 begin
  checkinactive;
  inherited;
+end;
+
+function tlocalindexes.getactiveindex: integer;
+begin
+ result:= tmsebufdataset(fowner).actindex - 1;
+end;
+
+procedure tlocalindexes.setactiveindex(const avalue: integer);
+begin
+ if avalue < 0 then begin
+  tmsebufdataset(fowner).actindex:= 0;
+ end
+ else begin
+  items[avalue].active:= true;
+ end;
 end;
 
 { tlocalindex }

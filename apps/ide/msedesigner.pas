@@ -1198,7 +1198,10 @@ procedure tcomponents.doadd(component: tcomponent);
 var
  root: tcomponent;
 begin
- add(component);
+ if not(component is twidget) or 
+         (ws_iswidget in twidget1(component).fwidgetstate) then begin
+  add(component);
+ end;
  root:= famodule;
  if csinline in component.componentstate then begin
   famodule:= component;

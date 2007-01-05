@@ -6,9 +6,9 @@ object mainfo: tmainfo
   visible = False
   container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_subfocus, ow_mousetransparent, ow_destroywidgets, ow_autoscale]
   container.bounds_x = 0
-  container.bounds_y = 18
+  container.bounds_y = 16
   container.bounds_cx = 587
-  container.bounds_cy = 120
+  container.bounds_cy = 122
   container.frame.framei_left = 0
   container.frame.framei_top = 0
   container.frame.framei_right = 0
@@ -52,6 +52,7 @@ object mainfo: tmainfo
     bounds_x = 0
     bounds_y = 1
     bounds_cx = 587
+    bounds_cy = 18
     frame.dummy = 0
     anchors = [an_top]
     taborder = 1
@@ -59,7 +60,7 @@ object mainfo: tmainfo
     font.options = [foo_antialiased]
     font.dummy = 0
     options = [dwo_hintclippedtext]
-    reffontheight = 16
+    reffontheight = 14
   end
   object gdb: tgdbmi
     onevent = gdbonevent
@@ -83,7 +84,7 @@ object mainfo: tmainfo
             submenu.count = 4
             submenu.items = <            
               item
-                submenu.count = 5
+                submenu.count = 6
                 submenu.items = <                
                   item
                     caption = '&Mainform'
@@ -115,6 +116,12 @@ object mainfo: tmainfo
                     caption = 'S&ubform'
                     state = [as_localcaption, as_localtag, as_localonexecute]
                     tag = 4
+                    onexecute = newformonexecute
+                  end                
+                  item
+                    caption = '&Report'
+                    state = [as_localcaption, as_localtag, as_localonexecute]
+                    tag = 5
                     onexecute = newformonexecute
                   end>
                 caption = '&Form'

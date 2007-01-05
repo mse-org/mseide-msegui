@@ -2618,12 +2618,12 @@ begin
   end;
   widget1:= fparentwidget;
   while widget1 <> nil do begin
-   if widget1 is tpublishedwidget then begin
+   if widget1 is tactionwidget then begin
     translateclientpoint1(mouseinfo.pos,self,widget1);
     bo1:= not (es_child in mouseinfo.eventstate);
     include(mouseinfo.eventstate,es_child);
     try
-     tpublishedwidget(widget1).dopopup(amenu,mouseinfo);
+     tactionwidget(widget1).dopopup(amenu,mouseinfo);
     finally
      if bo1 then begin
       exclude(mouseinfo.eventstate,es_child);
