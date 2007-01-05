@@ -235,6 +235,7 @@ type
    procedure registerchildwidget(const child: twidget); override;
    procedure designselected(const selected: boolean); override;
    procedure doselect; virtual;
+   procedure loaded; override;
   public
    constructor create(aowner: tcomponent); override;
    function isactivepage: boolean;
@@ -271,6 +272,7 @@ type
    procedure visiblechanged; override;
    procedure setcaption(const value: msestring); override;
    procedure doselect; virtual;
+   procedure loaded; override;
   public
    constructor create(aowner: tcomponent); override;
    function isactivepage: boolean;
@@ -1415,8 +1417,15 @@ begin
  fcolortab:= cl_default;
  fcoloractivetab:= cl_default;
  foptionswidget:= defaulttaboptionswidget;
- include(fwidgetstate,ws_nodesignvisible);
  exclude(fwidgetstate,ws_visible);
+end;
+
+procedure ttabpage.loaded;
+begin
+ if fparentwidget is ttabwidget then begin
+  include(fwidgetstate,ws_nodesignvisible);
+ end;
+ inherited;
 end;
 
 procedure ttabpage.changed;
@@ -1593,8 +1602,15 @@ begin
  fcolortab:= cl_default;
  fcoloractivetab:= cl_active;
  inherited create(aowner);
- include(fwidgetstate,ws_nodesignvisible);
  exclude(fwidgetstate,ws_visible);
+end;
+
+procedure ttabform.loaded;
+begin
+ if fparentwidget is ttabwidget then begin
+  include(fwidgetstate,ws_nodesignvisible);
+ end;
+ inherited;
 end;
 
 function ttabform.gettabindex: integer;
