@@ -66,6 +66,7 @@ type
    procedure selectfont(const afont: fontnumty; const acodepage: integer);
    procedure definefont(const adata: fontnumty; const acodepage: integer);
    procedure setpslinewidth(const avalue: integer);
+   function gcposstring(const apos: pointty): string;
    function posstring(const apos: pointty): string;
    function diststring(const adist: integer): string;
    function rectsizestring(const asize: sizety): string;
@@ -839,7 +840,8 @@ begin
     str1:= str1 + ' [';
     int2:= 3;
     for int1:= 0 to high(ar1) do begin
-     str1:= str1 + ' '+ posstring(addpoint(ar1[int1].pos,gc.cliporigin)) +
+     str1:= str1 + ' '+
+      gcposstring(addpoint(ar1[int1].pos,gc.cliporigin)) +
                    ' ' + rectsizestring(ar1[int1].size);
      dec(int2);
      if int2 <= 0 then begin
@@ -852,6 +854,13 @@ begin
    streamwrite(str1+nl);
   end;
  end;
+end;
+
+function tpostscriptcanvas.gcposstring(const apos: pointty): string;
+begin
+ result:= 
+  psrealtostr(apos.x*fgcscale+fgcoffsetx)+' '+
+  psrealtostr(fgcoffsety-apos.y*fgcscale);
 end;
 
 function tpostscriptcanvas.posstring(const apos: pointty): string;
