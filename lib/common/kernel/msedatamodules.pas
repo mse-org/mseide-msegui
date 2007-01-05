@@ -43,8 +43,19 @@ type
  end;
  datamoduleclassty = class of tmsedatamodule;
  
+function createmsedatamodule(const aclass: tclass;
+                     const aclassname: pshortstring): tmsecomponent;
 implementation
+type
+ tmsecomponent1 = class(tmsecomponent);
   
+function createmsedatamodule(const aclass: tclass;
+                     const aclassname: pshortstring): tmsecomponent;
+begin
+ result:= datamoduleclassty(aclass).create(nil,false);
+ tmsecomponent1(result).factualclassname:= aclassname;
+end;
+
 { tmsedatamodule }
 
 constructor tmsedatamodule.create(aowner: tcomponent);

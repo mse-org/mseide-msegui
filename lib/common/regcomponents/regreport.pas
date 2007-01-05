@@ -14,10 +14,16 @@ uses
  msereport,msedesignintf;
  
 implementation
-
+const
+ reportintf: designmoduleintfty = 
+  (createfunc: {$ifdef FPC}@{$endif}createreport;
+   initnewcomponent: {$ifdef FPC}@{$endif}initreportcomponent);
+  
 procedure Register;
 begin
  registercomponents('Rep',[treportpage,tbandarea,trecordband]); 
+ 
+ registerdesignmoduleclass(treport,reportintf);
 end;
 
 initialization

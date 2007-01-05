@@ -63,6 +63,7 @@ type
    fdesigner: tdesigner;
    fform: twidget;
    fmodule: tmsecomponent;
+   fmoduleintf: pdesignmoduleintfty;
    fmodulesetting: integer;
    procedure setmodule(const Value: tmsecomponent);
   protected
@@ -77,7 +78,9 @@ type
       const CurName, NewName: string); override;
    procedure doshow; override;
   public
-   constructor create(aowner: tcomponent; adesigner: tdesigner); reintroduce;
+   constructor create(const aowner: tcomponent; const adesigner: tdesigner;
+                        const aintf: pdesignmoduleintfty);
+                                        reintroduce;
    function designnotification: idesignnotification;
    procedure updatecaption;
    property module: tmsecomponent read fmodule write setmodule;
@@ -226,7 +229,7 @@ type
                     const afilename: filenamety; var cancel: boolean);
 
   public
-   constructor create(aowner: tformdesignerfo; adesigner: tdesigner);
+   constructor create(const aowner: tformdesignerfo; const adesigner: tdesigner);
    destructor destroy; override;
    procedure updateprojectoptions;
    property snaptogrid: boolean read fsnaptogrid write fsnaptogrid default true;
@@ -680,7 +683,8 @@ end;
 
 { tdesignwindow }
 
-constructor tdesignwindow.create(aowner: tformdesignerfo; adesigner: tdesigner);
+constructor tdesignwindow.create(const aowner: tformdesignerfo; 
+                                   const adesigner: tdesigner);
 begin
  fdesigner:= adesigner;
  fshowgrid:= true;
@@ -1821,9 +1825,12 @@ end;
 
 { tformdesignerfo }
 
-constructor tformdesignerfo.create(aowner: tcomponent; adesigner: tdesigner);
+constructor tformdesignerfo.create(const aowner: tcomponent; 
+                                   const adesigner: tdesigner;
+                                   const aintf: pdesignmoduleintfty);
 begin
  fdesigner:= adesigner;
+ fmoduleintf:= aintf;
 // createwindow;
  inherited create(aowner);
 end;

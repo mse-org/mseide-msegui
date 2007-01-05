@@ -84,7 +84,13 @@ type
    function geteditorclass: propertyeditorclassty; override;
    function getelementeditorclass: elementeditorclassty; override;
  end;
- 
+
+const
+ mseformintf: designmoduleintfty = 
+  (createfunc: {$ifdef FPC}@{$endif}createmseform);
+ subformintf: designmoduleintfty = 
+  (createfunc: {$ifdef FPC}@{$endif}createsubform);
+
 procedure Register;
 begin
  registercomponents('Widget',[teventwidget,tbutton,tstockglyphbutton,
@@ -125,6 +131,10 @@ begin
  registerunitgroup(['msegrids'],['msegui','msegraphutils','mseclasses']);
  registerunitgroup(['msewidgetgrid'],['msedataedits',
                     'msegui','msegraphutils','mseclasses']);
+                    
+ registerdesignmoduleclass(tmseform,mseformintf);
+ registerdesignmoduleclass(tdockform,mseformintf);
+ registerdesignmoduleclass(tsubform,subformintf);
 end;
 
 

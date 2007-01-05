@@ -151,6 +151,7 @@ type
    property onrender: rendereventty read fonrender write fonrender;
    property pagewidth: real read fpagewidth write setpagewidth;
    property pageheight: real read fpageheight write setpageheight;
+   property font: twidgetfont read getfont write setfont stored isfontstored;
  end;
  
  treportpage = class(tcustomreportpage)
@@ -161,6 +162,7 @@ type
    property frame;
    property face;
    property visible;
+   property font;
  
    property onbeforerender;
    property onrender;   
@@ -221,9 +223,12 @@ type
   
 function createreport(const aclass: tclass; 
                    const aclassname: pshortstring): tmsecomponent;
+procedure initreportcomponent(const amodule: tcomponent; 
+                                         const acomponent: tcomponent);
+
 implementation
 uses
- msedatalist,sysutils;
+ msedatalist,sysutils,msedrawtext;
 type
  twidget1 = class(twidget);
  tmsecomponent1 = class(tmsecomponent);
@@ -233,6 +238,14 @@ function createreport(const aclass: tclass;
 begin
  result:= reportclassty(aclass).create(nil,false);
  tmsecomponent1(result).factualclassname:= aclassname;
+end;
+
+procedure initreportcomponent(const amodule: tcomponent;
+                                           const acomponent: tcomponent);
+begin
+ if acomponent is twidget then begin
+  twidget(acomponent).scale(tcustomreport(amodule).fppmm/defaultppmm);
+ end;
 end;
 
 { tcustomrecordband }

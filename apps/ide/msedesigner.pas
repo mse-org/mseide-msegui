@@ -82,6 +82,7 @@ type
   moduleclassname: string[80]; //can not be ansistring!
   instancevarname: string;
   instance: tmsecomponent;
+  moduleintf: pdesignmoduleintfty;
   methods: tmethods;
   components: tcomponents;
   designform: tmseform;
@@ -1483,7 +1484,7 @@ begin
   instancevarname:= ainstancevarname;
   moduleclassname:= amoduleclassname;
   try
-   instance:= createdesignmodule(designmoduleclassname,@moduleclassname);
+   instance:= createdesignmodule(designmoduleclassname,@moduleclassname,moduleintf);
    tcomponent1(instance).setdesigning(true{$ifndef FPC},true{$endif});
   except
    result.Free;
@@ -1756,6 +1757,11 @@ begin
    except
     result.Free;
     raise;
+   end;
+   with modules.findmodule(module)^.moduleintf^ do begin
+    if assigned(initnewcomponent) then begin
+     initnewcomponent(module,result);
+    end;
    end;
    addcomponent(module,result);
   end
@@ -2731,7 +2737,7 @@ begin //loadformfile
         reader.free;
        end;
        if result <> nil then begin
-        result^.designform:= tformdesignerfo.create(nil,self);
+        result^.designform:= tformdesignerfo.create(nil,self,result^.moduleintf);
         tformdesignerfo(result^.designform).module:= module;
         checkmethodtypes(result,true,nil);
  //       showformdesigner(result);

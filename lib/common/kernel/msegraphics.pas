@@ -943,7 +943,7 @@ type
 
  egdi = class(eerror)
   private
-    ferror1: gdierrorty;
+   ferror1: gdierrorty;
   public
    constructor create(aerror: gdierrorty; atext: string);
    property error: gdierrorty read ferror1;
@@ -2778,9 +2778,9 @@ var
  int1,int2: integer;
 
 begin
- if fdrawinfo.gc.handle <> 0 then begin
-  checkgcstate([]); //update pending changes
- end;
+// if fdrawinfo.gc.handle <> 0 then begin
+//  checkgcstate([]); //update pending changes
+// end;
  with fvaluestack do begin
   result:= count-1;
   if count >= length(stack) then begin

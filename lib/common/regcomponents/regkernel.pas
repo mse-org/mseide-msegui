@@ -19,7 +19,7 @@ uses
  classes,mseguithread,msebitmap,msetimer,msestatfile,mseactions,mseshapes,
  msedesignintf,msepropertyeditors,msemenus,msegui,msepipestream,sysutils,
  msegraphutils,regkernel_bmp,msegraphics,msestrings,msepostscriptprinter,
- mseprinter,msetypes,msedatalist;
+ mseprinter,msetypes,msedatalist,msedatamodules,mseclasses;
 
 type
  twidget1 = class(twidget);
@@ -64,6 +64,10 @@ type
    function subproperties: propertyeditorarty; override;
  end;
  
+const   
+ datamoduleintf: designmoduleintfty = 
+  (createfunc: {$ifdef FPC}@{$endif}createmsedatamodule);
+
 procedure Register;
 begin
  registercomponents('Gui',[tthreadcomp,tpipereadercomp,tbitmapcomp,timagelist,
@@ -90,6 +94,8 @@ begin
  registerpropertyeditor(typeinfo(integer),tactivator,'clients',
                          tactivatorclientspropertyeditor);
  registerunitgroup(['msestatfile'],['msestat']);
+ 
+ registerdesignmoduleclass(tmsedatamodule,datamoduleintf);
 end;
 
 { tactionpropertyeditor }

@@ -506,8 +506,6 @@ function checkcanevent(const acomponent: tcomponent; const event: tmethod): bool
 procedure readstringar(const reader: treader; out ar: stringarty);
 procedure writestringar(const writer: twriter; const ar: stringarty);
 
-function createmsedatamodule(const aclass: tclass;
-                    const aclassname: pshortstring): tmsecomponent;
 function swapmethodtable(const instance: tobject; const newtable: pointer): pointer;
 procedure objectbinarytotextmse(input, output: tstream);
                 //workaround for FPC bug 7813 with localized float strings
@@ -2881,13 +2879,6 @@ begin
    result:= result.FindComponent(ar1[int1]);
   end;
  end;
-end;
-
-function createmsedatamodule(const aclass: tclass;
-                     const aclassname: pshortstring): tmsecomponent;
-begin
- result:= datamoduleclassty(aclass).create(nil,false);
- result.factualclassname:= aclassname;
 end;
 
 initialization

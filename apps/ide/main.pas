@@ -270,11 +270,6 @@ begin
  designer.ongetmodulenamefile:= {$ifdef FPC}@{$endif}dofindmodulebyname;
  designer.ongetmoduletypefile:= {$ifdef FPC}@{$endif}dofindmodulebytype;
  sysenv.init(sysenvvalues);
- registerdesignmoduleclass(tmseform,{$ifdef FPC}@{$endif}createmseform);
- registerdesignmoduleclass(tdockform,{$ifdef FPC}@{$endif}createmseform);
- registerdesignmoduleclass(tsubform,{$ifdef FPC}@{$endif}createsubform);
- registerdesignmoduleclass(treport,{$ifdef FPC}@{$endif}createreport);
- registerdesignmoduleclass(tmsedatamodule,{$ifdef FPC}@{$endif}createmsedatamodule);
  designer.objformat:= of_fp;
  componentpalettefo.updatecomponentpalette(true);
  designnotifications.Registernotification(idesignnotification(self));
