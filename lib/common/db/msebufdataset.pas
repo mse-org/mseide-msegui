@@ -3004,7 +3004,8 @@ function tlocalindex.find(const avalues: array of const;
 var
  str1: string;
 begin
- if find(avalues,aisnull,str1,partialkey) then begin
+ result:= find(avalues,aisnull,str1,partialkey);
+ if result then begin
   tmsebufdataset(fowner).bookmark:= str1;
  end;
 end;
