@@ -138,7 +138,105 @@ const
                     [fal_options,fal_fadirection,fal_image,fal_fapos,fal_facolor,
                     fal_fatransparency];
 type
+ iactivator = interface(inullinterface)
+ end;
+ iactivatorclient = interface(inullinterface)
+ end;
 
+ activatoroptionty = (avo_activateonloaded,avo_activatedelayed,
+                avo_deactivateonterminated,
+                avo_handleexceptions,avo_quietexceptions,
+                avo_abortonexception);
+ activatoroptionsty = set of activatoroptionty;
+const
+ defaultactivatoroptions = [avo_handleexceptions,avo_quietexceptions];
+
+type
+ tactivator = class;
+
+ tguicomponent = class(tmsecomponent,iactivator)
+  private
+   factivator: tactivator;
+   procedure setactivator(const avalue: tactivator);
+  protected
+   fdesignchangedlock: integer;
+   procedure receiveevent(const event: tobjectevent); override;
+   procedure doasyncevent(var atag: integer); virtual;
+   procedure designchanged; //for designer notify
+   procedure loaded; override;
+   procedure doactivated; virtual;
+   procedure dodeactivated; virtual;
+   procedure objectevent(const sender: tobject;
+                          const event: objecteventty); override;
+  public
+   procedure asyncevent(atag: integer = 0);
+                          //posts event for doasyncevent to self
+   procedure postcomponentevent(const event: tcomponentevent);
+   property activator: tactivator read factivator write setactivator;
+ end;
+
+ activateerroreventty = procedure(const sender: tactivator; 
+                 const aclient: tobject; const aexception: exception;
+                 var handled: boolean) of object;
+ 
+ tactivator = class(tguicomponent)
+  private
+   foptions: activatoroptionsty;
+   fonbeforeactivate: notifyeventty;
+   fonafteractivate: notifyeventty;
+   fonbeforedeactivate: notifyeventty;
+   fonafterdeactivate: notifyeventty;
+   factive: boolean;
+   factivated: boolean;
+   fonactivateerror: activateerroreventty;
+   procedure readclientnames(reader: treader);
+   procedure writeclientnames(writer: twriter);
+   function getclients: integer;
+   procedure setclients(const avalue: integer);
+   procedure setoptions(const avalue: activatoroptionsty);
+   procedure setactive(const avalue: boolean);
+  protected
+   fclientnames: stringarty;
+   fclients: pointerarty;
+   procedure registerclient(const aclient: iobjectlink);
+   procedure unregisterclient(const aclient: iobjectlink);
+   procedure updateorder;
+   function getclientname(const avalue: tobject; const aindex: integer): string;
+   function getclientnames: stringarty;
+   procedure defineproperties(filer: tfiler); override;
+   procedure doasyncevent(var atag: integer); override;
+   procedure loaded; override;
+   procedure unlink(const source,dest: iobjectlink; valuepo: pointer = nil); override;
+   procedure objevent(const sender: iobjectlink;
+                         const event: objecteventty); override;
+   procedure doterminated(const sender: tobject);   
+  public
+   constructor create(aowner: tcomponent); override;
+   destructor destroy; override;
+   class procedure addclient(const aactivator: tactivator; 
+              const aclient: iobjectlink; var dest: tactivator);
+   procedure activateclients;
+   procedure deactivateclients;
+   property activated: boolean read factivated;
+  published
+   property clients: integer read getclients write setclients; 
+                                  //hook for object inspector
+   property options: activatoroptionsty read foptions write setoptions 
+                    default defaultactivatoroptions;
+   property active: boolean read factive write setactive;
+   property onbeforeactivate: notifyeventty read fonbeforeactivate
+                           write fonbeforeactivate;
+   property onactivateerror: activateerroreventty read fonactivateerror 
+                                   write fonactivateerror;                              
+   property onafteractivate: notifyeventty read fonafteractivate 
+                           write fonafteractivate;
+   property onbeforedeactivate: notifyeventty read fonbeforedeactivate 
+                            write fonbeforedeactivate;
+   property onafterdeactivate: notifyeventty read fonbeforedeactivate 
+                            write fonafterdeactivate;
+   property activator;
+ end;
+ 
  twidget = class;
  tcustomframe = class;
 
@@ -521,105 +619,6 @@ type
   accept: boolean;
  end;
 
- iactivator = interface(inullinterface)
- end;
- iactivatorclient = interface(inullinterface)
- end;
- 
- activatoroptionty = (avo_activateonloaded,avo_activatedelayed,
-                avo_deactivateonterminated,
-                avo_handleexceptions,avo_quietexceptions,
-                avo_abortonexception);
- activatoroptionsty = set of activatoroptionty;
-const
- defaultactivatoroptions = [avo_handleexceptions,avo_quietexceptions];
- 
-type
- tactivator = class;
-
- tguicomponent = class(tmsecomponent,iactivator)
-  private
-   factivator: tactivator;
-   procedure setactivator(const avalue: tactivator);
-  protected
-   fdesignchangedlock: integer;
-   procedure receiveevent(const event: tobjectevent); override;
-   procedure doasyncevent(var atag: integer); virtual;
-   procedure designchanged; //for designer notify
-   procedure loaded; override;
-   procedure doactivated; virtual;
-   procedure dodeactivated; virtual;
-   procedure objectevent(const sender: tobject;
-                          const event: objecteventty); override;
-  public
-   procedure asyncevent(atag: integer = 0);
-                          //posts event for doasyncevent to self
-   procedure postcomponentevent(const event: tcomponentevent);
-   property activator: tactivator read factivator write setactivator;
- end;
-
- activateerroreventty = procedure(const sender: tactivator; 
-                 const aclient: tobject; const aexception: exception;
-                 var handled: boolean) of object;
- 
- tactivator = class(tguicomponent)
-  private
-   foptions: activatoroptionsty;
-   fonbeforeactivate: notifyeventty;
-   fonafteractivate: notifyeventty;
-   fonbeforedeactivate: notifyeventty;
-   fonafterdeactivate: notifyeventty;
-   factive: boolean;
-   factivated: boolean;
-   fonactivateerror: activateerroreventty;
-   procedure readclientnames(reader: treader);
-   procedure writeclientnames(writer: twriter);
-   function getclients: integer;
-   procedure setclients(const avalue: integer);
-   procedure setoptions(const avalue: activatoroptionsty);
-   procedure setactive(const avalue: boolean);
-  protected
-   fclientnames: stringarty;
-   fclients: pointerarty;
-   procedure registerclient(const aclient: iobjectlink);
-   procedure unregisterclient(const aclient: iobjectlink);
-   procedure updateorder;
-   function getclientname(const avalue: tobject; const aindex: integer): string;
-   function getclientnames: stringarty;
-   procedure defineproperties(filer: tfiler); override;
-   procedure doasyncevent(var atag: integer); override;
-   procedure loaded; override;
-   procedure unlink(const source,dest: iobjectlink; valuepo: pointer = nil); override;
-   procedure objevent(const sender: iobjectlink;
-                         const event: objecteventty); override;
-   procedure doterminated(const sender: tobject);   
-  public
-   constructor create(aowner: tcomponent); override;
-   destructor destroy; override;
-   class procedure addclient(const aactivator: tactivator; 
-              const aclient: iobjectlink; var dest: tactivator);
-   procedure activateclients;
-   procedure deactivateclients;
-   property activated: boolean read factivated;
-  published
-   property clients: integer read getclients write setclients; 
-                                  //hook for object inspector
-   property options: activatoroptionsty read foptions write setoptions 
-                    default defaultactivatoroptions;
-   property active: boolean read factive write setactive;
-   property onbeforeactivate: notifyeventty read fonbeforeactivate
-                           write fonbeforeactivate;
-   property onactivateerror: activateerroreventty read fonactivateerror 
-                                   write fonactivateerror;                              
-   property onafteractivate: notifyeventty read fonafteractivate 
-                           write fonafteractivate;
-   property onbeforedeactivate: notifyeventty read fonbeforedeactivate 
-                            write fonbeforedeactivate;
-   property onafterdeactivate: notifyeventty read fonbeforedeactivate 
-                            write fonafterdeactivate;
-   property activator;
- end;
- 
  twidgetevent = class(tcomponentevent)
  end;
 

@@ -177,8 +177,8 @@ type
    procedure unregisterchildwidget(const child: twidget); override;
    procedure setparentwidget(const avalue: twidget); override;   
   public
-   constructor create(aowner: tcomponent); override; overload;
-   constructor create(const aowner: tcomponent; 
+   constructor create(aowner: tcomponent);overload; override;
+   constructor create(const aowner: tcomponent;
                          const apage: tcustomreportpage); reintroduce; overload;
    destructor destroy; override;
  end;
