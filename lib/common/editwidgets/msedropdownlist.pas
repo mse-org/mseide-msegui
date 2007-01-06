@@ -239,8 +239,9 @@ type
    procedure dobeforedropdown; virtual;
    procedure doafterclosedropdown; virtual;
    procedure internaldropdown; virtual;
-   procedure setdropdowntext(const avalue: msestring; const docheckvalue: boolean;
-                                const canceled: boolean);
+   function setdropdowntext(const avalue: msestring; const docheckvalue: boolean;
+                                const canceled: boolean): boolean;
+             //true if selected
    function candropdown: boolean; virtual;
    procedure selectnone; virtual;
    //ibutton
@@ -720,17 +721,23 @@ begin
  result:= fdataselected;
 end;
 
-procedure tcustomdropdowncontroller.setdropdowntext(const avalue: msestring;
-                        const docheckvalue: boolean; const canceled: boolean);
+function tcustomdropdowncontroller.setdropdowntext(const avalue: msestring;
+                        const docheckvalue: boolean; const canceled: boolean): boolean;
 begin
  fdataselected:= fdataselected or docheckvalue;
  fdataselected:= fintf.setdropdowntext(avalue,docheckvalue,canceled);
+ result:= fdataselected;
 end;
 
 procedure tcustomdropdowncontroller.applicationactivechanged(const avalue: boolean);
+var
+ widget1: twidget;
 begin
- if not avalue and (getdropdownwidget <> nil) then begin
-  canceldropdown;
+ if not avalue then begin
+  widget1:= getdropdownwidget;
+  if (widget1 <> nil) and not widget1.window.hastransientfor then begin
+   canceldropdown;
+  end;
 //  getdropdownwidget.release;
  end;
 end;
