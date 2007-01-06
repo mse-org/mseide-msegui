@@ -502,10 +502,11 @@ type
   private
    fcaption: msestring;
   protected
+   function getcaption: msestring; virtual;
    procedure setcaption(const Value: msestring); virtual;
    procedure windowcreated; override;
   public
-   property caption: msestring read fcaption write setcaption;
+   property caption: msestring read getcaption write setcaption;
  end;
 
  tscrollbarwidget = class(tcustomeventwidget,iscrollbar)
@@ -626,6 +627,7 @@ type
   protected
    procedure updatewindowinfo(var info: windowinfoty); override;
    procedure dokeydown(var info: keyeventinfoty); override;
+   function getcaption: msestring; override;
    procedure setcaption(const Value: msestring); override;
    procedure internalcreateframe; override;
   public
@@ -875,6 +877,7 @@ var
  buttonheight: integer;
  buttonwidth: integer;
  widget: tshowmessagewidget;
+ widget1: twidget; //dummy parent to get invisible canvas
  but: array[0..integer(high(modalresultty))] of tmessagebutton;
  int1,int2: integer;
  rect1,rect2: rectty;
@@ -884,10 +887,14 @@ var
  
 begin 
  transientfor:= application.unreleasedactivewindow;
+ widget1:= twidget.create(nil); 
+ widget1.visible:= false;
+       //stays invisible, no wm_configured processing on win32
  widget:= tshowmessagewidget.create(nil,(transientfor <> nil) and 
                                               (wo_popup in transientfor.options));
+ widget.parentwidget:= widget1; //do not create window handle of widget
  try
-  acanvas:= widget.getcanvas;
+  acanvas:= widget1.getcanvas; 
   buttonheight:= acanvas.font.glyphheight + 6;
   buttonwidth:= 50;
   for int1:= 0 to ord(high(buttons)) do begin
@@ -935,16 +942,17 @@ begin
   inc(rect1.cx,2*horztextdist);
   inc(rect1.cy,2*verttextdist);
   
+  widget.parentwidget:= nil;  //remove dummy parent
+  widget.clientsize:= rect1.size;
   if placementrect = nil then begin
-   widget.widgetrect:= makerect(rect1.pos,addsize(rect1.size,widget.framewidth));
+//   widget.widgetrect:= makerect(rect1.pos,addsize(rect1.size,widget.framewidth));
    widget.window.windowpos:= wp_screencentered;
   end
   else begin
    rect2:= placementrect^;
    dec(rect2.y,8);
    inc(rect2.cy,28); //for windowdecoration
-   widget.widgetrect:= placepopuprect(transientfor,rect2,placement,
-                             addsize(rect1.size,widget.framewidth));
+   widget.widgetrect:= placepopuprect(transientfor,rect2,placement,widget.size);
   end;
 
   with widget.info.dest do begin
@@ -980,6 +988,7 @@ begin
    result:= mr_cancel;
   end;
  finally
+  widget1.free;
   widget.Free;
  end;
 end;
@@ -2932,12 +2941,17 @@ end;
 constructor ttoplevelwidget.create(aowner: tcomponent);
 begin
  inherited;
+ visible:= false;
  optionswidget:= defaultoptionstoplevelwidget;
 // fcolor:= cl_background;
- visible:= false;
 end;
 
 { tcaptionwidget }
+
+function tcaptionwidget.getcaption: msestring;
+begin
+ result:= fcaption;
+end;
 
 procedure tcaptionwidget.setcaption(const Value: msestring);
 begin
@@ -3205,6 +3219,7 @@ begin
  inherited create(aowner);
  if apopuptransient then begin
   color:= cl_active;
+//exit;
   createframe;
   with tcustomcaptionframe(fframe) do begin
    colorframe:= cl_black;
@@ -3233,12 +3248,24 @@ begin
  window.localshortcuts:= true;
 end;
 
+function tmessagewidget.getcaption: msestring;
+begin
+ if fframe <> nil then begin
+  result:= tcustomcaptionframe(fframe).caption;
+ end
+ else begin
+  result:= inherited getcaption;
+ end;
+end;
+
 procedure tmessagewidget.setcaption(const Value: msestring);
 begin
- inherited;
  if fframe <> nil then begin
   tcustomcaptionframe(fframe).caption:= value;
- end;
+ end
+ else begin
+  inherited;
+ end; 
 end;
 
 procedure tmessagewidget.internalcreateframe;
