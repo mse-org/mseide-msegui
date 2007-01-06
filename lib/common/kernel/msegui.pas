@@ -1229,6 +1229,7 @@ type
        //stacking is performed in mainloop idle, nil means bottom
    function stackedunder: twindow; //nil if top
    function stackedover: twindow;  //nil if bottom
+   function hastransientfor: boolean;
 
    procedure capturemouse;
    procedure releasemouse;
@@ -8854,6 +8855,11 @@ begin
  end;
 end;
 
+function twindow.hastransientfor: boolean;
+begin
+ result:= ftransientforcount > 0;
+end;
+
 procedure twindow.capturemouse;
 begin
  if app.grabpointer(winid) then begin
@@ -10341,12 +10347,12 @@ begin
  result:= 0;
  if (tws_windowvisible in twindow(l).fstate) then begin
   if not (tws_windowvisible in twindow(r).fstate) then begin
-   inc(result,8);
+   inc(result,64);
   end
  end
  else begin
   if (tws_windowvisible in twindow(r).fstate) then begin
-   dec(result,8);
+   dec(result,64);
   end
   else begin
    exit; //both invisible -> no change in order
@@ -10356,14 +10362,26 @@ begin
  if ow_top in twindow(l).fowner.foptionswidget then inc(result);
  if ow_background in twindow(r).fowner.foptionswidget then inc(result);
  if ow_top in twindow(r).fowner.foptionswidget then dec(result);
- if (tws_modal in twindow(l).fstate) or (twindow(l).ftransientfor <> nil)
-           or (twindow(l).ftransientforcount > 0)
-            then begin
+
+ if twindow(l).ftransientforcount > 0 then begin
   inc(result,4);
  end;
- if (tws_modal in twindow(r).fstate) or (twindow(r).ftransientfor <> nil) or
-               (twindow(r).ftransientforcount > 0) then begin
+ if (tws_modal in twindow(l).fstate) or (twindow(l).ftransientfor <> nil)
+            then begin
+  inc(result,16);
+  if twindow(l).ftransientforcount > 0 then begin
+   dec(result,8);
+  end;
+ end;
+ if twindow(r).ftransientforcount > 0 then begin
   dec(result,4);
+ end;
+ if (tws_modal in twindow(r).fstate) or (twindow(r).ftransientfor <> nil)
+            then begin
+  dec(result,16);
+  if twindow(r).ftransientforcount > 0 then begin
+   inc(result,8);
+  end;
  end;
 end;
 

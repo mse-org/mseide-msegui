@@ -501,8 +501,8 @@ type
  tcaptionwidget = class(ttoplevelwidget)
   private
    fcaption: msestring;
-   procedure setcaption(const Value: msestring);
   protected
+   procedure setcaption(const Value: msestring); virtual;
    procedure windowcreated; override;
   public
    property caption: msestring read fcaption write setcaption;
@@ -621,9 +621,16 @@ type
  end;
 
  tmessagewidget = class(tcaptionwidget)
+  private
+   fpopuptransient: boolean;
   protected
    procedure updatewindowinfo(var info: windowinfoty); override;
    procedure dokeydown(var info: keyeventinfoty); override;
+   procedure setcaption(const Value: msestring); override;
+   procedure internalcreateframe; override;
+  public
+   constructor create(const aowner: tcomponent; const apopuptransient: boolean);
+                               reintroduce;
  end;
 
  buttonoptionty = (bo_executeonclick,bo_executeonkey,bo_executeonshortcut,
@@ -877,7 +884,8 @@ var
  
 begin 
  transientfor:= application.unreleasedactivewindow;
- widget:= tshowmessagewidget.create(nil);
+ widget:= tshowmessagewidget.create(nil,(transientfor <> nil) and 
+                                              (wo_popup in transientfor.options));
  try
   acanvas:= widget.getcanvas;
   buttonheight:= acanvas.font.glyphheight + 6;
@@ -928,7 +936,7 @@ begin
   inc(rect1.cy,2*verttextdist);
   
   if placementrect = nil then begin
-   widget.widgetrect:= rect1;
+   widget.widgetrect:= makerect(rect1.pos,addsize(rect1.size,widget.framewidth));
    widget.window.windowpos:= wp_screencentered;
   end
   else begin
@@ -936,12 +944,12 @@ begin
    dec(rect2.y,8);
    inc(rect2.cy,28); //for windowdecoration
    widget.widgetrect:= placepopuprect(transientfor,rect2,placement,
-                             rect1.size);
+                             addsize(rect1.size,widget.framewidth));
   end;
 
   with widget.info.dest do begin
    rect1.x:= x + (cx - int2) div 2;
-   rect1.y:= y + cy + verttextdist;
+   rect1.y:= y + cy + verttextdist + widget.paintpos.y;
    rect1.cx:= buttonwidth;
    rect1.cy:= buttonheight;
   end;
@@ -3190,6 +3198,22 @@ end;
 
 { tmessagewidget }
 
+constructor tmessagewidget.create(const aowner: tcomponent;
+               const apopuptransient: boolean);
+begin
+ fpopuptransient:= apopuptransient;
+ inherited create(aowner);
+ if apopuptransient then begin
+  color:= cl_active;
+  createframe;
+  with tcustomcaptionframe(fframe) do begin
+   colorframe:= cl_black;
+   framewidth:= 2;
+   captionpos:= cp_top;
+  end;
+ end;
+end;
+
 procedure tmessagewidget.dokeydown(var info: keyeventinfoty);
 begin
  with info do begin
@@ -3203,7 +3227,23 @@ procedure tmessagewidget.updatewindowinfo(var info: windowinfoty);
 begin
  inherited;
  info.options:= [wo_message];
+ if fpopuptransient then begin
+  include(info.options,wo_popup);
+ end;
  window.localshortcuts:= true;
+end;
+
+procedure tmessagewidget.setcaption(const Value: msestring);
+begin
+ inherited;
+ if fframe <> nil then begin
+  tcustomcaptionframe(fframe).caption:= value;
+ end;
+end;
+
+procedure tmessagewidget.internalcreateframe;
+begin
+ tcustomcaptionframe.create(self);
 end;
 
 { tcustomthumbtrackscrollframe }
