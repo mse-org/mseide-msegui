@@ -891,7 +891,7 @@ begin
  widget1.visible:= false;
        //stays invisible, no wm_configured processing on win32
  widget:= tshowmessagewidget.create(nil,(transientfor <> nil) and 
-                                              (wo_popup in transientfor.options));
+             (wo_popup in transientfor.options) and transientfor.owner.visible);
  widget.parentwidget:= widget1; //do not create window handle of widget
  try
   acanvas:= widget1.getcanvas; 
