@@ -1,7 +1,7 @@
 object projectoptionsfo: tprojectoptionsfo
   optionswidget = [ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_destroywidgets, ow_hinton]
-  bounds_x = 182
-  bounds_y = 106
+  bounds_x = 122
+  bounds_y = 117
   bounds_cx = 629
   bounds_cy = 572
   visible = False
