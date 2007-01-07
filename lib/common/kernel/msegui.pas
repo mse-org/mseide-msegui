@@ -46,7 +46,8 @@ type
                    //track font.linespacing,
                    //create fonthighdelta and childscaled events
                    ow_autoscale, //synchronizes bounds_cy with fontheightdelta
-                   ow_autosize   //used in tbutton and tlabel
+                   ow_autosize,ow_autosizeanright,ow_autosizeanbottom
+                                 //used in tbutton and tlabel
                    );
  optionswidgetty = set of optionwidgetty;
 
@@ -4253,7 +4254,13 @@ begin
   subsize1(size1,value.size);
   size2:= value.size;
   inc(value.cx,size1.cx);
+  if (ow_autosizeanright in foptionswidget) and not (an_right in fanchors) then begin
+   dec(value.x,size1.cx);
+  end;
   inc(value.cy,size1.cy);
+  if (ow_autosizeanbottom in foptionswidget) and not (an_bottom in fanchors) then begin
+   dec(value.y,size1.cy);
+  end;
   if not windowevent then begin
    checkwidgetsize(value.size);
   end;
