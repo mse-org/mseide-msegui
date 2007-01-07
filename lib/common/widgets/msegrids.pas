@@ -2902,7 +2902,9 @@ end;
 procedure tfixrow.synctofontheight;
 begin
  if fframe <> nil then begin
-  height:= height + font.glyphheight - fframe.framei_top + fframe.framei_bottom;
+  fframe.checkstate;
+  height:= {height + }font.glyphheight + fframe.finnerframe.top + 
+                                     fframe.finnerframe.bottom;
  end
  else begin
   height:= font.glyphheight + 2;
