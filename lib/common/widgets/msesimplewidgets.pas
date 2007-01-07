@@ -22,7 +22,7 @@ const
  defaultbuttonwidth = 50;
  defaultbuttonheight = 20;
  defaultlabeltextflags = [tf_ycentered];
- defaultlabeloptionswidget = (defaultoptionswidget + [ow_fontglyphheight{,ow_autosize}]) - 
+ defaultlabeloptionswidget = (defaultoptionswidget + [ow_fontglyphheight,ow_autosize]) - 
               [ow_mousefocus,ow_tabfocus,ow_arrowfocus];
  defaultlabelwidgetwidth = 100;
  defaultlabelwidgetheight = 20;
@@ -187,6 +187,7 @@ type
  labeloptionty = (lao_nogray);
  labeloptionsty = set of labeloptionty;
  
+type 
  tcustomlabel = class(tpublishedwidget)
   private
    fcaption: richstringty;
@@ -207,15 +208,17 @@ type
   public
    constructor create(aowner: tcomponent); override;
    procedure synctofontheight; override;
+   procedure initnewcomponent; override;
    property caption: msestring read getcaption write setcaption;
    property font: twidgetfont read getfont write setfont stored isfontstored;
    property textflags: textflagsty read ftextflags write settextflags default defaultlabeltextflags;
    property options: labeloptionsty read foptions write setoptions default [];
+  published
+   property optionswidget default defaultlabeloptionswidget;
  end;
 
  tlabel = class(tcustomlabel)
   published
-   property optionswidget default defaultlabeloptionswidget;
    property caption;
    property font;
    property textflags;
@@ -837,6 +840,12 @@ procedure tcustomlabel.clientrectchanged;
 begin
  inherited;
  checkautosize; //for frame.framei
+end;
+
+procedure tcustomlabel.initnewcomponent;
+begin
+ inherited;
+ caption:= name;
 end;
 
 { tgroupboxframe }
