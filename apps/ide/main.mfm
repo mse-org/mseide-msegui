@@ -37,7 +37,7 @@ object mainfo: tmainfo
   top = 80
   moduleclassname = 'tmseform'
   object basedock: tdockpanel
-    optionswidget = [ow_background, ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_autoscale]
+    optionswidget = [ow_background, ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_subfocus, ow_destroywidgets, ow_autoscale]
     bounds_x = 0
     bounds_y = 21
     bounds_cx = 587

@@ -374,6 +374,7 @@ type
    constructor create; override;
    destructor destroy; override;
    procedure assign(source: tpersistent); override;
+   procedure scale(const ascale: real); virtual;
 
    function gethandleforcanvas(const canvas: tcanvas): fontnumty;
    property handle: fontnumty read gethandle {write sethandle};
@@ -2591,6 +2592,12 @@ begin
  else begin
   style:= style - [fs_strikeout];
  end;
+end;
+
+procedure tfont.scale(const ascale: real);
+begin
+ height:= round(height * ascale);
+ width:= round(width * ascale);
 end;
 
 { tcanvasfont }

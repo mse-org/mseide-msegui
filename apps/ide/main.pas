@@ -981,7 +981,9 @@ begin
   saveall.enabled:= sourcefo.modified or designer.modified or projectoptions.modified;
   actionsmo.toggleformunit.enabled:= (flastform <> nil) or 
                                             (designer.modules.count > 0);
-  if (sourcefo.activepage <> nil) and sourcefo.checkancestor(flastform) then begin
+  if (sourcefo.activepage <> nil) and 
+         (sourcefo.checkancestor(flastform) or 
+         sourcefo.activepage.entered) then begin
    print.enabled:= true;
    with sourcefo.activepage do begin
     actionsmo.save.enabled:= modified;
