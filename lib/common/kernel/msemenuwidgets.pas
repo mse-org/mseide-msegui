@@ -529,6 +529,7 @@ begin
  end;
  initlayoutinfo(self,flayout,amenu,[],cl_black);
  inherited create(aowner,transientfor);
+ optionswidget:= optionswidget - [ow_tabfocus,ow_arrowfocus,ow_mousefocus];
  internalcreateframe;
  if menucomp <> nil then begin
   assigntemplate(menucomp.template);
@@ -1287,6 +1288,9 @@ begin
  if fstackedoverbefore = nil then begin
   setlinkedvar(fwindow.stackedover,tlinkedobject(fstackedoverbefore));
  end;
+ if factivewindowbefore <> nil then begin
+  factivewindowbefore.deactivateintermediate;
+ end;
  inherited;
  if value < 0 then begin
 //  focusback(factivewindowbefore <> nil);
@@ -1301,9 +1305,9 @@ begin
      gui_stackoverwindow(fwindow.winid,fstackedoverbefore.winid);
     end;
    end;
-   if (factivewindowbefore <> nil) and factivewindowbefore.visible then begin
-    factivewindowbefore.activate;
-   end;
+  end;
+  if (factivewindowbefore <> nil) and factivewindowbefore.visible then begin
+   factivewindowbefore.reactivate;
   end;
   setlinkedvar(nil,tlinkedobject(factivewindowbefore));
   setlinkedvar(nil,tlinkedobject(fstackedoverbefore));

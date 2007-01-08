@@ -1081,6 +1081,8 @@ type
 
    function active: boolean;
    function entered: boolean;
+   function activeentered: boolean; 
+     //true if entered and window is regularactivewindow or inactivated
    function focused: boolean;
    function clicked: boolean;
 
@@ -1168,6 +1170,7 @@ type
    function internalupdate: boolean;
            //updates screen representation, false if nothing is painted
    function canactivate: boolean;
+   procedure deactivate;
      //icanvas
    procedure gcneeded(const sender: tcanvas);
    function getmonochrome: boolean;
@@ -1183,7 +1186,6 @@ type
                                       //nil if from application
    procedure show(windowevent: boolean);
    procedure hide(windowevent: boolean);
-   procedure deactivate;
    procedure setfocusedwidget(widget: twidget);
    procedure setmodalresult(const Value: modalresultty);
    function getglobalshortcuts: boolean;
@@ -1220,6 +1222,9 @@ type
    function beginmodal: boolean; //true if window destroyed
    procedure endmodal;
    procedure activate;
+   function deactivateintermediate: boolean; 
+      //true if ok, sets app.finactivewindow
+   procedure reactivate; //clears app.finactivewindow
    procedure update;
    function candefocus: boolean;
    procedure nofocus;
@@ -1336,6 +1341,7 @@ type
    fwindows: windowarty;
    factivewindow: twindow;
    fwantedactivewindow: twindow; //set by twindow.activate if modal
+   finactivewindow: twindow;
    ffocuslockwindow: twindow;
    ffocuslocktransientfor: twindow;
    fstate: applicationstatesty;
@@ -6889,6 +6895,12 @@ begin
  result:= ws_entered in fwidgetstate;
 end;
 
+function twidget.activeentered: boolean;
+begin
+ result:= entered and ((app.regularactivewindow = window) or 
+                (app.finactivewindow = window));
+end;
+
 function twidget.focused: boolean;
 begin
  result:= ws_focused in fwidgetstate;
@@ -8273,6 +8285,9 @@ var
  widgetar: widgetarty;
  int1: integer;
 begin
+ if app.finactivewindow = self then begin
+  app.finactivewindow:= nil;
+ end;
  activewindowbefore:= app.factivewindow;
  show(windowevent);
  widgetar:= nil; //compilerwarning
@@ -8360,6 +8375,21 @@ begin
    app.factivewindow:= nil; //should never happen
   end;
  end;
+end;
+
+function twindow.deactivateintermediate: boolean;
+begin
+ deactivate;
+ if app.factivewindow = nil then begin
+  result:= true;
+  app.finactivewindow:= self;
+ end;
+end;
+
+procedure twindow.reactivate; //clears app.finactivewindow
+begin
+ app.finactivewindow:= nil;
+ activate;
 end;
 
 procedure twindow.hide(windowevent: boolean);
@@ -9425,6 +9455,9 @@ begin
  end;
  if factivewindow = sender then begin
   factivewindow:= nil;
+ end;
+ if finactivewindow = sender then begin
+  finactivewindow:= nil;
  end;
  if fwantedactivewindow = sender then begin
   fwantedactivewindow:= nil;
