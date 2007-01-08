@@ -32,54 +32,54 @@ object debuggerfo: tdebuggerfo
     buttons.count = 13
     buttons.width = 24
     buttons.height = 24
-    buttons.items = <
+    buttons.items = <    
       item
         action = actionsmo.reset
-      end
+      end    
       item
         action = actionsmo.interrupt
-      end
+      end    
       item
         action = actionsmo.continue
-      end
+      end    
       item
         action = actionsmo.next
-      end
+      end    
       item
         action = actionsmo.step
-      end
+      end    
       item
         action = actionsmo.finish
-      end
+      end    
       item
         options = [mao_separator]
-      end
+      end    
       item
         hint = 'Next instruction'
         action = actionsmo.nexti
         state = [as_localhint]
-      end
+      end    
       item
         hint = 'Step instruction'
         action = actionsmo.stepi
         state = [as_localhint]
-      end
+      end    
       item
         options = [mao_separator]
-      end
+      end    
       item
         action = actionsmo.bkptsonact
-        state = [as_checked, as_localchecked]
+        state = [as_checked]
         options = [mao_checkbox]
-      end
+      end    
       item
         action = actionsmo.watchesonact
-        state = [as_checked, as_localchecked]
+        state = [as_checked]
         options = [mao_checkbox]
-      end
+      end    
       item
         action = actionsmo.bluedotsonact
-        state = [as_checked, as_localchecked]
+        state = [as_checked]
         options = [mao_checkbox]
       end>
     options = [tbo_dragsourceenabledonly, tbo_dragdestenabledonly]
