@@ -984,7 +984,7 @@ begin
   saveall.enabled:= sourcefo.modified or designer.modified or projectoptions.modified;
   actionsmo.toggleformunit.enabled:= (flastform <> nil) or 
                                             (designer.modules.count > 0);
-  if (sourcefo.activepage <> nil) and sourcefo.checkancestor(flastform) then begin
+  if (sourcefo.activepage <> nil) and sourcefo.activepage.activeentered then begin
    print.enabled:= true;
    with sourcefo.activepage do begin
     actionsmo.save.enabled:= modified;
@@ -1197,10 +1197,10 @@ end;
 procedure tmainfo.mainonactivewindowchanged(const oldwindow: twindow; 
                        const newwindow: twindow);
 begin
- if (newwindow <> nil) and (newwindow <> self.window) and
+ if (newwindow <> nil) {and (newwindow <> self.window)} and
     not (newwindow.transientfor <> nil) and (newwindow.owner is tcustommseform) then begin
   flastform:= tcustommseform(newwindow.owner);
-  if (flastform = sourcefo) then begin
+  if sourcefo.checkancestor(flastform) then begin
    flastdesignform:= flastform;
   end
   else begin

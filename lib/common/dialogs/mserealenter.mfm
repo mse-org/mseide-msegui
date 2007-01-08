@@ -6,12 +6,25 @@ object realenterfo: trealenterfo
   bounds_cymin = 75
   visible = False
   container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_subfocus, ow_mousetransparent, ow_destroywidgets, ow_autoscale]
+  container.bounds_x = 0
+  container.bounds_y = 0
   container.bounds_cx = 233
   container.bounds_cy = 88
   container.frame.dummy = 0
   options = [fo_screencentered, fo_closeonesc, fo_localshortcuts, fo_autoreadstat, fo_autowritestat]
   icon.transparency = -2147483648
   moduleclassname = 'tmseform'
+  object lab: tlabel
+    optionswidget = [ow_mousewheel, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+    bounds_x = 8
+    bounds_y = 9
+    bounds_cx = 217
+    bounds_cy = 46
+    anchors = [an_left, an_top, an_right, an_bottom]
+    taborder = 3
+    caption = 'lab'
+    reffontheight = 14
+  end
   object value: trealedit
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
     bounds_x = 8
@@ -19,39 +32,34 @@ object realenterfo: trealenterfo
     bounds_cx = 100
     bounds_cy = 20
     frame.dummy = 0
-    anchors = [an_left, an_bottom]
+    anchors = [an_left, an_right, an_bottom]
     optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_resetselectonexit, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_savevalue, oe_savestate]
     reffontheight = 14
   end
-  object lab: tlabel
-    bounds_x = 8
-    bounds_y = 8
-    bounds_cx = 217
-    bounds_cy = 47
-    anchors = [an_left, an_top, an_right, an_bottom]
-    taborder = 3
-    reffontheight = 14
-  end
   object ok: tbutton
+    optionswidget = [ow_tabfocus, ow_arrowfocus, ow_mousewheel, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
     bounds_x = 120
-    bounds_y = 60
+    bounds_y = 62
     bounds_cx = 50
-    bounds_cy = 22
-    anchors = [an_left, an_bottom]
+    bounds_cy = 20
+    anchors = [an_right, an_bottom]
     taborder = 1
     state = [as_default, as_localdefault, as_localcaption]
     caption = '&OK'
     modalresult = mr_ok
+    reffontheight = 14
   end
   object cancel: tbutton
+    optionswidget = [ow_tabfocus, ow_arrowfocus, ow_mousewheel, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
     bounds_x = 176
-    bounds_y = 60
+    bounds_y = 62
     bounds_cx = 50
-    bounds_cy = 22
-    anchors = [an_left, an_bottom]
+    bounds_cy = 20
+    anchors = [an_right, an_bottom]
     taborder = 2
     state = [as_localcaption]
     caption = '&Cancel'
     modalresult = mr_cancel
+    reffontheight = 14
   end
 end

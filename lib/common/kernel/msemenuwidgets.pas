@@ -529,6 +529,7 @@ begin
  end;
  initlayoutinfo(self,flayout,amenu,[],cl_black);
  inherited create(aowner,transientfor);
+ optionswidget:= optionswidget - [ow_tabfocus,ow_arrowfocus,ow_mousefocus];
  internalcreateframe;
  if menucomp <> nil then begin
   assigntemplate(menucomp.template);
@@ -858,12 +859,9 @@ end;
 
 procedure tpopupmenuwidget.internalsetactiveitem(const avalue: integer;
           const aclicked: boolean; const force: boolean);
-//var
-// bo1: boolean;
 begin
  with flayout do begin
   if (activeitem <> avalue) or force then begin
-//   bo1:= activeitem >= 0;
    if activeitem >= 0 then begin
     if (fnextpopup <> nil) then begin
      fnextpopup.release;
@@ -884,6 +882,9 @@ begin
       include(state,ss_clicked);
      end;
      invalidaterect(dim);
+     if mlo_main in options then begin
+      capturekeyboard;
+     end;
      if not (mlo_childreninactive in options) and
               (tmenuitem1(menu).fsubmenu[activeitem].count > 0) then begin
       tpopupmenuwidget.create(@fnextpopup,tmenuitem1(menu).fsubmenu[activeitem],
@@ -896,11 +897,9 @@ begin
      end;
     end;
     capturemouse;
-//    if not bo1 then begin
-     if not (not canfocus or setfocus(application.activewindow <> nil) or 
-                      not(mlo_main in options)) then begin
-      closepopupstack(nil);
-     end;
+//    if not (not canfocus or setfocus(application.activewindow <> nil) or 
+//                     not(mlo_main in options)) then begin
+//     closepopupstack(nil);
 //    end;
    end
    else begin
@@ -920,6 +919,7 @@ end;
 
 procedure tpopupmenuwidget.activatemenu(keymode: boolean; aclicked: boolean);
 begin
+ capturekeyboard;
  if keymode then begin
   beginkeymode;
  end
@@ -937,6 +937,7 @@ end;
 procedure tpopupmenuwidget.childdeactivated(const sender: tpopupmenuwidget);
 begin
  capturemouse;
+ capturekeyboard;
 end;
 
 procedure tpopupmenuwidget.deactivatemenu;
@@ -1286,10 +1287,15 @@ begin
  end;
  if fstackedoverbefore = nil then begin
   setlinkedvar(fwindow.stackedover,tlinkedobject(fstackedoverbefore));
+  window.bringtofront;
+ end;
+ if factivewindowbefore <> nil then begin
+  factivewindowbefore.deactivateintermediate;
  end;
  inherited;
  if value < 0 then begin
-  focusback(factivewindowbefore <> nil);
+//  focusback(factivewindowbefore <> nil);
+  releasekeyboard;
   if factivewindowbefore <> fwindow then begin
    if (fstackedoverbefore <> nil) and fstackedoverbefore.visible then begin
     setlength(ar1,2);
@@ -1300,9 +1306,9 @@ begin
      gui_stackoverwindow(fwindow.winid,fstackedoverbefore.winid);
     end;
    end;
-   if (factivewindowbefore <> nil) and factivewindowbefore.visible then begin
-    factivewindowbefore.activate;
-   end;
+  end;
+  if (factivewindowbefore <> nil) and factivewindowbefore.visible then begin
+   factivewindowbefore.reactivate;
   end;
   setlinkedvar(nil,tlinkedobject(factivewindowbefore));
   setlinkedvar(nil,tlinkedobject(fstackedoverbefore));

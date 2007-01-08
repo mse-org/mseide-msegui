@@ -930,6 +930,8 @@ type
    procedure scrollcaret(const dist: pointty);
    procedure capturemouse(grab: boolean = true);
    procedure releasemouse;
+   procedure capturekeyboard;
+   procedure releasekeyboard;
    procedure synctofontheight; virtual;
 
    procedure dragevent(var info: draginfoty); virtual;
@@ -1069,6 +1071,8 @@ type
 
    function active: boolean;
    function entered: boolean;
+   function activeentered: boolean; 
+     //true if entered and window is regularactivewindow or inactivated
    function focused: boolean;
    function clicked: boolean;
 
@@ -1156,6 +1160,7 @@ type
    function internalupdate: boolean;
            //updates screen representation, false if nothing is painted
    function canactivate: boolean;
+   procedure deactivate;
      //icanvas
    procedure gcneeded(const sender: tcanvas);
    function getmonochrome: boolean;
@@ -1171,7 +1176,6 @@ type
                                       //nil if from application
    procedure show(windowevent: boolean);
    procedure hide(windowevent: boolean);
-   procedure deactivate;
    procedure setfocusedwidget(widget: twidget);
    procedure setmodalresult(const Value: modalresultty);
    function getglobalshortcuts: boolean;
@@ -1208,6 +1212,9 @@ type
    function beginmodal: boolean; //true if window destroyed
    procedure endmodal;
    procedure activate;
+   function deactivateintermediate: boolean; 
+      //true if ok, sets app.finactivewindow
+   procedure reactivate; //clears app.finactivewindow
    procedure update;
    function candefocus: boolean;
    procedure nofocus;
@@ -1321,6 +1328,7 @@ type
    fwindows: windowarty;
    factivewindow: twindow;
    fwantedactivewindow: twindow; //set by twindow.activate if modal
+   finactivewindow: twindow;
    ffocuslockwindow: twindow;
    ffocuslocktransientfor: twindow;
    fstate: applicationstatesty;
@@ -1328,6 +1336,7 @@ type
    fcaret: tcaret;
    fmousecapturewidget: twidget;
    fmousewidget: twidget;
+   fkeyboardcapturewidget: twidget;
    fclientmousewidget: twidget;
    fonexception: exceptioneventty;
    fhintedwidget: twidget;
@@ -3193,7 +3202,7 @@ var
   pos,color: real;
   rea1,rea2: real;
   co1: rgbtriplety;
-
+                              //todo: optimize
  begin
   po1:= @rgbs[index];
   po2:= @rgbs[index+1];
@@ -3237,12 +3246,19 @@ var
     int2:= ipos;
     ipos:= round(pos);
     co1:= scalecolor(color,po1^,po2^);
+{$ifdef FPC}{$checkpointer off}{$endif} //scanline is not in heap on win32
     if reverse then begin
+     if ipos < 0 then begin
+      ipos:= 0;
+     end;
      for int3:= int2 downto ipos + 1 do begin
       fade^[int3]:= co1;
      end;
     end
     else begin
+     if ipos > imax then begin
+      ipos:= imax;
+     end;
      for int3:= int2 to ipos - 1 do begin
       fade^[int3]:= co1;
      end;
@@ -3253,6 +3269,7 @@ var
     fade^[ipos]:= co1;
    end;
   end;
+{$ifdef FPC}{$checkpointer default}{$endif}
  end;
 
  procedure createalphabuffer;
@@ -6846,6 +6863,12 @@ begin
  result:= ws_entered in fwidgetstate;
 end;
 
+function twidget.activeentered: boolean;
+begin
+ result:= entered and ((app.regularactivewindow = window) or 
+                (app.finactivewindow = window));
+end;
+
 function twidget.focused: boolean;
 begin
  result:= ws_focused in fwidgetstate;
@@ -7049,13 +7072,21 @@ begin
   exclude(fwidgetstate,ws_mousecaptured);
  end;
 end;
-{
-procedure twidget.mousecaptureend;
+
+procedure twidget.capturekeyboard;
 begin
- fwidgetstate:= fwidgetstate -
-          [ws_clicked,ws_mousecaptured,ws_clientmousecaptured];
+ if app <> nil then begin
+  app.fkeyboardcapturewidget:= self;
+ end;
 end;
-}
+
+procedure twidget.releasekeyboard;
+begin
+ if (app <> nil) and (app.fkeyboardcapturewidget = self) then begin
+  app.fkeyboardcapturewidget:= nil;
+ end;
+end;
+
 procedure twidget.dragevent(var info: draginfoty);
 var
  po1: pointty;
@@ -8190,6 +8221,9 @@ var
  widgetar: widgetarty;
  int1: integer;
 begin
+ if app.finactivewindow = self then begin
+  app.finactivewindow:= nil;
+ end;
  activewindowbefore:= app.factivewindow;
  show(windowevent);
  widgetar:= nil; //compilerwarning
@@ -8277,6 +8311,21 @@ begin
    app.factivewindow:= nil; //should never happen
   end;
  end;
+end;
+
+function twindow.deactivateintermediate: boolean;
+begin
+ deactivate;
+ if app.factivewindow = nil then begin
+  result:= true;
+  app.finactivewindow:= self;
+ end;
+end;
+
+procedure twindow.reactivate; //clears app.finactivewindow
+begin
+ app.finactivewindow:= nil;
+ activate;
 end;
 
 procedure twindow.hide(windowevent: boolean);
@@ -8554,11 +8603,19 @@ end;
 
 procedure twindow.dispatchkeyevent(const eventkind: eventkindty;
                                        var info: keyeventinfoty);
+var
+ widget1: twidget;
 begin
- if ffocusedwidget <> nil then begin
+ if app.fkeyboardcapturewidget <> nil then begin
+  widget1:= app.fkeyboardcapturewidget;
+ end
+ else begin
+  widget1:= ffocusedwidget;
+ end;
+ if widget1 <> nil then begin
   case eventkind of
-   ek_keypress: ffocusedwidget.internalkeydown(info);
-   ek_keyrelease: ffocusedwidget.dokeyup(info);
+   ek_keypress: widget1.internalkeydown(info);
+   ek_keyrelease: widget1.dokeyup(info);
   end;
  end
  else begin
@@ -9327,6 +9384,9 @@ begin
  if factivewindow = sender then begin
   factivewindow:= nil;
  end;
+ if finactivewindow = sender then begin
+  finactivewindow:= nil;
+ end;
  if fwantedactivewindow = sender then begin
   fwantedactivewindow:= nil;
  end;
@@ -9589,12 +9649,13 @@ end;
 
 procedure tinternalapplication.processkeyevent(event: tkeyevent);
 var
- window: twindow;
+ window1: twindow;
+ widget1: twidget;
  info: keyeventinfoty;
  shift: shiftstatesty;
 begin
  with event do begin
-  if findwindow(fwinid,window) then begin
+  if findwindow(fwinid,window1) then begin
    fillchar(info,sizeof(info),0);
    with info do begin
     key:= fkey;
@@ -9612,16 +9673,26 @@ begin
     else begin
      shiftstate:= fshiftstate - shift;
     end;
-    if factivewindow <> nil then begin
+    if fkeyboardcapturewidget <> nil then begin
+     window1:= fkeyboardcapturewidget.window;
+     widget1:= fkeyboardcapturewidget;
+    end
+    else begin
+     window1:= factivewindow;
+     if window1 <> nil then begin
+      widget1:= factivewindow.ffocusedwidget;
+     end;
+    end;
+    if window1 <> nil then begin
      fmouseparkeventinfo.shiftstate:= shiftstatesty(
         replacebits({$ifdef FPC}longword{$else}byte{$endif}(shiftstate),
           {$ifdef FPC}longword{$else}byte{$endif}(fmouseparkeventinfo.shiftstate),
           {$ifdef FPC}longword{$else}byte{$endif}(keyshiftstatesmask)));
      if kind = ek_keypress then begin
-      fonkeypresslist.dokeyevent(factivewindow.ffocusedwidget,info);
+      fonkeypresslist.dokeyevent(widget1,info);
      end;
      if not (es_processed in eventstate) then begin
-      factivewindow.dispatchkeyevent(kind,info);
+      window1.dispatchkeyevent(kind,info);
      end;
     end;
    end;
@@ -10363,6 +10434,9 @@ procedure tinternalapplication.widgetdestroyed(const widget: twidget);
 begin
  if fmousecapturewidget = widget then begin
   capturemouse(nil,false);
+ end;
+ if fkeyboardcapturewidget = widget then begin
+  fkeyboardcapturewidget:= nil; 
  end;
  if fcaretwidget = widget then begin
   fcaretwidget:= nil;
