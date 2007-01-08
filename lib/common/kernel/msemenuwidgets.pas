@@ -1280,14 +1280,18 @@ var
  ar1: winidarty;
  ar2: integerarty;
  window1: twindow;
+ bo1: boolean;
 begin
  window1:= factivewindowbefore;
+ bo1:= application.active;
  if factivewindowbefore = nil then begin
   setlinkedvar(application.activewindow,tlinkedobject(factivewindowbefore));
  end;
  if fstackedoverbefore = nil then begin
   setlinkedvar(fwindow.stackedover,tlinkedobject(fstackedoverbefore));
-  window.bringtofront;
+  if bo1 then begin
+   window.bringtofront;
+  end;
  end;
  if factivewindowbefore <> nil then begin
   factivewindowbefore.deactivateintermediate;
@@ -1307,7 +1311,8 @@ begin
     end;
    end;
   end;
-  if (factivewindowbefore <> nil) and factivewindowbefore.visible then begin
+  if bo1 and (factivewindowbefore <> nil) and 
+                    factivewindowbefore.visible then begin
    factivewindowbefore.reactivate;
   end;
   setlinkedvar(nil,tlinkedobject(factivewindowbefore));
