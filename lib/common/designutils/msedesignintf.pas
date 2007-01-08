@@ -271,10 +271,12 @@ type
                                  const aclassname: pshortstring): tmsecomponent;
  initdesigncomponentprocty = procedure(const amodule: tcomponent; 
                                                 const acomponent: tcomponent);
+ getdesignscalefuncty = function(const amodule: tcomponent): real;
  
  designmoduleintfty = record
   createfunc: createdesignmodulefuncty;
   initnewcomponent: initdesigncomponentprocty;
+  getscale: getdesignscalefuncty;
  end;
  pdesignmoduleintfty = ^designmoduleintfty;
  

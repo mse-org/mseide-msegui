@@ -225,6 +225,7 @@ function createreport(const aclass: tclass;
                    const aclassname: pshortstring): tmsecomponent;
 procedure initreportcomponent(const amodule: tcomponent; 
                                          const acomponent: tcomponent);
+function getreportscale(const amodule: tcomponent): real;
 
 implementation
 uses
@@ -240,12 +241,17 @@ begin
  tmsecomponent1(result).factualclassname:= aclassname;
 end;
 
+function getreportscale(const amodule: tcomponent): real;
+begin
+ result:= tcustomreport(amodule).fppmm/defaultppmm;
+end;
+
 procedure initreportcomponent(const amodule: tcomponent;
                                            const acomponent: tcomponent);
 begin
- if acomponent is twidget then begin
-  twidget(acomponent).scale(tcustomreport(amodule).fppmm/defaultppmm);
- end;
+// if acomponent is twidget then begin
+//  twidget(acomponent).scale(getreportscale(amodule));
+// end;
 end;
 
 { tcustomrecordband }

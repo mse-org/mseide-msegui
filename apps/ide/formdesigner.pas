@@ -1130,22 +1130,25 @@ procedure tdesignwindow.placecomponent(const component: tcomponent;
 var
  widget1: twidget;
  po1: pointty;
+ rea1: real;
 begin
  try
+  rea1:= 1.0;
   if component is tmsecomponent then begin
-   tmsecomponent(component).initnewcomponent;
+   with tformdesignerfo(fowner).fmoduleintf^ do begin
+    if assigned(getscale) then begin
+     rea1:= getscale(module);
+    end;
+   end;
+   tmsecomponent(component).initnewcomponent(rea1);
   end;
   if (component is twidget) and (form <> nil) then begin
    widget1:= widgetatpos(apos,true);
-//   while (widget1 <> nil) and ((csancestor in widget1.componentstate) or
-//                not (ws_iswidget in widget1.widgetstate)) do begin
-//      //regular components can not be streamed in inherited modules
-//    widget1:= widget1.parentwidget;
-//   end;
    if widget1 <> nil then begin
     po1:= dosnaptogrid(apos);
     widget1.insertwidget(twidget(component),translatewidgetpoint(po1,form,
                                                   widget1));
+    twidget(component).initnewwidget(rea1);
    end;
   end
   else begin
@@ -1157,6 +1160,17 @@ begin
     setrootpos(component,dosnaptogrid(apos));
    end;
   end;
+//  if component is tmsecomponent then begin
+//   with tformdesignerfo(fowner).fmoduleintf^ do begin
+//    if assigned(getscale) then begin
+//     rea1:= getscale(module);
+//    end
+//    else begin
+//     rea1:= 1.0;
+//    end;
+//   end;
+//   tmsecomponent(component).initnewcomponent(rea1);
+//  end;
   tcomponent1(component).loaded;
   domodified;
  except

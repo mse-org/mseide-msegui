@@ -1306,7 +1306,7 @@ end;
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
 
-   procedure initnewcomponent; override;
+   procedure initnewcomponent(const ascale: real); override;
    procedure synctofontheight; override;
    procedure dragevent(var info: draginfoty); override;
 
@@ -8400,7 +8400,7 @@ begin
  end;
 end;
 
-procedure tcustomgrid.initnewcomponent;
+procedure tcustomgrid.initnewcomponent(const ascale: real);
 begin
  ffixrows.count:= 1;
  inherited;

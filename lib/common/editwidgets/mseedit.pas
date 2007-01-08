@@ -274,7 +274,7 @@ type
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
-   procedure initnewcomponent; override;
+   procedure initnewcomponent(const ascale: real); override;
    procedure changed;
    procedure initfocus;
    procedure synctofontheight; override;
@@ -994,9 +994,10 @@ begin
  end;
 end;
 
-procedure tcustomedit.initnewcomponent;
+procedure tcustomedit.initnewcomponent(const ascale: real);
 begin
  internalcreateframe;
+ fframe.scale(ascale);
  inherited;
 end;
 

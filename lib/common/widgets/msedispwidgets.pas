@@ -85,7 +85,7 @@ type
    procedure enabledchanged; override;
   public
    constructor create(aowner: tcomponent); override;
-   procedure initnewcomponent; override;
+   procedure initnewcomponent(const ascale: real); override;
    procedure synctofontheight; override;
   published
    property bounds_cx default defaultdispwidgetwidth;
@@ -281,11 +281,12 @@ begin
  finfo.flags:= ftextflags;
 end;
 
-procedure tdispwidget.initnewcomponent;
+procedure tdispwidget.initnewcomponent(const ascale: real);
 begin
  inherited;
  internalcreateframe;
- synctofontheight;
+ fframe.scale(ascale);
+// synctofontheight;
 end;
 
 procedure tdispwidget.settextflags(const value: textflagsty);

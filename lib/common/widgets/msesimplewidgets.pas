@@ -208,7 +208,7 @@ type
   public
    constructor create(aowner: tcomponent); override;
    procedure synctofontheight; override;
-   procedure initnewcomponent; override;
+   procedure initnewcomponent(const ascale: real); override;
    property caption: msestring read getcaption write setcaption;
    property font: twidgetfont read getfont write setfont stored isfontstored;
    property textflags: textflagsty read ftextflags write settextflags default defaultlabeltextflags;
@@ -275,7 +275,7 @@ type
    procedure internalcreateframe; override;
   public
    constructor create(aowner: tcomponent); override;
-   procedure initnewcomponent; override;
+   procedure initnewcomponent(const ascale: real); override;
   published
    property optionswidget default defaultgroupboxoptionswidget;
  end;
@@ -842,7 +842,7 @@ begin
  checkautosize; //for frame.framei
 end;
 
-procedure tcustomlabel.initnewcomponent;
+procedure tcustomlabel.initnewcomponent(const ascale: real);
 begin
  inherited;
  caption:= name;
@@ -963,10 +963,11 @@ begin
  optionswidget:= defaultgroupboxoptionswidget;
 end;
 
-procedure tgroupbox.initnewcomponent;
+procedure tgroupbox.initnewcomponent(const ascale: real);
 begin
  inherited;
  internalcreateframe;
+ fframe.scale(ascale);
 end;
 
 procedure tgroupbox.internalcreateframe;

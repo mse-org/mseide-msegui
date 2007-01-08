@@ -295,7 +295,7 @@ type
    procedure getoptionalobject(const instance: tobject; createproc: createprocty);
    function getcorbainterface(const aintf: ptypeinfo; out obj) : boolean;
 //   function getcorbainterface(const aintf: tguid; out obj) : boolean;
-   procedure initnewcomponent; virtual;
+   procedure initnewcomponent(const ascale: real); virtual;
    function checkowned(component: tcomponent): boolean; 
                  //true if component is owned or self
    function checkowner(component: tcomponent): boolean; 
@@ -2109,7 +2109,7 @@ begin
  result:= fobjectlinker;
 end;
 
-procedure tmsecomponent.initnewcomponent;
+procedure tmsecomponent.initnewcomponent(const ascale: real);
 begin
  //dummy
 end;

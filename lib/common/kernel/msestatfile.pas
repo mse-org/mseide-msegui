@@ -53,7 +53,7 @@ type
    function getstatvarname: msestring;
   public
    constructor create(aowner: tcomponent); override;
-   procedure initnewcomponent; override;
+   procedure initnewcomponent(const ascale: real); override;
    procedure readstat(stream: ttextstream = nil); overload;
    procedure readstat(const aname: msestring; const statreader: tstatreader); overload;
    procedure writestat(const stream: ttextstream = nil); overload;
@@ -101,7 +101,7 @@ begin
  inherited;
 end;
 
-procedure tstatfile.initnewcomponent;
+procedure tstatfile.initnewcomponent(const ascale: real);
 begin
  ffilename:= defaultstatfilename;
 end;

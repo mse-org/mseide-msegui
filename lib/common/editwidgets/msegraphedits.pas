@@ -119,7 +119,7 @@ type
 
   public
    constructor create(aowner: tcomponent); override;
-   procedure initnewcomponent; override;
+   procedure initnewcomponent(const ascale: real); override;
    procedure initgridwidget; virtual;
 
    function edited: boolean;
@@ -160,7 +160,7 @@ type
    function getdatatyp: datatypty; override;
    procedure dopaint(const canvas: tcanvas); override;
   public
-   procedure initnewcomponent; override;
+   procedure initnewcomponent(const ascale: real); override;
    property value: pointer read fvalue write setvalue default nil;
    property gridvalue[const index: integer]: pointer
         read getgridvalue write setgridvalue; default;
@@ -536,8 +536,9 @@ type
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
+   procedure synctofontheight; override;
    procedure initgridwidget; override;
-   procedure initnewcomponent; override;
+   procedure initnewcomponent(const ascale: real); override;
    property optionswidget default defaultoptionswidget - [ow_mousefocus];
    property valuefaces: tvaluefacearrayprop read fvaluefaces write setvaluefaces;
    property font: twidgetfont read getfont write setfont stored isfontstored;
@@ -1000,10 +1001,11 @@ begin
  end;
 end;
 
-procedure tgraphdataedit.initnewcomponent;
+procedure tgraphdataedit.initnewcomponent(const ascale: real);
 begin
  inherited;
  internalcreateframe;
+ fframe.scale(ascale);
 end;
 
 function tgraphdataedit.getstatvarname: msestring;
@@ -1924,7 +1926,13 @@ begin
  inherited;
 end;
 
-procedure tcustomdatabutton.initnewcomponent;
+procedure tcustomdatabutton.synctofontheight;
+begin
+ inherited;
+ bounds_cy:= font.glyphheight + innerclientframewidth.cy + 6;
+end;
+
+procedure tcustomdatabutton.initnewcomponent(const ascale: real);
 begin
  //dummy
 end;
@@ -2285,7 +2293,7 @@ begin
  //dummy
 end;
 
-procedure tpointeredit.initnewcomponent;
+procedure tpointeredit.initnewcomponent(const ascale: real);
 begin
  //do nothing
 end;

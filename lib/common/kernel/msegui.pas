@@ -880,7 +880,10 @@ type
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
    procedure afterconstruction; override;
-   procedure initnewcomponent; override;
+   procedure initnewcomponent(const ascale: real); override;
+                     //called before inserting in parentwidget
+   procedure initnewwidget(const ascale: real); virtual;
+                     //called after inserting in parentwidget
    procedure createframe;
    procedure createface;
    procedure createfont;
@@ -3798,9 +3801,14 @@ begin
  destroyregion(fwidgetregion);
 end;
 
-procedure twidget.initnewcomponent;
+procedure twidget.initnewcomponent(const ascale: real);
 begin
  inherited;
+ scale(ascale);
+end;
+
+procedure twidget.initnewwidget(const ascale: real);
+begin
  synctofontheight;
 end;
 

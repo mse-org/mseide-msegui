@@ -450,7 +450,7 @@ begin
    for int1:= 0 to high(values) do begin
     dispar[int1]:= tedit.create(sourcefo.sourcehintwidget);
     with dispar[int1] do begin
-     initnewcomponent;
+     initnewcomponent(1.0);
      frame.levelo:= 0;
      frame.framewidth:= 1;
      frame.colorframe:= cl_dkgray;
