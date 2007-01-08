@@ -8,16 +8,19 @@ object componentpalettefo: tcomponentpalettefo
   frame.dummy = 0
   visible = False
   container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_subfocus, ow_mousetransparent, ow_destroywidgets, ow_autoscale]
+  container.bounds_x = 0
+  container.bounds_y = 0
   container.bounds_cx = 728
   container.bounds_cy = 69
   container.frame.dummy = 0
   container.onchildscaled = componentgrouponchildscaled
   dragdock.caption = 'Component Palette'
-  dragdock.optionsdock = [od_savepos, od_canmove, od_canfloat, od_candock]
+  dragdock.optionsdock = [od_savepos, od_canmove, od_canfloat, od_candock, od_propsize]
   options = [fo_savepos, fo_savestate]
   statfile = mainfo.projectstatfile
   icon.transparentcolor = -2147483648
   icon.options = [bmo_masked]
+  icon.transparency = -2147483648
   icon.image = {
     0000000002000000180000001800000074020000000000000000000000000000
     0000000000000000000000000000000000000000804CF021F8FCF80980808001
@@ -50,6 +53,7 @@ object componentpalettefo: tcomponentpalettefo
   moduleclassname = 'tdockform'
   object componentpalette: ttoolbar
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_hinton]
+    bounds_x = 0
     bounds_y = 26
     bounds_cx = 728
     bounds_cy = 30
@@ -66,6 +70,8 @@ object componentpalettefo: tcomponentpalettefo
   end
   object componentpages: ttabbar
     optionswidget = [ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+    bounds_x = 0
+    bounds_y = 0
     bounds_cx = 728
     bounds_cy = 20
     bounds_cymin = 20
@@ -76,6 +82,6 @@ object componentpalettefo: tcomponentpalettefo
     options = [tabo_dragsource, tabo_dragdest]
     left = 128
     top = 72
-    reffontheight = 16
+    reffontheight = 14
   end
 end

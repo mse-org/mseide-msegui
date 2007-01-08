@@ -1,24 +1,30 @@
 object debuggerfo: tdebuggerfo
   optionswidget = [ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_destroywidgets, ow_hinton, ow_autoscale]
-  bounds_x = 313
-  bounds_y = 204
+  bounds_x = 123
+  bounds_y = 118
   bounds_cx = 441
   bounds_cy = 100
+  color = -2147483647
   frame.grip_size = 10
   frame.grip_options = [go_closebutton, go_fixsizebutton, go_topbutton]
   frame.dummy = 0
   visible = False
   container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_mousetransparent, ow_destroywidgets, ow_autoscale]
+  container.bounds_x = 0
+  container.bounds_y = 0
   container.bounds_cx = 431
   container.bounds_cy = 100
   container.frame.dummy = 0
   dragdock.caption = 'Debugger'
-  dragdock.optionsdock = [od_savepos, od_canmove, od_canfloat, od_candock, od_fixsize]
+  dragdock.optionsdock = [od_savepos, od_canmove, od_canfloat, od_candock, od_propsize]
   options = [fo_savepos, fo_savestate]
   statfile = mainfo.projectstatfile
+  icon.transparency = -2147483648
   moduleclassname = 'tdockform'
   object gdbtoolbar: ttoolbar
     optionswidget = [ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_timedhint]
+    bounds_x = 0
+    bounds_y = 0
     bounds_cx = 431
     bounds_cy = 100
     frame.dummy = 0
@@ -51,24 +57,29 @@ object debuggerfo: tdebuggerfo
       item
         hint = 'Next instruction'
         action = actionsmo.nexti
+        state = [as_localhint]
       end    
       item
         hint = 'Step instruction'
         action = actionsmo.stepi
+        state = [as_localhint]
       end    
       item
         options = [mao_separator]
       end    
       item
         action = actionsmo.bkptsonact
+        state = [as_checked, as_localchecked]
         options = [mao_checkbox]
       end    
       item
         action = actionsmo.watchesonact
+        state = [as_checked, as_localchecked]
         options = [mao_checkbox]
       end    
       item
         action = actionsmo.bluedotsonact
+        state = [as_checked, as_localchecked]
         options = [mao_checkbox]
       end>
     options = [tbo_dragsourceenabledonly, tbo_dragdestenabledonly]

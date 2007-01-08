@@ -10,13 +10,17 @@ object targetconsolefo: ttargetconsolefo
   popupmenu = tpopupmenu1
   visible = False
   container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_mousetransparent, ow_destroywidgets, ow_autoscale]
+  container.bounds_x = 0
+  container.bounds_y = 0
   container.bounds_cx = 358
   container.bounds_cy = 137
   container.frame.dummy = 0
+  dragdock.optionsdock = [od_savepos, od_canmove, od_canfloat, od_candock, od_propsize]
   statfile = mainfo.projectstatfile
   caption = 'Target console'
   icon.transparentcolor = -2147483648
   icon.options = [bmo_masked]
+  icon.transparency = -2147483648
   icon.image = {
     0000000002000000180000001800000078030000000000000000000000000000
     0000000000000000000000000000000000000000E0E0E019F8FCF816E0E0E002
@@ -57,6 +61,8 @@ object targetconsolefo: ttargetconsolefo
   moduleclassname = 'tdockform'
   object grid: twidgetgrid
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_focusbackonesc, ow_destroywidgets, ow_fontlineheight, ow_autoscale]
+    bounds_x = 0
+    bounds_y = 0
     bounds_cx = 358
     bounds_cy = 137
     frame.dummy = 0
@@ -78,6 +84,8 @@ object targetconsolefo: ttargetconsolefo
     reffontheight = 14
     object terminal: tterminal
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontlineheight, ow_autoscale]
+      bounds_x = 0
+      bounds_y = 0
       bounds_cx = 3000
       bounds_cy = 16
       visible = False
