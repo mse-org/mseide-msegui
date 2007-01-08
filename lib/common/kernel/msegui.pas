@@ -3237,7 +3237,7 @@ var
   pos,color: real;
   rea1,rea2: real;
   co1: rgbtriplety;
-
+                              //todo: optimize
  begin
   po1:= @rgbs[index];
   po2:= @rgbs[index+1];
@@ -3283,11 +3283,17 @@ var
     co1:= scalecolor(color,po1^,po2^);
 {$ifdef FPC}{$checkpointer off}{$endif} //scanline is not in heap on win32
     if reverse then begin
+     if ipos < 0 then begin
+      ipos:= 0;
+     end;
      for int3:= int2 downto ipos + 1 do begin
       fade^[int3]:= co1;
      end;
     end
     else begin
+     if ipos > imax then begin
+      ipos:= imax;
+     end;
      for int3:= int2 to ipos - 1 do begin
       fade^[int3]:= co1;
      end;
