@@ -64,6 +64,7 @@ type
    procedure actionchanged;
    function getactioninfopo: pactioninfoty;
    procedure doshortcut(var info: keyeventinfoty);
+   function getinstance: tobject; override;
   public
    constructor create(const aowner: tobject;
          const aprop: tindexpersistentarrayprop); overload; override;
@@ -532,6 +533,11 @@ begin
  else begin
   state:= state + [as_invisible];
  end;
+end;
+
+function ttoolbutton.getinstance: tobject;
+begin
+ result:= fowner;
 end;
 
 { ttoolbuttons }

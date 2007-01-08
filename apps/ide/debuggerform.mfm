@@ -69,17 +69,17 @@ object debuggerfo: tdebuggerfo
       end    
       item
         action = actionsmo.bkptsonact
-        state = [as_checked, as_localchecked]
+        state = [as_checked]
         options = [mao_checkbox]
       end    
       item
         action = actionsmo.watchesonact
-        state = [as_checked, as_localchecked]
+        state = [as_checked]
         options = [mao_checkbox]
       end    
       item
         action = actionsmo.bluedotsonact
-        state = [as_checked, as_localchecked]
+        state = [as_checked]
         options = [mao_checkbox]
       end>
     options = [tbo_dragsourceenabledonly, tbo_dragdestenabledonly]
