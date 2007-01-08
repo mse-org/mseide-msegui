@@ -1287,6 +1287,7 @@ begin
  end;
  if fstackedoverbefore = nil then begin
   setlinkedvar(fwindow.stackedover,tlinkedobject(fstackedoverbefore));
+  window.bringtofront;
  end;
  if factivewindowbefore <> nil then begin
   factivewindowbefore.deactivateintermediate;
