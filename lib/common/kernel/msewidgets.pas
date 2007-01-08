@@ -56,6 +56,7 @@ type
   public
    constructor create(const intf: iframe);
    destructor destroy; override;
+   procedure scale(const ascale: real); override;
    procedure createfont;
    procedure dopaintframe(const canvas: tcanvas; const rect: rectty); override;
    procedure updatemousestate(const sender: twidget; const apos: pointty); override;
@@ -1541,6 +1542,14 @@ begin
    end;
   end;
  end;
+end;
+
+procedure tcustomcaptionframe.scale(const ascale: real);
+begin
+ if ffont <> nil then begin
+  ffont.scale(ascale);
+ end;
+ inherited;
 end;
 
 { tcustomscrollframe }
