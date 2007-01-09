@@ -1284,17 +1284,19 @@ var
 begin
  window1:= factivewindowbefore;
  bo1:= application.active;
- if factivewindowbefore = nil then begin
-  setlinkedvar(application.activewindow,tlinkedobject(factivewindowbefore));
- end;
- if fstackedoverbefore = nil then begin
-  setlinkedvar(fwindow.stackedover,tlinkedobject(fstackedoverbefore));
-  if bo1 then begin
-   window.bringtofront;
+ if value >= 0 then begin
+  if factivewindowbefore = nil then begin
+   setlinkedvar(application.activewindow,tlinkedobject(factivewindowbefore));
   end;
- end;
- if factivewindowbefore <> nil then begin
-  factivewindowbefore.deactivateintermediate;
+  if fstackedoverbefore = nil then begin
+   setlinkedvar(fwindow.stackedover,tlinkedobject(fstackedoverbefore));
+   if bo1 then begin
+    window.bringtofront;
+   end;
+  end;
+  if factivewindowbefore <> nil then begin
+   factivewindowbefore.deactivateintermediate;
+  end;
  end;
  inherited;
  if value < 0 then begin
