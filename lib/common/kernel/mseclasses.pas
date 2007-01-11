@@ -25,6 +25,7 @@ const
 {$endif}
 const
  moduleclassnamename = 'moduleclassname';
+// inheritedmoduleclassnamename = 'inheritedmoduleclassname';
  compilerdefaults =
      '{$ifdef FPC}{$mode objfpc}{$h+}{$INTERFACES CORBA}{$endif}';
 

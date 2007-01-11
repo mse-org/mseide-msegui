@@ -1588,16 +1588,7 @@ begin
     if po1 = nil then begin
      raise exception.create('Ancestor for "'+designmoduleclassname+'" not found.');
     end;
-    beginsubmodulecopy;
-    try
-     instance:= tmsecomponent(copycomponent(po1^.instance,nil,
-                         {$ifdef FPC}@{$endif}fdesigner.findancestor,
-                         {$ifdef FPC}@{$endif}fdesigner.findcomponentclass,
-                         nil,
-                         {$ifdef FPC}@{$endif}fdesigner.ancestornotfound));
-    finally
-     endsubmodulecopy;
-    end;
+    instance:= fdesigner.copycomponent(po1^.instance,nil);
     moduleintf:= po1^.moduleintf;
     tcomponent1(instance).setancestor(true);
     additem(pointerarty(fdesigner.floadedsubmodules),instance);
@@ -2305,7 +2296,8 @@ begin
   result:= tmsecomponent(mseclasses.copycomponent(source,nil,
             {$ifdef FPC}@{$endif}findancestor,
             {$ifdef FPC}@{$endif}findcomponentclass,
-            {$ifdef FPC}@{$endif}createcomponent));
+            {$ifdef FPC}@{$endif}createcomponent,
+            {$ifdef FPC}@{$endif}ancestornotfound));
   if po1 = nil then begin
    docopymethods(source,result);
   end;
@@ -2693,7 +2685,6 @@ begin
 end;
 
 function tdesigner.loadformfile(filename: msestring): pmoduleinfoty;
-
 var
  module: tmsecomponent;
  loadedsubmodulesindex: integer;
@@ -2715,7 +2706,8 @@ var
  end;
  
 var
- moduleclassname1,modulename,designmoduleclassname: string;
+ moduleclassname1,modulename,
+ designmoduleclassname{,inheritedmoduleclassname}: string;
  stream1: ttextstream;
  stream2: tmemorystream;
  reader: treader;
@@ -2729,6 +2721,7 @@ var
  loadingdesignerbefore: tdesigner;
  loadingmodulepobefore: pmoduleinfoty;
  isinherited: boolean;
+ str1: string;
 
 begin //loadformfile
  filename:= filepath(filename);
@@ -2740,6 +2733,7 @@ begin //loadformfile
   end;
   stream1:= ttextstream.Create(filename,fm_read);
   designmoduleclassname:= '';
+//  inheritedmoduleclassname:= '';
   try
    stream2:= tmemorystream.Create;
    try
@@ -2761,15 +2755,20 @@ begin //loadformfile
        isinherited:= ffinherited in flags;
        while not endoflist do begin
       {$ifdef FPC}
-        if driver.beginproperty = moduleclassnamename then begin
+        str1:= driver.beginproperty;
       {$else}
-        if readstr = moduleclassnamename then begin
+        str1:= readstr;
        {$endif}
+        if str1 = moduleclassnamename then begin
          designmoduleclassname:= readstring;
-         break;
         end
         else begin
-         {$ifdef FPC}driver.{$endif}skipvalue;
+//         if str1 = inheritedmoduleclassnamename then begin
+//          inheritedmoduleclassname:= readstring;
+//         end
+//         else begin
+          {$ifdef FPC}driver.{$endif}skipvalue;
+//         end;
         end;
        end;
       end;
