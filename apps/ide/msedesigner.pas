@@ -1588,7 +1588,16 @@ begin
     if po1 = nil then begin
      raise exception.create('Ancestor for "'+designmoduleclassname+'" not found.');
     end;
-    instance:= tmsecomponent(copycomponent(po1^.instance,nil));
+    beginsubmodulecopy;
+    try
+     instance:= tmsecomponent(copycomponent(po1^.instance,nil,
+                         {$ifdef FPC}@{$endif}fdesigner.findancestor,
+                         {$ifdef FPC}@{$endif}fdesigner.findcomponentclass,
+                         nil,
+                         {$ifdef FPC}@{$endif}fdesigner.ancestornotfound));
+    finally
+     endsubmodulecopy;
+    end;
     moduleintf:= po1^.moduleintf;
     tcomponent1(instance).setancestor(true);
     additem(pointerarty(fdesigner.floadedsubmodules),instance);

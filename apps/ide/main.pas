@@ -1471,15 +1471,20 @@ var
  str1,str2,str3,str4,str5: filenamety;
  dir,base,ext: filenamety;
  po1: pmoduleinfoty;
+ ancestorclass,ancestorunit: string;
  
 begin
  if formkindty(tmenuitem(sender).tag) = fok_inherited then begin
   po1:= selectinheritedmodule(nil,'Select ancestor');
+  ancestorclass:= po1^.moduleclassname;
+  ancestorunit:= filenamebase(po1^.filename);
   if po1 = nil then begin
    exit;
   end;
  end
  else begin
+  ancestorclass:= '';
+  ancestorunit:= '';
   po1:= nil;
  end;
  str1:= '';
@@ -1531,10 +1536,12 @@ begin
    splitfilepath(str1,dir,base,ext);
    str4:= getmodulename(base,str4);
    str5:= replacefileext(str1,'mfm');
-   copynewfile(str2,str1,false,true,['%UNITNAME%','%FORMNAME%'],
-                            ['${%FILENAMEBASE%}',str4]);
+   copynewfile(str2,str1,false,true,
+             ['%UNITNAME%','%FORMNAME%','%ANCESTORUNIT%','%ANCESTORCLASS%'],
+            ['${%FILENAMEBASE%}',str4,ancestorunit,ancestorclass]); //source
    copynewfile(str3,str5,false,true,
-            ['%UNITNAME%','%FORMNAME%'],['${%FILENAMEBASE%}',str4]);
+            ['%UNITNAME%','%FORMNAME%','%ANCESTORUNIT%','%ANCESTORCLASS%'],
+            ['${%FILENAMEBASE%}',str4,ancestorunit,ancestorclass]); //form
    sourcefo.openfile(str1,true);
    openformfile(str5,true,false,true);
    po1:= designer.modules.findmodule(str5);

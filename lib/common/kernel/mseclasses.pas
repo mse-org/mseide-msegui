@@ -477,7 +477,8 @@ procedure loadmsemodule(const instance: tmsecomponent; aclass: tclass);
 function copycomponent(const source: tcomponent; const aowner: tcomponent = nil;
               const onfindancestor: tfindancestorevent = nil;
               const onfindcomponentclass: tfindcomponentclassevent = nil;
-              const oncreatecomponent: tcreatecomponentevent = nil): tcomponent;
+              const oncreatecomponent: tcreatecomponentevent = nil;
+              const onancestornotfound: tancestornotfoundevent = nil): tcomponent;
                 //copy by stream.writecomponent, readcomponent
 procedure refreshancestor(const descendent,newancestor,oldancestor: tcomponent;
               const revert: boolean;
@@ -750,7 +751,8 @@ end;
 function copycomponent(const source: tcomponent; const aowner: tcomponent = nil;
               const onfindancestor: tfindancestorevent = nil;
               const onfindcomponentclass: tfindcomponentclassevent = nil;
-              const oncreatecomponent: tcreatecomponentevent = nil): tcomponent;
+              const oncreatecomponent: tcreatecomponentevent = nil;
+              const onancestornotfound: tancestornotfoundevent = nil): tcomponent;
                 //copy by stream.writecomponent, readcomponent
 var
  stream: tmemorystream;
@@ -778,6 +780,7 @@ begin
    try
     reader.OnFindComponentClass:= onfindcomponentclass;
     reader.OnCreateComponent:= oncreatecomponent;
+    reader.onancestornotfound:= onancestornotfound;
 //    reader.ancestor:= aancestor;
     reader.ReadrootComponent(result);
    finally
