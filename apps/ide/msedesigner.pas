@@ -677,18 +677,6 @@ end;
 
 { tdescendentinstancelist }
 
-procedure checkancestor(const acomponent: tcomponent);
-var
- int1: integer;
-begin
- if not (csinline in acomponent.componentstate) then begin
-  for int1:= 0 to acomponent.componentcount - 1 do begin
-   checkancestor(acomponent.components[int1]);
-  end;
-  tcomponent1(acomponent).setancestor(true);
- end;
-end;
-
 procedure tdescendentinstancelist.delcomp(child: tcomponent);
 begin
  tcomponent1(child).getchildren({$ifdef FPC}@{$endif}delcomp,froot);
@@ -745,7 +733,13 @@ begin
  comp2:= fdesigner.copycomponent(info^.ancestor,info^.ancestor);
  info^.descendent:= comp2;
  comp2.name:= str1;
- checkancestor(comp2);
+ if isroot then begin
+  tcomponent1(comp2).setancestor(true);
+ end
+ else begin
+  tmsecomponent1(comp2).setinline(true);
+ end;
+ checkinline(comp2);
  fobjectlinker.link(comp2); 
  if isroot then begin
   tmsecomponent1(module^.instance).fancestorclassname:= ancestorclassname;
@@ -2051,15 +2045,16 @@ procedure tdesigner.createcomponent(Reader: TReader; ComponentClass: TComponentC
                    var Component: TComponent);
 var
  asubmoduleinfopo: pmoduleinfoty;
+ int1: integer;
 begin
  asubmoduleinfopo:= fsubmoduleinfopo;    //can be recursive
  if asubmoduleinfopo <> nil then begin
   component:= copycomponent(asubmoduleinfopo^.instance,asubmoduleinfopo^.instance);
   reader.root.insertcomponent(component);
-  checkancestor(component);
   tmsecomponent1(component).setinline(true);
+  checkinline(component);
   if (submodulecopy = 0) and 
-          (reader.root.componentstate * [csinline,csancestor] = [])  then begin
+          (reader.root.componentstate * [csinline{,csancestor}] = [])  then begin
    additem(pointerarty(floadedsubmodules),component);
    fdescendentinstancelist.add(tmsecomponent(component),asubmoduleinfopo^.instance,fsubmodulelist);
   end;

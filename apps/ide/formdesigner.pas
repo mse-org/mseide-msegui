@@ -2194,6 +2194,7 @@ begin
   tcomponent1(comp).setinline(true);
   tcomponent1(comp).setancestor(true);
   {$endif}
+  checkinline(comp);
   comp.name:= po1^.instance.name;
   fdesigner.addancestorinfo(comp,po1^.instance);
   with tdesignwindow(window) do begin

@@ -489,6 +489,8 @@ procedure refreshancestor(const descendent,newancestor,oldancestor: tcomponent;
               const onfindmethod: tfindmethodevent = nil;
               const sourcemethodtab: pointer = nil;
               const destmethodtab: pointer = nil);
+procedure checkinline(const acomponent: tcomponent);
+                 //resets csancestor of csinline components
 
 function issubcomponent(const root,child: tcomponent): boolean;
 function findcomponentbynamepath(const namepath: string): tcomponent;
@@ -602,6 +604,38 @@ var
  fmodules: tmodulelist;
  floadedlist: tloadedlist;
  fmodulestoregister: msecomponentarty;
+
+procedure clearinline(const acomponent: tcomponent);
+var
+ int1: integer;
+begin
+ tmsecomponent(acomponent).setinline(false);
+ for int1:= 0 to acomponent.componentcount - 1 do begin
+  clearinline(acomponent.components[int1]);
+ end;
+end;
+
+procedure checkinline(const acomponent: tcomponent);
+var
+ int1: integer;
+ comp1: tcomponent1;
+begin
+ if csinline in acomponent.componentstate then begin
+  with tcomponentcracker(acomponent) do begin
+   exclude(fcomponentstate,csancestor);
+  end;
+  for int1:= 0 to acomponent.componentcount - 1 do begin
+   comp1:= tcomponent1(acomponent.components[int1]);
+   comp1.setancestor(true);
+   clearinline(comp1);
+  end;
+ end
+ else begin
+  for int1:= 0 to acomponent.componentcount - 1 do begin
+   checkinline(acomponent.components[int1]);
+  end;
+ end;
+end;
 
 function swapmethodtable(const instance: tobject; const newtable: pointer): pointer;
 var
