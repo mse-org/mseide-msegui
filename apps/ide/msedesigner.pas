@@ -742,8 +742,7 @@ begin
  checkinline(comp2);
  fobjectlinker.link(comp2); 
  if isroot then begin
-  tmsecomponent1(module^.instance).fancestorclassname:= ancestorclassname;
-  tmsecomponent1(comp2).setancestor(true);
+  tmsecomponent1(comp2).fancestorclassname:= ancestorclassname;
   module^.instance:= comp2;
   if norootposition then begin
    if (comp2 is twidget) then begin
