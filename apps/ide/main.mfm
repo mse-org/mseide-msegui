@@ -84,7 +84,7 @@ object mainfo: tmainfo
             submenu.count = 4
             submenu.items = <            
               item
-                submenu.count = 6
+                submenu.count = 7
                 submenu.items = <                
                   item
                     caption = '&Mainform'
@@ -122,6 +122,12 @@ object mainfo: tmainfo
                     caption = '&Report'
                     state = [as_localcaption, as_localtag, as_localonexecute]
                     tag = 5
+                    onexecute = newformonexecute
+                  end                
+                  item
+                    caption = '&Inherited'
+                    state = [as_localcaption, as_localtag, as_localonexecute]
+                    tag = 6
                     onexecute = newformonexecute
                   end>
                 caption = '&Form'

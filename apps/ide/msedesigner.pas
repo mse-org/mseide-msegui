@@ -83,6 +83,7 @@ type
   instancevarname: string;
   instance: tmsecomponent;
   moduleintf: pdesignmoduleintfty;
+  designformclass: pointer;
   methods: tmethods;
   components: tcomponents;
   designform: tmseform;
@@ -134,7 +135,7 @@ type
    fdesigner: tdesigner;
    function getitempo1(const index: integer): pmoduleinfoty;
   protected
-   function newmodule(const afilename: msestring;
+   function newmodule(const ainherited: boolean; const afilename: msestring;
                 const amoduleclassname,ainstancevarname,
                      designmoduleclassname: string): tmoduleinfo;
    function findmethodbyname(const name: string; const atype: ptypeinfo;
@@ -153,6 +154,7 @@ type
    function findmodulebyname(const name: string): pmoduleinfoty;
    function findmoduleinstancebyname(const name: string): tcomponent;
    function findmoduleinstancebyclass(const aclass: tclass): tcomponent;
+   function findmodulebyclassname(aclassname: string): pmoduleinfoty;
    function findmodulebycomponent(const acomponent: tobject): pmoduleinfoty;
    function findmodulebyinstance(const ainstance: tcomponent): pmoduleinfoty;
    function filenames: filenamearty;
@@ -228,11 +230,13 @@ type
    fdelcomps:componentarty;
    froot: tcomponent;
    fmodule: pmoduleinfoty;
+   fmodifiedlevel: integer;
    procedure delcomp(child: tcomponent);
    procedure addcomp(child: tcomponent);
   protected
    procedure modulemodified(const amodule: pmoduleinfoty);
-   procedure revert(const info: pancestorinfoty; const module: pmoduleinfoty);
+   procedure revert(const info: pancestorinfoty; const module: pmoduleinfoty;
+                    const norootposition: boolean = false);
    procedure setnodefaultpos(const aroot: twidget);
    procedure restorepos(const aroot: twidget);
   public
@@ -280,6 +284,7 @@ type
                    var Component: TComponent);
    procedure findancestor(Writer: TWriter; Component: TComponent;
               const aName: string; var Ancestor, RootAncestor: TComponent);
+   function getinheritedmodule(const aclassname: string): pmoduleinfoty;
    function findcomponentmodule(const acomponent: tcomponent): pmoduleinfoty;
    procedure selectionchanged;
    procedure docopymethods(const source, dest: tcomponent);
@@ -294,6 +299,8 @@ type
    procedure componentevent(const event: tcomponentevent); override;
    function checkmodule(const filename: msestring): pmoduleinfoty;
    procedure checkident(const aname: string);
+   procedure beginstreaming(const amodule: pmoduleinfoty);
+   procedure endstreaming(const amodule: pmoduleinfoty);
   public
    constructor create; reintroduce;
    destructor destroy; override;
@@ -597,7 +604,8 @@ begin
   comp:= po1^.ancestor;
   po1^.ancestor:= nil;
   comp.Free;  
-  po1^.ancestor:= fdesigner.copycomponent(amodule,amodule);
+//  po1^.ancestor:= fdesigner.copycomponent(amodule,amodule);
+  po1^.ancestor:= fdesigner.copycomponent(amodule,nil);
   fobjectlinker.link(po1^.ancestor);
  end;
 end;
@@ -694,7 +702,7 @@ begin
 end;
 
 procedure tdescendentinstancelist.revert(const info: pancestorinfoty; 
-                    const module: pmoduleinfoty);
+            const module: pmoduleinfoty; const norootposition: boolean = false);
 
  
 var
@@ -702,19 +710,33 @@ var
  parent1: twidget;
  str1: string;
  int1: integer;
+ isroot: boolean;
+ ancestorclassname: string;
+ pt1: pointty;
 begin
  comp1:= info^.descendent;
+ isroot:= comp1 = module^.instance;
+ if isroot then begin
+  ancestorclassname:= tmsecomponent1(module^.instance).fancestorclassname;
+ end;
  info^.descendent:= nil;
  if comp1 is twidget then begin
-  parent1:= twidget(comp1).parentwidget;
+  with twidget1(comp1) do begin
+   parent1:= parentwidget;
+   pt1:= tformdesignerfo(module^.designform).modulerect.pos;
+  end;
  end
  else begin
   parent1:= nil;
+  pt1:= getcomponentpos(comp1);
  end;
  str1:= comp1.name;
  fobjectlinker.unlink(comp1);
  fdelcomps:= nil;
  froot:= comp1.owner;
+ if froot = nil then begin
+  froot:= comp1;
+ end;
  delcomp(comp1);
  for int1:= 0 to high(fdelcomps) do begin
   fdelcomps[int1].free;
@@ -724,9 +746,27 @@ begin
  info^.descendent:= comp2;
  comp2.name:= str1;
  checkancestor(comp2);
- tmsecomponent1(comp2).setinline(true);
- fobjectlinker.link(comp2);
- module^.instance.insertcomponent(comp2);
+ fobjectlinker.link(comp2); 
+ if isroot then begin
+  tmsecomponent1(module^.instance).fancestorclassname:= ancestorclassname;
+  tmsecomponent1(comp2).setancestor(true);
+  module^.instance:= comp2;
+  if norootposition then begin
+   if (comp2 is twidget) then begin
+    with twidget1(comp2) do begin
+     fwidgetrect.pos:= pt1;              //do not restore position
+    end;
+   end
+   else begin
+    setcomponentpos(comp2,pt1);
+   end;
+  end;
+  tformdesignerfo(module^.designform).module:= comp2;
+ end
+ else begin
+  tmsecomponent1(comp2).setinline(true);
+  module^.instance.insertcomponent(comp2);
+ end;
  if parent1 <> nil then begin
   twidget(info^.descendent).parentwidget:= parent1;
  end;
@@ -735,15 +775,12 @@ begin
  removefixupreferences(module^.instance,'');
 end;         
 
-{$define debug submodule}
-
 procedure tdescendentinstancelist.modulemodified(const amodule: pmoduleinfoty);
 type
  streamarty = array of tstream;
  ancestorinfopoarty = array of pancestorinfoty;
- 
 
-{$ifdef debugsubmodule}
+{$ifdef mse_debugsubmodule}
 var
  teststream: ttextstream;
  procedure debugout(const atext: string; const stream: tstream);
@@ -758,111 +795,155 @@ var
 {$endif}
 
 var
- modules,module: moduleinfopoarty;
+ modifiedowners,dependentmodules: moduleinfopoarty;
  streams: streamarty;
  infos: ancestorinfopoarty;
  stream1: tmemorystream;
  writer1: twriter;
  reader1: treader;
- ancestor: tcomponent;
+ comp1,ancestor: tcomponent;
  int1,int2: integer;
  po1: pancestorinfoty;
  po2: pmoduleinfoty;
+ rect1: rectty;
 
 begin
- po1:= datapo;
- for int1:= 0 to fcount - 1 do begin
-  if po1^.ancestor = amodule^.instance then begin
-   additem(pointerarty(infos),po1);
-   po2:= fdesigner.modules.findmodule(tmsecomponent(po1^.descendent.owner));
-   additem(pointerarty(modules),po2);
-   if finditem(pointerarty(module),po2) < 0 then begin
-    additem(pointerarty(module),po2);
-   end;
-  end;
-  inc(po1);
+ if fmodifiedlevel >= 16 then begin
+  exit;
  end;
- if high(infos) >= 0 then begin
- {$ifdef debugsubmodule}
-  teststream:= ttextstream.create;
- {$endif}
-  ancestor:= fdesigner.fsubmodulelist.findancestor(amodule^.instance);
-  beginsubmodulecopy;
-  try 
-   setlength(streams,length(infos));
-   for int1:= 0 to high(modules) do begin
-    fdesigner.buildmethodtable(modules[int1]);
-    try
-     streams[int1]:= tmemorystream.create;
-     writer1:= twriter.create(streams[int1],4096);
-     try
-      writer1.onfindancestor:= {$ifdef FPC}@{$endif}fdesigner.findancestor;
-      writer1.writedescendent(infos[int1]^.descendent,ancestor);
-     finally
-      writer1.free;
-     end;
- {$ifdef debugsubmodule}
-     debugout('state ' + modules[int1]^.instance.name,streams[int1]);
- {$endif}
-    finally
-     fdesigner.releasemethodtable(modules[int1]);
+ inc(fmodifiedlevel);
+ try
+  po1:= datapo;
+  if fmodifiedlevel = 16 then begin
+   showmessage('Recursive form inheritance of "'+
+                               amodule^.filename+'".','ERROR');
+   sysutils.abort;
+  end;
+  for int1:= 0 to fcount - 1 do begin
+   if po1^.ancestor = amodule^.instance then begin
+    additem(pointerarty(infos),po1);
+    comp1:= po1^.descendent.owner;
+    if comp1 = nil then begin  //inherited form
+     comp1:= po1^.descendent;
+    end;
+    po2:= fdesigner.modules.findmodule(tmsecomponent(comp1));
+    additem(pointerarty(modifiedowners),po2);
+    if finditem(pointerarty(dependentmodules),po2) < 0 then begin
+     additem(pointerarty(dependentmodules),po2);
     end;
    end;
-   fdesigner.fsubmodulelist.renewbackup(amodule^.instance);
-   ferrorhandler:= treaderrorhandler.create(nil);
-   try
-    for int1:= 0 to high(modules) do begin
-     streams[int1].position:= 0;
-     revert(infos[int1],modules[int1]);
-     reader1:= treader.create(streams[int1],4096);
-     fdesigner.buildmethodtable(modules[int1]);
-     try
-      reader1.onerror:= {$ifdef FPC}@{$endif}ferrorhandler.onerror;
-      reader1.onancestornotfound:= {$ifdef FPC}@{$endif}ferrorhandler.ancestornotfound;
-      reader1.onsetname:= {$ifdef FPC}@{$endif}ferrorhandler.onsetname;
-      reader1.onfindcomponentclass:= {$ifdef FPC}@{$endif}fdesigner.findcomponentclass;
-      reader1.oncreatecomponent:= {$ifdef FPC}@{$endif}fdesigner.createcomponent;
-      reader1.onfindmethod:= {$ifdef FPC}@{$endif}fdesigner.findmethod2;
-      reader1.root:= modules[int1]^.instance;
-      ferrorhandler.fnewcomponents:= nil;
-      reader1.root:= modules[int1]^.instance;
-      ferrorhandler.froot:= modules[int1]^.instance;
-      reader1.parent:= infos[int1]^.descendent.getparentcomponent;
-      {$ifdef FPC}
-      reader1.driver.beginrootcomponent;
-      {$else}
-      reader1.readsignature;
-      {$endif}
-      reader1.beginreferences;
-      reader1.readcomponent(infos[int1]^.descendent);
-      reader1.fixupreferences;
-      reader1.endreferences;
-     finally
-      reader1.free;
-      fdesigner.releasemethodtable(modules[int1]);
-      removefixupreferences(modules[int1]^.instance,'');
+   inc(po1);
+  end;
+  if high(infos) >= 0 then begin
+  {$ifdef mse_debugsubmodule}
+   teststream:= ttextstream.create;
+  {$endif}
+   ancestor:= fdesigner.fsubmodulelist.findancestor(amodule^.instance);
+   beginsubmodulecopy;
+   try 
+    setlength(streams,length(infos));
+    for int1:= 0 to high(modifiedowners) do begin
+     fdesigner.buildmethodtable(modifiedowners[int1]);
+     if infos[int1]^.descendent.owner = nil then begin //inherited form
+      fdesigner.beginstreaming(modifiedowners[int1]);
      end;
-     for int2:= high(ferrorhandler.fnewcomponents) downto 0 do begin
-      if ferrorhandler.fnewcomponents[int2] <> infos[int1]^.descendent then begin
-       modules[int1]^.components.add(ferrorhandler.fnewcomponents[int2]);
+     try
+      streams[int1]:= tmemorystream.create;
+      writer1:= twriter.create(streams[int1],4096);
+      try
+       writer1.onfindancestor:= {$ifdef FPC}@{$endif}fdesigner.findancestor;
+       writer1.writedescendent(infos[int1]^.descendent,ancestor);
+      finally
+       if infos[int1]^.descendent.owner = nil then begin //inherited form
+        fdesigner.endstreaming(modifiedowners[int1]);
+       end;
+       writer1.free;
+      end;
+  {$ifdef mse_debugsubmodule}
+      debugout('state ' + modifiedowners[int1]^.instance.name,streams[int1]);
+  {$endif}
+     finally
+      fdesigner.releasemethodtable(modifiedowners[int1]);
+     end;
+    end;
+    fdesigner.fsubmodulelist.renewbackup(amodule^.instance);
+    ferrorhandler:= treaderrorhandler.create(nil);
+    try
+     for int1:= 0 to high(modifiedowners) do begin
+      modifiedowners[int1]^.designform.window.beginmoving; //no flicker
+      try
+       streams[int1].position:= 0;
+       revert(infos[int1],modifiedowners[int1],true);
+       reader1:= treader.create(streams[int1],4096);
+       fdesigner.buildmethodtable(modifiedowners[int1]);
+       try
+        reader1.onerror:= {$ifdef FPC}@{$endif}ferrorhandler.onerror;
+        reader1.onancestornotfound:= 
+                          {$ifdef FPC}@{$endif}ferrorhandler.ancestornotfound;
+        reader1.onsetname:= {$ifdef FPC}@{$endif}ferrorhandler.onsetname;
+        reader1.onfindcomponentclass:= 
+                          {$ifdef FPC}@{$endif}fdesigner.findcomponentclass;
+        reader1.oncreatecomponent:= {$ifdef FPC}@{$endif}fdesigner.createcomponent;
+        reader1.onfindmethod:= {$ifdef FPC}@{$endif}fdesigner.findmethod2;
+        reader1.root:= modifiedowners[int1]^.instance;
+        ferrorhandler.fnewcomponents:= nil;
+        reader1.root:= modifiedowners[int1]^.instance;
+        ferrorhandler.froot:= modifiedowners[int1]^.instance;
+        if infos[int1]^.descendent.owner = nil then begin //inherited form
+         with tformdesignerfo(modifiedowners[int1]^.designform) do begin
+          beginplacement;
+          try
+           reader1.readrootcomponent(infos[int1]^.descendent);
+           placemodule;
+          finally
+           endplacement;
+          end;
+         end;
+        end
+        else begin
+         reader1.parent:= infos[int1]^.descendent.getparentcomponent;
+         {$ifdef FPC}
+         reader1.driver.beginrootcomponent;
+         {$else}
+         reader1.readsignature;
+         {$endif}
+         reader1.beginreferences;
+         reader1.readcomponent(infos[int1]^.descendent);
+         reader1.fixupreferences;
+         reader1.endreferences;
+        end;
+       finally
+        reader1.free;
+        fdesigner.releasemethodtable(modifiedowners[int1]);
+        removefixupreferences(modifiedowners[int1]^.instance,'');
+       end;
+       for int2:= high(ferrorhandler.fnewcomponents) downto 0 do begin
+        if ferrorhandler.fnewcomponents[int2] <> infos[int1]^.descendent then begin
+         modifiedowners[int1]^.components.add(ferrorhandler.fnewcomponents[int2]);
+        end;
+       end;
+      finally
+       modifiedowners[int1]^.designform.window.endmoving;
       end;
      end;
+    finally
+     ferrorhandler.free;
+     for int1:= 0 to high(streams) do begin
+      streams[int1].free;
+     end;
+    end;
+    for int1:= 0 to high(dependentmodules) do begin
+     fdesigner.componentmodified(dependentmodules[int1]^.instance);
     end;
    finally
-    ferrorhandler.free;
-    for int1:= 0 to high(streams) do begin
-     streams[int1].free;
-    end;
+    endsubmodulecopy;
+  {$ifdef mse_debugsubmodule}
+    teststream.free;
+  {$endif}
    end;
-   for int1:= 0 to high(module) do begin
-    fdesigner.componentmodified(module[int1]^.instance);
-   end;
-  finally
-   endsubmodulecopy;
- {$ifdef debugsubmodule}
-   teststream.free;
- {$endif}
   end;
+ finally
+  dec(fmodifiedlevel);
  end;
 end;
 (*
@@ -954,7 +1035,7 @@ var
 begin
  po1:= datapo;
  for int1:= 0 to fcount - 1 do begin
-  if (po1^.descendent is twidget) and 
+  if (po1^.descendent is twidget) and (po1^.descendent <> nil) and //else inherited form
                       twidget(po1^.descendent).checkancestor(aroot) then begin
    twidget1(po1^.ancestor).fwidgetrect.pos:= makepoint(-bigint,-bigint);
   end;
@@ -1468,11 +1549,30 @@ begin
  end;
 end;
 
-function tmodulelist.newmodule(const afilename: msestring;
-         const amoduleclassname,ainstancevarname,
+function tmodulelist.findmodulebyclassname(aclassname: string): pmoduleinfoty;
+var
+ int1: integer;
+ po1: ppointeraty;
+begin
+ result:= nil;
+ po1:= datapo;
+ aclassname:= uppercase(aclassname);
+ for int1:= 0 to fcount-1 do begin
+  with tmoduleinfo(iobjectlink(po1^[int1]).getinstance) do begin
+   if uppercase(info.moduleclassname) = aclassname then begin
+    result:= @info;
+    break;
+   end;
+  end;
+ end;
+end;
+
+function tmodulelist.newmodule(const ainherited: boolean;
+       const afilename: msestring; const amoduleclassname,ainstancevarname,
                                 designmoduleclassname: string): tmoduleinfo;
 var
  po1: pmoduleinfoty;
+ int1: integer;
 begin
  po1:= findmodule(afilename);
  if po1 <> nil then begin
@@ -1482,9 +1582,27 @@ begin
  with result.info do begin
   filename:= afilename;
   instancevarname:= ainstancevarname;
-  moduleclassname:= amoduleclassname;
   try
-   instance:= createdesignmodule(designmoduleclassname,@moduleclassname,moduleintf);
+   if ainherited then begin
+    po1:= fdesigner.getinheritedmodule(designmoduleclassname);
+    if po1 = nil then begin
+     raise exception.create('Ancestor for "'+designmoduleclassname+'" not found.');
+    end;
+    instance:= tmsecomponent(copycomponent(po1^.instance,nil));
+    moduleintf:= po1^.moduleintf;
+    tcomponent1(instance).setancestor(true);
+    additem(pointerarty(fdesigner.floadedsubmodules),instance);
+    fdesigner.fdescendentinstancelist.add(tmsecomponent(instance),po1^.instance,
+                                          fdesigner.fsubmodulelist);
+    moduleclassname:= amoduleclassname;
+    tmsecomponent1(instance).factualclassname:= @moduleclassname;
+    tmsecomponent1(instance).fancestorclassname:= designmoduleclassname;
+   end
+   else begin
+    moduleclassname:= amoduleclassname;
+    instance:= createdesignmodule(designmoduleclassname,@moduleclassname,
+                     moduleintf{,designform});
+   end;
    tcomponent1(instance).setdesigning(true{$ifndef FPC},true{$endif});
   except
    result.Free;
@@ -1896,38 +2014,26 @@ begin
  end;
 end;
 
+function tdesigner.getinheritedmodule(const aclassname: string): pmoduleinfoty;
+begin
+ result:= fmodules.findmodulebyclassname(aclassname);
+ if result = nil then begin
+  if assigned(fongetmoduletypefile) then begin
+   fongetmoduletypefile(aclassname);
+  end;
+  result:= fmodules.findmodulebyclassname(aclassname);
+ end;
+end;
+
 procedure tdesigner.findcomponentclass(Reader: TReader; const aClassName: string;
         var ComponentClass: TComponentClass);
 
- function findclass(const classname: string): pmoduleinfoty;
- var
-  int1: integer;
-  po1: pmoduleinfoty;
- begin
-  result:= nil;
-  for int1:= 0 to fmodules.count - 1 do begin
-   po1:= fmodules[int1];
-   if uppercase(po1^.moduleclassname) = classname then begin
-    result:= po1;
-    break;
-   end;
-  end;
- end;
-
 var
- str1: string;
  po1: pmoduleinfoty;
 begin
  fsubmoduleinfopo:= nil;
  if componentclass = nil then begin
-  str1:= uppercase(aclassname);
-  po1:= findclass(str1);
-  if po1 = nil then begin
-   if assigned(fongetmoduletypefile) then begin
-    fongetmoduletypefile(aclassname);
-   end;
-   po1:= findclass(str1);
-  end;
+  po1:= getinheritedmodule(aclassname);
   if po1 <> nil then begin
    fsubmoduleinfopo:= po1;  //used in createcomponent
    componentclass:= tcomponentclass(po1^.instance.classtype);
@@ -1948,10 +2054,6 @@ var
 begin
  asubmoduleinfopo:= fsubmoduleinfopo;    //can be recursive
  if asubmoduleinfopo <> nil then begin
-//  component:= mseclasses.copycomponent(asubmoduleinfopo^.instance,reader.root,
-//      {$ifdef FPC}@{$endif}findancestor,
-//      {$ifdef FPC}@{$endif}findcomponentclass,{$ifdef FPC}@{$endif}createcomponent);
-//  docopymethods(asubmoduleinfopo^.instance,component);
   component:= copycomponent(asubmoduleinfopo^.instance,asubmoduleinfopo^.instance);
   reader.root.insertcomponent(component);
   checkancestor(component);
@@ -2072,6 +2174,25 @@ begin
  end;
 end;
 
+procedure tdesigner.beginstreaming(const amodule: pmoduleinfoty);
+begin
+ with amodule^ do begin
+  if instance is twidget then begin
+   twidget1(instance).fwidgetrect.pos:= 
+              tformdesignerfo(designform).modulerect.pos;
+  end;
+ end;
+end;
+
+procedure tdesigner.endstreaming(const amodule: pmoduleinfoty);
+begin
+ with amodule^ do begin
+  if instance is twidget then begin
+   twidget1(instance).fwidgetrect.pos:= nullpoint;
+  end;
+ end;
+end;
+
 procedure tdesigner.modulechanged(const amodule: pmoduleinfoty);
 begin
  componentmodified(amodule^.instance);
@@ -2164,6 +2285,7 @@ begin
  if root <> nil then begin
   po1:= fmodules.findmodule(root);
   if po1 <> nil then begin
+   beginstreaming(po1);
    buildmethodtable(po1);
   end;
  end
@@ -2181,6 +2303,7 @@ begin
  finally
   endsubmodulecopy;
   if po1 <> nil then begin
+   endstreaming(po1);
    releasemethodtable(po1);
   end;
  end;
@@ -2289,8 +2412,9 @@ begin
   end;
  end
  else begin
-  if (component.owner <> nil) and 
-          not (csinline in component.owner.componentstate) then begin
+  if (component.owner <> nil) and (ancestor <> rootancestor) and
+          not (csinline in component.owner.componentstate) and
+          not (csancestor in component.owner.componentstate) then begin
    ancestor:= nil; //has name duplicate
   end;
  end; 
@@ -2595,6 +2719,7 @@ var
  bo1: boolean;
  loadingdesignerbefore: tdesigner;
  loadingmodulepobefore: pmoduleinfoty;
+ isinherited: boolean;
 
 begin //loadformfile
  filename:= filepath(filename);
@@ -2621,9 +2746,10 @@ begin //loadformfile
       {$else}
        readsignature;
        ReadPrefix(flags,pos);
-       moduleclassname1 := ReadStr;
-       modulename := ReadStr;
+       moduleclassname1:= ReadStr;
+       modulename:= ReadStr;
        {$endif}
+       isinherited:= ffinherited in flags;
        while not endoflist do begin
       {$ifdef FPC}
         if driver.beginproperty = moduleclassnamename then begin
@@ -2647,7 +2773,7 @@ begin //loadformfile
      begingloballoading;
      try
       try
-       moduleinfo:= fmodules.newmodule(filename,moduleclassname1,modulename,
+       moduleinfo:= fmodules.newmodule(isinherited,filename,moduleclassname1,modulename,
        designmoduleclassname);
        fmodules.add(moduleinfo);
        result:= @moduleinfo.info;
@@ -2737,8 +2863,7 @@ begin //loadformfile
         reader.free;
        end;
        if result <> nil then begin
-        result^.designform:= tformdesignerfo.create(nil,self,result^.moduleintf);
-        tformdesignerfo(result^.designform).module:= module;
+        result^.designform:= createdesignform(self,result);
         checkmethodtypes(result,true,nil);
  //       showformdesigner(result);
         result^.modified:= false;
@@ -2820,9 +2945,11 @@ var
  writer1: twriter;
  ar1: pointarty;
  int1: integer;
+ ancestor: tcomponent;
 begin
  buildmethodtable(amodule);
  with amodule^ do begin
+ {
   if instance is twidget then begin
    twidget1(instance).fwidgetrect.pos:= designform.pos;
    fdescendentinstancelist.setnodefaultpos(twidget(instance));
@@ -2830,16 +2957,25 @@ begin
   else begin
    setcomponentpos(instance,designform.pos);
   end;
+  }
   writer1:= twriter.create(astream,4096);
+  beginstreaming(amodule);
   try
+   if csancestor in instance.componentstate then begin
+    ancestor:= fdescendentinstancelist.findancestor(instance);
+   end
+   else begin
+    ancestor:= nil;
+   end;
    writer1.onfindancestor:= {$ifdef FPC}@{$endif}findancestor;
-   writer1.writedescendent(instance,nil);
+   writer1.writedescendent(instance,ancestor);
   finally
+   endstreaming(amodule);
    writer1.free;
    releasemethodtable(amodule);
    if instance is twidget then begin
     fdescendentinstancelist.restorepos(twidget(instance));
-    twidget1(instance).fwidgetrect.pos:= nullpoint;
+//    twidget1(instance).fwidgetrect.pos:= nullpoint;
    end;
   end;
  end;
@@ -3097,7 +3233,7 @@ begin
  result:= comp.Name;
  comp1:= comp.owner;
  if comp1 <> nil then begin
-  while (comp1.owner <> nil) and (comp1.Owner.Owner <> nil) do begin
+  while (comp1.owner <> nil) do begin
    result:= comp1.Name + '.' + result;
    comp1:= comp1.Owner;
   end;

@@ -38,7 +38,7 @@ uses
  sysutils,classes,msesimplewidgets,msegrids,msemenus,mseimage,msedispwidgets,
  msetoolbar,msetabs,msedesignintf,regwidgets_bmp,
  msesplitter,msedock,mseforms,mseclasses,typinfo,msearrayprops,
- msegui;
+ msegui,formdesigner;
  
 type
  tpropertyeditor1 = class(tpropertyeditor);

@@ -1079,7 +1079,7 @@ begin
  result:= '';
  if instance <> nil then begin
   if (factmodule <> nil) and not factmodule.checkowned(instance) and 
-          (factmodule <> instance) then begin
+          (factmodule <> instance) and (instance.owner <> nil) then begin
    result:=  instance.owner.name+'.';
   end;
   result:= result + designer.getcomponentdispname(instance) +

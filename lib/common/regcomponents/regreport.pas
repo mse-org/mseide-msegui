@@ -10,10 +10,10 @@
 unit regreport;
 {$ifdef FPC}{$mode objfpc}{$h+}{$INTERFACES CORBA}{$endif}
 interface
-uses
- msereport,msedesignintf;
  
 implementation
+uses
+ msereport,msedesignintf,formdesigner;
 const
  reportintf: designmoduleintfty = 
   (createfunc: {$ifdef FPC}@{$endif}createreport;

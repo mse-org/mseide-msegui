@@ -2243,7 +2243,7 @@ object projectoptionsfo: tprojectoptionsfo
           object mainfoform: tfilenameedit
             optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
             bounds_x = 0
-            bounds_y = 46
+            bounds_y = 38
             bounds_cx = 627
             bounds_cy = 37
             frame.caption = 'Mainform form (*.mfm)'
@@ -2271,7 +2271,7 @@ object projectoptionsfo: tprojectoptionsfo
           object simplefosource: tfilenameedit
             optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
             bounds_x = 0
-            bounds_y = 86
+            bounds_y = 70
             bounds_cx = 627
             bounds_cy = 37
             frame.caption = 'Simple Form source (*.pas)'
@@ -2299,7 +2299,7 @@ object projectoptionsfo: tprojectoptionsfo
           object simplefoform: tfilenameedit
             optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
             bounds_x = 0
-            bounds_y = 126
+            bounds_y = 102
             bounds_cx = 627
             bounds_cy = 37
             frame.caption = 'Simple Form form (*.mfm)'
@@ -2327,7 +2327,7 @@ object projectoptionsfo: tprojectoptionsfo
           object dockingfosource: tfilenameedit
             optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
             bounds_x = 0
-            bounds_y = 166
+            bounds_y = 134
             bounds_cx = 627
             bounds_cy = 37
             frame.caption = 'Docking Form source (*.pas)'
@@ -2355,7 +2355,7 @@ object projectoptionsfo: tprojectoptionsfo
           object dockingfoform: tfilenameedit
             optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
             bounds_x = 0
-            bounds_y = 206
+            bounds_y = 166
             bounds_cx = 627
             bounds_cy = 37
             frame.caption = 'Docking Form form (*.mfm)'
@@ -2383,7 +2383,7 @@ object projectoptionsfo: tprojectoptionsfo
           object datamodsource: tfilenameedit
             optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
             bounds_x = 0
-            bounds_y = 246
+            bounds_y = 198
             bounds_cx = 627
             bounds_cy = 37
             frame.caption = 'Datamodule source (*.pas)'
@@ -2411,7 +2411,7 @@ object projectoptionsfo: tprojectoptionsfo
           object datamodform: tfilenameedit
             optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
             bounds_x = 0
-            bounds_y = 286
+            bounds_y = 230
             bounds_cx = 627
             bounds_cy = 37
             frame.caption = 'Datamodule form (*.mfm)'
@@ -2439,10 +2439,66 @@ object projectoptionsfo: tprojectoptionsfo
           object subfosource: tfilenameedit
             optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
             bounds_x = 0
-            bounds_y = 326
+            bounds_y = 262
             bounds_cx = 627
             bounds_cy = 37
             frame.caption = 'Subform source (*.pas)'
+            frame.button.imagenr = 17
+            frame.dummy = 0
+            frame.outerframe = (
+              0
+              17
+              0
+              0
+            )
+            anchors = [an_top]
+            taborder = 12
+            onshowhint = hintexpandedmacros
+            controller.filterlist.data = (
+              (
+                'Pascal file'
+                '"*.pas" "*.pp"'
+              )
+            )
+            controller.captionopen = 'Source template for Subform'
+            controller.ongetfilename = expandfilename
+            reffontheight = 14
+          end
+          object subfoform: tfilenameedit
+            optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+            bounds_x = 0
+            bounds_y = 294
+            bounds_cx = 627
+            bounds_cy = 37
+            frame.caption = 'Subform form (*.mfm)'
+            frame.button.imagenr = 17
+            frame.dummy = 0
+            frame.outerframe = (
+              0
+              17
+              0
+              0
+            )
+            anchors = [an_top]
+            taborder = 13
+            onshowhint = hintexpandedmacros
+            controller.filterlist.data = (
+              (
+                'Form file'
+                '*.mfm'
+              )
+            )
+            controller.captionopen = 'Form template for Subform'
+            controller.ongetfilename = expandfilename
+            reffontheight = 14
+          end
+          object reportsource: tfilenameedit
+            optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+            bounds_x = 0
+            bounds_y = 326
+            bounds_cx = 627
+            bounds_cy = 37
+            frame.caption = 'Report source (*.pas)'
             frame.button.imagenr = 17
             frame.dummy = 0
             frame.outerframe = (
@@ -2464,13 +2520,13 @@ object projectoptionsfo: tprojectoptionsfo
             controller.ongetfilename = expandfilename
             reffontheight = 14
           end
-          object subfoform: tfilenameedit
+          object reportform: tfilenameedit
             optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
             bounds_x = 0
-            bounds_y = 366
+            bounds_y = 358
             bounds_cx = 627
             bounds_cy = 37
-            frame.caption = 'Subform form (*.mfm)'
+            frame.caption = 'Report form (*.mfm)'
             frame.button.imagenr = 17
             frame.dummy = 0
             frame.outerframe = (
@@ -2492,13 +2548,13 @@ object projectoptionsfo: tprojectoptionsfo
             controller.ongetfilename = expandfilename
             reffontheight = 14
           end
-          object reportsource: tfilenameedit
+          object inheritedsource: tfilenameedit
             optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
             bounds_x = 0
-            bounds_y = 406
+            bounds_y = 390
             bounds_cx = 627
             bounds_cy = 37
-            frame.caption = 'Report source (*.pas)'
+            frame.caption = 'Iherited Form source (*.pas)'
             frame.button.imagenr = 17
             frame.dummy = 0
             frame.outerframe = (
@@ -2520,13 +2576,13 @@ object projectoptionsfo: tprojectoptionsfo
             controller.ongetfilename = expandfilename
             reffontheight = 14
           end
-          object reportform: tfilenameedit
+          object inheritedform: tfilenameedit
             optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
             bounds_x = 0
-            bounds_y = 446
+            bounds_y = 422
             bounds_cx = 627
             bounds_cy = 37
-            frame.caption = 'Report form (*.mfm)'
+            frame.caption = 'Inherited Form form (*.mfm)'
             frame.button.imagenr = 17
             frame.dummy = 0
             frame.outerframe = (

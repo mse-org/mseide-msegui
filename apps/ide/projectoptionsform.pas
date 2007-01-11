@@ -83,6 +83,8 @@ type
   newsubfoform: filenamety;
   newreportsource: filenamety;
   newreportform: filenamety;
+  newinheritedsource: filenamety;
+  newinheritedform: filenamety;
  end;
 
  projectoptionsty = record
@@ -262,6 +264,8 @@ type
    defon: tbooleanedit;
    reportsource: tfilenameedit;
    reportform: tfilenameedit;
+   inheritedsource: tfilenameedit;
+   inheritedform: tfilenameedit;
    tgroupbox1: tgroupbox;
    backupfilecount: tintegeredit;
    debugoptions: tstringedit;
@@ -528,6 +532,8 @@ begin
    li.expandmacros(newsubfoform);
    li.expandmacros(newreportsource);
    li.expandmacros(newreportform);
+   li.expandmacros(newinheritedsource);
+   li.expandmacros(newinheritedform);
    clearfontalias;
    for int1:= 0 to high(fontalias) do begin
     registerfontalias(fontalias[int1],fontnames[int1],fam_overwrite,fontheights[int1]);
@@ -717,6 +723,8 @@ begin
   newsubfoform:= '${TEMPLATEDIR}default/subform.mfm';
   newreportsource:= '${TEMPLATEDIR}default/report.pas';
   newreportform:= '${TEMPLATEDIR}default/report.mfm';
+  newinheritedsource:= '${TEMPLATEDIR}default/inheritedform.pas';
+  newinheritedform:= '${TEMPLATEDIR}default/inheritedform.mfm';
  end;
  expandprojectmacros;
 end;
@@ -892,6 +900,8 @@ begin
   updatevalue('newsubfoform',newsubfoform);
   updatevalue('newreportsource',newreportsource);
   updatevalue('newreportform',newreportform);
+  updatevalue('newinheritedsource',newinheritedsource);
+  updatevalue('newinheritedform',newinheritedform);
   
   if not iswriter then begin
    if mainfo.sysenv.getintegervalue(int1,ord(env_vargroup),1,6) then begin
@@ -1002,6 +1012,8 @@ begin
   fo.subfoform.value:= newsubfoform;
   fo.reportsource.value:= newreportsource;
   fo.reportform.value:= newreportform;
+  fo.inheritedsource.value:= newinheritedsource;
+  fo.inheritedform.value:= newinheritedform;
 
   fo.makecommand.value:= makecommand;
   fo.debugcommand.value:= debugcommand;
@@ -1153,6 +1165,8 @@ begin
   newsubfoform:= fo.subfoform.value;
   newreportsource:= fo.reportsource.value;
   newreportform:= fo.reportform.value;
+  newinheritedsource:= fo.inheritedsource.value;
+  newinheritedform:= fo.inheritedform.value;
   
   makecommand:= fo.makecommand.value;
   debugcommand:= fo.debugcommand.value;
@@ -1430,7 +1444,8 @@ procedure tprojectoptionsfo.formtemplateonchildscaled(const sender: TObject);
 begin
  placeyorder(0,[0],[mainfosource,mainfoform,simplefosource,simplefoform,
        dockingfosource,dockingfoform,datamodsource,datamodform,
-       subfosource,subfoform,reportsource,reportform]);
+       subfosource,subfoform,reportsource,reportform,
+       inheritedsource,inheritedform]);
 end;
 
 procedure tprojectoptionsfo.encodingsetvalue(const sender: TObject;

@@ -1151,6 +1151,7 @@ type
    fstate: windowstatesty;
    ffocuscount: cardinal; //for recursive setwidgetfocus
    factivecount: cardinal; //for recursive activate,deactivate
+   fmoving: integer;
    ffocusedwidget: twidget;
    fmodalinfopo: pmodalinfoty;
    foptions: windowoptionsty;
@@ -1233,6 +1234,8 @@ type
    procedure nofocus;
    property focuscount: cardinal read ffocuscount;
    function close: boolean; //true if ok
+   procedure beginmoving; //lock window rect modification
+   procedure endmoving;
    procedure bringtofront;
    procedure sendtoback;
    procedure stackunder(const predecessor: twindow);
@@ -4373,12 +4376,14 @@ begin
   if (fparentwidget <> nil) then begin
    fparentwidget.widgetregionchanged(self); //new position
   end;
-  if ownswindow1 and (tws_windowvisible in fwindow.fstate) then begin
-   fwindow.checkwindow(windowevent);
-  end;
  end;
  if poscha and not (csloading in componentstate) then begin
   poschanged;
+ end;
+ if bo1 then begin
+  if ownswindow1 and (tws_windowvisible in fwindow.fstate) then begin
+   fwindow.checkwindow(windowevent);
+  end;
  end;
 end;
 
@@ -8269,7 +8274,8 @@ begin
   else begin
    if fstate * [tws_posvalid,tws_sizevalid] <>
            [tws_posvalid,tws_sizevalid] then begin
-    if visible and not windowevent and not (tws_needsdefaultpos in fstate) then begin
+    if visible and not windowevent and not (tws_needsdefaultpos in fstate) and
+        (fmoving <= 0) then begin
      guierror(gui_reposwindow(fwinid,fowner.fwidgetrect),self);
      fstate:= fstate + [tws_posvalid,tws_sizevalid];
     end;
@@ -9226,6 +9232,19 @@ procedure twindow.postkeyevent(const akey: keyty;
 begin
  application.postevent(tkeyevent.create(winid,release,akey,akey,
              ashiftstate,achars));
+end;
+
+procedure twindow.beginmoving;
+begin
+ inc(fmoving);
+end;
+
+procedure twindow.endmoving;
+begin
+ dec(fmoving);
+ if fmoving = 0 then begin
+  checkwindow(false);
+ end;
 end;
 
 { tonterminatedlist }

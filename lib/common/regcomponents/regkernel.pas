@@ -19,7 +19,7 @@ uses
  classes,mseguithread,msebitmap,msetimer,msestatfile,mseactions,mseshapes,
  msedesignintf,msepropertyeditors,msemenus,msegui,msepipestream,sysutils,
  msegraphutils,regkernel_bmp,msegraphics,msestrings,msepostscriptprinter,
- mseprinter,msetypes,msedatalist,msedatamodules,mseclasses;
+ mseprinter,msetypes,msedatalist,msedatamodules,mseclasses,formdesigner;
 
 type
  twidget1 = class(twidget);

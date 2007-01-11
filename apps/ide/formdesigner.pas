@@ -74,18 +74,27 @@ type
    procedure doafterpaint(const canvas: tcanvas); override;
    procedure createwindow; override;
    procedure doactivate; override;
-   procedure ValidateRename(AComponent: TComponent;
-      const CurName, NewName: string); override;
+   procedure validaterename(acomponent: tcomponent;
+                                      const curname, newname: string); override;
+   procedure notification(acomponent: tcomponent;
+                                      operation: toperation); override;
    procedure doshow; override;
   public
    constructor create(const aowner: tcomponent; const adesigner: tdesigner;
                         const aintf: pdesignmoduleintfty);
                                         reintroduce;
+   destructor destroy; override;
    function designnotification: idesignnotification;
+   property modulerect: rectty read fwidgetrect;
    procedure updatecaption;
+   procedure placemodule;
+   procedure beginplacement;
+   procedure endplacement;
    property module: tmsecomponent read fmodule write setmodule;
    property form: twidget read fform;
  end;
+
+ designformclassty = class of tformdesignerfo;
 
  formselectedinfoty = record
   selectedinfo: selectedinfoty;
@@ -126,7 +135,7 @@ type
    procedure componentschanged;
    function itempo(const index: integer): pformselectedinfoty;
  end;
-
+ 
  selectmodety = (sm_select,sm_add,sm_flip,sm_remove);
 
  tdesignwindow = class(twindow,idesignnotification)
@@ -240,6 +249,17 @@ type
                                      default defaultgridsizey;
  end;
 
+procedure registerdesignmoduleclass(const aclass: tcomponentclass;
+                               const aintf: designmoduleintfty;
+                               const adesignformclass: designformclassty = nil);
+function createdesignmodule(designmoduleclassname: string;
+                           const aclassname: pshortstring;
+                           out aintf: pdesignmoduleintfty): tmsecomponent;
+function createdesignform(const aowner: tdesigner; 
+                 const amodule: pmoduleinfoty): tformdesignerfo;
+function selectinheritedmodule(const amodule: pmoduleinfoty;
+                               const caption: msestring = ''): pmoduleinfoty;
+
 implementation
 uses
  formdesigner_mfm,mselist,msekeyboard,mseguiglob,msepointer,msebits,sysutils,
@@ -253,6 +273,86 @@ type
  tframe1 = class(tframe);
 
  designerfoeventty = (fde_none,fde_syncsize,fde_updatecaption);
+
+ designmoduleinfoty = record
+  classtype: tcomponentclass;
+  intf: pdesignmoduleintfty;
+  designformclass: designformclassty;
+ end;
+ designmoduleinfoarty = array of designmoduleinfoty;
+
+ tdesignmoduleinfoar = class
+  private
+   flist: designmoduleinfoarty;
+ end;
+ 
+var
+ fregistereddesignmoduleclasses: tdesignmoduleinfoar;
+
+function registereddesignmoduleclasses: tdesignmoduleinfoar;
+begin
+ if fregistereddesignmoduleclasses = nil then begin
+  fregistereddesignmoduleclasses:= tdesignmoduleinfoar.create;
+ end;
+ result:= fregistereddesignmoduleclasses;
+end;
+ 
+procedure registerdesignmoduleclass(const aclass: tcomponentclass;
+                               const aintf: designmoduleintfty;
+                               const adesignformclass: designformclassty = nil);
+var
+ int1: integer;
+begin
+ with registereddesignmoduleclasses do begin
+  for int1:= 0 to high(flist) do begin
+   with flist[int1] do begin
+    if classtype = aclass then begin
+     intf:= @aintf;
+     exit;
+    end;
+   end;
+  end;
+  registerclass(aclass);
+  setlength(flist,high(flist)+2);
+  with flist[high(flist)] do begin
+   classtype:= aclass;
+   intf:= @aintf;
+   designformclass:= adesignformclass;
+  end;
+ end;
+end;
+
+function createdesignmodule(designmoduleclassname: string;
+              const aclassname: pshortstring;
+              out aintf: pdesignmoduleintfty): tmsecomponent;
+var
+ int1: integer;
+begin
+ if designmoduleclassname = '' then begin
+  designmoduleclassname:= defaultmoduleclassname;
+ end;
+ designmoduleclassname:= uppercase(designmoduleclassname);
+ with registereddesignmoduleclasses do begin
+  for int1:= 0 to high(flist) do begin
+   with flist[int1] do begin
+    if uppercase(classtype.classname) = designmoduleclassname then begin
+     aintf:= intf;
+     result:= intf^.createfunc(classtype,aclassname);
+     exit;
+    end;
+   end;
+  end;
+ end;
+ raise exception.Create('Unknown moduleclass for "'+ aclassname^ +'": "'+
+              designmoduleclassname+'".');
+end;
+
+function createdesignform(const aowner: tdesigner; 
+                 const amodule: pmoduleinfoty): tformdesignerfo;
+begin
+ result:= tformdesignerfo.create(nil,aowner,amodule^.moduleintf);
+ result.module:= amodule^.instance;
+end;
 
 function getcomponentrect(const sender: twidget;
                                     const component: tcomponent): rectty;
@@ -800,19 +900,21 @@ procedure tdesignwindow.doafterpaint(const canvas: tcanvas);
 var
  int1: integer;
 begin
- canvas.intersectcliprect(fowner.container.paintrect);
- canvas.move(fowner.container.clientpos);
- with tformdesignerfo(fowner).fmodule do begin
-  for int1:= 0 to componentcount - 1 do begin
-   drawcomponent(components[int1]);
+ if tformdesignerfo(fowner).fmodule <> nil then begin
+  canvas.intersectcliprect(fowner.container.paintrect);
+  canvas.move(fowner.container.clientpos);
+  with tformdesignerfo(fowner).fmodule do begin
+   for int1:= 0 to componentcount - 1 do begin
+    drawcomponent(components[int1]);
+   end;
   end;
+  if form <> nil then begin
+   drawgrid(canvas);
+  end;
+  fselections.paint(canvas);
+  canvas.remove(fowner.container.clientpos);
+  showxorpic(canvas);
  end;
- if form <> nil then begin
-  drawgrid(canvas);
- end;
- fselections.paint(canvas);
- canvas.remove(fowner.container.clientpos);
- showxorpic(canvas);
 end;
 
 function tdesignwindow.componentscrollsize: sizety;
@@ -993,6 +1095,10 @@ var
 // component1: tcomponent;
 
 begin
+ if module = nil then begin
+  inherited;
+  exit;
+ end;
  if eventkind = ek_keypress then begin
   with info do begin
    if shiftstate = [] then begin
@@ -1279,6 +1385,10 @@ var
 label
  1;
 begin
+ if module = nil then begin
+  inherited;
+  exit;
+ end;
  if info.eventkind in [ek_mouseleave,ek_mouseenter] then begin
   fclickedcompbefore:= nil;
   exit;
@@ -1528,9 +1638,9 @@ end;
 procedure tdesignwindow.poschanged;
 begin
  inherited;
-// if (form <> nil) then begin
+ if tformdesignerfo(fowner).fmodulesetting = 0 then begin
   doModified;
-// end;
+ end;
 end;
 
 function tdesignwindow.insertoffset: pointty;
@@ -1828,15 +1938,6 @@ begin
  gridsizey:= projectoptions.gridsizey;
 end;
 
-procedure tformdesignerfo.ValidateRename(AComponent: TComponent;
-  const CurName, NewName: string);
-begin
-  inherited;
-  if (acomponent <> nil) and not (csdestroying in acomponent.componentstate) then begin
-   fdesigner.validaterename(acomponent,curname,newname);
-  end;
-end;
-
 { tformdesignerfo }
 
 constructor tformdesignerfo.create(const aowner: tcomponent; 
@@ -1847,6 +1948,30 @@ begin
  fmoduleintf:= aintf;
 // createwindow;
  inherited create(aowner);
+end;
+
+destructor tformdesignerfo.destroy;
+begin
+ fmodule.free;
+ inherited;
+end;
+
+procedure tformdesignerfo.ValidateRename(AComponent: TComponent;
+  const CurName, NewName: string);
+begin
+  inherited;
+  if (acomponent <> nil) and not (csdestroying in acomponent.componentstate) then begin
+   fdesigner.validaterename(acomponent,curname,newname);
+  end;
+end;
+
+procedure tformdesignerfo.notification(acomponent: tcomponent;
+                                      operation: toperation); 
+begin
+ if (operation = opremove) and (acomponent = fmodule) then begin
+  fmodule:= nil;
+ end;
+ inherited;
 end;
 
 procedure tformdesignerfo.createwindow;
@@ -1936,31 +2061,40 @@ begin
  updatecaption;
 end;
 
-procedure tformdesignerfo.setmodule(const Value: tmsecomponent);
+procedure tformdesignerfo.beginplacement;
+begin
+ inc(fmodulesetting);
+end;
+
+procedure tformdesignerfo.endplacement;
+begin
+  dec(fmodulesetting);
+end;
+
+
+procedure tformdesignerfo.placemodule;
 var
  asize: sizety;
  po1: pointty;
  int1: integer;
 begin
- inc(fmodulesetting);
+ beginplacement;
  try
-  fmodule := Value;
-  InsertComponent(value);
-  if value is twidget then begin
-   widgetrect:= twidget(value).widgetrect;
-   twidget(value).parentwidget:= self;
-   twidget(value).pos:= nullpoint;
-   fform:= twidget(value);
+  if fmodule is twidget then begin
+   fform:= twidget(fmodule);
+   widgetrect:= twidget(fmodule).widgetrect;
+   twidget(fmodule).parentwidget:= self;
+   twidget(fmodule).pos:= nullpoint;
   end
   else begin
    fform:= nil;
-   if value is tmsedatamodule then begin
-    asize:= tmsedatamodule(value).size;
+   if fmodule is tmsedatamodule then begin
+    asize:= tmsedatamodule(fmodule).size;
    end
    else begin
     asize:= nullsize;
-    for int1:= 0 to value.ComponentCount - 1 do begin
-     po1:= getcomponentpos(value.Components[int1]);
+    for int1:= 0 to fmodule.ComponentCount - 1 do begin
+     po1:= getcomponentpos(fmodule.Components[int1]);
      if po1.x > asize.cx then begin
       asize.cx:= po1.x;
      end;
@@ -1971,10 +2105,23 @@ begin
     inc(asize.cx,80);
     inc(asize.cy,30); //todo: correct size, scrollbox
    end;
-   widgetrect:= makerect(getcomponentpos(value),asize);
+   widgetrect:= makerect(getcomponentpos(fmodule),asize);
   end;
  finally
-  dec(fmodulesetting);
+  endplacement;
+ end;
+end;
+
+procedure tformdesignerfo.setmodule(const Value: tmsecomponent);
+begin
+ if fmodule <> value then begin
+  fmodule.free;
+  fmodule:= Value;
+  if fmodule <> nil then begin
+   fmodule.freenotification(self);
+  end;
+//  InsertComponent(value);
+  placemodule;
  end;
 end;
 
@@ -1999,47 +2146,60 @@ begin
  designer.getcomponenteditor.edit;
 end;
 
-procedure tformdesignerfo.doinsertsubmodule(const sender: tobject);
+function selectinheritedmodule(const amodule: pmoduleinfoty;
+                          const caption: msestring = ''): pmoduleinfoty;
 var
  fo: tselectsubmoduledialogfo;
- comp: tmsecomponent;
- po1: pmoduleinfoty;
  ar1: msestringarty;
  mstr1: msestring;
  int1: integer;
 begin
+ result:= nil;
  fo:= tselectsubmoduledialogfo.create(nil);
  try
-  ar1:= fdesigner.modules.filenames;
-  mstr1:= fdesigner.modules.findmodulebyinstance(module)^.filename;
-  for int1:= 0 to high(ar1) do begin
-   if ar1[int1] = mstr1 then begin
-    deleteitem(ar1,int1);
-    break;
-   end;
+  if caption <> '' then begin
+   fo.caption:= caption;
   end;
-  fo.submodule.dropdown.cols[0].asarray:= ar1;
-  if fo.show(true,window) = mr_ok then begin
-   po1:= fdesigner.modules.findmodule(fo.submodule.value);
-   if po1 <> nil then begin
-    comp:= fdesigner.copycomponent(po1^.instance,nil);
-    {$ifdef FPC}
-    comp.setinline(true);
-    comp.setancestor(true);
-    {$else}
-    tcomponent1(comp).setinline(true);
-    tcomponent1(comp).setancestor(true);
-    {$endif}
-    comp.name:= po1^.instance.name;
-    fdesigner.addancestorinfo(comp,po1^.instance);
-    with tdesignwindow(window) do begin
-     doaddcomponent(comp);
-     placecomponent(comp,fmousepos);
+  ar1:= designer.modules.filenames;
+  if amodule <> nil then begin
+   mstr1:= amodule^.filename;
+   for int1:= 0 to high(ar1) do begin
+    if ar1[int1] = mstr1 then begin
+     deleteitem(ar1,int1);
+     break;
     end;
    end;
   end;
+  fo.submodule.dropdown.cols[0].asarray:= ar1;
+  if fo.show(true) = mr_ok then begin
+   result:= designer.modules.findmodule(fo.submodule.value);
+  end;
  finally
   fo.Free;
+ end;
+end;
+
+procedure tformdesignerfo.doinsertsubmodule(const sender: tobject);
+var
+ comp: tmsecomponent;
+ po1: pmoduleinfoty;
+begin
+ po1:= selectinheritedmodule(fdesigner.modules.findmodulebyinstance(module));
+ if po1 <> nil then begin
+  comp:= fdesigner.copycomponent(po1^.instance,nil);
+  {$ifdef FPC}
+  comp.setinline(true);
+  comp.setancestor(true);
+  {$else}
+  tcomponent1(comp).setinline(true);
+  tcomponent1(comp).setancestor(true);
+  {$endif}
+  comp.name:= po1^.instance.name;
+  fdesigner.addancestorinfo(comp,po1^.instance);
+  with tdesignwindow(window) do begin
+   doaddcomponent(comp);
+   placecomponent(comp,fmousepos);
+  end;
  end;
 end;
 
@@ -2150,4 +2310,6 @@ begin
  end;
 end;
 
+finalization
+ freeandnil(fregistereddesignmoduleclasses);
 end.

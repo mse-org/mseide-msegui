@@ -280,23 +280,11 @@ type
  end;
  pdesignmoduleintfty = ^designmoduleintfty;
  
- designmoduleinfoty = record
-  classtype: tcomponentclass;
-  intf: pdesignmoduleintfty;
- end;
- designmoduleinfoarty = array of designmoduleinfoty;
-
 procedure registercomponents(const page: msestring;
                           const componentclasses: array of tcomponentclass);
 function registeredcomponents: tcomponentclasslist;
 function unitgroups: tunitgroups;
 procedure registerunitgroup(const adependents,agroup: array of string);
-
-procedure registerdesignmoduleclass(const aclass: tcomponentclass;
-                               const aintf: designmoduleintfty);
-function createdesignmodule(designmoduleclassname: string;
-                           const aclassname: pshortstring;
-                           out aintf: pdesignmoduleintfty): tmsecomponent;
 
 function designnotifications: tdesignnotifications;
 
@@ -328,74 +316,12 @@ type
   {$endif}
   
  tcomponent1 = class(tcomponent);
- tdesignmoduleinfoar = class
-  private
-   flist: designmoduleinfoarty;
- end;
- 
+
 var
  adesignnotifications: tdesignnotifications;
  aregisteredcomponents: tcomponentclasslist;
- aregistereddesignmoduleclasses: tdesignmoduleinfoar;
 // aregistereddesignmoduleclasses: designmoduleinfoarty;
  aunitgroups: tunitgroups;
-
-function registereddesignmoduleclasses: tdesignmoduleinfoar;
-begin
- if aregistereddesignmoduleclasses = nil then begin
-  aregistereddesignmoduleclasses:= tdesignmoduleinfoar.create;
- end;
- result:= aregistereddesignmoduleclasses;
-end;
-
-function createdesignmodule(designmoduleclassname: string;
-              const aclassname: pshortstring;
-              out aintf: pdesignmoduleintfty): tmsecomponent;
-var
- int1: integer;
-begin
- if designmoduleclassname = '' then begin
-  designmoduleclassname:= defaultmoduleclassname;
- end;
- designmoduleclassname:= uppercase(designmoduleclassname);
- with registereddesignmoduleclasses do begin
-  for int1:= 0 to high(flist) do begin
-   with flist[int1] do begin
-    if uppercase(classtype.classname) = designmoduleclassname then begin
-     aintf:= intf;
-     result:= intf^.createfunc(classtype,aclassname);
-     exit;
-    end;
-   end;
-  end;
- end;
- raise exception.Create('Unknown moduleclass for "'+ aclassname^ +'": "'+
-              designmoduleclassname+'".');
-end;
-
-procedure registerdesignmoduleclass(const aclass: tcomponentclass;
-                                     const aintf: designmoduleintfty);
-var
- int1: integer;
-begin
- with registereddesignmoduleclasses do begin
-  for int1:= 0 to high(flist) do begin
-   with flist[int1] do begin
-    if classtype = aclass then begin
-     intf:= @aintf;
-     exit;
-    end;
-   end;
-  end;
-  registerclass(aclass);
-  setlength(flist,high(flist)+2);
-  with flist[high(flist)] do begin
-   classtype:= aclass;
-   intf:= @aintf;
-  end;
- end;
-end;
-
 
 procedure setcomponentpos(const component: tcomponent; const pos: pointty);
 var
@@ -1316,5 +1242,4 @@ finalization
  freeandnil(adesignnotifications);
  freeandnil(aregisteredcomponents);
  freeandnil(aunitgroups);
- freeandnil(aregistereddesignmoduleclasses);
 end.

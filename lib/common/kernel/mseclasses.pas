@@ -254,6 +254,7 @@ type
    fmsecomponentstyle: componentstylesty;
    fobjectlinker: tobjectlinker;
    factualclassname: pshortstring;
+   fancestorclassname: string;
    fhelpcontext: msestring;
    function getobjectlinker: tobjectlinker;
    procedure objectevent(const sender: tobject; const event: objecteventty); virtual;
@@ -2379,24 +2380,13 @@ procedure tmsecomponent.getoptionalobject(const instance: tobject; createproc: c
 begin
  mseclasses.getoptionalobject(componentstate,instance,createproc);
 end;
-{
-procedure tmsecomponent.getoptionalobject(var instance; instanceclass: tclass);
-begin
- mseclasses.getoptionalobject(componentstate,instance,instanceclass);
-end;
-}
+
 procedure tmsecomponent.setoptionalobject(const value: tpersistent; 
               var instance; createproc: createprocty);
 begin
  mseclasses.setoptionalobject(componentstate,value,instance,createproc);
 end;
-{
-procedure tmsecomponent.setoptionalobject(const value: tpersistent; var instance;
-                         instanceclass: tclass);
-begin
- mseclasses.setoptionalobject(componentstate,value,instance,instanceclass);
-end;
-}
+
 procedure tmsecomponent.loaded;
 begin
  inherited;
@@ -2419,6 +2409,21 @@ end;
 procedure tmsecomponent.designselected(const selected: boolean);
 begin
  //dummy
+end;
+
+procedure tmsecomponent.readmoduleclassname(reader: treader);
+begin
+ reader.ReadString; //dummy
+end;
+
+procedure tmsecomponent.writemoduleclassname(writer: twriter);
+begin
+ if fancestorclassname <> '' then begin
+  writer.writestring(fancestorclassname);
+ end
+ else begin
+  writer.writestring(getmoduleclassname);
+ end;
 end;
 
 procedure tmsecomponent.defineproperties(filer: tfiler);
@@ -2479,16 +2484,6 @@ begin
  finally
   setclassname(self,classnamebefore);
  end;
-end;
-
-procedure tmsecomponent.readmoduleclassname(reader: treader);
-begin
- reader.ReadString; //dummy
-end;
-
-procedure tmsecomponent.writemoduleclassname(writer: twriter);
-begin
- writer.WriteString(getmoduleclassname);
 end;
 
 function tmsecomponent.gethelpcontext: msestring;

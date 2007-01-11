@@ -42,7 +42,8 @@ type
  messagetextkindty = (mtk_info,mtk_running,mtk_finished,mtk_error,mtk_signal);
 
  startcommandty = (sc_none,sc_step,sc_continue);
- formkindty = (fok_main,fok_simple,fok_dock,fok_data,fok_subform,fok_report);
+ formkindty = (fok_main,fok_simple,fok_dock,fok_data,fok_subform,
+               fok_report,fok_inherited);
 
  tmainfo = class(tmseform,idesignnotification)
    gdb: tgdbmi;
@@ -134,6 +135,8 @@ type
    flastdesignform: tcustommseform;
    fexecstamp: integer;
    fprojectname: filenamety;
+   fcheckmodulelevel: integer;
+   fcheckmodulerecursion: boolean;
    procedure newproject(const fromprogram,empty: boolean);
    function checkgdberror(aresult: gdbresultty): boolean;
    procedure doshowform(const sender: tobject);
@@ -372,7 +375,12 @@ var
     try
      po1:= openformfile(wstr1,false,false,false);
     except
-     po1:= nil;
+     on e: eabort do begin
+      raise;
+     end
+     else begin
+      po1:= nil;
+     end;
     end;
    end;
   end;
@@ -383,37 +391,47 @@ var
  
 begin
  ar1:= nil; //compilerwarning
- with projectoptions do begin
-  po1:= nil;
-  wstr2:= struppercase(atypename);
-  for int1:= 0 to high(moduletypes) do begin
-   if moduletypes[int1] = wstr2 then begin
-    if int1 <= high(modulefilenames) then begin
-     checkmodule(modulefilenames[int1]);
+ if fcheckmodulelevel >= 16 then begin
+  showmessage('Recursive form hierarchy for "'+atypename+'"','ERROR');
+  sysutils.abort;
+ end;
+ inc(fcheckmodulelevel);
+ try
+  with projectoptions do begin
+   po1:= nil;
+   wstr2:= struppercase(atypename);
+   for int1:= 0 to high(moduletypes) do begin
+    if moduletypes[int1] = wstr2 then begin
+     if int1 <= high(modulefilenames) then begin
+      checkmodule(modulefilenames[int1]);
+     end;
+     break;
     end;
-    break;
    end;
   end;
- end;
- if po1 = nil then begin
-  ar1:= projecttree.units.moduleclassnames;
-  for int1:= 0 to high(ar1) do begin
-   if ar1[int1] = wstr2 then begin
-    checkmodule(projecttree.units.modulefilenames[int1]);
-    break;
+  if po1 = nil then begin
+   ar1:= projecttree.units.moduleclassnames;
+   for int1:= 0 to high(ar1) do begin
+    if ar1[int1] = wstr2 then begin
+     checkmodule(projecttree.units.modulefilenames[int1]);
+     break;
+    end;
    end;
   end;
- end;
- if (po1 = nil) or (stringicomp(po1^.moduleclassname,atypename) <> 0) then begin
-  if showmessage('Classtype '+atypename+' not found.'+lineend+
-                        ' Do you wish to search the formfile?','WARNING',
-                        [mr_yes,mr_cancel]) = mr_yes then begin
-   wstr2:= '';
-   if filedialog(wstr2,[fdo_checkexist],'Formfile for '+ atypename,
-                  ['Formfiles'],['*.mfm']) = mr_ok then begin
-    openformfile(wstr2,false,false,false);
+  if (po1 = nil) or 
+             (stringicomp(po1^.moduleclassname,atypename) <> 0) then begin
+   if showmessage('Classtype '+atypename+' not found.'+lineend+
+                         ' Do you wish to search the formfile?','WARNING',
+                         [mr_yes,mr_cancel]) = mr_yes then begin
+    wstr2:= '';
+    if filedialog(wstr2,[fdo_checkexist],'Formfile for '+ atypename,
+                   ['Formfiles'],['*.mfm']) = mr_ok then begin
+     openformfile(wstr2,false,false,false);
+    end;
    end;
   end;
+ finally
+  dec(fcheckmodulelevel);
  end;
 end;
 
@@ -1455,6 +1473,15 @@ var
  po1: pmoduleinfoty;
  
 begin
+ if formkindty(tmenuitem(sender).tag) = fok_inherited then begin
+  po1:= selectinheritedmodule(nil,'Select ancestor');
+  if po1 = nil then begin
+   exit;
+  end;
+ end
+ else begin
+  po1:= nil;
+ end;
  str1:= '';
  if filedialog(str1,[fdo_save,fdo_checkexist],'New form',['Pascal Files'],
          ['"*.pas" "*.pp"'],'pas') = mr_ok then begin
@@ -1487,12 +1514,17 @@ begin
      str3:= newreportform;
      str4:= 'report';
     end;
+    fok_inherited: begin
+     str2:= newinheritedsource;
+     str3:= newinheritedform;
+    end;
     else begin
      str2:= '';
      str3:= '';
     end;
    end;
   end;
+//  selectinheritedmodule(nil,'Select ancestor');
   if (str2 <> '') and (str3 <> '') then begin
    str2:= filepath(str2); //sourcesource
    str3:= filepath(str3); //formsource
