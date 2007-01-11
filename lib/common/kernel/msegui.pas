@@ -14,7 +14,7 @@ unit msegui;
 interface
 
 uses
- Classes,sysutils,msegraphics,msetypes,msestrings,mseerror,msegraphutils,
+ classes,sysutils,msegraphics,msetypes,msestrings,mseerror,msegraphutils,
  msepointer,mseevent,msekeyboard,mseclasses,mseguiglob,mselist,msesys,msethread,
  msebitmap,msearrayprops{,msedatamodules};
 

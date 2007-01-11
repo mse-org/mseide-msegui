@@ -1121,21 +1121,36 @@ var
  moduleloadlevel: integer;
  
 function initmsecomponent(instance: tcomponent; rootancestor: tclass): boolean;
-var                                //!!!!todo: evaluate rootancestor
+
+ procedure doload(const aclass: tclass);
+ var
+  po1: pobjectdatainfoty;
+ begin
+  if (aclass <> rootancestor) and (aclass <> tcomponent) then begin
+   doload(aclass.classparent);
+   po1:= objectdatalist.find(aclass,'');
+   if (po1 <> nil) then begin
+    loadmodule(instance,po1,false);
+   end;
+  end;
+ end;
+ 
+var                                
  po1: pobjectdatainfoty;
- classty: tclass;
+ class1: tclass;
 
 begin
  result:= false;
  if objectdatalist <> nil then begin
-  classty:= instance.classtype;
-  po1:= objectdatalist.find(classty,instance.name);
+  class1:= instance.classtype;
+  po1:= objectdatalist.find(class1,instance.name);
   if (po1 <> nil) then begin
    inc(moduleloadlevel);
    if moduleloadlevel = 1 then begin
     begingloballoading;
    end;
    try
+    doload(class1.classparent);    //load inherited
     loadmodule(instance,po1,false);
     if finditem(pointerarty(fmodulestoregister),instance) >= 0 then begin
      fmodules.add(tmsecomponent(instance));
@@ -1323,7 +1338,7 @@ begin
  aname:= uppercase(aname);
  result:= pobjectdatainfoty(fdata);
  for int1:= 0 to fcount -1 do begin                           
-  if (result^.objectclass = aclass) and (result^.name = aname) then begin
+  if (result^.objectclass = aclass) and ((aname = '') or (result^.name = aname)) then begin
    exit;
   end;
   inc(result);
@@ -1340,7 +1355,7 @@ begin
  result:= pobjectdatainfoty(fdata);
  for int1:= 0 to fcount -1 do begin                           
   if (stringicomp1(result^.objectclass.classname,aclassname) = 0) and 
-                       (result^.name = aname) then begin
+                       ((aname = '') or (result^.name = aname)) then begin
    exit;
   end;
   inc(result);
