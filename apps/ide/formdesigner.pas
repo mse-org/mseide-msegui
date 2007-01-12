@@ -264,7 +264,7 @@ implementation
 uses
  formdesigner_mfm,mselist,msekeyboard,mseguiglob,msepointer,msebits,sysutils,
  msestockobjects,msedrawtext,selectsubmoduledialogform,mseshapes,settaborderform,
- msedatalist,objectinspector,projectoptionsform,main,msedatamodules;
+ msedatalist,objectinspector,projectoptionsform,main,msedatamodules,msetypes;
 
 type
  tcomponent1 = class(tcomponent);
@@ -2153,6 +2153,8 @@ var
  ar1: msestringarty;
  mstr1: msestring;
  int1: integer;
+ ar2: componentarty;
+ po1: pmoduleinfoty;
 begin
  result:= nil;
  fo:= tselectsubmoduledialogfo.create(nil);
@@ -2160,13 +2162,20 @@ begin
   if caption <> '' then begin
    fo.caption:= caption;
   end;
-  ar1:= designer.modules.filenames;
   if amodule <> nil then begin
-   mstr1:= amodule^.filename;
-   for int1:= 0 to high(ar1) do begin
-    if ar1[int1] = mstr1 then begin
-     deleteitem(ar1,int1);
-     break;
+   ar2:= designer.descendentinstancelist.getancestors(amodule^.instance);
+   additem(pointerarty(ar2),amodule^.instance);
+  end
+  else begin
+   ar2:= nil;
+  end;
+  ar1:= nil;
+  with designer.modules do begin
+   for int1:= 0 to count - 1 do begin
+    with itempo[int1]^ do begin
+     if finditem(pointerarty(ar2),instance) < 0 then begin
+      additem(ar1,filename);
+     end;
     end;
    end;
   end;

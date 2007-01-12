@@ -244,6 +244,7 @@ type
                                          const submodulelist: tsubmodulelist);
    function getclassname(const comp: tcomponent): string;
                    //returns submodule or root classname if appropriate
+   function getancestors(const adescendent: tcomponent): componentarty;
  end;
 
  getmoduleeventty = procedure(const amodule: pmoduleinfoty;
@@ -387,6 +388,8 @@ type
    function checkcanclose(const amodule: pmoduleinfoty; out references:  string): boolean;
 
    property modules: tmodulelist read getmodules;
+   property descendentinstancelist: tdescendentinstancelist read 
+                                                  fdescendentinstancelist;
 
    property objformat: objformatty read fobjformat write fobjformat default of_default;
    property designfiles: tindexedfilenamelist read fdesignfiles;
@@ -734,6 +737,9 @@ begin
  end;
  fdelcomps:= nil;
  comp2:= fdesigner.copycomponent(info^.ancestor,info^.ancestor);
+ if isroot then begin
+  initrootdescendent(comp2);
+ end;
  info^.descendent:= comp2;
  comp2.name:= str1;
  with tmsecomponent1(comp2) do begin
@@ -773,6 +779,48 @@ begin
  addcomp(comp2);
  removefixupreferences(module^.instance,'');
 end;         
+
+function tdescendentinstancelist.getancestors(
+                               const adescendent: tcomponent): componentarty;
+                               
+ procedure addancestors(const adescendent: tcomponent);
+ var
+  po1: pointer;
+  int1: integer;
+  po2: pmoduleinfoty;
+ begin
+  po1:= datapo;
+  for int1:= 0 to count - 1 do begin
+   with(pancestorinfoaty(po1)^[int1]) do begin
+    if descendent = adescendent then begin
+     if finditem(pointerarty(result),ancestor) < 0 then begin
+      additem(pointerarty(result),ancestor);
+     end;
+     addancestors(ancestor);
+    end
+   end;
+  end;
+ end;
+ 
+var
+ po1: pointer;
+ int1: integer;
+ po2: pmoduleinfoty;
+begin
+ result:= nil;
+ addancestors(adescendent);
+ po1:= datapo;
+ for int1:= 0 to count - 1 do begin
+  with(pancestorinfoaty(po1)^[int1]) do begin
+   if ancestor = adescendent then begin
+    po2:= fdesigner.modules.findmodulebycomponent(descendent);
+    if (po2 <> nil) and (finditem(pointerarty(result),po2^.instance) < 0) then begin
+     additem(pointerarty(result),po2^.instance);
+    end;
+   end;
+  end;
+ end;
+end;
 
 procedure tdescendentinstancelist.modulemodified(const amodule: pmoduleinfoty);
 type

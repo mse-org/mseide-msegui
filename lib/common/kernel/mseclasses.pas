@@ -491,7 +491,9 @@ procedure refreshancestor(const descendent,newancestor,oldancestor: tcomponent;
               const destmethodtab: pointer = nil);
 procedure checkinline(const acomponent: tcomponent);
                  //resets csancestor of csinline components
-
+procedure initrootdescendent(const acomponent: tcomponent);
+                 //clears csinline flags of acomoponent and children,
+                 // sets csancestor
 function issubcomponent(const root,child: tcomponent): boolean;
 function findcomponentbynamepath(const namepath: string): tcomponent;
 function getlinkedcomponents(const acomponent: tcomponent): componentarty;
@@ -635,6 +637,12 @@ begin
    checkinline(acomponent.components[int1]);
   end;
  end;
+end;
+
+procedure initrootdescendent(const acomponent: tcomponent);
+begin
+ clearinline(acomponent);
+ tcomponent1(acomponent).setancestor(true);
 end;
 
 function swapmethodtable(const instance: tobject; const newtable: pointer): pointer;
