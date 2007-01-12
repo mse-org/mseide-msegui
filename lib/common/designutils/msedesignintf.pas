@@ -13,7 +13,7 @@ unit msedesignintf;
 
 interface
 uses
- Classes,msegraphutils,mselist,Sysutils,Typinfo,msebitmap,
+ classes,msegraphutils,mselist,sysutils,typinfo,msebitmap,
  msetypes,msestrings,msegraphics,msegui,
  mseclasses,mseforms,msestat;
 const
@@ -314,7 +314,8 @@ type
     FLookupRoot: TComponent;
   end;
   {$endif}
-  
+ treader1 = class(treader);
+ twriter1 = class(twriter);  
  tcomponent1 = class(tcomponent);
 var
  adesignnotifications: tdesignnotifications;
@@ -364,14 +365,24 @@ begin
  end;
 end;
 
+{$ifdef FPC}
+var
+ componentposreversed: boolean;
+{$endif}
 
 procedure setcomponentpos(const component: tcomponent; const pos: pointty);
 var
  lo1: longint;
 begin
  {$ifdef FPC} //fpbug
- longrec(lo1).hi:= pos.x;
- longrec(lo1).lo:= pos.y;
+ if componentposreversed then begin
+  longrec(lo1).hi:= pos.x;
+  longrec(lo1).lo:= pos.y;
+ end
+ else begin
+  longrec(lo1).lo:= pos.x;
+  longrec(lo1).hi:= pos.y;
+ end;
  {$else}
  longrec(lo1).lo:= pos.x;
  longrec(lo1).hi:= pos.y;
@@ -382,11 +393,17 @@ end;
 function getcomponentpos(const component: tcomponent): pointty;
 begin
  {$ifdef FPC} //fpbug
- result.x:= smallint(longrec(component.DesignInfo).hi);
- result.y:= smallint(longrec(component.DesignInfo).lo);
+ if componentposreversed then begin
+  result.x:= smallint(longrec(component.designinfo).hi);
+  result.y:= smallint(longrec(component.designinfo).lo);
+ end
+ else begin
+  result.x:= smallint(longrec(component.designinfo).lo);
+  result.y:= smallint(longrec(component.designinfo).hi);
+ end;
  {$else}
- result.x:= smallint(longrec(component.DesignInfo).Lo);
- result.y:= smallint(longrec(component.DesignInfo).hi);
+ result.x:= smallint(longrec(component.designinfo).lo);
+ result.y:= smallint(longrec(component.designinfo).hi);
  {$endif}
 end;
 
@@ -1277,7 +1294,37 @@ begin
  setlength(result,int2);
 end;
 
+{$ifdef FPC}
+procedure checkreversedcomponentpos;
+var
+ comp1: tcomponent;
+ writer1: twriter;
+ reader1: treader;
+ stream1: tmemorystream;
+ int1: integer;
+ str1: string;
+begin
+ comp1:= tcomponent.create(nil);
+ comp1.designinfo:= 1;
+ stream1:= tmemorystream.create;
+ writer1:= twriter.create(stream1,256);
+ twriter1(writer1).writeproperties(comp1);
+ writer1.free;
+ stream1.position:= 0;
+ reader1:= treader.create(stream1,256);
+ str1:= reader1.driver.beginproperty;
+ int1:= reader1.readinteger;
+ componentposreversed:= (int1 = 1) xor (str1 = 'left');
+ reader1.free;
+ stream1.free;
+ comp1.free;
+end;
+{$endif}
+
 initialization
+ {$ifdef FPC}
+ checkreversedcomponentpos;
+ {$endif}
  adesignnotifications:= tdesignnotifications.Create;
 // aregisteredcomponents:= tcomponentclasslist.create;
 finalization
