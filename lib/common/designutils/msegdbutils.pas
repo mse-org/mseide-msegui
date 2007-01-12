@@ -2878,6 +2878,7 @@ end;
 function tgdbmi.getpcharvar(address: cardinal): string;
 const
  maxblocklength = 16;
+ maxlength = 10000;
 var
  data: bytearty;
  po1: pchar;
@@ -2919,6 +2920,10 @@ begin
     move(data[0],result[int1],int2);
     inc(int1,int2);
     inc(address,int2);
+    if int1 > maxlength then begin
+     result:= result + '''...';
+     exit;
+    end;
    end;
   until bo1 or (length(data) < blocklength);
   result:= result + '''';
@@ -2928,6 +2933,7 @@ end;
 function tgdbmi.getpmsecharvar(address: cardinal): msestring;
 const
  maxblocklength = 16;
+ maxlength = 10000;
 var
  data: wordarty;
  po1: pmsechar;
@@ -2969,6 +2975,10 @@ begin
     move(data[0],result[int1],int2*sizeof(msechar));
     inc(int1,int2);
     inc(address,int2*sizeof(msechar));
+    if int1 > maxlength then begin
+     result:= result + '''...';
+     exit;
+    end;
    end;
   until bo1 or (length(data) < blocklength);
   result:= result + '''';
