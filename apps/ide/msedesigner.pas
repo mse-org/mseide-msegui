@@ -699,14 +699,17 @@ var
  str1: string;
  int1: integer;
  isroot: boolean;
- ancestorclassname: string;
+ ancestorclassname1: string;
+ actualclassname1: pshortstring;
  pt1: pointty;
 begin
  comp1:= info^.descendent;
  isroot:= comp1 = module^.instance;
- if isroot then begin
-  ancestorclassname:= tmsecomponent1(module^.instance).fancestorclassname;
+ with tmsecomponent1(comp1) do begin
+  ancestorclassname1:= fancestorclassname;
+  actualclassname1:= factualclassname;
  end;
+ 
  info^.descendent:= nil;
  if comp1 is twidget then begin
   with twidget1(comp1) do begin
@@ -733,6 +736,10 @@ begin
  comp2:= fdesigner.copycomponent(info^.ancestor,info^.ancestor);
  info^.descendent:= comp2;
  comp2.name:= str1;
+ with tmsecomponent1(comp2) do begin
+  fancestorclassname:= ancestorclassname1;
+  factualclassname:= actualclassname1;
+ end;
  if isroot then begin
   tcomponent1(comp2).setancestor(true);
  end
@@ -742,7 +749,6 @@ begin
  checkinline(comp2);
  fobjectlinker.link(comp2); 
  if isroot then begin
-  tmsecomponent1(comp2).fancestorclassname:= ancestorclassname;
   module^.instance:= comp2;
   if norootposition then begin
    if (comp2 is twidget) then begin
@@ -939,59 +945,6 @@ begin
   dec(fmodifiedlevel);
  end;
 end;
-(*
-procedure tdescendentinstancelist.modulemodified(const amodule: tcomponent;
-                         const oldmodule: tmsecomponent);
-var
- po1: pancestorinfoty;
- int1,int2: integer;
- po2,po3: pmoduleinfoty;
- bo1: boolean;
- desttable: pointer; 
-begin
- po1:= datapo;
- po3:= nil;
- beginsubmodulecopy;
- try
-  bo1:= false;
-  for int1:= 0 to fcount - 1 do begin
-   if po1^.ancestor = amodule then begin
-    if po3 = nil then begin
-     po3:= fdesigner.modules.findmodule(tmsecomponent(amodule));
-     fdesigner.flookupmodule:= po3;
-     desttable:= po3^.methods.createmethodtable;
-    end;     
-    po2:= fdesigner.modules.findmodule(tmsecomponent(po1^.descendent.owner));
-    fdesigner.buildmethodtable(po2);
-    try
-     refreshancestor(po1^.descendent,po1^.ancestor,oldmodule,false,
-     {$ifdef FPC}@{$endif}fdesigner.findancestor,
-     {$ifdef FPC}@{$endif}fdesigner.findcomponentclass,
-     {$ifdef FPC}@{$endif}fdesigner.createcomponent,
-     {$ifdef FPC}@{$endif}fdesigner.findmethod2,
-     desttable,po2^.methods.createmethodtable);
-//     fdesigner.dorefreshmethods(po1^.descendent,po1^.ancestor,oldmodule);
-    finally
-     fdesigner.releasemethodtable(po2);
-    end;
-   end;
-   inc(po1);
-  end;
- finally
-  endsubmodulecopy;
-  if po3 <> nil then begin
-   designer.releasemethodtable(po3);
-  end;
- end;
- po1:= datapo;
- for int1:= 0 to fcount - 1 do begin
-  if po1^.ancestor = amodule then begin
-   fdesigner.componentmodified(po1^.descendent);
-  end;
-  inc(po1);
- end;
-end;
-*)
 
 procedure tdescendentinstancelist.add(const instance,ancestor: tmsecomponent;
        const submodulelist: tsubmodulelist);
@@ -1005,7 +958,7 @@ function tdescendentinstancelist.getclassname(const comp: tcomponent): string;
 var
  comp1: tmsecomponent;
 begin
- if (comp.Owner <> nil) and (comp.Owner.owner = nil) then begin
+ if (comp.owner = nil) then begin
   //module, must be tmsecomponent;
   result:= tmsecomponent(comp).actualclassname;
  end
@@ -1017,7 +970,7 @@ begin
     exit;
    end;
   end;
-  result:= comp.ClassName;
+  result:= comp.classname;
  end;
 end;
 
@@ -1575,6 +1528,7 @@ begin
  with result.info do begin
   filename:= afilename;
   instancevarname:= ainstancevarname;
+  moduleclassname:= amoduleclassname;
   try
    if ainherited then begin
     po1:= fdesigner.getinheritedmodule(designmoduleclassname);
@@ -1587,12 +1541,10 @@ begin
     additem(pointerarty(fdesigner.floadedsubmodules),instance);
     fdesigner.fdescendentinstancelist.add(tmsecomponent(instance),po1^.instance,
                                           fdesigner.fsubmodulelist);
-    moduleclassname:= amoduleclassname;
     tmsecomponent1(instance).factualclassname:= @moduleclassname;
     tmsecomponent1(instance).fancestorclassname:= designmoduleclassname;
    end
    else begin
-    moduleclassname:= amoduleclassname;
     instance:= createdesignmodule(designmoduleclassname,@moduleclassname,
                      moduleintf{,designform});
    end;
@@ -2757,12 +2709,7 @@ begin //loadformfile
          designmoduleclassname:= readstring;
         end
         else begin
-//         if str1 = inheritedmoduleclassnamename then begin
-//          inheritedmoduleclassname:= readstring;
-//         end
-//         else begin
-          {$ifdef FPC}driver.{$endif}skipvalue;
-//         end;
+         {$ifdef FPC}driver.{$endif}skipvalue;
         end;
        end;
       end;
