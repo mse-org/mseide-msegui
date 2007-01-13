@@ -162,7 +162,7 @@ function textindextopos(const canvas: tcanvas; var info: drawtextinfoty;
 
 implementation
 uses
- mseguiintf,msebits,msedatalist,math,msereal,sysutils;
+ mseguiintf,msebits,msedatalist,{$ifdef FPC}math{$else}Math{$endif},msereal,sysutils;
 
 type
  tcanvas1 = class(tcanvas);
