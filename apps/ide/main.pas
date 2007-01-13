@@ -1476,11 +1476,11 @@ var
 begin
  if formkindty(tmenuitem(sender).tag) = fok_inherited then begin
   po1:= selectinheritedmodule(nil,'Select ancestor');
-  ancestorclass:= po1^.moduleclassname;
-  ancestorunit:= filenamebase(po1^.filename);
   if po1 = nil then begin
    exit;
   end;
+  ancestorclass:= po1^.moduleclassname;
+  ancestorunit:= filenamebase(po1^.filename);
  end
  else begin
   ancestorclass:= '';

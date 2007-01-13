@@ -839,6 +839,20 @@ var
   teststream.position:= 0;
   teststream.writetotext(output);
  end;
+ procedure debugbinout(const atext: string; const acomp,aancestor: tcomponent);
+ var
+  stream1: tmemorystream;
+  writer1: twriter;
+ begin
+  stream1:= tmemorystream.create;
+  writer1:= twriter.create(stream1,1024);
+  writer1.onfindancestor:= {$ifdef FPC}@{$endif}fdesigner.findancestor;
+  writer1.writedescendent(acomp,aancestor);
+  writer1.free;
+  debugout(atext,stream1);
+  stream1.free;
+ end;
+ 
 {$endif}
 
 var
@@ -936,13 +950,17 @@ begin
         ferrorhandler.fnewcomponents:= nil;
         reader1.root:= modifiedowners[int1]^.instance;
         ferrorhandler.froot:= modifiedowners[int1]^.instance;
-        if infos[int1]^.descendent.owner = nil then begin //inherited form
+        comp1:= infos[int1]^.descendent;
+        if comp1.owner = nil then begin //inherited form
          with tformdesignerfo(modifiedowners[int1]^.designform) do begin
           beginplacement;
+          dec(submodulecopy);
           try
-           reader1.readrootcomponent(infos[int1]^.descendent);
+           reader1.readrootcomponent(comp1);
+           checkinline(comp1);
            placemodule;
           finally
+           inc(submodulecopy);
            endplacement;
           end;
          end;
@@ -969,6 +987,10 @@ begin
          modifiedowners[int1]^.components.add(ferrorhandler.fnewcomponents[int2]);
         end;
        end;
+ {$ifdef mse_debugsubmodule}
+       debugbinout('after load ' + infos[int1]^.descendent.name,
+                         infos[int1]^.descendent,infos[int1]^.ancestor);
+ {$endif}
       finally
        modifiedowners[int1]^.designform.window.endmoving;
       end;
@@ -1583,7 +1605,12 @@ begin
     if po1 = nil then begin
      raise exception.create('Ancestor for "'+designmoduleclassname+'" not found.');
     end;
-    instance:= fdesigner.copycomponent(po1^.instance,nil);
+    fdesigner.beginstreaming(po1);
+    try
+     instance:= fdesigner.copycomponent(po1^.instance,nil);
+    finally
+     fdesigner.endstreaming(po1);
+    end;
     moduleintf:= po1^.moduleintf;
     tcomponent1(instance).setancestor(true);
     additem(pointerarty(fdesigner.floadedsubmodules),instance);
