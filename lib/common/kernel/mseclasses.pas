@@ -1176,7 +1176,10 @@ var
  begin
   if (aclass <> rootancestor) and (aclass <> tcomponent) then begin
    doload(aclass.classparent);
-   po1:= objectdatalist.find(aclass,'');
+   po1:= objectdatalist.find(aclass,instance.name);
+   if po1 = nil then begin
+    po1:= objectdatalist.find(aclass,'');
+   end; 
    if (po1 <> nil) then begin
     if not loadingstarted then begin
      loadingstarted:= true;    
@@ -1192,6 +1195,9 @@ var
  
 begin
  if objectdatalist <> nil then begin
+  if (rootancestor = nil) then begin
+   rootancestor:= instance.classtype.classparent;
+  end;
   loadingstarted:= false;
   try
    doload(instance.classtype);

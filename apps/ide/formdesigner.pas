@@ -2320,6 +2320,7 @@ begin
  end;
 end;
 
+initialization
 finalization
  freeandnil(fregistereddesignmoduleclasses);
 end.
