@@ -474,7 +474,7 @@ procedure setlinkedcomponent(const sender: iobjectlink; const source: tmsecompon
                       var instance: tmsecomponent; ainterfacetype: pointer = nil);
 procedure reloadmsecomponent(Instance: tmsecomponent);
 function initmsecomponent(instance: tcomponent; rootancestor: tclass): boolean;
-procedure loadmsemodule(const instance: tmsecomponent; aclass: tclass);
+procedure loadmsemodule(const instance: tmsecomponent; const rootancestor: tclass);
 function copycomponent(const source: tcomponent; const aowner: tcomponent = nil;
               const onfindancestor: tfindancestorevent = nil;
               const onfindcomponentclass: tfindcomponentclassevent = nil;
@@ -1167,7 +1167,9 @@ var
  moduleloadlevel: integer;
  
 function initmsecomponent(instance: tcomponent; rootancestor: tclass): boolean;
-
+var
+ loadingstarted: boolean;
+ 
  procedure doload(const aclass: tclass);
  var
   po1: pobjectdatainfoty;
@@ -1176,47 +1178,46 @@ function initmsecomponent(instance: tcomponent; rootancestor: tclass): boolean;
    doload(aclass.classparent);
    po1:= objectdatalist.find(aclass,'');
    if (po1 <> nil) then begin
+    if not loadingstarted then begin
+     loadingstarted:= true;    
+     inc(moduleloadlevel);
+     if moduleloadlevel = 1 then begin
+      begingloballoading;
+     end;
+    end;
     loadmodule(instance,po1,false);
-   end;
+   end;     
   end;
  end;
  
-var                                
- po1: pobjectdatainfoty;
- class1: tclass;
-
 begin
- result:= false;
  if objectdatalist <> nil then begin
-  class1:= instance.classtype;
-  po1:= objectdatalist.find(class1,instance.name);
-  if (po1 <> nil) then begin
-   inc(moduleloadlevel);
-   if moduleloadlevel = 1 then begin
-    begingloballoading;
+  loadingstarted:= false;
+  try
+   doload(instance.classtype);
+   if finditem(pointerarty(fmodulestoregister),instance) >= 0 then begin
+    fmodules.add(tmsecomponent(instance));
+    globalfixupreferences;
    end;
-   try
-    doload(class1.classparent);    //load inherited
-    loadmodule(instance,po1,false);
-    if finditem(pointerarty(fmodulestoregister),instance) >= 0 then begin
-     fmodules.add(tmsecomponent(instance));
-     globalfixupreferences;
-    end;
-    if moduleloadlevel = 1 then begin
-     moduleloadlevel:= 0;  //allow loading of forms in loaded procedure
-     notifygloballoading;
-    end;
-   finally
+   if loadingstarted and (moduleloadlevel = 1) then begin
+    moduleloadlevel:= 0;  //allow loading of forms in loaded procedure
+    notifygloballoading;
+   end;
+  finally
+   if loadingstarted then begin
     if moduleloadlevel > 0 then begin
      dec(moduleloadlevel);
     end;
     if moduleloadlevel = 0 then begin
      endgloballoading;
     end;
-    removeitem(pointerarty(fmodulestoregister),instance);
    end;
-   result:= true;
+   removeitem(pointerarty(fmodulestoregister),instance);
   end;
+  result:= loadingstarted;
+ end
+ else begin
+  result:= false;
  end;
 end;
 
@@ -1292,11 +1293,20 @@ begin
   end;
 end;
 
-procedure loadmsemodule(const instance: tmsecomponent; aclass: tclass);
+procedure loadmsemodule(const instance: tmsecomponent; const rootancestor: tclass);
+
+ procedure doregister(aclass: tclass);
+ begin
+  if (aclass <> rootancestor) and (aclass <> tcomponent) then begin
+   doregister(aclass.classparent);
+   registerclassproperties(aclass);
+  end;
+ end;
+ 
 begin
-  registerclassproperties(instance.classtype);
-  if not initmsecomponent(instance,aclass) then begin
-   if not initinheritedcomponent(instance, aclass) then begin
+  doregister(instance.classtype);
+  if not initmsecomponent(instance,rootancestor) then begin
+   if not initinheritedcomponent(instance,rootancestor) then begin
     guierror(gue_resnotfound,instance);
    end;
   end;
