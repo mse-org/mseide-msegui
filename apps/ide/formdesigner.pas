@@ -2118,10 +2118,10 @@ begin
   fmodule.free;
   fmodule:= Value;
   if fmodule <> nil then begin
-   fmodule.freenotification(self);
+//   fmodule.freenotification(self);
+   InsertComponent(value);
+   placemodule;
   end;
-//  InsertComponent(value);
-  placemodule;
  end;
 end;
 

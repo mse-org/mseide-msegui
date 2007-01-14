@@ -434,6 +434,11 @@ begin
  result:= fdesigner;
 end;
 
+function ismodule(const acomponent: tcomponent): boolean;
+begin
+ result:= (acomponent.owner = nil) or (acomponent.owner.owner = nil);
+end;
+
 function getglobalcomponent(const Name: string): TComponent;
 begin
  if (loadingdesigner <> nil) or (submodulecopy > 0) then begin
@@ -728,7 +733,7 @@ begin
  fobjectlinker.unlink(comp1);
  fdelcomps:= nil;
  froot:= comp1.owner;
- if froot = nil then begin
+ if ismodule(comp1) then begin 
   froot:= comp1;
  end;
  delcomp(comp1);
@@ -883,9 +888,11 @@ begin
   for int1:= 0 to fcount - 1 do begin
    if po1^.ancestor = amodule^.instance then begin
     additem(pointerarty(infos),po1);
-    comp1:= po1^.descendent.owner;
-    if comp1 = nil then begin  //inherited form
+    if ismodule(po1^.descendent) then begin  //inherited form        
      comp1:= po1^.descendent;
+    end
+    else begin
+     comp1:= po1^.descendent.owner;
     end;
     po2:= fdesigner.modules.findmodule(tmsecomponent(comp1));
     additem(pointerarty(modifiedowners),po2);
@@ -905,7 +912,7 @@ begin
     setlength(streams,length(infos));
     for int1:= 0 to high(modifiedowners) do begin
      fdesigner.buildmethodtable(modifiedowners[int1]);
-     if infos[int1]^.descendent.owner = nil then begin //inherited form
+     if ismodule(infos[int1]^.descendent.owner) then begin //inherited form
       fdesigner.beginstreaming(modifiedowners[int1]);
      end;
      try
@@ -915,7 +922,7 @@ begin
        writer1.onfindancestor:= {$ifdef FPC}@{$endif}fdesigner.findancestor;
        writer1.writedescendent(infos[int1]^.descendent,ancestor);
       finally
-       if infos[int1]^.descendent.owner = nil then begin //inherited form
+       if ismodule(infos[int1]^.descendent.owner) then begin //inherited form
         fdesigner.endstreaming(modifiedowners[int1]);
        end;
        writer1.free;
@@ -951,7 +958,7 @@ begin
         reader1.root:= modifiedowners[int1]^.instance;
         ferrorhandler.froot:= modifiedowners[int1]^.instance;
         comp1:= infos[int1]^.descendent;
-        if comp1.owner = nil then begin //inherited form
+        if ismodule(comp1) then begin //inherited form
          with tformdesignerfo(modifiedowners[int1]^.designform) do begin
           beginplacement;
           dec(submodulecopy);
@@ -1028,7 +1035,7 @@ function tdescendentinstancelist.getclassname(const comp: tcomponent): string;
 var
  comp1: tmsecomponent;
 begin
- if (comp.owner = nil) then begin
+ if ismodule(comp) then begin
   //module, must be tmsecomponent;
   result:= tmsecomponent(comp).actualclassname;
  end
@@ -3256,11 +3263,9 @@ var
 begin
  result:= comp.Name;
  comp1:= comp.owner;
- if comp1 <> nil then begin
-  while (comp1.owner <> nil) do begin
-   result:= comp1.Name + '.' + result;
-   comp1:= comp1.Owner;
-  end;
+ while not ismodule(comp1) do begin
+  result:= comp1.Name + '.' + result;
+  comp1:= comp1.Owner;
  end;
 end;
 

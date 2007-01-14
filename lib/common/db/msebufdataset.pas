@@ -36,6 +36,8 @@ const
  dsbuffieldkinds = [fkcalculated,fklookup];
  bufferfieldkinds = [fkdata];
  
+ dscheckfilter = ord(high(tdatasetstate)) + 1; 
+ 
 type  
  fielddataty = record
   nullmask: array[0..0] of byte; //variable length
@@ -249,7 +251,8 @@ type
  
  bufdatasetstatety = (bs_opening,bs_fetching,bs_applying,
                       bs_hasindex,bs_fetchall,bs_indexvalid,
-                      bs_editing,bs_append,bs_internalcalc,bs_utf8);
+                      bs_editing,bs_append,bs_internalcalc,bs_utf8,
+                      bs_hasfilter);
  bufdatasetstatesty = set of bufdatasetstatety;
    
  internalcalcfieldseventty = procedure(const sender: tmsebufdataset;
@@ -282,6 +285,7 @@ type
 
    femptybuffer: pintrecordty;
    ffilterbuffer: pintrecordty;
+   fcheckfilterbuffer: pdsrecordty;
    fcurrentbuf: pintrecordty;
    fnewvaluebuffer: pdsrecordty; //buffer for applyupdates
    fbstate: bufdatasetstatesty;
@@ -335,6 +339,7 @@ type
                                out avalue: msestring): boolean;
    procedure setmsestringdata(const sender: tmsestringfield; const avalue: msestring);
    procedure setoninternalcalcfields(const avalue: internalcalcfieldseventty);
+   procedure checkfilterstate;
   protected
    fapplyindex: integer; //take care about canceled updates while applying
    ffailedcount: integer;
@@ -369,7 +374,9 @@ type
                                    docheck: boolean): tgetresult; override;
    function bookmarktostring(const abookmark: bookmarkdataty): string;
    procedure checkrecno(const avalue: integer);
-                              
+   procedure setonfilterrecord(const value: tfilterrecordevent); override;
+
+   procedure loaded; override;                              
    procedure internalopen; override;
    procedure internalclose; override;
    procedure clearbuffers; override;
@@ -403,6 +410,7 @@ type
    property actindex: integer read factindex write setactindex;
    function findrecord(arecordpo: pintrecordty): integer;
                          //returns index, -1 if not found
+   procedure dofilterrecord(var acceptable: boolean); virtual;
 
  {abstracts, must be overidden by descendents}
    function fetch : boolean; virtual; abstract;
@@ -422,6 +430,7 @@ type
    procedure stringtoparam(const source: msestring; const dest: tparam);
                   //takes care about utf8 conversion
 
+   procedure filterchanged;
    procedure resetindex; //deactivates all indexes
    function createblobbuffer(const afield: tfield): tblobbuffer;
    procedure applyupdates(const maxerrors: integer = 0); virtual; overload;
@@ -959,51 +968,67 @@ end;
 
 function tmsebufdataset.getrecord(buffer: pchar; getmode: tgetmode;
                                             docheck: boolean): tgetresult;
+var
+ acceptable: boolean;
+ state1: tdatasetstate; 
 begin
  result:= grok;
- case getmode of
-  gmprior: begin
-   if frecno <= 0 then begin
-    result := grbof;
-   end
-   else begin
-    internalsetrecno(frecno-1);
+ acceptable:= true;
+ fcheckfilterbuffer:= pointer(buffer);
+ repeat
+  case getmode of
+   gmprior: begin
+    if frecno <= 0 then begin
+     result := grbof;
+    end
+    else begin
+     internalsetrecno(frecno-1);
+    end;
    end;
-  end;
-  gmcurrent: begin
-   if (frecno < 0) or (frecno >= fbrecordcount) then begin
-    result := grerror;
+   gmcurrent: begin
+    if (frecno < 0) or (frecno >= fbrecordcount) then begin
+     result := grerror;
+    end;
    end;
-  end;
-  gmnext: begin
-   if frecno >= fbrecordcount - 1 then begin
-    if getnextpacket = 0 then begin
-     result:= greof;
+   gmnext: begin
+    if frecno >= fbrecordcount - 1 then begin
+     if getnextpacket = 0 then begin
+      result:= greof;
+     end
+     else begin
+      internalsetrecno(frecno+1);
+     end;
     end
     else begin
      internalsetrecno(frecno+1);
     end;
-   end
-   else begin
-    internalsetrecno(frecno+1);
    end;
   end;
- end;
- if result = grok then begin
-  with pdsrecordty(buffer)^ do begin
-   with dsheader.bookmark do  begin
-    data.recno:= frecno;
-    data.recordpo:= fcurrentbuf;
-    flag:= bfcurrent;
+  if result = grok then begin
+   with pdsrecordty(buffer)^ do begin
+    with dsheader.bookmark do  begin
+     data.recno:= frecno;
+     data.recordpo:= fcurrentbuf;
+     flag:= bfcurrent;
+    end;
+    move(fcurrentbuf^.header,header,frecordsize);
+    getcalcfields(buffer);
+    if filtered then begin
+     state1:= settempstate(tdatasetstate(dscheckfilter));
+     try
+      dofilterrecord(acceptable);
+     finally
+      restorestate(state1);
+     end;
+    end;
+    if (getmode = gmcurrent) and not acceptable then begin
+     result:= grerror;
+    end;
    end;
-   move(fcurrentbuf^.header,header,frecordsize);
-   getcalcfields(buffer);
   end;
- end
- else begin
-  if (result = grerror) and docheck then begin
-   databaseerror('No record');
-  end;
+ until acceptable or (result <> grok);
+ if docheck and (result = grerror) then begin
+  databaseerror('No record');
  end;
 end;
 
@@ -1222,47 +1247,62 @@ begin
 end;
 
 function tmsebufdataset.getfieldbuffer(const afield: tfield;
-             out buffer: pointer; out datasize: integer): boolean; //true if not null
+             out buffer: pointer; out datasize: integer): boolean;
+              //read buffer
+              //true if not null
 var
  int1: integer;
 begin 
  result:= false;
  int1:= afield.fieldno - 1;
- if state = dscalcfields then begin
-  buffer:= @pdsrecordty(calcbuffer)^.header;
- end
- else begin
-  if bs_internalcalc in fbstate then begin
-   if int1 < 0 then begin//calc field
-    buffer:= @pdsrecordty(activebuffer)^.header;
-    //values invalid!
-   end
-   else begin
-    buffer:= @fcurrentbuf^.header;
-   end;
-  end
+ case ord(state) of
+  ord(dscalcfields): begin
+   buffer:= @pdsrecordty(calcbuffer)^.header;
+  end;
+  dscheckfilter: begin
+   buffer:= @fcheckfilterbuffer^.header;
+  end;
   else begin
-   if bs_applying in fbstate then begin
-    buffer:= @fnewvaluebuffer^.header;
+   if bs_internalcalc in fbstate then begin
+    if int1 < 0 then begin//calc field
+     buffer:= @pdsrecordty(activebuffer)^.header;
+     //values invalid!
+    end
+    else begin
+     buffer:= @fcurrentbuf^.header;
+    end;
    end
    else begin
-    buffer:= @pdsrecordty(activebuffer)^.header;
+    if bs_applying in fbstate then begin
+     buffer:= @fnewvaluebuffer^.header;
+    end
+    else begin
+     buffer:= @pdsrecordty(activebuffer)^.header;
+    end;
    end;
   end;
  end;
  if int1 >= 0 then begin // data field
   result:= false;
   if state = dsoldvalue then begin
-   if not getrecordupdatebuffer then begin
-       // there is no old value available
-    buffer:= nil;
-    exit;
+   if getrecordupdatebuffer then begin
+    buffer:= fupdatebuffer[fcurrentupdatebuffer].oldvalues;
+    if buffer <> nil then begin
+     buffer:= @pintrecordty(buffer)^.header;
+    end;
+   end
+   else begin
+    buffer:= @fcurrentbuf^.header   //there is no old value available
    end;
-   buffer:= @fupdatebuffer[fcurrentupdatebuffer].oldvalues^.header;
-  end; 
-  result:= not getfieldisnull(precheaderty(buffer)^.fielddata.nullmask,int1);
-  inc(buffer,ffieldbufpositions[int1]);
-  datasize:= ffieldsizes[int1];
+  end;
+  if buffer <> nil then begin
+   result:= not getfieldisnull(precheaderty(buffer)^.fielddata.nullmask,int1);
+   inc(buffer,ffieldbufpositions[int1]);
+   datasize:= ffieldsizes[int1];
+  end
+  else begin
+   datasize:= 0;
+  end;
  end
  else begin   
   int1:= -2 - int1;
@@ -2584,6 +2624,42 @@ procedure tmsebufdataset.checkrecno(const avalue: integer);
 begin
  if (avalue > recordcount) or (avalue < 1) then begin
   databaseerror(snosuchrecord,self);
+ end;
+end;
+
+procedure tmsebufdataset.setonfilterrecord(const value: tfilterrecordevent);
+begin
+ inherited;
+ checkfilterstate;
+ filterchanged;
+end;
+
+procedure tmsebufdataset.filterchanged;
+begin
+ if (state <> dsinactive) then begin
+  checkbrowsemode;
+  resync([]);
+ end;
+end;
+
+procedure tmsebufdataset.checkfilterstate;
+begin
+ exclude(fbstate,bs_hasfilter);
+ if checkcanevent(self,tmethod(onfilterrecord)) then begin
+  include(fbstate,bs_hasfilter);
+ end
+end;
+
+procedure tmsebufdataset.loaded;
+begin
+ inherited;
+ checkfilterstate;
+end;
+
+procedure tmsebufdataset.dofilterrecord(var acceptable: boolean);
+begin
+ if checkcanevent(self,tmethod(onfilterrecord)) then begin
+  onfilterrecord(self,acceptable);
  end;
 end;
 

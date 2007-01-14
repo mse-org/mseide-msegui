@@ -760,25 +760,23 @@ begin
   Result := SQLstr;
 end;
 
-procedure TSQLQuery.ApplyFilter;
-
-var S : String;
-
+procedure tsqlquery.applyfilter;
+var
+ s: string;
 begin
-  FreeFldBuffers;
-  (Database as tsqlconnection).UnPrepareStatement(FCursor);
-  FIsEOF := False;
-  inherited internalclose;
-
-  s := FSQLBuf;
-
-  if Filtered then s := AddFilter(s);
-
-  (Database as tsqlconnection).PrepareStatement(Fcursor,(transaction as tsqltransaction),S,FParams);
-
-  Execute;
-  inherited InternalOpen;
-  First;
+ freefldbuffers;
+ tsqlconnection(database).unpreparestatement(fcursor);
+ fiseof := false;
+ inherited internalclose;
+ s:= fsqlbuf;
+ if filtered and (filter <> '') then begin
+  s:= addfilter(s);
+ end;
+ tsqlconnection(database).preparestatement(fcursor,
+                                  tsqltransaction(transaction),s,fparams);
+ execute;
+ inherited internalopen;
+ first;
 end;
 
 Procedure TSQLQuery.SetActive (Value : Boolean);
@@ -794,12 +792,15 @@ end;
 procedure TSQLQuery.SetFiltered(Value: Boolean);
 
 begin
-  if Value and not FParseSQL then DatabaseErrorFmt(SNoParseSQL,['Filtering ']);
-  if (Filtered <> Value) then
-    begin
-    inherited setfiltered(Value);
-    if active then ApplyFilter;
-    end;
+ if Value and not FParseSQL and (filter <> '') then begin
+  DatabaseErrorFmt(SNoParseSQL,['Filtering ']);
+ end;
+ if (Filtered <> Value) then begin
+  inherited setfiltered(Value);
+  if active then begin 
+   ApplyFilter;
+  end;
+ end;   
 end;
 
 procedure TSQLQuery.SetFilterText(const Value: string);
@@ -840,7 +841,7 @@ begin
 
     SQLParser(FSQLBuf);
 
-    if filtered then
+    if filtered and (filter <> '') then
       Db.PrepareStatement(Fcursor,sqltr,AddFilter(FSQLBuf),FParams)
     else
       Db.PrepareStatement(Fcursor,sqltr,FSQLBuf,FParams);
