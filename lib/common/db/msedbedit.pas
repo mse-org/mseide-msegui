@@ -135,12 +135,14 @@ type
    fintf: idbeditfieldlink;
    fediting: boolean;
    fmodified: boolean;
+   ffilterediting: boolean;
    frecordchange: integer;
    fbeginedit: integer;
    fmaxlength: integer;
    function canmodify: boolean;
    procedure setediting(avalue: boolean);
   protected
+   procedure dataevent(event: tdataevent; info: ptrint); override;
    procedure activechanged; override;
    procedure editingchanged; override;
    procedure focuscontrol(afield: tfieldref); override;
@@ -1896,12 +1898,13 @@ end;
 
 function teditwidgetdatalink.canmodify: Boolean;
 begin
- result:= not readonly and (field <> nil) and not field.readonly;
+ result:= (field <> nil) and 
+           (ffilterediting or not readonly and not field.readonly);
 end;
 
 procedure teditwidgetdatalink.modified;
 begin
- if not editing and (frecordchange = 0) then begin
+ if not editing and (frecordchange = 0) and not ffilterediting then begin
   inc(fbeginedit);
   try
    edit;
@@ -1918,8 +1921,8 @@ var
 begin
  state1:= fintf.getwidget.ComponentState;
  if state1 * [cswriting,csdesigning] = [] then begin
-  if (datasource = nil) or
-          not editing and not (canmodify and datasource.AutoEdit) then begin
+  if not ffilterediting and ((datasource = nil) or
+          not editing and not (canmodify and datasource.AutoEdit)) then begin
    include(aoptions,oe_readonly);
   end;
  end;
@@ -1931,8 +1934,25 @@ begin
  fintf.updatereadonlystate;
 end;
 
+procedure teditwidgetdatalink.dataevent(event: tdataevent; info: ptrint);
+var
+ bo1: boolean;
+begin
+ bo1:= ffilterediting;
+ if event = deupdatestate then begin
+  ffilterediting:= dataset.state = dsfilter;
+ end;
+ inherited;
+ if bo1 <> ffilterediting then begin
+  fintf.updatereadonlystate;
+ end;
+end;
+
 procedure teditwidgetdatalink.activechanged;
 begin
+ if not active then begin
+  ffilterediting:= false;
+ end;
  fintf.updatereadonlystate;
  inherited;
  if active and (field <> nil) and 
@@ -2005,32 +2025,39 @@ var
  bo1: boolean;
 begin
  result:= true;
- if (field <> nil) and editing then begin
-  fintf.valuetofield;
-  if (oe_autopost in fintf.getoptionsedit) and active then begin
-   widget1:= fintf.getwidget.parentwidget;
-   if (widget1 <> nil) then begin
-    if widget1.parentwidget is tcustomgrid then begin
-     with tcustomgrid1(widget1.parentwidget) do begin
-      bo1:= fnonullcheck > 0;
-      if bo1 then begin
-       dec(fnonullcheck);   //remove colchangelock
+ if (field <> nil) then begin
+  if ffilterediting then begin
+   fintf.valuetofield;
+  end
+  else begin
+   if editing then begin
+    fintf.valuetofield;
+    if (oe_autopost in fintf.getoptionsedit) and active then begin
+     widget1:= fintf.getwidget.parentwidget;
+     if (widget1 <> nil) then begin
+      if widget1.parentwidget is tcustomgrid then begin
+       with tcustomgrid1(widget1.parentwidget) do begin
+        bo1:= fnonullcheck > 0;
+        if bo1 then begin
+         dec(fnonullcheck);   //remove colchangelock
+        end;
+       end;
+      end
+      else begin
+       bo1:= false;
+      end;
+      try
+       result:= widget1.canparentclose;
+      finally
+       if bo1 then begin
+        inc(tcustomgrid1(widget1.parentwidget).fnonullcheck);
+       end;
       end;
      end;
-    end
-    else begin
-     bo1:= false;
-    end;
-    try
-     result:= widget1.canparentclose;
-    finally
-     if bo1 then begin
-      inc(tcustomgrid1(widget1.parentwidget).fnonullcheck);
+     if result then begin
+      dataset.post;
      end;
     end;
-   end;
-   if result then begin
-    dataset.post;
    end;
   end;
  end;
@@ -5037,7 +5064,7 @@ begin
          end;
         end
         else begin
-         if (gdo_propscrollbar in foptions) then begin
+         if not dataset.filtered and (gdo_propscrollbar in foptions) then begin
           int1:= dataset.recordcount;
           if int1 >= 0 then begin
            int2:= round(int1 * sender.value)+1;

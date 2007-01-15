@@ -281,10 +281,11 @@ type
    fcalcstringpositions: integerarty;
    
    fallpacketsfetched : boolean;
+   fbuffercountbefore: integer;
    fonupdateerror: tresolvererrorevent;
 
    femptybuffer: pintrecordty;
-   ffilterbuffer: pintrecordty;
+   ffilterbuffer: pdsrecordty;
    fcheckfilterbuffer: pdsrecordty;
    fcurrentbuf: pintrecordty;
    fnewvaluebuffer: pdsrecordty; //buffer for applyupdates
@@ -308,6 +309,7 @@ type
    procedure finalizechangedstrings(const tocompare: recheaderty; 
                                       var tofinalize: recheaderty);
    procedure addrefstrings(var header: recheaderty);
+   procedure intfinalizerecord(const buffer: pintrecordty);
    procedure intfreerecord(var buffer: pintrecordty);
 
    procedure clearindex;
@@ -430,6 +432,8 @@ type
    procedure stringtoparam(const source: msestring; const dest: tparam);
                   //takes care about utf8 conversion
 
+   procedure beginfilteredit;
+   procedure endfilteredit;
    procedure filterchanged;
    procedure resetindex; //deactivates all indexes
    function createblobbuffer(const afield: tfield): tblobbuffer;
@@ -694,11 +698,16 @@ begin
  end;
 end;
 
+procedure tmsebufdataset.intfinalizerecord(const buffer: pintrecordty);
+begin
+ freeblobs(buffer^.header.blobinfo);
+ finalizestrings(buffer^.header);
+end;
+
 procedure tmsebufdataset.intfreerecord(var buffer: pintrecordty);
 begin
  if buffer <> nil then begin
-  freeblobs(buffer^.header.blobinfo);
-  finalizestrings(buffer^.header);
+  intfinalizerecord(buffer);  
   freemem(buffer);
   buffer:= nil;
  end;
@@ -872,7 +881,7 @@ begin
  calcrecordsize;
  findexlocal.bindfields;
  femptybuffer:= intallocrecord;
- ffilterbuffer:= intallocrecord;
+ ffilterbuffer:= pdsrecordty(allocrecordbuffer);
  fnewvaluebuffer:= pdsrecordty(allocrecordbuffer);
  updatestate;
  fallpacketsfetched:= false;
@@ -893,7 +902,8 @@ begin
    end;
   end;
   intfreerecord(femptybuffer);
-  intfreerecord(ffilterbuffer);
+  intfinalizerecord(@ffilterbuffer^.header);
+  freerecordbuffer(pchar(ffilterbuffer));
  // pointer(fnewvaluebuffer^.header.blobinfo):= nil;
  // freerecordbuffer(pchar(fnewvaluebuffer));
   freemem(fnewvaluebuffer); //allways copied by move, needs no finalize
@@ -1262,6 +1272,9 @@ begin
   dscheckfilter: begin
    buffer:= @fcheckfilterbuffer^.header;
   end;
+  ord(dsfilter): begin
+   buffer:= @ffilterbuffer^.header;
+  end;
   else begin
    if bs_internalcalc in fbstate then begin
     if int1 < 0 then begin//calc field
@@ -1361,32 +1374,34 @@ begin
   databaseerrorfmt(snotineditstate,[name],self);
  end;
  int1:= afield.fieldno-1;
- if state = dscalcfields then begin
-  result:= @pdsrecordty(calcbuffer)^.header;
- end
- else begin
-  if bs_internalcalc in fbstate then begin
-   if int1 < 0 then begin//calc field
-    result:= @pdsrecordty(activebuffer)^.header;
-    //values invalid!
-   end
-   else begin
-    result:= @fcurrentbuf^.header;
-   end;
-  end
+ case state of
+  dscalcfields: begin
+   result:= @pdsrecordty(calcbuffer)^.header;
+  end;
+  dsfilter:  begin 
+   result:= @ffilterbuffer^.header;
+  end;
   else begin
-   if bs_applying in fbstate then begin
-    result:= @fnewvaluebuffer^.header;
+   if bs_internalcalc in fbstate then begin
+    if int1 < 0 then begin//calc field
+     result:= @pdsrecordty(activebuffer)^.header;
+     //values invalid!
+    end
+    else begin
+     result:= @fcurrentbuf^.header;
+    end;
    end
    else begin
-    result:= @pdsrecordty(activebuffer)^.header;
+    if bs_applying in fbstate then begin
+     result:= @fnewvaluebuffer^.header;
+    end
+    else begin
+     result:= @pdsrecordty(activebuffer)^.header;
+    end;
    end;
   end;
  end;
  if int1 >= 0 then begin // data field
-  if state = dsfilter then begin 
-   result:= @ffilterbuffer^.header;
-  end;
   if isnull then begin
    setfieldisnull(precheaderty(result)^.fielddata.nullmask,int1);
   end
@@ -2636,8 +2651,29 @@ end;
 
 procedure tmsebufdataset.filterchanged;
 begin
- if (state <> dsinactive) then begin
+ if not (state in [dsinactive,dsfilter]) then begin
   checkbrowsemode;
+  resync([]);
+ end;
+end;
+
+procedure tmsebufdataset.beginfilteredit;
+begin
+ if state <> dsfilter then begin
+  checkbrowsemode;
+  fbuffercountbefore:= buffercount;
+  setbuflistsize(1);
+  setstate(dsfilter);
+  dataevent(dedatasetchange,0);
+ end;
+end;
+
+procedure tmsebufdataset.endfilteredit;
+begin
+ if state = dsfilter then begin
+  dataevent(deupdaterecord, 0);
+  setbuflistsize(fbuffercountbefore);
+  setstate(dsbrowse);
   resync([]);
  end;
 end;

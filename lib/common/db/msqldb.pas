@@ -797,8 +797,13 @@ begin
  end;
  if (Filtered <> Value) then begin
   inherited setfiltered(Value);
-  if active then begin 
-   ApplyFilter;
+  if active then begin
+   if filter <> '' then begin 
+    ApplyFilter;
+   end
+   else begin
+    resync([]);
+   end;
   end;
  end;   
 end;
