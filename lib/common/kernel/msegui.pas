@@ -14,7 +14,8 @@ unit msegui;
 interface
 
 uses
- {$ifdef FPC}classes{$else}Classes{$endif},sysutils,msegraphics,msetypes,msestrings,mseerror,msegraphutils,
+ {$ifdef FPC}classes{$else}Classes{$endif},sysutils,msegraphics,msetypes,
+ msestrings,mseerror,msegraphutils,
  msepointer,mseevent,msekeyboard,mseclasses,mseguiglob,mselist,msesys,msethread,
  msebitmap,msearrayprops{,msedatamodules};
 
@@ -81,7 +82,7 @@ type
                  fs_sbleft,fs_sbtop,fs_sbright,fs_sbbottom,
                  fs_nowidget,fs_nosetinstance,fs_disabled,fs_captiondistouter,
                  fs_drawfocusrect,fs_paintrectfocus,
-                 fs_captionfocus,fs_rectsvalid);
+                 fs_captionfocus,fs_captionhint,fs_rectsvalid);
  framestatesty = set of framestatety;
 
  modalresultty = (mr_none,mr_canclose,mr_windowclosed,mr_windowdestroyed,
@@ -9649,6 +9650,8 @@ var
  int1: integer;
  bo1: boolean;
  ek1: eventkindty;
+ widget1: twidget;
+ pt1: pointty;
 begin
  with event do begin
   if findwindow(fwinid,window) then begin
@@ -9766,11 +9769,24 @@ begin
     end;
    end;
    if not (hfl_custom in fhintinfo.flags) then begin
-    if (fclientmousewidget <> fhintedwidget) then begin
-     if (fclientmousewidget <> fhintwidget) and
+    widget1:= fmousewidget;
+    if widget1 <> nil then begin
+     if widget1.fframe <> nil then begin
+      with widget1.fframe do begin
+       checkstate;
+       pt1:= translatewidgetpoint(abspos,nil,widget1);
+       if not (pointinrect(pt1,fpaintrect) or 
+           (fs_captionhint in fstate) and pointincaption(pt1)) then begin
+        widget1:= nil;
+       end;
+      end;
+     end;
+    end;
+    if (widget1 <> fhintedwidget) then begin
+     if (widget1 <> fhintwidget) and
                (fhintedwidget <> nil) or (fhintwidget = nil) then begin
       deactivatehint;
-      fhintedwidget:= fclientmousewidget;
+      fhintedwidget:= widget1;
       if fhintedwidget <> nil then begin
        fhinttimer.interval:= -hintdelaytime;
        fhinttimer.enabled:= true;
@@ -9778,7 +9794,8 @@ begin
      end;
     end
     else begin
-     if (fhintedwidget <> nil) and (fhintwidget = nil) and (kind = ek_mousemove) then begin
+     if (fhintedwidget <> nil) and (fhintwidget = nil) and 
+                                  (kind = ek_mousemove) then begin
       fhinttimer.interval:= -hintdelaytime;
       if (ow_multiplehint in fhintedwidget.foptionswidget) and
         (distance(fhintinfo.mouserefpos,abspos) > 3) then begin

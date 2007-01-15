@@ -662,7 +662,8 @@ const
 constructor tgrapheditframe.create(const intf: iframe);
 begin
  inherited;
- fstate:= fstate + [fs_drawfocusrect,fs_captionfocus,fs_paintrectfocus];
+ fstate:= fstate + [fs_drawfocusrect,fs_captionfocus,fs_captionhint,
+                     fs_paintrectfocus];
  fi.colorclient:= cl_foreground;
  fi.levelo:= -2;
  captionpos:= cp_right;
