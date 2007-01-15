@@ -1526,8 +1526,48 @@ begin
 end;
 
 function tcustomcaptionframe.pointincaption(const point: pointty): boolean;
+var
+ rect1: rectty;
+ int1: integer;
 begin
- result:= (finfo.text.text <> '') and pointinrect(point,finfo.dest);
+ if finfo.text.text = '' then begin
+  result:= false;
+ end
+ else begin
+  updatestate;
+  rect1:= finfo.dest;
+  with rect1 do begin
+   case fcaptionpos of
+    cp_left,cp_lefttop,cp_leftbottom: begin
+     int1:= fpaintrect.x - (x + cx);
+     if int1 > 0 then begin
+      inc(rect1.cx,int1);
+     end;
+    end;
+    cp_top,cp_topleft,cp_topright: begin
+     int1:= fpaintrect.y - (y + cy);
+     if int1 > 0 then begin
+      inc(rect1.cy,int1);
+     end;
+    end;
+    cp_right,cp_righttop,cp_rightbottom: begin
+     int1:= x - (fpaintrect.x + fpaintrect.cx);
+     if int1 > 0 then begin
+      dec(rect1.x,int1);
+      inc(rect1.cx,int1);
+     end;
+    end;
+    cp_bottom,cp_bottomleft,cp_bottomright: begin
+     int1:= y - (fpaintrect.y + fpaintrect.cy);
+     if int1 > 0 then begin
+      dec(rect1.y,int1);
+      inc(rect1.cy,int1);
+     end;
+    end;
+   end;
+  end;
+  result:= pointinrect(point,rect1);
+ end;
 end;
 
 procedure tcustomcaptionframe.updatemousestate(const sender: twidget;
