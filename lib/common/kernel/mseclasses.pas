@@ -1169,15 +1169,16 @@ var
 function initmsecomponent(instance: tcomponent; rootancestor: tclass): boolean;
 var
  loadingstarted: boolean;
+ rootancestor1: tclass;
  
  procedure doload(const aclass: tclass);
  var
   po1: pobjectdatainfoty;
  begin
-  if (aclass <> rootancestor) and (aclass <> tcomponent) then begin
+  if (aclass <> rootancestor1) and (aclass <> tcomponent) then begin
    doload(aclass.classparent);
    po1:= objectdatalist.find(aclass,instance.name);
-   if po1 = nil then begin
+   if (po1 = nil) and (rootancestor <> nil) then begin
     po1:= objectdatalist.find(aclass,'');
    end; 
    if (po1 <> nil) then begin
@@ -1196,7 +1197,10 @@ var
 begin
  if objectdatalist <> nil then begin
   if (rootancestor = nil) then begin
-   rootancestor:= instance.classtype.classparent;
+   rootancestor1:= instance.classtype.classparent;
+  end
+  else begin
+   rootancestor1:= rootancestor;
   end;
   loadingstarted:= false;
   try
