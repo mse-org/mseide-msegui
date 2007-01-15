@@ -1579,6 +1579,9 @@ begin
    if fs_captionfocus in fstate then begin
     include(fwidgetstate,ws_wantmousefocus);
    end;
+   if fs_captionhint in fstate then begin
+    include(fwidgetstate,ws_wantmousemove);
+   end;
   end;
  end;
 end;
