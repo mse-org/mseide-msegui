@@ -1636,7 +1636,7 @@ var
  bu1: dbnavigbuttonsty;
 begin
  bu1:= [];
- if active then begin
+ if active and (dataset.state <> dsfilter) then begin
   bu1:= [dbnb_first,dbnb_prior,dbnb_next,dbnb_last];
   if bof then begin
    bu1:= bu1 - [dbnb_first,dbnb_prior];
