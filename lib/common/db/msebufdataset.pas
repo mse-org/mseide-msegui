@@ -431,7 +431,7 @@ type
    procedure oldfieldtoparam(const source: tfield; const dest: tparam);
    procedure stringtoparam(const source: msestring; const dest: tparam);
                   //takes care about utf8 conversion
-
+   procedure clearrecord;
    procedure beginfilteredit;
    procedure endfilteredit;
    procedure filterchanged;
@@ -2696,6 +2696,32 @@ procedure tmsebufdataset.dofilterrecord(var acceptable: boolean);
 begin
  if checkcanevent(self,tmethod(onfilterrecord)) then begin
   onfilterrecord(self,acceptable);
+ end;
+end;
+
+procedure tmsebufdataset.clearrecord;
+var
+ int1: integer;
+begin
+ checkactive;
+ try
+  disablecontrols;
+  for int1:= 0 to fields.count - 1 do begin
+   with fields[int1] do begin
+    if state = dsfilter then begin
+     if not isblob then begin
+      clear;
+     end;
+    end
+    else begin
+     if not readonly then begin
+      clear;
+     end;
+    end;
+   end;
+  end;
+ finally
+  enablecontrols;
  end;
 end;
 
