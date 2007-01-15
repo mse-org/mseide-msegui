@@ -1572,7 +1572,13 @@ procedure wsetbounds_cymax(const awidget: twidget; const avalue: integer);
 function application: tapplication;
 function applicationallocated: boolean;
 function mousebuttontoshiftstate(button: mousebuttonty): shiftstatesty;
+
 procedure beep;
+procedure enablewidgets(awidgets: array of twidget);
+procedure disablewidgets(awidgets: array of twidget);
+procedure showwidgets(awidgets: array of twidget);
+procedure hidewidgets(awidgets: array of twidget);
+
 
 procedure writewidgetnames(const writer: twriter; const ar: widgetarty);
 function needswidgetnamewriting(const ar: widgetarty): boolean;
@@ -1967,6 +1973,42 @@ end;
 procedure beep;
 begin
  gui_beep;
+end;
+
+procedure disablewidgets(awidgets: array of twidget);
+var
+ int1: integer;
+begin
+ for int1:= 0 to high(awidgets) do begin
+  awidgets[int1].enabled:= false;
+ end;
+end;
+
+procedure enablewidgets(awidgets: array of twidget);
+var
+ int1: integer;
+begin
+ for int1:= 0 to high(awidgets) do begin
+  awidgets[int1].enabled:= true;
+ end;
+end;
+
+procedure showwidgets(awidgets: array of twidget);
+var
+ int1: integer;
+begin
+ for int1:= 0 to high(awidgets) do begin
+  awidgets[int1].visible:= false;
+ end;
+end;
+
+procedure hidewidgets(awidgets: array of twidget);
+var
+ int1: integer;
+begin
+ for int1:= 0 to high(awidgets) do begin
+  awidgets[int1].visible:= false;
+ end;
 end;
 
 procedure designeventloop;

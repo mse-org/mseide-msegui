@@ -1365,6 +1365,7 @@ end;
 
 function tmsebufdataset.getfieldbuffer(const afield: tfield;
                         const isnull: boolean; out datasize: integer): pointer;
+           //write buffer
 var
  int1: integer;
 begin 
@@ -1441,7 +1442,7 @@ begin
   move(buffer^,po1^,datasize);
  end;
  if (field.fieldno > 0) and not 
-                 (state in [dscalcfields,dsinternalcalc,dsfilter,dsnewvalue]) then begin
+                 (state in [dscalcfields,dsinternalcalc,{dsfilter,}dsnewvalue]) then begin
   dataevent(defieldchange, ptrint(field));
  end;
 end;
@@ -1459,7 +1460,7 @@ begin
   setlength(msestring(po1^),sender.characterlength);
  end;
  if (sender.fieldno > 0) and not 
-                 (state in [dscalcfields,dsfilter,dsnewvalue]) then begin
+                 (state in [dscalcfields,dsinternalcalc,{dsfilter,}dsnewvalue]) then begin
   dataevent(defieldchange,ptrint(sender));
  end;
 end;
