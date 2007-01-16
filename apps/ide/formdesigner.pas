@@ -79,6 +79,10 @@ type
    procedure notification(acomponent: tcomponent;
                                       operation: toperation); override;
    procedure doshow; override;
+
+   function insertoffset: pointty; virtual;
+   function gridoffset: pointty; virtual;
+   function gridrect: rectty; virtual;
   public
    constructor create(const aowner: tcomponent; const adesigner: tdesigner;
                         const aintf: pdesignmoduleintfty);
@@ -189,8 +193,8 @@ type
    function snaptogriddelta(const pos: pointty): pointty;
    function form: twidget;
    function module: tmsecomponent;
-   function insertoffset: pointty;
-   function gridoffset: pointty;
+//   function insertoffset: pointty;
+//   function gridoffset: pointty;
    function componentscrollsize: sizety;
 
    procedure setrootpos(const component: tcomponent; const apos: pointty);
@@ -1642,7 +1646,7 @@ begin
   doModified;
  end;
 end;
-
+{
 function tdesignwindow.insertoffset: pointty;
 begin
  if form = nil then begin
@@ -1659,7 +1663,7 @@ begin
  result:= insertoffset;
 // addpoint1(result,scrollbox.clientpos);
 end;
-
+}
 function tdesignwindow.snaptogriddelta(const pos: pointty): pointty;
 begin
  if fsnaptogrid then begin
@@ -1674,8 +1678,8 @@ end;
 function tdesignwindow.dosnaptogrid(const pos: pointty): pointty;
 begin
  if fsnaptogrid then begin
-  result:= snaptogriddelta(subpoint(pos,gridoffset));
-  addpoint1(result,gridoffset);
+  result:= snaptogriddelta(subpoint(pos,tformdesignerfo(fowner).gridoffset));
+  addpoint1(result,tformdesignerfo(fowner).gridoffset);
  end
  else begin
   result:= pos;
@@ -1692,15 +1696,9 @@ var
  int1: integer;
 begin
  if fshowgrid then begin
-  if form = nil then begin
-   rect2:= fowner.clientrect;
-  end
-  else begin
-   rect2:= form.container.paintrect;
-   addpoint1(rect2.pos,form.container.rootpos);
-  end;
+  rect2:= tformdesignerfo(fowner).gridrect;
   msegraphutils.intersectrect(canvas.clipbox,rect2,rect1);
-  offset:= gridoffset;
+  offset:= tformdesignerfo(fowner).gridoffset;
   with rect1 do begin
    po1.x:= ((x - offset.x) div fgridsizex) * fgridsizex + offset.x;
    po1.y:= ((y - offset.y) div fgridsizey) * fgridsizey + offset.y;
@@ -2317,6 +2315,33 @@ begin
  if askok('Do you wish to revert to inherited'+lineend+
           'the selected component?') then begin
   fdesigner.revert(tdesignwindow(window).fselections[0]);
+ end;
+end;
+
+function tformdesignerfo.insertoffset: pointty;
+begin
+ if form = nil then begin
+  result:= clientpos;
+ end
+ else begin
+  result:= translateclientpoint(nullpoint,form.container,form);
+  addpoint1(result,form.paintpos);
+ end;
+end;
+
+function tformdesignerfo.gridoffset: pointty;
+begin
+ result:= insertoffset;
+end;
+
+function tformdesignerfo.gridrect: rectty;
+begin
+ if form = nil then begin
+  result:= clientrect;
+ end
+ else begin
+  result:= form.container.paintrect;
+  addpoint1(result.pos,form.container.rootpos);
  end;
 end;
 
