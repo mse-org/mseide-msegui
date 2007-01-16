@@ -3293,12 +3293,28 @@ function tdesigner.getcomponentdispname(const comp: tcomponent): string;
                    //returns qualified name
 var
  comp1: tcomponent;
+ bo1: boolean;
 begin
  result:= comp.Name;
  comp1:= comp.owner;
  while not ismodule(comp1) do begin
   result:= comp1.Name + '.' + result;
   comp1:= comp1.Owner;
+ end;
+ bo1:= ismodule(comp);
+ if bo1 or ismodule(comp.owner) then begin
+  if csancestor in comp.componentstate then begin
+   if bo1 then begin
+    comp1:= comp;
+   end
+   else begin
+    comp1:= comp.owner;
+   end;
+   comp1:= fdescendentinstancelist.findancestor(comp1);
+   if comp1 <> nil then begin
+    result:= result+'<'+comp1.name+'>';
+   end;
+  end;
  end;
 end;
 
