@@ -245,6 +245,7 @@ type
    function getclassname(const comp: tcomponent): string;
                    //returns submodule or root classname if appropriate
    function getancestors(const adescendent: tcomponent): componentarty;
+   function getdescendents(const aancestor: tcomponent): componentarty;
  end;
 
  getmoduleeventty = procedure(const amodule: pmoduleinfoty;
@@ -825,6 +826,36 @@ begin
    end;
   end;
  end;
+end;
+
+function tdescendentinstancelist.getdescendents(
+                                 const aancestor: tcomponent): componentarty;
+var
+ recursionlevel: integer;
+ 
+ procedure adddescendent(const aancestor: tcomponent);
+ var
+  int1: integer;
+  po1: pancestorinfoaty;
+ begin
+  dec(recursionlevel);
+  if recursionlevel > 0 then begin
+   po1:= datapo;
+   for int1:= count - 1 downto 0 do begin
+    with po1^[int1] do begin
+     if ancestor = aancestor then begin
+      additem(pointerarty(result),descendent);
+      adddescendent(descendent);
+     end;
+    end;
+   end;      
+  end;
+  inc(recursionlevel);
+ end;
+ 
+begin
+ recursionlevel:= 32; //max
+ adddescendent(aancestor);
 end;
 
 procedure tdescendentinstancelist.modulemodified(const amodule: pmoduleinfoty);
@@ -1834,15 +1865,16 @@ end;
 
 procedure tdesigner.ClearSelection;
 begin
-
+ //dummy
 end;
 
 procedure tdesigner.addcomponent(const module: tmsecomponent; const acomponent: tcomponent);
 var
- int1: integer;
+ int1,int2: integer;
  str1: string;
  bo1: boolean;
  classna: string;
+ ar1: componentarty;
  
 begin
  with registeredcomponents do begin
@@ -1868,19 +1900,20 @@ begin
     str1:= classna + '1';
    end;
    int1:= 1;
+   ar1:= fdescendentinstancelist.getdescendents(module);
+   additem(pointerarty(ar1),module);
    repeat
     bo1:= true;
-    try
-     acomponent.Name:= str1;
-    except
-     on ecomponenterror do begin
+    for int2:= 0 to high(ar1) do begin
+     if ar1[int2].findcomponent(str1) <> nil then begin
       inc(int1);
       str1:= classna + inttostr(int1);
       bo1:= false;
+      break;
      end;
-     else raise;
     end;
    until bo1;
+   acomponent.Name:= str1;
    fmodules.findmodulebyinstance(module)^.components.add(acomponent);
    designnotifications.ItemInserted(self,module,acomponent);
   end
