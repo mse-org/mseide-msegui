@@ -62,6 +62,8 @@ type
 constructor treportcontainer.create(aowner: tcomponent);
 begin
  inherited;
+ createframe;
+ frame.colorclient:= cl_white;
  anchors:= [an_top,an_bottom];
 end;
 

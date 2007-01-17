@@ -212,6 +212,7 @@ type
    property reppages[index: integer]: tcustomreportpage read getreppages 
                                                 write setreppages; default;
    property font: twidgetfont read getfont write setfont;
+   property color default cl_transparent;
  end;
 
  treport = class(tcustomreport)
@@ -688,6 +689,8 @@ begin
  fppmm:= defaultrepppmm;
  designrect:= makerect(50,50,50,50);
  inherited;
+ visible:= false;
+ color:= cl_transparent;
  createfont;
 end;
 
