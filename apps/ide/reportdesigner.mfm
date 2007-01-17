@@ -1,7 +1,13 @@
 inherited reportdesignerfo: treportdesignerfo
   bounds_x = 4
   bounds_y = 100
+  bounds_cx = 593
+  bounds_cy = 428
+  color = -2147483647
+  container.bounds_cx = 593
+  container.bounds_cy = 428
   container.frame.dummy = 0
+  container.onchildscaled = repchildscaled
   icon.transparentcolor = -2147483648
   icon.transparency = -2147483648
   icon.image = {
@@ -23,7 +29,20 @@ inherited reportdesignerfo: treportdesignerfo
     FEFF7F00FEFF7FBFFEFF7F08FEFF7F00FEFF7F03FEFF7F40FEFF7F00FEFF7F00
     FEFF7FB7FEFF7FBF00000008
   }
+  onchildscaled = repchildscaled
   moduleclassname = 'Tformdesignerfo'
+  object tabbar: ttabbar[0]
+    bounds_x = 0
+    bounds_y = 0
+    bounds_cx = 593
+    bounds_cy = 18
+    frame.dummy = 0
+    anchors = [an_top]
+    onactivetabchange = tabcha
+    ontabmoving = tabmo
+    onclientmouseevent = tabmouse
+    options = [tabo_dragsource, tabo_dragdest]
+  end
   inherited popupme: tpopupmenu
     menu.submenu.items = <    
       item

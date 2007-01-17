@@ -20,7 +20,7 @@ unit formdesigner;
 
 interface
 uses
- Classes,mseforms,msegui,mseevent,msegraphutils,msegraphics,msedesignintf,
+ classes,mseforms,msegui,mseevent,msegraphutils,msegraphics,msedesignintf,
  mseclasses,msemenuwidgets,msemenus,msefiledialog,msedesigner,typinfo,
  componentpaletteform,msestrings,msewidgets;
 
@@ -40,6 +40,49 @@ const
  complabelrightmargin = 2 + handlesize div 2;
 
 type
+ formselectedinfoty = record
+  selectedinfo: selectedinfoty;
+  rect: rectty;
+  nohandles: boolean;
+  handles: array[firsthandle..lasthandle] of rectty;
+  markers: array[markerty] of rectty;
+ end;
+
+ pformselectedinfoty = ^formselectedinfoty;
+
+ tdesignwindow = class;
+
+ tformdesignerselections = class(tdesignerselections)
+  private
+   fowner: tdesignwindow;
+   finfovalid: boolean;
+   fmovingchecked: boolean;
+   procedure updateinfos;
+   procedure paint(const canvas: tcanvas);
+   procedure beforepaintmoving;
+   procedure paintmoving(const canvas: tcanvas; const pos: pointty);
+   function move(const dist: pointty): boolean;
+                  //false if nothing is moved
+   procedure resize(const dist: pointty);
+   procedure deletecomponents;
+   function getareainfo(const pos: pointty; out index: integer): areaty;
+  protected
+   function getrecordsize: integer; override;
+   procedure externalcomponentchanged(const acomponent: tobject);
+   procedure removeforeign; //removes form and components in other modules
+  public
+   constructor create(owner: tdesignwindow);
+   function assign(const source: idesignerselections): boolean;
+              //true if owned components involved
+   function remove(const ainstance: tcomponent): integer; override;
+   procedure change; override;
+   procedure dochanged; override;
+   procedure componentschanged;
+   function itempo(const index: integer): pformselectedinfoty;
+ end;
+ 
+ selectmodety = (sm_select,sm_add,sm_flip,sm_remove);
+
  tformdesignerfo = class(tmseform)
    popupme: tpopupmenu;
    procedure doshowobjectinspector(const sender: tobject);
@@ -80,12 +123,17 @@ type
                                       operation: toperation); override;
    procedure doshow; override;
 
+   procedure componentselected(const aselections: tformdesignerselections); virtual;
+   function getmoduleparent: twidget; virtual;
    function insertoffset: pointty; virtual;
    function gridoffset: pointty; virtual;
    function gridrect: rectty; virtual;
+   class function fixformsize: boolean; virtual;
+   function getdesignrect: rectty; virtual;
+   procedure setdesignrect(const arect: rectty); virtual;
   public
    constructor create(const aowner: tcomponent; const adesigner: tdesigner;
-                        const aintf: pdesignmoduleintfty);
+                        const aintf: pdesignmoduleintfty); virtual;
                                         reintroduce;
    destructor destroy; override;
    function designnotification: idesignnotification;
@@ -94,53 +142,13 @@ type
    procedure placemodule;
    procedure beginplacement;
    procedure endplacement;
+   procedure beginstreaming; virtual;
+   procedure endstreaming; virtual;
    property module: tmsecomponent read fmodule write setmodule;
    property form: twidget read fform;
  end;
 
  designformclassty = class of tformdesignerfo;
-
- formselectedinfoty = record
-  selectedinfo: selectedinfoty;
-  rect: rectty;
-  handles: array[firsthandle..lasthandle] of rectty;
-  markers: array[markerty] of rectty;
- end;
-
- pformselectedinfoty = ^formselectedinfoty;
-
- tdesignwindow = class;
-
- tformdesignerselections = class(tdesignerselections)
-  private
-   fowner: tdesignwindow;
-   finfovalid: boolean;
-   fmovingchecked: boolean;
-   procedure updateinfos;
-   procedure paint(const canvas: tcanvas);
-   procedure beforepaintmoving;
-   procedure paintmoving(const canvas: tcanvas; const pos: pointty);
-   function move(const dist: pointty): boolean;
-                  //false if nothing is moved
-   procedure resize(const dist: pointty);
-   procedure deletecomponents;
-   function getareainfo(const pos: pointty; out index: integer): areaty;
-  protected
-   function getrecordsize: integer; override;
-   procedure externalcomponentchanged(const acomponent: tobject);
-   procedure removeforeign; //removes form and components in other modules
-  public
-   constructor create(owner: tdesignwindow);
-   function assign(const source: idesignerselections): boolean;
-              //true if owned components involved
-   function remove(const ainstance: tcomponent): integer; override;
-   procedure change; override;
-   procedure dochanged; override;
-   procedure componentschanged;
-   function itempo(const index: integer): pformselectedinfoty;
- end;
- 
- selectmodety = (sm_select,sm_add,sm_flip,sm_remove);
 
  tdesignwindow = class(twindow,idesignnotification)
   private
@@ -256,9 +264,8 @@ type
 procedure registerdesignmoduleclass(const aclass: tcomponentclass;
                                const aintf: designmoduleintfty;
                                const adesignformclass: designformclassty = nil);
-function createdesignmodule(designmoduleclassname: string;
-                           const aclassname: pshortstring;
-                           out aintf: pdesignmoduleintfty): tmsecomponent;
+function createdesignmodule(const amodule: pmoduleinfoty; designmoduleclassname: string;
+                           const aclassname: pshortstring): tmsecomponent;
 function createdesignform(const aowner: tdesigner; 
                  const amodule: pmoduleinfoty): tformdesignerfo;
 function selectinheritedmodule(const amodule: pmoduleinfoty;
@@ -281,7 +288,7 @@ type
  designmoduleinfoty = record
   classtype: tcomponentclass;
   intf: pdesignmoduleintfty;
-  designformclass: designformclassty;
+  formclass: designformclassty;
  end;
  designmoduleinfoarty = array of designmoduleinfoty;
 
@@ -312,6 +319,7 @@ begin
    with flist[int1] do begin
     if classtype = aclass then begin
      intf:= @aintf;
+     formclass:= adesignformclass;
      exit;
     end;
    end;
@@ -321,28 +329,30 @@ begin
   with flist[high(flist)] do begin
    classtype:= aclass;
    intf:= @aintf;
-   designformclass:= adesignformclass;
+   formclass:= adesignformclass;
   end;
  end;
 end;
 
-function createdesignmodule(designmoduleclassname: string;
-              const aclassname: pshortstring;
-              out aintf: pdesignmoduleintfty): tmsecomponent;
+function createdesignmodule(const amodule: pmoduleinfoty; designmoduleclassname: string;
+              const aclassname: pshortstring): tmsecomponent;
 var
  int1: integer;
 begin
- if designmoduleclassname = '' then begin
-  designmoduleclassname:= defaultmoduleclassname;
- end;
- designmoduleclassname:= uppercase(designmoduleclassname);
- with registereddesignmoduleclasses do begin
-  for int1:= 0 to high(flist) do begin
-   with flist[int1] do begin
-    if uppercase(classtype.classname) = designmoduleclassname then begin
-     aintf:= intf;
-     result:= intf^.createfunc(classtype,aclassname);
-     exit;
+ with amodule^ do begin
+  if designmoduleclassname = '' then begin
+   designmoduleclassname:= defaultmoduleclassname;
+  end;
+  designmoduleclassname:= uppercase(designmoduleclassname);
+  with registereddesignmoduleclasses do begin
+   for int1:= 0 to high(flist) do begin
+    with flist[int1] do begin
+     if uppercase(classtype.classname) = designmoduleclassname then begin
+      designformclass:= formclass;
+      moduleintf:= intf;
+      result:= intf^.createfunc(classtype,aclassname);
+      exit;
+     end;
     end;
    end;
   end;
@@ -354,8 +364,13 @@ end;
 function createdesignform(const aowner: tdesigner; 
                  const amodule: pmoduleinfoty): tformdesignerfo;
 begin
- result:= tformdesignerfo.create(nil,aowner,amodule^.moduleintf);
- result.module:= amodule^.instance;
+ with amodule^ do begin
+  if designformclass = nil then begin
+   designformclass:= tformdesignerfo;
+  end;
+  result:= designformclassty(designformclass).create(nil,aowner,moduleintf);
+  result.module:= instance;
+ end;
 end;
 
 function getcomponentrect(const sender: twidget;
@@ -483,10 +498,12 @@ begin
    with itempo(int1)^,selectedinfo do begin
     if (instance is twidget) and (fowner.form <> nil) then begin
      with twidget(instance) do begin
+      nohandles:= ws_nodesignhandles in widgetstate;
       rect:= makerect(rootpos,size);
      end;
     end
     else begin
+     nohandles:= false;
      if instance is tcomponent then begin
       rect:= getcomponentrect1(fowner.fowner,tcomponent(instance),fowner.module);
      end
@@ -564,7 +581,7 @@ begin
   if count > 1 then begin
    for int1:= 0 to count - 1 do begin
     with itempo(int1)^,selectedinfo do begin
-     if (instance <> fowner.module) and fowner.module.checkowned(instance) then begin
+     if not (instance <> fowner.module) and fowner.module.checkowned(instance) then begin
       for marker:= low(markerty) to high(markerty) do begin
        fillrect(markers[marker],cl_dkgray);
       end;
@@ -575,7 +592,8 @@ begin
   else begin
    for int1:= 0 to count - 1 do begin
     with itempo(int1)^,selectedinfo do begin
-     if (instance <> fowner.module) and fowner.module.checkowned(instance) then begin
+     if not nohandles and (instance <> fowner.module) and 
+                               fowner.module.checkowned(instance) then begin
       for handle:= firsthandle to lasthandle do begin
        fillrect(handles[handle],cl_black);
       end;
@@ -597,18 +615,20 @@ begin
   for int1:= 0 to count - 1 do begin
    with itempo(int1)^,selectedinfo do begin
     if (fowner.form <> nil) and (instance is twidget) and
-         (instance <> fowner.module) then begin
-     widget1:= twidget(instance).parentwidget;
-     while widget1 <> nil do begin
-      if (widget1 <> fowner.form) and (indexof(widget1) >= 0) then begin
-       break;  //moved by parent
+                                    (instance <> fowner.module) then begin
+     if not nohandles then begin
+      widget1:= twidget(instance).parentwidget;
+      while widget1 <> nil do begin
+       if (widget1 <> fowner.form) and (indexof(widget1) >= 0) then begin
+        break;  //moved by parent
+       end;
+       widget1:= widget1.parentwidget;
       end;
-      widget1:= widget1.parentwidget;
-     end;
-     if widget1 = nil then begin
-      with twidget(instance) do begin
-       pos:= addpoint(pos,dist);
-       result:= true;
+      if widget1 = nil then begin
+       with twidget(instance) do begin
+        pos:= addpoint(pos,dist);
+        result:= true;
+       end;
       end;
      end;
     end
@@ -648,7 +668,9 @@ begin
    with itempo(int1)^,selectedinfo do begin
     if instance is twidget then begin
      with twidget(instance) do begin
-      size:= sizety(addpoint(pointty(size),dist));
+      if not nohandles then begin
+       size:= sizety(addpoint(pointty(size),dist));
+      end;
      end;
     end;
    end;
@@ -698,20 +720,22 @@ begin
  index:= -1;
  if count = 1 then begin
   with itempo(0)^,selectedinfo do begin
-   if instance is tcomponent then begin
-    if instance is twidget then begin
-     for handle:= firsthandle to lasthandle do begin
-      if pointinrect(pos,handles[handle]) then begin
-       result:= handle;
-       index:= 0;
-       exit;
+   if not nohandles then begin
+    if instance is tcomponent then begin
+     if instance is twidget then begin
+      for handle:= firsthandle to lasthandle do begin
+       if pointinrect(pos,handles[handle]) then begin
+        result:= handle;
+        index:= 0;
+        exit;
+       end;
       end;
      end;
-    end;
-    if pointinrect(pos,rect) then begin
-     result:= ar_component;
-     index:= 0;
-     exit;
+     if pointinrect(pos,rect) then begin
+      result:= ar_component;
+      index:= 0;
+      exit;
+     end;
     end;
    end;
   end;
@@ -719,10 +743,12 @@ begin
  else begin
   for int1:= 0 to count - 1 do begin
    with itempo(int1)^,selectedinfo do begin
-    if pointinrect(pos,rect) and (instance is tcomponent) then begin
-     result:= ar_component;
-     index:= int1;
-     break;
+    if not nohandles then begin
+     if pointinrect(pos,rect) and (instance is tcomponent) then begin
+      result:= ar_component;
+      index:= int1;
+      break;
+     end;
     end;
    end;
   end;
@@ -812,7 +838,8 @@ procedure tdesignwindow.paintxorpic(const canvas: tcanvas);
 begin
  if fxorpicactive then begin
   canvas.save;
-  canvas.intersectcliprect(fowner.container.paintrect);
+//  canvas.intersectcliprect(fowner.container.paintrect);
+  canvas.intersectcliprect(tformdesignerfo(fowner).gridrect);
   canvas.move(fowner.container.clientpos);
   case factarea of
    firsthandle..lasthandle: begin
@@ -905,7 +932,7 @@ var
  int1: integer;
 begin
  if tformdesignerfo(fowner).fmodule <> nil then begin
-  canvas.intersectcliprect(fowner.container.paintrect);
+  canvas.intersectcliprect(tformdesignerfo(fowner).gridrect);
   canvas.move(fowner.container.clientpos);
   with tformdesignerfo(fowner).fmodule do begin
    for int1:= 0 to componentcount - 1 do begin
@@ -1221,18 +1248,21 @@ function tdesignwindow.widgetatpos(const apos: pointty; onlywidgets: boolean): t
 var
  widgetinfo: widgetatposinfoty;
 begin
- fillchar(widgetinfo,sizeof(widgetinfo),0);
- with widgetinfo do begin
-  pos:= apos;
-  if onlywidgets then begin
-   childstate:= [ws_iswidget,ws_isvisible];
-  end
-  else begin
-   childstate:= [ws_isvisible];
+ result:= nil;
+ if pointinrect(apos,tformdesignerfo(fowner).gridrect) then begin
+  fillchar(widgetinfo,sizeof(widgetinfo),0);
+  with widgetinfo do begin
+   pos:= subpoint(apos,form.rootpos);
+   if onlywidgets then begin
+    childstate:= [ws_iswidget,ws_isvisible];
+   end
+   else begin
+    childstate:= [ws_isvisible];
+   end;
+   parentstate:= [ws_isvisible];
   end;
-  parentstate:= [ws_isvisible];
+  result:= form.widgetatpos(widgetinfo);
  end;
- result:= form.widgetatpos(widgetinfo);
 end;
 
 procedure tdesignwindow.placecomponent(const component: tcomponent;
@@ -1255,7 +1285,7 @@ begin
   if (component is twidget) and (form <> nil) then begin
    widget1:= widgetatpos(apos,true);
    if widget1 <> nil then begin
-    po1:= dosnaptogrid(apos);
+    po1:= subpoint(dosnaptogrid(apos),form.rootpos);
     widget1.insertwidget(twidget(component),translatewidgetpoint(po1,form,
                                                   widget1));
     twidget(component).initnewwidget(rea1);
@@ -1621,6 +1651,7 @@ procedure tdesignwindow.selectionchanged(const adesigner: idesigner;
       const aselection: idesignerselections);
 begin
  if fselections.assign(aselection) then begin
+  tformdesignerfo(fowner).componentselected(fselections);
   fowner.invalidate;
  end;
 end;
@@ -1958,7 +1989,8 @@ procedure tformdesignerfo.ValidateRename(AComponent: TComponent;
   const CurName, NewName: string);
 begin
   inherited;
-  if (acomponent <> nil) and not (csdestroying in acomponent.componentstate) then begin
+  if (fdesigner <> nil) and (acomponent <> nil) and 
+                  not (csdestroying in acomponent.componentstate) then begin
    fdesigner.validaterename(acomponent,curname,newname);
   end;
 end;
@@ -2008,6 +2040,11 @@ begin
  end;
 end;
 
+class function tformdesignerfo.fixformsize: boolean;
+begin
+ result:= false;
+end;
+
 procedure tformdesignerfo.doasyncevent(var atag: integer);
 begin
  case designerfoeventty(atag) of
@@ -2022,16 +2059,18 @@ begin
    end;
   end;
   fde_syncsize: begin
-   if form <> nil then begin
-    form.size:= size;
-    size:= form.size;
-   end
-   else begin
-    if module is tmsedatamodule then begin
-     tmsedatamodule(module).size:= size; 
+   if not fixformsize then begin
+    if form <> nil then begin
+     form.size:= size;
+     size:= form.size;
+    end
+    else begin
+     if module is tmsedatamodule then begin
+      tmsedatamodule(module).size:= size; 
+     end;
     end;
+    tdesignwindow(window).domodified;
    end;
-   tdesignwindow(window).domodified;
   end;
  end;
 end;  
@@ -2066,9 +2105,17 @@ end;
 
 procedure tformdesignerfo.endplacement;
 begin
-  dec(fmodulesetting);
+ dec(fmodulesetting);
 end;
 
+function tformdesignerfo.getdesignrect: rectty;
+begin
+ result:= twidget(fmodule).widgetrect;
+end;
+
+procedure tformdesignerfo.setdesignrect(const arect: rectty);
+begin
+end;
 
 procedure tformdesignerfo.placemodule;
 var
@@ -2080,8 +2127,8 @@ begin
  try
   if fmodule is twidget then begin
    fform:= twidget(fmodule);
-   widgetrect:= twidget(fmodule).widgetrect;
-   twidget(fmodule).parentwidget:= self;
+   widgetrect:= getdesignrect;
+   twidget(fmodule).parentwidget:= getmoduleparent;
    twidget(fmodule).pos:= nullpoint;
   end
   else begin
@@ -2117,7 +2164,7 @@ begin
   fmodule:= Value;
   if fmodule <> nil then begin
 //   fmodule.freenotification(self);
-   InsertComponent(value);
+   insertcomponent(value);
    placemodule;
   end;
  end;
@@ -2342,6 +2389,30 @@ begin
  else begin
   result:= form.container.paintrect;
   addpoint1(result.pos,form.container.rootpos);
+ end;
+end;
+
+function tformdesignerfo.getmoduleparent: twidget;
+begin
+ result:= self;
+end;
+
+procedure tformdesignerfo.componentselected(const aselections: tformdesignerselections);
+begin
+ //dummy
+end;
+
+procedure tformdesignerfo.beginstreaming;
+begin
+ if fmodule is twidget then begin
+  twidget1(fmodule).fwidgetrect.pos:= modulerect.pos;
+ end;
+end;
+
+procedure tformdesignerfo.endstreaming;
+begin
+ if fmodule is twidget then begin
+  twidget1(fmodule).fwidgetrect.pos:= nullpoint;
  end;
 end;
 

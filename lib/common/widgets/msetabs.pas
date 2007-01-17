@@ -117,7 +117,11 @@ type
   stepinfo: framestepinfoty;
   options: shapestatesty;
  end;
- 
+
+ movingeventty = procedure(const sender: tobject; var curindex: integer;
+                                       var newindex: integer) of object;
+ movedeventty = procedure(const sender: tobject; const curindex: integer;
+                                       const newindex: integer) of object;
  tabbaroptionty = (tabo_dragsource,tabo_dragdest,
                      tabo_dragsourceenabledonly,tabo_dragdestenabledonly,
                                 //no action on disabled pages
@@ -133,6 +137,9 @@ type
    fonactivetabchange: notifyeventty;
    fupdating: integer;
    finternaltabchange: objectprocty;
+   fontabmoving: movingeventty;
+   fontabmoved: movedeventty;
+   fonclientmouseevent: mouseeventty;
    procedure settabs(const Value: ttabs);
    procedure layoutchanged;
    procedure updatelayout;
@@ -160,7 +167,7 @@ type
    procedure beginupdate;
    procedure endupdate;
    function tabatpos(const apos: pointty; const enabledonly: boolean = false): integer;
-   procedure movetab(const curindex,newindex: integer);
+   procedure movetab(curindex,newindex: integer);
    function activetag: integer; //0 if no activetab, activetab.tag otherwise
    procedure dragevent(var info: draginfoty); override;
    property activetab: integer read getactivetab write setactivetab;
@@ -170,6 +177,9 @@ type
                   write fonactivetabchange;
    property font: twidgetfont read getfont write setfont stored isfontstored;
    property options: tabbaroptionsty read foptions write setoptions default [];
+   property ontabmoving: movingeventty read fontabmoving write fontabmoving;
+   property ontabmoved: movedeventty read fontabmoved write fontabmoved;
+   property onclientmouseevent: mouseeventty read fonclientmouseevent write fonclientmouseevent;
  end;
 
  ttabbar = class(tcustomtabbar,istatfile)
@@ -195,6 +205,9 @@ type
    property tabs;
    property firsttab;
    property onactivetabchange;
+   property ontabmoving;
+   property ontabmoved;
+   property onclientmouseevent;
    property font;
    property options;
    property drag: tdragcontroller read fdragcontroller write setdragcontroller;
@@ -1081,8 +1094,8 @@ procedure tcustomtabbar.tabclicked(const sender: ttab; const info: mouseeventinf
 begin
  if (tabo_clickedtabfirst in foptions) or 
     (tabo_dblclickedtabfirst in foptions) and (ss_double in info.shiftstate) then begin
-  flayoutinfo.tabs.move(sender.findex,0);
-//  updateactivetabindex;
+  movetab(sender.findex,0);
+//  flayoutinfo.tabs.move(sender.findex,0);
  end;
  sender.active:= true;
 end;
@@ -1221,6 +1234,9 @@ end;
 
 procedure tcustomtabbar.clientmouseevent(var info: mouseeventinfoty);
 begin
+ if canevent(tmethod(fonclientmouseevent)) then begin
+  fonclientmouseevent(self,info);
+ end;
  inherited;
  if updatemouseshapestate(flayoutinfo.cells,info,self) then begin
 //  invalidate;
@@ -1312,9 +1328,15 @@ begin
  end;
 end;
 
-procedure tcustomtabbar.movetab(const curindex,newindex: integer);
+procedure tcustomtabbar.movetab(curindex,newindex: integer);
 begin
+ if canevent(tmethod(fontabmoving)) then begin
+  fontabmoving(self,curindex,newindex);
+ end;
  flayoutinfo.tabs.move(curindex,newindex);
+ if canevent(tmethod(fontabmoved)) then begin
+  fontabmoved(self,curindex,newindex);
+ end;
 end;
 
 procedure tcustomtabbar.dostep(const event: stepkindty);
@@ -1408,7 +1430,8 @@ begin
     end;
     dek_drop: begin
      if candest then begin
-      flayoutinfo.tabs.move(ttagdragobject(dragobject^).tag,int1);
+//      flayoutinfo.tabs.move(ttagdragobject(dragobject^).tag,int1);
+      movetab(ttagdragobject(dragobject^).tag,int1);
      end;
     end;
    end;

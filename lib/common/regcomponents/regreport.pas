@@ -13,7 +13,7 @@ interface
  
 implementation
 uses
- msereport,msedesignintf,formdesigner;
+ msereport,msedesignintf,formdesigner,reportdesigner;
 const
  reportintf: designmoduleintfty = 
   (createfunc: {$ifdef FPC}@{$endif}createreport;
@@ -24,7 +24,7 @@ procedure Register;
 begin
  registercomponents('Rep',[treportpage,tbandarea,trecordband]); 
  
- registerdesignmoduleclass(treport,reportintf);
+ registerdesignmoduleclass(treport,reportintf,treportdesignerfo);
 end;
 
 initialization

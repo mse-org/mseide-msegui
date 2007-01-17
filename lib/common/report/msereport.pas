@@ -12,10 +12,10 @@ unit msereport;
 interface
 uses
  classes,msegui,msegraphics,msetypes,msewidgets,msegraphutils,mseclasses,
- msetabs,mseprinter,msestream;
+ msetabs,mseprinter,msestream,msearrayprops;
 
 const
- defaultrepppmm = 10;
+ defaultrepppmm = 3;
  defaultreppagewidth = 190;
  defaultreppageheight = 270;
   
@@ -113,7 +113,9 @@ type
  reportpagestatesty = set of reportpagestatety;
  
  bandareaarty = array of tcustombandarea;
-  
+ 
+ tcustomreport = class;
+   
  tcustomreportpage = class(twidget)
   private
    fareas: bandareaarty;
@@ -128,10 +130,13 @@ type
    procedure updatepagesize;
    procedure setppmm(const avalue: real);
   protected
+   freport: tcustomreport;
    procedure setname(const newname: tcomponentname); override;
    procedure registerchildwidget(const child: twidget); override;
    procedure unregisterchildwidget(const child: twidget); override;
    procedure setparentwidget(const avalue: twidget); override;   
+   procedure insertwidget(const awidget: twidget; const apos: pointty); override;
+   procedure sizechanged; override;
 
    procedure renderbackground(const acanvas: tcanvas);
    procedure beginrender;
@@ -154,6 +159,8 @@ type
    property font: twidgetfont read getfont write setfont stored isfontstored;
  end;
  
+ reportpagearty = array of tcustomreportpage;
+ 
  treportpage = class(tcustomreportpage)
   published
    property pagewidth;
@@ -167,30 +174,30 @@ type
    property onbeforerender;
    property onrender;   
  end;
-
- treporttab = class(ttabpage)
-  private
-   fpage: tcustomreportpage;
-   fppmm: real;
-  protected
-   procedure registerchildwidget(const child: twidget); override;
-   procedure unregisterchildwidget(const child: twidget); override;
-   procedure setparentwidget(const avalue: twidget); override;   
-  public
-   constructor create(aowner: tcomponent);overload; override;
-   constructor create(const aowner: tcomponent;
-                         const apage: tcustomreportpage); reintroduce; overload;
-   destructor destroy; override;
- end;
- 
- tcustomreport = class(tcustomtabwidget)
+  
+ tcustomreport = class(twidget)
   private
    fppmm: real;
    procedure setppmm(const avalue: real);
+   function getreppages(index: integer): tcustomreportpage;
+   procedure setreppages(index: integer; const avalue: tcustomreportpage);
+   procedure readbounds_x(reader: treader);
+   procedure writebounds_x(writer: twriter);
+   procedure readbounds_y(reader: treader);
+   procedure writebounds_y(writer: twriter);
+   procedure readbounds_cx(reader: treader);
+   procedure writebounds_cx(writer: twriter);
+   procedure readbounds_cy(reader: treader);
+   procedure writebounds_cy(writer: twriter);
   protected
+   designrect: rectty;
+   freppages: reportpagearty;
    procedure insertwidget(const awidget: twidget; const apos: pointty); override;
    function internalrender(const acanvas: tcanvas; const aprinter: tprinter;
                    const acommand: string; const astream: ttextstream): boolean;
+   procedure unregisterchildwidget(const child: twidget); override;
+   procedure getchildren(proc: tgetchildproc; root: tcomponent); override;
+   procedure defineproperties(filer: tfiler); override;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -201,6 +208,10 @@ type
    function render(const aprinter: tprinter; const astream: ttextstream): boolean;
                                        overload;  //true if empty
    property ppmm: real read fppmm write setppmm; //pixel per mm
+   function reppagecount: integer;
+   property reppages[index: integer]: tcustomreportpage read getreppages 
+                                                write setreppages; default;
+   property font: twidgetfont read getfont write setfont;
  end;
 
  treport = class(tcustomreport)
@@ -211,12 +222,13 @@ type
    constructor create(aowner: tcomponent; load: boolean); 
                                      overload; virtual;   
   published    
-   property bounds_x;
-   property bounds_y;
-   property bounds_cx;
-   property bounds_cy;
+//   property bounds_x;
+//   property bounds_y;
+//   property bounds_cx;
+//   property bounds_cy;
    property color;
    property ppmm;
+   property font;
  end;
 
  reportclassty = class of treport;
@@ -484,6 +496,7 @@ end;
 constructor tcustomreportpage.create(aowner: tcomponent);
 begin
  inherited;
+ fwidgetstate:= fwidgetstate + [ws_nodesignvisible,ws_nodesignhandles];
  fpagewidth:= defaultreppagewidth;
  fpageheight:= defaultreppageheight; 
  fppmm:= defaultrepppmm;
@@ -509,6 +522,12 @@ end;
 
 procedure tcustomreportpage.setparentwidget(const avalue: twidget);
 begin
+ if avalue is tcustomreport then begin
+  freport:= tcustomreport(avalue);
+ end
+ else begin
+  freport:= nil;
+ end;
  inherited;
 end;
 
@@ -599,9 +618,11 @@ end;
 procedure tcustomreportpage.setname(const newname: tcomponentname);
 begin
  inherited;
+ {
  if fparentwidget is treporttab then begin
   treporttab(fparentwidget).caption:= newname;
  end;
+ }
 end;
 
 procedure tcustomreportpage.setpagewidth(const avalue: real);
@@ -640,21 +661,51 @@ begin
  end;
 end;
 
+procedure tcustomreportpage.insertwidget(const awidget: twidget;
+               const apos: pointty);
+begin
+ if (awidget is tcustomreportpage) and (fparentwidget <> nil) then begin
+  fparentwidget.insertwidget(awidget,addpoint(apos,pos));
+ end
+ else begin
+  inherited;
+ end;
+  
+end;
+
+procedure tcustomreportpage.sizechanged;
+begin
+ if (freport <> nil) and visible then begin
+  freport.size:= size;
+ end;
+ inherited;
+end;
+
  {tcustomreport}
  
 constructor tcustomreport.create(aowner: tcomponent);
 begin
  fppmm:= defaultrepppmm;
+ designrect:= makerect(50,50,50,50);
  inherited;
+ createfont;
 end;
 
 destructor tcustomreport.destroy;
 var
  int1: integer;
 begin
+{
  for int1:= count - 1 downto 0 do begin
   items[int1].free; //tabs have no ws_iswidget
  end;
+ }
+ inherited;
+end;
+
+procedure tcustomreport.unregisterchildwidget(const child: twidget);
+begin
+ removeitem(pointerarty(freppages),child);
  inherited;
 end;
 
@@ -667,33 +718,21 @@ begin
    raise exception.create('Invalid value');
   end;
   fppmm:= avalue;
-  for int1:= 0 to count - 1 do begin
-   with treporttab(items[int1]) do begin
-    if fpage <> nil then begin
-     fpage.ppmm:= avalue;
-    end;
-   end;
+  for int1:= 0 to high(freppages) do begin
+   freppages[int1].ppmm:= avalue;
   end;
  end;
 end;
 
 procedure tcustomreport.insertwidget(const awidget: twidget;
                const apos: pointty);
-var
- page1: treporttab;
 begin
- if csloading in componentstate then begin
-  inherited;
- end
- else begin
-  if not (awidget is tcustomreportpage) then begin
-   raise exception.create('Invalid widget');
-  end
-  else begin
-   page1:= treporttab.create(self,tcustomreportpage(awidget));
-   inherited insertwidget(page1,apos);
-  end;
+ if not (awidget is tcustomreportpage) then begin
+  raise exception.create('Invalid widget');
  end;
+ additem(pointerarty(freppages),awidget);
+ tcustomreportpage(awidget).ppmm:= fppmm;
+ inherited;
 end;
 
 function tcustomreport.internalrender(const acanvas: tcanvas;
@@ -715,28 +754,16 @@ begin
    aprinter.beginprint(acommand);
   end;
  end;
- for int1:= 0 to count - 1 do begin
-  with treporttab(items[int1]) do begin
-   if fpage <> nil then begin
-    fpage.beginrender;
-   end;
-  end;
+ for int1:= 0 to high(freppages) do begin
+  freppages[int1].beginrender;
  end;
  try
-  for int1:= 0 to count - 1 do begin
-   with treporttab(items[int1]) do begin
-    if fpage <> nil then begin
-     result:= result and fpage.render(acanvas);
-    end;
-   end;
+  for int1:= 0 to high(freppages) do begin
+   freppages[int1].render(acanvas);
   end;
  finally
-  for int1:= 0 to count - 1 do begin
-   with treporttab(items[int1]) do begin
-    if fpage <> nil then begin
-     fpage.endrender;
-    end;
-   end;
+  for int1:= 0 to high(freppages) do begin
+   freppages[int1].endrender;
   end;
   if aprinter <> nil then begin
    aprinter.endprint;
@@ -762,6 +789,92 @@ begin
  result:= internalrender(aprinter.canvas,aprinter,'',astream);
 end;
 
+procedure tcustomreport.getchildren(proc: tgetchildproc; root: tcomponent);
+var
+ int1: integer;
+ comp1: tcomponent;
+begin
+ for int1:= 0 to high(freppages) do begin
+  comp1:= freppages[int1];
+  if ((comp1.owner = root) or (csinline in root.componentstate) and
+      not (csancestor in comp1.componentstate) and
+                                 issubcomponent(comp1.owner,root)) then begin
+   proc(comp1);
+  end;
+ end;
+end;
+
+function tcustomreport.getreppages(index: integer): tcustomreportpage;
+begin
+ checkarrayindex(freppages,index);
+ result:= freppages[index];
+end;
+
+procedure tcustomreport.setreppages(index: integer;
+               const avalue: tcustomreportpage);
+begin
+ checkarrayindex(freppages,index);
+ freppages[index].assign(avalue);
+end;
+
+function tcustomreport.reppagecount: integer;
+begin
+ result:= length(freppages);
+end;
+
+procedure tcustomreport.readbounds_x(reader: treader);
+begin
+ designrect.x:= reader.readinteger;
+end;
+
+procedure tcustomreport.writebounds_x(writer: twriter);
+begin
+ writer.writeinteger(designrect.x);
+end;
+
+procedure tcustomreport.readbounds_y(reader: treader);
+begin
+ designrect.y:= reader.readinteger;
+end;
+
+procedure tcustomreport.writebounds_y(writer: twriter);
+begin
+ writer.writeinteger(designrect.y);
+end;
+
+procedure tcustomreport.readbounds_cx(reader: treader);
+begin
+ designrect.cx:= reader.readinteger;
+end;
+
+procedure tcustomreport.writebounds_cx(writer: twriter);
+begin
+ writer.writeinteger(designrect.cx);
+end;
+
+procedure tcustomreport.readbounds_cy(reader: treader);
+begin
+ designrect.cy:= reader.readinteger;
+end;
+
+procedure tcustomreport.writebounds_cy(writer: twriter);
+begin
+ writer.writeinteger(designrect.cy);
+end;
+
+procedure tcustomreport.defineproperties(filer: tfiler);
+begin
+ filer.defineproperty('dr_x',{$ifdef FPC}@{$endif}readbounds_x,
+                                 {$ifdef FPC}@{$endif}writebounds_x,true);
+ filer.defineproperty('dr_y',{$ifdef FPC}@{$endif}readbounds_y,
+                                 {$ifdef FPC}@{$endif}writebounds_y,true);
+ filer.defineproperty('dr_cx',{$ifdef FPC}@{$endif}readbounds_cx,
+                                 {$ifdef FPC}@{$endif}writebounds_cx,true);
+ filer.defineproperty('dr_cy',{$ifdef FPC}@{$endif}readbounds_cy,
+                                 {$ifdef FPC}@{$endif}writebounds_cy,true);
+ inherited;
+end;
+
  {treport}
  
 constructor treport.create(aowner: tcomponent);
@@ -784,53 +897,4 @@ begin
  result:= 'treport';
 end;
 
-{ treporttab }
-
-constructor treporttab.create(aowner: tcomponent);
-begin
- fppmm:= defaultrepppmm;
- inherited;
- exclude(fwidgetstate,ws_iswidget);
-end;
-
-constructor treporttab.create(const aowner: tcomponent;
-               const apage: tcustomreportpage);
-begin
- create(aowner);
- caption:= apage.name;
- apage.parentwidget:= self;
-end;
-
-destructor treporttab.destroy;
-begin
- inherited;
-end;
-
-procedure treporttab.registerchildwidget(const child: twidget);
-begin
- if (fpage = nil) and (child is tcustomreportpage) then begin
-  fpage:= tcustomreportpage(child);
-  fpage.ppmm:= fppmm;
- end;
- inherited;
-end;
-
-procedure treporttab.unregisterchildwidget(const child: twidget);
-begin
- inherited;
- if child is tcustomreportpage then begin
-  fpage:= nil;
-  if not (csdestroying in componentstate) then begin
-   free;
-  end;
- end;
-end;
-
-procedure treporttab.setparentwidget(const avalue: twidget);
-begin
- inherited;
-end;
-
-initialization
- registerclass(treporttab);
 end.

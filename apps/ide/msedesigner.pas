@@ -1650,6 +1650,7 @@ begin
      fdesigner.endstreaming(po1);
     end;
     moduleintf:= po1^.moduleintf;
+    designformclass:= po1^.designformclass;
     tcomponent1(instance).setancestor(true);
     additem(pointerarty(fdesigner.floadedsubmodules),instance);
     fdesigner.fdescendentinstancelist.add(tmsecomponent(instance),po1^.instance,
@@ -1658,8 +1659,7 @@ begin
     tmsecomponent1(instance).fancestorclassname:= designmoduleclassname;
    end
    else begin
-    instance:= createdesignmodule(designmoduleclassname,@moduleclassname,
-                     moduleintf{,designform});
+    instance:= createdesignmodule(@result.info,designmoduleclassname,@moduleclassname);
    end;
    tcomponent1(instance).setdesigning(true{$ifndef FPC},true{$endif});
   except
@@ -2238,19 +2238,14 @@ end;
 procedure tdesigner.beginstreaming(const amodule: pmoduleinfoty);
 begin
  with amodule^ do begin
-  if instance is twidget then begin
-   twidget1(instance).fwidgetrect.pos:= 
-              tformdesignerfo(designform).modulerect.pos;
-  end;
+  tformdesignerfo(designform).beginstreaming;
  end;
 end;
 
 procedure tdesigner.endstreaming(const amodule: pmoduleinfoty);
 begin
  with amodule^ do begin
-  if instance is twidget then begin
-   twidget1(instance).fwidgetrect.pos:= nullpoint;
-  end;
+  tformdesignerfo(designform).endstreaming;
  end;
 end;
 

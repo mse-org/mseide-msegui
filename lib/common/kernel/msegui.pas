@@ -67,7 +67,8 @@ type
                   ws_showed,ws_hidden, //used in tcustomeventwidget
                   ws_destroying,
                   ws_staticframe,ws_staticface,
-                  ws_nodesignvisible,ws_nodesignframe,ws_isvisible
+                  ws_nodesignvisible,ws_nodesignframe,ws_nodesignhandles,
+                  ws_isvisible
                  );
  widgetstatesty = set of widgetstatety;
  widgetstate1ty = (ws1_releasing,ws1_childscaled,
@@ -3940,7 +3941,7 @@ end;
 procedure twidget.placexorder(const startx: integer; const dist: array of integer;
                 const awidgets: array of twidget; const endmargin: integer = minint);
                //origin = clientpos, endmargin by size adjust of widgets 
-               //with [an_top,an_bottom], minit -> no change
+               //with [an_left,an_right], minit -> no change
 var
  int1,int2,int3,int4,int5: integer;
  widget1: twidget;
@@ -3996,7 +3997,7 @@ end;
 procedure twidget.placeyorder(const starty: integer; const dist: array of integer;
                 const awidgets: array of twidget; const endmargin: integer = minint);
                //origin = clientpos, endmargin by size adjust of widgets 
-               //with [an_left,an_right], minit -> no change
+               //with [an_top,an_bottom], minit -> no change
 var
  int1,int2,int3,int4,int5: integer;
  widget1: twidget;

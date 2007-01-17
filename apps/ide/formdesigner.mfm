@@ -1,4 +1,4 @@
-object formdesignerfo: Tformdesignerfo
+object formdesignerfo: tformdesignerfo
   optionswidget = [ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_destroywidgets, ow_hinton, ow_autoscale]
   bounds_x = 4
   bounds_y = 100
@@ -6,12 +6,15 @@ object formdesignerfo: Tformdesignerfo
   bounds_cy = 300
   visible = False
   container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_mousetransparent, ow_destroywidgets, ow_autoscale]
+  container.bounds_x = 0
+  container.bounds_y = 0
   container.bounds_cx = 287
   container.bounds_cy = 300
   container.frame.dummy = 0
   container.oncalcminscrollsize = calcscrollsize
   icon.transparentcolor = -2147483648
   icon.options = [bmo_masked]
+  icon.transparency = -2147483648
   icon.image = {
     0000000002000000180000001800000078010000000000000000000000000000
     0000000000000000000000000000000000000000804CF019F8FCF816804CF002

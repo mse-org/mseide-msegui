@@ -266,7 +266,7 @@ type
                                       const agroup: array of string);
    function getneededunits(const unitname: string): stringarty;
  end;
-
+ 
  createdesignmodulefuncty = function(const aclass: tclass;
                                  const aclassname: pshortstring): tmsecomponent;
  initdesigncomponentprocty = procedure(const amodule: tcomponent; 

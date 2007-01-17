@@ -190,7 +190,6 @@ type
    factivedesignmodule: pmoduleinfoty;
    fprojectloaded: boolean;
    errorformfilename: filenamety;
-
    function loadexec(isattach: boolean): boolean; //true if ok
    procedure setstattext(const atext: msestring; const akind: messagetextkindty = mtk_info);
    procedure refreshstopinfo(const stopinfo: stopinfoty);
