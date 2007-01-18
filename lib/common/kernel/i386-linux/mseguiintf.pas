@@ -214,14 +214,14 @@ const
  wholecircle = 360*64;
 
  defaultfontnames: defaultfontnamesty =
-  //stf_default  stf_menu    stf_prop      stf_fixed,
-      ('',          '',  'Helvetica',      'Courier',
+  //stf_default  stf_menu  stf_report   stf_prop      stf_fixed,
+      ('',          '',    'Arial',    'Helvetica',      'Courier',
   //stf_swiss    stf_roman          stf_courier
       'Arial', 'Times New Roman', 'Courier New');
 
  xftdefaultfontnames: defaultfontnamesty =
-  //stf_default  stf_menu    stf_prop      stf_fixed,
-      ('',          '',  'sans',      'fixed',
+  //stf_default  stf_menu stf_report stf_prop      stf_fixed,
+      ('',          '',    'Arial',   'sans',      'fixed',
   //stf_swiss    stf_roman          stf_courier
       'Arial', 'serif', 'Courier New');
 

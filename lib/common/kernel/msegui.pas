@@ -71,7 +71,7 @@ type
                   ws_isvisible
                  );
  widgetstatesty = set of widgetstatety;
- widgetstate1ty = (ws1_releasing,ws1_childscaled,
+ widgetstate1ty = (ws1_releasing,ws1_childscaled,ws1_fontheightlock,
                    ws1_widgetregionvalid,ws1_rootvalid,{ws1_clientsizing,}
                    ws1_anchorsizing,ws1_isstreamed,
                    ws1_noclipchildren
@@ -595,7 +595,8 @@ type
   public
    class function getinstancepo(owner: tobject): pfont; override;
  end;
-
+ widgetfontclassty = class of twidgetfont;
+ 
  pdragobject = ^tdragobject;
  tdragobject = class
   private
@@ -877,7 +878,7 @@ type
 
    procedure internalcreateframe; virtual;
    procedure internalcreateface; virtual;
-   procedure internalcreatefont;
+   procedure internalcreatefont; virtual;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -7636,7 +7637,7 @@ begin
   else begin
    ffontheight:= getfont.lineheight;
   end; 
-  if int1 <> 0 then begin
+  if (int1 <> 0) and not (ws1_fontheightlock in fwidgetstate1) then begin
    int1:= ffontheight - int1;
    if int1 <> 0 then begin
     dofontheightdelta(int1);
@@ -7848,8 +7849,8 @@ procedure twidget.internalcreatefont;
 begin
  if ffont = nil then begin
   ffont:= twidgetfont.create;
-  ffont.onchange:= {$ifdef FPC}@{$endif}dofontchanged;
  end;
+ ffont.onchange:= {$ifdef FPC}@{$endif}dofontchanged;
 end;
 
 procedure twidget.syncsinglelinefontheight;
@@ -8151,31 +8152,36 @@ var
  int1: integer;
  rect1: rectty;
 begin
- rect1:= fwidgetrect;
- if fframe <> nil then begin
-  fframe.scale(ascale);
+ include(fwidgetstate1,ws1_fontheightlock);
+ try
+  rect1:= fwidgetrect;
+  if fframe <> nil then begin
+   fframe.scale(ascale);
+  end;
+  if ffont <> nil then begin
+   ffont.scale(ascale);
+  end;
+  for int1:= 0 to high(fwidgets) do begin
+   fwidgets[int1].scale(ascale);
+  end;
+  with rect1 do begin
+   x:= round(x*ascale);
+   y:= round(y*ascale);
+   cx:= round(cx*ascale);
+   cy:= round(cy*ascale);
+  end;  
+  with fminsize do begin
+   cx:= round(cx*ascale);
+   cy:= round(cy*ascale);
+  end;
+  with fmaxsize do begin
+   cx:= round(cx*ascale);
+   cy:= round(cy*ascale);
+  end;
+  widgetrect:= rect1;
+ finally
+  exclude(fwidgetstate1,ws1_fontheightlock);
  end;
- if ffont <> nil then begin
-  ffont.scale(ascale);
- end;
- for int1:= 0 to high(fwidgets) do begin
-  fwidgets[int1].scale(ascale);
- end;
- with rect1 do begin
-  x:= round(x*ascale);
-  y:= round(y*ascale);
-  cx:= round(cx*ascale);
-  cy:= round(cy*ascale);
- end;  
- with fminsize do begin
-  cx:= round(cx*ascale);
-  cy:= round(cy*ascale);
- end;
- with fmaxsize do begin
-  cx:= round(cx*ascale);
-  cy:= round(cy*ascale);
- end;
- widgetrect:= rect1;
 end;
 
 { twindow }

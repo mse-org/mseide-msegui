@@ -582,7 +582,8 @@ begin
   if count > 1 then begin
    for int1:= 0 to count - 1 do begin
     with itempo(int1)^,selectedinfo do begin
-     if not (instance <> fowner.module) and fowner.module.checkowned(instance) then begin
+     if not nohandles and (instance <> fowner.module) and 
+                            fowner.module.checkowned(instance) then begin
       for marker:= low(markerty) to high(markerty) do begin
        fillrect(markers[marker],cl_dkgray);
       end;

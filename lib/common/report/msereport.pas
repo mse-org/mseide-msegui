@@ -18,6 +18,8 @@ const
  defaultrepppmm = 3;
  defaultreppagewidth = 190;
  defaultreppageheight = 270;
+ defaultrepfontheight = 14;
+ defaultrepfontname = 'stf_report';
   
 type
  tcustombandarea = class;
@@ -174,7 +176,7 @@ type
    property onbeforerender;
    property onrender;   
  end;
-  
+
  tcustomreport = class(twidget)
   private
    fppmm: real;
@@ -198,6 +200,7 @@ type
    procedure unregisterchildwidget(const child: twidget); override;
    procedure getchildren(proc: tgetchildproc; root: tcomponent); override;
    procedure defineproperties(filer: tfiler); override;
+   procedure internalcreatefont; override;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -223,10 +226,6 @@ type
    constructor create(aowner: tcomponent; load: boolean); 
                                      overload; virtual;   
   published    
-//   property bounds_x;
-//   property bounds_y;
-//   property bounds_cx;
-//   property bounds_cy;
    property color;
    property ppmm;
    property font;
@@ -720,6 +719,11 @@ begin
   if avalue <= 0 then begin
    raise exception.create('Invalid value');
   end;
+  if (ffont <> nil) and (fppmm > 0) then begin
+   include(fwidgetstate1,ws1_fontheightlock);
+   ffont.scale(avalue/fppmm);
+   exclude(fwidgetstate1,ws1_fontheightlock);
+  end;
   fppmm:= avalue;
   for int1:= 0 to high(freppages) do begin
    freppages[int1].ppmm:= avalue;
@@ -875,6 +879,17 @@ begin
                                  {$ifdef FPC}@{$endif}writebounds_cx,true);
  filer.defineproperty('dr_cy',{$ifdef FPC}@{$endif}readbounds_cy,
                                  {$ifdef FPC}@{$endif}writebounds_cy,true);
+ inherited;
+end;
+
+procedure tcustomreport.internalcreatefont;
+var
+ font1: twidgetfont;
+begin
+ font1:= twidgetfont.create;
+ font1.height:= round(defaultrepfontheight * (fppmm/defaultrepppmm));
+ font1.name:= defaultrepfontname;
+ ffont:= font1;
  inherited;
 end;
 

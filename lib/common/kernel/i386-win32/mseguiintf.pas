@@ -145,8 +145,8 @@ const
 // col1: tagrgbquad = (rgbblue: $ff; rgbgreen: $ff; rgbred: $ff);
 
  defaultfontnames: defaultfontnamesty =
-  //stf_default  stf_menu    stf_prop      stf_fixed,
-      ('',          '',  'MS Sans Serif','Courier',
+  //stf_default  stf_menu stf_report   stf_prop      stf_fixed,
+      ('',          '',  'Arial'     'MS Sans Serif','Courier',
   //stf_helvetica stf_roman          stf_courier
       'Arial', 'Times New Roman', 'Courier New');
 
