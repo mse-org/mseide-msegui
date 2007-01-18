@@ -7584,7 +7584,9 @@ end;
 
 procedure twidget.dofontchanged(const sender: tobject);
 begin
- fontchanged;
+ if not (ws1_fontheightlock in fwidgetstate1) then begin
+  fontchanged;
+ end;
 end;
 
 procedure twidget.fontchanged;

@@ -133,7 +133,6 @@ type
    procedure setppmm(const avalue: real);
   protected
    freport: tcustomreport;
-   procedure setname(const newname: tcomponentname); override;
    procedure registerchildwidget(const child: twidget); override;
    procedure unregisterchildwidget(const child: twidget); override;
    procedure setparentwidget(const avalue: twidget); override;   
@@ -613,16 +612,6 @@ begin
  for int1:= 0 to high(fareas) do begin
   fareas[int1].endrender;
  end;
-end;
-
-procedure tcustomreportpage.setname(const newname: tcomponentname);
-begin
- inherited;
- {
- if fparentwidget is treporttab then begin
-  treporttab(fparentwidget).caption:= newname;
- end;
- }
 end;
 
 procedure tcustomreportpage.setpagewidth(const avalue: real);
