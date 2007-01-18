@@ -325,6 +325,8 @@ type
    procedure componentmodified(const component: tobject);
    procedure selectcomponent(instance: tcomponent);
    procedure setselections(const list: idesignerselections);
+   function createnewcomponent(const module: tmsecomponent;
+                                 const aclass: tcomponentclass): tcomponent;
    function createcurrentcomponent(const module: tmsecomponent): tcomponent;
    function hascurrentcomponent: boolean;
    procedure addcomponent(const module: tmsecomponent; const acomponent: tcomponent);
@@ -1924,24 +1926,30 @@ begin
  end;
 end;
 
+function tdesigner.createnewcomponent(const module: tmsecomponent;
+                                 const aclass: tcomponentclass): tcomponent;
+begin
+ result:= tcomponent(aclass.newinstance);
+ try
+  tcomponent1(result).setdesigning(true);
+  result.create(nil);
+ except
+  result.Free;
+  raise;
+ end;
+ with modules.findmodule(module)^.moduleintf^ do begin
+  if assigned(initnewcomponent) then begin
+   initnewcomponent(module,result);
+  end;
+ end;
+ addcomponent(module,result);
+end;
+
 function tdesigner.createcurrentcomponent(const module: tmsecomponent): tcomponent;
 begin
  with registeredcomponents do begin
   if selectedclass <> nil then begin
-   result:= tcomponent(selectedclass.newinstance);
-   try
-    tcomponent1(result).setdesigning(true);
-    result.create(nil);
-   except
-    result.Free;
-    raise;
-   end;
-   with modules.findmodule(module)^.moduleintf^ do begin
-    if assigned(initnewcomponent) then begin
-     initnewcomponent(module,result);
-    end;
-   end;
-   addcomponent(module,result);
+   result:= createnewcomponent(module,selectedclass);
   end
   else begin
    result:= nil;

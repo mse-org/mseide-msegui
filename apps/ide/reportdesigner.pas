@@ -3,7 +3,8 @@ unit reportdesigner;
 interface
 uses
  classes,msegui,mseclasses,mseforms,formdesigner,msesimplewidgets,msetabs,msesplitter,
- msegraphutils,msedesigner,msedesignintf,msereport,msetypes,mseevent,mseguiglob;
+ msegraphutils,msedesigner,msedesignintf,msereport,msetypes,mseevent,mseguiglob,
+ msemenus;
 
 const
  updatetabtag = 83684;
@@ -24,6 +25,9 @@ type
    procedure tabmo(const sender: TObject; var curindex: Integer;
                    var newindex: Integer);
    procedure tabmouse(const sender: twidget; var info: mouseeventinfoty);
+   procedure deletepage(const sender: TObject);
+   procedure popupupda(const sender: tcustommenu);
+   procedure addpage(const sender: TObject);
   private
    freportcontainer: treportcontainer;
    fstate: reportdesignerstatesty;
@@ -40,6 +44,7 @@ type
    procedure doasyncevent(var atag: integer); override;
    procedure componentselected(const aselections: tformdesignerselections); override;
    class function fixformsize: boolean; override;
+   function candelete(const acomponent: tcomponent): boolean; override;
   public
    constructor create(const aowner: tcomponent; const adesigner: tdesigner;
                         const aintf: pdesignmoduleintfty); override;
@@ -53,7 +58,7 @@ var
 implementation
 
 uses
- reportdesigner_mfm,msedatalist,msegraphics;
+ reportdesigner_mfm,msedatalist,msegraphics,msewidgets;
 type
  tcustomreport1 = class(tcustomreport);
  
@@ -163,7 +168,7 @@ begin
   reppage1:= report[tabbar.activetab];
   report.size:= reppage1.size;
   reppage1.bringtofront;
-  designer.selectcomponent(report);
+//  designer.selectcomponent(report);
  end;
 end;
 
@@ -178,6 +183,7 @@ begin
    if widget1 is twidget then begin
     for int2:= high(freppages) downto 0 do begin
      if widget1.checkancestor(freppages[int2]) then begin
+      checktabs;
       tabbar.activetab:= int2;
       exit;
      end;
@@ -216,6 +222,45 @@ end;
 function treportdesignerfo.getdesignrect: rectty;
 begin
  result:= tcustomreport1(form).designrect;
+end;
+
+procedure treportdesignerfo.popupupda(const sender: tcustommenu);
+begin
+ popupme.menu.itembyname('delpage').enabled:= tabbar.activetab >= 0;
+end;
+
+function treportdesignerfo.candelete(const acomponent: tcomponent): boolean;
+var
+ int1: integer;
+begin
+ result:= true;
+ with report do begin
+  for int1:= 0 to reppagecount - 1 do begin
+   if acomponent = reppages[int1] then begin
+    result:= false;
+    break;
+   end;
+  end;
+ end;
+end;
+
+procedure treportdesignerfo.addpage(const sender: TObject);
+var
+ comp1: tcomponent;
+begin
+ comp1:= designer.createnewcomponent(report,treportpage);
+ placecomponent(comp1,freportcontainer.rootpos);
+end;
+
+procedure treportdesignerfo.deletepage(const sender: TObject);
+var
+ comp1: tcomponent;
+begin
+ comp1:= report[tabbar.activetab];
+ if askok('Do you wish to delete '''+
+                          comp1.name+'''?','WARNING',mr_cancel) then begin
+  designer.deletecomponent(comp1);
+ end;
 end;
 
 end.

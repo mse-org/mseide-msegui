@@ -44,6 +44,7 @@ inherited reportdesignerfo: treportdesignerfo
     options = [tabo_dragsource, tabo_dragdest]
   end
   inherited popupme: tpopupmenu
+    menu.submenu.count = 21
     menu.submenu.items = <    
       item
       end    
@@ -80,6 +81,22 @@ inherited reportdesignerfo: treportdesignerfo
       item
       end    
       item
+      end    
+      item
+        options = [mao_separator, mao_shortcutcaption]
+      end    
+      item
+        caption = 'Add report page'
+        state = [as_localcaption, as_localonexecute]
+        onexecute = addpage
+      end    
+      item
+        caption = 'Delete report page'
+        name = 'delpage'
+        state = [as_localcaption, as_localonexecute]
+        options = [mao_shortcutcaption, mao_asyncexecute]
+        onexecute = deletepage
       end>
+    onupdate = popupupda
   end
 end

@@ -735,7 +735,7 @@ begin
  end;
  additem(pointerarty(freppages),awidget);
  tcustomreportpage(awidget).ppmm:= fppmm;
- inherited;
+ inherited insertwidget(awidget,nullpoint);
 end;
 
 function tcustomreport.internalrender(const acanvas: tcanvas;

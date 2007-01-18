@@ -1234,7 +1234,8 @@ end;
 
 procedure tcustomtabbar.clientmouseevent(var info: mouseeventinfoty);
 begin
- if canevent(tmethod(fonclientmouseevent)) then begin
+ if not (es_processed in info.eventstate) and 
+                           canevent(tmethod(fonclientmouseevent)) then begin
   fonclientmouseevent(self,info);
  end;
  inherited;

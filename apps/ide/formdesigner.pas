@@ -131,6 +131,8 @@ type
    class function fixformsize: boolean; virtual;
    function getdesignrect: rectty; virtual;
    procedure setdesignrect(const arect: rectty); virtual;
+   function candelete(const acomponent: tcomponent): boolean; virtual;
+   procedure placecomponent(const component: tcomponent; const apos: pointty);
   public
    constructor create(const aowner: tcomponent; const adesigner: tdesigner;
                         const aintf: pdesignmoduleintfty); virtual;
@@ -217,7 +219,6 @@ type
    procedure dopopup(var info: mouseeventinfoty);
 
    function widgetatpos(const apos: pointty; onlywidgets: boolean): twidget;
-   procedure placecomponent(const component: tcomponent; const apos: pointty);
 
    //idesignnotification
    procedure itemdeleted(const adesigner: idesigner;
@@ -1222,11 +1223,11 @@ procedure tdesignwindow.dopopup(var info: mouseeventinfoty);
 var
  bo1: boolean;
 begin
- with tformdesignerfo(fowner).popupme,menu do begin
+ with tformdesignerfo(fowner),popupme,menu do begin
   bo1:= (fselections.count > 0) and (fselections[0] <> module);
   itembyname('copy').enabled:= bo1;
   itembyname('cut').enabled:= bo1;
-  itembyname('delete').enabled:= bo1;
+  itembyname('delete').enabled:= bo1 and candelete(fselections[0]);
   itembyname('undelete').enabled:= fdelobjs <> nil;
   itembyname('paste').enabled:= true;
   itembyname('editcomp').enabled:= designer.componentcanedit;
@@ -1263,61 +1264,6 @@ begin
   end;
   result:= form.widgetatpos(widgetinfo);
  end;
-end;
-
-procedure tdesignwindow.placecomponent(const component: tcomponent;
-                                                      const apos: pointty);
-var
- widget1: twidget;
- po1: pointty;
- rea1: real;
-begin
- try
-  rea1:= 1.0;
-  if component is tmsecomponent then begin
-   with tformdesignerfo(fowner).fmoduleintf^ do begin
-    if assigned(getscale) then begin
-     rea1:= getscale(module);
-    end;
-   end;
-   tmsecomponent(component).initnewcomponent(rea1);
-  end;
-  if (component is twidget) and (form <> nil) then begin
-   widget1:= widgetatpos(apos,true);
-   if widget1 <> nil then begin
-    po1:= subpoint(dosnaptogrid(apos),form.rootpos);
-    widget1.insertwidget(twidget(component),translatewidgetpoint(po1,form,
-                                                  widget1));
-    twidget(component).initnewwidget(rea1);
-   end;
-  end
-  else begin
-   if form <> nil then begin
-    setrootpos(component,form.clientpostowidgetpos(
-          dosnaptogrid(form.widgetpostoclientpos(apos))));
-   end
-   else begin
-    setrootpos(component,dosnaptogrid(apos));
-   end;
-  end;
-//  if component is tmsecomponent then begin
-//   with tformdesignerfo(fowner).fmoduleintf^ do begin
-//    if assigned(getscale) then begin
-//     rea1:= getscale(module);
-//    end
-//    else begin
-//     rea1:= 1.0;
-//    end;
-//   end;
-//   tmsecomponent(component).initnewcomponent(rea1);
-//  end;
-  tcomponent1(component).loaded;
-  domodified;
- except
-  deletecomponent(component);
-  raise;
- end;
- selectcomponent(component);
 end;
 
 procedure tdesignwindow.recalcclientsize;
@@ -1525,7 +1471,7 @@ begin
        component:= fdesigner.createcurrentcomponent(module);
       end;
       if component <> nil then begin
-       placecomponent(component,pos);
+       tformdesignerfo(fowner).placecomponent(component,pos);
        recalcclientsize;
       end;
      end
@@ -2413,6 +2359,57 @@ procedure tformdesignerfo.endstreaming;
 begin
  if fmodule is twidget then begin
   twidget1(fmodule).fwidgetrect.pos:= nullpoint;
+ end;
+end;
+
+function tformdesignerfo.candelete(const acomponent: tcomponent): boolean;
+begin
+ result:= true;
+end;
+
+procedure tformdesignerfo.placecomponent(const component: tcomponent;
+                                                      const apos: pointty);
+var
+ widget1: twidget;
+ po1: pointty;
+ rea1: real;
+begin
+ with tdesignwindow(window) do begin
+  try
+   rea1:= 1.0;
+   if component is tmsecomponent then begin
+    with tformdesignerfo(fowner).fmoduleintf^ do begin
+     if assigned(getscale) then begin
+      rea1:= getscale(module);
+     end;
+    end;
+    tmsecomponent(component).initnewcomponent(rea1);
+   end;
+   if (component is twidget) and (form <> nil) then begin
+    widget1:= widgetatpos(apos,true);
+    if widget1 <> nil then begin
+     po1:= subpoint(dosnaptogrid(apos),form.rootpos);
+     widget1.insertwidget(twidget(component),translatewidgetpoint(po1,form,
+                                                   widget1));
+     twidget(component).initnewwidget(rea1);
+    end;
+   end
+   else begin
+    if form <> nil then begin
+     setrootpos(component,form.clientpostowidgetpos(
+           dosnaptogrid(form.widgetpostoclientpos(apos))));
+    end
+    else begin
+     setrootpos(component,dosnaptogrid(apos));
+    end;
+   end;
+   tcomponent1(component).loaded;
+   domodified;
+  except
+   deletecomponent(component);
+   raise;
+  end;
+  selectcomponent(component);
  end;
 end;
 
