@@ -1149,29 +1149,36 @@ begin
  end;
  if eventkind = ek_keypress then begin
   with info do begin
-   if shiftstate = [] then begin
+   if shiftstate * keyshiftstatesmask = [] then begin
     include(eventstate,es_processed);
     case key of
      key_escape: begin
-      if (fselections.count > 1) or (form = nil) then begin
-       selectcomponent(module);
+      if factarea <> ar_none then begin
+       hidexorpic(fowner.container.getcanvas(org_widget));
+       fxorpicactive:= false;
+       factarea:= ar_none;
       end
-      else begin
-       if fselections.count = 1 then begin
-        widget1:= twidget(fselections[0]);
-        if widget1 is twidget then begin
-         repeat
-          widget1:= widget1.parentwidget;
-         until (widget1 = nil) or (ws_iswidget in widget1.widgetstate);
-         if (widget1 <> nil) and (widget1 <> fowner) then begin
-          selectcomponent(widget1);
+      else begin      
+       if (fselections.count > 1) or (form = nil) then begin
+        selectcomponent(module);
+       end
+       else begin
+        if fselections.count = 1 then begin
+         widget1:= twidget(fselections[0]);
+         if widget1 is twidget then begin
+          repeat
+           widget1:= widget1.parentwidget;
+          until (widget1 = nil) or (ws_iswidget in widget1.widgetstate);
+          if (widget1 <> nil) and (widget1 <> fowner) then begin
+           selectcomponent(widget1);
+          end
+          else begin
+           selectcomponent(module);
+          end;
          end
          else begin
           selectcomponent(module);
          end;
-        end
-        else begin
-         selectcomponent(module);
         end;
        end;
       end;
