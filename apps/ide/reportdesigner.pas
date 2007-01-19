@@ -37,6 +37,10 @@ type
    function getdesignrect: rectty; override;
    function gridrect: rectty; override;
    function insertoffset: pointty; override;
+   function gridsizex: integer; override;
+   function gridsizey: integer; override;
+   function showgrid: boolean; override;
+   function snaptogrid: boolean; override;
    procedure checktabs;
    procedure updatetabs;
    procedure validaterename(acomponent: tcomponent;
@@ -211,7 +215,7 @@ end;
 
 procedure treportdesignerfo.beginstreaming;
 begin
- tcustomreport1(form).designrect:= widgetrect;
+ tcustomreport1(form).frepdesigninfo.widgetrect:= widgetrect;
 end;
 
 procedure treportdesignerfo.endstreaming;
@@ -221,7 +225,7 @@ end;
 
 function treportdesignerfo.getdesignrect: rectty;
 begin
- result:= tcustomreport1(form).designrect;
+ result:= tcustomreport1(form).frepdesigninfo.widgetrect;
 end;
 
 procedure treportdesignerfo.popupupda(const sender: tcustommenu);
@@ -261,6 +265,31 @@ begin
                           comp1.name+'''?','WARNING',mr_cancel) then begin
   designer.deletecomponent(comp1);
  end;
+end;
+
+function treportdesignerfo.gridsizex: integer;
+begin
+ with tcustomreport1(form) do begin
+  result:= round(frepdesigninfo.gridsize * ppmm);
+ end;
+ if result < 2 then begin
+  result:= 2;
+ end;
+end;
+
+function treportdesignerfo.gridsizey: integer;
+begin
+ result:= gridsizex;
+end;
+
+function treportdesignerfo.showgrid: boolean;
+begin
+ result:= tcustomreport1(form).frepdesigninfo.showgrid;
+end;
+
+function treportdesignerfo.snaptogrid: boolean;
+begin
+ result:= tcustomreport1(form).frepdesigninfo.snaptogrid;
 end;
 
 end.

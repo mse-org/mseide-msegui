@@ -13,7 +13,8 @@ unit msegraphics;
 
 interface
 uses
- Classes,msetypes,msestrings,mseerror,msegraphutils,mseguiglob,mseclasses;
+ {$ifdef FPC}classes{$else}Classes{$endif},msetypes,msestrings,mseerror,
+ msegraphutils,mseguiglob,mseclasses;
 
 const
  redmask = $ff0000;

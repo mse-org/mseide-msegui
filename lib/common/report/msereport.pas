@@ -176,30 +176,37 @@ type
    property onrender;   
  end;
 
+ repdesigninfoty = record
+  widgetrect: rectty;
+  gridsize: real;
+  showgrid: boolean;
+  snaptogrid: boolean;
+ end;
+ 
  tcustomreport = class(twidget)
   private
    fppmm: real;
    procedure setppmm(const avalue: real);
    function getreppages(index: integer): tcustomreportpage;
    procedure setreppages(index: integer; const avalue: tcustomreportpage);
-   procedure readbounds_x(reader: treader);
-   procedure writebounds_x(writer: twriter);
-   procedure readbounds_y(reader: treader);
-   procedure writebounds_y(writer: twriter);
-   procedure readbounds_cx(reader: treader);
-   procedure writebounds_cx(writer: twriter);
-   procedure readbounds_cy(reader: treader);
-   procedure writebounds_cy(writer: twriter);
+   function getgrid_show: boolean;
+   procedure setgrid_show(const avalue: boolean);
+   function getgrid_snap: boolean;
+   procedure setgrid_snap(const avalue: boolean);
+   function getgrid_size: real;
+   procedure setgrid_size(avalue: real);
+   procedure writerepdesigninfo(writer: twriter);
+   procedure readrepdesigninfo(reader: treader);
   protected
-   designrect: rectty;
+   frepdesigninfo: repdesigninfoty;
    freppages: reportpagearty;
    procedure insertwidget(const awidget: twidget; const apos: pointty); override;
    function internalrender(const acanvas: tcanvas; const aprinter: tprinter;
                    const acommand: string; const astream: ttextstream): boolean;
    procedure unregisterchildwidget(const child: twidget); override;
    procedure getchildren(proc: tgetchildproc; root: tcomponent); override;
-   procedure defineproperties(filer: tfiler); override;
    procedure internalcreatefont; override;
+   procedure defineproperties(filer: tfiler); override;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -215,6 +222,9 @@ type
                                                 write setreppages; default;
    property font: twidgetfont read getfont write setfont;
    property color default cl_transparent;
+   property grid_show: boolean read frepdesigninfo.showgrid write setgrid_show default true;
+   property grid_snap: boolean read frepdesigninfo.snaptogrid write setgrid_snap default true;
+   property grid_size: real read frepdesigninfo.gridsize write setgrid_size;   
  end;
 
  treport = class(tcustomreport)
@@ -228,6 +238,9 @@ type
    property color;
    property ppmm;
    property font;
+   property grid_show;
+   property grid_snap;
+   property grid_size;
  end;
 
  reportclassty = class of treport;
@@ -240,7 +253,7 @@ function getreportscale(const amodule: tcomponent): real;
 
 implementation
 uses
- msedatalist,sysutils,msedrawtext;
+ msedatalist,sysutils,msedrawtext,msestreaming;
 type
  twidget1 = class(twidget);
  tmsecomponent1 = class(tmsecomponent);
@@ -495,7 +508,8 @@ end;
 constructor tcustomreportpage.create(aowner: tcomponent);
 begin
  inherited;
- fwidgetstate:= fwidgetstate + [ws_nodesignvisible,ws_nodesignhandles];
+ fwidgetstate1:= fwidgetstate1 + [ws1_nodesignvisible,ws1_nodesignhandles,
+                                       ws1_nodesigndelete];
  fpagewidth:= defaultreppagewidth;
  fpageheight:= defaultreppageheight; 
  fppmm:= defaultrepppmm;
@@ -675,7 +689,12 @@ end;
 constructor tcustomreport.create(aowner: tcomponent);
 begin
  fppmm:= defaultrepppmm;
- designrect:= makerect(50,50,50,50);
+ with frepdesigninfo do begin
+  widgetrect:= makerect(50,50,50,50);
+  gridsize:= 2; //mm
+  showgrid:= true;
+  snaptogrid:= true;
+ end;
  inherited;
  visible:= false;
  color:= cl_transparent;
@@ -818,59 +837,6 @@ begin
  result:= length(freppages);
 end;
 
-procedure tcustomreport.readbounds_x(reader: treader);
-begin
- designrect.x:= reader.readinteger;
-end;
-
-procedure tcustomreport.writebounds_x(writer: twriter);
-begin
- writer.writeinteger(designrect.x);
-end;
-
-procedure tcustomreport.readbounds_y(reader: treader);
-begin
- designrect.y:= reader.readinteger;
-end;
-
-procedure tcustomreport.writebounds_y(writer: twriter);
-begin
- writer.writeinteger(designrect.y);
-end;
-
-procedure tcustomreport.readbounds_cx(reader: treader);
-begin
- designrect.cx:= reader.readinteger;
-end;
-
-procedure tcustomreport.writebounds_cx(writer: twriter);
-begin
- writer.writeinteger(designrect.cx);
-end;
-
-procedure tcustomreport.readbounds_cy(reader: treader);
-begin
- designrect.cy:= reader.readinteger;
-end;
-
-procedure tcustomreport.writebounds_cy(writer: twriter);
-begin
- writer.writeinteger(designrect.cy);
-end;
-
-procedure tcustomreport.defineproperties(filer: tfiler);
-begin
- filer.defineproperty('dr_x',{$ifdef FPC}@{$endif}readbounds_x,
-                                 {$ifdef FPC}@{$endif}writebounds_x,true);
- filer.defineproperty('dr_y',{$ifdef FPC}@{$endif}readbounds_y,
-                                 {$ifdef FPC}@{$endif}writebounds_y,true);
- filer.defineproperty('dr_cx',{$ifdef FPC}@{$endif}readbounds_cx,
-                                 {$ifdef FPC}@{$endif}writebounds_cx,true);
- filer.defineproperty('dr_cy',{$ifdef FPC}@{$endif}readbounds_cy,
-                                 {$ifdef FPC}@{$endif}writebounds_cy,true);
- inherited;
-end;
-
 procedure tcustomreport.internalcreatefont;
 var
  font1: twidgetfont;
@@ -879,6 +845,59 @@ begin
  font1.height:= round(defaultrepfontheight * (fppmm/defaultrepppmm));
  font1.name:= defaultrepfontname;
  ffont:= font1;
+ inherited;
+end;
+
+function tcustomreport.getgrid_show: boolean;
+begin
+ result:= frepdesigninfo.showgrid;
+end;
+
+procedure tcustomreport.setgrid_show(const avalue: boolean);
+begin
+ frepdesigninfo.showgrid:= avalue;
+ designchanged;
+end;
+
+function tcustomreport.getgrid_snap: boolean;
+begin
+ result:= frepdesigninfo.snaptogrid;
+end;
+
+procedure tcustomreport.setgrid_snap(const avalue: boolean);
+begin
+ frepdesigninfo.snaptogrid:= avalue;
+ designchanged;
+end;
+
+function tcustomreport.getgrid_size: real;
+begin
+ result:= frepdesigninfo.gridsize;
+end;
+
+procedure tcustomreport.setgrid_size(avalue: real);
+begin
+ if avalue < 2/ppmm then begin
+  avalue:= 2/ppmm;
+ end;
+ frepdesigninfo.gridsize:= avalue;
+ designchanged;
+end;
+
+procedure tcustomreport.writerepdesigninfo(writer: twriter);
+begin
+ writerectty(writer,frepdesigninfo.widgetrect);
+end;
+
+procedure tcustomreport.readrepdesigninfo(reader: treader);
+begin
+ frepdesigninfo.widgetrect:= readrectty(reader);
+end;
+
+procedure tcustomreport.defineproperties(filer: tfiler);
+begin
+ filer.defineproperty('repdesigninfo',{$ifdef FPC}@{$endif}readrepdesigninfo,
+                                 {$ifdef FPC}@{$endif}writerepdesigninfo,true);
  inherited;
 end;
 

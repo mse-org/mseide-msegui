@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2006 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2007 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -14,12 +14,14 @@ unit msestreaming;
 interface
 
 uses
- Classes,msetypes;
+ {$ifdef FPC}Classes{$else}classes{$endif},msetypes,msegraphutils;
 
 function fullcomponentname(component: tcomponent): string;
 
 function readrealty(const reader: treader): realty;
 procedure writerealty(const writer: twriter; const value: realty);
+function readrectty(const reader: treader): rectty;
+procedure writerectty(const writer: twriter; const avalue: rectty);
 
 function readrecordcount(const obj: tpersistent;
     const recordsize: integer; const stream: tstream): integer;
@@ -82,6 +84,30 @@ begin
   end;
  end;
 // stream.WriteBuffer(value,sizeof(value));
+end;
+
+function readrectty(const reader: treader): rectty;
+begin
+ with reader,result do begin
+  readlistbegin;
+  x:= readinteger;
+  y:= readinteger;
+  cx:= readinteger;
+  cy:= readinteger;
+  readlistend;
+ end;
+end;
+
+procedure writerectty(const writer: twriter; const avalue: rectty);
+begin
+ with writer,avalue do begin
+  writelistbegin;
+  writeinteger(x);
+  writeinteger(y);
+  writeinteger(cx);
+  writeinteger(cy);
+  writelistend;
+ end;
 end;
 
 function readrecordcount(const obj: tpersistent;

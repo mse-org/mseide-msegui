@@ -67,14 +67,15 @@ type
                   ws_showed,ws_hidden, //used in tcustomeventwidget
                   ws_destroying,
                   ws_staticframe,ws_staticface,
-                  ws_nodesignvisible,ws_nodesignframe,ws_nodesignhandles,
                   ws_isvisible
                  );
  widgetstatesty = set of widgetstatety;
  widgetstate1ty = (ws1_releasing,ws1_childscaled,ws1_fontheightlock,
                    ws1_widgetregionvalid,ws1_rootvalid,{ws1_clientsizing,}
                    ws1_anchorsizing,ws1_isstreamed,
-                   ws1_noclipchildren
+                   ws1_noclipchildren,
+                   ws1_nodesignvisible,ws1_nodesignframe,ws1_nodesignhandles,
+                   ws1_nodesigndelete
                    );
  widgetstates1ty = set of widgetstate1ty;
 
@@ -5033,7 +5034,8 @@ end;
 
 function twidget.needsdesignframe: boolean;
 begin
- result:= (fwidgetstate * [ws_iswidget,ws_nodesignframe] = [ws_iswidget]) and
+ result:= (ws_iswidget in fwidgetstate) and 
+                             not (ws1_nodesignframe in fwidgetstate1) and
              ((fcolor = cl_parent) or (fcolor = cl_transparent) or
                (fparentwidget <> nil) and (fparentwidget.fcolor = fcolor)) and
  ((fframe = nil) or (fframe.fi.leveli = 0) and (fframe.fi.levelo = 0) and
@@ -6978,7 +6980,7 @@ end;
 function twidget.isvisible: boolean;
 begin
  result:= (ws_visible in fwidgetstate) or
-  ((csdesigning in componentstate) and not (ws_nodesignvisible in fwidgetstate));
+  ((csdesigning in componentstate) and not (ws1_nodesignvisible in fwidgetstate1));
 end;
 
 function twidget.parentisvisible: boolean; //checks visible flags of ancestors

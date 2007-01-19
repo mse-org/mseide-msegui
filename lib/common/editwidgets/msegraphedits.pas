@@ -1916,7 +1916,7 @@ begin
  finfo.color:= cl_transparent;
  finfo.colorglyph:= cl_black;
  finfo.state:= finfo.state + [ss_showfocusrect,ss_showdefaultrect];
- include(fwidgetstate,ws_nodesignframe);
+ include(fwidgetstate1,ws1_nodesignframe);
  size:= makesize(defaultbuttonwidth,defaultbuttonheight);
 end;
 

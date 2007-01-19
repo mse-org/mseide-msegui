@@ -57,6 +57,7 @@ type
    fowner: tdesignwindow;
    finfovalid: boolean;
    fmovingchecked: boolean;
+   fcandelete: boolean;
    procedure updateinfos;
    procedure paint(const canvas: tcanvas);
    procedure beforepaintmoving;
@@ -66,10 +67,12 @@ type
    procedure resize(const dist: pointty);
    procedure deletecomponents;
    function getareainfo(const pos: pointty; out index: integer): areaty;
+   function getcandelete: boolean;
   protected
    function getrecordsize: integer; override;
    procedure externalcomponentchanged(const acomponent: tobject);
    procedure removeforeign; //removes form and components in other modules
+   property candelete: boolean read getcandelete;
   public
    constructor create(owner: tdesignwindow);
    function assign(const source: idesignerselections): boolean;
@@ -128,6 +131,10 @@ type
    function insertoffset: pointty; virtual;
    function gridoffset: pointty; virtual;
    function gridrect: rectty; virtual;
+   function gridsizex: integer; virtual;
+   function gridsizey: integer; virtual;
+   function showgrid: boolean; virtual;
+   function snaptogrid: boolean; virtual;
    class function fixformsize: boolean; virtual;
    function getdesignrect: rectty; virtual;
    procedure setdesignrect(const arect: rectty); virtual;
@@ -154,8 +161,6 @@ type
 
  tdesignwindow = class(twindow,idesignnotification)
   private
-   fgridsizex: integer;
-   fgridsizey: integer;
    fpickpos: pointty;
    fmousepos: pointty;
    fpickwidget: twidget;
@@ -168,6 +173,8 @@ type
    fselecting: integer;
    fselections: tformdesignerselections;
    fdesigner: tdesigner;
+   fgridsizex: integer;
+   fgridsizey: integer;
    fsnaptogrid: boolean;
    fshowgrid: boolean;
    fdelobjs: objinfoarty;
@@ -495,11 +502,13 @@ var
  int1: integer;
 begin
  if not finfovalid then begin
+  fcandelete:= count > 0;
   for int1:= 0 to count - 1 do begin
    with itempo(int1)^,selectedinfo do begin
     if (instance is twidget) and (fowner.form <> nil) then begin
-     with twidget(instance) do begin
-      nohandles:= ws_nodesignhandles in widgetstate;
+     with twidget1(instance) do begin
+      nohandles:= ws1_nodesignhandles in fwidgetstate1;
+      fcandelete:= fcandelete and not (ws1_nodesigndelete in fwidgetstate1);
       rect:= makerect(rootpos,size);
      end;
     end
@@ -811,6 +820,12 @@ begin
  end;
  endupdate;
  fowner.updateselections;
+end;
+
+function tformdesignerselections.getcandelete: boolean;
+begin
+ updateinfos;
+ result:= fcandelete;
 end;
 
 { tdesignwindow }
@@ -1162,7 +1177,9 @@ begin
       end;
      end;
      key_delete: begin
-      dodelete;
+      if fselections.candelete then begin
+       dodelete;
+      end;
      end;
      else begin
       exclude(eventstate,es_processed);
@@ -1201,7 +1218,9 @@ begin
        docopy(false);
       end;
       key_x: begin
-       docut;
+       if fselections.candelete then begin
+        docut;
+       end;
       end;
       key_v: begin
        dopaste;
@@ -1222,13 +1241,14 @@ end;
 procedure tdesignwindow.dopopup(var info: mouseeventinfoty);
 
 var
- bo1: boolean;
+ bo1,bo2: boolean;
 begin
  with tformdesignerfo(fowner),popupme,menu do begin
   bo1:= (fselections.count > 0) and (fselections[0] <> module);
+  bo2:= bo1 and fselections.candelete;
   itembyname('copy').enabled:= bo1;
-  itembyname('cut').enabled:= bo1;
-  itembyname('delete').enabled:= bo1 and candelete(fselections[0]);
+  itembyname('cut').enabled:= bo2;
+  itembyname('delete').enabled:= bo2;
   itembyname('undelete').enabled:= fdelobjs <> nil;
   itembyname('paste').enabled:= true;
   itembyname('editcomp').enabled:= designer.componentcanedit;
@@ -1644,9 +1664,9 @@ end;
 }
 function tdesignwindow.snaptogriddelta(const pos: pointty): pointty;
 begin
- if fsnaptogrid then begin
-  result.x:= roundint(pos.x,fgridsizex);
-  result.y:= roundint(pos.y,fgridsizey);
+ if tformdesignerfo(fowner).snaptogrid then begin
+  result.x:= roundint(pos.x,tformdesignerfo(fowner).gridsizex);
+  result.y:= roundint(pos.y,tformdesignerfo(fowner).gridsizey);
  end
  else begin
   result:= pos;
@@ -1655,7 +1675,7 @@ end;
 
 function tdesignwindow.dosnaptogrid(const pos: pointty): pointty;
 begin
- if fsnaptogrid then begin
+ if tformdesignerfo(fowner).snaptogrid then begin
   result:= snaptogriddelta(subpoint(pos,tformdesignerfo(fowner).gridoffset));
   addpoint1(result,tformdesignerfo(fowner).gridoffset);
  end
@@ -1671,28 +1691,32 @@ var
  endy: integer;
  offset: pointty;
  points1: pointarty;
- int1: integer;
+ int1,gridcx,gridcy: integer;
 begin
- if fshowgrid then begin
+ if tformdesignerfo(fowner).showgrid then begin
   rect2:= tformdesignerfo(fowner).gridrect;
   msegraphutils.intersectrect(canvas.clipbox,rect2,rect1);
   offset:= tformdesignerfo(fowner).gridoffset;
+  with tformdesignerfo(fowner) do begin
+   gridcx:= gridsizex;
+   gridcy:= gridsizey;
+  end;
   with rect1 do begin
-   po1.x:= ((x - offset.x) div fgridsizex) * fgridsizex + offset.x;
-   po1.y:= ((y - offset.y) div fgridsizey) * fgridsizey + offset.y;
+   po1.x:= ((x - offset.x) div gridcx) * gridcx + offset.x;
+   po1.y:= ((y - offset.y) div gridcy) * gridcy + offset.y;
    endy:= y + cy;
   end;
-  setlength(points1, rect1.cx div fgridsizex + 1);
+  setlength(points1, rect1.cx div gridcx + 1);
   for int1:= 0 to high(points1) do begin
    points1[int1].x:= po1.x;
-   inc(po1.x,fgridsizex);
+   inc(po1.x,gridcx);
   end;
   while po1.y < endy do begin
    for int1:= 0 to high(points1) do begin
     points1[int1].y:= po1.y;
    end;
    canvas.drawpoints(points1,cl_black);
-   inc(po1.y,fgridsizey);
+   inc(po1.y,gridcy);
   end;
  end;
 end;
@@ -2412,6 +2436,26 @@ begin
   end;
   selectcomponent(component);
  end;
+end;
+
+function tformdesignerfo.gridsizex: integer;
+begin
+ result:= tdesignwindow(window).fgridsizex;
+end;
+
+function tformdesignerfo.gridsizey: integer;
+begin
+ result:= tdesignwindow(window).fgridsizey;
+end;
+
+function tformdesignerfo.showgrid: boolean;
+begin
+ result:= tdesignwindow(window).fshowgrid;
+end;
+
+function tformdesignerfo.snaptogrid: boolean;
+begin
+ result:= tdesignwindow(window).fsnaptogrid;
 end;
 
 initialization

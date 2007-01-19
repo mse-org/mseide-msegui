@@ -1497,7 +1497,7 @@ end;
 procedure ttabpage.loaded;
 begin
  if fparentwidget is tcustomtabwidget then begin
-  include(fwidgetstate,ws_nodesignvisible);
+  include(fwidgetstate1,ws1_nodesignvisible);
  end;
  inherited;
 end;
@@ -1633,7 +1633,7 @@ end;
 procedure ttabform.loaded;
 begin
  if fparentwidget is tcustomtabwidget then begin
-  include(fwidgetstate,ws_nodesignvisible);
+  include(fwidgetstate1,ws1_nodesignvisible);
  end;
  inherited;
 end;
@@ -1915,7 +1915,7 @@ begin
    ftabs.tabs.insert(tab,aindex);
    ftabs.tabs.endupdate(true);
   end;
-  include(widget1.fwidgetstate,ws_nodesignvisible);
+  include(widget1.fwidgetstate1,ws1_nodesignvisible);
   page.settabwidget(self);
   pagechanged(page);
   if not (csloading in componentstate) then begin
@@ -1949,7 +1949,7 @@ begin
    ftabs.flayoutinfo.activetab:= factivepageindex;
    ftabs.tabs.delete(int1);
    with widget1 do begin
-    exclude(fwidgetstate,ws_nodesignvisible);
+    exclude(fwidgetstate1,ws1_nodesignvisible);
     if page.gettabwidget = self then begin
      page.settabwidget(nil);
     end;

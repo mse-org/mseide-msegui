@@ -362,7 +362,7 @@ constructor tcustombutton.create(aowner: tcomponent);
 begin
  initactioninfo(factioninfo);
  inherited;
- include(fwidgetstate,ws_nodesignframe);
+ include(fwidgetstate1,ws1_nodesignframe);
  size:= makesize(defaultbuttonwidth,defaultbuttonheight);
 end;
 
