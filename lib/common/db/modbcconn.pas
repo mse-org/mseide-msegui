@@ -419,7 +419,7 @@ procedure TODBCConnection.DeAllocateCursorHandle(var cursor: TSQLCursor);
 begin
   // make sure we don't deallocate the cursor if the connection was lost already
   if not Connected then
-    (cursor as TODBCCursor).FSTMTHandle:=SQL_INVALID_HANDLE;
+    pointer((cursor as TODBCCursor).FSTMTHandle):=pointer(SQL_INVALID_HANDLE);
 
   FreeAndNil(cursor); // the destructor of TODBCCursor frees the ODBC Statement handle
 end;
@@ -896,7 +896,7 @@ begin
   
   FBlobStreams.Free;
 
-  if FSTMTHandle<>SQL_INVALID_HANDLE then
+  if pointer(FSTMTHandle)<>pointer(SQL_INVALID_HANDLE) then
   begin
     // deallocate statement handle
     Res:=SQLFreeHandle(SQL_HANDLE_STMT, FSTMTHandle);

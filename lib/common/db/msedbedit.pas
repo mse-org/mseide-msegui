@@ -1303,7 +1303,7 @@ type
    procedure setrow(arow: integer);
    procedure changed;
    function empty(index: integer): boolean;
-   procedure updateeditoptions(const aoptions: optionseditty);
+   procedure updateeditoptions(var aoptions: optionseditty);
    procedure showrect(const arect: rectty; const aframe: tcustomframe);
    procedure widgetpainted(const canvas: tcanvas);
    function nullcheckneeded(const newfocus: twidget): boolean;
@@ -5834,7 +5834,7 @@ begin
  result:= false;
 end;
 
-procedure tcustomdbstringgrid.updateeditoptions(const aoptions: optionseditty);
+procedure tcustomdbstringgrid.updateeditoptions(var aoptions: optionseditty);
 begin
  //dummy
 end;
