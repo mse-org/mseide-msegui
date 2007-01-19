@@ -146,7 +146,7 @@ const
 
  defaultfontnames: defaultfontnamesty =
   //stf_default  stf_menu stf_report   stf_prop      stf_fixed,
-      ('',          '',  'Arial'     'MS Sans Serif','Courier',
+      ('',          '',  'Arial'  ,  'MS Sans Serif','Courier',
   //stf_helvetica stf_roman          stf_courier
       'Arial', 'Times New Roman', 'Courier New');
 
