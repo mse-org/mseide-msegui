@@ -466,7 +466,7 @@ end;
 Procedure TSQLConnection.ExecuteDirect(const SQL: String);
 
 begin
-  ExecuteDirect(SQL,FTransaction);
+ ExecuteDirect(SQL,FTransaction);
 end;
 
 Procedure TSQLConnection.ExecuteDirect(SQL: String;

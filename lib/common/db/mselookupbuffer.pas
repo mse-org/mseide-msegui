@@ -440,7 +440,7 @@ begin
  end;
 end;
 
-function tcustomlookupbuffer.find(const fieldno: integer; const avalue: real;
+function tcustomlookupbuffer.find(const fieldno: integer; const avalue: realty;
            out aindex: integer; const filter: lbfiltereventty = nil): boolean;
 begin
  checkbuffer;

@@ -15,7 +15,8 @@ unit mseguiintf; //i386-linux
 interface
 
 uses
- Xlib,msetypes,msegui,msegraphics,msegraphutils,mseevent,msepointer,mseguiglob,
+ {$ifdef FPC}xlib{$else}Xlib{$endif},msetypes,msegui,msegraphics,msegraphutils,
+ mseevent,msepointer,mseguiglob,
  msethread{$ifdef FPC},x,xutil,dynlibs{$endif},libc,msesysintf,msestockobjects,
  msestrings;
 
@@ -564,7 +565,9 @@ var
  defscreen: pscreen;
  defvisual: msepvisual;
  defdepth: integer;
+ msecolormap: colormap;
  istruecolor: boolean;
+ is8bitcolor: boolean;
  xredmask,xgreenmask,xbluemask: cardinal;
  xredshift,xgreenshift,xblueshift: integer;
  xredshiftleft,xgreenshiftleft,xblueshiftleft: boolean;
@@ -2085,7 +2088,18 @@ begin                                           //todo: speedup
   end;
 // end;
 end;
-
+{
+function gui_rgbtocolormappixel(rgb: cardinal): pixelty;
+begin
+ with rgbtriplety(rgb) do begin
+  if is8bitcolor and (red = green) and (red = blue) and (red <> 255) then begin
+   red:= red and xbluemask;
+   green:= green and xbluemask;       //more neutral gray
+  end;
+ end;
+ result:= gui_rgbtopixel(rgb);
+end;
+}
 function gui_pixeltorgb(pixel: cardinal): cardinal;
 begin
 // if istruecolor then begin
@@ -2438,6 +2452,10 @@ begin
  end
  else begin
   height:= rect.cy;
+ end;
+ if msecolormap <> 0 then begin
+  attributes.colormap:= msecolormap;
+  valuemask:= valuemask or cwcolormap;
  end;
  id:= xcreatewindow(appdisp,rootid,rect.x,rect.y,width,height,0,
      copyfromparent,copyfromparent,xlib.pvisual(copyfromparent),
@@ -4757,6 +4775,51 @@ begin
  result:= 0;
 end;
 
+procedure initcolormap;
+const
+ redm = $07;
+ reds = 5;
+ greenm = $38;
+ greens = 2;
+ bluem = $c0;
+ blues = 0;
+{
+ redm = $e0;
+ reds = 0;
+ greenm = $1c;
+ greens = 3;
+ bluem = $03;
+ blues = 6;
+}
+var
+ map1: array[0..255] of txcolor;
+ int1: integer;
+begin
+ msecolormap:= xcreatecolormap(appdisp,rootid,pointer(defvisual),allocall);
+ if msecolormap <> 0 then begin
+  xredshiftleft:= false;
+  xredshift:= 16 + reds;
+  xredmask:= redm;
+  xgreenshiftleft:= false;
+  xgreenshift:= 8 + greens;
+  xgreenmask:= greenm;
+  xblueshiftleft:= false;
+  xblueshift:= 0 + blues;
+  xbluemask:= bluem;
+  for int1:= 0 to 255 do begin
+   with map1[int1] do begin
+    pixel:= int1;
+    red:= ($ffff*(int1 and redm)) div redm ;
+    green:= ($ffff*(int1 and greenm)) div greenm ;
+    blue:= ($ffff*(int1 and bluem)) div bluem ;
+    flags:= dored or dogreen or doblue;
+    pad:= 0;
+   end;
+  end;
+  xstorecolors(appdisp,msecolormap,@map1,256);
+ end;
+end;
+
 function gui_init: guierrorty;
 label
  error;
@@ -4835,44 +4898,55 @@ begin
   goto error;
  end;
  {$ifdef FPC} {$checkpointer off} {$endif}
- istruecolor:= defvisual^._class = truecolor;
- {$ifdef FPC} {$checkpointer default} {$endif}
- if istruecolor then begin
- {$ifdef FPC} {$checkpointer off} {$endif}
-  xredmask:= defvisual^.red_mask;
-  xgreenmask:= defvisual^.green_mask;
-  xbluemask:= defvisual^.blue_mask;
- {$ifdef FPC} {$checkpointer default} {$endif}
-  xredshift:= highestbit(xredmask)-(redshift+7);
-  if xredshift < 0 then begin
-   xredshiftleft:= false;
-   xredshift:= -xredshift;
-  end
-  else begin
-   xredshiftleft:= true;
-  end;
-  xgreenshift:= highestbit(xgreenmask)-(greenshift+7);
-  if xgreenshift < 0 then begin
-   xgreenshiftleft:= false;
-   xgreenshift:= -xgreenshift;
-  end
-  else begin
-   xgreenshiftleft:= true;
-  end;
-  xblueshift:= highestbit(xbluemask)-(blueshift+7);
-  if xblueshift < 0 then begin
-   xblueshiftleft:= false;
-   xblueshift:= -xblueshift;
-  end
-  else begin
-   xblueshiftleft:= true;
+ is8bitcolor:= (defvisual^.map_entries = 256);
+ if (defvisual^._class = pseudocolor) and is8bitcolor then begin
+  istruecolor:= false;
+  initcolormap;
+  if msecolormap = 0 then begin
+   result:= gue_nocolormap;
+   goto error;
   end;
  end
  else begin
-  result:= gue_notruecolor;
-  goto error;
+  istruecolor:= (defvisual^._class = truecolor) or (defvisual^._class = directcolor);
+ {$ifdef FPC} {$checkpointer default} {$endif}
+  if istruecolor then begin
+  {$ifdef FPC} {$checkpointer off} {$endif}
+   xredmask:= defvisual^.red_mask;
+   xgreenmask:= defvisual^.green_mask;
+   xbluemask:= defvisual^.blue_mask;
+  {$ifdef FPC} {$checkpointer default} {$endif}
+   xredshift:= highestbit(xredmask)-(redshift+7);
+   if xredshift < 0 then begin
+    xredshiftleft:= false;
+    xredshift:= -xredshift;
+   end
+   else begin
+    xredshiftleft:= true;
+   end;
+   xgreenshift:= highestbit(xgreenmask)-(greenshift+7);
+   if xgreenshift < 0 then begin
+    xgreenshiftleft:= false;
+    xgreenshift:= -xgreenshift;
+   end
+   else begin
+    xgreenshiftleft:= true;
+   end;
+   xblueshift:= highestbit(xbluemask)-(blueshift+7);
+   if xblueshift < 0 then begin
+    xblueshiftleft:= false;
+    xblueshift:= -xblueshift;
+   end
+   else begin
+    xblueshiftleft:= true;
+   end;
+  end
+  else begin
+   result:= gue_notruecolor;
+   goto error;
+  end;
  end;
-
+ 
  hasxrender:= hasxrender and (xrenderqueryextension(msedisplay,@int1,@int2) <> 0);
  if hasxrender then begin
   screenrenderpictformat:= xrenderfindvisualformat(appdisp,pvisual(defvisual));
@@ -5020,6 +5094,10 @@ begin
   im:= nil;
  end;
  if appdisp <> nil then begin
+  if msecolormap <> 0 then begin
+   xfreecolormap(appdisp,msecolormap);
+   msecolormap:= 0;
+  end;
   xclosedisplay(appdisp);
   appdisp:= nil;
  end;

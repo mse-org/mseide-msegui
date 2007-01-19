@@ -33,7 +33,7 @@ type
  imselocate = interface(inullinterface)['{2680958F-F954-DA11-9015-00C0CA1308FF}']
    function locate(const key: integer; const field: tfield;
                      const options: locateoptionsty = []): locateresultty;
-   function locate(const key: string; const field: tfield; 
+   function locate(const key: string; const field: tfield;
                  const options: locateoptionsty = []): locateresultty;
  end;
   
@@ -681,7 +681,7 @@ type
   function readsequence(const sequencename: string): string;
   function writesequence(const sequencename: string;
                     const avalue: largeint): string;
-  procedure ExecuteDirect(SQL : String);
+  procedure ExecuteDirect(const SQL : String);
  end;
 
  databaseeventty = procedure(const sender: tdatabase) of object;

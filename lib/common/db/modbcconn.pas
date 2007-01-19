@@ -344,7 +344,7 @@ begin
   // I'm not sure whether this is correct; perhaps we should return nil
   // note that FDBHandle is a LongInt, because ODBC handles are integers, not pointers
   // I wonder how this will work on 64 bit platforms then (FK)
-  Result:=pointer(PtrInt(FDBCHandle));
+  Result:=pointer(FDBCHandle);
 end;
 
 procedure TODBCConnection.DoInternalConnect;
@@ -421,7 +421,7 @@ procedure TODBCConnection.DeAllocateCursorHandle(var cursor: TSQLCursor);
 begin
   // make sure we don't deallocate the cursor if the connection was lost already
   if not Connected then
-    (cursor as TODBCCursor).FSTMTHandle:=SQL_INVALID_HANDLE;
+    pointer((cursor as TODBCCursor).FSTMTHandle):= pointer(SQL_INVALID_HANDLE);
 
   FreeAndNil(cursor); // the destructor of TODBCCursor frees the ODBC Statement handle
 end;
@@ -915,7 +915,7 @@ begin
   
   FBlobStreams.Free;
 
-  if FSTMTHandle<>SQL_INVALID_HANDLE then
+  if pointer(FSTMTHandle) <> pointer(SQL_INVALID_HANDLE) then
   begin
     // deallocate statement handle
     Res:=SQLFreeHandle(SQL_HANDLE_STMT, FSTMTHandle);
