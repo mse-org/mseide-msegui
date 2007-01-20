@@ -4801,7 +4801,7 @@ const
  blues = 6;
 }
 var
- map1: array[0..255] of txcolor;
+ map1: array[0..255] of {$ifdef FPC}txcolor{$else}xcolor{$endif};
  int1: integer;
 begin
  msecolormap:= xcreatecolormap(appdisp,rootid,pointer(defvisual),allocall);
@@ -4821,8 +4821,13 @@ begin
     red:= ($ffff*(int1 and redm)) div redm ;
     green:= ($ffff*(int1 and greenm)) div greenm ;
     blue:= ($ffff*(int1 and bluem)) div bluem ;
+    {$ifdef FPC}
     flags:= dored or dogreen or doblue;
     pad:= 0;
+    {$else}
+    flags:= char(dored or dogreen or doblue);
+    pad:= #0;
+    {$endif}
    end;
   end;
   with map1[$f6] do begin //value for cl_background
@@ -4912,7 +4917,11 @@ begin
   goto error;
  end;
  {$ifdef FPC} {$checkpointer off} {$endif}
+ {$ifdef FPC}
  is8bitcolor:= defaultdepthofscreen(defscreen) = 8;
+ {$else}
+ is8bitcolor:= defscreen^.root_depth = 8;
+ {$endif}
  if (defvisual^._class = pseudocolor) and is8bitcolor then begin
   istruecolor:= false;
   initcolormap;
