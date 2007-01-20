@@ -799,7 +799,6 @@ type
    procedure clampinview(const arect: rectty; const bottomright: boolean); virtual;
                     //origin paintpos
 
-   procedure internalpaint(const canvas: tcanvas);
    function needsdesignframe: boolean; virtual;
    procedure dobeforepaint(const canvas: tcanvas); virtual;
    procedure dopaintbackground(const canvas: tcanvas); virtual;
@@ -920,6 +919,7 @@ type
    procedure sendtoback;
    procedure stackunder(const predecessor: twidget);
 
+   procedure paint(const canvas: tcanvas);
    procedure update; virtual;
    procedure updatecursorshape(force: boolean = false);
    procedure scrollwidgets(const dist: pointty);
@@ -4941,14 +4941,15 @@ end;
 
 function twidget.needsdesignframe: boolean;
 begin
- result:= (fwidgetstate * [ws_iswidget,ws_nodesignframe] = [ws_iswidget]) and
-             ((fcolor = cl_parent) or (fcolor = cl_transparent) or
-               (fparentwidget <> nil) and (fparentwidget.fcolor = fcolor)) and
+ result:= (ws_iswidget in fwidgetstate) and 
+                             not (ws_nodesignframe in fwidgetstate) and
+  ((fcolor = cl_transparent) or (fparentwidget <> nil) and 
+    (colortopixel(actualcolor) = colortopixel(fparentwidget.actualcolor))) and
  ((fframe = nil) or (fframe.fi.leveli = 0) and (fframe.fi.levelo = 0) and
        (fframe.fi.framewidth = 0));
 end;
 
-procedure twidget.internalpaint(const canvas: tcanvas);
+procedure twidget.paint(const canvas: tcanvas);
 var
  int1,int2: integer;
  saveindex: integer;
@@ -5023,7 +5024,7 @@ begin
      end;
      if not canvas.clipregionisempty then begin
       canvas.move(fwidgetrect.pos);
-      internalpaint(canvas);
+      paint(canvas);
      end;
      canvas.restore(saveindex);
     end;
@@ -8504,7 +8505,7 @@ begin
    try
     fupdateregion:= 0;
     result:= true;
-    fowner.internalpaint(fcanvas);
+    fowner.paint(fcanvas);
    finally
     if bo1 then begin
      tcaret1(app.fcaret).restore;
@@ -8525,7 +8526,7 @@ begin
      bmp.canvas.origin:= nullpoint;
      fupdateregion:= 0;
      result:= true;
-     fowner.internalpaint(bmp.canvas);
+     fowner.paint(bmp.canvas);
      bmp.paint(fcanvas,rect1);
     end
     else begin
