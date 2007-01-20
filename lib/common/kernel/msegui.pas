@@ -891,8 +891,6 @@ type
    procedure createframe;
    procedure createface;
    procedure createfont;
-
-   procedure paint(const canvas: tcanvas); virtual;
    
    function widgetstate: widgetstatesty;                 //iframe
    property widgetstate1: widgetstates1ty read fwidgetstate1;
@@ -937,6 +935,7 @@ type
    procedure sendtoback;
    procedure stackunder(const predecessor: twidget);
 
+   procedure paint(const canvas: tcanvas); virtual;
    procedure update; virtual;
    procedure updatecursorshape(force: boolean = false);
    procedure scrollwidgets(const dist: pointty);
