@@ -1530,8 +1530,11 @@ begin
   end;
  {$ifdef FPC} {$checkpointer default} {$endif}
  end;
- colormaps[cm_namedrgb,integer(cardinal(cl_0)-cardinal(cl_namedrgb))]:= mseguiintf.pixel0;
- colormaps[cm_namedrgb,integer(cardinal(cl_1)-cardinal(cl_namedrgb))]:= mseguiintf.pixel1;
+ colormaps[cm_namedrgb,integer(cardinal(cl_0)-cardinal(cl_namedrgb))]:= 
+                                                              mseguiintf.pixel0;
+ colormaps[cm_namedrgb,integer(cardinal(cl_1)-cardinal(cl_namedrgb))]:= 
+                                                              mseguiintf.pixel1;
+ gui_initcolormap;
 end;
 
 procedure setcolormapvalue(index: colorty; const red,green,blue: integer);

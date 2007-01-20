@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2006 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2007 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -70,6 +70,7 @@ function gui_rgbtopixel(rgb: cardinal): pixelty;
 function gui_pixeltorgb(pixel: pixelty): cardinal;
 //function gui_rgbtocolormappixel(rgb: cardinal): pixelty;
               //neutralizes color in 8bit coler depth
+function gui_initcolormap: guierrorty;
 
 function gui_regiontorects(const aregion: regionty): rectarty;
 //procedure gui_changegc(var drawinfo: drawinfoty; const values: gcvaluesty);

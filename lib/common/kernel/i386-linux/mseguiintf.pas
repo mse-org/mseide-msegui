@@ -4775,6 +4775,15 @@ begin
  result:= 0;
 end;
 
+function gui_initcolormap: guierrorty;
+begin
+ if is8bitcolor and istruecolor then begin
+  setcolormapvalue(cl_background,$d0,$e0,$d0);
+             //green instead of blue tint
+ end;
+ result:= gue_ok;
+end;
+
 procedure initcolormap;
 const
  redm = $07;
@@ -4815,6 +4824,11 @@ begin
     flags:= dored or dogreen or doblue;
     pad:= 0;
    end;
+  end;
+  with map1[$f6] do begin //value for cl_background
+   red:= $d000;
+   green:= $d000;
+   blue:= $d000;
   end;
   xstorecolors(appdisp,msecolormap,@map1,256);
  end;
@@ -4898,7 +4912,7 @@ begin
   goto error;
  end;
  {$ifdef FPC} {$checkpointer off} {$endif}
- is8bitcolor:= (defvisual^.map_entries = 256);
+ is8bitcolor:= defaultdepthofscreen(defscreen) = 8;
  if (defvisual^._class = pseudocolor) and is8bitcolor then begin
   istruecolor:= false;
   initcolormap;

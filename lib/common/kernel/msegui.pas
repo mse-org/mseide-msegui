@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2006 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2007 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -1347,7 +1347,7 @@ type
 
  tapplication = class(tmsecomponent)
   private
-//   fwindows: tpointerlist;
+   finiting: integer;
    fwindows: windowarty;
    factivewindow: twindow;
    fwantedactivewindow: twindow; //set by twindow.activate if modal
@@ -10639,13 +10639,18 @@ end;
 procedure tapplication.initialize;
 begin
  with tinternalapplication(self) do begin
-  if not (aps_inited in fstate) then begin
-   fdesigning:= false;
-   fstate:= [];
-   guierror(gui_init,self);
-   msetimer.init;
-   msegraphics.init;
-   include(fstate,aps_inited);
+  if not (aps_inited in fstate) and (finiting = 0) then begin
+   inc(finiting);
+   try
+    fdesigning:= false;
+    fstate:= [];
+    guierror(gui_init,self);
+    msetimer.init;
+    msegraphics.init;
+    include(fstate,aps_inited);
+   finally
+    dec(finiting);
+   end;
   end;
  end;
 end;
