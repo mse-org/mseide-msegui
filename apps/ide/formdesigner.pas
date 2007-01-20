@@ -142,8 +142,8 @@ type
    procedure placecomponent(const component: tcomponent; const apos: pointty);
   public
    constructor create(const aowner: tcomponent; const adesigner: tdesigner;
-                        const aintf: pdesignmoduleintfty); virtual;
-                                        reintroduce;
+                        const aintf: pdesignmoduleintfty); reintroduce; virtual;
+                        
    destructor destroy; override;
    function designnotification: idesignnotification;
    property modulerect: rectty read fwidgetrect;
