@@ -3818,6 +3818,11 @@ begin
  end;
 end;
 
+function gui_initcolormap: guierrorty;
+begin
+ result:= gue_ok; //dummy
+end;
+
 function gui_init: guierrorty;
 const
  classstyle = cs_owndc;
