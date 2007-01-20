@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2006 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2007 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -1533,7 +1533,7 @@ begin
   result:= false;
  end
  else begin
-  updatestate;
+  checkstate;
   rect1:= finfo.dest;
   with rect1 do begin
    case fcaptionpos of
