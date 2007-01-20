@@ -38,6 +38,7 @@ type
    fonbeforerender: beforerenderrecordeventty;
    fonrender: rendereventty;
    fstate: recordbandstatesty;
+   fonafterrender: notifyeventty;
   protected
    procedure setparentwidget(const avalue: twidget); override;   
    procedure internalpaint(const canvas: tcanvas); override;
@@ -49,11 +50,14 @@ type
    function bandheight: integer;
    procedure dobeforerender(var empty: boolean); virtual;
    procedure dorender(const acanvas: tcanvas); virtual;
+   procedure doafterrender; virtual;
   public
    property bandarea: tcustombandarea read fbandarea;
    property onbeforerender: beforerenderrecordeventty read fonbeforerender
                                write fonbeforerender;
    property onrender: rendereventty read fonrender write fonrender;
+   property onafterrender: notifyeventty read fonafterrender
+                               write fonafterrender;
  end;
 
  trecordband = class(tcustomrecordband)
@@ -80,6 +84,7 @@ type
    freportpage: tcustomreportpage;
    fonbeforerender: notifyeventty;
    fonrender: rendereventty;
+   fonafterrender: notifyeventty;
   protected
    procedure registerchildwidget(const child: twidget); override;
    procedure unregisterchildwidget(const child: twidget); override;
@@ -98,17 +103,21 @@ type
    procedure endrender;
    procedure dobeforerender; virtual;
    procedure dorender(const acanvas: tcanvas); virtual;
+   procedure doafterrender; virtual;
    procedure init; virtual;
   public
    property onbeforerender: notifyeventty read fonbeforerender
                                write fonbeforerender;
    property onrender: rendereventty read fonrender write fonrender;
+   property onafterrender: notifyeventty read fonafterrender
+                               write fonafterrender;
  end; 
  
  tbandarea = class(tcustombandarea)
   published
    property onbeforerender;
    property onrender;
+   property onafterrender;
  end;
 
  reportpagestatety = (rpps_inited,rpps_rendering,rpps_backgroundrendered);
@@ -127,6 +136,7 @@ type
    fpagewidth: real;
    fpageheight: real;
    fppmm: real;
+   fonafterrender: notifyeventty;
    procedure setpagewidth(const avalue: real);
    procedure setpageheight(const avalue: real);
    procedure updatepagesize;
@@ -146,6 +156,7 @@ type
    procedure beginarea(const acanvas: tcanvas; const sender: tcustombandarea);
    procedure dobeforerender; virtual;
    procedure dorender(const acanvas: tcanvas); virtual;
+   procedure doafterrender; virtual;
    procedure init; virtual;
    property ppmm: real read fppmm write setppmm; //pixel per mm
   public
@@ -155,6 +166,8 @@ type
    property onbeforerender: notifyeventty read fonbeforerender
                                write fonbeforerender;
    property onrender: rendereventty read fonrender write fonrender;
+   property onafterrender: notifyeventty read fonafterrender
+                               write fonafterrender;
    property pagewidth: real read fpagewidth write setpagewidth;
    property pageheight: real read fpageheight write setpageheight;
    property font: twidgetfont read getfont write setfont stored isfontstored;
@@ -174,6 +187,7 @@ type
  
    property onbeforerender;
    property onrender;   
+   property onafterrender;
  end;
 
  repdesigninfoty = record
@@ -186,6 +200,8 @@ type
  tcustomreport = class(twidget)
   private
    fppmm: real;
+   fonbeforerender: notifyeventty;
+   fonafterrender: notifyeventty;
    procedure setppmm(const avalue: real);
    function getreppages(index: integer): tcustomreportpage;
    procedure setreppages(index: integer; const avalue: tcustomreportpage);
@@ -225,6 +241,11 @@ type
    property grid_show: boolean read frepdesigninfo.showgrid write setgrid_show default true;
    property grid_snap: boolean read frepdesigninfo.snaptogrid write setgrid_snap default true;
    property grid_size: real read frepdesigninfo.gridsize write setgrid_size;   
+
+   property onbeforerender: notifyeventty read fonbeforerender
+                               write fonbeforerender;
+   property onafterrender: notifyeventty read fonafterrender
+                               write fonafterrender;
  end;
 
  treport = class(tcustomreport)
@@ -241,6 +262,8 @@ type
    property grid_show;
    property grid_snap;
    property grid_size;
+   property onbeforerender;
+   property onafterrender;
  end;
 
  reportclassty = class of treport;
@@ -318,6 +341,7 @@ begin
   finally
    fbandarea.endband(acanvas,self);
   end;
+  doafterrender;
  end;
 end;
 
@@ -353,6 +377,13 @@ procedure tcustomrecordband.endrender;
 begin
  exclude(fstate,rbs_rendering);
  exclude(fwidgetstate1,ws1_noclipchildren);
+end;
+
+procedure tcustomrecordband.doafterrender;
+begin
+ if canevent(tmethod(fonafterrender)) then begin
+  fonafterrender(self);
+ end;
 end;
 
 { tcustombandarea }
@@ -405,6 +436,9 @@ begin
    exclude(fstate,bas_inited);
   end;
   exclude(fstate,bas_rendering);
+ end;
+ if bas_backgroundrendered in fstate then begin
+  doafterrender;
  end;
 end;
 
@@ -503,6 +537,13 @@ begin
  end;
 end;
 
+procedure tcustombandarea.doafterrender;
+begin
+ if canevent(tmethod(fonafterrender)) then begin
+  fonafterrender(self);
+ end;
+end;
+
 { tcustomreportpage }
 
 constructor tcustomreportpage.create(aowner: tcomponent);
@@ -568,6 +609,9 @@ begin
   fareas[int1].render(acanvas);
  end;
  result:= not (rpps_backgroundrendered in fstate);
+ if not result then begin
+  doafterrender;
+ end;
 end;
 
 function tcustomreportpage.rendering: boolean;
@@ -684,6 +728,13 @@ begin
  inherited;
 end;
 
+procedure tcustomreportpage.doafterrender;
+begin
+ if canevent(tmethod(fonafterrender)) then begin
+  fonafterrender(self);
+ end;
+end;
+
  {tcustomreport}
  
 constructor tcustomreport.create(aowner: tcomponent);
@@ -769,6 +820,9 @@ begin
    aprinter.beginprint(acommand);
   end;
  end;
+ if canevent(tmethod(fonbeforerender)) then begin
+  fonbeforerender(self);
+ end;
  for int1:= 0 to high(freppages) do begin
   freppages[int1].beginrender;
  end;
@@ -780,9 +834,15 @@ begin
   for int1:= 0 to high(freppages) do begin
    freppages[int1].endrender;
   end;
-  if aprinter <> nil then begin
-   aprinter.endprint;
-   aprinter.ppmm:= rea1;
+  try
+   if canevent(tmethod(fonafterrender)) then begin
+    fonafterrender(self);
+   end;
+  finally
+   if aprinter <> nil then begin
+    aprinter.endprint;
+    aprinter.ppmm:= rea1;
+   end;
   end;
  end;
 end;
