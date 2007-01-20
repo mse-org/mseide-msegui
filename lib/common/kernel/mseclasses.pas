@@ -506,7 +506,7 @@ function findglobalcomponentlocked: boolean;
 
 function getenumnames(const atypeinfo: ptypeinfo): msestringarty;
 function getcorbainterface(const aobject: tobject; const aintf: ptypeinfo;
-                       out obj) : boolean;
+                                                  out obj) : boolean;
 
 function checkcanevent(const acomponent: tcomponent; const event: tmethod): boolean;
 

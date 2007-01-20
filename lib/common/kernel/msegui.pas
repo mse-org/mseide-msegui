@@ -75,7 +75,8 @@ type
                    ws1_anchorsizing,ws1_isstreamed,
                    ws1_noclipchildren,
                    ws1_nodesignvisible,ws1_nodesignframe,ws1_nodesignhandles,
-                   ws1_nodesigndelete
+                   ws1_nodesigndelete,
+                   ws1_fakevisible //used for report size calculations
                    );
  widgetstates1ty = set of widgetstate1ty;
 
@@ -811,7 +812,6 @@ type
    procedure clampinview(const arect: rectty; const bottomright: boolean); virtual;
                     //origin paintpos
 
-   procedure internalpaint(const canvas: tcanvas); virtual;
    function needsdesignframe: boolean; virtual;
    procedure dobeforepaint(const canvas: tcanvas); virtual;
    procedure dopaintbackground(const canvas: tcanvas); virtual;
@@ -891,6 +891,8 @@ type
    procedure createframe;
    procedure createface;
    procedure createfont;
+
+   procedure paint(const canvas: tcanvas); virtual;
    
    function widgetstate: widgetstatesty;                 //iframe
    property widgetstate1: widgetstates1ty read fwidgetstate1;
@@ -5036,13 +5038,13 @@ function twidget.needsdesignframe: boolean;
 begin
  result:= (ws_iswidget in fwidgetstate) and 
                              not (ws1_nodesignframe in fwidgetstate1) and
-             ((fcolor = cl_parent) or (fcolor = cl_transparent) or
-               (fparentwidget <> nil) and (fparentwidget.fcolor = fcolor)) and
+  ((fcolor = cl_transparent) or (fparentwidget <> nil) and 
+    (colortopixel(actualcolor) = colortopixel(fparentwidget.actualcolor))) and
  ((fframe = nil) or (fframe.fi.leveli = 0) and (fframe.fi.levelo = 0) and
        (fframe.fi.framewidth = 0));
 end;
 
-procedure twidget.internalpaint(const canvas: tcanvas);
+procedure twidget.paint(const canvas: tcanvas);
 var
  int1,int2: integer;
  saveindex: integer;
@@ -5120,7 +5122,7 @@ begin
      end;
      if not canvas.clipregionisempty then begin
       canvas.move(fwidgetrect.pos);
-      internalpaint(canvas);
+      paint(canvas);
      end;
      canvas.restore(saveindex);
     end;
@@ -7027,6 +7029,9 @@ begin
    end
    else begin
     include(fwidgetstate,ws_visible);
+    if (ws1_fakevisible in fwidgetstate1) and (fparentwidget <> nil) then begin
+     fparentwidget.widgetregionchanged(self);
+    end;
    end;
   end
   else begin
@@ -8641,7 +8646,7 @@ begin
    try
     fupdateregion:= 0;
     result:= true;
-    fowner.internalpaint(fcanvas);
+    fowner.paint(fcanvas);
    finally
     if bo1 then begin
      tcaret1(app.fcaret).restore;
@@ -8662,7 +8667,7 @@ begin
      bmp.canvas.origin:= nullpoint;
      fupdateregion:= 0;
      result:= true;
-     fowner.internalpaint(bmp.canvas);
+     fowner.paint(bmp.canvas);
      bmp.paint(fcanvas,rect1);
     end
     else begin

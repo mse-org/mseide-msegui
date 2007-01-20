@@ -22,7 +22,8 @@ const
   
 procedure Register;
 begin
- registercomponents('Rep',[{treportpage,}tbandarea,trecordband]); 
+ registercomponents('Rep',[{treportpage,}tbandarea,tbandgroup,
+                    trecordband]); 
  
  registerdesignmoduleclass(treport,reportintf,treportdesignerfo);
 end;

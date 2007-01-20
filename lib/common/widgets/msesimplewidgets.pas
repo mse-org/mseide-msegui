@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2006 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2007 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -244,7 +244,7 @@ type
  optionscalety = (osc_expandx,osc_shrinkx,osc_expandy,osc_shrinky);
  optionsscalety = set of optionscalety;
  
- tscalingwidget = class(tpublishedwidget)
+ tcustomscalingwidget = class(tpublishedwidget)
   private
    fonfontheightdelta: fontheightdeltaeventty;
    fonchildscaled: notifyeventty;
@@ -264,7 +264,14 @@ type
                      write fonfontheightdelta;
    property onchildscaled: notifyeventty read fonchildscaled write fonchildscaled;
  end;
-
+ 
+ tscalingwidget = class(tcustomscalingwidget)
+  published
+   property optionsscale;
+   property onfontheightdelta;
+   property onchildscaled;
+ end;
+ 
 const
  defaultgroupboxoptionswidget = defaultoptionswidget + 
         [ow_arrowfocusin,ow_arrowfocusout,ow_parenttabfocus,ow_subfocus];
@@ -863,9 +870,9 @@ begin
  captionoffset:= 4;
 end;
 
-{ tscalingwidget }
+{ tcustomscalingwidget }
 
-procedure tscalingwidget.dochildscaled(const sender: twidget);
+procedure tcustomscalingwidget.dochildscaled(const sender: twidget);
 begin
  if canevent(tmethod(fonchildscaled)) then begin
   fonchildscaled(self);
@@ -875,7 +882,7 @@ begin
  end;
 end;
 
-procedure tscalingwidget.dofontheightdelta(var delta: integer);
+procedure tcustomscalingwidget.dofontheightdelta(var delta: integer);
 begin
  if canevent(tmethod(fonfontheightdelta)) then begin
   fonfontheightdelta(self,delta);
@@ -883,7 +890,7 @@ begin
  inherited;
 end;
 
-procedure tscalingwidget.setoptionsscale(const avalue: optionsscalety);
+procedure tcustomscalingwidget.setoptionsscale(const avalue: optionsscalety);
 begin
  if foptionsscale <> avalue then begin
   foptionsscale:= avalue;
@@ -891,7 +898,7 @@ begin
  end;
 end;
 
-procedure tscalingwidget.updateoptionsscale;
+procedure tcustomscalingwidget.updateoptionsscale;
 var
  size1,size2: sizety;
  rect1: rectty;
@@ -943,13 +950,13 @@ begin
  end;
 end;
 
-procedure tscalingwidget.widgetregionchanged(const sender: twidget);
+procedure tcustomscalingwidget.widgetregionchanged(const sender: twidget);
 begin
  inherited;
  updateoptionsscale;
 end;
 
-procedure tscalingwidget.clientrectchanged;
+procedure tcustomscalingwidget.clientrectchanged;
 begin
  inherited;
  updateoptionsscale;

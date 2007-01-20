@@ -12,7 +12,7 @@ unit msereport;
 interface
 uses
  classes,msegui,msegraphics,msetypes,msewidgets,msegraphutils,mseclasses,
- msetabs,mseprinter,msestream,msearrayprops;
+ msetabs,mseprinter,msestream,msearrayprops,mseguiglob,msesimplewidgets;
 
 const
  defaultrepppmm = 3;
@@ -32,41 +32,73 @@ type
  recordbandstatety = (rbs_rendering);
  recordbandstatesty = set of recordbandstatety; 
  
- tcustomrecordband = class(tpublishedwidget)
+ ibandparent = interface(inullinterface)
+                        ['{B02EE732-4686-4E0C-8C18-419D7D020386}']
+  function beginband(const acanvas: tcanvas;
+                              const sender: tcustomrecordband): boolean;
+                   //true if area full
+  procedure endband(const acanvas: tcanvas; const sender: tcustomrecordband);  
+ end;
+ 
+ tcustomrecordband = class(tcustomscalingwidget)
   private
-   fbandarea: tcustombandarea;
+   fparentintf: ibandparent;
    fonbeforerender: beforerenderrecordeventty;
-   fonrender: rendereventty;
+   fonpaint: painteventty;
+   fonafterpaint: painteventty;
    fstate: recordbandstatesty;
-   fonafterrender: notifyeventty;
   protected
+   procedure inheritedpaint(const acanvas: tcanvas);
+   procedure paint(const canvas: tcanvas); override;
    procedure setparentwidget(const avalue: twidget); override;   
-   procedure internalpaint(const canvas: tcanvas); override;
    procedure render(const acanvas: tcanvas; var empty: boolean); virtual;
    procedure init; virtual;
    procedure beginrender;
    procedure endrender;
+   procedure doonpaint(const acanvas: tcanvas); override;
+   procedure doafterpaint(const acanvas: tcanvas); override;
    function rendering: boolean;
    function bandheight: integer;
    procedure dobeforerender(var empty: boolean); virtual;
-   procedure dorender(const acanvas: tcanvas); virtual;
-   procedure doafterrender; virtual;
   public
-   property bandarea: tcustombandarea read fbandarea;
+//   property bandarea: tcustombandarea read fbandarea;
    property onbeforerender: beforerenderrecordeventty read fonbeforerender
                                write fonbeforerender;
-   property onrender: rendereventty read fonrender write fonrender;
-   property onafterrender: notifyeventty read fonafterrender
-                               write fonafterrender;
+   property onpaint: painteventty read fonpaint write fonpaint;
+   property onafterpaint: painteventty read fonafterpaint write fonafterpaint;
  end;
 
  trecordband = class(tcustomrecordband)
   published
+   property optionsscale;
+   property onfontheightdelta;
+   property onchildscaled;
+
    property onbeforerender;
-   property onrender;
- end;
+   property onpaint;
+   property onafterpaint;
+  end;
  
  recordbandarty = array of tcustomrecordband;
+ 
+ tcustombandgroup = class(tcustomrecordband)
+  private
+   fbands: recordbandarty;
+  protected
+   procedure registerchildwidget(const child: twidget); override;
+   procedure unregisterchildwidget(const child: twidget); override;
+   procedure dobeforerender(var empty: boolean); override;
+//   procedure dorender(const acanvas: tcanvas); override;
+   procedure render(const acanvas: tcanvas; var empty: boolean); override;
+  public
+ end;
+
+ tbandgroup = class(tcustombandgroup)
+  published
+   property onbeforerender;
+   property onpaint;
+   property onafterpaint;
+ end;
  
  bandareastatety = (bas_inited,bas_backgroundrendered,bas_areafull,
                     bas_rendering);
@@ -74,7 +106,7 @@ type
 
  tcustomreportpage = class;
    
- tcustombandarea = class(tpublishedwidget)
+ tcustombandarea = class(tpublishedwidget,ibandparent)
   private
    fbands: recordbandarty;
    fstate: bandareastatesty;
@@ -83,17 +115,13 @@ type
    fsaveindex: integer;
    freportpage: tcustomreportpage;
    fonbeforerender: notifyeventty;
-   fonrender: rendereventty;
-   fonafterrender: notifyeventty;
+   fonpaint: painteventty;
+   fonafterpaint: painteventty;
   protected
    procedure registerchildwidget(const child: twidget); override;
    procedure unregisterchildwidget(const child: twidget); override;
    procedure setparentwidget(const avalue: twidget); override;   
-   procedure internalpaint(const canvas: tcanvas); override;
-   function beginband(const acanvas: tcanvas;
-                               const sender: tcustomrecordband): boolean;
-                    //true if area full
-   procedure endband(const acanvas: tcanvas; const sender: tcustomrecordband);  
+   procedure paint(const canvas: tcanvas); override;
    procedure renderbackground(const acanvas: tcanvas);
    function areafull: boolean;
    function render(const acanvas: tcanvas): boolean;
@@ -102,22 +130,26 @@ type
    procedure beginrender;
    procedure endrender;
    procedure dobeforerender; virtual;
-   procedure dorender(const acanvas: tcanvas); virtual;
-   procedure doafterrender; virtual;
+   procedure doonpaint(const acanvas: tcanvas); override;
+   procedure doafterpaint1(const acanvas: tcanvas); virtual;
    procedure init; virtual;
+           //ibandparent
+   function beginband(const acanvas: tcanvas;
+                               const sender: tcustomrecordband): boolean;
+                    //true if area full
+   procedure endband(const acanvas: tcanvas; const sender: tcustomrecordband);  
   public
    property onbeforerender: notifyeventty read fonbeforerender
                                write fonbeforerender;
-   property onrender: rendereventty read fonrender write fonrender;
-   property onafterrender: notifyeventty read fonafterrender
-                               write fonafterrender;
+   property onpaint: painteventty read fonpaint write fonpaint;
+   property onafterpaint: painteventty read fonafterpaint write fonafterpaint;
  end; 
  
  tbandarea = class(tcustombandarea)
   published
    property onbeforerender;
-   property onrender;
-   property onafterrender;
+   property onpaint;
+   property onafterpaint;
  end;
 
  reportpagestatety = (rpps_inited,rpps_rendering,rpps_backgroundrendered);
@@ -132,11 +164,12 @@ type
    fareas: bandareaarty;
    fstate: reportpagestatesty;
    fonbeforerender: notifyeventty;
-   fonrender: rendereventty;
+   fonpaint: painteventty;
+   fonafterpaint: painteventty;
    fpagewidth: real;
    fpageheight: real;
    fppmm: real;
-   fonafterrender: notifyeventty;
+   fpagenum: integer;
    procedure setpagewidth(const avalue: real);
    procedure setpageheight(const avalue: real);
    procedure updatepagesize;
@@ -155,8 +188,8 @@ type
    function rendering: boolean;
    procedure beginarea(const acanvas: tcanvas; const sender: tcustombandarea);
    procedure dobeforerender; virtual;
-   procedure dorender(const acanvas: tcanvas); virtual;
-   procedure doafterrender; virtual;
+   procedure doonpaint(const acanvas: tcanvas); override;
+   procedure doafterpaint1(const acanvas: tcanvas); virtual;
    procedure init; virtual;
    property ppmm: real read fppmm write setppmm; //pixel per mm
   public
@@ -165,9 +198,9 @@ type
           //true if finished
    property onbeforerender: notifyeventty read fonbeforerender
                                write fonbeforerender;
-   property onrender: rendereventty read fonrender write fonrender;
-   property onafterrender: notifyeventty read fonafterrender
-                               write fonafterrender;
+   property onpaint: painteventty read fonpaint write fonpaint;
+   property onafterpaint: painteventty read fonafterpaint write fonafterpaint;
+
    property pagewidth: real read fpagewidth write setpagewidth;
    property pageheight: real read fpageheight write setpageheight;
    property font: twidgetfont read getfont write setfont stored isfontstored;
@@ -186,8 +219,8 @@ type
    property font;
  
    property onbeforerender;
-   property onrender;   
-   property onafterrender;
+   property onpaint;   
+   property onafterpaint;
  end;
 
  repdesigninfoty = record
@@ -202,6 +235,7 @@ type
    fppmm: real;
    fonbeforerender: notifyeventty;
    fonafterrender: notifyeventty;
+   fprinter: tprinter;
    procedure setppmm(const avalue: real);
    function getreppages(index: integer): tcustomreportpage;
    procedure setreppages(index: integer; const avalue: tcustomreportpage);
@@ -223,6 +257,7 @@ type
    procedure getchildren(proc: tgetchildproc; root: tcomponent); override;
    procedure internalcreatefont; override;
    procedure defineproperties(filer: tfiler); override;
+   procedure nextpage(const acanvas: tcanvas);
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -305,11 +340,11 @@ end;
 
 procedure tcustomrecordband.setparentwidget(const avalue: twidget);
 begin
- if avalue is tcustombandarea then begin
-  fbandarea:= tcustombandarea(avalue);
+ if avalue <> nil then begin
+  avalue.getcorbainterface(typeinfo(ibandparent),fparentintf);
  end
  else begin
-  fbandarea:= nil;
+  fparentintf:= nil;
  end;
  inherited;
 end;
@@ -321,10 +356,17 @@ begin
  end;
 end;
 
-procedure tcustomrecordband.dorender(const acanvas: tcanvas);
+procedure tcustomrecordband.doonpaint(const acanvas: tcanvas);
 begin
- if canevent(tmethod(fonrender)) then begin
-  fonrender(self,acanvas);
+ if canevent(tmethod(fonpaint)) then begin
+  fonpaint(self,acanvas);
+ end;
+end;
+
+procedure tcustomrecordband.doafterpaint(const acanvas: tcanvas);
+begin
+ if canevent(tmethod(fonafterpaint)) then begin
+  fonafterpaint(self,acanvas);
  end;
 end;
 
@@ -332,16 +374,14 @@ procedure tcustomrecordband.render(const acanvas: tcanvas; var empty: boolean);
 begin
  dobeforerender(empty);
  if not empty and visible then begin
-  if fbandarea.beginband(acanvas,self) then begin
+  if fparentintf.beginband(acanvas,self) then begin
    exit;
   end;
   try
-   inherited internalpaint(acanvas);
-   dorender(acanvas);
+   inherited paint(acanvas);
   finally
-   fbandarea.endband(acanvas,self);
+   fparentintf.endband(acanvas,self);
   end;
-  doafterrender;
  end;
 end;
 
@@ -360,7 +400,12 @@ begin
  result:= bounds_cy;
 end;
 
-procedure tcustomrecordband.internalpaint(const canvas: tcanvas);
+procedure tcustomrecordband.inheritedpaint(const acanvas: tcanvas);
+begin
+ inherited paint(acanvas);
+end;
+
+procedure tcustomrecordband.paint(const canvas: tcanvas);
 begin
  if not rendering then begin
   inherited;
@@ -370,19 +415,69 @@ end;
 procedure tcustomrecordband.beginrender;
 begin
  fstate:= [rbs_rendering];
- include(fwidgetstate1,ws1_noclipchildren);
+ include(widgetstate1,ws1_noclipchildren);
 end;
 
 procedure tcustomrecordband.endrender;
 begin
  exclude(fstate,rbs_rendering);
- exclude(fwidgetstate1,ws1_noclipchildren);
+ exclude(widgetstate1,ws1_noclipchildren);
 end;
 
-procedure tcustomrecordband.doafterrender;
+
+{ tcustombandgroup }
+
+procedure tcustombandgroup.registerchildwidget(const child: twidget);
 begin
- if canevent(tmethod(fonafterrender)) then begin
-  fonafterrender(self);
+ inherited;
+ if child is tcustomrecordband then begin
+  additem(pointerarty(fbands),child);
+ end;
+end;
+
+procedure tcustombandgroup.unregisterchildwidget(const child: twidget);
+begin
+ removeitem(pointerarty(fbands),child);
+ inherited;
+end;
+
+procedure tcustombandgroup.dobeforerender(var empty: boolean);
+var
+ int1: integer;
+begin
+ inherited;
+ for int1:= 0 to high(fbands) do begin
+  fbands[int1].dobeforerender(empty);
+ end;
+end;
+{
+procedure tcustombandgroup.dorender(const acanvas: tcanvas);
+var
+ int1: integer;
+begin
+ inherited;
+ for int1:= 0 to high(fbands) do begin
+  fbands[int1].dorender(acanvas);
+ end;
+end;
+}
+
+procedure tcustombandgroup.render(const acanvas: tcanvas;
+               var empty: boolean);
+var
+ int1,int2: integer;
+ 
+begin
+ dobeforerender(empty);
+ if not empty and visible then begin
+  if fparentintf.beginband(acanvas,self) then begin
+   exit;
+  end;
+  try
+   inheritedpaint(acanvas);
+  finally
+   fparentintf.endband(acanvas,self);
+  end;
  end;
 end;
 
@@ -414,7 +509,7 @@ begin
 end;
 
 function tcustombandarea.render(const acanvas: tcanvas): boolean;
-var
+var                     //true if finished
  bo1: boolean;
 begin
  result:= true;
@@ -422,12 +517,13 @@ begin
   init;
  end;
  try
+  fstate:= fstate - [bas_areafull,bas_backgroundrendered];
   dobeforerender;
   while (factiveband <= high(fbands)) and not areafull do begin
-   bo1:= true;
+   bo1:= true; //empty
    fbands[factiveband].render(acanvas,bo1);
-   if bo1 or (bas_areafull in fstate) then begin
-    result:= result and bo1;
+   result:= result and bo1;
+   if bo1 then begin
     inc(factiveband);
    end;
   end;
@@ -438,7 +534,7 @@ begin
   exclude(fstate,bas_rendering);
  end;
  if bas_backgroundrendered in fstate then begin
-  doafterrender;
+  doafterpaint1(acanvas);
  end;
 end;
 
@@ -460,10 +556,17 @@ begin
  end;
 end;
 
-procedure tcustombandarea.dorender(const acanvas: tcanvas);
+procedure tcustombandarea.doonpaint(const acanvas: tcanvas);
 begin
- if canevent(tmethod(fonrender)) then begin
-  fonrender(self,acanvas);
+ if canevent(tmethod(fonpaint)) then begin
+  fonpaint(self,acanvas);
+ end;
+end;
+
+procedure tcustombandarea.doafterpaint1(const acanvas: tcanvas);
+begin
+ if canevent(tmethod(fonafterpaint)) then begin
+  fonafterpaint(self,acanvas);
  end;
 end;
 
@@ -471,8 +574,7 @@ procedure tcustombandarea.renderbackground(const acanvas: tcanvas);
 begin
  freportpage.beginarea(acanvas,self);
  acanvas.origin:= pos;
- inherited internalpaint(acanvas);
- dorender(acanvas);
+ inherited paint(acanvas);
 end;
 
 function tcustombandarea.beginband(const acanvas: tcanvas;
@@ -503,7 +605,7 @@ begin
  result:= bas_areafull in fstate;
 end;
 
-procedure tcustombandarea.internalpaint(const canvas: tcanvas);
+procedure tcustombandarea.paint(const canvas: tcanvas);
 begin
  if not rendering then begin
   inherited;
@@ -534,13 +636,6 @@ begin
  exclude(fwidgetstate1,ws1_noclipchildren);
  for int1:= 0 to high(fbands) do begin
   fbands[int1].endrender;
- end;
-end;
-
-procedure tcustombandarea.doafterrender;
-begin
- if canevent(tmethod(fonafterrender)) then begin
-  fonafterrender(self);
  end;
 end;
 
@@ -602,16 +697,21 @@ begin
  if not (rpps_inited in fstate) then begin
   init;
  end;
- acanvas.reset;
- acanvas.intersectcliprect(makerect(nullpoint,fwidgetrect.size));
- dobeforerender;
- for int1:= 0 to high(fareas) do begin
-  fareas[int1].render(acanvas);
- end;
- result:= not (rpps_backgroundrendered in fstate);
- if not result then begin
-  doafterrender;
- end;
+ fpagenum:= 0;
+ repeat
+  exclude(fstate,rpps_backgroundrendered);
+  acanvas.reset;
+  acanvas.intersectcliprect(makerect(nullpoint,fwidgetrect.size));
+  dobeforerender;
+  for int1:= 0 to high(fareas) do begin
+   fareas[int1].render(acanvas);
+  end;
+  result:= not (rpps_backgroundrendered in fstate);
+  if not result then begin
+   doafterpaint1(acanvas);
+  end;
+  inc(fpagenum);
+ until result;
 end;
 
 function tcustomreportpage.rendering: boolean;
@@ -626,18 +726,27 @@ begin
  end;
 end;
 
-procedure tcustomreportpage.dorender(const acanvas: tcanvas);
+procedure tcustomreportpage.doonpaint(const acanvas: tcanvas);
 begin
- if canevent(tmethod(fonrender)) then begin
-  fonrender(self,acanvas);
+ if canevent(tmethod(fonpaint)) then begin
+  fonpaint(self,acanvas);
+ end;
+end;
+
+procedure tcustomreportpage.doafterpaint1(const acanvas: tcanvas);
+begin
+ if canevent(tmethod(fonafterpaint)) then begin
+  fonafterpaint(self,acanvas);
  end;
 end;
 
 procedure tcustomreportpage.renderbackground(const acanvas: tcanvas);
 begin
+ if fpagenum <> 0 then begin
+  freport.nextpage(acanvas);
+ end;
  acanvas.origin:= pos;
- inherited internalpaint(acanvas);
- dorender(acanvas);
+ inherited paint(acanvas);
  include(fstate,rpps_backgroundrendered);
 end;
 
@@ -728,13 +837,6 @@ begin
  inherited;
 end;
 
-procedure tcustomreportpage.doafterrender;
-begin
- if canevent(tmethod(fonafterrender)) then begin
-  fonafterrender(self);
- end;
-end;
-
  {tcustomreport}
  
 constructor tcustomreport.create(aowner: tcomponent);
@@ -804,12 +906,46 @@ end;
 function tcustomreport.internalrender(const acanvas: tcanvas;
                const aprinter: tprinter; const acommand: string;
                const astream: ttextstream): boolean;
+ procedure fakevisible(const awidget: twidget; const aset: boolean);
+ var 
+  int1: integer;
+ begin
+  with twidget1(awidget) do begin
+   if aset then begin
+    include(fwidgetstate1,ws1_fakevisible);
+   end
+   else begin
+    exclude(fwidgetstate1,ws1_fakevisible);
+   end;
+   for int1:= 0 to high(fwidgets) do begin
+    fakevisible(fwidgets[int1],aset);
+   end;
+  end;
+ end;
+ 
+var               
+ rea1: real;
+
+ procedure dofinish;
+ var
+  int1: integer;
+ begin
+  fakevisible(self,false);
+  for int1:= 0 to high(freppages) do begin
+   freppages[int1].endrender;
+  end;
+  if aprinter <> nil then begin
+   aprinter.endprint;
+   aprinter.ppmm:= rea1;
+  end;
+ end;
+ 
 var
  int1: integer;
  bo1: boolean;
- rea1: real;
 begin
  result:= true;
+ fprinter:= aprinter;
  if aprinter <> nil then begin
   rea1:= aprinter.ppmm;
   aprinter.ppmm:= fppmm;
@@ -820,29 +956,29 @@ begin
    aprinter.beginprint(acommand);
   end;
  end;
- if canevent(tmethod(fonbeforerender)) then begin
-  fonbeforerender(self);
- end;
+ fakevisible(self,true);
  for int1:= 0 to high(freppages) do begin
   freppages[int1].beginrender;
+ end;
+ try
+  if canevent(tmethod(fonbeforerender)) then begin
+   fonbeforerender(self);
+  end;
+ except
+  dofinish;
+  raise;
  end;
  try
   for int1:= 0 to high(freppages) do begin
    freppages[int1].render(acanvas);
   end;
  finally
-  for int1:= 0 to high(freppages) do begin
-   freppages[int1].endrender;
-  end;
   try
    if canevent(tmethod(fonafterrender)) then begin
     fonafterrender(self);
    end;
   finally
-   if aprinter <> nil then begin
-    aprinter.endprint;
-    aprinter.ppmm:= rea1;
-   end;
+   dofinish;
   end;
  end;
 end;
@@ -959,6 +1095,13 @@ begin
  filer.defineproperty('repdesigninfo',{$ifdef FPC}@{$endif}readrepdesigninfo,
                                  {$ifdef FPC}@{$endif}writerepdesigninfo,true);
  inherited;
+end;
+
+procedure tcustomreport.nextpage(const acanvas: tcanvas);
+begin
+ if acanvas is tcustomprintercanvas then begin
+  tcustomprintercanvas(acanvas).nextpage;
+ end;
 end;
 
  {treport}
