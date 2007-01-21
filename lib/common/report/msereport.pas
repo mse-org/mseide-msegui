@@ -12,7 +12,8 @@ unit msereport;
 interface
 uses
  classes,msegui,msegraphics,msetypes,msewidgets,msegraphutils,mseclasses,
- msetabs,mseprinter,msestream,msearrayprops,mseguiglob,msesimplewidgets;
+ msetabs,mseprinter,msestream,msearrayprops,mseguiglob,msesimplewidgets,
+ msedrawtext,msestrings,mserichstring;
 
 const
  defaultrepppmm = 3;
@@ -28,7 +29,54 @@ type
                                const acanvas: tcanvas) of object;
  beforerenderrecordeventty = procedure(const sender: tcustomrecordband;
                                           var empty: boolean) of object;
+
+ treptabfont = class(tparentfont)
+  protected
+   class function getinstancepo(owner: tobject): pfont; override;
+ end;
+
+ treptabulatoritem = class(ttabulatoritem)
+  private
+   fvalue: richstringty;
+   ffont: treptabfont;
+   procedure setvalue(const avalue: msestring);
+   procedure setrichvalue(const avalue: richstringty);
+   function getfont: treptabfont;
+   procedure setfont(const avalue: treptabfont);
+   function isfontstored: boolean;
+   procedure createfont;
+   procedure changed;
+   procedure fontchanged(const asender: tobject);
+  public 
+   destructor destroy; override;
+   property richvalue: richstringty read fvalue write setrichvalue;
+  published
+   property value: msestring read fvalue.text write setvalue;
+   property font: treptabfont read getfont write setfont stored isfontstored;
+ end;
  
+ treptabulators = class(tcustomtabulators)
+  private
+   finfo: drawtextinfoty;
+   fband: tcustomrecordband;
+   fminsize: sizety;
+   fsizevalid: boolean;
+   function getitems(const index: integer): treptabulatoritem;
+   procedure setitems(const index: integer; const avalue: treptabulatoritem);
+   procedure processvalues(const acanvas: tcanvas; const adest: rectty;
+                        const apaint: boolean);
+  protected
+   class function getitemclass: tabulatoritemclassty; override;
+   procedure paint(const acanvas: tcanvas; const adest: rectty);
+   procedure checksize;
+  public
+   constructor create(const aowner: tcustomrecordband);
+   property items[const index: integer]: treptabulatoritem read getitems 
+                       write setitems; default;
+ published
+   property defaultdist;
+ end;
+  
  recordbandstatety = (rbs_rendering);
  recordbandstatesty = set of recordbandstatety; 
  
@@ -47,29 +95,43 @@ type
    fonpaint: painteventty;
    fonafterpaint: painteventty;
    fstate: recordbandstatesty;
+   ftabs: treptabulators;
+   fupdating: integer;
+   procedure settabs(const avalue: treptabulators);
   protected
+   procedure minclientsizechanged;
+   procedure fontchanged; override;
    procedure inheritedpaint(const acanvas: tcanvas);
    procedure paint(const canvas: tcanvas); override;
    procedure setparentwidget(const avalue: twidget); override;   
+   function calcminscrollsize: sizety; override;
    procedure render(const acanvas: tcanvas; var empty: boolean); virtual;
    procedure init; virtual;
    procedure beginrender;
    procedure endrender;
+   procedure dopaint(const acanvas: tcanvas); override;
    procedure doonpaint(const acanvas: tcanvas); override;
    procedure doafterpaint(const acanvas: tcanvas); override;
    function rendering: boolean;
    function bandheight: integer;
    procedure dobeforerender(var empty: boolean); virtual;
   public
-//   property bandarea: tcustombandarea read fbandarea;
+   constructor create(aowner: tcomponent); override;
+   destructor destroy; override;
+   procedure beginupdate;
+   procedure endupdate;
    property onbeforerender: beforerenderrecordeventty read fonbeforerender
                                write fonbeforerender;
    property onpaint: painteventty read fonpaint write fonpaint;
    property onafterpaint: painteventty read fonafterpaint write fonafterpaint;
+   property tabs: treptabulators read ftabs write settabs;
+   property font: twidgetfont read getfont write setfont stored isfontstored;
  end;
 
  trecordband = class(tcustomrecordband)
   published
+   property font;
+   property tabs;
    property optionsscale;
    property onfontheightdelta;
    property onchildscaled;
@@ -91,10 +153,12 @@ type
 //   procedure dorender(const acanvas: tcanvas); override;
    procedure render(const acanvas: tcanvas; var empty: boolean); override;
   public
+   property font: twidgetfont read getfont write setfont stored isfontstored;
  end;
 
  tbandgroup = class(tcustombandgroup)
   published
+   property font;
    property onbeforerender;
    property onpaint;
    property onafterpaint;
@@ -139,6 +203,7 @@ type
                     //true if area full
    procedure endband(const acanvas: tcanvas; const sender: tcustomrecordband);  
   public
+   property font: twidgetfont read getfont write setfont stored isfontstored;
    property onbeforerender: notifyeventty read fonbeforerender
                                write fonbeforerender;
    property onpaint: painteventty read fonpaint write fonpaint;
@@ -147,6 +212,7 @@ type
  
  tbandarea = class(tcustombandarea)
   published
+   property font;
    property onbeforerender;
    property onpaint;
    property onafterpaint;
@@ -311,8 +377,9 @@ function getreportscale(const amodule: tcomponent): real;
 
 implementation
 uses
- msedatalist,sysutils,msedrawtext,msestreaming;
+ msedatalist,sysutils,msestreaming;
 type
+ tcustomframe1 = class(tcustomframe);
  twidget1 = class(twidget);
  tmsecomponent1 = class(tmsecomponent);
  
@@ -336,7 +403,188 @@ begin
 // end;
 end;
 
+{ treptabfot }
+
+class function treptabfont.getinstancepo(owner: tobject): pfont;
+begin
+ result:= @treptabulatoritem(owner).ffont;
+end;
+
+{ treptabulatoritem }
+
+destructor treptabulatoritem.destroy;
+begin
+ inherited;
+ ffont.free;
+end;
+
+procedure treptabulatoritem.setvalue(const avalue: msestring);
+begin
+ fvalue.text:= avalue;
+ fvalue.format:= nil;
+ changed;
+end;
+
+procedure treptabulatoritem.setrichvalue(const avalue: richstringty);
+begin
+ fvalue:= avalue;
+ changed;
+end;
+
+function treptabulatoritem.getfont: treptabfont;
+begin
+ getoptionalobject(treptabulators(fowner).fband.componentstate,ffont,
+                     {$ifdef FPC}@{$endif}createfont);
+ if ffont <> nil then begin
+  result:= ffont;
+ end
+ else begin
+  result:= treptabfont(treptabulators(fowner).fband.getfont);
+ end;
+end;
+
+procedure treptabulatoritem.createfont;
+begin
+ if ffont = nil then begin
+  ffont:= treptabfont.create;
+  ffont.onchange:= {$ifdef FPC}@{$endif}fontchanged;
+ end;
+end;
+
+procedure treptabulatoritem.setfont(const avalue: treptabfont);
+begin
+ if avalue <> ffont then begin
+  setoptionalobject(treptabulators(fowner).fband.componentstate,avalue,
+                 ffont,{$ifdef fpc}@{$endif}createfont);
+  changed;
+ end;
+end;
+
+function treptabulatoritem.isfontstored: boolean;
+begin
+ result:= ffont <> nil;
+end;
+
+procedure treptabulatoritem.changed;
+begin
+ with treptabulators(fowner),fband do begin
+  fsizevalid:= false;
+  minclientsizechanged;
+ end;
+end;
+
+procedure treptabulatoritem.fontchanged(const asender: tobject);
+begin
+ changed;
+end;
+
+{ treptabulators }
+
+constructor treptabulators.create(const aowner: tcustomrecordband);
+begin
+ fband:= aowner;
+ inherited create;
+end;
+
+class function treptabulators.getitemclass: tabulatoritemclassty;
+begin
+ result:= treptabulatoritem;
+end;
+
+function treptabulators.getitems(const index: integer): treptabulatoritem;
+begin
+ result:= treptabulatoritem(inherited items[index]);
+end;
+
+procedure treptabulators.setitems(const index: integer;
+               const avalue: treptabulatoritem);
+begin
+ inherited items[index]:= avalue;
+end;
+
+procedure treptabulators.processvalues(const acanvas: tcanvas;
+               const adest: rectty; const apaint: boolean);
+var
+ int1,int2,int3: integer;
+ rstr1: richstringty;
+begin
+ fminsize:= nullsize;
+ if count > 0 then begin
+  checkuptodate;
+  with finfo do begin
+   for int1:= 0 to count - 1 do begin
+    with treptabulatoritem(fitems[int1]) do begin
+     finfo.font:= font;
+     text:= fvalue;
+     dest:= adest;
+     textrect(acanvas,finfo);
+     with ftabs[int1] do begin
+      case kind of
+       tak_left: begin
+        dest.x:= adest.x + pos;
+       end;
+       tak_right: begin
+        dest.x:= adest.x + pos - res.cx;
+       end;
+       tak_centered: begin
+        dest.x:= adest.x + pos - res.cx div 2;
+       end;
+       else begin //tak_decimal
+        int2:= findlastchar(fvalue.text,msechar(decimalseparator));
+        if int2 > 0 then begin
+         rstr1:= richcopy(fvalue,int2,bigint);
+         int3:= textrect(acanvas,rstr1,[],finfo.font).cx;
+        end
+        else begin
+         int3:= 0;
+        end;
+        dest.x:= adest.x + pos - res.cx + int3; 
+       end;
+      end;
+     end;
+    end;
+    int2:= dest.x + res.cx;
+    if int2 > fminsize.cx then begin
+     fminsize.cx:= int2;
+    end;
+    int2:= dest.y + res.cy;
+    if int2 > fminsize.cy then begin
+     fminsize.cy:= int2;
+    end;
+    if apaint then begin
+     drawtext(acanvas,finfo);
+    end;
+   end;
+  end;
+ end;
+ fsizevalid:= true;
+end;
+
+procedure treptabulators.paint(const acanvas: tcanvas; const adest: rectty);
+begin
+ processvalues(acanvas,adest,true);
+end;
+
+procedure treptabulators.checksize;
+begin
+ if not fsizevalid then begin
+  processvalues(fband.getcanvas,fband.innerclientrect,false);
+ end;
+end;
+
 { tcustomrecordband }
+
+constructor tcustomrecordband.create(aowner: tcomponent);
+begin
+ ftabs:= treptabulators.create(self);
+ inherited;
+end;
+
+destructor tcustomrecordband.destroy;
+begin
+ inherited;
+ ftabs.free;
+end;
 
 procedure tcustomrecordband.setparentwidget(const avalue: twidget);
 begin
@@ -360,13 +608,6 @@ procedure tcustomrecordband.doonpaint(const acanvas: tcanvas);
 begin
  if canevent(tmethod(fonpaint)) then begin
   fonpaint(self,acanvas);
- end;
-end;
-
-procedure tcustomrecordband.doafterpaint(const acanvas: tcanvas);
-begin
- if canevent(tmethod(fonafterpaint)) then begin
-  fonafterpaint(self,acanvas);
  end;
 end;
 
@@ -424,6 +665,94 @@ begin
  exclude(widgetstate1,ws1_noclipchildren);
 end;
 
+procedure tcustomrecordband.settabs(const avalue: treptabulators);
+begin
+ ftabs.assign(avalue);
+end;
+
+procedure tcustomrecordband.doafterpaint(const acanvas: tcanvas);
+var
+ ar1: segmentarty;
+ ar2: tabulatorarty;
+ int1,int2: integer;
+begin
+ inherited;
+ if canevent(tmethod(fonafterpaint)) then begin
+  fonafterpaint(self,acanvas);
+ end;
+ if csdesigning in componentstate then begin
+  ar2:= ftabs.tabs;
+  setlength(ar1,length(ar2));
+  int2:= innerclientwidgetpos.x;
+  for int1:= 0 to high(ar1) do begin
+   with ar1[int1] do begin
+    a.x:= ar2[int1].pos+int2;
+    a.y:= 0;
+    b.x:= a.x;
+    b.y:= fwidgetrect.cy;
+   end;
+  end;
+  acanvas.dashes:= #2#2;
+  acanvas.drawlinesegments(ar1,cl_red);
+  acanvas.dashes:= '';
+ end;
+end;
+
+procedure tcustomrecordband.dopaint(const acanvas: tcanvas);
+begin
+ inherited;
+ ftabs.paint(acanvas,innerclientrect);
+end;
+
+function tcustomrecordband.calcminscrollsize: sizety;
+var
+ size1: sizety;
+begin
+ result:= inherited calcminscrollsize;
+ ftabs.checksize;
+ if fframe = nil then begin
+  size1:= ftabs.fminsize;
+ end
+ else begin
+  size1:= addsize(tcustomframe1(fframe).fi.innerframe.bottomright,
+                          ftabs.fminsize);
+ end;
+ with size1 do begin
+  if cx > result.cx then begin
+   result.cx:= cx;
+  end;
+  if cy > result.cy then begin
+   result.cy:= cy
+  end;
+ end;
+end;
+
+procedure tcustomrecordband.minclientsizechanged;
+begin
+ if (fupdating <= 0) and not (csloading in componentstate) then begin
+  clientrectchanged;
+ end;
+end;
+
+procedure tcustomrecordband.fontchanged;
+begin
+ ftabs.fsizevalid:= false;
+ inherited;
+ minclientsizechanged;
+end;
+
+procedure tcustomrecordband.beginupdate;
+begin
+ inc(fupdating);
+end;
+
+procedure tcustomrecordband.endupdate;
+begin
+ dec(fupdating);
+ if fupdating = 0 then begin
+  clientrectchanged;
+ end;
+end;
 
 { tcustombandgroup }
 

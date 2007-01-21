@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2006 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2007 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -3395,7 +3395,7 @@ end;
 procedure tcanvas.drawlinesegments(const apoints: array of segmentty;
                const acolor: colorty = cl_default);
 begin
- if checkforeground(acolor,true) then begin
+ if (high(apoints) >= 0) and checkforeground(acolor,true) then begin
   with fdrawinfo.points do begin
    points:= @apoints[0];
    count:= length(apoints) * 2;

@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2006 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2007 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -53,23 +53,25 @@ type
    property kind: tabulatorkindty read fkind write setkind default tak_left;
    property pos: real read fpos write setpos;
  end;
-
+ tabulatoritemclassty = class of ttabulatoritem;
+ 
  tcustomtabulators = class(townedpersistentarrayprop)
   private
    fppmm: real;
    fuptodate: boolean;
-   ftabs: tabulatorarty;
    fdefaultdist: real;
    procedure setppmm(const avalue: real);
    function gettabs: tabulatorarty;
-   procedure checkuptodate;
    function getitems(const index: integer): ttabulatoritem;
    procedure setitems(const index: integer; const avalue: ttabulatoritem);
    procedure setdefaultdist(const avalue: real);
    function getpos(const index: integer): integer;
   protected
+   ftabs: tabulatorarty;
+   procedure checkuptodate;
    procedure dochange(const index: integer); override;
    procedure changed(const sender: ttabulatoritem);
+   class function getitemclass: tabulatoritemclassty; virtual;
   public
    constructor create; reintroduce;
    procedure assign(source: tpersistent); override;
@@ -1023,7 +1025,7 @@ end;
 constructor tcustomtabulators.create;
 begin
  fppmm:= defaultppmm;
- inherited create(self,ttabulatoritem);
+ inherited create(self,getitemclass);
 end;
 
 procedure tcustomtabulators.assign(source: tpersistent);
@@ -1045,6 +1047,11 @@ begin
  else begin
   inherited;
  end;
+end;
+
+class function tcustomtabulators.getitemclass: tabulatoritemclassty;
+begin
+ result:= ttabulatoritem;
 end;
 
 procedure tcustomtabulators.changed(const sender: ttabulatoritem);
