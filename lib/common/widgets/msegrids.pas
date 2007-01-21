@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2006 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2007 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -9160,13 +9160,20 @@ begin
   if frowcount >= frowcountmax then begin
    po1.x:= 0;
    po1.y:= -fystep;
-   updatelayout1;
-   scrollrect(po1,fdatarecty,scrollcaret);
+   if updatingbefore = 0 then begin
+    updatelayout1;
+    scrollrect(po1,fdatarecty,scrollcaret);
+   end
+   else begin
+    include(fstate,gs_invalidated);
+   end;
    rowcount:= frowcount+1;
    updatelayout1;
 //   scrollrect(po1,fdatarecty,scrollcaret);
    dec(fnoinvalidate);
-   rowchanged(frowcount-1);
+   if updatingbefore = 0 then begin
+    rowchanged(frowcount-1);
+   end;
   end
   else begin
    rowcount:= rowcount+1;
