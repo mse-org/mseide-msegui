@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2006 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2007 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -9728,7 +9728,11 @@ end;
 
 procedure tinternalapplication.waitevent;
 begin
+ while gui_hasevent do begin
+  feventlist.add(gui_getevent);
+ end;
  if feventlist.count = 0 then begin
+  inc(fidlecount);
   include(fstate,aps_waiting);
   feventlist.add(gui_getevent);
   exclude(fstate,aps_waiting);
@@ -10055,7 +10059,6 @@ begin       //eventloop
       checkwindowstack;
      end;
      checkcursorshape;
-     inc(fidlecount);
      if once then begin
       break;
      end;
@@ -10848,16 +10851,14 @@ function tapplication.checkoverload(const asleepus: integer = 100000): boolean;
 var
  int1: integer;
 begin
- result:= not (aps_waiting in fstate) and (fidlecount = 0);
- if result then begin
-  fidlecount:= 0;
-  if result and (asleepus >= 0) and not ismainthread then begin
-   int1:= unlockall;
-   repeat
-    sleepus(asleepus);
-   until fidlecount > 0;
-   relockall(int1);
-  end;
+ result:= (fidlecount = 0) and not (aps_waiting in fstate);
+ fidlecount:= 0;
+ if result and (asleepus >= 0) and not ismainthread then begin
+  int1:= unlockall;
+  repeat
+   sleepus(asleepus);
+  until (fidlecount > 0) or (aps_waiting in fstate);
+  relockall(int1);
  end;
 end;
 

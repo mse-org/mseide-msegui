@@ -1,4 +1,4 @@
-{ MSEide Copyright (c) 1999-2006 by Martin Schreiber
+{ MSEide Copyright (c) 1999-2007 by Martin Schreiber
    
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -64,7 +64,9 @@ procedure domake(atag: integer);
 begin
  killmake;
  maker:= tmaker.Create(atag);
- messagefo.messages.show;
+ if projectoptions.closemessages then begin
+  messagefo.messages.show;
+ end;
 end;
 
 procedure abortmake;
@@ -213,9 +215,6 @@ begin
  with messagefo.messages do begin
   datacols[0].readpipe(str1);
   showlastrow;
-//  if not (frame.sbvert.clicked or frame.sbvert.clicked) then begin
-//   showcell(makegridcoord(0,bigint));
-//  end;
  end;
  if fmessagefile <> nil then begin
   fmessagefile.writestr(str1);
