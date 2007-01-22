@@ -1177,6 +1177,7 @@ end;
    fnumoffset: integer; //for fixcols
    fnonullcheck: integer;
    fnocheckvalue: integer;
+   fappendcount: integer;
    procedure setoptionsgrid(const avalue: optionsgridty); virtual;
 
    procedure doinsertrow(const sender: tobject); virtual;
@@ -1189,7 +1190,7 @@ end;
                  out info: celleventinfoty);
    procedure invalidate;
    procedure invalidatesinglecell(const cell: gridcoordty);
-   function checkinvalidate: boolean;
+   function caninvalidate: boolean;
    function docheckcellvalue: boolean;
    procedure removeappendedrow;
    procedure internalupdatelayout;
@@ -1229,6 +1230,7 @@ end;
    procedure sortchanged;
    procedure sortinvalid;
    procedure checksort;
+   procedure checkinvalidate;
    function startanchor: gridcoordty;
    function endanchor: gridcoordty;
 
@@ -3142,7 +3144,7 @@ end;
 procedure tfixrow.changed;
 begin
  inherited;
- if fgrid.checkinvalidate then begin
+ if fgrid.caninvalidate then begin
   fgrid.invalidaterect(fgrid.cellrect(makegridcoord(invalidaxis,getrowindex)));
  end;
 end;
@@ -4209,7 +4211,7 @@ end;
 procedure tcustomstringcol.setitems(aindex: integer; const Value: msestring);
 begin
  tmsestringdatalist(fdata)[aindex]:= value;
- cellchanged(aindex);
+ cellchanged(aindex); //??? already called?
 end;
 
 function tcustomstringcol.getdatalist: tmsestringdatalist;
@@ -5604,13 +5606,13 @@ end;
 
 procedure tcustomgrid.invalidate;
 begin
- if checkinvalidate then begin
+ if caninvalidate then begin
   inherited;
   exclude(fstate,gs_invalidated);
  end;
 end;
 
-function tcustomgrid.checkinvalidate: boolean;
+function tcustomgrid.caninvalidate: boolean;
 begin
  if fnoinvalidate = 0 then begin
   result:= (fupdating = 0) and not (csloading in componentstate);
@@ -9132,6 +9134,70 @@ procedure tcustomgrid.clear; //sets rowcount to 0
 begin
  rowcount:= 0;
 end;
+(*
+function tcustomgrid.appendrow: integer; //returns index of new row
+var
+ updatingbefore: integer;
+ noinvalidatebefore: integer;
+ po1: pointty;
+ statebefore: framestatesty;
+ scrollheightbefore: integer;
+ 
+ procedure updatelayout1;
+ begin
+  fupdating:= 0;
+  internalupdatelayout;
+  fupdating:= updatingbefore;
+ end;
+var
+ rect1: rectty; 
+begin
+ statebefore:= tgridframe(fframe).fstate;
+ scrollheightbefore:= 
+  tcustomscrollbar1(tgridframe(fframe).fvert).fdrawinfo.areas[sbbu_move].dim.cy;
+ noinvalidatebefore:= fnoinvalidate;
+ updatingbefore:= fupdating;
+ beginupdate;
+ inc(fnoinvalidate);
+ try
+  if frowcount >= frowcountmax then begin
+   po1.x:= 0;
+   po1.y:= -fystep;
+   updatelayout1;
+   dec(fnoinvalidate);
+   checkinvalidate1;
+   inc(fnoinvalidate);
+   scrollrect(po1,fdatarecty,scrollcaret);
+   rowcount:= frowcount+1;
+   updatelayout1;
+//   scrollrect(po1,fdatarecty,scrollcaret);
+   dec(fnoinvalidate);
+//invalidaterect(clientrect);
+   rowchanged(frowcount-1);
+  end
+  else begin
+   rowcount:= rowcount+1;
+   updatelayout1;
+   dec(fnoinvalidate);
+   rowchanged(frowcount-1);
+  end;
+  result:= frowcount-1;
+  if statebefore * scrollbarframestates <> 
+                    tgridframe(fframe).fstate * scrollbarframestates then begin
+   invalidatewidget;
+  end
+  else begin
+   if tcustomscrollbar1(tgridframe(fframe).fvert).fdrawinfo.areas[sbbu_move].dim.cy <> 
+                    scrollheightbefore then begin
+    tcustomscrollbar1(tgridframe(fframe).fvert).invalidate;
+   end;
+  end;
+ finally
+  fnoinvalidate:= noinvalidatebefore;
+  fupdating:= updatingbefore
+ end;
+end;
+*)
 
 function tcustomgrid.appendrow: integer; //returns index of new row
 var
@@ -9147,7 +9213,10 @@ var
   internalupdatelayout;
   fupdating:= updatingbefore;
  end;
- 
+
+var
+ canscroll: boolean;
+  
 begin
  statebefore:= tgridframe(fframe).fstate;
  scrollheightbefore:= 
@@ -9155,27 +9224,30 @@ begin
  noinvalidatebefore:= fnoinvalidate;
  updatingbefore:= fupdating;
  beginupdate;
- inc(fnoinvalidate);
  try
   if frowcount >= frowcountmax then begin
+   canscroll:= showing and (fappendcount < 5);
+   inc(fappendcount);
    po1.x:= 0;
    po1.y:= -fystep;
-   if updatingbefore = 0 then begin
+   if canscroll then begin
     updatelayout1;
+    checkinvalidate;
     scrollrect(po1,fdatarecty,scrollcaret);
    end
    else begin
-    include(fstate,gs_invalidated);
+    invalidate;
    end;
+   inc(fnoinvalidate);
    rowcount:= frowcount+1;
    updatelayout1;
-//   scrollrect(po1,fdatarecty,scrollcaret);
    dec(fnoinvalidate);
-   if updatingbefore = 0 then begin
+   if canscroll then begin
     rowchanged(frowcount-1);
    end;
   end
   else begin
+   inc(fnoinvalidate);
    rowcount:= rowcount+1;
    updatelayout1;
    dec(fnoinvalidate);
@@ -9200,7 +9272,36 @@ end;
 
 procedure tcustomgrid.beginupdate;
 begin
+ if fupdating = 0 then begin
+  fappendcount:= 0;
+ end;
  inc(fupdating);
+end;
+
+procedure tcustomgrid.checkinvalidate;
+var
+ int1: integer;
+begin
+ if gs_invalidated in fstate then begin
+  invalidate;
+  finvalidatedcells:= nil;
+ end
+ else begin
+  if finvalidatedcells <> nil then begin
+   for int1:= 0 to high(finvalidatedcells) do begin
+    with finvalidatedcells[int1] do begin
+     if (row < 0) and (col < 0) then begin
+      invalidate;
+      break;
+     end
+     else begin
+      invalidatecell(finvalidatedcells[int1]);
+     end;
+    end;
+   end;
+   finvalidatedcells:= nil;
+  end;
+ end;
 end;
 
 procedure tcustomgrid.endupdate;
@@ -9224,26 +9325,7 @@ begin
    end;
   end;
   checksort;
-  if gs_invalidated in fstate then begin
-   invalidate;
-   finvalidatedcells:= nil;
-  end
-  else begin
-   if finvalidatedcells <> nil then begin
-    for int1:= 0 to high(finvalidatedcells) do begin
-     with finvalidatedcells[int1] do begin
-      if (row < 0) and (col < 0) then begin
-       invalidate;
-       break;
-      end
-      else begin
-       invalidatecell(finvalidatedcells[int1]);
-      end;
-     end;
-    end;
-    finvalidatedcells:= nil;
-   end;
-  end;
+  checkinvalidate;
   if gs_rowdatachanged in fstate then begin
    rowdatachanged(0,frowcount);
   end; 
