@@ -37,8 +37,10 @@ type
 
  tabulatorkindty = (tak_left,tak_right,tak_centered,tak_decimal);
  tabulatorty = record
+  index: integer;
   kind: tabulatorkindty;
   pos: integer;
+  width: integer;
  end;
  tabulatorarty = array of tabulatorty;
 
@@ -1112,10 +1114,38 @@ begin
  if not fuptodate then begin
   setlength(ftabs,count);
   for int1:= 0 to high(ftabs) do begin
-   ftabs[int1].kind:= ttabulatoritem(fitems[int1]).fkind;
-   ftabs[int1].pos:= round(ttabulatoritem(fitems[int1]).fpos*fppmm);
+   with ftabs[int1] do begin
+    index:= int1;
+    kind:= ttabulatoritem(fitems[int1]).fkind;
+    pos:= round(ttabulatoritem(fitems[int1]).fpos*fppmm);
+   end;
   end;
   sortarray(ftabs,{$ifdef FPC}@{$endif}cmptab,sizeof(ftabs[0]));
+  for int1:= 0 to high(ftabs) do begin
+   with ftabs[int1] do begin
+    width:= 0;
+    case kind of 
+     tak_right: begin
+      if int1 > 0 then begin
+       width:= pos - ftabs[int1-1].pos;
+      end
+      else begin
+       width:= pos;
+      end;
+     end;
+     tak_centered: begin
+      if (int1 > 0) and (int1 < high(ftabs)) then begin
+       width:= ftabs[int1+1].pos - ftabs[int1-1].pos;
+      end;
+     end;
+     else begin //tak_left,tak_decimal
+      if int1 < high(ftabs) then begin
+       width:= ftabs[int1+1].pos - pos;
+      end;
+     end;
+    end;
+   end;
+  end;
   fuptodate:= true;
  end;
 end;

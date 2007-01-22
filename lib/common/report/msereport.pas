@@ -21,6 +21,8 @@ const
  defaultreppageheight = 270;
  defaultrepfontheight = 14;
  defaultrepfontname = 'stf_report';
+ 
+ defaultreptabtextflags = [tf_ycentered];
   
 type
  tcustombandarea = class;
@@ -39,6 +41,8 @@ type
   private
    fvalue: richstringty;
    ffont: treptabfont;
+   ftextflags: textflagsty;
+   fdatafield: string;
    procedure setvalue(const avalue: msestring);
    procedure setrichvalue(const avalue: richstringty);
    function getfont: treptabfont;
@@ -47,12 +51,18 @@ type
    procedure createfont;
    procedure changed;
    procedure fontchanged(const asender: tobject);
+   procedure settextflags(const avalue: textflagsty);
+   procedure setdatafiled(const avalue: string);
   public 
+   constructor create(aowner: tobject); override;
    destructor destroy; override;
    property richvalue: richstringty read fvalue write setrichvalue;
   published
    property value: msestring read fvalue.text write setvalue;
    property font: treptabfont read getfont write setfont stored isfontstored;
+   property textflags: textflagsty read ftextflags write settextflags 
+                   default defaultreptabtextflags;
+   property datafield: string read fdatafield write setdatafiled;
  end;
  
  treptabulators = class(tcustomtabulators)
@@ -412,6 +422,12 @@ end;
 
 { treptabulatoritem }
 
+constructor treptabulatoritem.create(aowner: tobject);
+begin
+ ftextflags:= defaultreptabtextflags;
+ inherited;
+end;
+
 destructor treptabulatoritem.destroy;
 begin
  inherited;
@@ -478,6 +494,19 @@ begin
  changed;
 end;
 
+procedure treptabulatoritem.settextflags(const avalue: textflagsty);
+begin
+ if ftextflags <> avalue then begin
+  ftextflags:= checktextflags(ftextflags,avalue);
+  changed;
+ end;
+end;
+
+procedure treptabulatoritem.setdatafiled(const avalue: string);
+begin
+ fdatafield:= avalue
+end;
+
 { treptabulators }
 
 constructor treptabulators.create(const aowner: tcustomrecordband);
@@ -513,33 +542,41 @@ begin
   checkuptodate;
   with finfo do begin
    for int1:= 0 to count - 1 do begin
-    with treptabulatoritem(fitems[int1]) do begin
-     finfo.font:= font;
-     text:= fvalue;
+    with ftabs[int1] do begin
+     with treptabulatoritem(fitems[index]) do begin
+      finfo.font:= font;
+      flags:= ftextflags;
+      text:= fvalue;
+     end;
      dest:= adest;
+     if (kind = tak_left) and (int1 = high(ftabs)) then begin
+      dest.cx:= adest.cx - pos;
+     end
+     else begin
+      dest.cx:= width;
+     end;
      textrect(acanvas,finfo);
-     with ftabs[int1] do begin
-      case kind of
-       tak_left: begin
-        dest.x:= adest.x + pos;
+     dest.cx:= res.cx;
+     case kind of
+      tak_left: begin
+       dest.x:= adest.x + pos;
+      end;
+      tak_right: begin
+       dest.x:= adest.x + pos - res.cx;
+      end;
+      tak_centered: begin
+       dest.x:= adest.x + pos - res.cx div 2;
+      end;
+      else begin //tak_decimal
+       int2:= findlastchar(text.text,msechar(decimalseparator));
+       if int2 > 0 then begin
+        rstr1:= richcopy(text,int2,bigint);
+        int3:= textrect(acanvas,rstr1,[],finfo.font).cx;
+       end
+       else begin
+        int3:= 0;
        end;
-       tak_right: begin
-        dest.x:= adest.x + pos - res.cx;
-       end;
-       tak_centered: begin
-        dest.x:= adest.x + pos - res.cx div 2;
-       end;
-       else begin //tak_decimal
-        int2:= findlastchar(fvalue.text,msechar(decimalseparator));
-        if int2 > 0 then begin
-         rstr1:= richcopy(fvalue,int2,bigint);
-         int3:= textrect(acanvas,rstr1,[],finfo.font).cx;
-        end
-        else begin
-         int3:= 0;
-        end;
-        dest.x:= adest.x + pos - res.cx + int3; 
-       end;
+       dest.x:= adest.x + pos - res.cx + int3; 
       end;
      end;
     end;

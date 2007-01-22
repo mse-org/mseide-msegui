@@ -13,19 +13,47 @@ interface
  
 implementation
 uses
- classes,msereport,msedesignintf,formdesigner,reportdesigner;
+ classes,msereport,msedesignintf,formdesigner,reportdesigner,msepropertyeditors,
+ sysutils,msestrings;
 const
  reportintf: designmoduleintfty = 
   (createfunc: {$ifdef FPC}@{$endif}createreport;
    initnewcomponent: {$ifdef FPC}@{$endif}initreportcomponent;
    getscale: {$ifdef FPC}@{$endif}getreportscale);
-  
+type
+ treptabulatoreditor = class(tclasselementeditor)
+  public
+   function getvalue: msestring; override;
+ end;
+ 
+ treptabulatorseditor = class(tpersistentarraypropertyeditor)
+  protected
+   function geteditorclass: propertyeditorclassty; override;
+ end;
+   
 procedure Register;
 begin
  registercomponents('Rep',[{treportpage,}tbandarea,tbandgroup,
                     trecordband]); 
  
  registerdesignmoduleclass(treport,reportintf,treportdesignerfo);
+ registerpropertyeditor(typeinfo(treptabulators),nil,'',treptabulatorseditor);
+end;
+
+{ treptabulatoreditor }
+
+function treptabulatoreditor.getvalue: msestring;
+begin
+ with treptabulatoritem(getordvalue) do begin
+  result:= '<'+formatfloat('0.0',pos)+'><'+datafield+'>';
+ end;
+end;
+
+{ treptabulatorseditor }
+
+function treptabulatorseditor.geteditorclass: propertyeditorclassty;
+begin
+ result:= treptabulatoreditor;
 end;
 
 initialization
