@@ -517,6 +517,7 @@ type
    function istextflagsactivestored: boolean;
    function isoptionseditstored: boolean;
    function getoptionsedit: optionseditty;
+   procedure settextflagsactive(const avalue: textflagsty);
   protected
    ftextinfo: drawtextinfoty;
    function getitems(aindex: integer): msestring; virtual;
@@ -542,7 +543,7 @@ type
    property textflags: textflagsty read ftextinfo.flags write settextflags
                stored istextflagsstored default defaultcoltextflags;
    property textflagsactive: textflagsty read ftextflagsactive
-             write ftextflagsactive stored istextflagsactivestored 
+             write settextflagsactive stored istextflagsactivestored 
                     default defaultactivecoltextflags;
    property optionsedit: stringcoleditoptionsty read foptionsedit write foptionsedit
                stored isoptionseditstored default defaultstringcoleditoptions;
@@ -953,7 +954,7 @@ end;
    ftextflagsactive: textflagsty;
    function getcols(const index: integer): tstringcol;
    procedure settextflags(avalue: textflagsty);
-   procedure settextflagsactive(const Value: textflagsty);
+   procedure settextflagsactive(avalue: textflagsty);
    procedure setoptionsedit(const avalue: stringcoleditoptionsty);
   protected
    function getcolclass: stringcolclassty; virtual;
@@ -4148,6 +4149,14 @@ begin
  end;
 end;
 
+procedure tcustomstringcol.settextflagsactive(const avalue: textflagsty);
+begin
+ if ftextflagsactive <> avalue then begin
+  ftextflagsactive:= checktextflags(ftextflagsactive,avalue);
+ end;
+ changed;
+end;
+
 function tcustomstringcol.createdatalist: tdatalist;
 begin
  result:= tmsestringdatalist.create;
@@ -5302,18 +5311,19 @@ begin
  end;
 end;
 
-procedure tstringcols.settextflagsactive(const Value: textflagsty);
+procedure tstringcols.settextflagsactive(avalue: textflagsty);
 var
  int1: integer;
  mask: {$ifdef FPC}longword{$else}word{$endif};
 begin
- if ftextflagsactive <> value then begin
-  mask:= {$ifdef FPC}longword{$else}word{$endif}(value) xor
+ if ftextflagsactive <> avalue then begin
+  avalue:= checktextflags(ftextflagsactive,avalue);
+  mask:= {$ifdef FPC}longword{$else}word{$endif}(avalue) xor
          {$ifdef FPC}longword{$else}word{$endif}(ftextflagsactive);
-  ftextflagsactive := Value;
+  ftextflagsactive := avalue;
   for int1:= 0 to count - 1 do begin
    tstringcol(items[int1]).textflagsactive:=
-          textflagsty(replacebits({$ifdef FPC}longword{$else}word{$endif}(value),
+          textflagsty(replacebits({$ifdef FPC}longword{$else}word{$endif}(avalue),
         {$ifdef FPC}longword{$else}word{$endif}(tstringcol(items[int1]).textflagsactive),mask));
   end;
  end;
