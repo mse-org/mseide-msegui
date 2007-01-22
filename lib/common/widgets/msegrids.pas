@@ -13,7 +13,8 @@ unit msegrids;
 
 interface
 uses
- Classes,SysUtils,mseclasses,msegui,msegraphics,msetypes,msestrings,msegraphutils,
+ {$ifdef FPC}classes,sysutils{$else}Classes,SysUtils{$endif},mseclasses,msegui,
+ msegraphics,msetypes,msestrings,msegraphutils,
  msescrollbar,msearrayprops,mseguiglob,
  msedatalist,msedrawtext,msewidgets,mseevent,mseinplaceedit,mseeditglob,
  mseobjectpicker,msepointer,msetimer,msebits,msestat,msestatfile,msekeyboard,
@@ -505,7 +506,7 @@ type
    foptionsedit: stringcoleditoptionsty;
    fonsetvalue: setstringeventty;
    fondataentered: notifyeventty;
-   procedure settextflags(const Value: textflagsty);
+   procedure settextflags(const avalue: textflagsty);
    function getdatalist: tmsestringdatalist;
    procedure setdatalist(const value: tmsestringdatalist);
 
@@ -951,7 +952,7 @@ end;
    ftextflags: textflagsty;
    ftextflagsactive: textflagsty;
    function getcols(const index: integer): tstringcol;
-   procedure settextflags(const Value: textflagsty);
+   procedure settextflags(avalue: textflagsty);
    procedure settextflagsactive(const Value: textflagsty);
    procedure setoptionsedit(const avalue: stringcoleditoptionsty);
   protected
@@ -4139,10 +4140,10 @@ begin
  inherited;
 end;
 
-procedure tcustomstringcol.settextflags(const Value: textflagsty);
+procedure tcustomstringcol.settextflags(const avalue: textflagsty);
 begin
- if ftextinfo.flags <> value then begin
-  ftextinfo.flags := Value;
+ if ftextinfo.flags <> avalue then begin
+  ftextinfo.flags:= checktextflags(ftextinfo.flags,avalue);
   changed;
  end;
 end;
@@ -5283,18 +5284,19 @@ begin
  result:= tstringcol(items[index]);
 end;
 
-procedure tstringcols.settextflags(const Value: textflagsty);
+procedure tstringcols.settextflags(avalue: textflagsty);
 var
  int1: integer;
  mask: {$ifdef FPC}longword{$else}word{$endif};
 begin
- if ftextflags <> value then begin
-  mask:= {$ifdef FPC}longword{$else}word{$endif}(value) xor
+ if ftextflags <> avalue then begin
+  avalue:= checktextflags(ftextflags,avalue);
+  mask:= {$ifdef FPC}longword{$else}word{$endif}(avalue) xor
   {$ifdef FPC}longword{$else}word{$endif}(ftextflags);
-  ftextflags := Value;
+  ftextflags:= avalue;
   for int1:= 0 to count - 1 do begin
    tstringcol(items[int1]).textflags:=
-        textflagsty(replacebits({$ifdef FPC}longword{$else}word{$endif}(value),
+        textflagsty(replacebits({$ifdef FPC}longword{$else}word{$endif}(avalue),
         {$ifdef FPC}longword{$else}word{$endif}(tstringcol(items[int1]).textflags),mask));
   end;
  end;
