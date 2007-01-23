@@ -13,7 +13,7 @@ interface
 uses
  classes,msegui,msegraphics,msetypes,msewidgets,msegraphutils,mseclasses,
  msetabs,mseprinter,msestream,msearrayprops,mseguiglob,msesimplewidgets,
- msedrawtext,msestrings,mserichstring;
+ msedrawtext,msestrings,mserichstring,msedb,db;
 
 const
  defaultrepppmm = 3;
@@ -37,12 +37,23 @@ type
    class function getinstancepo(owner: tobject): pfont; override;
  end;
 
- treptabulatoritem = class(ttabulatoritem)
+ treptabulatoritem = class;
+ 
+ treptabitemdatalink = class(tfielddatalink)
+  private
+   fowner: treptabulatoritem;
+  protected
+   procedure recordchanged(afield: tfield); override;
+  public
+   constructor create(const aowner: treptabulatoritem);
+ end;
+ 
+ treptabulatoritem = class(ttabulatoritem,idbeditinfo)
   private
    fvalue: richstringty;
    ffont: treptabfont;
    ftextflags: textflagsty;
-   fdatafield: string;
+   fdatalink: tfielddatalink;
    procedure setvalue(const avalue: msestring);
    procedure setrichvalue(const avalue: richstringty);
    function getfont: treptabfont;
@@ -53,6 +64,14 @@ type
    procedure fontchanged(const asender: tobject);
    procedure settextflags(const avalue: textflagsty);
    procedure setdatafiled(const avalue: string);
+   function getdatasource: tdatasource;
+   procedure setdatasource(const avalue: tdatasource);
+   function getdatafield: string;
+   procedure setdatafield(const avalue: string);
+               //idbeditinfo
+   function getdatasource(const aindex: integer): tdatasource;
+   procedure getfieldtypes(out apropertynames: stringarty;
+                           out afieldtypes: fieldtypesarty);
   public 
    constructor create(aowner: tobject); override;
    destructor destroy; override;
@@ -62,7 +81,8 @@ type
    property font: treptabfont read getfont write setfont stored isfontstored;
    property textflags: textflagsty read ftextflags write settextflags 
                    default defaultreptabtextflags;
-   property datafield: string read fdatafield write setdatafiled;
+   property datafield: string read getdatafield write setdatafield;
+   property datasource: tdatasource read getdatasource write setdatasource;
  end;
  
  treptabulators = class(tcustomtabulators)
@@ -97,7 +117,10 @@ type
                    //true if area full
   procedure endband(const acanvas: tcanvas; const sender: tcustomrecordband);  
  end;
- 
+
+ trecordbanddatalink = class(tmsedatalink)
+ end;
+  
  tcustomrecordband = class(tcustomscalingwidget)
   private
    fparentintf: ibandparent;
@@ -107,7 +130,10 @@ type
    fstate: recordbandstatesty;
    ftabs: treptabulators;
    fupdating: integer;
+   fdatalink: trecordbanddatalink;
    procedure settabs(const avalue: treptabulators);
+   procedure setdatasource(const avalue: tdatasource);
+   function getdatasource: tdatasource;
   protected
    procedure minclientsizechanged;
    procedure fontchanged; override;
@@ -136,12 +162,14 @@ type
    property onafterpaint: painteventty read fonafterpaint write fonafterpaint;
    property tabs: treptabulators read ftabs write settabs;
    property font: twidgetfont read getfont write setfont stored isfontstored;
+   property datasource: tdatasource read getdatasource write setdatasource;
  end;
 
  trecordband = class(tcustomrecordband)
   published
    property font;
    property tabs;
+   property datasource;
    property optionsscale;
    property onfontheightdelta;
    property onchildscaled;
@@ -413,11 +441,26 @@ begin
 // end;
 end;
 
-{ treptabfot }
+{ treptabfont }
 
 class function treptabfont.getinstancepo(owner: tobject): pfont;
 begin
  result:= @treptabulatoritem(owner).ffont;
+end;
+
+{ treptabitemdatalink }
+
+constructor treptabitemdatalink.create(const aowner: treptabulatoritem);
+begin
+ fowner:= aowner;
+ inherited create;
+end;
+
+procedure treptabitemdatalink.recordchanged(afield: tfield);
+begin
+ if (afield = nil) or (afield = field) then begin
+  treptabulators(fowner.fowner).fband.invalidate;
+ end;
 end;
 
 { treptabulatoritem }
@@ -425,13 +468,20 @@ end;
 constructor treptabulatoritem.create(aowner: tobject);
 begin
  ftextflags:= defaultreptabtextflags;
+ fdatalink:= tfielddatalink.create;
  inherited;
+ with treptabulators(aowner).fband do begin
+  if not (csloading in componentstate) then begin
+   self.datasource:= datasource;
+  end;
+ end;
 end;
 
 destructor treptabulatoritem.destroy;
 begin
  inherited;
  ffont.free;
+ fdatalink.free;
 end;
 
 procedure treptabulatoritem.setvalue(const avalue: msestring);
@@ -504,7 +554,39 @@ end;
 
 procedure treptabulatoritem.setdatafiled(const avalue: string);
 begin
- fdatafield:= avalue
+ fdatalink.fieldname:= avalue
+end;
+
+function treptabulatoritem.getdatasource: tdatasource;
+begin
+ result:= fdatalink.datasource;
+end;
+
+procedure treptabulatoritem.setdatasource(const avalue: tdatasource);
+begin
+ fdatalink.datasource:= avalue;
+end;
+
+function treptabulatoritem.getdatafield: string;
+begin
+ result:= fdatalink.fieldname;
+end;
+
+procedure treptabulatoritem.setdatafield(const avalue: string);
+begin
+ fdatalink.fieldname:= avalue;
+end;
+
+function treptabulatoritem.getdatasource(const aindex: integer): tdatasource;
+begin
+ result:= datasource;
+end;
+
+procedure treptabulatoritem.getfieldtypes(out apropertynames: stringarty;
+               out afieldtypes: fieldtypesarty);
+begin
+ apropertynames:= nil;
+ afieldtypes:= nil;
 end;
 
 { treptabulators }
@@ -544,9 +626,15 @@ begin
    for int1:= 0 to count - 1 do begin
     with ftabs[int1] do begin
      with treptabulatoritem(fitems[index]) do begin
+      if fdatalink.fieldactive then begin
+       text.text:= fdatalink.msedisplaytext;
+       text.format:= nil;
+      end
+      else begin
+       text:= fvalue;
+      end;
       finfo.font:= font;
       flags:= ftextflags;
-      text:= fvalue;
      end;
      dest:= adest;
      if (kind = tak_left) and (int1 = high(ftabs)) then begin
@@ -614,6 +702,7 @@ end;
 constructor tcustomrecordband.create(aowner: tcomponent);
 begin
  ftabs:= treptabulators.create(self);
+ fdatalink:= trecordbanddatalink.create;
  inherited;
 end;
 
@@ -621,6 +710,7 @@ destructor tcustomrecordband.destroy;
 begin
  inherited;
  ftabs.free;
+ fdatalink.free;
 end;
 
 procedure tcustomrecordband.setparentwidget(const avalue: twidget);
@@ -791,6 +881,24 @@ begin
  end;
 end;
 
+procedure tcustomrecordband.setdatasource(const avalue: tdatasource);
+var
+ int1: integer;
+begin
+ fdatalink.datasource:= avalue;
+ if (componentstate*[csdesigning,csloading] = [csdesigning]) and 
+                           (avalue <> nil) then begin
+  for int1:= 0 to ftabs.count - 1 do begin
+   ftabs[int1].datasource:= avalue;
+  end;
+ end;
+end;
+
+function tcustomrecordband.getdatasource: tdatasource;
+begin
+ result:= fdatalink.datasource;
+end;
+
 { tcustombandgroup }
 
 procedure tcustombandgroup.registerchildwidget(const child: twidget);
@@ -945,16 +1053,20 @@ end;
 
 function tcustombandarea.beginband(const acanvas: tcanvas;
                              const sender: tcustomrecordband): boolean;
+var
+ bo1: boolean;
 begin
  fsaveindex:= acanvas.save;
- if not (bas_backgroundrendered in fstate) then begin
+ bo1:= (bas_backgroundrendered in fstate);
+ if not bo1 then begin
   include(fstate,bas_backgroundrendered);
   renderbackground(acanvas);
   facty:= innerclientwidgetpos.y + bounds_y;
  end;
  acanvas.origin:= makepoint(sender.bounds_x+bounds_x,facty);
  inc(facty,sender.bandheight);
- result:= facty > bounds_y + bounds_cy;
+ result:= bo1 and (facty > bounds_y + bounds_cy);
+                //print minimum one band
  if result then begin
   include(fstate,bas_areafull);
  end;
@@ -1377,6 +1489,14 @@ begin
       not (csancestor in comp1.componentstate) and
                                  issubcomponent(comp1.owner,root)) then begin
    proc(comp1);
+  end;
+ end;
+ if root = self then begin
+  for int1 := 0 to componentcount - 1 do begin
+   comp1 := components[int1];
+   if not comp1.hasparent then begin
+    proc(comp1);
+   end;
   end;
  end;
 end;

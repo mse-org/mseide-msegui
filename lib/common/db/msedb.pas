@@ -520,6 +520,7 @@ type
    procedure layoutchanged; override;
   public
    function assql: string;
+   function fieldactive: boolean;
    property field: tfield read ffield;
    property fieldname: string read ffieldname write setfieldname;
    
@@ -2462,6 +2463,11 @@ procedure tfielddatalink.SetAsVariant(const avalue: variant);
 begin
  checkfield;
  field.asvariant:= avalue;
+end;
+
+function tfielddatalink.fieldactive: boolean;
+begin
+ result:= active and (ffield <> nil);
 end;
 
 { tactivatorcontroller }

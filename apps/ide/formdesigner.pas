@@ -1454,6 +1454,9 @@ begin
                (fselections.indexof(component) < 0) then begin
          selectcomponent(component,sm_select);
         end;
+        if ss_double in shiftstate then begin
+         designer.showobjectinspector;
+        end;
        end;
       end
       else begin
