@@ -1275,6 +1275,9 @@ begin
   ord(dsfilter): begin
    buffer:= @ffilterbuffer^.header;
   end;
+  ord(dscurvalue): begin
+   buffer:= @fcurrentbuf^.header;
+  end;
   else begin
    if bs_internalcalc in fbstate then begin
     if int1 < 0 then begin//calc field
@@ -2207,7 +2210,12 @@ begin
    end;
   end
   else begin
-   buffer:= @pdsrecordty(activebuffer)^.header;
+   if state = dscurvalue then begin
+    buffer:= @fcurrentbuf^.header;
+   end
+   else begin
+    buffer:= @pdsrecordty(activebuffer)^.header;
+   end;
   end;
   with precheaderty(buffer)^ do begin
    for int1:= high(blobinfo) downto 0 do begin
