@@ -1945,7 +1945,7 @@ var
 begin
  bo1:= ffilterediting;
  if event = deupdatestate then begin
-  ffilterediting:= dataset.state = dsfilter;
+  ffilterediting:= (dataset <> nil) and (dataset.state = dsfilter);
  end;
  inherited;
  if bo1 <> ffilterediting then begin

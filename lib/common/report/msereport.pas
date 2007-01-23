@@ -132,7 +132,7 @@ type
    fupdating: integer;
    fdatalink: trecordbanddatalink;
    procedure settabs(const avalue: treptabulators);
-   procedure setdatasource(const avalue: tdatasource);
+   procedure setdatasource(const avalue: tdatasource); virtual;
    function getdatasource: tdatasource;
   protected
    procedure minclientsizechanged;
@@ -184,6 +184,7 @@ type
  tcustombandgroup = class(tcustomrecordband)
   private
    fbands: recordbandarty;
+   procedure setdatasource(const avalue: tdatasource); override;
   protected
    procedure registerchildwidget(const child: twidget); override;
    procedure unregisterchildwidget(const child: twidget); override;
@@ -708,9 +709,9 @@ end;
 
 destructor tcustomrecordband.destroy;
 begin
- inherited;
  ftabs.free;
  fdatalink.free;
+ inherited;
 end;
 
 procedure tcustomrecordband.setparentwidget(const avalue: twidget);
@@ -726,6 +727,9 @@ end;
 
 procedure tcustomrecordband.dobeforerender(var empty: boolean);
 begin
+ if fdatalink.active then begin
+  empty:= fdatalink.dataset.eof;
+ end;
  if canevent(tmethod(fonbeforerender)) then begin
   fonbeforerender(self,empty);
  end;
@@ -804,8 +808,13 @@ var
  int1,int2: integer;
 begin
  inherited;
- if canevent(tmethod(fonafterpaint)) then begin
-  fonafterpaint(self,acanvas);
+ if (rbs_rendering in fstate) then begin
+  if canevent(tmethod(fonafterpaint)) then begin
+   fonafterpaint(self,acanvas);
+  end;
+  if fdatalink.active then begin
+   fdatalink.dataset.next;
+  end;
  end;
  if csdesigning in componentstate then begin
   ar2:= ftabs.tabs;
@@ -953,6 +962,25 @@ begin
    fparentintf.endband(acanvas,self);
   end;
  end;
+end;
+
+procedure tcustombandgroup.setdatasource(const avalue: tdatasource);
+var
+ int1,int2: integer;
+begin
+ inherited;
+ if (componentstate*[csdesigning,csloading] = [csdesigning]) and 
+                                               (avalue <> nil) then begin
+  for int1:= 0 to high(fbands) do begin
+   with fbands[int1] do begin
+    if datasource = nil then begin
+     for int2:= 0 to ftabs.count - 1 do begin
+      ftabs[int1].datasource:= avalue;
+     end;
+    end;
+   end;
+  end;
+ end; 
 end;
 
 { tcustombandarea }
