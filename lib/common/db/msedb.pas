@@ -454,6 +454,7 @@ type
    procedure setasmsestring(const avalue: msestring);
   protected
    function HasParent: Boolean; override;
+   function getasvariant: variant; override;
   public
 //   procedure Clear; override;
    function assql: string;
@@ -1423,7 +1424,12 @@ end;
 
 function tmsememofield.getasvariant: variant;
 begin
- result:= getasmsestring;
+ if isnull then begin
+  result:= NULL;
+ end
+ else begin
+  result:= getasmsestring;
+ end;
 end;
 
 procedure tmsememofield.setvarvalue(const avalue: variant);
@@ -2211,6 +2217,16 @@ end;
 function tmseblobfield.asoldsql: string;
 begin
  result:= fieldtooldsql(self);
+end;
+
+function tmseblobfield.getasvariant: variant;
+begin
+ if isnull then begin
+  result:= NULL;
+ end
+ else begin
+  result:= getasstring;
+ end;
 end;
 
 { tmsegraphicfield }
