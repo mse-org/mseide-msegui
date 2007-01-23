@@ -53,7 +53,7 @@ type
    fvalue: richstringty;
    ffont: treptabfont;
    ftextflags: textflagsty;
-   fdatalink: tfielddatalink;
+   fdatalink: treptabitemdatalink;
    procedure setvalue(const avalue: msestring);
    procedure setrichvalue(const avalue: richstringty);
    function getfont: treptabfont;
@@ -468,7 +468,7 @@ end;
 constructor treptabulatoritem.create(aowner: tobject);
 begin
  ftextflags:= defaultreptabtextflags;
- fdatalink:= tfielddatalink.create;
+ fdatalink:= treptabitemdatalink.create(self);
  inherited;
  with treptabulators(aowner).fband do begin
   if not (csloading in componentstate) then begin

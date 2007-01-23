@@ -75,7 +75,7 @@ type
                    ws1_anchorsizing,ws1_isstreamed,
                    ws1_noclipchildren,
                    ws1_nodesignvisible,ws1_nodesignframe,ws1_nodesignhandles,
-                   ws1_nodesigndelete,
+                   ws1_nodesigndelete,ws1_designactive,
                    ws1_fakevisible //used for report size calculations
                    );
  widgetstates1ty = set of widgetstate1ty;

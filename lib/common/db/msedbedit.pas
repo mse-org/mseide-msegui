@@ -39,6 +39,7 @@ type
 
 const
  defaultdbnavigatoroptions = [dno_confirmdelete];
+ designdbnavigbuttons = [dbnb_first,dbnb_prior,dbnb_next,dbnb_last];
  
 type  
  idbnaviglink = interface(inullinterface)
@@ -81,8 +82,8 @@ type
    procedure setactivebuttons(const abuttons: dbnavigbuttonsty);
    function getnavigoptions: dbnavigatoroptionsty;
   public
-   destructor destroy; override; 
    constructor create(aowner: tcomponent); override;
+   destructor destroy; override; 
   published
    property datasource: tdatasource read getdatasource write setdatasource;
    property visiblebuttons: dbnavigbuttonsty read fvisiblebuttons 
@@ -1655,6 +1656,9 @@ begin
   if not datasource.dataset.canmodify then begin
    bu1:= bu1 - [dbnb_edit,dbnb_delete,dbnb_insert];
   end;
+  if csdesigning in dataset.componentstate then begin
+   bu1:= bu1 * designdbnavigbuttons;
+  end;
  end;
  fintf.setactivebuttons(bu1);
 end;
@@ -1743,6 +1747,7 @@ begin
  fshortcuts[dbnb_last]:= key_modctrl + ord(key_pagedown);
  fshortcuts[dbnb_edit]:= ord(key_f2);
  inherited;
+ include(fwidgetstate1,ws1_designactive);
  size:= makesize(defaultdbnavigatorwidth,defaultdbnavigatorheight);
  buttons.count:= ord(high(dbnavigbuttonty))+1;
  for int1:= 0 to ord(high(dbnavigbuttonty)) do begin

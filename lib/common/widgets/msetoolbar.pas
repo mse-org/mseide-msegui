@@ -1050,7 +1050,8 @@ var
  int1: integer;
 begin
  inherited;
- if not (csdesigning in componentstate) then begin
+ if not (csdesigning in componentstate) or 
+                            (ws1_designactive in fwidgetstate1) then begin
   with flayout do begin
    if updatemouseshapestate(cells,info,self) then begin
 //    shapeinfotobuttons;

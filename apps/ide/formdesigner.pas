@@ -1487,7 +1487,10 @@ begin
     pos:= posbefore;
     if bo1 then begin
      if not (es_processed in eventstate) then begin
-      fowner.capturemouse; //capture mouse
+      if (capture = nil) or not 
+             (ws1_designactive in twidget1(capture).fwidgetstate1) then begin
+       fowner.capturemouse; //capture mouse
+      end;
       updatecursorshape(factarea);
      end
      else begin
@@ -1534,7 +1537,6 @@ begin
          fselections.componentschanged;
         end;
        end;
- //      doModified;
        fowner.invalidate;
       end;
       ar_component: begin
@@ -1542,7 +1544,6 @@ begin
         fowner.invalidate; //redraw handles
         recalcclientsize;
        end;
- //      doModified;
       end;
       ar_selectrect: begin
        if fpickwidget <> nil then begin
