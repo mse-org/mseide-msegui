@@ -184,7 +184,7 @@ procedure tmsepqconnection.reopends;
 var
  int1: integer;
 begin
- for int1:= high(fdatasets) downto 0 do begin
+ for int1:= 0 to high(fdatasets) do begin
   if fdatasets[int1] <> nil then begin
    if frecnos[int1] >= -1 then begin
     with tdbdataset(fdatasets[int1]) do begin
