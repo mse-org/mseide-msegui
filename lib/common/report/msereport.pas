@@ -275,6 +275,8 @@ type
    fpageheight: real;
    fppmm: real;
    fpagenum: integer;
+   fonfirstpage: notifyeventty;
+   fonafterlastpage: notifyeventty;
    procedure setpagewidth(const avalue: real);
    procedure setpageheight(const avalue: real);
    procedure updatepagesize;
@@ -292,19 +294,27 @@ type
    procedure endrender;
    function rendering: boolean;
    procedure beginarea(const acanvas: tcanvas; const sender: tcustombandarea);
+   procedure dofirstpage; virtual;
    procedure dobeforerender; virtual;
    procedure doonpaint(const acanvas: tcanvas); override;
    procedure doafterpaint1(const acanvas: tcanvas); virtual;
+   procedure doafterlastpage; virtual;
    procedure init; virtual;
    property ppmm: real read fppmm write setppmm; //pixel per mm
   public
    constructor create(aowner: tcomponent); override;
    function render(const acanvas: tcanvas): boolean;
           //true if finished
+   property pagenum: integer read fpagenum write fpagenum; 
+                            //null-based, local to this page
+   property onfirstpage: notifyeventty read fonfirstpage
+                               write fonfirstpage;
    property onbeforerender: notifyeventty read fonbeforerender
                                write fonbeforerender;
    property onpaint: painteventty read fonpaint write fonpaint;
    property onafterpaint: painteventty read fonafterpaint write fonafterpaint;
+   property onafterlastpage: notifyeventty read fonafterlastpage
+                               write fonafterlastpage;
 
    property pagewidth: real read fpagewidth write setpagewidth;
    property pageheight: real read fpageheight write setpageheight;
@@ -323,9 +333,11 @@ type
    property visible;
    property font;
  
+   property onfirstpage;
    property onbeforerender;
    property onpaint;   
    property onafterpaint;
+   property onafterlastpage;
  end;
 
  repdesigninfoty = record
@@ -341,6 +353,7 @@ type
    fonbeforerender: notifyeventty;
    fonafterrender: notifyeventty;
    fprinter: tprinter;
+   fpagenum: integer;
    procedure setppmm(const avalue: real);
    function getreppages(index: integer): tcustomreportpage;
    procedure setreppages(index: integer; const avalue: tcustomreportpage);
@@ -376,6 +389,8 @@ type
    function reppagecount: integer;
    property reppages[index: integer]: tcustomreportpage read getreppages 
                                                 write setreppages; default;
+   property pagenum: integer read fpagenum write fpagenum; 
+                            //null-based
    property font: twidgetfont read getfont write setfont;
    property color default cl_transparent;
    property grid_show: boolean read frepdesigninfo.showgrid write setgrid_show default true;
@@ -1204,6 +1219,7 @@ begin
   init;
  end;
  fpagenum:= 0;
+ dofirstpage;
  repeat
   exclude(fstate,rpps_backgroundrendered);
   acanvas.reset;
@@ -1217,7 +1233,11 @@ begin
    doafterpaint1(acanvas);
   end;
   inc(fpagenum);
+  if freport <> nil then begin
+   inc(freport.fpagenum);
+  end;
  until result;
+ doafterlastpage;
 end;
 
 function tcustomreportpage.rendering: boolean;
@@ -1343,6 +1363,20 @@ begin
  inherited;
 end;
 
+procedure tcustomreportpage.dofirstpage;
+begin
+ if canevent(tmethod(fonfirstpage)) then begin
+  fonfirstpage(self);
+ end;
+end;
+
+procedure tcustomreportpage.doafterlastpage;
+begin
+ if canevent(tmethod(fonafterlastpage)) then begin
+  fonafterlastpage(self);
+ end;
+end;
+
  {tcustomreport}
  
 constructor tcustomreport.create(aowner: tcomponent);
@@ -1452,6 +1486,7 @@ var
 begin
  result:= true;
  fprinter:= aprinter;
+ fpagenum:= 0;
  if aprinter <> nil then begin
   rea1:= aprinter.ppmm;
   aprinter.ppmm:= fppmm;

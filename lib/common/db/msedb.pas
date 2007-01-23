@@ -169,10 +169,13 @@ type
    function getinstance: tfield;
   protected
    function HasParent: Boolean; override;
-   property asmsestring: msestring read getasmsestring write setasmsestring;
+   function getasvariant: variant; override;
+   procedure setvarvalue(const avalue: variant);
   public
    destructor destroy; override;
    procedure Clear; override;
+   property asmsestring: msestring read getasmsestring write setasmsestring;
+   function oldmsestring(out aisnull: boolean): msestring;
    function assql: string;
    function asoldsql: string;
   published
@@ -1269,6 +1272,16 @@ end;
 function tmsestringfield.oldmsestring(out aisnull: boolean): msestring;
 var
  statebefore: tdatasetstate;
+begin
+ statebefore:= tdataset1(dataset).settempstate(dsoldvalue);
+ aisnull:= getdata(nil);
+ result:= getasmsestring;
+ tdataset1(dataset).restorestate(statebefore);
+end;
+{
+function tmsestringfield.oldmsestring(out aisnull: boolean): msestring;
+var
+ statebefore: tdatasetstate;
  str1: string;
 begin
  statebefore:= tdataset1(dataset).settempstate(dsoldvalue);
@@ -1276,7 +1289,7 @@ begin
  result:= str1;
  tdataset1(dataset).restorestate(statebefore);
 end;
-
+}
 procedure tmsestringfield.setismsestring(const getter: getmsestringdataty;
            const setter: setmsestringdataty; const acharacterlength: integer);
 begin
@@ -1406,6 +1419,26 @@ end;
 function tmsememofield.asoldsql: string;
 begin
  result:= fieldtooldsql(self);
+end;
+
+function tmsememofield.getasvariant: variant;
+begin
+ result:= getasmsestring;
+end;
+
+procedure tmsememofield.setvarvalue(const avalue: variant);
+begin
+ setasmsestring(avalue);
+end;
+
+function tmsememofield.oldmsestring(out aisnull: boolean): msestring;
+var
+ statebefore: tdatasetstate;
+begin
+ statebefore:= tdataset1(dataset).settempstate(dsoldvalue);
+ aisnull:= getdata(nil);
+ result:= getasmsestring;
+ tdataset1(dataset).restorestate(statebefore);
 end;
 
 { tmsenumericfield }

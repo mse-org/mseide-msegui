@@ -2188,13 +2188,28 @@ function tmsebufdataset.createblobstream(field: tfield;
                mode: tblobstreammode): tstream;
 var
  int1: integer;
+ buffer: pointer;
 begin
  if (mode <> bmread) and not (state in dseditmodes) then begin
   databaseerrorfmt(snotineditstate,[name],self);
  end;  
  result:= nil;
  if mode = bmread then begin
-  with pdsrecordty(activebuffer)^.header do begin
+  if state = dsoldvalue then begin
+   if getrecordupdatebuffer then begin
+    buffer:= fupdatebuffer[fcurrentupdatebuffer].oldvalues;
+    if buffer <> nil then begin
+     buffer:= @pintrecordty(buffer)^.header;
+    end;
+   end
+   else begin
+    buffer:= @fcurrentbuf^.header   //there is no old value available
+   end;
+  end
+  else begin
+   buffer:= @pdsrecordty(activebuffer)^.header;
+  end;
+  with precheaderty(buffer)^ do begin
    for int1:= high(blobinfo) downto 0 do begin
     if blobinfo[int1].field = field then begin
      result:= tblobcopy.create(blobinfo[int1]);
