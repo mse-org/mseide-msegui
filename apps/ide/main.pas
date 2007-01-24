@@ -1,5 +1,5 @@
 { MSEide Copyright (c) 1999-2006 by Martin Schreiber
-   
+
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation; either version 2 of the License, or
@@ -249,8 +249,7 @@ uses
  findinfileform,formdesigner,sourceupdate,actionsmodule,programparametersform,
  objectinspector,msesysutils,msestream,msesys,cpuform,disassform,
  panelform,watchpointsform,threadsform,msegraphics,targetconsole,
- debuggerform,componentpaletteform,messageform,msesettings,mseintegerenter,
- msereport
+ debuggerform,componentpaletteform,messageform,msesettings,mseintegerenter
  {$ifdef linux} ,libc {$endif};
 
 procedure handleerror(const e: exception; const text: string);
