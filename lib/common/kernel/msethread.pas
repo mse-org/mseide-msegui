@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2006 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2007 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -14,7 +14,8 @@ unit msethread;
 
 interface
 uses
- {$ifdef FPC}{$ifdef UNIX}cthreads,{$endif}{$endif}Classes,mseclasses,mselist,mseevent,msesys,msetypes;
+ {$ifdef FPC}{$ifdef UNIX}cthreads,{$endif}classes{$else}Classes{$endif},
+ mseclasses,mselist,mseevent,msesys,msetypes;
 
 type
  tmsethread = class;

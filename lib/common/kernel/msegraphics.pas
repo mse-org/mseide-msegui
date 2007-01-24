@@ -2667,8 +2667,19 @@ end;
 
 procedure tcanvas.gdi(const func: gdifuncty);
 begin
- fgdifuncs^[func](fdrawinfo);
-// gui_gdifunc(func,fdrawinfo);
+ with application do begin
+  if not ismainthread then begin
+   lock;
+   try
+    fgdifuncs^[func](fdrawinfo);
+   finally
+    unlock;
+   end;
+  end
+  else begin
+   fgdifuncs^[func](fdrawinfo);
+  end;
+ end;
  if flushgdi then begin
   gui_flushgdi;
  end;

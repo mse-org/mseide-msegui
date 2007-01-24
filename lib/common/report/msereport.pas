@@ -13,7 +13,7 @@ interface
 uses
  classes,msegui,msegraphics,msetypes,msewidgets,msegraphutils,mseclasses,
  msetabs,mseprinter,msestream,msearrayprops,mseguiglob,msesimplewidgets,
- msedrawtext,msestrings,mserichstring,msedb,db;
+ msedrawtext,msestrings,mserichstring,msedb,db,msethread;
 
 const
  defaultrepppmm = 3;
@@ -353,7 +353,10 @@ type
    fonbeforerender: notifyeventty;
    fonafterrender: notifyeventty;
    fprinter: tprinter;
+   fcanvas: tcanvas;
    fpagenum: integer;
+   fthread: tmsethread;
+   fprinterppmmbefore: real;
    procedure setppmm(const avalue: real);
    function getreppages(index: integer): tcustomreportpage;
    procedure setreppages(index: integer; const avalue: tcustomreportpage);
@@ -365,6 +368,10 @@ type
    procedure setgrid_size(avalue: real);
    procedure writerepdesigninfo(writer: twriter);
    procedure readrepdesigninfo(reader: treader);
+   function exec(thread: tmsethread): integer;
+   function getcanceled: boolean;
+   procedure setcanceled(const avalue: boolean);
+   function getrunning: boolean;
   protected
    frepdesigninfo: repdesigninfoty;
    freppages: reportpagearty;
@@ -385,6 +392,8 @@ type
                                        overload;  //true if empty
    function render(const aprinter: tprinter; const astream: ttextstream): boolean;
                                        overload;  //true if empty
+   procedure waitfor;
+   
    property ppmm: real read fppmm write setppmm; //pixel per mm
    function reppagecount: integer;
    property reppages[index: integer]: tcustomreportpage read getreppages 
@@ -396,6 +405,8 @@ type
    property grid_show: boolean read frepdesigninfo.showgrid write setgrid_show default true;
    property grid_snap: boolean read frepdesigninfo.snaptogrid write setgrid_snap default true;
    property grid_size: real read frepdesigninfo.gridsize write setgrid_size;   
+   property canceled: boolean read getcanceled write setcanceled;
+   property running: boolean read getrunning;
 
    property onbeforerender: notifyeventty read fonbeforerender
                                write fonbeforerender;
@@ -746,14 +757,24 @@ begin
   empty:= fdatalink.dataset.eof;
  end;
  if canevent(tmethod(fonbeforerender)) then begin
-  fonbeforerender(self,empty);
+  application.lock;
+  try
+   fonbeforerender(self,empty);
+  finally
+   application.unlock;
+  end;
  end;
 end;
 
 procedure tcustomrecordband.doonpaint(const acanvas: tcanvas);
 begin
  if canevent(tmethod(fonpaint)) then begin
-  fonpaint(self,acanvas);
+  application.lock;
+  try
+   fonpaint(self,acanvas);
+  finally
+   application.unlock;
+  end;
  end;
 end;
 
@@ -825,7 +846,12 @@ begin
  inherited;
  if (rbs_rendering in fstate) then begin
   if canevent(tmethod(fonafterpaint)) then begin
-   fonafterpaint(self,acanvas);
+   application.lock;
+   try
+    fonafterpaint(self,acanvas);
+   finally
+    application.unlock;
+   end;
   end;
   if fdatalink.active then begin
    fdatalink.dataset.next;
@@ -1069,21 +1095,36 @@ end;
 procedure tcustombandarea.dobeforerender;
 begin
  if canevent(tmethod(fonbeforerender)) then begin
-  fonbeforerender(self);
+  application.lock;
+  try
+   fonbeforerender(self);
+  finally
+   application.unlock;
+  end;
  end;
 end;
 
 procedure tcustombandarea.doonpaint(const acanvas: tcanvas);
 begin
  if canevent(tmethod(fonpaint)) then begin
-  fonpaint(self,acanvas);
+  application.lock;
+  try
+   fonpaint(self,acanvas);
+  finally
+   application.unlock;
+  end;
  end;
 end;
 
 procedure tcustombandarea.doafterpaint1(const acanvas: tcanvas);
 begin
  if canevent(tmethod(fonafterpaint)) then begin
-  fonafterpaint(self,acanvas);
+  application.lock;
+  try
+   fonafterpaint(self,acanvas);
+  finally
+   application.unlock;
+  end;
  end;
 end;
 
@@ -1235,6 +1276,7 @@ begin
   inc(fpagenum);
   if freport <> nil then begin
    inc(freport.fpagenum);
+   result:= result or freport.fthread.terminated;
   end;
  until result;
  doafterlastpage;
@@ -1248,21 +1290,36 @@ end;
 procedure tcustomreportpage.dobeforerender;
 begin
  if canevent(tmethod(fonbeforerender)) then begin
-  fonbeforerender(self);
+  application.lock;
+  try
+   fonbeforerender(self);
+  finally
+   application.unlock;
+  end;
  end;
 end;
 
 procedure tcustomreportpage.doonpaint(const acanvas: tcanvas);
 begin
  if canevent(tmethod(fonpaint)) then begin
-  fonpaint(self,acanvas);
+  application.lock;
+  try
+   fonpaint(self,acanvas);
+  finally
+   application.unlock;
+  end;
  end;
 end;
 
 procedure tcustomreportpage.doafterpaint1(const acanvas: tcanvas);
 begin
  if canevent(tmethod(fonafterpaint)) then begin
-  fonafterpaint(self,acanvas);
+  application.lock;
+  try
+   fonafterpaint(self,acanvas);
+  finally
+   application.unlock;
+  end;
  end;
 end;
 
@@ -1366,14 +1423,24 @@ end;
 procedure tcustomreportpage.dofirstpage;
 begin
  if canevent(tmethod(fonfirstpage)) then begin
-  fonfirstpage(self);
+  application.lock;
+  try
+   fonfirstpage(self);
+  finally
+   application.unlock;
+  end;
  end;
 end;
 
 procedure tcustomreportpage.doafterlastpage;
 begin
  if canevent(tmethod(fonafterlastpage)) then begin
-  fonafterlastpage(self);
+  application.lock;
+  try
+   fonafterlastpage(self);
+  finally
+   application.unlock;
+  end;
  end;
 end;
 
@@ -1395,14 +1462,8 @@ begin
 end;
 
 destructor tcustomreport.destroy;
-var
- int1: integer;
 begin
-{
- for int1:= count - 1 downto 0 do begin
-  items[int1].free; //tabs have no ws_iswidget
- end;
- }
+ fthread.free;
  inherited;
 end;
 
@@ -1443,9 +1504,8 @@ begin
  inherited insertwidget(awidget,nullpoint);
 end;
 
-function tcustomreport.internalrender(const acanvas: tcanvas;
-               const aprinter: tprinter; const acommand: string;
-               const astream: ttextstream): boolean;
+function tcustomreport.exec(thread: tmsethread): integer;
+
  procedure fakevisible(const awidget: twidget; const aset: boolean);
  var 
   int1: integer;
@@ -1463,9 +1523,6 @@ function tcustomreport.internalrender(const acanvas: tcanvas;
   end;
  end;
  
-var               
- rea1: real;
-
  procedure dofinish;
  var
   int1: integer;
@@ -1474,21 +1531,68 @@ var
   for int1:= 0 to high(freppages) do begin
    freppages[int1].endrender;
   end;
-  if aprinter <> nil then begin
-   aprinter.endprint;
-   aprinter.ppmm:= rea1;
+  if fprinter <> nil then begin
+   fprinter.endprint;
+   fprinter.ppmm:= fprinterppmmbefore;
   end;
  end;
- 
-var
+
+var               
  int1: integer;
  bo1: boolean;
+
+begin
+ result:= 0;
+ fakevisible(self,true);
+ for int1:= 0 to high(freppages) do begin
+  freppages[int1].beginrender;
+ end;
+ try
+  if canevent(tmethod(fonbeforerender)) then begin
+   application.lock;
+   try
+    fonbeforerender(self);
+   finally
+    application.unlock;
+   end;
+  end;
+ except
+  dofinish;
+  raise;
+ end;
+ try
+  for int1:= 0 to high(freppages) do begin
+   freppages[int1].render(fcanvas);
+   if fthread.terminated then begin
+    break;
+   end;
+  end;
+ finally
+  try
+   if canevent(tmethod(fonafterrender)) then begin
+    application.lock;
+    try
+     fonafterrender(self);
+    finally
+     application.unlock;
+    end;
+   end;
+  finally
+   dofinish;
+  end;
+ end;
+end;
+
+function tcustomreport.internalrender(const acanvas: tcanvas;
+               const aprinter: tprinter; const acommand: string;
+               const astream: ttextstream): boolean;
 begin
  result:= true;
  fprinter:= aprinter;
+ fcanvas:= acanvas;
  fpagenum:= 0;
  if aprinter <> nil then begin
-  rea1:= aprinter.ppmm;
+  fprinterppmmbefore:= aprinter.ppmm;
   aprinter.ppmm:= fppmm;
   if astream <> nil then begin
    aprinter.beginprint(astream);
@@ -1497,31 +1601,8 @@ begin
    aprinter.beginprint(acommand);
   end;
  end;
- fakevisible(self,true);
- for int1:= 0 to high(freppages) do begin
-  freppages[int1].beginrender;
- end;
- try
-  if canevent(tmethod(fonbeforerender)) then begin
-   fonbeforerender(self);
-  end;
- except
-  dofinish;
-  raise;
- end;
- try
-  for int1:= 0 to high(freppages) do begin
-   freppages[int1].render(acanvas);
-  end;
- finally
-  try
-   if canevent(tmethod(fonafterrender)) then begin
-    fonafterrender(self);
-   end;
-  finally
-   dofinish;
-  end;
- end;
+ freeandnil(fthread);
+ fthread:= tmsethread.create({$ifdef FPC}@{$endif}exec);
 end;
 
 function tcustomreport.render(const acanvas: tcanvas): boolean;
@@ -1650,6 +1731,34 @@ procedure tcustomreport.nextpage(const acanvas: tcanvas);
 begin
  if acanvas is tcustomprintercanvas then begin
   tcustomprintercanvas(acanvas).nextpage;
+ end;
+end;
+
+function tcustomreport.getcanceled: boolean;
+begin
+ result:= (fthread <> nil) and fthread.terminated;
+end;
+
+procedure tcustomreport.setcanceled(const avalue: boolean);
+begin
+ if avalue and (fthread <> nil) then begin
+  fthread.terminate;
+ end;
+end;
+
+function tcustomreport.getrunning: boolean;
+begin
+ result:= (fthread <> nil) and fthread.running;
+end;
+
+procedure tcustomreport.waitfor;
+var
+ int1: integer;
+begin
+ if running then begin
+  int1:= application.unlockall;
+  fthread.waitfor;
+  application.relockall(int1);
  end;
 end;
 
