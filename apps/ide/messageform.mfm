@@ -16,6 +16,7 @@ object messagefo: tmessagefo
   container.frame.dummy = 0
   dragdock.caption = 'Messages'
   dragdock.optionsdock = [od_savepos, od_canmove, od_canfloat, od_candock, od_propsize]
+  options = [fo_savepos, fo_savestate]
   statfile = mainfo.projectstatfile
   icon.transparency = -2147483648
   moduleclassname = 'tdockform'
@@ -43,9 +44,9 @@ object messagefo: tmessagefo
       end>
     rowcountmax = 5000
     datarowlinewidth = 0
-    datarowheight = 14
+    datarowheight = 16
     oncellevent = messagesoncellevent
-    reffontheight = 14
+    reffontheight = 16
   end
   object tpopupmenu1: tpopupmenu
     menu.submenu.count = 1
