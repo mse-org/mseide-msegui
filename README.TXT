@@ -1,8 +1,9 @@
 MSEide+MSEgui Pascal Cross Platform GUI Development System.
-Version 1.0.rc2
+
+2007-01-24 Version 1.0
 
 - Compiles with FPC 2.0.4
-- Tested on i386-linux SuSE 9.0,9.2,10.1 and i386-win32 98 and 2000.
+- Tested on i386-linux SuSE 9.0,9.2,10.2 and i386-win32 98 and 2000.
 - Links to xlib and gdi32, no external widget library needed.
 - Internal character encoding is UCS2.
 - Uses anti aliased fonts on Linux (Xft).
@@ -70,12 +71,12 @@ If you wish to do it from scratch:
 If you want add custom icons to your components:
 
 - Convert 24*24 pixel BMP files with tools/bmp2pas to
-  a icon unit ('*_bmp.pas').
+  an icon unit ('*_bmp.pas').
 - add the name of the icon unit to 'uses' in your register unit.
  
 How to run i18ndemo
 *******************
-- Start MSEide version 0.9b.
+- Start MSEide version 1.0.
 - 'Project'-'Open'-'yourdirectory/msegui/apps/i18ndemo/i18ndemo.prj'.
 - 'Project'-'Make' to create the rst files.
 - 'Project'-'Open'-'yourdirectory/msegui/tools/i18n/msei18n.prj'.

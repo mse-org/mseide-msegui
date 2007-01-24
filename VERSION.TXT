@@ -1,4 +1,8 @@
 MSEide+MSEgui version history
+
+Version 1.0
+2007-01-24
+
 Version 1.0rc2
 2006-11-22 tcustomlookupbuffer.options olbdb_invalidateonupdatedata ->
  olbdb_invalidateifmodified.
