@@ -1753,6 +1753,7 @@ begin
   if mask * [gvm_linewidth,gvm_dashes,gvm_capstyle,gvm_joinstyle] <> [] then begin
    flags:= flags - [gcf_foregroundpenvalid];
    peninfo:= lineinfo;
+   peninfo.width:= peninfo.width shr linewidthshift;
   end;
   if gvm_rasterop in mask then begin
    exclude(flags,gcf_rasterop);

@@ -32,6 +32,7 @@ type
  shiftstatesty = set of shiftstatety;
 
 const
+ defaultppmm = 3;      //3 pixel per mm
 // shiftstatemask = [ss_shift,ss_alt,ss_ctrl];
  sizingtol = 2; //+- pixel
  sizingwidth = 2*sizingtol;                                        

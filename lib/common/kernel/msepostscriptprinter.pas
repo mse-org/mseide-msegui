@@ -704,12 +704,12 @@ begin
    handle:= adata;
    namenum:= int2;
    if height = 0 then begin
-    size:= round(defaultfontheight*fprinter.ppmm);
+    size:= round(defaultfontheight*ppmm);
    end
    else begin
     size:= height;
    end;
-   scalestring:= psrealtostr((size / fprinter.ppmm)*mmtoprintscale);
+   scalestring:= psrealtostr((size / ppmm)*mmtoprintscale);
    additem(codepages,acodepage);
   end;
  end;
@@ -1148,7 +1148,7 @@ begin
   rea1:= nulllinewidth;
  end
  else begin
-  rea1:= (avalue/fprinter.ppmm) * mmtoprintscale;
+  rea1:= avalue/(ppmm*(1 shl linewidthshift)) * mmtoprintscale;
  end;
  streamwrite(psrealtostr(rea1)+' setlinewidth'+nl);
 end;
@@ -1823,8 +1823,8 @@ begin
 //  end;
   fillchar(gc1,sizeof(gc1),0);
   gc1.handle:= cardinal(invalidgchandle);
-  linktopaintdevice(ptrint(self),gc1,makesize(round(pa_width*fprinter.ppmm),
-                       round(pa_height*fprinter.ppmm)),nullpoint);
+  linktopaintdevice(ptrint(self),gc1,makesize(round(pa_width*ppmm),
+                       round(pa_height*ppmm)),nullpoint);
  end;
 end;
 

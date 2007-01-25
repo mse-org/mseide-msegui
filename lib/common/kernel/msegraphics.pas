@@ -24,6 +24,8 @@ const
  bluemask = $0000ff;
  blueshift = 0;
 
+ linewidthshift = 16;
+ 
  invalidgchandle = cardinal(-1);
  
 type
@@ -521,7 +523,7 @@ type
  gcvaluemasksty = set of gcvaluemaskty;
 
  lineinfoty = record
-  width: integer;
+  width: integer; //pixel shl linewidthshift
   dashes: dashesstringty;
   capstyle: capstylety;
   joinstyle: joinstylety;
@@ -642,6 +644,7 @@ type
    gccolorbackground,gccolorforeground: colorty;
    fdefaultfont: fontnumty;
    fcliporigin: pointty;
+   fppmm: real;
    procedure adjustrectar(po: prectty; count: integer);
    procedure readjustrectar(po: prectty; count: integer);
    procedure error(nr: gdierrorty; const text: string);
@@ -669,7 +672,7 @@ type
    function getdashes: dashesstringty;
    procedure setdashes(const Value: dashesstringty);
    function getlinewidth: integer;
-   procedure setlinewidth(const Value: integer);
+   procedure setlinewidth(Value: integer);
    function getcapstyle: capstylety;
    function getjoinstyle: joinstylety;
    procedure setcapstyle(const Value: capstylety);
@@ -677,6 +680,8 @@ type
    procedure initregrect(const adest: regionty; const arect: rectty);
    procedure initregreg(const adest: regionty; const asource: regionty);
    procedure updatecliporigin(const Value: pointty);
+   function getlinewidthmm: real;
+   procedure setlinewidthmm(const avalue: real);
   protected
    fstate: canvasstatesty;
    fsize: sizety;
@@ -686,6 +691,7 @@ type
    gcfonthandle1: fontnumty;
    afonthandle1: fontnumty;
    ffont: tfont;
+   procedure setppmm(avalue: real); virtual;
    procedure valuechanged(value: canvasstatety);
    procedure valueschanged(values: canvasstatesty);
    procedure initgcstate; virtual;
@@ -849,6 +855,8 @@ type
    property brushorigin: pointty read getbrushorigin write setbrushorigin;
 
    property linewidth: integer read getlinewidth write setlinewidth default 0;
+   property linewidthmm: real read getlinewidthmm write setlinewidthmm;
+   
    property dashes: dashesstringty read getdashes write setdashes;
      //last byte 0 -> opaque dash  //todo: dashoffset
    property capstyle: capstylety read getcapstyle write setcapstyle
@@ -858,6 +866,8 @@ type
 
    property paintdevice: paintdevicety read fdrawinfo.paintdevice;
    property gchandle: cardinal read getgchandle;
+   property ppmm: real read fppmm write setppmm; 
+                   //used for linewidth mm, value not saved/restored
  end;
 
  pixmapstatety = (pms_monochrome,pms_ownshandle,pms_maskvalid,pms_nosave);
@@ -2782,6 +2792,7 @@ procedure tcanvas.init;
  end;
 
 begin
+ fppmm:= defaultppmm;
  restore(0); 
 // reset;
  initvalues(fvaluestack.stack[0]);
@@ -4182,13 +4193,30 @@ end;
 
 function tcanvas.getlinewidth: integer;
 begin
- result:= fvaluepo^.lineinfo.width;
+ result:= fvaluepo^.lineinfo.width shr linewidthshift;
 end;
 
-procedure tcanvas.setlinewidth(const Value: integer);
+procedure tcanvas.setlinewidth(Value: integer);
 begin
+ value:= value shl linewidthshift;
  if fvaluepo^.lineinfo.width <> value then begin
   fvaluepo^.lineinfo.width:= value;
+  valuechanged(cs_linewidth);
+ end;
+end;
+
+function tcanvas.getlinewidthmm: real;
+begin
+ result:= fvaluepo^.lineinfo.width / (fppmm * (1 shl linewidthshift));
+end;
+
+procedure tcanvas.setlinewidthmm(const avalue: real);
+var
+ int1: integer;
+begin
+ int1:= round(avalue * (1 shl linewidthshift) * fppmm);
+ if fvaluepo^.lineinfo.width <> int1 then begin
+  fvaluepo^.lineinfo.width:= int1;
   valuechanged(cs_linewidth);
  end;
 end;
@@ -4695,6 +4723,14 @@ begin
  checkgcstate([cs_gc]);
  updatecliporigin(value);
  gdi(gdi_setcliporigin);
+end;
+
+procedure tcanvas.setppmm(avalue: real);
+begin
+ if avalue < 0.1 then begin
+  avalue:= 0.1;
+ end;
+ fppmm:= avalue; 
 end;
 
 { egdi }

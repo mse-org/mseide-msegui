@@ -16,10 +16,9 @@ unit msedrawtext;
 interface
 uses
  Classes,msegraphics,mserichstring,msegraphutils,
-  msearrayprops,mseclasses,msestrings,msetypes;
+  msearrayprops,mseclasses,msestrings,msetypes,mseguiglob;
 
 const
- defaultppmm = 3;      //3 pixel per mm
  defaulttabwidth = 20; //mm
  textellipse = msestring('...');
 

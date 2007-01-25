@@ -2912,7 +2912,7 @@ begin
   end;
   if gvm_linewidth in mask then begin
    xmask:= xmask or gclinewidth;
-   xvalues.line_width:= lineinfo.width;
+   xvalues.line_width:= lineinfo.width shr linewidthshift;
   end;
   if gvm_dashes in mask then begin
    with lineinfo do begin

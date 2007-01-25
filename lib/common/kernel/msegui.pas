@@ -848,7 +848,7 @@ type
    procedure setfontheight;
    procedure postchildscaled;
    procedure dofontheightdelta(var delta: integer); virtual;
-   procedure syncsinglelinefontheight;
+   procedure syncsinglelinefontheight(const lineheight: boolean = false);
 
    procedure setwidgetrect(const Value: rectty);
    procedure internalsetwidgetrect(Value: rectty; const windowevent: boolean);
@@ -1550,6 +1550,9 @@ function translateclientrect(const rect: rectty;
     //translates from source client to dest client, to screen if dest = nil
     //source = nil -> screen
 
+procedure sortwidgetsxorder(var awidgets: widgetarty);
+procedure sortwidgetsyorder(var awidgets: widgetarty);
+
 procedure syncmaxautosize(const widgets: array of twidget);
 procedure syncminframewidth(const awidth: integer; const awidgets: array of twidget);
 
@@ -1844,6 +1847,32 @@ function translatewidgetrect(const rect: rectty;
 begin
  result:= rect;
  translatewidgetpoint1(result.pos,source,dest);
+end;
+
+function compx(const l,r): integer;
+begin
+ result:= twidget(l).fwidgetrect.x - twidget(r).fwidgetrect.x;
+ if result = 0 then begin
+  result:= twidget(l).fwidgetrect.y - twidget(r).fwidgetrect.y;
+ end;
+end;
+
+procedure sortwidgetsxorder(var awidgets: widgetarty);
+begin
+ sortarray(pointerarty(awidgets),{$ifdef FPC}@{$endif}compx);
+end;
+
+function compy(const l,r): integer;
+begin
+ result:= twidget(l).fwidgetrect.y - twidget(r).fwidgetrect.y;
+ if result = 0 then begin
+  result:= twidget(l).fwidgetrect.x - twidget(r).fwidgetrect.x;
+ end;
+end;
+
+procedure sortwidgetsyorder(var awidgets: widgetarty);
+begin
+ sortarray(pointerarty(awidgets),{$ifdef FPC}@{$endif}compy);
 end;
 
 procedure translatepaintpoint1(var point: pointty;
@@ -5701,32 +5730,16 @@ begin
  end;
 end;
 
-function compx(const l,r): integer;
-begin
- result:= twidget(l).fwidgetrect.x - twidget(r).fwidgetrect.x;
- if result = 0 then begin
-  result:= twidget(l).fwidgetrect.y - twidget(r).fwidgetrect.y;
- end;
-end;
-
 function twidget.getsortxchildren: widgetarty;
 begin
  result:= copy(container.fwidgets);
- sortarray(pointerarty(result),{$ifdef FPC}@{$endif}compx);
-end;
-
-function compy(const l,r): integer;
-begin
- result:= twidget(l).fwidgetrect.y - twidget(r).fwidgetrect.y;
- if result = 0 then begin
-  result:= twidget(l).fwidgetrect.x - twidget(r).fwidgetrect.x;
- end;
+ sortwidgetsxorder(result);
 end;
 
 function twidget.getsortychildren: widgetarty;
 begin
  result:= copy(container.fwidgets);
- sortarray(pointerarty(result),{$ifdef FPC}@{$endif}compy);
+ sortwidgetsyorder(result);
 end;
 
 function twidget.widgetatpos(const pos: pointty; const state: widgetstatesty): twidget;
@@ -7861,13 +7874,21 @@ begin
  ffont.onchange:= {$ifdef FPC}@{$endif}dofontchanged;
 end;
 
-procedure twidget.syncsinglelinefontheight;
+procedure twidget.syncsinglelinefontheight(const lineheight: boolean = false);
+var
+ int1: integer;
 begin
- if fframe = nil then begin
-  bounds_cy:= bounds_cy + getfont.glyphheight + 2 - paintsize.cy
+ if lineheight then begin
+  int1:= getfont.lineheight;
  end
  else begin
-  bounds_cy:= bounds_cy + getfont.glyphheight + fframe.framei_top + 
+  int1:= getfont.glyphheight;
+ end;
+ if fframe = nil then begin
+  bounds_cy:= bounds_cy + int1 + 2 - paintsize.cy
+ end
+ else begin
+  bounds_cy:= bounds_cy + int1 + fframe.framei_top + 
              fframe.framei_bottom - paintsize.cy;
  end;
 end;

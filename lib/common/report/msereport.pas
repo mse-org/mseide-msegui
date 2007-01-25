@@ -23,7 +23,32 @@ const
  defaultrepfontname = 'stf_report';
  
  defaultreptabtextflags = [tf_ycentered];
+ defaultbandanchors = [an_top];
+ defaultbandoptionswidget = defaultoptionswidget + [ow_fontlineheight];
   
+type
+// tablineposty = (tlp_inner,tlp_center,tlp_outer);
+ tablineinfoty = record
+  width: real;
+  color: colorty;
+  colorgap: colorty;
+  capstyle: capstylety;
+  dashes: string;
+  dist: integer;
+ end;
+ tablinekindty = (tlk_top,tlk_vert,tlk_bottom);
+ tablineinfoarty = array[tablinekindty] of tablineinfoty;
+const
+ defaulttablinewidth = 0;
+ defaulttablinecolor = cl_black;
+ defaulttablinecolorgap = cl_transparent;
+ defaulttablinecapstyle = cs_projecting;
+ defaulttablinedashes = '';
+ defaulttablinedist = 0;
+ defaulttablineinfo: tablineinfoty = (width: defaulttablinewidth; 
+         color: defaulttablinecolor; colorgap: defaulttablinecolorgap;
+         capstyle: defaulttablinecapstyle;
+         dashes: defaulttablinedashes; dist: defaulttablinedist);
 type
  tcustombandarea = class;
  tcustomrecordband = class;
@@ -47,15 +72,21 @@ type
   public
    constructor create(const aowner: treptabulatoritem);
  end;
- 
+
+ getrichstringeventty = procedure(const sender: tobject; 
+                                   var avalue: richstringty) of object;
+               
  treptabulatoritem = class(ttabulatoritem,idbeditinfo)
   private
    fvalue: richstringty;
    ffont: treptabfont;
    ftextflags: textflagsty;
    fdatalink: treptabitemdatalink;
+   fongetvalue: getrichstringeventty;
+   flineinfos: tablineinfoarty;
    procedure setvalue(const avalue: msestring);
    procedure setrichvalue(const avalue: richstringty);
+   function getdisptext: richstringty;
    function getfont: treptabfont;
    procedure setfont(const avalue: treptabfont);
    function isfontstored: boolean;
@@ -64,14 +95,56 @@ type
    procedure fontchanged(const asender: tobject);
    procedure settextflags(const avalue: textflagsty);
    procedure setdatafiled(const avalue: string);
-   function getdatasource: tdatasource;
+   function getdatasource1: tdatasource;
    procedure setdatasource(const avalue: tdatasource);
    function getdatafield: string;
    procedure setdatafield(const avalue: string);
+
+   procedure setlitop_width(const avalue: real);
+   function islitop_widthstored: boolean;
+   procedure setlitop_color(const avalue: colorty);
+   function islitop_colorstored: boolean;
+   procedure setlitop_colorgap(const avalue: colorty);
+   function islitop_colorgapstored: boolean;
+   procedure setlitop_capstyle(const avalue: capstylety);
+   function islitop_capstylestored: boolean;
+   procedure setlitop_dashes(const avalue: string);
+   function islitop_dashesstored: boolean;
+   procedure setlitop_dist(const avalue: integer);
+   function islitop_diststored: boolean;
+
+   procedure setlivert_width(const avalue: real);
+   function islivert_widthstored: boolean;
+   procedure setlivert_color(const avalue: colorty);
+   function islivert_colorstored: boolean;
+   procedure setlivert_colorgap(const avalue: colorty);
+   function islivert_colorgapstored: boolean;
+   procedure setlivert_capstyle(const avalue: capstylety);
+   function islivert_capstylestored: boolean;
+   procedure setlivert_dashes(const avalue: string);
+   function islivert_dashesstored: boolean;
+   procedure setlivert_dist(const avalue: integer);
+   function islivert_diststored: boolean;
+
+   procedure setlibottom_width(const avalue: real);
+   function islibottom_widthstored: boolean;
+   procedure setlibottom_color(const avalue: colorty);
+   function islibottom_colorstored: boolean;
+   procedure setlibottom_colorgap(const avalue: colorty);
+   function islibottom_colorgapstored: boolean;
+   procedure setlibottom_capstyle(const avalue: capstylety);
+   function islibottom_capstylestored: boolean;
+   procedure setlibottom_dashes(const avalue: string);
+   function islibottom_dashesstored: boolean;
+   procedure setlibottom_dist(const avalue: integer);
+   function islibottom_diststored: boolean;
+
                //idbeditinfo
    function getdatasource(const aindex: integer): tdatasource;
    procedure getfieldtypes(out apropertynames: stringarty;
                            out afieldtypes: fieldtypesarty);
+  protected
+   function xlineoffset: integer;
   public 
    constructor create(aowner: tobject); override;
    destructor destroy; override;
@@ -82,15 +155,92 @@ type
    property textflags: textflagsty read ftextflags write settextflags 
                    default defaultreptabtextflags;
    property datafield: string read getdatafield write setdatafield;
-   property datasource: tdatasource read getdatasource write setdatasource;
+   property datasource: tdatasource read getdatasource1 write setdatasource;
+
+   property litop_width: real read flineinfos[tlk_top].width write
+                 setlitop_width stored islitop_widthstored;
+   property litop_color: colorty read flineinfos[tlk_top].color write
+                 setlitop_color stored islitop_colorstored
+                                  default defaulttablinecolor;
+   property litop_colorgap: colorty read flineinfos[tlk_top].colorgap write
+                 setlitop_colorgap stored islitop_colorgapstored
+                                  default defaulttablinecolorgap;
+   property litop_capstyle: capstylety read flineinfos[tlk_top].capstyle write
+                 setlitop_capstyle stored islitop_capstylestored
+                                  default defaulttablinecapstyle;
+   property litop_dashes: string read flineinfos[tlk_top].dashes write
+                 setlitop_dashes stored islitop_dashesstored;
+   property litop_dist: integer read flineinfos[tlk_top].dist write
+                 setlitop_dist stored islitop_diststored
+                                  default defaulttablinedist;
+
+   property livert_width: real read flineinfos[tlk_vert].width write
+                 setlivert_width stored islivert_widthstored;
+   property livert_color: colorty read flineinfos[tlk_vert].color write
+                 setlivert_color stored islivert_colorstored
+                                  default defaulttablinecolor;
+   property livert_colorgap: colorty read flineinfos[tlk_vert].colorgap write
+                 setlivert_colorgap stored islivert_colorgapstored
+                                  default defaulttablinecolorgap;
+   property livert_capstyle: capstylety read flineinfos[tlk_vert].capstyle write
+                 setlivert_capstyle stored islivert_capstylestored
+                                  default defaulttablinecapstyle;
+   property livert_dashes: string read flineinfos[tlk_vert].dashes write
+                 setlivert_dashes stored islivert_dashesstored;
+   property livert_dist: integer read flineinfos[tlk_vert].dist write
+                 setlivert_dist stored islivert_diststored
+                                  default defaulttablinedist;
+                 
+   property libottom_width: real read flineinfos[tlk_bottom].width write
+                 setlibottom_width stored islibottom_widthstored;
+   property libottom_color: colorty read flineinfos[tlk_bottom].color write
+                 setlibottom_color stored islibottom_colorstored
+                                  default defaulttablinecolor;
+   property libottom_colorgap: colorty read flineinfos[tlk_bottom].colorgap write
+                 setlibottom_colorgap stored islibottom_colorgapstored
+                                  default defaulttablinecolorgap;
+   property libottom_capstyle: capstylety read flineinfos[tlk_bottom].capstyle write
+                 setlibottom_capstyle stored islibottom_capstylestored
+                                  default defaulttablinecapstyle;
+   property libottom_dashes: string read flineinfos[tlk_bottom].dashes write
+                 setlibottom_dashes stored islibottom_dashesstored;
+   property libottom_dist: integer read flineinfos[tlk_bottom].dist write
+                 setlibottom_dist stored islibottom_diststored
+                                  default defaulttablinedist;
+
+   property ongetvalue: getrichstringeventty read fongetvalue write fongetvalue;
  end;
  
+                 
  treptabulators = class(tcustomtabulators)
   private
    finfo: drawtextinfoty;
    fband: tcustomrecordband;
    fminsize: sizety;
    fsizevalid: boolean;
+   flineinfos: tablineinfoarty;
+
+   procedure setlitop_width(const avalue: real);
+   procedure setlitop_color(const avalue: colorty);
+   procedure setlitop_colorgap(const avalue: colorty);
+   procedure setlitop_capstyle(const avalue: capstylety);
+   procedure setlitop_dashes(const avalue: string);
+   procedure setlitop_dist(const avalue: integer);
+
+   procedure setlivert_width(const avalue: real);
+   procedure setlivert_color(const avalue: colorty);
+   procedure setlivert_colorgap(const avalue: colorty);
+   procedure setlivert_capstyle(const avalue: capstylety);
+   procedure setlivert_dashes(const avalue: string);
+   procedure setlivert_dist(const avalue: integer);
+
+   procedure setlibottom_width(const avalue: real);
+   procedure setlibottom_color(const avalue: colorty);
+   procedure setlibottom_colorgap(const avalue: colorty);
+   procedure setlibottom_capstyle(const avalue: capstylety);
+   procedure setlibottom_dashes(const avalue: string);
+   procedure setlibottom_dist(const avalue: integer);
+
    function getitems(const index: integer): treptabulatoritem;
    procedure setitems(const index: integer; const avalue: treptabulatoritem);
    procedure processvalues(const acanvas: tcanvas; const adest: rectty;
@@ -104,6 +254,46 @@ type
    property items[const index: integer]: treptabulatoritem read getitems 
                        write setitems; default;
  published
+                 
+   property litop_width: real read flineinfos[tlk_top].width write
+                 setlitop_width;
+   property litop_color: colorty read flineinfos[tlk_top].color write
+                 setlitop_color default defaulttablinecolor;
+   property litop_colorgap: colorty read flineinfos[tlk_top].colorgap write
+                 setlitop_colorgap default defaulttablinecolorgap;
+   property litop_capstyle: capstylety read flineinfos[tlk_top].capstyle write
+                 setlitop_capstyle default defaulttablinecapstyle;
+   property litop_dashes: string read flineinfos[tlk_top].dashes write
+                 setlitop_dashes;
+   property litop_dist: integer read flineinfos[tlk_top].dist write
+                 setlitop_dist default defaulttablinedist;
+
+   property livert_width: real read flineinfos[tlk_vert].width write
+                 setlivert_width;
+   property livert_color: colorty read flineinfos[tlk_vert].color write
+                 setlivert_color default defaulttablinecolor;
+   property livert_colorgap: colorty read flineinfos[tlk_vert].colorgap write
+                 setlivert_colorgap default defaulttablinecolorgap;
+   property livert_capstyle: capstylety read flineinfos[tlk_vert].capstyle write
+                 setlivert_capstyle default defaulttablinecapstyle;
+   property livert_dashes: string read flineinfos[tlk_vert].dashes write
+                 setlivert_dashes;
+   property livert_dist: integer read flineinfos[tlk_vert].dist write
+                 setlivert_dist default defaulttablinedist;
+                 
+   property libottom_width: real read flineinfos[tlk_bottom].width write
+                 setlibottom_width;
+   property libottom_color: colorty read flineinfos[tlk_bottom].color write
+                 setlibottom_color default defaulttablinecolor;
+   property libottom_colorgap: colorty read flineinfos[tlk_bottom].colorgap write
+                 setlibottom_colorgap default defaulttablinecolorgap;
+   property libottom_capstyle: capstylety read flineinfos[tlk_bottom].capstyle write
+                 setlibottom_capstyle default defaulttablinecapstyle;
+   property libottom_dashes: string read flineinfos[tlk_bottom].dashes write
+                 setlibottom_dashes;
+   property libottom_dist: integer read flineinfos[tlk_bottom].dist write
+                 setlibottom_dist default defaulttablinedist;
+
    property defaultdist;
  end;
   
@@ -151,6 +341,7 @@ type
    function rendering: boolean;
    function bandheight: integer;
    procedure dobeforerender(var empty: boolean); virtual;
+   procedure synctofontheight; override;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -163,6 +354,8 @@ type
    property tabs: treptabulators read ftabs write settabs;
    property font: twidgetfont read getfont write setfont stored isfontstored;
    property datasource: tdatasource read getdatasource write setdatasource;
+  published
+   property anchors default defaultbandanchors;
  end;
 
  trecordband = class(tcustomrecordband)
@@ -356,7 +549,7 @@ type
    fcanvas: tcanvas;
    fpagenum: integer;
    fthread: tmsethread;
-   fprinterppmmbefore: real;
+   fppmmbefore: real;
    procedure setppmm(const avalue: real);
    function getreppages(index: integer): tcustomreportpage;
    procedure setreppages(index: integer; const avalue: tcustomreportpage);
@@ -497,7 +690,8 @@ begin
  ftextflags:= defaultreptabtextflags;
  fdatalink:= treptabitemdatalink.create(self);
  inherited;
- with treptabulators(aowner).fband do begin
+ with treptabulators(aowner),fband do begin
+  self.flineinfos:= flineinfos;
   if not (csloading in componentstate) then begin
    self.datasource:= datasource;
   end;
@@ -584,7 +778,7 @@ begin
  fdatalink.fieldname:= avalue
 end;
 
-function treptabulatoritem.getdatasource: tdatasource;
+function treptabulatoritem.getdatasource1: tdatasource;
 begin
  result:= fdatalink.datasource;
 end;
@@ -592,6 +786,7 @@ end;
 procedure treptabulatoritem.setdatasource(const avalue: tdatasource);
 begin
  fdatalink.datasource:= avalue;
+ changed;
 end;
 
 function treptabulatoritem.getdatafield: string;
@@ -616,11 +811,258 @@ begin
  afieldtypes:= nil;
 end;
 
+function treptabulatoritem.getdisptext: richstringty;
+begin
+ if fdatalink.fieldactive then begin
+  result.text:= fdatalink.msedisplaytext;
+  result.format:= nil;
+ end
+ else begin
+  result:= fvalue;
+ end;
+ if treptabulators(fowner).fband.canevent(tmethod(fongetvalue)) then begin
+  fongetvalue(self,result);
+ end;
+end;
+
+procedure treptabulatoritem.setlitop_width(const avalue: real);
+begin
+ flineinfos[tlk_top].width:= avalue;
+ changed;
+end;
+
+function treptabulatoritem.islitop_widthstored: boolean;
+begin
+ result:= flineinfos[tlk_top].width <> 
+                treptabulators(fowner).flineinfos[tlk_top].width;
+end;
+
+procedure treptabulatoritem.setlitop_color(const avalue: colorty);
+begin
+ flineinfos[tlk_top].color:= avalue;
+ changed;
+end;
+
+function treptabulatoritem.islitop_colorstored: boolean;
+begin
+ result:= flineinfos[tlk_top].color <> 
+               treptabulators(fowner).flineinfos[tlk_top].color;
+end;
+
+procedure treptabulatoritem.setlitop_colorgap(const avalue: colorty);
+begin
+ flineinfos[tlk_top].colorgap:= avalue;
+ changed;
+end;
+
+function treptabulatoritem.islitop_colorgapstored: boolean;
+begin
+ result:= flineinfos[tlk_top].colorgap <> 
+              treptabulators(fowner).flineinfos[tlk_top].colorgap;
+end;
+
+procedure treptabulatoritem.setlitop_capstyle(const avalue: capstylety);
+begin
+ flineinfos[tlk_top].capstyle:= avalue;
+ changed;
+end;
+
+function treptabulatoritem.islitop_capstylestored: boolean;
+begin
+ result:= flineinfos[tlk_top].capstyle <> 
+              treptabulators(fowner).flineinfos[tlk_top].capstyle;
+end;
+
+procedure treptabulatoritem.setlitop_dashes(const avalue: string);
+begin
+ flineinfos[tlk_top].dashes:= avalue;
+ changed;
+end;
+
+function treptabulatoritem.islitop_dashesstored: boolean;
+begin
+ result:= flineinfos[tlk_top].dashes <> 
+              treptabulators(fowner).flineinfos[tlk_top].dashes;
+end;
+
+procedure treptabulatoritem.setlitop_dist(const avalue: integer);
+begin
+ flineinfos[tlk_top].dist:= avalue;
+ changed;
+end;
+
+function treptabulatoritem.islitop_diststored: boolean;
+begin
+ result:= flineinfos[tlk_top].dist <> 
+              treptabulators(fowner).flineinfos[tlk_top].dist;
+end;
+
+procedure treptabulatoritem.setlivert_width(const avalue: real);
+begin
+ flineinfos[tlk_vert].width:= avalue;
+ changed;
+end;
+
+function treptabulatoritem.islivert_widthstored: boolean;
+begin
+ result:= flineinfos[tlk_vert].width <> 
+                treptabulators(fowner).flineinfos[tlk_vert].width;
+end;
+
+procedure treptabulatoritem.setlivert_color(const avalue: colorty);
+begin
+ flineinfos[tlk_vert].color:= avalue;
+ changed;
+end;
+
+function treptabulatoritem.islivert_colorstored: boolean;
+begin
+ result:= flineinfos[tlk_vert].color <> 
+               treptabulators(fowner).flineinfos[tlk_vert].color;
+end;
+
+procedure treptabulatoritem.setlivert_colorgap(const avalue: colorty);
+begin
+ flineinfos[tlk_vert].colorgap:= avalue;
+ changed;
+end;
+
+function treptabulatoritem.islivert_colorgapstored: boolean;
+begin
+ result:= flineinfos[tlk_vert].colorgap <> 
+              treptabulators(fowner).flineinfos[tlk_vert].colorgap;
+end;
+
+procedure treptabulatoritem.setlivert_capstyle(const avalue: capstylety);
+begin
+ flineinfos[tlk_vert].capstyle:= avalue;
+ changed;
+end;
+
+function treptabulatoritem.islivert_capstylestored: boolean;
+begin
+ result:= flineinfos[tlk_vert].capstyle <> 
+              treptabulators(fowner).flineinfos[tlk_vert].capstyle;
+end;
+
+procedure treptabulatoritem.setlivert_dashes(const avalue: string);
+begin
+ flineinfos[tlk_vert].dashes:= avalue;
+ changed;
+end;
+
+function treptabulatoritem.islivert_dashesstored: boolean;
+begin
+ result:= flineinfos[tlk_vert].dashes <> 
+              treptabulators(fowner).flineinfos[tlk_vert].dashes;
+end;
+
+procedure treptabulatoritem.setlivert_dist(const avalue: integer);
+begin
+ flineinfos[tlk_vert].dist:= avalue;
+ changed;
+end;
+
+function treptabulatoritem.islivert_diststored: boolean;
+begin
+ result:= flineinfos[tlk_vert].dist <> 
+              treptabulators(fowner).flineinfos[tlk_vert].dist;
+end;
+
+procedure treptabulatoritem.setlibottom_width(const avalue: real);
+begin
+ flineinfos[tlk_bottom].width:= avalue;
+ changed;
+end;
+
+function treptabulatoritem.islibottom_widthstored: boolean;
+begin
+ result:= flineinfos[tlk_bottom].width <> 
+                treptabulators(fowner).flineinfos[tlk_bottom].width;
+end;
+
+procedure treptabulatoritem.setlibottom_color(const avalue: colorty);
+begin
+ flineinfos[tlk_bottom].color:= avalue;
+ changed;
+end;
+
+function treptabulatoritem.islibottom_colorstored: boolean;
+begin
+ result:= flineinfos[tlk_bottom].color <> 
+               treptabulators(fowner).flineinfos[tlk_bottom].color;
+end;
+
+procedure treptabulatoritem.setlibottom_colorgap(const avalue: colorty);
+begin
+ flineinfos[tlk_bottom].colorgap:= avalue;
+ changed;
+end;
+
+function treptabulatoritem.islibottom_colorgapstored: boolean;
+begin
+ result:= flineinfos[tlk_bottom].colorgap <> 
+              treptabulators(fowner).flineinfos[tlk_bottom].colorgap;
+end;
+
+procedure treptabulatoritem.setlibottom_capstyle(const avalue: capstylety);
+begin
+ flineinfos[tlk_bottom].capstyle:= avalue;
+ changed;
+end;
+
+function treptabulatoritem.islibottom_capstylestored: boolean;
+begin
+ result:= flineinfos[tlk_bottom].capstyle <> 
+              treptabulators(fowner).flineinfos[tlk_bottom].capstyle;
+end;
+
+procedure treptabulatoritem.setlibottom_dashes(const avalue: string);
+begin
+ flineinfos[tlk_bottom].dashes:= avalue;
+ changed;
+end;
+
+function treptabulatoritem.islibottom_dashesstored: boolean;
+begin
+ result:= flineinfos[tlk_bottom].dashes <> 
+              treptabulators(fowner).flineinfos[tlk_bottom].dashes;
+end;
+
+procedure treptabulatoritem.setlibottom_dist(const avalue: integer);
+begin
+ flineinfos[tlk_bottom].dist:= avalue;
+ changed;
+end;
+
+function treptabulatoritem.islibottom_diststored: boolean;
+begin
+ result:= flineinfos[tlk_bottom].dist <> 
+              treptabulators(fowner).flineinfos[tlk_bottom].dist;
+end;
+
+function treptabulatoritem.xlineoffset: integer;
+begin
+ with flineinfos[tlk_vert] do begin
+  if kind = tak_left then begin
+   result:= -dist;
+  end
+  else begin
+   result:= dist;
+  end;
+ end; 
+end;
+
 { treptabulators }
 
 constructor treptabulators.create(const aowner: tcustomrecordband);
+var
+ kind1: tablinekindty;
 begin
  fband:= aowner;
+ for kind1:= low(tablinekindty) to high(tablinekindty) do begin
+  flineinfos[kind1]:= defaulttablineinfo;
+ end;
  inherited create;
 end;
 
@@ -643,6 +1085,86 @@ end;
 procedure treptabulators.processvalues(const acanvas: tcanvas;
                const adest: rectty; const apaint: boolean);
 var
+ bo1: boolean;
+
+ procedure checkinit(const ainfo: tablineinfoty);
+ begin
+  if not bo1 then begin
+   bo1:= true;
+   acanvas.save;
+   acanvas.addclipframe(makerect(nullpoint,fband.paintsize),1000);
+  end;
+  with ainfo do begin
+   acanvas.linewidthmm:= width;
+   acanvas.capstyle:= capstyle;
+   if (dashes <> '') and (colorgap <> cl_transparent) then begin
+    acanvas.dashes:= copy(dashes+#0,1,high(dashesstringty));
+    acanvas.colorbackground:= colorgap;
+   end
+   else begin
+    acanvas.dashes:= copy(dashes,1,high(dashesstringty));
+   end;
+  end;
+ end;
+ 
+ procedure drawhorzline(const aindex: integer; const akind: tablinekindty);
+  function nextx: integer;
+  begin
+   if aindex < high(ftabs) then begin
+    with ftabs[aindex+1] do begin
+     result:= pos + treptabulatoritem(fitems[index]).xlineoffset;
+    end;
+   end
+   else begin
+    result:= fband.clientwidth;
+   end;
+  end;
+  
+ var
+  startx,endx,y: integer;
+ begin
+  with treptabulatoritem(fitems[ftabs[aindex].index]) do begin
+   with flineinfos[akind] do begin
+    if width > 0 then begin
+     checkinit(flineinfos[akind]);
+     with ftabs[aindex] do begin     
+      case kind of
+       tak_left: begin
+        startx:= pos + xlineoffset;
+        endx:= nextx;
+       end;
+       else begin
+        if aindex > 0 then begin
+         with ftabs[aindex-1] do begin
+          startx:= pos + treptabulatoritem(fitems[index]).xlineoffset;
+         end;
+        end
+        else begin
+         startx:= 0;
+        end;
+        if kind = tak_centered then begin
+         endx:= nextx;
+        end
+        else begin
+         endx:= pos + xlineoffset;
+        end;
+       end;
+      end;
+     end;
+     if akind = tlk_top then begin
+      y:= - flineinfos[tlk_top].dist;
+     end
+     else begin
+      y:= treptabulators(fowner).fband.clientheight + 
+                     flineinfos[tlk_bottom].dist;
+     end;
+     acanvas.drawline(makepoint(startx,y),makepoint(endx,y),color);
+    end;
+   end;
+  end;
+ end;
+ 
+var
  int1,int2,int3: integer;
  rstr1: richstringty;
 begin
@@ -653,13 +1175,7 @@ begin
    for int1:= 0 to count - 1 do begin
     with ftabs[int1] do begin
      with treptabulatoritem(fitems[index]) do begin
-      if fdatalink.fieldactive then begin
-       text.text:= fdatalink.msedisplaytext;
-       text.format:= nil;
-      end
-      else begin
-       text:= fvalue;
-      end;
+      text:= getdisptext;
       finfo.font:= font;
       flags:= ftextflags;
      end;
@@ -708,6 +1224,35 @@ begin
     end;
    end;
   end;
+  if apaint then begin
+   bo1:= false;
+   for int1:= 0 to count - 1 do begin
+    with treptabulatoritem(fitems[ftabs[int1].index]) do begin
+     with flineinfos[tlk_vert] do begin
+      if width > 0 then begin
+       checkinit(flineinfos[tlk_vert]);
+       with ftabs[int1] do begin
+        case kind of 
+         tak_left: begin
+          int2:= pos - dist
+         end
+         else begin
+          int2:= pos + dist;
+         end;
+        end;
+       end;
+       acanvas.drawline(makepoint(int2,fband.clientheight),
+                               makepoint(int2,0),color);
+      end;
+     end;
+    end;
+    drawhorzline(int1,tlk_top);
+    drawhorzline(int1,tlk_bottom);
+   end;
+   if bo1 then begin
+    acanvas.restore;
+   end;
+  end;
  end;
  fsizevalid:= true;
 end;
@@ -724,6 +1269,222 @@ begin
  end;
 end;
 
+procedure treptabulators.setlitop_width(const avalue: real);
+var
+ int1: integer;
+begin
+ if avalue <> flineinfos[tlk_top].width then begin
+  flineinfos[tlk_top].width:= avalue;
+  for int1:= 0 to high(fitems) do begin
+   treptabulatoritem(fitems[int1]).litop_width:= avalue;
+  end;
+ end;
+end;
+
+procedure treptabulators.setlitop_color(const avalue: colorty);
+var
+ int1: integer;
+begin
+ if avalue <> flineinfos[tlk_top].color then begin
+  flineinfos[tlk_top].color:= avalue;
+  for int1:= 0 to high(fitems) do begin
+   treptabulatoritem(fitems[int1]).litop_color:= avalue;
+  end;
+ end;
+end;
+
+procedure treptabulators.setlitop_colorgap(const avalue: colorty);
+var
+ int1: integer;
+begin
+ if avalue <> flineinfos[tlk_top].colorgap then begin
+  flineinfos[tlk_top].colorgap:= avalue;
+  for int1:= 0 to high(fitems) do begin
+   treptabulatoritem(fitems[int1]).litop_colorgap:= avalue;
+  end;
+ end;
+end;
+
+procedure treptabulators.setlitop_capstyle(const avalue: capstylety);
+var
+ int1: integer;
+begin
+ if avalue <> flineinfos[tlk_top].capstyle then begin
+  flineinfos[tlk_top].capstyle:= avalue;
+  for int1:= 0 to high(fitems) do begin
+   treptabulatoritem(fitems[int1]).litop_capstyle:= avalue;
+  end;
+ end;
+end;
+
+procedure treptabulators.setlitop_dashes(const avalue: string);
+var
+ int1: integer;
+begin
+ if avalue <> flineinfos[tlk_top].dashes then begin
+  flineinfos[tlk_top].dashes:= avalue;
+  for int1:= 0 to high(fitems) do begin
+   treptabulatoritem(fitems[int1]).litop_dashes:= avalue;
+  end;
+ end;
+end;
+
+procedure treptabulators.setlitop_dist(const avalue: integer);
+var
+ int1: integer;
+begin
+ if avalue <> flineinfos[tlk_top].dist then begin
+  flineinfos[tlk_top].dist:= avalue;
+  for int1:= 0 to high(fitems) do begin
+   treptabulatoritem(fitems[int1]).litop_dist:= avalue;
+  end;
+ end;
+end;
+
+procedure treptabulators.setlivert_width(const avalue: real);
+var
+ int1: integer;
+begin
+ if avalue <> flineinfos[tlk_vert].width then begin
+  flineinfos[tlk_vert].width:= avalue;
+  for int1:= 0 to high(fitems) do begin
+   treptabulatoritem(fitems[int1]).livert_width:= avalue;
+  end;
+ end;
+end;
+
+procedure treptabulators.setlivert_color(const avalue: colorty);
+var
+ int1: integer;
+begin
+ if avalue <> flineinfos[tlk_vert].color then begin
+  flineinfos[tlk_vert].color:= avalue;
+  for int1:= 0 to high(fitems) do begin
+   treptabulatoritem(fitems[int1]).livert_color:= avalue;
+  end;
+ end;
+end;
+
+procedure treptabulators.setlivert_colorgap(const avalue: colorty);
+var
+ int1: integer;
+begin
+ if avalue <> flineinfos[tlk_vert].colorgap then begin
+  flineinfos[tlk_vert].colorgap:= avalue;
+  for int1:= 0 to high(fitems) do begin
+   treptabulatoritem(fitems[int1]).livert_colorgap:= avalue;
+  end;
+ end;
+end;
+
+procedure treptabulators.setlivert_capstyle(const avalue: capstylety);
+var
+ int1: integer;
+begin
+ if avalue <> flineinfos[tlk_vert].capstyle then begin
+  flineinfos[tlk_vert].capstyle:= avalue;
+  for int1:= 0 to high(fitems) do begin
+   treptabulatoritem(fitems[int1]).livert_capstyle:= avalue;
+  end;
+ end;
+end;
+
+procedure treptabulators.setlivert_dashes(const avalue: string);
+var
+ int1: integer;
+begin
+ if avalue <> flineinfos[tlk_vert].dashes then begin
+  flineinfos[tlk_vert].dashes:= avalue;
+  for int1:= 0 to high(fitems) do begin
+   treptabulatoritem(fitems[int1]).livert_dashes:= avalue;
+  end;
+ end;
+end;
+
+procedure treptabulators.setlivert_dist(const avalue: integer);
+var
+ int1: integer;
+begin
+ if avalue <> flineinfos[tlk_vert].dist then begin
+  flineinfos[tlk_vert].dist:= avalue;
+  for int1:= 0 to high(fitems) do begin
+   treptabulatoritem(fitems[int1]).livert_dist:= avalue;
+  end;
+ end;
+end;
+
+procedure treptabulators.setlibottom_width(const avalue: real);
+var
+ int1: integer;
+begin
+ if avalue <> flineinfos[tlk_bottom].width then begin
+  flineinfos[tlk_bottom].width:= avalue;
+  for int1:= 0 to high(fitems) do begin
+   treptabulatoritem(fitems[int1]).libottom_width:= avalue;
+  end;
+ end;
+end;
+
+procedure treptabulators.setlibottom_color(const avalue: colorty);
+var
+ int1: integer;
+begin
+ if avalue <> flineinfos[tlk_bottom].color then begin
+  flineinfos[tlk_bottom].color:= avalue;
+  for int1:= 0 to high(fitems) do begin
+   treptabulatoritem(fitems[int1]).libottom_color:= avalue;
+  end;
+ end;
+end;
+
+procedure treptabulators.setlibottom_colorgap(const avalue: colorty);
+var
+ int1: integer;
+begin
+ if avalue <> flineinfos[tlk_bottom].colorgap then begin
+  flineinfos[tlk_bottom].colorgap:= avalue;
+  for int1:= 0 to high(fitems) do begin
+   treptabulatoritem(fitems[int1]).libottom_colorgap:= avalue;
+  end;
+ end;
+end;
+
+procedure treptabulators.setlibottom_capstyle(const avalue: capstylety);
+var
+ int1: integer;
+begin
+ if avalue <> flineinfos[tlk_bottom].capstyle then begin
+  flineinfos[tlk_bottom].capstyle:= avalue;
+  for int1:= 0 to high(fitems) do begin
+   treptabulatoritem(fitems[int1]).libottom_capstyle:= avalue;
+  end;
+ end;
+end;
+
+procedure treptabulators.setlibottom_dashes(const avalue: string);
+var
+ int1: integer;
+begin
+ if avalue <> flineinfos[tlk_bottom].dashes then begin
+  flineinfos[tlk_bottom].dashes:= avalue;
+  for int1:= 0 to high(fitems) do begin
+   treptabulatoritem(fitems[int1]).libottom_dashes:= avalue;
+  end;
+ end;
+end;
+
+procedure treptabulators.setlibottom_dist(const avalue: integer);
+var
+ int1: integer;
+begin
+ if avalue <> flineinfos[tlk_bottom].dist then begin
+  flineinfos[tlk_bottom].dist:= avalue;
+  for int1:= 0 to high(fitems) do begin
+   treptabulatoritem(fitems[int1]).libottom_dist:= avalue;
+  end;
+ end;
+end;
+
 { tcustomrecordband }
 
 constructor tcustomrecordband.create(aowner: tcomponent);
@@ -731,6 +1492,8 @@ begin
  ftabs:= treptabulators.create(self);
  fdatalink:= trecordbanddatalink.create;
  inherited;
+ fanchors:= defaultbandanchors;
+ foptionswidget:= defaultbandoptionswidget;
 end;
 
 destructor tcustomrecordband.destroy;
@@ -949,6 +1712,11 @@ begin
  result:= fdatalink.datasource;
 end;
 
+procedure tcustomrecordband.synctofontheight;
+begin
+ syncsinglelinefontheight(true);
+end;
+
 { tcustombandgroup }
 
 procedure tcustombandgroup.registerchildwidget(const child: twidget);
@@ -1087,6 +1855,7 @@ var
 begin
   factiveband:= 0;
   include(fstate,bas_inited);
+  sortwidgetsyorder(widgetarty(fbands));
   for int1:= 0 to high(fbands) do begin
    fbands[int1].init;
   end;
@@ -1533,8 +2302,9 @@ function tcustomreport.exec(thread: tmsethread): integer;
   end;
   if fprinter <> nil then begin
    fprinter.endprint;
-   fprinter.ppmm:= fprinterppmmbefore;
+//   fprinter.ppmm:= fpmmbefore;
   end;
+  fcanvas.ppmm:= fppmmbefore;
  end;
 
 var               
@@ -1591,9 +2361,10 @@ begin
  fprinter:= aprinter;
  fcanvas:= acanvas;
  fpagenum:= 0;
+ fppmmbefore:= acanvas.ppmm;
+ acanvas.ppmm:= fppmm;
  if aprinter <> nil then begin
-  fprinterppmmbefore:= aprinter.ppmm;
-  aprinter.ppmm:= fppmm;
+//  aprinter.ppmm:= fppmm;
   if astream <> nil then begin
    aprinter.beginprint(astream);
   end

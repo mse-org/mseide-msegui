@@ -91,14 +91,14 @@ type
    fpa_frameright: real;
    fpa_framebottom: real;
    ftabulators: tprintertabulators;
-   fppmm: real;
+//   fppmm: real;
    fprintcommand: string;
    fstatfile: tstatfile;
    fstatvarname: msestring;
    fpa_orientation: pageorientationty;
    procedure setstream(const avalue: ttextstream);
    procedure settabulators(const avalue: tprintertabulators);
-   procedure setppmm(const avalue: real);
+//   procedure setppmm(const avalue: real);
    procedure setpa_frameleft(const avalue: real);
    procedure setpa_frametop(const avalue: real);
    procedure setpa_frameright(const avalue: real);
@@ -146,7 +146,7 @@ type
    property pa_frameright: real read fpa_frameright write setpa_frameright;  //mm, default 10
    property pa_framebottom: real read fpa_framebottom write setpa_framebottom; //mm, default 10
    property tabulators: tprintertabulators read ftabulators write settabulators;
-   property ppmm: real read fppmm write setppmm; //pixel per mm, default 10
+//   property ppmm: real read fppmm write setppmm; //pixel per mm, default 10
    property printcommand: string read fprintcommand write fprintcommand;
 //   property colorspace: colorspacety read getcolorspace write setcolorspace;
    property statfile: tstatfile read fstatfile write setstatfile;
@@ -187,6 +187,7 @@ type
    fcolorspace: colorspacety;
    procedure initprinting;
    procedure checkgcstate(state: canvasstatesty); override;
+   procedure setppmm(avalue: real); override;
    procedure updatescale; virtual;
    procedure updateframe;
    procedure beginpage; virtual;
@@ -262,6 +263,7 @@ type
    property printorientation;
    property colorspace;
    property title;
+   property ppmm; //default 10
  end;
  
  tprintervalueselector = class(tcustomselector)
@@ -319,7 +321,7 @@ type
 
 constructor tprinter.create(aowner: tcomponent);
 begin
- fppmm:= defaultppmm;
+// fppmm:= defaultppmm;
  fpa_size:= sps_a4;
  with stdpagesizes[fpa_size] do begin
   fpa_width:= width;
@@ -332,6 +334,7 @@ begin
  ftabulators:= tprintertabulators.create;
  fprintcommand:= sys_getprintcommand;
  inherited;
+ fcanvas.ppmm:= defaultppmm;
 end;
 
 destructor tprinter.destroy;
@@ -457,14 +460,14 @@ begin
  fpa_orientation:= avalue;
  pagesizechanged;
 end;
-
+{
 procedure tprinter.setppmm(const avalue: real);
 begin
  fppmm:= avalue;
  ftabulators.ppmm:= avalue;
  fcanvas.updatescale;
 end;
-
+}
 procedure tprinter.setpa_frameleft(const avalue: real);
 begin
  fpa_frameleft:= avalue;
@@ -592,17 +595,18 @@ begin
  if not (csloading in fprinter.componentstate) then begin
   exclude(fstate,cs_origin);
   with fprinter do begin
-   fgcscale:= mmtoprintscale/fppmm; //map to printerunits
+//   self.ppmm:= fppmm;
+   fgcscale:= mmtoprintscale/ppmm; //map to printerunits
 
    if fprintorientation = pao_landscape then begin
-    fsize.cx:= round(fpa_height * fppmm);
-    fsize.cy:= round(fpa_width * fppmm);
+    fsize.cx:= round(fpa_height * ppmm);
+    fsize.cy:= round(fpa_width * ppmm);
     fgcoffsetx:= mmtoprintscale * fpa_frameleft;
     fgcoffsety:= - fpa_frametop*mmtoprintscale;
    end
    else begin
-    fsize.cx:= round(fpa_width * fppmm);
-    fsize.cy:= round(fpa_height * fppmm);
+    fsize.cx:= round(fpa_width * ppmm);
+    fsize.cy:= round(fpa_height * ppmm);
     fgcoffsetx:= mmtoprintscale * fpa_frameleft;
     fgcoffsety:= (fpa_height-fpa_frametop)*mmtoprintscale;
    end;
@@ -610,17 +614,17 @@ begin
    if fprintorientation = pao_landscape then begin
     fboundingbox.left:= round(fpa_frametop*mmtoprintscale);
     fboundingbox.bottom:= round(fpa_frameleft*mmtoprintscale);
-    fboundingbox.right:= round((fsize.cy/fppmm-fpa_framebottom)*mmtoprintscale);
-    fboundingbox.top:= round((fsize.cx/fppmm-fpa_frameright)*mmtoprintscale);
+    fboundingbox.right:= round((fsize.cy/ppmm-fpa_framebottom)*mmtoprintscale);
+    fboundingbox.top:= round((fsize.cx/ppmm-fpa_frameright)*mmtoprintscale);
    end
    else begin
     fboundingbox.left:= round(fpa_frameleft*mmtoprintscale);
     fboundingbox.bottom:= round(fpa_framebottom*mmtoprintscale);
-    fboundingbox.right:= round((fsize.cx/fppmm-fpa_frameright)*mmtoprintscale);
-    fboundingbox.top:= round((fsize.cy/fppmm-fpa_frametop)*mmtoprintscale);
+    fboundingbox.right:= round((fsize.cx/ppmm-fpa_frameright)*mmtoprintscale);
+    fboundingbox.top:= round((fsize.cy/ppmm-fpa_frametop)*mmtoprintscale);
    end;
-   fclientsize.cx:= fsize.cx - round((fpa_frameleft+fpa_frameright)*fppmm);
-   fclientsize.cy:= fsize.cy - round((fpa_frametop+fpa_framebottom)*fppmm);
+   fclientsize.cx:= fsize.cx - round((fpa_frameleft+fpa_frameright)*ppmm);
+   fclientsize.cy:= fsize.cy - round((fpa_frametop+fpa_framebottom)*ppmm);
   end;
  end;
 end;
@@ -628,10 +632,10 @@ end;
 procedure tcustomprintercanvas.checkgcstate(state: canvasstatesty);
 begin
  if not (cs_origin in fstate) then begin
-  with fprinter do begin
-   foriginx:= fgcoffsetx + mmtoprintscale * (origin.x/fppmm);
-   foriginy:= fgcoffsety - mmtoprintscale * (origin.y/fppmm);
-  end;
+//  with fprinter do begin
+   foriginx:= fgcoffsetx + mmtoprintscale * (origin.x/ppmm);
+   foriginy:= fgcoffsety - mmtoprintscale * (origin.y/ppmm);
+//  end;
  end;
  inherited;
 end;
@@ -752,18 +756,18 @@ begin
       if kind = tak_decimal then begin
        int2:= msestrrscan(ar1[int1].text,widechar(decimalseparator));
        if int2 > 0 then begin
-        textout(richcopy(ar1[int1],1,int2-1),makerect(round(pos*fprinter.fppmm),dest.y,0,
+        textout(richcopy(ar1[int1],1,int2-1),makerect(round(pos*ppmm),dest.y,0,
                   dest.cy),aflags,0); //int
         textout(richcopy(ar1[int1],int2,bigint),makerect(0,dest.y,0,
                   dest.cy),aflags-[tf_right],-1); //frac
        end
        else begin
-        textout(ar1[int1],makerect(round(pos*fprinter.fppmm),dest.y,0,
+        textout(ar1[int1],makerect(round(pos*ppmm),dest.y,0,
                   dest.cy),aflags,0); //no frac
        end;
       end
       else begin
-       textout(ar1[int1],makerect(round(pos*fprinter.fppmm),dest.y,0,dest.cy),aflags,0);
+       textout(ar1[int1],makerect(round(pos*ppmm),dest.y,0,dest.cy),aflags,0);
       end;
      end;
     end;
@@ -910,7 +914,7 @@ function tcustomprintercanvas.lineheight: integer;
 begin
  result:= font.height;
  if result = 0 then begin
-  result:= round(defaultfontheight*fprinter.fppmm);
+  result:= round(defaultfontheight*ppmm);
  end;
  result:= result + font.extraspace;
 end;
@@ -980,6 +984,13 @@ begin
  if fstream <> nil then begin
   fstream.writeln(atext);
  end;
+end;
+
+procedure tcustomprintercanvas.setppmm(avalue: real);
+begin
+ inherited;
+ fprinter.ftabulators.ppmm:= avalue;
+ updatescale;
 end;
 
 { tprintervalueselector }
