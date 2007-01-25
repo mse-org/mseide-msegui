@@ -1,4 +1,6 @@
 MSEide+MSEgui version history
+
+2007-01-25 tprinter.ppmm -> tcanvas.ppmm.
 2006-12-23 tfixrow.hints moved to tcolheader.
 2006-12-22 Item order of tfixcols, tfixrows and tfixcolheaders reversed.
 2006-11-22 tcustomlookupbuffer.options olbdb_invalidateonupdatedata ->
