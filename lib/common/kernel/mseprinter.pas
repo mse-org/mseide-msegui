@@ -252,9 +252,7 @@ type
    property lastpage: integer read flastpage write flastpage default bigint;
    
    property printorientation: pageorientationty read fprintorientation 
-                write setprintorientation default pao_portrait;
-   
-   //dashes unit is 0.1mm
+                write setprintorientation default pao_portrait;   
  end;
 
  tprintercanvas = class(tcustomprintercanvas)

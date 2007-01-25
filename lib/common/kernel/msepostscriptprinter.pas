@@ -780,17 +780,16 @@ begin
  with fdrawinfo,gcvalues^ do begin
   if gvm_dashes in mask then begin
    int2:= length(lineinfo.dashes);
-   if int2 > 0 then begin
-    if lineinfo.dashes[int2] = #0 then begin
-     dec(int2);
-    end;
-    str1:= '[';
-    for int1:= 1 to int2 do begin
-     str1:= str1 + psrealtostr(mmtoprintscale*(byte(lineinfo.dashes[int1])/10))+' ';
-    end;
-    str1:= str1+'] 0 setdash'+nl;
-    streamwrite(str1);
+   if (int2 > 0) and (lineinfo.dashes[int2] = #0) then begin
+    dec(int2);
    end;
+   str1:= '[';
+   for int1:= 1 to int2 do begin
+    str1:= str1 + 
+         psrealtostr(mmtoprintscale*(byte(lineinfo.dashes[int1])/ppmm))+' ';
+   end;
+   str1:= str1+'] 0 setdash'+nl;
+   streamwrite(str1);
   end;
   if (self.brush <> nil) and 
             ([gvm_brush,gvm_brushorigin] * mask <> []) then begin
