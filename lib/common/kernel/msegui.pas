@@ -71,12 +71,13 @@ type
                  );
  widgetstatesty = set of widgetstatety;
  widgetstate1ty = (ws1_releasing,ws1_childscaled,ws1_fontheightlock,
-                   ws1_widgetregionvalid,ws1_rootvalid,{ws1_clientsizing,}
+                   ws1_widgetregionvalid,ws1_rootvalid,
                    ws1_anchorsizing,ws1_isstreamed,
                    ws1_noclipchildren,
                    ws1_nodesignvisible,ws1_nodesignframe,ws1_nodesignhandles,
                    ws1_nodesigndelete,ws1_designactive,
-                   ws1_fakevisible //used for report size calculations
+                   ws1_fakevisible,ws1_nominsize
+                         //used for report size calculations
                    );
  widgetstates1ty = set of widgetstate1ty;
 
@@ -4773,7 +4774,8 @@ begin
  end;
  for int1:= 0 to widgetcount - 1 do begin
   with fwidgets[int1],fwidgetrect do begin
-   if visible or (csdesigning in componentstate) then begin
+   if visible and not(ws1_nominsize in fwidgetstate1) or 
+                                  (csdesigning in componentstate) then begin
     anch:= fanchors * [an_left,an_right];
     if anch = [an_right] then begin
 //     int2:= cx + indent.left;
@@ -6955,7 +6957,8 @@ function twidget.showing: boolean;
 begin
  result:= isvisible and
   (
-   (fparentwidget = nil) and ((fwindow <> nil) and (tws_windowvisible in fwindow.fstate)) or
+   (fparentwidget = nil) and ((fwindow <> nil) and 
+                                   (tws_windowvisible in fwindow.fstate)) or
    (fparentwidget <> nil) and fparentwidget.showing
   );
 end;
@@ -7041,13 +7044,13 @@ begin
    end
    else begin
     include(fwidgetstate,ws_visible);
-    if (ws1_fakevisible in fwidgetstate1) and (fparentwidget <> nil) then begin
-     fparentwidget.widgetregionchanged(self);
-    end;
    end;
   end
   else begin
    hide;
+  end;
+  if (ws1_fakevisible in fwidgetstate1) and (fparentwidget <> nil) then begin
+   fparentwidget.widgetregionchanged(self);
   end;
  end
  else begin

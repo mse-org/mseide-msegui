@@ -306,11 +306,18 @@ type
                               const sender: tcustomrecordband): boolean;
                    //true if area full
   procedure endband(const acanvas: tcanvas; const sender: tcustomrecordband);  
+  function isfirstband: boolean;
+  function islastband(const addheight: integer = 0): boolean;
+  procedure updatevisible;
  end;
 
  trecordbanddatalink = class(tmsedatalink)
  end;
-  
+
+ bandvisibility = (bv_firstvisible,bv_firstinvisible,bv_normalvisible,
+                  bv_normalinvisible,bv_lastvisible,bv_lastinvisible);
+ bandvisibilitiesty = set of bandvisibility;
+    
  tcustomrecordband = class(tcustomscalingwidget)
   private
    fparentintf: ibandparent;
@@ -321,9 +328,11 @@ type
    ftabs: treptabulators;
    fupdating: integer;
    fdatalink: trecordbanddatalink;
+   fvisibility: bandvisibilitiesty;
    procedure settabs(const avalue: treptabulators);
    procedure setdatasource(const avalue: tdatasource); virtual;
    function getdatasource: tdatasource;
+   procedure setvisibility(const avalue: bandvisibilitiesty);
   protected
    procedure minclientsizechanged;
    procedure fontchanged; override;
@@ -342,6 +351,7 @@ type
    function bandheight: integer;
    procedure dobeforerender(var empty: boolean); virtual;
    procedure synctofontheight; override;
+   procedure updatevisibility; virtual;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -354,6 +364,8 @@ type
    property tabs: treptabulators read ftabs write settabs;
    property font: twidgetfont read getfont write setfont stored isfontstored;
    property datasource: tdatasource read getdatasource write setdatasource;
+   property visibility: bandvisibilitiesty read fvisibility write setvisibility
+                                                 default [];
   published
    property anchors default defaultbandanchors;
  end;
@@ -363,6 +375,7 @@ type
    property font;
    property tabs;
    property datasource;
+   property visibility;
    property optionsscale;
    property onfontheightdelta;
    property onchildscaled;
@@ -379,11 +392,13 @@ type
    fbands: recordbandarty;
    procedure setdatasource(const avalue: tdatasource); override;
   protected
+   procedure setparentwidget(const avalue: twidget); override;   
    procedure registerchildwidget(const child: twidget); override;
    procedure unregisterchildwidget(const child: twidget); override;
    procedure dobeforerender(var empty: boolean); override;
 //   procedure dorender(const acanvas: tcanvas); override;
    procedure render(const acanvas: tcanvas; var empty: boolean); override;
+   procedure updatevisibility; override;
   public
    property font: twidgetfont read getfont write setfont stored isfontstored;
  end;
@@ -437,6 +452,7 @@ type
                                const sender: tcustomrecordband): boolean;
                     //true if area full
    procedure endband(const acanvas: tcanvas; const sender: tcustomrecordband);  
+   procedure updatevisible;
   public
    function isfirstband: boolean;
    function islastband(const addheight: integer = 0): boolean;
@@ -642,7 +658,7 @@ function getreportscale(const amodule: tcomponent): real;
 
 implementation
 uses
- msedatalist,sysutils,msestreaming;
+ msedatalist,sysutils,msestreaming,msebits;
 type
  tcustomframe1 = class(tcustomframe);
  twidget1 = class(twidget);
@@ -1549,8 +1565,17 @@ begin
 end;
 
 procedure tcustomrecordband.render(const acanvas: tcanvas; var empty: boolean);
+var
+ widget1: twidget;
 begin
+ widget1:= rootwidget;
+ if (widget1 is tcustomreport) and 
+                       tcustomreport(widget1).fthread.terminated then begin
+  abort;
+ end;
+ application.checkoverload;
  dobeforerender(empty);
+ fparentintf.updatevisible;
  if not empty and visible then begin
   if fparentintf.beginband(acanvas,self) then begin
    exit;
@@ -1719,9 +1744,67 @@ begin
  result:= fdatalink.datasource;
 end;
 
+procedure tcustomrecordband.setvisibility(const avalue: bandvisibilitiesty);
+const
+ firstmask: bandvisibilitiesty = [bv_firstvisible,bv_firstinvisible];
+ normalmask: bandvisibilitiesty = [bv_normalvisible,bv_normalinvisible];
+ lastmask: bandvisibilitiesty = [bv_lastvisible,bv_lastinvisible];
+var
+ vis1: bandvisibilitiesty;
+begin
+ vis1:= bandvisibilitiesty(setsinglebit(longword(avalue),longword(fvisibility),
+                                 longword(firstmask)));
+ vis1:= bandvisibilitiesty(setsinglebit(longword(vis1),longword(fvisibility),
+                                 longword(normalmask)));
+ fvisibility:= bandvisibilitiesty(setsinglebit(longword(vis1),
+                                 longword(fvisibility),longword(lastmask)));
+end;
+
 procedure tcustomrecordband.synctofontheight;
 begin
  syncsinglelinefontheight(true);
+end;
+
+procedure tcustomrecordband.updatevisibility;
+var
+ first,last: boolean;
+begin
+ if fparentintf <> nil then begin
+  if fvisibility <> [] then begin
+   first:= fparentintf.isfirstband;
+   last:= fparentintf.islastband;
+   if first then begin
+    if bv_firstvisible in fvisibility then begin
+     visible:= true;
+    end
+    else begin
+     if bv_firstinvisible in fvisibility then begin
+      visible:= false;
+     end;
+    end;
+   end;
+   if last then begin
+    if bv_lastvisible in fvisibility then begin
+     visible:= true;
+    end
+    else begin
+     if bv_lastinvisible in fvisibility then begin
+      visible:= false;
+     end;
+    end;
+   end;
+   if not first and not last then begin
+    if bv_normalvisible in fvisibility then begin
+     visible:= true;
+    end
+    else begin
+     if bv_normalinvisible in fvisibility then begin
+      visible:= false;
+     end;
+    end;
+   end;
+  end;
+ end;
 end;
 
 { tcustombandgroup }
@@ -1731,6 +1814,7 @@ begin
  inherited;
  if child is tcustomrecordband then begin
   additem(pointerarty(fbands),child);
+  tcustomrecordband(child).fparentintf:= fparentintf;
  end;
 end;
 
@@ -1799,6 +1883,26 @@ begin
  end; 
 end;
 
+procedure tcustombandgroup.setparentwidget(const avalue: twidget);
+var
+ int1: integer;
+begin
+ inherited;
+ for int1:= 0 to high(fbands) do begin
+  fbands[int1].fparentintf:= fparentintf;
+ end;
+end;
+
+procedure tcustombandgroup.updatevisibility;
+var
+ int1: integer;
+begin
+ inherited;
+ for int1:= 0 to high(fbands) do begin
+  fbands[int1].updatevisibility;
+ end;
+end;
+
 { tcustombandarea }
 
 procedure tcustombandarea.registerchildwidget(const child: twidget);
@@ -1837,15 +1941,26 @@ begin
  try
   fstate:= fstate - [bas_areafull,bas_backgroundrendered,bas_notfirstband,
                              bas_lastband];
-  dobeforerender;
-  while (factiveband <= high(fbands)) and not areafull do begin
-   bo1:= true; //empty
-   exclude(fstate,bas_bandstarted);
-   fbands[factiveband].render(acanvas,bo1);
-   include(fstate,bas_notfirstband);
-   result:= result and bo1;
-   if bo1 then begin
-    inc(factiveband);
+  if factiveband <= high(fbands) then begin
+   updatevisible;
+   dobeforerender;
+   while (factiveband <= high(fbands)) and not areafull do begin
+    bo1:= true; //empty
+    exclude(fstate,bas_bandstarted);
+    while (factiveband <= high(fbands)) and 
+                            not fbands[factiveband].visible do begin
+     inc(factiveband);
+    end;
+    if factiveband <= high(fbands) then begin
+     fbands[factiveband].render(acanvas,bo1);
+     include(fstate,bas_notfirstband);
+     result:= result and bo1;
+     if bo1 then begin
+      repeat
+       inc(factiveband);
+      until (factiveband > high(fbands)) or fbands[factiveband].visible;
+     end;
+    end;
    end;
   end;
  finally
@@ -2020,6 +2135,15 @@ begin
    int1:= int1 + fbands[factiveband].bounds_cy;
   end;
   result:= checkareafull(int1);
+ end;
+end;
+
+procedure tcustombandarea.updatevisible;
+var
+ int1: integer;
+begin
+ for int1:= 0 to high(fbands) do begin
+  fbands[int1].updatevisibility;
  end;
 end;
 
