@@ -73,6 +73,7 @@ type
  widgetstate1ty = (ws1_releasing,ws1_childscaled,ws1_fontheightlock,
                    ws1_widgetregionvalid,ws1_rootvalid,
                    ws1_anchorsizing,ws1_isstreamed,
+                   ws1_scaled, //used in tcustomscalingwidget
                    ws1_noclipchildren,
                    ws1_nodesignvisible,ws1_nodesignframe,ws1_nodesignhandles,
                    ws1_nodesigndelete,ws1_designactive,

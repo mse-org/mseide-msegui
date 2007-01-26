@@ -429,6 +429,7 @@ type
    fstate: bandareastatesty;
    factiveband: integer;
    facty: integer;
+   fbandnum: integer;
    fsaveindex: integer;
    freportpage: tcustomreportpage;
    fonbeforerender: notifyeventty;
@@ -451,6 +452,7 @@ type
    procedure doonpaint(const acanvas: tcanvas); override;
    procedure doafterpaint1(const acanvas: tcanvas); virtual;
    procedure init; virtual;
+   procedure initareapage;
    function checkareafull(ay: integer): boolean;
    function lastbandheight: integer;
            //ibandparent
@@ -1904,9 +1906,11 @@ var
  int1: integer;
 begin
  inherited;
+ beginscaling;
  for int1:= 0 to high(fbands) do begin
   fbands[int1].updatevisibility;
  end;
+ endscaling;
 end;
 
 function tcustombandgroup.getminbandsize: sizety;
@@ -2027,6 +2031,13 @@ begin
  end;
 end;
 
+procedure tcustombandarea.initareapage;
+begin
+ exclude(fstate,bas_notfirstband);
+ facty:= innerclientwidgetpos.y + bounds_y;
+ fbandnum:= 0;
+end;
+
 procedure tcustombandarea.init;
 var
  int1: integer;
@@ -2037,6 +2048,7 @@ begin
   for int1:= 0 to high(fbands) do begin
    fbands[int1].init;
   end;
+  initareapage;
 end;
 
 procedure tcustombandarea.dobeforerender;
@@ -2100,16 +2112,16 @@ begin
  if not bo1 then begin
   include(fstate,bas_backgroundrendered);
   renderbackground(acanvas);
-  facty:= innerclientwidgetpos.y + bounds_y;
+  initareapage
  end;
  acanvas.origin:= makepoint(sender.bounds_x+bounds_x,facty);
  inc(facty,sender.bandheight);
+ include(fstate,bas_bandstarted);
  result:= bo1 and checkareafull(facty);
                 //print minimum one band
- include(fstate,bas_bandstarted);
  if result then begin
   include(fstate,bas_areafull);
-  exclude(fstate,bas_notfirstband);
+  initareapage;
  end;
 end;
 
@@ -2118,6 +2130,7 @@ procedure tcustombandarea.endband(const acanvas: tcanvas;
 begin
  acanvas.restore(fsaveindex); 
  include(fstate,bas_notfirstband);
+ inc(fbandnum);
 end;
 
 function tcustombandarea.getareafull: boolean;

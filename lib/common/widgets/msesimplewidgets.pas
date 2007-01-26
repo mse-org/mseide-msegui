@@ -252,6 +252,8 @@ type
    fscaling: integer;
    procedure setoptionsscale(const avalue: optionsscalety);
   protected
+   procedure beginscaling;
+   procedure endscaling;
    procedure updateoptionsscale;
    procedure dochildscaled(const sender: twidget); override;
    procedure dofontheightdelta(var delta: integer); override;
@@ -905,48 +907,68 @@ var
 begin
  if foptionsscale * [osc_expandx,osc_expandy,
                     osc_shrinkx,osc_shrinky] <> [] then begin
-  if (componentstate * [csloading,csdestroying] = []) and 
-                    (fscaling = 0) then begin
-   
-   inc(fscaling);
-   try
-    size1:= calcminscrollsize;
-    size2:= paintsize;
-    rect1.cx:= size1.cx - size2.cx;
-    rect1.cy:= size1.cy - size2.cy;
-    if not (osc_expandx in foptionsscale) then begin
-     if rect1.cx > 0 then begin
-      rect1.cx:= 0;
+  if (componentstate * [csloading,csdestroying] = []) then begin
+   if fscaling <> 0 then begin    
+    include(fwidgetstate1,ws1_scaled);
+   end
+   else begin
+    inc(fscaling);
+    try
+     exclude(fwidgetstate1,ws1_scaled);
+     size1:= calcminscrollsize;
+     size2:= paintsize;
+     rect1.cx:= size1.cx - size2.cx;
+     rect1.cy:= size1.cy - size2.cy;
+     if not (osc_expandx in foptionsscale) then begin
+      if rect1.cx > 0 then begin
+       rect1.cx:= 0;
+      end;
      end;
-    end;
-    if not (osc_expandy in foptionsscale) then begin
-     if rect1.cy > 0 then begin
-      rect1.cy:= 0;
+     if not (osc_expandy in foptionsscale) then begin
+      if rect1.cy > 0 then begin
+       rect1.cy:= 0;
+      end;
      end;
-    end;
-    if not (osc_shrinkx in foptionsscale) then begin
-     if rect1.cx < 0 then begin
-      rect1.cx:= 0;
+     if not (osc_shrinkx in foptionsscale) then begin
+      if rect1.cx < 0 then begin
+       rect1.cx:= 0;
+      end;
      end;
-    end;
-    if not (osc_shrinky in foptionsscale) then begin
-     if rect1.cy < 0 then begin
-      rect1.cy:= 0;
+     if not (osc_shrinky in foptionsscale) then begin
+      if rect1.cy < 0 then begin
+       rect1.cy:= 0;
+      end;
      end;
+     rect1.pos:= fwidgetrect.pos;
+     if an_right in fanchors then begin
+      dec(rect1.x,rect1.cx);
+     end;
+     if an_bottom in fanchors then begin
+      dec(rect1.y,rect1.cy);
+     end;
+     addsize1(rect1.size,fwidgetrect.size);
+     internalsetwidgetrect(rect1,false);
+    finally
+     dec(fscaling)
     end;
-    rect1.pos:= fwidgetrect.pos;
-    if an_right in fanchors then begin
-     dec(rect1.x,rect1.cx);
-    end;
-    if an_bottom in fanchors then begin
-     dec(rect1.y,rect1.cy);
-    end;
-    addsize1(rect1.size,fwidgetrect.size);
-    internalsetwidgetrect(rect1,false);
-   finally
-    dec(fscaling)
    end;
   end;
+ end;
+end;
+
+procedure tcustomscalingwidget.beginscaling;
+begin
+ if fscaling = 0 then begin
+  exclude(fwidgetstate1,ws1_scaled);
+ end;
+ inc(fscaling);
+end;
+
+procedure tcustomscalingwidget.endscaling;
+begin
+ dec(fscaling);
+ if (fscaling = 0) and (ws1_scaled in fwidgetstate1) then begin
+  updateoptionsscale;
  end;
 end;
 
