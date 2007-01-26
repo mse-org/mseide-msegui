@@ -339,11 +339,12 @@ type
    procedure inheritedpaint(const acanvas: tcanvas);
    procedure paint(const canvas: tcanvas); override;
    procedure setparentwidget(const avalue: twidget); override;   
+   function getminbandsize: sizety; virtual;
    function calcminscrollsize: sizety; override;
    procedure render(const acanvas: tcanvas; var empty: boolean); virtual;
    procedure init; virtual;
-   procedure beginrender;
-   procedure endrender;
+   procedure beginrender; virtual;
+   procedure endrender; virtual;
    procedure dopaint(const acanvas: tcanvas); override;
    procedure doonpaint(const acanvas: tcanvas); override;
    procedure doafterpaint(const acanvas: tcanvas); override;
@@ -397,8 +398,13 @@ type
    procedure unregisterchildwidget(const child: twidget); override;
    procedure dobeforerender(var empty: boolean); override;
 //   procedure dorender(const acanvas: tcanvas); override;
-   procedure render(const acanvas: tcanvas; var empty: boolean); override;
+//   procedure render(const acanvas: tcanvas; var empty: boolean); override;
+   procedure dopaint(const acanvas: tcanvas); override;
    procedure updatevisibility; override;
+   function getminbandsize: sizety; override;
+   procedure init; override;
+   procedure beginrender; override;
+   procedure endrender; override;
   public
    property font: twidgetfont read getfont write setfont stored isfontstored;
  end;
@@ -1574,6 +1580,7 @@ begin
   abort;
  end;
  application.checkoverload;
+ fparentintf.updatevisible; //??
  dobeforerender(empty);
  fparentintf.updatevisible;
  if not empty and visible then begin
@@ -1590,7 +1597,7 @@ end;
 
 procedure tcustomrecordband.init;
 begin
-// fstate:= [];
+ //dummy
 end;
 
 function tcustomrecordband.rendering: boolean;
@@ -1676,18 +1683,20 @@ begin
  ftabs.paint(acanvas,innerclientrect);
 end;
 
+function tcustomrecordband.getminbandsize: sizety;
+begin
+ ftabs.checksize;
+ result:= ftabs.fminsize;
+end;
+
 function tcustomrecordband.calcminscrollsize: sizety;
 var
  size1: sizety;
 begin
  result:= inherited calcminscrollsize;
- ftabs.checksize;
- if fframe = nil then begin
-  size1:= ftabs.fminsize;
- end
- else begin
-  size1:= addsize(tcustomframe1(fframe).fi.innerframe.bottomright,
-                          ftabs.fminsize);
+ size1:= getminbandsize;
+ if fframe <> nil then begin
+  addsize1(size1,tcustomframe1(fframe).fi.innerframe.bottomright);
  end;
  with size1 do begin
   if cx > result.cx then begin
@@ -1811,10 +1820,16 @@ end;
 
 procedure tcustombandgroup.registerchildwidget(const child: twidget);
 begin
- inherited;
  if child is tcustomrecordband then begin
+  inherited;
   additem(pointerarty(fbands),child);
-  tcustomrecordband(child).fparentintf:= fparentintf;
+  with tcustomrecordband(child) do begin
+   fparentintf:= self.fparentintf;
+   include(fwidgetstate1,ws1_nominsize);
+  end;
+ end
+ else begin
+  raise exception.create('Widget must be tcustomrecordband.');
  end;
 end;
 
@@ -1822,6 +1837,7 @@ procedure tcustombandgroup.unregisterchildwidget(const child: twidget);
 begin
  removeitem(pointerarty(fbands),child);
  inherited;
+ exclude(tcustomrecordband(child).fwidgetstate1,ws1_nominsize);
 end;
 
 procedure tcustombandgroup.dobeforerender(var empty: boolean);
@@ -1833,34 +1849,24 @@ begin
   fbands[int1].dobeforerender(empty);
  end;
 end;
-{
-procedure tcustombandgroup.dorender(const acanvas: tcanvas);
+
+procedure tcustombandgroup.dopaint(const acanvas: tcanvas);
 var
  int1: integer;
+ pt1: pointty;
 begin
  inherited;
- for int1:= 0 to high(fbands) do begin
-  fbands[int1].dorender(acanvas);
- end;
-end;
-}
-
-procedure tcustombandgroup.render(const acanvas: tcanvas;
-               var empty: boolean);
-var
- int1,int2: integer;
- 
-begin
- dobeforerender(empty);
- if not empty and visible then begin
-  if fparentintf.beginband(acanvas,self) then begin
-   exit;
+ if rendering then begin
+  pt1:= acanvas.origin;
+  for int1:= 0 to high(fbands) do begin
+   with fbands[int1] do begin
+    if visible then begin
+     inheritedpaint(acanvas);
+     acanvas.move(makepoint(0,bounds_cy));
+    end;
+   end;
   end;
-  try
-   inheritedpaint(acanvas);
-  finally
-   fparentintf.endband(acanvas,self);
-  end;
+  acanvas.origin:= pt1;
  end;
 end;
 
@@ -1900,6 +1906,54 @@ begin
  inherited;
  for int1:= 0 to high(fbands) do begin
   fbands[int1].updatevisibility;
+ end;
+end;
+
+function tcustombandgroup.getminbandsize: sizety;
+var
+ int1,int2,int3: integer;
+begin
+ result:= inherited getminbandsize;
+ int2:= 0;
+ for int1:= 0 to high(fbands) do begin
+  with fbands[int1] do begin
+   if visible then begin
+    int3:= bounds_x + bounds_cx;
+    if int3 > result.cx then begin
+     result.cx:= int3;
+    end;
+    inc(int2,bounds_cy);
+   end;
+  end;
+ end;
+ if int2 > result.cy then begin
+  result.cy:= int2;
+ end;
+end;
+
+procedure tcustombandgroup.init;
+begin
+ sortwidgetsyorder(widgetarty(fbands));
+ inherited;
+end;
+
+procedure tcustombandgroup.beginrender;
+var
+ int1: integer;
+begin
+ inherited;
+ for int1:= 0 to high(fbands) do begin
+  fbands[int1].beginrender;
+ end;
+end;
+
+procedure tcustombandgroup.endrender;
+var
+ int1: integer;
+begin
+ inherited;
+ for int1:= 0 to high(fbands) do begin
+  fbands[int1].endrender;
  end;
 end;
 
@@ -1953,7 +2007,6 @@ begin
     end;
     if factiveband <= high(fbands) then begin
      fbands[factiveband].render(acanvas,bo1);
-     include(fstate,bas_notfirstband);
      result:= result and bo1;
      if bo1 then begin
       repeat
@@ -2056,6 +2109,7 @@ begin
  include(fstate,bas_bandstarted);
  if result then begin
   include(fstate,bas_areafull);
+  exclude(fstate,bas_notfirstband);
  end;
 end;
 
@@ -2063,6 +2117,7 @@ procedure tcustombandarea.endband(const acanvas: tcanvas;
                                       const sender: tcustomrecordband);
 begin
  acanvas.restore(fsaveindex); 
+ include(fstate,bas_notfirstband);
 end;
 
 function tcustombandarea.getareafull: boolean;
