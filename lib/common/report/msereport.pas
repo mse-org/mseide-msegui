@@ -29,7 +29,7 @@ const
 type
 // tablineposty = (tlp_inner,tlp_center,tlp_outer);
  tablineinfoty = record
-  width: real;
+  widthmm: real;
   color: colorty;
   colorgap: colorty;
   capstyle: capstylety;
@@ -45,7 +45,7 @@ const
  defaulttablinecapstyle = cs_projecting;
  defaulttablinedashes = '';
  defaulttablinedist = 0;
- defaulttablineinfo: tablineinfoty = (width: defaulttablinewidth; 
+ defaulttablineinfo: tablineinfoty = (widthmm: defaulttablinewidth; 
          color: defaulttablinecolor; colorgap: defaulttablinecolorgap;
          capstyle: defaulttablinecapstyle;
          dashes: defaulttablinedashes; dist: defaulttablinedist);
@@ -100,8 +100,8 @@ type
    function getdatafield: string;
    procedure setdatafield(const avalue: string);
 
-   procedure setlitop_width(const avalue: real);
-   function islitop_widthstored: boolean;
+   procedure setlitop_widthmm(const avalue: real);
+   function islitop_widthmmstored: boolean;
    procedure setlitop_color(const avalue: colorty);
    function islitop_colorstored: boolean;
    procedure setlitop_colorgap(const avalue: colorty);
@@ -113,8 +113,8 @@ type
    procedure setlitop_dist(const avalue: integer);
    function islitop_diststored: boolean;
 
-   procedure setlivert_width(const avalue: real);
-   function islivert_widthstored: boolean;
+   procedure setlivert_widthmm(const avalue: real);
+   function islivert_widthmmstored: boolean;
    procedure setlivert_color(const avalue: colorty);
    function islivert_colorstored: boolean;
    procedure setlivert_colorgap(const avalue: colorty);
@@ -126,8 +126,8 @@ type
    procedure setlivert_dist(const avalue: integer);
    function islivert_diststored: boolean;
 
-   procedure setlibottom_width(const avalue: real);
-   function islibottom_widthstored: boolean;
+   procedure setlibottom_widthmm(const avalue: real);
+   function islibottom_widthmmstored: boolean;
    procedure setlibottom_color(const avalue: colorty);
    function islibottom_colorstored: boolean;
    procedure setlibottom_colorgap(const avalue: colorty);
@@ -157,8 +157,8 @@ type
    property datafield: string read getdatafield write setdatafield;
    property datasource: tdatasource read getdatasource1 write setdatasource;
 
-   property litop_width: real read flineinfos[tlk_top].width write
-                 setlitop_width stored islitop_widthstored;
+   property litop_widthmm: real read flineinfos[tlk_top].widthmm write
+                 setlitop_widthmm stored islitop_widthmmstored;
    property litop_color: colorty read flineinfos[tlk_top].color write
                  setlitop_color stored islitop_colorstored
                                   default defaulttablinecolor;
@@ -174,8 +174,8 @@ type
                  setlitop_dist stored islitop_diststored
                                   default defaulttablinedist;
 
-   property livert_width: real read flineinfos[tlk_vert].width write
-                 setlivert_width stored islivert_widthstored;
+   property livert_widthmm: real read flineinfos[tlk_vert].widthmm write
+                 setlivert_widthmm stored islivert_widthmmstored;
    property livert_color: colorty read flineinfos[tlk_vert].color write
                  setlivert_color stored islivert_colorstored
                                   default defaulttablinecolor;
@@ -191,8 +191,8 @@ type
                  setlivert_dist stored islivert_diststored
                                   default defaulttablinedist;
                  
-   property libottom_width: real read flineinfos[tlk_bottom].width write
-                 setlibottom_width stored islibottom_widthstored;
+   property libottom_widthmm: real read flineinfos[tlk_bottom].widthmm write
+                 setlibottom_widthmm stored islibottom_widthmmstored;
    property libottom_color: colorty read flineinfos[tlk_bottom].color write
                  setlibottom_color stored islibottom_colorstored
                                   default defaulttablinecolor;
@@ -220,21 +220,21 @@ type
    fsizevalid: boolean;
    flineinfos: tablineinfoarty;
 
-   procedure setlitop_width(const avalue: real);
+   procedure setlitop_widthmm(const avalue: real);
    procedure setlitop_color(const avalue: colorty);
    procedure setlitop_colorgap(const avalue: colorty);
    procedure setlitop_capstyle(const avalue: capstylety);
    procedure setlitop_dashes(const avalue: string);
    procedure setlitop_dist(const avalue: integer);
 
-   procedure setlivert_width(const avalue: real);
+   procedure setlivert_widthmm(const avalue: real);
    procedure setlivert_color(const avalue: colorty);
    procedure setlivert_colorgap(const avalue: colorty);
    procedure setlivert_capstyle(const avalue: capstylety);
    procedure setlivert_dashes(const avalue: string);
    procedure setlivert_dist(const avalue: integer);
 
-   procedure setlibottom_width(const avalue: real);
+   procedure setlibottom_widthmm(const avalue: real);
    procedure setlibottom_color(const avalue: colorty);
    procedure setlibottom_colorgap(const avalue: colorty);
    procedure setlibottom_capstyle(const avalue: capstylety);
@@ -255,8 +255,8 @@ type
                        write setitems; default;
  published
                  
-   property litop_width: real read flineinfos[tlk_top].width write
-                 setlitop_width;
+   property litop_widthmm: real read flineinfos[tlk_top].widthmm write
+                 setlitop_widthmm;
    property litop_color: colorty read flineinfos[tlk_top].color write
                  setlitop_color default defaulttablinecolor;
    property litop_colorgap: colorty read flineinfos[tlk_top].colorgap write
@@ -268,8 +268,8 @@ type
    property litop_dist: integer read flineinfos[tlk_top].dist write
                  setlitop_dist default defaulttablinedist;
 
-   property livert_width: real read flineinfos[tlk_vert].width write
-                 setlivert_width;
+   property livert_widthmm: real read flineinfos[tlk_vert].widthmm write
+                 setlivert_widthmm;
    property livert_color: colorty read flineinfos[tlk_vert].color write
                  setlivert_color default defaulttablinecolor;
    property livert_colorgap: colorty read flineinfos[tlk_vert].colorgap write
@@ -281,8 +281,8 @@ type
    property livert_dist: integer read flineinfos[tlk_vert].dist write
                  setlivert_dist default defaulttablinedist;
                  
-   property libottom_width: real read flineinfos[tlk_bottom].width write
-                 setlibottom_width;
+   property libottom_widthmm: real read flineinfos[tlk_bottom].widthmm write
+                 setlibottom_widthmm;
    property libottom_color: colorty read flineinfos[tlk_bottom].color write
                  setlibottom_color default defaulttablinecolor;
    property libottom_colorgap: colorty read flineinfos[tlk_bottom].colorgap write
@@ -397,7 +397,7 @@ type
  end;
  
  bandareastatety = (bas_inited,bas_backgroundrendered,bas_areafull,
-                    bas_rendering);
+                    bas_rendering,bas_notfirstband,bas_lastband,bas_bandstarted);
  bandareastatesty = set of bandareastatety; 
 
  tcustomreportpage = class;
@@ -413,13 +413,14 @@ type
    fonbeforerender: notifyeventty;
    fonpaint: painteventty;
    fonafterpaint: painteventty;
+   function getareafull: boolean;
+   procedure setareafull(const avalue: boolean);
   protected
    procedure registerchildwidget(const child: twidget); override;
    procedure unregisterchildwidget(const child: twidget); override;
    procedure setparentwidget(const avalue: twidget); override;   
    procedure paint(const canvas: tcanvas); override;
    procedure renderbackground(const acanvas: tcanvas);
-   function areafull: boolean;
    function render(const acanvas: tcanvas): boolean;
           //true if finished
    function rendering: boolean;
@@ -429,12 +430,18 @@ type
    procedure doonpaint(const acanvas: tcanvas); override;
    procedure doafterpaint1(const acanvas: tcanvas); virtual;
    procedure init; virtual;
+   function checkareafull(ay: integer): boolean;
+   function lastbandheight: integer;
            //ibandparent
    function beginband(const acanvas: tcanvas;
                                const sender: tcustomrecordband): boolean;
                     //true if area full
    procedure endband(const acanvas: tcanvas; const sender: tcustomrecordband);  
   public
+   function isfirstband: boolean;
+   function islastband(const addheight: integer = 0): boolean;
+   property areafull: boolean read getareafull write setareafull;
+   
    property font: twidgetfont read getfont write setfont stored isfontstored;
    property onbeforerender: notifyeventty read fonbeforerender
                                write fonbeforerender;
@@ -825,16 +832,16 @@ begin
  end;
 end;
 
-procedure treptabulatoritem.setlitop_width(const avalue: real);
+procedure treptabulatoritem.setlitop_widthmm(const avalue: real);
 begin
- flineinfos[tlk_top].width:= avalue;
+ flineinfos[tlk_top].widthmm:= avalue;
  changed;
 end;
 
-function treptabulatoritem.islitop_widthstored: boolean;
+function treptabulatoritem.islitop_widthmmstored: boolean;
 begin
- result:= flineinfos[tlk_top].width <> 
-                treptabulators(fowner).flineinfos[tlk_top].width;
+ result:= flineinfos[tlk_top].widthmm <> 
+                treptabulators(fowner).flineinfos[tlk_top].widthmm;
 end;
 
 procedure treptabulatoritem.setlitop_color(const avalue: colorty);
@@ -897,16 +904,16 @@ begin
               treptabulators(fowner).flineinfos[tlk_top].dist;
 end;
 
-procedure treptabulatoritem.setlivert_width(const avalue: real);
+procedure treptabulatoritem.setlivert_widthmm(const avalue: real);
 begin
- flineinfos[tlk_vert].width:= avalue;
+ flineinfos[tlk_vert].widthmm:= avalue;
  changed;
 end;
 
-function treptabulatoritem.islivert_widthstored: boolean;
+function treptabulatoritem.islivert_widthmmstored: boolean;
 begin
- result:= flineinfos[tlk_vert].width <> 
-                treptabulators(fowner).flineinfos[tlk_vert].width;
+ result:= flineinfos[tlk_vert].widthmm <> 
+                treptabulators(fowner).flineinfos[tlk_vert].widthmm;
 end;
 
 procedure treptabulatoritem.setlivert_color(const avalue: colorty);
@@ -969,16 +976,16 @@ begin
               treptabulators(fowner).flineinfos[tlk_vert].dist;
 end;
 
-procedure treptabulatoritem.setlibottom_width(const avalue: real);
+procedure treptabulatoritem.setlibottom_widthmm(const avalue: real);
 begin
- flineinfos[tlk_bottom].width:= avalue;
+ flineinfos[tlk_bottom].widthmm:= avalue;
  changed;
 end;
 
-function treptabulatoritem.islibottom_widthstored: boolean;
+function treptabulatoritem.islibottom_widthmmstored: boolean;
 begin
- result:= flineinfos[tlk_bottom].width <> 
-                treptabulators(fowner).flineinfos[tlk_bottom].width;
+ result:= flineinfos[tlk_bottom].widthmm <> 
+                treptabulators(fowner).flineinfos[tlk_bottom].widthmm;
 end;
 
 procedure treptabulatoritem.setlibottom_color(const avalue: colorty);
@@ -1095,7 +1102,7 @@ var
    acanvas.addclipframe(makerect(nullpoint,fband.paintsize),1000);
   end;
   with ainfo do begin
-   acanvas.linewidthmm:= width;
+   acanvas.linewidthmm:= widthmm;
    acanvas.capstyle:= capstyle;
    if (dashes <> '') and (colorgap <> cl_transparent) then begin
     acanvas.dashes:= copy(dashes+#0,1,high(dashesstringty));
@@ -1125,7 +1132,7 @@ var
  begin
   with treptabulatoritem(fitems[ftabs[aindex].index]) do begin
    with flineinfos[akind] do begin
-    if width > 0 then begin
+    if widthmm > 0 then begin
      checkinit(flineinfos[akind]);
      with ftabs[aindex] do begin     
       case kind of
@@ -1229,7 +1236,7 @@ begin
    for int1:= 0 to count - 1 do begin
     with treptabulatoritem(fitems[ftabs[int1].index]) do begin
      with flineinfos[tlk_vert] do begin
-      if width > 0 then begin
+      if widthmm > 0 then begin
        checkinit(flineinfos[tlk_vert]);
        with ftabs[int1] do begin
         case kind of 
@@ -1269,14 +1276,14 @@ begin
  end;
 end;
 
-procedure treptabulators.setlitop_width(const avalue: real);
+procedure treptabulators.setlitop_widthmm(const avalue: real);
 var
  int1: integer;
 begin
- if avalue <> flineinfos[tlk_top].width then begin
-  flineinfos[tlk_top].width:= avalue;
+ if avalue <> flineinfos[tlk_top].widthmm then begin
+  flineinfos[tlk_top].widthmm:= avalue;
   for int1:= 0 to high(fitems) do begin
-   treptabulatoritem(fitems[int1]).litop_width:= avalue;
+   treptabulatoritem(fitems[int1]).litop_widthmm:= avalue;
   end;
  end;
 end;
@@ -1341,14 +1348,14 @@ begin
  end;
 end;
 
-procedure treptabulators.setlivert_width(const avalue: real);
+procedure treptabulators.setlivert_widthmm(const avalue: real);
 var
  int1: integer;
 begin
- if avalue <> flineinfos[tlk_vert].width then begin
-  flineinfos[tlk_vert].width:= avalue;
+ if avalue <> flineinfos[tlk_vert].widthmm then begin
+  flineinfos[tlk_vert].widthmm:= avalue;
   for int1:= 0 to high(fitems) do begin
-   treptabulatoritem(fitems[int1]).livert_width:= avalue;
+   treptabulatoritem(fitems[int1]).livert_widthmm:= avalue;
   end;
  end;
 end;
@@ -1413,14 +1420,14 @@ begin
  end;
 end;
 
-procedure treptabulators.setlibottom_width(const avalue: real);
+procedure treptabulators.setlibottom_widthmm(const avalue: real);
 var
  int1: integer;
 begin
- if avalue <> flineinfos[tlk_bottom].width then begin
-  flineinfos[tlk_bottom].width:= avalue;
+ if avalue <> flineinfos[tlk_bottom].widthmm then begin
+  flineinfos[tlk_bottom].widthmm:= avalue;
   for int1:= 0 to high(fitems) do begin
-   treptabulatoritem(fitems[int1]).libottom_width:= avalue;
+   treptabulatoritem(fitems[int1]).libottom_widthmm:= avalue;
   end;
  end;
 end;
@@ -1828,11 +1835,14 @@ begin
   init;
  end;
  try
-  fstate:= fstate - [bas_areafull,bas_backgroundrendered];
+  fstate:= fstate - [bas_areafull,bas_backgroundrendered,bas_notfirstband,
+                             bas_lastband];
   dobeforerender;
   while (factiveband <= high(fbands)) and not areafull do begin
    bo1:= true; //empty
+   exclude(fstate,bas_bandstarted);
    fbands[factiveband].render(acanvas,bo1);
+   include(fstate,bas_notfirstband);
    result:= result and bo1;
    if bo1 then begin
     inc(factiveband);
@@ -1904,6 +1914,14 @@ begin
  inherited paint(acanvas);
 end;
 
+function tcustombandarea.checkareafull(ay: integer): boolean;
+begin
+ if frame <> nil then begin
+  ay:= ay + fframe.innerframe.bottom;
+ end;
+ result:= ay > bounds_y + bounds_cy;
+end;
+
 function tcustombandarea.beginband(const acanvas: tcanvas;
                              const sender: tcustomrecordband): boolean;
 var
@@ -1918,8 +1936,9 @@ begin
  end;
  acanvas.origin:= makepoint(sender.bounds_x+bounds_x,facty);
  inc(facty,sender.bandheight);
- result:= bo1 and (facty > bounds_y + bounds_cy);
+ result:= bo1 and checkareafull(facty);
                 //print minimum one band
+ include(fstate,bas_bandstarted);
  if result then begin
   include(fstate,bas_areafull);
  end;
@@ -1931,9 +1950,19 @@ begin
  acanvas.restore(fsaveindex); 
 end;
 
-function tcustombandarea.areafull: boolean;
+function tcustombandarea.getareafull: boolean;
 begin
  result:= bas_areafull in fstate;
+end;
+
+procedure tcustombandarea.setareafull(const avalue: boolean);
+begin
+ if avalue then begin
+  include(fstate,bas_areafull);
+ end
+ else begin
+  exclude(fstate,bas_areafull);
+ end;
 end;
 
 procedure tcustombandarea.paint(const canvas: tcanvas);
@@ -1967,6 +1996,30 @@ begin
  exclude(fwidgetstate1,ws1_noclipchildren);
  for int1:= 0 to high(fbands) do begin
   fbands[int1].endrender;
+ end;
+end;
+
+function tcustombandarea.isfirstband: boolean;
+begin
+ result:= not (bas_notfirstband in fstate);
+end;
+
+function tcustombandarea.lastbandheight: integer;
+begin
+ result:= fbands[factiveband].bounds_cy;
+end;
+
+function tcustombandarea.islastband(const addheight: integer = 0): boolean;
+var
+ int1: integer;
+begin
+ result:= (bas_lastband in fstate);
+ if not result then begin
+  int1:= facty + addheight + lastbandheight;
+  if not (bas_bandstarted in fstate) then begin
+   int1:= int1 + fbands[factiveband].bounds_cy;
+  end;
+  result:= checkareafull(int1);
  end;
 end;
 
