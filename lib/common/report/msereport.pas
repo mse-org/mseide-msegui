@@ -353,6 +353,7 @@ type
    procedure dobeforerender(var empty: boolean); virtual;
    procedure synctofontheight; override;
    procedure updatevisibility; virtual;
+   function lastbandheight: integer; virtual;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -405,6 +406,7 @@ type
    procedure init; override;
    procedure beginrender; override;
    procedure endrender; override;
+   function lastbandheight: integer; override;
   public
    property font: twidgetfont read getfont write setfont stored isfontstored;
  end;
@@ -418,7 +420,8 @@ type
  end;
  
  bandareastatety = (bas_inited,bas_backgroundrendered,bas_areafull,
-                    bas_rendering,bas_notfirstband,bas_lastband,bas_bandstarted);
+                    bas_rendering,bas_notfirstband,bas_lastband,bas_bandstarted{,
+                    bas_lastchecking,bas_lastchecked});
  bandareastatesty = set of bandareastatety; 
 
  tcustomreportpage = class;
@@ -454,7 +457,6 @@ type
    procedure init; virtual;
    procedure initareapage;
    function checkareafull(ay: integer): boolean;
-   function lastbandheight: integer;
            //ibandparent
    function beginband(const acanvas: tcanvas;
                                const sender: tcustomrecordband): boolean;
@@ -1818,6 +1820,11 @@ begin
  end;
 end;
 
+function tcustomrecordband.lastbandheight: integer;
+begin
+ result:= bounds_cy;
+end;
+
 { tcustombandgroup }
 
 procedure tcustombandgroup.registerchildwidget(const child: twidget);
@@ -1932,6 +1939,27 @@ begin
  end;
  if int2 > result.cy then begin
   result.cy:= int2;
+ end;
+end;
+
+function tcustombandgroup.lastbandheight: integer;
+var
+ int1,int2: integer;
+begin
+ result:= inherited lastbandheight;
+ if osc_expandy in optionsscale then begin
+  int2:= innerclientframewidth.cy;
+  for int1:= 0 to high(fbands) do begin
+   with fbands[int1] do begin
+    if visible and not (bv_lastinvisible in visibility) or 
+           (bv_lastvisible in visibility) then begin
+     int2:= int2 + bounds_cy;
+    end;
+   end;
+  end;
+  if int2 > result then begin
+   result:= int2;
+  end;
  end;
 end;
 
@@ -2187,20 +2215,17 @@ begin
  result:= not (bas_notfirstband in fstate);
 end;
 
-function tcustombandarea.lastbandheight: integer;
-begin
- result:= fbands[factiveband].bounds_cy;
-end;
-
 function tcustombandarea.islastband(const addheight: integer = 0): boolean;
 var
  int1: integer;
 begin
- result:= (bas_lastband in fstate);
- if not result then begin
-  int1:= facty + addheight + lastbandheight;
-  if not (bas_bandstarted in fstate) then begin
-   int1:= int1 + fbands[factiveband].bounds_cy;
+ result:= fstate * [bas_lastband{,bas_lastchecking}] <> [];
+ if not result {and not(bas_lastchecked in fstate)} then begin
+  with fbands[factiveband] do begin
+   int1:= facty + addheight + lastbandheight;
+   if not (bas_bandstarted in self.fstate) then begin
+    int1:= int1 + bounds_cy;
+   end;
   end;
   result:= checkareafull(int1);
  end;
