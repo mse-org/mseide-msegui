@@ -600,7 +600,7 @@ type
   public
    constructor create(aowner: tcomponent); override;
    function render(const acanvas: tcanvas): boolean;
-          //true if finished
+          //true if empty
    property pagenum: integer read fpagenum write fpagenum; 
                             //null-based, local to this page
    property onfirstpage: notifyeventty read fonfirstpage
@@ -2230,13 +2230,13 @@ procedure tcustombandarea.init;
 var
  int1: integer;
 begin
-  factiveband:= 0;
-  include(fstate,bas_inited);
-  sortwidgetsyorder(widgetarty(fbands));
-  for int1:= 0 to high(fbands) do begin
-   fbands[int1].init;
-  end;
-  initareapage;
+ factiveband:= 0;
+ include(fstate,bas_inited);
+ sortwidgetsyorder(widgetarty(fbands));
+ for int1:= 0 to high(fbands) do begin
+  fbands[int1].init;
+ end;
+ initareapage;
 end;
 
 procedure tcustombandarea.initpage;
@@ -2277,10 +2277,11 @@ begin
             ((rbs_pageshowed in fstate) or not(bv_everypage in fvisibility)); 
                              //empty    
       render(acanvas,bo1);
-      bo1:= bv_everypage in fvisibility;
+      bo1:= bo1 or (bv_everypage in fvisibility);
       fstate:= fstate + [rbs_showed,rbs_pageshowed];
      end;
-     result:= result and bo1;
+     result:= bo1;
+//     result:= result and bo1;
      if bo1 then begin
       repeat
        inc(factiveband);
@@ -2523,30 +2524,32 @@ end;
 function tcustomreportpage.render(const acanvas: tcanvas): boolean;
 var
  int1: integer;
+ bo1: boolean;
 begin
  if not (rpps_inited in fstate) then begin
   init;
  end;
  fpagenum:= 0;
  dofirstpage;
+ result:= true;
  repeat
   exclude(fstate,rpps_backgroundrendered);
   acanvas.reset;
   acanvas.intersectcliprect(makerect(nullpoint,fwidgetrect.size));
   dobeforerender;
+  bo1:= true;
   for int1:= 0 to high(fareas) do begin
-   fareas[int1].render(acanvas);
+   bo1:= fareas[int1].render(acanvas) and bo1;
   end;
-  result:= not (rpps_backgroundrendered in fstate);
-  if not result then begin
+  if rpps_backgroundrendered in fstate then begin
    doafterpaint1(acanvas);
   end;
   inc(fpagenum);
   if freport <> nil then begin
    inc(freport.fpagenum);
-   result:= result or freport.fthread.terminated;
   end;
- until result;
+  result:= result and bo1;
+ until bo1;
  doafterlastpage;
 end;
 
