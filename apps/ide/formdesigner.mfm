@@ -39,7 +39,7 @@ object formdesignerfo: tformdesignerfo
   top = 180
   moduleclassname = 'tmseform'
   object popupme: tpopupmenu
-    menu.submenu.count = 18
+    menu.submenu.count = 19
     menu.submenu.items = <    
       item
         caption = 'Show objectinspector'
@@ -140,6 +140,12 @@ object formdesignerfo: tformdesignerfo
         name = 'insertsub'
         state = [as_localcaption, as_localonexecute]
         onexecute = doinsertsubmodule
+      end    
+      item
+        caption = 'Insert component'
+        name = 'insertcomp'
+        state = [as_localcaption, as_localonexecute]
+        onexecute = doinsertcomponent
       end>
     left = 48
     top = 40

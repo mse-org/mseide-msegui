@@ -31,7 +31,7 @@ object projectoptionsfo: tprojectoptionsfo
     frame.dummy = 0
     anchors = [an_top, an_bottom]
     taborder = 1
-    activepageindex = 5
+    activepageindex = 2
     tab_frame.dummy = 0
     tab_size = 20
     statfile = statfile1
@@ -409,6 +409,7 @@ object projectoptionsfo: tprojectoptionsfo
       frame.dummy = 0
       anchors = [an_left, an_top, an_right, an_bottom]
       taborder = 5
+      visible = True
       caption = '&Editor'
       reffontheight = 14
       object dispgrid: twidgetgrid
@@ -427,7 +428,7 @@ object projectoptionsfo: tprojectoptionsfo
           0
         )
         anchors = [an_left, an_top, an_right]
-        taborder = 16
+        taborder = 17
         optionsgrid = [og_rowinserting, og_rowdeleting, og_focuscellonenter, og_autofirstrow, og_autoappend, og_autopopup]
         rowcount = 2
         datacols.count = 1
@@ -471,7 +472,7 @@ object projectoptionsfo: tprojectoptionsfo
         bounds_cy = 191
         frame.dummy = 0
         anchors = [an_top, an_bottom]
-        taborder = 17
+        taborder = 18
         optionsgrid = [og_colsizing, og_keyrowmoving, og_rowinserting, og_rowdeleting, og_selectedrowsdeleting, og_focuscellonenter, og_autofirstrow, og_autoappend, og_autopopup]
         datacols.count = 2
         datacols.items = <        
@@ -523,7 +524,7 @@ object projectoptionsfo: tprojectoptionsfo
           64
           2
         )
-        taborder = 4
+        taborder = 5
         value = True
       end
       object editfontname: tstringedit
@@ -540,7 +541,7 @@ object projectoptionsfo: tprojectoptionsfo
           0
           0
         )
-        taborder = 11
+        taborder = 12
         ondataentered = fontondataentered
         value = 'mseide_source'
         reffontheight = 14
@@ -559,7 +560,7 @@ object projectoptionsfo: tprojectoptionsfo
           2
           0
         )
-        taborder = 12
+        taborder = 13
         ondataentered = fontondataentered
         reffontheight = 14
       end
@@ -577,7 +578,7 @@ object projectoptionsfo: tprojectoptionsfo
           0
           0
         )
-        taborder = 13
+        taborder = 14
         ondataentered = fontondataentered
         reffontheight = 14
       end
@@ -594,7 +595,7 @@ object projectoptionsfo: tprojectoptionsfo
           67
           2
         )
-        taborder = 15
+        taborder = 16
         ondataentered = fontondataentered
         value = True
       end
@@ -613,7 +614,7 @@ object projectoptionsfo: tprojectoptionsfo
           30
           0
         )
-        taborder = 14
+        taborder = 15
         ondataentered = fontondataentered
         min = -1000
         max = 1000
@@ -632,7 +633,7 @@ object projectoptionsfo: tprojectoptionsfo
           97
           2
         )
-        taborder = 8
+        taborder = 9
         value = True
       end
       object rightmarginchars: tintegeredit
@@ -649,7 +650,7 @@ object projectoptionsfo: tprojectoptionsfo
           27
           0
         )
-        taborder = 9
+        taborder = 10
         optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_eatreturn, oe_resetselectonexit, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_savevalue, oe_savestate]
         value = 80
         min = 1
@@ -670,7 +671,7 @@ object projectoptionsfo: tprojectoptionsfo
           33
           0
         )
-        taborder = 5
+        taborder = 6
         optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_eatreturn, oe_resetselectonexit, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_savevalue, oe_savestate]
         value = 1
         min = 1
@@ -691,7 +692,7 @@ object projectoptionsfo: tprojectoptionsfo
           18
           0
         )
-        taborder = 6
+        taborder = 7
         value = 4
         min = 1
         max = 50
@@ -712,7 +713,7 @@ object projectoptionsfo: tprojectoptionsfo
           0
         )
         anchors = [an_left, an_top, an_right]
-        taborder = 18
+        taborder = 19
       end
       object encoding: tenumedit
         optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
@@ -728,7 +729,7 @@ object projectoptionsfo: tprojectoptionsfo
           0
           0
         )
-        taborder = 10
+        taborder = 11
         value = 0
         onsetvalue = encodingsetvalue
         dropdown.options = [deo_selectonly, deo_forceselect, deo_autodropdown, deo_keydropdown]
@@ -757,7 +758,7 @@ object projectoptionsfo: tprojectoptionsfo
           59
           0
         )
-        taborder = 7
+        taborder = 8
         value = 2
         max = 10
         reffontheight = 14
@@ -850,6 +851,22 @@ object projectoptionsfo: tprojectoptionsfo
         min = 1
         max = 1000
         reffontheight = 14
+      end
+      object moveonfirstclick: tbooleanedit
+        bounds_x = 344
+        bounds_y = 53
+        bounds_cx = 111
+        bounds_cy = 16
+        frame.caption = 'Move on first click'
+        frame.dummy = 0
+        frame.outerframe = (
+          0
+          1
+          98
+          2
+        )
+        taborder = 4
+        value = True
       end
     end
     object makepage: ttabpage
@@ -2008,7 +2025,6 @@ object projectoptionsfo: tprojectoptionsfo
       frame.dummy = 0
       anchors = [an_left, an_top, an_right, an_bottom]
       taborder = 1
-      visible = True
       caption = '&Templates'
       reffontheight = 14
       object newfile: ttabwidget

@@ -105,6 +105,7 @@ type
    procedure calcscrollsize(const sender: tscrollingwidget; var asize: sizety);
    procedure formdeonclose(const sender: TObject);
    procedure revertexe(const sender: TObject);
+   procedure doinsertcomponent(const sender: TObject);
   private
    fdesigner: tdesigner;
    fform: twidget;
@@ -139,7 +140,8 @@ type
    function getdesignrect: rectty; virtual;
    procedure setdesignrect(const arect: rectty); virtual;
    function candelete(const acomponent: tcomponent): boolean; virtual;
-   procedure placecomponent(const component: tcomponent; const apos: pointty);
+   procedure placecomponent(const component: tcomponent; const apos: pointty;
+                                 aparent: tcomponent = nil);
   public
    constructor create(const aowner: tcomponent; const adesigner: tdesigner;
                         const aintf: pdesignmoduleintfty); reintroduce; virtual;
@@ -1264,6 +1266,8 @@ begin
   itembyname('insertsub').enabled:= bo1;
   itembyname('revert').enabled:= (fselections.count = 1) and 
           (fselections[0].componentstate * [csinline,csancestor] <> []);
+  itembyname('insertcomp').enabled:= designer.hascurrentcomponent and
+           (fselections.count = 1);
   itembyname('bringtofro').enabled:= bo1;
   itembyname('sendtoba').enabled:= bo1;
   itembyname('settabord').enabled:= bo1 and 
@@ -1453,6 +1457,9 @@ begin
         if (component = form) and (fselections.count > 1) or 
                (fselections.indexof(component) < 0) then begin
          selectcomponent(component,sm_select);
+         if projectoptions.moveonfirstclick then begin
+          factarea:= ar_component;
+         end;
         end;
         if ss_double in shiftstate then begin
          designer.showobjectinspector;
@@ -1506,7 +1513,6 @@ begin
       end;
       if component <> nil then begin
        tformdesignerfo(fowner).placecomponent(component,pos);
-       recalcclientsize;
       end;
      end
      else begin
@@ -2215,6 +2221,55 @@ begin
  end;
 end;
 
+procedure tformdesignerfo.placecomponent(const component: tcomponent;
+                        const apos: pointty; aparent: tcomponent = nil);
+var
+// widget1: twidget;
+ po1: pointty;
+ rea1: real;
+begin
+ with tdesignwindow(window) do begin
+  try
+   rea1:= 1.0;
+   if component is tmsecomponent then begin
+    with tformdesignerfo(fowner).fmoduleintf^ do begin
+     if assigned(getscale) then begin
+      rea1:= getscale(module);
+     end;
+    end;
+    tmsecomponent(component).initnewcomponent(rea1);
+   end;
+   if (component is twidget) and (form <> nil) then begin
+    if (aparent = nil) or not (aparent is twidget) then begin
+     aparent:= widgetatpos(apos,true);
+    end;
+    if aparent <> nil then begin
+     po1:= subpoint(dosnaptogrid(apos),form.rootpos);
+     twidget(aparent).insertwidget(twidget(component),translatewidgetpoint(po1,form,
+                                                   twidget(aparent)));
+     twidget(component).initnewwidget(rea1);
+    end;
+   end
+   else begin
+    if form <> nil then begin
+     setrootpos(component,form.clientpostowidgetpos(
+           dosnaptogrid(form.widgetpostoclientpos(apos))));
+    end
+    else begin
+     setrootpos(component,dosnaptogrid(apos));
+    end;
+   end;
+   tcomponent1(component).loaded;
+   domodified;
+  except
+   deletecomponent(component);
+   raise;
+  end;
+  selectcomponent(component);
+  recalcclientsize;
+ end;
+end;
+
 procedure tformdesignerfo.doinsertsubmodule(const sender: tobject);
 var
  comp: tmsecomponent;
@@ -2235,9 +2290,19 @@ begin
   fdesigner.addancestorinfo(comp,po1^.instance);
   with tdesignwindow(window) do begin
    doaddcomponent(comp);
-   placecomponent(comp,fmousepos);
+   placecomponent(comp,fmousepos,fselections[0]);
   end;
  end;
+end;
+
+procedure tformdesignerfo.doinsertcomponent(const sender: TObject);
+var
+ comp1: tcomponent;
+begin
+ comp1:= fdesigner.createcurrentcomponent(module);
+ with tdesignwindow(window) do begin
+  placecomponent(comp1,fmousepos,fselections[0]);
+ end;  
 end;
 
 procedure tformdesignerfo.dobringtofront(const sender: tobject);
@@ -2401,52 +2466,6 @@ end;
 function tformdesignerfo.candelete(const acomponent: tcomponent): boolean;
 begin
  result:= true;
-end;
-
-procedure tformdesignerfo.placecomponent(const component: tcomponent;
-                                                      const apos: pointty);
-var
- widget1: twidget;
- po1: pointty;
- rea1: real;
-begin
- with tdesignwindow(window) do begin
-  try
-   rea1:= 1.0;
-   if component is tmsecomponent then begin
-    with tformdesignerfo(fowner).fmoduleintf^ do begin
-     if assigned(getscale) then begin
-      rea1:= getscale(module);
-     end;
-    end;
-    tmsecomponent(component).initnewcomponent(rea1);
-   end;
-   if (component is twidget) and (form <> nil) then begin
-    widget1:= widgetatpos(apos,true);
-    if widget1 <> nil then begin
-     po1:= subpoint(dosnaptogrid(apos),form.rootpos);
-     widget1.insertwidget(twidget(component),translatewidgetpoint(po1,form,
-                                                   widget1));
-     twidget(component).initnewwidget(rea1);
-    end;
-   end
-   else begin
-    if form <> nil then begin
-     setrootpos(component,form.clientpostowidgetpos(
-           dosnaptogrid(form.widgetpostoclientpos(apos))));
-    end
-    else begin
-     setrootpos(component,dosnaptogrid(apos));
-    end;
-   end;
-   tcomponent1(component).loaded;
-   domodified;
-  except
-   deletecomponent(component);
-   raise;
-  end;
-  selectcomponent(component);
- end;
 end;
 
 function tformdesignerfo.gridsizex: integer;

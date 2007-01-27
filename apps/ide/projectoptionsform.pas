@@ -103,9 +103,9 @@ type
 
   showgrid: boolean;
   snaptogrid: boolean;
+  moveonfirstclick: boolean;
   gridsizex: integer;
   gridsizey: integer;
-  
   autoindent: boolean;
   blockindent: integer;
   rightmarginon: boolean;
@@ -188,6 +188,7 @@ type
    makeoptions: tstringedit;
    makeoptionsgrid: twidgetgrid;
    makesplitter: tsplitter;
+   moveonfirstclick: tbooleanedit;
    showgrid: tbooleanedit;
    sighandle: tbooleanedit;
    signalgrid: twidgetgrid;
@@ -645,6 +646,7 @@ begin
   checkmethods:= true;
   showgrid:= true;
   snaptogrid:= true;
+  moveonfirstclick:= true;
   gridsizex:= defaultgridsizex;
   gridsizey:= defaultgridsizey;
   findreplaceinfo.find.options:= [so_caseinsensitive];
@@ -867,6 +869,7 @@ begin
   updatevalue('fontheights',fontheights);
   updatevalue('showgrid',showgrid);
   updatevalue('snaptogrid',snaptogrid);
+  updatevalue('moveonfirstclick',moveonfirstclick);
   updatevalue('autoindent',autoindent);
   updatevalue('blockindent',blockindent);
   updatevalue('rightmarginon',rightmarginon);
@@ -973,6 +976,7 @@ begin
   fo.checkmethods.value:= checkmethods;
   fo.showgrid.value:= showgrid;
   fo.snaptogrid.value:= snaptogrid;
+  fo.moveonfirstclick.value:= moveonfirstclick;
   fo.gridsizex.value:= gridsizex;
   fo.gridsizey.value:= gridsizey;
   fo.autoindent.value:= autoindent;
@@ -1127,6 +1131,7 @@ begin
   checkmethods:= fo.checkmethods.value;
   showgrid:= fo.showgrid.value;
   snaptogrid:= fo.snaptogrid.value;
+  moveonfirstclick:= fo.moveonfirstclick.value;
   gridsizex:= fo.gridsizex.value;
   gridsizey:= fo.gridsizey.value;
   
