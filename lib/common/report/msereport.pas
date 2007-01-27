@@ -27,7 +27,9 @@ const
  defaultbandoptionswidget = defaultoptionswidget + [ow_fontlineheight];
   
 type
-// tablineposty = (tlp_inner,tlp_center,tlp_outer);
+ linevisiblety = (lv_first,lv_normal,lv_last);
+ linevisiblesty = set of linevisiblety;
+  
  tablineinfoty = record
   widthmm: real;
   color: colorty;
@@ -35,6 +37,7 @@ type
   capstyle: capstylety;
   dashes: string;
   dist: integer;
+  visible: linevisiblesty; 
  end;
  tablinekindty = (tlk_top,tlk_vert,tlk_bottom);
  tablineinfoarty = array[tablinekindty] of tablineinfoty;
@@ -45,10 +48,12 @@ const
  defaulttablinecapstyle = cs_projecting;
  defaulttablinedashes = '';
  defaulttablinedist = 0;
+ defaulttablinevisible = [lv_first,lv_normal,lv_last];
  defaulttablineinfo: tablineinfoty = (widthmm: defaulttablinewidth; 
          color: defaulttablinecolor; colorgap: defaulttablinecolorgap;
          capstyle: defaulttablinecapstyle;
-         dashes: defaulttablinedashes; dist: defaulttablinedist);
+         dashes: defaulttablinedashes; dist: defaulttablinedist;
+         visible: defaulttablinevisible);
 type
  tcustombandarea = class;
  tcustomrecordband = class;
@@ -106,6 +111,7 @@ type
    procedure setlitop_capstyle(const avalue: capstylety);
    procedure setlitop_dashes(const avalue: string);
    procedure setlitop_dist(const avalue: integer);
+   procedure setlitop_visible(const avalue: linevisiblesty);
 
    procedure setlivert_widthmm(const avalue: real);
    function islivert_widthmmstored: boolean;
@@ -119,6 +125,8 @@ type
    function islivert_dashesstored: boolean;
    procedure setlivert_dist(const avalue: integer);
    function islivert_diststored: boolean;
+   procedure setlivert_visible(const avalue: linevisiblesty);
+   function islivert_visiblestored: boolean;
 
    procedure setlibottom_widthmm(const avalue: real);
    procedure setlibottom_color(const avalue: colorty);
@@ -126,6 +134,7 @@ type
    procedure setlibottom_capstyle(const avalue: capstylety);
    procedure setlibottom_dashes(const avalue: string);
    procedure setlibottom_dist(const avalue: integer);
+   procedure setlibottom_visible(const avalue: linevisiblesty);
 
                //idbeditinfo
    function getdatasource(const aindex: integer): tdatasource;
@@ -157,6 +166,8 @@ type
                  setlitop_dashes;
    property litop_dist: integer read flineinfos[tlk_top].dist write
                  setlitop_dist default defaulttablinedist;
+   property litop_visible: linevisiblesty read flineinfos[tlk_top].visible write
+                 setlitop_visible default defaulttablinevisible;
 
    property livert_widthmm: real read flineinfos[tlk_vert].widthmm write
                  setlivert_widthmm stored islivert_widthmmstored;
@@ -174,6 +185,9 @@ type
    property livert_dist: integer read flineinfos[tlk_vert].dist write
                  setlivert_dist stored islivert_diststored
                                   default defaulttablinedist;
+   property livert_visible: linevisiblesty read flineinfos[tlk_vert].visible write
+                 setlivert_visible stored islivert_visiblestored 
+                                  default defaulttablinevisible;
                  
    property libottom_widthmm: real read flineinfos[tlk_bottom].widthmm write
                  setlibottom_widthmm;
@@ -187,6 +201,8 @@ type
                                          setlibottom_dashes;
    property libottom_dist: integer read flineinfos[tlk_bottom].dist write
                                  setlibottom_dist default defaulttablinedist;
+   property libottom_visible: linevisiblesty read flineinfos[tlk_bottom].visible write
+                 setlibottom_visible default defaulttablinevisible;
 
    property ongetvalue: getrichstringeventty read fongetvalue write fongetvalue;
  end;
@@ -208,6 +224,7 @@ type
    procedure setlitop_capstyle(const avalue: capstylety);
    procedure setlitop_dashes(const avalue: string);
    procedure setlitop_dist(const avalue: integer);
+   procedure setlitop_visible(const avalue: linevisiblesty);
 
    procedure setlistart_widthmm(const avalue: real);
    procedure setlistart_color(const avalue: colorty);
@@ -215,6 +232,7 @@ type
    procedure setlistart_capstyle(const avalue: capstylety);
    procedure setlistart_dashes(const avalue: string);
    procedure setlistart_dist(const avalue: integer);
+   procedure setlistart_visible(const avalue: linevisiblesty);
 
    procedure setlivert_widthmm(const avalue: real);
    procedure setlivert_color(const avalue: colorty);
@@ -222,6 +240,7 @@ type
    procedure setlivert_capstyle(const avalue: capstylety);
    procedure setlivert_dashes(const avalue: string);
    procedure setlivert_dist(const avalue: integer);
+   procedure setlivert_visible(const avalue: linevisiblesty);
 
    procedure setliend_widthmm(const avalue: real);
    procedure setliend_color(const avalue: colorty);
@@ -229,6 +248,7 @@ type
    procedure setliend_capstyle(const avalue: capstylety);
    procedure setliend_dashes(const avalue: string);
    procedure setliend_dist(const avalue: integer);
+   procedure setliend_visible(const avalue: linevisiblesty);
 
    procedure setlibottom_widthmm(const avalue: real);
    procedure setlibottom_color(const avalue: colorty);
@@ -236,6 +256,7 @@ type
    procedure setlibottom_capstyle(const avalue: capstylety);
    procedure setlibottom_dashes(const avalue: string);
    procedure setlibottom_dist(const avalue: integer);
+   procedure setlibottom_visible(const avalue: linevisiblesty);
 
    function getitems(const index: integer): treptabulatoritem;
    procedure setitems(const index: integer; const avalue: treptabulatoritem);
@@ -263,6 +284,8 @@ type
                  setlitop_dashes;
    property litop_dist: integer read flineinfos[tlk_top].dist write
                  setlitop_dist default defaulttablinedist;
+   property litop_visible: linevisiblesty read flineinfos[tlk_top].visible write
+                 setlitop_visible default defaulttablinevisible;
 
    property listart_widthmm: real read flistart.widthmm write
                  setlistart_widthmm;
@@ -276,6 +299,8 @@ type
                  setlistart_dashes;
    property listart_dist: integer read flistart.dist write
                  setlistart_dist default defaulttablinedist;
+   property listart_visible: linevisiblesty read flistart.visible write
+                 setlistart_visible default defaulttablinevisible;
 
    property livert_widthmm: real read flineinfos[tlk_vert].widthmm write
                  setlivert_widthmm;
@@ -289,6 +314,8 @@ type
                  setlivert_dashes;
    property livert_dist: integer read flineinfos[tlk_vert].dist write
                  setlivert_dist default defaulttablinedist;
+   property livert_visible: linevisiblesty read flineinfos[tlk_vert].visible write
+                 setlivert_visible default defaulttablinevisible;
                  
    property liend_widthmm: real read fliend.widthmm write
                  setliend_widthmm;
@@ -302,6 +329,8 @@ type
                  setliend_dashes;
    property liend_dist: integer read fliend.dist write
                  setliend_dist default defaulttablinedist;
+   property liend_visible: linevisiblesty read fliend.visible write
+                 setliend_visible default defaulttablinevisible;
 
    property libottom_widthmm: real read flineinfos[tlk_bottom].widthmm write
                  setlibottom_widthmm;
@@ -309,12 +338,14 @@ type
                  setlibottom_color default defaulttablinecolor;
    property libottom_colorgap: colorty read flineinfos[tlk_bottom].colorgap write
                  setlibottom_colorgap default defaulttablinecolorgap;
-   property libottom_capstyle: capstylety read flineinfos[tlk_bottom].capstyle write
-                 setlibottom_capstyle default defaulttablinecapstyle;
+   property libottom_capstyle: capstylety read flineinfos[tlk_bottom].capstyle
+               write setlibottom_capstyle default defaulttablinecapstyle;
    property libottom_dashes: string read flineinfos[tlk_bottom].dashes write
                  setlibottom_dashes;
    property libottom_dist: integer read flineinfos[tlk_bottom].dist write
                  setlibottom_dist default defaulttablinedist;
+   property libottom_visible: linevisiblesty read flineinfos[tlk_bottom].visible
+               write setlibottom_visible default defaulttablinevisible;
 
    property defaultdist;
  end;
@@ -436,6 +467,13 @@ type
  tbandgroup = class(tcustombandgroup)
   published
    property font;
+//   property tabs;
+   property datasource;
+   property visibility;
+   property optionsscale;
+   property onfontheightdelta;
+   property onchildscaled;
+
    property onbeforerender;
    property onpaint;
    property onafterpaint;
@@ -921,6 +959,12 @@ begin
  changed;
 end;
 
+procedure treptabulatoritem.setlitop_visible(const avalue: linevisiblesty);
+begin
+ flineinfos[tlk_top].visible:= avalue;
+ changed;
+end;
+
 procedure treptabulatoritem.setlivert_widthmm(const avalue: real);
 begin
  flineinfos[tlk_vert].widthmm:= avalue;
@@ -993,6 +1037,18 @@ begin
               treptabulators(fowner).flineinfos[tlk_vert].dist;
 end;
 
+procedure treptabulatoritem.setlivert_visible(const avalue: linevisiblesty);
+begin
+ flineinfos[tlk_vert].visible:= avalue;
+ changed;
+end;
+
+function treptabulatoritem.islivert_visiblestored: boolean;
+begin
+ result:= flineinfos[tlk_vert].visible <> 
+              treptabulators(fowner).flineinfos[tlk_vert].visible;
+end;
+
 procedure treptabulatoritem.setlibottom_widthmm(const avalue: real);
 begin
  flineinfos[tlk_bottom].widthmm:= avalue;
@@ -1026,6 +1082,12 @@ end;
 procedure treptabulatoritem.setlibottom_dist(const avalue: integer);
 begin
  flineinfos[tlk_bottom].dist:= avalue;
+ changed;
+end;
+
+procedure treptabulatoritem.setlibottom_visible(const avalue: linevisiblesty);
+begin
+ flineinfos[tlk_bottom].visible:= avalue;
  changed;
 end;
 
@@ -1077,6 +1139,7 @@ procedure treptabulators.processvalues(const acanvas: tcanvas;
 var
  bo1: boolean;
  bandcx: integer;
+ visiblemask: linevisiblesty;
  
  procedure checkinit(const ainfo: tablineinfoty);
  begin
@@ -1118,39 +1181,41 @@ var
   with treptabulatoritem(fitems[ftabs[aindex].index]) do begin
    with flineinfos[akind] do begin
     if widthmm > 0 then begin
-     checkinit(flineinfos[akind]);
-     with ftabs[aindex] do begin     
-      case kind of
-       tak_left: begin
-        startx:= pos + xlineoffset;
-        endx:= nextx;
-       end;
-       else begin
-        if aindex > 0 then begin
-         with ftabs[aindex-1] do begin
-          startx:= pos + treptabulatoritem(fitems[index]).xlineoffset;
-         end;
-        end
-        else begin
-         startx:= 0;
-        end;
-        if kind = tak_centered then begin
+     if visible * visiblemask <> [] then begin
+      checkinit(flineinfos[akind]);
+      with ftabs[aindex] do begin     
+       case kind of
+        tak_left: begin
+         startx:= pos + xlineoffset;
          endx:= nextx;
-        end
+        end;
         else begin
-         endx:= pos + xlineoffset;
+         if aindex > 0 then begin
+          with ftabs[aindex-1] do begin
+           startx:= pos + treptabulatoritem(fitems[index]).xlineoffset;
+          end;
+         end
+         else begin
+          startx:= 0;
+         end;
+         if kind = tak_centered then begin
+          endx:= nextx;
+         end
+         else begin
+          endx:= pos + xlineoffset;
+         end;
         end;
        end;
       end;
+      if akind = tlk_top then begin
+       y:= - flineinfos[tlk_top].dist;
+      end
+      else begin
+       y:= treptabulators(fowner).fband.clientheight + 
+                      flineinfos[tlk_bottom].dist;
+      end;
+      acanvas.drawline(makepoint(startx,y),makepoint(endx,y),color);
      end;
-     if akind = tlk_top then begin
-      y:= - flineinfos[tlk_top].dist;
-     end
-     else begin
-      y:= treptabulators(fowner).fband.clientheight + 
-                     flineinfos[tlk_bottom].dist;
-     end;
-     acanvas.drawline(makepoint(startx,y),makepoint(endx,y),color);
     end;
    end;
   end;
@@ -1160,10 +1225,31 @@ var
  int1,int2,int3: integer;
  bo2: boolean;
  rstr1: richstringty;
+ 
 begin
  fminsize:= nullsize;
  bandcx:= fband.innerclientsize.cx;
  bo1:= false;
+ if apaint then begin
+  with fband do begin
+   if not rendering or (fparentintf = nil) then begin 
+    visiblemask:= [lv_first,lv_normal,lv_last];
+   end
+   else begin
+    visiblemask:= [lv_normal];    
+    with fparentintf do begin
+     if isfirstband then begin
+      include(visiblemask,lv_first);
+      exclude(visiblemask,lv_normal);
+     end;
+     if islastband then begin
+      include(visiblemask,lv_last);
+      exclude(visiblemask,lv_normal);
+     end;
+    end;
+   end;
+  end;
+ end;
  if count > 0 then begin
   checkuptodate;
   with finfo do begin
@@ -1224,19 +1310,21 @@ begin
     with treptabulatoritem(fitems[ftabs[int1].index]) do begin
      with flineinfos[tlk_vert] do begin
       if widthmm > 0 then begin
-       checkinit(flineinfos[tlk_vert]);
-       with ftabs[int1] do begin
-        case kind of 
-         tak_left: begin
-          int2:= pos - dist
-         end
-         else begin
-          int2:= pos + dist;
+       if visible * visiblemask <> [] then begin
+        checkinit(flineinfos[tlk_vert]);
+        with ftabs[int1] do begin
+         case kind of 
+          tak_left: begin
+           int2:= pos - dist
+          end
+          else begin
+           int2:= pos + dist;
+          end;
          end;
         end;
+        acanvas.drawline(makepoint(int2,fband.clientheight),
+                                              makepoint(int2,0),color);
        end;
-       acanvas.drawline(makepoint(int2,fband.clientheight),
-                                             makepoint(int2,0),color);
       end;
      end;
     end;
@@ -1251,33 +1339,41 @@ begin
   bandcx:= fband.clientwidth;
   with flistart do begin
    if widthmm > 0 then begin
-    checkinit(flistart);
-    acanvas.drawline(makepoint(-dist,
-           fband.clientheight+flineinfos[tlk_bottom].dist),
-                         makepoint(-dist,-flineinfos[tlk_top].dist),color);
+    if visible * visiblemask <> [] then begin
+     checkinit(flistart);
+     acanvas.drawline(makepoint(-dist,
+            fband.clientheight+flineinfos[tlk_bottom].dist),
+                          makepoint(-dist,-flineinfos[tlk_top].dist),color);
+    end;
    end;
   end;
   with fliend do begin
    if widthmm > 0 then begin
-    checkinit(fliend);
-    acanvas.drawline(makepoint(bandcx+dist,fband.clientheight+
-                              flineinfos[tlk_bottom].dist),
-                   makepoint(bandcx+dist,-flineinfos[tlk_top].dist),color);
+    if visible * visiblemask <> [] then begin
+     checkinit(fliend);
+     acanvas.drawline(makepoint(bandcx+dist,fband.clientheight+
+                               flineinfos[tlk_bottom].dist),
+                    makepoint(bandcx+dist,-flineinfos[tlk_top].dist),color);
+    end;
    end;
   end;
   with flineinfos[tlk_top] do begin
    if widthmm > 0 then begin
-    checkinit(flineinfos[tlk_top]);
-    acanvas.drawline(makepoint(-flistart.dist,-dist),
-                               makepoint(bandcx+fliend.dist,-dist),color);
+    if visible * visiblemask <> [] then begin
+     checkinit(flineinfos[tlk_top]);
+     acanvas.drawline(makepoint(-flistart.dist,-dist),
+                                makepoint(bandcx+fliend.dist,-dist),color);
+    end;
    end;
   end;
   with flineinfos[tlk_bottom] do begin
    if widthmm > 0 then begin
-    checkinit(flineinfos[tlk_bottom]);
-    int2:= fband.clientheight+dist;
-    acanvas.drawline(makepoint(-flistart.dist,int2),
+    if visible * visiblemask <> [] then begin
+     checkinit(flineinfos[tlk_bottom]);
+     int2:= fband.clientheight+dist;
+     acanvas.drawline(makepoint(-flistart.dist,int2),
                                makepoint(bandcx+fliend.dist,int2),color);
+    end;
    end;
   end;
  end;
@@ -1350,6 +1446,14 @@ begin
  end;
 end;
 
+procedure treptabulators.setlitop_visible(const avalue: linevisiblesty);
+begin
+ if avalue <> flineinfos[tlk_top].visible then begin
+  flineinfos[tlk_top].visible:= avalue;
+  fband.invalidate;
+ end;
+end;
+
 procedure treptabulators.setlistart_widthmm(const avalue: real);
 begin
  if avalue <> flistart.widthmm then begin
@@ -1394,6 +1498,14 @@ procedure treptabulators.setlistart_dist(const avalue: integer);
 begin
  if avalue <> flistart.dist then begin
   flistart.dist:= avalue;
+  fband.invalidate;
+ end;
+end;
+
+procedure treptabulators.setlistart_visible(const avalue: linevisiblesty);
+begin
+ if avalue <> flistart.visible then begin
+  flistart.visible:= avalue;
   fband.invalidate;
  end;
 end;
@@ -1470,6 +1582,18 @@ begin
  end;
 end;
 
+procedure treptabulators.setlivert_visible(const avalue: linevisiblesty);
+var
+ int1: integer;
+begin
+ if avalue <> flineinfos[tlk_vert].visible then begin
+  flineinfos[tlk_vert].visible:= avalue;
+  for int1:= 0 to high(fitems) do begin
+   treptabulatoritem(fitems[int1]).livert_visible:= avalue;
+  end;
+ end;
+end;
+
 procedure treptabulators.setliend_widthmm(const avalue: real);
 begin
  if avalue <> fliend.widthmm then begin
@@ -1518,6 +1642,14 @@ begin
  end;
 end;
 
+procedure treptabulators.setliend_visible(const avalue: linevisiblesty);
+begin
+ if avalue <> fliend.visible then begin
+  fliend.visible:= avalue;
+  fband.invalidate;
+ end;
+end;
+
 procedure treptabulators.setlibottom_widthmm(const avalue: real);
 begin
  if avalue <> flineinfos[tlk_bottom].widthmm then begin
@@ -1562,6 +1694,14 @@ procedure treptabulators.setlibottom_dist(const avalue: integer);
 begin
  if avalue <> flineinfos[tlk_bottom].dist then begin
   flineinfos[tlk_bottom].dist:= avalue;
+  fband.invalidate;
+ end;
+end;
+
+procedure treptabulators.setlibottom_visible(const avalue: linevisiblesty);
+begin
+ if avalue <> flineinfos[tlk_bottom].visible then begin
+  flineinfos[tlk_bottom].visible:= avalue;
   fband.invalidate;
  end;
 end;
