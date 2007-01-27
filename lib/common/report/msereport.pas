@@ -350,7 +350,7 @@ type
    property defaultdist;
  end;
   
- recordbandstatety = (rbs_rendering);
+ recordbandstatety = (rbs_rendering,rbs_showed,rbs_pageshowed);
  recordbandstatesty = set of recordbandstatety; 
  
  ibandparent = interface(inullinterface)
@@ -367,10 +367,18 @@ type
  trecordbanddatalink = class(tmsedatalink)
  end;
 
- bandvisibility = (bv_firstvisible,bv_firstinvisible,bv_normalvisible,
-                  bv_normalinvisible,bv_lastvisible,bv_lastinvisible);
- bandvisibilitiesty = set of bandvisibility;
-    
+ bandvisibilityty = (bv_once,bv_everypage,
+                  bv_firstofpageshow,bv_firstofpagehide,
+                  bv_normalshow,bv_normalhide,
+                  bv_lastofpageshow,bv_lastofpagehide);
+ bandvisibilitiesty = set of bandvisibilityty;
+
+const 
+ visibilitymask = [bv_firstofpageshow,bv_firstofpagehide,
+                    bv_normalshow,bv_normalhide,
+                    bv_lastofpageshow,bv_lastofpagehide];
+
+type                     
  tcustomrecordband = class(tcustomscalingwidget)
   private
    fparentintf: ibandparent;
@@ -396,6 +404,7 @@ type
    function calcminscrollsize: sizety; override;
    procedure render(const acanvas: tcanvas; var empty: boolean); virtual;
    procedure init; virtual;
+   procedure initpage; virtual;
    procedure beginrender; virtual;
    procedure endrender; virtual;
    procedure dopaint(const acanvas: tcanvas); override;
@@ -516,6 +525,7 @@ type
    procedure doafterpaint1(const acanvas: tcanvas); virtual;
    procedure init; virtual;
    procedure initareapage;
+   procedure initpage;
    function checkareafull(ay: integer): boolean;
            //ibandparent
    function beginband(const acanvas: tcanvas;
@@ -1792,6 +1802,11 @@ begin
  //dummy
 end;
 
+procedure tcustomrecordband.initpage;
+begin
+ exclude(fstate,rbs_pageshowed);
+end;
+
 function tcustomrecordband.rendering: boolean;
 begin
  result:= rbs_rendering in fstate;
@@ -1947,9 +1962,9 @@ end;
 
 procedure tcustomrecordband.setvisibility(const avalue: bandvisibilitiesty);
 const
- firstmask: bandvisibilitiesty = [bv_firstvisible,bv_firstinvisible];
- normalmask: bandvisibilitiesty = [bv_normalvisible,bv_normalinvisible];
- lastmask: bandvisibilitiesty = [bv_lastvisible,bv_lastinvisible];
+ firstmask: bandvisibilitiesty = [bv_firstofpageshow,bv_firstofpagehide];
+ normalmask: bandvisibilitiesty = [bv_normalshow,bv_normalhide];
+ lastmask: bandvisibilitiesty = [bv_lastofpageshow,bv_lastofpagehide];
 var
  vis1: bandvisibilitiesty;
 begin
@@ -1968,38 +1983,41 @@ end;
 
 procedure tcustomrecordband.updatevisibility;
 var
- first,last: boolean;
+ first,last,showed,hidden: boolean;
 begin
  if fparentintf <> nil then begin
-  if fvisibility <> [] then begin
+  if fvisibility * visibilitymask <> [] then begin
    first:= fparentintf.isfirstband;
    last:= fparentintf.islastband;
    if first then begin
-    if bv_firstvisible in fvisibility then begin
+    if bv_firstofpageshow in fvisibility then begin
      visible:= true;
+     exit;
     end
     else begin
-     if bv_firstinvisible in fvisibility then begin
+     if bv_firstofpagehide in fvisibility then begin
       visible:= false;
      end;
     end;
    end;
    if last then begin
-    if bv_lastvisible in fvisibility then begin
+    if bv_lastofpageshow in fvisibility then begin
+     exit;
      visible:= true;
     end
     else begin
-     if bv_lastinvisible in fvisibility then begin
+     if bv_lastofpagehide in fvisibility then begin
       visible:= false;
      end;
     end;
    end;
    if not first and not last then begin
-    if bv_normalvisible in fvisibility then begin
+    if bv_normalshow in fvisibility then begin
+     exit;
      visible:= true;
     end
     else begin
-     if bv_normalinvisible in fvisibility then begin
+     if bv_normalhide in fvisibility then begin
       visible:= false;
      end;
     end;
@@ -2143,8 +2161,8 @@ begin
   int2:= innerclientframewidth.cy;
   for int1:= 0 to high(fbands) do begin
    with fbands[int1] do begin
-    if visible and not (bv_lastinvisible in visibility) or 
-           (bv_lastvisible in visibility) then begin
+    if visible and not (bv_lastofpagehide in visibility) or 
+           (bv_lastofpageshow in visibility) then begin
      int2:= int2 + bounds_cy;
     end;
    end;
@@ -2208,6 +2226,32 @@ begin
  inherited;
 end;
 
+procedure tcustombandarea.init;
+var
+ int1: integer;
+begin
+  factiveband:= 0;
+  include(fstate,bas_inited);
+  sortwidgetsyorder(widgetarty(fbands));
+  for int1:= 0 to high(fbands) do begin
+   fbands[int1].init;
+  end;
+  initareapage;
+end;
+
+procedure tcustombandarea.initpage;
+var
+ int1: integer;
+begin
+  factiveband:= 0;
+  sortwidgetsyorder(widgetarty(fbands));
+  for int1:= 0 to high(fbands) do begin
+   fbands[int1].initpage;
+  end;
+ fstate:= fstate - [bas_areafull,bas_backgroundrendered,bas_notfirstband,
+                             bas_lastband];
+end;
+
 function tcustombandarea.render(const acanvas: tcanvas): boolean;
 var                     //true if finished
  bo1: boolean;
@@ -2217,20 +2261,25 @@ begin
   init;
  end;
  try
-  fstate:= fstate - [bas_areafull,bas_backgroundrendered,bas_notfirstband,
-                             bas_lastband];
+  initpage;
   if factiveband <= high(fbands) then begin
    updatevisible;
    dobeforerender;
    while (factiveband <= high(fbands)) and not areafull do begin
-    bo1:= true; //empty
     exclude(fstate,bas_bandstarted);
     while (factiveband <= high(fbands)) and 
                             not fbands[factiveband].visible do begin
      inc(factiveband);
     end;
     if factiveband <= high(fbands) then begin
-     fbands[factiveband].render(acanvas,bo1);
+     with fbands[factiveband] do begin
+      bo1:= ((rbs_showed in fstate) or not(bv_once in fvisibility)) and
+            ((rbs_pageshowed in fstate) or not(bv_everypage in fvisibility)); 
+                             //empty    
+      render(acanvas,bo1);
+      bo1:= bv_everypage in fvisibility;
+      fstate:= fstate + [rbs_showed,rbs_pageshowed];
+     end;
      result:= result and bo1;
      if bo1 then begin
       repeat
@@ -2256,19 +2305,6 @@ begin
  exclude(fstate,bas_notfirstband);
  facty:= innerclientwidgetpos.y + bounds_y;
  fbandnum:= 0;
-end;
-
-procedure tcustombandarea.init;
-var
- int1: integer;
-begin
-  factiveband:= 0;
-  include(fstate,bas_inited);
-  sortwidgetsyorder(widgetarty(fbands));
-  for int1:= 0 to high(fbands) do begin
-   fbands[int1].init;
-  end;
-  initareapage;
 end;
 
 procedure tcustombandarea.dobeforerender;
@@ -2404,7 +2440,8 @@ end;
 
 function tcustombandarea.isfirstband: boolean;
 begin
- result:= not (bas_notfirstband in fstate);
+ result:= not (rbs_pageshowed in fbands[factiveband].fstate);
+// result:= not (bas_notfirstband in fstate);
 end;
 
 function tcustombandarea.islastband(const addheight: integer = 0): boolean;
