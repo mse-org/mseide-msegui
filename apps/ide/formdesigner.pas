@@ -258,6 +258,9 @@ type
                   const afilename: filenamety; const backupcreated: boolean);
    procedure closeobjecttext(const adesigner: idesigner;
                     const afilename: filenamety; var cancel: boolean);
+   procedure beforemake(const adesigner: idesigner; const maketag: integer;
+                         var abort: boolean);
+   procedure aftermake(const adesigner: idesigner; const exitcode: integer);
 
   public
    constructor create(const aowner: tformdesignerfo; const adesigner: tdesigner);
@@ -1953,6 +1956,18 @@ begin
  snaptogrid:= projectoptions.snaptogrid;
  gridsizex:= projectoptions.gridsizex;
  gridsizey:= projectoptions.gridsizey;
+end;
+
+procedure tdesignwindow.beforemake(const adesigner: idesigner;
+               const maketag: integer; var abort: boolean);
+begin
+ //dummy
+end;
+
+procedure tdesignwindow.aftermake(const adesigner: idesigner;
+                                   const exitcode: integer);
+begin
+ //dummy
 end;
 
 { tformdesignerfo }

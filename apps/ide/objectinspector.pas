@@ -182,6 +182,9 @@ type
                    const afilename: filenamety; const backupcreated: boolean);
    procedure closeobjecttext(const adesigner: idesigner;
                     const afilename: filenamety; var cancel: boolean);
+   procedure beforemake(const adesigner: idesigner; const maketag: integer;
+                         var abort: boolean);
+   procedure aftermake(const adesigner: idesigner; const exitcode: integer);
 
    //iobjectinspector
    function getproperties(const objects: objectarty; const amodule: tmsecomponent;
@@ -1589,6 +1592,18 @@ begin
  for int1:= grid.rowhigh downto 0 do begin
   props[int1].expanded:= false;
  end;
+end;
+
+procedure tobjectinspectorfo.beforemake(const adesigner: idesigner;
+               const maketag: integer; var abort: boolean);
+begin
+ //dummy
+end;
+
+procedure tobjectinspectorfo.aftermake(const adesigner: idesigner;
+                              const exitcode: integer);
+begin
+ //dummy
 end;
 
 initialization

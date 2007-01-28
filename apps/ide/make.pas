@@ -29,7 +29,7 @@ implementation
 uses
  mseprocutils,main,msestream,projectoptionsform,sysutils,msegrids,msetypes,
  sourceform,mseclasses,msegui,mseeditglob,msefileutils,msesys,msepipestream,
- msesysutils,msegraphics,msestrings,messageform;
+ msesysutils,msegraphics,msestrings,messageform,msedesignintf,msedesigner;
 
 type
  tmaker = class(tguicomponent)
@@ -61,11 +61,17 @@ begin
 end;
 
 procedure domake(atag: integer);
+var
+ bo1: boolean;
 begin
  killmake;
- maker:= tmaker.Create(atag);
- if projectoptions.closemessages then begin
-  messagefo.messages.show;
+ bo1:= false;
+ designnotifications.beforemake(idesigner(designer),atag,bo1);
+ if not bo1 then begin
+  maker:= tmaker.Create(atag);
+  if projectoptions.closemessages then begin
+   messagefo.messages.show;
+  end;
  end;
 end;
 
@@ -163,7 +169,8 @@ begin
  end
  else begin
   mainfo.setstattext('Make not running.',mtk_error);
-  mainfo.makefinished(int1);
+  designnotifications.aftermake(idesigner(designer),int1);
+//  mainfo.makefinished(int1);
  end;
 end;
 
@@ -189,7 +196,8 @@ begin
   messagefo.messages.appendrow(['']);
  end;
  procid:= invalidprochandle;
- mainfo.makefinished(fexitcode);
+ designnotifications.aftermake(idesigner(designer),fexitcode);
+// mainfo.makefinished(fexitcode);
  messagefo.messages.font.options:= messagefo.messages.font.options +
              [foo_antialiased] - [foo_nonantialiased];
 end;

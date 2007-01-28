@@ -153,6 +153,10 @@ type
                  const afilename: filenamety; const backupcreated: boolean);
   procedure closeobjecttext(const adesigner: idesigner;
                       const afilename: filenamety; var cancel: boolean);
+
+  procedure beforemake(const adesigner: idesigner; const maketag: integer;
+                             var abort: boolean);
+  procedure aftermake(const adesigner: idesigner; const exitcode: integer);
  end;
 
  selectedinfoty = record
@@ -245,6 +249,9 @@ type
                const afilename: filenamety; const backupcreated: boolean);
    procedure closeobjecttext(const adesigner: idesigner; 
                  const afilename: filenamety; out cancel: boolean);
+   procedure beforemake(const adesigner: idesigner; const maketag: integer;
+                         var abort: boolean);
+   procedure aftermake(const adesigner: idesigner; const exitcode: integer);
    
    procedure Registernotification(const DesignNotification: IDesignNotification);
    procedure Unregisternotification(const DesignNotification: IDesignNotification);
@@ -1166,7 +1173,30 @@ var
 begin
  for int1:= 0 to count - 1 do begin
   idesignnotification(fitems[int1]).instancevarnamechanging(adesigner,amodule,
-           newname);
+                                                     newname);
+ end;
+end;
+
+procedure tdesignnotifications.beforemake(const adesigner: idesigner;
+               const maketag: integer; var abort: boolean);
+var
+ int1: integer;
+begin
+ for int1:= 0 to count - 1 do begin
+  if abort then begin 
+   break;
+  end;
+  idesignnotification(fitems[int1]).beforemake(adesigner,maketag,abort);
+ end;
+end;
+
+procedure tdesignnotifications.aftermake(const adesigner: idesigner;
+                          const exitcode: integer);
+var
+ int1: integer;
+begin
+ for int1:= 0 to count - 1 do begin
+  idesignnotification(fitems[int1]).aftermake(adesigner,exitcode);
  end;
 end;
 

@@ -109,6 +109,9 @@ type
                    const afilename: filenamety; const backupcreated: boolean);
    procedure closeobjecttext(const adesigner: idesigner;
                     const afilename: filenamety; var cancel: boolean);
+   procedure beforemake(const adesigner: idesigner; const maketag: integer;
+                         var abort: boolean);
+   procedure aftermake(const adesigner: idesigner; const exitcode: integer);
 
    procedure getincludefile(const sender: tparser; const scanner: tscanner);
    procedure updateunit(const infopo: punitinfoty;
@@ -2008,6 +2011,18 @@ begin
    result:= nil;
   end;
  end;
+end;
+
+procedure tsourceupdater.beforemake(const adesigner: idesigner;
+               const maketag: integer; var abort: boolean);
+begin
+ //dummy
+end;
+
+procedure tsourceupdater.aftermake(const adesigner: idesigner;
+                      const exitcode: integer);
+begin
+ //dummy
 end;
 
 end.

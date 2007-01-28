@@ -173,6 +173,9 @@ type
                     const afilename: filenamety; const backupcreated: boolean);
    procedure closeobjecttext(const adesigner: idesigner;
                     const afilename: filenamety; var cancel: boolean);
+   procedure beforemake(const adesigner: idesigner; const maketag: integer;
+                         var abort: boolean);
+   procedure aftermake(const adesigner: idesigner; const exitcode: integer);
 
    function checksave: modalresultty;
    procedure unloadexec;
@@ -204,7 +207,7 @@ type
    function openproject(const aname: filenamety;
                              const ascopy: boolean = false): boolean;
    procedure saveproject(const aname: filenamety; const ascopy: boolean = false);
-   procedure makefinished(const exitcode: integer);
+//   procedure makefinished(const exitcode: integer);
    procedure sourcechanged(const sender: tsourcepage);
    function opensource(const filekind: filekindty; const addtoproject: boolean;
                         const aactivate: boolean = true): boolean;
@@ -1946,7 +1949,7 @@ begin
   openproject(str1);
  end;
 end;
-
+{
 procedure tmainfo.makefinished(const exitcode: integer);
 begin
  if exitcode <> 0 then begin
@@ -1967,15 +1970,8 @@ begin
    end;
   end;
  end;
- {
- with messagefo.messages do begin
-  if rowcount > 0 then begin
-   datacols[0][rowcount-1]:= datacols[0][rowcount-1] + statdisp.value;
-  end;
- end;
- }
 end;
-
+}
 procedure tmainfo.domake(atag: integer);
 begin
  unloadexec;
@@ -2118,6 +2114,35 @@ end;
 procedure tmainfo.configureexecute(const sender: TObject);
 begin
  configureide;
+end;
+
+procedure tmainfo.beforemake(const adesigner: idesigner;
+               const maketag: integer; var abort: boolean);
+begin
+ //dummy
+end;
+
+procedure tmainfo.aftermake(const adesigner: idesigner;
+                               const exitcode: integer);
+begin
+ if exitcode <> 0 then begin
+  setstattext('Make ***ERROR*** '+inttostr(exitcode)+'.',mtk_error);
+  showfirsterror;
+ end
+ else begin
+  setstattext('Make OK.',mtk_finished);
+  fcurrent:= true;
+  fnoremakecheck:= false;
+  messagefo.messages.lastrow;
+  if projectoptions.closemessages then begin
+   messagefo.hide;
+  end;
+  if fstartcommand <> sc_none then begin
+   if loadexec(false) then begin
+    gdb.run;
+   end;
+  end;
+ end;
 end;
 
 end.
