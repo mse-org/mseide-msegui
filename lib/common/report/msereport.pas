@@ -581,13 +581,18 @@ type
    fpagewidth: real;
    fpageheight: real;
    fppmm: real;
+   fvisiblepage: boolean;
    fpagenum: integer;
    fonfirstpage: notifyeventty;
    fonafterlastpage: notifyeventty;
+   fnextpage: tcustomreportpage;
+   fnextpageifempty: tcustomreportpage;
    procedure setpagewidth(const avalue: real);
    procedure setpageheight(const avalue: real);
    procedure updatepagesize;
    procedure setppmm(const avalue: real);
+   procedure setnextpage(const avalue: tcustomreportpage);
+   procedure setnextpageifempty(const avalue: tcustomreportpage);
   protected
    freport: tcustomreport;
    procedure registerchildwidget(const child: twidget); override;
@@ -612,8 +617,11 @@ type
    constructor create(aowner: tcomponent); override;
    function render(const acanvas: tcanvas): boolean;
           //true if empty
+   property report: tcustomreport read freport;
    property pagenum: integer read fpagenum write fpagenum; 
                             //null-based, local to this page
+   property visiblepage: boolean read fvisiblepage write fvisiblepage default true;
+
    property onfirstpage: notifyeventty read fonfirstpage
                                write fonfirstpage;
    property onbeforerender: notifyeventty read fonbeforerender
@@ -626,6 +634,9 @@ type
    property pagewidth: real read fpagewidth write setpagewidth;
    property pageheight: real read fpageheight write setpageheight;
    property font: twidgetfont read getfont write setfont stored isfontstored;
+   property nextpage: tcustomreportpage read fnextpage write setnextpage;
+   property nextpageifempty: tcustomreportpage read fnextpageifempty write 
+                          setnextpageifempty;
  end;
  
  reportpagearty = array of tcustomreportpage;
@@ -639,6 +650,9 @@ type
    property face;
    property visible;
    property font;
+   property nextpage;
+   property nextpageifempty;
+   property visiblepage;
  
    property onfirstpage;
    property onbeforerender;
@@ -2541,6 +2555,7 @@ end;
 
 constructor tcustomreportpage.create(aowner: tcomponent);
 begin
+ fvisiblepage:= true;
  inherited;
  fwidgetstate1:= fwidgetstate1 + [ws1_nodesignvisible,ws1_nodesignhandles,
                                        ws1_nodesigndelete];
@@ -2616,7 +2631,7 @@ begin
    inc(freport.fpagenum);
   end;
   result:= result and bo1;
- until bo1;
+ until bo1 or (fnextpage <> nil);
  doafterlastpage;
 end;
 
@@ -2663,7 +2678,7 @@ end;
 
 procedure tcustomreportpage.renderbackground(const acanvas: tcanvas);
 begin
- if fpagenum <> 0 then begin
+ if freport.fpagenum <> 0 then begin
   freport.nextpage(acanvas);
  end;
  acanvas.origin:= pos;
@@ -2782,6 +2797,16 @@ begin
  end;
 end;
 
+procedure tcustomreportpage.setnextpage(const avalue: tcustomreportpage);
+begin
+ setlinkedvar(avalue,fnextpage);
+end;
+
+procedure tcustomreportpage.setnextpageifempty(const avalue: tcustomreportpage);
+begin
+ setlinkedvar(avalue,fnextpageifempty);
+end;
+
  {tcustomreport}
  
 constructor tcustomreport.create(aowner: tcomponent);
@@ -2879,7 +2904,8 @@ function tcustomreport.exec(thread: tmsethread): integer;
 var               
  int1: integer;
  bo1: boolean;
-
+ page1: tcustomreportpage;
+ 
 begin
  result:= 0;
  fakevisible(self,true);
@@ -2900,10 +2926,41 @@ begin
   raise;
  end;
  try
-  for int1:= 0 to high(freppages) do begin
-   freppages[int1].render(fcanvas);
-   if fthread.terminated then begin
-    break;
+  if high(freppages) >= 0 then begin
+   page1:= freppages[0];
+   while true do begin
+    for int1:= finditem(pointerarty(freppages),page1) to high(freppages) do begin
+     if freppages[int1].visiblepage then begin
+      page1:= freppages[int1];
+      break;
+     end;
+    end;
+    if page1.visiblepage and not fthread.terminated then begin
+     bo1:= page1.render(fcanvas);
+     if not bo1 and (page1.nextpage <> nil) then begin
+       page1:= page1.nextpage;
+     end
+     else begin
+      if bo1 and (page1.nextpageifempty <> nil) then begin
+       page1:= page1.nextpageifempty;
+      end
+      else begin
+       int1:= finditem(pointerarty(freppages),page1);
+       if (int1 >= 0) and (int1 < high(freppages)) then begin
+        page1:= freppages[int1+1];
+       end
+       else begin
+        page1:= nil;
+       end;
+      end;
+     end;
+     if finditem(pointerarty(freppages),page1) < 0 then begin
+      break;
+     end;
+    end
+    else begin
+     break;
+    end;
    end;
   end;
  finally
