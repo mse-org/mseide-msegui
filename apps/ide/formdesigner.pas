@@ -22,7 +22,7 @@ interface
 uses
  classes,mseforms,msegui,mseevent,msegraphutils,msegraphics,msedesignintf,
  mseclasses,msemenuwidgets,msemenus,msefiledialog,msedesigner,typinfo,
- componentpaletteform,msestrings,msewidgets;
+ componentpaletteform,msestrings,msewidgets,msereport;
 
 type
  areaty = (ar_none,ar_component,ar_selectrect,ht_topleft,ht_top,ht_topright,ht_right,

@@ -364,12 +364,14 @@ type
   procedure updatevisible;
   function getwidget: twidget;
   function remainingheight: integer;
+  function pagenum: integer; //null based
  end;
 
  trecordbanddatalink = class(tmsedatalink)
  end;
 
- bandvisibilityty = (bv_once,bv_everypage,
+ bandvisibilityty = (bv_once,bv_evenpage,bv_oddpage,   
+                          //page nums are null based
                   bv_firstofpageshow,bv_firstofpagehide,
                   bv_normalshow,bv_normalhide,
                   bv_lastofpageshow,bv_lastofpagehide);
@@ -543,6 +545,7 @@ type
    function isfirstband: boolean;
    function islastband(const addheight: integer = 0): boolean;
    function remainingheight: integer;
+   function pagenum: integer; //null based
    property acty: integer read getacty;
    property areafull: boolean read getareafull write setareafull;
    
@@ -702,7 +705,7 @@ type
    function reppagecount: integer;
    property reppages[index: integer]: tcustomreportpage read getreppages 
                                                 write setreppages; default;
-   property pagenum: integer read fpagenum write fpagenum; 
+   property pagenum: integer read fpagenum {write fpagenum}; 
                             //null-based
    property font: twidgetfont read getfont write setfont;
    property color default cl_transparent;
@@ -2291,7 +2294,7 @@ end;
 
 function tcustombandarea.render(const acanvas: tcanvas): boolean;
 var                     //true if finished
- bo1: boolean;
+ bo1,bo2: boolean;
 begin
  result:= true;
  if not (bas_inited in fstate) then begin
@@ -2310,11 +2313,13 @@ begin
     end;
     if factiveband <= high(fbands) then begin
      with fbands[factiveband] do begin
+      bo2:= odd(fparentintf.pagenum);
+      bo2:= bo2 and (bv_oddpage in fvisibility) or 
+            not bo2 and (bv_evenpage in fvisibility);
       bo1:= ((rbs_showed in fstate) or not(bv_once in fvisibility)) and
-            ((rbs_pageshowed in fstate) or not(bv_everypage in fvisibility)); 
-                             //empty    
+            ((rbs_pageshowed in fstate) or not bo2);   //empty    
       render(acanvas,bo1);
-      bo1:= bo1 or (bv_everypage in fvisibility);
+      bo1:= bo1 or bo2{(bv_everypage in fvisibility)};
       fstate:= fstate + [rbs_showed,rbs_pageshowed];
      end;
      result:= bo1;
@@ -2525,6 +2530,11 @@ begin
  for int1:= 0 to high(fbands) do begin
   fbands[int1].updatevisibility;
  end;
+end;
+
+function tcustombandarea.pagenum: integer;
+begin
+ result:= tcustomreport(freportpage.owner).pagenum;
 end;
 
 { tcustomreportpage }

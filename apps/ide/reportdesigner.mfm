@@ -44,8 +44,10 @@ inherited reportdesignerfo: treportdesignerfo
     options = [tabo_dragsource, tabo_dragdest]
   end
   inherited popupme: tpopupmenu
-    menu.submenu.count = 21
+    menu.submenu.count = 22
     menu.submenu.items = <    
+      item
+      end    
       item
       end    
       item
