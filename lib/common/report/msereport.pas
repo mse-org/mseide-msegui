@@ -362,6 +362,8 @@ type
   function isfirstband: boolean;
   function islastband(const addheight: integer = 0): boolean;
   procedure updatevisible;
+  function getwidget: twidget;
+  function remainingheight: integer;
  end;
 
  trecordbanddatalink = class(tmsedatalink)
@@ -421,6 +423,8 @@ type
    destructor destroy; override;
    procedure beginupdate;
    procedure endupdate;
+   function remainingbands: integer;
+   
    property onbeforerender: beforerenderrecordeventty read fonbeforerender
                                write fonbeforerender;
    property onpaint: painteventty read fonpaint write fonpaint;
@@ -501,6 +505,7 @@ type
    fstate: bandareastatesty;
    factiveband: integer;
    facty: integer;
+   factybefore: integer;
    fbandnum: integer;
    fsaveindex: integer;
    freportpage: tcustomreportpage;
@@ -509,6 +514,7 @@ type
    fonafterpaint: painteventty;
    function getareafull: boolean;
    procedure setareafull(const avalue: boolean);
+   function getacty: integer;
   protected
    procedure registerchildwidget(const child: twidget); override;
    procedure unregisterchildwidget(const child: twidget); override;
@@ -536,6 +542,8 @@ type
   public
    function isfirstband: boolean;
    function islastband(const addheight: integer = 0): boolean;
+   function remainingheight: integer;
+   property acty: integer read getacty;
    property areafull: boolean read getareafull write setareafull;
    
    property font: twidgetfont read getfont write setfont stored isfontstored;
@@ -2031,6 +2039,35 @@ begin
  result:= bounds_cy;
 end;
 
+function tcustomrecordband.remainingbands: integer;
+var
+ widget1,widget2,widget3: twidget;
+ int1,int2: integer;
+begin
+ result:= 0;
+ if fparentintf <> nil then begin
+  widget3:= fparentintf.getwidget;
+  widget1:= self;
+  repeat
+   widget2:= widget1;
+   widget1:= widget1.parentwidget;
+  until (widget1 = widget3);
+  if widget2 is tcustomrecordband then begin
+   with tcustomrecordband(widget2) do begin
+    int2:= fparentintf.remainingheight - lastbandheight;
+    if int2 >= 0 then begin
+     if bounds_cy <= 0 then begin
+      result:= bigint;
+     end
+     else begin
+      result:= 1 + int2 div bounds_cy;
+     end;
+    end;
+   end;
+  end;
+ end;
+end;
+
 { tcustombandgroup }
 
 procedure tcustombandgroup.registerchildwidget(const child: twidget);
@@ -2359,6 +2396,25 @@ begin
  result:= ay > bounds_y + bounds_cy;
 end;
 
+function tcustombandarea.getacty: integer;
+begin
+ if (bas_bandstarted in fstate) then begin
+  result:= factybefore;
+ end
+ else begin
+  result:= facty;
+ end;
+ result:= result - (innerclientwidgetpos.y + bounds_y);
+end;
+
+function tcustombandarea.remainingheight: integer;
+begin
+ result:= facty - (bounds_y + bounds_cy);
+ if fframe <> nil then begin
+  result:= result - fframe.innerframe.bottom;
+ end;
+end;
+
 function tcustombandarea.beginband(const acanvas: tcanvas;
                              const sender: tcustomrecordband): boolean;
 var
@@ -2372,6 +2428,7 @@ begin
   initareapage
  end;
  acanvas.origin:= makepoint(sender.bounds_x+bounds_x,facty);
+ factybefore:= facty;
  inc(facty,sender.bandheight);
  include(fstate,bas_bandstarted);
  result:= bo1 and checkareafull(facty);
