@@ -182,6 +182,8 @@ type
                    const afilename: filenamety; const backupcreated: boolean);
    procedure closeobjecttext(const adesigner: idesigner;
                     const afilename: filenamety; var cancel: boolean);
+   procedure beforefilesave(const adesigner: idesigner;
+                                    const afilename: filenamety);
    procedure beforemake(const adesigner: idesigner; const maketag: integer;
                          var abort: boolean);
    procedure aftermake(const adesigner: idesigner; const exitcode: integer);
@@ -1602,6 +1604,12 @@ end;
 
 procedure tobjectinspectorfo.aftermake(const adesigner: idesigner;
                               const exitcode: integer);
+begin
+ //dummy
+end;
+
+procedure tobjectinspectorfo.beforefilesave(const adesigner: idesigner;
+               const afilename: filenamety);
 begin
  //dummy
 end;

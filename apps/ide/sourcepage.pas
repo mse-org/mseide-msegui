@@ -147,7 +147,7 @@ uses
  sysutils,msewidgets,finddialogform,replacedialogform,msekeyboard,mseguiglob,
  sourceupdate,mseparser,msefiledialog,mseintegerenter,msedesigner,
  projectoptionsform,msesys,make,actionsmodule,msegraphics,sourcehintform,
- mseedit,msedrawtext,msebits,msedatalist,msestream;
+ mseedit,msedrawtext,msebits,msedatalist,msestream,msedesignintf;
 
 const
  pascaldelims = msestring(' :;+-*/(){},=<>' + c_linefeed + c_return + c_tab);
@@ -769,8 +769,6 @@ end;
 procedure tsourcepage.save(newname: filenamety);
 var
  info: fileinfoty;
-//int1,int2: integer;
-//checklist: tmsestringdatalist;
 begin
  if newname = '' then begin
   if (edit.filename = '') then begin
@@ -782,30 +780,16 @@ begin
    newname:= edit.filename;
   end;
  end;
-//for int1:= 0 to 1000 do begin
  createbackupfile(newname,edit.filename,fbackupcreated,
                             projectoptions.backupfilecount);
+ finitialfilepath:= newname;
+ try
+  designnotifications.beforefilesave(idesigner(designer),newname);
+ except
+  application.handleexception(nil);
+ end; 
  edit.savetofile(newname);
  setsyntaxdef(newname);
-{ 
-checklist:= tmsestringdatalist.create;
-checklist.loadfromfile(newname);
-if checklist.count <> edit.datalist.count then begin
- writeln('count error');
-end
-else begin
- for int2:= 0 to checklist.count - 1 do begin
-  if checklist[int2] <> edit.datalist[int2] then begin
-   writeln('data error');
-   break;
-  end;
- end;
-end;
-checklist.free;
-end;
-}
-
- finitialfilepath:= newname;
  if getfileinfo(newname,info) then begin
   fsavetime:= info.extinfo1.modtime;
  end;

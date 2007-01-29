@@ -154,6 +154,8 @@ type
   procedure closeobjecttext(const adesigner: idesigner;
                       const afilename: filenamety; var cancel: boolean);
 
+  procedure beforefilesave(const adesigner: idesigner;
+                                    const afilename: filenamety);
   procedure beforemake(const adesigner: idesigner; const maketag: integer;
                              var abort: boolean);
   procedure aftermake(const adesigner: idesigner; const exitcode: integer);
@@ -249,6 +251,8 @@ type
                const afilename: filenamety; const backupcreated: boolean);
    procedure closeobjecttext(const adesigner: idesigner; 
                  const afilename: filenamety; out cancel: boolean);
+   procedure beforefilesave(const adesigner: idesigner;
+                                 const afilename: filenamety);
    procedure beforemake(const adesigner: idesigner; const maketag: integer;
                          var abort: boolean);
    procedure aftermake(const adesigner: idesigner; const exitcode: integer);
@@ -1174,6 +1178,16 @@ begin
  for int1:= 0 to count - 1 do begin
   idesignnotification(fitems[int1]).instancevarnamechanging(adesigner,amodule,
                                                      newname);
+ end;
+end;
+
+procedure tdesignnotifications.beforefilesave(const adesigner: idesigner;
+               const afilename: filenamety);
+var
+ int1: integer;
+begin
+ for int1:= 0 to count - 1 do begin
+  idesignnotification(fitems[int1]).beforefilesave(adesigner,afilename);
  end;
 end;
 
