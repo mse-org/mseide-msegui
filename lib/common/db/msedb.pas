@@ -3340,9 +3340,20 @@ begin
 end;
 
 procedure tdbcontroller.setdatabasename(const avalue: filenamety);
+var
+ str1: filenamety;
 begin
- fdatabasename:= tomsefilepath(avalue);
- tdatabase(fowner).databasename:= tosysfilepath(filepath(avalue,fk_default,true));
+ str1:= trim(avalue);
+ if (str1 <> '') and (str1[1] = '''') and 
+                    (str1[length(str1)] = '''') then begin
+  fdatabasename:= str1;
+  tdatabase(fowner).databasename:= copy(str1,2,length(str1)-2);
+ end
+ else begin
+  fdatabasename:= tomsefilepath(str1);
+  tdatabase(fowner).databasename:= 
+                   tosysfilepath(filepath(str1,fk_default,true));
+ end;
 end;
 
 { tmsedatasource }
