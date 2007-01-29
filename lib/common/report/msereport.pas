@@ -364,7 +364,7 @@ type
   procedure updatevisible;
   function getwidget: twidget;
   function remainingheight: integer;
-  function pagenum: integer; //null based
+  function reppagenum: integer; //null based
  end;
 
  trecordbanddatalink = class(tmsedatalink)
@@ -547,7 +547,7 @@ type
    function isfirstband: boolean;
    function islastband(const addheight: integer = 0): boolean;
    function remainingheight: integer;
-   function pagenum: integer; //null based
+   function reppagenum: integer; //null based
    property acty: integer read getacty;
    property areafull: boolean read getareafull write setareafull;
    
@@ -573,8 +573,9 @@ type
  
  tcustomreport = class;
    
- tcustomreportpage = class(twidget)
+ tcustomreportpage = class(twidget,ibandparent)
   private
+   fbands: recordbandarty;
    fareas: bandareaarty;
    fstate: reportpagestatesty;
    fonbeforerender: notifyeventty;
@@ -589,6 +590,7 @@ type
    fonafterlastpage: notifyeventty;
    fnextpage: tcustomreportpage;
    fnextpageifempty: tcustomreportpage;
+   fsaveindex: integer;
    procedure setpagewidth(const avalue: real);
    procedure setpageheight(const avalue: real);
    procedure updatepagesize;
@@ -615,6 +617,17 @@ type
    procedure doafterlastpage; virtual;
    procedure init; virtual;
    property ppmm: real read fppmm write setppmm; //pixel per mm
+   
+             //ibandparent
+  function beginband(const acanvas: tcanvas;
+                              const sender: tcustomrecordband): boolean;
+  procedure endband(const acanvas: tcanvas; const sender: tcustomrecordband);  
+  function isfirstband: boolean;
+  function islastband(const addheight: integer = 0): boolean;
+  procedure updatevisible;
+  function remainingheight: integer;
+  function reppagenum: integer; //null based
+  
   public
    constructor create(aowner: tcomponent); override;
    function render(const acanvas: tcanvas): boolean;
@@ -2024,7 +2037,7 @@ begin
  result:= visible;
  if fparentintf <> nil then begin
   if foptions * visibilitymask <> [] then begin
-   even1:= not odd(fparentintf.pagenum);
+   even1:= not odd(fparentintf.reppagenum);
    if even1 and (bo_evenpagehide in foptions) then begin
     result:= false;
     goto endlab;
@@ -2255,7 +2268,7 @@ begin
   int2:= innerclientframewidth.cy;
   for int1:= 0 to high(fbands) do begin
    with fbands[int1] do begin
-    even1:= not odd(fparentintf.pagenum);
+    even1:= not odd(fparentintf.reppagenum);
     bo1:= (even1 and (bo_evenpageshow in foptions) or 
                     not even1 and (bo_oddpageshow in foptions)) and
          not (even1 and (bo_oddpagehide in foptions) or 
@@ -2372,7 +2385,7 @@ begin
     end;
     if factiveband <= high(fbands) then begin
      with fbands[factiveband] do begin
-      bo2:= odd(fparentintf.pagenum);
+      bo2:= odd(fparentintf.reppagenum);
       bo2:= bo2 and (bo_oddpage in foptions) or 
             not bo2 and (bo_evenpage in foptions);
       bo1:= ((rbs_showed in fstate) or not(bo_once in foptions)) and
@@ -2591,9 +2604,9 @@ begin
  end;
 end;
 
-function tcustombandarea.pagenum: integer;
+function tcustombandarea.reppagenum: integer;
 begin
- result:= tcustomreport(freportpage.owner).pagenum;
+ result:= freportpage.freport.pagenum;
 end;
 
 { tcustomreportpage }
@@ -2618,12 +2631,18 @@ begin
  inherited;
  if child is tcustombandarea then begin
   additem(pointerarty(fareas),child);
+ end
+ else begin
+  if child is tcustomrecordband then begin
+   additem(pointerarty(fbands),child);
+  end;
  end;
 end;
 
 procedure tcustomreportpage.unregisterchildwidget(const child: twidget);
 begin
  removeitem(pointerarty(fareas),child);
+ removeitem(pointerarty(fbands),child);
  inherited;
 end;
 
@@ -2651,7 +2670,7 @@ end;
 function tcustomreportpage.render(const acanvas: tcanvas): boolean;
 var
  int1: integer;
- bo1: boolean;
+ bo1,bo2: boolean;
 begin
  if not (rpps_inited in fstate) then begin
   init;
@@ -2667,6 +2686,21 @@ begin
   bo1:= true;
   for int1:= 0 to high(fareas) do begin
    bo1:= fareas[int1].render(acanvas) and bo1;
+  end;
+  sortwidgetsyorder(widgetarty(fbands));
+  for int1:= 0 to high(fbands) do begin
+   fbands[int1].initpage;
+  end;
+  for int1:= 0 to high(fbands) do begin
+   bo2:= odd(reppagenum);
+   with fbands[int1] do begin
+    bo2:= bo1 or (bo2 and (bo_oddpage in foptions) or 
+            not bo2 and (bo_evenpage in foptions)) or
+          ((rbs_showed in fstate) and (bo_once in foptions));
+               //empty    
+    fbands[int1].render(acanvas,bo2);
+    bo1:= bo1 and bo2;
+   end;
   end;
   if rpps_backgroundrendered in fstate then begin
    doafterpaint1(acanvas);
@@ -2746,6 +2780,9 @@ var
 begin
  fstate:= [rpps_rendering];
  include(fwidgetstate1,ws1_noclipchildren);
+ for int1:= 0 to high(fbands) do begin
+  fbands[int1].beginrender;
+ end;
  for int1:= 0 to high(fareas) do begin
   fareas[int1].beginrender;
  end;
@@ -2757,6 +2794,9 @@ var
 begin
  exclude(fstate,rpps_rendering);
  exclude(fwidgetstate1,ws1_noclipchildren);
+ for int1:= 0 to high(fbands) do begin
+  fbands[int1].endrender;
+ end;
  for int1:= 0 to high(fareas) do begin
   fareas[int1].endrender;
  end;
@@ -2806,8 +2846,7 @@ begin
  end
  else begin
   inherited;
- end;
-  
+ end;  
 end;
 
 procedure tcustomreportpage.sizechanged;
@@ -2850,6 +2889,55 @@ end;
 procedure tcustomreportpage.setnextpageifempty(const avalue: tcustomreportpage);
 begin
  setlinkedvar(avalue,fnextpageifempty);
+end;
+
+function tcustomreportpage.beginband(const acanvas: tcanvas;
+               const sender: tcustomrecordband): boolean;
+begin
+ fsaveindex:= acanvas.save;
+ if not (rpps_backgroundrendered in fstate) then begin
+  renderbackground(acanvas);
+ end;
+ acanvas.origin:= sender.pos;
+ result:= false;
+end;
+
+procedure tcustomreportpage.endband(const acanvas: tcanvas;
+               const sender: tcustomrecordband);
+begin
+ acanvas.restore(fsaveindex);
+end;
+
+function tcustomreportpage.isfirstband: boolean;
+begin
+ result:= false;
+end;
+
+function tcustomreportpage.islastband(const addheight: integer = 0): boolean;
+begin
+ result:= false;
+end;
+
+procedure tcustomreportpage.updatevisible;
+var
+ int1: integer;
+begin
+ for int1:= 0 to high(fbands) do begin
+  fbands[int1].updatevisibility;
+ end;
+ for int1:= 0 to high(fareas) do begin
+  fareas[int1].updatevisible;
+ end;
+end;
+
+function tcustomreportpage.remainingheight: integer;
+begin
+ result:= 0;
+end;
+
+function tcustomreportpage.reppagenum: integer;
+begin
+ result:= freport.fpagenum;
 end;
 
  {tcustomreport}
