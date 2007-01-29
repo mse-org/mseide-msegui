@@ -370,17 +370,21 @@ type
  trecordbanddatalink = class(tmsedatalink)
  end;
 
- bandvisibilityty = (bv_once,bv_evenpage,bv_oddpage,   
+ bandoptionty = (bo_once,bo_evenpage,bo_oddpage,   
                           //page nums are null based
-                  bv_firstofpageshow,bv_firstofpagehide,
-                  bv_normalshow,bv_normalhide,
-                  bv_lastofpageshow,bv_lastofpagehide);
- bandvisibilitiesty = set of bandvisibilityty;
+                  bo_evenpageshow,bo_evenpagehide,
+                  bo_oddpageshow,bo_oddpagehide,
+                  bo_firstofpageshow,bo_firstofpagehide,
+                  bo_normalshow,bo_normalhide,
+                  bo_lastofpageshow,bo_lastofpagehide);
+ bandoptionsty = set of bandoptionty;
 
 const 
- visibilitymask = [bv_firstofpageshow,bv_firstofpagehide,
-                    bv_normalshow,bv_normalhide,
-                    bv_lastofpageshow,bv_lastofpagehide];
+ visibilitymask = [bo_evenpageshow,bo_evenpagehide,
+                   bo_oddpageshow,bo_oddpagehide,
+                   bo_firstofpageshow,bo_firstofpagehide,
+                   bo_normalshow,bo_normalhide,
+                   bo_lastofpageshow,bo_lastofpagehide];
 
 type                     
  tcustomrecordband = class(tcustomscalingwidget)
@@ -393,11 +397,11 @@ type
    ftabs: treptabulators;
    fupdating: integer;
    fdatalink: trecordbanddatalink;
-   fvisibility: bandvisibilitiesty;
+   foptions: bandoptionsty;
    procedure settabs(const avalue: treptabulators);
    procedure setdatasource(const avalue: tdatasource); virtual;
    function getdatasource: tdatasource;
-   procedure setvisibility(const avalue: bandvisibilitiesty);
+   procedure setoptions(const avalue: bandoptionsty);
   protected
    procedure minclientsizechanged;
    procedure fontchanged; override;
@@ -418,6 +422,7 @@ type
    function bandheight: integer;
    procedure dobeforerender(var empty: boolean); virtual;
    procedure synctofontheight; override;
+   function getvisibility: boolean;
    procedure updatevisibility; virtual;
    function lastbandheight: integer; virtual;
   public
@@ -434,8 +439,7 @@ type
    property tabs: treptabulators read ftabs write settabs;
    property font: twidgetfont read getfont write setfont stored isfontstored;
    property datasource: tdatasource read getdatasource write setdatasource;
-   property visibility: bandvisibilitiesty read fvisibility write setvisibility
-                                                 default [];
+   property options: bandoptionsty read foptions write setoptions default [];
   published
    property anchors default defaultbandanchors;
  end;
@@ -445,7 +449,7 @@ type
    property font;
    property tabs;
    property datasource;
-   property visibility;
+   property options;
    property optionsscale;
    property onfontheightdelta;
    property onchildscaled;
@@ -466,8 +470,6 @@ type
    procedure registerchildwidget(const child: twidget); override;
    procedure unregisterchildwidget(const child: twidget); override;
    procedure dobeforerender(var empty: boolean); override;
-//   procedure dorender(const acanvas: tcanvas); override;
-//   procedure render(const acanvas: tcanvas; var empty: boolean); override;
    procedure dopaint(const acanvas: tcanvas); override;
    procedure updatevisibility; override;
    function getminbandsize: sizety; override;
@@ -484,7 +486,7 @@ type
    property font;
 //   property tabs;
    property datasource;
-   property visibility;
+   property options;
    property optionsscale;
    property onfontheightdelta;
    property onchildscaled;
@@ -1985,20 +1987,26 @@ begin
  result:= fdatalink.datasource;
 end;
 
-procedure tcustomrecordband.setvisibility(const avalue: bandvisibilitiesty);
+procedure tcustomrecordband.setoptions(const avalue: bandoptionsty);
 const
- firstmask: bandvisibilitiesty = [bv_firstofpageshow,bv_firstofpagehide];
- normalmask: bandvisibilitiesty = [bv_normalshow,bv_normalhide];
- lastmask: bandvisibilitiesty = [bv_lastofpageshow,bv_lastofpagehide];
+ evenmask: bandoptionsty = [bo_evenpageshow,bo_evenpagehide];
+ oddmask: bandoptionsty = [bo_oddpageshow,bo_oddpagehide];
+ firstmask: bandoptionsty = [bo_firstofpageshow,bo_firstofpagehide];
+ normalmask: bandoptionsty = [bo_normalshow,bo_normalhide];
+ lastmask: bandoptionsty = [bo_lastofpageshow,bo_lastofpagehide];
 var
- vis1: bandvisibilitiesty;
+ vis1: bandoptionsty;
 begin
- vis1:= bandvisibilitiesty(setsinglebit(longword(avalue),longword(fvisibility),
+ vis1:= bandoptionsty(setsinglebit(longword(avalue),longword(foptions),
+                                 longword(evenmask)));
+ vis1:= bandoptionsty(setsinglebit(longword(vis1),longword(foptions),
+                                 longword(oddmask)));
+ vis1:= bandoptionsty(setsinglebit(longword(vis1),longword(foptions),
                                  longword(firstmask)));
- vis1:= bandvisibilitiesty(setsinglebit(longword(vis1),longword(fvisibility),
+ vis1:= bandoptionsty(setsinglebit(longword(vis1),longword(foptions),
                                  longword(normalmask)));
- fvisibility:= bandvisibilitiesty(setsinglebit(longword(vis1),
-                                 longword(fvisibility),longword(lastmask)));
+ foptions:= bandoptionsty(setsinglebit(longword(vis1),
+                                 longword(foptions),longword(lastmask)));
 end;
 
 procedure tcustomrecordband.synctofontheight;
@@ -2006,49 +2014,80 @@ begin
  syncsinglelinefontheight(true);
 end;
 
-procedure tcustomrecordband.updatevisibility;
+function tcustomrecordband.getvisibility: boolean;
 var
  first,last,showed,hidden: boolean;
+ even1,bo1: boolean;
+label
+ endlab;
 begin
+ result:= visible;
  if fparentintf <> nil then begin
-  if fvisibility * visibilitymask <> [] then begin
+  if foptions * visibilitymask <> [] then begin
+   even1:= not odd(fparentintf.pagenum);
+   if even1 and (bo_evenpagehide in foptions) then begin
+    result:= false;
+    goto endlab;
+   end;
+   if not even1 and (bo_oddpagehide in foptions) then begin
+    result:= false;
+    goto endlab;
+   end;
+   bo1:= even1 and (bo_evenpageshow in foptions);
+   bo1:= bo1 or not even1 and (bo_oddpageshow in foptions);
    first:= fparentintf.isfirstband;
    last:= fparentintf.islastband;
    if first then begin
-    if bv_firstofpageshow in fvisibility then begin
-     visible:= true;
-     exit;
+    if bo_firstofpageshow in foptions then begin
+     result:= true;
+     goto endlab;
     end
     else begin
-     if bv_firstofpagehide in fvisibility then begin
-      visible:= false;
+     if bo_firstofpagehide in foptions then begin
+      result:= false;
      end;
     end;
    end;
    if last then begin
-    if bv_lastofpageshow in fvisibility then begin
-     exit;
-     visible:= true;
+    if bo_lastofpageshow in foptions then begin
+     result:= true;
+     goto endlab;
     end
     else begin
-     if bv_lastofpagehide in fvisibility then begin
-      visible:= false;
+     if bo_lastofpagehide in foptions then begin
+      result:= false;
+      bo1:= false;
      end;
     end;
    end;
    if not first and not last then begin
-    if bv_normalshow in fvisibility then begin
-     exit;
-     visible:= true;
+    if bo_normalshow in foptions then begin
+     result:= true;
+     goto endlab;
     end
     else begin
-     if bv_normalhide in fvisibility then begin
-      visible:= false;
+     if bo_normalhide in foptions then begin
+      result:= false;
+      bo1:= false;
      end;
     end;
    end;
+   if bo1 then begin
+    result:= true;
+   end;
   end;
  end;
+endlab:
+{
+ if asetvisible then begin
+  visible:= result;
+ end;
+ }
+end;
+
+procedure tcustomrecordband.updatevisibility;
+begin
+ visible:= getvisibility;
 end;
 
 function tcustomrecordband.lastbandheight: integer;
@@ -2209,14 +2248,20 @@ end;
 function tcustombandgroup.lastbandheight: integer;
 var
  int1,int2: integer;
+ even1,bo1: boolean;
 begin
  result:= inherited lastbandheight;
  if osc_expandy in optionsscale then begin
   int2:= innerclientframewidth.cy;
   for int1:= 0 to high(fbands) do begin
    with fbands[int1] do begin
-    if visible and not (bv_lastofpagehide in visibility) or 
-           (bv_lastofpageshow in visibility) then begin
+    even1:= not odd(fparentintf.pagenum);
+    bo1:= (even1 and (bo_evenpageshow in foptions) or 
+                    not even1 and (bo_oddpageshow in foptions)) and
+         not (even1 and (bo_oddpagehide in foptions) or 
+              not even1 and (bo_oddpagehide in foptions));
+    if bo1 and (visible and not (bo_lastofpagehide in options) or 
+           (bo_lastofpageshow in options)) then begin
      int2:= int2 + bounds_cy;
     end;
    end;
@@ -2328,9 +2373,9 @@ begin
     if factiveband <= high(fbands) then begin
      with fbands[factiveband] do begin
       bo2:= odd(fparentintf.pagenum);
-      bo2:= bo2 and (bv_oddpage in fvisibility) or 
-            not bo2 and (bv_evenpage in fvisibility);
-      bo1:= ((rbs_showed in fstate) or not(bv_once in fvisibility)) and
+      bo2:= bo2 and (bo_oddpage in foptions) or 
+            not bo2 and (bo_evenpage in foptions);
+      bo1:= ((rbs_showed in fstate) or not(bo_once in foptions)) and
             ((rbs_pageshowed in fstate) or not bo2);   //empty    
       render(acanvas,bo1);
       bo1:= bo1 or bo2{(bv_everypage in fvisibility)};
