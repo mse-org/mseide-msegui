@@ -432,14 +432,14 @@ type
    procedure endupdate;
    function remainingbands: integer;
    
-   property onbeforerender: beforerenderrecordeventty read fonbeforerender
-                               write fonbeforerender;
-   property onpaint: painteventty read fonpaint write fonpaint;
-   property onafterpaint: painteventty read fonafterpaint write fonafterpaint;
    property tabs: treptabulators read ftabs write settabs;
    property font: twidgetfont read getfont write setfont stored isfontstored;
    property datasource: tdatasource read getdatasource write setdatasource;
    property options: bandoptionsty read foptions write setoptions default [];
+   property onbeforerender: beforerenderrecordeventty read fonbeforerender
+                               write fonbeforerender;
+   property onpaint: painteventty read fonpaint write fonpaint;
+   property onafterpaint: painteventty read fonafterpaint write fonafterpaint;
   published
    property anchors default defaultbandanchors;
  end;
@@ -566,13 +566,20 @@ type
    property onafterpaint;
  end;
 
- reportpagestatety = (rpps_inited,rpps_rendering,rpps_backgroundrendered);
+ reportpagestatety = (rpps_inited,rpps_rendering,rpps_backgroundrendered,
+                      rpps_showed);
  reportpagestatesty = set of reportpagestatety;
  
  bandareaarty = array of tcustombandarea;
  
  tcustomreport = class;
    
+ treportpagedatalink = class(tmsedatalink)
+ end;
+
+ reportpageoptionty = (rpo_once);
+ reportpageoptionsty = set of reportpageoptionty;
+ 
  tcustomreportpage = class(twidget,ibandparent)
   private
    fbands: recordbandarty;
@@ -591,12 +598,16 @@ type
    fnextpage: tcustomreportpage;
    fnextpageifempty: tcustomreportpage;
    fsaveindex: integer;
+   fdatalink: treportpagedatalink;
+   foptions: reportpageoptionsty;
    procedure setpagewidth(const avalue: real);
    procedure setpageheight(const avalue: real);
    procedure updatepagesize;
    procedure setppmm(const avalue: real);
    procedure setnextpage(const avalue: tcustomreportpage);
    procedure setnextpageifempty(const avalue: tcustomreportpage);
+   function getdatasource: tdatasource;
+   procedure setdatasource(const avalue: tdatasource);
   protected
    freport: tcustomreport;
    procedure registerchildwidget(const child: twidget); override;
@@ -630,6 +641,7 @@ type
   
   public
    constructor create(aowner: tcomponent); override;
+   destructor destroy; override;
    function render(const acanvas: tcanvas): boolean;
           //true if empty
    property report: tcustomreport read freport;
@@ -637,6 +649,15 @@ type
                             //null-based, local to this page
    property visiblepage: boolean read fvisiblepage write fvisiblepage default true;
 
+   property pagewidth: real read fpagewidth write setpagewidth;
+   property pageheight: real read fpageheight write setpageheight;
+   property font: twidgetfont read getfont write setfont stored isfontstored;
+   property nextpage: tcustomreportpage read fnextpage write setnextpage;
+   property nextpageifempty: tcustomreportpage read fnextpageifempty write 
+                          setnextpageifempty;
+   property datasource: tdatasource read getdatasource write setdatasource;
+   property options: reportpageoptionsty read foptions write foptions default [];
+   
    property onfirstpage: notifyeventty read fonfirstpage
                                write fonfirstpage;
    property onbeforerender: notifyeventty read fonbeforerender
@@ -645,13 +666,6 @@ type
    property onafterpaint: painteventty read fonafterpaint write fonafterpaint;
    property onafterlastpage: notifyeventty read fonafterlastpage
                                write fonafterlastpage;
-
-   property pagewidth: real read fpagewidth write setpagewidth;
-   property pageheight: real read fpageheight write setpageheight;
-   property font: twidgetfont read getfont write setfont stored isfontstored;
-   property nextpage: tcustomreportpage read fnextpage write setnextpage;
-   property nextpageifempty: tcustomreportpage read fnextpageifempty write 
-                          setnextpageifempty;
  end;
  
  reportpagearty = array of tcustomreportpage;
@@ -668,6 +682,8 @@ type
    property nextpage;
    property nextpageifempty;
    property visiblepage;
+   property datasource;
+   property options;
  
    property onfirstpage;
    property onbeforerender;
@@ -2614,6 +2630,7 @@ end;
 constructor tcustomreportpage.create(aowner: tcomponent);
 begin
  fvisiblepage:= true;
+ fdatalink:= treportpagedatalink.create;
  inherited;
  fwidgetstate1:= fwidgetstate1 + [ws1_nodesignvisible,ws1_nodesignhandles,
                                        ws1_nodesigndelete];
@@ -2624,6 +2641,12 @@ begin
   cx:= round(defaultreppagewidth*defaultrepppmm);
   cy:= round(defaultreppageheight*defaultrepppmm);
  end;
+end;
+
+destructor tcustomreportpage.destroy;
+begin
+ inherited;
+ fdatalink.free;
 end;
 
 procedure tcustomreportpage.registerchildwidget(const child: twidget);
@@ -2662,6 +2685,7 @@ var
  int1: integer;
 begin
  include(fstate,rpps_inited);
+ exclude(fstate,rpps_showed);
  for int1:= 0 to high(fareas) do begin
   fareas[int1].init;
  end;
@@ -2670,7 +2694,7 @@ end;
 function tcustomreportpage.render(const acanvas: tcanvas): boolean;
 var
  int1: integer;
- bo1,bo2: boolean;
+ bo1,bo2,bo3: boolean;
 begin
  if not (rpps_inited in fstate) then begin
   init;
@@ -2691,23 +2715,35 @@ begin
   for int1:= 0 to high(fbands) do begin
    fbands[int1].initpage;
   end;
+  bo2:= odd(reppagenum);
+  bo3:= not ((rpo_once in foptions) and not (rpps_showed in fstate) or 
+         (fdatalink.active and not fdatalink.dataset.eof));
   for int1:= 0 to high(fbands) do begin
-   bo2:= odd(reppagenum);
    with fbands[int1] do begin
-    bo2:= bo1 or (bo2 and (bo_oddpage in foptions) or 
-            not bo2 and (bo_evenpage in foptions)) or
-          ((rbs_showed in fstate) and (bo_once in foptions));
+    bo2:= bo3 and (bo1 or (bo2 and (bo_oddpage in foptions) or 
+               not bo2 and (bo_evenpage in foptions)) or
+                 ((rbs_showed in fstate) and (bo_once in foptions)));
                //empty    
     fbands[int1].render(acanvas,bo2);
     bo1:= bo1 and bo2;
    end;
   end;
+  if not (rpps_backgroundrendered in fstate) and 
+    (not bo3 or (rpo_once in foptions) and not (rpps_showed in fstate)) then begin
+   renderbackground(acanvas);  
+  end;
+              
   if rpps_backgroundrendered in fstate then begin
    doafterpaint1(acanvas);
-  end;
-  inc(fpagenum);
-  if freport <> nil then begin
-   inc(freport.fpagenum);
+   if fdatalink.active then begin
+    bo1:= false;
+    fdatalink.dataset.next;
+   end;
+   inc(fpagenum);
+   if freport <> nil then begin
+    inc(freport.fpagenum);
+   end;
+   include(fstate,rpps_showed);
   end;
   result:= result and bo1;
  until bo1 or (fnextpage <> nil);
@@ -2938,6 +2974,16 @@ end;
 function tcustomreportpage.reppagenum: integer;
 begin
  result:= freport.fpagenum;
+end;
+
+function tcustomreportpage.getdatasource: tdatasource;
+begin
+ result:= fdatalink.datasource;
+end;
+
+procedure tcustomreportpage.setdatasource(const avalue: tdatasource);
+begin
+ fdatalink.datasource:= avalue;
 end;
 
  {tcustomreport}
