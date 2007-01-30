@@ -25,6 +25,10 @@ const
  defaultreptabtextflags = [tf_ycentered];
  defaultbandanchors = [an_top];
  defaultbandoptionswidget = defaultoptionswidget + [ow_fontlineheight];
+ 
+ defaultrepvaluedisptextflags = [tf_ycentered];
+ defaultrepvaluedispoptionsscale = 
+               [osc_expandx,osc_shrinkx,osc_expandy,osc_shrinky];
   
 type
  linevisiblety = (lv_first,lv_normal,lv_last);
@@ -458,6 +462,53 @@ type
    property onpaint;
    property onafterpaint;
   end;
+
+ tcustomrepvaluedisp = class(tcustomrecordband)
+  private
+   ftextflags: textflagsty;
+   fformat: string;
+   procedure setformat(const avalue: string);
+  protected
+   function calcminscrollsize: sizety; override;
+   procedure dopaint(const acanvas: tcanvas); override;
+   function getdisptext: msestring; virtual;
+  public
+   constructor create(aowner: tcomponent); override;
+   property textflags: textflagsty read ftextflags write ftextflags default 
+               defaultrepvaluedisptextflags;
+   property format: string read fformat write setformat;
+   property optionsscale default defaultrepvaluedispoptionsscale;
+  published
+   property anchors default [an_left,an_top];
+ end;
+ 
+ trepvaluedisp = class(tcustomrepvaluedisp)
+  published
+   property font;
+//   property tabs;
+//   property datasource;
+   property options;
+   property optionsscale;
+   property onfontheightdelta;
+   property onchildscaled;
+
+   property onbeforerender;
+   property onpaint;
+   property onafterpaint;
+ end;
+ 
+ treppagenumdisp = class(trepvaluedisp)
+  private
+   foffset: integer;
+   procedure setoffset(const avalue: integer);
+  protected
+   function getdisptext: msestring; override;
+  public
+   constructor create(aowner: tcomponent); override;
+  published
+   property offset: integer read foffset write setoffset default 1;
+   property format;
+ end;
  
  recordbandarty = array of tcustomrecordband;
  
@@ -1781,6 +1832,7 @@ begin
  inherited;
  fanchors:= defaultbandanchors;
  foptionswidget:= defaultbandoptionswidget;
+ optionsscale:= defaultrepvaluedispoptionsscale;
 end;
 
 destructor tcustomrecordband.destroy;
@@ -3358,6 +3410,81 @@ end;
 class function treport.getmoduleclassname: string;
 begin
  result:= 'treport';
+end;
+
+{ tcustomrepvaluedisp }
+
+constructor tcustomrepvaluedisp.create(aowner: tcomponent);
+begin
+ ftextflags:= defaultrepvaluedisptextflags;
+ inherited;
+ fanchors:= [an_left,an_top];
+end;
+
+procedure tcustomrepvaluedisp.dopaint(const acanvas: tcanvas);
+begin
+ inherited;
+ drawtext(acanvas,getdisptext,innerclientrect,ftextflags,font);
+end;
+
+function tcustomrepvaluedisp.getdisptext: msestring;
+begin
+ result:= name;
+end;
+
+procedure tcustomrepvaluedisp.setformat(const avalue: string);
+begin
+ if fformat <> avalue then begin
+  fformat:= avalue;
+  minclientsizechanged;
+ end;
+// invalidate;
+end;
+
+function tcustomrepvaluedisp.calcminscrollsize: sizety;
+var
+ size1: sizety;
+begin
+ result:= inherited calcminscrollsize;
+ size1:= textrect(getcanvas,getdisptext,ftextflags,font).size;
+ if fframe <> nil then begin
+  with fframe do begin
+   size1.cx:= size1.cx + framei_left + framei_right;
+   size1.cy:= size1.cy + framei_top + framei_bottom;
+  end;
+ end;
+ if size1.cx > result.cx then begin
+  result.cx:= size1.cx;
+ end;
+ if size1.cy > result.cy then begin
+  result.cy:= size1.cy;
+ end;
+end;
+
+{ treppagenumdisp }
+
+constructor treppagenumdisp.create(aowner: tcomponent);
+begin
+ foffset:= 1;
+ inherited;
+end;
+
+function treppagenumdisp.getdisptext: msestring;
+begin
+ if fparentintf <> nil then  begin
+  result:= formatfloat(fformat,fparentintf.reppagenum+foffset);
+ end
+ else begin
+  result:= inherited getdisptext;
+ end;
+end;
+
+procedure treppagenumdisp.setoffset(const avalue: integer);
+begin
+ if foffset <> avalue then begin
+  foffset:= avalue;
+  minclientsizechanged;
+ end;
 end;
 
 end.
