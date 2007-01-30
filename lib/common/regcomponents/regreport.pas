@@ -34,7 +34,7 @@ type
 procedure Register;
 begin
  registercomponents('Rep',[{treportpage,}tbandarea,tbandgroup,
-                    trecordband,treppagenumdisp]); 
+                    trecordband,treppagenumdisp,trepprinttimedisp]); 
  
  registerdesignmoduleclass(treport,reportintf,treportdesignerfo);
  registerpropertyeditor(typeinfo(treptabulators),nil,'',treptabulatorseditor);

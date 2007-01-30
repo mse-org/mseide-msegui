@@ -368,7 +368,10 @@ type
   procedure updatevisible;
   function getwidget: twidget;
   function remainingheight: integer;
+  function pagepagenum: integer; //null based
   function reppagenum: integer; //null based
+  function pageprintstarttime: tdatetime;
+  function repprintstarttime: tdatetime;
  end;
 
  trecordbanddatalink = class(tmsedatalink)
@@ -380,7 +383,11 @@ type
                   bo_oddpageshow,bo_oddpagehide,
                   bo_firstofpageshow,bo_firstofpagehide,
                   bo_normalshow,bo_normalhide,
-                  bo_lastofpageshow,bo_lastofpagehide);
+                  bo_lastofpageshow,bo_lastofpagehide,
+                  bo_localvalue 
+                  //used in treppagenumdisp to number of the current page
+                  //and in trepprinttimedisp to show now
+                  );
  bandoptionsty = set of bandoptionty;
 
 const 
@@ -503,13 +510,21 @@ type
    procedure setoffset(const avalue: integer);
   protected
    function getdisptext: msestring; override;
+   procedure initpage; override;
   public
    constructor create(aowner: tcomponent); override;
   published
    property offset: integer read foffset write setoffset default 1;
    property format;
  end;
- 
+
+ trepprinttimedisp = class(trepvaluedisp)
+  protected
+   function getdisptext: msestring; override;
+  published
+   property format;
+ end;
+  
  recordbandarty = array of tcustomrecordband;
  
  tcustombandgroup = class(tcustomrecordband)
@@ -554,6 +569,10 @@ type
 
  tcustomreportpage = class;
    
+ bandareaeventty = procedure(const sender: tcustombandarea) of object;
+ bandareapainteventty = procedure(const sender: tcustombandarea;
+                              const acanvas: tcanvas) of object;
+                              
  tcustombandarea = class(tpublishedwidget,ibandparent)
   private
    fbands: recordbandarty;
@@ -564,9 +583,9 @@ type
    fbandnum: integer;
    fsaveindex: integer;
    freportpage: tcustomreportpage;
-   fonbeforerender: notifyeventty;
-   fonpaint: painteventty;
-   fonafterpaint: painteventty;
+   fonbeforerender: bandareaeventty;
+   fonpaint: bandareapainteventty;
+   fonafterpaint: bandareapainteventty;
    function getareafull: boolean;
    procedure setareafull(const avalue: boolean);
    function getacty: integer;
@@ -598,15 +617,18 @@ type
    function isfirstband: boolean;
    function islastband(const addheight: integer = 0): boolean;
    function remainingheight: integer;
+   function pagepagenum: integer; //null based
    function reppagenum: integer; //null based
+   function pageprintstarttime: tdatetime;
+   function repprintstarttime: tdatetime;
    property acty: integer read getacty;
    property areafull: boolean read getareafull write setareafull;
    
    property font: twidgetfont read getfont write setfont stored isfontstored;
-   property onbeforerender: notifyeventty read fonbeforerender
+   property onbeforerender: bandareaeventty read fonbeforerender
                                write fonbeforerender;
-   property onpaint: painteventty read fonpaint write fonpaint;
-   property onafterpaint: painteventty read fonafterpaint write fonafterpaint;
+   property onpaint: bandareapainteventty read fonpaint write fonpaint;
+   property onafterpaint: bandareapainteventty read fonafterpaint write fonafterpaint;
  end; 
  
  tbandarea = class(tcustombandarea)
@@ -618,7 +640,7 @@ type
  end;
 
  reportpagestatety = (rpps_inited,rpps_rendering,rpps_backgroundrendered,
-                      rpps_showed);
+                      rpps_showed,rpps_finish);
  reportpagestatesty = set of reportpagestatety;
  
  bandareaarty = array of tcustombandarea;
@@ -628,29 +650,34 @@ type
  treportpagedatalink = class(tmsedatalink)
  end;
 
- reportpageoptionty = (rpo_once);
+ reportpageoptionty = (rpo_once,rpo_firsteven,rpo_firstodd);
  reportpageoptionsty = set of reportpageoptionty;
- 
+
+ reportpageeventty = procedure(const sender: tcustomreportpage) of object;
+ reportpagepainteventty = procedure(const sender: tcustomreportpage;
+                              const acanvas: tcanvas) of object;
+  
  tcustomreportpage = class(twidget,ibandparent)
   private
    fbands: recordbandarty;
    fareas: bandareaarty;
    fstate: reportpagestatesty;
-   fonbeforerender: notifyeventty;
-   fonpaint: painteventty;
-   fonafterpaint: painteventty;
+   fonbeforerender: reportpageeventty;
+   fonpaint: reportpagepainteventty;
+   fonafterpaint: reportpagepainteventty;
    fpagewidth: real;
    fpageheight: real;
    fppmm: real;
    fvisiblepage: boolean;
    fpagenum: integer;
-   fonfirstpage: notifyeventty;
-   fonafterlastpage: notifyeventty;
+   fonfirstpage: reportpageeventty;
+   fonafterlastpage: reportpageeventty;
    fnextpage: tcustomreportpage;
    fnextpageifempty: tcustomreportpage;
    fsaveindex: integer;
    fdatalink: treportpagedatalink;
    foptions: reportpageoptionsty;
+   fprintstarttime: tdatetime;
    procedure setpagewidth(const avalue: real);
    procedure setpageheight(const avalue: real);
    procedure updatepagesize;
@@ -659,6 +686,7 @@ type
    procedure setnextpageifempty(const avalue: tcustomreportpage);
    function getdatasource: tdatasource;
    procedure setdatasource(const avalue: tdatasource);
+   procedure setoptions(const avalue: reportpageoptionsty);
   protected
    freport: tcustomreport;
    procedure registerchildwidget(const child: twidget); override;
@@ -680,25 +708,33 @@ type
    procedure init; virtual;
    property ppmm: real read fppmm write setppmm; //pixel per mm
    
-             //ibandparent
-  function beginband(const acanvas: tcanvas;
-                              const sender: tcustomrecordband): boolean;
-  procedure endband(const acanvas: tcanvas; const sender: tcustomrecordband);  
-  function isfirstband: boolean;
-  function islastband(const addheight: integer = 0): boolean;
-  procedure updatevisible;
-  function remainingheight: integer;
-  function reppagenum: integer; //null based
+   function render(const acanvas: tcanvas): boolean;
+          //true if empty
+
+              //ibandparent
+   function beginband(const acanvas: tcanvas;
+                               const sender: tcustomrecordband): boolean;
+   procedure endband(const acanvas: tcanvas; const sender: tcustomrecordband);  
+   function isfirstband: boolean;
+   function islastband(const addheight: integer = 0): boolean;
+   procedure updatevisible;
+   function remainingheight: integer;
+   function pagepagenum: integer; //null based
+   function reppagenum: integer; //null based
+   function pageprintstarttime: tdatetime;
+   function repprintstarttime: tdatetime;
   
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
-   function render(const acanvas: tcanvas): boolean;
-          //true if empty
+   
    property report: tcustomreport read freport;
    property pagenum: integer read fpagenum write fpagenum; 
                             //null-based, local to this page
+   property printstarttime: tdatetime read fprintstarttime write fprintstarttime;
    property visiblepage: boolean read fvisiblepage write fvisiblepage default true;
+   procedure activatepage;
+   procedure finish;
 
    property pagewidth: real read fpagewidth write setpagewidth;
    property pageheight: real read fpageheight write setpageheight;
@@ -707,15 +743,17 @@ type
    property nextpageifempty: tcustomreportpage read fnextpageifempty write 
                           setnextpageifempty;
    property datasource: tdatasource read getdatasource write setdatasource;
-   property options: reportpageoptionsty read foptions write foptions default [];
+   property options: reportpageoptionsty read foptions write setoptions
+                                                 default [];
    
-   property onfirstpage: notifyeventty read fonfirstpage
+   property onfirstpage: reportpageeventty read fonfirstpage
                                write fonfirstpage;
-   property onbeforerender: notifyeventty read fonbeforerender
+   property onbeforerender: reportpageeventty read fonbeforerender
                                write fonbeforerender;
-   property onpaint: painteventty read fonpaint write fonpaint;
-   property onafterpaint: painteventty read fonafterpaint write fonafterpaint;
-   property onafterlastpage: notifyeventty read fonafterlastpage
+   property onpaint: reportpagepainteventty read fonpaint write fonpaint;
+   property onafterpaint: reportpagepainteventty read fonafterpaint 
+                        write fonafterpaint;
+   property onafterlastpage: reportpageeventty read fonafterlastpage
                                write fonafterlastpage;
  end;
  
@@ -750,6 +788,9 @@ type
   snaptogrid: boolean;
  end;
  
+ repstatety = (rs_activepageset,rs_finish);
+ repstatesty = set of repstatety;
+  
  tcustomreport = class(twidget)
   private
    fppmm: real;
@@ -760,6 +801,9 @@ type
    fpagenum: integer;
    fthread: tmsethread;
    fppmmbefore: real;
+   fstate: repstatesty;
+   factivepage: integer;
+   fprintstarttime: tdatetime;
    procedure setppmm(const avalue: real);
    function getreppages(index: integer): tcustomreportpage;
    procedure setreppages(index: integer; const avalue: tcustomreportpage);
@@ -775,6 +819,7 @@ type
    function getcanceled: boolean;
    procedure setcanceled(const avalue: boolean);
    function getrunning: boolean;
+   procedure setactivepage(const avalue: integer);
   protected
    frepdesigninfo: repdesigninfoty;
    freppages: reportpagearty;
@@ -803,6 +848,10 @@ type
                                                 write setreppages; default;
    property pagenum: integer read fpagenum {write fpagenum}; 
                             //null-based
+   property activepage: integer read factivepage write setactivepage;
+   procedure finish;
+   property printstarttime: tdatetime read fprintstarttime write fprintstarttime;
+
    property font: twidgetfont read getfont write setfont;
    property color default cl_transparent;
    property grid_show: boolean read frepdesigninfo.showgrid write setgrid_show default true;
@@ -2672,15 +2721,31 @@ begin
  end;
 end;
 
+function tcustombandarea.pagepagenum: integer;
+begin
+ result:= freportpage.pagenum;
+end;
+
 function tcustombandarea.reppagenum: integer;
 begin
  result:= freportpage.freport.pagenum;
+end;
+
+function tcustombandarea.pageprintstarttime: tdatetime;
+begin
+ result:= freportpage.fprintstarttime;
+end;
+
+function tcustombandarea.repprintstarttime: tdatetime;
+begin
+ result:= freportpage.freport.fprintstarttime;
 end;
 
 { tcustomreportpage }
 
 constructor tcustomreportpage.create(aowner: tcomponent);
 begin
+ fprintstarttime:= now;
  fvisiblepage:= true;
  fdatalink:= treportpagedatalink.create;
  inherited;
@@ -2751,10 +2816,21 @@ begin
  if not (rpps_inited in fstate) then begin
   init;
  end;
+ fprintstarttime:= now;
+ bo1:= odd(reppagenum);
+ if bo1 and (rpo_firsteven in foptions) or not bo1 and 
+                         (rpo_firstodd in foptions) then begin
+  freport.nextpage(acanvas);  
+  inc(freport.fpagenum);
+ end;
  fpagenum:= 0;
+ exclude(fstate,rpps_finish);
  dofirstpage;
  result:= true;
  repeat
+  if rpps_finish in fstate then begin
+   break;
+  end;
   exclude(fstate,rpps_backgroundrendered);
   acanvas.reset;
   acanvas.intersectcliprect(makerect(nullpoint,fwidgetrect.size));
@@ -2792,9 +2868,7 @@ begin
     fdatalink.dataset.next;
    end;
    inc(fpagenum);
-   if freport <> nil then begin
-    inc(freport.fpagenum);
-   end;
+   inc(freport.fpagenum);
    include(fstate,rpps_showed);
   end;
   result:= result and bo1;
@@ -3023,6 +3097,11 @@ begin
  result:= 0;
 end;
 
+function tcustomreportpage.pagepagenum: integer;
+begin
+ result:= fpagenum;
+end;
+
 function tcustomreportpage.reppagenum: integer;
 begin
  result:= freport.fpagenum;
@@ -3033,15 +3112,44 @@ begin
  result:= fdatalink.datasource;
 end;
 
+function tcustomreportpage.pageprintstarttime: tdatetime;
+begin
+ result:= fprintstarttime;
+end;
+
+function tcustomreportpage.repprintstarttime: tdatetime;
+begin
+ result:= freport.fprintstarttime;
+end;
+
 procedure tcustomreportpage.setdatasource(const avalue: tdatasource);
 begin
  fdatalink.datasource:= avalue;
+end;
+
+procedure tcustomreportpage.activatepage;
+begin
+ freport.activepage:= finditem(pointerarty(freport.freppages),self);
+end;
+
+procedure tcustomreportpage.finish;
+begin
+ include(fstate,rpps_finish);
+end;
+
+procedure tcustomreportpage.setoptions(const avalue: reportpageoptionsty);
+const
+ mask: reportpageoptionsty = [rpo_firsteven,rpo_firstodd];
+begin
+ foptions:= reportpageoptionsty(setsinglebit(longword(avalue),
+                 longword(foptions),longword(mask)));
 end;
 
  {tcustomreport}
  
 constructor tcustomreport.create(aowner: tcomponent);
 begin
+ fprintstarttime:= now;
  fppmm:= defaultrepppmm;
  with frepdesigninfo do begin
   widgetrect:= makerect(50,50,50,50);
@@ -3138,6 +3246,8 @@ var
  page1: tcustomreportpage;
  
 begin
+ fstate:= [];
+ factivepage:= 0;
  result:= 0;
  fakevisible(self,true);
  for int1:= 0 to high(freppages) do begin
@@ -3157,8 +3267,8 @@ begin
   raise;
  end;
  try
-  if high(freppages) >= 0 then begin
-   page1:= freppages[0];
+  if high(freppages) >= factivepage then begin
+   page1:= freppages[factivepage];
    while true do begin
     for int1:= finditem(pointerarty(freppages),page1) to high(freppages) do begin
      if freppages[int1].visiblepage then begin
@@ -3167,21 +3277,31 @@ begin
      end;
     end;
     if page1.visiblepage and not fthread.terminated then begin
+     exclude(fstate,rs_activepageset);
+     factivepage:= finditem(pointerarty(freppages),page1);
      bo1:= page1.render(fcanvas);
-     if not bo1 and (page1.nextpage <> nil) then begin
-       page1:= page1.nextpage;
+     if rs_finish in fstate then begin
+      break;
+     end;
+     if rs_activepageset in fstate then begin
+      page1:= freppages[factivepage];
      end
      else begin
-      if bo1 and (page1.nextpageifempty <> nil) then begin
-       page1:= page1.nextpageifempty;
+      if not bo1 and (page1.nextpage <> nil) then begin
+        page1:= page1.nextpage;
       end
       else begin
-       int1:= finditem(pointerarty(freppages),page1);
-       if (int1 >= 0) and (int1 < high(freppages)) then begin
-        page1:= freppages[int1+1];
+       if bo1 and (page1.nextpageifempty <> nil) then begin
+        page1:= page1.nextpageifempty;
        end
        else begin
-        page1:= nil;
+        int1:= finditem(pointerarty(freppages),page1);
+        if (int1 >= 0) and (int1 < high(freppages)) then begin
+         page1:= freppages[int1+1];
+        end
+        else begin
+         page1:= nil;
+        end;
        end;
       end;
      end;
@@ -3214,6 +3334,7 @@ function tcustomreport.internalrender(const acanvas: tcanvas;
                const aprinter: tprinter; const acommand: string;
                const astream: ttextstream): boolean;
 begin
+ fprintstarttime:= now;
  result:= true;
  fprinter:= aprinter;
  fcanvas:= acanvas;
@@ -3390,6 +3511,18 @@ begin
  end;
 end;
 
+procedure tcustomreport.setactivepage(const avalue: integer);
+begin
+ checkarrayindex(freppages,avalue);
+ include(fstate,rs_activepageset);
+ factivepage:= avalue;
+end;
+
+procedure tcustomreport.finish;
+begin
+ include(fstate,rs_finish);
+end;
+
  {treport}
  
 constructor treport.create(aowner: tcomponent);
@@ -3470,8 +3603,16 @@ begin
 end;
 
 function treppagenumdisp.getdisptext: msestring;
+var
+ int1: integer;
 begin
  if fparentintf <> nil then  begin
+  if bo_localvalue in foptions then begin
+   int1:= fparentintf.pagepagenum;
+  end
+  else begin
+   int1:= fparentintf.reppagenum
+  end;
   result:= formatfloat(fformat,fparentintf.reppagenum+foffset);
  end
  else begin
@@ -3484,6 +3625,39 @@ begin
  if foffset <> avalue then begin
   foffset:= avalue;
   minclientsizechanged;
+ end;
+end;
+
+procedure treppagenumdisp.initpage;
+begin
+ inherited;
+ minclientsizechanged;
+end;
+
+{ trepprinttimedisp }
+
+function trepprinttimedisp.getdisptext: msestring;
+var
+ ti1: tdatetime;
+ str1: string;
+begin
+ if fparentintf <> nil then begin
+  if bo_localvalue in foptions then begin
+   ti1:= fparentintf.pageprintstarttime;
+  end
+  else begin
+   ti1:= fparentintf.repprintstarttime;
+  end;
+  if fformat = '' then begin
+   str1:= 'c';
+  end
+  else begin
+   str1:= fformat;
+  end;
+  result:= formatdatetime(str1,ti1);
+ end
+ else begin
+  result:= inherited getdisptext;
  end;
 end;
 
