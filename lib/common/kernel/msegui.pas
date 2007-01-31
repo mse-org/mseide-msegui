@@ -4107,6 +4107,7 @@ begin
  child.rootchanged;
  child.updateopaque(true); //for cl_parent
  if not (csloading in componentstate) and not (ws_loadlock in fwidgetstate) then begin
+  child.ftaborder:= high(fwidgets);
   sortzorder;
   updatetaborder(child);
   if child.visible then begin
