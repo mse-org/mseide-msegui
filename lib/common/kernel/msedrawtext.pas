@@ -37,8 +37,9 @@ type
  tabulatorkindty = (tak_left,tak_right,tak_centered,tak_decimal);
  tabulatorty = record
   index: integer;
-  kind: tabulatorkindty;
-  pos: integer;
+  tabkind: tabulatorkindty;
+  linepos: integer;
+  textpos: integer;
   width: integer;
  end;
  tabulatorarty = array of tabulatorty;
@@ -49,10 +50,14 @@ type
    fpos: real;
    procedure setkind(const avalue: tabulatorkindty);
    procedure setpos(const avalue: real);
+   procedure setposdist(const avalue: real);
+  protected
+   fposdist: real;
+   property posdist: real read fposdist write setposdist; //mm
   public
   published
    property kind: tabulatorkindty read fkind write setkind default tak_left;
-   property pos: real read fpos write setpos;
+   property pos: real read fpos write setpos; //mm
  end;
  tabulatoritemclassty = class of ttabulatoritem;
  
@@ -391,21 +396,21 @@ begin
         end;
         }
         if nexttab < info.tabulators.count then begin
-         case tabs[nexttab].kind of
+         case tabs[nexttab].tabkind of
           tak_right: begin
-           charwidths[int1-1]:= tabs[nexttab].pos - awidth - 
+           charwidths[int1-1]:= tabs[nexttab].textpos - awidth - 
                                    tabitemwidth(int1,#0);
           end;
           tak_centered: begin
-           charwidths[int1-1]:= tabs[nexttab].pos - awidth - 
+           charwidths[int1-1]:= tabs[nexttab].textpos - awidth - 
                                    tabitemwidth(int1,#0) div 2;
           end;
           tak_decimal: begin
-           charwidths[int1-1]:= tabs[nexttab].pos - awidth - 
+           charwidths[int1-1]:= tabs[nexttab].textpos - awidth - 
                                    tabitemwidth(int1,widechar(decimalseparator));
           end;
           else begin //tak_left
-           charwidths[int1-1]:= tabs[nexttab].pos - awidth;
+           charwidths[int1-1]:= tabs[nexttab].textpos - awidth;
           end;
          end;
          additem(lineinfos[high(lineinfos)].tabchars,int1);
@@ -1021,6 +1026,17 @@ begin
  end;
 end;
 
+procedure ttabulatoritem.setposdist(const avalue: real);
+begin
+ if fposdist <> avalue then begin
+  fposdist:= avalue;
+  if isemptyreal(fposdist) then begin
+   fpos:= 0;
+  end;
+  tcustomtabulators(fowner).changed(self);
+ end;
+end;
+
 { tcustomtabulators }
 
 constructor tcustomtabulators.create;
@@ -1103,7 +1119,7 @@ end;
 
 function cmptab(const l,r): integer;
 begin
- result:= tabulatorty(l).pos - tabulatorty(r).pos;
+ result:= tabulatorty(l).linepos - tabulatorty(r).linepos;
 end;
 
 procedure tcustomtabulators.checkuptodate;
@@ -1115,31 +1131,45 @@ begin
   for int1:= 0 to high(ftabs) do begin
    with ftabs[int1] do begin
     index:= int1;
-    kind:= ttabulatoritem(fitems[int1]).fkind;
-    pos:= round(ttabulatoritem(fitems[int1]).fpos*fppmm);
+    with ttabulatoritem(fitems[int1]) do begin
+     tabkind:= fkind;
+     linepos:= round(fpos*fppmm);
+     case kind of
+      tak_left: begin
+       textpos:= round((fpos + fposdist)*fppmm);
+      end;
+      tak_right,tak_decimal: begin
+       textpos:= round((fpos - fposdist)*fppmm);
+      end; 
+      else begin
+       textpos:= linepos;
+      end;
+     end;
+    end;
    end;
   end;
   sortarray(ftabs,{$ifdef FPC}@{$endif}cmptab,sizeof(ftabs[0]));
   for int1:= 0 to high(ftabs) do begin
    with ftabs[int1] do begin
     width:= 0;
-    case kind of 
+    case tabkind of 
      tak_right: begin
       if int1 > 0 then begin
-       width:= pos - ftabs[int1-1].pos;
+       width:= textpos - ftabs[int1-1].linepos;
       end
       else begin
-       width:= pos;
+       width:= textpos;
       end;
      end;
      tak_centered: begin
       if (int1 > 0) and (int1 < high(ftabs)) then begin
-       width:= ftabs[int1+1].pos - ftabs[int1-1].pos;
+       width:= ftabs[int1+1].linepos - ftabs[int1-1].linepos - 
+                round(2*ttabulatoritem(fitems[index]).fposdist);
       end;
      end;
      else begin //tak_left,tak_decimal
       if int1 < high(ftabs) then begin
-       width:= ftabs[int1+1].pos - pos;
+       width:= ftabs[int1+1].linepos - textpos;
       end;
      end;
     end;
@@ -1180,15 +1210,15 @@ var
 begin
  checkuptodate;
  if index <= high(ftabs) then begin
-  result:= ftabs[index].pos;
+  result:= ftabs[index].textpos;
  end
  else begin
   if length(ftabs) > 0 then begin
    if fdefaultdist > 0 then begin
-    int1:= trunc(ftabs[high(ftabs)].pos/fdefaultdist);
+    int1:= trunc(ftabs[high(ftabs)].linepos/fdefaultdist);
    end
    else begin
-    result:= ftabs[high(ftabs)].pos;
+    result:= ftabs[high(ftabs)].textpos;
     exit;
    end;
   end

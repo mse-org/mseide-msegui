@@ -209,8 +209,8 @@ type
                  setlibottom_visible default defaulttablinevisible;
 
    property ongetvalue: getrichstringeventty read fongetvalue write fongetvalue;
- end;
- 
+   property posdist; //mm
+ end; 
                  
  treptabulators = class(tcustomtabulators)
   private
@@ -221,6 +221,7 @@ type
    flineinfos: tablineinfoarty;
    flistart: tablineinfoty;
    fliend: tablineinfoty;
+   fposdist: real;
 
    procedure setlitop_widthmm(const avalue: real);
    procedure setlitop_color(const avalue: colorty);
@@ -266,6 +267,7 @@ type
    procedure setitems(const index: integer; const avalue: treptabulatoritem);
    procedure processvalues(const acanvas: tcanvas; const adest: rectty;
                         const apaint: boolean);
+   procedure setposdist(const avalue: real);
   protected
    class function getitemclass: tabulatoritemclassty; override;
    procedure paint(const acanvas: tcanvas; const adest: rectty);
@@ -349,8 +351,8 @@ type
    property libottom_dist: integer read flineinfos[tlk_bottom].dist write
                  setlibottom_dist default defaulttablinedist;
    property libottom_visible: linevisiblesty read flineinfos[tlk_bottom].visible
-               write setlibottom_visible default defaulttablinevisible;
-
+               write setlibottom_visible default defaulttablinevisible;               
+   property posdist: real read fposdist write setposdist; //mm
    property defaultdist;
  end;
   
@@ -586,6 +588,7 @@ type
    fonbeforerender: bandareaeventty;
    fonpaint: bandareapainteventty;
    fonafterpaint: bandareapainteventty;
+   fonfirstarea: bandareaeventty;
    function getareafull: boolean;
    procedure setareafull(const avalue: boolean);
    function getacty: integer;
@@ -600,6 +603,7 @@ type
    function rendering: boolean;
    procedure beginrender;
    procedure endrender;
+   procedure dofirstarea; virtual;
    procedure dobeforerender; virtual;
    procedure doonpaint(const acanvas: tcanvas); override;
    procedure doafterpaint1(const acanvas: tcanvas); virtual;
@@ -625,6 +629,7 @@ type
    property areafull: boolean read getareafull write setareafull;
    
    property font: twidgetfont read getfont write setfont stored isfontstored;
+   property onfirstarea: bandareaeventty read fonfirstarea write fonfirstarea;
    property onbeforerender: bandareaeventty read fonbeforerender
                                write fonbeforerender;
    property onpaint: bandareapainteventty read fonpaint write fonpaint;
@@ -634,6 +639,7 @@ type
  tbandarea = class(tcustombandarea)
   published
    property font;
+   property onfirstarea;
    property onbeforerender;
    property onpaint;
    property onafterpaint;
@@ -958,6 +964,7 @@ begin
   self.flineinfos[tlk_vert]:= flineinfos[tlk_vert];
   if not (csloading in componentstate) then begin
    self.fdatalink.datasource:= datasource;
+   self.fposdist:= posdist;
   end;
  end;
 end;
@@ -1333,7 +1340,7 @@ var
   begin
    if aindex < high(ftabs) then begin
     with ftabs[aindex+1] do begin
-     result:= pos + treptabulatoritem(fitems[index]).xlineoffset;
+     result:= linepos + treptabulatoritem(fitems[index]).xlineoffset;
     end;
    end
    else begin
@@ -1352,13 +1359,13 @@ var
       with ftabs[aindex] do begin     
        case kind of
         tak_left: begin
-         startx:= pos + xlineoffset;
+         startx:=linepos + xlineoffset;
          endx:= nextx;
         end;
         else begin
          if aindex > 0 then begin
           with ftabs[aindex-1] do begin
-           startx:= pos + treptabulatoritem(fitems[index]).xlineoffset;
+           startx:= linepos + treptabulatoritem(fitems[index]).xlineoffset;
           end;
          end
          else begin
@@ -1368,7 +1375,7 @@ var
           endx:= nextx;
          end
          else begin
-          endx:= pos + xlineoffset;
+          endx:= linepos + xlineoffset;
          end;
         end;
        end;
@@ -1427,23 +1434,23 @@ begin
       flags:= ftextflags;
      end;
      dest:= adest;
-     if (kind = tak_left) and (int1 = high(ftabs)) then begin
-      dest.cx:= adest.cx - pos;
+     if (tabkind = tak_left) and (int1 = high(ftabs)) then begin
+      dest.cx:= adest.cx - textpos;
      end
      else begin
       dest.cx:= width;
      end;
      textrect(acanvas,finfo);
      dest.cx:= res.cx;
-     case kind of
+     case tabkind of
       tak_left: begin
-       dest.x:= adest.x + pos;
+       dest.x:= adest.x + textpos;
       end;
       tak_right: begin
-       dest.x:= adest.x + pos - res.cx;
+       dest.x:= adest.x + textpos - res.cx;
       end;
       tak_centered: begin
-       dest.x:= adest.x + pos - res.cx div 2;
+       dest.x:= adest.x + textpos - res.cx div 2;
       end;
       else begin //tak_decimal
        int2:= findlastchar(text.text,msechar(decimalseparator));
@@ -1454,7 +1461,7 @@ begin
        else begin
         int3:= 0;
        end;
-       dest.x:= adest.x + pos - res.cx + int3; 
+       dest.x:= adest.x + textpos - res.cx + int3; 
       end;
      end;
     end;
@@ -1481,10 +1488,10 @@ begin
         with ftabs[int1] do begin
          case kind of 
           tak_left: begin
-           int2:= pos - dist
+           int2:= linepos - dist
           end
           else begin
-           int2:= pos + dist;
+           int2:= linepos + dist;
           end;
          end;
         end;
@@ -1872,6 +1879,18 @@ begin
  end;
 end;
 
+procedure treptabulators.setposdist(const avalue: real);
+var
+ int1: integer;
+begin
+ if avalue <> fposdist then begin
+  fposdist:= avalue;
+  for int1:= 0 to high(fitems) do begin
+   treptabulatoritem(fitems[int1]).posdist:= avalue;
+  end;
+ end;
+end;
+
 { tcustomrecordband }
 
 constructor tcustomrecordband.create(aowner: tcomponent);
@@ -2028,7 +2047,7 @@ begin
   int2:= innerclientwidgetpos.x;
   for int1:= 0 to high(ar1) do begin
    with ar1[int1] do begin
-    a.x:= ar2[int1].pos+int2;
+    a.x:= ar2[int1].linepos+int2;
     a.y:= 0;
     b.x:= a.x;
     b.y:= fwidgetrect.cy;
@@ -2487,6 +2506,7 @@ begin
  result:= true;
  if not (bas_inited in fstate) then begin
   init;
+  dofirstarea;
  end;
  try
   initpage;
@@ -2536,6 +2556,18 @@ begin
  exclude(fstate,bas_notfirstband);
  facty:= innerclientwidgetpos.y + bounds_y;
  fbandnum:= 0;
+end;
+
+procedure tcustombandarea.dofirstarea;
+begin
+ if canevent(tmethod(fonfirstarea)) then begin
+  application.lock;
+  try
+   fonfirstarea(self);
+  finally
+   application.unlock;
+  end;
+ end;
 end;
 
 procedure tcustombandarea.dobeforerender;
