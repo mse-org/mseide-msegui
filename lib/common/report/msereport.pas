@@ -61,6 +61,7 @@ const
 type
  tcustombandarea = class;
  tcustomrecordband = class;
+ tcustomreportpage = class;
  rendereventty = procedure(const sender: tobject;
                                const acanvas: tcanvas) of object;
  beforerenderrecordeventty = procedure(const sender: tcustomrecordband;
@@ -356,7 +357,7 @@ type
    property defaultdist;
  end;
   
- recordbandstatety = (rbs_rendering,rbs_showed,rbs_pageshowed);
+ recordbandstatety = (rbs_rendering,rbs_showed,rbs_pageshowed,rbs_finish);
  recordbandstatesty = set of recordbandstatety; 
  
  ibandparent = interface(inullinterface)
@@ -374,6 +375,7 @@ type
   function reppagenum: integer; //null based
   function pageprintstarttime: tdatetime;
   function repprintstarttime: tdatetime;
+  function getreppage: tcustomreportpage;
  end;
 
  trecordbanddatalink = class(tmsedatalink)
@@ -444,6 +446,8 @@ type
    procedure beginupdate;
    procedure endupdate;
    function remainingbands: integer;
+   function reppage: tcustomreportpage;
+   procedure finish;
    
    property tabs: treptabulators read ftabs write settabs;
    property font: twidgetfont read getfont write setfont stored isfontstored;
@@ -568,8 +572,6 @@ type
                     bas_rendering,bas_notfirstband,bas_lastband,bas_bandstarted{,
                     bas_lastchecking,bas_lastchecked});
  bandareastatesty = set of bandareastatety; 
-
- tcustomreportpage = class;
    
  bandareaeventty = procedure(const sender: tcustombandarea) of object;
  bandareapainteventty = procedure(const sender: tcustombandarea;
@@ -625,6 +627,8 @@ type
    function reppagenum: integer; //null based
    function pageprintstarttime: tdatetime;
    function repprintstarttime: tdatetime;
+   function getreppage: tcustomreportpage;
+
    property acty: integer read getacty;
    property areafull: boolean read getareafull write setareafull;
    
@@ -729,6 +733,7 @@ type
    function reppagenum: integer; //null based
    function pageprintstarttime: tdatetime;
    function repprintstarttime: tdatetime;
+   function getreppage: tcustomreportpage;
   
   public
    constructor create(aowner: tcomponent); override;
@@ -1923,7 +1928,7 @@ end;
 procedure tcustomrecordband.dobeforerender(var empty: boolean);
 begin
  if fdatalink.active then begin
-  empty:= fdatalink.dataset.eof;
+  empty:= (rbs_finish in fstate) or fdatalink.dataset.eof;
  end;
  if canevent(tmethod(fonbeforerender)) then begin
   application.lock;
@@ -1958,6 +1963,7 @@ begin
  end;
  application.checkoverload;
  fparentintf.updatevisible; //??
+ empty:= empty or (rbs_finish in fstate);
  dobeforerender(empty);
  fparentintf.updatevisible;
  if not empty and visible then begin
@@ -1974,7 +1980,7 @@ end;
 
 procedure tcustomrecordband.init;
 begin
- //dummy
+ exclude(fstate,rbs_finish);
 end;
 
 procedure tcustomrecordband.initpage;
@@ -2272,6 +2278,21 @@ begin
  end;
 end;
 
+function tcustomrecordband.reppage: tcustomreportpage;
+begin
+ if fparentintf <> nil then  begin
+  result:= fparentintf.getreppage;
+ end
+ else begin
+  result:= nil;
+ end;
+end;
+
+procedure tcustomrecordband.finish;
+begin
+ include(fstate,rbs_finish);
+end;
+
 { tcustombandgroup }
 
 procedure tcustombandgroup.registerchildwidget(const child: twidget);
@@ -2404,12 +2425,16 @@ begin
   for int1:= 0 to high(fbands) do begin
    with fbands[int1] do begin
     even1:= not odd(fparentintf.reppagenum);
-    bo1:= (even1 and (bo_evenpageshow in foptions) or 
-                    not even1 and (bo_oddpageshow in foptions)) and
-         not (even1 and (bo_oddpagehide in foptions) or 
-              not even1 and (bo_oddpagehide in foptions));
-    if bo1 and (visible and not (bo_lastofpagehide in options) or 
-           (bo_lastofpageshow in options)) then begin
+    if even1 and (bo_evenpageshow in foptions) or 
+                    not even1 and (bo_oddpageshow in foptions) then begin
+     bo1:= true;
+    end
+    else begin
+     bo1:= visible and  not (even1 and (bo_oddpagehide in foptions) or 
+                             not even1 and (bo_oddpagehide in foptions));
+    end;
+    if bo1 and not (bo_lastofpagehide in options) or 
+           (bo_lastofpageshow in options) then begin
      int2:= int2 + bounds_cy;
     end;
    end;
@@ -2723,7 +2748,8 @@ end;
 
 function tcustombandarea.isfirstband: boolean;
 begin
- result:= not (rbs_pageshowed in fbands[factiveband].fstate);
+ result:= (factiveband <= high(fbands)) and 
+                    not (rbs_pageshowed in fbands[factiveband].fstate);
 // result:= not (bas_notfirstband in fstate);
 end;
 
@@ -2732,7 +2758,7 @@ var
  int1: integer;
 begin
  result:= fstate * [bas_lastband{,bas_lastchecking}] <> [];
- if not result {and not(bas_lastchecked in fstate)} then begin
+ if not result and (factiveband <= high(fbands)) then begin
   with fbands[factiveband] do begin
    int1:= facty + addheight + lastbandheight;
    if not (bas_bandstarted in self.fstate) then begin
@@ -2770,6 +2796,11 @@ end;
 function tcustombandarea.repprintstarttime: tdatetime;
 begin
  result:= freportpage.freport.fprintstarttime;
+end;
+
+function tcustombandarea.getreppage: tcustomreportpage;
+begin
+ result:= freportpage;
 end;
 
 { tcustomreportpage }
@@ -3176,6 +3207,11 @@ const
 begin
  foptions:= reportpageoptionsty(setsinglebit(longword(avalue),
                  longword(foptions),longword(mask)));
+end;
+
+function tcustomreportpage.getreppage: tcustomreportpage;
+begin
+ result:= self;
 end;
 
  {tcustomreport}
