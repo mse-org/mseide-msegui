@@ -524,7 +524,7 @@ type
    property format;
  end;
 
- trepprinttimedisp = class(trepvaluedisp)
+ trepprintdatedisp = class(trepvaluedisp)
   protected
    function getdisptext: msestring; override;
   published
@@ -3705,9 +3705,9 @@ begin
  minclientsizechanged;
 end;
 
-{ trepprinttimedisp }
+{ trepprintdatedisp }
 
-function trepprinttimedisp.getdisptext: msestring;
+function trepprintdatedisp.getdisptext: msestring;
 var
  ti1: tdatetime;
  str1: string;

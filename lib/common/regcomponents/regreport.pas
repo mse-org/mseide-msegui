@@ -14,7 +14,7 @@ interface
 implementation
 uses
  classes,msereport,msedesignintf,formdesigner,reportdesigner,msepropertyeditors,
- sysutils,msestrings;
+ sysutils,msestrings,regreport_bmp;
 const
  reportintf: designmoduleintfty = 
   (createfunc: {$ifdef FPC}@{$endif}createreport;
@@ -34,7 +34,7 @@ type
 procedure Register;
 begin
  registercomponents('Rep',[{treportpage,}tbandarea,tbandgroup,
-                    trecordband,treppagenumdisp,trepprinttimedisp]); 
+                    trecordband,treppagenumdisp,trepprintdatedisp]); 
  
  registerdesignmoduleclass(treport,reportintf,treportdesignerfo);
  registerpropertyeditor(typeinfo(treptabulators),nil,'',treptabulatorseditor);
