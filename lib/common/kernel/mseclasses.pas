@@ -451,6 +451,17 @@ function ownernamepath(const acomponent: tcomponent): string;
 
 function getpropinfoar(const obj: tobject): propinfopoarty;
 
+procedure createobjectlinker(const owner: iobjectlink; onevent: objectlinkeventty;
+                                  var instance: tobjectlinker);
+ //sets finstancepo
+procedure getoptionalobject(const componentstate: tcomponentstate;
+                       const instance: tobject; createproc: createprocty); overload;
+procedure setoptionalobject(const componentstate: tcomponentstate;
+                  const value: tpersistent; var instance;
+                    createproc: createprocty); overload;
+procedure setlinkedcomponent(const sender: iobjectlink; const source: tmsecomponent;
+                      var instance: tmsecomponent; ainterfacetype: pointer = nil);
+
 procedure createmodule(aowner: tcomponent; instanceclass: msecomponentclassty; var reference);
 procedure registerobjectdata(datapo: pobjectdataty; 
                  objectclass: tpersistentclass; name: string = ''); overload;
@@ -462,16 +473,6 @@ procedure unregisterobjectdata(const objectclassname: string; const name: string
 procedure resetchangedmodules;
 procedure reloadchangedmodules;
 
-procedure createobjectlinker(const owner: iobjectlink; onevent: objectlinkeventty;
-                                  var instance: tobjectlinker);
- //sets finstancepo
-procedure getoptionalobject(const componentstate: tcomponentstate;
-                       const instance: tobject; createproc: createprocty); overload;
-procedure setoptionalobject(const componentstate: tcomponentstate;
-                  const value: tpersistent; var instance;
-                    createproc: createprocty); overload;
-procedure setlinkedcomponent(const sender: iobjectlink; const source: tmsecomponent;
-                      var instance: tmsecomponent; ainterfacetype: pointer = nil);
 procedure reloadmsecomponent(Instance: tmsecomponent);
 function initmsecomponent(instance: tcomponent; rootancestor: tclass): boolean;
 procedure loadmsemodule(const instance: tmsecomponent; const rootancestor: tclass);

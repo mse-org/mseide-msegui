@@ -1435,7 +1435,9 @@ procedure townedpersistentarrayprop.createitem(const index: integer;
                   var item: tpersistent);
 begin
  if fitemclasstype <> nil then begin
-  item:= ownedpersistentclassty(fitemclasstype).create(fowner);
+  item:= tpersistent(fitemclasstype.newinstance);
+  townedpersistent(item).create(fowner)
+//  item:= ownedpersistentclassty(fitemclasstype).create(fowner);
  end
  else begin
   item:= nil;

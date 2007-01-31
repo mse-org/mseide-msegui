@@ -957,7 +957,7 @@ begin
  with treptabulators(aowner),fband do begin
   self.flineinfos[tlk_vert]:= flineinfos[tlk_vert];
   if not (csloading in componentstate) then begin
-   self.datasource:= datasource;
+   self.fdatalink.datasource:= datasource;
   end;
  end;
 end;
@@ -2510,8 +2510,8 @@ begin
       bo1:= bo1 or bo2{(bv_everypage in fvisibility)};
       fstate:= fstate + [rbs_showed,rbs_pageshowed];
      end;
-     result:= bo1;
-//     result:= result and bo1;
+//     result:= bo1;
+     result:= result and bo1;
      if bo1 then begin
       repeat
        inc(factiveband);
@@ -2833,7 +2833,9 @@ begin
   exclude(fstate,rpps_backgroundrendered);
   acanvas.reset;
   acanvas.intersectcliprect(makerect(nullpoint,fwidgetrect.size));
+  updatevisible;
   dobeforerender;
+  updatevisible;
   bo1:= true;
   for int1:= 0 to high(fareas) do begin
    bo1:= fareas[int1].render(acanvas) and bo1;
@@ -3614,7 +3616,7 @@ begin
   else begin
    int1:= fparentintf.reppagenum
   end;
-  result:= formatfloat(fformat,fparentintf.reppagenum+foffset);
+  result:= formatfloat(fformat,int1+foffset);
  end
  else begin
   result:= inherited getdisptext;
