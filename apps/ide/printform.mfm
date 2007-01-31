@@ -3,8 +3,11 @@ object printfo: tprintfo
   bounds_y = 216
   bounds_cx = 392
   bounds_cy = 281
+  taborder = 1
   visible = False
   container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_subfocus, ow_mousetransparent, ow_destroywidgets, ow_autoscale]
+  container.bounds_x = 0
+  container.bounds_y = 0
   container.bounds_cx = 392
   container.bounds_cy = 281
   container.frame.dummy = 0
@@ -289,6 +292,7 @@ object printfo: tprintfo
   end
   object printer: tpostscriptprinter
     canvas.font.dummy = 0
+    canvas.ppmm = 10
     onpagestart = pronpagestart
     pa_width = 210
     pa_height = 297
@@ -297,7 +301,6 @@ object printfo: tprintfo
     pa_frametop = 10
     pa_frameright = 10
     pa_framebottom = 10
-    ppmm = 10
     printcommand = 'lp -'
     statfile = tstatfile1
     left = 184
