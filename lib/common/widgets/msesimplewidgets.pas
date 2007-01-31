@@ -248,10 +248,10 @@ type
   private
    fonfontheightdelta: fontheightdeltaeventty;
    fonchildscaled: notifyeventty;
-   foptionsscale: optionsscalety;
    fscaling: integer;
    procedure setoptionsscale(const avalue: optionsscalety);
   protected
+   foptionsscale: optionsscalety;
    procedure beginscaling;
    procedure endscaling;
    procedure updateoptionsscale;

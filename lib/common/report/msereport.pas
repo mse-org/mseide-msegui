@@ -1881,7 +1881,6 @@ begin
  inherited;
  fanchors:= defaultbandanchors;
  foptionswidget:= defaultbandoptionswidget;
- optionsscale:= defaultrepvaluedispoptionsscale;
 end;
 
 destructor tcustomrecordband.destroy;
@@ -3550,7 +3549,9 @@ end;
 constructor tcustomrepvaluedisp.create(aowner: tcomponent);
 begin
  ftextflags:= defaultrepvaluedisptextflags;
+ foptionsscale:= defaultrepvaluedispoptionsscale;
  inherited;
+ foptionsscale:= defaultrepvaluedispoptionsscale;
  fanchors:= [an_left,an_top];
 end;
 
