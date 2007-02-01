@@ -140,6 +140,7 @@ type
    procedure setlibottom_dashes(const avalue: string);
    procedure setlibottom_dist(const avalue: integer);
    procedure setlibottom_visible(const avalue: linevisiblesty);
+   procedure recchanged;
 
                //idbeditinfo
    function getdatasource(const aindex: integer): tdatasource;
@@ -273,6 +274,7 @@ type
    class function getitemclass: tabulatoritemclassty; override;
    procedure paint(const acanvas: tcanvas; const adest: rectty);
    procedure checksize;
+   procedure recchanged;
   public
    constructor create(const aowner: tcustomrecordband);
    property items[const index: integer]: treptabulatoritem read getitems 
@@ -412,7 +414,7 @@ const
                    ];
 
 type                     
- tcustomrecordband = class(tcustomscalingwidget,idbeditinfo)
+ tcustomrecordband = class(tcustomscalingwidget,idbeditinfo,ireccontrol)
   private
    fparentintf: ibandparent;
    fonbeforerender: beforerenderrecordeventty;
@@ -426,6 +428,7 @@ type
    fvisigrouplink: tfielddatalink;
    foptions: bandoptionsty;
    fgroupnum: integer;
+   frecnobefore: integer;
    procedure settabs(const avalue: treptabulators);
    procedure setoptions(const avalue: bandoptionsty);
    function getvisidatasource: tdatasource;
@@ -434,12 +437,14 @@ type
    procedure setvisidatafield(const avalue: string);
    function getdatasource: tdatasource; overload;
    procedure setdatasource(const avalue: tdatasource); virtual;
+   function getvisigroupfield: string;
+   procedure setvisigroupfield(const avalue: string);
               //idbeditinfo
    function getdatasource(const aindex: integer): tdatasource; overload;
    procedure getfieldtypes(out apropertynames: stringarty;
                            out afieldtypes: fieldtypesarty);
-   function getvisigroupfield: string;
-   procedure setvisigroupfield(const avalue: string);
+              //ireccontrol
+   procedure recchanged;
   protected
    procedure minclientsizechanged;
    procedure fontchanged; override;
@@ -743,6 +748,8 @@ type
    fdatalink: treportpagedatalink;
    foptions: reportpageoptionsty;
    fprintstarttime: tdatetime;
+   freccontrols: pointerarty;
+   frecnobefore: integer;
    procedure setpagewidth(const avalue: real);
    procedure setpageheight(const avalue: real);
    procedure updatepagesize;
@@ -795,7 +802,8 @@ type
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
-   
+
+   procedure recordchanged;   
    property report: tcustomreport read freport;
    property pagenum: integer read fpagenum write fpagenum; 
                             //null-based, local to this page
@@ -1369,6 +1377,11 @@ begin
    result:= dist;
   end;
  end; 
+end;
+
+procedure treptabulatoritem.recchanged;
+begin
+ fdatalink.recordchanged(nil);
 end;
 
 { treptabulators }
@@ -1986,6 +1999,15 @@ begin
  end;
 end;
 
+procedure treptabulators.recchanged;
+var
+ int1: integer;
+begin
+ for int1:= 0 to high(fitems) do begin
+  treptabulatoritem(fitems[int1]).recchanged;
+ end;
+end;
+
 { tcustomrecordband }
 
 constructor tcustomrecordband.create(aowner: tcomponent);
@@ -2113,12 +2135,23 @@ procedure tcustomrecordband.beginrender;
 begin
  fstate:= [rbs_rendering];
  include(widgetstate1,ws1_noclipchildren);
+ if fdatalink.active then begin
+  frecnobefore:= fdatalink.dataset.recno;
+  fdatalink.dataset.disablecontrols;
+ end; 
 end;
 
 procedure tcustomrecordband.endrender;
 begin
  exclude(fstate,rbs_rendering);
  exclude(widgetstate1,ws1_noclipchildren);
+ if fdatalink.active then begin
+  try
+   fdatalink.dataset.recno:= frecnobefore;
+  except
+  end;
+  fdatalink.dataset.enablecontrols;
+ end; 
 end;
 
 procedure tcustomrecordband.settabs(const avalue: treptabulators);
@@ -2142,6 +2175,9 @@ begin
   finally
    application.unlock;
   end;
+ end;
+ if setflag then begin
+  fparentintf.getreppage.recordchanged;
  end;
 end;
 
@@ -2538,6 +2574,12 @@ end;
 procedure tcustomrecordband.setvisigroupfield(const avalue: string);
 begin
  fvisigrouplink.fieldname:= avalue;
+end;
+
+procedure tcustomrecordband.recchanged;
+begin
+ fdatalink.recordchanged(nil);
+ ftabs.recchanged;
 end;
 
 { tcustombandgroup }
@@ -3212,6 +3254,7 @@ begin
  end;
  fpagenum:= 0;
  exclude(fstate,rpps_finish);
+ recordchanged;
  dofirstpage;
  result:= true;
  repeat
@@ -3260,6 +3303,7 @@ begin
     finally
      application.unlock;
     end;
+    recordchanged;
    end;
    inc(fpagenum);
    inc(freport.fpagenum);
@@ -3332,11 +3376,29 @@ begin
 end;
 
 procedure tcustomreportpage.beginrender;
+ procedure addreccontrols(const awidget: twidget);
+ var
+  int1: integer;
+  po1: pointer;
+ begin
+  for int1:= 0 to awidget.widgetcount -1 do begin
+   addreccontrols(awidget.widgets[int1]);
+   if awidget.widgets[int1].getcorbainterface(typeinfo(ireccontrol),po1) then begin
+    additem(freccontrols,po1);
+   end;
+  end;
+ end;
 var
  int1: integer;
 begin
+ freccontrols:= nil;
+ addreccontrols(self);
  fstate:= [rpps_rendering];
  include(fwidgetstate1,ws1_noclipchildren);
+ if fdatalink.active then begin
+  frecnobefore:= fdatalink.dataset.recno;
+  fdatalink.dataset.disablecontrols;
+ end;
  for int1:= 0 to high(fbands) do begin
   fbands[int1].beginrender;
  end;
@@ -3349,8 +3411,16 @@ procedure tcustomreportpage.endrender;
 var
  int1: integer;
 begin
+ freccontrols:= nil;
  exclude(fstate,rpps_rendering);
  exclude(fwidgetstate1,ws1_noclipchildren);
+ if fdatalink.active then begin
+  try
+   fdatalink.dataset.recno:= frecnobefore;
+  except
+  end;
+  fdatalink.dataset.enablecontrols;
+ end; 
  for int1:= 0 to high(fbands) do begin
   fbands[int1].endrender;
  end;
@@ -3553,6 +3623,15 @@ end;
 function tcustomreportpage.islastrecord: boolean;
 begin
  checkislastrecord(fdatalink,result);
+end;
+
+procedure tcustomreportpage.recordchanged;
+var
+ int1: integer;
+begin
+ for int1:= 0 to high(freccontrols) do begin
+  ireccontrol(freccontrols[int1]).recchanged;
+ end;
 end;
 
  {tcustomreport}

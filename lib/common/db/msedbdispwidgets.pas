@@ -21,7 +21,7 @@ type
    constructor create(const intf: idbdispfieldlink);
  end;
  
- tdblabel = class(tcustomlabel,idbeditinfo,idbdispfieldlink)
+ tdblabel = class(tcustomlabel,idbeditinfo,idbdispfieldlink,ireccontrol)
   private
    fdatalink: tdispfielddatalink;
    function getdatafield: string; overload;
@@ -35,6 +35,8 @@ type
      //idbdispfieldlink
    procedure fieldtovalue;
    procedure setnullvalue;
+   //ireccontrol
+   procedure recchanged;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -47,20 +49,23 @@ type
    property optionswidget default defaultlabeloptionswidget;
  end;
 
- tdbstringdisp = class(tcustomstringdisp,idbeditinfo,idbdispfieldlink)
+ tdbstringdisp = class(tcustomstringdisp,idbeditinfo,idbdispfieldlink,
+                                     ireccontrol)
   private
    fdatalink: tdispfielddatalink;
    function getdatafield: string; overload;
    procedure setdatafield(const avalue: string);
    function getdatasource: tdatasource;
    procedure setdatasource(const avalue: tdatasource);
-     //idbeditinfo
+   //idbeditinfo
    function getdatasource(const aindex: integer): tdatasource; overload;
    procedure getfieldtypes(out propertynames: stringarty;
                           out fieldtypes: fieldtypesarty); virtual;
-     //idbdispfieldlink
+   //idbdispfieldlink
    procedure fieldtovalue; virtual;
    procedure setnullvalue;
+   //ireccontrol
+   procedure recchanged;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -70,7 +75,7 @@ type
    property datasource: tdatasource read getdatasource write setdatasource;
  end;
   
- tdbstringdisplb = class(tdbstringdisp,idbeditinfo,idbdispfieldlink)
+ tdbstringdisplb = class(tdbstringdisp,idbeditinfo,idbdispfieldlink,ireccontrol)
   private
    flookupbuffer: tcustomlookupbuffer;
    flookupkeyfieldno: integer;
@@ -93,7 +98,7 @@ type
    property lookupvaluefieldno: integer read flookupvaluefieldno write flookupvaluefieldno default 0;
  end;
  
- tdbintegerdisp = class(tcustomintegerdisp,idbeditinfo,idbdispfieldlink)
+ tdbintegerdisp = class(tcustomintegerdisp,idbeditinfo,idbdispfieldlink,ireccontrol)
   private
    fdatalink: tdispfielddatalink;
    fisnotnull: boolean;
@@ -108,6 +113,8 @@ type
      //idbdispfieldlink
    procedure fieldtovalue; virtual;
    procedure setnullvalue;
+   //ireccontrol
+   procedure recchanged;
   protected
    function getvaluetext: msestring; override;
   public
@@ -119,7 +126,7 @@ type
    property datasource: tdatasource read getdatasource write setdatasource;
  end;
  
- tdbintegerdisplb = class(tdbintegerdisp,idbeditinfo,idbdispfieldlink)
+ tdbintegerdisplb = class(tdbintegerdisp,idbeditinfo,idbdispfieldlink,ireccontrol)
   private
    flookupbuffer: tcustomlookupbuffer;
    flookupkeyfieldno: integer;
@@ -139,7 +146,7 @@ type
    property lookupvaluefieldno: integer read flookupvaluefieldno write flookupvaluefieldno default 0;
  end;
  
- tdbbooleandisp = class(tcustombooleandisp,idbeditinfo,idbdispfieldlink)
+ tdbbooleandisp = class(tcustombooleandisp,idbeditinfo,idbdispfieldlink,ireccontrol)
   private
    fisnotnull: boolean;
    fdatalink: tdispfielddatalink;
@@ -154,6 +161,8 @@ type
      //idbdispfieldlink
    procedure fieldtovalue;
    procedure setnullvalue;
+   //ireccontrol
+   procedure recchanged;
   protected
    function getvaluetext: msestring; override;
   public
@@ -165,7 +174,7 @@ type
    property datasource: tdatasource read getdatasource write setdatasource;
  end;
  
- tdbrealdisp = class(tcustomrealdisp,idbeditinfo,idbdispfieldlink)
+ tdbrealdisp = class(tcustomrealdisp,idbeditinfo,idbdispfieldlink,ireccontrol)
   private
    fdatalink: tdispfielddatalink;
    function getdatafield: string;
@@ -179,6 +188,8 @@ type
      //idbdispfieldlink
    procedure fieldtovalue; virtual;
    procedure setnullvalue;
+   //ireccontrol
+   procedure recchanged;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -188,7 +199,7 @@ type
    property datasource: tdatasource read getdatasource write setdatasource;
  end;
   
- tdbrealdisplb = class(tdbrealdisp,idbeditinfo,idbdispfieldlink)
+ tdbrealdisplb = class(tdbrealdisp,idbeditinfo,idbdispfieldlink,ireccontrol)
   private
    flookupbuffer: tcustomlookupbuffer;
    flookupkeyfieldno: integer;
@@ -211,7 +222,7 @@ type
    property lookupvaluefieldno: integer read flookupvaluefieldno write flookupvaluefieldno default 0;
  end;
  
- tdbdatetimedisp = class(tcustomdatetimedisp,idbeditinfo,idbdispfieldlink)
+ tdbdatetimedisp = class(tcustomdatetimedisp,idbeditinfo,idbdispfieldlink,ireccontrol)
   private
    fdatalink: tdispfielddatalink;
    function getdatafield: string;
@@ -225,6 +236,8 @@ type
      //idbdispfieldlink
    procedure fieldtovalue; virtual;
    procedure setnullvalue;
+   //ireccontrol
+   procedure recchanged;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -234,7 +247,7 @@ type
    property datasource: tdatasource read getdatasource write setdatasource;
  end;
  
- tdbdatetimedisplb = class(tdbdatetimedisp,idbeditinfo,idbdispfieldlink)
+ tdbdatetimedisplb = class(tdbdatetimedisp,idbeditinfo,idbdispfieldlink,ireccontrol)
   private
    flookupbuffer: tcustomlookupbuffer;
    flookupkeyfieldno: integer;
@@ -343,6 +356,11 @@ begin
  result:= datasource;
 end;
 
+procedure tdblabel.recchanged;
+begin
+ fdatalink.recordchanged(nil);
+end;
+
 { tdbstringdisp }
 
 constructor tdbstringdisp.create(aowner: tcomponent);
@@ -398,6 +416,11 @@ end;
 function tdbstringdisp.getdatasource(const aindex: integer): tdatasource;
 begin
  result:= datasource;
+end;
+
+procedure tdbstringdisp.recchanged;
+begin
+ fdatalink.recordchanged(nil);
 end;
 
 { tdbstringdisplb }
@@ -516,6 +539,11 @@ begin
  result:= datasource;
 end;
 
+procedure tdbintegerdisp.recchanged;
+begin
+ fdatalink.recordchanged(nil);
+end;
+
 { tdbintegerdisplb }
 
 procedure tdbintegerdisplb.fieldtovalue;
@@ -625,6 +653,11 @@ begin
  result:= datasource;
 end;
 
+procedure tdbbooleandisp.recchanged;
+begin
+ fdatalink.recordchanged(nil);
+end;
+
 { tdbrealdisp }
 
 constructor tdbrealdisp.create(aowner: tcomponent);
@@ -680,6 +713,11 @@ end;
 function tdbrealdisp.getdatasource(const aindex: integer): tdatasource;
 begin
  result:= datasource;
+end;
+
+procedure tdbrealdisp.recchanged;
+begin
+ fdatalink.recordchanged(nil);
 end;
 
 { tdbrealdisplb }
@@ -790,6 +828,11 @@ end;
 function tdbdatetimedisp.getdatasource(const aindex: integer): tdatasource;
 begin
  result:= datasource;
+end;
+
+procedure tdbdatetimedisp.recchanged;
+begin
+ fdatalink.recordchanged(nil);
 end;
 
 { tdbdatetimedisplb }

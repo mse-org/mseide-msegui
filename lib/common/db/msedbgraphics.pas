@@ -32,7 +32,7 @@ type
    constructor create(const intf: idbgraphicfieldlink);
  end;
 
- tdbimage = class(timage,idbeditinfo,idbgraphicfieldlink)
+ tdbimage = class(timage,idbeditinfo,idbgraphicfieldlink,ireccontrol)
   private
    fformat: string;
    fdatalink: tgraphicdatalink;
@@ -47,6 +47,8 @@ type
      //idbgraphicfieldlink
    procedure fieldtovalue; virtual;
    procedure setnullvalue;
+   //ireccontrol
+   procedure recchanged;
    procedure setformat(const avalue: string);
   public
    constructor create(aowner: tcomponent); override;
@@ -140,6 +142,11 @@ end;
 procedure tdbimage.setformat(const avalue: string);
 begin
  fformat:= avalue;
+end;
+
+procedure tdbimage.recchanged;
+begin
+ fdatalink.recordchanged(nil);
 end;
 
 { tgraphicdatalink }

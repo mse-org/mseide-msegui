@@ -162,7 +162,7 @@ type
              //true if text to long
  end;
 
- tdbstringedit = class(tcustomstringedit,idbeditfieldlink,idbeditinfo)
+ tdbstringedit = class(tcustomstringedit,idbeditfieldlink,idbeditinfo,ireccontrol)
   private
    fdatalink: teditwidgetdatalink;
    function getdatafield: string;
@@ -187,6 +187,8 @@ type
    //idbeditinfo
    procedure getfieldtypes(out propertynames: stringarty;
                           out fieldtypes: fieldtypesarty);
+   //ireccontrol
+   procedure recchanged;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -201,7 +203,7 @@ type
    property onsetvalue;
  end;
 
- tdbdialogstringedit = class(tcustomdialogstringedit,idbeditfieldlink,idbeditinfo)
+ tdbdialogstringedit = class(tcustomdialogstringedit,idbeditfieldlink,idbeditinfo,ireccontrol)
   private
    fdatalink: teditwidgetdatalink;
    function getdatafield: string;
@@ -225,6 +227,8 @@ type
    //idbeditinfo
    procedure getfieldtypes(out propertynames: stringarty;
                           out fieldtypes: fieldtypesarty);
+   //ireccontrol
+   procedure recchanged;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -240,7 +244,7 @@ type
    property onexecute;
  end;
  
- tcustomdbdropdownlistedit = class(tcustomdropdownlistedit,idbeditfieldlink,idbeditinfo)
+ tcustomdbdropdownlistedit = class(tcustomdropdownlistedit,idbeditfieldlink,idbeditinfo,ireccontrol)
   private
    fdatalink: teditwidgetdatalink;
    function getdatafield: string;
@@ -264,6 +268,8 @@ type
    //idbeditinfo
    procedure getfieldtypes(out propertynames: stringarty;
                           out fieldtypes: fieldtypesarty);
+   //ireccontrol
+   procedure recchanged;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -284,7 +290,7 @@ type
    property onafterclosedropdown;
  end;
 
- tdbkeystringedit = class(tcustomkeystringedit,idbeditfieldlink,idbeditinfo)
+ tdbkeystringedit = class(tcustomkeystringedit,idbeditfieldlink,idbeditinfo,ireccontrol)
   private
    fdatalink: teditwidgetdatalink;
    function getdatafield: string;
@@ -308,6 +314,8 @@ type
    //idbeditinfo
    procedure getfieldtypes(out propertynames: stringarty;
                           out fieldtypes: fieldtypesarty);
+   //ireccontrol
+   procedure recchanged;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -325,7 +333,7 @@ type
    property oninit;
  end;
 
- tdbmemoedit = class(tcustommemoedit,idbeditfieldlink,idbeditinfo)
+ tdbmemoedit = class(tcustommemoedit,idbeditfieldlink,idbeditinfo,ireccontrol)
   private
    fdatalink: teditwidgetdatalink;
    function getdatafield: string;
@@ -349,6 +357,8 @@ type
    //idbeditinfo
    procedure getfieldtypes(out propertynames: stringarty;
                           out fieldtypes: fieldtypesarty);
+   //ireccontrol
+   procedure recchanged;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -362,7 +372,7 @@ type
    property frame;
  end;
 
- tdbintegeredit = class(tcustomintegeredit,idbeditfieldlink,idbeditinfo)
+ tdbintegeredit = class(tcustomintegeredit,idbeditfieldlink,idbeditinfo,ireccontrol)
   private
    fdatalink: teditwidgetdatalink;
    function getdatafield: string;
@@ -389,6 +399,8 @@ type
    //idbeditinfo
    procedure getfieldtypes(out propertynames: stringarty;
                           out fieldtypes: fieldtypesarty);
+   //ireccontrol
+   procedure recchanged;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -406,7 +418,7 @@ type
    property onsetvalue;
  end;
 
- tdbbooleanedit = class(tcustombooleanedit,idbeditfieldlink,idbeditinfo)
+ tdbbooleanedit = class(tcustombooleanedit,idbeditfieldlink,idbeditinfo,ireccontrol)
   private
    fdatalink: teditwidgetdatalink;
    function getdatafield: string;
@@ -430,6 +442,8 @@ type
    //idbeditinfo
    procedure getfieldtypes(out propertynames: stringarty;
                           out fieldtypes: fieldtypesarty);
+   //ireccontrol
+   procedure recchanged;                          
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -444,7 +458,7 @@ type
    property group;
  end;
 
- tdbdataicon = class(tcustomdataicon,idbeditfieldlink,idbeditinfo)
+ tdbdataicon = class(tcustomdataicon,idbeditfieldlink,idbeditinfo,ireccontrol)
   private
    fdatalink: teditwidgetdatalink;
    function getdatafield: string;
@@ -468,6 +482,8 @@ type
    //idbeditinfo
    procedure getfieldtypes(out propertynames: stringarty;
                           out fieldtypes: fieldtypesarty);
+   //ireccontrol
+   procedure recchanged;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -484,7 +500,7 @@ type
    property imagenums;
  end;
 
- tdbdatabutton = class(tcustomdatabutton,idbeditfieldlink,idbeditinfo)
+ tdbdatabutton = class(tcustomdatabutton,idbeditfieldlink,idbeditinfo,ireccontrol)
   private
    fdatalink: teditwidgetdatalink;
    function getdatafield: string;
@@ -508,6 +524,8 @@ type
    //idbeditinfo
    procedure getfieldtypes(out propertynames: stringarty;
                           out fieldtypes: fieldtypesarty);
+   //ireccontrol
+   procedure recchanged;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -529,7 +547,7 @@ type
    property max;
  end;
  
- tdbbooleaneditradio = class(tcustombooleaneditradio,idbeditfieldlink,idbeditinfo)
+ tdbbooleaneditradio = class(tcustombooleaneditradio,idbeditfieldlink,idbeditinfo,ireccontrol)
   private
    fdatalink: teditwidgetdatalink;
    function getdatafield: string;
@@ -553,6 +571,8 @@ type
    //idbeditinfo
    procedure getfieldtypes(out propertynames: stringarty;
                           out fieldtypes: fieldtypesarty);
+   //ireccontrol
+   procedure recchanged;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -567,7 +587,7 @@ type
    property group;
  end;
 
- tdbrealedit = class(tcustomrealedit,idbeditfieldlink,idbeditinfo)
+ tdbrealedit = class(tcustomrealedit,idbeditfieldlink,idbeditinfo,ireccontrol)
   private
    fdatalink: teditwidgetdatalink;
    function getdatafield: string;
@@ -591,6 +611,8 @@ type
    //idbeditinfo
    procedure getfieldtypes(out propertynames: stringarty;
                           out fieldtypes: fieldtypesarty);
+   //ireccontrol
+   procedure recchanged;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -608,7 +630,7 @@ type
    property onsetvalue;
  end;
 
- tdbdatetimeedit = class(tcustomdatetimeedit,idbeditfieldlink,idbeditinfo)
+ tdbdatetimeedit = class(tcustomdatetimeedit,idbeditfieldlink,idbeditinfo,ireccontrol)
   private
    fdatalink: teditwidgetdatalink;
    function getdatafield: string;
@@ -632,6 +654,8 @@ type
    //idbeditinfo
    procedure getfieldtypes(out propertynames: stringarty;
                           out fieldtypes: fieldtypesarty);
+   //ireccontrol
+   procedure recchanged;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -649,7 +673,7 @@ type
    property onsetvalue;
  end;
 
- tdbcalendardatetimeedit = class(tcustomcalendardatetimeedit,idbeditfieldlink,idbeditinfo)
+ tdbcalendardatetimeedit = class(tcustomcalendardatetimeedit,idbeditfieldlink,idbeditinfo,ireccontrol)
   private
    fdatalink: teditwidgetdatalink;
    function getdatafield: string;
@@ -673,6 +697,8 @@ type
    //idbeditinfo
    procedure getfieldtypes(out propertynames: stringarty;
                           out fieldtypes: fieldtypesarty);
+   //ireccontrol
+   procedure recchanged;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -691,7 +717,7 @@ type
    property dropdown;
  end;
  
- tcustomdbenumedit = class(tcustomenumedit,idbeditfieldlink,idbeditinfo)
+ tcustomdbenumedit = class(tcustomenumedit,idbeditfieldlink,idbeditinfo,ireccontrol)
   private
    fdatalink: teditwidgetdatalink;
    function getdatafield: string;
@@ -715,6 +741,8 @@ type
    //idbeditinfo
    procedure getfieldtypes(out propertynames: stringarty;
                           out fieldtypes: fieldtypesarty); virtual;
+   //ireccontrol
+   procedure recchanged;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -1016,7 +1044,7 @@ type
    property buttonminlength;
   end;
 
- tdbenumeditdb = class(tdbenumedit,idbdropdownlist,idbeditinfo)
+ tdbenumeditdb = class(tdbenumedit,idbdropdownlist,idbeditinfo,ireccontrol)
   private
    function getdropdown: tdbdropdownlistcontroller;
    procedure setdropdown(const avalue: tdbdropdownlistcontroller);
@@ -1040,7 +1068,7 @@ type
    property dropdown: tdbdropdownlistcontroller read getdropdown write setdropdown;
  end;
  
- tdbkeystringeditdb = class(tdbkeystringedit,idbdropdownlist,idbeditinfo)
+ tdbkeystringeditdb = class(tdbkeystringedit,idbdropdownlist,idbeditinfo,ireccontrol)
   private
    fkeyvalue: msestring;
    function getdropdown: tdbdropdownlistcontroller;
@@ -2223,6 +2251,11 @@ begin
  end;
 end;
 
+procedure tdbstringedit.recchanged;
+begin
+ fdatalink.recordchanged(nil);
+end;
+
 { tdbdialogstringedit }
 
 constructor tdbdialogstringedit.create(aowner: tcomponent);
@@ -2334,6 +2367,11 @@ begin
  result:= datasource;
 end;
 
+procedure tdbdialogstringedit.recchanged;
+begin
+ fdatalink.recordchanged(nil);
+end;
+
 { tcustomdbdropdownlistedit }
 
 constructor tcustomdbdropdownlistedit.create(aowner: tcomponent);
@@ -2443,6 +2481,11 @@ end;
 function tcustomdbdropdownlistedit.getdatasource(const aindex: integer): tdatasource;
 begin
  result:= datasource;
+end;
+
+procedure tcustomdbdropdownlistedit.recchanged;
+begin
+ fdatalink.recordchanged(nil);
 end;
 
 { tdbkeystringedit }
@@ -2557,6 +2600,11 @@ begin
  result:= datasource;
 end;
 
+procedure tdbkeystringedit.recchanged;
+begin
+ fdatalink.recordchanged(nil);
+end;
+
 { tdbmemoedit }
 
 constructor tdbmemoedit.create(aowner: tcomponent);
@@ -2666,6 +2714,11 @@ end;
 function tdbmemoedit.getdatasource(const aindex: integer): tdatasource;
 begin
  result:= datasource;
+end;
+
+procedure tdbmemoedit.recchanged;
+begin
+ fdatalink.recordchanged(nil);
 end;
 
 { tdbintegeredit }
@@ -2803,6 +2856,11 @@ begin
  result:= datasource;
 end;
 
+procedure tdbintegeredit.recchanged;
+begin
+ fdatalink.recordchanged(nil);
+end;
+
 { tdbbooleanedit }
 
 constructor tdbbooleanedit.create(aowner: tcomponent);
@@ -2906,6 +2964,11 @@ end;
 function tdbbooleanedit.getdatasource(const aindex: integer): tdatasource;
 begin
  result:= datasource;
+end;
+
+procedure tdbbooleanedit.recchanged;
+begin
+ fdatalink.recordchanged(nil);
 end;
 
 { tdbdataicon }
@@ -3021,6 +3084,11 @@ begin
  result:= datasource;
 end;
 
+procedure tdbdataicon.recchanged;
+begin
+ fdatalink.recordchanged(nil);
+end;
+
 { tdbdatabutton }
 
 constructor tdbdatabutton.create(aowner: tcomponent);
@@ -3132,6 +3200,11 @@ end;
 function tdbdatabutton.getdatasource(const aindex: integer): tdatasource;
 begin
  result:= datasource;
+end;
+
+procedure tdbdatabutton.recchanged;
+begin
+ fdatalink.recordchanged(nil);
 end;
 
 { tdbbooleaneditradio }
@@ -3252,6 +3325,11 @@ begin
  result:= datasource;
 end;
 
+procedure tdbbooleaneditradio.recchanged;
+begin
+ fdatalink.recordchanged(nil);
+end;
+
 { tdbrealedit }
 
 constructor tdbrealedit.create(aowner: tcomponent);
@@ -3367,6 +3445,11 @@ end;
 function tdbrealedit.getdatasource(const aindex: integer): tdatasource;
 begin
  result:= datasource;
+end;
+
+procedure tdbrealedit.recchanged;
+begin
+ fdatalink.recordchanged(nil);
 end;
 
 { tdbdatetimeedit }
@@ -3492,6 +3575,11 @@ begin
  result:= datasource;
 end;
 
+procedure tdbdatetimeedit.recchanged;
+begin
+ fdatalink.recordchanged(nil);
+end;
+
 { tdbcalendardatetimeedit }
 
 constructor tdbcalendardatetimeedit.create(aowner: tcomponent);
@@ -3615,6 +3703,11 @@ begin
  result:= datasource;
 end;
 
+procedure tdbcalendardatetimeedit.recchanged;
+begin
+ fdatalink.recordchanged(nil);
+end;
+
 { tcustomdbenumedit }
 
 constructor tcustomdbenumedit.create(aowner: tcomponent);
@@ -3736,6 +3829,11 @@ end;
 function tcustomdbenumedit.getdatasource(const aindex: integer): tdatasource;
 begin
  result:= datasource;
+end;
+
+procedure tcustomdbenumedit.recchanged;
+begin
+ fdatalink.recordchanged(nil);
 end;
 
 { tdbbooleantextedit }

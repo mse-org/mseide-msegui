@@ -18,7 +18,8 @@ uses
  msedatalist,mseeditglob,msegrids,msetypes,msedb;
  
 type
- tdbfilenameedit = class(tcustomfilenameedit,idbeditfieldlink,idbeditinfo)
+ tdbfilenameedit = class(tcustomfilenameedit,idbeditfieldlink,idbeditinfo,
+                                      ireccontrol)
   private
    fdatalink: teditwidgetdatalink;
    function getdatafield: string;
@@ -43,6 +44,8 @@ type
    //idbeditinfo
    procedure getfieldtypes(out propertynames: stringarty;
                           out fieldtypes: fieldtypesarty);
+   //ireccontrol
+   procedure recchanged;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -186,6 +189,11 @@ begin
    text:= copy(text,1,int1);
   end;
  end;
+end;
+
+procedure tdbfilenameedit.recchanged;
+begin
+ teditwidgetdatalink1(fdatalink).recordchanged(nil);
 end;
 
 end.

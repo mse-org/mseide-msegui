@@ -44,6 +44,10 @@ type
     //propertynames = nil -> propertyname = 'datafield'
  end;
 
+ ireccontrol = interface(inullinterface)['{E24D8F6A-0A01-4BAB-B778-300775A15CF6}']
+  procedure recchanged;
+ end;
+ 
  ipersistentfieldsinfo = interface(inullinterface)
                    ['{A8493C65-34BB-DA11-9DCA-00C0CA1308FF}'] 
   function getfieldnames: stringarty;
