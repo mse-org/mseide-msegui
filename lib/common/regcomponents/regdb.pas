@@ -12,28 +12,10 @@ unit regdb;
 {$ifdef FPC}{$mode objfpc}{$h+}{$INTERFACES CORBA}{$endif}
 
 interface
-
-implementation
 uses
- dbconst,classes,msedesignintf,db,msedbedit,typinfo,mseibconnection,msepropertyeditors,
- msepqconnection,mseodbcconn,msemysql40conn,msemysql41conn,msemysql50conn,{sqldb,}
- mselookupbuffer,msesqldb,msedbf,msesdfdata,msememds,msedb,mseclasses,msetypes,
- msestrings,msedatalist,msedbfieldeditor,sysutils,msetexteditor,
- msedbdispwidgets,msedbgraphics,regdb_bmp,msegui,msedbdialog,msegrids,
- regwidgets,msebufdataset
- {$ifdef mse_with_sqlite}
- ,msesqlite3ds
- {$endif}
- ;
-
-type
- tpropertyeditor1 = class(tpropertyeditor);
+ msesqldb,msedbedit,msepropertyeditors,msedb,mseclasses,msetypes,msestrings;
  
- tnolistdropdowncolpropertyeditor = class(tarraypropertyeditor)
-  protected
-   function geteditorclass: propertyeditorclassty; override;
- end;
-
+type
  tdbfieldnamepropertyeditor = class(tstringpropertyeditor)
   protected
    fdbeditinfointf: idbeditinfo;
@@ -56,6 +38,27 @@ type
  end;
  
  tdbfieldnamearraypropertyeditor = class(tstringarraypropertyeditor)
+  protected
+   function geteditorclass: propertyeditorclassty; override;
+ end;
+
+implementation
+uses
+ dbconst,classes,msedesignintf,db,typinfo,mseibconnection,
+ msepqconnection,mseodbcconn,msemysql40conn,msemysql41conn,msemysql50conn,{sqldb,}
+ mselookupbuffer,msedbf,msesdfdata,msememds,
+ msedatalist,msedbfieldeditor,sysutils,msetexteditor,
+ msedbdispwidgets,msedbgraphics,regdb_bmp,msegui,msedbdialog,msegrids,
+ regwidgets,msebufdataset
+ {$ifdef mse_with_sqlite}
+ ,msesqlite3ds
+ {$endif}
+ ;
+
+type
+ tpropertyeditor1 = class(tpropertyeditor);
+ 
+ tnolistdropdowncolpropertyeditor = class(tarraypropertyeditor)
   protected
    function geteditorclass: propertyeditorclassty; override;
  end;

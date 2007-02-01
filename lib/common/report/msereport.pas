@@ -411,7 +411,7 @@ const
                    ];
 
 type                     
- tcustomrecordband = class(tcustomscalingwidget)
+ tcustomrecordband = class(tcustomscalingwidget,idbeditinfo)
   private
    fparentintf: ibandparent;
    fonbeforerender: beforerenderrecordeventty;
@@ -421,11 +421,20 @@ type
    ftabs: treptabulators;
    fupdating: integer;
    fdatalink: trecordbanddatalink;
+   fvisidatalink: tfielddatalink;
    foptions: bandoptionsty;
    procedure settabs(const avalue: treptabulators);
    procedure setdatasource(const avalue: tdatasource); virtual;
    function getdatasource: tdatasource;
    procedure setoptions(const avalue: bandoptionsty);
+   function getvisidatasource: tdatasource;
+   procedure setvisidatasource(const avalue: tdatasource);
+   function getvisidatafield: string;
+   procedure setvisidatafield(const avalue: string);
+              //idbeditinfo
+   function getdatasource(const aindex: integer): tdatasource;
+   procedure getfieldtypes(out apropertynames: stringarty;
+                           out afieldtypes: fieldtypesarty);
   protected
    procedure minclientsizechanged;
    procedure fontchanged; override;
@@ -442,6 +451,7 @@ type
    procedure dopaint(const acanvas: tcanvas); override;
    procedure doonpaint(const acanvas: tcanvas); override;
    procedure doafterpaint(const acanvas: tcanvas); override;
+   procedure nextrecord;
    function rendering: boolean;
    function bandheight: integer;
    procedure dobeforerender(var empty: boolean); virtual;
@@ -462,6 +472,10 @@ type
    property tabs: treptabulators read ftabs write settabs;
    property font: twidgetfont read getfont write setfont stored isfontstored;
    property datasource: tdatasource read getdatasource write setdatasource;
+   property visidatasource: tdatasource read getvisidatasource 
+                          write setvisidatasource;
+   property visidatafield: string read getvisidatafield write setvisidatafield;
+               //controls visibility not null -> visible
    property options: bandoptionsty read foptions write setoptions default [];
    property onbeforerender: beforerenderrecordeventty read fonbeforerender
                                write fonbeforerender;
@@ -478,6 +492,8 @@ type
    property datasource;
    property options;
    property optionsscale;
+   property visidatasource;
+   property visidatafield;
    property onfontheightdelta;
    property onchildscaled;
 
@@ -587,6 +603,9 @@ type
    property datasource;
    property options;
    property optionsscale;
+   property visidatasource;
+   property visidatafield;
+
    property onfontheightdelta;
    property onchildscaled;
 
@@ -1966,6 +1985,7 @@ constructor tcustomrecordband.create(aowner: tcomponent);
 begin
  ftabs:= treptabulators.create(self);
  fdatalink:= trecordbanddatalink.create;
+ fvisidatalink:= tfielddatalink.create;
  inherited;
  fanchors:= defaultbandanchors;
  foptionswidget:= defaultbandoptionswidget;
@@ -1975,6 +1995,7 @@ destructor tcustomrecordband.destroy;
 begin
  ftabs.free;
  fdatalink.free;
+ fvisidatalink.free;
  inherited;
 end;
 
@@ -2036,6 +2057,7 @@ begin
   end;
   try
    inherited paint(acanvas);
+   nextrecord;
   finally
    fparentintf.endband(acanvas,self);
   end;
@@ -2091,6 +2113,18 @@ begin
  ftabs.assign(avalue);
 end;
 
+procedure tcustomrecordband.nextrecord;
+begin
+ if fdatalink.active then begin
+  application.lock;
+  try
+   fdatalink.dataset.next;
+  finally
+   application.unlock;
+  end;
+ end;
+end;
+
 procedure tcustomrecordband.doafterpaint(const acanvas: tcanvas);
 var
  ar1: segmentarty;
@@ -2103,14 +2137,6 @@ begin
    application.lock;
    try
     fonafterpaint(self,acanvas);
-   finally
-    application.unlock;
-   end;
-  end;
-  if fdatalink.active then begin
-   application.lock;
-   try
-    fdatalink.dataset.next;
    finally
     application.unlock;
    end;
@@ -2255,6 +2281,20 @@ label
  endlab;
 begin
  result:= visible;
+ if fvisidatalink.fieldactive then begin
+  if fvisidatalink.datasource = fdatalink.datasource then begin
+   while not fdatalink.dataset.eof and fvisidatalink.field.isnull do begin
+    fdatalink.dataset.next;
+   end;
+  end;
+  if fvisidatalink.field.isnull then begin
+   result:= false;
+   goto endlab;
+  end
+  else begin
+   result:= true;
+  end;
+ end;
  if fparentintf <> nil then begin
   if foptions * visibilitymask <> [] then begin
    even1:= not odd(fparentintf.reppagenum);
@@ -2354,11 +2394,6 @@ begin
   end;
  end;
 endlab:
-{
- if asetvisible then begin
-  visible:= result;
- end;
- }
 end;
 
 function tcustomrecordband.getvisibility: boolean;
@@ -2420,6 +2455,38 @@ begin
  include(fstate,rbs_finish);
 end;
 
+function tcustomrecordband.getvisidatasource: tdatasource;
+begin
+ result:= fvisidatalink.datasource;
+end;
+
+procedure tcustomrecordband.setvisidatasource(const avalue: tdatasource);
+begin
+ fvisidatalink.datasource:= avalue;
+end;
+
+function tcustomrecordband.getvisidatafield: string;
+begin
+ result:= fvisidatalink.fieldname;
+end;
+
+procedure tcustomrecordband.setvisidatafield(const avalue: string);
+begin
+ fvisidatalink.fieldname:= avalue;
+end;
+
+function tcustomrecordband.getdatasource(const aindex: integer): tdatasource;
+begin
+ result:= fvisidatalink.datasource;
+end;
+
+procedure tcustomrecordband.getfieldtypes(out apropertynames: stringarty;
+               out afieldtypes: fieldtypesarty);
+begin
+ apropertynames:= nil;
+ afieldtypes:= nil;
+end;
+
 { tcustombandgroup }
 
 procedure tcustombandgroup.registerchildwidget(const child: twidget);
@@ -2470,6 +2537,7 @@ begin
     if visible then begin
      acanvas.origin:= makepoint(int2 + bounds_x,int3);
      inheritedpaint(acanvas);
+     nextrecord;
      inc(int3,bounds_cy);
 //     acanvas.move(makepoint(0,bounds_cy));
     end;
