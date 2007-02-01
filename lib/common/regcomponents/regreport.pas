@@ -40,6 +40,8 @@ begin
  registerpropertyeditor(typeinfo(treptabulators),nil,'',treptabulatorseditor);
  registerpropertyeditor(typeinfo(string),tcustomrecordband,'visidatafield',
         tdbfieldnamepropertyeditor);
+ registerpropertyeditor(typeinfo(string),tcustomrecordband,'visigroupfield',
+        tdbfieldnamepropertyeditor);
 end;
 
 { treptabulatoreditor }

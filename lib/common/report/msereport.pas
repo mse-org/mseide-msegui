@@ -357,7 +357,8 @@ type
    property defaultdist;
  end;
   
- recordbandstatety = (rbs_rendering,rbs_showed,rbs_pageshowed,rbs_finish);
+ recordbandstatety = (rbs_rendering,rbs_showed,rbs_pageshowed,rbs_finish,
+                      rbs_notfirstrecord);
  recordbandstatesty = set of recordbandstatety; 
  
  ibandparent = interface(inullinterface)
@@ -422,19 +423,23 @@ type
    fupdating: integer;
    fdatalink: trecordbanddatalink;
    fvisidatalink: tfielddatalink;
+   fvisigrouplink: tfielddatalink;
    foptions: bandoptionsty;
+   fgroupnum: integer;
    procedure settabs(const avalue: treptabulators);
-   procedure setdatasource(const avalue: tdatasource); virtual;
-   function getdatasource: tdatasource;
    procedure setoptions(const avalue: bandoptionsty);
    function getvisidatasource: tdatasource;
    procedure setvisidatasource(const avalue: tdatasource);
    function getvisidatafield: string;
    procedure setvisidatafield(const avalue: string);
+   function getdatasource: tdatasource; overload;
+   procedure setdatasource(const avalue: tdatasource); virtual;
               //idbeditinfo
-   function getdatasource(const aindex: integer): tdatasource;
+   function getdatasource(const aindex: integer): tdatasource; overload;
    procedure getfieldtypes(out apropertynames: stringarty;
                            out afieldtypes: fieldtypesarty);
+   function getvisigroupfield: string;
+   procedure setvisigroupfield(const avalue: string);
   protected
    procedure minclientsizechanged;
    procedure fontchanged; override;
@@ -451,7 +456,7 @@ type
    procedure dopaint(const acanvas: tcanvas); override;
    procedure doonpaint(const acanvas: tcanvas); override;
    procedure doafterpaint(const acanvas: tcanvas); override;
-   procedure nextrecord;
+   procedure nextrecord(const setflag: boolean = true);
    function rendering: boolean;
    function bandheight: integer;
    procedure dobeforerender(var empty: boolean); virtual;
@@ -476,6 +481,7 @@ type
                           write setvisidatasource;
    property visidatafield: string read getvisidatafield write setvisidatafield;
                //controls visibility not null -> visible
+   property visigroupfield: string read getvisigroupfield write setvisigroupfield;
    property options: bandoptionsty read foptions write setoptions default [];
    property onbeforerender: beforerenderrecordeventty read fonbeforerender
                                write fonbeforerender;
@@ -494,6 +500,7 @@ type
    property optionsscale;
    property visidatasource;
    property visidatafield;
+   property visigroupfield;
    property onfontheightdelta;
    property onchildscaled;
 
@@ -1986,6 +1993,7 @@ begin
  ftabs:= treptabulators.create(self);
  fdatalink:= trecordbanddatalink.create;
  fvisidatalink:= tfielddatalink.create;
+ fvisigrouplink:= tfielddatalink.create;
  inherited;
  fanchors:= defaultbandanchors;
  foptionswidget:= defaultbandoptionswidget;
@@ -1996,6 +2004,7 @@ begin
  ftabs.free;
  fdatalink.free;
  fvisidatalink.free;
+ fvisigrouplink.free;
  inherited;
 end;
 
@@ -2067,6 +2076,10 @@ end;
 procedure tcustomrecordband.init;
 begin
  exclude(fstate,rbs_finish);
+ if fvisigrouplink.fieldactive then begin
+  fgroupnum:= fvisigrouplink.asinteger;
+//  fgroupnum:= fvisigrouplink.aslargeint;
+ end;
 end;
 
 procedure tcustomrecordband.initpage;
@@ -2113,8 +2126,15 @@ begin
  ftabs.assign(avalue);
 end;
 
-procedure tcustomrecordband.nextrecord;
+procedure tcustomrecordband.nextrecord(const setflag: boolean = true);
 begin
+ if setflag then begin
+  include(fstate,rbs_notfirstrecord);
+  if fvisigrouplink.fieldactive then begin
+//   fgroupnum:= fvisigrouplink.field.aslargeint;
+   fgroupnum:= fvisigrouplink.field.asinteger;
+  end;
+ end;
  if fdatalink.active then begin
   application.lock;
   try
@@ -2284,7 +2304,7 @@ begin
  if fvisidatalink.fieldactive then begin
   if fvisidatalink.datasource = fdatalink.datasource then begin
    while not fdatalink.dataset.eof and fvisidatalink.field.isnull do begin
-    fdatalink.dataset.next;
+    nextrecord(false);
    end;
   end;
   if fvisidatalink.field.isnull then begin
@@ -2295,8 +2315,25 @@ begin
    result:= true;
   end;
  end;
- if fparentintf <> nil then begin
-  if foptions * visibilitymask <> [] then begin
+ if fvisigrouplink.fieldactive then begin
+  if fvisigrouplink.datasource = fdatalink.datasource then begin
+   while not fdatalink.dataset.eof and 
+//                (fvisidatalink.field.aslargeint = fgroupnum) do begin
+                (fvisidatalink.field.asinteger = fgroupnum) do begin
+    nextrecord(false);
+   end;
+  end;
+//  if fvisigrouplink.field.aslargeint = fgroupnum then begin
+  if fvisigrouplink.field.asinteger = fgroupnum then begin
+   result:= false;
+   goto endlab;
+  end
+  else begin
+   result:= true;
+  end;
+ end;
+ if foptions * visibilitymask <> [] then begin
+  if fparentintf <> nil then begin
    even1:= not odd(fparentintf.reppagenum);
    if even1 and (bo_hideevenpage in foptions) then begin
     result:= false;
@@ -2463,6 +2500,7 @@ end;
 procedure tcustomrecordband.setvisidatasource(const avalue: tdatasource);
 begin
  fvisidatalink.datasource:= avalue;
+ fvisigrouplink.datasource:= avalue;
 end;
 
 function tcustomrecordband.getvisidatafield: string;
@@ -2483,8 +2521,23 @@ end;
 procedure tcustomrecordband.getfieldtypes(out apropertynames: stringarty;
                out afieldtypes: fieldtypesarty);
 begin
- apropertynames:= nil;
- afieldtypes:= nil;
+ setlength(apropertynames,2);
+ apropertynames[0]:= 'visidatafield';
+ apropertynames[1]:= 'visigroupfield';
+ setlength(afieldtypes,2);
+ afieldtypes[0]:= [];
+ afieldtypes[1]:= [ftinteger,ftlargeint,ftsmallint,
+                     ftword,ftboolean];
+end;
+
+function tcustomrecordband.getvisigroupfield: string;
+begin
+ result:= fvisigrouplink.fieldname;
+end;
+
+procedure tcustomrecordband.setvisigroupfield(const avalue: string);
+begin
+ fvisigrouplink.fieldname:= avalue;
 end;
 
 { tcustombandgroup }
