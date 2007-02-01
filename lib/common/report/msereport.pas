@@ -815,6 +815,7 @@ type
    fstate: repstatesty;
    factivepage: integer;
    fprintstarttime: tdatetime;
+   fonprogress: notifyeventty;
    procedure setppmm(const avalue: real);
    function getreppages(index: integer): tcustomreportpage;
    procedure setreppages(index: integer; const avalue: tcustomreportpage);
@@ -842,6 +843,7 @@ type
    procedure internalcreatefont; override;
    procedure defineproperties(filer: tfiler); override;
    procedure nextpage(const acanvas: tcanvas);
+   procedure doprogress;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -875,6 +877,7 @@ type
                                write fonbeforerender;
    property onafterrender: notifyeventty read fonafterrender
                                write fonafterrender;
+   property onprogress: notifyeventty read fonprogress write fonprogress;
  end;
 
  treport = class(tcustomreport)
@@ -893,6 +896,7 @@ type
    property grid_size;
    property onbeforerender;
    property onafterrender;
+   property onprogress;
  end;
 
  reportclassty = class of treport;
@@ -910,6 +914,11 @@ type
  tcustomframe1 = class(tcustomframe);
  twidget1 = class(twidget);
  tmsecomponent1 = class(tmsecomponent);
+
+procedure renderingerror;
+begin
+ raise exception.create('Operation not possible while rendering');
+end;
  
 function createreport(const aclass: tclass; 
                    const aclassname: pshortstring): tmsecomponent;
@@ -2044,7 +2053,12 @@ begin
    end;
   end;
   if fdatalink.active then begin
-   fdatalink.dataset.next;
+   application.lock;
+   try
+    fdatalink.dataset.next;
+   finally
+    application.unlock;
+   end;
   end;
  end;
  if csdesigning in componentstate then begin
@@ -2929,12 +2943,18 @@ begin
    doafterpaint1(acanvas);
    if fdatalink.active then begin
     bo1:= false;
-    fdatalink.dataset.next;
+    application.lock;
+    try
+     fdatalink.dataset.next;
+    finally
+     application.unlock;
+    end;
    end;
    inc(fpagenum);
    inc(freport.fpagenum);
    include(fstate,rpps_showed);
   end;
+  freport.doprogress;
   result:= result and bo1;
  until bo1 or (fnextpage <> nil);
  doafterlastpage;
@@ -3590,6 +3610,18 @@ end;
 procedure tcustomreport.finish;
 begin
  include(fstate,rs_finish);
+end;
+
+procedure tcustomreport.doprogress;
+begin
+ if canevent(tmethod(fonprogress)) then begin
+  application.lock;
+  try
+   fonprogress(self);
+  finally
+   application.unlock;
+  end;
+ end;  
 end;
 
  {treport}
