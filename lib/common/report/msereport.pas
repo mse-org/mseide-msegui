@@ -66,7 +66,8 @@ type
                                const acanvas: tcanvas) of object;
  beforerenderrecordeventty = procedure(const sender: tcustomrecordband;
                                           var empty: boolean) of object;
-
+ synceventty = procedure() of object;
+ 
  treptabfont = class(tparentfont)
   protected
    class function getinstancepo(owner: tobject): pfont; override;
@@ -386,20 +387,22 @@ type
  trecordbanddatalink = class(tmsedatalink)
  end;
 
- bandoptionty = (bo_once,bo_evenpage,bo_oddpage,   
+ bandoptionty = (bo_once,bo_evenpage,bo_oddpage, 
                           //page nums are null based
-                  bo_showevenpage,bo_hideevenpage,
-                  bo_showoddpage,bo_hideoddpage,
-                  bo_showfirstofpage,bo_hidefirstofpage,
-                  bo_shownormalofpage,bo_hidenormalofpage,
-                  bo_showlastofpage,bo_hidelastofpage,
-                  bo_showfirstrecord,bo_hidefirstrecord,
-                  bo_shownormalrecord,bo_hidenormalrecord,
-                  bo_showlastrecord,bo_hidelastrecord,
-                  bo_localvalue 
+                 bo_visigroupfirst,bo_visigrouplast,
+                         //show only first/last record of group
+                 bo_showevenpage,bo_hideevenpage,
+                 bo_showoddpage,bo_hideoddpage,
+                 bo_showfirstofpage,bo_hidefirstofpage,
+                 bo_shownormalofpage,bo_hidenormalofpage,
+                 bo_showlastofpage,bo_hidelastofpage,
+                 bo_showfirstrecord,bo_hidefirstrecord,
+                 bo_shownormalrecord,bo_hidenormalrecord,
+                 bo_showlastrecord,bo_hidelastrecord,
+                 bo_localvalue 
                   //used in treppagenumdisp to number of the current page
                   //and in trepprinttimedisp to show now
-                  );
+                 );
  bandoptionsty = set of bandoptionty;
 
 const 
@@ -428,6 +431,7 @@ type
    fvisigrouplink: tfielddatalink;
    foptions: bandoptionsty;
    fgroupnum: integer;
+   fnextgroupnum: integer;
    frecnobefore: integer;
    procedure settabs(const avalue: treptabulators);
    procedure setoptions(const avalue: bandoptionsty);
@@ -461,6 +465,9 @@ type
    procedure dopaint(const acanvas: tcanvas); override;
    procedure doonpaint(const acanvas: tcanvas); override;
    procedure doafterpaint(const acanvas: tcanvas); override;
+   procedure dobeforenextrecord; virtual;
+   procedure dosyncnextrecord; virtual;
+   
    procedure nextrecord(const setflag: boolean = true);
    function rendering: boolean;
    function bandheight: integer;
@@ -592,6 +599,8 @@ type
    function pageprintstarttime: tdatetime;
    function repprintstarttime: tdatetime;
    function getreppage: tcustomreportpage;
+   procedure dobeforenextrecord; override;
+   procedure dosyncnextrecord; override;
   protected
    procedure setparentwidget(const avalue: twidget); override;   
    procedure registerchildwidget(const child: twidget); override;
@@ -670,6 +679,8 @@ type
    procedure init; virtual;
    procedure initareapage;
    procedure initpage;
+   procedure dobeforenextrecord;
+   procedure dosyncnextrecord;
    function checkareafull(ay: integer): boolean;
            //ibandparent
    function beginband(const acanvas: tcanvas;
@@ -778,6 +789,8 @@ type
    procedure doafterpaint1(const acanvas: tcanvas); virtual;
    procedure doafterlastpage; virtual;
    procedure init; virtual;
+   procedure dobeforenextrecord;
+   procedure dosyncnextrecord;
    property ppmm: real read fppmm write setppmm; //pixel per mm
    
    function render(const acanvas: tcanvas): boolean;
@@ -1009,12 +1022,16 @@ begin
  end;
 end;
 }
-function checkislastrecord(const adatalink: tmsedatalink): boolean;
+function checkislastrecord(const adatalink: tmsedatalink; 
+                               const syncproc: synceventty): boolean;
 begin                     
  with adatalink do begin          //todo: optimize   
   if active then begin
    if not dataset.eof then begin
     dataset.next;
+    if assigned(syncproc) then begin
+     syncproc;
+    end;
     result:= dataset.eof;
     dataset.prior;
     if result and not dataset.bof then begin
@@ -2104,16 +2121,18 @@ begin
  empty:= empty or (rbs_finish in fstate);
  dobeforerender(empty);
  fparentintf.updatevisible;
- if not empty and visible then begin
-  if fparentintf.beginband(acanvas,self) then begin
-   exit;
+ if not empty then begin
+  if visible then begin
+   if fparentintf.beginband(acanvas,self) then begin
+    exit;
+   end;
+   try
+    inherited paint(acanvas);
+   finally
+    fparentintf.endband(acanvas,self);
+   end;
   end;
-  try
-   inherited paint(acanvas);
-   nextrecord;
-  finally
-   fparentintf.endband(acanvas,self);
-  end;
+  nextrecord;
  end;
 end;
 
@@ -2122,6 +2141,7 @@ begin
  exclude(fstate,rbs_finish);
  if fvisigrouplink.fieldactive then begin
   fgroupnum:= fvisigrouplink.asinteger;
+  fnextgroupnum:= fgroupnum;
 //  fgroupnum:= fvisigrouplink.aslargeint;
  end;
 end;
@@ -2161,7 +2181,7 @@ begin
   frecnobefore:= fdatalink.dataset.recno;
   fdatalink.dataset.disablecontrols;
   fdatalink.dataset.first;
-  if checkislastrecord(fdatalink) then begin
+  if checkislastrecord(fdatalink,@dosyncnextrecord) then begin
    include(fstate,rbs_lastrecord);
   end;
  end; 
@@ -2185,14 +2205,25 @@ begin
  ftabs.assign(avalue);
 end;
 
+procedure tcustomrecordband.dobeforenextrecord;
+begin
+ if fvisigrouplink.fieldactive then begin
+  fgroupnum:= fvisigrouplink.field.asinteger;
+ end;
+end;
+
+procedure tcustomrecordband.dosyncnextrecord;
+begin
+ if fvisigrouplink.fieldactive then begin
+  fnextgroupnum:= fvisigrouplink.field.asinteger;
+ end;
+end;
+
 procedure tcustomrecordband.nextrecord(const setflag: boolean = true);
 begin
  if setflag then begin
   include(fstate,rbs_notfirstrecord);
-  if fvisigrouplink.fieldactive then begin
-//   fgroupnum:= fvisigrouplink.field.aslargeint;
-   fgroupnum:= fvisigrouplink.field.asinteger;
-  end;
+  dobeforenextrecord;
  end;
  if fdatalink.active then begin
   application.lock;
@@ -2203,7 +2234,7 @@ begin
   end;
  end;
  if setflag then begin
-  if checkislastrecord(fdatalink) then begin
+  if checkislastrecord(fdatalink,@dosyncnextrecord) then begin
    include(fstate,rbs_lastrecord);
   end; 
   fparentintf.getreppage.recordchanged;
@@ -2397,6 +2428,7 @@ label
 begin
  result:= visible;
  if fvisidatalink.fieldactive then begin
+ {
   if fvisidatalink.datasource = fdatalink.datasource then begin
    bo1:= false;
    while not fdatalink.dataset.eof and fvisidatalink.field.isnull do begin
@@ -2404,11 +2436,12 @@ begin
     bo1:= true;
    end;
    if bo1 then begin
-    if checkislastrecord(fdatalink) then begin
+    if checkislastrecord(fdatalink,@dosyncnextrecord) then begin
      include(fstate,rbs_lastrecord);
     end; 
    end;
   end;
+  }
   if fvisidatalink.field.isnull then begin
    result:= false;
    goto endlab;
@@ -2417,7 +2450,10 @@ begin
    result:= true;
   end;
  end;
+ firstrecord:= isfirstrecord;
+ lastrecord:= islastrecord;
  if fvisigrouplink.fieldactive then begin
+ {
   if fvisigrouplink.datasource = fdatalink.datasource then begin
    bo1:= false;
    while not fdatalink.dataset.eof and 
@@ -2426,17 +2462,21 @@ begin
     nextrecord(false);
    end;
    if bo1 then begin
-    if checkislastrecord(fdatalink) then begin
+    if checkislastrecord(fdatalink,@dosyncnextrecord) then begin
      include(fstate,rbs_lastrecord);
     end; 
    end;
   end;
-  if fvisigrouplink.field.asinteger = fgroupnum then begin
-   result:= false;
-   goto endlab;
+  }
+  if (bo_visigroupfirst in foptions) and (firstrecord or 
+                  (fvisigrouplink.field.asinteger <> fgroupnum)) or
+         (bo_visigrouplast in foptions) and (lastrecord or 
+                  (fvisigrouplink.field.asinteger <> fnextgroupnum)) then begin
+   result:= true;
   end
   else begin
-   result:= true;
+   result:= false;
+   goto endlab;
   end;
  end;
  if foptions * visibilitymask <> [] then begin
@@ -2454,8 +2494,6 @@ begin
    bo1:= bo1 or not even1 and (bo_showoddpage in foptions);
    firstofpage:= fparentintf.isfirstband;
    lastofpage:= checklast and fparentintf.islastband;
-   firstrecord:= isfirstrecord;
-   lastrecord:= islastrecord;
    if firstofpage then begin
     if bo_showfirstofpage in foptions then begin
      result:= true;
@@ -2698,10 +2736,10 @@ begin
     if visible then begin
      acanvas.origin:= makepoint(int2 + bounds_x,int3);
      inheritedpaint(acanvas);
-     nextrecord;
      inc(int3,bounds_cy);
 //     acanvas.move(makepoint(0,bounds_cy));
     end;
+    nextrecord;
    end;
   end;
   acanvas.origin:= pt1;
@@ -2793,9 +2831,14 @@ begin
 end;
 
 procedure tcustombandgroup.init;
+var
+ int1: integer;
 begin
  sortwidgetsyorder(widgetarty(fbands));
  inherited;
+ for int1:= 0 to high(fbands) do begin
+  fbands[int1].init;
+ end;
 end;
 
 procedure tcustombandgroup.beginrender;
@@ -2878,6 +2921,26 @@ end;
 function tcustombandgroup.getreppage: tcustomreportpage;
 begin
  result:= fparentintf.getreppage;
+end;
+
+procedure tcustombandgroup.dobeforenextrecord;
+var
+ int1: integer;
+begin
+ inherited;
+ for int1:= 0 to high(fbands) do begin
+  fbands[int1].dobeforenextrecord;
+ end;
+end;
+
+procedure tcustombandgroup.dosyncnextrecord;
+var
+ int1: integer;
+begin
+ inherited;
+ for int1:= 0 to high(fbands) do begin
+  fbands[int1].dosyncnextrecord;
+ end;
 end;
 
 { tcustombandarea }
@@ -3222,6 +3285,24 @@ begin
  result:= freportpage.islastrecord;
 end;
 
+procedure tcustombandarea.dobeforenextrecord;
+var
+ int1: integer;
+begin
+ for int1:= 0 to high(fbands) do begin
+  fbands[int1].dobeforenextrecord;
+ end;
+end;
+
+procedure tcustombandarea.dosyncnextrecord;
+var
+ int1: integer;
+begin
+ for int1:= 0 to high(fbands) do begin
+  fbands[int1].dosyncnextrecord;
+ end;
+end;
+
 { tcustomreportpage }
 
 constructor tcustomreportpage.create(aowner: tcomponent);
@@ -3289,6 +3370,30 @@ begin
  end;
 end;
 
+procedure tcustomreportpage.dosyncnextrecord;
+var
+ int1: integer;
+begin
+ for int1:= 0 to high(fareas) do begin
+  fareas[int1].dosyncnextrecord;
+ end;
+ for int1:= 0 to high(fbands) do begin
+  fbands[int1].dosyncnextrecord;
+ end;
+end;
+
+procedure tcustomreportpage.dobeforenextrecord;
+var
+ int1: integer;
+begin
+ for int1:= 0 to high(fareas) do begin
+  fareas[int1].dobeforenextrecord;
+ end;
+ for int1:= 0 to high(fbands) do begin
+  fbands[int1].dobeforenextrecord;
+ end;
+end;
+
 function tcustomreportpage.render(const acanvas: tcanvas): boolean;
 var
  int1: integer;
@@ -3351,8 +3456,9 @@ begin
     bo1:= false;
     application.lock;
     try
+     dobeforenextrecord;
      fdatalink.dataset.next;
-     if checkislastrecord(fdatalink) then begin
+     if checkislastrecord(fdatalink,@dosyncnextrecord) then begin
       include(fstate,rpps_lastrecord);
      end; 
     finally
@@ -3455,7 +3561,7 @@ begin
    frecnobefore:= dataset.recno;
    dataset.disablecontrols;
    dataset.first;
-   if checkislastrecord(fdatalink) then begin
+   if checkislastrecord(fdatalink,@dosyncnextrecord) then begin
     include(fstate,rpps_lastrecord);
    end;
   end;
@@ -3700,8 +3806,13 @@ procedure tcustomreportpage.recordchanged;
 var
  int1: integer;
 begin
- for int1:= 0 to high(freccontrols) do begin
-  ireccontrol(freccontrols[int1]).recchanged;
+ application.lock;
+ try
+  for int1:= 0 to high(freccontrols) do begin
+   ireccontrol(freccontrols[int1]).recchanged;
+  end;
+ finally
+  application.unlock;
  end;
 end;
 
