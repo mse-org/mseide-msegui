@@ -360,7 +360,7 @@ type
  end;
   
  recordbandstatety = (rbs_rendering,rbs_showed,rbs_pageshowed,rbs_finish,
-                      rbs_notfirstrecord);
+                      rbs_notfirstrecord,rbs_lastrecord);
  recordbandstatesty = set of recordbandstatety; 
  
  ibandparent = interface(inullinterface)
@@ -466,6 +466,8 @@ type
    function bandheight: integer;
    procedure dobeforerender(var empty: boolean); virtual;
    procedure synctofontheight; override;
+   function isfirstrecord: boolean;
+   function islastrecord: boolean;
    function bandisvisible(const checklast: boolean): boolean;
    function getvisibility: boolean;
    procedure updatevisibility; virtual;
@@ -582,8 +584,6 @@ type
    procedure endband(const acanvas: tcanvas; const sender: tcustomrecordband);  
    function isfirstband: boolean;
    function islastband(const addheight: integer = 0): boolean;
-   function isfirstrecord: boolean;
-   function islastrecord: boolean;
    procedure updatevisible;
    function getwidget: twidget;
    function remainingheight: integer;
@@ -710,7 +710,7 @@ type
  end;
 
  reportpagestatety = (rpps_inited,rpps_rendering,rpps_backgroundrendered,
-                      rpps_showed,rpps_finish);
+                      rpps_showed,rpps_finish,rpps_notfirstrecord,rpps_lastrecord);
  reportpagestatesty = set of reportpagestatety;
  
  bandareaarty = array of tcustombandarea;
@@ -984,7 +984,7 @@ procedure renderingerror;
 begin
  raise exception.create('Operation not possible while rendering');
 end;
-
+{
 function checkisfirstrecord(const adatalink: tmsedatalink;
            out avalue: boolean): boolean; //true if adatalink active
 begin
@@ -1006,6 +1006,28 @@ begin
  end
  else begin
   avalue:= false;
+ end;
+end;
+}
+function checkislastrecord(const adatalink: tmsedatalink): boolean;
+begin                     
+ with adatalink do begin          //todo: optimize   
+  if active then begin
+   if not dataset.eof then begin
+    dataset.next;
+    result:= dataset.eof;
+    dataset.prior;
+    if result and not dataset.bof then begin
+     dataset.next;
+    end;
+   end
+   else begin
+    result:= true;
+   end;
+  end
+  else begin
+   result:= false;
+  end;
  end;
 end;
 
@@ -2138,6 +2160,10 @@ begin
  if fdatalink.active then begin
   frecnobefore:= fdatalink.dataset.recno;
   fdatalink.dataset.disablecontrols;
+  fdatalink.dataset.first;
+  if checkislastrecord(fdatalink) then begin
+   include(fstate,rbs_lastrecord);
+  end;
  end; 
 end;
 
@@ -2177,6 +2203,9 @@ begin
   end;
  end;
  if setflag then begin
+  if checkislastrecord(fdatalink) then begin
+   include(fstate,rbs_lastrecord);
+  end; 
   fparentintf.getreppage.recordchanged;
  end;
 end;
@@ -2328,6 +2357,36 @@ begin
  syncsinglelinefontheight(true);
 end;
 
+function tcustomrecordband.isfirstrecord: boolean;
+begin
+ if fdatalink.active then begin
+  result:= not (rbs_notfirstrecord in fstate);
+ end
+ else begin
+  if fparentintf <> nil then begin
+   result:= fparentintf.isfirstrecord;
+  end
+  else begin
+   result:= false;
+  end;
+ end;
+end;
+
+function tcustomrecordband.islastrecord: boolean;
+begin
+ if fdatalink.active then begin
+  result:= rbs_lastrecord in fstate;
+ end
+ else begin
+  if fparentintf <> nil then begin
+   result:= fparentintf.islastrecord;
+  end
+  else begin
+   result:= false;
+  end;
+ end;
+end;
+
 function tcustomrecordband.bandisvisible(const checklast: boolean): boolean;
 var
  firstofpage,lastofpage,showed,hidden: boolean;
@@ -2339,8 +2398,15 @@ begin
  result:= visible;
  if fvisidatalink.fieldactive then begin
   if fvisidatalink.datasource = fdatalink.datasource then begin
+   bo1:= false;
    while not fdatalink.dataset.eof and fvisidatalink.field.isnull do begin
     nextrecord(false);
+    bo1:= true;
+   end;
+   if bo1 then begin
+    if checkislastrecord(fdatalink) then begin
+     include(fstate,rbs_lastrecord);
+    end; 
    end;
   end;
   if fvisidatalink.field.isnull then begin
@@ -2353,13 +2419,18 @@ begin
  end;
  if fvisigrouplink.fieldactive then begin
   if fvisigrouplink.datasource = fdatalink.datasource then begin
+   bo1:= false;
    while not fdatalink.dataset.eof and 
-//                (fvisidatalink.field.aslargeint = fgroupnum) do begin
                 (fvisidatalink.field.asinteger = fgroupnum) do begin
+    bo1:= true;
     nextrecord(false);
    end;
+   if bo1 then begin
+    if checkislastrecord(fdatalink) then begin
+     include(fstate,rbs_lastrecord);
+    end; 
+   end;
   end;
-//  if fvisigrouplink.field.aslargeint = fgroupnum then begin
   if fvisigrouplink.field.asinteger = fgroupnum then begin
    result:= false;
    goto endlab;
@@ -2383,13 +2454,8 @@ begin
    bo1:= bo1 or not even1 and (bo_showoddpage in foptions);
    firstofpage:= fparentintf.isfirstband;
    lastofpage:= checklast and fparentintf.islastband;
-   if checkisfirstrecord(fdatalink,firstrecord) then begin
-    checkislastrecord(fdatalink,lastrecord);
-   end
-   else begin
-    firstrecord:= fparentintf.isfirstrecord;
-    lastrecord:= fparentintf.islastrecord;
-   end;
+   firstrecord:= isfirstrecord;
+   lastrecord:= islastrecord;
    if firstofpage then begin
     if bo_showfirstofpage in foptions then begin
      result:= true;
@@ -2772,20 +2838,6 @@ end;
 function tcustombandgroup.islastband(const addheight: integer = 0): boolean;
 begin
  result:= fparentintf.islastband;
-end;
-
-function tcustombandgroup.isfirstrecord: boolean;
-begin
- if not checkisfirstrecord(fdatalink,result) then begin
-  result:= fparentintf.isfirstrecord;
- end;
-end;
-
-function tcustombandgroup.islastrecord: boolean;
-begin
- if not checkislastrecord(fdatalink,result) then begin
-  result:= fparentintf.isfirstrecord;
- end;
 end;
 
 procedure tcustombandgroup.updatevisible;
@@ -3300,6 +3352,9 @@ begin
     application.lock;
     try
      fdatalink.dataset.next;
+     if checkislastrecord(fdatalink) then begin
+      include(fstate,rpps_lastrecord);
+     end; 
     finally
      application.unlock;
     end;
@@ -3395,9 +3450,15 @@ begin
  addreccontrols(self);
  fstate:= [rpps_rendering];
  include(fwidgetstate1,ws1_noclipchildren);
- if fdatalink.active then begin
-  frecnobefore:= fdatalink.dataset.recno;
-  fdatalink.dataset.disablecontrols;
+ with fdatalink do begin
+  if active then begin
+   frecnobefore:= dataset.recno;
+   dataset.disablecontrols;
+   dataset.first;
+   if checkislastrecord(fdatalink) then begin
+    include(fstate,rpps_lastrecord);
+   end;
+  end;
  end;
  for int1:= 0 to high(fbands) do begin
   fbands[int1].beginrender;
@@ -3617,12 +3678,22 @@ end;
 
 function tcustomreportpage.isfirstrecord: boolean;
 begin
- checkisfirstrecord(fdatalink,result);
+ if fdatalink.active then begin
+  result:= not (rpps_notfirstrecord in fstate);
+ end
+ else begin
+  result:= false;
+ end;
 end;
 
 function tcustomreportpage.islastrecord: boolean;
 begin
- checkislastrecord(fdatalink,result);
+ if fdatalink.active then begin
+  result:= rpps_lastrecord in fstate;
+ end
+ else begin
+  result:= false;
+ end;
 end;
 
 procedure tcustomreportpage.recordchanged;
