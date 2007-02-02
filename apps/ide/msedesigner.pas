@@ -320,8 +320,10 @@ type
    function checkmethodtypes(const amodule: pmoduleinfoty;
             const init: boolean; const quiet: tcomponent): boolean;
                //does correct errors quiet for tmethod.data = quiet
+   procedure doswapmethodpointers(const ainstance: tobject;
+                        const ainit: boolean);
    
-   //idesigner
+      //idesigner
    procedure componentmodified(const component: tobject);
    procedure selectcomponent(instance: tcomponent);
    procedure setselections(const list: idesignerselections);
@@ -859,7 +861,7 @@ begin
  recursionlevel:= 32; //max
  adddescendent(aancestor);
 end;
-
+(*
 procedure tdescendentinstancelist.modulemodified(const amodule: pmoduleinfoty);
 type
  streamarty = array of tstream;
@@ -1016,6 +1018,213 @@ begin
          reader1.readcomponent(infos[int1]^.descendent);
          reader1.fixupreferences;
          reader1.endreferences;
+        end;
+       finally
+        reader1.free;
+        fdesigner.releasemethodtable(modifiedowners[int1]);
+        removefixupreferences(modifiedowners[int1]^.instance,'');
+       end;
+       for int2:= high(ferrorhandler.fnewcomponents) downto 0 do begin
+        if ferrorhandler.fnewcomponents[int2] <> infos[int1]^.descendent then begin
+         modifiedowners[int1]^.components.add(ferrorhandler.fnewcomponents[int2]);
+        end;
+       end;
+ {$ifdef mse_debugsubmodule}
+       debugbinout('after load ' + infos[int1]^.descendent.name,
+                         infos[int1]^.descendent,infos[int1]^.ancestor);
+ {$endif}
+      finally
+       modifiedowners[int1]^.designform.window.endmoving;
+      end;
+     end;
+    finally
+     ferrorhandler.free;
+     for int1:= 0 to high(streams) do begin
+      streams[int1].free;
+     end;
+    end;
+    for int1:= 0 to high(dependentmodules) do begin
+     fdesigner.componentmodified(dependentmodules[int1]^.instance);
+    end;
+   finally
+    endsubmodulecopy;
+  {$ifdef mse_debugsubmodule}
+    teststream.free;
+  {$endif}
+   end;
+  end;
+ finally
+  dec(fmodifiedlevel);
+ end;
+end;
+*)
+
+procedure tdescendentinstancelist.modulemodified(const amodule: pmoduleinfoty);
+type
+ streamarty = array of tstream;
+ ancestorinfopoarty = array of pancestorinfoty;
+
+{$ifdef mse_debugsubmodule}
+var
+ teststream: ttextstream;
+ procedure debugout(const atext: string; const stream: tstream);
+ begin
+  writeln(atext);
+  stream.position:= 0;
+  teststream.size:= 0;
+  objectbinarytotextmse(stream,teststream);
+  teststream.position:= 0;
+  teststream.writetotext(output);
+ end;
+ procedure debugbinout(const atext: string; const acomp,aancestor: tcomponent);
+ var
+  stream1: tmemorystream;
+  writer1: twriter;
+ begin
+  stream1:= tmemorystream.create;
+  writer1:= twriter.create(stream1,1024);
+  writer1.onfindancestor:= {$ifdef FPC}@{$endif}fdesigner.findancestor;
+  writer1.writedescendent(acomp,aancestor);
+  writer1.free;
+  debugout(atext,stream1);
+  stream1.free;
+ end;
+ 
+{$endif}
+
+var
+ modifiedowners,dependentmodules: moduleinfopoarty;
+ streams: streamarty;
+ infos: ancestorinfopoarty;
+ stream1: tmemorystream;
+ writer1: twriter;
+ reader1: treader;
+ comp1,ancestor: tcomponent;
+ int1,int2: integer;
+ po1: pancestorinfoty;
+ po2: pmoduleinfoty;
+ rect1: rectty;
+
+begin
+ if fmodifiedlevel >= 16 then begin
+  exit;
+ end;
+ inc(fmodifiedlevel);
+ try
+  po1:= datapo;
+  if fmodifiedlevel = 16 then begin
+   showmessage('Recursive form inheritance of "'+
+                               amodule^.filename+'".','ERROR');
+   sysutils.abort;
+  end;
+  for int1:= 0 to fcount - 1 do begin
+   if po1^.ancestor = amodule^.instance then begin
+    additem(pointerarty(infos),po1);
+    if ismodule(po1^.descendent) then begin  //inherited form        
+     comp1:= po1^.descendent;
+    end
+    else begin
+     comp1:= po1^.descendent.owner;
+    end;
+    po2:= fdesigner.modules.findmodule(tmsecomponent(comp1));
+    additem(pointerarty(modifiedowners),po2);
+    if finditem(pointerarty(dependentmodules),po2) < 0 then begin
+     additem(pointerarty(dependentmodules),po2);
+    end;
+   end;
+   inc(po1);
+  end;
+  if high(infos) >= 0 then begin
+  {$ifdef mse_debugsubmodule}
+   teststream:= ttextstream.create;
+  {$endif}
+   ancestor:= fdesigner.fsubmodulelist.findancestor(amodule^.instance);
+   designer.doswapmethodpointers(ancestor,false);
+   beginsubmodulecopy;
+   try 
+    setlength(streams,length(infos));
+    for int1:= 0 to high(modifiedowners) do begin
+     fdesigner.buildmethodtable(modifiedowners[int1]);
+     if ismodule(infos[int1]^.descendent.owner) then begin //inherited form
+      fdesigner.beginstreaming(modifiedowners[int1]);
+     end;
+     try
+      streams[int1]:= tmemorystream.create;
+      writer1:= twriter.create(streams[int1],4096);
+      try
+       writer1.onfindancestor:= {$ifdef FPC}@{$endif}fdesigner.findancestor;
+       designer.doswapmethodpointers(infos[int1]^.descendent,false);
+       writer1.writedescendent(infos[int1]^.descendent,ancestor);
+      finally
+       designer.doswapmethodpointers(infos[int1]^.descendent,true);
+       if ismodule(infos[int1]^.descendent.owner) then begin //inherited form
+        fdesigner.endstreaming(modifiedowners[int1]);
+       end;
+       writer1.free;
+      end;
+  {$ifdef mse_debugsubmodule}
+      debugout('state ' + modifiedowners[int1]^.instance.name,streams[int1]);
+  {$endif}
+     finally
+      fdesigner.releasemethodtable(modifiedowners[int1]);
+     end;
+    end;
+    fdesigner.fsubmodulelist.renewbackup(amodule^.instance);
+    ferrorhandler:= treaderrorhandler.create(nil);
+    try
+     for int1:= 0 to high(modifiedowners) do begin
+      modifiedowners[int1]^.designform.window.beginmoving; //no flicker
+      try
+       streams[int1].position:= 0;
+       revert(infos[int1],modifiedowners[int1],true);
+       reader1:= treader.create(streams[int1],4096);
+       fdesigner.buildmethodtable(modifiedowners[int1]);
+       try
+        reader1.onerror:= {$ifdef FPC}@{$endif}ferrorhandler.onerror;
+        reader1.onancestornotfound:= 
+                          {$ifdef FPC}@{$endif}ferrorhandler.ancestornotfound;
+        reader1.onsetname:= {$ifdef FPC}@{$endif}ferrorhandler.onsetname;
+        reader1.onfindcomponentclass:= 
+                          {$ifdef FPC}@{$endif}fdesigner.findcomponentclass;
+        reader1.oncreatecomponent:= {$ifdef FPC}@{$endif}fdesigner.createcomponent;
+        reader1.onfindmethod:= {$ifdef FPC}@{$endif}fdesigner.findmethod2;
+        reader1.root:= modifiedowners[int1]^.instance;
+        ferrorhandler.fnewcomponents:= nil;
+        reader1.root:= modifiedowners[int1]^.instance;
+        ferrorhandler.froot:= modifiedowners[int1]^.instance;
+        comp1:= infos[int1]^.descendent;
+        if ismodule(comp1) then begin //inherited form
+         with tformdesignerfo(modifiedowners[int1]^.designform) do begin
+          beginplacement;
+          dec(submodulecopy);
+          designer.doswapmethodpointers(comp1,false);
+          try
+           reader1.readrootcomponent(comp1);
+           checkinline(comp1);
+           placemodule;
+          finally
+           designer.doswapmethodpointers(comp1,true);
+           inc(submodulecopy);
+           endplacement;
+          end;
+         end;
+        end
+        else begin
+         reader1.parent:= comp1.getparentcomponent;
+         {$ifdef FPC}
+         reader1.driver.beginrootcomponent;
+         {$else}
+         reader1.readsignature;
+         {$endif}
+         reader1.beginreferences;
+         try
+          designer.doswapmethodpointers(comp1,false);
+          reader1.readcomponent(comp1);
+         finally
+          reader1.fixupreferences;
+          reader1.endreferences;
+          designer.doswapmethodpointers(comp1,true);
+         end;
         end;
        finally
         reader1.free;
@@ -1684,14 +1893,15 @@ function tmodulelist.findmethodbyname(const name: string;
   if ainfo <> nil then begin
    po1:= ainfo^.methods.findmethodbyname(aname,atype,bo1);
    if po1 <> nil then begin
-    result.code:= po1^.address;
-    result.Data:= ainfo^.instance;
+    result.data:= po1^.address;
+ //   result.code:= po1^.address;
+ //   result.Data:= ainfo^.instance;
    end
-   else begin
-    if bo1 then begin
-     result.data:= pointer(1); //name found
-    end;
-   end;
+//   else begin
+//    if bo1 then begin
+//     result.data:= pointer(1); //name found
+//    end;
+//   end;
   end;
  end;
 
@@ -1721,7 +1931,7 @@ begin
  po1:= datapo;
  for int1:= 0 to fcount - 1 do begin
   with tmoduleinfo(iobjectlink(po1^[int1]).getinstance) do begin
-   po2:= info.methods.findmethod(method.Code);
+   po2:= info.methods.findmethod(method.data);
    if po2 <> nil then begin
     if info.components.find(comp) = nil then begin
      result:= info.instance.actualclassname + '.' + po2^.name //foreign module
@@ -2035,9 +2245,14 @@ begin
  if po1 <> nil then begin
   with po1^.methods do begin
    inc(methodaddressdummy);
-   result.code:= pointer(methodaddressdummy);
-   result.Data:= po1^.instance;
-   addmethod(aname,result.code,atype);
+   if methodaddressdummy < 256 then begin
+    methodaddressdummy:= 256; //0..255 -> special purpose
+   end;
+//   result.code:= pointer(methodaddressdummy);
+//   result.Data:= po1^.instance;
+   result.data:= pointer(methodaddressdummy);
+   result.code:= nil;
+   addmethod(aname,result.data,atype);
   end;
   if atype <> nil then begin
    designnotifications.methodcreated(idesigner(self),module,aname,atype);
@@ -2058,7 +2273,7 @@ begin
   po1:= floadingmodulepo^.methods.findmethodbyname(amethodname);
   if po1 = nil then begin
    method:= createmethod(amethodname,nil,nil);
-   address:= method.code;
+   address:= method.data;
   end
   else begin
    address:= po1^.address;
@@ -2177,19 +2392,10 @@ begin
  for int1:= 0 to high(propar) do begin
   if po1^^.proptype^.kind = tkmethod then begin
    method2:= getmethodprop(newancestor,po1^);
-   if (method2.code <> nil) and (method2.data <> nil) then begin
+   if (method2.code <> nil) or (method2.data <> nil) then begin
     setmethodprop(descendent,po1^,method2); 
          //refresh ancestor value, it is not possible to override methods
    end;
-{
-   method1:= getmethodprop(descendent,po1^);
-   method2:= getmethodprop(newancestor,po1^);
-   method3:= getmethodprop(oldancestor,po1^);
-   if (method1.code = method3.code) and (method1.data = method3.data) and 
-       ((method1.code <> method2.code) or (method1.data <> method2.data)) then begin
-    setmethodprop(descendent,po1^,method2); //refresh ancestor value
-   end;
-}
   end;
   inc(po1);
  end;
@@ -2357,6 +2563,7 @@ begin
   po1:= nil;
  end;
  try
+  doswapmethodpointers(source,false);
   result:= tmsecomponent(mseclasses.copycomponent(source,nil,
             {$ifdef FPC}@{$endif}findancestor,
             {$ifdef FPC}@{$endif}findcomponentclass,
@@ -2366,12 +2573,14 @@ begin
    docopymethods(source,result);
   end;
  finally
+  doswapmethodpointers(source,true);
   endsubmodulecopy;
   if po1 <> nil then begin
    endstreaming(po1);
    releasemethodtable(po1);
   end;
  end;
+ doswapmethodpointers(result,true);
 end;
 
 procedure tdesigner.revert(const acomponent: tcomponent);
@@ -2493,13 +2702,13 @@ begin
  moduleinfo:= fmodules.findmodulebyinstance(tcomponent(method.data));
  if moduleinfo <> nil then begin
   with moduleinfo^.methods do begin
-   methodinfo:= findmethod(method.Code);
+   methodinfo:= findmethod(method.data);
   end;
  end
  else begin
   methodinfo:= nil;
   for int1:= 0 to fmodules.count - 1 do begin
-   methodinfo:= fmodules[int1]^.methods.findmethod(method.code);
+   methodinfo:= fmodules[int1]^.methods.findmethod(method.data);
    if methodinfo <> nil then begin
     moduleinfo:= fmodules[int1];
     break;
@@ -2601,6 +2810,130 @@ begin
  end;
 end;
 
+type
+ propprocty = procedure(const ainstance: tobject; const data: pointer; 
+                const apropinfo: ppropinfo);
+                
+procedure forallmethodproperties(const ainstance: tobject; const data: pointer;
+                              const aproc: propprocty);
+var
+ ar1: propinfopoarty;
+ int1,int2: integer;
+ obj1: tobject;
+begin
+ ar1:= getpropinfoar(ainstance);
+ for int1:= 0 to high(ar1) do begin
+  case ar1[int1]^.proptype^.kind of
+   tkmethod: begin
+    aproc(ainstance,data,ar1[int1]);
+   end;
+   tkclass: begin
+    obj1:= getobjectprop(ainstance,ar1[int1]);
+    if (obj1 <> nil) and (not (obj1 is tcomponent) or 
+              (cssubcomponent in tcomponent(obj1).componentstyle)) then begin
+     forallmethodproperties(obj1,data,aproc);
+     if obj1 is tpersistentarrayprop then begin
+      with tpersistentarrayprop(obj1) do begin
+       for int2:= 0 to count - 1 do begin
+        forallmethodproperties(items[int2],data,aproc);
+       end;
+      end;
+     end
+     else begin
+      if obj1 is tcollection then begin
+       with tcollection(obj1) do begin
+        for int2:= 0 to count - 1 do begin
+         forallmethodproperties(items[int2],data,aproc);
+        end;
+       end;
+      end;
+     end;
+    end;
+   end;
+  end;
+ end;
+ if ainstance is tcomponent then begin
+  with tcomponent(ainstance) do begin
+   for int1:= 0 to componentcount - 1 do begin
+    forallmethodproperties(components[int1],data,aproc);
+   end;
+  end;
+ end;
+end;
+
+procedure swapmethodpointer(const ainstance: tobject; const data: pointer;
+                             const apropinfo: ppropinfo);
+var
+ method1: tmethod;                             
+begin
+ method1:= getmethodprop(ainstance,apropinfo);
+ if method1.data <> nil then begin
+  method1.code:= method1.data;
+  method1.data:= nil;
+  setmethodprop(ainstance,apropinfo,method1);
+ end;
+end;
+
+procedure swapinitmethodpointer(const ainstance: tobject; const data: pointer;
+                             const apropinfo: ppropinfo);
+var
+ method1: tmethod;                             
+begin
+ method1:= getmethodprop(ainstance,apropinfo);
+ if method1.code <> nil then begin
+  method1.data:= method1.code;
+  method1.code:= nil;
+  setmethodprop(ainstance,apropinfo,method1);
+ end;
+end;
+
+procedure tdesigner.doswapmethodpointers(const ainstance: tobject;
+                    const ainit: boolean);
+begin
+ if ainit then begin
+  forallmethodproperties(ainstance,nil,{$ifdef FPC}@{$endif}swapinitmethodpointer);
+ end
+ else begin
+  forallmethodproperties(ainstance,nil,{$ifdef FPC}@{$endif}swapmethodpointer);
+ end;
+end;
+
+{
+procedure tdesigner.doswapmethodpointers(const ainstance: tobject;
+                    const ainit: boolean);
+var
+ propar: propinfopoarty;
+ int1: integer;
+ method1: tmethod;
+ po1: ^ppropinfo;
+ po2: pointer;
+begin
+ propar:= getpropinfoar(ainstance);
+ po1:= pointer(propar);
+ for int1:= high(propar) downto 0 do begin
+  case po1^^.proptype^.kind of
+   tkmethod: begin
+    method1:= getmethodprop(ainstance,po1^);
+    if ainit then begin
+     if method1.code <> nil then begin
+      method1.data:= method1.code;
+      method1.code:= nil;
+      setmethodprop(ainstance,po1^,method1);
+     end;
+    end
+    else begin
+     if method1.data <> nil then begin
+      method1.code:= method1.data;
+      method1.data:= nil;
+      setmethodprop(ainstance,po1^,method1);
+     end;
+    end;
+   end;
+  end;
+  inc(po1);
+ end;
+end;
+}
 function tdesigner.checkmethodtypes(const amodule: pmoduleinfoty;
                       const init: boolean; const quiet: tcomponent): boolean;
                                       //false on cancel
@@ -2623,10 +2956,10 @@ var
    case ar1[int1]^.proptype^.kind of
     tkmethod: begin
      method1:= getmethodprop(instance,ar1[int1]);
-     if (method1.code <> nil) and ((quiet = nil) or 
+     if (method1.data <> nil) and ((quiet = nil) or 
                          (pointer(quiet) = method1.data)) then begin
-      method1.data:= amodule^.instance;
-      po1:= amodule^.methods.findmethod(method1.code);
+//      method1.data:= amodule^.instance;
+      po1:= amodule^.methods.findmethod(method1.data);
       if po1 <> nil then begin
        if init then begin
         po1^.typeinfo:= ar1[int1]^.proptype{$ifndef FPC}^{$endif};
@@ -2859,6 +3192,7 @@ begin //loadformfile
          reader.onancestornotfound:= {$ifdef FPC}@{$endif}ancestornotfound;
          reader.oncreatecomponent:= {$ifdef FPC}@{$endif}createcomponent;
          reader.ReadrootComponent(module);
+         doswapmethodpointers(module,true);
          module.Name:= modulename;
          result^.components.assigncomps(module);
          rootnames:= tstringlist.create;
@@ -3025,11 +3359,13 @@ begin
    setcomponentpos(instance,designform.pos);
   end;
   }
+  doswapmethodpointers(instance,false);
   writer1:= twriter.create(astream,4096);
   beginstreaming(amodule);
   try
    if csancestor in instance.componentstate then begin
     ancestor:= fdescendentinstancelist.findancestor(instance);
+    doswapmethodpointers(ancestor,false);
    end
    else begin
     ancestor:= nil;
@@ -3037,8 +3373,12 @@ begin
    writer1.onfindancestor:= {$ifdef FPC}@{$endif}findancestor;
    writer1.writedescendent(instance,ancestor);
   finally
+   if ancestor <> nil then begin
+    doswapmethodpointers(ancestor,true);
+   end;
    endstreaming(amodule);
    writer1.free;
+   doswapmethodpointers(instance,true);
    releasemethodtable(amodule);
    if instance is twidget then begin
     fdescendentinstancelist.restorepos(twidget(instance));

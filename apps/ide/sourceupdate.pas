@@ -971,7 +971,7 @@ var
 
 begin
  result:= emptysourcepos;
- if amethod.code <> nil then begin
+ if amethod.data <> nil then begin
   designer.getmethodinfo(amethod,moduleinfo,methodinfo);
   if moduleinfo <> nil then begin
    unitinfo:= updateformunit(moduleinfo^.filename,false);

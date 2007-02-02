@@ -558,9 +558,6 @@ type
  fieldclasstypearty = array of fieldclasstypety; 
         
  tmsedatasource = class(tdatasource)
-  protected
-   Procedure DoDataChange (Info : Pointer); override;
-   Procedure DoStateChange; override;
  end;
  
  tpersistentfields = class(tpersistentarrayprop,ipersistentfieldsinfo)
@@ -3361,20 +3358,6 @@ begin
 end;
 
 { tmsedatasource }
-
-procedure tmsedatasource.DoDataChange(Info: Pointer);
-begin
- if not (csdesigning in componentstate) then begin
-  inherited;
- end;
-end;
-
-procedure tmsedatasource.DoStateChange;
-begin
- if not (csdesigning in componentstate) then begin
-  inherited;
- end;
-end;
 
 { tfieldlinkdatalink }
 

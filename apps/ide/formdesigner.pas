@@ -2483,7 +2483,10 @@ end;
 procedure tformdesignerfo.endstreaming;
 begin
  if fmodule is twidget then begin
-  twidget1(fmodule).fwidgetrect.pos:= nullpoint;
+  with twidget1(fmodule) do begin
+   fwidgetrect.pos:= nullpoint;
+   rootchanged;
+  end;
  end;
 end;
 

@@ -88,29 +88,9 @@ type
    procedure inheritedinternaldelete;
    procedure inheritedinternalopen;
    
-   procedure dataevent(event: tdataevent; info: ptrint); override;
-   
-   procedure DoAfterCancel; override;
-   procedure DoAfterClose; override;
    procedure DoAfterDelete; override;
-   procedure DoAfterEdit; override;
-   procedure DoAfterInsert; override;
-   procedure DoAfterOpen; override;
-   procedure DoAfterPost; override;
-   procedure DoAfterScroll; override;
-   procedure DoAfterRefresh; override;
-   procedure DoBeforeCancel; override;
-   procedure DoBeforeClose; override;
-   procedure DoBeforeDelete; override;
-   procedure DoBeforeEdit; override;
-   procedure DoBeforeInsert; override;
-   procedure DoBeforeOpen; override;
-   procedure DoBeforePost; override;
-   procedure DoBeforeScroll; override;
-   procedure DoBeforeRefresh; override;
-   procedure DoOnCalcFields; override;
-   procedure DoOnNewRecord; override;
-   
+   procedure dataevent(event: tdataevent; info: ptrint); override;
+      
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -1059,148 +1039,14 @@ begin
  inherited internaldelete;
 end;
 
-procedure tmsesqlquery.DoAfterCancel;
-begin
- if not (csdesigning in componentstate) then begin
-  inherited;
- end;
-end;
-
-procedure tmsesqlquery.DoAfterClose;
-begin
- if not (csdesigning in componentstate) then begin
-  inherited;
- end;
-end;
-
 procedure tmsesqlquery.DoAfterDelete;
 begin
- if not (csdesigning in componentstate) then begin
-  inherited;
- end;
+ inherited;
  if dso_autoapply in fcontroller.options then begin
   applyupdates;
  end;
 end;
 
-procedure tmsesqlquery.DoAfterEdit;
-begin
- if not (csdesigning in componentstate) then begin
-  inherited;
- end;
-end;
-
-procedure tmsesqlquery.DoAfterInsert;
-begin
- if not (csdesigning in componentstate) then begin
-  inherited;
- end;
-end;
-
-procedure tmsesqlquery.DoAfterOpen;
-begin
- if not (csdesigning in componentstate) then begin
-  inherited;
- end;
-end;
-
-procedure tmsesqlquery.DoAfterPost;
-begin
- if not (csdesigning in componentstate) then begin
-  inherited;
- end;
-end;
-
-procedure tmsesqlquery.DoAfterScroll;
-begin
- if not (csdesigning in componentstate) then begin
-  inherited;
- end;
-end;
-
-procedure tmsesqlquery.DoAfterRefresh;
-begin
- if not (csdesigning in componentstate) then begin
-  inherited;
- end;
-end;
-
-procedure tmsesqlquery.DoBeforeCancel;
-begin
- if not (csdesigning in componentstate) then begin
-  inherited;
- end;
-end;
-
-procedure tmsesqlquery.DoBeforeClose;
-begin
- if not (csdesigning in componentstate) then begin
-  inherited;
- end;
-end;
-
-procedure tmsesqlquery.DoBeforeDelete;
-begin
- if not (csdesigning in componentstate) then begin
-  inherited;
- end;
-end;
-
-procedure tmsesqlquery.DoBeforeEdit;
-begin
- if not (csdesigning in componentstate) then begin
-  inherited;
- end;
-end;
-
-procedure tmsesqlquery.DoBeforeInsert;
-begin
- if not (csdesigning in componentstate) then begin
-  inherited;
- end;
-end;
-
-procedure tmsesqlquery.DoBeforeOpen;
-begin
- if not (csdesigning in componentstate) then begin
-  inherited;
- end;
-end;
-
-procedure tmsesqlquery.DoBeforePost;
-begin
- if not (csdesigning in componentstate) then begin
-  inherited;
- end;
-end;
-
-procedure tmsesqlquery.DoBeforeScroll;
-begin
- if not (csdesigning in componentstate) then begin
-  inherited;
- end;
-end;
-
-procedure tmsesqlquery.DoBeforeRefresh;
-begin
- if not (csdesigning in componentstate) then begin
-  inherited;
- end;
-end;
-
-procedure tmsesqlquery.DoOnCalcFields;
-begin
- if not (csdesigning in componentstate) then begin
-  inherited;
- end;
-end;
-
-procedure tmsesqlquery.DoOnNewRecord;
-begin
- if not (csdesigning in componentstate) then begin
-  inherited;
- end;
-end;
 {
 procedure tmsesqlquery.internalpost;
 begin        //workaround for FPC bug 7266

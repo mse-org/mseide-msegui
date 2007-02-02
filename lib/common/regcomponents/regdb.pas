@@ -727,7 +727,7 @@ begin
  inherited;
  with tlbdropdownlistcontroller(fprops[0].instance) do begin
   if not (olb_copyitems in optionslb) then begin
-   if getmethodvalue.code <> nil then begin
+   if getmethodvalue.data <> nil then begin
     if buttonlength = 0 then begin
      buttonlength:= -1;
     end;

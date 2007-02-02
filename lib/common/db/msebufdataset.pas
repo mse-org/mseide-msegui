@@ -3,7 +3,7 @@
     Copyright (c) 1999-2000 by Michael Van Canneyt, member of the
     Free Pascal development team
     
-    Rewritten 2006 by Martin Schreiber
+    Rewritten 2006-2007 by Martin Schreiber
     
     BufDataset implementation
 
@@ -18,6 +18,8 @@
  
 unit msebufdataset;
  
+{$ifdef FPC}{$mode objfpc}{$h+}{$INTERFACES CORBA}{$endif}
+
 interface 
 
 uses

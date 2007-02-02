@@ -790,6 +790,7 @@ begin
      try
       modulepo:= designer.modules.findmodulebycomponent(component);
       po1:= swapmethodtable(comp1,modulepo^.methods.createmethodtable);
+      designer.doswapmethodpointers(component,false);
       try
        writer.Root:= component.Owner;
        tfilercracker(writer).flookuproot:= comp1;
@@ -799,6 +800,7 @@ begin
        {$endif}
        writer.writecomponent(component);
       finally
+       designer.doswapmethodpointers(component,true);
        swapmethodtable(comp1,po1);
        modulepo^.methods.releasemethodtable;
       end;
@@ -951,6 +953,7 @@ begin
       factcomp:= nil;
       reader.Readcomponents(comp1,nil,{$ifdef FPC}@{$endif}dosetactcomp);
       if factcomp <> nil then begin
+       designer.doswapmethodpointers(factcomp,true);
        if assigned(initproc) then begin
         initproc(factcomp,aparent);
        end;
@@ -962,7 +965,7 @@ begin
      end;
     end;
     if pastingmodulepo <> nil then begin
-     designer.checkmethodtypes(pastingmodulepo,false,comp1);
+     designer.checkmethodtypes(pastingmodulepo,false,comp1);  //////////todo: quiet not working
     end;
    finally
     binstream.Free;

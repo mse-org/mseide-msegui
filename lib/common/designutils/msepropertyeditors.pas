@@ -1549,7 +1549,7 @@ var
  method1: tmethod;
 begin
  method1:= getmethodvalue;
- if method1.Code <> nil then begin
+ if method1.data <> nil then begin
   result:= fdesigner.getmethodname(method1,fcomponent);
  end
  else begin
@@ -1594,8 +1594,8 @@ begin
   end;
   method1:= fdesigner.getmethod(value,fmodule,
                   fprops[0].propinfo^.proptype{$ifndef FPC}^{$endif});
-  if method1.code = nil then begin //method not found
-   if (method2.code <> nil) and not isselected then begin
+  if method1.data = nil then begin //method not found
+   if (method2.data <> nil) and not isselected then begin
     fdesigner.changemethodname(method2,value,
          fprops[0].propinfo^.proptype{$ifndef FPC}^{$endif});
     method1:= method2;
