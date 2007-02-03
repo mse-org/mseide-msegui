@@ -85,6 +85,7 @@ type
   moduleintf: pdesignmoduleintfty;
   designformclass: pointer;
   methods: tmethods;
+  methodtableswapped: integer;
   components: tcomponents;
   designform: tmseform;
   modified: boolean;
@@ -797,9 +798,7 @@ begin
 end;
 
 procedure tdescendentinstancelist.revert(const info: pancestorinfoty; 
-            const module: pmoduleinfoty; const norootposition: boolean = false);
-
- 
+            const module: pmoduleinfoty; const norootposition: boolean = false); 
 var
  comp1,comp2: tmsecomponent;
  parent1: twidget;
@@ -2687,57 +2686,52 @@ procedure tdesigner.revert(const acomponent: tcomponent);
 var
  comp1: tcomponent;
  po1: pancestorinfoty;
- po2: pmoduleinfoty;
+ po2,po3: pmoduleinfoty;
  bo1: boolean;
  pos1: pointty;
 begin
  comp1:= nil;
- fdescendentinstancelist.beginstreaming;
- doswapmethodpointers(acomponent,false);
- try
-  if csinline in acomponent.componentstate then begin
-   po1:= fdescendentinstancelist.finddescendentinfo(acomponent);
-   if po1 <> nil then begin
-    po2:= fmodules.findmodule(tmsecomponent(acomponent.owner));
-    if po2 <> nil then begin
-     bo1:= acomponent is twidget;
-     if bo1 then begin
-      pos1:= twidget(acomponent).pos;
-     end;
-     fdescendentinstancelist.revert(po1,po2);
-     if bo1 then begin
-      twidget(po1^.descendent).pos:= pos1;
-     end;
+ po2:= fmodules.findmodule(tmsecomponent(acomponent.owner));
+ if csinline in acomponent.componentstate then begin
+  po1:= fdescendentinstancelist.finddescendentinfo(acomponent);
+  if po1 <> nil then begin
+   if po2 <> nil then begin
+    bo1:= acomponent is twidget;
+    if bo1 then begin
+     pos1:= twidget(acomponent).pos;
+    end;
+    fdescendentinstancelist.revert(po1,po2);
+    if bo1 then begin
+     twidget(po1^.descendent).pos:= pos1;
     end;
    end;
-  end
-  else begin
-   if csancestor in acomponent.componentstate then begin
-    comp1:= fdescendentinstancelist.findancestor(acomponent.owner);
+  end;
+ end
+ else begin
+  if csancestor in acomponent.componentstate then begin
+   comp1:= fdescendentinstancelist.findancestor(acomponent.owner);
+   if comp1 <> nil then begin
+    comp1:= comp1.findcomponent(acomponent.name);
     if comp1 <> nil then begin
-     comp1:= comp1.findcomponent(acomponent.name);
-     if comp1 <> nil then begin
-      doswapmethodpointers(comp1,false);
-      try
-       refreshancestor(acomponent,comp1,comp1,true,
-        {$ifdef FPC}@{$endif}findancestor,
-        {$ifdef FPC}@{$endif}findcomponentclass,
-        {$ifdef FPC}@{$endif}createcomponent);
-       dorefreshmethods(acomponent,comp1,acomponent);
-      finally
-       doswapmethodpointers(comp1,true);
-      end;
+     fdescendentinstancelist.beginstreaming;
+     doswapmethodpointers(acomponent,false);
+     doswapmethodpointers(comp1,false);
+     try
+      refreshancestor(acomponent,comp1,comp1,true,
+       {$ifdef FPC}@{$endif}findancestor,
+       {$ifdef FPC}@{$endif}findcomponentclass,
+       {$ifdef FPC}@{$endif}createcomponent);
+      dorefreshmethods(acomponent,comp1,acomponent);
+     finally
+      doswapmethodpointers(acomponent,true);
+      doswapmethodpointers(comp1,true);
+      fdescendentinstancelist.endstreaming;
      end;
     end;
    end;
   end;
- finally
-  doswapmethodpointers(acomponent,true);
-  fdescendentinstancelist.endstreaming;
  end;
- if comp1 <> nil then begin
-  componentmodified(comp1);
- end;
+ componentmodified(acomponent);
 end;
 
 function tdesigner.getreferencingmodulenames(const amodule: pmoduleinfoty): stringarty;
@@ -3384,9 +3378,14 @@ end;
 
 procedure tdesigner.buildmethodtable(const amodule: pmoduleinfoty);
 begin
- flookupmodule:= amodule;
- with amodule^ do begin
-  methodtablebefore:= swapmethodtable(instance,methods.createmethodtable);
+ if amodule <> nil then begin
+  with amodule^ do begin
+   if methodtableswapped = 0 then begin
+    flookupmodule:= amodule;
+    methodtablebefore:= swapmethodtable(instance,methods.createmethodtable);
+   end;
+   inc(methodtableswapped);
+  end;
  end;
 end;
 
@@ -3397,11 +3396,16 @@ var
  {$endif}
  methodtabpo: ppointer;
 begin
- with amodule^ do begin
-  swapmethodtable(instance,methodtablebefore);
-  methods.releasemethodtable;
+ if amodule <> nil then begin
+  with amodule^ do begin
+   dec(methodtableswapped);
+   if methodtableswapped = 0 then begin
+    swapmethodtable(instance,methodtablebefore);
+    methods.releasemethodtable;
+    flookupmodule:= nil;
+   end;
+  end;
  end;
- flookupmodule:= nil;
 end;
 
 procedure tdesigner.writemodule(const amodule: pmoduleinfoty;
