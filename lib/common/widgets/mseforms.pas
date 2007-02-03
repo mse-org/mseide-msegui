@@ -379,6 +379,7 @@ type
  tsubform = class(tpublishedwidget)
   protected
    class function getmoduleclassname: string; override;
+   procedure getchildren(proc: tgetchildproc; root: tcomponent); override;
   public
    constructor create(aowner: tcomponent); overload; override;
    constructor create(aowner: tcomponent; load: boolean); reintroduce; overload;  virtual;
@@ -677,15 +678,15 @@ end;
 procedure tcustommseform.getchildren(proc: tgetchildproc; root: tcomponent);
 var
  int1: integer;
- component: tcomponent;
+ comp1: tcomponent;
 begin
  inherited;
  fscrollbox.getchildren(proc,root);
  if root = self then begin
-  for int1 := 0 to componentcount - 1 do begin
-   component := components[int1];
-   if not component.hasparent then begin
-    proc(component);
+  for int1:= 0 to componentcount - 1 do begin
+   comp1:= components[int1];
+   if not comp1.hasparent then begin
+    proc(comp1);
    end;
   end;
  end;
@@ -1424,6 +1425,22 @@ end;
 class function tsubform.getmoduleclassname: string;
 begin
  result:= 'tsubform';
+end;
+
+procedure tsubform.getchildren(proc: tgetchildproc; root: tcomponent);
+var
+ int1: integer;
+ comp1: tcomponent;
+begin
+ inherited;
+ if root = self then begin
+  for int1:= 0 to componentcount - 1 do begin
+   comp1:= components[int1];
+   if not comp1.hasparent then begin
+    proc(comp1);
+   end;
+  end;
+ end;
 end;
 
 end.
