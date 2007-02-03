@@ -802,8 +802,6 @@ type
    procedure endband(const acanvas: tcanvas; const sender: tcustomrecordband);  
    function isfirstband: boolean;
    function islastband(const addheight: integer = 0): boolean;
-   function isfirstrecord: boolean;
-   function islastrecord: boolean;
    procedure updatevisible;
    function remainingheight: integer;
    function pagepagenum: integer; //null based
@@ -816,6 +814,8 @@ type
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
 
+   function isfirstrecord: boolean;
+   function islastrecord: boolean;
    procedure recordchanged;   
    property report: tcustomreport read freport;
    property pagenum: integer read fpagenum write fpagenum; 

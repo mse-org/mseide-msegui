@@ -2464,8 +2464,8 @@ procedure tdesigner.docopymethods(const source,dest: tcomponent;
       setmethodprop(dest,ar1[int1],method1); 
      end;
     end;
+    {
     tkclass: begin
-{
      obj1:= getobjectprop(source,ar1[int1]);
      if (obj1 <> nil) and (not (obj1 is tcomponent) or 
                (cssubcomponent in tcomponent(obj1).componentstyle)) then begin
@@ -2484,8 +2484,8 @@ procedure tdesigner.docopymethods(const source,dest: tcomponent;
        end;
       end;        //collections?
      end;
-     }
     end;
+    }
    end;
   end;
  end;
