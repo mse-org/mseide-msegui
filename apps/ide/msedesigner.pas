@@ -178,6 +178,8 @@ type
 
  tancestorlist = class(tobjectlinkrecordlist)
   private
+   fstreaming: integer;
+   fswappedancestors: componentarty;
   protected
    procedure dounlink(var item); override;
    procedure itemdestroyed(const sender: iobjectlink); override;
@@ -188,6 +190,8 @@ type
    function finddescendentinfo(const adescendent: tcomponent): pancestorinfoty;
    function findancestorinfo(const aancestor: tcomponent): pancestorinfoty;
    procedure add(const adescendent,aancestor: tmsecomponent);
+   procedure beginstreaming;
+   procedure endstreaming;
  end;
 
  tdesignerancestorlist = class(tancestorlist)
@@ -472,6 +476,57 @@ begin
  end;
 end;
 
+type
+ propprocty = procedure(const ainstance: tobject; const data: pointer; 
+                const apropinfo: ppropinfo);
+                
+procedure forallmethodproperties(const ainstance: tobject; const data: pointer;
+                              const aproc: propprocty);
+var
+ ar1: propinfopoarty;
+ int1,int2: integer;
+ obj1: tobject;
+begin
+ ar1:= getpropinfoar(ainstance);
+ for int1:= 0 to high(ar1) do begin
+  case ar1[int1]^.proptype^.kind of
+   tkmethod: begin
+    aproc(ainstance,data,ar1[int1]);
+   end;
+   tkclass: begin
+    obj1:= getobjectprop(ainstance,ar1[int1]);
+    if (obj1 <> nil) and (not (obj1 is tcomponent) or 
+              (cssubcomponent in tcomponent(obj1).componentstyle)) then begin
+     forallmethodproperties(obj1,data,aproc);
+     if obj1 is tpersistentarrayprop then begin
+      with tpersistentarrayprop(obj1) do begin
+       for int2:= 0 to count - 1 do begin
+        forallmethodproperties(items[int2],data,aproc);
+       end;
+      end;
+     end
+     else begin
+      if obj1 is tcollection then begin
+       with tcollection(obj1) do begin
+        for int2:= 0 to count - 1 do begin
+         forallmethodproperties(items[int2],data,aproc);
+        end;
+       end;
+      end;
+     end;
+    end;
+   end;
+  end;
+ end;
+ if ainstance is tcomponent then begin
+  with tcomponent(ainstance) do begin
+   for int1:= 0 to componentcount - 1 do begin
+    forallmethodproperties(components[int1],data,aproc);
+   end;
+  end;
+ end;
+end;
+
 { tancestorlist }
 
 constructor tancestorlist.create;
@@ -527,6 +582,32 @@ begin
    break;
   end;
   inc(po1);
+ end;
+ if (fstreaming > 0) and (result <> nil) then begin
+  if finditem(pointerarty(fswappedancestors),result) < 0 then begin
+   designer.doswapmethodpointers(result,false);
+   additem(pointerarty(fswappedancestors),result);
+  end;
+ end;
+end;
+
+procedure tancestorlist.beginstreaming;
+begin
+ inc(fstreaming);
+end;
+
+procedure tancestorlist.endstreaming;
+var
+ int1: integer;
+ ar1: componentarty;
+begin
+ dec(fstreaming);
+ if fstreaming = 0 then begin
+  ar1:= copy(fswappedancestors);
+  fswappedancestors:= nil;
+  for int1:= 0 to high(ar1) do begin
+   designer.doswapmethodpointers(ar1[int1],true);
+  end;
  end;
 end;
 
@@ -1139,8 +1220,9 @@ begin
    teststream:= ttextstream.create;
   {$endif}
    ancestor:= fdesigner.fsubmodulelist.findancestor(amodule^.instance);
-   designer.doswapmethodpointers(ancestor,false);
+//   designer.doswapmethodpointers(ancestor,false);
    beginsubmodulecopy;
+   beginstreaming;
    try 
     setlength(streams,length(infos));
     for int1:= 0 to high(modifiedowners) do begin
@@ -1153,10 +1235,11 @@ begin
       writer1:= twriter.create(streams[int1],4096);
       try
        writer1.onfindancestor:= {$ifdef FPC}@{$endif}fdesigner.findancestor;
-       designer.doswapmethodpointers(infos[int1]^.descendent,false);
-       writer1.writedescendent(infos[int1]^.descendent,ancestor);
+       comp1:= infos[int1]^.descendent;
+       designer.doswapmethodpointers(comp1,false);
+       writer1.writedescendent(comp1,ancestor);
       finally
-       designer.doswapmethodpointers(infos[int1]^.descendent,true);
+       designer.doswapmethodpointers(comp1,true);
        if ismodule(infos[int1]^.descendent.owner) then begin //inherited form
         fdesigner.endstreaming(modifiedowners[int1]);
        end;
@@ -1250,14 +1333,15 @@ begin
       streams[int1].free;
      end;
     end;
-    for int1:= 0 to high(dependentmodules) do begin
-     fdesigner.componentmodified(dependentmodules[int1]^.instance);
-    end;
    finally
     endsubmodulecopy;
+    endstreaming;
   {$ifdef mse_debugsubmodule}
     teststream.free;
   {$endif}
+   end;
+   for int1:= 0 to high(dependentmodules) do begin
+    fdesigner.componentmodified(dependentmodules[int1]^.instance);
    end;
   end;
  finally
@@ -2552,6 +2636,7 @@ var
  po1: pmoduleinfoty;
 begin
  beginsubmodulecopy;
+ fdescendentinstancelist.beginstreaming;
  if root <> nil then begin
   po1:= fmodules.findmodule(root);
   if po1 <> nil then begin
@@ -2562,8 +2647,8 @@ begin
  else begin
   po1:= nil;
  end;
+ doswapmethodpointers(source,false);
  try
-  doswapmethodpointers(source,false);
   result:= tmsecomponent(mseclasses.copycomponent(source,nil,
             {$ifdef FPC}@{$endif}findancestor,
             {$ifdef FPC}@{$endif}findcomponentclass,
@@ -2574,6 +2659,7 @@ begin
   end;
  finally
   doswapmethodpointers(source,true);
+  fdescendentinstancelist.endstreaming;
   endsubmodulecopy;
   if po1 <> nil then begin
    endstreaming(po1);
@@ -2592,36 +2678,41 @@ var
  pos1: pointty;
 begin
  comp1:= nil;
- if csinline in acomponent.componentstate then begin
-  po1:= fdescendentinstancelist.finddescendentinfo(acomponent);
-  if po1 <> nil then begin
-   po2:= fmodules.findmodule(tmsecomponent(acomponent.owner));
-   if po2 <> nil then begin
-    bo1:= acomponent is twidget;
-    if bo1 then begin
-     pos1:= twidget(acomponent).pos;
-    end;
-    fdescendentinstancelist.revert(po1,po2);
-    if bo1 then begin
-     twidget(po1^.descendent).pos:= pos1;
+ fdescendentinstancelist.beginstreaming;
+ try
+  if csinline in acomponent.componentstate then begin
+   po1:= fdescendentinstancelist.finddescendentinfo(acomponent);
+   if po1 <> nil then begin
+    po2:= fmodules.findmodule(tmsecomponent(acomponent.owner));
+    if po2 <> nil then begin
+     bo1:= acomponent is twidget;
+     if bo1 then begin
+      pos1:= twidget(acomponent).pos;
+     end;
+     fdescendentinstancelist.revert(po1,po2);
+     if bo1 then begin
+      twidget(po1^.descendent).pos:= pos1;
+     end;
     end;
    end;
-  end;
- end
- else begin
-  if csancestor in acomponent.componentstate then begin
-   comp1:= fdescendentinstancelist.findancestor(acomponent.owner);
-   if comp1 <> nil then begin
-    comp1:= comp1.findcomponent(acomponent.name);
+  end
+  else begin
+   if csancestor in acomponent.componentstate then begin
+    comp1:= fdescendentinstancelist.findancestor(acomponent.owner);
     if comp1 <> nil then begin
-     refreshancestor(acomponent,comp1,comp1,true,
-      {$ifdef FPC}@{$endif}findancestor,
-      {$ifdef FPC}@{$endif}findcomponentclass,
-      {$ifdef FPC}@{$endif}createcomponent);
-     dorefreshmethods(acomponent,comp1,acomponent);
+     comp1:= comp1.findcomponent(acomponent.name);
+     if comp1 <> nil then begin
+      refreshancestor(acomponent,comp1,comp1,true,
+       {$ifdef FPC}@{$endif}findancestor,
+       {$ifdef FPC}@{$endif}findcomponentclass,
+       {$ifdef FPC}@{$endif}createcomponent);
+      dorefreshmethods(acomponent,comp1,acomponent);
+     end;
     end;
    end;
   end;
+ finally
+  fdescendentinstancelist.endstreaming;
  end;
  if comp1 <> nil then begin
   componentmodified(comp1);
@@ -2810,57 +2901,6 @@ begin
  end;
 end;
 
-type
- propprocty = procedure(const ainstance: tobject; const data: pointer; 
-                const apropinfo: ppropinfo);
-                
-procedure forallmethodproperties(const ainstance: tobject; const data: pointer;
-                              const aproc: propprocty);
-var
- ar1: propinfopoarty;
- int1,int2: integer;
- obj1: tobject;
-begin
- ar1:= getpropinfoar(ainstance);
- for int1:= 0 to high(ar1) do begin
-  case ar1[int1]^.proptype^.kind of
-   tkmethod: begin
-    aproc(ainstance,data,ar1[int1]);
-   end;
-   tkclass: begin
-    obj1:= getobjectprop(ainstance,ar1[int1]);
-    if (obj1 <> nil) and (not (obj1 is tcomponent) or 
-              (cssubcomponent in tcomponent(obj1).componentstyle)) then begin
-     forallmethodproperties(obj1,data,aproc);
-     if obj1 is tpersistentarrayprop then begin
-      with tpersistentarrayprop(obj1) do begin
-       for int2:= 0 to count - 1 do begin
-        forallmethodproperties(items[int2],data,aproc);
-       end;
-      end;
-     end
-     else begin
-      if obj1 is tcollection then begin
-       with tcollection(obj1) do begin
-        for int2:= 0 to count - 1 do begin
-         forallmethodproperties(items[int2],data,aproc);
-        end;
-       end;
-      end;
-     end;
-    end;
-   end;
-  end;
- end;
- if ainstance is tcomponent then begin
-  with tcomponent(ainstance) do begin
-   for int1:= 0 to componentcount - 1 do begin
-    forallmethodproperties(components[int1],data,aproc);
-   end;
-  end;
- end;
-end;
-
 procedure swapmethodpointer(const ainstance: tobject; const data: pointer;
                              const apropinfo: ppropinfo);
 var
@@ -2890,11 +2930,14 @@ end;
 procedure tdesigner.doswapmethodpointers(const ainstance: tobject;
                     const ainit: boolean);
 begin
- if ainit then begin
-  forallmethodproperties(ainstance,nil,{$ifdef FPC}@{$endif}swapinitmethodpointer);
- end
- else begin
-  forallmethodproperties(ainstance,nil,{$ifdef FPC}@{$endif}swapmethodpointer);
+ if finditem(pointerarty(fdescendentinstancelist.fswappedancestors),
+                           ainstance) < 0 then begin
+  if ainit then begin
+   forallmethodproperties(ainstance,nil,{$ifdef FPC}@{$endif}swapinitmethodpointer);
+  end
+  else begin
+   forallmethodproperties(ainstance,nil,{$ifdef FPC}@{$endif}swapmethodpointer);
+  end;
  end;
 end;
 
@@ -3350,22 +3393,13 @@ var
 begin
  buildmethodtable(amodule);
  with amodule^ do begin
- {
-  if instance is twidget then begin
-   twidget1(instance).fwidgetrect.pos:= designform.pos;
-   fdescendentinstancelist.setnodefaultpos(twidget(instance));
-  end
-  else begin
-   setcomponentpos(instance,designform.pos);
-  end;
-  }
+  fdescendentinstancelist.beginstreaming;
   doswapmethodpointers(instance,false);
   writer1:= twriter.create(astream,4096);
   beginstreaming(amodule);
   try
    if csancestor in instance.componentstate then begin
     ancestor:= fdescendentinstancelist.findancestor(instance);
-    doswapmethodpointers(ancestor,false);
    end
    else begin
     ancestor:= nil;
@@ -3373,16 +3407,13 @@ begin
    writer1.onfindancestor:= {$ifdef FPC}@{$endif}findancestor;
    writer1.writedescendent(instance,ancestor);
   finally
-   if ancestor <> nil then begin
-    doswapmethodpointers(ancestor,true);
-   end;
+   fdescendentinstancelist.endstreaming;
    endstreaming(amodule);
    writer1.free;
    doswapmethodpointers(instance,true);
    releasemethodtable(amodule);
    if instance is twidget then begin
     fdescendentinstancelist.restorepos(twidget(instance));
-//    twidget1(instance).fwidgetrect.pos:= nullpoint;
    end;
   end;
  end;
