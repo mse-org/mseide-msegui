@@ -294,8 +294,8 @@ type
    function getinheritedmodule(const aclassname: string): pmoduleinfoty;
    function findcomponentmodule(const acomponent: tcomponent): pmoduleinfoty;
    procedure selectionchanged;
-   procedure docopymethods(const source, dest: tcomponent);
-   procedure dorefreshmethods(const descendent,newancestor,oldancestor: tcomponent);
+   procedure docopymethods(const source, dest: tcomponent; const force: boolean);
+//   procedure dorefreshmethods(const descendent,newancestor,oldancestor: tcomponent);
    procedure writemodule(const amodule: pmoduleinfoty; const astream: tstream);
    procedure notifydeleted(comp: tcomponent);
    procedure componentdestroyed(const acomponent: tcomponent; const module: pmoduleinfoty);
@@ -482,7 +482,7 @@ type
                 const apropinfo: ppropinfo);
                 
 procedure forallmethodproperties(const ainstance: tobject; const data: pointer;
-                              const aproc: propprocty);
+                              const aproc: propprocty; const docomps: boolean);
 var
  ar1: propinfopoarty;
  int1,int2: integer;
@@ -508,11 +508,11 @@ begin
     obj1:= getobjectprop(ainstance,ar1[int1]);
     if (obj1 <> nil) and (not (obj1 is tcomponent) or 
               (cssubcomponent in tcomponent(obj1).componentstyle)) then begin
-     forallmethodproperties(obj1,data,aproc);
+     forallmethodproperties(obj1,data,aproc,docomps);
      if obj1 is tpersistentarrayprop then begin
       with tpersistentarrayprop(obj1) do begin
        for int2:= 0 to count - 1 do begin
-        forallmethodproperties(items[int2],data,aproc);
+        forallmethodproperties(items[int2],data,aproc,docomps);
        end;
       end;
      end
@@ -520,7 +520,7 @@ begin
       if obj1 is tcollection then begin
        with tcollection(obj1) do begin
         for int2:= 0 to count - 1 do begin
-         forallmethodproperties(items[int2],data,aproc);
+         forallmethodproperties(items[int2],data,aproc,docomps);
         end;
        end;
       end;
@@ -529,10 +529,10 @@ begin
    end;
   end;
  end;
- if ainstance is tcomponent then begin
+ if docomps and (ainstance is tcomponent) then begin
   with tcomponent(ainstance) do begin
    for int1:= 0 to componentcount - 1 do begin
-    forallmethodproperties(components[int1],data,aproc);
+    forallmethodproperties(components[int1],data,aproc,docomps);
    end;
   end;
  end;
@@ -2446,7 +2446,74 @@ begin
  end;
 end;
 
-procedure tdesigner.docopymethods(const source, dest: tcomponent);
+procedure tdesigner.docopymethods(const source,dest: tcomponent;
+                                      const force: boolean);
+ procedure doprops(const source,desc: tobject);
+ var
+  ar1: propinfopoarty;
+  int1,int2,int3: integer;
+  method1: tmethod;
+  obj1,obj2: tobject;
+ begin
+  ar1:= getpropinfoar(desc);
+  for int1:= 0 to high(ar1) do begin
+   case ar1[int1]^.proptype^.kind of
+    tkmethod: begin
+     method1:= getmethodprop(source,ar1[int1]);
+     if {force or }(method1.code <> nil) or (method1.data <> nil) then begin
+      setmethodprop(dest,ar1[int1],method1); 
+     end;
+    end;
+    tkclass: begin
+{
+     obj1:= getobjectprop(source,ar1[int1]);
+     if (obj1 <> nil) and (not (obj1 is tcomponent) or 
+               (cssubcomponent in tcomponent(obj1).componentstyle)) then begin
+      obj2:= getobjectprop(dest,ar1[int1]);
+      if obj2 <> nil then begin
+       doprops(obj1,obj2);
+       if obj1 is tpersistentarrayprop then begin
+        int3:= tpersistentarrayprop(obj1).count;
+        if int3 > tpersistentarrayprop(obj2).count then begin
+         int3:= tpersistentarrayprop(obj2).count;
+        end;
+        for int2:= 0 to int3 - 1 do begin
+         doprops(tpersistentarrayprop(obj1).items[int2],
+                 tpersistentarrayprop(obj2).items[int2]);
+        end;
+       end;
+      end;        //collections?
+     end;
+     }
+    end;
+   end;
+  end;
+ end;
+ 
+var 
+ comp1,comp2: tcomponent;
+ int1: integer;
+ bo1: boolean;
+begin
+ bo1:= setloading(dest,true);
+ try 
+  doprops(source,dest);
+ finally
+  setloading(dest,bo1);
+ end; 
+ for int1:= 0 to source.componentcount - 1 do begin
+  comp1:= source.components[int1];
+  comp2:= dest.findcomponent(comp1.name);
+  if (comp2 <> nil) and
+       (comp1.classtype = comp2.classtype) then begin
+   docopymethods(comp1,comp2,force);
+  end;
+ end;
+end;
+
+{
+procedure tdesigner.docopymethods(const source, dest: tcomponent; 
+                           const force: boolean);
 var
  propar: propinfopoarty;
  po1: ^ppropinfo;
@@ -2470,34 +2537,65 @@ begin
   comp1:= source.Components[int1];
   comp2:= dest.FindComponent(comp1.name);
   if (comp2 <> nil) and (comp1.ClassType = comp2.ClassType) then begin
-   docopymethods(comp1,comp2);
+   docopymethods(comp1,comp2,force);
   end;
  end;
 end;
-
+}
+{
 procedure tdesigner.dorefreshmethods(const descendent,newancestor,
                                     oldancestor: tcomponent);
-var
- propar: propinfopoarty;
- po1: ^ppropinfo;
- int1: integer;
- method1,method2,method3: tmethod;
- comp1,comp2,comp3: tcomponent;
-begin
- propar:= getpropinfoar(descendent);
- po1:= pointer(propar);
- for int1:= 0 to high(propar) do begin
-  if po1^^.proptype^.kind = tkmethod then begin
-   method2:= getmethodprop(newancestor,po1^);
-   if (method2.code <> nil) or (method2.data <> nil) then begin
-    setmethodprop(descendent,po1^,method2); 
-         //refresh ancestor value, it is not possible to override methods
+ procedure doprops(const desc,newan,oldan: tobject);
+ var
+  ar1: propinfopoarty;
+  int1,int2,int3: integer;
+  method1,method2,method3: tmethod;
+  obj1,obj2,obj3: tobject;
+ begin
+  ar1:= getpropinfoar(desc);
+  for int1:= 0 to high(ar1) do begin
+   case ar1[int1]^.proptype^.kind of
+    tkmethod: begin
+     method2:= getmethodprop(newan,ar1[int1]);
+     if (method2.code <> nil) or (method2.data <> nil) then begin
+      setmethodprop(desc,ar1[int1],method2); 
+          //refresh ancestor value, it is not possible to override methods
+     end;
+    end;
+    tkclass: begin
+     obj1:= getobjectprop(desc,ar1[int1]);
+     obj2:= getobjectprop(newan,ar1[int1]);
+     obj3:= getobjectprop(oldan,ar1[int1]);
+     if (obj1 <> nil) and (not (obj1 is tcomponent) or 
+               (cssubcomponent in tcomponent(obj1).componentstyle)) then begin
+      doprops(obj1,obj2,obj3);
+      if obj1 is tpersistentarrayprop then begin
+       int3:= tpersistentarrayprop(obj1).count;
+       if int3 > tpersistentarrayprop(obj2).count then begin
+        int3:= tpersistentarrayprop(obj2).count;
+       end;
+       if int3 > tpersistentarrayprop(obj3).count then begin
+        int3:= tpersistentarrayprop(obj3).count;
+       end;
+       for int2:= 0 to int3 - 1 do begin
+        doprops(tpersistentarrayprop(obj1).items[int2],
+                tpersistentarrayprop(obj2).items[int2],
+                tpersistentarrayprop(obj3).items[int2]);
+       end;
+      end;
+     end;
+    end;
    end;
   end;
-  inc(po1);
  end;
- for int1:= 0 to descendent.ComponentCount - 1 do begin
-  comp1:= descendent.Components[int1];
+ 
+var 
+ comp1,comp2,comp3: tcomponent;
+ int1: integer;
+begin
+ doprops(descendent,newancestor,oldancestor);
+ for int1:= 0 to descendent.componentcount - 1 do begin
+  comp1:= descendent.components[int1];
   comp2:= newancestor.findcomponent(comp1.name);
   comp3:= oldancestor.findcomponent(comp1.name);
   if (comp2 <> nil) and (comp3 <> nil) and
@@ -2507,6 +2605,7 @@ begin
   end;
  end;
 end;
+}
 
 procedure tdesigner.componentevent(const event: tcomponentevent);
 begin
@@ -2668,7 +2767,7 @@ begin
             {$ifdef FPC}@{$endif}createcomponent,
             {$ifdef FPC}@{$endif}ancestornotfound));
   if po1 = nil then begin
-   docopymethods(source,result);
+   docopymethods(source,result,false);
   end;
   doswapmethodpointers(result,true);
  finally
@@ -2721,7 +2820,8 @@ begin
        {$ifdef FPC}@{$endif}findancestor,
        {$ifdef FPC}@{$endif}findcomponentclass,
        {$ifdef FPC}@{$endif}createcomponent);
-      dorefreshmethods(acomponent,comp1,acomponent);
+      docopymethods(comp1,acomponent,true);
+//      dorefreshmethods(acomponent,comp1,acomponent);
      finally
       doswapmethodpointers(acomponent,true);
       doswapmethodpointers(comp1,true);
@@ -2948,10 +3048,12 @@ begin
  if finditem(pointerarty(fdescendentinstancelist.fswappedancestors),
                            ainstance) < 0 then begin
   if ainit then begin
-   forallmethodproperties(ainstance,nil,{$ifdef FPC}@{$endif}swapinitmethodpointer);
+   forallmethodproperties(ainstance,nil,
+           {$ifdef FPC}@{$endif}swapinitmethodpointer,true);
   end
   else begin
-   forallmethodproperties(ainstance,nil,{$ifdef FPC}@{$endif}swapmethodpointer);
+   forallmethodproperties(ainstance,nil,
+           {$ifdef FPC}@{$endif}swapmethodpointer,true);
   end;
  end;
 end;

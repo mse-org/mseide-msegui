@@ -518,7 +518,8 @@ function swapmethodtable(const instance: tobject; const newtable: pointer): poin
 procedure objectbinarytotextmse(input, output: tstream);
                 //workaround for FPC bug 7813 with localized float strings
 
-procedure setloading(const acomponent: tcomponent; const avalue: boolean);
+function setloading(const acomponent: tcomponent; const avalue: boolean): boolean;
+           //returns old value
                     
 implementation
 uses
@@ -557,6 +558,29 @@ type
    FVCLComObject: Pointer;
  end;
  {$endif}
+ {$ifdef FPC}
+ TFilercracker = class(TObject)
+  private
+    FRoot: TComponent;
+    FLookupRoot: TComponent;
+    FAncestor: TPersistent;
+    FIgnoreChildren: Boolean;
+ end;
+ {$else}
+ TFilercracker = class(TObject)
+  private
+    FStream: TStream;
+    FBuffer: Pointer;
+    FBufSize: Integer;
+    FBufPos: Integer;
+    FBufEnd: Integer;
+    FRoot: TComponent;
+    FLookupRoot: TComponent;
+    FAncestor: TPersistent;
+    FIgnoreChildren: Boolean;
+  end;
+ {$endif}
+ 
  tpersistent1 = class(tpersistent);
  tcomponent1 = class(tcomponent);
 
@@ -610,8 +634,9 @@ var
  floadedlist: tloadedlist;
  fmodulestoregister: msecomponentarty;
 
-procedure setloading(const acomponent: tcomponent; const avalue: boolean);
+function setloading(const acomponent: tcomponent; const avalue: boolean): boolean;
 begin
+ result:= csdesigning in acomponent.componentstate;
  with tcomponentcracker(acomponent) do begin
   if avalue then begin
    include(fcomponentstate,csloading);
@@ -975,6 +1000,18 @@ begin
   end;
   try
    writer.OnFindAncestor:= onfindancestor;
+   {
+   writer.root:= newancestor;
+   writer.ancestor:= descendent;
+   writer.rootancestor:= newancestor;
+   if descendent.owner <> nil then begin
+    twritercracker(writer).flookuproot:= descendent.owner; 
+   end
+   else begin
+    writer.lookuproot:= descendent; 
+   end;
+   writer.writecomponent(newancestor);
+   }
    writer.WriteDescendent(newancestor,descendent); //new state
   finally
    tmsecomponent(newancestor).SetInline(inl);

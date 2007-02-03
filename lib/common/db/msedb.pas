@@ -2620,7 +2620,9 @@ begin
  end;
  reader.readlistend;
  for int1:= 0 to high(fieldtypes) do begin
-  fitems[int1]:= msefieldtypeclasses[fieldtypes[int1]].create(nil);
+  if fitems[int1] = nil then begin
+   fitems[int1]:= msefieldtypeclasses[fieldtypes[int1]].create(nil);
+  end;
  end;
  readcollection(reader);
  for int1:= 0 to high(fitems) do begin
