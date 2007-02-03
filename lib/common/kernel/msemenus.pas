@@ -584,7 +584,8 @@ end;
 
 procedure tmenuitem.setonexecute(const avalue: notifyeventty);
 begin
- setactiononexecute(iactionlink(self),avalue);
+ setactiononexecute(iactionlink(self),avalue,
+                (fowner <> nil) and (csloading in fowner.componentstate));
 end;
 
 function tmenuitem.isonexecutestored: Boolean;

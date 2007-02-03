@@ -417,7 +417,7 @@ end;
 
 procedure ttoolbutton.setonexecute(const Value: notifyeventty);
 begin
- setactiononexecute(iactionlink(self),value);
+ setactiononexecute(iactionlink(self),value,csloading in toolbar.componentstate);
 end;
 
 function ttoolbutton.isonexecutestored: Boolean;

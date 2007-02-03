@@ -484,7 +484,7 @@ end;
 
 procedure tcustombutton.setonexecute(const value: notifyeventty);
 begin
- setactiononexecute(iactionlink(self),value);
+ setactiononexecute(iactionlink(self),value,csloading in componentstate);
 end;
 
 function tcustombutton.isonexecutestored: boolean;

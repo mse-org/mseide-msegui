@@ -486,7 +486,17 @@ var
  ar1: propinfopoarty;
  int1,int2: integer;
  obj1: tobject;
+ bo1: boolean;
 begin
+ if ainstance is tcomponent then begin
+  bo1:= not (csloading in tcomponent(ainstance).componentstate);
+  if bo1 then begin
+   setloading(tcomponent(ainstance),true);
+  end;
+ end
+ else begin
+  bo1:= false;
+ end;
  ar1:= getpropinfoar(ainstance);
  for int1:= 0 to high(ar1) do begin
   case ar1[int1]^.proptype^.kind of
@@ -524,6 +534,9 @@ begin
     forallmethodproperties(components[int1],data,aproc);
    end;
   end;
+ end;
+ if bo1 then begin
+  setloading(tcomponent(ainstance),false);
  end;
 end;
 
@@ -2463,7 +2476,8 @@ begin
  end;
 end;
 
-procedure tdesigner.dorefreshmethods(const descendent,newancestor,oldancestor: tcomponent);
+procedure tdesigner.dorefreshmethods(const descendent,newancestor,
+                                    oldancestor: tcomponent);
 var
  propar: propinfopoarty;
  po1: ^ppropinfo;
@@ -2657,6 +2671,7 @@ begin
   if po1 = nil then begin
    docopymethods(source,result);
   end;
+  doswapmethodpointers(result,true);
  finally
   doswapmethodpointers(source,true);
   fdescendentinstancelist.endstreaming;
@@ -2666,7 +2681,6 @@ begin
    releasemethodtable(po1);
   end;
  end;
- doswapmethodpointers(result,true);
 end;
 
 procedure tdesigner.revert(const acomponent: tcomponent);
@@ -2679,6 +2693,7 @@ var
 begin
  comp1:= nil;
  fdescendentinstancelist.beginstreaming;
+ doswapmethodpointers(acomponent,false);
  try
   if csinline in acomponent.componentstate then begin
    po1:= fdescendentinstancelist.finddescendentinfo(acomponent);
@@ -2702,16 +2717,22 @@ begin
     if comp1 <> nil then begin
      comp1:= comp1.findcomponent(acomponent.name);
      if comp1 <> nil then begin
-      refreshancestor(acomponent,comp1,comp1,true,
-       {$ifdef FPC}@{$endif}findancestor,
-       {$ifdef FPC}@{$endif}findcomponentclass,
-       {$ifdef FPC}@{$endif}createcomponent);
-      dorefreshmethods(acomponent,comp1,acomponent);
+      doswapmethodpointers(comp1,false);
+      try
+       refreshancestor(acomponent,comp1,comp1,true,
+        {$ifdef FPC}@{$endif}findancestor,
+        {$ifdef FPC}@{$endif}findcomponentclass,
+        {$ifdef FPC}@{$endif}createcomponent);
+       dorefreshmethods(acomponent,comp1,acomponent);
+      finally
+       doswapmethodpointers(comp1,true);
+      end;
      end;
     end;
    end;
   end;
  finally
+  doswapmethodpointers(acomponent,true);
   fdescendentinstancelist.endstreaming;
  end;
  if comp1 <> nil then begin

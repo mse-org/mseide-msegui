@@ -183,7 +183,8 @@ procedure setactionoptions(const sender: iactionlink; const value: menuactionopt
 
 procedure setactiongroup(const sender: iactionlink; const value: integer);
 function isactiongroupstored(const info: actioninfoty): boolean;
-procedure setactiononexecute(const sender: iactionlink; const value: notifyeventty);
+procedure setactiononexecute(const sender: iactionlink;
+                             const value: notifyeventty; const aloading: boolean);
 function isactiononexecutestored(const info: actioninfoty): boolean;
 
 procedure actionbeginload(const sender: iactionlink);
@@ -874,11 +875,14 @@ begin
  end;
 end;
 
-procedure setactiononexecute(const sender: iactionlink; const value: notifyeventty);
+procedure setactiononexecute(const sender: iactionlink;
+                    const value: notifyeventty; const aloading: boolean);
 begin
  with sender.getactioninfopo^ do begin
   onexecute:= value;
-  include(state,as_localonexecute);
+  if not aloading then begin //IDE sets csloading while method pointer swapping
+   include(state,as_localonexecute);
+  end;
  end;
  sender.actionchanged;
 end;

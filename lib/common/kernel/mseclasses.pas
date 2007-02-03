@@ -517,6 +517,8 @@ procedure writestringar(const writer: twriter; const ar: stringarty);
 function swapmethodtable(const instance: tobject; const newtable: pointer): pointer;
 procedure objectbinarytotextmse(input, output: tstream);
                 //workaround for FPC bug 7813 with localized float strings
+
+procedure setloading(const acomponent: tcomponent; const avalue: boolean);
                     
 implementation
 uses
@@ -608,6 +610,18 @@ var
  floadedlist: tloadedlist;
  fmodulestoregister: msecomponentarty;
 
+procedure setloading(const acomponent: tcomponent; const avalue: boolean);
+begin
+ with tcomponentcracker(acomponent) do begin
+  if avalue then begin
+   include(fcomponentstate,csloading);
+  end
+  else begin
+   exclude(fcomponentstate,csloading);
+  end;
+ end;
+end;
+                    
 procedure clearinline(const acomponent: tcomponent);
 var
  int1: integer;
@@ -842,7 +856,6 @@ begin
  end;
 end;
 
-{$define d ebugsubmodule}
 const
  skipmark = 'h71%z/ur';
  
@@ -918,11 +931,11 @@ var
  eventhandler: trefresheventhandler;
  inl,anc: boolean;
  tabbefore: pointer;
- {$ifdef debugsubmodule}
+ {$ifdef mse_debugrefresh}
  stream3: ttextstream;
  {$endif}
 begin
- {$ifdef debugsubmodule}
+ {$ifdef mse_debugrefresh}
   writeln('descendent: '+ descendent.name + ' newancestor: '+
          newancestor.name + ' oldancestor: '+oldancestor.name);
  stream3:= ttextstream.create;
@@ -945,27 +958,13 @@ begin
    end;
    writer.Free;
   end;
- {$ifdef debugsubmodule}
+ {$ifdef mse_debugrefresh}
    stream1.position:= 0;
    objectbinarytotextmse(stream1,stream3);
    stream3.position:= 0;
    writeln('changes oldancestor->descendent');
    stream3.writetotext(output);
  {$endif}
- {
-  comp1:= copycomponent(newancestor,nil,onfindancestor,onfindcomponentclass,
-                         oncreatecomponent);
-  writer:= twriter.Create(stream2,4096);
-  try
-   writer.OnFindAncestor:= onfindancestor;
-   tmsecomponent(comp1).SetInline(true);
-   tcomponent1(comp1).SetAncestor(true);
-   writer.WriteDescendent(comp1,descendent); //new state
-  finally
-   writer.Free;
-   comp1.Free;
-  end;
-}
   writer:= twriter.Create(stream2,4096);
   inl:= csinline in newancestor.componentstate;
   anc:= csancestor in newancestor.componentstate;
@@ -985,7 +984,7 @@ begin
    end;
    writer.Free;
   end;
- {$ifdef debugsubmodule}
+ {$ifdef mse_debugrefresh}
    stream2.position:= 0;
    stream3.setsize(0);
    objectbinarytotextmse(stream2,stream3);
@@ -1003,8 +1002,6 @@ begin
    reader.OnFindComponentClass:= onfindcomponentclass;
    reader.OnCreateComponent:= oncreatecomponent;
    reader.onfindmethod:= onfindmethod;
-//   reader.onsetname:= {$ifdef FPC}@{$endif}eventhandler.onsetname;
-//   reader.onerror:= {$ifdef FPC}@{$endif}eventhandler.onerror;
    reader.ReadRootComponent(descendent);
   finally
    if destmethodtab <> nil then begin
@@ -1041,7 +1038,7 @@ begin
  finally
   stream1.Free;
   stream2.Free;
-  {$ifdef debugsubmodule}
+  {$ifdef mse_debugrefresh}
   stream3.free;
   {$endif}
   eventhandler.free;
