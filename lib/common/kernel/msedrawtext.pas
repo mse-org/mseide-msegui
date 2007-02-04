@@ -483,9 +483,9 @@ begin
    end;
   end;
   if (tf_block in flags) and (dest.cx > 0) then begin
+   po1:= pointer(info.text.text);
    for int3:= 0 to high(lineinfos) - 1 do begin
-    po1:= pointer(info.text.text);
-    with layoutinfo.lineinfos[int3] do begin     
+    with lineinfos[int3] do begin     
      if tabchars = nil then begin
       int4:= 0;
       setlength(tabchars,licount); //max
@@ -509,6 +509,12 @@ begin
        listartx:= dest.x;
       end;
      end;  
+    end;
+   end;
+   if high(lineinfos) >= 0 then begin
+    if res.cx <= dest.cx then begin
+     res.x:= dest.x;
+     res.cx:= dest.cx;
     end;
    end;
   end;
