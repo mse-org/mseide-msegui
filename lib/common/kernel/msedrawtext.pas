@@ -15,7 +15,7 @@ unit msedrawtext;
 
 interface
 uses
- Classes,msegraphics,mserichstring,msegraphutils,
+ {$ifdef FPC}classes{$else}Classes{$endif},msegraphics,mserichstring,msegraphutils,
   msearrayprops,mseclasses,msestrings,msetypes,mseguiglob;
 
 const
@@ -23,7 +23,7 @@ const
  textellipse = msestring('...');
 
 type
- textflagty = (tf_xcentered,tf_right,tf_ycentered,tf_bottom, 
+ textflagty = (tf_xcentered,tf_right,tf_block,tf_ycentered,tf_bottom, 
                  //order fix, used in msepostscriptprinter
                tf_clipi,tf_clipo,
                tf_grayed,tf_wordbreak,tf_noselect,
@@ -271,9 +271,10 @@ var
  textlen: integer;
  style1: fontstylesty;
  nexttab: integer;
- rea1: real;
+ rea1,rea2: real;
  tabs: tabulatorarty;
-
+ po1: pmsecharaty;
+ 
 begin
  tabs:= nil; //compiler warning
  if info.font <> nil then begin
@@ -481,6 +482,36 @@ begin
     end;
    end;
   end;
+  if (tf_block in flags) and (dest.cx > 0) then begin
+   for int3:= 0 to high(lineinfos) - 1 do begin
+    po1:= pointer(info.text.text);
+    with layoutinfo.lineinfos[int3] do begin     
+     if tabchars = nil then begin
+      int4:= 0;
+      setlength(tabchars,licount); //max
+      for int1:= liindex-1 to liindex + licount - 2 do begin
+       if po1^[int1] = ' ' then begin
+        tabchars[int4]:= int1+1;
+        inc(int4);
+       end;
+      end;
+      setlength(tabchars,int4);
+      if int4 > 0 then begin
+       rea1:= (dest.cx - liwidth) / int4;
+       rea2:= 0;
+       int2:= 0;
+       for int1:= 0 to high(tabchars) do begin
+        rea2:= rea2 + rea1;
+        int4:= round(rea2) - int2;
+        inc(charwidths[tabchars[int1]-1],int4);
+        inc(int2,int4);
+       end;
+       listartx:= dest.x;
+      end;
+     end;  
+    end;
+   end;
+  end;
  end;
 end;
 
@@ -655,7 +686,7 @@ var
    x:= pos.x;
    xbefore:= x;
    with info,canvas,layoutinfo,lineinfos[row] do begin
-    if (tabulators = nil) or
+    if {(tabulators = nil) or}
              (tabchars = nil) then begin
      drawstring(@text.text[astart],acount,pos,nil,grayed);
      for int2:= astart - 1 to astart + acount - 2 do begin
