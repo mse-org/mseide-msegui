@@ -50,10 +50,13 @@ type
    fpos: real;
    procedure setkind(const avalue: tabulatorkindty);
    procedure setpos(const avalue: real);
-   procedure setposdist(const avalue: real);
+   procedure setdistleft(const avalue: real);
+   procedure setdistright(const avalue: real);
   protected
-   fposdist: real;
-   property posdist: real read fposdist write setposdist; //mm
+   fdistleft: real;
+   fdistright: real;
+   property distleft: real read fdistleft write setdistleft; //mm
+   property distright: real read fdistright write setdistright; //mm
   public
   published
    property kind: tabulatorkindty read fkind write setkind default tak_left;
@@ -1063,12 +1066,23 @@ begin
  end;
 end;
 
-procedure ttabulatoritem.setposdist(const avalue: real);
+procedure ttabulatoritem.setdistleft(const avalue: real);
 begin
- if fposdist <> avalue then begin
-  fposdist:= avalue;
-  if isemptyreal(fposdist) then begin
-   fpos:= 0;
+ if fdistleft <> avalue then begin
+  fdistleft:= avalue;
+  if isemptyreal(fdistleft) then begin
+   fdistleft:= 0;
+  end;
+  tcustomtabulators(fowner).changed(self);
+ end;
+end;
+
+procedure ttabulatoritem.setdistright(const avalue: real);
+begin
+ if fdistright <> avalue then begin
+  fdistright:= avalue;
+  if isemptyreal(fdistright) then begin
+   fdistright:= 0;
   end;
   tcustomtabulators(fowner).changed(self);
  end;
@@ -1173,13 +1187,13 @@ begin
      linepos:= round(fpos*fppmm);
      case kind of
       tak_left: begin
-       textpos:= round((fpos + fposdist)*fppmm);
+       textpos:= round((fpos + fdistleft)*fppmm);
       end;
       tak_right,tak_decimal: begin
-       textpos:= round((fpos - fposdist)*fppmm);
+       textpos:= round((fpos - fdistright)*fppmm);
       end; 
       else begin
-       textpos:= linepos;
+       textpos:= round((fpos + fdistleft - fdistright)*fppmm);
       end;
      end;
     end;
@@ -1187,26 +1201,27 @@ begin
   end;
   sortarray(ftabs,{$ifdef FPC}@{$endif}cmptab,sizeof(ftabs[0]));
   for int1:= 0 to high(ftabs) do begin
-   with ftabs[int1] do begin
-    width:= 0;
+   with ftabs[int1],ttabulatoritem(fitems[index]) do begin
     case tabkind of 
      tak_right: begin
+      width:= -round(fdistleft*fppmm);
       if int1 > 0 then begin
-       width:= textpos - ftabs[int1-1].linepos;
+       width:= textpos - ftabs[int1-1].linepos + width;
       end
       else begin
-       width:= textpos;
+       width:= textpos + width;
       end;
      end;
      tak_centered: begin
+      width:= -round((fdistleft + fdistright)*fppmm);
       if (int1 > 0) and (int1 < high(ftabs)) then begin
-       width:= ftabs[int1+1].linepos - ftabs[int1-1].linepos - 
-                round(2*ttabulatoritem(fitems[index]).fposdist);
+       width:= ftabs[int1+1].linepos - ftabs[int1-1].linepos + width;
       end;
      end;
      else begin //tak_left,tak_decimal
+      width:= -round(fdistright*fppmm);
       if int1 < high(ftabs) then begin
-       width:= ftabs[int1+1].linepos - textpos;
+       width:= ftabs[int1+1].linepos - textpos + width;
       end;
      end;
     end;

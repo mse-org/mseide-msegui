@@ -212,7 +212,8 @@ type
                  setlibottom_visible default defaulttablinevisible;
 
    property ongetvalue: getrichstringeventty read fongetvalue write fongetvalue;
-   property posdist; //mm
+   property distleft; //mm
+   property distright; //mm
  end; 
                  
  treptabulators = class(tcustomtabulators)
@@ -224,7 +225,8 @@ type
    flineinfos: tablineinfoarty;
    flistart: tablineinfoty;
    fliend: tablineinfoty;
-   fposdist: real;
+   fdistright: real;
+   fdistleft: real;
 
    procedure setlitop_widthmm(const avalue: real);
    procedure setlitop_color(const avalue: colorty);
@@ -270,7 +272,8 @@ type
    procedure setitems(const index: integer; const avalue: treptabulatoritem);
    procedure processvalues(const acanvas: tcanvas; const adest: rectty;
                         const apaint: boolean);
-   procedure setposdist(const avalue: real);
+   procedure setdistleft(const avalue: real);
+   procedure setdistright(const avalue: real);
   protected
    class function getitemclass: tabulatoritemclassty; override;
    procedure paint(const acanvas: tcanvas; const adest: rectty);
@@ -356,7 +359,8 @@ type
                  setlibottom_dist default defaulttablinedist;
    property libottom_visible: linevisiblesty read flineinfos[tlk_bottom].visible
                write setlibottom_visible default defaulttablinevisible;               
-   property posdist: real read fposdist write setposdist; //mm
+   property distleft: real read fdistleft write setdistleft; //mm
+   property distright: real read fdistright write setdistright; //mm
    property defaultdist;
  end;
   
@@ -987,7 +991,7 @@ function getreportscale(const amodule: tcomponent): real;
 
 implementation
 uses
- msedatalist,sysutils,msestreaming,msebits;
+ msedatalist,sysutils,msestreaming,msebits,msereal;
 type
  tcustomframe1 = class(tcustomframe);
  twidget1 = class(twidget);
@@ -1106,7 +1110,8 @@ begin
   self.flineinfos[tlk_vert]:= flineinfos[tlk_vert];
   if not (csloading in componentstate) then begin
    self.fdatalink.datasource:= datasource;
-   self.fposdist:= posdist;
+   self.fdistleft:= distleft;
+   self.fdistright:= distright;
   end;
  end;
 end;
@@ -1581,8 +1586,8 @@ begin
       flags:= ftextflags;
      end;
      dest:= adest;
-     if (tabkind = tak_left) and (int1 = high(ftabs)) then begin
-      dest.cx:= adest.cx - textpos;
+     if width <= 0 then begin
+      dest.cx:= adest.cx + width;
      end
      else begin
       dest.cx:= width;
@@ -2026,14 +2031,32 @@ begin
  end;
 end;
 
-procedure treptabulators.setposdist(const avalue: real);
+procedure treptabulators.setdistleft(const avalue: real);
 var
  int1: integer;
 begin
- if avalue <> fposdist then begin
-  fposdist:= avalue;
+ if avalue <> fdistleft then begin
+  fdistleft:= avalue;
+  if isemptyreal(fdistleft) then begin
+   fdistleft:= 0;
+  end;
   for int1:= 0 to high(fitems) do begin
-   treptabulatoritem(fitems[int1]).posdist:= avalue;
+   treptabulatoritem(fitems[int1]).distleft:= fdistleft;
+  end;
+ end;
+end;
+
+procedure treptabulators.setdistright(const avalue: real);
+var
+ int1: integer;
+begin
+ if avalue <> fdistright then begin
+  fdistright:= avalue;
+  if isemptyreal(fdistright) then begin
+   fdistright:= 0;
+  end;
+  for int1:= 0 to high(fitems) do begin
+   treptabulatoritem(fitems[int1]).distright:= fdistright;
   end;
  end;
 end;
