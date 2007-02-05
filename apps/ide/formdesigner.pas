@@ -217,6 +217,7 @@ type
 //   function insertoffset: pointty;
 //   function gridoffset: pointty;
    function componentscrollsize: sizety;
+   function componentoffset: pointty;
 
    procedure setrootpos(const component: tcomponent; const apos: pointty);
    procedure beginselect;
@@ -394,6 +395,7 @@ function getcomponentrect(const sender: twidget;
                                     const component: tcomponent): rectty;
 begin
  result.pos:= getcomponentpos(component);
+ addpoint1(result.pos,tdesignwindow(sender.window).componentoffset);
  result.cx:= componentsize + complabelleftmargin + 
                  sender.getcanvas.getstringwidth(component.name) +
                   complabelrightmargin;
@@ -956,6 +958,7 @@ procedure tdesignwindow.doafterpaint(const canvas: tcanvas);
  
 var
  int1: integer;
+ pt1: pointty;
 begin
  if tformdesignerfo(fowner).fmodule <> nil then begin
   canvas.intersectcliprect(tformdesignerfo(fowner).gridrect);
@@ -1978,6 +1981,11 @@ procedure tdesignwindow.beforefilesave(const adesigner: idesigner;
                const afilename: filenamety);
 begin
  //dummy
+end;
+
+function tdesignwindow.componentoffset: pointty;
+begin
+ result:= tformdesignerfo(fowner).gridrect.pos;
 end;
 
 { tformdesignerfo }

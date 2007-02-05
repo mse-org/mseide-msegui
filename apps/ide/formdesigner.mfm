@@ -130,6 +130,11 @@ object formdesignerfo: tformdesignerfo
         options = [mao_separator, mao_shortcutcaption]
       end    
       item
+        caption = 'Touch Form'
+        state = [as_localcaption, as_localonexecute]
+        onexecute = dotouch
+      end    
+      item
         caption = 'Revert to inherited'
         name = 'revert'
         state = [as_localcaption, as_localonexecute]
@@ -147,11 +152,6 @@ object formdesignerfo: tformdesignerfo
         name = 'insertcomp'
         state = [as_localcaption, as_localonexecute]
         onexecute = doinsertcomponent
-      end    
-      item
-        caption = 'Touch'
-        state = [as_localcaption, as_localonexecute]
-        onexecute = dotouch
       end>
     left = 48
     top = 40
