@@ -1584,13 +1584,20 @@ begin
       text:= getdisptext;
       finfo.font:= font;
       flags:= ftextflags;
-     end;
-     dest:= adest;
-     if width <= 0 then begin
-      dest.cx:= adest.cx + width;
-     end
-     else begin
-      dest.cx:= width;
+      dest:= adest;
+      if width <= 0 then begin
+       case kind of
+        tak_left: begin
+         dest.cx:= adest.cx - textpos + width;
+        end;
+        else begin
+         dest.cx:= adest.cx + width;
+        end;
+       end;
+      end
+      else begin
+       dest.cx:= width;
+      end;
      end;
      textrect(acanvas,finfo);
      dest.cx:= res.cx;

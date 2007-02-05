@@ -279,6 +279,7 @@ var
  rea1,rea2: real;
  tabs: tabulatorarty;
  po1: pmsecharaty;
+ bo1: boolean;
  
 begin
  tabs:= nil; //compiler warning
@@ -489,9 +490,11 @@ begin
   end;
   if (tf_block in flags) and (dest.cx > 0) then begin
    po1:= pointer(info.text.text);
+   bo1:= false;
    for int3:= 0 to high(lineinfos) - 1 do begin
     with lineinfos[int3] do begin     
      if (tabchars = nil) and not linebreak then begin
+      bo1:= true;
       int4:= 0;
       setlength(tabchars,licount); //max
       for int1:= liindex-1 to liindex + licount - 2 do begin
@@ -516,7 +519,7 @@ begin
      end;  
     end;
    end;
-   if high(lineinfos) >= 0 then begin
+   if bo1 then begin
     if res.cx <= dest.cx then begin
      res.x:= dest.x;
      res.cx:= dest.cx;
@@ -1194,8 +1197,9 @@ begin
       tak_right,tak_decimal: begin
        textpos:= round((fpos - fdistright)*fppmm);
       end; 
-      else begin
-       textpos:= round((fpos + fdistleft - fdistright)*fppmm);
+      else begin //tak_center
+//       textpos:= round((fpos + (fdistleft - fdistright))*fppmm);
+       textpos:= linepos;
       end;
      end;
     end;
@@ -1205,7 +1209,7 @@ begin
   for int1:= 0 to high(ftabs) do begin
    with ftabs[int1],ttabulatoritem(fitems[index]) do begin
     case tabkind of 
-     tak_right: begin
+     tak_right,tak_decimal: begin
       width:= -round(fdistleft*fppmm);
       if int1 > 0 then begin
        width:= textpos - ftabs[int1-1].linepos + width;
@@ -1215,15 +1219,18 @@ begin
       end;
      end;
      tak_centered: begin
-      width:= -round((fdistleft + fdistright)*fppmm);
+      width:= -round((fdistright+fdistleft)*fppmm);
       if (int1 > 0) and (int1 < high(ftabs)) then begin
        width:= ftabs[int1+1].linepos - ftabs[int1-1].linepos + width;
+      end
+      else begin
+       width:= 2 * linepos + width;
       end;
      end;
-     else begin //tak_left,tak_decimal
-      width:= -round(fdistright*fppmm);
+     else begin //tak_left
+      width:= -round((fdistright)*fppmm);
       if int1 < high(ftabs) then begin
-       width:= ftabs[int1+1].linepos - textpos + width;
+       width:= ftabs[int1+1].linepos - textpos + width
       end;
      end;
     end;
