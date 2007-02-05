@@ -347,6 +347,7 @@ type
     FRootAncestor: TComponent;
     FPropPath: String;
   end;
+  tbinaryobjectreader1 = class(tbinaryobjectreader);
   {$else}
   TWritercracker = class(TFiler)
   protected
@@ -1237,14 +1238,25 @@ begin
   readvalue;
   int1:= 0;
   while not EndOfList do begin
+  {
    if int1 >= count then begin
     raise earraystreamerror.create('Arrayproperty length mismatch: '+
           inttostr(count) + '.');
    end;
+  }
    if NextValue in [vaInt8, vaInt16, vaInt32] then ReadInteger;
    ReadListBegin;
    while not EndOfList do  begin
-    treader1(reader).ReadProperty(getitems(int1));
+    if int1 <= high(fitems) then begin
+     treader1(reader).ReadProperty(getitems(int1));
+    end
+    else begin
+     {$ifdef FPC}
+     tbinaryobjectreader1(reader.driver).skipproperty;
+     {$else}
+     treader1(reader).skipproperty;
+     {$endif}
+    end;
    end;
    ReadListEnd;
    inc(int1);
