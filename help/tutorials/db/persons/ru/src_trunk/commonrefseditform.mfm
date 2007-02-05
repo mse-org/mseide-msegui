@@ -1,0 +1,173 @@
+object commonrefseditfo: tcommonrefseditfo
+  optionswidget = [ow_arrowfocus, ow_subfocus, ow_destroywidgets, ow_hinton, ow_autoscale]
+  bounds_x = 61
+  bounds_y = 154
+  bounds_cx = 401
+  bounds_cy = 323
+  anchors = []
+  container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_subfocus, ow_mousetransparent, ow_destroywidgets, ow_autoscale]
+  container.bounds_cx = 401
+  container.bounds_cy = 323
+  container.frame.dummy = 0
+  onclosequery = commonrefseditfoclosequery
+  moduleclassname = 'tmseform'
+  object btnSaveAll: tbutton
+    bounds_x = 8
+    bounds_y = 232
+    bounds_cx = 74
+    bounds_cy = 28
+    frame.colorclient = 16763135
+    frame.localprops = [frl_colorclient]
+    frame.template = mainfo.ftButtons
+    frame.dummy = 0
+    taborder = 7
+    state = [as_disabled, as_localcaption]
+    action = actSaveAll
+    caption = 'Save All'
+  end
+  object btnUnDo: tbutton
+    bounds_x = 168
+    bounds_y = 232
+    bounds_cx = 58
+    bounds_cy = 28
+    frame.colorclient = -1879048188
+    frame.localprops = [frl_colorclient]
+    frame.template = mainfo.ftButtons
+    frame.dummy = 0
+    taborder = 6
+    state = [as_disabled, as_localcaption]
+    action = actUnDo
+    caption = 'UnDo'
+  end
+  object btnAdd: tbutton
+    bounds_x = 240
+    bounds_y = 232
+    bounds_cx = 66
+    bounds_cy = 28
+    frame.colorclient = 13158650
+    frame.localprops = [frl_colorclient]
+    frame.template = mainfo.ftButtons
+    frame.dummy = 0
+    taborder = 4
+    state = [as_localcaption]
+    action = actAdd
+    caption = 'Add'
+  end
+  object btnDelete: tbutton
+    bounds_x = 320
+    bounds_y = 232
+    bounds_cx = 74
+    bounds_cy = 28
+    frame.colorclient = 16763080
+    frame.localprops = [frl_colorclient]
+    frame.template = mainfo.ftButtons
+    frame.dummy = 0
+    taborder = 3
+    state = [as_disabled, as_localcaption]
+    action = actDelete
+    caption = 'Delete'
+  end
+  object btnClose: tbutton
+    bounds_x = 128
+    bounds_y = 272
+    bounds_cx = 266
+    bounds_cy = 44
+    frame.colorclient = -1610612714
+    frame.localprops = [frl_colorclient]
+    frame.template = mainfo.ftButtons
+    frame.dummy = 0
+    taborder = 2
+    state = [as_localcaption]
+    caption = 'Close'
+    modalresult = mr_windowclosed
+  end
+  object btnUnDoAll: tbutton
+    bounds_x = 96
+    bounds_y = 232
+    bounds_cx = 66
+    bounds_cy = 28
+    frame.colorclient = -1879048188
+    frame.localprops = [frl_colorclient]
+    frame.template = mainfo.ftButtons
+    frame.dummy = 0
+    taborder = 5
+    state = [as_disabled, as_localcaption]
+    action = actUnDoAll
+    caption = 'UnDo All'
+  end
+  object lblAddedLegend: tlabel
+    bounds_x = 8
+    bounds_y = 272
+    bounds_cx = 88
+    bounds_cy = 18
+    frame.leveli = -2
+    frame.colorclient = 16760832
+    frame.caption = 'added'
+    frame.captionpos = cp_right
+    frame.captiondist = 10
+    frame.localprops = [frl_leveli, frl_framewidth, frl_colorframe, frl_colorclient]
+    frame.dummy = 0
+    frame.outerframe = (
+      0
+      0
+      52
+      0
+    )
+    taborder = 1
+    reffontheight = 16
+  end
+  object lblChangedLegend: tlabel
+    bounds_x = 8
+    bounds_y = 296
+    bounds_cx = 102
+    bounds_cy = 18
+    frame.leveli = -2
+    frame.colorclient = -1610612728
+    frame.caption = 'changed'
+    frame.captionpos = cp_right
+    frame.captiondist = 10
+    frame.localprops = [frl_leveli, frl_colorclient]
+    frame.dummy = 0
+    frame.outerframe = (
+      0
+      0
+      66
+      0
+    )
+    reffontheight = 16
+  end
+  object actSaveAll: taction
+    state = [as_disabled]
+    onexecute = saveallexecute
+    left = 8
+    top = 192
+  end
+  object actUnDo: taction
+    state = [as_disabled]
+    onexecute = undoexecute
+    left = 160
+    top = 192
+  end
+  object actAdd: taction
+    onexecute = addexecute
+    left = 240
+    top = 192
+  end
+  object actDelete: taction
+    state = [as_disabled]
+    onexecute = deleteexecute
+    left = 312
+    top = 192
+  end
+  object dsContents: tmsedatasource
+    OnDataChange = contentschange
+    left = 152
+    top = 168
+  end
+  object actUnDoAll: taction
+    state = [as_disabled]
+    onexecute = undoallexecute
+    left = 80
+    top = 192
+  end
+end

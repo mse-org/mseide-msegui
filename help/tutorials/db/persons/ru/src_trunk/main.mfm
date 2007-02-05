@@ -1,0 +1,616 @@
+object mainfo: tmainfo
+  bounds_x = 35
+  bounds_y = 146
+  bounds_cx = 707
+  bounds_cy = 401
+  container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_subfocus, ow_mousetransparent, ow_destroywidgets, ow_autoscale]
+  container.bounds_x = 0
+  container.bounds_y = 22
+  container.bounds_cx = 707
+  container.bounds_cy = 379
+  container.frame.dummy = 0
+  container.taborder = 1
+  optionswindow = [wo_groupleader]
+  mainmenu = mnuMain
+  font.dummy = 0
+  options = [fo_main, fo_terminateonclose, fo_autoreadstat, fo_autowritestat, fo_savepos, fo_savestate]
+  caption = 'The Galaxy Data Keeper'
+  icon.transparency = -2147483648
+  moduleclassname = 'tmseform'
+  object grdPersons: tdbstringgrid
+    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_focusbackonesc, ow_mousewheel, ow_destroywidgets, ow_hinton, ow_fontglyphheight, ow_autoscale]
+    bounds_x = 8
+    bounds_y = 8
+    bounds_cx = 689
+    bounds_cy = 306
+    frame.dummy = 0
+    anchors = [an_left, an_top, an_right, an_bottom]
+    popupmenu = pupPersons
+    datasource = dsPersons
+    optionsgrid = [og_colsizing, og_focuscellonenter, og_autofirstrow, og_colchangeontabkey, og_autopopup]
+    datacols.count = 7
+    datacols.colorselect = -1610612713
+    datacols.options = [co_readonly, co_focusselect, co_rowselect, co_proportional, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_mousescrollrow]
+    datacols.optionsedit = [scoe_undoonesc, scoe_eatreturn, scoe_autoselect, scoe_autoselectonfirstclick, scoe_caretonreadonly]
+    datacols.items = <    
+      item
+        frame.framei_left = 5
+        frame.localprops = [frl_fileft]
+        frame.dummy = 0
+        colorselect = -1610612713
+        width = 133
+        options = [co_readonly, co_focusselect, co_rowselect, co_proportional, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_mousescrollrow]
+        onshowhint = shownamehint
+        datafield = 'descr'
+      end    
+      item
+        frame.framei_left = 5
+        frame.localprops = [frl_fileft]
+        frame.dummy = 0
+        colorselect = -1610612713
+        width = 101
+        options = [co_readonly, co_focusselect, co_rowselect, co_proportional, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_mousescrollrow]
+        datafield = 'country'
+      end    
+      item
+        frame.framei_left = 5
+        frame.localprops = [frl_fileft]
+        frame.dummy = 0
+        colorselect = -1610612713
+        width = 89
+        options = [co_readonly, co_focusselect, co_rowselect, co_proportional, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_mousescrollrow]
+        datafield = 'occupation'
+      end    
+      item
+        frame.framei_left = 5
+        frame.localprops = [frl_fileft]
+        frame.dummy = 0
+        colorselect = -1610612713
+        width = 94
+        options = [co_readonly, co_focusselect, co_rowselect, co_proportional, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_mousescrollrow]
+        datafield = 'feature'
+      end    
+      item
+        frame.framei_right = 5
+        frame.localprops = [frl_firight]
+        frame.dummy = 0
+        colorselect = -1610612713
+        width = 70
+        options = [co_readonly, co_focusselect, co_rowselect, co_proportional, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_mousescrollrow]
+        datafield = 'sexual_potention'
+        textflags = [tf_right, tf_ycentered, tf_noselect]
+      end    
+      item
+        colorselect = -1610612713
+        width = 89
+        options = [co_readonly, co_focusselect, co_rowselect, co_proportional, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_mousescrollrow]
+        datafield = 'dateofbirth'
+        textflags = [tf_xcentered, tf_ycentered, tf_noselect]
+      end    
+      item
+        colorselect = -1610612713
+        width = 54
+        options = [co_readonly, co_focusselect, co_rowselect, co_fill, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_mousescrollrow]
+        datafield = 'if_happy'
+        textflags = [tf_xcentered, tf_ycentered, tf_noselect]
+      end>
+    datalink.options = [gdo_propscrollbar, gdo_thumbtrack]
+    fixcols.count = 1
+    fixcols.items = <    
+      item
+        width = 32
+        numstart = 1
+        numstep = 1
+      end>
+    fixrows.count = 1
+    fixrows.items = <    
+      item
+        frame.levelo = 1
+        frame.leveli = -1
+        frame.colorclient = -1610612716
+        frame.localprops = [frl_levelo, frl_leveli, frl_framewidth, frl_colorframe, frl_fitop, frl_fibottom, frl_colorclient]
+        frame.dummy = 0
+        height = 36
+        captions.count = 7
+        captions.items = <        
+          item
+            caption = 'Name'
+          end        
+          item
+            caption = 'Country'
+          end        
+          item
+            caption = 'Occupation'
+          end        
+          item
+            caption = 'Feature'
+          end        
+          item
+            caption = 'Sexual'#13#10'potention'
+          end        
+          item
+            caption = 'Date of'#13#10'birth'
+          end        
+          item
+            caption = 'Happy?'
+          end>
+        captionsfix.count = 1
+        captionsfix.items = <        
+          item
+            caption = #8470
+          end>
+      end>
+    datarowheight = 16
+    oncellevent = personsevent
+    reffontheight = 14
+  end
+  object btnExit: tbutton
+    bounds_x = 639
+    bounds_y = 341
+    bounds_cx = 58
+    bounds_cy = 29
+    frame.template = ftButtons
+    frame.dummy = 0
+    anchors = [an_right, an_bottom]
+    taborder = 1
+    state = [as_localcaption]
+    action = actExit
+    caption = 'E&xit'
+  end
+  object btnEdit: tbutton
+    bounds_x = 214
+    bounds_y = 335
+    bounds_cx = 71
+    bounds_cy = 30
+    frame.colorclient = 13172680
+    frame.localprops = [frl_colorclient]
+    frame.template = ftButtons
+    frame.dummy = 0
+    anchors = [an_right, an_bottom]
+    taborder = 2
+    state = [as_localcaption]
+    action = actEdit
+    caption = '&Edit..'
+  end
+  object btnAdd: tbutton
+    bounds_x = 326
+    bounds_y = 335
+    bounds_cx = 79
+    bounds_cy = 30
+    frame.colorclient = 13158655
+    frame.localprops = [frl_colorclient]
+    frame.template = ftButtons
+    frame.dummy = 0
+    anchors = [an_right, an_bottom]
+    taborder = 3
+    state = [as_localcaption]
+    action = actAdd
+    caption = '&Add..'
+  end
+  object btnDelete: tbutton
+    bounds_x = 446
+    bounds_y = 335
+    bounds_cx = 79
+    bounds_cy = 30
+    frame.colorclient = 16763080
+    frame.localprops = [frl_colorclient]
+    frame.template = ftButtons
+    frame.dummy = 0
+    anchors = [an_right, an_bottom]
+    taborder = 4
+    state = [as_localcaption]
+    action = actDelete
+    caption = '&Delete..'
+  end
+  object conn: tmsepqconnection
+    Connected = True
+    DatabaseName = 'serious_matters'
+    Params.Strings = (
+      'options=''--CLIENT_ENCODING=koi8'''
+    )
+    Password = 'all'
+    Transaction = trans
+    UserName = 'worldadmin'
+    HostName = 'localhost'
+    options = [pqco_closetransactiononfail]
+    left = 16
+    top = 344
+  end
+  object trans: tmsesqltransaction
+    Active = True
+    Database = conn
+    Params.Strings = (
+      ''
+    )
+    left = 16
+    top = 368
+  end
+  object qryPersons: tmsesqlquery
+    Active = True
+    Database = conn
+    Transaction = trans
+    SQL.Strings = (
+      'select'
+      '  a.id,'
+      '  a.feature_id,'
+      '  a.occupation_id,'
+      '  a.country_id,'
+      '  a.descr,'
+      '  a.sexual_potention ,'
+      '  a.photo,'
+      '  b.descr as country,'
+      '  c.descr as occupation,'
+      '  d.descr as feature,'
+      '  a.if_happy,'
+      'a.dateofbirth'
+      'from persons a left outer join '
+      'countries  b on a.country_id=b.id left outer join '
+      'occupations c on a.occupation_id=c.id left outer join '
+      'features  d on a.feature_id=d.id '
+      'order by a.id;'
+    )
+    IndexDefs = <>
+    Params = <>
+    UsePrimaryKeyAsKey = False
+    StatementType = stSelect
+    FieldDefs = <    
+      item
+        Name = 'id'
+        DataType = ftInteger
+        Precision = -1
+        Size = 4
+      end    
+      item
+        Name = 'feature_id'
+        DataType = ftInteger
+        Precision = -1
+        Size = 4
+      end    
+      item
+        Name = 'occupation_id'
+        DataType = ftInteger
+        Precision = -1
+        Size = 4
+      end    
+      item
+        Name = 'country_id'
+        DataType = ftInteger
+        Precision = -1
+        Size = 4
+      end    
+      item
+        Name = 'descr'
+        DataType = ftMemo
+        Precision = -1
+        Size = 4
+      end    
+      item
+        Name = 'sexual_potention'
+        DataType = ftFloat
+        Precision = -1
+        Size = 8
+      end    
+      item
+        Name = 'photo'
+        DataType = ftBlob
+        Precision = -1
+        Size = 4
+      end    
+      item
+        Name = 'country'
+        DataType = ftMemo
+        Precision = -1
+        Size = 4
+      end    
+      item
+        Name = 'occupation'
+        DataType = ftMemo
+        Precision = -1
+        Size = 4
+      end    
+      item
+        Name = 'feature'
+        DataType = ftMemo
+        Precision = -1
+        Size = 4
+      end    
+      item
+        Name = 'if_happy'
+        DataType = ftBoolean
+        Precision = -1
+        Size = 1
+      end    
+      item
+        Name = 'dateofbirth'
+        DataType = ftDate
+        Precision = -1
+        Size = 8
+      end>
+    onapplyrecupdate = personsupdate
+    left = 80
+    top = 344
+    object fldSexPotention: tmsefloatfield
+      AlignMent = taRightJustify
+      DisplayWidth = 10
+      FieldName = 'sexual_potention'
+      DisplayFormat = '##.##'
+      left = 432
+      top = 114
+    end
+    object fldHappy: tmsebooleanfield
+      DisplayWidth = 3
+      FieldName = 'if_happy'
+      Index = 1
+      displayvalues = #1044#1072';'#1053#1077#1090
+      left = 600
+      top = 98
+    end
+    object fldCountryId: tmselongintfield
+      AlignMent = taRightJustify
+      DisplayWidth = 10
+      FieldName = 'country_id'
+      Index = 2
+      left = 176
+      top = 98
+    end
+    object fldOccupationId: tmselongintfield
+      AlignMent = taRightJustify
+      DisplayWidth = 10
+      FieldName = 'occupation_id'
+      Index = 3
+      left = 272
+      top = 162
+    end
+    object fldFeatureId: tmselongintfield
+      AlignMent = taRightJustify
+      DisplayWidth = 10
+      FieldName = 'feature_id'
+      Index = 4
+      left = 376
+      top = 90
+    end
+    object fldPersonId: tmselongintfield
+      AlignMent = taRightJustify
+      DisplayWidth = 10
+      FieldName = 'id'
+      Index = 5
+      left = 184
+      top = 336
+    end
+    object fldDateOfBirth: tmsedatefield
+      DisplayWidth = 10
+      FieldName = 'dateofbirth'
+      Index = 6
+      left = 520
+      top = 72
+    end
+    object fldName: tmsememofield
+      DisplayWidth = 10
+      FieldName = 'descr'
+      Index = 7
+      Size = 4
+      Transliterate = False
+      left = 80
+      top = 110
+    end
+    object fldCountry: tmsememofield
+      DisplayWidth = 10
+      FieldName = 'country'
+      Index = 8
+      Size = 4
+      Transliterate = False
+      left = 168
+      top = 118
+    end
+    object fldOccupation: tmsememofield
+      DisplayWidth = 10
+      FieldName = 'occupation'
+      Index = 9
+      Size = 4
+      Transliterate = False
+      left = 272
+      top = 182
+    end
+    object fldFeature: tmsememofield
+      DisplayWidth = 10
+      FieldName = 'feature'
+      Index = 10
+      Size = 4
+      Transliterate = False
+      left = 360
+      top = 134
+    end
+  end
+  object fldName1: tmsestringfield
+    DisplayWidth = 20
+    FieldName = 'descr'
+    Index = -1
+    left = 104
+    top = 82
+  end
+  object fldCountry1: tmsestringfield
+    DisplayWidth = 20
+    FieldName = 'country'
+    Index = -1
+    left = 184
+    top = 66
+  end
+  object fldOccupation1: tmsestringfield
+    DisplayWidth = 20
+    FieldName = 'occupation'
+    Index = -1
+    left = 272
+    top = 130
+  end
+  object fldFeature1: tmsestringfield
+    DisplayWidth = 20
+    FieldName = 'feature'
+    Index = -1
+    left = 384
+    top = 66
+  end
+  object dsPersons: tmsedatasource
+    DataSet = qryPersons
+    left = 88
+    top = 368
+  end
+  object actExit: taction
+    shortcut = 16465
+    onexecute = appexit
+    left = 24
+  end
+  object mnuMain: tmainmenu
+    menu.submenu.count = 3
+    menu.submenu.items = <    
+      item
+        submenu.count = 1
+        submenu.items = <        
+          item
+            action = actExit
+            caption = 'E&xit'
+            state = [as_localcaption]
+          end>
+        caption = '&File..'
+        state = [as_localcaption]
+      end    
+      item
+        submenu.count = 5
+        submenu.items = <        
+          item
+            action = actPlanetsEdit
+            caption = '&Planets..'
+            state = [as_localcaption]
+          end        
+          item
+            action = actContinentsEdit
+            caption = '&Continents..'
+            state = [as_localcaption]
+          end        
+          item
+            action = actCountriesEdit
+            caption = 'C&ountries..'
+            state = [as_localcaption]
+          end        
+          item
+            action = actFeaturesEdit
+            caption = '&Features..'
+            state = [as_localcaption]
+          end        
+          item
+            action = actOccupationsEdit
+            caption = '&Occupations..'
+            state = [as_localcaption]
+          end>
+        caption = 'Ed&it..'
+        state = [as_localcaption]
+      end    
+      item
+        submenu.count = 1
+        submenu.items = <        
+          item
+            action = actShowAbout
+            caption = '&About program..'
+            state = [as_localcaption]
+          end>
+        caption = '&Help'
+        state = [as_localcaption]
+      end>
+    menu.font.height = 13
+    menu.font.name = 'stf_helvetica'
+    menu.font.dummy = 0
+    itemframetemplate = ftMainMenuItem
+    popupitemframetemplate = ftMainMenuPopupItem
+    left = 336
+  end
+  object ftMainMenuItem: tframecomp
+    template.framei_left = 10
+    template.framei_top = 5
+    template.framei_right = 50
+    left = 416
+    top = 1
+  end
+  object actEdit: taction
+    shortcut = 16453
+    onexecute = editformshow
+    left = 216
+    top = 290
+  end
+  object actAdd: taction
+    shortcut = 20486
+    onexecute = addformshow
+    left = 320
+    top = 290
+  end
+  object actDelete: taction
+    shortcut = 16452
+    onexecute = deleterecord
+    left = 440
+    top = 290
+  end
+  object pupPersons: tpopupmenu
+    menu.submenu.count = 3
+    menu.submenu.items = <    
+      item
+        action = actEdit
+        caption = '&Edit record..'
+        state = [as_localcaption]
+      end    
+      item
+        action = actAdd
+        caption = '&Add record..'
+        state = [as_localcaption]
+      end    
+      item
+        action = actDelete
+        caption = '&Delete record..'
+        state = [as_localcaption]
+      end>
+    left = 368
+    top = 234
+  end
+  object ftButtons: tframecomp
+    template.levelo = -1
+    template.leveli = 2
+    template.colorclient = -1610612712
+    left = 544
+    top = 354
+  end
+  object actPlanetsEdit: taction
+    onexecute = planetseditexecute
+    left = 104
+    top = 162
+  end
+  object actContinentsEdit: taction
+    onexecute = continentseditexecute
+    left = 104
+    top = 186
+  end
+  object actCountriesEdit: taction
+    onexecute = countrieseditexecute
+    left = 104
+    top = 210
+  end
+  object actFeaturesEdit: taction
+    onexecute = featureseditexecute
+    left = 104
+    top = 234
+  end
+  object actOccupationsEdit: taction
+    onexecute = occupationseditexecute
+    left = 104
+    top = 258
+  end
+  object actShowAbout: taction
+    onexecute = showaboutexecute
+    left = 216
+    top = 2
+  end
+  object ftMainMenuPopupItem: tframecomp
+    template.framei_left = 10
+    template.framei_top = 1
+    template.framei_right = 2
+    template.framei_bottom = 1
+    left = 536
+    top = 2
+  end
+end
