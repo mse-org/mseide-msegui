@@ -1450,12 +1450,14 @@ begin
        end;
       end;
       if component <> nil then begin
+      {
        if (component = module) and (fclickedcompbefore = module) and
                   (ss_double in shiftstate) and isinpaintrect then begin
         mainfo.loadsourcebyform(fdesigner.actmodulepo^.filename,true);
         include(eventstate,es_processed);
         goto 1;
        end;
+       }
        if (factcompindex < 0) or (component <> fselections[factcompindex]) then begin
         factarea:= ar_none;
        end;
