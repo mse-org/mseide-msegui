@@ -107,6 +107,7 @@ type
    procedure formdeonclose(const sender: TObject);
    procedure revertexe(const sender: TObject);
    procedure doinsertcomponent(const sender: TObject);
+   procedure dotouch(const sender: TObject);
   private
    fdesigner: tdesigner;
    fform: twidget;
@@ -2327,6 +2328,11 @@ begin
  with tdesignwindow(window) do begin
   placecomponent(comp1,fmousepos,fselections[0]);
  end;  
+end;
+
+procedure tformdesignerfo.dotouch(const sender: TObject);
+begin
+ tdesignwindow(window).domodified;
 end;
 
 procedure tformdesignerfo.dobringtofront(const sender: tobject);

@@ -4,6 +4,7 @@ object formdesignerfo: tformdesignerfo
   bounds_y = 100
   bounds_cx = 287
   bounds_cy = 300
+  taborder = 1
   visible = False
   container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_mousetransparent, ow_destroywidgets, ow_autoscale]
   container.bounds_x = 0
@@ -39,7 +40,7 @@ object formdesignerfo: tformdesignerfo
   top = 180
   moduleclassname = 'tmseform'
   object popupme: tpopupmenu
-    menu.submenu.count = 19
+    menu.submenu.count = 20
     menu.submenu.items = <    
       item
         caption = 'Show objectinspector'
@@ -146,6 +147,11 @@ object formdesignerfo: tformdesignerfo
         name = 'insertcomp'
         state = [as_localcaption, as_localonexecute]
         onexecute = doinsertcomponent
+      end    
+      item
+        caption = 'Touch'
+        state = [as_localcaption, as_localonexecute]
+        onexecute = dotouch
       end>
     left = 48
     top = 40
