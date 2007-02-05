@@ -222,8 +222,8 @@ const
 
  xftdefaultfontnames: defaultfontnamesty =
   //stf_default  stf_menu stf_report stf_prop      stf_fixed,
-      ('',          '',    'Arial',   'sans',      'fixed',
-  //stf_swiss    stf_roman          stf_courier
+      ('',          '',    'Arial',   'sans',      'monospace',
+  //stf_swiss stf_roman   stf_courier
       'Arial', 'serif', 'Courier New');
 
  capstyles: array[capstylety] of integer = (capbutt,capround,capprojecting);
