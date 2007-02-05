@@ -3,7 +3,10 @@ object editfo: teditfo
   bounds_y = 171
   bounds_cx = 379
   bounds_cy = 334
+  taborder = 1
   container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_subfocus, ow_mousetransparent, ow_destroywidgets, ow_autoscale]
+  container.bounds_x = 0
+  container.bounds_y = 0
   container.bounds_cx = 379
   container.bounds_cy = 334
   container.frame.dummy = 0
@@ -40,16 +43,16 @@ object editfo: teditfo
   end
   object seName: tdbstringedit
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
-    bounds_x = 12
+    bounds_x = 13
     bounds_y = 16
-    bounds_cx = 328
-    bounds_cy = 22
+    bounds_cx = 327
+    bounds_cy = 20
     frame.caption = 'Name'
     frame.captionpos = cp_left
     frame.captiondist = 15
     frame.dummy = 0
     frame.outerframe = (
-      52
+      51
       0
       0
       0
@@ -57,19 +60,19 @@ object editfo: teditfo
     optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_notnull, oe_autopopupmenu, oe_keyexecute, oe_savevalue, oe_savestate]
     datafield = 'descr'
     datasource = mainfo.dsPersons
-    reffontheight = 16
+    reffontheight = 14
   end
   object cbPlanets: tenumeditlb
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
     bounds_x = 16
-    bounds_y = 45
+    bounds_y = 47
     bounds_cx = 148
-    bounds_cy = 41
+    bounds_cy = 37
     frame.caption = 'Planet'
     frame.dummy = 0
     frame.outerframe = (
       0
-      19
+      17
       0
       0
     )
@@ -80,19 +83,19 @@ object editfo: teditfo
     dropdown.cols.items = <    
       item
       end>
-    reffontheight = 16
+    reffontheight = 14
   end
   object cbContinents: tenumeditlb
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
     bounds_x = 184
-    bounds_y = 45
+    bounds_y = 47
     bounds_cx = 156
-    bounds_cy = 41
+    bounds_cy = 37
     frame.caption = 'Continent'
     frame.dummy = 0
     frame.outerframe = (
       0
-      19
+      17
       0
       0
     )
@@ -104,20 +107,20 @@ object editfo: teditfo
       item
       end>
     dropdown.onfilter = continentsfilter
-    reffontheight = 16
+    reffontheight = 14
   end
   object cbCountries: tdbenumeditlb
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
-    bounds_x = 47
+    bounds_x = 53
     bounds_y = 96
-    bounds_cx = 301
-    bounds_cy = 22
+    bounds_cx = 295
+    bounds_cy = 20
     frame.caption = 'Country'
     frame.captionpos = cp_left
     frame.captiondist = 15
     frame.dummy = 0
     frame.outerframe = (
-      65
+      59
       0
       0
       0
@@ -132,20 +135,20 @@ object editfo: teditfo
       item
       end>
     dropdown.onfilter = countriesfilter
-    reffontheight = 16
+    reffontheight = 14
   end
   object cbOccupations: tdbenumeditlb
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
-    bounds_x = 26
+    bounds_x = 33
     bounds_y = 128
-    bounds_cx = 322
-    bounds_cy = 22
+    bounds_cx = 315
+    bounds_cy = 20
     frame.caption = 'Occupation'
     frame.captionpos = cp_left
     frame.captiondist = 15
     frame.dummy = 0
     frame.outerframe = (
-      86
+      79
       0
       0
       0
@@ -159,20 +162,20 @@ object editfo: teditfo
     dropdown.cols.items = <    
       item
       end>
-    reffontheight = 16
+    reffontheight = 14
   end
   object cbFeatures: tdbenumeditlb
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
-    bounds_x = 48
+    bounds_x = 53
     bounds_y = 160
-    bounds_cx = 300
-    bounds_cy = 22
+    bounds_cx = 295
+    bounds_cy = 20
     frame.caption = 'Feature'
     frame.captionpos = cp_left
     frame.captiondist = 15
     frame.dummy = 0
     frame.outerframe = (
-      64
+      59
       0
       0
       0
@@ -186,20 +189,20 @@ object editfo: teditfo
     dropdown.cols.items = <    
       item
       end>
-    reffontheight = 16
+    reffontheight = 14
   end
   object reSexPotention: tdbrealedit
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
-    bounds_x = 4
+    bounds_x = 18
     bounds_y = 192
-    bounds_cx = 160
-    bounds_cy = 22
+    bounds_cx = 146
+    bounds_cy = 20
     frame.caption = 'Sex. potention'
     frame.captionpos = cp_left
     frame.captiondist = 15
     frame.dummy = 0
     frame.outerframe = (
-      108
+      94
       0
       0
       0
@@ -210,20 +213,21 @@ object editfo: teditfo
     datasource = mainfo.dsPersons
     formatedit = '##.##'
     formatdisp = '##.##'
-    reffontheight = 16
+    reffontheight = 14
+    val = 0
   end
   object beHappy: tdbbooleantextedit
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
-    bounds_x = 45
+    bounds_x = 50
     bounds_y = 256
-    bounds_cx = 167
-    bounds_cy = 22
+    bounds_cx = 162
+    bounds_cy = 20
     frame.caption = 'Happy ?'
     frame.captionpos = cp_left
     frame.captiondist = 15
     frame.dummy = 0
     frame.outerframe = (
-      67
+      62
       0
       0
       0
@@ -233,36 +237,37 @@ object editfo: teditfo
     text_true = #1045#1097#1077' '#1082#1072#1082
     datafield = 'if_happy'
     datasource = mainfo.dsPersons
-    reffontheight = 16
+    reffontheight = 14
   end
   object lblDateFormatHint: tlabel
     bounds_x = 224
     bounds_y = 224
-    bounds_cy = 26
+    bounds_cx = 0
+    bounds_cy = 14
     taborder = 12
-    reffontheight = 16
+    reffontheight = 14
   end
   object lblSexPotentionHint: tlabel
     bounds_x = 176
     bounds_y = 192
-    bounds_cx = 68
-    bounds_cy = 26
+    bounds_cx = 56
+    bounds_cy = 14
     taborder = 11
     caption = '(0..100) %'
-    reffontheight = 16
+    reffontheight = 14
   end
   object cdeDateOfBirth: tdbcalendardatetimeedit
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_mousewheel, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
-    bounds_x = 18
+    bounds_x = 29
     bounds_y = 224
-    bounds_cx = 194
-    bounds_cy = 22
+    bounds_cx = 183
+    bounds_cy = 20
     frame.caption = 'Date of birth'
     frame.captionpos = cp_left
     frame.captiondist = 15
     frame.dummy = 0
     frame.outerframe = (
-      94
+      83
       0
       0
       0
@@ -270,7 +275,8 @@ object editfo: teditfo
     taborder = 5
     datafield = 'dateofbirth'
     datasource = mainfo.dsPersons
-    reffontheight = 16
+    reffontheight = 14
+    val = 0
     ma = 73050
   end
 end

@@ -3,6 +3,7 @@ object mainfo: tmainfo
   bounds_y = 146
   bounds_cx = 707
   bounds_cy = 401
+  taborder = 1
   container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_subfocus, ow_mousetransparent, ow_destroywidgets, ow_autoscale]
   container.bounds_x = 0
   container.bounds_y = 22
@@ -227,8 +228,9 @@ object mainfo: tmainfo
   end
   object qryPersons: tmsesqlquery
     Active = True
-    Database = conn
+    database = conn
     Transaction = trans
+    params = <>
     SQL.Strings = (
       'select'
       '  a.id,'
@@ -250,7 +252,6 @@ object mainfo: tmainfo
       'order by a.id;'
     )
     IndexDefs = <>
-    Params = <>
     UsePrimaryKeyAsKey = False
     StatementType = stSelect
     FieldDefs = <    
@@ -527,7 +528,7 @@ object mainfo: tmainfo
     template.framei_top = 5
     template.framei_right = 50
     left = 416
-    top = 1
+    top = 166
   end
   object actEdit: taction
     shortcut = 16453
@@ -611,6 +612,6 @@ object mainfo: tmainfo
     template.framei_right = 2
     template.framei_bottom = 1
     left = 536
-    top = 2
+    top = 167
   end
 end

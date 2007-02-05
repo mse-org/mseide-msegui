@@ -1,14 +1,18 @@
 object commonrefseditfo: tcommonrefseditfo
   optionswidget = [ow_arrowfocus, ow_subfocus, ow_destroywidgets, ow_hinton, ow_autoscale]
   bounds_x = 61
-  bounds_y = 154
+  bounds_y = 155
   bounds_cx = 401
   bounds_cy = 323
   anchors = []
+  taborder = 1
   container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_subfocus, ow_mousetransparent, ow_destroywidgets, ow_autoscale]
+  container.bounds_x = 0
+  container.bounds_y = 0
   container.bounds_cx = 401
   container.bounds_cy = 323
   container.frame.dummy = 0
+  icon.transparency = -2147483648
   onclosequery = commonrefseditfoclosequery
   moduleclassname = 'tmseform'
   object btnSaveAll: tbutton
@@ -96,10 +100,11 @@ object commonrefseditfo: tcommonrefseditfo
     caption = 'UnDo All'
   end
   object lblAddedLegend: tlabel
+    optionswidget = [ow_mousewheel, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
     bounds_x = 8
     bounds_y = 272
-    bounds_cx = 88
-    bounds_cy = 18
+    bounds_cx = 83
+    bounds_cy = 16
     frame.leveli = -2
     frame.colorclient = 16760832
     frame.caption = 'added'
@@ -110,17 +115,18 @@ object commonrefseditfo: tcommonrefseditfo
     frame.outerframe = (
       0
       0
-      52
+      47
       0
     )
     taborder = 1
-    reffontheight = 16
+    reffontheight = 14
   end
   object lblChangedLegend: tlabel
+    optionswidget = [ow_mousewheel, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
     bounds_x = 8
     bounds_y = 296
-    bounds_cx = 102
-    bounds_cy = 18
+    bounds_cx = 96
+    bounds_cy = 16
     frame.leveli = -2
     frame.colorclient = -1610612728
     frame.caption = 'changed'
@@ -131,10 +137,10 @@ object commonrefseditfo: tcommonrefseditfo
     frame.outerframe = (
       0
       0
-      66
+      60
       0
     )
-    reffontheight = 16
+    reffontheight = 14
   end
   object actSaveAll: taction
     state = [as_disabled]

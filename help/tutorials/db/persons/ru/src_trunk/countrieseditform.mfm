@@ -3,7 +3,10 @@ object countrieseditfo: tcountrieseditfo
   bounds_y = 171
   bounds_cx = 402
   bounds_cy = 323
+  taborder = 1
   container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_subfocus, ow_mousetransparent, ow_mousewheel, ow_destroywidgets, ow_autoscale]
+  container.bounds_x = 0
+  container.bounds_y = 0
   container.bounds_cx = 402
   container.bounds_cy = 323
   container.frame.dummy = 0
@@ -15,28 +18,25 @@ object countrieseditfo: tcountrieseditfo
   moduleclassname = 'tmseform'
   inline commonrefseditfo1: tcommonrefseditfo
     bounds_cx = 402
+    taborder = 0
     container.bounds_cx = 402
     container.frame.dummy = 0
     icon.transparency = -2147483648
     inherited btnSaveAll: tbutton
       frame.dummy = 0
       taborder = 8
-      state = [as_disabled, as_localcaption, as_localonexecute]
     end
     inherited btnUnDo: tbutton
       frame.dummy = 0
       taborder = 7
-      state = [as_disabled, as_localcaption, as_localonexecute]
     end
     inherited btnAdd: tbutton
       frame.dummy = 0
       taborder = 5
-      state = [as_localcaption, as_localonexecute]
     end
     inherited btnDelete: tbutton
       frame.dummy = 0
       taborder = 4
-      state = [as_disabled, as_localcaption, as_localonexecute]
     end
     inherited btnClose: tbutton
       frame.dummy = 0
@@ -45,7 +45,6 @@ object countrieseditfo: tcountrieseditfo
     inherited btnUnDoAll: tbutton
       frame.dummy = 0
       taborder = 6
-      state = [as_disabled, as_localcaption, as_localonexecute]
     end
     inherited lblAddedLegend: tlabel
       frame.dummy = 0
@@ -75,7 +74,7 @@ object countrieseditfo: tcountrieseditfo
       fixrows.items = <      
         item
           color = -1610612716
-          height = 20
+          height = 18
           captions.count = 2
           captions.items = <          
             item
@@ -114,11 +113,12 @@ object countrieseditfo: tcountrieseditfo
           widgetname = 'lbneContinent'
         end>
       datalink.options = [gdo_propscrollbar, gdo_thumbtrack]
-      datalink.onupdaterowdata = grdcountriesupdaterowdata
       datarowheight = 22
-      reffontheight = 16
+      reffontheight = 14
       object seCountry: tdbstringedit
         optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_mousewheel, ow_destroywidgets, ow_fontglyphheight]
+        bounds_x = 0
+        bounds_y = 0
         bounds_cx = 178
         bounds_cy = 22
         frame.levelo = 0
@@ -130,11 +130,12 @@ object countrieseditfo: tcountrieseditfo
         optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_notnull, oe_autopost, oe_autopopupmenu, oe_keyexecute, oe_savevalue, oe_savestate]
         datafield = 'descr'
         datasource = refsdatamo.dsCountries
-        reffontheight = 16
+        reffontheight = 14
       end
       object lbneContinent: tdbenumeditlb
         optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_mousewheel, ow_destroywidgets, ow_fontglyphheight]
         bounds_x = 179
+        bounds_y = 0
         bounds_cx = 159
         bounds_cy = 22
         frame.levelo = 0
@@ -142,6 +143,7 @@ object countrieseditfo: tcountrieseditfo
         frame.localprops = [frl_levelo, frl_colorclient]
         frame.button.color = -1879048187
         frame.dummy = 0
+        taborder = 2
         visible = False
         optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_autopost, oe_autopopupmenu, oe_keyexecute, oe_savevalue, oe_savestate]
         datafield = 'continent_id'
@@ -151,7 +153,7 @@ object countrieseditfo: tcountrieseditfo
         dropdown.cols.items = <        
           item
           end>
-        reffontheight = 16
+        reffontheight = 14
       end
     end
     inherited actSaveAll: taction

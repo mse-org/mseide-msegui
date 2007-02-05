@@ -3,7 +3,10 @@ object featureseditfo: tfeatureseditfo
   bounds_y = 142
   bounds_cx = 402
   bounds_cy = 322
+  taborder = 1
   container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_subfocus, ow_mousetransparent, ow_mousewheel, ow_destroywidgets, ow_autoscale]
+  container.bounds_x = 0
+  container.bounds_y = 0
   container.bounds_cx = 402
   container.bounds_cy = 322
   container.frame.dummy = 0
@@ -16,6 +19,7 @@ object featureseditfo: tfeatureseditfo
   inline commonrefseditfo1: tcommonrefseditfo
     bounds_cx = 402
     bounds_cy = 322
+    taborder = 0
     container.bounds_cx = 402
     container.bounds_cy = 322
     container.frame.dummy = 0
@@ -23,22 +27,18 @@ object featureseditfo: tfeatureseditfo
     inherited btnSaveAll: tbutton
       frame.dummy = 0
       taborder = 8
-      state = [as_disabled, as_localcaption, as_localonexecute]
     end
     inherited btnUnDo: tbutton
       frame.dummy = 0
       taborder = 7
-      state = [as_disabled, as_localcaption, as_localonexecute]
     end
     inherited btnAdd: tbutton
       frame.dummy = 0
       taborder = 5
-      state = [as_localcaption, as_localonexecute]
     end
     inherited btnDelete: tbutton
       frame.dummy = 0
       taborder = 4
-      state = [as_disabled, as_localcaption, as_localonexecute]
     end
     inherited btnClose: tbutton
       frame.dummy = 0
@@ -47,7 +47,6 @@ object featureseditfo: tfeatureseditfo
     inherited btnUnDoAll: tbutton
       frame.dummy = 0
       taborder = 6
-      state = [as_disabled, as_localcaption, as_localonexecute]
     end
     inherited lblAddedLegend: tlabel
       frame.dummy = 0
@@ -77,7 +76,7 @@ object featureseditfo: tfeatureseditfo
       fixrows.items = <      
         item
           color = -1610612716
-          height = 20
+          height = 18
           captions.count = 1
           captions.items = <          
             item
@@ -105,22 +104,24 @@ object featureseditfo: tfeatureseditfo
           widgetname = 'seFeature'
         end>
       datalink.options = [gdo_propscrollbar, gdo_thumbtrack]
-      datalink.onupdaterowdata = grdfeaturesupdaterowdata
       datarowheight = 22
-      reffontheight = 16
+      reffontheight = 14
       object seFeature: tdbstringedit
         optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_mousewheel, ow_destroywidgets, ow_fontglyphheight]
+        bounds_x = 0
+        bounds_y = 0
         bounds_cx = 336
         bounds_cy = 22
         frame.levelo = 0
         frame.colorclient = -2147483645
         frame.localprops = [frl_levelo, frl_colorclient]
         frame.dummy = 0
+        taborder = 1
         visible = False
         optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_notnull, oe_autopost, oe_autopopupmenu, oe_keyexecute, oe_savevalue, oe_savestate]
         datafield = 'descr'
         datasource = refsdatamo.dsFeatures
-        reffontheight = 16
+        reffontheight = 14
       end
     end
     inherited actSaveAll: taction

@@ -8,13 +8,13 @@ object refsdatamo: trefsdatamo
   )
   object qryPlanets: tmsesqlquery
     Active = True
-    Database = mainfo.conn
+    database = mainfo.conn
     Transaction = mainfo.trans
+    params = <>
     SQL.Strings = (
       'select * from planets order by id;'
     )
     IndexDefs = <>
-    Params = <>
     UsePrimaryKeyAsKey = False
     StatementType = stSelect
     FieldDefs = <    
@@ -41,12 +41,12 @@ object refsdatamo: trefsdatamo
           AlignMent = taRightJustify
           DisplayWidth = 10
           FieldName = 'id'
-          Index = 1
           ProviderFlags = [pfInKey]
         end      
         item
           DisplayWidth = 10
           FieldName = 'descr'
+          Index = 1
           Size = 4
           Transliterate = False
         end>
@@ -57,13 +57,13 @@ object refsdatamo: trefsdatamo
   object qryContinents: tmsesqlquery
     Active = True
     BeforeOpen = qrycontinentsbeforeopen
-    Database = mainfo.conn
+    database = mainfo.conn
     Transaction = mainfo.trans
+    params = <>
     SQL.Strings = (
       'select * from continents order by id;'
     )
     IndexDefs = <>
-    Params = <>
     UsePrimaryKeyAsKey = False
     StatementType = stSelect
     FieldDefs = <    
@@ -97,19 +97,19 @@ object refsdatamo: trefsdatamo
           AlignMent = taRightJustify
           DisplayWidth = 10
           FieldName = 'id'
-          Index = 1
           ProviderFlags = [pfInKey]
         end      
         item
           AlignMent = taRightJustify
           DisplayWidth = 10
           FieldName = 'planet_id'
-          Index = 2
+          Index = 1
           ProviderFlags = [pfInUpdate]
         end      
         item
           DisplayWidth = 10
           FieldName = 'descr'
+          Index = 2
           Size = 4
           Transliterate = False
         end>
@@ -120,13 +120,13 @@ object refsdatamo: trefsdatamo
   object qryCountries: tmsesqlquery
     Active = True
     BeforeOpen = qrycountriesbeforeopen
-    Database = mainfo.conn
+    database = mainfo.conn
     Transaction = mainfo.trans
+    params = <>
     SQL.Strings = (
       'select * from countries order by id;'
     )
     IndexDefs = <>
-    Params = <>
     UsePrimaryKeyAsKey = False
     StatementType = stSelect
     FieldDefs = <    
@@ -160,19 +160,19 @@ object refsdatamo: trefsdatamo
           AlignMent = taRightJustify
           DisplayWidth = 10
           FieldName = 'id'
-          Index = 1
           ProviderFlags = [pfInKey]
         end      
         item
           AlignMent = taRightJustify
           DisplayWidth = 10
           FieldName = 'continent_id'
-          Index = 2
+          Index = 1
           ProviderFlags = [pfInUpdate]
         end      
         item
           DisplayWidth = 10
           FieldName = 'descr'
+          Index = 2
           Size = 4
           Transliterate = False
         end>
@@ -182,13 +182,13 @@ object refsdatamo: trefsdatamo
   end
   object qryOccupations: tmsesqlquery
     Active = True
-    Database = mainfo.conn
+    database = mainfo.conn
     Transaction = mainfo.trans
+    params = <>
     SQL.Strings = (
       'select * from occupations order by id;'
     )
     IndexDefs = <>
-    Params = <>
     UsePrimaryKeyAsKey = False
     StatementType = stSelect
     FieldDefs = <    
@@ -215,12 +215,12 @@ object refsdatamo: trefsdatamo
           AlignMent = taRightJustify
           DisplayWidth = 10
           FieldName = 'id'
-          Index = 1
           ProviderFlags = [pfInKey]
         end      
         item
           DisplayWidth = 10
           FieldName = 'descr'
+          Index = 1
           Size = 4
           Transliterate = False
         end>
@@ -230,13 +230,13 @@ object refsdatamo: trefsdatamo
   end
   object qryFeatures: tmsesqlquery
     Active = True
-    Database = mainfo.conn
+    database = mainfo.conn
     Transaction = mainfo.trans
+    params = <>
     SQL.Strings = (
       'select * from features order by id;'
     )
     IndexDefs = <>
-    Params = <>
     UsePrimaryKeyAsKey = False
     StatementType = stSelect
     FieldDefs = <    
@@ -263,12 +263,12 @@ object refsdatamo: trefsdatamo
           AlignMent = taRightJustify
           DisplayWidth = 10
           FieldName = 'id'
-          Index = 1
           ProviderFlags = [pfInKey]
         end      
         item
           DisplayWidth = 10
           FieldName = 'descr'
+          Index = 1
           Size = 4
           Transliterate = False
         end>
