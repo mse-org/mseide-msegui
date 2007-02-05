@@ -116,6 +116,7 @@ type
   listartx: integer;
   liwidth: integer;
   tabchars: integerarty;
+  linebreak: boolean;  //true if newline sequnce detected
  end;
  lineinfoarty = array of lineinfoty;
 
@@ -230,6 +231,7 @@ var
     with lineinfos[high(lineinfos)] do begin
      licount:= aindex - liindex;
      liwidth:= awidth;
+     linebreak:= true;
     end;
     inc(aindex);
     if (ch1 = c_return) and (aindex <= length(info.text.text)) and
@@ -489,7 +491,7 @@ begin
    po1:= pointer(info.text.text);
    for int3:= 0 to high(lineinfos) - 1 do begin
     with lineinfos[int3] do begin     
-     if tabchars = nil then begin
+     if (tabchars = nil) and not linebreak then begin
       int4:= 0;
       setlength(tabchars,licount); //max
       for int1:= liindex-1 to liindex + licount - 2 do begin
