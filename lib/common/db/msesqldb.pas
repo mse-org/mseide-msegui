@@ -453,7 +453,9 @@ end;
 
 procedure tmsesqlquery.setonapplyrecupdate(const avalue: applyrecupdateeventty);
 begin
- checkinactive;
+ if not (csloading in componentstate) then begin
+  checkinactive;
+ end;
  if assigned(avalue) and not (csdesigning in componentstate) then begin
   include(fmstate,sqs_userapplayrecupdate);
  end
