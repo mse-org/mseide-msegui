@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2006 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2007 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -65,7 +65,9 @@ type
    procedure refused(const apos: pointty); override;
  end;
 
- dockbuttonrectty = (dbr_handle,dbr_close,dbr_fixsize,dbr_top,dbr_background);
+ dockbuttonrectty = (dbr_handle,dbr_close,dbr_maximize,dbr_normalize,
+                     dbr_minimize,dbr_fixsize,
+                     dbr_top,dbr_background);
 
  idockcontroller = interface(idragcontroller)
   function checkdock(var info: draginfoty): boolean;
@@ -178,6 +180,7 @@ type
    procedure restorepickshape;
    procedure updatesplitterrects(const awidgets: widgetarty);
    procedure setoptionsdock(const avalue: optionsdockty); virtual;
+   function isfullarea: boolean;
   public
    constructor create(aintf: idockcontroller);
    destructor destroy; override;
@@ -223,7 +226,9 @@ type
  end;
 
 type
- gripoptionty = (go_closebutton,go_fixsizebutton,go_topbutton,go_backgroundbutton,
+ gripoptionty = (go_closebutton,go_minimizebutton,go_normalizebutton,
+                 go_maximizebutton,
+                 go_fixsizebutton,go_topbutton,go_backgroundbutton,
                  go_horz,go_vert,go_opposite);
  gripoptionsty = set of gripoptionty;
 
@@ -2194,6 +2199,14 @@ begin
  end;
 end;
 
+function tdockcontroller.isfullarea: boolean;
+var
+ acontroller: tdockcontroller;
+begin
+ result:= getparentcontroller(acontroller) and 
+              (acontroller.fsplitdir <> sd_none);
+end;
+
 { tgripframe }
 
 constructor tgripframe.create(const intf: iframe; const acontroller: tdockcontroller);
@@ -2225,7 +2238,7 @@ var
  colorbefore: colorty;
  po1,po2: pointty;
  int1,int2: integer;
- rect1: rectty;
+ rect1,rect2: rectty;
 begin
  inherited;
  with canvas do begin
@@ -2233,6 +2246,9 @@ begin
   rect1:= clipbox;
   if testintersectrect(rect1,fgriprect) then begin
    colorbefore:= color;
+   with frects[dbr_handle] do begin
+    int1:= x + cx div 2;
+   end;
    if go_closebutton in fgrip_options then begin
     if fgrip_size >= 8 then begin
      draw3dframe(canvas,frects[dbr_close],1,defaultframecolors);
@@ -2242,8 +2258,31 @@ begin
      drawcross(frects[dbr_close],fgrip_colorbutton);
     end;
    end;
-   with frects[dbr_handle] do begin
-    int1:= x + cx div 2;
+   with frects[dbr_maximize] do begin
+    if (cx > 0) and (go_maximizebutton in fgrip_options) then begin
+     draw3dframe(canvas,frects[dbr_maximize],1,defaultframecolors);
+     drawframe(inflaterect(frects[dbr_maximize],-2),-1,fgrip_colorbutton);
+     drawvect(makepoint(x+2,y+3),gd_right,cx-5,fgrip_colorbutton);
+    end;
+   end;
+   with frects[dbr_normalize] do begin
+    if (cx > 0) and (go_normalizebutton in fgrip_options) then begin
+     draw3dframe(canvas,frects[dbr_normalize],1,defaultframecolors);
+     rect2.cx:= cx * 2 div 3 - 3;
+     rect2.cy:= rect2.cx;
+     rect2.pos:= addpoint(pos,makepoint(2,2));
+     drawrect(rect2,fgrip_colorbutton);
+     rect2.x:= x + cx - 3 - rect2.cx;
+     rect2.y:= y + cy - 3 - rect2.cy;
+     drawrect(rect2,fgrip_colorbutton);
+    end;
+   end;
+   with frects[dbr_minimize] do begin
+    if (cx > 0) and (go_minimizebutton in fgrip_options) then begin
+     draw3dframe(canvas,frects[dbr_minimize],1,defaultframecolors);
+     drawvect(makepoint(x+2,y+cy-3),gd_right,cx-5,fgrip_colorbutton);
+     drawvect(makepoint(x+2,y+cy-4),gd_right,cx-5,fgrip_colorbutton);
+    end;
    end;
    with frects[dbr_fixsize] do begin
     if (cx > 0) and (go_fixsizebutton in fgrip_options) then begin
@@ -2416,7 +2455,10 @@ procedure tgripframe.updaterects;
    cy:= fgrip_size;
   end;
  end;
- 
+
+var
+ bo1,bo2,bo3: boolean;
+  
 begin
  inherited;
  with fgriprect do begin
@@ -2447,31 +2489,48 @@ begin
    end;
   end;
  end;
- frects[dbr_handle]:= fgriprect;
  with fintf.getwidget do begin
-  if (go_closebutton in fgrip_options) and
-         ((parentwidget <> nil) or (csdesigning in ComponentState)) then begin
+  frects[dbr_handle]:= fgriprect;
+  bo1:= (parentwidget <> nil) or (csdesigning in componentstate);
+  bo3:= fcontroller.isfullarea;
+  bo2:= not bo3 or (csdesigning in componentstate);
+  if bo1 and (go_closebutton in fgrip_options) then begin
    initrect(dbr_close);
   end
   else begin
    frects[dbr_close]:= nullrect;
   end;
-  if (go_fixsizebutton in fgrip_options) and
-          ((csdesigning in componentstate) or (parentwidget <> nil)) then begin
+  if bo2 and (go_maximizebutton in fgrip_options) then begin
+   initrect(dbr_maximize);
+  end
+  else begin
+   frects[dbr_maximize]:= nullrect;
+  end;
+  if bo2 and (go_normalizebutton in fgrip_options) then begin
+   initrect(dbr_normalize);
+  end
+  else begin
+   frects[dbr_normalize]:= nullrect;
+  end;
+  if bo2 and (go_minimizebutton in fgrip_options) then begin
+   initrect(dbr_minimize);
+  end
+  else begin
+   frects[dbr_minimize]:= nullrect;
+  end;
+  if bo1 and bo3 and (go_fixsizebutton in fgrip_options) then begin
    initrect(dbr_fixsize);
   end
   else begin
    frects[dbr_fixsize]:= nullrect;
   end;
-  if (go_topbutton in fgrip_options) and
-        ((csdesigning in componentstate) or (parentwidget = nil)) then begin
+  if bo2 and (go_topbutton in fgrip_options) then begin
    initrect(dbr_top);
   end
   else begin
    frects[dbr_top]:= nullrect;
   end;
-  if (go_backgroundbutton in fgrip_options) and
-   ((csdesigning in componentstate) or (parentwidget = nil)) then begin
+  if bo2 and (go_backgroundbutton in fgrip_options) then begin
    initrect(dbr_background);
   end
   else begin

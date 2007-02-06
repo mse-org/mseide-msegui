@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2006 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2007 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -258,9 +258,9 @@ type
    procedure getimage(const index: integer; const dest: tmaskedbitmap);
    function addimage(image: tmaskedbitmap): integer;
 
-   procedure paint(const acanvas: tcanvas; const dest: rectty;
-             const index: integer; const alignment: alignmentsty = [];
-               const acolor: colorty = cl_default
+   procedure paint(const acanvas: tcanvas; const index: integer;
+                   const dest: rectty; const alignment: alignmentsty = [];
+                   const acolor: colorty = cl_default
                //used for monochrome bitmaps, cl_default-> acanvas.color
             );
    procedure assign(sender: tpersistent); override;
@@ -1769,9 +1769,9 @@ begin
  end;
 end;
 
-procedure timagelist.paint(const acanvas: tcanvas; const dest: rectty;
-  const index: integer; const alignment: alignmentsty = [];
-  const acolor: colorty = cl_default 
+procedure timagelist.paint(const acanvas: tcanvas; const index: integer; 
+         const dest: rectty;  const alignment: alignmentsty = [];
+         const acolor: colorty = cl_default 
   //used for monochrome bitmaps, cl_default-> acanvas.color
   );
 begin

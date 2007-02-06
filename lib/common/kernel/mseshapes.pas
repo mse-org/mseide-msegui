@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2006 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2007 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -538,7 +538,7 @@ begin
     inc(int1,imagecheckedoffset);
    end;
    if colorglyph <> cl_none then begin
-    imagelist.paint(canvas,rect1,int1,align1,colorglyph);
+    imagelist.paint(canvas,int1,rect1,align1,colorglyph);
    end;
    int1:= imagelist.width;
    case pos of
@@ -668,7 +668,7 @@ begin
    else begin
     int1:= ord(stg_checked);
    end;
-   stockobjects.glyphs.paint(canvas,rect1,int1,align1,info.colorglyph);
+   stockobjects.glyphs.paint(canvas,int1,rect1,align1,info.colorglyph);
   end;
  end;
 end;
@@ -689,7 +689,8 @@ begin
    x:= x + cx - int1;
    cx:= int1;
   end;
-  stockobjects.glyphs.paint(canvas,rect,ord(stg_arrowrightsmall),alignment,info.colorglyph);
+  stockobjects.glyphs.paint(canvas,ord(stg_arrowrightsmall),rect,alignment,
+                                  info.colorglyph);
  end;
 end;
 

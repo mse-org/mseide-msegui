@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2006 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2007 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -473,7 +473,8 @@ begin
   if aimagelist <> nil then begin
    int1:= getactimagenr;
    if (int1 >= 0) and (int1 < aimagelist.count) then begin
-    aimagelist.paint(acanvas,imagerect,int1,[al_xcentered,al_ycentered],fintf.getcolorglyph);
+    aimagelist.paint(acanvas,int1,imagerect,[al_xcentered,al_ycentered],
+                   fintf.getcolorglyph);
    end;
   end;
  end;
@@ -1564,8 +1565,8 @@ begin
    acanvas.restore;
   end;
   if boxno >= 0 then begin
-   stockobjects.glyphs.paint(acanvas,expandboxrect,
-                  boxno,[al_xcentered,al_ycentered],fintf.getcolorglyph);
+   stockobjects.glyphs.paint(acanvas,boxno,expandboxrect,
+                  [al_xcentered,al_ycentered],fintf.getcolorglyph);
   end;
  end;
  inherited;

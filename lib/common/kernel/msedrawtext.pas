@@ -1194,7 +1194,7 @@ begin
       tak_left: begin
        textpos:= round((fpos + fdistleft)*fppmm);
       end;
-      tak_right,tak_decimal: begin
+      tak_right{,tak_decimal}: begin
        textpos:= round((fpos - fdistright)*fppmm);
       end; 
       else begin //tak_center

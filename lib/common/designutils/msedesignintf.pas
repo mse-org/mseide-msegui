@@ -526,7 +526,7 @@ var
 begin
  int1:= indexof(tcomponentclass(acomponent.classtype));
  if int1 >= 0 then begin
-  fimagelist.paint(canvas,dest, itempo(int1)^.icon);
+  fimagelist.paint(canvas,itempo(int1)^.icon,dest);
  end;
 end;
 

@@ -1635,7 +1635,7 @@ begin
      else glyph:= stockglyphty(-1);
     end;
     if ord(glyph) >= 0 then begin
-     stockobjects.glyphs.paint(canvas,innerrect,ord(glyph),
+     stockobjects.glyphs.paint(canvas,ord(glyph),innerrect,
             [al_xcentered,al_ycentered]);
     end;
 //   end;

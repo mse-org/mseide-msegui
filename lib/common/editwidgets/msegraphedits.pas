@@ -1380,7 +1380,7 @@ begin
   bo1:= boolean(avalue);
  end;
  if bo1 then begin
-   stockobjects.paintglyph(getglyph,canvas,arect,not isenabled,fcolorglyph);
+   stockobjects.paintglyph(canvas,getglyph,arect,not isenabled,fcolorglyph);
  end;
 end;
 
@@ -2210,7 +2210,7 @@ begin
   if (int1 >= 0) then begin
    int1:= int1 + fimageoffset;
    if (int1 < fimagelist.count) and (int1 >= 0) then begin
-    fimagelist.paint(canvas,arect,int1,[al_ycentered,al_xcentered]);
+    fimagelist.paint(canvas,int1,arect,[al_ycentered,al_xcentered]);
    end;
   end
   else begin
@@ -2218,7 +2218,7 @@ begin
     po1:= pintegeraty(tarrayprop1(fimagenums).getdatapo^);
     for int2:= 0 to fimagenums.count-1 do begin
      if int1 and bits[int2] <> 0 then begin
-      fimagelist.paint(canvas,arect,po1^[int2],[al_ycentered,al_xcentered]);
+      fimagelist.paint(canvas,po1^[int2],arect,[al_ycentered,al_xcentered]);
      end;
     end;
    end;

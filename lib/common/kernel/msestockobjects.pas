@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2006 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2007 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -34,26 +34,29 @@ type
  stockfontty = (stf_default,stf_menu,stf_report,stf_proportional,stf_fixed,
                 stf_helvetica,stf_roman,stf_courier); //scaleable fonts
  defaultfontnamesty = array[stockfontty] of string;
-type             //  0         1               2
- stockglyphty = (stg_none,stg_checked,stg_checkedradio,
-                //   3         4               5
-                 stg_box,stg_boxexpanded,stg_boxexpand,
-                //   6             7              8            9
-                 stg_arrowright,stg_arrowup,stg_arrowleft,stg_arrowdown,
-                //  10
-                 stg_ellipse,
-                //        11               12                 13                14
-                 stg_arrowrightsmall,stg_arrowupsmall,stg_arrowleftsmall,stg_arrowdownsmall,
-                //       15                16
-                 stg_arrowfirstsmall,stg_arrowlastsmall,
-                //       17
-                 stg_ellipsesmall,
-                //     18         19         20         21         22
-                 stg_dbfirst,stg_dbprior,stg_dbnext,stg_dblast,stg_dbinsert,
-                //     23          24        26         27         28
-                 stg_dbdelete,stg_dbedit,stg_dbpost,stg_dbcancel,stg_dbrefresh,
-                //     29            30              31
-                 stg_dbindbrowse,stg_dbindedit,stg_dbindinsert);
+type             
+ stockglyphty = (
+ //  0         1               2
+  stg_none,stg_checked,stg_checkedradio,
+ //   3         4               5
+  stg_box,stg_boxexpanded,stg_boxexpand,
+ //   6             7              8            9
+  stg_arrowright,stg_arrowup,stg_arrowleft,stg_arrowdown,
+ //  10         11
+  stg_ellipse,stg_dot,
+ //        12               13                 14                15
+  stg_arrowrightsmall,stg_arrowupsmall,stg_arrowleftsmall,stg_arrowdownsmall,
+ //       16                17
+  stg_arrowfirstsmall,stg_arrowlastsmall,
+ //       18           19
+  stg_ellipsesmall,stg_dotsmall,
+ //     20         21         22         23         24
+  stg_dbfirst,stg_dbprior,stg_dbnext,stg_dblast,stg_dbinsert,
+ //     25          26        27         28         29
+  stg_dbdelete,stg_dbedit,stg_dbpost,stg_dbcancel,stg_dbrefresh,
+ //     30            31              32
+  stg_dbindbrowse,stg_dbindedit,stg_dbindinsert
+                 );
 
  stockcaptionsty = (sc_none,sc_is_invalid,sc_Format_error,sc_Value_is_required,
                     sc_Error,sc_Min,sc_Max,sc_Range_error,
@@ -90,8 +93,8 @@ type             //  0         1               2
   public
    constructor create;
    destructor destroy; override;
-   procedure paintglyph(glyph: stockglyphty; const canvas: tcanvas;
-              const rect: rectty; grayed: boolean = false;
+   procedure paintglyph(const canvas: tcanvas; const glyph: stockglyphty;
+              const rect: rectty; const grayed: boolean = false;
               const color: colorty = cl_glyph;
               aalignment: alignmentsty = [al_ycentered,al_xcentered]);
    property bitmaps[index: stockbitmapty]: tbitmap read getbitmaps;
@@ -411,9 +414,9 @@ begin
  result:= stockcaptions(index);
 end;
 
-procedure tstockobjects.paintglyph(glyph: stockglyphty;
-  const canvas: tcanvas; const rect: rectty;
-     grayed: boolean = false;  const color: colorty = cl_glyph;
+procedure tstockobjects.paintglyph(const canvas: tcanvas; 
+     const glyph: stockglyphty; const rect: rectty;
+     const grayed: boolean = false;  const color: colorty = cl_glyph;
      aalignment: alignmentsty = [al_ycentered,al_xcentered]);
 var
  colorbefore: colorty;
@@ -423,7 +426,7 @@ begin
  if grayed then begin
   aalignment:= aalignment + [al_grayed];
  end;
- glyphs.paint(canvas,rect,integer(glyph),aalignment,color);
+ glyphs.paint(canvas,integer(glyph),rect,aalignment,color);
  canvas.color:= colorbefore;
 end;
 
