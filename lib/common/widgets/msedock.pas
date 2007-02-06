@@ -119,6 +119,7 @@ type
  dockstatesty = set of dockstatety;
 
  splitdirty = (sd_none,sd_x,sd_y,sd_tabed);
+ mdistatety = (mds_normal,mds_maximized,mds_minimized);
 
  docklayouteventty = procedure(const sender: twidget; const achildren: widgetarty) of object;
 
@@ -147,6 +148,8 @@ type
    fsplitterrects: rectarty;
    frecalclevel: integer;
    fsplitdir,fasplitdir: splitdirty;
+   fmdistate: mdistatety;
+   fnormalrect: rectty;
    ftabwidget: twidget; //tdocktabwidget, circular interface reference
    ftaborder: msestringarty;
    factivetab: integer; //used only for statreading
@@ -168,6 +171,7 @@ type
    procedure splitterchanged;
    procedure updategrip(const asplitdir: splitdirty; const awidget: twidget);
    procedure setuseroptions(const avalue: optionsdockty);
+   function placementrect: rectty;
   protected
    foptionsdock: optionsdockty;
    function getparentcontroller(out acontroller: tdockcontroller): boolean;
@@ -939,14 +943,15 @@ var
 
 var
  needsfixscale: boolean;
+ intf1: idocktarget;
 begin
- if (fsplitdir = sd_x) or (fsplitdir = sd_y) then begin
-  ar1:= nil; //compiler warning
-  widget1:= fintf.getwidget;
-  hasparent1:= widget1.parentwidget <> nil;
-  widget1:= widget1.container;
-  if (widget1 <> nil) and (widget1.ComponentState * [csloading,csdesigning] = []) then begin
-   rect1:= idockcontroller(fintf).getplacementrect;
+ widget1:= fintf.getwidget;
+ hasparent1:= widget1.parentwidget <> nil;
+ widget1:= widget1.container;
+ if (widget1 <> nil) and (widget1.ComponentState * [csloading,csdesigning] = []) then begin
+  rect1:= idockcontroller(fintf).getplacementrect;
+  if (fsplitdir = sd_x) or (fsplitdir = sd_y) then begin
+   ar1:= nil; //compiler warning
    if not sizeisequal(fsize,rect1.size) or force then begin
     fsize:= rect1.size;
     if fdockstate * [dos_updating1,dos_updating2,dos_updating4] <> [] then begin
@@ -1072,6 +1077,30 @@ begin
      end;
     end;
    end;
+  end
+  else begin
+   if fsplitdir = sd_none then begin
+    if frecalclevel = 0 then begin
+     inc(frecalclevel);
+     try
+      with twidget1(widget1) do begin
+       for int1:= 0 to high(fwidgets) do begin
+        with fwidgets[int1] do begin
+         if getcorbainterface(typeinfo(idocktarget),intf1) then begin
+          with intf1.getdockcontroller do begin
+           if fmdistate = mds_maximized then begin
+            widgetrect:= rect1;
+           end;
+          end;
+         end;
+        end;
+       end;
+      end;
+     finally
+      dec(frecalclevel);
+     end;
+    end;
+   end;  
   end;
  end;
 end;
@@ -1093,7 +1122,7 @@ begin
 end;
 
 procedure tdockcontroller.calclayout(const dragobject: tdockdragobject;
-                       const nonewplace: boolean);
+                                                  const nonewplace: boolean);
 var
  rect1: rectty;
  po1: pointty;
@@ -1105,13 +1134,12 @@ var
  index: integer;
  xorrect: rectty;
  intf1: idocktarget;
-// minsize: integer;
  propsize,varsize,fixsize,fixcount: integer;
  prop,fix: booleanarty;
  dirchanged: boolean;
  newwidget: boolean;
  controller1: tdockcontroller;
-
+ 
 begin
  container1:= twidget1(fintf.getwidget.container);
  if csdestroying in container1.componentstate then begin
@@ -2264,14 +2292,41 @@ end;
 
 procedure tdockcontroller.maximize;
 begin
+ if ismdi then begin
+  with fintf.getwidget do begin  
+   if fmdistate = mds_normal then begin
+    fnormalrect:= widgetrect;
+   end;
+   fmdistate:= mds_maximized;
+   widgetrect:= placementrect;
+  end;
+ end; 
 end;
 
 procedure tdockcontroller.normalize;
 begin
+ if ismdi and (fmdistate <> mds_normal) then begin
+  with fintf.getwidget do begin  
+   fmdistate:= mds_normal;
+   widgetrect:= fnormalrect;
+  end;
+ end; 
 end;
 
 procedure tdockcontroller.minimize;
 begin
+end;
+
+function tdockcontroller.placementrect: rectty;
+var
+ contr1: tdockcontroller;
+begin
+ if getparentcontroller(contr1) then begin
+  result:= idockcontroller(contr1.fintf).getplacementrect;
+ end
+ else begin
+  result:= nullrect;
+ end;
 end;
 
 { tgripframe }
