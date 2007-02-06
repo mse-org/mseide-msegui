@@ -35,27 +35,29 @@ type
                 stf_helvetica,stf_roman,stf_courier); //scaleable fonts
  defaultfontnamesty = array[stockfontty] of string;
 type             
- stockglyphty = (
+ stockglyphty = (        //order fix!
  //  0         1               2
   stg_none,stg_checked,stg_checkedradio,
  //   3         4               5
   stg_box,stg_boxexpanded,stg_boxexpand,
  //   6             7              8            9
   stg_arrowright,stg_arrowup,stg_arrowleft,stg_arrowdown,
- //  10         11
-  stg_ellipse,stg_dot,
- //        12               13                 14                15
+ //  10         
+  stg_ellipse,
+ //        11               12                 13                14
   stg_arrowrightsmall,stg_arrowupsmall,stg_arrowleftsmall,stg_arrowdownsmall,
- //       16                17
+ //       15                16
   stg_arrowfirstsmall,stg_arrowlastsmall,
- //       18           19
-  stg_ellipsesmall,stg_dotsmall,
- //     20         21         22         23         24
+ //       17           
+  stg_ellipsesmall,
+ //     18         19         20         21         22
   stg_dbfirst,stg_dbprior,stg_dbnext,stg_dblast,stg_dbinsert,
- //     25          26        27         28         29
+ //     23          24        25         26         27
   stg_dbdelete,stg_dbedit,stg_dbpost,stg_dbcancel,stg_dbrefresh,
- //     30            31              32
-  stg_dbindbrowse,stg_dbindedit,stg_dbindinsert
+ //     28            29              30
+  stg_dbindbrowse,stg_dbindedit,stg_dbindinsert,
+ //     31      32
+  stg_dot,stg_dotsmall
                  );
 
  stockcaptionsty = (sc_none,sc_is_invalid,sc_Format_error,sc_Value_is_required,
