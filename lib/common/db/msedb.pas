@@ -858,6 +858,7 @@ function fieldclasstoclasstyp(const fieldclass: fieldclassty): fieldclasstypety;
 function fieldtosql(const field: tfield): string;
 function fieldtooldsql(const field: tfield): string;
 function fieldchanged(const field: tfield): boolean;
+function curfieldchanged(const field: tfield): boolean;
 procedure fieldtoparam(const field: tfield; const param: tparam);
 procedure msestringtoparam(const avalue: msestring; const param: tparam);
 //function getasmsestring(const field: tfield): msestring;
@@ -1071,7 +1072,7 @@ begin
  tdataset1(field.dataset).restorestate(statebefore);
 end;
  
-function fieldchanged(const field: tfield): boolean;
+function dofieldchanged(const field: tfield; const astate: tdatasetstate): boolean;
       //todo: fast compare in tbufdataset
 var
  statebefore: tdatasetstate;
@@ -1081,57 +1082,82 @@ var
  bo1: boolean;
  str1: string;
  wstr1: widestring;
+ mstr1: msestring;
  rea1: real;
  int641: int64;
+ cur1: currency;
 begin
  result:= false;
  if field.fieldno > 0 then begin
   ds1:= tdataset1(field.dataset);
   statebefore:= ds1.state;
   isnull:= field.isnull;
-  case field.datatype of
-   ftString,ftFixedChar: begin
-    str1:= field.asstring;
-    ds1.settempstate(dsoldvalue); 
-    result:= (field.isnull xor isnull) or (str1 <> field.asstring);
+  if field is tmsestringfield then begin
+   mstr1:= tmsestringfield(field).asmsestring;
+   ds1.settempstate(astate); 
+   result:= (field.isnull xor isnull) or 
+                 (mstr1 <> tmsestringfield(field).asmsestring);
+  end
+  else begin
+   case field.datatype of
+    ftString,ftFixedChar,ftmemo,ftblob: begin
+     str1:= field.asstring;
+     ds1.settempstate(astate); 
+     result:= (field.isnull xor isnull) or (str1 <> field.asstring);
+    end;
+    ftSmallint,ftInteger,ftWord: begin
+     int1:= field.asinteger;
+     ds1.settempstate(astate); 
+     result:= (field.isnull xor isnull) or (int1 <> field.asinteger);
+    end;
+    ftBoolean: begin
+     bo1:= field.asboolean;
+     ds1.settempstate(astate); 
+     result:= (field.isnull xor isnull) or (bo1 <> field.asboolean);
+    end; 
+    ftFloat,ftDate,ftTime,ftDateTime,ftTimeStamp,ftFMTBcd: begin
+     rea1:= field.asfloat;
+     ds1.settempstate(astate); 
+     result:= (field.isnull xor isnull) or (rea1 <> field.asfloat);
+    end;
+    ftCurrency,ftBCD: begin
+     cur1:= field.ascurrency;
+     ds1.settempstate(astate); 
+     result:= (field.isnull xor isnull) or (cur1 <> field.ascurrency);
+    end;
+ //    ftBytes, ftVarBytes, ftAutoInc, ftBlob, ftMemo, ftGraphic, ftFmtMemo,
+ //    ftParadoxOle, ftDBaseOle, ftTypedBinary, ftCursor, 
+    ftWideString: begin
+ //    wstr1:= field.aswidestring;
+     wstr1:= field.asstring;
+     ds1.settempstate(astate); 
+ //    result:= (field.isnull xor isnull) or (wstr1 <> field.aswidestring);
+     result:= (field.isnull xor isnull) or (wstr1 <> field.asstring);
+    end;
+    ftLargeint: begin
+     int641:= tlargeintfield(field).aslargeint;
+     ds1.settempstate(astate); 
+     result:= (field.isnull xor isnull) or 
+                 (int641 <> tlargeintfield(field).aslargeint);
+    end;
+ //    ftADT, ftArray, ftReference,
+ //    ftDataSet, ftOraBlob, ftOraClob, ftVariant, ftInterface,
+ //    ftIDispatch, ftGuid, ftTimeStamp, ftFMTBcd);
+ 
    end;
-   ftSmallint,ftInteger,ftWord: begin
-    int1:= field.asinteger;
-    ds1.settempstate(dsoldvalue); 
-    result:= (field.isnull xor isnull) or (int1 <> field.asinteger);
-   end;
-   ftBoolean: begin
-    bo1:= field.asboolean;
-    ds1.settempstate(dsoldvalue); 
-    result:= (field.isnull xor isnull) or (bo1 <> field.asboolean);
-   end; 
-   ftFloat,ftCurrency,ftBCD,ftDate,ftTime,ftDateTime,ftTimeStamp,ftFMTBcd: begin
-    rea1:= field.asfloat;
-    ds1.settempstate(dsoldvalue); 
-    result:= (field.isnull xor isnull) or (rea1 <> field.asfloat);
-   end;
-//    ftBytes, ftVarBytes, ftAutoInc, ftBlob, ftMemo, ftGraphic, ftFmtMemo,
-//    ftParadoxOle, ftDBaseOle, ftTypedBinary, ftCursor, 
-   ftWideString: begin
-//    wstr1:= field.aswidestring;
-    wstr1:= field.asstring;
-    ds1.settempstate(dsoldvalue); 
-//    result:= (field.isnull xor isnull) or (wstr1 <> field.aswidestring);
-    result:= (field.isnull xor isnull) or (wstr1 <> field.asstring);
-   end;
-   ftLargeint: begin
-    int641:= tlargeintfield(field).aslargeint;
-    ds1.settempstate(dsoldvalue); 
-    result:= (field.isnull xor isnull) or 
-                (int641 <> tlargeintfield(field).aslargeint);
-   end;
-//    ftADT, ftArray, ftReference,
-//    ftDataSet, ftOraBlob, ftOraClob, ftVariant, ftInterface,
-//    ftIDispatch, ftGuid, ftTimeStamp, ftFMTBcd);
-
   end;
   ds1.restorestate(statebefore); 
  end;
+end;
+
+function fieldchanged(const field: tfield): boolean;
+begin
+ result:= dofieldchanged(field,dsoldvalue);
+end;
+
+function curfieldchanged(const field: tfield): boolean;
+begin
+ result:= dofieldchanged(field,dscurvalue);
 end;
 
 function fieldclasstoclasstyp(const fieldclass: fieldclassty): fieldclasstypety;
