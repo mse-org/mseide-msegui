@@ -233,6 +233,7 @@ type
    function assql: string;
    function asoldsql: string;
    property asmsestring: msestring read getasmsestring write setasmsestring;
+   property Value: Largeint read GetAsLargeint write SetAsLargeint;
   published
    property DataSet stored false;
    property ProviderFlags default defaultproviderflags;
@@ -448,6 +449,7 @@ type
    function assql: string;
    function asoldsql: string;
    property asmsestring: msestring read getasmsestring write setasmsestring;
+   property Value: Currency read GetAsCurrency write SetAsCurrency;
   published
    property DataSet stored false;
    property ProviderFlags default defaultproviderflags;
