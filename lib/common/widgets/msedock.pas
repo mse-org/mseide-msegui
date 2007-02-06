@@ -65,10 +65,13 @@ type
    procedure refused(const apos: pointty); override;
  end;
 
- dockbuttonrectty = (dbr_handle,dbr_close,dbr_maximize,dbr_normalize,
+ dockbuttonrectty = (dbr_none,dbr_handle,dbr_close,dbr_maximize,dbr_normalize,
                      dbr_minimize,dbr_fixsize,
                      dbr_top,dbr_background);
-
+const
+ dbr_first = dbr_handle;
+ dbr_last = dbr_background;
+type
  idockcontroller = interface(idragcontroller)
   function checkdock(var info: draginfoty): boolean;
   function getbuttonrects(const index: dockbuttonrectty): rectty;  
@@ -109,7 +112,9 @@ type
 
  dockstatety = (dos_layoutvalid,dos_updating1,dos_updating2,dos_updating3,
                  dos_updating4,dos_updating5,
-                    dos_closebuttonclicked,dos_fixsizebuttonclicked,
+                    dos_closebuttonclicked,dos_maximizebuttonclicked,
+                    dos_normalizebuttonclicked,dos_minimizebuttonclicked,
+                    dos_fixsizebuttonclicked,
                     dos_topbuttonclicked,dos_backgroundbuttonclicked);
  dockstatesty = set of dockstatety;
 
@@ -178,15 +183,21 @@ type
                       const nonewplace: boolean);
    procedure setpickshape(const ashape: cursorshapety);
    procedure restorepickshape;
+   function checkbuttonarea(const apos: pointty): dockbuttonrectty;
    procedure updatesplitterrects(const awidgets: widgetarty);
    procedure setoptionsdock(const avalue: optionsdockty); virtual;
    function isfullarea: boolean;
+   function ismdi: boolean;
   public
    constructor create(aintf: idockcontroller);
    destructor destroy; override;
    function beforedragevent(var info: draginfoty): boolean; override;
    procedure enddrag; override;
    procedure clientmouseevent(var info: mouseeventinfoty); override;
+   procedure childmouseevent(const sender: twidget; const info: mouseeventinfoty);
+   procedure maximize;
+   procedure normalize;
+   procedure minimize;
    procedure dopaint(const acanvas: tcanvas); //canvasorigin = container.clientpos;
    procedure doactivate;
 //   procedure childmouseevent(const sender: twidget; var info: mouseeventinfoty);
@@ -239,7 +250,7 @@ type
 
  tgripframe = class(tcaptionframe)
   private
-   frects: array[dockbuttonrectty] of rectty;
+   frects: array[dbr_first..dbr_last] of rectty;
    fgriprect: rectty;
    fgrip_pos: captionposty;
    fgrip_color: colorty;
@@ -1859,6 +1870,19 @@ begin
  end;
 end;
 
+function tdockcontroller.checkbuttonarea(const apos: pointty): dockbuttonrectty;
+var
+ dbr1: dockbuttonrectty;
+begin
+ result:= dbr_none;
+ for dbr1:= dbr_first to dbr_last do begin
+  if pointinrect(apos,idockcontroller(fintf).getbuttonrects(dbr1)) then begin
+   result:= dbr1;
+   break;
+  end;
+ end;
+end;
+
 procedure tdockcontroller.clientmouseevent(var info: mouseeventinfoty);
 
 var
@@ -2072,17 +2096,14 @@ begin
              stockobjects.bitmaps[stb_dens50]);
       end;
       fsizeoffset:= 0;
-      if pointinrect(pos,idockcontroller(fintf).getbuttonrects(dbr_close)) then begin
-       include(fdockstate,dos_closebuttonclicked);
-      end;
-      if pointinrect(pos,idockcontroller(fintf).getbuttonrects(dbr_fixsize)) then begin
-       include(fdockstate,dos_fixsizebuttonclicked);
-      end;
-      if pointinrect(pos,idockcontroller(fintf).getbuttonrects(dbr_top)) then begin
-       include(fdockstate,dos_topbuttonclicked);
-      end;
-      if pointinrect(pos,idockcontroller(fintf).getbuttonrects(dbr_background)) then begin
-       include(fdockstate,dos_backgroundbuttonclicked);
+      case checkbuttonarea(pos) of
+       dbr_close: include(fdockstate,dos_closebuttonclicked);
+       dbr_maximize: include(fdockstate,dos_maximizebuttonclicked);
+       dbr_normalize: include(fdockstate,dos_normalizebuttonclicked);
+       dbr_minimize: include(fdockstate,dos_minimizebuttonclicked);
+       dbr_fixsize: include(fdockstate,dos_fixsizebuttonclicked);
+       dbr_top: include(fdockstate,dos_topbuttonclicked);
+       dbr_background: include(fdockstate,dos_backgroundbuttonclicked);
       end;
      end;
     end;
@@ -2116,36 +2137,62 @@ begin
       fintf.getwidget.invalidate;
      end
      else begin
-      if (dos_closebuttonclicked in fdockstate) and
-                 pointinrect(pos,idockcontroller(fintf).getbuttonrects(dbr_close)) then begin
-       widget1.hide;
-      end;
-      if (dos_fixsizebuttonclicked in fdockstate) and
-                 pointinrect(pos,idockcontroller(fintf).getbuttonrects(dbr_fixsize)) then begin
-       useroptions:= optionsdockty(
-        togglebit({$ifdef FPC}longword{$else}word{$endif}(fuseroptions),
-        ord(od_fixsize)));
-       widget1.invalidatewidget;
-      end;
-      if (dos_topbuttonclicked in fdockstate) and
-                 pointinrect(pos,idockcontroller(fintf).getbuttonrects(dbr_top)) then begin
-       useroptions:= optionsdockty(
-        togglebit({$ifdef FPC}longword{$else}word{$endif}(fuseroptions),
-        ord(od_top)));
-       widget1.invalidatewidget;
-      end;
-      if (dos_backgroundbuttonclicked in fdockstate) and
-                 pointinrect(pos,idockcontroller(fintf).getbuttonrects(dbr_background)) then begin
-       useroptions:= optionsdockty(
-        togglebit({$ifdef FPC}longword{$else}word{$endif}(fuseroptions),
-        ord(od_background)));
-       widget1.invalidatewidget;
+      case checkbuttonarea(pos) of
+       dbr_close: begin
+        if (dos_closebuttonclicked in fdockstate) then begin
+         widget1.hide;
+        end;
+       end;
+       dbr_maximize: maximize;
+       dbr_normalize: normalize;
+       dbr_minimize: minimize;
+       dbr_fixsize: begin
+        if (dos_fixsizebuttonclicked in fdockstate) then begin
+         useroptions:= optionsdockty(
+          togglebit({$ifdef FPC}longword{$else}word{$endif}(fuseroptions),
+          ord(od_fixsize)));
+         widget1.invalidatewidget;
+        end;
+       end;
+       dbr_top: begin
+        if (dos_topbuttonclicked in fdockstate) then begin
+         useroptions:= optionsdockty(
+          togglebit({$ifdef FPC}longword{$else}word{$endif}(fuseroptions),
+          ord(od_top)));
+         widget1.invalidatewidget;
+        end;
+       end;
+       dbr_background: begin
+        if (dos_backgroundbuttonclicked in fdockstate) then begin
+         useroptions:= optionsdockty(
+          togglebit({$ifdef FPC}longword{$else}word{$endif}(fuseroptions),
+          ord(od_background)));
+         widget1.invalidatewidget;
+        end;
+       end;
       end;
      end;
-     fdockstate:= fdockstate - [dos_closebuttonclicked,dos_fixsizebuttonclicked,
-                        dos_topbuttonclicked,dos_backgroundbuttonclicked];
+     fdockstate:= fdockstate - 
+        [dos_closebuttonclicked,dos_maximizebuttonclicked,
+            dos_normalizebuttonclicked,dos_minimizebuttonclicked,
+            dos_fixsizebuttonclicked,dos_topbuttonclicked,
+            dos_backgroundbuttonclicked];
     end;
    end;
+  end;
+ end;
+end;
+
+procedure tdockcontroller.childmouseevent(const sender: twidget;
+               const info: mouseeventinfoty);
+var
+ widget1: twidget;
+begin
+ if (info.eventkind = ek_buttonpress) and ismdi then begin
+  widget1:= fintf.getwidget;
+  widget1.bringtofront;
+  if (sender = widget1) and widget1.canfocus then begin
+   widget1.setfocus;
   end;
  end;
 end;
@@ -2205,6 +2252,26 @@ var
 begin
  result:= getparentcontroller(acontroller) and 
               (acontroller.fsplitdir <> sd_none);
+end;
+
+function tdockcontroller.ismdi: boolean;
+var
+ acontroller: tdockcontroller;
+begin
+ result:= getparentcontroller(acontroller) and 
+              (acontroller.fsplitdir = sd_none);
+end;
+
+procedure tdockcontroller.maximize;
+begin
+end;
+
+procedure tdockcontroller.normalize;
+begin
+end;
+
+procedure tdockcontroller.minimize;
+begin
 end;
 
 { tgripframe }
@@ -2490,51 +2557,35 @@ begin
   end;
  end;
  with fintf.getwidget do begin
+  fillchar(frects,sizeof(frects),0);
   frects[dbr_handle]:= fgriprect;
   bo1:= (parentwidget <> nil) or (csdesigning in componentstate);
   bo3:= fcontroller.isfullarea;
   bo2:= not bo3 or (csdesigning in componentstate);
   if bo1 and (go_closebutton in fgrip_options) then begin
    initrect(dbr_close);
-  end
-  else begin
-   frects[dbr_close]:= nullrect;
   end;
-  if bo2 and (go_maximizebutton in fgrip_options) then begin
-   initrect(dbr_maximize);
-  end
-  else begin
-   frects[dbr_maximize]:= nullrect;
-  end;
-  if bo2 and (go_normalizebutton in fgrip_options) then begin
-   initrect(dbr_normalize);
-  end
-  else begin
-   frects[dbr_normalize]:= nullrect;
-  end;
-  if bo2 and (go_minimizebutton in fgrip_options) then begin
-   initrect(dbr_minimize);
-  end
-  else begin
-   frects[dbr_minimize]:= nullrect;
+  if fcontroller.ismdi or (csdesigning in componentstate) then begin
+   if go_maximizebutton in fgrip_options then begin
+    initrect(dbr_maximize);
+   end;
+   if go_normalizebutton in fgrip_options then begin
+    initrect(dbr_normalize);
+   end;
+   if go_minimizebutton in fgrip_options then begin
+    initrect(dbr_minimize);
+   end;
   end;
   if bo1 and bo3 and (go_fixsizebutton in fgrip_options) then begin
    initrect(dbr_fixsize);
-  end
-  else begin
-   frects[dbr_fixsize]:= nullrect;
   end;
-  if bo2 and (go_topbutton in fgrip_options) then begin
-   initrect(dbr_top);
-  end
-  else begin
-   frects[dbr_top]:= nullrect;
-  end;
-  if bo2 and (go_backgroundbutton in fgrip_options) then begin
-   initrect(dbr_background);
-  end
-  else begin
-   frects[dbr_background]:= nullrect;
+  if bo2 then begin
+   if go_topbutton in fgrip_options then begin
+    initrect(dbr_top);
+   end;
+   if go_backgroundbutton in fgrip_options then begin
+    initrect(dbr_background);
+   end;
   end;
  end;
 end;
@@ -2720,14 +2771,18 @@ procedure tdockpanel.updatewindowinfo(var info: windowinfoty);
 begin
  inherited;
  info.options:= foptionswindow;
- info.options:= foptionswindow;
  getwindowicon(ficon,info.icon,info.iconmask);
 end;
 
 function tdockpanel.getbuttonrects(const index: dockbuttonrectty): rectty;
 begin
  if fframe = nil then begin
-  result:= clientrect;
+  if index = dbr_handle then begin
+   result:= clientrect;
+  end
+  else begin
+   result:= nullrect;
+  end;
  end
  else begin
   result:= tgripframe(fframe).getbuttonrects(index);

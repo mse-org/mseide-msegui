@@ -290,6 +290,8 @@ type
    procedure dostatread1(const reader: tstatreader); override;
    procedure dostatwrite1(const writer: tstatwriter); override;
    procedure mouseevent(var info: mouseeventinfoty); override;
+   procedure childmouseevent(const sender: twidget;
+                          var info: mouseeventinfoty); override;
    procedure doactivate; override;
   public
    constructor create(aowner: tcomponent; load: boolean); override;
@@ -1381,6 +1383,13 @@ begin
  if not (es_processed in info.eventstate) then begin
   fdragdock.mouseevent(info);
  end;
+end;
+
+procedure tcustomdockform.childmouseevent(const sender: twidget;
+               var info: mouseeventinfoty);
+begin
+ fdragdock.childmouseevent(sender,info);
+ inherited;
 end;
 
 procedure tcustomdockform.doactivate;
