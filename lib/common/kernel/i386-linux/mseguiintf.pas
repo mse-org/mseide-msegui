@@ -220,9 +220,9 @@ const
       'Arial', 'Times New Roman', 'Courier New');
 
  xftdefaultfontnames: defaultfontnamesty =
-  //stf_default  stf_menu    stf_prop      stf_fixed,
-      ('',          '',  'sans',      'fixed',
-  //stf_swiss    stf_roman          stf_courier
+  //stf_default  stf_menu stf_prop stf_fixed,
+      ('',          '',  'sans',   'monospace',
+  //stf_swiss stf_roman  stf_courier
       'Arial', 'serif', 'Courier New');
 
  capstyles: array[capstylety] of integer = (capbutt,capround,capprojecting);
