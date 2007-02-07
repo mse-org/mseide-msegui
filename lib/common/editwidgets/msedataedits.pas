@@ -1670,11 +1670,14 @@ begin
   case eventkind of
    dek_check: begin
     inherited;
-    accept:= accept and (dragobject^ is tstringdragobject);
+    accept:= accept or (dragobject^ is tstringdragobject);
    end;
    dek_drop: begin
-    with dragobject^ as tstringdragobject do begin
-     value:= data;
+    if dragobject^ is tstringdragobject then begin
+     value:= tstringdragobject(dragobject^).data;
+    end
+    else begin
+     inherited;
     end;
    end;
    else begin
