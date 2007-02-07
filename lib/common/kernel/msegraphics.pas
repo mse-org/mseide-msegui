@@ -142,7 +142,8 @@ const
  cl_selectedtextbackground = cl_mapped + 11;
  cl_infobackground =         cl_mapped + 12;
  cl_glyph =                  cl_mapped + 13;
- cl_lastmapped =             cl_mapped + 14;
+ cl_activegrip =             cl_mapped + 14;
+ cl_lastmapped =             cl_mapped + 15;
 
  cl_0 =                      cl_namedrgb + 0; //select colorbackground for monochrome bitmaps
  cl_1 =                      cl_namedrgb + 1; //select colorforeground
@@ -228,7 +229,8 @@ const
     (name: 'cl_selectedtext'; rgb:           (blue: $ff; green: $ff; red: $ff; res: $00)),
     (name: 'cl_selectedtextbackground'; rgb: (blue: $c0; green: $00; red: $00; res: $00)),
     (name: 'cl_infobackground'; rgb:         (blue: $e0; green: $ff; red: $ff; res: $00)),
-    (name: 'cl_glyph'; rgb:                  (blue: $00; green: $00; red: $00; res: $00))
+    (name: 'cl_glyph'; rgb:                  (blue: $00; green: $00; red: $00; res: $00)),
+    (name: 'cl_activegrip'; rgb:             (blue: $90; green: $20; red: $20; res: $00))
    );
 
  defaultnamedrgb: array[0..namedrgbcolorcount-1]

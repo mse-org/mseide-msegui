@@ -21,6 +21,7 @@ const
  defaultgripsize = 10;
  defaultgripgrip = stb_none;
  defaultgripcolor = cl_white;
+ defaultgripcoloractive = cl_activegrip;
  defaultgrippos = cp_right;
  defaultsplittersize = 3;
 
@@ -121,7 +122,7 @@ type
  dockstatesty = set of dockstatety;
 
  splitdirty = (sd_none,sd_x,sd_y,sd_tabed);
- mdistatety = (mds_normal,mds_maximized,mds_minimized);
+ mdistatety = (mds_normal,mds_maximized,mds_minimized,mds_floating);
 
  docklayouteventty = procedure(const sender: twidget; const achildren: widgetarty) of object;
 
@@ -184,6 +185,7 @@ type
    procedure dochilddock(const awidget: twidget);
    procedure dochildfloat(const awidget: twidget);
    function docheckdock(const info: draginfoty): boolean;
+   function canfloat: boolean;
    procedure refused(const apos: pointty);
    procedure calclayout(const dragobject: tdockdragobject;
                       const nonewplace: boolean);
@@ -266,12 +268,14 @@ type
    fgrip_options: gripoptionsty;
    fgrip_colorbutton: colorty;
    fcontroller: tdockcontroller;
-   procedure setgrip_color(const Value: colorty);
-   procedure setgrip_grip(const Value: stockbitmapty);
-   procedure setgrip_size(const Value: integer);
+   fgrip_coloractive: colorty;
+   procedure setgrip_color(const avalue: colorty);
+   procedure setgrip_grip(const avalue: stockbitmapty);
+   procedure setgrip_size(const avalue: integer);
    procedure setgrip_options(avalue: gripoptionsty);
    procedure setgrip_colorbutton(const Value: colorty);
    function getbuttonrects(const index: dockbuttonrectty): rectty;
+   procedure setgrip_coloractive(const avalue: colorty);
   protected
    procedure updaterects; override;
    procedure updatestate; override;
@@ -282,12 +286,15 @@ type
    procedure dopaintframe(const canvas: tcanvas; const rect: rectty); override;
    property buttonrects[const index:  dockbuttonrectty]: rectty read getbuttonrects;
    function getminimizedsize(out apos: captionposty): sizety;
+   function griprect: rectty; //origin = pos
   published
 //   property grip_pos: captionposty read fgrip_pos write setgrip_pos stored true;
    property grip_size: integer read fgrip_size write setgrip_size stored true;
                                //for optionalclass
    property grip_grip: stockbitmapty read fgrip_grip write setgrip_grip default defaultgripgrip;
    property grip_color: colorty read fgrip_color write setgrip_color default defaultgripcolor;
+   property grip_coloractive: colorty read fgrip_coloractive 
+                      write setgrip_coloractive default defaultgripcoloractive;
    property grip_colorbutton: colorty read fgrip_colorbutton write
                  setgrip_colorbutton default cl_black;
    property grip_options: gripoptionsty read fgrip_options write setgrip_options default defaultgripoptions;
@@ -1402,7 +1409,7 @@ begin
         result:= true;
        end
        else begin
-        if (od_canfloat in foptionsdock) then begin
+        if canfloat then begin
          dofloat(nullpoint);
          result:= true;
         end;
@@ -1525,6 +1532,11 @@ begin
      if checkaccept then begin
       with tdockdragobject(dragobject^) do begin
        if container1 = fxorwidget then begin
+        with tdockdragobject(dragobject^).fdock do begin
+         if fmdistate = mds_floating then begin
+          fmdistate:= mds_normal;
+         end;
+        end;
         calclayout(tdockdragobject(dragobject^),false);
         dochilddock(widget);
         result:= true;
@@ -1557,6 +1569,7 @@ var
  int1: integer;
  controller1: tdockcontroller;
 begin
+ fmdistate:= mds_normal;
  widget1:= twidget1(fintf.getwidget);
  inc(floatdockcount);
  int1:= floatdockcount;
@@ -1577,6 +1590,7 @@ var
  int1: integer;
  controller1: tdockcontroller;
 begin
+ fmdistate:= mds_floating;
  getparentcontroller(controller1);
  widget1:= twidget1(fintf.getwidget);
  widget1.parentwidget:= nil;
@@ -1586,7 +1600,6 @@ begin
   widget1.window.caption:= wstr1;
  end;
  updategrip(sd_none,widget1);
- widget1.activate;
  inc(floatdockcount);
  int1:= floatdockcount;
  if widget1.canevent(tmethod(fonfloat)) then begin
@@ -1594,7 +1607,14 @@ begin
  end;
  if (floatdockcount = int1) and (controller1 <> nil) then begin
   controller1.dochildfloat(widget1);
+  widget1.activate;
  end;
+end;
+
+function tdockcontroller.canfloat: boolean;
+begin
+ result:= (od_canfloat in foptionsdock) and 
+               not (ismdi and (mdistate = mds_minimized))
 end;
 
 procedure tdockcontroller.refused(const apos: pointty);
@@ -1603,7 +1623,7 @@ var
  intf1: idocktarget;
  dir1: splitdirty;
 begin
- if (od_canfloat in foptionsdock) then begin
+ if canfloat then begin
   widget1:= fintf.getwidget.parentwidget;
   dir1:= sd_none; //compiler warning
   if widget1 <> nil then begin
@@ -2227,7 +2247,8 @@ begin
  if (info.eventkind = ek_buttonpress) and ismdi then begin
   widget1:= fintf.getwidget;
   widget1.bringtofront;
-  if (sender = widget1) and widget1.canfocus then begin
+  if ((sender = widget1) or (sender = widget1.container)) and 
+                 widget1.canfocus then begin
    widget1.setfocus;
   end;
  end;
@@ -2294,8 +2315,9 @@ function tdockcontroller.ismdi: boolean;
 var
  acontroller: tdockcontroller;
 begin
- result:= getparentcontroller(acontroller) and 
-              (acontroller.fsplitdir = sd_none);
+ result:= (fintf.getwidget.parentwidget <> nil) and 
+  (fmdistate <> mds_floating) and getparentcontroller(acontroller) and 
+                          (acontroller.fsplitdir = sd_none);
 end;
 
 procedure tdockcontroller.maximize;
@@ -2369,6 +2391,7 @@ end;
 constructor tgripframe.create(const intf: iframe; const acontroller: tdockcontroller);
 begin
  fgrip_color:= defaultgripcolor;
+ fgrip_coloractive:= defaultgripcoloractive;
  fgrip_colorbutton:= cl_black;
  fgrip_size:= defaultgripsize;
  fgrip_pos:= defaultgrippos;
@@ -2396,6 +2419,7 @@ var
  po1,po2: pointty;
  int1,int2: integer;
  rect1,rect2: rectty;
+ col1: colorty;
 begin
  inherited;
  with canvas do begin
@@ -2480,6 +2504,12 @@ begin
     end;
    end;
    if fgrip_grip = stb_none then begin
+    if fintf.getwidget.active then begin
+     col1:= fgrip_coloractive;
+    end
+    else begin
+     col1:=  cl_shadow;
+    end;
     with rect1,frects[dbr_handle] do begin
      int1:= fgrip_size div 4;
      int2:= (fgrip_size mod 4) div 2;
@@ -2493,7 +2523,7 @@ begin
         drawline(po1,po2,cl_highlight);
         inc(po1.x,2);
         inc(po2.x,2);
-        drawline(po1,po2,cl_shadow);
+        drawline(po1,po2,col1);
         inc(po1.x,2);
         inc(po2.x,2);
        end;
@@ -2509,7 +2539,7 @@ begin
         drawline(po1,po2,cl_highlight);
         inc(po1.y,2);
         inc(po2.y,2);
-        drawline(po1,po2,cl_shadow);
+        drawline(po1,po2,col1);
         inc(po1.y,2);
         inc(po2.y,2);
        end;
@@ -2520,7 +2550,12 @@ begin
    else begin
     brushbefore:= brush;
     brush:= stockobjects.bitmaps[fgrip_grip];
-    color:= fgrip_color;
+    if fintf.getwidget.active then begin
+     color:= fgrip_coloractive;
+    end
+    else begin
+     color:= fgrip_color;
+    end;
     fillrect(frects[dbr_handle],cl_brushcanvas);
     brush:= brushbefore;
  //  stockobjects.bitmaps[fgrip_grip].paint(canvas,fhandlerect,
@@ -2563,26 +2598,34 @@ begin
  end;
 end;
 
-procedure tgripframe.setgrip_color(const Value: colorty);
+procedure tgripframe.setgrip_color(const avalue: colorty);
 begin
- if fgrip_color <> value then begin
-  fgrip_color := Value;
+ if fgrip_color <> avalue then begin
+  fgrip_color := avalue;
   fintf.invalidatewidget;
  end;
 end;
 
-procedure tgripframe.setgrip_grip(const Value: stockbitmapty);
+procedure tgripframe.setgrip_coloractive(const avalue: colorty);
 begin
- if fgrip_grip <> value then begin
-  fgrip_grip:= Value;
+ if fgrip_coloractive <> avalue then begin
+  fgrip_coloractive:= avalue;
   fintf.invalidatewidget;
  end;
 end;
 
-procedure tgripframe.setgrip_size(const Value: integer);
+procedure tgripframe.setgrip_grip(const avalue: stockbitmapty);
 begin
- if fgrip_size <> value then begin
-  fgrip_size:= Value;
+ if fgrip_grip <> avalue then begin
+  fgrip_grip:= avalue;
+  fintf.invalidatewidget;
+ end;
+end;
+
+procedure tgripframe.setgrip_size(const avalue: integer);
+begin
+ if fgrip_size <> avalue then begin
+  fgrip_size:= avalue;
   internalupdatestate;
  end;
 end;
@@ -2680,7 +2723,8 @@ begin
   fillchar(frects,sizeof(frects),0);
   frects[dbr_handle]:= fgriprect;
   designing:= csdesigning in componentstate;
-  bo1:= (parentwidget <> nil) or designing;
+  bo1:= (parentwidget <> nil) and (fcontroller.fmdistate <> mds_floating) or
+                                 designing;
   bo3:= fcontroller.isfullarea;
   bo2:= not bo3 or designing;
   if bo1 and (go_closebutton in fgrip_options) then begin
@@ -2735,6 +2779,11 @@ begin
   end;
  end;
  inherited;
+end;
+
+function tgripframe.griprect: rectty;
+begin
+ result:= frects[dbr_handle];
 end;
 
 { tdockhandle }

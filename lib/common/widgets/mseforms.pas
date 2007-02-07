@@ -293,8 +293,10 @@ type
    procedure mouseevent(var info: mouseeventinfoty); override;
    procedure childmouseevent(const sender: twidget;
                           var info: mouseeventinfoty); override;
+   procedure activechanged; override;
    procedure doactivate; override;
    function canfocus: boolean; override;
+   procedure activate(const abringtofront: boolean = true); override;
   public
    constructor create(aowner: tcomponent; load: boolean); override;
    destructor destroy; override;
@@ -1413,6 +1415,25 @@ end;
 function tcustomdockform.canfocus: boolean;
 begin
  result:= inherited canfocus and (fdragdock.mdistate <> mds_minimized);
+end;
+
+procedure tcustomdockform.activate(const abringtofront: boolean = true);
+begin
+ if fdragdock.mdistate = mds_minimized then begin
+  fdragdock.normalize;
+ end;
+ if fdragdock.ismdi then begin
+  bringtofront;
+ end;
+ inherited;
+end;
+
+procedure tcustomdockform.activechanged;
+begin
+ if fframe <> nil then begin
+  invalidaterect(tgripframe(fframe).griprect,org_widget);
+ end;
+ inherited;
 end;
 
 { tdockform}

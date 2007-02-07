@@ -931,7 +931,7 @@ type
    function show(const modal: boolean = false;
             const transientfor: twindow = nil): modalresultty; virtual;
    procedure hide;
-   procedure activate(const bringtofront: boolean = true);
+   procedure activate(const abringtofront: boolean = true); virtual;
                              //show and setfocus
    procedure bringtofront;
    procedure sendtoback;
@@ -8047,9 +8047,9 @@ begin
  result:= self;
 end;
 
-procedure twidget.activate(const bringtofront: boolean = true);
+procedure twidget.activate(const abringtofront: boolean = true);
 begin
- if bringtofront then begin
+ if abringtofront then begin
   window.bringtofront;
  end;
  show;
