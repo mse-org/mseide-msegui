@@ -23,7 +23,7 @@ const
  textellipse = msestring('...');
 
 type
- textflagty = (tf_xcentered,tf_right,tf_block,tf_ycentered,tf_bottom, 
+ textflagty = (tf_xcentered,tf_right,tf_xjustify,tf_ycentered,tf_bottom, 
                  //order fix, used in msepostscriptprinter
                tf_clipi,tf_clipo,
                tf_grayed,tf_wordbreak,tf_noselect,
@@ -488,7 +488,7 @@ begin
     end;
    end;
   end;
-  if (tf_block in flags) and (dest.cx > 0) then begin
+  if (tf_xjustify in flags) and (dest.cx > 0) then begin
    po1:= pointer(info.text.text);
    bo1:= false;
    for int3:= 0 to high(lineinfos) - 1 do begin
