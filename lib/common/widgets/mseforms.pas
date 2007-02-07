@@ -141,6 +141,7 @@ type
    function checkdock(var info: draginfoty): boolean;
    function getbuttonrects(const index: dockbuttonrectty): rectty;  
    function getplacementrect: rectty;
+   function getminimizedsize(out apos: captionposty): sizety;
   public
    constructor create(aowner: tcomponent); overload; override;
    constructor create(aowner: tcomponent; load: boolean); reintroduce; overload;  virtual;
@@ -293,6 +294,7 @@ type
    procedure childmouseevent(const sender: twidget;
                           var info: mouseeventinfoty); override;
    procedure doactivate; override;
+   function canfocus: boolean; override;
   public
    constructor create(aowner: tcomponent; load: boolean); override;
    destructor destroy; override;
@@ -1094,6 +1096,16 @@ begin
  end;
 end;
 
+function tcustommseform.getminimizedsize(out apos: captionposty): sizety;
+begin
+ if fframe = nil then begin
+  result:= nullsize;
+ end
+ else begin
+  result:= tgripframe(fframe).getminimizedsize(apos);
+ end;
+end;
+
 function tcustommseform.getcaption: msestring;
 begin
  result:= fcaption;
@@ -1396,6 +1408,11 @@ procedure tcustomdockform.doactivate;
 begin
  fdragdock.doactivate;
  inherited;
+end;
+
+function tcustomdockform.canfocus: boolean;
+begin
+ result:= inherited canfocus and (fdragdock.mdistate <> mds_minimized);
 end;
 
 { tdockform}

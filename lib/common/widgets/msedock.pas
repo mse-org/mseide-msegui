@@ -77,6 +77,8 @@ type
   function getbuttonrects(const index: dockbuttonrectty): rectty;  
                                       //origin = clientrect.pos
   function getplacementrect: rectty;  //origin = container.pos
+  function getminimizedsize(out apos: captionposty): sizety;  
+                     //cx = 0 -> normalwidth, cy = 0 -> normalheight
   function getcaption: msestring;
  end;
 
@@ -209,6 +211,7 @@ type
    procedure widgetregionchanged(const sender: twidget);
    procedure beginclientrectchanged;
    procedure endclientrectchanged;
+   property mdistate: mdistatety read fmdistate;
    //istatfile
    procedure dostatread(const reader: tstatreader);
    procedure dostatwrite(const writer: tstatwriter; const bounds: prectty = nil);
@@ -278,6 +281,7 @@ type
    procedure updatemousestate(const sender: twidget; const apos: pointty); override;
    procedure dopaintframe(const canvas: tcanvas; const rect: rectty); override;
    property buttonrects[const index:  dockbuttonrectty]: rectty read getbuttonrects;
+   function getminimizedsize(out apos: captionposty): sizety;
   published
 //   property grip_pos: captionposty read fgrip_pos write setgrip_pos stored true;
    property grip_size: integer read fgrip_size write setgrip_size stored true;
@@ -310,6 +314,7 @@ type
    function checkdock(var info: draginfoty): boolean;
    function getbuttonrects(const index: dockbuttonrectty): rectty;
    function getplacementrect: rectty;
+   function getminimizedsize(out apos: captionposty): sizety;
    function getcaption: msestring;
    //istatfile
    procedure dostatread(const reader: tstatreader);
@@ -1080,6 +1085,9 @@ begin
   end
   else begin
    if fsplitdir = sd_none then begin
+    if fmdistate = mds_normal then begin
+     fnormalrect:= widget1.widgetrect;
+    end;
     if frecalclevel = 0 then begin
      inc(frecalclevel);
      try
@@ -2306,15 +2314,42 @@ end;
 procedure tdockcontroller.normalize;
 begin
  if ismdi and (fmdistate <> mds_normal) then begin
-  with fintf.getwidget do begin  
-   fmdistate:= mds_normal;
-   widgetrect:= fnormalrect;
-  end;
+  fmdistate:= mds_normal;
+  fintf.getwidget.widgetrect:= fnormalrect;
  end; 
 end;
 
 procedure tdockcontroller.minimize;
+var
+ rect1: rectty;
+ pos1: captionposty;
 begin
+ if ismdi then begin
+  with fintf.getwidget do begin
+   if fmdistate = mds_normal then begin
+    fnormalrect:= widgetrect;
+   end;
+   if canclose(nil) then begin
+    fmdistate:= mds_minimized;
+    nextfocus;
+    with rect1 do begin
+     pos:= fnormalrect.pos;
+     size:= idockcontroller(fintf).getminimizedsize(pos1);
+     if cx = 0 then begin
+      cx:= fnormalrect.cx;
+     end;
+     if cy = 0 then begin
+      cy:= fnormalrect.cy;
+     end;
+     case pos1 of
+      cp_right: inc(x,fnormalrect.cx - cx);
+      cp_bottom: inc(y,fnormalrect.cy - cy);
+     end;
+    end;
+    widgetrect:= rect1;
+   end; 
+  end;
+ end;
 end;
 
 function tdockcontroller.placementrect: rectty;
@@ -2402,8 +2437,24 @@ begin
    with frects[dbr_minimize] do begin
     if (cx > 0) and (go_minimizebutton in fgrip_options) then begin
      draw3dframe(canvas,frects[dbr_minimize],1,defaultframecolors);
-     drawvect(makepoint(x+2,y+cy-3),gd_right,cx-5,fgrip_colorbutton);
-     drawvect(makepoint(x+2,y+cy-4),gd_right,cx-5,fgrip_colorbutton);
+     case fgrip_pos of
+      cp_left: begin
+       drawvect(makepoint(x+2,y+2),gd_down,cy-5,fgrip_colorbutton);
+       drawvect(makepoint(x+3,y+2),gd_down,cy-5,fgrip_colorbutton);
+      end;
+      cp_right: begin
+       drawvect(makepoint(x+cx-3,y+2),gd_down,cy-5,fgrip_colorbutton);
+       drawvect(makepoint(x+cx-4,y+2),gd_down,cy-5,fgrip_colorbutton);
+      end;
+      cp_bottom: begin
+       drawvect(makepoint(x+2,y+cy-3),gd_right,cx-5,fgrip_colorbutton);
+       drawvect(makepoint(x+2,y+cy-4),gd_right,cx-5,fgrip_colorbutton);
+      end;
+      else begin //cp_top
+       drawvect(makepoint(x+2,y+2),gd_right,cx-5,fgrip_colorbutton);
+       drawvect(makepoint(x+2,y+3),gd_right,cx-5,fgrip_colorbutton);
+      end;
+     end;
     end;
    end;
    with frects[dbr_fixsize] do begin
@@ -2485,6 +2536,20 @@ begin
  result:= frects[index];
  dec(result.x,fpaintrect.x+fclientrect.x);
  dec(result.y,fpaintrect.y+fclientrect.y);
+end;
+
+function tgripframe.getminimizedsize(out apos: captionposty): sizety;
+begin
+ checkstate;
+ if fgrip_pos in [cp_right,cp_left] then begin
+  result.cy:= 0;
+  result.cx:= fpaintframe.left + fpaintframe.right;
+ end
+ else begin
+  result.cx:= 0;
+  result.cy:= fpaintframe.top + fpaintframe.bottom;;
+ end;
+ apos:= fgrip_pos;
 end;
 
 procedure tgripframe.getpaintframe(var frame: framety);
@@ -2579,7 +2644,7 @@ procedure tgripframe.updaterects;
  end;
 
 var
- bo1,bo2,bo3: boolean;
+ bo1,bo2,bo3,designing: boolean;
   
 begin
  inherited;
@@ -2614,20 +2679,24 @@ begin
  with fintf.getwidget do begin
   fillchar(frects,sizeof(frects),0);
   frects[dbr_handle]:= fgriprect;
-  bo1:= (parentwidget <> nil) or (csdesigning in componentstate);
+  designing:= csdesigning in componentstate;
+  bo1:= (parentwidget <> nil) or designing;
   bo3:= fcontroller.isfullarea;
-  bo2:= not bo3 or (csdesigning in componentstate);
+  bo2:= not bo3 or designing;
   if bo1 and (go_closebutton in fgrip_options) then begin
    initrect(dbr_close);
   end;
-  if fcontroller.ismdi or (csdesigning in componentstate) then begin
-   if go_maximizebutton in fgrip_options then begin
+  if fcontroller.ismdi or designing then begin
+   if (go_maximizebutton in fgrip_options) and 
+             ((fcontroller.mdistate <> mds_maximized) or designing) then begin
     initrect(dbr_maximize);
    end;
-   if go_normalizebutton in fgrip_options then begin
+   if (go_normalizebutton in fgrip_options) and 
+           ((fcontroller.mdistate <> mds_normal) or designing) then begin
     initrect(dbr_normalize);
    end;
-   if go_minimizebutton in fgrip_options then begin
+   if (go_minimizebutton in fgrip_options) and
+        ((fcontroller.mdistate <> mds_minimized) or designing) then begin
     initrect(dbr_minimize);
    end;
   end;
@@ -2841,6 +2910,16 @@ begin
  end
  else begin
   result:= tgripframe(fframe).getbuttonrects(index);
+ end;
+end;
+
+function tdockpanel.getminimizedsize(out apos: captionposty): sizety;
+begin
+ if fframe = nil then begin
+  result:= nullsize;
+ end
+ else begin
+  result:= tgripframe(fframe).getminimizedsize(apos);
  end;
 end;
 
