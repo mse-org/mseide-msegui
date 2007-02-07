@@ -4873,8 +4873,10 @@ begin
      else begin
       if anch = [] then begin
        if fparentwidget <> nil then begin
-        rect1.x:= fparentwidget.paintpos.x;
-        rect1.cx:= fparentwidget.paintsize.cx;
+        rect1.x:= fparentwidget.clientwidgetpos.x;
+        rect1.cx:= fparentwidget.clientsize.cx;
+//        rect1.x:= fparentwidget.paintpos.x;
+//        rect1.cx:= fparentwidget.paintsize.cx;
        end;
       end;
      end;
@@ -4892,8 +4894,10 @@ begin
      else begin
       if anch = [] then begin
        if fparentwidget <> nil then begin
-        rect1.y:= fparentwidget.paintpos.y;
-        rect1.cy:= fparentwidget.paintsize.cy;
+        rect1.y:= fparentwidget.clientwidgetpos.y;
+        rect1.cy:= fparentwidget.clientsize.cy;
+//        rect1.y:= fparentwidget.paintpos.y;
+//        rect1.cy:= fparentwidget.paintsize.cy;
        end;
       end;
      end;

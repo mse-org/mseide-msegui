@@ -7,6 +7,7 @@ object messagefo: tmessagefo
   frame.grip_size = 10
   frame.grip_options = [go_closebutton, go_fixsizebutton, go_topbutton]
   frame.dummy = 0
+  taborder = 1
   visible = False
   container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_mousetransparent, ow_destroywidgets, ow_autoscale]
   container.bounds_x = 0
@@ -44,9 +45,9 @@ object messagefo: tmessagefo
       end>
     rowcountmax = 5000
     datarowlinewidth = 0
-    datarowheight = 16
+    datarowheight = 14
     oncellevent = messagesoncellevent
-    reffontheight = 16
+    reffontheight = 14
   end
   object tpopupmenu1: tpopupmenu
     menu.submenu.count = 1

@@ -1095,6 +1095,7 @@ begin
     if fmdistate = mds_normal then begin
      fnormalrect:= widget1.widgetrect;
     end;
+    {
     if frecalclevel = 0 then begin
      inc(frecalclevel);
      try
@@ -1115,6 +1116,7 @@ begin
       dec(frecalclevel);
      end;
     end;
+    }
    end;  
   end;
  end;
@@ -1521,8 +1523,16 @@ begin
           translatewidgetpoint1(rect1.pos,container1,nil);
          end;
         end;
-        setxorwidget(container1,clipinrect(rect1,
-          makerect(translatewidgetpoint(container1.paintpos,container1,nil),size1)));
+        if fasplitdir = sd_none then begin
+         setxorwidget(container1,clipinrect(rect1,
+           makerect(translatewidgetpoint(container1.clientwidgetpos,
+           container1,nil),container1.clientsize)));
+        end
+        else begin
+         setxorwidget(container1,clipinrect(rect1,
+           makerect(translatewidgetpoint(container1.paintpos,
+           container1,nil),size1)));
+        end;
         result:= true;
        end;
       end;
@@ -1590,9 +1600,12 @@ var
  int1: integer;
  controller1: tdockcontroller;
 begin
+ widget1:= twidget1(fintf.getwidget);
+ if ismdi then begin
+  widget1.anchors:= [an_left,an_top];
+ end;  
  fmdistate:= mds_floating;
  getparentcontroller(controller1);
- widget1:= twidget1(fintf.getwidget);
  widget1.parentwidget:= nil;
  widget1.pos:= addpoint(widget1.pos,adist);
  wstr1:= getfloatcaption;
@@ -2328,6 +2341,7 @@ begin
     fnormalrect:= widgetrect;
    end;
    fmdistate:= mds_maximized;
+   anchors:= [];
    widgetrect:= placementrect;
   end;
  end; 
@@ -2337,7 +2351,10 @@ procedure tdockcontroller.normalize;
 begin
  if ismdi and (fmdistate <> mds_normal) then begin
   fmdistate:= mds_normal;
-  fintf.getwidget.widgetrect:= fnormalrect;
+  with fintf.getwidget do begin
+   anchors:= [an_left,an_top];
+   widgetrect:= fnormalrect;
+  end;
  end; 
 end;
 
@@ -2368,6 +2385,7 @@ begin
       cp_bottom: inc(y,fnormalrect.cy - cy);
      end;
     end;
+    anchors:= [an_left,an_top];
     widgetrect:= rect1;
    end; 
   end;
