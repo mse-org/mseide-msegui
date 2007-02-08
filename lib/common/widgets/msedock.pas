@@ -34,8 +34,13 @@ type
             od_propsize,od_fixsize,od_top,od_background);
  optionsdockty = set of optiondockty;
 
+ dockbuttonrectty = (dbr_none,dbr_handle,dbr_close,dbr_maximize,dbr_normalize,
+                     dbr_minimize,dbr_fixsize,
+                     dbr_top,dbr_background);
 const
  defaultoptionsdock = [od_savepos];
+ dbr_first = dbr_handle;
+ dbr_last = dbr_background;
 
 type
  twidgetdragobject = class(tdragobject)
@@ -66,13 +71,6 @@ type
    procedure refused(const apos: pointty); override;
  end;
 
- dockbuttonrectty = (dbr_none,dbr_handle,dbr_close,dbr_maximize,dbr_normalize,
-                     dbr_minimize,dbr_fixsize,
-                     dbr_top,dbr_background);
-const
- dbr_first = dbr_handle;
- dbr_last = dbr_background;
-type
  idockcontroller = interface(idragcontroller)
   function checkdock(var info: draginfoty): boolean;
   function getbuttonrects(const index: dockbuttonrectty): rectty;  
@@ -2740,9 +2738,9 @@ const
  amask: gripoptionsty = [go_horz,go_vert];
 begin
  avalue:= gripoptionsty(setsinglebit(
-              {$ifdef FPC}longword{$else}byte{$endif}(avalue),
-              {$ifdef FPC}longword{$else}byte{$endif}(fgrip_options),
-              {$ifdef FPC}longword{$else}byte{$endif}(amask)));
+              {$ifdef FPC}longword{$else}word{$endif}(avalue),
+              {$ifdef FPC}longword{$else}word{$endif}(fgrip_options),
+              {$ifdef FPC}longword{$else}word{$endif}(amask)));
  if fgrip_options <> avalue then begin
   fgrip_options:= avalue;
   internalupdatestate;

@@ -293,7 +293,7 @@ type
    procedure mouseevent(var info: mouseeventinfoty); override;
    procedure childmouseevent(const sender: twidget;
                           var info: mouseeventinfoty); override;
-   procedure poschanged override;
+   procedure poschanged; override;
    procedure activechanged; override;
    procedure doactivate; override;
    function canfocus: boolean; override;
