@@ -1062,17 +1062,23 @@ type
    function clipedpaintrect: rectty;         //origin = pos, cliped by all parentpaintrects
    function innerpaintrect: rectty;          //origin = pos
 
+   function widgetsizerect: rectty;          //pos = nullpoint
    function clientrect: rectty;              //origin = paintrect.pos
    procedure changeclientsize(const delta: sizety); //asynchronous
    property clientsize: sizety read getclientsize write setclientsize;
    property clientwidth: integer read getclientwidth write setclientwidth;
    property clientheight: integer read getclientheight write setclientheight;
    function clientpos: pointty;              //origin = paintrect.pos;
+   function clientwidgetrect: rectty;        //origin = pos
    function clientwidgetpos: pointty;        //origin = pos
    function clientparentpos: pointty;        //origin = parentwidget.pos
    property parentclientpos: pointty read getparentclientpos write setparentclientpos;
-   function paintparentpos: pointty;         //origin = parentwidget.pos
                                              //origin = parentwidget.clientpos
+   function paintparentpos: pointty;         //origin = parentwidget.pos
+   function paintrectparent: rectty; //origin = paintpos,
+                                         //nullrect if parent = nil,
+   function clientrectparent: rectty; //origin = paintpos,
+                                         //nullrect if parent = nil,
    function innerwidgetrect: rectty;         //origin = pos
    function innerclientrect: rectty;         //origin = clientpos
    function innerclientsize: sizety;
@@ -2593,6 +2599,7 @@ end;
 procedure tcustomframe.updatemousestate(const sender: twidget;
                  const apos: pointty);
 begin
+ checkstate;
  with sender do begin
   if not (ow_mousetransparent in foptionswidget) and
                        pointinrect(apos,fpaintrect) then begin
@@ -5511,6 +5518,12 @@ begin
  end;
 end;
 
+function twidget.widgetsizerect: rectty;          //pos = nullpoint
+begin
+ result.pos:= nullpoint;
+ result.size:= fwidgetrect.size;
+end;
+
 function twidget.clientrect: rectty;
 begin
  if fframe <> nil then begin
@@ -6031,6 +6044,21 @@ begin
  setclientsize(makesize(getclientsize.cx,avalue));
 end;
 
+function twidget.clientwidgetrect: rectty;        //origin = pos
+begin
+ if fframe <> nil then begin
+  with frame do begin
+   checkstate;
+   result:= fclientrect;
+   addpoint(result.pos,fpaintrect.pos);
+  end
+ end
+ else begin
+  result.pos:= nullpoint;
+  result.size:= fwidgetrect.size;
+ end;
+end;
+
 function twidget.clientwidgetpos: pointty;
 begin
  if fframe <> nil then begin
@@ -6066,6 +6094,30 @@ end;
 function twidget.paintparentpos: pointty;       //origin = parentwidget.pos
 begin
  result:= addpoint(fwidgetrect.pos,paintpos);
+end;
+
+function twidget.paintrectparent: rectty; //origin = paintpos,
+                                         //nullrect if parent = nil,
+begin
+ if fparentwidget = nil then begin
+  result:= nullrect;
+ end
+ else begin
+  result:= fparentwidget.paintrect;
+  subpoint1(result.pos,paintparentpos);
+ end;
+end;
+
+function twidget.clientrectparent: rectty; //origin = paintpos,
+                                         //nullrect if parent = nil,
+begin
+ if fparentwidget = nil then begin
+  result:= nullrect;
+ end
+ else begin
+  result:= fparentwidget.clientwidgetrect;
+  subpoint1(result.pos,paintparentpos);
+ end;
 end;
 
 function twidget.getparentclientpos: pointty;   //origin = parentwidget.clientpos

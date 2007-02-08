@@ -15,7 +15,7 @@ interface
 uses
  msewidgets,classes,msedrag,msegui,msegraphutils,mseevent,mseclasses,
  msegraphics,msestockobjects,mseguiglob,msestat,msestatfile,msepointer,
- msesplitter,msesimplewidgets,msetypes,msestrings,msebitmap;
+ msesplitter,msesimplewidgets,msetypes,msestrings,msebitmap,mseobjectpicker;
 
 const
  defaultgripsize = 10;
@@ -27,7 +27,7 @@ const
 
 type
  optiondockty = (od_savepos,
-            od_canmove,od_canfloat,od_candock,od_acceptsdock,
+            od_canmove,od_cansize,od_canfloat,od_candock,od_acceptsdock,
             od_splitvert,od_splithorz,od_tabed,od_proportional,
             od_propsize,od_fixsize,od_top,od_background);
  optionsdockty = set of optiondockty;
@@ -158,6 +158,7 @@ type
    factivetab: integer; //used only for statreading
    fuseroptions: optionsdockty;
    floatdockcount: integer;
+   fobjectpicker: tobjectpicker;
    procedure setdockhandle(const avalue: tdockhandle);
    procedure layoutchanged;
    function checksplit(const awidgets: widgetarty;
@@ -196,6 +197,7 @@ type
    procedure setoptionsdock(const avalue: optionsdockty); virtual;
    function isfullarea: boolean;
    function ismdi: boolean;
+   function canmdisize: boolean;
   public
    constructor create(aintf: idockcontroller);
    destructor destroy; override;
@@ -257,7 +259,7 @@ const
 
 type
 
- tgripframe = class(tcaptionframe)
+ tgripframe = class(tcaptionframe,iobjectpicker)
   private
    frects: array[dbr_first..dbr_last] of rectty;
    fgriprect: rectty;
@@ -269,6 +271,7 @@ type
    fgrip_colorbutton: colorty;
    fcontroller: tdockcontroller;
    fgrip_coloractive: colorty;
+   fobjectpicker: tobjectpicker;
    procedure setgrip_color(const avalue: colorty);
    procedure setgrip_grip(const avalue: stockbitmapty);
    procedure setgrip_size(const avalue: integer);
@@ -280,9 +283,24 @@ type
    procedure updaterects; override;
    procedure updatestate; override;
    procedure getpaintframe(var frame: framety); override;
+   function calcsizingrect(const akind: sizingkindty;
+                                const offset: pointty): rectty;
+      //iobjectpicker
+   function getwidget: twidget;
+   function getcursorshape(const pos: pointty; const shiftstate: shiftstatesty; 
+                                     var shape: cursorshapety): boolean;
+    //true if found
+   procedure getpickobjects(const rect: rectty;  const shiftstate: shiftstatesty;
+                                     var objects: integerarty);
+   procedure beginpickmove(const objects: integerarty);
+   procedure endpickmove(const pos,offset: pointty; const objects: integerarty);
+   procedure paintxorpic(const canvas: tcanvas; const pos,offset: pointty;
+                 const objects: integerarty);
   public
    constructor create(const intf: iframe; const acontroller: tdockcontroller);
+   destructor destroy; override;
    procedure updatemousestate(const sender: twidget; const apos: pointty); override;
+   procedure mouseevent(var info: mouseeventinfoty);
    procedure dopaintframe(const canvas: tcanvas; const rect: rectty); override;
    property buttonrects[const index:  dockbuttonrectty]: rectty read getbuttonrects;
    function getminimizedsize(out apos: captionposty): sizety;
@@ -2257,12 +2275,14 @@ procedure tdockcontroller.childmouseevent(const sender: twidget;
 var
  widget1: twidget;
 begin
- if (info.eventkind = ek_buttonpress) and ismdi then begin
-  widget1:= fintf.getwidget;
-  widget1.bringtofront;
-  if ((sender = widget1) or (sender = widget1.container)) and 
-                 widget1.canfocus then begin
-   widget1.setfocus;
+ if ismdi then begin
+  if (info.eventkind = ek_buttonpress) then begin
+   widget1:= fintf.getwidget;
+   widget1.bringtofront;
+   if ((sender = widget1) or (sender = widget1.container)) and 
+                  widget1.canfocus then begin
+    widget1.setfocus;
+   end;
   end;
  end;
 end;
@@ -2331,6 +2351,11 @@ begin
  result:= (fintf.getwidget.parentwidget <> nil) and 
   (fmdistate <> mds_floating) and getparentcontroller(acontroller) and 
                           (acontroller.fsplitdir = sd_none);
+end;
+
+function tdockcontroller.canmdisize: boolean;
+begin
+ result:= ismdi and (od_cansize in foptionsdock);
 end;
 
 procedure tdockcontroller.maximize;
@@ -2406,7 +2431,8 @@ end;
 
 { tgripframe }
 
-constructor tgripframe.create(const intf: iframe; const acontroller: tdockcontroller);
+constructor tgripframe.create(const intf: iframe;
+                       const acontroller: tdockcontroller);
 begin
  fgrip_color:= defaultgripcolor;
  fgrip_coloractive:= defaultgripcoloractive;
@@ -2417,6 +2443,13 @@ begin
  fgrip_options:= defaultgripoptions;
  fcontroller:= acontroller;
  inherited create(intf);
+ fobjectpicker:= tobjectpicker.create(iobjectpicker(self));
+end;
+
+destructor tgripframe.destroy;
+begin
+ fobjectpicker.free;
+ inherited;
 end;
 
 procedure tgripframe.dopaintframe(const canvas: tcanvas; const rect: rectty);
@@ -2670,15 +2703,6 @@ begin
  end;
 end;
 
-procedure tgripframe.updatemousestate(const sender: twidget;
-  const apos: pointty);
-begin
- inherited;
- if pointinrect(apos,fgriprect) then begin
-  include(twidget1(sender).fwidgetstate,ws_wantmousebutton);
- end;
-end;
-
 procedure tgripframe.updaterects;
 
  procedure initrect(const index: dockbuttonrectty);
@@ -2802,6 +2826,125 @@ end;
 function tgripframe.griprect: rectty;
 begin
  result:= frects[dbr_handle];
+end;
+
+function tgripframe.getwidget: twidget;
+begin
+ result:= fcontroller.fintf.getwidget;
+end;
+
+procedure tgripframe.updatemousestate(const sender: twidget;
+               const apos: pointty);
+begin
+ inherited;
+ if pointinrect(apos,fgriprect) or (fcontroller.canmdisize) then begin
+  with twidget1(sender) do begin
+   fwidgetstate:= fwidgetstate + [ws_wantmousemove,ws_wantmousebutton];
+  end;
+ end;  
+end;
+ 
+procedure tgripframe.getpickobjects(const rect: rectty;
+               const shiftstate: shiftstatesty; var objects: integerarty);
+var
+ kind1: sizingkindty;
+begin
+ if (fcontroller.mdistate <> mds_minimized) and
+      (not pointinrect(rect.pos,fgriprect) or 
+         pointinrect(rect.pos,frects[dbr_handle])) then begin
+  kind1:= calcsizingkind(rect.pos,makerect(nullpoint,fintf.getwidget.size));
+  if kind1 <> sk_none then begin
+   setlength(objects,1);
+   objects[0]:= ord(kind1);
+  end
+  else begin
+   objects:= nil;
+  end;
+ end
+ else begin
+  objects:= nil;
+ end;
+end;
+
+function tgripframe.getcursorshape(const pos: pointty;
+           const shiftstate: shiftstatesty; var shape: cursorshapety): boolean;
+var
+ ar1: integerarty;
+begin
+ getpickobjects(makerect(pos,nullsize),shiftstate,ar1);
+ result:= ar1 <> nil;
+ if result then begin
+  shape:= sizingcursors[sizingkindty(ar1[0])];
+ end
+end;
+
+procedure tgripframe.beginpickmove(const objects: integerarty);
+begin
+end;
+
+function tgripframe.calcsizingrect(const akind: sizingkindty;
+                                const offset: pointty): rectty;
+var
+ cxmin,cymin: integer;
+ int1: integer;
+begin
+ with fintf.getwidget do begin
+  cxmin:= bounds_cxmin;
+  cymin:= bounds_cymin;
+  if fgrip_pos in [cp_right,cp_left] then begin
+   int1:= fpaintframe.left + fpaintframe.right;
+   if cxmin < int1 then begin
+    cxmin:= int1;
+   end;
+   int1:= fpaintframe.top + fpaintframe.bottom +
+              fgriprect.cy - frects[dbr_handle].cy;
+   if cymin < int1 then begin
+    cymin:= int1;
+   end;
+  end
+  else begin
+   int1:= fpaintframe.top + fpaintframe.bottom;
+   if cymin < int1 then begin
+    cymin:= int1;
+   end;
+   int1:= fpaintframe.left + fpaintframe.right +
+              fgriprect.cx - frects[dbr_handle].cx;
+   if cxmin < int1 then begin
+    cxmin:= int1;
+   end;
+  end;  
+  result:= adjustsizingrect(widgetrect,akind,offset,
+                   cxmin,bounds_cxmax,cymin,bounds_cymax);
+  if parentwidget <> nil then begin
+   intersectrect(result,parentwidget.clientwidgetrect,result);
+  end;
+ end;
+end;
+ 
+procedure tgripframe.endpickmove(const pos: pointty; const offset: pointty;
+               const objects: integerarty);
+begin
+ fintf.getwidget.widgetrect:= calcsizingrect(sizingkindty(objects[0]),offset);
+end;
+
+procedure tgripframe.paintxorpic(const canvas: tcanvas; const pos: pointty;
+               const offset: pointty; const objects: integerarty);
+var
+ rect1: rectty;
+begin
+ rect1:= calcsizingrect(sizingkindty(objects[0]),offset);
+ with fintf.getwidget do begin
+  subpoint1(rect1.pos,paintparentpos);
+  canvas.save;
+  canvas.addcliprect(paintrectparent);
+  canvas.drawxorframe(rect1,-3,stockobjects.bitmaps[stb_dens50]);
+  canvas.restore;
+ end;
+end;
+
+procedure tgripframe.mouseevent(var info: mouseeventinfoty);
+begin
+ fobjectpicker.mouseevent(info);
 end;
 
 { tdockhandle }

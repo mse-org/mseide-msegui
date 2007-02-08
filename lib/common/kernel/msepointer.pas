@@ -17,6 +17,7 @@ uses
 
 const
  defaultcaretblinkperiodetime = 1000000; //us
+ defaultsizingmargin = 3;
 type
 
  cursorshapety = (cr_default,
@@ -28,6 +29,13 @@ type
              cr_res0,cr_res1,cr_res2,cr_res3,cr_res4,cr_res5,cr_res6,cr_res7,
              cr_user);
 
+ sizingkindty = (sk_none,sk_right,sk_topright,sk_top,sk_topleft,
+                     sk_left,sk_bottomleft,sk_bottom,sk_bottomright);
+const
+ sizingcursors: array[sizingkindty] of cursorshapety = 
+   (cr_default,cr_sizehor,cr_toprightcorner,cr_sizever,cr_topleftcorner,
+    cr_sizehor,cr_bottomleftcorner,cr_sizever,cr_bottomrightcorner);
+type
  imouse = interface
   function getmousewinid: winidty;
  end;
@@ -117,9 +125,129 @@ type
    property periodetime: integer read getperiodetime write setperiodetime;
  end;
 
+function calcsizingkind(const apos: pointty; const arect: rectty;
+                const margin: integer = defaultsizingmargin): sizingkindty;
+function adjustsizingrect(const arect: rectty; const kind: sizingkindty;
+         const offset: pointty; const cxmin,cxmax,cymin,cymax: integer): rectty;
+
 implementation
 uses
  mseguiintf;
+
+function calcsizingkind(const apos: pointty; const arect: rectty;
+                const margin: integer = defaultsizingmargin): sizingkindty;
+var
+ margin2,distright,disttop,distleft,distbottom: integer;
+begin
+ result:= sk_none;
+ distright:= abs(apos.x - (arect.x+arect.cx));
+ disttop:= abs(apos.y - (arect.y));
+ distleft:= abs(apos.x - (arect.x));
+ distbottom:= abs(apos.y - (arect.y+arect.cy));
+ margin2:= 2 * margin;
+ if disttop < margin then begin
+  if distleft < margin2 then begin
+   result:= sk_topleft;
+  end
+  else begin
+   if distright < margin2 then begin
+    result:= sk_topright;
+   end
+   else begin
+    result:= sk_top;
+   end;
+  end;
+ end
+ else begin
+  if distbottom < margin then begin
+   if distleft < margin2 then begin
+    result:= sk_bottomleft;
+   end
+   else begin
+    if distright < margin2 then begin
+     result:= sk_bottomright;
+    end
+    else begin
+     result:= sk_bottom;
+    end;
+   end;
+  end
+  else begin
+   if distleft < margin then begin
+    result:= sk_left;
+   end
+   else  begin
+    if distright < margin then begin
+     result:= sk_right;
+    end;
+   end;
+  end;
+ end;
+end;
+
+function adjustsizingrect(const arect: rectty; const kind: sizingkindty;
+         const offset: pointty; const cxmin,cxmax,cymin,cymax: integer): rectty;
+ procedure adjustright;
+ begin
+  result.cx:= result.cx + offset.x;
+  if (cxmax > 0) and (result.cx > cxmax) then begin
+   result.cx:= cxmax;
+  end;
+  if result.cx < cxmin then begin
+   result.cx:= cxmin;
+  end;
+ end;
+ procedure adjusttop;
+ var
+  int1: integer;
+ begin
+  int1:= offset.y;
+  if (cymax <> 0) and (result.cy - int1 > cymax) then begin
+   int1:= result.cy - cymax;
+  end;
+  if result.cy - int1 < cymin then begin
+   int1:= result.cy - cymin;
+  end;
+  result.y:= result.y + int1;
+  result.cy:= result.cy - int1;
+ end;
+ procedure adjustleft;
+ var
+  int1: integer;
+ begin
+  int1:= offset.x;
+  if (cxmax <> 0) and (result.cx - int1 > cxmax) then begin
+   int1:= result.cx - cxmax;
+  end;
+  if result.cx - int1 < cxmin then begin
+   int1:= result.cx - cxmin;
+  end;
+  result.x:= result.x + int1;
+  result.cx:= result.cx - int1;
+ end;
+ procedure adjustbottom;
+ begin
+  result.cy:= result.cy + offset.y;
+  if (cymax > 0) and (result.cy > cymax) then begin
+   result.cy:= cymax;
+  end;
+  if result.cy < cymin then begin
+   result.cy:= cymin;
+  end;
+ end;
+begin
+ result:= arect;
+ case kind of
+  sk_right: adjustright;
+  sk_topright: begin adjusttop; adjustright end;
+  sk_top: adjusttop;
+  sk_topleft: begin adjusttop; adjustleft end;
+  sk_left: adjustleft;
+  sk_bottomleft: begin adjustbottom; adjustleft end;
+  sk_bottom: adjustbottom;
+  sk_bottomright: begin adjustbottom; adjustright end;  
+ end;
+end;
 
 { tmouse }
 

@@ -116,6 +116,8 @@ function testintersectrect(const a,b: rectty): boolean;
      //true on intersection
 function clipinrect(const point: pointty; const boundsrect: rectty): pointty; overload;
 function clipinrect(const rect: rectty; const boundsrect: rectty): rectty; overload;
+procedure clipinrect1(var point: pointty; const boundsrect: rectty); overload;
+procedure clipinrect1(var rect: rectty; const boundsrect: rectty); overload;
 
 function pointinrect(const point: pointty; const rect: rectty): boolean;
      //true if point is in rect
@@ -131,7 +133,7 @@ function rotatedirection(const olddest,newvalue,
 
 implementation
 uses
- SysUtils;
+ SysUtils,msegui;
 
 function rotatedirection(const olddest,newvalue,
                     oldvalue: graphicdirectionty): graphicdirectionty;
@@ -580,21 +582,52 @@ begin
           (itopleft.y >= otopleft.y) and (ibottomright.y <= obottomright.y);
 end;
 
+procedure clipinrect1(var point: pointty; const boundsrect: rectty);
+begin
+ with boundsrect do begin
+  if point.x < x then begin
+   point.x:= x;
+  end;
+  if point.x >= x + cx then begin
+   point.x:= x + cx - 1;
+  end;
+  if point.y < y then begin
+   point.y:= y;
+  end;
+  if point.y >= y + cy then begin
+   point.y:= y + cy - 1;
+  end;
+ end;
+end;
+
 function clipinrect(const point: pointty; const boundsrect: rectty): pointty;
 begin
  result:= point;
+ clipinrect1(result,boundsrect);
+end;
+
+procedure clipinrect1(var rect: rectty; const boundsrect: rectty);
+begin
  with boundsrect do begin
-  if result.x < x then begin
-   result.x:= x;
+  if rect.x < x then begin
+   rect.x:= x;
   end;
-  if result.x >= x + cx then begin
-   result.x:= x + cx - 1;
+  if rect.x + rect.cx > x + cx then begin
+   rect.x:= x + cx - rect.cx;
+   if rect.x < x then begin
+    rect.x:= x;
+    rect.cx:= cx;
+   end;
   end;
-  if result.y < y then begin
-   result.y:= y;
+  if rect.y < y then begin
+   rect.y:= y;
   end;
-  if result.y >= y + cy then begin
-   result.y:= y + cy - 1;
+  if rect.y + rect.cy > y + cy then begin
+   rect.y:= y + cy - rect.cy;
+   if rect.y < y then begin
+    rect.y:= y;
+    rect.cy:= cy;
+   end;
   end;
  end;
 end;
@@ -602,28 +635,7 @@ end;
 function clipinrect(const rect: rectty; const boundsrect: rectty): rectty;
 begin
  result:= rect;
- with boundsrect do begin
-  if result.x < x then begin
-   result.x:= x;
-  end;
-  if result.x + result.cx > x + cx then begin
-   result.x:= x + cx - result.cx;
-   if result.x < x then begin
-    result.x:= x;
-    result.cx:= cx;
-   end;
-  end;
-  if result.y < y then begin
-   result.y:= y;
-  end;
-  if result.y + result.cy > y + cy then begin
-   result.y:= y + cy - result.cy;
-   if result.y < y then begin
-    result.y:= y;
-    result.cy:= cy;
-   end;
-  end;
- end;
+ clipinrect1(result,boundsrect);
 end;
 
 end.

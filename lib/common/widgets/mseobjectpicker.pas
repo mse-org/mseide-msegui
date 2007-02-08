@@ -48,7 +48,7 @@ type
  objectpickerstatety = (ops_moving,ops_xorpicpainted,ops_cursorchanged);
  objectpickerstatesty = set of objectpickerstatety;
 
- tobjectpicker = class
+ tobjectpicker = class      //todo: area selecting, area deselecting
   private
    fintf: iobjectpicker;
    fobjects: integerarty;

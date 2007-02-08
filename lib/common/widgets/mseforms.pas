@@ -1402,8 +1402,14 @@ end;
 procedure tcustomdockform.childmouseevent(const sender: twidget;
                var info: mouseeventinfoty);
 begin
- fdragdock.childmouseevent(sender,info);
- inherited;
+ if (frame <> nil) and fdragdock.ismdi and 
+                       not (csdesigning in componentstate) then begin
+  frame.mouseevent(info);
+ end;
+ if not (es_processed in info.eventstate) then begin  
+  fdragdock.childmouseevent(sender,info);
+  inherited;
+ end;
 end;
 
 procedure tcustomdockform.doactivate;
