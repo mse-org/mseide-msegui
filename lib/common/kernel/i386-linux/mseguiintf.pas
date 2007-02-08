@@ -5054,7 +5054,9 @@ begin
  end;
 
  result:= gue_ok;
-//xsynchronize(appdisp,{$ifdef FPC}true{$else}1{$endif});
+ {$ifdef mse_flushgdi}
+ xsynchronize(appdisp,{$ifdef FPC}true{$else}1{$endif});
+ {$endif}
  errorhandlerbefore:= xseterrorhandler({$ifdef FPC}@{$endif}errorhandler);
  exit;
 error:

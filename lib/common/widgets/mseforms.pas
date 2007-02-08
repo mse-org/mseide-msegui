@@ -293,6 +293,7 @@ type
    procedure mouseevent(var info: mouseeventinfoty); override;
    procedure childmouseevent(const sender: twidget;
                           var info: mouseeventinfoty); override;
+   procedure poschanged override;
    procedure activechanged; override;
    procedure doactivate; override;
    function canfocus: boolean; override;
@@ -1439,6 +1440,12 @@ begin
  if fframe <> nil then begin
   invalidaterect(tgripframe(fframe).griprect,org_widget);
  end;
+ inherited;
+end;
+
+procedure tcustomdockform.poschanged;
+begin
+ fdragdock.poschanged;
  inherited;
 end;
 

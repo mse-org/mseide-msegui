@@ -8392,8 +8392,8 @@ begin
  fcanvas.unlink;
  fasynccanvas.unlink;
  if fwinid <> 0 then begin
-  gui_destroywindow(fwinid);
   app.windowdestroyed(fwinid);
+  gui_destroywindow(fwinid);
   fwinid:= 0;
  end;
  exclude(fstate,tws_windowvisible);
