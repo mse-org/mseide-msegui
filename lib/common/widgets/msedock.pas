@@ -1831,9 +1831,10 @@ begin
     parentwidget:= widget1;
    end;
    bo1:= reader.readboolean('visible',bo1);
-   if (parentwidget <> nil) and 
-           not parentwidget.getcorbainterface(typeinfo(idocktarget),intf1)then begin
-    rect1:= clipinrect(rect1,parentwidget.paintrect);
+   if (parentwidget <> nil) then begin
+    if not parentwidget.getcorbainterface(typeinfo(idocktarget),intf1)then begin
+     rect1:= clipinrect(rect1,parentwidget.paintrect);
+    end;
    end
    else begin
     str1:= '~';
