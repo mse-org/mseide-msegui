@@ -959,6 +959,9 @@ type
    procedure invalidatewidget;     //invalidates whole widget
    procedure invalidate;           //invalidates clientrect
    procedure invalidaterect(const rect: rectty; org: originty = org_client);
+   function hasoverlappingsiblings(arect: rectty): boolean; //origin = pos
+//   procedure invalidatesiblings(arect: rectty); //origin = pos
+
 
    function window: twindow;
    function rootwidget: twidget;
@@ -5666,6 +5669,59 @@ begin
   fwindow.invalidaterect(rect1,self);
  end;
 end;
+{
+procedure twidget.invalidatesiblings(arect: rectty);
+var
+ rect1: rectty;
+ int1: integer;
+ bo1: boolean;
+ widget1: twidget;
+begin
+ if fparentwidget <> nil then begin
+  if not (ws_opaque in fwidgetstate) then begin
+   invalidaterect(arect,org_widget);
+  end
+  else begin
+   updateroot;
+   addpoint1(arect.pos,fwidgetrect.pos);
+   for int1:= high(fparentwidget.fwidgets) downto 0 do begin
+    widget1:= fparentwidget.fwidgets[int1];
+    if widget1 = self then begin
+     break;
+    end;
+    if intersectrect(widget1.fwidgetrect,arect,rect1) then begin
+     inc(rect1.x,fparentwidget.frootpos.x);
+     inc(rect1.y,fparentwidget.frootpos.y);
+     fwindow.invalidaterect(rect1,self);
+    end; 
+   end;
+   fparentwidget.invalidatesiblings(arect);
+  end;
+ end;
+end;
+}
+function twidget.hasoverlappingsiblings(arect: rectty): boolean;
+var
+ int1: integer;
+ widget1: twidget;
+begin
+ result:= false;
+ if fparentwidget <> nil then begin
+  updateroot;
+  addpoint1(arect.pos,fwidgetrect.pos);
+  for int1:= high(fparentwidget.fwidgets) downto 0 do begin
+   widget1:= fparentwidget.fwidgets[int1];
+   if widget1 = self then begin
+    break;
+   end;
+   if intersectrect(widget1.fwidgetrect,arect,arect) then begin
+    result:= true;
+    exit;
+   end; 
+  end;
+  result:= fparentwidget.hasoverlappingsiblings(arect);
+ end;
+end;
 
 procedure twidget.internalcreateface;
 begin
@@ -7322,7 +7378,7 @@ var
  begin
   fwindow.invalidaterect(intersectrect(rect1,rect2));
  end;
-
+ 
 begin
  if (dist.x = 0) and (dist.y = 0) or not showing then begin
   exit;
@@ -7332,7 +7388,8 @@ begin
   if ahascaret then begin
    tcaret1(app.fcaret).remove;
   end;
-  if (ow_noscroll in foptionswidget) or (tws_painting in fwindow.fstate) then begin
+  if (ow_noscroll in foptionswidget) or not (ws_opaque in fwidgetstate) or
+                                  (tws_painting in fwindow.fstate) then begin
    invalidaterect(rect);
   end
   else begin
@@ -7343,37 +7400,42 @@ begin
     inc(rect1.y,fframe.fpaintrect.y); //widget origin
    end;
    msegraphutils.intersectrect(rect1,clipedpaintrect,rect1);
-   rect2:= rect1; //backup for invalidate
-   addpoint1(rect2.pos,frootpos);
-   msegraphutils.intersectrect(rect1,removerect(rect1,dist),rect1);
-   addpoint1(rect1.pos,frootpos);
-   fwindow.movewindowrect(dist,rect1);
-   rect1.y:= rect2.y;
-   rect1.cy:= rect2.cy;
-   if dist.x < 0 then begin
-    rect1.cx:= -dist.x;
-    rect1.x:= rect2.x + rect2.cx - rect1.cx;
-    doinvalidate;
+   if hasoverlappingsiblings(rect1) then begin
+    invalidaterect(rect1,org_widget);
    end
    else begin
-    if dist.x > 0 then begin
-     rect1.x:= rect2.x;
-     rect1.cx:= dist.x;
+    rect2:= rect1; //backup for invalidate
+    addpoint1(rect2.pos,frootpos);
+    msegraphutils.intersectrect(rect1,removerect(rect1,dist),rect1);
+    addpoint1(rect1.pos,frootpos);
+    fwindow.movewindowrect(dist,rect1);
+    rect1.y:= rect2.y;
+    rect1.cy:= rect2.cy;
+    if dist.x < 0 then begin
+     rect1.cx:= -dist.x;
+     rect1.x:= rect2.x + rect2.cx - rect1.cx;
      doinvalidate;
+    end
+    else begin
+     if dist.x > 0 then begin
+      rect1.x:= rect2.x;
+      rect1.cx:= dist.x;
+      doinvalidate;
+     end;
     end;
-   end;
-   rect1.x:= rect2.x;
-   rect1.cx:= rect2.cx;
-   if dist.y < 0 then begin
-    rect1.cy:= -dist.y;
-    rect1.y:= rect2.y + rect2.cy - rect1.cy;
-    doinvalidate;
-   end
-   else begin
-    if dist.y > 0 then begin
-     rect1.y:= rect2.y;
-     rect1.cy:= dist.y;
+    rect1.x:= rect2.x;
+    rect1.cx:= rect2.cx;
+    if dist.y < 0 then begin
+     rect1.cy:= -dist.y;
+     rect1.y:= rect2.y + rect2.cy - rect1.cy;
      doinvalidate;
+    end
+    else begin
+     if dist.y > 0 then begin
+      rect1.y:= rect2.y;
+      rect1.cy:= dist.y;
+      doinvalidate;
+     end;
     end;
    end;
   end;
