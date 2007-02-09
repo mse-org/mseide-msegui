@@ -112,7 +112,7 @@ type
  end;
 
  dockstatety = (dos_layoutvalid,dos_updating1,dos_updating2,dos_updating3,
-                 dos_updating4,dos_updating5,dos_mdipossetting,
+                 dos_updating4,dos_updating5,dos_tabedending,
                     dos_closebuttonclicked,dos_maximizebuttonclicked,
                     dos_normalizebuttonclicked,dos_minimizebuttonclicked,
                     dos_fixsizebuttonclicked,
@@ -122,7 +122,10 @@ type
  splitdirty = (sd_none,sd_x,sd_y,sd_tabed);
  mdistatety = (mds_normal,mds_maximized,mds_minimized,mds_floating);
 
- docklayouteventty = procedure(const sender: twidget; const achildren: widgetarty) of object;
+ docklayouteventty = procedure(const sender: twidget; 
+                                        const achildren: widgetarty) of object;
+ mdistatechangedeventty = procedure(const sender: twidget;
+                             const oldvalue,newvalue: mdistatety) of object;
 
  tdockcontroller = class(tdragcontroller)
   private
@@ -154,7 +157,8 @@ type
    factivetab: integer; //used only for statreading
    fuseroptions: optionsdockty;
    floatdockcount: integer;
-   fobjectpicker: tobjectpicker;
+//   fobjectpicker: tobjectpicker;
+   fonmdistatechanged: mdistatechangedeventty;
    procedure setdockhandle(const avalue: tdockhandle);
    procedure layoutchanged;
    function checksplit(const awidgets: widgetarty;
@@ -172,6 +176,7 @@ type
    procedure updategrip(const asplitdir: splitdirty; const awidget: twidget);
    procedure setuseroptions(const avalue: optionsdockty);
    function placementrect: rectty;
+   procedure setmdistate(const avalue: mdistatety);
   protected
    foptionsdock: optionsdockty;
    function getparentcontroller(out acontroller: tdockcontroller): boolean;
@@ -181,6 +186,7 @@ type
    procedure dodock;
    procedure dochilddock(const awidget: twidget);
    procedure dochildfloat(const awidget: twidget);
+   procedure domdistatechanged(const oldstate,newstate: mdistatety);
    function docheckdock(const info: draginfoty): boolean;
    function canfloat: boolean;
    procedure refused(const apos: pointty);
@@ -203,9 +209,11 @@ type
    procedure childmouseevent(const sender: twidget; const info: mouseeventinfoty);
    procedure checkmouseactivate(const sender: twidget; 
                                       const info: mouseeventinfoty);
+   {
    procedure maximize;
    procedure normalize;
    procedure minimize;
+   }
    procedure dopaint(const acanvas: tcanvas); //canvasorigin = container.clientpos;
    procedure doactivate;
    procedure sizechanged(force: boolean = false; scalefixedalso: boolean = false);
@@ -213,7 +221,7 @@ type
    procedure widgetregionchanged(const sender: twidget);
    procedure beginclientrectchanged;
    procedure endclientrectchanged;
-   property mdistate: mdistatety read fmdistate;
+   property mdistate: mdistatety read fmdistate write setmdistate;
       //istatfile
    procedure dostatread(const reader: tstatreader);
    procedure dostatwrite(const writer: tstatwriter; const bounds: prectty = nil);
@@ -239,6 +247,8 @@ type
    property onchilddock: widgeteventty read fonchilddock write fonchilddock;
    property onchildfloat: widgeteventty read fonchildfloat write fonchildfloat;
    property oncheckdock: checkdockeventty read foncheckdock write foncheckdock;
+   property onmdistatechanged: mdistatechangedeventty read fonmdistatechanged 
+                              write fonmdistatechanged;
  end;
 
  idocktarget = interface(inullinterface)['{1A50A4E4-5B46-4C7C-A992-51EFEA1202B8}']
@@ -1235,8 +1245,10 @@ begin
     with tdocktabpage(items[int1]) do begin
      widget2:= ftarget;
      ftarget:= nil;
+     include(fdockstate,dos_tabedending);
      widget2.anchors:= fanchors;
      widget2.parentwidget:= container1;
+     exclude(fdockstate,dos_tabedending);
     end;
    end;
    freeandnil(ftabwidget);
@@ -1376,9 +1388,7 @@ begin
    else begin
     if widget1 <> nil then begin
      widget1.parentwidget:= container1;
-     include(fdockstate,dos_mdipossetting);
      widget1.widgetrect:= translatewidgetrect(xorrect,nil,container1);
-     exclude(fdockstate,dos_mdipossetting);
     end;
    end;
   end;
@@ -1704,6 +1714,16 @@ begin
  widget1:= twidget1(fintf.getwidget);
  if widget1.canevent(tmethod(fonchildfloat)) then begin
   fonchildfloat(widget1,awidget);
+ end;
+end;
+
+procedure tdockcontroller.domdistatechanged(const oldstate,newstate: mdistatety);
+var
+ widget1: twidget1;
+begin
+ widget1:= twidget1(fintf.getwidget);
+ if widget1.canevent(tmethod(fonmdistatechanged)) then begin
+  fonmdistatechanged(widget1,oldstate,newstate);
  end;
 end;
 
@@ -2250,9 +2270,9 @@ begin
          widget1.hide;
         end;
        end;
-       dbr_maximize: maximize;
-       dbr_normalize: normalize;
-       dbr_minimize: minimize;
+       dbr_maximize: mdistate:= mds_maximized;
+       dbr_normalize: mdistate:= mds_normal;
+       dbr_minimize: mdistate:= mds_minimized;
        dbr_fixsize: begin
         if (dos_fixsizebuttonclicked in fdockstate) then begin
          useroptions:= optionsdockty(
@@ -2377,15 +2397,14 @@ begin
  result:= (fintf.getwidget.parentwidget <> nil) and 
   (fmdistate <> mds_floating) and getparentcontroller(acontroller) and 
         (acontroller.fsplitdir = sd_none) and 
-         (not (dos_updating1 in acontroller.fdockstate) or 
-         (dos_mdipossetting in acontroller.fdockstate));
+                 not (dos_tabedending in acontroller.fdockstate);
 end;
 
 function tdockcontroller.canmdisize: boolean;
 begin
  result:= ismdi and (od_cansize in foptionsdock);
 end;
-
+{
 procedure tdockcontroller.maximize;
 begin
  if ismdi then begin
@@ -2443,6 +2462,67 @@ begin
    end; 
   end;
  end;
+end;
+}
+procedure tdockcontroller.setmdistate(const avalue: mdistatety);
+var
+ statebefore: mdistatety;
+ rect1: rectty;
+ pos1: captionposty;
+begin
+ if fmdistate <> avalue then begin
+  if ismdi then begin
+   statebefore:= fmdistate;
+   with twidget1(fintf.getwidget) do begin
+    if fmdistate = mds_normal then begin
+     fnormalrect:= widgetrect;
+    end;
+    case avalue of
+     mds_normal: begin
+      fmdistate:= mds_normal;
+      anchors:= [an_left,an_top];
+      widgetrect:= fnormalrect;
+     end;
+     mds_minimized: begin
+      if canclose(nil) then begin
+       fmdistate:= mds_minimized;
+       nextfocus;
+       with rect1 do begin
+        pos:= fnormalrect.pos;
+        size:= idockcontroller(fintf).getminimizedsize(pos1);
+        if cx = 0 then begin
+         cx:= fnormalrect.cx;
+        end;
+        if cy = 0 then begin
+         cy:= fnormalrect.cy;
+        end;
+        case pos1 of
+         cp_right: inc(x,fnormalrect.cx - cx);
+         cp_bottom: inc(y,fnormalrect.cy - cy);
+        end;
+       end;
+       anchors:= [an_left,an_top];
+       widgetrect:= rect1;
+      end
+      else begin
+       exit;
+      end;
+     end;
+     mds_maximized: begin
+      fmdistate:= mds_maximized;
+      anchors:= [];
+     end;
+    end;
+    if (fframe <> nil) then begin
+     tcustomframe1(fframe).updatestate;
+    end;        
+    domdistatechanged(statebefore,fmdistate);
+   end;
+  end
+  else begin
+   fmdistate:= avalue;
+  end;
+ end;  
 end;
 
 function tdockcontroller.placementrect: rectty;
@@ -2910,7 +2990,7 @@ procedure tgripframe.getpickobjects(const rect: rectty;
 var
  kind1: sizingkindty;
 begin
- if (fcontroller.mdistate <> mds_minimized) and
+ if (fcontroller.mdistate = mds_normal) and
       (not pointinrect(rect.pos,fgriprect) or 
          pointinrect(rect.pos,frects[dbr_handle])) then begin
   kind1:= calcsizingkind(rect.pos,makerect(nullpoint,fintf.getwidget.size));

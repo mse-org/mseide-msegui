@@ -1437,7 +1437,7 @@ end;
 procedure tcustomdockform.activate(const abringtofront: boolean = true);
 begin
  if fdragdock.mdistate = mds_minimized then begin
-  fdragdock.normalize;
+  fdragdock.mdistate:= mds_normal;
  end;
  if fdragdock.ismdi then begin
   bringtofront;
