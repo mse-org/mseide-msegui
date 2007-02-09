@@ -903,6 +903,7 @@ type
 
    function parentcolor: colorty;
    function actualcolor: colorty; virtual;
+   function backgroundcolor: colorty;
    function translatecolor(const acolor: colorty): colorty;
 
    procedure widgetevent(const event: twidgetevent); virtual;
@@ -4945,7 +4946,7 @@ begin
  result:= (ws_iswidget in fwidgetstate) and 
                              not (ws_nodesignframe in fwidgetstate) and
   ((fcolor = cl_transparent) or (fparentwidget <> nil) and 
-    (colortopixel(actualcolor) = colortopixel(fparentwidget.actualcolor))) and
+    (colortopixel(actualcolor) = colortopixel(fparentwidget.backgroundcolor))) and
  ((fframe = nil) or (fframe.fi.leveli = 0) and (fframe.fi.levelo = 0) and
        (fframe.fi.framewidth = 0));
 end;
@@ -7001,6 +7002,26 @@ begin
  end;
 end;
 
+function twidget.backgroundcolor: colorty;
+begin
+ if (fframe = nil) or (fframe.fi.colorclient = cl_transparent) then begin
+  if fparentwidget = nil then begin
+   result:= actualcolor;
+  end
+  else begin
+   if (fcolor <> cl_parent) and (fcolor <> cl_default) then begin
+    result:= fcolor;
+   end
+   else begin
+    result:= fparentwidget.backgroundcolor;
+   end;
+  end;
+ end
+ else begin
+  result:= fframe.fi.colorclient;
+ end;
+end;
+ 
 function twidget.translatecolor(const acolor: colorty): colorty;
 begin
  if acolor = cl_default then begin
