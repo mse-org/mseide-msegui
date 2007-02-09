@@ -201,6 +201,8 @@ type
    procedure enddrag; override;
    procedure clientmouseevent(var info: mouseeventinfoty); override;
    procedure childmouseevent(const sender: twidget; const info: mouseeventinfoty);
+   procedure checkmouseactivate(const sender: twidget; 
+                                      const info: mouseeventinfoty);
    procedure maximize;
    procedure normalize;
    procedure minimize;
@@ -2288,13 +2290,13 @@ begin
  end;
 end;
 
-procedure tdockcontroller.childmouseevent(const sender: twidget;
-               const info: mouseeventinfoty);
+procedure tdockcontroller.checkmouseactivate(const sender: twidget;
+                                                 const info: mouseeventinfoty);
 var
  widget1: twidget;
 begin
- if ismdi then begin
-  if (info.eventkind = ek_buttonpress) then begin
+ if (info.eventkind = ek_buttonpress) then begin
+  if ismdi then begin
    widget1:= fintf.getwidget;
    widget1.bringtofront;
    if ((sender = widget1) or (sender = widget1.container)) and 
@@ -2303,6 +2305,12 @@ begin
    end;
   end;
  end;
+end;
+
+procedure tdockcontroller.childmouseevent(const sender: twidget;
+               const info: mouseeventinfoty);
+begin
+ checkmouseactivate(sender,info);
 end;
 
 procedure tdockcontroller.widgetregionchanged(const sender: twidget);

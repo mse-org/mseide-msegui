@@ -379,6 +379,7 @@ type
    procedure widgetregionchanged(const sender: twidget); override;
    procedure dopaint(const acanvas: tcanvas); override;
    function getdockcontroller: tdockcontroller;
+   procedure mouseevent(var info: mouseeventinfoty); override;
   public
    constructor create(aowner: tcustomdockform); reintroduce;
  end;
@@ -530,6 +531,12 @@ end;
 function tdockformscrollbox.getdockcontroller: tdockcontroller;
 begin
  result:= tcustomdockform(owner).fdragdock;
+end;
+
+procedure tdockformscrollbox.mouseevent(var info: mouseeventinfoty);
+begin
+ inherited;
+ getdockcontroller.checkmouseactivate(self,info);
 end;
 
 { tcustommseform }
@@ -1397,6 +1404,9 @@ begin
  inherited;
  if not (es_processed in info.eventstate) then begin
   fdragdock.mouseevent(info);
+ end
+ else begin
+  fdragdock.checkmouseactivate(self,info);
  end;
 end;
 

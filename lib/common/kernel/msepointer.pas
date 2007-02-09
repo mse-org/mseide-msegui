@@ -174,11 +174,31 @@ begin
   end
   else begin
    if distleft < margin then begin
-    result:= sk_left;
+    if disttop < margin2 then begin
+     result:= sk_topleft;
+    end
+    else begin
+     if distbottom < margin2 then begin
+      result:= sk_bottomleft;
+     end
+     else begin
+      result:= sk_left;
+     end;
+    end
    end
    else  begin
     if distright < margin then begin
-     result:= sk_right;
+     if disttop < margin2 then begin
+      result:= sk_topright;
+     end
+     else begin
+      if distbottom < margin2 then begin
+       result:= sk_bottomright;
+      end
+      else begin
+       result:= sk_right;
+      end;
+     end;
     end;
    end;
   end;
