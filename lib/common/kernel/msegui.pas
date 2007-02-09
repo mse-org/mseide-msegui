@@ -982,6 +982,7 @@ type
               //returns first matching descendent
 
    property container: twidget read getcontainer;
+   function containeroffset: pointty;
    function childrencount: integer; virtual;
    property children[const index: integer]: twidget read getchildwidgets; default;
    function childatpos(const pos: pointty; 
@@ -3932,6 +3933,19 @@ end;
 function twidget.getcontainer: twidget;
 begin
  result:= self;
+end;
+
+function twidget.containeroffset: pointty;
+var
+ widget1: twidget;
+begin
+ widget1:= getcontainer;
+ if widget1 = self then begin
+  result:= nullpoint;
+ end
+ else begin
+  result:= widget1.fwidgetrect.pos;
+ end;
 end;
 
 function twidget.childrencount: integer;

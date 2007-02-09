@@ -1029,6 +1029,9 @@ var
 begin
  doaddcomponent(component);
  if (component is twidget) and (parent is twidget) then begin
+  with twidget(component) do begin
+   pos:= addpoint(pos,twidget(parent).containeroffset);
+  end;
   twidget(parent).insertwidget(twidget(component));
   if fclipinitcomps then begin
    rect1:= twidget(component).widgetrect;
