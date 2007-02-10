@@ -157,7 +157,6 @@ type
    factivetab: integer; //used only for statreading
    fuseroptions: optionsdockty;
    floatdockcount: integer;
-//   fobjectpicker: tobjectpicker;
    fonmdistatechanged: mdistatechangedeventty;
    procedure setdockhandle(const avalue: tdockhandle);
    procedure layoutchanged;
@@ -209,11 +208,6 @@ type
    procedure childmouseevent(const sender: twidget; const info: mouseeventinfoty);
    procedure checkmouseactivate(const sender: twidget; 
                                       const info: mouseeventinfoty);
-   {
-   procedure maximize;
-   procedure normalize;
-   procedure minimize;
-   }
    procedure dopaint(const acanvas: tcanvas); //canvasorigin = container.clientpos;
    procedure doactivate;
    procedure sizechanged(force: boolean = false; scalefixedalso: boolean = false);
@@ -3086,7 +3080,9 @@ end;
 
 procedure tgripframe.mouseevent(var info: mouseeventinfoty);
 begin
- fobjectpicker.mouseevent(info);
+ if not fcontroller.active then begin
+  fobjectpicker.mouseevent(info);
+ end;
 end;
 
 { tdockhandle }

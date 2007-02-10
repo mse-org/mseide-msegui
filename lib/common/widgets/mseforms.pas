@@ -1412,11 +1412,16 @@ end;
 
 procedure tcustomdockform.childmouseevent(const sender: twidget;
                var info: mouseeventinfoty);
+var
+ pt1: pointty;
 begin
  fdragdock.checkmouseactivate(self,info);
  if (frame <> nil) and fdragdock.ismdi and 
                        not (csdesigning in componentstate) then begin
+  pt1:= info.pos;
+  translatewidgetpoint1(info.pos,sender,self);
   frame.mouseevent(info);
+  info.pos:= pt1;
  end;
  if not (es_processed in info.eventstate) then begin  
   fdragdock.childmouseevent(sender,info);
