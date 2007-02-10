@@ -7838,7 +7838,8 @@ end;
 
 function twidget.hasparent: boolean;
 begin
- result:= fparentwidget <> nil;
+ result:= getparentcomponent <> nil;
+// result:= fparentwidget <> nil;
 end;
 
 procedure twidget.setparentcomponent(value: tcomponent);
