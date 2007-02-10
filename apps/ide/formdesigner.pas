@@ -185,6 +185,8 @@ type
    fshowgrid: boolean;
    fdelobjs: objinfoarty;
    fclipinitcomps: boolean;
+   finitcompsoffset: pointty;
+   fuseinitcompsoffset: boolean;
    fclickedcompbefore: tcomponent;
    procedure drawgrid(const canvas: tcanvas);
    procedure hidexorpic(const canvas: tcanvas);
@@ -200,7 +202,7 @@ type
    procedure setgridsizey(const avalue: integer);
    procedure doundelete;
    procedure dodelete;
-   procedure dopaste;
+   procedure dopaste(const usemousepos: boolean);
    procedure docopy(const noclear: boolean);
    procedure docut;
    procedure recalcclientsize;
@@ -1028,15 +1030,23 @@ var
  rect1: rectty;
  size1: sizety;
  int1: integer;
+ pt1: pointty;
 begin
  doaddcomponent(component);
  if (component is twidget) and (parent is twidget) then begin
   with twidget(component) do begin
-   pos:= addpoint(pos,twidget(parent).containeroffset);
+   if fuseinitcompsoffset then begin
+//    pt1:= subpoint(finitcompsoffset,twidget(parent).containeroffset);
+    pt1:= finitcompsoffset;
+   end
+   else begin 
+    pt1:= addpoint(pos,twidget(parent).containeroffset);
+   end;
   end;
-  twidget(parent).insertwidget(twidget(component));
+  twidget(parent).insertwidget(twidget(component),pt1);
   if fclipinitcomps then begin
    rect1:= twidget(component).widgetrect;
+   addpoint1(rect1.pos,finitcompsoffset);
    shiftinrect(rect1,makerect(nullpoint,twidget(component).parentwidget.size));
    twidget(component).widgetrect:= rect1;
   end;
@@ -1083,17 +1093,21 @@ begin
  dodelete;
 end;
 
-procedure tdesignwindow.dopaste;
+procedure tdesignwindow.dopaste(const usemousepos: boolean);
 var
  widget1: twidget;
 begin
  try
   if form <> nil then begin
-   fclipinitcomps:= true;
+   fclipinitcomps:= not usemousepos;
    with fselections do begin
     if count = 1 then begin
      widget1:= twidget(items[0]);
      if (widget1 is twidget) and form.checkdescendent(widget1) then begin
+      fuseinitcompsoffset:= usemousepos;
+      if usemousepos then begin
+       finitcompsoffset:= subpoint(fmousepos,widget1.rootpos);
+      end;
       clear;
       pastefromclipboard(module,widget1,{$ifdef FPC}@{$endif}doinitcomponent);
       updateselections;
@@ -1247,7 +1261,7 @@ begin
        end;
       end;
       key_v: begin
-       dopaste;
+       dopaste(false);
       end;
       else begin
        exclude(eventstate,es_processed);
@@ -2415,7 +2429,7 @@ end;
 
 procedure tformdesignerfo.pasteexe(const sender: TObject);
 begin
- tdesignwindow(twidget(tmenuitem(sender).owner.owner).window).dopaste;
+ tdesignwindow(twidget(tmenuitem(sender).owner.owner).window).dopaste(true);
 end;
 
 procedure tformdesignerfo.deleteexe(const sender: TObject);

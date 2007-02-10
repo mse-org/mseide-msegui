@@ -7829,13 +7829,11 @@ end;
 
 function twidget.getparentcomponent: tcomponent;
 begin
- if (fparentwidget <> nil) and (csdesigning in componentstate) and 
-         not(csdesigning in fparentwidget.componentstate) then begin
+ result:= parentofcontainer;
+ if (result <> nil) and (csdesigning in componentstate) and 
+         not(csdesigning in result.componentstate) then begin
   result:= nil; //parentwidget is designer
  end
- else begin
-  result:= fparentwidget;
- end;
 end;
 
 function twidget.hasparent: boolean;
