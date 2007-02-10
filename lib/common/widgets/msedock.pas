@@ -1142,8 +1142,10 @@ begin
   end
   else begin
    if ismdi then begin
-    if fmdistate = mds_normal then begin
-     fnormalrect:= widget2.widgetrect;
+    case fmdistate of
+     mds_normal: begin
+      fnormalrect:= widget2.widgetrect;
+     end;
     end;
    end;  
   end;
@@ -2533,9 +2535,35 @@ begin
 end;
 
 procedure tdockcontroller.poschanged;
+var
+ pos1: captionposty;
+ widget1: twidget;
 begin
- if ismdi and (fmdistate = mds_normal) then begin
-  fnormalrect:= fintf.getwidget.widgetrect;
+ if ismdi then begin 
+  widget1:= fintf.getwidget;
+  case fmdistate of
+   mds_normal: begin
+    fnormalrect:= widget1.widgetrect;
+   end;
+   mds_minimized: begin
+    idockcontroller(fintf).getminimizedsize(pos1);
+    with widget1 do begin
+     case pos1 of
+      cp_left,cp_top: begin
+       fnormalrect.pos:= pos;
+      end;
+      cp_right: begin
+       fnormalrect.y:= bounds_y;
+       fnormalrect.x:= bounds_x + bounds_cx - fnormalrect.cx;
+      end;
+      cp_bottom: begin
+       fnormalrect.x:= bounds_x;
+       fnormalrect.y:= bounds_y + bounds_cy - fnormalrect.cy;
+      end;
+     end;
+    end;
+   end;
+  end;
  end; 
 end;
 
