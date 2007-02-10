@@ -7320,6 +7320,20 @@ end;
 
 function twidget.getparentcomponent: tcomponent;
 begin
+ result:= parentofcontainer;
+ if (result <> nil) and (csdesigning in componentstate) and 
+         not(csdesigning in result.componentstate) then begin
+  result:= nil; //parentwidget is designer
+ end
+end;
+
+function twidget.hasparent: boolean;
+begin
+ result:= getparentcomponent <> nil;
+end;
+{
+function twidget.getparentcomponent: tcomponent;
+begin
  if (fparentwidget <> nil) and (csdesigning in componentstate) and 
          not(csdesigning in fparentwidget.componentstate) then begin
   result:= nil; //parentwidget is designer
@@ -7333,7 +7347,7 @@ function twidget.hasparent: boolean;
 begin
  result:= fparentwidget <> nil;
 end;
-
+}
 procedure twidget.setparentcomponent(value: tcomponent);
 begin
  if value is twidget then begin
