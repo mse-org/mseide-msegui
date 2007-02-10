@@ -230,6 +230,7 @@ var
  frame1: framety;
  framehalfwidth: integer;
  framewidth1: integer;
+ extrasp: integer;
  
 begin
  with layout,tmenuitem1(menu) do begin
@@ -238,13 +239,16 @@ begin
     framehalfwidth:= (abs(levelo) + abs(leveli) + framewidth);
     framewidth1:= framehalfwidth * 2;
     frame1:= fi.innerframe;
+    extrasp:= fi.extraspace;
    end;
   end
   else begin
    framehalfwidth:= 0;
    framewidth1:= 0;
    frame1:= nullframe;
+   extrasp:= 0;
   end; 
+  framewidth1:= framewidth1 + extrasp;
   setlength(cells,count);
   maxheight:= 0;
   ay:= framehalfwidth;
@@ -337,7 +341,7 @@ begin
      with cells[int1].buttoninfo do begin
       if not (ss_invisible in state) then begin
        dim.x:= dim.x + shift;
-       if dim.x + dim.cx + framewidth1 > amax then begin
+       if dim.x + dim.cx + framewidth1 - extrasp > amax then begin
         shift:= shift - dim.x + framehalfwidth;
         dim.x:= framehalfwidth;
         inc(regioncount);
@@ -348,7 +352,7 @@ begin
      end;
     end;
     size.cx:= ax;
-    size.cy:= regioncount * (maxheight + framewidth1);
+    size.cy:= regioncount * (maxheight + framewidth1) - extrasp;
    end
    else begin
     if mao_singleregion in layout.menu.options then begin
@@ -370,7 +374,7 @@ begin
      with cells[int1].buttoninfo.dim do begin
       y:= y + shift;
       int2:= y + cy  + framewidth1;
-      if int2 > amax then begin
+      if int2 - extrasp > amax then begin
        shift:= shift - y + framehalfwidth;
        y:= framehalfwidth;
        ax:= ax + textwidth + framewidth1;
@@ -385,8 +389,8 @@ begin
       cx:= textwidth;
      end;
     end;
-    size.cx:=  regioncount * (textwidth  + framewidth1);
-    size.cy:= maxheight - framehalfwidth;
+    size.cx:=  regioncount * (textwidth  + framewidth1) - extrasp;
+    size.cy:= maxheight - framehalfwidth - extrasp;
    end;
   end
   else begin
