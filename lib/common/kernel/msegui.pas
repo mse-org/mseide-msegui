@@ -8218,11 +8218,12 @@ procedure twidget.bringtofront;
 begin
  if fparentwidget <> nil then begin
   with fparentwidget do begin
-   removeitem(pointerarty(fwidgets),self);
-   additem(pointerarty(fwidgets),self);
-   sortzorder;
+   if fwidgets[high(fwidgets)] <> self then begin
+    removeitem(pointerarty(fwidgets),self);
+    additem(pointerarty(fwidgets),self);
+    sortzorder;
+   end;
   end;
-//  invalidate;
  end
  else begin
   window.bringtofront;
@@ -8233,9 +8234,11 @@ procedure twidget.sendtoback;
 begin
  if fparentwidget <> nil then begin
   with fparentwidget do begin
-   removeitem(pointerarty(fwidgets),self);
-   insertitem(pointerarty(fwidgets),0,pointer(self));
-   sortzorder;
+   if fwidgets[0] <> self then begin
+    removeitem(pointerarty(fwidgets),self);
+    insertitem(pointerarty(fwidgets),0,pointer(self));
+    sortzorder;
+   end;
   end;
 //  invalidate;
  end

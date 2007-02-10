@@ -59,14 +59,19 @@ type
    fcursorbefore: cursorshapety;
    procedure removexorpic;
    procedure paintxorpic;
+   procedure dokeypress(const sender: twidget; var info: keyeventinfoty);
+   procedure endmoving;
   public
    constructor create(const intf: iobjectpicker; aorigin: originty = org_client);
+   destructor destroy; override;
    procedure mouseevent(var info: mouseeventinfoty);
    procedure restorexorpic(const canvas: tcanvas);
    property objects: integerarty read fobjects;
  end;
 
 implementation
+uses
+ msekeyboard;
 type
  twidget1 = class(twidget);
 
@@ -77,6 +82,24 @@ constructor tobjectpicker.create(const intf: iobjectpicker;
 begin
  fintf:= intf;
  forigin:= aorigin;
+end;
+
+destructor tobjectpicker.destroy;
+begin
+ application.unregisteronkeypress({$ifdef FPC}@{$endif}dokeypress);
+ inherited;
+end;
+
+procedure tobjectpicker.endmoving;
+var
+ widget1: twidget;
+begin
+ application.unregisteronkeypress({$ifdef FPC}@{$endif}dokeypress);
+ removexorpic;
+ widget1:= twidget1(fintf.getwidget);
+ widget1.cursor:= fcursorbefore;
+ widget1.releasemouse;
+ exclude(fstate,ops_moving);
 end;
 
 procedure tobjectpicker.mouseevent(var info: mouseeventinfoty);
@@ -94,6 +117,7 @@ begin
     fpickpos:= info.pos;
     fpickoffset:= nullpoint;
     if length(fobjects) > 0 then begin
+     application.registeronkeypress({$ifdef FPC}@{$endif}dokeypress);
      include(fstate,ops_moving);
      widget1:= twidget1(fintf.getwidget);
      fcursorbefore:= widget1.cursor;
@@ -107,13 +131,8 @@ begin
   end;
   ek_buttonrelease: begin
    if (info.button = mb_left) and (ops_moving in fstate) then begin
-    removexorpic;
-    widget1:= twidget1(fintf.getwidget);
-    widget1.cursor:= fcursorbefore;
-//    widget1.updatecursorshape(true);
-    widget1.releasemouse;
+    endmoving;
     fintf.endpickmove(info.pos,fpickoffset,fobjects);
-    exclude(fstate,ops_moving);
     include(info.eventstate,es_processed);
    end;
   end;
@@ -148,9 +167,12 @@ end;
 procedure tobjectpicker.paintxorpic;
 var
  canvas1: tcanvas;
+ widget1: twidget;
 begin
  if not (ops_xorpicpainted in fstate) then begin
-  canvas1:= fintf.getwidget.getcanvas(forigin);
+  widget1:= fintf.getwidget;
+  widget1.update;
+  canvas1:= widget1.getcanvas(forigin);
   canvas1.rasterop:= rop_xor;
   fintf.paintxorpic(canvas1,addpoint(fpickoffset,fpickpos),fpickoffset,fobjects);
   include(fstate,ops_xorpicpainted);
@@ -183,6 +205,15 @@ begin
   fintf.paintxorpic(canvas,addpoint(fpickoffset,fpickpos),fpickoffset,fobjects);
   include(fstate,ops_xorpicpainted);
   canvas.restore(int1);
+ end;
+end;
+
+procedure tobjectpicker.dokeypress(const sender: twidget;
+               var info: keyeventinfoty);
+begin
+ if (ops_moving in fstate) and (info.key = key_escape) then begin
+  endmoving;
+  include(info.eventstate,es_processed);
  end;
 end;
 
