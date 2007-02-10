@@ -26,7 +26,8 @@ uses
   {$ifdef FPC}{$ifndef mse_withoutdb},msereport{$endif}{$endif};
 
 type
- areaty = (ar_none,ar_component,ar_selectrect,ht_topleft,ht_top,ht_topright,ht_right,
+ areaty = (ar_none,ar_component,ar_componentmove,ar_selectrect,ht_topleft,
+             ht_top,ht_topright,ht_right,
              ht_bottomright,ht_bottom,ht_bottomleft,ht_left);
  markerty = (mt_topleft,mt_topright,mt_bottomright,mt_bottomleft);
 
@@ -39,6 +40,7 @@ const
  componentsize = 24;
  complabelleftmargin = 2;
  complabelrightmargin = 2 + handlesize div 2;
+ movethreshold = 3;
 
 type
  formselectedinfoty = record
@@ -878,7 +880,7 @@ begin
      restore;
     end;
    end;
-   ar_component: begin
+   ar_componentmove: begin
     fselections.paintmoving(canvas,fxorpicoffset);
    end;
    ar_selectrect: begin
@@ -1560,7 +1562,7 @@ begin
        end;
        fowner.invalidate;
       end;
-      ar_component: begin
+      ar_componentmove: begin
        if fselections.move(griddelta) then begin
         fowner.invalidate; //redraw handles
         recalcclientsize;
@@ -1622,6 +1624,16 @@ begin
         updatesizerect;
        end;
        ar_component: begin
+//        fxorpicoffset:= griddelta;
+        if distance(fpickpos,pos) > movethreshold then begin
+         fxorpicoffset:= griddelta;
+         factarea:= ar_componentmove;
+        end
+        else begin
+         bo1:= false;
+        end;
+       end;
+       ar_componentmove: begin
         fxorpicoffset:= griddelta;
        end;
        ar_selectrect: begin
@@ -1634,7 +1646,9 @@ begin
       end;
       if bo1 then begin
        fxorpicactive:= true;
-       fselections.beforepaintmoving; //resets canvas
+       if factarea <> ar_component then begin
+        fselections.beforepaintmoving; //resets canvas
+       end;
        showxorpic(fowner.container.getcanvas(org_widget));
       end;
      end;
