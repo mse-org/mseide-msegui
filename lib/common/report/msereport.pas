@@ -918,8 +918,8 @@ type
    frepdesigninfo: repdesigninfoty;
    freppages: reportpagearty;
    procedure insertwidget(const awidget: twidget; const apos: pointty); override;
-   function internalrender(const acanvas: tcanvas; const aprinter: tprinter;
-                   const acommand: string; const astream: ttextstream): boolean;
+   procedure internalrender(const acanvas: tcanvas; const aprinter: tprinter;
+                   const acommand: string; const astream: ttextstream);
    procedure unregisterchildwidget(const child: twidget); override;
    procedure getchildren(proc: tgetchildproc; root: tcomponent); override;
    procedure internalcreatefont; override;
@@ -929,11 +929,11 @@ type
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
-   function render(const acanvas: tcanvas): boolean; overload;
+   procedure render(const acanvas: tcanvas); overload;
                     //true if empty
-   function render(const aprinter: tprinter; const command: string = ''): boolean;
+   procedure render(const aprinter: tprinter; const command: string = '');
                                        overload;  //true if empty
-   function render(const aprinter: tprinter; const astream: ttextstream): boolean;
+   procedure render(const aprinter: tprinter; const astream: ttextstream);
                                        overload;  //true if empty
    procedure waitfor;
    
@@ -4031,12 +4031,11 @@ begin
  end;
 end;
 
-function tcustomreport.internalrender(const acanvas: tcanvas;
+procedure tcustomreport.internalrender(const acanvas: tcanvas;
                const aprinter: tprinter; const acommand: string;
-               const astream: ttextstream): boolean;
+               const astream: ttextstream);
 begin
  fprintstarttime:= now;
- result:= true;
  fprinter:= aprinter;
  fcanvas:= acanvas;
  fpagenum:= 0;
@@ -4055,21 +4054,21 @@ begin
  fthread:= tmsethread.create({$ifdef FPC}@{$endif}exec);
 end;
 
-function tcustomreport.render(const acanvas: tcanvas): boolean;
+procedure tcustomreport.render(const acanvas: tcanvas);
 begin
- result:= internalrender(acanvas,nil,'',nil);
+ internalrender(acanvas,nil,'',nil);
 end;
 
-function tcustomreport.render(const aprinter: tprinter;
-               const command: string = ''): boolean;
+procedure tcustomreport.render(const aprinter: tprinter;
+               const command: string = '');
 begin
- result:= internalrender(aprinter.canvas,aprinter,command,nil);
+ internalrender(aprinter.canvas,aprinter,command,nil);
 end;
 
-function tcustomreport.render(const aprinter: tprinter;
-               const astream: ttextstream): boolean;
+procedure tcustomreport.render(const aprinter: tprinter;
+               const astream: ttextstream);
 begin
- result:= internalrender(aprinter.canvas,aprinter,'',astream);
+ internalrender(aprinter.canvas,aprinter,'',astream);
 end;
 
 procedure tcustomreport.getchildren(proc: tgetchildproc; root: tcomponent);
