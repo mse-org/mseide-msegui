@@ -35,6 +35,12 @@ type
    property leveli;
    property framewidth;
    property colorframe;
+   property colordkshadow;
+   property colorshadow;
+   property colorlight;
+   property colorhighlight;
+   property colordkwidth;
+   property colorhlwidth;
    property framei_left default 1;
    property framei_top default 1;
    property framei_right default 1;
@@ -58,6 +64,12 @@ type
    property leveli;
    property framewidth;
    property colorframe;
+   property colordkshadow;
+   property colorshadow;
+   property colorlight;
+   property colorhighlight;
+   property colordkwidth;
+   property colorhlwidth;
    property framei_left default 1;
    property framei_top default 1;
    property framei_right default 1;
@@ -83,6 +95,12 @@ type
    property leveli;
    property framewidth;
    property colorframe;
+   property colordkshadow;
+   property colorshadow;
+   property colorlight;
+   property colorhighlight;
+   property colordkwidth;
+   property colorhlwidth;
    property framei_left default 1;
    property framei_top default 1;
    property framei_right default 1;

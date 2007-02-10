@@ -126,7 +126,10 @@ const
 
 type
 
- framelocalpropty = (frl_levelo,frl_leveli,frl_framewidth,frl_colorframe,
+ framelocalpropty = (frl_levelo,frl_leveli,frl_framewidth,
+                     frl_colorframe,frl_colordkshadow,frl_colorshadow,
+                     frl_colorlight,frl_colorhighlight,
+                     frl_colordkwidth,frl_colorhlwidth,
                      frl_fileft,frl_fitop,frl_firight,frl_fibottom,frl_colorclient,
                      frl_nodisable);
  framelocalpropsty = set of framelocalpropty;
@@ -270,9 +273,11 @@ type
   levelo: integer;
   leveli: integer;
   framewidth: integer;
+  extraspace: integer;
   colorframe: colorty;
-  innerframe: framety;
+  framecolors:framecolorinfoty;
   colorclient: colorty;
+  innerframe: framety;
  end;
 
  tframecomp = class;
@@ -290,6 +295,20 @@ type
    function isframewidthstored: boolean;
    procedure setcolorframe(const Value: colorty);
    function iscolorframestored: boolean;
+   
+   procedure setcolordkshadow(const avalue: colorty);
+   function iscolordkshadowstored: boolean;
+   procedure setcolorshadow(const avalue: colorty);
+   function iscolorshadowstored: boolean;
+   procedure setcolorlight(const avalue: colorty);
+   function iscolorlightstored: boolean;
+   procedure setcolorhighlight(const avalue: colorty);
+   function iscolorhighlightstored: boolean;
+   procedure setcolordkwidth(const avalue: integer);
+   function iscolordkwidthstored: boolean;
+   procedure setcolorhlwidth(const avalue: integer);
+   function iscolorhlwidthstored: boolean;
+   
    procedure setframei_bottom(const Value: integer);
    function isfibottomstored: boolean;
    procedure setframei_left(const Value: integer);
@@ -360,6 +379,26 @@ type
                      stored isframewidthstored default 0;
    property colorframe: colorty read fi.colorframe write setcolorframe
                      stored iscolorframestored default cl_transparent;
+
+   property colordkshadow: colorty read fi.framecolors.shadow.effectcolor
+              write setcolordkshadow
+                     stored iscolordkshadowstored default cl_default;
+   property colorshadow: colorty read fi.framecolors.shadow.color
+              write setcolorshadow
+                     stored iscolorshadowstored default cl_default;
+   property colorlight: colorty read fi.framecolors.light.color
+              write setcolorlight
+                     stored iscolorlightstored default cl_default;
+   property colorhighlight: colorty read fi.framecolors.light.effectcolor
+              write setcolorhighlight
+                     stored iscolorhighlightstored default cl_default;
+   property colordkwidth: integer read fi.framecolors.shadow.effectwidth
+              write setcolordkwidth
+                     stored iscolordkwidthstored default -1;
+   property colorhlwidth: integer read fi.framecolors.light.effectwidth
+              write setcolorhlwidth
+                     stored iscolorhlwidthstored default -1;
+
    property framei_left: integer read fi.innerframe.left write setframei_left
                      stored isfileftstored default 0;
    property framei_top: integer read fi.innerframe.top  write setframei_top
@@ -386,6 +425,12 @@ type
    property framei_right;
    property framei_bottom;
    property colorclient;
+   property colordkshadow;
+   property colorshadow;
+   property colorlight;
+   property colorhighlight;
+   property colordkwidth;
+   property colorhlwidth;
    property localprops; //before template
    property template;
  end;
@@ -394,6 +439,13 @@ type
   private
    procedure setcolorclient(const Value: colorty);
    procedure setcolorframe(const Value: colorty);
+   procedure setcolordkshadow(const avalue: colorty);
+   procedure setcolorshadow(const avalue: colorty);
+   procedure setcolorlight(const avalue: colorty);
+   procedure setcolorhighlight(const avalue: colorty);
+   procedure setcolordkwidth(const avalue: integer);
+   procedure setcolorhlwidth(const avalue: integer);
+
    procedure setframei_bottom(const Value: integer);
    procedure setframei_left(const Value: integer);
    procedure setframei_right(const Value: integer);
@@ -414,13 +466,32 @@ type
   published
    property levelo: integer read fi.levelo write setlevelo default 0;
    property leveli: integer read fi.leveli write setleveli default 0;
-   property framewidth: integer read fi.framewidth write setframewidth default 0;
-   property colorframe: colorty read fi.colorframe write setcolorframe default cl_transparent;
-   property framei_left: integer read fi.innerframe.left write setframei_left default 0;
-   property framei_top: integer read fi.innerframe.top write setframei_top default 0;
-   property framei_right: integer read fi.innerframe.right write setframei_right default 0;
-   property framei_bottom: integer read fi.innerframe.bottom write setframei_bottom default 0;
-   property colorclient: colorty read fi.colorclient write setcolorclient default cl_transparent;
+   property framewidth: integer read fi.framewidth
+                        write setframewidth default 0;
+   property colorframe: colorty read fi.colorframe 
+                        write setcolorframe default cl_transparent;
+   property framei_left: integer read fi.innerframe.left 
+                       write setframei_left default 0;
+   property framei_top: integer read fi.innerframe.top 
+                        write setframei_top default 0;
+   property framei_right: integer read fi.innerframe.right 
+                      write setframei_right default 0;
+   property framei_bottom: integer read fi.innerframe.bottom 
+                     write setframei_bottom default 0;
+   property colorclient: colorty read fi.colorclient write setcolorclient 
+                                            default cl_transparent;
+   property colordkshadow: colorty read fi.framecolors.shadow.effectcolor
+                     write setcolordkshadow default cl_default;
+   property colorshadow: colorty read fi.framecolors.shadow.color
+                       write setcolorshadow default cl_default;
+   property colorlight: colorty read fi.framecolors.light.color
+                        write setcolorlight default cl_default;
+   property colorhighlight: colorty read fi.framecolors.light.effectcolor
+                    write setcolorhighlight default cl_default;
+   property colordkwidth: integer read fi.framecolors.shadow.effectwidth
+                      write setcolordkwidth default -1;
+   property colorhlwidth: integer read fi.framecolors.light.effectwidth
+                      write setcolorhlwidth default -1;
  end;
 
  tframecomp = class(ttemplatecontainer)
@@ -2574,15 +2645,29 @@ end;
 
 { tcustomframe }
 
+procedure initframeinfo(var fi: frameinfoty);
+begin
+ with fi do begin
+  colorclient:= cl_transparent;
+  colorframe:= cl_transparent;
+  with framecolors do begin
+   shadow.effectcolor:= cl_default;
+   shadow.color:= cl_default;
+   shadow.effectwidth:= -1;
+   light.color:= cl_default;
+   light.effectcolor:= cl_default;
+   light.effectwidth:= -1;
+  end; 
+ end;
+end;
+
 constructor tcustomframe.create(const intf: iframe);
 begin
  fintf:= intf;
  if not (fs_nosetinstance in fstate) then begin
   fintf.setframeinstance(self);
  end;
-// owner.fframe:= self;
- fi.colorclient:= cl_transparent;
- fi.colorframe:= cl_transparent;
+ initframeinfo(fi);
 end;
 
 destructor tcustomframe.destroy;
@@ -2624,7 +2709,7 @@ var
 begin
  rect1:= deflaterect(rect,fouterframe);
  if fi.levelo <> 0 then begin
-  draw3dframe(canvas,rect1,fi.levelo,defaultframecolors);
+  draw3dframe(canvas,rect1,fi.levelo,fi.framecolors);
   inflaterect1(rect1,-abs(fi.levelo));
  end;
  if fi.framewidth > 0 then begin
@@ -2632,7 +2717,7 @@ begin
   inflaterect1(rect1,-fi.framewidth);
  end;
  if fi.leveli <> 0 then begin
-  draw3dframe(canvas,rect1,fi.leveli,defaultframecolors);
+  draw3dframe(canvas,rect1,fi.leveli,fi.framecolors);
  end;
  if fi.colorclient <> cl_transparent then begin
   canvas.fillrect(deflaterect(rect,fpaintframe),fi.colorclient);
@@ -2837,6 +2922,60 @@ begin
  end;
 end;
 
+procedure tcustomframe.setcolordkshadow(const avalue: colorty);
+begin
+ if fi.framecolors.shadow.effectcolor <> avalue then begin
+  include(flocalprops,frl_colordkshadow);
+  fi.framecolors.shadow.effectcolor:= avalue;
+  fintf.invalidatewidget;
+ end;
+end;
+
+procedure tcustomframe.setcolorshadow(const avalue: colorty);
+begin
+ if fi.framecolors.shadow.color <> avalue then begin
+  include(flocalprops,frl_colorshadow);
+  fi.framecolors.shadow.color:= avalue;
+  fintf.invalidatewidget;
+ end;
+end;
+
+procedure tcustomframe.setcolorlight(const avalue: colorty);
+begin
+ if fi.framecolors.light.color <> avalue then begin
+  include(flocalprops,frl_colorlight);
+  fi.framecolors.light.color:= avalue;
+  fintf.invalidatewidget;
+ end;
+end;
+
+procedure tcustomframe.setcolorhighlight(const avalue: colorty);
+begin
+ if fi.framecolors.light.effectcolor <> avalue then begin
+  include(flocalprops,frl_colorhighlight);
+  fi.framecolors.light.effectcolor:= avalue;
+  fintf.invalidatewidget;
+ end;
+end;
+
+procedure tcustomframe.setcolordkwidth(const avalue: integer);
+begin
+ if fi.framecolors.shadow.effectwidth <> avalue then begin
+  include(flocalprops,frl_colordkwidth);
+  fi.framecolors.shadow.effectwidth:= avalue;
+  fintf.invalidatewidget;
+ end;
+end;
+
+procedure tcustomframe.setcolorhlwidth(const avalue: integer);
+begin
+ if fi.framecolors.light.effectwidth <> avalue then begin
+  include(flocalprops,frl_colorhlwidth);
+  fi.framecolors.light.effectwidth:= avalue;
+  fintf.invalidatewidget;
+ end;
+end;
+
 procedure tcustomframe.settemplate(const avalue: tframecomp);
 begin
  fintf.getwidget.setlinkedvar(avalue,tmsecomponent(ftemplate));
@@ -2864,6 +3003,26 @@ begin
   end;
   if not (frl_colorframe in flocalprops) then begin
    colorframe:= ainfo.colorframe;
+  end;
+  with framecolors do begin
+   if not (frl_colordkshadow in flocalprops) then begin
+    shadow.effectcolor:= ainfo.framecolors.shadow.effectcolor;
+   end;
+   if not (frl_colorshadow in flocalprops) then begin
+    shadow.color:= ainfo.framecolors.shadow.color;
+   end;
+   if not (frl_colorlight in flocalprops) then begin
+    light.color:= ainfo.framecolors.light.color;
+   end;
+   if not (frl_colorhighlight in flocalprops) then begin
+    light.effectcolor:= ainfo.framecolors.light.effectcolor;
+   end;
+   if not (frl_colordkwidth in flocalprops) then begin
+    shadow.effectwidth:= ainfo.framecolors.shadow.effectwidth;
+   end;
+   if not (frl_colorhlwidth in flocalprops) then begin
+    light.effectwidth:= ainfo.framecolors.light.effectwidth;
+   end;
   end;
   if not (frl_fileft in flocalprops) then begin
    innerframe.left:= ainfo.innerframe.left;
@@ -3012,6 +3171,36 @@ begin
  result:= (ftemplate = nil) or (frl_colorframe in flocalprops);
 end;
 
+function tcustomframe.iscolordkshadowstored: boolean;
+begin
+ result:= (ftemplate = nil) or (frl_colordkshadow in flocalprops);
+end;
+
+function tcustomframe.iscolorshadowstored: boolean;
+begin
+ result:= (ftemplate = nil) or (frl_colorshadow in flocalprops);
+end;
+
+function tcustomframe.iscolorlightstored: boolean;
+begin
+ result:= (ftemplate = nil) or (frl_colorlight in flocalprops);
+end;
+
+function tcustomframe.iscolorhighlightstored: boolean;
+begin
+ result:= (ftemplate = nil) or (frl_colorhighlight in flocalprops);
+end;
+
+function tcustomframe.iscolordkwidthstored: boolean;
+begin
+ result:= (ftemplate = nil) or (frl_colordkwidth in flocalprops);
+end;
+
+function tcustomframe.iscolorhlwidthstored: boolean;
+begin
+ result:= (ftemplate = nil) or (frl_colorhlwidth in flocalprops);
+end;
+
 function tcustomframe.isfibottomstored: boolean;
 begin
  result:= (ftemplate = nil) or (frl_fibottom in flocalprops);
@@ -3070,20 +3259,55 @@ end;
 constructor tframetemplate.create(const owner: tmsecomponent;
                       const onchange: notifyeventty);
 begin
- fi.colorclient:= cl_transparent;
- fi.colorframe:= cl_transparent;
+ initframeinfo(fi);
  inherited;
 end;
 
 procedure tframetemplate.setcolorclient(const Value: colorty);
 begin
- fi.colorclient := Value;
+ fi.colorclient:= Value;
  changed;
 end;
 
 procedure tframetemplate.setcolorframe(const Value: colorty);
 begin
- fi.colorframe := Value;
+ fi.colorframe:= Value;
+ changed;
+end;
+
+procedure tframetemplate.setcolordkshadow(const avalue: colorty);
+begin
+ fi.framecolors.shadow.effectcolor:= avalue;
+ changed;
+end;
+
+procedure tframetemplate.setcolorshadow(const avalue: colorty);
+begin
+ fi.framecolors.shadow.color:= avalue;
+ changed;
+end;
+
+procedure tframetemplate.setcolorlight(const avalue: colorty);
+begin
+ fi.framecolors.light.color:= avalue;
+ changed;
+end;
+
+procedure tframetemplate.setcolorhighlight(const avalue: colorty);
+begin
+ fi.framecolors.light.effectcolor:= avalue;
+ changed;
+end;
+
+procedure tframetemplate.setcolordkwidth(const avalue: integer);
+begin
+ fi.framecolors.shadow.effectwidth:= avalue;
+ changed;
+end;
+
+procedure tframetemplate.setcolorhlwidth(const avalue: integer);
+begin
+ fi.framecolors.light.effectwidth:= avalue;
  changed;
 end;
 
@@ -3159,7 +3383,7 @@ begin
  end;
  rect1:= inflaterect(arect,abs(fi.leveli));
  if fi.leveli <> 0 then begin
-  mseshapes.draw3dframe(acanvas,rect1,fi.leveli,defaultframecolors);
+  mseshapes.draw3dframe(acanvas,rect1,fi.leveli,fi.framecolors);
  end;
  if fi.framewidth > 0 then begin
   inflaterect1(rect1,fi.framewidth);
@@ -3167,7 +3391,7 @@ begin
  end;
  if fi.levelo <> 0 then begin
   inflaterect1(rect1,abs(fi.levelo));
-  mseshapes.draw3dframe(acanvas,rect1,fi.levelo,defaultframecolors);
+  mseshapes.draw3dframe(acanvas,rect1,fi.levelo,fi.framecolors);
  end;
 end;
 

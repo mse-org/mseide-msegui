@@ -309,6 +309,12 @@ type
    property leveli;
    property framewidth;
    property colorframe;
+   property colordkshadow;
+   property colorshadow;
+   property colorlight;
+   property colorhighlight;
+   property colordkwidth;
+   property colorhlwidth;
    property colorclient;
    property colorbutton;
    property framei_left;

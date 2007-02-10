@@ -90,7 +90,7 @@ type
  pshapeinfoarty = ^shapeinfoarty;
 
 procedure draw3dframe(const canvas: tcanvas; const arect: rectty; level: integer;
-                                 const colorinfo: framecolorinfoty);
+                                 colorinfo: framecolorinfoty);
 procedure drawfocusrect(const canvas: tcanvas; const arect: rectty);
 procedure drawtoolbutton(const canvas: tcanvas; const info: shapeinfoty);
 procedure drawbutton(const canvas: tcanvas; const info: shapeinfoty);
@@ -309,7 +309,7 @@ begin
 end;
 
 procedure draw3dframe(const canvas: tcanvas; const arect: rectty; level: integer;
-                                 const colorinfo: framecolorinfoty);
+                                 colorinfo: framecolorinfoty);
 
 type
  cornerinfoty = record
@@ -367,6 +367,26 @@ var
 begin
  if (level = 0) or (arect.cx = 0) or (arect.cy = 0) then begin
   exit;
+ end;
+ with colorinfo do begin
+  if shadow.effectcolor = cl_default then begin
+   shadow.effectcolor:= defaultframecolors.shadow.effectcolor;
+  end;
+  if shadow.color = cl_default then begin
+   shadow.color:= defaultframecolors.shadow.color;
+  end;
+  if light.color = cl_default then begin
+   light.color:= defaultframecolors.light.color;
+  end;
+  if light.effectcolor = cl_default then begin
+   light.effectcolor:= defaultframecolors.light.effectcolor;
+  end;
+  if shadow.effectwidth < 0 then begin
+   shadow.effectwidth:= defaultframecolors.shadow.effectwidth;
+  end;
+  if light.effectwidth < 0 then begin
+   light.effectwidth:= defaultframecolors.light.effectwidth;
+  end;
  end;
  if level < 0 then begin
   down:= true;
