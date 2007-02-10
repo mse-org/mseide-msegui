@@ -1563,6 +1563,7 @@ begin
          end;
         end;
         if fasplitdir = sd_none then begin
+         subpoint1(rect1.pos,widget.paintpos);
          setxorwidget(container1,clipinrect(rect1,
            makerect(translatewidgetpoint(container1.clientwidgetpos,
            container1,nil),container1.clientsize)));
