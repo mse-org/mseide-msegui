@@ -1111,6 +1111,7 @@ type
    property size: sizety read fwidgetrect.size write setsize;
    property minsize: sizety read fminsize write setminsize;
    property maxsize: sizety read fmaxsize write setmaxsize;
+   function maxclientsize: sizety; virtual;
    property bounds_x: integer read fwidgetrect.x write setbounds_x nodefault;
    property bounds_y: integer read fwidgetrect.y write setbounds_y nodefault;
    property bounds_cx: integer read fwidgetrect.cx write setbounds_cx
@@ -8631,6 +8632,11 @@ begin
  finally
   exclude(fwidgetstate1,ws1_fontheightlock);
  end;
+end;
+
+function twidget.maxclientsize: sizety;
+begin
+ result:= clientsize;
 end;
 
 { twindow }

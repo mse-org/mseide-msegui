@@ -614,6 +614,7 @@ type
                 //origin paintpos
  public
    constructor create(aowner: tcomponent); override;
+   function maxclientsize: sizety; override;
    procedure dochildscaled(const sender: twidget); override;
    property onscroll: pointeventty read fonscroll write fonscroll;
    property onfontheightdelta: fontheightdeltaeventty read fonfontheightdelta
@@ -3190,6 +3191,11 @@ begin
  frame.showrect(removerect(arect,clientpos),bottomright);
 // frame.showrect(removerect(arect,clientwidgetpos));
 // frame.showrect(arect);
+end;
+
+function tscrollingwidget.maxclientsize: sizety;
+begin
+ result:= makesize(bigint,bigint);
 end;
 
 { tscrollbarwidget }

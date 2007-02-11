@@ -1560,9 +1560,13 @@ begin
         end;
         if fasplitdir = sd_none then begin
          subpoint1(rect1.pos,widget.paintpos);
+         if widget1 <> container1 then begin
+          addpoint1(rect1.pos,widget1.paintpos);
+         end;
+//         addpoint1(rect1.pos,container1.clientpos);
          setxorwidget(container1,clipinrect(rect1,
            makerect(translatewidgetpoint(container1.clientwidgetpos,
-           container1,nil),container1.clientsize)));
+           container1,nil),container1.maxclientsize)));
         end
         else begin
          setxorwidget(container1,clipinrect(rect1,
@@ -3080,7 +3084,10 @@ begin
   result:= adjustsizingrect(widgetrect,akind,offset,
                    cxmin,bounds_cxmax,cymin,bounds_cymax);
   if parentwidget <> nil then begin
-   intersectrect(result,parentwidget.clientwidgetrect,result);
+//   intersectrect(result,parentwidget.clientwidgetrect,result);
+   with parentwidget do begin
+    intersectrect(result,makerect(clientwidgetpos,maxclientsize),result);   
+   end;
   end;
  end;
 end;
