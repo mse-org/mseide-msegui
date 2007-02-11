@@ -31,9 +31,9 @@ function do_it () {
 # $4 = defines
 # $5 = external imports
 
-  local inc_dirs; local defs; local imports;
+  local inc_dirs; local imports;
   local src_dir; local xml_dir; local html_dir;
-  local DescrFiles; local UnitListPp; local UnitListPas; local UnitList;
+  local DescrFiles;
   local CurInputFileList; local CurDescrFileList;
   local unit_file; local pas_file; local pp_file; local cur_dir_inc;
 
@@ -52,21 +52,11 @@ function do_it () {
 # create description file list
   DescrFiles=`find $xml_dir -name *.xml`
 
-# create unit file list
-  UnitListPp=`find  $src_dir -name *.pp`
-  UnitListPas=`find $src_dir -name *.pas`
-  UnitList=`echo -e $UnitListPp" "$UnitListPas | sort -ru`
-
   inc_dirs=
   for id in $3; do
     inc_dirs="${inc_dirs} -Fi${fpc_src_dir}/$1/${id}"
   done
   
-  defs=
-  for def in $4; do
-    defs="${defs} -d${def}"
-  done
-
   imports=
   for imp in $5; do
     imports="${imports} --import=${imp}"

@@ -77,7 +77,7 @@ for subdir in $msegui_dirs; do
   [ -d $cur_dir ] || continue
   
 # obtaining the list of directories with msegui source files
-  for f in `find $cur_dir/ -name *.pas`"\n"`find $cur_dir/ -name *.pp`; do
+  for f in `find $cur_dir/ -iregex '.*\.\(pas\|pp\)'`; do
     tmp=`dirname $f`   
     [ -d $tmp ] && echo -e $tmp; 
   done | sort -ru | sed '/\(regcomponents\|designutils\)/d' > ~/mseguidoc_xml.dirs;
@@ -88,8 +88,8 @@ for subdir in $msegui_dirs; do
   rm -f -- ~/mseguidoc_xml.dirs
 
 # obtaining the list of directories with msegui include files
-  for i in `find $cur_dir/ -name *.inc`; do
-    tmp=`dirname $i`   
+  for i in `find $cur_dir/ -iname *.inc`; do
+    tmp=`dirname $i` 
     [ -d $tmp ] && echo -e "-Fi$tmp"; 
   done | sort -u | sed '/\(regcomponents\|designutils\)/d' > ~/mseguidoc_xml.inc;
 # forming input arguments string for makeskel 
