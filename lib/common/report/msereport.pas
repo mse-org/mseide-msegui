@@ -13,7 +13,8 @@ interface
 uses
  classes,msegui,msegraphics,msetypes,msewidgets,msegraphutils,mseclasses,
  msetabs,mseprinter,msestream,msearrayprops,mseguiglob,msesimplewidgets,
- msedrawtext,msestrings,mserichstring,msedb,db,msethread;
+ msedrawtext,msestrings,mserichstring,msedb,db,msethread,mseobjectpicker,
+ msepointer,mseevent;
 
 const
  defaultrepppmm = 3;
@@ -21,6 +22,7 @@ const
  defaultreppageheight = 270;
  defaultrepfontheight = 14;
  defaultrepfontname = 'stf_report';
+ tabpickthreshold = 3;
  
  defaultreptabtextflags = [tf_ycentered];
  defaultbandanchors = [an_top];
@@ -421,7 +423,7 @@ const
                    ];
 
 type                     
- tcustomrecordband = class(tcustomscalingwidget,idbeditinfo,ireccontrol)
+ tcustomrecordband = class(tcustomscalingwidget,idbeditinfo,ireccontrol,iobjectpicker)
   private
    fparentintf: ibandparent;
    fonbeforerender: beforerenderrecordeventty;
@@ -437,6 +439,7 @@ type
    fgroupnum: integer;
    fnextgroupnum: integer;
    frecnobefore: integer;
+   fobjectpicker: tobjectpicker;
    procedure settabs(const avalue: treptabulators);
    procedure setoptions(const avalue: bandoptionsty);
    function getvisidatasource: tdatasource;
@@ -483,6 +486,18 @@ type
    function getvisibility: boolean;
    procedure updatevisibility; virtual;
    function lastbandheight: integer; virtual;
+   procedure clientmouseevent(var info: mouseeventinfoty); override;
+   procedure loaded; override;
+      //iobjectpicker
+   function getcursorshape(const apos: pointty; const ashiftstate: shiftstatesty; 
+                                     var ashape: cursorshapety): boolean;
+    //true if found
+   procedure getpickobjects(const arect: rectty;  const ashiftstate: shiftstatesty;
+                                     var aobjects: integerarty);
+   procedure beginpickmove(const aobjects: integerarty);
+   procedure endpickmove(const apos,aoffset: pointty; const aobjects: integerarty);
+   procedure paintxorpic(const acanvas: tcanvas; const apos,aoffset: pointty;
+                 const aobjects: integerarty);
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -2092,11 +2107,20 @@ end;
 
 destructor tcustomrecordband.destroy;
 begin
+ fobjectpicker.free;
  ftabs.free;
  fdatalink.free;
  fvisidatalink.free;
  fvisigrouplink.free;
  inherited;
+end;
+
+procedure tcustomrecordband.loaded;
+begin
+ inherited;
+ if csdesigning in componentstate then begin
+  fobjectpicker:= tobjectpicker.create(iobjectpicker(self));
+ end;
 end;
 
 procedure tcustomrecordband.setparentwidget(const avalue: twidget);
@@ -2714,6 +2738,61 @@ procedure tcustomrecordband.recchanged;
 begin
  fdatalink.recordchanged(nil);
  ftabs.recchanged;
+end;
+
+function tcustomrecordband.getcursorshape(const apos: pointty;
+               const ashiftstate: shiftstatesty;
+               var ashape: cursorshapety): boolean;
+var
+ ar1: integerarty;
+begin
+ getpickobjects(makerect(apos,nullsize),ashiftstate,ar1);
+ result:= ar1 <> nil;
+ if result then begin
+  ashape:= cr_sizehor;
+ end;
+end;
+
+procedure tcustomrecordband.getpickobjects(const arect: rectty;
+               const ashiftstate: shiftstatesty; var aobjects: integerarty);
+var
+ int1,int2: integer;
+begin
+ for int1:= 0 to ftabs.count - 1 do begin
+  int2:= abs(arect.x - ftabs.linepos[int1]);
+  if int2 < tabpickthreshold then begin
+   setlength(aobjects,1);
+   aobjects[0]:= int1;
+   break;
+  end;
+ end;
+end;
+
+procedure tcustomrecordband.beginpickmove(const aobjects: integerarty);
+begin
+end;
+
+procedure tcustomrecordband.endpickmove(const apos: pointty;
+               const aoffset: pointty; const aobjects: integerarty);
+begin
+ ftabs.linepos[aobjects[0]]:= ftabs.linepos[aobjects[0]] + aoffset.x;
+ designchanged;
+end;
+
+procedure tcustomrecordband.paintxorpic(const acanvas: tcanvas;
+               const apos: pointty; const aoffset: pointty;
+               const aobjects: integerarty);
+begin
+ acanvas.fillxorrect(makerect(aoffset.x+ftabs.pos[aobjects[0]],0,
+                               1,clientheight));
+end;
+
+procedure tcustomrecordband.clientmouseevent(var info: mouseeventinfoty);
+begin
+ if fobjectpicker <> nil then begin
+  fobjectpicker.mouseevent(info);
+ end;
+ inherited;
 end;
 
 { tcustombandgroup }

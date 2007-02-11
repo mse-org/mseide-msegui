@@ -34,15 +34,15 @@ type
 
  iobjectpicker = interface(inullinterface)
   function getwidget: twidget;
-  function getcursorshape(const pos: pointty; const shiftstate: shiftstatesty; 
-                                    var shape: cursorshapety): boolean;
+  function getcursorshape(const apos: pointty; const ashiftstate: shiftstatesty; 
+                                    var ashape: cursorshapety): boolean;
    //true if found
-  procedure getpickobjects(const rect: rectty;  const shiftstate: shiftstatesty;
+  procedure getpickobjects(const arect: rectty;  const ashiftstate: shiftstatesty;
                                     var objects: integerarty);
-  procedure beginpickmove(const objects: integerarty);
-  procedure endpickmove(const pos,offset: pointty; const objects: integerarty);
-  procedure paintxorpic(const canvas: tcanvas; const pos,offset: pointty;
-                const objects: integerarty);
+  procedure beginpickmove(const aobjects: integerarty);
+  procedure endpickmove(const apos,aoffset: pointty; const aobjects: integerarty);
+  procedure paintxorpic(const acanvas: tcanvas; const apos,aoffset: pointty;
+                const aobjects: integerarty);
  end;
 
  objectpickerstatety = (ops_moving,ops_xorpicpainted,ops_cursorchanged);

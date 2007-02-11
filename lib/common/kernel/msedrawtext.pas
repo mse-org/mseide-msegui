@@ -75,6 +75,8 @@ type
    procedure setitems(const index: integer; const avalue: ttabulatoritem);
    procedure setdefaultdist(const avalue: real);
    function getpos(const index: integer): integer;
+   function getlinepos(const index: integer): integer;
+   procedure setlinepos(const index: integer; const avalue: integer);
   protected
    ftabs: tabulatorarty;
    procedure checkuptodate;
@@ -94,6 +96,7 @@ type
    property items[const index: integer]: ttabulatoritem read getitems 
                        write setitems; default;
    property pos[const index: integer]: integer read getpos;
+   property linepos[const index: integer]: integer read getlinepos write setlinepos;
  end;
 
  ttabulators = class(tcustomtabulators)
@@ -1288,6 +1291,39 @@ begin
   end;
   result:= round((int1 + index - high(ftabs)) * fdefaultdist);
  end;
+end;
+
+function tcustomtabulators.getlinepos(const index: integer): integer;
+var
+ int1: integer;
+begin
+ checkuptodate;
+ if index <= high(ftabs) then begin
+  result:= ftabs[index].linepos;
+ end
+ else begin
+  if length(ftabs) > 0 then begin
+   if fdefaultdist > 0 then begin
+    int1:= trunc(ftabs[high(ftabs)].linepos/fdefaultdist);
+   end
+   else begin
+    result:= ftabs[high(ftabs)].linepos;
+    exit;
+   end;
+  end
+  else begin
+   int1:= 0;
+  end;
+  result:= round((int1 + index - high(ftabs)) * fdefaultdist);
+ end;
+end;
+
+procedure tcustomtabulators.setlinepos(const index: integer;
+               const avalue: integer);
+begin
+ checkuptodate;
+ checkindex(index);
+ ttabulatoritem(fitems[ftabs[index].index]).pos:= avalue / ppmm;
 end;
 
 end.
