@@ -1585,6 +1585,12 @@ begin
         with tdockdragobject(dragobject^).fdock do begin
          if fmdistate = mds_floating then begin
           fmdistate:= mds_normal;
+         end
+         else begin
+          if fmdistate = mds_maximized then begin
+           fnormalrect:= widget1.widgetrect;
+           mdistate:= mds_normal;
+          end;
          end;
         end;
         calclayout(tdockdragobject(dragobject^),false);
@@ -3017,7 +3023,7 @@ procedure tgripframe.getpickobjects(const rect: rectty;
 var
  kind1: sizingkindty;
 begin
- if (fcontroller.mdistate = mds_normal) and
+ if (fcontroller.mdistate <> mds_minimized) and
       (not pointinrect(rect.pos,fgriprect) or 
          pointinrect(rect.pos,frects[dbr_handle])) then begin
   kind1:= calcsizingkind(rect.pos,makerect(nullpoint,fintf.getwidget.size));
@@ -3095,7 +3101,9 @@ end;
 procedure tgripframe.endpickmove(const pos: pointty; const offset: pointty;
                const objects: integerarty);
 begin
- fintf.getwidget.widgetrect:= calcsizingrect(sizingkindty(objects[0]),offset);
+ fcontroller.fnormalrect:= calcsizingrect(sizingkindty(objects[0]),offset);
+ fcontroller.mdistate:= mds_normal;
+ fintf.getwidget.widgetrect:= fcontroller.fnormalrect;
 end;
 
 procedure tgripframe.paintxorpic(const canvas: tcanvas; const pos: pointty;
