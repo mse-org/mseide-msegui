@@ -5543,11 +5543,12 @@ begin
   end
   else begin
    frootpos:= nullpoint;
-   if (fwindow = nil) and not (ws_destroying in fwidgetstate) then begin
+   if (fwindow = nil) and not (ws_destroying in fwidgetstate) and not 
+                        (csdestroying in componentstate) then begin
     createwindow;
     invalidatewidget;
     if (ws_visible in fwidgetstate) and
-            (componentstate * [csloading,csinline] = []) then begin
+            (componentstate * [csloading,csinline,csdestroying] = []) then begin
      fwindow.show(false);
     end;
    end;

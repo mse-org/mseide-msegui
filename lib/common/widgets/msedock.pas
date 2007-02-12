@@ -198,6 +198,7 @@ type
    procedure setoptionsdock(const avalue: optionsdockty); virtual;
    function isfullarea: boolean;
    function ismdi: boolean;
+   function isfloating: boolean;
    function canmdisize: boolean;
   public
    constructor create(aintf: idockcontroller);
@@ -253,7 +254,8 @@ type
  gripoptionty = (go_closebutton,go_minimizebutton,go_normalizebutton,
                  go_maximizebutton,
                  go_fixsizebutton,go_topbutton,go_backgroundbutton,
-                 go_horz,go_vert,go_opposite);
+                 go_horz,go_vert,go_opposite,go_showsplitcaption,
+                 go_showfloatcaption);
  gripoptionsty = set of gripoptionty;
 
 const
@@ -2407,6 +2409,11 @@ begin
                  not (dos_tabedending in acontroller.fdockstate);
 end;
 
+function tdockcontroller.isfloating: boolean;
+begin
+ result:= fintf.getwidget.parentwidget = nil;
+end;
+
 function tdockcontroller.canmdisize: boolean;
 begin
  result:= ismdi and (od_cansize in foptionsdock);
@@ -2620,6 +2627,7 @@ var
  rect1,rect2: rectty;
  col1: colorty;
  info1: drawtextinfoty;
+ floating: boolean;
 label
  endlab;
 begin
@@ -2708,7 +2716,11 @@ begin
    rect1:= frects[dbr_handle];
    if fgrip_pos in [cp_top,cp_bottom] then begin
     info1.text.text:= fcontroller.caption;
-    if (info1.text.text <> '') and fcontroller.ismdi then begin
+    floating:= fcontroller.isfloating;
+    if (info1.text.text <> '') and 
+      (not floating and (go_showsplitcaption in fgrip_options) or 
+      floating and (go_showfloatcaption in fgrip_options) or
+                                                 fcontroller.ismdi) then begin
      with info1 do begin
       text.format:= nil;
       dest:= rect1;
