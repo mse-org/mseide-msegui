@@ -7685,7 +7685,7 @@ begin
   if ahascaret then begin
    tcaret1(app.fcaret).remove;
   end;
-  if (ow_noscroll in foptionswidget) or not (ws_opaque in fwidgetstate) or
+  if (ow_noscroll in foptionswidget) {or not (ws_opaque in fwidgetstate)} or
                                   (tws_painting in fwindow.fstate) then begin
    invalidaterect(rect);
   end

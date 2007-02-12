@@ -3,13 +3,17 @@ object sourcepage: tsourcepage
   bounds_y = 245
   bounds_cx = 311
   bounds_cy = 228
-  color = -2147483645
+  color = -2147483647
+  taborder = 1
   visible = False
   container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_subfocus, ow_mousetransparent, ow_destroywidgets, ow_autoscale]
+  container.bounds_x = 0
+  container.bounds_y = 0
   container.bounds_cx = 311
   container.bounds_cy = 228
   container.frame.dummy = 0
   icon.transparentcolor = -2147483648
+  icon.transparency = -2147483648
   oncreate = sourcefooncreate
   onloaded = sourcefoonloaded
   ondestroy = sourcefoondestroy
@@ -18,6 +22,8 @@ object sourcepage: tsourcepage
   moduleclassname = 'tmseform'
   object grid: twidgetgrid
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_mousewheel, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+    bounds_x = 0
+    bounds_y = 0
     bounds_cx = 311
     bounds_cy = 206
     frame.dummy = 0
@@ -50,13 +56,13 @@ object sourcepage: tsourcepage
     onrowsinserted = gridonrowsinserted
     onrowsdeleted = gridonrowsdeleted
     oncellevent = gridoncellevent
-    reffontheight = 16
+    reffontheight = 14
     object dataicon: tdataicon
       bounds_x = 2
       bounds_y = 2
       bounds_cx = 15
       bounds_cy = 16
-      taborder = 1
+      taborder = 3
       visible = False
       optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_eatreturn, oe_resetselectonexit, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_savestate]
       valuedefault = -2147483648
@@ -82,12 +88,16 @@ object sourcepage: tsourcepage
     end
     object edit: tsyntaxedit
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontlineheight]
+      bounds_x = 0
+      bounds_y = 0
       bounds_cx = 2000
       bounds_cy = 16
+      taborder = 1
       visible = False
       font.name = 'mseide_source'
       font.dummy = 0
       optionsedit = [oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_linebreak, oe_eatreturn, oe_keyexecute, oe_savestate]
+      marginlinecolor = -2147483648
       tabulators.ppmm = 3
       onfontchanged = editonfontchanged
       onmodifiedchanged = editonmodifiedchanged
@@ -99,23 +109,26 @@ object sourcepage: tsourcepage
     end
   end
   object linedisp: tstringdisp
-    bounds_y = 207
+    bounds_x = 0
+    bounds_y = 209
     bounds_cx = 68
+    bounds_cy = 18
     frame.dummy = 0
     anchors = [an_left, an_bottom]
     taborder = 2
     textflags = [tf_xcentered, tf_ycentered]
-    reffontheight = 16
+    reffontheight = 14
   end
   object pathdisp: tstringdisp
     bounds_x = 68
-    bounds_y = 207
+    bounds_y = 209
     bounds_cx = 243
+    bounds_cy = 18
     frame.dummy = 0
     anchors = [an_left, an_right, an_bottom]
     taborder = 1
     textflags = [tf_ycentered, tf_ellipseleft]
     options = [dwo_hintclippedtext]
-    reffontheight = 16
+    reffontheight = 14
   end
 end
