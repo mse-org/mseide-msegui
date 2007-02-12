@@ -4200,7 +4200,8 @@ begin
    parentclientrectchanged;
   end
   else begin
-   if visible and not (ws_destroying in fwidgetstate) then begin
+   if visible and not (ws_destroying in fwidgetstate) and 
+             not (csdestroying in componentstate) then begin
     window.show(false);
    end;
   end;
@@ -5129,7 +5130,7 @@ begin
     createwindow;
     invalidatewidget;
     if (ws_visible in fwidgetstate) and
-            (componentstate * [csloading,csinline] = []) then begin
+            (componentstate * [csloading,csinline,csdestroying] = []) then begin
      fwindow.show(false);
     end;
    end;
