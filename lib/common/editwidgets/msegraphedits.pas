@@ -288,7 +288,7 @@ type
    fcancel: boolean;
    procedure setvalue(const avalue: realty);
    procedure setbar_face(const avalue: tbarface);
-   procedure updatebarrect(const avalue: real; const arect: rectty;
+   procedure updatebarrect(const avalue: realty; const arect: rectty;
                     out facedest,framebardest,facebardest: rectty);
    procedure updatebar;
    procedure setscale(const avalue: real);
@@ -2368,7 +2368,7 @@ begin
  fbar_face.assign(avalue);
 end;
 
-procedure tprogressbar.updatebarrect(const avalue: real; const arect: rectty;
+procedure tprogressbar.updatebarrect(const avalue: realty; const arect: rectty;
                               out facedest,framebardest,facebardest: rectty);
 var
  int1,int2,int3: integer;
@@ -2443,7 +2443,7 @@ var
  po1,po2,po3: prectty;
  rect1,rect2,rect3: rectty;
  str1: string;
- rea1: real;
+ rea1: realty;
 begin
  if @avalue = nil then begin
   po1:= @ffacerect;
@@ -2455,8 +2455,8 @@ begin
   po1:= @rect1;
   po2:= @rect2;
   po3:= @rect3;
-  rea1:= real(avalue);
-  updatebarrect(real(avalue),arect,rect1,rect2,rect3);  
+  rea1:= realty(avalue);
+  updatebarrect(realty(avalue),arect,rect1,rect2,rect3);  
  end;
  if not isemptyreal(rea1) then begin
   canvas.save;

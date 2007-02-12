@@ -2059,9 +2059,11 @@ var
 begin
  if avalue <> fdistleft then begin
   fdistleft:= avalue;
+  {
   if isemptyreal(fdistleft) then begin
    fdistleft:= 0;
   end;
+  }
   for int1:= 0 to high(fitems) do begin
    treptabulatoritem(fitems[int1]).distleft:= fdistleft;
   end;
@@ -2074,9 +2076,11 @@ var
 begin
  if avalue <> fdistright then begin
   fdistright:= avalue;
+  {
   if isemptyreal(fdistright) then begin
    fdistright:= 0;
   end;
+  }
   for int1:= 0 to high(fitems) do begin
    treptabulatoritem(fitems[int1]).distright:= fdistright;
   end;

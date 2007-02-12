@@ -1067,9 +1067,11 @@ procedure ttabulatoritem.setpos(const avalue: real);
 begin
  if fpos <> avalue then begin
   fpos:= avalue;
+  {
   if isemptyreal(fpos) then begin
    fpos:= 0;
   end;
+  }
   tcustomtabulators(fowner).changed(self);
  end;
 end;
@@ -1078,9 +1080,11 @@ procedure ttabulatoritem.setdistleft(const avalue: real);
 begin
  if fdistleft <> avalue then begin
   fdistleft:= avalue;
+{
   if isemptyreal(fdistleft) then begin
    fdistleft:= 0;
   end;
+  }
   tcustomtabulators(fowner).changed(self);
  end;
 end;
@@ -1089,9 +1093,11 @@ procedure ttabulatoritem.setdistright(const avalue: real);
 begin
  if fdistright <> avalue then begin
   fdistright:= avalue;
+  {
   if isemptyreal(fdistright) then begin
    fdistright:= 0;
   end;
+  }
   tcustomtabulators(fowner).changed(self);
  end;
 end;
@@ -1262,7 +1268,7 @@ end;
 procedure tcustomtabulators.setdefaultdist(const avalue: real);
 begin
  fdefaultdist:= avalue;
- if isemptyreal(fdefaultdist) or (fdefaultdist < 0) then begin
+ if {isemptyreal(fdefaultdist) or} (fdefaultdist < 0) then begin
   fdefaultdist:= 0;
  end;
  dochange(-1);

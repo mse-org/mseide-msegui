@@ -33,7 +33,7 @@ type
  winidararty = array of winidarty;
 
  preal = ^real;
- realty = double;
+ realty = type double;
  prealty = ^realty;
 
  datetimekindty = (dtk_date,dtk_time,dtk_datetime);
