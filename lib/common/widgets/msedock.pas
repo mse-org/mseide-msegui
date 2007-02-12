@@ -2243,7 +2243,6 @@ begin
     end;
    end;
    with frects[dbr_handle] do begin
-    int1:= x + cx div 2;
    end;
    with frects[dbr_fixsize] do begin
     if (cx > 0) and (go_fixsizebutton in fgrip_options) then begin
@@ -2253,6 +2252,7 @@ begin
    end;
    with frects[dbr_top] do begin
     if (cx > 0) and (go_topbutton in fgrip_options)  then begin
+     int1:= x + cx div 2;
      draw3dframe(canvas,frects[dbr_top],calclevel(od_top),defaultframecolors);
      drawlines([makepoint(int1-3,y+4),makepoint(int1,y+1),makepoint(int1,y+cy-1)],
               false,fgrip_colorbutton);
@@ -2261,7 +2261,9 @@ begin
    end;
    with frects[dbr_background] do begin
     if (cx > 0) and (go_backgroundbutton in fgrip_options) then begin
-     draw3dframe(canvas,frects[dbr_background],calclevel(od_background),defaultframecolors);
+     int1:= x + cx div 2;
+     draw3dframe(canvas,frects[dbr_background],calclevel(od_background),
+                    defaultframecolors);
      drawlines([makepoint(int1-3,y+cx-4),makepoint(int1,y+cy-1),makepoint(int1,y+1)],
               false,fgrip_colorbutton);
      drawline(makepoint(int1+3,y+cx-4),makepoint(int1,y+cy-1),fgrip_colorbutton);
