@@ -4608,7 +4608,8 @@ begin
    parentclientrectchanged;
   end
   else begin
-   if visible and not (ws_destroying in fwidgetstate) then begin
+   if visible and not (ws_destroying in fwidgetstate) and 
+             not (csdestroying in componentstate) then begin
     window.show(false);
    end;
   end;
@@ -5543,8 +5544,7 @@ begin
   end
   else begin
    frootpos:= nullpoint;
-   if (fwindow = nil) and not (ws_destroying in fwidgetstate) and not 
-                        (csdestroying in componentstate) then begin
+   if (fwindow = nil) and not (ws_destroying in fwidgetstate) then begin
     createwindow;
     invalidatewidget;
     if (ws_visible in fwidgetstate) and
