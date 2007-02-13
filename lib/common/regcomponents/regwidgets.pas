@@ -38,7 +38,7 @@ uses
  sysutils,classes,msesimplewidgets,msegrids,msemenus,mseimage,msedispwidgets,
  msetoolbar,msetabs,msedesignintf,regwidgets_bmp,
  msesplitter,msedock,mseforms,mseclasses,typinfo,msearrayprops,
- msegui,formdesigner;
+ msegui,formdesigner,msedial;
  
 type
  tpropertyeditor1 = class(tpropertyeditor);
@@ -87,9 +87,11 @@ type
 
 const
  mseformintf: designmoduleintfty = 
-  (createfunc: {$ifdef FPC}@{$endif}createmseform);
+  (createfunc: {$ifdef FPC}@{$endif}createmseform;
+     initnewcomponent: nil; getscale: nil);
  subformintf: designmoduleintfty = 
-  (createfunc: {$ifdef FPC}@{$endif}createsubform);
+  (createfunc: {$ifdef FPC}@{$endif}createsubform;
+     initnewcomponent: nil; getscale: nil);
 
 procedure Register;
 begin
@@ -100,7 +102,8 @@ begin
   tbytestringdisp,tbooleandisp,
   tgroupbox,tscrollbox,tstepbox,tdockpanel,tdockhandle,tmseformwidget,
   tdockformwidget,
-  tsplitter,tspacer,ttoolbar,{tdocktoolbar,}ttabbar,ttabwidget,ttabpage]);
+  tsplitter,tspacer,ttoolbar,{tdocktoolbar,}ttabbar,ttabwidget,ttabpage,
+  tdial]);
  registerpropertyeditor(typeinfo(tcellframe),nil,'',
                             toptionalclasspropertyeditor);
  registerpropertyeditor(typeinfo(tdatacols),nil,'',tdatacolseditor);

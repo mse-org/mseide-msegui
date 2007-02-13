@@ -109,7 +109,13 @@ procedure moverect1(var rect: rectty; const dist: pointty);
 function removerect(const rect: rectty; const dist: pointty): rectty;
 procedure removerect1(var rect: rectty; const dist: pointty);
 procedure shiftinrect(var rect: rectty; const outerrect: rectty);
-
+function changerectdirection(const arect: rectty;
+                const olddirction,newdirection: graphicdirectionty): rectty;
+function rotateframe(const aframe: framety; const olddirection,
+                  newdirection: graphicdirectionty): framety;
+procedure rotateframe1(var aframe: framety; const olddirection,
+                  newdirection: graphicdirectionty);
+                
 function intersectrect(const a,b: rectty; out dest: rectty): boolean; overload;
 function intersectrect(const a,b: rectty): rectty; overload;
 function testintersectrect(const a,b: rectty): boolean;
@@ -134,6 +140,45 @@ function rotatedirection(const olddest,newvalue,
 implementation
 uses
  SysUtils,msegui;
+
+function rotateframe(const aframe: framety; const olddirection,
+                  newdirection: graphicdirectionty): framety;
+begin
+ result:= aframe;
+ rotateframe1(result,olddirection,newdirection);
+end;
+
+procedure rotateframe1(var aframe: framety; const olddirection,
+                  newdirection: graphicdirectionty);
+var
+ int1: integer;
+ frame1: framety;
+begin
+ if olddirection <> newdirection then begin
+  frame1:= aframe;
+  int1:= (ord(newdirection) - ord(olddirection)) and $3;
+  case int1 of
+   1: begin
+    aframe.top:= frame1.right;
+    aframe.left:= frame1.top;
+    aframe.bottom:= frame1.left;
+    aframe.right:= frame1.bottom;
+   end;
+   2: begin
+    aframe.left:= frame1.right;
+    aframe.bottom:= frame1.top;
+    aframe.right:= frame1.left;
+    aframe.top:= frame1.bottom;
+   end;
+   3: begin
+    aframe.bottom:= frame1.right;
+    aframe.right:= frame1.top;
+    aframe.top:= frame1.left;
+    aframe.left:= frame1.bottom;
+   end;
+  end;
+ end;
+end;
 
 function rotatedirection(const olddest,newvalue,
                     oldvalue: graphicdirectionty): graphicdirectionty;
@@ -160,6 +205,20 @@ begin
   if y < outerrect.y then begin
    y:= outerrect.y;
   end;
+ end;
+end;
+
+function changerectdirection(const arect: rectty;
+                const olddirction,newdirection: graphicdirectionty): rectty;
+begin
+ result.pos:= arect.pos;
+ if (olddirction in [gd_left,gd_right]) xor 
+                (newdirection in [gd_left,gd_right]) then begin
+  result.cx:= arect.cy;
+  result.cy:= arect.cx;
+ end
+ else begin
+  result.size:= arect.size;
  end;
 end;
 
