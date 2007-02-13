@@ -254,7 +254,7 @@ type
  bufdatasetstatety = (bs_opening,bs_fetching,bs_applying,
                       bs_hasindex,bs_fetchall,bs_indexvalid,
                       bs_editing,bs_append,bs_internalcalc,bs_utf8,
-                      bs_hasfilter);
+                      bs_hasfilter,bs_visiblerecordcountvalid);
  bufdatasetstatesty = set of bufdatasetstatety;
    
  internalcalcfieldseventty = procedure(const sender: tmsebufdataset;
@@ -298,6 +298,7 @@ type
    findexlocal: tlocalindexes;
    factindex: integer;
    foninternalcalcfields: internalcalcfieldseventty;
+   fvisiblerecordcount: integer;
    procedure calcrecordsize;
    procedure alignfieldpos(var avalue: integer);
    function loadbuffer(var buffer: recheaderty): tgetresult;
@@ -379,6 +380,7 @@ type
    function bookmarktostring(const abookmark: bookmarkdataty): string;
    procedure checkrecno(const avalue: integer);
    procedure setonfilterrecord(const value: tfilterrecordevent); override;
+   procedure setfiltered(value: boolean); override;
 
    procedure loaded; override;                              
    procedure internalopen; override;
@@ -389,7 +391,7 @@ type
    procedure dataevent(event: tdataevent; info: ptrint); override;
    
    function  getfieldclass(fieldtype: tfieldtype): tfieldclass; override;
-   function getnextpacket : integer;
+   function getnextpacket(const all: boolean) : integer;
    function getrecordsize: word; override;
    procedure internalpost; override;
    procedure internaldelete; override;
@@ -437,6 +439,8 @@ type
    procedure beginfilteredit;
    procedure endfilteredit;
    procedure filterchanged;
+   function countvisiblerecords: integer;
+   procedure fetchall;
    procedure resetindex; //deactivates all indexes
    function createblobbuffer(const afield: tfield): tblobbuffer;
    procedure applyupdates(const maxerrors: integer = 0); virtual; overload;
@@ -973,8 +977,11 @@ end;
 
 procedure tmsebufdataset.internallast;
 begin
+{
  repeat
  until (getnextpacket < fpacketrecords) or (bs_fetchall in fbstate);
+}
+ getnextpacket(true);
  internalsetrecno(fbrecordcount)
 end;
 
@@ -1004,7 +1011,7 @@ begin
    end;
    gmnext: begin
     if frecno >= fbrecordcount - 1 then begin
-     if getnextpacket = 0 then begin
+     if getnextpacket(bs_fetchall in fbstate) = 0 then begin
       result:= greof;
      end
      else begin
@@ -1136,7 +1143,7 @@ begin
  end;
 end;
 
-function tmsebufdataset.getnextpacket : integer;
+function tmsebufdataset.getnextpacket(const all: boolean): integer;
 var
  state1: tdatasetstate;
  int1,int2: integer;
@@ -1148,7 +1155,7 @@ begin
   exit;
  end;
  int2:= fbrecordcount;
- while ((result < fpacketrecords) or (bs_fetchall in fbstate)) and 
+ while ((result < fpacketrecords) or all) and 
                              (loadbuffer(femptybuffer^.header) = grok) do begin
   appendrecord(femptybuffer);
   femptybuffer:= intallocrecord;
@@ -1992,8 +1999,8 @@ begin
  checkbrowsemode;
  if value > recordcount then begin
   repeat
-  until (getnextpacket < fpacketrecords) or (value <= recordcount) or
-                        (bs_fetchall in fbstate);
+  until (getnextpacket(bs_fetchall in fbstate) < fpacketrecords) or 
+                       (value <= recordcount) or (bs_fetchall in fbstate);
  end;
  if nocheck then begin
   if value > fbrecordcount then begin
@@ -2642,6 +2649,9 @@ end;
 
 procedure tmsebufdataset.dataevent(event: tdataevent; info: ptrint);
 begin
+ if event in [deupdaterecord,dedatasetchange] then begin
+  exclude(fbstate,bs_visiblerecordcountvalid);
+ end;
  if (event = deupdatestate) and (state = dsbrowse) then begin
   updatecursorpos; //update fcurrentbuf after open
  end;
@@ -2675,8 +2685,15 @@ begin
  filterchanged;
 end;
 
+procedure tmsebufdataset.setfiltered(value: boolean);
+begin
+ inherited;
+ filterchanged; 
+end;
+
 procedure tmsebufdataset.filterchanged;
 begin
+ exclude(fbstate,bs_visiblerecordcountvalid);
  if not (state in [dsinactive,dsfilter]) then begin
   checkbrowsemode;
   resync([]);
@@ -2749,6 +2766,46 @@ begin
  finally
   enablecontrols;
  end;
+end;
+
+procedure tmsebufdataset.fetchall;
+begin
+ getnextpacket(true);
+end;
+
+function tmsebufdataset.countvisiblerecords: integer;
+var
+ int1,int2: integer;
+ getresult: tgetresult;
+begin
+ checkbrowsemode;
+ if not (bs_visiblerecordcountvalid in fbstate) then begin
+  if not filtered then begin
+   fetchall;
+   fvisiblerecordcount:= fbrecordcount;
+  end
+  else begin
+   int1:= frecno;
+   disablecontrols;
+   getnextpacket(true);
+   try
+    fvisiblerecordcount:= 0;
+    internalsetrecno(0);
+    if (getrecord(activebuffer,gmcurrent,false) = grok) or 
+       (getrecord(activebuffer,gmnext,false) = grok) then begin
+     repeat
+      inc(fvisiblerecordcount);
+     until getrecord(activebuffer,gmnext,false) <> grok;
+    end;   
+   finally
+    internalsetrecno(int1);
+    getrecord(activebuffer,gmcurrent,false);
+    enablecontrols;
+   end;
+  end;
+  include(fbstate,bs_visiblerecordcountvalid);
+ end;    
+ result:= fvisiblerecordcount;
 end;
 
 { tlocalindexes }
