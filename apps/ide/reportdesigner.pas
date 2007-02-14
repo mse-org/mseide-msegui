@@ -329,6 +329,8 @@ begin
     exclude(fstate,rds_mouseinclient);
     xdisp.value:= emptyreal;
     ydisp.value:= emptyreal;
+    dialh.markers[0].value:= emptyreal;
+    dialv.markers[0].value:= emptyreal;
    end;
    ek_mouseenter: begin
     include(fstate,rds_mouseinclient);
@@ -344,7 +346,9 @@ begin
   if (eventkind in mouseposevents) and (rds_mouseinclient in fstate) then begin
    pt1:= translatewidgetpoint(pos,sender,reportcontainer);
    xdisp.value:= pt1.x/ppmm - dialh.offset;
+   dialh.markers[0].value:= xdisp.value;
    ydisp.value:= pt1.y/ppmm - dialv.offset;
+   dialv.markers[0].value:= ydisp.value;
   end;
  end;
 end;
@@ -366,6 +370,7 @@ procedure treportdesignerfo.reportcontainerscroll(const sender: twidget;
                const point: pointty);
 begin
  updatedials;
+ formcontainerscrolled; 
 end;
 
 procedure treportdesignerfo.repcomtainerchildscaled(const sender: TObject);

@@ -61,7 +61,6 @@ type
    finfovalid: boolean;
    fmovingchecked: boolean;
    fcandelete: boolean;
-   procedure updateinfos;
    procedure paint(const canvas: tcanvas);
    procedure beforepaintmoving;
    procedure paintmoving(const canvas: tcanvas; const pos: pointty);
@@ -71,6 +70,7 @@ type
    procedure deletecomponents;
    function getareainfo(const pos: pointty; out index: integer): areaty;
    function getcandelete: boolean;
+   procedure updateinfos;
   protected
    function getrecordsize: integer; override;
    procedure externalcomponentchanged(const acomponent: tobject);
@@ -118,6 +118,7 @@ type
    fmodulesetting: integer;
    procedure setmodule(const Value: tmsecomponent);
   protected
+   procedure formcontainerscrolled;
    procedure widgetregionchanged(const sender: twidget); override;
    procedure sizechanged; override;
    procedure doasyncevent(var atag: integer); override;
@@ -305,7 +306,7 @@ type
  tmseform1 = class(tmseform);
  tframe1 = class(tframe);
 
- designerfoeventty = (fde_none,fde_syncsize,fde_updatecaption);
+ designerfoeventty = (fde_none,fde_syncsize,fde_updatecaption,fde_scrolled);
 
  designmoduleinfoty = record
   classtype: tcomponentclass;
@@ -2126,8 +2127,16 @@ begin
     tdesignwindow(window).domodified;
    end;
   end;
+  fde_scrolled: begin
+   tdesignwindow(window).fselections.change;
+  end;
  end;
 end;  
+
+procedure tformdesignerfo.formcontainerscrolled;
+begin
+ asyncevent(ord(fde_scrolled));
+end;
 
 procedure tformdesignerfo.sizechanged;
 begin
