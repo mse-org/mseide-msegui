@@ -148,7 +148,7 @@ type
                                  aparent: tcomponent = nil);
   public
    constructor create(const aowner: tcomponent; const adesigner: tdesigner;
-                        const aintf: pdesignmoduleintfty); reintroduce; virtual;
+                      const aintf: pdesignmoduleintfty); reintroduce; virtual;
                         
    destructor destroy; override;
    function designnotification: idesignnotification;

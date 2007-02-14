@@ -1,15 +1,15 @@
 inherited reportdesignerfo: treportdesignerfo
   bounds_x = 4
   bounds_y = 100
-  bounds_cx = 593
-  bounds_cy = 428
+  bounds_cx = 673
+  bounds_cy = 459
   color = -2147483647
-  container.bounds_cx = 593
-  container.bounds_cy = 428
+  container.bounds_cx = 673
+  container.bounds_cy = 459
+  container.color = -1879048185
   container.frame.dummy = 0
   container.onchildscaled = repchildscaled
-  icon.transparentcolor = -2147483648
-  icon.transparency = -2147483648
+  container.onchildmouseevent = reportchildmouseevent
   icon.image = {
     0000000002000000180000001800000078010000000000000000000000000000
     0000000000000000000000000000000000000000804CF019F8FCF816804CF002
@@ -27,71 +27,192 @@ inherited reportdesignerfo: treportdesignerfo
     804CF00280808016804CF01900000009FEFF7F08FEFF7FBFFEFF7F08FEFF7FBF
     FEFF7F00FEFF7FBFFEFF7FB7FEFF7F00FEFF7FBFFEFF7F00FEFF7F03FEFF7F00
     FEFF7F00FEFF7FBFFEFF7F08FEFF7F00FEFF7F03FEFF7F40FEFF7F00FEFF7F00
-    FEFF7FB7FEFF7FBF00000008
-  }
+    FEFF7FB7FEFF7FBF00000008}
+  onresize = formresized
   onchildscaled = repchildscaled
   moduleclassname = 'Tformdesignerfo'
-  object tabbar: ttabbar[0]
-    bounds_x = 0
-    bounds_y = 0
-    bounds_cx = 593
-    bounds_cy = 18
+  object dialh: tdial [0]
+    bounds_x = 9
+    bounds_y = 17
+    bounds_cx = 662
+    bounds_cy = 9
+    color = -1879048185
+    frame.localprops = [frl_fileft]
     frame.dummy = 0
-    anchors = [an_top]
+    anchors = [an_left, an_top, an_right]
+    taborder = 4
+    range = 100.000000000000000000
+    tick0_interval = 10.000000000000000000
+    tick0_length = 10
+    tick1_interval = 5.000000000000000000
+    tick1_color = -1610612733
+    tick1_length = 8
+    tick2_interval = 1.000000000000000000
+    tick2_color = -1610612733
+  end
+  object tabbar: ttabbar [1]
+    optionswidget = [ow_mousewheel, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+    bounds_x = 96
+    bounds_y = 0
+    bounds_cx = 575
+    bounds_cy = 17
+    color = -1879048187
+    frame.dummy = 0
+    anchors = [an_left, an_top, an_right]
     onactivetabchange = tabcha
     ontabmoving = tabmo
     onclientmouseevent = tabmouse
     options = [tabo_dragsource, tabo_dragdest]
+    reffontheight = 13
+  end
+  object reportcontainer: tscrollbox [2]
+    bounds_x = 9
+    bounds_y = 26
+    bounds_cx = 664
+    bounds_cy = 433
+    frame.colorclient = -1610612730
+    frame.localprops = [frl_colorclient]
+    frame.dummy = 0
+    anchors = [an_left, an_top, an_right, an_bottom]
+    taborder = 1
+    optionsscale = []
+    onchildscaled = repcomtainerchildscaled
+    onscroll = reportcontainerscroll
+  end
+  object tspacer1: tspacer [3]
+    bounds_x = 144
+    bounds_y = 17
+    bounds_cx = 50
+    bounds_cy = 5
+    taborder = 2
+    optionsscale = []
+    linktop = tabbar
+    linkbottom = dialh
+    offset_bottom = -5
+  end
+  object dialv: tdial [4]
+    bounds_x = 0
+    bounds_y = 26
+    bounds_cx = 9
+    bounds_cy = 430
+    color = -1879048185
+    anchors = [an_left, an_top, an_bottom]
+    taborder = 3
+    direction = gd_up
+    range = 100.000000000000000000
+    tick0_interval = 10.000000000000000000
+    tick0_length = 10
+    tick1_interval = 5.000000000000000000
+    tick1_color = -1610612733
+    tick1_length = 8
+    tick2_interval = 1.000000000000000000
+    tick2_color = -1610612733
+  end
+  object tspacer2: tspacer [5]
+    bounds_x = 144
+    bounds_y = 26
+    bounds_cx = 50
+    bounds_cy = 5
+    taborder = 5
+    optionsscale = []
+    linktop = dialh
+    linkbottom = reportcontainer
+    offset_bottom = -5
+  end
+  object tspacer3: tspacer [6]
+    bounds_x = 9
+    bounds_y = 173
+    bounds_cx = 5
+    bounds_cy = 50
+    taborder = 6
+    optionsscale = []
+    linkleft = dialv
+    linkright = reportcontainer
+    offset_right = -5
+  end
+  object xdisp: trealdisp [7]
+    bounds_x = 48
+    bounds_y = 0
+    bounds_cx = 49
+    bounds_cy = 17
+    color = -1879048187
+    frame.dummy = 0
+    taborder = 7
+    textflags = [tf_ycentered]
+    format = '0.0'
+    reffontheight = 13
+  end
+  object ydisp: trealdisp [8]
+    bounds_x = 0
+    bounds_y = 0
+    bounds_cx = 49
+    bounds_cy = 17
+    color = -1879048187
+    frame.dummy = 0
+    taborder = 8
+    format = '0.0'
+    reffontheight = 13
+  end
+  object tspacer4: tspacer [9]
+    bounds_x = 16
+    bounds_y = 26
+    bounds_cx = 50
+    bounds_cy = 5
+    taborder = 9
+    optionsscale = []
+    linktop = dialh
+    linkbottom = dialv
+    offset_bottom = -5
   end
   inherited popupme: tpopupmenu
     menu.submenu.count = 22
-    menu.submenu.items = <    
+    menu.submenu.items = <
       item
-      end    
+      end
       item
-      end    
+      end
       item
-      end    
+      end
       item
-      end    
+      end
       item
-      end    
+      end
       item
-      end    
+      end
       item
-      end    
+      end
       item
-      end    
+      end
       item
-      end    
+      end
       item
-      end    
+      end
       item
-      end    
+      end
       item
-      end    
+      end
       item
-      end    
+      end
       item
-      end    
+      end
       item
-      end    
+      end
       item
-      end    
+      end
       item
-      end    
+      end
       item
-      end    
+      end
       item
-      end    
+      end
       item
         options = [mao_separator, mao_shortcutcaption]
-      end    
+      end
       item
         caption = 'Add report page'
         state = [as_localcaption, as_localonexecute]
         onexecute = addpage
-      end    
+      end
       item
         caption = 'Delete report page'
         name = 'delpage'

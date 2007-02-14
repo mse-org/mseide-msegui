@@ -249,6 +249,8 @@ type
    fonfontheightdelta: fontheightdeltaeventty;
    fonchildscaled: notifyeventty;
    fscaling: integer;
+   fonresize: notifyeventty;
+   fonmove: notifyeventty;
    procedure setoptionsscale(const avalue: optionsscalety);
   protected
    foptionsscale: optionsscalety;
@@ -259,7 +261,11 @@ type
    procedure dofontheightdelta(var delta: integer); override;
    procedure widgetregionchanged(const sender: twidget); override;
    procedure clientrectchanged; override;
+   procedure poschanged; override;
+   procedure sizechanged; override;
   public
+   property onresize: notifyeventty read fonresize write fonresize;
+   property onmove: notifyeventty read fonmove write fonmove;
   published
    property optionsscale: optionsscalety read foptionsscale write setoptionsscale;
    property onfontheightdelta: fontheightdeltaeventty read fonfontheightdelta
@@ -272,6 +278,8 @@ type
    property optionsscale;
    property onfontheightdelta;
    property onchildscaled;
+   property onresize;
+   property onmove;
  end;
  
 const
@@ -291,16 +299,19 @@ type
 
  tscrollbox = class(tscalingwidget)
   private
+   fonscroll: pointeventty;
    function getframe: tscrollboxframe;
    procedure setframe(const value: tscrollboxframe);
   protected
    procedure internalcreateframe; override;
    procedure widgetregionchanged(const sender: twidget); override;
    procedure mouseevent(var info: mouseeventinfoty); override;
+   procedure doscroll(const dist: pointty); override;
   public
    constructor create(aowner: tcomponent); override;
   published
    property frame: tscrollboxframe read getframe write setframe;
+   property onscroll: pointeventty read fonscroll write fonscroll;
  end;
 
  tstepboxframe = class(tcustomstepframe)
@@ -990,6 +1001,22 @@ begin
  updateoptionsscale;
 end;
 
+procedure tcustomscalingwidget.poschanged;
+begin
+ inherited;
+ if canevent(tmethod(fonmove)) then begin
+  fonmove(self);
+ end;
+end;
+
+procedure tcustomscalingwidget.sizechanged;
+begin
+ inherited;
+ if canevent(tmethod(fonresize)) then begin
+  fonresize(self);
+ end;
+end;
+
 { tgroupbox }
 
 constructor tgroupbox.create(aowner: tcomponent);
@@ -1043,6 +1070,14 @@ procedure tscrollbox.widgetregionchanged(const sender: twidget);
 begin
  inherited;
  tscrollboxframe(fframe).updateclientrect;
+end;
+
+procedure tscrollbox.doscroll(const dist: pointty);
+begin
+ inherited;
+ if canevent(tmethod(fonscroll)) then begin
+  fonscroll(self,dist);
+ end;
 end;
 
 { tcustomstepbox }

@@ -25,7 +25,7 @@ type
    ftick1: dialtickinfoty;
    ftick2: dialtickinfoty;
    foffset: real;
-   fscale: real;
+   frange: real;
    procedure setdirection(const avalue: graphicdirectionty);
    procedure changed;
    procedure settick0_interval(const avalue: real);
@@ -45,7 +45,7 @@ type
    procedure settick2_length(const avalue: integer);
    
    procedure setoffset(const avalue: real);
-   procedure setscale(const avalue: real);
+   procedure setrange(const avalue: real);
   protected
    procedure checklayout;
    procedure dopaint(const acanvas: tcanvas); override;
@@ -55,7 +55,7 @@ type
    property direction: graphicdirectionty read fdirection write setdirection
                                        default gd_right;
    property offset: real read foffset write setoffset;//0.0..1.0
-   property scale: real read fscale write setscale; //default 1.0
+   property range: real read frange write setrange; //default 1.0
    property tick0_interval: real read ftick0.interval write settick0_interval;
                       //default 0.1
    property tick0_color: colorty read ftick0.color write settick0_color
@@ -94,7 +94,7 @@ type
   published
    property direction;
    property offset;
-   property scale;
+   property range;
    property tick0_interval;
    property tick0_color;
    property tick0_width;
@@ -115,6 +115,8 @@ type
  end;
  
 implementation
+uses
+ sysutils;
 type
  tcustomframe1 = class(tcustomframe);
   
@@ -131,7 +133,7 @@ begin
  ftick1.length:= 10;
  ftick2.interval:= 0.01;
  ftick2.length:= 5;
- fscale:= 1.0;
+ frange:= 1.0;
  inherited;
  size:= makesize(100,15);
  color:= cl_transparent;
@@ -194,8 +196,8 @@ var
       lineend:= linestart + length;
      end;
     end;
-    step:= abs(interval*scale);
-    offs:= offset * scale / step;
+    step:= abs(interval/frange);
+    offs:= offset / (frange * step);
     offs:= (offs - int(offs)) * step;
     setlength(ticks,round(1.0/(step))+1);
     if fdirection in [gd_right,gd_left] then begin
@@ -229,12 +231,14 @@ var
 begin
  if not (dis_layoutvalid in fstate) then begin
   rect1:= innerclientrect;
+  {
   if fdirection in [gd_right,gd_left] then begin
    dec(rect1.cx);
   end
   else begin
    dec(rect1.cy);
   end;
+  }
   calcticks(ftick0);
   calcticks(ftick1);
   calcticks(ftick2);
@@ -395,10 +399,13 @@ begin
  end;
 end;
 
-procedure tcustomdial.setscale(const avalue: real);
+procedure tcustomdial.setrange(const avalue: real);
 begin
- if fscale <> avalue then begin
-  fscale:= avalue;
+ if frange <> avalue then begin
+  if avalue = 0 then begin
+   raise exception.create('Range can not be 0.0.');
+  end;
+  frange:= avalue;
   changed;
  end;
 end;

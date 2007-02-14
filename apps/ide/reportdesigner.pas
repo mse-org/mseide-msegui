@@ -2,9 +2,9 @@ unit reportdesigner;
 {$ifdef FPC}{$mode objfpc}{$h+}{$INTERFACES CORBA}{$endif}
 interface
 uses
- classes,msegui,mseclasses,mseforms,formdesigner,msesimplewidgets,msetabs,msesplitter,
- msegraphutils,msedesigner,msedesignintf,msereport,msetypes,mseevent,mseguiglob,
- msemenus;
+ classes,msegui,mseclasses,mseforms,formdesigner,msesimplewidgets,msetabs,
+ msesplitter,msegraphutils,msedesigner,msedesignintf,msereport,msetypes,
+ mseevent,mseguiglob,msemenus,msedial,msedispwidgets;
 
 const
  updatetabtag = 83684;
@@ -15,11 +15,20 @@ type
   public
    constructor create(aowner: tcomponent); override;
  end;
- reportdesignerstatety = (rds_tabupdating);
+ reportdesignerstatety = (rds_tabupdating,rds_mouseinclient);
  reportdesignerstatesty = set of reportdesignerstatety;
  
  treportdesignerfo = class(tformdesignerfo)
+   dialh: tdial;
+   dialv: tdial;
    tabbar: ttabbar;
+   reportcontainer: tscrollbox;
+   tspacer4: tspacer;
+   xdisp: trealdisp;
+   ydisp: trealdisp;
+   tspacer1: tspacer;
+   tspacer2: tspacer;
+   tspacer3: tspacer;
    procedure repchildscaled(const sender: TObject);
    procedure tabcha(const sender: TObject);
    procedure tabmo(const sender: TObject; var curindex: Integer;
@@ -28,9 +37,15 @@ type
    procedure deletepage(const sender: TObject);
    procedure popupupda(const sender: tcustommenu);
    procedure addpage(const sender: TObject);
+   procedure formresized(const sender: TObject);
+   procedure reportchildmouseevent(const sender: twidget;
+                   var info: mouseeventinfoty);
+   procedure reportcontainerscroll(const sender: twidget; const point: pointty);
+   procedure repcomtainerchildscaled(const sender: TObject);
   private
-   freportcontainer: treportcontainer;
+//   freportcontainer: treportcontainer;
    fstate: reportdesignerstatesty;
+   function ppmm: real;
   protected
    function report: tcustomreport;
    function getmoduleparent: twidget; override;
@@ -49,6 +64,7 @@ type
    procedure componentselected(const aselections: tformdesignerselections); override;
    class function fixformsize: boolean; override;
    function candelete(const acomponent: tcomponent): boolean; override;
+   procedure updatedials;
   public
    constructor create(const aowner: tcomponent; const adesigner: tdesigner;
                         const aintf: pdesignmoduleintfty); override;
@@ -62,7 +78,7 @@ var
 implementation
 
 uses
- reportdesigner_mfm,msedatalist,msegraphics,msewidgets;
+ reportdesigner_mfm,msedatalist,msegraphics,msewidgets,msereal;
 type
  tcustomreport1 = class(tcustomreport);
  
@@ -82,8 +98,8 @@ constructor treportdesignerfo.create(const aowner: tcomponent;
         const adesigner: tdesigner; const aintf: pdesignmoduleintfty);
 begin
  inherited;
- freportcontainer:= treportcontainer.create(self);
- freportcontainer.parentwidget:= container;
+// freportcontainer:= treportcontainer.create(self);
+// freportcontainer.parentwidget:= container;
 end;
 
 class function treportdesignerfo.fixformsize: boolean;
@@ -93,12 +109,12 @@ end;
 
 function treportdesignerfo.getmoduleparent: twidget;
 begin
- result:= freportcontainer;
+ result:= reportcontainer;
 end;
 
 function treportdesignerfo.gridrect: rectty;
 begin
- with freportcontainer do begin
+ with reportcontainer do begin
   result:= intersectrect(inherited gridrect,
                  makerect(addpoint(paintpos,pos),paintsize));
  end;
@@ -106,12 +122,12 @@ end;
 
 function treportdesignerfo.insertoffset: pointty;
 begin
- result:= translateclientpoint(nullpoint,freportcontainer,self);
+ result:= translateclientpoint(nullpoint,reportcontainer,self);
 end;
 
 procedure treportdesignerfo.repchildscaled(const sender: TObject);
 begin
- placeyorder(0,[],[tabbar,freportcontainer],0);
+// placeyorder(0,[],[tabbar,freportcontainer],0);
 end;
 
 procedure treportdesignerfo.checktabs;
@@ -253,7 +269,7 @@ var
  comp1: tcomponent;
 begin
  comp1:= designer.createnewcomponent(report,treportpage);
- placecomponent(comp1,freportcontainer.rootpos);
+ placecomponent(comp1,reportcontainer.rootpos);
 end;
 
 procedure treportdesignerfo.deletepage(const sender: TObject);
@@ -290,6 +306,71 @@ end;
 function treportdesignerfo.snaptogrid: boolean;
 begin
  result:= tcustomreport1(form).frepdesigninfo.snaptogrid;
+end;
+
+function treportdesignerfo.ppmm: real;
+begin
+ if report = nil then begin
+  result:= 3;
+ end
+ else begin
+  result:= report.ppmm;
+ end;
+end;
+
+procedure treportdesignerfo.reportchildmouseevent(const sender: twidget;
+               var info: mouseeventinfoty);
+var
+ pt1: pointty;
+begin
+ with info do begin
+  case eventkind of
+   ek_mouseleave: begin
+    exclude(fstate,rds_mouseinclient);
+    xdisp.value:= emptyreal;
+    ydisp.value:= emptyreal;
+   end;
+   ek_mouseenter: begin
+    include(fstate,rds_mouseinclient);
+   end;
+   ek_buttonpress: begin
+    if (button = mb_left) and (ss_double in shiftstate) and 
+             not reportcontainer.checkdescendent(sender) then begin
+     designer.showobjectinspector;
+     include(eventstate,es_processed);
+    end;
+   end;
+  end;
+  if (eventkind in mouseposevents) and (rds_mouseinclient in fstate) then begin
+   pt1:= translatewidgetpoint(pos,sender,reportcontainer);
+   xdisp.value:= pt1.x/ppmm - dialh.offset;
+   ydisp.value:= pt1.y/ppmm - dialv.offset;
+  end;
+ end;
+end;
+
+procedure treportdesignerfo.updatedials;
+begin
+ dialh.range:= dialh.bounds_cx / ppmm;
+ dialv.range:= dialv.bounds_cy / ppmm;
+ dialh.offset:= reportcontainer.clientpos.x / ppmm;
+ dialv.offset:= reportcontainer.clientpos.y / ppmm;
+end;
+
+procedure treportdesignerfo.formresized(const sender: TObject);
+begin
+ updatedials;
+end;
+
+procedure treportdesignerfo.reportcontainerscroll(const sender: twidget;
+               const point: pointty);
+begin
+ updatedials;
+end;
+
+procedure treportdesignerfo.repcomtainerchildscaled(const sender: TObject);
+begin
+ updatedials;
 end;
 
 end.

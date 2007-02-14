@@ -3976,6 +3976,9 @@ begin
   for int1:= 0 to high(freppages) do begin
    freppages[int1].ppmm:= avalue;
   end;
+  if not (csloading in componentstate) then begin
+   postchildscaled;
+  end;
  end;
 end;
 

@@ -42,9 +42,16 @@ type
    constructor create(aowner: tcustommseform); reintroduce;
   published
    property onscroll;
+   property onresize;
    property onfontheightdelta;
    property onchildscaled;
    property oncalcminscrollsize;
+   property onchildmouseevent;
+   property onmouseevent;
+   property onclientmouseevent;
+   property onbeforepaint;
+   property onpaint;
+   property onafterpaint;
  end;
 
  tcustommseform = class(tcustomeventwidget,istatfile,idockcontroller)
