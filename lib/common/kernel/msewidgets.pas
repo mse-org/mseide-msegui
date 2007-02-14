@@ -3052,7 +3052,8 @@ end;
 procedure tscrollingwidget.doscroll(const dist: pointty);
 begin
  inherited;
- if assigned(fonscroll) then begin
+ if canevent(tmethod(fonscroll)) then begin
+// if assigned(fonscroll) then begin
   fonscroll(self,dist);
  end;
 end;
