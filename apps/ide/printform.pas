@@ -4,7 +4,7 @@ interface
 uses
  msegui,mseclasses,mseforms,msesimplewidgets,msepostscriptprinter,mseprinter,
  msedataedits,mseguithread,msegraphedits,msestrings,msegraphics,msestat,
- msestatfile;
+ msestatfile,msetypes;
 
 type
  tprintfo = class(tmseform)
@@ -23,9 +23,9 @@ type
    tpagesizeselector1: tpagesizeselector;
    tstatfile1: tstatfile;
    procedure pronpagestart(const sender: tprinter);
-   procedure lastpagesetvalue(const sender: TObject; var avalue: real; 
+   procedure lastpagesetvalue(const sender: TObject; var avalue: realty; 
                             var accept: Boolean);
-   procedure firstpagesetvalue(const sender: TObject; var avalue: real; 
+   procedure firstpagesetvalue(const sender: TObject; var avalue: realty; 
                             var accept: Boolean);
    procedure printidle(var again: Boolean);
    procedure runonexecute(const sender: TObject);
@@ -131,7 +131,7 @@ begin
  end;
 end;
 
-procedure tprintfo.lastpagesetvalue(const sender: TObject; var avalue: real;
+procedure tprintfo.lastpagesetvalue(const sender: TObject; var avalue: realty;
                             var accept: Boolean);
 begin
  if not isemptyreal(avalue) and (avalue < firstpage.value) then begin
@@ -140,7 +140,7 @@ begin
 end;
 
 procedure tprintfo.firstpagesetvalue(const sender: TObject;
-                           var avalue: real; var accept: Boolean);
+                           var avalue: realty; var accept: Boolean);
 begin
  if not isemptyreal(lastpage.value) and (avalue > lastpage.value) then begin
   lastpage.value:= avalue;

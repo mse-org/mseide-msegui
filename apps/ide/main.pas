@@ -28,7 +28,7 @@ uses
  msegraphutils,typinfo,msedock,sysutils,msesysenv,msestrings,
  msepostscriptprinter;
 const
- versiontext = '1.1 unstable';
+ versiontext = '1.2beta1';
  idecaption = 'MSEide';
 type
  envvarty = (env_vargroup,env_np);
