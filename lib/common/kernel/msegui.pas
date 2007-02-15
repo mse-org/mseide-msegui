@@ -2067,6 +2067,7 @@ var
 begin
  if high(awidgets) >= 0 then begin
   int2:= -bigint;
+  widget1:= awidgets[0]; //compiler warning
   for int1:= high(awidgets) downto 0 do begin
    with awidgets[int1] do begin
     if fframe = nil then begin
@@ -2081,18 +2082,18 @@ begin
     int2:= int3;
    end;
   end;
- end;
- widget1.bounds_cx:= awidth;
- int2:= widget1.bounds_cx - int2; //min frame width
- for int1:= 0 to high(awidgets) do begin
-  with awidgets[int1] do begin
-   if fframe = nil then begin
-    int3:= 0;
-   end
-   else begin
-    int3:= fframe.fouterframe.left + fframe.fouterframe.right;
+  widget1.bounds_cx:= awidth;
+  int2:= widget1.bounds_cx - int2; //min frame width
+  for int1:= 0 to high(awidgets) do begin
+   with awidgets[int1] do begin
+    if fframe = nil then begin
+     int3:= 0;
+    end
+    else begin
+     int3:= fframe.fouterframe.left + fframe.fouterframe.right;
+    end;
+    bounds_cx:= int2 + int3;
    end;
-   bounds_cx:= int2 + int3;
   end;
  end;
 end;
@@ -8909,6 +8910,9 @@ begin
  if app.factivewindow = nil then begin
   result:= true;
   app.finactivewindow:= self;
+ end
+ else begin
+  result:= false;
  end;
 end;
 
@@ -10308,6 +10312,9 @@ begin
      window1:= factivewindow;
      if window1 <> nil then begin
       widget1:= factivewindow.ffocusedwidget;
+     end
+     else begin
+      widget1:= nil; //compiler warning
      end;
     end;
     if window1 <> nil then begin
