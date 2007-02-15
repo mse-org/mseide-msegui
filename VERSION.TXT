@@ -1,5 +1,7 @@
 MSEide+MSEgui version history
 
+2007-02-15 TSQLQuery.UpdateSQL,InsertSQL and DeleteSQL renamed to 
+ SQLUpdate,SQLInsert and SQLDelete.
 2007-02-06 tstockobjects.paintglyph order of parameters changed.
 2007-02-06 timagelist.paint order of parameters changed.
 2007-01-25 tprinter.ppmm -> tcanvas.ppmm.

@@ -206,9 +206,9 @@ type
     FCursor              : TSQLCursor;
     FUpdateable          : boolean;
     FSQL                 : TStringList;
-    FUpdateSQL,
-    FInsertSQL,
-    FDeleteSQL           : TStringList;
+    FSQLUpdate,
+    FSQLInsert,
+    FSQLDelete           : TStringList;
     FIsEOF               : boolean;
     FLoadingFieldDefs    : boolean;
     FIndexDefs           : TIndexDefs;
@@ -324,9 +324,9 @@ type
     property params : tmseparams read fparams write setparams;
                        //before SQL
     property SQL : TStringlist read FSQL write FSQL;
-    property UpdateSQL : TStringlist read FUpdateSQL write FUpdateSQL;
-    property InsertSQL : TStringlist read FInsertSQL write FInsertSQL;
-    property DeleteSQL : TStringlist read FDeleteSQL write FDeleteSQL;
+    property SQLUpdate : TStringlist read FSQLUpdate write FSQLUpdate;
+    property SQLInsert : TStringlist read FSQLInsert write FSQLInsert;
+    property SQLDelete : TStringlist read FSQLDelete write FSQLDelete;
     property IndexDefs : TIndexDefs read GetIndexDefs;
     property UpdateMode : TUpdateMode read FUpdateMode write SetUpdateMode;
     property UsePrimaryKeyAsKey : boolean read FUsePrimaryKeyAsKey write SetUsePrimaryKeyAsKey;
@@ -1227,9 +1227,9 @@ begin
         end;
       if FUpdateable then
         begin
-        InitialiseModifyQuery(FDeleteQry,FDeleteSQL);
-        InitialiseModifyQuery(FUpdateQry,FUpdateSQL);
-        InitialiseModifyQuery(FInsertQry,FInsertSQL);
+        InitialiseModifyQuery(FDeleteQry,FSQLDelete);
+        InitialiseModifyQuery(FUpdateQry,FSQLUpdate);
+        InitialiseModifyQuery(FInsertQry,FSQLInsert);
         end;
       end
     else
@@ -1278,12 +1278,12 @@ begin
   FSQL := TStringList.Create;
   FSQL.OnChange := @OnChangeSQL;
 
-  FUpdateSQL := TStringList.Create;
-  FUpdateSQL.OnChange := @OnChangeModifySQL;
-  FInsertSQL := TStringList.Create;
-  FInsertSQL.OnChange := @OnChangeModifySQL;
-  FDeleteSQL := TStringList.Create;
-  FDeleteSQL.OnChange := @OnChangeModifySQL;
+  FSQLUpdate := TStringList.Create;
+  FSQLUpdate.OnChange := @OnChangeModifySQL;
+  FSQLInsert := TStringList.Create;
+  FSQLInsert.OnChange := @OnChangeModifySQL;
+  FSQLDelete := TStringList.Create;
+  FSQLDelete.OnChange := @OnChangeModifySQL;
 
   FIndexDefs := TIndexDefs.Create(Self);
   FReadOnly := false;
@@ -1302,9 +1302,9 @@ begin
   FreeAndNil(FMasterLink);
   FreeAndNil(FParams);
   FreeAndNil(FSQL);
-  FreeAndNil(FInsertSQL);
-  FreeAndNil(FDeleteSQL);
-  FreeAndNil(FUpdateSQL);
+  FreeAndNil(FSQLInsert);
+  FreeAndNil(FSQLDelete);
+  FreeAndNil(FSQLUpdate);
   FreeAndNil(FIndexDefs);
   inherited Destroy;
 end;
