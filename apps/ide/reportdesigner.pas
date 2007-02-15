@@ -64,7 +64,9 @@ type
    procedure componentselected(const aselections: tformdesignerselections); override;
    class function fixformsize: boolean; override;
    function candelete(const acomponent: tcomponent): boolean; override;
+   procedure componentmoving(const apos: pointty); override;
    procedure updatedials;
+   procedure setmousemarkers(const avalue: pointty; const source: twidget);
   public
    constructor create(const aowner: tcomponent; const adesigner: tdesigner;
                         const aintf: pdesignmoduleintfty); override;
@@ -318,6 +320,18 @@ begin
  end;
 end;
 
+procedure treportdesignerfo.setmousemarkers(const avalue: pointty;
+                                                    const source: twidget);
+var
+ pt1: pointty;
+begin
+ pt1:= translatewidgetpoint(avalue,source,reportcontainer);
+ xdisp.value:= pt1.x/ppmm - dialh.offset;
+ dialh.markers[0].value:= xdisp.value;
+ ydisp.value:= pt1.y/ppmm - dialv.offset;
+ dialv.markers[0].value:= ydisp.value;
+end;
+
 procedure treportdesignerfo.reportchildmouseevent(const sender: twidget;
                var info: mouseeventinfoty);
 var
@@ -344,11 +358,7 @@ begin
    end;
   end;
   if (eventkind in mouseposevents) and (rds_mouseinclient in fstate) then begin
-   pt1:= translatewidgetpoint(pos,sender,reportcontainer);
-   xdisp.value:= pt1.x/ppmm - dialh.offset;
-   dialh.markers[0].value:= xdisp.value;
-   ydisp.value:= pt1.y/ppmm - dialv.offset;
-   dialv.markers[0].value:= ydisp.value;
+   setmousemarkers(pos,sender);
   end;
  end;
 end;
@@ -376,6 +386,11 @@ end;
 procedure treportdesignerfo.repcomtainerchildscaled(const sender: TObject);
 begin
  updatedials;
+end;
+
+procedure treportdesignerfo.componentmoving(const apos: pointty);
+begin
+ setmousemarkers(apos,self);
 end;
 
 end.

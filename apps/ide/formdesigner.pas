@@ -117,7 +117,9 @@ type
    fmoduleintf: pdesignmoduleintfty;
    fmodulesetting: integer;
    procedure setmodule(const Value: tmsecomponent);
+   function getselections: tformdesignerselections;
   protected
+   property selections: tformdesignerselections read getselections;
    procedure formcontainerscrolled;
    procedure widgetregionchanged(const sender: twidget); override;
    procedure sizechanged; override;
@@ -145,6 +147,7 @@ type
    function getdesignrect: rectty; virtual;
    procedure setdesignrect(const arect: rectty); virtual;
    function candelete(const acomponent: tcomponent): boolean; virtual;
+   procedure componentmoving(const apos: pointty); virtual;
    procedure placecomponent(const component: tcomponent; const apos: pointty;
                                  aparent: tcomponent = nil);
   public
@@ -1424,6 +1427,8 @@ var
  clipo: pointty;
  isinpaintrect: boolean;
  ss1: shiftstatesty;
+ po1: pformselectedinfoty;
+ pt1: pointty; 
 label
  1;
 begin
@@ -1470,14 +1475,6 @@ begin
        end;
       end;
       if component <> nil then begin
-      {
-       if (component = module) and (fclickedcompbefore = module) and
-                  (ss_double in shiftstate) and isinpaintrect then begin
-        mainfo.loadsourcebyform(fdesigner.actmodulepo^.filename,true);
-        include(eventstate,es_processed);
-        goto 1;
-       end;
-       }
        if (factcompindex < 0) or (component <> fselections[factcompindex]) then begin
         factarea:= ar_none;
        end;
@@ -1639,7 +1636,6 @@ begin
         updatesizerect;
        end;
        ar_component: begin
-//        fxorpicoffset:= griddelta;
         if distance(fpickpos,pos) > movethreshold then begin
          fxorpicoffset:= griddelta;
          factarea:= ar_componentmove;
@@ -1671,6 +1667,77 @@ begin
    end;
   end;
 1:
+  if (eventkind in mouseposevents) and (fselections.count = 1) then begin
+   fselections.updateinfos;
+   po1:= fselections.itempo(0);
+   if po1^.selectedinfo.instance <> tformdesignerfo(fowner).fmodule then begin
+    bo1:= true;
+    case factarea of
+     ar_component: begin
+      if (eventkind = ek_buttonpress) and (button = mb_left) then begin
+       pt1:= rectcenter(po1^.handles[ht_topleft]);
+      end
+      else begin
+       bo1:= false;
+      end;
+     end;
+     ht_topleft: begin
+      pt1:= factsizerect.pos;
+     end;
+     ht_left: begin
+      with factsizerect do begin
+       pt1.x:= x;
+       pt1.y:= y + cy div 2;
+      end;
+     end;
+     ht_bottomleft: begin
+      with factsizerect do begin
+       pt1.x:= x;
+       pt1.y:= y + cy;
+      end;
+     end;
+     ht_bottom: begin
+      with factsizerect do begin
+       pt1.x:= x + cx div 2;
+       pt1.y:= y + cy ;
+      end;
+     end;
+     ht_bottomright: begin
+      with factsizerect do begin
+       pt1.x:= x + cx;
+       pt1.y:= y + cy;
+      end;
+     end;
+     ht_right: begin
+      with factsizerect do begin
+       pt1.x:= x + cx;
+       pt1.y:= y + cy div 2;
+      end;
+     end;
+     ht_topright: begin
+      with factsizerect do begin
+       pt1.x:= x + cx;
+       pt1.y:= y;
+      end;
+     end;
+     ht_top: begin
+      with factsizerect do begin
+       pt1.x:= x + cx div 2;
+       pt1.y:= y;
+      end;
+     end;
+     ar_componentmove: begin
+      pt1:= addpoint(rectcenter(po1^.handles[ht_topleft]),fxorpicoffset);
+     end;
+     else begin
+      bo1:= false;
+     end;
+    end;
+    if bo1 then begin
+     tformdesignerfo(fowner).componentmoving(pt1);
+    end;
+   end;
+  end;
   addpoint1(pos,clipo);
  end;
 end;
@@ -2569,6 +2636,16 @@ end;
 function tformdesignerfo.snaptogrid: boolean;
 begin
  result:= tdesignwindow(window).fsnaptogrid;
+end;
+
+procedure tformdesignerfo.componentmoving(const apos: pointty);
+begin
+ //dummy
+end;
+
+function tformdesignerfo.getselections: tformdesignerselections;
+begin
+ result:= tdesignwindow(fwindow).fselections;
 end;
 
 initialization

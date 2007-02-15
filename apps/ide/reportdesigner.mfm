@@ -165,21 +165,21 @@ inherited reportdesignerfo: treportdesignerfo
     offset_right = -5
   end
   object xdisp: trealdisp [7]
-    bounds_x = 48
+    bounds_x = 41
     bounds_y = 0
-    bounds_cx = 49
+    bounds_cx = 55
     bounds_cy = 17
     color = -1879048187
     frame.dummy = 0
     taborder = 7
     textflags = [tf_ycentered]
-    format = '0.0'
+    format = '0.0mm'
     reffontheight = 13
   end
   object ydisp: trealdisp [8]
     bounds_x = 0
     bounds_y = 0
-    bounds_cx = 49
+    bounds_cx = 41
     bounds_cy = 17
     color = -1879048187
     frame.dummy = 0

@@ -89,6 +89,7 @@ procedure addsize1(var dest: sizety; const size: sizety);
 function subsize(const a,b: sizety): sizety; //result:= a-b
 procedure subsize1(var dest: sizety; const size: sizety);
 
+function rectcenter(const arect: rectty): pointty;
 procedure centerrect(apos: pointty; asize: integer; out rect: rectty);
 function inflaterect(const rect: rectty; value: integer): rectty; overload;
 function inflaterect(const rect: rectty; const frame: framety): rectty; overload;
@@ -443,6 +444,14 @@ function pointinrect(const point: pointty; const rect: rectty): boolean;
 begin
  result:= (point.x >= rect.x) and (point.x < rect.x + rect.cx) and
           (point.y >= rect.y) and (point.y < rect.y + rect.cy);
+end;
+
+function rectcenter(const arect: rectty): pointty;
+begin
+ with arect do begin
+  result.x:= x + cx div 2;
+  result.y:= y + cy div 2;
+ end;
 end;
 
 procedure centerrect(apos: pointty; asize: integer; out rect: rectty);
