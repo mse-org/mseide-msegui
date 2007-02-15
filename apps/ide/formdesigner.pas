@@ -1242,13 +1242,24 @@ begin
      if (es_processed in eventstate) then begin
       if shiftstate = [ss_ctrl] then begin
        fselections.move(po1);
+       if fselections.count > 0 then begin
+        fselections.updateinfos;
+        tformdesignerfo(fowner).componentmoving(
+             rectcenter(fselections.itempo(0)^.handles[ht_topleft]));
+       end;
       end
       else begin
        fselections.resize(po1);
+       if fselections.count > 0 then begin
+        fselections.updateinfos;
+        with fselections.itempo(0)^.handles[ht_bottomright] do begin
+         tformdesignerfo(fowner).componentmoving(
+                             makepoint(x+cx div 2 + 1,y+cy div 2 +1));
+        end;
+       end;
       end;
       fowner.invalidate;
       recalcclientsize;
-//      domodified;
      end;
     end;
    end;
