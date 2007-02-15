@@ -35,7 +35,7 @@ inherited reportdesignerfo: treportdesignerfo
     bounds_x = 9
     bounds_y = 17
     bounds_cx = 662
-    bounds_cy = 9
+    bounds_cy = 7
     color = -1879048185
     frame.localprops = [frl_fileft]
     frame.dummy = 0
@@ -65,7 +65,6 @@ inherited reportdesignerfo: treportdesignerfo
         color = -1610612733
         length = 3
       end>
-    options = []
   end
   object tabbar: ttabbar [1]
     optionswidget = [ow_mousewheel, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
@@ -83,10 +82,10 @@ inherited reportdesignerfo: treportdesignerfo
     reffontheight = 13
   end
   object reportcontainer: tscrollbox [2]
-    bounds_x = 9
-    bounds_y = 26
-    bounds_cx = 664
-    bounds_cy = 433
+    bounds_x = 7
+    bounds_y = 24
+    bounds_cx = 666
+    bounds_cy = 435
     frame.colorclient = -1610612730
     frame.localprops = [frl_colorclient]
     frame.dummy = 0
@@ -109,9 +108,9 @@ inherited reportdesignerfo: treportdesignerfo
   end
   object dialv: tdial [4]
     bounds_x = 0
-    bounds_y = 26
-    bounds_cx = 9
-    bounds_cy = 430
+    bounds_y = 24
+    bounds_cx = 7
+    bounds_cy = 432
     color = -1879048185
     anchors = [an_left, an_top, an_bottom]
     taborder = 3
@@ -144,7 +143,7 @@ inherited reportdesignerfo: treportdesignerfo
   end
   object tspacer2: tspacer [5]
     bounds_x = 144
-    bounds_y = 26
+    bounds_y = 24
     bounds_cx = 50
     bounds_cy = 5
     taborder = 5
@@ -154,7 +153,7 @@ inherited reportdesignerfo: treportdesignerfo
     offset_bottom = -5
   end
   object tspacer3: tspacer [6]
-    bounds_x = 9
+    bounds_x = 7
     bounds_y = 173
     bounds_cx = 5
     bounds_cy = 50
@@ -189,7 +188,7 @@ inherited reportdesignerfo: treportdesignerfo
   end
   object tspacer4: tspacer [9]
     bounds_x = 16
-    bounds_y = 26
+    bounds_y = 24
     bounds_cx = 50
     bounds_cy = 5
     taborder = 9
