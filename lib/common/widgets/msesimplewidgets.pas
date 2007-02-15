@@ -1069,7 +1069,9 @@ end;
 procedure tscrollbox.widgetregionchanged(const sender: twidget);
 begin
  inherited;
- tscrollboxframe(fframe).updateclientrect;
+ if not (csdestroying in componentstate) then begin
+  tscrollboxframe(fframe).updateclientrect;
+ end;
 end;
 
 procedure tscrollbox.doscroll(const dist: pointty);

@@ -42,13 +42,6 @@ inherited reportdesignerfo: treportdesignerfo
     anchors = [an_left, an_top, an_right]
     taborder = 4
     range = 100.000000000000000000
-    tick0_interval = 10.000000000000000000
-    tick0_length = 10
-    tick1_interval = 5.000000000000000000
-    tick1_color = -1610612733
-    tick1_length = 8
-    tick2_interval = 1.000000000000000000
-    tick2_color = -1610612733
     markers.count = 1
     markers.items = <
       item
@@ -57,6 +50,22 @@ inherited reportdesignerfo: treportdesignerfo
           0.000000000000000000
           True)
       end>
+    ticks.count = 3
+    ticks.items = <
+      item
+        interval = 10.000000000000000000
+      end
+      item
+        interval = 5.000000000000000000
+        color = -1610612733
+        length = 6
+      end
+      item
+        interval = 1.000000000000000000
+        color = -1610612733
+        length = 3
+      end>
+    options = []
   end
   object tabbar: ttabbar [1]
     optionswidget = [ow_mousewheel, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
@@ -108,15 +117,6 @@ inherited reportdesignerfo: treportdesignerfo
     taborder = 3
     direction = gd_down
     range = 100.000000000000000000
-    tick0_interval = 10.000000000000000000
-    tick0_length = 10
-    tick1_interval = 5.000000000000000000
-    tick1_color = -1610612733
-    tick1_indent = 1
-    tick1_length = 8
-    tick2_interval = 1.000000000000000000
-    tick2_color = -1610612733
-    tick2_indent = 3
     markers.count = 1
     markers.items = <
       item
@@ -125,6 +125,22 @@ inherited reportdesignerfo: treportdesignerfo
           0.000000000000000000
           True)
       end>
+    ticks.count = 3
+    ticks.items = <
+      item
+        interval = 10.000000000000000000
+      end
+      item
+        interval = 5.000000000000000000
+        color = -1610612733
+        length = 6
+      end
+      item
+        interval = 1.000000000000000000
+        color = -1610612733
+        length = 4
+      end>
+    options = [do_opposite]
   end
   object tspacer2: tspacer [5]
     bounds_x = 144
