@@ -1,15 +1,18 @@
 MSEide+MSEgui Pascal Cross Platform GUI Development System.
-Version 0.9b
+
+2007-02-16 Version 1.2beta1 
+Copyright (c) 1999-2007 by Martin Schreiber
 
 - Compiles with FPC 2.0.4
-- Tested on i386-linux SuSE 9.0,9.2,10.1 and i386-win32 98 and 2000.
+- Tested on i386-linux SuSE 9.0,10.2 and i386-win32 98 and 2000.
 - Links to xlib and gdi32, no external widget library needed.
 - Internal character encoding is UCS2.
 - Uses anti aliased fonts on Linux (Xft).
 - All screen drawing is double buffered.
-- Has docking forms.
+- Has docking forms and MDI.
 - Has embedded forms (similar to TFrame).
 - Internationalization functionality with resource modules.
+- Report generator.
 
 IDE:
 - Integrated debugging.
@@ -19,6 +22,8 @@ IDE:
 - Integrated visual form designer with source code update for components and 
   events.
 - Flexible and handy build system with switchable macros.
+- Visual form inheritance.
+- Integrated report designer.
 
 License:
 IDE is under GPL, library under modified LGPL like FPC-RTL.
@@ -26,7 +31,7 @@ IDE is under GPL, library under modified LGPL like FPC-RTL.
 Installation:
 *************
 1. Download and install FPC 2.0.4, you can get it from 
-   http://www.freepascal.org/download.html
+   http://www.freepascal.org/download.var
 2. Download src and bin zip's.
 3. Extract them to a directory of your choice ('yourdirectory') .
 4. Run 'yourdirectory/bin/i386-linux/mseide' on linux or 
@@ -65,17 +70,17 @@ If you wish to do it from scratch:
 - Enter the unitname followed by a comma 
   ('myregunit,' if your regunitfile is 'myregunit.pas') in 
   a file named 'regcomponents.inc'.
-- build the ide with -dmorecomponents as option.
+- Build the IDE with -dmorecomponents as option.
 
 If you want add custom icons to your components:
 
 - Convert 24*24 pixel BMP files with tools/bmp2pas to
-  a icon unit ('*_bmp.pas').
-- add the name of the icon unit to 'uses' in your register unit.
+  an icon unit ('*_bmp.pas').
+- Add the name of the icon unit to 'uses' in your register unit.
  
 How to run i18ndemo
 *******************
-- Start MSEide version 0.9b.
+- Start MSEide.
 - 'Project'-'Open'-'yourdirectory/msegui/apps/i18ndemo/i18ndemo.prj'.
 - 'Project'-'Make' to create the rst files.
 - 'Project'-'Open'-'yourdirectory/msegui/tools/i18n/msei18n.prj'.
