@@ -23,6 +23,7 @@ const
  defaultrepfontheight = 14;
  defaultrepfontname = 'stf_report';
  tabpickthreshold = 3;
+ endrendertag = 49125363;
  
  defaultreptabtextflags = [tf_ycentered];
  defaultbandanchors = [an_top];
@@ -941,6 +942,7 @@ type
    procedure defineproperties(filer: tfiler); override;
    procedure nextpage(const acanvas: tcanvas);
    procedure doprogress;
+   procedure doasyncevent(var atag: integer); override;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -974,6 +976,7 @@ type
                                write fonbeforerender;
    property onafterrender: notifyeventty read fonafterrender
                                write fonafterrender;
+        //executed in main thread context
    property onprogress: notifyeventty read fonprogress write fonprogress;
  end;
 
@@ -4029,6 +4032,7 @@ function tcustomreport.exec(thread: tmsethread): integer;
 //   fprinter.ppmm:= fpmmbefore;
   end;
   fcanvas.ppmm:= fppmmbefore;
+  asyncevent(endrendertag);
  end;
 
 var               
@@ -4106,6 +4110,8 @@ begin
    end;
   end;
  finally
+  dofinish;
+  {
   try
    if canevent(tmethod(fonafterrender)) then begin
     application.lock;
@@ -4118,6 +4124,7 @@ begin
   finally
    dofinish;
   end;
+  }
  end;
 end;
 
@@ -4323,6 +4330,14 @@ begin
    application.unlock;
   end;
  end;  
+end;
+
+procedure tcustomreport.doasyncevent(var atag: integer);
+begin
+ inherited;
+ if (atag = endrendertag) and canevent(tmethod(fonafterrender)) then begin
+  fonafterrender(self);
+ end;
 end;
 
  {treport}
