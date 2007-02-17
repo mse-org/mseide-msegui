@@ -215,6 +215,8 @@ type
    property options: labeloptionsty read foptions write setoptions default [];
   published
    property optionswidget default defaultlabeloptionswidget;
+   property bounds_cx default defaultlabelwidgetwidth;
+   property bounds_cy default defaultlabelwidgetheight;
  end;
 
  tlabel = class(tcustomlabel)
@@ -223,8 +225,6 @@ type
    property font;
    property textflags;
    property options;
-   property bounds_cx default defaultlabelwidgetwidth;
-   property bounds_cy default defaultlabelwidgetheight;
  end;
  
  tgroupboxframe = class(tcaptionframe)

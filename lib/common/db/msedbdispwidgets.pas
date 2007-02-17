@@ -47,6 +47,9 @@ type
    property bounds_cx default defaultlabelwidgetwidth;
    property bounds_cy default defaultlabelwidgetheight;
    property optionswidget default defaultlabeloptionswidget;
+   property font;
+   property textflags;
+   property options;
  end;
 
  tdbstringdisp = class(tcustomstringdisp,idbeditinfo,idbdispfieldlink,
