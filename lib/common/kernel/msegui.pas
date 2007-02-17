@@ -10866,9 +10866,8 @@ begin
    guierror(gue_recursivemodal,self,fowner.name);
   end;
   include(fstate,tws_modal);
-//  sender.internalactivate(false,true);
  end;
- bo1:= unlock;
+ bo1:= ismainthread and unlock;
  try
   result:= eventloop(sender);
  finally
