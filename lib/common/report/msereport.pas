@@ -3949,6 +3949,10 @@ end;
 
 destructor tcustomreport.destroy;
 begin
+ if fthread <> nil then begin
+  fthread.terminate;
+  application.waitforthread(fthread);
+ end;
  fthread.free;
  inherited;
 end;
