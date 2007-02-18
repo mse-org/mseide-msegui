@@ -123,19 +123,12 @@ type
    procedure setlitop_visible(const avalue: linevisiblesty);
 
    procedure setlivert_widthmm(const avalue: real);
-   function islivert_widthmmstored: boolean;
    procedure setlivert_color(const avalue: colorty);
-   function islivert_colorstored: boolean;
    procedure setlivert_colorgap(const avalue: colorty);
-   function islivert_colorgapstored: boolean;
    procedure setlivert_capstyle(const avalue: capstylety);
-   function islivert_capstylestored: boolean;
    procedure setlivert_dashes(const avalue: string);
-   function islivert_dashesstored: boolean;
    procedure setlivert_dist(const avalue: integer);
-   function islivert_diststored: boolean;
    procedure setlivert_visible(const avalue: linevisiblesty);
-   function islivert_visiblestored: boolean;
 
    procedure setlibottom_widthmm(const avalue: real);
    procedure setlibottom_color(const avalue: colorty);
@@ -180,24 +173,19 @@ type
                  setlitop_visible default defaulttablinevisible;
 
    property livert_widthmm: real read flineinfos[tlk_vert].widthmm write
-                 setlivert_widthmm stored islivert_widthmmstored;
+                           setlivert_widthmm;
    property livert_color: colorty read flineinfos[tlk_vert].color write
-                 setlivert_color stored islivert_colorstored
-                                  default defaulttablinecolor;
+                             setlivert_color default defaulttablinecolor;
    property livert_colorgap: colorty read flineinfos[tlk_vert].colorgap write
-                 setlivert_colorgap stored islivert_colorgapstored
-                                  default defaulttablinecolorgap;
+                             setlivert_colorgap default defaulttablinecolorgap;
    property livert_capstyle: capstylety read flineinfos[tlk_vert].capstyle write
-                 setlivert_capstyle stored islivert_capstylestored
-                                  default defaulttablinecapstyle;
+                             setlivert_capstyle default defaulttablinecapstyle;
    property livert_dashes: string read flineinfos[tlk_vert].dashes write
-                 setlivert_dashes stored islivert_dashesstored;
+                             setlivert_dashes;
    property livert_dist: integer read flineinfos[tlk_vert].dist write
-                 setlivert_dist stored islivert_diststored
-                                  default defaulttablinedist;
+                             setlivert_dist default defaulttablinedist;
    property livert_visible: linevisiblesty read flineinfos[tlk_vert].visible write
-                 setlivert_visible stored islivert_visiblestored 
-                                  default defaulttablinevisible;
+                 setlivert_visible default defaulttablinevisible;
                  
    property libottom_widthmm: real read flineinfos[tlk_bottom].widthmm write
                  setlibottom_widthmm;
@@ -1309,22 +1297,10 @@ begin
  changed;
 end;
 
-function treptabulatoritem.islivert_widthmmstored: boolean;
-begin
- result:= flineinfos[tlk_vert].widthmm <> 
-                treptabulators(fowner).flineinfos[tlk_vert].widthmm;
-end;
-
 procedure treptabulatoritem.setlivert_color(const avalue: colorty);
 begin
  flineinfos[tlk_vert].color:= avalue;
  changed;
-end;
-
-function treptabulatoritem.islivert_colorstored: boolean;
-begin
- result:= flineinfos[tlk_vert].color <> 
-               treptabulators(fowner).flineinfos[tlk_vert].color;
 end;
 
 procedure treptabulatoritem.setlivert_colorgap(const avalue: colorty);
@@ -1333,22 +1309,10 @@ begin
  changed;
 end;
 
-function treptabulatoritem.islivert_colorgapstored: boolean;
-begin
- result:= flineinfos[tlk_vert].colorgap <> 
-              treptabulators(fowner).flineinfos[tlk_vert].colorgap;
-end;
-
 procedure treptabulatoritem.setlivert_capstyle(const avalue: capstylety);
 begin
  flineinfos[tlk_vert].capstyle:= avalue;
  changed;
-end;
-
-function treptabulatoritem.islivert_capstylestored: boolean;
-begin
- result:= flineinfos[tlk_vert].capstyle <> 
-              treptabulators(fowner).flineinfos[tlk_vert].capstyle;
 end;
 
 procedure treptabulatoritem.setlivert_dashes(const avalue: string);
@@ -1357,34 +1321,16 @@ begin
  changed;
 end;
 
-function treptabulatoritem.islivert_dashesstored: boolean;
-begin
- result:= flineinfos[tlk_vert].dashes <> 
-              treptabulators(fowner).flineinfos[tlk_vert].dashes;
-end;
-
 procedure treptabulatoritem.setlivert_dist(const avalue: integer);
 begin
  flineinfos[tlk_vert].dist:= avalue;
  changed;
 end;
 
-function treptabulatoritem.islivert_diststored: boolean;
-begin
- result:= flineinfos[tlk_vert].dist <> 
-              treptabulators(fowner).flineinfos[tlk_vert].dist;
-end;
-
 procedure treptabulatoritem.setlivert_visible(const avalue: linevisiblesty);
 begin
  flineinfos[tlk_vert].visible:= avalue;
  changed;
-end;
-
-function treptabulatoritem.islivert_visiblestored: boolean;
-begin
- result:= flineinfos[tlk_vert].visible <> 
-              treptabulators(fowner).flineinfos[tlk_vert].visible;
 end;
 
 procedure treptabulatoritem.setlibottom_widthmm(const avalue: real);
@@ -1867,10 +1813,12 @@ procedure treptabulators.setlivert_widthmm(const avalue: real);
 var
  int1: integer;
 begin
- if avalue <> flineinfos[tlk_vert].widthmm then begin
+ if (avalue <> flineinfos[tlk_vert].widthmm) then begin
   flineinfos[tlk_vert].widthmm:= avalue;
-  for int1:= 0 to high(fitems) do begin
-   treptabulatoritem(fitems[int1]).livert_widthmm:= avalue;
+  if not (csloading in fband.componentstate) then begin
+   for int1:= 0 to high(fitems) do begin
+    treptabulatoritem(fitems[int1]).livert_widthmm:= avalue;
+   end;
   end;
  end;
 end;
@@ -1879,10 +1827,12 @@ procedure treptabulators.setlivert_color(const avalue: colorty);
 var
  int1: integer;
 begin
- if avalue <> flineinfos[tlk_vert].color then begin
+ if (avalue <> flineinfos[tlk_vert].color) then begin
   flineinfos[tlk_vert].color:= avalue;
-  for int1:= 0 to high(fitems) do begin
-   treptabulatoritem(fitems[int1]).livert_color:= avalue;
+  if not (csloading in fband.componentstate) then begin
+   for int1:= 0 to high(fitems) do begin
+    treptabulatoritem(fitems[int1]).livert_color:= avalue;
+   end;
   end;
  end;
 end;
@@ -1891,10 +1841,12 @@ procedure treptabulators.setlivert_colorgap(const avalue: colorty);
 var
  int1: integer;
 begin
- if avalue <> flineinfos[tlk_vert].colorgap then begin
+ if (avalue <> flineinfos[tlk_vert].colorgap) then begin
   flineinfos[tlk_vert].colorgap:= avalue;
-  for int1:= 0 to high(fitems) do begin
-   treptabulatoritem(fitems[int1]).livert_colorgap:= avalue;
+  if not (csloading in fband.componentstate) then begin
+   for int1:= 0 to high(fitems) do begin
+    treptabulatoritem(fitems[int1]).livert_colorgap:= avalue;
+   end;
   end;
  end;
 end;
@@ -1903,10 +1855,12 @@ procedure treptabulators.setlivert_capstyle(const avalue: capstylety);
 var
  int1: integer;
 begin
- if avalue <> flineinfos[tlk_vert].capstyle then begin
+ if (avalue <> flineinfos[tlk_vert].capstyle) then begin
   flineinfos[tlk_vert].capstyle:= avalue;
-  for int1:= 0 to high(fitems) do begin
-   treptabulatoritem(fitems[int1]).livert_capstyle:= avalue;
+  if not (csloading in fband.componentstate) then begin
+   for int1:= 0 to high(fitems) do begin
+    treptabulatoritem(fitems[int1]).livert_capstyle:= avalue;
+   end;
   end;
  end;
 end;
@@ -1915,10 +1869,12 @@ procedure treptabulators.setlivert_dashes(const avalue: string);
 var
  int1: integer;
 begin
- if avalue <> flineinfos[tlk_vert].dashes then begin
+ if (avalue <> flineinfos[tlk_vert].dashes) then begin
   flineinfos[tlk_vert].dashes:= avalue;
-  for int1:= 0 to high(fitems) do begin
-   treptabulatoritem(fitems[int1]).livert_dashes:= avalue;
+  if not (csloading in fband.componentstate) then begin
+   for int1:= 0 to high(fitems) do begin
+    treptabulatoritem(fitems[int1]).livert_dashes:= avalue;
+   end;
   end;
  end;
 end;
@@ -1927,10 +1883,12 @@ procedure treptabulators.setlivert_dist(const avalue: integer);
 var
  int1: integer;
 begin
- if avalue <> flineinfos[tlk_vert].dist then begin
+ if (avalue <> flineinfos[tlk_vert].dist) then begin
   flineinfos[tlk_vert].dist:= avalue;
-  for int1:= 0 to high(fitems) do begin
-   treptabulatoritem(fitems[int1]).livert_dist:= avalue;
+  if not (csloading in fband.componentstate) then begin
+   for int1:= 0 to high(fitems) do begin
+    treptabulatoritem(fitems[int1]).livert_dist:= avalue;
+   end;
   end;
  end;
 end;
@@ -1939,7 +1897,8 @@ procedure treptabulators.setlivert_visible(const avalue: linevisiblesty);
 var
  int1: integer;
 begin
- if avalue <> flineinfos[tlk_vert].visible then begin
+ if (avalue <> flineinfos[tlk_vert].visible) and 
+              not (csloading in fband.componentstate) then begin
   flineinfos[tlk_vert].visible:= avalue;
   for int1:= 0 to high(fitems) do begin
    treptabulatoritem(fitems[int1]).livert_visible:= avalue;
