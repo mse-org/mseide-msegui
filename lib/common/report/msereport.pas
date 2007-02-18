@@ -1618,18 +1618,21 @@ begin
       end;
      end;
      textrect(acanvas,finfo);
-     dest.cx:= res.cx;
+//     dest.cx:= res.cx;
      case tabkind of
       tak_left: begin
        dest.x:= adest.x + textpos;
       end;
       tak_right: begin
+       dest.cx:= res.cx;
        dest.x:= adest.x + textpos - res.cx;
       end;
       tak_centered: begin
+       dest.cx:= res.cx;
        dest.x:= adest.x + textpos - res.cx div 2;
       end;
       else begin //tak_decimal
+       dest.cx:= res.cx;
        int2:= findlastchar(text.text,msechar(decimalseparator));
        if int2 > 0 then begin
         rstr1:= richcopy(text,int2,bigint);
