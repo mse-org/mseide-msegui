@@ -1189,9 +1189,10 @@ procedure TSQLQuery.InternalOpen;
   end;
 
 
-var tel         : integer;
+var tel, fieldc : integer;
     f           : TField;
     s           : string;
+    IndexFields : TStrings;
 begin
  if database <> nil then begin
   getcorbainterface(database,typeinfo(iblobconnection),fblobintf);
@@ -1216,10 +1217,15 @@ begin
               if ixPrimary in indexdefs[tel].options then
                 begin
                 // Todo: If there is more then one field in the key, that must be parsed
-                  s := indexdefs[tel].fields;
-                  F := Findfield(s);
-                  if F <> nil then
-                    F.ProviderFlags := F.ProviderFlags + [pfInKey];
+                  IndexFields := TStringList.Create;
+                  ExtractStrings([';'],[' '],pchar(indexdefs[tel].fields),IndexFields);
+                  for fieldc := 0 to IndexFields.Count-1 do
+                    begin
+                    F := Findfield(IndexFields[fieldc]);
+                    if F <> nil then
+                      F.ProviderFlags := F.ProviderFlags + [pfInKey];
+                    end;
+                  IndexFields.Free;
                 end;
               end;
             end;
