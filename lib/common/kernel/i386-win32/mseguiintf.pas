@@ -1150,6 +1150,8 @@ var
 begin
  result:= false;
  with drawinfo.getfont.fontdata^ do begin
+  height:= height shr fontsizeshift;
+  width:= width shr fontsizeshift;
   fontinfo1:= defaultfontinfo;
   with fontinfo1 do begin
    if height <> 0 then begin
