@@ -3579,6 +3579,8 @@ begin
  ar1:= nil; //compiler warning;
  fontinfo:= defaultfontinfo;
  with drawinfo.getfont.fontdata^ do begin
+  height:= height shr fontsizeshift;
+  width:= width shr fontsizeshift;
   if height <> 0 then begin
    fontinfo[fn_pixel_size]:= inttostr(height);
   end;

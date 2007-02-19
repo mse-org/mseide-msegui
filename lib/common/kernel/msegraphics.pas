@@ -25,6 +25,7 @@ const
  blueshift = 0;
 
  linewidthshift = 16;
+ fontsizeshift = 16;
  
  invalidgchandle = cardinal(-1);
  
@@ -2462,26 +2463,26 @@ end;
 
 function tfont.getheight: integer;
 begin
- result:= finfopo^.height;
+ result:= finfopo^.height shr fontsizeshift;
 end;
 
 procedure tfont.setheight(const avalue: integer);
 begin
  if finfopo^.height <> avalue then begin
-  finfopo^.height := avalue;
+  finfopo^.height:= avalue shl fontsizeshift;
   releasehandles;
  end;
 end;
 
 function tfont.getwidth: integer;
 begin
- result:= finfopo^.width;
+ result:= finfopo^.width shr fontsizeshift;
 end;
 
 procedure tfont.setwidth(const avalue: integer);
 begin
  if finfopo^.width <> avalue then begin
-  finfopo^.width := avalue;
+  finfopo^.width:= avalue shl fontsizeshift;
   releasehandles;
  end;
 end;
