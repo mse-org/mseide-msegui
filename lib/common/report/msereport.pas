@@ -905,6 +905,7 @@ type
    fprintstarttime: tdatetime;
    fonprogress: notifyeventty;
    fonrenderfinish: reporteventty;
+   fnilstream: boolean;
    procedure setppmm(const avalue: real);
    function getreppages(index: integer): tcustomreportpage;
    procedure setreppages(index: integer; const avalue: tcustomreportpage);
@@ -927,7 +928,7 @@ type
    procedure insertwidget(const awidget: twidget; const apos: pointty); override;
    procedure internalrender(const acanvas: tcanvas; const aprinter: tprinter;
                   const acommand: string; const astream: ttextstream;
-                  const nilstream: boolean; const onafterrender: reporteventty);
+                  const anilstream: boolean; const onafterrender: reporteventty);
    procedure unregisterchildwidget(const child: twidget); override;
    procedure getchildren(proc: tgetchildproc; root: tcomponent); override;
    procedure internalcreatefont; override;
@@ -955,6 +956,8 @@ type
    property activepage: integer read factivepage write setactivepage;
    procedure finish;
    property printstarttime: tdatetime read fprintstarttime write fprintstarttime;
+   property nilstream: boolean read fnilstream;
+                           //true if reder called with nil stream
 
    property font: twidgetfont read getfont write setfont;
    property color default cl_transparent;
@@ -4096,9 +4099,10 @@ end;
 
 procedure tcustomreport.internalrender(const acanvas: tcanvas;
                const aprinter: tprinter; const acommand: string;
-               const astream: ttextstream; const nilstream: boolean;
+               const astream: ttextstream; const anilstream: boolean;
                const onafterrender: reporteventty);
 begin
+ fnilstream:= anilstream;
  fonrenderfinish:= onafterrender;
  fprintstarttime:= now;
  fprinter:= aprinter;
@@ -4108,7 +4112,7 @@ begin
  acanvas.ppmm:= fppmm;
  if aprinter <> nil then begin
 //  aprinter.ppmm:= fppmm;
-  if (astream <> nil) or nilstream then begin
+  if (astream <> nil) or anilstream then begin
    aprinter.beginprint(astream);
   end
   else begin
