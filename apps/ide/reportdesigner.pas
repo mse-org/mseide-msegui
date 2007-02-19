@@ -129,7 +129,9 @@ end;
 
 procedure treportdesignerfo.repchildscaled(const sender: TObject);
 begin
-// placeyorder(0,[],[tabbar,freportcontainer],0);
+ ydisp.bounds_cx:= getcanvas.getstringwidth('999.9') + 8;
+ xdisp.bounds_cx:= getcanvas.getstringwidth('999.9mm') + 8;
+ placexorder(0,[],[ydisp,xdisp,tabbar],0);
 end;
 
 procedure treportdesignerfo.checktabs;
