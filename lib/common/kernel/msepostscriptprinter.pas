@@ -707,7 +707,7 @@ begin
     size:= round(defaultfontheight*ppmm);
    end
    else begin
-    size:= height;
+    size:= height shr fontsizeshift;
    end;
    scalestring:= psrealtostr((size / ppmm)*mmtoprintscale);
    additem(codepages,acodepage);
