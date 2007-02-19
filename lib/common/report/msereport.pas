@@ -2759,7 +2759,7 @@ procedure tcustomrecordband.paintxorpic(const acanvas: tcanvas;
                const apos: pointty; const aoffset: pointty;
                const aobjects: integerarty);
 begin
- acanvas.fillxorrect(makerect(aoffset.x+ftabs.pos[aobjects[0]],0,
+ acanvas.fillxorrect(makerect(aoffset.x+ftabs.linepos[aobjects[0]],0,
                                1,clientheight));
 end;
 
