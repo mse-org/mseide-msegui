@@ -887,7 +887,9 @@ type
  
  repstatety = (rs_activepageset,rs_finish);
  repstatesty = set of repstatety;
-  
+
+ reporteventty = procedure(const sender: tcustomreport) of object;
+   
  tcustomreport = class(twidget)
   private
    fppmm: real;
@@ -902,6 +904,7 @@ type
    factivepage: integer;
    fprintstarttime: tdatetime;
    fonprogress: notifyeventty;
+   fonrenderfinish: reporteventty;
    procedure setppmm(const avalue: real);
    function getreppages(index: integer): tcustomreportpage;
    procedure setreppages(index: integer; const avalue: tcustomreportpage);
@@ -923,7 +926,8 @@ type
    freppages: reportpagearty;
    procedure insertwidget(const awidget: twidget; const apos: pointty); override;
    procedure internalrender(const acanvas: tcanvas; const aprinter: tprinter;
-                   const acommand: string; const astream: ttextstream);
+                  const acommand: string; const astream: ttextstream;
+                  const nilstream: boolean; const onafterrender: reporteventty);
    procedure unregisterchildwidget(const child: twidget); override;
    procedure getchildren(proc: tgetchildproc; root: tcomponent); override;
    procedure internalcreatefont; override;
@@ -934,12 +938,12 @@ type
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
-   procedure render(const acanvas: tcanvas); overload;
-                    //true if empty
-   procedure render(const aprinter: tprinter; const command: string = '');
-                                       overload;  //true if empty
-   procedure render(const aprinter: tprinter; const astream: ttextstream);
-                                       overload;  //true if empty
+   procedure render(const acanvas: tcanvas;
+                        const onafterrender: reporteventty = nil); overload;
+   procedure render(const aprinter: tprinter; const command: string = '';
+                        const onafterrender: reporteventty = nil); overload;
+   procedure render(const aprinter: tprinter; const astream: ttextstream;
+                        const onafterrender: reporteventty = nil); overload;
    procedure waitfor;
    
    property ppmm: real read fppmm write setppmm; //pixel per mm
@@ -4092,8 +4096,10 @@ end;
 
 procedure tcustomreport.internalrender(const acanvas: tcanvas;
                const aprinter: tprinter; const acommand: string;
-               const astream: ttextstream);
+               const astream: ttextstream; const nilstream: boolean;
+               const onafterrender: reporteventty);
 begin
+ fonrenderfinish:= onafterrender;
  fprintstarttime:= now;
  fprinter:= aprinter;
  fcanvas:= acanvas;
@@ -4102,7 +4108,7 @@ begin
  acanvas.ppmm:= fppmm;
  if aprinter <> nil then begin
 //  aprinter.ppmm:= fppmm;
-  if astream <> nil then begin
+  if (astream <> nil) or nilstream then begin
    aprinter.beginprint(astream);
   end
   else begin
@@ -4113,21 +4119,24 @@ begin
  fthread:= tmsethread.create({$ifdef FPC}@{$endif}exec);
 end;
 
-procedure tcustomreport.render(const acanvas: tcanvas);
+procedure tcustomreport.render(const acanvas: tcanvas;
+              const onafterrender: reporteventty = nil);
 begin
- internalrender(acanvas,nil,'',nil);
+ internalrender(acanvas,nil,'',nil,false,onafterrender);
 end;
 
 procedure tcustomreport.render(const aprinter: tprinter;
-               const command: string = '');
+               const command: string = '';
+              const onafterrender: reporteventty = nil);
 begin
- internalrender(aprinter.canvas,aprinter,command,nil);
+ internalrender(aprinter.canvas,aprinter,command,nil,false,onafterrender);
 end;
 
 procedure tcustomreport.render(const aprinter: tprinter;
-               const astream: ttextstream);
+               const astream: ttextstream;
+              const onafterrender: reporteventty = nil);
 begin
- internalrender(aprinter.canvas,aprinter,'',astream);
+ internalrender(aprinter.canvas,aprinter,'',astream,astream = nil,onafterrender);
 end;
 
 procedure tcustomreport.getchildren(proc: tgetchildproc; root: tcomponent);
@@ -4297,8 +4306,13 @@ end;
 procedure tcustomreport.doasyncevent(var atag: integer);
 begin
  inherited;
- if (atag = endrendertag) and canevent(tmethod(fonafterrender)) then begin
-  fonafterrender(self);
+ if (atag = endrendertag) then begin
+  if canevent(tmethod(fonafterrender)) then begin
+   fonafterrender(self);
+  end;
+  if canevent(tmethod(fonrenderfinish)) then begin
+   fonrenderfinish(self);
+  end;
  end;
 end;
 
