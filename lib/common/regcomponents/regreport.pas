@@ -38,6 +38,8 @@ begin
  
  registerdesignmoduleclass(treport,reportintf,treportdesignerfo);
  registerpropertyeditor(typeinfo(treptabulators),nil,'',treptabulatorseditor);
+ registerpropertyeditor(typeinfo(tcustomrecordband),treptabulators,'linksource',
+                           tlocallinkcomponentpropertyeditor);
  registerpropertyeditor(typeinfo(string),tcustomrecordband,'visidatafield',
         tdbfieldnamepropertyeditor);
  registerpropertyeditor(typeinfo(string),tcustomrecordband,'visigroupfield',

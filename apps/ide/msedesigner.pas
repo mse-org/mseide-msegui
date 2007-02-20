@@ -308,6 +308,8 @@ type
    procedure checkident(const aname: string);
    procedure beginstreaming(const amodule: pmoduleinfoty);
    procedure endstreaming(const amodule: pmoduleinfoty);
+   property selections: tdesignerselections read fselections;
+                 //do not modify!
   public
    constructor create; reintroduce;
    destructor destroy; override;

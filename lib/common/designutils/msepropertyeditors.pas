@@ -45,7 +45,8 @@ type
                    ps_valuelist,ps_dialog,ps_sortlist,ps_owned,
                    ps_noadditems,ps_nodeleteitems,
                    ps_isordprop,ps_modified,ps_candefault,ps_component,ps_subprop,
-                   ps_local);  //do not display foreign components
+                   ps_local,  //do not display foreign components
+                   ps_link);  //do not display selected components
  propertystatesty = set of propertystatety;
 
  iremotepropertyeditor = interface
@@ -302,7 +303,12 @@ type
   protected
    function getdefaultstate: propertystatesty; override;
  end;
- 
+
+ tlocallinkcomponentpropertyeditor = class(tcomponentpropertyeditor)
+  protected
+   function getdefaultstate: propertystatesty; override;
+ end;
+  
  tsetpropertyeditor = class;
  tsetelementeditor = class(tpropertyeditor)
   protected
@@ -668,7 +674,8 @@ uses
  mseshapes,msestockobjects,msetexteditor,
  msegraphicstream,
  mseformatbmpico{$ifdef FPC},mseformatjpg,mseformatpng,
- mseformatpnm,mseformattga,mseformatxpm{$endif},msestat,msestatfile,msefileutils;
+ mseformatpnm,mseformattga,mseformatxpm{$endif},msestat,msestatfile,msefileutils,
+ msedesigner;
 
 const
  methodsortlevel = 100;
@@ -678,6 +685,7 @@ const
 type
  twidget1 = class(twidget);
  tcustomcaptionframe1 = class(tcustomcaptionframe);
+ tdesigner1 = class(tdesigner);
 
 var
  apropertyeditors: tpropertyeditors;
@@ -1868,19 +1876,49 @@ end;
 function tcomponentpropertyeditor.getvalues: msestringarty;
 var
  co1: tcomponent;
+ ar1: componentarty;
+ int1,int2: integer;
 begin
  if issubcomponent then begin
   result:= inherited getvalues;
  end
  else begin
-  if ps_local in fstate then begin
-   co1:= fmodule;
+  if ps_link in fstate then begin
+   ar1:= fdesigner.getcomponentlist(tcomponentclass(typedata^.classtype));
+   if ps_local in fstate then begin
+    co1:= fcomponent.owner;
+    for int1:= high(ar1) downto 0 do begin
+     if ar1[int1].owner <> co1 then begin
+      ar1[int1]:= nil;
+     end;
+    end;
+   end;
+   for int1:= 0 to high(ar1) do begin
+    with tdesigner1(designer).selections do begin
+     for int2:= count - 1 downto 0 do begin
+      if items[int2] = ar1[int1] then begin
+       ar1[int1]:= nil; //remove selected components
+       break;
+      end;
+     end;
+    end;
+   end;
+   for int1:= 0 to high(ar1) do begin
+    if ar1[int1] <> nil then begin
+     additem(result,msestring(ar1[int1].name));
+    end;
+   end;
   end
   else begin
-   co1:= nil;
-  end;
-  result:= fdesigner.getcomponentnamelist(
+   if ps_local in fstate then begin
+    co1:= fmodule;
+   end
+   else begin
+    co1:= nil;
+   end;
+   result:= fdesigner.getcomponentnamelist(
                   tcomponentclass(typedata^.classtype),false,co1);
+  end;
  end;
 end;
 
@@ -1959,6 +1997,13 @@ end;
 function tlocalcomponentpropertyeditor.getdefaultstate: propertystatesty;
 begin
  result:= inherited getdefaultstate + [ps_local];
+end;
+
+{ tlocallinkcomponentpropertyeditor }
+
+function tlocallinkcomponentpropertyeditor.getdefaultstate: propertystatesty;
+begin
+ result:= inherited getdefaultstate + [ps_local,ps_link];
 end;
 
 { toptionalclasspropertyeditor }
@@ -3681,7 +3726,7 @@ begin
 end;
 
 initialization
- apropertyeditors:= tpropertyeditors.Create;
+// apropertyeditors:= tpropertyeditors.Create;
 finalization
  freeandnil(apropertyeditors);
 end.
