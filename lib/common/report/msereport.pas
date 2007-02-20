@@ -2125,7 +2125,7 @@ end;
 procedure treptabulators.dochange(const aindex: integer);
 begin
  inherited;
- fband.sendchangeevent; 
+ fband.sendchangeevent(oe_designchanged); 
 end;
 
 { tcustomrecordband }
@@ -2835,7 +2835,7 @@ procedure tcustomrecordband.objectevent(const sender: tobject;
                const event: objecteventty);
 begin
  inherited;
- if (event = oe_changed) and (sender = ftabs.flinksource) then begin
+ if (event = oe_designchanged) and (sender = ftabs.flinksource) then begin
   ftabs.sourcechanged;
   designchanged;
  end;

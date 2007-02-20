@@ -55,7 +55,8 @@ type
    function QueryInterface(const IID: TGUID; out Obj): HResult; stdcall;
  end;
 
- objecteventty = (oe_destroyed,oe_connect,oe_changed,oe_activate,oe_deactivate);
+ objecteventty = (oe_destroyed,oe_connect,oe_changed,oe_designchanged,
+                  oe_activate,oe_deactivate);
  objectlinkeventty = procedure(const sender: tobject;
                     const event: objecteventty) of object;
  iobjectlink = interface(inullinterface)

@@ -47,9 +47,17 @@ end;
 { treptabulatoreditor }
 
 function treptabulatoreditor.getvalue: msestring;
+var
+ mstr1: msestring;
 begin
  with treptabulatoritem(getordvalue) do begin
-  result:= '<'+formatfloat('0.0',pos)+'><'+datafield+'>';
+  if datafield = '' then begin
+   mstr1:= value;
+  end
+  else begin
+   mstr1:= datafield;
+  end;
+  result:= '<'+formatfloat('0.0',pos)+'><'+mstr1+'>';
  end;
 end;
 

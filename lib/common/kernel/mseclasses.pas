@@ -260,7 +260,7 @@ type
    function getobjectlinker: tobjectlinker;
    procedure objectevent(const sender: tobject; const event: objecteventty); virtual;
    procedure loaded; override;
-   procedure sendchangeevent;
+   procedure sendchangeevent(const aevent: objecteventty = oe_changed);
    function linkcount: integer;
    function canevent(const event: tmethod): boolean;
    function candestroyevent(const event: tmethod): boolean;
@@ -2515,10 +2515,10 @@ begin
  //dummy
 end;
 
-procedure tmsecomponent.sendchangeevent;
+procedure tmsecomponent.sendchangeevent(const aevent: objecteventty = oe_changed);
 begin
  if (fobjectlinker <> nil) and not (csloading in componentstate) then begin
-  fobjectlinker.sendevent(oe_changed);
+  fobjectlinker.sendevent(aevent);
  end;
 end;
 
