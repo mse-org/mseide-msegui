@@ -892,11 +892,14 @@ type
   snaptogrid: boolean;
  end;
  
- repstatety = (rs_activepageset,rs_finish);
+ repstatety = (rs_activepageset,rs_finish,rs_running);
  repstatesty = set of repstatety;
 
  reporteventty = procedure(const sender: tcustomreport) of object;
-   
+
+ reportoptionty = (reo_autorelease);
+ reportoptionsty = set of reportoptionty;
+ 
  tcustomreport = class(twidget)
   private
    fppmm: real;
@@ -913,6 +916,7 @@ type
    fonprogress: notifyeventty;
    fonrenderfinish: reporteventty;
    fnilstream: boolean;
+   foptions: reportoptionsty;
    procedure setppmm(const avalue: real);
    function getreppages(index: integer): tcustomreportpage;
    procedure setreppages(index: integer; const avalue: tcustomreportpage);
@@ -953,6 +957,7 @@ type
    procedure render(const aprinter: tprinter; const astream: ttextstream;
                         const onafterrender: reporteventty = nil); overload;
    procedure waitfor;
+           //returns before calling of onafterrender
    
    property ppmm: real read fppmm write setppmm; //pixel per mm
    function reppagecount: integer;
@@ -973,6 +978,7 @@ type
    property grid_size: real read frepdesigninfo.gridsize write setgrid_size;   
    property canceled: boolean read getcanceled write setcanceled;
    property running: boolean read getrunning;
+   property options: reportoptionsty read foptions write foptions;
 
    property onbeforerender: notifyeventty read fonbeforerender
                                write fonbeforerender;
@@ -996,6 +1002,7 @@ type
    property grid_show;
    property grid_snap;
    property grid_size;
+   property options;
    property onbeforerender;
    property onafterrender;
    property onprogress;
@@ -4163,6 +4170,10 @@ procedure tcustomreport.internalrender(const acanvas: tcanvas;
                const astream: ttextstream; const anilstream: boolean;
                const onafterrender: reporteventty);
 begin
+ if running then begin
+  raise exception.create('Already rendering.');
+ end;
+ include(fstate,rs_running);
  fnilstream:= anilstream;
  fonrenderfinish:= onafterrender;
  fprintstarttime:= now;
@@ -4341,6 +4352,7 @@ begin
   int1:= application.unlockall;
   fthread.waitfor;
   application.relockall(int1);
+  exclude(fstate,rs_running);
  end;
 end;
 
@@ -4377,6 +4389,10 @@ begin
   end;
   if canevent(tmethod(fonrenderfinish)) then begin
    fonrenderfinish(self);
+  end;
+  exclude(fstate,rs_running);
+  if reo_autorelease in foptions then begin
+   release;
   end;
  end;
 end;

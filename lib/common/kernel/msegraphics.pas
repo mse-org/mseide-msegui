@@ -1733,8 +1733,8 @@ var
  begin
   po1^.name:= name;
   po1^.mode:= mode;
-  po1^.height:= height;
-  po1^.width:= width;
+  po1^.height:= height shl fontsizeshift;
+  po1^.width:= width shl fontsizeshift;
   po1^.options:= options;
  end;
 
