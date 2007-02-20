@@ -11,4 +11,8 @@ object ${%FORMNAME%}: t${%FORMNAME%}
     369
   )
   moduleclassname = 'treport'
+  object treportpage1: treportpage
+    pagewidth = 190
+    pageheight = 270
+  end
 end

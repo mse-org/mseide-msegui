@@ -6,6 +6,7 @@ uses
 
 type
  t${%FORMNAME%} = class(treport)
+   treportpage1: treportpage;
  end;
 var
  ${%FORMNAME%}: t${%FORMNAME%};

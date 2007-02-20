@@ -1562,6 +1562,8 @@ type
    function regularactivewindow: twindow;
    function unreleasedactivewindow: twindow;
    function activewidget: twidget;
+   function activerootwidget: twidget;
+   
    function windowatpos(const pos: pointty): twindow;
    function findwidget(const namepath: string; out awidget: twidget): boolean;
                 //false if invalid namepath, '' -> nil and true
@@ -11595,6 +11597,16 @@ function tapplication.activewidget: twidget;
 begin
  if factivewindow <> nil then begin
   result:= factivewindow.ffocusedwidget;
+ end
+ else begin
+  result:= nil;
+ end;
+end;
+
+function tapplication.activerootwidget: twidget;
+begin
+ if factivewindow <> nil then begin
+  result:= factivewindow.fowner;
  end
  else begin
   result:= nil;
