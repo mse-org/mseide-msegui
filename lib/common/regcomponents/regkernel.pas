@@ -74,7 +74,7 @@ begin
                     ttimer,tstatfile,taction,tfacecomp,tframecomp,
                     tpostscriptprinter,tactivator]);
  registercomponents('Dialog',[tpagesizeselector,tpageorientationselector]);
- registerpropertyeditor(typeinfo(twidget),nil,'',tcomponentpropertyeditor);
+// registerpropertyeditor(typeinfo(twidget),nil,'',tcomponentpropertyeditor);
  registerpropertyeditor(typeinfo(tcustomaction),nil,'',tactionpropertyeditor);
  registerpropertyeditor(typeinfo(string),tfont,'name',tfontnamepropertyeditor);
  registerpropertyeditor(typeinfo(actionstatesty),nil,'',tshapestatespropertyeditor);

@@ -275,6 +275,7 @@ type
    procedure recchanged;
    procedure sourcechanged;
    procedure dochange(const aindex: integer); override;
+   procedure setcount1(acount: integer; doinit: boolean); override;
   public
    constructor create(const aowner: tcustomrecordband);
    property items[const index: integer]: treptabulatoritem read getitems 
@@ -2135,6 +2136,36 @@ procedure treptabulators.dochange(const aindex: integer);
 begin
  inherited;
  fband.sendchangeevent(oe_designchanged); 
+end;
+
+procedure treptabulators.setcount1(acount: integer; doinit: boolean);
+const
+ step = 10;
+var
+ countbefore: integer;
+ int1,int2: integer;
+begin
+ with fband do begin
+  if (componentstate * [csdesigning,csloading] = [csdesigning]) and
+              (acount > count) then begin
+   countbefore:= count;
+   checkuptodate;
+   if countbefore > 0 then begin
+    int2:= self.pos[countbefore-1] + step;
+   end
+   else begin
+    int2:= 0;
+   end;
+   inherited;
+   for int1:= countbefore to count - 1 do begin
+    items[int1].pos:= int2 / ppmm;    
+    inc(int2,step); //offset
+   end;
+  end
+  else begin
+   inherited;
+  end;
+ end;
 end;
 
 { tcustomrecordband }
