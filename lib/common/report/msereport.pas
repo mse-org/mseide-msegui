@@ -34,7 +34,7 @@ const
                [osc_expandx,osc_shrinkx,osc_expandy,osc_shrinky];
   
 type
- linevisiblety = (lv_first,lv_normal,lv_last);
+ linevisiblety = (lv_firstofpage,lv_normal,lv_lastofpage,lv_firstrecord,lv_lastrecord);
  linevisiblesty = set of linevisiblety;
   
  tablineinfoty = record
@@ -55,7 +55,8 @@ const
  defaulttablinecapstyle = cs_projecting;
  defaulttablinedashes = '';
  defaulttablinedist = 0;
- defaulttablinevisible = [lv_first,lv_normal,lv_last];
+ defaulttablinevisible = [lv_firstofpage,lv_normal,lv_lastofpage,
+                          lv_firstrecord,lv_lastrecord];
  defaulttablineinfo: tablineinfoty = (widthmm: defaulttablinewidth; 
          color: defaulttablinecolor; colorgap: defaulttablinecolorgap;
          capstyle: defaulttablinecapstyle;
@@ -1546,17 +1547,25 @@ begin
  if apaint then begin
   with fband do begin
    if not rendering or (fparentintf = nil) then begin 
-    visiblemask:= [lv_first,lv_normal,lv_last];
+    visiblemask:= [lv_firstofpage,lv_normal,lv_lastofpage,lv_firstrecord,lv_lastrecord];
    end
    else begin
     visiblemask:= [lv_normal];    
     with fparentintf do begin
      if isfirstband then begin
-      include(visiblemask,lv_first);
+      include(visiblemask,lv_firstofpage);
       exclude(visiblemask,lv_normal);
      end;
      if islastband then begin
-      include(visiblemask,lv_last);
+      include(visiblemask,lv_lastofpage);
+      exclude(visiblemask,lv_normal);
+     end;
+     if isfirstrecord then begin
+      include(visiblemask,lv_firstrecord);
+      exclude(visiblemask,lv_normal);
+     end;
+     if islastrecord then begin
+      include(visiblemask,lv_lastrecord);
       exclude(visiblemask,lv_normal);
      end;
     end;
