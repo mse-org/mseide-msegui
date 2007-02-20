@@ -947,6 +947,8 @@ type
    procedure nextpage(const acanvas: tcanvas);
    procedure doprogress;
    procedure doasyncevent(var atag: integer); override;
+   procedure notification(acomponent: tcomponent; 
+                                        operation: toperation); override;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -4176,6 +4178,10 @@ begin
  include(fstate,rs_running);
  fnilstream:= anilstream;
  fonrenderfinish:= onafterrender;
+ if assigned(fonrenderfinish) and 
+         (tobject(tmethod(fonrenderfinish).data) is tcomponent) then begin
+  tcomponent(tmethod(fonrenderfinish).data).freenotification(self);
+ end;
  fprintstarttime:= now;
  fprinter:= aprinter;
  fcanvas:= acanvas;
@@ -4394,6 +4400,16 @@ begin
   if reo_autorelease in foptions then begin
    release;
   end;
+ end;
+end;
+
+procedure tcustomreport.notification(acomponent: tcomponent;
+               operation: toperation);
+begin
+ inherited;
+ if assigned(fonrenderfinish) and 
+           (tmethod(fonrenderfinish).data = pointer(acomponent)) then begin
+  fonrenderfinish:= nil;
  end;
 end;
 
