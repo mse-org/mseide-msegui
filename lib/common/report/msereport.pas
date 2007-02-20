@@ -214,8 +214,8 @@ type
    fminsize: sizety;
    fsizevalid: boolean;
    flineinfos: tablineinfoarty;
-   flistart: tablineinfoty;
-   fliend: tablineinfoty;
+   flileft: tablineinfoty;
+   fliright: tablineinfoty;
    fdistright: real;
    fdistleft: real;
 
@@ -228,13 +228,13 @@ type
    procedure setlitop_dist(const avalue: integer);
    procedure setlitop_visible(const avalue: linevisiblesty);
 
-   procedure setlistart_widthmm(const avalue: real);
-   procedure setlistart_color(const avalue: colorty);
-   procedure setlistart_colorgap(const avalue: colorty);
-   procedure setlistart_capstyle(const avalue: capstylety);
-   procedure setlistart_dashes(const avalue: string);
-   procedure setlistart_dist(const avalue: integer);
-   procedure setlistart_visible(const avalue: linevisiblesty);
+   procedure setlileft_widthmm(const avalue: real);
+   procedure setlileft_color(const avalue: colorty);
+   procedure setlileft_colorgap(const avalue: colorty);
+   procedure setlileft_capstyle(const avalue: capstylety);
+   procedure setlileft_dashes(const avalue: string);
+   procedure setlileft_dist(const avalue: integer);
+   procedure setlileft_visible(const avalue: linevisiblesty);
 
    procedure setlivert_widthmm(const avalue: real);
    procedure setlivert_color(const avalue: colorty);
@@ -244,13 +244,13 @@ type
    procedure setlivert_dist(const avalue: integer);
    procedure setlivert_visible(const avalue: linevisiblesty);
 
-   procedure setliend_widthmm(const avalue: real);
-   procedure setliend_color(const avalue: colorty);
-   procedure setliend_colorgap(const avalue: colorty);
-   procedure setliend_capstyle(const avalue: capstylety);
-   procedure setliend_dashes(const avalue: string);
-   procedure setliend_dist(const avalue: integer);
-   procedure setliend_visible(const avalue: linevisiblesty);
+   procedure setliright_widthmm(const avalue: real);
+   procedure setliright_color(const avalue: colorty);
+   procedure setliright_colorgap(const avalue: colorty);
+   procedure setliright_capstyle(const avalue: capstylety);
+   procedure setliright_dashes(const avalue: string);
+   procedure setliright_dist(const avalue: integer);
+   procedure setliright_visible(const avalue: linevisiblesty);
 
    procedure setlibottom_widthmm(const avalue: real);
    procedure setlibottom_color(const avalue: colorty);
@@ -295,20 +295,20 @@ type
    property litop_visible: linevisiblesty read flineinfos[tlk_top].visible write
                  setlitop_visible default defaulttablinevisible;
 
-   property listart_widthmm: real read flistart.widthmm write
-                 setlistart_widthmm;
-   property listart_color: colorty read flistart.color write
-                 setlistart_color default defaulttablinecolor;
-   property listart_colorgap: colorty read flistart.colorgap write
-                 setlistart_colorgap default defaulttablinecolorgap;
-   property listart_capstyle: capstylety read flistart.capstyle write
-                 setlistart_capstyle default defaulttablinecapstyle;
-   property listart_dashes: string read flistart.dashes write
-                 setlistart_dashes;
-   property listart_dist: integer read flistart.dist write
-                 setlistart_dist default defaulttablinedist;
-   property listart_visible: linevisiblesty read flistart.visible write
-                 setlistart_visible default defaulttablinevisible;
+   property lileft_widthmm: real read flileft.widthmm write
+                 setlileft_widthmm;
+   property lileft_color: colorty read flileft.color write
+                 setlileft_color default defaulttablinecolor;
+   property lileft_colorgap: colorty read flileft.colorgap write
+                 setlileft_colorgap default defaulttablinecolorgap;
+   property lileft_capstyle: capstylety read flileft.capstyle write
+                 setlileft_capstyle default defaulttablinecapstyle;
+   property lileft_dashes: string read flileft.dashes write
+                 setlileft_dashes;
+   property lileft_dist: integer read flileft.dist write
+                 setlileft_dist default defaulttablinedist;
+   property lileft_visible: linevisiblesty read flileft.visible write
+                 setlileft_visible default defaulttablinevisible;
 
    property livert_widthmm: real read flineinfos[tlk_vert].widthmm write
                  setlivert_widthmm;
@@ -325,20 +325,20 @@ type
    property livert_visible: linevisiblesty read flineinfos[tlk_vert].visible write
                  setlivert_visible default defaulttablinevisible;
                  
-   property liend_widthmm: real read fliend.widthmm write
-                 setliend_widthmm;
-   property liend_color: colorty read fliend.color write
-                 setliend_color default defaulttablinecolor;
-   property liend_colorgap: colorty read fliend.colorgap write
-                 setliend_colorgap default defaulttablinecolorgap;
-   property liend_capstyle: capstylety read fliend.capstyle write
-                 setliend_capstyle default defaulttablinecapstyle;
-   property liend_dashes: string read fliend.dashes write
-                 setliend_dashes;
-   property liend_dist: integer read fliend.dist write
-                 setliend_dist default defaulttablinedist;
-   property liend_visible: linevisiblesty read fliend.visible write
-                 setliend_visible default defaulttablinevisible;
+   property liright_widthmm: real read fliright.widthmm write
+                 setliright_widthmm;
+   property liright_color: colorty read fliright.color write
+                 setliright_color default defaulttablinecolor;
+   property liright_colorgap: colorty read fliright.colorgap write
+                 setliright_colorgap default defaulttablinecolorgap;
+   property liright_capstyle: capstylety read fliright.capstyle write
+                 setliright_capstyle default defaulttablinecapstyle;
+   property liright_dashes: string read fliright.dashes write
+                 setliright_dashes;
+   property liright_dist: integer read fliright.dist write
+                 setliright_dist default defaulttablinedist;
+   property liright_visible: linevisiblesty read fliright.visible write
+                 setliright_visible default defaulttablinevisible;
 
    property libottom_widthmm: real read flineinfos[tlk_bottom].widthmm write
                  setlibottom_widthmm;
@@ -1423,8 +1423,8 @@ var
  kind1: tablinekindty;
 begin
  fband:= aowner;
- flistart:= defaulttablineinfo;
- fliend:= defaulttablineinfo;
+ flileft:= defaulttablineinfo;
+ fliright:= defaulttablineinfo;
  for kind1:= low(tablinekindty) to high(tablinekindty) do begin
   flineinfos[kind1]:= defaulttablineinfo;
  end;
@@ -1660,20 +1660,20 @@ begin
  acanvas.remove(makepoint(adest.x,0));
  if apaint then begin
   bandcx:= fband.clientwidth;
-  with flistart do begin
+  with flileft do begin
    if widthmm > 0 then begin
     if visible * visiblemask <> [] then begin
-     checkinit(flistart);
+     checkinit(flileft);
      acanvas.drawline(makepoint(-dist,
             fband.clientheight+flineinfos[tlk_bottom].dist),
                           makepoint(-dist,-flineinfos[tlk_top].dist),color);
     end;
    end;
   end;
-  with fliend do begin
+  with fliright do begin
    if widthmm > 0 then begin
     if visible * visiblemask <> [] then begin
-     checkinit(fliend);
+     checkinit(fliright);
      acanvas.drawline(makepoint(bandcx+dist,fband.clientheight+
                                flineinfos[tlk_bottom].dist),
                     makepoint(bandcx+dist,-flineinfos[tlk_top].dist),color);
@@ -1684,8 +1684,8 @@ begin
    if widthmm > 0 then begin
     if visible * visiblemask <> [] then begin
      checkinit(flineinfos[tlk_top]);
-     acanvas.drawline(makepoint(-flistart.dist,-dist),
-                                makepoint(bandcx+fliend.dist,-dist),color);
+     acanvas.drawline(makepoint(-flileft.dist,-dist),
+                                makepoint(bandcx+fliright.dist,-dist),color);
     end;
    end;
   end;
@@ -1694,8 +1694,8 @@ begin
     if visible * visiblemask <> [] then begin
      checkinit(flineinfos[tlk_bottom]);
      int2:= fband.clientheight+dist;
-     acanvas.drawline(makepoint(-flistart.dist,int2),
-                               makepoint(bandcx+fliend.dist,int2),color);
+     acanvas.drawline(makepoint(-flileft.dist,int2),
+                               makepoint(bandcx+fliright.dist,int2),color);
     end;
    end;
   end;
@@ -1777,58 +1777,58 @@ begin
  end;
 end;
 
-procedure treptabulators.setlistart_widthmm(const avalue: real);
+procedure treptabulators.setlileft_widthmm(const avalue: real);
 begin
- if avalue <> flistart.widthmm then begin
-  flistart.widthmm:= avalue;
+ if avalue <> flileft.widthmm then begin
+  flileft.widthmm:= avalue;
   fband.invalidate;
  end;
 end;
 
-procedure treptabulators.setlistart_color(const avalue: colorty);
+procedure treptabulators.setlileft_color(const avalue: colorty);
 begin
- if avalue <> flistart.color then begin
-  flistart.color:= avalue;
+ if avalue <> flileft.color then begin
+  flileft.color:= avalue;
   fband.invalidate;
  end;
 end;
 
-procedure treptabulators.setlistart_colorgap(const avalue: colorty);
+procedure treptabulators.setlileft_colorgap(const avalue: colorty);
 begin
- if avalue <> flistart.colorgap then begin
-  flistart.colorgap:= avalue;
+ if avalue <> flileft.colorgap then begin
+  flileft.colorgap:= avalue;
   fband.invalidate;
  end;
 end;
 
-procedure treptabulators.setlistart_capstyle(const avalue: capstylety);
+procedure treptabulators.setlileft_capstyle(const avalue: capstylety);
 begin
- if avalue <> flistart.capstyle then begin
-  flistart.capstyle:= avalue;
+ if avalue <> flileft.capstyle then begin
+  flileft.capstyle:= avalue;
   fband.invalidate;
  end;
 end;
 
-procedure treptabulators.setlistart_dashes(const avalue: string);
+procedure treptabulators.setlileft_dashes(const avalue: string);
 begin
- if avalue <> flistart.dashes then begin
-  flistart.dashes:= avalue;
+ if avalue <> flileft.dashes then begin
+  flileft.dashes:= avalue;
   fband.invalidate;
  end;
 end;
 
-procedure treptabulators.setlistart_dist(const avalue: integer);
+procedure treptabulators.setlileft_dist(const avalue: integer);
 begin
- if avalue <> flistart.dist then begin
-  flistart.dist:= avalue;
+ if avalue <> flileft.dist then begin
+  flileft.dist:= avalue;
   fband.invalidate;
  end;
 end;
 
-procedure treptabulators.setlistart_visible(const avalue: linevisiblesty);
+procedure treptabulators.setlileft_visible(const avalue: linevisiblesty);
 begin
- if avalue <> flistart.visible then begin
-  flistart.visible:= avalue;
+ if avalue <> flileft.visible then begin
+  flileft.visible:= avalue;
   fband.invalidate;
  end;
 end;
@@ -1930,58 +1930,58 @@ begin
  end;
 end;
 
-procedure treptabulators.setliend_widthmm(const avalue: real);
+procedure treptabulators.setliright_widthmm(const avalue: real);
 begin
- if avalue <> fliend.widthmm then begin
-  fliend.widthmm:= avalue;
+ if avalue <> fliright.widthmm then begin
+  fliright.widthmm:= avalue;
   fband.invalidate;
  end;
 end;
 
-procedure treptabulators.setliend_color(const avalue: colorty);
+procedure treptabulators.setliright_color(const avalue: colorty);
 begin
- if avalue <> fliend.color then begin
-  fliend.color:= avalue;
+ if avalue <> fliright.color then begin
+  fliright.color:= avalue;
   fband.invalidate;
  end;
 end;
 
-procedure treptabulators.setliend_colorgap(const avalue: colorty);
+procedure treptabulators.setliright_colorgap(const avalue: colorty);
 begin
- if avalue <> fliend.colorgap then begin
-  fliend.colorgap:= avalue;
+ if avalue <> fliright.colorgap then begin
+  fliright.colorgap:= avalue;
   fband.invalidate;
  end;
 end;
 
-procedure treptabulators.setliend_capstyle(const avalue: capstylety);
+procedure treptabulators.setliright_capstyle(const avalue: capstylety);
 begin
- if avalue <> fliend.capstyle then begin
-  fliend.capstyle:= avalue;
+ if avalue <> fliright.capstyle then begin
+  fliright.capstyle:= avalue;
   fband.invalidate;
  end;
 end;
 
-procedure treptabulators.setliend_dashes(const avalue: string);
+procedure treptabulators.setliright_dashes(const avalue: string);
 begin
- if avalue <> fliend.dashes then begin
-  fliend.dashes:= avalue;
+ if avalue <> fliright.dashes then begin
+  fliright.dashes:= avalue;
   fband.invalidate;
  end;
 end;
 
-procedure treptabulators.setliend_dist(const avalue: integer);
+procedure treptabulators.setliright_dist(const avalue: integer);
 begin
- if avalue <> fliend.dist then begin
-  fliend.dist:= avalue;
+ if avalue <> fliright.dist then begin
+  fliright.dist:= avalue;
   fband.invalidate;
  end;
 end;
 
-procedure treptabulators.setliend_visible(const avalue: linevisiblesty);
+procedure treptabulators.setliright_visible(const avalue: linevisiblesty);
 begin
- if avalue <> fliend.visible then begin
-  fliend.visible:= avalue;
+ if avalue <> fliright.visible then begin
+  fliright.visible:= avalue;
   fband.invalidate;
  end;
 end;
