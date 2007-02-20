@@ -2361,7 +2361,8 @@ begin
  //dummy;
 end;
 
-procedure tguicomponent.objectevent(const sender: tobject; const event: objecteventty);
+procedure tguicomponent.objectevent(const sender: tobject; 
+                               const event: objecteventty);
 begin
  inherited;
  if (sender = factivator) then begin

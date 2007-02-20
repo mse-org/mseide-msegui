@@ -219,6 +219,7 @@ type
    fdistright: real;
    fdistleft: real;
 
+   flinksource: tcustomrecordband;
    procedure setlitop_widthmm(const avalue: real);
    procedure setlitop_color(const avalue: colorty);
    procedure setlitop_colorgap(const avalue: colorty);
@@ -265,11 +266,14 @@ type
                         const apaint: boolean);
    procedure setdistleft(const avalue: real);
    procedure setdistright(const avalue: real);
+   procedure setlinksource(const avalue: tcustomrecordband);
   protected
    class function getitemclass: tabulatoritemclassty; override;
    procedure paint(const acanvas: tcanvas; const adest: rectty);
    procedure checksize;
    procedure recchanged;
+   procedure sourcechanged;
+   procedure dochange(const aindex: integer); override;
   public
    constructor create(const aowner: tcustomrecordband);
    property items[const index: integer]: treptabulatoritem read getitems 
@@ -352,6 +356,7 @@ type
                write setlibottom_visible default defaulttablinevisible;               
    property distleft: real read fdistleft write setdistleft; //mm
    property distright: real read fdistright write setdistright; //mm
+   property linksource: tcustomrecordband read flinksource write setlinksource;
    property defaultdist;
  end;
   
@@ -447,6 +452,8 @@ type
    procedure recchanged;
   protected
    procedure minclientsizechanged;
+   procedure objectevent(const sender: tobject;
+                          const event: objecteventty); override;
    procedure fontchanged; override;
    procedure inheritedpaint(const acanvas: tcanvas);
    procedure paint(const canvas: tcanvas); override;
@@ -1188,6 +1195,7 @@ begin
  with treptabulators(fowner),fband do begin
   fsizevalid:= false;
   minclientsizechanged;
+  change(-1);
  end;
 end;
 
@@ -2068,6 +2076,49 @@ begin
  end;
 end;
 
+procedure treptabulators.setlinksource(const avalue: tcustomrecordband);
+var
+ band1: tcustomrecordband;
+begin
+ if avalue <> flinksource then begin
+  band1:= avalue;
+  while band1 <> nil do begin
+   if band1 = fband then begin
+    raise exception.create('Recursive linksource.');
+   end;
+   band1:= band1.ftabs.flinksource;
+  end;
+  fband.setlinkedvar(avalue,flinksource);
+  sourcechanged;
+ end;
+end;
+
+procedure treptabulators.sourcechanged;
+var
+ int1: integer;
+begin
+ if (flinksource <> nil) and 
+                   not (csloading in flinksource.componentstate) then begin
+  beginupdate;
+  try
+   count:= flinksource.ftabs.count;
+   for int1:= 0 to high(fitems) do begin
+    with treptabulatoritem(fitems[int1]) do begin
+     pos:= treptabulatoritem(flinksource.ftabs.fitems[int1]).pos;
+    end;
+   end;
+  finally
+   endupdate;
+  end;
+ end;
+end;
+
+procedure treptabulators.dochange(const aindex: integer);
+begin
+ inherited;
+ fband.sendchangeevent; 
+end;
+
 { tcustomrecordband }
 
 constructor tcustomrecordband.create(aowner: tcomponent);
@@ -2769,6 +2820,16 @@ begin
   fobjectpicker.mouseevent(info);
  end;
  inherited;
+end;
+
+procedure tcustomrecordband.objectevent(const sender: tobject;
+               const event: objecteventty);
+begin
+ inherited;
+ if (event = oe_changed) and (sender = ftabs.flinksource) then begin
+  ftabs.sourcechanged;
+  designchanged;
+ end;
 end;
 
 { tcustombandgroup }
