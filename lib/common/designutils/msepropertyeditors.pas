@@ -52,6 +52,7 @@ type
  iremotepropertyeditor = interface
   function getordvalue(const index: integer = 0): integer;
   procedure setordvalue(const value: longword);
+  procedure setordvalue(const index: integer; const value: longword);
   procedure setbitvalue(const value: boolean; const index: integer);
   function getfloatvalue(const index: integer = 0): extended;
   procedure setfloatvalue(const value: extended);
@@ -88,7 +89,8 @@ type
    function typedata: ptypedata;
 
    function getordvalue(const index: integer = 0): integer;
-   procedure setordvalue(const value: longword);
+   procedure setordvalue(const value: longword); overload;
+   procedure setordvalue(const index: integer; const value: longword); overload;
    procedure setbitvalue(const value: boolean; const index: integer);
    function getfloatvalue(const index: integer = 0): extended;
    procedure setfloatvalue(const value: extended);
@@ -436,6 +438,7 @@ type
 
    function getordvalue(const index: integer = 0): integer;
    procedure setordvalue(const value: longword);
+   procedure setordvalue(const index: integer; const value: longword);
    function getfloatvalue(const index: integer = 0): extended;
    procedure setfloatvalue(const value: extended);
    function getstringvalue(const index: integer = 0): string;
@@ -509,6 +512,7 @@ type
    function getdefaultstate: propertystatesty; override;
    function getordvalue(const index: integer = 0): integer;
    procedure setordvalue(const value: longword);
+   procedure setordvalue(const index: integer; const value: longword);
    procedure doinsert(const sender: tobject);
    procedure doappend(const sender: tobject);
    procedure dodelete(const sender: tobject);
@@ -1103,6 +1107,20 @@ begin
    with fprops[int1] do begin
     setordprop(instance, propinfo, value);
    end;
+  end;
+  updatedefaultvalue;
+  modified;
+ end;
+end;
+
+procedure tpropertyeditor.setordvalue(const index: integer; const value: longword);
+begin
+ if fremote <> nil then begin
+  fremote.setordvalue(index,value);
+ end
+ else begin
+  with fprops[index] do begin
+   setordprop(instance, propinfo, value);
   end;
   updatedefaultvalue;
   modified;
@@ -2056,15 +2074,17 @@ procedure tparentclasspropertyeditor.edit;
 var
  obj1: tobject;
  persist1,persist2: tpersistent;
-
+ int1: integer;
 begin
   obj1:= getinstance;
   if obj1 = nil then begin
-   persist1:= tpersistent(getordvalue);
-   setordvalue(1);
-   persist2:= tpersistent(getordvalue);
-   if (persist1 <> nil) and (persist2 <> nil) then begin
-    persist2.Assign(persist1);
+   for int1:= 0 to count - 1 do begin
+    persist1:= tpersistent(getordvalue(int1));
+    setordvalue(int1,1);
+    persist2:= tpersistent(getordvalue(int1));
+    if (persist1 <> nil) and (persist2 <> nil) then begin
+     persist2.Assign(persist1);
+    end;
    end;
   end
   else begin
@@ -2352,6 +2372,15 @@ begin
   with fprops[int1] do begin
    tintegerarrayprop(GetOrdProp1(instance,propinfo))[findex]:= value;
   end;
+ end;
+ modified;
+end;
+
+procedure tarrayelementeditor.setordvalue(const index: integer; 
+                         const value: longword);
+begin
+ with fprops[index] do begin
+  tintegerarrayprop(GetOrdProp1(instance,propinfo))[findex]:= value;
  end;
  modified;
 end;
@@ -2747,6 +2776,12 @@ begin
 end;
 
 procedure tcollectionitemeditor.setordvalue(const value: longword);
+begin
+ //dummy
+end;
+
+procedure tcollectionitemeditor.setordvalue(const index: integer; 
+                               const value: longword);
 begin
  //dummy
 end;
