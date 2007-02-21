@@ -152,22 +152,30 @@ type
    property statfile: tstatfile read fstatfile write setstatfile;
    property statvarname: msestring read fstatvarname write fstatvarname;
  end;
- 
+
+ pagerangety = record
+  first,last: integer;
+ end;
+ pagerangearty = array of pagerangety;
+  
  tcustomprintercanvas = class(tcanvas)
   private
    fheaderheight: integer;
    ffooterheight: integer;
-   ffirstpage: integer;
-   flastpage: integer;
+//   ffirstpage: integer;
+//   flastpage: integer;
    fpagenumber: integer;
    findentx: integer;
    findenty: integer;
    fprintorientation: pageorientationty;
    fpagechanging: integer;
+   fpages: pagerangearty;
+   fpagesstring: msestring;
    procedure setcolorspace(const avalue: colorspacety);
    function getliney: integer;
    procedure setprintorientation(const avalue: pageorientationty);
    procedure setliney(const avalue: integer);
+   procedure setpages(const avalue: pagerangearty);
   protected
 //   fgcoffset: pointty;
    fgcoffsetx: real;
@@ -202,6 +210,7 @@ type
    procedure internalwriteln(const avalue: richstringty);
    procedure streamwrite(const atext: string); //checks fstream = nil
    procedure streamwriteln(const atext: string); //checks fstream = nil
+   procedure setpagesstring(const avalue: msestring);
   public
    constructor create(const user: tprinter; const intf: icanvas);
    
@@ -241,15 +250,24 @@ type
    function lineheight: integer; //pixels
 
    procedure nextpage;
-   function active: boolean; //true if firstpage <= pagenumber <= flastpage
+   function active: boolean; 
+     //checks pages
       
    property title: msestring read ftitle write ftitle;
                             //used as print job lable
    property clientsize: sizety read fclientsize;
    property colorspace: colorspacety read fcolorspace write setcolorspace;
    property pagenumber: integer read fpagenumber;
+   {
    property firstpage: integer read ffirstpage write ffirstpage default 0;
+                  //null based
    property lastpage: integer read flastpage write flastpage default bigint;
+                  //null based
+                  }
+   property pages: pagerangearty read fpages write setpages;
+                  //all if nil, null based
+   property pagesstring: msestring read fpagesstring write setpagesstring;
+                  //one based, example: '1-5,7,9,11-13', all if ''
    
    property printorientation: pageorientationty read fprintorientation 
                 write setprintorientation default pao_portrait;   
@@ -308,6 +326,9 @@ type
                    write setvalue default pao_portrait;
  end;
  
+function stringtopages(const avalue: widestring): pagerangearty;
+                  //one based, example: '1-5,7,9,11-13'
+
 implementation
 uses
  sysutils,mseprocutils,msepipestream,msesysintf;
@@ -315,6 +336,53 @@ uses
 type
  tfont1 = class(tfont);
  
+function stringtopages(const avalue: widestring): pagerangearty;
+var
+ ar1,ar2: msestringarty;
+ int1,int2: integer;
+ ar3: pagerangearty;
+begin
+ if avalue = '' then begin
+  result:= nil;
+ end
+ else begin
+  try
+   ar1:= splitstring(avalue,',');
+   setlength(ar3,length(avalue)); //max
+   int2:= 0;
+   for int1:= high(ar1) downto 0 do begin
+    ar2:= splitstring(ar1[int1],'-');
+    if high(ar2) = 1 then begin
+     ar3[int2].first:= strtoint(ar2[0]);
+     ar3[int2].last:= strtoint(ar2[1]);
+    end
+    else begin
+     if high(ar2) = 0 then begin
+      ar3[int2].first:= strtoint(ar2[0]);
+      ar3[int2].last:= ar3[int2].first;
+     end
+     else begin
+      raise exception.create('');
+     end;
+    end;
+    with ar3[int2] do begin
+     if (first <= 0) or (last <= 0) or (last < first) then begin
+      raise exception.create('');
+     end;
+     dec(first);
+     dec(last);
+    end;
+    inc(int2);
+   end;
+  except
+   raise exception.create('Invalid pages: '''+avalue+'''.'+lineend+
+                          'Example: ''1-5,7,9,11-13''');
+  end;
+  setlength(ar3,int2);
+  result:= ar3;
+ end;
+end;
+
 { tprinter }
 
 constructor tprinter.create(aowner: tcomponent);
@@ -568,7 +636,7 @@ end;
 constructor tcustomprintercanvas.create(const user: tprinter; const intf: icanvas);
 begin
  fprinter:= user;
- flastpage:= bigint;
+// flastpage:= bigint;
  inherited create(user,intf);
 end;
 
@@ -941,8 +1009,20 @@ begin
 end;
 
 function tcustomprintercanvas.active: boolean;
+var
+ int1: integer;
 begin
- result:= (fpagenumber >= ffirstpage) and (fpagenumber <= flastpage);
+ result:= fpages = nil;
+ if not result then begin
+  for int1:= high(fpages) downto 0 do begin
+   with fpages[int1] do begin
+    if (fpagenumber >= first) and (fpagenumber <= last) then begin
+     result:= true;
+     break;
+    end;
+   end;
+  end;
+ end;
 end;
 
 function tcustomprintercanvas.liney1: integer;
@@ -989,6 +1069,17 @@ begin
  inherited;
  fprinter.ftabulators.ppmm:= avalue;
  updatescale;
+end;
+
+procedure tcustomprintercanvas.setpages(const avalue: pagerangearty);
+begin
+ fpages:= copy(avalue);
+end;
+
+procedure tcustomprintercanvas.setpagesstring(const avalue: msestring);
+begin
+ pages:= stringtopages(avalue);
+ fpagesstring:= avalue;
 end;
 
 { tprintervalueselector }

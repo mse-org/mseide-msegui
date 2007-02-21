@@ -1,5 +1,8 @@
 MSEide+MSEgui version history
 
+2007-02-21 tprintercanvas.firstpage, lastpage replaced by 
+ tprintercanvas.pages.
+
 Version 1.2beta1
 2007-02-15 TSQLQuery.UpdateSQL,InsertSQL and DeleteSQL renamed to 
  SQLUpdate,SQLInsert and SQLDelete.

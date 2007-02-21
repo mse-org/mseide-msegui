@@ -11,8 +11,6 @@ type
    ok: tbutton;
    cancel: tbutton;
    printer: tpostscriptprinter;
-   firstpage: trealedit;
-   lastpage: trealedit;
    linenum: tbooleanedit;
    fontsize: trealedit;
    colorset: tbooleanedit;
@@ -22,17 +20,16 @@ type
    tpageorientationselector1: tpageorientationselector;
    tpagesizeselector1: tpagesizeselector;
    tstatfile1: tstatfile;
+   pages: tstringedit;
    procedure pronpagestart(const sender: tprinter);
-   procedure lastpagesetvalue(const sender: TObject; var avalue: realty; 
-                            var accept: Boolean);
-   procedure firstpagesetvalue(const sender: TObject; var avalue: realty; 
-                            var accept: Boolean);
    procedure printidle(var again: Boolean);
    procedure runonexecute(const sender: TObject);
    procedure cancelexec(const sender: TObject);
    procedure sourcefosetvalue(const sender: TObject; var avalue: msestring;
                   var accept: Boolean);
    procedure titlefosetvalue(const sender: TObject; var avalue: msestring;
+                   var accept: Boolean);
+   procedure pagessetvalue(const sender: TObject; var avalue: msestring;
                    var accept: Boolean);
   protected
    run,started: boolean;
@@ -53,10 +50,7 @@ begin
   with printer,canvas do begin
    if run then begin
     if not started then begin
-     firstpage:= round(self.firstpage.value)-1;
-     if not isemptyreal(self.lastpage.value) then begin
-      lastpage:= round(self.lastpage.value)-1;
-     end;
+     pagesstring:= self.pages.value;
      started:= true;
      beginprint(getprintcommand);
      if colorset.value then begin
@@ -131,22 +125,6 @@ begin
  end;
 end;
 
-procedure tprintfo.lastpagesetvalue(const sender: TObject; var avalue: realty;
-                            var accept: Boolean);
-begin
- if not isemptyreal(avalue) and (avalue < firstpage.value) then begin
-  avalue:= firstpage.value;
- end;
-end;
-
-procedure tprintfo.firstpagesetvalue(const sender: TObject;
-                           var avalue: realty; var accept: Boolean);
-begin
- if not isemptyreal(lastpage.value) and (avalue > lastpage.value) then begin
-  lastpage.value:= avalue;
- end;
-end;
-
 procedure tprintfo.runonexecute(const sender: TObject);
 begin
  if window.candefocus then begin
@@ -182,6 +160,12 @@ begin
  if avalue = '' then begin
   avalue:= defaulttitleprintfont;
  end;
+end;
+
+procedure tprintfo.pagessetvalue(const sender: TObject; var avalue: msestring;
+               var accept: Boolean);
+begin
+ stringtopages(avalue);
 end;
 
 end.
