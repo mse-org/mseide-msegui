@@ -347,11 +347,11 @@ begin
  end
  else begin
   try
-   ar1:= splitstring(avalue,',');
+   ar1:= splitstring(avalue,widechar(','));
    setlength(ar3,length(avalue)); //max
    int2:= 0;
    for int1:= high(ar1) downto 0 do begin
-    ar2:= splitstring(ar1[int1],'-');
+    ar2:= splitstring(ar1[int1],widechar('-'));
     if high(ar2) = 1 then begin
      ar3[int2].first:= strtoint(ar2[0]);
      ar3[int2].last:= strtoint(ar2[1]);

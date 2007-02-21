@@ -153,6 +153,7 @@ object printfo: tprintfo
       16
       0
       0)
+    anchors = [an_top, an_right]
     taborder = 3
     dropdown.cols.count = 1
     dropdown.cols.items = <
@@ -208,6 +209,7 @@ object printfo: tprintfo
       16
       0
       0)
+    anchors = [an_top, an_right]
     taborder = 4
     dropdown.cols.count = 1
     dropdown.cols.items = <
@@ -249,6 +251,7 @@ object printfo: tprintfo
       16
       0
       0)
+    anchors = [an_left, an_top, an_right]
     taborder = 2
     onsetvalue = pagessetvalue
     reffontheight = 13
