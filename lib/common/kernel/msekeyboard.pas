@@ -258,8 +258,8 @@ type
         key_Hyper_R =            $1057,
         key_Help =               $1058,
 
-        key_wheelup =            $1800,
-        key_wheeldown =          $1801,
+//        key_wheelup =            $1800,
+//        key_wheeldown =          $1801,
 
         key_unknown =            $ffff
         );

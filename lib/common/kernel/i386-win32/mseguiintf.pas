@@ -3428,6 +3428,7 @@ var
  po1: pointty;
  shiftstate: shiftstatesty;
  key1: keyty;
+ wrect1: trect;
 begin
  result:= 1;
  case msg of
@@ -3543,15 +3544,25 @@ begin
    end;
   end;
   wm_mousewheel: begin
-   shiftstate:= wheelkeystatetoshiftstate(wparam);
-   inc(mousewheelpos,smallint(hiword(wparam)));
-   while mousewheelpos >= wheelstep do begin
-    eventlist.add(tkeyevent.create(ahwnd,false,key_wheelup,key_wheelup,shiftstate,''));
-    dec(mousewheelpos,wheelstep);
-   end;
-   while mousewheelpos <= -wheelstep do begin
-    eventlist.add(tkeyevent.create(ahwnd,false,key_wheeldown,key_wheeldown,shiftstate,''));
-    inc(mousewheelpos,wheelstep);
+   if mousewindow <> 0 then begin
+    shiftstate:= wheelkeystatetoshiftstate(wparam);
+    po1:= winmousepostopoint(lparam);
+    subpoint1(po1,getclientrect(mousewindow).pos);
+    inc(mousewheelpos,smallint(hiword(wparam)));
+    while mousewheelpos >= wheelstep do begin
+    eventlist.add(tmouseevent.create(mousewindow,false,mb_none,mw_up,po1,
+            winmousekeyflagstoshiftstate(wparam),timestamp));
+ //    eventlist.add(tkeyevent.create(ahwnd,false,key_wheelup,key_wheelup,shiftstate,''));
+     dec(mousewheelpos,wheelstep);
+    end;
+    while mousewheelpos <= -wheelstep do begin
+     eventlist.add(tmouseevent.create(mousewindow,false,mb_none,mw_down,po1,
+            winmousekeyflagstoshiftstate(wparam),timestamp));
+ //    eventlist.add(tkeyevent.create(ahwnd,false,key_wheeldown,key_wheeldown,shiftstate,''));
+     inc(mousewheelpos,wheelstep);
+    end;
+    result:= 0;
+    exit;
    end;
   end;
   wm_mousemove,
@@ -3567,7 +3578,7 @@ begin
    end;
    eventlist.add(tmouseevent.create(ahwnd,
         (msg = wm_lbuttonup) or (msg = wm_mbuttonup) or (msg = wm_rbuttonup),
-         button,po1,
+         button,mw_none,po1,
            winmousekeyflagstoshiftstate(wparam),timestamp));
    result:= 0;
    exit;

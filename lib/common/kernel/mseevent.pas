@@ -26,7 +26,8 @@ const
 type
  eventkindty = (ek_none,ek_focusin,ek_focusout,ek_checkapplicationactive,
                 ek_enterwindow,ek_leavewindow,
-                ek_buttonpress,ek_buttonrelease,ek_mousemove,ek_mousepark,
+                ek_buttonpress,ek_buttonrelease,ek_mousewheel,
+                ek_mousemove,ek_mousepark,
                 ek_mouseenter,ek_mouseleave,{ek_mousecapturebegin,}ek_mousecaptureend,
                 ek_clientmouseenter,ek_clientmouseleave,
                 ek_expose,ek_configure,
@@ -47,16 +48,26 @@ type
  eventstatety = (es_processed,es_child,es_broadcast,es_modal,es_drag,
                  es_reflected,es_nofocus);
  eventstatesty = set of eventstatety;
- mouseeventinfoty = record
+ mouseeventinfoty = record //same layout as mousewheeleventinfoty!
   eventkind: eventkindty;
-  button: mousebuttonty;
   shiftstate: shiftstatesty;
   pos: pointty;
   eventstate: eventstatesty;
   timestamp: cardinal; //usec, 0 -> invalid
+  button: mousebuttonty;
  end;
  pmouseeventinfoty = ^mouseeventinfoty;
-
+ 
+ mousewheeleventinfoty = record //same layout as mouseeventinfoty!
+  eventkind: eventkindty;
+  shiftstate: shiftstatesty;
+  pos: pointty;
+  eventstate: eventstatesty;
+  timestamp: cardinal; //usec, 0 -> invalid
+  wheel: mousewheelty;
+ end;
+ pmousewheeleventty = ^mousewheeleventinfoty;
+ 
  keyeventinfoty = record
   key,keynomod: keyty;
   chars: msestring;

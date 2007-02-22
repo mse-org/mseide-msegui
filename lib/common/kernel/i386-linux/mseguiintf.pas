@@ -4653,7 +4653,7 @@ begin
   motionnotify: begin
    with xev.xmotion do begin
     lasteventtime:= time;
-    result:= tmouseevent.create(xwindow,false,mb_none,
+    result:= tmouseevent.create(xwindow,false,mb_none,mw_none,
                 makepoint(x,y),xtoshiftstate(state,key_none,mb_none,false),time*1000);
    end;
   end;
@@ -4693,17 +4693,21 @@ begin
     shiftstate1:= xtoshiftstate(state,key_none,button1,xev.xtype=buttonrelease);
     if button = 4 then begin
      if xev.xtype = buttonpress then begin
-      result:= tkeyevent.create(xwindow,false,key_wheelup,key_wheelup,shiftstate1,chars);
+      result:= tmouseevent.create(xwindow,false,mb_none,mw_up,
+                makepoint(x,y),shiftstate1,time*1000);
+//      result:= tkeyevent.create(xwindow,false,key_wheelup,key_wheelup,shiftstate1,chars);
      end;
     end
     else begin
      if button = 5 then begin
       if xev.xtype = buttonpress then begin
-       result:= tkeyevent.create(xwindow,false,key_wheeldown,key_wheeldown,shiftstate1,chars);
+       result:= tmouseevent.create(xwindow,false,mb_none,mw_down,
+                makepoint(x,y),shiftstate1,time*1000);
+//       result:= tkeyevent.create(xwindow,false,key_wheeldown,key_wheeldown,shiftstate1,chars);
       end;
      end
      else begin
-      result:= tmouseevent.create(xwindow,xtype = buttonrelease,button1,
+      result:= tmouseevent.create(xwindow,xtype = buttonrelease,button1,mw_none,
                 makepoint(x,y),shiftstate1,time*1000);
      end;
     end;

@@ -49,9 +49,11 @@ type
    procedure setvalue(const avalue: tdatetime);
    function isinvalidcell(const acell: gridcoordty): boolean;
   protected
+//   procedure mousewheelevent(var info: mousewheeleventinfoty); override;
    procedure dokeydown(var info: keyeventinfoty); override;
    procedure doactivate; override;
    procedure dodeactivate; override;
+   procedure mousewheelevent(var info: mousewheeleventinfoty); override;
   public
    constructor create(const aowner: tcomponent;
                                   const acontroller: tcalendarcontroller);
@@ -245,7 +247,7 @@ begin
      with keyeventinfopo^ do begin
       include(eventstate,es_processed);
       case key of
-       key_pagedown,key_wheeldown: begin
+       key_pagedown{,key_wheeldown}: begin
         if shiftstate = [ss_ctrl] then begin
          yearup(nil);
         end
@@ -253,7 +255,7 @@ begin
          moup(nil);
         end;
        end;
-       key_pageup,key_wheelup: begin
+       key_pageup{,key_wheelup}: begin
         if shiftstate = [ss_ctrl] then begin
          yeardown(nil);
         end
@@ -281,6 +283,33 @@ begin
         exclude(eventstate,es_processed);
        end;
       end;
+     end;
+    end;
+   end;
+  end;
+ end;
+end;
+
+procedure tpopupcalendarfo.mousewheelevent(var info: mousewheeleventinfoty);
+begin
+ with info do begin
+  if not (es_processed in eventstate) then begin
+   include(eventstate,es_processed);
+   case wheel of 
+    mw_up: begin
+     if shiftstate = [ss_ctrl] then begin
+      yearup(nil);
+     end
+     else begin
+      moup(nil);
+     end;
+    end;
+    mw_down: begin
+     if shiftstate = [ss_ctrl] then begin
+      yearup(nil);
+     end
+     else begin
+      moup(nil);
      end;
     end;
    end;

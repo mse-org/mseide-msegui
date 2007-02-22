@@ -59,6 +59,7 @@ type
  widgetstatety = (ws_visible,ws_enabled,
                   ws_active,ws_entered,ws_focused,
                   ws_mouseinclient,ws_wantmousebutton,ws_wantmousemove,
+//                  ws_wantmousewheel,
                   ws_wantmousefocus,ws_iswidget,
                   ws_opaque,ws_nopaint,
                   ws_clicked,ws_mousecaptured,ws_clientmousecaptured,
@@ -115,8 +116,9 @@ const
  defaultwidgetstates = [ws_visible,ws_enabled,ws_iswidget,ws_isvisible];
  defaultwidgetstatesinvisible = [ws_enabled,ws_iswidget];
  focusstates = [ws_visible,ws_enabled];
- defaultoptionswidget = [ow_mousefocus,ow_tabfocus,ow_arrowfocus,ow_mousewheel,
+ defaultoptionswidget = [ow_mousefocus,ow_tabfocus,ow_arrowfocus,{ow_mousewheel,}
                          ow_destroywidgets,ow_autoscale];
+ defaultoptionswidgetmousewheel = defaultoptionswidget + [ow_mousewheel];
  defaultoptionswidgetnofocus = defaultoptionswidget -
              [ow_mousefocus,ow_tabfocus,ow_arrowfocus];
  defaultwidgetwidth = 50;
@@ -638,6 +640,7 @@ type
  end;
 
  mouseeventty = procedure (const sender: twidget; var info: mouseeventinfoty) of object;
+ mousewheeleventty = procedure (const sender: twidget; var info: mousewheeleventinfoty) of object;
  keyeventty = procedure (const sender: twidget; var info: keyeventinfoty) of object;
  painteventty = procedure (const sender: twidget; const canvas: tcanvas) of object;
  pointeventty = procedure(const sender: twidget; const point: pointty) of object;
@@ -912,6 +915,7 @@ type
    procedure dofocus; virtual;
    procedure dodefocus; virtual;
    procedure dochildfocused(const sender: twidget); virtual;
+   procedure domousewheelevent(var info: mousewheeleventinfoty); virtual;
 
    procedure reflectmouseevent(var info: mouseeventinfoty);
                                   //posts mousevent to window under mouse
@@ -919,6 +923,7 @@ type
    procedure clientmouseevent(var info: mouseeventinfoty); virtual;
    procedure childmouseevent(const sender: twidget;
                               var info: mouseeventinfoty); virtual;
+   procedure mousewheelevent(var info: mousewheeleventinfoty); virtual;
 
    procedure dokeydown(var info: keyeventinfoty); virtual;
    procedure doshortcut(var info: keyeventinfoty; const sender: twidget); virtual;
@@ -1401,12 +1406,14 @@ type
   public
    fpos: pointty;
    fbutton: mousebuttonty;
+   fwheel: mousewheelty;
    fshiftstate: shiftstatesty;
    freflected: boolean;
    property timestamp: cardinal read ftimestamp; //0 -> invalid
-   constructor create(winid: winidty; release: boolean; button: mousebuttonty;
-                      pos: pointty; shiftstate: shiftstatesty; atimestamp: cardinal;
-                      reflected: boolean = false);
+   constructor create(const winid: winidty; const release: boolean;
+                      const button: mousebuttonty; const wheel: mousewheelty;
+                      const pos: pointty; const shiftstate: shiftstatesty;
+                      atimestamp: cardinal; const reflected: boolean = false);
                       //button = none for mousemove
  end;
 
@@ -2713,6 +2720,14 @@ begin
    fwidgetstate:= fwidgetstate - [ws_mouseinclient,ws_wantmousemove,
                            ws_wantmousebutton,ws_wantmousefocus];
   end;
+  {
+  if ow_mousewheel in foptionswidget then begin
+   include(fwidgetstate,ws_wantmousewheel);
+  end
+  else begin
+   exclude(fwidgetstate,ws_wantmousewheel);
+  end;
+  }
  end;
 end;
 
@@ -6126,6 +6141,9 @@ begin
    ek_mousemove,ek_mousepark: begin
     childstate:= [ws_enabled,ws_isvisible,ws_wantmousemove];
    end;
+   ek_mousewheel: begin
+    childstate:= [ws_enabled,ws_isvisible{,ws_wantmousewheel}];
+   end;
   end;
  end;
  result:= widgetatpos(findinfo);
@@ -6141,12 +6159,20 @@ begin
            (apos.y >= 0) and (apos.y < fwidgetrect.cy) and
             not (ow_mousetransparent in foptionswidget) then begin
    fwidgetstate:= fwidgetstate +
-          [ws_mouseinclient,ws_wantmousebutton,ws_wantmousemove,ws_wantmousefocus];
+      [ws_mouseinclient,ws_wantmousebutton,ws_wantmousemove,ws_wantmousefocus];
   end
   else begin
    fwidgetstate:= fwidgetstate -
-          [ws_mouseinclient,ws_wantmousebutton,ws_wantmousemove,ws_wantmousefocus];
+      [ws_mouseinclient,ws_wantmousebutton,ws_wantmousemove,ws_wantmousefocus];
   end;
+  {
+  if ow_mousewheel in foptionswidget then begin
+   include(fwidgetstate,ws_wantmousewheel);
+  end
+  else begin
+   exclude(fwidgetstate,ws_wantmousewheel);
+  end;
+  }
  end;
 end;
 
@@ -6297,6 +6323,39 @@ begin
      fwidgetstate:= fwidgetstate - [ws_clientmousecaptured];
      app.ungrabpointer;
     end;
+   end;
+  end;
+ end;
+end;
+
+procedure twidget.domousewheelevent(var info: mousewheeleventinfoty);
+begin
+ //dummy
+end;
+
+procedure twidget.mousewheelevent(var info: mousewheeleventinfoty);
+var
+ bo1: boolean;
+ pt1: pointty;
+begin
+ with info do begin
+  if not (es_processed in eventstate) then begin
+   if ow_mousewheel in foptionswidget then begin
+    domousewheelevent(info);
+   end;
+   if not (es_processed in eventstate) and (fparentwidget <> nil) then begin
+    pt1:= self.pos;
+    addpoint1(pos,pt1);
+    bo1:= es_child in eventstate;
+    try
+     include(eventstate,es_child);
+     fparentwidget.mousewheelevent(info);
+    finally
+     subpoint1(pos,pt1);
+     if not bo1 then begin
+      exclude(eventstate,es_child);
+     end;
+    end;   
    end;
   end;
  end;
@@ -7753,7 +7812,7 @@ begin
          makerect(addpoint(addpoint(rootpos,paintpos),rect.pos),rect.size)) then begin
           //replay last mousepos
      app.feventlist.insert(0,tmouseevent.create(fwindow.winid,false,
-                    mb_none,pos,shiftstate,0));
+                    mb_none,mw_none,pos,shiftstate,0));
     end;
    end;
   end;
@@ -8158,7 +8217,8 @@ begin
    end;
    subpoint1(po1,window1.fowner.fwidgetrect.pos);
    app.feventlist.insert(0,tmouseevent.create(window1.winid,
-     eventkind = ek_buttonrelease,button,po1,shiftstate,info.timestamp,true));
+     eventkind = ek_buttonrelease,button,mw_none,po1,shiftstate,info.timestamp,
+     true));
   end;
  end;
 end;
@@ -9169,12 +9229,22 @@ begin
  if info.eventkind in [ek_mouseenter,ek_mouseleave] then begin
   exit;
  end;
- checkmousewidget(info,capture);
+ if info.eventkind = ek_mousewheel then begin
+  capture:= fowner.mouseeventwidget(info);
+ end
+ else begin
+  checkmousewidget(info,capture);
+ end;
  if capture <> nil then begin
   with capture do begin
    subpoint1(info.pos,rootpos);
    posbefore:= info.pos;
-   mouseevent(info);
+   if info.eventkind = ek_mousewheel then begin
+    mousewheelevent(mousewheeleventinfoty(info));
+   end
+   else begin
+    mouseevent(info);
+   end;
    posbefore:= subpoint(info.pos,posbefore);
    if (posbefore.x <> 0) or (posbefore.y <> 0) then begin
     gui_flushgdi;
@@ -9866,9 +9936,10 @@ end;
 
 { tmouseevent }
 
-constructor tmouseevent.create(winid: winidty; release: boolean; button: mousebuttonty;
-                pos: pointty; shiftstate: shiftstatesty; atimestamp: cardinal;
-                reflected: boolean = false);
+constructor tmouseevent.create(const winid: winidty; const release: boolean;
+                      const button: mousebuttonty; const wheel: mousewheelty;
+                      const pos: pointty; const shiftstate: shiftstatesty;
+                      atimestamp: cardinal; const reflected: boolean = false);
 var
  eventkind1: eventkindty;
 begin
@@ -9876,19 +9947,25 @@ begin
   inc(atimestamp);
  end;
  ftimestamp:= atimestamp;
- if button = mb_none then begin
-  eventkind1:= ek_mousemove;
- end
- else begin
-  if release then begin
-   eventkind1:= ek_buttonrelease;
+ if wheel = mw_none then begin
+  if button = mb_none then begin
+   eventkind1:= ek_mousemove;
   end
   else begin
-   eventkind1:= ek_buttonpress;
+   if release then begin
+    eventkind1:= ek_buttonrelease;
+   end
+   else begin
+    eventkind1:= ek_buttonpress;
+   end;
   end;
+ end
+ else begin
+  eventkind1:= ek_mousewheel;
  end;
  inherited create(eventkind1,winid);
  fbutton:= button;
+ fwheel:= wheel;
  fpos:= pos;
  fshiftstate:= shiftstate;
  freflected:= reflected;
@@ -10131,7 +10208,12 @@ begin
      include(eventstate,es_reflected);
     end;
     info.eventkind:= kind;
-    button:= fbutton;
+    if kind = ek_mousewheel then begin
+     mousewheeleventinfoty(info).wheel:= fwheel;
+    end
+    else begin
+     button:= fbutton;
+    end;
     pos:= fpos;
     abspos:= addpoint(window.fowner.fwidgetrect.pos,pos);
     case info.button of
@@ -10799,7 +10881,7 @@ begin       //eventloop
          processmouseevent(tmouseevent(event));
         end;
        end;
-       ek_buttonpress,ek_buttonrelease: begin
+       ek_buttonpress,ek_buttonrelease,ek_mousewheel: begin
         processmouseevent(tmouseevent(event));
        end;
        ek_keypress,ek_keyrelease: begin

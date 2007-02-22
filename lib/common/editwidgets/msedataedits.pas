@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2006 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2007 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -205,6 +205,7 @@ type
    procedure editnotification(var info: editnotificationinfoty); override;
    procedure internalcreateframe; override;
    procedure mouseevent(var info: mouseeventinfoty); override;
+   procedure domousewheelevent(var info: mousewheeleventinfoty); override;
    procedure dokeydown(var info: keyeventinfoty); override;
            //iscrollbar
    procedure scrollevent(sender: tcustomscrollbar; event: scrolleventty);
@@ -216,6 +217,7 @@ type
    property textflagsactive default defaultmemotextflagsactive;
   published
    property optionsedit default defaultmemooptionsedit;
+   property optionswidget default defaultoptionswidgetmousewheel;
  end;
 
  tmemoedit = class(tcustommemoedit)
@@ -1746,6 +1748,7 @@ end;
 constructor tcustommemoedit.create(aowner: tcomponent);
 begin
  inherited;
+ foptionswidget:= defaultoptionswidgetmousewheel;
  foptionsedit:= defaultmemooptionsedit;
  textflags:= defaultmemotextflags;
  textflagsactive:= defaultmemotextflagsactive;
@@ -1948,31 +1951,21 @@ begin
      key_pagedown: begin
       int1:= (innerpaintrect.cy - self.font.lineheight);
      end;
-     key_wheelup: begin
-      if fframe <> nil then begin
-       frame.sbvert.pagedown;
-      end;
-     end;
-     key_wheeldown: begin
-      if fframe <> nil then begin
-       frame.sbvert.pageup;
-      end;
-     end;
      key_up: begin
-      if (info.key = key_wheelup) and not (ow_mousewheel in optionswidget) then begin
-       exclude(info.eventstate,es_processed);
-      end
-      else begin
+//      if (info.key = key_wheelup) and not (ow_mousewheel in optionswidget) then begin
+//       exclude(info.eventstate,es_processed);
+//      end
+//      else begin
        int1:= - self.font.lineheight;
-      end;
+//      end;
      end;
      key_down: begin
-      if (info.key = key_wheeldown) and not (ow_mousewheel in optionswidget) then begin
-       exclude(info.eventstate,es_processed);
-      end
-      else begin
+//      if (info.key = key_wheeldown) and not (ow_mousewheel in optionswidget) then begin
+//       exclude(info.eventstate,es_processed);
+//      end
+//      else begin
        int1:= self.font.lineheight; 
-      end;
+//      end;
      end;
      else begin
       exclude(info.eventstate,es_processed);
@@ -2010,6 +2003,14 @@ var
 begin
  inherited;
  updatescrollbars;
+end;
+
+procedure tcustommemoedit.domousewheelevent(var info: mousewheeleventinfoty);
+begin
+ if fframe <> nil then begin
+  frame.domousewheelevent(info);
+ end;
+ inherited;
 end;
 
 { thexstringedit }

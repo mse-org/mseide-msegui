@@ -26,8 +26,11 @@ type
 
 const
  defaultformoptions = [fo_autoreadstat,fo_autowritestat,fo_savepos,fo_savestate];
- defaultformwidgetoptions = (defaultoptionswidget - [ow_mousefocus,ow_tabfocus]) +
-   [ow_subfocus,ow_hinton];
+ defaultformwidgetoptions = (defaultoptionswidgetmousewheel - 
+                         [ow_mousefocus,ow_tabfocus]) + [ow_subfocus,ow_hinton];
+ defaultcontaineroptionswidget = defaultoptionswidgetmousewheel + 
+                                        [ow_subfocus,ow_mousetransparent];
+
 
 type
 
@@ -52,6 +55,7 @@ type
    property onbeforepaint;
    property onpaint;
    property onafterpaint;
+   property optionswidget default defaultoptionswidgetmousewheel;
  end;
 
  tcustommseform = class(tcustomeventwidget,istatfile,idockcontroller)
@@ -414,7 +418,7 @@ uses
 const
  containercommonflags: optionswidgetty = 
             [ow_arrowfocus,ow_arrowfocusin,ow_arrowfocusout,ow_destroywidgets,
-             ow_parenttabfocus{,
+             ow_parenttabfocus,ow_mousewheel{,
              ow_subfocus,ow_mousefocus,ow_tabfocus}];
  
 type
@@ -487,8 +491,9 @@ begin
  inherited create(aowner);
  setsubcomponent(true);
  exclude(fwidgetstate,ws_iswidget);
- include(foptionswidget,ow_subfocus);
- include(foptionswidget,ow_mousetransparent);
+ foptionswidget:= defaultcontaineroptionswidget;
+// include(foptionswidget,ow_subfocus);
+// include(foptionswidget,ow_mousetransparent);
  parentwidget:= aowner;
  name:= 'container';
 end;

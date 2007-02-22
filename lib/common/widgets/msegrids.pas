@@ -131,7 +131,8 @@ const
  slowrepeat = 200000; //us
  fastrepeat = 100000; //us
 
- defaultgridwidgetoptions = defaultoptionswidget + [ow_focusbackonesc,ow_fontglyphheight];
+ defaultgridwidgetoptions = defaultoptionswidgetmousewheel + 
+                                        [ow_focusbackonesc,ow_fontglyphheight];
 
 type
  tgridexception = class(exception);
@@ -1266,6 +1267,7 @@ end;
    procedure dodeactivate; override;
    procedure mouseevent(var info: mouseeventinfoty); override;
    procedure clientmouseevent(var info: mouseeventinfoty); override;
+   procedure domousewheelevent(var info: mousewheeleventinfoty); override;
    procedure dokeydown(var info: keyeventinfoty); override;
    procedure dokeyup(var info: keyeventinfoty); override;
    procedure dopaint(const acanvas: tcanvas); override;
@@ -8106,6 +8108,48 @@ begin
  end;
 end;
 }
+procedure tcustomgrid.domousewheelevent(var info: mousewheeleventinfoty);
+begin
+ frame.domousewheelevent(info);
+ inherited;
+end;
+
+{
+procedure tcustomgrid.domousewheelevent(var info: mousewheeleventinfoty);
+var
+ action: focuscellactionty;
+begin
+ with info do begin
+  if not (es_processed in eventstate) then begin
+   if ss_shift in shiftstate then begin
+    action:= fca_focusinshift;
+   end
+   else begin
+    action:= fca_focusin;
+   end;
+   include(eventstate,es_processed);
+   case wheel of
+    mw_up: begin
+     if gs_isdb in fstate then begin
+      pageup(action);
+     end
+     else begin
+      scrollrows(rowsperpage-1);
+     end;
+    end;
+    mw_down: begin
+     if gs_isdb in fstate then begin
+      pagedown(action);
+     end
+     else begin
+      scrollrows(-rowsperpage+1);
+     end;
+    end;
+   end;
+  end;
+ end;
+end;
+}
 procedure tcustomgrid.dokeydown(var info: keyeventinfoty);
 var
  action: focuscellactionty;
@@ -8162,32 +8206,6 @@ begin
       end
       else begin
        rowdown(action);
-      end;
-     end;
-     key_wheelup: begin
-      if ow_mousewheel in optionswidget then begin
-       if gs_isdb in fstate then begin
-        pageup(action);
-       end
-       else begin
-        scrollrows(rowsperpage-1);
-       end;
-      end
-      else begin 
-       exclude(info.eventstate,es_processed);
-      end;
-     end;
-     key_wheeldown: begin
-      if ow_mousewheel in optionswidget then begin
-       if gs_isdb in fstate then begin
-        pagedown(action);
-       end
-       else begin
-        scrollrows(-rowsperpage+1);
-       end;
-      end
-      else begin 
-       exclude(info.eventstate,es_processed);
       end;
      end;
      key_pageup: begin

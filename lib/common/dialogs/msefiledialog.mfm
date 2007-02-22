@@ -6,6 +6,7 @@ object filedialogfo: Tfiledialogfo
   bounds_cy = 307
   bounds_cxmin = 360
   bounds_cymin = 150
+  taborder = 1
   visible = False
   container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_mousetransparent, ow_destroywidgets, ow_autoscale]
   container.bounds_x = 0
@@ -19,8 +20,8 @@ object filedialogfo: Tfiledialogfo
   onloaded = formoncreate
   onkeydown = listviewonkeydown
   onchildscaled = foonchildscaled
-  left = 239
-  top = 138
+  Left = 239
+  Top = 138
   moduleclassname = 'tmseform'
   object namecont: tgroupbox
     bounds_x = 0
@@ -29,6 +30,7 @@ object filedialogfo: Tfiledialogfo
     bounds_cy = 50
     anchors = [an_left, an_top, an_right]
     visible = False
+    optionsscale = []
   end
   object bucont: tspacer
     optionswidget = [ow_tabfocus, ow_parenttabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_mousewheel, ow_destroywidgets, ow_autoscale]
@@ -53,8 +55,7 @@ object filedialogfo: Tfiledialogfo
         0
         1
         86
-        1
-      )
+        1)
       onsetvalue = showhiddenonsetvalue
     end
     object tspacer4: tspacer
@@ -63,6 +64,7 @@ object filedialogfo: Tfiledialogfo
       bounds_cx = 8
       bounds_cy = 20
       taborder = 3
+      optionsscale = []
       linkleft = ok
       linkright = cancel
     end
@@ -76,6 +78,8 @@ object filedialogfo: Tfiledialogfo
       anchors = [an_left, an_bottom]
       taborder = 2
       state = [as_localcaption]
+      autosize_cx = 0
+      autosize_cy = 0
       caption = '&Cancel'
       modalresult = mr_cancel
       reffontheight = 13
@@ -91,13 +95,15 @@ object filedialogfo: Tfiledialogfo
       anchors = [an_left, an_bottom]
       taborder = 1
       state = [as_default, as_localdefault, as_localcaption, as_localonexecute]
+      autosize_cx = 0
+      autosize_cy = 0
       caption = '&Ok'
       onexecute = okonexecute
       reffontheight = 13
     end
   end
   object listview: tfilelistview
-    optionswidget = [ow_mousefocus, ow_arrowfocus, ow_focusbackonesc, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+    optionswidget = [ow_mousefocus, ow_arrowfocus, ow_focusbackonesc, ow_mousewheel, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
     bounds_x = 0
     bounds_y = 26
     bounds_cx = 588
@@ -131,6 +137,8 @@ object filedialogfo: Tfiledialogfo
     anchors = [an_top, an_right]
     taborder = 8
     state = [as_localcaption, as_localonexecute]
+    autosize_cx = 0
+    autosize_cy = 0
     caption = '&New dir'
     onexecute = createdironexecute
     reffontheight = 13
@@ -145,6 +153,8 @@ object filedialogfo: Tfiledialogfo
     anchors = [an_top, an_right]
     taborder = 7
     state = [as_localcaption, as_localonexecute]
+    autosize_cx = 0
+    autosize_cy = 0
     caption = '&Up'
     onexecute = upaction
     reffontheight = 13
@@ -162,8 +172,7 @@ object filedialogfo: Tfiledialogfo
       0
       0
       31
-      0
-    )
+      0)
     anchors = [an_left, an_right, an_bottom]
     taborder = 3
     optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_resetselectonexit, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_keyexecute, oe_savevalue, oe_savestate]
@@ -171,7 +180,7 @@ object filedialogfo: Tfiledialogfo
     dropdown.dropdownrowcount = 10
     dropdown.options = [deo_keydropdown]
     dropdown.cols.count = 1
-    dropdown.cols.items = <    
+    dropdown.cols.items = <
       item
         textflags = [tf_ycentered, tf_noselect, tf_ellipseleft]
       end>
@@ -190,16 +199,15 @@ object filedialogfo: Tfiledialogfo
       0
       0
       25
-      0
-    )
+      0)
     anchors = [an_left, an_right, an_bottom]
     taborder = 4
     ondataentered = filepathentered
     onsetvalue = filteronsetvalue
     dropdown.cols.count = 2
-    dropdown.cols.items = <    
+    dropdown.cols.items = <
       item
-      end    
+      end
       item
         options = [co_readonly, co_invisible, co_focusselect, co_fill]
       end>
@@ -220,8 +228,7 @@ object filedialogfo: Tfiledialogfo
       0
       0
       16
-      0
-    )
+      0)
     anchors = [an_left, an_top, an_right]
     taborder = 6
     onshowhint = dirshowhint
@@ -237,6 +244,7 @@ object filedialogfo: Tfiledialogfo
     bounds_cx = 8
     bounds_cy = 20
     taborder = 2
+    optionsscale = []
     linkleft = dir
     linkright = up
     options = [spao_glueright]
@@ -247,6 +255,7 @@ object filedialogfo: Tfiledialogfo
     bounds_cx = 8
     bounds_cy = 20
     taborder = 1
+    optionsscale = []
     linkleft = up
     linkright = createdir
     options = [spao_glueright]

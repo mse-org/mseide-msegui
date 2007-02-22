@@ -53,6 +53,9 @@ type
 
    property onmouseevent;
    property onchildmouseevent;
+   property onclientmouseevent;
+   property onmousewheelevent;
+
    property onkeydown;
    property onkeyup;
    property onshortcut;
@@ -306,12 +309,14 @@ type
    procedure internalcreateframe; override;
    procedure widgetregionchanged(const sender: twidget); override;
    procedure mouseevent(var info: mouseeventinfoty); override;
+   procedure domousewheelevent(var info: mousewheeleventinfoty); override;
    procedure doscroll(const dist: pointty); override;
   public
    constructor create(aowner: tcomponent); override;
   published
    property frame: tscrollboxframe read getframe write setframe;
    property onscroll: pointeventty read fonscroll write fonscroll;
+   property optionswidget default defaultoptionswidgetmousewheel;
  end;
 
  tstepboxframe = class(tcustomstepframe)
@@ -1042,6 +1047,7 @@ end;
 constructor tscrollbox.create(aowner: tcomponent);
 begin
  inherited;
+ foptionswidget:= defaultoptionswidgetmousewheel;
  internalcreateframe;
 end;
 
@@ -1058,6 +1064,12 @@ end;
 procedure tscrollbox.mouseevent(var info: mouseeventinfoty);
 begin
  tscrollframe(fframe).mouseevent(info);
+ inherited;
+end;
+
+procedure tscrollbox.domousewheelevent(var info: mousewheeleventinfoty);
+begin
+ tscrollframe(fframe).domousewheelevent(info);
  inherited;
 end;
 

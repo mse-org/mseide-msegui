@@ -158,12 +158,13 @@ type
    procedure updaterects; override;
    procedure getpaintframe(var frame: framety); override;
    function getscrollbarclass(vert: boolean): framescrollbarclassty; virtual;
-  public
+ public
    constructor create(const intf: iframe; const scrollintf: iscrollbar);
    destructor destroy; override;
    procedure updatemousestate(const sender: twidget; const apos: pointty); override;
    procedure dopaintframe(const canvas: tcanvas; const rect: rectty); override;
    procedure mouseevent(var info: mouseeventinfoty); virtual;
+   procedure domousewheelevent(var info: mousewheeleventinfoty); virtual;
    property state: framestatesty read fstate;
    property sbhorz: tcustomscrollbar read getsbhorz write setsbhorz;
    property sbvert: tcustomscrollbar read getsbvert write setsbvert;
@@ -432,6 +433,7 @@ type
   private
    fonloaded: notifyeventty;
    fonmouseevent: mouseeventty;
+   fonmousewheelevent: mousewheeleventty;
    fonchildmouseevent: mouseeventty;
    fonclientmouseevent: mouseeventty;
    fonkeyup: keyeventty;
@@ -453,6 +455,7 @@ type
    fonclosequery: queryeventty;
    fonevent: eventeventty;
    fonasyncevent: asynceventeventty;
+   fonmouswheeleevent: mousewheeleventty;
   protected
    procedure poschanged; override;
    procedure sizechanged; override;
@@ -462,6 +465,7 @@ type
    procedure mouseevent(var info: mouseeventinfoty); override;
    procedure clientmouseevent(var info: mouseeventinfoty); override;
    procedure childmouseevent(const sender: twidget; var info: mouseeventinfoty); override;
+   procedure domousewheelevent(var info: mousewheeleventinfoty); override;
    procedure dokeydown(var info: keyeventinfoty); override;
    procedure dokeyup(var info: keyeventinfoty); override;
    procedure doshortcut(var info: keyeventinfoty; const sender: twidget); override;
@@ -486,7 +490,10 @@ type
    property onmouseevent: mouseeventty read fonmouseevent write fonmouseevent;
    property onchildmouseevent: mouseeventty read fonchildmouseevent
                         write fonchildmouseevent;
-   property onclientmouseevent: mouseeventty read fonclientmouseevent write fonclientmouseevent;
+   property onclientmouseevent: mouseeventty read fonclientmouseevent 
+                                             write fonclientmouseevent;
+   property onmousewheelevent: mousewheeleventty read fonmouswheeleevent 
+                                             write fonmousewheelevent;
 
    property onkeydown: keyeventty read fonkeydown write fonkeydown;
    property onkeyup: keyeventty read fonkeyup write fonkeyup;
@@ -605,6 +612,7 @@ type
    procedure internalcreateframe; override;
    procedure doscroll(const dist: pointty); override;
    procedure mouseevent(var info: mouseeventinfoty); override;
+   procedure domousewheelevent(var info: mousewheeleventinfoty); override;
    procedure writestate(writer: twriter); override;
    procedure internalcreateface; override;
    function calcminscrollsize: sizety; override;
@@ -622,8 +630,9 @@ type
    property onchildscaled: notifyeventty read fonchildscaled write fonchildscaled;
    property oncalcminscrollsize: calcminscrollsizeeventty 
                    read foncalcminscrollsize write foncalcminscrollsize;
- published
+  published
    property frame: tscrollboxframe read getframe write setframe;
+   property optionswidget default defaultoptionswidgetmousewheel;
  end;
 
  tpopupwidget = class(ttoplevelwidget)
@@ -1667,18 +1676,39 @@ begin
   end;
  end;
 end;
-{
-procedure tcustomscrollframe.excludeopaque(const canvas: tcanvas);
+
+procedure tcustomscrollframe.domousewheelevent(var info: mousewheeleventinfoty);
+var
+ scrollbar: tcustomscrollbar;
 begin
- inherited;
- if fs_sbverton in fstate then begin
-  fvert.excludeopaque(canvas);
- end;
- if fs_sbhorzon in fstate then begin
-  fhorz.excludeopaque(canvas);
+ with info do begin
+  if not (es_processed in eventstate) then begin
+   if (fs_sbverton in fstate) then begin
+    scrollbar:= sbvert;
+   end
+   else begin
+    if fs_sbhorzon in fstate then begin
+     scrollbar:= sbhorz;
+    end
+    else begin
+     scrollbar:= nil;
+    end;
+   end;
+   if scrollbar <> nil then begin
+    include(eventstate,es_processed);
+    case wheel of
+     mw_up: begin
+      scrollbar.pagedown;
+     end;
+     mw_down: begin
+      scrollbar.pageup;
+     end;
+    end;
+   end;
+  end;
  end;
 end;
- }
+
 procedure tcustomscrollframe.dopaintframe(const canvas: tcanvas;
   const rect: rectty);
 begin
@@ -2831,6 +2861,15 @@ begin
  inherited;
 end;
 
+procedure tcustomeventwidget.domousewheelevent(var info: mousewheeleventinfoty);
+begin
+ inherited;
+ if canevent(tmethod(fonmousewheelevent)) then begin
+  fonmousewheelevent(self,info);
+ end;
+end;
+
+
 procedure tcustomeventwidget.dobeforepaint(const canvas: tcanvas);
 var
  saveindex: integer;
@@ -3058,6 +3097,7 @@ end;
 constructor tscrollingwidget.create(aowner: tcomponent);
 begin
  inherited;
+ foptionswidget:= defaultoptionswidgetmousewheel;
  internalcreateframe;
  setstaticframe(true);
 end;
@@ -3080,6 +3120,12 @@ end;
 procedure tscrollingwidget.mouseevent(var info: mouseeventinfoty);
 begin
  tscrollframe(fframe).mouseevent(info);
+ inherited;
+end;
+
+procedure tscrollingwidget.domousewheelevent(var info: mousewheeleventinfoty);
+begin
+ tscrollframe(fframe).domousewheelevent(info);
  inherited;
 end;
 

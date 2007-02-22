@@ -7,6 +7,7 @@ object targetconsolefo: ttargetconsolefo
   frame.grip_size = 10
   frame.grip_options = [go_closebutton, go_fixsizebutton, go_topbutton]
   frame.dummy = 0
+  taborder = 1
   popupmenu = tpopupmenu1
   visible = False
   container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_mousetransparent, ow_destroywidgets, ow_autoscale]
@@ -54,13 +55,12 @@ object targetconsolefo: ttargetconsolefo
     E0E0E00280808016E0E0E01900000000FEFF7F00FEFF7FBFFEFF5F08FEFF5F00
     FEFF5F00FEFD5F00FEFF5F00FEFF5F00FEFF5F00FEFF5F00FEFF5F03FEFF5F00
     FEFF5F00FEFF5FBFFEFF5F08FEFF5F00FEFF5F03FEFF5F40FEFF5F00FEFF5F00
-    02004000FEFF7F0000000000
-  }
+    02004000FEFF7F0000000000}
   onidle = targetconsoleonidle
   onshow = tartgetconsoleonshow
   moduleclassname = 'tdockform'
   object grid: twidgetgrid
-    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_focusbackonesc, ow_destroywidgets, ow_fontlineheight, ow_autoscale]
+    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_focusbackonesc, ow_mousewheel, ow_destroywidgets, ow_fontlineheight, ow_autoscale]
     bounds_x = 0
     bounds_y = 0
     bounds_cx = 358
@@ -70,9 +70,10 @@ object targetconsolefo: ttargetconsolefo
     font.name = 'stf_fixed'
     font.dummy = 0
     optionsgrid = [og_focuscellonenter, og_autofirstrow, og_colchangeontabkey, og_autopopup]
+    rowcount = 0
     rowcountmax = 5000
     datacols.count = 1
-    datacols.items = <    
+    datacols.items = <
       item
         width = 3000
         options = [co_fill, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
@@ -80,28 +81,29 @@ object targetconsolefo: ttargetconsolefo
         widgetname = 'terminal'
       end>
     datarowlinewidth = 0
-    datarowheight = 16
-    reffontheight = 14
+    datarowheight = 15
+    reffontheight = 13
     object terminal: tterminal
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontlineheight, ow_autoscale]
       bounds_x = 0
       bounds_y = 0
       bounds_cx = 3000
-      bounds_cy = 16
+      bounds_cy = 15
+      taborder = 1
       visible = False
       onsendtext = sendtext
-      reffontheight = 14
+      reffontheight = 13
     end
   end
   object tpopupmenu1: tpopupmenu
     menu.submenu.count = 1
-    menu.submenu.items = <    
+    menu.submenu.items = <
       item
         caption = 'Clear'
         state = [as_localcaption, as_localonexecute]
         onexecute = clearexe
       end>
-    left = 88
-    top = 48
+    Left = 88
+    Top = 48
   end
 end

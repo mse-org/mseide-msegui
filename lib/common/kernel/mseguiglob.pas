@@ -27,6 +27,7 @@ type
                  );
 
  mousebuttonty = (mb_none,mb_left,mb_right,mb_middle);
+ mousewheelty = (mw_none,mw_up,mw_down);
 
  shiftstatety = (ss_shift,ss_alt,ss_ctrl,ss_left,ss_right,ss_middle,ss_double);
  shiftstatesty = set of shiftstatety;

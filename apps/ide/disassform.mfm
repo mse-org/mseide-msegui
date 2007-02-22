@@ -7,14 +7,17 @@ object disassfo: tdisassfo
   frame.grip_size = 10
   frame.grip_options = [go_closebutton, go_fixsizebutton, go_topbutton]
   frame.dummy = 0
+  taborder = 1
   visible = False
   container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_mousetransparent, ow_destroywidgets, ow_autoscale]
+  container.bounds_x = 0
+  container.bounds_y = 0
   container.bounds_cx = 554
   container.bounds_cy = 210
   container.frame.dummy = 0
   dragdock.splitter_size = 0
   dragdock.caption = 'Assembler'
-  dragdock.optionsdock = [od_canmove, od_canfloat, od_candock, od_propsize, od_savepos]
+  dragdock.optionsdock = [od_savepos, od_canmove, od_canfloat, od_candock, od_propsize]
   options = [fo_savepos, fo_savestate]
   statfile = mainfo.projectstatfile
   caption = 'Assembler'
@@ -56,7 +59,9 @@ object disassfo: tdisassfo
   onshow = disassfoonshow
   moduleclassname = 'tdockform'
   object grid: tstringgrid
-    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_focusbackonesc, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_focusbackonesc, ow_mousewheel, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+    bounds_x = 0
+    bounds_y = 0
     bounds_cx = 554
     bounds_cy = 210
     frame.dummy = 0
@@ -80,7 +85,7 @@ object disassfo: tdisassfo
     rowcolors.items = (
       14745599
       16777184)
-    datarowheight = 18
-    reffontheight = 16
+    datarowheight = 15
+    reffontheight = 13
   end
 end

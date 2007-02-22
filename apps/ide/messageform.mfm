@@ -22,7 +22,7 @@ object messagefo: tmessagefo
   icon.transparency = -2147483648
   moduleclassname = 'tdockform'
   object messages: tstringgrid
-    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_focusbackonesc, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_focusbackonesc, ow_mousewheel, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
     bounds_x = 0
     bounds_y = 0
     bounds_cx = 481
@@ -35,7 +35,7 @@ object messagefo: tmessagefo
     font.dummy = 0
     datacols.count = 1
     datacols.linewidth = 0
-    datacols.items = <    
+    datacols.items = <
       item
         linecolorfix = -1610612733
         colorselect = 16777088
@@ -43,21 +43,22 @@ object messagefo: tmessagefo
         options = [co_readonly, co_focusselect]
         optionsedit = []
       end>
+    rowcount = 0
     rowcountmax = 5000
     datarowlinewidth = 0
-    datarowheight = 14
+    datarowheight = 13
     oncellevent = messagesoncellevent
-    reffontheight = 14
+    reffontheight = 13
   end
   object tpopupmenu1: tpopupmenu
     menu.submenu.count = 1
-    menu.submenu.items = <    
+    menu.submenu.items = <
       item
         caption = 'Copy to clipboard'
         state = [as_localcaption, as_localonexecute]
         onexecute = copyexe
       end>
-    left = 88
-    top = 72
+    Left = 88
+    Top = 72
   end
 end
