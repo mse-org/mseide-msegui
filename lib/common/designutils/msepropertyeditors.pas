@@ -51,8 +51,8 @@ type
 
  iremotepropertyeditor = interface
   function getordvalue(const index: integer = 0): integer;
-  procedure setordvalue(const value: longword);
-  procedure setordvalue(const index: integer; const value: longword);
+  procedure setordvalue(const value: longword); overload;
+  procedure setordvalue(const index: integer; const value: longword); overload;
   procedure setbitvalue(const value: boolean; const index: integer);
   function getfloatvalue(const index: integer = 0): extended;
   procedure setfloatvalue(const value: extended);
@@ -437,8 +437,8 @@ type
    procedure dodelete(const sender: tobject);
 
    function getordvalue(const index: integer = 0): integer;
-   procedure setordvalue(const value: longword);
-   procedure setordvalue(const index: integer; const value: longword);
+   procedure setordvalue(const value: longword); overload;
+   procedure setordvalue(const index: integer; const value: longword); overload;
    function getfloatvalue(const index: integer = 0): extended;
    procedure setfloatvalue(const value: extended);
    function getstringvalue(const index: integer = 0): string;
@@ -511,8 +511,8 @@ type
   protected
    function getdefaultstate: propertystatesty; override;
    function getordvalue(const index: integer = 0): integer;
-   procedure setordvalue(const value: longword);
-   procedure setordvalue(const index: integer; const value: longword);
+   procedure setordvalue(const value: longword); overload;
+   procedure setordvalue(const index: integer; const value: longword); overload;
    procedure doinsert(const sender: tobject);
    procedure doappend(const sender: tobject);
    procedure dodelete(const sender: tobject);
@@ -564,9 +564,9 @@ type
    function getniltext: string; virtual;
    function getinstance: tpersistent; virtual;
    function getdefaultstate: propertystatesty; override;
-   procedure setvalue(const value: msestring); override;
   public
    function getvalue: msestring; override;
+   procedure setvalue(const value: msestring); override;
    procedure edit; override;
  end;
 
