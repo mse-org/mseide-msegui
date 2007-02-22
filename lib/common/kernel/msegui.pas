@@ -6446,7 +6446,7 @@ begin
   with frame do begin
    checkstate;
    result:= fclientrect;
-   addpoint(result.pos,fpaintrect.pos);
+   addpoint1(result.pos,fpaintrect.pos);
   end
  end
  else begin

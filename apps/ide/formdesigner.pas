@@ -191,6 +191,7 @@ type
    fclipinitcomps: boolean;
    finitcompsoffset: pointty;
    fuseinitcompsoffset: boolean;
+   fcompsoffsetused: boolean;
    fclickedcompbefore: tcomponent;
    procedure drawgrid(const canvas: tcanvas);
    procedure hidexorpic(const canvas: tcanvas);
@@ -1040,18 +1041,28 @@ begin
  if (component is twidget) and (parent is twidget) then begin
   with twidget(component) do begin
    if fuseinitcompsoffset then begin
-//    pt1:= subpoint(finitcompsoffset,twidget(parent).containeroffset);
     pt1:= finitcompsoffset;
+    subpoint1(finitcompsoffset,pos);
+    fcompsoffsetused:= true;
+    fuseinitcompsoffset:= false;
    end
    else begin 
-    pt1:= addpoint(pos,twidget(parent).containeroffset);
+    if fcompsoffsetused then begin
+     pt1:= addpoint(pos,finitcompsoffset);
+    end
+    else begin
+     pt1:= addpoint(pos,twidget(parent).containeroffset);
+    end;
    end;
   end;
   twidget(parent).insertwidget(twidget(component),pt1);
   if fclipinitcomps then begin
    rect1:= twidget(component).widgetrect;
-   addpoint1(rect1.pos,finitcompsoffset);
-   shiftinrect(rect1,makerect(nullpoint,twidget(component).parentwidget.size));
+//   if fuseinitcompsoffset then begin
+//    addpoint1(rect1.pos,finitcompsoffset);
+//   end;
+   shiftinrect(rect1,twidget(component).parentwidget.clientwidgetrect);
+//   shiftinrect(rect1,makerect(nullpoint,twidget(component).parentwidget.size));
    twidget(component).widgetrect:= rect1;
   end;
  end;
@@ -1109,8 +1120,9 @@ begin
      widget1:= twidget(items[0]);
      if (widget1 is twidget) and form.checkdescendent(widget1) then begin
       fuseinitcompsoffset:= usemousepos;
+      fcompsoffsetused:= false;
       if usemousepos then begin
-       finitcompsoffset:= subpoint(fmousepos,widget1.rootpos);
+       finitcompsoffset:= subpoint(dosnaptogrid(fmousepos),widget1.rootpos);
       end;
       clear;
       pastefromclipboard(module,widget1,{$ifdef FPC}@{$endif}doinitcomponent);
