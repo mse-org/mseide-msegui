@@ -4430,16 +4430,19 @@ procedure tcustomreport.doasyncevent(var atag: integer);
 begin
  inherited;
  if (atag = endrendertag) then begin
-  if canevent(tmethod(fonafterrender)) then begin
-   fonafterrender(self);
-  end;
-  if canevent(tmethod(fonrenderfinish)) then begin
-   fonrenderfinish(self);
-  end;
-  exclude(fstate,rs_running);
-  if reo_autorelease in foptions then begin
-   release;
-  end;
+  try
+   if canevent(tmethod(fonafterrender)) then begin
+    fonafterrender(self);
+   end;
+   if canevent(tmethod(fonrenderfinish)) then begin
+    fonrenderfinish(self);
+   end;
+   exclude(fstate,rs_running);
+  finally
+   if reo_autorelease in foptions then begin
+    release;
+   end;
+  end; 
  end;
 end;
 
