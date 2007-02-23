@@ -755,7 +755,8 @@ type
  reportpageeventty = procedure(const sender: tcustomreportpage) of object;
  reportpagepainteventty = procedure(const sender: tcustomreportpage;
                               const acanvas: tcanvas) of object;
-  
+ reppageorientationty = (rpo_default,rpo_portrait,rpo_landscape);
+ 
  tcustomreportpage = class(twidget,ibandparent)
   private
    fbands: recordbandarty;
@@ -779,6 +780,7 @@ type
    fprintstarttime: tdatetime;
    freccontrols: pointerarty;
    frecnobefore: integer;
+   fprintorientation: reppageorientationty;
    procedure setpagewidth(const avalue: real);
    procedure setpageheight(const avalue: real);
    procedure updatepagesize;
@@ -852,6 +854,9 @@ type
    property datasource: tdatasource read getdatasource write setdatasource;
    property options: reportpageoptionsty read foptions write setoptions
                                                  default [];
+   property printorientation: reppageorientationty read fprintorientation 
+                write fprintorientation default rpo_default;   
+                      //default --> printer.canvas value
    
    property onfirstpage: reportpageeventty read fonfirstpage
                                write fonfirstpage;
@@ -880,6 +885,7 @@ type
    property visiblepage;
    property datasource;
    property options;
+   property printorientation;
  
    property onfirstpage;
    property onbeforerender;
@@ -939,6 +945,7 @@ type
   protected
    frepdesigninfo: repdesigninfoty;
    freppages: reportpagearty;
+   fdefaultprintorientation: pageorientationty;
    procedure insertwidget(const awidget: twidget; const apos: pointty); override;
    procedure internalrender(const acanvas: tcanvas; const aprinter: tprinter;
                   const acommand: string; const astream: ttextstream;
@@ -3720,9 +3727,20 @@ begin
 end;
 
 procedure tcustomreportpage.renderbackground(const acanvas: tcanvas);
+var
+ orient1: pageorientationty;
 begin
  if freport.fpagenum <> 0 then begin
   freport.nextpage(acanvas);
+ end;
+ if acanvas is tprintercanvas then begin
+  if fprintorientation = rpo_default then begin
+   orient1:= freport.fdefaultprintorientation;
+  end
+  else begin
+   orient1:= pageorientationty(pred(fprintorientation));
+  end;
+  tprintercanvas(acanvas).printorientation:= orient1;
  end;
  acanvas.origin:= pos;
  inherited paint(acanvas);
@@ -4115,7 +4133,7 @@ function tcustomreport.exec(thread: tmsethread): integer;
   end;
   if fprinter <> nil then begin
    fprinter.endprint;
-//   fprinter.ppmm:= fpmmbefore;
+   fprinter.canvas.printorientation:= fdefaultprintorientation;
   end;
   fcanvas.ppmm:= fppmmbefore;
   asyncevent(endrendertag);
@@ -4237,6 +4255,7 @@ begin
  acanvas.ppmm:= fppmm;
  if aprinter <> nil then begin
 //  aprinter.ppmm:= fppmm;
+  fdefaultprintorientation:= fprinter.canvas.printorientation;
   if (astream <> nil) or anilstream then begin
    aprinter.beginprint(astream);
   end
