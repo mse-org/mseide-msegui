@@ -203,12 +203,12 @@ const
  defaultfunctional: array[0..functionalcolorcount-1]
                      of colorinfoty =
    (
-    (name: 'cl_none';  rgb:                  (blue: $00; green: $00; red: $00; res: $00)),
-    (name: 'cl_default'; rgb:                (blue: $00; green: $00; red: $00; res: $00)),
-    (name: 'cl_parent';  rgb:                (blue: $00; green: $00; red: $00; res: $00)),
-    (name: 'cl_transparent'; rgb:            (blue: $00; green: $00; red: $00; res: $00)),
-    (name: 'cl_brush';  rgb:                 (blue: $00; green: $00; red: $00; res: $00)),
-    (name: 'cl_brushcanvas'; rgb:            (blue: $00; green: $00; red: $00; res: $00))
+    (name: 'cl_none';  rgb:                  (blue: $00; green: $00; red: $00; res: $00)), //0
+    (name: 'cl_default'; rgb:                (blue: $00; green: $00; red: $00; res: $00)), //1
+    (name: 'cl_parent';  rgb:                (blue: $00; green: $00; red: $00; res: $00)), //2
+    (name: 'cl_transparent'; rgb:            (blue: $00; green: $00; red: $00; res: $00)), //3
+    (name: 'cl_brush';  rgb:                 (blue: $00; green: $00; red: $00; res: $00)), //4
+    (name: 'cl_brushcanvas'; rgb:            (blue: $00; green: $00; red: $00; res: $00))  //5
 //    (name: 'cl_mask'; rgb:                   (blue: $00; green: $00; red: $00; res: $00))
 //    (name: 'cl_grayed'; rgb:                 (blue: $80; green: $80; red: $80; res: $00))
    );
@@ -216,56 +216,56 @@ const
  defaultmapped: array[0..mappedcolorcount-1]
                      of colorinfoty =
    (
-    (name: 'cl_dkshadow'; rgb:               (blue: $00; green: $00; red: $00; res: $00)),
-    (name: 'cl_shadow'; rgb:                 (blue: $80; green: $80; red: $80; res: $00)),
-    (name: 'cl_mid'; rgb:                    (blue: $c0; green: $c0; red: $c0; res: $00)),
-    (name: 'cl_light'; rgb:                  (blue: $e0; green: $e0; red: $e0; res: $00)),
-    (name: 'cl_highlight'; rgb:              (blue: $ff; green: $ff; red: $ff; res: $00)),
-    (name: 'cl_background';  rgb:            (blue: $d0; green: $d0; red: $d0; res: $00)),
-    (name: 'cl_foreground';  rgb:            (blue: $ff; green: $ff; red: $ff; res: $00)),
-    (name: 'cl_active';  rgb:                (blue: $e0; green: $e0; red: $e0; res: $00)),
-    (name: 'cl_noedit';  rgb:                (blue: $e0; green: $e0; red: $e0; res: $00)),
+    (name: 'cl_dkshadow'; rgb:               (blue: $00; green: $00; red: $00; res: $00)), //0
+    (name: 'cl_shadow'; rgb:                 (blue: $80; green: $80; red: $80; res: $00)), //1
+    (name: 'cl_mid'; rgb:                    (blue: $c0; green: $c0; red: $c0; res: $00)), //2
+    (name: 'cl_light'; rgb:                  (blue: $e0; green: $e0; red: $e0; res: $00)), //3
+    (name: 'cl_highlight'; rgb:              (blue: $ff; green: $ff; red: $ff; res: $00)), //4
+    (name: 'cl_background';  rgb:            (blue: $d0; green: $d0; red: $d0; res: $00)), //5
+    (name: 'cl_foreground';  rgb:            (blue: $ff; green: $ff; red: $ff; res: $00)), //6
+    (name: 'cl_active';  rgb:                (blue: $e0; green: $e0; red: $e0; res: $00)), //7
+    (name: 'cl_noedit';  rgb:                (blue: $e0; green: $e0; red: $e0; res: $00)), //8
                                 //canvas defaultcolors
-    (name: 'cl_text';  rgb:                  (blue: $00; green: $00; red: $00; res: $00)),
-    (name: 'cl_selectedtext'; rgb:           (blue: $ff; green: $ff; red: $ff; res: $00)),
-    (name: 'cl_selectedtextbackground'; rgb: (blue: $c0; green: $00; red: $00; res: $00)),
-    (name: 'cl_infobackground'; rgb:         (blue: $e0; green: $ff; red: $ff; res: $00)),
-    (name: 'cl_glyph'; rgb:                  (blue: $00; green: $00; red: $00; res: $00)),
-    (name: 'cl_activegrip'; rgb:             (blue: $90; green: $20; red: $20; res: $00))
+    (name: 'cl_text';  rgb:                  (blue: $00; green: $00; red: $00; res: $00)), //9
+    (name: 'cl_selectedtext'; rgb:           (blue: $ff; green: $ff; red: $ff; res: $00)), //10
+    (name: 'cl_selectedtextbackground'; rgb: (blue: $c0; green: $00; red: $00; res: $00)), //11
+    (name: 'cl_infobackground'; rgb:         (blue: $e0; green: $ff; red: $ff; res: $00)), //12
+    (name: 'cl_glyph'; rgb:                  (blue: $00; green: $00; red: $00; res: $00)), //13
+    (name: 'cl_activegrip'; rgb:             (blue: $90; green: $20; red: $20; res: $00))  //14
    );
 
  defaultnamedrgb: array[0..namedrgbcolorcount-1]
                      of colorinfoty =
    (
-    (name: 'cl_0';  rgb:                     (blue: $00; green: $00; red: $00; res: $00)),
-    (name: 'cl_1';  rgb:                     (blue: $ff; green: $ff; red: $ff; res: $00)),
+    (name: 'cl_0';  rgb:                     (blue: $00; green: $00; red: $00; res: $00)), //0
+    (name: 'cl_1';  rgb:                     (blue: $ff; green: $ff; red: $ff; res: $00)), //1
 
-    (name: 'cl_black'; rgb:                  (blue: $00; green: $00; red: $00; res: $00)),
-    (name: 'cl_dkgray';  rgb:                (blue: $80; green: $80; red: $80; res: $00)),
-    (name: 'cl_gray';  rgb:                  (blue: $c0; green: $c0; red: $c0; res: $00)),
-    (name: 'cl_ltgray';  rgb:                (blue: $e0; green: $e0; red: $e0; res: $00)),
-    (name: 'cl_white';  rgb:                 (blue: $ff; green: $ff; red: $ff; res: $00)),
+    (name: 'cl_black'; rgb:                  (blue: $00; green: $00; red: $00; res: $00)), //2
+    (name: 'cl_dkgray';  rgb:                (blue: $80; green: $80; red: $80; res: $00)), //3
+    (name: 'cl_gray';  rgb:                  (blue: $c0; green: $c0; red: $c0; res: $00)), //4
+    (name: 'cl_ltgray';  rgb:                (blue: $e0; green: $e0; red: $e0; res: $00)), //5
+    (name: 'cl_white';  rgb:                 (blue: $ff; green: $ff; red: $ff; res: $00)), //6
 
-    (name: 'cl_red';   rgb:                  (blue: $00; green: $00; red: $ff; res: $00)),
-    (name: 'cl_green'; rgb:                  (blue: $00; green: $ff; red: $00; res: $00)),
-    (name: 'cl_blue';  rgb:                  (blue: $ff; green: $00; red: $00; res: $00)),
-    (name: 'cl_cyan';  rgb:                  (blue: $ff; green: $ff; red: $00; res: $00)),
-    (name: 'cl_magenta';  rgb:               (blue: $ff; green: $00; red: $ff; res: $00)),
-    (name: 'cl_yellow';  rgb:                (blue: $00; green: $ff; red: $ff; res: $00)),
+    (name: 'cl_red';   rgb:                  (blue: $00; green: $00; red: $ff; res: $00)), //7
+    (name: 'cl_green'; rgb:                  (blue: $00; green: $ff; red: $00; res: $00)), //8
+    (name: 'cl_blue';  rgb:                  (blue: $ff; green: $00; red: $00; res: $00)), //9
+    (name: 'cl_cyan';  rgb:                  (blue: $ff; green: $ff; red: $00; res: $00)), //10
+    (name: 'cl_magenta';  rgb:               (blue: $ff; green: $00; red: $ff; res: $00)), //11
+    (name: 'cl_yellow';  rgb:                (blue: $00; green: $ff; red: $ff; res: $00)), //12
 
-    (name: 'cl_dkred';   rgb:                (blue: $00; green: $00; red: $c0; res: $00)),
-    (name: 'cl_dkgreen'; rgb:                (blue: $00; green: $c0; red: $00; res: $00)),
-    (name: 'cl_dkblue';  rgb:                (blue: $c0; green: $00; red: $00; res: $00)),
-    (name: 'cl_dkcyan';  rgb:                (blue: $80; green: $80; red: $00; res: $00)),
-    (name: 'cl_dkmagenta';  rgb:             (blue: $80; green: $00; red: $80; res: $00)),
-    (name: 'cl_dkyellow';  rgb:              (blue: $00; green: $80; red: $80; res: $00)),
+    (name: 'cl_dkred';   rgb:                (blue: $00; green: $00; red: $c0; res: $00)), //13
+    (name: 'cl_dkgreen'; rgb:                (blue: $00; green: $c0; red: $00; res: $00)), //14
+    (name: 'cl_dkblue';  rgb:                (blue: $c0; green: $00; red: $00; res: $00)), //15
+    (name: 'cl_dkcyan';  rgb:                (blue: $80; green: $80; red: $00; res: $00)), //16
+    (name: 'cl_dkmagenta';  rgb:             (blue: $80; green: $00; red: $80; res: $00)), //17
+    (name: 'cl_dkyellow';  rgb:              (blue: $00; green: $80; red: $80; res: $00)), //18
 
-    (name: 'cl_ltred';   rgb:                (blue: $a0; green: $a0; red: $ff; res: $00)),
-    (name: 'cl_ltgreen'; rgb:                (blue: $a0; green: $ff; red: $a0; res: $00)),
-    (name: 'cl_ltblue';  rgb:                (blue: $ff; green: $a0; red: $a0; res: $00)),
-    (name: 'cl_ltcyan';  rgb:                (blue: $ff; green: $ff; red: $a0; res: $00)),
-    (name: 'cl_ltmagenta';  rgb:             (blue: $ff; green: $a0; red: $ff; res: $00)),
-    (name: 'cl_ltyellow';  rgb:              (blue: $a0; green: $ff; red: $ff; res: $00))
+    (name: 'cl_ltred';   rgb:                (blue: $a0; green: $a0; red: $ff; res: $00)), //19
+    (name: 'cl_ltgreen'; rgb:                (blue: $a0; green: $ff; red: $a0; res: $00)), //20
+    (name: 'cl_ltblue';  rgb:                (blue: $ff; green: $a0; red: $a0; res: $00)), //21
+    (name: 'cl_ltcyan';  rgb:                (blue: $ff; green: $ff; red: $a0; res: $00)), //22
+    (name: 'cl_ltmagenta';  rgb:             (blue: $ff; green: $a0; red: $ff; res: $00)), //23
+    (name: 'cl_ltyellow';  rgb:              (blue: $a0; green: $ff; red: $ff; res: $00))  //24
    );
 
 type

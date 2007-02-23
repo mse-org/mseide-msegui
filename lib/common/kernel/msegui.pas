@@ -888,6 +888,7 @@ type
    procedure checkautosize;
    procedure poschanged; virtual;
    procedure clientrectchanged; virtual;
+   procedure parentchanged; virtual;
    procedure rootchanged; virtual;
    function getdefaultfocuschild: twidget; virtual;
                                    //returns first focusable widget
@@ -4633,11 +4634,10 @@ begin
    end;
   end;
   if componentstate * [csloading,csdestroying] = [] then begin
- //  sizechanged;
- //  poschanged;
    fontchanged;
    colorchanged;
    enabledchanged; //-> statechanged
+   parentchanged;
   end;
  end;
 end;
@@ -4942,6 +4942,7 @@ begin
   fontchanged;
   colorchanged;
   enabledchanged; //-> statechanged
+  parentchanged; 
   if ownswindow1 and (ws_visible in fwidgetstate) and
                           (componentstate * [csloading,csinline] = []) then begin
    fwindow.show(false);
@@ -5586,6 +5587,19 @@ begin
  fwidgetstate1:= fwidgetstate1 - [ws1_widgetregionvalid,ws1_rootvalid];
  for int1:= 0 to high(fwidgets) do begin
   fwidgets[int1].rootchanged;
+ end;
+end;
+
+procedure twidget.parentchanged;
+var
+ int1: integer;
+begin
+ if not (ws_loadedproc in fwidgetstate) then begin
+  for int1:= 0 to high(fwidgets) do begin
+   with fwidgets[int1] do begin
+    parentchanged;
+   end;
+  end;
  end;
 end;
 

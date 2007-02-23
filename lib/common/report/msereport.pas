@@ -459,7 +459,7 @@ type
    procedure fontchanged; override;
    procedure inheritedpaint(const acanvas: tcanvas);
    procedure paint(const canvas: tcanvas); override;
-   procedure setparentwidget(const avalue: twidget); override;   
+   procedure parentchanged; override; //update fparentintf
    function getminbandsize: sizety; virtual;
    function calcminscrollsize: sizety; override;
    procedure render(const acanvas: tcanvas; var empty: boolean); virtual;
@@ -581,6 +581,7 @@ type
   protected
    function getdisptext: msestring; override;
    procedure initpage; override;
+   procedure parentchanged; override;
   public
    constructor create(aowner: tcomponent); override;
   published
@@ -2199,10 +2200,16 @@ begin
  end;
 end;
 
-procedure tcustomrecordband.setparentwidget(const avalue: twidget);
+procedure tcustomrecordband.parentchanged;
+var
+ widget1: twidget;
 begin
- if avalue <> nil then begin
-  avalue.getcorbainterface(typeinfo(ibandparent),fparentintf);
+ if fparentwidget <> nil then begin
+  widget1:= fparentwidget;
+  while (widget1 <> nil) and 
+    not widget1.getcorbainterface(typeinfo(ibandparent),fparentintf) do begin
+   widget1:= widget1.parentwidget;
+  end; 
  end
  else begin
   fparentintf:= nil;
@@ -4564,6 +4571,12 @@ begin
 end;
 
 procedure treppagenumdisp.initpage;
+begin
+ inherited;
+ minclientsizechanged;
+end;
+
+procedure treppagenumdisp.parentchanged;
 begin
  inherited;
  minclientsizechanged;

@@ -83,7 +83,7 @@ type
    property onsetvalue: setcoloreventty read getonsetvalue write setonsetvalue;
  end;
 
- tcolordropdowncontroller = class(tdropdownlistcontroller)
+ tcolordropdowncontroller = class(tnocolsdropdownlistcontroller)
   public
    constructor create(const intf: idropdownlist);
    procedure createframe; override;

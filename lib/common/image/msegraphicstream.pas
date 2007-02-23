@@ -362,14 +362,47 @@ end;
 { tmsefpmemoryimage }
 
 procedure tmsefpmemoryimage.assignto(dest: tpersistent);
+
+var
+ coloralpha: boolean;
+ 
+ function getmask(ashift: word): boolean;
+ var
+  int1,int2: integer;
+  bo1,bo2: boolean;
+  po1: prgbtripleaty;
+  by1: byte;
+ begin
+  bo1:= false;
+  bo2:= false;
+  with tmaskedbitmap(dest) do begin
+   for int1:= 0 to height - 1 do begin
+    po1:= mask.scanline[int1];
+    for int2:= 0 to width - 1 do begin
+     by1:= colors[int2,int1].alpha shr ashift;
+     bo1:= bo1 or ((by1 < 255) and (by1 > 0));
+     bo2:= bo2 and (by1 <> 0);
+     with po1^[int2] do begin
+      red:= by1;      
+      green:= by1;      
+      blue:= by1;      
+      res:= 0;
+     end;
+    end;
+   end;
+  end;
+  coloralpha:= bo1;
+  result:= bo2;
+ end;
+  
 var
  int1,int2: integer;
  po1: prgbtripleaty;
  col1: tfpcolor;
  hasalpha: boolean;
- coloralpha: boolean;
  by1: byte;
  col2: colorty;
+ 
 begin
  if dest is tbitmap then begin
   with tbitmap(dest) do begin
@@ -394,19 +427,8 @@ begin
     with tmaskedbitmap(dest) do begin
      masked:= true;
      colormask:= true;
-     coloralpha:= false;
-     for int1:= 0 to height - 1 do begin
-      po1:= mask.scanline[int1];
-      for int2:= 0 to width - 1 do begin
-       by1:= colors[int2,int1].alpha shr 8;
-       coloralpha:= coloralpha or ((by1 < 255) and (by1 > 0));
-       with po1^[int2] do begin
-        red:= by1;      
-        green:= by1;      
-        blue:= by1;      
-        res:= 0;
-       end;
-      end;
+     if not getmask(8) then begin
+      getmask(0); //try 8 bit
      end;
      col2:= maskcolorbackground;
      maskcolorbackground:= 0;

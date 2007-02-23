@@ -343,14 +343,11 @@ type
                     write fbuttonminlength default defaultbuttonminlength;
  end;
 
- tdropdownlistcontroller = class(tcustomdropdownlistcontroller)
+ tnocolsdropdownlistcontroller = class(tcustomdropdownlistcontroller)
   protected
    function getbuttonframeclass: dropdownbuttonframeclassty; override;
   published
    property options;
-   property cols;
-   property valuecol;
-   property itemindex;
    property dropdownrowcount;
    property width;
    property datarowlinewidth;
@@ -359,6 +356,13 @@ type
    property buttonminlength;
  end;
 
+ tdropdownlistcontroller = class(tnocolsdropdownlistcontroller)
+  published
+   property cols;
+   property valuecol;
+   property itemindex;
+ end;
+ 
  dropdownlistcontrollerclassty = class of tcustomdropdownlistcontroller;
 
  tmbdropdownlistcontroller = class(tdropdownlistcontroller)
@@ -1093,9 +1097,9 @@ begin
  inherited;
 end;
 
-{ tdropdownlistcontroller }
+{ tnocolsdropdownlistcontroller }
 
-function tdropdownlistcontroller.getbuttonframeclass: dropdownbuttonframeclassty;
+function tnocolsdropdownlistcontroller.getbuttonframeclass: dropdownbuttonframeclassty;
 begin
  result:= tdropdownbuttonframe;
 end;

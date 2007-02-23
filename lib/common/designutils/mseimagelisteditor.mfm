@@ -1,10 +1,13 @@
 object imagelisteditorfo: timagelisteditorfo
-  optionswidget = [ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_mousewheel, ow_destroywidgets, ow_hinton, ow_autoscale]
+  optionswidget = [ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_destroywidgets, ow_hinton, ow_autoscale]
   bounds_x = 220
   bounds_y = 325
   bounds_cx = 304
   bounds_cy = 347
+  taborder = 1
   container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_mousetransparent, ow_destroywidgets, ow_autoscale]
+  container.bounds_x = 0
+  container.bounds_y = 0
   container.bounds_cx = 304
   container.bounds_cy = 347
   container.frame.dummy = 0
@@ -21,6 +24,8 @@ object imagelisteditorfo: timagelisteditorfo
     bounds_cy = 20
     anchors = [an_left, an_bottom]
     state = [as_localcaption, as_localonexecute]
+    autosize_cx = 0
+    autosize_cy = 0
     caption = 'add'
     onexecute = addonexecute
   end
@@ -33,6 +38,8 @@ object imagelisteditorfo: timagelisteditorfo
     anchors = [an_left, an_bottom]
     taborder = 2
     state = [as_localcaption]
+    autosize_cx = 0
+    autosize_cy = 0
     caption = 'cancel'
     modalresult = mr_cancel
   end
@@ -45,6 +52,8 @@ object imagelisteditorfo: timagelisteditorfo
     anchors = [an_left, an_bottom]
     taborder = 3
     state = [as_localcaption]
+    autosize_cx = 0
+    autosize_cy = 0
     caption = 'OK'
     modalresult = mr_ok
   end
@@ -57,11 +66,15 @@ object imagelisteditorfo: timagelisteditorfo
     anchors = [an_left, an_bottom]
     taborder = 1
     state = [as_localcaption, as_localonexecute]
+    autosize_cx = 0
+    autosize_cy = 0
     caption = 'clear'
     onexecute = clearonexecute
   end
   object disp: tlistview
     optionswidget = [ow_mousefocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_focusbackonesc, ow_destroywidgets, ow_fontglyphheight]
+    bounds_x = 0
+    bounds_y = 0
     bounds_cx = 304
     bounds_cy = 284
     frame.dummy = 0
@@ -73,24 +86,23 @@ object imagelisteditorfo: timagelisteditorfo
     itemlist.captionpos = cp_bottom
     itemlist.imagelist = imagelist
     itemlist.imagewidth = 16
-    itemlist.imageheight = 32
+    itemlist.imageheight = 16
     onitemevent = disponitemevent
     onitemsmoved = disponitemsmoved
-    reffontheight = 16
+    reffontheight = 13
   end
   object stretch: tbooleanedit
     bounds_x = 8
-    bounds_y = 323
-    bounds_cx = 56
-    bounds_cy = 18
+    bounds_y = 324
+    bounds_cx = 48
+    bounds_cy = 15
     frame.caption = 'stretch'
     frame.dummy = 0
     frame.outerframe = (
       0
-      2
-      43
-      3
-    )
+      1
+      35
+      1)
     anchors = [an_left, an_bottom]
     taborder = 6
     statfile = statfile1
@@ -98,17 +110,16 @@ object imagelisteditorfo: timagelisteditorfo
   end
   object masked: tbooleanedit
     bounds_x = 8
-    bounds_y = 294
-    bounds_cx = 63
-    bounds_cy = 18
+    bounds_y = 295
+    bounds_cx = 53
+    bounds_cy = 15
     frame.caption = 'masked'
     frame.dummy = 0
     frame.outerframe = (
       0
-      2
-      50
-      3
-    )
+      1
+      40
+      1)
     anchors = [an_left, an_bottom]
     taborder = 4
     value = True
@@ -116,9 +127,9 @@ object imagelisteditorfo: timagelisteditorfo
   object transparentcolor: tcoloredit
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
     bounds_x = 80
-    bounds_y = 291
-    bounds_cx = 214
-    bounds_cy = 22
+    bounds_y = 294
+    bounds_cx = 192
+    bounds_cy = 19
     frame.caption = 'Transparent color'
     frame.captionpos = cp_right
     frame.button.width = 13
@@ -126,9 +137,8 @@ object imagelisteditorfo: timagelisteditorfo
     frame.outerframe = (
       0
       0
-      108
-      0
-    )
+      86
+      0)
     anchors = [an_left, an_bottom]
     taborder = 5
     statfile = statfile1
@@ -137,74 +147,23 @@ object imagelisteditorfo: timagelisteditorfo
     buttonellipse.width = 13
     buttonellipse.imagenr = 17
     dropdown.options = [deo_autodropdown, deo_keydropdown]
-    dropdown.cols.count = 1
-    dropdown.cols.items = <    
-      item
-        data = (
-          'cl_0'
-          'cl_1'
-          'cl_black'
-          'cl_dkgray'
-          'cl_gray'
-          'cl_ltgray'
-          'cl_white'
-          'cl_red'
-          'cl_green'
-          'cl_blue'
-          'cl_cyan'
-          'cl_magenta'
-          'cl_yellow'
-          'cl_dkred'
-          'cl_dkgreen'
-          'cl_dkblue'
-          'cl_dkcyan'
-          'cl_dkmagenta'
-          'cl_dkyellow'
-          'cl_ltred'
-          'cl_ltgreen'
-          'cl_ltblue'
-          'cl_ltcyan'
-          'cl_ltmagenta'
-          'cl_ltyellow'
-          'cl_dkshadow'
-          'cl_shadow'
-          'cl_mid'
-          'cl_light'
-          'cl_highlight'
-          'cl_background'
-          'cl_foreground'
-          'cl_active'
-          'cl_noedit'
-          'cl_text'
-          'cl_selectedtext'
-          'cl_selectedtextbackground'
-          'cl_infobackground'
-          'cl_glyph'
-          'cl_none'
-          'cl_default'
-          'cl_parent'
-          'cl_transparent'
-          'cl_brush'
-          'cl_brushcanvas'
-        )
-      end>
-    dropdown.itemindex = 40
-    reffontheight = 16
+    reffontheight = 13
   end
   object imagelist: timagelist
     transparentcolor = -2147483647
-    left = 24
-    top = 176
+    Left = 24
+    Top = 176
   end
   object filedialog: tfiledialog
     statfile = statfile1
-    left = 112
-    top = 176
+    dialogkind = fdk_none
+    Left = 112
+    Top = 176
   end
   object statfile1: tstatfile
     filename = 'imagelisteditor'
     options = [sfo_memory]
-    left = 200
-    top = 176
+    Left = 200
+    Top = 176
   end
 end
