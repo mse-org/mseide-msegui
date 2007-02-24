@@ -598,7 +598,9 @@ const
 
 function psrealtostr(const avalue: real): string;
 begin
- result:= formatfloatmse(avalue,'0.000');
+ result:= replacechar(formatfloat('0.000',avalue),decimalseparator,'.');
+          //todo: optimize
+// result:= formatfloatmse(avalue,'0.000');
 end;
 
 { tpostscriptcanvas }

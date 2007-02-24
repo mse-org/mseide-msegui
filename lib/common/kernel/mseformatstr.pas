@@ -23,8 +23,9 @@ const
 type
  numbasety = (nb_bin,nb_oct,nb_dec,nb_hex);
 
-function formatfloatmse(const value: extended; const format: string): string;
-               //immer'.' als separator
+function formatfloatmse(const value: extended; const format: msestring;
+                         const dot: boolean = false): msestring;
+                      //if dot -> always '.' as decimal separator
 function realtostr(const value: extended): string;     //immer'.' als separator
 function strtoreal(const s: string): extended;   //immer'.' als separator
 
@@ -156,6 +157,498 @@ implementation
 
 uses
  sysconst,msedate,msereal,Math;
+ 
+//copied from FPC sysstr.inc
+//todo: optimize
+
+Function FloatToTextFmt(Buffer: PmseChar; Value: Extended; format: PmseChar): Integer;
+
+Var
+  Digits: String[40];                         { String Of Digits                 }
+  Exponent: String[8];                        { Exponent strin                   }
+  FmtStart, FmtStop: PmseChar;                { Start And End Of relevant part   }
+                                              { Of format String                 }
+  ExpFmt, ExpSize: Integer;                   { Type And Length Of               }
+                                              { exponential format chosen        }
+  Placehold: Array[1..4] Of Integer;          { Number Of placeholders In All    }
+                                              { four Sections                    }
+  thousand: Boolean;                          { thousand separators?             }
+  UnexpectedDigits: Integer;                  { Number Of unexpected Digits that }
+                                              { have To be inserted before the   }
+                                              { First placeholder.               }
+  DigitExponent: Integer;                     { Exponent Of First digit In       }
+                                              { Digits Array.                    }
+
+  { Find end of format section starting at P. False, if empty }
+
+  Function GetSectionEnd(Var P: PmseChar): Boolean;
+  Var
+    C: mseChar;
+    SQ, DQ: Boolean;
+  Begin
+    Result := False;
+    SQ := False;
+    DQ := False;
+    C := P[0];
+    While (C<>#0) And ((C<>';') Or SQ Or DQ) Do
+      Begin
+      Result := True;
+      Case C Of
+        #34: If Not SQ Then DQ := Not DQ;
+        #39: If Not DQ Then SQ := Not SQ;
+      End;
+      Inc(P);
+      C := P[0];
+      End;
+  End;
+
+  { Find start and end of format section to apply. If section doesn't exist,
+    use section 1. If section 2 is used, the sign of value is ignored.       }
+
+  Procedure GetSectionRange(section: Integer);
+  Var
+    Sec: Array[1..3] Of PmseChar;
+    SecOk: Array[1..3] Of Boolean;
+  Begin
+    Sec[1] := format;
+    SecOk[1] := GetSectionEnd(Sec[1]);
+    If section > 1 Then
+      Begin
+      Sec[2] := Sec[1];
+      If Sec[2][0] <> #0 Then
+        Inc(Sec[2]);
+      SecOk[2] := GetSectionEnd(Sec[2]);
+      If section > 2 Then
+        Begin
+        Sec[3] := Sec[2];
+        If Sec[3][0] <> #0 Then
+          Inc(Sec[3]);
+        SecOk[3] := GetSectionEnd(Sec[3]);
+        End;
+      End;
+    If Not SecOk[1] Then
+      FmtStart := Nil
+    Else
+      Begin
+      If Not SecOk[section] Then
+        section := 1
+      Else If section = 2 Then
+        Value := -Value;   { Remove sign }
+      If section = 1 Then FmtStart := format Else
+        Begin
+        FmtStart := Sec[section - 1];
+        Inc(FmtStart);
+        End;
+      FmtStop := Sec[section];
+      End;
+  End;
+
+  { Find format section ranging from FmtStart to FmtStop. }
+
+  Procedure GetFormatOptions;
+  Var
+    Fmt: PmseChar;
+    SQ, DQ: Boolean;
+    area: Integer;
+  Begin
+    SQ := False;
+    DQ := False;
+    Fmt := FmtStart;
+    ExpFmt := 0;
+    area := 1;
+    thousand := False;
+    Placehold[1] := 0;
+    Placehold[2] := 0;
+    Placehold[3] := 0;
+    Placehold[4] := 0;
+    While Fmt < FmtStop Do
+      Begin
+      Case Fmt[0] Of
+        #34:
+          Begin
+          If Not SQ Then
+            DQ := Not DQ;
+          Inc(Fmt);
+          End;
+        #39:
+          Begin
+          If Not DQ Then
+            SQ := Not SQ;
+          Inc(Fmt);
+          End;
+      Else
+        { This was 'if not SQ or DQ'. Looked wrong... }
+        If Not (SQ Or DQ) Then
+          Begin
+          Case Fmt[0] Of
+            '0':
+              Begin
+              Case area Of
+                1:
+                  area := 2;
+                4:
+                  Begin
+                  area := 3;
+                  Inc(Placehold[3], Placehold[4]);
+                  Placehold[4] := 0;
+                  End;
+              End;
+              Inc(Placehold[area]);
+              Inc(Fmt);
+              End;
+
+            '#':
+              Begin
+              If area=3 Then
+                area:=4;
+              Inc(Placehold[area]);
+              Inc(Fmt);
+              End;
+            '.':
+              Begin
+              If area<3 Then
+                area:=3;
+              Inc(Fmt);
+              End;
+            ',':
+              Begin
+              thousand := True;
+              Inc(Fmt);
+              End;
+            'e', 'E':
+              If ExpFmt = 0 Then
+                Begin
+                If (Fmt[0]='E') Then
+                  ExpFmt:=1
+                Else
+                  ExpFmt := 3;
+                Inc(Fmt);
+                If (Fmt<FmtStop) Then
+                  Begin
+                  Case Fmt[0] Of
+                    '+':
+                      Begin
+                      End;
+                    '-':
+                      Inc(ExpFmt);
+                  Else
+                    ExpFmt := 0;
+                  End;
+                  If ExpFmt <> 0 Then
+                    Begin
+                    Inc(Fmt);
+                    ExpSize := 0;
+                    While (Fmt<FmtStop) And
+                          (ExpSize<4) And
+                          (Fmt[0] In ['0'..'9']) Do
+                      Begin
+                      Inc(ExpSize);
+                      Inc(Fmt);
+                      End;
+                    End;
+                  End;
+                End
+              Else
+                Inc(Fmt);
+          Else { Case }
+            Inc(Fmt);
+          End; { Case }
+          End { Begin }
+        Else 
+          Begin
+          Inc(Fmt)
+          End;
+      End; { Case }
+      End; { While .. Begin }
+  End;
+
+  Procedure FloatToStr;
+
+  Var
+    I, J, Exp, Width, Decimals, DecimalPoint, len: Integer;
+
+  Begin
+    If ExpFmt = 0 Then
+      Begin
+      { Fixpoint }
+      Decimals:=Placehold[3]+Placehold[4];
+      Width:=Placehold[1]+Placehold[2]+Decimals;
+      If (Decimals=0) Then
+        Str(Value:Width:0,Digits)
+      Else
+        Str(Value:Width+1:Decimals,Digits);
+      len:=Length(Digits);
+      { Find the decimal point }
+      If (Decimals=0) Then
+        DecimalPoint:=len+1
+      Else
+        DecimalPoint:=len-Decimals;
+      { If value is very small, and no decimal places
+        are desired, remove the leading 0.            }
+      If (Abs(Value) < 1) And (Placehold[2] = 0) Then
+        Begin
+        If (Placehold[1]=0) Then
+          Delete(Digits,DecimalPoint-1,1)
+        Else
+          Digits[DecimalPoint-1]:=' ';
+        End;
+
+      { Convert optional zeroes to spaces. }
+      I:=len;
+      J:=DecimalPoint+Placehold[3];
+      While (I>J) And (Digits[I]='0') Do
+        Begin
+        Digits[I] := ' ';
+        Dec(I);
+        End;
+      { If integer value and no obligatory decimal
+        places, remove decimal point. }
+      If (DecimalPoint < len) And (Digits[DecimalPoint + 1] = ' ') Then
+          Digits[DecimalPoint] := ' ';
+      { Convert spaces left from obligatory decimal point to zeroes. }
+      I:=DecimalPoint-Placehold[2];
+      While (I<DecimalPoint) And (Digits[I]=' ') Do
+        Begin
+        Digits[I] := '0';
+        Inc(I);
+        End;
+      Exp := 0;
+      End
+    Else
+      Begin
+      { Scientific: exactly <Width> Digits With <Precision> Decimals
+        And adjusted Exponent. }
+      If Placehold[1]+Placehold[2]=0 Then
+        Placehold[1]:=1;
+      Decimals := Placehold[3] + Placehold[4];
+      Width:=Placehold[1]+Placehold[2]+Decimals;
+      Str(Value:Width+8,Digits);
+      { Find and cut out exponent. Always the
+        last 6 characters in the string.
+        -> 0000E+0000                         }
+      I:=Length(Digits)-5;
+      Val(Copy(Digits,I+1,5),Exp,J);
+      Exp:=Exp+1-(Placehold[1]+Placehold[2]);
+      Delete(Digits, I, 6);
+      { Str() always returns at least one digit after the decimal point.
+        If we don't want it, we have to remove it. }
+      If (Decimals=0) And (Placehold[1]+Placehold[2]<= 1) Then
+        Begin
+        If (Digits[4]>='5') Then
+          Begin
+          Inc(Digits[2]);
+          If (Digits[2]>'9') Then
+            Begin
+            Digits[2] := '1';
+            Inc(Exp);
+            End;
+          End;
+        Delete(Digits, 3, 2);
+        DecimalPoint := Length(Digits) + 1;
+        End
+      Else
+        Begin
+        { Move decimal point at the desired position }
+        Delete(Digits, 3, 1);
+        DecimalPoint:=2+Placehold[1]+Placehold[2];
+        If (Decimals<>0) Then
+          Insert('.',Digits,DecimalPoint);
+        End;
+
+      { Convert optional zeroes to spaces. }
+      I := Length(Digits);
+      J := DecimalPoint + Placehold[3];
+      While (I > J) And (Digits[I] = '0') Do
+        Begin
+        Digits[I] := ' ';
+        Dec(I);
+        End;
+
+      { If integer number and no obligatory decimal paces, remove decimal point }
+
+      If (DecimalPoint<Length(Digits)) And
+         (Digits[DecimalPoint+1]=' ') Then
+          Digits[DecimalPoint]:=' ';
+      If (Digits[1]=' ') Then
+        Begin
+        Delete(Digits, 1, 1);
+        Dec(DecimalPoint);
+        End;
+      { Calculate exponent string }
+      Str(Abs(Exp), Exponent);
+      While Length(Exponent)<ExpSize Do
+        Insert('0',Exponent,1);
+      If Exp >= 0 Then
+        Begin
+        If (ExpFmt In [1,3]) Then
+          Insert('+', Exponent, 1);
+        End
+      Else
+        Insert('-',Exponent,1);
+      If (ExpFmt<3) Then
+        Insert('E',Exponent,1)
+      Else
+        Insert('e',Exponent,1);
+      End;
+    DigitExponent:=DecimalPoint-2;
+    If (Digits[1]='-') Then
+      Dec(DigitExponent);
+    UnexpectedDigits:=DecimalPoint-1-(Placehold[1]+Placehold[2]);
+  End;
+
+  Function PutResult: LongInt;
+
+  Var
+    SQ, DQ: Boolean;
+    Fmt, Buf: PmseChar;
+    Dig, N: Integer;
+
+  Begin
+    SQ := False;
+    DQ := False;
+    Fmt := FmtStart;
+    Buf := Buffer;
+    Dig := 1;
+    While (Fmt<FmtStop) Do
+      Begin
+      //Write(Fmt[0]);
+      Case Fmt[0] Of
+        #34:
+          Begin
+          If Not SQ Then
+            DQ := Not DQ;
+          Inc(Fmt);
+          End;
+        #39:
+          Begin
+          If Not DQ Then
+            SQ := Not SQ;
+          Inc(Fmt);
+          End;
+      Else
+        If Not (SQ Or DQ) Then
+          Begin
+          Case Fmt[0] Of
+            '0', '#', '.':
+              Begin
+              If (Dig=1) And (UnexpectedDigits>0) Then
+                Begin
+                { Everything unexpected is written before the first digit }
+                For N := 1 To UnexpectedDigits Do
+                  Begin
+                  Buf[0] := Digits[N];
+                  Inc(Buf);
+                  If thousand And (Digits[N]<>'-') Then
+                    Begin
+                    If (DigitExponent Mod 3 = 0) And (DigitExponent>0) Then
+                      Begin
+                      Buf[0] := ThousandSeparator;
+                      Inc(Buf);
+                      End;
+                    Dec(DigitExponent);
+                    End;
+                  End;
+                Inc(Dig, UnexpectedDigits);
+                End;
+              If (Digits[Dig]<>' ') Then
+                Begin
+                If (Digits[Dig]='.') Then
+                  Buf[0] := DecimalSeparator
+                Else
+                  Buf[0] := Digits[Dig];
+                Inc(Buf);
+                If thousand And (DigitExponent Mod 3 = 0) And (DigitExponent > 0) Then
+                  Begin
+                  Buf[0] := ThousandSeparator;
+                  Inc(Buf);
+                  End;
+                End;
+              Inc(Dig);
+              Dec(DigitExponent);
+              Inc(Fmt);
+              End;
+            'e', 'E':
+              Begin
+              If ExpFmt <> 0 Then
+                Begin
+                Inc(Fmt);
+                If Fmt < FmtStop Then
+                  Begin
+                  If Fmt[0] In ['+', '-'] Then
+                    Begin
+                    Inc(Fmt, ExpSize);
+                    For N:=1 To Length(Exponent) Do
+                      Buf[N-1] := Exponent[N];
+                    Inc(Buf,Length(Exponent));
+                    ExpFmt:=0;
+                    End;
+                  Inc(Fmt);
+                  End;
+                End
+              Else
+                Begin
+                { No legal exponential format.
+                  Simply write the 'E' to the result. }
+                Buf[0] := Fmt[0];
+                Inc(Buf);
+                Inc(Fmt);
+                End;
+              End;
+          Else { Case }
+            { Usual character }
+            If (Fmt[0]<>',') Then
+              Begin
+              Buf[0] := Fmt[0];
+              Inc(Buf);
+              End;
+            Inc(Fmt);
+          End; { Case }
+          End
+        Else { IF }
+          Begin
+          { Character inside single or double quotes }
+          Buf[0] := Fmt[0];
+          Inc(Buf);
+          Inc(Fmt);
+          End;
+      End; { Case }
+    End; { While .. Begin }
+//    Result:=PtrInt(Buf)-PtrInt(Buffer);
+    result:= buf - buffer;
+  End;
+var
+ int1: integer;
+begin
+ if value > 0 then begin
+  getsectionrange(1);
+ end
+ else begin
+  if (value < 0) then begin
+   getsectionrange(2)
+  end
+  else begin
+   getsectionrange(3);
+  end;
+ end;
+ if fmtstart = nil then begin
+  result:= floattotext(pchar(buffer),value,ffgeneral,15,4);
+ end
+ else begin
+  getformatoptions;
+  if (expfmt = 0) and (abs(value) >= 1e18) then begin
+   result:= floattotext(pchar(buffer),value,ffgeneral,15,4);
+  end
+  else begin
+   floattostr;
+   result:= putresult;
+   exit;
+  end;
+ end;
+ for int1:= result - 1 downto 0 do begin
+  pmsecharaty(buffer)^[int1]:= pcharaty(buffer)^[int1];
+             //convert to widestring
+ end;
+end;
 
 function cstringtostringvar(var inp: pchar): string;
 
@@ -670,14 +1163,17 @@ begin
  result:= byte(((inp div 10) shl 4) + (inp mod 10))
 end;
 
-function formatfloatmse(const value: extended; const format: string): string;
-               //immer'.' als separator
+function formatfloatmse(const value: extended; const format: msestring;
+                                 const dot: boolean = false): msestring;
+var
+ int1: integer;
 begin
- {$ifdef withformatsettings}
- formatfloat(format,value,defaultformatsettings);
- {$else}
- result:= replacechar(formatfloat(format,value),decimalseparator,'.')
- {$endif}
+ setlength(result,length(format)+200); //max
+ int1:= floattotextfmt(pmsechar(result),value,pmsechar(format));
+ setlength(result,int1);
+ if dot then begin
+  replacechar1(result,decimalseparator,'.');
+ end;
 end;
 
 function realToStr(const value: extended): string;     //immer'.' als separator

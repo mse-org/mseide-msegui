@@ -997,12 +997,14 @@ end;
 
 function encodesqlfloat(const avalue: real): string;
 begin
- result:= formatfloatmse(avalue,'');
+ result:= replacechar(floattostr(avalue),decimalseparator,'.');
+//( result:= formatfloatmse(avalue,'');
 end;
 
 function encodesqlcurrency(const avalue: currency): string;
 begin
- result:= formatfloatmse(avalue,'0.####');
+ result:= replacechar(formatfloat('0.####',avalue),decimalseparator,'.')
+// result:= formatfloatmse(avalue,'0.####');
 end;
 
 function encodesqlboolean(const avalue: boolean): string;

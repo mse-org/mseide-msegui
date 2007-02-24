@@ -381,6 +381,8 @@ type
   function remainingheight: integer;
   function pagepagenum: integer; //null based
   function reppagenum: integer; //null based
+  function getlastpagepagecount: integer;
+  function getlastreppagecount: integer;
   function pageprintstarttime: tdatetime;
   function repprintstarttime: tdatetime;
   function getreppage: tcustomreportpage;
@@ -543,8 +545,8 @@ type
  tcustomrepvaluedisp = class(tcustomrecordband)
   private
    ftextflags: textflagsty;
-   fformat: string;
-   procedure setformat(const avalue: string);
+   fformat: msestring;
+   procedure setformat(const avalue: msestring);
   protected
    function calcminscrollsize: sizety; override;
    procedure dopaint(const acanvas: tcanvas); override;
@@ -553,7 +555,7 @@ type
    constructor create(aowner: tcomponent); override;
    property textflags: textflagsty read ftextflags write ftextflags default 
                defaultrepvaluedisptextflags;
-   property format: string read fformat write setformat;
+   property format: msestring read fformat write setformat;
    property optionsscale default defaultrepvaluedispoptionsscale;
   published
    property anchors default [an_left,an_top];
@@ -614,6 +616,8 @@ type
    function remainingheight: integer;
    function pagepagenum: integer; //null based
    function reppagenum: integer; //null based
+   function getlastpagepagecount: integer;
+   function getlastreppagecount: integer;
    function pageprintstarttime: tdatetime;
    function repprintstarttime: tdatetime;
    function getreppage: tcustomreportpage;
@@ -706,6 +710,8 @@ type
                     //true if area full
    procedure endband(const acanvas: tcanvas; const sender: tcustomrecordband);  
    procedure updatevisible;
+   function getlastpagepagecount: integer;
+   function getlastreppagecount: integer;
   public
    function isfirstband: boolean;
    function islastband(const addheight: integer = 0): boolean;
@@ -781,6 +787,7 @@ type
    freccontrols: pointerarty;
    frecnobefore: integer;
    fprintorientation: reppageorientationty;
+   flastpagecount: integer;
    procedure setpagewidth(const avalue: real);
    procedure setpageheight(const avalue: real);
    procedure updatepagesize;
@@ -829,6 +836,8 @@ type
    function pageprintstarttime: tdatetime;
    function repprintstarttime: tdatetime;
    function getreppage: tcustomreportpage;
+   function getlastpagepagecount: integer;
+   function getlastreppagecount: integer;
   
   public
    constructor create(aowner: tcomponent); override;
@@ -839,12 +848,15 @@ type
    procedure recordchanged;   
    property report: tcustomreport read freport;
    property pagenum: integer read fpagenum write fpagenum; 
-                            //null-based, local to this page
+                 //null-based, local to this page
+   property lastpagecount: integer read getlastpagepagecount write flastpagecount;
+                 //local to this page
    property printstarttime: tdatetime read fprintstarttime write fprintstarttime;
    property visiblepage: boolean read fvisiblepage write fvisiblepage default true;
    procedure activatepage;
    procedure finish;
 
+   
    property pagewidth: real read fpagewidth write setpagewidth;
    property pageheight: real read fpageheight write setpageheight;
    property font: twidgetfont read getfont write setfont stored isfontstored;
@@ -926,6 +938,7 @@ type
    fonrenderfinish: reporteventty;
    fnilstream: boolean;
    foptions: reportoptionsty;
+   flastpagecount: integer;
    procedure setppmm(const avalue: real);
    function getreppages(index: integer): tcustomreportpage;
    procedure setreppages(index: integer; const avalue: tcustomreportpage);
@@ -977,6 +990,7 @@ type
                                                 write setreppages; default;
    property pagenum: integer read fpagenum {write fpagenum}; 
                             //null-based
+   property lastpagecount: integer read flastpagecount write flastpagecount;
    property activepage: integer read factivepage write setactivepage;
    procedure finish;
    property printstarttime: tdatetime read fprintstarttime write fprintstarttime;
@@ -1030,7 +1044,7 @@ function getreportscale(const amodule: tcomponent): real;
 
 implementation
 uses
- msedatalist,sysutils,msestreaming,msebits,msereal;
+ msedatalist,sysutils,msestreaming,msebits,msereal,mseformatstr;
 type
  tcustomframe1 = class(tcustomframe);
  twidget1 = class(twidget);
@@ -3117,6 +3131,16 @@ begin
  result:= fparentintf.reppagenum;
 end;
 
+function tcustombandgroup.getlastpagepagecount: integer;
+begin
+ result:= fparentintf.getlastpagepagecount;
+end;
+
+function tcustombandgroup.getlastreppagecount: integer;
+begin
+ result:= fparentintf.getlastreppagecount;
+end;
+
 function tcustombandgroup.pageprintstarttime: tdatetime;
 begin
  result:= fparentintf.pageprintstarttime;
@@ -3474,6 +3498,16 @@ begin
  result:= freportpage.fprintstarttime;
 end;
 
+function tcustombandarea.getlastpagepagecount: integer;
+begin
+ result:= freportpage.flastpagecount;
+end;
+
+function tcustombandarea.getlastreppagecount: integer;
+begin
+ result:= freportpage.freport.flastpagecount;
+end;
+
 function tcustombandarea.repprintstarttime: tdatetime;
 begin
  result:= freportpage.freport.fprintstarttime;
@@ -3798,6 +3832,7 @@ procedure tcustomreportpage.endrender;
 var
  int1: integer;
 begin
+ flastpagecount:= fpagenum;
  freccontrols:= nil;
  exclude(fstate,rpps_rendering);
  exclude(fwidgetstate1,ws1_noclipchildren);
@@ -4036,6 +4071,16 @@ begin
  end;
 end;
 
+function tcustomreportpage.getlastpagepagecount: integer;
+begin
+ result:= flastpagecount;
+end;
+
+function tcustomreportpage.getlastreppagecount: integer;
+begin
+ result:= freport.flastpagecount;
+end;
+
  {tcustomreport}
  
 constructor tcustomreport.create(aowner: tcomponent);
@@ -4128,6 +4173,7 @@ function tcustomreport.exec(thread: tmsethread): integer;
   int1: integer;
  begin
   fakevisible(self,false);
+  flastpagecount:= fpagenum;
   for int1:= 0 to high(freppages) do begin
    freppages[int1].endrender;
   end;
@@ -4526,7 +4572,7 @@ begin
  result:= name;
 end;
 
-procedure tcustomrepvaluedisp.setformat(const avalue: string);
+procedure tcustomrepvaluedisp.setformat(const avalue: msestring);
 begin
  if fformat <> avalue then begin
   fformat:= avalue;
@@ -4566,6 +4612,7 @@ end;
 function treppagenumdisp.getdisptext: msestring;
 var
  int1: integer;
+ 
 begin
  if fparentintf <> nil then  begin
   if bo_localvalue in foptions then begin
@@ -4574,7 +4621,8 @@ begin
   else begin
    int1:= fparentintf.reppagenum
   end;
-  result:= formatfloat(fformat,int1+foffset);
+  result:= formatfloatmse(int1+foffset,fformat);
+//  result:= formatfloat(fformat,int1+foffset);
  end
  else begin
   result:= inherited getdisptext;
