@@ -588,7 +588,7 @@ type
    constructor create(aowner: tcomponent); override;
   published
    property offset: integer read foffset write setoffset default 1;
-   property format;
+   property format;   //'1' returns lastpagecount
  end;
 
  trepprintdatedisp = class(trepvaluedisp)
@@ -4611,18 +4611,48 @@ end;
 
 function treppagenumdisp.getdisptext: msestring;
 var
- int1: integer;
- 
+ int1,int2: integer;
+ mstr1: msestring; 
+ squote,dquote: boolean;
 begin
  if fparentintf <> nil then  begin
+  squote:= false;
+  dquote:= false;
+  mstr1:= fformat;
+  for int1:= 1 to length(fformat) do begin
+   case fformat[int1] of
+    '''': begin
+     if not dquote then begin
+      squote:= not squote;
+     end;
+    end;
+    '"': begin
+     if not squote then begin
+      dquote:= not dquote;
+     end;
+    end;
+    '1': begin
+     if not (squote or dquote) then begin
+
+      if bo_localvalue in foptions then begin
+       int2:= fparentintf.getlastpagepagecount;
+      end
+      else begin
+       int2:= fparentintf.getlastreppagecount;
+      end;
+      mstr1:= copy(fformat,1,int1-1) + '"' +inttostr(int2) +'"' +
+                              copy(fformat,int1+1,bigint);
+     end;
+    end;
+   end;
+  end;
   if bo_localvalue in foptions then begin
    int1:= fparentintf.pagepagenum;
   end
   else begin
    int1:= fparentintf.reppagenum
   end;
-  result:= formatfloatmse(int1+foffset,fformat);
-//  result:= formatfloat(fformat,int1+foffset);
+  result:= formatfloatmse(int1+foffset,mstr1);
  end
  else begin
   result:= inherited getdisptext;
