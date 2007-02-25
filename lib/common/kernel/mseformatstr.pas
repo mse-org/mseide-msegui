@@ -340,7 +340,8 @@ Var
                     ExpSize := 0;
                     While (Fmt<FmtStop) And
                           (ExpSize<4) And
-                          (Fmt[0] In ['0'..'9']) Do
+                          (fmt^ >= '0') and (fmt^ <= '9') do
+//                          (Fmt[0] In ['0'..'9']) Do
                       Begin
                       Inc(ExpSize);
                       Inc(Fmt);
@@ -536,13 +537,13 @@ Var
                 { Everything unexpected is written before the first digit }
                 For N := 1 To UnexpectedDigits Do
                   Begin
-                  Buf[0] := Digits[N];
+                  Buf[0] := widechar(Digits[N]);
                   Inc(Buf);
                   If thousand And (Digits[N]<>'-') Then
                     Begin
                     If (DigitExponent Mod 3 = 0) And (DigitExponent>0) Then
                       Begin
-                      Buf[0] := ThousandSeparator;
+                      Buf[0] := widechar(ThousandSeparator);
                       Inc(Buf);
                       End;
                     Dec(DigitExponent);
@@ -553,13 +554,13 @@ Var
               If (Digits[Dig]<>' ') Then
                 Begin
                 If (Digits[Dig]='.') Then
-                  Buf[0] := DecimalSeparator
+                  Buf[0] := widechar(DecimalSeparator)
                 Else
-                  Buf[0] := Digits[Dig];
+                  Buf[0] := widechar(Digits[Dig]);
                 Inc(Buf);
                 If thousand And (DigitExponent Mod 3 = 0) And (DigitExponent > 0) Then
                   Begin
-                  Buf[0] := ThousandSeparator;
+                  Buf[0] := widechar(ThousandSeparator);
                   Inc(Buf);
                   End;
                 End;
@@ -574,11 +575,12 @@ Var
                 Inc(Fmt);
                 If Fmt < FmtStop Then
                   Begin
-                  If Fmt[0] In ['+', '-'] Then
+//                  If Fmt[0] In ['+', '-'] Then
+                  If (Fmt[0] = '+') or (fmt[0] = '-') Then
                     Begin
                     Inc(Fmt, ExpSize);
                     For N:=1 To Length(Exponent) Do
-                      Buf[N-1] := Exponent[N];
+                      Buf[N-1] := widechar(Exponent[N]);
                     Inc(Buf,Length(Exponent));
                     ExpFmt:=0;
                     End;
@@ -631,12 +633,20 @@ begin
   end;
  end;
  if fmtstart = nil then begin
+ {$ifdef FPC}
   result:= floattotext(pchar(buffer),value,ffgeneral,15,4);
+ {$else}
+  result:= floattotext(pchar(buffer),value,fvextended,ffgeneral,15,4);
+ {$endif}
  end
  else begin
   getformatoptions;
   if (expfmt = 0) and (abs(value) >= 1e18) then begin
+ {$ifdef FPC}
    result:= floattotext(pchar(buffer),value,ffgeneral,15,4);
+ {$else}
+   result:= floattotext(pchar(buffer),value,fvextended,ffgeneral,15,4);
+ {$endif}
   end
   else begin
    floattostr;
@@ -645,7 +655,7 @@ begin
   end;
  end;
  for int1:= result - 1 downto 0 do begin
-  pmsecharaty(buffer)^[int1]:= pcharaty(buffer)^[int1];
+  pmsecharaty(buffer)^[int1]:= widechar(pcharaty(buffer)^[int1]);
              //convert to widestring
  end;
 end;
@@ -1172,7 +1182,7 @@ begin
  int1:= floattotextfmt(pmsechar(result),value,pmsechar(format));
  setlength(result,int1);
  if dot then begin
-  replacechar1(result,decimalseparator,'.');
+  replacechar1(result,widechar(decimalseparator),widechar('.'));
  end;
 end;
 
