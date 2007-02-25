@@ -239,6 +239,8 @@ type
    procedure setwidth(const Value: integer);
    procedure setbitmap(const Value: tmaskedbitmap);
    procedure copyimages(const image: tmaskedbitmap; const destindex: integer);
+   function getcolormask: boolean;
+   procedure setcolormask(const avalue: boolean);
   protected
    function indextoorg(index: integer): pointty;
    procedure change;
@@ -277,6 +279,7 @@ type
    property height: integer read fsize.cy 
                    write setheight default defaultimagelistheight;
    property masked: boolean read getmasked write setmasked default true;
+   property colormask: boolean read getcolormask write setcolormask default false;
    property transparentcolor: colorty read gettransparentcolor 
                          write settransparentcolor default cl_none;
    property onchange: notifyeventty read fonchange write fonchange;
@@ -1403,7 +1406,19 @@ begin
       end;
      end
      else begin
-      exclude(self.foptions,bmo_masked);
+      if masked then begin
+       include(self.foptions,bmo_masked);
+       exclude(self.fstate,pms_maskvalid);
+      end
+      else begin
+       exclude(self.foptions,bmo_masked);
+      end;
+      if colormask then begin
+       include(self.foptions,bmo_colormask);
+      end
+      else begin
+       exclude(self.foptions,bmo_colormask);
+      end;
      end;
      self.ftransparentcolor:= ftransparentcolor;
     end;
@@ -1514,6 +1529,7 @@ begin
   size1:= dest.size;
   dest.clear;
   dest.monochrome:= monochrome;
+  dest.colormask:= colormask;
   dest.masked:= masked;
   if masked then begin
    dest.fmask.monochrome:= fmask.monochrome;
@@ -1759,6 +1775,16 @@ end;
 function timagelist.getmonochrome: boolean;
 begin
  result:= fbitmap.monochrome;
+end;
+
+function timagelist.getcolormask: boolean;
+begin
+ result:= fbitmap.colormask;
+end;
+
+procedure timagelist.setcolormask(const avalue: boolean);
+begin
+ fbitmap.colormask:= avalue;
 end;
 
 procedure timagelist.setmonochrome(const Value: boolean);

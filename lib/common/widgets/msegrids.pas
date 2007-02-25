@@ -1080,6 +1080,7 @@ end;
    ffirstvisiblerow: integer;
    flastvisiblerow: integer;
    fupdating: integer;
+   flayoutupdating: integer;
    fnullchecking: integer;
    frowdatachanging: integer;
    fnoshowcaretrect: integer;
@@ -5872,6 +5873,14 @@ begin
   exclude(fstate,gs_layoutupdating);
   if canevent(tmethod(fonlayoutchanged)) then begin
    fonlayoutchanged(self);
+   if not (gs_layoutvalid in fstate) and (flayoutupdating < 16) then begin
+    inc(flayoutupdating);
+    try
+     internalupdatelayout;
+    finally
+     dec(flayoutupdating);
+    end;
+   end;
   end;
  end;
 end;

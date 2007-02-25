@@ -4020,8 +4020,10 @@ begin
     if needstransform then begin
      xrendersetpicturetransform(appdisp,spic,@transform);
     end;
-    xrendercomposite(appdisp,pictop,spic,maskpic,dpic,ax,ay,0,0,destrect^.x,destrect^.y,
+    xrendercomposite(appdisp,pictop,spic,maskpic,dpic,ax,ay,ax,ay,destrect^.x,destrect^.y,
                        destrect^.cx,destrect^.cy);
+//    xrendercomposite(appdisp,pictop,spic,maskpic,dpic,ax,ay,0,0,destrect^.x,destrect^.y,
+//                       destrect^.cx,destrect^.cy);
    end;
    if maskpic <> 0 then begin
     xrenderfreepicture(appdisp,maskpic);

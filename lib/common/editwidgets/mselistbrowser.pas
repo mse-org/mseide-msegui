@@ -210,6 +210,8 @@ type
    procedure setcellfocusrectdist(const avalue: integer);
    function getonselectionchanged: listvieweventty;
    procedure setonselectionchanged(const avalue: listvieweventty);
+   function getonlayoutchanged: listvieweventty;
+   procedure setonlayoutchanged(const avalue: listvieweventty);
   protected
    fitemlist: titemviewlist;
    procedure setframeinstance(instance: tcustomframe); override;
@@ -279,6 +281,8 @@ type
    property optionsgrid default defaultlistviewoptionsgrid;
    property onselectionchanged: listvieweventty read getonselectionchanged 
                                 write setonselectionchanged;
+   property onlayoutchanged: listvieweventty read getonlayoutchanged 
+                                write setonlayoutchanged;
  end;
 
  tlistview = class(tcustomlistview)
@@ -304,6 +308,7 @@ type
    property statvarname;
    property statfile;
    property onselectionchanged;
+   property onlayoutchanged;
    property onitemevent;
    property drag;
    property onitemsmoved;
@@ -662,8 +667,9 @@ begin
    tlistitem.calcitemlayout(subsize(makesize(cellwidth,cellheight),fcellframe.paintframewidth),
              tframe1(fcellframe).fi.innerframe,self,flayoutinfo);
   end;
+  layoutchanged;
  end;
- invalidate;
+// invalidate;
 end;
 
 function titemviewlist.getcolorglyph: colorty;
@@ -1825,6 +1831,16 @@ end;
 function tcustomlistview.hasselection: boolean;
 begin
  result:= false;
+end;
+
+function tcustomlistview.getonlayoutchanged: listvieweventty;
+begin
+ result:= listvieweventty(inherited onlayoutchanged);
+end;
+
+procedure tcustomlistview.setonlayoutchanged(const avalue: listvieweventty);
+begin
+ inherited onlayoutchanged:= gridnotifyeventty(avalue);
 end;
 
 { tcustomitemeditlist }

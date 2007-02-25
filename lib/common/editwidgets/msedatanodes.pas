@@ -837,7 +837,8 @@ procedure tcustomitemlist.setimageheight(const Value: integer);
 begin
  if fimagesize.cy <> value then begin
   fimagesize.cy := Value;
-  invalidate;
+  updatelayout;
+//  invalidate;
  end;
 end;
 
@@ -845,7 +846,8 @@ procedure tcustomitemlist.setimagewidth(const Value: integer);
 begin
  if fimagesize.cx <> value then begin
   fimagesize.cx := Value;
-  invalidate;
+  updatelayout;
+//  invalidate;
  end;
 end;
 
@@ -856,7 +858,8 @@ begin
   if (fimagelist <> nil) and (csdesigning in fintf.getcomponentstate) then begin
    fimagesize:= fimagelist.size;
   end;
-  invalidate;
+  updatelayout;
+//  invalidate;
  end;
 end;
 

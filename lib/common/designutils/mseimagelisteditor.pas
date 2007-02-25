@@ -37,6 +37,7 @@ type
                   const fromindex,toindex,count: integer);
 
 //   procedure disponpaint(const sender: twidget; const canvas: tcanvas);
+   procedure layoutchanged(const sender: tcustomlistview);
   private
    procedure listchange(const sender: tobject);
  end;
@@ -182,6 +183,14 @@ begin
   end;
  end;
  disp.endupdate;
+end;
+
+procedure timagelisteditorfo.layoutchanged(const sender: tcustomlistview);
+begin
+ with sender do begin
+  itemlist.imagewidth:= cellwidth;
+  itemlist.imageheight:= cellheight - font.glyphheight;
+ end;
 end;
 
 end.
