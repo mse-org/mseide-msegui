@@ -2262,7 +2262,8 @@ begin
  else begin
   beginupdate;
   try
-   count:= fcount+1;
+   internalsetcount(fcount+1,true);
+//   count:= fcount+1;
    checkindex(index);
    int1:= (index)*fsize;
    move((fdatapo+int1)^,(fdatapo+int1+fsize)^,(fcount-index-1)*fsize);
