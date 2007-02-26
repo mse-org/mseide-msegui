@@ -13,7 +13,7 @@ unit msereal;
 
 interface
 uses
- msetypes,mseformatstr,Classes;
+ msetypes,mseformatstr,Classes,msestrings;
 
 const
  emptyrealstring = '';   //stringsymbol for empty realty
@@ -26,7 +26,7 @@ function candiv(const val: realty): boolean; //true if not 0.0 or empty:
 
 function strtorealty(const ein: string; forcevalue: boolean = false): realty;
 function strtorealtydot(const ein: string): realty;
-function realtytostr(const val: realty; const format: string = ''): string;
+function realtytostr(const val: realty; const format: msestring = ''): msestring;
 function realtytostrdot(const val: realty): string;
 {
 procedure varianttorealty(const value: variant; out ziel: realty); overload;
@@ -40,7 +40,7 @@ function mulrealty(const a,b: realty): realty; //result = a * b
 
 implementation
 uses
- sysutils,msestrings;
+ sysutils;
 
 const
  co1: array[0..7] of byte = ($0,0,0,0,0,0,$f0,$ff);      //- inf
@@ -141,13 +141,13 @@ begin
  end;
 end;
 
-function realtytostr(const val: realty; const format: string = ''): string;
+function realtytostr(const val: realty; const format: msestring = ''): msestring;
 begin
  if isemptyreal(val) then begin
   result:= emptyrealstring;
  end
  else begin
-  result:= formatfloat(format,val);
+  result:= formatfloatmse(val,format);
  end;
 end;
 

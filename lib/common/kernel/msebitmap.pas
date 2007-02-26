@@ -1918,6 +1918,7 @@ begin
   dest.size:= size;
   dest.copyarea(fbitmap,rect1,nullpoint,rop_copy,masked and not dest.masked);
   if masked and dest.masked then begin
+   dest.colormask:= dest.colormask or colormask;
    dest.mask.copyarea(fbitmap.fmask,rect1,nullpoint,rop_copy,false,
                dest.fmaskcolorforeground,dest.fmaskcolorbackground);
   end;

@@ -182,11 +182,11 @@ type
   private
    fvalue: realty;
    fonchange: changerealeventty;
-   fformat: string;
+   fformat: msestring;
    procedure setvalue(const avalue: realty);
    procedure readvalue(reader: treader);
    procedure writevalue(writer: twriter);
-   procedure setformat(const avalue: string);
+   procedure setformat(const avalue: msestring);
   protected
    procedure valuechanged; override;
    function getvaluetext: msestring; override;
@@ -195,7 +195,7 @@ type
    constructor create(aowner: tcomponent); override;
    property value: realty read fvalue write setvalue stored false;
   published
-   property format: string read fformat write setformat;
+   property format: msestring read fformat write setformat;
    property onchange: changerealeventty read fonchange write fonchange;
  end;
 
@@ -557,9 +557,9 @@ begin
  inherited;
 end;
 
-procedure tcustomrealdisp.setformat(const avalue: string);
+procedure tcustomrealdisp.setformat(const avalue: msestring);
 begin
- fformat := avalue;
+ fformat:= avalue;
  formatchanged;
 end;
 

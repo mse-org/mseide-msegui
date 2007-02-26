@@ -670,14 +670,14 @@ type
   private
    fonsetvalue: setrealeventty;
    fvalue: realty;
-   fformatdisp: string;
-   fformatedit: string;
+   fformatdisp: msestring;
+   fformatedit: msestring;
    fscale: real;
    fmin: realty;
    fmax: realty;
    procedure setvalue(const Value: realty);
-   procedure setformatdisp(const Value: string);
-   procedure setformatedit(const Value: string);
+   procedure setformatdisp(const Value: msestring);
+   procedure setformatedit(const Value: msestring);
    procedure readvalue(reader: treader);
    procedure writevalue(writer: twriter);
    procedure readmin(reader: treader);
@@ -710,8 +710,8 @@ type
    property asinteger: integer read getasinteger write setasinteger;
    property onsetvalue: setrealeventty read fonsetvalue write fonsetvalue;
    property value: realty read fvalue write setvalue stored false;
-   property formatedit: string read fformatedit write setformatedit;
-   property formatdisp: string read fformatdisp write setformatdisp;
+   property formatedit: msestring read fformatedit write setformatedit;
+   property formatdisp: msestring read fformatdisp write setformatdisp;
    property scale: real read fscale write setscale;
    property min: realty read fmin write fmin stored false;
    property max: realty read fmax write fmax stored false;
@@ -3178,13 +3178,13 @@ begin
  inherited;
 end;
 
-procedure tcustomrealedit.setformatdisp(const Value: string);
+procedure tcustomrealedit.setformatdisp(const Value: msestring);
 begin
  fformatdisp := Value;
  formatchanged;
 end;
 
-procedure tcustomrealedit.setformatedit(const Value: string);
+procedure tcustomrealedit.setformatedit(const Value: msestring);
 begin
  fformatedit := Value;
  formatchanged;
