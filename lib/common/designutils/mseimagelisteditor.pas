@@ -146,7 +146,7 @@ begin
    imagelist.beginupdate;
    try
     int2:= 0;
-    for int1:= 0 to disp.itemlist.count - 1do begin
+    for int1:= 0 to disp.itemlist.count - 1 do begin
      if ns_selected in disp.itemlist[int1].state then begin
       imagelist.deleteimage(int2);
      end
@@ -154,7 +154,12 @@ begin
       inc(int2);
      end;
     end;
-    disp.datacols.clearselection;
+    with disp do begin
+     datacols.clearselection;
+     if focusedindex >= 0 then begin
+      items[focusedindex].selected:= true;
+     end;
+    end;
    finally
     imagelist.endupdate;
    end;
