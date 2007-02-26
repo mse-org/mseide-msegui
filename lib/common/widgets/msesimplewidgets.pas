@@ -308,6 +308,9 @@ type
    property framei_bottom;
    property caption;
    property captionpos;
+   property captiondist;
+   property captiondistouter;
+   property captionoffset;
    property font;
    property buttonsize;
    property buttonpos;
