@@ -5,8 +5,9 @@ object objectinspectorfo: tobjectinspectorfo
   bounds_cx = 254
   bounds_cy = 248
   frame.grip_size = 10
-  frame.grip_options = [go_closebutton, go_fixsizebutton, go_topbutton]
+  frame.grip_options = [go_closebutton, go_fixsizebutton, go_topbutton, go_backgroundbutton]
   frame.dummy = 0
+  taborder = 1
   visible = False
   container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_mousetransparent, ow_destroywidgets, ow_autoscale]
   container.bounds_x = 0
@@ -146,7 +147,7 @@ object objectinspectorfo: tobjectinspectorfo
       frame.colorclient = -2147483646
       frame.localprops = [frl_levelo, frl_colorclient]
       frame.dummy = 0
-      taborder = 2
+      taborder = 1
       onpopup = propsonpopup
       visible = False
       optionsedit = [oe_readonly, oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_resetselectonexit, oe_locate, oe_savestate]
@@ -180,6 +181,7 @@ object objectinspectorfo: tobjectinspectorfo
           imagenr = 17
         end>
       frame.dummy = 0
+      taborder = 2
       visible = False
       optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_forcereturncheckvalue, oe_eatreturn, oe_resetselectonexit, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_savestate]
       font.name = 'stf_default'
@@ -190,11 +192,11 @@ object objectinspectorfo: tobjectinspectorfo
       onbuttonaction = valuesbuttonaction
       onupdaterowvalues = valueupdaterowvalue
       dropdown.options = [deo_autodropdown, deo_keydropdown, deo_cliphint]
+      dropdown.dropdownrowcount = 16
       dropdown.cols.count = 1
       dropdown.cols.items = <      
         item
         end>
-      dropdown.dropdownrowcount = 16
       onbeforedropdown = valuesbeforedropdown
       reffontheight = 14
     end
