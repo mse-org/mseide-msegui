@@ -907,6 +907,7 @@ type
 
    procedure doscroll(const dist: pointty); virtual;
 
+   procedure doloaded; virtual;
    procedure dohide; virtual;
    procedure doshow; virtual;
    procedure doactivate; virtual;
@@ -4932,6 +4933,7 @@ begin
  try
   exclude(fwidgetstate1,ws1_widgetregionvalid);
   inherited;
+  doloaded;
   sortzorder;
   updatetaborder(nil);
   if fframe <> nil then begin
@@ -4946,6 +4948,9 @@ begin
   if ownswindow1 and (ws_visible in fwidgetstate) and
                           (componentstate * [csloading,csinline] = []) then begin
    fwindow.show(false);
+  end;
+  if showing then begin
+   doshow;
   end;
  finally
   exclude(fwidgetstate,ws_loadedproc);
@@ -6846,6 +6851,11 @@ begin
  end;
 end;
 
+procedure twidget.doloaded;
+begin
+ //dummy
+end;
+
 procedure twidget.dohide;
 var
  int1: integer;
@@ -6915,11 +6925,13 @@ procedure twidget.doshow;
 var
  int1: integer;
 begin
- visiblechanged;
- for int1:= 0 to widgetcount - 1 do begin
-  with widgets[int1] do begin
-   if fwidgetstate * [ws_visible,ws_showproc] = [ws_visible] then begin
-    doshow;
+ if not (ws_loadedproc in fwidgetstate) then begin
+  visiblechanged;
+  for int1:= 0 to widgetcount - 1 do begin
+   with widgets[int1] do begin
+    if fwidgetstate * [ws_visible,ws_showproc] = [ws_visible] then begin
+     doshow;
+    end;
    end;
   end;
  end;
@@ -9053,6 +9065,7 @@ begin
  if (ws_visible in fowner.fwidgetstate) then begin
   if not visible then begin
    include(fstate,tws_windowvisible);
+   include(app.fstate,aps_needsupdatewindowstack);
    if not (csdesigning in fowner.ComponentState) then begin
     if not windowevent then begin
      gui_showwindow(winid);
@@ -9491,17 +9504,20 @@ end;
 procedure twindow.bringtofront;
 begin
  gui_raisewindow(winid);
+ include(app.fstate,aps_needsupdatewindowstack);
 end;
 
 procedure twindow.sendtoback;
 begin
  gui_lowerwindow(winid);
+ include(app.fstate,aps_needsupdatewindowstack);
 end;
 
 procedure twindow.stackunder(const predecessor: twindow);
 begin
  if (predecessor <> self) then begin
   app.stackunder(self,predecessor);
+  include(app.fstate,aps_needsupdatewindowstack);
  end;
 end;
 
@@ -9509,6 +9525,7 @@ procedure twindow.stackover(const predecessor: twindow);
 begin
  if (predecessor <> self) then begin
   app.stackover(self,predecessor);
+  include(app.fstate,aps_needsupdatewindowstack);
  end;
 end;
 
@@ -10833,9 +10850,8 @@ begin       //eventloop
          end;
          inc(po1);
         end;
-
+        include(fstate,aps_needsupdatewindowstack);
         if bo1 then begin
-         include(fstate,aps_needsupdatewindowstack);
          setwindowfocus(twindowevent(event).fwinid);
          checkapplicationactive;
         end;
