@@ -54,6 +54,12 @@ Breakpoints don't work on win32 in units compiled with -CX
 String and dynamic array variables of units compiled with 
 -gv (Valgrind debug info) are displayed incorrect.
 
+Popup widgets behind the forms
+******************************
+If the popup widgets are showed behind the forms try to start the 
+MSEgui program with the option '--TOPLEVELRAISE'. Do *not* use this option
+if is not necessary (KDE, Gnome, IceWM...).
+
 How to add custom components to MSEide
 **************************************
 There is a project 'apps/myide/mymseide.prj' as a demo.
