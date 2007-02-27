@@ -16,7 +16,7 @@ interface
 
 uses
  {$ifdef FPC}xlib{$else}Xlib{$endif},msetypes,msegui,msegraphics,msegraphutils,
- mseevent,msepointer,mseguiglob,
+ mseevent,msepointer,mseguiglob,msesys,
  msethread{$ifdef FPC},x,xutil,dynlibs{$endif},libc,msesysintf,msestockobjects,
  msestrings;
 
@@ -574,6 +574,7 @@ var
  defcolormap: colormap;
  hasxrender: boolean;
  hasxft: boolean;
+ toplevelraise: boolean;
  screenrenderpictformat,bitmaprenderpictformat,alpharenderpictformat: pxrenderpictformat;
 
  rootid: winidty;
@@ -652,7 +653,7 @@ end;
 
 function gui_canstackunder: boolean;
 begin
- result:= false; //found no solution to restack windows in kde
+ result:= false; //no solution found to restack windows in kde
 //result:= true;
 end;
 
@@ -1263,8 +1264,13 @@ end;
 
 function gui_raisewindow(id: winidty): guierrorty;
 begin
-// xraisewindow(appdisp,toplevelwindow(id));
- xraisewindow(appdisp,id);
+ if toplevelraise then begin
+//  waitfordecoration(id);
+  xraisewindow(appdisp,toplevelwindow(id));
+ end
+ else begin
+  xraisewindow(appdisp,id);
+ end;
  result:= gue_ok;
 end;
 
@@ -1329,7 +1335,7 @@ begin
        pindex:= 0;
       end;
       for int1:= pindex to high(ar1) do begin
-       xraisewindow(appdisp,ar1[int1]);
+       gui_raisewindow(ar1[int1]);
       end;
      end;
     end;
@@ -1757,11 +1763,12 @@ begin
  int1:= 0;
  result:= false;
  repeat
+  xflush(appdisp);    //windowmanager has to work
   if gui_windowvisible(id) then begin
    result:= true;
    break;
   end;
-  xflush(appdisp);    //windowmanager has to work
+//  xflush(appdisp);    //windowmanager has to work
   sleep(5*int1);
   inc(int1);
  until (int1 > 45);
@@ -1809,14 +1816,13 @@ begin
  if hasoverrideredirect(id) or bo1 then begin
   waitfordecoration(id);
   if (transientfor = 0) or (transientfor = rootwindow) then begin
-   xraisewindow(appdisp,id);
+   gui_raisewindow(id);
   end
   else begin
    waitfordecoration(transientfor);
-   gui_stackunderwindow(transientfor,id);
-//   wins[0]:= toplevelwindow(id);
-//   wins[1]:= toplevelwindow(transientfor);
-//   xrestackwindows(appdisp,@wins[0],2);
+   gui_raisewindow(transientfor);
+   gui_raisewindow(id);   
+//   gui_stackunderwindow(transientfor,id);
   end;
  end;
 end;
@@ -2437,10 +2443,12 @@ begin
   attributes.override_redirect:= {$ifdef FPC}true{$else}1{$endif};
   valuemask:= valuemask or cwoverrideredirect;
  end;
+ {
  if (wo_popup in options.options) and (options.transientfor <> 0) then begin
   xraisewindow(appdisp,options.transientfor);
     //transientforhint not used by overrideredirect
  end;
+ }
  if rect.cx <= 0 then begin
   width:= 1;
  end
@@ -2500,6 +2508,13 @@ begin
  if netatoms[net_wm_pid] <> 0 then begin
   setcardinalproperty(id,netatoms[net_wm_pid],getpid);
  end;
+ if (wo_popup in options.options) and (options.transientfor <> 0) then begin
+  gui_raisewindow(options.transientfor);
+    //transientforhint not used by overrideredirect
+ end;
+ if (wo_popup in options.options) then begin
+  gui_raisewindow(id);
+ end;
 end;
 
 function gui_getwindowrect(id: winidty; out rect: rectty): guierrorty;
@@ -2551,7 +2566,7 @@ begin
   {$ifdef FPC} {$checkpointer off} {$endif}
   xgetwmnormalhints(appdisp,id,sizehints,@int1);
   with sizehints^ do begin
-   flags:= flags or pposition or psize or usposition or ussize or pbasesize or
+   flags:= flags or pposition or psize or usposition or ussize {or pbasesize} or
                        pwingravity;
    x:= changes.x;
    y:= changes.y;
@@ -2562,7 +2577,6 @@ begin
    win_gravity:= staticgravity;
   end;
  {$ifdef FPC} {$checkpointer default} {$endif}
-// xsetnormalhints(appdisp,id,sizehints);
   xsetwmnormalhints(appdisp,id,sizehints);
   xfree(sizehints);
  end;
@@ -2596,7 +2610,6 @@ begin
   end;
  end;
  {$ifdef FPC} {$checkpointer default} {$endif}
-// xsetnormalhints(appdisp,id,sizehints);
  xsetwmnormalhints(appdisp,id,sizehints);
  xfree(sizehints);
  result:= gue_ok;
@@ -4856,6 +4869,7 @@ var
  attrib: xsetwindowattributes;
  netnum: netatomty;
  int1,int2: integer;
+ ar1: stringarty;
 {$ifdef hassm}
  smcb: smccallbacks;
  clientid: pchar;
@@ -4863,6 +4877,14 @@ var
 {$endif}
 
 begin
+ ar1:= getcommandlinearguments;
+ for int1:= 1 to high(ar1) do begin
+  if ar1[int1] = '--TOPLEVELRAISE' then begin
+   toplevelraise:= true;
+   deletecommandlineargument(int1);
+   break;
+  end;
+ end;
  {$ifdef hassm} 
   //todo: error handling
  if sminfo.smconnection = nil then begin
