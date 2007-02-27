@@ -115,6 +115,7 @@ type
    function isgroupleader: boolean; override;
 
    procedure readstate(reader: treader); override;
+   procedure doloaded; override;
    procedure loaded; override;
    procedure setoptionswidget(const avalue: optionswidgetty); override;
 
@@ -719,6 +720,14 @@ begin
  end;
 end;
 
+procedure tcustommseform.doloaded;
+begin
+ if canevent(tmethod(foncreate)) then begin
+  foncreate(self);
+ end;
+ inherited;
+end;
+
 procedure tcustommseform.loaded;
 begin
  exclude(fscrollbox.fwidgetstate,ws_loadlock);
@@ -734,9 +743,6 @@ begin
  inherited;
  updateoptions;
  updatemainmenutemplates;
- if canevent(tmethod(foncreate)) then begin
-  foncreate(self);
- end;
  application.postevent(tobjectevent.create(ek_loaded,ievent(self)));
 end;
 
