@@ -78,9 +78,9 @@ type
    property imagenr: integer read finfo.imagenr write setimagenr
                             stored isimagenrstored default -1;
    property colorglyph: colorty read finfo.colorglyph write setcolorglyph 
-                       stored iscolorglyphstored;
+                       stored iscolorglyphstored default cl_glyph;
    property color: colorty read finfo.color write setcolor 
-                       stored iscolorstored;
+                       stored iscolorstored default cl_transparent;
    property imagecheckedoffset: integer read finfo.imagecheckedoffset
               write setimagecheckedoffset
                             stored isimagecheckedoffsetstored default 0;
@@ -564,11 +564,19 @@ end;
 procedure ttoolbuttons.createitem(const index: integer; var item: tpersistent);
 begin
  inherited;
- with ttoolbutton(item) do begin
-  imagelist:= fimagelist;
-  colorglyph:= fcolorglyph;
-  color:= fcolor;
-  state:= state - [as_localimagelist,as_localcolorglyph,as_localcolor];
+ if not (csloading in tcustomtoolbar(fowner).componentstate) then begin
+  with ttoolbutton(item) do begin
+   if fimagelist <> nil then begin
+    imagelist:= fimagelist;
+   end;
+   if fcolorglyph <> cl_glyph then begin
+    colorglyph:= fcolorglyph;
+   end;
+   if fcolor <> cl_transparent then begin
+    color:= fcolor;
+   end;
+//   state:= state - [as_localimagelist,as_localcolorglyph,as_localcolor];
+  end;
  end;
 end;
 

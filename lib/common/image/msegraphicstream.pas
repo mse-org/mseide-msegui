@@ -423,17 +423,22 @@ begin
      end;
     end;
    end;
-   if hasalpha and (dest is tmaskedbitmap) then begin
+   if dest is tmaskedbitmap then begin
     with tmaskedbitmap(dest) do begin
-     masked:= true;
-     colormask:= true;
-     if not getmask(8) then begin
-      getmask(0); //try 8 bit
+     if hasalpha then begin
+      masked:= true;
+      colormask:= true;
+      if not getmask(8) then begin
+       getmask(0); //try 8 bit
+      end;
+      col2:= maskcolorbackground;
+      maskcolorbackground:= 0;
+      colormask:= coloralpha;
+      maskcolorbackground:= col2;
+     end
+     else begin
+      masked:= false;
      end;
-     col2:= maskcolorbackground;
-     maskcolorbackground:= 0;
-     colormask:= coloralpha;
-     maskcolorbackground:= col2;
     end;
    end;
 {$ifdef FPC}{$checkpointer default}{$endif}

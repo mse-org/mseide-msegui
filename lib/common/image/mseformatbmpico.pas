@@ -249,6 +249,9 @@ begin
 //   stream.formaterror;
   end;
   dest.clear;
+  if dest is tmaskedbitmap then begin
+   tmaskedbitmap(dest).masked:= false;
+  end;
   dest.monochrome:= false;
   readbmp(stream,fileheader.bfoffbits,dest);
  finally
