@@ -473,7 +473,7 @@ type
    procedure doexit; override;
    procedure dofocus; override;
    procedure dodefocus; override;
-   procedure loaded; override;
+   procedure doloaded; override;
    procedure dohide; override;
    procedure doshow; override;
    procedure doactivate; override;
@@ -2936,7 +2936,7 @@ begin
  end;
 end;
 
-procedure tcustomeventwidget.loaded;
+procedure tcustomeventwidget.doloaded;
 begin
  inherited;
  if canevent(tmethod(fonloaded)) then begin
