@@ -2410,19 +2410,13 @@ begin
     end;
     if aparent <> nil then begin
      po1:= subpoint(dosnaptogrid(apos),form.rootpos);
-     twidget(aparent).insertwidget(twidget(component),translatewidgetpoint(po1,form,
-                                                   twidget(aparent)));
+     twidget(aparent).insertwidget(twidget(component),
+             translatewidgetpoint(po1,form,twidget(aparent)));
      twidget(component).initnewwidget(rea1);
     end;
    end
    else begin
-    if form <> nil then begin
-     setrootpos(component,form.clientpostowidgetpos(
-           dosnaptogrid(form.widgetpostoclientpos(apos))));
-    end
-    else begin
-     setrootpos(component,dosnaptogrid(apos));
-    end;
+    setrootpos(component,subpoint(dosnaptogrid(apos),insertoffset));
    end;
    tcomponent1(component).loaded;
    domodified;

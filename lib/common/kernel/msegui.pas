@@ -5384,10 +5384,11 @@ end;
 
 function twidget.needsdesignframe: boolean;
 begin
- result:= (ws_iswidget in fwidgetstate) and 
-                             not (ws1_nodesignframe in fwidgetstate1) and
+ result:= (ws_iswidget in fwidgetstate) and
+  not (ws1_nodesignframe in fwidgetstate1) and
   ((fcolor = cl_transparent) or (fparentwidget <> nil) and 
-    (colortopixel(actualcolor) = colortopixel(fparentwidget.backgroundcolor))) and
+   (colortopixel(actualcolor) = colortopixel(fparentwidget.backgroundcolor))
+  ) and
  ((fframe = nil) or (fframe.fi.leveli = 0) and (fframe.fi.levelo = 0) and
        (fframe.fi.framewidth = 0));
 end;
