@@ -3961,8 +3961,12 @@ begin
      pictop:= pictopover;
     end
     else begin
-     pictop:= pictopover; //pictopsrc is unreliable!?
-//     pictop:= pictopsrc; 
+     if (df_canvasismonochrome in gc.drawingflags) and (mask = nil) then begin
+      pictop:= pictopsrc; 
+     end
+     else begin
+      pictop:= pictopover; //pictopsrc is unreliable!?
+     end;
      maskpic:= 0;
     end;
    end;
