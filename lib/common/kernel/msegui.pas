@@ -8422,7 +8422,8 @@ begin
   result:= ffont;
  end
  else begin
-  if fparentwidget <> nil then begin
+  if (fparentwidget <> nil) and 
+                   not (csloading in fparentwidget.componentstate) then begin
    result:= fparentwidget.getfont;
   end
   else begin
