@@ -22,7 +22,6 @@ object mainfo: tmainfo
   container.onchildscaled = onscale
   optionswindow = [wo_groupleader]
   mainmenu = mainmenu1
-  font.dummy = 0
   options = [fo_main, fo_terminateonclose, fo_globalshortcuts, fo_savepos, fo_savestate]
   statfile = projectstatfile
   caption = 'MSEide'
@@ -58,8 +57,8 @@ object mainfo: tmainfo
     frame.dummy = 0
     anchors = [an_top]
     taborder = 1
+    font.color = -1610612734
     font.name = 'stf_default'
-    font.options = [foo_antialiased]
     font.dummy = 0
     options = [dwo_hintclippedtext]
     reffontheight = 14
