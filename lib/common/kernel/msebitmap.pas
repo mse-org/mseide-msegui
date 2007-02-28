@@ -145,6 +145,7 @@ type
    procedure setsource(const Value: tbitmapcomp);
    function getmasked: boolean;
    procedure setmasked(const Value: boolean);
+   procedure setmonochrome(const avalue: boolean); override;
    procedure readimage(stream: tstream);
    procedure writeimage(stream: tstream);
    function getmask1: tbitmap;
@@ -196,7 +197,7 @@ type
                      //used to convert monchrome mask to colormask
   published
    property transparentcolor: colorty read ftransparentcolor write settransparentcolor
-                default cl_default;
+                default cl_default; //cl_default ->bottom right pixel
    property options: bitmapoptionsty read getoptions write setoptions default [];
    property source: tbitmapcomp read fsource write setsource;
    property colorforeground;
@@ -1262,6 +1263,17 @@ begin
  end;
 end;
 
+procedure tmaskedbitmap.setmonochrome(const avalue: boolean);
+begin
+ inherited;
+ if avalue then begin
+  include(foptions,bmo_monochrome);
+ end
+ else begin
+  exclude(foptions,bmo_monochrome);
+ end;
+end;
+
 function tmaskedbitmap.getcolormask: boolean;
 begin
  result:= bmo_colormask in foptions;
@@ -1531,13 +1543,11 @@ begin
   dest.monochrome:= monochrome;
   dest.colormask:= colormask;
   dest.masked:= masked;
-  if masked then begin
-   dest.fmask.monochrome:= fmask.monochrome;
-  end;
   dest.size:= size1;
   tcanvas1(dest.canvas).internalcopyarea(canvas,makerect(nullpoint,size),
        makerect(nullpoint,size1),rop_copy,cl_none,nil,[al_stretchx,al_stretchy],
        nullpoint,cl_none);
+       
   if masked then begin
    tcanvas1(dest.fmask.canvas).internalcopyarea(mask.canvas,makerect(nullpoint,size),
        makerect(nullpoint,size1),rop_copy,cl_none,nil,[al_stretchx,al_stretchy],
@@ -1815,7 +1825,7 @@ procedure timagelist.settransparentcolor(const Value: colorty);
 begin
  fbitmap.transparentcolor:= value;
 end;
-
+{
 procedure timagelist.setimage(index: integer; image: tmaskedbitmap;
                       const source: rectty);
 var
@@ -1871,6 +1881,89 @@ begin
  end;
  change;
 end;
+}
+
+procedure timagelist.setimage(index: integer; image: tmaskedbitmap;
+                      const source: rectty);
+var
+ po1: pointty;
+ rect1: rectty;
+ bo1: boolean;
+ int1: integer;
+ 
+begin
+ po1:= indextoorg(index);
+ rect1:= source;
+ with rect1 do begin
+  bo1:= (x < 0) or (y < 0) or (x + cx > image.fsize.cx) or 
+                 (y + cy > image.fsize.cy);
+  if cx > fsize.cx then begin
+   cx:= fsize.cx;
+  end;
+  if cy > fsize.cy then begin
+   cy:= fsize.cy;
+  end;
+ end;
+ {
+ intersectrect(source,makerect(nullpoint,image.fsize),rect1);
+ if rect1.cx > fsize.cx then begin
+  rect1.cx:= fsize.cx;
+ end;
+ if rect1.cy > fsize.cy then begin
+  rect1.cy:= fsize.cy;
+ end;
+ bo1:= (rect1.cx < fsize.cx) or (rect1.cy < fsize.cy);
+ }
+ if masked then begin
+  fbitmap.copyarea(image,rect1,po1,rop_copy,false);
+  if image.masked then begin
+   if bo1 then begin
+    if fbitmap.mask.monochrome then begin
+     fbitmap.mask.canvas.fillrect(makerect(po1,fsize),cl_0);
+    end
+    else begin
+     fbitmap.mask.canvas.fillrect(makerect(po1,fsize),
+                          fbitmap.fmaskcolorbackground);
+    end;
+   end;
+   fbitmap.mask.copyarea(image.mask,rect1,po1,rop_copy,false,
+           fbitmap.fmaskcolorforeground,fbitmap.fmaskcolorbackground);
+  end
+  else begin
+   if bo1 then begin
+    if fbitmap.mask.monochrome then begin
+     fbitmap.mask.canvas.fillrect(makerect(po1,fsize),cl_0);
+    end
+    else begin
+     fbitmap.mask.canvas.fillrect(makerect(po1,fsize),
+                          fbitmap.fmaskcolorbackground);
+    end;
+   end;
+   subpoint1(po1,rect1.pos);
+   addpoint1(pointty(rect1.size),rect1.pos);
+   if fbitmap.mask.monochrome then begin
+    fbitmap.mask.canvas.fillrect(makerect(po1,rect1.size),cl_1);
+   end
+   else begin
+    fbitmap.mask.canvas.fillrect(makerect(po1,rect1.size),
+                         fbitmap.fmaskcolorforeground);
+   end;
+  end;
+ end
+ else begin
+  if bo1 then begin
+   if monochrome then begin
+    fbitmap.canvas.fillrect(makerect(po1,fsize),cl_0);
+   end
+   else begin
+    fbitmap.canvas.fillrect(makerect(po1,fsize),fbitmap.ftransparentcolor);
+   end;
+  end;
+  fbitmap.copyarea(image,rect1,po1,rop_copy,false);
+ end;
+ change;
+end;
+
 {
 procedure timagelist.getimage(const index: integer; const dest: tmaskedbitmap);
 var
@@ -1933,16 +2026,37 @@ begin
  setimage(index,image,makerect(nullpoint,image.fsize));
 end;
 
-procedure timagelist.copyimages(const image: tmaskedbitmap; const destindex: integer);
+procedure timagelist.copyimages(const image: tmaskedbitmap; 
+                                                 const destindex: integer);
 var
  rect1: rectty;
- int1: integer;
+ int1,int2: integer;
 begin
- rect1.pos:= nullpoint;
- rect1.size:= fsize;
+ with image.fsize do begin
+  if fsize.cx > cx then begin
+   int2:= -(fsize.cx - cx) div 2;
+  end
+  else begin
+   int2:= 0;
+  end;
+  if fsize.cy > cy then begin
+   rect1.y:= -(fsize.cy - cy) div 2;
+  end
+  else begin
+   rect1.y:= 0;
+  end;
+  rect1.cx:= cx - int2;
+  rect1.cy:= cy - rect1.y;
+ end;
+// rect1.pos:= nullpoint; 
+// rect1.y:= 0;         
+// int2:= 0;
+// rect1.cx:= fsize.cx - int2;
+// rect1.cy:= fsize.cy - rect1.y;
+// rect1.size:= fsize;
  int1:= destindex;
  while rect1.y < image.fsize.cy do begin
-  rect1.x:= 0;
+  rect1.x:= int2;
   while rect1.x < image.fsize.cx do begin
    if int1 >= fcount then begin
     exit;
@@ -1986,7 +2100,9 @@ begin
     buffer:= tmaskedbitmap.create(monochrome);
     buffer.assign1(fbitmap,false);
     fbitmap.size:= makesize(int2*fsize.cx,int2*fsize.cy);
-    copyimages(buffer,0);
+    if not buffer.isempty then begin
+     copyimages(buffer,0);
+    end;
     buffer.Free;
    end;
   end;
