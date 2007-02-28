@@ -330,7 +330,6 @@ type
 
  tfont = class(toptionalpersistent,icanvas)
   private
-   finfo: fontinfoty;
    finfopo: pfontinfoty;
    fhandlepo: ^fontnumty;
    fonchange: notifyeventty;
@@ -374,6 +373,7 @@ type
    function getstrikeout: boolean;
    procedure setstrikeout(const avalue: boolean);
   protected
+   finfo: fontinfoty;
    function gethandle: fontnumty; virtual;
    function getdatapo: pfontdataty;
   public
@@ -398,7 +398,7 @@ type
    property strikeout: boolean read getstrikeout write setstrikeout;
 
   published
-   property color: colorty read getcolor write setcolor default cl_black;
+   property color: colorty read getcolor write setcolor default cl_text;
    property colorbackground: colorty read getcolorbackground
                  write setcolorbackground default cl_transparent;
    property height: integer read getheight write setheight default 0;
@@ -915,7 +915,7 @@ type
    procedure acquirehandle; virtual;
    property handle: pixmapty read gethandle write sethandle;
    function getmonochrome: boolean;
-   procedure setmonochrome(const avalue: boolean);
+   procedure setmonochrome(const avalue: boolean); virtual;
    function getconverttomonochromecolorbackground: colorty; virtual;
    function getmask: tsimplebitmap; virtual;
 //   function getmaskhandle(var gchandle: cardinal): pixmapty; virtual;
@@ -2235,7 +2235,7 @@ begin
  if finfopo = nil then begin
   finfopo:= @finfo;
  end;
- finfopo^.color:= cl_black;
+ finfopo^.color:= cl_text;
  finfopo^.colorbackground:= cl_transparent;
  updatehandlepo;
  dochanged([cs_fontcolor,cs_fontcolorbackground]);
