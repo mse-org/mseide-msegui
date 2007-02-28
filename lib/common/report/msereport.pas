@@ -32,6 +32,7 @@ const
  defaultrepvaluedisptextflags = [tf_ycentered];
  defaultrepvaluedispoptionsscale = 
                [osc_expandx,osc_shrinkx,osc_expandy,osc_shrinky];
+ defaultrepfontcolor = cl_black;
   
 type
  linevisiblety = (lv_firstofpage,lv_normal,lv_lastofpage,lv_firstrecord,lv_lastrecord);
@@ -75,8 +76,26 @@ type
  treptabfont = class(tparentfont)
   protected
    class function getinstancepo(owner: tobject): pfont; override;
+  public
+   constructor create; override;
+  published
+   property color default defaultrepfontcolor;
  end;
 
+ trepwidgetfont = class(twidgetfont)
+  public
+   constructor create; override;
+  published
+   property color default defaultrepfontcolor;
+ end;
+ 
+ trepfont = class(tfont)
+  public
+   constructor create; override;
+  published
+   property color default defaultrepfontcolor;
+ end;
+ 
  treptabulatoritem = class;
  
  treptabitemdatalink = class(tfielddatalink)
@@ -455,6 +474,10 @@ type
               //ireccontrol
    procedure recchanged;
   protected
+   procedure setfont(const avalue: trepwidgetfont);
+   function getfont: trepwidgetfont;
+   function getfontclass: widgetfontclassty; override;
+   
    procedure minclientsizechanged;
    procedure objectevent(const sender: tobject;
                           const event: objecteventty); override;
@@ -508,7 +531,7 @@ type
    procedure finish;
    
    property tabs: treptabulators read ftabs write settabs;
-   property font: twidgetfont read getfont write setfont stored isfontstored;
+   property font: trepwidgetfont read getfont write setfont stored isfontstored;
    property datasource: tdatasource read getdatasource write setdatasource;
    property visidatasource: tdatasource read getvisidatasource 
                           write setvisidatasource;
@@ -636,7 +659,7 @@ type
    procedure endrender; override;
    function lastbandheight: integer; override;
   public
-   property font: twidgetfont read getfont write setfont stored isfontstored;
+   property font: trepwidgetfont read getfont write setfont stored isfontstored;
  end;
 
  tbandgroup = class(tcustombandgroup)
@@ -712,6 +735,9 @@ type
    procedure updatevisible;
    function getlastpagepagecount: integer;
    function getlastreppagecount: integer;
+   procedure setfont(const avalue: trepwidgetfont);
+   function getfont: trepwidgetfont;
+   function getfontclass: widgetfontclassty; override;
   public
    function isfirstband: boolean;
    function islastband(const addheight: integer = 0): boolean;
@@ -727,7 +753,7 @@ type
    property acty: integer read getacty;
    property areafull: boolean read getareafull write setareafull;
    
-   property font: twidgetfont read getfont write setfont stored isfontstored;
+   property font: trepwidgetfont read getfont write setfont stored isfontstored;
    property onfirstarea: bandareaeventty read fonfirstarea write fonfirstarea;
    property onbeforerender: bandareaeventty read fonbeforerender
                                write fonbeforerender;
@@ -805,6 +831,10 @@ type
    procedure insertwidget(const awidget: twidget; const apos: pointty); override;
    procedure sizechanged; override;
 
+   procedure setfont(const avalue: trepwidgetfont);
+   function getfont: trepwidgetfont;
+   function getfontclass: widgetfontclassty; override;
+
    procedure renderbackground(const acanvas: tcanvas);
    procedure beginrender;
    procedure endrender;
@@ -859,7 +889,7 @@ type
    
    property pagewidth: real read fpagewidth write setpagewidth;
    property pageheight: real read fpageheight write setpageheight;
-   property font: twidgetfont read getfont write setfont stored isfontstored;
+   property font: trepwidgetfont read getfont write setfont stored isfontstored;
    property nextpage: tcustomreportpage read fnextpage write setnextpage;
    property nextpageifempty: tcustomreportpage read fnextpageifempty write 
                           setnextpageifempty;
@@ -965,13 +995,16 @@ type
                   const anilstream: boolean; const onafterrender: reporteventty);
    procedure unregisterchildwidget(const child: twidget); override;
    procedure getchildren(proc: tgetchildproc; root: tcomponent); override;
-   procedure internalcreatefont; override;
+//   procedure internalcreatefont; override;
    procedure defineproperties(filer: tfiler); override;
    procedure nextpage(const acanvas: tcanvas);
    procedure doprogress;
    procedure doasyncevent(var atag: integer); override;
    procedure notification(acomponent: tcomponent; 
                                         operation: toperation); override;
+   procedure setfont(const avalue: trepfont);
+   function getfont: trepfont;
+   function getfontclass: widgetfontclassty; override;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -997,7 +1030,7 @@ type
    property nilstream: boolean read fnilstream;
                            //true if reder called with nil stream
 
-   property font: twidgetfont read getfont write setfont;
+   property font: trepfont read getfont write setfont;
    property color default cl_transparent;
    property grid_show: boolean read frepdesigninfo.showgrid write setgrid_show default true;
    property grid_snap: boolean read frepdesigninfo.snaptogrid write setgrid_snap default true;
@@ -1130,6 +1163,13 @@ end;
 class function treptabfont.getinstancepo(owner: tobject): pfont;
 begin
  result:= @treptabulatoritem(owner).ffont;
+end;
+
+constructor treptabfont.create;
+begin
+ inherited;
+ finfo.color:= defaultrepfontcolor;
+ finfo.name:= defaultrepfontname;
 end;
 
 { treptabitemdatalink }
@@ -2909,6 +2949,21 @@ begin
  end;
 end;
 
+procedure tcustomrecordband.setfont(const avalue: trepwidgetfont);
+begin
+ inherited setfont(avalue);
+end;
+
+function tcustomrecordband.getfont: trepwidgetfont;
+begin
+ result:= trepwidgetfont(inherited getfont);
+end;
+
+function tcustomrecordband.getfontclass: widgetfontclassty;
+begin
+ result:= trepwidgetfont;
+end;
+
 { tcustombandgroup }
 
 procedure tcustombandgroup.registerchildwidget(const child: twidget);
@@ -3546,6 +3601,21 @@ begin
  end;
 end;
 
+procedure tcustombandarea.setfont(const avalue: trepwidgetfont);
+begin
+ inherited setfont(avalue);
+end;
+
+function tcustombandarea.getfont: trepwidgetfont;
+begin
+ result:= trepwidgetfont(inherited getfont);
+end;
+
+function tcustombandarea.getfontclass: widgetfontclassty;
+begin
+ result:= trepwidgetfont;
+end;
+
 { tcustomreportpage }
 
 constructor tcustomreportpage.create(aowner: tcomponent);
@@ -4081,6 +4151,21 @@ begin
  result:= freport.flastpagecount;
 end;
 
+procedure tcustomreportpage.setfont(const avalue: trepwidgetfont);
+begin
+ inherited setfont(avalue);
+end;
+
+function tcustomreportpage.getfont: trepwidgetfont;
+begin
+ result:= trepwidgetfont(inherited getfont);
+end;
+
+function tcustomreportpage.getfontclass: widgetfontclassty;
+begin
+ result:= trepwidgetfont;
+end;
+
  {tcustomreport}
  
 constructor tcustomreport.create(aowner: tcomponent);
@@ -4096,7 +4181,10 @@ begin
  inherited;
  visible:= false;
  color:= cl_transparent;
- createfont;
+ ffont:= twidgetfont(trepfont.create);
+ ffont.height:= round(defaultrepfontheight * (fppmm/defaultrepppmm));
+ ffont.onchange:= {$ifdef FPC}@{$endif}dofontchanged;
+ //createfont;
 end;
 
 destructor tcustomreport.destroy;
@@ -4373,18 +4461,18 @@ function tcustomreport.reppagecount: integer;
 begin
  result:= length(freppages);
 end;
-
+{
 procedure tcustomreport.internalcreatefont;
 var
  font1: twidgetfont;
 begin
- font1:= twidgetfont.create;
+ font1:= trepwidgetfont.create;
  font1.height:= round(defaultrepfontheight * (fppmm/defaultrepppmm));
- font1.name:= defaultrepfontname;
+// font1.name:= defaultrepfontname;
  ffont:= font1;
  inherited;
 end;
-
+}
 function tcustomreport.getgrid_show: boolean;
 begin
  result:= frepdesigninfo.showgrid;
@@ -4526,6 +4614,23 @@ begin
            (tmethod(fonrenderfinish).data = pointer(acomponent)) then begin
   fonrenderfinish:= nil;
  end;
+end;
+
+procedure tcustomreport.setfont(const avalue: trepfont);
+begin
+ ffont.assign(avalue);
+// inherited setfont(avalue);
+end;
+
+function tcustomreport.getfont: trepfont;
+begin
+// result:= trepwidgetfont(inherited getfont);
+ result:= trepfont(ffont);      //has no parent font
+end;
+
+function tcustomreport.getfontclass: widgetfontclassty;
+begin
+ result:= nil; //static font
 end;
 
  {treport}
@@ -4704,6 +4809,24 @@ begin
  else begin
   result:= inherited getdisptext;
  end;
+end;
+
+{ trepwidgetfont }
+
+constructor trepwidgetfont.create;
+begin
+ inherited;
+ finfo.color:= defaultrepfontcolor;
+ finfo.name:= defaultrepfontname;
+end;
+
+{ trepfont }
+
+constructor trepfont.create;
+begin
+ inherited;
+ finfo.color:= defaultrepfontcolor;
+ finfo.name:= defaultrepfontname;
 end;
 
 end.

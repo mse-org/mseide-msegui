@@ -771,7 +771,6 @@ type
    procedure reclipcaret;
    procedure updatetaborder(awidget: twidget);
    procedure settaborder(const Value: integer);
-   procedure dofontchanged(const sender: tobject);
    procedure parentfontchanged;
    procedure setanchors(const Value: anchorsty);
 
@@ -810,6 +809,7 @@ type
    ffont: twidgetfont;
    fhint: msestring;
    fdefaultfocuschild: twidget;
+
 
    procedure defineproperties(filer: tfiler); override;
    function gethelpcontext: msestring; override;
@@ -933,6 +933,7 @@ type
    procedure dokeydownaftershortcut(var info: keyeventinfoty); virtual;
    procedure dokeyup(var info: keyeventinfoty); virtual;
 
+   procedure dofontchanged(const sender: tobject);
    procedure setfontheight;
    procedure postchildscaled;
    procedure dofontheightdelta(var delta: integer); virtual;
@@ -967,6 +968,7 @@ type
 
    procedure internalcreateframe; virtual;
    procedure internalcreateface; virtual;
+   function getfontclass: widgetfontclassty; virtual;
    procedure internalcreatefont; virtual;
   public
    constructor create(aowner: tcomponent); override;
@@ -8376,10 +8378,15 @@ begin       //!!!!todo
  end;
 end;
 
+function twidget.getfontclass: widgetfontclassty;
+begin
+ result:= twidgetfont;
+end;
+
 procedure twidget.internalcreatefont;
 begin
  if ffont = nil then begin
-  ffont:= twidgetfont.create;
+  ffont:= getfontclass.create;
  end;
  ffont.onchange:= {$ifdef FPC}@{$endif}dofontchanged;
 end;
