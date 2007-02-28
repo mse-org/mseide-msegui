@@ -1280,19 +1280,22 @@ end;
 
 procedure tcustomcaptionframe.dopaintframe(const canvas: tcanvas;
   const rect: rectty);
-var
- reg: regionty;
+//var
+// reg: regionty;
 begin
- reg:= 0; //compiler warning
+// reg:= 0; //compiler warning
  if finfo.text.text <> '' then begin
-  reg:= canvas.copyclipregion;
+//  reg:= canvas.copyclipregion;
+  drawtext(canvas,finfo);
   canvas.subcliprect(inflaterect(finfo.dest,captionmargin));
  end;
  inherited;
+ {
  if finfo.text.text <> '' then begin
   canvas.clipregion:= reg;
   drawtext(canvas,finfo);
  end;
+ }
 end;
 
 procedure tcustomcaptionframe.createfont;
