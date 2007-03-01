@@ -4230,8 +4230,18 @@ begin
 end;
 
 procedure tcanvas.setdashes(const Value: dashesstringty);
+var
+ int1: integer;
 begin
- fvaluepo^.lineinfo.dashes:= value;
+ with fvaluepo^.lineinfo do begin
+  dashes:= value;
+  for int1:= 1 to length(dashes) do begin
+   if dashes[int1] = #0 then begin
+    setlength(dashes,int1);
+    break;
+   end;
+  end;
+ end;
  valuechanged(cs_dashes);
 end;
 

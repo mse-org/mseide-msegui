@@ -943,12 +943,12 @@ type
   snaptogrid: boolean;
  end;
  
- repstatety = (rs_activepageset,rs_finish,rs_running);
+ repstatety = (rs_activepageset,rs_finish,rs_running,rs_endpass);
  repstatesty = set of repstatety;
 
  reporteventty = procedure(const sender: tcustomreport) of object;
 
- reportoptionty = (reo_autorelease);
+ reportoptionty = (reo_autorelease,reo_prepass);
  reportoptionsty = set of reportoptionty;
  
  tcustomreport = class(twidget)
@@ -957,6 +957,9 @@ type
    fonbeforerender: notifyeventty;
    fonafterrender: notifyeventty;
    fprinter: tprinter;
+   fstream: ttextstream;
+   fstreamset: boolean;
+   fcommand: string;
    fcanvas: tcanvas;
    fpagenum: integer;
    fthread: tmsethread;
@@ -1014,8 +1017,8 @@ type
                         const onafterrender: reporteventty = nil); overload;
    procedure render(const aprinter: tprinter; const astream: ttextstream;
                         const onafterrender: reporteventty = nil); overload;
-   procedure waitfor;
-           //returns before calling of onafterrender
+   procedure waitfor;         //returns before calling of onafterrender
+   function prepass: boolean; //true if in prepass render state
    
    property ppmm: real read fppmm write setppmm; //pixel per mm
    function reppagecount: integer;
@@ -1082,6 +1085,19 @@ type
  tcustomframe1 = class(tcustomframe);
  twidget1 = class(twidget);
  tmsecomponent1 = class(tmsecomponent);
+
+function checkdashes(const avalue: string): string;
+var
+ int1: integer;
+begin
+ result:= avalue;
+ for int1:= 1 to length(avalue) do begin
+  if avalue[int1] = #0 then begin
+   setlength(result,int1-1);     //remove nulls
+   break;
+  end;
+ end;
+end;
 
 procedure renderingerror;
 begin
@@ -1363,7 +1379,7 @@ end;
 
 procedure treptabulatoritem.setlitop_dashes(const avalue: string);
 begin
- flineinfos[tlk_top].dashes:= avalue;
+ flineinfos[tlk_top].dashes:= checkdashes(avalue);
  changed;
 end;
 
@@ -1405,7 +1421,7 @@ end;
 
 procedure treptabulatoritem.setlivert_dashes(const avalue: string);
 begin
- flineinfos[tlk_vert].dashes:= avalue;
+ flineinfos[tlk_vert].dashes:= checkdashes(avalue);
  changed;
 end;
 
@@ -1447,7 +1463,7 @@ end;
 
 procedure treptabulatoritem.setlibottom_dashes(const avalue: string);
 begin
- flineinfos[tlk_bottom].dashes:= avalue;
+ flineinfos[tlk_bottom].dashes:= checkdashes(avalue);
  changed;
 end;
 
@@ -1828,7 +1844,7 @@ end;
 procedure treptabulators.setlitop_dashes(const avalue: string);
 begin
  if avalue <> flineinfos[tlk_top].dashes then begin
-  flineinfos[tlk_top].dashes:= avalue;
+  flineinfos[tlk_top].dashes:= checkdashes(avalue);
   fband.invalidate;
  end;
 end;
@@ -1884,7 +1900,7 @@ end;
 procedure treptabulators.setlileft_dashes(const avalue: string);
 begin
  if avalue <> flileft.dashes then begin
-  flileft.dashes:= avalue;
+  flileft.dashes:= checkdashes(avalue);
   fband.invalidate;
  end;
 end;
@@ -1966,10 +1982,10 @@ var
  int1: integer;
 begin
  if (avalue <> flineinfos[tlk_vert].dashes) then begin
-  flineinfos[tlk_vert].dashes:= avalue;
+  flineinfos[tlk_vert].dashes:= checkdashes(avalue);
   if not (csloading in fband.componentstate) then begin
    for int1:= 0 to high(fitems) do begin
-    treptabulatoritem(fitems[int1]).livert_dashes:= avalue;
+    treptabulatoritem(fitems[int1]).livert_dashes:= checkdashes(avalue);
    end;
   end;
  end;
@@ -2037,7 +2053,7 @@ end;
 procedure treptabulators.setliright_dashes(const avalue: string);
 begin
  if avalue <> fliright.dashes then begin
-  fliright.dashes:= avalue;
+  fliright.dashes:= checkdashes(avalue);
   fband.invalidate;
  end;
 end;
@@ -2093,7 +2109,7 @@ end;
 procedure treptabulators.setlibottom_dashes(const avalue: string);
 begin
  if avalue <> flineinfos[tlk_bottom].dashes then begin
-  flineinfos[tlk_bottom].dashes:= avalue;
+  flineinfos[tlk_bottom].dashes:= checkdashes(avalue);
   fband.invalidate;
  end;
 end;
@@ -4255,8 +4271,11 @@ function tcustomreport.exec(thread: tmsethread): integer;
    end;
   end;
  end;
+
+var
+ terminated1: boolean; 
  
- procedure dofinish;
+ procedure dofinish(const islast: boolean);
  var
   int1: integer;
  begin
@@ -4265,105 +4284,130 @@ function tcustomreport.exec(thread: tmsethread): integer;
   for int1:= 0 to high(freppages) do begin
    freppages[int1].endrender;
   end;
-  if fprinter <> nil then begin
-   fprinter.endprint;
-   fprinter.canvas.printorientation:= fdefaultprintorientation;
+  terminated1:= thread.terminated;
+  if islast or (rs_endpass in fstate) or terminated1 then begin
+   exclude(fstate,rs_running);
+   fstream.free;
+   if fprinter <> nil then begin
+    fprinter.endprint;
+    fprinter.canvas.printorientation:= fdefaultprintorientation;
+   end;
+   fcanvas.ppmm:= fppmmbefore;
+   asyncevent(endrendertag);
   end;
-  fcanvas.ppmm:= fppmmbefore;
-  asyncevent(endrendertag);
  end;
 
 var               
  int1: integer;
  bo1: boolean;
  page1: tcustomreportpage;
+ stream1: ttextstream;
  
 begin
  fstate:= [];
- factivepage:= 0;
- result:= 0;
- fakevisible(self,true);
- for int1:= 0 to high(freppages) do begin
-  freppages[int1].beginrender;
+ result:= 0; 
+ fdefaultprintorientation:= pao_portrait;
+ if fprinter <> nil then begin
+  fdefaultprintorientation:= fprinter.canvas.printorientation;
  end;
- try
-  if canevent(tmethod(fonbeforerender)) then begin
-   application.lock;
-   try
-    fonbeforerender(self);
-   finally
-    application.unlock;
-   end;
-  end;
- except
-  dofinish;
-  raise;
+ fppmmbefore:= fcanvas.ppmm;
+ fcanvas.ppmm:= fppmm;
+ if not (reo_prepass in foptions) then begin
+  include(fstate,rs_endpass);
  end;
- try
-  if high(freppages) >= factivepage then begin
-   page1:= freppages[factivepage];
-   while true do begin
-    for int1:= finditem(pointerarty(freppages),page1) to high(freppages) do begin
-     if freppages[int1].visiblepage then begin
-      page1:= freppages[int1];
-      break;
-     end;
-    end;
-    if page1.visiblepage and not fthread.terminated then begin
-     exclude(fstate,rs_activepageset);
-     factivepage:= finditem(pointerarty(freppages),page1);
-     bo1:= page1.render(fcanvas);
-     if rs_finish in fstate then begin
-      break;
-     end;
-     if rs_activepageset in fstate then begin
-      page1:= freppages[factivepage];
+ repeat
+  fpagenum:= 0;
+  factivepage:= 0;
+  fakevisible(self,true);
+  try
+   if fprinter <> nil then begin
+    if rs_endpass in fstate then begin
+     if fstreamset then begin
+      stream1:= fstream;
+      fstream:= nil;
+      fprinter.beginprint(stream1);
      end
      else begin
-      if not bo1 and (page1.nextpage <> nil) then begin
-        page1:= page1.nextpage;
-      end
-      else begin
-       if bo1 and (page1.nextpageifempty <> nil) then begin
-        page1:= page1.nextpageifempty;
-       end
-       else begin
-        int1:= finditem(pointerarty(freppages),page1);
-        if (int1 >= 0) and (int1 < high(freppages)) then begin
-         page1:= freppages[int1+1];
-        end
-        else begin
-         page1:= nil;
-        end;
-       end;
-      end;
-     end;
-     if finditem(pointerarty(freppages),page1) < 0 then begin
-      break;
+      fprinter.beginprint(fcommand);
      end;
     end
     else begin
-     break;
+     fprinter.beginprint(nil);
     end;
+   end;   
+   for int1:= 0 to high(freppages) do begin
+    freppages[int1].beginrender;
    end;
-  end;
- finally
-  dofinish;
-  {
-  try
-   if canevent(tmethod(fonafterrender)) then begin
+   if canevent(tmethod(fonbeforerender)) then begin
     application.lock;
     try
-     fonafterrender(self);
+     fonbeforerender(self);
     finally
      application.unlock;
     end;
    end;
-  finally
-   dofinish;
+  except
+   dofinish(true);
+   raise;
   end;
-  }
- end;
+  try
+   if high(freppages) >= factivepage then begin
+    page1:= freppages[factivepage];
+    while true do begin
+     for int1:= finditem(pointerarty(freppages),page1) to high(freppages) do begin
+      if freppages[int1].visiblepage then begin
+       page1:= freppages[int1];
+       break;
+      end;
+     end;
+     if page1.visiblepage and not fthread.terminated then begin
+      exclude(fstate,rs_activepageset);
+      factivepage:= finditem(pointerarty(freppages),page1);
+      bo1:= page1.render(fcanvas);
+      if rs_finish in fstate then begin
+       break;
+      end;
+      if rs_activepageset in fstate then begin
+       page1:= freppages[factivepage];
+      end
+      else begin
+       if not bo1 and (page1.nextpage <> nil) then begin
+         page1:= page1.nextpage;
+       end
+       else begin
+        if bo1 and (page1.nextpageifempty <> nil) then begin
+         page1:= page1.nextpageifempty;
+        end
+        else begin
+         int1:= finditem(pointerarty(freppages),page1);
+         if (int1 >= 0) and (int1 < high(freppages)) then begin
+          page1:= freppages[int1+1];
+         end
+         else begin
+          page1:= nil;
+         end;
+        end;
+       end;
+      end;
+      if finditem(pointerarty(freppages),page1) < 0 then begin
+       break;
+      end;
+     end
+     else begin
+      break;
+     end;
+    end;
+   end;
+  except
+   dofinish(true);
+   raise;
+  end;
+  dofinish(false);
+  if (rs_endpass in fstate) then begin
+   break;
+  end;
+  fstate:= [rs_endpass];
+ until terminated1;
 end;
 
 procedure tcustomreport.internalrender(const acanvas: tcanvas;
@@ -4384,19 +4428,9 @@ begin
  fprintstarttime:= now;
  fprinter:= aprinter;
  fcanvas:= acanvas;
- fpagenum:= 0;
- fppmmbefore:= acanvas.ppmm;
- acanvas.ppmm:= fppmm;
- if aprinter <> nil then begin
-//  aprinter.ppmm:= fppmm;
-  fdefaultprintorientation:= fprinter.canvas.printorientation;
-  if (astream <> nil) or anilstream then begin
-   aprinter.beginprint(astream);
-  end
-  else begin
-   aprinter.beginprint(acommand);
-  end;
- end;
+ fstream:= astream;
+ fstreamset:= (astream <> nil) or nilstream;
+ fcommand:= acommand;
  freeandnil(fthread);
  fthread:= tmsethread.create({$ifdef FPC}@{$endif}exec);
 end;
@@ -4547,7 +4581,10 @@ end;
 
 function tcustomreport.getrunning: boolean;
 begin
+ result:= rs_running in fstate;
+ {
  result:= (fthread <> nil) and fthread.running;
+ }
 end;
 
 procedure tcustomreport.waitfor;
@@ -4558,7 +4595,7 @@ begin
   int1:= application.unlockall;
   fthread.waitfor;
   application.relockall(int1);
-  exclude(fstate,rs_running);
+//  exclude(fstate,rs_running);
  end;
 end;
 
@@ -4597,7 +4634,7 @@ begin
    if canevent(tmethod(fonrenderfinish)) then begin
     fonrenderfinish(self);
    end;
-   exclude(fstate,rs_running);
+//   exclude(fstate,rs_running);
   finally
    if reo_autorelease in foptions then begin
     release;
@@ -4631,6 +4668,11 @@ end;
 function tcustomreport.getfontclass: widgetfontclassty;
 begin
  result:= nil; //static font
+end;
+
+function tcustomreport.prepass: boolean;
+begin
+ result:= not (rs_endpass in fstate);
 end;
 
  {treport}

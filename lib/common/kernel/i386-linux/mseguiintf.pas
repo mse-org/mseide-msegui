@@ -4881,6 +4881,9 @@ var
 {$endif}
 
 begin
+ {$ifdef mse_flushgdi}
+ xinitthreads;
+ {$endif}
  ar1:= getcommandlinearguments;
  for int1:= 1 to high(ar1) do begin
   if ar1[int1] = '--TOPLEVELRAISE' then begin
