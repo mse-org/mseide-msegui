@@ -110,6 +110,7 @@ procedure moverect1(var rect: rectty; const dist: pointty);
 function removerect(const rect: rectty; const dist: pointty): rectty;
 procedure removerect1(var rect: rectty; const dist: pointty);
 procedure shiftinrect(var rect: rectty; const outerrect: rectty);
+procedure centerinrect(var rect: rectty; const outerrect: rectty);
 function changerectdirection(const arect: rectty;
                 const olddirction,newdirection: graphicdirectionty): rectty;
 function rotateframe(const aframe: framety; const olddirection,
@@ -206,6 +207,14 @@ begin
   if y < outerrect.y then begin
    y:= outerrect.y;
   end;
+ end;
+end;
+
+procedure centerinrect(var rect: rectty; const outerrect: rectty);
+begin
+ with outerrect do begin
+  rect.x:= x + (cx - rect.cx) div 2;
+  rect.y:= y + (cy - rect.cy) div 2;
  end;
 end;
 

@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2006 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2007 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -14,7 +14,8 @@ unit mseactions;
 interface
 
 uses
- Classes,mseclasses,mseshapes,mserichstring,msetypes,mseguiglob,msegui,
+ {$ifdef FPC}classes{$else}Classes{$endif},mseclasses,mseshapes,mserichstring,
+ msetypes,mseguiglob,msegui,
  msebitmap,msekeyboard,mseevent,msestat,msestatfile,msestrings,msegraphics;
 
 const

@@ -106,6 +106,8 @@ type
    fowner: tcustommenu;
    fsubmenu: tmenuitems;
    function getactioninfopo: pactioninfoty;
+   procedure objectevent(const sender: tobject;
+                                     const event: objecteventty); override;
    procedure receiveevent(const event: tobjectevent); override;
    function internalexecute(async: boolean): boolean;
   public
@@ -907,6 +909,15 @@ begin
  if avalue <> ffont then begin
   setoptionalobject(fowner.componentstate,avalue,ffont,
                {$ifdef FPC}@{$endif}createfont);
+  actionchanged;
+ end;
+end;
+
+procedure tmenuitem.objectevent(const sender: tobject;
+               const event: objecteventty);
+begin
+ inherited;
+ if (event = oe_changed) and (sender = finfo.imagelist) then begin
   actionchanged;
  end;
 end;
