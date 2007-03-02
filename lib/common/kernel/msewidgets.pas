@@ -31,6 +31,7 @@ type
    fcaptionpos: captionposty;
    fcaptiondist: integer;
    fcaptionoffset: integer;
+   fupdating: integer;
    function getcaption: msestring;
    procedure setcaption(const Value: msestring);
    procedure fontchanged(const sender: tobject);
@@ -1463,7 +1464,14 @@ begin
  subframe1(fra1,fouterframe);
  if not isnullframe(fra1) then begin
   subpoint1(finfo.dest.pos,pointty(fra1.topleft));
-  fintf.setwidgetrect(deflaterect(fintf.getwidgetrect,fra1));
+  if fupdating < 16 then begin
+   inc(fupdating);
+   try
+    fintf.setwidgetrect(deflaterect(fintf.getwidgetrect,fra1));
+   finally
+    dec(fupdating);
+   end;
+  end;
  end;
  inherited;
 end;
