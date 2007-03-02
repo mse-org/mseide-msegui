@@ -169,6 +169,7 @@ type
   protected
     function GetHandle : Pointer; virtual;
     Procedure SetDatabase (Value : TDatabase); override;
+    procedure disconnect(const sender: tsqlquery);
   public
     constructor Create(AOwner : TComponent); override;
     destructor Destroy; override;
@@ -199,6 +200,7 @@ type
               //returns blobid or data in param
   procedure setupblobdata(const afield: tfield; const acursor: tsqlcursor;
                               const aparam: tparam);
+  function blobscached: boolean;
  end;
 
   TSQLQuery = class (tmsebufdataset)
@@ -227,7 +229,7 @@ type
     FDeleteQry,
     FInsertQry           : TSQLQuery;
 
-   fblobintf: iblobconnection;
+    fblobintf: iblobconnection;
    
 //   fIsPrepared: boolean;
     procedure FreeFldBuffers;
@@ -249,6 +251,9 @@ type
    procedure setdatabase1(const avalue: tsqlconnection);
    procedure checkdatabase;
    procedure setparams(const avalue: TmseParams);
+   function getconnected: boolean;
+   procedure setconnected(const avalue: boolean);
+   procedure fetchallblobs;
   protected
     FTableName           : string;
     FReadOnly            : boolean;
@@ -276,6 +281,7 @@ type
     procedure SetFilterText(const Value: string); override;
     Function GetDataSource : TDatasource; override;
     Procedure SetDataSource(AValue : TDatasource); 
+    procedure fetchblobs; virtual;
   public
     constructor Create(AOwner : TComponent); override;
     destructor Destroy; override;
@@ -287,6 +293,7 @@ type
     function CreateBlobStream(Field: TField; Mode: TBlobStreamMode): TStream; override;
     property Prepared : boolean read IsPrepared;
     procedure Notification(AComponent: TComponent; Operation: TOperation); override;
+    property connected: boolean read getconnected write setconnected;
   published
     // redeclared data set properties
     property Active;
@@ -338,7 +345,16 @@ type
 
 implementation
 uses 
- dbconst,strutils,mseclasses,msedatalist,msereal;
+ dbconst,strutils,mseclasses,msedatalist,msereal,msedb;
+
+type
+ TDBTransactioncracker = Class(TComponent)
+  Private
+    FActive        : boolean;
+    FDatabase      : TDatabase;
+    FDataSets      : TList;
+    FOpenAfterRead : boolean;
+ end;
 
 //copied from dsparams.inc 
 //todo: not needed for FPC 2.1.1
@@ -400,6 +416,21 @@ begin
   end; {case}
 end;
 
+function compblobcache(const a,b): integer;
+var
+ lint1: int64;
+begin
+ lint1:= blobcacheinfoty(a).id - blobcacheinfoty(b).id;
+ result:= 0;
+ if lint1 < 0 then begin
+  result:= -1;
+ end
+ else begin
+  if lint1 > 0 then begin
+   result:= 1;
+  end;
+ end;
+end;
 
 { TSQLConnection }
 
@@ -622,15 +653,39 @@ end;
 
 procedure TSQLTransaction.Rollback;
 begin
-  if active then
-    begin
-    closedatasets;
-    if (Database as tsqlconnection).RollBack(FTrans) then
-      begin
-      CloseTrans;
-      FreeAndNil(FTrans);
-      end;
-    end;
+ if active then begin
+  closedatasets;
+  if (Database as tsqlconnection).RollBack(FTrans) then begin
+   CloseTrans;
+   FreeAndNil(FTrans);
+  end;
+ end;
+end;
+
+procedure tsqltransaction.disconnect(const sender: tsqlquery);
+var
+ int1: integer;
+begin
+ with tdbtransactioncracker(self) do begin
+  int1:= 1;
+  if sender.fupdateqry <> nil then begin
+   inc(int1,3); //insert,update,delete
+  end;
+  if fdatasets.count > int1 then begin
+   databaseerror('Offline mode needs exclusive transaction.',sender);
+  end;
+  fdatasets.remove(sender);
+  with sender do begin
+   if (not IsPrepared) and (assigned(database)) and (assigned(FCursor)) then begin
+        (database as TSQLconnection).UnPrepareStatement(FCursor);
+   end;
+  end;
+  try
+   active:= false;
+  finally
+   fdatasets.insert(0,sender);
+  end;
+ end;
 end;
 
 procedure TSQLTransaction.RollbackRetaining;
@@ -1476,6 +1531,7 @@ begin
   end;
  end;
  with qry do begin
+  transaction.active:= true;
   freeblobar:= nil;
   try
    for x := 0 to Params.Count-1 do begin
@@ -1682,10 +1738,27 @@ begin
 end;
 
 function TSQLQuery.CreateBlobStream(Field: TField; Mode: TBlobStreamMode): TStream;
+var
+ info: blobcacheinfoty; 
+ int1: integer;
+ blob1: blobinfoty;
 begin
  result:= inherited createblobstream(field,mode);
  if result = nil then begin
-  result := (DataBase as tsqlconnection).CreateBlobStream(Field,Mode,fcursor);
+  if (bs_blobsfetched in fbstate) and (mode = bmread) then begin
+   if field.getdata(@info.id) and
+           findarrayvalue(info,fblobcache,length(fblobcache),@compblobcache,
+                                        sizeof(blobcacheinfoty),int1) then begin
+    with fblobcache[int1] do begin
+     blob1.data:= pointer(data);
+     blob1.datalength:= length(data);
+    end;
+    result:= tblobcopy.create(blob1);
+   end;
+  end
+  else begin
+   result:= tsqlconnection(database).CreateBlobStream(Field,Mode,fcursor);
+  end;
  end;
 end;
 
@@ -1766,6 +1839,98 @@ end;
 procedure TSQLQuery.setparams(const avalue: TmseParams);
 begin
  fparams.assign(avalue);
+end;
+
+function tsqlquery.getconnected: boolean;
+begin
+ result:= (transaction <> nil) and transaction.active;
+end;
+
+procedure TSQLQuery.fetchblobs;
+var
+ datapobefore: pintrecordty;
+ statebefore: tdatasetstate;
+ int1,int2,int3: integer;
+ ind1: pointerarty;
+ fieldar1: fieldarty;
+ ar1: integerarty;
+ stream1: tmemorystream;
+begin
+ if (fblobintf <> nil) and not fblobintf.blobscached then begin
+  setlength(fieldar1,fields.count);
+  int2:= 0;
+  for int1:= 0 to high(fieldar1) do begin
+   fieldar1[int2]:= fields[int1];
+   if fieldar1[int2].isblob then begin
+    inc(int2);
+   end;
+  end;
+  if int2 > 0 then begin
+   setlength(fieldar1,int2);
+   setlength(ar1,int2);
+   for int1:= 0 to high(ar1) do begin
+    ar1[int1]:= fieldar1[int1].fieldno-1;
+   end;
+   fblobcache:= nil;
+   datapobefore:= fcurrentbuf;
+   ind1:= findexes[0].ind;
+   statebefore:= settempstate(dscurvalue);
+   int3:= 0;
+   try
+    for int1:= 0 to recordcount - 1 do begin
+     fcurrentbuf:= ind1[int1];
+     for int2:= 0 to high(fieldar1) do begin
+      if not getfieldisnull(fcurrentbuf^.header.fielddata.nullmask,
+                                                        ar1[int2]) then begin
+       if high(fblobcache) < int3 then begin
+        setlength(fblobcache,high(fblobcache)*2+258);
+       end;
+       stream1:= tmemorystream(createblobstream(fieldar1[int2],bmread));
+       if stream1.size > 0 then begin
+        with fblobcache[int3] do begin
+         fieldar1[int2].getdata(@id);
+         setlength(data,stream1.size);
+         move(stream1.memory^,data[1],length(data));
+        end;
+        inc(int3);
+       end;
+       stream1.free;
+      end;
+     end;
+    end;
+    setlength(fblobcache,int3);
+    sortarray(fblobcache,@compblobcache,sizeof(blobcacheinfoty));
+    include(fbstate,bs_blobsfetched);
+   finally
+    fcurrentbuf:= datapobefore;
+    restorestate(statebefore);
+   end;
+  end;
+ end;
+end;
+
+procedure tsqlquery.fetchallblobs;
+begin
+ if not fallpacketsfetched then begin
+  fetchall;
+  fetchblobs;
+ end;
+end;
+
+procedure TSQLQuery.setconnected(const avalue: boolean);
+begin
+ if not (bs_opening in fbstate) then begin
+  checkactive;
+ end;
+ if avalue then begin
+  transaction.active:= true;
+ end
+ else begin
+  if transaction.active then begin
+   fetchallblobs;
+   tsqltransaction(transaction).disconnect(self);
+  end;
+ end;
 end;
 
 { TSQLCursor }

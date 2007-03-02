@@ -444,6 +444,7 @@ end;
 procedure tmsesqlquery.internalopen;
 begin
  fcontroller.internalopen;
+ connected:= not (dso_offline in fcontroller.options);
 end;
 
 procedure tmsesqlquery.internalclose;
@@ -834,6 +835,7 @@ end;
 procedure tmsesqlquery.applyupdates(const maxerrors: integer;
                 const cancelonerror: boolean = false);
 begin
+ transaction.active:= true;
  try
   fmstate:= fmstate - [sqs_updateabort,sqs_updateerror];
   inherited;
@@ -853,6 +855,7 @@ end;
 
 procedure tmsesqlquery.applyupdate;
 begin
+ transaction.active:= true;
  inherited applyupdate(fcontroller.options *
       [dso_cancelupdateonerror,dso_cancelupdatesonerror] <> []);
 end;

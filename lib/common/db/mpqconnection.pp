@@ -76,6 +76,7 @@ type
              out newid: string);
    procedure setupblobdata(const afield: tfield; const acursor: tsqlcursor;
                                    const aparam: tparam);
+   function blobscached: boolean;
   public
    constructor Create(AOwner : TComponent); override;
   published
@@ -898,6 +899,11 @@ end;
 function TPQConnection.getblobdatasize: integer;
 begin
  result:= sizeof(integer);
+end;
+
+function TPQConnection.blobscached: boolean;
+begin
+ result:= true;
 end;
 
 {

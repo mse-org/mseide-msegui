@@ -45,7 +45,13 @@ type
   nullmask: array[0..0] of byte; //variable length
                                  //fielddata following
  end;
-  
+ 
+ blobcacheinfoty = record
+  id: int64;
+  data: string;
+ end;
+ blobcacheinfoarty = array of blobcacheinfoty;
+   
  blobinfoty = record
   field: tfield;
   data: pointer;
@@ -252,7 +258,8 @@ type
  recupdatebufferarty = array of recupdatebufferty;
  
  bufdatasetstatety = (bs_opening,bs_fetching,bs_applying,
-                      bs_hasindex,bs_fetchall,bs_indexvalid,
+                      bs_hasindex,bs_fetchall,bs_blobsfetched,
+                      bs_indexvalid,
                       bs_editing,bs_append,bs_internalcalc,bs_utf8,
                       bs_hasfilter,bs_visiblerecordcountvalid);
  bufdatasetstatesty = set of bufdatasetstatety;
@@ -282,19 +289,15 @@ type
    fcalcfieldsizes: integerarty;
    fcalcstringpositions: integerarty;
    
-   fallpacketsfetched : boolean;
    fbuffercountbefore: integer;
    fonupdateerror: tresolvererrorevent;
 
    femptybuffer: pintrecordty;
    ffilterbuffer: pdsrecordty;
    fcheckfilterbuffer: pdsrecordty;
-   fcurrentbuf: pintrecordty;
    fnewvaluebuffer: pdsrecordty; //buffer for applyupdates
-   fbstate: bufdatasetstatesty;
    
    factindexpo: pindexty;    
-   findexes: array of indexty;
    findexlocal: tlocalindexes;
    factindex: integer;
    foninternalcalcfields: internalcalcfieldseventty;
@@ -346,9 +349,14 @@ type
    procedure setoninternalcalcfields(const avalue: internalcalcfieldseventty);
    procedure checkfilterstate;
   protected
+   fbstate: bufdatasetstatesty;
+   fallpacketsfetched : boolean;
    fapplyindex: integer; //take care about canceled updates while applying
    ffailedcount: integer;
    frecno: integer; //null based
+   findexes: array of indexty;
+   fblobcache: blobcacheinfoarty;
+   fcurrentbuf: pintrecordty;
    
    procedure updatestate;
    function getintblobpo: pblobinfoarty; //in currentrecbuf
@@ -464,6 +472,8 @@ type
    property indexlocal: tlocalindexes read findexlocal write setindexlocal;
   end;
    
+function getfieldisnull(nullmask: pbyte; const x: integer): boolean;
+
 implementation
 uses
  dbconst,msedatalist,sysutils,mseformatstr,msereal;
@@ -875,6 +885,7 @@ begin
   end;
  end;
  include(fbstate,bs_opening);
+ exclude(fbstate,bs_blobsfetched);
  if isutf8 then begin
   include(fbstate,bs_utf8);
  end
@@ -900,6 +911,7 @@ var
 begin
  exclude(fbstate,bs_opening);
  frecno:= -1;
+ fblobcache:= nil;
  if fopen then begin
   fopen:= false;
   with findexes[0] do begin

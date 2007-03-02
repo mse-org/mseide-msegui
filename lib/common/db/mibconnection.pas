@@ -95,6 +95,7 @@ type
               const afield: tfield; const aparam: tparam; out newid: string);
    procedure setupblobdata(const afield: tfield; const acursor: tsqlcursor;
                               const aparam: tparam);
+   function blobscached: boolean;
   public
     constructor Create(AOwner : TComponent); override;
     procedure createdatabase(const asql: string);
@@ -1316,6 +1317,11 @@ begin
   releaseibase60;
  end;
 {$endif}
+end;
+
+function TIBConnection.blobscached: boolean;
+begin
+ result:= false;
 end;
 
 end.
