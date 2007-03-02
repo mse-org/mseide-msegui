@@ -342,6 +342,7 @@ type
    property captiondist;
    property captiondistouter;
    property captionoffset;
+   property captionnoclip;
    property font;
    property buttonsize;
    property buttonpos;

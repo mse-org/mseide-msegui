@@ -86,7 +86,8 @@ type
  framestatety = (fs_sbhorzon,fs_sbverton,fs_sbhorzfix,fs_sbvertfix,
                  fs_sbhorztop,fs_sbvertleft,
                  fs_sbleft,fs_sbtop,fs_sbright,fs_sbbottom,
-                 fs_nowidget,fs_nosetinstance,fs_disabled,fs_captiondistouter,
+                 fs_nowidget,fs_nosetinstance,fs_disabled,
+                 fs_captiondistouter,fs_captionnoclip,
                  fs_drawfocusrect,fs_paintrectfocus,
                  fs_captionfocus,fs_captionhint,fs_rectsvalid);
  framestatesty = set of framestatety;
@@ -362,6 +363,7 @@ type
    procedure scale(const ascale: real); virtual;
 
    procedure paint(const canvas: tcanvas; const rect: rectty); virtual;
+   procedure afterpaint(const canvas: tcanvas); virtual;
    function outerframewidth: sizety; //widgetsize - framesize
    function frameframewidth: sizety; //widgetsize - (paintsize + paintframe)
    function paintframewidth: sizety; //widgetsize - paintsize
@@ -2772,6 +2774,11 @@ begin
  dopaintframe(canvas,rect);
  canvas.intersectcliprect(deflaterect(rect,fpaintframe));
  canvas.move(addpoint(fpaintrect.pos,fclientrect.pos));
+end;
+
+procedure tcustomframe.afterpaint(const canvas: tcanvas);
+begin
+ //dummy
 end;
 
 function tcustomframe.checkshortcut(var info: keyeventinfoty): boolean;
@@ -5378,6 +5385,9 @@ end;
 
 procedure twidget.doafterpaint(const canvas: tcanvas);
 begin
+ if fframe <> nil then begin
+  fframe.afterpaint(canvas);
+ end;
  if needsfocuspaint and (fwidgetstate * [ws_focused,ws_active] =
                [ws_focused,ws_active]) then begin
   fframe.dopaintfocusrect(canvas,makerect(nullpoint,fwidgetrect.size));

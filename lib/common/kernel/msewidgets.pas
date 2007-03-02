@@ -44,6 +44,8 @@ type
    procedure writeouterframe(writer: twriter);
    function getcaptiondistouter: boolean;
    procedure setcaptiondistouter(const Value: boolean);
+   procedure setcaptionnoclip(const avalue: boolean);
+   function getcaptionnoclip: boolean;
   protected
    ffont: tframefont;
    finfo: drawtextinfoty;
@@ -59,6 +61,7 @@ type
    procedure scale(const ascale: real); override;
    procedure createfont;
    procedure dopaintframe(const canvas: tcanvas; const rect: rectty); override;
+   procedure afterpaint(const canvas: tcanvas); override;
    procedure updatemousestate(const sender: twidget; const apos: pointty); override;
    function pointincaption(const point: pointty): boolean; override;
                 //origin = widgetrect
@@ -69,7 +72,10 @@ type
    property captiondist: integer read fcaptiondist write setcaptiondist default 1;
    property captiondistouter: boolean read getcaptiondistouter
                  write setcaptiondistouter default false;
-   property captionoffset: integer read fcaptionoffset write setcaptionoffset default 0;
+   property captionoffset: integer read fcaptionoffset write setcaptionoffset 
+                                        default 0;
+   property captionnoclip: boolean read getcaptionnoclip write setcaptionnoclip
+                                        default false;   
    property font: tframefont read getfont write setfont stored isfontstored;
  end;
 
@@ -95,6 +101,7 @@ type
    property captiondist;
    property captiondistouter;
    property captionoffset;
+   property captionnoclip;
    property font;
    property localprops;  //before template
    property template;
@@ -194,6 +201,7 @@ type
    property captiondist;
    property captiondistouter;
    property captionoffset;
+   property captionnoclip;
    property font;
    property localprops; //before template
    property template;
@@ -265,6 +273,7 @@ type
    property captiondist;
    property captiondistouter;
    property captionoffset;
+   property captionnoclip;
    property font;
    property localprops; //before template
    property template;
@@ -1280,22 +1289,33 @@ end;
 
 procedure tcustomcaptionframe.dopaintframe(const canvas: tcanvas;
   const rect: rectty);
-//var
-// reg: regionty;
+var
+ reg1: regionty;
 begin
-// reg:= 0; //compiler warning
- if finfo.text.text <> '' then begin
-//  reg:= canvas.copyclipregion;
-  drawtext(canvas,finfo);
+ reg1:= 0;
+ if not (fs_captionnoclip in fstate) and (finfo.text.text <> '') then begin
+  reg1:= canvas.copyclipregion;
+//  drawtext(canvas,finfo);
   canvas.subcliprect(inflaterect(finfo.dest,captionmargin));
  end;
  inherited;
+ if reg1 <> 0 then begin
+  canvas.clipregion:= reg1;
+ end;
  {
  if finfo.text.text <> '' then begin
   canvas.clipregion:= reg;
   drawtext(canvas,finfo);
  end;
  }
+end;
+
+procedure tcustomcaptionframe.afterpaint(const canvas: tcanvas);
+begin
+ if finfo.text.text <> '' then begin
+  drawtext(canvas,finfo);
+ end;
+ inherited;
 end;
 
 procedure tcustomcaptionframe.createfont;
@@ -1503,6 +1523,19 @@ begin
   end;
   internalupdatestate;
  end;
+end;
+
+function tcustomcaptionframe.getcaptionnoclip: boolean;
+begin
+ result:= fs_captionnoclip in fstate;
+end;
+
+procedure tcustomcaptionframe.setcaptionnoclip(const avalue: boolean);
+begin
+ if updatebit({$ifdef FPC}longword{$else}longword{$endif}(fstate),
+       ord(fs_captionnoclip),avalue) then begin
+  internalupdatestate;
+ end;   
 end;
 
 procedure tcustomcaptionframe.defineproperties(filer: tfiler);

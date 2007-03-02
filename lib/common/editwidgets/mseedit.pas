@@ -51,6 +51,7 @@ type
    property captiondist;
    property captiondistouter;
    property captionoffset;
+   property captionnoclip;
    property font;
    property localprops; //before template
    property template;
@@ -82,6 +83,7 @@ type
    property captiondist;
    property captiondistouter;
    property captionoffset;
+   property captionnoclip;
    property font;
    property localprops; //before template
    property template;
@@ -113,6 +115,7 @@ type
    property captiondist;
    property captiondistouter;
    property captionoffset;
+   property captionnoclip;
    property font;
    property localprops; //before template
    property template;
