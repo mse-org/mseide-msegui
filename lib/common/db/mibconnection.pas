@@ -70,7 +70,8 @@ type
                          buf: string; AParams: TParams); override;
     procedure UnPrepareStatement(cursor : TSQLCursor); override;
     procedure FreeFldBuffers(cursor : TSQLCursor); override;
-    procedure Execute(const cursor: TSQLCursor; const AParams : TParams); override;
+    procedure Execute(const cursor: TSQLCursor;
+              const atransaction: tsqltransaction; const AParams : TParams); override;
     procedure AddFieldDefs(cursor: TSQLCursor;FieldDefs : TfieldDefs); override;
     function Fetch(cursor : TSQLCursor) : boolean; override;
     function loadfield(const cursor: tsqlcursor; const afield: tfield;
@@ -566,7 +567,7 @@ begin
 end;
 
 procedure TIBConnection.Execute(const cursor: TSQLCursor;
-                                           const AParams : TParams);
+                const atransaction: tsqltransaction; const AParams : TParams);
 begin
  if Assigned(APArams) and (AParams.count > 0) then begin
   SetParameters(cursor, AParams);

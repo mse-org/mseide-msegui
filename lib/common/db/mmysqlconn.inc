@@ -82,7 +82,8 @@ Type
     procedure PrepareStatement(cursor: TSQLCursor;ATransaction : TSQLTransaction;buf : string; AParams : TParams); override;
     procedure UnPrepareStatement(cursor:TSQLCursor); override;
     procedure FreeFldBuffers(cursor : TSQLCursor); override;
-    procedure Execute(cursor: TSQLCursor;atransaction:tSQLtransaction;AParams : TParams); override;
+    procedure Execute(const cursor: TSQLCursor;
+             const atransaction:tSQLtransaction; const AParams : TParams); override;
     procedure AddFieldDefs(cursor: TSQLCursor; FieldDefs : TfieldDefs); override;
     function Fetch(cursor : TSQLCursor) : boolean; override;
     function loadfield(const cursor: tsqlcursor; const afield: tfield;
@@ -352,8 +353,8 @@ begin
   SetLength(c.MapDSRowToMSQLRow,0);
 end;
 
-procedure TConnectionName.Execute(cursor: TSQLCursor;
-  atransaction: tSQLtransaction;AParams : TParams);
+procedure TConnectionName.Execute(const  cursor: TSQLCursor;
+               const atransaction: tSQLtransaction; const AParams : TParams);
 
 Var
   C : TCursorName;

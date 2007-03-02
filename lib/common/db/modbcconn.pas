@@ -85,7 +85,8 @@ type
     procedure CommitRetaining(trans:TSQLHandle); override;
     procedure RollbackRetaining(trans:TSQLHandle); override;
     // - Statement execution
-    procedure Execute(cursor:TSQLCursor; ATransaction:TSQLTransaction; AParams:TParams); override;
+    procedure Execute(const cursor:TSQLCursor; 
+             const ATransaction:TSQLTransaction; const AParams:TParams); override;
     // - Result retrieving
     procedure AddFieldDefs(cursor:TSQLCursor; FieldDefs:TFieldDefs); override;
     function Fetch(cursor:TSQLCursor):boolean; override;
@@ -489,7 +490,8 @@ begin
   // Tranactions not implemented yet
 end;
 
-procedure TODBCConnection.Execute(cursor: TSQLCursor; ATransaction: TSQLTransaction; AParams: TParams);
+procedure TODBCConnection.Execute(const cursor: TSQLCursor;
+      const ATransaction: TSQLTransaction; const AParams: TParams);
 var
   ODBCCursor:TODBCCursor;
 begin
