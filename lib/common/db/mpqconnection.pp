@@ -50,7 +50,8 @@ type
 
    procedure PrepareStatement(cursor: TSQLCursor;ATransaction : TSQLTransaction;buf : string; AParams : TParams); override;
    procedure FreeFldBuffers(cursor : TSQLCursor); override;
-   procedure Execute(cursor: TSQLCursor;atransaction:tSQLtransaction; AParams : TParams); override;
+   procedure Execute(const cursor: TSQLCursor; const atransaction: tsqltransaction;
+                                   const AParams : TParams); override;
    procedure AddFieldDefs(cursor: TSQLCursor; FieldDefs : TfieldDefs); override;
    function Fetch(cursor : TSQLCursor) : boolean; override;
    procedure UnPrepareStatement(cursor : TSQLCursor); override;
@@ -485,8 +486,8 @@ begin
 // Do nothing
 end;
 
-procedure TPQConnection.Execute(cursor: TSQLCursor;atransaction:tSQLtransaction;
-                           AParams : TParams);
+procedure TPQConnection.Execute(const cursor: TSQLCursor; 
+           const atransaction: tsqltransaction; const AParams : TParams);
 
 var
  ar: array of pointer;
@@ -534,7 +535,7 @@ begin
    end;
   end
   else begin
-    tr := TPQTrans(aTransaction.Handle);
+    tr := TPQTrans(cursor.ftrans);
 
     s := statement;
     //Should be altered, just like in TSQLQuery.ApplyRecUpdate

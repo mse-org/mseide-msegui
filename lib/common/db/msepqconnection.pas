@@ -43,8 +43,8 @@ type
                                 override;
    procedure commitretaining(trans : tsqlhandle); override;
    procedure rollbackretaining(trans : tsqlhandle); override;
-   procedure execute(cursor: tsqlcursor; atransaction: tsqltransaction; 
-                            aparams: tparams); override;
+   procedure execute(const cursor: tsqlcursor; const atransaction: tsqltransaction;
+                             const aparams: tparams); override;
    //idbcontroller
    function readsequence(const sequencename: string): string;
    function writesequence(const sequencename: string;
@@ -205,8 +205,8 @@ begin
  end;
 end;
 
-procedure tmsepqconnection.execute(cursor: tsqlcursor; 
-                             atransaction: tsqltransaction; aparams: tparams);
+procedure tmsepqconnection.execute(const cursor: tsqlcursor; 
+               const atransaction: tsqltransaction; const aparams: tparams);
 const
  savepointname = 'mseinternal$savepoint';
 begin

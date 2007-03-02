@@ -59,6 +59,7 @@ type
     FInitFieldDef  : Boolean;
     FStatementType : TStatementType;
     fblobs: stringarty;
+    ftrans: pointer;
    function addblobdata(const adata: pointer; const alength: integer): integer;
                                            overload;
    function addblobdata(const adata: string): integer; overload;
@@ -91,6 +92,8 @@ type
 
     procedure SetTransaction(Value : TSQLTransaction);
     procedure GetDBInfo(const SchemaType : TSchemaType; const SchemaObjectName, ReturnField : string; List: TStrings);
+   function getconnected: boolean;
+   procedure setconnected(const avalue: boolean);
   protected
     FConnOptions         : TConnOptions;
 
@@ -106,7 +109,8 @@ type
     Function AllocateTransactionHandle : TSQLHandle; virtual; abstract;
 
     procedure PrepareStatement(cursor: TSQLCursor;ATransaction : TSQLTransaction;buf : string; AParams : TParams); virtual; abstract;
-    procedure Execute(cursor: TSQLCursor;atransaction:tSQLtransaction; AParams : TParams); virtual; abstract;
+    procedure Execute(const cursor: TSQLCursor; const atransaction: tsqltransaction;
+                                 const AParams : TParams); virtual; abstract;
     function Fetch(cursor : TSQLCursor) : boolean; virtual; abstract;
     procedure AddFieldDefs(cursor: TSQLCursor; FieldDefs : TfieldDefs); virtual; abstract;
     procedure UnPrepareStatement(cursor : TSQLCursor); virtual; abstract;
@@ -146,7 +150,7 @@ type
     property CharSet : string read FCharSet write FCharSet;
     property HostName : string Read FHostName Write FHostName;
 
-    property Connected;
+    property Connected: boolean read getconnected write setconnected default false;
     Property Role :  String read FRole write FRole;
     property DatabaseName;
     property KeepConnection;
@@ -356,6 +360,20 @@ type
     FOpenAfterRead : boolean;
  end;
 
+  TDatabasecracker = class(TComponent)
+  private
+    FConnected : Boolean;
+    FDataBaseName : String;
+    FDataSets : TList;
+    FTransactions : TList;
+    FDirectory : String;
+    FKeepConnection : Boolean;
+    FLoginPrompt : Boolean;
+    FOnLogin : TLoginEvent;
+    FParams : TStrings;
+    FSQLBased : Boolean;
+    FOpenAfterRead : boolean;
+  end;
 //copied from dsparams.inc 
 //todo: not needed for FPC 2.1.1
 
@@ -514,7 +532,7 @@ begin
 
   try
     Cursor := AllocateCursorHandle;
-
+    cursor.ftrans:= atransaction.handle;
     SQL := TrimRight(SQL);
 
     if SQL = '' then
@@ -523,7 +541,8 @@ begin
     Cursor.FStatementType := stNone;
 
     PrepareStatement(cursor,ATransaction,SQL,Nil);
-    execute(cursor,ATransaction, Nil);
+    cursor.ftrans:= atransaction.handle;
+    execute(cursor,atransaction,Nil);
     UnPrepareStatement(Cursor);
   finally;
     DeAllocateCursorHandle(Cursor);
@@ -618,6 +637,46 @@ function TSQLConnection.CreateBlobStream(const Field: TField;
 begin
  result:= nil; //compiler warning
  DatabaseErrorFmt(SUnsupportedFieldType,['Blob']);
+end;
+
+function TSQLConnection.getconnected: boolean;
+begin
+ result:= inherited connected;
+end;
+
+procedure TSQLConnection.setconnected(const avalue: boolean);
+var
+ int1: integer;
+begin
+ with tdatabasecracker(self) do begin
+  If aValue <> FConnected then begin
+   If aValue then begin
+    if csReading in ComponentState then begin
+     FOpenAfterRead:= true;
+     exit;
+    end
+    else begin
+     DoInternalConnect;
+    end;
+   end
+   else begin
+//    Closedatasets;
+    for int1:= fdatasets.count - 1 downto 0 do begin
+     with tsqlquery(fdatasets[int1]) do begin
+      if (transaction = nil) or (transaction.active) then begin
+       close; //not disconnected
+      end;
+     end;
+    end;
+    Closetransactions;
+    DoInternalDisConnect;
+    if csloading in ComponentState then begin
+     FOpenAfterRead := false;
+    end;
+   end;
+   FConnected:= aValue;
+  end;
+ end;
 end;
 
 { TSQLTransaction }
@@ -891,9 +950,9 @@ begin
     if not sqltr.Active then sqltr.StartTransaction;
 
 //    if assigned(fcursor) then FreeAndNil(fcursor);
-    if not assigned(fcursor) then
-      FCursor := Db.AllocateCursorHandle;
-
+    if not assigned(fcursor) then FCursor := Db.AllocateCursorHandle;
+    fcursor.ftrans:= sqltr.handle;
+    
     FSQLBuf := TrimRight(FSQL.Text);
 
     if FSQLBuf = '' then
@@ -954,8 +1013,8 @@ begin
    end;
   end;
  end;
- tsqlconnection(database).execute(Fcursor,
-                                   tsqltransaction(Transaction), FParams);
+ fcursor.ftrans:= tsqltransaction(transaction).handle;
+ tsqlconnection(database).execute(Fcursor,tsqltransaction(transaction),FParams);
 end;
 
 function tsqlquery.loadfield(const afield: tfield; const buffer: pointer;

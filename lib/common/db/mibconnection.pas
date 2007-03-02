@@ -70,7 +70,7 @@ type
                          buf: string; AParams: TParams); override;
     procedure UnPrepareStatement(cursor : TSQLCursor); override;
     procedure FreeFldBuffers(cursor : TSQLCursor); override;
-    procedure Execute(cursor: TSQLCursor;atransaction:tSQLtransaction; AParams : TParams); override;
+    procedure Execute(const cursor: TSQLCursor; const AParams : TParams); override;
     procedure AddFieldDefs(cursor: TSQLCursor;FieldDefs : TfieldDefs); override;
     function Fetch(cursor : TSQLCursor) : boolean; override;
     function loadfield(const cursor: tsqlcursor; const afield: tfield;
@@ -565,17 +565,15 @@ begin
     end;
 end;
 
-procedure TIBConnection.Execute(cursor: TSQLCursor;
-                             atransaction:tSQLtransaction; AParams : TParams);
-var 
- tr: pointer;
+procedure TIBConnection.Execute(const cursor: TSQLCursor;
+                                           const AParams : TParams);
 begin
- tr := aTransaction.Handle;
  if Assigned(APArams) and (AParams.count > 0) then begin
   SetParameters(cursor, AParams);
  end;
  with cursor as TIBCursor do begin
-  if isc_dsql_execute2(@Status,@tr,@Statement,1,in_SQLDA,nil) <> 0 then begin
+  if isc_dsql_execute2(@Status,@cursor.ftrans,
+                       @Statement,1,in_SQLDA,nil) <> 0 then begin
    CheckError('Execute', Status);
   end;
  end;
@@ -1163,7 +1161,7 @@ var
   blobSegment : pointer;
   blobSegLen : smallint;
   maxBlobSize : longInt;
-  TransactionHandle : pointer;
+//  TransactionHandle : pointer;
   blobId : ISC_QUAD;
 begin
 
@@ -1173,13 +1171,13 @@ begin
     if not field.getData(@blobId) then
       exit;
 
-    if not assigned(Transaction) then
-      DatabaseError(SErrConnTransactionnSet);
+//    if not assigned(Transaction) then
+//      DatabaseError(SErrConnTransactionnSet);
 
-    TransactionHandle := transaction.Handle;
+ //   TransactionHandle := transaction.Handle;
     blobHandle := nil;
 
-    if isc_open_blob(@FStatus, @FSQLDatabaseHandle, @TransactionHandle, @blobHandle, @blobId) <> 0 then
+    if isc_open_blob(@FStatus, @FSQLDatabaseHandle, @acursor.ftrans, @blobHandle, @blobId) <> 0 then
       CheckError('TIBConnection.CreateBlobStream', FStatus);
 
     maxBlobSize := getMaxBlobSize(blobHandle);
@@ -1187,7 +1185,8 @@ begin
     blobSegment := AllocMem(maxBlobSize);
     mStream := TMemoryStream.create;
 
-    while (isc_get_segment(@FStatus, @blobHandle, @blobSegLen, maxBlobSize, blobSegment) = 0) do begin
+    while (isc_get_segment(@FStatus, @blobHandle, @blobSegLen,
+                                     maxBlobSize, blobSegment) = 0) do begin
         mStream.writeBuffer(blobSegment^, blobSegLen);
     end;
     freemem(blobSegment);

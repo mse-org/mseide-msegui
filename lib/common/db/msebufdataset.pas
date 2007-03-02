@@ -436,6 +436,7 @@ type
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
 
+   procedure savetostream(const astream: tstream);
    procedure Append;
    function isutf8: boolean; virtual;
    procedure bindfields(const bind: boolean);
@@ -2818,6 +2819,17 @@ begin
   include(fbstate,bs_visiblerecordcountvalid);
  end;    
  result:= fvisiblerecordcount;
+end;
+
+// data format:
+// header: bdsfheaderty
+// fieldnames,fieldtypes
+// updatebuffer
+// oldvalues
+// currentvalues
+
+procedure tmsebufdataset.savetostream(const astream: tstream);
+begin
 end;
 
 { tlocalindexes }
