@@ -780,10 +780,16 @@ begin
 end;
 
 destructor TSQLTransaction.Destroy;
+var
+ bo1: boolean;
 begin
-  Rollback;
-  FreeAndNil(FParams);
-  inherited Destroy;
+ bo1:= active;
+ Rollback;
+ if not bo1 then begin
+  closedatasets; //close disconnected
+ end;
+ FreeAndNil(FParams);
+ inherited Destroy;
 end;
 
 Procedure TSQLTransaction.SetDatabase(Value : TDatabase);
@@ -976,7 +982,9 @@ end;
 procedure TSQLQuery.UnPrepare;
 
 begin
+ if connected then begin
   CheckInactive;
+ end;
   if IsPrepared then with Database as TSQLConnection do
     UnPrepareStatement(FCursor);
 end;

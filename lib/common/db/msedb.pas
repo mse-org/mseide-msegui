@@ -8,6 +8,7 @@ uses
  msestockobjects,sysutils;
  
 type
+ fieldtypearty = array of tfieldtype;
  fieldtypesty = set of tfieldtype;
  fieldtypesarty = array of fieldtypesty;
 const

@@ -281,6 +281,7 @@ type
    ffieldbufpositions: integerarty;
    ffieldsizes: integerarty;
    fdbfieldsizes: integerarty;
+   fdbfieldtypes: fieldtypearty;
    fstringpositions: integerarty;
    
    fcalcrecordsize: integer;
@@ -941,6 +942,7 @@ begin
  ffieldbufpositions:= nil;
  ffieldsizes:= nil;
  fdbfieldsizes:= nil;
+ fdbfieldtypes:= nil;
  fstringpositions:= nil;
  fcalcfieldbufpositions:= nil;
  fcalcfieldsizes:= nil;
@@ -1897,22 +1899,24 @@ end;
 
 procedure tmsebufdataset.calcrecordsize;
 
-procedure addfield(const aindex: integer; const datatype: tfieldtype;
-                                     const asize: integer);
-var
- bo1: boolean;
-begin
- ffieldsizes[aindex]:= getfieldsize(datatype,bo1);
- if bo1 then begin
-  additem(fstringpositions,frecordsize);
-  fdbfieldsizes[aindex]:= asize;
- end
- else begin
-  fdbfieldsizes[aindex]:= ffieldsizes[aindex];
- end;
- inc(frecordsize,ffieldsizes[aindex]);
- alignfieldpos(frecordsize);
-end;
+ procedure addfield(const aindex: integer; const datatype: tfieldtype;
+                                      const asize: integer);
+ var
+  bo1: boolean;
+ begin
+  ffieldbufpositions[aindex]:= frecordsize;
+  ffieldsizes[aindex]:= getfieldsize(datatype,bo1);
+  if bo1 then begin
+   additem(fstringpositions,frecordsize);
+   fdbfieldsizes[aindex]:= asize;
+  end
+  else begin
+   fdbfieldsizes[aindex]:= ffieldsizes[aindex];
+  end;
+  fdbfieldtypes[aindex]:= datatype;        //used for savetostream;
+  inc(frecordsize,ffieldsizes[aindex]);
+  alignfieldpos(frecordsize);
+ end; //addfield
 
 var 
  int1,int2: integer;
@@ -1939,9 +1943,9 @@ begin
  setlength(ffieldbufpositions,int1);
  setlength(ffieldsizes,int1);
  setlength(fdbfieldsizes,int1);
+ setlength(fdbfieldtypes,int1);
  fstringpositions:= nil;
  for int1:= 0 to fielddefs.count - 1 do begin
-  ffieldbufpositions[int1]:= frecordsize;
   with fielddefs[int1] do begin
    field1:= fields.findfield(name);
    if (field1 <> nil) and (field1.fieldkind = fkdata) then begin
@@ -1954,7 +1958,6 @@ begin
   field1:= fields[int1];
   with field1 do begin
    if fieldkind = fkinternalcalc then begin
-    ffieldbufpositions[int2]:= frecordsize;
     addfield(int2,datatype,size);
     tfieldcracker(field1).ffieldno:= int2 + 1;
     inc(int2);
@@ -2823,13 +2826,65 @@ end;
 
 // data format:
 // header: bdsfheaderty
-// fieldnames,fieldtypes
-// updatebuffer
-// oldvalues
+// fieldkinds,fieldbufpositions
 // currentvalues
+// updatebuffer
 
-procedure tmsebufdataset.savetostream(const astream: tstream);
+type
+ tbufstreamwriter = class
+  private
+   fstream: tstream;
+  public
+   constructor create(const astream: tstream);
+   procedure write(const buffer; const length: integer);
+ end;
+ 
+{ tbufstreamwriter }
+
+constructor tbufstreamwriter.create(const astream: tstream);
 begin
+ fstream:= astream;
+end;
+
+procedure tbufstreamwriter.write(const buffer; const length: integer);
+begin
+ fstream.write(buffer,length);
+end;
+
+type
+ tbsfheaderty = packed record
+  tag: array[0..14]of char;
+  byteorder: byte;      //0 -> little endian, 1 - big endian
+  version: integer;
+  fieldcount: integer;
+ end;
+const
+ bufdattag = 'MSEBUFDAT'#0#0#0#0#0#0;
+   
+procedure tmsebufdataset.savetostream(const astream: tstream);
+var
+ header: tbsfheaderty;
+ writer: tbufstreamwriter;
+ fieldco: integer;
+begin
+ checkactive;
+ fieldco:= length(fdbfieldtypes);
+ writer:= tbufstreamwriter.create(astream);
+ try
+  with header do begin
+   tag:= bufdattag;
+   byteorder:= 0;
+   version:= 0;
+   fieldcount:= fieldco;
+  end;
+  if header.fieldcount > 0 then begin
+   writer.write(header,sizeof(header));
+   writer.write(fdbfieldtypes[0],fieldco * sizeof(fdbfieldtypes[0]));
+   writer.write(ffieldbufpositions[0],fieldco * sizeof(ffieldbufpositions[0]));
+  end;
+ finally
+  writer.free;
+ end;
 end;
 
 { tlocalindexes }
