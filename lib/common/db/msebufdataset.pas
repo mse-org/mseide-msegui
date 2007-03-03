@@ -2846,12 +2846,6 @@ begin
  result:= fvisiblerecordcount;
 end;
 
-// data format:
-// header: bdsfheaderty
-// fieldkinds,fieldbufpositions
-// currentvalues
-// updatebuffer
-
 type
  tbufstreamwriter = class
   private
@@ -2861,8 +2855,10 @@ type
    procedure write(const buffer; const length: integer);
    procedure writefielddata(const data; const atype: tfieldtype;
                const asize: integer);
+   procedure writestring(const avalue: string);
    procedure writemsestring(const avalue: msestring);
    procedure writeinteger(const avalue: integer);
+   procedure writefielddef(const afielddef: tfielddef);
  end;
 
  tbufstreamreader = class
@@ -2873,8 +2869,10 @@ type
    procedure read(out buffer; const length: integer);
    procedure readfielddata(out data; const atype: tfieldtype;
                const asize: integer);
+   function readstring: string;
    function readmsestring: msestring;
    function readinteger: integer;
+   procedure readfielddef(const aowner: tfielddefs);
  end;
   
 { tbufstreamwriter }
@@ -2904,6 +2902,12 @@ begin
  end;
 end;
 
+procedure tbufstreamwriter.writestring(const avalue: string);
+begin
+ writeinteger(length(avalue));
+ write(pointer(avalue)^,length(avalue));
+end;
+
 procedure tbufstreamwriter.writemsestring(const avalue: msestring);
 begin
  writeinteger(length(avalue));
@@ -2913,6 +2917,18 @@ end;
 procedure tbufstreamwriter.writeinteger(const avalue: integer);
 begin
  write(avalue,sizeof(integer));
+end;
+
+procedure tbufstreamwriter.writefielddef(const afielddef: tfielddef);
+begin
+ with afielddef do begin
+  writestring(name);
+  writeinteger(ord(datatype));  
+  writeinteger(size);
+  writeinteger(integer(required));
+  writeinteger(fieldno);
+  writeinteger(precision);
+ end;
 end;
 
 { tbufstreamreader }
@@ -2942,6 +2958,15 @@ begin
  end;
 end;
 
+function tbufstreamreader.readstring: string;
+var
+ int1: integer;
+begin
+ int1:= readinteger;
+ setlength(result,int1);
+ read(pointer(result)^,int1);
+end;
+
 function tbufstreamreader.readmsestring: msestring;
 var
  int1: integer;
@@ -2956,18 +2981,46 @@ begin
  read(result,sizeof(integer));
 end;
 
+procedure tbufstreamreader.readfielddef(const aowner: tfielddefs);
+var
+ name: string;
+ datatype: tfieldtype;
+ size: integer;
+ required: boolean;
+ fieldno: integer;
+ precision: integer; 
+ def1: tfielddef;
+begin
+ name:= readstring;
+ datatype:= tfieldtype(readinteger);  
+ size:= readinteger;
+ required:= boolean(readinteger);
+ fieldno:= readinteger;
+ precision:= readinteger;
+ def1:= tfielddef.create(aowner,name,datatype,size,required,fieldno);
+ def1.precision:= precision;
+end;
+
 type
  tbsfheaderty = packed record
   tag: array[0..14]of char;
   byteorder: byte;      //0 -> little endian, 1 - big endian
   version: integer;
   fieldcount: integer;
+  fielddefcount: integer;
   recordcount: integer;
  end;
  
 const
  bufdattag = 'MSEBUFDAT'#0#0#0#0#0#0;
    
+// data format:
+// header: bdsfheaderty
+// fielddefs
+// fieldkinds,fieldbufpositions
+// currentvalues
+// updatebuffer
+
 procedure tmsebufdataset.savetostream(const astream: tstream);
 var
  header: tbsfheaderty;
@@ -2986,10 +3039,14 @@ begin
    byteorder:= 0;
    version:= 0;
    fieldcount:= fieldco;
+   fielddefcount:= fielddefs.count;
    recordcount:= self.recordcount;
   end;
   if header.fieldcount > 0 then begin
    writer.write(header,sizeof(header));
+   for int1:= 0 to header.fielddefcount - 1 do begin
+    writer.writefielddef(fielddefs[int1]);
+   end;
    writer.write(fdbfieldtypes[0],fieldco * sizeof(fdbfieldtypes[0]));
    writer.write(ffieldbufpositions[0],fieldco * sizeof(ffieldbufpositions[0]));
    with findexes[0] do begin
@@ -3027,13 +3084,23 @@ begin
  reader:= tbufstreamreader.create(floadingstream);
  try
   reader.read(header,sizeof(header));
-  if not comparemem(@header.tag,pointer(bufdattag),sizeof(header.tag)) then begin
+  if not comparemem(@header.tag,pointer(bufdattag),sizeof(header.tag)) or 
+            (header.fielddefcount > 1000) then begin
    formaterror;
   end;
   try
+   fielddefs.beginupdate;
+   try
+    fielddefs.clear;
+    for int1:= 0 to header.fielddefcount - 1 do begin
+     reader.readfielddef(fielddefs);
+    end;
+   finally
+    fielddefs.endupdate;
+   end;
    dointernalopen;
    fieldco:= length(fdbfieldtypes);
-   if header.fieldcount <> fieldco then begin
+   if (header.fieldcount <> fieldco) then begin
     formaterror;
    end;
    if fieldco > 0 then begin

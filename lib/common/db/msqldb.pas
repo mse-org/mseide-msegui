@@ -1295,6 +1295,7 @@ begin
 end;
 
 procedure TSQLQuery.InternalOpen;
+
   procedure InitialiseModifyQuery(var qry : TSQLQuery; aSQL: TSTringList);  
   begin
    qry:= TSQLQuery.Create(nil);
@@ -1304,7 +1305,8 @@ procedure TSQLQuery.InternalOpen;
     Transaction:= Self.Transaction;
     SQL.Assign(aSQL);
    end;
-  end;
+  end; //initialisemodifyquery
+
 var
  tel,fieldc: integer;
  f: TField;
@@ -1314,47 +1316,49 @@ begin
  if database <> nil then begin
   getcorbainterface(database,typeinfo(iblobconnection),fblobintf);
  end;
- try
-  Prepare;
-  if FCursor.FStatementType in [stSelect] then begin
-   Execute;
-   if FCursor.FInitFieldDef then InternalInitFieldDefs;
-   if DefaultFields then begin
-    CreateFields;
-    if FUpdateable then begin
-     if FusePrimaryKeyAsKey then begin
-      UpdateIndexDefs;
-      for tel := 0 to indexdefs.count-1 do  begin
-       if ixPrimary in indexdefs[tel].options then begin
-  // Todo: If there is more then one field in the key, that must be parsed
-        IndexFields := TStringList.Create;
-        ExtractStrings([';'],[' '],pchar(indexdefs[tel].fields),IndexFields);
-        for fieldc := 0 to IndexFields.Count-1 do begin
-         F := Findfield(IndexFields[fieldc]);
-         if F <> nil then begin
-          F.ProviderFlags := F.ProviderFlags + [pfInKey];
+ if not streamloading then begin  
+  try
+   Prepare;
+   if FCursor.FStatementType in [stSelect] then begin
+    Execute;
+    if FCursor.FInitFieldDef then InternalInitFieldDefs;
+    if DefaultFields then begin
+     CreateFields;
+     if FUpdateable then begin
+      if FusePrimaryKeyAsKey then begin
+       UpdateIndexDefs;
+       for tel := 0 to indexdefs.count-1 do  begin
+        if ixPrimary in indexdefs[tel].options then begin
+   // Todo: If there is more then one field in the key, that must be parsed
+         IndexFields := TStringList.Create;
+         ExtractStrings([';'],[' '],pchar(indexdefs[tel].fields),IndexFields);
+         for fieldc := 0 to IndexFields.Count-1 do begin
+          F := Findfield(IndexFields[fieldc]);
+          if F <> nil then begin
+           F.ProviderFlags := F.ProviderFlags + [pfInKey];
+          end;
          end;
+         IndexFields.Free;
         end;
-        IndexFields.Free;
        end;
       end;
      end;
     end;
+    if FUpdateable then begin
+     InitialiseModifyQuery(FDeleteQry,FSQLDelete);
+     InitialiseModifyQuery(FUpdateQry,FSQLUpdate);
+     InitialiseModifyQuery(FInsertQry,FSQLInsert);
+    end;
+   end
+   else begin
+    DatabaseError(SErrNoSelectStatement,Self);
    end;
-   if FUpdateable then begin
-    InitialiseModifyQuery(FDeleteQry,FSQLDelete);
-    InitialiseModifyQuery(FUpdateQry,FSQLUpdate);
-    InitialiseModifyQuery(FInsertQry,FSQLInsert);
-   end;
-  end
-  else begin
-   DatabaseError(SErrNoSelectStatement,Self);
-  end;
   except
    on E:Exception do
     raise;
   end;
-  inherited InternalOpen;
+ end;
+ inherited;
 end;
 
 procedure tsqlquery.internalrefresh;
@@ -1760,10 +1764,17 @@ end;
 Function TSQLQuery.GetCanModify: Boolean;
 
 begin
-  if FCursor.FStatementType = stSelect then
-    Result:= Active and  FUpdateable and (not FReadOnly)
-  else
-    Result := False;
+ if not connected then begin
+  result:= active and not freadonly;
+ end
+ else begin
+  if (fcursor <> nil) and (FCursor.FStatementType = stSelect) then begin
+   Result:= Active and  FUpdateable and (not FReadOnly)
+  end
+  else begin
+   Result:= False;
+  end;
+ end;
 end;
 
 function TSQLQuery.GetIndexDefs : TIndexDefs;
