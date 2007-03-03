@@ -257,7 +257,7 @@ type
 
  recupdatebufferarty = array of recupdatebufferty;
  
- bufdatasetstatety = (bs_opening,bs_fetching,bs_applying,
+ bufdatasetstatety = (bs_opening,bs_loading,bs_fetching,bs_applying,
                       bs_hasindex,bs_fetchall,bs_blobsfetched,
                       bs_indexvalid,
                       bs_editing,bs_append,bs_internalcalc,bs_utf8,
@@ -303,6 +303,8 @@ type
    factindex: integer;
    foninternalcalcfields: internalcalcfieldseventty;
    fvisiblerecordcount: integer;
+   floadingstream: tstream;
+   
    procedure calcrecordsize;
    procedure alignfieldpos(var avalue: integer);
    function loadbuffer(var buffer: recheaderty): tgetresult;
@@ -349,6 +351,9 @@ type
    procedure setmsestringdata(const sender: tmsestringfield; const avalue: msestring);
    procedure setoninternalcalcfields(const avalue: internalcalcfieldseventty);
    procedure checkfilterstate;
+   procedure dointernalopen;
+   procedure doloadfromstream;
+   procedure dointernalclose;
   protected
    fbstate: bufdatasetstatesty;
    fallpacketsfetched : boolean;
@@ -436,9 +441,11 @@ type
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
+   procedure Append;
 
    procedure savetostream(const astream: tstream);
-   procedure Append;
+   procedure loadfromstream(const astream: tstream);
+   function streamloading: boolean;
    function isutf8: boolean; virtual;
    procedure bindfields(const bind: boolean);
    procedure fieldtoparam(const source: tfield; const dest: tparam);
@@ -875,7 +882,7 @@ begin
  end;
 end;
 
-procedure tmsebufdataset.internalopen;
+procedure tmsebufdataset.dointernalopen;
 var
  int1: integer;
 begin
@@ -907,7 +914,17 @@ begin
  fopen:= true;
 end;
 
-procedure tmsebufdataset.internalclose;
+procedure tmsebufdataset.internalopen;
+begin
+ if streamloading then begin
+  doloadfromstream;
+ end
+ else begin
+  dointernalopen;
+ end;
+end;
+
+procedure tmsebufdataset.dointernalclose;
 var 
  int1: integer;
 begin
@@ -949,6 +966,11 @@ begin
  fcalcstringpositions:= nil;
  
  bindfields(false);
+end;
+
+procedure tmsebufdataset.internalclose;
+begin
+ dointernalclose;
 end;
 
 procedure tmsebufdataset.clearbuffers;
@@ -2837,8 +2859,24 @@ type
   public
    constructor create(const astream: tstream);
    procedure write(const buffer; const length: integer);
+   procedure writefielddata(const data; const atype: tfieldtype;
+               const asize: integer);
+   procedure writemsestring(const avalue: msestring);
+   procedure writeinteger(const avalue: integer);
  end;
- 
+
+ tbufstreamreader = class
+  private
+   fstream: tstream;
+  public
+   constructor create(const astream: tstream);
+   procedure read(out buffer; const length: integer);
+   procedure readfielddata(out data; const atype: tfieldtype;
+               const asize: integer);
+   function readmsestring: msestring;
+   function readinteger: integer;
+ end;
+  
 { tbufstreamwriter }
 
 constructor tbufstreamwriter.create(const astream: tstream);
@@ -2851,13 +2889,82 @@ begin
  fstream.write(buffer,length);
 end;
 
+procedure tbufstreamwriter.writefielddata(const data; const atype: tfieldtype;
+               const asize: integer);
+begin
+ case atype of
+  ftstring,ftfixedchar: begin
+   writemsestring(msestring(data));
+  end;
+  ftmemo,ftblob: begin
+  end;
+  else begin
+   write(data,asize);
+  end;
+ end;
+end;
+
+procedure tbufstreamwriter.writemsestring(const avalue: msestring);
+begin
+ writeinteger(length(avalue));
+ write(pointer(avalue)^,length(avalue)*sizeof(msechar));
+end;
+
+procedure tbufstreamwriter.writeinteger(const avalue: integer);
+begin
+ write(avalue,sizeof(integer));
+end;
+
+{ tbufstreamreader }
+
+constructor tbufstreamreader.create(const astream: tstream);
+begin
+ fstream:= astream;
+end;
+
+procedure tbufstreamreader.read(out buffer; const length: integer);
+begin
+ fstream.read(buffer,length);
+end;
+
+procedure tbufstreamreader.readfielddata(out data; const atype: tfieldtype;
+               const asize: integer);
+begin
+ case atype of
+  ftstring,ftfixedchar: begin
+   msestring(data):= readmsestring;
+  end;
+  ftmemo,ftblob: begin
+  end;
+  else begin
+   read(data,asize);
+  end;
+ end;
+end;
+
+function tbufstreamreader.readmsestring: msestring;
+var
+ int1: integer;
+begin
+ int1:= readinteger;
+ setlength(result,int1);
+ read(pointer(result)^,int1*sizeof(msechar));
+end;
+
+function tbufstreamreader.readinteger: integer;
+begin
+ read(result,sizeof(integer));
+end;
+
 type
  tbsfheaderty = packed record
   tag: array[0..14]of char;
   byteorder: byte;      //0 -> little endian, 1 - big endian
   version: integer;
   fieldcount: integer;
+  recordcount: integer;
  end;
+ 
 const
  bufdattag = 'MSEBUFDAT'#0#0#0#0#0#0;
    
@@ -2866,8 +2973,11 @@ var
  header: tbsfheaderty;
  writer: tbufstreamwriter;
  fieldco: integer;
+ datapo: precheaderty;
+ int1,int2: integer;
 begin
- checkactive;
+ checkbrowsemode;
+ fetchall;
  fieldco:= length(fdbfieldtypes);
  writer:= tbufstreamwriter.create(astream);
  try
@@ -2876,15 +2986,103 @@ begin
    byteorder:= 0;
    version:= 0;
    fieldcount:= fieldco;
+   recordcount:= self.recordcount;
   end;
   if header.fieldcount > 0 then begin
    writer.write(header,sizeof(header));
    writer.write(fdbfieldtypes[0],fieldco * sizeof(fdbfieldtypes[0]));
    writer.write(ffieldbufpositions[0],fieldco * sizeof(ffieldbufpositions[0]));
+   with findexes[0] do begin
+    for int1:= 0 to recordcount - 1 do begin
+     datapo:= @(pintrecordty(ind[int1])^.header);
+     writer.write(datapo^.fielddata,fnullmasksize);
+     for int2:= 0 to fieldco - 1 do begin
+      writer.writefielddata((pointer(datapo) + ffieldbufpositions[int2])^,
+                                   fdbfieldtypes[int2],fdbfieldsizes[int2]);
+     end;
+    end;
+   end;
   end;
  finally
   writer.free;
  end;
+end;
+
+procedure tmsebufdataset.doloadfromstream;
+
+ procedure formaterror;
+ begin
+  databaseerror('Invalid data stream.',self);
+ end;
+
+var
+ header: tbsfheaderty;
+ reader: tbufstreamreader;
+ fieldco: integer;
+ datapo: precheaderty;
+ int1,int2: integer;
+ ar1: fieldtypearty;
+ ar2: integerarty;
+begin
+ reader:= tbufstreamreader.create(floadingstream);
+ try
+  reader.read(header,sizeof(header));
+  if not comparemem(@header.tag,pointer(bufdattag),sizeof(header.tag)) then begin
+   formaterror;
+  end;
+  try
+   dointernalopen;
+   fieldco:= length(fdbfieldtypes);
+   if header.fieldcount <> fieldco then begin
+    formaterror;
+   end;
+   if fieldco > 0 then begin
+    setlength(ar1,fieldco);
+    setlength(ar2,fieldco);
+    reader.read(ar1[0],fieldco * sizeof(ar1[0]));
+    reader.read(ar2[0],fieldco * sizeof(ar2[0]));
+    if not comparemem(pointer(ar1),pointer(fdbfieldtypes),
+               fieldco * sizeof(ar1[0])) or 
+       not comparemem(pointer(ar2),pointer(ffieldbufpositions),
+        fieldco * sizeof(ar2[0]))then begin
+     formaterror;
+    end;
+    for int1:= 0 to header.recordcount - 1 do begin
+     datapo:= @femptybuffer^.header;
+     reader.read(datapo^.fielddata,fnullmasksize);
+     for int2:= 0 to fieldco - 1 do begin
+      reader.readfielddata((pointer(datapo) + ffieldbufpositions[int2])^,
+                                   fdbfieldtypes[int2],fdbfieldsizes[int2]);
+     end;
+     appendrecord(femptybuffer);
+     femptybuffer:= intallocrecord;
+    end;
+    fallpacketsfetched:= true;
+   end;
+  except
+   dointernalclose;
+   raise;
+  end;
+ finally
+  reader.free;
+ end;
+end;
+
+procedure tmsebufdataset.loadfromstream(const astream: tstream);
+begin
+ checkinactive;
+ floadingstream:= astream;
+ include(fbstate,bs_loading);
+ try
+  active:= true;
+ finally
+  exclude(fbstate,bs_loading);
+ end;
+end;
+
+function tmsebufdataset.streamloading: boolean;
+begin
+ result:= bs_loading in fbstate;
 end;
 
 { tlocalindexes }

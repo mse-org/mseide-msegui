@@ -1,5 +1,6 @@
 {
     Copyright (c) 2004 by Joost van der Sluis
+    Modified 2006-2007 by Martin Schreiber
 
     SQL database & dataset
 
@@ -1052,9 +1053,9 @@ begin
   if DefaultFields then
     DestroyFields;
   FIsEOF := False;
-  if assigned(FUpdateQry) then FreeAndNil(FUpdateQry);
-  if assigned(FInsertQry) then FreeAndNil(FInsertQry);
-  if assigned(FDeleteQry) then FreeAndNil(FDeleteQry);
+  FreeAndNil(FUpdateQry);
+  FreeAndNil(FInsertQry);
+  FreeAndNil(FDeleteQry);
 //  FRecordSize := 0;
   inherited internalclose;
 end;
@@ -1282,89 +1283,76 @@ begin
 end;
 *)
 procedure TSQLQuery.InitUpdates(ASQL : string);
-
-
 begin
-  if pos(',',FFromPart) > 0 then
-    FUpdateable := False // select-statements from more then one table are not updateable
-  else
-    begin
-    FUpdateable := True;
-    FTableName := FFromPart;
-    end;
-
+ if pos(',',FFromPart) > 0 then begin
+  FUpdateable := False 
+           // select-statements from more then one table are not updateable
+ end
+ else begin
+  FUpdateable := True;
+  FTableName := FFromPart;
+ end;
 end;
 
 procedure TSQLQuery.InternalOpen;
-
-  procedure InitialiseModifyQuery(var qry : TSQLQuery; aSQL: TSTringList);
-  
+  procedure InitialiseModifyQuery(var qry : TSQLQuery; aSQL: TSTringList);  
   begin
-    qry := TSQLQuery.Create(nil);
-    with qry do
-      begin
-      ParseSQL := False;
-      DataBase := Self.DataBase;
-      Transaction := Self.Transaction;
-      SQL.Assign(aSQL);
-      end;
+   qry:= TSQLQuery.Create(nil);
+   with qry do begin
+    ParseSQL:= False;
+    DataBase:= Self.DataBase;
+    Transaction:= Self.Transaction;
+    SQL.Assign(aSQL);
+   end;
   end;
-
-
-var tel, fieldc : integer;
-    f           : TField;
-    s           : string;
-    IndexFields : TStrings;
+var
+ tel,fieldc: integer;
+ f: TField;
+ s: string;
+ IndexFields: TStrings;
 begin
  if database <> nil then begin
   getcorbainterface(database,typeinfo(iblobconnection),fblobintf);
  end;
-  try
-    Prepare;
-    if FCursor.FStatementType in [stSelect] then
-      begin
-      Execute;
-      if FCursor.FInitFieldDef then InternalInitFieldDefs;
-      if DefaultFields then
-        begin
-        CreateFields;
-
-        if FUpdateable then
-          begin
-          if FusePrimaryKeyAsKey then
-            begin
-            UpdateIndexDefs;
-            for tel := 0 to indexdefs.count-1 do {with indexdefs[tel] do}
-              begin
-              if ixPrimary in indexdefs[tel].options then
-                begin
-                // Todo: If there is more then one field in the key, that must be parsed
-                  IndexFields := TStringList.Create;
-                  ExtractStrings([';'],[' '],pchar(indexdefs[tel].fields),IndexFields);
-                  for fieldc := 0 to IndexFields.Count-1 do
-                    begin
-                    F := Findfield(IndexFields[fieldc]);
-                    if F <> nil then
-                      F.ProviderFlags := F.ProviderFlags + [pfInKey];
-                    end;
-                  IndexFields.Free;
-                end;
-              end;
-            end;
-          end;
+ try
+  Prepare;
+  if FCursor.FStatementType in [stSelect] then begin
+   Execute;
+   if FCursor.FInitFieldDef then InternalInitFieldDefs;
+   if DefaultFields then begin
+    CreateFields;
+    if FUpdateable then begin
+     if FusePrimaryKeyAsKey then begin
+      UpdateIndexDefs;
+      for tel := 0 to indexdefs.count-1 do  begin
+       if ixPrimary in indexdefs[tel].options then begin
+  // Todo: If there is more then one field in the key, that must be parsed
+        IndexFields := TStringList.Create;
+        ExtractStrings([';'],[' '],pchar(indexdefs[tel].fields),IndexFields);
+        for fieldc := 0 to IndexFields.Count-1 do begin
+         F := Findfield(IndexFields[fieldc]);
+         if F <> nil then begin
+          F.ProviderFlags := F.ProviderFlags + [pfInKey];
+         end;
         end;
-      if FUpdateable then
-        begin
-        InitialiseModifyQuery(FDeleteQry,FSQLDelete);
-        InitialiseModifyQuery(FUpdateQry,FSQLUpdate);
-        InitialiseModifyQuery(FInsertQry,FSQLInsert);
-        end;
-      end
-    else
-      DatabaseError(SErrNoSelectStatement,Self);
+        IndexFields.Free;
+       end;
+      end;
+     end;
+    end;
+   end;
+   if FUpdateable then begin
+    InitialiseModifyQuery(FDeleteQry,FSQLDelete);
+    InitialiseModifyQuery(FUpdateQry,FSQLUpdate);
+    InitialiseModifyQuery(FInsertQry,FSQLInsert);
+   end;
+  end
+  else begin
+   DatabaseError(SErrNoSelectStatement,Self);
+  end;
   except
-    on E:Exception do
-      raise;
+   on E:Exception do
+    raise;
   end;
   inherited InternalOpen;
 end;
