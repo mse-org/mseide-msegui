@@ -857,6 +857,8 @@ type
    procedure receiveevent(const event: tobjectevent); override;
    procedure setparentcomponent(value: tcomponent); override;
    procedure setparentwidget(const Value: twidget); virtual;
+   procedure setlockedparentwidget(const avalue: twidget);
+            //sets ws_loadlock before setting, restores afterwards
    procedure updatewindowinfo(var info: windowinfoty); virtual;
    procedure windowcreated; virtual;
    procedure setoptionswidget(const avalue: optionswidgetty); virtual;
@@ -983,7 +985,8 @@ type
    procedure createframe;
    procedure createface;
    procedure createfont;
-   
+
+   function isloading: boolean;      //checks ws_loadlock and csdestroing too
    function widgetstate: widgetstatesty;                 //iframe
    property widgetstate1: widgetstates1ty read fwidgetstate1;
    function hasparent: boolean; override;               //tcomponent
@@ -4530,7 +4533,7 @@ end;
 
 procedure twidget.sortzorder;
 begin
- if not (csloading in componentstate) and not (ws_loadlock in fwidgetstate) then begin
+ if not isloading then begin
   sortarray(pointerarty(fwidgets),{$ifdef FPC}@{$endif}compzorder);
   invalidatewidget;
  end;
@@ -4545,7 +4548,7 @@ begin
  fwidgets[high(fwidgets)]:= child;
  child.rootchanged;
  child.updateopaque(true); //for cl_parent
- if not (csloading in componentstate) and not (ws_loadlock in fwidgetstate) then begin
+ if not isloading then begin
   child.ftaborder:= high(fwidgets);
   sortzorder;
   updatetaborder(child);
@@ -4573,7 +4576,7 @@ begin
   fdefaultfocuschild:= nil;
  end;
  child.rootchanged;
- if not (csloading in componentstate) and not (ws_loadlock in fwidgetstate) then begin
+ if not isloading then begin
   updatetaborder(nil);
   if child.isvisible then begin
    widgetregionchanged(child);
@@ -4643,11 +4646,26 @@ begin
     window.show(false);
    end;
   end;
-  if componentstate * [csloading,csdestroying] = [] then begin
+  if not isloading then begin
    fontchanged;
    colorchanged;
    enabledchanged; //-> statechanged
    parentchanged;
+  end;
+ end;
+end;
+
+procedure twidget.setlockedparentwidget(const avalue: twidget);
+var
+ bo1: boolean;
+begin
+ bo1:= ws_loadlock in fwidgetstate;
+ include(fwidgetstate,ws_loadlock);
+ try
+  setparentwidget(avalue);
+ finally
+  if not bo1 then begin
+   exclude(fwidgetstate,ws_loadlock);
   end;
  end;
 end;
@@ -4945,12 +4963,15 @@ begin
   doloaded;
   sortzorder;
   updatetaborder(nil);
-  if fframe <> nil then begin
-   fframe.parentfontchanged;
+//  if fframe <> nil then begin
+//   fframe.parentfontchanged;
+//  end;
+  parentfontchanged;
+  if ffont <> nil then begin
+   fontchanged;
   end;
   sizechanged;
   poschanged;
-  fontchanged;
   colorchanged;
   enabledchanged; //-> statechanged
   parentchanged; 
@@ -5613,6 +5634,7 @@ var
  int1: integer;
 begin
  if not (ws_loadedproc in fwidgetstate) then begin
+  parentfontchanged;
   for int1:= 0 to high(fwidgets) do begin
    with fwidgets[int1] do begin
     parentchanged;
@@ -7910,8 +7932,7 @@ var
 
 begin
  sortlist:= nil; //compiler warning
- if not (csloading in componentstate) and not (ws_loadlock in fwidgetstate) and
-       not (ws_destroying in fwidgetstate) then begin
+ if not isloading then begin
   if awidget <> nil then begin
    for int1:= 0 to widgetcount - 1 do begin
     if twidget(fwidgets[int1]) <> awidget then begin
@@ -8535,6 +8556,12 @@ begin
  else begin
   exclude(fwidgetstate,ws_staticframe);
  end;
+end;
+
+function twidget.isloading: boolean;
+begin
+ result:= ([csloading,csdestroying] * componentstate <> []) or 
+                               (ws_loadlock in fwidgetstate);
 end;
 
 function twidget.widgetstate: widgetstatesty;

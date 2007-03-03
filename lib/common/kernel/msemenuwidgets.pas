@@ -1178,7 +1178,7 @@ begin
  inherited create(nil,amenu,nil,nil,fmenucomp);
  foptionswidget:= foptionswidget-[ow_mousefocus,ow_tabfocus,ow_arrowfocus];
  fwidgetstate:= fwidgetstate - [ws_iswidget];
- parentwidget:= aowner;
+ setlockedparentwidget(aowner);
  flayout.options:= [mlo_horz,mlo_main,mlo_childreninactive];
  flayout.popupdirection:= gd_down;
  if not (csloading in aowner.ComponentState) and not (csloading in componentstate) then begin
@@ -1287,7 +1287,8 @@ var
  bo1: boolean;
 begin
  window1:= factivewindowbefore;
- bo1:= application.active;
+ bo1:= application.active and not ((fmenucomp = nil) or 
+                              (csdesigning in fmenucomp.componentstate));
  if value >= 0 then begin
   if factivewindowbefore = nil then begin
    setlinkedvar(application.activewindow,tlinkedobject(factivewindowbefore));

@@ -76,6 +76,7 @@ type
  treptabfont = class(tparentfont)
   protected
    class function getinstancepo(owner: tobject): pfont; override;
+   procedure setname(const avalue: string); override;
   public
    constructor create; override;
   published
@@ -83,6 +84,8 @@ type
  end;
 
  trepwidgetfont = class(twidgetfont)
+  protected
+   procedure setname(const avalue: string); override;
   public
    constructor create; override;
   published
@@ -90,6 +93,8 @@ type
  end;
  
  trepfont = class(tfont)
+  protected
+   procedure setname(const avalue: string); override;
   public
    constructor create; override;
   published
@@ -1186,6 +1191,16 @@ begin
  inherited;
  finfo.color:= defaultrepfontcolor;
  finfo.name:= defaultrepfontname;
+end;
+
+procedure treptabfont.setname(const avalue: string);
+begin
+ if avalue = '' then begin
+  inherited setname(defaultrepfontname);
+ end
+ else begin
+  inherited;
+ end;
 end;
 
 { treptabitemdatalink }
@@ -4862,6 +4877,16 @@ begin
  finfo.name:= defaultrepfontname;
 end;
 
+procedure trepwidgetfont.setname(const avalue: string);
+begin
+ if avalue = '' then begin
+  inherited setname(defaultrepfontname);
+ end
+ else begin
+  inherited;
+ end;
+end;
+
 { trepfont }
 
 constructor trepfont.create;
@@ -4869,6 +4894,16 @@ begin
  inherited;
  finfo.color:= defaultrepfontcolor;
  finfo.name:= defaultrepfontname;
+end;
+
+procedure trepfont.setname(const avalue: string);
+begin
+ if avalue = '' then begin
+  inherited setname(defaultrepfontname);
+ end
+ else begin
+  inherited;
+ end;
 end;
 
 end.

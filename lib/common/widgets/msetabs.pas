@@ -1739,7 +1739,8 @@ begin
  ftabs.SetSubComponent(true);
  ftabs.tabs.oncreatetab:= {$ifdef FPC}@{$endif}createpagetab;
  exclude(ftabs.fwidgetstate,ws_iswidget);
- ftabs.parentwidget:= self;
+ ftabs.setlockedparentwidget(self);
+// ftabs.parentwidget:= self;
  ftabs.finternaltabchange:= {$ifdef FPC}@{$endif}tabchanged;
  fobjectpicker:= tobjectpicker.create(iobjectpicker(self),org_widget);
 end;

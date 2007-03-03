@@ -1418,14 +1418,15 @@ end;
 constructor tfixcontainer.create(aowner: tcustomwidgetgrid);
 begin
  fgrid:= aowner;
- inherited create(nil{aowner});
+ inherited create({nil}aowner);
  include(fwidgetstate,ws_nopaint);
  exclude(fwidgetstate,ws_opaque);
  exclude(fwidgetstate,ws_iswidget);
  foptionswidget:= foptionswidget + 
             [ow_mousetransparent,ow_arrowfocusin,ow_arrowfocusout,ow_subfocus,
                           ow_focusbackonesc];
- parentwidget:= aowner;
+ setlockedparentwidget(aowner);
+// parentwidget:= aowner;
 end;
 
 procedure tfixcontainer.unregisterchildwidget(const child: twidget);
@@ -1613,7 +1614,8 @@ begin
  foptionswidget:= foptionswidget + [ow_mousetransparent,
                                     ow_subfocus,ow_focusbackonesc];
  foptionswidget:= foptionswidget - [ow_tabfocus];
- parentwidget:= aowner;
+ setlockedparentwidget(aowner);
+// parentwidget:= aowner;
 end;
 
 procedure tcontainer.unregisterchildwidget(const child: twidget);
@@ -1697,7 +1699,8 @@ begin
  fcontainer2:= tcontainer.create(self);
  fcontainer3:= tbottomcontainer.create(self);
  fwidgetdummy:= tdummywidget.create(self);
- fwidgetdummy.parentwidget:= fcontainer2;
+ fwidgetdummy.setlockedparentwidget(fcontainer2);
+// fwidgetdummy.parentwidget:= fcontainer2;
  setoptionsgrid(foptionsgrid); //synchronize container
 // fcontainer.Name:= 'container';
 end;

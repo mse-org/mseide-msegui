@@ -1246,6 +1246,9 @@ begin
  fcaptionpos:= cp_topleft;
  fcaptiondist:= 1;
  inherited;
+ if ffont = nil then begin
+  finfo.font:= fintf.getframefont;
+ end;
 end;
 
 destructor tcustomcaptionframe.destroy;

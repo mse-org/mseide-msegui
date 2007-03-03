@@ -488,14 +488,12 @@ end;
 
 constructor tformscrollbox.create(aowner: tcustommseform);
 begin
-// inherited create(nil);
  inherited create(aowner);
  setsubcomponent(true);
  exclude(fwidgetstate,ws_iswidget);
  foptionswidget:= defaultcontaineroptionswidget;
-// include(foptionswidget,ow_subfocus);
-// include(foptionswidget,ow_mousetransparent);
- parentwidget:= aowner;
+// parentwidget:= aowner;
+ setlockedparentwidget(aowner);
  name:= 'container';
 end;
 

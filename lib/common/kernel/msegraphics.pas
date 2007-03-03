@@ -357,7 +357,6 @@ type
    function getcharset: string;
    function getname: string;
    procedure setcharset(const Value: string);
-   procedure setname(const Value: string);
    function getoptions: fontoptionsty;
    procedure setoptions(const avalue: fontoptionsty);
      //icanvas
@@ -374,6 +373,7 @@ type
    procedure setstrikeout(const avalue: boolean);
   protected
    finfo: fontinfoty;
+   procedure setname(const Value: string); virtual;
    function gethandle: fontnumty; virtual;
    function getdatapo: pfontdataty;
   public
