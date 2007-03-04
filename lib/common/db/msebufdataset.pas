@@ -41,6 +41,15 @@ const
  dscheckfilter = ord(high(tdatasetstate)) + 1; 
  
 type  
+ fieldinfoty = record
+  offset: integer; //data offset in buffer     ////
+  size: integer;   //size in buffer              //  checked by save/restore
+  fieldtype:  tfieldtype;                        //
+  dbfieldsize: integer; //maxsize of dbfield   ////
+  field: tfield; //last!
+ end;
+ fieldinfoarty = array of fieldinfoty;
+ 
  fielddataty = record
   nullmask: array[0..0] of byte; //variable length
                                  //fielddata following
@@ -63,6 +72,15 @@ type
  blobinfoarty = array of blobinfoty;
  pblobinfoarty = ^blobinfoarty;
 
+ blobstreamfixinfoty = record
+  id: int64;
+  new: boolean;
+ end;
+ blobstreaminfoty = record
+  info: blobstreamfixinfoty;
+  data: string;
+ end;
+ 
  recheaderty = record
   blobinfo: blobinfoarty;
   fielddata: fielddataty;   
@@ -107,14 +125,14 @@ const
 //                 +---------<frecordsize>---------+
 // intrecheaderty, |recheaderty,fielddata          |
 //                 |moved to tdataset buffer header|
-//                 |fieldoffsets are in ffieldbufpositions
+//                 |fieldoffsets are in ffieldinfos[].offset
 //                 |                               |
 // structure of dataset recordbuffer:
 //                 +----------------------<fcalcrecordsize>----------+
 //                 +---------<frecordsize>---------+                 |
 // dsrecheaderty,  |recheaderty,fielddata          |calcfields       |
 //                 |moved to internal buffer header|                 | 
-//                 |<-field offsets are in ffieldbufpositions        |
+//                 |<-field offsets are in ffieldinfos[].offset      |
 //                 |<-calcfield offsets are in fcalcfieldbufpositions|
 
 type
@@ -258,7 +276,7 @@ type
  recupdatebufferarty = array of recupdatebufferty;
  
  bufdatasetstatety = (bs_opening,bs_loading,bs_fetching,bs_applying,
-                      bs_hasindex,bs_fetchall,bs_blobsfetched,
+                      bs_hasindex,bs_fetchall,bs_blobsfetched,bs_blobscached,
                       bs_indexvalid,
                       bs_editing,bs_append,bs_internalcalc,bs_utf8,
                       bs_hasfilter,bs_visiblerecordcountvalid);
@@ -278,10 +296,12 @@ type
    fnullmasksize: integer;
    fcalcfieldcount: integer;
    finternalcalcfieldcount: integer;
-   ffieldbufpositions: integerarty;
-   ffieldsizes: integerarty;
-   fdbfieldsizes: integerarty;
-   fdbfieldtypes: fieldtypearty;
+   ffieldinfos: fieldinfoarty;
+//   ffieldbufpositions: integerarty;
+//   ffieldsizes: integerarty;
+//   fdbfieldsizes: integerarty;
+//   fdbfieldtypes: fieldtypearty;
+//   fdbfields: fieldarty;
    fstringpositions: integerarty;
    
    fcalcrecordsize: integer;
@@ -362,15 +382,30 @@ type
    frecno: integer; //null based
    findexes: array of indexty;
    fblobcache: blobcacheinfoarty;
+   fblobcount: integer;
    fcurrentbuf: pintrecordty;
-   
+
+   function findcachedblob(var info: blobcacheinfoty): boolean; overload;
+   function findcachedblob(const id: int64; 
+                           out info: blobcacheinfoty): boolean; overload;
+   function addblobcache(const adata: pointer;
+                    const alength: integer): integer; overload;
+   function addblobcache(const aid: int64; const adata: string): integer; overload;
    procedure updatestate;
    function getintblobpo: pblobinfoarty; //in currentrecbuf
    procedure internalcancel; override;
    procedure cancelrecupdate(var arec: recupdatebufferty);
    procedure setdatastringvalue(const afield: tfield; const avalue: string);
-   
-   function createblobstream(field: tfield; mode: tblobstreammode): tstream; override;
+
+   procedure sortblobcache;   
+   procedure fetchblobs;
+   procedure fetchallblobs;
+   procedure getofflineblob(const data: precheaderty; const aindex: integer;
+                                   out info: blobstreaminfoty);
+   procedure setofflineblob(const adata: precheaderty; const aindex: integer;
+                                   const info: blobstreaminfoty);
+   function createblobstream(field: tfield;
+                                     mode: tblobstreammode): tstream; override;
    procedure internalapplyupdate(const maxerrors: integer;
                 const cancelonerror: boolean; var response: tresolverresponse);
    procedure afterapply; virtual;
@@ -435,6 +470,7 @@ type
  {abstracts, must be overidden by descendents}
    function fetch : boolean; virtual; abstract;
    function getblobdatasize: integer; virtual; abstract;
+   function blobscached: boolean; virtual; abstract;
    function loadfield(const afield: tfield; const buffer: pointer;
                     var bufsize: integer): boolean; virtual; abstract;
            //if bufsize < 0 -> buffer was to small, should be -bufsize
@@ -507,6 +543,22 @@ type
    FFieldNo : Longint;
  end;
    
+function compblobcache(const a,b): integer;
+var
+ lint1: int64;
+begin
+ lint1:= blobcacheinfoty(a).id - blobcacheinfoty(b).id;
+ result:= 0;
+ if lint1 < 0 then begin
+  result:= -1;
+ end
+ else begin
+  if lint1 > 0 then begin
+   result:= 1;
+  end;
+ end;
+end;
+
 function compinteger(const l,r): integer;
 begin
  result:= integer(l) - integer(r);
@@ -916,6 +968,12 @@ end;
 
 procedure tmsebufdataset.internalopen;
 begin
+ if blobscached then begin
+  include(fbstate,bs_blobscached);
+ end
+ else begin
+  exclude(fbstate,bs_blobscached);
+ end;
  if streamloading then begin
   doloadfromstream;
  end
@@ -931,6 +989,7 @@ begin
  exclude(fbstate,bs_opening);
  frecno:= -1;
  fblobcache:= nil;
+ fblobcount:= 0;
  if fopen then begin
   fopen:= false;
   with findexes[0] do begin
@@ -956,10 +1015,7 @@ begin
  clearindex;
  fbrecordcount:= 0;
  
- ffieldbufpositions:= nil;
- ffieldsizes:= nil;
- fdbfieldsizes:= nil;
- fdbfieldtypes:= nil;
+ ffieldinfos:= nil;
  fstringpositions:= nil;
  fcalcfieldbufpositions:= nil;
  fcalcfieldsizes:= nil;
@@ -1259,43 +1315,45 @@ begin
  for int1:= 0 to fields.count-1 do begin
   field1:= fields[int1];
   fno:= field1.fieldno-1;
-  case field1.fieldkind of
-   fkdata: begin
-    int2:= fdbfieldsizes[fno];
-    if field1.datatype in charfields then begin
-     int2:= int2*4+4; //room for multibyte encodings
-     setlength(str1,int2); 
-     if not loadfield(field1,pointer(str1),int2) then begin
-      setfieldisnull(buffer.fielddata.nullmask,fno);
-     end
-     else begin
-      if int2 < 0 then begin //buffer to small
-       int2:= -int2;
-       setlength(str1,int2);
-       loadfield(field1,pointer(str1),int2);
-      end;
-      setlength(str1,int2);
-      po2:= pointer(@buffer)+ffieldbufpositions[fno];
-      if bs_utf8 in fbstate then begin
-       po2^:= utf8tostring(str1);
+  with ffieldinfos[fno] do begin
+   case field1.fieldkind of
+    fkdata: begin
+     int2:= dbfieldsize;
+     if field1.datatype in charfields then begin
+      int2:= int2*4+4; //room for multibyte encodings
+      setlength(str1,int2); 
+      if not loadfield(field1,pointer(str1),int2) then begin
+       setfieldisnull(buffer.fielddata.nullmask,fno);
       end
       else begin
-       po2^:= msestring(str1);
+       if int2 < 0 then begin //buffer to small
+        int2:= -int2;
+        setlength(str1,int2);
+        loadfield(field1,pointer(str1),int2);
+       end;
+       setlength(str1,int2);
+       po2:= pointer(@buffer) + offset;
+       if bs_utf8 in fbstate then begin
+        po2^:= utf8tostring(str1);
+       end
+       else begin
+        po2^:= msestring(str1);
+       end;
+       if length(po2^) > dbfieldsize then begin
+        setlength(po2^,dbfieldsize);
+       end;
       end;
-      if length(po2^) > fdbfieldsizes[fno] then begin
-       setlength(po2^,fdbfieldsizes[fno]);
+     end
+     else begin
+      if not loadfield(field1,pointer(@buffer)+offset,int2) or 
+                           (int2 < 0)then begin
+       setfieldisnull(buffer.fielddata.nullmask,fno);        //buffer too small
       end;
-     end;
-    end
-    else begin
-     if not loadfield(field1,
-              pointer(@buffer)+ffieldbufpositions[fno],int2) or (int2 < 0)then begin
-      setfieldisnull(buffer.fielddata.nullmask,fno);        //buffer too small
      end;
     end;
-   end;
-   fkinternalcalc: begin
-    setfieldisnull(buffer.fielddata.nullmask,fno);
+    fkinternalcalc: begin
+     setfieldisnull(buffer.fielddata.nullmask,fno);
+    end;
    end;
   end;
  end;
@@ -1359,8 +1417,8 @@ begin
   end;
   if buffer <> nil then begin
    result:= not getfieldisnull(precheaderty(buffer)^.fielddata.nullmask,int1);
-   inc(buffer,ffieldbufpositions[int1]);
-   datasize:= ffieldsizes[int1];
+   inc(buffer,ffieldinfos[int1].offset{ffieldbufpositions[int1]});
+   datasize:= ffieldinfos[int1].size{ffieldsizes[int1]};
   end
   else begin
    datasize:= 0;
@@ -1458,8 +1516,8 @@ begin
   else begin
    unsetfieldisnull(precheaderty(result)^.fielddata.nullmask,int1);
   end;
-  inc(result,ffieldbufpositions[int1]);
-  datasize:= ffieldsizes[int1];
+  inc(result,ffieldinfos[int1].offset{ffieldbufpositions[int1]});
+  datasize:= ffieldinfos[int1].size{ffieldsizes[int1]};
  end
  else begin
   int1:= -2 - int1;
@@ -1922,22 +1980,25 @@ end;
 procedure tmsebufdataset.calcrecordsize;
 
  procedure addfield(const aindex: integer; const datatype: tfieldtype;
-                                      const asize: integer);
+                        const asize: integer; const afield: tfield);
  var
   bo1: boolean;
  begin
-  ffieldbufpositions[aindex]:= frecordsize;
-  ffieldsizes[aindex]:= getfieldsize(datatype,bo1);
-  if bo1 then begin
-   additem(fstringpositions,frecordsize);
-   fdbfieldsizes[aindex]:= asize;
-  end
-  else begin
-   fdbfieldsizes[aindex]:= ffieldsizes[aindex];
+  with ffieldinfos[aindex] do begin
+   offset:= frecordsize;
+   size:= getfieldsize(datatype,bo1);
+   if bo1 then begin
+    additem(fstringpositions,frecordsize);
+    dbfieldsize:= asize;     //max size
+   end
+   else begin
+    dbfieldsize:= size;
+   end;
+   fieldtype:= datatype;        //used for savetostream;
+   field:= afield;
+   inc(frecordsize,size);
+   alignfieldpos(frecordsize);
   end;
-  fdbfieldtypes[aindex]:= datatype;        //used for savetostream;
-  inc(frecordsize,ffieldsizes[aindex]);
-  alignfieldpos(frecordsize);
  end; //addfield
 
 var 
@@ -1962,16 +2023,13 @@ begin
  inc(frecordsize,fnullmasksize);
  alignfieldpos(frecordsize);
  
- setlength(ffieldbufpositions,int1);
- setlength(ffieldsizes,int1);
- setlength(fdbfieldsizes,int1);
- setlength(fdbfieldtypes,int1);
+ setlength(ffieldinfos,int1);
  fstringpositions:= nil;
  for int1:= 0 to fielddefs.count - 1 do begin
   with fielddefs[int1] do begin
    field1:= fields.findfield(name);
    if (field1 <> nil) and (field1.fieldkind = fkdata) then begin
-    addfield(int1,datatype,size);
+    addfield(int1,datatype,size,field1);
    end;
   end;
  end;
@@ -1980,7 +2038,7 @@ begin
   field1:= fields[int1];
   with field1 do begin
    if fieldkind = fkinternalcalc then begin
-    addfield(int2,datatype,size);
+    addfield(int2,datatype,size,field1);
     tfieldcracker(field1).ffieldno:= int2 + 1;
     inc(int2);
    end;
@@ -2275,6 +2333,134 @@ begin
  end; 
 end;
 
+procedure tmsebufdataset.fetchallblobs;
+begin
+ if not fallpacketsfetched then begin
+  fetchall;
+  fetchblobs;
+ end;
+end;
+
+function tmsebufdataset.findcachedblob(var info: blobcacheinfoty): boolean;
+var
+ int1: integer;
+begin
+ if bs_blobscached in fbstate then begin
+  info:= fblobcache[integer(info.id)];
+  result:= true;
+ end
+ else begin
+  result:= findarrayvalue(info,fblobcache,fblobcount,@compblobcache,
+                                         sizeof(blobcacheinfoty),int1);
+  if result then begin
+   info.data:= fblobcache[int1].data;
+  end
+  else begin
+   info.data:= '';
+  end;
+ end
+end;
+
+procedure tmsebufdataset.sortblobcache;
+begin
+ setlength(fblobcache,fblobcount);
+ sortarray(fblobcache,@compblobcache,sizeof(blobcacheinfoty));
+end;
+
+procedure tmsebufdataset.fetchblobs;
+var
+ datapobefore: pintrecordty;
+ statebefore: tdatasetstate;
+ int1,int2,int3: integer;
+ ind1: pointerarty;
+ fieldar1: fieldarty;
+ ar1: integerarty;
+ stream1: tmemorystream;
+ id: int64;
+begin
+ if not blobscached then begin
+  setlength(fieldar1,fields.count);
+  int2:= 0;
+  for int1:= 0 to high(fieldar1) do begin
+   fieldar1[int2]:= fields[int1];
+   if fieldar1[int2].isblob then begin
+    inc(int2);
+   end;
+  end;
+  if int2 > 0 then begin
+   setlength(fieldar1,int2);
+   setlength(ar1,int2);
+   for int1:= 0 to high(ar1) do begin
+    ar1[int1]:= fieldar1[int1].fieldno-1;
+   end;
+   datapobefore:= fcurrentbuf;
+   ind1:= findexes[0].ind;
+   statebefore:= settempstate(dscurvalue);
+   fblobcache:= nil;
+   fblobcount:= 0;
+   try
+    for int1:= 0 to recordcount - 1 do begin
+     fcurrentbuf:= ind1[int1];
+     for int2:= 0 to high(fieldar1) do begin
+      if not getfieldisnull(fcurrentbuf^.header.fielddata.nullmask,
+                                                        ar1[int2]) then begin
+       stream1:= tmemorystream(createblobstream(fieldar1[int2],bmread));
+       int3:= addblobcache(stream1.memory,stream1.size);
+       fieldar1[int2].getdata(@fblobcache[int3].id);
+       stream1.free;
+      end;
+     end;
+    end;
+    sortblobcache;
+   finally
+    fcurrentbuf:= datapobefore;
+    restorestate(statebefore);
+   end;
+  end;
+ end
+ else begin
+  setlength(fblobcache,fblobcount);
+ end;
+ include(fbstate,bs_blobsfetched);
+end;
+
+function tmsebufdataset.findcachedblob(const id: int64; 
+                           out info: blobcacheinfoty): boolean; overload;
+begin
+ info.id:= id;
+ result:= findcachedblob(info);
+end;
+
+procedure tmsebufdataset.getofflineblob(const data: precheaderty;
+                       const aindex: integer; out info: blobstreaminfoty);
+var
+ cacheinfo: blobcacheinfoty;
+begin
+ with ffieldinfos[aindex] do begin
+  move((pointer(data)+offset)^,cacheinfo.id,size);
+  findcachedblob(cacheinfo);
+  with info,info do begin
+   id:= cacheinfo.id;
+   new:= false;
+   data:= cacheinfo.data;
+  end;
+ end;
+end;
+var testvar: pint64;
+procedure tmsebufdataset.setofflineblob(const adata: precheaderty;
+                       const aindex: integer; const info: blobstreaminfoty);
+begin
+ with info,info do begin
+  if not new then begin
+   with ffieldinfos[aindex] do begin
+testvar:= pointer(data)+offset;
+    move(id,(pointer(adata)+offset)^,size);
+   end;
+   addblobcache(id,data);
+  end;
+ end;
+end;
+
 procedure tmsebufdataset.setdatastringvalue(const afield: tfield; const avalue: string);
 var
  po1: pbyte;
@@ -2288,7 +2474,7 @@ begin
  end;
  int1:= afield.fieldno - 1;
  if avalue <> '' then begin
-  move(avalue[1],(po1+ffieldbufpositions[int1])^,length(avalue));
+  move(avalue[1],(po1+ffieldinfos[int1].offset{ffieldbufpositions[int1]})^,length(avalue));
   unsetfieldisnull(precheaderty(po1)^.fielddata.nullmask,int1);
  end
  else begin
@@ -2850,11 +3036,13 @@ type
  tbufstreamwriter = class
   private
    fstream: tstream;
+   fowner: tmsebufdataset;
   public
-   constructor create(const astream: tstream);
+   constructor create(const aowner: tmsebufdataset; const astream: tstream);
    procedure write(const buffer; const length: integer);
-   procedure writefielddata(const data; const atype: tfieldtype;
-               const asize: integer);
+//   procedure writefielddata(const data; const atype: tfieldtype;
+//               const asize: integer);
+   procedure writefielddata(const data: precheaderty; const aindex: integer);
    procedure writestring(const avalue: string);
    procedure writemsestring(const avalue: msestring);
    procedure writeinteger(const avalue: integer);
@@ -2864,11 +3052,13 @@ type
  tbufstreamreader = class
   private
    fstream: tstream;
+   fowner: tmsebufdataset;
   public
-   constructor create(const astream: tstream);
+   constructor create(const aowner: tmsebufdataset; const astream: tstream);
    procedure read(out buffer; const length: integer);
-   procedure readfielddata(out data; const atype: tfieldtype;
-               const asize: integer);
+   procedure readfielddata(const data: precheaderty; const aindex: integer);
+//   procedure readfielddata(out data; const atype: tfieldtype;
+//               const asize: integer);
    function readstring: string;
    function readmsestring: msestring;
    function readinteger: integer;
@@ -2877,8 +3067,10 @@ type
   
 { tbufstreamwriter }
 
-constructor tbufstreamwriter.create(const astream: tstream);
+constructor tbufstreamwriter.create(const aowner: tmsebufdataset; 
+                                            const astream: tstream);
 begin
+ fowner:= aowner;
  fstream:= astream;
 end;
 
@@ -2887,6 +3079,32 @@ begin
  fstream.write(buffer,length);
 end;
 
+procedure tbufstreamwriter.writefielddata(const data: precheaderty; 
+                                                    const aindex: integer);
+var
+ fielddata: pointer;
+ blobinfo: blobstreaminfoty;
+begin
+ with fowner.ffieldinfos[aindex] do begin
+  fielddata:= pointer(data) + offset;
+  case fieldtype of
+   ftstring,ftfixedchar: begin
+    writemsestring(msestring(fielddata^));
+   end;
+   ftmemo,ftblob: begin
+    if not getfieldisnull(@data^.fielddata.nullmask,aindex) then begin
+     fowner.getofflineblob(data,aindex,blobinfo);
+     write(blobinfo.info,sizeof(blobinfo.info));
+     writestring(blobinfo.data);
+    end;
+   end;
+   else begin
+    write(fielddata^,size);
+   end;
+  end;
+ end; 
+end;
+{          
 procedure tbufstreamwriter.writefielddata(const data; const atype: tfieldtype;
                const asize: integer);
 begin
@@ -2901,7 +3119,7 @@ begin
   end;
  end;
 end;
-
+}
 procedure tbufstreamwriter.writestring(const avalue: string);
 begin
  writeinteger(length(avalue));
@@ -2933,8 +3151,10 @@ end;
 
 { tbufstreamreader }
 
-constructor tbufstreamreader.create(const astream: tstream);
+constructor tbufstreamreader.create(const aowner: tmsebufdataset; 
+                                               const astream: tstream);
 begin
+ fowner:= aowner;
  fstream:= astream;
 end;
 
@@ -2943,6 +3163,32 @@ begin
  fstream.read(buffer,length);
 end;
 
+procedure tbufstreamreader.readfielddata(const data: precheaderty; 
+                         const aindex: integer);
+var
+ fielddata: pointer;
+ blobinfo: blobstreaminfoty;
+begin
+ with fowner.ffieldinfos[aindex] do begin
+  fielddata:= pointer(data) + offset;
+  case fieldtype of
+   ftstring,ftfixedchar: begin
+    msestring(fielddata^):= readmsestring;
+   end;
+   ftmemo,ftblob: begin
+    if not getfieldisnull(@data^.fielddata.nullmask,aindex) then begin
+     read(blobinfo.info,sizeof(blobinfo.info));
+     blobinfo.data:= readstring;
+     fowner.setofflineblob(data,aindex,blobinfo);
+    end;
+   end;
+   else begin
+    read(fielddata^,size);
+   end;
+  end;
+ end;
+end;
+{
 procedure tbufstreamreader.readfielddata(out data; const atype: tfieldtype;
                const asize: integer);
 begin
@@ -2957,7 +3203,7 @@ begin
   end;
  end;
 end;
-
+}
 function tbufstreamreader.readstring: string;
 var
  int1: integer;
@@ -3030,9 +3276,9 @@ var
  int1,int2: integer;
 begin
  checkbrowsemode;
- fetchall;
- fieldco:= length(fdbfieldtypes);
- writer:= tbufstreamwriter.create(astream);
+ fetchallblobs;
+ fieldco:= length(ffieldinfos);
+ writer:= tbufstreamwriter.create(self,astream);
  try
   with header do begin
    tag:= bufdattag;
@@ -3047,15 +3293,15 @@ begin
    for int1:= 0 to header.fielddefcount - 1 do begin
     writer.writefielddef(fielddefs[int1]);
    end;
-   writer.write(fdbfieldtypes[0],fieldco * sizeof(fdbfieldtypes[0]));
-   writer.write(ffieldbufpositions[0],fieldco * sizeof(ffieldbufpositions[0]));
+   writer.write(ffieldinfos[0],fieldco * sizeof(ffieldinfos[0]));
    with findexes[0] do begin
     for int1:= 0 to recordcount - 1 do begin
      datapo:= @(pintrecordty(ind[int1])^.header);
      writer.write(datapo^.fielddata,fnullmasksize);
      for int2:= 0 to fieldco - 1 do begin
-      writer.writefielddata((pointer(datapo) + ffieldbufpositions[int2])^,
-                                   fdbfieldtypes[int2],fdbfieldsizes[int2]);
+      writer.writefielddata(datapo,int2);
+ //     writer.writefielddata((pointer(datapo) + ffieldbufpositions[int2])^,
+ //                                  fdbfieldtypes[int2],fdbfieldsizes[int2]);
      end;
     end;
    end;
@@ -3078,10 +3324,9 @@ var
  fieldco: integer;
  datapo: precheaderty;
  int1,int2: integer;
- ar1: fieldtypearty;
- ar2: integerarty;
+ ar1: fieldinfoarty;
 begin
- reader:= tbufstreamreader.create(floadingstream);
+ reader:= tbufstreamreader.create(self,floadingstream);
  try
   reader.read(header,sizeof(header));
   if not comparemem(@header.tag,pointer(bufdattag),sizeof(header.tag)) or 
@@ -3099,33 +3344,34 @@ begin
     fielddefs.endupdate;
    end;
    dointernalopen;
-   fieldco:= length(fdbfieldtypes);
+   fieldco:= length(ffieldinfos);
    if (header.fieldcount <> fieldco) then begin
     formaterror;
    end;
    if fieldco > 0 then begin
     setlength(ar1,fieldco);
-    setlength(ar2,fieldco);
     reader.read(ar1[0],fieldco * sizeof(ar1[0]));
-    reader.read(ar2[0],fieldco * sizeof(ar2[0]));
-    if not comparemem(pointer(ar1),pointer(fdbfieldtypes),
-               fieldco * sizeof(ar1[0])) or 
-       not comparemem(pointer(ar2),pointer(ffieldbufpositions),
-        fieldco * sizeof(ar2[0]))then begin
-     formaterror;
+    for int1:= 0 to high(ar1) do begin
+     if not comparemem(@ar1[int1],@ffieldinfos[int1],sizeof(ar1[0]) - 
+                  sizeof(ar1[0].field)) then begin
+      formaterror;
+     end;
     end;
     for int1:= 0 to header.recordcount - 1 do begin
      datapo:= @femptybuffer^.header;
      reader.read(datapo^.fielddata,fnullmasksize);
      for int2:= 0 to fieldco - 1 do begin
-      reader.readfielddata((pointer(datapo) + ffieldbufpositions[int2])^,
-                                   fdbfieldtypes[int2],fdbfieldsizes[int2]);
+      reader.readfielddata(datapo,int2);
+//      reader.readfielddata((pointer(datapo) + ffieldbufpositions[int2])^,
+//                                   fdbfieldtypes[int2],fdbfieldsizes[int2]);
      end;
      appendrecord(femptybuffer);
      femptybuffer:= intallocrecord;
     end;
     fallpacketsfetched:= true;
    end;
+   include(fbstate,bs_blobsfetched);
+   sortblobcache;
   except
    dointernalclose;
    raise;
@@ -3150,6 +3396,37 @@ end;
 function tmsebufdataset.streamloading: boolean;
 begin
  result:= bs_loading in fbstate;
+end;
+
+function tmsebufdataset.addblobcache(const adata: pointer;
+                         const alength: integer): integer;
+begin
+ result:= fblobcount;
+ inc(fblobcount);
+ if result > high(fblobcache) then begin
+  setlength(fblobcache,2*result+256);
+ end;
+ with fblobcache[result] do begin
+  id:= result;
+  setlength(data,alength);
+ {$ifdef FPC} {$checkpointer off} {$endif} //adata can be foreign memory
+  move(adata^,pointer(data)^,alength);
+ {$ifdef FPC} {$checkpointer default} {$endif}
+ end;
+end;
+
+function tmsebufdataset.addblobcache(const aid: int64;
+                                const adata: string): integer; overload;
+begin
+ result:= fblobcount;
+ inc(fblobcount);
+ if result > high(fblobcache) then begin
+  setlength(fblobcache,2*result+256);
+ end;
+ with fblobcache[result] do begin
+  id:= aid;
+  data:= adata;
+ end;
 end;
 
 { tlocalindexes }
@@ -3486,7 +3763,8 @@ begin
      end;
      fieldindex:= fieldno - 1;
      if fieldindex >= 0 then begin
-      recoffset:= ffieldbufpositions[fieldindex]+intheadersize;
+      recoffset:= ffieldinfos[fieldindex].offset{ffieldbufpositions[fieldindex]}+
+                          intheadersize;
      end
      else begin
       recoffset:= offset; //calc field

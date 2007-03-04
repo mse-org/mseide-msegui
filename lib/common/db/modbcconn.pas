@@ -33,7 +33,8 @@ type
     FParamBuf:array of pointer; // buffers that can be used to bind the i-th parameter in the query
     FBlobStreams:TList;   // list of Blob TMemoryStreams stored in field buffers (we need this currently as we can't hook into the freeing of TBufDataset buffers)
   public
-    constructor Create(Connection:TODBCConnection);
+    constructor Create(const aquery: tsqlquery;
+                                      const Connection:TODBCConnection);
     destructor Destroy; override;
   end;
 
@@ -71,7 +72,7 @@ type
     procedure DoInternalConnect; override;
     procedure DoInternalDisconnect; override;
     // - Handle (de)allocation
-    function AllocateCursorHandle:TSQLCursor; override;
+    function AllocateCursorHandle(const aquery: tsqlquery): TSQLCursor; override;
     procedure DeAllocateCursorHandle(var cursor:TSQLCursor); override;
     function AllocateTransactionHandle:TSQLHandle; override;
     // - Statement handling
@@ -413,9 +414,9 @@ begin
     ODBCCheckResult(Res,SQL_HANDLE_DBC,FDBCHandle,'Could not free connection handle.');
 end;
 
-function TODBCConnection.AllocateCursorHandle: TSQLCursor;
+function TODBCConnection.AllocateCursorHandle(const aquery: tsqlquery): TSQLCursor;
 begin
-  Result:=TODBCCursor.Create(self);
+  Result:=TODBCCursor.Create(aquery,self);
 end;
 
 procedure TODBCConnection.DeAllocateCursorHandle(var cursor: TSQLCursor);
@@ -897,8 +898,10 @@ end;
 
 { TODBCCursor }
 
-constructor TODBCCursor.Create(Connection:TODBCConnection);
+constructor TODBCCursor.Create(const aquery: tsqlquery;
+                                         const Connection:TODBCConnection);
 begin
+ inherited create(aquery);
   // allocate statement handle
   ODBCCheckResult(
     SQLAllocHandle(SQL_HANDLE_STMT, Connection.FDBCHandle, FSTMTHandle),

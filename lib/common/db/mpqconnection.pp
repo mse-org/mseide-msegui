@@ -44,7 +44,7 @@ type
    procedure DoInternalDisconnect; override;
    function GetHandle : pointer; override;
 
-   Function AllocateCursorHandle : TSQLCursor; override;
+   Function AllocateCursorHandle(const aquery: tsqlquery) : TSQLCursor; override;
    Procedure DeAllocateCursorHandle(var cursor : TSQLCursor); override;
    Function AllocateTransactionHandle : TSQLHandle; override;
 
@@ -347,10 +347,9 @@ begin
   end;
 end;
 
-Function TPQConnection.AllocateCursorHandle : TSQLCursor;
-
+Function TPQConnection.AllocateCursorHandle(const aquery: tsqlquery): TSQLCursor;
 begin
-  result := TPQCursor.create;
+ result:= TPQCursor.create(aquery);
 end;
 
 Procedure TPQConnection.DeAllocateCursorHandle(var cursor : TSQLCursor);
@@ -856,7 +855,7 @@ begin
  result:= nil;
  if mode = bmread then begin
   if field.getData(@blobId) then begin
-   result:= tstringcopystream.create(acursor.fblobs[blobid]);
+   result:= acursor.getcachedblob(blobid);
   end;
  end;
 end;

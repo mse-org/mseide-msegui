@@ -55,17 +55,23 @@ type
   end;
 
   TSQLCursor = Class(TSQLHandle)
-  public
+   private
+    fquery: tsqlquery;
+    fblobs: stringarty;
+    fblobcount: integer;
+   public
     FPrepared      : Boolean;
     FInitFieldDef  : Boolean;
     FStatementType : TStatementType;
-    fblobs: stringarty;
     ftrans: pointer;
-   function addblobdata(const adata: pointer; const alength: integer): integer;
-                                           overload;
-   function addblobdata(const adata: string): integer; overload;
-   procedure blobfieldtoparam(const afield: tfield; const aparam: tparam;
-                    const asstring: boolean = false);
+    constructor create(const aquery: tsqlquery);
+    procedure close;
+    function getcachedblob(const blobid: integer): tstream;
+    function addblobdata(const adata: pointer; const alength: integer): integer;
+                                            overload;
+    function addblobdata(const adata: string): integer; overload;
+    procedure blobfieldtoparam(const afield: tfield; const aparam: tparam;
+                     const asstring: boolean = false);
   end;
 
 
@@ -105,7 +111,8 @@ type
     function GetAsSQLText(Param : TParam) : string; overload; virtual;
     function GetHandle : pointer; virtual; virtual;
 
-    Function AllocateCursorHandle : TSQLCursor; virtual; abstract;
+    Function AllocateCursorHandle(const aowner: tsqlquery) : TSQLCursor; virtual; abstract;
+                        //aowner used as blob cache
     Procedure DeAllocateCursorHandle(var cursor : TSQLCursor); virtual; abstract;
     Function AllocateTransactionHandle : TSQLHandle; virtual; abstract;
 
@@ -258,35 +265,34 @@ type
    procedure setparams(const avalue: TmseParams);
    function getconnected: boolean;
    procedure setconnected(const avalue: boolean);
-   procedure fetchallblobs;
   protected
-    FTableName           : string;
-    FReadOnly            : boolean;
-    // abstract & virtual methods of TBufDataset
-    function Fetch : boolean; override;
-    function getblobdatasize: integer; override;
-    function loadfield(const afield: tfield; const buffer: pointer;
-                     var bufsize: integer): boolean; override;
-           //if bufsize < 0 -> buffer was to small, should be -bufsize
-    // abstract & virtual methods of TDataset
-    procedure UpdateIndexDefs; override;
-    procedure SetDatabase(Value : TDatabase); override;
-    Procedure SetTransaction(Value : TDBTransaction); override;
-    procedure InternalAddRecord(Buffer: Pointer; AAppend: Boolean); override;
-    procedure InternalClose; override;
-    procedure InternalInitFieldDefs; override;
-    procedure InternalOpen; override;
-    procedure internalrefresh; override;
-    function  GetCanModify: Boolean; override;
-    Procedure internalApplyRecUpdate(UpdateKind : TUpdateKind);
-    procedure ApplyRecUpdate(UpdateKind : TUpdateKind); override;
-    Function IsPrepared: Boolean; virtual;
-    Procedure SetActive (Value : Boolean); override;
-    procedure SetFiltered(Value: Boolean); override;
-    procedure SetFilterText(const Value: string); override;
-    Function GetDataSource : TDatasource; override;
-    Procedure SetDataSource(AValue : TDatasource); 
-    procedure fetchblobs; virtual;
+   FTableName           : string;
+   FReadOnly            : boolean;
+   // abstract & virtual methods of TBufDataset
+   function Fetch : boolean; override;
+   function getblobdatasize: integer; override;
+   function blobscached: boolean; override;
+   function loadfield(const afield: tfield; const buffer: pointer;
+                    var bufsize: integer): boolean; override;
+          //if bufsize < 0 -> buffer was to small, should be -bufsize
+   // abstract & virtual methods of TDataset
+   procedure UpdateIndexDefs; override;
+   procedure SetDatabase(Value : TDatabase); override;
+   Procedure SetTransaction(Value : TDBTransaction); override;
+   procedure InternalAddRecord(Buffer: Pointer; AAppend: Boolean); override;
+   procedure InternalClose; override;
+   procedure InternalInitFieldDefs; override;
+   procedure InternalOpen; override;
+   procedure internalrefresh; override;
+   function  GetCanModify: Boolean; override;
+   Procedure internalApplyRecUpdate(UpdateKind : TUpdateKind);
+   procedure ApplyRecUpdate(UpdateKind : TUpdateKind); override;
+   Function IsPrepared: Boolean; virtual;
+   Procedure SetActive (Value : Boolean); override;
+   procedure SetFiltered(Value: Boolean); override;
+   procedure SetFilterText(const Value: string); override;
+   Function GetDataSource : TDatasource; override;
+   Procedure SetDataSource(AValue : TDatasource); 
   public
     constructor Create(AOwner : TComponent); override;
     destructor Destroy; override;
@@ -350,7 +356,7 @@ type
 
 implementation
 uses 
- dbconst,strutils,mseclasses,msedatalist,msereal,msedb;
+ dbconst,strutils,mseclasses,msedatalist,msereal,msedb,msestream;
 
 type
  TDBTransactioncracker = Class(TComponent)
@@ -435,22 +441,6 @@ begin
   end; {case}
 end;
 
-function compblobcache(const a,b): integer;
-var
- lint1: int64;
-begin
- lint1:= blobcacheinfoty(a).id - blobcacheinfoty(b).id;
- result:= 0;
- if lint1 < 0 then begin
-  result:= -1;
- end
- else begin
-  if lint1 > 0 then begin
-   result:= 1;
-  end;
- end;
-end;
-
 { TSQLConnection }
 
 function TSQLConnection.StrToStatementType(s : string) : TStatementType;
@@ -532,7 +522,7 @@ begin
   if not ATransaction.Active then ATransaction.StartTransaction;
 
   try
-    Cursor := AllocateCursorHandle;
+    Cursor := AllocateCursorHandle(nil);
     cursor.ftrans:= atransaction.handle;
     SQL := TrimRight(SQL);
 
@@ -957,7 +947,9 @@ begin
     if not sqltr.Active then sqltr.StartTransaction;
 
 //    if assigned(fcursor) then FreeAndNil(fcursor);
-    if not assigned(fcursor) then FCursor := Db.AllocateCursorHandle;
+    if not assigned(fcursor) then begin
+     FCursor:= Db.AllocateCursorHandle(self);
+    end;
     fcursor.ftrans:= sqltr.handle;
     
     FSQLBuf := TrimRight(FSQL.Text);
@@ -1041,7 +1033,7 @@ end;
 procedure TSQLQuery.InternalClose;
 begin
  if fcursor <> nil then begin
-  fcursor.fblobs:= nil;
+  fcursor.close;
  end;
  fblobintf:= nil;
   if StatementType = stSelect then FreeFldBuffers;
@@ -1812,13 +1804,9 @@ begin
  result:= inherited createblobstream(field,mode);
  if result = nil then begin
   if (bs_blobsfetched in fbstate) and (mode = bmread) then begin
-   if field.getdata(@info.id) and
-           findarrayvalue(info,fblobcache,length(fblobcache),@compblobcache,
-                                        sizeof(blobcacheinfoty),int1) then begin
-    with fblobcache[int1] do begin
-     blob1.data:= pointer(data);
-     blob1.datalength:= length(data);
-    end;
+   if field.getdata(@info.id) and findcachedblob(info) then begin
+    blob1.data:= pointer(info.data);
+    blob1.datalength:= length(info.data);
     result:= tblobcopy.create(blob1);
    end;
   end
@@ -1912,75 +1900,9 @@ begin
  result:= (transaction <> nil) and transaction.active;
 end;
 
-procedure TSQLQuery.fetchblobs;
-var
- datapobefore: pintrecordty;
- statebefore: tdatasetstate;
- int1,int2,int3: integer;
- ind1: pointerarty;
- fieldar1: fieldarty;
- ar1: integerarty;
- stream1: tmemorystream;
+function tsqlquery.blobscached: boolean;
 begin
- if (fblobintf <> nil) and not fblobintf.blobscached then begin
-  setlength(fieldar1,fields.count);
-  int2:= 0;
-  for int1:= 0 to high(fieldar1) do begin
-   fieldar1[int2]:= fields[int1];
-   if fieldar1[int2].isblob then begin
-    inc(int2);
-   end;
-  end;
-  if int2 > 0 then begin
-   setlength(fieldar1,int2);
-   setlength(ar1,int2);
-   for int1:= 0 to high(ar1) do begin
-    ar1[int1]:= fieldar1[int1].fieldno-1;
-   end;
-   fblobcache:= nil;
-   datapobefore:= fcurrentbuf;
-   ind1:= findexes[0].ind;
-   statebefore:= settempstate(dscurvalue);
-   int3:= 0;
-   try
-    for int1:= 0 to recordcount - 1 do begin
-     fcurrentbuf:= ind1[int1];
-     for int2:= 0 to high(fieldar1) do begin
-      if not getfieldisnull(fcurrentbuf^.header.fielddata.nullmask,
-                                                        ar1[int2]) then begin
-       if high(fblobcache) < int3 then begin
-        setlength(fblobcache,high(fblobcache)*2+258);
-       end;
-       stream1:= tmemorystream(createblobstream(fieldar1[int2],bmread));
-       if stream1.size > 0 then begin
-        with fblobcache[int3] do begin
-         fieldar1[int2].getdata(@id);
-         setlength(data,stream1.size);
-         move(stream1.memory^,data[1],length(data));
-        end;
-        inc(int3);
-       end;
-       stream1.free;
-      end;
-     end;
-    end;
-    setlength(fblobcache,int3);
-    sortarray(fblobcache,@compblobcache,sizeof(blobcacheinfoty));
-    include(fbstate,bs_blobsfetched);
-   finally
-    fcurrentbuf:= datapobefore;
-    restorestate(statebefore);
-   end;
-  end;
- end;
-end;
-
-procedure tsqlquery.fetchallblobs;
-begin
- if not fallpacketsfetched then begin
-  fetchall;
-  fetchblobs;
- end;
+ result:= (fblobintf <> nil) and fblobintf.blobscached;
 end;
 
 procedure TSQLQuery.setconnected(const avalue: boolean);
@@ -2001,15 +1923,29 @@ end;
 
 { TSQLCursor }
 
-function TSQLCursor.addblobdata(const adata: pointer;
-               const alength: integer): integer;
+constructor TSQLCursor.create(const aquery: tsqlquery);
 begin
- result:= length(fblobs);
- setlength(fblobs,result+1);
- setlength(fblobs[result],alength);
-{$ifdef FPC} {$checkpointer off} {$endif} //adata can be foreign memory
- move(adata^,fblobs[result][1],alength);
-{$ifdef FPC} {$checkpointer default} {$endif}
+ fquery:= aquery;
+ inherited create;
+end;
+
+function TSQLCursor.addblobdata(const adata: pointer;
+                                            const alength: integer): integer;
+begin
+ if fquery = nil then begin
+  result:= fblobcount;
+  inc(fblobcount);
+  if result > high(fblobs) then begin
+   setlength(fblobs,2*result+256);
+  end;
+  setlength(fblobs[result],alength);
+ {$ifdef FPC} {$checkpointer off} {$endif} //adata can be foreign memory
+  move(adata^,fblobs[result][1],alength);
+ {$ifdef FPC} {$checkpointer default} {$endif}
+ end
+ else begin
+  result:= fquery.addblobcache(adata,alength);
+ end;
 end;
 
 function TSQLCursor.addblobdata(const adata: string): integer;
@@ -2021,18 +1957,41 @@ procedure TSQLCursor.blobfieldtoparam(const afield: tfield;
                const aparam: tparam; const asstring: boolean = false);
 var
  blobid: integer;
+ str1: string;
 begin
  if afield.getdata(@blobid) then begin
-  if asstring then begin
-   aparam.asstring:= fblobs[blobid];
+  if fquery = nil then begin
+   str1:= fblobs[blobid];
   end
   else begin
-   aparam.asblob:= fblobs[blobid];
+   str1:= fquery.fblobcache[blobid].data;
+  end;
+  if asstring then begin
+   aparam.asstring:= str1;
+  end
+  else begin
+   aparam.asblob:= str1;
   end;
  end
  else begin
   aparam.clear;
  end;
+end;
+
+function TSQLCursor.getcachedblob(const blobid: integer): tstream;
+begin
+ if fquery = nil then begin
+  result:= tstringcopystream.create(fblobs[blobid]);
+ end
+ else begin
+  result:= tstringcopystream.create(fquery.fblobcache[blobid].data);
+ end;
+end;
+
+procedure TSQLCursor.close;
+begin
+ fblobs:= nil;
+ fblobcount:= 0;
 end;
 
 { tmseparams }

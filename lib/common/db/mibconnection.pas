@@ -62,7 +62,7 @@ type
     procedure DoInternalDisconnect; override;
     function GetHandle : pointer; override;
 
-    Function AllocateCursorHandle : TSQLCursor; override;
+    Function AllocateCursorHandle(const aquery: tsqlquery): TSQLCursor; override;
     Procedure DeAllocateCursorHandle(var cursor : TSQLCursor); override;
     Function AllocateTransactionHandle : TSQLHandle; override;
 
@@ -432,12 +432,12 @@ begin
  end;
 end;
 
-Function TIBConnection.AllocateCursorHandle : TSQLCursor;
+Function TIBConnection.AllocateCursorHandle(const aquery: tsqlquery): TSQLCursor;
 
 var curs : TIBCursor;
 
 begin
-  curs := TIBCursor.create;
+  curs := TIBCursor.create(aquery);
   curs.sqlda := nil;
   curs.statement := nil;
   curs.FPrepared := False;
@@ -609,7 +609,7 @@ begin
   datatype:= ftstring;
   name:= 'FIELD';
  end;
- fcursor:= fowner.allocatecursorhandle;
+ fcursor:= fowner.allocatecursorhandle(nil);
  fcursor.fstatementtype:= stselect;
  ftransaction:= tsqltransaction.create(nil);
  ftransaction.database:= aowner;

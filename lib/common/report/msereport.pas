@@ -419,6 +419,8 @@ type
                           //page nums are null based
                  bo_visigroupfirst,bo_visigrouplast,
                          //show only first/last record of group
+                 bo_showfirstpage,bo_hidefirstpage,
+                 bo_shownormalpage,bo_hidenormalpage,
                  bo_showevenpage,bo_hideevenpage,
                  bo_showoddpage,bo_hideoddpage,
                  bo_showfirstofpage,bo_hidefirstofpage,
@@ -434,7 +436,9 @@ type
  bandoptionsty = set of bandoptionty;
 
 const 
- visibilitymask = [bo_showevenpage,bo_hideevenpage,
+ visibilitymask = [bo_showfirstpage,bo_hidefirstpage,
+                   bo_shownormalpage,bo_hidenormalpage,
+                   bo_showevenpage,bo_hideevenpage,
                    bo_showoddpage,bo_hideoddpage,
                    bo_showfirstofpage,bo_hidefirstofpage,
                    bo_shownormalofpage,bo_hidenormalofpage,
@@ -2583,11 +2587,13 @@ end;
 
 procedure tcustomrecordband.setoptions(const avalue: bandoptionsty);
 const
+ firstmask: bandoptionsty = [bo_showfirstpage,bo_hidefirstpage];
+ normalmask: bandoptionsty = [bo_shownormalpage,bo_hidenormalpage];
  evenmask: bandoptionsty = [bo_showevenpage,bo_hideevenpage];
  oddmask: bandoptionsty = [bo_showoddpage,bo_hideoddpage];
- firstpagemask: bandoptionsty = [bo_showfirstofpage,bo_hidefirstofpage];
+ firstofpagemask: bandoptionsty = [bo_showfirstofpage,bo_hidefirstofpage];
  normalofpagemask: bandoptionsty = [bo_shownormalofpage,bo_hidenormalofpage];
- lastpagemask: bandoptionsty = [bo_showlastofpage,bo_hidelastofpage];
+ lastofpagemask: bandoptionsty = [bo_showlastofpage,bo_hidelastofpage];
  firstrecmask: bandoptionsty = [bo_showfirstrecord,bo_hidefirstrecord];
  normalrecmask: bandoptionsty = [bo_shownormalrecord,bo_hidenormalrecord];
  lastrecmask: bandoptionsty = [bo_showlastrecord,bo_hidelastrecord];
@@ -2595,15 +2601,19 @@ var
  vis1: bandoptionsty;
 begin
  vis1:= bandoptionsty(setsinglebit(longword(avalue),longword(foptions),
+                                 longword(firstmask)));
+ vis1:= bandoptionsty(setsinglebit(longword(vis1),longword(foptions),
+                                 longword(normalmask)));
+ vis1:= bandoptionsty(setsinglebit(longword(vis1),longword(foptions),
                                  longword(evenmask)));
  vis1:= bandoptionsty(setsinglebit(longword(vis1),longword(foptions),
                                  longword(oddmask)));
  vis1:= bandoptionsty(setsinglebit(longword(vis1),longword(foptions),
-                                 longword(firstpagemask)));
+                                 longword(firstofpagemask)));
  vis1:= bandoptionsty(setsinglebit(longword(vis1),longword(foptions),
                                  longword(normalofpagemask)));
  vis1:= bandoptionsty(setsinglebit(longword(vis1),
-                                 longword(foptions),longword(lastpagemask)));
+                                 longword(foptions),longword(lastofpagemask)));
  vis1:= bandoptionsty(setsinglebit(longword(vis1),longword(foptions),
                                  longword(firstrecmask)));
  vis1:= bandoptionsty(setsinglebit(longword(vis1),longword(foptions),
@@ -2651,7 +2661,7 @@ function tcustomrecordband.bandisvisible(const checklast: boolean): boolean;
 var
  firstofpage,lastofpage,showed,hidden: boolean;
  firstrecord,lastrecord: boolean;
- even1,bo1: boolean;
+ even1,first1,bo1: boolean;
 label
  endlab;
 begin
@@ -2710,6 +2720,24 @@ begin
  end;
  if foptions * visibilitymask <> [] then begin
   if fparentintf <> nil then begin
+   first1:= fparentintf.pagepagenum = 0;
+   if first1 and (bo_hidefirstpage in foptions) then begin
+    result:= false;
+    goto endlab;
+   end;
+   if first1 and (bo_showfirstpage in foptions) then begin
+    result:= true;
+    goto endlab;
+   end;
+   if not first1 and (bo_hidenormalpage in foptions) then begin
+    result:= false;
+    goto endlab;
+   end;
+   if not first1 and (bo_shownormalpage in foptions) then begin
+    result:= true;
+    goto endlab;
+   end;
+
    even1:= not odd(fparentintf.reppagenum);
    if even1 and (bo_hideevenpage in foptions) then begin
     result:= false;
@@ -2721,6 +2749,7 @@ begin
    end;
    bo1:= even1 and (bo_showevenpage in foptions);
    bo1:= bo1 or not even1 and (bo_showoddpage in foptions);
+
    firstofpage:= fparentintf.isfirstband;
    lastofpage:= checklast and fparentintf.islastband;
    if firstofpage then begin

@@ -75,7 +75,7 @@ Type
     function GetAsSQLText(Field : TField) : string; overload; virtual;
     function GetAsSQLText(Param : TParam) : string; overload; virtual;
 
-    Function AllocateCursorHandle : TSQLCursor; override;
+    Function AllocateCursorHandle(const aquery: tsqlquery): TSQLCursor; override;
     Procedure DeAllocateCursorHandle(var cursor : TSQLCursor); override;
     Function AllocateTransactionHandle : TSQLHandle; override;
 
@@ -287,9 +287,9 @@ begin
   Result:=FMySQL;
 end;
 
-function TConnectionName.AllocateCursorHandle: TSQLCursor;
+function TConnectionName.AllocateCursorHandle(const aquery: tsqlquery): TSQLCursor;
 begin
-  Result:=TCursorName.Create;
+  Result:=TCursorName.Create(aquery);
 end;
 
 Procedure TConnectionName.DeAllocateCursorHandle(var cursor : TSQLCursor);
