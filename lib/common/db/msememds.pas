@@ -165,6 +165,9 @@ end;
 
 procedure tmsememdataset.internalopen;
 begin
+ if getrecordsize = 0 then begin
+  createtable;
+ end;
  fcontroller.internalopen;
 end;
 

@@ -874,6 +874,11 @@ uses
  rtlconsts,msefileutils,typinfo,dbconst,msedatalist,mseformatstr,
  msereal,variants;
 type
+ TFieldDefcracker = class(TCollectionItem)
+  Private
+    FDataType : TFieldType;
+    FFieldNo : Longint;
+ end;
  tdataset1 = class(tdataset);
 {
 function getasmsestring(const field: tfield): msestring;
@@ -1870,6 +1875,7 @@ function tmsebooleanfield.getasmsestring: msestring;
 var 
  bo1: wordbool;
 begin
+ bo1:= false;
  if getdata(@bo1) then begin
   result:= fdisplays[false,bo1]
  end
@@ -3167,9 +3173,16 @@ procedure tdscontroller.internalopen;
 var
  int1,int2: integer;
 begin
- updatelinkedfields;
- fintf.inheritedinternalopen;
  with tdataset(fowner) do begin
+  for int1:= 0 to fielddefs.count - 1 do begin
+   with tfielddefcracker(fielddefs[int1]) do begin
+    if ffieldno = 0 then begin
+     ffieldno:= int1 + 1;
+    end;
+   end;
+  end;
+  updatelinkedfields;
+  fintf.inheritedinternalopen;
   for int1:= 0 to fields.count - 1 do begin
    with fields[int1] do begin
     int2:= fielddefs.indexof(fieldname);
