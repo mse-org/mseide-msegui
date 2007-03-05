@@ -754,7 +754,6 @@ type
    function getsize: sizety;
 
    procedure widgetregioninvalid;
-   procedure updateopaque(const children: boolean);
    function invalidateneeded: boolean;
    procedure updateroot;
    procedure addopaquechildren(var region: regionty);
@@ -836,6 +835,7 @@ type
    function isvisible: boolean;      //checks designing
    function parentisvisible: boolean;//checks isvisible flags of ancestors
    function parentvisible: boolean;  //checks visible flags of ancestors
+   procedure updateopaque(const children: boolean);
 
    //iframe
    procedure setframeinstance(instance: tcustomframe); virtual;
@@ -885,6 +885,7 @@ type
    procedure statechanged; virtual; //enabled,active,visible
    procedure enabledchanged; virtual;
    procedure activechanged; virtual;
+   procedure visiblepropchanged; virtual;
    procedure visiblechanged; virtual;
    procedure colorchanged; virtual;
    procedure sizechanged; virtual;
@@ -4780,7 +4781,7 @@ begin
  end;
  poscha:= (value.x <> fwidgetrect.x) or (value.y <> fwidgetrect.y);
  sizecha:= (value.cx <> fwidgetrect.cx) or (value.cy <> fwidgetrect.cy);
- bo1:= isvisible and (poscha or sizecha);
+ bo1:= (isvisible or (ws1_fakevisible in fwidgetstate1)) and (poscha or sizecha);
  if bo1 and (fparentwidget <> nil) then begin
   invalidatewidget; //old position
  end;
@@ -5001,6 +5002,7 @@ begin
   colorchanged;
   enabledchanged; //-> statechanged
   parentchanged; 
+  visiblepropchanged;
   if ownswindow1 and (ws_visible in fwidgetstate) and
                           (componentstate * [csloading,csinline] = []) then begin
    fwindow.show(false);
@@ -5092,6 +5094,11 @@ begin
  if (ws_focused in fwidgetstate) and needsfocuspaint then begin
   invalidatewidget;
  end;
+end;
+
+procedure twidget.visiblepropchanged;
+begin
+ //dummy
 end;
 
 procedure twidget.visiblechanged;
@@ -7591,9 +7598,13 @@ begin
   else begin
    hide;
   end;
-  if (ws1_fakevisible in fwidgetstate1) and (fparentwidget <> nil) then begin
-   fparentwidget.widgetregionchanged(self);
+  if (ws1_fakevisible in fwidgetstate1) then begin
+   updateopaque(false);
+   if (fparentwidget <> nil) then begin
+    fparentwidget.widgetregionchanged(self);
+   end;
   end;
+  visiblepropchanged;
  end
  else begin
   if value then begin

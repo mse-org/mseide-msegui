@@ -244,7 +244,8 @@ type
    property captionoffset default 4;
  end;
 
- optionscalety = (osc_expandx,osc_shrinkx,osc_expandy,osc_shrinky);
+ optionscalety = (osc_expandx,osc_shrinkx,osc_expandy,osc_shrinky,
+                  osc_invisishrinkx,osc_invisishrinky);
  optionsscalety = set of optionscalety;
  
  tcustomscalingwidget = class(tpublishedwidget)
@@ -254,6 +255,7 @@ type
    fscaling: integer;
    fonresize: notifyeventty;
    fonmove: notifyeventty;
+   fsizebefore: sizety;
    procedure setoptionsscale(const avalue: optionsscalety);
   protected
    foptionsscale: optionsscalety;
@@ -266,6 +268,7 @@ type
    procedure clientrectchanged; override;
    procedure poschanged; override;
    procedure sizechanged; override;
+   procedure visiblepropchanged; override;
   public
    property onresize: notifyeventty read fonresize write fonresize;
    property onmove: notifyeventty read fonmove write fonmove;
@@ -930,9 +933,12 @@ procedure tcustomscalingwidget.updateoptionsscale;
 var
  size1,size2: sizety;
  rect1: rectty;
+ bo1: boolean;
+ box,boy: boolean;
 begin
  if foptionsscale * [osc_expandx,osc_expandy,
-                    osc_shrinkx,osc_shrinky] <> [] then begin
+                    osc_shrinkx,osc_shrinky,
+                    osc_invisishrinkx,osc_invisishrinky] <> [] then begin
   if (componentstate * [csloading,csdestroying] = []) then begin
    if fscaling <> 0 then begin    
     include(fwidgetstate1,ws1_scaled);
@@ -943,26 +949,63 @@ begin
      exclude(fwidgetstate1,ws1_scaled);
      size1:= calcminscrollsize;
      size2:= paintsize;
+     box:= false;
+     boy:= false;
+     bo1:= not (visible or (csdesigning in componentstate));
+     if (osc_invisishrinkx in foptionsscale) then begin
+      if bo1 then begin
+       if fsizebefore.cx = 0 then begin
+        fsizebefore.cx:= size2.cx;
+       end;
+       size1.cx:= 0;
+      end
+      else begin
+       if fsizebefore.cx <> 0 then begin
+        size1.cx:= fsizebefore.cx;
+        fsizebefore.cx:= 0;
+        box:= true;
+       end;
+      end;
+     end;
+     if (osc_invisishrinky in foptionsscale) then begin
+      if bo1 then begin
+       if fsizebefore.cy = 0 then begin
+        fsizebefore.cy:= size2.cy;
+       end;
+       size1.cy:= 0;
+      end
+      else begin
+       if fsizebefore.cy <> 0 then begin
+        size1.cy:= fsizebefore.cy;
+        fsizebefore.cy:= 0;
+        boy:= true;
+       end;
+      end;
+     end;
      rect1.cx:= size1.cx - size2.cx;
      rect1.cy:= size1.cy - size2.cy;
-     if not (osc_expandx in foptionsscale) then begin
-      if rect1.cx > 0 then begin
-       rect1.cx:= 0;
+     if not (bo1 and (osc_invisishrinkx in foptionsscale)) then begin
+      if not (osc_expandx in foptionsscale) and not box then begin
+       if rect1.cx > 0 then begin
+        rect1.cx:= 0;
+       end;
+      end;
+      if not (osc_shrinkx in foptionsscale) then begin
+       if rect1.cx < 0 then begin
+        rect1.cx:= 0;
+       end;
       end;
      end;
-     if not (osc_expandy in foptionsscale) then begin
-      if rect1.cy > 0 then begin
-       rect1.cy:= 0;
+     if not (bo1 and (osc_invisishrinky in foptionsscale)) then begin
+      if not (osc_expandy in foptionsscale) and not boy then begin
+       if rect1.cy > 0 then begin
+        rect1.cy:= 0;
+       end;
       end;
-     end;
-     if not (osc_shrinkx in foptionsscale) then begin
-      if rect1.cx < 0 then begin
-       rect1.cx:= 0;
-      end;
-     end;
-     if not (osc_shrinky in foptionsscale) then begin
-      if rect1.cy < 0 then begin
-       rect1.cy:= 0;
+      if not (osc_shrinky in foptionsscale) then begin
+       if rect1.cy < 0 then begin
+        rect1.cy:= 0;
+       end;
       end;
      end;
      rect1.pos:= fwidgetrect.pos;
@@ -1023,6 +1066,14 @@ begin
  inherited;
  if canevent(tmethod(fonresize)) then begin
   fonresize(self);
+ end;
+end;
+
+procedure tcustomscalingwidget.visiblepropchanged;
+begin
+ inherited;
+ if foptionsscale * [osc_invisishrinkx,osc_invisishrinky] <> [] then begin
+  updateoptionsscale;
  end;
 end;
 
