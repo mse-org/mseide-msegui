@@ -1661,8 +1661,8 @@ function translateclientrect(const rect: rectty;
     //translates from source client to dest client, to screen if dest = nil
     //source = nil -> screen
 
-procedure sortwidgetsxorder(var awidgets: widgetarty);
-procedure sortwidgetsyorder(var awidgets: widgetarty);
+procedure sortwidgetsxorder(var awidgets: widgetarty; const parent: twidget = nil);
+procedure sortwidgetsyorder(var awidgets: widgetarty; const parent: twidget = nil);
 
 procedure syncmaxautosize(const widgets: array of twidget);
 procedure syncminframewidth(const awidth: integer; const awidgets: array of twidget);
@@ -1968,9 +1968,22 @@ begin
  end;
 end;
 
-procedure sortwidgetsxorder(var awidgets: widgetarty);
+procedure sortwidgetsxorder(var awidgets: widgetarty; const parent: twidget = nil);
+var
+ int1: integer;
+ ar1,ar2: integerarty;
 begin
- sortarray(pointerarty(awidgets),{$ifdef FPC}@{$endif}compx);
+ if parent = nil then begin
+  sortarray(pointerarty(awidgets),{$ifdef FPC}@{$endif}compx);
+ end
+ else begin
+  setlength(ar1,length(awidgets));
+  for int1:= 0 to high(ar1) do begin
+   ar1[int1]:= translatewidgetpoint(awidgets[int1].pos,awidgets[int1],parent).x;
+  end;
+  sortarray(ar1,ar2);
+  orderarray(ar2,pointerarty(awidgets));
+ end;
 end;
 
 function compy(const l,r): integer;
@@ -1981,9 +1994,22 @@ begin
  end;
 end;
 
-procedure sortwidgetsyorder(var awidgets: widgetarty);
+procedure sortwidgetsyorder(var awidgets: widgetarty; const parent: twidget = nil);
+var
+ int1: integer;
+ ar1,ar2: integerarty;
 begin
- sortarray(pointerarty(awidgets),{$ifdef FPC}@{$endif}compy);
+ if parent = nil then begin
+  sortarray(pointerarty(awidgets),{$ifdef FPC}@{$endif}compy);
+ end
+ else begin
+  setlength(ar1,length(awidgets));
+  for int1:= 0 to high(ar1) do begin
+   ar1[int1]:= translatewidgetpoint(awidgets[int1].pos,awidgets[int1],parent).y;
+  end;
+  sortarray(ar1,ar2);
+  orderarray(ar2,pointerarty(awidgets));
+ end;
 end;
 
 procedure translatepaintpoint1(var point: pointty;
@@ -5104,8 +5130,9 @@ var
  indent: framety;
  clientorig: pointty;
 begin
- result.cx:= -bigint;
- result.cy:= -bigint;
+// result.cx:= -bigint;
+// result.cy:= -bigint;
+ result:= nullsize;
  if fframe <> nil then begin
   indent:= fframe.fi.innerframe;
 //  clientorig:= subpoint(fframe.fpaintrect.pos,fframe.fclientrect.pos);

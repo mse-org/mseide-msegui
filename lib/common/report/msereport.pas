@@ -392,6 +392,8 @@ type
  
  ibandparent = interface(inullinterface)
                         ['{B02EE732-4686-4E0C-8C18-419D7D020386}']
+  procedure registerclient(const sender: tcustomrecordband);
+  procedure unregisterclient(const sender: tcustomrecordband);
   function beginband(const acanvas: tcanvas;
                               const sender: tcustomrecordband): boolean;
                    //true if area full
@@ -637,6 +639,8 @@ type
    fbands: recordbandarty;
    procedure setdatasource(const avalue: tdatasource); override;
            //ibandparent;
+   procedure registerclient(const sender: tcustomrecordband);
+   procedure unregisterclient(const sender: tcustomrecordband);
    function beginband(const acanvas: tcanvas;
                               const sender: tcustomrecordband): boolean;
                    //true if area full
@@ -737,6 +741,8 @@ type
    procedure dosyncnextrecord;
    function checkareafull(ay: integer): boolean;
            //ibandparent
+   procedure registerclient(const sender: tcustomrecordband);
+   procedure unregisterclient(const sender: tcustomrecordband);
    function beginband(const acanvas: tcanvas;
                                const sender: tcustomrecordband): boolean;
                     //true if area full
@@ -863,6 +869,8 @@ type
           //true if empty
 
               //ibandparent
+   procedure registerclient(const sender: tcustomrecordband);
+   procedure unregisterclient(const sender: tcustomrecordband);
    function beginband(const acanvas: tcanvas;
                                const sender: tcustomrecordband): boolean;
    procedure endband(const acanvas: tcanvas; const sender: tcustomrecordband);  
@@ -2301,13 +2309,22 @@ var
  widget1: twidget;
 begin
  if fparentwidget <> nil then begin
+  if fparentintf <> nil then begin
+   fparentintf.unregisterclient(self);
+  end;
   widget1:= fparentwidget;
   while (widget1 <> nil) and 
     not widget1.getcorbainterface(typeinfo(ibandparent),fparentintf) do begin
    widget1:= widget1.parentwidget;
   end; 
+  if fparentintf <> nil then begin
+   fparentintf.registerclient(self);
+  end;
  end
  else begin
+  if fparentintf <> nil then begin
+   fparentintf.unregisterclient(self);
+  end;
   fparentintf:= nil;
  end;
  inherited;
@@ -3049,6 +3066,16 @@ begin
  exclude(tcustomrecordband(child).fwidgetstate1,ws1_nominsize);
 end;
 
+procedure tcustombandgroup.registerclient(const sender: tcustomrecordband);
+begin
+ //dummy, register children only
+end;
+
+procedure tcustombandgroup.unregisterclient(const sender: tcustomrecordband);
+begin
+ //dummy, register children only
+end;
+
 procedure tcustombandgroup.dobeforerender(var empty: boolean);
 var
  int1: integer;
@@ -3305,6 +3332,16 @@ procedure tcustombandarea.unregisterchildwidget(const child: twidget);
 begin
  removeitem(pointerarty(fbands),child);
  inherited;
+end;
+
+procedure tcustombandarea.registerclient(const sender: tcustomrecordband);
+begin
+ //dummy, register children only
+end;
+
+procedure tcustombandarea.unregisterclient(const sender: tcustomrecordband);
+begin
+ //dummy, register children only
 end;
 
 procedure tcustombandarea.setparentwidget(const avalue: twidget);
@@ -3706,19 +3743,31 @@ begin
  inherited;
  if child is tcustombandarea then begin
   additem(pointerarty(fareas),child);
- end
- else begin
-  if child is tcustomrecordband then begin
-   additem(pointerarty(fbands),child);
-  end;
  end;
+// else begin
+//  if child is tcustomrecordband then begin
+//   additem(pointerarty(fbands),child);
+//  end;
+// end;
 end;
 
 procedure tcustomreportpage.unregisterchildwidget(const child: twidget);
 begin
  removeitem(pointerarty(fareas),child);
- removeitem(pointerarty(fbands),child);
+// removeitem(pointerarty(fbands),child);
  inherited;
+end;
+
+procedure tcustomreportpage.registerclient(const sender: tcustomrecordband);
+begin
+ if finditem(pointerarty(fbands),sender) < 0 then begin
+  additem(pointerarty(fbands),sender);
+ end;
+end;
+
+procedure tcustomreportpage.unregisterclient(const sender: tcustomrecordband);
+begin
+ removeitem(pointerarty(fbands),sender);
 end;
 
 procedure tcustomreportpage.setparentwidget(const avalue: twidget);
@@ -3801,7 +3850,7 @@ begin
   for int1:= 0 to high(fareas) do begin
    bo1:= fareas[int1].render(acanvas) and bo1;
   end;
-  sortwidgetsyorder(widgetarty(fbands));
+  sortwidgetsyorder(widgetarty(fbands),self);
   for int1:= 0 to high(fbands) do begin
    fbands[int1].initpage;
   end;
@@ -4077,7 +4126,7 @@ begin
  if not (rpps_backgroundrendered in fstate) then begin
   renderbackground(acanvas);
  end;
- acanvas.origin:= sender.pos;
+ acanvas.origin:= translatewidgetpoint(sender.pos,sender.parentwidget,self);
  result:= false;
 end;
 
