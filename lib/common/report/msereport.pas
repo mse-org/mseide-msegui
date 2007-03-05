@@ -802,6 +802,8 @@ type
  reportpageeventty = procedure(const sender: tcustomreportpage) of object;
  reportpagepainteventty = procedure(const sender: tcustomreportpage;
                               const acanvas: tcanvas) of object;
+ beforerenderpageeventty = procedure(const sender: tcustomreportpage;
+                                          var empty: boolean) of object;
  reppageorientationty = (rpo_default,rpo_portrait,rpo_landscape);
  
  tcustomreportpage = class(twidget,ibandparent)
@@ -809,7 +811,7 @@ type
    fbands: recordbandarty;
    fareas: bandareaarty;
    fstate: reportpagestatesty;
-   fonbeforerender: reportpageeventty;
+   fonbeforerender: beforerenderpageeventty;
    fonpaint: reportpagepainteventty;
    fonafterpaint: reportpagepainteventty;
    fpagewidth: real;
@@ -856,7 +858,7 @@ type
    function rendering: boolean;
    procedure beginarea(const acanvas: tcanvas; const sender: tcustombandarea);
    procedure dofirstpage; virtual;
-   procedure dobeforerender; virtual;
+   procedure dobeforerender(var empty: boolean); virtual;
    procedure doonpaint(const acanvas: tcanvas); override;
    procedure doafterpaint1(const acanvas: tcanvas); virtual;
    procedure doafterlastpage; virtual;
@@ -919,7 +921,7 @@ type
    
    property onfirstpage: reportpageeventty read fonfirstpage
                                write fonfirstpage;
-   property onbeforerender: reportpageeventty read fonbeforerender
+   property onbeforerender: beforerenderpageeventty read fonbeforerender
                                write fonbeforerender;
    property onpaint: reportpagepainteventty read fonpaint write fonpaint;
    property onafterpaint: reportpagepainteventty read fonafterpaint 
@@ -3820,6 +3822,7 @@ function tcustomreportpage.render(const acanvas: tcanvas): boolean;
 var
  int1: integer;
  bo1,bo2,bo3: boolean;
+ hascustomdata: boolean;
 begin
  if not (rpps_inited in fstate) then begin
   init;
@@ -3844,9 +3847,10 @@ begin
   acanvas.reset;
   acanvas.intersectcliprect(makerect(nullpoint,fwidgetrect.size));
   updatevisible;
-  dobeforerender;
+  bo1:= true; //empty
+  dobeforerender(bo1);
+  hascustomdata:= not bo1;
   updatevisible;
-  bo1:= true;
   for int1:= 0 to high(fareas) do begin
    bo1:= fareas[int1].render(acanvas) and bo1;
   end;
@@ -3855,7 +3859,8 @@ begin
    fbands[int1].initpage;
   end;
   bo2:= odd(reppagenum);
-  bo3:= not ((rpo_once in foptions) and not (rpps_showed in fstate) or 
+  bo3:= hascustomdata or 
+         not ((rpo_once in foptions) and not (rpps_showed in fstate) or 
          (fdatalink.active and not fdatalink.dataset.eof));
   for int1:= 0 to high(fbands) do begin
    with fbands[int1] do begin
@@ -3903,12 +3908,12 @@ begin
  result:= rpps_rendering in fstate;
 end;
 
-procedure tcustomreportpage.dobeforerender;
+procedure tcustomreportpage.dobeforerender(var empty: boolean);
 begin
  if canevent(tmethod(fonbeforerender)) then begin
   application.lock;
   try
-   fonbeforerender(self);
+   fonbeforerender(self,empty);
   finally
    application.unlock;
   end;
