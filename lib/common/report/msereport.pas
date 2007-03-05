@@ -3821,7 +3821,7 @@ end;
 function tcustomreportpage.render(const acanvas: tcanvas): boolean;
 var
  int1: integer;
- bo1,bo2,bo3: boolean;
+ bo1,bo2,bo3,bo4: boolean;
  hascustomdata: boolean;
 begin
  if not (rpps_inited in fstate) then begin
@@ -3847,9 +3847,10 @@ begin
   acanvas.reset;
   acanvas.intersectcliprect(makerect(nullpoint,fwidgetrect.size));
   updatevisible;
-  bo1:= true; //empty
+  bo1:= (not fdatalink.active or fdatalink.dataset.eof) and
+         not ((rpo_once in foptions) and not (rpps_showed in fstate));
   dobeforerender(bo1);
-  hascustomdata:= not bo1;
+  bo3:= bo1; //customdata empty
   updatevisible;
   for int1:= 0 to high(fareas) do begin
    bo1:= fareas[int1].render(acanvas) and bo1;
@@ -3859,21 +3860,16 @@ begin
    fbands[int1].initpage;
   end;
   bo2:= odd(reppagenum);
-  bo3:= hascustomdata or 
-         not ((rpo_once in foptions) and not (rpps_showed in fstate) or 
-         (fdatalink.active and not fdatalink.dataset.eof));
   for int1:= 0 to high(fbands) do begin
    with fbands[int1] do begin
-    bo2:= bo3 and (bo1 or (bo2 and (bo_oddpage in foptions) or 
-               not bo2 and (bo_evenpage in foptions)) or
-                 ((rbs_showed in fstate) and (bo_once in foptions)));
+    bo4:= (bo3 and bo1) or not bo2 and (bo_oddpage in foptions) or 
+                                  bo2 and (bo_evenpage in foptions);
                //empty    
-    fbands[int1].render(acanvas,bo2);
-    bo1:= bo1 and bo2;
+    fbands[int1].render(acanvas,bo4);
+    bo1:= bo1 and bo4;
    end;
   end;
-  if not (rpps_backgroundrendered in fstate) and 
-    (not bo3 or (rpo_once in foptions) and not (rpps_showed in fstate)) then begin
+  if not (rpps_backgroundrendered in fstate) and not bo3 then begin
    renderbackground(acanvas);  
   end;
               
