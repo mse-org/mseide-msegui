@@ -4639,8 +4639,9 @@ var
  indent: framety;
  clientorig: pointty;
 begin
- result.cx:= -bigint;
- result.cy:= -bigint;
+// result.cx:= -bigint;
+// result.cy:= -bigint;
+ result:= nullsize;
  if fframe <> nil then begin
   indent:= fframe.fi.innerframe;
 //  clientorig:= subpoint(fframe.fpaintrect.pos,fframe.fclientrect.pos);
