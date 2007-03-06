@@ -598,7 +598,8 @@ type
  end;
 
  datasetoptionty = (dso_utf8,dso_cancelupdateonerror,dso_cancelupdatesonerror,
-                         dso_autoapply,dso_autocommitret,dso_offline);
+                         dso_autoapply,dso_autocommitret,dso_cacheblobs,
+                         dso_offline);
  datasetoptionsty = set of datasetoptionty;
  
 const

@@ -90,6 +90,7 @@ type
    
    procedure DoAfterDelete; override;
    procedure dataevent(event: tdataevent; info: ptrint); override;
+   function wantblobfetch: boolean; override;
       
   public
    constructor create(aowner: tcomponent); override;
@@ -1086,6 +1087,11 @@ end;
 function tmsesqlquery.isutf8: boolean;
 begin
  result:= dso_utf8 in fcontroller.options;
+end;
+
+function tmsesqlquery.wantblobfetch: boolean;
+begin
+ result:= (dso_cacheblobs in fcontroller.options);
 end;
 
 { tparamsourcedatalink }

@@ -961,7 +961,10 @@ begin
       end
       else begin
        if fsizebefore.cx <> 0 then begin
-        size1.cx:= fsizebefore.cx;
+        if foptionsscale * [osc_shrinkx,osc_expandx] <> 
+                                         [osc_shrinkx,osc_expandx] then begin
+         size1.cx:= fsizebefore.cx;
+        end;
         fsizebefore.cx:= 0;
         box:= true;
        end;
@@ -976,7 +979,10 @@ begin
       end
       else begin
        if fsizebefore.cy <> 0 then begin
-        size1.cy:= fsizebefore.cy;
+        if foptionsscale * [osc_shrinky,osc_expandy] <> 
+                                         [osc_shrinky,osc_expandy] then begin
+         size1.cy:= fsizebefore.cy;
+        end;
         fsizebefore.cy:= 0;
         boy:= true;
        end;

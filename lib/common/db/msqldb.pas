@@ -66,9 +66,11 @@ type
     ftrans: pointer;
     constructor create(const aquery: tsqlquery);
     procedure close;
+    function wantblobfetch: boolean;
     function getcachedblob(const blobid: integer): tstream;
     function addblobdata(const adata: pointer; const alength: integer): integer;
                                             overload;
+    procedure addblobcache(const aid: int64; const adata: string);
     function addblobdata(const adata: string): integer; overload;
     procedure blobfieldtoparam(const afield: tfield; const aparam: tparam;
                      const asstring: boolean = false);
@@ -1953,6 +1955,11 @@ begin
  result:= addblobdata(pointer(adata),length(adata));
 end;
 
+procedure TSQLCursor.addblobcache(const aid: int64; const adata: string);
+begin
+ fquery.addblobcache(aid,adata);
+end;
+
 procedure TSQLCursor.blobfieldtoparam(const afield: tfield;
                const aparam: tparam; const asstring: boolean = false);
 var
@@ -1992,6 +1999,11 @@ procedure TSQLCursor.close;
 begin
  fblobs:= nil;
  fblobcount:= 0;
+end;
+
+function TSQLCursor.wantblobfetch: boolean;
+begin
+ result:= (fquery <> nil) and (bs_blobsfetched in fquery.fbstate);
 end;
 
 { tmseparams }

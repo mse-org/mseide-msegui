@@ -57,6 +57,10 @@ type
     function getMaxBlobSize(blobHandle : TIsc_Blob_Handle) : longInt;
     procedure SetParameters(cursor : TSQLCursor;AParams : TParams);
     procedure FreeSQLDABuffer(var aSQLDA : PXSQLDA);
+    function getblobstream(const acursor: tsqlcursor; const blobid: isc_quad;
+                       const forstring: boolean = false): tmemorystream;
+    function getblobstring(const acursor: tsqlcursor;
+                                       const blobid: isc_quad): string;
   protected
     procedure DoInternalConnect; override;
     procedure DoInternalDisconnect; override;
@@ -111,7 +115,8 @@ type
 
 implementation
 
-uses strutils;
+uses 
+ strutils,msestrings;
 
 type
   TTm = packed record
@@ -836,76 +841,67 @@ function tibconnection.loadfield(const cursor: tsqlcursor; const afield: tfield;
       const buffer: pointer; var bufsize: integer): boolean;
            //if bufsize < 0 -> buffer was to small, should be -bufsize
 var
-// x: integer;
  VarcharLen: word;
  CurrBuff: pchar;
  b: longint;
  c: currency;
 begin
- with TIBCursor(cursor) do begin
- {
-  for x := 0 to SQLDA^.SQLD - 1 do begin
-   if SQLDA^.SQLVar[x].AliasName = FieldDef.Name then break;
-  end;
- //todo: optimize, use fieldno?
-  if SQLDA^.SQLVar[x].AliasName <> FieldDef.Name then begin
-   DatabaseErrorFmt(SFieldNotFound,[FieldDef.Name],self);
-  end;
-  }
-  with SQLDA^.SQLVar[afield.fieldno-1] do begin
-   if assigned(SQLInd) and (SQLInd^ = -1) then begin
-    result:= false
+ with TIBCursor(cursor),SQLDA^.SQLVar[afield.fieldno-1] do begin
+  if assigned(SQLInd) and (SQLInd^ = -1) then begin
+   result:= false
+  end
+  else begin
+   Result := true;
+   if ((SQLType and not 1) = SQL_VARYING) then begin
+    Move(SQLData^,VarcharLen,2);
+    CurrBuff:= SQLData + 2;
    end
    else begin
-    Result := true;
-    if ((SQLType and not 1) = SQL_VARYING) then begin
-     Move(SQLData^,VarcharLen,2);
-     CurrBuff:= SQLData + 2;
-    end
-    else begin
-     CurrBuff:= SQLData;
-     VarCharLen:= SQLLen;
+    CurrBuff:= SQLData;
+    VarCharLen:= SQLLen;
+   end;
+   case aField.DataType of
+    ftBCD: begin
+     c:= 0;
+     Move(CurrBuff^,c,SQLLen);
+     c:= c*intpower(10,4+SQLScale);
+     Move(c,buffer^,sizeof(c));
     end;
-    case aField.DataType of
-     ftBCD: begin
-      c:= 0;
-      Move(CurrBuff^,c,SQLLen);
-      c:= c*intpower(10,4+SQLScale);
-      Move(c,buffer^,sizeof(c));
-     end;
-     ftInteger,ftsmallint: begin
-      b:= 0;        //todo: byte order?
-      Move(b, Buffer^,sizeof(longint));
-      Move(CurrBuff^,Buffer^,SQLLen);
-     end;
-     ftLargeint: begin
-      FillByte(buffer^,sizeof(LargeInt),0);
-      Move(CurrBuff^,Buffer^,SQLLen);
-     end;
-     ftDate,ftTime,ftDateTime: begin
-      GetDateTime(CurrBuff,Buffer,SQLType);
-     end;
-     ftString: begin
-      if bufsize < varcharlen then begin
-       bufsize:= -varcharlen;
-      end
-      else begin
-       bufsize:= varcharlen;
-       move(currbuff^,buffer^,varcharlen);
-      end;
-  //    Move(CurrBuff^,Buffer^,SQLDA^.SQLVar[x].SQLLen);
-  //    PChar(Buffer + VarCharLen)^ := #0;
-     end;
-     ftFloat: begin
-      GetFloat(CurrBuff,Buffer,sqllen);
-     end;
-     ftBlob,ftmemo,ftgraphic: begin  // load the BlobIb in field's buffer
-      FillByte(buffer^,sizeof(LargeInt),0);
-      Move(CurrBuff^,Buffer^,SQLLen);
-     end;
+    ftInteger,ftsmallint: begin
+     b:= 0;        //todo: byte order?
+     Move(b, Buffer^,sizeof(longint));
+     Move(CurrBuff^,Buffer^,SQLLen);
+    end;
+    ftLargeint: begin
+     FillByte(buffer^,sizeof(LargeInt),0);
+     Move(CurrBuff^,Buffer^,SQLLen);
+    end;
+    ftDate,ftTime,ftDateTime: begin
+     GetDateTime(CurrBuff,Buffer,SQLType);
+    end;
+    ftString: begin
+     if bufsize < varcharlen then begin
+      bufsize:= -varcharlen;
+     end
      else begin
-      result := false;
+      bufsize:= varcharlen;
+      move(currbuff^,buffer^,varcharlen);
      end;
+ //    Move(CurrBuff^,Buffer^,SQLDA^.SQLVar[x].SQLLen);
+ //    PChar(Buffer + VarCharLen)^ := #0;
+    end;
+    ftFloat: begin
+     GetFloat(CurrBuff,Buffer,sqllen);
+    end;
+    ftBlob,ftmemo,ftgraphic: begin  // load the BlobIb in field's buffer
+     FillByte(buffer^,sizeof(LargeInt),0);
+     Move(CurrBuff^,Buffer^,SQLLen);
+     if wantblobfetch then begin
+      addblobcache(pint64(buffer)^,getblobstring(cursor,pisc_quad(buffer)^));
+     end;
+    end;
+    else begin
+     result := false;
     end;
    end;
   end;
@@ -1151,59 +1147,63 @@ begin
      CheckError('isc_blob_info', FStatus);
 end;
 
+function tibconnection.getblobstream(const acursor: tsqlcursor;
+      const blobid: isc_quad; const forstring: boolean = false): tmemorystream;
+const
+  isc_segstr_eof = 335544367;
+var
+ blobHandle : Isc_blob_Handle;
+ blobSegment : pointer;
+ blobSegLen : smallint;
+ maxBlobSize : longInt; 
+begin
+ blobHandle:= nil;
+ if isc_open_blob(@FStatus, @FSQLDatabaseHandle, @acursor.ftrans,
+                        @blobHandle, @blobId) <> 0 then begin
+  CheckError('TIBConnection.CreateBlobStream', FStatus);
+ end;
+ maxBlobSize:= getMaxBlobSize(blobHandle);
+ blobSegment:= AllocMem(maxBlobSize);
+ if forstring then begin
+  result:= tmemorystringstream.create;
+ end
+ else begin
+  result:= tmemorystream.create;
+ end;
+ while isc_get_segment(@FStatus,@blobHandle,@blobSegLen,maxBlobSize,
+                                                    blobSegment) = 0 do begin
+  result.writeBuffer(blobSegment^,blobSegLen);
+ end;
+ freemem(blobSegment);
+ result.seek(0,soFromBeginning);
+ if FStatus[1] = isc_segstr_eof then begin
+  if isc_close_blob(@FStatus, @blobHandle) <> 0 then begin
+   CheckError('TIBConnection.CreateBlobStream isc_close_blob', FStatus);
+  end;
+ end
+ else begin
+  CheckError('TIBConnection.CreateBlobStream isc_get_segment', FStatus);
+ end;
+end;
+
+function tibconnection.getblobstring(const acursor: tsqlcursor; 
+                                            const blobid: isc_quad): string;
+begin
+ tmemorystringstream(getblobstream(acursor,blobid,true)).destroyasstring(result);
+end;
+
 function TIBConnection.CreateBlobStream(const Field: TField;
           const Mode: TBlobStreamMode; const acursor: tsqlcursor): TStream;
-const
-  isc_segstr_eof = 335544367; // It's not defined in ibase60 but in ibase40. Would it be better to define in ibase60?
-
 var
-  mStream : TMemoryStream;
-  blobHandle : Isc_blob_Handle;
-  blobSegment : pointer;
-  blobSegLen : smallint;
-  maxBlobSize : longInt;
-//  TransactionHandle : pointer;
   blobId : ISC_QUAD;
 begin
-
-  result := nil;
-  if mode = bmRead then begin
-
-    if not field.getData(@blobId) then
-      exit;
-
-//    if not assigned(Transaction) then
-//      DatabaseError(SErrConnTransactionnSet);
-
- //   TransactionHandle := transaction.Handle;
-    blobHandle := nil;
-
-    if isc_open_blob(@FStatus, @FSQLDatabaseHandle, @acursor.ftrans, @blobHandle, @blobId) <> 0 then
-      CheckError('TIBConnection.CreateBlobStream', FStatus);
-
-    maxBlobSize := getMaxBlobSize(blobHandle);
-
-    blobSegment := AllocMem(maxBlobSize);
-    mStream := TMemoryStream.create;
-
-    while (isc_get_segment(@FStatus, @blobHandle, @blobSegLen,
-                                     maxBlobSize, blobSegment) = 0) do begin
-        mStream.writeBuffer(blobSegment^, blobSegLen);
-    end;
-    freemem(blobSegment);
-    mStream.seek(0,soFromBeginning);
-
-    if FStatus[1] = isc_segstr_eof then
-      begin
-        if isc_close_blob(@FStatus, @blobHandle) <> 0 then
-          CheckError('TIBConnection.CreateBlobStream isc_close_blob', FStatus);
-      end
-    else
-      CheckError('TIBConnection.CreateBlobStream isc_get_segment', FStatus);
-
-    result := mStream;
-
+ result := nil;
+ if mode = bmRead then begin
+  if not field.getData(@blobId) then begin
+   exit;
   end;
+  result:= getblobstream(acursor,blobid);
+ end;
 end;
 
 procedure TIBConnection.writeblobdata(const atransaction: tsqltransaction;

@@ -558,6 +558,7 @@ procedure removearrayduplicates(var value: pointerarty);
 procedure checkarrayindex(const value; const index: integer);
           //value = dynamic array, exception bei ungueltigem index
 
+function comparepointer(const l,r): integer;
 function compareinteger(const l,r): integer;
 function comparerealty(const l,r): integer;
 function compareasciistring(const l,r): integer;
@@ -595,6 +596,7 @@ procedure sortarray(var sortlist; compare: arraysortcomparety;
 procedure sortarray(var dest: pointerarty; compare: arraysortcomparety); overload;
 procedure sortarray(var dest: pointerarty; compare: arraysortcomparety;
                     out indexlist: integerarty); overload;
+procedure sortarray(var dest: pointerarty); overload; //compares adresses
 procedure sortarray(var dest: integerarty); overload;
 procedure sortarray(var dest: integerarty; out indexlist: integerarty); overload;
 procedure sortarray(var dest: cardinalarty); overload;
@@ -1414,6 +1416,22 @@ begin
  end;
 end;
 
+function comparepointer(const l,r): integer;
+var
+ pint1: ptrint;
+begin
+ result:= 1;
+ pint1:= ptrint(l) - ptrint(r);
+ if pint1 < 0 then begin
+  result:= -1
+ end
+ else begin
+  if pint1 = 0 then begin
+   result:= 0;
+  end;
+ end;
+end;
+
 function compareinteger(const l,r): integer;
 begin
  result:= integer(l) - integer(r);
@@ -1701,6 +1719,11 @@ begin
  sortarray(dest,compare,indexlist);
 end;
                     
+procedure sortarray(var dest: pointerarty);
+begin
+ sortarray(dest,{$ifdef FPC}@{$endif}comparepointer,sizeof(pointer));
+end;
+
 procedure sortarray(var dest: integerarty);
 begin
  sortarray(dest,{$ifdef FPC}@{$endif}compareinteger,sizeof(integer));

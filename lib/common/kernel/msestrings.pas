@@ -13,7 +13,7 @@ unit msestrings;
 
 interface
 uses
- msegraphutils,msetypes{$ifdef FPC},strings{$endif};
+ classes,msegraphutils,msetypes{$ifdef FPC},strings{$endif};
 {$ifdef FPC}
  {$ifdef FPC_WINLIKEWIDESTRING}
   {$define msestringsarenotrefcounted}
@@ -50,10 +50,6 @@ const
  maxdatasize = $7fffffff;
 type
  pmsestring = ^msestring;
-// strty = array[0..maxdatasize-1] of char;
-// pstrty = ^strty;
-// msestrty = array[0..maxdatasize div sizeof(msechar)-1] of msechar;
-// pmsestrty = ^msestrty;
  msestringarty = array of msestring;
  pmsestringarty = ^msestringarty;
  msestringaty = array[0..0] of msestring;
@@ -99,12 +95,26 @@ type
  end;
  lstringarty = array of lstringty;
  lmsestringarty = array of lmsestringty;
+ 
+ stringheaderty = packed record
+  ref: sizeint;
+  len: sizeint;
+ end;
+ pstringheaderty = ^stringheaderty;
 
 const
  emptylstring: lstringty = (po: nil; len: 0);
  emptywstring: lmsestringty = (po: nil; len: 0);
 
 type
+ tmemorystringstream = class(tmemorystream) 
+        //has room for stringheader, do not change size!
+  public
+   constructor create;
+   procedure destroyasstring(out data: string);
+   //calls destroy, not possible to use as destructor in FPC
+ end;
+ 
  searchoptionty = (so_caseinsensitive,so_wholeword);
  searchoptionsty = set of searchoptionty;
 
@@ -386,7 +396,9 @@ function locatestring(const afilter: msestring; const getkeystringfunc: getkeyst
 implementation
 uses
  sysutils,msedatalist,msesysintf;
-
+type
+ tmemorystream1 = class(tmemorystream);
+ 
 function locatestring(const afilter: msestring; const getkeystringfunc: getkeystringfuncty;
            const options: locatestringoptionsty;
            const count: integer; var aindex: integer): boolean;
@@ -3500,6 +3512,35 @@ function removelinebreaks(const s: msestring): msestring;
     //replaces linebreaks with space
 begin
  result:= concatstrings(breaklines(s),' ');
+end;
+
+{ tmemorystringstream }
+
+constructor tmemorystringstream.create;
+var
+ header: stringheaderty;
+begin
+ inherited;
+ fillchar(header,sizeof(header),0);
+ writebuffer(header,sizeof(header));
+end;
+
+procedure tmemorystringstream.destroyasstring(out data: string);
+var
+ ch1: char;
+begin
+ with pstringheaderty(memory)^ do begin
+  ref:= 1;
+  len:= size - sizeof(stringheaderty);
+ end;
+ ch1:= #0;
+ position:= size;
+ writebuffer(ch1,sizeof(ch1));
+ data:= ''; //decref
+ pointer(data):= memory + sizeof(stringheaderty);
+ setpointer(nil,0);
+// destroy;            //destroy does not free memory???
+ free;
 end;
 
 end.
