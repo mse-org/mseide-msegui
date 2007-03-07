@@ -525,7 +525,7 @@ function getfieldisnull(nullmask: pbyte; const x: integer): boolean;
 
 implementation
 uses
- dbconst,msedatalist,sysutils,mseformatstr,msereal,msestream,msesys;
+ rtlconsts,dbconst,msedatalist,sysutils,mseformatstr,msereal,msestream,msesys;
 const
  snotineditstate = 
  'Operation not allowed, dataset "%s" is not in an edit or insert state.';
@@ -2433,7 +2433,6 @@ begin
       end;
      end;
     end;
-//    sortblobcache;
    finally
     fcurrentbuf:= datapobefore;
     restorestate(statebefore);
@@ -2460,6 +2459,7 @@ var
  int1: integer;
 begin
  with ffieldinfos[aindex] do begin
+  cacheinfo.id:= 0; //field size can be 32 bit
   move((pointer(data)+offset)^,cacheinfo.id,size);
   with data^ do begin
    for int1:= high(blobinfo) downto 0 do begin
@@ -3083,6 +3083,9 @@ begin
  result:= fvisiblerecordcount;
 end;
 
+const
+ buffersize = 4096;
+ 
 type
  updatebufferheaderty = record
   kind: tupdatekind; //-1 -> endmarker
@@ -3093,9 +3096,13 @@ type
   private
    fstream: tstream;
    fowner: tmsebufdataset;
+   fbuffer: array [0..buffersize-1] of byte;
+   fbufindex: integer;
+   procedure flushbuffer;
   public
    constructor create(const aowner: tmsebufdataset; const astream: tstream);
-   procedure write(const buffer; const length: integer);
+   destructor destroy; override;
+   procedure write(const buffer; length: integer);
 //   procedure writefielddata(const data; const atype: tfieldtype;
 //               const asize: integer);
    procedure writefielddata(const data: precheaderty;
@@ -3111,9 +3118,12 @@ type
   private
    fstream: tstream;
    fowner: tmsebufdataset;
+   fbuffer: array [0..buffersize-1] of byte;
+   fbuflen: integer;
+   fbufindex: integer;
   public
    constructor create(const aowner: tmsebufdataset; const astream: tstream);
-   function read(out buffer; const length: integer): integer;
+   function read(out buffer; length: integer): integer;
    procedure readbuffer(out buffer; const length: integer);
    procedure readfielddata(const data: precheaderty; const aindex: integer);
 //   procedure readfielddata(out data; const atype: tfieldtype;
@@ -3135,9 +3145,37 @@ begin
  fstream:= astream;
 end;
 
-procedure tbufstreamwriter.write(const buffer; const length: integer);
+destructor tbufstreamwriter.destroy;
 begin
- fstream.writebuffer(buffer,length);
+ flushbuffer;
+ inherited;
+end;
+
+procedure tbufstreamwriter.flushbuffer;
+begin
+ fstream.writebuffer(fbuffer,fbufindex);
+ fbufindex:= 0;
+end;
+
+procedure tbufstreamwriter.write(const buffer; length: integer);
+var
+ po1: pointer;
+ int1: integer;
+begin
+ po1:= @buffer;
+ while length > 0 do begin
+  int1:= length;
+  if int1 + fbufindex > buffersize then begin
+   int1:= buffersize - fbufindex;
+  end;
+  move(po1^,fbuffer[fbufindex],int1);
+  inc(fbufindex,int1);
+  if fbufindex >= buffersize then begin
+   flushbuffer;
+  end;
+  inc(po1,int1);
+  dec(length,int1);
+ end;
 end;
 
 procedure tbufstreamwriter.writefielddata(const data: precheaderty; 
@@ -3165,22 +3203,7 @@ begin
   end;
  end; 
 end;
-{          
-procedure tbufstreamwriter.writefielddata(const data; const atype: tfieldtype;
-               const asize: integer);
-begin
- case atype of
-  ftstring,ftfixedchar: begin
-   writemsestring(msestring(data));
-  end;
-  ftmemo,ftblob: begin
-  end;
-  else begin
-   write(data,asize);
-  end;
- end;
-end;
-}
+
 procedure tbufstreamwriter.writestring(const avalue: string);
 begin
  writeinteger(length(avalue));
@@ -3224,9 +3247,38 @@ begin
  fstream:= astream;
 end;
 
+function tbufstreamreader.read(out buffer; length: integer): integer;
+var
+ po1: pointer;
+ int1: integer;
+begin
+ po1:= @buffer;
+ result:= 0;
+ while length > 0 do begin
+  int1:= length;
+  if int1 + fbufindex >= fbuflen then begin
+   int1:= fbuflen - fbufindex;
+  end;
+  move(fbuffer[fbufindex],po1^,int1);
+  inc(po1,int1);
+  inc(result,int1);
+  dec(length,int1);
+  inc(fbufindex,int1);
+  if fbufindex >= fbuflen then begin
+   fbufindex:= 0;
+   fbuflen:= fstream.read(fbuffer,buffersize);
+   if fbuflen = 0 then begin
+    exit;        //eof
+   end;
+  end; 
+ end;
+end;
+
 procedure tbufstreamreader.readbuffer(out buffer; const length: integer);
 begin
- fstream.readbuffer(buffer,length);
+ if read(buffer,length) < length then begin
+  raise ereaderror.create(sreaderror);
+ end;
 end;
 
 procedure tbufstreamreader.readfielddata(const data: precheaderty; 
@@ -3254,22 +3306,7 @@ begin
   end;
  end;
 end;
-{
-procedure tbufstreamreader.readfielddata(out data; const atype: tfieldtype;
-               const asize: integer);
-begin
- case atype of
-  ftstring,ftfixedchar: begin
-   msestring(data):= readmsestring;
-  end;
-  ftmemo,ftblob: begin
-  end;
-  else begin
-   read(data,asize);
-  end;
- end;
-end;
-}
+
 function tbufstreamreader.readstring: string;
 var
  int1: integer;
@@ -3311,11 +3348,6 @@ begin
  precision:= readinteger;
  def1:= tfielddef.create(aowner,name,datatype,size,required,fieldno);
  def1.precision:= precision;
-end;
-
-function tbufstreamreader.read(out buffer; const length: integer): integer;
-begin
- result:= fstream.read(buffer,length);
 end;
 
 function tbufstreamreader.readupbuheader(
@@ -3441,6 +3473,7 @@ var
  ar1: fieldinfoarty;
  upbuheader: updatebufferheaderty;
 begin
+ exclude(fbstate,bs_blobscached);
  reader:= tbufstreamreader.create(self,floadingstream);
  try
   reader.readbuffer(header,sizeof(header));

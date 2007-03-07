@@ -1816,6 +1816,7 @@ begin
  result:= inherited createblobstream(field,mode);
  if result = nil then begin
   if (bs_blobsfetched in fbstate) and (mode = bmread) then begin
+   info.id:= 0; //fieldsize can be 32 bit
    if field.getdata(@info.id) and findcachedblob(info) then begin
     blob1.data:= pointer(info.data);
     blob1.datalength:= length(info.data);
