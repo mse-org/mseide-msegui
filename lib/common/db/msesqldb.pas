@@ -838,7 +838,7 @@ end;
 procedure tmsesqlquery.applyupdates(const maxerrors: integer;
                 const cancelonerror: boolean = false);
 begin
- transaction.active:= true;
+ checkconnected;
  try
   fmstate:= fmstate - [sqs_updateabort,sqs_updateerror];
   inherited;
@@ -858,7 +858,7 @@ end;
 
 procedure tmsesqlquery.applyupdate;
 begin
- transaction.active:= true;
+ checkconnected;
  inherited applyupdate(fcontroller.options *
       [dso_cancelupdateonerror,dso_cancelupdatesonerror] <> []);
 end;

@@ -27,7 +27,9 @@ const
  
  defaultreptabtextflags = [tf_ycentered];
  defaultbandanchors = [an_top];
- defaultbandoptionswidget = defaultoptionswidget + [ow_fontlineheight];
+ defaultbandoptionswidget = defaultoptionswidget;
+               {(defaultoptionswidget + [ow_fontlineheight]) - 
+                                    [ow_fontglyphheight];}
  
  defaultrepvaluedisptextflags = [tf_ycentered];
  defaultrepvaluedispoptionsscale = 
@@ -585,6 +587,7 @@ type
    property onafterpaint: painteventty read fonafterpaint write fonafterpaint;
   published
    property anchors default defaultbandanchors;
+   property optionswidget default defaultbandoptionswidget;
  end;
 
  trecordband = class(tcustomrecordband)

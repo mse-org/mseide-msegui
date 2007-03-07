@@ -284,6 +284,7 @@ type
    procedure InternalAddRecord(Buffer: Pointer; AAppend: Boolean); override;
    procedure InternalClose; override;
    procedure InternalInitFieldDefs; override;
+   procedure connect(const aexecute: boolean);
    procedure InternalOpen; override;
    procedure internalrefresh; override;
    function  GetCanModify: Boolean; override;
@@ -1050,6 +1051,7 @@ begin
   FreeAndNil(FUpdateQry);
   FreeAndNil(FInsertQry);
   FreeAndNil(FDeleteQry);
+  exclude(fbstate,bs_connected);
 //  FRecordSize := 0;
   inherited internalclose;
 end;
@@ -1288,7 +1290,7 @@ begin
  end;
 end;
 
-procedure TSQLQuery.InternalOpen;
+procedure TSQLQuery.connect(const aexecute: boolean);
 
   procedure InitialiseModifyQuery(var qry : TSQLQuery; aSQL: TSTringList);  
   begin
@@ -1314,7 +1316,9 @@ begin
   try
    Prepare;
    if FCursor.FStatementType in [stSelect] then begin
-    Execute;
+    if aexecute then begin
+     Execute;
+    end;
     if FCursor.FInitFieldDef then InternalInitFieldDefs;
     if DefaultFields then begin
      CreateFields;
@@ -1351,10 +1355,16 @@ begin
    on E:Exception do
     raise;
   end;
+  include(fbstate,bs_connected);
  end;
- inherited;
 end;
 
+procedure tsqlquery.internalopen;
+begin
+ connect(true);
+ inherited;
+end;
+ 
 procedure tsqlquery.internalrefresh;
 var
  int1: integer;
@@ -1899,7 +1909,8 @@ end;
 
 function tsqlquery.getconnected: boolean;
 begin
- result:= (transaction <> nil) and transaction.active;
+ result:= bs_connected in fbstate;
+// result:= (transaction <> nil) and transaction.active;
 end;
 
 function tsqlquery.blobscached: boolean;
@@ -1912,13 +1923,16 @@ begin
  if not (bs_opening in fbstate) then begin
   checkactive;
  end;
- if avalue then begin
-  transaction.active:= true;
- end
- else begin
-  if transaction.active then begin
-   fetchallblobs;
-   tsqltransaction(transaction).disconnect(self);
+ if avalue <> connected then begin
+  if avalue then begin
+   connect(false);
+  end
+  else begin
+   if transaction.active then begin
+    fetchallblobs;
+    tsqltransaction(transaction).disconnect(self);
+    exclude(fbstate,bs_connected);
+   end;
   end;
  end;
 end;

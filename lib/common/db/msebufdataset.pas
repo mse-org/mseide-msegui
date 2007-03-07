@@ -277,6 +277,7 @@ type
  recupdatebufferarty = array of recupdatebufferty;
  
  bufdatasetstatety = (bs_opening,bs_loading,bs_fetching,bs_applying,
+                      bs_connected,
                       bs_hasindex,bs_fetchall,
                       bs_blobsfetched,bs_blobscached,bs_blobssorted,
                       bs_indexvalid,
@@ -437,6 +438,7 @@ type
    procedure internalinsert; override;
    procedure internaledit; override;
    procedure dataevent(event: tdataevent; info: ptrint); override;
+   procedure checkconnected;
    
    function  getfieldclass(fieldtype: tfieldtype): tfieldclass; override;
    function getnextpacket(const all: boolean) : integer;
@@ -480,6 +482,8 @@ type
 
    procedure savetostream(const astream: tstream);
    procedure loadfromstream(const astream: tstream);
+   procedure savetofile(const afilename: filenamety);
+   procedure loadfromfile(const afilename: filenamety);
    function streamloading: boolean;
    
    function isutf8: boolean; virtual;
@@ -521,7 +525,11 @@ function getfieldisnull(nullmask: pbyte; const x: integer): boolean;
 
 implementation
 uses
- dbconst,msedatalist,sysutils,mseformatstr,msereal;
+ dbconst,msedatalist,sysutils,mseformatstr,msereal,msestream,msesys;
+const
+ snotineditstate = 
+ 'Operation not allowed, dataset "%s" is not in an edit or insert state.';
+            //name changed in FPC 2_2
 type
  tmsestringfield1 = class(tmsestringfield); 
   
@@ -2879,7 +2887,8 @@ begin
    int2:= 0;
    if bind then begin
     if field1.fieldkind = fkdata then begin
-     fielddef1:= fielddefs.find(field1.fieldname);
+     fielddef1:= tfielddef(fielddefs.find(field1.fieldname));
+                   //needed for FPC 2_2
      if fielddef1 <> nil then begin
       int2:= fielddef1.size;
      end;
@@ -3075,6 +3084,11 @@ begin
 end;
 
 type
+ updatebufferheaderty = record
+  kind: tupdatekind; //-1 -> endmarker
+  newindex: integer; 
+ end;
+ 
  tbufstreamwriter = class
   private
    fstream: tstream;
@@ -3090,6 +3104,7 @@ type
    procedure writemsestring(const avalue: msestring);
    procedure writeinteger(const avalue: integer);
    procedure writefielddef(const afielddef: tfielddef);
+   procedure writeupbuheader(const aheader: updatebufferheaderty);
  end;
 
  tbufstreamreader = class
@@ -3107,6 +3122,8 @@ type
    function readmsestring: msestring;
    function readinteger: integer;
    procedure readfielddef(const aowner: tfielddefs);
+   function readupbuheader(out aheader: updatebufferheaderty): boolean;
+                //false if eof or endmarker
  end;
   
 { tbufstreamwriter }
@@ -3120,7 +3137,7 @@ end;
 
 procedure tbufstreamwriter.write(const buffer; const length: integer);
 begin
- fstream.write(buffer,length);
+ fstream.writebuffer(buffer,length);
 end;
 
 procedure tbufstreamwriter.writefielddata(const data: precheaderty; 
@@ -3191,6 +3208,11 @@ begin
   writeinteger(fieldno);
   writeinteger(precision);
  end;
+end;
+
+procedure tbufstreamwriter.writeupbuheader(const aheader: updatebufferheaderty);
+begin
+ write(aheader,sizeof(aheader));
 end;
 
 { tbufstreamreader }
@@ -3296,9 +3318,17 @@ begin
  result:= fstream.read(buffer,length);
 end;
 
+function tbufstreamreader.readupbuheader(
+                      out aheader: updatebufferheaderty): boolean;
+begin
+ result:= (read(aheader,sizeof(aheader)) = sizeof(aheader)) and 
+          (ord(aheader.kind) <> -1);
+end;
+
 type
+ bufdattagty = array[0..15]of char;
  tbsfheaderty = packed record
-  tag: array[0..14]of char;
+  tag: bufdattagty;
   byteorder: byte;      //0 -> little endian, 1 - big endian
   version: integer;
   fieldcount: integer;
@@ -3306,13 +3336,8 @@ type
   recordcount: integer;
  end;
  
- updatebufferheaderty = record
-  kind: tupdatekind;
-  newindex: integer;
- end;
- 
 const
- bufdattag = 'MSEBUFDAT'#0#0#0#0#0#0;
+ bufdattag: bufdattagty = 'MSEBUFDAT'#0#0#0#0#0#0;
    
 // data format:
 // header: bdsfheaderty
@@ -3320,6 +3345,7 @@ const
 // currentvalues
 // updatebuffer
 // updatebufferitem: updatebufferheader,old fielddata if not insert
+// endmarker
 
  
 procedure tmsebufdataset.savetostream(const astream: tstream);
@@ -3378,7 +3404,7 @@ begin
                                              sizeof(pointer),int2);
         newindex:= ar2[int2];
        end;
-       writer.write(upbuheader,sizeof(upbuheader));
+       writer.writeupbuheader(upbuheader);
        if kind in [ukdelete,ukmodify] then begin
         datapo:= @(oldvalues^.header);
         writer.write(datapo^.fielddata,fnullmasksize);
@@ -3390,6 +3416,9 @@ begin
      end;
     end;
    end;
+   upbuheader.kind:= tupdatekind(-1);
+   upbuheader.newindex:= minint;
+   writer.writeupbuheader(upbuheader); //endmarker
   end;
  finally
   writer.free;
@@ -3415,8 +3444,7 @@ begin
  reader:= tbufstreamreader.create(self,floadingstream);
  try
   reader.readbuffer(header,sizeof(header));
-  if not comparemem(@header.tag,pointer(bufdattag),sizeof(header.tag)) or 
-            (header.fielddefcount > 1000) then begin
+  if (header.tag <> bufdattag) or (header.fielddefcount > 1000) then begin
    formaterror;
   end;
   try
@@ -3453,8 +3481,7 @@ begin
      femptybuffer:= intallocrecord;
     end;
     int2:= 0;
-    while reader.read(upbuheader,sizeof(upbuheader)) = 
-                                        sizeof(upbuheader) do begin
+    while reader.readupbuheader(upbuheader) do begin
      if high(fupdatebuffer) < int2 then begin
       setlength(fupdatebuffer,2*high(fupdatebuffer)+258);
      end;     
@@ -3548,6 +3575,37 @@ end;
 function tmsebufdataset.wantblobfetch: boolean;
 begin
  result:= false;
+end;
+
+procedure tmsebufdataset.checkconnected;
+begin
+ if not (bs_connected in fbstate) then begin
+  databaseerror('Not connected.',self);
+ end;
+end;
+
+procedure tmsebufdataset.savetofile(const afilename: filenamety);
+var
+ stream1: tstream;
+begin
+ stream1:= tmsefilestream.create(afilename,fm_create);
+ try
+  savetostream(stream1);
+ finally
+  stream1.free;
+ end;
+end;
+
+procedure tmsebufdataset.loadfromfile(const afilename: filenamety);
+var
+ stream1: tstream;
+begin
+ stream1:= tmsefilestream.create(afilename,fm_read);
+ try
+  loadfromstream(stream1);
+ finally
+  stream1.free;
+ end;
 end;
 
 { tlocalindexes }
