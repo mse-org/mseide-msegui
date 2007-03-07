@@ -3537,7 +3537,7 @@ begin
  position:= size;
  writebuffer(ch1,sizeof(ch1));
  data:= ''; //decref
- pointer(data):= memory + sizeof(stringheaderty);
+ pointer(data):= pointer(ptrint(memory) + sizeof(stringheaderty));
  setpointer(nil,0);
 // destroy;            //destroy does not free memory???
  free;
