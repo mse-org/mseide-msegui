@@ -64,11 +64,12 @@ type
     FIsOpen: boolean;
     FFilterBuffer: PChar;
     ffieldoffsets: integerarty;
-    ffieldsizes: integerarty;
+    freadfieldsizes: integerarty;
+    fwritefieldsizes: integerarty;
     procedure calcrecordlayout;
     function  MDSGetRecordOffset(ARecNo: integer): longint;
     function  MDSGetFieldOffset(FieldNo: integer): integer;
-    function  MDSGetFieldSize(FieldNo: integer): integer;
+    function  MDSGetBufferSize(FieldNo: integer; out fieldsize: integer): integer;
     function  MDSGetActiveBuffer(var Buffer: PChar): Boolean;
     procedure MDSReadRecord(Buffer:PChar;ARecNo:Integer);
     procedure MDSWriteRecord(Buffer:PChar;ARecNo:Integer);
@@ -282,20 +283,29 @@ begin
   Raise MDSError.CreateFmt(Fmt,Args);
 end;
 
-function TMemDataset.MDSGetFieldSize(FieldNo: integer): integer;
-
+function TMemDataset.MDSGetBufferSize(FieldNo: integer;
+                                     out fieldsize: integer): integer;
+var
+ dt1: tfieldtype;
 begin
-  case FieldDefs.Items[FieldNo-1].Datatype of
-   ftString:   result:=FieldDefs.Items[FieldNo-1].Size+1;
-   ftBoolean:  result:=SizeOf(Wordbool{Boolean});
-   ftFloat:    result:=SizeOf(Double{Extended});
-   ftLargeInt: result:=SizeOf(int64);
-   ftSmallInt: result:=SizeOf(SmallInt);
-   ftInteger:  result:=SizeOf(Integer);
-   ftDate:     result:=SizeOf(TDateTime);
-   ftTime:     result:=SizeOf(TDateTime);
+ dt1:= FieldDefs.Items[FieldNo-1].Datatype;
+ case dt1 of
+  ftString:   result:=FieldDefs.Items[FieldNo-1].Size+1;
+  ftBoolean:  result:=SizeOf(Wordbool{Boolean});
+  ftFloat:    result:=SizeOf(Double{Extended});
+  ftLargeInt: result:=SizeOf(int64);
+  ftSmallInt: result:=SizeOf(SmallInt);
+  ftInteger:  result:=SizeOf(Integer);
+  ftDate:     result:=SizeOf(TDateTime);
+  ftTime:     result:=SizeOf(TDateTime);
  else
-   RaiseError(SErrFieldTypeNotSupported,[FieldDefs.Items[FieldNo-1].Name]);
+  RaiseError(SErrFieldTypeNotSupported,[FieldDefs.Items[FieldNo-1].Name]);
+ end;
+ if dt1 = ftstring then begin
+  fieldsize:= result - 1;
+ end
+ else begin
+  fieldsize:= result;
  end;
 end;
 
@@ -616,7 +626,8 @@ begin
   DestroyFields;
  end;
  ffieldoffsets:= nil;
- ffieldsizes:= nil;
+ freadfieldsizes:= nil;
+ fwritefieldsizes:= nil;
 end;
 
 procedure TMemDataset.InternalPost;
@@ -689,7 +700,7 @@ begin
  result:= (int1 >= 0) and MDSGetActiveBuffer(SrcBuffer) and 
           not getfieldisnull(pointer(srcbuffer),int1);
  if result and (buffer <> nil) then begin
-  Move((SrcBuffer+ffieldoffsets[int1])^, Buffer^,ffieldsizes[int1]);
+  Move((SrcBuffer+ffieldoffsets[int1])^, Buffer^,freadfieldsizes[int1]);
  end;
 end;
 
@@ -706,7 +717,7 @@ begin
   end
   else begin 
    unsetfieldisnull(pointer(destbuffer),int1);
-   Move(Buffer^,(DestBuffer+ffieldoffsets[int1])^,ffieldsizes[int1]);
+   Move(Buffer^,(DestBuffer+ffieldoffsets[int1])^,fwritefieldsizes[int1]);
    dataevent(defieldchange,ptrint(field));
   end;
  end;
@@ -817,12 +828,13 @@ var
 begin
  int1:= fielddefs.count;
  setlength(ffieldoffsets,int1);
- setlength(ffieldsizes,int1);
+ setlength(freadfieldsizes,int1);
+ setlength(fwritefieldsizes,int1);
  FRecSize:= (int1+7) div 8; //null mask
  for int1:= 0 to high(ffieldoffsets) do begin
   ffieldoffsets[int1]:= frecsize;
-  ffieldsizes[int1]:= MDSGetFieldSize(int1+1);
-  FRecSize:= FRecSize + ffieldsizes[int1];
+  freadfieldsizes[int1]:= MDSGetbufferSize(int1+1,fwritefieldsizes[int1]);
+  FRecSize:= FRecSize + freadfieldsizes[int1];
  end;
 end;
 
