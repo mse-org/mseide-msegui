@@ -8485,20 +8485,19 @@ begin
 end;
 
 function twidget.getfont: twidgetfont;
+var
+ widget1: twidget;
 begin
  getoptionalobject(ffont,{$ifdef FPC}@{$endif}internalcreatefont);
- if ffont <> nil then begin
-  result:= ffont;
- end
- else begin
-  if (fparentwidget <> nil) and 
-                   not (csloading in fparentwidget.componentstate) then begin
-   result:= fparentwidget.getfont;
-  end
-  else begin
-   result:= stockobjects.fonts[stf_default];
+ widget1:= self;
+ repeat
+  result:= widget1.ffont;
+  if result <> nil then begin
+   exit;
   end;
- end;
+  widget1:= widget1.fparentwidget;
+ until widget1 = nil;
+ result:= stockobjects.fonts[stf_default];
 end;
 
 function twidget.getframefont: tfont;
