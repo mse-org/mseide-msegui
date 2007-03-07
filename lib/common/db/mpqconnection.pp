@@ -444,7 +444,11 @@ begin
         end;
        end;
        s[length(s)]:= ')';
+       {$ifdef FPC_2_2}
+       buf := AParams.ParseSQL(buf,false,false,false,psPostgreSQL);
+       {$else}
        buf := AParams.ParseSQL(buf,false,psPostgreSQL);
+       {$endif}
       end;
       s:= s + ' as ' + buf;
       res := pqexec(tr.PGConn,pchar(s));

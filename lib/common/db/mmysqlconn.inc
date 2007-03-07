@@ -313,7 +313,13 @@ begin
     begin
     FStatement:=Buf;
     if assigned(AParams) and (AParams.count > 0) then
-      FStatement := AParams.ParseSQL(FStatement,false,psSimulated,paramBinding,ParamReplaceString);
+    {$ifdef FPC_2_2}
+      FStatement := AParams.ParseSQL(FStatement,false,false,false,psSimulated,
+                       paramBinding,ParamReplaceString);
+    {$else}
+      FStatement := AParams.ParseSQL(FStatement,false,psSimulated,
+                       paramBinding,ParamReplaceString);
+    {$endif}
     if FStatementType=stSelect then
       FNeedData:=True;
     ConnectMySQL(FQMySQL,FMySQL^.host,FMySQL^.user,FMySQL^.passwd);

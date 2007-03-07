@@ -445,7 +445,11 @@ begin
 
   // Parse the SQL and build FParamIndex
   if assigned(AParams) and (AParams.count > 0) then
+  {$ifdef FPC_2_2}
+    buf := AParams.ParseSQL(buf,false,false,false,psInterbase,ODBCCursor.FParamIndex);
+  {$else}
     buf := AParams.ParseSQL(buf,false,psInterbase,ODBCCursor.FParamIndex);
+  {$endif}
 
   // prepare statement
   ODBCCheckResult(

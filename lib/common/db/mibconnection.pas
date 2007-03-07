@@ -486,8 +486,11 @@ begin
     tr := aTransaction.Handle;
     
     if assigned(AParams) and (AParams.count > 0) then
+    {$ifdef FPC_2_2}
+      buf := AParams.ParseSQL(buf,false,false,false,psInterbase,paramBinding);
+    {$else}
       buf := AParams.ParseSQL(buf,false,psInterbase,paramBinding);
-
+    {$endif}
     if isc_dsql_prepare(@Status, @tr, @Statement, 0, @Buf[1], Dialect, nil) <> 0 then
       CheckError('PrepareStatement', Status);
     FPrepared := True;
@@ -730,7 +733,9 @@ begin
      if TransType = ftBCD then begin
       FD.precision:= SQLLen;
      end;
+     {$ifndef FPC_2_2} //???
      FD.DisplayName:= AliasName;
+     {$endif}
     end;
    end;
   end;

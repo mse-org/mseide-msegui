@@ -526,10 +526,13 @@ function getfieldisnull(nullmask: pbyte; const x: integer): boolean;
 implementation
 uses
  rtlconsts,dbconst,msedatalist,sysutils,mseformatstr,msereal,msestream,msesys;
+{$ifdef FPC_2_2}
 const
  snotineditstate = 
  'Operation not allowed, dataset "%s" is not in an edit or insert state.';
             //name changed in FPC 2_2
+{$endif}
+
 type
  tmsestringfield1 = class(tmsestringfield); 
   
