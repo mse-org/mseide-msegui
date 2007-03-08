@@ -682,7 +682,7 @@ begin
    inc(po1^);
   end;
 {$else}
-  reallocstring(str); //delphi and FPC 2.1.1 
+  reallocstring(str); //delphi and FPC 2.2
                       //widestrings are not refcounted on win32
 {$endif}
  end;
