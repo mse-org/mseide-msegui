@@ -1399,6 +1399,7 @@ begin
  registerpropertyeditor(typeinfo(boolean),nil,'',tbooleanpropertyeditor); //for fpc
  {$endif}
  registerpropertyeditor(typeinfo(string),nil,'',tstringpropertyeditor);
+ registerpropertyeditor(typeinfo(string),tcomponent,'Name',tnamepropertyeditor);
  registerpropertyeditor(typeinfo(msestring),nil,'',tmsestringpropertyeditor);
  registerpropertyeditor(typeinfo(colorty),nil,'',tcolorpropertyeditor);
 // registerpropertyeditor(typeinfo(msechar),nil,'',tmsestringpropertyeditor);

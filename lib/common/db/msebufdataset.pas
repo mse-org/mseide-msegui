@@ -40,6 +40,9 @@ const
  
  dscheckfilter = ord(high(tdatasetstate)) + 1; 
  
+const
+ bufstreambuffersize = 4096; 
+  
 type  
  fieldinfoty = record
   offset: integer; //data offset in buffer     ////
@@ -143,6 +146,52 @@ type
  pindexty = ^indexty;
 
  tmsebufdataset = class;
+ 
+ updatebufferheaderty = record
+  kind: tupdatekind; //-1 -> endmarker
+  newindex: integer; 
+ end;
+ 
+ tbufstreamwriter = class
+  private
+   fstream: tstream;
+   fowner: tmsebufdataset;
+   fbuffer: array [0..bufstreambuffersize-1] of byte;
+   fbufindex: integer;
+   procedure flushbuffer;
+  public
+   constructor create(const aowner: tmsebufdataset; const astream: tstream);
+   destructor destroy; override;
+   procedure write(const buffer; length: integer);
+   procedure writefielddata(const data: precheaderty;
+                          const aindex: integer);
+   procedure writestring(const avalue: string);
+   procedure writemsestring(const avalue: msestring);
+   procedure writeinteger(const avalue: integer);
+   procedure writefielddef(const afielddef: tfielddef);
+   procedure writeupbuheader(const aheader: updatebufferheaderty);
+   procedure writeendmarker;
+ end;
+
+ tbufstreamreader = class
+  private
+   fstream: tstream;
+   fowner: tmsebufdataset;
+   fbuffer: array [0..bufstreambuffersize-1] of byte;
+   fbuflen: integer;
+   fbufindex: integer;
+  public
+   constructor create(const aowner: tmsebufdataset; const astream: tstream);
+   function read(out buffer; length: integer): integer;
+   procedure readbuffer(out buffer; const length: integer);
+   procedure readfielddata(const data: precheaderty; const aindex: integer);
+   function readstring: string;
+   function readmsestring: msestring;
+   function readinteger: integer;
+   procedure readfielddef(const aowner: tfielddefs);
+   function readupbuheader(out aheader: updatebufferheaderty): boolean;
+                //false if eof or endmarker
+ end;
  
   TResolverErrorEvent = procedure(Sender: TObject; DataSet: tmsebufdataset;
                           E: EUpdateError; UpdateKind: TUpdateKind;
@@ -323,6 +372,8 @@ type
    fvisiblerecordcount: integer;
    floadingstream: tstream;
    
+   flogfilename: filenamety;
+   flogger: tbufstreamwriter;
    procedure calcrecordsize;
    procedure alignfieldpos(var avalue: integer);
    function loadbuffer(var buffer: recheaderty): tgetresult;
@@ -372,6 +423,8 @@ type
    procedure dointernalopen;
    procedure doloadfromstream;
    procedure dointernalclose;
+   procedure logupdatebuffer(const awriter: tbufstreamwriter; 
+                     const abuffer: recupdatebufferty; const aindex: integer);
   protected
    fbstate: bufdatasetstatesty;
    fallpacketsfetched : boolean;
@@ -439,7 +492,9 @@ type
    procedure internaledit; override;
    procedure dataevent(event: tdataevent; info: ptrint); override;
    procedure checkconnected;
-   
+   procedure startlogger;
+   procedure closelogger;
+ 
    function  getfieldclass(fieldtype: tfieldtype): tfieldclass; override;
    function getnextpacket(const all: boolean) : integer;
    function getrecordsize: word; override;
@@ -512,6 +567,7 @@ type
    function updatestatus: tupdatestatus; override;
    property changecount : integer read getchangecount;
   published
+   property logfilename: filenamety read flogfilename write flogfilename;
    property packetrecords : integer read fpacketrecords write setpacketrecords 
                                  default defaultpacketrecords;
    property onupdateerror: tresolvererrorevent read fonupdateerror 
@@ -673,6 +729,249 @@ begin
 end;
 
 
+{ tbufstreamwriter }
+
+constructor tbufstreamwriter.create(const aowner: tmsebufdataset; 
+                                            const astream: tstream);
+begin
+ fowner:= aowner;
+ fstream:= astream;
+end;
+
+destructor tbufstreamwriter.destroy;
+begin
+ flushbuffer;
+ inherited;
+end;
+
+procedure tbufstreamwriter.flushbuffer;
+begin
+ fstream.writebuffer(fbuffer,fbufindex);
+ fbufindex:= 0;
+end;
+
+procedure tbufstreamwriter.write(const buffer; length: integer);
+var
+ po1: pointer;
+ int1: integer;
+begin
+ po1:= @buffer;
+ while length > 0 do begin
+  int1:= length;
+  if int1 + fbufindex > bufstreambuffersize then begin
+   int1:= bufstreambuffersize - fbufindex;
+  end;
+  move(po1^,fbuffer[fbufindex],int1);
+  inc(fbufindex,int1);
+  if fbufindex >= bufstreambuffersize then begin
+   flushbuffer;
+  end;
+  inc(po1,int1);
+  dec(length,int1);
+ end;
+end;
+
+procedure tbufstreamwriter.writefielddata(const data: precheaderty; 
+                                                    const aindex: integer);
+var
+ fielddata: pointer;
+ blobinfo: blobstreaminfoty;
+begin
+ with fowner.ffieldinfos[aindex] do begin
+  fielddata:= pointer(data) + offset;
+  case fieldtype of
+   ftstring,ftfixedchar: begin
+    writemsestring(msestring(fielddata^));
+   end;
+   ftmemo,ftblob: begin
+    if not getfieldisnull(@data^.fielddata.nullmask,aindex) then begin
+     fowner.getofflineblob(data,aindex,blobinfo);
+     write(blobinfo.info,sizeof(blobinfo.info));
+     writestring(blobinfo.data);
+    end;
+   end;
+   else begin
+    write(fielddata^,size);
+   end;
+  end;
+ end; 
+end;
+
+procedure tbufstreamwriter.writestring(const avalue: string);
+begin
+ writeinteger(length(avalue));
+ write(pointer(avalue)^,length(avalue));
+end;
+
+procedure tbufstreamwriter.writemsestring(const avalue: msestring);
+begin
+ writeinteger(length(avalue));
+ write(pointer(avalue)^,length(avalue)*sizeof(msechar));
+end;
+
+procedure tbufstreamwriter.writeinteger(const avalue: integer);
+begin
+ write(avalue,sizeof(integer));
+end;
+
+procedure tbufstreamwriter.writefielddef(const afielddef: tfielddef);
+begin
+ with afielddef do begin
+  writestring(name);
+  writeinteger(ord(datatype));  
+  writeinteger(size);
+  writeinteger(integer(required));
+  writeinteger(fieldno);
+  writeinteger(precision);
+ end;
+end;
+
+procedure tbufstreamwriter.writeupbuheader(const aheader: updatebufferheaderty);
+begin
+ write(aheader,sizeof(aheader));
+end;
+
+procedure tbufstreamwriter.writeendmarker;
+var
+ header: updatebufferheaderty;
+begin
+ with header do begin
+  kind:= tupdatekind(-1);
+  newindex:= minint;
+ end;
+ writeupbuheader(header);
+end;
+
+{ tbufstreamreader }
+
+constructor tbufstreamreader.create(const aowner: tmsebufdataset; 
+                                               const astream: tstream);
+begin
+ fowner:= aowner;
+ fstream:= astream;
+end;
+
+function tbufstreamreader.read(out buffer; length: integer): integer;
+var
+ po1: pointer;
+ int1: integer;
+begin
+ po1:= @buffer;
+ result:= 0;
+ while length > 0 do begin
+  int1:= length;
+  if int1 + fbufindex >= fbuflen then begin
+   int1:= fbuflen - fbufindex;
+  end;
+  move(fbuffer[fbufindex],po1^,int1);
+  inc(po1,int1);
+  inc(result,int1);
+  dec(length,int1);
+  inc(fbufindex,int1);
+  if fbufindex >= fbuflen then begin
+   fbufindex:= 0;
+   fbuflen:= fstream.read(fbuffer,bufstreambuffersize);
+   if fbuflen = 0 then begin
+    exit;        //eof
+   end;
+  end; 
+ end;
+end;
+
+procedure tbufstreamreader.readbuffer(out buffer; const length: integer);
+begin
+ if read(buffer,length) < length then begin
+  raise ereaderror.create(sreaderror);
+ end;
+end;
+
+procedure tbufstreamreader.readfielddata(const data: precheaderty; 
+                         const aindex: integer);
+var
+ fielddata: pointer;
+ blobinfo: blobstreaminfoty;
+begin
+ with fowner.ffieldinfos[aindex] do begin
+  fielddata:= pointer(data) + offset;
+  case fieldtype of
+   ftstring,ftfixedchar: begin
+    msestring(fielddata^):= readmsestring;
+   end;
+   ftmemo,ftblob: begin
+    if not getfieldisnull(@data^.fielddata.nullmask,aindex) then begin
+     readbuffer(blobinfo.info,sizeof(blobinfo.info));
+     blobinfo.data:= readstring;
+     fowner.setofflineblob(data,aindex,blobinfo);
+    end;
+   end;
+   else begin
+    readbuffer(fielddata^,size);
+   end;
+  end;
+ end;
+end;
+
+function tbufstreamreader.readstring: string;
+var
+ int1: integer;
+begin
+ int1:= readinteger;
+ setlength(result,int1);
+ readbuffer(pointer(result)^,int1);
+end;
+
+function tbufstreamreader.readmsestring: msestring;
+var
+ int1: integer;
+begin
+ int1:= readinteger;
+ setlength(result,int1);
+ readbuffer(pointer(result)^,int1*sizeof(msechar));
+end;
+
+function tbufstreamreader.readinteger: integer;
+begin
+ readbuffer(result,sizeof(integer));
+end;
+
+procedure tbufstreamreader.readfielddef(const aowner: tfielddefs);
+var
+ name: string;
+ datatype: tfieldtype;
+ size: integer;
+ required: boolean;
+ fieldno: integer;
+ precision: integer; 
+ def1: tfielddef;
+begin
+ name:= readstring;
+ datatype:= tfieldtype(readinteger);  
+ size:= readinteger;
+ required:= boolean(readinteger);
+ fieldno:= readinteger;
+ precision:= readinteger;
+ def1:= tfielddef.create(aowner,name,datatype,size,required,fieldno);
+ def1.precision:= precision;
+end;
+
+function tbufstreamreader.readupbuheader(
+                      out aheader: updatebufferheaderty): boolean;
+begin
+ result:= (read(aheader,sizeof(aheader)) = sizeof(aheader)) and 
+          (ord(aheader.kind) <> -1);
+end;
+
+type
+ bufdattagty = array[0..15]of char;
+ tbsfheaderty = packed record
+  tag: bufdattagty;
+  byteorder: byte;      //0 -> little endian, 1 - big endian
+  version: integer;
+  fieldcount: integer;
+  fielddefcount: integer;
+  recordcount: integer;
+ end;
+ 
 { tblobbuffer }
 
 constructor tblobbuffer.create(const aowner: tmsebufdataset; const afield: tfield);
@@ -718,6 +1017,7 @@ destructor tmsebufdataset.destroy;
 begin
  inherited destroy;
  findexlocal.free;
+ closelogger;
 end;
 
 procedure tmsebufdataset.setpacketrecords(avalue : integer);
@@ -1003,6 +1303,7 @@ var
  int1: integer;
 begin
  exclude(fbstate,bs_opening);
+ closelogger;
  frecno:= -1;
  resetblobcache;
  if fopen then begin
@@ -3087,291 +3388,6 @@ begin
 end;
 
 const
- buffersize = 4096;
- 
-type
- updatebufferheaderty = record
-  kind: tupdatekind; //-1 -> endmarker
-  newindex: integer; 
- end;
- 
- tbufstreamwriter = class
-  private
-   fstream: tstream;
-   fowner: tmsebufdataset;
-   fbuffer: array [0..buffersize-1] of byte;
-   fbufindex: integer;
-   procedure flushbuffer;
-  public
-   constructor create(const aowner: tmsebufdataset; const astream: tstream);
-   destructor destroy; override;
-   procedure write(const buffer; length: integer);
-//   procedure writefielddata(const data; const atype: tfieldtype;
-//               const asize: integer);
-   procedure writefielddata(const data: precheaderty;
-                          const aindex: integer);
-   procedure writestring(const avalue: string);
-   procedure writemsestring(const avalue: msestring);
-   procedure writeinteger(const avalue: integer);
-   procedure writefielddef(const afielddef: tfielddef);
-   procedure writeupbuheader(const aheader: updatebufferheaderty);
- end;
-
- tbufstreamreader = class
-  private
-   fstream: tstream;
-   fowner: tmsebufdataset;
-   fbuffer: array [0..buffersize-1] of byte;
-   fbuflen: integer;
-   fbufindex: integer;
-  public
-   constructor create(const aowner: tmsebufdataset; const astream: tstream);
-   function read(out buffer; length: integer): integer;
-   procedure readbuffer(out buffer; const length: integer);
-   procedure readfielddata(const data: precheaderty; const aindex: integer);
-//   procedure readfielddata(out data; const atype: tfieldtype;
-//               const asize: integer);
-   function readstring: string;
-   function readmsestring: msestring;
-   function readinteger: integer;
-   procedure readfielddef(const aowner: tfielddefs);
-   function readupbuheader(out aheader: updatebufferheaderty): boolean;
-                //false if eof or endmarker
- end;
-  
-{ tbufstreamwriter }
-
-constructor tbufstreamwriter.create(const aowner: tmsebufdataset; 
-                                            const astream: tstream);
-begin
- fowner:= aowner;
- fstream:= astream;
-end;
-
-destructor tbufstreamwriter.destroy;
-begin
- flushbuffer;
- inherited;
-end;
-
-procedure tbufstreamwriter.flushbuffer;
-begin
- fstream.writebuffer(fbuffer,fbufindex);
- fbufindex:= 0;
-end;
-
-procedure tbufstreamwriter.write(const buffer; length: integer);
-var
- po1: pointer;
- int1: integer;
-begin
- po1:= @buffer;
- while length > 0 do begin
-  int1:= length;
-  if int1 + fbufindex > buffersize then begin
-   int1:= buffersize - fbufindex;
-  end;
-  move(po1^,fbuffer[fbufindex],int1);
-  inc(fbufindex,int1);
-  if fbufindex >= buffersize then begin
-   flushbuffer;
-  end;
-  inc(po1,int1);
-  dec(length,int1);
- end;
-end;
-
-procedure tbufstreamwriter.writefielddata(const data: precheaderty; 
-                                                    const aindex: integer);
-var
- fielddata: pointer;
- blobinfo: blobstreaminfoty;
-begin
- with fowner.ffieldinfos[aindex] do begin
-  fielddata:= pointer(data) + offset;
-  case fieldtype of
-   ftstring,ftfixedchar: begin
-    writemsestring(msestring(fielddata^));
-   end;
-   ftmemo,ftblob: begin
-    if not getfieldisnull(@data^.fielddata.nullmask,aindex) then begin
-     fowner.getofflineblob(data,aindex,blobinfo);
-     write(blobinfo.info,sizeof(blobinfo.info));
-     writestring(blobinfo.data);
-    end;
-   end;
-   else begin
-    write(fielddata^,size);
-   end;
-  end;
- end; 
-end;
-
-procedure tbufstreamwriter.writestring(const avalue: string);
-begin
- writeinteger(length(avalue));
- write(pointer(avalue)^,length(avalue));
-end;
-
-procedure tbufstreamwriter.writemsestring(const avalue: msestring);
-begin
- writeinteger(length(avalue));
- write(pointer(avalue)^,length(avalue)*sizeof(msechar));
-end;
-
-procedure tbufstreamwriter.writeinteger(const avalue: integer);
-begin
- write(avalue,sizeof(integer));
-end;
-
-procedure tbufstreamwriter.writefielddef(const afielddef: tfielddef);
-begin
- with afielddef do begin
-  writestring(name);
-  writeinteger(ord(datatype));  
-  writeinteger(size);
-  writeinteger(integer(required));
-  writeinteger(fieldno);
-  writeinteger(precision);
- end;
-end;
-
-procedure tbufstreamwriter.writeupbuheader(const aheader: updatebufferheaderty);
-begin
- write(aheader,sizeof(aheader));
-end;
-
-{ tbufstreamreader }
-
-constructor tbufstreamreader.create(const aowner: tmsebufdataset; 
-                                               const astream: tstream);
-begin
- fowner:= aowner;
- fstream:= astream;
-end;
-
-function tbufstreamreader.read(out buffer; length: integer): integer;
-var
- po1: pointer;
- int1: integer;
-begin
- po1:= @buffer;
- result:= 0;
- while length > 0 do begin
-  int1:= length;
-  if int1 + fbufindex >= fbuflen then begin
-   int1:= fbuflen - fbufindex;
-  end;
-  move(fbuffer[fbufindex],po1^,int1);
-  inc(po1,int1);
-  inc(result,int1);
-  dec(length,int1);
-  inc(fbufindex,int1);
-  if fbufindex >= fbuflen then begin
-   fbufindex:= 0;
-   fbuflen:= fstream.read(fbuffer,buffersize);
-   if fbuflen = 0 then begin
-    exit;        //eof
-   end;
-  end; 
- end;
-end;
-
-procedure tbufstreamreader.readbuffer(out buffer; const length: integer);
-begin
- if read(buffer,length) < length then begin
-  raise ereaderror.create(sreaderror);
- end;
-end;
-
-procedure tbufstreamreader.readfielddata(const data: precheaderty; 
-                         const aindex: integer);
-var
- fielddata: pointer;
- blobinfo: blobstreaminfoty;
-begin
- with fowner.ffieldinfos[aindex] do begin
-  fielddata:= pointer(data) + offset;
-  case fieldtype of
-   ftstring,ftfixedchar: begin
-    msestring(fielddata^):= readmsestring;
-   end;
-   ftmemo,ftblob: begin
-    if not getfieldisnull(@data^.fielddata.nullmask,aindex) then begin
-     readbuffer(blobinfo.info,sizeof(blobinfo.info));
-     blobinfo.data:= readstring;
-     fowner.setofflineblob(data,aindex,blobinfo);
-    end;
-   end;
-   else begin
-    readbuffer(fielddata^,size);
-   end;
-  end;
- end;
-end;
-
-function tbufstreamreader.readstring: string;
-var
- int1: integer;
-begin
- int1:= readinteger;
- setlength(result,int1);
- readbuffer(pointer(result)^,int1);
-end;
-
-function tbufstreamreader.readmsestring: msestring;
-var
- int1: integer;
-begin
- int1:= readinteger;
- setlength(result,int1);
- readbuffer(pointer(result)^,int1*sizeof(msechar));
-end;
-
-function tbufstreamreader.readinteger: integer;
-begin
- readbuffer(result,sizeof(integer));
-end;
-
-procedure tbufstreamreader.readfielddef(const aowner: tfielddefs);
-var
- name: string;
- datatype: tfieldtype;
- size: integer;
- required: boolean;
- fieldno: integer;
- precision: integer; 
- def1: tfielddef;
-begin
- name:= readstring;
- datatype:= tfieldtype(readinteger);  
- size:= readinteger;
- required:= boolean(readinteger);
- fieldno:= readinteger;
- precision:= readinteger;
- def1:= tfielddef.create(aowner,name,datatype,size,required,fieldno);
- def1.precision:= precision;
-end;
-
-function tbufstreamreader.readupbuheader(
-                      out aheader: updatebufferheaderty): boolean;
-begin
- result:= (read(aheader,sizeof(aheader)) = sizeof(aheader)) and 
-          (ord(aheader.kind) <> -1);
-end;
-
-type
- bufdattagty = array[0..15]of char;
- tbsfheaderty = packed record
-  tag: bufdattagty;
-  byteorder: byte;      //0 -> little endian, 1 - big endian
-  version: integer;
-  fieldcount: integer;
-  fielddefcount: integer;
-  recordcount: integer;
- end;
- 
-const
  bufdattag: bufdattagty = 'MSEBUFDAT'#0#0#0#0#0#0;
    
 // data format:
@@ -3381,8 +3397,35 @@ const
 // updatebuffer
 // updatebufferitem: updatebufferheader,old fielddata if not insert
 // endmarker
-
  
+procedure tmsebufdataset.logupdatebuffer(const awriter: tbufstreamwriter; 
+                const abuffer: recupdatebufferty; const aindex: integer);
+var
+ upbuheader: updatebufferheaderty;
+ datapo: precheaderty;
+ int2: integer;
+begin
+ with abuffer,upbuheader do begin
+  if bookmark.recordpo <> nil then begin
+   kind:= updatekind;
+   if kind = ukdelete then begin
+    newindex:= -1;
+   end
+   else begin
+    newindex:= aindex;
+   end;
+   awriter.writeupbuheader(upbuheader);
+   if kind in [ukdelete,ukmodify] then begin
+    datapo:= @(oldvalues^.header);
+    awriter.write(datapo^.fielddata,fnullmasksize);
+    for int2:= 0 to high(ffieldinfos) do begin
+     awriter.writefielddata(datapo,int2);
+    end;
+   end;
+  end;
+ end;
+end;
+
 procedure tmsebufdataset.savetostream(const astream: tstream);
 var
  header: tbsfheaderty;
@@ -3392,7 +3435,6 @@ var
  int1,int2: integer;
  ar1: pointerarty;
  ar2: integerarty;
- upbuheader: updatebufferheaderty;
 begin
  checkbrowsemode;
  fetchallblobs;
@@ -3428,32 +3470,12 @@ begin
     move(pointer(findexes[0])^,pointer(ar1)^,fbrecordcount*sizeof(pointer));
     sortarray(ar1,@comparepointer,sizeof(pointer),ar2);
     for int1:= 0 to high(fupdatebuffer) do begin
-     with fupdatebuffer[int1],upbuheader do begin
-      if bookmark.recordpo <> nil then begin
-       kind:= updatekind;
-       if kind = ukdelete then begin
-        newindex:= -1;
-       end
-       else begin
-        findarrayitem(bookmark.recordpo,ar1,@comparepointer,
-                                             sizeof(pointer),int2);
-        newindex:= ar2[int2];
-       end;
-       writer.writeupbuheader(upbuheader);
-       if kind in [ukdelete,ukmodify] then begin
-        datapo:= @(oldvalues^.header);
-        writer.write(datapo^.fielddata,fnullmasksize);
-        for int2:= 0 to fieldco - 1 do begin
-         writer.writefielddata(datapo,int2);
-        end;
-       end;
-      end;
-     end;
+     findarrayitem(fupdatebuffer[int1].bookmark.recordpo,ar1,@comparepointer,
+                                         sizeof(pointer),int2);
+     logupdatebuffer(writer,fupdatebuffer[int1],ar2[int2]);
     end;
    end;
-   upbuheader.kind:= tupdatekind(-1);
-   upbuheader.newindex:= minint;
-   writer.writeupbuheader(upbuheader); //endmarker
+   writer.writeendmarker;
   end;
  finally
   writer.free;
@@ -3640,6 +3662,28 @@ begin
  try
   loadfromstream(stream1);
  finally
+  stream1.free;
+ end;
+end;
+
+procedure tmsebufdataset.startlogger;
+var
+ stream1: tmsefilestream;
+begin
+ if flogfilename <> '' then begin
+  stream1:= tmsefilestream.create(flogfilename,fm_create);
+  flogger:= tbufstreamwriter.create(self,stream1);
+ end;
+end;
+
+procedure tmsebufdataset.closelogger;
+var
+ stream1: tstream;
+begin
+ if flogger <> nil then begin
+  flogger.writeendmarker;
+  stream1:= flogger.fstream;
+  freeandnil(flogger);
   stream1.free;
  end;
 end;

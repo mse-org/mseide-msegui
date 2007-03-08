@@ -153,6 +153,10 @@ type
    function getvalue: msestring; override;
  end;
 
+ tnamepropertyeditor = class(tstringpropertyeditor)
+  procedure setvalue(const value: msestring); override;
+ end;
+ 
  tfontnamepropertyeditor = class(tstringpropertyeditor)
   protected
    function getdefaultstate: propertystatesty; override;
@@ -3758,6 +3762,16 @@ begin
   tarraypropertyeditor(fparenteditor).itemmoved(
           tarrayelementeditor(sender).findex,findex);
  end;
+end;
+
+{ tnamepropertyeditor }
+
+procedure tnamepropertyeditor.setvalue(const value: msestring);
+begin
+ if not isvalidident(value) then begin
+  raise exception.create('Invalid component name '''+value+'''.');
+ end;
+ inherited;
 end;
 
 initialization
