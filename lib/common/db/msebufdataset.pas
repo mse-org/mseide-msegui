@@ -147,9 +147,22 @@ type
 
  tmsebufdataset = class;
  
- updatebufferheaderty = record
+ logflagty = (lf_end,lf_rec,lf_update);
+ reclogheaderty = record
+  po: pointer;
+ end;
+ updatelogheaderty = record
   kind: tupdatekind; //-1 -> endmarker
-  newindex: integer; 
+  po: pointer; 
+ end;
+ logbufferheaderty = record
+  case flag: logflagty of
+   lf_rec: (
+    rec: reclogheaderty;
+   );
+   lf_update: (
+    update: updatelogheaderty;
+   );
  end;
  
  tbufstreamwriter = class
@@ -168,8 +181,10 @@ type
    procedure writestring(const avalue: string);
    procedure writemsestring(const avalue: msestring);
    procedure writeinteger(const avalue: integer);
+   procedure writepointer(const avalue: pointer);
+   
    procedure writefielddef(const afielddef: tfielddef);
-   procedure writeupbuheader(const aheader: updatebufferheaderty);
+   procedure writelogbufferheader(const aheader: logbufferheaderty);
    procedure writeendmarker;
  end;
 
@@ -188,9 +203,10 @@ type
    function readstring: string;
    function readmsestring: msestring;
    function readinteger: integer;
+   function readpointer: pointer;
    procedure readfielddef(const aowner: tfielddefs);
-   function readupbuheader(out aheader: updatebufferheaderty): boolean;
-                //false if eof or endmarker
+   function readlogbufferheader(out aheader: logbufferheaderty): boolean;
+                    //false if eof or lf_end
  end;
  
   TResolverErrorEvent = procedure(Sender: TObject; DataSet: tmsebufdataset;
@@ -424,7 +440,9 @@ type
    procedure doloadfromstream;
    procedure dointernalclose;
    procedure logupdatebuffer(const awriter: tbufstreamwriter; 
-                     const abuffer: recupdatebufferty; const aindex: integer);
+                     const abuffer: recupdatebufferty);
+   procedure logrecbuffer(const awriter: tbufstreamwriter;
+                     const abuffer: pintrecordty);
   protected
    fbstate: bufdatasetstatesty;
    fallpacketsfetched : boolean;
@@ -826,20 +844,24 @@ begin
  end;
 end;
 
-procedure tbufstreamwriter.writeupbuheader(const aheader: updatebufferheaderty);
+procedure tbufstreamwriter.writelogbufferheader(
+                                const aheader: logbufferheaderty);
 begin
  write(aheader,sizeof(aheader));
 end;
 
 procedure tbufstreamwriter.writeendmarker;
 var
- header: updatebufferheaderty;
+ abuffer: logbufferheaderty;
 begin
- with header do begin
-  kind:= tupdatekind(-1);
-  newindex:= minint;
- end;
- writeupbuheader(header);
+ fillchar(abuffer,sizeof(abuffer),0);
+ abuffer.flag:= lf_end;
+ write(abuffer,sizeof(abuffer));
+end;
+
+procedure tbufstreamwriter.writepointer(const avalue: pointer);
+begin
+ write(avalue,sizeof(pointer));
 end;
 
 { tbufstreamreader }
@@ -954,11 +976,16 @@ begin
  def1.precision:= precision;
 end;
 
-function tbufstreamreader.readupbuheader(
-                      out aheader: updatebufferheaderty): boolean;
+function tbufstreamreader.readlogbufferheader(
+                      out aheader: logbufferheaderty): boolean;
 begin
  result:= (read(aheader,sizeof(aheader)) = sizeof(aheader)) and 
-          (ord(aheader.kind) <> -1);
+          (aheader.flag <> lf_end);
+end;
+
+function tbufstreamreader.readpointer: pointer;
+begin
+ readbuffer(result,sizeof(pointer));
 end;
 
 type
@@ -2165,6 +2192,11 @@ begin
   end;
   if state = dsinsert then begin
    fcurrentbuf:= intallocrecord;
+  end
+  else begin
+   if flogger <> nil then begin
+//    flogger.logrecbuffer(@header);
+   end;
   end;
   if not getrecordupdatebuffer then begin
    getnewupdatebuffer;
@@ -3393,28 +3425,29 @@ const
 // data format:
 // header: bdsfheaderty
 // fielddefs
-// currentvalues
+// currentvalues: recbufferheader,pointer,nullmask,fielddata
 // updatebuffer
-// updatebufferitem: updatebufferheader,old fielddata if not insert
+// updatebufferitem: updatebufferheader,old nullmask,fielddata if not insert
 // endmarker
  
 procedure tmsebufdataset.logupdatebuffer(const awriter: tbufstreamwriter; 
-                const abuffer: recupdatebufferty; const aindex: integer);
+                const abuffer: recupdatebufferty);
 var
- upbuheader: updatebufferheaderty;
+ header1: logbufferheaderty;
  datapo: precheaderty;
  int2: integer;
 begin
- with abuffer,upbuheader do begin
+ header1.flag:= lf_update;
+ with abuffer,header1.update do begin
   if bookmark.recordpo <> nil then begin
    kind:= updatekind;
    if kind = ukdelete then begin
-    newindex:= -1;
+    po:= nil;
    end
    else begin
-    newindex:= aindex;
+    po:= bookmark.recordpo;
    end;
-   awriter.writeupbuheader(upbuheader);
+   awriter.writelogbufferheader(header1);
    if kind in [ukdelete,ukmodify] then begin
     datapo:= @(oldvalues^.header);
     awriter.write(datapo^.fielddata,fnullmasksize);
@@ -3426,15 +3459,31 @@ begin
  end;
 end;
 
+procedure tmsebufdataset.logrecbuffer(const awriter: tbufstreamwriter;
+                                               const abuffer: pintrecordty);
+var
+ datapo: precheaderty;
+ header1: logbufferheaderty;
+ int1: integer;
+begin
+ header1.flag:= lf_rec;
+ with header1.rec do begin
+  po:= abuffer;
+ end;
+ awriter.writelogbufferheader(header1);
+ datapo:= @(abuffer^.header);
+ awriter.write(datapo^.fielddata,fnullmasksize);
+ for int1:= 0 to high(ffieldinfos) do begin
+  awriter.writefielddata(datapo,int1);
+ end;
+end;
+
 procedure tmsebufdataset.savetostream(const astream: tstream);
 var
  header: tbsfheaderty;
  writer: tbufstreamwriter;
  fieldco: integer;
- datapo: precheaderty;
  int1,int2: integer;
- ar1: pointerarty;
- ar2: integerarty;
 begin
  checkbrowsemode;
  fetchallblobs;
@@ -3457,23 +3506,11 @@ begin
    writer.write(ffieldinfos[0],fieldco * sizeof(ffieldinfos[0]));
    with findexes[0] do begin
     for int1:= 0 to recordcount - 1 do begin
-     datapo:= @(pintrecordty(ind[int1])^.header);
-     writer.write(datapo^.fielddata,fnullmasksize);
-     for int2:= 0 to fieldco - 1 do begin
-      writer.writefielddata(datapo,int2);
-     end;
+     logrecbuffer(writer,pintrecordty(ind[int1]));
     end;
    end;
-   if changecount > 0 then begin
-    ar1:= nil;
-    allocuninitedarray(fbrecordcount,sizeof(pointer),ar1);
-    move(pointer(findexes[0])^,pointer(ar1)^,fbrecordcount*sizeof(pointer));
-    sortarray(ar1,@comparepointer,sizeof(pointer),ar2);
-    for int1:= 0 to high(fupdatebuffer) do begin
-     findarrayitem(fupdatebuffer[int1].bookmark.recordpo,ar1,@comparepointer,
-                                         sizeof(pointer),int2);
-     logupdatebuffer(writer,fupdatebuffer[int1],ar2[int2]);
-    end;
+   for int1:= 0 to high(fupdatebuffer) do begin
+    logupdatebuffer(writer,fupdatebuffer[int1]);
    end;
    writer.writeendmarker;
   end;
@@ -3496,7 +3533,9 @@ var
  datapo: precheaderty;
  int1,int2: integer;
  ar1: fieldinfoarty;
- upbuheader: updatebufferheaderty;
+ header1: logbufferheaderty;
+ ar2: pointerarty;
+ ar3: integerarty;
 begin
  exclude(fbstate,bs_blobscached);
  reader:= tbufstreamreader.create(self,floadingstream);
@@ -3529,7 +3568,13 @@ begin
       formaterror;
      end;
     end;
-    for int1:= 0 to header.recordcount - 1 do begin
+    setlength(ar2,header.recordcount);
+    for int1:= 0 to high(ar2) do begin
+     if not reader.readlogbufferheader(header1) or 
+                                   (header1.flag <> lf_rec) then begin
+      formaterror;
+     end;
+     ar2[int1]:= header1.rec.po;
      datapo:= @femptybuffer^.header;
      reader.readbuffer(datapo^.fielddata,fnullmasksize);
      for int2:= 0 to fieldco - 1 do begin
@@ -3538,33 +3583,42 @@ begin
      appendrecord(femptybuffer);
      femptybuffer:= intallocrecord;
     end;
+    ar1:= nil;
+    allocuninitedarray(fbrecordcount,sizeof(pointer),ar1);
+    move(pointer(findexes[0])^,pointer(ar1)^,fbrecordcount*sizeof(pointer));
+    sortarray(ar2,@comparepointer,sizeof(pointer),ar3);
+        //index of old pointers
     int2:= 0;
-    while reader.readupbuheader(upbuheader) do begin
-     if high(fupdatebuffer) < int2 then begin
-      setlength(fupdatebuffer,2*high(fupdatebuffer)+258);
-     end;     
-     with fupdatebuffer[int2],upbuheader do begin
-      updatekind:= kind;
-      if (kind = ukdelete) and (newindex <> -1) then begin
-       formaterror;
-      end
-      else begin
-       if (newindex < 0) or (newindex >= fbrecordcount) then begin
-        formaterror;
+    while reader.readlogbufferheader(header1) do begin
+     if header1.flag = lf_update then begin
+      if high(fupdatebuffer) < int2 then begin
+       setlength(fupdatebuffer,2*high(fupdatebuffer)+258);
+      end;     
+      with fupdatebuffer[int2],header1.update do begin
+       updatekind:= kind;
+       if kind = ukdelete then begin
+        bookmark.recno:= -1;
+        bookmark.recordpo:= nil;
+       end
+       else begin
+        if not findarrayitem(po,ar2,@comparepointer,
+                                         sizeof(pointer),int1) then begin
+         formaterror;        //old pointer not found
+        end;
+        bookmark.recno:= ar3[int1];
+        bookmark.recordpo:= findexes[0].ind[bookmark.recno];
+       end;
+       if kind in [ukdelete,ukmodify] then begin
+        oldvalues:= intallocrecord;
+        datapo:= @oldvalues^.header;
+        reader.readbuffer(datapo^.fielddata,fnullmasksize);
+        for int1:= 0 to fieldco - 1 do begin
+         reader.readfielddata(datapo,int1);
+        end;
        end;
       end;
-      bookmark.recno:= newindex;
-      bookmark.recordpo:= findexes[0].ind[newindex];
-      if kind in [ukdelete,ukmodify] then begin
-       oldvalues:= intallocrecord;
-       datapo:= @oldvalues^.header;
-       reader.readbuffer(datapo^.fielddata,fnullmasksize);
-       for int1:= 0 to fieldco - 1 do begin
-        reader.readfielddata(datapo,int1);
-       end;
-      end;
+      inc(int2);
      end;
-     inc(int2);
     end; 
     setlength(fupdatebuffer,int2);   
     fallpacketsfetched:= true;
