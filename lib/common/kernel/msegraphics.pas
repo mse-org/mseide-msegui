@@ -985,6 +985,8 @@ const
 
 procedure init;
 procedure deinit;
+procedure gdi_lock;   //locks only if not mainthread
+procedure gdi_unlock; //unlocks only if not mainthread
 
 procedure allocbuffer(var buffer: bufferty; size: integer);
 procedure freebuffer(var buffer: bufferty);
@@ -1002,6 +1004,8 @@ function realfontname(const aliasname: string): string;
 
 procedure gdierror(error: gdierrorty; const text: string = ''); overload;
 procedure gdierror(error: gdierrorty; sender: tobject; text: string = ''); overload;
+procedure gdierrorlocked(error: gdierrorty; const text: string = ''); overload;
+procedure gdierrorlocked(error: gdierrorty; sender: tobject; text: string = ''); overload;
 
 function stringtocolor(value: string): colorty;
 function colortostring(value: colorty): string;
@@ -1079,6 +1083,24 @@ type
               const options: fontoptionsty = []): boolean;
               //true if registering ok
  end;
+
+procedure gdi_lock;
+begin
+ with application do begin
+  if not ismainthread then begin
+   lock;
+  end;
+ end;
+end;
+
+procedure gdi_unlock;
+begin
+ with application do begin
+  if not ismainthread then begin
+   unlock;
+  end;
+ end;
+end;
 
 var
  colormaps: array[colormapsty] of array of pixelty;
@@ -1306,7 +1328,9 @@ begin
  with fonts[index] do begin
   data.name:= '';
   data.charset:= '';
+  gdi_lock;
   gui_freefontdata(data);
+  gdi_unlock;
   refcount:= 0;
  end;
 end;
@@ -1385,8 +1409,10 @@ var
                             fontstylehandlemask);
   end;
  end;
-
+label
+ endlab;
 begin
+ gdi_lock;
  with fontinfo do begin           //todo: hash or similar
   style1:= {$ifdef FPC}longword{$else}byte{$endif}(style) and fontstylehandlemask;
   for int1:= 0 to high(fonts) do begin
@@ -1402,7 +1428,7 @@ begin
      (charset = data.charset) then begin
      inc(refcount);
      result:= int1 + 1;
-     exit;
+     goto endlab
     end;
    end;
   end;
@@ -1420,6 +1446,8 @@ begin
    result:= 0;
   end;
  end;
+endlab:
+ gdi_unlock;
 end;
 
 
@@ -1450,6 +1478,12 @@ begin
  raise egdi.create(error,text);
 end;
 
+procedure gdierrorlocked(error: gdierrorty; const text: string = ''); overload;
+begin
+ gdi_unlock;
+ gdierror(error,text);
+end;
+
 procedure gdierror(error: gdierrorty; sender: tobject;
                        text: string = ''); overload;
 begin
@@ -1463,6 +1497,13 @@ begin
   end;
  end;
  gdierror(error,text);
+end;
+
+procedure gdierrorlocked(error: gdierrorty; sender: tobject;
+                       text: string = ''); overload;
+begin
+ gdi_unlock;
+ gdierror(error,sender,text);
 end;
 
 function getdefaultcolorinfo(map: colormapsty; index: integer): pcolorinfoty;
@@ -1852,6 +1893,7 @@ end;
 procedure tsimplebitmap.creategc;
 var
  gc: gcty;
+ err: guierrorty;
 begin
  if fcanvas <> nil then begin
   fillchar(gc,sizeof(gcty),0);
@@ -1859,7 +1901,10 @@ begin
   if pms_monochrome in fstate then begin
    include(gc.drawingflags,df_canvasismonochrome);
   end;
-  guierror(gui_creategc(fhandle,true,gc),self);
+  gdi_lock;
+  err:= gui_creategc(fhandle,true,gc);
+  gdi_unlock;
+  guierror(err,self);
   fcanvas.linktopaintdevice(fhandle,gc,fsize,fdefaultcliporigin);
  end;
 end;
@@ -1877,7 +1922,9 @@ procedure tsimplebitmap.createhandle(copyfrom: pixmapty);
 begin
  if (fsize.cx > 0) and (fsize.cy > 0) then begin
   if fhandle = 0 then begin
+   gdi_lock;
    fhandle:= gui_createpixmap(fsize,0,pms_monochrome in fstate,copyfrom);
+   gdi_unlock;
    if fhandle = 0 then begin
     gdierror(gde_pixmap);
    end;
@@ -1921,7 +1968,9 @@ begin
   bo1:= pms_ownshandle in fstate;
   releasehandle;
   if bo1 then begin
+   gdi_lock;
    gui_freepixmap(fhandle);
+   gdi_unlock;
   end;
   fhandle:= 0;
  end;
@@ -1966,7 +2015,9 @@ begin
  fhandle:= value;
  if value <> 0 then begin
   info.handle:= value;
+  gdi_lock;
   gui_getpixmapinfo(info);
+  gdi_unlock;
   with info do begin
    fsize:= size;
    if depth = 1 then begin
@@ -2535,9 +2586,13 @@ end;
 procedure tfont.gcneeded(const sender: tcanvas);
 var
  gc: gcty;
+ err: guierrorty;
 begin
  fillchar(gc,sizeof(gcty),0);
- guierror(gui_creategc(0,false,gc),self);
+ gdi_lock;
+ err:= gui_creategc(0,false,gc);
+ gdi_unlock;
+ guierror(err,self);
  sender.linktopaintdevice(0,gc,nullsize,nullpoint);
 end;
 
@@ -2685,16 +2740,19 @@ begin
    lock;
    try
     fgdifuncs^[func](fdrawinfo);
+    if flushgdi then begin
+     gui_flushgdi;
+    end;
    finally
     unlock;
    end;
   end
   else begin
    fgdifuncs^[func](fdrawinfo);
+   if flushgdi then begin
+    gui_flushgdi;
+   end;
   end;
- end;
- if flushgdi then begin
-  gui_flushgdi;
  end;
 end;
 
@@ -3673,7 +3731,9 @@ begin
    text:= pointer(atext);
    count:= length(atext);
   end;
+  gdi_lock;
   result:= gui_gettext16width(fdrawinfo);
+  gdi_unlock;
  end;
 end;
 
@@ -3694,7 +3754,8 @@ begin
   resultpo:= @result;
  end;
  checkgcstate([cs_gc]);
- gdierror(gui_getfontmetrics(fdrawinfo),self);
+ gdi_lock;
+ gdierrorlocked(gui_getfontmetrics(fdrawinfo),self);
  with result do begin
   sum:= width - leftbearing - rightbearing;
  end;

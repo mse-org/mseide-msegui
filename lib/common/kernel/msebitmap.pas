@@ -394,7 +394,9 @@ begin
  end;
  destroyhandle;
  fsize:= asize;
+ gdi_lock;
  fhandle:= gui_createbitmapfromdata(asize,data,msbitfirst,dwordaligned,bottomup);
+ gdi_unlock;
  if fhandle = 0 then begin
   gdierror(gde_pixmap);
  end;
@@ -587,11 +589,13 @@ end;
 procedure tbitmap.getimage;
 begin
  if fhandle <> 0 then begin
+  gdi_lock;
   if fcanvas <> nil then begin
-   gdierror(gui_pixmaptoimage(fhandle,fimage,tcanvas1(fcanvas).fdrawinfo.gc.handle));
+   gdierrorlocked(gui_pixmaptoimage(fhandle,fimage,
+                           tcanvas1(fcanvas).fdrawinfo.gc.handle));
   end
   else begin
-   gdierror(gui_pixmaptoimage(fhandle,fimage,0));
+   gdierrorlocked(gui_pixmaptoimage(fhandle,fimage,0));
   end;
  end
  else begin
@@ -620,10 +624,12 @@ begin
  else begin
   ca1:= 0;
  end;
+ gdi_lock;
  if gui_imagetopixmap(fimage,pixmap,ca1) = gde_ok then begin
   handle:= pixmap;
   include(fstate,pms_ownshandle);
  end;
+ gdi_unlock;
 end;
 
 function tbitmap.checkindex(const index: pointty): integer;

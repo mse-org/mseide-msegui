@@ -1446,7 +1446,9 @@ var
  rowbytes: integer;
  image: imagety;
 begin
+ gdi_lock;
  result:= gui_pixmaptoimage(pixmap,image,agchandle) = gde_ok;
+ gdi_unlock;
  if not result then begin
   exit;
  end;
@@ -1559,7 +1561,8 @@ var
  masked: boolean;
  po1,po2,po3: pbyte;
  int1: integer;
- 
+label
+ endlab; 
 begin
  with fdrawinfo,copyarea do begin
   if not (df_canvasispixmap in source^.gc.drawingflags) then begin
@@ -1570,15 +1573,19 @@ begin
   if masked then begin
    if fpslevel >= psl_3 then begin
     with source^ do begin
+     gdi_lock;
      if gui_pixmaptoimage(tsimplebitmap1(mask).handle,image,
                                    mask.canvas.gchandle) <> gde_ok then begin
-      exit;
+      goto endlab;   
      end;
+     gdi_unlock;
      convertmono(sourcerect^,image,ar2,maskrowbytes);
      gui_freeimagemem(image.pixels);
+     gdi_lock;
      if gui_pixmaptoimage(paintdevice,image,gc.handle) <> gde_ok then begin
-      exit;
-     end
+      goto endlab;
+     end;
+     gdi_unlock;
     end;
     if image.monochrome then begin
      convertmono(sourcerect^,image,ar3,rowbytes);
@@ -1626,12 +1633,14 @@ begin
     end;
    end
    else begin
+    gdi_lock;
     if not (createpattern(sourcerect^,destrect^,acolorbackground,acolorforeground,
                    source^.paintdevice,source^.gc.handle,imagepatname) and 
           (gui_pixmaptoimage(tsimplebitmap1(mask).handle,image,
                                    mask.canvas.gchandle) = gde_ok)) then begin
-     exit;
+     goto endlab;
     end;
+    gdi_unlock;
     convertmono(sourcerect^,image,ar1,rowbytes);
     gui_freeimagemem(image.pixels);
     str1:= 'gsave setpattern /picstr '+inttostr(rowbytes)+' string def ';
@@ -1652,9 +1661,11 @@ begin
   end
   else begin
    with source^ do begin
+    gdi_lock;
     if gui_pixmaptoimage(paintdevice,image,gc.handle) <> gde_ok then begin
-     exit;
+     goto endlab;
     end;
+    gdi_unlock;
    end;
    components:= 1;
    if image.monochrome then begin
@@ -1722,6 +1733,9 @@ begin
   str1:= str1 + '/imdict null def /madict null def ';
  end;
  streamwrite(str1+nl);
+ exit;
+endlab:
+ gdi_unlock;
 end;
 
 procedure tpostscriptcanvas.endpage;
