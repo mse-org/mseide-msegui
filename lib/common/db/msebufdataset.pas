@@ -149,10 +149,11 @@ type
  
  logflagty = (lf_end,lf_rec,lf_update);
  reclogheaderty = record
+  kind: tupdatekind;
   po: pointer;
  end;
  updatelogheaderty = record
-  kind: tupdatekind; //-1 -> endmarker
+  kind: tupdatekind;
   po: pointer; 
  end;
  logbufferheaderty = record
@@ -207,6 +208,7 @@ type
    procedure readfielddef(const aowner: tfielddefs);
    function readlogbufferheader(out aheader: logbufferheaderty): boolean;
                     //false if eof or lf_end
+   procedure readrecord(const arecord: pintrecordty);
  end;
  
   TResolverErrorEvent = procedure(Sender: TObject; DataSet: tmsebufdataset;
@@ -441,8 +443,8 @@ type
    procedure dointernalclose;
    procedure logupdatebuffer(const awriter: tbufstreamwriter; 
                      const abuffer: recupdatebufferty);
-   procedure logrecbuffer(const awriter: tbufstreamwriter;
-                     const abuffer: pintrecordty);
+   procedure logrecbuffer(const awriter: tbufstreamwriter; 
+                         const akind: tupdatekind; const abuffer: pintrecordty);
   protected
    fbstate: bufdatasetstatesty;
    fallpacketsfetched : boolean;
@@ -512,6 +514,7 @@ type
    procedure checkconnected;
    procedure startlogger;
    procedure closelogger;
+   procedure savestate(const awriter: tbufstreamwriter);
  
    function  getfieldclass(fieldtype: tfieldtype): tfieldclass; override;
    function getnextpacket(const all: boolean) : integer;
@@ -553,6 +556,7 @@ type
    destructor destroy; override;
    procedure Append;
 
+   procedure recover; //loads from logfile
    procedure savetostream(const astream: tstream);
    procedure loadfromstream(const astream: tstream);
    procedure savetofile(const afilename: filenamety);
@@ -999,6 +1003,18 @@ type
   recordcount: integer;
  end;
  
+procedure tbufstreamreader.readrecord(const arecord: pintrecordty);
+var
+ int1: integer;
+ datapo: precheaderty;
+begin
+ datapo:= @arecord^.header;
+ readbuffer(datapo^.fielddata,fowner.fnullmasksize);
+ for int1:= 0 to high(fowner.ffieldinfos) do begin
+  readfielddata(datapo,int1);
+ end;
+end;
+
 { tblobbuffer }
 
 constructor tblobbuffer.create(const aowner: tmsebufdataset; const afield: tfield);
@@ -2192,11 +2208,6 @@ begin
   end;
   if state = dsinsert then begin
    fcurrentbuf:= intallocrecord;
-  end
-  else begin
-   if flogger <> nil then begin
-//    flogger.logrecbuffer(@header);
-   end;
   end;
   if not getrecordupdatebuffer then begin
    getnewupdatebuffer;
@@ -2258,10 +2269,11 @@ begin
   end;
   finalizestrings(fcurrentbuf^.header);
   move(header,fcurrentbuf^.header,frecordsize); //get new field values
+  if flogger <> nil then begin
+   logrecbuffer(flogger,fupdatebuffer[fcurrentupdatebuffer].updatekind,
+                     fcurrentbuf);
+  end;
   if state = dsinsert then begin
-//   if eof then begin
-//    inc(frecno); //append
-//   end;
    with dsheader.bookmark do  begin
     frecno:= insertrecord(frecno,fcurrentbuf);
     fcurrentbuf:= factindexpo^.ind[frecno];
@@ -3423,11 +3435,13 @@ const
  bufdattag: bufdattagty = 'MSEBUFDAT'#0#0#0#0#0#0;
    
 // data format:
+//
 // header: bdsfheaderty
 // fielddefs
 // currentvalues: recbufferheader,pointer,nullmask,fielddata
 // updatebuffer
 // updatebufferitem: updatebufferheader,old nullmask,fielddata if not insert
+// postlog
 // endmarker
  
 procedure tmsebufdataset.logupdatebuffer(const awriter: tbufstreamwriter; 
@@ -3460,7 +3474,7 @@ begin
 end;
 
 procedure tmsebufdataset.logrecbuffer(const awriter: tbufstreamwriter;
-                                               const abuffer: pintrecordty);
+                       const akind: tupdatekind; const abuffer: pintrecordty);
 var
  datapo: precheaderty;
  header1: logbufferheaderty;
@@ -3468,52 +3482,62 @@ var
 begin
  header1.flag:= lf_rec;
  with header1.rec do begin
+  kind:= akind;
   po:= abuffer;
  end;
  awriter.writelogbufferheader(header1);
- datapo:= @(abuffer^.header);
- awriter.write(datapo^.fielddata,fnullmasksize);
- for int1:= 0 to high(ffieldinfos) do begin
-  awriter.writefielddata(datapo,int1);
+ if akind in [ukmodify,ukinsert] then begin
+  datapo:= @(abuffer^.header);
+  awriter.write(datapo^.fielddata,fnullmasksize);
+  for int1:= 0 to high(ffieldinfos) do begin
+   awriter.writefielddata(datapo,int1);
+  end;
  end;
 end;
 
-procedure tmsebufdataset.savetostream(const astream: tstream);
+procedure tmsebufdataset.savestate(const awriter: tbufstreamwriter);
 var
  header: tbsfheaderty;
  writer: tbufstreamwriter;
  fieldco: integer;
  int1,int2: integer;
 begin
+ fieldco:= length(ffieldinfos);
+ with header do begin
+  tag:= bufdattag;
+  byteorder:= 0;
+  version:= 0;
+  fieldcount:= fieldco;
+  fielddefcount:= fielddefs.count;
+  recordcount:= self.recordcount;
+ end;
+ if header.fieldcount > 0 then begin
+  awriter.write(header,sizeof(header));
+  for int1:= 0 to header.fielddefcount - 1 do begin
+   awriter.writefielddef(fielddefs[int1]);
+  end;
+  awriter.write(ffieldinfos[0],fieldco * sizeof(ffieldinfos[0]));
+  with findexes[0] do begin
+   for int1:= 0 to recordcount - 1 do begin
+    logrecbuffer(awriter,ukinsert,pintrecordty(ind[int1]));
+   end;
+  end;
+  for int1:= 0 to high(fupdatebuffer) do begin
+   logupdatebuffer(awriter,fupdatebuffer[int1]);
+  end;
+ end;
+end;
+
+procedure tmsebufdataset.savetostream(const astream: tstream);
+var
+ writer: tbufstreamwriter;
+begin
  checkbrowsemode;
  fetchallblobs;
- fieldco:= length(ffieldinfos);
  writer:= tbufstreamwriter.create(self,astream);
  try
-  with header do begin
-   tag:= bufdattag;
-   byteorder:= 0;
-   version:= 0;
-   fieldcount:= fieldco;
-   fielddefcount:= fielddefs.count;
-   recordcount:= self.recordcount;
-  end;
-  if header.fieldcount > 0 then begin
-   writer.write(header,sizeof(header));
-   for int1:= 0 to header.fielddefcount - 1 do begin
-    writer.writefielddef(fielddefs[int1]);
-   end;
-   writer.write(ffieldinfos[0],fieldco * sizeof(ffieldinfos[0]));
-   with findexes[0] do begin
-    for int1:= 0 to recordcount - 1 do begin
-     logrecbuffer(writer,pintrecordty(ind[int1]));
-    end;
-   end;
-   for int1:= 0 to high(fupdatebuffer) do begin
-    logupdatebuffer(writer,fupdatebuffer[int1]);
-   end;
-   writer.writeendmarker;
-  end;
+  savestate(writer);
+  writer.writeendmarker;
  finally
   writer.free;
  end;
@@ -3530,7 +3554,6 @@ var
  header: tbsfheaderty;
  reader: tbufstreamreader;
  fieldco: integer;
- datapo: precheaderty;
  int1,int2: integer;
  ar1: fieldinfoarty;
  header1: logbufferheaderty;
@@ -3575,11 +3598,14 @@ begin
       formaterror;
      end;
      ar2[int1]:= header1.rec.po;
+     reader.readrecord(femptybuffer);
+     {
      datapo:= @femptybuffer^.header;
      reader.readbuffer(datapo^.fielddata,fnullmasksize);
      for int2:= 0 to fieldco - 1 do begin
       reader.readfielddata(datapo,int2);
      end;
+     }
      appendrecord(femptybuffer);
      femptybuffer:= intallocrecord;
     end;
@@ -3590,34 +3616,43 @@ begin
         //index of old pointers
     int2:= 0;
     while reader.readlogbufferheader(header1) do begin
-     if header1.flag = lf_update then begin
-      if high(fupdatebuffer) < int2 then begin
-       setlength(fupdatebuffer,2*high(fupdatebuffer)+258);
-      end;     
-      with fupdatebuffer[int2],header1.update do begin
-       updatekind:= kind;
-       if kind = ukdelete then begin
-        bookmark.recno:= -1;
-        bookmark.recordpo:= nil;
-       end
-       else begin
-        if not findarrayitem(po,ar2,@comparepointer,
-                                         sizeof(pointer),int1) then begin
-         formaterror;        //old pointer not found
+     case header1.flag of
+      lf_update: begin
+       if high(fupdatebuffer) < int2 then begin
+        setlength(fupdatebuffer,2*high(fupdatebuffer)+258);
+       end;     
+       with fupdatebuffer[int2],header1.update do begin
+        updatekind:= kind;
+        if kind = ukdelete then begin
+         bookmark.recno:= -1;
+         bookmark.recordpo:= nil;
+        end
+        else begin
+         if not findarrayitem(po,ar2,@comparepointer,
+                                          sizeof(pointer),int1) then begin
+          formaterror;        //old pointer not found
+         end;
+         bookmark.recno:= ar3[int1];
+         bookmark.recordpo:= findexes[0].ind[bookmark.recno];
         end;
-        bookmark.recno:= ar3[int1];
-        bookmark.recordpo:= findexes[0].ind[bookmark.recno];
-       end;
-       if kind in [ukdelete,ukmodify] then begin
-        oldvalues:= intallocrecord;
-        datapo:= @oldvalues^.header;
-        reader.readbuffer(datapo^.fielddata,fnullmasksize);
-        for int1:= 0 to fieldco - 1 do begin
-         reader.readfielddata(datapo,int1);
+        if kind in [ukdelete,ukmodify] then begin
+         oldvalues:= intallocrecord;
+         reader.readrecord(oldvalues);
         end;
        end;
+       inc(int2);
       end;
-      inc(int2);
+      lf_rec: begin
+       with header1.rec do begin
+        if not findarrayitem(po,ar2,@comparepointer,
+                                               sizeof(pointer),int1) then begin
+         if kind <> ukinsert then begin
+          formaterror;
+         end;
+        end;        
+        reader.readrecord(findexes[0].ind[ar3[int1]]);
+       end;        
+      end;
      end;
     end; 
     setlength(fupdatebuffer,int2);   
@@ -3720,6 +3755,15 @@ begin
  end;
 end;
 
+procedure tmsebufdataset.recover;
+begin
+ if trim(flogfilename) = '' then begin
+  databaseerror('No log file name.',self);
+ end;
+ loadfromfile(flogfilename);
+ startlogger;
+end;
+
 procedure tmsebufdataset.startlogger;
 var
  stream1: tmsefilestream;
@@ -3727,6 +3771,7 @@ begin
  if flogfilename <> '' then begin
   stream1:= tmsefilestream.create(flogfilename,fm_create);
   flogger:= tbufstreamwriter.create(self,stream1);
+  savestate(flogger);
  end;
 end;
 

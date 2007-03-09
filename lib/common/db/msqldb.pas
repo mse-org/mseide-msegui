@@ -1294,12 +1294,14 @@ procedure TSQLQuery.connect(const aexecute: boolean);
 
   procedure InitialiseModifyQuery(var qry : TSQLQuery; aSQL: TSTringList);  
   begin
-   qry:= TSQLQuery.Create(nil);
-   with qry do begin
-    ParseSQL:= False;
-    DataBase:= Self.DataBase;
-    Transaction:= Self.Transaction;
-    SQL.Assign(aSQL);
+   if qry = nil then begin
+    qry:= TSQLQuery.Create(nil);
+    with qry do begin
+     ParseSQL:= False;
+     DataBase:= Self.DataBase;
+     Transaction:= Self.Transaction;
+     SQL.Assign(aSQL);
+    end;
    end;
   end; //initialisemodifyquery
 
@@ -1926,6 +1928,7 @@ begin
  end;
  if avalue <> connected then begin
   if avalue then begin
+   closelogger;
    connect(false);
   end
   else begin
@@ -1933,6 +1936,7 @@ begin
     fetchallblobs;
     tsqltransaction(transaction).disconnect(self);
     exclude(fbstate,bs_connected);
+    startlogger;
    end;
   end;
  end;
