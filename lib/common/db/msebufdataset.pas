@@ -1967,6 +1967,9 @@ begin
  deleterecord(frecno);
 //  dec(fbrecordcount);
  fupdatebuffer[fcurrentupdatebuffer].updatekind := ukdelete;
+ if flogger <> nil then begin
+  logupdatebuffer(flogger,fupdatebuffer[fcurrentupdatebuffer]);
+ end;
 end;
 
 procedure tmsebufdataset.applyrecupdate(updatekind : tupdatekind);
@@ -3459,14 +3462,9 @@ begin
  with abuffer,header1.update do begin
   if bookmark.recordpo <> nil then begin
    kind:= updatekind;
-   if kind = ukdelete then begin
-    po:= nil;
-   end
-   else begin
-    po:= bookmark.recordpo;
-   end;
+   po:= bookmark.recordpo;
    awriter.writelogbufferheader(header1);
-   if kind in [ukdelete,ukmodify] then begin
+   if kind = ukmodify then begin
     datapo:= @(oldvalues^.header);
     awriter.write(datapo^.fielddata,fnullmasksize);
     for int2:= 0 to high(ffieldinfos) do begin
@@ -3567,7 +3565,8 @@ var
  po1: pointer;
  
  function findrec(const oldpo: pointer; out newpo: pointer;
-                                out aindex: integer): boolean;
+                                out aindex: integer;
+                                const delete: boolean = false): boolean;
            //returns new pointer
  var
   int1: integer;
@@ -3577,6 +3576,13 @@ var
   if result then begin
    aindex:= ar3[int1];
    newpo:= findexes[0].ind[aindex];
+   if delete then begin
+    dec(header.recordcount);
+    dec(fbrecordcount);
+    deleteitem(findexes[0].ind,aindex);
+    deleteitem(ar3,int1);
+    deleteitem(ar2,int1);
+   end;
   end
   else begin
    for int1:= 0 to high(appended) do begin
@@ -3584,6 +3590,10 @@ var
      aindex:= header.recordcount+int1;
      newpo:= findexes[0].ind[aindex];
      result:= true;
+     if delete then begin
+      deleteitem(appended,int1);
+      dec(fbrecordcount);
+     end;
      break;
     end;
    end;
@@ -3647,16 +3657,25 @@ begin
        end;     
        with fupdatebuffer[int2],header1.update do begin
         updatekind:= kind;
-        if kind = ukdelete then begin
-         bookmark.recno:= -1;
-         bookmark.recordpo:= nil;
+        if kind = ukdelete then begin 
+                          //todo: deleted inserted and deleted modified
+         if po = nil then begin
+          bookmark.recno:= 0;
+          bookmark.recordpo:= nil;
+         end
+         else begin
+          if not findrec(po,bookmark.recordpo,bookmark.recno,true) then begin
+           formaterror;        //old pointer not found
+          end;
+          oldvalues:= bookmark.recordpo;
+         end;
         end
         else begin
          if not findrec(po,bookmark.recordpo,bookmark.recno) then begin
           formaterror;        //old pointer not found
          end;
         end;
-        if kind in [ukdelete,ukmodify] then begin
+        if kind = ukmodify then begin
          oldvalues:= intallocrecord;
          reader.readrecord(oldvalues);
         end;
