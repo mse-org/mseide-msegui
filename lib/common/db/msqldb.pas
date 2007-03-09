@@ -675,10 +675,16 @@ begin
 end;
 
 { TSQLTransaction }
+
 procedure TSQLTransaction.EndTransaction;
 
 begin
-  rollback;
+ case faction of
+  caCommit: commit;
+  caCommitRetaining: commitretaining;
+  caRollbackRetaining: rollbackretaining;
+  else rollback;        //canone,caRollback
+ end;
 end;
 
 function TSQLTransaction.GetHandle: pointer;
