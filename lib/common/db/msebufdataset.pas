@@ -3553,7 +3553,7 @@ procedure tmsebufdataset.doloadfromstream;
  begin
   databaseerror('Invalid data stream.',self);
  end;
-
+ 
 var
  header: tbsfheaderty;
  reader: tbufstreamreader;
@@ -3563,6 +3563,33 @@ var
  header1: logbufferheaderty;
  ar2: pointerarty;
  ar3: integerarty;
+ appended: pointerarty;
+ po1: pointer;
+ 
+ function findrec(const oldpo: pointer; out newpo: pointer;
+                                out aindex: integer): boolean;
+           //returns new pointer
+ var
+  int1: integer;
+ begin
+  result:= findarrayitem(oldpo,ar2,@comparepointer,
+                                          sizeof(pointer),int1);
+  if result then begin
+   aindex:= ar3[int1];
+   newpo:= findexes[0].ind[aindex];
+  end
+  else begin
+   for int1:= 0 to high(appended) do begin
+    if appended[int1] = oldpo then begin
+     aindex:= header.recordcount+int1;
+     newpo:= findexes[0].ind[aindex];
+     result:= true;
+     break;
+    end;
+   end;
+  end;
+ end;
+ 
 begin
  exclude(fbstate,bs_blobscached);
  reader:= tbufstreamreader.create(self,floadingstream);
@@ -3625,12 +3652,9 @@ begin
          bookmark.recordpo:= nil;
         end
         else begin
-         if not findarrayitem(po,ar2,@comparepointer,
-                                          sizeof(pointer),int1) then begin
+         if not findrec(po,bookmark.recordpo,bookmark.recno) then begin
           formaterror;        //old pointer not found
          end;
-         bookmark.recno:= ar3[int1];
-         bookmark.recordpo:= findexes[0].ind[bookmark.recno];
         end;
         if kind in [ukdelete,ukmodify] then begin
          oldvalues:= intallocrecord;
@@ -3641,13 +3665,18 @@ begin
       end;
       lf_rec: begin
        with header1.rec do begin
-        if not findarrayitem(po,ar2,@comparepointer,
-                                               sizeof(pointer),int1) then begin
+        if not findrec(po,po1,int1) then begin
          if kind <> ukinsert then begin
           formaterror;
          end;
-        end;        
-        reader.readrecord(findexes[0].ind[ar3[int1]]);
+         reader.readrecord(femptybuffer);
+         appendrecord(femptybuffer);
+         femptybuffer:= intallocrecord;
+         additem(appended,po);
+        end
+        else begin
+         reader.readrecord(po1);
+        end;
        end;        
       end;
      end;
