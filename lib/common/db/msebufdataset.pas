@@ -2695,10 +2695,8 @@ end;
 
 procedure tmsebufdataset.fetchallblobs;
 begin
- if not fallpacketsfetched then begin
-  fetchall;
-  fetchblobs;
- end;
+ fetchall;
+ fetchblobs;
 end;
 
 function tmsebufdataset.findcachedblob(var info: blobcacheinfoty): boolean;

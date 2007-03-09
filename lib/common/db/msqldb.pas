@@ -285,6 +285,7 @@ type
    procedure InternalClose; override;
    procedure InternalInitFieldDefs; override;
    procedure connect(const aexecute: boolean);
+   procedure disconnect;
    procedure InternalOpen; override;
    procedure internalrefresh; override;
    function  GetCanModify: Boolean; override;
@@ -728,12 +729,15 @@ begin
    databaseerror('Offline mode needs exclusive transaction.',sender);
   end;
   fdatasets.remove(sender);
+  {
   with sender do begin
    if (not IsPrepared) and (assigned(database)) and (assigned(FCursor)) then begin
         (database as TSQLconnection).UnPrepareStatement(FCursor);
    end;
   end;
+  }
   try
+//   commit;
    active:= false;
   finally
    fdatasets.insert(0,sender);
@@ -1033,27 +1037,34 @@ begin
   // not implemented - sql dataset
 end;
 
-procedure TSQLQuery.InternalClose;
+procedure TSQLQuery.disconnect;
 begin
- if fcursor <> nil then begin
-  fcursor.close;
- end;
- fblobintf:= nil;
-  if StatementType = stSelect then FreeFldBuffers;
-// Database and FCursor could be nil, for example if the database is not
-// assigned, and .open is called
+ if bs_connected in fbstate then begin
+  if fcursor <> nil then begin
+   fcursor.close;
+  end;
   if (not IsPrepared) and (assigned(database)) and (assigned(FCursor)) then begin
         (database as TSQLconnection).UnPrepareStatement(FCursor);
   end;
-  if DefaultFields then
-    DestroyFields;
-  FIsEOF := False;
   FreeAndNil(FUpdateQry);
   FreeAndNil(FInsertQry);
   FreeAndNil(FDeleteQry);
   exclude(fbstate,bs_connected);
+ end;
+end;
+
+procedure TSQLQuery.InternalClose;
+begin
+// Database and FCursor could be nil, for example if the database is not
+// assigned, and .open is called
+ disconnect;
+ fblobintf:= nil;
+ if StatementType = stSelect then FreeFldBuffers;
+ if DefaultFields then
+   DestroyFields;
+ FIsEOF := False;
 //  FRecordSize := 0;
-  inherited internalclose;
+ inherited internalclose;
 end;
 
 procedure TSQLQuery.InternalInitFieldDefs;
@@ -1922,7 +1933,7 @@ begin
 end;
 
 procedure TSQLQuery.setconnected(const avalue: boolean);
-begin
+begin         //todo: check connect disconnect sequence
  if not (bs_opening in fbstate) then begin
   checkactive;
  end;
@@ -1935,7 +1946,9 @@ begin
    if transaction.active then begin
     fetchallblobs;
     tsqltransaction(transaction).disconnect(self);
-    exclude(fbstate,bs_connected);
+    disconnect;
+    unprepare;
+    TSQLConnection(database).DeAllocateCursorHandle(FCursor);
     startlogger;
    end;
   end;
