@@ -1568,6 +1568,7 @@ begin
   if not (df_canvasispixmap in source^.gc.drawingflags) then begin
    exit;
   end;
+  subpoint1(destrect^.pos,origin); //map to pd origin
   checkcolorspace;
   masked:= (mask <> nil) and mask.monochrome;
   if masked then begin
