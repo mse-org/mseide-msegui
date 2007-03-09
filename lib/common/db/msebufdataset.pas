@@ -2194,6 +2194,8 @@ var
  bo1: boolean;
  ar1,ar2,ar3: integerarty;
  lastind: integer;
+ newupdatebuffer: boolean;
+ 
 begin
  checkindex(false); //needed for first append
  with pdsrecordty(activebuffer)^ do begin
@@ -2209,7 +2211,8 @@ begin
   if state = dsinsert then begin
    fcurrentbuf:= intallocrecord;
   end;
-  if not getrecordupdatebuffer then begin
+  newupdatebuffer:= not getrecordupdatebuffer;
+  if newupdatebuffer then begin
    getnewupdatebuffer;
    with fupdatebuffer[fcurrentupdatebuffer] do begin
     bookmark.recordpo:= fcurrentbuf;
@@ -2272,6 +2275,9 @@ begin
   if flogger <> nil then begin
    logrecbuffer(flogger,fupdatebuffer[fcurrentupdatebuffer].updatekind,
                      fcurrentbuf);
+   if newupdatebuffer then begin
+    logupdatebuffer(flogger,fupdatebuffer[fcurrentupdatebuffer]);
+   end;
   end;
   if state = dsinsert then begin
    with dsheader.bookmark do  begin
@@ -3597,13 +3603,6 @@ begin
      end;
      ar2[int1]:= header1.rec.po;
      reader.readrecord(femptybuffer);
-     {
-     datapo:= @femptybuffer^.header;
-     reader.readbuffer(datapo^.fielddata,fnullmasksize);
-     for int2:= 0 to fieldco - 1 do begin
-      reader.readfielddata(datapo,int2);
-     end;
-     }
      appendrecord(femptybuffer);
      femptybuffer:= intallocrecord;
     end;
