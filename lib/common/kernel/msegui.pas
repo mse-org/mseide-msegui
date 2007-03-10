@@ -4993,6 +4993,9 @@ begin
 //  if fframe <> nil then begin
 //   fframe.parentfontchanged;
 //  end;
+  if fframe <> nil then begin
+   fframe.updaterects;
+  end;
   parentfontchanged;
   if ffont <> nil then begin
    fontchanged;

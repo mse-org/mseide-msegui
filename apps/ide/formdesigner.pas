@@ -640,6 +640,7 @@ var
  int1: integer;
  widget1: twidget;
  comp1: tcomponent;
+ rect1,rect2: rectty;
 begin
  result:= false;
  if (dist.x <> 0) or (dist.y <> 0) then begin
@@ -673,14 +674,34 @@ begin
       comp1:= comp1.owner;
      end;
      if comp1 = nil then begin
-      fowner.fowner.invalidaterect(getcomponentrect1(
-                                         fowner.fowner,tcomponent(instance),
-                                         fowner.module));
+      rect1:= getcomponentrect1(fowner.fowner,tcomponent(instance),
+                                          fowner.module);
+      fowner.fowner.invalidaterect(rect1);
+      addpoint1(rect1.pos,dist);
+      with tformdesignerfo(fowner.fowner) do begin
+       rect2:= gridrect;
+       if form <> nil then begin      
+        shiftinrect(rect1,rect2);
+        subpoint1(rect1.pos,rect2.pos);
+       end
+       else begin
+        if rect1.x < rect2.x then begin
+         rect1.x:= rect2.x;
+        end;
+        if rect1.y < rect2.y then begin
+         rect1.y:= rect2.y;
+        end;
+       end;
+      end;
+      setcomponentpos(tcomponent(instance),rect1.pos);
+      fowner.fowner.invalidaterect(rect1);
+{                                         
       setcomponentpos(tcomponent(instance),
              addpoint(getcomponentpos(tcomponent(instance)),dist));
       fowner.fowner.invalidaterect(getcomponentrect1(
                                          fowner.fowner,tcomponent(instance),
                                          fowner.module));
+                                         }
       result:= true;
      end;
     end;
@@ -747,6 +768,7 @@ var
  handle: areaty;
  int1: integer;
 begin
+ updateinfos;
  result:= ar_none;
  index:= -1;
  if count = 1 then begin
@@ -1466,7 +1488,11 @@ begin
  checkmousewidget(info,capture);
  with info do begin
   ss1:= shiftstate * shiftstatesmask;
-  isinpaintrect:= pointinrect(pos,fowner.container.paintrect);
+  isinpaintrect:= pointinrect(pos,tformdesignerfo(fowner).gridrect);
+  {
+  isinpaintrect:= pointinrect(translatewidgetpoint(pos,fowner,fowner.container),
+                                     fowner.container.paintrect);
+  }
   clipo:= fowner.container.clientpos;
   subpoint1(pos,clipo);
   posbefore:= pos;
@@ -1538,7 +1564,10 @@ begin
     if ((area1 < firsthandle) or (area1 > lasthandle)) and
        ((factarea < firsthandle) or (factarea > lasthandle)) and 
        not (fdesigner.hascurrentcomponent and (eventkind = ek_buttonpress) and 
-           (button = mb_left) and (ss1 = [ss_left])) then begin
+       (button = mb_left) and (ss1 = [ss_left])) and 
+       not ((area1 = ar_component) and 
+           not(fselections[int1] is twidget)) and 
+       (factarea <> ar_componentmove) then begin
      addpoint1(pos,clipo);
      inherited;
      subpoint1(pos,clipo);
