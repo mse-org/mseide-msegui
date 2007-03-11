@@ -343,7 +343,7 @@ type
   public
    constructor create(aownsobjects: boolean);
    destructor destroy; override;
-   function add(value: iobjectlink): integer;
+   function add(const value: iobjectlink): integer;
    procedure insert(const index: integer; const value: iobjectlink); reintroduce;
    function getfirst: iobjectlink;
    function getlast: iobjectlink;
@@ -358,7 +358,9 @@ type
    function getitems(const index: integer): tlinkedobject;
    procedure setitems(const index: integer; const Value: tlinkedobject);
   public
-   function add(value: tlinkedobject): integer;
+   function findobject(const aobject: tlinkedobject): integer;
+                  //-1 if not found
+   function add(const value: tlinkedobject): integer;
    procedure insert(const index: integer; const value: tlinkedobject); reintroduce;
    function getfirst: tlinkedobject;
    function getlast: tlinkedobject;
@@ -371,7 +373,9 @@ type
    procedure setitems(const index: integer; const Value: tlinkedpersistent);
   protected
   public
-   procedure add(value: tlinkedpersistent);
+   function findobject(const aobject: tlinkedpersistent): integer;
+                  //-1 if not found
+   procedure add(const value: tlinkedpersistent);
    procedure insert(const index: integer; const value: tlinkedpersistent); reintroduce;
    function getfirst: tlinkedpersistent;
    function getlast: tlinkedpersistent;
@@ -384,6 +388,8 @@ type
    procedure setitems(const index: integer; const Value: tmsecomponent);
   protected
   public
+   function findobject(const aobject: tmsecomponent): integer;
+                  //-1 if not found
    function add(const value: tmsecomponent): integer;
    procedure insert(const index: integer; const value: tmsecomponent); reintroduce;
    function getfirst: tmsecomponent;
@@ -2634,7 +2640,7 @@ begin
  fobjectlinker.Free;
 end;
 
-function tlinkedqueue.add(value: iobjectlink): integer;
+function tlinkedqueue.add(const value: iobjectlink): integer;
 begin
  result:= inherited add(pointer(value));
  fobjectlinker.link(iobjectlink(self),value);
@@ -2733,7 +2739,7 @@ end;
 
 { tlinkedobjectqueue }
 
-function tlinkedobjectqueue.add(value: tlinkedobject): integer;
+function tlinkedobjectqueue.add(const value: tlinkedobject): integer;
 begin
  result:= inherited add(iobjectlink(value));
 end;
@@ -2765,9 +2771,14 @@ begin
  inherited setitems(index,iobjectlink(value));
 end;
 
+function tlinkedobjectqueue.findobject(const aobject: tlinkedobject): integer;
+begin
+ result:= indexof(iobjectlink(aobject));
+end;
+
 { tpersistentqueue }
 
-procedure tpersistentqueue.add(value: tlinkedpersistent);
+procedure tpersistentqueue.add(const value: tlinkedpersistent);
 begin
  inherited add(iobjectlink(value));
 end;
@@ -2797,6 +2808,11 @@ procedure tpersistentqueue.setitems(const index: integer;
                 const Value: tlinkedpersistent);
 begin
  inherited setitems(index,iobjectlink(value));
+end;
+
+function tpersistentqueue.findobject(const aobject: tlinkedpersistent): integer;
+begin
+ result:= indexof(iobjectlink(aobject));
 end;
 
 { tcomponentqueue }
@@ -2831,6 +2847,11 @@ procedure tcomponentqueue.setitems(const index: integer;
   const Value: tmsecomponent);
 begin
  inherited setitems(index,ievent(value));
+end;
+
+function tcomponentqueue.findobject(const aobject: tmsecomponent): integer;
+begin
+ result:= indexof(ievent(aobject));
 end;
 
  { tobjectlinkrecordlist }

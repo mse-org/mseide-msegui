@@ -6988,7 +6988,7 @@ begin
   if (fwindow <> nil) and (fparentwidget<> nil) and 
                             checkdescendent(fwindow.focusedwidget) then begin
    nextfocus;
-   if checkdescendent(fwindow.focusedwidget) then begin
+   if (fwindow <> nil) and checkdescendent(fwindow.focusedwidget) then begin
     show; //defocus was not possible
    end;
   end;

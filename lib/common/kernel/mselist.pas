@@ -134,6 +134,7 @@ type
    function delete(index: integer): pointer; override;
    function add(const value: pointer): integer;
    function indexof(const item: pointer): integer;
+   //-1 if not found
    procedure insert(index: integer; const value: pointer); override;
    function getfirst: pointer;
    function getlast: pointer;

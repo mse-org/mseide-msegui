@@ -381,6 +381,7 @@ uses
 
 type
  twidget1 = class(twidget);
+ twindow1 = class(twindow);
  tcustomframe1 = class(tcustomframe);
  tcustomtabwidget1 = class(tcustomtabwidget);
 
@@ -2177,6 +2178,9 @@ var
   end;
  end;
 
+var
+ modalresultbefore: modalresultty;
+ 
 begin
  inherited;
  with info do begin
@@ -2276,7 +2280,18 @@ begin
       case checkbuttonarea(pos) of
        dbr_close: begin
         if (dos_closebuttonclicked in fdockstate) then begin
-         widget1.hide;
+         with twindow1(widget1.window) do begin
+          fmodalresult:= mr_windowclosed;
+          try
+           if widget1.canclose(nil) then begin
+            widget1.hide;
+           end;
+          finally
+           if fmodalresult = mr_windowclosed then begin
+            fmodalresult:= mr_none;
+           end;
+          end;
+         end;
         end;
        end;
        dbr_maximize: mdistate:= mds_maximized;
