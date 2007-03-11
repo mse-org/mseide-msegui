@@ -384,7 +384,7 @@ type
    procedure setitems(const index: integer; const Value: tmsecomponent);
   protected
   public
-   procedure add(value: tmsecomponent);
+   function add(const value: tmsecomponent): integer;
    procedure insert(const index: integer; const value: tmsecomponent); reintroduce;
    function getfirst: tmsecomponent;
    function getlast: tmsecomponent;
@@ -2801,9 +2801,9 @@ end;
 
 { tcomponentqueue }
 
-procedure tcomponentqueue.add(value: tmsecomponent);
+function tcomponentqueue.add(const value: tmsecomponent): integer;
 begin
- inherited add(ievent(value));
+ result:= inherited add(ievent(value));
 end;
 
 function tcomponentqueue.getfirst: tmsecomponent;
