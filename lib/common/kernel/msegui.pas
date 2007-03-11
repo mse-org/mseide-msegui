@@ -342,6 +342,7 @@ type
    fi: frameinfoty;
    procedure setdisabled(const value: boolean); virtual;
    procedure updateclientrect; virtual;
+   procedure calcrects;
    procedure updaterects; virtual;
    procedure internalupdatestate;
    procedure updatestate; virtual;
@@ -876,6 +877,7 @@ type
    function isfontstored: Boolean;
    procedure setfont(const avalue: twidgetfont);
    function getfont: twidgetfont;
+   function getfont1: twidgetfont; //no getoptionalobject
    function getframefont: tfont;
    procedure fontchanged; virtual;
 
@@ -2828,7 +2830,7 @@ begin
  finnerclientrect:= deflaterect(fclientrect,fi.innerframe);
 end;
 
-procedure tcustomframe.updaterects;
+procedure tcustomframe.calcrects;
 begin
  fwidth.left:= abs(fi.levelo) + fi.framewidth + abs(fi.leveli);
  fwidth.top:= fwidth.left;
@@ -2843,6 +2845,11 @@ begin
  fpaintrect.size:= fintf.getwidgetrect.size;
  fpaintrect.cx:= fpaintrect.cx - fpaintframe.left - fpaintframe.right;
  fpaintrect.cy:= fpaintrect.cy - fpaintframe.top - fpaintframe.bottom;
+end;
+
+procedure tcustomframe.updaterects;
+begin
+ calcrects;
 end;
 
 procedure tcustomframe.updatestate;
@@ -4994,7 +5001,7 @@ begin
 //   fframe.parentfontchanged;
 //  end;
   if fframe <> nil then begin
-   fframe.updaterects;
+   fframe.calcrects; //rects must be valid for parentfontchanged
   end;
   parentfontchanged;
   if ffont <> nil then begin
@@ -8198,8 +8205,8 @@ begin
  if componentstate * [csdestroying,csloading] = [] then begin
   invalidate;
   if not (ws_loadedproc in fwidgetstate) then begin
-   for int1:= 0 to widgetcount - 1 do begin
-    widgets[int1].parentfontchanged;
+   for int1:= 0 to high(fwidgets) do begin
+    fwidgets[int1].parentfontchanged;
    end;
   end;
   updatefontheight;
@@ -8487,11 +8494,10 @@ begin
  setfontheight;
 end;
 
-function twidget.getfont: twidgetfont;
+function twidget.getfont1: twidgetfont;
 var
  widget1: twidget;
 begin
- getoptionalobject(ffont,{$ifdef FPC}@{$endif}internalcreatefont);
  widget1:= self;
  repeat
   result:= widget1.ffont;
@@ -8503,10 +8509,16 @@ begin
  result:= stockobjects.fonts[stf_default];
 end;
 
+function twidget.getfont: twidgetfont;
+begin
+ getoptionalobject(ffont,{$ifdef FPC}@{$endif}internalcreatefont);
+ result:= getfont1;
+end;
+
 function twidget.getframefont: tfont;
 begin
  if fparentwidget <> nil then begin
-  result:= fparentwidget.getfont;
+  result:= fparentwidget.getfont1;
  end
  else begin
   result:= stockobjects.fonts[stf_default];
