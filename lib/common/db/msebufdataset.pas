@@ -2000,6 +2000,9 @@ begin
       deleterecord(bookmark.recordpo);
       if bookmark.recordpo = fcurrentbuf then begin
        fcurrentbuf:= nil;
+       if frecno >= 0 then begin
+        dec(frecno);
+       end;
       end;
       intfreerecord(bookmark.recordpo);
      end;
