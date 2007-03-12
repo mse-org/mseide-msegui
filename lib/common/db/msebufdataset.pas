@@ -1459,7 +1459,7 @@ begin
     end;
    end;
    gmcurrent: begin
-    if (frecno < 0) or (frecno >= fbrecordcount) then begin
+    if (frecno < 0) or (frecno >= fbrecordcount) or (fcurrentbuf = nil) then begin
      result := grerror;
     end;
    end;
@@ -1998,6 +1998,9 @@ begin
     else begin
      if updatekind = ukinsert then begin
       deleterecord(bookmark.recordpo);
+      if bookmark.recordpo = fcurrentbuf then begin
+       fcurrentbuf:= nil;
+      end;
       intfreerecord(bookmark.recordpo);
      end;
     end;
@@ -3723,23 +3726,38 @@ begin
       end;
       lf_cancel: begin
        with header1.update do begin
-        case kind of
-         ukmodify: begin
-          int3:= -1;
-          for int1:= 0 to int2 - 1 do begin
-           if oldupdatepointers[int1] = po then begin
-            int3:= int1;
-            break;
-           end;
-          end;
-          if int3 < 0 then begin
-           formaterror;
-          end;
-          cancelrecupdate(updabuf[int3]);
-          updabuf[int3].bookmark.recordpo:= nil;
-                    //inactive
+        int3:= -1;
+        for int1:= 0 to int2 - 1 do begin
+         if oldupdatepointers[int1] = po then begin
+          int3:= int1;
+          break;
          end;
         end;
+        if int3 < 0 then begin
+         formaterror;
+        end;
+        case kind of
+         ukmodify: begin
+          cancelrecupdate(updabuf[int3]);
+         end;
+         ukdelete: begin
+          with updabuf[int3] do begin
+           appendrecord(bookmark.recordpo);
+           additem(appended,bookmark.recordpo);
+          end;
+         end;
+         ukinsert: begin
+          if not findrec(oldupdatepointers[int3],po1,int1,true) then begin
+           formaterror;
+          end;
+          with updabuf[int3] do begin
+           intfreerecord(bookmark.recordpo);
+          end;
+         end;
+        end;
+        updabuf[int3].bookmark.recordpo:= nil;
+        oldupdatepointers[int3]:= nil;
+                    //inactive
        end;
       end;
      end;
