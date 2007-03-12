@@ -147,12 +147,13 @@ type
 
  tmsebufdataset = class;
  
- logflagty = (lf_end,lf_rec,lf_update);
+ logflagty = (lf_end,lf_rec,lf_update,lf_cancel);
  reclogheaderty = record
   kind: tupdatekind;
   po: pointer;
  end;
  updatelogheaderty = record
+  logging: boolean;
   kind: tupdatekind;
   po: pointer; 
  end;
@@ -161,7 +162,7 @@ type
    lf_rec: (
     rec: reclogheaderty;
    );
-   lf_update: (
+   lf_update,lf_cancel: (
     update: updatelogheaderty;
    );
  end;
@@ -442,7 +443,8 @@ type
    procedure doloadfromstream;
    procedure dointernalclose;
    procedure logupdatebuffer(const awriter: tbufstreamwriter; 
-                     const abuffer: recupdatebufferty);
+            const abuffer: recupdatebufferty; const alogging: boolean;
+            const acancel: boolean);
    procedure logrecbuffer(const awriter: tbufstreamwriter; 
                          const akind: tupdatekind; const abuffer: pintrecordty);
   protected
@@ -1965,10 +1967,9 @@ begin
   end;
  end;
  deleterecord(frecno);
-//  dec(fbrecordcount);
  fupdatebuffer[fcurrentupdatebuffer].updatekind := ukdelete;
  if flogger <> nil then begin
-  logupdatebuffer(flogger,fupdatebuffer[fcurrentupdatebuffer]);
+  logupdatebuffer(flogger,fupdatebuffer[fcurrentupdatebuffer],true,false);
  end;
 end;
 
@@ -1979,6 +1980,9 @@ end;
 
 procedure tmsebufdataset.cancelrecupdate(var arec: recupdatebufferty);
 begin
+ if (flogger <> nil) and not (bs_loading in fbstate) then begin
+  logupdatebuffer(flogger,arec,true,true);
+ end;
  with arec do begin
   if bookmark.recordpo <> nil then begin
    if updatekind = ukmodify then begin
@@ -1986,8 +1990,6 @@ begin
     finalizestrings(bookmark.recordpo^.header);
     move(oldvalues^.header,bookmark.recordpo^.header,frecordsize);
     freemem(oldvalues); //no finalize
-//    pointer(bookmark.recordpo^.header.blobinfo):= nil;
-//    intfreerecord(oldvalues);
    end
    else begin
     if updatekind = ukdelete then begin
@@ -1997,7 +1999,6 @@ begin
      if updatekind = ukinsert then begin
       deleterecord(bookmark.recordpo);
       intfreerecord(bookmark.recordpo);
-//      deleterecord(bookmark.recno);
      end;
     end;
    end;
@@ -2279,7 +2280,7 @@ begin
    logrecbuffer(flogger,fupdatebuffer[fcurrentupdatebuffer].updatekind,
                      fcurrentbuf);
    if newupdatebuffer then begin
-    logupdatebuffer(flogger,fupdatebuffer[fcurrentupdatebuffer]);
+    logupdatebuffer(flogger,fupdatebuffer[fcurrentupdatebuffer],true,false);
    end;
   end;
   if state = dsinsert then begin
@@ -2295,8 +2296,7 @@ begin
    if (state = dsedit) and (bs_indexvalid in fbstate) then begin
     for int1:= high(ar1) downto 0 do begin
      if ar2[int1] <> 0 then begin // position changed
-//      int2:= findexlocal[int1].findboundary(fcurrentbuf);
-      int2:= ar3[int1]; //new boundary
+      int2:= ar3[int1];           //new boundary
       with findexes[int1+1] do begin
        for int3:= ar1[int1] - 1 downto 0 do begin
         if ind[int3] = fcurrentbuf then begin //update indexes
@@ -2320,7 +2320,6 @@ begin
   end;
  end;
  fbstate:= fbstate - [bs_editing,bs_append];
-// exclude(fbstate,bs_editing);
 end;
 
 procedure tmsebufdataset.internalcancel;
@@ -2336,7 +2335,6 @@ begin
   end;
  end;
  fbstate:= fbstate - [bs_editing,bs_append];
-// exclude(fbstate,bs_editing);
 end;
 
 procedure tmsebufdataset.alignfieldpos(var avalue: integer);
@@ -3452,19 +3450,28 @@ const
 // endmarker
  
 procedure tmsebufdataset.logupdatebuffer(const awriter: tbufstreamwriter; 
-                const abuffer: recupdatebufferty);
+                const abuffer: recupdatebufferty;
+                const alogging: boolean; const acancel: boolean);
 var
  header1: logbufferheaderty;
  datapo: precheaderty;
  int2: integer;
 begin
- header1.flag:= lf_update;
+ if acancel then begin
+  header1.flag:= lf_cancel;
+ end
+ else begin
+  header1.flag:= lf_update;
+ end;
  with abuffer,header1.update do begin
   if bookmark.recordpo <> nil then begin
+   logging:= alogging;
    kind:= updatekind;
    po:= bookmark.recordpo;
    awriter.writelogbufferheader(header1);
-   if kind = ukmodify then begin
+   if not acancel and 
+       ((kind = ukmodify) or 
+              not logging and (kind = ukdelete) and (po <> nil)) then begin
     datapo:= @(oldvalues^.header);
     awriter.write(datapo^.fielddata,fnullmasksize);
     for int2:= 0 to high(ffieldinfos) do begin
@@ -3525,7 +3532,7 @@ begin
    end;
   end;
   for int1:= 0 to high(fupdatebuffer) do begin
-   logupdatebuffer(awriter,fupdatebuffer[int1]);
+   logupdatebuffer(awriter,fupdatebuffer[int1],false,false);
   end;
  end;
 end;
@@ -3556,9 +3563,7 @@ var
  header: tbsfheaderty;
  reader: tbufstreamreader;
  fieldco: integer;
- int1,int2: integer;
  ar1: fieldinfoarty;
- header1: logbufferheaderty;
  ar2: pointerarty;
  ar3: integerarty;
  appended: pointerarty;
@@ -3599,9 +3604,21 @@ var
    end;
   end;
  end;
+
+var
+ actindexbefore: integer; 
+ oldupdatepointers: pointerarty;
+ bo1: boolean;
+ int1,int2,int3: integer;
+ header1: logbufferheaderty;
+ updabuf: recupdatebufferarty;
  
 begin
- exclude(fbstate,bs_blobscached);
+ actindexbefore:= factindex;
+ factindex:= 0;
+ factindexpo:= @findexes[0];
+ fbstate:= fbstate - [bs_blobscached,bs_indexvalid];
+// exclude(fbstate,bs_blobscached);
  reader:= tbufstreamreader.create(self,floadingstream);
  try
   reader.readbuffer(header,sizeof(header));
@@ -3651,37 +3668,6 @@ begin
     int2:= 0;
     while reader.readlogbufferheader(header1) do begin
      case header1.flag of
-      lf_update: begin
-       if high(fupdatebuffer) < int2 then begin
-        setlength(fupdatebuffer,2*high(fupdatebuffer)+258);
-       end;     
-       with fupdatebuffer[int2],header1.update do begin
-        updatekind:= kind;
-        if kind = ukdelete then begin 
-                          //todo: deleted inserted and deleted modified
-         if po = nil then begin
-          bookmark.recno:= 0;
-          bookmark.recordpo:= nil;
-         end
-         else begin
-          if not findrec(po,bookmark.recordpo,bookmark.recno,true) then begin
-           formaterror;        //old pointer not found
-          end;
-          oldvalues:= bookmark.recordpo;
-         end;
-        end
-        else begin
-         if not findrec(po,bookmark.recordpo,bookmark.recno) then begin
-          formaterror;        //old pointer not found
-         end;
-        end;
-        if kind = ukmodify then begin
-         oldvalues:= intallocrecord;
-         reader.readrecord(oldvalues);
-        end;
-       end;
-       inc(int2);
-      end;
       lf_rec: begin
        with header1.rec do begin
         if not findrec(po,po1,int1) then begin
@@ -3698,9 +3684,76 @@ begin
         end;
        end;        
       end;
+      lf_update: begin
+       if high(updabuf) < int2 then begin
+        setlength(updabuf,2*high(updabuf)+258);
+        setlength(oldupdatepointers,length(updabuf));
+       end;     
+       with updabuf[int2],header1.update do begin
+        updatekind:= kind;
+        oldupdatepointers[int2]:= po;
+        if kind = ukdelete then begin 
+                          //todo: deleted inserted and deleted modified
+         if po = nil then begin
+          bookmark.recno:= 0;
+          bookmark.recordpo:= nil;
+         end
+         else begin
+          if not findrec(po,bookmark.recordpo,bookmark.recno,true) then begin
+           if logging then begin
+            formaterror;
+           end;
+           bookmark.recordpo:= intallocrecord;
+           reader.readrecord(bookmark.recordpo);
+          end;
+          oldvalues:= bookmark.recordpo;
+         end;
+        end
+        else begin
+         if not findrec(po,bookmark.recordpo,bookmark.recno) then begin
+          formaterror;        //old pointer not found
+         end;
+        end;
+        if kind = ukmodify then begin
+         oldvalues:= intallocrecord;
+         reader.readrecord(oldvalues);
+        end;
+       end;
+       inc(int2);
+      end;
+      lf_cancel: begin
+       with header1.update do begin
+        case kind of
+         ukmodify: begin
+          int3:= -1;
+          for int1:= 0 to int2 - 1 do begin
+           if oldupdatepointers[int1] = po then begin
+            int3:= int1;
+            break;
+           end;
+          end;
+          if int3 < 0 then begin
+           formaterror;
+          end;
+          cancelrecupdate(updabuf[int3]);
+          updabuf[int3].bookmark.recordpo:= nil;
+                    //inactive
+         end;
+        end;
+       end;
+      end;
      end;
     end; 
+    setlength(updabuf,int2);
     setlength(fupdatebuffer,int2);   
+    int2:= 0;     //pack updatebuffer
+    for int1:= 0 to high(updabuf) do begin
+     if updabuf[int1].bookmark.recordpo <> nil then begin
+      fupdatebuffer[int2]:= updabuf[int1];
+      inc(int2);
+     end;
+    end;
+    setlength(fupdatebuffer,int2);
     fallpacketsfetched:= true;
    end;
    include(fbstate,bs_blobsfetched);
@@ -3711,6 +3764,8 @@ begin
   end;
  finally
   reader.free;
+  factindex:= actindexbefore;
+  factindexpo:= @findexes[factindex];
  end;
 end;
 
