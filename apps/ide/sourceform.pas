@@ -87,6 +87,7 @@ type
    fbookmarkar: array of bookmarkarty;
    fpagedestroying: integer;
    popuprow: integer;
+   fallsaved: boolean;
    function geteditpositem(const index: integer): msestring;
    procedure seteditposcount(const count: integer);
    procedure  seteditpositem(const index: integer; const avalue: msestring);
@@ -126,6 +127,7 @@ type
                               onlyifloaded: boolean = false): tsourcepage;
    procedure saveactivepage(const newname: filenamety = '');
    function saveall(noconfirm: boolean): modalresultty; //false if canceled
+   property allsaved: boolean read fallsaved;
    function closeactivepage: boolean;
    function closepage(const apage: tsourcepage;
                         noclosecheck: boolean = false): boolean; overload;
@@ -698,17 +700,21 @@ begin
  for int1:= 0 to tabwidget.count - 1 do begin
   result:= tsourcepage(tabwidget[int1]).checksave(noconfirm,true);
   case result of
-   mr_cancel,mr_noall: begin
+   mr_cancel: begin
     exit;
+   end;
+   mr_noall: begin
+    break;
    end;
    mr_all: begin
     for int2:= int1 to tabwidget.count - 1 do begin
      tsourcepage(tabwidget[int2]).checksave(true,true);
     end;
-    exit;
+    break;
    end;
   end;
  end;
+ fallsaved:= fallsaved or not noconfirm;
 end;
 
 function tsourcefo.modified: boolean;
@@ -740,9 +746,11 @@ end;
 procedure tsourcefo.sourcefoonclosequery(const sender: tcustommseform;
   var modalresult: modalresultty);
 begin
+{
  if saveall(false) = mr_cancel then begin
   modalresult:= mr_none;
  end;
+}
 end;
 
 procedure tsourcefo.updatecaption;
@@ -848,6 +856,7 @@ end;
 
 procedure tsourcefo.textmodified(const sender: tsourcepage);
 begin
+ fallsaved:= false;
  if not ffileloading then begin
   mainfo.sourcechanged(sender);
  end;

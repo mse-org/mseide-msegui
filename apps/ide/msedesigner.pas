@@ -278,6 +278,7 @@ type
    fformloadlevel: integer;
    flookupmodule: pmoduleinfoty;
    fnotifydeletedlock: integer;
+   fallsaved: boolean;
    function formfiletoname(const filename: msestring): msestring;
    procedure findmethod(Reader: TReader; const aMethodName: string;
                    var Address: Pointer; var Error: Boolean);
@@ -2726,6 +2727,7 @@ end;
 
 procedure tdesigner.componentmodified(const component: tobject);
 begin
+ fallsaved:= false;
  if component <> nil then begin
   fmodules.componentmodified(component);
  end;
@@ -3601,17 +3603,25 @@ begin
      exit;
     end;
    end;
-   if modified and (result <> mr_noall) and (noconfirm or (result = mr_all) or
-                confirmsavechangedfile(filename,result,true)) then begin
+   if modified and (result <> mr_noall) and 
+     (noconfirm or 
+      (result = mr_all) or
+      not fallsaved and confirmsavechangedfile(filename,result,true)) then begin
     if not saveformfile(po1,filename,createdatafile) then begin
      result:= mr_cancel;
     end;
    end;
-   if result in [mr_cancel,mr_noall] then begin
-    exit;
+   case result of 
+    mr_cancel: begin
+     exit;
+    end;
+    mr_noall: begin
+     break;
+    end;
    end;
   end;
  end;
+ fallsaved:= fallsaved or not noconfirm;
 end;
 
 function tdesigner.closemodule(const amodule: pmoduleinfoty;
