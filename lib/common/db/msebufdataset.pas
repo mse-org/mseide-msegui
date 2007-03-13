@@ -3457,7 +3457,7 @@ const
 // currentvalues: recbufferheader,pointer,nullmask,fielddata
 // updatebuffer
 // updatebufferitem: updatebufferheader,old nullmask,fielddata if not insert
-// postlog
+// post log
 // endmarker
  
 procedure tmsebufdataset.logupdatebuffer(const awriter: tbufstreamwriter; 
@@ -3718,17 +3718,21 @@ begin
           if (int3 < 0) or not findrec(deletedrecord,po1,int1,true) then begin
            formaterror;
           end;
-          updabuf[int3].bookmark.recordpo:= nil; //will be removed
-          bookmark.recordpo:= nil;//will be removed
+          updabuf[int3].bookmark.recordpo:= nil; //to be removed
+          bookmark.recordpo:= nil;               //to be removed
           intfreerecord(po1);
          end
          else begin
-          if not findrec(po,bookmark.recordpo,bookmark.recno,true) then begin
-           if logging then begin
-            formaterror;
+          if deletedrecord <> bookmark.recordpo then begin
+          end
+          else begin
+           if not findrec(po,bookmark.recordpo,bookmark.recno,true) then begin
+            if logging then begin
+             formaterror;
+            end;
+            bookmark.recordpo:= intallocrecord;
+            reader.readrecord(bookmark.recordpo);
            end;
-           bookmark.recordpo:= intallocrecord;
-           reader.readrecord(bookmark.recordpo);
           end;
           oldvalues:= bookmark.recordpo;
          end;

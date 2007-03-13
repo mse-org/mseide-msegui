@@ -2635,6 +2635,7 @@ end;
 function tformdesignerfo.getmoduleparent: twidget;
 begin
  result:= self;
+ fscrollbox.visible:= false;
 end;
 
 procedure tformdesignerfo.componentselected(const aselections: tformdesignerselections);

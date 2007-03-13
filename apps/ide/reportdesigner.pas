@@ -100,8 +100,6 @@ constructor treportdesignerfo.create(const aowner: tcomponent;
         const adesigner: tdesigner; const aintf: pdesignmoduleintfty);
 begin
  inherited;
-// freportcontainer:= treportcontainer.create(self);
-// freportcontainer.parentwidget:= container;
 end;
 
 class function treportdesignerfo.fixformsize: boolean;
