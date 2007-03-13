@@ -155,7 +155,8 @@ type
  updatelogheaderty = record
   logging: boolean;
   kind: tupdatekind;
-  po: pointer; 
+  po: pointer;
+  deletedrecord: pintrecordty;
  end;
  logbufferheaderty = record
   case flag: logflagty of
@@ -443,8 +444,8 @@ type
    procedure doloadfromstream;
    procedure dointernalclose;
    procedure logupdatebuffer(const awriter: tbufstreamwriter; 
-            const abuffer: recupdatebufferty; const alogging: boolean;
-            const acancel: boolean);
+            const abuffer: recupdatebufferty; const adeletedrecord: pintrecordty;
+            const alogging: boolean; const acancel: boolean);
    procedure logrecbuffer(const awriter: tbufstreamwriter; 
                          const akind: tupdatekind; const abuffer: pintrecordty);
   protected
@@ -1946,7 +1947,11 @@ begin
 end;
 
 procedure tmsebufdataset.internaldelete;
+var
+ po1: pintrecordty;
+ 
 begin
+ po1:= fcurrentbuf;
  if not getrecordupdatebuffer then begin
   getnewupdatebuffer;
   with fupdatebuffer[fcurrentupdatebuffer] do begin
@@ -1969,7 +1974,7 @@ begin
  deleterecord(frecno);
  fupdatebuffer[fcurrentupdatebuffer].updatekind := ukdelete;
  if flogger <> nil then begin
-  logupdatebuffer(flogger,fupdatebuffer[fcurrentupdatebuffer],true,false);
+  logupdatebuffer(flogger,fupdatebuffer[fcurrentupdatebuffer],po1,true,false);
  end;
 end;
 
@@ -1981,7 +1986,7 @@ end;
 procedure tmsebufdataset.cancelrecupdate(var arec: recupdatebufferty);
 begin
  if (flogger <> nil) and not (bs_loading in fbstate) then begin
-  logupdatebuffer(flogger,arec,true,true);
+  logupdatebuffer(flogger,arec,nil,true,true);
  end;
  with arec do begin
   if bookmark.recordpo <> nil then begin
@@ -2286,7 +2291,7 @@ begin
    logrecbuffer(flogger,fupdatebuffer[fcurrentupdatebuffer].updatekind,
                      fcurrentbuf);
    if newupdatebuffer then begin
-    logupdatebuffer(flogger,fupdatebuffer[fcurrentupdatebuffer],true,false);
+    logupdatebuffer(flogger,fupdatebuffer[fcurrentupdatebuffer],nil,true,false);
    end;
   end;
   if state = dsinsert then begin
@@ -3456,7 +3461,7 @@ const
 // endmarker
  
 procedure tmsebufdataset.logupdatebuffer(const awriter: tbufstreamwriter; 
-                const abuffer: recupdatebufferty;
+                const abuffer: recupdatebufferty; const adeletedrecord: pintrecordty;
                 const alogging: boolean; const acancel: boolean);
 var
  header1: logbufferheaderty;
@@ -3470,7 +3475,8 @@ begin
   header1.flag:= lf_update;
  end;
  with abuffer,header1.update do begin
-  if bookmark.recordpo <> nil then begin
+  if (bookmark.recordpo <> nil) or (deletedrecord <> nil) then begin
+   deletedrecord:= adeletedrecord;
    logging:= alogging;
    kind:= updatekind;
    po:= bookmark.recordpo;
@@ -3538,7 +3544,7 @@ begin
    end;
   end;
   for int1:= 0 to high(fupdatebuffer) do begin
-   logupdatebuffer(awriter,fupdatebuffer[int1],false,false);
+   logupdatebuffer(awriter,fupdatebuffer[int1],nil,false,false);
   end;
  end;
 end;
@@ -3698,11 +3704,23 @@ begin
        with updabuf[int2],header1.update do begin
         updatekind:= kind;
         oldupdatepointers[int2]:= po;
+        int3:= -1;
+        if deletedrecord <> nil then begin
+         for int1:= 0 to int2-1 do begin
+          if oldupdatepointers[int1] = deletedrecord then begin
+           int3:= int1;
+           break;
+          end;
+         end;
+        end;
         if kind = ukdelete then begin 
-                          //todo: deleted inserted and deleted modified
-         if po = nil then begin
-          bookmark.recno:= 0;
-          bookmark.recordpo:= nil;
+         if po = nil then begin //deleting of inserted record
+          if (int3 < 0) or not findrec(deletedrecord,po1,int1,true) then begin
+           formaterror;
+          end;
+          updabuf[int3].bookmark.recordpo:= nil; //will be removed
+          bookmark.recordpo:= nil;//will be removed
+          intfreerecord(po1);
          end
          else begin
           if not findrec(po,bookmark.recordpo,bookmark.recno,true) then begin
