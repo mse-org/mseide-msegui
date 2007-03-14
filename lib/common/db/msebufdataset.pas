@@ -3714,28 +3714,36 @@ begin
          end;
         end;
         if kind = ukdelete then begin 
-         if po = nil then begin //deleting of inserted record
-          if (int3 < 0) or not findrec(deletedrecord,po1,int1,true) then begin
+         if logging and (po <> deletedrecord) then begin
+          if (int3 < 0) or 
+                           not findrec(deletedrecord,po1,int1,true) then begin
            formaterror;
           end;
+          if po = nil then begin
+           bookmark.recordpo:= nil;   //deleting of inserted record
+           intfreerecord(po1);
+          end
+          else begin        //deleting of modified record
+           intfreerecord(updabuf[int3].bookmark.recordpo);
+           bookmark.recordpo:= updabuf[int3].oldvalues;
+           bookmark.recno:= 0;
+          end;
           updabuf[int3].bookmark.recordpo:= nil; //to be removed
-          bookmark.recordpo:= nil;               //to be removed
-          intfreerecord(po1);
          end
          else begin
-          if deletedrecord <> bookmark.recordpo then begin
+          if logging then begin
+           if not findrec(deletedrecord,bookmark.recordpo,
+                                         bookmark.recno,true) then begin
+            formaterror;
+           end;
           end
           else begin
-           if not findrec(po,bookmark.recordpo,bookmark.recno,true) then begin
-            if logging then begin
-             formaterror;
-            end;
-            bookmark.recordpo:= intallocrecord;
-            reader.readrecord(bookmark.recordpo);
-           end;
+           bookmark.recno:= 0;
+           bookmark.recordpo:= intallocrecord;
+           reader.readrecord(bookmark.recordpo);
           end;
-          oldvalues:= bookmark.recordpo;
          end;
+         oldvalues:= bookmark.recordpo;
         end
         else begin
          if not findrec(po,bookmark.recordpo,bookmark.recno) then begin
