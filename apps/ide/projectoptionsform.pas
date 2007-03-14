@@ -89,6 +89,7 @@ type
 
  projectoptionsty = record
   modified: boolean;
+  savechecked: boolean;
   ignoreexceptionclasses: stringarty;
   t: projecttextty;
   texp: projecttextty;
@@ -617,6 +618,7 @@ begin
   deletememorystatstream(dbfieldeditorstatname);
   {$endif}{$endif}
   modified:= false;
+  savechecked:= false;
   sigsettings:= defaultsigsettings;
   exceptclassnames:= nil;
   exceptignore:= nil;
@@ -734,6 +736,7 @@ end;
 procedure projectoptionsmodified;
 begin
  projectoptions.modified:= true;
+ projectoptions.savechecked:= false;
 end;
 
 procedure setsignalinfocount(const count: integer);
@@ -928,6 +931,7 @@ begin
   selecteditpageform.updatestat(statfiler);
   programparametersform.updatestat(statfiler);
   modified:= false;
+  savechecked:= false;
  end;
 end;
 
@@ -1271,7 +1275,7 @@ begin
   result:= fo.show(true,nil) = mr_ok;
   if result then begin
    formtoprojectoptions(fo);
-   projectoptions.modified:= true;
+   projectoptionsmodified;
    projectoptionschanged;
   end;
  finally

@@ -127,6 +127,7 @@ type
                               onlyifloaded: boolean = false): tsourcepage;
    procedure saveactivepage(const newname: filenamety = '');
    function saveall(noconfirm: boolean): modalresultty; //false if canceled
+   procedure savecanceled; //resets fallsaved
    property allsaved: boolean read fallsaved;
    function closeactivepage: boolean;
    function closepage(const apage: tsourcepage;
@@ -698,7 +699,8 @@ var
 begin
  result:= mr_none;
  for int1:= 0 to tabwidget.count - 1 do begin
-  result:= tsourcepage(tabwidget[int1]).checksave(noconfirm,true);
+  result:= mainfo.checksavecancel(
+           tsourcepage(tabwidget[int1]).checksave(noconfirm,true));
   case result of
    mr_cancel: begin
     exit;
@@ -1125,6 +1127,11 @@ begin
    editor.endgroup;
   end;
  end;
+end;
+
+procedure tsourcefo.savecanceled;
+begin
+ fallsaved:= false;
 end;
 
 end.

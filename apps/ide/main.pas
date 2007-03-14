@@ -202,6 +202,7 @@ type
    function checkremake(startcommand: startcommandty): boolean;
    procedure resetstartcommand;
    procedure domake(atag: integer);
+   function checksavecancel(const aresult: modalresultty): modalresultty;
    function closeall(const nosave: boolean): boolean; //false in cancel
    function closemodule(const amodule: pmoduleinfoty;
                           const achecksave: boolean;
@@ -505,7 +506,7 @@ begin
   result:= designer.saveall(result = mr_all,true);
   if result <> mr_cancel then begin
    with projectoptions,texp do begin
-    if modified then begin
+    if modified and not savechecked then begin
      result:= showmessage('Project '+fprojectname+' is modified. Save?','Confirmation',
                     [mr_yes,mr_no,mr_cancel],mr_yes);
      if result = mr_yes then begin
@@ -519,6 +520,7 @@ begin
        saveproject(str1);
       end;
      end;
+     savechecked:= true;
     end
     else begin
      saveproject(projectfilename);
@@ -526,6 +528,7 @@ begin
    end;
   end;
  end;
+ checksavecancel(result);
 end;
 
 procedure tmainfo.updatemodifiedforms;
@@ -1601,14 +1604,27 @@ begin
  end;
 end;
 
+function tmainfo.checksavecancel(const aresult: modalresultty): modalresultty;
+begin
+ if aresult = mr_cancel then begin
+  projectoptions.savechecked:= false;
+  sourcefo.savecanceled;
+  designer.savecanceled;
+ end;
+ result:= aresult;
+end;
+
 function tmainfo.closeall(const nosave: boolean): boolean;
 begin
- result:= nosave or (designer.saveall(false,true) <> mr_cancel);
+ result:= sourcefo.closeall(nosave);
  if result then begin
-  result:= sourcefo.closeall(nosave);
+  result:= nosave or 
+         (checksavecancel(designer.saveall(false,true)) <> mr_cancel);
   if result then begin
-   while designer.modules.count > 0 do begin
-    closemodule(designer.modules.itempo[designer.modules.count-1],nosave,true);
+   if result then begin
+    while designer.modules.count > 0 do begin
+     closemodule(designer.modules.itempo[designer.modules.count-1],nosave,true);
+    end;
    end;
   end;
  end;
@@ -1977,8 +1993,8 @@ end;
 procedure tmainfo.domake(atag: integer);
 begin
  unloadexec;
- if (sourcefo.saveall(true) <> mr_cancel) and
-         (designer.saveall(true,true) <> mr_cancel) then begin
+ if (checksavecancel(sourcefo.saveall(true)) <> mr_cancel) and
+         (checksavecancel(designer.saveall(true,true)) <> mr_cancel) then begin
   updatemodifiedforms;
   make.domake(atag);
  end;

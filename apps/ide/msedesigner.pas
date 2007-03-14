@@ -383,6 +383,7 @@ type
                  const afilename: msestring; createdatafile: boolean): boolean;
                         //false if canceled
    function saveall(noconfirm,createdatafile: boolean): modalresultty;
+   procedure savecanceled; //resets fallsaved
    procedure setactivemodule(const adesignform: tmseform);
    function sourcenametoformname(const aname: filenamety): filenamety;
 
@@ -4020,6 +4021,11 @@ begin
  else begin
   result:= icomponenteditor(fcomponenteditor);
  end;
+end;
+
+procedure tdesigner.savecanceled;
+begin
+ fallsaved:= false;
 end;
 
 { tcomponentslink }
