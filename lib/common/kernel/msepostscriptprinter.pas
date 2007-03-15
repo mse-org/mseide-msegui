@@ -399,10 +399,10 @@ const
     'srb',         'sb',     'slb',        'sl');
  
  tftopa: array [0..15] of psalignty = (//tf_xcentered,tf_right,tf_ycentered,tf_bottom,
-  pa_lefttop,                          //   0            0        0            0
+  pa_lefttop,                          //   0            0        0            0 
   pa_top,                              //   1            0        0            0
-  pa_righttop,                         //   0            1        0            0
-  pa_center, //invalid                 //   1            1        0            0
+  pa_righttop,                         //   0            1        0            0  
+  pa_center, //invalid                 //   1            1        0            0 
   pa_left,                             //   0            0        1            0
   pa_center,                           //   1            0        1            0
   pa_right,                            //   0            1        1            0
@@ -1031,7 +1031,8 @@ end;
 procedure tpostscriptcanvas.textout(const text: richstringty; const dest: rectty;
          const flags: textflagsty; const tabdist: real);
 const
- mask: textflagsty = [tf_xcentered,tf_right,tf_ycentered,tf_bottom];
+ mask1 = [tf_xcentered,tf_right];
+ mask2 = [tf_ycentered,tf_bottom];
 var
  str1: string;
  int1,int2,int3: integer;
@@ -1116,9 +1117,10 @@ begin
    ' 1 index '+       //llx,lly,urx
    psrealtostr(foriginy-(dest.y)*fgcscale)+' '; //llx,lly,urx,ury
  end;
- str1:= str1+alignmentsubs[
-       tftopa[{$ifdef FPC}longword{$else}word{$endif}(flags) and
-       {$ifdef FPC}longword{$else}word{$endif}(mask)]];
+ int1:= {$ifdef FPC}longword{$else}word{$endif}(flags*mask1) or 
+        ({$ifdef FPC}longword{$else}word{$endif}(flags*mask2) shr 1); 
+        //remove tf_xjustify
+ str1:= str1+alignmentsubs[tftopa[int1]];
  if fs_underline in font.style then begin
   str1:= str1 + ' ul';
  end;

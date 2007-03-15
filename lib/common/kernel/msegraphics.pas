@@ -275,7 +275,7 @@ type
    cs_dashes,cs_linewidth,cs_capstyle,cs_joinstyle,
    cs_fonthandle,cs_font,cs_fontcolor,cs_fontcolorbackground,
    cs_rasterop,cs_brush,cs_brushorigin,
-   cs_painted{,cs_monochrome});
+   cs_painted,cs_internaldrawtext{,cs_monochrome});
  canvasstatesty = set of canvasstatety;
 
 const
@@ -720,6 +720,8 @@ type
    procedure fillarc(const def: rectty; const startang,extentang: real; 
                               const acolor: colorty; const pieslice: boolean);
    procedure getarcinfo(out startpo,endpo: pointty);
+   procedure internaldrawtext(var info); virtual;
+                       //info = drawtextinfoty
   public
    drawinfopo: pointer; //used to transport additional drawing information
    constructor create(const user: tobject; const intf: icanvas);
@@ -4805,6 +4807,11 @@ begin
   avalue:= 0.1;
  end;
  fppmm:= avalue; 
+end;
+
+procedure tcanvas.internaldrawtext(var info);
+begin
+ gdierror(gde_notimplemented);
 end;
 
 { egdi }

@@ -818,7 +818,11 @@ label
  endlab;
 
 begin                  //drawtext
- with info,canvas do begin
+ with info,tcanvas1(canvas) do begin
+  if cs_internaldrawtext in fstate then begin
+   internaldrawtext(info);
+   exit;
+  end;
   save;
   if tf_clipi in flags then begin
    intersectcliprect(dest);
@@ -997,9 +1001,6 @@ procedure textrect(const canvas: tcanvas; var info: drawtextinfoty);
 var
  layoutinfo: layoutinfoty;
 begin
-// if info.font <> nil then begin
-//  canvas.font:= info.font;
-// end;
  layouttext(canvas,info,layoutinfo);
 end;
 

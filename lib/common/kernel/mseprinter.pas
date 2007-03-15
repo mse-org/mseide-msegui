@@ -211,12 +211,14 @@ type
    procedure streamwrite(const atext: string); //checks fstream = nil
    procedure streamwriteln(const atext: string); //checks fstream = nil
    procedure setpagesstring(const avalue: msestring);
+   procedure internaldrawtext(var info); override;
+                       //info = drawtextinfoty
   public
    constructor create(const user: tprinter; const intf: icanvas);
    
    procedure reset; override;
    
-   //if cy of destrect = 0 and tf_ycentered in textflags -> place on baseline
+   // if cy of destrect = 0 and tf_ycentered in textflags -> place on baseline
    procedure drawtext(var info: drawtextinfoty); overload;
    procedure drawtext(const atext: richstringty;
                    const adest: rectty; aflags: textflagsty = [];
@@ -227,7 +229,6 @@ type
    procedure drawtext(const atext: msestring;
                    const adest: rectty; aflags: textflagsty = [];
                    afont: tfont = nil; atabulators: ttabulators = nil); overload;
-
    procedure writeln(const avalue: msestring = ''); overload;
    procedure writeln(const avalue: richstringty); overload;
    procedure writelines(const alines: array of msestring); overload;
@@ -638,6 +639,7 @@ begin
  fprinter:= user;
 // flastpage:= bigint;
  inherited create(user,intf);
+ include(fstate,cs_internaldrawtext);
 end;
 
 procedure tcustomprintercanvas.initprinting;
@@ -738,19 +740,25 @@ var
  ar1: richstringarty;
  int1,int2: integer;
  rea1: real;
- aflags: textflagsty;
+ flags1: textflagsty;
  mstr1: msestring;
  rstr1: richstringty;
+ layoutinfo: layoutinfoty;
+ rect1: rectty;
+label
+ endlab;
 begin
+ save;
+ layouttext(self,info,layoutinfo);
  if fstream = nil then begin
-  exit;
+  goto endlab;
  end;
  ar1:= nil; //compiler warning
- info.res:= nullrect;
- save;
- if info.font <> nil then begin //foreign font
-  font:= info.font;
- end;
+// info.res:= nullrect;
+// save;
+// if info.font <> nil then begin //foreign font
+//  font:= info.font;
+// end;
  with fdrawinfo do begin
   afonthandle1:= tfont1(font).gethandle;
 //   afonthandle:= tfont1(font).getdatapo^.font;
@@ -769,71 +777,95 @@ begin
     begintextclip(clip);
    end;
   end;
-  if countchars(text.text,c_tab) = 0 then begin
-   textout(text,dest,flags,0);
+  if high(layoutinfo.lineinfos) > 0 then begin
+   rect1:= dest;
+   flags1:= flags - [tf_ycentered,tf_bottom];
+   with layoutinfo do begin
+    rect1.cy:= font.lineheight;
+    if tf_ycentered in flags then begin
+     rect1.y:= dest.y + (dest.cy - length(lineinfos) * rect1.cy) div 2;
+    end
+    else begin
+     if tf_bottom in flags then begin
+      rect1.y:= dest.cy - length(lineinfos) * rect1.cy;
+     end;
+    end;
+    for int1:= 0 to high(lineinfos) do begin
+     with lineinfos[int1] do begin
+      rstr1:= richcopy(text,liindex,licount);
+      textout(rstr1,rect1,flags1,0);
+      inc(rect1.y,rect1.cy);
+     end;
+    end;
+   end;
   end
-  else begin
-   if tabulators = nil then begin
-    tab1:= fprinter.ftabulators;
+  else begin //single line
+   if countchars(text.text,c_tab) = 0 then begin
+    textout(text,dest,flags,0);
    end
    else begin
-    tab1:= tabulators;
-   end;
-   if tab1.count = 0 then begin
-    if tab1.defaultdist = 0 then begin      //has no tabs
-     mstr1:= text.text;
-     try
-      replacechar(text.text,c_tab,' ');
-      textout(text,dest,flags,0);
-     finally
-      text.text:= mstr1;
+    if tabulators = nil then begin
+     tab1:= fprinter.ftabulators;
+    end
+    else begin
+     tab1:= tabulators;
+    end;
+    if tab1.count = 0 then begin
+     if tab1.defaultdist = 0 then begin      //has no tabs
+      mstr1:= text.text;
+      try
+       replacechar(text.text,c_tab,' ');
+       textout(text,dest,flags,0);
+      finally
+       text.text:= mstr1;
+      end;
+     end
+     else begin
+      ar1:= splitrichstring(text,c_tab);
+      textout(ar1[0],dest,flags,0);
+      rea1:= tab1.defaultdist*mmtoprintscale;
+      for int1:= 1 to high(ar1) do begin     
+       textout(ar1[int1],dest,flags,rea1);
+      end;
      end;
     end
     else begin
      ar1:= splitrichstring(text,c_tab);
      textout(ar1[0],dest,flags,0);
-     rea1:= tab1.defaultdist*mmtoprintscale;
      for int1:= 1 to high(ar1) do begin     
-      textout(ar1[int1],dest,flags,rea1);
-     end;
-    end;
-   end
-   else begin
-    ar1:= splitrichstring(text,c_tab);
-    textout(ar1[0],dest,flags,0);
-    for int1:= 1 to high(ar1) do begin     
-     if int1 > tab1.count then begin
-      rstr1.text:= ' ';
-      rstr1.format:= nil;
-      rstr1:= richconcat(rstr1,ar1[int1]);
-      for int2:= int1+1 to high(ar1) do begin
-       rstr1:= richconcat(rstr1,' ');
-       rstr1:= richconcat(rstr1,ar1[int2]);
+      if int1 > tab1.count then begin
+       rstr1.text:= ' ';
+       rstr1.format:= nil;
+       rstr1:= richconcat(rstr1,ar1[int1]);
+       for int2:= int1+1 to high(ar1) do begin
+        rstr1:= richconcat(rstr1,' ');
+        rstr1:= richconcat(rstr1,ar1[int2]);
+       end;
+       textout(rstr1,dest,flags-[tf_right,tf_xcentered],-1); //print rest of string
+       break;
       end;
-      textout(rstr1,dest,flags-[tf_right,tf_xcentered],-1); //print rest of string
-      break;
-     end;
-     aflags:= flags - [tf_xcentered,tf_right];
-     with tab1[int1-1] do begin
-      case kind of
-       tak_right,tak_decimal: aflags:= aflags + [tf_right];
-       tak_centered: aflags:= aflags + [tf_xcentered];
-      end;
-      if kind = tak_decimal then begin
-       int2:= msestrrscan(ar1[int1].text,widechar(decimalseparator));
-       if int2 > 0 then begin
-        textout(richcopy(ar1[int1],1,int2-1),makerect(round(pos*ppmm),dest.y,0,
-                  dest.cy),aflags,0); //int
-        textout(richcopy(ar1[int1],int2,bigint),makerect(0,dest.y,0,
-                  dest.cy),aflags-[tf_right],-1); //frac
+      flags1:= flags - [tf_xcentered,tf_right];
+      with tab1[int1-1] do begin
+       case kind of
+        tak_right,tak_decimal: flags1:= flags1 + [tf_right];
+        tak_centered: flags1:= flags1 + [tf_xcentered];
+       end;
+       if kind = tak_decimal then begin
+        int2:= msestrrscan(ar1[int1].text,widechar(decimalseparator));
+        if int2 > 0 then begin
+         textout(richcopy(ar1[int1],1,int2-1),makerect(round(pos*ppmm),dest.y,0,
+                   dest.cy),flags1,0); //int
+         textout(richcopy(ar1[int1],int2,bigint),makerect(0,dest.y,0,
+                   dest.cy),flags1-[tf_right],-1); //frac
+        end
+        else begin
+         textout(ar1[int1],makerect(round(pos*ppmm),dest.y,0,
+                   dest.cy),flags1,0); //no frac
+        end;
        end
        else begin
-        textout(ar1[int1],makerect(round(pos*ppmm),dest.y,0,
-                  dest.cy),aflags,0); //no frac
+        textout(ar1[int1],makerect(round(pos*ppmm),dest.y,0,dest.cy),flags1,0);
        end;
-      end
-      else begin
-       textout(ar1[int1],makerect(round(pos*ppmm),dest.y,0,dest.cy),aflags,0);
       end;
      end;
     end;
@@ -843,6 +875,7 @@ begin
    endtextclip;
   end;
  end;
+endlab:
  restore;
 end;
 
@@ -1080,6 +1113,11 @@ procedure tcustomprintercanvas.setpagesstring(const avalue: msestring);
 begin
  pages:= stringtopages(avalue);
  fpagesstring:= avalue;
+end;
+
+procedure tcustomprintercanvas.internaldrawtext(var info);
+begin
+ drawtext(drawtextinfoty(info));
 end;
 
 { tprintervalueselector }

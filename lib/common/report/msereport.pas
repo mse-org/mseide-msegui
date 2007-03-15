@@ -1677,9 +1677,11 @@ var
  end;
  
 var
- int1,int2,int3: integer;
+ int1,int2,int3,int4: integer;
  bo2: boolean;
  rstr1: richstringty;
+ rect1: rectty;
+ isdecimal: boolean;
  
 begin
  fminsize:= nullsize;
@@ -1737,8 +1739,20 @@ begin
        dest.cx:= width;
       end;
      end;
+     dest.x:= adest.x + textpos;
+     isdecimal:= tabkind = tak_decimal;
+     case tabkind of 
+      tak_centered: begin
+       flags:= (flags - [tf_right]) + [tf_xcentered];
+       dec(dest.x,dest.cx div 2);
+      end;
+      tak_right,tak_decimal: begin   
+       flags:= (flags - [tf_xcentered]) + [tf_right];
+       dec(dest.x,dest.cx);
+      end;
+     end;
+     {
      textrect(acanvas,finfo);
-//     dest.cx:= res.cx;
      case tabkind of
       tak_left: begin
        dest.x:= adest.x + textpos;
@@ -1764,8 +1778,52 @@ begin
        dest.x:= adest.x + textpos - res.cx + int3; 
       end;
      end;
+     }
     end;
-    int2:= dest.x + res.cx;
+    if isdecimal then begin
+     int2:= findlastchar(text.text,msechar(decimalseparator));
+     if int2 > 0 then begin
+      rstr1:= text;
+      text:= richcopy(rstr1,1,int2-1);
+      if apaint then begin
+       drawtext(acanvas,finfo);
+      end
+      else begin
+       textrect(acanvas,finfo);
+      end;
+      int3:= res.x;
+      int4:= res.cx;
+      text:= richcopy(rstr1,int2,bigint);
+      inc(dest.x,dest.cx);
+      exclude(flags,tf_right);
+      if apaint then begin
+       drawtext(acanvas,finfo);
+      end
+      else begin
+       textrect(acanvas,finfo);
+      end;
+      res.x:= int3;
+      res.cx:= res.cx + int4;
+      text:= rstr1;
+     end
+     else begin
+      if apaint then begin
+       drawtext(acanvas,finfo);
+      end
+      else begin
+       textrect(acanvas,finfo);
+      end;
+     end;
+    end
+    else begin            //not decimal
+     if apaint then begin
+      drawtext(acanvas,finfo);
+     end
+     else begin
+      textrect(acanvas,finfo);
+     end;
+    end;
+    int2:= res.x + res.cx;
     if int2 > fminsize.cx then begin
      fminsize.cx:= int2;
     end;
@@ -1773,9 +1831,11 @@ begin
     if int2 > fminsize.cy then begin
      fminsize.cy:= int2;
     end;
+    {
     if apaint then begin
      drawtext(acanvas,finfo);
     end;
+    }
    end;
   end;
   if apaint then begin
