@@ -738,13 +738,13 @@ var
  afontnum: integer;
  tab1: tcustomtabulators;
  ar1: richstringarty;
- int1,int2: integer;
+ int1,int2,int3,int4,int5: integer;
  rea1: real;
- flags1: textflagsty;
+ flags1,flags2: textflagsty;
  mstr1: msestring;
  rstr1: richstringty;
  layoutinfo: layoutinfoty;
- rect1: rectty;
+ rect1,rect2: rectty;
 label
  endlab;
 begin
@@ -780,6 +780,7 @@ begin
   if high(layoutinfo.lineinfos) > 0 then begin
    rect1:= dest;
    flags1:= flags - [tf_ycentered,tf_bottom];
+   flags2:= flags1 - [tf_xcentered,tf_right,tf_xjustify];
    with layoutinfo do begin
     rect1.cy:= font.lineheight;
     if tf_ycentered in flags then begin
@@ -792,8 +793,37 @@ begin
     end;
     for int1:= 0 to high(lineinfos) do begin
      with lineinfos[int1] do begin
-      rstr1:= richcopy(text,liindex,licount);
-      textout(rstr1,rect1,flags1,0);
+      if (tf_xjustify in flags) and (high(tabchars) > 0) and 
+                  (int1 < high(lineinfos)) then begin
+       rstr1:= richcopy(text,liindex,tabchars[0]-liindex);
+       textout(rstr1,rect1,flags2,0); //first word
+       rea1:= (dest.cx - liwidth + getstringwidth(' ') * length(tabchars)) /
+                        length(tabchars); //gap width
+       rect2:= rect1;        //x justify text
+       rect2.cx:= 0;                                    
+       int3:= dest.x;
+       for int2:= liindex to tabchars[0] - 1 do begin
+        inc(int3,charwidths[int2]);            //end of first word
+       end;
+       for int2:= 0 to high(tabchars) - 1 do begin
+        int5:= 0;
+        for int4:= tabchars[int2]+1 to tabchars[int2+1] - 1 do begin
+         inc(int5,charwidths[int4]); //width of actual word
+        end;
+        rect2.x:= round(int3 + (int2 + 1) * rea1 + int5 div 2);
+        int3:= int3 + int5;
+        rstr1:= richcopy(text,tabchars[int2]+1,tabchars[int2+1] - 
+                                                        tabchars[int2] - 1);
+        textout(rstr1,rect2,flags2 + [tf_xcentered],0);
+       end;
+       rstr1:= richcopy(text,tabchars[high(tabchars)]+1,
+                          liindex+licount-tabchars[high(tabchars)]-1);
+       textout(rstr1,rect1,flags2+[tf_right],0); //last word word       
+      end
+      else begin
+       rstr1:= richcopy(text,liindex,licount);
+       textout(rstr1,rect1,flags1,0);
+      end;
       inc(rect1.y,rect1.cy);
      end;
     end;

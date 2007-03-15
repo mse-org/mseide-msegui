@@ -289,7 +289,7 @@ begin
  if info.font <> nil then begin
   canvas.font:= info.font;
  end;
- with info,canvas,layoutinfo do begin
+ with info,tcanvas1(canvas),layoutinfo do begin
   tcanvas1(canvas).checkgcstate([cs_gc]);
   canvas.initdrawinfo(drawinfo);
   ascent:= font.ascent;
@@ -507,7 +507,7 @@ begin
        end;
       end;
       setlength(tabchars,int4);
-      if int4 > 0 then begin
+      if (int4 > 0) and not (cs_internaldrawtext in fstate) then begin
        rea1:= (dest.cx - liwidth) / int4;
        rea2:= 0;
        int2:= 0;
