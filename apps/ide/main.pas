@@ -1616,15 +1616,14 @@ end;
 
 function tmainfo.closeall(const nosave: boolean): boolean;
 begin
- result:= sourcefo.closeall(nosave);
+ result:= nosave or (checksavecancel(sourcefo.saveall(false)) <> mr_cancel);
  if result then begin
   result:= nosave or 
          (checksavecancel(designer.saveall(false,true)) <> mr_cancel);
   if result then begin
-   if result then begin
-    while designer.modules.count > 0 do begin
-     closemodule(designer.modules.itempo[designer.modules.count-1],nosave,true);
-    end;
+   sourcefo.closeall(true);
+   while designer.modules.count > 0 do begin
+    closemodule(designer.modules.itempo[designer.modules.count-1],nosave,true);
    end;
   end;
  end;
