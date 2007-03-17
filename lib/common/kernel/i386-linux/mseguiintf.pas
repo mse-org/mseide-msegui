@@ -2732,7 +2732,11 @@ var
  XRenderFillRectangle: procedure(dpy:PDisplay; op:longint; dst:TPicture;
               color:PXRenderColor; x:longint;
               y:longint; width:dword; height:dword);cdecl;
- XRenderSetPictureTransform: procedure(dpy:PDisplay; picture:TPicture; transform:PXTransform);
+ XRenderSetPictureTransform: procedure(dpy:PDisplay; picture:TPicture;
+                                        transform:PXTransform);
+          cdecl;
+ XRenderSetPictureFilter: procedure(dpy:PDisplay; picture:TPicture;
+                      filter: pchar; params: pinteger; nparams: integer);
           cdecl;
  XRenderFreePicture: procedure(dpy:PDisplay; picture:TPicture);
                  cdecl;
@@ -2755,27 +2759,39 @@ begin
   {$ifdef FPC}pointer({$endif}XRenderSetPictureClipRectangles{$ifdef FPC}){$endif}:=
      getprocaddress(libhandle,'XRenderSetPictureClipRectangles');
   if {$ifndef FPC}@{$endif}XRenderSetPictureClipRectangles = nil then exit;
+
   {$ifdef FPC}pointer({$endif}XRenderCreatePicture{$ifdef FPC}){$endif}:=
      getprocaddress(libhandle,'XRenderCreatePicture');
   if {$ifndef FPC}@{$endif}XRenderCreatePicture = nil then exit;
+
   {$ifdef FPC}pointer({$endif}XRenderFillRectangle{$ifdef FPC}){$endif}:=
      getprocaddress(libhandle,'XRenderFillRectangle');
   if {$ifndef FPC}@{$endif}XRenderFillRectangle = nil then exit;
+
   {$ifdef FPC}pointer({$endif}XRenderSetPictureTransform{$ifdef FPC}){$endif}:=
      getprocaddress(libhandle,'XRenderSetPictureTransform');
   if {$ifndef FPC}@{$endif}XRenderSetPictureTransform = nil then exit;
+
+  {$ifdef FPC}pointer({$endif}XRenderSetPictureFilter{$ifdef FPC}){$endif}:=
+     getprocaddress(libhandle,'XRenderSetPictureFilter');
+  if {$ifndef FPC}@{$endif}XRenderSetPictureFilter = nil then exit;
+
   {$ifdef FPC}pointer({$endif}XRenderFreePicture{$ifdef FPC}){$endif}:=
      getprocaddress(libhandle,'XRenderFreePicture');
   if {$ifndef FPC}@{$endif}XRenderFreePicture = nil then exit;
+
   {$ifdef FPC}pointer({$endif}XRenderComposite{$ifdef FPC}){$endif}:=
      getprocaddress(libhandle,'XRenderComposite');
   if {$ifndef FPC}@{$endif}XRenderComposite = nil then exit;
+
   {$ifdef FPC}pointer({$endif}XRenderQueryExtension{$ifdef FPC}){$endif}:=
      getprocaddress(libhandle,'XRenderQueryExtension');
   if {$ifndef FPC}@{$endif}XRenderQueryExtension = nil then exit;
+
   {$ifdef FPC}pointer({$endif}XRenderFindVisualFormat{$ifdef FPC}){$endif}:=
      getprocaddress(libhandle,'XRenderFindVisualFormat');
   if {$ifndef FPC}@{$endif}XRenderFindVisualFormat = nil then exit;
+
   {$ifdef FPC}pointer({$endif}XRenderFindStandardFormat{$ifdef FPC}){$endif}:=
      getprocaddress(libhandle,'XRenderFindStandardFormat');
   if {$ifndef FPC}@{$endif}XRenderFindStandardFormat = nil then exit;
@@ -3913,6 +3929,16 @@ var
  pictop: integer;
  colormask: boolean;
  bo1: boolean;
+ 
+ procedure updatetransform(const apic: tpicture);
+ begin
+  if needstransform then begin
+   xrendersetpicturetransform(appdisp,apic,@transform);
+   if al_intpol in drawinfo.copyarea.alignment then begin
+    xrendersetpicturefilter(appdisp,apic,'good',nil,0);
+   end;
+  end
+ end;
 
 begin
  with drawinfo,copyarea,sourcerect^,gc,x11gcty(platformdata) do begin
@@ -3948,8 +3974,6 @@ begin
     ax:= x;
     ay:= y;
    end;
-   fillchar(sattributes,sizeof(sattributes),0);
-   fillchar(dattributes,sizeof(dattributes),0);
    if (cardinal(transparency) <> 0) and not colormask then begin
     maskpic:= createmaskpicture(rgbtriplety(cardinal(transparency) xor $ffffff));
     pictop:= pictopover;
@@ -3957,19 +3981,26 @@ begin
    else begin
     if colormask then begin
      maskpic:= createmaskpicture(mask);
+     updatetransform(maskpic);
+     {
      if needstransform then begin
       xrendersetpicturetransform(appdisp,maskpic,@transform);
      end;
+     }
      pictop:= pictopover;
     end
     else begin
+     maskpic:= 0;
      if (df_canvasismonochrome in gc.drawingflags) and (mask = nil) then begin
       pictop:= pictopsrc; 
      end
      else begin
+      if mask <> nil then begin
+       maskpic:= createmaskpicture(rgbtriplety($ffffff));
+                 //does not work with none
+      end;
       pictop:= pictopover; //pictopsrc is unreliable!?
      end;
-     maskpic:= 0;
     end;
    end;
    with sattributes do begin
@@ -4002,11 +4033,14 @@ begin
      if gcclipregion <> 0 then begin
       setregion(gc,region(gcclipregion),dpic);
      end;
+     updatetransform(spic);
+     {
      if needstransform then begin
       xrendersetpicturetransform(appdisp,spic,@transform);
      end;
-     xrendercomposite(appdisp,pictop,cpic,spic,dpic,0,0,ax,ay,destrect^.x,destrect^.y,
-                        destrect^.cx,destrect^.cy);
+     }
+     xrendercomposite(appdisp,pictop,cpic,spic,dpic,0,0,ax,ay,
+                          destrect^.x,destrect^.y,destrect^.cx,destrect^.cy);
      xrenderfreepicture(appdisp,cpic);
      if df_opaque in gc.drawingflags then begin
       xvalues.xfunction:= gxxor;
@@ -4036,9 +4070,12 @@ begin
     if gcclipregion <> 0 then begin
      setregion(gc,region(gcclipregion),dpic);
     end;
+    updatetransform(spic);
+    {
     if needstransform then begin
      xrendersetpicturetransform(appdisp,spic,@transform);
     end;
+    }
     xrendercomposite(appdisp,pictop,spic,maskpic,dpic,ax,ay,ax,ay,destrect^.x,destrect^.y,
                        destrect^.cx,destrect^.cy);
 //    xrendercomposite(appdisp,pictop,spic,maskpic,dpic,ax,ay,0,0,destrect^.x,destrect^.y,
