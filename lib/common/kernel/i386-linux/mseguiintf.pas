@@ -1480,7 +1480,7 @@ function gui_pixmaptoimage(pixmap: pixmapty; out image: imagety;
                                       gchandle: cardinal): gdierrorty;
 var
  info: pixmapinfoty;
- ximage: pximage;
+ ximage1: pximage;
  po1: pcardinal;
  po2: pbyte;
  int1,int2: integer;
@@ -1493,13 +1493,13 @@ begin
   image.pixels:= nil;
   if info.depth = 1 then begin //monochrome
    image.monochrome:= true;
-   ximage:= xgetimage(appdisp,pixmap,0,0,info.size.cx,info.size.cy,1,xypixmap);
-   if ximage = nil then begin
+   ximage1:= xgetimage(appdisp,pixmap,0,0,info.size.cx,info.size.cy,1,xypixmap);
+   if ximage1 = nil then begin
     result:= gde_image;
     exit;
    end;
  {$ifdef FPC} {$checkpointer off} {$endif}
-   with ximage^ do begin
+   with ximage1^ do begin
     wordmax:= (image.size.cx + 31) div 32;
     image.length:= wordmax * image.size.cy;
     image.pixels:= gui_allocimagemem(image.length);
@@ -1542,8 +1542,8 @@ begin
   else begin
    image.monochrome:= false;
    image.length:= image.size.cx * image.size.cy;
-   ximage:= xgetimage(appdisp,pixmap,0,0,info.size.cx,info.size.cy,$ffffffff,zpixmap);
-   if ximage = nil then begin
+   ximage1:= xgetimage(appdisp,pixmap,0,0,info.size.cx,info.size.cy,$ffffffff,zpixmap);
+   if ximage1 = nil then begin
     result:= gde_image;
     exit;
    end;
@@ -1555,13 +1555,13 @@ begin
    for int1:= 0 to info.size.cy - 1 do begin
     for int2:= 0 to info.size.cx - 1 do begin
  {$ifdef FPC} {$checkpointer off} {$endif}
-     po1^:= gui_pixeltorgb(ximage^.f.get_pixel(ximage,int2,int1));
+     po1^:= gui_pixeltorgb(ximage1^.f.get_pixel(ximage1,int2,int1));
  {$ifdef FPC} {$checkpointer default} {$endif}
      inc(po1);
     end;
    end;
   end;
-  xdestroyimage(ximage);
+  xdestroyimage(ximage1);
  end;
 end;
 
@@ -3948,6 +3948,8 @@ begin
     ax:= x;
     ay:= y;
    end;
+   fillchar(sattributes,sizeof(sattributes),0);
+   fillchar(dattributes,sizeof(dattributes),0);
    if (cardinal(transparency) <> 0) and not colormask then begin
     maskpic:= createmaskpicture(rgbtriplety(cardinal(transparency) xor $ffffff));
     pictop:= pictopover;

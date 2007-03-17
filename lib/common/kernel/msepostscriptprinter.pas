@@ -1409,29 +1409,116 @@ procedure convertmono(const sourcerect: rectty; const image: imagety;
                       out data: bytearty; out rowbytes: integer);
 var
  sourcerowstep: integer;
- rowshiftleft,rowshiftright: integer;
+ rowshiftleft,rowshiftright: byte;
  po1,po2: pbyte;
  int1,int2: integer;
 begin
  with sourcerect do begin
   rowbytes:= (cx + 7) div 8;
   setlength(data,rowbytes*cy);
-  rowshiftleft:= x and $7;
-  rowshiftright:= 8-rowshiftleft;
+  rowshiftright:= x and $7;
+  rowshiftleft:= 8-rowshiftright;
   sourcerowstep:= ((image.size.cx + 31) div 32)*4;
   po1:= @pbyteaty(image.pixels)^[y * sourcerowstep + x div 8];
-  sourcerowstep:= sourcerowstep - rowbytes + 1;
+  sourcerowstep:= sourcerowstep - rowbytes;
   po2:= pointer(data);
   for int1:= cy - 1 downto 0 do begin
-   for int2:= rowbytes - 2 downto 0 do begin
-    po2^:= (po1^ shl rowshiftleft);
+   for int2:= rowbytes - 1 downto 0 do begin
+    po2^:= (po1^ shr rowshiftright);
     inc(po1);
-    po2^:= bitreverse[po2^ or (po1^ shr rowshiftright)];
+    po2^:= bitreverse[po2^ or byte(po1^ shl rowshiftleft)];
+                           //byte(... needed for FPC!
     inc(po2);
    end;
-   po2^:= bitreverse[po1^ shl rowshiftleft];
-   inc(po2);
    inc(po1,sourcerowstep);
+  end;
+ end;
+end;
+
+procedure convertmonotogray(const sourcerect: rectty; var image: imagety;
+                      out data: bytearty; out rowbytes: integer;
+                      const colorforeground,colorbackground: colorty);
+var
+ grf,grb: byte;
+ po1: pbyte;
+ po2: pbyte;
+ int1,int2: integer;
+ ar1: bytearty;
+ rowb: integer;
+ by1: byte;
+begin
+ convertmono(sourcerect,image,ar1,rowb);
+ image.monochrome:= false;
+ with colortorgb(colorforeground) do begin
+  grf:= (red + green + blue) div 3;
+ end;
+ with colortorgb(colorbackground) do begin
+  grb:= (red + green + blue) div 3;
+ end;
+ with sourcerect do begin
+  rowbytes:= cx;
+  setlength(data,rowbytes*cy);
+  po2:= pointer(data);
+  for int1:= 0 to cy - 1 do begin
+   po1:= @ar1[int1*rowb];
+   for int2:= 0 to cx - 1 do begin
+    by1:= bytebitsreverse[int2 and $7];
+    if po1^ and by1 = 0 then begin
+     po2^:= grb;
+    end
+    else begin
+     po2^:= grf;
+    end;
+    inc(po2);
+    if by1 = $01 then begin
+     inc(po1);
+    end;
+   end;
+  end;
+ end;
+end;
+
+procedure convertmonotorgb(const sourcerect: rectty; var image: imagety;
+                      out data: bytearty; out rowbytes: integer;
+                      const colorforeground,colorbackground: colorty);
+var
+ rgbf,rgbb: rgbtriplety;
+ po1: pbyte;
+ po2: pbyte;
+ int1,int2: integer;
+ ar1: bytearty;
+ rowb: integer;
+ by1: byte;
+ po3: prgbtriplety;
+begin
+ convertmono(sourcerect,image,ar1,rowb);
+ image.monochrome:= false;
+ rgbf:= colortorgb(colorforeground);
+ rgbb:= colortorgb(colorbackground);
+ with sourcerect do begin
+  rowbytes:= cx*3;
+  setlength(data,rowbytes*cy);
+  po2:= pointer(data);
+  for int1:= 0 to cy - 1 do begin
+   po1:= @ar1[int1*rowb];
+   for int2:= 0 to cx - 1 do begin
+    by1:= bytebitsreverse[int2 and $7];
+    if po1^ and by1 = 0 then begin
+     po3:= @rgbb;
+    end
+    else begin
+     po3:= @rgbf;
+    end;
+    po2^:= po3^.red;
+    inc(po2);
+    po2^:= po3^.green;
+    inc(po2);
+    po2^:= po3^.blue;
+    inc(po2);
+    if by1 = $01 then begin
+     inc(po1);
+    end;
+   end;
   end;
  end;
 end;
@@ -1472,7 +1559,7 @@ begin
   result:= false;
   exit;
  end;
- str1:= '/'+patname+' '+inttostr(rowbytes*image.size.cy)+' string def'+nl+
+ str1:= '/'+patname+' '+inttostr(rowbytes*sourcerect.cy)+' string def'+nl+
         'currentfile '+patname+' readhexstring'+nl;
  streamwrite(str1);
  writebinhex(ar1);
@@ -1574,7 +1661,7 @@ begin
   checkcolorspace;
   masked:= (mask <> nil) and mask.monochrome;
   if masked then begin
-   if fpslevel >= psl_3 then begin
+   if (fpslevel >= psl_3) then begin
     with source^ do begin
      gdi_lock;
      if gui_pixmaptoimage(tsimplebitmap1(mask).handle,image,
@@ -1591,7 +1678,15 @@ begin
      gdi_unlock;
     end;
     if image.monochrome then begin
-     convertmono(sourcerect^,image,ar3,rowbytes);
+//     convertmono(sourcerect^,image,ar3,rowbytes);
+     if colorspace = cos_gray then begin
+      convertmonotogray(sourcerect^,image,ar3,rowbytes,
+                 fdrawinfo.acolorforeground,fdrawinfo.acolorbackground);
+     end
+     else begin
+      convertmonotorgb(sourcerect^,image,ar3,rowbytes,
+                 fdrawinfo.acolorforeground,fdrawinfo.acolorbackground);
+     end
     end
     else begin
      if colorspace = cos_gray then begin
@@ -1606,7 +1701,7 @@ begin
     po1:= pointer(ar1);
     po2:= pointer(ar2);
     po3:= pointer(ar3);
-    for int1:= image.size.cy - 1 downto 0 do begin
+    for int1:= sourcerect^.cy - 1 downto 0 do begin
      system.move(po2^,po1^,maskrowbytes);
      inc(po1,maskrowbytes);
      inc(po2,maskrowbytes);
@@ -1629,7 +1724,7 @@ begin
     str1:= str1 + ' >> def'+nl+
     '<< /ImageType 3 /DataDict imdict /MaskDict madict /InterleaveType 2 >>'+nl;
     if image.monochrome then begin
-     str1:= str1 + 'imagemask';
+     str1:= str1 + 'imagemask';        //does not work?
     end
     else begin
      str1:= str1 + 'image';
