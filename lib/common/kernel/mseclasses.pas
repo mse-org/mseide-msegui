@@ -2773,7 +2773,7 @@ end;
 
 function tlinkedobjectqueue.findobject(const aobject: tlinkedobject): integer;
 begin
- result:= indexof(iobjectlink(aobject));
+ result:= indexof(pointer(iobjectlink(aobject)));
 end;
 
 { tpersistentqueue }
@@ -2812,7 +2812,7 @@ end;
 
 function tpersistentqueue.findobject(const aobject: tlinkedpersistent): integer;
 begin
- result:= indexof(iobjectlink(aobject));
+ result:= indexof(pointer(iobjectlink(aobject)));
 end;
 
 { tcomponentqueue }
@@ -2851,7 +2851,7 @@ end;
 
 function tcomponentqueue.findobject(const aobject: tmsecomponent): integer;
 begin
- result:= indexof(ievent(aobject));
+ result:= indexof(pointer(ievent(aobject)));
 end;
 
  { tobjectlinkrecordlist }
