@@ -465,7 +465,7 @@ procedure tpropertyvalue.updatestate;
 begin
  with feditor do begin
   if allequal then begin
-   caption:= getvalue;
+   caption:= removelinebreaks(getvalue);
   end
   else begin
    caption:= '';
@@ -1307,7 +1307,7 @@ begin
  if (aitem <> nil) and (tpropertyvalue(aitem).feditor <> nil) then begin
   with tpropertyvalue(aitem).feditor do begin
    if (aindex = values.activerow) or allequal then begin
-    aitem.caption:= getvalue;
+    aitem.caption:= removelinebreaks(getvalue);
    end
    else begin
     aitem.caption:= '';
