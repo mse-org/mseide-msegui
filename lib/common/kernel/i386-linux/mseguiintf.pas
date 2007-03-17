@@ -3900,6 +3900,9 @@ begin
  end;
 end;
 
+const
+ rgbwhite: rgbtriplety = (blue: $ff; green: $ff; red: $ff; res: $00);
+
 procedure gui_copyarea(var drawinfo: drawinfoty);
 
 const
@@ -3996,7 +3999,7 @@ begin
      end
      else begin
       if mask <> nil then begin
-       maskpic:= createmaskpicture(rgbtriplety($ffffff));
+       maskpic:= createmaskpicture(rgbwhite);
                  //does not work with none
       end;
       pictop:= pictopover; //pictopsrc is unreliable!?
