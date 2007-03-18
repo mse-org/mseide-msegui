@@ -272,18 +272,25 @@ type
    fgrip_size: integer;
    fgrip_grip: stockbitmapty;
    fgrip_options: gripoptionsty;
-   fgrip_colorbutton: colorty;
+   fgrip_colorglyph: colorty;
    fcontroller: tdockcontroller;
    fgrip_coloractive: colorty;
    fobjectpicker: tobjectpicker;
+   fgrip_colorbutton: colorty;
+   fgrip_colorbuttonactive: colorty;
+   fgrip_colorglyphactive: colorty;
    procedure setgrip_color(const avalue: colorty);
    procedure setgrip_grip(const avalue: stockbitmapty);
    procedure setgrip_size(const avalue: integer);
    procedure setgrip_options(avalue: gripoptionsty);
-   procedure setgrip_colorbutton(const Value: colorty);
+   procedure setgrip_colorglyph(const avalue: colorty);
    function getbuttonrects(const index: dockbuttonrectty): rectty;
    procedure setgrip_coloractive(const avalue: colorty);
+   procedure setgrip_colorbutton(const avalue: colorty);
+   procedure setgrip_colorbuttonactive(const avalue: colorty);
+   procedure setgrip_colorglyphactive(const avalue: colorty);
   protected
+   procedure updatewidgetstate; override;   
    procedure updaterects; override;
    procedure updatestate; override;
    procedure getpaintframe(var frame: framety); override;
@@ -321,8 +328,14 @@ type
                                                        default defaultgripcolor;
    property grip_coloractive: colorty read fgrip_coloractive 
                       write setgrip_coloractive default defaultgripcoloractive;
+   property grip_colorglyph: colorty read fgrip_colorglyph write
+                 setgrip_colorglyph default cl_glyph;
+   property grip_colorglyphactive: colorty read fgrip_colorglyphactive write
+                 setgrip_colorglyphactive default cl_glyph;
    property grip_colorbutton: colorty read fgrip_colorbutton write
-                 setgrip_colorbutton default cl_black;
+                 setgrip_colorbutton default cl_transparent;
+   property grip_colorbuttonactive: colorty read fgrip_colorbuttonactive write
+                 setgrip_colorbuttonactive default cl_transparent;
    property grip_options: gripoptionsty read fgrip_options write setgrip_options
                                                      default defaultgripoptions;
  end;
@@ -2606,7 +2619,10 @@ constructor tgripframe.create(const intf: iframe;
 begin
  fgrip_color:= defaultgripcolor;
  fgrip_coloractive:= defaultgripcoloractive;
- fgrip_colorbutton:= cl_black;
+ fgrip_colorglyph:= cl_glyph;
+ fgrip_colorglyphactive:= cl_glyph;
+ fgrip_colorbutton:= cl_transparent;
+ fgrip_colorbuttonactive:= cl_transparent;
  fgrip_size:= defaultgripsize;
  fgrip_pos:= defaultgrippos;
  fgrip_grip:= defaultgripgrip;
@@ -2643,6 +2659,7 @@ var
  col1: colorty;
  info1: drawtextinfoty;
  floating: boolean;
+ colorbutton,colorglyph: colorty;
 label
  endlab;
 begin
@@ -2652,79 +2669,95 @@ begin
   rect1:= clipbox;
   if testintersectrect(rect1,fgriprect) then begin
    colorbefore:= color;
+   if fintf.getwidget.active then begin
+    colorbutton:= fgrip_colorbuttonactive;
+    colorglyph:= fgrip_colorglyphactive;
+   end
+   else begin
+    colorbutton:= fgrip_colorbutton;
+    colorglyph:= fgrip_colorglyph;
+   end;
    if go_closebutton in fgrip_options then begin
+    fillrect(frects[dbr_close],colorbutton);
     if fgrip_size >= 8 then begin
      draw3dframe(canvas,frects[dbr_close],1,defaultframecolors);
-     drawcross(inflaterect(frects[dbr_close],-2),fgrip_colorbutton);
+     drawcross(inflaterect(frects[dbr_close],-2),colorglyph);
     end
     else begin
-     drawcross(frects[dbr_close],fgrip_colorbutton);
+     drawcross(frects[dbr_close],colorglyph);
     end;
    end;
    with frects[dbr_maximize] do begin
     if (cx > 0) and (go_maximizebutton in fgrip_options) then begin
+     fillrect(frects[dbr_maximize],colorbutton);
      draw3dframe(canvas,frects[dbr_maximize],1,defaultframecolors);
-     drawframe(inflaterect(frects[dbr_maximize],-2),-1,fgrip_colorbutton);
-     drawvect(makepoint(x+2,y+3),gd_right,cx-5,fgrip_colorbutton);
+     drawframe(inflaterect(frects[dbr_maximize],-2),-1,colorglyph);
+     drawvect(makepoint(x+2,y+3),gd_right,cx-5,colorglyph);
     end;
    end;
    with frects[dbr_normalize] do begin
     if (cx > 0) and (go_normalizebutton in fgrip_options) then begin
+     fillrect(frects[dbr_normalize],colorbutton);
      draw3dframe(canvas,frects[dbr_normalize],1,defaultframecolors);
      rect2.cx:= cx * 2 div 3 - 3;
      rect2.cy:= rect2.cx;
      rect2.pos:= addpoint(pos,makepoint(2,2));
-     drawrect(rect2,fgrip_colorbutton);
+     drawrect(rect2,colorglyph);
      rect2.x:= x + cx - 3 - rect2.cx;
      rect2.y:= y + cy - 3 - rect2.cy;
-     drawrect(rect2,fgrip_colorbutton);
+     drawrect(rect2,colorglyph);
     end;
    end;
    with frects[dbr_minimize] do begin
     if (cx > 0) and (go_minimizebutton in fgrip_options) then begin
+     fillrect(frects[dbr_minimize],colorbutton);
      draw3dframe(canvas,frects[dbr_minimize],1,defaultframecolors);
      case fgrip_pos of
       cp_left: begin
-       drawvect(makepoint(x+2,y+2),gd_down,cy-5,fgrip_colorbutton);
-       drawvect(makepoint(x+3,y+2),gd_down,cy-5,fgrip_colorbutton);
+       drawvect(makepoint(x+2,y+2),gd_down,cy-5,colorglyph);
+       drawvect(makepoint(x+3,y+2),gd_down,cy-5,colorglyph);
       end;
       cp_right: begin
-       drawvect(makepoint(x+cx-3,y+2),gd_down,cy-5,fgrip_colorbutton);
-       drawvect(makepoint(x+cx-4,y+2),gd_down,cy-5,fgrip_colorbutton);
+       drawvect(makepoint(x+cx-3,y+2),gd_down,cy-5,colorglyph);
+       drawvect(makepoint(x+cx-4,y+2),gd_down,cy-5,colorglyph);
       end;
       cp_bottom: begin
-       drawvect(makepoint(x+2,y+cy-3),gd_right,cx-5,fgrip_colorbutton);
-       drawvect(makepoint(x+2,y+cy-4),gd_right,cx-5,fgrip_colorbutton);
+       drawvect(makepoint(x+2,y+cy-3),gd_right,cx-5,colorglyph);
+       drawvect(makepoint(x+2,y+cy-4),gd_right,cx-5,colorglyph);
       end;
       else begin //cp_top
-       drawvect(makepoint(x+2,y+2),gd_right,cx-5,fgrip_colorbutton);
-       drawvect(makepoint(x+2,y+3),gd_right,cx-5,fgrip_colorbutton);
+       drawvect(makepoint(x+2,y+2),gd_right,cx-5,colorglyph);
+       drawvect(makepoint(x+2,y+3),gd_right,cx-5,colorglyph);
       end;
      end;
     end;
    end;
    with frects[dbr_fixsize] do begin
     if (cx > 0) and (go_fixsizebutton in fgrip_options) then begin
-     draw3dframe(canvas,frects[dbr_fixsize],calclevel(od_fixsize),defaultframecolors);
-     drawframe(inflaterect(frects[dbr_fixsize],-2),-1,fgrip_colorbutton);
+     fillrect(frects[dbr_fixsize],colorbutton);
+     draw3dframe(canvas,frects[dbr_fixsize],calclevel(od_fixsize),
+                  defaultframecolors);
+     drawframe(inflaterect(frects[dbr_fixsize],-2),-1,colorglyph);
     end;
    end;
    with frects[dbr_top] do begin
     if (cx > 0) and (go_topbutton in fgrip_options)  then begin
+     fillrect(frects[dbr_top],colorbutton);
      int1:= x + cx div 2;
      draw3dframe(canvas,frects[dbr_top],calclevel(od_top),defaultframecolors);
      drawlines([makepoint(int1-3,y+4),makepoint(int1,y+1),makepoint(int1,y+cy-1)],
-              false,fgrip_colorbutton);
-     drawline(makepoint(int1+3,y+4),makepoint(int1,y+1),fgrip_colorbutton);
+              false,colorglyph);
+     drawline(makepoint(int1+3,y+4),makepoint(int1,y+1),colorglyph);
     end;
    end;
    with frects[dbr_background] do begin
     if (cx > 0) and (go_backgroundbutton in fgrip_options) then begin
-    int1:= x + cx div 2;
-    draw3dframe(canvas,frects[dbr_background],calclevel(od_background),defaultframecolors);
+     fillrect(frects[dbr_background],colorbutton);
+     int1:= x + cx div 2;
+     draw3dframe(canvas,frects[dbr_background],calclevel(od_background),defaultframecolors);
      drawlines([makepoint(int1-3,y+cx-4),makepoint(int1,y+cy-1),makepoint(int1,y+1)],
-              false,fgrip_colorbutton);
-     drawline(makepoint(int1+3,y+cx-4),makepoint(int1,y+cy-1),fgrip_colorbutton);
+              false,colorglyph);
+     drawline(makepoint(int1+3,y+cx-4),makepoint(int1,y+cy-1),colorglyph);
     end;
    end;
    rect1:= frects[dbr_handle];
@@ -2895,10 +2928,34 @@ begin
  end;
 end;
 
-procedure tgripframe.setgrip_colorbutton(const Value: colorty);
+procedure tgripframe.setgrip_colorglyph(const avalue: colorty);
 begin
- if fgrip_colorbutton <> value then begin
-  fgrip_colorbutton := Value;
+ if fgrip_colorglyph <> avalue then begin
+  fgrip_colorglyph := avalue;
+  internalupdatestate;
+ end;
+end;
+
+procedure tgripframe.setgrip_colorglyphactive(const avalue: colorty);
+begin
+ if fgrip_colorglyphactive <> avalue then begin
+  fgrip_colorglyphactive := avalue;
+  internalupdatestate;
+ end;
+end;
+
+procedure tgripframe.setgrip_colorbutton(const avalue: colorty);
+begin
+ if fgrip_colorbutton <> avalue then begin
+  fgrip_colorbutton := avalue;
+  internalupdatestate;
+ end;
+end;
+
+procedure tgripframe.setgrip_colorbuttonactive(const avalue: colorty);
+begin
+ if fgrip_colorbuttonactive <> avalue then begin
+  fgrip_colorbuttonactive := avalue;
   internalupdatestate;
  end;
 end;
@@ -3152,6 +3209,12 @@ begin
  if not fcontroller.active then begin
   fobjectpicker.mouseevent(info);
  end;
+end;
+
+procedure tgripframe.updatewidgetstate;
+begin
+ inherited;
+ fintf.getwidget.invalidaterect(fgriprect,org_widget);
 end;
 
 { tdockhandle }
