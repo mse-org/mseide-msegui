@@ -788,7 +788,8 @@ begin
   end;
   if high(layoutinfo.lineinfos) > 0 then begin
    rect1:= dest;
-   flags1:= (flags - [tf_bottom]) + [tf_ycentered];
+//   flags1:= (flags - [tf_bottom]) + [tf_ycentered];
+   flags1:= flags;
    flags2:= flags1 - [tf_xcentered,tf_right,tf_xjustify];
    with layoutinfo do begin
     rect1.cy:= font.lineheight;
