@@ -2439,7 +2439,10 @@ end;
 
 function tdockcontroller.isfloating: boolean;
 begin
- result:= fintf.getwidget.parentwidget = nil;
+ with fintf.getwidget do begin
+  result:= (parentwidget = nil) or (csdesigning in componentstate) and 
+               (parentwidget = owner);
+ end;
 end;
 
 function tdockcontroller.canmdisize: boolean;
