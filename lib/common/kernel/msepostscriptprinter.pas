@@ -1926,6 +1926,7 @@ end;
 procedure tpostscriptprinter.gcneeded(const sender: tcanvas);
 var
  gc1: gcty;
+ rea1: real;
 begin
  if not (sender is tpostscriptcanvas) then begin
   guierror(gue_invalidcanvas);
@@ -1936,8 +1937,14 @@ begin
 //  end;
   fillchar(gc1,sizeof(gc1),0);
   gc1.handle:= cardinal(invalidgchandle);
-  linktopaintdevice(ptrint(self),gc1,makesize(round(pa_width*ppmm),
-                       round(pa_height*ppmm)),nullpoint);
+  if pa_width > pa_height then begin //quadratic for landscape/portrait switching
+   rea1:= pa_width;
+  end
+  else begin
+   rea1:= pa_height;
+  end;
+  linktopaintdevice(ptrint(self),gc1,makesize(round(rea1{pa_width}*ppmm),
+                       round(rea1{pa_height}*ppmm)),nullpoint);
  end;
 end;
 

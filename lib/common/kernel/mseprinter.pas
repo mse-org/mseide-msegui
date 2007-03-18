@@ -694,6 +694,15 @@ begin
    fclientsize.cx:= fsize.cx - round((fpa_frameleft+fpa_frameright)*ppmm);
    fclientsize.cy:= fsize.cy - round((fpa_frametop+fpa_framebottom)*ppmm);
   end;
+  with fsize do begin
+   if cx > cy then begin 
+       //quadratic because of cliprectinit with later orientation switch
+    cy:= cx;
+   end
+   else begin
+    cx:= cy;             
+   end;
+  end;  
  end;
 end;
 
@@ -779,7 +788,7 @@ begin
   end;
   if high(layoutinfo.lineinfos) > 0 then begin
    rect1:= dest;
-   flags1:= flags - [tf_ycentered,tf_bottom];
+   flags1:= (flags - [tf_bottom]) + [tf_ycentered];
    flags2:= flags1 - [tf_xcentered,tf_right,tf_xjustify];
    with layoutinfo do begin
     rect1.cy:= font.lineheight;
