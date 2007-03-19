@@ -1,4 +1,5 @@
 object sourcepage: tsourcepage
+  optionswidget = [ow_arrowfocus, ow_subfocus, ow_destroywidgets, ow_hinton, ow_autoscale]
   bounds_x = 192
   bounds_y = 245
   bounds_cx = 311
@@ -97,6 +98,7 @@ object sourcepage: tsourcepage
       font.name = 'mseide_source'
       font.dummy = 0
       optionsedit = [oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_linebreak, oe_eatreturn, oe_keyexecute, oe_savestate]
+      onkeydown = editonkeydown
       marginlinecolor = -2147483648
       tabulators.ppmm = 3
       onfontchanged = editonfontchanged

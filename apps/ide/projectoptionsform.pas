@@ -112,6 +112,7 @@ type
   rightmarginon: boolean;
   rightmarginchars: integer;
   tabstops: integer;
+  spacetabs: boolean;
   editfontname: string;
   editfontheight: integer;
   editfontwidth: integer;
@@ -268,6 +269,7 @@ type
    reportform: tfilenameedit;
    inheritedsource: tfilenameedit;
    inheritedform: tfilenameedit;
+   spacetabs: tbooleanedit;
    tgroupbox1: tgroupbox;
    backupfilecount: tintegeredit;
    debugoptions: tstringedit;
@@ -657,6 +659,7 @@ begin
   rightmarginon:= true;
   rightmarginchars:= 80;
   tabstops:= 4;
+  spacetabs:= false;
   editfontname:= 'mseide_source';
   editfontheight:= 0;
   editfontwidth:= 0;
@@ -878,6 +881,7 @@ begin
   updatevalue('rightmarginon',rightmarginon);
   updatevalue('rightmarginchars',rightmarginchars);
   updatevalue('tabstops',tabstops);
+  updatevalue('spacetabs',spacetabs);
   updatevalue('editfontname',editfontname);
   updatevalue('editfontheight',editfontheight);
   updatevalue('editfontwidth',editfontwidth);
@@ -986,6 +990,7 @@ begin
   fo.autoindent.value:= autoindent;
   fo.blockindent.value:= blockindent;
   fo.tabstops.value:= tabstops;
+  fo.spacetabs.value:= spacetabs;
   fo.rightmarginon.value:= rightmarginon;
   fo.rightmarginchars.value:= rightmarginchars;
   fo.editfontname.value:= editfontname;
@@ -1142,6 +1147,7 @@ begin
   autoindent:= fo.autoindent.value;
   blockindent:= fo.blockindent.value;
   tabstops:= fo.tabstops.value;
+  spacetabs:= fo.spacetabs.value;
   rightmarginon:= fo.rightmarginon.value;
   rightmarginchars:= fo.rightmarginchars.value;
   editfontname:= fo.editfontname.value;

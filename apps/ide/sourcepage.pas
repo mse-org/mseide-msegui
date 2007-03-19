@@ -57,6 +57,7 @@ type
    procedure editonfontchanged(const sender: TObject);
    procedure sourcefoondeactivate(const sender: TObject);
    procedure gridoncellevent(const sender: TObject; var info: celleventinfoty);
+   procedure editonkeydown(const sender: twidget; var info: keyeventinfoty);
   private
    factiverow: integer;
    flasthint: gridcoordty;
@@ -514,7 +515,8 @@ begin
  showsourcehint(apos,ar1);
 end;
 
-procedure tsourcepage.editoncellevent(const sender: TObject; var info: celleventinfoty);
+procedure tsourcepage.editoncellevent(const sender: TObject; 
+                                                    var info: celleventinfoty);
 
  procedure checklink;
  var
@@ -522,7 +524,7 @@ procedure tsourcepage.editoncellevent(const sender: TObject; var info: cellevent
  begin
   if info.keyeventinfopo^.shiftstate = [ss_ctrl] then begin
    if edit.mousepostotextpos(translatewidgetpoint(application.mouse.pos,nil,edit),
-              pos2,true) then begin
+                                            pos2,true) then begin
     showlink(pos2);
    end;
   end
@@ -1228,6 +1230,17 @@ end;
 procedure tsourcepage.setbackupcreated;
 begin
  fbackupcreated:= true;
+end;
+
+procedure tsourcepage.editonkeydown(const sender: twidget;
+                                                   var info: keyeventinfoty);
+begin
+ with info,tsyntaxedit(sender).editor,projectoptions do begin
+  if spacetabs and (tabstops > 0) and (shiftstate = []) and 
+                                             (key = key_tab) then begin
+   chars:= charstring(' ',(curindex div tabstops + 1) * tabstops - curindex);
+  end;
+ end;
 end;
 
 end.
