@@ -1337,8 +1337,8 @@ begin
    if FCursor.FStatementType in [stSelect] then begin
     if aexecute then begin
      Execute;
+     if FCursor.FInitFieldDef then InternalInitFieldDefs;
     end;
-    if FCursor.FInitFieldDef then InternalInitFieldDefs;
     if DefaultFields then begin
      CreateFields;
      if FUpdateable then begin

@@ -1975,6 +1975,7 @@ begin
  fupdatebuffer[fcurrentupdatebuffer].updatekind := ukdelete;
  if flogger <> nil then begin
   logupdatebuffer(flogger,fupdatebuffer[fcurrentupdatebuffer],po1,true,false);
+  flogger.flushbuffer;
  end;
 end;
 
@@ -1987,6 +1988,7 @@ procedure tmsebufdataset.cancelrecupdate(var arec: recupdatebufferty);
 begin
  if (flogger <> nil) and not (bs_loading in fbstate) then begin
   logupdatebuffer(flogger,arec,nil,true,true);
+  flogger.flushbuffer;
  end;
  with arec do begin
   if bookmark.recordpo <> nil then begin
@@ -2293,6 +2295,7 @@ begin
    if newupdatebuffer then begin
     logupdatebuffer(flogger,fupdatebuffer[fcurrentupdatebuffer],nil,true,false);
    end;
+   flogger.flushbuffer;
   end;
   if state = dsinsert then begin
    with dsheader.bookmark do  begin
