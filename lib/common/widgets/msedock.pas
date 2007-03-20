@@ -265,8 +265,6 @@ type
 
  tgripframe = class(tcaptionframe,iobjectpicker)
   private
-   frects: array[dbr_first..dbr_last] of rectty;
-   fgriprect: rectty;
    fgrip_pos: captionposty;
    fgrip_color: colorty;
    fgrip_size: integer;
@@ -290,6 +288,8 @@ type
    procedure setgrip_colorbuttonactive(const avalue: colorty);
    procedure setgrip_colorglyphactive(const avalue: colorty);
   protected
+   frects: array[dbr_first..dbr_last] of rectty;
+   fgriprect: rectty;
    procedure updatewidgetstate; override;   
    procedure updaterects; override;
    procedure updatestate; override;
@@ -307,6 +307,9 @@ type
    procedure endpickmove(const pos,offset: pointty; const objects: integerarty);
    procedure paintxorpic(const canvas: tcanvas; const pos,offset: pointty;
                  const objects: integerarty);
+   procedure drawgripbutton(const acanvas: tcanvas; const kind: dockbuttonrectty;
+                    const arect: rectty; 
+                    const acolorglyph,acolorbutton: colorty); virtual;
   public
    constructor create(const intf: iframe; const acontroller: tdockcontroller);
    destructor destroy; override;
@@ -2641,8 +2644,10 @@ begin
  inherited;
 end;
 
-procedure tgripframe.dopaintframe(const canvas: tcanvas; const rect: rectty);
-
+procedure tgripframe.drawgripbutton(const acanvas: tcanvas;
+               const kind: dockbuttonrectty; const arect: rectty;
+               const acolorglyph: colorty; const acolorbutton: colorty);
+               
  function calclevel(const aoption: optiondockty): integer;
  begin
   if aoption in fcontroller.foptionsdock then begin
@@ -2652,6 +2657,83 @@ procedure tgripframe.dopaintframe(const canvas: tcanvas; const rect: rectty);
    result:= 1;
   end;
  end;
+ 
+var
+ rect2: rectty;
+ int1: integer;
+begin
+ with acanvas,arect do begin
+  fillrect(arect,acolorbutton);
+  case kind of
+   dbr_close: begin
+    if fgrip_size >= 8 then begin
+     draw3dframe(acanvas,arect,1,defaultframecolors);
+     drawcross(inflaterect(arect,-2),acolorglyph);
+    end
+    else begin
+     drawcross(arect,acolorglyph);
+    end;
+   end;
+   dbr_maximize: begin
+    draw3dframe(acanvas,arect,1,defaultframecolors);
+    drawframe(inflaterect(arect,-2),-1,acolorglyph);
+    drawvect(makepoint(x+2,y+3),gd_right,cx-5,acolorglyph);
+   end;
+   dbr_normalize: begin
+    draw3dframe(acanvas,arect,1,defaultframecolors);
+    rect2.cx:= cx * 2 div 3 - 3;
+    rect2.cy:= rect2.cx;
+    rect2.pos:= addpoint(pos,makepoint(2,2));
+    drawrect(rect2,acolorglyph);
+    rect2.x:= x + cx - 3 - rect2.cx;
+    rect2.y:= y + cy - 3 - rect2.cy;
+    drawrect(rect2,acolorglyph);
+   end;
+   dbr_minimize: begin
+    draw3dframe(acanvas,arect,1,defaultframecolors);
+    case fgrip_pos of
+     cp_left: begin
+      drawvect(makepoint(x+2,y+2),gd_down,cy-5,acolorglyph);
+      drawvect(makepoint(x+3,y+2),gd_down,cy-5,acolorglyph);
+     end;
+     cp_right: begin
+      drawvect(makepoint(x+cx-3,y+2),gd_down,cy-5,acolorglyph);
+      drawvect(makepoint(x+cx-4,y+2),gd_down,cy-5,acolorglyph);
+     end;
+     cp_bottom: begin
+      drawvect(makepoint(x+2,y+cy-3),gd_right,cx-5,acolorglyph);
+      drawvect(makepoint(x+2,y+cy-4),gd_right,cx-5,acolorglyph);
+     end;
+     else begin //cp_top
+      drawvect(makepoint(x+2,y+2),gd_right,cx-5,acolorglyph);
+      drawvect(makepoint(x+2,y+3),gd_right,cx-5,acolorglyph);
+     end;
+    end;
+   end;
+   dbr_fixsize: begin
+    draw3dframe(acanvas,arect,calclevel(od_fixsize),
+                 defaultframecolors);
+    drawframe(inflaterect(arect,-2),-1,acolorglyph);
+   end;
+   dbr_top: begin
+    int1:= x + cx div 2;
+    draw3dframe(acanvas,arect,calclevel(od_top),defaultframecolors);
+    drawlines([makepoint(int1-3,y+4),makepoint(int1,y+1),makepoint(int1,y+cy-1)],
+             false,acolorglyph);
+    drawline(makepoint(int1+3,y+4),makepoint(int1,y+1),acolorglyph);
+   end;
+   dbr_background: begin
+    int1:= x + cx div 2;
+    draw3dframe(acanvas,arect,calclevel(od_background),defaultframecolors);
+    drawlines([makepoint(int1-3,y+cx-4),makepoint(int1,y+cy-1),makepoint(int1,y+1)],
+             false,acolorglyph);
+    drawline(makepoint(int1+3,y+cx-4),makepoint(int1,y+cy-1),acolorglyph);
+   end;
+  end;
+ end;  
+end;
+
+procedure tgripframe.dopaintframe(const canvas: tcanvas; const rect: rectty);
 
 var
  brushbefore: tsimplebitmap;
@@ -2681,87 +2763,32 @@ begin
     colorglyph:= fgrip_colorglyph;
    end;
    if go_closebutton in fgrip_options then begin
-    fillrect(frects[dbr_close],colorbutton);
-    if fgrip_size >= 8 then begin
-     draw3dframe(canvas,frects[dbr_close],1,defaultframecolors);
-     drawcross(inflaterect(frects[dbr_close],-2),colorglyph);
-    end
-    else begin
-     drawcross(frects[dbr_close],colorglyph);
-    end;
+    drawgripbutton(canvas,dbr_close,frects[dbr_close],colorglyph,colorbutton);
    end;
-   with frects[dbr_maximize] do begin
-    if (cx > 0) and (go_maximizebutton in fgrip_options) then begin
-     fillrect(frects[dbr_maximize],colorbutton);
-     draw3dframe(canvas,frects[dbr_maximize],1,defaultframecolors);
-     drawframe(inflaterect(frects[dbr_maximize],-2),-1,colorglyph);
-     drawvect(makepoint(x+2,y+3),gd_right,cx-5,colorglyph);
-    end;
+   if (frects[dbr_maximize].cx > 0) and 
+           (go_maximizebutton in fgrip_options) then begin
+    drawgripbutton(canvas,dbr_maximize,frects[dbr_maximize],colorglyph,colorbutton);
    end;
-   with frects[dbr_normalize] do begin
-    if (cx > 0) and (go_normalizebutton in fgrip_options) then begin
-     fillrect(frects[dbr_normalize],colorbutton);
-     draw3dframe(canvas,frects[dbr_normalize],1,defaultframecolors);
-     rect2.cx:= cx * 2 div 3 - 3;
-     rect2.cy:= rect2.cx;
-     rect2.pos:= addpoint(pos,makepoint(2,2));
-     drawrect(rect2,colorglyph);
-     rect2.x:= x + cx - 3 - rect2.cx;
-     rect2.y:= y + cy - 3 - rect2.cy;
-     drawrect(rect2,colorglyph);
-    end;
+   if (frects[dbr_normalize].cx > 0) and 
+                           (go_normalizebutton in fgrip_options) then begin
+    drawgripbutton(canvas,dbr_normalize,frects[dbr_normalize],colorglyph,colorbutton);
    end;
-   with frects[dbr_minimize] do begin
-    if (cx > 0) and (go_minimizebutton in fgrip_options) then begin
-     fillrect(frects[dbr_minimize],colorbutton);
-     draw3dframe(canvas,frects[dbr_minimize],1,defaultframecolors);
-     case fgrip_pos of
-      cp_left: begin
-       drawvect(makepoint(x+2,y+2),gd_down,cy-5,colorglyph);
-       drawvect(makepoint(x+3,y+2),gd_down,cy-5,colorglyph);
-      end;
-      cp_right: begin
-       drawvect(makepoint(x+cx-3,y+2),gd_down,cy-5,colorglyph);
-       drawvect(makepoint(x+cx-4,y+2),gd_down,cy-5,colorglyph);
-      end;
-      cp_bottom: begin
-       drawvect(makepoint(x+2,y+cy-3),gd_right,cx-5,colorglyph);
-       drawvect(makepoint(x+2,y+cy-4),gd_right,cx-5,colorglyph);
-      end;
-      else begin //cp_top
-       drawvect(makepoint(x+2,y+2),gd_right,cx-5,colorglyph);
-       drawvect(makepoint(x+2,y+3),gd_right,cx-5,colorglyph);
-      end;
-     end;
-    end;
+   if (frects[dbr_minimize].cx > 0) and 
+                           (go_minimizebutton in fgrip_options) then begin
+    drawgripbutton(canvas,dbr_minimize,frects[dbr_minimize],colorglyph,colorbutton);
    end;
-   with frects[dbr_fixsize] do begin
-    if (cx > 0) and (go_fixsizebutton in fgrip_options) then begin
-     fillrect(frects[dbr_fixsize],colorbutton);
-     draw3dframe(canvas,frects[dbr_fixsize],calclevel(od_fixsize),
-                  defaultframecolors);
-     drawframe(inflaterect(frects[dbr_fixsize],-2),-1,colorglyph);
-    end;
+   if (frects[dbr_fixsize].cx > 0) and 
+                           (go_fixsizebutton in fgrip_options) then begin
+    drawgripbutton(canvas,dbr_fixsize,frects[dbr_fixsize],colorglyph,colorbutton);
    end;
-   with frects[dbr_top] do begin
-    if (cx > 0) and (go_topbutton in fgrip_options)  then begin
-     fillrect(frects[dbr_top],colorbutton);
-     int1:= x + cx div 2;
-     draw3dframe(canvas,frects[dbr_top],calclevel(od_top),defaultframecolors);
-     drawlines([makepoint(int1-3,y+4),makepoint(int1,y+1),makepoint(int1,y+cy-1)],
-              false,colorglyph);
-     drawline(makepoint(int1+3,y+4),makepoint(int1,y+1),colorglyph);
-    end;
+   if (frects[dbr_top].cx > 0) and 
+                           (go_topbutton in fgrip_options)  then begin
+    drawgripbutton(canvas,dbr_top,frects[dbr_top],colorglyph,colorbutton);
    end;
-   with frects[dbr_background] do begin
-    if (cx > 0) and (go_backgroundbutton in fgrip_options) then begin
-     fillrect(frects[dbr_background],colorbutton);
-     int1:= x + cx div 2;
-     draw3dframe(canvas,frects[dbr_background],calclevel(od_background),defaultframecolors);
-     drawlines([makepoint(int1-3,y+cx-4),makepoint(int1,y+cy-1),makepoint(int1,y+1)],
-              false,colorglyph);
-     drawline(makepoint(int1+3,y+cx-4),makepoint(int1,y+cy-1),colorglyph);
-    end;
+   if (frects[dbr_background].cx > 0) and 
+                           (go_backgroundbutton in fgrip_options) then begin
+    drawgripbutton(canvas,dbr_background,frects[dbr_background],colorglyph,
+                                                                 colorbutton);
    end;
    rect1:= frects[dbr_handle];
    if fgrip_pos in [cp_top,cp_bottom] then begin
@@ -2778,7 +2805,7 @@ begin
       dec(dest.cx,1);
       font:= self.font;
       tabulators:= nil;
-      flags:= [tf_clipi];
+      flags:= [tf_clipi,tf_ycentered];
       drawtext(canvas,info1);
       inc(res.cx,1);
       inc(rect1.x,res.cx);
@@ -3046,7 +3073,8 @@ begin
     initrect(dbr_minimize);
    end;
   end;
-  if bo1 and bo3 and (go_fixsizebutton in fgrip_options) then begin
+  if bo1 and (bo3 or designing) and 
+                             (go_fixsizebutton in fgrip_options) then begin
    initrect(dbr_fixsize);
   end;
   if bo2 then begin
