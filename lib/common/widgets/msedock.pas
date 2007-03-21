@@ -175,18 +175,20 @@ type
    procedure updategrip(const asplitdir: splitdirty; const awidget: twidget);
    procedure setuseroptions(const avalue: optionsdockty);
    function placementrect: rectty;
-   procedure setmdistate(const avalue: mdistatety);
   protected
    foptionsdock: optionsdockty;
+   procedure setmdistate(const avalue: mdistatety); virtual;
+   procedure domdistatechanged(const oldstate,newstate: mdistatety); virtual;
+   procedure dofloat(const adist: pointty); virtual;
+   procedure dodock; virtual;
+   procedure dochilddock(const awidget: twidget); virtual;
+   procedure dochildfloat(const awidget: twidget); virtual;
+   function docheckdock(const info: draginfoty): boolean; virtual;
+
    function getparentcontroller(out acontroller: tdockcontroller): boolean;
    property useroptions: optionsdockty read fuseroptions write setuseroptions
                      default defaultoptionsdock;
-   procedure dofloat(const adist: pointty);
-   procedure dodock;
-   procedure dochilddock(const awidget: twidget);
-   procedure dochildfloat(const awidget: twidget);
-   procedure domdistatechanged(const oldstate,newstate: mdistatety);
-   function docheckdock(const info: draginfoty): boolean;
+
    function canfloat: boolean;
    procedure refused(const apos: pointty);
    procedure calclayout(const dragobject: tdockdragobject;
@@ -3350,7 +3352,9 @@ constructor tdockpanel.create(aowner: tcomponent);
 begin
  ficon:= tmaskedbitmap.create(false);
  ficon.onchange:= {$ifdef FPC}@{$endif}iconchanged;
- fdragdock:= tdockcontroller.create(idockcontroller(self));
+ if fdragdock = nil then begin
+  fdragdock:= tdockcontroller.create(idockcontroller(self));
+ end;
  inherited;
 end;
 

@@ -1254,7 +1254,9 @@ end;
 {
 constructor tdocktoolbar.create(aowner: tcomponent);
 begin
- fdragcontroller:= tdockcontroller.create(idockcontroller(self));
+ if fdragcontroller = nil then begin
+  fdragcontroller:= tdockcontroller.create(idockcontroller(self));
+ end;
  inherited;
 end;
 

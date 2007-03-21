@@ -1307,7 +1307,9 @@ end;
 
 constructor tcustomdockform.create(aowner: tcomponent; load: boolean);
 begin
- fdragdock:= tformdockcontroller.create(idockcontroller(self));
+ if fdragdock = nil then begin
+  fdragdock:= tformdockcontroller.create(idockcontroller(self));
+ end;
  if fscrollbox = nil then begin
   fscrollbox:= tdockformscrollbox.create(self);
  end;
