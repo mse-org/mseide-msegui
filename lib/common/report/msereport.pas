@@ -1626,7 +1626,9 @@ var
    bo1:= true;
    acanvas.save;
    acanvas.move(makepoint(adest.x,0));
-   acanvas.addclipframe(makerect(nullpoint,fband.paintsize),1000);
+   acanvas.addcliprect(inflaterect(makerect(nullpoint,fband.size),1000));
+                   //allow line drawing everywhere
+//   acanvas.addclipframe(makerect(nullpoint,fband.paintsize),1000);
   end;
   with ainfo do begin
    acanvas.linewidthmm:= widthmm;
