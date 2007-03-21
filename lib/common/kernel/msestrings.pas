@@ -35,6 +35,7 @@ const
  c_tab = #$09;
  c_backspace = #$08;
  c_delete = #$7f;
+ c_softhyphen = #$ad;
 
  {$ifdef mswindows}
  pathdelim = '\';

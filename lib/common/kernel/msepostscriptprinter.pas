@@ -932,13 +932,18 @@ begin
  for int1:= 0 to count-1 do begin
   ch1:= (text+int1)^;
   if (ch1 >= #128) or (ch1 < #32) then begin
-   (po1+int2)^:= '\';             //octal  
-   (po1+int2+3)^:= char((byte(ch1) and $07) + ord('0'));
-   ch1:= char(byte(ch1) shr 3);
-   (po1+int2+2)^:= char((byte(ch1) and $07) + ord('0'));
-   ch1:= char(byte(ch1) shr 3);
-   (po1+int2+1)^:= char((byte(ch1) and $03) + ord('0'));
-   inc(int2,3);
+   if ch1 = #0 then begin
+    dec(int2);        //remove zeroes
+   end
+   else begin
+    (po1+int2)^:= '\';             //octal  
+    (po1+int2+3)^:= char((byte(ch1) and $07) + ord('0'));
+    ch1:= char(byte(ch1) shr 3);
+    (po1+int2+2)^:= char((byte(ch1) and $07) + ord('0'));
+    ch1:= char(byte(ch1) shr 3);
+    (po1+int2+1)^:= char((byte(ch1) and $03) + ord('0'));
+    inc(int2,3);
+   end;
   end 
   else begin
    case ch1 of

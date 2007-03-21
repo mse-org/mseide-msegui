@@ -26,7 +26,7 @@ type
  textflagty = (tf_xcentered,tf_right,tf_xjustify,tf_ycentered,tf_bottom, 
                  //order fix, used in msepostscriptprinter
                tf_clipi,tf_clipo,
-               tf_grayed,tf_wordbreak,tf_noselect,
+               tf_grayed,tf_wordbreak,tf_softhyphen,tf_noselect,
                tf_ellipseleft,{tf_ellipsemid,}tf_ellipseright);
  textflagsty = set of textflagty;
 const
@@ -118,7 +118,7 @@ type
   liindex,licount: integer;
   listartx: integer;
   liwidth: integer;
-  tabchars: integerarty;
+  tabchars,justifychars: integerarty;
   linebreak: boolean;  //true if newline sequnce detected
  end;
  lineinfoarty = array of lineinfoty;
@@ -197,6 +197,26 @@ begin
  result:= textflagsty(setsinglebit({$ifdef FPC}longword{$else}word{$endif}(result),
               {$ifdef FPC}longword{$else}word{$endif}(old),
               {$ifdef FPC}longword{$else}word{$endif}(ellipsemask)));
+end;
+
+function mergearray(const a,b: integerarty): integerarty;
+         //result is sorted without duplicates
+var
+ int1,int2: integer;
+begin
+ result:= a;
+ stackarray(b,result);
+ if high(result) >= 0 then begin
+  sortarray(result);
+  int2:= 0;
+  for int1:= 1 to high(result) do begin
+   if result[int2] <> result[int1] then begin
+    inc(int2);
+    result[int2]:= result[int1];
+   end;
+  end;
+  setlength(result,int2+1);
+ end;
 end;
 
 procedure layouttext(const canvas: tcanvas; var info: drawtextinfoty; 
@@ -283,7 +303,40 @@ var
  tabs: tabulatorarty;
  po1: pmsecharaty;
  bo1: boolean;
+ wch1: widechar;
+ ar1: integerarty;
+
+ procedure checksofthyphen(const alineinfo: integer);
+ begin
+  if tf_softhyphen in info.flags then begin
+   with layoutinfo do begin
+    if (int2 > 0) and (info.text.text[int2] = c_softhyphen) then begin
+     dec(awidth,charwidths[int2-1]); //not used
+     charwidths[int2-1]:= 0;
+     additem((lineinfos[alineinfo]).tabchars,int2);
+    end;
+   end;
+  end;
+ end;
  
+ procedure addtabchar(const aindex: integer);
+ var
+  int1: integer; 
+ begin
+  with layoutinfo,lineinfos[high(lineinfos)] do begin
+   for int1:= 0 to high(tabchars) do begin
+    if tabchars[int1] = aindex then begin
+     exit;
+    end;
+    if tabchars[int1] > aindex then begin
+     insertitem(tabchars,int1,aindex);
+     exit;
+    end;
+   end;
+   additem(tabchars,int1);
+  end;
+ end;
+  
 begin
  tabs:= nil; //compiler warning
  if info.font <> nil then begin
@@ -307,7 +360,8 @@ begin
    style1:= font.style;
    for int1:= 0 to high(text.format) do begin
     with text.format[int1] do begin
-     if {$ifdef FPC}longword{$else}byte{$endif}(newinfos) and fontstylehandlemask <> 0 then begin
+     if {$ifdef FPC}longword{$else}byte{$endif}(newinfos) and 
+                                          fontstylehandlemask <> 0 then begin
       if index > textlen then begin
        getcharwidths(textlen-int2);
       end
@@ -334,12 +388,17 @@ begin
     int3:= 0; //textwidth of last whitespace
     awidth:= 0; //textwidth
     while int1 <= textlen do begin
-     if text.text[int1] = ' ' then begin
+     wch1:= text.text[int1];
+     if (wch1 = ' ') or 
+        ((wch1 = '-') or (wch1 = c_softhyphen)) and 
+            (awidth + charwidths[int1-1] <= info.dest.cx) then begin
+      checksofthyphen(high(lineinfos));
       int2:= int1;
       int3:= awidth;
      end
      else begin
       if checklinebreak(int1) then begin
+       checksofthyphen(high(lineinfos)-1);
        break;
       end;
      end;
@@ -347,10 +406,14 @@ begin
      if (awidth > info.dest.cx) and (awidth > charwidths[int1-1]) then begin
                            //min one char on line
       with lineinfos[high(lineinfos)] do begin
-       if int2 > 0 then begin //use last whitespace for break
+       if (int2 > 0) then begin //use last whitespace for break
+        if text.text[int2] <> ' ' then begin
+         inc(int3,charwidths[int2-1]); //'-'
+         inc(int2);
+        end;
         licount:= int2 - liindex;
         liwidth:= int3;
-        int1:= int2 + 1;
+        int1:= int2;
        end
        else begin
         licount:= int1 - liindex; //no whitespace to break
@@ -366,6 +429,7 @@ begin
      inc(int1);
     end;
    end;
+   checksofthyphen(high(lineinfos));
    with lineinfos[high(lineinfos)] do begin
     if textlen > 0 then begin
      licount:= textlen - liindex + 1;
@@ -395,16 +459,6 @@ begin
       if info.text.text[int1] = c_tab then begin
        if tabs <> nil then begin
         inc(nexttab);
-        {
-        int4:= nexttab+1;
-        nexttab:= bigint;
-        for int4:= int4 to high(tabs) do begin
-         if tabs[int4].pos > awidth then begin
-          nexttab:= int4;
-          break;
-         end;
-        end;
-        }
         if nexttab < info.tabulators.count then begin
          case tabs[nexttab].tabkind of
           tak_right: begin
@@ -423,19 +477,19 @@ begin
            charwidths[int1-1]:= tabs[nexttab].textpos - awidth;
           end;
          end;
-         additem(lineinfos[high(lineinfos)].tabchars,int1);
+         addtabchar(int1);
         end
         else begin
          if rea1 > 0 then begin
           charwidths[int1-1]:= round(ceil(awidth / rea1)*rea1) - awidth;
-          additem(lineinfos[high(lineinfos)].tabchars,int1);
+          addtabchar(int1);
          end;
         end;
        end
        else begin
         if rea1 > 0 then begin
          charwidths[int1-1]:= round(floor((awidth+rea1+0.1)/rea1)*rea1) - awidth;
-         additem(lineinfos[high(lineinfos)].tabchars,int1);
+         addtabchar(int1);
         end;
        end;
       end;
@@ -496,28 +550,35 @@ begin
    bo1:= false;
    for int3:= 0 to high(lineinfos) - 1 do begin
     with lineinfos[int3] do begin     
-     if (tabchars = nil) and not linebreak then begin
+     if not linebreak then begin
       bo1:= true;
       int4:= 0;
-      setlength(tabchars,licount); //max
+      setlength(justifychars,licount); //max
       for int1:= liindex-1 to liindex + licount - 2 do begin
        if po1^[int1] = ' ' then begin
-        tabchars[int4]:= int1+1;
+        justifychars[int4]:= int1+1;
         inc(int4);
        end;
       end;
-      setlength(tabchars,int4);
+      setlength(justifychars,int4);
       if (int4 > 0) and not (cs_internaldrawtext in fstate) then begin
        rea1:= (dest.cx - liwidth) / int4;
        rea2:= 0;
        int2:= 0;
-       for int1:= 0 to high(tabchars) do begin
+       for int1:= 0 to high(justifychars) do begin
         rea2:= rea2 + rea1;
         int4:= round(rea2) - int2;
-        inc(charwidths[tabchars[int1]-1],int4);
+        inc(charwidths[justifychars[int1]-1],int4);
         inc(int2,int4);
        end;
        listartx:= dest.x;
+       if tabchars <> nil then begin
+        tabchars:= mergearray(tabchars,justifychars);
+       end
+       else begin
+        tabchars:= justifychars;
+       end;
+       justifychars:= nil;
       end;
      end;  
     end;
@@ -812,7 +873,7 @@ var
 var
  row: integer;
  ellipsewidth: integer;
- int1,{int2,}int3{,int4}: integer;
+ int1,int2,int3{,int4}: integer;
  lastover: boolean;
 label
  endlab;
@@ -839,7 +900,6 @@ begin                  //drawtext
   defaultcolorbackground:= font.colorbackground;
   fontstylebefore:= font.style;
   afontstyle:= fontstylebefore;
-//  layouttext(canvas,info,layoutinfo);
   grayed:= tf_grayed in flags;
   with layoutinfo do begin
    underline:= descent div 2 + 1;

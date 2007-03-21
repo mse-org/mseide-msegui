@@ -109,6 +109,9 @@ type
  charaty = array[0..0] of char;
  pcharaty = ^charaty;
 
+ widecharaty = array[0..0] of widechar;
+ pwidecharaty = ^widecharaty;
+
  objectaty = array[0..0] of tobject;
  pobjectaty = ^objectaty;
 

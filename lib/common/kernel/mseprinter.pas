@@ -754,6 +754,7 @@ var
  rstr1: richstringty;
  layoutinfo: layoutinfoty;
  rect1,rect2: rectty;
+ backup: msestring;
 label
  endlab;
 begin
@@ -763,14 +764,8 @@ begin
   goto endlab;
  end;
  ar1:= nil; //compiler warning
-// info.res:= nullrect;
-// save;
-// if info.font <> nil then begin //foreign font
-//  font:= info.font;
-// end;
  with fdrawinfo do begin
   afonthandle1:= tfont1(font).gethandle;
-//   afonthandle:= tfont1(font).getdatapo^.font;
   with fvaluepo^.font do begin
    acolorforeground:= color;
    acolorbackground:= colorbackground;
@@ -786,133 +781,144 @@ begin
     begintextclip(clip);
    end;
   end;
-  if high(layoutinfo.lineinfos) > 0 then begin
-   rect1:= dest;
-//   flags1:= (flags - [tf_bottom]) + [tf_ycentered];
-   flags1:= flags;
-   flags2:= flags1 - [tf_xcentered,tf_right,tf_xjustify];
+  backup:= text.text;
+  try
    with layoutinfo do begin
-    rect1.cy:= font.lineheight;
-    if tf_ycentered in flags then begin
-     rect1.y:= dest.y + (dest.cy - length(lineinfos) * rect1.cy) div 2;
-    end
-    else begin
-     if tf_bottom in flags then begin
-      rect1.y:= dest.cy - length(lineinfos) * rect1.cy;
-     end;
-    end;
-    for int1:= 0 to high(lineinfos) do begin
-     with lineinfos[int1] do begin
-      if (tf_xjustify in flags) and (high(tabchars) > 0) and 
-                  (int1 < high(lineinfos)) then begin
-       rstr1:= richcopy(text,liindex,tabchars[0]-liindex);
-       textout(rstr1,rect1,flags2,0); //first word
-       rea1:= (dest.cx - liwidth + getstringwidth(' ') * length(tabchars)) /
-                        length(tabchars); //gap width
-       rect2:= rect1;        //x justify text
-       rect2.cx:= 0;                                    
-       int3:= dest.x;
-       for int2:= liindex to tabchars[0] - 1 do begin
-        inc(int3,charwidths[int2]);            //end of first word
-       end;
-       for int2:= 0 to high(tabchars) - 1 do begin
-        int5:= 0;
-        for int4:= tabchars[int2]+1 to tabchars[int2+1] - 1 do begin
-         inc(int5,charwidths[int4]); //width of actual word
+    if tf_softhyphen in flags then begin
+     for int1:= 0 to high(lineinfos) do begin
+      with lineinfos[int1] do begin
+       for int2:= 0 to high(tabchars) do begin
+        if text.text[tabchars[int2]] = c_softhyphen then begin
+         text.text[tabchars[int2]]:= #0; //will be removed in printing routine
         end;
-        rect2.x:= round(int3 + (int2 + 1) * rea1 + int5 div 2);
-        int3:= int3 + int5;
-        rstr1:= richcopy(text,tabchars[int2]+1,tabchars[int2+1] - 
-                                                        tabchars[int2] - 1);
-        textout(rstr1,rect2,flags2 + [tf_xcentered],0);
        end;
-       rstr1:= richcopy(text,tabchars[high(tabchars)]+1,
-                          liindex+licount-tabchars[high(tabchars)]-1);
-       textout(rstr1,rect1,flags2+[tf_right],0); //last word word       
-      end
-      else begin
-       rstr1:= richcopy(text,liindex,licount);
-       textout(rstr1,rect1,flags1,0);
       end;
-      inc(rect1.y,rect1.cy);
      end;
     end;
-   end;
-  end
-  else begin //single line
-   if countchars(text.text,c_tab) = 0 then begin
-    textout(text,dest,flags,0);
-   end
-   else begin
-    if tabulators = nil then begin
-     tab1:= fprinter.ftabulators;
-    end
-    else begin
-     tab1:= tabulators;
-    end;
-    if tab1.count = 0 then begin
-     if tab1.defaultdist = 0 then begin      //has no tabs
-      mstr1:= text.text;
-      try
-       replacechar(text.text,c_tab,' ');
-       textout(text,dest,flags,0);
-      finally
-       text.text:= mstr1;
-      end;
+    text.text:= replacechar(text.text,c_softhyphen,'-');
+    if high(lineinfos) > 0 then begin
+     rect1:= dest;
+     flags1:= flags;
+     flags2:= flags1 - [tf_xcentered,tf_right,tf_xjustify];
+     rect1.cy:= font.lineheight;
+     if tf_ycentered in flags then begin
+      rect1.y:= dest.y + (dest.cy - length(lineinfos) * rect1.cy) div 2;
      end
      else begin
-      ar1:= splitrichstring(text,c_tab);
-      textout(ar1[0],dest,flags,0);
-      rea1:= tab1.defaultdist*mmtoprintscale;
-      for int1:= 1 to high(ar1) do begin     
-       textout(ar1[int1],dest,flags,rea1);
+      if tf_bottom in flags then begin
+       rect1.y:= dest.cy - length(lineinfos) * rect1.cy;
+      end;
+     end;
+     for int1:= 0 to high(lineinfos) do begin
+      with lineinfos[int1] do begin
+       if (tf_xjustify in flags) and (high(justifychars) > 0) and 
+                   (int1 < high(lineinfos)) then begin
+        rstr1:= richcopy(text,liindex,justifychars[0]-liindex);
+        textout(rstr1,rect1,flags2,0); //first word
+        rea1:= (dest.cx - liwidth + getstringwidth(' ') * length(justifychars)) /
+                         length(justifychars); //gap width
+        rect2:= rect1;        //x justify text
+        rect2.cx:= 0;                                    
+        int3:= dest.x;
+        for int2:= liindex - 1 to justifychars[0] - 2 do begin
+         inc(int3,charwidths[int2]);            //end of first word
+        end;
+        for int2:= 0 to high(justifychars) - 1 do begin
+         int5:= 0;
+         for int4:= justifychars[int2] to justifychars[int2+1] - 2 do begin
+          inc(int5,charwidths[int4]); //width of actual word
+         end;
+         rect2.x:= round(int3 + (int2 + 1) * rea1 + int5 div 2);
+         int3:= int3 + int5;
+         rstr1:= richcopy(text,justifychars[int2]+1,justifychars[int2+1] - 
+                                                         justifychars[int2] - 1);
+         textout(rstr1,rect2,flags2 + [tf_xcentered],0);
+        end;
+        rstr1:= richcopy(text,justifychars[high(justifychars)]+1,
+                           liindex+licount-justifychars[high(justifychars)]-1);
+        textout(rstr1,rect1,flags2+[tf_right],0); //last word
+       end
+       else begin
+        rstr1:= richcopy(text,liindex,licount);
+        textout(rstr1,rect1,flags1,0);
+       end;
+       inc(rect1.y,rect1.cy);
       end;
      end;
     end
-    else begin
-     ar1:= splitrichstring(text,c_tab);
-     textout(ar1[0],dest,flags,0);
-     for int1:= 1 to high(ar1) do begin     
-      if int1 > tab1.count then begin
-       rstr1.text:= ' ';
-       rstr1.format:= nil;
-       rstr1:= richconcat(rstr1,ar1[int1]);
-       for int2:= int1+1 to high(ar1) do begin
-        rstr1:= richconcat(rstr1,' ');
-        rstr1:= richconcat(rstr1,ar1[int2]);
-       end;
-       textout(rstr1,dest,flags-[tf_right,tf_xcentered],-1); //print rest of string
-       break;
+    else begin //single line
+     if countchars(text.text,c_tab) = 0 then begin
+      textout(text,dest,flags,0);
+     end
+     else begin
+      if tabulators = nil then begin
+       tab1:= fprinter.ftabulators;
+      end
+      else begin
+       tab1:= tabulators;
       end;
-      flags1:= flags - [tf_xcentered,tf_right];
-      with tab1[int1-1] do begin
-       case kind of
-        tak_right,tak_decimal: flags1:= flags1 + [tf_right];
-        tak_centered: flags1:= flags1 + [tf_xcentered];
-       end;
-       if kind = tak_decimal then begin
-        int2:= msestrrscan(ar1[int1].text,widechar(decimalseparator));
-        if int2 > 0 then begin
-         textout(richcopy(ar1[int1],1,int2-1),makerect(round(pos*ppmm),dest.y,0,
-                   dest.cy),flags1,0); //int
-         textout(richcopy(ar1[int1],int2,bigint),makerect(0,dest.y,0,
-                   dest.cy),flags1-[tf_right],-1); //frac
-        end
-        else begin
-         textout(ar1[int1],makerect(round(pos*ppmm),dest.y,0,
-                   dest.cy),flags1,0); //no frac
-        end;
+      if tab1.count = 0 then begin
+       if tab1.defaultdist = 0 then begin      //has no tabs
+        replacechar(text.text,c_tab,' ');
+        textout(text,dest,flags,0);
        end
        else begin
-        textout(ar1[int1],makerect(round(pos*ppmm),dest.y,0,dest.cy),flags1,0);
+        ar1:= splitrichstring(text,c_tab);
+        textout(ar1[0],dest,flags,0);
+        rea1:= tab1.defaultdist*mmtoprintscale;
+        for int1:= 1 to high(ar1) do begin     
+         textout(ar1[int1],dest,flags,rea1);
+        end;
+       end;
+      end
+      else begin
+       ar1:= splitrichstring(text,c_tab);
+       textout(ar1[0],dest,flags,0);
+       for int1:= 1 to high(ar1) do begin     
+        if int1 > tab1.count then begin
+         rstr1.text:= ' ';
+         rstr1.format:= nil;
+         rstr1:= richconcat(rstr1,ar1[int1]);
+         for int2:= int1+1 to high(ar1) do begin
+          rstr1:= richconcat(rstr1,' ');
+          rstr1:= richconcat(rstr1,ar1[int2]);
+         end;
+         textout(rstr1,dest,flags-[tf_right,tf_xcentered],-1); //print rest of string
+         break;
+        end;
+        flags1:= flags - [tf_xcentered,tf_right];
+        with tab1[int1-1] do begin
+         case kind of
+          tak_right,tak_decimal: flags1:= flags1 + [tf_right];
+          tak_centered: flags1:= flags1 + [tf_xcentered];
+         end;
+         if kind = tak_decimal then begin
+          int2:= msestrrscan(ar1[int1].text,widechar(decimalseparator));
+          if int2 > 0 then begin
+           textout(richcopy(ar1[int1],1,int2-1),makerect(round(pos*ppmm),dest.y,0,
+                     dest.cy),flags1,0); //int
+           textout(richcopy(ar1[int1],int2,bigint),makerect(0,dest.y,0,
+                     dest.cy),flags1-[tf_right],-1); //frac
+          end
+          else begin
+           textout(ar1[int1],makerect(round(pos*ppmm),dest.y,0,
+                     dest.cy),flags1,0); //no frac
+          end;
+         end
+         else begin
+          textout(ar1[int1],makerect(round(pos*ppmm),dest.y,0,dest.cy),flags1,0);
+         end;
+        end;
        end;
       end;
      end;
     end;
+   end;       //with layoutinfo
+  finally
+   text.text:= backup;
+   if flags * [tf_clipi,tf_clipo] <> [] then begin
+    endtextclip;
    end;
-  end;
-  if flags * [tf_clipi,tf_clipo] <> [] then begin
-   endtextclip;
   end;
  end;
 endlab:
