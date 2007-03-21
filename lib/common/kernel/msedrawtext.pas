@@ -383,6 +383,7 @@ begin
   int1:= 1;
   awidth:= 0; //textwidth
   if tf_wordbreak in flags then begin
+   int2:= 0;
    while int1 <= textlen do begin
     int2:= 0; //index of last whitespace
     int3:= 0; //textwidth of last whitespace
@@ -430,8 +431,8 @@ begin
      end;
      inc(int1);
     end;
+    checksofthyphen(high(lineinfos));
    end;
-   checksofthyphen(high(lineinfos));
    with lineinfos[high(lineinfos)] do begin
     if textlen > 0 then begin
      licount:= textlen - liindex + 1;
