@@ -1825,6 +1825,9 @@ begin
     if int2 > fminsize.cx then begin
      fminsize.cx:= int2;
     end;
+    if res.cy = 0 then begin
+     res.cy:= font.lineheight;
+    end;
     int2:= dest.y + res.cy;
     if int2 > fminsize.cy then begin
      fminsize.cy:= int2;
