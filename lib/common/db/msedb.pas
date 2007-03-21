@@ -2990,7 +2990,19 @@ begin
      vtCurrency:   field1.ascurrency:= VCurrency^;
      vtVariant:    field1.asvariant:= VVariant^;
  //    vtInterface:
-     vtWideString: field1.asstring:= widestring(VWideString);
+     vtWideString: begin
+      if (field1 is tmsestringfield) then begin
+       tmsestringfield(field1).asmsestring:= widestring(vwidestring);
+      end
+      else begin 
+       if (field1 is tmsememofield) then begin
+        tmsememofield(field1).asmsestring:= widestring(vwidestring);
+       end
+       else begin
+        field1.asstring:= widestring(vwidestring);
+       end;
+      end;
+     end;
  //  vtInt64:
  //  vtQWord:
     end;
@@ -3197,6 +3209,7 @@ begin
     end;
    end;
   end;
+  updatelinkedfields; //second check
  end;
 end;
 
