@@ -403,7 +403,9 @@ begin
        break;
       end;
      end;
-     inc(awidth,charwidths[int1-1]);
+     if (wch1 <> c_softhyphen) or not (tf_softhyphen in flags) then begin
+      inc(awidth,charwidths[int1-1]);
+     end;
      if (awidth > info.dest.cx) and (awidth > charwidths[int1-1]) then begin
                            //min one char on line
       with lineinfos[high(lineinfos)] do begin
