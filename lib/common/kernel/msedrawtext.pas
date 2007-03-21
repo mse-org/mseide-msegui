@@ -311,7 +311,7 @@ var
   if tf_softhyphen in info.flags then begin
    with layoutinfo do begin
     if (int2 > 0) and (info.text.text[int2] = c_softhyphen) then begin
-     dec(awidth,charwidths[int2-1]); //not used
+//     dec(awidth,charwidths[int2-1]); //not used
      charwidths[int2-1]:= 0;
      additem((lineinfos[alineinfo]).tabchars,int2);
     end;
