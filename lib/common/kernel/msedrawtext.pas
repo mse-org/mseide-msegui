@@ -409,11 +409,13 @@ begin
        if (int2 > 0) then begin //use last whitespace for break
         if text.text[int2] <> ' ' then begin
          inc(int3,charwidths[int2-1]); //'-'
-         inc(int2);
+         licount:= int2 - liindex + 1;
+        end
+        else begin
+         licount:= int2 - liindex;
         end;
-        licount:= int2 - liindex;
         liwidth:= int3;
-        int1:= int2;
+        int1:= int2 + 1;
        end
        else begin
         licount:= int1 - liindex; //no whitespace to break

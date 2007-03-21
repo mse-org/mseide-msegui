@@ -162,8 +162,6 @@ type
   private
    fheaderheight: integer;
    ffooterheight: integer;
-//   ffirstpage: integer;
-//   flastpage: integer;
    fpagenumber: integer;
    findentx: integer;
    findenty: integer;
@@ -177,7 +175,6 @@ type
    procedure setliney(const avalue: integer);
    procedure setpages(const avalue: pagerangearty);
   protected
-//   fgcoffset: pointty;
    fgcoffsetx: real;
    fgcoffsety: real;
    fgcscale: real;
@@ -203,7 +200,7 @@ type
    procedure textout(const text: richstringty; const dest: rectty;
                         const flags: textflagsty;
                         const tabdist: real); virtual; abstract;
-       //tabdist < 0 -> lastx                 
+                              //tabdist < 0 -> lastx                 
    procedure begintextclip(const arect: rectty); virtual; abstract;
    procedure endtextclip; virtual; abstract;
    procedure checknextpage;
@@ -1121,7 +1118,8 @@ begin
  fliney:= avalue - fheaderheight;
 end;
 
-procedure tcustomprintercanvas.setprintorientation(const avalue: pageorientationty);
+procedure tcustomprintercanvas.setprintorientation(
+                                             const avalue: pageorientationty);
 begin
  if avalue <> fprintorientation then begin
   fprintorientation:= avalue;

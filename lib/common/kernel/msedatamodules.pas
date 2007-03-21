@@ -19,6 +19,7 @@ type
    fondestroyed: notifyeventty;
    foptions: datamoduleoptionsty;
    fstatfile: tstatfile;
+   fonloaded: notifyeventty;
    procedure writesize(writer: twriter);
    procedure readsize(reader: treader);
    procedure setstatfile(const avalue: tstatfile);
@@ -38,6 +39,7 @@ type
                            default defaultdatamoduleoptions;
    property statfile: tstatfile read fstatfile write setstatfile;
    property oncreate: notifyeventty read foncreate write foncreate;
+   property onloaded: notifyeventty read fonloaded write fonloaded;
    property ondestroy: notifyeventty read fondestroy write fondestroy;
    property ondestroyed: notifyeventty read fondestroyed write fondestroyed;
  end;
@@ -73,6 +75,9 @@ begin
   loadmsemodule(self,tmsedatamodule);
   if (fstatfile <> nil) and (dmo_autoreadstat in foptions) then begin
    fstatfile.readstat;
+  end;
+  if canevent(tmethod(fonloaded)) then begin
+   fonloaded(self);
   end;
  end;
 end;

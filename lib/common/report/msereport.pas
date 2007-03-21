@@ -14,7 +14,7 @@ uses
  classes,msegui,msegraphics,msetypes,msewidgets,msegraphutils,mseclasses,
  msetabs,mseprinter,msestream,msearrayprops,mseguiglob,msesimplewidgets,
  msedrawtext,msestrings,mserichstring,msedb,db,msethread,mseobjectpicker,
- msepointer,mseevent,msesplitter;
+ msepointer,mseevent,msesplitter,msestatfile;
 
 const
  defaultrepppmm = 3;
@@ -116,7 +116,7 @@ type
 
  getrichstringeventty = procedure(const sender: tobject; 
                                    var avalue: richstringty) of object;
-               
+
  treptabulatoritem = class(ttabulatoritem,idbeditinfo)
   private
    fvalue: richstringty;
@@ -426,7 +426,7 @@ type
 
  trecordbanddatalink = class(tmsedatalink)
  end;
-
+ 
  bandoptionty = (bo_once,bo_evenpage,bo_oddpage,
                   //defines hasdata, page nums are null based
                  bo_visigroupfirst,bo_visigrouplast,
@@ -1000,7 +1000,8 @@ type
 
  reporteventty = procedure(const sender: tcustomreport) of object;
 
- reportoptionty = (reo_autorelease,reo_prepass);
+ reportoptionty = (reo_autorelease,reo_prepass,
+                      reo_autoreadstat,reo_autowritestat);
  reportoptionsty = set of reportoptionty;
  
  tcustomreport = class(twidget)
@@ -1024,6 +1025,10 @@ type
    fnilstream: boolean;
    foptions: reportoptionsty;
    flastpagecount: integer;
+   foncreate: notifyeventty;
+   fondestroy: notifyeventty;
+   fondestroyed: notifyeventty;
+   fstatfile: tstatfile;
    procedure setppmm(const avalue: real);
    function getreppages(index: integer): tcustomreportpage;
    procedure setreppages(index: integer; const avalue: tcustomreportpage);
@@ -1050,7 +1055,6 @@ type
                   const anilstream: boolean; const onafterrender: reporteventty);
    procedure unregisterchildwidget(const child: twidget); override;
    procedure getchildren(proc: tgetchildproc; root: tcomponent); override;
-//   procedure internalcreatefont; override;
    procedure defineproperties(filer: tfiler); override;
    procedure nextpage(const acanvas: tcanvas);
    procedure doprogress;
@@ -1060,6 +1064,8 @@ type
    procedure setfont(const avalue: trepfont);
    function getfont: trepfont;
    function getfontclass: widgetfontclassty; override;
+   procedure beforedestruction; override;
+   procedure doloaded; override;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -1100,9 +1106,15 @@ type
                                write fonafterrender;
         //executed in main thread context
    property onprogress: notifyeventty read fonprogress write fonprogress;
+   property oncreate: notifyeventty read foncreate write foncreate;
+   property ondestroy: notifyeventty read fondestroy write fondestroy;
+   property ondestroyed: notifyeventty read fondestroyed write fondestroyed;
  end;
 
  treport = class(tcustomreport)
+  private
+   fonloaded: notifyeventty;
+   procedure setstatfile(const avalue: tstatfile);
   protected
    class function getmoduleclassname: string; override;
   public
@@ -1110,6 +1122,7 @@ type
    constructor create(aowner: tcomponent; load: boolean); 
                                      overload; virtual;   
   published    
+   property statfile: tstatfile read fstatfile write setstatfile;
    property color;
    property ppmm;
    property font;
@@ -1120,6 +1133,10 @@ type
    property onbeforerender;
    property onafterrender;
    property onprogress;
+   property oncreate;
+   property onloaded: notifyeventty read fonloaded write fonloaded;
+   property ondestroy;
+   property ondestroyed;
  end;
 
  reportclassty = class of treport;
@@ -1261,7 +1278,12 @@ end;
 procedure treptabitemdatalink.recordchanged(afield: tfield);
 begin
  if (afield = nil) or (afield = field) then begin
-  treptabulators(fowner.fowner).fband.invalidate;
+  fowner.changed;
+  {
+  with treptabulators(fowner.fowner).fband do begin
+   invalidate;
+  end;
+  }
  end;
 end;
 
@@ -1345,8 +1367,10 @@ procedure treptabulatoritem.changed;
 begin
  with treptabulators(fowner),fband do begin
   fsizevalid:= false;
-  minclientsizechanged;
-  change(-1);
+  if rendering or (csdesigning in componentstate) then begin
+   minclientsizechanged;
+   change(-1);
+  end;
  end;
 end;
 
@@ -1751,34 +1775,6 @@ begin
        dec(dest.x,dest.cx);
       end;
      end;
-     {
-     textrect(acanvas,finfo);
-     case tabkind of
-      tak_left: begin
-       dest.x:= adest.x + textpos;
-      end;
-      tak_right: begin
-       dest.cx:= res.cx;
-       dest.x:= adest.x + textpos - res.cx;
-      end;
-      tak_centered: begin
-       dest.cx:= res.cx;
-       dest.x:= adest.x + textpos - res.cx div 2;
-      end;
-      else begin //tak_decimal
-       dest.cx:= res.cx;
-       int2:= findlastchar(text.text,msechar(decimalseparator));
-       if int2 > 0 then begin
-        rstr1:= richcopy(text,int2,bigint);
-        int3:= textrect(acanvas,rstr1,[],finfo.font).cx;
-       end
-       else begin
-        int3:= 0;
-       end;
-       dest.x:= adest.x + textpos - res.cx + int3; 
-      end;
-     end;
-     }
     end;
     if isdecimal then begin
      int2:= findlastchar(text.text,msechar(decimalseparator));
@@ -1831,11 +1827,6 @@ begin
     if int2 > fminsize.cy then begin
      fminsize.cy:= int2;
     end;
-    {
-    if apaint then begin
-     drawtext(acanvas,finfo);
-    end;
-    }
    end;
   end;
   if apaint then begin
@@ -4466,12 +4457,38 @@ begin
 end;
 
 destructor tcustomreport.destroy;
+var
+ bo1: boolean;
 begin
+ bo1:= csdesigning in componentstate;
  if fthread <> nil then begin
   fthread.terminate;
   application.waitforthread(fthread);
  end;
  fthread.free;
+ inherited; //csdesigningflag is removed
+ if not bo1 and candestroyevent(tmethod(fondestroyed)) then begin
+  fondestroyed(self);
+ end;
+end;
+
+procedure tcustomreport.beforedestruction;
+begin
+ if (fstatfile <> nil) and (reo_autowritestat in foptions) and
+                 not (csdesigning in componentstate) then begin
+  fstatfile.writestat;
+ end;
+ inherited;
+ if candestroyevent(tmethod(fondestroy)) then begin
+  fondestroy(self);
+ end;
+end;
+
+procedure tcustomreport.doloaded;
+begin
+ if canevent(tmethod(foncreate)) then begin
+  foncreate(self);
+ end;
  inherited;
 end;
 
@@ -4919,12 +4936,10 @@ end;
 procedure tcustomreport.setfont(const avalue: trepfont);
 begin
  ffont.assign(avalue);
-// inherited setfont(avalue);
 end;
 
 function tcustomreport.getfont: trepfont;
 begin
-// result:= trepwidgetfont(inherited getfont);
  result:= trepfont(ffont);      //has no parent font
 end;
 
@@ -4952,12 +4967,23 @@ begin
  if load and not (csdesigning in componentstate) and
           (cs_ismodule in fmsecomponentstyle) then begin
   loadmsemodule(self,treport);
+  if (fstatfile <> nil) and (reo_autoreadstat in foptions) then begin
+   fstatfile.readstat;
+  end;
+  if canevent(tmethod(fonloaded)) then begin
+   fonloaded(self);
+  end;
  end;
 end;
 
 class function treport.getmoduleclassname: string;
 begin
  result:= 'treport';
+end;
+
+procedure treport.setstatfile(const avalue: tstatfile);
+begin
+ setlinkedvar(avalue,tmsecomponent(fstatfile));
 end;
 
 { tcustomrepvaluedisp }

@@ -4997,9 +4997,6 @@ begin
   doloaded;
   sortzorder;
   updatetaborder(nil);
-//  if fframe <> nil then begin
-//   fframe.parentfontchanged;
-//  end;
   if fframe <> nil then begin
    fframe.calcrects; //rects must be valid for parentfontchanged
   end;
