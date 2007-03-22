@@ -86,7 +86,7 @@ begin
  instream.readln(str1);
  instream.position:= posbefore;
  splitstring(str1,ar1,' ',true);
- if (length(ar1) <> 3) or (ar1[0] <> 'object') or
+ if (length(ar1) <> 3) or not((ar1[0] = 'object') or (ar1[0] = 'inherited')) or
            (ar1[1][length(ar1[1])] <> ':') then begin
   raise exception.Create('Invalid format: "'+str1+'".');
  end;

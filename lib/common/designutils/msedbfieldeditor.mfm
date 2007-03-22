@@ -10,7 +10,7 @@ object msedbfieldeditorfo: tmsedbfieldeditorfo
   container.frame.dummy = 0
   options = [fo_closeonesc, fo_autoreadstat, fo_autowritestat, fo_savepos, fo_savestate]
   statfile = tstatfile1
-  onloaded = formloaded
+  oneventloopstart = formloaded
   moduleclassname = 'tmseform'
   object tbutton1: tbutton
     bounds_x = 472

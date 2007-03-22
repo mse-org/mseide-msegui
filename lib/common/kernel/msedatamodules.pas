@@ -27,6 +27,7 @@ type
    procedure getchildren(proc: tgetchildproc; root: tcomponent); override;
    class function getmoduleclassname: string; override;
    procedure defineproperties(filer: tfiler); override;
+   procedure doonloaded; virtual;
    procedure loaded; override;
   public
    constructor create(aowner: tcomponent); overload; override;
@@ -76,9 +77,7 @@ begin
   if (fstatfile <> nil) and (dmo_autoreadstat in foptions) then begin
    fstatfile.readstat;
   end;
-  if canevent(tmethod(fonloaded)) then begin
-   fonloaded(self);
-  end;
+  doonloaded;
  end;
 end;
 
@@ -90,6 +89,13 @@ begin
  inherited; //csdesigningflag is removed
  if not bo1 and candestroyevent(tmethod(fondestroyed)) then begin
   fondestroyed(self);
+ end;
+end;
+
+procedure tmsedatamodule.doonloaded;
+begin
+ if canevent(tmethod(fonloaded)) then begin
+  fonloaded(self);
  end;
 end;
 

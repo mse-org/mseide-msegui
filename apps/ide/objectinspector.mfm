@@ -39,7 +39,7 @@ object objectinspectorfo: tobjectinspectorfo
     FCF37F00FC030003FC030040FC030000FC030000FC030000FC03000000000000
   }
   oncreate = tmseformcreate
-  onloaded = objectinspectorfoonloaded
+  oneventloopstart = objectinspectorfoonloaded
   onchildscaled = objectinspectoronchildscaled
   left = 239
   top = 180

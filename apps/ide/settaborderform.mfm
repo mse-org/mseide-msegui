@@ -11,7 +11,7 @@ object settaborderfo: tsettaborderfo
   statfile = statfile1
   caption = 'Set Tab Order'
   icon.transparency = -2147483648
-  onloaded = formonloaded
+  oneventloopstart = formonloaded
   onclosequery = formonclosequery
   onmouseevent = formmouseevent
   moduleclassname = 'tmseform'

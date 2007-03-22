@@ -5,7 +5,7 @@ object mainfo: tmainfo
   statfile = projectfo.projectstat
   caption = 'MSEi18n'
   oncreate = tmainfooncreate
-  onloaded = tmainfoonloaded
+  oneventloopstart = tmainfoonloaded
   ondestroy = tmainfoondestroy
   onclosequery = mainclosequery
   container.frame.levelo = 1

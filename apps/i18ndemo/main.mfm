@@ -9,7 +9,7 @@ object mainfo: tmainfo
   container.frame.dummy = 0
   optionswindow = [wo_groupleader]
   options = [fo_main, fo_terminateonclose, fo_autoreadstat, fo_autowritestat, fo_savepos, fo_savestate]
-  onloaded = formonloaded
+  oneventloopstart = formonloaded
   moduleclassname = 'tmseform'
   object disp1: tstringdisp
     bounds_x = 16

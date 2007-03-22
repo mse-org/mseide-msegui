@@ -61,8 +61,9 @@ type
  tcustommseform = class(tcustomeventwidget,istatfile,idockcontroller)
   private
    foncreate: notifyeventty;
-   fondestroyed: notifyeventty;
    fonloaded: notifyeventty;
+   fondestroyed: notifyeventty;
+   foneventloopstart: notifyeventty;
    fondestroy: notifyeventty;
    fonclosequery: closequeryeventty;
    fonclose: notifyeventty;
@@ -114,6 +115,7 @@ type
    function isgroupleader: boolean; override;
 
    procedure readstate(reader: treader); override;
+   procedure doonloaded; virtual;
    procedure doloaded; override;
    procedure loaded; override;
    procedure setoptionswidget(const avalue: optionswidgetty); override;
@@ -121,12 +123,13 @@ type
    function getcaption: msestring;
    procedure setcaption(const Value: msestring); virtual;
    procedure getchildren(proc: tgetchildproc; root: tcomponent); override;
-   procedure doterminated(const sender: tobject);
-   procedure doterminatequery(var terminate: boolean);
-   procedure doidle(var again: boolean);
-   procedure dowindowactivechanged(const oldwindow,newwindow: twindow);
-   procedure dowindowdestroyed(const awindow: twindow);
-   procedure doapplicationactivechanged(const avalue: boolean);
+   procedure doeventloopstart; virtual;
+   procedure doterminated(const sender: tobject); virtual;
+   procedure doterminatequery(var terminate: boolean); virtual;
+   procedure doidle(var again: boolean); virtual;
+   procedure dowindowactivechanged(const oldwindow,newwindow: twindow); virtual;
+   procedure dowindowdestroyed(const awindow: twindow); virtual;
+   procedure doapplicationactivechanged(const avalue: boolean); virtual;
    procedure objectevent(const sender: tobject; const event: objecteventty); override;
    procedure receiveevent(const event: tobjectevent); override;
    procedure dokeydown(var info: keyeventinfoty); override;
@@ -134,9 +137,9 @@ type
    function getframe: tgripframe;
    procedure setframe(const Value: tgripframe);
    //istatfile
-   procedure dostatread(const reader: tstatreader);
+   procedure dostatread(const reader: tstatreader); virtual;
    procedure dostatread1(const reader: tstatreader); virtual;
-   procedure dostatwrite(const writer: tstatwriter);
+   procedure dostatwrite(const writer: tstatwriter); virtual;
    procedure dostatwrite1(const writer: tstatwriter); virtual;
    procedure statreading; virtual;
    procedure statread; virtual;
@@ -179,6 +182,8 @@ type
 
    property oncreate: notifyeventty read foncreate write foncreate;
    property onloaded: notifyeventty read fonloaded write fonloaded;
+   property oneventloopstart: notifyeventty read foneventloopstart 
+                                   write foneventloopstart;
    property ondestroy: notifyeventty read fondestroy write fondestroy;
    property ondestroyed: notifyeventty read fondestroyed write fondestroyed;
    property onclosequery: closequeryeventty read fonclosequery write fonclosequery;
@@ -228,6 +233,7 @@ type
 
    property oncreate;
    property onloaded;
+   property oneventloopstart;
    property ondestroy;
    property ondestroyed;
    property onclosequery;
@@ -330,6 +336,7 @@ type
 
    property oncreate;
    property onloaded;
+   property oneventloopstart;
    property ondestroy;
    property ondestroyed;
    property onclosequery;
@@ -548,6 +555,18 @@ end;
 { tcustommseform }
 
 constructor tcustommseform.create(aowner: tcomponent; load: boolean);
+
+ procedure registerhandlers;
+ begin
+  application.registeronterminated({$ifdef FPC}@{$endif}doterminated);
+  application.registeronterminate({$ifdef FPC}@{$endif}doterminatequery);
+  application.registeronidle({$ifdef FPC}@{$endif}doidle);
+  application.registeronactivechanged({$ifdef FPC}@{$endif}dowindowactivechanged);
+  application.registeronwindowdestroyed({$ifdef FPC}@{$endif}dowindowdestroyed);
+  application.registeronapplicationactivechanged(
+        {$ifdef FPC}@{$endif}doapplicationactivechanged);
+ end;
+ 
 begin
  ficon:= tmaskedbitmap.create(false);
  ficon.onchange:= {$ifdef FPC}@{$endif}iconchanged;
@@ -568,14 +587,12 @@ begin
   if (fstatfile <> nil) and (fo_autoreadstat in foptions) then begin
    fstatfile.readstat;
   end;
+  registerhandlers;
+  doonloaded;
+ end
+ else begin
+  registerhandlers;
  end;
- application.registeronterminated({$ifdef FPC}@{$endif}doterminated);
- application.registeronterminate({$ifdef FPC}@{$endif}doterminatequery);
- application.registeronidle({$ifdef FPC}@{$endif}doidle);
- application.registeronactivechanged({$ifdef FPC}@{$endif}dowindowactivechanged);
- application.registeronwindowdestroyed({$ifdef FPC}@{$endif}dowindowdestroyed);
- application.registeronapplicationactivechanged(
-       {$ifdef FPC}@{$endif}doapplicationactivechanged);
 end;
 
 constructor tcustommseform.create(aowner: tcomponent);
@@ -713,6 +730,13 @@ begin
  end;
 end;
 
+procedure tcustommseform.doonloaded;
+begin
+ if canevent(tmethod(fonloaded)) then begin
+  fonloaded(self);
+ end;
+end;
+
 procedure tcustommseform.doloaded;
 begin
  if canevent(tmethod(foncreate)) then begin
@@ -743,13 +767,18 @@ begin
                    longword(containercommonflags));
 end;
 
+procedure tcustommseform.doeventloopstart;
+begin
+ if canevent(tmethod(foneventloopstart)) then begin
+  foneventloopstart(self);
+ end;
+end;
+
 procedure tcustommseform.receiveevent(const event: tobjectevent);
 begin
  inherited;
  if event.kind = ek_loaded then begin
-  if canevent(tmethod(fonloaded)) then begin
-   fonloaded(self);
-  end;
+  doeventloopstart;
  end;
 end;
 

@@ -16,7 +16,7 @@ object sourcepage: tsourcepage
   icon.transparentcolor = -2147483648
   icon.transparency = -2147483648
   oncreate = sourcefooncreate
-  onloaded = sourcefoonloaded
+  oneventloopstart = sourcefoonloaded
   ondestroy = sourcefoondestroy
   onshow = sourcefoonshow
   onhide = sourcefoondeactivate

@@ -17,7 +17,7 @@ object projecttreefo: tprojecttreefo
   statfile = mainfo.projectstatfile
   caption = 'project'
   oncreate = projecttreefooncreate
-  onloaded = projecttreefoonloaded
+  oneventloopstart = projecttreefoonloaded
   ondestroy = projecttreefoondestroy
   onstatupdate = projecttreeonupdatestat
   moduleclassname = 'tdockform'

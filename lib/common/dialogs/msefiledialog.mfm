@@ -17,7 +17,7 @@ object filedialogfo: Tfiledialogfo
   container.onchildscaled = foonchildscaled
   options = [fo_screencentered, fo_closeonesc, fo_localshortcuts, fo_autoreadstat, fo_autowritestat]
   icon.transparency = -2147483648
-  onloaded = formoncreate
+  oneventloopstart = formoncreate
   onkeydown = listviewonkeydown
   onchildscaled = foonchildscaled
   left = 239

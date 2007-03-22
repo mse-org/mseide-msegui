@@ -27,7 +27,7 @@ object mainfo: tmainfo
   caption = 'MSEide'
   icon.transparency = -2147483648
   oncreate = mainfooncreate
-  onloaded = mainonloaded
+  oneventloopstart = mainonloaded
   ondestroy = mainfoondestroy
   onclosequery = mainfoonclosequery
   onwindowactivechanged = mainonactivewindowchanged
