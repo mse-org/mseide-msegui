@@ -79,6 +79,7 @@ type
    procedure applyrecupdate(updatekind: tupdatekind); override;
    function  getcanmodify: boolean; override;
    function  getfieldclass(fieldtype: tfieldtype): tfieldclass; override;
+   function islocal: boolean; override;
        //idscontroller
    procedure inheriteddataevent(const event: tdataevent; const info: ptrint);
    procedure inheritedcancel;
@@ -1092,6 +1093,11 @@ end;
 function tmsesqlquery.wantblobfetch: boolean;
 begin
  result:= (dso_cacheblobs in fcontroller.options);
+end;
+
+function tmsesqlquery.islocal: boolean;
+begin
+ result:= dso_local in fcontroller.options;
 end;
 
 { tparamsourcedatalink }

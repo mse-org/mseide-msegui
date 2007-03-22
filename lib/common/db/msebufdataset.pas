@@ -547,6 +547,7 @@ type
    function findrecord(arecordpo: pintrecordty): integer;
                          //returns index, -1 if not found
    procedure dofilterrecord(var acceptable: boolean); virtual;
+   function islocal: boolean; virtual;
 
  {abstracts, must be overidden by descendents}
    function fetch : boolean; virtual; abstract;
@@ -3941,8 +3942,13 @@ begin
  if trim(flogfilename) = '' then begin
   databaseerror('No log file name.',self);
  end;
- loadfromfile(flogfilename);
- startlogger;
+ if islocal then begin
+  active:= true;
+ end
+ else begin
+  loadfromfile(flogfilename);
+  startlogger;
+ end;
 end;
 
 procedure tmsebufdataset.startlogger;
@@ -3967,6 +3973,11 @@ begin
   freeandnil(flogger);
   stream1.free;
  end;
+end;
+
+function tmsebufdataset.islocal: boolean;
+begin
+ result:= false;
 end;
 
 { tlocalindexes }
