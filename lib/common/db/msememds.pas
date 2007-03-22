@@ -32,6 +32,7 @@ type
    function getactive: boolean;
    procedure loaded; override;
    function  getfieldclass(fieldtype: tfieldtype): tfieldclass; override;
+   procedure openlocal;
    procedure internalopen; override;
    procedure internalinsert; override;
    procedure internaldelete; override;
@@ -189,6 +190,11 @@ end;
 procedure tmsememdataset.internaldelete;
 begin
  fcontroller.internaldelete;
+end;
+
+procedure tmsememdataset.openlocal;
+begin
+ inherited internalopen;
 end;
 
 end.

@@ -33,6 +33,7 @@ type
    function getactive: boolean;
    procedure loaded; override;
    function  getfieldclass(fieldtype: tfieldtype): tfieldclass; override;
+   procedure openlocal;
    procedure internalopen; override;
    procedure internalinsert; override;
    procedure internaldelete; override;
@@ -208,6 +209,11 @@ end;
 procedure tmsesqlite3dataset.internaldelete;
 begin
  fcontroller.internaldelete;
+end;
+
+procedure tmsesqlite3dataset.openlocal;
+begin
+ inherited internalopen;
 end;
 
 end.

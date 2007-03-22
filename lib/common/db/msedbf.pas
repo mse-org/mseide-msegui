@@ -35,6 +35,7 @@ type
    procedure loaded; override;
    function  getfieldclass(fieldtype: tfieldtype): tfieldclass; override;
    procedure dataevent(event: tdataevent; info: ptrint); override;
+   procedure openlocal;
    procedure internalopen; override;
    procedure internalinsert; override;
    procedure internaldelete; override;
@@ -209,6 +210,11 @@ end;
 procedure tmsedbf.internaldelete;
 begin
  fcontroller.internaldelete;
+end;
+
+procedure tmsedbf.openlocal;
+begin
+ inherited internalopen;
 end;
 
 end.

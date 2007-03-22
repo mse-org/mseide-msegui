@@ -440,6 +440,7 @@ type
    procedure setmsestringdata(const sender: tmsestringfield; const avalue: msestring);
    procedure setoninternalcalcfields(const avalue: internalcalcfieldseventty);
    procedure checkfilterstate;
+   procedure openlocal;
    procedure dointernalopen;
    procedure doloadfromstream;
    procedure dointernalclose;
@@ -606,7 +607,8 @@ function getfieldisnull(nullmask: pbyte; const x: integer): boolean;
 
 implementation
 uses
- rtlconsts,dbconst,msedatalist,sysutils,mseformatstr,msereal,msestream,msesys;
+ rtlconsts,dbconst,msedatalist,sysutils,mseformatstr,msereal,msestream,msesys,
+ msefileutils;
 {$ifdef FPC_2_2}
 const
  snotineditstate = 
@@ -1341,6 +1343,31 @@ begin
  end
  else begin
   dointernalopen;
+ end;
+end;
+
+procedure tmsebufdataset.openlocal;
+var
+ bo1: boolean;
+begin
+ bo1:= false;
+ if defaultfields then begin
+  createfields;
+ end;
+ if (flogfilename <> '') and findfile(flogfilename) then begin
+  floadingstream:= tmsefilestream.create(flogfilename,fm_read);
+  try
+   doloadfromstream
+  finally
+   floadingstream.free;
+  end;
+ end
+ else begin
+  dointernalopen;
+  fallpacketsfetched:= true;
+ end;
+ if (flogfilename <> '') and not (csdesigning in componentstate) then begin
+  startlogger;   
  end;
 end;
 
@@ -3926,6 +3953,7 @@ begin
   stream1:= tmsefilestream.create(flogfilename,fm_create);
   flogger:= tbufstreamwriter.create(self,stream1);
   savestate(flogger);
+  flogger.flushbuffer;
  end;
 end;
 

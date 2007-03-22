@@ -589,6 +589,7 @@ type
   function inheritedmoveby(const distance: integer): integer;
   procedure inheritedinternalinsert;
   procedure inheritedinternalopen;
+  procedure openlocal;
   procedure inheritedinternaldelete;
  end;
 
@@ -599,7 +600,8 @@ type
 
  datasetoptionty = (dso_utf8,dso_cancelupdateonerror,dso_cancelupdatesonerror,
                          dso_autoapply,dso_autocommitret,dso_cacheblobs,
-                         dso_offline);
+                         dso_offline, //disconnect database after open
+                         dso_local);  //do not connect database on open
  datasetoptionsty = set of datasetoptionty;
  
 const
@@ -3195,7 +3197,12 @@ begin
    end;
   end;
   updatelinkedfields;
-  fintf.inheritedinternalopen;
+  if dso_local in foptions then begin
+   fintf.openlocal;
+  end
+  else begin
+   fintf.inheritedinternalopen;
+  end;
   for int1:= 0 to fields.count - 1 do begin
    with fields[int1] do begin
     int2:= fielddefs.indexof(fieldname);

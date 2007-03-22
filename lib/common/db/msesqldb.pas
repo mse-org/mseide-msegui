@@ -445,7 +445,7 @@ end;
 procedure tmsesqlquery.internalopen;
 begin
  fcontroller.internalopen;
- if not streamloading then begin
+ if not streamloading and not (dso_local in fcontroller.options) then begin
   connected:= not (dso_offline in fcontroller.options);
  end;
 end;

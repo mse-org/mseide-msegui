@@ -36,6 +36,7 @@ type
    procedure loaded; override;
    function  getfieldclass(fieldtype: tfieldtype): tfieldclass; override;
    procedure dataevent(event: tdataevent; info: ptrint); override;
+   procedure openlocal;
    procedure internalopen; override;
    procedure internalinsert; override;
    procedure internaldelete; override;
@@ -78,6 +79,7 @@ type
    procedure loaded; override;
    function  getfieldclass(fieldtype: tfieldtype): tfieldclass; override;
    procedure dataevent(event: tdataevent; info: ptrint); override;
+   procedure openlocal;
    procedure internalopen; override;
    procedure internalinsert; override;
    procedure internaldelete; override;
@@ -254,6 +256,11 @@ begin
  fcontroller.internaldelete;
 end;
 
+procedure tmsefixedformatdataset.openlocal;
+begin
+ inherited internalopen;
+end;
+
 { tmsesdfdataset }
 
 constructor tmsesdfdataset.create(aowner: tcomponent);
@@ -404,6 +411,11 @@ end;
 procedure tmsesdfdataset.internaldelete;
 begin
  fcontroller.internaldelete;
+end;
+
+procedure tmsesdfdataset.openlocal;
+begin
+ inherited internalopen;
 end;
 
 end.
