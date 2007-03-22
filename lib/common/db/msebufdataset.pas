@@ -2103,9 +2103,11 @@ procedure tmsebufdataset.internalapplyupdate(const maxerrors: integer;
  
 var
  EUpdErr: EUpdateError;
+ by1: boolean;
 
 begin
  include(fbstate,bs_applying);
+ by1:= not islocal;
  with fupdatebuffer[fcurrentupdatebuffer] do begin
   try
    move(bookmark.recordpo^.header,fnewvaluebuffer^.header,frecordsize);
@@ -2113,7 +2115,9 @@ begin
    Response:= rrApply;
    try
     try
-     ApplyRecUpdate(UpdateKind);
+     if by1 then begin
+      ApplyRecUpdate(UpdateKind);
+     end;
     finally
      pointer(bookmark.recordpo^.header.blobinfo):= 
          pointer(fnewvaluebuffer^.header.blobinfo); //update deleted blobs
