@@ -1492,6 +1492,7 @@ type
    fbuttonpresswidgetbefore: twidget;
    fbuttonreleasewidgetbefore: twidget;
    factmousewindow: twindow;
+   fdelayedmouseshift: pointty;
    function getterminated: boolean;
    procedure setterminated(const Value: boolean);
    procedure invalidated;
@@ -1624,6 +1625,7 @@ type
    property caret: tcaret read fcaret;
    property mouse: tmouse read fmouse;
    procedure mouseparkevent; //simulates mouseparkevent
+   procedure delayedmouseshift(const ashift: pointty);
    property cursorshape: cursorshapety read fcursorshape write setcursorshape;
    procedure updatecursorshape; //restores cursorshape of mousewidget
    property mousewidget: twidget read fmousewidget;
@@ -9361,6 +9363,7 @@ begin
   with capture do begin
    subpoint1(info.pos,rootpos);
    posbefore:= info.pos;
+   app.fdelayedmouseshift:= nullpoint;
    if info.eventkind = ek_mousewheel then begin
     mousewheelevent(mousewheeleventinfoty(info));
    end
@@ -9368,6 +9371,7 @@ begin
     mouseevent(info);
    end;
    posbefore:= subpoint(info.pos,posbefore);
+   addpoint1(posbefore,app.fdelayedmouseshift);
    if (posbefore.x <> 0) or (posbefore.y <> 0) then begin
     gui_flushgdi;
     with app do begin
@@ -12356,6 +12360,11 @@ begin
  finally
   exclude(fstate,aps_terminating);
  end;
+end;
+
+procedure tapplication.delayedmouseshift(const ashift: pointty);
+begin
+ addpoint1(fdelayedmouseshift,ashift);
 end;
 
 initialization

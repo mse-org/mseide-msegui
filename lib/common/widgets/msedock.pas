@@ -208,9 +208,9 @@ type
    function beforedragevent(var info: draginfoty): boolean; override;
    procedure enddrag; override;
    procedure clientmouseevent(var info: mouseeventinfoty); override;
-   procedure childmouseevent(const sender: twidget; const info: mouseeventinfoty);
+   procedure childmouseevent(const sender: twidget; var info: mouseeventinfoty);
    procedure checkmouseactivate(const sender: twidget; 
-                                      const info: mouseeventinfoty);
+                                      var info: mouseeventinfoty);
    procedure dopaint(const acanvas: tcanvas); //canvasorigin = container.clientpos;
    procedure doactivate;
    procedure sizechanged(force: boolean = false; scalefixedalso: boolean = false);
@@ -2353,7 +2353,7 @@ begin
 end;
 
 procedure tdockcontroller.checkmouseactivate(const sender: twidget;
-                                                 const info: mouseeventinfoty);
+                                                 var info: mouseeventinfoty);
 var
  widget1: twidget;
 begin
@@ -2370,7 +2370,7 @@ begin
 end;
 
 procedure tdockcontroller.childmouseevent(const sender: twidget;
-               const info: mouseeventinfoty);
+               var info: mouseeventinfoty);
 begin
  checkmouseactivate(sender,info);
 end;

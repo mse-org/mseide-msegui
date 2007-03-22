@@ -1452,9 +1452,11 @@ end;
 procedure tcustomdockform.childmouseevent(const sender: twidget;
                var info: mouseeventinfoty);
 var
- pt1: pointty;
+ pt1,pt2: pointty;
 begin
+ pt2:= pos;
  fdragdock.checkmouseactivate(self,info);
+ application.delayedmouseshift(subpoint(pos,pt2)); //follow shift in view
  if (frame <> nil) and fdragdock.ismdi and 
                        not (csdesigning in componentstate) then begin
   pt1:= info.pos;
