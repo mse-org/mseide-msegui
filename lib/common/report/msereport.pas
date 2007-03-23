@@ -2647,7 +2647,7 @@ begin
  if not empty then begin
   if visible then begin
    if fparentintf.beginband(acanvas,self) then begin
-    exit;
+    exit; //area full
    end;
    try
     inherited paint(acanvas);
@@ -3552,7 +3552,7 @@ begin
             ((rbs_pageshowed in fstate) or not bo2);   //empty    
       render(acanvas,bo1);
       bo1:= bo1 or bo2{(bv_everypage in fvisibility)};
-      fstate:= fstate + [rbs_showed,rbs_pageshowed];
+//      fstate:= fstate + [rbs_showed,rbs_pageshowed];
      end;
 //     result:= bo1;
      result:= result and bo1;
@@ -3693,6 +3693,7 @@ procedure tcustombandarea.endband(const acanvas: tcanvas;
 begin
  acanvas.restore(fsaveindex); 
  include(fstate,bas_notfirstband);
+ sender.fstate:= sender.fstate + [rbs_showed,rbs_pageshowed];
  inc(fbandnum);
 end;
 
