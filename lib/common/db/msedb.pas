@@ -2422,16 +2422,21 @@ end;
 
 function tfielddatalink.msedisplaytext: msestring;
 begin
- if fismsestring then begin
-  result:= tmsestringfield(ffield).asmsestring;
- end
- else begin
-  if utf8 then begin
-   result:= utf8tostring(ffield.displaytext);
+ if ffield <> nil then begin
+  if fismsestring then begin
+   result:= tmsestringfield(ffield).asmsestring;
   end
   else begin
-   result:= ffield.displaytext;
+   if utf8 then begin
+    result:= utf8tostring(ffield.displaytext);
+   end
+   else begin
+    result:= ffield.displaytext;
+   end;
   end;
+ end
+ else begin
+  result:= '';
  end;
 end;
 

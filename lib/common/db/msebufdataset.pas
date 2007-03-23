@@ -1758,6 +1758,10 @@ var
  int1: integer;
 begin 
  result:= false;
+ if not active then begin
+  buffer:= nil;
+  exit;
+ end;
  int1:= afield.fieldno - 1;
  case ord(state) of
   ord(dscalcfields): begin
