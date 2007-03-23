@@ -60,9 +60,9 @@ object cpufo: tcpufo
   object v: tbooleanedit
     Tag = 17
     bounds_x = 76
-    bounds_y = 1
+    bounds_y = 2
     bounds_cx = 11
-    bounds_cy = 28
+    bounds_cy = 27
     color = -2147483645
     frame.levelo = -1
     frame.colorclient = -1879048185
@@ -72,7 +72,7 @@ object cpufo: tcpufo
     frame.dummy = 0
     frame.outerframe = (
       0
-      17
+      16
       0
       0
     )
@@ -82,9 +82,9 @@ object cpufo: tcpufo
   object r: tbooleanedit
     Tag = 16
     bounds_x = 92
-    bounds_y = 1
+    bounds_y = 2
     bounds_cx = 11
-    bounds_cy = 28
+    bounds_cy = 27
     color = -2147483645
     frame.levelo = -1
     frame.colorclient = -1879048185
@@ -94,7 +94,7 @@ object cpufo: tcpufo
     frame.dummy = 0
     frame.outerframe = (
       0
-      17
+      16
       0
       0
     )
@@ -105,8 +105,8 @@ object cpufo: tcpufo
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
     bounds_x = 0
     bounds_y = 32
-    bounds_cx = 115
-    bounds_cy = 20
+    bounds_cx = 113
+    bounds_cy = 17
     frame.levelo = -1
     frame.colorclient = -1879048185
     frame.caption = 'eax'
@@ -116,7 +116,7 @@ object cpufo: tcpufo
     frame.outerframe = (
       0
       0
-      22
+      20
       0
     )
     taborder = 1
@@ -126,14 +126,14 @@ object cpufo: tcpufo
     onsetvalue = regsetvalue
     base = nb_hex
     max = -1
-    reffontheight = 16
+    reffontheight = 13
   end
   object ebx: tintegeredit
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
     bounds_x = 0
     bounds_y = 53
-    bounds_cx = 115
-    bounds_cy = 20
+    bounds_cx = 113
+    bounds_cy = 17
     frame.levelo = -1
     frame.colorclient = -1879048185
     frame.caption = 'ebx'
@@ -143,7 +143,7 @@ object cpufo: tcpufo
     frame.outerframe = (
       0
       0
-      22
+      20
       0
     )
     taborder = 2
@@ -153,21 +153,21 @@ object cpufo: tcpufo
     onsetvalue = regsetvalue
     base = nb_hex
     max = -1
-    reffontheight = 16
+    reffontheight = 13
   end
   object on: tbooleanedit
     Tag = -1
     bounds_x = 7
     bounds_y = 9
-    bounds_cx = 59
-    bounds_cy = 16
+    bounds_cx = 53
+    bounds_cy = 15
     frame.caption = 'CPU on'
     frame.dummy = 0
     frame.outerframe = (
       0
       1
-      46
-      2
+      40
+      1
     )
     onchange = ononchange
     value = True
@@ -176,8 +176,8 @@ object cpufo: tcpufo
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
     bounds_x = 0
     bounds_y = 74
-    bounds_cx = 114
-    bounds_cy = 20
+    bounds_cx = 113
+    bounds_cy = 17
     frame.levelo = -1
     frame.colorclient = -1879048185
     frame.caption = 'ecx'
@@ -187,7 +187,7 @@ object cpufo: tcpufo
     frame.outerframe = (
       0
       0
-      21
+      20
       0
     )
     taborder = 3
@@ -197,14 +197,14 @@ object cpufo: tcpufo
     onsetvalue = regsetvalue
     base = nb_hex
     max = -1
-    reffontheight = 16
+    reffontheight = 13
   end
   object edx: tintegeredit
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
     bounds_x = 0
     bounds_y = 95
-    bounds_cx = 115
-    bounds_cy = 20
+    bounds_cx = 113
+    bounds_cy = 17
     frame.levelo = -1
     frame.colorclient = -1879048185
     frame.caption = 'edx'
@@ -214,7 +214,7 @@ object cpufo: tcpufo
     frame.outerframe = (
       0
       0
-      22
+      20
       0
     )
     taborder = 4
@@ -224,14 +224,14 @@ object cpufo: tcpufo
     onsetvalue = regsetvalue
     base = nb_hex
     max = -1
-    reffontheight = 16
+    reffontheight = 13
   end
   object esi: tintegeredit
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
     bounds_x = 0
     bounds_y = 116
-    bounds_cx = 113
-    bounds_cy = 20
+    bounds_cx = 109
+    bounds_cy = 17
     frame.levelo = -1
     frame.colorclient = -1879048185
     frame.caption = 'esi'
@@ -241,7 +241,7 @@ object cpufo: tcpufo
     frame.outerframe = (
       0
       0
-      20
+      16
       0
     )
     taborder = 5
@@ -251,14 +251,14 @@ object cpufo: tcpufo
     onsetvalue = regsetvalue
     base = nb_hex
     max = -1
-    reffontheight = 16
+    reffontheight = 13
   end
   object edi: tintegeredit
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
     bounds_x = 0
     bounds_y = 137
-    bounds_cx = 113
-    bounds_cy = 20
+    bounds_cx = 110
+    bounds_cy = 17
     frame.levelo = -1
     frame.colorclient = -1879048185
     frame.caption = 'edi'
@@ -268,7 +268,7 @@ object cpufo: tcpufo
     frame.outerframe = (
       0
       0
-      20
+      17
       0
     )
     taborder = 6
@@ -278,14 +278,14 @@ object cpufo: tcpufo
     onsetvalue = regsetvalue
     base = nb_hex
     max = -1
-    reffontheight = 16
+    reffontheight = 13
   end
   object ebp: tintegeredit
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
     bounds_x = 0
     bounds_y = 158
-    bounds_cx = 117
-    bounds_cy = 20
+    bounds_cx = 114
+    bounds_cy = 17
     frame.levelo = -1
     frame.colorclient = -1879048185
     frame.caption = 'ebp'
@@ -295,7 +295,7 @@ object cpufo: tcpufo
     frame.outerframe = (
       0
       0
-      24
+      21
       0
     )
     taborder = 7
@@ -305,14 +305,14 @@ object cpufo: tcpufo
     onsetvalue = regsetvalue
     base = nb_hex
     max = -1
-    reffontheight = 16
+    reffontheight = 13
   end
   object esp: tintegeredit
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
     bounds_x = 120
     bounds_y = 53
-    bounds_cx = 124
-    bounds_cy = 20
+    bounds_cx = 120
+    bounds_cy = 17
     frame.levelo = -1
     frame.colorclient = -1879048185
     frame.caption = 'esp'
@@ -322,7 +322,7 @@ object cpufo: tcpufo
     frame.outerframe = (
       0
       0
-      24
+      20
       0
     )
     taborder = 9
@@ -332,14 +332,14 @@ object cpufo: tcpufo
     onsetvalue = regsetvalue
     base = nb_hex
     max = -1
-    reffontheight = 16
+    reffontheight = 13
   end
   object eip: tintegeredit
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
     bounds_x = 120
     bounds_y = 74
-    bounds_cx = 120
-    bounds_cy = 20
+    bounds_cx = 117
+    bounds_cy = 17
     frame.levelo = -1
     frame.colorclient = -1879048185
     frame.caption = 'eip'
@@ -349,7 +349,7 @@ object cpufo: tcpufo
     frame.outerframe = (
       0
       0
-      20
+      17
       0
     )
     taborder = 10
@@ -359,14 +359,14 @@ object cpufo: tcpufo
     onsetvalue = regsetvalue
     base = nb_hex
     max = -1
-    reffontheight = 16
+    reffontheight = 13
   end
   object eflags: tintegeredit
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
     bounds_x = 120
     bounds_y = 32
-    bounds_cx = 116
-    bounds_cy = 20
+    bounds_cx = 114
+    bounds_cy = 17
     frame.levelo = -1
     frame.colorclient = -1879048185
     frame.caption = 'efl'
@@ -376,7 +376,7 @@ object cpufo: tcpufo
     frame.outerframe = (
       0
       0
-      16
+      14
       0
     )
     taborder = 8
@@ -387,14 +387,14 @@ object cpufo: tcpufo
     onsetvalue = regsetvalue
     base = nb_hex
     max = -1
-    reffontheight = 16
+    reffontheight = 13
   end
   object cs: tintegeredit
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
     bounds_x = 120
     bounds_y = 116
-    bounds_cx = 57
-    bounds_cy = 20
+    bounds_cx = 55
+    bounds_cy = 17
     frame.levelo = -1
     frame.colorclient = -1879048185
     frame.caption = 'cs'
@@ -404,7 +404,7 @@ object cpufo: tcpufo
     frame.outerframe = (
       0
       0
-      16
+      14
       0
     )
     taborder = 11
@@ -415,14 +415,14 @@ object cpufo: tcpufo
     base = nb_hex
     bitcount = 16
     max = -1
-    reffontheight = 16
+    reffontheight = 13
   end
   object ds: tintegeredit
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
     bounds_x = 120
     bounds_y = 137
-    bounds_cx = 58
-    bounds_cy = 20
+    bounds_cx = 55
+    bounds_cy = 17
     frame.levelo = -1
     frame.colorclient = -1879048185
     frame.caption = 'ds'
@@ -432,7 +432,7 @@ object cpufo: tcpufo
     frame.outerframe = (
       0
       0
-      17
+      14
       0
     )
     taborder = 13
@@ -443,14 +443,14 @@ object cpufo: tcpufo
     base = nb_hex
     bitcount = 16
     max = -1
-    reffontheight = 16
+    reffontheight = 13
   end
   object es: tintegeredit
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
     bounds_x = 120
     bounds_y = 158
-    bounds_cx = 58
-    bounds_cy = 20
+    bounds_cx = 55
+    bounds_cy = 17
     frame.levelo = -1
     frame.colorclient = -1879048185
     frame.caption = 'es'
@@ -460,7 +460,7 @@ object cpufo: tcpufo
     frame.outerframe = (
       0
       0
-      17
+      14
       0
     )
     taborder = 15
@@ -471,14 +471,14 @@ object cpufo: tcpufo
     base = nb_hex
     bitcount = 16
     max = -1
-    reffontheight = 16
+    reffontheight = 13
   end
   object fs: tintegeredit
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
     bounds_x = 179
     bounds_y = 116
-    bounds_cx = 54
-    bounds_cy = 20
+    bounds_cx = 52
+    bounds_cy = 17
     frame.levelo = -1
     frame.colorclient = -1879048185
     frame.caption = 'fs'
@@ -488,7 +488,7 @@ object cpufo: tcpufo
     frame.outerframe = (
       0
       0
-      13
+      11
       0
     )
     taborder = 12
@@ -499,14 +499,14 @@ object cpufo: tcpufo
     base = nb_hex
     bitcount = 16
     max = -1
-    reffontheight = 16
+    reffontheight = 13
   end
   object gs: tintegeredit
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
     bounds_x = 179
     bounds_y = 137
-    bounds_cx = 58
-    bounds_cy = 20
+    bounds_cx = 55
+    bounds_cy = 17
     frame.levelo = -1
     frame.colorclient = -1879048185
     frame.caption = 'gs'
@@ -516,7 +516,7 @@ object cpufo: tcpufo
     frame.outerframe = (
       0
       0
-      17
+      14
       0
     )
     taborder = 14
@@ -527,14 +527,14 @@ object cpufo: tcpufo
     base = nb_hex
     bitcount = 16
     max = -1
-    reffontheight = 16
+    reffontheight = 13
   end
   object ss: tintegeredit
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
     bounds_x = 179
     bounds_y = 158
-    bounds_cx = 58
-    bounds_cy = 20
+    bounds_cx = 54
+    bounds_cy = 17
     frame.levelo = -1
     frame.colorclient = -1879048185
     frame.caption = 'ss'
@@ -544,7 +544,7 @@ object cpufo: tcpufo
     frame.outerframe = (
       0
       0
-      17
+      13
       0
     )
     taborder = 16
@@ -555,14 +555,14 @@ object cpufo: tcpufo
     base = nb_hex
     bitcount = 16
     max = -1
-    reffontheight = 16
+    reffontheight = 13
   end
   object o: tbooleanedit
     Tag = 11
     bounds_x = 142
-    bounds_y = 1
+    bounds_y = 2
     bounds_cx = 11
-    bounds_cy = 28
+    bounds_cy = 27
     color = -2147483645
     frame.levelo = -1
     frame.colorclient = -1879048185
@@ -572,7 +572,7 @@ object cpufo: tcpufo
     frame.dummy = 0
     frame.outerframe = (
       0
-      17
+      16
       0
       0
     )
@@ -582,9 +582,9 @@ object cpufo: tcpufo
   object d: tbooleanedit
     Tag = 10
     bounds_x = 153
-    bounds_y = 1
+    bounds_y = 2
     bounds_cx = 11
-    bounds_cy = 28
+    bounds_cy = 27
     color = -2147483645
     frame.levelo = -1
     frame.colorclient = -1879048185
@@ -594,7 +594,7 @@ object cpufo: tcpufo
     frame.dummy = 0
     frame.outerframe = (
       0
-      17
+      16
       0
       0
     )
@@ -604,9 +604,9 @@ object cpufo: tcpufo
   object i: tbooleanedit
     Tag = 9
     bounds_x = 164
-    bounds_y = 1
+    bounds_y = 2
     bounds_cx = 11
-    bounds_cy = 28
+    bounds_cy = 27
     color = -2147483645
     frame.levelo = -1
     frame.colorclient = -1879048185
@@ -616,7 +616,7 @@ object cpufo: tcpufo
     frame.dummy = 0
     frame.outerframe = (
       0
-      17
+      16
       0
       0
     )
@@ -626,9 +626,9 @@ object cpufo: tcpufo
   object t: tbooleanedit
     Tag = 8
     bounds_x = 175
-    bounds_y = 1
+    bounds_y = 2
     bounds_cx = 11
-    bounds_cy = 28
+    bounds_cy = 27
     color = -2147483645
     frame.levelo = -1
     frame.colorclient = -1879048185
@@ -638,7 +638,7 @@ object cpufo: tcpufo
     frame.dummy = 0
     frame.outerframe = (
       0
-      17
+      16
       0
       0
     )
@@ -648,9 +648,9 @@ object cpufo: tcpufo
   object s: tbooleanedit
     Tag = 7
     bounds_x = 186
-    bounds_y = 1
+    bounds_y = 2
     bounds_cx = 11
-    bounds_cy = 28
+    bounds_cy = 27
     color = -2147483645
     frame.levelo = -1
     frame.colorclient = -1879048185
@@ -660,7 +660,7 @@ object cpufo: tcpufo
     frame.dummy = 0
     frame.outerframe = (
       0
-      17
+      16
       0
       0
     )
@@ -670,9 +670,9 @@ object cpufo: tcpufo
   object z: tbooleanedit
     Tag = 6
     bounds_x = 197
-    bounds_y = 1
+    bounds_y = 2
     bounds_cx = 11
-    bounds_cy = 28
+    bounds_cy = 27
     color = -2147483645
     frame.levelo = -1
     frame.colorclient = -1879048185
@@ -682,7 +682,7 @@ object cpufo: tcpufo
     frame.dummy = 0
     frame.outerframe = (
       0
-      17
+      16
       0
       0
     )
@@ -692,9 +692,9 @@ object cpufo: tcpufo
   object a: tbooleanedit
     Tag = 4
     bounds_x = 208
-    bounds_y = 1
+    bounds_y = 2
     bounds_cx = 11
-    bounds_cy = 28
+    bounds_cy = 27
     color = -2147483645
     frame.levelo = -1
     frame.colorclient = -1879048185
@@ -704,7 +704,7 @@ object cpufo: tcpufo
     frame.dummy = 0
     frame.outerframe = (
       0
-      17
+      16
       0
       0
     )
@@ -714,9 +714,9 @@ object cpufo: tcpufo
   object p: tbooleanedit
     Tag = 2
     bounds_x = 219
-    bounds_y = 1
+    bounds_y = 2
     bounds_cx = 11
-    bounds_cy = 28
+    bounds_cy = 27
     color = -2147483645
     frame.levelo = -1
     frame.colorclient = -1879048185
@@ -726,7 +726,7 @@ object cpufo: tcpufo
     frame.dummy = 0
     frame.outerframe = (
       0
-      17
+      16
       0
       0
     )
@@ -735,9 +735,9 @@ object cpufo: tcpufo
   end
   object c: tbooleanedit
     bounds_x = 230
-    bounds_y = 1
+    bounds_y = 2
     bounds_cx = 11
-    bounds_cy = 28
+    bounds_cy = 27
     color = -2147483645
     frame.levelo = -1
     frame.colorclient = -1879048185
@@ -747,7 +747,7 @@ object cpufo: tcpufo
     frame.dummy = 0
     frame.outerframe = (
       0
-      17
+      16
       0
       0
     )
@@ -757,9 +757,9 @@ object cpufo: tcpufo
   object nt: tbooleanedit
     Tag = 15
     bounds_x = 106
-    bounds_y = 1
-    bounds_cx = 18
-    bounds_cy = 28
+    bounds_y = 2
+    bounds_cx = 17
+    bounds_cy = 27
     color = -2147483645
     frame.levelo = -1
     frame.colorclient = -1879048185
@@ -769,8 +769,8 @@ object cpufo: tcpufo
     frame.dummy = 0
     frame.outerframe = (
       3
-      17
-      4
+      16
+      3
       0
     )
     taborder = 19
@@ -779,9 +779,8 @@ object cpufo: tcpufo
   object io: tbooleanedit
     Tag = 12
     bounds_x = 126
-    bounds_y = 1
-    bounds_cx = 14
-    bounds_cy = 28
+    bounds_y = 2
+    bounds_cy = 27
     color = -2147483645
     frame.levelo = -1
     frame.colorclient = -1879048185
@@ -791,8 +790,8 @@ object cpufo: tcpufo
     frame.dummy = 0
     frame.outerframe = (
       1
-      17
-      2
+      16
+      1
       0
     )
     taborder = 20

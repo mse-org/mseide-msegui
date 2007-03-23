@@ -1066,7 +1066,7 @@ end;
 
 procedure twidgetcol.updateeditoptions(var aoptions: optionseditty);
 begin
- exclude(aoptions,oe_linebreak);
+// exclude(aoptions,oe_linebreak); //not sure about
  updatebit(cardinal(foptions),ord(co_readonly),oe_readonly in aoptions);
  updatebit(cardinal(foptions),ord(co_savevalue),oe_savevalue in aoptions);
 end;

@@ -9,7 +9,17 @@ order6=0
 order7=0
 order8=0
 [projectoptions]
-options=41
+projectdir=/C:/proj/mseide-msegui/trunk/apps/ide
+finddialog=8
+ [finddialogfo]
+ stackedunder=
+ x=319
+ y=205
+ cx=331
+ cy=116
+ [finddialogfo.selectedonly]
+ value=0
+options=44
  [projectoptionsfo]
  stackedunder=
  x=151
@@ -18,7 +28,7 @@ options=41
  cy=572
  [projectoptionsfo.tabwidget]
  firsttab=0
- index=3
+ index=2
  [projectoptionsfo.macrogrid]
  width0=13
  width1=13
@@ -51,6 +61,19 @@ options=41
  values1=1
   EconvertError
  width1=764
+ [projectoptionsfo.newfile]
+ firsttab=0
+ index=0
+settings=9
+ [settingsfo]
+ stackedunder=
+ x=100
+ y=106
+ cx=358
+ cy=531
+ wsize=0
+ active=1
+ visible=1
 sigsettings=27
  1,1,T,F
  3,3,T,F
@@ -89,7 +112,7 @@ modulenames=0
 moduletypes=0
 modulefiles=0
 mainfile=mseide.pas
-targetfile=mseide${EXEEXT}
+targetfile=mseidefp${EXEEXT}
 messageoutputfile=
 copymessages=0
 closemessages=1
@@ -124,6 +147,8 @@ sourcedirs=3
  ${MSELIBDIR}kernel/$TARGET/
  ${MSELIBDIR}*/
  ./
+defines=0
+defineson=0
 unitdirs=3
  ${MSELIBDIR}kernel/$TARGET/
  ${MSELIBDIR}kernel/
@@ -145,13 +170,15 @@ fontnames=0
 fontheights=0
 showgrid=1
 snaptogrid=1
+moveonfirstclick=1
 autoindent=1
 blockindent=1
 rightmarginon=1
 rightmarginchars=80
 tabstops=4
+spacetabs=0
 editfontname=mseide_source
-editfontheight=0
+editfontheight=14
 editfontwidth=0
 editfontextraspace=0
 editfontantialiased=1
@@ -189,16 +216,25 @@ newdatamodsource=${TEMPLATEDIR}default/datamodule.pas
 newdatamodform=${TEMPLATEDIR}default/datamodule.mfm
 newsubfosource=${TEMPLATEDIR}default/subform.pas
 newsubfoform=${TEMPLATEDIR}default/subform.mfm
+newreportsource=${TEMPLATEDIR}default/report.pas
+newreportform=${TEMPLATEDIR}default/report.mfm
+newinheritedsource=${TEMPLATEDIR}default/inheritedform.pas
+newinheritedform=${TEMPLATEDIR}default/inheritedform.mfm
 stoponexception=0
 activateonbreak=1
 showconsole=0
 externalconsole=0
 [breakpoints]
-on=0
-path=0
-line=0
-ignore=0
-condition=0
+on=1
+ 1
+path=1
+ /C:/proj/mseide-msegui/trunk/lib/common/editwidgets/msedataedits.pas
+line=1
+ 1202
+ignore=1
+ 0
+condition=1
+ 
 panels=1
  panel1
 units=
@@ -213,23 +249,27 @@ files=
  a=0,4132,0,Files
  )
 [layout]
-windowlayout=245
+windowlayout=316
  [mainfo]
- stackedunder=componentpalettefo
+ stackedunder=
  x=4
  y=24
  cx=286
- cy=74
+ cy=63
  wsize=0
- active=0
+ active=1
  visible=1
  [mainfo.basedock]
  splitdir=2
- useroptions=5616
+ useroptions=5088
  [mainfo.openfile]
  filenames=0
- lastdir=
- filefilterindex=2
+ filehistory=4
+  /C:/proj/mseide-msegui/trunk/lib/common/editwidgets/msedataedits.pas
+  /C:/proj/mseide-msegui/trunk/apps/ide/selecteditpageform.pas
+  /C:/proj/mseide-msegui/trunk/apps/ide/cpuform.pas
+  /C:/proj/mseide-msegui/trunk/apps/ide/make.pas
+ filefilterindex=0
  filecolwidth=174
  [actionsmo.watchesonact]
  checked=1
@@ -237,50 +277,75 @@ windowlayout=245
  checked=1
  [sourcefo]
  splitdir=0
- useroptions=527
+ useroptions=1051
  parent=mainfo.panel1.container
  visible=1
+ mdistate=0
+ nx=0
+ ny=0
+ ncx=0
+ ncy=0
  x=0
  y=0
- cx=724
- cy=408
+ cx=844
+ cy=491
  [debuggerfo]
  splitdir=0
- useroptions=15
+ useroptions=1051
  parent=mainfo.basedock
  visible=1
+ mdistate=0
+ nx=0
+ ny=0
+ ncx=0
+ ncy=0
  x=0
  y=0
  cx=286
- cy=38
+ cy=29
  [componentpalettefo]
  splitdir=0
- useroptions=15
- stackedunder=
+ useroptions=1051
+ stackedunder=objectinspectorfo
  parent=
+ mdistate=0
+ nx=0
+ ny=0
+ ncx=0
+ ncy=0
  x=335
  y=24
  cx=440
- cy=129
+ cy=79
  wsize=0
- active=1
+ active=0
  visible=1
  [componentpalettefo.componentpages]
  activetab=0
  [messagefo]
  splitdir=0
- useroptions=1551
+ useroptions=3099
  parent=mainfo.panel1.container
- visible=1
+ visible=0
+ mdistate=0
+ nx=0
+ ny=0
+ ncx=0
+ ncy=0
  x=0
- y=411
- cx=724
- cy=80
+ y=415
+ cx=844
+ cy=76
  [watchfo]
  splitdir=0
- useroptions=783
- stackedunder=objectinspectorfo
+ useroptions=1563
+ stackedunder=disassfo
  parent=
+ mdistate=0
+ nx=0
+ ny=0
+ ncx=0
+ ncy=0
  x=510
  y=325
  cx=310
@@ -290,35 +355,43 @@ windowlayout=245
  visible=0
  [watchfo.grid]
  width0=13
- values1=1
-  
+ values1=0
  width1=152
- values2=1
-  
+ values2=0
  [watchfo.watchon]
  [watchfo.expression]
  [watchfo.watcheson]
  value=1
  [objectinspectorfo]
  splitdir=0
- useroptions=527
- stackedunder=disassfo
+ useroptions=1051
+ stackedunder=mainfo.panel1
  parent=
+ mdistate=0
+ nx=0
+ ny=0
+ ncx=0
+ ncy=0
  x=670
  y=179
  cx=316
  cy=484
  wsize=0
  active=0
- visible=0
+ visible=1
  [objectinspectorfo.grid]
  width0=113
  width1=187
  [breakpointsfo]
  splitdir=0
- useroptions=527
+ useroptions=1051
  stackedunder=projecttreefo
  parent=
+ mdistate=0
+ nx=0
+ ny=0
+ ncx=0
+ ncy=0
  x=107
  y=404
  cx=477
@@ -327,12 +400,17 @@ windowlayout=245
  active=0
  visible=0
  [breakpointsfo.bkptson]
- value=1
+ value=0
  [watchpointsfo]
  splitdir=0
- useroptions=527
- stackedunder=stackfo
+ useroptions=1051
+ stackedunder=cpufo
  parent=
+ mdistate=0
+ nx=0
+ ny=0
+ ncx=0
+ ncy=0
  x=537
  y=26
  cx=483
@@ -357,21 +435,31 @@ windowlayout=245
  width6=103
  [stackfo]
  splitdir=0
- useroptions=527
- stackedunder=cpufo
+ useroptions=1051
+ stackedunder=componentpalettefo
  parent=
+ mdistate=0
+ nx=0
+ ny=0
+ ncx=0
+ ncy=0
  x=407
  y=349
  cx=254
  cy=180
  wsize=0
  active=0
- visible=0
+ visible=1
  [projecttreefo]
  splitdir=0
- useroptions=15
+ useroptions=27
  stackedunder=findinfilefo
  parent=
+ mdistate=0
+ nx=0
+ ny=0
+ ncx=0
+ ncy=0
  x=321
  y=101
  cx=698
@@ -381,18 +469,28 @@ windowlayout=245
  visible=0
  [findinfilefo]
  splitdir=0
- useroptions=527
+ useroptions=1051
  stackedunder=targetconsolefo
  parent=
+ mdistate=0
+ nx=0
+ ny=0
+ ncx=0
+ ncy=0
  x=548
  y=115
  cx=369
  cy=198
  [cpufo]
  splitdir=0
- useroptions=527
+ useroptions=1051
  stackedunder=threadsfo
  parent=
+ mdistate=0
+ nx=0
+ ny=0
+ ncx=0
+ ncy=0
  x=192
  y=451
  cx=257
@@ -402,9 +500,14 @@ windowlayout=245
  visible=0
  [disassfo]
  splitdir=0
- useroptions=527
+ useroptions=1051
  stackedunder=breakpointsfo
  parent=
+ mdistate=0
+ nx=0
+ ny=0
+ ncx=0
+ ncy=0
  x=162
  y=502
  cx=564
@@ -414,9 +517,14 @@ windowlayout=245
  visible=0
  [threadsfo]
  splitdir=0
- useroptions=527
+ useroptions=1051
  stackedunder=watchfo
  parent=
+ mdistate=0
+ nx=0
+ ny=0
+ ncx=0
+ ncy=0
  x=37
  y=270
  cx=349
@@ -426,9 +534,14 @@ windowlayout=245
  visible=0
  [targetconsolefo]
  splitdir=0
- useroptions=1
- stackedunder=mainfo.panel1
+ useroptions=1051
+ stackedunder=stackfo
  parent=
+ mdistate=0
+ nx=0
+ ny=0
+ ncx=0
+ ncy=0
  x=116
  y=297
  cx=904
@@ -438,12 +551,17 @@ windowlayout=245
  visible=1
  [mainfo.panel1]
  splitdir=2
- useroptions=2047
+ useroptions=2043
  stackedunder=mainfo
  parent=
+ mdistate=0
+ nx=0
+ ny=0
+ ncx=0
+ ncy=0
  x=4
  y=201
- cx=734
+ cx=854
  cy=491
  wsize=0
  active=0
@@ -456,27 +574,80 @@ blockindent=1
 rightmarginon=1
 rightmarginchars=80
 tabstops=4
-finddtext=
-findhistory=0
+finddtext=tmemoedit
+findhistory=1
+ tmemoedit
 findoptions=1
-editpos=0
-sourcefiles=0
-ismoduletexts=0
+editpos=10
+ 0,-1073741823
+ 0,-1073741823
+ 0,-1073741823
+ 0,-1073741823
+ 0,-1073741823
+ 0,-1073741823
+ 0,-1073741823
+ 0,-1073741823
+ 0,1201
+ 51,1068
+bookmarks0=0
+bookmarks1=0
+bookmarks2=0
+bookmarks3=0
+bookmarks4=0
+bookmarks5=0
+bookmarks6=0
+bookmarks7=0
+bookmarks8=0
+bookmarks9=0
+sourcefiles=10
+ /C:/proj/mseide-msegui/trunk/apps/ide/make.pas
+ /C:/proj/mseide-msegui/trunk/apps/ide/cpuform.pas
+ /C:/proj/mseide-msegui/trunk/apps/ide/actionsmodule.pas
+ /C:/proj/mseide-msegui/trunk/apps/ide/main.pas
+ /C:/proj/mseide-msegui/trunk/apps/ide/selecteditpageform.pas
+ /C:/proj/mseide-msegui/trunk/apps/ide/mseide.pas
+ /C:/proj/mseide-msegui/trunk/apps/ide/main.mfm
+ /C:/proj/mseide-msegui/trunk/apps/ide/cpuform.mfm
+ /C:/proj/mseide-msegui/trunk/lib/common/editwidgets/msedataedits.pas
+ /C:/proj/mseide-msegui/trunk/lib/common/editwidgets/msewidgetgrid.pas
+relpaths=10
+ make.pas
+ cpuform.pas
+ actionsmodule.pas
+ main.pas
+ selecteditpageform.pas
+ mseide.pas
+ main.mfm
+ cpuform.mfm
+ ../../lib/common/editwidgets/msedataedits.pas
+ ../../lib/common/editwidgets/msewidgetgrid.pas
+ismoduletexts=10
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 1
+ 1
+ 0
+ 0
 modules=0
 visiblemodules=0
 [sourcefo.tabwidget]
-tabsize=134
+tabsize=99
 firsttab=0
-index=-1
+index=9
 [components]
 [selecteditpage]
 colwidth=100
-x=0
-y=0
-cx=0
-cy=0
+x=160
+y=133
+cx=704
+cy=473
 [progparams]
 parameters=
+progparamhistory=0
 workingdirectory=
 envvarons=0
 envvarnames=0

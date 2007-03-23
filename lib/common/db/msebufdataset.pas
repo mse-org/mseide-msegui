@@ -1072,7 +1072,7 @@ end;
 procedure tmsebufdataset.setpacketrecords(avalue : integer);
 begin
  if (avalue = 0) then begin
-  databaseerror(sinvpacketrecordsvalue);
+  databaseerror('Packetrecords can not be 0.'{sinvpacketrecordsvalue});
  end;
  fpacketrecords:= avalue;
  updatestate;
