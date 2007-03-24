@@ -291,12 +291,12 @@ type
 
  tcustomdockform = class(tcustommseform,idocktarget)
   private
-   fdragdock: tformdockcontroller;
    function getdockcontroller: tdockcontroller;
    procedure setdragdock(const Value: tformdockcontroller);
    function getframe: tgripframe;
    procedure setframe(const avalue: tgripframe);
   protected
+   fdragdock: tformdockcontroller;
    procedure internalcreateframe; override;
    procedure updateoptions; override;
    function getoptions: formoptionsty; override;
