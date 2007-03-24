@@ -49,7 +49,7 @@ uses
  mselookupbuffer,msedbf,msesdfdata,msememds,
  msedatalist,msedbfieldeditor,sysutils,msetexteditor,
  msedbdispwidgets,msedbgraphics,regdb_bmp,msegui,msedbdialog,msegrids,
- regwidgets,msebufdataset
+ regwidgets,msebufdataset,msedbevents
  {$ifdef mse_with_sqlite}
  ,msesqlite3ds
  {$endif}
@@ -170,7 +170,7 @@ procedure Register;
 begin
  registercomponents('Dbf',[
       tfieldparamlink,tfieldlink,ttimestampfieldlink,tfieldfieldlink,
-      tsequencelink,
+      tsequencelink,tdbevent,
       tmsestringfield,tmselongintfield,tmselargeintfield,tmsesmallintfield,
       tmsewordfield,tmseautoincfield,tmsefloatfield,tmsecurrencyfield,
       tmsebooleanfield,tmsedatetimefield,tmsedatefield,tmsetimefield,

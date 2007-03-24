@@ -21,6 +21,7 @@ const
  defaultpqconnectionoptionsty = [pqco_usesavepoint];
  
 type 
+
  datasetarty = array of tdataset;
  tmsepqconnection = class(tpqconnection,idbcontroller)
   private

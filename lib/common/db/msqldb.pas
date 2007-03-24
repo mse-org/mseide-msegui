@@ -105,7 +105,7 @@ type
    procedure setconnected(const avalue: boolean);
   protected
     FConnOptions         : TConnOptions;
-
+ 
     function StrToStatementType(s : string) : TStatementType; virtual;
     procedure DoInternalConnect; override;
     procedure DoInternalDisconnect; override;

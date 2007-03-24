@@ -1,3 +1,16 @@
+{
+    Copyright (c) 2004 by Joost van der Sluis
+    Modified 2006-2007 by Martin Schreiber
+    
+    See the file COPYING.FPC, included in this distribution,
+    for details about the copyright.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+ **********************************************************************}
+ 
 unit mpqconnection;
 
 {$mode objfpc}{$H+}
@@ -7,7 +20,7 @@ unit mpqconnection;
 interface
 
 uses
-  Classes, SysUtils, msqldb, db, dbconst,
+  Classes, SysUtils, msqldb, db, dbconst,msedbevents,
 {$IfDef LinkDynamically}
   postgres3dyn;
 {$Else}
@@ -30,15 +43,18 @@ type
     Nr        : string;
   end;
 
-  { TPQConnection }
-
- TPQConnection = class (TSQLConnection,iblobconnection)
+ dbeventarty = array of tdbevent;
+ 
+ TPQConnection = class (TSQLConnection,iblobconnection,idbevent,idbeventcontroller)
   private
    FCursorCount         : word;
    FConnectString       : string;
    FSQLDatabaseHandle   : pointer;
    FIntegerDateTimes    : boolean;
+   feventcontroller: tdbeventcontroller;
    function TranslateFldType(Type_Oid : integer) : TFieldType;
+   function geteventinterval: integer;
+   procedure seteventinterval(const avalue: integer);
   protected
    procedure DoInternalConnect; override;
    procedure DoInternalDisconnect; override;
@@ -78,20 +94,34 @@ type
    procedure setupblobdata(const afield: tfield; const acursor: tsqlcursor;
                                    const aparam: tparam);
    function blobscached: boolean;
+          //idbevent
+   procedure listen(const sender: tdbevent);
+   procedure unlisten(const sender: tdbevent);
+   procedure fire(const sender: tdbevent);
+          //idbeventcontroller
+   function getdbevent(var aname: string; var id: int64): boolean;
+               //false if none
+   procedure dolisten(const sender: tdbevent);
+   procedure dounlisten(const sender: tdbevent);
+   procedure dopqexec(const asql: string);
   public
    constructor Create(AOwner : TComponent); override;
+   destructor destroy; override;
+   property eventcontroller: tdbeventcontroller read feventcontroller;
   published
     property DatabaseName;
     property KeepConnection;
     property LoginPrompt;
     property Params;
     property OnLogin;
+    property eventinterval: integer read geteventinterval 
+                     write seteventinterval default defaultdbeventinterval;
   end;
 
 implementation
 
 uses 
- math,msestrings,msestream,msetypes;
+ math,msestrings,msestream,msetypes,msedatalist;
 
 ResourceString
   SErrRollbackFailed = 'Rollback transaction failed';
@@ -125,12 +155,26 @@ const Oid_Bool     = 16;
  inv_read =  $40000;
  inv_write = $20000;
  invalidoid = 0;
- 
-constructor TPQConnection.Create(AOwner : TComponent);
 
+type 
+  TDatabasecracker = class(TComponent)
+  private
+    FConnected : Boolean;
+  end;
+  
+{ tpqconnection }
+  
+constructor tpqconnection.create(aowner: tcomponent);
 begin
-  inherited;
-  FConnOptions := FConnOptions + [sqSupportParams];
+ feventcontroller:= tdbeventcontroller.create(idbeventcontroller(self));
+ inherited;
+ fconnoptions:= fconnoptions + [sqsupportparams];
+end;
+
+destructor TPQConnection.destroy;
+begin
+ inherited;
+ feventcontroller.free;
 end;
 
 function TPQConnection.GetTransactionHandle(trans : TSQLHandle): pointer;
@@ -284,42 +328,50 @@ end;
 
 
 procedure TPQConnection.DoInternalConnect;
-
-var msg : string;
-
+var 
+ msg: string;
+ bo1: boolean;
+ int1: integer;
 begin
 {$IfDef LinkDynamically}
-  InitialisePostgres3;
+ InitialisePostgres3;
 {$EndIf}
 
-  inherited dointernalconnect;
+ inherited dointernalconnect;
 
-  FConnectString := '';
-  if (UserName <> '') then FConnectString := FConnectString + ' user=''' + UserName + '''';
-  if (Password <> '') then FConnectString := FConnectString + ' password=''' + Password + '''';
-  if (HostName <> '') then FConnectString := FConnectString + ' host=''' + HostName + '''';
-  if (DatabaseName <> '') then FConnectString := FConnectString + ' dbname=''' + DatabaseName + '''';
-  if (Params.Text <> '') then FConnectString := FConnectString + ' '+Params.Text;
+ FConnectString := '';
+ if (UserName <> '') then FConnectString := FConnectString + ' user=''' + UserName + '''';
+ if (Password <> '') then FConnectString := FConnectString + ' password=''' + Password + '''';
+ if (HostName <> '') then FConnectString := FConnectString + ' host=''' + HostName + '''';
+ if (DatabaseName <> '') then FConnectString := FConnectString + ' dbname=''' + DatabaseName + '''';
+ if (Params.Text <> '') then FConnectString := FConnectString + ' '+Params.Text;
 
-  FSQLDatabaseHandle := PQconnectdb(pchar(FConnectString));
+ FSQLDatabaseHandle := PQconnectdb(pchar(FConnectString));
 
-  if (PQstatus(FSQLDatabaseHandle) = CONNECTION_BAD) then
-    begin
-    msg := PQerrorMessage(FSQLDatabaseHandle);
-    dointernaldisconnect;
-    DatabaseError(sErrConnectionFailed + ' (PostgreSQL: ' + msg + ')',self);
-    end;
+ if (PQstatus(FSQLDatabaseHandle) = CONNECTION_BAD) then begin
+  msg := PQerrorMessage(FSQLDatabaseHandle);
+  dointernaldisconnect;
+  DatabaseError(sErrConnectionFailed + ' (PostgreSQL: ' + msg + ')',self);
+ end;
 // This does only work for pg>=8.0, so timestamps won't work with earlier versions of pg which are compiled with integer_datetimes on
-  FIntegerDatetimes := pqparameterstatus(FSQLDatabaseHandle,'integer_datetimes') = 'on';
+ FIntegerDatetimes := pqparameterstatus(FSQLDatabaseHandle,'integer_datetimes') = 'on';
+ with tdatabasecracker(self) do begin
+  bo1:= fconnected;
+  fconnected:= true;
+  feventcontroller.connect;
+  fconnected:= bo1;
+ end;
 end;
 
 procedure TPQConnection.DoInternalDisconnect;
+var
+ int1: integer;
 begin
-  PQfinish(FSQLDatabaseHandle);
+ feventcontroller.disconnect;
+ PQfinish(FSQLDatabaseHandle);
 {$IfDef LinkDynamically}
-  ReleasePostgres3;
+ ReleasePostgres3;
 {$EndIf}
-
 end;
 
 function TPQConnection.TranslateFldType(Type_Oid : integer) : TFieldType;
@@ -873,25 +925,17 @@ var
  str1: string;
  int1: integer;
 begin
-{
- if alength = 0 then begin
-  aparam.clear;
-  newid:= '';
+ setlength(str1,alength);
+ move(adata^,str1[1],alength);
+ if afield.datatype = ftmemo then begin
+  aparam.asstring:= str1;
  end
  else begin
- }
-  setlength(str1,alength);
-  move(adata^,str1[1],alength);
-  if afield.datatype = ftmemo then begin
-   aparam.asstring:= str1;
-  end
-  else begin
-   aparam.asblob:= str1;
-  end;
-  int1:= acursor.addblobdata(str1);
-  setlength(newid,sizeof(int1));
-  move(int1,newid[1],sizeof(int1));
-// end;
+  aparam.asblob:= str1;
+ end;
+ int1:= acursor.addblobdata(str1);
+ setlength(newid,sizeof(int1));
+ move(int1,newid[1],sizeof(int1));
 end;
 
 procedure TPQConnection.setupblobdata(const afield: tfield; 
@@ -908,6 +952,77 @@ end;
 function TPQConnection.blobscached: boolean;
 begin
  result:= true;
+end;
+
+procedure TPQConnection.dolisten(const sender: tdbevent);
+begin
+ dopqexec('LISTEN '+sender.eventname+';');
+end;
+
+procedure TPQConnection.dounlisten(const sender: tdbevent);
+begin
+ dopqexec('UNLISTEN '+sender.eventname+';');
+end;
+
+procedure TPQConnection.listen(const sender: tdbevent);
+begin
+ feventcontroller.register(sender);
+ if connected then begin
+  dolisten(sender);
+ end;
+end;
+
+procedure TPQConnection.unlisten(const sender: tdbevent);
+begin
+ if connected then begin
+  dounlisten(sender);
+ end;
+ feventcontroller.unregister(sender);
+end;
+
+procedure TPQConnection.fire(const sender: tdbevent);
+begin
+ dopqexec('NOTIFY '+sender.eventname+';');
+end;
+
+function TPQConnection.getdbevent(var aname: string; var id: int64): boolean;
+var
+ info: ppgnotify;
+begin
+ pqconsumeinput(fsqldatabasehandle);
+ info:= pqnotifies(fsqldatabasehandle);
+ result:= info <> nil;
+ if result then begin
+  aname:= info^.relname;
+  id:= info^.be_pid;
+  pqfreemem(info);
+ end;
+end;
+
+function TPQConnection.geteventinterval: integer;
+begin
+ result:= feventcontroller.eventinterval;
+end;
+
+procedure TPQConnection.seteventinterval(const avalue: integer);
+begin
+ feventcontroller.eventinterval:= avalue;
+end;
+
+procedure tpqconnection.dopqexec(const asql: string);
+var
+ res: ppgresult;
+
+begin
+ res:= pqexec(fsqldatabasehandle,pchar(asql));
+ if pqresultstatus(res) <> pgres_command_ok then begin
+  pqclear(res);
+  databaseerror('PQExecerror'+ ' (postgresql: ' + 
+                        pqerrormessage(fsqldatabasehandle) + ')',self);
+ end
+ else begin
+  pqclear(res);
+ end;
 end;
 
 {
