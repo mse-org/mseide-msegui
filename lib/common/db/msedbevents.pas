@@ -258,6 +258,9 @@ end;
 procedure tdbeventcontroller.seteventinterval(const avalue: integer);
 begin
  ftimer.interval:= avalue;
+ if avalue < 0 then begin
+  ftimer.enabled:= true; //trigger oneshot
+ end;
 end;
 
 procedure tdbeventcontroller.getevents;

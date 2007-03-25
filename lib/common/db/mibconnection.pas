@@ -93,7 +93,6 @@ type
                        const forstring: boolean = false): tmemorystream;
     function getblobstring(const acursor: tsqlcursor;
                                        const blobid: isc_quad): string;
-   procedure eventfired(const aevent: pfbeventbufferty; const aupdated: pchar);
   protected
    procedure freeeventbuffer(var abuffer: pfbeventbufferty);
    
@@ -211,6 +210,7 @@ constructor TIBConnection.Create(AOwner : TComponent);
 begin
  sys_mutexcreate(fmutex);
  feventcontroller:= tdbeventcontroller.create(idbeventcontroller(self));
+ feventcontroller.eventinterval:= -1; //event driven
  inherited;
  FConnOptions := FConnOptions + [sqSupportParams];
 end;
@@ -1408,47 +1408,19 @@ procedure TIBConnection.fire(const sender: tdbevent);
 begin
  databaseerror('Event fire not implemented.',self);
 end;
-var testvar: pfbeventbufferty;
 
 procedure eventcallback(adata: pointer; alength: smallint; aupdated: pchar); cdecl;
-//                      {$ifdef unix}cdecl{$else}stdcall{$endif};
 var
  status: statusvectorty; 
 begin
-// tibconnection(pfbeventbufferty(adata)^.event.database).eventfired(
-//                                          adata,aupdated);
  with pfbeventbufferty(adata)^,tibconnection(event.database) do begin
-//  isc_event_counts(status,length,eventbuffer,updated);
-//  if status[0] > 0 then begin
    sys_mutexlock(fmutex);
    inc(count);
    inc(feventcount);
    move(aupdated^,resultbuffer^,alength);
-//   isc_event_counts(status,length,eventbuffer,resultbuffer);
-//   isc_que_events(@status,@fsqldatabasehandle,@id,length,
-//       eventbuffer,isc_callback(@eventcallback),adata);
+   feventcontroller.eventinterval:= -1; //restart timer
    sys_mutexunlock(fmutex);
-//   interlockedincrement(count);
-//   interlockedincrement(feventcount);
-//  end;
  end;
-end;
-
-procedure TIBConnection.eventfired(const aevent: pfbeventbufferty;
-                        const aupdated: pchar);
-var
- status: statusvectorty; 
-begin
- sys_mutexlock(fmutex);
- with aevent^ do begin
-  isc_event_counts(@status,length,eventbuffer,aupdated);
-  inc(count);
-//  interlockedincrement(count);
- end;
- inc(feventcount);
-// interlockedincrement(feventcount);
- 
- sys_mutexunlock(fmutex);
 end;
 
 function TIBConnection.getdbevent(var aname: string; var aid: int64): boolean;
@@ -1462,13 +1434,12 @@ begin
   dec(feventcount);
   for int1:= 0 to high(feventbuffers) do begin
    if feventbuffers[int1] <> nil then begin
-testvar:= feventbuffers[int1];
     with feventbuffers[int1]^ do begin
      if count <> 0 then begin
       isc_event_counts(@status,length,eventbuffer,resultbuffer);
       isc_que_events(@status,@fsqldatabasehandle,@id,length,
          eventbuffer,isc_callback(@eventcallback),feventbuffers[int1]);
-      if count < 0 then begin
+      if count < 0 then begin     //first dummy
        count:= 0;
       end
       else begin
@@ -1503,7 +1474,6 @@ begin
  end;
  getmem(feventbuffers[int2],sizeof(fbeventbufferty));
  fillchar(feventbuffers[int2]^,sizeof(fbeventbufferty),0);
- testvar:= feventbuffers[int2];
  with feventbuffers[int2]^ do begin
   count:= -2; //remove dummy call
   event:= sender;
