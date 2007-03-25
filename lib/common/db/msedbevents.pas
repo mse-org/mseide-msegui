@@ -24,7 +24,7 @@ type
   procedure fire(const sender: tdbevent);
  end;
  idbeventcontroller = interface(inullinterface)
-  function getdbevent(var aname: string; var id: int64): boolean;
+  function getdbevent(var aname: string; var aid: int64): boolean;
               //false if none
   procedure dolisten(const sender: tdbevent);
   procedure dounlisten(const sender: tdbevent);

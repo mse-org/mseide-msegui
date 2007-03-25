@@ -1,3 +1,16 @@
+{
+    Copyright (c) 2004 by Joost van der Sluis
+    Modified 2006-2007 by Martin Schreiber
+    
+    See the file COPYING.FPC, included in this distribution,
+    for details about the copyright.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+ **********************************************************************}
+ 
 unit mIBConnection;
 
 {$mode objfpc}{$H+}
@@ -7,7 +20,7 @@ unit mIBConnection;
 interface
 
 uses
-  Classes, SysUtils, msqldb, db, math, dbconst, msebufdataset,
+ Classes,SysUtils,msqldb,db,math,dbconst,msebufdataset,msedbevents,msesys,
 {$IfDef LinkDynamically}
   ibase60dyn;
 {$Else}
@@ -37,12 +50,28 @@ type
     Status              : array [0..19] of ISC_STATUS;
   end;
 
-  TIBConnection = class (TSQLConnection,iblobconnection)
+  fbeventbufferty = record
+   event: tdbevent;
+   name: string;
+   length: integer;
+   eventbuffer: pchar;
+   resultbuffer: pchar;
+   id: isc_long;
+   count: integer;
+  end;
+  pfbeventbufferty = ^fbeventbufferty;
+  statusvectorty = array[0..19] of ISC_STATUS;
+  
+  TIBConnection = class (TSQLConnection,iblobconnection,
+                                               idbevent,idbeventcontroller)
   private
     FSQLDatabaseHandle   : pointer;
-    FStatus              : array [0..19] of ISC_STATUS;
+    FStatus              : statusvectorty; //array [0..19] of ISC_STATUS;
     FDialect             : integer;
-
+    feventcontroller: tdbeventcontroller;
+    feventbuffers: array of pfbeventbufferty;
+    feventcount: integer;
+    fmutex: mutexty;
     procedure SetDBDialect;
     procedure AllocSQLDA(var aSQLDA : PXSQLDA;Count : integer);
     procedure TranslateFldType(SQLType,sqlsubtype,SQLLen,SQLScale: integer;
@@ -53,7 +82,10 @@ type
     procedure GetFloat(const CurrBuff,Buffer: pointer; 
                                      const datalength: integer);
     procedure SetFloat(CurrBuff: pointer; Dbl: Double; Size: integer);
-    procedure CheckError(ProcName : string; Status : array of ISC_STATUS);
+    procedure CheckError(const ProcName : string; 
+                             const Status : statusvectorty); overload;
+    procedure CheckError(const ProcName : string;
+                             const Status: integer); overload;
     function getMaxBlobSize(blobHandle : TIsc_Blob_Handle) : longInt;
     procedure SetParameters(cursor : TSQLCursor;AParams : TParams);
     procedure FreeSQLDABuffer(var aSQLDA : PXSQLDA);
@@ -61,7 +93,10 @@ type
                        const forstring: boolean = false): tmemorystream;
     function getblobstring(const acursor: tsqlcursor;
                                        const blobid: isc_quad): string;
+   procedure eventfired(aevent: pfbeventbufferty);
   protected
+   procedure freeeventbuffer(var abuffer: pfbeventbufferty);
+   
     procedure DoInternalConnect; override;
     procedure DoInternalDisconnect; override;
     function GetHandle : pointer; override;
@@ -93,7 +128,7 @@ type
                            const acursor: tsqlcursor): TStream; override;
     function getblobdatasize: integer; override;
                            
-                    //iblobconnection                           
+           //iblobconnection                           
    procedure writeblobdata(const atransaction: tsqltransaction;
               const tablename: string; const acursor: tsqlcursor;
               const adata: pointer; const alength: integer;
@@ -101,8 +136,18 @@ type
    procedure setupblobdata(const afield: tfield; const acursor: tsqlcursor;
                               const aparam: tparam);
    function blobscached: boolean;
+          //idbevent
+   procedure listen(const sender: tdbevent);
+   procedure unlisten(const sender: tdbevent);
+   procedure fire(const sender: tdbevent);
+          //idbeventcontroller
+   function getdbevent(var aname: string; var aid: int64): boolean;
+          //false if none
+   procedure dolisten(const sender: tdbevent);
+   procedure dounlisten(const sender: tdbevent);
   public
     constructor Create(AOwner : TComponent); override;
+    destructor destroy; override;
     procedure createdatabase(const asql: string);
   published
     property Dialect  : integer read FDialect write FDialect;
@@ -116,7 +161,7 @@ type
 implementation
 
 uses 
- strutils,msestrings;
+ strutils,msestrings,msesysintf;
 
 type
   TTm = packed record
@@ -133,7 +178,8 @@ type
     __tm_zone : Pchar;
   end;
 
-procedure TIBConnection.CheckError(ProcName : string; Status : array of ISC_STATUS);
+procedure TIBConnection.CheckError(const ProcName : string; 
+                         const Status: statusvectorty);
 var
   buf : array [0..1024] of char;
   p   : pointer;
@@ -153,14 +199,28 @@ begin
   end;
 end;
 
+procedure tibconnection.CheckError(const ProcName : string; const Status: integer);
+begin
+ if status <> 0 then begin
+  checkerror(procname,fstatus);
+ end;
+end;
 
 constructor TIBConnection.Create(AOwner : TComponent);
 
 begin
-  inherited;
-  FConnOptions := FConnOptions + [sqSupportParams];
+ sys_mutexcreate(fmutex);
+ feventcontroller:= tdbeventcontroller.create(idbeventcontroller(self));
+ inherited;
+ FConnOptions := FConnOptions + [sqSupportParams];
 end;
 
+destructor TIBConnection.destroy;
+begin
+ inherited;
+ feventcontroller.free;
+ sys_mutexdestroy(fmutex);
+end;
 
 function TIBConnection.GetTransactionHandle(trans : TSQLHandle): pointer;
 begin
@@ -288,22 +348,21 @@ begin
   raise;
  end;
 {$EndIf}
+ feventcontroller.connect;
 end;
 
 procedure TIBConnection.DoInternalDisconnect;
 begin
-  if not Connected then
-  begin
-    FSQLDatabaseHandle := nil;
-    Exit;
-  end;
-
-  isc_detach_database(@FStatus[0], @FSQLDatabaseHandle);
-  CheckError('Close', FStatus);
+ feventcontroller.disconnect;
+ if not Connected then begin
+  FSQLDatabaseHandle:= nil;
+  Exit;
+ end;
+ isc_detach_database(@FStatus[0], @FSQLDatabaseHandle);
+ CheckError('Close', FStatus);
 {$IfDef LinkDynamically}
-  ReleaseIBase60;
+ ReleaseIBase60;
 {$EndIf}
-
 end;
 
 
@@ -1327,6 +1386,148 @@ end;
 function TIBConnection.blobscached: boolean;
 begin
  result:= false;
+end;
+
+procedure TIBConnection.listen(const sender: tdbevent);
+begin
+ feventcontroller.register(sender);
+ if connected then begin
+  dolisten(sender);
+ end;
+end;
+
+procedure TIBConnection.unlisten(const sender: tdbevent);
+begin
+ if connected then begin
+  dounlisten(sender);
+ end;
+ feventcontroller.unregister(sender);
+end;
+
+procedure TIBConnection.fire(const sender: tdbevent);
+begin
+ databaseerror('Event fire not implemented.',self);
+end;
+
+function TIBConnection.getdbevent(var aname: string; var aid: int64): boolean;
+var
+ int1: integer;
+ status: statusvectorty; 
+begin
+ result:= false;
+ if feventcount > 0 then begin
+  sys_mutexlock(fmutex);
+  dec(feventcount);
+  for int1:= 0 to high(feventbuffers) do begin
+   if feventbuffers[int1] <> nil then begin
+    with feventbuffers[int1]^ do begin
+     if count > 0 then begin
+//      isc_event_counts(status,length,eventbuffer,resultbuffer);
+//      if status[0] > 0 then begin
+//      end;
+      dec(count);
+      aname:= event.eventname;
+      aid:= id;
+      result:= true;
+      break;
+     end;
+    end;
+   end;
+  end;
+  sys_mutexunlock(fmutex);
+ end;
+end;
+
+procedure eventcallback(adata: pointer; alength: smallint; aupdated: pchar); cdecl;
+//                      {$ifdef unix}cdecl{$else}stdcall{$endif};
+//var
+// status: statusvectorty; 
+begin
+ tibconnection(pfbeventbufferty(adata)^.event.database).eventfired(adata);
+ {
+ with pfbeventbufferty(adata)^,tibconnection(event.database) do begin
+//  isc_event_counts(status,length,eventbuffer,updated);
+//  if status[0] > 0 then begin
+   sys_mutexlock(fmutex);
+   inc(count);
+   inc(feventcount);
+   move(aupdated^,resultbuffer^,alength);
+   sys_mutexunlock(fmutex);
+//   interlockedincrement(count);
+//   interlockedincrement(feventcount);
+//  end;
+ end;
+ }
+end;
+
+procedure TIBConnection.eventfired(aevent: pfbeventbufferty);
+begin
+ sys_mutexlock(fmutex);
+ with aevent^ do begin
+  inc(count);
+//  interlockedincrement(count);
+ end;
+ inc(feventcount);
+// interlockedincrement(feventcount);
+ 
+ sys_mutexunlock(fmutex);
+end;
+
+var testvar: pfbeventbufferty;
+procedure TIBConnection.dolisten(const sender: tdbevent);
+var
+ int1,int2: integer;
+begin
+ int2:= -1;
+ for int1:= 0 to high(feventbuffers) do begin
+  if feventbuffers[int1] = nil then begin
+   int2:= int1;
+   break;
+  end;
+ end;
+ if int2 < 0 then begin
+  int2:= length(feventbuffers);
+  setlength(feventbuffers,high(feventbuffers)+17);
+ end;
+ getmem(feventbuffers[int2],sizeof(fbeventbufferty));
+ fillchar(feventbuffers[int2]^,sizeof(fbeventbufferty),0);
+ testvar:= feventbuffers[int2];
+ with feventbuffers[int2]^ do begin
+//  count:= -1; //remove dummy call
+//  interlockeddecrement(feventcount);
+  event:= sender;
+  name:= sender.eventname;
+  length:= isc_event_block(@eventbuffer,@resultbuffer,1,[pchar(name)]);
+  checkerror('dolisten',isc_que_events(@fstatus,@fsqldatabasehandle,@id,length,
+         eventbuffer,isc_callback(@eventcallback),feventbuffers[int2]));
+ end;
+end;
+
+procedure TIBConnection.dounlisten(const sender: tdbevent);
+var
+ int1: integer;
+begin
+ for int1:= 0 to high(feventbuffers) do begin
+  if (feventbuffers[int1] <> nil) and 
+                 (feventbuffers[int1]^.event = sender) then begin
+   sys_mutexlock(fmutex); //not save! there can be an event in queue
+   isc_cancel_events(@fstatus,@fsqldatabasehandle,@feventbuffers[int1]^.id);
+   freeeventbuffer(feventbuffers[int1]);
+   sys_mutexunlock(fmutex);
+   break;
+  end;
+ end;
+end;
+
+procedure TIBConnection.freeeventbuffer(var abuffer: pfbeventbufferty);
+begin
+ with abuffer^ do begin
+  isc_free(eventbuffer);
+  isc_free(resultbuffer);
+ end;
+ finalize(abuffer^);
+ freemem(abuffer);
+ abuffer:= nil;
 end;
 
 end.

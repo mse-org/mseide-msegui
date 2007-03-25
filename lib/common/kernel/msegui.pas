@@ -10721,6 +10721,7 @@ begin
    break;
   end;
  end;
+ checksynchronize;
 end;
 
 procedure tinternalapplication.checkshortcut(const sender: twindow;

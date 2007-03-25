@@ -82,9 +82,12 @@ type
    procedure RollBackRetaining(trans : TSQLHandle); override;
    procedure UpdateIndexDefs(var IndexDefs : TIndexDefs;TableName : string); override;
    function GetSchemaInfoSQL(SchemaType : TSchemaType; SchemaObjectName, SchemaPattern : string) : string; override;
+   procedure dopqexec(const asql: string);
+
    function CreateBlobStream(const Field: TField; const Mode: TBlobStreamMode;
                       const acursor: tsqlcursor): TStream; override;
    function getblobdatasize: integer; override;
+
           //iblobconnection
    procedure writeblobdata(const atransaction: tsqltransaction;
              const tablename: string; const acursor: tsqlcursor;
@@ -94,16 +97,16 @@ type
    procedure setupblobdata(const afield: tfield; const acursor: tsqlcursor;
                                    const aparam: tparam);
    function blobscached: boolean;
+
           //idbevent
    procedure listen(const sender: tdbevent);
    procedure unlisten(const sender: tdbevent);
    procedure fire(const sender: tdbevent);
           //idbeventcontroller
-   function getdbevent(var aname: string; var id: int64): boolean;
+   function getdbevent(var aname: string; var aid: int64): boolean;
                //false if none
    procedure dolisten(const sender: tdbevent);
    procedure dounlisten(const sender: tdbevent);
-   procedure dopqexec(const asql: string);
   public
    constructor Create(AOwner : TComponent); override;
    destructor destroy; override;
@@ -985,7 +988,7 @@ begin
  dopqexec('NOTIFY '+sender.eventname+';');
 end;
 
-function TPQConnection.getdbevent(var aname: string; var id: int64): boolean;
+function TPQConnection.getdbevent(var aname: string; var aid: int64): boolean;
 var
  info: ppgnotify;
 begin
@@ -994,7 +997,7 @@ begin
  result:= info <> nil;
  if result then begin
   aname:= info^.relname;
-  id:= info^.be_pid;
+  aid:= info^.be_pid;
   pqfreemem(info);
  end;
 end;
