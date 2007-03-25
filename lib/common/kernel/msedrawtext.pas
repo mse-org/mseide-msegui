@@ -333,7 +333,7 @@ var
      exit;
     end;
    end;
-   additem(tabchars,int1);
+   additem(tabchars,aindex);
   end;
  end;
   

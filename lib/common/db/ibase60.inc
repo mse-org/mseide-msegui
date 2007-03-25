@@ -1748,7 +1748,7 @@ type
 
   function isc_event_block(_para1:PPchar; _para2:PPchar; _para3:word;
                       args: array of const):ISC_LONG; cdecl; external gdslib;
-  procedure isc_event_count(_para1: PISC_STATUS; _para2: word;
+  procedure isc_event_count(_para1: PISC_STATUS; _para2: short;
                      _para3: pchar; _para4: pchar); extdecl;  external gdslib;
   {!!MVC
   void         isc_event_counts (unsigned ISC_LONG   ,
@@ -2288,7 +2288,7 @@ var
   isc_encode_timestamp : procedure (_para1:pointer; _para2:PISC_TIMESTAMP); extdecl;
   isc_event_block : function (_para1:PPchar; _para2:PPchar; _para3:word;
                             args: array of const):ISC_LONG; cdecl; {varargs;}
-  isc_event_counts: procedure (_para1: PISC_STATUS; _para2: word;
+  isc_event_counts: procedure (_para1: PISC_STATUS; _para2: short;
                      _para3: pchar; _para4: pchar); extdecl;
 {!!MVC
   void         isc_event_counts (unsigned ISC_LONG   ,
