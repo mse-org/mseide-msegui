@@ -766,6 +766,10 @@ begin
     projectfo.datafilename.value:= replacefileext(filename,'trd');
     projectfo.impexpfiledialog.controller.clear;
     projectfo.impexpfiledialog.controller.filename:= replacefileext(filename,'csv');
+    writeprojectdata;
+   end
+   else begin
+    writestat;
    end;
   end;
   updatecaption;
