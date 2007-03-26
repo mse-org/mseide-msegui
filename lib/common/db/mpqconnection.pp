@@ -110,6 +110,7 @@ type
   public
    constructor Create(AOwner : TComponent); override;
    destructor destroy; override;
+   function backendpid: int64; //0 if not connected
    property eventcontroller: tdbeventcontroller read feventcontroller;
   published
     property DatabaseName;
@@ -1025,6 +1026,16 @@ begin
  end
  else begin
   pqclear(res);
+ end;
+end;
+
+function TPQConnection.backendpid: int64;
+begin
+ if not connected then begin
+  result:= 0;
+ end
+ else begin
+  result:= cardinal(pqbackendpid(fsqldatabasehandle));
  end;
 end;
 
