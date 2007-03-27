@@ -6228,18 +6228,24 @@ end;
 procedure tcustomgrid.dopopup(var amenu: tpopupmenu; var mouseinfo: mouseeventinfoty);
 var
  bo1: boolean;
+ state1: actionstatesty;
 begin
- if (og_autopopup in foptionsgrid) and (ffocusedcell.row >= 0) and
-  (foptionsgrid * [og_rowdeleting,og_rowinserting] <> []) then begin
+ if (og_autopopup in foptionsgrid) then begin
   bo1:= og_rowinserting in foptionsgrid;
   if bo1 then begin
    tpopupmenu.additems(amenu,self,mouseinfo,['&Insert Row (Shift+Ctrl+Insert)',
-                 '&Append Row (Ctrl+Insert)'],[],[],
-                  [{$ifdef FPC}@{$endif}doinsertrow,{$ifdef FPC}@{$endif}doappendrow]);
+       '&Append Row (Ctrl+Insert)'],[],[],
+        [{$ifdef FPC}@{$endif}doinsertrow,{$ifdef FPC}@{$endif}doappendrow]);
   end;
   if og_rowdeleting in foptionsgrid then begin
-   tpopupmenu.additems(amenu,self,mouseinfo,['&Delete Row (Ctrl+Delete)'],[],[],
-                  [{$ifdef FPC}@{$endif}dodeleterows],not bo1);
+   if ffocusedcell.row >= 0 then begin
+    state1:= [];
+   end
+   else begin
+    state1:= [as_disabled];
+   end;
+   tpopupmenu.additems(amenu,self,mouseinfo,['&Delete Row (Ctrl+Delete)'],
+                  [],[state1],[{$ifdef FPC}@{$endif}dodeleterows],not bo1);
   end;
  end;
  inherited;
