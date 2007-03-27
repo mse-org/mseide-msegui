@@ -147,7 +147,7 @@ type
 
  tmsebufdataset = class;
  
- logflagty = (lf_end,lf_rec,lf_update,lf_cancel);
+ logflagty = (lf_end,lf_rec,lf_update,lf_cancel,lf_apply);
  reclogheaderty = record
   kind: tupdatekind;
   po: pointer;
@@ -163,7 +163,7 @@ type
    lf_rec: (
     rec: reclogheaderty;
    );
-   lf_update,lf_cancel: (
+   lf_update,lf_cancel,lf_apply: (
     update: updatelogheaderty;
    );
  end;
@@ -353,7 +353,7 @@ type
                       bs_editing,bs_append,bs_internalcalc,bs_utf8,
                       bs_hasfilter,bs_visiblerecordcountvalid);
  bufdatasetstatesty = set of bufdatasetstatety;
-   
+
  internalcalcfieldseventty = procedure(const sender: tmsebufdataset;
                                               const fetching: boolean) of object;
  tmsebufdataset = class(tdbdataset)
@@ -446,7 +446,7 @@ type
    procedure dointernalclose;
    procedure logupdatebuffer(const awriter: tbufstreamwriter; 
             const abuffer: recupdatebufferty; const adeletedrecord: pintrecordty;
-            const alogging: boolean; const acancel: boolean);
+            const alogging: boolean; const alogmode: logflagty);
    procedure logrecbuffer(const awriter: tbufstreamwriter; 
                          const akind: tupdatekind; const abuffer: pintrecordty);
   protected
@@ -2008,7 +2008,7 @@ begin
  deleterecord(frecno);
  fupdatebuffer[fcurrentupdatebuffer].updatekind := ukdelete;
  if flogger <> nil then begin
-  logupdatebuffer(flogger,fupdatebuffer[fcurrentupdatebuffer],po1,true,false);
+  logupdatebuffer(flogger,fupdatebuffer[fcurrentupdatebuffer],po1,true,lf_update);
   flogger.flushbuffer;
  end;
 end;
@@ -2021,7 +2021,7 @@ end;
 procedure tmsebufdataset.cancelrecupdate(var arec: recupdatebufferty);
 begin
  if (flogger <> nil) and not (bs_loading in fbstate) then begin
-  logupdatebuffer(flogger,arec,nil,true,true);
+  logupdatebuffer(flogger,arec,nil,true,lf_cancel);
   flogger.flushbuffer;
  end;
  with arec do begin
@@ -2158,6 +2158,10 @@ begin
     end;
    end;
    if response = rrApply then begin
+    if flogger <> nil then begin
+     logupdatebuffer(flogger,fupdatebuffer[fcurrentupdatebuffer],nil,true,lf_apply);
+     flogger.flushbuffer;
+    end;
     intFreeRecord(OldValues);
     Bookmark.recordpo:= nil;
    end
@@ -2331,7 +2335,8 @@ begin
    logrecbuffer(flogger,fupdatebuffer[fcurrentupdatebuffer].updatekind,
                      fcurrentbuf);
    if newupdatebuffer then begin
-    logupdatebuffer(flogger,fupdatebuffer[fcurrentupdatebuffer],nil,true,false);
+    logupdatebuffer(flogger,fupdatebuffer[fcurrentupdatebuffer],nil,true,
+                           lf_update);
    end;
    flogger.flushbuffer;
   end;
@@ -3503,18 +3508,13 @@ const
  
 procedure tmsebufdataset.logupdatebuffer(const awriter: tbufstreamwriter; 
                 const abuffer: recupdatebufferty; const adeletedrecord: pintrecordty;
-                const alogging: boolean; const acancel: boolean);
+                const alogging: boolean; const alogmode: logflagty);
 var
  header1: logbufferheaderty;
  datapo: precheaderty;
  int2: integer;
 begin
- if acancel then begin
-  header1.flag:= lf_cancel;
- end
- else begin
-  header1.flag:= lf_update;
- end;
+ header1.flag:= alogmode;
  with abuffer,header1.update do begin
   if (bookmark.recordpo <> nil) or (deletedrecord <> nil) then begin
    deletedrecord:= adeletedrecord;
@@ -3522,7 +3522,7 @@ begin
    kind:= updatekind;
    po:= bookmark.recordpo;
    awriter.writelogbufferheader(header1);
-   if not acancel and 
+   if (alogmode = lf_update) and 
        ((kind = ukmodify) or 
               not logging and (kind = ukdelete) and (po <> nil)) then begin
     datapo:= @(oldvalues^.header);
@@ -3585,7 +3585,17 @@ begin
    end;
   end;
   for int1:= 0 to high(fupdatebuffer) do begin
-   logupdatebuffer(awriter,fupdatebuffer[int1],nil,false,false);
+   with fupdatebuffer[int1] do begin
+    if bookmark.recordpo <> nil then begin
+    {
+     if updatekind = ukinsert then begin
+      logrecbuffer(awriter,updatekind,
+                      bookmark.recordpo);
+     end;    
+    }
+     logupdatebuffer(awriter,fupdatebuffer[int1],nil,false,lf_update);
+    end;
+   end;
   end;
  end;
 end;
@@ -3838,6 +3848,29 @@ begin
         oldupdatepointers[int3]:= nil;
                     //inactive
        end;
+      end;
+      lf_apply: begin
+       with header1.update do begin
+        int3:= -1;
+        for int1:= 0 to int2-1 do begin
+         if oldupdatepointers[int1] = po then begin
+          int3:= int1;
+          break;
+         end;
+        end;
+        if int3 < 0 then begin
+         formaterror;
+        end;
+        with updabuf[int3] do begin
+         intfreerecord(oldvalues);
+         bookmark.recordpo:= nil;
+         oldupdatepointers[int3]:= nil;
+                    //inactive
+        end;
+       end;
+      end;
+      else begin
+       formaterror;
       end;
      end;
     end; 
