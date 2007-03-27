@@ -1533,7 +1533,7 @@ begin
   databaseerror('No record');
  end;
 end;
-
+var testvar: pointer;
 function tmsebufdataset.getrecordupdatebuffer : boolean;
 var 
  int1: integer;
@@ -1553,8 +1553,10 @@ begin
      end;
     end;
    end;
+testvar:= recordpo;
    result:= (fcurrentupdatebuffer <= high(fupdatebuffer))  and 
-          (fupdatebuffer[fcurrentupdatebuffer].bookmark.recordpo = recordpo);
+          (fupdatebuffer[fcurrentupdatebuffer].bookmark.recordpo = recordpo) and 
+          (recordpo <> nil);
   end;
  end;
 end;
@@ -3712,10 +3714,15 @@ begin
      femptybuffer:= intallocrecord;
     end;
     ar1:= nil;
-    allocuninitedarray(fbrecordcount,sizeof(pointer),ar1);
-    move(pointer(findexes[0])^,pointer(ar1)^,fbrecordcount*sizeof(pointer));
-    sortarray(ar2,@comparepointer,sizeof(pointer),ar3);
-        //index of old pointers
+    if header.recordcount > 0 then begin
+     allocuninitedarray(fbrecordcount,sizeof(pointer),ar1);
+     move(pointer(findexes[0])^,pointer(ar1)^,fbrecordcount*sizeof(pointer));
+     sortarray(ar2,@comparepointer,sizeof(pointer),ar3);
+         //index of old pointers
+    end
+    else begin
+     ar3:= nil;
+    end;
     int2:= 0;
     while reader.readlogbufferheader(header1) do begin
      case header1.flag of
