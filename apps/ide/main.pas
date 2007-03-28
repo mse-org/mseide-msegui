@@ -31,11 +31,12 @@ const
  versiontext = '1.1 unstable';
  idecaption = 'MSEide';
 type
- envvarty = (env_vargroup,env_np);
+ envvarty = (env_vargroup,env_np,env_filename);
 const
  sysenvvalues: array[envvarty] of argumentdefty =
   ((kind: ak_pararg; name: '-macrogroup'; anames: nil; flags: [arf_integer]),
-   (kind: ak_par; name: 'np'; anames: nil; flags: []));
+   (kind: ak_par; name: 'np'; anames: nil; flags: []),
+   (kind: ak_arg; name: ''; anames: nil; flags: []));
 
 type
  filekindty = (fk_none,fk_source,fk_unit);
@@ -1955,15 +1956,33 @@ end;
 procedure tmainfo.mainstatfileonupdatestat(const sender: tobject;
                    const filer: tstatfiler);
 var
- str1: filenamety;
+ mstr1,mstr2: filenamety;
+ ar1: msestringarty;
+ int1: integer;
 begin
  updatesettings(filer);
 
- str1:= projectoptions.projectfilename;
- filer.updatevalue('projectname',str1);
+ mstr1:= projectoptions.projectfilename;
+ filer.updatevalue('projectname',mstr1);
  filer.updatevalue('projecthistory',projecthistory);
- if not filer.iswriter and (str1 <> '') and not sysenv.defined[ord(env_np)] then begin
-  openproject(str1);
+ if not filer.iswriter then begin
+  if sysenv.defined[ord(env_filename)] then begin
+   ar1:= sysenv.values[ord(env_filename)];
+   if (high(ar1) = 0) and (fileext(ar1[0]) = 'prj') then begin
+    mstr1:= filepath(ar1[0]);
+   end
+   else begin
+    if high(ar1) >= 0 then begin
+     for int1:= 0 to high(ar1) do begin
+      sourcefo.openfile(ar1[int1],int1 = 0);
+     end;
+    end;
+    exit;
+   end;
+  end;
+ end;
+ if not filer.iswriter and (mstr1 <> '') and not sysenv.defined[ord(env_np)] then begin
+  openproject(mstr1);
  end;
 end;
 {
