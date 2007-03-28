@@ -105,6 +105,7 @@ object actionsmo: tactionsmo
   end
   object undo: taction
     caption = '&Undo'
+    shortcut = 16474
     onexecute = undoactonexecute
     left = 280
     top = 4
@@ -225,10 +226,10 @@ object actionsmo: tactionsmo
     top = 212
   end
   object buttonicons: timagelist
-    count = 15
     width = 24
     height = 24
     transparentcolor = -2147483648
+    count = 15
     left = 160
     top = 136
     image = {
