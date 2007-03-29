@@ -178,8 +178,7 @@ begin
       tmsebcdfield,tmseblobfield,tmsememofield,tmsegraphicfield,
       tdblabel,tdbstringdisp,tdbintegerdisp,tdbbooleandisp,
       tdbrealdisp,tdbdatetimedisp,
-      tdbstringdisplb,tdbintegerdisplb,tdbrealdisplb,tdbdatetimedisplb,
-      tdbimage
+      tdbstringdisplb,tdbintegerdisplb,tdbrealdisplb,tdbdatetimedisplb
       ]);
  registercomponents('Db',[
       tenumeditdb,tkeystringeditdb,tenumeditlb,tkeystringeditlb,
@@ -187,7 +186,7 @@ begin
       tdbbooleantextedit,
       tdbkeystringedit,tdbkeystringeditdb,tdbkeystringeditlb,
       tdbintegeredit,tdbenumedit,tdbenumeditdb,tdbenumeditlb,
-      tdbdataicon,tdbdatabutton,tdbrealedit,tdbdatetimeedit,
+      tdbdataicon,tdbdataimage,tdbdatabutton,tdbrealedit,tdbdatetimeedit,
       tdbcalendardatetimeedit,tdbfilenameedit,
       tdbbooleanedit,tdbbooleaneditradio,
       tdbwidgetgrid,tdbstringgrid,

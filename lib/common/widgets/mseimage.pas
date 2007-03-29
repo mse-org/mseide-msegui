@@ -13,7 +13,8 @@ unit mseimage;
 
 interface
 uses
- Classes,msegraphics,msegraphutils,msewidgets,msebitmap,msegui;
+ {$ifdef FPC}classes{$else}Classes{$endif},msegraphics,msegraphutils,msewidgets,
+  msebitmap,msegui;
 
 type
  timage = class(tscrollingwidget)
@@ -26,12 +27,14 @@ type
    procedure setcolorbackground(const Value: colorty);
    procedure setcolorforeground(const Value: colorty);
   protected
+   procedure paintbmp(const acanvas: tcanvas; const abmp: tmaskedbitmap;
+                          const dest: rectty);
    procedure dopaint(const canvas: tcanvas); override;
    function calcminscrollsize: sizety; override;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
-   procedure changed;
+   procedure changed; virtual;
   published
    property bitmap: tmaskedbitmap read fbitmap write setbitmap;
    property colorforeground: colorty read fcolorforeground //for monochrome bitmaps
@@ -69,18 +72,24 @@ begin
  minscrollsizechanged;
 end;
 
-procedure timage.dopaint(const canvas: tcanvas);
+procedure timage.paintbmp(const acanvas: tcanvas; const abmp: tmaskedbitmap;
+                          const dest: rectty);
 var
  col1,col2: colorty;
 begin
+ col1:= acanvas.color;
+ col2:= acanvas.colorbackground;
+ acanvas.color:= fcolorforeground;
+ acanvas.colorbackground:= fcolorbackground;
+ abmp.paint(acanvas,makerect(nullpoint,clientsize));
+ acanvas.color:= col1;
+ acanvas.colorbackground:= col2;
+end;
+
+procedure timage.dopaint(const canvas: tcanvas);
+begin
  inherited;
- col1:= canvas.color;
- col2:= canvas.colorbackground;
- canvas.color:= fcolorforeground;
- canvas.colorbackground:= fcolorbackground;
- fbitmap.paint(canvas,makerect(nullpoint,clientsize));
- canvas.color:= col1;
- canvas.colorbackground:= col2;
+ paintbmp(canvas,fbitmap,makerect(nullpoint,clientsize));
 end;
 
 procedure timage.setbitmap(const Value: tmaskedbitmap);

@@ -13,7 +13,8 @@ unit msedbgraphics;
 
 interface
 uses
- classes,db,mseimage,msedbdispwidgets,msedb,msetypes;
+ classes,db,mseimage,msedataimage,msedbdispwidgets,msedb,msetypes,msedbedit,
+ msegrids,msewidgetgrid,msedatalist;
 
 { add the needed graphic format units to your project:
  mseformatbmpico,mseformatjpg,mseformatpng,
@@ -21,35 +22,43 @@ uses
 }
 
 type
- idbgraphicfieldlink = interface(idbdispfieldlink)
+ idbgraphicfieldlink = interface(idbeditfieldlink)
   procedure setformat(const avalue: string);
  end;
  
- tgraphicdatalink = class(tdispfielddatalink)
+ tgraphicdatalink = class(teditwidgetdatalink)
   protected
    procedure setfield(const value: tfield); override;
   public
    constructor create(const intf: idbgraphicfieldlink);
  end;
 
- tdbimage = class(timage,idbeditinfo,idbgraphicfieldlink,ireccontrol)
+ tdbdataimage = class(tcustomdataimage,idbeditinfo,idbgraphicfieldlink,ireccontrol)
   private
-   fformat: string;
    fdatalink: tgraphicdatalink;
    function getdatafield: string; overload;
    procedure setdatafield(const avalue: string);
    function getdatasource: tdatasource;
    procedure setdatasource(const avalue: tdatasource);
+   procedure griddatasourcechanged; override;
+   function getrowdatapo(const info: cellinfoty): pointer; override;
+   function createdatalist(const sender: twidgetcol): tdatalist; override;
      //idbeditinfo
    function getdatasource(const aindex: integer): tdatasource; overload;
    procedure getfieldtypes(out propertynames: stringarty;
                           out fieldtypes: fieldtypesarty); virtual;
+     //idbeditfieldlink
+   function getgriddatasource: tdatasource;
+   function edited: boolean;
+   procedure initfocus;
+   function checkvalue(const quiet: boolean = false): boolean;
+   procedure valuetofield;
+   procedure updatereadonlystate;
      //idbgraphicfieldlink
    procedure fieldtovalue; virtual;
    procedure setnullvalue;
    //ireccontrol
    procedure recchanged;
-   procedure setformat(const avalue: string);
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -57,6 +66,7 @@ type
   published
    property datafield: string read getdatafield write setdatafield;
    property datasource: tdatasource read getdatasource write setdatasource;
+   property format;
  end;
  
 implementation
@@ -66,42 +76,42 @@ uses
 type
  tsimplebitmap1 = class(tsimplebitmap);
  
- { tdbimage }
+ { tdbdataimage }
 
-constructor tdbimage.create(aowner: tcomponent);
+constructor tdbdataimage.create(aowner: tcomponent);
 begin
  fdatalink:= tgraphicdatalink.create(idbgraphicfieldlink(self));
  inherited;
  include(tsimplebitmap1(bitmap).fstate,pms_nosave);
 end;
 
-destructor tdbimage.destroy;
+destructor tdbdataimage.destroy;
 begin
  inherited;
  fdatalink.free;
 end;
 
-function tdbimage.getdatafield: string;
+function tdbdataimage.getdatafield: string;
 begin
  result:= fdatalink.fieldname;
 end;
 
-procedure tdbimage.setdatafield(const avalue: string);
+procedure tdbdataimage.setdatafield(const avalue: string);
 begin
  fdatalink.fieldname:= avalue;
 end;
 
-function tdbimage.getdatasource: tdatasource;
+function tdbdataimage.getdatasource: tdatasource;
 begin
  result:= fdatalink.datasource;
 end;
 
-procedure tdbimage.setdatasource(const avalue: tdatasource);
+procedure tdbdataimage.setdatasource(const avalue: tdatasource);
 begin
  fdatalink.datasource:= avalue;
 end;
 
-procedure tdbimage.getfieldtypes(out propertynames: stringarty; 
+procedure tdbdataimage.getfieldtypes(out propertynames: stringarty; 
                     out fieldtypes: fieldtypesarty);
 begin
  propertynames:= nil;
@@ -109,7 +119,7 @@ begin
  fieldtypes[0]:= blobfields;
 end;
 
-procedure tdbimage.fieldtovalue;
+procedure tdbdataimage.fieldtovalue;
 var
  stream1: tstringcopystream;
  str1: string;
@@ -121,7 +131,7 @@ begin
  else begin
   stream1:= tstringcopystream.create(str1);
   try
-   bitmap.loadfromstream(stream1,fformat);
+   bitmap.loadfromstream(stream1,format);
   except
    bitmap.clear;
   end;
@@ -129,24 +139,72 @@ begin
  end;
 end;
 
-procedure tdbimage.setnullvalue;
+procedure tdbdataimage.setnullvalue;
 begin
  bitmap.clear;
 end;
 
-function tdbimage.getdatasource(const aindex: integer): tdatasource;
+function tdbdataimage.getdatasource(const aindex: integer): tdatasource;
 begin
  result:= datasource;
 end;
 
-procedure tdbimage.setformat(const avalue: string);
-begin
- fformat:= avalue;
-end;
-
-procedure tdbimage.recchanged;
+procedure tdbdataimage.recchanged;
 begin
  fdatalink.recordchanged(nil);
+end;
+
+procedure tdbdataimage.griddatasourcechanged;
+begin
+ fdatalink.griddatasourcechanged;
+end;
+
+function tdbdataimage.getgriddatasource: tdatasource;
+begin
+ result:= tcustomdbwidgetgrid(fgridintf.getcol.grid).datasource;
+end;
+
+function tdbdataimage.edited: boolean;
+begin
+ result:= false;
+end;
+
+procedure tdbdataimage.initfocus;
+begin
+ //dummy
+end;
+
+function tdbdataimage.checkvalue(const quiet: boolean = false): boolean;
+begin
+ //dummy
+end;
+
+procedure tdbdataimage.valuetofield;
+begin
+ //dumy
+end;
+
+procedure tdbdataimage.updatereadonlystate;
+begin
+ //dummy
+end;
+
+function tdbdataimage.getrowdatapo(const info: cellinfoty): pointer;
+begin
+ with info do begin
+  if griddatalink <> nil then begin
+   result:= tgriddatalink(griddatalink).getansistringbuffer(
+                                                 fdatalink.field,cell.row);
+  end
+  else begin
+   result:= nil;
+  end;
+ end;
+end;
+
+function tdbdataimage.createdatalist(const sender: twidgetcol): tdatalist;
+begin
+ result:= nil;
 end;
 
 { tgraphicdatalink }

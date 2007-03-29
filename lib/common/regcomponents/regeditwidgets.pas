@@ -15,7 +15,8 @@ interface
 
 implementation
 uses
- Classes,mseedit,msedataedits,msegraphedits,{msestringlistedit,}mselistbrowser,
+ {$ifdef FPC}classes{$else}Classes{$endif},mseedit,msedataedits,msegraphedits,
+ msedataimage,mselistbrowser,
  msewidgetgrid,msetextedit,msedesignintf,regeditwidgets_bmp,msepropertyeditors,
  msedropdownlist,mseterminal,msedrawtext,msedatanodes,msedialog,msestrings,
  regwidgets,msearrayprops,typinfo,msestockobjects;
@@ -56,7 +57,7 @@ procedure Register;
 begin
  registercomponents('Edit',[tedit,tslider,tprogressbar,
    tbooleanedit,tbooleaneditradio,
-   tdatabutton,tstockglyphdatabutton,tdataicon,tpointeredit,
+   tdatabutton,tstockglyphdatabutton,tdataicon,tdataimage,tpointeredit,
    tstringedit,tdropdownlistedit,thistoryedit,tdialogstringedit,
    thexstringedit,tmemoedit,
    tintegeredit,trealedit,tdatetimeedit,tcalendardatetimeedit,tkeystringedit,

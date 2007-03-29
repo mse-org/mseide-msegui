@@ -181,6 +181,8 @@ type
    procedure stretch(const dest: tmaskedbitmap);
    procedure remask; //recalc mask
    procedure automask; //transparentcolor is bottomright pixel
+   procedure loadfromstring(const avalue: string; const format: string = '';
+                               const index: integer = -1);
    procedure loadfromstream(const stream: tstream; const format: string = '';
                                const index: integer = -1); //index in ico
    procedure loadfromfile(const filename: filenamety; const format: string = '';
@@ -1584,6 +1586,24 @@ begin
   loadfromstream(stream,format,index);
  finally
   stream.free;
+ end;
+end;
+
+procedure tmaskedbitmap.loadfromstring(const avalue: string;
+               const format: string = ''; const index: integer = -1);
+var
+ stream1: tstringcopystream;
+begin
+ if avalue = '' then begin
+  clear;
+ end
+ else begin
+  stream1:= tstringcopystream.create(avalue);
+  try
+   loadfromstream(stream1,format);
+  finally
+   stream1.free;
+  end;
  end;
 end;
 

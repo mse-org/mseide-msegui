@@ -133,7 +133,6 @@ type
  
  teditwidgetdatalink = class(tfielddatalink)
   private
-   fintf: idbeditfieldlink;
    fediting: boolean;
    fmodified: boolean;
    ffilterediting: boolean;
@@ -144,6 +143,7 @@ type
    function canmodify: boolean;
    procedure setediting(avalue: boolean);
   protected
+   fintf: idbeditfieldlink;
    procedure dataevent(event: tdataevent; info: ptrint); override;
    procedure activechanged; override;
    procedure editingchanged; override;
@@ -874,6 +874,7 @@ type
    fzebraoffset: integer;
    ffirstrecordbefore: integer;
    fdatasetstatebefore: tdatasetstate;
+   fansistringbuffer: ansistring;
    fstringbuffer: msestring;
    fintegerbuffer: integer;
    frealtybuffer: realty;
@@ -935,6 +936,7 @@ type
    destructor destroy; override;
    property firstrecord: integer read getfirstrecord;
 //   function getdisplaytextbuffer(const afield: tfield; const row: integer): pointer;
+   function getansistringbuffer(const afield: tfield; const row: integer): pointer;
    function getstringbuffer(const afield: tfield; const row: integer): pointer;
    function getdisplaystringbuffer(const afield: tfield; const row: integer): pointer;
    function getbooleanbuffer(const afield: tfield; const row: integer): pointer;
@@ -4746,6 +4748,23 @@ end;
 function tgriddatalink.hasdata: boolean;
 begin
  result:= active and (recordcount > 0);
+end;
+
+function tgriddatalink.getansistringbuffer(const afield: tfield;
+                                                  const row: integer): pointer;
+var
+ int1: integer;
+begin
+ result:= nil;
+ if (afield <> nil) and hasdata then begin
+  int1:= activerecord;
+  activerecord:= row;
+  if not afield.isnull then begin
+   result:= @fansistringbuffer;
+   fansistringbuffer:= afield.asstring;
+  end;
+  activerecord:= int1;
+ end;
 end;
 
 function tgriddatalink.getstringbuffer(const afield: tfield;

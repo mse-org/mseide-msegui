@@ -1,5 +1,7 @@
 MSEide+MSEgui version history
 
+2007-03-29 tdbimage renamed to tdbdataimage.
+
 Version 1.2beta2
 2007-03-22 tcustommseform.onloaded renamed to oneventloopstart.
 2007-03-18 tgripframe.grip_colorbutton -> grip_colorglyph.
