@@ -61,6 +61,9 @@ type
   end;
   pfbeventbufferty = ^fbeventbufferty;
   statusvectorty = array[0..19] of ISC_STATUS;
+
+  ibconnectionoptionty = (ibo_embedded);
+  ibconnectionoptionsty = set of ibconnectionoptionty;
   
   TIBConnection = class (TSQLConnection,iblobconnection,
                                                idbevent,idbeventcontroller)
@@ -72,6 +75,7 @@ type
     feventbuffers: array of pfbeventbufferty;
     feventcount: integer;
     fmutex: mutexty;
+   foptions: ibconnectionoptionsty;
     procedure SetDBDialect;
     procedure AllocSQLDA(var aSQLDA : PXSQLDA;Count : integer);
     procedure TranslateFldType(SQLType,sqlsubtype,SQLLen,SQLScale: integer;
@@ -150,6 +154,7 @@ type
     procedure createdatabase(const asql: string);
   published
     property Dialect  : integer read FDialect write FDialect;
+    property options: ibconnectionoptionsty read foptions write foptions;
     property DatabaseName;
     property KeepConnection;
     property LoginPrompt;
@@ -318,6 +323,7 @@ var
   ADatabaseName : String;
 begin
 {$IfDef LinkDynamically}
+ useembeddedfirebird:= ibo_embedded in foptions;
  InitialiseIBase60;
  try 
 {$EndIf}
