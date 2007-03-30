@@ -174,7 +174,7 @@ procedure tsqlite3connection.PrepareStatement(cursor: TSQLCursor;
                ATransaction: TSQLTransaction; buf: string; AParams: TParams);
 begin
  with tsqlite3cursor(cursor) do begin
-  checkerror(sqlite3_prepare_v2(fhandle,pchar(buf),length(buf),@fstatement,
+  checkerror(sqlite3_prepare(fhandle,pchar(buf),length(buf),@fstatement,
                                                @ftail));
  end;
 end;
@@ -220,17 +220,20 @@ end;
 function tsqlite3connection.Commit(trans: TSQLHandle): boolean;
 begin
  execsql('COMMIT');
+ result:= true;
 end;
 
 function tsqlite3connection.RollBack(trans: TSQLHandle): boolean;
 begin
  execsql('ROLLBACK');
+ result:= true;
 end;
 
 function tsqlite3connection.StartdbTransaction(trans: TSQLHandle;
                aParams: string): boolean;
 begin
  execsql('BEGIN');
+ result:= true;
 end;
 
 procedure tsqlite3connection.CommitRetaining(trans: TSQLHandle);

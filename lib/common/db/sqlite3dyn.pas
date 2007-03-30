@@ -225,10 +225,14 @@ var
  sqlite3_errcode: function(db:Psqlite3):longint;cdecl;
  sqlite3_errmsg: function(_para1:Psqlite3):Pchar;cdecl;
  sqlite3_errmsg16: function(_para1:Psqlite3):pointer;cdecl;
- sqlite3_prepare_v2: function(db:Psqlite3; zSql:Pchar; nBytes:longint;
+ sqlite3_prepare: function(db:Psqlite3; zSql:Pchar; nBytes:longint;
                           ppStmt:PPsqlite3_stmt; pzTail:PPchar):longint;cdecl;
- sqlite3_prepare16_v2: function(db:Psqlite3; zSql:pointer; nBytes:longint;
+ sqlite3_prepare16: function(db:Psqlite3; zSql:pointer; nBytes:longint;
                         ppStmt:PPsqlite3_stmt; pzTail:Ppointer):longint;cdecl;
+// sqlite3_prepare_v2: function(db:Psqlite3; zSql:Pchar; nBytes:longint;
+//                          ppStmt:PPsqlite3_stmt; pzTail:PPchar):longint;cdecl;
+// sqlite3_prepare16_v2: function(db:Psqlite3; zSql:pointer; nBytes:longint;
+//                        ppStmt:PPsqlite3_stmt; pzTail:Ppointer):longint;cdecl;
  sqlite3_bind_blob: function(_para1:Psqlite3_stmt; _para2:longint;
           _para3:pointer; n:longint; _para5:bind_destructor_func):longint;cdecl;
  sqlite3_bind_double: function(_para1:Psqlite3_stmt; _para2:longint;
@@ -372,18 +376,19 @@ var
  sqlite3libraryhandle: tlibhandle;
  refcount: integer;
   
-function getprocaddress(const lib: tlibhandle; anames: array of string; 
-                             adest: array of ppointer): boolean;
+procedure getprocaddress(const lib: tlibhandle; anames: array of string; 
+                             adest: array of ppointer);
 var
  int1: integer;
 begin
  if high(anames) <> high(adest) then begin
   raise exception.create('Invalid parameter.');
  end;
- result:= true;
  for int1:= 0 to high(anames) do begin
   adest[int1]^:= getprocedureaddress(lib,anames[int1]);
-  result:= result and (adest[int1] <> nil);
+  if adest[int1]^ = nil then begin
+   raise exception.create('Function "'+anames[int1]+'" not found.');
+  end;
  end;
 end;
 
@@ -396,199 +401,210 @@ begin
    result:= false;
    exit;
   end;
-  getprocaddress(sqlite3libraryhandle,
-   [
-  'sqlite3_close',                //0
-  'sqlite3_exec',                 //1
-  'sqlite3_last_insert_rowid',    //2
-  'sqlite3_changes',              //3
-  'sqlite3_total_changes',        //4
-  'sqlite3_interrupt',            //5
-  'sqlite3_complete',             //6
-  'sqlite3_complete16',           //7
-  'sqlite3_busy_handler',         //8
-  'sqlite3_busy_timeout',         //9
-  'sqlite3_get_table',            //10
-  'sqlite3_free_table',           //11
-  'sqlite3_mprintf',              //12
-  'sqlite3_free',                 //13
-  'sqlite3_snprintf',             //14
-  'sqlite3_set_authorizer',       //15
-  'sqlite3_trace',                //16
-  'sqlite3_progress_handler',     //17
-  'sqlite3_commit_hook',          //18
-  'sqlite3_open',                 //19
-  'sqlite3_open16',               //20
-  'sqlite3_errcode',              //21
-  'sqlite3_errmsg',               //22
-  'sqlite3_errmsg16',             //23
-  'sqlite3_prepare_v2',           //24
-  'sqlite3_prepare16_v2',         //25
-  'sqlite3_bind_blob',            //26
-  'sqlite3_bind_double',          //27
-  'sqlite3_bind_int',             //28
-  'sqlite3_bind_int64',           //29
-  'sqlite3_bind_null',            //30
-  'sqlite3_bind_text',            //31
-  'sqlite3_bind_text16',          //32
-  'sqlite3_bind_blob',            //33
-  'sqlite3_bind_text',            //34
-  'sqlite3_bind_text16',          //35
-  'sqlite3_bind_parameter_count', //36
-  'sqlite3_bind_parameter_name',  //37
-  'sqlite3_bind_parameter_index', //38
-  'sqlite3_column_count',         //39
-  'sqlite3_column_name',          //40
-  'sqlite3_column_name16',        //41
-  'sqlite3_column_decltype',      //42
-  'sqlite3_column_decltype16',    //43
-  'sqlite3_step',                 //44
-  'sqlite3_data_count',           //45
-  'sqlite3_column_blob',          //46
-  'sqlite3_column_bytes',         //47
-  'sqlite3_column_bytes16',       //48
-  'sqlite3_column_double',        //49
-  'sqlite3_column_int',           //50
-  'sqlite3_column_int64',         //51
-  'sqlite3_column_text',          //52
-  'sqlite3_column_text16',        //53
-  'sqlite3_column_type',          //54
-  'sqlite3_finalize',             //55
-  'sqlite3_reset',                //56
-  'sqlite3_create_function',      //57
-  'sqlite3_create_function16',    //58
-  'sqlite3_aggregate_count',      //59
-  'sqlite3_value_blob',           //60
-  'sqlite3_value_bytes',          //61
-  'sqlite3_value_bytes16',        //62
-  'sqlite3_value_double',         //63
-  'sqlite3_value_int',            //64
-  'sqlite3_value_int64',          //65
-  'sqlite3_value_text',           //66
-  'sqlite3_value_text16',         //67
-  'sqlite3_value_text16le',       //68
-  'sqlite3_value_text16be',       //69
-  'sqlite3_value_type',           //70
-  'sqlite3_aggregate_context',    //71
-  'sqlite3_user_data',            //72
-  'sqlite3_get_auxdata',          //73
-  'sqlite3_set_auxdata',          //74
-  'sqlite3_result_blob',          //75
-  'sqlite3_result_double',        //76
-  'sqlite3_result_error',         //77
-  'sqlite3_result_error16',       //78
-  'sqlite3_result_int',           //79
-  'sqlite3_result_int64',         //80
-  'sqlite3_result_null',          //81
-  'sqlite3_result_text',          //82
-  'sqlite3_result_text16',        //83
-  'sqlite3_result_text16le',      //84
-  'sqlite3_result_text16be',      //85
-  'sqlite3_result_value',         //86
-  'sqlite3_create_collation',     //87
-  'sqlite3_create_collation16',   //88
-  'sqlite3_collation_needed',     //89
-  'sqlite3_collation_needed16',   //90
-  'sqlite3_libversion',           //91
-  'sqlite3_version',              //92
-  'sqlite3_libversion_number'     //93
-    ],
+  try
+   getprocaddress(sqlite3libraryhandle,
     [
-  @sqlite3_close,                 //0
-  @sqlite3_exec,                  //1
-  @sqlite3_last_insert_rowid,     //2
-  @sqlite3_changes,               //3
-  @sqlite3_total_changes,         //4
-  @sqlite3_interrupt,             //5
-  @sqlite3_complete,              //6
-  @sqlite3_complete16,            //7
-  @sqlite3_busy_handler,          //8
-  @sqlite3_busy_timeout,          //9
-  @sqlite3_get_table,             //10
-  @sqlite3_free_table,            //11
-  @sqlite3_mprintf,               //12
-  @sqlite3_free,                  //13
-  @sqlite3_snprintf,              //14
-  @sqlite3_set_authorizer,        //15
-  @sqlite3_trace,                 //16
-  @sqlite3_progress_handler,      //17
-  @sqlite3_commit_hook,           //18
-  @sqlite3_open,                  //19
-  @sqlite3_open16,                //20
-  @sqlite3_errcode,               //21
-  @sqlite3_errmsg,                //22
-  @sqlite3_errmsg16,              //23
-  @sqlite3_prepare_v2,               //24
-  @sqlite3_prepare16_v2,             //25
-  @sqlite3_bind_blob,             //26
-  @sqlite3_bind_double,           //27
-  @sqlite3_bind_int,              //28
-  @sqlite3_bind_int64,            //29
-  @sqlite3_bind_null,             //30
-  @sqlite3_bind_text,             //31
-  @sqlite3_bind_text16,           //32
-  @sqlite3_bind_blob1,            //33
-  @sqlite3_bind_text1,            //34
-  @sqlite3_bind_text161,          //35
-  @sqlite3_bind_parameter_count,  //36
-  @sqlite3_bind_parameter_name,   //37
-  @sqlite3_bind_parameter_index,  //38
-  @sqlite3_column_count,          //39
-  @sqlite3_column_name,           //40
-  @sqlite3_column_name16,         //41
-  @sqlite3_column_decltype,       //42
-  @sqlite3_column_decltype16,     //43
-  @sqlite3_step,                  //44
-  @sqlite3_data_count,            //45
-  @sqlite3_column_blob,           //46
-  @sqlite3_column_bytes,          //47
-  @sqlite3_column_bytes16,        //48
-  @sqlite3_column_double,         //49
-  @sqlite3_column_int,            //50
-  @sqlite3_column_int64,          //51
-  @sqlite3_column_text,           //52
-  @sqlite3_column_text16,         //53
-  @sqlite3_column_type,           //54
-  @sqlite3_finalize,              //55
-  @sqlite3_reset,                 //56
-  @sqlite3_create_function,       //57
-  @sqlite3_create_function16,     //58
-  @sqlite3_aggregate_count,       //59
-  @sqlite3_value_blob,            //60
-  @sqlite3_value_bytes,           //61
-  @sqlite3_value_bytes16,         //62
-  @sqlite3_value_double,          //63
-  @sqlite3_value_int,             //64
-  @sqlite3_value_int64,           //65
-  @sqlite3_value_text,            //66
-  @sqlite3_value_text16,          //67
-  @sqlite3_value_text16le,        //68
-  @sqlite3_value_text16be,        //69
-  @sqlite3_value_type,            //70
-  @sqlite3_aggregate_context,     //71
-  @sqlite3_user_data,             //72
-  @sqlite3_get_auxdata,           //73
-  @sqlite3_set_auxdata,           //74
-  @sqlite3_result_blob,           //75
-  @sqlite3_result_double,         //76
-  @sqlite3_result_error,          //77
-  @sqlite3_result_error16,        //78
-  @sqlite3_result_int,            //79
-  @sqlite3_result_int64,          //80
-  @sqlite3_result_null,           //81
-  @sqlite3_result_text,           //82
-  @sqlite3_result_text16,         //83
-  @sqlite3_result_text16le,       //84
-  @sqlite3_result_text16be,       //85
-  @sqlite3_result_value,          //86
-  @sqlite3_create_collation,      //87
-  @sqlite3_create_collation16,    //88
-  @sqlite3_collation_needed,      //89
-  @sqlite3_collation_needed16,    //90
-  @sqlite3_libversion,            //91
-  @sqlite3_version,               //92
-  @sqlite3_libversion_number      //93
-    ]);
+   'sqlite3_close',                //0
+   'sqlite3_exec',                 //1
+   'sqlite3_last_insert_rowid',    //2
+   'sqlite3_changes',              //3
+   'sqlite3_total_changes',        //4
+   'sqlite3_interrupt',            //5
+   'sqlite3_complete',             //6
+   'sqlite3_complete16',           //7
+   'sqlite3_busy_handler',         //8
+   'sqlite3_busy_timeout',         //9
+   'sqlite3_get_table',            //10
+   'sqlite3_free_table',           //11
+   'sqlite3_mprintf',              //12
+   'sqlite3_free',                 //13
+   'sqlite3_snprintf',             //14
+   'sqlite3_set_authorizer',       //15
+   'sqlite3_trace',                //16
+   'sqlite3_progress_handler',     //17
+   'sqlite3_commit_hook',          //18
+   'sqlite3_open',                 //19
+   'sqlite3_open16',               //20
+   'sqlite3_errcode',              //21
+   'sqlite3_errmsg',               //22
+   'sqlite3_errmsg16',             //23
+   'sqlite3_prepare',              //24
+   'sqlite3_prepare16',            //25
+   'sqlite3_bind_blob',            //26
+   'sqlite3_bind_double',          //27
+   'sqlite3_bind_int',             //28
+   'sqlite3_bind_int64',           //29
+   'sqlite3_bind_null',            //30
+   'sqlite3_bind_text',            //31
+   'sqlite3_bind_text16',          //32
+   'sqlite3_bind_blob',            //33
+   'sqlite3_bind_text',            //34
+   'sqlite3_bind_text16',          //35
+   'sqlite3_bind_parameter_count', //36
+   'sqlite3_bind_parameter_name',  //37
+   'sqlite3_bind_parameter_index', //38
+   'sqlite3_column_count',         //39
+   'sqlite3_column_name',          //40
+   'sqlite3_column_name16',        //41
+   'sqlite3_column_decltype',      //42
+   'sqlite3_column_decltype16',    //43
+   'sqlite3_step',                 //44
+   'sqlite3_data_count',           //45
+   'sqlite3_column_blob',          //46
+   'sqlite3_column_bytes',         //47
+   'sqlite3_column_bytes16',       //48
+   'sqlite3_column_double',        //49
+   'sqlite3_column_int',           //50
+   'sqlite3_column_int64',         //51
+   'sqlite3_column_text',          //52
+   'sqlite3_column_text16',        //53
+   'sqlite3_column_type',          //54
+   'sqlite3_finalize',             //55
+   'sqlite3_reset',                //56
+   'sqlite3_create_function',      //57
+   'sqlite3_create_function16',    //58
+   'sqlite3_aggregate_count',      //59
+   'sqlite3_value_blob',           //60
+   'sqlite3_value_bytes',          //61
+   'sqlite3_value_bytes16',        //62
+   'sqlite3_value_double',         //63
+   'sqlite3_value_int',            //64
+   'sqlite3_value_int64',          //65
+   'sqlite3_value_text',           //66
+   'sqlite3_value_text16',         //67
+   'sqlite3_value_text16le',       //68
+   'sqlite3_value_text16be',       //69
+   'sqlite3_value_type',           //70
+   'sqlite3_aggregate_context',    //71
+   'sqlite3_user_data',            //72
+   'sqlite3_get_auxdata',          //73
+   'sqlite3_set_auxdata',          //74
+   'sqlite3_result_blob',          //75
+   'sqlite3_result_double',        //76
+   'sqlite3_result_error',         //77
+   'sqlite3_result_error16',       //78
+   'sqlite3_result_int',           //79
+   'sqlite3_result_int64',         //80
+   'sqlite3_result_null',          //81
+   'sqlite3_result_text',          //82
+   'sqlite3_result_text16',        //83
+   'sqlite3_result_text16le',      //84
+   'sqlite3_result_text16be',      //85
+   'sqlite3_result_value',         //86
+   'sqlite3_create_collation',     //87
+   'sqlite3_create_collation16',   //88
+   'sqlite3_collation_needed',     //89
+   'sqlite3_collation_needed16',   //90
+   'sqlite3_libversion',           //91
+   'sqlite3_version',              //92
+   'sqlite3_libversion_number'     //93
+     ],
+     [
+   @sqlite3_close,                 //0
+   @sqlite3_exec,                  //1
+   @sqlite3_last_insert_rowid,     //2
+   @sqlite3_changes,               //3
+   @sqlite3_total_changes,         //4
+   @sqlite3_interrupt,             //5
+   @sqlite3_complete,              //6
+   @sqlite3_complete16,            //7
+   @sqlite3_busy_handler,          //8
+   @sqlite3_busy_timeout,          //9
+   @sqlite3_get_table,             //10
+   @sqlite3_free_table,            //11
+   @sqlite3_mprintf,               //12
+   @sqlite3_free,                  //13
+   @sqlite3_snprintf,              //14
+   @sqlite3_set_authorizer,        //15
+   @sqlite3_trace,                 //16
+   @sqlite3_progress_handler,      //17
+   @sqlite3_commit_hook,           //18
+   @sqlite3_open,                  //19
+   @sqlite3_open16,                //20
+   @sqlite3_errcode,               //21
+   @sqlite3_errmsg,                //22
+   @sqlite3_errmsg16,              //23
+   @sqlite3_prepare,               //24
+   @sqlite3_prepare16,             //25
+   @sqlite3_bind_blob,             //26
+   @sqlite3_bind_double,           //27
+   @sqlite3_bind_int,              //28
+   @sqlite3_bind_int64,            //29
+   @sqlite3_bind_null,             //30
+   @sqlite3_bind_text,             //31
+   @sqlite3_bind_text16,           //32
+   @sqlite3_bind_blob1,            //33
+   @sqlite3_bind_text1,            //34
+   @sqlite3_bind_text161,          //35
+   @sqlite3_bind_parameter_count,  //36
+   @sqlite3_bind_parameter_name,   //37
+   @sqlite3_bind_parameter_index,  //38
+   @sqlite3_column_count,          //39
+   @sqlite3_column_name,           //40
+   @sqlite3_column_name16,         //41
+   @sqlite3_column_decltype,       //42
+   @sqlite3_column_decltype16,     //43
+   @sqlite3_step,                  //44
+   @sqlite3_data_count,            //45
+   @sqlite3_column_blob,           //46
+   @sqlite3_column_bytes,          //47
+   @sqlite3_column_bytes16,        //48
+   @sqlite3_column_double,         //49
+   @sqlite3_column_int,            //50
+   @sqlite3_column_int64,          //51
+   @sqlite3_column_text,           //52
+   @sqlite3_column_text16,         //53
+   @sqlite3_column_type,           //54
+   @sqlite3_finalize,              //55
+   @sqlite3_reset,                 //56
+   @sqlite3_create_function,       //57
+   @sqlite3_create_function16,     //58
+   @sqlite3_aggregate_count,       //59
+   @sqlite3_value_blob,            //60
+   @sqlite3_value_bytes,           //61
+   @sqlite3_value_bytes16,         //62
+   @sqlite3_value_double,          //63
+   @sqlite3_value_int,             //64
+   @sqlite3_value_int64,           //65
+   @sqlite3_value_text,            //66
+   @sqlite3_value_text16,          //67
+   @sqlite3_value_text16le,        //68
+   @sqlite3_value_text16be,        //69
+   @sqlite3_value_type,            //70
+   @sqlite3_aggregate_context,     //71
+   @sqlite3_user_data,             //72
+   @sqlite3_get_auxdata,           //73
+   @sqlite3_set_auxdata,           //74
+   @sqlite3_result_blob,           //75
+   @sqlite3_result_double,         //76
+   @sqlite3_result_error,          //77
+   @sqlite3_result_error16,        //78
+   @sqlite3_result_int,            //79
+   @sqlite3_result_int64,          //80
+   @sqlite3_result_null,           //81
+   @sqlite3_result_text,           //82
+   @sqlite3_result_text16,         //83
+   @sqlite3_result_text16le,       //84
+   @sqlite3_result_text16be,       //85
+   @sqlite3_result_value,          //86
+   @sqlite3_create_collation,      //87
+   @sqlite3_create_collation16,    //88
+   @sqlite3_collation_needed,      //89
+   @sqlite3_collation_needed16,    //90
+   @sqlite3_libversion,            //91
+   @sqlite3_version,               //92
+   @sqlite3_libversion_number      //93
+     ]);
+  except
+   on e: exception do begin
+    e.message:= 'Library "'+alibname+'": '+e.message;
+    result:= false;
+    if unloadlibrary(sqlite3libraryhandle) then begin
+     sqlite3libraryhandle:= nilhandle;
+    end;
+    raise;
+   end;
+  end;
  end;
  inc(refcount);
 end;
