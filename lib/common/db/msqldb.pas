@@ -1843,7 +1843,15 @@ begin
    end;
   end
   else begin
-   result:= tsqlconnection(database).CreateBlobStream(Field,Mode,fcursor);
+   if database = nil then begin
+    if mode = bmwrite then begin
+     result:= createblobbuffer(field);
+    end;
+   end
+   else begin
+    result:= tsqlconnection(database).CreateBlobStream(Field,
+                                        Mode,fcursor);
+   end;
   end;
  end;
 end;
