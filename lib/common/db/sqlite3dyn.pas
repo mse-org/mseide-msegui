@@ -77,7 +77,7 @@ const
   SQLITE_NOTADB = 26;   { File opened that is not a database file  }
   SQLITE_ROW = 100;   { sqlite3_step() has another row ready  }
   SQLITE_DONE = 101;   { sqlite3_step() has finished executing  }
-
+  
 type
   sqlite_int64 = int64;
   sqlite_uint64 = qword;
@@ -187,18 +187,20 @@ Const
   
 
 var
- sqlite3_close: function(_para1:Psqlite3):longint;cdecl;
- sqlite3_exec: function(_para1:Psqlite3; sql:Pchar; _para3:sqlite3_callback; _para4:pointer; errmsg:PPchar):longint;
- sqlite3_last_insert_rowid: function(_para1:Psqlite3):sqlite_int64;
- sqlite3_changes: function(_para1:Psqlite3):longint;
- sqlite3_total_changes: function(_para1:Psqlite3):longint;
- sqlite3_interrupt: procedure(_para1:Psqlite3);
- sqlite3_complete: function(sql:Pchar):longint;
- sqlite3_complete16: function(sql:pointer):longint;
- sqlite3_busy_handler: function(_para1:Psqlite3; _para2:busy_handler_func; _para3:pointer):longint;
- sqlite3_busy_timeout: function(_para1:Psqlite3; ms:longint):longint;
- sqlite3_get_table: function(_para1:Psqlite3; sql:Pchar; resultp:PPPchar; nrow:Plongint; ncolumn:Plongint; 
-           errmsg:PPchar):longint;cdecl;
+ sqlite3_close: function(_para1:Psqlite3):longint; cdecl;
+ sqlite3_exec: function(_para1: Psqlite3; sql: Pchar; _para3: sqlite3_callback;
+              _para4: pointer; errmsg: PPchar): longint; cdecl;
+ sqlite3_last_insert_rowid: function(_para1: Psqlite3): sqlite_int64; cdecl;
+ sqlite3_changes: function(_para1: Psqlite3): longint; cdecl;
+ sqlite3_total_changes: function(_para1: Psqlite3): longint; cdecl;
+ sqlite3_interrupt: procedure(_para1: Psqlite3); cdecl;
+ sqlite3_complete: function(sql: Pchar): longint; cdecl;
+ sqlite3_complete16: function(sql: pointer):longint; cdecl;
+ sqlite3_busy_handler: function(_para1: Psqlite3; _para2: busy_handler_func;
+                      _para3: pointer):longint; cdecl;
+ sqlite3_busy_timeout: function(_para1: Psqlite3; ms: longint):longint; cdecl;
+ sqlite3_get_table: function(_para1: Psqlite3; sql: Pchar; resultp: PPPchar;
+               nrow: Plongint; ncolumn: Plongint; errmsg: PPchar):longint;cdecl;
  sqlite3_free_table: procedure(result:PPchar);cdecl;
 
 // Todo: see how translate sqlite3_mprintf, sqlite3_vmprintf, sqlite3_snprintf
@@ -223,9 +225,9 @@ var
  sqlite3_errcode: function(db:Psqlite3):longint;cdecl;
  sqlite3_errmsg: function(_para1:Psqlite3):Pchar;cdecl;
  sqlite3_errmsg16: function(_para1:Psqlite3):pointer;cdecl;
- sqlite3_prepare: function(db:Psqlite3; zSql:Pchar; nBytes:longint;
+ sqlite3_prepare_v2: function(db:Psqlite3; zSql:Pchar; nBytes:longint;
                           ppStmt:PPsqlite3_stmt; pzTail:PPchar):longint;cdecl;
- sqlite3_prepare16: function(db:Psqlite3; zSql:pointer; nBytes:longint;
+ sqlite3_prepare16_v2: function(db:Psqlite3; zSql:pointer; nBytes:longint;
                         ppStmt:PPsqlite3_stmt; pzTail:Ppointer):longint;cdecl;
  sqlite3_bind_blob: function(_para1:Psqlite3_stmt; _para2:longint;
           _para3:pointer; n:longint; _para5:bind_destructor_func):longint;cdecl;
@@ -420,8 +422,8 @@ begin
   'sqlite3_errcode',              //21
   'sqlite3_errmsg',               //22
   'sqlite3_errmsg16',             //23
-  'sqlite3_prepare',              //24
-  'sqlite3_prepare16',            //25
+  'sqlite3_prepare_v2',           //24
+  'sqlite3_prepare16_v2',         //25
   'sqlite3_bind_blob',            //26
   'sqlite3_bind_double',          //27
   'sqlite3_bind_int',             //28
@@ -516,8 +518,8 @@ begin
   @sqlite3_errcode,               //21
   @sqlite3_errmsg,                //22
   @sqlite3_errmsg16,              //23
-  @sqlite3_prepare,               //24
-  @sqlite3_prepare16,             //25
+  @sqlite3_prepare_v2,               //24
+  @sqlite3_prepare16_v2,             //25
   @sqlite3_bind_blob,             //26
   @sqlite3_bind_double,           //27
   @sqlite3_bind_int,              //28
