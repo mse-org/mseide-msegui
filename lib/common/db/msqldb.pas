@@ -1896,7 +1896,12 @@ end;
 
 function TSQLQuery.getblobdatasize: integer;
 begin
- result:= tsqlconnection(database).getblobdatasize;
+ if database = nil then begin
+  result:= sizeof(int64); //max
+ end
+ else begin
+  result:= tsqlconnection(database).getblobdatasize;
+ end;
 end;
 
 function TSQLQuery.getdatabase1: tsqlconnection;
