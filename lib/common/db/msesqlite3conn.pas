@@ -46,6 +46,7 @@ type
    function blobscached: boolean;
 
   protected
+   function stringquery(const asql: string): stringarty;
    procedure checkerror(const aerror: integer);
    
    procedure DoInternalConnect; override;
@@ -81,6 +82,8 @@ type
    function CreateBlobStream(const Field: TField; const Mode: TBlobStreamMode; 
                        const acursor: tsqlcursor): TStream; override;
    procedure execsql(const asql: string);
+   procedure UpdateIndexDefs(var IndexDefs : TIndexDefs;
+                               const TableName : string); override;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -574,6 +577,54 @@ end;
 function tsqlite3connection.blobscached: boolean;
 begin
  result:= true;
+end;
+
+function execcallback(adata: pointer; ncols: longint; //adata = pstringarty
+                avalues: PPchar; anames: PPchar):longint; cdecl;
+var
+ int1: integer;
+begin
+ setlength(pstringarty(adata)^,ncols);
+ for int1:= 0 to ncols - 1 do begin
+  pstringarty(adata)^[int1]:= pcharpoaty(avalues)^[int1];
+ end;
+ result:= 0;
+end;
+
+function tsqlite3connection.stringquery(const asql: string): stringarty;
+begin
+ result:= nil;
+ checkerror(sqlite3_exec(fhandle,pchar(asql),@execcallback,@result,nil));
+end;
+
+procedure tsqlite3connection.UpdateIndexDefs(var IndexDefs: TIndexDefs;
+                              const TableName: string);
+var
+ int1,int2: integer;
+ ar1: stringarty;
+ str1: string;
+begin
+ ar1:= stringquery(
+ 'SELECT sql FROM sqlite_master WHERE type = ''table'' AND (name = '''+
+       tablename+''');');
+ if high(ar1) = 0 then begin
+  str1:= ar1[0];
+  int1:= findchar(str1,'(');
+  if int1 > 0 then begin
+   str1:= uppercase(copy(str1,int1+1,length(str1)-int1-1));
+   ar1:= splitstring(str1,',');         //todo: real parsing
+   for int1:= 0 to high(ar1) do begin
+    int2:= pos('PRIMARY',ar1[int1]);
+    if (int2 > 0) and (pos('KEY',ar1[int1]) > int2) then begin
+     ar1:= splitstring(ar1[int1],' ');
+     if (ar1[0][1] = '''') and (ar1[0][length(ar1[0])] = '''') then begin
+      str1:= copy(ar1[0],2,length(ar1[0]) - 2);
+      indexdefs.add('$PRIMARYKEY$',str1,[ixPrimary,ixUnique]);
+     end;
+    end;
+   end;
+  end;
+ end; 
 end;
 
 end.

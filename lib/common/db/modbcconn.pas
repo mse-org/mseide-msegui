@@ -98,7 +98,8 @@ type
                  const acursor: tsqlcursor): TStream; override;
     procedure FreeFldBuffers(cursor:TSQLCursor); override;
     // - UpdateIndexDefs
-    procedure UpdateIndexDefs(var IndexDefs:TIndexDefs; TableName:string); override;
+    procedure UpdateIndexDefs(var IndexDefs:TIndexDefs;
+                          const TableName:string); override;
     // - Schema info
     function GetSchemaInfoSQL(SchemaType:TSchemaType; SchemaObjectName, SchemaObjectPattern:string):string; override;
 
@@ -855,7 +856,8 @@ begin
   end;
 end;
 
-procedure TODBCConnection.UpdateIndexDefs(var IndexDefs: TIndexDefs; TableName: string);
+procedure TODBCConnection.UpdateIndexDefs(var IndexDefs: TIndexDefs; 
+                                    const TableName: string);
 begin
   inherited UpdateIndexDefs(IndexDefs, TableName);
   // TODO: implement this

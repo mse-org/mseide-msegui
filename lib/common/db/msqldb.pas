@@ -137,7 +137,8 @@ type
     procedure RollBackRetaining(trans : TSQLHandle); virtual; abstract;
     function getblobdatasize: integer; virtual; abstract;
 
-    procedure UpdateIndexDefs(var IndexDefs : TIndexDefs;TableName : string); virtual;
+    procedure UpdateIndexDefs(var IndexDefs : TIndexDefs;
+                                          const TableName : string); virtual;
     function GetSchemaInfoSQL(SchemaType : TSchemaType; SchemaObjectName, SchemaPattern : string) : string; virtual;
     function CreateBlobStream(const Field: TField; const Mode: TBlobStreamMode;
                  const acursor: tsqlcursor): TStream; virtual;
@@ -470,10 +471,11 @@ begin
     end;
 end;
 
-procedure TSQLConnection.UpdateIndexDefs(var IndexDefs : TIndexDefs;TableName : string);
+procedure TSQLConnection.UpdateIndexDefs(var IndexDefs : TIndexDefs;
+                                  const TableName : string);
 
 begin
-// Empty abstract
+ //dummy
 end;
 
 procedure TSQLConnection.DoInternalConnect;

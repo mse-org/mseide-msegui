@@ -125,7 +125,8 @@ type
     function StartdbTransaction(trans : TSQLHandle; AParams : string) : boolean; override;
     procedure CommitRetaining(trans : TSQLHandle); override;
     procedure RollBackRetaining(trans : TSQLHandle); override;
-    procedure UpdateIndexDefs(var IndexDefs : TIndexDefs;TableName : string); override;
+    procedure UpdateIndexDefs(var IndexDefs : TIndexDefs;
+                                           const TableName : string); override;
     function GetSchemaInfoSQL(SchemaType : TSchemaType; SchemaObjectName, SchemaPattern : string) : string; override;
     function CreateBlobStream(const Field: TField; const Mode: TBlobStreamMode;
                            const acursor: tsqlcursor): TStream; override;
@@ -1103,7 +1104,8 @@ begin
 end;
 
 
-procedure TIBConnection.UpdateIndexDefs(var IndexDefs : TIndexDefs;TableName : string);
+procedure TIBConnection.UpdateIndexDefs(var IndexDefs : TIndexDefs;
+                               const TableName : string);
 
 var qry : TSQLQuery;
 

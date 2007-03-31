@@ -80,7 +80,8 @@ type
    procedure CommitRetaining(trans : TSQLHandle); override;
    function StartdbTransaction(trans : TSQLHandle; AParams : string) : boolean; override;
    procedure RollBackRetaining(trans : TSQLHandle); override;
-   procedure UpdateIndexDefs(var IndexDefs : TIndexDefs;TableName : string); override;
+   procedure UpdateIndexDefs(var IndexDefs : TIndexDefs;
+                                 const TableName : string); override;
    function GetSchemaInfoSQL(SchemaType : TSchemaType; SchemaObjectName, SchemaPattern : string) : string; override;
    procedure dopqexec(const asql: string);
 
@@ -811,7 +812,8 @@ begin
 {$ifdef FPC}{$checkpointer default}{$endif}
 end;
 
-procedure TPQConnection.UpdateIndexDefs(var IndexDefs : TIndexDefs;TableName : string);
+procedure TPQConnection.UpdateIndexDefs(var IndexDefs : TIndexDefs;
+                          const TableName : string);
 
 var qry : TSQLQuery;
 

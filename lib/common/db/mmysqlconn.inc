@@ -95,7 +95,8 @@ Type
     function StartdbTransaction(trans : TSQLHandle; AParams : string) : boolean; override;
     procedure CommitRetaining(trans : TSQLHandle); override;
     procedure RollBackRetaining(trans : TSQLHandle); override;
-    procedure UpdateIndexDefs(var IndexDefs : TIndexDefs;TableName : string); override;
+    procedure UpdateIndexDefs(var IndexDefs : TIndexDefs;
+                                          const TableName : string); override;
 
   Public
     Property ServerInfo : String Read FServerInfo;
@@ -739,7 +740,8 @@ begin
   Result := True;
 end;
 
-procedure TConnectionName.UpdateIndexDefs(var IndexDefs : TIndexDefs;TableName : string);
+procedure TConnectionName.UpdateIndexDefs(var IndexDefs : TIndexDefs;
+                     const TableName : string);
 
 var qry : TSQLQuery;
 
