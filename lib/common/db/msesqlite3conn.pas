@@ -260,7 +260,13 @@ begin
        ftstring: begin
         str1:= asstring;
         stringaddref(str1);
-        checkerror(sqlite3_bind_text(fstatement,int1+1,pchar(asstring),
+        checkerror(sqlite3_bind_text(fstatement,int1+1,pchar(str1),
+                    length(str1),@freebindstring));
+       end;
+       ftblob: begin
+        str1:= asstring;
+        stringaddref(str1);
+        checkerror(sqlite3_bind_blob(fstatement,int1+1,pointer(str1),
                     length(str1),@freebindstring));
        end;
        else begin
