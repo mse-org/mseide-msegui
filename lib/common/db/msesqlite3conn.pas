@@ -17,7 +17,7 @@ type
  sqliteoptionty = (slo_transactions);
  sqliteoptionsty = set of sqliteoptionty;
  
- tsqlite3connection = class(tsqlconnection,idbcontroller)
+ tsqlite3connection = class(tsqlconnection,idbcontroller,iblobconnection)
   private
    fcontroller: tdbcontroller;
    fhandle: psqlite3;
@@ -34,6 +34,17 @@ type
    function writesequence(const sequencename: string;
                     const avalue: largeint): string;
    procedure updateutf8(var autf8: boolean);                    
+
+          //iblobconnection
+   procedure writeblobdata(const atransaction: tsqltransaction;
+             const tablename: string; const acursor: tsqlcursor;
+             const adata: pointer; const alength: integer;
+             const afield: tfield; const aparam: tparam;
+             out newid: string);
+   procedure setupblobdata(const afield: tfield; const acursor: tsqlcursor;
+                                   const aparam: tparam);
+   function blobscached: boolean;
+
   protected
    procedure checkerror(const aerror: integer);
    
@@ -154,14 +165,23 @@ end;
 
 function tsqlite3connection.CreateBlobStream(const Field: TField;
                const Mode: TBlobStreamMode; const acursor: tsqlcursor): TStream;
+var
+ blobid: integer;
+ int1,int2: integer;
+ str1: string;
+ bo1: boolean;
 begin
  if (mode = bmwrite) and (field.dataset is tmsesqlquery) then begin
   result:= tmsebufdataset(field.dataset).createblobbuffer(field);
  end
  else begin
-  result:= inherited createblobstream(field,mode,acursor);
+  result:= nil;
+  if mode = bmread then begin
+   if field.getData(@blobId) then begin
+    result:= acursor.getcachedblob(blobid);
+   end;
+  end;
  end;
- //todo
 end;
 
 function tsqlite3connection.AllocateTransactionHandle: TSQLHandle;
@@ -359,7 +379,7 @@ var
  fnum: integer;
  i: integer;
  i64: int64;
- int1: integer;
+ int1,int2: integer;
 begin
  with tsqlite3cursor(cursor) do begin
   fnum:= afield.fieldno - 1;
@@ -393,7 +413,19 @@ begin
        move(sqlite3_column_text(fstatement,fnum)^,buffer^,int1);
       end;
      end;
-    end
+    end;
+    ftmemo: begin
+     int2:= sqlite3_column_bytes(fstatement,fnum);
+     int1:= addblobdata(sqlite3_column_text(fstatement,fnum),int2);
+     move(int1,buffer^,sizeof(int1));
+      //save id
+    end;
+    ftblob: begin
+     int2:= sqlite3_column_bytes(fstatement,fnum);
+     int1:= addblobdata(sqlite3_column_blob(fstatement,fnum),int2);
+     move(int1,buffer^,sizeof(int1));
+      //save id
+    end;
     else begin
      result:= false; // unknown
     end; 
@@ -444,6 +476,7 @@ end;
 
 function tsqlite3connection.getblobdatasize: integer;
 begin
+ result:= blobidsize;
 end;
 
 procedure tsqlite3connection.DoInternalConnect;
@@ -466,9 +499,9 @@ var
 begin
  if fhandle <> nil then begin
   int1:= sqlite3_close(fhandle);
-  if int1 = sqlite_busy then begin
-   checkerror(int1);
-  end;
+//  if int1 = sqlite_busy then begin
+//   checkerror(int1);
+//  end;
   fhandle:= nil;
   releasesqlite3;
  end; 
@@ -509,6 +542,38 @@ end;
 procedure tsqlite3connection.updateutf8(var autf8: boolean);
 begin
  autf8:= true;
+end;
+
+procedure tsqlite3connection.writeblobdata(const atransaction: tsqltransaction;
+               const tablename: string; const acursor: tsqlcursor;
+               const adata: pointer; const alength: integer;
+               const afield: tfield; const aparam: tparam; out newid: string);
+var
+ str1: string;
+ int1: integer;
+begin
+ setlength(str1,alength);
+ move(adata^,str1[1],alength);
+ if afield.datatype = ftmemo then begin
+  aparam.asstring:= str1;
+ end
+ else begin
+  aparam.asblob:= str1;
+ end;
+ int1:= acursor.addblobdata(str1);
+ setlength(newid,sizeof(int1));
+ move(int1,newid[1],sizeof(int1));
+end;
+
+procedure tsqlite3connection.setupblobdata(const afield: tfield;
+               const acursor: tsqlcursor; const aparam: tparam);
+begin
+ acursor.blobfieldtoparam(afield,aparam,afield.datatype = ftmemo);
+end;
+
+function tsqlite3connection.blobscached: boolean;
+begin
+ result:= true;
 end;
 
 end.
