@@ -27,6 +27,7 @@ type
    function readsequence(const sequencename: string): string;
    function writesequence(const sequencename: string;
                     const avalue: largeint): string;
+   procedure updateutf8(var autf8: boolean);                    
                     
   protected
    function CreateBlobStream(const Field: TField; const Mode: TBlobStreamMode; 
@@ -111,6 +112,11 @@ begin
  else begin
   result:= inherited createblobstream(field,mode,acursor);
  end;
+end;
+
+procedure tmseibconnection.updateutf8(var autf8: boolean);
+begin
+ //dummy
 end;
 
 end.

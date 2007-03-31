@@ -938,9 +938,14 @@ begin
      Move(c,buffer^,sizeof(c));
     end;
     ftInteger,ftsmallint: begin
-     b:= 0;        //todo: byte order?
-     Move(b, Buffer^,sizeof(longint));
-     Move(CurrBuff^,Buffer^,SQLLen);
+//     b:= 0;        //todo: byte order?
+//     Move(b, Buffer^,sizeof(longint));
+//     Move(CurrBuff^,Buffer^,SQLLen);
+     longint(buffer^):= 0;
+     Move(CurrBuff^,buffer^,SQLLen);
+     if afield.datatype = ftsmallint then begin
+      longint(buffer^):= smallint(buffer^);
+     end;
     end;
     ftLargeint: begin
      FillByte(buffer^,sizeof(LargeInt),0);

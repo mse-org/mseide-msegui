@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2006 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2007 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -444,7 +444,20 @@ begin
 end;
 
 procedure tmsesqlquery.internalopen;
+var
+ intf1: idbcontroller;
+ bo1: boolean;
 begin
+ if getcorbainterface(database,typeinfo(idbcontroller),intf1) then begin
+  bo1:= dso_utf8 in fcontroller.options;
+  intf1.updateutf8(bo1);
+  if bo1 then begin
+   fcontroller.options:= fcontroller.options + [dso_utf8];
+  end
+  else begin
+   fcontroller.options:= fcontroller.options - [dso_utf8];
+  end;
+ end;
  fcontroller.internalopen;
  if not streamloading and not (dso_local in fcontroller.options) then begin
   connected:= not (dso_offline in fcontroller.options);

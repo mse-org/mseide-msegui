@@ -11,13 +11,17 @@ unit msesqlite3conn;
 {$ifdef FPC}{$mode objfpc}{$h+}{$INTERFACES CORBA}{$endif}
 interface
 uses
- classes,msqldb,msedb,msestrings,db,sqlite3dyn;
+ classes,msqldb,msedb,msestrings,db,sqlite3dyn,msetypes;
  
 type
+ sqliteoptionty = (slo_transactions);
+ sqliteoptionsty = set of sqliteoptionty;
+ 
  tsqlite3connection = class(tsqlconnection,idbcontroller)
   private
    fcontroller: tdbcontroller;
    fhandle: psqlite3;
+   foptions: sqliteoptionsty;
    function getdatabasename: filenamety;
    procedure setdatabasename(const avalue: filenamety);
    procedure loaded; override;
@@ -29,7 +33,7 @@ type
    function readsequence(const sequencename: string): string;
    function writesequence(const sequencename: string;
                     const avalue: largeint): string;
-                    
+   procedure updateutf8(var autf8: boolean);                    
   protected
    procedure checkerror(const aerror: integer);
    
@@ -73,16 +77,21 @@ type
    property DatabaseName: filenamety read getdatabasename write setdatabasename;
    property Connected: boolean read getconnected write setconnected;
    property controller: tdbcontroller read fcontroller write setcontroller;
+   property options: sqliteoptionsty read foptions write foptions;
  end;
  
 implementation
 uses
- msesqldb,msebufdataset,dbconst,sysutils;
+ msesqldb,msebufdataset,dbconst,sysutils,typinfo;
 type
+ storagetypety = (st_none,st_integer,st_float,st_text,st_blob,st_null);
+ 
  tsqlite3cursor = class(tsqlcursor)
   private
    fstatement: psqlite3_stmt;
    ftail: pchar;
+   fstate: integer;
+   fparambinding: integerarty;
  end;
   
 { tsqlite3connection }
@@ -174,6 +183,13 @@ procedure tsqlite3connection.PrepareStatement(cursor: TSQLCursor;
                ATransaction: TSQLTransaction; buf: string; AParams: TParams);
 begin
  with tsqlite3cursor(cursor) do begin
+  if assigned(aparams) and (aparams.count > 0) then begin
+  {$ifdef FPC_2_2}
+    buf := aparams.parsesql(buf,false,false,false,psinterbase,fparambinding);
+  {$else}
+    buf := aparams.parsesql(buf,false,psinterbase,fparambinding);
+  {$endif}
+  end;
   checkerror(sqlite3_prepare(fhandle,pchar(buf),length(buf),@fstatement,
                                                @ftail));
  end;
@@ -188,28 +204,202 @@ begin
  end;
 end;
 
+procedure freebindstring(astring: pointer); cdecl;
+begin
+ string(astring):= '';
+end;
+
 procedure tsqlite3connection.Execute(const cursor: TSQLCursor;
                const atransaction: tsqltransaction; const AParams: TParams);
+var
+ int1: integer;
+ str1: string;
 begin
+ with tsqlite3cursor(cursor) do begin
+  if aparams <> nil then begin
+   for int1:= 0 to high(fparambinding) do begin
+    with aparams[fparambinding[int1]] do begin
+     if isnull then begin
+      checkerror(sqlite3_bind_null(fstatement,int1+1));
+     end
+     else begin
+      case datatype of
+       ftinteger,ftboolean,ftsmallint: begin
+        checkerror(sqlite3_bind_int(fstatement,int1+1,asinteger));
+       end;
+       ftlargeint: begin
+        checkerror(sqlite3_bind_int64(fstatement,int1+1,aslargeint));
+       end;
+       ftfloat: begin
+        checkerror(sqlite3_bind_double(fstatement,int1+1,asfloat));
+       end;
+       ftstring: begin
+        str1:= asstring;
+        stringaddref(str1);
+        checkerror(sqlite3_bind_text(fstatement,int1+1,pchar(asstring),
+                    length(str1),@freebindstring));
+       end;
+       else begin
+        databaseerror('Parameter type '+getenumname(typeinfo(tfieldtype),
+                                       ord(datatype))+' not supported.',self);
+       end;
+      end;
+     end;
+    end;
+   end;
+  end;
+  fstate:= sqlite3_step(fstatement);
+  if fstate <= sqliteerrormax then begin
+   checkerror(sqlite3_reset(fstatement));
+  end;
+  if fstate = sqlite_row then begin
+   fstate:= sqliteerrormax; //first row
+  end;
+ end;
 end;
 
 function tsqlite3connection.Fetch(cursor: TSQLCursor): boolean;
 begin
+ with tsqlite3cursor(cursor) do begin
+  if fstate = sqliteerrormax then begin
+   fstate:= sqlite_row; //first row;
+  end
+  else begin
+   if fstate = sqlite_row then begin
+    fstate:= sqlite3_step(fstatement);
+    if fstate <= sqliteerrormax then begin
+     checkerror(sqlite3_reset(fstatement));  //right error returned??
+    end;
+   end;
+  end;
+  result:= fstate = sqlite_row;
+ end;
 end;
 
 procedure tsqlite3connection.AddFieldDefs(cursor: TSQLCursor;
                FieldDefs: TfieldDefs);
+var
+ int1: integer;
+ str1,str2: string;
+ ft1: tfieldtype;
+ size1: word;
+ ar1: stringarty;
 begin
+ with tsqlite3cursor(cursor) do begin
+  for int1:= 0 to sqlite3_column_count(fstatement) - 1 do begin
+   str1:= sqlite3_column_name(fstatement,int1);
+   str2:= uppercase(sqlite3_column_decltype(fstatement,int1));
+   ft1:= ftunknown;
+   size1:= 0;
+   if (str2 = 'INT') or (str2 = 'INTEGER') then begin
+    ft1:= ftinteger;
+   end
+   else begin
+    if str2 = 'LARGEINT' then begin
+     ft1:= ftlargeint;
+    end
+    else begin
+     if str2 = 'WORD' then begin
+      ft1:= ftword;
+     end
+     else begin
+      if str2 = 'FLOAT' then begin        //todo: currency, numeric...
+       ft1:= ftfloat;
+      end
+      else begin
+       if pos('VARCHAR',str2) = 1 then begin
+        ft1:= ftstring;
+        size1:= 255; //default
+        ar1:= splitstring(str2,'(');
+        if high(ar1) >= 1 then begin
+         ar1:= splitstring(ar1[1],')');
+         if high(ar1) >= 0 then begin
+          try
+           size1:= strtoint(ar1[0]);
+          except
+          end;
+         end;
+        end;
+       end
+       else begin
+        if str2 = 'TEXT' then begin
+         ft1:= ftmemo;
+        end
+        else begin
+         if str2 = 'BLOB' then begin
+          ft1:= ftblob;
+         end;
+        end;
+       end;
+      end;
+     end;
+    end;
+   end;
+   case ft1 of
+    ftinteger: size1:= sizeof(integer);
+    ftlargeint: size1:= sizeof(largeint);
+    ftfloat: size1:= sizeof(double);
+    ftblob,ftmemo: size1:= sizeof(blobidsize);
+   end;
+   tfielddef.create(fielddefs,str1,ft1,size1,false,int1+1);
+  end;
+ end;
 end;
 
 procedure tsqlite3connection.FreeFldBuffers(cursor: TSQLCursor);
 begin
+ //dummy
 end;
 
 function tsqlite3connection.loadfield(const cursor: tsqlcursor;
                const afield: tfield; const buffer: pointer;
                var bufsize: integer): boolean;
+var
+ st1: storagetypety;
+ fnum: integer;
+ i: integer;
+ i64: int64;
+ int1: integer;
 begin
+ with tsqlite3cursor(cursor) do begin
+  fnum:= afield.fieldno - 1;
+  st1:= storagetypety(sqlite3_column_type(fstatement,fnum));
+  result:= st1 <> st_null;
+  if result then begin
+   case afield.datatype of
+    ftinteger,ftsmallint: begin
+     i:= sqlite3_column_int(fstatement,fnum);
+     if afield.datatype = ftsmallint then begin
+      integer(buffer^):= smallint(i);
+     end
+     else begin
+      integer(buffer^):= i;
+     end;
+    end;
+    ftlargeint: begin
+     largeint(buffer^):= sqlite3_column_int64(fstatement,fnum);
+    end;
+    ftfloat: begin
+     double(buffer^):= sqlite3_column_double(fstatement,fnum);
+    end;
+    ftstring: begin
+     int1:= sqlite3_column_bytes(fstatement,fnum);
+     if int1 > bufsize then begin
+      bufsize:= - int1;
+     end
+     else begin
+      bufsize:= int1;
+      if int1 > 0 then begin
+       move(sqlite3_column_text(fstatement,fnum)^,buffer^,int1);
+      end;
+     end;
+    end
+    else begin
+     result:= false; // unknown
+    end; 
+   end;
+  end;
+ end;
 end;
 
 function tsqlite3connection.GetTransactionHandle(trans: TSQLHandle): pointer;
@@ -219,20 +409,26 @@ end;
 
 function tsqlite3connection.Commit(trans: TSQLHandle): boolean;
 begin
- execsql('COMMIT');
+ if slo_transactions in foptions then begin
+  execsql('COMMIT');
+ end;
  result:= true;
 end;
 
 function tsqlite3connection.RollBack(trans: TSQLHandle): boolean;
 begin
- execsql('ROLLBACK');
+ if slo_transactions in foptions then begin
+  execsql('ROLLBACK');
+ end;
  result:= true;
 end;
 
 function tsqlite3connection.StartdbTransaction(trans: TSQLHandle;
                aParams: string): boolean;
 begin
- execsql('BEGIN');
+ if slo_transactions in foptions then begin
+  execsql('BEGIN');
+ end;
  result:= true;
 end;
 
@@ -308,6 +504,11 @@ begin
  if int1 <> sqlite_ok then begin
   databaseerror(str1);
  end;
+end;
+
+procedure tsqlite3connection.updateutf8(var autf8: boolean);
+begin
+ autf8:= true;
 end;
 
 end.

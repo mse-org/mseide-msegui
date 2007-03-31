@@ -52,6 +52,7 @@ type
                     const avalue: largeint): string;
    function CreateBlobStream(const Field: TField; const Mode: TBlobStreamMode;
                          const acursor: tsqlcursor): TStream; override;
+   procedure updateutf8(var autf8: boolean);                    
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -271,6 +272,11 @@ begin
  else begin
   result:= inherited createblobstream(field,mode,acursor);
  end;
+end;
+
+procedure tmsepqconnection.updateutf8(var autf8: boolean);
+begin
+ //dummy
 end;
 
 end.

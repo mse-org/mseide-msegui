@@ -582,6 +582,12 @@ type
    property items[const index: integer]: tfield read getitems write setitems; default;
  end;
 
+ datasetoptionty = (dso_utf8,dso_cancelupdateonerror,dso_cancelupdatesonerror,
+                         dso_autoapply,dso_autocommitret,dso_cacheblobs,
+                         dso_offline, //disconnect database after open
+                         dso_local);  //do not connect database on open
+ datasetoptionsty = set of datasetoptionty;
+ 
  idscontroller = interface(inullinterface)
   procedure inheriteddataevent(const event: tdataevent; const info: ptrint);
   procedure inheritedcancel;
@@ -598,12 +604,6 @@ type
   function getcontroller: tdscontroller;
  end;
 
- datasetoptionty = (dso_utf8,dso_cancelupdateonerror,dso_cancelupdatesonerror,
-                         dso_autoapply,dso_autocommitret,dso_cacheblobs,
-                         dso_offline, //disconnect database after open
-                         dso_local);  //do not connect database on open
- datasetoptionsty = set of datasetoptionty;
- 
 const
  defaultdscontrolleroptions = [];
  de_modified = ord(high(tdataevent))+1;
@@ -637,6 +637,7 @@ type
    function getrecno: integer;
    procedure setrecno(const avalue: integer);
   protected
+   procedure setoptions(const avalue: datasetoptionsty); virtual;
    procedure modified;
    procedure setowneractive(const avalue: boolean); override;
    procedure fielddestroyed(const sender: ifieldcomponent);
@@ -677,7 +678,7 @@ type
    function assqltime(const avalue: tdatetime): string;
   published
    property fields: tpersistentfields read ffields write setfields;
-   property options: datasetoptionsty read foptions write foptions 
+   property options: datasetoptionsty read foptions write setoptions 
                    default defaultdscontrolleroptions;
  end;
  
@@ -694,6 +695,7 @@ type
   function writesequence(const sequencename: string;
                     const avalue: largeint): string;
   procedure ExecuteDirect(const SQL : String);
+  procedure updateutf8(var autf8: boolean);
  end;
 
  databaseeventty = procedure(const sender: tdatabase) of object;
@@ -3353,6 +3355,11 @@ end;
 procedure tdscontroller.modified;
 begin
  tdataset1(fowner).dataevent(tdataevent(de_modified),0);
+end;
+
+procedure tdscontroller.setoptions(const avalue: datasetoptionsty);
+begin
+ foptions:= avalue;
 end;
 
 { ttacontroller }

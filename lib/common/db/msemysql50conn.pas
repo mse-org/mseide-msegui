@@ -28,6 +28,7 @@ type
    function readsequence(const sequencename: string): string;
    function writesequence(const sequencename: string;
                     const avalue: largeint): string;
+   procedure updateutf8(var autf8: boolean);                    
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -97,6 +98,11 @@ function tmsemysql50connection.writesequence(const sequencename: string;
                const avalue: largeint): string;
 begin
  result:= '';
+end;
+
+procedure tmsemysql50connection.updateutf8(var autf8: boolean);
+begin
+ //dummy
 end;
 
 end.

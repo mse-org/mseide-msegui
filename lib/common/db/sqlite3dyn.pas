@@ -77,7 +77,9 @@ const
   SQLITE_NOTADB = 26;   { File opened that is not a database file  }
   SQLITE_ROW = 100;   { sqlite3_step() has another row ready  }
   SQLITE_DONE = 101;   { sqlite3_step() has finished executing  }
-  
+
+  sqliteerrormax = 99;
+    
 type
   sqlite_int64 = int64;
   sqlite_uint64 = qword;
