@@ -47,6 +47,7 @@ type
 
   protected
    function stringquery(const asql: string): stringarty;
+   function stringsquery(const asql: string): stringararty;
    procedure checkerror(const aerror: integer);
    
    procedure DoInternalConnect; override;
@@ -597,34 +598,49 @@ begin
  checkerror(sqlite3_exec(fhandle,pchar(asql),@execcallback,@result,nil));
 end;
 
+function execscallback(adata: pointer; ncols: longint; //adata = pstringarty
+                avalues: PPchar; anames: PPchar):longint; cdecl;
+var
+ int1: integer;
+ po1: pstringarty;
+begin
+ setlength(pstringararty(adata)^,high(pstringararty(adata)^)+2);
+ po1:= @(pstringararty(adata)^[high(pstringararty(adata)^)]);
+ setlength(po1^,ncols);
+ for int1:= 0 to ncols - 1 do begin
+  po1^[int1]:= pcharpoaty(avalues)^[int1];
+ end;
+ result:= 0;
+end;
+
+function tsqlite3connection.stringsquery(const asql: string): stringararty;
+begin
+ result:= nil;
+ checkerror(sqlite3_exec(fhandle,pchar(asql),@execscallback,@result,nil));
+end;
+
 procedure tsqlite3connection.UpdateIndexDefs(var IndexDefs: TIndexDefs;
                               const TableName: string);
 var
  int1,int2: integer;
- ar1: stringarty;
+ ar1: stringararty;
  str1: string;
 begin
- ar1:= stringquery(
- 'SELECT sql FROM sqlite_master WHERE type = ''table'' AND (name = '''+
-       tablename+''');');
- if high(ar1) = 0 then begin
-  str1:= ar1[0];
-  int1:= findchar(str1,'(');
-  if int1 > 0 then begin
-   str1:= uppercase(copy(str1,int1+1,length(str1)-int1-1));
-   ar1:= splitstring(str1,',');         //todo: real parsing
-   for int1:= 0 to high(ar1) do begin
-    int2:= pos('PRIMARY',ar1[int1]);
-    if (int2 > 0) and (pos('KEY',ar1[int1]) > int2) then begin
-     ar1:= splitstring(ar1[int1],' ');
-     if (ar1[0][1] = '''') and (ar1[0][length(ar1[0])] = '''') then begin
-      str1:= copy(ar1[0],2,length(ar1[0]) - 2);
-      indexdefs.add('$PRIMARYKEY$',str1,[ixPrimary,ixUnique]);
-     end;
-    end;
-   end;
+ ar1:= stringsquery('PRAGMA table_info('+tablename+');');
+ for int1:= 0 to high(ar1) do begin
+  if (high(ar1[int1]) >= 5) and (ar1[int1][5] <> '0') then begin
+   indexdefs.add('$PRIMARY_KEY$',ar1[int1][1],[ixPrimary,ixUnique]);
+   break;
   end;
- end; 
+ end;
+{  
+for int1:= 0 to high(ar2) do begin
+ for int2:= 0 to high(ar2[int1]) do begin
+  write(ar2[int1][int2],' ');
+ end;
+ writeln;
+end;
+}
 end;
 
 end.

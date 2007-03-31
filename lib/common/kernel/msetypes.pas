@@ -85,6 +85,8 @@ type
  pcomplexarty = ^complexarty;
  stringarty = array of string;
  pstringarty = ^stringarty;
+ stringararty = array of stringarty;
+ pstringararty = ^stringararty;
 
  pointeraty = array[0..0] of pointer;
  ppointeraty = ^pointeraty;
