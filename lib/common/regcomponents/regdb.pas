@@ -174,9 +174,8 @@ begin
       tmsedatasource,
       tmsedbf,tmsefixedformatdataset,tmsesdfdataset,tmsememdataset,
       tmsesqlquery,tmsesqltransaction,
-      tmseibconnection,tmsepqconnection,tmseodbcconnection,
-      tmsemysql40connection,tmsemysql41connection,tmsemysql50connection,
-      tsqlite3connection
+      tmseibconnection,tmsepqconnection,tsqlite3connection,tmseodbcconnection,
+      tmsemysql40connection,tmsemysql41connection,tmsemysql50connection
       {$ifdef mse_with_sqlite}
        ,tmsesqlite3dataset
       {$endif}
