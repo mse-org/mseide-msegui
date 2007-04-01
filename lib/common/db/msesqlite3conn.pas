@@ -391,9 +391,9 @@ begin
      end;
     end;
    end;
-   if ft1 <> ftunknown then begin
+//   if ft1 <> ftunknown then begin
     tfielddef.create(fielddefs,str1,ft1,size1,false,int1+1);
-   end;
+//   end;
   end;
  end;
 end;
