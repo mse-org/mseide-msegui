@@ -1990,7 +1990,14 @@ begin
   ffilterediting:= false;
  end;
  fintf.updatereadonlystate;
- inherited;
+ try
+  inherited;
+ except
+  on e: exception do begin
+   e.message:= fintf.getwidget.name + ': ' + e.message;
+   raise
+  end;
+ end;
  if active and (field <> nil) and 
                     (field.datatype in [ftstring,ftfixedchar]) then begin
   fmaxlength:= 0;

@@ -1199,8 +1199,8 @@ function checkfieldcompatibility(const afield: tfield;
                      const adatatype: tfieldtype): boolean;
            //true if ok
 begin
- result:= (afield.datatype in fieldcompatibility[adatatype]) or 
-                            (adatatype = ftunknown);
+ result:= (afield.datatype in fieldcompatibility[adatatype]){ or 
+                            (adatatype = ftunknown)};
 end;
 
 function vartorealty(const avalue: variant): realty;
