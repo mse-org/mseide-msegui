@@ -55,7 +55,7 @@ type
   
 procedure Register;
 begin
- registercomponents('Edit',[tedit,tslider,tprogressbar,
+ registercomponents('Edit',[twidgetgrid,tedit,tslider,tprogressbar,
    tbooleanedit,tbooleaneditradio,
    tdatabutton,tstockglyphdatabutton,tdataicon,tdataimage,tpointeredit,
    tstringedit,tdropdownlistedit,thistoryedit,tdialogstringedit,
@@ -65,7 +65,7 @@ begin
    {tstringlistedit,}
    tlistview,titemedit,tdropdownitemedit,tmbdropdownitemedit,ttreeitemedit,
    trecordfieldedit,
-   twidgetgrid,ttextedit,tterminal]);
+   ttextedit,tterminal]);
  registerpropertyeditor(tdropdowncols.classinfo,nil,'',tdropdowncolpropertyeditor);
  registerpropertyeditor(ttabulators.classinfo,ttextedit,'tabulators',
             toptionalpersistentarraypropertyeditor);

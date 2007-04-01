@@ -168,7 +168,30 @@ type
     
 procedure Register;
 begin
- registercomponents('Dbf',[
+ registercomponents('DB',[     
+      tdbnavigator,tdbstringgrid,
+      tlookupbuffer,tdblookupbuffer,tdbmemolookupbuffer,
+      tmsedatasource,
+      tmsedbf,tmsefixedformatdataset,tmsesdfdataset,tmsememdataset,
+      tmsesqlquery,tmsesqltransaction,
+      tmseibconnection,tmsepqconnection,tmseodbcconnection,
+      tmsemysql40connection,tmsemysql41connection,tmsemysql50connection,
+      tsqlite3connection
+      {$ifdef mse_with_sqlite}
+       ,tmsesqlite3dataset
+      {$endif}
+      ]);
+ registercomponents('DBe',[tdbwidgetgrid,
+      tenumeditdb,tkeystringeditdb,tenumeditlb,tkeystringeditlb,
+      tdbmemoedit,tdbstringedit,tdbdropdownlistedit,tdbdialogstringedit,
+      tdbbooleantextedit,
+      tdbkeystringedit,tdbkeystringeditdb,tdbkeystringeditlb,
+      tdbintegeredit,tdbenumedit,tdbenumeditdb,tdbenumeditlb,
+      tdbdataicon,tdbdataimage,tdbdatabutton,tdbrealedit,tdbdatetimeedit,
+      tdbcalendardatetimeedit,tdbfilenameedit,
+      tdbbooleanedit,tdbbooleaneditradio
+      ]);
+ registercomponents('DBf',[
       tfieldparamlink,tfieldlink,ttimestampfieldlink,tfieldfieldlink,
       tsequencelink,tdbevent,
       tmsestringfield,tmselongintfield,tmselargeintfield,tmsesmallintfield,
@@ -179,29 +202,6 @@ begin
       tdblabel,tdbstringdisp,tdbintegerdisp,tdbbooleandisp,
       tdbrealdisp,tdbdatetimedisp,
       tdbstringdisplb,tdbintegerdisplb,tdbrealdisplb,tdbdatetimedisplb
-      ]);
- registercomponents('Db',[
-      tenumeditdb,tkeystringeditdb,tenumeditlb,tkeystringeditlb,
-      tdbmemoedit,tdbstringedit,tdbdropdownlistedit,tdbdialogstringedit,
-      tdbbooleantextedit,
-      tdbkeystringedit,tdbkeystringeditdb,tdbkeystringeditlb,
-      tdbintegeredit,tdbenumedit,tdbenumeditdb,tdbenumeditlb,
-      tdbdataicon,tdbdataimage,tdbdatabutton,tdbrealedit,tdbdatetimeedit,
-      tdbcalendardatetimeedit,tdbfilenameedit,
-      tdbbooleanedit,tdbbooleaneditradio,
-      tdbwidgetgrid,tdbstringgrid,
-      
-      
-      tlookupbuffer,tdblookupbuffer,tdbmemolookupbuffer,
-      tmsedatasource,tdbnavigator,
-      tmsedbf,tmsefixedformatdataset,tmsesdfdataset,tmsememdataset,
-      tmsesqlquery,tmsesqltransaction,
-      tmseibconnection,tmsepqconnection,tmseodbcconnection,
-      tmsemysql40connection,tmsemysql41connection,tmsemysql50connection,
-      tsqlite3connection
-      {$ifdef mse_with_sqlite}
-       ,tmsesqlite3dataset
-      {$endif}
       ]);
  registerpropertyeditor(typeinfo(tnolistdropdowncol),nil,'',tclasspropertyeditor);
  registerpropertyeditor(typeinfo(tnolistdropdowncols),nil,'',
