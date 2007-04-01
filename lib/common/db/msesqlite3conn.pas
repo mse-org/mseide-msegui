@@ -238,6 +238,7 @@ procedure tsqlite3connection.Execute(const cursor: TSQLCursor;
 var
  int1: integer;
  str1: string;
+ cu1: currency;
 begin
  with tsqlite3cursor(cursor) do begin
   if aparams <> nil then begin
@@ -253,6 +254,10 @@ begin
        end;
        ftlargeint: begin
         checkerror(sqlite3_bind_int64(fstatement,int1+1,aslargeint));
+       end;
+       ftbcd: begin
+        cu1:= ascurrency;
+        checkerror(sqlite3_bind_int64(fstatement,int1+1,pint64(@cu1)^));
        end;
        ftfloat: begin
         checkerror(sqlite3_bind_double(fstatement,int1+1,asfloat));
@@ -333,31 +338,36 @@ begin
       ft1:= ftword;
      end
      else begin
-      if str2 = 'FLOAT' then begin        //todo: currency, numeric...
+      if str2 = 'FLOAT' then begin     
        ft1:= ftfloat;
       end
       else begin
-       if pos('VARCHAR',str2) = 1 then begin
-        ft1:= ftstring;
-        size1:= 255; //default
-        ar1:= splitstring(str2,'(');
-        if high(ar1) >= 1 then begin
-         ar1:= splitstring(ar1[1],')');
-         if high(ar1) >= 0 then begin
-          try
-           size1:= strtoint(ar1[0]);
-          except
-          end;
-         end;
-        end;
+       if pos('NUMERIC',str2) = 1 then begin      
+        ft1:= ftbcd;
        end
        else begin
-        if str2 = 'TEXT' then begin
-         ft1:= ftmemo;
+        if pos('VARCHAR',str2) = 1 then begin
+         ft1:= ftstring;
+         size1:= 255; //default
+         ar1:= splitstring(str2,'(');
+         if high(ar1) >= 1 then begin
+          ar1:= splitstring(ar1[1],')');
+          if high(ar1) >= 0 then begin
+           try
+            size1:= strtoint(ar1[0]);
+           except
+           end;
+          end;
+         end;
         end
         else begin
-         if str2 = 'BLOB' then begin
-          ft1:= ftblob;
+         if str2 = 'TEXT' then begin
+          ft1:= ftmemo;
+         end
+         else begin
+          if str2 = 'BLOB' then begin
+           ft1:= ftblob;
+          end;
          end;
         end;
        end;
@@ -370,6 +380,7 @@ begin
     ftlargeint: size1:= sizeof(largeint);
     ftfloat: size1:= sizeof(double);
     ftblob,ftmemo: size1:= sizeof(blobidsize);
+    ftbcd: size1:= sizeof(currency);
    end;
    tfielddef.create(fielddefs,str1,ft1,size1,false,int1+1);
   end;
@@ -406,7 +417,7 @@ begin
       integer(buffer^):= i;
      end;
     end;
-    ftlargeint: begin
+    ftlargeint,ftbcd: begin
      largeint(buffer^):= sqlite3_column_int64(fstatement,fnum);
     end;
     ftfloat: begin
