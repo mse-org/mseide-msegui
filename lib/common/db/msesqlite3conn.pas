@@ -252,6 +252,9 @@ begin
        ftinteger,ftboolean,ftsmallint: begin
         checkerror(sqlite3_bind_int(fstatement,int1+1,asinteger));
        end;
+       ftword: begin
+        checkerror(sqlite3_bind_int(fstatement,int1+1,asword));
+       end;
        ftlargeint: begin
         checkerror(sqlite3_bind_int64(fstatement,int1+1,aslargeint));
        end;
@@ -328,45 +331,58 @@ begin
    size1:= 0;
    if (str2 = 'INT') or (str2 = 'INTEGER') then begin
     ft1:= ftinteger;
+    size1:= sizeof(integer);
    end
    else begin
     if str2 = 'LARGEINT' then begin
      ft1:= ftlargeint;
+     size1:= sizeof(largeint);
     end
     else begin
      if str2 = 'WORD' then begin
       ft1:= ftword;
+      size1:= sizeof(word);
      end
      else begin
-      if str2 = 'FLOAT' then begin     
-       ft1:= ftfloat;
+      if str2 = 'SMALLINT' then begin
+       ft1:= ftsmallint;
+       size1:= sizeof(smallint);
       end
       else begin
-       if pos('NUMERIC',str2) = 1 then begin      
-        ft1:= ftbcd;
+       if str2 = 'FLOAT' then begin     
+        ft1:= ftfloat;
+        size1:= sizeof(double);
        end
        else begin
-        if pos('VARCHAR',str2) = 1 then begin
-         ft1:= ftstring;
-         size1:= 255; //default
-         ar1:= splitstring(str2,'(');
-         if high(ar1) >= 1 then begin
-          ar1:= splitstring(ar1[1],')');
-          if high(ar1) >= 0 then begin
-           try
-            size1:= strtoint(ar1[0]);
-           except
-           end;
-          end;
-         end;
+        if pos('NUMERIC',str2) = 1 then begin      
+         ft1:= ftbcd;
+         size1:= sizeof(currency);
         end
         else begin
-         if str2 = 'TEXT' then begin
-          ft1:= ftmemo;
+         if pos('VARCHAR',str2) = 1 then begin
+          ft1:= ftstring;
+          size1:= 255; //default
+          ar1:= splitstring(str2,'(');
+          if high(ar1) >= 1 then begin
+           ar1:= splitstring(ar1[1],')');
+           if high(ar1) >= 0 then begin
+            try
+             size1:= strtoint(ar1[0]);
+            except
+            end;
+           end;
+          end;
          end
          else begin
-          if str2 = 'BLOB' then begin
-           ft1:= ftblob;
+          if str2 = 'TEXT' then begin
+           ft1:= ftmemo;
+           size1:= blobidsize;
+          end
+          else begin
+           if str2 = 'BLOB' then begin
+            ft1:= ftblob;
+            size1:= blobidsize;
+           end;
           end;
          end;
         end;
@@ -375,14 +391,9 @@ begin
      end;
     end;
    end;
-   case ft1 of
-    ftinteger: size1:= sizeof(integer);
-    ftlargeint: size1:= sizeof(largeint);
-    ftfloat: size1:= sizeof(double);
-    ftblob,ftmemo: size1:= sizeof(blobidsize);
-    ftbcd: size1:= sizeof(currency);
+   if ft1 <> ftunknown then begin
+    tfielddef.create(fielddefs,str1,ft1,size1,false,int1+1);
    end;
-   tfielddef.create(fielddefs,str1,ft1,size1,false,int1+1);
   end;
  end;
 end;
@@ -408,14 +419,14 @@ begin
   result:= st1 <> st_null;
   if result then begin
    case afield.datatype of
-    ftinteger,ftsmallint: begin
-     i:= sqlite3_column_int(fstatement,fnum);
-     if afield.datatype = ftsmallint then begin
-      integer(buffer^):= smallint(i);
-     end
-     else begin
-      integer(buffer^):= i;
-     end;
+    ftinteger: begin
+     integer(buffer^):= sqlite3_column_int(fstatement,fnum);
+    end;
+    ftsmallint: begin
+     smallint(buffer^):= sqlite3_column_int(fstatement,fnum);
+    end;
+    ftword: begin
+     word(buffer^):= sqlite3_column_int(fstatement,fnum);
     end;
     ftlargeint,ftbcd: begin
      largeint(buffer^):= sqlite3_column_int64(fstatement,fnum);
