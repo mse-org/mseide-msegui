@@ -233,87 +233,6 @@ begin
  string(astring):= '';
 end;
 
-procedure tsqlite3connection.Execute(const cursor: TSQLCursor;
-               const atransaction: tsqltransaction; const AParams: TParams);
-var
- int1: integer;
- str1: string;
- cu1: currency;
-begin
- with tsqlite3cursor(cursor) do begin
-  if aparams <> nil then begin
-   for int1:= 0 to high(fparambinding) do begin
-    with aparams[fparambinding[int1]] do begin
-     if isnull then begin
-      checkerror(sqlite3_bind_null(fstatement,int1+1));
-     end
-     else begin
-      case datatype of
-       ftinteger,ftboolean,ftsmallint: begin
-        checkerror(sqlite3_bind_int(fstatement,int1+1,asinteger));
-       end;
-       ftword: begin
-        checkerror(sqlite3_bind_int(fstatement,int1+1,asword));
-       end;
-       ftlargeint: begin
-        checkerror(sqlite3_bind_int64(fstatement,int1+1,aslargeint));
-       end;
-       ftbcd: begin
-        cu1:= ascurrency;
-        checkerror(sqlite3_bind_int64(fstatement,int1+1,pint64(@cu1)^));
-       end;
-       ftfloat: begin
-        checkerror(sqlite3_bind_double(fstatement,int1+1,asfloat));
-       end;
-       ftstring: begin
-        str1:= asstring;
-        stringaddref(str1);
-        checkerror(sqlite3_bind_text(fstatement,int1+1,pchar(str1),
-                    length(str1),@freebindstring));
-       end;
-       ftblob: begin
-        str1:= asstring;
-        stringaddref(str1);
-        checkerror(sqlite3_bind_blob(fstatement,int1+1,pointer(str1),
-                    length(str1),@freebindstring));
-       end;
-       else begin
-        databaseerror('Parameter type '+getenumname(typeinfo(tfieldtype),
-                                       ord(datatype))+' not supported.',self);
-       end;
-      end;
-     end;
-    end;
-   end;
-  end;
-  fstate:= sqlite3_step(fstatement);
-  if fstate <= sqliteerrormax then begin
-   checkerror(sqlite3_reset(fstatement));
-  end;
-  if fstate = sqlite_row then begin
-   fstate:= sqliteerrormax; //first row
-  end;
- end;
-end;
-
-function tsqlite3connection.Fetch(cursor: TSQLCursor): boolean;
-begin
- with tsqlite3cursor(cursor) do begin
-  if fstate = sqliteerrormax then begin
-   fstate:= sqlite_row; //first row;
-  end
-  else begin
-   if fstate = sqlite_row then begin
-    fstate:= sqlite3_step(fstatement);
-    if fstate <= sqliteerrormax then begin
-     checkerror(sqlite3_reset(fstatement));  //right error returned??
-    end;
-   end;
-  end;
-  result:= fstate = sqlite_row;
- end;
-end;
-
 procedure tsqlite3connection.AddFieldDefs(cursor: TSQLCursor;
                FieldDefs: TfieldDefs);
 var
@@ -349,40 +268,70 @@ begin
        size1:= sizeof(smallint);
       end
       else begin
-       if (str2 = 'REAL') or (pos('FLOAT',str1) = 1) or 
-                                      (pos('DOUBLE',str1) = 1) then begin     
-        ft1:= ftfloat;
-        size1:= sizeof(double);
+       if str2 = 'BOOLEAN' then begin
+        ft1:= ftboolean;
+        size1:= sizeof(wordbool);
        end
        else begin
-        if pos('NUMERIC',str2) = 1 then begin      
-         ft1:= ftbcd;
-         size1:= sizeof(currency);
+        if (str2 = 'REAL') or (pos('FLOAT',str2) = 1) or 
+                                       (pos('DOUBLE',str2) = 1) then begin     
+         ft1:= ftfloat;
+         size1:= sizeof(double);
         end
         else begin
-         if pos('VARCHAR',str2) = 1 then begin
-          ft1:= ftstring;
-          size1:= 255; //default
-          ar1:= splitstring(str2,'(');
-          if high(ar1) >= 1 then begin
-           ar1:= splitstring(ar1[1],')');
-           if high(ar1) >= 0 then begin
-            try
-             size1:= strtoint(ar1[0]);
-            except
-            end;
-           end;
-          end;
+         if str2 = 'DATETIME' then begin
+          ft1:= ftdatetime;
+          size1:= sizeof(tdatetime);
          end
          else begin
-          if str2 = 'TEXT' then begin
-           ft1:= ftmemo;
-           size1:= blobidsize;
+          if str2 = 'DATE' then begin
+           ft1:= ftdate;
+           size1:= sizeof(tdatetime);
           end
           else begin
-           if str2 = 'BLOB' then begin
-            ft1:= ftblob;
-            size1:= blobidsize;
+           if str2 = 'TIME' then begin
+            ft1:= fttime;
+            size1:= sizeof(tdatetime);
+           end          
+           else begin
+            if pos('NUMERIC',str2) = 1 then begin      
+             ft1:= ftbcd;
+             size1:= sizeof(currency);
+            end
+            else begin
+             if str2 = 'CURRENCY' then begin
+              ft1:= ftcurrency;
+              size1:= sizeof(double);
+             end
+             else begin
+              if pos('VARCHAR',str2) = 1 then begin
+               ft1:= ftstring;
+               size1:= 255; //default
+               ar1:= splitstring(str2,'(');
+               if high(ar1) >= 1 then begin
+                ar1:= splitstring(ar1[1],')');
+                if high(ar1) >= 0 then begin
+                 try
+                  size1:= strtoint(ar1[0]);
+                 except
+                 end;
+                end;
+               end;
+              end
+              else begin
+               if str2 = 'TEXT' then begin
+                ft1:= ftmemo;
+                size1:= blobidsize;
+               end
+               else begin
+                if str2 = 'BLOB' then begin
+                 ft1:= ftblob;
+                 size1:= blobidsize;
+                end;
+               end;
+              end;
+             end;
+            end;
            end;
           end;
          end;
@@ -392,16 +341,72 @@ begin
      end;
     end;
    end;
-//   if ft1 <> ftunknown then begin
-    tfielddef.create(fielddefs,str1,ft1,size1,false,int1+1);
-//   end;
+   tfielddef.create(fielddefs,str1,ft1,size1,false,int1+1);
   end;
  end;
 end;
 
-procedure tsqlite3connection.FreeFldBuffers(cursor: TSQLCursor);
+procedure tsqlite3connection.Execute(const cursor: TSQLCursor;
+               const atransaction: tsqltransaction; const AParams: TParams);
+var
+ int1: integer;
+ str1: string;
+ cu1: currency;
 begin
- //dummy
+ with tsqlite3cursor(cursor) do begin
+  if aparams <> nil then begin
+   for int1:= 0 to high(fparambinding) do begin
+    with aparams[fparambinding[int1]] do begin
+     if isnull then begin
+      checkerror(sqlite3_bind_null(fstatement,int1+1));
+     end
+     else begin
+      case datatype of
+       ftinteger,ftboolean,ftsmallint: begin
+        checkerror(sqlite3_bind_int(fstatement,int1+1,asinteger));
+       end;
+       ftword: begin
+        checkerror(sqlite3_bind_int(fstatement,int1+1,asword));
+       end;
+       ftlargeint: begin
+        checkerror(sqlite3_bind_int64(fstatement,int1+1,aslargeint));
+       end;
+       ftbcd: begin
+        cu1:= ascurrency;
+        checkerror(sqlite3_bind_int64(fstatement,int1+1,pint64(@cu1)^));
+       end;
+       ftfloat,fttime,ftdate,ftdatetime,ftcurrency: begin
+        checkerror(sqlite3_bind_double(fstatement,int1+1,asfloat));
+       end;
+       ftstring: begin
+        str1:= asstring;
+        stringaddref(str1);
+        checkerror(sqlite3_bind_text(fstatement,int1+1,pchar(str1),
+                    length(str1),@freebindstring));
+       end;
+       ftblob: begin
+        str1:= asstring;
+        stringaddref(str1);
+        checkerror(sqlite3_bind_blob(fstatement,int1+1,pointer(str1),
+                    length(str1),@freebindstring));
+       end;
+       else begin
+        databaseerror('Parameter type '+getenumname(typeinfo(tfieldtype),
+                                       ord(datatype))+' not supported.',self);
+       end;
+      end;
+     end;
+    end;
+   end;
+  end;
+  fstate:= sqlite3_step(fstatement);
+  if fstate <= sqliteerrormax then begin
+   checkerror(sqlite3_reset(fstatement));
+  end;
+  if fstate = sqlite_row then begin
+   fstate:= sqliteerrormax; //first row
+  end;
+ end;
 end;
 
 function tsqlite3connection.loadfield(const cursor: tsqlcursor;
@@ -429,12 +434,18 @@ begin
     ftword: begin
      word(buffer^):= sqlite3_column_int(fstatement,fnum);
     end;
+    ftboolean: begin
+     wordbool(buffer^):= sqlite3_column_int(fstatement,fnum) <> 0;
+    end; 
     ftlargeint,ftbcd: begin
      largeint(buffer^):= sqlite3_column_int64(fstatement,fnum);
     end;
-    ftfloat: begin
+    ftfloat,ftcurrency: begin
      double(buffer^):= sqlite3_column_double(fstatement,fnum);
     end;
+    ftdatetime,ftdate,fttime: begin
+     tdatetime(buffer^):= sqlite3_column_double(fstatement,fnum);
+    end; 
     ftstring: begin
      int1:= sqlite3_column_bytes(fstatement,fnum);
      if int1 > bufsize then begin
@@ -465,6 +476,29 @@ begin
    end;
   end;
  end;
+end;
+
+function tsqlite3connection.Fetch(cursor: TSQLCursor): boolean;
+begin
+ with tsqlite3cursor(cursor) do begin
+  if fstate = sqliteerrormax then begin
+   fstate:= sqlite_row; //first row;
+  end
+  else begin
+   if fstate = sqlite_row then begin
+    fstate:= sqlite3_step(fstatement);
+    if fstate <= sqliteerrormax then begin
+     checkerror(sqlite3_reset(fstatement));  //right error returned??
+    end;
+   end;
+  end;
+  result:= fstate = sqlite_row;
+ end;
+end;
+
+procedure tsqlite3connection.FreeFldBuffers(cursor: TSQLCursor);
+begin
+ //dummy
 end;
 
 function tsqlite3connection.GetTransactionHandle(trans: TSQLHandle): pointer;
