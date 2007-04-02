@@ -9082,6 +9082,8 @@ begin
   rowbefore:= ffocusedcell.row;
   beginupdate;
   if index >= 0 then begin //datarows
+   fdatacols.insertrow(index,count);
+   ffixcols.insertrow(index,count);
    if (ffocusedcell.row >= 0) then begin
     if (ffocusedcell.row >= index) then begin
      inc(ffocusedcell.row,count);
@@ -9090,8 +9092,8 @@ begin
      end;
     end;
    end;
-   fdatacols.insertrow(index,count);
-   ffixcols.insertrow(index,count);
+//   fdatacols.insertrow(index,count);
+//   ffixcols.insertrow(index,count);
    inc(frowcount,count);
    if frowcount > frowcountmax then begin
     frowcount:= frowcountmax;
