@@ -14,21 +14,23 @@ unit msedate;
 interface
 
 function maxdays(year: word; month: word): word;
-function utctolocaltime(value: tdatetime): tdatetime;
-function localtimetoutc(value: tdatetime): tdatetime;
+function utctolocaltime(const value: tdatetime): tdatetime;
+function localtimetoutc(const value: tdatetime): tdatetime;
 
 implementation
 uses
  msesysintf;
  
-function utctolocaltime(value: tdatetime): tdatetime;
+function utctolocaltime(const value: tdatetime): tdatetime;
 begin
- result:= value + sys_localtimeoffset;
+ result:= sys_utctolocaltime(value);
+// result:= value + sys_localtimeoffset;
 end;
 
-function localtimetoutc(value: tdatetime): tdatetime;
+function localtimetoutc(const value: tdatetime): tdatetime;
 begin
- result:= value - sys_localtimeoffset;
+ result:= sys_localtimetoutc(value);
+// result:= value - sys_localtimeoffset;
 end;
 
 function maxdays(year: word; month: word): word;

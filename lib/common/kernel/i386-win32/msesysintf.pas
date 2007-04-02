@@ -812,6 +812,16 @@ begin
  result:= int64(ti2) / (24*60*60*10000000); //100ns
 end;
 
+function sys_utctolocaltime(const value: tdatetime): tdatetime;
+begin
+ result:= value + sys_localtimeoffset; //todo
+end;
+
+function sys_localtimetoutc(const value: tdatetime): tdatetime;
+begin
+ result:= value - sys_localtimeoffset; //todo
+end;
+
 {
 function sys_localtimeoffset: tdatetime;
 var

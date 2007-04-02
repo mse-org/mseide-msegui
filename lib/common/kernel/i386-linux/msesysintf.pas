@@ -186,7 +186,7 @@ procedure setcloexec(const fd: integer);
 
 implementation
 uses
- sysutils,msefileutils;
+ sysutils,msefileutils,dateutils;
 {$ifdef FPC}
 const
  recursive = PTHREAD_MUTEX_RECURSIVE;
@@ -1153,6 +1153,51 @@ begin
   gmtoff:= tm.__tm_gmtoff / (24.0*60.0*60.0);
  end;
  result:= gmtoff;
+end;
+
+const
+ datetimeoffset = -25569;
+ 
+function sys_utctolocaltime(const value: tdatetime): tdatetime;
+var
+ ti1: integer;
+ rea1: real;
+ tm: tunixtime;
+begin
+ rea1:= value + datetimeoffset;
+ if rea1 < 0 then begin
+  ti1:= 0;
+ end
+ else begin
+  ti1:= round(rea1) * 24*60*60; //seconds
+ end;
+ localtime_r(@ti1,@tm);
+ result:= incsecond(value,tm.__tm_gmtoff);
+// result:= value + sys_localtimeoffset; 
+end;
+
+function sys_localtimetoutc(const value: tdatetime): tdatetime;
+var
+ year,month,day,hour,minute,second,millisecond: word;
+ tm: tunixtime;
+begin
+ if value < -datetimeoffset then begin
+  decodedatetime(-datetimeoffset,year,month,day,hour,minute,second,millisecond);
+ end
+ else begin
+  decodedatetime(value,year,month,day,hour,minute,second,millisecond);
+ end;
+ with tm do begin
+  tm_sec:= second;
+  tm_min:= minute;
+  tm_hour:= hour;
+  tm_mday:= day;
+  tm_mon:= month;
+  tm_year:= year-1900;
+ end;
+ timelocal(tm);
+ result:= incsecond(value,-tm.__tm_gmtoff);
+// result:= value - sys_localtimeoffset; 
 end;
 
 function sys_getlangname: string;

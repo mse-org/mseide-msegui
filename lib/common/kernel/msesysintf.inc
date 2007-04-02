@@ -91,4 +91,6 @@ function sys_getlangname: string;
 //function sys_getlastsyserror: integer;
 function sys_getprintcommand: string;
 
+function sys_utctolocaltime(const value: tdatetime): tdatetime;
+function sys_localtimetoutc(const value: tdatetime): tdatetime;
 
