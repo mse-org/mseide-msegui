@@ -24,8 +24,8 @@ uses
 | or DOUBLE[...]     |                     |             |             |
 | CURRENCY           | REAL                | ftcurrency  | double!     |
 | DATETIME           | REAL UTC            | ftdatetime  | tdatetime   |
-| DATE               | REAL UTC            | ftdate      | tdatetime   |
-| TIME               | REAL UTC            | fttime      | tdatetime   |
+| DATE               | REAL                | ftdate      | tdatetime   |
+| TIME               | REAL                | fttime      | tdatetime   |
 | NUMERIC[...]       | INTEGER 8           | ftbcd       | currency    |
 | VARCHAR[(n)]       | TEXT                | ftstring    | msestring   |
 | TEXT               | TEXT                | ftmemo      | utf8 string |
@@ -116,7 +116,7 @@ type
  
 implementation
 uses
- msesqldb,msebufdataset,dbconst,sysutils,typinfo,dateutils,msesysintf;
+ msesqldb,msebufdataset,dbconst,sysutils,typinfo,dateutils,msesysintf,msedate;
 type
  storagetypety = (st_none,st_integer,st_float,st_text,st_blob,st_null);
  
@@ -399,15 +399,10 @@ begin
        end;
        ftdatetime: begin
         checkerror(sqlite3_bind_double(fstatement,int1+1,
-             asfloat-sys_localtimeoffset)); //wrong with negative values
+                                              localtimetoutc(asfloat)));
        end;
-       ftdate: begin
-        checkerror(sqlite3_bind_double(fstatement,int1+1,
-             int(asfloat-sys_localtimeoffset))); //wrong with negative values
-       end;
-       fttime: begin
-        checkerror(sqlite3_bind_double(fstatement,int1+1,
-             frac(asfloat-sys_localtimeoffset))); //wrong with negative values
+       ftdate,fttime: begin
+        checkerror(sqlite3_bind_double(fstatement,int1+1,asfloat));
        end;
        ftstring: begin
         str1:= asstring;
@@ -495,8 +490,8 @@ begin
           hour:= strtoint(ar2[0]);
           minute:= strtoint(ar2[1]);
           second:= strtoint(ar2[2]);
-          tdatetime(buffer^):= encodedatetime(year,month,day,
-                 hour,minute,second,0) + sys_localtimeoffset;
+          tdatetime(buffer^):= utctolocaltime(encodedatetime(year,month,day,
+                                              hour,minute,second,0));
           result:= true;
          end;
         end;
@@ -508,9 +503,7 @@ begin
           year:= strtoint(ar2[0]);
           month:= strtoint(ar2[1]);
           day:= strtoint(ar2[2]);
-          tdatetime(buffer^):= int(encodedate(year,month,day) + 
-                                       sys_localtimeoffset); 
-               //wrong with negative value
+          tdatetime(buffer^):= encodedate(year,month,day); 
           result:= true;
          end
          else begin
@@ -519,8 +512,7 @@ begin
            hour:= strtoint(ar2[0]);
            minute:= strtoint(ar2[1]);
            second:= strtoint(ar2[2]);
-           tdatetime(buffer^):= frac(encodetime(hour,minute,second,0) + 
-                                       sys_localtimeoffset); 
+           tdatetime(buffer^):= encodetime(hour,minute,second,0); 
                //wrong with negative value
            result:= true;
           end;
