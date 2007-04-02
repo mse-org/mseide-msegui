@@ -102,6 +102,28 @@ In MSEi18n:
 
 SQLite
 ******
-To install SQLite support into the IDE compile the ide with -dmse_with_sqlite
-(experimental, needs installed libsqlite3.so (linux) or sqlite3.dll (win32)
-on your system.
+To install tmsesqlite3dataset compile the IDE with -dmse_with_sqlite 
+(experimental, needs installed libsqlite3.so (linux) or sqlite3.dll (win32) 
+on your system).
+
+tsqlite3connection is available without -dmse_with_sqlite. Field type mapping:
+
+      Type name        SQLite storage class  Field type    Data type
++--------------------+---------------------+-------------+-------------+
+| INTEGER or INT     | INTEGER 4           | ftinteger   | integer     |
+| LARGEINT           | INTEGER 8           | ftlargeint  | largeint    |
+| WORD               | INTEGER 2           | ftword      | word        |
+| SMALLINT           | INTEGER 2           | ftsmallint  | smallint    |
+| BOOLEAN            | INTEGER 2           | ftboolean   | wordbool    |
+| FLOAT[...] or REAL | REAL                | ftfloat     | double      |
+| or DOUBLE[...]     |                     |             |             |
+| CURRENCY           | REAL                | ftcurrency  | double!     |
+| DATETIME           | REAL UTC            | ftdatetime  | tdatetime   |
+| DATE               | REAL UTC            | ftdate      | tdatetime   |
+| TIME               | REAL UTC            | fttime      | tdatetime   |
+| NUMERIC[...]       | INTEGER 8           | ftbcd       | currency    |
+| VARCHAR[(n)]       | TEXT                | ftstring    | msestring   |
+| TEXT               | TEXT                | ftmemo      | utf8 string |
+| BLOB               | BLOB                | ftblob      | string      |
++--------------------+---------------------+-------------+-------------+
+
