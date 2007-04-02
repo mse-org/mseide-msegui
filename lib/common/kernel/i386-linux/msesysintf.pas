@@ -1137,14 +1137,22 @@ begin
  end;
 end;
 
+var
+ lastlocaltime: integer;
+ gmtoff: real;
+ 
 function sys_localtimeoffset: tdatetime;
 var
  tm: tunixtime;
  int1: integer;
 begin
  int1:= __time(nil);
- localtime_r(@int1,@tm);
- result:= tm.__tm_gmtoff / (24.0*60.0*60.0);
+ if int1 <> lastlocaltime then begin
+  lastlocaltime:= int1;
+  localtime_r(@int1,@tm);
+  gmtoff:= tm.__tm_gmtoff / (24.0*60.0*60.0);
+ end;
+ result:= gmtoff;
 end;
 
 function sys_getlangname: string;
