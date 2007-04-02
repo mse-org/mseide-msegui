@@ -1140,8 +1140,10 @@ end;
 function sys_localtimeoffset: tdatetime;
 var
  tm: tunixtime;
+ int1: integer;
 begin
- localtime_r(nil,@tm);
+ int1:= __time(nil);
+ localtime_r(@int1,@tm);
  result:= tm.__tm_gmtoff / (24.0*60.0*60.0);
 end;
 
