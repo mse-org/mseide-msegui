@@ -21,7 +21,7 @@ uses
 | SMALLINT           | INTEGER 2           | ftsmallint  | smallint    |
 | BOOLEAN            | INTEGER 2           | ftboolean   | wordbool    |
 | FLOAT[...] or REAL | REAL                | ftfloat     | double      |
-| or DOUBLE [...]    |                     |             |             |
+| or DOUBLE[...]     |                     |             |             |
 | CURRENCY           | REAL                | ftcurrency  | double!     |
 | DATETIME           | REAL                | ftdatetime  | tdatetime   |
 | DATE               | REAL                | ftdate      | tdatetime   |
