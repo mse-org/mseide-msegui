@@ -13,23 +13,23 @@ interface
 uses
  classes,msqldb,msedb,msestrings,db,sqlite3dyn,msetypes;
 { 
-      Type name  Â  Â Â  SQLite storage class Â  Â Field type Â  Data type
+      Type name        SQLite storage class  Field type    Data type
 +--------------------+---------------------+-------------+-------------+
-| INTEGER or INT Â  Â  | INTEGER 4 Â  Â Â  Â  Â  Â |Â ftinteger Â  | integer     |
-| LARGEINT Â  Â  Â  Â  Â  | INTEGER 8 Â  Â Â  Â  Â  Â |Â ftlargeint Â | largeint    |
-| WORD Â  Â  Â  Â  Â  Â  Â  | INTEGER 2 Â  Â Â  Â  Â  Â |Â ftword Â  Â  Â | word        |
-| SMALLINT Â  Â  Â  Â  Â  | INTEGER 2 Â  Â Â  Â  Â  Â |Â ftsmallint Â | smallint Â   |
-| BOOLEAN Â  Â  Â  Â  Â  Â |Â INTEGER 2 Â  Â Â  Â  Â  Â |Â ftboolean Â  |Â wordbool    |
-| FLOAT[...] or REAL |Â REAL Â  Â  Â  Â   Â  Â  Â  | ftfloat Â  Â  |Â double      |
-| or DOUBLE[...]  Â  Â |                     |             |             |
-| CURRENCY Â  Â  Â  Â  Â  | REAL Â  Â  Â  Â   Â  Â  Â  |Â ftcurrency Â | double!     |
-| DATETIME Â  Â  Â  Â  Â  | REAL Â  Â  Â  Â   Â  Â  Â  |Â ftdatetime Â | tdatetime   |
-| DATE Â  Â  Â  Â  Â  Â  Â  | REAL Â  Â  Â  Â   Â  Â  Â  |Â ftdate Â  Â  Â | tdatetime   |
-| TIME Â  Â  Â  Â  Â  Â  Â  | REAL Â  Â  Â  Â   Â  Â  Â  |Â fttime Â  Â  Â | tdatetime   |
-| NUMERIC[...] Â  Â  Â  | INTEGER 8 Â  Â Â  Â  Â  Â | ftbcd Â  Â  Â  |Â currency    |
-| VARCHAR[(n)] Â  Â  Â  | TEXT Â  Â  Â  Â   Â  Â  Â  |Â ftstring Â  Â | msestring   |
-| TEXT Â  Â  Â  Â  Â  Â  Â  | TEXT Â  Â  Â  Â   Â  Â  Â  |Â ftmemo Â  Â  Â | utf8 string |
-| BLOB Â  Â  Â  Â  Â  Â  Â  | BLOB Â  Â  Â  Â   Â  Â  Â  |Â ftblob Â  Â  Â | string      |
+| INTEGER or INT     | INTEGER 4           | ftinteger   | integer     |
+| LARGEINT           | INTEGER 8           | ftlargeint  | largeint    |
+| WORD               | INTEGER 2           | ftword      | word        |
+| SMALLINT           | INTEGER 2           | ftsmallint  | smallint    |
+| BOOLEAN            | INTEGER 2           | ftboolean   | wordbool    |
+| FLOAT[...] or REAL | REAL                | ftfloat     | double      |
+| or DOUBLE[...]     |                     |             |             |
+| CURRENCY           | REAL                | ftcurrency  | double!     |
+| DATETIME           | REAL                | ftdatetime  | tdatetime   |
+| DATE               | REAL                | ftdate      | tdatetime   |
+| TIME               | REAL                | fttime      | tdatetime   |
+| NUMERIC[...]       | INTEGER 8           | ftbcd       | currency    |
+| VARCHAR[(n)]       | TEXT                | ftstring    | msestring   |
+| TEXT               | TEXT                | ftmemo      | utf8 string |
+| BLOB               | BLOB                | ftblob      | string      |
 +--------------------+---------------------+-------------+-------------+
 }
 type
@@ -116,7 +116,7 @@ type
  
 implementation
 uses
- msesqldb,msebufdataset,dbconst,sysutils,typinfo;
+ msesqldb,msebufdataset,dbconst,sysutils,typinfo,dateutils,msesysintf;
 type
  storagetypety = (st_none,st_integer,st_float,st_text,st_blob,st_null);
  
@@ -394,8 +394,20 @@ begin
         cu1:= ascurrency;
         checkerror(sqlite3_bind_int64(fstatement,int1+1,pint64(@cu1)^));
        end;
-       ftfloat,fttime,ftdate,ftdatetime,ftcurrency: begin
+       ftfloat,ftcurrency: begin
         checkerror(sqlite3_bind_double(fstatement,int1+1,asfloat));
+       end;
+       ftdatetime: begin
+        checkerror(sqlite3_bind_double(fstatement,int1+1,
+             asfloat-sys_localtimeoffset)); //wrong with negative values
+       end;
+       ftdate: begin
+        checkerror(sqlite3_bind_double(fstatement,int1+1,
+             int(asfloat-sys_localtimeoffset))); //wrong with negative values
+       end;
+       fttime: begin
+        checkerror(sqlite3_bind_double(fstatement,int1+1,
+             frac(asfloat-sys_localtimeoffset))); //wrong with negative values
        end;
        ftstring: begin
         str1:= asstring;
@@ -437,6 +449,9 @@ var
  i: integer;
  i64: int64;
  int1,int2: integer;
+ str1: string;
+ ar1,ar2: stringarty;
+ year,month,day,hour,minute,second: integer;
 begin
  with tsqlite3cursor(cursor) do begin
   fnum:= afield.fieldno - 1;
@@ -463,7 +478,63 @@ begin
      double(buffer^):= sqlite3_column_double(fstatement,fnum);
     end;
     ftdatetime,ftdate,fttime: begin
-     tdatetime(buffer^):= sqlite3_column_double(fstatement,fnum);
+     if st1 = st_text then begin
+      result:= false;
+      setlength(str1,sqlite3_column_bytes(fstatement,fnum));
+      move(sqlite3_column_text(fstatement,fnum)^,str1[1],length(str1));
+      try
+       ar1:= splitstring(str1,' ');
+       if high(ar1) = 1 then begin
+        ar2:= splitstring(ar1[0],'-');
+        if high(ar2) = 2 then begin
+         year:= strtoint(ar2[0]);
+         month:= strtoint(ar2[1]);
+         day:= strtoint(ar2[2]);
+         ar2:= splitstring(ar1[1],':');
+         if high(ar2) = 2 then begin
+          hour:= strtoint(ar2[0]);
+          minute:= strtoint(ar2[1]);
+          second:= strtoint(ar2[2]);
+          tdatetime(buffer^):= encodedatetime(year,month,day,
+                 hour,minute,second,0) + sys_localtimeoffset;
+          result:= true;
+         end;
+        end;
+       end
+       else begin
+        if high(ar1) = 0 then begin
+         ar2:= splitstring(ar1[0],'-');
+         if high(ar2) = 2 then begin
+          year:= strtoint(ar2[0]);
+          month:= strtoint(ar2[1]);
+          day:= strtoint(ar2[2]);
+          tdatetime(buffer^):= int(encodedate(year,month,day) + 
+                                       sys_localtimeoffset); 
+               //wrong with negative value
+          result:= true;
+         end
+         else begin
+          ar2:= splitstring(ar1[0],':');
+          if high(ar2) = 2 then begin
+           hour:= strtoint(ar2[0]);
+           minute:= strtoint(ar2[1]);
+           second:= strtoint(ar2[2]);
+           tdatetime(buffer^):= frac(encodetime(hour,minute,second,0) + 
+                                       sys_localtimeoffset); 
+               //wrong with negative value
+           result:= true;
+          end;
+         end;
+        end;
+       end;
+      except
+      end;
+     end
+     else begin
+      tdatetime(buffer^):= sqlite3_column_double(fstatement,fnum) + 
+                          sys_localtimeoffset;
+                 //wrong with negative value
+     end;
     end; 
     ftstring: begin
      int1:= sqlite3_column_bytes(fstatement,fnum);

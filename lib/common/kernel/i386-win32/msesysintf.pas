@@ -803,16 +803,28 @@ end;
 
 function sys_localtimeoffset: tdatetime;
 var
+ ti1,ti2: tfiletime; 
+begin
+ ti1.dwhighdatetime:= $40000000;
+ ti1.dwlowdatetime:= 0;
+ filetimetolocalfiletime(@ti1,@ti2);
+ ti2.dwhighdatetime:= ti2.dwhighdatetime - $40000000;
+ result:= int64(ti2) / (24*60*60*10000000); //100ns
+end;
+
+{
+function sys_localtimeoffset: tdatetime;
+var
  info: _time_zone_information;
 begin
  if gettimezoneinformation(info) = $ffffffff then begin
   result:= 0;
  end
  else begin
-  result:= - info.Bias / (24.0*60.0);
+  result:= - info.Bias / (24.0*60.0);    //does not check daylightsaving
  end;
 end;
-
+}
 function sys_getlangname: string;
 type
  langty = 
