@@ -349,7 +349,8 @@ begin
        size1:= sizeof(smallint);
       end
       else begin
-       if str2 = 'FLOAT' then begin     
+       if (str2 = 'REAL') or (pos('FLOAT',str1) = 1) or 
+                                      (pos('DOUBLE',str1) = 1) then begin     
         ft1:= ftfloat;
         size1:= sizeof(double);
        end
