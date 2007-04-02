@@ -267,7 +267,7 @@ begin
    str2:= uppercase(sqlite3_column_decltype(fstatement,int1));
    ft1:= ftunknown;
    size1:= 0;
-   if (str2 = 'INT') or (str2 = 'INTEGER') then begin
+   if pos('INT',str2) = 1 then begin //or 'INTEGER'
     ft1:= ftinteger;
     size1:= sizeof(integer);
    end
