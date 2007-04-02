@@ -12,7 +12,26 @@ unit msesqlite3conn;
 interface
 uses
  classes,msqldb,msedb,msestrings,db,sqlite3dyn,msetypes;
- 
+{ 
+      Type name       SQLite storage class    Field type   Data type
++--------------------+---------------------+-------------+-------------+
+| INTEGER or INT     | INTEGER 4           | ftinteger   | integer     |
+| LARGEINT           | INTEGER 8           | ftlargeint  | largeint    |
+| WORD               | INTEGER 2           | ftword      | word        |
+| SMALLINT           | INTEGER 2           | ftsmallint  | smallint    |
+| BOOLEAN            | INTEGER 2           | ftboolean   | wordbool    |
+| FLOAT[...] or REAL | REAL                | ftfloat     | double      |
+| or DOUBLE [...]    |                     |             |             |
+| CURRENCY           | REAL                | ftcurrency  | double!     |
+| DATETIME           | REAL                | ftdatetime  | tdatetime   |
+| DATE               | REAL                | ftdate      | tdatetime   |
+| TIME               | REAL                | fttime      | tdatetime   |
+| NUMERIC[...]       | INTEGER 8           | ftbcd       | currency    |
+| VARCHAR[(n)]       | TEXT                | ftstring    | msestring   |
+| TEXT               | TEXT                | ftmemo      | utf8 string |
+| BLOB               | BLOB                | ftblob      | string      |
++--------------------+---------------------+-------------+-------------+
+}
 type
  sqliteoptionty = (slo_transactions);
  sqliteoptionsty = set of sqliteoptionty;

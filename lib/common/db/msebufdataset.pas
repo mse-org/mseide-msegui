@@ -1675,17 +1675,15 @@ begin
   ftstring,ftfixedchar: begin
    isstring:= true;
    result:= sizeof(msestring);
-//   result:= fielddef.size + 1;
   end;
   ftsmallint,ftinteger,ftword: result:= sizeof(longint);
   ftboolean: result:= sizeof(wordbool);
   ftbcd: result:= sizeof(currency);
-  ftfloat: result:= sizeof(double);
+  ftfloat,ftcurrency: result:= sizeof(double);
   ftlargeint: result:= sizeof(largeint);
   fttime,ftdate,ftdatetime: result:= sizeof(tdatetime);
   ftmemo,ftblob: result:= getblobdatasize;
   else result:= 0;
-//  else result:= 10     //???
  end;
 end;
 
