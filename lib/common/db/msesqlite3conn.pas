@@ -36,7 +36,7 @@ type
  sqliteoptionty = (slo_transactions);
  sqliteoptionsty = set of sqliteoptionty;
  
- tsqlite3connection = class(tsqlconnection,idbcontroller,iblobconnection)
+ tsqlite3connection = class(tcustomsqlconnection,idbcontroller,iblobconnection)
   private
    fcontroller: tdbcontroller;
    fhandle: psqlite3;
@@ -112,6 +112,16 @@ type
    property Connected: boolean read getconnected write setconnected;
    property controller: tdbcontroller read fcontroller write setcontroller;
    property options: sqliteoptionsty read foptions write foptions;
+//    property Password;
+   property Transaction;
+//    property UserName;
+//    property CharSet;
+//    property HostName;
+//    Property Role;
+//    property KeepConnection;
+//    property LoginPrompt;
+//    property Params;
+//    property OnLogin;
  end;
  
 implementation

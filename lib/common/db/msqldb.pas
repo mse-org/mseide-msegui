@@ -43,7 +43,7 @@ type
    function  parsesql(const sql: string; const docreate: boolean): string; overload;
  end;
  
-  TSQLConnection = class;
+  tcustomsqlconnection = class;
   TSQLTransaction = class;
   TSQLQuery = class;
 
@@ -85,12 +85,12 @@ const
                  );
 
 
-{ TSQLConnection }
+{ tcustomsqlconnection }
 type
 
-  { TSQLConnection }
+  { tcustomsqlconnection }
 
-  TSQLConnection = class (TDatabase)
+ tcustomsqlconnection = class (TDatabase)
   private
     FPassword            : string;
     FTransaction         : TSQLTransaction;
@@ -154,7 +154,6 @@ type
     procedure GetTableNames(List : TStrings; SystemTables : Boolean = false); virtual;
     procedure GetProcedureNames(List : TStrings); virtual;
     procedure GetFieldNames(const TableName : string; List :  TStrings); virtual;
-  published
     property Password : string read FPassword write FPassword;
     property Transaction : TSQLTransaction read FTransaction write SetTransaction;
     property UserName : string read FUserName write FUserName;
@@ -163,13 +162,25 @@ type
 
     property Connected: boolean read getconnected write setconnected default false;
     Property Role :  String read FRole write FRole;
+  end;
+
+ tsqlconnection = class(tcustomsqlconnection)
+  published
+    property Password;
+    property Transaction;
+    property UserName;
+    property CharSet;
+    property HostName;
+
+    property Connected;
+    Property Role;
     property DatabaseName;
     property KeepConnection;
     property LoginPrompt;
     property Params;
     property OnLogin;
-  end;
-
+ end;
+ 
 { TSQLTransaction }
 
   TCommitRollbackAction = (caNone, caCommit, caCommitRetaining, caRollback,
@@ -262,8 +273,8 @@ type
     Procedure SQLParser(var ASQL : string);
     procedure ApplyFilter;
     Function AddFilter(SQLstr : string) : string;
-   function getdatabase1: tsqlconnection;
-   procedure setdatabase1(const avalue: tsqlconnection);
+   function getdatabase1: tcustomsqlconnection;
+   procedure setdatabase1(const avalue: tcustomsqlconnection);
    procedure checkdatabase;
    procedure setparams(const avalue: TmseParams);
    function getconnected: boolean;
@@ -339,7 +350,7 @@ type
     property OnNewRecord;
     property OnPostError;
     property AutoCalcFields;
-    property database: tsqlconnection read getdatabase1 write setdatabase1;
+    property database: tcustomsqlconnection read getdatabase1 write setdatabase1;
 //    property Database;
 
     property Transaction;
@@ -446,9 +457,9 @@ begin
   end; {case}
 end;
 
-{ TSQLConnection }
+{ tcustomsqlconnection }
 
-function TSQLConnection.StrToStatementType(s : string) : TStatementType;
+function tcustomsqlconnection.StrToStatementType(s : string) : TStatementType;
 
 var T : TStatementType;
 
@@ -459,7 +470,7 @@ begin
       Exit(t);
 end;
 
-procedure TSQLConnection.SetTransaction(Value : TSQLTransaction);
+procedure tcustomsqlconnection.SetTransaction(Value : TSQLTransaction);
 begin
   if FTransaction<>value then
     begin
@@ -471,29 +482,29 @@ begin
     end;
 end;
 
-procedure TSQLConnection.UpdateIndexDefs(var IndexDefs : TIndexDefs;
+procedure tcustomsqlconnection.UpdateIndexDefs(var IndexDefs : TIndexDefs;
                                   const TableName : string);
 
 begin
  //dummy
 end;
 
-procedure TSQLConnection.DoInternalConnect;
+procedure tcustomsqlconnection.DoInternalConnect;
 begin
   if (DatabaseName = '') then
     DatabaseError(SErrNoDatabaseName,self);
 end;
 
-procedure TSQLConnection.DoInternalDisconnect;
+procedure tcustomsqlconnection.DoInternalDisconnect;
 begin
 end;
 
-destructor TSQLConnection.Destroy;
+destructor tcustomsqlconnection.Destroy;
 begin
   inherited Destroy;
 end;
 
-procedure TSQLConnection.StartTransaction;
+procedure tcustomsqlconnection.StartTransaction;
 begin
   if not assigned(Transaction) then
     DatabaseError(SErrConnTransactionnSet)
@@ -501,7 +512,7 @@ begin
     Transaction.StartTransaction;
 end;
 
-procedure TSQLConnection.EndTransaction;
+procedure tcustomsqlconnection.EndTransaction;
 begin
   if not assigned(Transaction) then
     DatabaseError(SErrConnTransactionnSet)
@@ -509,13 +520,13 @@ begin
     Transaction.EndTransaction;
 end;
 
-Procedure TSQLConnection.ExecuteDirect(const SQL: String);
+Procedure tcustomsqlconnection.ExecuteDirect(const SQL: String);
 
 begin
  ExecuteDirect(SQL,FTransaction);
 end;
 
-Procedure TSQLConnection.ExecuteDirect(SQL: String;
+Procedure tcustomsqlconnection.ExecuteDirect(SQL: String;
                                         const ATransaction: TSQLTransaction);
 
 var Cursor : TSQLCursor;
@@ -546,7 +557,7 @@ begin
   end;
 end;
 
-procedure TSQLConnection.GetDBInfo(const SchemaType : TSchemaType; const SchemaObjectName, ReturnField : string; List: TStrings);
+procedure tcustomsqlconnection.GetDBInfo(const SchemaType : TSchemaType; const SchemaObjectName, ReturnField : string; List: TStrings);
 
 var qry : TSQLQuery;
 
@@ -573,23 +584,23 @@ begin
 end;
 
 
-procedure TSQLConnection.GetTableNames(List: TStrings; SystemTables: Boolean);
+procedure tcustomsqlconnection.GetTableNames(List: TStrings; SystemTables: Boolean);
 begin
   if not systemtables then GetDBInfo(stTables,'','table_name',List)
     else GetDBInfo(stSysTables,'','table_name',List);
 end;
 
-procedure TSQLConnection.GetProcedureNames(List: TStrings);
+procedure tcustomsqlconnection.GetProcedureNames(List: TStrings);
 begin
   GetDBInfo(stProcedures,'','proc_name',List);
 end;
 
-procedure TSQLConnection.GetFieldNames(const TableName: string; List: TStrings);
+procedure tcustomsqlconnection.GetFieldNames(const TableName: string; List: TStrings);
 begin
   GetDBInfo(stColumns,TableName,'column_name',List);
 end;
 
-function TSQLConnection.GetAsSQLText(Field : TField) : string;
+function tcustomsqlconnection.GetAsSQLText(Field : TField) : string;
 
 begin
   if (not assigned(field)) or field.IsNull then Result := 'Null'
@@ -602,7 +613,7 @@ begin
   end; {case}
 end;
 
-function TSQLConnection.GetAsSQLText(Param: TParam) : string;
+function tcustomsqlconnection.GetAsSQLText(Param: TParam) : string;
 
 begin
   if (not assigned(param)) or param.IsNull then Result := 'Null'
@@ -616,19 +627,19 @@ begin
 end;
 
 
-function TSQLConnection.GetHandle: pointer;
+function tcustomsqlconnection.GetHandle: pointer;
 begin
   Result := nil;
 end;
 
-function TSQLConnection.GetSchemaInfoSQL( SchemaType : TSchemaType; SchemaObjectName, SchemaPattern : string) : string;
+function tcustomsqlconnection.GetSchemaInfoSQL( SchemaType : TSchemaType; SchemaObjectName, SchemaPattern : string) : string;
 
 begin
  result:= ''; //compiler warning
  DatabaseError(SMetadataUnavailable);
 end;
 
-function TSQLConnection.CreateBlobStream(const Field: TField;
+function tcustomsqlconnection.CreateBlobStream(const Field: TField;
               const Mode: TBlobStreamMode; const acursor: tsqlcursor): TStream;
 
 begin
@@ -636,12 +647,12 @@ begin
  DatabaseErrorFmt(SUnsupportedFieldType,['Blob']);
 end;
 
-function TSQLConnection.getconnected: boolean;
+function tcustomsqlconnection.getconnected: boolean;
 begin
  result:= inherited connected;
 end;
 
-procedure TSQLConnection.setconnected(const avalue: boolean);
+procedure tcustomsqlconnection.setconnected(const avalue: boolean);
 var
  int1: integer;
 begin
@@ -691,7 +702,7 @@ end;
 
 function TSQLTransaction.GetHandle: pointer;
 begin
-  Result := (Database as tsqlconnection).GetTransactionHandle(FTrans);
+  Result := (Database as tcustomsqlconnection).GetTransactionHandle(FTrans);
 end;
 
 procedure TSQLTransaction.Commit;
@@ -699,7 +710,7 @@ begin
   if active then
     begin
     closedatasets;
-    if (Database as tsqlconnection).commit(FTrans) then
+    if (Database as tcustomsqlconnection).commit(FTrans) then
       begin
       closeTrans;
       FreeAndNil(FTrans);
@@ -710,14 +721,14 @@ end;
 procedure TSQLTransaction.CommitRetaining;
 begin
   if active then
-    (Database as tsqlconnection).commitRetaining(FTrans);
+    (Database as tcustomsqlconnection).commitRetaining(FTrans);
 end;
 
 procedure TSQLTransaction.Rollback;
 begin
  if active then begin
   closedatasets;
-  if (Database as tsqlconnection).RollBack(FTrans) then begin
+  if (Database as tcustomsqlconnection).RollBack(FTrans) then begin
    CloseTrans;
    FreeAndNil(FTrans);
   end;
@@ -740,7 +751,7 @@ begin
   {
   with sender do begin
    if (not IsPrepared) and (assigned(database)) and (assigned(FCursor)) then begin
-        (database as TSQLconnection).UnPrepareStatement(FCursor);
+        (database as tcustomsqlconnection).UnPrepareStatement(FCursor);
    end;
   end;
   }
@@ -756,18 +767,18 @@ end;
 procedure TSQLTransaction.RollbackRetaining;
 begin
   if active then
-    (Database as tsqlconnection).RollBackRetaining(FTrans);
+    (Database as tcustomsqlconnection).RollBackRetaining(FTrans);
 end;
 
 procedure TSQLTransaction.StartTransaction;
 
-var db : TSQLConnection;
+var db : tcustomsqlconnection;
 
 begin
   if Active then
     DatabaseError(SErrTransAlreadyActive);
 
-  db := (Database as tsqlconnection);
+  db := (Database as tcustomsqlconnection);
 
   if Db = nil then
     DatabaseError(SErrDatabasenAssigned);
@@ -805,7 +816,7 @@ begin
     begin
     CheckInactive;
     If Assigned(Database) then
-      with Database as TSqlConnection do
+      with Database as tcustomsqlconnection do
         if Transaction = self then Transaction := nil;
     inherited SetDatabase(Value);
     end;
@@ -849,17 +860,17 @@ end;
 
 procedure TSQLQuery.SetDatabase(Value : TDatabase);
 var 
- db: tsqlconnection;
+ db: tcustomsqlconnection;
 begin
  if (Database <> Value) then begin
-  if (value <> nil) and not (value is tsqlconnection) then begin
-   exception.create(name+': Database must be tsqlconnection.');
+  if (value <> nil) and not (value is tcustomsqlconnection) then begin
+   exception.create(name+': Database must be tcustomsqlconnection.');
   end;
   UnPrepare;
   if assigned(FCursor) then begin
-   TSQLConnection(database).DeAllocateCursorHandle(FCursor);
+   tcustomsqlconnection(database).DeAllocateCursorHandle(FCursor);
   end;
-  db:= value as tsqlconnection;
+  db:= value as tcustomsqlconnection;
   inherited setdatabase(value);
   if assigned(value) and (Transaction = nil) and 
                   (Assigned(db.Transaction)) then begin
@@ -891,14 +902,14 @@ var
  s: string;
 begin
  freefldbuffers;
- tsqlconnection(database).unpreparestatement(fcursor);
+ tcustomsqlconnection(database).unpreparestatement(fcursor);
  fiseof := false;
  inherited internalclose;
  s:= fsqlbuf;
  if filtered and (filter <> '') then begin
   s:= addfilter(s);
  end;
- tsqlconnection(database).preparestatement(fcursor,
+ tcustomsqlconnection(database).preparestatement(fcursor,
                                   tsqltransaction(transaction),s,fparams);
  execute;
  inherited internalopen;
@@ -945,13 +956,13 @@ end;
 
 procedure TSQLQuery.Prepare;
 var
-  db    : tsqlconnection;
+  db    : tcustomsqlconnection;
   sqltr : tsqltransaction;
 
 begin
   if not IsPrepared then
     begin
-    db := (Database as tsqlconnection);
+    db := (Database as tcustomsqlconnection);
     sqltr := (transaction as tsqltransaction);
     if not assigned(Db) then
       DatabaseError(SErrDatabasenAssigned);
@@ -993,13 +1004,13 @@ begin
  if connected then begin
   CheckInactive;
  end;
-  if IsPrepared then with Database as TSQLConnection do
+  if IsPrepared then with Database as tcustomsqlconnection do
     UnPrepareStatement(FCursor);
 end;
 
 procedure TSQLQuery.FreeFldBuffers;
 begin
-  if assigned(FCursor) then (Database as tsqlconnection).FreeFldBuffers(FCursor);
+  if assigned(FCursor) then (Database as tcustomsqlconnection).FreeFldBuffers(FCursor);
 end;
 
 function TSQLQuery.Fetch : boolean;
@@ -1009,7 +1020,7 @@ begin
   Exit;
  end;
  if not FIsEof then begin
-  FIsEOF:= not tsqlconnection(database).Fetch(Fcursor);
+  FIsEOF:= not tcustomsqlconnection(database).Fetch(Fcursor);
  end;
  Result := not FIsEOF;
 end;
@@ -1030,14 +1041,14 @@ begin
   end;
  end;
  fcursor.ftrans:= tsqltransaction(transaction).handle;
- tsqlconnection(database).execute(Fcursor,tsqltransaction(transaction),FParams);
+ tcustomsqlconnection(database).execute(Fcursor,tsqltransaction(transaction),FParams);
 end;
 
 function tsqlquery.loadfield(const afield: tfield; const buffer: pointer;
                      var bufsize: integer): boolean;
            //if bufsize < 0 -> buffer was to small, should be -bufsize
 begin
- result:= tSQLConnection(database).LoadField(FCursor,aField,buffer,bufsize)
+ result:= tcustomsqlconnection(database).LoadField(FCursor,aField,buffer,bufsize)
 end;
 
 procedure TSQLQuery.InternalAddRecord(Buffer: Pointer; AAppend: Boolean);
@@ -1052,7 +1063,7 @@ begin
    fcursor.close;
   end;
   if (not IsPrepared) and (assigned(database)) and (assigned(FCursor)) then begin
-        (database as TSQLconnection).UnPrepareStatement(FCursor);
+        (database as tcustomsqlconnection).UnPrepareStatement(FCursor);
   end;
   FreeAndNil(FUpdateQry);
   FreeAndNil(FInsertQry);
@@ -1085,7 +1096,7 @@ begin
   try
     FieldDefs.Clear;
 
-    (Database as tsqlconnection).AddFieldDefs(fcursor,FieldDefs);
+    (Database as tcustomsqlconnection).AddFieldDefs(fcursor,FieldDefs);
   finally
     FLoadingFieldDefs := False;
   end;
@@ -1127,7 +1138,7 @@ begin
 
 		case ParsePart of
 		    ppStart  : begin
-			FCursor.FStatementType := (Database as tsqlconnection).StrToStatementType(s);
+			FCursor.FStatementType := (Database as tcustomsqlconnection).StrToStatementType(s);
 		
 			if FCursor.FStatementType = stSelect then 
 			    ParsePart := ppSelect
@@ -1233,7 +1244,7 @@ begin
 
         case ParsePart of
           ppStart  : begin
-                     FCursor.FStatementType := (Database as tsqlconnection).StrToStatementType(s);
+                     FCursor.FStatementType := (Database as tcustomsqlconnection).StrToStatementType(s);
                      if FCursor.FStatementType = stSelect then ParsePart := ppSelect
                        else break;
                      if not FParseSQL then break;
@@ -1411,7 +1422,7 @@ begin
    // FCursor has to be assigned, or else the prepare went wrong before PrepareStatment was
    // called, so UnPrepareStatement shoudn't be called either
   if (not IsPrepared) and (assigned(database)) and (assigned(FCursor)) then begin
-   (database as TSQLConnection).UnPrepareStatement(Fcursor);
+   (database as tcustomsqlconnection).UnPrepareStatement(Fcursor);
   end;
  end;
 end;
@@ -1443,7 +1454,7 @@ destructor TSQLQuery.Destroy;
 begin
   if Active then Close;
   UnPrepare;
-  if assigned(FCursor) then (Database as TSQLConnection).DeAllocateCursorHandle(FCursor);
+  if assigned(FCursor) then (Database as tcustomsqlconnection).DeAllocateCursorHandle(FCursor);
   FreeAndNil(FMasterLink);
   FreeAndNil(FParams);
   FreeAndNil(FSQL);
@@ -1495,7 +1506,7 @@ Procedure TSQLQuery.UpdateIndexDefs;
 
 begin
   if assigned(DataBase) then
-    TSQLConnection(database).UpdateIndexDefs(FIndexDefs,FTableName);
+    tcustomsqlconnection(database).UpdateIndexDefs(FIndexDefs,FTableName);
 end;
 
 Procedure TSQLQuery.internalApplyRecUpdate(UpdateKind : TUpdateKind);
@@ -1825,7 +1836,7 @@ procedure TSQLQuery.SetSchemaInfo( SchemaType : TSchemaType; SchemaObjectName, S
 begin
   ReadOnly := True;
   SQL.Clear;
-  SQL.Add((DataBase as tsqlconnection).GetSchemaInfoSQL(SchemaType, SchemaObjectName, SchemaPattern));
+  SQL.Add((DataBase as tcustomsqlconnection).GetSchemaInfoSQL(SchemaType, SchemaObjectName, SchemaPattern));
 end;
 
 function TSQLQuery.CreateBlobStream(Field: TField; Mode: TBlobStreamMode): TStream;
@@ -1851,7 +1862,7 @@ begin
     end;
    end
    else begin
-    result:= tsqlconnection(database).CreateBlobStream(Field,
+    result:= tcustomsqlconnection(database).CreateBlobStream(Field,
                                         Mode,fcursor);
    end;
   end;
@@ -1910,16 +1921,16 @@ begin
   result:= sizeof(int64); //max
  end
  else begin
-  result:= tsqlconnection(database).getblobdatasize;
+  result:= tcustomsqlconnection(database).getblobdatasize;
  end;
 end;
 
-function TSQLQuery.getdatabase1: tsqlconnection;
+function TSQLQuery.getdatabase1: tcustomsqlconnection;
 begin
- result:= tsqlconnection(inherited database);
+ result:= tcustomsqlconnection(inherited database);
 end;
 
-procedure TSQLQuery.setdatabase1(const avalue: tsqlconnection);
+procedure TSQLQuery.setdatabase1(const avalue: tcustomsqlconnection);
 begin
  inherited database:= avalue;
 end;
@@ -1969,7 +1980,7 @@ begin         //todo: check connect disconnect sequence
     tsqltransaction(transaction).disconnect(self);
     disconnect;
     unprepare;
-    TSQLConnection(database).DeAllocateCursorHandle(FCursor);
+    tcustomsqlconnection(database).DeAllocateCursorHandle(FCursor);
     startlogger;
    end;
   end;
