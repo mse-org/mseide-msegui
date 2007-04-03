@@ -343,14 +343,22 @@ type
    property ProviderFlags default defaultproviderflags;
    property displayvalues: msestring read fdisplayvalues write setdisplayvalues;
  end;
+ 
+ datetimefieldoptionty = (dtfo_utc,dtfo_local); //DB time format
+ datetimefieldoptionsty = set of datetimefieldoptionty;
+                       
  tmsedatetimefield = class(tdatetimefield)
   private
+   foptions: datetimefieldoptionsty;
    function getasmsestring: msestring;
    procedure setasmsestring(const avalue: msestring);
+   procedure setoptions(const avalue: datetimefieldoptionsty);
   protected
    function HasParent: Boolean; override;
    function getasdatetime: tdatetime; override;
    procedure setasdatetime(avalue: tdatetime); override;
+   procedure setasstring(const avalue: string); override;
+   procedure gettext(var thetext: string; adisplaytext: boolean); override;
   public
    procedure Clear; override;
    function assql: string;
@@ -359,7 +367,19 @@ type
   published
    property DataSet stored false;
    property ProviderFlags default defaultproviderflags;
+   property options: datetimefieldoptionsty read foptions write setoptions;
  end;
+ 
+ tmsedatefield = class(tmsedatetimefield)
+  public
+   constructor create(aowner: tcomponent); override;
+ end;
+ 
+ tmsetimefield = class(tmsedatetimefield)
+  public
+   constructor create(aowner: tcomponent); override;
+ end;
+{ 
  tmsedatefield = class(tdatefield)
   private
    function getasmsestring: msestring;
@@ -394,6 +414,7 @@ type
    property DataSet stored false;
    property ProviderFlags default defaultproviderflags;
  end;
+ }
  tmsebinaryfield = class(tbinaryfield)
   private
    function getasmsestring: msestring;
@@ -877,7 +898,7 @@ function vartorealty(const avalue: variant): realty;
 implementation
 uses
  rtlconsts,msefileutils,typinfo,dbconst,msedatalist,mseformatstr,
- msereal,variants;
+ msereal,variants,msebits,msedate;
 type
  TFieldDefcracker = class(TCollectionItem)
   Private
@@ -1965,6 +1986,12 @@ begin
  end
  else begin
   result:= inherited getasdatetime;
+  if dtfo_utc in foptions then begin
+   result:= utctolocaltime(result);
+  end;
+  if dtfo_local in foptions then begin
+   result:= localtimetoutc(result);
+  end;
  end;
 end;
 
@@ -1974,6 +2001,12 @@ begin
   clear;
  end
  else begin
+  if dtfo_utc in foptions then begin
+   avalue:= localtimetoutc(avalue);
+  end;
+  if dtfo_local in foptions then begin
+   avalue:= utctolocaltime(avalue);
+  end;
   inherited;
  end;
 end;
@@ -1988,8 +2021,52 @@ begin
  result:= fieldtooldsql(self);
 end;
 
+procedure tmsedatetimefield.setoptions(const avalue: datetimefieldoptionsty);
+const
+ mask: datetimefieldoptionsty = [dtfo_utc,dtfo_local];
+begin
+ foptions:= datetimefieldoptionsty(setsinglebit(longword(avalue),
+                                        longword(foptions),longword(mask)));
+end;
+
+procedure tmsedatetimefield.setasstring(const avalue: string);
+begin
+ setasdatetime(strtodatetime(avalue));
+end;
+
+procedure tmsedatetimefield.gettext(var thetext: string; adisplaytext: boolean);
+var
+ r: tdatetime;
+ f: string;
+begin
+ if isnull then begin
+  thetext:=''
+ end
+ else begin
+  r:= getasdatetime;
+  if adisplaytext and (length(displayformat) <> 0) then begin
+   f:= displayformat;
+  end
+  else begin
+   case datatype of
+    fttime: f:= shorttimeformat;
+    ftdate: f:= shortdateformat;
+    else f:= 'c'
+   end;
+  end;
+  thetext:= formatdatetime(f,r);
+ end;
+end;
+
 { tmsedatefield }
 
+constructor tmsedatefield.create(aowner: tcomponent);
+begin
+ inherited;
+ setdatatype(ftdate); 
+end;
+
+{
 function tmsedatefield.HasParent: Boolean;
 begin
  result:= dataset <> nil;
@@ -2039,9 +2116,17 @@ function tmsedatefield.asoldsql: string;
 begin
  result:= fieldtooldsql(self);
 end;
+}
 
 { tmsetimefield }
 
+constructor tmsetimefield.create(aowner: tcomponent);
+begin
+ inherited;
+ setdatatype(fttime); 
+end;
+
+{
 function tmsetimefield.HasParent: Boolean;
 begin
  result:= dataset <> nil;
@@ -2091,6 +2176,7 @@ function tmsetimefield.asoldsql: string;
 begin
  result:= fieldtooldsql(self);
 end;
+}
 
 { tmsebinaryfield }
 

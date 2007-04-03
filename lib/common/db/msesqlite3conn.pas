@@ -23,7 +23,7 @@ uses
 | FLOAT[...] or REAL | REAL                | ftfloat     | double      |
 | or DOUBLE[...]     |                     |             |             |
 | CURRENCY           | REAL                | ftcurrency  | double!     |
-| DATETIME           | REAL UTC            | ftdatetime  | tdatetime   |
+| DATETIME           | REAL                | ftdatetime  | tdatetime   |
 | DATE               | REAL                | ftdate      | tdatetime   |
 | TIME               | REAL                | fttime      | tdatetime   |
 | NUMERIC[...]       | INTEGER 8           | ftbcd       | currency    |
@@ -397,11 +397,7 @@ begin
        ftfloat,ftcurrency: begin
         checkerror(sqlite3_bind_double(fstatement,int1+1,asfloat));
        end;
-       ftdatetime: begin
-        checkerror(sqlite3_bind_double(fstatement,int1+1,
-                                              localtimetoutc(asfloat)));
-       end;
-       ftdate,fttime: begin
+       ftdatetime,ftdate,fttime: begin
         checkerror(sqlite3_bind_double(fstatement,int1+1,asfloat));
        end;
        ftstring: begin
@@ -490,8 +486,8 @@ begin
           hour:= strtoint(ar2[0]);
           minute:= strtoint(ar2[1]);
           second:= strtoint(ar2[2]);
-          tdatetime(buffer^):= utctolocaltime(encodedatetime(year,month,day,
-                                              hour,minute,second,0));
+          tdatetime(buffer^):= encodedatetime(year,month,day,
+                                              hour,minute,second,0);
           result:= true;
          end;
         end;
@@ -513,7 +509,6 @@ begin
            minute:= strtoint(ar2[1]);
            second:= strtoint(ar2[2]);
            tdatetime(buffer^):= encodetime(hour,minute,second,0); 
-               //wrong with negative value
            result:= true;
           end;
          end;
@@ -523,9 +518,7 @@ begin
       end;
      end
      else begin
-      tdatetime(buffer^):= sqlite3_column_double(fstatement,fnum) + 
-                          sys_localtimeoffset;
-                 //wrong with negative value
+      tdatetime(buffer^):= sqlite3_column_double(fstatement,fnum);
      end;
     end; 
     ftstring: begin
