@@ -802,6 +802,27 @@ begin
 end;
 
 function sys_localtimeoffset: tdatetime;
+var                                  
+ tinfo: time_zone_information;
+ int1: integer;
+begin
+ with tinfo do begin
+  {$ifdef FPC}
+  case gettimezoneinformation(@tinfo) of 
+  {$else}
+  case gettimezoneinformation(tinfo) of
+  {$endif}
+   time_zone_id_unknown: int1:= bias;
+   time_zone_id_standard: int1:= bias + standardbias;
+   time_zone_id_daylight: int1:= bias + daylightbias;
+   else int1:= 0;
+  end;
+ end;
+ result:= -int1 / (24*60.0);
+end;
+
+{
+function sys_localtimeoffset: tdatetime;
 var
  ti1,ti2: tfiletime; 
 begin
@@ -815,7 +836,7 @@ begin
  ti2.dwhighdatetime:= ti2.dwhighdatetime - $40000000;
  result:= int64(ti2) / (24*60*60*1e7); //100ns
 end;
-
+}
 function localtimeshift(value: tdatetime; const tolocal: boolean) : integer;
              //todo: optimize
  function systitodatetime(const ayear: word; const systi: systemtime): tdatetime;
