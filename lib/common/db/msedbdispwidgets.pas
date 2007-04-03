@@ -3,13 +3,14 @@ unit msedbdispwidgets;
 interface
 uses
  db,classes,msesimplewidgets,msedb,msetypes,mseclasses,mseguiglob,
- msedispwidgets,msestrings,mselookupbuffer;
+ msedispwidgets,msestrings,mselookupbuffer,msegui;
  
 type 
 
  idbdispfieldlink = interface(inullinterface)
   procedure fieldtovalue;
   procedure setnullvalue;
+  function getwidget: twidget;
  end;
  
  tdispfielddatalink = class(tfielddatalink)
@@ -17,6 +18,7 @@ type
   protected
    fintf: idbdispfieldlink;
    procedure recordchanged(afield: tfield); override;
+   procedure activechanged; override;
   public
    constructor create(const intf: idbdispfieldlink);
  end;
@@ -275,7 +277,7 @@ type
  
 implementation
 uses
- msereal;
+ msereal,sysutils;
  
 { tdispfielddatalink }
 
@@ -299,6 +301,18 @@ begin
   end
   else begin
    fintf.setnullvalue;
+  end;
+ end;
+end;
+
+procedure tdispfielddatalink.activechanged;
+begin
+ try
+  inherited;
+ except
+  on e: exception do begin
+   e.message:= fintf.getwidget.name + ': ' + e.message;
+   raise
   end;
  end;
 end;
