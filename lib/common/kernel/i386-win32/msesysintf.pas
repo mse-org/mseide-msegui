@@ -851,7 +851,11 @@ var
  stddate,dldate: tdatetime;
  bo1: boolean; 
 begin
+ {$ifdef FPC}
  if gettimezoneinformation(@tinfo) = time_zone_id_invalid then begin
+ {$else}
+ if gettimezoneinformation(tinfo) = time_zone_id_invalid then begin
+ {$endif}
   result:= 0;
  end
  else begin
