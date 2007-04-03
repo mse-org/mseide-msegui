@@ -381,6 +381,8 @@ var
  int1: integer;
  str1: string;
  cu1: currency;
+ do1: double;
+ wo1: word;
 begin
  with tsqlite3cursor(cursor) do begin
   if aparams <> nil then begin
@@ -404,11 +406,17 @@ begin
         cu1:= ascurrency;
         checkerror(sqlite3_bind_int64(fstatement,int1+1,pint64(@cu1)^));
        end;
-       ftfloat,ftcurrency: begin
-        checkerror(sqlite3_bind_double(fstatement,int1+1,asfloat));
-       end;
-       ftdatetime,ftdate,fttime: begin
-        checkerror(sqlite3_bind_double(fstatement,int1+1,asfloat));
+       ftfloat,ftcurrency,ftdatetime,ftdate,fttime: begin
+        do1:= asfloat;
+//        if do1 > 1e15 then begin           //sigfpe in sqlitelib
+//         str1:= floattostr(do1);
+//         stringaddref(str1);
+//         checkerror(sqlite3_bind_text(fstatement,int1+1,pchar(str1),
+//                    length(str1),@freebindstring));
+//        end
+//        else begin
+         checkerror(sqlite3_bind_double(fstatement,int1+1,do1));
+//        end;
        end;
        ftstring: begin
         str1:= asstring;
@@ -431,7 +439,10 @@ begin
     end;
    end;
   end;
+  wo1:= get8087cw;
+  set8087cw(wo1 or $1f);             //mask exceptions, Sqlite3 has overflow
   fstate:= sqlite3_step(fstatement);
+  set8087cw(wo1);                    //restore
   if fstate <= sqliteerrormax then begin
    checkerror(sqlite3_reset(fstatement));
   end;
