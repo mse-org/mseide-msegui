@@ -23,7 +23,7 @@ var
 
 implementation
 uses
- sysutils,windows,msebits,msefileutils,mseguiintf,msedatalist;
+ sysutils,windows,msebits,msefileutils,mseguiintf,msedatalist,dateutils;
 
 //todo: correct unicode implementation, long filepaths, stubs for win95
 
@@ -807,19 +807,96 @@ var
 begin
  ti1.dwhighdatetime:= $40000000;
  ti1.dwlowdatetime:= 0;
+ {$ifdef FPC}
  filetimetolocalfiletime(@ti1,@ti2);
+ {$else}
+ filetimetolocalfiletime(ti1,ti2);
+ {$endif}
  ti2.dwhighdatetime:= ti2.dwhighdatetime - $40000000;
- result:= int64(ti2) / (24*60*60*10000000); //100ns
+ result:= int64(ti2) / (24*60*60*1e7); //100ns
 end;
 
-function sys_utctolocaltime(const value: tdatetime): tdatetime;
+function localtimeshift(value: tdatetime; const tolocal: boolean) : integer;
+             //todo: optimize
+ function systitodatetime(const ayear: word; const systi: systemtime): tdatetime;
+ var
+  wo1,wo2,wo3: word;
+  dt1: tdatetime;
+  int1: integer;
+ begin
+  with systi do begin
+   dt1:= encodedate(ayear,wmonth,1);
+   wo1:= dayoftheweek(dt1);
+   if wo1 = 7 then begin
+    wo1:= 0;               //0 -> so
+   end;
+   wo2:= wday; //n't occurence
+   for int1:= 1 to daysinamonth(ayear,wmonth) do begin
+    if wo1 = wdayofweek then begin
+     wo3:= int1;
+     dec(wo2);
+     if wo2 = 0 then begin
+      break;
+     end;
+    end;
+    wo1:= (wo1 + 1) mod 7;
+   end;
+   result:= encodedate(ayear,wmonth,wo3) + encodetime(whour,wminute,0,0);
+  end;
+ end;                 
+ 
+var                                  
+ tinfo: time_zone_information;
+ year: word;
+ stddate,dldate: tdatetime;
+ bo1: boolean; 
 begin
- result:= value + sys_localtimeoffset; //todo
+ if gettimezoneinformation(@tinfo) = time_zone_id_invalid then begin
+  result:= 0;
+ end
+ else begin
+  with tinfo do begin
+   result:= bias;
+   if tolocal then begin
+    value:= incminute(value,-bias); //->localtime
+   end;
+   if (standarddate.wmonth <> daylightdate.wmonth) and (value > 0) then begin
+    try
+     year:= yearof(value);
+     stddate:= systitodatetime(year,standarddate);
+     dldate:= systitodatetime(year,daylightdate);
+     if stddate > dldate then begin
+      bo1:= (value >= dldate) and (value < stddate);
+     end
+     else begin
+      bo1:= (value <= dldate) and (value > stddate);
+     end;
+     if bo1 then begin
+      result:= result + daylightbias;
+     end
+     else begin
+      result:= result + standardbias;
+     end;
+    except
+    end;
+   end;
+  end;
+ end;
+ if tolocal then begin
+  result:= -result;
+ end;
+end;
+
+function sys_utctolocaltime(const value: tdatetime): tdatetime;  
+begin
+ result:= incminute(value,localtimeshift(value,true));
+// result:= value + sys_localtimeoffset; //todo
 end;
 
 function sys_localtimetoutc(const value: tdatetime): tdatetime;
 begin
- result:= value - sys_localtimeoffset; //todo
+ result:= incminute(value,localtimeshift(value,false));
+// result:= value - sys_localtimeoffset; //todo
 end;
 
 {
