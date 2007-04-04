@@ -1668,9 +1668,9 @@ var
  controller1: tdockcontroller;
 begin
  widget1:= twidget1(fintf.getwidget);
- if ismdi then begin
-  widget1.anchors:= [an_left,an_top];
- end;  
+// if ismdi then begin
+//  widget1.anchors:= [an_left,an_top];
+// end;  
  fmdistate:= mds_floating;
  getparentcontroller(controller1);
  widget1.parentwidget:= nil;
@@ -3142,7 +3142,23 @@ begin
  if (fcontroller.mdistate <> mds_minimized) and
       (not pointinrect(rect.pos,fgriprect) or 
          pointinrect(rect.pos,frects[dbr_handle])) then begin
-  kind1:= calcsizingkind(rect.pos,makerect(nullpoint,fintf.getwidget.size));
+  with fintf.getwidget do begin
+   kind1:= calcsizingkind(rect.pos,makerect(nullpoint,size));
+   if anchors * [an_left,an_right] = [] then begin
+    case kind1 of
+     sk_right,sk_left: kind1:= sk_none;
+     sk_topright,sk_topleft: kind1:= sk_top;
+     sk_bottomright,sk_bottomleft: kind1:= sk_bottom;
+    end;
+   end;
+   if anchors * [an_top,an_bottom] = [] then begin
+    case kind1 of
+     sk_top,sk_bottom: kind1:= sk_none;
+     sk_topleft,sk_bottomleft: kind1:= sk_left;
+     sk_topright,sk_bottomright: kind1:= sk_right;
+    end;
+   end;
+  end;
   if kind1 <> sk_none then begin
    setlength(objects,1);
    objects[0]:= ord(kind1);
