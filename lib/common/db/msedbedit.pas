@@ -631,6 +631,37 @@ type
    property onsetvalue;
  end;
 
+ tdbprogressbar = class(tcustomprogressbar,idbeditfieldlink,idbeditinfo,ireccontrol)
+  private
+   fdatalink: teditwidgetdatalink;
+   function getdatafield: string;
+   procedure setdatafield(const avalue: string);
+   function getdatasource: tdatasource; overload;
+   function getdatasource(const aindex: integer): tdatasource; overload;
+   procedure setdatasource(const avalue: tdatasource);
+  protected
+   function getrowdatapo(const info: cellinfoty): pointer; override;
+   procedure griddatasourcechanged; override;
+   //idbeditfieldlink
+   procedure valuetofield;
+   procedure fieldtovalue;
+   //idbeditinfo
+   procedure getfieldtypes(out propertynames: stringarty;
+                          out fieldtypes: fieldtypesarty);
+   //ireccontrol
+   procedure recchanged;
+   //idbeditfieldlink
+   function getgriddatasource: tdatasource;
+   function createdatalist(const sender: twidgetcol): tdatalist; override;
+   function checkvalue(const quiet: boolean = false): boolean;
+  public
+   constructor create(aowner: tcomponent); override;
+   destructor destroy; override;
+  published
+   property datafield: string read getdatafield write setdatafield;
+   property datasource: tdatasource read getdatasource write setdatasource;
+ end;
+ 
  tdbdatetimeedit = class(tcustomdatetimeedit,idbeditfieldlink,idbeditinfo,ireccontrol)
   private
    fdatalink: teditwidgetdatalink;
@@ -3467,6 +3498,111 @@ end;
 procedure tdbrealedit.recchanged;
 begin
  fdatalink.recordchanged(nil);
+end;
+
+{ tdbprogressbar }
+
+constructor tdbprogressbar.create(aowner: tcomponent);
+begin
+// fisdb:= true;
+ fdatalink:= teditwidgetdatalink.Create(idbeditfieldlink(self));
+ inherited;
+end;
+
+destructor tdbprogressbar.destroy;
+begin
+ inherited;
+ fdatalink.free;
+end;
+
+function tdbprogressbar.getrowdatapo(const info: cellinfoty): pointer;
+begin
+ with info do begin
+  if griddatalink <> nil then begin
+   result:= tgriddatalink(griddatalink).getrealtybuffer(fdatalink.field,cell.row);
+  end
+  else begin
+   result:= nil;
+  end;
+ end;
+end;
+
+procedure tdbprogressbar.valuetofield;
+begin
+ if isemptyreal(value) then begin
+  fdatalink.field.clear;
+ end
+ else begin
+  fdatalink.field.asfloat:= value;
+ end;
+end;
+
+procedure tdbprogressbar.fieldtovalue;
+begin
+ if fdatalink.field.isnull then begin
+  value:= emptyreal;
+ end
+ else begin
+  value:= fdatalink.field.asfloat;
+ end;
+end;
+
+procedure tdbprogressbar.getfieldtypes(out propertynames: stringarty;
+               out fieldtypes: fieldtypesarty);
+begin
+ propertynames:= nil;
+ setlength(fieldtypes,1);
+ fieldtypes[0]:= realfields + integerfields;
+end;
+
+procedure tdbprogressbar.recchanged;
+begin
+ fdatalink.recordchanged(nil);
+end;
+
+function tdbprogressbar.getgriddatasource: tdatasource;
+begin
+ result:= tcustomdbwidgetgrid(fgridintf.getcol.grid).datasource;
+end;
+
+function tdbprogressbar.createdatalist(const sender: twidgetcol): tdatalist;
+begin
+ result:= nil;
+end;
+
+function tdbprogressbar.getdatafield: string;
+begin
+ result:= fdatalink.fieldname;
+end;
+
+procedure tdbprogressbar.setdatafield(const avalue: string);
+begin
+ fdatalink.fieldname:= avalue;
+end;
+
+function tdbprogressbar.getdatasource: tdatasource;
+begin
+ result:= fdatalink.datasource;
+end;
+
+procedure tdbprogressbar.setdatasource(const avalue: tdatasource);
+begin
+ fdatalink.setwidgetdatasource(avalue);
+end;
+
+function tdbprogressbar.checkvalue(const quiet: boolean = false): boolean;
+begin
+ result:= false; //dummy
+end;
+
+function tdbprogressbar.getdatasource(const aindex: integer): tdatasource;
+begin
+ result:= datasource;
+end;
+
+procedure tdbprogressbar.griddatasourcechanged;
+begin
+ fdatalink.griddatasourcechanged;
 end;
 
 { tdbdatetimeedit }

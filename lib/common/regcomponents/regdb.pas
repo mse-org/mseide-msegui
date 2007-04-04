@@ -186,7 +186,8 @@ begin
       tdbbooleantextedit,
       tdbkeystringedit,tdbkeystringeditdb,tdbkeystringeditlb,
       tdbintegeredit,tdbenumedit,tdbenumeditdb,tdbenumeditlb,
-      tdbdataicon,tdbdataimage,tdbdatabutton,tdbrealedit,tdbdatetimeedit,
+      tdbdataicon,tdbdataimage,tdbdatabutton,tdbrealedit,tdbprogressbar,
+      tdbdatetimeedit,
       tdbcalendardatetimeedit,tdbfilenameedit,
       tdbbooleanedit,tdbbooleaneditradio
       ]);

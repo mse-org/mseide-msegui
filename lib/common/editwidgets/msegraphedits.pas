@@ -227,6 +227,7 @@ type
    procedure internalcheckvalue(var avalue; var accept: boolean); override;
    procedure readstatvalue(const reader: tstatreader); override;
    procedure writestatvalue(const writer: tstatwriter); override;
+   procedure setnullvalue; virtual; //for dbedits
   public
    constructor create(aowner: tcomponent); override;
    procedure fillcol(const value: realty);
@@ -278,16 +279,16 @@ type
    constructor create(const intf: iface);
  end;
 
- tprogressbar = class;
+ tcustomprogressbar = class;
   
  tbarframe = class(tframe)
   private
-   fowner: tprogressbar;
+   fowner: tcustomprogressbar;
   public
-   constructor create(const aowner: tprogressbar);
+   constructor create(const aowner: tcustomprogressbar);
  end;
 
- tprogressbar = class(trealgraphdataedit,iface)
+ tcustomprogressbar = class(trealgraphdataedit,iface)
   private
    fbar_face: tbarface;
    fbar_frame: tbarframe;
@@ -325,9 +326,9 @@ type
                              //threadsave
    property cancel: boolean read fcancel write fcancel;
                     //ored with doprogress.acancel, resetted by value:= 0.0
-  published
    property value: realty read fvalue write setvalue;  
           //threadsave, range 0 .. 1.0
+  published
    property optionswidget default defaultoptionswidgetnofocus;
    property bar_face: tbarface read fbar_face write setbar_face;
    property bar_frame: tbarframe read fbar_frame write setbar_frame;
@@ -342,7 +343,12 @@ type
    property onfinished: progresseventty read fonfinished write fonfinished;
                //called in doprogress if avalue = 1.0 or canceled
  end;
- 
+
+ tprogressbar = class(tcustomprogressbar)
+  published
+   property value;
+ end;
+  
  ttogglegraphdataedit = class(tgraphdataedit)
   private
    foptions: buttonoptionsty;
@@ -831,6 +837,11 @@ end;
 function trealgraphdataedit.isnull: boolean;
 begin
  result:= isemptyreal(value);
+end;
+
+procedure trealgraphdataedit.setnullvalue;
+begin
+ value:= emptyreal;
 end;
 
 { tslider }
@@ -2384,16 +2395,16 @@ end;
 
 { tbarframe }
 
-constructor tbarframe.create(const aowner: tprogressbar);
+constructor tbarframe.create(const aowner: tcustomprogressbar);
 begin
  fowner:= aowner;
  fstate:= [fs_nowidget,fs_nosetinstance];
  inherited create(iframe(aowner));
 end;
 
-{ tprogressbar }
+{ tcustomprogressbar }
 
-constructor tprogressbar.create(aowner: tcomponent);
+constructor tcustomprogressbar.create(aowner: tcomponent);
 begin
  fbar_face:= tbarface.create(iface(self));
  fbar_frame:= tbarframe.create(self);
@@ -2404,14 +2415,14 @@ begin
  optionswidget:= defaultoptionswidgetnofocus;
 end;
 
-destructor tprogressbar.destroy;
+destructor tcustomprogressbar.destroy;
 begin
  inherited;
  fbar_face.free;
  fbar_frame.free;
 end;
 
-procedure tprogressbar.setvalue(const avalue: realty);
+procedure tcustomprogressbar.setvalue(const avalue: realty);
 begin
  if not (csloading in componentstate) then begin
   application.lock;
@@ -2429,12 +2440,12 @@ begin
  end;
 end;
 
-procedure tprogressbar.setbar_face(const avalue: tbarface);
+procedure tcustomprogressbar.setbar_face(const avalue: tbarface);
 begin
  fbar_face.assign(avalue);
 end;
 
-procedure tprogressbar.updatebarrect(const avalue: realty; const arect: rectty;
+procedure tcustomprogressbar.updatebarrect(const avalue: realty; const arect: rectty;
                               out facedest,framebardest,facebardest: rectty);
 var
  int1,int2,int3: integer;
@@ -2477,24 +2488,24 @@ begin
  end;
 end;
 
-procedure tprogressbar.updatebar;
+procedure tcustomprogressbar.updatebar;
 begin
  updatebarrect(fvalue,innerclientrect,ffacerect,fframebarrect,ffacebarrect);
 end;
 
-procedure tprogressbar.clientrectchanged;
+procedure tcustomprogressbar.clientrectchanged;
 begin
  inherited;
  updatebar;
 end;
 
-procedure tprogressbar.dochange;
+procedure tcustomprogressbar.dochange;
 begin
  updatebar;
  inherited;
 end;
 
-procedure tprogressbar.changedirection(const avalue: graphicdirectionty;
+procedure tcustomprogressbar.changedirection(const avalue: graphicdirectionty;
                var dest: graphicdirectionty);
 begin
  fbar_face.fade_direction:= rotatedirection(fbar_face.fade_direction,avalue,dest);
@@ -2503,7 +2514,7 @@ begin
  updatebar;
 end;
 
-procedure tprogressbar.paintglyph(const canvas: tcanvas; const avalue;
+procedure tcustomprogressbar.paintglyph(const canvas: tcanvas; const avalue;
                                          const arect: rectty);
 var
  po1,po2,po3: prectty;
@@ -2539,35 +2550,35 @@ begin
  end;
 end;
 
-procedure tprogressbar.internalcreateframe;
+procedure tcustomprogressbar.internalcreateframe;
 begin
  tdispframe.create(self);
 end;
 
-procedure tprogressbar.setscale(const avalue: real);
+procedure tcustomprogressbar.setscale(const avalue: real);
 begin
  fscale:= avalue;
  formatchanged;
 end;
 
-procedure tprogressbar.setformat(const avalue: string);
+procedure tcustomprogressbar.setformat(const avalue: string);
 begin
  fformat:= avalue;
  formatchanged;
 end;
 
-procedure tprogressbar.settextflags(const avalue: textflagsty);
+procedure tcustomprogressbar.settextflags(const avalue: textflagsty);
 begin
  ftextflags:= avalue;
  formatchanged;
 end;
 
-procedure tprogressbar.setbar_frame(const avalue: tbarframe);
+procedure tcustomprogressbar.setbar_frame(const avalue: tbarframe);
 begin
  fbar_frame.assign(avalue);
 end;
 
-procedure tprogressbar.doprogress(const sender: tobject; const avalue: real;
+procedure tcustomprogressbar.doprogress(const sender: tobject; const avalue: real;
                var acancel: boolean);
 begin
  application.lock;

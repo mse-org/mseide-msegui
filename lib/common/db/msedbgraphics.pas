@@ -176,6 +176,7 @@ end;
 
 function tdbdataimage.checkvalue(const quiet: boolean = false): boolean;
 begin
+ result:= false;
  //dummy
 end;
 
