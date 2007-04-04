@@ -79,8 +79,10 @@ type
 
    function getgridintf: iwidgetgrid;
    procedure checkgrid;
+   procedure internalfillcol(const value);
+   procedure internalassigncol(const value);
    procedure internalgetgridvalue(const index: integer; out value);
-   procedure internalsetgridvalue(const index: integer; const Value);
+   procedure internalsetgridvalue(const index: integer; const avalue);
    procedure dochange; virtual;
    function docheckvalue(var avalue): boolean; virtual;
    procedure valuechanged;
@@ -213,6 +215,10 @@ type
    fdirection: graphicdirectionty;
    procedure setvalue(const avalue: realty);
    procedure setdirection(const avalue: graphicdirectionty);
+   function getgridvalue(const index: integer): realty;
+   procedure setgridvalue(const index: integer; const avalue: realty);
+   function getgridvalues: realarty;
+   procedure setgridvalues(const avalue: realarty);
   protected
    function createdatalist(const sender: twidgetcol): tdatalist; override;
    function getdatatyp: datatypty; override;
@@ -223,6 +229,12 @@ type
    procedure writestatvalue(const writer: tstatwriter); override;
   public
    constructor create(aowner: tcomponent); override;
+   procedure fillcol(const value: realty);
+   procedure assigncol(const avalue: trealdatalist);
+   function isnull: boolean;
+   property gridvalue[const index: integer]: realty
+        read getgridvalue write setgridvalue; default;
+   property gridvalues: realarty read getgridvalues write setgridvalues;
   published
    property bounds_cx default defaultsliderwidth;
    property bounds_cy default defaultsliderheight;
@@ -785,6 +797,42 @@ begin
  end;
 end;
 
+function trealgraphdataedit.getgridvalue(const index: integer): realty;
+begin
+ internalgetgridvalue(index,result);
+end;
+
+procedure trealgraphdataedit.setgridvalue(const index: integer;
+               const avalue: realty);
+begin
+ internalsetgridvalue(index,avalue);
+end;
+
+function trealgraphdataedit.getgridvalues: realarty;
+begin
+ result:= trealdatalist(fgridintf.getcol.datalist).asarray;
+end;
+
+procedure trealgraphdataedit.setgridvalues(const avalue: realarty);
+begin
+ trealdatalist(fgridintf.getcol.datalist).asarray:= avalue;
+end;
+
+procedure trealgraphdataedit.fillcol(const value: realty);
+begin
+ internalfillcol(value);
+end;
+
+procedure trealgraphdataedit.assigncol(const avalue: trealdatalist);
+begin
+ internalassigncol(avalue);
+end;
+
+function trealgraphdataedit.isnull: boolean;
+begin
+ result:= isemptyreal(value);
+end;
+
 { tslider }
 
 constructor tslider.create(aowner: tcomponent);
@@ -1191,10 +1239,10 @@ begin
 end;
 
 procedure tgraphdataedit.internalsetgridvalue(const index: integer;
-  const Value);
+                                                        const avalue);
 begin
  checkgrid;
- fgridintf.setdata(index,value);
+ fgridintf.setdata(index,avalue);
 end;
 {
 procedure tgraphdataedit.clientmouseevent(var info: mouseeventinfoty);
@@ -1285,6 +1333,22 @@ end;
 procedure tgraphdataedit.updatereadonlystate;
 begin
  //dummy
+end;
+
+procedure tgraphdataedit.internalfillcol(const value);
+begin
+ checkgrid;
+ with tdatalist1(fgridintf.getcol.datalist) do begin
+  tdatalist1(fgridintf.getcol.datalist).internalfill(count,value);
+ end;
+end;
+
+procedure tgraphdataedit.internalassigncol(const value);
+begin
+ checkgrid;
+ with fgridintf.getcol do begin
+  datalist.Assign(tdatalist(value));
+ end;
 end;
 
 { ttogglegraphdataedit}
