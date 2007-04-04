@@ -3321,7 +3321,8 @@ begin
  else begin
   bo1:= not isemptyreal(fvalue);
   bo2:= not isemptyreal(fmin);
-  bo3:= cmprealty(fmax,0.99*bigreal) < 0;
+  bo3:= cmprealty(fmax,bigreal) <> 0;
+//  bo3:= cmprealty(fmax,0.99*bigreal) < 0;
  end;
  
  filer.DefineProperty('val',

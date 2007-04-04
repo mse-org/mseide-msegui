@@ -3451,7 +3451,7 @@ procedure tdbrealedit.getfieldtypes(out propertynames: stringarty;
 begin
  propertynames:= nil;
  setlength(fieldtypes,1);
- fieldtypes[0]:= realfields;
+ fieldtypes[0]:= realfields + integerfields;
 end;
 
 function tdbrealedit.nullcheckneeded(const newfocus: twidget): boolean;
