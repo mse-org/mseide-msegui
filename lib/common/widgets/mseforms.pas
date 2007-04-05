@@ -74,7 +74,7 @@ type
    foptions: formoptionsty;
    fstatfile: tstatfile;
    fcaption: msestring;
-   fmainmenuwidget: tmainmenuwidget;
+   fmainmenuwidget: tframemenuwidget;
    foptionswindow: windowoptionsty;
    fonstatread: statreadeventty;
    fonstatafterread: notifyeventty;
@@ -809,7 +809,7 @@ begin
   freeandnil(fmainmenuwidget);
   setlinkedvar(value,tmsecomponent(fmainmenu));
   if value <> nil then begin
-   fmainmenuwidget:= tmainmenuwidget.create(self,fmainmenu);
+   fmainmenuwidget:= tframemenuwidget.create(self,fmainmenu);
    twidget1(fmainmenuwidget).setdesigning(csdesigning in componentstate);
    updatemainmenutemplates;
   end;

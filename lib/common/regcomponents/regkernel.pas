@@ -70,9 +70,11 @@ const
 
 procedure Register;
 begin
- registercomponents('Gui',[tthreadcomp,tpipereadercomp,tbitmapcomp,timagelist,
-                    ttimer,tstatfile,taction,tfacecomp,tframecomp,
-                    tpostscriptprinter,tactivator]);
+ registercomponents('Gui',[tmainmenu,tpopupmenu,tfacecomp,tframecomp,
+                    tbitmapcomp,timagelist,
+                    tstatfile,taction,tactivator,
+                    ttimer,tthreadcomp,tpipereadercomp,                    
+                    tpostscriptprinter]);
  registercomponents('Dialog',[tpagesizeselector,tpageorientationselector]);
 // registerpropertyeditor(typeinfo(twidget),nil,'',tcomponentpropertyeditor);
  registerpropertyeditor(typeinfo(tcustomaction),nil,'',tactionpropertyeditor);

@@ -13,7 +13,7 @@ unit msemenuwidgets;
 
 interface
 uses
- msewidgets,mseshapes,msemenus,msegraphutils,msegraphics,msetypes,
+ classes,msewidgets,mseshapes,msemenus,msegraphutils,msegraphics,msetypes,
  msegui,mseguiglob,mseevent,mseclasses;
 
 type
@@ -78,7 +78,7 @@ type
   public
    constructor create(instance: ppopupmenuwidget;
        const amenu: tmenuitem; const transientfor: twindow;
-       const aowner: twidget = nil; const menucomp: tcustommenu = nil);
+       const aowner: tcomponent = nil; const menucomp: tcustommenu = nil); overload;
    destructor destroy; override;
    procedure menuchanged(const sender: tmenuitem);
    procedure release; override;
@@ -90,32 +90,65 @@ type
    property activeitem: integer read flayout.activeitem write setactiveitem;
  end;
 
- tmainmenuwidget = class(tpopupmenuwidget)
+ tcustommainmenuwidget = class(tpopupmenuwidget)
   private
    factivewindowbefore: twindow;
    fstackedoverbefore: twindow;
+   flayoutcalcing: integer;
    procedure internalsetactiveitem(const Value: integer;
            const aclicked: boolean; const force: boolean); override;
   protected
+   procedure restorefocus;
+   function checkprevpopuparea(const apos: pointty): boolean; override;
    procedure nextpopupshowing; override;
    procedure clientrectchanged; override;
    procedure updatelayout; override;
    procedure updatepos; override;
    function isinpopuparea(const apos: pointty): boolean; override;
-   function checkprevpopuparea(const apos: pointty): boolean; override;
    procedure doshortcut(var info: keyeventinfoty; const sender: twidget); override;
    procedure childdeactivated(const sender: tpopupmenuwidget); override;
    procedure activatemenu(keymode: boolean; aclicked: boolean); override;
    procedure deactivatemenu; override;
    procedure selectmenu; override;
    procedure internalcreateframe; override;
-  public
    procedure loaded; override;
+  public
    procedure release; override;
-   constructor create(const aowner: twidget; const amenu: tmenuitem); overload;
-   constructor create(const aowner: twidget; const amenu: tmainmenu); overload;
  end;
 
+ tframemenuwidget = class(tcustommainmenuwidget)
+  protected
+  public
+   constructor create(const aparent: twidget;
+                                      const amenu: tmenuitem); overload;
+   constructor create(const aparent: twidget;
+                                      const amenu: tmainmenu); overload;
+   procedure loaded; override;
+ end;
+
+ mainmenuwidgetoptionty = (mwo_vertical);
+ mainmenuwidgetoptionsty = set of mainmenuwidgetoptionty;
+ 
+ tmainmenuwidget = class(tcustommainmenuwidget)
+  private
+   foptions: mainmenuwidgetoptionsty;
+   procedure setmenu(const avalue: tmainmenu);
+   function getmenu: tmainmenu;
+   procedure setoptions(const avalue: mainmenuwidgetoptionsty);
+  protected
+//   function checkprevpopuparea(const apos: pointty): boolean; override;
+   procedure objectevent(const sender: tobject; const event: objecteventty); override;
+   procedure loaded; override;
+  public
+   constructor create(aowner: tcomponent); override;
+   destructor destroy; override;
+  published
+   property menu: tmainmenu read getmenu write setmenu;   
+   property options: mainmenuwidgetoptionsty read foptions write setoptions default [];
+   property popupdirection: graphicdirectionty read flayout.popupdirection write 
+                                  flayout.popupdirection default gd_down;
+ end;
+ 
  mainmenupainterstatety = (mmps_layoutvalid);
  mainmenupainterstatesty = set of mainmenupainterstatety;
 
@@ -137,7 +170,7 @@ function showpopupmenu(const menu: tmenuitem; const transientfor: twidget;
 implementation
 uses
  msedrawtext,mserichstring,msestockobjects,sysutils,msekeyboard,msebits,
- mseactions,classes,mseguiintf;
+ mseactions,mseguiintf;
 
 type
  tmenuitem1 = class(tmenuitem);
@@ -403,16 +436,22 @@ function getcellatpos(const info: menulayoutinfoty; const pos: pointty): integer
 var
  int1: integer;
 begin
- result:= -1;
  with info do begin
-  for int1:= 0 to high(cells) do begin
-   with cells[int1].buttoninfo do begin
-    if (state * [ss_disabled,ss_invisible,ss_separator] = []) and
-               pointinrect(pos,dim) then begin
-     result:= int1;
-     break;
+  if (pos.x >= 0) and (pos.y >= 0) and 
+                     (pos.x < size.cx) and (pos.y < size.cy) then begin
+   result:= -2;
+   for int1:= 0 to high(cells) do begin
+    with cells[int1].buttoninfo do begin
+     if (state * [ss_disabled,ss_invisible,ss_separator] = []) and
+                pointinrect(pos,dim) then begin
+      result:= int1;
+      break;
+     end;
     end;
    end;
+  end
+  else begin
+   result:= -1;
   end;
  end;
 end;
@@ -524,7 +563,7 @@ end;
 
 constructor tpopupmenuwidget.create(instance: ppopupmenuwidget; const amenu: tmenuitem;
          const transientfor: twindow;
-         const aowner: twidget = nil; const menucomp: tcustommenu = nil);
+         const aowner: tcomponent = nil; const menucomp: tcustommenu = nil);
 begin
  finstancepo:= pobject(instance);
  fmenucomp:= menucomp;
@@ -801,7 +840,8 @@ begin
    exit;
   end;
   if eventkind in mouseposevents then begin
-   if not checkprevpopuparea(translatetoscreen(pos)) then begin
+//   if not checkprevpopuparea(translatetoscreen(pos)) then begin
+   if not checkprevpopuparea(po1) then begin
     if pointinrect(pos,paintrect) then begin
      internalsetactiveitem(getcellatpos(flayout,
       subpoint(pos,paintrect.pos)),
@@ -863,9 +903,15 @@ end;
 
 procedure tpopupmenuwidget.internalsetactiveitem(const avalue: integer;
           const aclicked: boolean; const force: boolean);
+var
+ value1: integer;
 begin
  with flayout do begin
-  if (activeitem <> avalue) or force then begin
+  value1:= avalue;
+  if value1 < 0 then begin
+   value1:= -1;
+  end; 
+  if (activeitem <> value1) or force then begin
    if activeitem >= 0 then begin
     if (fnextpopup <> nil) then begin
      fnextpopup.release;
@@ -875,9 +921,9 @@ begin
      invalidaterect(dim);
     end;
    end;
-   activeitem:= avalue;
+   activeitem:= value1;
    if activeitem >= 0 then begin
-    if not menu[avalue].canactivate then begin
+    if not menu[value1].canactivate then begin
      activeitem:= nextmenuitem(flayout);
     end;
     with cells[activeitem].buttoninfo do begin
@@ -1171,61 +1217,68 @@ begin
  end;
 end;
 
-{ tmainmenuwidget }
+{ tcustommainmenuwidget }
 
-constructor tmainmenuwidget.create(const aowner: twidget; const amenu: tmenuitem);
-begin
- inherited create(nil,amenu,nil,nil,fmenucomp);
- foptionswidget:= foptionswidget-[ow_mousefocus,ow_tabfocus,ow_arrowfocus];
- fwidgetstate:= fwidgetstate - [ws_iswidget];
- setlockedparentwidget(aowner);
- flayout.options:= [mlo_horz,mlo_main,mlo_childreninactive];
- flayout.popupdirection:= gd_down;
- if not (csloading in aowner.ComponentState) and not (csloading in componentstate) then begin
-  updatelayout;
-  visible:= true;
- end;
-end;
-
-constructor tmainmenuwidget.create(const aowner: twidget; const amenu: tmainmenu);
-begin
- fmenucomp:= amenu;
- create(aowner,amenu.menu);
-end;
-
-procedure tmainmenuwidget.internalcreateframe;
+procedure tcustommainmenuwidget.internalcreateframe;
 begin
  inherited;
  tcustomframe1(fframe).fi.levelo:= 0; //do not set localprops
 end;
 
-procedure tmainmenuwidget.loaded;
+procedure tcustommainmenuwidget.loaded;
 begin
- include(fwidgetstate,ws_visible);
  inherited;
  updatelayout;
 end;
 
-procedure tmainmenuwidget.updatepos;
+procedure tcustommainmenuwidget.updatepos;
 begin
  //dummy
 end;
 
-procedure tmainmenuwidget.updatelayout;
+procedure tcustommainmenuwidget.updatelayout;
+var
+ int1: integer;
+ rect1: rectty;
 begin
- flayout.popupdirection:= gd_down;
- calcmenulayout(flayout,getcanvas,innerclientrect.cx);
- movemenulayout(flayout,innerclientrect.pos);
- bounds_cy:= flayout.size.cy + innerclientframewidth.cy;
+// flayout.popupdirection:= gd_down;
+ if flayoutcalcing = 0 then begin
+  inc(flayoutcalcing);
+  try
+   if mlo_horz in flayout.options then begin
+    calcmenulayout(flayout,getcanvas,innerclientrect.cx);
+   end
+   else begin
+    calcmenulayout(flayout,getcanvas,innerclientrect.cy);
+   end;
+   movemenulayout(flayout,innerclientrect.pos);
+   rect1:= fwidgetrect;
+   if mlo_horz in flayout.options then begin
+    rect1.cy:= flayout.size.cy + innerclientframewidth.cy;
+    if an_bottom in fanchors then begin
+     rect1.y:= rect1.y + fwidgetrect.cy - rect1.cy;
+    end;
+   end
+   else begin
+    rect1.cx:= flayout.size.cx + innerclientframewidth.cx;
+    if an_right in fanchors then begin
+     rect1.x:= rect1.x + fwidgetrect.cx - rect1.cx;
+    end;
+   end;
+   widgetrect:= rect1;
+  finally
+   dec(flayoutcalcing);
+  end;
+ end;
 end;
 
-procedure tmainmenuwidget.clientrectchanged;
+procedure tcustommainmenuwidget.clientrectchanged;
 begin
  inherited;
  updatelayout;
 end;
 
-procedure tmainmenuwidget.nextpopupshowing;
+procedure tcustommainmenuwidget.nextpopupshowing;
 begin
  inherited;
  if fmenucomp <> nil then begin
@@ -1233,33 +1286,17 @@ begin
  end;
 end;
 
-procedure tmainmenuwidget.release;
+procedure tcustommainmenuwidget.release;
 begin
  setactiveitem(-1);
 end;
 
-function tmainmenuwidget.isinpopuparea(const apos: pointty): boolean;
+function tcustommainmenuwidget.isinpopuparea(const apos: pointty): boolean;
 begin
- result:= pointinrect(translatewidgetpoint(apos,nil,self),fwidgetrect);
+ result:= pointinrect(translatewidgetpoint(apos,nil,parentwidget),fwidgetrect);
 end;
 
-function tmainmenuwidget.checkprevpopuparea(const apos: pointty): boolean;
-var
- po1: pointty;
-begin
- po1:= translatewidgetpoint(apos,nil,self);
- result:= inherited checkprevpopuparea(po1);
- if not result then begin
-  result:= not pointinrect(po1,fwidgetrect) and
-         pointinrect(po1,rootwidget.widgetrect);
-  if result then begin
-   capturemouse;
-   release;
-  end;
- end;
-end;
-
-procedure tmainmenuwidget.doshortcut(var info: keyeventinfoty;
+procedure tcustommainmenuwidget.doshortcut(var info: keyeventinfoty;
   const sender: twidget);
 begin
  inherited;
@@ -1270,7 +1307,7 @@ begin
  end;
 end;
 
-procedure tmainmenuwidget.childdeactivated(const sender: tpopupmenuwidget);
+procedure tcustommainmenuwidget.childdeactivated(const sender: tpopupmenuwidget);
 begin
  inherited;
  if mlo_keymode in sender.flayout.options then begin
@@ -1278,34 +1315,11 @@ begin
  end;
 end;
 
-procedure tmainmenuwidget.internalsetactiveitem(const Value: integer;
-           const aclicked: boolean; const force: boolean);
+procedure tcustommainmenuwidget.restorefocus;
 var
  ar1: winidarty;
  ar2: integerarty;
- window1: twindow;
- bo1: boolean;
 begin
- window1:= factivewindowbefore;
- bo1:= application.active and not ((fmenucomp = nil) or 
-                              (csdesigning in fmenucomp.componentstate));
- if value >= 0 then begin
-  if factivewindowbefore = nil then begin
-   setlinkedvar(application.activewindow,tlinkedobject(factivewindowbefore));
-  end;
-  if fstackedoverbefore = nil then begin
-   setlinkedvar(fwindow.stackedover,tlinkedobject(fstackedoverbefore));
-   if bo1 then begin
-    window.bringtofront;
-   end;
-  end;
-  if factivewindowbefore <> nil then begin
-   factivewindowbefore.deactivateintermediate;
-  end;
- end;
- inherited;
- if value < 0 then begin
-//  focusback(factivewindowbefore <> nil);
   releasekeyboard;
   if factivewindowbefore <> fwindow then begin
    if (fstackedoverbefore <> nil) and fstackedoverbefore.visible then begin
@@ -1318,31 +1332,179 @@ begin
     end;
    end;
   end;
-  if bo1 and (factivewindowbefore <> nil) and 
-                    factivewindowbefore.visible then begin
+  if application.active and not ((fmenucomp = nil) or 
+                 (csdesigning in fmenucomp.componentstate)) and 
+       (factivewindowbefore <> nil) and factivewindowbefore.visible then begin
    factivewindowbefore.reactivate;
   end;
   setlinkedvar(nil,tlinkedobject(factivewindowbefore));
   setlinkedvar(nil,tlinkedobject(fstackedoverbefore));
+end;
+
+procedure tcustommainmenuwidget.internalsetactiveitem(const Value: integer;
+           const aclicked: boolean; const force: boolean);
+var
+ window1: twindow;
+begin
+ window1:= factivewindowbefore;
+ if value >= 0 then begin
+  if factivewindowbefore = nil then begin
+   setlinkedvar(application.activewindow,tlinkedobject(factivewindowbefore));
+  end;
+  if fstackedoverbefore = nil then begin
+   setlinkedvar(fwindow.stackedover,tlinkedobject(fstackedoverbefore));
+   if application.active and not ((fmenucomp = nil) or 
+                 (csdesigning in fmenucomp.componentstate)) then begin
+    window.bringtofront;
+   end;
+  end;
+  if factivewindowbefore <> nil then begin
+   factivewindowbefore.deactivateintermediate;
+  end;
+ end;
+ inherited;
+ if value = -1 then begin
+//  focusback(factivewindowbefore <> nil);
+  restorefocus;
  end;
 end;
 
-procedure tmainmenuwidget.activatemenu(keymode: boolean; aclicked: boolean);
+procedure tcustommainmenuwidget.activatemenu(keymode: boolean; aclicked: boolean);
 begin
  inherited;
  flayout.menu.owner.checkexec;
 end;
 
-procedure tmainmenuwidget.selectmenu;
+procedure tcustommainmenuwidget.selectmenu;
 begin
  inherited;
  flayout.menu.owner.checkexec;
 end;
 
-procedure tmainmenuwidget.deactivatemenu;
+procedure tcustommainmenuwidget.deactivatemenu;
 begin
  inherited;
  releasemouse;
+end;
+
+function tcustommainmenuwidget.checkprevpopuparea(const apos: pointty): boolean;
+var
+ po1: pointty;
+begin
+ po1:= translatewidgetpoint(apos,nil,parentwidget);
+ result:= not pointinrect(po1,fwidgetrect) and
+         pointinrect(apos,rootwidget.widgetrect);
+ if result then begin
+  capturemouse;
+  release;
+ end;
+{
+ po1:= translatewidgetpoint(apos,nil,self);
+ result:= inherited checkprevpopuparea(po1);
+ if not result then begin
+  result:= not pointinrect(po1,fwidgetrect) and
+         pointinrect(po1,rootwidget.widgetrect);
+  if result then begin
+   capturemouse;
+   release;
+  end;
+ end;
+ }
+end;
+
+{ tframemenuwidget }
+
+constructor tframemenuwidget.create(const aparent: twidget; 
+                                           const amenu: tmenuitem);
+begin
+ inherited create(nil,amenu,nil,nil,fmenucomp);
+ foptionswidget:= foptionswidget-[ow_mousefocus,ow_tabfocus,ow_arrowfocus];
+ fwidgetstate:= fwidgetstate - [ws_iswidget];
+ setlockedparentwidget(aparent);
+ flayout.options:= [mlo_horz,mlo_main,mlo_childreninactive];
+ flayout.popupdirection:= gd_down;
+ if not (csloading in aparent.ComponentState) and not (csloading in componentstate) then begin
+  updatelayout;
+  visible:= true;
+ end;
+end;
+
+constructor tframemenuwidget.create(const aparent: twidget; const amenu: tmainmenu);
+begin
+ fmenucomp:= amenu;
+ create(aparent,amenu.menu);
+end;
+
+procedure tframemenuwidget.loaded;
+begin
+ include(fwidgetstate,ws_visible);
+ inherited;
+end;
+
+{ tmainmenuwidget }
+
+constructor tmainmenuwidget.create(aowner: tcomponent);
+begin
+ setlinkedvar(tmainmenu.create(self),fmenucomp);
+ fmenucomp.setsubcomponent(true);
+ inherited create(nil,fmenucomp.menu,nil,aowner,fmenucomp);
+ if csdesigning in componentstate then begin
+  fmenucomp.setdesigning(true);
+ end;
+ flayout.options:= [mlo_horz,mlo_main,mlo_childreninactive];
+ flayout.popupdirection:= gd_down;
+ if not (csloading in componentstate) then begin
+  updatelayout;
+ end;
+ visible:= true;
+end;
+
+destructor tmainmenuwidget.destroy;
+begin
+ fmenucomp.free;
+ inherited;
+end;
+
+procedure tmainmenuwidget.setmenu(const avalue: tmainmenu);
+begin
+ fmenucomp.assign(avalue);
+end;
+
+function tmainmenuwidget.getmenu: tmainmenu;
+begin
+ result:= tmainmenu(fmenucomp);
+end;
+
+procedure tmainmenuwidget.setoptions(const avalue: mainmenuwidgetoptionsty);
+begin
+ if foptions <> avalue then begin
+  foptions:= avalue;
+  if mwo_vertical in foptions then begin
+   exclude(flayout.options,mlo_horz);   
+  end
+  else begin
+   include(flayout.options,mlo_horz);     
+  end;
+  if not (csloading in componentstate) then begin
+   updatelayout;
+  end;
+ end;
+end;
+
+procedure tmainmenuwidget.objectevent(const sender: tobject;
+               const event: objecteventty);
+begin
+ inherited;
+ if (event = oe_changed) and (sender = fmenucomp) and
+                                  not (csloading in componentstate) then begin
+  updatelayout;
+ end; 
+end;
+
+procedure tmainmenuwidget.loaded;
+begin
+ inherited;
+ assigntemplate(fmenucomp.template);
 end;
 
 end.

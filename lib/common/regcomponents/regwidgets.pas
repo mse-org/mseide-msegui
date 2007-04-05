@@ -38,7 +38,7 @@ uses
  sysutils,classes,msesimplewidgets,msegrids,msemenus,mseimage,msedispwidgets,
  msetoolbar,msetabs,msedesignintf,regwidgets_bmp,
  msesplitter,msedock,mseforms,mseclasses,typinfo,msearrayprops,
- msegui,formdesigner,msedial;
+ msegui,formdesigner,msedial,msemenuwidgets;
  
 type
  tpropertyeditor1 = class(tpropertyeditor);
@@ -96,8 +96,8 @@ const
 procedure Register;
 begin
  registercomponents('Widget',[teventwidget,tbutton,tstockglyphbutton,
-  tdrawgrid,tstringgrid,tmainmenu,
-  tpopupmenu,tlabel,tpaintbox,timage,tintegerdisp,trealdisp,tdatetimedisp,
+  tdrawgrid,tstringgrid,tmainmenuwidget,
+  tlabel,tpaintbox,timage,tintegerdisp,trealdisp,tdatetimedisp,
   tstringdisp,
   tbytestringdisp,tbooleandisp,
   tgroupbox,tscrollbox,tstepbox,tdockpanel,tdockhandle,tmseformwidget,

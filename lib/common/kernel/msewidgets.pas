@@ -653,7 +653,7 @@ type
    function internalshow(const modal: boolean; transientfor: twindow;
            const windowevent: boolean): modalresultty; override;
   public
-   constructor create(aowner: tcomponent; transientfor: twindow); reintroduce;
+   constructor create(aowner: tcomponent; transientfor: twindow); overload; reintroduce;
  end;
 
  thintwidget = class(tpopupwidget)
@@ -2778,8 +2778,10 @@ procedure tactionwidget.dopopup(var amenu: tpopupmenu;
 var
  widget1: twidget;
  bo1: boolean;
+ menu1: tpopupmenu;
 
 begin
+ menu1:= amenu;
  try
   if (fpopupmenu <> nil) then begin
    tpopupmenu.additems(amenu,self,mouseinfo,fpopupmenu);
@@ -2810,6 +2812,9 @@ begin
   end;
  finally
   if not (es_child in mouseinfo.eventstate) then begin
+   if amenu <> menu1 then begin
+    freetransientmenu(tcustommenu(menu1)); //if amenu overwritten
+   end;
    freetransientmenu(tcustommenu(amenu));
   end;
  end;
