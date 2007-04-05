@@ -1348,14 +1348,13 @@ var
  window1: twindow;
 begin
  window1:= factivewindowbefore;
- if value >= 0 then begin
+ if (value >= 0) and not (csdesigning in componentstate) then begin
   if factivewindowbefore = nil then begin
    setlinkedvar(application.activewindow,tlinkedobject(factivewindowbefore));
   end;
   if fstackedoverbefore = nil then begin
    setlinkedvar(fwindow.stackedover,tlinkedobject(fstackedoverbefore));
-   if application.active and not ((fmenucomp = nil) or 
-                 (csdesigning in fmenucomp.componentstate)) then begin
+   if application.active and (fmenucomp <> nil) then begin
     window.bringtofront;
    end;
   end;
@@ -1471,6 +1470,7 @@ procedure tmainmenuwidget.initnewcomponent(const ascale: real);
 begin
  inherited;
  fmenucomp.menu.submenu.insert(0,['Item0'],[],[],[]);
+ bounds_cx:= 100;
 end;
 
 procedure tmainmenuwidget.setmenu(const avalue: tmainmenu);

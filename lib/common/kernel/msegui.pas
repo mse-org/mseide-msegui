@@ -5460,13 +5460,22 @@ end;
 
 function twidget.needsdesignframe: boolean;
 begin
- result:= (ws_iswidget in fwidgetstate) and
-  not (ws1_nodesignframe in fwidgetstate1) and
-  ((fcolor = cl_transparent) or (fparentwidget <> nil) and 
-   (colortopixel(actualcolor) = colortopixel(fparentwidget.backgroundcolor))
-  ) and
- ((fframe = nil) or (fframe.fi.leveli = 0) and (fframe.fi.levelo = 0) and
-       (fframe.fi.framewidth = 0));
+ result:= 
+ (ws_iswidget in fwidgetstate) and
+   not (ws1_nodesignframe in fwidgetstate1) and
+   (
+     ((fwidgetrect.cx = 0) or (fwidgetrect.cy = 0)) or
+     (
+       ( 
+         (fcolor = cl_transparent) or 
+           (fparentwidget <> nil) and 
+           (colortopixel(actualcolor) = colortopixel(fparentwidget.backgroundcolor))
+       ) and
+       ((fframe = nil) or (fframe.fi.leveli = 0) and (fframe.fi.levelo = 0) and
+                          (fframe.fi.framewidth = 0)
+       )
+     )     
+   );
 end;
 
 procedure twidget.paint(const canvas: tcanvas);
@@ -5480,7 +5489,9 @@ var
 
 begin
  canvas.save;
- canvas.intersectcliprect(makerect(nullpoint,fwidgetrect.size));
+ rect1.pos:= nullpoint;
+ rect1.size:= fwidgetrect.size;
+ canvas.intersectcliprect(rect1);
  if canvas.clipregionisempty then begin
   canvas.restore;
   exit;
@@ -5496,7 +5507,7 @@ begin
   end;
   if not canvas.clipregionisempty then begin
    if ws_opaque in fwidgetstate then begin
-     canvas.fillrect(makerect(nullpoint,fwidgetrect.size),actcolor);
+    canvas.fillrect(rect1,actcolor);
    end;
    {$ifdef mse_slowdrawing}
    sleep(500);
@@ -5512,7 +5523,7 @@ begin
   canvas.restore(saveindex);
   if (csdesigning in componentstate) and needsdesignframe then begin
    canvas.dashes:= #2#3;
-   canvas.drawrect(makerect(0,0,fwidgetrect.cx-1,fwidgetrect.cy-1),cl_black);
+   canvas.drawrect(makerect(0,0,rect1.cx-1,rect1.cy-1),cl_black);
    canvas.dashes:= '';
   end;
  end
@@ -11012,7 +11023,7 @@ begin       //eventloop
         end;
        end;
        ek_buttonpress,ek_buttonrelease,ek_mousewheel: begin
-        processmouseevent(tmouseevent(event));
+       processmouseevent(tmouseevent(event));
        end;
        ek_keypress,ek_keyrelease: begin
         processkeyevent(tkeyevent(event));
