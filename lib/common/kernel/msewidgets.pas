@@ -653,7 +653,7 @@ type
    function internalshow(const modal: boolean; transientfor: twindow;
            const windowevent: boolean): modalresultty; override;
   public
-   constructor create(aowner: tcomponent; transientfor: twindow); overload; reintroduce;
+   constructor create(aowner: tcomponent; transientfor: twindow); reintroduce; overload;
  end;
 
  thintwidget = class(tpopupwidget)

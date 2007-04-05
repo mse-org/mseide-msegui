@@ -186,7 +186,7 @@ procedure setcloexec(const fd: integer);
 
 implementation
 uses
- sysutils,msefileutils,dateutils;
+ sysutils,msefileutils{$ifdef FPC},dateutils{$else},DateUtils{$endif};
 {$ifdef FPC}
 const
  recursive = PTHREAD_MUTEX_RECURSIVE;

@@ -142,6 +142,7 @@ type
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
+   procedure initnewcomponent(const ascale: real); override;
   published
    property menu: tmainmenu read getmenu write setmenu;   
    property options: mainmenuwidgetoptionsty read foptions write setoptions default [];
@@ -1445,12 +1446,13 @@ end;
 
 constructor tmainmenuwidget.create(aowner: tcomponent);
 begin
- setlinkedvar(tmainmenu.create(self),fmenucomp);
+ setlinkedvar(tmainmenu.create(self),tmsecomponent(fmenucomp));
  fmenucomp.setsubcomponent(true);
  inherited create(nil,fmenucomp.menu,nil,aowner,fmenucomp);
  if csdesigning in componentstate then begin
-  fmenucomp.setdesigning(true);
+  tmsecomponent1(fmenucomp).setdesigning(true);
  end;
+ freeandnil(fframe);
  flayout.options:= [mlo_horz,mlo_main,mlo_childreninactive];
  flayout.popupdirection:= gd_down;
  if not (csloading in componentstate) then begin
@@ -1463,6 +1465,12 @@ destructor tmainmenuwidget.destroy;
 begin
  fmenucomp.free;
  inherited;
+end;
+
+procedure tmainmenuwidget.initnewcomponent(const ascale: real);
+begin
+ inherited;
+ fmenucomp.menu.submenu.insert(0,['Item0'],[],[],[]);
 end;
 
 procedure tmainmenuwidget.setmenu(const avalue: tmainmenu);
