@@ -92,6 +92,7 @@ const
   'Alle',                 //sc_All
   'Best'#228'tigung',     //sc_Confirmation
   'Datensatz l'#246'schen?' //sc_Delete_record
+  'Seite schliessen'        //sc_close_page
 );
     
 initialization

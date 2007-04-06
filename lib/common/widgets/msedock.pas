@@ -203,6 +203,7 @@ type
    foptionsdock: optionsdockty;
    procedure objectevent(const sender: tobject; const event: objecteventty); override;
    
+   procedure doclose(const awidget: twidget);
    procedure setmdistate(const avalue: mdistatety); virtual;
    procedure domdistatechanged(const oldstate,newstate: mdistatety); virtual;
    procedure dofloat(const adist: pointty); virtual;
@@ -455,6 +456,7 @@ type
   private
    fcontroller: tdockcontroller;
   protected
+   procedure doclosepage(const sender: tobject); override;
    procedure dopageremoved(const apage: twidget);  override;
    procedure updateoptions;
   public
@@ -594,6 +596,11 @@ begin
   fcontroller.ftabwidget:= nil;
  end;
  inherited;
+end;
+
+procedure tdocktabwidget.doclosepage(const sender: tobject);
+begin
+ fcontroller.doclose(tdocktabpage(items[fpopuptab]).ftarget);
 end;
 
 procedure tdocktabwidget.dopageremoved(const apage: twidget);
@@ -2135,6 +2142,22 @@ begin
  end;
 end;
 
+procedure tdockcontroller.doclose(const awidget: twidget);
+begin
+  with twindow1(awidget.window) do begin
+   fmodalresult:= mr_windowclosed;
+   try
+    if awidget.canclose(nil) then begin
+     awidget.hide;
+    end;
+   finally
+    if fmodalresult = mr_windowclosed then begin
+     fmodalresult:= mr_none;
+    end;
+   end;
+  end;
+end;
+
 procedure tdockcontroller.clientmouseevent(var info: mouseeventinfoty);
 
 var
@@ -2395,18 +2418,7 @@ begin
       case checkbuttonarea(pos) of
        dbr_close: begin
         if (dos_closebuttonclicked in fdockstate) then begin
-         with twindow1(widget1.window) do begin
-          fmodalresult:= mr_windowclosed;
-          try
-           if widget1.canclose(nil) then begin
-            widget1.hide;
-           end;
-          finally
-           if fmodalresult = mr_windowclosed then begin
-            fmodalresult:= mr_none;
-           end;
-          end;
-         end;
+         doclose(widget1);
         end;
        end;
        dbr_maximize: mdistate:= mds_maximized;

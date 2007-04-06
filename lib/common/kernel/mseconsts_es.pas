@@ -94,7 +94,8 @@ const
   'TARGA imagen',                      //sc_TARGA_image
   'Todo',                              //sc_All
   'Confirme',                          //sc_Confirmation
-  #191'Borrar el registro?'            //sc_Delete_record
+  #191'Borrar el registro?',           //sc_Delete_record
+  'Close page'                         //sc_close_page
 );
     
 initialization

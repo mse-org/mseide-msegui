@@ -73,7 +73,8 @@ type
                     sc_MS_Bitmap,sc_MS_Icon,sc_JPEG_Image,sc_PNG_Image,
                     sc_XPM_Image,sc_PNM_Image,sc_TARGA_image,
                     sc_All,
-                    sc_Confirmation,sc_Delete_record
+                    sc_Confirmation,sc_Delete_record,
+                    sc_close_page
                     );
  
  tstockobjects = class

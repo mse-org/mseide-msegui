@@ -21,7 +21,7 @@ type
                      tabo_vertical,tabo_opposite,
                      tabo_buttonsoutside,tabo_tabsizing,
                      tabo_acttabfirst,tabo_clickedtabfirst,tabo_dblclickedtabfirst,
-                     tabo_sorted);
+                     tabo_sorted,tabo_autopopup);
  tabbaroptionsty = set of tabbaroptionty;
 
 implementation

@@ -135,8 +135,8 @@ const
   'TARGA Image',        //sc_TARGA_image
   'All',                //sc_All
   'Confirmation',       //sc_Confirmation
-  'Delete record?'      //sc_Delete_record
-
+  'Delete record?',     //sc_Delete_record
+  'Close page'          //sc_close_page
                        );
 
 procedure registerlangconsts(const name: string; const stockcaption: stockcaptionty;

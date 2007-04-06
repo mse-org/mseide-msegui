@@ -16,7 +16,7 @@ uses
  msetabsglob,msewidgets,mseclasses,msearrayprops,classes,mseshapes,
  mserichstring,msetypes,msegraphics,msegraphutils,mseevent,mseguiglob,msegui,
  mseforms,rtlconsts,msesimplewidgets,msedrag,
- mseobjectpicker,msepointer,msestat,msestatfile,msestrings;
+ mseobjectpicker,msepointer,msestat,msestatfile,msestrings,msemenus;
 
 const
  defaulttaboptionswidget = defaultoptionswidget + [ow_subfocus,ow_fontglyphheight];
@@ -346,6 +346,7 @@ type
    function checktabsizingpos(const apos: pointty): boolean;
    function getidents: integerarty;
   protected
+   fpopuptab: integer;
    procedure internaladd(const page: itabpage; aindex: integer);
    procedure internalremove(const page: itabpage);
    procedure registerchildwidget(const child: twidget); override;
@@ -363,6 +364,8 @@ type
    procedure childmouseevent(const sender: twidget; var info: mouseeventinfoty); override;
    procedure doafterpaint(const canvas: tcanvas); override;
    procedure dofontheightdelta(var delta: integer); override;
+   procedure doclosepage(const sender: tobject); virtual;
+   procedure dopopup(var amenu: tpopupmenu; var mouseinfo: mouseeventinfoty); override;
 
    //istatfile
    procedure dostatread(const reader: tstatreader);
@@ -1774,8 +1777,10 @@ begin
    else begin
     ftabs.tabs[int1].state:= ftabs.tabs[int1].state - [ts_disabled];
    end;
+   
    if widget1.isvisible and (widget1.enabled or 
                     (csdesigning in widget1.componentstate)) then begin
+    ftabs.tabs[int1].state:= ftabs.tabs[int1].state - [ts_invisible];
     setactivepageindex(int1);
    end
    else begin
@@ -2176,7 +2181,8 @@ begin
   end;
   int1:= newindex;
   repeat
-   if (items[int1].enabled) or (csdesigning in componentstate) then begin
+   if (items[int1].enabled) and not (ts_invisible in ftabs.tabs[int1].state) or 
+            (csdesigning in componentstate) then begin
     setactivepageindex(int1);
     break;
    end
@@ -2196,7 +2202,8 @@ begin
    end;
   until int1 = newindex;
   if int1 = factivepageindex then begin
-   if not ((items[int1].enabled) or (csdesigning in componentstate)) then begin
+   if not ((items[int1].enabled) and not (ts_invisible in ftabs.tabs[int1].state)
+                 or (csdesigning in componentstate)) then begin
     setactivepageindex(-1);
    end;
   end;
@@ -2596,6 +2603,28 @@ begin
   end;
  end;
  raise exception.create('Tabpage '''+aname+''' not found.');
+end;
+
+procedure tcustomtabwidget.doclosepage(const sender: tobject);
+begin
+ items[fpopuptab].visible:= false;
+ ftabs.tabs[fpopuptab].state:= ftabs.tabs[fpopuptab].state + [ts_invisible];
+end;
+
+procedure tcustomtabwidget.dopopup(var amenu: tpopupmenu;
+               var mouseinfo: mouseeventinfoty);
+var
+ int1: integer;
+begin
+ if (tabo_autopopup in options) then begin
+  fpopuptab:= ftabs.tabatpos(translateclientpoint(mouseinfo.pos,self,ftabs));
+  if fpopuptab >= 0 then begin
+   tpopupmenu.additems(amenu,self,mouseinfo,
+      [stockobjects.captions[sc_close_page]],
+      [],[],[{$ifdef FPC}@{$endif}doclosepage]);
+  end;
+ end;
+ inherited;
 end;
 
 { tpagetab }
