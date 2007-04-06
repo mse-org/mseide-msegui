@@ -2775,22 +2775,22 @@ end;
 
 procedure tdockcontroller.settab_frame(const avalue: tframecomp);
 begin
- setlinkedvar(avalue,ftab_frame);
+ setlinkedvar(avalue,tmsecomponent(ftab_frame));
 end;
 
 procedure tdockcontroller.settab_face(const avalue: tfacecomp);
 begin
- setlinkedvar(avalue,ftab_face);
+ setlinkedvar(avalue,tmsecomponent(ftab_face));
 end;
 
 procedure tdockcontroller.settab_facetab(const avalue: tfacecomp);
 begin
- setlinkedvar(avalue,ftab_facetab);
+ setlinkedvar(avalue,tmsecomponent(ftab_facetab));
 end;
 
 procedure tdockcontroller.settab_faceactivetab(const avalue: tfacecomp);
 begin
- setlinkedvar(avalue,ftab_faceactivetab);
+ setlinkedvar(avalue,tmsecomponent(ftab_faceactivetab));
 end;
 
 procedure tdockcontroller.objectevent(const sender: tobject;

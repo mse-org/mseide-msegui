@@ -568,7 +568,7 @@ type
    procedure internalcreate;
    procedure doalphablend(const canvas: tcanvas);
   public
-   constructor create; override; overload;
+   constructor create; overload; override;
    constructor create(const owner: twidget); overload;//sets fowner.fframe
    constructor create(const intf: iface); overload;
    destructor destroy; override;

@@ -821,10 +821,10 @@ begin
  result:= -int1 / (24*60.0);
 end;
 
-{
+(*
 function sys_localtimeoffset: tdatetime;
 var
- ti1,ti2: tfiletime; 
+ ti1,ti2: tfiletime;
 begin
  ti1.dwhighdatetime:= $40000000;
  ti1.dwlowdatetime:= 0;
@@ -836,7 +836,7 @@ begin
  ti2.dwhighdatetime:= ti2.dwhighdatetime - $40000000;
  result:= int64(ti2) / (24*60*60*1e7); //100ns
 end;
-}
+*)
 function localtimeshift(value: tdatetime; const tolocal: boolean) : integer;
              //todo: optimize
  function systitodatetime(const ayear: word; const systi: systemtime): tdatetime;
