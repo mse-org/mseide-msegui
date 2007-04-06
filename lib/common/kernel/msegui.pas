@@ -518,6 +518,7 @@ type
    property template: tframetemplate read gettemplate write settemplate;
  end;
 
+ tcustomface = class;
  iface = interface(inullinterface)
   function getwidget: twidget;
   function translatecolor(const acolor: colorty): colorty;
@@ -567,8 +568,9 @@ type
    procedure internalcreate;
    procedure doalphablend(const canvas: tcanvas);
   public
-   constructor create(const owner: twidget); reintroduce; overload;//sets fowner.fframe
-   constructor create(const intf: iface); reintroduce; overload;
+   constructor create; override; overload;
+   constructor create(const owner: twidget); overload;//sets fowner.fframe
+   constructor create(const intf: iface); overload;
    destructor destroy; override;
    procedure assign(source: tpersistent); override;
    procedure paint(const canvas: tcanvas; const rect: rectty); virtual;
@@ -617,6 +619,7 @@ type
    function getinfosize: integer; override;
    function getinfoad: pointer; override;
    procedure copyinfo(const source: tpersistenttemplate); override;
+   procedure internalcreate; override;
   public
    constructor create(const owner: tmsecomponent; const onchange: notifyeventty); override;
    destructor destroy; override;
@@ -838,6 +841,7 @@ type
    function parentvisible: boolean;  //checks visible flags of ancestors
    procedure updateopaque(const children: boolean);
 
+   //iface
    //iframe
    procedure setframeinstance(instance: tcustomframe); virtual;
    procedure setstaticframe(value: boolean);
@@ -3532,6 +3536,12 @@ begin
  fi.fade_color.onchange:= {$ifdef FPC}@{$endif}dochange;
 end;
 
+constructor tcustomface.create;
+begin
+ inherited;
+ internalcreate;
+end;
+
 constructor tcustomface.create(const owner: twidget);
 begin
  fintf:= iface(owner);
@@ -4008,8 +4018,7 @@ end;
 
 { tfacetemplate }
 
-constructor tfacetemplate.create(const owner: tmsecomponent;
-                       const onchange: notifyeventty);
+procedure tfacetemplate.internalcreate;
 begin
  fi.image:= tmaskedbitmap.create(false);
  fi.fade_pos:= trealarrayprop.Create;
@@ -4019,6 +4028,12 @@ begin
  fi.image.onchange:= {$ifdef FPC}@{$endif}doimagechange;
  fi.fade_pos.onchange:= {$ifdef FPC}@{$endif}dochange;
  fi.fade_color.onchange:= {$ifdef FPC}@{$endif}dochange;
+end;
+
+constructor tfacetemplate.create(const owner: tmsecomponent;
+                       const onchange: notifyeventty);
+begin
+ internalcreate;
  inherited;
 end;
 
@@ -8557,7 +8572,7 @@ end;
 procedure twidget.setframe(const avalue: tcustomframe);
 begin
  if (ws_staticframe in fwidgetstate) then begin
-  if avalue <> nil then begin
+  if (avalue <> nil) and (pointer(avalue) <> pointer(1)) then begin
    fframe.assign(avalue);
   end;
  end
@@ -8575,7 +8590,7 @@ end;
 procedure twidget.setface(const avalue: tcustomface);
 begin
  if (ws_staticface in fwidgetstate) then begin
-  if avalue <> nil then begin
+  if (avalue <> nil) and (pointer(avalue) <> pointer(1)) then begin
    fface.assign(avalue);
   end;
  end

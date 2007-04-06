@@ -4498,7 +4498,7 @@ end;
 function gui_getevent: tevent;
 
 var
- xev: xevent;
+ xev,xev2: xevent;
  w: winidty;
  eventkind: eventkindty;
  akey: keysym;
@@ -4813,12 +4813,18 @@ begin
   configurenotify: begin
    with xev.xconfigure do begin
     w:= xwindow;
-    while longint(xchecktypedwindowevent(appdisp,w,configurenotify,@xev))
-                  <> 0 do begin end;
-     //gnome returns a different pos on window resizing than on window moving!
-    gui_getwindowrect(w,rect1);
-    result:= twindowrectevent.create(ek_configure,xwindow,rect1);
+    if longint(xchecktypedwindowevent(appdisp,w,destroynotify,@xev2)) <> 0 then begin
+     result:= twindowevent.create(ek_destroy,xwindow);
+    end
+    else begin
+      
+     while longint(xchecktypedwindowevent(appdisp,w,configurenotify,@xev))
+                   <> 0 do begin end;
+      //gnome returns a different pos on window resizing than on window moving!
+     gui_getwindowrect(w,rect1);
+     result:= twindowrectevent.create(ek_configure,xwindow,rect1);
 //    result:= twindowrectevent.create(ek_configure,xwindow,makerect(x,y,width,height));
+    end;
    end;
   end;
   destroynotify: begin

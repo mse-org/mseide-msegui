@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2006 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2007 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -13,7 +13,7 @@ unit msetabs;
 
 interface
 uses
- msewidgets,mseclasses,msearrayprops,classes,mseshapes,
+ msetabsglob,msewidgets,mseclasses,msearrayprops,classes,mseshapes,
  mserichstring,msetypes,msegraphics,msegraphutils,mseevent,mseguiglob,msegui,
  mseforms,rtlconsts,msesimplewidgets,msedrag,
  mseobjectpicker,msepointer,msestat,msestatfile,msestrings;
@@ -21,8 +21,6 @@ uses
 const
  defaulttaboptionswidget = defaultoptionswidget + [ow_subfocus,ow_fontglyphheight];
 // defaulttabsize = 20;
- defaulttabsizemin = 20;
- defaulttabsizemax = 200;
 
 type
 
@@ -122,14 +120,6 @@ type
                                        var newindex: integer) of object;
  movedeventty = procedure(const sender: tobject; const curindex: integer;
                                        const newindex: integer) of object;
- tabbaroptionty = (tabo_dragsource,tabo_dragdest,
-                     tabo_dragsourceenabledonly,tabo_dragdestenabledonly,
-                                //no action on disabled pages
-                     tabo_vertical,tabo_opposite,
-                     tabo_buttonsoutside,tabo_tabsizing,
-                     tabo_acttabfirst,tabo_clickedtabfirst,tabo_dblclickedtabfirst,
-                     tabo_sorted);
- tabbaroptionsty = set of tabbaroptionty;
 
  tcustomtabbar = class(tcustomstepbox)
   private

@@ -15,7 +15,8 @@ interface
 uses
  msewidgets,classes,msedrag,msegui,msegraphutils,mseevent,mseclasses,
  msegraphics,msestockobjects,mseguiglob,msestat,msestatfile,msepointer,
- msesplitter,msesimplewidgets,msetypes,msestrings,msebitmap,mseobjectpicker;
+ msesplitter,msesimplewidgets,msetypes,msestrings,msebitmap,mseobjectpicker,
+ msetabsglob;
  
 //todo: optimize
 
@@ -41,7 +42,8 @@ const
  defaultoptionsdock = [od_savepos];
  dbr_first = dbr_handle;
  dbr_last = dbr_background;
-
+ defaulttaboptions= [tabo_dragdest,tabo_dragsource];
+ 
 type
  twidgetdragobject = class(tdragobject)
   private
@@ -158,6 +160,17 @@ type
    fuseroptions: optionsdockty;
    floatdockcount: integer;
    fonmdistatechanged: mdistatechangedeventty;
+   ftab_options: tabbaroptionsty;
+   ftab_size: integer;
+   ftab_sizemin: integer;
+   ftab_sizemax: integer;
+   ftab_color: colorty;
+   ftab_colortab: colorty;
+   ftab_coloractivetab: colorty;
+   ftab_frame: tframecomp;
+   ftab_face: tfacecomp;
+   ftab_facetab: tfacecomp;
+   ftab_faceactivetab: tfacecomp;
    procedure setdockhandle(const avalue: tdockhandle);
    procedure layoutchanged;
    function checksplit(const awidgets: widgetarty;
@@ -175,8 +188,21 @@ type
    procedure updategrip(const asplitdir: splitdirty; const awidget: twidget);
    procedure setuseroptions(const avalue: optionsdockty);
    function placementrect: rectty;
+   procedure settab_options(const avalue: tabbaroptionsty);
+   procedure settab_frame(const avalue: tframecomp);
+   procedure settab_face(const avalue: tfacecomp);
+   procedure settab_color(const avalue: colorty);
+   procedure settab_colortab(const avalue: colorty);
+   procedure settab_coloractivetab(const avalue: colorty);
+   procedure settab_facetab(const avalue: tfacecomp);
+   procedure settab_faceactivetab(const avalue: tfacecomp);
+   procedure settab_size(const avalue: integer);
+   procedure settab_sizemin(const avalue: integer);
+   procedure settab_sizemax(const avalue: integer);
   protected
    foptionsdock: optionsdockty;
+   procedure objectevent(const sender: tobject; const event: objecteventty); override;
+   
    procedure setmdistate(const avalue: mdistatety); virtual;
    procedure domdistatechanged(const oldstate,newstate: mdistatety); virtual;
    procedure dofloat(const adist: pointty); virtual;
@@ -235,6 +261,24 @@ type
                         write setsplitter_color default defaultsplittercolor;
    property splitter_colorgrip: colorty read fsplitter_colorgrip
                         write setsplitter_colorgrip default defaultsplittercolorgrip;
+   property tab_options: tabbaroptionsty read ftab_options write settab_options 
+                                   default defaulttaboptions;
+   property tab_frame: tframecomp read ftab_frame write settab_frame;
+   property tab_face: tfacecomp read ftab_face write settab_face;
+   property tab_color: colorty read ftab_color write settab_color default cl_default;
+   property tab_colortab: colorty read ftab_colortab 
+                        write settab_colortab default cl_transparent;
+   property tab_coloractivetab: colorty read ftab_coloractivetab 
+                        write settab_coloractivetab default cl_active;
+   property tab_facetab: tfacecomp read ftab_facetab write settab_facetab;
+   property tab_faceactivetab: tfacecomp read ftab_faceactivetab 
+                                                 write settab_faceactivetab;
+   property tab_size: integer read ftab_size write settab_size;
+   property tab_sizemin: integer read ftab_sizemin write settab_sizemin
+                            default defaulttabsizemin;
+   property tab_sizemax: integer read ftab_sizemax write settab_sizemax
+                            default defaulttabsizemax;
+   
    property caption: msestring read fcaption write setcaption;
    property optionsdock: optionsdockty read foptionsdock write setoptionsdock
                       default defaultoptionsdock;
@@ -412,8 +456,9 @@ type
    fcontroller: tdockcontroller;
   protected
    procedure dopageremoved(const apage: twidget);  override;
+   procedure updateoptions;
   public
-   constructor create(const acontroller: tdockcontroller);
+   constructor create(const acontroller: tdockcontroller; const aparent: twidget);
                     reintroduce;
    destructor destroy; override;
  end;
@@ -491,11 +536,56 @@ end;
 
 { tdocktabwidget }
 
-constructor tdocktabwidget.create(const acontroller: tdockcontroller);
+constructor tdocktabwidget.create(const acontroller: tdockcontroller;
+                     const aparent: twidget);
 begin
  fcontroller:= acontroller;
  inherited create(nil);
- options:= options + [tabo_dragdest,tabo_dragsource];
+ parentwidget:= aparent;
+ updateoptions;
+ synctofontheight;
+// options:= options + [tabo_dragdest,tabo_dragsource];
+end;
+
+procedure tdocktabwidget.updateoptions;
+begin
+ with fcontroller do begin
+  self.options:= ftab_options;
+  self.tab_color:= ftab_color;
+  self.tab_colortab:= ftab_colortab;
+  self.tab_coloractivetab:= ftab_coloractivetab;
+  self.tab_size:= ftab_size;
+  self.tab_sizemin:= ftab_sizemin;
+  self.tab_sizemax:= ftab_sizemax;
+  if ftab_frame <> nil then begin
+   self.tab_frame:= tstepboxframe(1);
+   self.tab_frame.assign(ftab_frame);
+  end
+  else begin
+   self.tab_frame:= nil;
+  end;
+  if ftab_face <> nil then begin
+   self.tab_face:= tface(1);
+   self.tab_face.assign(ftab_face);
+  end
+  else begin
+   self.tab_face:= nil;
+  end;
+  if ftab_facetab <> nil then begin
+   self.tab_facetab:= tface(1);
+   self.tab_facetab.assign(ftab_facetab);
+  end
+  else begin
+   self.tab_facetab:= nil;
+  end;
+  if ftab_faceactivetab <> nil then begin
+   self.tab_faceactivetab:= tface(1);
+   self.tab_faceactivetab.assign(ftab_faceactivetab);
+  end
+  else begin
+   self.tab_faceactivetab:= nil;
+  end;
+ end;
 end;
 
 destructor tdocktabwidget.destroy;
@@ -518,7 +608,8 @@ end;
 
 { tdocktabpage }
 
-constructor tdocktabpage.create(const atabwidget: tdocktabwidget; const awidget: twidget);
+constructor tdocktabpage.create(const atabwidget: tdocktabwidget;
+                        const awidget: twidget);
 var
  intf1: idocktarget;
 begin
@@ -586,6 +677,12 @@ begin
  fsplitter_color:= defaultsplittercolor;
  fsplitter_colorgrip:= defaultsplittercolorgrip;
  fsplitter_size:= defaultsplittersize;
+ ftab_options:= defaulttaboptions;
+ ftab_color:= cl_default;
+ ftab_colortab:= cl_transparent;
+ ftab_coloractivetab:= cl_active;
+ ftab_sizemin:= defaulttabsizemin;
+ ftab_sizemax:= defaulttabsizemax;
  inherited create(aintf);
 end;
 
@@ -1384,8 +1481,8 @@ begin
     include(fdockstate,dos_updating5);
     try
      if ftabwidget = nil then begin
-      ftabwidget:= tdocktabwidget.create(self);
-      ftabwidget.parentwidget:= container1;
+      ftabwidget:= tdocktabwidget.create(self,container1);
+//      ftabwidget.parentwidget:= container1;
       ftabwidget.anchors:= [];
       include(twidget1(ftabwidget).foptionswidget,ow_noautosizing);
      end;
@@ -2618,6 +2715,91 @@ begin
    end;
   end;
  end; 
+end;
+
+procedure tdockcontroller.settab_options(const avalue: tabbaroptionsty);
+begin
+ ftab_options:= avalue;
+ if ftabwidget <> nil then begin
+  tdocktabwidget(ftabwidget).updateoptions;
+ end;
+end;
+
+procedure tdockcontroller.settab_color(const avalue: colorty);
+begin
+ ftab_color:= avalue;
+ if ftabwidget <> nil then begin
+  tdocktabwidget(ftabwidget).updateoptions;
+ end;
+end;
+
+procedure tdockcontroller.settab_colortab(const avalue: colorty);
+begin
+ ftab_colortab:= avalue;
+ if ftabwidget <> nil then begin
+  tdocktabwidget(ftabwidget).updateoptions;
+ end;
+end;
+
+procedure tdockcontroller.settab_coloractivetab(const avalue: colorty);
+begin
+ ftab_coloractivetab:= avalue;
+ if ftabwidget <> nil then begin
+  tdocktabwidget(ftabwidget).updateoptions;
+ end;
+end;
+
+procedure tdockcontroller.settab_size(const avalue: integer);
+begin
+ ftab_size:= avalue;
+ if ftabwidget <> nil then begin
+  tdocktabwidget(ftabwidget).updateoptions;
+ end;
+end;
+
+procedure tdockcontroller.settab_sizemin(const avalue: integer);
+begin
+ ftab_sizemin:= avalue;
+ if ftabwidget <> nil then begin
+  tdocktabwidget(ftabwidget).updateoptions;
+ end;
+end;
+
+procedure tdockcontroller.settab_sizemax(const avalue: integer);
+begin
+ ftab_sizemax:= avalue;
+ if ftabwidget <> nil then begin
+  tdocktabwidget(ftabwidget).updateoptions;
+ end;
+end;
+
+procedure tdockcontroller.settab_frame(const avalue: tframecomp);
+begin
+ setlinkedvar(avalue,ftab_frame);
+end;
+
+procedure tdockcontroller.settab_face(const avalue: tfacecomp);
+begin
+ setlinkedvar(avalue,ftab_face);
+end;
+
+procedure tdockcontroller.settab_facetab(const avalue: tfacecomp);
+begin
+ setlinkedvar(avalue,ftab_facetab);
+end;
+
+procedure tdockcontroller.settab_faceactivetab(const avalue: tfacecomp);
+begin
+ setlinkedvar(avalue,ftab_faceactivetab);
+end;
+
+procedure tdockcontroller.objectevent(const sender: tobject;
+               const event: objecteventty);
+begin
+ inherited;
+ if (event = oe_changed) and (ftabwidget <> nil) then begin
+  tdocktabwidget(ftabwidget).updateoptions;
+ end;
 end;
 
 { tgripframe }

@@ -72,6 +72,8 @@ type
  propinfopoarty = array of ppropinfo;
 
  tvirtualpersistent = class(tpersistent)
+  protected
+   procedure internalcreate; virtual;
   public
    constructor create; virtual;
  end;
@@ -462,9 +464,15 @@ procedure createobjectlinker(const owner: iobjectlink; onevent: objectlinkeventt
  //sets finstancepo
 procedure getoptionalobject(const componentstate: tcomponentstate;
                        const instance: tobject; createproc: createprocty); overload;
+procedure getoptionalobject(const componentstate: tcomponentstate;
+                  var instance: tvirtualpersistent;
+                         const aclass: virtualpersistentclassty); overload;
 procedure setoptionalobject(const componentstate: tcomponentstate;
                   const value: tpersistent; var instance;
                     createproc: createprocty); overload;
+procedure setoptionalobject(const componentstate: tcomponentstate;
+                  const value: tvirtualpersistent; var instance;
+                  const aclass: virtualpersistentclassty); overload;
 procedure setlinkedcomponent(const sender: iobjectlink; const source: tmsecomponent;
                       var instance: tmsecomponent; ainterfacetype: pointer = nil);
 
@@ -1598,6 +1606,14 @@ begin
  end;
 end;
 
+procedure getoptionalobject(const componentstate: tcomponentstate;
+           var instance: tvirtualpersistent; const aclass: virtualpersistentclassty);
+begin
+ if (instance = nil) and (csreading{csloading} in componentstate) then begin
+  instance:= aclass.create;
+ end;
+end;
+
 procedure setoptionalobject(const componentstate: tcomponentstate;
                   const value: tpersistent; var instance; createproc: createprocty);
 begin
@@ -1605,7 +1621,26 @@ begin
   if tpersistent(instance) = nil then begin
    createproc;
   end;
-  if not (csdesigning in componentstate) then begin
+  if not (csdesigning in componentstate) and 
+                             (pointer(value) <> pointer(1)) then begin
+   tpersistent(instance).assign(value);
+  end;
+ end
+ else begin
+  freeandnil(tpersistent(instance));
+ end;
+end;
+
+procedure setoptionalobject(const componentstate: tcomponentstate;
+                  const value: tvirtualpersistent; var instance;
+                  const aclass: virtualpersistentclassty);
+begin
+ if value <> nil then begin
+  if tpersistent(instance) = nil then begin
+   tvirtualpersistent(instance):= aclass.create;
+  end;
+  if not (csdesigning in componentstate) and 
+                             (pointer(value) <> pointer(1)) then begin
    tpersistent(instance).assign(value);
   end;
  end
@@ -2911,6 +2946,12 @@ end;
 constructor tvirtualpersistent.create;
 begin
  inherited;
+ internalcreate;
+end;
+
+procedure tvirtualpersistent.internalcreate;
+begin
+ //dummy
 end;
 
 { townedeventpersistent }
