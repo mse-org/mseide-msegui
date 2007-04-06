@@ -1,0 +1,52 @@
+object GuiMDIChildFo: TGuiMDIChildfo
+  optionswidget = [ow_arrowfocus, ow_subfocus, ow_destroywidgets, ow_hinton, ow_autoscale]
+  bounds_x = 232
+  bounds_y = 255
+  bounds_cx = 257
+  bounds_cy = 194
+  color = -1879048181
+  frame.levelo = 1
+  frame.colordkshadow = -1879048192
+  frame.colorshadow = -1879048191
+  frame.colorlight = -1879048189
+  frame.colorhighlight = -1879048188
+  frame.framei_left = 1
+  frame.framei_top = 1
+  frame.framei_right = 1
+  frame.framei_bottom = 1
+  frame.captiondist = -2
+  frame.captionoffset = 3
+  frame.font.color = -1879048182
+  frame.font.name = 'stf_default'
+  frame.font.dummy = 0
+  frame.localprops = [frl_levelo, frl_framewidth, frl_colorframe, frl_colordkshadow, frl_colorshadow, frl_colorlight, frl_colorhighlight, frl_firight, frl_colorclient]
+  frame.grip_size = 14
+  frame.grip_grip = stb_dens0
+  frame.grip_color = -2147483645
+  frame.grip_coloractive = -2147483645
+  frame.grip_colorbutton = -1879048187
+  frame.grip_colorbuttonactive = -1879048187
+  frame.grip_options = [go_closebutton, go_minimizebutton, go_normalizebutton, go_maximizebutton, go_horz, go_showsplitcaption]
+  frame.dummy = 0
+  taborder = 1
+  visible = False
+  container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_subfocus, ow_mousetransparent, ow_destroywidgets, ow_autoscale]
+  container.bounds_x = 2
+  container.bounds_y = 16
+  container.bounds_cx = 253
+  container.bounds_cy = 176
+  container.color = -1879048187
+  container.frame.dummy = 0
+  dragdock.caption = 'MDI child form'
+  dragdock.optionsdock = [od_savepos, od_canmove, od_cansize, od_candock]
+  font.name = 'stf_default'
+  font.dummy = 0
+  options = [fo_freeonclose, fo_defaultpos, fo_autoreadstat, fo_autowritestat, fo_savepos, fo_savestate]
+  icon.transparency = -2147483648
+  moduleclassname = 'tdockform'
+  object ActionActivate: taction
+    onexecute = OnExecuteActionActivate
+    left = 96
+    top = 32
+  end
+end

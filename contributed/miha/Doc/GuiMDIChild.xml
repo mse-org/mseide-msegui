@@ -1,0 +1,393 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<fpdoc-descriptions>
+<package name="ContribMiha">
+
+<!--
+  ====================================================================
+    GuiMDIChild
+  ====================================================================
+-->
+
+<module name="GuiMDIChild">
+<short>Simple MDI framework.</short>
+<descr>
+<p>Unit provides the base functional for creating a MDI-application.</p>
+<p>Consists of two main parts:</p>
+<ul>
+<li><link id="TGuiMDIChildFo">TGuiMDIChildFo </link> as ancestor of the MDI child window.</li>
+<li><link id="TMDIController">TMDIController </link> as manager of MDI children windows.</li>
+</ul>
+<p><b>Usage:</b></p>
+<ol>
+<li>Add unit GuiMDIChild in the project.</li>
+<li>Add code for creating instance of the TMDIController. <link id="ExampleOfMDIInitialize">Example...</link></li>
+<li>Attach menu item of the main app menu to MDI-controller.</li>
+<li>Make your MDI-forms as inherited from TGuiMDIChildFo. See TGuiViewTextFo form in the sample project.</li>
+</ol>
+</descr>
+
+<topic name="ExampleOfMDIInitialize">
+<short>
+Example of MDI initialization.
+</short>
+<descr>
+<code>
+procedure tmainfo.OnLoadedForm(const sender: TObject);
+begin
+  FMDI := TMDIController.Create(mainfo, MDIArea);
+  FMDI.Menu := MnuMain.menu.Items[1]; // Menu item for filling by the controller
+end;
+</code>
+</descr>
+</topic>
+
+<!-- object Visibility: default -->
+<element name="IMDIChild">
+<short>Callback interface of the MDI-child form</short>
+<descr>
+For internal usage.
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- object Visibility: default -->
+<element name="TMDIDockController">
+<short>Reimplementation tdockcontroller</short>
+<descr>
+For internal usage.
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- object Visibility: default -->
+<element name="TMDIController">
+<short>Controller of the MDI-child forms.</short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- object Visibility: default -->
+<element name="TGuiMDIChildFo">
+<short>MDI-child form implementation</short>
+<descr>
+Ancestor for your MDI-children windows.
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- variable Visibility: default -->
+<element name="TGuiMDIChildFo.ActionActivate">
+<short>Action used for activating MDI-child form.</short>
+<descr>
+It's action assigned to a menu item by <link id="TMDIController"/>.
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- procedure Visibility: default -->
+<element name="TGuiMDIChildFo.OnExecuteActionActivate">
+<short>Execute event hadler for ActionActivate.</short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- property Visibility: public -->
+<element name="TGuiMDIChildFo.Key">
+<short>Key of the form.</short>
+<descr>
+Can be used for identificate children forms.
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constructor Visibility: public -->
+<element name="TMDIController.Create">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TMDIController.Create.AOwner">
+<short>Owner of the controller instance.</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TMDIController.Create.AMainMDIWidget">
+<short>MDI-area widget.</short>
+</element>
+
+<!-- destructor Visibility: public -->
+<element name="TMDIController.Destroy">
+<short></short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- function Visibility: public -->
+<element name="TMDIController.IndexOf">
+<short>Index of the child form.</short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="TMDIController.IndexOf.Result">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TMDIController.IndexOf.AChild">
+<short></short>
+</element>
+
+<!-- function Visibility: public -->
+<element name="TMDIController.IndexByKey">
+<short>Return index of the child form according to key.</short>
+<descr>
+Function return index of the first form with given <link id="TGuiMDIChildFo.Key">key</link>. Comparison is case-sensitive. -1 returns if key not found.
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- function Visibility: public -->
+<element name="TMDIController.ChildByKey">
+<short>Return child form according to key.</short>
+<descr>
+Function return first founded child form with given <link id="TGuiMDIChildFo.Key">key</link>. Comparison is case-sensitive. <b>Nil </b> returned if key not found.
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- procedure Visibility: public -->
+<element name="TMDIController.Activate">
+<short>Activate the child form.</short>
+<descr>
+Form will be activated and raised in z-order.
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- procedure Visibility: public -->
+<element name="TMDIController.Deactivate">
+<short>Deactivate the child form.</short>
+<descr>
+Form will be deactivated and dropped on one position in the z-order.
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- procedure Visibility: public -->
+<element name="TMDIController.Add">
+<short>Add new MDI-child form.</short>
+<descr>
+New form will be activated.
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- procedure Visibility: public -->
+<element name="TMDIController.Remove">
+<short>Remove MDI-child form.</short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- procedure Visibility: public -->
+<element name="TMDIController.PlaceChild">
+<short>Set position of the child form on the main MDI-area.</short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- procedure Visibility: public -->
+<element name="TMDIController.LockSequence">
+<short>Lock internal management of the z-order.</short>
+<descr>
+Must be used when MDI-children collection managed from outer code.
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- procedure Visibility: public -->
+<element name="TMDIController.UnlockSequence">
+<short>Unlock internal management of the z-order.</short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- property Visibility: public -->
+<element name="TMDIController.Locked">
+<short>Indication of the internal management of the z-order is on.</short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- property Visibility: public -->
+<element name="TMDIController.Count">
+<short>Count of MDI-children.</short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- property Visibility: public -->
+<element name="TMDIController.Children">
+<short>Index based list of the child forms.</short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- property Visibility: published -->
+<element name="TMDIController.MainMDIWidget">
+<short>Main MDI-area widget.</short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- property Visibility: published -->
+<element name="TMDIController.Menu">
+<short>Root of the MDI-controller menu.</short>
+<descr>
+<link id="ExampleOfMDIInitialize">Must be set when TMDIController initialized.</link>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- property Visibility: published -->
+<element name="TMDIController.WindowsMenu">
+<short>Submenu with per-child activation items.</short>
+<descr>
+Created by TMDIController.
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- property Visibility: published -->
+<element name="TMDIController.ActionMinAll">
+<short>Created by controller minimize all action.</short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- property Visibility: published -->
+<element name="TMDIController.ActionMaxAll">
+<short>Created by controller maximize all action.</short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- property Visibility: published -->
+<element name="TMDIController.HideMinimized">
+<short>Hide minimized forms.</short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="MDI_HSTEP">
+<short>Horizontal step used for set position of the child form.</short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="MDI_VSTEP">
+<short>Vertical step used for set position of the child form.</short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="MDI_MAX_CONTROLPOS">
+<short>Iterations count for trying set position of the child form.</short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+</module> <!-- GuiMDIChild -->
+
+</package>
+</fpdoc-descriptions>

@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<fpdoc-descriptions>
+<package name="ContribMiha">
+
+<!--
+  ====================================================================
+    GuiStyle
+  ====================================================================
+-->
+
+<module name="GuiStyle">
+<short>System colors grabber.</short>
+<descr>
+</descr>
+
+<!-- unresolved type reference Visibility: default -->
+<element name="msegraphics">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- unresolved type reference Visibility: default -->
+<element name="msebits">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- unresolved type reference Visibility: default -->
+<element name="msestat">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- unresolved type reference Visibility: default -->
+<element name="strutils">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- unresolved type reference Visibility: default -->
+<element name="sysutils">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- unresolved type reference Visibility: default -->
+<element name="classes">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- procedure Visibility: default -->
+<element name="SetDesktopSkin">
+<short>Grab desktop colors and font.</short>
+<descr>
+The Procedure reads the system colors and assigns them to the <i>mse</i> mapped colors. 
+It works in a Win32 (colors are read by <b>GetSysColor</b>) and in the Linux (but QT based only. Colors are read from <b>~/.qt/qtrc</b>).
+In the Linux envinronment the Procedure reads font name and its size from <i>qtrc</i> and assigns them to the mse default and menu font.
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+</module> <!-- GuiStyle -->
+
+</package>
+</fpdoc-descriptions>

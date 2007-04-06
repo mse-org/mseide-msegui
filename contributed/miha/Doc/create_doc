@@ -1,0 +1,9 @@
+#!/bin/bash
+
+#makeskel --package=ContribMiha --input=../GuiMDIChild.pas --output=GuiMDIChild.xml --disabled-protected --disable-private
+#makeskel --package=ContribMiha --input=../GuiStyle.pas --output=GuiStyle.xml --disabled-protected --disable-private
+fpdoc --package=ContribMiha --output=html --hide-protected\
+    --input=../GuiMDIChild.pas \
+    --input=../GuiStyle.pas \
+    --descr=GuiMDIChild.xml \
+    --descr=GuiStyle.xml 

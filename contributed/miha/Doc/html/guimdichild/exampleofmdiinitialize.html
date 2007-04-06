@@ -1,0 +1,23 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<title>Example of MDI initialization. </title>
+<link rel="stylesheet" type="text/css" href="../fpdoc.css">
+</head>
+<body>
+<table cellpadding="4" cellspacing="0" border="0" width="100%" class="bar">
+<tr>
+<td><b>[<a href="../guimdichild/index.html">Up</a>]</b></td>
+<td align="right"><span class="bartitle">Reference for unit 'GuiMDIChild' (<a href="../index.html">#ContribMiha</a>)</span></td>
+</tr>
+</table>
+<h2>Example of MDI initialization. </h2>
+<pre><span class="kw">procedure</span> tmainfo<span class="sym">.</span>OnLoadedForm<span class="sym">(</span><span class="kw">const</span> sender<span class="sym">:</span> TObject<span class="sym">)</span><span class="sym">;</span>
+<span class="kw">begin</span>
+  FMDI <span class="sym">:=</span> TMDIController<span class="sym">.</span>Create<span class="sym">(</span>mainfo<span class="sym">,</span> MDIArea<span class="sym">)</span><span class="sym">;</span>
+  FMDI<span class="sym">.</span>Menu <span class="sym">:=</span> MnuMain<span class="sym">.</span>menu<span class="sym">.</span>Items<span class="sym">[</span><span class="num">1</span><span class="sym">]</span><span class="sym">;</span> <span class="cmt">// Menu item for filling by the controller</span>
+<span class="kw">end</span><span class="sym">;</span>
+</pre>
+</body>
+</html>

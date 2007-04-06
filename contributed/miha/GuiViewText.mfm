@@ -1,0 +1,60 @@
+inherited GuiViewTextFo: tGuiViewTextfo
+  bounds_x = 185
+  bounds_y = 416
+  bounds_cx = 353
+  bounds_cy = 207
+  frame.font.dummy = 0
+  frame.grip_colorglyph = -2147483648
+  frame.dummy = 0
+  visible = True
+  container.bounds_cx = 349
+  container.bounds_cy = 189
+  container.frame.sbhorz.options = [sbo_thumbtrack, sbo_moveauto]
+  container.frame.sbvert.options = [sbo_thumbtrack, sbo_moveauto]
+  container.frame.dummy = 0
+  font.dummy = 0
+  icon.transparency = -2147483648
+  moduleclassname = 'TGuiMDIChildfo'
+  object WidgetGrid: twidgetgrid[0]
+    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_focusbackonesc, ow_mousewheel, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+    bounds_x = 0
+    bounds_y = 0
+    bounds_cx = 345
+    bounds_cy = 186
+    frame.dummy = 0
+    anchors = [an_left, an_top, an_right, an_bottom]
+    optionsgrid = [og_focuscellonenter, og_autofirstrow, og_colchangeontabkey, og_autopopup, og_mousescrollcol]
+    gridframecolor = -2147483648
+    datacols.count = 1
+    datacols.linewidth = 0
+    datacols.linecolor = -2147483648
+    datacols.linecolorfix = -2147483648
+    datacols.colorselect = -1879048181
+    datacols.items = <    
+      item
+        colorselect = -1879048181
+        width = 2000
+        options = [co_multiselect, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_nosort, co_mousescrollrow]
+        widgetname = 'Editor'
+      end>
+    datarowlinewidth = 0
+    datarowlinecolorfix = -2147483648
+    datarowlinecolor = -2147483648
+    datarowheight = 15
+    reffontheight = 13
+    object Editor: ttextedit
+      optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontlineheight, ow_autoscale]
+      bounds_x = 0
+      bounds_y = 0
+      bounds_cx = 2000
+      bounds_cy = 15
+      taborder = 1
+      visible = False
+      optionsedit = [oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_linebreak, oe_eatreturn, oe_keyexecute, oe_savevalue, oe_savestate]
+      marginlinecolor = -2147483648
+      reffontheight = 13
+    end
+  end
+  inherited ActionActivate: taction
+  end
+end
