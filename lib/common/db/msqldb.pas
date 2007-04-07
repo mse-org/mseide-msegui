@@ -22,7 +22,7 @@ unit msqldb;
 
 interface
 
-uses sysutils,classes,db,msebufdataset,msetypes;
+uses sysutils,classes,db,msebufdataset,msetypes,msedb,mseclasses;
 
 type TSchemaType = (stNoSchema,stTables,stSysTables,stProcedures,stColumns,
                     stProcedureParams,stIndexes,stPackages);
@@ -30,19 +30,6 @@ type TSchemaType = (stNoSchema,stTables,stSysTables,stProcedures,stColumns,
      TConnOptions= set of TConnOption;
 
 type
- tmseparams = class(tparams)
-  public
-   function  parsesql(const sql: string; const docreate: boolean; 
-          const  parameterstyle : tparamstyle; var parambinding: tparambinding; 
-           var replacestring : string): string; overload;
-   function  parsesql(const sql: string; const docreate: boolean;
-        parameterstyle : tparamstyle; var parambinding: tparambinding): string;
-                                                overload;
-   function  parsesql(const sql: string; const docreate: boolean;
-                            const parameterstyle : tparamstyle): string; overload;
-   function  parsesql(const sql: string; const docreate: boolean): string; overload;
- end;
- 
   tcustomsqlconnection = class;
   TSQLTransaction = class;
   TSQLQuery = class;
@@ -85,11 +72,9 @@ const
                  );
 
 
-{ tcustomsqlconnection }
 type
-
-  { tcustomsqlconnection }
-
+ tmsesqlscript = class;
+ 
  tcustomsqlconnection = class (TDatabase)
   private
     FPassword            : string;
@@ -99,13 +84,19 @@ type
     FCharSet             : string;
     FRole                : String;
 
+   fafterconnect: tmsesqlscript;
+   fbeforedisconnect: tmsesqlscript;
     procedure SetTransaction(Value : TSQLTransaction);
     procedure GetDBInfo(const SchemaType : TSchemaType; const SchemaObjectName, ReturnField : string; List: TStrings);
    function getconnected: boolean;
    procedure setconnected(const avalue: boolean);
+   procedure setafteconnect(const avalue: tmsesqlscript);
+   procedure setbeforedisconnect(const avalue: tmsesqlscript);
   protected
     FConnOptions         : TConnOptions;
  
+   procedure notification(acomponent: tcomponent; operation: toperation); override;
+   
     function StrToStatementType(s : string) : TStatementType; virtual;
     procedure DoInternalConnect; override;
     procedure DoInternalDisconnect; override;
@@ -143,14 +134,17 @@ type
     function CreateBlobStream(const Field: TField; const Mode: TBlobStreamMode;
                  const acursor: tsqlcursor): TStream; virtual;
   public
+    procedure Close;
+    procedure Open;
     property Handle: Pointer read GetHandle;
     destructor Destroy; override;
     procedure StartTransaction; override;
     procedure EndTransaction; override;
     property ConnOptions: TConnOptions read FConnOptions;
-    procedure ExecuteDirect(const SQL : String); overload; virtual;
-    procedure ExecuteDirect(SQL : String; const ATransaction : TSQLTransaction); 
-                                                       overload; virtual;
+    procedure executedirect(const asql: string); overload;
+    procedure executedirect(const asql: string;
+         atransaction: tsqltransaction;
+         const aparams: tparams = nil); overload;
     procedure GetTableNames(List : TStrings; SystemTables : Boolean = false); virtual;
     procedure GetProcedureNames(List : TStrings); virtual;
     procedure GetFieldNames(const TableName : string; List :  TStrings); virtual;
@@ -162,6 +156,8 @@ type
 
     property Connected: boolean read getconnected write setconnected default false;
     Property Role :  String read FRole write FRole;
+    property afterconnect: tmsesqlscript read fafterconnect write setafteconnect;
+    property beforedisconnect: tmsesqlscript read fbeforedisconnect write setbeforedisconnect;
   end;
 
  tsqlconnection = class(tcustomsqlconnection)
@@ -178,6 +174,8 @@ type
     property KeepConnection;
     property LoginPrompt;
     property Params;
+    property afterconnect;
+    property beforedisconnect;
     property OnLogin;
  end;
  
@@ -212,6 +210,31 @@ type
     property Params : TStringList read FParams write setparams;
   end;
 
+ tmsesqlscript = class(tmsecomponent)
+  private
+   fsql: tstringlist;
+   fdatabase: tsqlconnection;
+   ftransaction: tsqltransaction;
+   fparams: tmseparams;
+   procedure setsql(const avalue: tstringlist);
+   procedure setdatabase(const avalue: tsqlconnection);
+   procedure settransaction(const avalue: tsqltransaction);
+   procedure setparams(const avalue: tmseparams);
+  protected
+   procedure notification(acomponent: tcomponent; operation: toperation); override;
+  public
+   constructor create(aowner: tcomponent); override;
+   destructor destroy; override;
+   procedure execute(adatabase: tcustomsqlconnection = nil;
+                        atransaction: tsqltransaction = nil); overload;
+  published
+   property params : tmseparams read fparams write setparams;
+   property sql: tstringlist read fsql write setsql;
+   property database: tsqlconnection read fdatabase write setdatabase;
+   property transaction: tsqltransaction read ftransaction write settransaction;
+                  //can be nil
+ end;
+ 
 { TSQLQuery }
 const
  blobidsize = sizeof(integer);
@@ -279,6 +302,10 @@ type
    procedure setparams(const avalue: TmseParams);
    function getconnected: boolean;
    procedure setconnected(const avalue: boolean);
+   procedure setFSQL(const avalue: TStringlist);
+   procedure setFSQLUpdate(const avalue: TStringlist);
+   procedure setFSQLInsert(const avalue: TStringlist);
+   procedure setFSQLDelete(const avalue: TStringlist);
   protected
    FTableName           : string;
    FReadOnly            : boolean;
@@ -357,10 +384,10 @@ type
     property ReadOnly : Boolean read FReadOnly write SetReadOnly;
     property params : tmseparams read fparams write setparams;
                        //before SQL
-    property SQL : TStringlist read FSQL write FSQL;
-    property SQLUpdate : TStringlist read FSQLUpdate write FSQLUpdate;
-    property SQLInsert : TStringlist read FSQLInsert write FSQLInsert;
-    property SQLDelete : TStringlist read FSQLDelete write FSQLDelete;
+    property SQL : TStringlist read FSQL write setFSQL;
+    property SQLUpdate : TStringlist read FSQLUpdate write setFSQLUpdate;
+    property SQLInsert : TStringlist read FSQLInsert write setFSQLInsert;
+    property SQLDelete : TStringlist read FSQLDelete write setFSQLDelete;
     property IndexDefs : TIndexDefs read GetIndexDefs;
     property UpdateMode : TUpdateMode read FUpdateMode write SetUpdateMode;
     property UsePrimaryKeyAsKey : boolean read FUsePrimaryKeyAsKey write SetUsePrimaryKeyAsKey;
@@ -372,7 +399,7 @@ type
 
 implementation
 uses 
- dbconst,strutils,mseclasses,msedatalist,msereal,msedb,msestream;
+ dbconst,strutils,msedatalist,msereal,msestream;
 
 type
  TDBTransactioncracker = Class(TComponent)
@@ -520,37 +547,40 @@ begin
     Transaction.EndTransaction;
 end;
 
-Procedure tcustomsqlconnection.ExecuteDirect(const SQL: String);
-
+procedure tcustomsqlconnection.executedirect(const asql: string);
 begin
- ExecuteDirect(SQL,FTransaction);
+ executedirect(asql,ftransaction);
 end;
 
-Procedure tcustomsqlconnection.ExecuteDirect(SQL: String;
-                                        const ATransaction: TSQLTransaction);
+Procedure tcustomsqlconnection.ExecuteDirect(const aSQL: String;
+          ATransaction: TSQLTransaction;
+          const aparams: tparams = nil);
 
-var Cursor : TSQLCursor;
-
+var 
+ Cursor: TSQLCursor;
 begin
+ if atransaction = nil then begin
+  atransaction:= ftransaction;
+ end;
   if not assigned(ATransaction) then
     DatabaseError(SErrTransactionnSet);
-
-  if not Connected then Open;
+  connected:= true;
+//  if not Connected then Open;
   if not ATransaction.Active then ATransaction.StartTransaction;
 
   try
     Cursor := AllocateCursorHandle(nil);
     cursor.ftrans:= atransaction.handle;
-    SQL := TrimRight(SQL);
+//    SQL := TrimRight(SQL);
 
-    if SQL = '' then
+    if trimright(asql) = '' then
       DatabaseError(SErrNoStatement);
 
     Cursor.FStatementType := stNone;
 
-    PrepareStatement(cursor,ATransaction,SQL,Nil);
+    PrepareStatement(cursor,ATransaction,aSQL,aparams);
     cursor.ftrans:= atransaction.handle;
-    execute(cursor,atransaction,Nil);
+    execute(cursor,atransaction,aparams);
     UnPrepareStatement(Cursor);
   finally;
     DeAllocateCursorHandle(Cursor);
@@ -665,10 +695,18 @@ begin
     end
     else begin
      DoInternalConnect;
+     if fafterconnect <> nil then begin
+      fconnected:= true; //avoid recursion
+      fafterconnect.execute(self,ftransaction);
+     end;
     end;
    end
    else begin
 //    Closedatasets;
+    if fbeforedisconnect <> nil then begin
+     fbeforedisconnect.execute(self,ftransaction);
+     ftransaction.commit;
+    end;
     for int1:= fdatasets.count - 1 downto 0 do begin
      with tsqlquery(fdatasets[int1]) do begin
       if (transaction = nil) or (transaction.active) then begin
@@ -685,6 +723,52 @@ begin
    FConnected:= aValue;
   end;
  end;
+end;
+
+procedure tcustomsqlconnection.setafteconnect(const avalue: tmsesqlscript);
+begin
+ if fafterconnect <> nil then begin
+  fafterconnect.removefreenotification(self);
+ end;
+ fafterconnect:= avalue;
+ if fafterconnect <> nil then begin
+  fafterconnect.freenotification(self);
+ end;
+end;
+
+procedure tcustomsqlconnection.setbeforedisconnect(const avalue: tmsesqlscript);
+begin
+ if fbeforedisconnect <> nil then begin
+  fbeforedisconnect.removefreenotification(self);
+ end;
+ fbeforedisconnect:= avalue;
+ if fbeforedisconnect <> nil then begin
+  fbeforedisconnect.freenotification(self);
+ end;
+end;
+
+procedure tcustomsqlconnection.notification(acomponent: tcomponent;
+               operation: toperation);
+begin
+ if operation = opremove then begin
+  if acomponent = fafterconnect then begin
+   fafterconnect:= nil;
+  end;
+  if acomponent = fbeforedisconnect then begin
+   fbeforedisconnect:= nil;
+  end;
+ end;
+ inherited;
+end;
+
+procedure tcustomsqlconnection.Close;
+begin
+ connected:= false;
+end;
+
+procedure tcustomsqlconnection.Open;
+begin
+ connected:= true;
 end;
 
 { TSQLTransaction }
@@ -1987,6 +2071,26 @@ begin         //todo: check connect disconnect sequence
  end;
 end;
 
+procedure TSQLQuery.setFSQL(const avalue: TStringlist);
+begin
+ fsql.assign(avalue);
+end;
+
+procedure TSQLQuery.setFSQLUpdate(const avalue: TStringlist);
+begin
+ fsqlupdate.assign(avalue);
+end;
+
+procedure TSQLQuery.setFSQLInsert(const avalue: TStringlist);
+begin
+ fsqlinsert.assign(avalue);
+end;
+
+procedure TSQLQuery.setFSQLDelete(const avalue: TStringlist);
+begin
+ fsqldelete.assign(avalue);
+end;
+
 { TSQLCursor }
 
 constructor TSQLCursor.create(const aquery: tsqlquery);
@@ -2070,252 +2174,138 @@ begin
  result:= (fquery <> nil) and (bs_blobsfetched in fquery.fbstate);
 end;
 
-{ tmseparams }
+{ tmsesqlscript }
 
-function tmseparams.parsesql(const sql: string; const docreate: boolean;
-               const parameterstyle: tparamstyle;
-               var parambinding: tparambinding;
-               var replacestring: string): string;
+constructor tmsesqlscript.create(aowner: tcomponent);
+begin
+ fparams:= tmseparams.create(self);
+ fsql:= tstringlist.create;
+ inherited;
+end;
 
-type
-  // used for ParamPart
-  TStringPart = record
-    Start,Stop:integer;
+destructor tmsesqlscript.destroy;
+begin
+ fparams.free;
+ fsql.free;
+ inherited;
+end;
+
+procedure tmsesqlscript.setsql(const avalue: tstringlist);
+begin
+ fsql.assign(avalue);
+end;
+
+procedure tmsesqlscript.setdatabase(const avalue: tsqlconnection);
+begin
+ if fdatabase <> nil then begin
+  fdatabase.removefreenotification(self);
+ end;
+ fdatabase:= avalue;
+ if fdatabase <> nil then begin
+  fdatabase.freenotification(self);
+ end;
+end;
+
+procedure tmsesqlscript.settransaction(const avalue: tsqltransaction);
+begin
+ if ftransaction <> nil then begin
+  ftransaction.removefreenotification(self);
+ end;
+ ftransaction:= avalue;
+ if ftransaction <> nil then begin
+  ftransaction.freenotification(self);
+ end;
+end;
+
+function splitsql(const asql: string): stringarty;
+var
+ po1,po2: pchar;
+ 
+ procedure addstatement;
+ begin
+  setlength(result,high(result)+2);
+  setlength(result[high(result)],po1-po2);
+  move(po2^,result[high(result)][1],length(result[high(result)]));
+ end;
+ 
+begin
+ result:= nil;
+ po1:= pchar(asql);
+ po2:= po1;
+ while true do begin            //todo: skip comments
+  case po1^ of
+   #0: begin
+    break;
+   end;
+   ';': begin
+    inc(po1);
+    addstatement;
+    po2:= po1;
+   end;
+   '''': begin
+    inc(po1);
+    while (po1^ <> '''') and (po1^ <> #0) do begin
+     inc(po1);
+    end;
+    if po1^ = '''' then begin
+     inc(po1);
+    end;
+   end;
+   else begin
+    inc(po1);
+   end;
   end;
-
-const
-  ParamAllocStepSize = 8;
-
-var
-  IgnorePart:boolean;
-  p,ParamNameStart,BufStart:PChar;
-  ParamName:string;
-  QuestionMarkParamCount,ParameterIndex,NewLength:integer;
-  ParamCount:integer; // actual number of parameters encountered so far;
-                      // always <= Length(ParamPart) = Length(Parambinding)
-                      // Parambinding will have length ParamCount in the end
-  ParamPart:array of TStringPart; // describe which parts of buf are parameters
-  NewQueryLength:integer;
-  NewQuery:string;
-  NewQueryIndex,BufIndex,CopyLen,i:integer;    // Parambinding will have length ParamCount in the end
-  b:integer;
-  tmpParam:TParam;
-
-begin
-//  if DoCreate then Clear;        //2006-11-23 mse
-
-  // Parse the SQL and build ParamBinding
-  ParamCount:=0;
-  NewQueryLength:=Length(SQL);
-  SetLength(ParamPart,ParamAllocStepSize);
-  SetLength(Parambinding,ParamAllocStepSize);
-  QuestionMarkParamCount:=0; // number of ? params found in query so far
-
-  ReplaceString := '$';
-  if ParameterStyle = psSimulated then
-    while pos(ReplaceString,SQL) > 0 do ReplaceString := ReplaceString+'$';
-
-  p:=PChar(SQL);
-  BufStart:=p; // used to calculate ParamPart.Start values
-  repeat
-    case p^ of
-      '''': // single quote delimited string
-        begin
-          Inc(p);
-          while not (p^ in [#0, '''']) do
-          begin
-            if p^='\' then Inc(p,2) // make sure we handle \' and \\ correct
-            else Inc(p);
-          end;
-          if p^='''' then Inc(p); // skip final '
-        end;
-      '"':  // double quote delimited string
-        begin
-          Inc(p);
-          while not (p^ in [#0, '"']) do
-          begin
-            if p^='\'  then Inc(p,2) // make sure we handle \" and \\ correct
-            else Inc(p);
-          end;
-          if p^='"' then Inc(p); // skip final "
-        end;
-      '-': // possible start of -- comment
-        begin
-          Inc(p);
-          if p='-' then // -- comment
-          begin
-            repeat // skip until at end of line
-              Inc(p);
-            until p^ in [#10, #0];
-          end
-        end;
-      '/': // possible start of /* */ comment
-        begin
-          Inc(p);
-          if p^='*' then // /* */ comment
-          begin
-            repeat
-              Inc(p);
-              if p^='*' then // possible end of comment
-              begin
-                Inc(p);
-                if p^='/' then Break; // end of comment
-              end;
-            until p^=#0;
-            if p^='/' then Inc(p); // skip final /
-          end;
-        end;
-      ':','?': // parameter
-        begin
-          IgnorePart := False;
-          if p^=':' then
-          begin // find parameter name
-            Inc(p);
-            if p^=':' then  // ignore ::, since some databases uses this as a cast (wb 4813)
-            begin
-              IgnorePart := True;
-              Inc(p);
-            end
-            else
-            begin
-              ParamNameStart:=p;
-              while not (p^ in (SQLDelimiterCharacters+[#0])) do
-                Inc(p);
-              ParamName:=Copy(ParamNameStart,1,p-ParamNameStart);
-            end;
-          end
-          else
-          begin
-            Inc(p);
-            ParamNameStart:=p;
-            ParamName:='';
-          end;
-
-          if not IgnorePart then
-          begin
-            Inc(ParamCount);
-            if ParamCount>Length(ParamPart) then
-            begin
-              NewLength:=Length(ParamPart)+ParamAllocStepSize;
-              SetLength(ParamPart,NewLength);
-              SetLength(ParamBinding,NewLength);
-            end;
-
-            if DoCreate then
-              begin
-              // Check if this is the first occurance of the parameter
-              tmpParam := FindParam(ParamName);
-              // If so, create the parameter and assign the Parameterindex
-              if not assigned(tmpParam) then
-                ParameterIndex := CreateParam(ftUnknown, ParamName, ptInput).Index
-              else  // else only assign the ParameterIndex
-                ParameterIndex := tmpParam.Index;
-              end
-            // else find ParameterIndex
-            else
-              begin
-                if ParamName<>'' then
-                  ParameterIndex:=ParamByName(ParamName).Index
-                else
-                begin
-                  ParameterIndex:=QuestionMarkParamCount;
-                  Inc(QuestionMarkParamCount);
-                end;
-              end;
-            if ParameterStyle in [psPostgreSQL,psSimulated] then
-              begin
-              if ParameterIndex > 8 then
-                inc(NewQueryLength,2)
-              else
-                inc(NewQueryLength,1)
-              end;
-
-            // store ParameterIndex in FParamIndex, ParamPart data
-            ParamBinding[ParamCount-1]:=ParameterIndex;
-            ParamPart[ParamCount-1].Start:=ParamNameStart-BufStart;
-            ParamPart[ParamCount-1].Stop:=p-BufStart+1;
-
-            // update NewQueryLength
-            Dec(NewQueryLength,p-ParamNameStart);
-          end;
-        end;
-      #0:Break;
-    else
-      Inc(p);
-    end;
-  until false;
-
-  SetLength(ParamPart,ParamCount);
-  SetLength(ParamBinding,ParamCount);
-
-  if ParamCount>0 then
-  begin
-    // replace :ParamName by ? for interbase and by $x for postgresql/psSimulated
-    // (using ParamPart array and NewQueryLength)
-    if (ParameterStyle = psSimulated) and (length(ReplaceString) > 1) then
-      inc(NewQueryLength,(paramcount)*(length(ReplaceString)-1));
-
-    SetLength(NewQuery,NewQueryLength);
-    NewQueryIndex:=1;
-    BufIndex:=1;
-    for i:=0 to High(ParamPart) do
-    begin
-      CopyLen:=ParamPart[i].Start-BufIndex;
-      Move(SQL[BufIndex],NewQuery[NewQueryIndex],CopyLen);
-      Inc(NewQueryIndex,CopyLen);
-      case ParameterStyle of
-        psInterbase : NewQuery[NewQueryIndex]:='?';
-        psPostgreSQL,
-        psSimulated : begin
-                        ParamName := IntToStr(ParamBinding[i]+1);
-                        for b := 1 to length(ReplaceString) do
-                          begin
-                          NewQuery[NewQueryIndex]:='$';
-                          Inc(NewQueryIndex);
-                          end;
-                        NewQuery[NewQueryIndex]:= paramname[1];
-                        if length(paramname)>1 then
-                          begin
-                          Inc(NewQueryIndex);
-                          NewQuery[NewQueryIndex]:= paramname[2]
-                          end;
-                      end;
-      end;
-      Inc(NewQueryIndex);
-      BufIndex:=ParamPart[i].Stop;
-    end;
-    CopyLen:=Length(SQL)+1-BufIndex;
-    Move(SQL[BufIndex],NewQuery[NewQueryIndex],CopyLen);
-  end
-  else
-    NewQuery:=SQL;
-    
-  Result := NewQuery;
+ end;
+ {
+ if po1 <> po2 then begin
+  addstatement;
+ end;
+ }
 end;
 
-function  tmseparams.parsesql(const sql: string; const docreate: boolean;
-        parameterstyle : tparamstyle; var parambinding: tparambinding): string;
+procedure tmsesqlscript.execute(adatabase: tcustomsqlconnection = nil;
+                 atransaction: tsqltransaction = nil);
 var
- rs: string;
+ str1: string;
+ ar1: stringarty;
+ int1: integer;
 begin
- result := parsesql(sql,docreate,parameterstyle,parambinding,rs);
+ if adatabase = nil then begin
+  adatabase:= fdatabase;
+ end;
+ if atransaction = nil then begin
+  atransaction:= ftransaction;
+ end; 
+ if adatabase = nil then begin
+  databaseerror(serrdatabasenassigned,self);
+ end;
+ str1:= fsql.text;
+ ar1:= splitsql(str1);
+ if high(ar1) < 0 then begin
+  databaseerror(serrnostatement,self);
+ end;
+ for int1:= 0 to high(ar1) do begin
+  adatabase.executedirect(ar1[int1],atransaction,fparams);
+ end;
 end;
 
-function tmseparams.parsesql(const sql: string; const docreate: boolean;
-               const parameterstyle: tparamstyle): string;
-var
- pb: tparambinding;
- rs: string;
+procedure tmsesqlscript.notification(acomponent: tcomponent;
+                                             operation: toperation);
 begin
- result:= parsesql(sql,docreate,parameterstyle,pb,rs);
+ if operation = opremove then begin
+  if (acomponent = fdatabase) then begin
+   fdatabase:= nil;
+  end;
+  if (acomponent = ftransaction) then begin
+   ftransaction:= nil;
+  end;
+ end;
+ inherited;
 end;
 
-function tmseparams.parsesql(const sql: string; const docreate: boolean): string;
-var
- pb: TParamBinding;
- rs: string;
+procedure tmsesqlscript.setparams(const avalue: tmseparams);
 begin
- result:= parsesql(sql,docreate,psinterbase,pb,rs);
+ fparams.assign(avalue);
 end;
 
 end.

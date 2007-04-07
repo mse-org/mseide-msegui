@@ -49,7 +49,7 @@ uses
  mselookupbuffer,msedbf,msesdfdata,msememds,
  msedatalist,msedbfieldeditor,sysutils,msetexteditor,
  msedbdispwidgets,msedbgraphics,regdb_bmp,msegui,msedbdialog,msegrids,
- regwidgets,msebufdataset,msedbevents,msesqlite3conn
+ regwidgets,msebufdataset,msedbevents,msesqlite3conn,msqldb
  {$ifdef mse_with_sqlite}
  ,msesqlite3ds
  {$endif}
@@ -173,7 +173,7 @@ begin
       tlookupbuffer,tdblookupbuffer,tdbmemolookupbuffer,
       tmsedatasource,
       tmsedbf,tmsefixedformatdataset,tmsesdfdataset,tmsememdataset,
-      tmsesqlquery,tmsesqltransaction,
+      tmsesqlquery,tmsesqltransaction,tmsesqlscript,
       tmseibconnection,tmsepqconnection,tsqlite3connection,tmseodbcconnection,
       tmsemysql40connection,tmsemysql41connection,tmsemysql50connection
       {$ifdef mse_with_sqlite}

@@ -817,6 +817,20 @@ type
    property datasource: tdatasource read getdatasource write setdatasource;
  end;
  
+ tmseparams = class(tparams)
+  public
+   function  parsesql(const sql: string; const docreate: boolean; 
+          const  parameterstyle : tparamstyle; var parambinding: tparambinding; 
+           var replacestring : string): string; overload;
+   function  parsesql(const sql: string; const docreate: boolean;
+        parameterstyle : tparamstyle; var parambinding: tparambinding): string;
+                                                overload;
+   function  parsesql(const sql: string; const docreate: boolean;
+                            const parameterstyle : tparamstyle): string; overload;
+   function  parsesql(const sql: string; const docreate: boolean): string; overload;
+   function expandvalues(const sql: string): string;
+ end;
+ 
 const
  fieldtypeclasses: array[fieldclasstypety] of fieldclassty = 
           (tfield,tstringfield,tnumericfield,
@@ -884,6 +898,7 @@ const
 function fieldclasstoclasstyp(const fieldclass: fieldclassty): fieldclasstypety;
 function fieldtosql(const field: tfield): string;
 function fieldtooldsql(const field: tfield): string;
+function paramtosql(const aparam: tparam): string;
 function fieldchanged(const field: tfield): boolean;
 function curfieldchanged(const field: tfield): boolean;
 procedure fieldtoparam(const field: tfield; const param: tparam);
@@ -1106,6 +1121,46 @@ begin
  tdataset1(field.dataset).restorestate(statebefore);
 end;
  
+function paramtosql(const aparam: tparam): string;
+begin
+ with aparam do begin
+  if (aparam = nil) or isnull then begin
+   result:= 'NULL'
+  end
+  else begin
+   case datatype of
+    ftstring: begin
+     result:= encodesqlstring(asstring);
+    end;
+    ftmemo: begin
+     result:= encodesqlstring(asstring);
+    end;
+    ftdate: begin
+     result := encodesqldate(asdatetime)
+    end;
+    fttime: begin
+     result := encodesqltime(asdatetime)
+    end;
+    ftdatetime: begin
+     result:= encodesqldatetime(asdatetime);
+    end;
+    ftfloat: begin
+     result:= encodesqlfloat(asfloat);
+    end;
+    ftbcd: begin
+     result:= encodesqlcurrency(ascurrency);
+    end;
+    ftboolean: begin
+     result:= encodesqlboolean(asboolean);
+    end;
+    else begin
+     result := asstring;
+    end;
+   end;
+  end;
+ end;
+end;
+
 function dofieldchanged(const field: tfield; const astate: tdatasetstate): boolean;
       //todo: fast compare in tbufdataset
 var
@@ -3683,6 +3738,284 @@ procedure ttimestampfieldlink.updatedata(const afield: tfield);
 begin
  afield.asdatetime:= now;
  inherited;
+end;
+
+{ tmseparams }
+
+function tmseparams.parsesql(const sql: string; const docreate: boolean;
+               const parameterstyle: tparamstyle;
+               var parambinding: tparambinding;
+               var replacestring: string): string;
+
+type
+  // used for ParamPart
+  TStringPart = record
+    Start,Stop:integer;
+  end;
+
+const
+  ParamAllocStepSize = 8;
+
+var
+  IgnorePart:boolean;
+  p,ParamNameStart,BufStart:PChar;
+  ParamName:string;
+  QuestionMarkParamCount,ParameterIndex,NewLength:integer;
+  ParamCount:integer; // actual number of parameters encountered so far;
+                      // always <= Length(ParamPart) = Length(Parambinding)
+                      // Parambinding will have length ParamCount in the end
+  ParamPart:array of TStringPart; // describe which parts of buf are parameters
+  NewQueryLength:integer;
+  NewQuery:string;
+  NewQueryIndex,BufIndex,CopyLen,i:integer;    // Parambinding will have length ParamCount in the end
+  b:integer;
+  tmpParam:TParam;
+
+begin
+//  if DoCreate then Clear;        //2006-11-23 mse
+
+  // Parse the SQL and build ParamBinding
+  ParamCount:=0;
+  NewQueryLength:=Length(SQL);
+  SetLength(ParamPart,ParamAllocStepSize);
+  SetLength(Parambinding,ParamAllocStepSize);
+  QuestionMarkParamCount:=0; // number of ? params found in query so far
+
+  ReplaceString := '$';
+  if ParameterStyle = psSimulated then
+    while pos(ReplaceString,SQL) > 0 do ReplaceString := ReplaceString+'$';
+
+  p:=PChar(SQL);
+  BufStart:=p; // used to calculate ParamPart.Start values
+  repeat
+    case p^ of
+      '''': // single quote delimited string
+        begin
+          Inc(p);
+          while not (p^ in [#0, '''']) do
+          begin
+            if p^='\' then Inc(p,2) // make sure we handle \' and \\ correct
+            else Inc(p);
+          end;
+          if p^='''' then Inc(p); // skip final '
+        end;
+      '"':  // double quote delimited string
+        begin
+          Inc(p);
+          while not (p^ in [#0, '"']) do
+          begin
+            if p^='\'  then Inc(p,2) // make sure we handle \" and \\ correct
+            else Inc(p);
+          end;
+          if p^='"' then Inc(p); // skip final "
+        end;
+      '-': // possible start of -- comment
+        begin
+          Inc(p);
+          if p='-' then // -- comment
+          begin
+            repeat // skip until at end of line
+              Inc(p);
+            until p^ in [#10, #0];
+          end
+        end;
+      '/': // possible start of /* */ comment
+        begin
+          Inc(p);
+          if p^='*' then // /* */ comment
+          begin
+            repeat
+              Inc(p);
+              if p^='*' then // possible end of comment
+              begin
+                Inc(p);
+                if p^='/' then Break; // end of comment
+              end;
+            until p^=#0;
+            if p^='/' then Inc(p); // skip final /
+          end;
+        end;
+      ':','?': // parameter
+        begin
+          IgnorePart := False;
+          if p^=':' then
+          begin // find parameter name
+            Inc(p);
+            if p^=':' then  // ignore ::, since some databases uses this as a cast (wb 4813)
+            begin
+              IgnorePart := True;
+              Inc(p);
+            end
+            else
+            begin
+              ParamNameStart:=p;
+              while not (p^ in (SQLDelimiterCharacters+[#0])) do
+                Inc(p);
+              ParamName:=Copy(ParamNameStart,1,p-ParamNameStart);
+            end;
+          end
+          else
+          begin
+            Inc(p);
+            ParamNameStart:=p;
+            ParamName:='';
+          end;
+
+          if not IgnorePart then
+          begin
+            Inc(ParamCount);
+            if ParamCount>Length(ParamPart) then
+            begin
+              NewLength:=Length(ParamPart)+ParamAllocStepSize;
+              SetLength(ParamPart,NewLength);
+              SetLength(ParamBinding,NewLength);
+            end;
+
+            if DoCreate then
+              begin
+              // Check if this is the first occurance of the parameter
+              tmpParam := FindParam(ParamName);
+              // If so, create the parameter and assign the Parameterindex
+              if not assigned(tmpParam) then
+                ParameterIndex := CreateParam(ftUnknown, ParamName, ptInput).Index
+              else  // else only assign the ParameterIndex
+                ParameterIndex := tmpParam.Index;
+              end
+            // else find ParameterIndex
+            else
+              begin
+                if ParamName<>'' then
+                  ParameterIndex:=ParamByName(ParamName).Index
+                else
+                begin
+                  ParameterIndex:=QuestionMarkParamCount;
+                  Inc(QuestionMarkParamCount);
+                end;
+              end;
+            if ParameterStyle in [psPostgreSQL,psSimulated] then
+              begin
+              if ParameterIndex > 8 then
+                inc(NewQueryLength,2)
+              else
+                inc(NewQueryLength,1)
+              end;
+
+            // store ParameterIndex in FParamIndex, ParamPart data
+            ParamBinding[ParamCount-1]:=ParameterIndex;
+            ParamPart[ParamCount-1].Start:=ParamNameStart-BufStart;
+            ParamPart[ParamCount-1].Stop:=p-BufStart+1;
+
+            // update NewQueryLength
+            Dec(NewQueryLength,p-ParamNameStart);
+          end;
+        end;
+      #0:Break;
+    else
+      Inc(p);
+    end;
+  until false;
+
+  SetLength(ParamPart,ParamCount);
+  SetLength(ParamBinding,ParamCount);
+
+  if ParamCount>0 then
+  begin
+    // replace :ParamName by ? for interbase and by $x for postgresql/psSimulated
+    // (using ParamPart array and NewQueryLength)
+    if (ParameterStyle = psSimulated) and (length(ReplaceString) > 1) then
+      inc(NewQueryLength,(paramcount)*(length(ReplaceString)-1));
+
+    SetLength(NewQuery,NewQueryLength);
+    NewQueryIndex:=1;
+    BufIndex:=1;
+    for i:=0 to High(ParamPart) do
+    begin
+      CopyLen:=ParamPart[i].Start-BufIndex;
+      Move(SQL[BufIndex],NewQuery[NewQueryIndex],CopyLen);
+      Inc(NewQueryIndex,CopyLen);
+      case ParameterStyle of
+        psInterbase : NewQuery[NewQueryIndex]:='?';
+        psPostgreSQL,
+        psSimulated : begin
+                        ParamName := IntToStr(ParamBinding[i]+1);
+                        for b := 1 to length(ReplaceString) do
+                          begin
+                          NewQuery[NewQueryIndex]:='$';
+                          Inc(NewQueryIndex);
+                          end;
+                        NewQuery[NewQueryIndex]:= paramname[1];
+                        if length(paramname)>1 then
+                          begin
+                          Inc(NewQueryIndex);
+                          NewQuery[NewQueryIndex]:= paramname[2]
+                          end;
+                      end;
+      end;
+      Inc(NewQueryIndex);
+      BufIndex:=ParamPart[i].Stop;
+    end;
+    CopyLen:=Length(SQL)+1-BufIndex;
+    Move(SQL[BufIndex],NewQuery[NewQueryIndex],CopyLen);
+  end
+  else
+    NewQuery:=SQL;
+    
+  Result := NewQuery;
+end;
+
+function  tmseparams.parsesql(const sql: string; const docreate: boolean;
+        parameterstyle : tparamstyle; var parambinding: tparambinding): string;
+var
+ rs: string;
+begin
+ result := parsesql(sql,docreate,parameterstyle,parambinding,rs);
+end;
+
+function tmseparams.parsesql(const sql: string; const docreate: boolean;
+               const parameterstyle: tparamstyle): string;
+var
+ pb: tparambinding;
+ rs: string;
+begin
+ result:= parsesql(sql,docreate,parameterstyle,pb,rs);
+end;
+
+function tmseparams.parsesql(const sql: string; const docreate: boolean): string;
+var
+ pb: TParamBinding;
+ rs: string;
+begin
+ result:= parsesql(sql,docreate,psinterbase,pb,rs);
+end;
+
+function tmseparams.expandvalues(const sql: string): string;
+var
+ pb: tparambinding;
+ int1,int2,int3,int4: integer;
+ str1,str2: string;
+ po1: pchar;
+begin
+ str2:= parsesql(sql,false,pssimulated,pb,str1);
+ if high(pb) >= 0 then begin
+  int3:= 1;
+  result:= '';
+  po1:= pchar(str2)-1;
+  for int1:= 0 to high(pb) do begin
+   int2:= pos(str1,str2);
+   for int4:= int2 to int2+length(str1)-1 do begin
+    (po1+int4)^:= ' '; //remove marker
+   end;
+   result:= result + copy(str2,int3,int2-int3) + paramtosql(items[pb[int1]]);
+   int3:= int2 + length(str1);
+   while (str2[int3] >= '0') and (str2[int3] <= '9') do begin
+    inc(int3);
+   end;
+  end;
+  result:= result + copy(str2,int3,bigint); //tail
+ end
+ else begin
+  result:= str2;   
+ end;
 end;
 
 end.
