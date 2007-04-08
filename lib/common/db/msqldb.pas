@@ -216,6 +216,7 @@ type
    fdatabase: tsqlconnection;
    ftransaction: tsqltransaction;
    fparams: tmseparams;
+   fstatementnr: integer;
    procedure setsql(const avalue: tstringlist);
    procedure setdatabase(const avalue: tsqlconnection);
    procedure settransaction(const avalue: tsqltransaction);
@@ -227,6 +228,7 @@ type
    destructor destroy; override;
    procedure execute(adatabase: tcustomsqlconnection = nil;
                         atransaction: tsqltransaction = nil); overload;
+   property statementnr: integer read fstatementnr; //null based
   published
    property params : tmseparams read fparams write setparams;
    property sql: tstringlist read fsql write setsql;
@@ -281,6 +283,7 @@ type
     fblobintf: iblobconnection;
    
 //   fIsPrepared: boolean;
+   fbeforeexecute: tmsesqlscript;
     procedure FreeFldBuffers;
     procedure InitUpdates(ASQL : string);
     function GetIndexDefs : TIndexDefs;
@@ -306,9 +309,13 @@ type
    procedure setFSQLUpdate(const avalue: TStringlist);
    procedure setFSQLInsert(const avalue: TStringlist);
    procedure setFSQLDelete(const avalue: TStringlist);
+   procedure setbeforeexecute(const avalue: tmsesqlscript);
   protected
    FTableName           : string;
    FReadOnly            : boolean;
+      
+   procedure notification(acomponent: tcomponent; operation: toperation); override;
+   
    // abstract & virtual methods of TBufDataset
    function Fetch : boolean; override;
    function getblobdatasize: integer; override;
@@ -346,9 +353,25 @@ type
     procedure SetSchemaInfo( SchemaType : TSchemaType; SchemaObjectName, SchemaPattern : string); virtual;
     function CreateBlobStream(Field: TField; Mode: TBlobStreamMode): TStream; override;
     property Prepared : boolean read IsPrepared;
-    procedure Notification(AComponent: TComponent; Operation: TOperation); override;
     property connected: boolean read getconnected write setconnected;
   published
+    property ReadOnly : Boolean read FReadOnly write SetReadOnly;
+    property params : tmseparams read fparams write setparams;
+                       //before SQL
+    property SQL : TStringlist read FSQL write setFSQL;
+    property SQLUpdate : TStringlist read FSQLUpdate write setFSQLUpdate;
+    property SQLInsert : TStringlist read FSQLInsert write setFSQLInsert;
+    property SQLDelete : TStringlist read FSQLDelete write setFSQLDelete;
+    property beforeexecute: tmsesqlscript read fbeforeexecute write setbeforeexecute;
+    property IndexDefs : TIndexDefs read GetIndexDefs;
+    property UpdateMode : TUpdateMode read FUpdateMode write SetUpdateMode;
+    property UsePrimaryKeyAsKey : boolean read FUsePrimaryKeyAsKey write SetUsePrimaryKeyAsKey;
+    property StatementType : TStatementType read GetStatementType;
+    property ParseSQL : Boolean read FParseSQL write SetParseSQL;
+    Property DataSource : TDatasource Read GetDataSource Write SetDatasource;
+    property database: tcustomsqlconnection read getdatabase1 write setdatabase1;
+    
+//    property SchemaInfo : TSchemaInfo read FSchemaInfo default stNoSchema;
     // redeclared data set properties
     property Active;
     property Filter;
@@ -377,24 +400,9 @@ type
     property OnNewRecord;
     property OnPostError;
     property AutoCalcFields;
-    property database: tcustomsqlconnection read getdatabase1 write setdatabase1;
 //    property Database;
 
     property Transaction;
-    property ReadOnly : Boolean read FReadOnly write SetReadOnly;
-    property params : tmseparams read fparams write setparams;
-                       //before SQL
-    property SQL : TStringlist read FSQL write setFSQL;
-    property SQLUpdate : TStringlist read FSQLUpdate write setFSQLUpdate;
-    property SQLInsert : TStringlist read FSQLInsert write setFSQLInsert;
-    property SQLDelete : TStringlist read FSQLDelete write setFSQLDelete;
-    property IndexDefs : TIndexDefs read GetIndexDefs;
-    property UpdateMode : TUpdateMode read FUpdateMode write SetUpdateMode;
-    property UsePrimaryKeyAsKey : boolean read FUsePrimaryKeyAsKey write SetUsePrimaryKeyAsKey;
-    property StatementType : TStatementType read GetStatementType;
-    property ParseSQL : Boolean read FParseSQL write SetParseSQL;
-    Property DataSource : TDatasource Read GetDataSource Write SetDatasource;
-//    property SchemaInfo : TSchemaInfo read FSchemaInfo default stNoSchema;
   end;
 
 implementation
@@ -1433,6 +1441,9 @@ begin
    Prepare;
    if FCursor.FStatementType in [stSelect] then begin
     if aexecute then begin
+     if fbeforeexecute <> nil then begin
+      fbeforeexecute.execute(database,tsqltransaction(transaction));
+     end;
      Execute;
      if FCursor.FInitFieldDef then InternalInitFieldDefs;
     end;
@@ -1991,12 +2002,17 @@ begin
     Result:=Nil;
 end;
 
-procedure TSQLQuery.Notification(AComponent: TComponent; Operation: TOperation); 
-
+procedure tsqlquery.notification(acomponent: tcomponent; operation: toperation); 
 begin
-  Inherited;
-  If (Operation=opRemove) and (AComponent=DataSource) then
-    DataSource:=Nil;
+ inherited;
+ if operation = opremove then begin
+  if acomponent = datasource then begin
+   datasource:= nil;
+  end;
+  if acomponent = fbeforeexecute then begin
+   fbeforeexecute:= nil;
+  end;
+ end;
 end;
 
 function TSQLQuery.getblobdatasize: integer;
@@ -2089,6 +2105,17 @@ end;
 procedure TSQLQuery.setFSQLDelete(const avalue: TStringlist);
 begin
  fsqldelete.assign(avalue);
+end;
+
+procedure TSQLQuery.setbeforeexecute(const avalue: tmsesqlscript);
+begin
+ if fbeforeexecute <> nil then begin
+  fbeforeexecute.removefreenotification(self);
+ end;
+ fbeforeexecute:= avalue;
+ if fbeforeexecute <> nil then begin
+  fbeforeexecute.freenotification(self);
+ end;
 end;
 
 { TSQLCursor }
@@ -2285,6 +2312,7 @@ begin
   databaseerror(serrnostatement,self);
  end;
  for int1:= 0 to high(ar1) do begin
+  fstatementnr:= int1;
   adatabase.executedirect(ar1[int1],atransaction,fparams);
  end;
 end;

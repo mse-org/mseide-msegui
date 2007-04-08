@@ -105,6 +105,14 @@ type
    procedure edit; override;
  end;
  
+ tsqlscriptsqlpropertyeditor = class(tsqlpropertyeditor)
+  private
+  protected
+   procedure doafterclosequery(var amodalresult: modalresultty); override;
+   function gettestbutton: boolean; override;
+  public
+ end;
+ 
  tonfilterpropertyeditor = class(tmethodpropertyeditor)
   public
    function getdefaultstate: propertystatesty; override;
@@ -228,6 +236,8 @@ begin
         tsqlpropertyeditor);
  registerpropertyeditor(typeinfo(tstringlist),tmsesqlquery,'SQL',
         tsqlquerysqlpropertyeditor);
+ registerpropertyeditor(typeinfo(tstringlist),tmsesqlscript,'SQL',
+        tsqlscriptsqlpropertyeditor);
  registerpropertyeditor(typeinfo(tdataset),nil,'',
                              tcomponentpropertyeditor);
  registerpropertyeditor(typeinfo(tdataset),tfield,'dataset',
@@ -712,6 +722,29 @@ begin
  if not factivebefore then begin
   tmsesqlquery(fprops[0].instance).active:= false;
  end;
+end;
+
+{ tsqlscriptsqlpropertyeditor }
+
+procedure tsqlscriptsqlpropertyeditor.doafterclosequery(var amodalresult: modalresultty);
+begin
+ if amodalresult = mr_canclose then begin
+  with tmsesqlscript(fprops[0].instance) do begin
+   try
+    execute;
+   except
+    on e: exception do begin
+     e.message:= 'Statement ' + inttostr(statementnr+1)+':'+lineend+e.message;
+     raise;
+    end;
+   end;
+  end;
+ end;
+end;
+
+function tsqlscriptsqlpropertyeditor.gettestbutton: boolean;
+begin
+ result:= true;
 end;
 
 { tonfilterpropertyeditor }
