@@ -2715,16 +2715,11 @@ begin
  exclude(fstate,rbs_rendering);
  exclude(widgetstate1,ws1_noclipchildren);
  if fdatalink.active then begin
-  application.lock;
   try
-   try
-    fdatalink.dataset.recno:= frecnobefore;
-   except
-   end;
-   fdatalink.dataset.enablecontrols;
-  finally
-   application.unlock;
+   fdatalink.dataset.recno:= frecnobefore;
+  except
   end;
+  fdatalink.dataset.enablecontrols;
  end; 
 end;
 
@@ -4177,16 +4172,11 @@ begin
  exclude(fstate,rpps_rendering);
  exclude(fwidgetstate1,ws1_noclipchildren);
  if fdatalink.active then begin
-  application.lock;
   try
-   try
-    fdatalink.dataset.recno:= frecnobefore;
-   except
-   end;
-   fdatalink.dataset.enablecontrols;
-  finally
-   application.unlock;
+   fdatalink.dataset.recno:= frecnobefore;
+  except
   end;
+  fdatalink.dataset.enablecontrols;
  end; 
  {
  for int1:= 0 to high(fbands) do begin
@@ -4575,21 +4565,26 @@ var
  var
   int1: integer;
  begin
-  fakevisible(self,false);
-  flastpagecount:= fpagenum;
-  for int1:= 0 to high(freppages) do begin
-   freppages[int1].endrender;
-  end;
-  terminated1:= thread.terminated;
-  if islast or (rs_endpass in fstate) or terminated1 then begin
-   exclude(fstate,rs_running);
-   fstream.free;
-   if fprinter <> nil then begin
-    fprinter.endprint;
-    fprinter.canvas.printorientation:= fdefaultprintorientation;
+  application.lock;
+  try
+   fakevisible(self,false);
+   flastpagecount:= fpagenum;
+   for int1:= 0 to high(freppages) do begin
+    freppages[int1].endrender;
    end;
-   fcanvas.ppmm:= fppmmbefore;
-   asyncevent(endrendertag);
+   terminated1:= thread.terminated;
+   if islast or (rs_endpass in fstate) or terminated1 then begin
+    exclude(fstate,rs_running);
+    fstream.free;
+    if fprinter <> nil then begin
+     fprinter.endprint;
+     fprinter.canvas.printorientation:= fdefaultprintorientation;
+    end;
+    fcanvas.ppmm:= fppmmbefore;
+    asyncevent(endrendertag);
+   end;
+  finally
+   application.unlock;
   end;
  end;
 
