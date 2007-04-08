@@ -2715,11 +2715,16 @@ begin
  exclude(fstate,rbs_rendering);
  exclude(widgetstate1,ws1_noclipchildren);
  if fdatalink.active then begin
+  application.lock;
   try
-   fdatalink.dataset.recno:= frecnobefore;
-  except
+   try
+    fdatalink.dataset.recno:= frecnobefore;
+   except
+   end;
+   fdatalink.dataset.enablecontrols;
+  finally
+   application.unlock;
   end;
-  fdatalink.dataset.enablecontrols;
  end; 
 end;
 
@@ -4172,11 +4177,16 @@ begin
  exclude(fstate,rpps_rendering);
  exclude(fwidgetstate1,ws1_noclipchildren);
  if fdatalink.active then begin
+  application.lock;
   try
-   fdatalink.dataset.recno:= frecnobefore;
-  except
+   try
+    fdatalink.dataset.recno:= frecnobefore;
+   except
+   end;
+   fdatalink.dataset.enablecontrols;
+  finally
+   application.unlock;
   end;
-  fdatalink.dataset.enablecontrols;
  end; 
  {
  for int1:= 0 to high(fbands) do begin
