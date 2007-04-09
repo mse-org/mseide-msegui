@@ -501,6 +501,8 @@ type
    fnextgroupnum: integer;
    frecnobefore: integer;
    fobjectpicker: tobjectpicker;
+   fnextband: tcustomrecordband;
+   fnextbandifempty: tcustomrecordband;
    procedure settabs(const avalue: treptabulators);
    procedure setoptions(const avalue: bandoptionsty);
    function getvisidatasource: tdatasource;
@@ -517,6 +519,8 @@ type
                            out afieldtypes: fieldtypesarty);
               //ireccontrol
    procedure recchanged;
+   procedure setnextband(const avalue: tcustomrecordband);
+   procedure setnextbandifempty(const avalue: tcustomrecordband);
   protected
    procedure setfont(const avalue: trepwidgetfont);
    function getfont: trepwidgetfont;
@@ -583,6 +587,11 @@ type
                //controls visibility not null -> visible
    property visigroupfield: string read getvisigroupfield write setvisigroupfield;
    property options: bandoptionsty read foptions write setoptions default [];
+   property nextband: tcustomrecordband read fnextband write setnextband;
+                       //used by tcustombandarea
+   property nextbandifempty: tcustomrecordband read fnextbandifempty 
+                                       write setnextbandifempty;
+                       //used by tcustombandarea
    property onbeforerender: beforerenderrecordeventty read fonbeforerender
                                write fonbeforerender;
    property onpaint: painteventty read fonpaint write fonpaint;
@@ -602,6 +611,8 @@ type
    property visidatasource;
    property visidatafield;
    property visigroupfield;
+   property nextband;
+   property nextbandifempty;
    property onfontheightdelta;
    property onchildscaled;
 
@@ -716,6 +727,8 @@ type
    property font;
 //   property tabs;
    property datasource;
+   property nextband;
+   property nextbandifempty;
    property options;
    property optionsscale;
    property visidatasource;
@@ -3192,6 +3205,16 @@ begin
  result:= trepwidgetfont;
 end;
 
+procedure tcustomrecordband.setnextband(const avalue: tcustomrecordband);
+begin
+ setlinkedvar(avalue,fnextband);
+end;
+
+procedure tcustomrecordband.setnextbandifempty(const avalue: tcustomrecordband);
+begin
+ setlinkedvar(avalue,fnextbandifempty);
+end;
+
 { tcustombandgroup }
 
 procedure tcustombandgroup.registerchildwidget(const child: twidget);
@@ -3535,6 +3558,7 @@ end;
 function tcustombandarea.render(const acanvas: tcanvas): boolean;
 var                     //true if finished
  bo1,bo2: boolean;
+ int1,int2: integer;
 begin
  result:= true;
  if not (bas_inited in fstate) then begin
@@ -3562,13 +3586,42 @@ begin
       render(acanvas,bo1);
       bo1:= bo1 or bo2{(bv_everypage in fvisibility)};
 //      fstate:= fstate + [rbs_showed,rbs_pageshowed];
-     end;
 //     result:= bo1;
-     result:= result and bo1;
-     if bo1 then begin
-      repeat
-       inc(factiveband);
-      until (factiveband > high(fbands)) or fbands[factiveband].visible;
+      result:= result and bo1;
+      if bo1 then begin //empty
+       if fnextbandifempty <> nil then begin
+        for int1:= 0 to high(fbands) do begin
+         if fbands[int1] = fnextbandifempty then begin
+          for int2:= int1 to factiveband do begin
+           exclude(fbands[int2].fstate,rbs_showed);
+          end;
+          factiveband:= int1-1;
+          break;
+         end;         
+        end;
+       end;
+       repeat
+        inc(factiveband);
+       until (factiveband > high(fbands)) or fbands[factiveband].visible;
+      end
+      else begin
+       if not (bas_areafull in self.fstate) and (fnextband <> nil) and 
+                  not (fdatalink.active and fdatalink.dataset.eof) then begin
+        for int1:= 0 to high(fbands) do begin
+         if fbands[int1] = fnextband then begin
+          for int2:= int1 to factiveband do begin
+           exclude(fbands[int2].fstate,rbs_showed);
+          end;
+          factiveband:= int1;
+          while (factiveband <= high(fbands)) and 
+                          not fbands[factiveband].visible do begin
+           inc(factiveband);
+          end;
+          break;
+         end;         
+        end;
+       end;
+      end;
      end;
     end;
    end;

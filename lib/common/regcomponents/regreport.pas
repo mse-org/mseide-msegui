@@ -44,6 +44,10 @@ begin
         tdbfieldnamepropertyeditor);
  registerpropertyeditor(typeinfo(string),tcustomrecordband,'visigroupfield',
         tdbfieldnamepropertyeditor);
+ registerpropertyeditor(typeinfo(tcustomrecordband),tcustomrecordband,'nextband',
+                                 tsisterwidgetpropertyeditor);
+ registerpropertyeditor(typeinfo(tcustomrecordband),tcustomrecordband,'nextbandifempty',
+                                 tsisterwidgetpropertyeditor);
 end;
 
 { treptabulatoreditor }
