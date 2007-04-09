@@ -397,6 +397,7 @@ type
   procedure updatevisibility;
   procedure beginrender;
   procedure endrender;
+  procedure init;
  end;
  ireportclientarty = array of ireportclient;
  
@@ -477,6 +478,7 @@ type
    procedure updatevisibility;
    procedure beginrender;
    procedure endrender;
+   procedure init;
   published
    property optionsrep: bandoptionsty read foptionsrep write setoptionsrep default [];
  end;
@@ -2568,6 +2570,11 @@ begin
  exclude(widgetstate1,ws1_noclipchildren);
 end;
 
+procedure trepspacer.init;
+begin
+ //dummy
+end;
+
 { tcustomrecordband }
 
 constructor tcustomrecordband.create(aowner: tcomponent);
@@ -3941,9 +3948,12 @@ var
 begin
  include(fstate,rpps_inited);
  exclude(fstate,rpps_showed);
- for int1:= 0 to high(fareas) do begin
-  fareas[int1].init;
+ for int1:= 0 to high(fclients) do begin
+  fclients[int1].init;
  end;
+// for int1:= 0 to high(fareas) do begin
+//  fareas[int1].init;
+// end;
 end;
 
 procedure tcustomreportpage.dosyncnextrecord;
