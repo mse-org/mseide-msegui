@@ -213,12 +213,12 @@ type
  tmsesqlscript = class(tmsecomponent)
   private
    fsql: tstringlist;
-   fdatabase: tsqlconnection;
+   fdatabase: tcustomsqlconnection;
    ftransaction: tsqltransaction;
    fparams: tmseparams;
    fstatementnr: integer;
    procedure setsql(const avalue: tstringlist);
-   procedure setdatabase(const avalue: tsqlconnection);
+   procedure setdatabase(const avalue: tcustomsqlconnection);
    procedure settransaction(const avalue: tsqltransaction);
    procedure setparams(const avalue: tmseparams);
   protected
@@ -232,7 +232,7 @@ type
   published
    property params : tmseparams read fparams write setparams;
    property sql: tstringlist read fsql write setsql;
-   property database: tsqlconnection read fdatabase write setdatabase;
+   property database: tcustomsqlconnection read fdatabase write setdatabase;
    property transaction: tsqltransaction read ftransaction write settransaction;
                   //can be nil
  end;
@@ -2222,7 +2222,7 @@ begin
  fsql.assign(avalue);
 end;
 
-procedure tmsesqlscript.setdatabase(const avalue: tsqlconnection);
+procedure tmsesqlscript.setdatabase(const avalue: tcustomsqlconnection);
 begin
  if fdatabase <> nil then begin
   fdatabase.removefreenotification(self);
