@@ -114,6 +114,8 @@ type
    property options: sqliteoptionsty read foptions write foptions;
 //    property Password;
    property Transaction;
+   property afterconnect;
+   property beforedisconnect;
 //    property UserName;
 //    property CharSet;
 //    property HostName;
