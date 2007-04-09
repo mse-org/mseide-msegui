@@ -659,6 +659,8 @@ type
 
  trepprintdatedisp = class(trepvaluedisp)
   protected
+   procedure initpage; override;
+   procedure parentchanged; override;
    function getdisptext: msestring; override;
   published
    property format;
@@ -5151,6 +5153,18 @@ begin
  else begin
   result:= inherited getdisptext;
  end;
+end;
+
+procedure trepprintdatedisp.initpage;
+begin
+ inherited;
+ minclientsizechanged;
+end;
+
+procedure trepprintdatedisp.parentchanged;
+begin
+ inherited;
+ minclientsizechanged;
 end;
 
 { trepwidgetfont }
