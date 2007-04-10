@@ -26,6 +26,7 @@ type
    procedure setconnected(const avalue: boolean);
   protected
    //idbcontroller
+   procedure setinheritedconnected(const avalue: boolean);
    function readsequence(const sequencename: string): string;
    function writesequence(const sequencename: string;
                     const avalue: largeint): string;
@@ -104,6 +105,11 @@ end;
 procedure tmsemysql41connection.updateutf8(var autf8: boolean);
 begin
  //dummy
+end;
+
+procedure tmsemysql41connection.setinheritedconnected(const avalue: boolean);
+begin
+ inherited connected:= avalue;
 end;
 
 end.

@@ -712,6 +712,7 @@ type
 
  idbcontroller = interface(inullinterface)
           ['{B26D004A-7FEE-44F2-9919-3B8612BDD598}']
+  procedure setinheritedconnected(const avalue: boolean);
   function readsequence(const sequencename: string): string;
   function writesequence(const sequencename: string;
                     const avalue: largeint): string;
@@ -3533,7 +3534,7 @@ begin
     fonbeforeconnect(tdatabase(fowner));
    end;
    try
-    connected:= avalue;
+    fintf.setinheritedconnected(avalue);
    except
     on e: exception do begin
      if checkcanevent(fowner,tmethod(fonconnecterror)) then begin
@@ -3551,7 +3552,8 @@ begin
   end;
  end
  else begin
-  tdatabase(fowner).connected:= avalue;
+  fintf.setinheritedconnected(avalue);
+//  tdatabase(fowner).connected:= avalue;
  end;
 end;
 

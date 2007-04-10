@@ -89,12 +89,12 @@ type
     procedure SetTransaction(Value : TSQLTransaction);
     procedure GetDBInfo(const SchemaType : TSchemaType; const SchemaObjectName, ReturnField : string; List: TStrings);
    function getconnected: boolean;
-   procedure setconnected(const avalue: boolean);
    procedure setafteconnect(const avalue: tmsesqlscript);
    procedure setbeforedisconnect(const avalue: tmsesqlscript);
   protected
     FConnOptions         : TConnOptions;
  
+   procedure setconnected(const avalue: boolean);
    procedure notification(acomponent: tcomponent; operation: toperation); override;
    
     function StrToStatementType(s : string) : TStatementType; virtual;

@@ -47,6 +47,7 @@ type
    procedure execute(const cursor: tsqlcursor; const atransaction: tsqltransaction;
                              const aparams: tparams); override;
    //idbcontroller
+   procedure setinheritedconnected(const avalue: boolean);
    function readsequence(const sequencename: string): string;
    function writesequence(const sequencename: string;
                     const avalue: largeint): string;
@@ -277,6 +278,11 @@ end;
 procedure tmsepqconnection.updateutf8(var autf8: boolean);
 begin
  //dummy
+end;
+
+procedure tmsepqconnection.setinheritedconnected(const avalue: boolean);
+begin
+ inherited connected:= avalue;
 end;
 
 end.
