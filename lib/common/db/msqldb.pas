@@ -102,7 +102,8 @@ type
     procedure DoInternalDisconnect; override;
     function GetAsSQLText(Field : TField) : string; overload; virtual;
     function GetAsSQLText(Param : TParam) : string; overload; virtual;
-    function GetHandle : pointer; virtual; virtual;
+    function GetHandle : pointer; virtual;
+    procedure updateprimarykeyfield(const afield: tfield); virtual;
 
     Function AllocateCursorHandle(const aowner: tsqlquery) : TSQLCursor; virtual; abstract;
                         //aowner used as blob cache
@@ -130,6 +131,7 @@ type
 
     procedure UpdateIndexDefs(var IndexDefs : TIndexDefs;
                                           const TableName : string); virtual;
+    function getprimarykeyfield(const atablename: string): string; virtual;
     function GetSchemaInfoSQL(SchemaType : TSchemaType; SchemaObjectName, SchemaPattern : string) : string; virtual;
     function CreateBlobStream(const Field: TField; const Mode: TBlobStreamMode;
                  const acursor: tsqlcursor): TStream; virtual;
@@ -313,6 +315,7 @@ type
   protected
    FTableName           : string;
    FReadOnly            : boolean;
+   fprimarykeyfield: tfield;
       
    procedure notification(acomponent: tcomponent; operation: toperation); override;
    
@@ -343,6 +346,7 @@ type
    procedure SetFilterText(const Value: string); override;
    Function GetDataSource : TDatasource; override;
    Procedure SetDataSource(AValue : TDatasource); 
+   
   public
     constructor Create(AOwner : TComponent); override;
     destructor Destroy; override;
@@ -779,6 +783,16 @@ begin
  connected:= true;
 end;
 
+procedure tcustomsqlconnection.updateprimarykeyfield(const afield: tfield);
+begin
+ //dummy
+end;
+
+function tcustomsqlconnection.getprimarykeyfield(const atablename: string): string;
+begin
+ result:= '';
+end;
+
 { TSQLTransaction }
 
 procedure TSQLTransaction.EndTransaction;
@@ -1170,6 +1184,7 @@ begin
 // assigned, and .open is called
  disconnect;
  fblobintf:= nil;
+ fprimarykeyfield:= nil;
  if StatementType = stSelect then FreeFldBuffers;
  if DefaultFields then
    DestroyFields;
@@ -1432,6 +1447,8 @@ var
  f: TField;
  s: string;
  IndexFields: TStrings;
+ str1: string;
+ 
 begin
  if database <> nil then begin
   getcorbainterface(database,typeinfo(iblobconnection),fblobintf);
@@ -1467,6 +1484,12 @@ begin
         end;
        end;
       end;
+     end;
+    end;
+    if database <> nil then begin
+     str1:= tcustomsqlconnection(database).getprimarykeyfield(ftablename);
+     if (str1 <> '') then begin
+      fprimarykeyfield:= fields.findfield(str1);
      end;
     end;
     if FUpdateable then begin
@@ -1767,6 +1790,9 @@ begin
     end;
    end;
    execsql;
+   if (updatekind = ukinsert) and (self.fprimarykeyfield <> nil) then begin
+    tcustomsqlconnection(database).updateprimarykeyfield(self.fprimarykeyfield);
+   end;
   finally
    for int1:= high(freeblobar) downto 0 do begin
     deleteblob(blobspo^,tfield(freeblobar[int1]));

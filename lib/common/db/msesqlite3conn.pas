@@ -105,6 +105,8 @@ type
    procedure execsql(const asql: string);
    procedure UpdateIndexDefs(var IndexDefs : TIndexDefs;
                                const TableName : string); override;
+   function getprimarykeyfield(const atablename: string): string; override;
+   procedure updateprimarykeyfield(const afield: tfield); override;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -131,6 +133,8 @@ implementation
 uses
  msesqldb,msebufdataset,dbconst,sysutils,typinfo,dateutils,msesysintf,msedate;
 type
+ tmsebufdataset1 = class(tmsebufdataset);
+ 
  storagetypety = (st_none,st_integer,st_float,st_text,st_blob,st_null);
  
  tsqlite3cursor = class(tsqlcursor)
@@ -781,6 +785,33 @@ begin
  checkerror(sqlite3_exec(fhandle,pchar(asql),@execscallback,@result,nil));
 end;
 
+function tsqlite3connection.getprimarykeyfield(const atablename: string): string;
+var
+ int1,int2: integer;
+ ar1: stringararty;
+ str1: string;
+begin
+ result:= '';
+ ar1:= stringsquery('PRAGMA table_info('+atablename+');');
+ for int1:= 0 to high(ar1) do begin
+  if (high(ar1[int1]) >= 5) and (ar1[int1][5] <> '0') then begin
+   result:= ar1[int1][1];
+   break;
+  end;
+ end;
+end;
+
+procedure tsqlite3connection.UpdateIndexDefs(var IndexDefs: TIndexDefs;
+                              const TableName: string);
+var
+ str1: string;
+begin
+ str1:= getprimarykeyfield(tablename);
+ if str1 <> '' then begin
+  indexdefs.add('$PRIMARY_KEY$',str1,[ixPrimary,ixUnique]);
+ end;
+end;
+{
 procedure tsqlite3connection.UpdateIndexDefs(var IndexDefs: TIndexDefs;
                               const TableName: string);
 var
@@ -795,19 +826,18 @@ begin
    break;
   end;
  end;
-{  
-for int1:= 0 to high(ar2) do begin
- for int2:= 0 to high(ar2[int1]) do begin
-  write(ar2[int1][int2],' ');
- end;
- writeln;
 end;
 }
-end;
-
 procedure tsqlite3connection.setinheritedconnected(const avalue: boolean);
 begin
  inherited connected:= avalue;
+end;
+
+procedure tsqlite3connection.updateprimarykeyfield(const afield: tfield);
+begin
+ with tmsebufdataset1(afield.dataset) do begin
+  setcurvalue(afield,sqlite3_last_insert_rowid(fhandle));
+ end;
 end;
 
 end.

@@ -471,6 +471,7 @@ type
    procedure internalcancel; override;
    procedure cancelrecupdate(var arec: recupdatebufferty);
    procedure setdatastringvalue(const afield: tfield; const avalue: string);
+   procedure setcurvalue(const afield: tfield; const avalue: int64);
 
    function wantblobfetch: boolean; virtual;
    procedure resetblobcache;
@@ -1861,6 +1862,23 @@ begin
  end
  else begin
   avalue:= '';
+ end;
+end;
+
+procedure tmsebufdataset.setcurvalue(const afield: tfield; const avalue: int64);
+var
+ po1: pointer;
+ int1: integer;
+begin
+ int1:= afield.fieldno - 1;
+ if int1 >= 0 then begin
+  po1:= @fcurrentbuf^.header;
+  unsetfieldisnull(precheaderty(po1)^.fielddata.nullmask,int1);
+  inc(po1,ffieldinfos[int1].offset);
+  case afield.datatype of
+   ftinteger,ftautoinc: pinteger(po1)^:= avalue;
+   ftlargeint: pint64(po1)^:= avalue;
+  end;
  end;
 end;
 
