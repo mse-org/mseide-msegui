@@ -1384,7 +1384,7 @@ procedure treptabulatoritem.changed;
 begin
  with treptabulators(fowner),fband do begin
   fsizevalid:= false;
-  if rendering or (csdesigning in componentstate) then begin
+  if rendering or ([csdesigning,csdestroying] * componentstate = [csdesigning]) then begin
    minclientsizechanged;
    change(-1);
   end;

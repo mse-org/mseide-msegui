@@ -2706,7 +2706,8 @@ end;
 
 function tfielddatalink.fieldactive: boolean;
 begin
- result:= active and (ffield <> nil);
+ result:= (ffield <> nil) and (dataset <> nil) and (dataset.state <> dsinactive);
+// result:= active and (ffield <> nil); //unreliable
 end;
 
 { tactivatorcontroller }
