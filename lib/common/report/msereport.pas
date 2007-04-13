@@ -551,8 +551,6 @@ type
    function bandheight: integer;
    procedure dobeforerender(var empty: boolean); virtual;
    procedure synctofontheight; override;
-   function isfirstrecord: boolean;
-   function islastrecord: boolean;
    function bandisvisible(const checklast: boolean): boolean;
    function getvisibility: boolean;
    procedure updatevisibility; virtual;
@@ -577,6 +575,8 @@ type
    function remainingbands: integer;
    function reppage: tcustomreportpage;
    procedure finish;
+   function isfirstrecord: boolean;
+   function islastrecord: boolean;
    
    property tabs: treptabulators read ftabs write settabs;
    property font: trepwidgetfont read getfont write setfont stored isfontstored;
