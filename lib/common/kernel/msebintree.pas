@@ -117,6 +117,7 @@ type
                            const asize: integer): tcachenode;
    function find(const akey: int64; out anode: tcachenode): boolean; overload;
    property maxsize: integer read fmaxsize write setmaxsize; //0 -> no limit
+   property size: integer read fsize;
  end;
 
 implementation
@@ -798,7 +799,7 @@ end;
 
 procedure tcacheavltree.setmaxsize(const avalue: integer);
 begin
- if fsize <> fmaxsize then begin
+ if fmaxsize <> avalue then begin
   fmaxsize:= avalue;
   checkbuffersize;
  end;
