@@ -88,7 +88,25 @@ type
    function find(const akey: int64; out anode: tint64avlnode): boolean; overload;
    procedure traverse(const aproc: int64nodeprocty);
  end;
- 
+
+ tcachenode = class(tint64avlnode)
+  private
+   fdata: pointer;
+   fsize: integer;
+  public
+   constructor create(const akey: int64; const adata: pointer; const asize: integer);
+   destructor destroy; override;
+   property data: pointer read fdata;
+   property size: integer read fsize;
+ end;
+  
+ tcacheavltree = class(tavltree)
+  public
+   function addnode(const akey: int64; const adata: pointer;
+                           const asize: integer): tcachenode;
+   function find(const akey: int64; out anode: tcachenode): boolean; overload;
+ end;
+
 implementation
 uses
  sysutils;
@@ -664,6 +682,39 @@ end;
 
 procedure tint64avltree.traverse(const aproc: int64nodeprocty);
 begin
+ inherited traverse(nodeprocty(aproc));
+end;
+
+{ tcachenode }
+
+constructor tcachenode.create(const akey: int64; const adata: pointer;
+               const asize: integer);
+begin
+ fdata:= adata;
+ fsize:= asize;
+ inherited create(akey);
+end;
+
+destructor tcachenode.destroy;
+begin
+ if fsize > 0 then begin
+  freemem(fdata);
+ end;
+ inherited;
+end;
+
+{ tcacheavltree }
+
+function tcacheavltree.addnode(const akey: int64; const adata: pointer;
+               const asize: integer): tcachenode;
+begin
+ result:= tcachenode.create(akey,adata,asize);
+ inherited addnode(result);
+end;
+
+function tcacheavltree.find(const akey: int64; out anode: tcachenode): boolean;
+begin
+ result:= find(akey,anode);
 end;
 
 end.
