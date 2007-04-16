@@ -33,6 +33,14 @@ type
    property key: integer read fkey;
  end;
  
+ tint64avlnode = class(tavlnode)
+  private
+   fkey: int64;
+  public 
+   constructor create(const akey: int64);
+   property key: int64 read fkey;
+ end;
+ 
  avlnodeclassty = class of tavlnode; 
  pavlnode = ^tavlnode;
 
@@ -54,8 +62,8 @@ type
              //true if exact
   public
    destructor destroy; override;
-   procedure clear;
-   procedure deletenode(const anode: tavlnode);
+   procedure clear; //frees the nodes
+   procedure removenode(const anode: tavlnode); //does not free node
    procedure traverse(const aproc: nodeprocty);
    property count: integer read fcount;
    property root: tavlnode read froot;
@@ -71,6 +79,16 @@ type
    procedure traverse(const aproc: integernodeprocty);
  end;
 
+ int64nodeprocty = procedure(const anode: tint64avlnode) of object;
+ 
+ tint64avltree = class(tavltree)
+  public
+   constructor create;
+   function addnode(const akey: int64): tint64avlnode;
+   function find(const akey: int64; out anode: tint64avlnode): boolean; overload;
+   procedure traverse(const aproc: int64nodeprocty);
+ end;
+ 
 implementation
 uses
  sysutils;
@@ -416,7 +434,7 @@ begin
  end;
 end;
 
-procedure tavltree.deletenode(const anode: tavlnode);
+procedure tavltree.removenode(const anode: tavlnode);
 
  procedure checkbalance;
  begin
@@ -594,6 +612,58 @@ end;
 procedure tintegeravltree.traverse(const aproc: integernodeprocty);
 begin
  inherited traverse(nodeprocty(aproc));
+end;
+
+{ tint64avlnode }
+
+constructor tint64avlnode.create(const akey: int64);
+begin
+ fkey:= akey;
+ inherited create;
+end;
+
+{ tint64avltree }
+
+function compareint64avl(const left,right: tavlnode): integer;
+var
+ lint1: int64;
+begin
+ result:= 0;
+ lint1:= tint64avlnode(left).fkey - tint64avlnode(right).fkey;
+ if lint1 > 0 then begin
+  result:= 1;
+ end
+ else begin
+  if lint1 < 0 then begin
+   result:= -1;
+  end;
+ end;
+end;
+
+constructor tint64avltree.create;
+begin
+ fcompare:= {$ifdef FPC}@{$endif}compareintegeravl;
+ inherited;
+end;
+
+function tint64avltree.addnode(const akey: int64): tint64avlnode;
+begin
+ result:= tint64avlnode.create(akey);
+ inherited addnode(result);
+end;
+
+function tint64avltree.find(const akey: int64;
+               out anode: tint64avlnode): boolean;
+var
+ n1: tint64avlnode;
+begin
+ n1:= tint64avlnode.create(akey);
+ result:= find(n1,anode);
+ n1.free;
+end;
+
+procedure tint64avltree.traverse(const aproc: int64nodeprocty);
+begin
 end;
 
 end.
