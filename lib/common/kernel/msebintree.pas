@@ -672,7 +672,7 @@ end;
 
 constructor tint64avltree.create;
 begin
- fcompare:= {$ifdef FPC}@{$endif}compareintegeravl;
+ fcompare:= {$ifdef FPC}@{$endif}compareint64avl;
  inherited;
 end;
 
