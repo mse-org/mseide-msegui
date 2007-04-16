@@ -62,7 +62,7 @@ type
              //true if exact
   public
    destructor destroy; override;
-   procedure clear; //frees the nodes
+   procedure clear; virtual;//frees the nodes
    procedure removenode(const anode: tavlnode); //does not free node
    procedure traverse(const aproc: nodeprocty);
    property count: integer read fcount;
@@ -84,7 +84,7 @@ type
  tint64avltree = class(tavltree)
   public
    constructor create;
-   function addnode(const akey: int64): tint64avlnode;
+   function addnode(const akey: int64): tint64avlnode; overload;
    function find(const akey: int64; out anode: tint64avlnode): boolean; overload;
    procedure traverse(const aproc: int64nodeprocty);
  end;
@@ -93,6 +93,8 @@ type
   private
    fdata: pointer;
    fsize: integer;
+   fprev: tcachenode;
+   fnext: tcachenode;
   public
    constructor create(const akey: int64; const adata: pointer; const asize: integer);
    destructor destroy; override;
@@ -100,11 +102,21 @@ type
    property size: integer read fsize;
  end;
   
- tcacheavltree = class(tavltree)
+ tcacheavltree = class(tint64avltree)
+  private
+   fsize: integer;
+   ffirst: tcachenode;
+   flast: tcachenode;
+   fmaxsize: integer;
+   procedure setmaxsize(const avalue: integer);
+   procedure checkbuffersize;
   public
+   procedure clear; override;
+   procedure removenode(const anode: tcachenode); //does not free node
    function addnode(const akey: int64; const adata: pointer;
                            const asize: integer): tcachenode;
    function find(const akey: int64; out anode: tcachenode): boolean; overload;
+   property maxsize: integer read fmaxsize write setmaxsize; //0 -> no limit
  end;
 
 implementation
@@ -705,16 +717,91 @@ end;
 
 { tcacheavltree }
 
+procedure tcacheavltree.checkbuffersize;
+var
+ n1: tcachenode;
+begin
+ if fmaxsize > 0 then begin
+  while (fsize > fmaxsize) and (fcount > 1) do begin
+   n1:= ffirst;
+   removenode(n1);
+   n1.free;
+  end;
+ end;
+end;
+
 function tcacheavltree.addnode(const akey: int64; const adata: pointer;
                const asize: integer): tcachenode;
+var
+ n1: tcachenode;
 begin
  result:= tcachenode.create(akey,adata,asize);
+ fsize:= fsize + asize;
+ if ffirst = nil then begin
+  ffirst:= result;
+  flast:= result;
+ end
+ else begin
+  flast.fnext:= result;
+  flast:= result;
+ end;
  inherited addnode(result);
+ checkbuffersize;
 end;
 
 function tcacheavltree.find(const akey: int64; out anode: tcachenode): boolean;
 begin
- result:= find(akey,anode);
+ result:= inherited find(akey,tint64avlnode(anode));
+ if result and (anode <> flast) then begin
+  if anode.fprev <> nil then begin
+   anode.fprev.fnext:= anode.fnext;
+  end;
+  if anode.fnext <> nil then begin
+   anode.fnext.fprev:= anode.fprev;
+  end;
+  flast.fnext:= anode;
+  anode.fprev:= flast;
+  anode.fnext:= nil;
+  flast:= anode;
+ end;
+end;
+
+procedure tcacheavltree.clear;
+begin
+ fsize:= 0;
+ inherited;
+end;
+
+procedure tcacheavltree.removenode(const anode: tcachenode);
+begin
+ fsize:= fsize - anode.fsize;
+ if fcount > 1 then begin
+  if anode = ffirst then begin
+   ffirst:= anode.fnext;
+   ffirst.fprev:= nil;
+  end
+  else begin
+   if anode = flast then begin
+    flast:= anode.fprev;
+    flast.fnext:= nil;
+   end;
+  end;
+ end
+ else begin
+  ffirst:= nil;
+  flast:= nil;  
+ end;
+ anode.fprev:= nil;
+ anode.fnext:= nil;
+ inherited;
+end;
+
+procedure tcacheavltree.setmaxsize(const avalue: integer);
+begin
+ if fsize <> fmaxsize then begin
+  fmaxsize:= avalue;
+  checkbuffersize;
+ end;
 end;
 
 end.
