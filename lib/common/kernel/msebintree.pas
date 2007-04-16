@@ -127,7 +127,20 @@ type
  tdatacacheavltree = class(tcacheavltree)
   public
    function addnode(const akey: int64; const adata: pointer;
-                           const asize: integer): tcachenode;
+                           const asize: integer): tdatacachenode;
+ end;
+ 
+ tstringcachenode = class(tcachenode)
+  private
+   fdata: string;
+  public
+   constructor create(const akey: int64; const adata: string);
+   property data: string read fdata;
+ end;
+ 
+ tstringcacheavltree = class(tcacheavltree)
+  public
+   function addnode(const akey: int64; const adata: string): tstringcachenode;
  end;
  
 implementation
@@ -815,12 +828,30 @@ begin
  end;
 end;
 
-{ tdataavltree }
+{ tdatacacheavltree }
 
 function tdatacacheavltree.addnode(const akey: int64; const adata: pointer;
-               const asize: integer): tcachenode;
+               const asize: integer): tdatacachenode;
 begin
  result:= tdatacachenode.create(akey,adata,asize);
+ inherited addnode(result);
+end;
+
+{ tstringcachenode }
+
+constructor tstringcachenode.create(const akey: int64; const adata: string);
+begin
+ fdata:= adata;
+ fsize:= length(adata);
+ inherited create(akey);
+end;
+
+{ tstringcacheavltree }
+
+function tstringcacheavltree.addnode(const akey: int64;
+               const adata: string): tstringcachenode;
+begin
+ result:= tstringcachenode.create(akey,adata);
  inherited addnode(result);
 end;
 
