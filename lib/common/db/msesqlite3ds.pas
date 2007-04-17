@@ -28,6 +28,7 @@ type
    procedure inheritedinternalinsert;
    procedure inheritedinternaldelete;
    procedure inheritedinternalopen;
+   procedure inheritedinternalclose;
   protected
    procedure setactive (value : boolean);
    function getactive: boolean;
@@ -37,6 +38,7 @@ type
    procedure internalopen; override;
    procedure internalinsert; override;
    procedure internaldelete; override;
+   procedure internalclose; override;
 
   public
    constructor create(aowner: tcomponent); override;
@@ -214,6 +216,16 @@ end;
 procedure tmsesqlite3dataset.openlocal;
 begin
  inherited internalopen;
+end;
+
+procedure tmsesqlite3dataset.inheritedinternalclose;
+begin
+ inherited internalclose;
+end;
+
+procedure tmsesqlite3dataset.internalclose;
+begin
+ fcontroller.internalclose;
 end;
 
 end.

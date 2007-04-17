@@ -5,7 +5,7 @@ interface
 
 uses
  classes,db,mseclasses,mseguiglob,msestrings,msetypes,msearrayprops,msegui,
- msestockobjects,sysutils;
+ msestockobjects,sysutils,msebintree;
  
 type
  fieldtypearty = array of tfieldtype;
@@ -163,7 +163,8 @@ type
    property DataSet stored false;
    property ProviderFlags default defaultproviderflags;
  end;
- 
+
+{ 
  tmsememofield = class(tmemofield,ifieldcomponent)
   private
    fdsintf: idsfieldcontroller;
@@ -187,6 +188,7 @@ type
    property DataSet stored false;
    property ProviderFlags default defaultproviderflags;
  end;
+ }
  tmsenumericfield = class(tnumericfield)
   private
    function getasmsestring: msestring;
@@ -311,6 +313,7 @@ type
    procedure setasmsestring(const avalue: msestring);
   protected
    function HasParent: Boolean; override;
+   procedure setasfloat(avalue: double); override;
   public
    procedure Clear; override;
    function assql: string;
@@ -466,6 +469,7 @@ type
    procedure setasmsestring(const avalue: msestring);
   protected
    function HasParent: Boolean; override;
+   procedure setasfloat(avalue: double); override;
   public
    procedure Clear; override;
    function assql: string;
@@ -478,13 +482,22 @@ type
  end;
  tmseblobfield = class(tblobfield)
   private
+   fcache: tstringcacheavltree;
    function getasmsestring: msestring;
    procedure setasmsestring(const avalue: msestring);
+   procedure setcachekb(const avalue: integer);
+   function getcachekb: integer;
+   function getid(out aid: int64): boolean;
+   procedure removecache;
   protected
    function HasParent: Boolean; override;
    function getasvariant: variant; override;
+   function getasstring: string; override;
+   procedure setasstring(const avalue: string); override;
   public
-//   procedure Clear; override;
+   destructor destroy; override;
+   procedure Clear; override;
+   procedure clearcache;
    function assql: string;
    function asoldsql: string;
    property asmsestring: msestring read getasmsestring write setasmsestring;
@@ -493,6 +506,8 @@ type
   published
    property DataSet stored false;
    property ProviderFlags default defaultproviderflags;
+   property cachekb: integer read getcachekb write setcachekb;
+                //cachesize in kilo bytes, 0 -> no cache
  end;
  tmsegraphicfield = class(tmseblobfield)
   private
@@ -503,6 +518,32 @@ type
    property format: string read fformat write fformat;
  end;
 
+ tmsememofield = class(tmseblobfield,ifieldcomponent)
+  private
+   fdsintf: idsfieldcontroller;
+   function getasmsestring: msestring;
+   procedure setasmsestring(const avalue: msestring);
+   //ifieldcomponent
+   procedure setdsintf(const avalue: idsfieldcontroller);
+   function getinstance: tfield;
+  protected
+//   function HasParent: Boolean; override;
+   function getasvariant: variant; override;
+   procedure setvarvalue(const avalue: variant);
+  public
+   constructor create(aowner: tcomponent); override;
+   destructor destroy; override;
+   procedure Clear; override;
+   property asmsestring: msestring read getasmsestring write setasmsestring;
+   function oldmsestring(out aisnull: boolean): msestring;
+   function assql: string;
+   function asoldsql: string;
+  published
+   property Transliterate default True;
+   property DataSet stored false;
+   property ProviderFlags default defaultproviderflags;
+ end;
+ 
  tmsedatalink = class(tdatalink)
   private
   protected
@@ -616,6 +657,7 @@ type
   function inheritedmoveby(const distance: integer): integer;
   procedure inheritedinternalinsert;
   procedure inheritedinternalopen;
+  procedure inheritedinternalclose;
   procedure openlocal;
   procedure inheritedinternaldelete;
  end;
@@ -685,6 +727,7 @@ type
    procedure internalinsert;
    procedure internaldelete;
    procedure internalopen;
+   procedure internalclose;
    procedure closequery(var amodalresult: modalresultty);
    function closequery: boolean; //true if ok
    function post: boolean; //calls post if in edit or insert state,
@@ -1493,6 +1536,12 @@ end;
 }
 { tmsememofield }
 
+constructor tmsememofield.create(aowner: tcomponent);
+begin
+ inherited;
+ setdatatype(ftmemo);
+end;
+
 destructor tmsememofield.destroy;
 begin
  if fdsintf <> nil then begin
@@ -1500,12 +1549,12 @@ begin
  end;
  inherited;
 end;
-
+{
 function tmsememofield.HasParent: Boolean;
 begin
  result:= dataset <> nil;
 end;
-
+}
 function tmsememofield.assql: string;
 begin
  result:= fieldtosql(self);
@@ -1910,6 +1959,16 @@ end;
 function tmsecurrencyfield.asoldsql: string;
 begin
  result:= fieldtooldsql(self);
+end;
+
+procedure tmsecurrencyfield.setasfloat(avalue: double);
+begin
+ if isemptyreal(avalue) then begin
+  clear;
+ end
+ else begin
+  inherited;
+ end;
 end;
 
 { tmsebooleanfield }
@@ -2362,7 +2421,23 @@ begin
  result:= fieldtooldsql(self);
 end;
 
+procedure tmsebcdfield.setasfloat(avalue: double);
+begin
+ if isemptyreal(avalue) then begin
+  clear;
+ end
+ else begin
+  inherited;
+ end;
+end;
+
 { tmseblobfield }
+
+destructor tmseblobfield.destroy;
+begin
+ freeandnil(fcache);
+ inherited;
+end;
 
 function tmseblobfield.HasParent: Boolean;
 begin
@@ -2411,6 +2486,98 @@ begin
  end
  else begin
   result:= getasstring;
+ end;
+end;
+
+procedure tmseblobfield.setcachekb(const avalue: integer);
+begin
+ if cachekb <> avalue then begin
+  if avalue > 0 then begin
+   if fcache = nil then begin
+    fcache:= tstringcacheavltree.create;
+   end;
+   fcache.maxsize:= avalue * 1024;
+  end
+  else begin
+   freeandnil(fcache);
+  end;
+ end;
+end;
+
+function tmseblobfield.getcachekb: integer;
+begin
+ result:= 0;
+ if fcache <> nil then begin
+  result:= fcache.maxsize div 1024;
+ end;
+end;
+
+function tmseblobfield.getid(out aid: int64): boolean;
+begin
+ aid:= 0;
+ case size of
+  4,8: begin
+   result:= getdata(@aid);
+  end;  
+  else begin
+   databaseerror('Invalid cache field: '''+fieldname+'''.',self);
+  end;
+ end;
+end;
+
+function tmseblobfield.getasstring: string;
+var
+ lint1: int64;
+ n1: tstringcachenode; 
+begin
+ if fcache <> nil then begin
+  result:= '';
+  if getid(lint1) then begin
+   if fcache.find(lint1,n1) then begin
+    result:= n1.data;
+   end
+   else begin
+    result:= inherited getasstring;
+    fcache.addnode(lint1,result);
+   end;
+  end;
+ end
+ else begin
+  result:= inherited getasstring;
+ end;
+end;
+
+procedure tmseblobfield.removecache;
+var
+ lint1: int64;
+ n1: tstringcachenode; 
+begin
+ if fcache <> nil then begin
+  if getid(lint1) then begin
+   if fcache.find(lint1,n1) then begin
+    fcache.removenode(n1);
+    n1.free;
+   end;
+  end;
+ end;
+end;
+
+procedure tmseblobfield.setasstring(const avalue: string);
+begin
+ removecache;
+ inherited;
+end;
+
+procedure tmseblobfield.Clear;
+begin
+ removecache;
+ inherited;
+end;
+
+procedure tmseblobfield.clearcache;
+begin
+ if fcache <> nil then begin
+  fcache.clear;
  end;
 end;
 
@@ -3367,6 +3534,22 @@ begin
    end;
   end;
   updatelinkedfields; //second check
+ end;
+end;
+
+procedure tdscontroller.internalclose;
+var
+ int1: integer;
+ field1: tfield;
+begin
+ fintf.inheritedinternalclose;
+ with tdataset(fowner) do begin
+  for int1:= 0 to fields.count - 1 do begin
+   field1:= fields[int1];
+   if field1 is tmseblobfield then begin
+    tmseblobfield(field1).clearcache;
+   end;
+  end;
  end;
 end;
 

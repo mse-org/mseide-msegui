@@ -88,6 +88,7 @@ type
    procedure inheritedinternalinsert;
    procedure inheritedinternaldelete;
    procedure inheritedinternalopen;
+   procedure inheritedinternalclose;
    
    procedure DoAfterDelete; override;
    procedure dataevent(event: tdataevent; info: ptrint); override;
@@ -463,11 +464,6 @@ begin
  if not streamloading and not (dso_local in fcontroller.options) then begin
   connected:= not (dso_offline in fcontroller.options);
  end;
-end;
-
-procedure tmsesqlquery.internalclose;
-begin
- inherited;
 end;
 
 procedure tmsesqlquery.setonapplyrecupdate(const avalue: applyrecupdateeventty);
@@ -1116,6 +1112,16 @@ end;
 function tmsesqlquery.islocal: boolean;
 begin
  result:= dso_local in fcontroller.options;
+end;
+
+procedure tmsesqlquery.inheritedinternalclose;
+begin
+ inherited internalclose;
+end;
+
+procedure tmsesqlquery.internalclose;
+begin
+ fcontroller.internalclose;
 end;
 
 { tparamsourcedatalink }

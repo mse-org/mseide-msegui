@@ -29,6 +29,7 @@ type
    procedure inheritedinternalinsert;
    procedure inheritedinternaldelete;
    procedure inheritedinternalopen;
+   procedure inheritedinternalclose;
   protected
    procedure setactive (value : boolean); {override;}
    function getactive: boolean;
@@ -37,6 +38,7 @@ type
    procedure dataevent(event: tdataevent; info: ptrint); override;
    procedure openlocal;
    procedure internalopen; override;
+   procedure internalclose; override;
    procedure internalinsert; override;
    procedure internaldelete; override;
   public
@@ -215,6 +217,16 @@ end;
 procedure tmsedbf.openlocal;
 begin
  inherited internalopen;
+end;
+
+procedure tmsedbf.inheritedinternalclose;
+begin
+ inherited internalclose;
+end;
+
+procedure tmsedbf.internalclose;
+begin
+ fcontroller.internalclose;
 end;
 
 end.

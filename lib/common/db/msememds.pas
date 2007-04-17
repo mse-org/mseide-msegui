@@ -27,6 +27,7 @@ type
    procedure inheritedinternalinsert;
    procedure inheritedinternaldelete;
    procedure inheritedinternalopen;
+   procedure inheritedinternalclose;
   protected
    procedure setactive (value : boolean);{ override;}
    function getactive: boolean;
@@ -36,6 +37,7 @@ type
    procedure internalopen; override;
    procedure internalinsert; override;
    procedure internaldelete; override;
+   procedure internalclose; override;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -195,6 +197,16 @@ end;
 procedure tmsememdataset.openlocal;
 begin
  inherited internalopen;
+end;
+
+procedure tmsememdataset.inheritedinternalclose;
+begin
+ inherited internalclose;
+end;
+
+procedure tmsememdataset.internalclose;
+begin
+ fcontroller.internalclose;
 end;
 
 end.

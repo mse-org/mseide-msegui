@@ -3384,8 +3384,10 @@ end;
 procedure tmsebufdataset.setonfilterrecord(const value: tfilterrecordevent);
 begin
  inherited;
- checkfilterstate;
- filterchanged;
+ if not (csdesigning in componentstate) then begin
+  checkfilterstate;
+  filterchanged;
+ end;
 end;
 
 procedure tmsebufdataset.setfiltered(value: boolean);

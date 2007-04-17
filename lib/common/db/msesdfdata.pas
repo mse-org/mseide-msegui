@@ -30,6 +30,7 @@ type
    procedure inheritedinternalinsert;
    procedure inheritedinternaldelete;
    procedure inheritedinternalopen;
+   procedure inheritedinternalclose;
   protected
    procedure setactive (value : boolean);{ override;}
    function getactive: boolean;
@@ -40,6 +41,7 @@ type
    procedure internalopen; override;
    procedure internalinsert; override;
    procedure internaldelete; override;
+   procedure internalclose; override;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -73,6 +75,7 @@ type
    procedure inheritedinternalinsert;
    procedure inheritedinternaldelete;
    procedure inheritedinternalopen;
+   procedure inheritedinternalclose;
   protected
    procedure setactive (value : boolean);{ override;}
    function getactive: boolean;
@@ -81,6 +84,7 @@ type
    procedure dataevent(event: tdataevent; info: ptrint); override;
    procedure openlocal;
    procedure internalopen; override;
+   procedure internalclose; override;
    procedure internalinsert; override;
    procedure internaldelete; override;
   public
@@ -261,6 +265,16 @@ begin
  inherited internalopen;
 end;
 
+procedure tmsefixedformatdataset.inheritedinternalclose;
+begin
+ inherited internalclose;
+end;
+
+procedure tmsefixedformatdataset.internalclose;
+begin
+ fcontroller.internalclose;
+end;
+
 { tmsesdfdataset }
 
 constructor tmsesdfdataset.create(aowner: tcomponent);
@@ -416,6 +430,16 @@ end;
 procedure tmsesdfdataset.openlocal;
 begin
  inherited internalopen;
+end;
+
+procedure tmsesdfdataset.inheritedinternalclose;
+begin
+ inherited internalclose;
+end;
+
+procedure tmsesdfdataset.internalclose;
+begin
+ fcontroller.internalclose;
 end;
 
 end.
