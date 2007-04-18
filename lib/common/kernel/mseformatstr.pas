@@ -23,11 +23,11 @@ const
 type
  numbasety = (nb_bin,nb_oct,nb_dec,nb_hex);
 
-function formatfloatmse(const value: extended; const format: msestring;
+function formatfloatmse(const value: double; const format: msestring;
                          const dot: boolean = false): msestring;
                       //if dot -> always '.' as decimal separator
-function realtostr(const value: extended): string;     //immer'.' als separator
-function strtoreal(const s: string): extended;   //immer'.' als separator
+function realtostr(const value: double): string;     //immer'.' als separator
+function strtoreal(const s: string): double;   //immer'.' als separator
 
 function bytetohex(const inp: byte): string;
  //wandelt byte in zwei ascii hexzeichen
@@ -1173,7 +1173,7 @@ begin
  result:= byte(((inp div 10) shl 4) + (inp mod 10))
 end;
 
-function formatfloatmse(const value: extended; const format: msestring;
+function formatfloatmse(const value: double; const format: msestring;
                                  const dot: boolean = false): msestring;
 var
  int1: integer;
@@ -1186,7 +1186,7 @@ begin
  end;
 end;
 
-function realToStr(const value: extended): string;     //immer'.' als separator
+function realToStr(const value: double): string;     //immer'.' als separator
 begin
  {$ifdef withformatsettings}
  result:= floattostr(value,defaultformatsettings)
@@ -1195,7 +1195,7 @@ begin
  {$endif}
 end;
 
-function StrToreal(const S: string): Extended;   //immer'.' als separator
+function StrToreal(const S: string): double;   //immer'.' als separator
 begin
  {$ifdef withformatsettings}
  result:= strtofloat(s,defaultformatsettings);

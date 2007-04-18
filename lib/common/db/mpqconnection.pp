@@ -126,7 +126,7 @@ type
 implementation
 
 uses 
- math,msestrings,msestream,msetypes,msedatalist;
+ math,msestrings,msestream,msetypes,msedatalist,mseformatstr;
 
 ResourceString
   SErrRollbackFailed = 'Rollback transaction failed';
@@ -566,8 +566,10 @@ begin
      with AParams[i] do begin
       if not IsNull then begin
        case DataType of
-        ftdatetime: s:= formatdatetime('YYYY-MM-DD',AParams[i].AsDateTime);
-        ftdate: s:= formatdatetime('YYYY-MM-DD',AParams[i].AsDateTime);
+        ftdatetime: s:= formatdatetime('YYYY-MM-DD',AsDateTime);
+        ftdate: s:= formatdatetime('YYYY-MM-DD',AsDateTime);
+        ftfloat,ftcurrency: s:= realtostr(asfloat);
+        ftbcd: s:= realtostr(ascurrency);
         else begin
          s:= AParams[i].asstring;
          if datatype = ftblob then begin
