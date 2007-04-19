@@ -11236,6 +11236,8 @@ begin
 end;
 
 function compwindowzorder(const l,r): integer;
+var
+ window1: twindow;
 begin
  result:= 0;
  if (tws_windowvisible in twindow(l).fstate) then begin
@@ -11255,10 +11257,26 @@ begin
  if ow_top in twindow(l).fowner.foptionswidget then inc(result);
  if ow_background in twindow(r).fowner.foptionswidget then inc(result);
  if ow_top in twindow(r).fowner.foptionswidget then dec(result);
-
+ window1:= twindow(l);
+ while window1.ftransientfor <> nil do begin
+  if window1.ftransientfor = twindow(r) then begin
+   inc(result,16);
+   exit;
+  end;
+  window1:= window1.ftransientfor;
+ end;
+ window1:= twindow(r);
+ while window1.ftransientfor <> nil do begin
+  if window1.ftransientfor = twindow(l) then begin
+   dec(result,16);
+   exit;
+  end;
+  window1:= window1.ftransientfor;
+ end;  
  if twindow(l).ftransientforcount > 0 then begin
   inc(result,4);
  end;
+ {
  if (tws_modal in twindow(l).fstate) or (twindow(l).ftransientfor <> nil)
             then begin
   inc(result,16);
@@ -11266,9 +11284,11 @@ begin
    dec(result,8);
   end;
  end;
+ }
  if twindow(r).ftransientforcount > 0 then begin
   dec(result,4);
  end;
+ {
  if (tws_modal in twindow(r).fstate) or (twindow(r).ftransientfor <> nil)
             then begin
   dec(result,16);
@@ -11276,6 +11296,7 @@ begin
    inc(result,8);
   end;
  end;
+ }
 end;
 
 procedure tinternalapplication.updatewindowstack;
@@ -11289,6 +11310,10 @@ begin
  ar4:= copy(ar3);
  sortarray(ar3,{$ifdef FPC}@{$endif}compwindowzorder,sizeof(ar3[0]));
  int2:= -1;
+//writeln('++++++++++++');
+//for int1:= 0 to high(ar3) do begin
+//writeln(ar3[int1].fowner.name,' ',ar3[int1].fowner.name);
+//end;
  for int1:= 0 to high(ar4) do begin
   if ar3[int1] <> ar4[int1] then begin
    int2:= int1; //invalid stackorder
