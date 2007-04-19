@@ -1053,6 +1053,12 @@ begin
    else begin
     setdropdowntext(fintf.geteditor.text,true,false,akey);
    end;
+  end
+  else begin
+   if (int1 < 0) and (deo_selectonly in foptions) then begin
+    setdropdowntext(fintf.geteditor.text,false,true,akey);
+                    //editor.undo
+   end;
   end;
  end;
  if index <> -1 then begin

@@ -4617,6 +4617,9 @@ begin
  else begin
   if arecordnum = -2 then begin
    bo1:= checkvalue; 
+  end
+  else begin
+   feditor.undo;
   end;
  end;
  if bo1 and (akey = key_tab) then begin
@@ -4669,6 +4672,9 @@ begin
  else begin
   if arecordnum = -2 then begin
    bo1:= checkvalue; 
+  end
+  else begin
+   feditor.undo;
   end;
  end;
  if bo1 and (akey = key_tab) then begin
@@ -4723,6 +4729,9 @@ begin
  else begin
   if arecordnum = -2 then begin
    bo1:= checkvalue; 
+  end
+  else begin
+   feditor.undo;
   end;
  end;
  if bo1 and (akey = key_tab) then begin
@@ -4776,6 +4785,9 @@ begin
  else begin
   if arecordnum = -2 then begin
    bo1:= checkvalue; 
+  end
+  else begin
+   feditor.undo;
   end;
  end;
  if bo1 and (akey = key_tab) then begin
@@ -6677,6 +6689,9 @@ begin
  else begin
   if arecordnum = -2 then begin
    bo1:= checkvalue; 
+  end
+  else begin
+   feditor.undo;
   end;
  end;
  if bo1 and (akey = key_tab) then begin
@@ -6741,8 +6756,11 @@ begin
   bo1:= checkvalue;
  end
  else begin
-  if arecordnum = -2 then begin
+  if arecordnum = -2 then begin //empty row selected
    bo1:= checkvalue; 
+  end
+  else begin
+   feditor.undo;
   end;
  end;
  if bo1 and (akey = key_tab) then begin
@@ -6811,6 +6829,9 @@ begin
  else begin
   if arecordnum = -2 then begin
    bo1:= checkvalue; 
+  end
+  else begin
+   feditor.undo;
   end;
  end;
  if bo1 and (akey = key_tab) then begin
@@ -6880,6 +6901,9 @@ begin
  else begin
   if arecordnum = -2 then begin
    bo1:= checkvalue; 
+  end
+  else begin
+   feditor.undo;
   end;
  end;
  if bo1 and (akey = key_tab) then begin
