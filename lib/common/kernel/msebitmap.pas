@@ -23,6 +23,11 @@ const
 
 type
 
+ imagebufferinfoty = record
+  image: imagety;
+  mask: imagety;
+ end;
+ 
  tbitmapcomp = class;
 
  tbitmap = class(tsimplebitmap)
@@ -63,6 +68,9 @@ type
    procedure dochange; virtual;
   public
    constructor create(amonochrome: boolean);
+
+   procedure savetoimage(out aimage: imagety);
+   procedure loadfromimage(const aimage: imagety);
    procedure assign(source: tpersistent); override;
    procedure change;
    procedure beginupdate;
@@ -177,6 +185,10 @@ type
   public
    constructor create(amonochrome: boolean);
    destructor destroy; override;
+   class procedure freeimageinfo(var ainfo: imagebufferinfoty);
+   procedure loadfromimagebuffer(const abuffer: imagebufferinfoty);
+   procedure savetoimagebuffer(out abuffer: imagebufferinfoty);
+   
    procedure initmask;
    procedure stretch(const dest: tmaskedbitmap);
    procedure remask; //recalc mask
@@ -1013,6 +1025,45 @@ begin
  change;
 end;
 
+procedure tbitmap.savetoimage(out aimage: imagety);
+begin
+ if hasimage then begin
+  if fimage.pixels = nil then begin
+   getimage;
+   aimage:= fimage;
+   fimage.pixels:= nil;
+  end
+  else begin
+   aimage:= fimage;
+   allocimagemem;
+   move(aimage.pixels^,fimage.pixels^,fimage.length * sizeof(cardinal));
+               //get a copy
+  end;
+ end
+ else begin
+  fillchar(aimage,sizeof(aimage),0);
+ end;
+end;
+
+procedure tbitmap.loadfromimage(const aimage: imagety);
+begin
+ if aimage.pixels = nil then begin
+  clear;
+ end
+ else begin
+  size:= aimage.size;
+  if aimage.monochrome then begin
+   include(fstate,pms_monochrome);
+  end
+  else begin
+   exclude(fstate,pms_monochrome);
+  end;
+  fimage:= aimage;
+  putimage;
+  fimage.pixels:= nil;  //does not own image
+ end;
+end;
+
 { tmaskedbitmap }
 
 constructor tmaskedbitmap.create(amonochrome: boolean);
@@ -1028,6 +1079,20 @@ begin
  freemask;
  inherited;
  fobjectlinker.free;
+end;
+
+class procedure tmaskedbitmap.freeimageinfo(var ainfo: imagebufferinfoty);
+begin
+ with ainfo do begin
+  if image.pixels <> nil then begin
+   gui_freeimagemem(image.pixels);
+   image.pixels:= nil;
+  end;
+  if mask.pixels <> nil then begin
+   gui_freeimagemem(mask.pixels);
+   mask.pixels:= nil;
+  end;
+ end;
 end;
 
 procedure tmaskedbitmap.freemask;
@@ -1604,6 +1669,39 @@ begin
   finally
    stream1.free;
   end;
+ end;
+end;
+
+procedure tmaskedbitmap.loadfromimagebuffer(const abuffer: imagebufferinfoty);
+begin
+ loadfromimage(abuffer.image);
+ if abuffer.mask.pixels <> nil then begin
+  include(foptions,bmo_masked);
+  createmask(not abuffer.mask.monochrome);
+  fmask.loadfromimage(abuffer.mask);
+  if abuffer.mask.monochrome then begin
+   exclude(foptions,bmo_colormask);
+  end
+  else begin
+   include(foptions,bmo_colormask);   
+  end;
+  include(fstate,pms_maskvalid);
+ end
+ else begin
+  freemask;
+  exclude(foptions,bmo_masked);
+  exclude(fstate,pms_maskvalid);
+ end;  
+end;
+
+procedure tmaskedbitmap.savetoimagebuffer(out abuffer: imagebufferinfoty);
+begin
+ savetoimage(abuffer.image);
+ if fmask <> nil then begin
+  fmask.savetoimage(abuffer.mask);
+ end
+ else begin
+  fillchar(abuffer.mask,sizeof(abuffer.mask),0);
  end;
 end;
 

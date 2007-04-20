@@ -487,9 +487,9 @@ type
    procedure setasmsestring(const avalue: msestring);
    procedure setcachekb(const avalue: integer);
    function getcachekb: integer;
-   function getid(out aid: int64): boolean;
-   procedure removecache;
   protected
+   procedure removecache(const aid: int64); virtual;
+   function getid(out aid: int64): boolean;
    function HasParent: Boolean; override;
    function getasvariant: variant; override;
    function getasstring: string; override;
@@ -497,7 +497,7 @@ type
   public
    destructor destroy; override;
    procedure Clear; override;
-   procedure clearcache;
+   procedure clearcache; virtual;
    function assql: string;
    function asoldsql: string;
    property asmsestring: msestring read getasmsestring write setasmsestring;
@@ -509,15 +509,6 @@ type
    property cachekb: integer read getcachekb write setcachekb;
                 //cachesize in kilo bytes, 0 -> no cache
  end;
- tmsegraphicfield = class(tmseblobfield)
-  private
-   fformat: string;
-  protected
-  public
-  published
-   property format: string read fformat write fformat;
- end;
-
  tmsememofield = class(tmseblobfield,ifieldcomponent)
   private
    fdsintf: idsfieldcontroller;
@@ -885,15 +876,6 @@ const
            tbinaryfield,tbytesfield,tvarbytesfield,
            tbcdfield,tblobfield,tmemofield,tgraphicfield);
 
- msefieldtypeclasses: array[fieldclasstypety] of fieldclassty = 
-          (tmsefield,tmsestringfield,tmsenumericfield,
-           tmselongintfield,tmselargeintfield,tmsesmallintfield,
-           tmsewordfield,tmseautoincfield,tmsefloatfield,tmsecurrencyfield,
-           tmsebooleanfield,
-           tmsedatetimefield,tmsedatefield,tmsetimefield,
-           tmsebinaryfield,tmsebytesfield,tmsevarbytesfield,
-           tmsebcdfield,tmseblobfield,tmsememofield,tmsegraphicfield);
-           
  tfieldtypetotypety: array[tfieldtype] of fieldclasstypety = (
     //ftUnknown, ftString, ftSmallint, ftInteger, ftWord,
       ft_unknown,ft_string,ft_smallint,ft_longint,ft_word,
@@ -938,7 +920,9 @@ const
     //ftIDispatch, ftGuid, ftTimeStamp, ftFMTBcd);
       [ftIDispatch],[ftGuid],[ftTimeStamp],[ftFMTBcd]
       );
-      
+
+function getmsefieldclass(const afieldtype: tfieldtype): tfieldclass; overload;
+function getmsefieldclass(const afieldtype: fieldclasstypety): tfieldclass; overload;
 function fieldclasstoclasstyp(const fieldclass: fieldclassty): fieldclasstypety;
 function fieldtosql(const field: tfield): string;
 function fieldtooldsql(const field: tfield): string;
@@ -957,7 +941,17 @@ function vartorealty(const avalue: variant): realty;
 implementation
 uses
  rtlconsts,msefileutils,typinfo,dbconst,msedatalist,mseformatstr,
- msereal,variants,msebits,msedate;
+ msereal,variants,msebits,msedate,msedbgraphics;
+const
+ msefieldtypeclasses: array[fieldclasstypety] of fieldclassty = 
+          (tmsefield,tmsestringfield,tmsenumericfield,
+           tmselongintfield,tmselargeintfield,tmsesmallintfield,
+           tmsewordfield,tmseautoincfield,tmsefloatfield,tmsecurrencyfield,
+           tmsebooleanfield,
+           tmsedatetimefield,tmsedatefield,tmsetimefield,
+           tmsebinaryfield,tmsebytesfield,tmsevarbytesfield,
+           tmsebcdfield,tmseblobfield,tmsememofield,tmsegraphicfield);
+           
 type
  TFieldDefcracker = class(TCollectionItem)
   Private
@@ -965,6 +959,17 @@ type
     FFieldNo : Longint;
  end;
  tdataset1 = class(tdataset);
+ 
+function getmsefieldclass(const afieldtype: tfieldtype): tfieldclass;
+begin
+ result:= msefieldtypeclasses[tfieldtypetotypety[afieldtype]];
+end;
+
+function getmsefieldclass(const afieldtype: fieldclasstypety): tfieldclass;
+begin
+ result:= msefieldtypeclasses[afieldtype];
+end;
+
 {
 function getasmsestring(const field: tfield): msestring;
 begin
@@ -2547,30 +2552,35 @@ begin
  end;
 end;
 
-procedure tmseblobfield.removecache;
+procedure tmseblobfield.removecache(const aid: int64);
 var
- lint1: int64;
  n1: tstringcachenode; 
 begin
  if fcache <> nil then begin
-  if getid(lint1) then begin
-   if fcache.find(lint1,n1) then begin
-    fcache.removenode(n1);
-    n1.free;
-   end;
+  if fcache.find(aid,n1) then begin
+   fcache.removenode(n1);
+   n1.free;
   end;
  end;
 end;
 
 procedure tmseblobfield.setasstring(const avalue: string);
+var
+ lint1: int64;
 begin
- removecache;
+ if getid(lint1) then begin
+  removecache(lint1);
+ end;
  inherited;
 end;
 
 procedure tmseblobfield.Clear;
+var
+ lint1: int64;
 begin
- removecache;
+ if getid(lint1) then begin
+  removecache(lint1);
+ end;
  inherited;
 end;
 
@@ -2580,8 +2590,6 @@ begin
   fcache.clear;
  end;
 end;
-
-{ tmsegraphicfield }
 
 { tdbfieldnamearrayprop }
 

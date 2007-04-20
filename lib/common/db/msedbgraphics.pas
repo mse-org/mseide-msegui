@@ -14,7 +14,7 @@ unit msedbgraphics;
 interface
 uses
  classes,db,mseimage,msedataimage,msedbdispwidgets,msedb,msetypes,msedbedit,
- msegrids,msewidgetgrid,msedatalist;
+ msegrids,msewidgetgrid,msedatalist,msebitmap,msebintree;
 
 { add the needed graphic format units to your project:
  mseformatbmpico,mseformatjpg,mseformatpng,
@@ -25,12 +25,42 @@ type
  idbgraphicfieldlink = interface(idbeditfieldlink)
   procedure setformat(const avalue: string);
  end;
+
+ timagecachenode = class(tcachenode)
+  private
+   fimage: imagebufferinfoty;
+  public
+   destructor destroy; override;
+ end;
  
+ timagecache = class(tcacheavltree)
+ end;
+  
+ tmsegraphicfield = class(tmseblobfield)
+  private
+   fformat: string;
+   fimagecache: timagecache;
+   function getimagecachekb: integer;
+   procedure setimagecachekb(const avalue: integer);
+  protected
+   procedure removecache(const aid: int64); override;
+  public
+   destructor destroy; override;
+   procedure loadbitmap(const abitmap: tmaskedbitmap; aformat: string);
+   procedure clearcache; override;
+  published
+   property format: string read fformat write fformat;
+   property imagecachekb: integer read getimagecachekb 
+                           write setimagecachekb default 0;
+                //cachesize in kilo bytes, 0 -> no cache
+ end;
+
  tgraphicdatalink = class(teditwidgetdatalink)
   protected
    procedure setfield(const value: tfield); override;
   public
    constructor create(const intf: idbgraphicfieldlink);
+   procedure loadbitmap(const abitmap: tmaskedbitmap; const aformat: string);
  end;
 
  tdbdataimage = class(tcustomdataimage,idbeditinfo,idbgraphicfieldlink,ireccontrol)
@@ -71,7 +101,7 @@ type
  
 implementation
 uses
- msebitmap,msestream,msegraphics;
+ msestream,msegraphics,sysutils;
  
 type
  tsimplebitmap1 = class(tsimplebitmap);
@@ -120,23 +150,8 @@ begin
 end;
 
 procedure tdbdataimage.fieldtovalue;
-var
- stream1: tstringcopystream;
- str1: string;
 begin
- str1:= datalink.field.asstring;
- if str1 = '' then begin
-  setnullvalue;
- end
- else begin
-  stream1:= tstringcopystream.create(str1);
-  try
-   bitmap.loadfromstream(stream1,format);
-  except
-   bitmap.clear;
-  end;
-  stream1.free;
- end;
+ datalink.loadbitmap(bitmap,format);
 end;
 
 procedure tdbdataimage.setnullvalue;
@@ -208,6 +223,103 @@ begin
  result:= nil;
 end;
 
+{ tmsegraphicfield }
+
+destructor tmsegraphicfield.destroy;
+begin
+ freeandnil(fimagecache);
+ inherited;
+end;
+
+procedure tmsegraphicfield.loadbitmap(const abitmap: tmaskedbitmap; 
+                                             aformat: string);
+var
+ stream1: tstringcopystream;
+ str1: string;
+ id1: int64;
+ n1: timagecachenode;
+begin
+ if not getid(id1) then begin
+  abitmap.clear;
+ end
+ else begin
+  if (fimagecache = nil) or 
+               not fimagecache.find(id1,tcachenode(n1)) then begin
+   str1:= asstring;
+   if str1 = '' then begin
+    abitmap.clear;
+   end
+   else begin
+    if aformat = '' then begin
+     aformat:= format;
+    end;
+    stream1:= tstringcopystream.create(str1);
+    try
+     abitmap.loadfromstream(stream1,aformat);
+    except
+     abitmap.clear;
+    end;
+    stream1.free;
+   end;
+   if fimagecache <> nil then begin
+    n1:= timagecachenode.create(id1);
+    abitmap.savetoimagebuffer(n1.fimage);
+    n1.fsize:= (n1.fimage.image.length + n1.fimage.mask.length) *
+                                       sizeof(cardinal);
+    fimagecache.addnode(n1);
+   end;
+  end
+  else begin
+   abitmap.loadfromimagebuffer(n1.fimage);
+  end;
+ end;
+end;
+
+function tmsegraphicfield.getimagecachekb: integer;
+begin
+ result:= 0;
+ if fimagecache <> nil then begin
+  result:= fimagecache.maxsize div 1024;
+ end;
+end;
+
+procedure tmsegraphicfield.setimagecachekb(const avalue: integer);
+begin
+ if imagecachekb <> avalue then begin
+  if avalue > 0 then begin
+   if fimagecache = nil then begin
+    fimagecache:= timagecache.create;
+   end;
+   fimagecache.maxsize:= avalue * 1024;
+  end
+  else begin
+   freeandnil(fimagecache);
+  end;
+ end;
+end;
+
+procedure tmsegraphicfield.clearcache;
+begin
+ if fimagecache <> nil then begin
+  fimagecache.clear;
+ end;
+ inherited;
+end;
+
+procedure tmsegraphicfield.removecache(const aid: int64);
+var
+ n1: timagecachenode; 
+begin
+ if fimagecache <> nil then begin
+  if fimagecache.find(aid,n1) then begin
+   fimagecache.removenode(n1);
+   n1.free;
+  end;
+ end;
+ inherited;
+end;
+
+
 { tgraphicdatalink }
 
 constructor tgraphicdatalink.create(const intf: idbgraphicfieldlink);
@@ -220,6 +332,42 @@ begin
  if value is tmsegraphicfield then begin
   idbgraphicfieldlink(fintf).setformat(tmsegraphicfield(value).format);
  end;
+ inherited;
+end;
+
+procedure tgraphicdatalink.loadbitmap(const abitmap: tmaskedbitmap;
+                                                const aformat: string);
+var
+ stream1: tstringcopystream;
+ str1: string;
+begin
+ if field is tmsegraphicfield then begin
+  with tmsegraphicfield(field) do begin
+   loadbitmap(abitmap,aformat);
+  end;
+ end
+ else begin
+  str1:= field.asstring;
+  if str1 = '' then begin
+   abitmap.clear;
+  end
+  else begin
+   stream1:= tstringcopystream.create(str1);
+   try
+    abitmap.loadfromstream(stream1,aformat);
+   except
+    abitmap.clear;
+   end;
+   stream1.free;
+  end;
+ end;
+end;
+
+{ timagecachenode }
+
+destructor timagecachenode.destroy;
+begin
+ tmaskedbitmap.freeimageinfo(fimage);
  inherited;
 end;
 

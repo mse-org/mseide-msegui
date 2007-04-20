@@ -93,6 +93,7 @@ type
   private
    fprev: tcachenode;
    fnext: tcachenode;
+  protected
    fsize: integer;
  end;
  

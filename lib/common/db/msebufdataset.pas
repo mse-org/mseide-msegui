@@ -3214,7 +3214,7 @@ end;
 
 function tmsebufdataset.GetFieldClass(FieldType: TFieldType): TFieldClass;
 begin
- result:= msefieldtypeclasses[tfieldtypetotypety[fieldtype]];
+ result:= getmsefieldclass(fieldtype);
 end;
 
 procedure tmsebufdataset.fieldtoparam(const source: tfield; const dest: tparam);

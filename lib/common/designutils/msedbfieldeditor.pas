@@ -80,7 +80,8 @@ begin
      result:= true;
      setlength(ar1,fields.rowcount-dataset.fields.count);
      for int1:= 0 to high(ar1) do begin
-      ct1:= msefieldtypeclasses[fieldclasstypety(classty[int1])];
+      ct1:= getmsefieldclass(fieldclasstypety(classty[int1]));
+//      ct1:= msefieldtypeclasses[fieldclasstypety(classty[int1])];
       int2:= index[int1];
       if int2 > 0 then begin
        dec(int2);

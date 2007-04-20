@@ -2100,7 +2100,9 @@ var
 begin
  result:= true;
  if fposting = 0 then begin
-  if (field <> nil) then begin
+  widget1:= fintf.getwidget;
+  if (field <> nil) and not ((oe_checkmrcancel in fintf.getoptionsedit) and
+             (widget1.window.modalresult = mr_cancel)) then begin
    if ffilterediting then begin
     fintf.valuetofield;
    end
@@ -2108,7 +2110,7 @@ begin
     if editing then begin
      fintf.valuetofield;
      if (oe_autopost in fintf.getoptionsedit) and active then begin
-      widget1:= fintf.getwidget.parentwidget;
+      widget1:= widget1.parentwidget;
       try
        inc(fposting);
        if (widget1 <> nil) then begin
