@@ -488,7 +488,8 @@ type
    procedure setcachekb(const avalue: integer);
    function getcachekb: integer;
   protected
-   procedure removecache(const aid: int64); virtual;
+   procedure removecache(const aid: int64); virtual; overload;
+   procedure removecache; overload;
    function getid(out aid: int64): boolean;
    function HasParent: Boolean; override;
    function getasvariant: variant; override;
@@ -501,6 +502,7 @@ type
    function assql: string;
    function asoldsql: string;
    property asmsestring: msestring read getasmsestring write setasmsestring;
+   procedure LoadFromStream(Stream: TStream);
    procedure LoadFromFile(const FileName: filenamety);
    procedure SaveToFile(const FileName: filenamety);
   published
@@ -2464,12 +2466,19 @@ begin
  result:= asstring;
 end;
 
+procedure tmseblobfield.LoadFromStream(Stream: TStream);
+begin
+ removecache;
+ inherited;
+end;
+
 procedure tmseblobfield.LoadFromFile(const FileName: filenamety);
 begin
  if filename = '' then begin
   clear;
  end
  else begin
+  removecache;
   inherited loadfromfile(tosysfilepath(filename));
  end;
 end;
@@ -2564,23 +2573,24 @@ begin
  end;
 end;
 
-procedure tmseblobfield.setasstring(const avalue: string);
+procedure tmseblobfield.removecache;
 var
  lint1: int64;
 begin
  if getid(lint1) then begin
   removecache(lint1);
  end;
+end;
+
+procedure tmseblobfield.setasstring(const avalue: string);
+begin
+ removecache;
  inherited;
 end;
 
 procedure tmseblobfield.Clear;
-var
- lint1: int64;
 begin
- if getid(lint1) then begin
-  removecache(lint1);
- end;
+ removecache;
  inherited;
 end;
 
