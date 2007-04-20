@@ -1,0 +1,518 @@
+[componentpalette]
+order0=0
+order1=0
+order2=0
+order3=0
+order4=0
+order5=0
+order6=0
+order7=0
+[projectoptions]
+projectdir=/home/pochta/mseide_projects/progressbar1
+options=41
+ [projectoptionsfo]
+ stackedunder=
+ x=151
+ y=68
+ cx=821
+ cy=572
+ [projectoptionsfo.tabwidget]
+ firsttab=0
+ index=3
+ [projectoptionsfo.macrogrid]
+ width0=13
+ width1=13
+ width2=13
+ width3=13
+ width4=13
+ width5=13
+ width6=146
+ width7=583
+ [projectoptionsfo.macrosplitter]
+ x=0
+ y=178
+ [projectoptionsfo.fontaliasgrid]
+ values0=0
+ width0=98
+ values1=0
+ width1=684
+ values2=0
+ width2=30
+ [projectoptionsfo.grid]
+ width0=231
+ [projectoptionsfo.makesplitter]
+ x=0
+ y=161
+ [projectoptionsfo.ttabwidget1]
+ firsttab=0
+ index=0
+ [projectoptionsfo.exceptionsgrid]
+ width0=47
+ values1=1
+  EconvertError
+ width1=764
+colordialog=6
+ [colordialogfo]
+ stackedunder=
+ x=145
+ y=239
+ cx=342
+ cy=303
+sigsettings=27
+ 1,1,T,F
+ 3,3,T,F
+ 4,4,T,F
+ 6,6,T,F
+ 7,7,T,F
+ 8,8,T,F
+ 9,9,T,F
+ 10,10,T,F
+ 11,11,T,F
+ 12,12,T,F
+ 13,13,T,F
+ 15,15,T,F
+ 16,16,T,F
+ 17,17,F,F
+ 18,18,T,F
+ 19,19,T,F
+ 20,20,T,F
+ 21,21,T,F
+ 22,22,T,F
+ 23,23,T,F
+ 24,24,T,F
+ 25,25,T,F
+ 26,26,T,F
+ 27,27,T,F
+ 28,28,T,F
+ 29,29,T,F
+ 30,30,T,F
+gridsizex=8
+gridsizey=8
+exceptclassnames=1
+ EconvertError
+exceptignore=1
+ 0
+modulenames=2
+ BARFO
+ MAINFO
+moduletypes=2
+ TBARFO
+ TMAINFO
+modulefiles=2
+ /home/pochta/mseide_projects/progressbar1/barform.mfm
+ /home/pochta/mseide_projects/progressbar1/main.mfm
+mainfile=progressbar.pas
+targetfile=progressbar${EXEEXT}
+messageoutputfile=
+copymessages=0
+closemessages=1
+checkmethods=1
+makecommand=${COMPILER}
+debugcommand=${DEBUGGER}
+debugoptions=
+debugtarget=
+defaultmake=1
+makeoptions=4
+ -l -Mobjfpc -Sh
+ -gl
+ -B
+ -OG2p3 -XX -Xs
+makeoptionson=4
+ 63
+ 31
+ 34
+ 32
+macroon=0
+macronames=0
+macrovalues=0
+macrogroup=0
+groupcomments=6
+ 
+ 
+ 
+ 
+ 
+ 
+sourcedirs=3
+ ${MSELIBDIR}kernel/$TARGET/
+ ${MSELIBDIR}*/
+ ./
+defines=0
+defineson=0
+unitdirs=3
+ ${MSELIBDIR}kernel/$TARGET/
+ ${MSELIBDIR}kernel/
+ ${MSELIBDIR}*/
+unitdirson=3
+ 65599
+ 196671
+ 65599
+sourcefilemasks=3
+ "*.pas" "*.dpr" "*.pp" "*.inc"
+ "*.c" "*.cc" "*.h"
+ "*.mfm"
+syntaxdeffiles=3
+ ${SYNTAXDEFDIR}pascal.sdef
+ ${SYNTAXDEFDIR}cpp.sdef
+ ${SYNTAXDEFDIR}objecttext.sdef
+fontalias=0
+fontnames=0
+fontheights=0
+showgrid=1
+snaptogrid=1
+autoindent=1
+blockindent=1
+rightmarginon=1
+rightmarginchars=80
+tabstops=4
+editfontname=mseide_source
+editfontheight=0
+editfontwidth=0
+editfontextraspace=0
+editfontantialiased=1
+backupfilecount=2
+encoding=0
+newprojectfiles=4
+ ${TEMPLATEDIR}default/project.pas
+ ${TEMPLATEDIR}default/main.pas
+ ${TEMPLATEDIR}default/main.mfm
+ ${TEMPLATEDIR}default/main_mfm.pas
+newprojectfilesdest=4
+ ${%PROJECTNAME%}.pas
+ 
+ 
+ 
+expandprojectfilemacros=4
+ 1
+ 1
+ 1
+ 0
+loadprojectfile=4
+ 1
+ 1
+ 1
+ 0
+newprogramfile=${TEMPLATEDIR}default/program.pas
+newunitfile=${TEMPLATEDIR}default/unit.pas
+newmainfosource=${TEMPLATEDIR}default/mainform.pas
+newmainfoform=${TEMPLATEDIR}default/mainform.mfm
+newsimplefosource=${TEMPLATEDIR}default/simpleform.pas
+newsimplefoform=${TEMPLATEDIR}default/simpleform.mfm
+newdockingfosource=${TEMPLATEDIR}default/dockingform.pas
+newdockingfoform=${TEMPLATEDIR}default/dockingform.mfm
+newdatamodsource=${TEMPLATEDIR}default/datamodule.pas
+newdatamodform=${TEMPLATEDIR}default/datamodule.mfm
+newsubfosource=${TEMPLATEDIR}default/subform.pas
+newsubfoform=${TEMPLATEDIR}default/subform.mfm
+stoponexception=0
+activateonbreak=1
+showconsole=0
+externalconsole=0
+[breakpoints]
+on=1
+ 0
+path=1
+ /home/pochta/mseide_projects/progressbar1/main.pas
+line=1
+ 47
+ignore=1
+ 0
+condition=1
+ 
+panels=1
+ panel1
+units=
+ (
+ modulefilenames=0
+ modulenames=0
+ moduleclassnames=0
+ a=0,4132,0,Units
+ )
+files=
+ (
+ a=0,4132,0,Files
+ )
+[layout]
+windowlayout=233
+ [mainfo]
+ stackedunder=
+ x=4
+ y=24
+ cx=286
+ cy=74
+ wsize=0
+ active=1
+ visible=1
+ [mainfo.basedock]
+ splitdir=2
+ useroptions=5616
+ [mainfo.openfile]
+ filenames=0
+ lastdir=
+ filehistory=0
+ filefilterindex=0
+ filecolwidth=174
+ [actionsmo.watchesonact]
+ checked=1
+ [actionsmo.bluedotsonact]
+ checked=1
+ [sourcefo]
+ splitdir=0
+ useroptions=527
+ parent=mainfo.panel1.container
+ visible=1
+ x=0
+ y=0
+ cx=724
+ cy=491
+ [debuggerfo]
+ splitdir=0
+ useroptions=15
+ parent=mainfo.basedock
+ visible=1
+ x=0
+ y=0
+ cx=286
+ cy=40
+ [componentpalettefo]
+ splitdir=0
+ useroptions=15
+ stackedunder=targetconsolefo
+ parent=
+ x=335
+ y=24
+ cx=440
+ cy=129
+ wsize=0
+ active=0
+ visible=1
+ [componentpalettefo.componentpages]
+ activetab=2
+ [messagefo]
+ splitdir=0
+ useroptions=1551
+ parent=mainfo.panel1.container
+ visible=0
+ x=0
+ y=411
+ cx=724
+ cy=80
+ [watchfo]
+ splitdir=0
+ useroptions=783
+ stackedunder=disassfo
+ parent=
+ x=510
+ y=325
+ cx=310
+ cy=245
+ wsize=0
+ active=0
+ visible=0
+ [watchfo.grid]
+ width0=13
+ values1=0
+ width1=152
+ values2=0
+ [watchfo.watchon]
+ [watchfo.expression]
+ [watchfo.watcheson]
+ value=1
+ [objectinspectorfo]
+ splitdir=0
+ useroptions=527
+ stackedunder=mainfo
+ parent=
+ x=476
+ y=27
+ cx=278
+ cy=518
+ wsize=0
+ active=0
+ visible=1
+ [objectinspectorfo.grid]
+ width0=149
+ width1=113
+ [breakpointsfo]
+ splitdir=0
+ useroptions=527
+ stackedunder=findinfilefo
+ parent=
+ x=107
+ y=404
+ cx=477
+ cy=128
+ wsize=0
+ active=0
+ visible=0
+ [breakpointsfo.bkptson]
+ value=1
+ [watchpointsfo]
+ splitdir=0
+ useroptions=527
+ stackedunder=cpufo
+ parent=
+ x=537
+ y=26
+ cx=483
+ cy=210
+ wsize=0
+ active=0
+ visible=0
+ [watchpointsfo.grid]
+ width0=16
+ values1=1
+  0
+ width1=33
+ values2=1
+  pinteger(0x126c6b4)^
+ width2=239
+ width4=34
+ values5=1
+  0
+ width5=38
+ values6=1
+  
+ width6=103
+ [stackfo]
+ splitdir=0
+ useroptions=527
+ stackedunder=watchpointsfo
+ parent=
+ x=407
+ y=349
+ cx=254
+ cy=180
+ wsize=0
+ active=0
+ visible=0
+ [projecttreefo]
+ splitdir=0
+ useroptions=15
+ stackedunder=stackfo
+ parent=
+ x=321
+ y=101
+ cx=698
+ cy=413
+ wsize=0
+ active=0
+ visible=0
+ [findinfilefo]
+ splitdir=0
+ useroptions=527
+ stackedunder=componentpalettefo
+ parent=
+ x=548
+ y=115
+ cx=369
+ cy=198
+ [cpufo]
+ splitdir=0
+ useroptions=527
+ stackedunder=threadsfo
+ parent=
+ x=192
+ y=451
+ cx=257
+ cy=188
+ wsize=0
+ active=0
+ visible=0
+ [disassfo]
+ splitdir=0
+ useroptions=527
+ stackedunder=breakpointsfo
+ parent=
+ x=162
+ y=502
+ cx=564
+ cy=210
+ wsize=0
+ active=0
+ visible=0
+ [threadsfo]
+ splitdir=0
+ useroptions=527
+ stackedunder=watchfo
+ parent=
+ x=37
+ y=270
+ cx=349
+ cy=276
+ wsize=0
+ active=0
+ visible=0
+ [targetconsolefo]
+ splitdir=0
+ useroptions=1
+ stackedunder=formdesignerfo
+ parent=
+ x=116
+ y=297
+ cx=904
+ cy=347
+ wsize=0
+ active=0
+ visible=1
+ [mainfo.panel1]
+ splitdir=2
+ useroptions=2047
+ stackedunder=objectinspectorfo
+ parent=
+ x=4
+ y=83
+ cx=734
+ cy=491
+ wsize=0
+ active=0
+ visible=1
+[edit]
+hintwidth=314
+hintheight=214
+autoindent=1
+blockindent=1
+rightmarginon=1
+rightmarginchars=80
+tabstops=4
+finddtext=
+findhistory=0
+findoptions=1
+editpos=3
+ 0,-1073741823
+ 57,4
+ 14,16
+bookmarks0=0
+bookmarks1=0
+bookmarks2=0
+sourcefiles=3
+ /home/pochta/mseide_projects/progressbar1/progressbar.pas
+ /home/pochta/mseide_projects/progressbar1/main.pas
+ /home/pochta/mseide_projects/progressbar1/barform.pas
+ismoduletexts=3
+ 0
+ 0
+ 0
+modules=2
+ /home/pochta/mseide_projects/progressbar1/main.mfm
+ /home/pochta/mseide_projects/progressbar1/barform.mfm
+visiblemodules=2
+ 1
+ 1
+[sourcefo.tabwidget]
+tabsize=134
+firsttab=0
+index=1
+[components]
+[selecteditpage]
+colwidth=100
+x=0
+y=0
+cx=0
+cy=0
+[progparams]
+parameters=
+workingdirectory=
+envvarons=0
+envvarnames=0
+envvarvalues=0

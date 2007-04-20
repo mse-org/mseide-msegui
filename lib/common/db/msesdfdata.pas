@@ -31,6 +31,7 @@ type
    procedure inheritedinternaldelete;
    procedure inheritedinternalopen;
    procedure inheritedinternalclose;
+   function getblobdatasize: integer;
   protected
    procedure setactive (value : boolean);{ override;}
    function getactive: boolean;
@@ -76,6 +77,7 @@ type
    procedure inheritedinternaldelete;
    procedure inheritedinternalopen;
    procedure inheritedinternalclose;
+   function getblobdatasize: integer;
   protected
    procedure setactive (value : boolean);{ override;}
    function getactive: boolean;
@@ -275,6 +277,11 @@ begin
  fcontroller.internalclose;
 end;
 
+function tmsefixedformatdataset.getblobdatasize: integer;
+begin
+ result:= 0; //no blobs
+end;
+
 { tmsesdfdataset }
 
 constructor tmsesdfdataset.create(aowner: tcomponent);
@@ -440,6 +447,11 @@ end;
 procedure tmsesdfdataset.internalclose;
 begin
  fcontroller.internalclose;
+end;
+
+function tmsesdfdataset.getblobdatasize: integer;
+begin
+ result:= 0; //no blobs
 end;
 
 end.

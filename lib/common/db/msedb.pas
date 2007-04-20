@@ -21,7 +21,7 @@ const
  datetimefields = [ftdate,fttime,ftdatetime];
  stringfields = textfields + integerfields + booleanfields +
                 realfields + datetimefields;
- blobfields = [ftblob,ftmemo,ftgraphic,ftstring];
+ blobfields = [ftblob,ftmemo,ftgraphic{,ftstring}];
  defaultproviderflags = [pfInUpdate,pfInWhere];
  
 type
@@ -653,6 +653,7 @@ type
   procedure inheritedinternalclose;
   procedure openlocal;
   procedure inheritedinternaldelete;
+  function getblobdatasize: integer;
  end;
 
  igetdscontroller = interface(inullinterface)
@@ -959,7 +960,11 @@ type
   Private
     FDataType : TFieldType;
     FFieldNo : Longint;
- end;
+    FInternalCalcField : Boolean;
+    FPrecision : Longint;
+    FRequired : Boolean;
+    FSize : Word;
+end;
  tdataset1 = class(tdataset);
  
 function getmsefieldclass(const afieldtype: tfieldtype): tfieldclass;
@@ -2534,7 +2539,9 @@ begin
    result:= getdata(@aid);
   end;  
   else begin
-   databaseerror('Invalid cache field: '''+fieldname+'''.',self);
+   if size > 0 then begin
+    databaseerror('Invalid cache field: '''+fieldname+'''.',self);
+   end;
   end;
  end;
 end;
@@ -3522,12 +3529,24 @@ end;
 procedure tdscontroller.internalopen;
 var
  int1,int2: integer;
+ blobdatasize: integer;
 begin
+ blobdatasize:= fintf.getblobdatasize;
  with tdataset(fowner) do begin
+  for int1:= 0 to fields.count - 1 do begin
+   with fields[int1] do begin
+    if datatype in blobfields then begin
+     size:= blobdatasize;
+    end;
+   end;
+  end;
   for int1:= 0 to fielddefs.count - 1 do begin
    with tfielddefcracker(fielddefs[int1]) do begin
     if ffieldno = 0 then begin
      ffieldno:= int1 + 1;
+    end;
+    if fdatatype in blobfields then begin
+     fsize:= blobdatasize;
     end;
    end;
   end;

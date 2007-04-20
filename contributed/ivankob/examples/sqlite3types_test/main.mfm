@@ -1,0 +1,877 @@
+object mainfo: tmainfo
+  optionswidget = [ow_arrowfocus, ow_subfocus, ow_destroywidgets, ow_hinton, ow_autoscale]
+  bounds_x = 50
+  bounds_y = 87
+  bounds_cx = 395
+  bounds_cy = 290
+  frame.dummy = 0
+  taborder = 1
+  container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_subfocus, ow_mousetransparent, ow_destroywidgets, ow_autoscale]
+  container.bounds_x = 0
+  container.bounds_y = 0
+  container.bounds_cx = 395
+  container.bounds_cy = 290
+  container.frame.dummy = 0
+  optionswindow = [wo_groupleader]
+  options = [fo_main, fo_terminateonclose, fo_autoreadstat, fo_autowritestat, fo_savepos, fo_savestate]
+  caption = 'SQLite3 data types testcase'
+  icon.transparency = -2147483648
+  moduleclassname = 'tmseform'
+  object tbutton1: tbutton
+    bounds_x = 320
+    bounds_y = 256
+    bounds_cx = 66
+    bounds_cy = 28
+    state = [as_localcaption]
+    caption = 'Exit'
+    modalresult = mr_canclose
+  end
+  object booleanedit: tdbbooleanedit
+    bounds_x = 52
+    bounds_y = 103
+    bounds_cx = 73
+    bounds_cy = 16
+    frame.caption = 'BOOLEAN'
+    frame.captionpos = cp_left
+    frame.dummy = 0
+    frame.outerframe = (
+      60
+      1
+      0
+      2
+    )
+    taborder = 1
+    optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_autopost, oe_autopopupmenu, oe_keyexecute, oe_savevalue, oe_savestate]
+    datafield = 'booleanf1'
+    datasource = ds
+  end
+  object smallintedit: tdbintegeredit
+    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+    bounds_x = 52
+    bounds_y = 80
+    bounds_cx = 160
+    bounds_cy = 20
+    frame.caption = 'SMALLINT'
+    frame.captionpos = cp_left
+    frame.dummy = 0
+    frame.outerframe = (
+      60
+      0
+      0
+      0
+    )
+    taborder = 2
+    optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_autopost, oe_autopopupmenu, oe_keyexecute, oe_savevalue, oe_savestate]
+    datafield = 'smallintf1'
+    datasource = ds
+    min = -32767
+    max = 32767
+    reffontheight = 14
+  end
+  object integeredit: tdbintegeredit
+    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+    bounds_x = 56
+    bounds_y = 8
+    bounds_cx = 156
+    bounds_cy = 20
+    frame.caption = 'INTEGER'
+    frame.captionpos = cp_left
+    frame.dummy = 0
+    frame.outerframe = (
+      56
+      0
+      0
+      0
+    )
+    taborder = 3
+    optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_autopost, oe_autopopupmenu, oe_keyexecute, oe_savevalue, oe_savestate]
+    datafield = 'integerf1'
+    datasource = ds
+    min = -2147483647
+    reffontheight = 14
+  end
+  object largeintedit: tdbintegeredit
+    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+    bounds_x = 50
+    bounds_y = 32
+    bounds_cx = 162
+    bounds_cy = 20
+    frame.caption = 'LARGEINT'
+    frame.captionpos = cp_left
+    frame.dummy = 0
+    frame.outerframe = (
+      62
+      0
+      0
+      0
+    )
+    taborder = 4
+    optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_autopost, oe_autopopupmenu, oe_keyexecute, oe_savevalue, oe_savestate]
+    datafield = 'largeintf1'
+    datasource = ds
+    min = -899999999
+    max = 899999999
+    reffontheight = 14
+  end
+  object numericedit: tdbrealedit
+    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+    bounds_x = 53
+    bounds_y = 160
+    bounds_cx = 159
+    bounds_cy = 20
+    frame.caption = 'NUMERIC'
+    frame.captionpos = cp_left
+    frame.dummy = 0
+    frame.outerframe = (
+      59
+      0
+      0
+      0
+    )
+    taborder = 5
+    optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_autopost, oe_autopopupmenu, oe_keyexecute, oe_savevalue, oe_savestate]
+    datafield = 'numericf1'
+    datasource = ds
+    reffontheight = 14
+    val = 123456.789
+  end
+  object realedit: tdbrealedit
+    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+    bounds_x = 17
+    bounds_y = 136
+    bounds_cx = 195
+    bounds_cy = 20
+    frame.caption = 'REALFLOATDBL'
+    frame.captionpos = cp_left
+    frame.dummy = 0
+    frame.outerframe = (
+      95
+      0
+      0
+      0
+    )
+    taborder = 6
+    optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_autopost, oe_autopopupmenu, oe_keyexecute, oe_savevalue, oe_savestate]
+    datafield = 'realfloatdoublef1'
+    datasource = ds
+    reffontheight = 14
+    val = 7.89E37
+  end
+  object varcharedit: tdbstringedit
+    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+    bounds_x = 233
+    bounds_y = 8
+    bounds_cx = 155
+    bounds_cy = 20
+    frame.caption = 'VarCHAR'
+    frame.captionpos = cp_left
+    frame.dummy = 0
+    frame.outerframe = (
+      55
+      0
+      0
+      0
+    )
+    taborder = 7
+    optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_autopost, oe_autopopupmenu, oe_keyexecute, oe_savevalue, oe_savestate]
+    datafield = 'vcharf1'
+    datasource = ds
+    reffontheight = 14
+  end
+  object textedit: tdbmemoedit
+    bounds_x = 256
+    bounds_y = 32
+    bounds_cx = 132
+    bounds_cy = 20
+    frame.caption = 'TEXT'
+    frame.captionpos = cp_left
+    frame.localprops = [frl_colorclient]
+    frame.dummy = 0
+    frame.outerframe = (
+      32
+      0
+      0
+      0
+    )
+    taborder = 8
+    optionsedit = [oe_closequery, oe_checkmrcancel, oe_linebreak, oe_eatreturn, oe_resetselectonexit, oe_autopost, oe_autopopupmenu, oe_keyexecute, oe_savevalue, oe_savestate]
+    textflags = [tf_wordbreak, tf_noselect]
+    textflagsactive = [tf_wordbreak]
+    datafield = 'textf1'
+    datasource = ds
+  end
+  object blobdisplay: tdbdataimage
+    bounds_x = 221
+    bounds_y = 64
+    bounds_cx = 165
+    bounds_cy = 130
+    frame.levelo = 1
+    frame.leveli = -1
+    frame.caption = 'BLOB'
+    frame.captionpos = cp_left
+    frame.font.dummy = 0
+    frame.localprops = [frl_levelo, frl_leveli]
+    frame.dummy = 0
+    frame.outerframe = (
+      35
+      0
+      0
+      0
+    )
+    face.image.transparentcolor = -2147483648
+    face.image.options = [bmo_masked, bmo_colormask]
+    face.image.alignment = [al_xcentered, al_ycentered]
+    face.image.transparency = -2147483648
+    face.image.image = {
+      0000000006000000640000006400000074060000000000000000000000000000
+      0000000000000000000000000000000000000000000000FF000000FF000000FF
+      000000FF000000FF000000FF000000FF000000FF000000FF000000FF000000B5
+      EB716A0800000009EB716A0600000048EB716A0E00000003EB716A0A0000004A
+      EB716A0D00000004EB716A0800000049EB716A0F00000002EB716A090000004B
+      EB716A0F00000001EB716A090000004DEB716A0D00000003EB716A0800000005
+      EB716A0600000041EB716A0100000001EB716A0100000001EB716A0A00000003
+      EB716A0600000004EB716A0900000044EB716A0100000001EB716A0800000003
+      EB716A0500000004EB716A0A00000044EB716A0100000001EB716A0900000002
+      EB716A0500000003EB716A0B00000044EB716A0100000002EB716A0900000001
+      EB716A0500000002EB716A0D00000043EB716A0100000003EB716A0E00000001
+      EB716A0E00000043EB716A0100000001EB716A0100000002EB716A1D00000042
+      EB716A0100000001EB716A0100000003EB716A1C00000042EB716A0100000001
+      EB716A0100000003EB716A1200000001EB716A0800000043EB716A0100000001
+      EB716A0100000004EB716A1000000002EB716A0800000043EB716A0100000001
+      EB716A0100000005EB716A0900000001EB716A0500000002EB716A0700000044
+      EB716A0100000001EB716A0100000006EB716A0F00000001EB716A0800000043
+      EB716A0100000001EB716A0100000006EB716A0800000001EB716A0600000001
+      EB716A0800000043EB716A0100000001EB716A0100000007EB716A0700000001
+      EB716A0600000001EB716A0900000041EB716A0300000009EB716A0400000003
+      EB716A0500000002EB716A0800000040EB716A0700000008EB716A0300000004
+      EB716A0E00000040EB716A0700000008EB716A0200000006EB716A0C00000061
+      EB716A01000000FF000000C5EB716A040000005FEB716A0500000038EB716A03
+      00000024EB716A050000000CEB716A0500000025EB716A0400000025EB716A04
+      0000000BEB716A070000000BEB716A0700000012EB716A0700000023EB716A04
+      00000008EB716A0B00000008EB716A0A00000006EB716A130000002CEB716A0F
+      00000004EB716A0D00000003EB716A1500000023EB716A0500000005EB716A10
+      00000002EB716A0D00000002EB716A0C00000001EB716A0A00000020EB716A07
+      00000001EB716A1400000002EB716A0D00000002EB716A0C00000001EB716A0B
+      0000001FEB716A0700000001EB716A1500000001EB716A0D00000001EB716A0D
+      00000001EB716A0A00000020EB716A0700000001EB716A1500000001EB716A05
+      00000001EB716A0D00000001EB716A0D00000001EB716A0400000021EB716A07
+      00000001EB716A0C00000001EB716A0700000001EB716A0400000002EB716A07
+      00000001EB716A0500000001EB716A0700000001EB716A0A00000021EB716A07
+      00000001EB716A0C00000001EB716A0700000001EB716A0400000001EB716A08
+      00000001EB716A0500000001EB716A0700000001EB716A0500000001EB716A04
+      00000021EB716A0700000001EB716A0600000001EB716A0500000002EB716A06
+      00000004EB716A0A00000001EB716A0500000001EB716A0600000002EB716A0A
+      00000021EB716A0700000001EB716A0600000001EB716A0500000002EB716A06
+      00000003EB716A0400000001EB716A0600000001EB716A0500000001EB716A05
+      00000003EB716A0500000026EB716A0600000002EB716A0C00000002EB716A06
+      00000002EB716A0400000002EB716A0600000001EB716A0B00000003EB716A05
+      00000026EB716A0600000002EB716A0C00000002EB716A0400000003EB716A05
+      00000002EB716A0600000003EB716A0900000003EB716A0500000026EB716A06
+      00000002EB716A0D00000001EB716A0400000003EB716A0500000002EB716A05
+      00000002EB716A0D00000001EB716A0600000002EB716A0200000020EB716A06
+      00000002EB716A1400000002EB716A0C00000002EB716A1800000020EB716A06
+      00000002EB716A0600000001EB716A0600000001EB716A0600000002EB716A0C
+      00000002EB716A0E00000001EB716A0800000021EB716A0600000002EB716A06
+      00000001EB716A0600000001EB716A0600000002EB716A0600000001EB716A05
+      00000002EB716A160000004EEB716A1000000054EB716A1000000054EB716A05
+      00000004EB716A0700000054EB716A0700000002EB716A0600000055EB716A0E
+      00000057EB716A09000000FF000000FF000000FF000000FF000000FF000000FF
+      000000FF000000F974180000000000FF000000FF000000FF000000FF000000FF
+      000000FF000000FF000000FF000000FF000000FF000000B50101010106060601
+      1D1D1D01303030021C1C1C010909090102020201000000090101010104040402
+      05050501030303010101010100000048080808010A0A0A011A1A1A011E1E1E01
+      5A5A5A01414141011D1D1D011B1B1B012E2E2E014E4E4E012D2D2D010A0A0A01
+      03030301010101010000000309090901242424014E4E4E015E5E5E0142424201
+      222222011C1C1C011F1F1F011B1B1B01020202010000004A010101010A0A0A01
+      0B0B0B0115151501141414013F3F3F015C5C5C015D5D5D015050500126262601
+      161616010C0C0C01010101010000000405050501343434016868680145454501
+      484848014F4F4F013E3E3E010303030100000049020202011C1C1C0137373701
+      7373730186868601E4E4E401E3E3E302D5D5D501F9F9F901FBFBFB0148484801
+      15151501343434010909090100000002ECECEC01F7F7F701E7E7E701CACACA01
+      ECECEC01D4D4D401C5C5C50111111101151515010000004B0101010105050501
+      1818180116161601343434013C3C3C01F6F6F601EEEEEE01FEFEFE02E5E5E501
+      232323012A2A2A01353535010101010100000001030303012222220196969601
+      DEDEDE01838383017272720127272701030303010C0C0C010000004D07070701
+      030303010F0F0F0104040401FEFEFE01E6E6E601FFFFFF01FEFEFE01FFFFFF01
+      BDBDBD01121212011C1C1C010E0E0E01000000030E0E0E01EEEEEE010C0C0C01
+      464646010E0E0E01010101010505050101010101000000050101010105050501
+      0F0F0F01141414010A0A0A010202020100000041010101010000000103030301
+      00000001FFFFFF0143434301FDFDFD01FFFFFF03858585011010100109090901
+      0101010100000003FAFAFA01010101011E1E1E01070707010404040102020201
+      00000004010101010A0A0A011A1A1A0128282801242424012222220111111101
+      060606010101010100000044FFFFFF01000000017D7D7D01FFFFFF03FDFDFD01
+      61616101222222010202020100000003FEFEFE0106060601121212010C0C0C01
+      0909090100000004020202011212120133333301444444013D3D3D0133333301
+      313131011B1B1B01070707010101010100000044FFFFFF010000000102020201
+      B8B8B801FCFCFC01FDFDFD01FFFFFF01F1F1F101616161012323230103030301
+      00000002FCFCFC010E0E0E0119191901222222010D0D0D010000000302020201
+      1B1B1B021A1A1A014D4D4D014E4E4E01444444012B2B2B01191919010A0A0A01
+      0202020100000044FFFFFF010000000214141401E0E0E001F1F1F101FEFEFE01
+      FFFFFF01DCDCDC01414141011E1E1E010A0A0A0100000001E8E8E8011F1F1F01
+      2B2B2B012E2E2E010B0B0B01000000020B0B0B0180808001D1D1D101E2E2E201
+      CCCCCC01B8B8B801A4A4A4016262620154545401404040012929290110101001
+      0101010100000043FFFFFF01000000033A3A3A01EFEFEF01EAEAEA01FFFFFF02
+      A6A6A6013F3F3F014C4C4C010B0B0B01CECECE013B3B3B014444440124242401
+      050505010000000118181801D5D5D501FFFFFF01CFCFCF011E1E1E0123232301
+      9A9A9A01AAAAAA01C5C5C5018585850173737301515151012121210106060601
+      00000043FFFFFF0100000001030303010000000270707001F1F1F101F8F8F801
+      FEFEFE01FFFFFF0185858501707070014E4E4E01B3B3B3016D6D6D014C4C4C01
+      151515010101010102020201BCBCBC01FFFFFF02565656010303030106060601
+      393939019A9A9A01A9A9A901B5B5B50191919101727272012F2F2F0109090901
+      0101010100000042FDFDFD01000000011111110100000003ADADAD01FBFBFB02
+      FFFFFF01F3F3F3016A6A6A0152525201BEBEBE018B8B8B01363636010A0A0A01
+      010101014F4F4F01FDFDFD01FFFFFF022D2D2D010101010213131301BBBBBB01
+      BEBEBE01D3D3D301B7B7B701737373012A2A2A01070707010101010100000042
+      F6F6F6010000000132323201000000030F0F0F01DDDDDD01FFFFFF01FBFBFB01
+      FFFFFF01D5D5D50136363601E7E7E70179797901242424011111110101010101
+      A1A1A101F8F8F801FFFFFF022C2C2C01010101010000000106060601E3E3E301
+      E4E4E401EEEEEE01D9D9D90168686801191919010303030100000043EEEEEE01
+      00000001575757010000000431313101F8F8F801FFFFFF01FEFEFE01FFFFFF01
+      A2A2A201FFFFFF0160606001292929012323230101010101B4B4B401EAEAEA01
+      FCFCFC01FFFFFF014D4D4D010000000201010101F7F7F701F1F1F101FDFDFD01
+      F2F2F20159595901202020010101010100000043EEEEEE010000000157575701
+      0000000567676701FFFFFF055E5E5E01353535012C2C2C0100000001AAAAAA01
+      E3E3E301FBFBFB01FFFFFF01656565010000000202020201F9F9F901EDEDED01
+      FFFFFF01FDFDFD01636363013030300100000044F6F6F6010000000132323201
+      00000006A4A4A401FFFFFF02FEFEFE01FBFBFB0167676701383838011C1C1C01
+      01010101B0B0B001EAEAEA01FCFCFC01FFFFFF01494949010202020100000001
+      07070701F5F5F501E1E1E101FDFDFD01F4F4F4016F6F6F013434340105050501
+      00000043FDFDFD010000000111111101000000060B0B0B01D6D6D601FFFFFF01
+      F7F7F701F3F3F30164646401393939010808080100000001A1A1A101F7F7F701
+      FFFFFF0223232301030303010000000111111101F0F0F001D0D0D001F7F7F701
+      E0E0E001818181013B3B3B010B0B0B0100000043FFFFFF010000000103030301
+      000000072A2A2A01EFEFEF01E5E5E501DDDDDD01666666012727270102020201
+      000000015A5A5A01FEFEFE01FFFFFF0222222201020202010000000125252501
+      ECECEC01CACACA01F2F2F201CACACA018F8F8F01393939010C0C0C0101010101
+      0000004111111101FFFFFF01111111010000000959595901DDDDDD01A8A8A801
+      646464010000000305050501CFCFCF01FFFFFF024D4D4D010000000250505001
+      F1F1F101E0E0E001D9D9D90188888801636363012A2A2A010808080100000040
+      0606060128282801A7A7A701FFFFFF01A7A7A701282828010303030100000008
+      8A8A8A01BFBFBF01050505010000000421212101DFDFDF01FFFFFF01CFCFCF01
+      1F1F1F011D1D1D01CDCDCD01FBFBFB01DCDCDC01424242013B3B3B0121212101
+      121212010101010100000040FFFFFF070000000807070701BABABA0100000006
+      0E0E0E0181818101D2D2D201F5F5F501F9F9F901D5D5D5018383830112121201
+      0707070108080802010101010000006101010101000000FF000000C506060601
+      3131310143434301101010010000005F4F4F4F01E9E9E9025F5F5F0112121201
+      00000038030303020101010100000024E8E8E801FFFFFF02E7E7E70104040401
+      0000000C01010101020202010303030102020201010101010000002501010101
+      0A0A0A010E0E0E010707070100000025E9E9E901FFFFFF02E8E8E8010000000B
+      01010101050505010B0B0B010A0A0A010909090105050501020202010000000B
+      010101040202020103030301010101010000001201010101090909011B1B1B01
+      303030011B1B1B0109090901020202010000002352525201EAEAEA01E7E7E701
+      4E4E4E0100000008030303010E0E0E01252525011F1F1F011515150116161601
+      111111010A0A0A010303030202020201000000080E0E0E011A1A1A0114141401
+      1111110121212101323232012B2B2B0116161601060606010101010100000006
+      0101010103030301040404010202020106060601121212011919190112121201
+      0606060101010101030303010909090122222201484848014F4F4F0116161601
+      0404040103030301010101010000002C010101010A0A0A012626260151515101
+      3D3D3D011F1F1F012121210125252501333333012D2D2D010F0F0F0102020201
+      0404040102020201010101010000000401010101191919013C3C3C012D2D2D01
+      242424012D2D2D013F3F3F013C3C3C012B2B2B011B1B1B011010100108080801
+      0303030100000003080808012D2D2D0152525201464646012121210120202001
+      33333301353535012F2F2F011C1C1C0108080801010101010505050120202001
+      3A3A3A016E6E6E0169696901303030012C2C2C01494949012929290100000023
+      090909011D1D1D01323232021D1D1D010000000505050501161616012F2F2F01
+      2C2C2C0135353501535353016C6C6C014B4B4B01242424011212120106060601
+      0F0F0F0142424201555555012D2D2D0105050501000000020808080142424201
+      74747401353535012D2D2D01474747014D4D4D014F4F4F015656560155555501
+      313131011F1F1F010C0C0C0100000002040404011A1A1A014646460145454501
+      1313130153535301727272015B5B5B014C4C4C01363636011919190106060601
+      000000010B0B0B01222222016767670191919101515151010E0E0E010A0A0A01
+      28282801505050011B1B1B0100000020FFFFFF01FCFCFC01F3F3F301FFFFFF02
+      575757013232320100000001FCFCFC01FFFFFF043737370146464601C2C2C201
+      F2F2F201E1E1E101858585013E3E3E011818180143434301BFBFBF01F9F9F901
+      EAEAEA01737373011E1E1E010C0C0C0100000002121212014343430192929201
+      8F8F8F01A6A6A601A8A8A801B6B6B601C1C1C101B5B5B501818181017B7B7B01
+      464646011818180100000002040404016F6F6F01D1D1D101BDBDBD01C2C2C201
+      C9C9C901E2E2E201F3F3F301F7F7F701FEFEFE01F9F9F9010404040100000001
+      0B0B0B013939390169696901C6C6C601A1A1A101C5C5C501C0C0C0015A5A5A01
+      1E1E1E0114141401010101010000001F43434301FCFCFC01EFEFEF01FFFFFF02
+      5B5B5B01323232010000000144444401FFFFFF0467676701F3F3F301FEFEFE01
+      FBFBFB01FFFFFF01FEFEFE01555555015F5F5F01FBFBFB01FFFFFF01F7F7F701
+      F4F4F401F5F5F50130303001121212010A0A0A010000000123232301D0D0D001
+      FCFCFC015D5D5D010C0C0C011111110177777701E7E7E701F8F8F801FAFAFA01
+      B1B1B101797979011E1E1E010000000104040401B1B1B101FFFFFF0295959501
+      0B0B0B018E8E8E01EBEBEB01F9F9F901FEFEFE01FCFCFC01E6E6E6010B0B0B01
+      00000001101010013D3D3D01E6E6E601FFFFFF019A9A9A010C0C0C0197979701
+      FAFAFA0183838301040404010000002004040401FEFEFE01F6F6F601FFFFFF02
+      4A4A4A011C1C1C010000000104040401FFFFFF04CACACA011F1F1F015B5B5B01
+      FFFFFF03DBDBDB01CFCFCF012626260152525201FEFEFE01FBFBFB01FFFFFF01
+      ADADAD01323232012D2D2D0100000001B6B6B601FDFDFD01FEFEFE014E4E4E01
+      010101010000000108080801F6F6F601FAFAFA01FFFFFF01EEEEEE017D7D7D01
+      1D1D1D010101010177777701FFFFFF032E2E2E01000000012F2F2F01EBEBEB01
+      F7F7F701F4F4F4018A8A8A015454540118181801010101010A0A0A01D4D4D401
+      FFFFFF0243434301000000012B2B2B01FFFFFF01FEFEFE013232320100000021
+      FFFFFF01FDFDFD01FFFFFF025F5F5F010C0C0C010101010100000001FEFEFE01
+      FFFFFF0326262601030303010B0B0B01FEFEFE01FFFFFF032929290100000001
+      0A0A0A01FFFFFF01FCFCFC01FFFFFF01E8E8E801575757015555550100000001
+      E6E6E601FBFBFB01FEFEFE01C7C7C7010000000201010101F7F7F701FCFCFC01
+      FFFFFF01FBFBFB01777777012222220100000001D5D5D501FEFEFE01FFFFFF02
+      0C0C0C01000000010C0C0C01E2E2E201F7F7F701FFFFFF01E2E2E20168686801
+      161616010000000163636301FFFFFF0317171701010101010B0B0B01FFFFFF02
+      9898980100000021FFFFFF047F7F7F011C1C1C010505050100000001FEFEFE01
+      FFFFFF03171717010D0D0D0101010101F5F5F501FEFEFE01FFFFFF021A1A1A01
+      0000000101010101FFFFFF01FCFCFC01FFFFFF01FCFCFC015757570200000001
+      60606001E6E6E601EBEBEB015C5C5C01000000011111110187878701FAFAFA01
+      FEFEFE01FFFFFF02858585012D2D2D0100000001EAEAEA01FDFDFD01FFFFFF02
+      020202010000000102020201E3E3E301FBFBFB01FFFFFF01FBFBFB0144444401
+      0808080100000001B9B9B901FFFFFF03010101010000000101010101FFFFFF02
+      D4D4D40100000021FFFFFF01FDFDFD01FFFFFF02828282014949490105050501
+      00000001FCFCFC01FFFFFF03474747012323230100000001E3E3E301FBFBFB01
+      FFFFFF024646460100000002FCFCFC01FEFEFE01FFFFFF023232320200000004
+      0202020168686801DBDBDB013D3D3D01F9F9F901FEFEFE01FFFFFF0290909001
+      2D2D2D0100000001CDCDCD01FDFDFD01FFFFFF02060606010000000108080801
+      F2F2F201FFFFFF02EAEAEA011212120100000002E9E9E901FFFFFF08F3F3F301
+      00000021FFFFFF01FCFCFC01FFFFFF0277777701656565010101010100000001
+      FBFBFB01FFFFFF03808080013434340100000001D3D3D301F9F9F901FFFFFF02
+      6969690100000002FAFAFA01FFFFFF03111111020000000330303001CBCBCB01
+      F7F7F7013737370100000001F7F7F701FEFEFE01FFFFFF028787870120202001
+      000000016D6D6D01FEFEFE01FFFFFF0227272701000000012B2B2B01F7F7F701
+      FDFDFD01FFFFFF018787870100000003FBFBFB01FFFFFF030A0A0A0100000026
+      FFFFFF01FDFDFD01FFFFFF024D4D4D014949490100000002FCFCFC01FFFFFF03
+      909090012B2B2B0101010101D9D9D901FAFAFA01FFFFFF025656560100000002
+      FBFBFB01FFFFFF03030303020000000274747401FAFAFA01FFFFFF017B7B7B01
+      00000002F8F8F801FFFFFF03757575010F0F0F01000000010101010190909001
+      FEFEFE01FFFFFF019B9B9B0114141401A7A7A701FEFEFE01FCFCFC01ACACAC01
+      0606060100000003F4F4F401FFFFFF032828280100000026FFFFFF041C1C1C02
+      00000002FEFEFE01FFFFFF03636363011515150104040401ECECEC01FEFEFE01
+      FFFFFF022828280100000002FEFEFE01FFFFFF03000000036C6C6C01FFFFFF03
+      1818180100000002FAFAFA01FFFFFF035A5A5A01030303010000000342424201
+      EAEAEA01F5F5F501EBEBEB01B9B9B9017D7D7D01414141010606060103030301
+      00000003D1D1D101FFFFFF036666660100000026FFFFFF040606060200000002
+      FFFFFF04242424010A0A0A0105050501FCFCFC01FFFFFF030B0B0B0102020201
+      00000001FFFFFF0400000003E0E0E001FFFFFF030D0D0D0100000002FDFDFD01
+      FFFFFF033030300100000002030303017F7F7F01F3F3F3014949490106060601
+      0808080101010101090909011E1E1E013B3B3B013A3A3A011111110101010101
+      000000018E8E8E01FFFFFF03CECECE01010101010000000247474701C0C0C001
+      0000002004040401FFFFFF04040404010000000203030301FFFFFF040A0A0A01
+      0404040103030301FFFFFF04040404010101010104040401FFFFFF0403030301
+      00000002F8F8F801FFFFFF037E7E7E010E0E0E018B8B8B01FFFFFF041A1A1A01
+      0000000297979701FFFFFF023D3D3D0105050501171717013D3D3D015B5B5B01
+      5D5D5D016A6A6A017575750152525201121212010202020123232301FAFAFA01
+      FFFFFF03929292010E0E0E0136363601E2E2E201363636010000002043434301
+      FFFFFF04404040010000000243434301FFFFFF04434343010000000141414101
+      FFFFFF0441414101000000014B4B4B01FFFFFF044040400100000002B8B8B801
+      FFFFFF04F3F3F30162626201E2E2E201FFFFFF03ACACAC0100000002F5F5F501
+      FFFFFF03FBFBFB02FEFEFE01FAFAFA01EAEAEA01CECECE019090900159595901
+      3D3D3D010C0C0C01000000016A6A6A01FFFFFF067373730100000021FFFFFF06
+      00000002FFFFFF0600000001FFFFFF0600000001FFFFFF06000000021B1B1B01
+      BCBCBC01FAFAFA01E3E3E301929292011B1B1B01000000014E4E4E01E0E0E001
+      F3F3F301A0A0A0010B0B0B0100000002ACACAC01FFFFFF01FEFEFE01FDFDFD01
+      FFFFFF03FDFDFD01F4F4F401EBEBEB01F6F6F6019C9C9C015D5D5D0130303001
+      030303010101010149494901C0C0C001F5F5F501F8F8F801C7C7C70151515101
+      0000004E0606060198989801F8F8F801FFFFFF01F2F2F201ECECEC01F8F8F801
+      FFFFFF01FBFBFB01EAEAEA01CBCBCB01C0C0C0016A6A6A014B4B4B0113131301
+      08080801000000545F5F5F01F1F1F1019E9E9E01525252010404040101010101
+      050505010F0F0F012C2C2C019A9A9A01CBCBCB01989898017373730150505001
+      2B2B2B011313130100000054E6E6E601F4F4F401303030015B5B5B0117171701
+      000000040A0A0A01D4D4D401979797017D7D7D0150505001353535010E0E0E01
+      00000054E9E9E901F6F6F6013C3C3C0141414101474747011212120102020201
+      0000000240404001EFEFEF018F8F8F014D4D4D01333333011818180100000055
+      5F5F5F01FBFBFB01D8D8D8015555550127272701141414010E0E0E0126262601
+      73737301EFEFEF01A5A5A5010D0D0D010A0A0A0104040401000000572F2F2F01
+      92929201C9C9C901E8E8E801F8F8F801F5F5F501D6D6D6019E9E9E0143434301
+      000000FF000000FF000000FF000000FF000000FF000000FF000000FF000000F9
+    }
+    face.fade_transparency = -2147483648
+    face.dummy = 0
+    taborder = 9
+    hint = 'Use the right click menu'#10'to load/save/clear'#10'the image'
+    popupmenu = blobpopup
+    onpopup = popupdisplay
+    bitmap.alignment = [al_xcentered, al_ycentered, al_fit]
+    bitmap.transparency = -2147483648
+    datafield = 'blobf1'
+    datasource = ds
+    format = 'jpg'
+  end
+  object timeedit: tdbdatetimeedit
+    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+    bounds_x = 82
+    bounds_y = 264
+    bounds_cx = 130
+    bounds_cy = 20
+    frame.caption = 'TIME'
+    frame.captionpos = cp_left
+    frame.dummy = 0
+    frame.outerframe = (
+      30
+      0
+      0
+      0
+    )
+    taborder = 10
+    optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_autopost, oe_autopopupmenu, oe_keyexecute, oe_savevalue, oe_savestate]
+    datafield = 'timef1'
+    datasource = ds
+    kind = dtk_time
+    reffontheight = 14
+    val = 0.081597222222222
+    ma = 365000.99998999998
+  end
+  object datetimeedit: tdbdatetimeedit
+    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+    bounds_x = 51
+    bounds_y = 216
+    bounds_cx = 193
+    bounds_cy = 20
+    frame.caption = 'DATETIME'
+    frame.captionpos = cp_left
+    frame.dummy = 0
+    frame.outerframe = (
+      61
+      0
+      0
+      0
+    )
+    taborder = 11
+    datafield = 'datetimef1'
+    datasource = ds
+    kind = dtk_datetime
+    reffontheight = 14
+    val = 39173.082986111112
+    ma = 365000.99998999998
+  end
+  object dateedit: tdbdatetimeedit
+    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+    bounds_x = 78
+    bounds_y = 240
+    bounds_cx = 134
+    bounds_cy = 20
+    frame.caption = 'DATE'
+    frame.captionpos = cp_left
+    frame.dummy = 0
+    frame.outerframe = (
+      34
+      0
+      0
+      0
+    )
+    taborder = 12
+    optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_autopost, oe_autopopupmenu, oe_keyexecute, oe_savevalue, oe_savestate]
+    datafield = 'datef1'
+    datasource = ds
+    reffontheight = 14
+    val = 39173
+    ma = 365000.99998999998
+  end
+  object wordedit: tdbintegeredit
+    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+    bounds_x = 71
+    bounds_y = 56
+    bounds_cx = 142
+    bounds_cy = 20
+    frame.caption = 'WORD'
+    frame.captionpos = cp_left
+    frame.dummy = 0
+    frame.outerframe = (
+      41
+      0
+      0
+      0
+    )
+    taborder = 13
+    optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_autopost, oe_autopopupmenu, oe_keyexecute, oe_savevalue, oe_savestate]
+    datafield = 'wordf1'
+    datasource = ds
+    max = 65535
+    reffontheight = 14
+  end
+  object currencyedit: tdbrealedit
+    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+    bounds_x = 40
+    bounds_y = 184
+    bounds_cx = 204
+    bounds_cy = 20
+    frame.caption = 'CURRENCY'
+    frame.captionpos = cp_left
+    frame.dummy = 0
+    frame.outerframe = (
+      72
+      0
+      0
+      0
+    )
+    taborder = 14
+    optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_autopost, oe_autopopupmenu, oe_keyexecute, oe_savevalue, oe_savestate]
+    datafield = 'currencyf1'
+    datasource = ds
+    formatedit = '0.##'
+    formatdisp = '0.##'
+    reffontheight = 14
+    val = 9876543210.0123463
+  end
+  object conn: tsqlite3connection
+    Connected = True
+    DatabaseName = './test.db'
+    Transaction = trans
+    left = 8
+    top = 232
+  end
+  object trans: tmsesqltransaction
+    Active = True
+    Database = conn
+    left = 16
+    top = 256
+  end
+  object qry: tmsesqlquery
+    Active = True
+    database = conn
+    Transaction = trans
+    params = <>
+    SQL.Strings = (
+      'select * from datatypes_test;'
+    )
+    SQLUpdate.Strings = (
+      'update datatypes_test set'
+      'integerf1= :INTEGERF1,'
+      'largeintf1= :LARGEINTF1,'
+      'wordf1= :WORDF1,'
+      'smallintf1= :SMALLINTF1,'
+      'booleanf1= :BOOLEANF1,'
+      'realfloatdoublef1= :REALFLOATDOUBLEF1,'
+      'datetimef1= :DATETIMEF1,'
+      'datef1= :DATEF1,'
+      'timef1= :TIMEF1,'
+      'numericf1= :NUMERICF1,'
+      'currencyf1= :CURRENCYF1,'
+      'vcharf1= :VCHARF1,'
+      'textf1= :TEXTF1,'
+      'blobf1= :BLOBF1'
+      ';'
+    )
+    IndexDefs = <>
+    StatementType = stSelect
+    FieldDefs = <    
+      item
+        Name = 'integerf1'
+        DataType = ftInteger
+        Precision = -1
+        Size = 4
+      end    
+      item
+        Name = 'largeintf1'
+        DataType = ftLargeint
+        Precision = -1
+        Size = 8
+      end    
+      item
+        Name = 'wordf1'
+        DataType = ftWord
+        Precision = -1
+        Size = 2
+      end    
+      item
+        Name = 'smallintf1'
+        DataType = ftSmallint
+        Precision = -1
+        Size = 2
+      end    
+      item
+        Name = 'booleanf1'
+        DataType = ftBoolean
+        Precision = -1
+        Size = 2
+      end    
+      item
+        Name = 'realfloatdoublef1'
+        DataType = ftFloat
+        Precision = -1
+        Size = 8
+      end    
+      item
+        Name = 'datetimef1'
+        DataType = ftDateTime
+        Precision = -1
+        Size = 8
+      end    
+      item
+        Name = 'datef1'
+        DataType = ftDate
+        Precision = -1
+        Size = 8
+      end    
+      item
+        Name = 'timef1'
+        DataType = ftTime
+        Precision = -1
+        Size = 8
+      end    
+      item
+        Name = 'numericf1'
+        DataType = ftBCD
+        Precision = -1
+        Size = 8
+      end    
+      item
+        Name = 'currencyf1'
+        DataType = ftCurrency
+        Precision = -1
+        Size = 8
+      end    
+      item
+        Name = 'vcharf1'
+        DataType = ftString
+        Precision = -1
+        Size = 255
+      end    
+      item
+        Name = 'textf1'
+        DataType = ftMemo
+        Precision = -1
+        Size = 4
+      end    
+      item
+        Name = 'blobf1'
+        DataType = ftBlob
+        Precision = -1
+        Size = 4
+      end>
+    controller.fields.count = 13
+    controller.fields.fields = (
+      (
+        ft_longint
+        ft_largeint
+        ft_word
+        ft_smallint
+        ft_boolean
+        ft_float
+        ft_datetime
+        ft_date
+        ft_time
+        ft_bcd
+        ft_currency
+        ft_string
+        ft_memo
+      )
+      <      
+        item
+          AlignMent = taRightJustify
+          DisplayWidth = 10
+          FieldName = 'integerf1'
+        end      
+        item
+          AlignMent = taRightJustify
+          DisplayWidth = 10
+          FieldName = 'largeintf1'
+          Index = 1
+        end      
+        item
+          AlignMent = taRightJustify
+          DisplayWidth = 10
+          FieldName = 'wordf1'
+          Index = 2
+        end      
+        item
+          AlignMent = taRightJustify
+          DisplayWidth = 10
+          FieldName = 'smallintf1'
+          Index = 3
+        end      
+        item
+          DisplayWidth = 5
+          FieldName = 'booleanf1'
+          Index = 4
+          displayvalues = 'True;False'
+        end      
+        item
+          AlignMent = taRightJustify
+          DisplayWidth = 10
+          FieldName = 'realfloatdoublef1'
+          Index = 5
+          Precision = -1
+        end      
+        item
+          DisplayWidth = 10
+          FieldName = 'datetimef1'
+          Index = 6
+        end      
+        item
+          DisplayWidth = 10
+          FieldName = 'datef1'
+          Index = 7
+        end      
+        item
+          DisplayWidth = 10
+          FieldName = 'timef1'
+          Index = 8
+        end      
+        item
+          AlignMent = taRightJustify
+          DisplayWidth = 15
+          FieldName = 'numericf1'
+          Index = 9
+          Precision = 15
+          Size = 8
+        end      
+        item
+          AlignMent = taRightJustify
+          DisplayWidth = 10
+          FieldName = 'currencyf1'
+          Index = 10
+          Precision = -1
+        end      
+        item
+          DisplayWidth = 255
+          FieldName = 'vcharf1'
+          Index = 11
+          Size = 255
+        end      
+        item
+          DisplayWidth = 10
+          FieldName = 'textf1'
+          Index = 12
+          Size = 4
+          Transliterate = False
+        end>
+    )
+    controller.options = [dso_utf8, dso_autoapply, dso_autocommitret]
+    left = 224
+    top = 240
+    object blobfield: tmseblobfield
+      DisplayWidth = 10
+      FieldName = 'blobf1'
+      Index = 13
+      Size = 4
+      left = 200
+      top = 96
+    end
+  end
+  object ds: tmsedatasource
+    DataSet = qry
+    left = 264
+    top = 256
+  end
+  object blobpopup: tpopupmenu
+    menu.submenu.count = 3
+    menu.submenu.items = <    
+      item
+        caption = 'Load from file..'
+        state = [as_localcaption, as_localonexecute]
+        onexecute = loadexec
+      end    
+      item
+        caption = 'Save to file..'
+        state = [as_localcaption, as_localonexecute]
+        onexecute = saveexec
+      end    
+      item
+        caption = 'Clear'
+        state = [as_localcaption, as_localonexecute]
+        onexecute = clearexec
+      end>
+    left = 264
+    top = 192
+  end
+  object blobdialog: tfiledialog
+    controller.lastdir = '~/'
+    controller.filter = '*.jpg'
+    controller.defaultext = 'jpg'
+    controller.options = [fdo_file, fdo_checkexist, fdo_savelastdir]
+    controller.captionopen = 'Open JPG-file'
+    controller.captionsave = 'Save JPG-file'
+    dialogkind = fdk_none
+    left = 299
+    top = 216
+  end
+end

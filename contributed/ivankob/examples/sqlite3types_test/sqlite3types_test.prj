@@ -1,0 +1,626 @@
+[componentpalette]
+order0=0
+order1=0
+order2=0
+order3=0
+order4=0
+order5=0
+order6=0
+order7=0
+order8=0
+order9=0
+[projectoptions]
+projectdir=/home/pochta/mseide_projects/sqlite3types_test
+options=41
+ [projectoptionsfo]
+ stackedunder=
+ x=151
+ y=68
+ cx=821
+ cy=572
+ [projectoptionsfo.tabwidget]
+ firsttab=0
+ index=3
+ [projectoptionsfo.macrogrid]
+ width0=13
+ width1=13
+ width2=13
+ width3=13
+ width4=13
+ width5=13
+ width6=146
+ width7=583
+ [projectoptionsfo.macrosplitter]
+ x=0
+ y=178
+ [projectoptionsfo.fontaliasgrid]
+ values0=0
+ width0=98
+ values1=0
+ width1=684
+ values2=0
+ width2=30
+ [projectoptionsfo.grid]
+ width0=231
+ [projectoptionsfo.makesplitter]
+ x=0
+ y=161
+ [projectoptionsfo.ttabwidget1]
+ firsttab=0
+ index=0
+ [projectoptionsfo.exceptionsgrid]
+ width0=47
+ values1=1
+  EconvertError
+ width1=764
+texteditor=15
+ [msetexteditorfo]
+ stackedunder=
+ x=79
+ y=219
+ cx=369
+ cy=268
+ wsize=0
+ active=1
+ visible=1
+ [msetexteditorfo.filedialog]
+ filenames=0
+ lastdir=
+ filehistory=0
+ filefilterindex=0
+ filecolwidth=0
+bmpfiledialog=8
+ []
+ filenames=1
+  /home/pochta/mseide_projects/sqlite3types_test/images/noimage.png
+ lastdir=/home/pochta/mseide_projects/sqlite3types_test/images/
+ filehistory=1
+  /home/pochta/mseide_projects/sqlite3types_test/images/noimage.png
+ filefilterindex=0
+ filecolwidth=174
+dbfieldeditor=12
+ [msedbfieldeditorfo]
+ stackedunder=
+ x=165
+ y=98
+ cx=637
+ cy=434
+ wsize=0
+ active=1
+ visible=1
+ [msedbfieldeditorfo.splitter]
+ x=350
+ y=24
+sigsettings=27
+ 1,1,T,F
+ 3,3,T,F
+ 4,4,T,F
+ 6,6,T,F
+ 7,7,T,F
+ 8,8,T,F
+ 9,9,T,F
+ 10,10,T,F
+ 11,11,T,F
+ 12,12,T,F
+ 13,13,T,F
+ 15,15,T,F
+ 16,16,T,F
+ 17,17,F,F
+ 18,18,T,F
+ 19,19,T,F
+ 20,20,T,F
+ 21,21,T,F
+ 22,22,T,F
+ 23,23,T,F
+ 24,24,T,F
+ 25,25,T,F
+ 26,26,T,F
+ 27,27,T,F
+ 28,28,T,F
+ 29,29,T,F
+ 30,30,T,F
+gridsizex=8
+gridsizey=8
+exceptclassnames=1
+ EconvertError
+exceptignore=1
+ 0
+modulenames=1
+ MAINFO
+moduletypes=1
+ TMAINFO
+modulefiles=1
+ /home/pochta/mseide_projects/sqlite3types_test/main.mfm
+mainfile=sqlite3types_test.pas
+targetfile=sqlite3types_test${EXEEXT}
+messageoutputfile=
+copymessages=0
+closemessages=1
+checkmethods=1
+makecommand=${COMPILER}
+debugcommand=${DEBUGGER}
+debugoptions=
+debugtarget=
+defaultmake=1
+makeoptions=4
+ -l -Mobjfpc -Sh
+ -gl
+ -B
+ -OG2p3 -XX -Xs
+makeoptionson=4
+ 63
+ 31
+ 34
+ 32
+macroon=0
+macronames=0
+macrovalues=0
+macrogroup=0
+groupcomments=6
+ 
+ 
+ 
+ 
+ 
+ 
+sourcedirs=3
+ ${MSELIBDIR}kernel/$TARGET/
+ ${MSELIBDIR}*/
+ ./
+defines=0
+defineson=0
+unitdirs=3
+ ${MSELIBDIR}kernel/$TARGET/
+ ${MSELIBDIR}kernel/
+ ${MSELIBDIR}*/
+unitdirson=3
+ 65599
+ 196671
+ 65599
+sourcefilemasks=3
+ "*.pas" "*.dpr" "*.pp" "*.inc"
+ "*.c" "*.cc" "*.h"
+ "*.mfm"
+syntaxdeffiles=3
+ ${SYNTAXDEFDIR}pascal.sdef
+ ${SYNTAXDEFDIR}cpp.sdef
+ ${SYNTAXDEFDIR}objecttext.sdef
+fontalias=0
+fontnames=0
+fontheights=0
+showgrid=1
+snaptogrid=1
+moveonfirstclick=1
+autoindent=1
+blockindent=1
+rightmarginon=1
+rightmarginchars=80
+tabstops=4
+spacetabs=0
+editfontname=mseide_source
+editfontheight=0
+editfontwidth=0
+editfontextraspace=0
+editfontantialiased=1
+backupfilecount=2
+encoding=0
+newprojectfiles=4
+ ${TEMPLATEDIR}default/project.pas
+ ${TEMPLATEDIR}default/main.pas
+ ${TEMPLATEDIR}default/main.mfm
+ ${TEMPLATEDIR}default/main_mfm.pas
+newprojectfilesdest=4
+ ${%PROJECTNAME%}.pas
+ 
+ 
+ 
+expandprojectfilemacros=4
+ 1
+ 1
+ 1
+ 0
+loadprojectfile=4
+ 1
+ 1
+ 1
+ 0
+newprogramfile=${TEMPLATEDIR}default/program.pas
+newunitfile=${TEMPLATEDIR}default/unit.pas
+newmainfosource=${TEMPLATEDIR}default/mainform.pas
+newmainfoform=${TEMPLATEDIR}default/mainform.mfm
+newsimplefosource=${TEMPLATEDIR}default/simpleform.pas
+newsimplefoform=${TEMPLATEDIR}default/simpleform.mfm
+newdockingfosource=${TEMPLATEDIR}default/dockingform.pas
+newdockingfoform=${TEMPLATEDIR}default/dockingform.mfm
+newdatamodsource=${TEMPLATEDIR}default/datamodule.pas
+newdatamodform=${TEMPLATEDIR}default/datamodule.mfm
+newsubfosource=${TEMPLATEDIR}default/subform.pas
+newsubfoform=${TEMPLATEDIR}default/subform.mfm
+newreportsource=${TEMPLATEDIR}default/report.pas
+newreportform=${TEMPLATEDIR}default/report.mfm
+newinheritedsource=${TEMPLATEDIR}default/inheritedform.pas
+newinheritedform=${TEMPLATEDIR}default/inheritedform.mfm
+stoponexception=0
+activateonbreak=1
+showconsole=0
+externalconsole=0
+[breakpoints]
+on=0
+path=0
+line=0
+ignore=0
+condition=0
+panels=1
+ panel1
+units=
+ (
+ modulefilenames=0
+ modulenames=0
+ moduleclassnames=0
+ a=0,4132,0,Units
+ )
+files=
+ (
+ a=0,4132,0,Files
+ )
+[layout]
+windowlayout=312
+ [mainfo]
+ stackedunder=
+ x=4
+ y=24
+ cx=286
+ cy=74
+ wsize=0
+ active=0
+ visible=1
+ [mainfo.basedock]
+ splitdir=2
+ useroptions=5088
+ [mainfo.openfile]
+ filenames=0
+ filehistory=0
+ filefilterindex=0
+ filecolwidth=174
+ [actionsmo.watchesonact]
+ checked=1
+ [actionsmo.bluedotsonact]
+ checked=1
+ [sourcefo]
+ splitdir=0
+ useroptions=1051
+ parent=mainfo.panel1.container
+ visible=1
+ mdistate=0
+ nx=0
+ ny=0
+ ncx=0
+ ncy=0
+ x=0
+ y=0
+ cx=747
+ cy=541
+ [debuggerfo]
+ splitdir=0
+ useroptions=1051
+ parent=mainfo.basedock
+ visible=1
+ mdistate=0
+ nx=0
+ ny=0
+ ncx=0
+ ncy=0
+ x=0
+ y=0
+ cx=286
+ cy=38
+ [componentpalettefo]
+ splitdir=0
+ useroptions=1051
+ stackedunder=mainfo.panel1
+ parent=
+ mdistate=0
+ nx=0
+ ny=0
+ ncx=0
+ ncy=0
+ x=97
+ y=53
+ cx=738
+ cy=69
+ wsize=0
+ active=0
+ visible=1
+ [componentpalettefo.componentpages]
+ activetab=5
+ [messagefo]
+ splitdir=0
+ useroptions=3099
+ parent=mainfo.panel1.container
+ visible=0
+ mdistate=0
+ nx=0
+ ny=0
+ ncx=0
+ ncy=0
+ x=0
+ y=461
+ cx=747
+ cy=80
+ [watchfo]
+ splitdir=0
+ useroptions=1563
+ stackedunder=disassfo
+ parent=
+ mdistate=0
+ nx=0
+ ny=0
+ ncx=0
+ ncy=0
+ x=68
+ y=345
+ cx=594
+ cy=159
+ wsize=0
+ active=0
+ visible=0
+ [watchfo.grid]
+ width0=13
+ values1=0
+ width1=152
+ values2=0
+ [watchfo.watchon]
+ [watchfo.expression]
+ [watchfo.watcheson]
+ value=1
+ [objectinspectorfo]
+ splitdir=0
+ useroptions=1051
+ stackedunder=componentpalettefo
+ parent=
+ mdistate=0
+ nx=0
+ ny=0
+ ncx=0
+ ncy=0
+ x=608
+ y=75
+ cx=316
+ cy=484
+ wsize=0
+ active=0
+ visible=1
+ [objectinspectorfo.grid]
+ width0=134
+ width1=166
+ [breakpointsfo]
+ splitdir=0
+ useroptions=1051
+ stackedunder=projecttreefo
+ parent=
+ mdistate=0
+ nx=0
+ ny=0
+ ncx=0
+ ncy=0
+ x=107
+ y=404
+ cx=477
+ cy=128
+ wsize=0
+ active=0
+ visible=0
+ [breakpointsfo.bkptson]
+ value=1
+ [watchpointsfo]
+ splitdir=0
+ useroptions=1051
+ stackedunder=stackfo
+ parent=
+ mdistate=0
+ nx=0
+ ny=0
+ ncx=0
+ ncy=0
+ x=186
+ y=124
+ cx=483
+ cy=210
+ wsize=0
+ active=0
+ visible=0
+ [watchpointsfo.grid]
+ width0=16
+ values1=1
+  0
+ width1=33
+ values2=1
+  pinteger(0x126c6b4)^
+ width2=239
+ width4=34
+ values5=1
+  0
+ width5=38
+ values6=1
+  
+ width6=103
+ [stackfo]
+ splitdir=0
+ useroptions=1051
+ stackedunder=cpufo
+ parent=
+ mdistate=0
+ nx=0
+ ny=0
+ ncx=0
+ ncy=0
+ x=407
+ y=349
+ cx=254
+ cy=180
+ wsize=0
+ active=0
+ visible=0
+ [projecttreefo]
+ splitdir=0
+ useroptions=27
+ stackedunder=findinfilefo
+ parent=
+ mdistate=0
+ nx=0
+ ny=0
+ ncx=0
+ ncy=0
+ x=321
+ y=101
+ cx=698
+ cy=413
+ wsize=0
+ active=0
+ visible=0
+ [findinfilefo]
+ splitdir=0
+ useroptions=1051
+ stackedunder=objectinspectorfo
+ parent=
+ mdistate=0
+ nx=0
+ ny=0
+ ncx=0
+ ncy=0
+ x=548
+ y=115
+ cx=369
+ cy=198
+ [cpufo]
+ splitdir=0
+ useroptions=1051
+ stackedunder=threadsfo
+ parent=
+ mdistate=0
+ nx=0
+ ny=0
+ ncx=0
+ ncy=0
+ x=192
+ y=451
+ cx=257
+ cy=188
+ wsize=0
+ active=0
+ visible=0
+ [disassfo]
+ splitdir=0
+ useroptions=1051
+ stackedunder=breakpointsfo
+ parent=
+ mdistate=0
+ nx=0
+ ny=0
+ ncx=0
+ ncy=0
+ x=162
+ y=502
+ cx=564
+ cy=210
+ wsize=0
+ active=0
+ visible=0
+ [threadsfo]
+ splitdir=0
+ useroptions=1051
+ stackedunder=watchfo
+ parent=
+ mdistate=0
+ nx=0
+ ny=0
+ ncx=0
+ ncy=0
+ x=37
+ y=270
+ cx=349
+ cy=276
+ wsize=0
+ active=0
+ visible=0
+ [targetconsolefo]
+ splitdir=0
+ useroptions=1051
+ stackedunder=watchpointsfo
+ parent=
+ mdistate=0
+ nx=0
+ ny=0
+ ncx=0
+ ncy=0
+ x=205
+ y=347
+ cx=368
+ cy=137
+ wsize=0
+ active=0
+ visible=0
+ [mainfo.panel1]
+ splitdir=2
+ useroptions=2043
+ stackedunder=formdesignerfo
+ parent=
+ mdistate=0
+ nx=0
+ ny=0
+ ncx=0
+ ncy=0
+ x=141
+ y=141
+ cx=757
+ cy=541
+ wsize=0
+ active=0
+ visible=1
+[edit]
+hintwidth=0
+hintheight=0
+autoindent=1
+blockindent=1
+rightmarginon=1
+rightmarginchars=80
+tabstops=4
+finddtext=
+findhistory=0
+findoptions=1
+editpos=2
+ 0,-1073741823
+ 5,65
+bookmarks0=0
+bookmarks1=0
+sourcefiles=2
+ /home/pochta/mseide_projects/sqlite3types_test/sqlite3types_test.pas
+ /home/pochta/mseide_projects/sqlite3types_test/main.pas
+relpaths=2
+ sqlite3types_test.pas
+ main.pas
+ismoduletexts=2
+ 0
+ 0
+modules=1
+ /home/pochta/mseide_projects/sqlite3types_test/main.mfm
+visiblemodules=1
+ 1
+[sourcefo.tabwidget]
+tabsize=134
+firsttab=0
+index=1
+[components]
+[selecteditpage]
+colwidth=100
+x=0
+y=0
+cx=0
+cy=0
+[progparams]
+parameters=
+progparamhistory=0
+workingdirectory=
+envvarons=0
+envvarnames=0
+envvarvalues=0

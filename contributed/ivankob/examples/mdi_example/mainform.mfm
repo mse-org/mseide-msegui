@@ -1,0 +1,125 @@
+object mainfo: tmainfo
+  optionswidget = [ow_arrowfocus, ow_subfocus, ow_destroywidgets, ow_hinton, ow_autoscale]
+  bounds_x = 102
+  bounds_y = 149
+  bounds_cx = 612
+  bounds_cy = 467
+  color = 15921906
+  frame.localprops = [frl_leveli]
+  frame.grip_size = 0
+  frame.grip_options = [go_closebutton, go_showsplitcaption, go_showfloatcaption]
+  frame.dummy = 0
+  taborder = 1
+  container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_subfocus, ow_mousetransparent, ow_destroywidgets, ow_autoscale]
+  container.bounds_x = 0
+  container.bounds_y = 21
+  container.bounds_cx = 612
+  container.bounds_cy = 446
+  container.frame.dummy = 0
+  optionswindow = [wo_groupleader]
+  mainmenu = tmainmenu1
+  font.name = 'Arial'
+  font.dummy = 0
+  options = [fo_main, fo_terminateonclose, fo_autoreadstat, fo_autowritestat, fo_savepos, fo_savestate]
+  caption = 'The main form'
+  icon.transparency = -2147483648
+  moduleclassname = 'tdockform'
+  object grpStatusBar: tgroupbox
+    bounds_x = 0
+    bounds_y = 416
+    bounds_cx = 612
+    bounds_cy = 26
+    color = 14737663
+    frame.levelo = 0
+    frame.leveli = -2
+    frame.localprops = [frl_levelo, frl_leveli]
+    frame.dummy = 0
+    anchors = [an_bottom]
+    object sdSubformNum: tstringdisp
+      bounds_x = 20
+      bounds_y = 2
+      bounds_cx = 145
+      bounds_cy = 22
+      color = -2147483645
+      frame.framei_left = 5
+      frame.caption = 'Subform selected :'
+      frame.captionpos = cp_left
+      frame.captiondist = 0
+      frame.localprops = [frl_leveli, frl_framewidth, frl_fileft]
+      frame.dummy = 0
+      frame.outerframe = (
+        93
+        0
+        0
+        0
+      )
+      anchors = [an_left]
+      value = '0'
+      reffontheight = 14
+    end
+    object sdSubformCnt: tstringdisp
+      bounds_x = 177
+      bounds_y = 2
+      bounds_cx = 145
+      bounds_cy = 22
+      color = -2147483645
+      frame.framei_left = 5
+      frame.caption = 'Subforms quantity :'
+      frame.captionpos = cp_left
+      frame.captiondist = 0
+      frame.localprops = [frl_leveli, frl_framewidth, frl_fileft]
+      frame.dummy = 0
+      frame.outerframe = (
+        96
+        0
+        0
+        0
+      )
+      anchors = [an_left]
+      taborder = 1
+      value = '0'
+      reffontheight = 14
+    end
+  end
+  object dockarea: tdockformwidget
+    bounds_x = 0
+    bounds_y = 0
+    bounds_cx = 612
+    bounds_cy = 416
+    color = -2147483646
+    frame.leveli = -1
+    frame.localprops = [frl_leveli]
+    frame.grip_size = 0
+    frame.dummy = 0
+    anchors = [an_top, an_bottom]
+    taborder = 1
+    container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_subfocus, ow_mousetransparent, ow_mousewheel, ow_destroywidgets, ow_autoscale]
+    container.bounds_x = 1
+    container.bounds_y = 1
+    container.bounds_cx = 610
+    container.bounds_cy = 414
+    container.frame.dummy = 0
+    dragdock.optionsdock = [od_savepos, od_acceptsdock]
+    icon.transparency = -2147483648
+  end
+  object tmainmenu1: tmainmenu
+    menu.submenu.count = 1
+    menu.submenu.items = <    
+      item
+        caption = 'New SubForm'
+        state = [as_localcaption, as_localonexecute]
+        onexecute = makenewform
+      end>
+    itemframetemplate = tframecomp1
+    left = 416
+    top = 8
+  end
+  object tframecomp1: tframecomp
+    template.leveli = 1
+    template.framewidth = 2
+    template.colorframe = 11382271
+    template.framei_right = 50
+    left = 288
+    top = 8
+  end
+end

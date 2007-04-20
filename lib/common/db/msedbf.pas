@@ -30,6 +30,7 @@ type
    procedure inheritedinternaldelete;
    procedure inheritedinternalopen;
    procedure inheritedinternalclose;
+   function getblobdatasize: integer;
   protected
    procedure setactive (value : boolean); {override;}
    function getactive: boolean;
@@ -227,6 +228,11 @@ end;
 procedure tmsedbf.internalclose;
 begin
  fcontroller.internalclose;
+end;
+
+function tmsedbf.getblobdatasize: integer;
+begin
+ result:= 0; //no blobid?
 end;
 
 end.

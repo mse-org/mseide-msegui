@@ -14,7 +14,7 @@ unit msedbgraphics;
 interface
 uses
  classes,db,mseimage,msedataimage,msedbdispwidgets,msedb,msetypes,msedbedit,
- msegrids,msewidgetgrid,msedatalist,msebitmap,msebintree;
+ msegrids,msewidgetgrid,msedatalist,msebitmap,msebintree,msegraphics;
 
 { add the needed graphic format units to your project:
  mseformatbmpico,mseformatjpg,mseformatpng,
@@ -45,6 +45,7 @@ type
   protected
    procedure removecache(const aid: int64); override;
   public
+   constructor create(aowner: tcomponent); override;
    destructor destroy; override;
    procedure loadbitmap(const abitmap: tmaskedbitmap; aformat: string);
    procedure clearcache; override;
@@ -71,6 +72,7 @@ type
    function getdatasource: tdatasource;
    procedure setdatasource(const avalue: tdatasource);
    procedure griddatasourcechanged; override;
+   procedure loadcellbmp(const acanvas: tcanvas; const abmp: tmaskedbitmap); override;
    function getrowdatapo(const info: cellinfoty): pointer; override;
    function createdatalist(const sender: twidgetcol): tdatalist; override;
      //idbeditinfo
@@ -89,6 +91,8 @@ type
    procedure setnullvalue;
    //ireccontrol
    procedure recchanged;
+  protected
+   procedure gridtovalue(const row: integer); override;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -101,7 +105,7 @@ type
  
 implementation
 uses
- msestream,msegraphics,sysutils;
+ msestream,sysutils;
  
 type
  tsimplebitmap1 = class(tsimplebitmap);
@@ -146,7 +150,7 @@ procedure tdbdataimage.getfieldtypes(out propertynames: stringarty;
 begin
  propertynames:= nil;
  setlength(fieldtypes,1);
- fieldtypes[0]:= blobfields;
+ fieldtypes[0]:= blobfields + [ftstring];
 end;
 
 procedure tdbdataimage.fieldtovalue;
@@ -208,12 +212,39 @@ end;
 function tdbdataimage.getrowdatapo(const info: cellinfoty): pointer;
 begin
  with info do begin
-  if griddatalink <> nil then begin
-   result:= tgriddatalink(griddatalink).getansistringbuffer(
-                                                 fdatalink.field,cell.row);
+  if (griddatalink <> nil) and not 
+     tgriddatalink(griddatalink).getrowfieldisnull(
+                                    fdatalink.field,cell.row) then begin
+   result:= tgriddatalink(griddatalink).getdummystringbuffer;
+   pstring(result)^:= ' ';
+//   result:= tgriddatalink(griddatalink).getansistringbuffer(
+//                                                 fdatalink.field,cell.row);
+    
   end
   else begin
    result:= nil;
+  end;
+ end;
+end;
+
+procedure tdbdataimage.loadcellbmp(const acanvas: tcanvas;
+               const abmp: tmaskedbitmap);
+var
+ int1: integer;
+begin
+ with cellinfoty(acanvas.drawinfopo^) do begin
+  if fdatalink.field is tmsegraphicfield then begin
+   with tgriddatalink(griddatalink) do begin
+    int1:= activerecord;
+    activerecord:= cell.row;
+    tmsegraphicfield(fdatalink.field).loadbitmap(abmp,format);
+    activerecord:= int1;
+   end;
+  end
+  else begin
+   abmp.loadfromstring(
+   string(tgriddatalink(griddatalink).getansistringbuffer(fdatalink.field,cell.row)^),
+                format);
   end;
  end;
 end;
@@ -223,7 +254,18 @@ begin
  result:= nil;
 end;
 
+procedure tdbdataimage.gridtovalue(const row: integer);
+begin
+ //dummy
+end;
+
 { tmsegraphicfield }
+
+constructor tmsegraphicfield.create(aowner: tcomponent);
+begin
+ inherited;
+ setdatatype(ftgraphic);
+end;
 
 destructor tmsegraphicfield.destroy;
 begin
@@ -243,7 +285,7 @@ begin
   abitmap.clear;
  end
  else begin
-  if (fimagecache = nil) or 
+  if (fimagecache = nil) or (size <= 0) or
                not fimagecache.find(id1,tcachenode(n1)) then begin
    str1:= asstring;
    if str1 = '' then begin
@@ -261,7 +303,7 @@ begin
     end;
     stream1.free;
    end;
-   if fimagecache <> nil then begin
+   if (fimagecache <> nil) and (size > 0) then begin
     n1:= timagecachenode.create(id1);
     abitmap.savetoimagebuffer(n1.fimage);
     n1.fsize:= (n1.fimage.image.length + n1.fimage.mask.length) *
@@ -318,7 +360,6 @@ begin
  end;
  inherited;
 end;
-
 
 { tgraphicdatalink }
 

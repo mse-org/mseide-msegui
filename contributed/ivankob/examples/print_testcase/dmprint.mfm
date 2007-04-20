@@ -1,0 +1,40 @@
+object dmprintmo: tdmprintmo
+  oncreate = dmprintmocreated
+  left = 185
+  top = 177
+  moduleclassname = 'tmsedatamodule'
+  size = (
+    314
+    55
+  )
+  object psprn: tpostscriptprinter
+    canvas.font.color = -1610612734
+    canvas.font.dummy = 0
+    canvas.colorspace = cos_rgb
+    canvas.ppmm = 10
+    canvas.pslevel = psl_3
+    pa_width = 210
+    pa_height = 297
+    pa_size = sps_a4
+    pa_frameleft = 10
+    pa_frametop = 10
+    pa_frameright = 10
+    pa_framebottom = 10
+    printcommand = 'lp -'
+    statfile = sfPrinter
+    left = 16
+    top = 16
+  end
+  object actPrinterSetup: taction
+    onexecute = printersetupexec
+    left = 88
+    top = 16
+  end
+  object sfPrinter: tstatfile
+    filename = 'printer.ini'
+    filedir = '~/.shrinking_testcase'
+    options = [sfo_createpath, sfo_activatorread, sfo_activatorwrite]
+    left = 232
+    top = 16
+  end
+end

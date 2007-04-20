@@ -1,0 +1,184 @@
+object reportikre: treportikre
+  ppmm = 3
+  font.height = 14
+  font.name = 'Times New Roman'
+  font.dummy = 0
+  grid_size = 2
+  options = [reo_autorelease, reo_prepass]
+  onbeforerender = beforerender
+  repdesigninfo = (
+    51
+    75
+    828
+    606
+  )
+  moduleclassname = 'treport'
+  object treportpage1: treportpage
+    pagewidth = 190
+    pageheight = 270
+    object tbandarea1: tbandarea
+      bounds_x = 54
+      bounds_y = 12
+      bounds_cx = 440
+      bounds_cy = 782
+      object bandData: trecordband
+        bounds_x = 0
+        bounds_y = 138
+        bounds_cx = 440
+        bounds_cy = 151
+        bounds_cymin = 15
+        frame.framei_bottom = 2
+        frame.localprops = [frl_fileft, frl_fibottom]
+        frame.dummy = 0
+        optionsscale = [osc_expandy, osc_shrinky]
+        font.height = 14
+        font.extraspace = -5
+        font.name = 'Times New Roman'
+        font.dummy = 0
+        tabs.count = 2
+        tabs.litop_widthmm = 0.1
+        tabs.lileft_widthmm = 0.1
+        tabs.livert_widthmm = 0.1
+        tabs.liright_widthmm = 0.1
+        tabs.libottom_widthmm = 0.1
+        tabs.linksource = bandHeader
+        tabs.items = <        
+          item
+            textflags = [tf_ycentered, tf_wordbreak, tf_softhyphen]
+            datafield = 'fldMemo'
+            datasource = mainfo.ds
+            livert_widthmm = 0.1
+            distleft = 1
+            distright = 1
+          end        
+          item
+            pos = 49
+            textflags = [tf_xcentered, tf_ycentered]
+            datafield = 'fldFloat'
+            datasource = mainfo.ds
+            livert_widthmm = 0.1
+          end>
+        datasource = mainfo.ds
+        onbeforerender = datarender
+      end
+      object bandHeader: trecordband
+        bounds_x = 0
+        bounds_y = 108
+        bounds_cx = 440
+        bounds_cy = 19
+        frame.framei_bottom = 2
+        frame.localprops = [frl_fitop, frl_fibottom]
+        frame.dummy = 0
+        taborder = 1
+        optionsscale = [osc_expandy, osc_shrinky]
+        font.height = 14
+        font.extraspace = -5
+        font.style = [fs_bold]
+        font.name = 'Times New Roman'
+        font.dummy = 0
+        tabs.count = 2
+        tabs.litop_widthmm = 0.3
+        tabs.livert_widthmm = 0.3
+        tabs.liright_widthmm = 0.3
+        tabs.libottom_widthmm = 0.3
+        tabs.items = <        
+          item
+            value = 'Very long text'
+            textflags = [tf_xcentered, tf_ycentered, tf_wordbreak]
+            livert_widthmm = 0.3
+          end        
+          item
+            pos = 49
+            value = 'Testcase resistance'
+            textflags = [tf_xcentered, tf_ycentered]
+            livert_widthmm = 0.3
+          end>
+        options = [bo_once]
+      end
+      object trecordband1: trecordband
+        bounds_x = 0
+        bounds_y = 12
+        bounds_cx = 440
+        bounds_cy = 91
+        taborder = 2
+        options = [bo_once]
+        object tlabel1: tlabel
+          bounds_x = 114
+          bounds_y = 6
+          bounds_cx = 242
+          bounds_cy = 65
+          frame.framei_right = 2
+          frame.framei_bottom = 2
+          frame.localprops = [frl_firight, frl_fibottom]
+          frame.dummy = 0
+          caption = 'Testcase report'#10'for debugging TMseSQLQuery'#13'in local mode, all records'
+          font.color = -1610612734
+          font.height = 18
+          font.style = [fs_bold]
+          font.name = 'Times New Roman'
+          font.dummy = 0
+          textflags = [tf_xcentered, tf_ycentered]
+          reffontheight = 21
+        end
+      end
+      object bandFooter: trecordband
+        bounds_x = 0
+        bounds_y = 300
+        bounds_cx = 440
+        bounds_cy = 45
+        taborder = 3
+        tabs.count = 2
+        tabs.litop_widthmm = 0.3
+        tabs.livert_widthmm = 0.3
+        tabs.liright_widthmm = 0.3
+        tabs.libottom_widthmm = 0.3
+        tabs.linksource = bandHeader
+        tabs.items = <        
+          item
+            value = 'The footer row'
+            font.height = 14
+            font.style = [fs_italic]
+            font.name = 'Times New Roman'
+            font.dummy = 0
+            textflags = [tf_ycentered, tf_wordbreak]
+            livert_widthmm = 0.3
+            distleft = 3
+          end        
+          item
+            pos = 49
+            value = #8721' resistance'
+            font.height = 14
+            font.style = [fs_bold]
+            font.name = 'Times New Roman'
+            font.dummy = 0
+            textflags = [tf_xcentered, tf_ycentered]
+            livert_widthmm = 0.3
+          end>
+        options = [bo_once]
+        onbeforerender = footerrender
+      end
+    end
+    object treppagenumdisp1: treppagenumdisp
+      bounds_x = 516
+      bounds_y = 0
+      bounds_cx = 55
+      bounds_cy = 13
+      taborder = 1
+      font.height = 10
+      font.name = 'stf_report'
+      font.dummy = 0
+      format = 'Page 0 of 1'
+    end
+    object trepprintdatedisp1: trepprintdatedisp
+      bounds_x = 0
+      bounds_y = 798
+      bounds_cx = 72
+      bounds_cy = 11
+      taborder = 2
+      font.height = 9
+      font.name = 'Times New Roman'
+      font.dummy = 0
+      format = 'yyyy, mmmm dd'
+    end
+  end
+end

@@ -29,6 +29,7 @@ type
    procedure inheritedinternaldelete;
    procedure inheritedinternalopen;
    procedure inheritedinternalclose;
+   function getblobdatasize: integer;
   protected
    procedure setactive (value : boolean);
    function getactive: boolean;
@@ -226,6 +227,11 @@ end;
 procedure tmsesqlite3dataset.internalclose;
 begin
  fcontroller.internalclose;
+end;
+
+function tmsesqlite3dataset.getblobdatasize: integer;
+begin
+ result:= 0; //no blobid
 end;
 
 end.

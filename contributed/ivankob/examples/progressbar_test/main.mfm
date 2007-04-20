@@ -1,0 +1,46 @@
+object mainfo: tmainfo
+  optionswidget = [ow_arrowfocus, ow_subfocus, ow_destroywidgets, ow_hinton, ow_autoscale]
+  bounds_x = 141
+  bounds_y = 156
+  bounds_cx = 337
+  bounds_cy = 64
+  taborder = 1
+  container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_subfocus, ow_mousetransparent, ow_destroywidgets, ow_autoscale]
+  container.bounds_x = 0
+  container.bounds_y = 0
+  container.bounds_cx = 337
+  container.bounds_cy = 64
+  container.frame.dummy = 0
+  optionswindow = [wo_groupleader]
+  options = [fo_main, fo_terminateonclose, fo_screencentered, fo_autoreadstat, fo_autowritestat, fo_savepos, fo_savestate]
+  caption = 'Everlasting task runner'
+  icon.transparency = -2147483648
+  moduleclassname = 'tmseform'
+  object tbutton1: tbutton
+    bounds_x = 120
+    bounds_y = 16
+    bounds_cx = 98
+    bounds_cy = 35
+    face.image.transparentcolor = -2147483648
+    face.image.options = [bmo_masked, bmo_colormask]
+    face.image.alignment = [al_stretchx, al_stretchy, al_intpol]
+    face.image.transparency = -2147483648
+    face.image.image = {
+      0000000006000000100000001000000008000000000000000000000000000000
+      0000000000000000000000000000000000000000B56059FFB560590108000000
+      000000FF00000001
+    }
+    face.fade_direction = gd_up
+    face.fade_transparency = -2147483648
+    face.dummy = 0
+    state = [as_localcaption, as_localonexecute]
+    caption = 'Run task'
+    onexecute = taskexec
+  end
+  object thrTask: tthreadcomp
+    onexecute = taskexecute
+    onterminate = taskfinished
+    left = 248
+    top = 24
+  end
+end

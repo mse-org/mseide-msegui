@@ -12,7 +12,7 @@ unit msedataimage;
 interface
 uses
  classes,msegui,mseimage,msewidgetgrid,msegrids,msedatalist,msegraphutils,
- msegraphics,mseclasses,mseeditglob;
+ msegraphics,mseclasses,mseeditglob,msebitmap;
  
 type
  tcustomdataimage = class(timage,igridwidget)
@@ -38,6 +38,7 @@ type
    function getrowdatapo(const info: cellinfoty): pointer; virtual;
    procedure setgridintf(const intf: iwidgetgrid);
    function getcellframe: framety;
+   procedure loadcellbmp(const acanvas: tcanvas; const abmp: tmaskedbitmap); virtual;
    procedure drawcell(const canvas: tcanvas);
    procedure valuetogrid(const row: integer); virtual;
    procedure gridtovalue(const row: integer); virtual;
@@ -64,7 +65,7 @@ type
    
 implementation
 uses
- msestream,sysutils,msebitmap;
+ msestream,sysutils;
   
 { tcustomdataimage }
 
@@ -129,6 +130,14 @@ begin
  result:= getinnerstframe;
 end;
 
+procedure tcustomdataimage.loadcellbmp(const acanvas: tcanvas;
+                                            const abmp: tmaskedbitmap);
+begin
+ with cellinfoty(acanvas.drawinfopo^) do begin
+  abmp.loadfromstring(string(datapo^),fformat);
+ end;
+end;
+
 procedure tcustomdataimage.drawcell(const canvas: tcanvas);
 var
  bmp: tmaskedbitmap;
@@ -143,7 +152,7 @@ begin
      bmp.transparency:= transparency;
      bmp.transparentcolor:= transparentcolor;
     end;
-    bmp.loadfromstring(string(datapo^),fformat);
+    loadcellbmp(canvas,bmp);
     paintbmp(canvas,bmp,innerrect);
    except;
    end;

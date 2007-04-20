@@ -905,6 +905,7 @@ type
    fzebraoffset: integer;
    ffirstrecordbefore: integer;
    fdatasetstatebefore: tdatasetstate;
+   fdummystringbuffer: ansistring;
    fansistringbuffer: ansistring;
    fstringbuffer: msestring;
    fintegerbuffer: integer;
@@ -967,6 +968,8 @@ type
    destructor destroy; override;
    property firstrecord: integer read getfirstrecord;
 //   function getdisplaytextbuffer(const afield: tfield; const row: integer): pointer;
+   function getdummystringbuffer: pstring;
+   function getrowfieldisnull(const afield: tfield; const row: integer): boolean;
    function getansistringbuffer(const afield: tfield; const row: integer): pointer;
    function getstringbuffer(const afield: tfield; const row: integer): pointer;
    function getdisplaystringbuffer(const afield: tfield; const row: integer): pointer;
@@ -4907,6 +4910,20 @@ begin
  result:= active and (recordcount > 0);
 end;
 
+function tgriddatalink.getrowfieldisnull(const afield: tfield; 
+                             const row: integer): boolean;
+var
+ int1: integer;
+begin
+ result:= true;
+ if (afield <> nil) and hasdata then begin
+  int1:= activerecord;
+  activerecord:= row;
+  result:= afield.isnull;
+  activerecord:= int1;
+ end;
+end;
+
 function tgriddatalink.getansistringbuffer(const afield: tfield;
                                                   const row: integer): pointer;
 var
@@ -5614,6 +5631,12 @@ begin
                 (og_autofirstrow in fgrid.optionsgrid) then begin
   dataset.insert;
  end;
+end;
+
+function tgriddatalink.getdummystringbuffer: pstring;
+begin
+ fdummystringbuffer:= '';
+ result:= @fdummystringbuffer;
 end;
 
 { tdbwidgetindicatorcol }

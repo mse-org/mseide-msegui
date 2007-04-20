@@ -1,0 +1,142 @@
+object reportcurrre: treportcurrre
+  ppmm = 3
+  font.height = 14
+  font.name = 'stf_report'
+  font.dummy = 0
+  grid_size = 2
+  repdesigninfo = (
+    98
+    28
+    662
+    684
+  )
+  moduleclassname = 'treport'
+  object treportpage1: treportpage
+    pagewidth = 190
+    pageheight = 270
+    font.height = 14
+    font.name = 'Times New Roman'
+    font.dummy = 0
+    options = [rpo_once]
+    object trepprintdatedisp1: trepprintdatedisp
+      bounds_x = 12
+      bounds_y = 497
+      bounds_cx = 135
+      bounds_cy = 16
+      format = 'yyyy, mmmm, dd hh:mm'
+    end
+    object trepspacer2: trepspacer
+      bounds_x = 258
+      bounds_y = 477
+      bounds_cx = 50
+      bounds_cy = 20
+      taborder = 1
+      linktop = bgAll
+      linkbottom = trepprintdatedisp1
+    end
+    object bgAll: tbandgroup
+      bounds_x = 0
+      bounds_y = 86
+      bounds_cx = 570
+      bounds_cy = 391
+      taborder = 2
+      options = [bo_once]
+      object rbLongText: trecordband
+        bounds_x = 0
+        bounds_y = -2
+        bounds_cx = 570
+        bounds_cy = 101
+        frame.caption = 'Very long text :'
+        frame.captiondist = 0
+        frame.captiondistouter = True
+        frame.font.color = -1610612734
+        frame.font.height = 16
+        frame.font.style = [fs_bold, fs_underline]
+        frame.font.name = 'Times New Roman'
+        frame.font.dummy = 0
+        frame.dummy = 0
+        optionsscale = [osc_expandy, osc_shrinky]
+        tabs.count = 1
+        tabs.items = <        
+          item
+            pos = 41.666666666666657
+            textflags = [tf_ycentered, tf_wordbreak]
+            datafield = 'fldMemo'
+            datasource = mainfo.ds
+          end>
+      end
+      object rbStuff: trecordband
+        bounds_x = 0
+        bounds_y = 100
+        bounds_cx = 570
+        bounds_cy = 31
+        frame.caption = 'Resistance :'
+        frame.captiondist = 0
+        frame.captiondistouter = True
+        frame.font.color = -1610612734
+        frame.font.height = 16
+        frame.font.style = [fs_bold, fs_underline]
+        frame.font.name = 'Times New Roman'
+        frame.font.dummy = 0
+        frame.localprops = [frl_framewidth, frl_fitop]
+        frame.dummy = 0
+        taborder = 1
+        tabs.count = 1
+        tabs.items = <        
+          item
+            pos = 41.666666666666657
+            datafield = 'fldFloat'
+            datasource = mainfo.ds
+          end>
+      end
+      object rbPhoto: trecordband
+        bounds_x = 0
+        bounds_y = 130
+        bounds_cx = 570
+        bounds_cy = 218
+        frame.caption = 'Photo :'
+        frame.captiondist = 0
+        frame.captiondistouter = True
+        frame.font.color = -1610612734
+        frame.font.height = 16
+        frame.font.style = [fs_bold, fs_underline]
+        frame.font.name = 'Times New Roman'
+        frame.font.dummy = 0
+        frame.dummy = 0
+        taborder = 2
+        optionsscale = [osc_expandy, osc_shrinky]
+        object dbdiPhoto: tdbdataimage
+          bounds_x = 126
+          bounds_y = 0
+          bounds_cx = 224
+          bounds_cy = 218
+          frame.dummy = 0
+          bitmap.alignment = [al_fit]
+          bitmap.transparency = -2147483648
+          datafield = 'fldBlob'
+          datasource = mainfo.ds
+        end
+      end
+    end
+    object trecordband1: trecordband
+      bounds_x = 0
+      bounds_y = 10
+      bounds_cx = 570
+      bounds_cy = 73
+      taborder = 3
+      tabs.count = 1
+      tabs.items = <      
+        item
+          kind = tak_centered
+          pos = 90
+          value = 'Report for the currently'#13'selected record'
+          font.height = 18
+          font.style = [fs_bold]
+          font.name = 'Times New Roman'
+          font.dummy = 0
+          datasource = mainfo.ds
+        end>
+      options = [bo_once]
+    end
+  end
+end

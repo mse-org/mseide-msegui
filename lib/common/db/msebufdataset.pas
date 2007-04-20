@@ -812,7 +812,7 @@ begin
    ftstring,ftfixedchar: begin
     writemsestring(msestring(fielddata^));
    end;
-   ftmemo,ftblob: begin
+   ftmemo,ftblob,ftgraphic: begin
     if not getfieldisnull(@data^.fielddata.nullmask,aindex) then begin
      fowner.getofflineblob(data,aindex,blobinfo);
      write(blobinfo.info,sizeof(blobinfo.info));
@@ -930,7 +930,7 @@ begin
    ftstring,ftfixedchar: begin
     msestring(fielddata^):= readmsestring;
    end;
-   ftmemo,ftblob: begin
+   ftmemo,ftblob,ftgraphic: begin
     if not getfieldisnull(@data^.fielddata.nullmask,aindex) then begin
      readbuffer(blobinfo.info,sizeof(blobinfo.info));
      blobinfo.data:= readstring;
@@ -980,6 +980,9 @@ begin
  name:= readstring;
  datatype:= tfieldtype(readinteger);  
  size:= readinteger;
+ if datatype in blobfields then begin
+  size:= fowner.getblobdatasize;
+ end;
  required:= boolean(readinteger);
  fieldno:= readinteger;
  precision:= readinteger;

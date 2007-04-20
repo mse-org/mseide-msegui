@@ -1,0 +1,345 @@
+object printersetupfo: tprintersetupfo
+  bounds_x = 114
+  bounds_y = 246
+  bounds_cx = 585
+  bounds_cy = 259
+  taborder = 1
+  visible = False
+  container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_subfocus, ow_mousetransparent, ow_mousewheel, ow_destroywidgets, ow_autoscale]
+  container.bounds_x = 0
+  container.bounds_y = 0
+  container.bounds_cx = 585
+  container.bounds_cy = 259
+  container.frame.dummy = 0
+  options = [fo_screencentered, fo_autoreadstat, fo_autowritestat]
+  statfile = dmprintmo.sfPrinter
+  caption = 'Printer settings'
+  icon.transparency = -2147483648
+  moduleclassname = 'tmseform'
+  object grpPrintWay: tgroupbox
+    bounds_x = 8
+    bounds_y = 9
+    bounds_cx = 210
+    bounds_cy = 81
+    frame.caption = ' Printing engine '
+    frame.captiondist = -9
+    frame.dummy = 0
+    frame.outerframe = (
+      0
+      7
+      0
+      0
+    )
+    taborder = 1
+    object breGDI: tbooleaneditradio
+      Tag = 1
+      bounds_x = 8
+      bounds_y = 24
+      bounds_cx = 125
+      bounds_cy = 16
+      frame.caption = 'X-Windows ( Xprt )'
+      frame.captiondist = 10
+      frame.dummy = 0
+      frame.outerframe = (
+        0
+        1
+        112
+        2
+      )
+      enabled = False
+      statfile = dmprintmo.sfPrinter
+      statvarname = 'PrnXprint'
+    end
+    object brePS: tbooleaneditradio
+      Tag = 2
+      bounds_x = 8
+      bounds_y = 56
+      bounds_cx = 167
+      bounds_cy = 16
+      frame.caption = 'GhostScript -> lp -> CUPS'
+      frame.captiondist = 10
+      frame.dummy = 0
+      frame.outerframe = (
+        0
+        1
+        154
+        2
+      )
+      taborder = 1
+      statfile = dmprintmo.sfPrinter
+      statvarname = 'PrnGS'
+      value = True
+    end
+  end
+  object grpPreviewMode: tgroupbox
+    bounds_x = 224
+    bounds_y = 9
+    bounds_cx = 354
+    bounds_cy = 241
+    frame.caption = ' Way of printing '
+    frame.captiondist = -9
+    frame.dummy = 0
+    frame.outerframe = (
+      0
+      7
+      0
+      0
+    )
+    taborder = 2
+    object breUsePreview: tbooleaneditradio
+      Tag = 1
+      bounds_x = 8
+      bounds_y = 24
+      bounds_cx = 153
+      bounds_cy = 16
+      frame.caption = 'Use a preview program'
+      frame.captiondist = 10
+      frame.dummy = 0
+      frame.outerframe = (
+        0
+        1
+        140
+        2
+      )
+      statfile = dmprintmo.sfPrinter
+      statvarname = 'UseGUI'
+      onchange = usepreviewentered
+      value = True
+    end
+    object breNoPreview: tbooleaneditradio
+      Tag = 2
+      bounds_x = 8
+      bounds_y = 104
+      bounds_cx = 152
+      bounds_cy = 16
+      frame.caption = 'Print directly to a queue'
+      frame.captiondist = 10
+      frame.dummy = 0
+      frame.outerframe = (
+        0
+        1
+        139
+        2
+      )
+      taborder = 1
+      statfile = dmprintmo.sfPrinter
+      statvarname = 'NoGUI'
+      onchange = nopreviewentered
+    end
+    object kseQuality: tkeystringedit
+      optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_mousewheel, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+      bounds_x = 16
+      bounds_y = 184
+      bounds_cx = 172
+      bounds_cy = 37
+      frame.caption = 'Printing quality'
+      frame.dummy = 0
+      frame.outerframe = (
+        0
+        17
+        0
+        0
+      )
+      taborder = 3
+      enabled = False
+      statfile = dmprintmo.sfPrinter
+      statvarname = 'Quality'
+      dropdown.cols.count = 4
+      dropdown.cols.items = <      
+        item
+          data = (
+            'Draft'
+            'Normal'
+            'High'
+          )
+        end      
+        item
+          options = [co_readonly, co_invisible, co_mousemovefocus, co_focusselect, co_rowselect, co_fill]
+          data = (
+            '120x72'
+            '120x144'
+            '240x144'
+          )
+        end      
+        item
+          options = [co_readonly, co_invisible, co_mousemovefocus, co_focusselect, co_rowselect, co_fill]
+          data = (
+            '60x216'
+            '120x216'
+            '240x216'
+          )
+        end      
+        item
+          options = [co_readonly, co_invisible, co_mousemovefocus, co_focusselect, co_rowselect, co_fill]
+          data = (
+            '100x100'
+            '150x150'
+            '300x300'
+          )
+        end>
+      oninit = qualityinit
+      reffontheight = 14
+    end
+    object kseDialogProgram: tkeystringedit
+      optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_mousewheel, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+      bounds_x = 96
+      bounds_y = 48
+      bounds_cx = 204
+      bounds_cy = 37
+      frame.caption = 'Program name'
+      frame.dummy = 0
+      frame.outerframe = (
+        0
+        17
+        0
+        0
+      )
+      taborder = 5
+      statfile = dmprintmo.sfPrinter
+      statvarname = 'Frontend'
+      dropdown.cols.count = 2
+      dropdown.cols.items = <      
+        item
+          data = (
+            'X Printing Panel'
+            'GNU Ghost Viewer'
+            'KDE Ghost Viewer'
+          )
+        end      
+        item
+          options = [co_readonly, co_invisible, co_mousemovefocus, co_focusselect, co_rowselect, co_fill]
+          data = (
+            'xpp'
+            'gv'
+            'kghostview'
+          )
+        end>
+      reffontheight = 14
+    end
+    object grpPrinterType: tgroupbox
+      bounds_x = 200
+      bounds_y = 130
+      bounds_cx = 146
+      bounds_cy = 97
+      frame.caption = 'Command system'
+      frame.captiondist = -9
+      frame.dummy = 0
+      frame.outerframe = (
+        0
+        7
+        0
+        0
+      )
+      taborder = 4
+      enabled = False
+      object brIBM: tbooleaneditradio
+        Tag = 1
+        bounds_x = 16
+        bounds_y = 24
+        bounds_cx = 106
+        bounds_cy = 16
+        frame.caption = 'IBM Pro Printer'
+        frame.captiondist = 10
+        frame.dummy = 0
+        frame.outerframe = (
+          0
+          1
+          93
+          2
+        )
+        statfile = dmprintmo.sfPrinter
+        statvarname = 'IBMPro'
+      end
+      object brPCL: tbooleaneditradio
+        Tag = 3
+        bounds_x = 16
+        bounds_y = 72
+        bounds_cx = 73
+        bounds_cy = 16
+        frame.caption = 'LaserJet'
+        frame.captiondist = 10
+        frame.dummy = 0
+        frame.outerframe = (
+          0
+          1
+          60
+          2
+        )
+        taborder = 2
+        statfile = dmprintmo.sfPrinter
+        statvarname = 'LaserJet'
+      end
+      object brEpson: tbooleaneditradio
+        Tag = 2
+        bounds_x = 16
+        bounds_y = 48
+        bounds_cx = 110
+        bounds_cy = 16
+        frame.caption = 'Epson ( Esc/P )'
+        frame.captiondist = 10
+        frame.dummy = 0
+        frame.outerframe = (
+          0
+          1
+          97
+          2
+        )
+        taborder = 1
+        statfile = dmprintmo.sfPrinter
+        statvarname = 'Epson'
+        value = True
+      end
+    end
+    object seQueueName: tstringedit
+      optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_mousewheel, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+      bounds_x = 16
+      bounds_y = 128
+      bounds_cx = 172
+      bounds_cy = 37
+      frame.caption = 'Queue name'
+      frame.dummy = 0
+      frame.outerframe = (
+        0
+        17
+        0
+        0
+      )
+      taborder = 2
+      hint = #1055#1091#1089#1090#1086#1077' '#1085#1072#1079#1074#1072#1085#1080#1077' - '#1087#1077#1095#1072#1090#1100' '#1085#1072' '#1086#1095#1077#1088#1077#1076#1100' '#1087#1086' '#1091#1084#1086#1083#1095#1072#1085#1080#1102
+      enabled = False
+      statfile = dmprintmo.sfPrinter
+      statvarname = 'Queue'
+      oncheckvalue = queuenamecheck
+      value = 'lp'
+      reffontheight = 14
+    end
+  end
+  object btnOk: tbutton
+    bounds_x = 8
+    bounds_y = 192
+    bounds_cx = 114
+    bounds_cy = 54
+    frame.template = mainfo.ftButtons
+    frame.dummy = 0
+    taborder = 3
+    state = [as_localcaption]
+    caption = 'Ok'
+    modalresult = mr_ok
+  end
+  object btnCancel: tbutton
+    bounds_x = 144
+    bounds_y = 216
+    bounds_cx = 74
+    bounds_cy = 30
+    frame.colorclient = -1610612733
+    frame.localprops = [frl_colorclient]
+    frame.template = mainfo.ftButtons
+    frame.dummy = 0
+    state = [as_localcaption]
+    caption = 'Cancel'
+    font.color = -1610612730
+    font.name = 'stf_default'
+    font.dummy = 0
+    modalresult = mr_cancel
+  end
+end

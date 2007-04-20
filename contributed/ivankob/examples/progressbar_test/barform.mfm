@@ -1,0 +1,80 @@
+object barfo: tbarfo
+  bounds_x = 233
+  bounds_y = 247
+  bounds_cx = 218
+  bounds_cy = 49
+  frame.levelo = 2
+  frame.localprops = [frl_levelo]
+  frame.dummy = 0
+  taborder = 1
+  container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_subfocus, ow_mousetransparent, ow_mousewheel, ow_destroywidgets, ow_autoscale]
+  container.bounds_x = 2
+  container.bounds_y = 2
+  container.bounds_cx = 214
+  container.bounds_cy = 45
+  container.frame.dummy = 0
+  optionswindow = [wo_popup]
+  options = [fo_screencentered, fo_autoreadstat, fo_autowritestat, fo_savepos, fo_savestate]
+  icon.transparency = -2147483648
+  oncreate = barformcreate
+  ondestroy = barfodestroy
+  moduleclassname = 'tmseform'
+  object bar: tprogressbar
+    bounds_x = 8
+    bounds_y = -1
+    bounds_cy = 37
+    frame.levelo = -2
+    frame.framewidth = 1
+    frame.colorframe = -1610612734
+    frame.framei_left = 0
+    frame.framei_top = 0
+    frame.framei_right = 0
+    frame.framei_bottom = 0
+    frame.caption = 'Current item'
+    frame.localprops = [frl_levelo, frl_framewidth, frl_colorframe, frl_fileft, frl_fitop, frl_firight, frl_fibottom, frl_colorclient]
+    frame.dummy = 0
+    frame.outerframe = (
+      0
+      17
+      0
+      0
+    )
+    face.image.transparency = -2147483648
+    face.fade_pos.count = 2
+    face.fade_pos.items = (
+      0
+      1
+    )
+    face.fade_color.count = 2
+    face.fade_color.items = (
+      -1610612712
+      -1610612729
+    )
+    face.fade_transparency = -2147483648
+    face.dummy = 0
+    bar_face.image.transparency = -2147483648
+    bar_face.fade_pos.count = 3
+    bar_face.fade_pos.items = (
+      0
+      0.4
+      1
+    )
+    bar_face.fade_color.count = 3
+    bar_face.fade_color.items = (
+      -1610612721
+      -1610612715
+      -1610612727
+    )
+    bar_face.fade_direction = gd_up
+    bar_face.fade_transparency = -2147483648
+    bar_face.dummy = 0
+    bar_frame.dummy = 0
+    scale = 0.01
+    format = ' 0%'
+    textflags = [tf_ycentered]
+    font.color = -1610612730
+    font.style = [fs_bold]
+    font.name = 'stf_default'
+    font.dummy = 0
+  end
+end

@@ -1,0 +1,256 @@
+object printersetupformw32fo: tprintersetupformw32fo
+  bounds_x = 187
+  bounds_y = 105
+  bounds_cx = 412
+  bounds_cy = 438
+  taborder = 1
+  visible = False
+  container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_subfocus, ow_mousetransparent, ow_mousewheel, ow_destroywidgets, ow_autoscale]
+  container.bounds_x = 0
+  container.bounds_y = 0
+  container.bounds_cx = 412
+  container.bounds_cy = 438
+  container.frame.dummy = 0
+  options = [fo_screencentered, fo_autoreadstat, fo_autowritestat]
+  statfile = dmprintmo.sfPrinter
+  caption = 'Printer settings'
+  icon.transparency = -2147483648
+  moduleclassname = 'tmseform'
+  object grpPrintWay: tgroupbox
+    bounds_x = 8
+    bounds_y = 10
+    bounds_cx = 394
+    bounds_cy = 136
+    frame.caption = ' Printing engine '
+    frame.captiondist = -9
+    frame.dummy = 0
+    frame.outerframe = (
+      0
+      6
+      0
+      0
+    )
+    taborder = 1
+    object breGDI: tbooleaneditradio
+      Tag = 1
+      bounds_x = 8
+      bounds_y = 24
+      bounds_cx = 91
+      bounds_cy = 15
+      frame.caption = 'Windows GDI'
+      frame.captiondist = 10
+      frame.dummy = 0
+      frame.outerframe = (
+        0
+        1
+        78
+        1
+      )
+      enabled = False
+      statfile = dmprintmo.sfPrinter
+      statvarname = 'PrnGDI'
+    end
+    object fneGSVPath: tfilenameedit
+      optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_mousewheel, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+      bounds_x = 16
+      bounds_y = 81
+      bounds_cx = 364
+      bounds_cy = 35
+      frame.caption = 'path to GsView32.exe'
+      frame.captionpos = cp_topright
+      frame.font.name = 'stf_default'
+      frame.font.dummy = 0
+      frame.button.imagenr = 17
+      frame.dummy = 0
+      frame.outerframe = (
+        0
+        16
+        0
+        0
+      )
+      taborder = 2
+      statfile = dmprintmo.sfPrinter
+      statvarname = 'GSViewPath'
+      controller.filter = 'gsview32.exe'
+      controller.options = [fdo_file, fdo_checkexist]
+      controller.captionopen = 'Point to file "gsview32.exe" here'
+      reffontheight = 13
+    end
+    object brePS: tbooleaneditradio
+      Tag = 2
+      bounds_x = 8
+      bounds_y = 56
+      bounds_cx = 80
+      bounds_cy = 15
+      frame.caption = 'GhostScript'
+      frame.captiondist = 10
+      frame.dummy = 0
+      frame.outerframe = (
+        0
+        1
+        67
+        1
+      )
+      taborder = 1
+      statfile = dmprintmo.sfPrinter
+      statvarname = 'PrnGS'
+      value = True
+    end
+  end
+  object grpPreviewMode: tgroupbox
+    bounds_x = 8
+    bounds_y = 162
+    bounds_cx = 394
+    bounds_cy = 208
+    frame.caption = ' Way of printing '
+    frame.captiondist = -9
+    frame.dummy = 0
+    frame.outerframe = (
+      0
+      6
+      0
+      0
+    )
+    taborder = 2
+    object breUsePreview: tbooleaneditradio
+      Tag = 1
+      bounds_x = 8
+      bounds_y = 24
+      bounds_cx = 140
+      bounds_cy = 15
+      frame.caption = ' Use a preview program '
+      frame.captiondist = 10
+      frame.dummy = 0
+      frame.outerframe = (
+        0
+        1
+        127
+        1
+      )
+      statfile = dmprintmo.sfPrinter
+      statvarname = 'UseGUI'
+      value = True
+    end
+    object breNoPreview: tbooleaneditradio
+      Tag = 2
+      bounds_x = 8
+      bounds_y = 58
+      bounds_cx = 129
+      bounds_cy = 28
+      frame.caption = ' Print directly '#13'(onto assigned printer)'
+      frame.captiondist = 10
+      frame.dummy = 0
+      frame.outerframe = (
+        0
+        7
+        116
+        8
+      )
+      taborder = 1
+      statfile = dmprintmo.sfPrinter
+      statvarname = 'NoGUI'
+      onchange = previewmodechanged
+    end
+    object grpPrinterType: tgroupbox
+      optionswidget = [ow_mousefocus, ow_parenttabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_mousewheel, ow_destroywidgets, ow_autoscale]
+      bounds_x = 200
+      bounds_y = 67
+      bounds_cx = 178
+      bounds_cy = 88
+      frame.caption = ' Command system '
+      frame.captiondist = -9
+      frame.dummy = 0
+      frame.outerframe = (
+        0
+        6
+        0
+        0
+      )
+      taborder = 4
+      enabled = False
+      object sdCommanSystem: tstringdisp
+        bounds_x = 16
+        bounds_y = 27
+        bounds_cx = 148
+        bounds_cy = 49
+        frame.colorclient = -1610612731
+        frame.localprops = [frl_colorclient]
+        frame.dummy = 0
+        textflags = [tf_xcentered, tf_ycentered]
+        value = 'defined by '#10'printer drtiver'
+        reffontheight = 13
+      end
+    end
+    object seQueueName: tstringedit
+      optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_mousewheel, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+      bounds_x = 16
+      bounds_y = 161
+      bounds_cx = 364
+      bounds_cy = 35
+      frame.caption = 'Printer name (Start->Settings->Printers and faxes)'
+      frame.dummy = 0
+      frame.outerframe = (
+        0
+        16
+        0
+        0
+      )
+      taborder = 2
+      hint = 'It may not contain spaces ( if inavoidable then rename the queue )'#10'Empty name means printing to last choosen in GsView32 printer'
+      enabled = False
+      statfile = dmprintmo.sfPrinter
+      statvarname = 'Queue'
+      oncheckvalue = printernamecheck
+      reffontheight = 13
+    end
+    object sdQuality: tstringdisp
+      bounds_x = 24
+      bounds_y = 94
+      bounds_cx = 156
+      bounds_cy = 57
+      frame.colorclient = -1610612731
+      frame.caption = 'Printing quality'
+      frame.localprops = [frl_colorclient]
+      frame.dummy = 0
+      frame.outerframe = (
+        0
+        16
+        0
+        0
+      )
+      taborder = 3
+      enabled = False
+      textflags = [tf_xcentered, tf_ycentered]
+      value = 'should be set in'#10' printer settings'
+      reffontheight = 13
+    end
+  end
+  object btnOk: tbutton
+    bounds_x = 120
+    bounds_y = 384
+    bounds_cx = 162
+    bounds_cy = 46
+    frame.template = mainfo.ftButtons
+    frame.dummy = 0
+    taborder = 3
+    state = [as_localcaption]
+    caption = 'Ok'
+    modalresult = mr_ok
+  end
+  object btnCancel: tbutton
+    bounds_x = 320
+    bounds_y = 400
+    bounds_cx = 82
+    bounds_cy = 30
+    frame.colorclient = -1610612733
+    frame.localprops = [frl_colorclient]
+    frame.template = mainfo.ftButtons
+    frame.dummy = 0
+    state = [as_localcaption]
+    caption = 'Cancel'
+    font.color = -1610612730
+    font.name = 'stf_default'
+    font.dummy = 0
+    modalresult = mr_cancel
+  end
+end
