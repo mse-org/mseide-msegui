@@ -621,14 +621,20 @@ type
    property onafterpaint;
   end;
 
+ tcustomrepvaluedisp = class; 
+ getrepvaluetexteventty = procedure(const sender: tcustomrepvaluedisp; 
+                                          var atext: msestring) of object;
+                                          
  tcustomrepvaluedisp = class(tcustomrecordband)
   private
    ftextflags: textflagsty;
    fformat: msestring;
+   fongettext: getrepvaluetexteventty;
    procedure setformat(const avalue: msestring);
   protected
    function calcminscrollsize: sizety; override;
    procedure dopaint(const acanvas: tcanvas); override;
+   procedure dogettext(var atext: msestring);
    function getdisptext: msestring; virtual;
   public
    constructor create(aowner: tcomponent); override;
@@ -636,12 +642,19 @@ type
                defaultrepvaluedisptextflags;
    property format: msestring read fformat write setformat;
    property optionsscale default defaultrepvaluedispoptionsscale;
+   property ongettext: getrepvaluetexteventty read fongettext write fongettext;
   published
    property anchors default [an_left,an_top];
  end;
  
  trepvaluedisp = class(tcustomrepvaluedisp)
+  private
+   fvalue: msestring;
+   procedure setvalue(const avalue: msestring);
+  protected
+   function getdisptext: msestring; override;
   published
+   property value: msestring read fvalue write setvalue;
    property font;
 //   property tabs;
 //   property datasource;
@@ -653,6 +666,7 @@ type
    property onbeforerender;
    property onpaint;
    property onafterpaint;
+   property ongettext;
  end;
  
  treppagenumdisp = class(trepvaluedisp)
@@ -5079,9 +5093,17 @@ begin
  drawtext(acanvas,getdisptext,innerclientrect,ftextflags,font);
 end;
 
+procedure tcustomrepvaluedisp.dogettext(var atext: msestring);
+begin
+ if canevent(tmethod(fongettext)) then begin
+  fongettext(self,atext);
+ end;
+end;
+
 function tcustomrepvaluedisp.getdisptext: msestring;
 begin
  result:= name;
+ dogettext(result);
 end;
 
 procedure tcustomrepvaluedisp.setformat(const avalue: msestring);
@@ -5111,6 +5133,25 @@ begin
  if size1.cy > result.cy then begin
   result.cy:= size1.cy;
  end;
+end;
+
+{ trepvaluedisp }
+
+procedure trepvaluedisp.setvalue(const avalue: msestring);
+begin
+ if fvalue <> avalue then begin
+  fvalue:= avalue;
+  minclientsizechanged;
+ end;
+end;
+
+function trepvaluedisp.getdisptext: msestring;
+begin
+ result:= fvalue;
+ if (csdesigning in componentstate) and (result = '') then begin
+  result:= name;
+ end;
+ dogettext(result);
 end;
 
 { treppagenumdisp }
@@ -5165,6 +5206,7 @@ begin
    int1:= fparentintf.reppagenum
   end;
   result:= formatfloatmse(int1+foffset,mstr1);
+  dogettext(result);
  end
  else begin
   result:= inherited getdisptext;
@@ -5212,6 +5254,7 @@ begin
    str1:= fformat;
   end;
   result:= formatdatetime(str1,ti1);
+  dogettext(result);
  end
  else begin
   result:= inherited getdisptext;
