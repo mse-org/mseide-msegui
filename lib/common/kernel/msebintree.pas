@@ -34,7 +34,7 @@ type
  end;
  
  tint64avlnode = class(tavlnode)
-  private
+  protected
    fkey: int64;
   public 
    constructor create(const akey: int64);
@@ -50,11 +50,11 @@ type
  tavltree = class
   private
    froot: tavlnode;
-   fcompare: nodecomparefuncty;
    fcount: integer;
 //   fnodeclass: avlnodeclassty;
 //   procedure freenode(const anode: tavlnode);
   protected
+   fcompare: nodecomparefuncty;
    function parentpo(const anode: tavlnode): pavlnode;
    procedure dobalance(const anode: tavlnode; const deleted: boolean);
    procedure addnode(const anode: tavlnode);
@@ -117,10 +117,10 @@ type
    procedure checkbuffersize;
   protected
    procedure addnode(const anode: tcachenode);   
+   function find(const akey: tcachenode; out anode: tcachenode): boolean;
   public
    procedure clear; override;
    procedure removenode(const anode: tcachenode); //does not free node
-   function find(const akey: int64; out anode: tcachenode): boolean;
    property maxsize: integer read fmaxsize write setmaxsize; //0 -> no limit
    property size: integer read fsize;
  end;
@@ -771,7 +771,7 @@ begin
  checkbuffersize;
 end;
 
-function tcacheavltree.find(const akey: int64; out anode: tcachenode): boolean;
+function tcacheavltree.find(const akey: tcachenode; out anode: tcachenode): boolean;
 begin
  result:= inherited find(akey,tint64avlnode(anode));
  if result and (anode <> flast) then begin

@@ -29,11 +29,21 @@ type
  timagecachenode = class(tcachenode)
   private
    fimage: imagebufferinfoty;
+  protected
+   flocal: boolean;
   public
+   constructor create(const aid: blobidty); overload;
    destructor destroy; override;
  end;
  
  timagecache = class(tcacheavltree)
+  protected
+   ffindnode: timagecachenode;
+  public
+   constructor create;
+   destructor destroy; override;
+   function find(const akey: blobidty; out anode: timagecachenode): boolean;
+                           overload;
  end;
   
  tmsegraphicfield = class(tmseblobfield)
@@ -43,7 +53,7 @@ type
    function getimagecachekb: integer;
    procedure setimagecachekb(const avalue: integer);
   protected
-   procedure removecache(const aid: int64); override;
+   procedure removecache(const aid: blobidty); override;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -278,15 +288,15 @@ procedure tmsegraphicfield.loadbitmap(const abitmap: tmaskedbitmap;
 var
  stream1: tstringcopystream;
  str1: string;
- id1: int64;
+ id1: blobidty;
  n1: timagecachenode;
 begin
- if not getid(id1) then begin
+ if isnull then begin
   abitmap.clear;
  end
  else begin
-  if (fimagecache = nil) or (size <= 0) or
-               not fimagecache.find(id1,tcachenode(n1)) then begin
+  if (fimagecache = nil) or not assigned(fgetblobid) or not fgetblobid(self,id1) or
+               not fimagecache.find(id1,n1) then begin
    str1:= asstring;
    if str1 = '' then begin
     abitmap.clear;
@@ -303,7 +313,7 @@ begin
     end;
     stream1.free;
    end;
-   if (fimagecache <> nil) and (size > 0) then begin
+   if (fimagecache <> nil) and assigned(fgetblobid) then begin
     n1:= timagecachenode.create(id1);
     abitmap.savetoimagebuffer(n1.fimage);
     n1.fsize:= (n1.fimage.image.length + n1.fimage.mask.length) *
@@ -348,7 +358,7 @@ begin
  inherited;
 end;
 
-procedure tmsegraphicfield.removecache(const aid: int64);
+procedure tmsegraphicfield.removecache(const aid: blobidty);
 var
  n1: timagecachenode; 
 begin
@@ -406,10 +416,58 @@ end;
 
 { timagecachenode }
 
+constructor timagecachenode.create(const aid: blobidty);
+begin
+ flocal:= aid.local;
+ inherited create(aid.id);
+end;
+
 destructor timagecachenode.destroy;
 begin
  tmaskedbitmap.freeimageinfo(fimage);
  inherited;
+end;
+
+{ timagecache }
+
+function compareblobid(const left,right: tavlnode): integer;
+var
+ lint1: int64;
+begin
+ result:= integer(timagecachenode(left).flocal) - 
+                 integer(timagecachenode(right).flocal);
+ if result = 0 then begin
+  lint1:= timagecachenode(left).fkey - timagecachenode(right).fkey;
+  if lint1 > 0 then begin
+   result:= 1;
+  end
+  else begin
+   if lint1 < 0 then begin
+    result:= -1;
+   end;
+  end;
+ end;
+end;
+
+constructor timagecache.create;
+begin
+ ffindnode:= timagecachenode.create;
+ inherited;
+ fcompare:= {$ifdef FPC}@{$endif}compareblobid;
+end;
+
+destructor timagecache.destroy;
+begin
+ inherited;
+ ffindnode.free;
+end;
+
+function timagecache.find(const akey: blobidty;
+               out anode: timagecachenode): boolean;
+begin
+ ffindnode.fkey:= akey.id;
+ ffindnode.flocal:= akey.local;
+ result:= find(ffindnode,tavlnode(anode));
 end;
 
 end.

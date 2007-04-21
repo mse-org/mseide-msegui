@@ -482,6 +482,7 @@ type
                                    out ainfo: blobstreaminfoty);
    procedure setofflineblob(const adata: precheaderty; const aindex: integer;
                                    const ainfo: blobstreaminfoty);
+   function getblobrecpo: precheaderty;
    function createblobstream(field: tfield;
                                      mode: tblobstreammode): tstream; override;
    procedure internalapplyupdate(const maxerrors: integer;
@@ -537,6 +538,8 @@ type
    function getfielddata(field: tfield; buffer: pointer;
                        nativeformat: boolean): boolean; override;
    function getfielddata(field: tfield; buffer: pointer): boolean; override;
+   function getfieldblobid(const field: tfield; out aid: blobidty): boolean;
+                    //false if null
    procedure setfielddata(field: tfield; buffer: pointer;
                                     nativeformat: boolean); override;
    procedure setfielddata(field: tfield; buffer: pointer); override;
@@ -620,6 +623,7 @@ const
 
 type
  tmsestringfield1 = class(tmsestringfield); 
+ tmseblobfield1 = class(tmseblobfield);
   
  TFieldcracker = class(TComponent)
   private
@@ -1537,7 +1541,7 @@ begin
   databaseerror('No record');
  end;
 end;
-var testvar: pointer;
+
 function tmsebufdataset.getrecordupdatebuffer : boolean;
 var 
  int1: integer;
@@ -1557,7 +1561,6 @@ begin
      end;
     end;
    end;
-testvar:= recordpo;
    result:= (fcurrentupdatebuffer <= high(fupdatebuffer))  and 
           (fupdatebuffer[fcurrentupdatebuffer].bookmark.recordpo = recordpo) and 
           (recordpo <> nil);
@@ -2737,6 +2740,29 @@ begin
   ReAllocmem(ValueBuffer,0);
 end;
 }
+function tmsebufdataset.getblobrecpo: precheaderty;
+begin
+ if state = dsoldvalue then begin
+  if getrecordupdatebuffer then begin
+   result:= pointer(fupdatebuffer[fcurrentupdatebuffer].oldvalues);
+   if result <> nil then begin
+    result:= @pintrecordty(result)^.header;
+   end;
+  end
+  else begin
+   result:= @fcurrentbuf^.header   //there is no old value available
+  end;
+ end
+ else begin
+  if state = dscurvalue then begin
+   result:= @fcurrentbuf^.header;
+  end
+  else begin
+   result:= @pdsrecordty(activebuffer)^.header;
+  end;
+ end;
+end;
+
 function tmsebufdataset.createblobstream(field: tfield;
                mode: tblobstreammode): tstream;
 var
@@ -2748,25 +2774,7 @@ begin
  end;  
  result:= nil;
  if mode = bmread then begin
-  if state = dsoldvalue then begin
-   if getrecordupdatebuffer then begin
-    buffer:= fupdatebuffer[fcurrentupdatebuffer].oldvalues;
-    if buffer <> nil then begin
-     buffer:= @pintrecordty(buffer)^.header;
-    end;
-   end
-   else begin
-    buffer:= @fcurrentbuf^.header   //there is no old value available
-   end;
-  end
-  else begin
-   if state = dscurvalue then begin
-    buffer:= @fcurrentbuf^.header;
-   end
-   else begin
-    buffer:= @pdsrecordty(activebuffer)^.header;
-   end;
-  end;
+  buffer:= getblobrecpo;
   with precheaderty(buffer)^ do begin
    for int1:= high(blobinfo) downto 0 do begin
     if blobinfo[int1].field = field then begin
@@ -2776,6 +2784,32 @@ begin
    end;
   end;
  end; 
+end;
+
+function tmsebufdataset.getfieldblobid(const field: tfield;
+               out aid: blobidty): boolean;
+var
+ po1: precheaderty;
+ po2: pointer;
+ int1: integer;
+begin
+ result:= getfieldbuffer(field,po2,int1);
+ if result then begin
+  po1:= getblobrecpo;
+  with po1^ do begin
+   for int1:= high(blobinfo) downto 0 do begin
+    if blobinfo[int1].field = field then begin
+     aid.local:= true;
+     aid.id:= ptrint(blobinfo[int1].data);
+     result:= aid.id <> 0;
+     exit;
+    end;
+   end;   
+   aid.local:= false;
+   aid.id:= 0;
+   move(po2^,aid.id,getblobdatasize);
+  end;
+ end;
 end;
 
 procedure tmsebufdataset.fetchallblobs;
@@ -3330,7 +3364,17 @@ begin
    else begin
     tmsestringfield1(field1).setismsestring(nil,nil,int2);
    end;
-  end; 
+  end
+  else begin
+   if field1 is tmseblobfield then begin
+    if bind then begin
+     tmseblobfield1(field1).fgetblobid:= @getfieldblobid;
+    end
+    else begin
+     tmseblobfield1(field1).fgetblobid:= nil;
+    end;
+   end;
+  end;
  end;
  inherited;
 end;

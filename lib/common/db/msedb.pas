@@ -480,17 +480,47 @@ type
    property DataSet stored false;
    property ProviderFlags default defaultproviderflags;
  end;
+ 
+ blobidty = record
+             id: int64;
+             local: boolean;
+            end;
+            
+ getblobidfuncty = function(const afield: tfield; out aid: blobidty): boolean
+                                                of object;
+
+ tblobcachenode = class(tstringcachenode)
+  private
+   flocal: boolean;
+  public
+   constructor create(const akey: blobidty; const adata: string); overload;
+ end;
+ 
+ tblobcache = class(tstringcacheavltree)
+  private
+   ffindnode: tblobcachenode;
+  public
+   constructor create;
+   destructor destroy; override;
+   function addnode(const akey: blobidty; 
+                           const adata: string): tblobcachenode; overload;
+   function find(const akey: blobidty; 
+                           out anode: tblobcachenode): boolean; overload;
+ end;
+ 
  tmseblobfield = class(tblobfield)
   private
-   fcache: tstringcacheavltree;
+   fcache: tblobcache;
    function getasmsestring: msestring;
    procedure setasmsestring(const avalue: msestring);
    procedure setcachekb(const avalue: integer);
    function getcachekb: integer;
   protected
-   procedure removecache(const aid: int64); virtual; overload;
+   fgetblobid: getblobidfuncty;
+   procedure removecache(const aid: blobidty); virtual; overload;
    procedure removecache; overload;
-   function getid(out aid: int64): boolean;
+//   function getblobid(out aid: blobidty): boolean;
+                //false if not available
    function HasParent: Boolean; override;
    function getasvariant: variant; override;
    function getasstring: string; override;
@@ -2513,7 +2543,7 @@ begin
  if cachekb <> avalue then begin
   if avalue > 0 then begin
    if fcache = nil then begin
-    fcache:= tstringcacheavltree.create;
+    fcache:= tblobcache.create;
    end;
    fcache.maxsize:= avalue * 1024;
   end
@@ -2530,9 +2560,14 @@ begin
   result:= fcache.maxsize div 1024;
  end;
 end;
-
-function tmseblobfield.getid(out aid: int64): boolean;
+(*
+function tmseblobfield.getblobid(out aid: blobidty): boolean;
 begin
+ result:= assigned(fgetblobid);
+ if result then begin
+  fgetblobid(aid);
+ end;
+ {
  aid:= 0;
  case size of
   4,8: begin
@@ -2544,22 +2579,23 @@ begin
    end;
   end;
  end;
+ }
 end;
-
+*)
 function tmseblobfield.getasstring: string;
 var
- lint1: int64;
- n1: tstringcachenode; 
+ id1: blobidty;
+ n1: tblobcachenode; 
 begin
- if fcache <> nil then begin
+ if (fcache <> nil) and assigned(fgetblobid) then begin
   result:= '';
-  if getid(lint1) then begin
-   if fcache.find(lint1,n1) then begin
+  if fgetblobid(self,id1) then begin
+   if fcache.find(id1,n1) then begin
     result:= n1.data;
    end
    else begin
     result:= inherited getasstring;
-    fcache.addnode(lint1,result);
+    fcache.addnode(id1,result);
    end;
   end;
  end
@@ -2568,9 +2604,9 @@ begin
  end;
 end;
 
-procedure tmseblobfield.removecache(const aid: int64);
+procedure tmseblobfield.removecache(const aid: blobidty);
 var
- n1: tstringcachenode; 
+ n1: tblobcachenode; 
 begin
  if fcache <> nil then begin
   if fcache.find(aid,n1) then begin
@@ -2582,10 +2618,10 @@ end;
 
 procedure tmseblobfield.removecache;
 var
- lint1: int64;
+ id1: blobidty;
 begin
- if getid(lint1) then begin
-  removecache(lint1);
+ if assigned(fgetblobid) and fgetblobid(self,id1) then begin
+  removecache(id1);
  end;
 end;
 
@@ -3529,10 +3565,11 @@ end;
 procedure tdscontroller.internalopen;
 var
  int1,int2: integer;
- blobdatasize: integer;
+// blobdatasize: integer;
 begin
- blobdatasize:= fintf.getblobdatasize;
+// blobdatasize:= fintf.getblobdatasize;
  with tdataset(fowner) do begin
+ {
   for int1:= 0 to fields.count - 1 do begin
    with fields[int1] do begin
     if datatype in blobfields then begin
@@ -3540,14 +3577,15 @@ begin
     end;
    end;
   end;
+  }
   for int1:= 0 to fielddefs.count - 1 do begin
    with tfielddefcracker(fielddefs[int1]) do begin
     if ffieldno = 0 then begin
      ffieldno:= int1 + 1;
     end;
-    if fdatatype in blobfields then begin
-     fsize:= blobdatasize;
-    end;
+//    if fdatatype in blobfields then begin
+//     fsize:= blobdatasize;
+//    end;
    end;
   end;
   updatelinkedfields;
@@ -4239,6 +4277,63 @@ begin
  else begin
   result:= str2;   
  end;
+end;
+
+{ tblobcachenode }
+
+constructor tblobcachenode.create(const akey: blobidty; const adata: string);
+begin
+ flocal:= akey.local;
+ inherited create(akey.id,adata);
+end;
+
+{ tblobcache }
+
+function compareblobid(const left,right: tavlnode): integer;
+var
+ lint1: int64;
+begin
+ result:= integer(tblobcachenode(left).flocal) - 
+                 integer(tblobcachenode(right).flocal);
+ if result = 0 then begin
+  lint1:= tblobcachenode(left).fkey - tblobcachenode(right).fkey;
+  if lint1 > 0 then begin
+   result:= 1;
+  end
+  else begin
+   if lint1 < 0 then begin
+    result:= -1;
+   end;
+  end;
+ end;
+end;
+
+constructor tblobcache.create;
+begin
+ ffindnode:= tblobcachenode.create;
+ inherited;
+ fcompare:= {$ifdef FPC}@{$endif}compareblobid;
+end;
+
+destructor tblobcache.destroy;
+begin
+ inherited;
+ ffindnode.free;
+end;
+
+function tblobcache.addnode(const akey: blobidty;
+               const adata: string): tblobcachenode;
+begin
+ result:= tblobcachenode.create(akey,adata);
+ addnode(result);
+end;
+
+function tblobcache.find(const akey: blobidty;
+               out anode: tblobcachenode): boolean;
+begin
+ ffindnode.fkey:= akey.id;
+ ffindnode.flocal:= akey.local;
+ result:= find(ffindnode,tavlnode(anode));
 end;
 
 end.
