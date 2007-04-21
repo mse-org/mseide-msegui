@@ -752,7 +752,7 @@ begin
 //         pchar(Buffer + li)^ := #0;
 //         i := pqfmod(res,x)-3;
     end;
-    ftblob,ftmemo: begin
+    ftblob,ftmemo,ftgraphic: begin
      li := pqgetlength(res,curtuple,x);
      int1:= addblobdata(currbuff,li);
      move(int1,buffer^,sizeof(int1));
