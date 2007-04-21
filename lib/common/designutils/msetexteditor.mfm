@@ -1,8 +1,10 @@
 object msetexteditorfo: tmsetexteditorfo
+  optionswidget = [ow_arrowfocus, ow_subfocus, ow_destroywidgets, ow_hinton, ow_autoscale]
   bounds_x = 79
   bounds_y = 219
   bounds_cx = 369
   bounds_cy = 268
+  taborder = 1
   visible = False
   container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_subfocus, ow_mousetransparent, ow_destroywidgets, ow_autoscale]
   container.bounds_x = 0
@@ -11,6 +13,7 @@ object msetexteditorfo: tmsetexteditorfo
   container.bounds_cy = 268
   container.frame.dummy = 0
   statfile = tstatfile1
+  caption = 'Texteditor'
   icon.transparency = -2147483648
   moduleclassname = 'tmseform'
   object ok: tbutton
@@ -61,31 +64,31 @@ object msetexteditorfo: tmsetexteditorfo
         widgetname = 'textedit'
       end>
     datarowlinewidth = 0
-    datarowheight = 15
-    reffontheight = 13
+    datarowheight = 16
+    reffontheight = 14
     object textedit: tsyntaxedit
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontlineheight, ow_autoscale]
       bounds_x = 0
       bounds_y = 0
       bounds_cx = 2000
-      bounds_cy = 15
+      bounds_cy = 16
+      taborder = 1
       visible = False
       optionsedit = [oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_linebreak, oe_eatreturn, oe_keyexecute, oe_savevalue, oe_savestate]
       marginlinecolor = -2147483648
       oneditnotifcation = editnotify
-      reffontheight = 13
+      reffontheight = 14
     end
   end
   object linedisp: tstringdisp
     bounds_x = 8
-    bounds_y = 243
+    bounds_y = 242
     bounds_cx = 76
-    bounds_cy = 19
     frame.dummy = 0
     anchors = [an_left, an_bottom]
     taborder = 4
     textflags = [tf_xcentered, tf_ycentered]
-    reffontheight = 13
+    reffontheight = 14
   end
   object test: tbutton
     bounds_x = 184
