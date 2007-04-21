@@ -794,6 +794,8 @@ end;
 procedure tcacheavltree.clear;
 begin
  fsize:= 0;
+ ffirst:= nil;
+ flast:= nil;
  inherited;
 end;
 

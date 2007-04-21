@@ -4118,7 +4118,9 @@ procedure tlocalindexes.setcount1(acount: integer; doinit: boolean);
 begin
  checkinactive;
  inherited;
- tmsebufdataset(fowner).updatestate;
+ if not (aps_destroying in fstate) then begin
+  tmsebufdataset(fowner).updatestate;
+ end;
 end;
 
 procedure tlocalindexes.bindfields;
