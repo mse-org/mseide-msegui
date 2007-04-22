@@ -384,6 +384,7 @@ type
    property buttonpos;
    property buttonslast;
    property buttonsinline;
+   property mousewheel;
  end;
 
  queryeventty = procedure(const sender: tobject; var answer: boolean) of object;

@@ -354,6 +354,7 @@ type
    property buttonsinline;
    property buttonsinvisible;
    property buttonsvisible;
+   property mousewheel;
  end;
 
  stepdirty = (sd_right,sd_up,sd_left,sd_down);
