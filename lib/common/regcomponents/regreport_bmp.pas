@@ -84,6 +84,21 @@ const
  );
 
 const
+ objdata_trepvaluedisp: record size: integer; data: array[0..193] of byte end =
+      (size: 194; data: (
+  84,80,70,48,11,116,98,105,116,109,97,112,99,111,109,112,13,116,114,101,
+  112,118,97,108,117,101,100,105,115,112,12,98,105,116,109,97,112,46,105,109,
+  97,103,101,10,144,0,0,0,0,0,0,0,0,0,0,0,24,0,0,0,
+  24,0,0,0,92,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+  255,0,255,146,255,255,255,20,255,0,255,4,255,255,255,20,255,0,255,4,
+  255,255,255,20,255,0,255,4,255,255,255,20,255,0,255,4,255,255,255,20,
+  255,0,255,4,255,255,255,20,255,0,255,4,255,255,255,20,255,0,255,4,
+  255,255,255,20,255,0,255,4,255,255,255,20,255,0,255,4,255,255,255,20,
+  255,0,255,4,255,255,255,20,255,0,255,170,0,0)
+ );
+
+const
  objdata_treppagenumdisp: record size: integer; data: array[0..595] of byte end =
       (size: 596; data: (
   84,80,70,48,11,116,98,105,116,109,97,112,99,111,109,112,15,116,114,101,
@@ -188,6 +203,7 @@ initialization
  registerobjectdata(@objdata_tbandarea,tbitmapcomp,'tbandarea');
  registerobjectdata(@objdata_tbandgroup,tbitmapcomp,'tbandgroup');
  registerobjectdata(@objdata_trecordband,tbitmapcomp,'trecordband');
+ registerobjectdata(@objdata_trepvaluedisp,tbitmapcomp,'trepvaluedisp');
  registerobjectdata(@objdata_treppagenumdisp,tbitmapcomp,'treppagenumdisp');
  registerobjectdata(@objdata_trepprintdatedisp,tbitmapcomp,'trepprintdatedisp');
  registerobjectdata(@objdata_trepspacer,tbitmapcomp,'trepspacer');

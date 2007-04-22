@@ -699,7 +699,7 @@ begin
  tcomponent1(acomponent).setancestor(true);
 end;
 
-function swapmethodtable(const instance: tobject; const newtable: pointer): pointer;
+function swapmethodtable(const instance: tobject; const newtable: pointer): pointer;		
 var
  {$ifdef mswindows}
  ca1: cardinal;
