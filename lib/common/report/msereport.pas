@@ -653,6 +653,7 @@ type
    procedure setvalue(const avalue: msestring);
   protected
    function getdisptext: msestring; override;
+   procedure dobeforerender(var empty: boolean); override;
   published
    property value: msestring read fvalue write setvalue;
    property font;
@@ -5151,7 +5152,15 @@ begin
  if (csdesigning in componentstate) and (result = '') then begin
   result:= name;
  end;
- dogettext(result);
+ if rendering then begin
+  dogettext(result);
+ end;
+end;
+
+procedure trepvaluedisp.dobeforerender(var empty: boolean);
+begin
+ inherited;
+ minclientsizechanged;
 end;
 
 { treppagenumdisp }
