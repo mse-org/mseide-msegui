@@ -605,7 +605,12 @@ begin
     up:= 1;
    end;
    pageup:= lasttab - firsttab + 1;
-   pagedown:= 1;
+   if firsttab = 0 then begin
+    pagedown:= 0;
+   end
+   else begin
+    pagedown:= 1;
+   end;
    aval:= 0;
    pagelast:= 0;
    endval:= 0;

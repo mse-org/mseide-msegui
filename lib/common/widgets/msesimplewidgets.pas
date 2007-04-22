@@ -372,7 +372,8 @@ type
    procedure widgetregionchanged(const sender: twidget); override;
    procedure clientmouseevent(var info: mouseeventinfoty); override;
    procedure mouseevent(var info: mouseeventinfoty); override;
-   procedure dostep(const event: stepkindty); virtual;
+   procedure mousewheelevent(var info: mousewheeleventinfoty); override;
+  procedure dostep(const event: stepkindty); virtual;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -1214,6 +1215,12 @@ begin
  if canevent(tmethod(fonstep)) then begin
   fonstep(self,event);
  end;
+end;
+
+procedure tcustomstepbox.mousewheelevent(var info: mousewheeleventinfoty);
+begin
+ frame.domousewheelevent(info);
+ inherited;
 end;
 
 { tpaintbox }

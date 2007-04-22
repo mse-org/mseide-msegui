@@ -314,15 +314,16 @@ type
    fforceinvisiblebuttons: stepkindsty;
    fforcevisiblebuttons: stepkindsty;
    fbuttonsinline: boolean;
+   fmousewheel: boolean;
    procedure setbuttonsize(const Value: integer);
    procedure setbuttonpos(const Value: stepbuttonposty);
    procedure setbuttonsinline(const value: boolean);
-   procedure setbuttonslast(const value: boolean);
-   procedure setcolorbutton(const Value: colorty);
-   procedure setdisabledbuttons(const Value: stepkindsty);
-   procedure setbuttonsinvisible(const Value: stepkindsty);
-   procedure setbuttonsvisible(const Value: stepkindsty);
-   procedure setneededbuttons(const Value: stepkindsty);
+   procedure setbuttonslast(const avalue: boolean);
+   procedure setcolorbutton(const avalue: colorty);
+   procedure setdisabledbuttons(const avalue: stepkindsty);
+   procedure setbuttonsinvisible(const avalue: stepkindsty);
+   procedure setbuttonsvisible(const avalue: stepkindsty);
+   procedure setneededbuttons(const avalue: stepkindsty);
   protected
    procedure layoutchanged;
    procedure updaterects; override;
@@ -334,6 +335,7 @@ type
    constructor create(const intf: iframe; const stepintf: istepbar);
    procedure updatemousestate(const sender: twidget; const apos: pointty); override;
    procedure mouseevent(var info: mouseeventinfoty); virtual;
+   procedure domousewheelevent(var info: mousewheeleventinfoty); virtual;
    procedure dopaintframe(const canvas: tcanvas; const rect: rectty); override;
    procedure updatebuttonstate(const first,delta,count: integer);
    function executestepevent(const event: stepkindty; const stepinfo: framestepinfoty;
@@ -349,6 +351,7 @@ type
    property buttonpos: stepbuttonposty read fbuttonpos write setbuttonpos default sbp_right;
    property buttonslast: boolean read fbuttonslast write setbuttonslast default false;
    property buttonsinline: boolean read fbuttonsinline write setbuttonsinline default false;
+   property mousewheel: boolean read fmousewheel write fmousewheel default true;
  end;
 
  tstepframe = class(tcustomstepframe)
@@ -1974,6 +1977,7 @@ begin
  fforceinvisiblebuttons:= [sk_first,sk_last];
  fcolorbutton:= cl_parent;
  intf.setstaticframe(true);
+ fmousewheel:= true;
  inherited create(intf);
 end;
 
@@ -2116,51 +2120,51 @@ begin
  end;
 end;
 
-procedure tcustomstepframe.setbuttonslast(const Value: boolean);
+procedure tcustomstepframe.setbuttonslast(const avalue: boolean);
 begin
- if fbuttonslast <> value then begin
-  fbuttonslast := Value;
+ if fbuttonslast <> avalue then begin
+  fbuttonslast:= avalue;
   layoutchanged;
  end;
 end;
 
-procedure tcustomstepframe.setcolorbutton(const Value: colorty);
+procedure tcustomstepframe.setcolorbutton(const avalue: colorty);
 begin
- if fcolorbutton <> value then begin
-  fcolorbutton := Value;
+ if fcolorbutton <> avalue then begin
+  fcolorbutton:= avalue;
   updatelayout;
   fintf.getwidget.invalidaterect(fdim,org_widget);
  end;
 end;
 
-procedure tcustomstepframe.setdisabledbuttons(const Value: stepkindsty);
+procedure tcustomstepframe.setdisabledbuttons(const avalue: stepkindsty);
 begin
- if fdisabledbuttons <> value then begin
-  fdisabledbuttons := Value;
+ if fdisabledbuttons <> avalue then begin
+  fdisabledbuttons:= avalue;
   layoutchanged;
  end;
 end;
 
-procedure tcustomstepframe.setbuttonsinvisible(const Value: stepkindsty);
+procedure tcustomstepframe.setbuttonsinvisible(const avalue: stepkindsty);
 begin
- if fforceinvisiblebuttons <> value then begin
-  fforceinvisiblebuttons := Value;
+ if fforceinvisiblebuttons <> avalue then begin
+  fforceinvisiblebuttons:= avalue;
   layoutchanged;
  end;
 end;
 
-procedure tcustomstepframe.setbuttonsvisible(const Value: stepkindsty);
+procedure tcustomstepframe.setbuttonsvisible(const avalue: stepkindsty);
 begin
- if fforcevisiblebuttons <> value then begin
-  fforcevisiblebuttons := Value;
+ if fforcevisiblebuttons <> avalue then begin
+  fforcevisiblebuttons:= avalue;
   layoutchanged;
  end;
 end;
 
-procedure tcustomstepframe.setneededbuttons(const Value: stepkindsty);
+procedure tcustomstepframe.setneededbuttons(const avalue: stepkindsty);
 begin
- if fneededbuttons <> value then begin
-  fneededbuttons := Value;
+ if fneededbuttons <> avalue then begin
+  fneededbuttons:= avalue;
   layoutchanged;
  end;
 end;
@@ -2363,6 +2367,21 @@ begin
   with twidget1(sender) do begin
    fwidgetstate:= fwidgetstate + [ws_wantmousebutton,ws_wantmousemove];
   end;
+ end;
+end;
+
+procedure tcustomstepframe.domousewheelevent(var info: mousewheeleventinfoty);
+const
+ stepdir: array[stepbuttonposty,boolean] of stepkindty =
+                  //down     //up
+             ((sk_down,        sk_up),          //sbp_right
+              (sk_right,      sk_left),       //sbp_top
+              (sk_down,        sk_up),          //sbp_left
+              (sk_right,      sk_left));      //sbp_bottom
+begin
+ if fmousewheel and (info.wheel <> mw_none) then begin
+  fstepintf.dostep(stepdir[fbuttonpos][info.wheel = mw_up]);
+  include(info.eventstate,es_processed);
  end;
 end;
 

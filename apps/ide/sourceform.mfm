@@ -7,6 +7,7 @@ object sourcefo: tsourcefo
   frame.grip_size = 10
   frame.grip_options = [go_closebutton, go_fixsizebutton, go_topbutton]
   frame.dummy = 0
+  taborder = 1
   visible = False
   container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_mousetransparent, ow_destroywidgets, ow_autoscale]
   container.bounds_x = 0
@@ -53,14 +54,12 @@ object sourcefo: tsourcefo
   onactivate = sourcefoonactivate
   moduleclassname = 'tdockform'
   object tabwidget: ttabwidget
-    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_subfocus, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
     bounds_x = 0
     bounds_y = 0
     bounds_cx = 423
     bounds_cy = 327
     anchors = []
     popupmenu = formpopup
-    activepageindex = -1
     onactivepagechanged = tabwidgetonactivepagechanged
     onpageremoved = tabwidgetpageremoved
     options = [tabo_dragsource, tabo_dragdest, tabo_vertical, tabo_opposite, tabo_tabsizing, tabo_dblclickedtabfirst]
@@ -70,7 +69,7 @@ object sourcefo: tsourcefo
     tab_frame.dummy = 0
     tab_size = 104
     tab_sizemin = 60
-    reffontheight = 16
+    reffontheight = 14
     object tstockglyphbutton1: tstockglyphbutton
       optionswidget = [ow_destroywidgets]
       bounds_x = 383
@@ -110,8 +109,8 @@ object sourcefo: tsourcefo
     top = 64
   end
   object imagelist: timagelist
-    count = 14
     transparentcolor = -2147483648
+    count = 14
     left = 33
     top = 93
     image = {
