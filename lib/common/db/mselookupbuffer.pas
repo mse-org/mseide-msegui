@@ -97,6 +97,7 @@ type
    procedure checkindexar(var aitem: floatindexinfoty); overload;
    procedure checkindexar(var aitem: stringindexinfoty;
                        const caseinsensitive: boolean); overload;
+   procedure checkarrayindex(const value; const index: integer);
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -416,7 +417,7 @@ end;
 function tcustomlookupbuffer.find(const fieldno: integer; const avalue: integer;
              out aindex: integer; const filter: lbfiltereventty = nil): boolean;
 begin
- checkbuffer;
+// checkbuffer;
  checkarrayindex(fintegerdata,fieldno);
  checkindexar(fintegerdata[fieldno]);
  with fintegerdata[fieldno] do begin
@@ -443,7 +444,7 @@ end;
 function tcustomlookupbuffer.find(const fieldno: integer; const avalue: realty;
            out aindex: integer; const filter: lbfiltereventty = nil): boolean;
 begin
- checkbuffer;
+// checkbuffer;
  checkarrayindex(ffloatdata,fieldno);
  checkindexar(ffloatdata[fieldno]);
  with ffloatdata[fieldno] do begin
@@ -487,7 +488,7 @@ function tcustomlookupbuffer.find(const fieldno: integer; const avalue: msestrin
 var
  int1: integer;
 begin
- checkbuffer;
+// checkbuffer;
  checkarrayindex(ftextdata,fieldno);
  checkindexar(ftextdata[fieldno],caseinsensitive);
  with ftextdata[fieldno] do begin
@@ -896,6 +897,13 @@ begin
  else begin
   result:= emptyreal;
  end;
+end;
+
+procedure tcustomlookupbuffer.checkarrayindex(const value;
+               const index: integer);
+begin
+ checkbuffer;
+ msedatalist.checkarrayindex(value,index);
 end;
 
 { tlookupbuffer }
