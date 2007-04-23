@@ -98,13 +98,14 @@ type
    procedure checkindexar(var aitem: stringindexinfoty;
                        const caseinsensitive: boolean); overload;
    procedure checkarrayindex(const value; const index: integer);
+                   //calls checkbuffer
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
    procedure beginupdate;
    procedure endupdate;
    procedure clearbuffer; virtual;
-   procedure checkbuffer; //automatically called by find functions
+   procedure checkbuffer; //automatically called
 
    function find(const fieldno: integer; const avalue: integer;
          out aindex: integer; const filter: lbfiltereventty = nil): boolean; overload;
