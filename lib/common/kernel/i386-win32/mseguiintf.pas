@@ -40,6 +40,7 @@ uses
 
 const
  widgetclassname = 'msetoplevelwidget';
+ childwidgetclassname = 'msechildwidget';
  msemessage = wm_user + $3694;
  wakeupmessage = msemessage + 1;
  destroymessage = msemessage + 2;
@@ -202,6 +203,7 @@ type
 var
  canshutdown: integer;
  widgetclass: atom;
+ childwidgetclass: atom;
  applicationwindow: winidty;
  desktopwindow: hwnd;
  eventlist: tobjectqueue;
@@ -3397,13 +3399,21 @@ var
  frame: framety;
 begin
  result:= gue_resizewindow;
- if windows.getwindowrect(id,rect1) then begin
-  if windows.GetclientRect(id,rect2) then begin
-   getframe(rect1,rect2,frame);
-   arect:= inflaterect(rect,frame);
-   if windows.SetWindowPos(id,0,arect.x,arect.y,arect.cx,arect.cy,
-                swp_nozorder or swp_noactivate) then begin
-    result:= gue_ok;
+ if embedded then begin
+  if windows.SetWindowPos(id,0,rect.x,rect.y,rect.cx,rect.cy,
+               swp_nozorder or swp_noactivate) then begin
+   result:= gue_ok;
+  end;
+ end
+ else begin
+  if windows.getwindowrect(id,rect1) then begin
+   if windows.GetclientRect(id,rect2) then begin
+    getframe(rect1,rect2,frame);
+    arect:= inflaterect(rect,frame);
+    if windows.SetWindowPos(id,0,arect.x,arect.y,arect.cx,arect.cy,
+                 swp_nozorder or swp_noactivate) then begin
+     result:= gue_ok;
+    end;
    end;
   end;
  end;
@@ -3418,6 +3428,22 @@ var
  mousewheelpos: integer;
  sizingwindow: hwnd;
  eventlooping: integer;
+
+function childWindowProc(ahWnd: HWND; Msg: UINT; wParam: WPARAM; lParam: LPARAM): LRESULT; stdcall;
+begin
+ case msg of
+  wm_destroy: begin
+   windowdestroyed(ahwnd);
+   eventlist.add(twindowevent.create(ek_destroy,ahwnd));
+  end;
+ end;
+ if iswin95 then begin
+  result:= defwindowproca(ahwnd,msg,wparam,lparam);
+ end
+ else begin
+  result:= defwindowprocw(ahwnd,msg,wparam,lparam);
+ end;
+end;
 
 function WindowProc(ahWnd: HWND; Msg: UINT; wParam: WPARAM; lParam: LPARAM): LRESULT; stdcall;
 const
@@ -3752,6 +3778,7 @@ function gui_createwindow(const rect: rectty; const options: internalwindowoptio
 var
  windowstyle,windowstyleex,ca2: cardinal;
  rect1: rectty;
+ classname: string;
 begin
  with options do begin
   windowstyleex:= 0;
@@ -3761,7 +3788,6 @@ begin
   end
   else begin
    if wo_message in options then begin
-//    windowstyle:= ws_thickframe or ws_sysmenu;
     windowstyle:= ws_overlappedwindow;
     windowstyleex:= ws_ex_toolwindow;
    end
@@ -3786,19 +3812,27 @@ begin
    end;
   end
   else begin
-   ca2:= applicationwindow;
+   if parent <> 0 then begin
+    ca2:= parent;
+    windowstyle:= ws_child;
+    classname:= childwidgetclassname;
+   end
+   else begin
+    ca2:= applicationwindow;
+    classname:= widgetclassname;
+   end;
    if setgroup and (groupleader = 0) or (wo_groupleader in options) then begin
     windowstyleex:= ws_ex_appwindow; //create a groupleader
 //    ca2:= 0;
    end;
-   id:= windows.CreateWindowex(windowstyleex,widgetclassname,nil,
+   id:= windows.CreateWindowex(windowstyleex,pchar(classname),nil,
          windowstyle,rect1.x,rect1.y,rect1.cx,rect1.cy,ca2,0,hinstance,nil);
   end;
   if id = 0 then begin
    result:= gue_createwindow;
   end
   else begin
-   if not (pos = wp_default) then begin
+   if not (pos = wp_default) and (parent = 0) then begin
     result:= gui_reposwindow(id,rect);
    end
    else begin
@@ -3859,7 +3893,15 @@ begin
  fillchar(brushinfo,sizeof(brushinfo),0);
  brushinfo.lbStyle:= bs_null;
  nullbrush:= createbrushindirect(brushinfo);
+ fillchar(classinfoa,sizeof(classinfoa),0);
  if iswin95 then begin
+  with classinfoa do begin
+   lpszclassname:= childwidgetclassname;
+   lpfnwndproc:= @childwindowproc;
+   hinstance:= {$ifdef FPC}system{$else}sysinit{$endif}.HInstance;
+   style:= classstyle;
+  end;
+  childwidgetclass:= registerclassa(classinfoa);
   fillchar(classinfoa,sizeof(classinfoa),0);
   with classinfoa do begin
    lpszclassname:= widgetclassname;
@@ -3870,6 +3912,14 @@ begin
   widgetclass:= registerclassa(classinfoa);
  end
  else begin
+  fillchar(classinfow,sizeof(classinfow),0);
+  with classinfow do begin
+   lpszclassname:= childwidgetclassname;
+   lpfnwndproc:= @childwindowproc;
+   hinstance:= {$ifdef FPC}system{$else}sysinit{$endif}.HInstance;
+   style:= classstyle;
+  end;
+  childwidgetclass:= registerclassw(classinfow);
   fillchar(classinfow,sizeof(classinfow),0);
   with classinfow do begin
    lpszclassname:= widgetclassname;
