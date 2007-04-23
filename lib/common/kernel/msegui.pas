@@ -1248,6 +1248,7 @@ type
  windowstatesty = set of windowstatety;
 
  internalwindowoptionsty = record
+  parent: winidty;
   options: windowoptionsty;
   pos: windowposty;
   transientfor: winidty;
@@ -1323,6 +1324,7 @@ type
    fasynccanvas: tcanvas;
    fmodalresult: modalresultty;
    fupdateregion: regionty;
+   function haswinid: boolean;
    function getwindowsize: windowsizety;
    procedure setwindowsize(const value: windowsizety);
    function getwindowpos: windowposty;
@@ -1400,6 +1402,7 @@ type
 
  activechangeeventty = procedure(const oldwindow,newwindow: twindow) of object;
  windoweventty = procedure(const awindow: twindow) of object;
+ winideventty = procedure(const awinid: winidty) of object;
  booleaneventty = procedure(const avalue: boolean) of object;
 
  twindowevent = class(tevent)
@@ -1619,6 +1622,8 @@ type
    procedure unregisteronactivechanged(const method: activechangeeventty);
    procedure registeronwindowdestroyed(const method: windoweventty);
    procedure unregisteronwindowdestroyed(const method: windoweventty);
+   procedure registeronwiniddestroyed(const method: winideventty);
+   procedure unregisteronwiniddestroyed(const method: winideventty);
    procedure registeronapplicationactivechanged(const method: booleaneventty);
    procedure unregisteronapplicationactivechanged(const method: booleaneventty);
 
@@ -1768,6 +1773,11 @@ type
    procedure doevent(const awindow: twindow);
  end;
 
+ tonwinideventlist = class(tmethodlist)
+  protected
+   procedure doevent(const awinid: winidty);
+ end;
+ 
  tonapplicationactivechangedlist = class(tmethodlist)
   protected
    procedure doevent(const activated: boolean);
@@ -1791,6 +1801,7 @@ type
    fonshortcutlist: tonkeyeventlist;
    fonactivechangelist: tonactivechangelist;
    fonwindowdestroyedlist: tonwindoweventlist;
+   fonwiniddestroyedlist: tonwinideventlist;
    fonapplicationactivechangedlist: tonapplicationactivechangedlist;
 
    fcaretwidget: twidget;
@@ -8888,6 +8899,11 @@ begin
  end;
 end;
 
+function twindow.haswinid: boolean;
+begin
+ result:= fwinid <> 0;
+end;
+
 procedure twindow.createwindow;
 var
  gc: gcty;
@@ -10061,6 +10077,17 @@ begin
  end;
 end;
 
+ {tonwinideventlist}
+
+procedure tonwinideventlist.doevent(const awinid: winidty);
+begin
+ factitem:= 0;
+ while factitem < fcount do begin
+  winideventty(getitempo(factitem)^)(awinid);
+  inc(factitem);
+ end;
+end;
+
 { tonapplicationactivechangedlist }
 
 
@@ -10163,6 +10190,7 @@ begin
  fonshortcutlist:= tonkeyeventlist.create;
  fonactivechangelist:= tonactivechangelist.create;
  fonwindowdestroyedlist:= tonwindoweventlist.create;
+ fonwiniddestroyedlist:= tonwinideventlist.create;
  fonapplicationactivechangedlist:= tonapplicationactivechangedlist.create;
 // fwindows:= tpointerlist.create;
  feventlist:= tobjectqueue.create(true);
@@ -10198,6 +10226,7 @@ begin
  fonshortcutlist.free;
  fonactivechangelist.free;
  fonwindowdestroyedlist.free;
+ fonwiniddestroyedlist.free;
  fonapplicationactivechangedlist.free;
  sys_mutexdestroy(fmutex);
  sys_mutexdestroy(feventlock);
@@ -10617,6 +10646,7 @@ var
  int1: integer;
  event : tevent;
 begin
+ fonwiniddestroyedlist.doevent(id);
  if not terminated then begin
   for int1:= 0 to getevents - 1 do begin
    event:= tevent(feventlist[int1]);
@@ -12290,6 +12320,16 @@ end;
 procedure tapplication.unregisteronwindowdestroyed(const method: windoweventty);
 begin
  tinternalapplication(self).fonwindowdestroyedlist.remove(tmethod(method));
+end;
+
+procedure tapplication.registeronwiniddestroyed(const method: winideventty);
+begin
+ tinternalapplication(self).fonwiniddestroyedlist.add(tmethod(method));
+end;
+
+procedure tapplication.unregisteronwiniddestroyed(const method: winideventty);
+begin
+ tinternalapplication(self).fonwiniddestroyedlist.remove(tmethod(method));
 end;
 
 procedure tapplication.registeronapplicationactivechanged(const method: booleaneventty);

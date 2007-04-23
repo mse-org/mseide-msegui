@@ -38,7 +38,7 @@ uses
  sysutils,classes,msesimplewidgets,msegrids,msemenus,mseimage,msedispwidgets,
  msetoolbar,msetabs,msedesignintf,regwidgets_bmp,
  msesplitter,msedock,mseforms,mseclasses,typinfo,msearrayprops,
- msegui,formdesigner,msedial,msemenuwidgets;
+ msegui,formdesigner,msedial,msemenuwidgets,msewindowwidget;
  
 type
  tpropertyeditor1 = class(tpropertyeditor);
@@ -103,7 +103,7 @@ begin
   tgroupbox,tscrollbox,tstepbox,tdockpanel,tdockhandle,tmseformwidget,
   tdockformwidget,
   tsplitter,tspacer,ttoolbar,{tdocktoolbar,}ttabbar,ttabwidget,ttabpage,
-  tdial]);
+  tdial,twindowwidget]);
  registerpropertyeditor(typeinfo(tcellframe),nil,'',
                             toptionalclasspropertyeditor);
  registerpropertyeditor(typeinfo(tdatacols),nil,'',tdatacolseditor);

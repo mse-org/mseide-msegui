@@ -42,7 +42,8 @@ function gui_getzorder(const ids: winidarty; out zorders: integerarty): guierror
     //topevel -> highest, numbers have not to be contiguous
 function gui_getwindowrect(id: winidty; out rect: rectty): guierrorty;
 function gui_setsizeconstraints(id: winidty; const min,max: sizety): guierrorty;
-function gui_reposwindow(id: winidty; const rect: rectty): guierrorty;
+function gui_reposwindow(id: winidty; const rect: rectty;
+                              const embedded: boolean = false): guierrorty;
 function gui_setwindowfocus(id: winidty): guierrorty;
 function gui_setappfocus(id: winidty): guierrorty;
 function gui_setwindowgroup(id: winidty; group: winidty): guierrorty;

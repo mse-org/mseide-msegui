@@ -2437,6 +2437,7 @@ var
  attributes: xsetwindowattributes;
  valuemask: longword;
  width,height: integer;
+ id1: winidty;
 begin
  valuemask:= 0;
  if wo_popup in options.options then begin
@@ -2465,12 +2466,23 @@ begin
   attributes.colormap:= msecolormap;
   valuemask:= valuemask or cwcolormap;
  end;
- id:= xcreatewindow(appdisp,rootid,rect.x,rect.y,width,height,0,
+ if options.parent <> 0 then begin
+  id1:= options.parent;
+ end
+ else begin
+  id1:= rootid;
+ end;
+ id:= xcreatewindow(appdisp,id1,rect.x,rect.y,width,height,0,
      copyfromparent,copyfromparent,xlib.pvisual(copyfromparent),
      valuemask,@attributes);
  if id = 0 then begin
   result:= gue_createwindow;
   exit;
+ end;
+ result:= gue_ok;
+ if options.parent <> 0 then begin
+  xselectinput(appdisp,id,structurenotifymask);
+  exit;          //embedded window
  end;
  if (options.transientfor <> 0) or
          (options.options * [wo_popup,wo_message] <> []) then begin
@@ -2492,7 +2504,6 @@ begin
  if options.pos <> wp_default then begin
   gui_reposwindow(id,rect);
  end;
- result:= gue_ok;
  xselectinput(appdisp,id,
 		      KeyPressMask or KeyReleaseMask or
                       buttonpressmask or buttonreleasemask or
@@ -2533,7 +2544,8 @@ begin
  end;
 end;
 
-function gui_reposwindow(id: winidty; const rect: rectty): guierrorty;
+function gui_reposwindow(id: winidty; const rect: rectty;
+                                const embedded: boolean = false): guierrorty;
 var
  changes: xwindowchanges;
  sizehints: pxsizehints;

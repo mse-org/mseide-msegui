@@ -3389,7 +3389,8 @@ begin
  result:= gue_ok;
 end;
 
-function gui_reposwindow(id: winidty; const rect: rectty): guierrorty;
+function gui_reposwindow(id: winidty; const rect: rectty;
+                       const embedded: boolean = false): guierrorty;
 var
  rect1,rect2: trect;
  arect: rectty;

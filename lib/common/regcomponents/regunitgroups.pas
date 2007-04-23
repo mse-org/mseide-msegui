@@ -1,3 +1,19 @@
+{ MSEide Copyright (c) 2007 by Martin Schreiber
+   
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+}
 unit regunitgroups;
 {$ifdef FPC}{$mode objfpc}{$h+}{$INTERFACES CORBA}{$endif}
 interface
@@ -7,6 +23,10 @@ uses
  
 procedure reggroups;
 begin
+
+registerunitgroup(['mbufdataset'],
+	['db']);
+
 registerunitgroup(['memds'],
 	['db']);
 
@@ -35,16 +55,19 @@ registerunitgroup(['msedbdialog'],
 	['db','msegrids']);
 
 registerunitgroup(['msedbdispwidgets'],
-	['db','msedb','mseguiglob']);
+	['msedb','msetypes','mseguiglob','db']);
 
 registerunitgroup(['msedbedit'],
-	['db','msedb','msetypes','msewidgetgrid','msegrids','msestrings','msescrollbar','msegraphics','msekeyboard']);
+	['db','msetypes','msewidgetgrid','msegrids','msedb','msestrings','mseguiglob','msescrollbar','mseeditglob','mseinplaceedit','msekeyboard']);
 
 registerunitgroup(['msedbf'],
-	['msestrings']);
+	['msestrings','msedb']);
+
+registerunitgroup(['msedbgraphics'],
+	['msebitmap','msebintree']);
 
 registerunitgroup(['msedb'],
-	['msetypes','db']);
+	['msetypes','db','msestrings']);
 
 registerunitgroup(['mseibconnection'],
 	['db']);
@@ -55,17 +78,20 @@ registerunitgroup(['mselookupbuffer'],
 registerunitgroup(['msememds'],
 	['msedb']);
 
-registerunitgroup(['msepqconnection'],
-	['db']);
-
 registerunitgroup(['msesdfdata'],
-	['msestrings']);
+	['msestrings','msedb','db']);
 
 registerunitgroup(['msesqldb'],
-	['db']);
+	['db','msedb']);
+
+registerunitgroup(['msesqlite3conn'],
+	['msqldb','db']);
+
+registerunitgroup(['msesqlite3ds'],
+	['msedb','db']);
 
 registerunitgroup(['msqldb'],
-	['db']);
+	['db','msedb']);
 
 registerunitgroup(['msecolordialog'],
 	['msegraphics']);
@@ -89,7 +115,7 @@ registerunitgroup(['mseedit'],
 	['msegraphutils','mseeditglob']);
 
 registerunitgroup(['msegraphedits'],
-	['msegrids','msestat','msetypes','msegraphutils','mseevent','msebitmap','msewidgetgrid']);
+	['msetypes','msegraphics','msegraphutils','mseevent','msestat','msebitmap','msewidgetgrid']);
 
 registerunitgroup(['mselistbrowser'],
 	['msetypes','msedatanodes','msegrids','mseevent','msegraphics','mseinplaceedit']);
@@ -140,7 +166,7 @@ registerunitgroup(['msegraphics'],
 	['msegraphutils']);
 
 registerunitgroup(['msegui'],
-	['msegraphutils','msegraphics','msestrings','mseevent','mseguiglob','msearrayprops','msekeyboard','msetypes']);
+	['msegraphutils','msegraphics','msestrings','mseevent','mseguiglob','msearrayprops','msetypes']);
 
 registerunitgroup(['mselist'],
 	['msetypes']);
@@ -149,7 +175,7 @@ registerunitgroup(['msemenus'],
 	['mseshapes','mseevent']);
 
 registerunitgroup(['msemenuwidgets'],
-	['msegraphutils','msegraphics','msemenus']);
+	['msegraphutils','msegraphics','mseevent','msemenus']);
 
 registerunitgroup(['msepointer'],
 	['msetypes','msegraphutils']);
@@ -188,7 +214,7 @@ registerunitgroup(['msewidgets'],
 	['msestrings','msegraphics','mseguiglob','msetypes','msescrollbar','msegraphutils','mseevent']);
 
 registerunitgroup(['msereport'],
-	['msegraphics','msetypes','msegraphutils','msestrings','msestream']);
+	['msegraphics','msetypes','msegraphutils','db','msestrings','msestream']);
 
 registerunitgroup(['msecommport'],
 	['msethread']);
@@ -206,7 +232,7 @@ registerunitgroup(['msedispwidgets'],
 	['msetypes']);
 
 registerunitgroup(['msedock'],
-	['msegraphutils','msegraphics','msetypes']);
+	['mseguiglob','msestat','msegraphutils']);
 
 registerunitgroup(['mseeditglob'],
 	['msetypes']);
@@ -233,10 +259,13 @@ registerunitgroup(['msesplitter'],
 	['msestatfile','msegraphics','msepointer','msetypes']);
 
 registerunitgroup(['msetabs'],
-	['mseevent','msestatfile','msestat','mseguiglob','msegraphutils','msetypes']);
+	['msetabsglob','mseevent','msestatfile','msestat','msegraphutils','msetypes']);
 
 registerunitgroup(['msetoolbar'],
 	['msestatfile','msegraphics','msestrings','mseshapes','mseevent']);
+
+registerunitgroup(['msewindowwidget'],
+	['msetypes']);
 end;
 
 initialization
