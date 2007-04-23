@@ -26,7 +26,7 @@ uses
   msegui,msegraphics,actionsmodule,sourceform,debuggerform,componentpaletteform,
   messageform,watchform,objectinspector,breakpointsform,watchpointsform,
   stackform,projecttreeform,findinfileform,cpuform,disassform,threadsform,
-  targetconsole,main,mseguiintf,msestockobjects;
+  targetconsole,main,mseguiintf,msestockobjects,regunitgroups;
 begin
  registerfontalias('mseide_source',gui_getdefaultfontnames[stf_courier],
                     fam_fixnooverwrite,16);
