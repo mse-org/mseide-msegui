@@ -60,8 +60,8 @@ type
 
 function msedisplay: pdisplay;
 function msevisual: pvisual;
-function rootwindow(id: winidty = 0): winidty;
-function defaultscreen: pscreen;
+function mserootwindow(id: winidty = 0): winidty;
+function msedefaultscreen: pscreen;
 
 type
  _XIM = record end;
@@ -972,7 +972,7 @@ begin
  end;
 end;
 
-function rootwindow(id: winidty = 0): winidty;
+function mserootwindow(id: winidty = 0): winidty;
 var
  x,y: integer;
  width,height,border,depth: cardinal;
@@ -1028,7 +1028,7 @@ begin
    data.l[0]:= ord(operation);
    data.l[1]:= netatoms[value1];
    data.l[2]:= netatoms[value2];
-   if xsendevent(appdisp,rootwindow(id),{$ifdef FPC}false{$else}0{$endif},
+   if xsendevent(appdisp,mserootwindow(id),{$ifdef FPC}false{$else}0{$endif},
             substructurenotifymask or substructureredirectmask,@xevent) <> 0 then begin
     result:= true;
    end;
@@ -1164,7 +1164,7 @@ begin
  result:= 0;
  level:= 0;
  if (netatoms[net_wm_pid] <> 0) then begin
-  scanchildren(rootwindow);
+  scanchildren(mserootwindow);
  end;
 end;
 
@@ -1403,7 +1403,7 @@ var
 begin
  bo1:= false;
  if netsupported then begin
-  bo1:= readlongproperty(rootwindow(id),netatoms[net_workarea],4,result);
+  bo1:= readlongproperty(mserootwindow(id),netatoms[net_workarea],4,result);
  end;
  if not bo1 then begin
   result:= makerect(nullpoint,gui_getscreensize);
@@ -1815,7 +1815,7 @@ begin
  bo1:= xgettransientforhint(appdisp,id,@transientfor) <> 0;
  if hasoverrideredirect(id) or bo1 then begin
   waitfordecoration(id);
-  if (transientfor = 0) or (transientfor = rootwindow) then begin
+  if (transientfor = 0) or (transientfor = mserootwindow) then begin
    gui_raisewindow(id);
   end
   else begin
@@ -1843,7 +1843,7 @@ function gui_setcursorshape(winid: winidty; shape: cursorshapety): guierrorty;
 begin
  result:= gue_ok;
  if winid = 0 then begin
-  winid:= rootwindow;
+  winid:= mserootwindow;
  end;
 // if cursorshape <> shape then begin
   if screencursor <> 0 then begin
@@ -2372,7 +2372,7 @@ end;
 function settransientforhint(id,transientfor: winidty): guierrorty;
 begin
  if transientfor = 0 then begin
-  xsettransientforhint(appdisp,id,rootwindow{0});
+  xsettransientforhint(appdisp,id,mserootwindow{0});
  end
  else begin
 //  xsettransientforhint(appdisp,id,toplevelwindow(transientfor));
@@ -2400,10 +2400,10 @@ var
  int1: integer;
  id: winidty;
 begin
- id:= rootwindow;
+ id:= mserootwindow;
  repeat
   result:= id;
-  if longint(xtranslatecoordinates(appdisp,rootwindow,result,
+  if longint(xtranslatecoordinates(appdisp,mserootwindow,result,
          pos.x,pos.y,@int1,@int1,@id)) = 0 then begin
    result:= 0;
    exit;
@@ -2648,7 +2648,7 @@ end;
 function gui_creategc(paintdevice: paintdevicety; ispixmap: boolean; var gc: gcty): guierrorty;
 begin
  if paintdevice = 0 then begin
-  paintdevice:= rootwindow;
+  paintdevice:= mserootwindow;
  end;
  gc.handle:= cardinal(xcreategc(appdisp,paintdevice,0,nil));
  if gc.handle = 0 then begin
@@ -4401,7 +4401,7 @@ begin
  result:= pvisual(defvisual);
 end;
 
-function defaultscreen: pscreen;
+function msedefaultscreen: pscreen;
 begin
  result:= defscreen;
 end;
