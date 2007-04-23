@@ -95,7 +95,7 @@ const
   'Todo',                              //sc_All
   'Confirme',                          //sc_Confirmation
   #191'Borrar el registro?',           //sc_Delete_record
-  'Close page'                         //sc_close_page
+  'Cerrar p'#225'gina'                 //sc_close_page
 );
     
 initialization
