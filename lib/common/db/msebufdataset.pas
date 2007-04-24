@@ -1876,15 +1876,18 @@ var
  po1: pointer;
  int1: integer;
 begin
- int1:= afield.fieldno - 1;
- if int1 >= 0 then begin
-  po1:= @fcurrentbuf^.header;
-  if getfieldisnull(precheaderty(po1)^.fielddata.nullmask,int1) then begin
-   unsetfieldisnull(precheaderty(po1)^.fielddata.nullmask,int1);
-   inc(po1,ffieldinfos[int1].offset);
-   case afield.datatype of
-    ftinteger,ftautoinc: pinteger(po1)^:= avalue;
-    ftlargeint: pint64(po1)^:= avalue;
+ if bs_applying in fbstate then begin
+  int1:= afield.fieldno - 1;
+  if int1 >= 0 then begin
+   po1:= @fupdatebuffer[fcurrentupdatebuffer].bookmark.recordpo^.header;
+ //  po1:= @fcurrentbuf^.header;
+   if getfieldisnull(precheaderty(po1)^.fielddata.nullmask,int1) then begin
+    unsetfieldisnull(precheaderty(po1)^.fielddata.nullmask,int1);
+    inc(po1,ffieldinfos[int1].offset);
+    case afield.datatype of
+     ftinteger,ftautoinc: pinteger(po1)^:= avalue;
+     ftlargeint: pint64(po1)^:= avalue;
+    end;
    end;
   end;
  end;
