@@ -11287,6 +11287,40 @@ begin
  if ow_top in twindow(l).fowner.foptionswidget then inc(result);
  if ow_background in twindow(r).fowner.foptionswidget then inc(result);
  if ow_top in twindow(r).fowner.foptionswidget then dec(result);
+ if twindow(l).ftransientfor <> nil then begin
+  inc(result,4);
+ end;
+ if twindow(r).ftransientfor <> nil then begin
+  dec(result,4);
+ end;
+ if twindow(l).ftransientforcount > 0 then begin
+  inc(result,2);
+ end;
+ if twindow(r).ftransientforcount > 0 then begin
+  dec(result,2);
+ end;
+ {
+ if twindow(l).ftransientforcount > 0 then begin
+  inc(result,4);
+ end;
+ if (tws_modal in twindow(l).fstate) or (twindow(l).ftransientfor <> nil)
+            then begin
+  inc(result,16);
+  if twindow(l).ftransientforcount > 0 then begin
+   dec(result,8);
+  end;
+ end;
+ if twindow(r).ftransientforcount > 0 then begin
+  dec(result,4);
+ end;
+ if (tws_modal in twindow(r).fstate) or (twindow(r).ftransientfor <> nil)
+            then begin
+  dec(result,16);
+  if twindow(r).ftransientforcount > 0 then begin
+   inc(result,8);
+  end;
+ end;
+ }
  window1:= twindow(l);
  while window1.ftransientfor <> nil do begin
   if window1.ftransientfor = twindow(r) then begin
@@ -11303,30 +11337,6 @@ begin
   end;
   window1:= window1.ftransientfor;
  end;  
- if twindow(l).ftransientforcount > 0 then begin
-  inc(result,4);
- end;
- {
- if (tws_modal in twindow(l).fstate) or (twindow(l).ftransientfor <> nil)
-            then begin
-  inc(result,16);
-  if twindow(l).ftransientforcount > 0 then begin
-   dec(result,8);
-  end;
- end;
- }
- if twindow(r).ftransientforcount > 0 then begin
-  dec(result,4);
- end;
- {
- if (tws_modal in twindow(r).fstate) or (twindow(r).ftransientfor <> nil)
-            then begin
-  dec(result,16);
-  if twindow(r).ftransientforcount > 0 then begin
-   inc(result,8);
-  end;
- end;
- }
 end;
 
 procedure tinternalapplication.updatewindowstack;
