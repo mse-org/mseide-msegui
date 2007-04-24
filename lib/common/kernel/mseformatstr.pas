@@ -717,6 +717,7 @@ begin
         if (po1^ < '0') or (po1^ > '7') then begin
          break;
         end;
+        inc(po1);
        end;
        ch1:= char(strtooct(psubstr(po2,po1)));
        dec(po1);
