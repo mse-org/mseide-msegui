@@ -28,6 +28,9 @@ type
    foncreatewinid: createwinideventty;
    fondestroywinid: destroywinideventty;
    fonclientpaint: windowwidgeteventty;
+   fonclientrectchanged: windowwidgeteventty;
+   fondestroy: windowwidgeteventty;
+   fonloaded: windowwidgeteventty;
    function getclientwinid: winidty;
   protected
    procedure checkclientwinid;
@@ -41,6 +44,7 @@ type
    procedure dodestroywinid; virtual;
    procedure doclientpaint; virtual;
    procedure doonpaint(const acanvas: tcanvas); override;
+   procedure doloaded; override;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -51,6 +55,10 @@ type
    property ondestroywinid: destroywinideventty read fondestroywinid 
                                      write fondestroywinid;
    property onclientpaint: windowwidgeteventty read fonclientpaint write fonclientpaint;
+   property onclientrectchanged: windowwidgeteventty read fonclientrectchanged 
+                                     write fonclientrectchanged;   
+   property ondestroy: windowwidgeteventty read fondestroy write fondestroy;     
+   property ondloaded: windowwidgeteventty read fonloaded write fonloaded;     
  end;
 
  twindowwidget = class(tcustomwindowwidget)
@@ -79,6 +87,8 @@ type
    property oncreatewinid;
    property ondestroywinid;
    property onclientpaint;
+   property onclientrectchanged;
+   property ondestroy;
  end;
  
 implementation
@@ -98,6 +108,9 @@ end;
 
 destructor tcustomwindowwidget.destroy;
 begin
+ if candestroyevent(tmethod(fondestroy)) then begin
+  fondestroy(self);
+ end;
  application.unregisteronwiniddestroyed({$ifdef FPC}@{$endif}winiddestroyed);
  if (fwindow <> nil) and (twindow1(fwindow).haswinid) then begin
   destroyclientwindow;
@@ -147,7 +160,10 @@ begin
   rect1:= innerwidgetrect;
   addpoint1(rect1.pos,rootpos);
   gui_reposwindow(fclientwinid,rect1,true);
- end;  
+ end;
+ if canevent(tmethod(fonclientrectchanged)) then begin
+  fonclientrectchanged(self);
+ end;
 end;
 
 procedure tcustomwindowwidget.visiblechanged;
@@ -206,6 +222,14 @@ end;
 function tcustomwindowwidget.hasclientwinid: boolean;
 begin
  result:= fclientwinid <> 0;
+end;
+
+procedure tcustomwindowwidget.doloaded;
+begin
+ inherited;
+ if canevent(tmethod(fonloaded)) then begin
+  fonloaded(self);
+ end;
 end;
 
 end.
