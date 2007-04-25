@@ -242,7 +242,29 @@ function readdir64_r(__dirp:PDIR; __entry:Pdirent64; __result:PPdirent64):longin
 function localtime_r(__timer:Ptime_t; __tp:Ptm):Ptm;cdecl;external clib name 'localtime_r';
 
 type
-  tstatbuf64 = {packed} record // Renamed due to conflict with stat64 function
+   tstatbuf64 = packed record
+        st_dev : __dev_t;
+        __pad1 : dword;
+        __st_ino : __ino_t;
+        st_mode : __mode_t;
+        st_nlink : __nlink_t;
+        st_uid : __uid_t;
+        st_gid : __gid_t;
+        st_rdev : __dev_t;
+        __pad2 : dword;
+        st_size : __off64_t;
+        st_blksize : __blksize_t;
+        st_blocks : __blkcnt64_t;
+        st_atime : __time_t;
+        st_atime_usec : dword;
+        st_mtime : __time_t;
+        st_mtime_usec : dword;
+        st_ctime : __time_t;
+        st_ctime_usec : dword;
+        st_ino : __ino64_t;
+     end;
+(*
+  tstatbuf64 = packed record // Renamed due to conflict with stat64 function
     st_dev: __dev_t;                    { Device.  }
     __pad1: Word;
     __st_ino: __ino_t;                  { 32bit file serial number.  }
@@ -263,7 +285,7 @@ type
     st_ctime_usec: LongWord;
     st_ino: __ino64_t;                  { File serial number.  }
   end;
-
+*)
 
 const
  stat_ver_mse = 3;
@@ -271,7 +293,9 @@ const
  path_max = 1024;
  filetypes: array[filetypety] of cardinal = (0,s_ifdir,s_ifblk,
                                 s_ifchr,s_ifreg,s_iflnk,s_ifsock,s_ififo);
- timeoffset = 0.0;
+// timeoffset = 0.0;
+ datetimeoffset = -25569;
+ 
 
 type
  linuxmutexty = record
@@ -958,7 +982,7 @@ end;
 
 function filetimetodatetime(sec: time_t; usec: cardinal): tdatetime;
 begin
- result:= sec / (24.0*60.0*60.0) + usec / (24.0*60.0*60.0*1e6) + timeoffset;
+ result:= sec / (24.0*60.0*60.0) + usec / (24.0*60.0*60.0*1e6) - datetimeoffset;
 end;
 
 function sys_getcurrentdir: msestring;
@@ -1155,9 +1179,6 @@ begin
  result:= gmtoff;
 end;
 
-const
- datetimeoffset = -25569;
- 
 function sys_utctolocaltime(const value: tdatetime): tdatetime;
 var
  ti1: integer;
