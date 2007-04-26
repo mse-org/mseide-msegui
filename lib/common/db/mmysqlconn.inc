@@ -58,6 +58,7 @@ Type
     FServerInfo: String;
     FMySQL : PMySQL;
     FDidConnect : Boolean;
+   fport: cardinal;
     function GetClientInfo: string;
     function GetServerStatus: String;
     procedure ConnectMySQL(var HMySQL : PMySQL;H,U,P : pchar);
@@ -105,6 +106,7 @@ Type
     property ServerStatus : String read GetServerStatus;
   published
     property Dialect  : integer read FDialect write FDialect;
+    property port: cardinal read fport write fport default 0;
     property DatabaseName;
     property HostName;
     property KeepConnection;
@@ -187,7 +189,7 @@ procedure TConnectionName.ConnectMySQL(var HMySQL : PMySQL;H,U,P : pchar);
 
 begin
   HMySQL := mysql_init(HMySQL);
-  HMySQL:=mysql_real_connect(HMySQL,PChar(H),PChar(U),Pchar(P),Nil,0,Nil,0);
+  HMySQL:=mysql_real_connect(HMySQL,PChar(H),PChar(U),Pchar(P),Nil,fport,Nil,0);
   If (HMySQL=Nil) then
     MySQlError(Nil,SErrServerConnectFailed,Self);
 end;
@@ -391,12 +393,15 @@ function TConnectionName.MySQLDataType(AType: enum_field_types; ASize, ADecimals
 begin
   Result := True;
   case AType of
-    FIELD_TYPE_TINY, FIELD_TYPE_SHORT, FIELD_TYPE_LONG, FIELD_TYPE_LONGLONG,
-    FIELD_TYPE_INT24:
+    FIELD_TYPE_TINY, FIELD_TYPE_SHORT, FIELD_TYPE_LONG:
       begin
       NewType := ftInteger;
       NewSize := 0;
       end;
+    FIELD_TYPE_LONGLONG,FIELD_TYPE_INT24: begin
+     newtype:= ftlargeint;
+     newsize:= 0;
+    end;     
 {$ifdef mysql50}
     FIELD_TYPE_NEWDECIMAL,
 {$endif}
