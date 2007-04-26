@@ -350,7 +350,7 @@ const
 
 type
 
- thistorycontroller = class(tcustomdropdownlistcontroller)
+ thistorycontroller = class(tdropdownlistcontroller)
   private
    fhistorymaxcount: integer;
    procedure sethistorymaxcount(const avalue: integer);
