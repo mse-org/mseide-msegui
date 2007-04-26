@@ -3474,7 +3474,7 @@ end;
 
 procedure ttextstringspropertyeditor.setvalue(const avalue: msestring);
 begin
- if avalue = '' then begin
+ if (avalue = '') and askok('Do you wish to clear "'+fname+'"?') then begin
   tstrings(getordvalue).clear;
  end;
  inherited;
