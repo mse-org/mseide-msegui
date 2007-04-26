@@ -92,7 +92,8 @@ type
                  fs_nowidget,fs_nosetinstance,fs_disabled,
                  fs_captiondistouter,fs_captionnoclip,
                  fs_drawfocusrect,fs_paintrectfocus,
-                 fs_captionfocus,fs_captionhint,fs_rectsvalid);
+                 fs_captionfocus,fs_captionhint,fs_rectsvalid,
+                 fs_widgetactive);
  framestatesty = set of framestatety;
 
  modalresultty = (mr_none,mr_canclose,mr_windowclosed,mr_windowdestroyed,
@@ -133,7 +134,8 @@ const
 type
 
  framelocalpropty = (frl_levelo,frl_leveli,frl_framewidth,frl_extraspace,
-                     frl_colorframe,frl_colordkshadow,frl_colorshadow,
+                     frl_colorframe,frl_colorframeactive,
+                     frl_colordkshadow,frl_colorshadow,
                      frl_colorlight,frl_colorhighlight,
                      frl_colordkwidth,frl_colorhlwidth,
                      frl_fileft,frl_fitop,frl_firight,frl_fibottom,frl_colorclient,
@@ -281,6 +283,7 @@ type
   framewidth: integer;
   extraspace: integer;
   colorframe: colorty;
+  colorframeactive: colorty;
   framecolors:framecolorinfoty;
   colorclient: colorty;
   innerframe: framety;
@@ -301,6 +304,8 @@ type
    function isframewidthstored: boolean;
    procedure setcolorframe(const Value: colorty);
    function iscolorframestored: boolean;
+   procedure setcolorframeactive(const avalue: colorty);
+   function iscolorframeactivestored: boolean;
    procedure setextraspace(const avalue: integer);
    function isextraspacestored: boolean;
    
@@ -391,6 +396,9 @@ type
                      stored isextraspacestored default 0;
    property colorframe: colorty read fi.colorframe write setcolorframe
                      stored iscolorframestored default cl_transparent;
+   property colorframeactive: colorty read fi.colorframeactive 
+                    write setcolorframeactive
+                     stored iscolorframeactivestored default cl_default;
 
    property colordkshadow: colorty read fi.framecolors.shadow.effectcolor
               write setcolordkshadow
@@ -2728,6 +2736,7 @@ begin
  with fi do begin
   colorclient:= cl_transparent;
   colorframe:= cl_transparent;
+  colorframeactive:= cl_default;
   with framecolors do begin
    shadow.effectcolor:= cl_default;
    shadow.color:= cl_default;
@@ -2792,6 +2801,7 @@ end;
 procedure tcustomframe.dopaintframe(const canvas: tcanvas; const rect: rectty);
 var
  rect1: rectty;
+ col1: colorty;
 begin
  rect1:= deflaterect(rect,fouterframe);
  if fi.levelo <> 0 then begin
@@ -2799,7 +2809,13 @@ begin
   inflaterect1(rect1,-abs(fi.levelo));
  end;
  if fi.framewidth > 0 then begin
-  canvas.drawframe(rect1,-fi.framewidth,fi.colorframe);
+  if (fi.colorframeactive = cl_default) or not fintf.getwidget.active then begin
+   col1:= fi.colorframe;
+  end
+  else begin
+   col1:= fi.colorframeactive;
+  end; 
+  canvas.drawframe(rect1,-fi.framewidth,col1);
   inflaterect1(rect1,-fi.framewidth);
  end;
  if fi.leveli <> 0 then begin
@@ -2839,8 +2855,23 @@ begin
 end;
 
 procedure tcustomframe.updatewidgetstate;
+var
+ bo1: boolean;
 begin
- //dummy
+ if (fi.colorframeactive <> cl_default)  and (fi.framewidth <> 0) then begin
+  with fintf.getwidget do begin
+   bo1:= active;
+   if bo1 xor (fs_widgetactive in fstate) then begin
+    fintf.invalidatewidget;
+    if bo1 then begin
+     include(fstate,fs_widgetactive);
+    end
+    else begin    
+     exclude(fstate,fs_widgetactive);
+    end;
+   end;
+  end;
+ end;
 end;
 
 procedure tcustomframe.updateclientrect;
@@ -3023,6 +3054,15 @@ begin
  if fi.colorframe <> value then begin
   include(flocalprops,frl_colorframe);
   fi.colorframe:= Value;
+  fintf.invalidatewidget;
+ end;
+end;
+
+procedure tcustomframe.setcolorframeactive(const avalue: colorty);
+begin
+ if fi.colorframeactive <> avalue then begin
+  include(flocalprops,frl_colorframeactive);
+  fi.colorframeactive:= avalue;
   fintf.invalidatewidget;
  end;
 end;
@@ -3282,6 +3322,11 @@ end;
 function tcustomframe.iscolorframestored: boolean;
 begin
  result:= (ftemplate = nil) or (frl_colorframe in flocalprops);
+end;
+
+function tcustomframe.iscolorframeactivestored: boolean;
+begin
+ result:= (ftemplate = nil) or (frl_colorframeactive in flocalprops);
 end;
 
 function tcustomframe.iscolordkshadowstored: boolean;

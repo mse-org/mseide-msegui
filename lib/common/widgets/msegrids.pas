@@ -1025,6 +1025,7 @@ end;
    property leveli;
    property framewidth;
    property colorframe;
+   property colorframeactive;
    property colordkshadow;
    property colorshadow;
    property colorlight;

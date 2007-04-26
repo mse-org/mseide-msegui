@@ -86,6 +86,7 @@ type
    property leveli;
    property framewidth;
    property colorframe;
+   property colorframeactive;
    property colordkshadow;
    property colorshadow;
    property colorlight;
@@ -190,6 +191,7 @@ type
    property colordkwidth;
    property colorhlwidth;
    property colorframe;
+   property colorframeactive;
    property framei_left;
    property framei_top;
    property framei_right;
@@ -258,6 +260,7 @@ type
    property leveli;
    property framewidth;
    property colorframe;
+   property colorframeactive;
    property colordkshadow;
    property colorshadow;
    property colorlight;
@@ -360,6 +363,7 @@ type
    property leveli;
    property framewidth;
    property colorframe;
+   property colorframeactive;
    property colordkshadow;
    property colorshadow;
    property colorlight;
