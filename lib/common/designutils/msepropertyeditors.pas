@@ -392,6 +392,7 @@ type
    function getutf8: boolean; virtual;
   public
    procedure edit; override;
+   procedure setvalue(const avalue: msestring); override;
    function getvalue: msestring; override;
  end;
 
@@ -3469,6 +3470,14 @@ end;
 function ttextstringspropertyeditor.getutf8: boolean;
 begin
  result:= false;
+end;
+
+procedure ttextstringspropertyeditor.setvalue(const avalue: msestring);
+begin
+ if avalue = '' then begin
+  tstrings(getordvalue).clear;
+ end;
+ inherited;
 end;
 
 { tdatalistpropertyeditor }
