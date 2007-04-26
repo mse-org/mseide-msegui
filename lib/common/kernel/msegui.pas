@@ -37,6 +37,9 @@ type
                    ow_arrowfocusin,ow_arrowfocusout,
                    ow_subfocus, //reflects focus to children
                    ow_focusbackonesc,
+                   ow_nochildshortcut, //do not propagate shortcuts to parent
+                   ow_noparentshortcut, //do not react to shortcuts from parent
+                   globalshortcut,ow_localshortcut,
                    ow_canclosenil, //canclose calls canclose(nil)
                    ow_mousetransparent,ow_mousewheel,ow_noscroll,ow_destroywidgets,
                    ow_hinton,ow_hintoff,ow_multiplehint,ow_timedhint,
@@ -7507,7 +7510,7 @@ begin
  if not (es_processed in info.eventstate) then begin
   if (sender <> nil) and (sender.fparentwidget = self) then begin
      //neighbors first
-   int2:= IndexOfwidget(sender);
+   int2:= indexofwidget(sender);
    for int1:= int2 + 1 to widgetcount - 1 do begin
     widgets[int1].doshortcut(info,nil);
     if es_processed in info.eventstate then begin
@@ -7526,7 +7529,11 @@ begin
   else begin
      //children
    for int1:= 0 to widgetcount - 1 do begin
-    widgets[int1].doshortcut(info,nil);
+    with widgets[int1] do begin
+     if not (ow_noparentshortcut in foptionswidget) then begin
+      doshortcut(info,nil);
+     end;
+    end;
     if (es_processed in info.eventstate) then begin
      break;
     end;
@@ -7534,7 +7541,8 @@ begin
   end;
   if not (es_processed in info.eventstate) and (sender <> nil) then begin
     //parent
-   if fparentwidget <> nil then begin
+   if (fparentwidget <> nil) and 
+                    not (ow_nochildshortcut in foptionswidget) then begin
     fparentwidget.doshortcut(info,sender);
    end
    else begin
