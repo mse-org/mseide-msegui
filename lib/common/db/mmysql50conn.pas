@@ -5,6 +5,7 @@
 unit mmysql50conn;
 
 {$DEFINE MYSQL50}
+{$DEFINE MYSQL41}
 
 {$i mmysqlconn.inc}
 

@@ -11,7 +11,7 @@ unit msemysql50conn;
 {$ifdef FPC}{$mode objfpc}{$h+}{$INTERFACES CORBA}{$endif}
 interface
 uses
- db,classes,mmysql50conn,msestrings,msedb;
+ db,classes,mmysql50conn,msestrings,msedb,msqldb;
  
 type
  tmsemysql50connection = class(tmysql50connection,idbcontroller)
@@ -29,6 +29,8 @@ type
    function readsequence(const sequencename: string): string;
    function writesequence(const sequencename: string;
                     const avalue: largeint): string;
+   function CreateBlobStream(const Field: TField; const Mode: TBlobStreamMode;
+                         const acursor: tsqlcursor): TStream; override;
    procedure updateutf8(var autf8: boolean);                    
   public
    constructor create(aowner: tcomponent); override;
@@ -41,7 +43,7 @@ type
  
 implementation
 uses
- msefileutils;
+ msefileutils,msesqldb,msebufdataset;
  
 { tmsemysql50connection }
 
@@ -109,6 +111,17 @@ end;
 procedure tmsemysql50connection.setinheritedconnected(const avalue: boolean);
 begin
  inherited connected:= avalue;
+end;
+
+function tmsemysql50connection.CreateBlobStream(const Field: TField;
+               const Mode: TBlobStreamMode; const acursor: tsqlcursor): TStream;
+begin
+ if (mode = bmwrite) and (field.dataset is tmsesqlquery) then begin
+  result:= tmsebufdataset(field.dataset).createblobbuffer(field);
+ end
+ else begin
+  result:= inherited createblobstream(field,mode,acursor);
+ end;
 end;
 
 end.

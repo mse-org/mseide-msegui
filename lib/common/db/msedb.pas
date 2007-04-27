@@ -1113,6 +1113,30 @@ begin
  setlength(result,po1-pchar(result)+1);
 end;
 
+function encodesqlblob(const avalue: string): string;
+var
+ int1: integer;
+ po1: pchar;
+ po2: pbyte;
+
+begin
+ setlength(result,length(avalue)*2+3);
+ po1:= pchar(result);
+ po1^:= 'x';
+ inc(po1);
+ po1^:= '''';
+ inc(po1);
+ po2:= pointer(avalue);
+ for int1:= 0 to length(avalue) - 1 do begin
+  po1^:= charhex[po2^ shr 4];
+  inc(po1);
+  po1^:= charhex[po2^ and $0f];
+  inc(po1);
+  inc(po2);
+ end;
+ po1^:= '''';
+end;
+
 function encodesqldatetime(const avalue: tdatetime): string;
 begin
  result := '''' + formatdatetime('yyyy-mm-dd hh:mm:ss',avalue) + '''';
@@ -1172,6 +1196,9 @@ begin
    ftmemo: begin
     result:= encodesqlstring(field.asstring);
    end;
+   ftblob,ftgraphic: begin
+    result:= encodesqlblob(field.asstring);
+   end;
    ftdate: begin
     result := encodesqldate(field.asdatetime)
    end;
@@ -1220,6 +1247,9 @@ begin
     end;
     ftmemo: begin
      result:= encodesqlstring(asstring);
+    end;
+    ftblob,ftgraphic: begin
+     result:= encodesqlblob(asstring);
     end;
     ftdate: begin
      result := encodesqldate(asdatetime)

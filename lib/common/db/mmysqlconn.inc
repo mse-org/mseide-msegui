@@ -1,3 +1,4 @@
+{Modified 2006-2007 by Martin Schreiber}
 
 {$mode objfpc}{$H+}
 {$MACRO on}
@@ -39,7 +40,7 @@ Type
 
   TCursorName = Class(TSQLCursor)
   protected
-    FQMySQL : PMySQL;
+//    FQMySQL : PMySQL;
     FRes: PMYSQL_RES;                   { Record pointer }
     FNeedData : Boolean;
     FStatement : String;
@@ -51,7 +52,7 @@ Type
     MapDSRowToMSQLRow  : array of integer;
   end;
 
-  TConnectionName = class (TSQLConnection)
+  TConnectionName = class (TSQLConnection,iblobconnection)
   private
     FDialect: integer;
     FHostInfo: String;
@@ -63,18 +64,22 @@ Type
     function GetServerStatus: String;
     procedure ConnectMySQL(var HMySQL : PMySQL;H,U,P : pchar);
   protected
+//   function stringtosqltext(const afeildtype: tfieldtype; const avalue: string): string;
     function StrToStatementType(s : string) : TStatementType; override;
     Procedure ConnectToServer; virtual;
     Procedure SelectDatabase; virtual;
-    function MySQLDataType(AType: enum_field_types; ASize, ADecimals: Integer; var NewType: TFieldType; var NewSize: Integer): Boolean;
-    function MySQLWriteData(AType: enum_field_types;ASize: Integer; AFieldType: TFieldType;Source, Dest: PChar): Boolean;
+//    function MySQLDataType(AType: enum_field_types; ASize, ADecimals: Integer; var NewType: TFieldType; var NewSize: Integer): Boolean;
+    function MySQLDataType(const afield: mysql_field; var NewType: TFieldType; var NewSize: Integer): Boolean;
+    function MySQLWriteData(const acursor: tsqlcursor; AType: enum_field_types;
+                        ASize: Integer;
+                        AFieldType: TFieldType;Source, Dest: PChar): Boolean;
     // SQLConnection methods
     procedure DoInternalConnect; override;
     procedure DoInternalDisconnect; override;
     function GetHandle : pointer; override;
 
-    function GetAsSQLText(Field : TField) : string; overload; virtual;
-    function GetAsSQLText(Param : TParam) : string; overload; virtual;
+//    function GetAsSQLText(Field : TField) : string; overload; override;
+//    function GetAsSQLText(Param : TParam) : string; overload; override;
 
     Function AllocateCursorHandle(const aquery: tsqlquery): TSQLCursor; override;
     Procedure DeAllocateCursorHandle(var cursor : TSQLCursor); override;
@@ -99,6 +104,19 @@ Type
     procedure UpdateIndexDefs(var IndexDefs : TIndexDefs;
                                           const TableName : string); override;
 
+   function CreateBlobStream(const Field: TField; const Mode: TBlobStreamMode;
+                         const acursor: tsqlcursor): TStream; override;
+   function getblobdatasize: integer; override;
+          //iblobconnection
+   procedure writeblobdata(const atransaction: tsqltransaction;
+             const tablename: string; const acursor: tsqlcursor;
+             const adata: pointer; const alength: integer;
+             const afield: tfield; const aparam: tparam;
+             out newid: string);
+   procedure setupblobdata(const afield: tfield; const acursor: tsqlcursor;
+                                   const aparam: tparam);
+   function blobscached: boolean;
+   
   Public
     Property ServerInfo : String Read FServerInfo;
     Property HostInfo : String Read FHostInfo;
@@ -193,22 +211,34 @@ begin
   If (HMySQL=Nil) then
     MySQlError(Nil,SErrServerConnectFailed,Self);
 end;
+{
+function tconnectionname.stringtosqltext(const afieldtype: tfieldtype;
+                                                const avalue: string): string;
+var 
+ esc_str : pchar;
+begin
+ Getmem(esc_str,length(avalue)*2+1);
+ mysql_real_escape_string(FMySQL,esc_str,pchar(str1),length(str1));
+ Result := '''' + esc_str + '''';
+ Freemem(esc_str);
+end;
 
 function TConnectionName.GetAsSQLText(Field : TField) : string;
 var 
  esc_str : pchar;
  str1: string;
 begin
-  if (not assigned(field)) or field.IsNull then Result := 'Null'
-  else if field.DataType = ftString then
-    begin
-    str1:= field.asstring;
-    Getmem(esc_str,length(str1)*2+1);
-    mysql_real_escape_string(FMySQL,esc_str,pchar(str1),length(str1));
-    Result := '''' + esc_str + '''';
-    Freemem(esc_str);
-    end
-  else Result := inherited GetAsSqlText(field);
+ if (not assigned(field)) or field.IsNull then begin
+  Result := 'Null'
+ end
+ else begin
+  if field.DataType in [ftString,ftmemo,ftblob,ftgraphic] then begin
+   result:= stringtosqltext(field.datatype,field.asstring);
+  end
+  else begin
+   Result := inherited GetAsSqlText(field);
+  end;
+ end;
 end;
 
 function TConnectionName.GetAsSQLText(Param: TParam) : string;
@@ -220,9 +250,9 @@ begin
   Result:= 'Null'
  end
  else begin
-  if param.DataType =  ftString then begin
+  if param.DataType in [ftString,ftmemo,ftblob,ftgraphic] then begin
    str1:= param.asstring;
-   Getmem(esc_str,length(str1)*2+1);
+   Getmem(esc_str,length(str1)*4+1);
    mysql_real_escape_string(FMySQL,esc_str,pchar(str1),length(str1));
    Result:= '''' + esc_str + '''';
    Freemem(esc_str);
@@ -232,7 +262,7 @@ begin
   end;
  end;
 end;
-
+}
 
 procedure TConnectionName.ConnectToServer;
 
@@ -325,19 +355,23 @@ begin
     {$endif}
     if FStatementType=stSelect then
       FNeedData:=True;
+   {
     ConnectMySQL(FQMySQL,FMySQL^.host,FMySQL^.user,FMySQL^.passwd);
     if mysql_select_db(FQMySQL,pchar(DatabaseName))<>0 then
       MySQLError(FQMySQL,SErrDatabaseSelectFailed,Self);
+   }
     end
 end;
 
 procedure TConnectionName.UnPrepareStatement(cursor: TSQLCursor);
 begin
+{
   With Cursor as TCursorName do
     begin
     mysql_close(FQMySQL);
     FQMysql := nil;
     end;
+}
 end;
 
 procedure TConnectionName.FreeFldBuffers(cursor: TSQLCursor);
@@ -349,11 +383,11 @@ begin
   C:=Cursor as TCursorName;
   if c.FStatementType=stSelect then
     c.FNeedData:=False;
-  if (c.FQMySQL <> Nil) then
-    begin
-    mysql_close(c.FQMySQL);
-    c.FQMySQL:=Nil;
-    end;
+//  if (c.FQMySQL <> Nil) then
+//    begin
+//    mysql_close(c.FQMySQL);
+//    c.FQMySQL:=Nil;
+//    end;
   If (C.FRes<>Nil) then
     begin
     Mysql_free_result(C.FRes);
@@ -376,73 +410,77 @@ begin
     if Assigned(AParams) and (AParams.count > 0) then
       for i := 0 to AParams.count -1 do
         C.FStatement := stringreplace(C.FStatement,C.ParamReplaceString+inttostr(AParams[i].Index+1),GetAsSQLText(AParams[i]),[rfReplaceAll,rfIgnoreCase]);
-    if mysql_query(c.FQMySQL,Pchar(C.FStatement))<>0 then
-      MySQLError(c.FQMYSQL,Format(SErrExecuting,[StrPas(mysql_error(c.FQMySQL))]),Self)
+    if mysql_query(FMySQL,Pchar(C.FStatement))<>0 then
+      MySQLError(FMYSQL,Format(SErrExecuting,[StrPas(mysql_error(FMySQL))]),Self)
     else
       begin
-      C.RowsAffected := mysql_affected_rows(c.FQMYSQL);
-      C.LastInsertID := mysql_insert_id(c.FQMYSQL);
+      C.RowsAffected := mysql_affected_rows(FMYSQL);
+      C.LastInsertID := mysql_insert_id(FMYSQL);
       if C.FNeedData then
-        C.FRes:=mysql_use_result(c.FQMySQL);
+        C.FRes:=mysql_store_result(FMySQL);
       end;
     end;
 end;
 
-function TConnectionName.MySQLDataType(AType: enum_field_types; ASize, ADecimals: Integer;
-   var NewType: TFieldType; var NewSize: Integer): Boolean;
+//function TConnectionName.MySQLDataType(AType: enum_field_types; ASize, ADecimals: Integer;
+//   var NewType: TFieldType; var NewSize: Integer): Boolean;
+function TConnectionName.MySQLDataType(const afield: mysql_field; var NewType: TFieldType;
+                            var NewSize: Integer): Boolean;
 begin
   Result := True;
-  case AType of
-    FIELD_TYPE_TINY, FIELD_TYPE_SHORT, FIELD_TYPE_LONG:
-      begin
-      NewType := ftInteger;
-      NewSize := 0;
-      end;
+  NewSize:= 0;
+  with afield do begin
+   case ftype of
+    FIELD_TYPE_TINY,FIELD_TYPE_SHORT,FIELD_TYPE_LONG: begin
+     NewType:= ftInteger;
+    end;
     FIELD_TYPE_LONGLONG,FIELD_TYPE_INT24: begin
      newtype:= ftlargeint;
-     newsize:= 0;
     end;     
-{$ifdef mysql50}
+ {$ifdef mysql50}
     FIELD_TYPE_NEWDECIMAL,
-{$endif}
-    FIELD_TYPE_DECIMAL: if ADecimals < 5 then
-                          begin
-                          NewType := ftBCD;
-                          NewSize := 0;
-                          end
-                        else
-                          begin
-                          NewType := ftFloat;
-                          NewSize := 0;
-                          end;
-    FIELD_TYPE_FLOAT, FIELD_TYPE_DOUBLE:
-      begin
-      NewType := ftFloat;
-      NewSize := 0;
-      end;
-    FIELD_TYPE_TIMESTAMP, FIELD_TYPE_DATETIME:
-      begin
-      NewType := ftDateTime;
-      NewSize := 0;
-      end;
-    FIELD_TYPE_DATE:
-      begin
-      NewType := ftDate;
-      NewSize := 0;
-      end;
-    FIELD_TYPE_TIME:
-      begin
-      NewType := ftTime;
-      NewSize := 0;
-      end;
-    FIELD_TYPE_VAR_STRING, FIELD_TYPE_STRING, FIELD_TYPE_ENUM, FIELD_TYPE_SET:
-      begin
-      NewType := ftString;
-      NewSize := ASize;
-      end;
-  else
-    Result := False;
+ {$endif}
+    FIELD_TYPE_DECIMAL: begin
+     if Decimals < 5 then begin
+      NewType:= ftBCD;
+     end
+     else begin
+      NewType:= ftFloat;
+     end;
+    end;
+    FIELD_TYPE_FLOAT,FIELD_TYPE_DOUBLE: begin
+     NewType:= ftFloat;
+    end;
+    FIELD_TYPE_TIMESTAMP,FIELD_TYPE_DATETIME: begin
+     NewType:= ftDateTime;
+    end;
+    FIELD_TYPE_DATE: begin
+     NewType:= ftDate;
+    end;
+    FIELD_TYPE_TIME: begin
+     NewType:= ftTime;
+    end;
+    FIELD_TYPE_VAR_STRING,FIELD_TYPE_STRING,FIELD_TYPE_ENUM,
+                            FIELD_TYPE_SET: begin
+     NewType:= ftString;
+     NewSize:= length;
+    end;
+    {$ifdef mysql41}     
+    field_type_blob: begin
+     if charsetnr = 63 then begin //binary
+      newtype:= ftblob;
+     end
+     else begin 
+      newtype:= ftmemo;
+     end;
+     newsize:= sizeof(integer);
+    end;
+    {$endif}
+   else begin
+    Result:= False;
+   end;
   end;
+ end;
 end;
 
 procedure TConnectionName.AddFieldDefs(cursor: TSQLCursor;
@@ -461,25 +499,24 @@ begin
   If (C.FRes=Nil) then
     begin
 //    Writeln('res is nil');
-    MySQLError(c.FQMySQL,SErrNoQueryResult,Self);
+    MySQLError(FMySQL,SErrNoQueryResult,Self);
     end;
 //  Writeln('MySQL: have result');
   FC:=mysql_num_fields(C.FRes);
   SetLength(c.MapDSRowToMSQLRow,FC);
 
   TF := 1;
-  For I:= 0 to FC-1 do
-    begin
-    field := mysql_fetch_field_direct(C.FRES, I);
+  For I:= 0 to FC-1 do begin
+   field := mysql_fetch_field_direct(C.FRES, I);
 //    Writeln('MySQL: creating fielddef ',I+1);
 
-    if MySQLDataType(field^.ftype, field^.length, field^.decimals, DFT, DFS) then
-      begin
-      TFieldDef.Create(FieldDefs, field^.name, DFT, DFS, False, TF);
-      c.MapDSRowToMSQLRow[TF-1] := I;
-      inc(TF);
-      end
-    end;
+//    if MySQLDataType(field^.ftype, field^.length, field^.decimals, DFT, DFS) then
+   if MySQLDataType(field^,DFT,DFS) then begin
+    TFieldDef.Create(FieldDefs,field^.name,DFT,DFS,False,TF);
+    c.MapDSRowToMSQLRow[TF-1] := I;
+    inc(TF);
+   end
+  end;
 //  Writeln('MySQL: Finished adding fielddefs');
 end;
 
@@ -514,7 +551,7 @@ begin
  if C.Row=nil then
     begin
  //   Writeln('LoadFieldsFromBuffer: row=nil');
-    MySQLError(c.FQMySQL,SErrFetchingData,Self);
+    MySQLError(FMySQL,SErrFetchingData,Self);
     end;
  Row:=C.Row;
  
@@ -533,9 +570,14 @@ begin
    end;
   end
   else begin
-   alen:= field^.length;
+   if afield.datatype in [ftmemo,ftgraphic,ftblob] then begin
+    alen:= mysql_fetch_lengths(c.fres)[c.MapDSRowToMSQLRow[fno]];
+   end
+   else begin
+    alen:= field^.length;
+   end;
   end;
-  Result:= MySQLWriteData(field^.ftype,alen,
+  Result:= MySQLWriteData(cursor, field^.ftype,alen,
        aField.DataType,Row^,Buffer);
  end;
 end;
@@ -652,7 +694,8 @@ begin
   Result := Result + EncodeTime(EH, EN, ES, 0);;
 end;
 
-function TConnectionName.MySQLWriteData(AType: enum_field_types;ASize: Integer;
+function TConnectionName.MySQLWriteData(const acursor: tsqlcursor; 
+                     AType: enum_field_types;ASize: Integer;
                      AFieldType: TFieldType;Source, Dest: PChar): Boolean;
 
 var
@@ -661,7 +704,7 @@ var
   VC: Currency;
   VD: TDateTime;
   Src : String;
-
+  int1: integer;
 begin
   Result := False;
   if Source = Nil then
@@ -741,6 +784,12 @@ begin
 //      else
 //        Dest^ := #0;
      end;
+    field_type_blob: begin
+     int1:= acursor.addblobdata(source,asize);
+     move(int1,dest^,sizeof(int1));
+      //save id
+    end;
+    
   end;
   Result := True;
 end;
@@ -811,6 +860,59 @@ end;
 procedure TConnectionName.RollBackRetaining(trans: TSQLHandle);
 begin
   // Do nothing
+end;
+
+function TConnectionName.CreateBlobStream(const Field: TField;
+               const Mode: TBlobStreamMode; const acursor: tsqlcursor): TStream;
+var
+ blobid: integer;
+ int1,int2: integer;
+ str1: string;
+ bo1: boolean;
+begin
+ result:= nil;
+ if mode = bmread then begin
+  if field.getData(@blobId) then begin
+   result:= acursor.getcachedblob(blobid);
+  end;
+ end;
+end;
+
+function TConnectionName.getblobdatasize: integer;
+begin
+ result:= sizeof(integer);
+end;
+
+procedure TConnectionName.writeblobdata(const atransaction: tsqltransaction;
+               const tablename: string; const acursor: tsqlcursor;
+               const adata: pointer; const alength: integer;
+               const afield: tfield; const aparam: tparam; out newid: string);
+var
+ str1: string;
+ int1: integer;
+begin
+ setlength(str1,alength);
+ move(adata^,str1[1],alength);
+ if afield.datatype = ftmemo then begin
+  aparam.asstring:= str1;
+ end
+ else begin
+  aparam.asblob:= str1;
+ end;
+ int1:= acursor.addblobdata(str1);
+ setlength(newid,sizeof(int1));
+ move(int1,newid[1],sizeof(int1));
+end;
+
+procedure TConnectionName.setupblobdata(const afield: tfield;
+               const acursor: tsqlcursor; const aparam: tparam);
+begin
+ acursor.blobfieldtoparam(afield,aparam,afield.datatype = ftmemo);
+end;
+
+function TConnectionName.blobscached: boolean;
+begin
+ result:= true;
 end;
 
 end.

@@ -645,6 +645,8 @@ end;
 function tcustomsqlconnection.GetAsSQLText(Field : TField) : string;
 
 begin
+ result:= fieldtosql(field);
+ {
   if (not assigned(field)) or field.IsNull then Result := 'Null'
   else case field.DataType of
     ftString   : Result := '''' + field.asstring + '''';
@@ -652,12 +654,15 @@ begin
     ftDateTime : Result := '''' + FormatDateTime('yyyy-mm-dd hh:mm:ss',Field.AsDateTime) + ''''
   else
     Result := field.asstring;
-  end; {case}
+  end; 
+  }
 end;
 
 function tcustomsqlconnection.GetAsSQLText(Param: TParam) : string;
 
 begin
+ result:= paramtosql(param);
+ {
   if (not assigned(param)) or param.IsNull then Result := 'Null'
   else case param.DataType of
     ftString   : Result := '''' + param.asstring + '''';
@@ -665,7 +670,8 @@ begin
     ftDateTime : Result := '''' + FormatDateTime('yyyy-mm-dd hh:mm:ss',Param.AsDateTime) + ''''
   else
     Result := Param.asstring;
-  end; {case}
+  end;
+ }
 end;
 
 
