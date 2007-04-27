@@ -131,7 +131,8 @@ type
 
     procedure UpdateIndexDefs(var IndexDefs : TIndexDefs;
                                           const TableName : string); virtual;
-    function getprimarykeyfield(const atablename: string): string; virtual;
+    function getprimarykeyfield(const atablename: string;
+                      const acursor: tsqlcursor): string; virtual;
     function GetSchemaInfoSQL(SchemaType : TSchemaType; SchemaObjectName, SchemaPattern : string) : string; virtual;
     function CreateBlobStream(const Field: TField; const Mode: TBlobStreamMode;
                  const acursor: tsqlcursor): TStream; virtual;
@@ -794,7 +795,8 @@ begin
  //dummy
 end;
 
-function tcustomsqlconnection.getprimarykeyfield(const atablename: string): string;
+function tcustomsqlconnection.getprimarykeyfield(const atablename: string;
+                               const acursor: tsqlcursor): string;
 begin
  result:= '';
 end;
@@ -1493,7 +1495,7 @@ begin
      end;
     end;
     if database <> nil then begin
-     str1:= tcustomsqlconnection(database).getprimarykeyfield(ftablename);
+     str1:= tcustomsqlconnection(database).getprimarykeyfield(ftablename,fcursor);
      if (str1 <> '') then begin
       fprimarykeyfield:= fields.findfield(str1);
      end;

@@ -50,6 +50,7 @@ Type
     ParamBinding : TParamBinding;
     ParamReplaceString : String;
     MapDSRowToMSQLRow  : array of integer;
+    fprimarykeyfieldname: string;
   end;
 
   TConnectionName = class (TSQLConnection,iblobconnection)
@@ -104,6 +105,9 @@ Type
     procedure UpdateIndexDefs(var IndexDefs : TIndexDefs;
                                           const TableName : string); override;
 
+   function getprimarykeyfield(const atablename: string;
+                                 const acursor: tsqlcursor): string; override;
+   procedure updateprimarykeyfield(const afield: tfield); override;
    function CreateBlobStream(const Field: TField; const Mode: TBlobStreamMode;
                          const acursor: tsqlcursor): TStream; override;
    function getblobdatasize: integer; override;
@@ -137,8 +141,10 @@ Type
 
 implementation
 
-uses dbconst;
-
+uses dbconst,msebufdataset;
+type
+ tmsebufdataset1 = class(tmsebufdataset);
+ 
 { TConnectionName }
 
 Resourcestring
@@ -508,6 +514,12 @@ begin
   TF := 1;
   For I:= 0 to FC-1 do begin
    field := mysql_fetch_field_direct(C.FRES, I);
+   with field^ do begin
+    if (flags and (pri_key_flag or auto_increment_flag) = 
+              (pri_key_flag or auto_increment_flag)) then begin
+     c.fprimarykeyfieldname:= name;
+    end;
+   end;
 //    Writeln('MySQL: creating fielddef ',I+1);
 
 //    if MySQLDataType(field^.ftype, field^.length, field^.decimals, DFT, DFS) then
@@ -913,6 +925,19 @@ end;
 function TConnectionName.blobscached: boolean;
 begin
  result:= true;
+end;
+
+function TConnectionName.getprimarykeyfield(const atablename: string;
+                        const acursor: tsqlcursor): string;
+begin
+ result:= tcursorname(acursor).fprimarykeyfieldname;
+end;
+
+procedure TConnectionName.updateprimarykeyfield(const afield: tfield);
+begin
+ with tmsebufdataset1(afield.dataset) do begin
+  setcurvalue(afield,mysql_insert_id(fmysql));
+ end;
 end;
 
 end.

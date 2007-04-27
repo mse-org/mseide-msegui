@@ -105,7 +105,8 @@ type
    procedure execsql(const asql: string);
    procedure UpdateIndexDefs(var IndexDefs : TIndexDefs;
                                const TableName : string); override;
-   function getprimarykeyfield(const atablename: string): string; override;
+   function getprimarykeyfield(const atablename: string;
+                                     const acursor: tsqlcursor): string; override;
    procedure updateprimarykeyfield(const afield: tfield); override;
   public
    constructor create(aowner: tcomponent); override;
@@ -785,7 +786,8 @@ begin
  checkerror(sqlite3_exec(fhandle,pchar(asql),@execscallback,@result,nil));
 end;
 
-function tsqlite3connection.getprimarykeyfield(const atablename: string): string;
+function tsqlite3connection.getprimarykeyfield(const atablename: string;
+                                const acursor: tsqlcursor): string;
 var
  int1,int2: integer;
  ar1: stringararty;
@@ -806,7 +808,7 @@ procedure tsqlite3connection.UpdateIndexDefs(var IndexDefs: TIndexDefs;
 var
  str1: string;
 begin
- str1:= getprimarykeyfield(tablename);
+ str1:= getprimarykeyfield(tablename,nil);
  if str1 <> '' then begin
   indexdefs.add('$PRIMARY_KEY$',str1,[ixPrimary,ixUnique]);
  end;
