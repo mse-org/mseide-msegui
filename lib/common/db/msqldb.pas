@@ -1529,17 +1529,17 @@ var
  int1: integer;
 begin
  int1:= recno;
- disablecontrols;
- try
+// disablecontrols;            //there is no updtestate in enablecontols
+// try
   if closetransactiononrefresh then begin
    transaction.active:= false;
   end;
   active:= false;
   active:= true;
   setrecno1(int1,true);
- finally
-  enablecontrols;
- end;
+// finally
+//  enablecontrols;
+// end;
 end;
 
 procedure TSQLQuery.ExecSQL;

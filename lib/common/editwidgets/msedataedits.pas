@@ -801,6 +801,7 @@ type
    procedure setframe(const avalue: tdropdownbuttonframe);
    function getframe: tdropdownbuttonframe;
   protected
+   function getcellframe: framety; override;
    procedure internalcreateframe; override;
    procedure dokeydown(var info: keyeventinfoty); override;
    procedure mouseevent(var info: mouseeventinfoty); override;
@@ -3771,6 +3772,11 @@ begin
  if fdropdown <> nil then begin
   fdropdown.updatereadonlystate;
  end;
+end;
+
+function tcustomcalendardatetimeedit.getcellframe: framety;
+begin
+ result:= subframe(getinnerstframe,tdropdownbuttonframe(fframe).buttonframe);
 end;
 
 end.
