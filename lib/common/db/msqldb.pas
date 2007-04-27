@@ -1634,8 +1634,9 @@ end;
 Procedure TSQLQuery.UpdateIndexDefs;
 
 begin
-  if assigned(DataBase) then
-    tcustomsqlconnection(database).UpdateIndexDefs(FIndexDefs,FTableName);
+ if assigned(DataBase) and (ftablename <> '') then begin
+  tcustomsqlconnection(database).UpdateIndexDefs(FIndexDefs,FTableName);
+ end;
 end;
 
 Procedure TSQLQuery.internalApplyRecUpdate(UpdateKind : TUpdateKind);
