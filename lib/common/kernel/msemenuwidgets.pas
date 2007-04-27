@@ -1505,7 +1505,7 @@ begin
  inherited;
  if (event = oe_changed) and (sender = fmenucomp) and
                                   not (csloading in componentstate) then begin
-  updatelayout;
+  assigntemplate(fmenucomp.template);                                  
  end; 
 end;
 
