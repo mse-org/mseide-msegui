@@ -93,6 +93,7 @@ type
    procedure DoAfterDelete; override;
    procedure dataevent(event: tdataevent; info: ptrint); override;
    function wantblobfetch: boolean; override;
+   function closetransactiononrefresh: boolean; override;
       
   public
    constructor create(aowner: tcomponent); override;
@@ -1107,6 +1108,11 @@ end;
 function tmsesqlquery.wantblobfetch: boolean;
 begin
  result:= (dso_cacheblobs in fcontroller.options);
+end;
+
+function tmsesqlquery.closetransactiononrefresh: boolean;
+begin
+ result:= (dso_refreshtransaction in fcontroller.options);
 end;
 
 function tmsesqlquery.islocal: boolean;

@@ -337,6 +337,7 @@ type
    procedure connect(const aexecute: boolean);
    procedure disconnect;
    procedure InternalOpen; override;
+   function closetransactiononrefresh: boolean; virtual;
    procedure internalrefresh; override;
    function  GetCanModify: Boolean; override;
    Procedure internalApplyRecUpdate(UpdateKind : TUpdateKind);
@@ -1530,7 +1531,9 @@ begin
  int1:= recno;
  disablecontrols;
  try
-//  transaction.active:= false;
+  if closetransactiononrefresh then begin
+   transaction.active:= false;
+  end;
   active:= false;
   active:= true;
   setrecno1(int1,true);
@@ -2150,6 +2153,11 @@ begin
  if fbeforeexecute <> nil then begin
   fbeforeexecute.freenotification(self);
  end;
+end;
+
+function TSQLQuery.closetransactiononrefresh: boolean;
+begin
+ result:= false;
 end;
 
 { TSQLCursor }

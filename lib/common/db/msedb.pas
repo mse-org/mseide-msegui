@@ -667,7 +667,8 @@ type
    property items[const index: integer]: tfield read getitems write setitems; default;
  end;
 
- datasetoptionty = (dso_utf8,dso_cancelupdateonerror,dso_cancelupdatesonerror,
+ datasetoptionty = (dso_utf8,dso_refreshtransaction,
+                         dso_cancelupdateonerror,dso_cancelupdatesonerror,                         
                          dso_autoapply,dso_autocommitret,dso_cacheblobs,
                          dso_offline, //disconnect database after open
                          dso_local);  //do not connect database on open
