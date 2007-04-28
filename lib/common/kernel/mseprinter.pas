@@ -197,6 +197,9 @@ type
    procedure updateframe;
    procedure beginpage; virtual;
    procedure endpage; virtual;
+   procedure dotextout(const text: richstringty; const dest: rectty;
+                        const flags: textflagsty;
+                        const tabdist: real; afontcolorshadow: colorty);
    procedure textout(const text: richstringty; const dest: rectty;
                         const flags: textflagsty;
                         const tabdist: real); virtual; abstract;
@@ -739,9 +742,39 @@ begin
  end;
 end;
 
+procedure tcustomprintercanvas.dotextout(const text: richstringty;
+               const dest: rectty; const flags: textflagsty;
+               const tabdist: real; afontcolorshadow: colorty);
+var
+ col1: colorty;
+begin
+ if tf_grayed in flags then begin
+  afontcolorshadow:= cl_white;
+ end;
+ if afontcolorshadow <> cl_none then begin
+  col1:= fdrawinfo.acolorforeground;
+  fdrawinfo.acolorforeground:= afontcolorshadow;
+  checkgcstate([cs_acolorforeground]);
+  textout(text,moverect(dest,makepoint(1,1)),flags,tabdist);
+  if tf_grayed in flags then begin
+   fdrawinfo.acolorforeground:= cl_dkgray;
+  end
+  else begin
+   fdrawinfo.acolorforeground:= col1;
+  end;
+  checkgcstate([cs_acolorforeground]);
+ end;  
+ textout(text,dest,flags,tabdist);
+ if tf_grayed in flags then begin
+  fdrawinfo.acolorforeground:= col1;
+  checkgcstate([cs_acolorforeground]);
+ end;
+end;
+
 procedure tcustomprintercanvas.drawtext(var info: drawtextinfoty);
 var
  afontnum: integer;
+ acolorshadow: colorty;
  tab1: tcustomtabulators;
  ar1: richstringarty;
  int1,int2,int3,int4,int5: integer;
@@ -763,9 +796,10 @@ begin
  ar1:= nil; //compiler warning
  with fdrawinfo do begin
   afonthandle1:= tfont1(font).gethandle;
-  with fvaluepo^.font do begin
+  with {fvaluepo^.}font do begin
    acolorforeground:= color;
    acolorbackground:= colorbackground;
+   acolorshadow:= colorshadow;
   end;
   checkgcstate([cs_font,cs_acolorforeground,cs_acolorbackground]);
  end;
@@ -811,7 +845,7 @@ begin
        if (tf_xjustify in flags) and (high(justifychars) > 0) and 
                    (int1 < high(lineinfos)) then begin
         rstr1:= richcopy(text,liindex,justifychars[0]-liindex);
-        textout(rstr1,rect1,flags2,0); //first word
+        dotextout(rstr1,rect1,flags2,0,acolorshadow); //first word
         rea1:= (dest.cx - liwidth + getstringwidth(' ') * length(justifychars)) /
                          length(justifychars); //gap width
         rect2:= rect1;        //x justify text
@@ -829,15 +863,15 @@ begin
          int3:= int3 + int5;
          rstr1:= richcopy(text,justifychars[int2]+1,justifychars[int2+1] - 
                                                          justifychars[int2] - 1);
-         textout(rstr1,rect2,flags2 + [tf_xcentered],0);
+         dotextout(rstr1,rect2,flags2 + [tf_xcentered],0,acolorshadow);
         end;
         rstr1:= richcopy(text,justifychars[high(justifychars)]+1,
                            liindex+licount-justifychars[high(justifychars)]-1);
-        textout(rstr1,rect1,flags2+[tf_right],0); //last word
+        dotextout(rstr1,rect1,flags2+[tf_right],0,acolorshadow); //last word
        end
        else begin
         rstr1:= richcopy(text,liindex,licount);
-        textout(rstr1,rect1,flags1,0);
+        dotextout(rstr1,rect1,flags1,0,acolorshadow);
        end;
        inc(rect1.y,rect1.cy);
       end;
@@ -845,7 +879,7 @@ begin
     end
     else begin //single line
      if countchars(text.text,c_tab) = 0 then begin
-      textout(text,dest,flags,0);
+      dotextout(text,dest,flags,0,acolorshadow);
      end
      else begin
       if tabulators = nil then begin
@@ -857,20 +891,20 @@ begin
       if tab1.count = 0 then begin
        if tab1.defaultdist = 0 then begin      //has no tabs
         replacechar(text.text,c_tab,' ');
-        textout(text,dest,flags,0);
+        dotextout(text,dest,flags,0,acolorshadow);
        end
        else begin
         ar1:= splitrichstring(text,c_tab);
-        textout(ar1[0],dest,flags,0);
+        dotextout(ar1[0],dest,flags,0,acolorshadow);
         rea1:= tab1.defaultdist*mmtoprintscale;
         for int1:= 1 to high(ar1) do begin     
-         textout(ar1[int1],dest,flags,rea1);
+         dotextout(ar1[int1],dest,flags,rea1,acolorshadow);
         end;
        end;
       end
       else begin
        ar1:= splitrichstring(text,c_tab);
-       textout(ar1[0],dest,flags,0);
+       dotextout(ar1[0],dest,flags,0,acolorshadow);
        for int1:= 1 to high(ar1) do begin     
         if int1 > tab1.count then begin
          rstr1.text:= ' ';
@@ -880,7 +914,7 @@ begin
           rstr1:= richconcat(rstr1,' ');
           rstr1:= richconcat(rstr1,ar1[int2]);
          end;
-         textout(rstr1,dest,flags-[tf_right,tf_xcentered],-1); //print rest of string
+         dotextout(rstr1,dest,flags-[tf_right,tf_xcentered],-1,acolorshadow); //print rest of string
          break;
         end;
         flags1:= flags - [tf_xcentered,tf_right];
@@ -892,18 +926,19 @@ begin
          if kind = tak_decimal then begin
           int2:= msestrrscan(ar1[int1].text,widechar(decimalseparator));
           if int2 > 0 then begin
-           textout(richcopy(ar1[int1],1,int2-1),makerect(round(pos*ppmm),dest.y,0,
-                     dest.cy),flags1,0); //int
-           textout(richcopy(ar1[int1],int2,bigint),makerect(0,dest.y,0,
-                     dest.cy),flags1-[tf_right],-1); //frac
+           dotextout(richcopy(ar1[int1],1,int2-1),makerect(round(pos*ppmm),dest.y,0,
+                     dest.cy),flags1,0,acolorshadow); //int
+           dotextout(richcopy(ar1[int1],int2,bigint),makerect(0,dest.y,0,
+                     dest.cy),flags1-[tf_right],-1,acolorshadow); //frac
           end
           else begin
-           textout(ar1[int1],makerect(round(pos*ppmm),dest.y,0,
-                     dest.cy),flags1,0); //no frac
+           dotextout(ar1[int1],makerect(round(pos*ppmm),dest.y,0,
+                     dest.cy),flags1,0,acolorshadow); //no frac
           end;
          end
          else begin
-          textout(ar1[int1],makerect(round(pos*ppmm),dest.y,0,dest.cy),flags1,0);
+          dotextout(ar1[int1],makerect(round(pos*ppmm),dest.y,0,dest.cy),flags1,
+                      0,acolorshadow);
          end;
         end;
        end;
