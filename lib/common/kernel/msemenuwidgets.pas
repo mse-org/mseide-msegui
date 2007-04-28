@@ -56,6 +56,7 @@ type
    procedure setactiveitem(const value: integer);
    procedure applicationactivechanged(const avalue: boolean);
   protected
+   flocalframeandface: boolean;
    procedure objectevent(const sender: tobject; const event: objecteventty); override;
    function translatetoscreen(const value: pointty): pointty; virtual;
    procedure updatelayout; virtual;
@@ -132,8 +133,8 @@ type
  tmainmenuwidget = class(tcustommainmenuwidget)
   private
    foptions: mainmenuwidgetoptionsty;
-   procedure setmenu(const avalue: tmainmenu);
-   function getmenu: tmainmenu;
+   procedure setmenu(const avalue: twidgetmainmenu);
+   function getmenu: twidgetmainmenu;
    procedure setoptions(const avalue: mainmenuwidgetoptionsty);
   protected
 //   function checkprevpopuparea(const apos: pointty): boolean; override;
@@ -144,7 +145,7 @@ type
    destructor destroy; override;
    procedure initnewcomponent(const ascale: real); override;
   published
-   property menu: tmainmenu read getmenu write setmenu;   
+   property menu: twidgetmainmenu read getmenu write setmenu;   
    property options: mainmenuwidgetoptionsty read foptions write setoptions default [];
    property popupdirection: graphicdirectionty read flayout.popupdirection write 
                                   flayout.popupdirection default gd_down;
@@ -621,24 +622,26 @@ end;
 procedure tpopupmenuwidget.updatetemplates;
 begin
  with ftemplates do begin
-  if frame <> nil then begin
-   if fframe = nil then begin
+  if not flocalframeandface then begin
+   if frame <> nil then begin
+    if fframe = nil then begin
+     internalcreateframe;
+    end;
+    fframe.assign(frame);
+   end
+   else begin
+    freeandnil(fframe); //restore original values
     internalcreateframe;
    end;
-   fframe.assign(frame);
-  end
-  else begin
-   freeandnil(fframe); //restore original values
-   internalcreateframe;
-  end;
-  if face <> nil then begin
-   if fface = nil then begin
-    internalcreateface;
+   if face <> nil then begin
+    if fface = nil then begin
+     internalcreateface;
+    end;
+    fface.assign(face);
+   end
+   else begin
+    freeandnil(fface);
    end;
-   fface.assign(face);
-  end
-  else begin
-   freeandnil(fface);
   end;
   if itemframe <> nil then begin
    flayout.itemframetemplate:= itemframe.template;
@@ -1445,7 +1448,8 @@ end;
 
 constructor tmainmenuwidget.create(aowner: tcomponent);
 begin
- setlinkedvar(tmainmenu.create(self),tmsecomponent(fmenucomp));
+ flocalframeandface:= true;
+ setlinkedvar(twidgetmainmenu.create(self),tmsecomponent(fmenucomp));
  fmenucomp.setsubcomponent(true);
  inherited create(nil,fmenucomp.menu,nil,aowner,fmenucomp);
  if csdesigning in componentstate then begin
@@ -1473,14 +1477,14 @@ begin
  bounds_cx:= 100;
 end;
 
-procedure tmainmenuwidget.setmenu(const avalue: tmainmenu);
+procedure tmainmenuwidget.setmenu(const avalue: twidgetmainmenu);
 begin
  fmenucomp.assign(avalue);
 end;
 
-function tmainmenuwidget.getmenu: tmainmenu;
+function tmainmenuwidget.getmenu: twidgetmainmenu;
 begin
- result:= tmainmenu(fmenucomp);
+ result:= twidgetmainmenu(fmenucomp);
 end;
 
 procedure tmainmenuwidget.setoptions(const avalue: mainmenuwidgetoptionsty);

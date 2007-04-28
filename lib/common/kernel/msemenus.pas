@@ -261,7 +261,7 @@ type
                  const aseparator: boolean = true); overload;
  end;
 
- tmainmenu = class(tmenu)
+ tcustommainmenu = class(tcustommenu)
   private
    fpopuptemplate: menutemplatety;
    procedure setpopupframetemplate(const avalue: tframecomp);
@@ -285,7 +285,38 @@ type
    property popupitemfacetemplate: tfacecomp read fpopuptemplate.itemface
                       write setpopupitemfacetemplate;
  end;
+ 
+ tmainmenu = class(tcustommainmenu)
+  published
+   property menu;
+   property options;
+   property onupdate;
+   property frametemplate;
+   property facetemplate;
+   property itemframetemplate;
+   property itemfacetemplate;
 
+   property popupframetemplate;
+   property popupfacetemplate;
+   property popupitemframetemplate;
+   property popupitemfacetemplate;
+ end;
+
+ twidgetmainmenu = class(tcustommainmenu)
+  published
+   property menu;
+   property options;
+   property onupdate;
+//   property frametemplate;
+//   property facetemplate;
+   property itemframetemplate;
+   property itemfacetemplate;
+
+   property popupframetemplate;
+   property popupfacetemplate;
+   property popupitemframetemplate;
+   property popupitemfacetemplate;
+ end; 
 procedure freetransientmenu(var amenu: tcustommenu);
 
 implementation
@@ -1210,55 +1241,55 @@ begin
  end;
 end;
 
-{ tmainmenu }
+{ tcustommainmenu }
 
-constructor tmainmenu.create(aowner: tcomponent);
+constructor tcustommainmenu.create(aowner: tcomponent);
 begin
  inherited;
  application.registeronidle({$ifdef FPC}@{$endif}doidle);
  fmenu.onchange:= {$ifdef FPC}@{$endif}menuchanged;
 end;
 
-destructor tmainmenu.destroy;
+destructor tcustommainmenu.destroy;
 begin
  application.unregisteronidle({$ifdef FPC}@{$endif}doidle);
  inherited;
 end;
 
-procedure tmainmenu.setpopupframetemplate(const avalue: tframecomp);
+procedure tcustommainmenu.setpopupframetemplate(const avalue: tframecomp);
 begin
  if avalue <> fpopuptemplate.frame then begin
   setlinkedvar(avalue,tmsecomponent(fpopuptemplate.frame));
  end;
 end;
 
-procedure tmainmenu.setpopupfacetemplate(const avalue: tfacecomp);
+procedure tcustommainmenu.setpopupfacetemplate(const avalue: tfacecomp);
 begin
  if avalue <> fpopuptemplate.face then begin
   setlinkedvar(avalue,tmsecomponent(fpopuptemplate.face));
  end;
 end;
 
-procedure tmainmenu.setpopupitemframetemplate(const avalue: tframecomp);
+procedure tcustommainmenu.setpopupitemframetemplate(const avalue: tframecomp);
 begin
  if avalue <> fpopuptemplate.itemframe then begin
   setlinkedvar(avalue,tmsecomponent(fpopuptemplate.itemframe));
  end;
 end;
 
-procedure tmainmenu.setpopupitemfacetemplate(const avalue: tfacecomp);
+procedure tcustommainmenu.setpopupitemfacetemplate(const avalue: tfacecomp);
 begin
  if avalue <> fpopuptemplate.itemface then begin
   setlinkedvar(avalue,tmsecomponent(fpopuptemplate.itemface));
  end;
 end;
 
-procedure tmainmenu.doidle(var again: boolean);
+procedure tcustommainmenu.doidle(var again: boolean);
 begin
  doupdate;
 end;
 
-procedure tmainmenu.menuchanged(const sender: tmenuitem);
+procedure tcustommainmenu.menuchanged(const sender: tmenuitem);
 begin
  if (fobjectlinker <> nil) and not (csloading in componentstate) then begin
   fobjectlinker.sendevent(oe_changed);
