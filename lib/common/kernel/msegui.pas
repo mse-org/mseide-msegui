@@ -460,6 +460,7 @@ type
   private
    procedure setcolorclient(const Value: colorty);
    procedure setcolorframe(const Value: colorty);
+   procedure setcolorframeactive(const avalue: colorty);
    procedure setcolordkshadow(const avalue: colorty);
    procedure setcolorshadow(const avalue: colorty);
    procedure setcolorlight(const avalue: colorty);
@@ -492,6 +493,8 @@ type
                         write setframewidth default 0;
    property colorframe: colorty read fi.colorframe 
                         write setcolorframe default cl_transparent;
+   property colorframeactive: colorty read fi.colorframeactive 
+                        write setcolorframeactive default cl_default;
    property framei_left: integer read fi.innerframe.left 
                        write setframei_left default 0;
    property framei_top: integer read fi.innerframe.top 
@@ -3435,6 +3438,12 @@ end;
 procedure tframetemplate.setcolorframe(const Value: colorty);
 begin
  fi.colorframe:= Value;
+ changed;
+end;
+
+procedure tframetemplate.setcolorframeactive(const avalue: colorty);
+begin
+ fi.colorframeactive:= avalue;
  changed;
 end;
 
