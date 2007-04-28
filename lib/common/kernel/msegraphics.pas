@@ -273,7 +273,7 @@ type
   (cs_regioncopy,cs_clipregion,cs_origin,cs_gc,
    cs_acolorbackground,cs_acolorforeground,cs_color,cs_colorbackground,
    cs_dashes,cs_linewidth,cs_capstyle,cs_joinstyle,
-   cs_fonthandle,cs_font,cs_fontcolor,cs_fontcolorbackground,
+   cs_fonthandle,cs_font,cs_fontcolor,cs_fontcolorbackground,cs_fontcolorshadow,
    cs_rasterop,cs_brush,cs_brushorigin,
    cs_painted,cs_internaldrawtext{,cs_monochrome});
  canvasstatesty = set of canvasstatety;
@@ -312,6 +312,7 @@ type
   handles: array[0..fontstylehandlemask] of fontnumty;
   color: colorty;
   colorbackground: colorty;
+  colorshadow: colorty;
   style: fontstylesty;
   height: integer;
   width: integer;
@@ -337,6 +338,8 @@ type
    procedure setextraspace(const avalue: integer);
    procedure setcolorbackground(const Value: colorty);
    function getcolorbackground: colorty;
+   procedure setcolorshadow(const Value: colorty);
+   function getcolorshadow: colorty;
    procedure setcolor(const Value: colorty);
    function getcolor: colorty;
    procedure setheight(const avalue: integer);
@@ -401,6 +404,8 @@ type
    property color: colorty read getcolor write setcolor default cl_text;
    property colorbackground: colorty read getcolorbackground
                  write setcolorbackground default cl_transparent;
+   property colorshadow: colorty read getcolorshadow
+                 write setcolorshadow default cl_none;
    property height: integer read getheight write setheight default 0;
    property width: integer read getwidth write setwidth default 0;
                   //avg. character width in 1/10 pixel, 0 = default
@@ -978,6 +983,7 @@ const
                 cs_acolorbackground,cs_acolorforeground,
                 cs_color,cs_colorbackground,
                 cs_fonthandle,cs_font,cs_fontcolor,cs_fontcolorbackground,
+                cs_fontcolorshadow,
                 cs_brush,cs_brushorigin] + linecanvasstates;
 
  defaultframecolors: framecolorinfoty =
@@ -2290,8 +2296,9 @@ begin
  end;
  finfopo^.color:= cl_text;
  finfopo^.colorbackground:= cl_transparent;
+ finfopo^.colorshadow:= cl_none;
  updatehandlepo;
- dochanged([cs_fontcolor,cs_fontcolorbackground]);
+ dochanged([cs_fontcolor,cs_fontcolorbackground,cs_fontcolorshadow]);
 end;
 
 destructor tfont.destroy;
@@ -2419,6 +2426,19 @@ begin
  result:= finfopo^.colorbackground;
 end;
 
+procedure tfont.setcolorshadow(const Value: colorty);
+begin
+ if finfopo^.colorshadow <> value then begin
+  finfopo^.colorshadow := Value;
+  dochanged([cs_fontcolorshadow]);
+ end;
+end;
+
+function tfont.getcolorshadow: colorty;
+begin
+ result:= finfopo^.colorshadow;
+end;
+
 procedure tfont.setcolor(const Value: colorty);
 begin
  if finfopo^.color <> value then begin
@@ -2439,6 +2459,10 @@ begin
     if finfopo^.colorbackground <> self.finfopo^.colorbackground then begin
      self.finfopo^.colorbackground:= finfopo^.colorbackground;
      include(changed,cs_fontcolorbackground);
+    end;
+    if finfopo^.colorshadow <> self.finfopo^.colorshadow then begin
+     self.finfopo^.colorshadow:= finfopo^.colorshadow;
+     include(changed,cs_fontcolorshadow);
     end;
     if finfopo^.color <> self.finfopo^.color then begin
      self.finfopo^.color:= finfopo^.color;
@@ -3663,6 +3687,8 @@ procedure tcanvas.drawstring(const atext: pmsechar; acount: integer; const apos:
                         const afont: tfont = nil; const grayed: boolean = false);
 var
  afontnum: integer;
+ acolorshadow: colorty;
+ acolor: colorty;
 begin
  with fdrawinfo do begin
   if afont <> nil then begin //foreign font
@@ -3670,36 +3696,49 @@ begin
     afontnum:= gethandleforcanvas(self);
     afonthandle1:= afontnum;
 //    afonthandle:= getfontdata(afontnum)^.font;
-    acolorforeground:= color;
+    acolor:= color;
     acolorbackground:= colorbackground;
+    acolorshadow:= colorshadow;
    end;
   end
   else begin
    afonthandle1:= ffont.gethandle;
 //   afonthandle:= ffont.getdatapo^.font;
    with fvaluepo^.font do begin
-    acolorforeground:= color;
+    acolor:= color;
     acolorbackground:= colorbackground;
+    acolorshadow:= colorshadow;
    end;
   end;
   with fdrawinfo.text16pos do begin
    pos:= @apos;
    text:= pointer(atext);
    count:= acount;
-   if grayed then begin
+   if grayed or (acolorshadow <> cl_none) then begin
     inc(pos^.x);
     inc(pos^.y);
-    acolorforeground:= cl_white;
+    if grayed then begin
+     acolorforeground:= cl_white;
+    end
+    else begin
+     acolorforeground:= acolorshadow;
+    end;
     acolorbackground:= cl_transparent;
     checkgcstate([cs_font,cs_acolorforeground,cs_acolorbackground]);
     gdi(gdi_drawstring16);
     dec(pos^.x);
     dec(pos^.y);
-    acolorforeground:= cl_dkgray;
+    if grayed then begin
+     acolorforeground:= cl_dkgray;
+    end
+    else begin
+     acolorforeground:= acolor;
+    end;
     checkgcstate([cs_acolorforeground]);
     gdi(gdi_drawstring16);
    end
    else begin
+    acolorforeground:= acolor;
     checkgcstate([cs_font,cs_acolorforeground,cs_acolorbackground]);
     gdi(gdi_drawstring16);
    end;
