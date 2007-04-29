@@ -2332,6 +2332,7 @@ begin             //updatelayout
    with fbuttons[int1] do begin
     imagelist:= stockobjects.glyphs;
     imagenr:= integer(stg_arrowrightsmall) + int1;
+    imagenrdisabled:= -2;
     color:= fcolorbutton;
     tag:= int1;
     doexecute:= {$ifdef FPC}@{$endif}execute;
