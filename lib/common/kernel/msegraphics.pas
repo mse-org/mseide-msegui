@@ -120,6 +120,7 @@ const
  cl_functional = colorty($80000000);
  cl_mapped =     colorty($90000000);
  cl_namedrgb =   colorty($a0000000);
+ cl_user =       colorty($b0000000);
 
  cl_none =                   cl_functional + 0;
  cl_default =                cl_functional + 1;
@@ -176,6 +177,19 @@ const
  cl_ltyellow =               cl_namedrgb + 24;
 
  cl_lastnamedrgb =           cl_namedrgb + 25;
+ 
+ cl_user0 =                  cl_user     + 0;
+ cl_user1 =                  cl_user     + 1;
+ cl_user2 =                  cl_user     + 2;
+ cl_user3 =                  cl_user     + 3;
+ cl_user4 =                  cl_user     + 4;
+ cl_user5 =                  cl_user     + 5;
+ cl_user6 =                  cl_user     + 6;
+ cl_user7 =                  cl_user     + 7;
+ cl_user8 =                  cl_user     + 8;
+ cl_user9 =                  cl_user     + 9;
+ 
+ cl_lastuser =               cl_user     + 10;
 
 type
 
@@ -186,18 +200,20 @@ type
  pcolorinfoty = ^colorinfoty;
  colorinfoarty = array of colorinfoty;
 
- colormapsty = (cm_rgb,cm_functional,cm_mapped,cm_namedrgb);
+ colormapsty = (cm_rgb,cm_functional,cm_mapped,cm_namedrgb,cm_user);
  colormapty = array[colormapsty] of cardinalarty;
 
 const
  functionalcolorcount = integer(cl_lastfunctional)-integer(cl_functional);
  mappedcolorcount = integer(cl_lastmapped)-integer(cl_mapped);
  namedrgbcolorcount = integer(cl_lastnamedrgb)-integer(cl_namedrgb);
+ usercolorcount = integer(cl_lastuser)-integer(cl_user);
  mapcolorcounts: array[colormapsty] of integer = (
               0,
               functionalcolorcount,
               mappedcolorcount,
-              namedrgbcolorcount
+              namedrgbcolorcount,
+              usercolorcount
             );
 
  defaultfunctional: array[0..functionalcolorcount-1]
@@ -268,6 +284,21 @@ const
     (name: 'cl_ltyellow';  rgb:              (blue: $a0; green: $ff; red: $ff; res: $00))  //24
    );
 
+ defaultuser: array[0..usercolorcount-1]
+                     of colorinfoty =
+   (
+    (name: 'cl_user0';  rgb:                 (blue: $00; green: $00; red: $00; res: $00)), //0
+    (name: 'cl_user1';  rgb:                 (blue: $00; green: $00; red: $00; res: $00)), //1
+    (name: 'cl_user2';  rgb:                 (blue: $00; green: $00; red: $00; res: $00)), //2
+    (name: 'cl_user3';  rgb:                 (blue: $00; green: $00; red: $00; res: $00)), //3
+    (name: 'cl_user4';  rgb:                 (blue: $00; green: $00; red: $00; res: $00)), //4
+    (name: 'cl_user5';  rgb:                 (blue: $00; green: $00; red: $00; res: $00)), //5
+    (name: 'cl_user6';  rgb:                 (blue: $00; green: $00; red: $00; res: $00)), //6
+    (name: 'cl_user7';  rgb:                 (blue: $00; green: $00; red: $00; res: $00)), //7
+    (name: 'cl_user8';  rgb:                 (blue: $00; green: $00; red: $00; res: $00)), //8
+    (name: 'cl_user9';  rgb:                 (blue: $00; green: $00; red: $00; res: $00))  //9
+   );
+   
 type
  canvasstatety =
   (cs_regioncopy,cs_clipregion,cs_origin,cs_gc,
@@ -1147,6 +1178,12 @@ begin
     exit;
    end;
   end;
+  for ca1:= 0 to mapcolorcounts[cm_user] - 1 do begin
+   if defaultuser[ca1].name = value then begin
+    result:= colorty(ca1 + cardinal(cl_user));
+    exit;
+   end;
+  end;
   gdierror(gde_invalidcolor);
  end;
 end;
@@ -1172,7 +1209,13 @@ begin
      result:= defaultfunctional[cardinal(value) - cardinal(cl_functional)].name;
     end
     else begin
-     result:= 'Invalid ($'+hextostr(cardinal(value),8)+')';
+     if (cardinal(value) >= cardinal(cl_user)) and
+          (cardinal(value) < cardinal(cl_lastuser)) then begin
+      result:= defaultuser[cardinal(value) - cardinal(cl_user)].name;
+     end
+     else begin
+      result:= 'Invalid ($'+hextostr(cardinal(value),8)+')';
+     end;
     end;
    end;
   end;
@@ -1183,7 +1226,7 @@ function getcolornames: msestringarty;
 var
  int1,int2: integer;
 begin
- setlength(result,namedrgbcolorcount+mappedcolorcount+functionalcolorcount);
+ setlength(result,namedrgbcolorcount+mappedcolorcount+functionalcolorcount+usercolorcount);
  for int1:= 0 to high(defaultnamedrgb) do begin
   result[int1]:= defaultnamedrgb[int1].name;
  end;
@@ -1195,13 +1238,17 @@ begin
  for int1:= 0 to high(defaultfunctional) do begin
   result[int1+int2]:= defaultfunctional[int1].name;
  end;
+ inc(int2,functionalcolorcount);
+ for int1:= 0 to high(defaultuser) do begin
+  result[int1+int2]:= defaultuser[int1].name;
+ end;
 end;
 
 function getcolorvalues: colorarty;
 var
  int1,int2: integer;
 begin
- setlength(result,namedrgbcolorcount+mappedcolorcount+functionalcolorcount);
+ setlength(result,namedrgbcolorcount+mappedcolorcount+functionalcolorcount+usercolorcount);
  for int1:= 0 to high(defaultnamedrgb) do begin
   result[int1]:= cl_namedrgb + cardinal(int1);
  end;
@@ -1212,6 +1259,10 @@ begin
  inc(int2,mappedcolorcount);
  for int1:= 0 to high(defaultfunctional) do begin
   result[int1+int2]:= cl_functional + cardinal(int1);
+ end;
+ inc(int2,functionalcolorcount);
+ for int1:= 0 to high(defaultuser) do begin
+  result[int1+int2]:= cl_user + cardinal(int1);
  end;
 end;
 
@@ -1525,6 +1576,9 @@ begin
   end;
   cm_namedrgb: begin
    result:= @defaultnamedrgb[index];
+  end;
+  cm_user: begin
+   result:= @defaultuser[index];
   end;
   else begin
    result:= nil;
