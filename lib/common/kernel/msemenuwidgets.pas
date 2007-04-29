@@ -1310,6 +1310,9 @@ begin
                   not (es_modal in info. eventstate) then begin
   dokeydown(info);
  end;
+ if not (es_processed in info.eventstate) and (fmenucomp <> nil) then begin
+  fmenucomp.menu.doshortcut(info);
+ end;
 end;
 
 procedure tcustommainmenuwidget.childdeactivated(const sender: tpopupmenuwidget);

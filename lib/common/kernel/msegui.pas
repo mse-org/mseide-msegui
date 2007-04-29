@@ -39,7 +39,7 @@ type
                    ow_focusbackonesc,
                    ow_nochildshortcut, //do not propagate shortcuts to parent
                    ow_noparentshortcut, //do not react to shortcuts from parent
-                   globalshortcut,ow_localshortcut,
+                   ow_globalshortcut,ow_localshortcut,
                    ow_canclosenil, //canclose calls canclose(nil)
                    ow_mousetransparent,ow_mousewheel,ow_noscroll,ow_destroywidgets,
                    ow_hinton,ow_hintoff,ow_multiplehint,ow_timedhint,
