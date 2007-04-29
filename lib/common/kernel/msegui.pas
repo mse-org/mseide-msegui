@@ -942,6 +942,7 @@ type
    procedure dofocus; virtual;
    procedure dodefocus; virtual;
    procedure dochildfocused(const sender: twidget); virtual;
+   procedure dofocuschanged(const oldwidget,newwidget: twidget); virtual;
    procedure domousewheelevent(var info: mousewheeleventinfoty); virtual;
 
    procedure reflectmouseevent(var info: mouseeventinfoty);
@@ -1415,6 +1416,7 @@ type
  pwindowaty = ^windowaty;
 
  activechangeeventty = procedure(const oldwindow,newwindow: twindow) of object;
+ focuschangeeventty = procedure(const oldwidget,newwidget: twidget) of object;
  windoweventty = procedure(const awindow: twindow) of object;
  winideventty = procedure(const awinid: winidty) of object;
  booleaneventty = procedure(const avalue: boolean) of object;
@@ -6980,6 +6982,15 @@ begin
  //dummy
 end;
 
+procedure twidget.dofocuschanged(const oldwidget,newwidget: twidget);
+var
+ int1: integer;
+begin
+ for int1:= 0 to high(fwidgets) do begin
+  fwidgets[int1].dofocuschanged(oldwidget,newwidget);
+ end;
+end;
+
 procedure twidget.internaldodefocus;
 begin
  if ws_focused in fwidgetstate then begin
@@ -9525,6 +9536,7 @@ end;
 procedure twindow.setfocusedwidget(widget: twidget);
 var
  focuscountbefore: cardinal;
+ focusedwidgetbefore: twidget;
  widget1: twidget;
  widgetar: widgetarty;
  int1,int2: integer;
@@ -9534,6 +9546,7 @@ begin
  if ffocusedwidget <> widget then begin
   inc(ffocuscount);
   focuscountbefore:= ffocuscount;
+  focusedwidgetbefore:= ffocusedwidget;
   widget1:= ffocusedwidget;
   if widget1 <> nil then begin
    if not (csdestroying in widget1.componentstate) then begin
@@ -9598,6 +9611,7 @@ begin
    end;
    ffocusedwidget.internaldofocus;
   end;
+  fowner.dofocuschanged(focusedwidgetbefore,ffocusedwidget);
  end;
 end;
 

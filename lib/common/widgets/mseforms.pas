@@ -262,6 +262,7 @@ type
    property onactivate;
    property onenter;
    property onexit;
+   property onfocusedwidgetchanged;
    property ondeactivate;
    property onhide;
    property onevent;

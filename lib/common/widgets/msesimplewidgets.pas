@@ -295,13 +295,18 @@ const
  
 type
  tgroupbox = class(tscalingwidget)
+  private
+   fonfocusedwidgetchanged: focuschangeeventty;
   protected
    procedure internalcreateframe; override;
+   procedure dofocuschanged(const oldwidget,newwidget: twidget); override;
   public
    constructor create(aowner: tcomponent); override;
    procedure initnewcomponent(const ascale: real); override;
   published
    property optionswidget default defaultgroupboxoptionswidget;
+   property onfocusedwidgetchanged: focuschangeeventty 
+                     read fonfocusedwidgetchanged write fonfocusedwidgetchanged;
  end;
 
  tscrollbox = class(tscalingwidget)
@@ -1105,6 +1110,16 @@ end;
 procedure tgroupbox.internalcreateframe;
 begin
  tgroupboxframe.create(iframe(self));
+end;
+
+procedure tgroupbox.dofocuschanged(const oldwidget: twidget;
+               const newwidget: twidget);
+begin
+ inherited;
+ if canevent(tmethod(fonfocusedwidgetchanged)) and 
+  (checkdescendent(oldwidget) or checkdescendent(newwidget)) then begin
+  fonfocusedwidgetchanged(oldwidget,newwidget);
+ end; 
 end;
 
 { tscrollbox }
