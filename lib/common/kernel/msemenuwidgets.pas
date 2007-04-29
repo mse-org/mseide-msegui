@@ -315,6 +315,7 @@ begin
     colorglyph:= layout.colorglyph;
     caption:= item1.finfo.caption1;
     imagenr:= item1.finfo.imagenr;
+    imagenrdisabled:= item1.finfo.imagenrdisabled;
     actionstatestoshapestates(item1.finfo,state);
     color:= cl_transparent;
     include(state,ss_flat);

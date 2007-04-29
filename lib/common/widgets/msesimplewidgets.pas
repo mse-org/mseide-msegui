@@ -99,6 +99,8 @@ type
    function isimageliststored: Boolean;
    procedure setimagenr(const Value: integer);
    function isimagenrstored: Boolean;
+   procedure setimagenrdisabled(const avalue: integer);
+   function isimagenrdisabledstored: Boolean;
    procedure setcolorglyph(const avalue: colorty);
    function iscolorglyphstored: boolean;
    procedure setcaptionpos(const avalue: captionposty);
@@ -137,6 +139,9 @@ type
                     stored isimageliststored;
    property imagenr: integer read factioninfo.imagenr write setimagenr
                             stored isimagenrstored default -1;
+   property imagenrdisabled: integer read factioninfo.imagenrdisabled
+                              write setimagenrdisabled
+                            stored isimagenrdisabledstored default -2;
    property colorglyph: colorty read factioninfo.colorglyph write setcolorglyph
                       stored iscolorglyphstored default cl_glyph;
    property font: twidgetfont read getfont write setfont stored isfontstored;
@@ -161,6 +166,7 @@ type
    property modalresult;
    property imagelist;
    property imagenr;
+   property imagenrdisabled;
    property colorglyph;
    property options;
    property onexecute;
@@ -564,6 +570,16 @@ end;
 function tcustombutton.isimagenrstored: Boolean;
 begin
  result:= isactionimagenrstored(factioninfo);
+end;
+
+procedure tcustombutton.setimagenrdisabled(const avalue: integer);
+begin
+ setactionimagenrdisabled(iactionlink(self),avalue);
+end;
+
+function tcustombutton.isimagenrdisabledstored: Boolean;
+begin
+ result:= isactionimagenrdisabledstored(factioninfo);
 end;
 
 procedure tcustombutton.setcolorglyph(const avalue: colorty);

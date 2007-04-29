@@ -37,7 +37,8 @@ type
                   {as_shortcutcaption,}
                   as_localdisabled,as_localinvisible,as_localchecked,as_localdefault,
                   as_localcaption,
-                  as_localimagelist,as_localimagenr,as_localimagecheckedoffset,
+                  as_localimagelist,as_localimagenr,as_localimagenrdisabled,
+                  as_localimagecheckedoffset,
                   as_localcolorglyph,as_localcolor,
                   as_localhint,as_localshortcut,as_localtag,
                   as_localgroup,as_localonexecute);
@@ -58,7 +59,8 @@ const
  localactionstates: actionstatesty =
                   [as_localdisabled,as_localinvisible,as_localchecked,as_localdefault,
                   as_localcaption,
-                  as_localimagelist,as_localimagenr,as_localimagecheckedoffset,
+                  as_localimagelist,as_localimagenr,as_localimagenrdisabled,
+                  as_localimagecheckedoffset,
                   as_localcolorglyph,as_localcolor,
                   as_localhint,as_localshortcut,as_localtag,
                   as_localgroup,as_localonexecute];
@@ -78,6 +80,7 @@ type
   color: colorty;
   colorglyph: colorty;
   imagenr: integer;
+  imagenrdisabled: integer;       //-2 -> grayed
   imagecheckedoffset: integer;
   imagelist: timagelist;
   face: tcustomface;
@@ -551,10 +554,16 @@ begin
     end;
    end;
    if ss_disabled in state then begin
-    include(align1,al_grayed);
+    int1:= imagenrdisabled;
+    if int1 = -2 then begin
+     int1:= imagenr;
+     include(align1,al_grayed);
+    end;
+   end
+   else begin
+    int1:= imagenr;
    end;
-   int1:= imagenr;
-   if ss_checked in state then begin
+   if (ss_checked in state) and (int1 >= 0) then begin
     inc(int1,imagecheckedoffset);
    end;
    if colorglyph <> cl_none then begin

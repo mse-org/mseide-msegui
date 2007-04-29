@@ -96,6 +96,8 @@ type
    function isimageliststored: Boolean;
    procedure setimagenr(const avalue: integer);
    function isimagenrstored: Boolean;
+   procedure setimagenrdisabled(const avalue: integer);
+   function isimagenrdisabledstored: Boolean;
    function getfont: tmenufont;
    procedure createfont;
    procedure dofontchanged(const sender: tobject);
@@ -152,6 +154,8 @@ type
                      stored isimageliststored;
    property imagenr: integer read finfo.imagenr write setimagenr
                             stored isimagenrstored default -1;
+   property imagenrdisabled: integer read finfo.imagenrdisabled write setimagenrdisabled
+                            stored isimagenrdisabledstored default -2;
    property font: tmenufont read getfont write setfont stored isfontstored;
    property onexecute: notifyeventty read finfo.onexecute
                      write setonexecute stored isonexecutestored;
@@ -899,6 +903,16 @@ end;
 function tmenuitem.isimagenrstored: Boolean;
 begin
  result:= isactionimagenrstored(finfo);
+end;
+
+procedure tmenuitem.setimagenrdisabled(const avalue: integer);
+begin
+ setactionimagenrdisabled(iactionlink(self),avalue);
+end;
+
+function tmenuitem.isimagenrdisabledstored: Boolean;
+begin
+ result:= isactionimagenrdisabledstored(finfo);
 end;
 
 function tmenuitem.isfontstored: boolean;

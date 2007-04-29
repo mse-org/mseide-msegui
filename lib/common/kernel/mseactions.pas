@@ -36,6 +36,7 @@ type
   shortcut: shortcutty;
   group: integer;
   imagenr: integer;
+  imagenrdisabled: integer; //-2 -> grayed
   colorglyph: colorty;
   color: colorty;
   imagecheckedoffset: integer;
@@ -68,6 +69,7 @@ type
    procedure setcaption(const Value: captionty);
    procedure setonexecute(const Value: notifyeventty);
    procedure setimagenr(const Value: integer);
+   procedure setimagenrdisabled(const avalue: integer);
    procedure setcolorglyph(const avalue: colorty);
    procedure setcolor(const avalue: colorty);
    procedure setimagecheckedoffset(const Value: integer);
@@ -115,6 +117,8 @@ type
    property group: integer read getgroup write setgroup default 0;
    property imagelist: timagelist read finfo.imagelist write setimagelist;
    property imagenr: integer read finfo.imagenr write setimagenr default -1;
+   property imagenrdisabled: integer read finfo.imagenrdisabled 
+                      write setimagenrdisabled default -2;
    property colorglyph: colorty read finfo.colorglyph write setcolorglyph default cl_glyph;
    property color: colorty read finfo.color write setcolor default cl_transparent;
    property imagecheckedoffset: integer read finfo.imagecheckedoffset write setimagecheckedoffset default 0;
@@ -139,6 +143,7 @@ type
    property tagaction;
    property imagelist;
    property imagenr;
+   property imagenrdisabled;
    property colorglyph;
    property color;
    property imagecheckedoffset;
@@ -164,6 +169,8 @@ procedure setactionimagelist(const sender: iactionlink; const value: timagelist)
 function isactionimageliststored(const info: actioninfoty): boolean;
 procedure setactionimagenr(const sender: iactionlink; const value: integer);
 function isactionimagenrstored(const info: actioninfoty): boolean;
+procedure setactionimagenrdisabled(const sender: iactionlink; const value: integer);
+function isactionimagenrdisabledstored(const info: actioninfoty): boolean;
 procedure setactioncolorglyph(const sender: iactionlink; const value: colorty);
 function isactioncolorglyphstored(const info: actioninfoty): boolean;
 procedure setactioncolor(const sender: iactionlink; const value: colorty);
@@ -311,6 +318,7 @@ procedure initactioninfo(var info: actioninfoty; aoptions: menuactionoptionsty =
 begin
  with info do begin
   imagenr:= -1;
+  imagenrdisabled:= -2;
   options:= aoptions;
   colorglyph:= cl_glyph;
   color:= cl_transparent;
@@ -467,6 +475,7 @@ begin
   shapeinfo.caption:= caption1;
   shapeinfo.imagelist:= imagelist;
   shapeinfo.imagenr:= imagenr;
+  shapeinfo.imagenrdisabled:= imagenrdisabled;
   shapeinfo.colorglyph:= colorglyph;
   shapeinfo.color:= color;
   shapeinfo.imagecheckedoffset:= imagecheckedoffset;
@@ -530,6 +539,9 @@ begin
      end;
      if not (as_localimagenr in state) then begin
       imagenr:= -1;
+     end;
+     if not (as_localimagenrdisabled in state) then begin
+      imagenrdisabled:= -2;
      end;
      if not (as_localcolorglyph in state) then begin
       colorglyph:= cl_glyph;
@@ -708,6 +720,23 @@ begin
  with info do begin
   result:= (as_localimagenr in state) and
          not ((action = nil) and (imagenr = -1));
+ end;
+end;
+
+procedure setactionimagenrdisabled(const sender: iactionlink; const value: integer);
+begin
+ with sender.getactioninfopo^ do begin
+  imagenrdisabled:= value;
+  include(state,as_localimagenrdisabled);
+ end;
+ sender.actionchanged;
+end;
+
+function isactionimagenrdisabledstored(const info: actioninfoty): boolean;
+begin
+ with info do begin
+  result:= (as_localimagenrdisabled in state) and
+         not ((action = nil) and (imagenrdisabled = -2));
  end;
 end;
 
@@ -1005,6 +1034,12 @@ begin
  changed;
 end;
 
+procedure tcustomaction.setimagenrdisabled(const avalue: integer);
+begin
+ finfo.imagenrdisabled:= avalue;
+ changed;
+end;
+
 procedure tcustomaction.setcolorglyph(const avalue: colorty);
 begin
  finfo.colorglyph:= avalue;
@@ -1118,6 +1153,11 @@ begin
   if not (as_localimagenr in state) and
               (imagenr <> finfo.imagenr) then begin
    imagenr:= finfo.imagenr;
+   bo1:= true;
+  end;
+  if not (as_localimagenrdisabled in state) and
+              (imagenrdisabled <> finfo.imagenrdisabled) then begin
+   imagenrdisabled:= finfo.imagenrdisabled;
    bo1:= true;
   end;
   if not (as_localcolorglyph in state) and
