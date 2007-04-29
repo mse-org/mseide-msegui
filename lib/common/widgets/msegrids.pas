@@ -8349,8 +8349,10 @@ begin
      end;
     end;
     key_delete: begin
-     if (info.shiftstate = [ss_ctrl]) then begin
-      dodeleterows(nil);
+     if og_rowdeleting in foptionsgrid then begin
+      if (info.shiftstate = [ss_ctrl]) then begin
+       dodeleterows(nil);
+      end;
      end
      else begin
       exclude(info.eventstate,es_processed);
