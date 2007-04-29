@@ -46,10 +46,11 @@ type
 
  teventwidget = class(tcustomeventwidget)
   published
-   property onenter;
-   property onexit;
-   property onfocus;
-   property ondefocus;
+   property onfocusedwidgetchanged;
+//   property onenter;
+//   property onexit;
+//   property onfocus;
+//   property ondefocus;
 
    property onmouseevent;
    property onchildmouseevent;
@@ -68,8 +69,8 @@ type
 
    property onshow;
    property onhide;
-   property onactivate;
-   property ondeactivate;
+ //  property onactivate;
+ //  property ondeactivate;
    property onresize;
    property onmove;
    property onclosequery;
