@@ -47,12 +47,16 @@ If you wish to to compile the IDE:
 1. In 'Project'-'Open' select 'yourdirectory/msegui/apps/ide/mseide.prj'.
 2. 'Target'-'Continue'.
 
+FPC 2.0.5
+*********
+In patch_fpc_2_0_5 are some patched FPC files, see
+http://www.mail-archive.com/fpc-devel%40lists.freepascal.org/msg07545.html
+for more info.
+
 FPC 2.2
 *******
-MSEide+MSEgui does not work with FPC2.2, see
+MSEide+MSEgui does not work with FPC 2.2, see
 http://www.mail-archive.com/fpc-devel%40lists.freepascal.org/msg07520.html
-and
-http://www.mail-archive.com/fpc-devel%40lists.freepascal.org/msg07545.html
 for more info. It seems that there are widestring bugs in FPC 2.2 for Linux too.
 
 Debugging
@@ -61,10 +65,11 @@ Breakpoints don't work on win32 in units compiled with -CX
 (create smartlinked units).
 String and dynamic array variables of units compiled with 
 -gv (Valgrind debug info) are displayed incorrect.
+gdb 6.5 has bugs with threads and forking on linux. Please update to gdb 6.6.
 
 Popup widgets behind the forms
 ******************************
-If the popup widgets are showed behind the forms try to start the 
+If the popup widgets are showed behind the forms, try to start the 
 MSEgui program with the option '--TOPLEVELRAISE'. Do *not* use this option
 if is not necessary (KDE, Gnome, IceWM... work well without).
 
