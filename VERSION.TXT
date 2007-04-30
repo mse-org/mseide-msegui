@@ -1,5 +1,6 @@
 MSEide+MSEgui version history
 
+Version 1.2rc1
 2007-03-29 tdbimage renamed to tdbdataimage.
 
 Version 1.2beta2

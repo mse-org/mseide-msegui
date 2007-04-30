@@ -47,6 +47,14 @@ If you wish to to compile the IDE:
 1. In 'Project'-'Open' select 'yourdirectory/msegui/apps/ide/mseide.prj'.
 2. 'Target'-'Continue'.
 
+FPC 2.2
+*******
+MSEide+MSEgui does not work with FPC2.2, see
+http://www.mail-archive.com/fpc-devel%40lists.freepascal.org/msg07520.html
+and
+http://www.mail-archive.com/fpc-devel%40lists.freepascal.org/msg07545.html
+for more info. It seems that there are widestring bugs in FPC 2.2 for Linux too.
+
 Debugging
 *********
 Breakpoints don't work on win32 in units compiled with -CX 
@@ -58,7 +66,18 @@ Popup widgets behind the forms
 ******************************
 If the popup widgets are showed behind the forms try to start the 
 MSEgui program with the option '--TOPLEVELRAISE'. Do *not* use this option
-if is not necessary (KDE, Gnome, IceWM...).
+if is not necessary (KDE, Gnome, IceWM... work well without).
+
+Invalid inputmanager for Ubuntu
+*******************************
+The utf-8 setup in Ubuntu seems to be incomplete. If you get the exception
+"egui : Invalid inputmanager tinternalapplication ." at program start, try to
+replace your language locale in /usr/share/X11/locale/locale.dir
+by en_US as a workaround. Example for ru_RU.UTF-8:
+replace 
+ru_RU.UTF-8/XLC_LOCALE ru_RU.UTF-8
+with
+en_US.UTF-8/XLC_LOCALE ru_RU.UTF-8
 
 How to add custom components to MSEide
 **************************************
