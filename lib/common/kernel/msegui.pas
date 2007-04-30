@@ -1062,6 +1062,7 @@ type
                             //scrolls paintrect and widgets
    procedure getcaret;
    procedure scrollcaret(const dist: pointty);
+   function mousecaptured: boolean;
    procedure capturemouse(grab: boolean = true);
    procedure releasemouse;
    procedure capturekeyboard;
@@ -7864,6 +7865,11 @@ begin
                  removerect(clipcaret,clientwidgetpos));
   app.fcaretwidget:= self;
  end;
+end;
+
+function twidget.mousecaptured: boolean;
+begin
+ result:= application.mousecapturewidget = self;
 end;
                      
 procedure twidget.capturemouse(grab: boolean = true);

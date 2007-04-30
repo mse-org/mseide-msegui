@@ -60,6 +60,9 @@ type
   areas: array[scrollbarareaty] of shapeinfoty;
  end;
 
+ scrollbarstatety = (scs_mousecaptured);
+ scrollbarstatesty = set of scrollbarstatety;
+ 
  tcustomscrollbar = class(tnullinterfacedpersistent)
   private
    forg: originty;
@@ -82,6 +85,7 @@ type
    ffaceendbutton: tface;
    fondimchanged: objectprocty;
    fbuttonendlength: integer;
+   fstate: scrollbarstatesty;
    procedure updatedim;
    procedure setdirection(const avalue: graphicdirectionty);
    procedure setcolor(const avalue: colorty);
@@ -703,7 +707,10 @@ procedure tcustomscrollbar.mouseevent(var info: mouseeventinfoty);
 
  procedure releasebutton;
  begin
-//  fintf.getwidget.releasemouse;
+  if scs_mousecaptured in fstate then begin
+   exclude(fstate,scs_mousecaptured);
+   fintf.getwidget.releasemouse;
+  end;
   freeandnil(frepeater);
   if clickedareaisvalid then begin
    exclude(fdrawinfo.areas[fclickedarea].state,ss_clicked);
@@ -788,7 +795,12 @@ begin
      fclickedarea:= ar1;
      if clickedareaisvalid then begin
       include(fdrawinfo.areas[fclickedarea].state,ss_clicked);
-//      fintf.getwidget.capturemouse(true);
+      with fintf.getwidget do begin
+       if not mousecaptured then begin
+        capturemouse(true);
+        include(fstate,scs_mousecaptured);
+       end;
+      end;
      end;
      invalidateclickedarea;
      if dobuttoncommand then begin
