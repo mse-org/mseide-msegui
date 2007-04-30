@@ -703,7 +703,7 @@ procedure tcustomscrollbar.mouseevent(var info: mouseeventinfoty);
 
  procedure releasebutton;
  begin
-  fintf.getwidget.releasemouse;
+//  fintf.getwidget.releasemouse;
   freeandnil(frepeater);
   if clickedareaisvalid then begin
    exclude(fdrawinfo.areas[fclickedarea].state,ss_clicked);
@@ -788,7 +788,7 @@ begin
      fclickedarea:= ar1;
      if clickedareaisvalid then begin
       include(fdrawinfo.areas[fclickedarea].state,ss_clicked);
-      fintf.getwidget.capturemouse(true);
+//      fintf.getwidget.capturemouse(true);
      end;
      invalidateclickedarea;
      if dobuttoncommand then begin
