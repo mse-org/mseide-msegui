@@ -188,8 +188,18 @@ const
  cl_user7 =                  cl_user     + 7;
  cl_user8 =                  cl_user     + 8;
  cl_user9 =                  cl_user     + 9;
+ cl_user10 =                 cl_user     + 10;
+ cl_user11 =                 cl_user     + 11;
+ cl_user12 =                 cl_user     + 12;
+ cl_user13 =                 cl_user     + 13;
+ cl_user14 =                 cl_user     + 14;
+ cl_user15 =                 cl_user     + 15;
+ cl_user16 =                 cl_user     + 16;
+ cl_user17 =                 cl_user     + 17;
+ cl_user18 =                 cl_user     + 18;
+ cl_user19 =                 cl_user     + 19;
  
- cl_lastuser =               cl_user     + 10;
+ cl_lastuser =               cl_user     + 20;
 
 type
 
@@ -296,7 +306,17 @@ const
     (name: 'cl_user6';  rgb:                 (blue: $00; green: $00; red: $00; res: $00)), //6
     (name: 'cl_user7';  rgb:                 (blue: $00; green: $00; red: $00; res: $00)), //7
     (name: 'cl_user8';  rgb:                 (blue: $00; green: $00; red: $00; res: $00)), //8
-    (name: 'cl_user9';  rgb:                 (blue: $00; green: $00; red: $00; res: $00))  //9
+    (name: 'cl_user9';  rgb:                 (blue: $00; green: $00; red: $00; res: $00)), //9
+    (name: 'cl_user10';  rgb:                (blue: $00; green: $00; red: $00; res: $00)), //10
+    (name: 'cl_user11';  rgb:                (blue: $00; green: $00; red: $00; res: $00)), //11
+    (name: 'cl_user12';  rgb:                (blue: $00; green: $00; red: $00; res: $00)), //12
+    (name: 'cl_user13';  rgb:                (blue: $00; green: $00; red: $00; res: $00)), //13
+    (name: 'cl_user14';  rgb:                (blue: $00; green: $00; red: $00; res: $00)), //14
+    (name: 'cl_user15';  rgb:                (blue: $00; green: $00; red: $00; res: $00)), //15
+    (name: 'cl_user16';  rgb:                (blue: $00; green: $00; red: $00; res: $00)), //16
+    (name: 'cl_user17';  rgb:                (blue: $00; green: $00; red: $00; res: $00)), //17
+    (name: 'cl_user18';  rgb:                (blue: $00; green: $00; red: $00; res: $00)), //18
+    (name: 'cl_user19';  rgb:                (blue: $00; green: $00; red: $00; res: $00))  //19
    );
    
 type
