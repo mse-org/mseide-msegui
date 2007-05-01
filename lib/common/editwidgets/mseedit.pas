@@ -514,6 +514,7 @@ begin
  finfo.color:= cl_parent;
  finfo.colorglyph:= cl_glyph;
  finfo.imagenr:= -1;
+ finfo.imagenrdisabled:= -2;
  include(finfo.state,ss_widgetorg);
  inherited;
 end;

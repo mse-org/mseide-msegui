@@ -40,13 +40,13 @@ type
    colorareabefore: tpaintbox;
    tgroupbox1: tgroupbox;
    tstatfile1: tstatfile;
-   procedure hueonsetvalue(const sender: TObject; var avalue: real; var accept: Boolean);
-   procedure satonsetvalue(const sender: TObject; var avalue: real; var accept: Boolean);
-   procedure brightonsetvalue(const sender: TObject; var avalue: real; var accept: Boolean);
+   procedure hueonsetvalue(const sender: TObject; var avalue: realty; var accept: Boolean);
+   procedure satonsetvalue(const sender: TObject; var avalue: realty; var accept: Boolean);
+   procedure brightonsetvalue(const sender: TObject; var avalue: realty; var accept: Boolean);
    procedure hsbchange(const sender: TObject);
-   procedure redonsetvalue(const sender: TObject; var avalue: real; var accept: Boolean);
-   procedure greenonsetvalue(const sender: TObject; var avalue: real; var accept: Boolean);
-   procedure blueonsetvalue(const sender: TObject; var avalue: real; var accept: Boolean);
+   procedure redonsetvalue(const sender: TObject; var avalue: realty; var accept: Boolean);
+   procedure greenonsetvalue(const sender: TObject; var avalue: realty; var accept: Boolean);
+   procedure blueonsetvalue(const sender: TObject; var avalue: realty; var accept: Boolean);
    procedure rgbchange(const sender: TObject);
   private
    fupdating: boolean;
@@ -133,9 +133,9 @@ begin
  with tcustomdropdownbuttonframe(twidget1(fintf.getwidget).fframe) do begin
   buttons.count:= 2;
   buttons[1].assign(buttons[0]);
-  buttons[0].imagenr:= ord(stg_ellipsesmall);
-  buttons[1].imagenr:= ord(stg_arrowdownsmall);
-  activebutton:= 1;
+  buttons[1].imagenr:= ord(stg_ellipsesmall);
+  buttons[0].imagenr:= ord(stg_arrowdownsmall);
+  activebutton:= 0;
  end;
 end;
 
@@ -193,7 +193,7 @@ procedure tcoloredit.buttonaction(var action: buttonactionty;
 var
  co1: colorty;
 begin
- if (action = ba_click) and (buttonindex = 0) then begin
+ if (action = ba_click) and (buttonindex = 1) then begin
   co1:= value;
   if colordialog(co1) = mr_ok then begin
    tcolordropdowncontroller(fdropdown).clearitemindex; 
@@ -263,19 +263,19 @@ end;
 { tcolordialogfo }
 
 procedure tcolordialogfo.hueonsetvalue(const sender: TObject;
-                               var avalue: real; var accept: Boolean);
+                               var avalue: realty; var accept: Boolean);
 begin
  hue.value:= round(avalue * 360);
 end;
 
 procedure tcolordialogfo.satonsetvalue(const sender: TObject;
-                               var avalue: real; var accept: Boolean);
+                               var avalue: realty; var accept: Boolean);
 begin
  sat.value:= round(avalue * 100);
 end;
 
 procedure tcolordialogfo.brightonsetvalue(const sender: TObject;
-                               var avalue: real; var accept: Boolean);
+                               var avalue: realty; var accept: Boolean);
 begin
  bright.value:= round(avalue * 100);
 end;
@@ -354,19 +354,19 @@ begin
 end;
 
 procedure tcolordialogfo.blueonsetvalue(const sender: TObject;
-                 var avalue: real; var accept: Boolean);
+                 var avalue: realty; var accept: Boolean);
 begin
  blue.value:= round(avalue * 255);
 end;
 
 procedure tcolordialogfo.greenonsetvalue(const sender: TObject;
-                var avalue: real; var accept: Boolean);
+                var avalue: realty; var accept: Boolean);
 begin
  green.value:= round(avalue * 255);
 end;
 
 procedure tcolordialogfo.redonsetvalue(const sender: TObject;
-               var avalue: real; var accept: Boolean);
+               var avalue: realty; var accept: Boolean);
 begin
  red.value:= round(avalue * 255);
 end;

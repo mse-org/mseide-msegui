@@ -158,9 +158,16 @@ type
 //   property onkeydown: keyeventty read fonkeydown write fonkeydown;
  end;
 
+ tpointeredit = class;
+ 
+ paintpointerglypheventty = procedure(const sender: tpointeredit;
+           const acanvas: tcanvas; const avalue: pointer;
+                                      const arow: integer) of object;
+                    
  tpointeredit = class(tgraphdataedit)
   private
    fvalue: pointer;
+   fonpaintglyph: paintpointerglypheventty;
    procedure setvalue(const avalue: pointer);
    function getgridvalue(const index: integer): pointer;
    procedure setgridvalue(const index: integer; const avalue: pointer);
@@ -169,13 +176,17 @@ type
   protected
    function createdatalist(const sender: twidgetcol): tdatalist; override;
    function getdatatyp: datatypty; override;
-   procedure dopaint(const canvas: tcanvas); override;
+   procedure paintglyph(const canvas: tcanvas; const avalue; const arect: rectty);
+                 override;
+//   procedure dopaint(const canvas: tcanvas); override;
   public
    procedure initnewcomponent(const ascale: real); override;
    property value: pointer read fvalue write setvalue default nil;
    property gridvalue[const index: integer]: pointer
         read getgridvalue write setgridvalue; default;
    property gridvalues: pointerarty read getgridvalues write setgridvalues;
+  published
+   property onpaintglyph: paintpointerglypheventty read fonpaintglyph write fonpaintglyph;
  end;
  
  tsliderscrollbar = class(tcustomscrollbar,iface)
@@ -2372,15 +2383,34 @@ procedure tpointeredit.setgridvalues(const avalue: pointerarty);
 begin
  tpointerdatalist(fgridintf.getcol.datalist).asarray:= avalue;
 end;
-
+{
 procedure tpointeredit.dopaint(const canvas: tcanvas);
 begin
  //dummy
 end;
-
+}
 procedure tpointeredit.initnewcomponent(const ascale: real);
 begin
  //do nothing
+end;
+
+procedure tpointeredit.paintglyph(const canvas: tcanvas; const avalue;
+               const arect: rectty);
+var
+ po1: pointer;
+ int1: integer;
+begin
+ if canevent(tmethod(fonpaintglyph)) then begin
+  if @avalue = nil then begin
+   po1:= fvalue;
+   int1:= row;
+  end
+  else begin
+   po1:= pointer(avalue);
+   int1:= pcellinfoty(canvas.drawinfopo)^.cell.row;
+  end;
+  fonpaintglyph(self,canvas,po1,int1);
+ end;
 end;
 
 { tbarface }

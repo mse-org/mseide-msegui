@@ -429,6 +429,7 @@ type
    fisnull: boolean; //used in tdbintegeredit
    procedure texttovalue(var accept: boolean; const quiet: boolean); override;
    function datatotext(const data): msestring; override;
+   procedure texttodata(const atext: msestring; var data); override;
    function createdatalist(const sender: twidgetcol): tdatalist; override;
    function getdatatyp: datatypty; override;
    procedure valuetogrid(const arow: integer); override;
@@ -695,6 +696,7 @@ type
    fisdb: boolean;
    procedure texttovalue(var accept: boolean; const quiet: boolean); override;
    function datatotext(const data): msestring; override;
+   procedure texttodata(const atext: msestring; var data); override;
    function createdatalist(const sender: twidgetcol): tdatalist; override;
    function getdatatyp: datatypty; override;
    procedure valuetogrid(const arow: integer); override;
@@ -759,6 +761,7 @@ type
    fisdb: boolean;
    procedure texttovalue(var accept: boolean; const quiet: boolean); override;
    function datatotext(const data): msestring; override;
+   procedure texttodata(const atext: msestring; var data); override;
    function createdatalist(const sender: twidgetcol): tdatalist; override;
    function getdatatyp: datatypty; override;
    procedure valuetogrid(const arow: integer); override;
@@ -2534,6 +2537,24 @@ begin
  end;
 end;
 
+procedure tcustomintegeredit.texttodata(const atext: msestring; var data);
+var
+ int1: integer;
+begin
+ try
+  int1:= strtointvalue(atext,fbase);
+ except
+  int1:= 0;
+ end;
+ if int1 < fmin then begin
+  int1:= fmin;
+ end;
+ if int1 > fmax then begin
+  int1:= fmax;
+ end;
+ integer(data):= int1;
+end;
+
 procedure tcustomintegeredit.readstatvalue(const reader: tstatreader);
 begin
  if fgridintf <> nil then begin
@@ -3277,6 +3298,27 @@ begin
  end;
 end;
 
+procedure tcustomrealedit.texttodata(const atext: msestring; var data);
+var
+ rea1: realty;
+begin
+ try
+  rea1:= strtorealty(atext);
+  if (fscale <> 0) and not isemptyreal(rea1) then begin
+   rea1:= rea1*fscale;
+  end;
+ except
+  rea1:= emptyreal;
+ end;
+ if cmprealty(fmin,rea1) > 0 then begin
+  rea1:= fmin;
+ end;
+ if cmprealty(fmax,rea1) < 0 then begin
+  rea1:= fmax;
+ end;
+ realty(data):= rea1;
+end;
+
 procedure tcustomrealedit.readvalue(reader: treader);
 begin
  value:= readrealty(reader);
@@ -3522,6 +3564,33 @@ begin
    end;
   end;
  end;
+end;
+
+procedure tcustomdatetimeedit.texttodata(const atext: msestring; var data);
+var
+ dat1: tdatetime;
+begin
+ try
+  if fkind = dtk_time then begin
+   dat1:= stringtotime(atext);
+  end
+  else begin
+   dat1:= stringtodatetime(atext);
+  end;
+ except
+  try
+   dat1:= strtorealty(atext);
+  except
+   dat1:= emptyreal;
+  end;
+ end;
+ if cmprealty(fmin,dat1) > 0 then begin
+  dat1:= fmin;
+ end;
+ if cmprealty(fmax,dat1) < 0 then begin
+  dat1:= fmax;
+ end;
+ tdatetime(data):= dat1;
 end;
 
 function tcustomdatetimeedit.datatotext(const data): msestring;

@@ -23,7 +23,9 @@ uses
  mseforms,msefiledialog,msegui,msestat,msestatfile,msetabs,msesimplewidgets,
  msetypes,msestrings,msedataedits,msetextedit,msegraphedits,msewidgetgrid,
  msegrids,msesplitter,msesysenv,msegdbutils,msedispwidgets,msesys,mseclasses,
- msegraphutils;
+ msegraphutils,mseevent,msetabsglob,msedatalist,msegraphics,msedropdownlist,
+ mseformatstr,mseinplaceedit,msedatanodes,mselistbrowser,msebitmap,
+ msecolordialog,msedrawtext,msewidgets;
 
 const
  defaultsourceprintfont = 'Courier';
@@ -151,6 +153,9 @@ type
   showconsole: boolean;
   externalconsole: boolean;
   sigsettings: sigsetinfoarty;
+  
+  usercolors: colorarty;
+  usercolorcomment: msestringarty;
 
   //programparameters
   progparameters: string;
@@ -270,12 +275,16 @@ type
    inheritedsource: tfilenameedit;
    inheritedform: tfilenameedit;
    spacetabs: tbooleanedit;
+   tbutton1: tbutton;
+   usercolors: tcoloredit;
    tgroupbox1: tgroupbox;
    backupfilecount: tintegeredit;
    debugoptions: tstringedit;
    exceptclassnames: tstringedit;
    tintegeredit2: tintegeredit;
    def: tstringedit;
+   coldi: tpointeredit;
+   usercolorcomment: tstringedit;
    ttabpage1: ttabpage;
    macrogrid: twidgetgrid;
    selectactivegroupgrid: twidgetgrid;
@@ -283,6 +292,7 @@ type
    fontaliasgrid: twidgetgrid;
    fontdisp: ttextedit;
    dispgrid: twidgetgrid;
+   ttabpage10: ttabpage;
    ttabpage2: ttabpage;
    ttabpage3: ttabpage;
    ttabpage4: ttabpage;
@@ -296,6 +306,7 @@ type
    twidgetgrid1: twidgetgrid;
    exceptionsgrid: twidgetgrid;
    twidgetgrid2: twidgetgrid;
+   colgrid: twidgetgrid;
    unitdirgrid: twidgetgrid;
    unitdirs: tfilenameedit;
    makepage: ttabpage;
@@ -325,6 +336,11 @@ type
    procedure encodingsetvalue(const sender: TObject; var avalue: integer;
                    var accept: Boolean);
    procedure createexe(const sender: TObject);
+   procedure drawcol(const sender: tpointeredit; const acanvas: tcanvas;
+                   const avalue: Pointer; const arow: Integer);
+   procedure colsetvalue(const sender: TObject; var avalue: colorty;
+                   var accept: Boolean);
+   procedure copycolorcode(const sender: TObject);
   private
    procedure activegroupchanged;
  end;
@@ -348,13 +364,13 @@ var
 
 implementation
 uses
- projectoptionsform_mfm,msedatalist,msewidgets,breakpointsform,sourceform,
+ projectoptionsform_mfm,breakpointsform,sourceform,
  objectinspector,msebits,msefileutils,msedesignintf,
  watchform,stackform,main,projecttreeform,findinfileform,sysutils,
- selecteditpageform,programparametersform,sourceupdate,mseedit,msegraphics,
+ selecteditpageform,programparametersform,sourceupdate,mseedit,
  msedesigner,panelform,watchpointsform,commandlineform,msestream,
  componentpaletteform,mserichstring,msesettings,formdesigner,
- msestringlisteditor,msetexteditor,msecolordialog,msepropertyeditors
+ msestringlisteditor,msetexteditor,msepropertyeditors
  {$ifdef FPC}{$ifndef mse_withoutdb},msedbfieldeditor{$endif}{$endif};
 
 type
@@ -570,6 +586,12 @@ begin
     additem(ignoreexceptionclasses,exceptclassnames[int1]);
    end;
   end;
+  for int1:= 0 to usercolorcount - 1 do begin
+   if int1 > high(usercolors) then begin
+    break;
+   end;
+   setcolormapvalue(cl_user + int1,usercolors[int1]);
+  end;
  end;
  li.free;
  mainfo.updatesigsettings;
@@ -701,6 +723,8 @@ begin
   fontalias:= nil;
   fontnames:= nil;
   fontheights:= nil;
+  usercolors:= nil;
+  usercolorcomment:= nil;
   additem(sourcefilemasks,'"*.pas" "*.dpr" "*.pp" "*.inc"');
   additem(syntaxdeffiles,'${SYNTAXDEFDIR}pascal.sdef');
   additem(sourcefilemasks,'"*.c" "*.cc" "*.h"');
@@ -873,6 +897,8 @@ begin
   updatevalue('fontalias',fontalias);
   updatevalue('fontnames',fontnames);
   updatevalue('fontheights',fontheights);
+  updatevalue('usercolors',integerarty(usercolors));
+  updatevalue('usercolorcomment',usercolorcomment);
   updatevalue('showgrid',showgrid);
   updatevalue('snaptogrid',snaptogrid);
   updatevalue('moveonfirstclick',moveonfirstclick);
@@ -943,6 +969,15 @@ procedure projectoptionstoform(fo: tprojectoptionsfo);
 var
  int1,int2: integer;
 begin
+ fo.usercolors.gridvalues:= integerarty(projectoptions.usercolors);
+ fo.usercolorcomment.gridvalues:= projectoptions.usercolorcomment;
+ fo.colgrid.rowcount:= usercolorcount;
+ fo.colgrid.fixcols[-1].captions.count:= usercolorcount;
+ with fo,projectoptions do begin
+  for int1:= 0 to colgrid.rowhigh do begin
+   colgrid.fixcols[-1].captions[int1]:= colortostring(cl_user+int1);
+  end;
+ end;
  with fo.signame do begin
   setlength(enums,siginfocount);
   int2:= 0;
@@ -1160,6 +1195,8 @@ begin
   fontalias:= fo.fontalias.gridvalues;
   fontnames:= fo.fontname.gridvalues;
   fontheights:= fo.fontheight.gridvalues;
+  usercolors:= colorarty(fo.usercolors.gridvalues);
+  usercolorcomment:= fo.usercolorcomment.gridvalues;
 
   newprojectfiles:= fo.newprojectfiles.gridvalues;
   newprojectfilesdest:= fo.newprojectfilesdest.gridvalues;
@@ -1483,6 +1520,36 @@ begin
  {$ifdef mswindows}
  externalconsole.visible:= true;
  {$endif}
+end;
+
+procedure tprojectoptionsfo.drawcol(const sender: tpointeredit;
+               const acanvas: tcanvas; const avalue: Pointer;
+               const arow: Integer);
+begin
+ with pcellinfoty(acanvas.drawinfopo)^ do begin
+  acanvas.fillrect(innerrect,usercolors[arow]);
+ end;
+end;
+
+procedure tprojectoptionsfo.colsetvalue(const sender: TObject;
+               var avalue: colorty; var accept: Boolean);
+begin
+ colgrid.invalidaterow(colgrid.row);
+end;
+
+procedure tprojectoptionsfo.copycolorcode(const sender: TObject);
+var
+ str1: msestring;
+ int1: integer;
+begin
+ str1:= '';
+ for int1:= 0 to colgrid.rowhigh do begin
+  if usercolors[int1] <> 0 then begin
+   str1:= str1 + ' setcolormapvalue('+colortostring(cl_user+int1)+','+
+               colortostring(usercolors[int1])+');'+lineend;
+  end;
+ end;
+ copytoclipboard(str1);
 end;
 
 end.

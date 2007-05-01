@@ -32,7 +32,7 @@ object projectoptionsfo: tprojectoptionsfo
     frame.dummy = 0
     anchors = [an_top, an_bottom]
     taborder = 1
-    activepageindex = 3
+    activepageindex = 4
     tab_frame.dummy = 0
     tab_size = 20
     statfile = statfile1
@@ -327,7 +327,7 @@ object projectoptionsfo: tprojectoptionsfo
       frame.dummy = 0
       anchors = [an_left, an_top, an_right, an_bottom]
       taborder = 2
-      caption = '&Font alias'
+      caption = '&Font Alias'
       object fontaliasgrid: twidgetgrid
         optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_focusbackonesc, ow_destroywidgets, ow_fontglyphheight]
         bounds_x = 0
@@ -404,6 +404,185 @@ object projectoptionsfo: tprojectoptionsfo
         end
       end
     end
+    object ttabpage10: ttabpage
+      bounds_x = 1
+      bounds_y = 21
+      bounds_cx = 627
+      bounds_cy = 522
+      frame.dummy = 0
+      anchors = [an_left, an_top, an_right, an_bottom]
+      taborder = 7
+      caption = 'User &Colors'
+      reffontheight = 14
+      object colgrid: twidgetgrid
+        optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_focusbackonesc, ow_mousewheel, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+        bounds_x = 0
+        bounds_y = 0
+        bounds_cx = 627
+        bounds_cy = 480
+        frame.dummy = 0
+        anchors = [an_top, an_bottom]
+        optionsgrid = [og_rowmoving, og_keyrowmoving, og_focuscellonenter, og_colchangeontabkey, og_autopopup, og_mousescrollcol]
+        fixcols.count = 1
+        fixcols.items = <        
+          item
+            color = -1879048185
+            width = 80
+          end>
+        fixrows.count = 1
+        fixrows.items = <        
+          item
+            height = 16
+            captions.count = 3
+            captions.items = <            
+              item
+              end            
+              item
+                caption = 'Color'
+              end            
+              item
+                caption = 'Comment'
+              end>
+            captionsfix.count = 1
+            captionsfix.items = <            
+              item
+                caption = 'Name'
+              end>
+          end>
+        rowcount = 20
+        datacols.count = 3
+        datacols.options = [co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_mousescrollrow]
+        datacols.items = <        
+          item
+            width = 22
+            options = [co_readonly, co_nofocus, co_drawfocus, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_mousescrollrow]
+            widgetname = 'coldi'
+            data = (
+              dl_custom
+              (              )
+            )
+          end        
+          item
+            width = 97
+            options = [co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_cancopy, co_canpaste, co_mousescrollrow]
+            widgetname = 'usercolors'
+            data = (
+              dl_integer
+              (
+                -2147483648
+                -2147483648
+                -2147483648
+                -2147483648
+                -2147483648
+                -2147483648
+                -2147483648
+                -2147483648
+                -2147483648
+                -2147483648
+                -2147483648
+                -2147483648
+                -2147483648
+                -2147483648
+                -2147483648
+                -2147483648
+                -2147483648
+                -2147483648
+                -2147483648
+                -2147483648
+              )
+            )
+          end        
+          item
+            width = 420
+            options = [co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_fill, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_cancopy, co_canpaste, co_mousescrollrow]
+            widthmin = 100
+            widgetname = 'usercolorcomment'
+            data = (
+              dl_msestring
+              (
+                0
+                0
+                0
+                0
+                0
+                0
+                0
+                0
+                0
+                0
+                0
+                0
+                0
+                0
+                0
+                0
+                0
+                0
+                0
+                0
+              )
+            )
+          end>
+        datarowheight = 16
+        reffontheight = 14
+        object coldi: tpointeredit
+          optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets]
+          bounds_x = 0
+          bounds_y = 0
+          bounds_cx = 22
+          bounds_cy = 16
+          taborder = 1
+          visible = False
+          optionsedit = [oe_readonly, oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_keyexecute, oe_savevalue, oe_savestate]
+          onpaintglyph = drawcol
+        end
+        object usercolors: tcoloredit
+          optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight]
+          bounds_x = 23
+          bounds_y = 0
+          bounds_cx = 97
+          bounds_cy = 16
+          frame.levelo = 0
+          frame.colorclient = -2147483645
+          frame.localprops = [frl_levelo, frl_colorclient]
+          frame.button.color = -1879048187
+          frame.dummy = 0
+          taborder = 2
+          visible = False
+          value = 0
+          valuedefault = 0
+          buttonellipse.color = -1879048187
+          dropdown.options = [deo_autodropdown, deo_keydropdown]
+          onsetvalue = colsetvalue
+          reffontheight = 14
+        end
+        object usercolorcomment: tstringedit
+          optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight]
+          bounds_x = 121
+          bounds_y = 0
+          bounds_cx = 420
+          bounds_cy = 16
+          frame.levelo = 0
+          frame.colorclient = -2147483645
+          frame.localprops = [frl_levelo, frl_colorclient]
+          frame.dummy = 0
+          taborder = 3
+          visible = False
+          reffontheight = 14
+        end
+      end
+      object tbutton1: tbutton
+        bounds_x = 11
+        bounds_y = 491
+        bounds_cx = 298
+        bounds_cy = 20
+        anchors = [an_left, an_bottom]
+        taborder = 1
+        state = [as_localcaption, as_localonexecute]
+        caption = 'Copy "setcolormapvalue" code to clipboard'
+        onexecute = copycolorcode
+      end
+    end
     object editorpage: ttabpage
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_destroywidgets, ow_fontglyphheight]
       bounds_x = 1
@@ -461,6 +640,7 @@ object projectoptionsfo: tprojectoptionsfo
           bounds_cy = 16
           taborder = 1
           visible = False
+          font.colorshadow = -2147483648
           font.name = 'stf_default'
           font.dummy = 0
           optionsedit = [oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_linebreak, oe_eatreturn, oe_autoselectonfirstclick, oe_keyexecute, oe_savestate]

@@ -4,8 +4,11 @@ object colordialogfo: tcolordialogfo
   bounds_y = 239
   bounds_cx = 342
   bounds_cy = 303
+  taborder = 1
   visible = False
   container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_mousetransparent, ow_destroywidgets, ow_autoscale]
+  container.bounds_x = 0
+  container.bounds_y = 0
   container.bounds_cx = 342
   container.bounds_cy = 303
   container.frame.dummy = 0
@@ -27,6 +30,8 @@ object colordialogfo: tcolordialogfo
     frame.dummy = 0
     anchors = [an_left, an_top, an_bottom]
     taborder = 11
+    onsetvalue = redonsetvalue
+    direction = gd_up
     scrollbar.options = [sbo_moveauto]
     scrollbar.color = -2147483645
     scrollbar.colorpattern = -2147483648
@@ -45,8 +50,6 @@ object colordialogfo: tcolordialogfo
     scrollbar.face.fade_direction = gd_up
     scrollbar.face.fade_transparency = -2147483648
     scrollbar.face.dummy = 0
-    onsetvalue = redonsetvalue
-    direction = gd_up
   end
   object slidergreen: tslider
     optionswidget = [ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
@@ -61,6 +64,8 @@ object colordialogfo: tcolordialogfo
     frame.dummy = 0
     anchors = [an_left, an_top, an_bottom]
     taborder = 12
+    onsetvalue = greenonsetvalue
+    direction = gd_up
     scrollbar.options = [sbo_moveauto]
     scrollbar.color = -2147483645
     scrollbar.colorpattern = -2147483648
@@ -79,8 +84,6 @@ object colordialogfo: tcolordialogfo
     scrollbar.face.fade_direction = gd_up
     scrollbar.face.fade_transparency = -2147483648
     scrollbar.face.dummy = 0
-    onsetvalue = greenonsetvalue
-    direction = gd_up
   end
   object sliderblue: tslider
     optionswidget = [ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
@@ -95,6 +98,8 @@ object colordialogfo: tcolordialogfo
     frame.dummy = 0
     anchors = [an_left, an_top, an_bottom]
     taborder = 13
+    onsetvalue = blueonsetvalue
+    direction = gd_up
     scrollbar.options = [sbo_moveauto]
     scrollbar.color = -2147483645
     scrollbar.colorpattern = -2147483648
@@ -113,8 +118,6 @@ object colordialogfo: tcolordialogfo
     scrollbar.face.fade_direction = gd_up
     scrollbar.face.fade_transparency = -2147483648
     scrollbar.face.dummy = 0
-    onsetvalue = blueonsetvalue
-    direction = gd_up
   end
   object red: tintegeredit
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
@@ -195,6 +198,8 @@ object colordialogfo: tcolordialogfo
     frame.dummy = 0
     anchors = [an_left, an_top, an_bottom]
     taborder = 8
+    onsetvalue = hueonsetvalue
+    direction = gd_up
     scrollbar.options = [sbo_moveauto]
     scrollbar.color = -2147483645
     scrollbar.colorpattern = -2147483648
@@ -223,8 +228,6 @@ object colordialogfo: tcolordialogfo
     scrollbar.face.fade_direction = gd_up
     scrollbar.face.fade_transparency = -2147483648
     scrollbar.face.dummy = 0
-    onsetvalue = hueonsetvalue
-    direction = gd_up
   end
   object slidersat: tslider
     optionswidget = [ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
@@ -239,6 +242,8 @@ object colordialogfo: tcolordialogfo
     frame.dummy = 0
     anchors = [an_left, an_top, an_bottom]
     taborder = 9
+    onsetvalue = satonsetvalue
+    direction = gd_up
     scrollbar.options = [sbo_moveauto]
     scrollbar.color = -2147483645
     scrollbar.colorpattern = -2147483648
@@ -257,8 +262,6 @@ object colordialogfo: tcolordialogfo
     scrollbar.face.fade_direction = gd_up
     scrollbar.face.fade_transparency = -2147483648
     scrollbar.face.dummy = 0
-    onsetvalue = satonsetvalue
-    direction = gd_up
   end
   object sliderbright: tslider
     optionswidget = [ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
@@ -273,6 +276,8 @@ object colordialogfo: tcolordialogfo
     frame.dummy = 0
     anchors = [an_left, an_top, an_bottom]
     taborder = 10
+    onsetvalue = brightonsetvalue
+    direction = gd_up
     scrollbar.options = [sbo_moveauto]
     scrollbar.color = -2147483645
     scrollbar.colorpattern = -2147483648
@@ -291,8 +296,6 @@ object colordialogfo: tcolordialogfo
     scrollbar.face.fade_direction = gd_up
     scrollbar.face.fade_transparency = -2147483648
     scrollbar.face.dummy = 0
-    onsetvalue = brightonsetvalue
-    direction = gd_up
   end
   object hue: tintegeredit
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]

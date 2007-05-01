@@ -2116,6 +2116,7 @@ begin
  snaptogrid:= projectoptions.snaptogrid;
  gridsizex:= projectoptions.gridsizex;
  gridsizey:= projectoptions.gridsizey;
+ fowner.invalidate;
 end;
 
 procedure tdesignwindow.beforemake(const adesigner: idesigner;

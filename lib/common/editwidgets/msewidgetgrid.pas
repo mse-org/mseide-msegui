@@ -217,6 +217,7 @@ type
    procedure docellevent(var info: celleventinfoty); override;
    procedure checkcellvalue(var accept: boolean); override; //store edited value to grid
    procedure dofocusedcellposchanged; override;
+   procedure dorowsmoved(const fromindex,toindex,count: integer); override;
    procedure mouseevent(var info: mouseeventinfoty); override;
    procedure childmouseevent(const sender: twidget; var info: mouseeventinfoty); override;
    procedure clientmouseevent(var info: mouseeventinfoty); override;
@@ -1787,6 +1788,24 @@ begin
  inherited;
 end;
 
+procedure tcustomwidgetgrid.dorowsmoved(const fromindex,toindex,count: integer);
+var
+ int1: integer;
+begin
+ if ffocusedcell.col >= 0 then begin
+  if (focusedcell.row >= toindex) and (focusedcell.row < toindex + count) then begin
+   for int1:= 0 to fdatacols.count - 1 do begin
+    with twidgetcols(fdatacols)[int1] do begin
+     if (co_norearange in foptions) and (fintf <> nil) then begin
+      fintf.gridtovalue(ffocusedcell.row);           
+     end;
+    end;
+   end;
+  end;
+ end;
+ inherited;
+end;
+
 function tcustomwidgetgrid.getdatacols: twidgetcols;
 begin
  result:= twidgetcols(fdatacols);
@@ -2240,24 +2259,22 @@ begin
   ar4:= breaklines(wstr1);
   if high(ar4) >= 0 then begin
    ar5:= splitstring(ar4[0],c_tab);
-   if (og_rowinserting in optionsgrid) and
+   if {(og_rowinserting in optionsgrid) and}
         ((high(ar4) > 0) or (high(ar5) > 0)) then begin
     int5:= row;
-//    if (col < 0) or (co_rowselect in datacols[col].options) then begin
-//      acol:= 0;
-//    end
-//    else begin
-//     acol:= col;
-//    end;
     beginupdate;
     try
      datacols.clearselection;
      int1:= row;
-     insertrow(row,length(ar4));
+     if og_rowinserting in optionsgrid then begin
+      insertrow(row,length(ar4));
+     end;
+     if high(ar4) >= rowcount - int1 then begin
+      setlength(ar4,rowcount-int1);
+     end;
      for int2:= int1 to int1 + high(ar4) do begin
       datacols.selected[makegridcoord(invalidaxis,int2)]:= true;
      end;
-//     int4:= datacols.count - acol -1;
      for int1:= 0 to high(ar4) do begin
       ar5:= splitstring(ar4[int1],c_tab);
       int3:= 0;
@@ -2271,7 +2288,10 @@ begin
        end;
        try
         if ar2[int3] <> nil then begin
-         tdataedit1(ar2[int3]).texttodata(ar5[int2],ar3[int3].getitempo(int5)^);
+         if ar3[int3] <> nil then begin
+          tdataedit1(ar2[int3]).texttodata(ar5[int2],ar3[int3].getitempo(int5)^);
+          ar3[int3].change(int5);         
+         end;
         end
         else begin
          if ar3[int3] <> nil then begin

@@ -3974,7 +3974,7 @@ end;
 procedure tdatacol.moverow(const fromindex, toindex: integer;
                   const count: integer);
 begin
- if fdata <> nil then begin
+ if (fdata <> nil) and not (co_norearange in foptions) then begin
   fdata.blockmovedata(fromindex,toindex,count);
  end;
 end;
