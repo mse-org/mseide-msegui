@@ -14,7 +14,7 @@ uses
  classes,msegui,msegraphics,msetypes,msewidgets,msegraphutils,mseclasses,
  msetabs,mseprinter,msestream,msearrayprops,mseguiglob,msesimplewidgets,
  msedrawtext,msestrings,mserichstring,msedb,db,msethread,mseobjectpicker,
- msepointer,mseevent,msesplitter,msestatfile;
+ msepointer,mseevent,msesplitter,msestatfile,mselookupbuffer,mseformatstr;
 
 const
  defaultrepppmm = 3;
@@ -669,7 +669,7 @@ type
    property onafterpaint;
    property ongettext;
  end;
- 
+
  treppagenumdisp = class(trepvaluedisp)
   private
    foffset: integer;
@@ -694,6 +694,172 @@ type
    property format;
  end;
   
+ tcustomreplookupdisp = class;
+ 
+ treplookupdatalink = class(tfielddatalink)
+  private
+   fowner: tcustomreplookupdisp;  
+  protected
+   procedure recordchanged(afield: tfield); override;
+  public
+   constructor create(const aowner: tcustomreplookupdisp);
+ end;
+ 
+ tcustomreplookupdisp = class(tcustomrepvaluedisp,idbeditinfo)
+  private
+   fkeydatalink: treplookupdatalink;
+   flookupbuffer: tcustomlookupbuffer;
+   flookupkeyfieldno: integer;
+   flookupvaluefieldno: integer;
+   ftextdefault: msestring;
+   fkeyvalue: integer;
+   procedure setlookupbuffer(const avalue: tcustomlookupbuffer);
+     //idbeditinfo
+   function getdatasource(const aindex: integer): tdatasource; overload;
+   procedure getfieldtypes(out propertynames: stringarty;
+                          out fieldtypes: fieldtypesarty); virtual;
+   function getkeydatasource: tdatasource;
+   procedure setkeydatasource(const avalue: tdatasource);
+   function getkeydatafield: string;
+   procedure setkeydatafield(const avalue: string);
+   procedure setlookupkeyfieldno(const avalue: integer);
+   procedure setlookupvaluefieldno(const avalue: integer);
+   procedure settextdefault(const avalue: msestring);
+   procedure setkeyvalue(const avalue: integer);
+  protected
+   flookuptext: msestring;
+   procedure change;
+   procedure objectevent(const sender: tobject; const event: objecteventty); override;
+   function getdisptext: msestring; override;
+   function getlookuptext: msestring; virtual;
+  public
+   constructor create(aowner: tcomponent); override;
+   destructor destroy; override;
+   property keydatasource: tdatasource read getkeydatasource write setkeydatasource;
+   property keydatafield: string read getkeydatafield write setkeydatafield;
+   property lookupbuffer: tcustomlookupbuffer read flookupbuffer 
+                                      write setlookupbuffer;
+   property lookupkeyfieldno: integer read flookupkeyfieldno 
+                                      write setlookupkeyfieldno default 0;
+   property lookupvaluefieldno: integer read flookupvaluefieldno 
+                                      write setlookupvaluefieldno default 0;
+   property textdefault: msestring read ftextdefault write settextdefault;
+   property keyvalue: integer read fkeyvalue write setkeyvalue;
+ end;
+
+ trepstringdisplb = class(tcustomreplookupdisp)
+  protected
+   function getlookuptext: msestring; override;
+  published
+   property keydatasource;
+   property keydatafield;
+   property lookupbuffer;
+   property lookupkeyfieldno;
+   property lookupvaluefieldno;
+   property textdefault;
+   property font;
+//   property format;
+   
+   property options;
+   property optionsscale;
+   property onfontheightdelta;
+   property onchildscaled;
+
+   property onbeforerender;
+   property onpaint;
+   property onafterpaint;
+   property ongettext;
+ end; 
+ 
+ trepintegerdisplb = class(tcustomreplookupdisp)
+  private
+   fbase: numbasety;
+   fbitcount: integer;
+   procedure setbase(const avalue: numbasety);
+   procedure setbitcount(const avalue: integer);
+  protected
+   function getlookuptext: msestring; override;
+  public
+   constructor create(aowner: tcomponent); override;
+  published
+   property base: numbasety read fbase write setbase default nb_dec;
+   property bitcount: integer read fbitcount write setbitcount default 32;
+   
+   property keydatasource;
+   property keydatafield;
+   property lookupbuffer;
+   property lookupkeyfieldno;
+   property lookupvaluefieldno;
+   property textdefault;
+   property font;
+//   property format;
+   
+   property options;
+   property optionsscale;
+   property onfontheightdelta;
+   property onchildscaled;
+
+   property onbeforerender;
+   property onpaint;
+   property onafterpaint;
+   property ongettext;
+ end; 
+ 
+ treprealdisplb = class(tcustomreplookupdisp)
+  protected
+   function getlookuptext: msestring; override;
+  published
+   property keydatasource;
+   property keydatafield;
+   property lookupbuffer;
+   property lookupkeyfieldno;
+   property lookupvaluefieldno;
+   property textdefault;
+   property font;
+   property format;
+   
+   property options;
+   property optionsscale;
+   property onfontheightdelta;
+   property onchildscaled;
+
+   property onbeforerender;
+   property onpaint;
+   property onafterpaint;
+   property ongettext;
+ end; 
+ 
+ trepdatetimedisplb = class(tcustomreplookupdisp)
+  private
+   fkind: datetimekindty;
+   procedure setkind(const avalue: datetimekindty);
+  protected
+   function getlookuptext: msestring; override;
+  public
+   constructor create(aowner: tcomponent); override;
+  published
+   property kind: datetimekindty read fkind write setkind default dtk_date;
+
+   property keydatasource;
+   property keydatafield;
+   property lookupbuffer;
+   property lookupkeyfieldno;
+   property lookupvaluefieldno;
+   property textdefault;
+   property font;
+   property format;
+   
+   property options;
+   property optionsscale;
+   property onfontheightdelta;
+   property onchildscaled;
+
+   property onbeforerender;
+   property onpaint;
+   property onafterpaint;
+   property ongettext;
+ end; 
+ 
  recordbandarty = array of tcustomrecordband;
  
  tcustombandgroup = class(tcustomrecordband,ibandparent)
@@ -1181,7 +1347,7 @@ function getreportscale(const amodule: tcomponent): real;
 
 implementation
 uses
- msedatalist,sysutils,msestreaming,msebits,msereal,mseformatstr;
+ msedatalist,sysutils,msestreaming,msebits,msereal;
 type
  tcustomframe1 = class(tcustomframe);
  twidget1 = class(twidget);
@@ -5140,10 +5306,10 @@ end;
 
 procedure trepvaluedisp.setvalue(const avalue: msestring);
 begin
- if fvalue <> avalue then begin
+// if fvalue <> avalue then begin
   fvalue:= avalue;
   minclientsizechanged;
- end;
+// end;
 end;
 
 function trepvaluedisp.getdisptext: msestring;
@@ -5318,6 +5484,221 @@ begin
  else begin
   inherited;
  end;
+end;
+
+{ tcustomreplookupdisp }
+
+constructor tcustomreplookupdisp.create(aowner: tcomponent);
+begin
+ fkeydatalink:= treplookupdatalink.create(self);
+ inherited;
+end;
+
+destructor tcustomreplookupdisp.destroy;
+begin
+ fkeydatalink.free;
+ inherited;
+end;
+
+procedure tcustomreplookupdisp.setlookupbuffer(const avalue: tcustomlookupbuffer);
+begin
+ setlinkedvar(avalue,tmsecomponent(flookupbuffer));
+ change;
+end;
+
+function tcustomreplookupdisp.getdatasource(const aindex: integer): tdatasource;
+begin
+ result:= keydatasource;
+end;
+
+procedure tcustomreplookupdisp.getfieldtypes(out propertynames: stringarty;
+               out fieldtypes: fieldtypesarty);
+begin
+ propertynames:= nil;
+ setlength(fieldtypes,1);
+ fieldtypes[0]:= integerfields;
+end;
+
+function tcustomreplookupdisp.getkeydatasource: tdatasource;
+begin
+ result:= fkeydatalink.datasource;
+end;
+
+procedure tcustomreplookupdisp.setkeydatasource(const avalue: tdatasource);
+begin
+ fkeydatalink.datasource:= avalue;
+end;
+
+function tcustomreplookupdisp.getkeydatafield: string;
+begin
+ result:= fkeydatalink.fieldname;
+end;
+
+procedure tcustomreplookupdisp.setkeydatafield(const avalue: string);
+begin
+ fkeydatalink.fieldname:= avalue;
+end;
+
+procedure tcustomreplookupdisp.setlookupkeyfieldno(const avalue: integer);
+begin
+ if avalue <> flookupkeyfieldno then begin
+  flookupkeyfieldno:= avalue;
+  change;
+ end;
+end;
+
+procedure tcustomreplookupdisp.setlookupvaluefieldno(const avalue: integer);
+begin
+ if avalue <> flookupvaluefieldno then begin
+  flookupvaluefieldno:= avalue;
+  change;
+ end;
+end;
+
+procedure tcustomreplookupdisp.change;
+begin
+ minclientsizechanged;
+end;
+
+procedure tcustomreplookupdisp.objectevent(const sender: tobject;
+               const event: objecteventty);
+begin
+ inherited;
+ if (event in [oe_changed,oe_connect]) and (sender = flookupbuffer) then begin
+  change;
+ end;
+end;
+
+procedure tcustomreplookupdisp.settextdefault(const avalue: msestring);
+begin
+ ftextdefault:= avalue;
+ change;
+end;
+
+function tcustomreplookupdisp.getdisptext: msestring;
+begin
+ result:= '';
+ if fkeydatalink.fieldactive then begin
+  keyvalue:= fkeydatalink.field.asinteger;
+  result:= flookuptext;
+ end;
+ if (result = '') and (csdesigning in componentstate) then begin
+  result:= ftextdefault;
+  if result = '' then begin
+   result:= inherited getdisptext;
+  end;
+ end
+ else begin
+  dogettext(result);
+ end;
+end;
+
+procedure tcustomreplookupdisp.setkeyvalue(const avalue: integer);
+begin
+ fkeyvalue:= avalue;
+ if flookupbuffer <> nil then begin
+  flookuptext:= getlookuptext;
+ end
+ else begin
+  flookuptext:= '';
+ end;
+end;
+
+function tcustomreplookupdisp.getlookuptext: msestring;
+begin
+ result:= name;
+end;
+
+{ treplookupdatalink }
+
+constructor treplookupdatalink.create(const aowner: tcustomreplookupdisp);
+begin
+ fowner:= aowner;
+ inherited create;
+end;
+
+procedure treplookupdatalink.recordchanged(afield: tfield);
+begin
+ if (afield = nil) or (afield = field) then begin
+  fowner.change;
+ end;
+end;
+
+{ trepstringdisplb }
+
+function trepstringdisplb.getlookuptext: msestring;
+begin
+ result:= flookupbuffer.lookuptext(flookupkeyfieldno,flookupvaluefieldno,
+                                            fkeyvalue);
+end;
+
+{ trepintegerdisplb }
+
+constructor trepintegerdisplb.create(aowner: tcomponent);
+begin
+ fbase:= nb_dec;
+ fbitcount:= 32;
+ inherited;
+end;
+
+function trepintegerdisplb.getlookuptext: msestring;
+var
+ int1: integer;
+begin
+ int1:= flookupbuffer.lookupinteger(flookupkeyfieldno,flookupvaluefieldno,
+                                            fkeyvalue);
+ result:= intvaluetostr(int1,fbase,fbitcount)
+end;
+
+procedure trepintegerdisplb.setbase(const avalue: numbasety);
+begin
+ fbase:= avalue;
+ change;
+end;
+
+procedure trepintegerdisplb.setbitcount(const avalue: integer);
+begin
+ fbitcount:= avalue;
+ change;
+end;
+
+{ treprealdisplb }
+
+function treprealdisplb.getlookuptext: msestring;
+var
+ rea1: realty;
+begin
+ rea1:= flookupbuffer.lookupfloat(flookupkeyfieldno,flookupvaluefieldno,
+                                            fkeyvalue);
+ result:= realtytostr(rea1,fformat)
+end;
+
+{ trepdatetimedisplb }
+
+constructor trepdatetimedisplb.create(aowner: tcomponent);
+begin
+ fkind:= dtk_date;
+ inherited;
+end;
+
+function trepdatetimedisplb.getlookuptext: msestring;
+var
+ dat1: tdatetime;
+begin
+ dat1:= flookupbuffer.lookupfloat(flookupkeyfieldno,flookupvaluefieldno,
+                                            fkeyvalue);
+ if fkind = dtk_time then begin
+  result:= mseformatstr.timetostring(dat1,fformat);
+ end
+ else begin
+  result:= mseformatstr.datetimetostring(dat1,fformat);
+ end;
+end;
+
+procedure trepdatetimedisplb.setkind(const avalue: datetimekindty);
+begin
+ fkind:= avalue;
+ change;
 end;
 
 end.

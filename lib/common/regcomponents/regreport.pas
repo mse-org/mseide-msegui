@@ -35,12 +35,17 @@ procedure Register;
 begin
  registercomponents('Rep',[{treportpage,}tbandarea,tbandgroup,
                     trecordband,
-                    trepvaluedisp,treppagenumdisp,trepprintdatedisp,trepspacer]); 
+                    trepvaluedisp,treppagenumdisp,trepprintdatedisp,
+                    trepstringdisplb,trepintegerdisplb,treprealdisplb,
+                    trepdatetimedisplb,
+                    trepspacer]); 
  
  registerdesignmoduleclass(treport,reportintf,treportdesignerfo);
  registerpropertyeditor(typeinfo(treptabulators),nil,'',treptabulatorseditor);
  registerpropertyeditor(typeinfo(tcustomrecordband),treptabulators,'linksource',
                            tlocallinkcomponentpropertyeditor);
+ registerpropertyeditor(typeinfo(string),tcustomreplookupdisp,'keydatafield',
+        tdbfieldnamepropertyeditor);
  registerpropertyeditor(typeinfo(string),tcustomrecordband,'visidatafield',
         tdbfieldnamepropertyeditor);
  registerpropertyeditor(typeinfo(string),tcustomrecordband,'visigroupfield',

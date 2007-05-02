@@ -187,8 +187,8 @@ type
    function getdatasource: tdatasource; overload;
    procedure setdatasource(const avalue: tdatasource);
      //idbeditinfo
-    function getdatasource(const aindex: integer): tdatasource; overload;
-  procedure getfieldtypes(out propertynames: stringarty;
+   function getdatasource(const aindex: integer): tdatasource; overload;
+   procedure getfieldtypes(out propertynames: stringarty;
                           out fieldtypes: fieldtypesarty); virtual;
      //idbdispfieldlink
    procedure fieldtovalue; virtual;
