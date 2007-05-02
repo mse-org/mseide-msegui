@@ -6,7 +6,7 @@ uses
  classes,db,msedb,msetypes,msestrings,mseclasses,msearrayprops,mselist,msegui;
  
 type
-
+ 
  tcustomlookupbuffer = class;
  tcustomdblookupbuffer = class;
  

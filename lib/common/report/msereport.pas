@@ -37,6 +37,7 @@ const
  defaultrepfontcolor = cl_black;
   
 type
+ lookupkindty = (lk_text,lk_integer,lk_float,lk_date,lk_time,lk_datetime);
  linevisiblety = (lv_firstofpage,lv_normal,lv_lastofpage,lv_firstrecord,lv_lastrecord);
  linevisiblesty = set of linevisiblety;
   
@@ -125,6 +126,11 @@ type
    fdatalink: treptabitemdatalink;
    fongetvalue: getrichstringeventty;
    flineinfos: tablineinfoarty;
+   flookupbuffer: tcustomlookupbuffer;
+   flookupkeyfieldno: integer;
+   flookupvaluefieldno: integer;
+   flookupkind: lookupkindty;
+   flookupformat: msestring;
    procedure setvalue(const avalue: msestring);
    procedure setrichvalue(const avalue: richstringty);
    function getdisptext: richstringty;
@@ -170,6 +176,11 @@ type
    function getdatasource(const aindex: integer): tdatasource;
    procedure getfieldtypes(out apropertynames: stringarty;
                            out afieldtypes: fieldtypesarty);
+   procedure setlookupbuffer(const avalue: tcustomlookupbuffer);
+   procedure setlookupkeyfieldno(const avalue: integer);
+   procedure setlookupvaluefieldno(const avalue: integer);
+   procedure setlookupkind(const avalue: lookupkindty);
+   procedure setlookupformat(const avalue: msestring);
   protected
    function xlineoffset: integer;
   public 
@@ -183,6 +194,15 @@ type
                    default defaultreptabtextflags;
    property datafield: string read getdatafield write setdatafield;
    property datasource: tdatasource read getdatasource1 write setdatasource;
+   property lookupbuffer: tcustomlookupbuffer read flookupbuffer 
+                                      write setlookupbuffer;
+   property lookupkeyfieldno: integer read flookupkeyfieldno 
+                                      write setlookupkeyfieldno default 0;
+   property lookupvaluefieldno: integer read flookupvaluefieldno 
+                                      write setlookupvaluefieldno default 0;
+   property lookupkind: lookupkindty read flookupkind 
+                                      write setlookupkind default lk_text;
+   property lookupformat: msestring read flookupformat write setlookupformat;
 
    property litop_widthmm: real read flineinfos[tlk_top].widthmm write
                  setlitop_widthmm;
@@ -693,7 +713,7 @@ type
   published
    property format;
  end;
-  
+{  
  tcustomreplookupdisp = class;
  
  treplookupdatalink = class(tfielddatalink)
@@ -859,6 +879,7 @@ type
    property onafterpaint;
    property ongettext;
  end; 
+ }
  
  recordbandarty = array of tcustomrecordband;
  
@@ -1509,6 +1530,7 @@ end;
 
 destructor treptabulatoritem.destroy;
 begin
+ lookupbuffer:= nil;
  inherited;
  ffont.free;
  fdatalink.free;
@@ -1624,10 +1646,52 @@ begin
 end;
 
 function treptabulatoritem.getdisptext: richstringty;
+var
+ key: integer;
+ mstr1: msestring;
+ int1: integer;
+ rea1: realty;
+ 
+ 
 begin
  if fdatalink.fieldactive then begin
-  result.text:= fdatalink.msedisplaytext;
   result.format:= nil;
+  if flookupbuffer <> nil then begin
+   try
+    result.text:= '';
+    key:= fdatalink.field.asinteger;
+    case flookupkind of
+     lk_text: begin
+      result.text:= flookupbuffer.lookuptext(flookupkeyfieldno,
+                   flookupvaluefieldno,key);
+     end;
+     lk_integer: begin
+      int1:= flookupbuffer.lookupinteger(flookupkeyfieldno,
+                   flookupvaluefieldno,key);
+      result.text:= inttostr(int1);
+     end;
+     lk_float: begin
+      rea1:= flookupbuffer.lookupfloat(flookupkeyfieldno,
+                   flookupvaluefieldno,key);
+      result.text:= realtytostr(rea1,flookupformat)
+     end;
+     lk_date,lk_datetime: begin
+      rea1:= flookupbuffer.lookupfloat(flookupkeyfieldno,
+                   flookupvaluefieldno,key);
+      result.text:= mseformatstr.datetimetostring(rea1,flookupformat);
+     end;
+     lk_time: begin
+      rea1:= flookupbuffer.lookupfloat(flookupkeyfieldno,
+                   flookupvaluefieldno,key);
+      result.text:= mseformatstr.timetostring(rea1,flookupformat);
+     end;
+    end;
+   except
+   end;
+  end
+  else begin
+   result.text:= fdatalink.msedisplaytext;
+  end;
  end
  else begin
   result:= fvalue;
@@ -1778,6 +1842,36 @@ end;
 procedure treptabulatoritem.recchanged;
 begin
  fdatalink.recordchanged(nil);
+end;
+
+procedure treptabulatoritem.setlookupbuffer(const avalue: tcustomlookupbuffer);
+begin
+ treptabulators(fowner).fband.setlinkedvar(avalue,tmsecomponent(flookupbuffer));
+ changed;
+end;
+
+procedure treptabulatoritem.setlookupkeyfieldno(const avalue: integer);
+begin
+ flookupkeyfieldno:= avalue;
+ changed;
+end;
+
+procedure treptabulatoritem.setlookupvaluefieldno(const avalue: integer);
+begin
+ flookupvaluefieldno:= avalue;
+ changed;
+end;
+
+procedure treptabulatoritem.setlookupkind(const avalue: lookupkindty);
+begin
+ flookupkind:= avalue;
+ changed;
+end;
+
+procedure treptabulatoritem.setlookupformat(const avalue: msestring);
+begin
+ flookupformat:= avalue;
+ changed;
 end;
 
 { treptabulators }
@@ -5485,7 +5579,7 @@ begin
   inherited;
  end;
 end;
-
+(*
 { tcustomreplookupdisp }
 
 constructor tcustomreplookupdisp.create(aowner: tcomponent);
@@ -5700,5 +5794,5 @@ begin
  fkind:= avalue;
  change;
 end;
-
+*)
 end.
