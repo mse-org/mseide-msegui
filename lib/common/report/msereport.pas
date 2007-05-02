@@ -486,7 +486,7 @@ const
                    bo_shownormalrecord,bo_hidenormalrecord,
                    bo_showlastrecord,bo_hidelastrecord
                    ];
-
+ defaultrepvaluedispoptions = [bo_evenpage,bo_oddpage];
 type                     
  trepspacer = class(tspacer,ireportclient)
   private
@@ -656,13 +656,15 @@ type
    procedure dopaint(const acanvas: tcanvas); override;
    procedure dogettext(var atext: msestring);
    function getdisptext: msestring; virtual;
+   procedure render(const acanvas: tcanvas; var empty: boolean); override;
   public
    constructor create(aowner: tcomponent); override;
    property textflags: textflagsty read ftextflags write ftextflags default 
-               defaultrepvaluedisptextflags;
+                                            defaultrepvaluedisptextflags;
    property format: msestring read fformat write setformat;
    property optionsscale default defaultrepvaluedispoptionsscale;
    property ongettext: getrepvaluetexteventty read fongettext write fongettext;
+   property options default defaultrepvaluedispoptions;
   published
    property anchors default [an_left,an_top];
  end;
@@ -4311,8 +4313,22 @@ end;
 function tcustomreportpage.render(const acanvas: tcanvas): boolean;
 var
  int1: integer;
- bo1,bo2,bo3,bo4: boolean;
+ bo1,bo2,bo3,bo4,bo5: boolean;
  hascustomdata: boolean;
+ 
+procedure renderband(const aband: tcustomrecordband);
+begin
+ with aband do begin
+  bo4:= bo5 and (bo2 and (bo_oddpage in foptions) or 
+          not bo2 and (bo_evenpage in foptions)); //has data
+  bo4:= not(bo4 or ((bo_once in foptions) and not (rbs_showed in fstate)));
+               //empty
+ 
+  render(acanvas,bo4);
+  bo1:= bo1 and bo4;
+ end;
+end;
+
 begin
  if not (rpps_inited in fstate) then begin
   init;
@@ -4350,13 +4366,16 @@ begin
    fbands[int1].initpage;
   end;
   bo2:= odd(reppagenum);
+  bo5:= true;
   for int1:= 0 to high(fbands) do begin
-   with fbands[int1] do begin
-    bo4:= (bo3 and bo1) or not bo2 and (bo_oddpage in foptions) or 
-                                  bo2 and (bo_evenpage in foptions);
-               //empty    
-    fbands[int1].render(acanvas,bo4);
-    bo1:= bo1 and bo4;
+   if not (fbands[int1] is tcustomrepvaluedisp) then begin
+    renderband(fbands[int1]);
+   end;
+  end;
+  bo5:= rpps_backgroundrendered in fstate;
+  for int1:= 0 to high(fbands) do begin
+   if fbands[int1] is tcustomrepvaluedisp then begin
+    renderband(fbands[int1]);
    end;
   end;
   if not (rpps_backgroundrendered in fstate) and not bo3 then begin
@@ -4635,6 +4654,7 @@ procedure tcustomreportpage.endband(const acanvas: tcanvas;
                const sender: tcustomrecordband);
 begin
  acanvas.restore(fsaveindex);
+ include(sender.fstate,rbs_showed);
 end;
 
 function tcustomreportpage.isfirstband: boolean;
@@ -5344,6 +5364,7 @@ begin
  ftextflags:= defaultrepvaluedisptextflags;
  foptionsscale:= defaultrepvaluedispoptionsscale;
  inherited;
+ foptions:= defaultrepvaluedispoptions;
  foptionsscale:= defaultrepvaluedispoptionsscale;
  fanchors:= [an_left,an_top];
 end;
@@ -5394,6 +5415,13 @@ begin
  if size1.cy > result.cy then begin
   result.cy:= size1.cy;
  end;
+end;
+
+procedure tcustomrepvaluedisp.render(const acanvas: tcanvas;
+               var empty: boolean);
+begin
+ inherited;
+ empty:= true;
 end;
 
 { trepvaluedisp }
