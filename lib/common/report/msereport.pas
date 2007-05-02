@@ -3595,14 +3595,14 @@ begin
      with fbands[factiveband] do begin
       bo2:= odd(fparentintf.reppagenum);
       bo2:= bo2 and (bo_oddpage in foptions) or 
-            not bo2 and (bo_evenpage in foptions);
+            not bo2 and (bo_evenpage in foptions); //has data
       bo1:= ((rbs_showed in fstate) or not(bo_once in foptions)) and
             ((rbs_pageshowed in fstate) or not bo2);   //empty    
       render(acanvas,bo1);
       bo1:= bo1 or bo2{(bv_everypage in fvisibility)};
 //      fstate:= fstate + [rbs_showed,rbs_pageshowed];
-//     result:= bo1;
-      result:= result and bo1;
+      result:= bo1;
+//      result:= result and bo1;
       if bo1 then begin //empty
        if fnextbandifempty <> nil then begin
         for int1:= 0 to high(fbands) do begin
