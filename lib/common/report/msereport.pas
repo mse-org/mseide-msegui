@@ -130,7 +130,7 @@ type
    flookupkeyfieldno: integer;
    flookupvaluefieldno: integer;
    flookupkind: lookupkindty;
-   flookupformat: msestring;
+   fformat: msestring;
    procedure setvalue(const avalue: msestring);
    procedure setrichvalue(const avalue: richstringty);
    function getdisptext: richstringty;
@@ -180,7 +180,7 @@ type
    procedure setlookupkeyfieldno(const avalue: integer);
    procedure setlookupvaluefieldno(const avalue: integer);
    procedure setlookupkind(const avalue: lookupkindty);
-   procedure setlookupformat(const avalue: msestring);
+   procedure setformat(const avalue: msestring);
   protected
    function xlineoffset: integer;
   public 
@@ -202,7 +202,7 @@ type
                                       write setlookupvaluefieldno default 0;
    property lookupkind: lookupkindty read flookupkind 
                                       write setlookupkind default lk_text;
-   property lookupformat: msestring read flookupformat write setlookupformat;
+   property format: msestring read fformat write setformat;
 
    property litop_widthmm: real read flineinfos[tlk_top].widthmm write
                  setlitop_widthmm;
@@ -1675,24 +1675,24 @@ begin
      lk_float: begin
       rea1:= flookupbuffer.lookupfloat(flookupkeyfieldno,
                    flookupvaluefieldno,key);
-      result.text:= realtytostr(rea1,flookupformat)
+      result.text:= realtytostr(rea1,fformat)
      end;
      lk_date,lk_datetime: begin
       rea1:= flookupbuffer.lookupfloat(flookupkeyfieldno,
                    flookupvaluefieldno,key);
-      result.text:= mseformatstr.datetimetostring(rea1,flookupformat);
+      result.text:= mseformatstr.datetimetostring(rea1,fformat);
      end;
      lk_time: begin
       rea1:= flookupbuffer.lookupfloat(flookupkeyfieldno,
                    flookupvaluefieldno,key);
-      result.text:= mseformatstr.timetostring(rea1,flookupformat);
+      result.text:= mseformatstr.timetostring(rea1,fformat);
      end;
     end;
    except
    end;
   end
   else begin
-   result.text:= fdatalink.msedisplaytext;
+   result.text:= fdatalink.msedisplaytext(fformat);
   end;
  end
  else begin
@@ -1870,9 +1870,9 @@ begin
  changed;
 end;
 
-procedure treptabulatoritem.setlookupformat(const avalue: msestring);
+procedure treptabulatoritem.setformat(const avalue: msestring);
 begin
- flookupformat:= avalue;
+ fformat:= avalue;
  changed;
 end;
 

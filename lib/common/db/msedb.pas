@@ -630,7 +630,7 @@ type
    property AsString: string read GetAsString write SetAsString;
    property AsVariant: variant read GetAsVariant write SetAsVariant;
    property asmsestring: msestring read getasmsestring write setasmsestring;
-   function msedisplaytext: msestring;
+   function msedisplaytext(const aformat: msestring = ''): msestring;
  end;
  
  fieldarrayty = array of tfield;
@@ -2823,23 +2823,45 @@ begin
  end;
 end;
 
-function tfielddatalink.msedisplaytext: msestring;
+function tfielddatalink.msedisplaytext(const aformat: msestring = ''): msestring;
+ procedure defaulttext;
+ begin
+  if utf8 then begin
+   result:= utf8tostring(ffield.displaytext);
+  end
+  else begin
+   result:= ffield.displaytext;
+  end;
+ end;
 begin
+ result:= '';
  if ffield <> nil then begin
   if fismsestring then begin
    result:= tmsestringfield(ffield).asmsestring;
   end
   else begin
-   if utf8 then begin
-    result:= utf8tostring(ffield.displaytext);
-   end
-   else begin
-    result:= ffield.displaytext;
+   if not ffield.isnull then begin
+    if aformat <> '' then begin
+     case ffield.datatype of
+      ftsmallint,ftinteger,ftword,ftlargeint,ftbcd,ftfloat,ftcurrency: begin
+       result:= formatfloatmse(field.asfloat,aformat);       
+      end;
+      ftboolean: begin
+       result:= formatfloatmse(ord(field.asboolean),aformat);       
+      end;
+      ftdate,fttime,ftdatetime: begin
+       result:= formatdatetime(aformat,field.asdatetime);
+      end;
+      else begin
+       defaulttext;
+      end;
+     end;
+    end
+    else begin
+     defaulttext;
+    end;
    end;
   end;
- end
- else begin
-  result:= '';
  end;
 end;
 
