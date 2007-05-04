@@ -717,7 +717,8 @@ type
  end;
 
  buttonoptionty = (bo_executeonclick,bo_executeonkey,bo_executeonshortcut,
-                   bo_focusonshortcut //for tcustombutton
+                   bo_focusonshortcut, //for tcustombutton
+                   bo_flat 
                    );
  buttonoptionsty = set of buttonoptionty;
 
@@ -731,6 +732,7 @@ type
    procedure setcolorglyph(const value: colorty);
   protected
    finfo: shapeinfoty;
+   procedure setoptions(const avalue: buttonoptionsty); virtual;
    procedure doshapeexecute(const atag: integer; const info: mouseeventinfoty);
    procedure doexecute; virtual;
    procedure statechanged; override;
@@ -741,7 +743,7 @@ type
    procedure clientrectchanged; override;
   public
    constructor create(aowner: tcomponent); override;
-   property options: buttonoptionsty read foptions write foptions
+   property options: buttonoptionsty read foptions write setoptions
                  default defaultbuttonoptions;
    property colorglyph: colorty read finfo.colorglyph write setcolorglyph
                     default cl_black;
@@ -1237,6 +1239,20 @@ procedure tactionsimplebutton.setcolorglyph(const value: colorty);
 begin
  if finfo.colorglyph <> value then begin
   finfo.colorglyph := value;
+  invalidate;
+ end;
+end;
+
+procedure tactionsimplebutton.setoptions(const avalue: buttonoptionsty);
+begin
+ if foptions <> avalue then begin
+  foptions:= avalue;
+  if bo_flat in avalue then begin
+   include(finfo.state,ss_flat);
+  end
+  else begin
+   exclude(finfo.state,ss_flat);
+  end;
   invalidate;
  end;
 end;

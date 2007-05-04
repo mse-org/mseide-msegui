@@ -107,6 +107,7 @@ type
    procedure setautosize_cx(const avalue: integer);
    procedure setautosize_cy(const avalue: integer);
   protected
+   procedure setoptions(const avalue: buttonoptionsty); override;
    function gethint: msestring; override;
    procedure sethint(const Value: msestring); override;
    function ishintstored: boolean; override;
@@ -418,6 +419,17 @@ begin
  inherited;
  include(fwidgetstate1,ws1_nodesignframe);
  size:= makesize(defaultbuttonwidth,defaultbuttonheight);
+end;
+
+procedure tcustombutton.setoptions(const avalue: buttonoptionsty);
+begin
+ inherited;
+ if bo_flat in avalue then begin
+  exclude(fwidgetstate1,ws1_nodesignframe);
+ end
+ else begin
+  include(fwidgetstate1,ws1_nodesignframe);
+ end;
 end;
 
 procedure tcustombutton.synctofontheight;
