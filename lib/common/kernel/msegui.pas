@@ -1550,6 +1550,8 @@ type
    procedure run;
    procedure createdatamodule(instanceclass: msecomponentclassty; var reference);
    procedure createform(instanceclass: widgetclassty; var reference);
+   procedure invalidate; //invalidates all registered forms
+   
    function trylock: boolean;
    function lock: boolean;
     //synchronizes calling thread with main event loop (mutex),
@@ -12548,6 +12550,15 @@ end;
 procedure tapplication.delayedmouseshift(const ashift: pointty);
 begin
  addpoint1(fdelayedmouseshift,ashift);
+end;
+
+procedure tapplication.invalidate;
+var
+ int1: integer;
+begin
+ for int1:= 0 to high(fwindows) do begin
+  fwindows[int1].fowner.invalidate;
+ end;
 end;
 
 initialization
