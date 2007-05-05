@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2006 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2007 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -56,6 +56,8 @@ type
   procedure setbitvalue(const value: boolean; const index: integer);
   function getfloatvalue(const index: integer = 0): extended;
   procedure setfloatvalue(const value: extended);
+  function getcurrencyvalue(const index: integer = 0): currency;
+  procedure setcurrencyvalue(const value: currency);
   function getstringvalue(const index: integer = 0): string;
   procedure setstringvalue(const value: string);
   function getmsestringvalue(const index: integer = 0): msestring;
@@ -94,6 +96,8 @@ type
    procedure setbitvalue(const value: boolean; const index: integer);
    function getfloatvalue(const index: integer = 0): extended;
    procedure setfloatvalue(const value: extended);
+   function getcurrencyvalue(const index: integer = 0): currency;
+   procedure setcurrencyvalue(const value: currency);
    function getstringvalue(const index: integer = 0): string;
    procedure setstringvalue(const value: string);
    function getmsestringvalue(const index: integer = 0): msestring;
@@ -217,6 +221,13 @@ type
    function getvalue: msestring; override;
  end;
 
+ tcurrencypropertyeditor = class(tpropertyeditor)
+  public
+   function allequal: boolean; override;
+   procedure setvalue(const value: msestring); override;
+   function getvalue: msestring; override;
+ end;
+ 
  tdatetimepropertyeditor = class(tpropertyeditor)
   public
    function allequal: boolean; override;
@@ -1177,6 +1188,35 @@ begin
   for int1:= 0 to high(fprops) do begin
    with fprops[int1] do begin
     SetfloatProp(Instance, PropInfo, Value);
+   end;
+  end;
+  modified;
+ end;
+end;
+
+function tpropertyeditor.getcurrencyvalue(const index: integer = 0): currency;
+begin
+ if fremote <> nil then begin
+  result:= fremote.getcurrencyvalue(index);
+ end
+ else begin
+  with fprops[index] do begin
+   result:= getfloatprop(instance,propinfo);
+  end;
+ end;
+end;
+
+procedure tpropertyeditor.setcurrencyvalue(const value: currency);
+var
+ int1: integer;
+begin
+ if fremote <> nil then begin
+  fremote.setcurrencyvalue(value);
+ end
+ else begin
+  for int1:= 0 to high(fprops) do begin
+   with fprops[int1] do begin
+    setfloatprop(instance, propinfo, value);
    end;
   end;
   modified;
@@ -3170,6 +3210,36 @@ end;
 function trealpropertyeditor.getvalue: msestring;
 begin
  result:= realtostr(getfloatvalue);
+end;
+
+{ tcurrencypropertyeditor }
+
+function tcurrencypropertyeditor.allequal: boolean;
+var
+ int1: integer;
+ cu1: currency;
+begin
+ result:= inherited allequal;
+ if not result then begin
+  result:= true;
+  cu1:= getcurrencyvalue;
+  for int1:= 1 to high(fprops) do begin
+   if cu1 <> getcurrencyvalue(int1) then begin
+    result:= false;
+    break;
+   end;
+  end;
+ end;
+end;
+
+procedure tcurrencypropertyeditor.setvalue(const value: msestring);
+begin
+ setcurrencyvalue(strtoreal(value));
+end;
+
+function tcurrencypropertyeditor.getvalue: msestring;
+begin
+ result:= realtostr(getcurrencyvalue);
 end;
 
 { trealtypropertyeditor }
