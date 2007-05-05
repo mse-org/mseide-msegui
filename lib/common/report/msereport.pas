@@ -681,6 +681,7 @@ type
    property font;
 //   property tabs;
 //   property datasource;
+   property textflags;
    property options;
    property optionsscale;
    property onfontheightdelta;
