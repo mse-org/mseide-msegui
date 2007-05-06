@@ -771,7 +771,7 @@ begin
  streamwrite(
   '%%Trailer'+nl+
   '%%Pages: '+inttostr(fps_pagenumber)+nl+
-  'EOF'+nl);
+  '%%EOF'+nl);
 end;
 
 procedure tpostscriptcanvas.ps_changegc;
