@@ -391,7 +391,8 @@ begin
     while int1 <= textlen do begin
      wch1:= text.text[int1];
      if (wch1 = ' ') or 
-        ((wch1 = '-') or (wch1 = c_softhyphen)) and 
+        ((wch1 = '-') and (int1 > 1) and (text.text[int1-1] <> ' ') or 
+        (wch1 = c_softhyphen)) and 
             (awidth + charwidths[int1-1] <= info.dest.cx) then begin
       checksofthyphen(high(lineinfos));
       int2:= int1;
