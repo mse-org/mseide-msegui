@@ -12506,7 +12506,7 @@ end;
 
 procedure tapplication.langchanged;
 begin
- //todo: refresh widgets
+ invalidate;
 end;
 
 function tapplication.candefocus: boolean;
