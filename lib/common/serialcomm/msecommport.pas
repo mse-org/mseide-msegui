@@ -30,7 +30,11 @@ type
     coms_exception,           //6
     coms_error,               //7
     coms_bufferoverflow,      //8
-    coms_canceled             //9
+    coms_canceled,            //9
+    coms_unknown,             //10
+    coms_command,             //11
+    coms_parameter,           //12
+    coms_busy                 //13
             );
 
  errorrecty = record
@@ -52,6 +56,11 @@ const
  cpf_error =               7;
  cpf_bufferoverflow =      8;
  cpf_canceled =            9;
+ 
+ cpf_unknown =            10;     //asciiprot errors
+ cpf_command =            11;
+ cpf_parameter =          12;
+ cpf_busy =               13;
  cpf_user =              100;
 
  errortexte: array[commstatety] of errorrecty =
@@ -65,7 +74,11 @@ const
    (error: cpf_exception; text: 'exception'),
    (error: cpf_error; text: 'error'),
    (error: cpf_bufferoverflow; text: 'bufferoverflow'),
-   (error: cpf_canceled; text: 'canceled')
+   (error: cpf_canceled; text: 'canceled'),
+   (error: cpf_unknown; text: 'unknown'),
+   (error: cpf_command; text: 'command error'),
+   (error: cpf_parameter; text: 'paramter error'),
+   (error: cpf_busy; text: 'busy')
   );
 
  commerrors = ' 1    ok' + c_linefeed +
@@ -346,12 +359,37 @@ type
   public
    constructor create(aowner: tcomponent); override;
    function send(const commandstring: string; out answer: string;
-            atimeout: integer = 0): integer; overload;
+            atimeout: integer = 0): integer;
   published
    property halfduplex;
    property eorchar: char read geteorchar write seteorchar default defaulteorchar;
  end;
 
+ asciiproterrorty = (ape_unknown,ape_command,ape_parameter,ape_busy);
+ 
+const
+ errorchar = '*';
+ errorcodes: array[asciiproterrorty] of integer = 
+  (cpf_unknown,cpf_command,cpf_parameter,cpf_busy);
+  
+type
+ tasciiprotevent = class(tasciicommevent)
+  private
+  protected
+   procedure processed(const thread: tcommthread; var ok: boolean); override;
+  public
+   constructor create(persistent: boolean; atimeout: integer = 200000); override;
+ end;
+
+ tasciiprotport = class(tasciicommport)
+  protected
+   function geteventclass: asciicommeventclassty; override;
+  public
+   function send(const commandstring: string; out answer: string;
+            atimeout: integer = 0; aadress: integer = -1): integer;
+                                     //-1: no address
+ end; 
+ 
 function checkcommport(commnr: commnrty): boolean;  //true wenn comport zur verfuegung
 function crc16(const data; len: integer): word;
 function bintoascii(const bytes: string): string; overload;
@@ -1783,6 +1821,56 @@ begin
   ok:= resultcode = cpf_ok;
  end;
  inherited;
+end;
+
+{ tasciiprotevent }
+
+constructor tasciiprotevent.create(persistent: boolean;
+               atimeout: integer = 200000);
+begin
+ inherited;
+end;
+
+procedure tasciiprotevent.processed(const thread: tcommthread; var ok: boolean);
+var
+ int1: integer;
+begin
+ if ok and (length(resultstring) > 0) then begin
+  if resultstring[1] = errorchar then begin
+   ok:= false;
+   if length(resultstring) = 1 then begin
+    int1:= ord(ape_command);
+   end
+   else begin
+    int1:= ord(resultstring[2]) - ord('A')+1;
+    if (int1 < ord(ape_command)) or 
+          (int1 > ord(high(asciiproterrorty))) then begin
+     int1:= ord(ape_unknown);
+    end;
+   end;
+   resultcode:= errorcodes[asciiproterrorty(int1)];
+  end;
+ end;
+ inherited;
+end;
+
+{ asciiprotport }
+ 
+function tasciiprotport.geteventclass: asciicommeventclassty;
+begin
+ result:= tasciiprotevent;
+end;
+
+function tasciiprotport.send(const commandstring: string; out answer: string;
+               atimeout: integer = 0; aadress: integer = -1): integer;
+begin
+ if aadress = -1 then begin
+  result:= inherited send(commandstring,answer,atimeout);
+ end
+ else begin
+  result:= inherited send(char(byte(aadress) or $80) +
+                        commandstring,answer,atimeout);
+ end;
 end;
 
 end.

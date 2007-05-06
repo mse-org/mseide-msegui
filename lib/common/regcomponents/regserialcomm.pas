@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2006 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2007 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -19,7 +19,8 @@ uses
 
 procedure Register;
 begin
- registercomponents('Comm',[tcommport,tasciicommport,tcommselector]);
+ registercomponents('Comm',[tcommport,tasciicommport,tasciiprotport,
+                                                            tcommselector]);
 end;
 
 initialization
