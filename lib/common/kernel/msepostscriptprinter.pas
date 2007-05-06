@@ -1856,6 +1856,7 @@ procedure tpostscriptcanvas.beginpage;
 var
  str1: string;
 begin
+ initgcvalues; //init state on every page, necessary for gv
  if active then begin
   str1:= ' '+inttostr(fps_pagenumber+1);
   streamwrite('%%Page:'+str1+str1+nl);

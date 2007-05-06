@@ -753,6 +753,7 @@ type
    procedure setppmm(avalue: real); virtual;
    procedure valuechanged(value: canvasstatety);
    procedure valueschanged(values: canvasstatesty);
+   procedure initgcvalues; virtual;
    procedure initgcstate; virtual;
    procedure finalizegcstate; virtual;
    function getgdifuncs: pgdifunctionaty; virtual;
@@ -2874,12 +2875,17 @@ begin
  result:= @fdrawinfo.gc;
 end;
 }
-procedure tcanvas.initgcstate;
+procedure tcanvas.initgcvalues;
 begin
  gccolorbackground:= cl_none;
  gccolorforeground:= cl_none;
  gcfonthandle1:= 0;
  fstate:= fstate - changedmask;
+end;
+
+procedure tcanvas.initgcstate;
+begin
+ initgcvalues;
 end;
 
 procedure tcanvas.finalizegcstate;
