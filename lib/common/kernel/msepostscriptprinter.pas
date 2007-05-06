@@ -769,7 +769,9 @@ procedure tpostscriptcanvas.ps_destroygc;
 begin
  endpage;
  streamwrite(
-  '%%Pages: '+inttostr(fps_pagenumber)+nl);
+  '%%Trailer'+nl+
+  '%%Pages: '+inttostr(fps_pagenumber)+nl+
+  'EOF'+nl);
 end;
 
 procedure tpostscriptcanvas.ps_changegc;
