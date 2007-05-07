@@ -67,11 +67,6 @@ type
    procedure definefont(const adata: fontnumty; const acodepage: integer);
    procedure setpslinewidth(const avalue: integer);
    function gcposstring(const apos: pointty): string;
-   function posstring(const apos: pointty): string;
-   function diststring(const adist: integer): string;
-   function rectsizestring(const asize: sizety): string;
-   function sizestring(const asize: sizety): string;
-   function rectstring(const arect: rectty): string;
    function strokestr: string;
    function rectscalestring(const arect: rectty): string; 
                  //transform unity cell to arect
@@ -116,6 +111,13 @@ type
    procedure checkmap(const acodepage: integer);
   public
    constructor create(const user: tprinter; const intf: icanvas);
+
+   function posstring(const apos: pointty): string;
+   function diststring(const adist: integer): string;
+   function rectsizestring(const asize: sizety): string;
+   function sizestring(const asize: sizety): string;
+   function rectstring(const arect: rectty): string;
+   procedure pscommand(const atext: string); // writes atext to postscript stream
   published
    property pslevel: pslevelty read fpslevel write fpslevel default psl_2;
  end;
@@ -628,6 +630,8 @@ begin
 end;
 
 procedure tpostscriptcanvas.initgcstate;
+var
+ str1: string;
 begin
  updatescale;
  fps_pagenumber:= 0;
@@ -648,7 +652,8 @@ begin
 '%%Title: '+ftitle+nl+
 '%%Pages: (atend)'+nl+
 '%%PageOrder: Ascend'+nl+
- preamble);
+ preamble+fpreamble);
+ fpreamble:= '';
  fstarted:= true;
  beginpage;
 end;
@@ -1916,6 +1921,15 @@ procedure tpostscriptcanvas.updatescale;
 begin
  inherited;
  checkscale;
+end;
+
+procedure tpostscriptcanvas.pscommand(const atext: string);
+begin
+ fdrawinfo.acolorforeground:= color;
+ fdrawinfo.acolorbackground:= colorbackground;
+ checkgcstate(changedmask);
+ streamwrite(atext);
+ initgcvalues;
 end;
 
 { tpostscriptprinter }

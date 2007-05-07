@@ -1221,6 +1221,8 @@ type
  repstatesty = set of repstatety;
 
  reporteventty = procedure(const sender: tcustomreport) of object;
+ preambleeventty = procedure(const sender: tcustomreport; var apreamble: string) of object;
+ 
 
  reportoptionty = (reo_autorelease,reo_prepass,
                       reo_autoreadstat,reo_autowritestat);
@@ -1251,6 +1253,7 @@ type
    fondestroy: notifyeventty;
    fondestroyed: notifyeventty;
    fstatfile: tstatfile;
+   fonpreamble: preambleeventty;
    procedure setppmm(const avalue: real);
    function getreppages(index: integer): tcustomreportpage;
    procedure setreppages(index: integer; const avalue: tcustomreportpage);
@@ -1322,6 +1325,7 @@ type
    property running: boolean read getrunning;
    property options: reportoptionsty read foptions write foptions;
 
+   property onpreamble: preambleeventty read fonpreamble write fonpreamble;
    property onbeforerender: notifyeventty read fonbeforerender
                                write fonbeforerender;
    property onafterrender: notifyeventty read fonafterrender
@@ -1352,6 +1356,7 @@ type
    property grid_snap;
    property grid_size;
    property options;
+   property onpreamble;
    property onbeforerender;
    property onafterrender;
    property onprogress;
@@ -4954,6 +4959,7 @@ var
  bo1: boolean;
  page1: tcustomreportpage;
  stream1: ttextstream;
+ str1: string;
  
 begin
  fstate:= [];
@@ -4973,18 +4979,22 @@ begin
   fakevisible(self,true);
   try
    if fprinter <> nil then begin
+    str1:= '';
+    if canevent(tmethod(fonpreamble)) then begin
+     fonpreamble(self,str1);
+    end;
     if rs_endpass in fstate then begin
      if fstreamset then begin
       stream1:= fstream;
       fstream:= nil;
-      fprinter.beginprint(stream1);
+      fprinter.beginprint(stream1,str1);
      end
      else begin
-      fprinter.beginprint(fcommand);
+      fprinter.beginprint(fcommand,str1);
      end;
     end
     else begin
-     fprinter.beginprint(nil);
+     fprinter.beginprint(nil,str1);
     end;
    end;   
    for int1:= 0 to high(freppages) do begin

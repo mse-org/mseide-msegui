@@ -128,8 +128,8 @@ type
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
-   procedure beginprint(command: string = ''); overload;
-   procedure beginprint(const astream: ttextstream); overload;
+   procedure beginprint(command: string = ''; const apreamble: string = ''); overload;
+   procedure beginprint(const astream: ttextstream; const apreamble: string = ''); overload;
     //printer owns the stream, nil -> dummy mode
    procedure endprint;
   published
@@ -190,7 +190,8 @@ type
    fstream: ttextstream;
    fprinter: tprinter;
    fcolorspace: colorspacety;
-   procedure initprinting;
+   fpreamble: string;
+   procedure initprinting(const apreamble: string = '');
    procedure checkgcstate(state: canvasstatesty); override;
    procedure setppmm(avalue: real); override;
    procedure updatescale; virtual;
@@ -419,7 +420,7 @@ begin
  fcanvas.updatescale;
 end;
 
-procedure tprinter.beginprint(command: string = '');
+procedure tprinter.beginprint(command: string = ''; const apreamble: string = '');
 var
  pip1: tpipewriter;
 begin
@@ -436,14 +437,14 @@ begin
   pip1.free;
   raise;
  end;
- beginprint(pip1);
+ beginprint(pip1,apreamble);
 end;
 
-procedure tprinter.beginprint(const astream: ttextstream);
+procedure tprinter.beginprint(const astream: ttextstream; const apreamble: string = '');
 begin
  endprint;
  setstream(astream);
- fcanvas.initprinting;
+ fcanvas.initprinting(apreamble);
 end;
 
 procedure tprinter.endprint;
@@ -642,8 +643,9 @@ begin
  include(fstate,cs_internaldrawtext);
 end;
 
-procedure tcustomprintercanvas.initprinting;
+procedure tcustomprintercanvas.initprinting(const apreamble: string = '');
 begin
+ fpreamble:= apreamble;
  fpagenumber:= 0;
  fpagelinenumber:= 0;
  fliney:= 0;
