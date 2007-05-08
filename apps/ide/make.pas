@@ -191,7 +191,7 @@ end;
 
 procedure tmaker.doasyncevent(var atag: integer);
 begin
- if not getprocessexitcode(procid,fexitcode,1000000) then begin
+ if not getprocessexitcode(procid,fexitcode,5000000) then begin
   messagefo.messages.appendrow(['Error: Timeout.']);
   messagefo.messages.appendrow(['']);
  end;
