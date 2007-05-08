@@ -427,7 +427,8 @@ begin
  prochandle:= execmse1(commandline);
  if prochandle <> invalidprochandle then begin
   repeat
-   sleep(0);
+   sys_sched_yield;
+//   sleep(0);
    bo1:= getexitcodeprocess(prochandle,dwo1);
    if bo1 then begin
     result:= dwo1;
@@ -476,7 +477,8 @@ begin
     if timeout(ca1) then begin
      break;
     end;
-    sleep(0);
+    sys_sched_yield;
+//    sleep(0);
    end;
   end
   else begin
