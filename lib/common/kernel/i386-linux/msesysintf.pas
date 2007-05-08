@@ -361,6 +361,11 @@ begin
  setlength(result,int2);
 end;
 
+procedure sys_sched_yield;
+begin
+ sched_yield;
+end;
+
 procedure sys_usleep(const us: cardinal);
 begin
  libc.usleep(us);

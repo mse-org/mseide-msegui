@@ -242,7 +242,8 @@ begin
      result:= false;
      break;
     end;
-    sleep(0);
+//    sleep(0);
+    sys_sched_yield;
    end;
   end
   else begin

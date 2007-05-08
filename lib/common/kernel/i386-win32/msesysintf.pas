@@ -222,6 +222,11 @@ begin
  end;
 end;
 
+procedure sys_sched_yield;
+begin
+ sleep(0);
+end;
+
 procedure sys_usleep(const us: cardinal);
 begin
  sleep(us div 1000);
