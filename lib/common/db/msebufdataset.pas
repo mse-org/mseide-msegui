@@ -3533,34 +3533,39 @@ var
  int1,int2: integer;
  getresult: tgetresult;
 begin
- checkbrowsemode;
- if not (bs_visiblerecordcountvalid in fbstate) then begin
-  if not filtered then begin
-   fetchall;
-   fvisiblerecordcount:= fbrecordcount;
-  end
-  else begin
-   int1:= frecno;
-   disablecontrols;
-   getnextpacket(true);
-   try
-    fvisiblerecordcount:= 0;
-    internalsetrecno(0);
-    if (getrecord(activebuffer,gmcurrent,false) = grok) or 
-       (getrecord(activebuffer,gmnext,false) = grok) then begin
-     repeat
-      inc(fvisiblerecordcount);
-     until getrecord(activebuffer,gmnext,false) <> grok;
-    end;   
-   finally
-    internalsetrecno(int1);
-    getrecord(activebuffer,gmcurrent,false);
-    enablecontrols;
+ if not (state in [dsinactive,dsfilter]) then begin
+  checkbrowsemode;
+  if not (bs_visiblerecordcountvalid in fbstate) then begin
+   if not filtered then begin
+    fetchall;
+    fvisiblerecordcount:= fbrecordcount;
+   end
+   else begin
+    int1:= frecno;
+    disablecontrols;
+    getnextpacket(true);
+    try
+     fvisiblerecordcount:= 0;
+     internalsetrecno(0);
+     if (getrecord(activebuffer,gmcurrent,false) = grok) or 
+        (getrecord(activebuffer,gmnext,false) = grok) then begin
+      repeat
+       inc(fvisiblerecordcount);
+      until getrecord(activebuffer,gmnext,false) <> grok;
+     end;   
+    finally
+     internalsetrecno(int1);
+     getrecord(activebuffer,gmcurrent,false);
+     enablecontrols;
+    end;
    end;
-  end;
-  include(fbstate,bs_visiblerecordcountvalid);
- end;    
- result:= fvisiblerecordcount;
+   include(fbstate,bs_visiblerecordcountvalid);
+  end;    
+  result:= fvisiblerecordcount;
+ end
+ else begin
+  result:= 0;
+ end;
 end;
 
 const
