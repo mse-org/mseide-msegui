@@ -2360,9 +2360,7 @@ begin
    end;
    with offset do begin
     inc(x,ax);
-//    inc(x,border);
     inc(y,ay);
-//    inc(y,border);
    end;
   end;
  end;
@@ -2372,10 +2370,9 @@ end;
 function settransientforhint(id,transientfor: winidty): guierrorty;
 begin
  if transientfor = 0 then begin
-  xsettransientforhint(appdisp,id,mserootwindow{0});
+  xsettransientforhint(appdisp,id,mserootwindow);
  end
  else begin
-//  xsettransientforhint(appdisp,id,toplevelwindow(transientfor));
   xsettransientforhint(appdisp,id,transientfor);
  end;
  result:= gue_ok;

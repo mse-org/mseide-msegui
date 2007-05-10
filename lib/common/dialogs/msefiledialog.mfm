@@ -1,7 +1,7 @@
 object filedialogfo: Tfiledialogfo
   optionswidget = [ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_destroywidgets, ow_hinton]
-  bounds_x = 17
-  bounds_y = 329
+  bounds_x = 14
+  bounds_y = 326
   bounds_cx = 588
   bounds_cy = 307
   bounds_cxmin = 360
@@ -169,8 +169,8 @@ object filedialogfo: Tfiledialogfo
     taborder = 3
     optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_resetselectonexit, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_keyexecute, oe_savevalue, oe_savestate]
     onsetvalue = filenamesetvalue
-    dropdown.dropdownrowcount = 10
     dropdown.options = [deo_keydropdown]
+    dropdown.dropdownrowcount = 10
     dropdown.cols.count = 1
     dropdown.cols.items = <    
       item

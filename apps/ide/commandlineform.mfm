@@ -1,18 +1,24 @@
 object commandlinefo: tcommandlinefo
+  optionswidget = [ow_arrowfocus, ow_subfocus, ow_destroywidgets, ow_hinton, ow_autoscale]
   bounds_x = 241
   bounds_y = 310
   bounds_cx = 542
   bounds_cy = 100
+  taborder = 1
   container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_subfocus, ow_mousetransparent, ow_destroywidgets, ow_autoscale]
+  container.bounds_x = 0
+  container.bounds_y = 0
   container.bounds_cx = 542
   container.bounds_cy = 100
   container.frame.dummy = 0
   options = [fo_screencentered, fo_closeonesc, fo_autoreadstat, fo_autowritestat, fo_savepos, fo_savestate]
-  caption = 'Commandline'
+  caption = 'Command Line'
   icon.transparency = -2147483648
   moduleclassname = 'tmseform'
   object disp: tmemoedit
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+    bounds_x = 0
+    bounds_y = 0
     bounds_cx = 542
     bounds_cy = 100
     frame.framei_left = 3
@@ -23,6 +29,6 @@ object commandlinefo: tcommandlinefo
     frame.dummy = 0
     anchors = []
     optionsedit = [oe_readonly, oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_linebreak, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_keyexecute, oe_savevalue, oe_savestate]
-    reffontheight = 13
+    reffontheight = 14
   end
 end

@@ -1,7 +1,7 @@
 object projectoptionsfo: tprojectoptionsfo
   optionswidget = [ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_destroywidgets, ow_hinton]
-  bounds_x = 122
-  bounds_y = 117
+  bounds_x = 117
+  bounds_y = 112
   bounds_cx = 629
   bounds_cy = 572
   taborder = 1
@@ -1600,7 +1600,7 @@ object projectoptionsfo: tprojectoptionsfo
         bounds_cy = 20
         taborder = 5
         state = [as_localcaption, as_localonexecute]
-        caption = 'Show commandline'
+        caption = 'Show command line'
         onexecute = showcommandlineonexecute
         reffontheight = 14
       end

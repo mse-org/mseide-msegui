@@ -1,7 +1,7 @@
 object msetexteditorfo: tmsetexteditorfo
   optionswidget = [ow_arrowfocus, ow_subfocus, ow_destroywidgets, ow_hinton, ow_autoscale]
-  bounds_x = 79
-  bounds_y = 219
+  bounds_x = 74
+  bounds_y = 214
   bounds_cx = 369
   bounds_cy = 268
   taborder = 1

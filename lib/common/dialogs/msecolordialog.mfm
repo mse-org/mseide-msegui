@@ -1,7 +1,7 @@
 object colordialogfo: tcolordialogfo
   optionswidget = [ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_destroywidgets, ow_hinton, ow_autoscale]
-  bounds_x = 145
-  bounds_y = 239
+  bounds_x = 140
+  bounds_y = 234
   bounds_cx = 342
   bounds_cy = 303
   taborder = 1
