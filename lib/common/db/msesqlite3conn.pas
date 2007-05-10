@@ -111,6 +111,7 @@ type
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
+   function getinsertid: int64; override;
   published
    property DatabaseName: filenamety read getdatabasename write setdatabasename;
    property Connected: boolean read getconnected write setconnected;
@@ -837,10 +838,15 @@ begin
  inherited connected:= avalue;
 end;
 
+function tsqlite3connection.getinsertid: int64;
+begin
+ result:= sqlite3_last_insert_rowid(fhandle);
+end;
+
 procedure tsqlite3connection.updateprimarykeyfield(const afield: tfield);
 begin
  with tmsebufdataset1(afield.dataset) do begin
-  setcurvalue(afield,sqlite3_last_insert_rowid(fhandle));
+  setcurvalue(afield,getinsertid);
  end;
 end;
 

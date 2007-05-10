@@ -152,6 +152,8 @@ type
     procedure GetTableNames(List : TStrings; SystemTables : Boolean = false); virtual;
     procedure GetProcedureNames(List : TStrings); virtual;
     procedure GetFieldNames(const TableName : string; List :  TStrings); virtual;
+    function getinsertid: int64; virtual;
+    
     property Password : string read FPassword write FPassword;
     property Transaction : TSQLTransaction read FTransaction write SetTransaction;
     property UserName : string read FUserName write FUserName;
@@ -807,6 +809,11 @@ end;
 function tcustomsqlconnection.getnumboolean: boolean;
 begin
  result:= true;
+end;
+
+function tcustomsqlconnection.getinsertid: int64;
+begin
+ databaseerror('Connection has no insert ID''s.');
 end;
 
 { TSQLTransaction }

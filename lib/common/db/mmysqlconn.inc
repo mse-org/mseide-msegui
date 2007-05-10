@@ -122,6 +122,7 @@ Type
    function blobscached: boolean;
    
   Public
+    function getinsertid: int64; override;
     Property ServerInfo : String Read FServerInfo;
     Property HostInfo : String Read FHostInfo;
     property ClientInfo: string read GetClientInfo;
@@ -933,10 +934,15 @@ begin
  result:= tcursorname(acursor).fprimarykeyfieldname;
 end;
 
+function TConnectionName.getinsertid: int64;
+begin
+ result:= mysql_insert_id(fmysql);
+end;
+
 procedure TConnectionName.updateprimarykeyfield(const afield: tfield);
 begin
  with tmsebufdataset1(afield.dataset) do begin
-  setcurvalue(afield,mysql_insert_id(fmysql));
+  setcurvalue(afield,getinsertid);
  end;
 end;
 
