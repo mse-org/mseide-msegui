@@ -88,6 +88,7 @@ type
    function CreateBlobStream(const Field: TField; const Mode: TBlobStreamMode;
                       const acursor: tsqlcursor): TStream; override;
    function getblobdatasize: integer; override;
+   function getnumboolean: boolean; override;
 
           //iblobconnection
    procedure writeblobdata(const atransaction: tsqltransaction;
@@ -1041,6 +1042,11 @@ begin
  else begin
   result:= cardinal(pqbackendpid(fsqldatabasehandle));
  end;
+end;
+
+function TPQConnection.getnumboolean: boolean;
+begin
+ result:= false;
 end;
 
 {

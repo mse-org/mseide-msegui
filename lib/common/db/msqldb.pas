@@ -128,6 +128,7 @@ type
     procedure CommitRetaining(trans : TSQLHandle); virtual; abstract;
     procedure RollBackRetaining(trans : TSQLHandle); virtual; abstract;
     function getblobdatasize: integer; virtual; abstract;
+    function getnumboolean: boolean; virtual;
 
     procedure UpdateIndexDefs(var IndexDefs : TIndexDefs;
                                           const TableName : string); virtual;
@@ -323,6 +324,7 @@ type
    // abstract & virtual methods of TBufDataset
    function Fetch : boolean; override;
    function getblobdatasize: integer; override;
+   function getnumboolean: boolean; virtual;
    function blobscached: boolean; override;
    function loadfield(const afield: tfield; const buffer: pointer;
                     var bufsize: integer): boolean; override;
@@ -800,6 +802,11 @@ function tcustomsqlconnection.getprimarykeyfield(const atablename: string;
                                const acursor: tsqlcursor): string;
 begin
  result:= '';
+end;
+
+function tcustomsqlconnection.getnumboolean: boolean;
+begin
+ result:= true;
 end;
 
 { TSQLTransaction }
@@ -2159,6 +2166,11 @@ end;
 function TSQLQuery.closetransactiononrefresh: boolean;
 begin
  result:= false;
+end;
+
+function TSQLQuery.getnumboolean: boolean;
+begin
+ result:= tcustomsqlconnection(database).getnumboolean;
 end;
 
 { TSQLCursor }

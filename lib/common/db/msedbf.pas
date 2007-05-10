@@ -31,6 +31,7 @@ type
    procedure inheritedinternalopen;
    procedure inheritedinternalclose;
    function getblobdatasize: integer;
+   function getnumboolean: boolean;
   protected
    procedure setactive (value : boolean); {override;}
    function getactive: boolean;
@@ -233,6 +234,11 @@ end;
 function tmsedbf.getblobdatasize: integer;
 begin
  result:= 0; //no blobid?
+end;
+
+function tmsedbf.getnumboolean: boolean;
+begin
+ result:= false;
 end;
 
 end.

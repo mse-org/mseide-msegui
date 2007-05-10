@@ -667,7 +667,7 @@ type
    property items[const index: integer]: tfield read getitems write setitems; default;
  end;
 
- datasetoptionty = (dso_utf8,dso_refreshtransaction,
+ datasetoptionty = (dso_utf8,dso_numboolean,dso_refreshtransaction,
                          dso_cancelupdateonerror,dso_cancelupdatesonerror,                         
                          dso_autoapply,dso_autocommitret,dso_cacheblobs,
                          dso_offline, //disconnect database after open
@@ -685,6 +685,7 @@ type
   procedure openlocal;
   procedure inheritedinternaldelete;
   function getblobdatasize: integer;
+  function getnumboolean: boolean;
  end;
 
  igetdscontroller = interface(inullinterface)
@@ -759,6 +760,7 @@ type
                            //returns false if nothing done
    function posting: boolean; //true if in post procedure
    function emptyinsert: boolean;
+   function assql(const avalue: boolean): string; overload;
    function assql(const avalue: msestring): string; overload;
    function assql(const avalue: integer): string; overload;
    function assql(const avalue: realty): string; overload;
@@ -3684,6 +3686,21 @@ end;
 function tdscontroller.getcontroller: tdscontroller;
 begin
  result:= self;
+end;
+
+function tdscontroller.assql(const avalue: boolean): string;
+begin
+ if fintf.getnumboolean then begin
+  if avalue then begin
+   result:= '1';
+  end
+  else begin
+   result:= '0';
+  end;
+ end
+ else begin   
+  result:= encodesqlboolean(avalue);
+ end;
 end;
 
 function tdscontroller.assql(const avalue: msestring): string;
