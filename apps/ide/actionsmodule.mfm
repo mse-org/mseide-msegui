@@ -395,7 +395,7 @@ object actionsmo: tactionsmo
     }
   end
   object selecteditpage: taction
-    caption = 'Select edit page'
+    caption = 'Select &edit page'
     shortcut = 16453
     options = [ao_globalshortcut]
     onexecute = selecteditpageonexecute
