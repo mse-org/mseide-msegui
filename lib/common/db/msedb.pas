@@ -763,6 +763,7 @@ type
    function assql(const avalue: boolean): string; overload;
    function assql(const avalue: msestring): string; overload;
    function assql(const avalue: integer): string; overload;
+   function assql(const avalue: int64): string; overload;
    function assql(const avalue: realty): string; overload;
    function assql(const avalue: tdatetime): string; overload;
    function assqldate(const avalue: tdatetime): string;
@@ -3719,6 +3720,11 @@ begin
 end;
 
 function tdscontroller.assql(const avalue: integer): string;
+begin
+ result:= inttostr(avalue);
+end;
+
+function tdscontroller.assql(const avalue: int64): string;
 begin
  result:= inttostr(avalue);
 end;
