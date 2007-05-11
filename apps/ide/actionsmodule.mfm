@@ -86,6 +86,7 @@ object actionsmo: tactionsmo
   end
   object save: taction
     caption = '&Save'
+    shortcut = 16467
     onexecute = saveactonexecute
     left = 8
     top = 28
@@ -394,8 +395,8 @@ object actionsmo: tactionsmo
     }
   end
   object selecteditpage: taction
-    caption = 'Select Page'
-    shortcut = 16467
+    caption = 'Select edit page'
+    shortcut = 16453
     options = [ao_globalshortcut]
     onexecute = selecteditpageonexecute
     left = 152

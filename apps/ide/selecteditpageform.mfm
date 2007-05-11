@@ -14,7 +14,7 @@ object selecteditpagefo: tselecteditpagefo
   container.frame.dummy = 0
   container.onchildscaled = formonchildscaled
   options = [fo_screencentered, fo_closeonesc, fo_autoreadstat, fo_autowritestat, fo_savepos, fo_savestate]
-  caption = 'Select edit page (Ctrl S)'
+  caption = 'Select edit page (Ctrl+E)'
   icon.transparentcolor = -2147483648
   icon.transparency = -2147483648
   oneventloopstart = fooncreate
@@ -22,7 +22,7 @@ object selecteditpagefo: tselecteditpagefo
   moduleclassname = 'tmseform'
   object list: tlistview
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_focusbackonesc, ow_destroywidgets, ow_multiplehint]
-    bounds_x = 8
+    bounds_x = 0
     bounds_y = 0
     bounds_cx = 704
     bounds_cy = 451
@@ -44,26 +44,26 @@ object selecteditpagefo: tselecteditpagefo
   object pathdisp: tstringdisp
     optionswidget = [ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
     bounds_x = 0
-    bounds_y = 455
+    bounds_y = 454
     bounds_cx = 650
-    bounds_cy = 17
+    bounds_cy = 18
     frame.dummy = 0
     anchors = [an_left, an_right, an_bottom]
     taborder = 2
     textflags = [tf_ycentered, tf_ellipseleft]
-    reffontheight = 13
+    reffontheight = 14
   end
   object openfilebutton: tbutton
     optionswidget = [ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
     bounds_x = 652
-    bounds_y = 455
+    bounds_y = 454
     bounds_cx = 50
-    bounds_cy = 17
+    bounds_cy = 18
     anchors = [an_right, an_bottom]
     taborder = 1
     state = [as_localcaption, as_localonexecute]
     caption = '&open'
     onexecute = openfileonexecute
-    reffontheight = 13
+    reffontheight = 14
   end
 end
