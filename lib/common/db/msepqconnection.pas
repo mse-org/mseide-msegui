@@ -220,7 +220,7 @@ begin
   fsavepointlock:= true;
   try
    if pqco_usesavepoint in foptions then begin
-    executedirect('SAVEPOINT '+savepointname+';');
+    executedirect('SAVEPOINT '+savepointname+';',atransaction);
    end;
    try
     inherited;
@@ -230,14 +230,14 @@ begin
     end
     else begin
      if pqco_usesavepoint in foptions then begin
-      executedirect('ROLLBACK TO SAVEPOINT '+savepointname+
-                    '; RELEASE SAVEPOINT '+savepointname+';');
+      executedirect('ROLLBACK TO SAVEPOINT '+savepointname+';',atransaction);
+      executedirect('RELEASE SAVEPOINT '+savepointname+';',atransaction);
      end;
     end;
     raise;
    end;
    if pqco_usesavepoint in foptions then begin
-    executedirect('RELEASE SAVEPOINT '+savepointname+';');
+    executedirect('RELEASE SAVEPOINT '+savepointname+';',atransaction);
    end;
   finally
    fsavepointlock:= false;

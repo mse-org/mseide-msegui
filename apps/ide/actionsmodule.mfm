@@ -70,6 +70,7 @@ object actionsmo: tactionsmo
   end
   object opensource: taction
     caption = '&Open'
+    shortcut = 16463
     onexecute = opensourceactonexecute
     left = 8
     top = 4
@@ -113,6 +114,7 @@ object actionsmo: tactionsmo
   end
   object redo: taction
     caption = '&Redo'
+    shortcut = 24666
     onexecute = redoactonexecute
     left = 280
     top = 28
@@ -454,6 +456,7 @@ object actionsmo: tactionsmo
   end
   object replace: taction
     caption = 'Find && &replace'
+    shortcut = 16466
     onexecute = replaceactonexecute
     left = 208
     top = 32
