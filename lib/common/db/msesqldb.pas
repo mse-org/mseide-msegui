@@ -15,9 +15,6 @@ uses
                    msqldb,msedb,mseclasses,msetypes,mseguiglob;
   
 type
-
-// TUpdateAction = (uaFail, uaAbort, uaSkip, uaRetry, uaApplied);
-
  tmsesqltransaction = class(tsqltransaction)
   private
    fcontroller: ttacontroller;
@@ -569,141 +566,7 @@ begin
   ukdelete: result:= deleterecquery;
  end;
 end;
-{
-Procedure TmseSQLQuery.ApplyRecUpdate1(UpdateKind : TUpdateKind);
 
-var
-    s : string;
-
-  procedure UpdateWherePart(var sql_where : string;x : integer);
-
-  begin
-   with tsqlquerycracker(self) do begin
-    if (pfInKey in Fields[x].ProviderFlags) or
-       ((FUpdateMode = upWhereAll) and (pfInWhere in Fields[x].ProviderFlags)) or
-       ((FUpdateMode = UpWhereChanged) and (pfInWhere in Fields[x].ProviderFlags) and (fields[x].value <> fields[x].oldvalue)) then
-      sql_where := sql_where + '(' + fields[x].FieldName + '= :OLD_' + fields[x].FieldName + ') and ';
-   end;
-  end;
-
-  function ModifyRecQuery : string;
-
-  var x          : integer;
-      sql_set    : string;
-      sql_where  : string;
-
-  begin
-   with tsqlquerycracker(self) do begin
-    sql_set := '';
-    sql_where := '';
-    for x := 0 to Fields.Count -1 do
-      begin
-      UpdateWherePart(sql_where,x);
-
-      if (pfInUpdate in Fields[x].ProviderFlags) then
-        sql_set := sql_set + fields[x].FieldName + '=:' + fields[x].FieldName + ',';
-      end;
-
-    setlength(sql_set,length(sql_set)-1);
-    setlength(sql_where,length(sql_where)-5);
-    result := 'update ' + FTableName + ' set ' + sql_set + ' where ' + sql_where;
-   end;
-  end;
-
-  function InsertRecQuery : string;
-
-  var x          : integer;
-      sql_fields : string;
-      sql_values : string;
-
-  begin
-   with tsqlquerycracker(self) do begin
-    sql_fields := '';
-    sql_values := '';
-    for x := 0 to Fields.Count -1 do begin
-     with fields[x] do begin
-      if not IsNull and 
-         (pfInUpdate in ProviderFlags) then begin //fpc bug 7565
-       sql_fields := sql_fields + FieldName + ',';
-       sql_values := sql_values + ':' + FieldName + ',';
-      end;
-     end;
-    end;
-    setlength(sql_fields,length(sql_fields)-1);
-    setlength(sql_values,length(sql_values)-1);
-
-    result := 'insert into ' + FTableName + ' (' + sql_fields + ') values (' + sql_values + ')';
-   end;
-  end;
-
-  function DeleteRecQuery : string;
-
-  var x          : integer;
-      sql_where  : string;
-
-  begin
-   with tsqlquerycracker(self) do begin
-    sql_where := '';
-    for x := 0 to Fields.Count -1 do
-      UpdateWherePart(sql_where,x);
-
-    setlength(sql_where,length(sql_where)-5);
-
-    result := 'delete from ' + FTableName + ' where ' + sql_where;
-   end;
-  end;
-
-var qry : tsqlquery;
-    x   : integer;
-    Fld : TField;
- int1: integer;
- blobspo: pblobinfoarty;
-    
-begin
- with tsqlquerycracker(self) do begin
-  blobspo:= getintblobpo;
-    case UpdateKind of
-      ukModify : begin
-                 qry := FUpdateQry;
-                 if trim(qry.sql.Text) = '' then qry.SQL.Add(ModifyRecQuery);
-                 end;
-      ukInsert : begin
-                 qry := FInsertQry;
-                 if trim(qry.sql.Text) = '' then qry.SQL.Add(InsertRecQuery);
-                 end;
-      ukDelete : begin
-                 qry := FDeleteQry;
-                 if trim(qry.sql.Text) = '' then qry.SQL.Add(DeleteRecQuery);
-                 end;
-    end;
-  with qry do
-    begin
-    for x := 0 to Params.Count-1 do with params[x] do if leftstr(name,4)='OLD_' then
-      begin
-      Fld := self.FieldByName(copy(name,5,length(name)-4));
-      AssignFieldValue(Fld,Fld.OldValue);
-      end
-    else
-      begin
-      Fld := self.FieldByName(name);
-      if fld is tblobfield and (fconnintf <> nil) then begin
-       for int1:= 0 to high(blobspo^) do begin
-        if blobspo^[int1].field = fld then begin
-         fconnintf.writeblob(tsqltransaction(transaction),ftablename,
-         blobspo^[int1],params[x]);
-         break;
-        end;
-       end;
-      end
-      else begin
-       AssignFieldValue(Fld,Fld.Value);
-      end;
-      end;
-    execsql;
-    end;
- end;
-end;
-}
 procedure tmsesqlquery.applyrecupdate(updatekind: tupdatekind);
 var
  bo1: boolean;
@@ -726,7 +589,6 @@ begin
    end;
   end
   else begin
-//   inherited;
   internalapplyrecupdate(updatekind);
   end;
  except
@@ -745,101 +607,7 @@ begin
   end;
  end;
 end;
-{
-procedure tmsesqlquery.internalapplyupdate(const maxerrors: integer; 
-               var arec: trecupdatebuffer; var response: tresolverresponse);
-               
- procedure checkcancel;
- begin
-  if dso_cancelupdateonerror in fcontroller.options then begin
-   cancelrecupdate(arec);
-   arec.bookmarkdata:= nil;
-   resync([]);
-  end;
- end;
- 
-var
- EUpdErr: EUpdateError;
 
-begin
- with arec do begin
-  Response:= rrApply;
-  try
-   ApplyRecUpdate(UpdateKind);
-  except
-   on E: EDatabaseError do begin
-    Inc(fFailedCount);
-    if longword(ffailedcount) > longword(MaxErrors) then begin
-     Response:= rrAbort
-    end
-    else begin
-     Response:= rrSkip;
-    end;
-    EUpdErr:= EUpdateError.Create(SOnUpdateError,E.Message,0,0,E);
-    if assigned(OnUpdateError) then begin
-     OnUpdateError(Self,Self,EUpdErr,UpdateKind,Response);
-    end
-    else begin
-     if Response = rrAbort then begin
-      checkcancel;
-      Raise EUpdErr;
-     end;
-    end;
-    eupderr.free;
-   end
-   else begin
-    raise;
-   end;
-  end;
-  if response = rrApply then begin
-   FreeRecordBuffer(OldValuesBuffer);
-   BookmarkData := nil;
-  end
-  else begin
-   checkcancel;
-  end;
- end;
-end;
-}
-{
-procedure tmsesqlquery.internalApplyUpdates(MaxErrors: Integer);
-
-var
- SaveBookmark: pchar;
-//    r            : Integer;
-// FailedCount: integer;
-// EUpdErr: EUpdateError;
- Response: TResolverResponse;
- StoreRecBuf: PBufRecLinkItem;
-
-begin
- with tbufdatasetcracker(self) do begin
-  CheckBrowseMode;
-  StoreRecBuf := FCurrentRecBuf;
-  try
-   fapplyindex := 0;
-   fFailedCount := 0;
-   Response := rrApply;
-   while (fapplyindex <= high(FUpdateBuffer)) and (Response <> rrAbort) do begin
-    with FUpdateBuffer[fapplyindex] do begin
-     if assigned(BookmarkData) then begin
-      InternalGotoBookmark(@BookmarkData);
-      Resync([rmExact,rmCenter]);
-      internalapplyupdate(maxerrors,FUpdateBuffer[fapplyindex],response);
-     end;
-     inc(fapplyindex);
-    end;
-   end;
-   if ffailedcount = 0 then begin
-    SetLength(FUpdateBuffer,0);
-   end;
-  finally 
-   FCurrentRecBuf := StoreRecBuf;
-   Resync([]);
-  end;
- end;
-end;
-}
 procedure tmsesqlquery.afterapply;
 begin
  if (dso_autocommitret in fcontroller.options) and (transaction <> nil) then begin
@@ -879,96 +647,6 @@ begin
       [dso_cancelupdateonerror,dso_cancelupdatesonerror] <> []);
 end;
 
-{
-procedure tmsesqlquery.applyupdate; //applies current record
-var
- response: tresolverresponse;
- var int1: integer;
-begin
- checkbrowsemode;
- with tbufdatasetcracker(self) do begin
-  if (fupdatebuffer <> nil) and (fcurrentrecbuf <> nil) then begin
-   for int1:= high(fupdatebuffer) downto 0 do begin
-    if fupdatebuffer[int1].bookmarkdata = fcurrentrecbuf then begin
-     ffailedcount:= 0;
-     internalapplyupdate(0,dso_cancelupdateonerror in fcontroller.options,
-                      fupdatebuffer[int1],response);
-     if response = rrapply then begin
-      afterapply;
-      deleteitem(fupdatebuffer,typeinfo(trecordsupdatebuffer),int1);
-      fcurrentupdatebuffer:= bigint; //invalid
-     end;
-    end;
-   end;
-  end;
- end;
-end;
-}
-{
-procedure tmsesqlquery.cancelrecupdate(var arec: trecupdatebuffer);
-     //copied from bufdataset.inc
-begin
- with tbufdatasetcracker(self),arec do begin
-  if bookmarkdata <> nil then begin
-   case updatekind of
-    ukmodify: begin
-     freeblobs(pblobinfoarty(BookmarkData+sizeof(TBufRecLinkItem))^);
-     move(pchar(OldValuesBuffer+sizeof(TBufRecLinkItem))^,
-            pchar(BookmarkData+sizeof(TBufRecLinkItem))^,FRecordSize);
-     FreeRecordBuffer(OldValuesBuffer);
-    end;
-    ukdelete: begin
-     if assigned(PBufRecLinkItem(BookmarkData)^.prior) then  begin
-              // or else it was the first record
-      PBufRecLinkItem(BookmarkData)^.prior^.next:= BookmarkData
-     end
-     else begin
-      FFirstRecBuf:= BookmarkData;
-     end;
-     PBufRecLinkItem(BookmarkData)^.next^.prior:= BookmarkData;
-     inc(FBRecordCount);
-    end;
-    ukInsert: begin
-     if assigned(PBufRecLinkItem(BookmarkData)^.prior) then begin
-      // or else it was the first record
-      PBufRecLinkItem(BookmarkData)^.prior^.next:= 
-                           PBufRecLinkItem(BookmarkData)^.next;
-     end
-     else begin
-      FFirstRecBuf := PBufRecLinkItem(BookmarkData)^.next;
-     end;
-     PBufRecLinkItem(BookmarkData)^.next^.prior:= 
-                                   PBufRecLinkItem(BookmarkData)^.prior;
-     // resync won't work if the currentbuffer is freed...
-     if FCurrentRecBuf = BookmarkData then begin
-      FCurrentRecBuf := FCurrentRecBuf^.next;
-     end;
-     FreeRecordBuffer(BookmarkData);
-     dec(FBRecordCount);
-    end;
-   end;
-  end;
- end;
-end;
-}
-{
-procedure tmsesqlquery.cancelupdates;
-var 
- int1: integer;
-begin
- cancel;
- checkbrowsemode;
- with tbufdatasetcracker(self) do begin
-  if fupdatebuffer <> nil then begin
-   for int1:= high(fupdatebuffer) downto 0 do begin
-    cancelrecupdate(fupdatebuffer[int1]);
-   end;
-   fupdatebuffer:= nil;
-   resync([]);
-  end;
- end;
-end;
-}
 function tmsesqlquery.getreadonly: boolean;
 begin
  result:= inherited readonly;
@@ -1071,20 +749,6 @@ begin
  end;
 end;
 
-{
-procedure tmsesqlquery.internalpost;
-begin        //workaround for FPC bug 7266
- with tbufdatasetcracker(self) do begin
-  if (state = dsinsert) and (ffirstrecbuf = flastrecbuf) then begin
-   setbookmarkdata(activebuffer,@ffirstrecbuf);
-   inherited;
-  end
-  else begin
-   inherited;
-  end;
- end;
-end;
-}
 function tmsesqlquery.getetstatementtype: TStatementType;
 begin
  result:= inherited statementtype;

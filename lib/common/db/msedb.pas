@@ -1,3 +1,12 @@
+{ MSEgui Copyright (c) 2004-2007 by Martin Schreiber
+
+    See the file COPYING.MSE, included in this distribution,
+    for details about the copyright.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+}
 unit msedb;
 {$ifdef FPC}{$mode objfpc}{$h+}{$INTERFACES CORBA}{$endif}
 
@@ -134,8 +143,6 @@ type
    fgetmsestringdata: getmsestringdataty;
    fsetmsestringdata: setmsestringdataty;
    fcharacterlength: integer;
-//   function getmsevalue(out avalue: msestring): boolean;
-//   procedure setmsevalue(const avalue: msestring);
    function getasmsestring: msestring;
    procedure setasmsestring(const avalue: msestring);
    //ifieldcomponent
@@ -164,31 +171,6 @@ type
    property ProviderFlags default defaultproviderflags;
  end;
 
-{ 
- tmsememofield = class(tmemofield,ifieldcomponent)
-  private
-   fdsintf: idsfieldcontroller;
-   function getasmsestring: msestring;
-   procedure setasmsestring(const avalue: msestring);
-   //ifieldcomponent
-   procedure setdsintf(const avalue: idsfieldcontroller);
-   function getinstance: tfield;
-  protected
-   function HasParent: Boolean; override;
-   function getasvariant: variant; override;
-   procedure setvarvalue(const avalue: variant);
-  public
-   destructor destroy; override;
-   procedure Clear; override;
-   property asmsestring: msestring read getasmsestring write setasmsestring;
-   function oldmsestring(out aisnull: boolean): msestring;
-   function assql: string;
-   function asoldsql: string;
-  published
-   property DataSet stored false;
-   property ProviderFlags default defaultproviderflags;
- end;
- }
  tmsenumericfield = class(tnumericfield)
   private
    function getasmsestring: msestring;
@@ -371,53 +353,16 @@ type
    property DataSet stored false;
    property ProviderFlags default defaultproviderflags;
    property options: datetimefieldoptionsty read foptions write setoptions;
- end;
- 
+ end; 
  tmsedatefield = class(tmsedatetimefield)
   public
    constructor create(aowner: tcomponent); override;
  end;
- 
  tmsetimefield = class(tmsedatetimefield)
   public
    constructor create(aowner: tcomponent); override;
  end;
-{ 
- tmsedatefield = class(tdatefield)
-  private
-   function getasmsestring: msestring;
-   procedure setasmsestring(const avalue: msestring);
-  protected
-   function getasdatetime: tdatetime; override;
-   procedure setasdatetime(avalue: tdatetime); override;
-   function HasParent: Boolean; override;
-  public
-   procedure Clear; override;
-   function assql: string;
-   function asoldsql: string;
-   property asmsestring: msestring read getasmsestring write setasmsestring;
-  published
-   property DataSet stored false;
-   property ProviderFlags default defaultproviderflags;
- end;
- tmsetimefield = class(ttimefield)
-  private
-   function getasmsestring: msestring;
-   procedure setasmsestring(const avalue: msestring);
-  protected
-   function getasdatetime: tdatetime; override;
-   procedure setasdatetime(avalue: tdatetime); override;
-   function HasParent: Boolean; override;
-  public
-   procedure Clear; override;
-   function assql: string;
-   function asoldsql: string;
-   property asmsestring: msestring read getasmsestring write setasmsestring;
-  published
-   property DataSet stored false;
-   property ProviderFlags default defaultproviderflags;
- end;
- }
+ 
  tmsebinaryfield = class(tbinaryfield)
   private
    function getasmsestring: msestring;
@@ -519,8 +464,6 @@ type
    fgetblobid: getblobidfuncty;
    procedure removecache(const aid: blobidty); virtual; overload;
    procedure removecache; overload;
-//   function getblobid(out aid: blobidty): boolean;
-                //false if not available
    function HasParent: Boolean; override;
    function getasvariant: variant; override;
    function getasstring: string; override;
@@ -550,7 +493,6 @@ type
    procedure setdsintf(const avalue: idsfieldcontroller);
    function getinstance: tfield;
   protected
-//   function HasParent: Boolean; override;
    function getasvariant: variant; override;
    procedure setvarvalue(const avalue: variant);
   public
