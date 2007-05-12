@@ -317,6 +317,7 @@ begin
     else begin
      tabpos:= 0;
     end;
+    tabpos:= tabpos - frame1.right - frame1.left;
     if atextsize.cy > maxheight then begin
      maxheight:= atextsize.cy;
     end;
@@ -1340,13 +1341,14 @@ procedure tcustommainmenuwidget.doshortcut(var info: keyeventinfoty;
   const sender: twidget);
 begin
  inherited;
- if not (es_processed in info.eventstate) and (info.shiftstate = [ss_alt]) and
-                  not(csdesigning in componentstate) and 
-                  not (es_modal in info. eventstate) then begin
-  dokeydown(info);
- end;
- if not (es_processed in info.eventstate) and (fmenucomp <> nil) then begin
-  fmenucomp.menu.doshortcut(info);
+ if not (csdesigning in componentstate) then begin
+  if not (es_processed in info.eventstate) and (info.shiftstate = [ss_alt]) and
+                   not (es_modal in info.eventstate) then begin
+   dokeydown(info);
+  end;
+  if not (es_processed in info.eventstate) and (fmenucomp <> nil) then begin
+   fmenucomp.menu.doshortcut(info);
+  end;
  end;
 end;
 
