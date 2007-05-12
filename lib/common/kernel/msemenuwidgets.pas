@@ -172,7 +172,7 @@ function showpopupmenu(const menu: tmenuitem; const transientfor: twidget;
 implementation
 uses
  msedrawtext,mserichstring,msestockobjects,sysutils,msekeyboard,msebits,
- mseactions,mseguiintf;
+ mseactions,mseguiintf,msestrings;
 
 type
  tmenuitem1 = class(tmenuitem);
@@ -251,12 +251,16 @@ end;
 
 procedure calcmenulayout(var layout: menulayoutinfoty; const canvas: tcanvas;
                               const maxsize: integer = bigint);
+const
+ shortcutdist = 5;
 var
  int1,int2: integer;
  ay,ax: integer;
  atextsize: sizety;
  maxheight: integer;
  textwidth: integer;
+ tabpos1: integer;
+ ashortcutwidth,shortcutwidth: integer;
  item1: tmenuitem1;
  hassubmenu: boolean;
  hascheckbox: boolean;
@@ -266,6 +270,7 @@ var
  framehalfwidth: integer;
  framewidth1: integer;
  extrasp: integer;
+ ar1: richstringarty;
  
 begin
  with layout,tmenuitem1(menu) do begin
@@ -289,6 +294,7 @@ begin
   ay:= framehalfwidth;
   ax:= framehalfwidth;
   textwidth:= 0;
+  shortcutwidth:= 0;
   hassubmenu:= false;
   hascheckbox:= false;
   for int1:= 0 to count - 1 do begin
@@ -296,21 +302,35 @@ begin
     item1:= tmenuitem1(fsubmenu[int1]);
     imagelist:= item1.finfo.imagelist;
     font:= item1.font;
-    atextsize:= textrect(canvas,item1.finfo.caption1,[],font).size;
+    ar1:= splitrichstring(item1.finfo.caption1,msechar(c_tab));
+    atextsize:= textrect(canvas,ar1[0],[],font).size;
     atextsize.cx:= atextsize.cx + frame1.left + frame1.right;
     atextsize.cy:= atextsize.cy + frame1.top + frame1.bottom;
     inc(atextsize.cy,2); //for 3D level
     if imagelist <> nil then begin
-     atextsize.cx:= atextsize.cx + imagelist.width;
+     tabpos:= -imagelist.width;
+     atextsize.cx:= atextsize.cx - tabpos;
      if atextsize.cy < imagelist.height then begin
       atextsize.cy:= imagelist.height;
      end;
+    end
+    else begin
+     tabpos:= 0;
     end;
     if atextsize.cy > maxheight then begin
      maxheight:= atextsize.cy;
     end;
     if atextsize.cx > textwidth then begin
      textwidth:= atextsize.cx;
+    end;
+    if high(ar1) > 0 then begin
+     ashortcutwidth:= textrect(canvas,ar1[1],[],font).cx;
+     if ashortcutwidth > shortcutwidth then begin
+      shortcutwidth:= ashortcutwidth;
+     end;
+    end
+    else begin
+     ashortcutwidth:= 0;
     end;
     colorglyph:= layout.colorglyph;
     caption:= item1.finfo.caption1;
@@ -341,6 +361,13 @@ begin
        end
        else begin
         cx:= atextsize.cx + 4;
+        if ashortcutwidth > 0 then begin
+         tabpos:= tabpos + atextsize.cx + shortcutdist;
+         cx:= cx + shortcutdist + ashortcutwidth;
+        end;
+        if ss_checkbox in state then begin
+         cx:= cx + menucheckboxwidth;
+        end;
        end;
        x:= ax;
        y:= ay;
@@ -362,6 +389,13 @@ begin
      dim:= nullrect;
     end;
    end;
+  end;
+  if shortcutwidth > 0 then begin
+   tabpos1:= textwidth + shortcutdist;
+   textwidth:= tabpos1 + shortcutwidth;
+  end
+  else begin
+   tabpos1:= 0;
   end;
   if not (as_invisible in state) then begin
    shift:= 0;
@@ -407,7 +441,8 @@ begin
     end;
     maxheight:= 0;
     for int1:= 0 to count - 1 do begin
-     with cells[int1].buttoninfo.dim do begin
+     with cells[int1].buttoninfo,dim do begin
+      tabpos:= tabpos + tabpos1;
       y:= y + shift;
       int2:= y + cy  + framewidth1;
       if int2 - extrasp > amax then begin

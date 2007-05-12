@@ -45,7 +45,7 @@ type
  actionstatesty = set of actionstatety;
 
  menuactionoptionty = (mao_separator,mao_checkbox,mao_radiobutton,mao_shortcutcaption,
-                           mao_asyncexecute,mao_singleregion);
+                           mao_asyncexecute,mao_singleregion,mao_shortcutright);
  menuactionoptionsty = set of menuactionoptionty;
 
 const
@@ -75,6 +75,7 @@ type
   state: shapestatesty;
   caption: richstringty;
   captionpos: captionposty;
+  tabpos: integer;
   font: tfont;
   group: integer;
   color: colorty;
@@ -121,8 +122,10 @@ var
  
 implementation
 uses
- classes,msedrawtext,msestockobjects,msebits;
-
+ classes,msedrawtext,msestockobjects,msebits,msestrings;
+var
+ buttontab: tcustomtabulators;
+ 
 procedure setchecked(var info: shapeinfoty; const value: boolean;
                       const widget: twidget);
 begin
@@ -591,8 +594,10 @@ procedure drawbuttoncaption(const canvas: tcanvas; const info: shapeinfoty;
 var
  textflags: textflagsty;
  rect1: rectty;
+ tab1: tcustomtabulators;
 begin
  with canvas,info do begin
+  tab1:= nil;
   if caption.text <> '' then begin
    rect1:= arect;
    case pos of
@@ -600,6 +605,10 @@ begin
      textflags:= [tf_ycentered,tf_clipo];
      inc(rect1.x,2);
      dec(rect1.cx,2);
+     if countchars(caption.text,msechar(c_tab)) = 1 then begin
+      tab1:= buttontab;
+      tab1[0].pos:= info.tabpos / defaultppmm;
+     end;
     end;
     cp_right: begin
      textflags:= [tf_ycentered,tf_right,tf_clipo];
@@ -612,7 +621,7 @@ begin
    if ss_disabled in state then begin
     include(textflags,tf_grayed);
    end;
-   drawtext(canvas,caption,rect1,arect,textflags,font);
+   drawtext(canvas,caption,rect1,arect,textflags,font,tab1);
   end;
  end;
 end;
@@ -780,4 +789,9 @@ begin
  end;
 end;
 
+initialization
+ buttontab:= tcustomtabulators.create;
+ buttontab.add(0,tak_left);
+finalization
+ buttontab.free;
 end.

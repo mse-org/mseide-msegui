@@ -27,7 +27,7 @@ type
                  //order fix, used in msepostscriptprinter
                tf_clipi,tf_clipo,
                tf_grayed,tf_wordbreak,tf_softhyphen,tf_noselect,
-               tf_ellipseleft,{tf_ellipsemid,}tf_ellipseright);
+               tf_ellipseleft,{tf_ellipsemid,}tf_ellipseright,tf_tabtospace);
  textflagsty = set of textflagty;
 const
  ellipsemask: textflagsty = [tf_ellipseleft,{tf_ellipsemid,}tf_ellipseright];
@@ -86,7 +86,7 @@ type
   public
    constructor create; reintroduce;
    procedure assign(source: tpersistent); override;
-   procedure add(const pos: real; const kind: tabulatorkindty);
+   procedure add(const apos: real; const akind: tabulatorkindty);
    procedure setdefaulttabs(const awidth: real = 20; const acount: integer = 20;
                          const akind: tabulatorkindty = tak_left);
    property tabs: tabulatorarty read gettabs;
@@ -228,6 +228,9 @@ var
  text1: pmsechar;
 
  procedure getcharwidths(acount: integer);
+ var
+  fontmetrics1: fontmetricsty;
+  int1: integer;
  begin
   if acount <= 0 then begin
    exit;
@@ -238,9 +241,22 @@ var
    text:= text1;
    count:= acount;
    gdierror(gui_getchar16widths(drawinfo));
-   inc(text1,acount);
-   inc(resultpo1,acount);
   end;
+  if tf_tabtospace in info.flags then begin
+   with drawinfo.getfontmetrics do begin
+    datapo:= drawinfo.getchar16widths.datapo;
+    char:= ' ';
+    resultpo:= @fontmetrics1;       
+    gdierror(gui_getfontmetrics(drawinfo));
+   end;
+   for int1:= 0 to acount-1 do begin
+    if (text1+int1)^ = c_tab then begin
+     pintegeraty(resultpo1)^[int1]:= fontmetrics1.width;
+    end;
+   end;
+  end; 
+  inc(text1,acount);
+  inc(resultpo1,acount);
  end;
 
  function checklinebreak(var aindex: integer): boolean;
@@ -336,266 +352,275 @@ var
    additem(tabchars,aindex);
   end;
  end;
-  
+
+var
+ spacewidth: integer;
+   
 begin
  tabs:= nil; //compiler warning
  if info.font <> nil then begin
   canvas.font:= info.font;
  end;
- with info,tcanvas1(canvas),layoutinfo do begin
-  tcanvas1(canvas).checkgcstate([cs_gc]);
-  canvas.initdrawinfo(drawinfo);
-  ascent:= font.ascent;
-  descent:= font.descent;
-  lineheight:= font.lineheight;
-  textlen:= length(text.text);
-  setlength(charwidths,textlen);
-  text1:= pointer(info.text.text);
-  resultpo1:= pointer(charwidths);
-  if text.format = nil then begin
-   getcharwidths(textlen);
-  end
-  else begin
-   int2:= 0;
-   style1:= font.style;
-   for int1:= 0 to high(text.format) do begin
-    with text.format[int1] do begin
-     if {$ifdef FPC}longword{$else}byte{$endif}(newinfos) and 
-                                          fontstylehandlemask <> 0 then begin
-      if index > textlen then begin
-       getcharwidths(textlen-int2);
-      end
-      else begin
-       getcharwidths(index-int2);
-      end;
-      int2:= index;
-      font.style:= style.fontstyle;
-     end;
-    end;
-   end;
-   if int2 < length(text.text) then begin
-    getcharwidths(length(text.text)-int2);
-   end;
-   font.style:= style1;
-  end;
-  setlength(lineinfos,1);
-  lineinfos[0].liindex:= 1;
-  int1:= 1;
-  awidth:= 0; //textwidth
-  if tf_wordbreak in flags then begin
-   int2:= 0;
-   while int1 <= textlen do begin
-    int2:= 0; //index of last whitespace
-    int3:= 0; //textwidth of last whitespace
-    awidth:= 0; //textwidth
-    while int1 <= textlen do begin
-     wch1:= text.text[int1];
-     if (wch1 = ' ') or 
-        ((wch1 = '-') and (int1 > 1) and (text.text[int1-1] <> ' ') or 
-        (wch1 = c_softhyphen)) and 
-            (awidth + charwidths[int1-1] <= info.dest.cx) then begin
-      checksofthyphen(high(lineinfos));
-      int2:= int1;
-      int3:= awidth;
-     end
-     else begin
-      if checklinebreak(int1) then begin
-       checksofthyphen(high(lineinfos)-1);
-       break;
-      end;
-     end;
-     if (wch1 <> c_softhyphen) or not (tf_softhyphen in flags) then begin
-      inc(awidth,charwidths[int1-1]);
-     end;
-     if (awidth > info.dest.cx) and (awidth > charwidths[int1-1]) then begin
-                           //min one char on line
-      with lineinfos[high(lineinfos)] do begin
-       if (int2 > 0) then begin //use last whitespace for break
-        if text.text[int2] <> ' ' then begin
-         inc(int3,charwidths[int2-1]); //'-'
-         licount:= int2 - liindex + 1;
-        end
-        else begin
-         licount:= int2 - liindex;
-        end;
-        liwidth:= int3;
-        int1:= int2 + 1;
+ try
+  gdi_lock;
+  with info,tcanvas1(canvas),layoutinfo do begin
+   tcanvas1(canvas).checkgcstate([cs_gc]);
+   canvas.initdrawinfo(drawinfo);
+   ascent:= font.ascent;
+   descent:= font.descent;
+   lineheight:= font.lineheight;
+   textlen:= length(text.text);
+   setlength(charwidths,textlen);
+   text1:= pointer(info.text.text);
+   resultpo1:= pointer(charwidths);
+   if text.format = nil then begin
+    getcharwidths(textlen);
+   end
+   else begin
+    int2:= 0;
+    style1:= font.style;
+    for int1:= 0 to high(text.format) do begin
+     with text.format[int1] do begin
+      if {$ifdef FPC}longword{$else}byte{$endif}(newinfos) and 
+                                           fontstylehandlemask <> 0 then begin
+       if index > textlen then begin
+        getcharwidths(textlen-int2);
        end
        else begin
-        licount:= int1 - liindex; //no whitespace to break
-        liwidth:= awidth - charwidths[int1];
+        getcharwidths(index-int2);
+       end;
+       int2:= index;
+       font.style:= style.fontstyle;
+      end;
+     end;
+    end;
+    if int2 < length(text.text) then begin
+     getcharwidths(length(text.text)-int2);
+    end;
+    font.style:= style1;
+   end;
+   setlength(lineinfos,1);
+   lineinfos[0].liindex:= 1;
+   int1:= 1;
+   awidth:= 0; //textwidth
+   if tf_wordbreak in flags then begin
+    int2:= 0;
+    while int1 <= textlen do begin
+     int2:= 0; //index of last whitespace
+     int3:= 0; //textwidth of last whitespace
+     awidth:= 0; //textwidth
+     while int1 <= textlen do begin
+      wch1:= text.text[int1];
+      if (wch1 = ' ') or 
+         ((wch1 = '-') and (int1 > 1) and (text.text[int1-1] <> ' ') or 
+         (wch1 = c_softhyphen)) and 
+             (awidth + charwidths[int1-1] <= info.dest.cx) then begin
+       checksofthyphen(high(lineinfos));
+       int2:= int1;
+       int3:= awidth;
+      end
+      else begin
+       if checklinebreak(int1) then begin
+        checksofthyphen(high(lineinfos)-1);
+        break;
        end;
       end;
-      setlength(lineinfos,high(lineinfos) + 2);
-      with lineinfos[high(lineinfos)] do begin
-       liindex:= int1;
+      if (wch1 <> c_softhyphen) or not (tf_softhyphen in flags) then begin
+       inc(awidth,charwidths[int1-1]);
       end;
-      break;
-     end;
-     inc(int1);
-    end;
-    checksofthyphen(high(lineinfos));
-   end;
-   with lineinfos[high(lineinfos)] do begin
-    if textlen > 0 then begin
-     licount:= textlen - liindex + 1;
-    end;
-    liwidth:= awidth;
-   end;
-  end
-  else begin
-   if (info.tabulators = nil) or 
-     (info.tabulators.count = 0) and (info.tabulators.defaultdist = 0) then begin
-    while int1 <= textlen do begin
-     if not checklinebreak(int1) then begin
-      inc(awidth,charwidths[int1-1]);
+      if (awidth > info.dest.cx) and (awidth > charwidths[int1-1]) then begin
+                            //min one char on line
+       with lineinfos[high(lineinfos)] do begin
+        if (int2 > 0) then begin //use last whitespace for break
+         if text.text[int2] <> ' ' then begin
+          inc(int3,charwidths[int2-1]); //'-'
+          licount:= int2 - liindex + 1;
+         end
+         else begin
+          licount:= int2 - liindex;
+         end;
+         liwidth:= int3;
+         int1:= int2 + 1;
+        end
+        else begin
+         licount:= int1 - liindex; //no whitespace to break
+         liwidth:= awidth - charwidths[int1];
+        end;
+       end;
+       setlength(lineinfos,high(lineinfos) + 2);
+       with lineinfos[high(lineinfos)] do begin
+        liindex:= int1;
+       end;
+       break;
+      end;
       inc(int1);
-     end
-     else begin
-      awidth:= 0;
      end;
+     checksofthyphen(high(lineinfos));
+    end;
+    with lineinfos[high(lineinfos)] do begin
+     if textlen > 0 then begin
+      licount:= textlen - liindex + 1;
+     end;
+     liwidth:= awidth;
     end;
    end
    else begin
-    tabs:= info.tabulators.tabs;
-    rea1:= info.tabulators.defaultdist * info.tabulators.ppmm;
-    nexttab:= -1;
-    while int1 <= textlen do begin
-     if not checklinebreak(int1) then begin 
-      if info.text.text[int1] = c_tab then begin
-       if tabs <> nil then begin
-        inc(nexttab);
-        if nexttab < info.tabulators.count then begin
-         case tabs[nexttab].tabkind of
-          tak_right: begin
-           charwidths[int1-1]:= tabs[nexttab].textpos - awidth - 
-                                   tabitemwidth(int1,#0);
+    if (info.tabulators = nil) or 
+      (info.tabulators.count = 0) and (info.tabulators.defaultdist = 0) or
+                                      (tf_tabtospace in flags) then begin
+     while int1 <= textlen do begin
+      if not checklinebreak(int1) then begin
+       inc(awidth,charwidths[int1-1]);
+       inc(int1);
+      end
+      else begin
+       awidth:= 0;
+      end;
+     end;
+    end
+    else begin //with tabulators
+     tabs:= info.tabulators.tabs;
+     rea1:= info.tabulators.defaultdist * info.tabulators.ppmm;
+     nexttab:= -1;
+     while int1 <= textlen do begin
+      if not checklinebreak(int1) then begin 
+       if info.text.text[int1] = c_tab then begin
+        if tabs <> nil then begin
+         inc(nexttab);
+         if nexttab < info.tabulators.count then begin
+          case tabs[nexttab].tabkind of
+           tak_right: begin
+            charwidths[int1-1]:= tabs[nexttab].textpos - awidth - 
+                                    tabitemwidth(int1,#0);
+           end;
+           tak_centered: begin
+            charwidths[int1-1]:= tabs[nexttab].textpos - awidth - 
+                                    tabitemwidth(int1,#0) div 2;
+           end;
+           tak_decimal: begin
+            charwidths[int1-1]:= tabs[nexttab].textpos - awidth - 
+                                    tabitemwidth(int1,widechar(decimalseparator));
+           end;
+           else begin //tak_left
+            charwidths[int1-1]:= tabs[nexttab].textpos - awidth;
+           end;
           end;
-          tak_centered: begin
-           charwidths[int1-1]:= tabs[nexttab].textpos - awidth - 
-                                   tabitemwidth(int1,#0) div 2;
-          end;
-          tak_decimal: begin
-           charwidths[int1-1]:= tabs[nexttab].textpos - awidth - 
-                                   tabitemwidth(int1,widechar(decimalseparator));
-          end;
-          else begin //tak_left
-           charwidths[int1-1]:= tabs[nexttab].textpos - awidth;
+          addtabchar(int1);
+         end
+         else begin
+          if rea1 > 0 then begin
+           charwidths[int1-1]:= round(ceil(awidth / rea1)*rea1) - awidth;
+           addtabchar(int1);
           end;
          end;
-         addtabchar(int1);
         end
         else begin
          if rea1 > 0 then begin
-          charwidths[int1-1]:= round(ceil(awidth / rea1)*rea1) - awidth;
+          charwidths[int1-1]:= round(floor((awidth+rea1+0.1)/rea1)*rea1) - awidth;
           addtabchar(int1);
          end;
         end;
-       end
-       else begin
-        if rea1 > 0 then begin
-         charwidths[int1-1]:= round(floor((awidth+rea1+0.1)/rea1)*rea1) - awidth;
-         addtabchar(int1);
-        end;
        end;
+       inc(awidth,charwidths[int1-1]);
+       inc(int1);
+      end
+      else begin
+       awidth:= 0;
+       nexttab:= -1;
       end;
-      inc(awidth,charwidths[int1-1]);
-      inc(int1);
+     end;
+    end;
+    with lineinfos[high(lineinfos)] do begin
+     liwidth:= awidth;
+     licount:= int1-liindex;
+    end;
+   end;
+   if high(lineinfos) >= 0 then begin
+    height:= lineheight*high(lineinfos)+ascent+descent;
+   end
+   else begin
+    height:= 0;
+   end;
+   res.y:= info.dest.y;
+   if tf_ycentered in flags then begin
+    res.y:= res.y + (info.dest.cy - height) div 2;
+   end
+   else begin
+    if tf_bottom in flags then begin
+     res.y:= res.y + info.dest.cy - height;
+    end;
+   end;
+   starty:= res.y + ascent; //layoutinfo
+   res.x:= bigint;
+   res.cy:= height;
+   res.cx:= 0;
+   for int3:= 0 to high(lineinfos) do begin
+    with layoutinfo.lineinfos[int3] do begin
+     listartx:= info.dest.x;
+     if tf_xcentered in flags then begin
+      listartx:= listartx + (info.dest.cx - liwidth) div 2;
      end
      else begin
-      awidth:= 0;
-      nexttab:= -1;
+      if tf_right in flags then begin
+       listartx:= listartx + info.dest.cx - liwidth;
+      end;
+     end;
+     if res.x > listartx then begin
+      res.x:= listartx;
+     end;
+     if res.cx < liwidth then begin
+      res.cx:= liwidth;
      end;
     end;
    end;
-   with lineinfos[high(lineinfos)] do begin
-    liwidth:= awidth;
-    licount:= int1-liindex;
-   end;
-  end;
-  if high(lineinfos) >= 0 then begin
-   height:= lineheight*high(lineinfos)+ascent+descent;
-  end
-  else begin
-   height:= 0;
-  end;
-  res.y:= info.dest.y;
-  if tf_ycentered in flags then begin
-   res.y:= res.y + (info.dest.cy - height) div 2;
-  end
-  else begin
-   if tf_bottom in flags then begin
-    res.y:= res.y + info.dest.cy - height;
-   end;
-  end;
-  starty:= res.y + ascent; //layoutinfo
-  res.x:= bigint;
-  res.cy:= height;
-  res.cx:= 0;
-  for int3:= 0 to high(lineinfos) do begin
-   with layoutinfo.lineinfos[int3] do begin
-    listartx:= info.dest.x;
-    if tf_xcentered in flags then begin
-     listartx:= listartx + (info.dest.cx - liwidth) div 2;
-    end
-    else begin
-     if tf_right in flags then begin
-      listartx:= listartx + info.dest.cx - liwidth;
+   if (tf_xjustify in flags) and (dest.cx > 0) then begin
+    po1:= pointer(info.text.text);
+    bo1:= false;
+    for int3:= 0 to high(lineinfos) - 1 do begin
+     with lineinfos[int3] do begin     
+      if not linebreak then begin
+       bo1:= true;
+       int4:= 0;
+       setlength(justifychars,licount); //max
+       for int1:= liindex-1 to liindex + licount - 2 do begin
+        if po1^[int1] = ' ' then begin
+         justifychars[int4]:= int1+1;
+         inc(int4);
+        end;
+       end;
+       setlength(justifychars,int4);
+       if (int4 > 0) and not (cs_internaldrawtext in fstate) then begin
+        rea1:= (dest.cx - liwidth) / int4;
+        rea2:= 0;
+        int2:= 0;
+        for int1:= 0 to high(justifychars) do begin
+         rea2:= rea2 + rea1;
+         int4:= round(rea2) - int2;
+         inc(charwidths[justifychars[int1]-1],int4);
+         inc(int2,int4);
+        end;
+        listartx:= dest.x;
+        if tabchars <> nil then begin
+         tabchars:= mergearray(tabchars,justifychars);
+        end
+        else begin
+         tabchars:= justifychars;
+        end;
+        justifychars:= nil;
+       end;
+      end;  
      end;
     end;
-    if res.x > listartx then begin
-     res.x:= listartx;
-    end;
-    if res.cx < liwidth then begin
-     res.cx:= liwidth;
-    end;
-   end;
-  end;
-  if (tf_xjustify in flags) and (dest.cx > 0) then begin
-   po1:= pointer(info.text.text);
-   bo1:= false;
-   for int3:= 0 to high(lineinfos) - 1 do begin
-    with lineinfos[int3] do begin     
-     if not linebreak then begin
-      bo1:= true;
-      int4:= 0;
-      setlength(justifychars,licount); //max
-      for int1:= liindex-1 to liindex + licount - 2 do begin
-       if po1^[int1] = ' ' then begin
-        justifychars[int4]:= int1+1;
-        inc(int4);
-       end;
-      end;
-      setlength(justifychars,int4);
-      if (int4 > 0) and not (cs_internaldrawtext in fstate) then begin
-       rea1:= (dest.cx - liwidth) / int4;
-       rea2:= 0;
-       int2:= 0;
-       for int1:= 0 to high(justifychars) do begin
-        rea2:= rea2 + rea1;
-        int4:= round(rea2) - int2;
-        inc(charwidths[justifychars[int1]-1],int4);
-        inc(int2,int4);
-       end;
-       listartx:= dest.x;
-       if tabchars <> nil then begin
-        tabchars:= mergearray(tabchars,justifychars);
-       end
-       else begin
-        tabchars:= justifychars;
-       end;
-       justifychars:= nil;
-      end;
-     end;  
-    end;
-   end;
-   if bo1 then begin
-    if res.cx <= dest.cx then begin
-     res.x:= dest.x;
-     res.cx:= dest.cx;
+    if bo1 then begin
+     if res.cx <= dest.cx then begin
+      res.x:= dest.x;
+      res.cx:= dest.cx;
+     end;
     end;
    end;
   end;
+ finally
+  gdi_unlock;
  end;
 end;
 
@@ -881,144 +906,156 @@ var
  ellipsewidth: integer;
  int1,int2,int3{,int4}: integer;
  lastover: boolean;
+ textbackup: msestring;
+ po1: pmsechar;
 label
  endlab;
 
 begin                  //drawtext
  with info,tcanvas1(canvas) do begin
-  if cs_internaldrawtext in fstate then begin
-   internaldrawtext(info);
-   exit;
+  if tf_tabtospace in flags then begin
+   textbackup:= text.text; //backup
+   replacechar1(text.text,msechar(c_tab),msechar(' '));
   end;
-  save;
-  if tf_clipi in flags then begin
-   intersectcliprect(dest);
-  end;
-  if tf_clipo in flags then begin
-   intersectcliprect(clip);
-  end;
-  if text.text = '' then begin
-   info.res:= nullrect;
-   goto endlab;
-  end;
-  layouttext(canvas,info,layoutinfo);
-  defaultcolor:= font.color;
-  defaultcolorbackground:= font.colorbackground;
-  fontstylebefore:= font.style;
-  afontstyle:= fontstylebefore;
-  grayed:= tf_grayed in flags;
-  with layoutinfo do begin
-   underline:= descent div 2 + 1;
-   if underline = 0 then begin
-    underline:= 1;
+  try
+   if cs_internaldrawtext in fstate then begin
+    internaldrawtext(info);
+    exit;
    end;
-   if underline >= descent then begin
-    underline:= descent - 1;
+   save;
+   if tf_clipi in flags then begin
+    intersectcliprect(dest);
    end;
-   strikeout:= - (ascent div 3);
-  end;
-  pos.y:= layoutinfo.starty;
-  if info.text.format <> nil then begin
-   infoindexbefore:= -1;
-   int1:= 0; //format index
-   row:= 0; //layoutinfo row index
-   lastover:= false;
-   while row <= high(layoutinfo.lineinfos) do begin
-    with layoutinfo.lineinfos[row] do begin
-     pos.x:= listartx;
-     charindexbefore:= liindex-1;
-     endindex:= charindexbefore + licount;
+   if tf_clipo in flags then begin
+    intersectcliprect(clip);
+   end;
+   if text.text = '' then begin
+    info.res:= nullrect;
+    goto endlab;
+   end;
+   layouttext(canvas,info,layoutinfo);
+   defaultcolor:= font.color;
+   defaultcolorbackground:= font.colorbackground;
+   fontstylebefore:= font.style;
+   afontstyle:= fontstylebefore;
+   grayed:= tf_grayed in flags;
+   with layoutinfo do begin
+    underline:= descent div 2 + 1;
+    if underline = 0 then begin
+     underline:= 1;
     end;
-    while true do begin
-     with text.format[int1] do begin
-      formatactive:= (index < endindex);
-      last:= (int1 >= high(text.format)) or not formatactive;
-      if last or (newinfos * stopmask <> []) then begin
-       if infoindexbefore >= 0 then begin
-        updatefont(text.format[infoindexbefore]);
-       end;
-       if formatactive and not lastover then begin
-        count:= text.format[int1].index - charindexbefore;
-        if count > 0 then begin
-         drawsubstring(row,charindexbefore+1,count);
-         inc(charindexbefore,count);
+    if underline >= descent then begin
+     underline:= descent - 1;
+    end;
+    strikeout:= - (ascent div 3);
+   end;
+   pos.y:= layoutinfo.starty;
+   if info.text.format <> nil then begin
+    infoindexbefore:= -1;
+    int1:= 0; //format index
+    row:= 0; //layoutinfo row index
+    lastover:= false;
+    while row <= high(layoutinfo.lineinfos) do begin
+     with layoutinfo.lineinfos[row] do begin
+      pos.x:= listartx;
+      charindexbefore:= liindex-1;
+      endindex:= charindexbefore + licount;
+     end;
+     while true do begin
+      with text.format[int1] do begin
+       formatactive:= (index < endindex);
+       last:= (int1 >= high(text.format)) or not formatactive;
+       if last or (newinfos * stopmask <> []) then begin
+        if infoindexbefore >= 0 then begin
+         updatefont(text.format[infoindexbefore]);
         end;
-        infoindexbefore:= int1;
-        if last then begin
-         updatefont(text.format[int1]);
-         count:= endindex - charindexbefore;
-         drawsubstring(row,charindexbefore+1,count);
-         inc(charindexbefore,count);
-         lastover:= true;
+        if formatactive and not lastover then begin
+         count:= text.format[int1].index - charindexbefore;
+         if count > 0 then begin
+          drawsubstring(row,charindexbefore+1,count);
+          inc(charindexbefore,count);
+         end;
+         infoindexbefore:= int1;
+         if last then begin
+          updatefont(text.format[int1]);
+          count:= endindex - charindexbefore;
+          drawsubstring(row,charindexbefore+1,count);
+          inc(charindexbefore,count);
+          lastover:= true;
+          break;
+         end;
+        end
+        else begin
+         drawsubstring(row,charindexbefore+1,endindex - charindexbefore);
          break;
         end;
-       end
-       else begin
-        drawsubstring(row,charindexbefore+1,endindex - charindexbefore);
-        break;
        end;
       end;
+      inc(int1);
      end;
-     inc(int1);
+     inc(row);
+     inc(pos.y,layoutinfo.lineheight);
     end;
-    inc(row);
-    inc(pos.y,layoutinfo.lineheight);
-   end;
-   font.color:= defaultcolor;
-   font.colorbackground:= defaultcolorbackground;
-   font.style:= fontstylebefore;
-  end
-  else begin
-   pos.x:= layoutinfo.lineinfos[0].listartx;
-   for row:= 0 to high(layoutinfo.lineinfos) do begin
-    with layoutinfo.lineinfos[row] do begin
-     pos.x:= listartx;
-     if (liwidth > dest.cx) and (flags * ellipsemask <> []) then begin
-      ellipsewidth:= getstringwidth(textellipse);
-      ellipsewidthsum:= liwidth + ellipsewidth;
-      int1:= liindex;
-      if tf_ellipseleft in flags then begin
-       int3:= liindex + licount;
-       while int1 < int3 do begin
-        dec(ellipsewidthsum,layoutinfo.charwidths[int1-1]);
-        inc(int1);
-        if ellipsewidthsum <= dest.cx then begin
-         break;
-        end;
-       end;
-       adjustellipsepos(ellipsewidthsum -liwidth);
-       drawstring(textellipse,pos,nil,tf_grayed in flags);
-       inc(pos.x,ellipsewidth);
-       dec(licount,int1-liindex);
-       liindex:= int1;
-       drawsubstring(row,liindex,licount);
-      end
-      else begin
-       if tf_ellipseright in flags then begin
-        int1:= int1 + licount;
-        while int1 > liindex do begin
-         dec(int1);
+    font.color:= defaultcolor;
+    font.colorbackground:= defaultcolorbackground;
+    font.style:= fontstylebefore;
+   end
+   else begin
+    pos.x:= layoutinfo.lineinfos[0].listartx;
+    for row:= 0 to high(layoutinfo.lineinfos) do begin
+     with layoutinfo.lineinfos[row] do begin
+      pos.x:= listartx;
+      if (liwidth > dest.cx) and (flags * ellipsemask <> []) then begin
+       ellipsewidth:= getstringwidth(textellipse);
+       ellipsewidthsum:= liwidth + ellipsewidth;
+       int1:= liindex;
+       if tf_ellipseleft in flags then begin
+        int3:= liindex + licount;
+        while int1 < int3 do begin
          dec(ellipsewidthsum,layoutinfo.charwidths[int1-1]);
+         inc(int1);
          if ellipsewidthsum <= dest.cx then begin
           break;
          end;
         end;
+        adjustellipsepos(ellipsewidthsum -liwidth);
+        drawstring(textellipse,pos,nil,tf_grayed in flags);
+        inc(pos.x,ellipsewidth);
+        dec(licount,int1-liindex);
+        liindex:= int1;
+        drawsubstring(row,liindex,licount);
+       end
+       else begin
+        if tf_ellipseright in flags then begin
+         int1:= int1 + licount;
+         while int1 > liindex do begin
+          dec(int1);
+          dec(ellipsewidthsum,layoutinfo.charwidths[int1-1]);
+          if ellipsewidthsum <= dest.cx then begin
+           break;
+          end;
+         end;
+        end;
+        licount:= int1 - liindex;
+        adjustellipsepos(ellipsewidthsum -liwidth);
+        drawsubstring(row,liindex,licount);
+        drawstring(textellipse,pos,nil,tf_grayed in flags);
        end;
-       licount:= int1 - liindex;
-       adjustellipsepos(ellipsewidthsum -liwidth);
+      end
+      else begin
        drawsubstring(row,liindex,licount);
-       drawstring(textellipse,pos,nil,tf_grayed in flags);
       end;
-     end
-     else begin
-      drawsubstring(row,liindex,licount);
+      inc(pos.y,layoutinfo.lineheight);
      end;
-     inc(pos.y,layoutinfo.lineheight);
     end;
    end;
-  end;
 endlab:
-  restore;
+   restore;
+  finally
+   if tf_tabtospace in flags then begin
+    text.text:= textbackup;
+   end;
+  end;
  end;
 end;
 
@@ -1214,13 +1251,13 @@ begin
  inherited;
 end;
 
-procedure tcustomtabulators.add(const pos: real; const kind: tabulatorkindty);
+procedure tcustomtabulators.add(const apos: real; const akind: tabulatorkindty);
 begin
  beginupdate;
   count:= count + 1;
   with ttabulatoritem(fitems[high(fitems)]) do begin
-   fpos:= pos;
-   fkind:= kind;
+   fpos:= apos;
+   fkind:= akind;
   end;
  endupdate;
 end;

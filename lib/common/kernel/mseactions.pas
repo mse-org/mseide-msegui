@@ -159,7 +159,7 @@ type
  end;
 
 procedure linktoaction(const sender: iactionlink; const aaction: tcustomaction;
-                             var info: actioninfoty);
+                      var info: actioninfoty);
                   //remove existing link, copy action to instance
 procedure setactionchecked(const sender: iactionlink; const value: boolean);
 procedure setactioncaption(const sender: iactionlink; const value: msestring);
@@ -510,7 +510,13 @@ begin
  str1:= info.captiontext;
  if (info.shortcut <> 0) and (mao_shortcutcaption in info.options)
            and not (as_disabled in info.state) then begin
-  str1:= str1 + ' ('+getshortcutname(info.shortcut)+')';
+  if mao_shortcutright in info.options then begin
+   str1:= str1 + c_tab;
+  end
+  else begin
+   str1:= str1 + ' ';
+  end;
+  str1:= str1 + '('+getshortcutname(info.shortcut)+')';
  end;
  captiontorichstring(str1,info.caption1);
 end;

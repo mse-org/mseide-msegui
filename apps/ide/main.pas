@@ -23,10 +23,9 @@ interface
 uses
  mseforms,msesimplewidgets,msegui,msegdbutils,mseactions,msedispwidgets,
  msedataedits,msestat,msestatfile,msemenus,msebitmap,msetoolbar,msegrids,
- msefiledialog,
- msetypes,sourcepage,msetabs,msedesignintf,msedesigner,classes,mseclasses,
- msegraphutils,typinfo,msedock,sysutils,msesysenv,msestrings,
- msepostscriptprinter;
+ msefiledialog,msetypes,sourcepage,msetabs,msedesignintf,msedesigner,classes,
+ mseclasses,msegraphutils,typinfo,msedock,sysutils,msesysenv,msestrings,
+ msepostscriptprinter,msegraphics;
 const
  versiontext = '1.1 unstable';
  idecaption = 'MSEide';
@@ -65,6 +64,7 @@ type
    openfile: tfiledialog;
 
    sysenv: tsysenvmanager;
+   dummyimagelist: timagelist;
    vievmenuicons: timagelist;
 
    procedure newprogramonexecute(const sender: TObject);
@@ -255,7 +255,7 @@ uses
  mseformdatatools,mseshapes,msefileutils,projecttreeform,mseeditglob,
  findinfileform,formdesigner,sourceupdate,actionsmodule,programparametersform,
  objectinspector,msesysutils,msestream,msesys,cpuform,disassform,
- panelform,watchpointsform,threadsform,msegraphics,targetconsole,
+ panelform,watchpointsform,threadsform,targetconsole,
  debuggerform,componentpaletteform,messageform,msesettings,mseintegerenter
  {$ifdef linux} ,libc {$endif};
 

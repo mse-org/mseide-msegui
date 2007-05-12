@@ -16,6 +16,9 @@ uses
  mseactions,msegui,msearrayprops,mseclasses,msegraphutils,
  msedrawtext,msegraphics,mseevent,mseguiglob,mseshapes,mserichstring,
  msetypes,msestrings,Classes,msekeyboard,msebitmap;
+
+const
+ defaultmenuoptions = [mao_shortcutcaption,mao_shortcutright];
 type
 
  menuinfoarty = array of actioninfoty;
@@ -144,7 +147,8 @@ type
    property name: string read fname write fname;
    property state: actionstatesty read finfo.state write setstate 
                      stored isstatestored default [];
-   property options: menuactionoptionsty read finfo.options write setoptions default [mao_shortcutcaption];
+   property options: menuactionoptionsty read finfo.options 
+                   write setoptions default defaultmenuoptions;
    property shortcut: shortcutty read finfo.shortcut write setshortcut 
                      stored isshortcutstored default 0;
    property tag: integer read finfo.tag write settag stored istagstored default 0;
@@ -510,7 +514,7 @@ begin
  else begin
   fowner:= aowner;
  end;
- initactioninfo(finfo,[mao_shortcutcaption]);
+ initactioninfo(finfo,defaultmenuoptions);
  inherited create;
 end;
 

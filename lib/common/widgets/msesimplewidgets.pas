@@ -858,6 +858,7 @@ begin
  if ftextflags <> value then begin
   ftextflags:= Value;
   updatetextflags;
+  checkautosize;
   invalidate;
  end;
 end;
@@ -897,7 +898,7 @@ end;
 
 procedure tcustomlabel.getautopaintsize(var asize: sizety);
 begin
- asize:= textrect(getcanvas,fcaption).size;
+ asize:= textrect(getcanvas,fcaption,ftextflags).size;
  if fframe <> nil then begin
   with fframe do begin
    asize.cx:= asize.cx + framei_left + framei_right;

@@ -57,6 +57,7 @@ object mainfo: tmainfo
     frame.dummy = 0
     anchors = [an_top]
     taborder = 1
+    font.colorshadow = -2147483648
     font.name = 'stf_default'
     font.dummy = 0
     options = [dwo_hintclippedtext]
@@ -256,19 +257,25 @@ object mainfo: tmainfo
         submenu.items = <        
           item
             caption = 'En&vironment'
-            state = [as_localcaption, as_localonexecute]
+            state = [as_localcaption, as_localimagelist, as_localonexecute]
+            imagelist = dummyimagelist
             onexecute = parametersonexecute
           end        
           item
             caption = 'Restart Debugger'
-            state = [as_localcaption, as_localonexecute]
+            state = [as_localcaption, as_localimagelist, as_localonexecute]
+            imagelist = dummyimagelist
             onexecute = startgdbonexecute
           end        
           item
             action = actionsmo.attachprocess
+            state = [as_localimagelist]
+            imagelist = dummyimagelist
           end        
           item
             action = actionsmo.detachtarget
+            state = [as_localimagelist]
+            imagelist = dummyimagelist
           end        
           item
             options = [mao_separator, mao_shortcutcaption]
@@ -303,13 +310,17 @@ object mainfo: tmainfo
           item
             action = actionsmo.bkptsonact
             state = [as_checked, as_localchecked]
-            options = [mao_checkbox, mao_shortcutcaption]
+            options = [mao_checkbox, mao_shortcutcaption, mao_shortcutright]
           end        
           item
             action = actionsmo.togglebkpt
+            state = [as_localimagelist]
+            imagelist = dummyimagelist
           end        
           item
             action = actionsmo.togglebkptenable
+            state = [as_localimagelist]
+            imagelist = dummyimagelist
           end        
           item
             options = [mao_separator, mao_shortcutcaption]
@@ -317,13 +328,13 @@ object mainfo: tmainfo
           item
             action = actionsmo.watchesonact
             state = [as_checked, as_localchecked]
-            options = [mao_checkbox, mao_shortcutcaption]
+            options = [mao_checkbox, mao_shortcutcaption, mao_shortcutright]
           end        
           item
             action = actionsmo.bluedotsonact
             caption = '&Exec line hint on'
             state = [as_checked, as_localchecked, as_localcaption]
-            options = [mao_checkbox, mao_shortcutcaption]
+            options = [mao_checkbox, mao_shortcutcaption, mao_shortcutright]
           end>
         caption = '&Target'
         state = [as_localcaption]
@@ -452,7 +463,7 @@ object mainfo: tmainfo
           item
             caption = '&Breakpoints'
             state = [as_localcaption, as_localimagelist, as_localimagenr, as_localonexecute]
-            options = [mao_shortcutcaption, mao_asyncexecute]
+            options = [mao_shortcutcaption, mao_asyncexecute, mao_shortcutright]
             imagelist = vievmenuicons
             imagenr = 6
             onexecute = viewbreakpointsonexecute
@@ -469,16 +480,18 @@ object mainfo: tmainfo
           end        
           item
             caption = 'Toggle Form/Inspector'
-            state = [as_localcaption, as_localshortcut, as_localonexecute]
-            options = [mao_shortcutcaption, mao_asyncexecute]
+            state = [as_localcaption, as_localimagelist, as_localshortcut, as_localonexecute]
+            options = [mao_shortcutcaption, mao_asyncexecute, mao_shortcutright]
             shortcut = 4154
+            imagelist = vievmenuicons
             onexecute = toggleobjectinspectoronexecute
           end        
           item
             action = actionsmo.toggleformunit
             caption = 'Toggle Form/Unit'
-            state = [as_localcaption]
-            options = [mao_shortcutcaption, mao_asyncexecute]
+            state = [as_localcaption, as_localimagelist]
+            options = [mao_shortcutcaption, mao_asyncexecute, mao_shortcutright]
+            imagelist = vievmenuicons
           end        
           item
             name = 'formmenuitemstart'
@@ -861,5 +874,11 @@ object mainfo: tmainfo
       FC7FFFFF7CFFFE1FFC7FFFFF7CFFFC0FFC7FFFFF7C00F81FFC7FFFFF7C00E039
       FC7FFFFF7C000030FC7FFFFF7C000000
     }
+  end
+  object dummyimagelist: timagelist
+    width = 24
+    transparentcolor = -2147483648
+    left = 128
+    top = 72
   end
 end
