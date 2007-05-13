@@ -1174,6 +1174,7 @@ type
    function framewidth: sizety;              //widgetrect.size - paintrect.size
    function clientframewidth: sizety;        //widgetrect.size - clientrect.size
    function innerclientframewidth: sizety;   //widgetrect.size - innerclientrect.size
+   function innerframewidth: sizety;         //clientrect.size - innerclientrect.size  
    function framerect: rectty;               //origin = pos
    function framepos: pointty;               //origin = pos
    function framesize: sizety;
@@ -5910,6 +5911,18 @@ begin
  {$ifdef FPC} {$checkpointer off} {$endif}
  result:= calcframewidth(@fframe.finnerclientrect);
  {$ifdef FPC} {$checkpointer default} {$endif}
+end;
+
+function twidget.innerframewidth: sizety;  
+begin
+ if frame <> nil then begin
+  fframe.checkstate;
+  result.cx:= fframe.fclientrect.cx - fframe.finnerclientrect.cx;
+  result.cy:= fframe.fclientrect.cy - fframe.finnerclientrect.cy;
+ end
+ else begin
+  result:= nullsize;
+ end;
 end;
 
 function twidget.framerect: rectty;

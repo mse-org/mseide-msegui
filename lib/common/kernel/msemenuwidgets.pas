@@ -103,6 +103,7 @@ type
    function checkprevpopuparea(const apos: pointty): boolean; override;
    procedure nextpopupshowing; override;
    procedure clientrectchanged; override;
+   procedure getautopaintsize(var asize: sizety); override;
    procedure updatelayout; override;
    procedure updatepos; override;
    function isinpopuparea(const apos: pointty): boolean; override;
@@ -412,7 +413,8 @@ begin
      with cells[int1].buttoninfo do begin
       if not (ss_invisible in state) then begin
        dim.x:= dim.x + shift;
-       if dim.x + dim.cx + framewidth1 - extrasp > amax then begin
+       if (int1 > 0) and 
+               (dim.x + dim.cx + framewidth1 - extrasp - framehalfwidth > amax) then begin
         shift:= shift - dim.x + framehalfwidth;
         dim.x:= framehalfwidth;
         inc(regioncount);
@@ -422,7 +424,7 @@ begin
       end;
      end;
     end;
-    size.cx:= ax;
+    size.cx:= ax - extrasp - framehalfwidth;
     size.cy:= regioncount * (maxheight + framewidth1) - extrasp;
    end
    else begin
@@ -446,7 +448,7 @@ begin
       tabpos:= tabpos + tabpos1;
       y:= y + shift;
       int2:= y + cy  + framewidth1;
-      if int2 - extrasp > amax then begin
+      if (int1 > 0) and (int2 - extrasp > amax) then begin
        shift:= shift - y + framehalfwidth;
        y:= framehalfwidth;
        ax:= ax + textwidth + framewidth1;
@@ -1277,20 +1279,31 @@ begin
  //dummy
 end;
 
+procedure tcustommainmenuwidget.getautopaintsize(var asize: sizety);
+begin
+ asize:= addsize(flayout.size,innerframewidth);
+end;
+
 procedure tcustommainmenuwidget.updatelayout;
 var
  int1: integer;
  rect1: rectty;
+ size1: sizety;
 begin
-// flayout.popupdirection:= gd_down;
  if flayoutcalcing = 0 then begin
   inc(flayoutcalcing);
   try
+   if ow_autosize in foptionswidget then begin
+    size1:= makesize(bigint,bigint);
+   end
+   else begin 
+    size1:= innerclientrect.size;
+   end;
    if mlo_horz in flayout.options then begin
-    calcmenulayout(flayout,getcanvas,innerclientrect.cx);
+    calcmenulayout(flayout,getcanvas,size1.cx);
    end
    else begin
-    calcmenulayout(flayout,getcanvas,innerclientrect.cy);
+    calcmenulayout(flayout,getcanvas,size1.cy);
    end;
    movemenulayout(flayout,innerclientrect.pos);
    rect1:= fwidgetrect;
