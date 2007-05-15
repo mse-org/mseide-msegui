@@ -613,7 +613,7 @@ end;
 
 function tsqlite3connection.Commit(trans: TSQLHandle): boolean;
 begin
- if slo_transactions in foptions then begin
+ if (slo_transactions in foptions) and not (csdesigning in componentstate) then begin
   execsql('COMMIT');
  end;
  result:= true;
@@ -621,7 +621,7 @@ end;
 
 function tsqlite3connection.RollBack(trans: TSQLHandle): boolean;
 begin
- if slo_transactions in foptions then begin
+ if (slo_transactions in foptions) and not (csdesigning in componentstate) then begin
   execsql('ROLLBACK');
  end;
  result:= true;
@@ -630,7 +630,7 @@ end;
 function tsqlite3connection.StartdbTransaction(trans: TSQLHandle;
                aParams: string): boolean;
 begin
- if slo_transactions in foptions then begin
+ if (slo_transactions in foptions) and not (csdesigning in componentstate) then begin
   execsql('BEGIN');
  end;
  result:= true;
