@@ -96,8 +96,8 @@ type
    function RollBack(trans : TSQLHandle) : boolean; override;
    function StartdbTransaction(trans : TSQLHandle; 
                 aParams : string) : boolean; override;
-   procedure CommitRetaining(trans : TSQLHandle); override;
-   procedure RollBackRetaining(trans : TSQLHandle); override;
+   procedure internalCommitRetaining(trans : TSQLHandle); override;
+   procedure internalRollBackRetaining(trans : TSQLHandle); override;
    function getblobdatasize: integer; override;
     
    function CreateBlobStream(const Field: TField; const Mode: TBlobStreamMode; 
@@ -153,6 +153,7 @@ constructor tsqlite3connection.create(aowner: tcomponent);
 begin
  inherited;
  fcontroller:= tdbcontroller.create(self,idbcontroller(self));
+ fconnoptions:= fconnoptions + [sco_supportparams,sco_emulateretaining];
 end;
 
 destructor tsqlite3connection.destroy;
@@ -636,14 +637,20 @@ begin
  result:= true;
 end;
 
-procedure tsqlite3connection.CommitRetaining(trans: TSQLHandle);
+procedure tsqlite3connection.internalCommitRetaining(trans: TSQLHandle);
 begin
- commit(trans);  //todo
+ commit(trans);  
+ if (slo_transactions in foptions) and not (csdesigning in componentstate) then begin
+  execsql('BEGIN');
+ end;
 end;
 
-procedure tsqlite3connection.RollBackRetaining(trans: TSQLHandle);
+procedure tsqlite3connection.internalRollBackRetaining(trans: TSQLHandle);
 begin
- rollback(trans); //todo
+ rollback(trans);
+ if (slo_transactions in foptions) and not (csdesigning in componentstate) then begin
+  execsql('BEGIN');
+ end;
 end;
 
 function tsqlite3connection.getblobdatasize: integer;

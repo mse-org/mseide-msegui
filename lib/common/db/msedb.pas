@@ -20,6 +20,7 @@ type
  fieldtypearty = array of tfieldtype;
  fieldtypesty = set of tfieldtype;
  fieldtypesarty = array of fieldtypesty;
+ datasetarty = array of tdataset;
 const
  charfields = [ftstring,ftfixedchar];
  textfields = [ftstring,ftfixedchar,ftwidestring,ftmemo];

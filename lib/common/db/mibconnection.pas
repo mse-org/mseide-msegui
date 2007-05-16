@@ -123,8 +123,8 @@ type
     function Commit(trans : TSQLHandle) : boolean; override;
     function RollBack(trans : TSQLHandle) : boolean; override;
     function StartdbTransaction(trans : TSQLHandle; AParams : string) : boolean; override;
-    procedure CommitRetaining(trans : TSQLHandle); override;
-    procedure RollBackRetaining(trans : TSQLHandle); override;
+    procedure internalCommitRetaining(trans : TSQLHandle); override;
+    procedure internalRollBackRetaining(trans : TSQLHandle); override;
     procedure UpdateIndexDefs(var IndexDefs : TIndexDefs;
                                            const TableName : string); override;
     function GetSchemaInfoSQL(SchemaType : TSchemaType; SchemaObjectName, SchemaPattern : string) : string; override;
@@ -218,7 +218,7 @@ begin
  feventcontroller:= tdbeventcontroller.create(idbeventcontroller(self));
  feventcontroller.eventinterval:= -1; //event driven
  inherited;
- FConnOptions := FConnOptions + [sqSupportParams];
+ FConnOptions := FConnOptions + [sco_SupportParams];
 end;
 
 destructor TIBConnection.destroy;
@@ -303,14 +303,14 @@ begin
 end;
 
 
-procedure TIBConnection.CommitRetaining(trans : TSQLHandle);
+procedure TIBConnection.internalCommitRetaining(trans : TSQLHandle);
 begin
   with trans as TIBtrans do
     if isc_commit_retaining(@Status, @TransactionHandle) <> 0 then
       CheckError('CommitRetaining', Status);
 end;
 
-procedure TIBConnection.RollBackRetaining(trans : TSQLHandle);
+procedure TIBConnection.internalRollBackRetaining(trans : TSQLHandle);
 begin
   with trans as TIBtrans do
     if isc_rollback_retaining(@Status, @TransactionHandle) <> 0 then

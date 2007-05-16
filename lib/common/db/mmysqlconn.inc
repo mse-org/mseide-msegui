@@ -100,8 +100,8 @@ Type
     function Commit(trans : TSQLHandle) : boolean; override;
     function RollBack(trans : TSQLHandle) : boolean; override;
     function StartdbTransaction(trans : TSQLHandle; AParams : string) : boolean; override;
-    procedure CommitRetaining(trans : TSQLHandle); override;
-    procedure RollBackRetaining(trans : TSQLHandle); override;
+    procedure internalCommitRetaining(trans : TSQLHandle); override;
+    procedure internalRollBackRetaining(trans : TSQLHandle); override;
     procedure UpdateIndexDefs(var IndexDefs : TIndexDefs;
                                           const TableName : string); override;
 
@@ -865,12 +865,12 @@ begin
   // Do nothing
 end;
 
-procedure TConnectionName.CommitRetaining(trans: TSQLHandle);
+procedure TConnectionName.internalCommitRetaining(trans: TSQLHandle);
 begin
   // Do nothing
 end;
 
-procedure TConnectionName.RollBackRetaining(trans: TSQLHandle);
+procedure TConnectionName.internalRollBackRetaining(trans: TSQLHandle);
 begin
   // Do nothing
 end;

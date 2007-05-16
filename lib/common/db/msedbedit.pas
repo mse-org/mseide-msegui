@@ -6317,7 +6317,7 @@ begin
  inherited;
  if accept and (ffocusedcell.col >= 0) then begin
   with datacols[ffocusedcell.col] do begin;
-   if fdatalink.fmodified then begin
+   if fdatalink.fmodified and self.fdatalink.active then begin
     fdatalink.dataentered;
    end;
   end;

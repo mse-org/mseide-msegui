@@ -77,9 +77,9 @@ type
    function GetTransactionHandle(trans : TSQLHandle): pointer; override;
    function RollBack(trans : TSQLHandle) : boolean; override;
    function Commit(trans : TSQLHandle) : boolean; override;
-   procedure CommitRetaining(trans : TSQLHandle); override;
+   procedure internalCommitRetaining(trans : TSQLHandle); override;
    function StartdbTransaction(trans : TSQLHandle; AParams : string) : boolean; override;
-   procedure RollBackRetaining(trans : TSQLHandle); override;
+   procedure internalRollBackRetaining(trans : TSQLHandle); override;
    procedure UpdateIndexDefs(var IndexDefs : TIndexDefs;
                                  const TableName : string); override;
    function GetSchemaInfoSQL(SchemaType : TSchemaType; SchemaObjectName, SchemaPattern : string) : string; override;
@@ -174,7 +174,7 @@ constructor tpqconnection.create(aowner: tcomponent);
 begin
  feventcontroller:= tdbeventcontroller.create(idbeventcontroller(self));
  inherited;
- fconnoptions:= fconnoptions + [sqsupportparams];
+ fconnoptions:= fconnoptions + [sco_supportparams,sco_emulateretaining];
 end;
 
 destructor TPQConnection.destroy;
@@ -274,7 +274,7 @@ begin
     end;
 end;
 
-procedure TPQConnection.RollBackRetaining(trans : TSQLHandle);
+procedure TPQConnection.internalRollBackRetaining(trans : TSQLHandle);
 var
   res : PPGresult;
   tr  : TPQTrans;
@@ -303,7 +303,7 @@ begin
     end;
 end;
 
-procedure TPQConnection.CommitRetaining(trans : TSQLHandle);
+procedure TPQConnection.internalCommitRetaining(trans : TSQLHandle);
 var
   res : PPGresult;
   tr  : TPQTrans;

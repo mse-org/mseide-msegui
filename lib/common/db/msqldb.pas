@@ -22,12 +22,14 @@ unit msqldb;
 
 interface
 
-uses sysutils,classes,db,msebufdataset,msetypes,msedb,mseclasses;
+uses 
+ sysutils,classes,db,msebufdataset,msetypes,msedb,mseclasses;
 
-type TSchemaType = (stNoSchema,stTables,stSysTables,stProcedures,stColumns,
+type 
+ TSchemaType = (stNoSchema,stTables,stSysTables,stProcedures,stColumns,
                     stProcedureParams,stIndexes,stPackages);
-     TConnOption = (sqSupportParams);
-     TConnOptions= set of TConnOption;
+ sqlconnoptionty = (sco_supportparams,sco_emulateretaining);
+ sqlconnoptionsty = set of sqlconnoptionty;
 
 type
   tcustomsqlconnection = class;
@@ -86,13 +88,17 @@ type
 
    fafterconnect: tmsesqlscript;
    fbeforedisconnect: tmsesqlscript;
-    procedure SetTransaction(Value : TSQLTransaction);
-    procedure GetDBInfo(const SchemaType : TSchemaType; const SchemaObjectName, ReturnField : string; List: TStrings);
+   fdatasets: datasetarty;
+   frecnos: integerarty;
+   procedure SetTransaction(Value : TSQLTransaction);
+   procedure GetDBInfo(const SchemaType : TSchemaType; const SchemaObjectName, ReturnField : string; List: TStrings);
    function getconnected: boolean;
    procedure setafteconnect(const avalue: tmsesqlscript);
    procedure setbeforedisconnect(const avalue: tmsesqlscript);
+   procedure closeds;
+   procedure reopends;
   protected
-    FConnOptions         : TConnOptions;
+    FConnOptions: sqlconnoptionsty;
  
    procedure setconnected(const avalue: boolean);
    procedure notification(acomponent: tcomponent; operation: toperation); override;
@@ -125,8 +131,11 @@ type
     function Commit(trans : TSQLHandle) : boolean; virtual; abstract;
     function RollBack(trans : TSQLHandle) : boolean; virtual; abstract;
     function StartdbTransaction(trans : TSQLHandle; aParams : string) : boolean; virtual; abstract;
-    procedure CommitRetaining(trans : TSQLHandle); virtual; abstract;
-    procedure RollBackRetaining(trans : TSQLHandle); virtual; abstract;
+    procedure internalcommitretaining(trans : tsqlhandle); virtual; abstract;
+    procedure internalrollbackretaining(trans : tsqlhandle); virtual; abstract;
+    
+    procedure CommitRetaining(trans : TSQLHandle); virtual;
+    procedure RollBackRetaining(trans : TSQLHandle); virtual;
     function getblobdatasize: integer; virtual; abstract;
     function getnumboolean: boolean; virtual;
 
@@ -137,6 +146,9 @@ type
     function GetSchemaInfoSQL(SchemaType : TSchemaType; SchemaObjectName, SchemaPattern : string) : string; virtual;
     function CreateBlobStream(const Field: TField; const Mode: TBlobStreamMode;
                  const acursor: tsqlcursor): TStream; virtual;
+    
+    procedure closeds(out activeds: integerarty);
+    procedure reopends(const activeds: integerarty);
   public
     procedure Close;
     procedure Open;
@@ -144,7 +156,7 @@ type
     destructor Destroy; override;
     procedure StartTransaction; override;
     procedure EndTransaction; override;
-    property ConnOptions: TConnOptions read FConnOptions;
+    property ConnOptions: sqlconnoptionsty read FConnOptions;
     procedure executedirect(const asql: string); overload;
     procedure executedirect(const asql: string;
          atransaction: tsqltransaction;
@@ -701,6 +713,46 @@ begin
  DatabaseErrorFmt(SUnsupportedFieldType,['Blob']);
 end;
 
+procedure tcustomsqlconnection.closeds(out activeds: integerarty);
+var
+ int1: integer;
+begin
+ setlength(activeds,datasetcount);
+ for int1:= 0 to high(activeds) do begin
+  with datasets[int1] do begin
+   if active then begin
+    activeds[int1]:= datasets[int1].recno;
+    active:= false;
+   end
+   else begin
+    activeds[int1]:= -2;
+   end;
+  end;
+ end;
+end;
+
+procedure tcustomsqlconnection.reopends(const activeds: integerarty);
+var
+ int1: integer;
+begin
+ for int1:= 0 to high(activeds) do begin
+  if activeds[int1] >= -1 then begin
+   with datasets[int1] do begin
+    active:= true;
+    disablecontrols;
+    if activeds[int1] >= 0 then begin
+     try
+      moveby(maxint);
+      recno:= activeds[int1];
+     except
+     end;
+    end;
+    enablecontrols;
+   end;
+  end;
+ end;
+end;
+
 function tcustomsqlconnection.getconnected: boolean;
 begin
  result:= inherited connected;
@@ -773,6 +825,8 @@ end;
 
 procedure tcustomsqlconnection.notification(acomponent: tcomponent;
                operation: toperation);
+var
+ int1: integer;
 begin
  if operation = opremove then begin
   if acomponent = fafterconnect then begin
@@ -780,6 +834,10 @@ begin
   end;
   if acomponent = fbeforedisconnect then begin
    fbeforedisconnect:= nil;
+  end;
+  int1:= finditem(pointerarty(fdatasets),acomponent);
+  if int1 >= 0 then begin
+   fdatasets[int1]:= nil;
   end;
  end;
  inherited;
@@ -816,6 +874,99 @@ begin
  databaseerror('Connection has no insert ID''s.');
 end;
 
+procedure tcustomsqlconnection.closeds;
+var
+ int1: integer;
+begin
+ setlength(fdatasets,datasetcount);
+ setlength(frecnos,length(fdatasets));
+ for int1:= high(fdatasets) downto 0 do begin
+  fdatasets[int1]:= datasets[int1];
+  with fdatasets[int1] do begin
+   freenotification(self);
+   if active then begin
+    frecnos[int1]:= recno;
+   end
+   else begin
+    frecnos[int1]:= -2;
+   end;
+  end;
+ end;
+ for int1:= high(fdatasets) downto 0 do begin
+  if (fdatasets[int1] <> nil) and 
+                 (tdbdataset(fdatasets[int1]).database = self) then begin
+   with fdatasets[int1] do begin
+    active:= false;
+   end;
+  end;
+ end;
+end;
+
+procedure tcustomsqlconnection.reopends;
+var
+ int1: integer;
+begin
+ for int1:= 0 to high(fdatasets) do begin
+  if fdatasets[int1] <> nil then begin
+   if frecnos[int1] >= -1 then begin
+    with tdbdataset(fdatasets[int1]) do begin
+     if database = self then begin
+      disablecontrols;
+      active:= true;
+      if frecnos[int1] >= 0 then begin
+       try
+        moveby(frecnos[int1]-recno);
+       except
+       end;
+      end;
+      enablecontrols;
+     end;
+    end;
+   end;
+  end;
+ end;
+end;
+
+procedure tcustomsqlconnection.CommitRetaining(trans: TSQLHandle);
+begin
+ if sco_emulateretaining in fconnoptions then begin
+  closeds; //cursors are lost
+  try
+   try
+    internalcommitretaining(trans);
+   finally
+    reopends;
+   end;
+  finally
+   fdatasets:= nil;
+   frecnos:= nil;
+  end;
+ end
+ else begin
+  internalcommitretaining(trans);
+ end;
+end;
+
+procedure tcustomsqlconnection.RollBackRetaining(trans: TSQLHandle);
+begin
+ if sco_emulateretaining in fconnoptions then begin
+  closeds; //cursors are lost
+  try
+   try
+    internalrollbackretaining(trans);
+   finally
+    reopends;
+   end;
+  finally
+   fdatasets:= nil;
+   frecnos:= nil;
+  end;
+ end
+ else begin
+  internalrollbackretaining(trans);
+ end;
+end;
+
 { TSQLTransaction }
 
 procedure TSQLTransaction.EndTransaction;
@@ -849,15 +1000,16 @@ end;
 
 procedure TSQLTransaction.CommitRetaining;
 begin
-  if active then
-    (Database as tcustomsqlconnection).commitRetaining(FTrans);
+ if active then begin
+  tcustomsqlconnection(database).commitRetaining(FTrans);
+ end;
 end;
 
 procedure TSQLTransaction.Rollback;
 begin
  if active then begin
   closedatasets;
-  if (Database as tcustomsqlconnection).RollBack(FTrans) then begin
+  if tcustomsqlconnection(database).RollBack(FTrans) then begin
    CloseTrans;
    FreeAndNil(FTrans);
   end;
@@ -895,8 +1047,9 @@ end;
 
 procedure TSQLTransaction.RollbackRetaining;
 begin
-  if active then
-    (Database as tcustomsqlconnection).RollBackRetaining(FTrans);
+ if active then begin
+  tcustomsqlconnection(database).RollBackRetaining(FTrans);
+ end;
 end;
 
 procedure TSQLTransaction.StartTransaction;

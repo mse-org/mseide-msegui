@@ -83,8 +83,8 @@ type
     function StartDBTransaction(trans:TSQLHandle; AParams:string):boolean; override;
     function Commit(trans:TSQLHandle):boolean; override;
     function Rollback(trans:TSQLHandle):boolean; override;
-    procedure CommitRetaining(trans:TSQLHandle); override;
-    procedure RollbackRetaining(trans:TSQLHandle); override;
+    procedure internalCommitRetaining(trans:TSQLHandle); override;
+    procedure internalRollbackRetaining(trans:TSQLHandle); override;
     // - Statement execution
     procedure Execute(const cursor:TSQLCursor; 
              const ATransaction:TSQLTransaction; const AParams:TParams); override;
@@ -486,12 +486,12 @@ begin
   // Tranactions not implemented yet
 end;
 
-procedure TODBCConnection.CommitRetaining(trans: TSQLHandle);
+procedure TODBCConnection.internalCommitRetaining(trans: TSQLHandle);
 begin
   // Tranactions not implemented yet
 end;
 
-procedure TODBCConnection.RollbackRetaining(trans: TSQLHandle);
+procedure TODBCConnection.internalRollbackRetaining(trans: TSQLHandle);
 begin
   // Tranactions not implemented yet
 end;
