@@ -50,6 +50,7 @@ type
  iactionlink = interface(iobjectlink)
   function getactioninfopo: pactioninfoty;
   procedure actionchanged;
+  function loading: boolean;
  end;
  
  asynceventty = procedure(const sender: tobject; var atag: integer) of object;
@@ -819,7 +820,7 @@ var
  startstate,statebefore: actionstatesty;
  bo1: boolean;
  po1: pactioninfoty;
- obj1: tobject;
+// obj1: tobject;
 begin
  po1:= sender.getactioninfopo;
  with po1^ do begin
@@ -842,9 +843,10 @@ begin
     calccaptiontext(po1^);
    end;
   end;
-  obj1:= sender.getinstance;
-  if not ((obj1 is tcomponent) and 
-            (csloading in tcomponent(obj1).componentstate)) then begin
+//  obj1:= sender.getinstance;
+//  if not ((obj1 is tcomponent) and 
+//            (csloading in tcomponent(obj1).componentstate)) then begin
+  if not sender.loading then begin
 {$ifdef FPC}longword{$else}longword{$endif}(state):=
     {$ifdef FPC}longword{$else}longword{$endif}(state) or
       (

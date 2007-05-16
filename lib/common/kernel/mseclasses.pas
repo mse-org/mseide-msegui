@@ -290,6 +290,7 @@ type
 
   public
    destructor destroy; override;
+   function loading: boolean;
    {$ifdef FPC}
    procedure setinline(value: boolean);
    procedure setancestor(value: boolean);
@@ -2657,6 +2658,11 @@ begin
   stackarray(pointerarty(fobjectlinker.linkedobjects),pointerarty(result));
  end;
  removearrayduplicates(pointerarty(result));
+end;
+
+function tmsecomponent.loading: boolean;
+begin
+ result:= csloading in componentstate;
 end;
 
 { tlinkedqueue }

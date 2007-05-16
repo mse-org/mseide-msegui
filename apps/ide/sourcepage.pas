@@ -716,7 +716,7 @@ begin
   bpinfo.line:= arow + 1;
  end;
  bpinfo.path:= edit.filename;
- bpinfo.bkpton:= astate in [bkpts_disabled,bkpts_none]; //for toggle
+ bpinfo.bkpton:= astate in [bkpts_disabled{,bkpts_none}]; //for toggle
  if astate = bkpts_none then begin
   breakpointsfo.addbreakpoint(bpinfo);
  end

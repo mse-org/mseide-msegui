@@ -1045,6 +1045,7 @@ end;
 procedure tpopupmenuwidget.selectmenu;
 var
  int1: integer;
+ bo1: boolean;
 begin
  with flayout do begin
   if mlo_childreninactive in options then begin
@@ -1057,16 +1058,21 @@ begin
  end
  else begin
   with flayout do begin
+   bo1:= not ((menu.owner <> nil) and (csdesigning in menu.owner.componentstate));
    if activeitem >= 0 then begin
     int1:= activeitem;
     with menu[int1] do begin
      if (mao_asyncexecute in options) then begin
       closepopupstack(menu[int1]);
-      asyncexecute;
+      if bo1 then begin
+       asyncexecute;
+      end;
      end
      else begin
       releasemouse;
-      execute;
+      if bo1 then begin
+       execute;
+      end;
       closepopupstack(menu[int1]);
      end;
     end;

@@ -309,7 +309,7 @@ object mainfo: tmainfo
           end        
           item
             action = actionsmo.bkptsonact
-            state = [as_checked, as_localchecked]
+            state = [as_checked]
             options = [mao_checkbox, mao_shortcutcaption, mao_shortcutright]
           end        
           item
@@ -327,13 +327,13 @@ object mainfo: tmainfo
           end        
           item
             action = actionsmo.watchesonact
-            state = [as_checked, as_localchecked]
+            state = [as_checked]
             options = [mao_checkbox, mao_shortcutcaption, mao_shortcutright]
           end        
           item
             action = actionsmo.bluedotsonact
             caption = '&Exec line hint on'
-            state = [as_checked, as_localchecked, as_localcaption]
+            state = [as_checked, as_localcaption]
             options = [mao_checkbox, mao_shortcutcaption, mao_shortcutright]
           end>
         caption = '&Target'

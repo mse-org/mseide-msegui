@@ -65,6 +65,8 @@ type
    function getactioninfopo: pactioninfoty;
    procedure doshortcut(var info: keyeventinfoty);
    function getinstance: tobject; override;
+   function loading: boolean;
+   
   public
    constructor create(const aowner: tobject;
          const aprop: tindexpersistentarrayprop); overload; override;
@@ -538,6 +540,12 @@ end;
 function ttoolbutton.getinstance: tobject;
 begin
  result:= fowner;
+end;
+
+function ttoolbutton.loading: boolean;
+begin
+ result:= (fowner is tcomponent) and 
+               (csloading in tcomponent(fowner).componentstate);
 end;
 
 { ttoolbuttons }

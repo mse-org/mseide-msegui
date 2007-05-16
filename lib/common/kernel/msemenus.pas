@@ -110,7 +110,10 @@ type
    finfo: actioninfoty;
    fowner: tcustommenu;
    fsubmenu: tmenuitems;
+   //iactionlink
    function getactioninfopo: pactioninfoty;
+   function loading: boolean;
+   
    procedure objectevent(const sender: tobject;
                                      const event: objecteventty); override;
    procedure receiveevent(const event: tobjectevent); override;
@@ -737,6 +740,11 @@ end;
 function tmenuitem.getactioninfopo: pactioninfoty;
 begin
  result:= @finfo;
+end;
+
+function tmenuitem.loading: boolean;
+begin
+ result:= (fowner <> nil) and (csloading in fowner.componentstate);
 end;
 
 procedure tmenuitem.beginload;
