@@ -10394,10 +10394,11 @@ var
  int1: integer;
 begin
  fonwindowdestroyedlist.doevent(sender);
- for int1:= 0 to high(fwindowstack) do begin
+ for int1:= high(fwindowstack) downto 0 do begin
   with fwindowstack[int1] do begin
    if (lower = sender) or (upper = sender) then begin
-    lower:= nil;
+    deleteitem(fwindowstack,typeinfo(windowstackinfoarty),int1);
+//    lower:= nil;
    end;
   end;
  end;
