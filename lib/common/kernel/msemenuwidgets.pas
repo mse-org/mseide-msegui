@@ -1401,20 +1401,22 @@ begin
  releasekeyboard;
  if mws_firstactivated in fstate then begin
   if factivewindowbefore <> fwindow then begin
-   if (fstackedoverbefore <> nil) and (mws_raised in fstate) then begin 
-    if fstackedoverbefore.visible then begin
-     setlength(ar1,2);
-     ar1[0]:= fstackedoverbefore.winid;
-     ar1[1]:= fwindow.winid;
-     gui_getzorder(ar1,ar2);
-     if ar2[1] > ar2[0] then begin
-      gui_stackoverwindow(fwindow.winid,fstackedoverbefore.winid);
+   if mws_raised in fstate then begin
+    if (fstackedoverbefore <> nil) then begin 
+     if fstackedoverbefore.visible then begin
+      setlength(ar1,2);
+      ar1[0]:= fstackedoverbefore.winid;
+      ar1[1]:= fwindow.winid;
+      gui_getzorder(ar1,ar2);
+      if ar2[1] > ar2[0] then begin
+       gui_stackoverwindow(fwindow.winid,fstackedoverbefore.winid);
+      end;
      end;
-    end;
-   end
-   else begin
-    if activateoptionset then begin
-     window.stackover(nil);
+    end
+    else begin
+     if activateoptionset then begin
+      window.stackover(nil);
+     end;
     end;
    end;
   end;

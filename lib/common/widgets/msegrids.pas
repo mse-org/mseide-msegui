@@ -6753,7 +6753,7 @@ begin
           end;
          end;
         end;
-        if str1 <> '' then begin
+        if (str1 <> '') and application.active then begin
          application.inithintinfo(hintinfo,self);
          hintinfo.caption:= str1;
          application.showhint(self,hintinfo);

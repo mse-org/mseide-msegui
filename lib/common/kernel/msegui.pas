@@ -1368,6 +1368,7 @@ type
    function beginmodal: boolean; //true if window destroyed
    procedure endmodal;
    procedure activate;
+   function active: boolean;
    function deactivateintermediate: boolean; 
       //true if ok, sets app.finactivewindow
    procedure reactivate; //clears app.finactivewindow
@@ -9942,6 +9943,11 @@ begin
  internalactivate(false);
 end;
 
+function twindow.active: boolean;
+begin
+ result:= app.factivewindow = self;
+end;
+
 procedure twindow.setcaption(const avalue: msestring);
 begin
  fcaption:= avalue;
@@ -12207,12 +12213,12 @@ var
  window1: twindow;
 begin
  with tinternalapplication(self),fhintinfo do begin
-  if sender <> nil then begin
-   window1:= sender.window;
-  end
-  else begin
+//  if sender <> nil then begin
+//   window1:= sender.window;
+//  end
+//  else begin
    window1:= activewindow;
-  end;
+//  end;
   fhintwidget:= thintwidget.create(nil,window1,fhintinfo);
   fhintwidget.show;
   if showtime <> 0 then begin
