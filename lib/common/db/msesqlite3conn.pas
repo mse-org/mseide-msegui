@@ -33,7 +33,7 @@ uses
 +--------------------+---------------------+-------------+-------------+
 }
 type
- sqliteoptionty = (slo_transactions);
+ sqliteoptionty = (slo_transactions,slo_designtransactions);
  sqliteoptionsty = set of sqliteoptionty;
  
  tsqlite3connection = class(tcustomsqlconnection,idbcontroller,iblobconnection)
@@ -69,6 +69,7 @@ type
    function stringquery(const asql: string): stringarty;
    function stringsquery(const asql: string): stringararty;
    procedure checkerror(const aerror: integer);
+   function cantransaction: boolean;
    
    procedure DoInternalConnect; override;
    procedure DoInternalDisconnect; override;
@@ -614,7 +615,7 @@ end;
 
 function tsqlite3connection.Commit(trans: TSQLHandle): boolean;
 begin
- if (slo_transactions in foptions) and not (csdesigning in componentstate) then begin
+ if cantransaction then begin
   execsql('COMMIT');
  end;
  result:= true;
@@ -622,7 +623,7 @@ end;
 
 function tsqlite3connection.RollBack(trans: TSQLHandle): boolean;
 begin
- if (slo_transactions in foptions) and not (csdesigning in componentstate) then begin
+ if cantransaction then begin
   execsql('ROLLBACK');
  end;
  result:= true;
@@ -631,7 +632,7 @@ end;
 function tsqlite3connection.StartdbTransaction(trans: TSQLHandle;
                aParams: string): boolean;
 begin
- if (slo_transactions in foptions) and not (csdesigning in componentstate) then begin
+ if cantransaction then begin
   execsql('BEGIN');
  end;
  result:= true;
@@ -640,7 +641,7 @@ end;
 procedure tsqlite3connection.internalCommitRetaining(trans: TSQLHandle);
 begin
  commit(trans);  
- if (slo_transactions in foptions) and not (csdesigning in componentstate) then begin
+ if cantransaction then begin
   execsql('BEGIN');
  end;
 end;
@@ -648,7 +649,7 @@ end;
 procedure tsqlite3connection.internalRollBackRetaining(trans: TSQLHandle);
 begin
  rollback(trans);
- if (slo_transactions in foptions) and not (csdesigning in componentstate) then begin
+ if cantransaction then begin
   execsql('BEGIN');
  end;
 end;
@@ -855,6 +856,12 @@ begin
  with tmsebufdataset1(afield.dataset) do begin
   setcurvalue(afield,getinsertid);
  end;
+end;
+
+function tsqlite3connection.cantransaction: boolean;
+begin
+ result:= (slo_transactions in foptions) and 
+    ((slo_designtransactions in foptions) or not (csdesigning in componentstate)); 
 end;
 
 end.
