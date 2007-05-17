@@ -1510,7 +1510,7 @@ begin
   try
    ca1:= strtointvalue(str1);
    {$ifdef UNIX}
-   ca1:= ca1+1; // todo: breakpoint at entrypoint does not work sometimes?
+//   ca1:= ca1+1; // todo: breakpoint at entrypoint does not work sometimes?
    {$endif}
    if synccommand('-break-insert -t *'+hextocstr(ca1,8)) <> gdb_ok then begin
 
