@@ -332,8 +332,7 @@ object mainfo: tmainfo
           end        
           item
             action = actionsmo.bluedotsonact
-            caption = '&Exec line hint on'
-            state = [as_checked, as_localcaption]
+            state = [as_checked]
             options = [mao_checkbox, mao_shortcutcaption, mao_shortcutright]
           end>
         caption = '&Target'
@@ -397,7 +396,7 @@ object mainfo: tmainfo
             onexecute = viewsourceonexecute
           end        
           item
-            caption = '&Find results'
+            caption = '&Find Results'
             state = [as_localcaption, as_localimagelist, as_localimagenr, as_localonexecute]
             imagelist = vievmenuicons
             imagenr = 15
@@ -636,6 +635,7 @@ object mainfo: tmainfo
         state = [as_localcaption, as_localonexecute]
         onexecute = aboutonexecute
       end>
+    options = [mo_activate]
     onupdate = mainmenuonupdate
     left = 247
     top = 60

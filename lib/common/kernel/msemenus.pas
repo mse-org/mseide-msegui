@@ -172,7 +172,7 @@ type
 
  menueventty = procedure(const sender: tcustommenu) of object;
 
- menuoptionty = (mo_insertfirst,mo_singleregion);
+ menuoptionty = (mo_insertfirst,mo_singleregion,mo_activate);
  menuoptionsty = set of menuoptionty;
 
  tmenuframetemplate = class(tframetemplate)

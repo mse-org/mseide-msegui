@@ -397,7 +397,7 @@ object actionsmo: tactionsmo
     }
   end
   object selecteditpage: taction
-    caption = 'Select &edit page'
+    caption = 'Select &Edit Page'
     shortcut = 16453
     options = [ao_globalshortcut]
     onexecute = selecteditpageonexecute
@@ -426,7 +426,7 @@ object actionsmo: tactionsmo
     top = 112
   end
   object nexti: taction
-    caption = 'Next instruction'
+    caption = 'Next Instruction'
     imagelist = buttonicons
     imagenr = 13
     shortcut = 28727
@@ -435,7 +435,7 @@ object actionsmo: tactionsmo
     top = 280
   end
   object stepi: taction
-    caption = 'Step instruction'
+    caption = 'Step Instruction'
     imagelist = buttonicons
     imagenr = 12
     shortcut = 28726
@@ -444,7 +444,7 @@ object actionsmo: tactionsmo
     top = 304
   end
   object bluedotsonact: taction
-    caption = 'Exec line hint on'
+    caption = 'Exec Line Hint on'
     state = [as_checked]
     imagelist = buttonicons
     imagenr = 14

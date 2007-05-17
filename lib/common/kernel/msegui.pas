@@ -1260,7 +1260,7 @@ type
                   tws_modal,tws_needsdefaultpos,
                   tws_closing,tws_globalshortcuts,tws_localshortcuts,
                   tws_buttonendmodal,tws_grouphidden,tws_groupminimized,
-                  tws_grab,tws_painting);
+                  tws_grab,tws_painting,tws_activatelocked);
  windowstatesty = set of windowstatety;
 
  internalwindowoptionsty = record
@@ -1309,8 +1309,8 @@ type
 
    function internalupdate: boolean;
            //updates screen representation, false if nothing is painted
-   function canactivate: boolean;
    procedure deactivate;
+   function canactivate: boolean;
      //icanvas
    procedure gcneeded(const sender: tcanvas);
    function getmonochrome: boolean;
@@ -1356,6 +1356,9 @@ type
    procedure poschanged; virtual;
    procedure internalactivate(const windowevent: boolean;
                                  const force: boolean = false);
+   procedure noactivewidget;
+   procedure lockactivate;
+   procedure unlockactivate;
    procedure setzorder(const value: integer);
   public
    constructor create(aowner: twidget);
@@ -9151,14 +9154,16 @@ begin
    end;
    if app.factivewindow = nil then begin
     if not (ws_active in fowner.fwidgetstate) then begin
-     inc(factivecount);
-     activecountbefore:= factivecount;
-     if ffocusedwidget <> nil then begin
-      widgetar:= ffocusedwidget.getrootwidgetpath;
-      for int1:= high(widgetar) downto 0 do begin
-       widgetar[int1].internaldoactivate;
-       if factivecount <> activecountbefore then begin
-        exit;
+     if not (tws_activatelocked in fstate) then begin
+      inc(factivecount);
+      activecountbefore:= factivecount;
+      if ffocusedwidget <> nil then begin
+       widgetar:= ffocusedwidget.getrootwidgetpath;
+       for int1:= high(widgetar) downto 0 do begin
+        widgetar[int1].internaldoactivate;
+        if factivecount <> activecountbefore then begin
+         exit;
+        end;
        end;
       end;
      end;
@@ -9185,30 +9190,48 @@ begin
  end;
 end;
 
-procedure twindow.deactivate;
+procedure twindow.noactivewidget;
 var
  widget: twidget;
+ activecountbefore: cardinal;
+begin
+ if ffocusedwidget <> nil then begin
+  inc(factivecount);
+  activecountbefore:= factivecount;
+  widget:= ffocusedwidget;
+  while widget <> nil do begin
+   widget.internaldodeactivate;
+   if factivecount <> activecountbefore then begin
+    exit;
+   end;
+   widget:= widget.fparentwidget;
+  end;
+ end
+ else begin
+  fowner.internaldodeactivate;
+ end;
+end;
+
+procedure twindow.lockactivate;
+begin
+ noactivewidget;
+ include(fstate,tws_activatelocked);
+end;
+
+procedure twindow.unlockactivate;
+begin
+ exclude(fstate,tws_activatelocked);
+end;
+
+procedure twindow.deactivate;
+var
  activecountbefore: cardinal;
 begin
  if app.ffocuslockwindow = self then begin
   app.ffocuslockwindow:= nil;
  end;
  if ws_active in fowner.fwidgetstate then begin
-  if ffocusedwidget <> nil then begin
-   inc(factivecount);
-   activecountbefore:= factivecount;
-   widget:= ffocusedwidget;
-   while widget <> nil do begin
-    widget.internaldodeactivate;
-    if factivecount <> activecountbefore then begin
-     exit;
-    end;
-    widget:= widget.fparentwidget;
-   end;
-  end
-  else begin
-   fowner.internaldodeactivate;
-  end;
+  noactivewidget;
   if app.factivewindow = self then begin
    inc(factivecount);
    activecountbefore:= factivecount;
@@ -9759,10 +9782,21 @@ begin
 end;
 
 procedure twindow.stackover(const predecessor: twindow);
+var
+ ar1: windowarty;
 begin
- if (predecessor <> self) then begin
-  app.stackover(self,predecessor);
-  include(app.fstate,aps_needsupdatewindowstack);
+ if predecessor = nil then begin
+  app.sortzorder;
+  ar1:= app.windowar;
+  if high(ar1) >= 0 then begin
+   stackunder(ar1[0]);
+  end;
+ end
+ else begin
+  if (predecessor <> self) and (predecessor <> nil) then begin
+   app.stackover(self,predecessor);
+   include(app.fstate,aps_needsupdatewindowstack);
+  end;
  end;
 end;
 
@@ -11340,7 +11374,7 @@ begin
   else begin
    for int1:= high(fwindowstack) downto 0 do begin
     with fwindowstack[int1] do begin
-     if lower <> nil then begin
+     if (lower <> nil) then begin
       gui_raisewindow(fwindowstack[int1].lower.winid);
      end;
     end;

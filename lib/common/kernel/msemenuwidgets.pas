@@ -76,6 +76,7 @@ type
    procedure childdeactivated(const sender: tpopupmenuwidget); virtual;
    procedure fontchanged; override;
    procedure internalcreateframe; override;
+   function activateoptionset: boolean;
   public
    constructor create(instance: ppopupmenuwidget;
        const amenu: tmenuitem; const transientfor: twindow;
@@ -91,14 +92,21 @@ type
    property activeitem: integer read flayout.activeitem write setactiveitem;
  end;
 
+ mainmenuwidgetoptionty = (mwo_vertical);
+ mainmenuwidgetoptionsty = set of mainmenuwidgetoptionty;
+ mainmenuwidgetstatety = (mws_firstactivated,mws_forced,mws_raised);
+ mainmenuwidgetstatesty = set of mainmenuwidgetstatety; 
  tcustommainmenuwidget = class(tpopupmenuwidget)
   private
    factivewindowbefore: twindow;
    fstackedoverbefore: twindow;
+   fstate: mainmenuwidgetstatesty;
    flayoutcalcing: integer;
    procedure internalsetactiveitem(const Value: integer;
            const aclicked: boolean; const force: boolean); override;
+   procedure checkactivate(const force: boolean);
   protected
+   foptions: mainmenuwidgetoptionsty;
    procedure restorefocus;
    function checkprevpopuparea(const apos: pointty): boolean; override;
    procedure nextpopupshowing; override;
@@ -114,6 +122,7 @@ type
    procedure selectmenu; override;
    procedure internalcreateframe; override;
    procedure loaded; override;
+   procedure mouseevent(var info: mouseeventinfoty); override;
   public
    procedure release; override;
  end;
@@ -128,12 +137,8 @@ type
    procedure loaded; override;
  end;
 
- mainmenuwidgetoptionty = (mwo_vertical);
- mainmenuwidgetoptionsty = set of mainmenuwidgetoptionty;
- 
  tmainmenuwidget = class(tcustommainmenuwidget)
   private
-   foptions: mainmenuwidgetoptionsty;
    procedure setmenu(const avalue: twidgetmainmenu);
    function getmenu: twidgetmainmenu;
    procedure setoptions(const avalue: mainmenuwidgetoptionsty);
@@ -975,9 +980,11 @@ begin
       include(state,ss_clicked);
      end;
      invalidaterect(dim);
+     {
      if mlo_main in options then begin
       capturekeyboard;
      end;
+     }
      if not (mlo_childreninactive in options) and
               (tmenuitem1(menu).fsubmenu[activeitem].count > 0) then begin
       tpopupmenuwidget.create(@fnextpopup,tmenuitem1(menu).fsubmenu[activeitem],
@@ -1266,6 +1273,11 @@ begin
  end;
 end;
 
+function tpopupmenuwidget.activateoptionset: boolean;
+begin
+ result:= (fmenucomp <> nil) and (mo_activate in fmenucomp.options);
+end;
+
 { tcustommainmenuwidget }
 
 procedure tcustommainmenuwidget.internalcreateframe;
@@ -1384,15 +1396,24 @@ var
  ar1: winidarty;
  ar2: integerarty;
 begin
-  releasekeyboard;
+ twindow1(window).unlockactivate;
+ releasekeyboard;
+ if mws_firstactivated in fstate then begin
   if factivewindowbefore <> fwindow then begin
-   if (fstackedoverbefore <> nil) and fstackedoverbefore.visible then begin
-    setlength(ar1,2);
-    ar1[0]:= fstackedoverbefore.winid;
-    ar1[1]:= fwindow.winid;
-    gui_getzorder(ar1,ar2);
-    if ar2[1] > ar2[0] then begin
-     gui_stackoverwindow(fwindow.winid,fstackedoverbefore.winid);
+   if (fstackedoverbefore <> nil) and (mws_raised in fstate) then begin 
+    if fstackedoverbefore.visible then begin
+     setlength(ar1,2);
+     ar1[0]:= fstackedoverbefore.winid;
+     ar1[1]:= fwindow.winid;
+     gui_getzorder(ar1,ar2);
+     if ar2[1] > ar2[0] then begin
+      gui_stackoverwindow(fwindow.winid,fstackedoverbefore.winid);
+     end;
+    end;
+   end
+   else begin
+    if activateoptionset then begin
+     window.stackover(nil);
     end;
    end;
   end;
@@ -1403,32 +1424,51 @@ begin
   end;
   setlinkedvar(nil,tlinkedobject(factivewindowbefore));
   setlinkedvar(nil,tlinkedobject(fstackedoverbefore));
+ end;
+end;
+
+procedure tcustommainmenuwidget.checkactivate(const force: boolean);
+begin
+ if force then begin
+  include(fstate,mws_forced);
+ end;
+ if not (mws_firstactivated in fstate) or force then begin
+  if not (mws_firstactivated in fstate) then begin
+   include(fstate,mws_firstactivated);
+   setlinkedvar(fwindow.stackedover,tlinkedobject(fstackedoverbefore));
+  end;
+  if (force or activateoptionset) then begin
+   capturekeyboard;
+   if (factivewindowbefore = nil) then begin
+    setlinkedvar(application.activewindow,tlinkedobject(factivewindowbefore));
+   end;
+  end;
+  if force or activateoptionset then begin
+   if application.active and (fmenucomp <> nil) then begin
+    window.bringtofront;
+    include(fstate,mws_raised);
+   end;
+  end;
+ end;
+ if mws_forced in fstate then begin
+  twindow1(window).lockactivate;
+  capturekeyboard;
+ end;
+ if factivewindowbefore <> nil then begin
+  factivewindowbefore.deactivateintermediate;
+ end;
 end;
 
 procedure tcustommainmenuwidget.internalsetactiveitem(const Value: integer;
            const aclicked: boolean; const force: boolean);
-var
- window1: twindow;
 begin
- window1:= factivewindowbefore;
  if (value >= 0) and not (csdesigning in componentstate) then begin
-  if factivewindowbefore = nil then begin
-   setlinkedvar(application.activewindow,tlinkedobject(factivewindowbefore));
-  end;
-  if fstackedoverbefore = nil then begin
-   setlinkedvar(fwindow.stackedover,tlinkedobject(fstackedoverbefore));
-   if application.active and (fmenucomp <> nil) then begin
-    window.bringtofront;
-   end;
-  end;
-  if factivewindowbefore <> nil then begin
-   factivewindowbefore.deactivateintermediate;
-  end;
+  checkactivate(false);
  end;
  inherited;
  if value = -1 then begin
-//  focusback(factivewindowbefore <> nil);
   restorefocus;
+  fstate:= [];
  end;
 end;
 
@@ -1440,8 +1480,21 @@ end;
 
 procedure tcustommainmenuwidget.selectmenu;
 begin
+ checkactivate(true);
  inherited;
  flayout.menu.owner.checkexec;
+end;
+
+procedure tcustommainmenuwidget.mouseevent(var info: mouseeventinfoty);
+begin
+ inherited;
+ if (activeitem >= 0) and (info.eventkind = ek_buttonpress) then begin
+  if factivewindowbefore <> nil then begin
+   twindow1(window).lockactivate;
+   capturekeyboard;
+//   factivewindowbefore.deactivateintermediate;
+  end;
+ end;
 end;
 
 procedure tcustommainmenuwidget.deactivatemenu;
