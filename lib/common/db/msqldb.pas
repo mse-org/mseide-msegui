@@ -227,7 +227,13 @@ type
     property Database;
     property Params : TStringList read FParams write setparams;
   end;
-
+ 
+ sqlscripteventty = procedure(const sender: tmsesqlscript;
+                                const adatabase: tcustomsqlconnection;
+                                const atransaction: tsqltransaction) of object;
+ sqlscripterroreventty = procedure(const sender: tmsesqlscript;
+                                const adatabase: tcustomsqlconnection;
+             const atransaction: tsqltransaction; const e: exception) of object;
  tmsesqlscript = class(tmsecomponent)
   private
    fsql: tstringlist;
@@ -235,12 +241,21 @@ type
    ftransaction: tsqltransaction;
    fparams: tmseparams;
    fstatementnr: integer;
+   fonbeforeexecute: sqlscripteventty;
+   fonafterexecute: sqlscripteventty;
+   fonerror: sqlscripterroreventty;
    procedure setsql(const avalue: tstringlist);
    procedure setdatabase(const avalue: tcustomsqlconnection);
    procedure settransaction(const avalue: tsqltransaction);
    procedure setparams(const avalue: tmseparams);
   protected
    procedure notification(acomponent: tcomponent; operation: toperation); override;
+   procedure dobeforeexecute(const adatabase: tcustomsqlconnection;
+                              const atransaction: tsqltransaction);
+   procedure doafterexecute(const adatabase: tcustomsqlconnection;
+                             const atransaction: tsqltransaction);
+   procedure doerror(const adatabase: tcustomsqlconnection;
+                            const atransaction: tsqltransaction; const e: exception);
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -253,6 +268,11 @@ type
    property database: tcustomsqlconnection read fdatabase write setdatabase;
    property transaction: tsqltransaction read ftransaction write settransaction;
                   //can be nil
+   property onbeforeexecute: sqlscripteventty read fonbeforeexecute 
+                                                     write fonbeforeexecute;
+   property onafterexecute: sqlscripteventty read fonafterexecute 
+                                                     write fonafterexecute;
+   property onerror: sqlscripterroreventty read fonerror write fonerror;
  end;
  
 { TSQLQuery }
@@ -2521,14 +2541,22 @@ begin
  if adatabase = nil then begin
   databaseerror(serrdatabasenassigned,self);
  end;
- str1:= fsql.text;
- ar1:= splitsql(str1);
- if high(ar1) < 0 then begin
-  databaseerror(serrnostatement,self);
- end;
- for int1:= 0 to high(ar1) do begin
-  fstatementnr:= int1;
-  adatabase.executedirect(ar1[int1],atransaction,fparams);
+ dobeforeexecute(adatabase,atransaction);
+ try
+  str1:= fsql.text;
+  ar1:= splitsql(str1);
+  if high(ar1) < 0 then begin
+   databaseerror(serrnostatement,self);
+  end;
+  for int1:= 0 to high(ar1) do begin
+   fstatementnr:= int1;
+   adatabase.executedirect(ar1[int1],atransaction,fparams);
+  end;
+  doafterexecute(adatabase,atransaction);
+ except
+  on e: exception do begin  
+   doerror(adatabase,atransaction,e);
+  end;
  end;
 end;
 
@@ -2549,6 +2577,30 @@ end;
 procedure tmsesqlscript.setparams(const avalue: tmseparams);
 begin
  fparams.assign(avalue);
+end;
+
+procedure tmsesqlscript.dobeforeexecute(const adatabase: tcustomsqlconnection;
+               const atransaction: tsqltransaction);
+begin
+ if canevent(tmethod(fonbeforeexecute)) then begin
+  fonbeforeexecute(self,adatabase,atransaction);
+ end;
+end;
+
+procedure tmsesqlscript.doafterexecute(const adatabase: tcustomsqlconnection;
+               const atransaction: tsqltransaction);
+begin
+ if canevent(tmethod(fonafterexecute)) then begin
+  fonafterexecute(self,adatabase,atransaction);
+ end;
+end;
+
+procedure tmsesqlscript.doerror(const adatabase: tcustomsqlconnection;
+               const atransaction: tsqltransaction; const e: exception);
+begin
+ if canevent(tmethod(fonerror)) then begin
+  fonerror(self,adatabase,atransaction,e);
+ end;
 end;
 
 end.
