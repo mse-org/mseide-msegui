@@ -874,6 +874,8 @@ type
    procedure objectevent(const sender: tobject; const event: objecteventty); override;
    procedure receiveevent(const event: tobjectevent); override;
    procedure setparentcomponent(value: tcomponent); override;
+   function clearparentwidget: twidget;
+             //returns old parentwidget
    procedure setparentwidget(const Value: twidget); virtual;
    procedure setlockedparentwidget(const avalue: twidget);
             //sets ws_loadlock before setting, restores afterwards
@@ -4304,10 +4306,13 @@ begin
   fwidgets:= nil;
  end;
  hide;
- parentwidget:= nil;
- if ownswindow1 then begin
-  fwindow.Free;
+ if fparentwidget <> nil then begin
+  clearparentwidget;
  end;
+// parentwidget:= nil;
+// if ownswindow1 then begin
+  fwindow.Free;
+// end;
  ffont.free;
  fframe.free;
  fface.free;
@@ -4724,10 +4729,18 @@ begin
  end;
 end;
 
+function twidget.clearparentwidget: twidget;
+             //returns old parentwidget
+begin
+ result:= fparentwidget;
+ fparentwidget:= nil;
+ fwindow:= nil;
+ result.unregisterchildwidget(self);
+end;
+
 procedure twidget.setparentwidget(const Value: twidget);
 var
  newpos: pointty;
- widget1: twidget;
 begin
  if fparentwidget <> value then begin
   if entered then begin
@@ -4752,11 +4765,7 @@ begin
   end;
 
   if fparentwidget <> nil then begin
-   widget1:= fparentwidget;
-   fparentwidget:= nil;
-   fwindow:= nil;
-   widget1.unregisterchildwidget(self);
-   subpoint1(newpos,widget1.clientwidgetpos);
+   subpoint1(newpos,clearparentwidget.clientwidgetpos);
   end;
   if fparentwidget <> nil then begin
    exit;                   //interrupt
