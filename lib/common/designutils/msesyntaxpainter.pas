@@ -143,7 +143,6 @@ type
    procedure setdeftext(const avalue: tmsestringdatalist);
    procedure deflistchanged(const sender: tobject);
   protected
-   procedure objevent(const sender: iobjectlink; const event: objecteventty); override;
 
   public
    constructor create(aowner: tcomponent); override;
@@ -1191,23 +1190,6 @@ begin
    end;
   end;
  end;
-end;
-
-procedure tsyntaxpainter.objevent(const sender: iobjectlink;
-  const event: objecteventty);
-var
- int1: integer;
-begin
- inherited;
-{
- if event = oe_destroyed then begin
-  for int1:= 0 to high(fclients) do begin
-   if fclients[int1].client = sender then begin
-    unregisterclient(int1);
-   end;
-  end;
- end;
- }
 end;
 
 procedure tsyntaxpainter.setdeftext(const avalue: tmsestringdatalist);

@@ -344,6 +344,8 @@ var
  int1,int2: integer;
  ar3: pagerangearty;
 begin
+ ar1:= nil; //compiler warning
+ ar2:= nil; //compiler warning
  if avalue = '' then begin
   result:= nil;
  end
@@ -753,8 +755,8 @@ begin
  if tf_grayed in flags then begin
   afontcolorshadow:= cl_white;
  end;
+ col1:= fdrawinfo.acolorforeground;
  if afontcolorshadow <> cl_none then begin
-  col1:= fdrawinfo.acolorforeground;
   fdrawinfo.acolorforeground:= afontcolorshadow;
   checkgcstate([cs_acolorforeground]);
   textout(text,moverect(dest,makepoint(1,1)),flags,tabdist);
@@ -765,7 +767,7 @@ begin
    fdrawinfo.acolorforeground:= col1;
   end;
   checkgcstate([cs_acolorforeground]);
- end;  
+ end;
  textout(text,dest,flags,tabdist);
  if tf_grayed in flags then begin
   fdrawinfo.acolorforeground:= col1;
@@ -775,14 +777,12 @@ end;
 
 procedure tcustomprintercanvas.drawtext(var info: drawtextinfoty);
 var
- afontnum: integer;
  acolorshadow: colorty;
  tab1: tcustomtabulators;
  ar1: richstringarty;
  int1,int2,int3,int4,int5: integer;
  rea1: real;
  flags1,flags2: textflagsty;
- mstr1: msestring;
  rstr1: richstringty;
  layoutinfo: layoutinfoty;
  rect1,rect2: rectty;
@@ -790,6 +790,7 @@ var
 label
  endlab;
 begin
+ ar1:= nil; //compiler warning
  save;
  layouttext(self,info,layoutinfo);
  if fstream = nil then begin

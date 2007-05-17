@@ -740,7 +740,7 @@ end;
 procedure tcustombuttonframe.dopaintframe(const canvas: tcanvas; const rect: rectty);
 var
  int1: integer;
- color1,color2: colorty;
+ color2: colorty;
 begin
  color2:= cl_none;
  for int1:= 0 to fbuttons.count-1 do begin
@@ -1071,6 +1071,7 @@ procedure tcustomedit.dopopup(var amenu: tpopupmenu;
                         var mouseinfo: mouseeventinfoty);
 var
  states: array[0..3] of actionstatesty;
+ sepchar: msechar;
 
 begin
  if oe_autopopupmenu in foptionsedit then begin
@@ -1099,11 +1100,17 @@ begin
   else begin
    states[3]:= [as_disabled];
   end;
+  if popupmenu <> nil then begin
+   sepchar:= popupmenu.shortcutseparator;
+  end
+  else begin
+   sepchar:= tcustommenu.getshortcutseparator(amenu);
+  end;
   tpopupmenu.additems(amenu,self,mouseinfo,
-     [stockobjects.captions[sc_Undo]+' (Esc)',
-      stockobjects.captions[sc_Copy]+' (Ctrl+C)',
-      stockobjects.captions[sc_Cut]+' (Ctrl+X)',
-      stockobjects.captions[sc_Paste]+' (Ctrl+V)'],
+     [stockobjects.captions[sc_Undo]+sepchar+'(Esc)',
+      stockobjects.captions[sc_Copy]+sepchar+'(Ctrl+C)',
+      stockobjects.captions[sc_Cut]+sepchar+'(Ctrl+X)',
+      stockobjects.captions[sc_Paste]+sepchar+'(Ctrl+V)'],
      [],states,[{$ifdef FPC}@{$endif}onundo,{$ifdef FPC}@{$endif}oncopy,
      {$ifdef FPC}@{$endif}oncut,{$ifdef FPC}@{$endif}onpaste]);
  end;

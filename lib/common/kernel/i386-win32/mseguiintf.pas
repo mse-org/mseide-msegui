@@ -537,8 +537,6 @@ function gui_createpixmap(const size: sizety; winid: winidty = 0;
              //copyfrom does not work if selected in dc!
 var
  dc,dc1: hdc;
- bitmapinfo: bitmapinfoty;//tagbitmapinfo;//bitmapinfoty;
- po1: pointer;
 
 begin
  inc(pixmapcount);
@@ -3455,7 +3453,6 @@ var
  po1: pointty;
  shiftstate: shiftstatesty;
  key1: keyty;
- wrect1: trect;
 begin
  result:= 1;
  case msg of

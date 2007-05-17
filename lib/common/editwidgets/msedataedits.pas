@@ -673,7 +673,7 @@ type
    fvalue: realty;
    fformatdisp: msestring;
    fformatedit: msestring;
-   fscale: real;
+   fvaluescale: real;
    fmin: realty;
    fmax: realty;
    procedure setvalue(const Value: realty);
@@ -689,7 +689,7 @@ type
    procedure setgridvalue(const index: integer; const Value: realty);
    function getgridvalues: realarty;
    procedure setgridvalues(const Value: realarty);
-   procedure setscale(const Value: real);
+   procedure setvaluescale(const Value: real);
    function getasinteger: integer;
    procedure setasinteger(const avalue: integer);
   protected
@@ -714,7 +714,7 @@ type
    property value: realty read fvalue write setvalue stored false;
    property formatedit: msestring read fformatedit write setformatedit;
    property formatdisp: msestring read fformatdisp write setformatdisp;
-   property scale: real read fscale write setscale;
+   property valuescale: real read fvaluescale write setvaluescale;
    property min: realty read fmin write fmin stored false;
    property max: realty read fmax write fmax stored false;
    property gridvalue[const index: integer]: realty
@@ -728,7 +728,7 @@ type
    property value stored false;
    property formatedit;
    property formatdisp;
-   property scale;
+   property valuescale;
    property min stored false;
    property max stored false;
  end;
@@ -1018,11 +1018,6 @@ begin
 end;
 
 procedure tdataedit.editnotification(var info: editnotificationinfoty);
-
-var
- rect1: rectty;
-// ar4,ar5: msestringarty;
-
 begin
  case info.action of
   ea_textentered: begin
@@ -1042,7 +1037,7 @@ begin
    fedited:= false;
   end;
   ea_caretupdating: begin
-   if (fgridintf <> nil) and focused then begin 
+   if (fgridintf <> nil) and focused then begin
     fgridintf.showcaretrect(info.caretrect,fframe);
    end;
   end;
@@ -1651,6 +1646,7 @@ procedure tcustomstringedit.readstatvalue(const reader: tstatreader);
 var
  ar1: msestringarty;
 begin
+ ar1:= nil; //compiler warning
  if fgridintf = nil then begin
   ar1:= nil;
   ar1:= reader.readarray(valuevarname+'ar',ar1);
@@ -2002,8 +1998,6 @@ begin
 end;
 
 procedure tcustommemoedit.setupeditor;
-var
- rect1: rectty;
 begin
  inherited;
  updatescrollbars;
@@ -3222,8 +3216,8 @@ begin
  else begin
   rea1:= realty(data);
  end;
- if (fscale <> 0) and not (isemptyreal(rea1)) then begin
-  rea1:= rea1/fscale;
+ if (fvaluescale <> 0) and not (isemptyreal(rea1)) then begin
+  rea1:= rea1/fvaluescale;
  end;
  if (@data = nil) and focused then begin
   result:= realtytostr(rea1,fformatedit);
@@ -3278,8 +3272,8 @@ begin
    rea1:= rea2;
   except
   end;
-  if (fscale <> 0) and not isemptyreal(rea1) then begin
-   rea1:= rea1*fscale;
+  if (fvaluescale <> 0) and not isemptyreal(rea1) then begin
+   rea1:= rea1*fvaluescale;
   end;
   if not (fisdb and isemptyreal(rea1)) then begin
    if (cmprealty(fmin,rea1) > 0) or (cmprealty(fmax,rea1) < 0) then begin
@@ -3304,8 +3298,8 @@ var
 begin
  try
   rea1:= strtorealty(atext);
-  if (fscale <> 0) and not isemptyreal(rea1) then begin
-   rea1:= rea1*fscale;
+  if (fvaluescale <> 0) and not isemptyreal(rea1) then begin
+   rea1:= rea1*fvaluescale;
   end;
  except
   rea1:= emptyreal;
@@ -3420,10 +3414,10 @@ begin
  trealdatalist(fgridintf.getcol.datalist).asarray:= value;
 end;
 
-procedure tcustomrealedit.setscale(const Value: real);
+procedure tcustomrealedit.setvaluescale(const Value: real);
 begin
- if fscale <> value then begin
-  fscale := Value;
+ if fvaluescale <> value then begin
+  fvaluescale:= Value;
   valuetotext;
  end;
 end;
@@ -3524,7 +3518,6 @@ procedure tcustomdatetimeedit.texttovalue(var accept: boolean;
                                                  const quiet: boolean);
 var
  dat1: tdatetime;
- str1: string;
 begin
  try
   if fkind = dtk_time then begin

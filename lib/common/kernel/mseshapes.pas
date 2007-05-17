@@ -45,7 +45,7 @@ type
  actionstatesty = set of actionstatety;
 
  menuactionoptionty = (mao_separator,mao_checkbox,mao_radiobutton,mao_shortcutcaption,
-                           mao_asyncexecute,mao_singleregion,mao_shortcutright);
+                           mao_asyncexecute,mao_singleregion);
  menuactionoptionsty = set of menuactionoptionty;
 
 const

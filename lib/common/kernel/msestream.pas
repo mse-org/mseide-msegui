@@ -441,8 +441,6 @@ var
  int1: integer;
  mstr1: msestring;
  first: boolean;
- bo1: boolean;
- po1: pmsechar;
  seps: msestring;
 begin
  first:= true;

@@ -16,10 +16,10 @@ type
  
  tcalendarcontroller = class(tdropdownwidgetcontroller)
   protected
-   procedure editnotification(var info: editnotificationinfoty); override;
    procedure dropdownkeydown(var info: keyeventinfoty);
   public
    constructor create(const intf: idropdowncalendar);
+   procedure editnotification(var info: editnotificationinfoty); override;
   published
    property bounds_cx default popupcalendarwidth;
  end;
@@ -132,7 +132,6 @@ end;
 procedure tcalendarcontroller.dropdownkeydown(var info: keyeventinfoty);
 var
  editor1: tinplaceedit;
- str1: msestring;
 begin
  editor1:= fintf.geteditor;
  editor1.dokeydown(info);

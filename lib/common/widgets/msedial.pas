@@ -56,7 +56,7 @@ type
  end;
 
  tcustomdial = class;
-  
+
  tdialmarkers = class(townedpersistentarrayprop)
   private
    function getitems(const aindex: integer): tdialmarker;
@@ -64,7 +64,7 @@ type
   protected
    procedure dosizechanged; override;
   public
-   constructor create(const aowner: tcustomdial);
+   constructor create(const aowner: tcustomdial); reintroduce;
    procedure paint(const acanvas: tcanvas);
    property items[const index: integer]: tdialmarker read getitems; default;
  end;
@@ -102,7 +102,7 @@ type
   protected
    procedure dosizechanged; override;
   public
-   constructor create(const aowner: tcustomdial);
+   constructor create(const aowner: tcustomdial); reintroduce;
    property items[const index: integer]: tdialtick read getitems; default;
  end;
  
@@ -507,6 +507,8 @@ var
   offs: real;
   int1: integer;
  begin
+  linestart:= 0; //compiler warning
+  lineend:= 0; //compiler warning
   with ainfo do begin
    if interval = 0 then begin
     ticks:= nil;

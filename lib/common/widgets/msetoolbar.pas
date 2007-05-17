@@ -66,6 +66,7 @@ type
    procedure doshortcut(var info: keyeventinfoty);
    function getinstance: tobject; override;
    function loading: boolean;
+   function shortcutseparator: msechar;
    
   public
    constructor create(const aowner: tobject;
@@ -546,6 +547,11 @@ function ttoolbutton.loading: boolean;
 begin
  result:= (fowner is tcomponent) and 
                (csloading in tcomponent(fowner).componentstate);
+end;
+
+function ttoolbutton.shortcutseparator: msechar;
+begin
+ result:= ' ';
 end;
 
 { ttoolbuttons }

@@ -223,7 +223,6 @@ type
  trealgraphdataedit = class(tgraphdataedit)
   private
    fonsetvalue: setrealeventty;
-   fvalue: realty;
    fdirection: graphicdirectionty;
    procedure setvalue(const avalue: realty);
    procedure setdirection(const avalue: graphicdirectionty);
@@ -232,6 +231,7 @@ type
    function getgridvalues: realarty;
    procedure setgridvalues(const avalue: realarty);
   protected
+   fvalue: realty;
    function createdatalist(const sender: twidgetcol): tdatalist; override;
    function getdatatyp: datatypty; override;
    procedure valuetogrid(const arow: integer); override;
@@ -307,7 +307,7 @@ type
    ffacerect: rectty;
    fframebarrect: rectty;
    ffacebarrect: rectty;
-   fscale: real;
+   fvaluescale: real;
    fformat: string;
    ftextflags: textflagsty;
    fonfinished: progresseventty;
@@ -318,7 +318,7 @@ type
    procedure updatebarrect(const avalue: realty; const arect: rectty;
                     out facedest,framebardest,facebardest: rectty);
    procedure updatebar;
-   procedure setscale(const avalue: real);
+   procedure setvaluescale(const avalue: real);
    procedure setformat(const avalue: string);
    procedure settextflags(const avalue: textflagsty);
    procedure setbar_frame(const avalue: tbarframe);
@@ -338,16 +338,16 @@ type
                              //threadsave
    property cancel: boolean read fcancel write fcancel;
                     //ored with doprogress.acancel, resetted by value:= 0.0
-   property value: realty read fvalue write setvalue;  
+   property value: realty read fvalue write setvalue;
           //threadsave, range 0 .. 1.0
   published
    property optionswidget default defaultoptionswidgetnofocus;
    property bar_face: tbarface read fbar_face write setbar_face;
    property bar_frame: tbarframe read fbar_frame write setbar_frame;
-   property scale: real read fscale write setscale; //default 0.01
-   property format: string read fformat write setformat; 
+   property valuescale: real read fvaluescale write setvaluescale; //default 0.01
+   property format: string read fformat write setformat;
                    //default '0%', '' for no numeric
-   property textflags: textflagsty read ftextflags write settextflags default 
+   property textflags: textflagsty read ftextflags write settextflags default
                               [tf_ycentered,tf_xcentered];
    property font: twidgetfont read getfont write setfont stored isfontstored;
    property onprogress: progresseventty read fonprogress write fonprogress;
@@ -2440,7 +2440,7 @@ begin
  fbar_face:= tbarface.create(iface(self));
  fbar_frame:= tbarframe.create(self);
  fformat:= '0%';
- fscale:= 0.01;
+ fvaluescale:= 0.01;
  ftextflags:= [tf_ycentered,tf_xcentered];
  inherited;
  optionswidget:= defaultoptionswidgetnofocus;
@@ -2550,7 +2550,6 @@ procedure tcustomprogressbar.paintglyph(const canvas: tcanvas; const avalue;
 var
  po1,po2,po3: prectty;
  rect1,rect2,rect3: rectty;
- str1: string;
  rea1: realty;
 begin
  if @avalue = nil then begin
@@ -2573,8 +2572,8 @@ begin
   fbar_face.paint(canvas,po1^);
   canvas.restore;
   if fformat <> '' then begin
-   if fscale <> 0 then begin
-    rea1:= rea1/scale;
+   if fvaluescale <> 0 then begin
+    rea1:= rea1/fvaluescale;
    end;
    drawtext(canvas,realtytostr(rea1,fformat),arect,ftextflags,ffont);
   end;
@@ -2586,9 +2585,9 @@ begin
  tdispframe.create(self);
 end;
 
-procedure tcustomprogressbar.setscale(const avalue: real);
+procedure tcustomprogressbar.setvaluescale(const avalue: real);
 begin
- fscale:= avalue;
+ fvaluescale:= avalue;
  formatchanged;
 end;
 

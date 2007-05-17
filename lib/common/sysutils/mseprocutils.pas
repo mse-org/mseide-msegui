@@ -184,8 +184,6 @@ var
   end;
  end;
   
-var
- int2: integer;
 begin
  ar1:= getprocesstree;
  setlength(result,1);
@@ -229,6 +227,7 @@ var
  ca1: cardinal;
 begin
  ca1:= timestep(timeoutus);
+ result:= false; //compiler warning
  while true do begin
   result:= getexitcodeprocess(prochandle,dwo1);
   if result then begin

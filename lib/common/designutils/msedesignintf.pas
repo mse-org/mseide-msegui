@@ -912,7 +912,6 @@ var
  binstream: tmemorystream;
  textstream: ttextstream;
  int1: integer;
- str1: msestring;
  countbefore: integer;
  reader: treader;
  comp1: tcomponent;
@@ -991,6 +990,7 @@ function tdesignerselections.pastefromclipboard(aowner,aparent: tcomponent;
 var
  str1: msestring;
 begin
+ result:= 0;
  if msewidgets.pastefromclipboard(str1) then begin
   result:= pastefromobjecttext(str1,aowner,aparent,initproc);
  end;

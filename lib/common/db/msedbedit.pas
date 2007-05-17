@@ -627,7 +627,7 @@ type
    property max stored false;
    property formatedit;
    property formatdisp;
-   property scale;
+   property valuescale;
    property onsetvalue;
  end;
 

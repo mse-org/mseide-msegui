@@ -2650,8 +2650,6 @@ begin
 end;
 
 function tmsecomponent.linkedobjects: objectarty;
-var
- int1: integer;
 begin
  result:= objectarty(getlinkedcomponents(self));
  if fobjectlinker <> nil then begin

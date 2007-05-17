@@ -154,7 +154,6 @@ type
    procedure setsource(const Value: tbitmapcomp);
    function getmasked: boolean;
    procedure setmasked(const Value: boolean);
-   procedure setmonochrome(const avalue: boolean); override;
    procedure readimage(stream: tstream);
    procedure writeimage(stream: tstream);
    function getmask1: tbitmap;
@@ -164,6 +163,7 @@ type
    procedure setcolormask(const avalue: boolean);
   protected
    fmask: tbitmap;
+   procedure setmonochrome(const avalue: boolean); override;
    function getasize: sizety; override;
    procedure createmask(const acolormask: boolean); virtual;
    function getconverttomonochromecolorbackground: colorty; override;
@@ -1903,7 +1903,6 @@ var
  po1: pointty;
  rect1: rectty;
  bo1: boolean;
- int1: integer;
  
 begin
  po1:= indextoorg(index);

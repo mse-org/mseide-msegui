@@ -1942,6 +1942,7 @@ var
  ar1: componentarty;
  int1,int2: integer;
 begin
+ ar1:= nil; //compiler warning
  if issubcomponent then begin
   result:= inherited getvalues;
  end
@@ -2021,7 +2022,6 @@ end;
 
 function tsisterwidgetpropertyeditor.getvalues: msestringarty;
 var
- co1: tcomponent;
  ar1: componentarty;
  widget1: twidget;
  int1: integer;
@@ -3098,9 +3098,7 @@ end;
 procedure tbitmappropertyeditor.edit;
 var
  bmp: tmaskedbitmap;
- str1: filenamety;
  int1: integer;
- ar1: stringarty;
  dialog: tfiledialog;
  statfile1: tstatfile;
 begin
@@ -3575,11 +3573,9 @@ end;
 
 procedure tdatalistpropertyeditor.edit;
 var
- datalist1: tdatalist;
  editform: tcustommseform;
 begin
  checkformkind;
- datalist1:= tdatalist(getordvalue);
  case formkind of
   lfk_msestring: begin
    editform:= tstringlisteditor.create({$ifdef FPC}@{$endif}closequery);

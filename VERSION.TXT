@@ -1,5 +1,8 @@
 MSEide+MSEgui version history
 
+2007-05-17 tcustomrealedit.scale -> valuescale.
+2007-05-07 tcustomprogressbar.scale -> valuescale.
+
 Version 1.2rc1
 2007-03-29 tdbimage renamed to tdbdataimage.
 

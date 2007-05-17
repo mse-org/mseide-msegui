@@ -673,8 +673,10 @@ begin
 end;
 
 procedure stringaddref(var str: msestring);
+{$ifndef msestringsarenotrefcounted}
 var
  po1: pinteger;
+{$endif}
 begin
  if pointer(str) <> nil then begin
 {$ifndef msestringsarenotrefcounted}

@@ -888,7 +888,6 @@ end;
    procedure setnewrowcol(const avalue: integer);
   protected
    procedure dosizechanged; override;
-   procedure move(const curindex,newindex: integer); override;
    procedure rearange(const list: tintegerdatalist); override;
    procedure setcount1(acount: integer; doinit: boolean); override;
    procedure setrowcountmax(const value: integer);
@@ -913,6 +912,7 @@ end;
   public
    constructor create(aowner: tcustomgrid; aclasstype: gridpropclassty);
    destructor destroy; override;
+   procedure move(const curindex,newindex: integer); override;
    procedure clearselection;
    function hasselection: boolean;
    function previosvisiblecol(aindex: integer): integer;
@@ -2881,8 +2881,6 @@ begin
 end;
 
 procedure tfixrow.movecol(const curindex,newindex: integer);
-var
- int1: integer;
 begin
  if (curindex >= 0) then begin
   fcaptions.movecol(curindex,newindex);
@@ -3045,6 +3043,7 @@ var
    else begin
     headers1:= fcaptions;
    end;
+   int2:= range.startindex;
    if range.startindex < headers1.count then begin
     for int3:= range.startindex downto 0 do begin
      int2:= int3;
@@ -3052,9 +3051,6 @@ var
       break;
      end;
     end;
-   end
-   else begin
-    int2:= range.startindex;
    end;
    for int1:= int2 to range.endindex do begin
     with tcol(cols.fitems[int1]) do begin
@@ -3694,7 +3690,6 @@ end;
 procedure tcustomgrid.cellmouseevent(const acell: gridcoordty; 
                     var info: mouseeventinfoty; const acellinfopo: pcelleventinfoty = nil);
 var
- event: celleventkindty;
  cellinfo: celleventinfoty;
  po1: pointty;
  cellinfopo: pcelleventinfoty;
@@ -4330,7 +4325,7 @@ end;
 procedure tcustomstringcol.readpipe(const text: string; const processeditchars: boolean = false);
 var
  ar1: stringarty;
- int1,int2,int3: integer;
+ int1: integer;
 begin
  ar1:= nil; //compiler warning
  if text <> '' then begin
@@ -6684,16 +6679,16 @@ var
  coord1: gridcoordty;
  str1: msestring;
  hintinfo: hintinfoty;
- int1: integer;
+// int1: integer;
  mousewidgetbefore: twidget;
- 
+
 begin
  inherited;
  fobjectpicker.mouseevent(info);
  if not (es_processed in info.eventstate) then begin
   fdragcontroller.clientmouseevent(info);
  end;
- if not (es_processed in info.eventstate) and 
+ if not (es_processed in info.eventstate) and
                            not(csdesigning in componentstate) then begin
   with info do begin
    if eventkind in mouseposevents then  begin
@@ -6801,7 +6796,7 @@ begin
       else begin
        frepeataction:= fca_focusinrepeater;
       end;
-      int1:= pos.y - clientpos.y;
+//      int1:= pos.y - clientpos.y;
       if pos.y < fdatarect.y - mousescrolldist then begin
        if (ffocusedcell.col >= 0) and 
                 (co_mousescrollrow in datacols[ffocusedcell.col].options) then begin
@@ -9982,7 +9977,6 @@ end;
 procedure tcellgrid.clientmouseevent(var info: mouseeventinfoty);
 var
  bo1,bo2: boolean;
- po1: pointty;
 begin
  bo1:= es_child in info.eventstate;
  bo2:=  gs_cellclicked in fstate;

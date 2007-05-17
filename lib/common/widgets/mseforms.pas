@@ -311,11 +311,11 @@ type
    procedure poschanged; override;
    procedure activechanged; override;
    procedure doactivate; override;
-   function canfocus: boolean; override;
-   procedure activate(const abringtofront: boolean = true); override;
   public
    constructor create(aowner: tcomponent; load: boolean); override;
    destructor destroy; override;
+   procedure activate(const abringtofront: boolean = true); override;
+   function canfocus: boolean; override;
    procedure dragevent(var info: draginfoty); override;
   published
    property dragdock: tformdockcontroller read fdragdock write setdragdock;

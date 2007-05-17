@@ -94,8 +94,6 @@ end;
 procedure tthreadsfo.gridoncellevent(const sender: TObject; var info: celleventinfoty);
 var
  stopinfo: stopinfoty;
- ar1: frameinfoarty;
- wstr1: filenamety;
 begin
  case info.eventkind of
   cek_enter: begin

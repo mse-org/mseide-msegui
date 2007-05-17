@@ -17,10 +17,14 @@ uses
  msedrawtext,msegraphics,mseevent,mseguiglob,mseshapes,mserichstring,
  msetypes,msestrings,Classes,msekeyboard,msebitmap;
 
-const
- defaultmenuoptions = [mao_shortcutcaption,mao_shortcutright];
 type
-
+ menuoptionty = (mo_insertfirst,mo_singleregion,mo_shortcutright,mo_activate);
+ menuoptionsty = set of menuoptionty;
+const
+ defaultmenuoptions = [mo_shortcutright];
+ defaultmenuactoptions = [mao_shortcutcaption];
+ 
+type
  menuinfoarty = array of actioninfoty;
  tmenuitem = class;
 
@@ -113,6 +117,7 @@ type
    //iactionlink
    function getactioninfopo: pactioninfoty;
    function loading: boolean;
+   function shortcutseparator: msechar;
    
    procedure objectevent(const sender: tobject;
                                      const event: objecteventty); override;
@@ -151,7 +156,7 @@ type
    property state: actionstatesty read finfo.state write setstate 
                      stored isstatestored default [];
    property options: menuactionoptionsty read finfo.options 
-                   write setoptions default defaultmenuoptions;
+                   write setoptions default defaultmenuactoptions;
    property shortcut: shortcutty read finfo.shortcut write setshortcut 
                      stored isshortcutstored default 0;
    property tag: integer read finfo.tag write settag stored istagstored default 0;
@@ -171,9 +176,6 @@ type
  pmenuitem = ^tmenuitem;
 
  menueventty = procedure(const sender: tcustommenu) of object;
-
- menuoptionty = (mo_insertfirst,mo_singleregion,mo_activate);
- menuoptionsty = set of menuoptionty;
 
  tmenuframetemplate = class(tframetemplate)
   public
@@ -224,6 +226,8 @@ type
    function count: integer;
    function transientfor: twidget;
    function mouseinfopo: pmouseeventinfoty;
+   function shortcutseparator: msechar;
+   class function getshortcutseparator(const ainstance: tcustommenu): msechar;
    property menu: tmenuitem read fmenu write setmenu;
    property frametemplate: tframecomp read ftemplate.frame write setframetemplate;
    property facetemplate: tfacecomp read ftemplate.face write setfacetemplate;
@@ -232,7 +236,7 @@ type
    property itemfacetemplate: tfacecomp read ftemplate.itemface 
                             write setitemfacetemplate;
    property template: menutemplatety read ftemplate;
-   property options: menuoptionsty read foptions write foptions default [];
+   property options: menuoptionsty read foptions write foptions default defaultmenuoptions;
    property onupdate: menueventty read fonupdate write fonupdate;
  end;
 
@@ -354,6 +358,7 @@ end;
 
 constructor tcustommenu.create(aowner: tcomponent);
 begin
+ foptions:= defaultmenuoptions;
  inherited;
  fmenu:= tmenuitem.create(nil,self);
 end;
@@ -446,6 +451,27 @@ begin
  result:= fmouseinfopo;
 end;
 
+function tcustommenu.shortcutseparator: msechar;
+begin
+ if mo_shortcutright in foptions then begin
+  result:= c_tab;
+ end
+ else begin
+  result:= ' ';
+ end;
+end;
+
+class function tcustommenu.getshortcutseparator(
+                       const ainstance: tcustommenu): msechar;
+begin
+ if ainstance = nil then begin
+  result:= c_tab;
+ end
+ else begin
+  result:= ainstance.shortcutseparator;
+ end;
+end;
+
 procedure tcustommenu.setframetemplate(const avalue: tframecomp);
 begin
  if avalue <> ftemplate.frame then begin
@@ -517,7 +543,7 @@ begin
  else begin
   fowner:= aowner;
  end;
- initactioninfo(finfo,defaultmenuoptions);
+ initactioninfo(finfo,defaultmenuactoptions);
  inherited create;
 end;
 
@@ -745,6 +771,16 @@ end;
 function tmenuitem.loading: boolean;
 begin
  result:= (fowner <> nil) and (csloading in fowner.componentstate);
+end;
+
+function tmenuitem.shortcutseparator: msechar;
+begin
+ if fowner <> nil then begin
+  result:= fowner.shortcutseparator;
+ end
+ else begin
+  result:= c_tab;
+ end;
 end;
 
 procedure tmenuitem.beginload;

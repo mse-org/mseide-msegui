@@ -41,7 +41,6 @@ type
  ppopupmenuwidget = ^tpopupmenuwidget;
  tpopupmenuwidget = class(tpopupwidget)
   private
-   flayout: menulayoutinfoty;
    fnextpopup,fprevpopup: tpopupmenuwidget;
    fposrect: rectty;
    fposition: graphicdirectionty;
@@ -56,6 +55,7 @@ type
    procedure setactiveitem(const value: integer);
    procedure applicationactivechanged(const avalue: boolean);
   protected
+   flayout: menulayoutinfoty;
    flocalframeandface: boolean;
    procedure objectevent(const sender: tobject; const event: objecteventty); override;
    function translatetoscreen(const value: pointty): pointty; virtual;
@@ -95,7 +95,8 @@ type
  mainmenuwidgetoptionty = (mwo_vertical);
  mainmenuwidgetoptionsty = set of mainmenuwidgetoptionty;
  mainmenuwidgetstatety = (mws_firstactivated,mws_forced,mws_raised);
- mainmenuwidgetstatesty = set of mainmenuwidgetstatety; 
+ mainmenuwidgetstatesty = set of mainmenuwidgetstatety;
+
  tcustommainmenuwidget = class(tpopupmenuwidget)
   private
    factivewindowbefore: twindow;
@@ -279,6 +280,7 @@ var
  ar1: richstringarty;
  
 begin
+ ar1:= nil; //compiler warning
  with layout,tmenuitem1(menu) do begin
   if itemframetemplate <> nil then begin
    with tframetemplate1(itemframetemplate) do begin
@@ -1304,7 +1306,6 @@ end;
 
 procedure tcustommainmenuwidget.updatelayout;
 var
- int1: integer;
  rect1: rectty;
  size1: sizety;
 begin

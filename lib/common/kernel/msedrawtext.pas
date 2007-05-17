@@ -904,10 +904,9 @@ var
 var
  row: integer;
  ellipsewidth: integer;
- int1,int2,int3{,int4}: integer;
+ int1,int3{,int4}: integer;
  lastover: boolean;
  textbackup: msestring;
- po1: pmsechar;
 label
  endlab;
 

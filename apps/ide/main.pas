@@ -1956,10 +1956,11 @@ end;
 procedure tmainfo.mainstatfileonupdatestat(const sender: tobject;
                    const filer: tstatfiler);
 var
- mstr1,mstr2: filenamety;
+ mstr1: filenamety;
  ar1: msestringarty;
  int1: integer;
 begin
+ ar1:= nil; //compiler warning
  updatesettings(filer);
 
  mstr1:= projectoptions.projectfilename;

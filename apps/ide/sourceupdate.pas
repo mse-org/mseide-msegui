@@ -1886,6 +1886,7 @@ var
  ar1: stringarty;
  ar3: msestringarty;
 begin
+ ar3:= nil; //compiler warning
  if not infopo^.interfacecompiled or
        not infopo^.implementationcompiled and not interfaceonly then begin
   if infopo^.unitname <> '' then begin

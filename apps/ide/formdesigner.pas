@@ -965,7 +965,6 @@ procedure tdesignwindow.doafterpaint(const canvas: tcanvas);
  var
   rect1: rectty;
   int1: integer;
-  bo1: boolean;
  begin
   if ((form = nil) or not (component is twidget)) and 
            not (cssubcomponent in component.componentstyle) then begin
@@ -989,7 +988,6 @@ procedure tdesignwindow.doafterpaint(const canvas: tcanvas);
  
 var
  int1: integer;
- pt1: pointty;
 begin
  if tformdesignerfo(fowner).fmodule <> nil then begin
   canvas.intersectcliprect(tformdesignerfo(fowner).gridrect);
@@ -1055,8 +1053,6 @@ end;
 procedure tdesignwindow.doinitcomponent(component: tcomponent; parent: tcomponent);
 var
  rect1: rectty;
- size1: sizety;
- int1: integer;
  pt1: pointty;
 begin
  doaddcomponent(component);
@@ -1094,7 +1090,6 @@ procedure tdesignwindow.docopy(const noclear: boolean);
 var
  int1: integer;
  widget1: twidget;
- bo1: boolean;
 begin
  fselections.remove(module);
  fselections.copytoclipboard;
@@ -1190,8 +1185,6 @@ begin
 end;
 
 procedure tdesignwindow.dodelete;
-var
- int1: integer;
 begin
  with fselections do begin
   removeforeign;
@@ -2379,10 +2372,8 @@ function selectinheritedmodule(const amodule: pmoduleinfoty;
 var
  fo: tselectsubmoduledialogfo;
  ar1: msestringarty;
- mstr1: msestring;
  int1: integer;
  ar2: componentarty;
- po1: pmoduleinfoty;
 begin
  result:= nil;
  fo:= tselectsubmoduledialogfo.create(nil);

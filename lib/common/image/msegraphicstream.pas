@@ -230,6 +230,7 @@ var
  ar1: stringarty;
  found: boolean;
 begin
+ ar1:= nil; //compiler warning
  if aformatlabel = '' then begin
   found:= true;
   for int1:= 0 to high(formats) do begin

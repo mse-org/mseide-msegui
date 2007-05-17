@@ -366,11 +366,8 @@ begin
 end;
 
 procedure tsourcepage.reload;
-var
- po1: punitinfoty;
 begin
  loadfile(edit.filename);
- 
 end;
 
 procedure tsourcepage.cleardebuglines;

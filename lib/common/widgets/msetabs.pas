@@ -2618,8 +2618,6 @@ end;
 
 procedure tcustomtabwidget.dopopup(var amenu: tpopupmenu;
                var mouseinfo: mouseeventinfoty);
-var
- int1: integer;
 begin
  if (tabo_autopopup in options) then begin
   fpopuptab:= ftabs.tabatpos(translateclientpoint(mouseinfo.pos,self,ftabs));

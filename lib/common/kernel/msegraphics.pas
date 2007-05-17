@@ -478,6 +478,7 @@ type
   private
    fcanvas: tcanvas;
    procedure dochanged(changed: canvasstatesty); override;
+  protected
    function gethandle: fontnumty; override;
   public
    constructor create(acanvas: tcanvas); reintroduce;

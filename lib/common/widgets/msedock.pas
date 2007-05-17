@@ -1129,7 +1129,6 @@ var
 
 var
  needsfixscale: boolean;
- intf1: idocktarget;
  widget2: twidget;
 begin
  widget2:= fintf.getwidget;
@@ -1405,6 +1404,7 @@ begin
   newwidget:= false;
  end;
  if (length(ar1) > 0) or (widget1 <> nil) then begin
+  step:= 0; //compiler warning
   if (fsplitdir <> sd_none) then begin
    if (widget1 <> nil) then begin
     if index > length(ar1) then begin
@@ -2316,9 +2316,6 @@ var
   end;
  end;
 
-var
- modalresultbefore: modalresultty;
- 
 begin
  inherited;
  with info do begin
@@ -2936,7 +2933,7 @@ var
  colorbefore: colorty;
  po1,po2: pointty;
  int1,int2: integer;
- rect1,rect2: rectty;
+ rect1: rectty;
  col1: colorty;
  info1: drawtextinfoty;
  floating: boolean;

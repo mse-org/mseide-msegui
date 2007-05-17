@@ -1007,7 +1007,6 @@ procedure tcustomdropdownlistcontroller.dropdownkeydown(var info: keyeventinfoty
 var
  editor1: tinplaceedit;
  str1: msestring;
- widget1: twidget;
 begin
  editor1:= fintf.geteditor;
  editor1.dokeydown(info);

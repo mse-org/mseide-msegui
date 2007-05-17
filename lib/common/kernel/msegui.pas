@@ -578,12 +578,12 @@ type
    procedure dochange(const sender: tarrayprop; const index: integer);
    procedure change;
    procedure imagechanged(const sender: tobject);
-   procedure internalcreate;
+   procedure internalcreate; override;
    procedure doalphablend(const canvas: tcanvas);
   public
    constructor create; overload; override;
-   constructor create(const owner: twidget); overload;//sets fowner.fframe
-   constructor create(const intf: iface); overload;
+   constructor create(const owner: twidget); reintroduce; overload;//sets fowner.fframe
+   constructor create(const intf: iface); reintroduce; overload;
    destructor destroy; override;
    procedure assign(source: tpersistent); override;
    procedure paint(const canvas: tcanvas; const rect: rectty); virtual;
@@ -9168,9 +9168,9 @@ begin
       end;
      end;
      app.factivewindow:= self;
-     if factivecount <> activecountbefore then begin
-      exit;
-     end;
+//     if factivecount <> activecountbefore then begin
+//      exit;
+//     end;
      if not windowevent then begin
       setwinfoc;
      end
@@ -9785,6 +9785,7 @@ procedure twindow.stackover(const predecessor: twindow);
 var
  ar1: windowarty;
 begin
+ ar1:= nil; //compiler warning
  if predecessor = nil then begin
   app.sortzorder;
   ar1:= app.windowar;

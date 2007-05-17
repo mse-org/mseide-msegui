@@ -534,7 +534,7 @@ end;
 procedure twidgetfixrows.updatewidgetrect;
 var
  rect1: rectty;
- int1,int2,int4: integer;
+ int1,int2: integer;
  coord1: gridcoordty;
 begin
  inc(fwidgetrectupdating);
@@ -1411,6 +1411,7 @@ begin
  end
  else begin
   window.nofocus;
+  result:= false;
  end;
 end;
 

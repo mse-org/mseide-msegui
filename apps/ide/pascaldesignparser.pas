@@ -1326,7 +1326,7 @@ var
  classinfopo: pclassinfoty;
  pos1: sourceposty;
  ident1: pascalidentty;
- lstr1,lstr2: lstringty;
+ lstr2: lstringty;
  pc,pc1: pcompinfoty;
  pd: pdefinfoty;
  bo1: boolean;
@@ -1653,6 +1653,7 @@ var
  int1: integer;
 
 begin
+ ar1:= nil; //compiler warning
  while not eof do begin
   ident1:= getident;
   if (ident1 >= 0) and (ident1 <> ord(id_threadvar)) then begin
@@ -1902,8 +1903,7 @@ var
 
 var
  aident: integer;
- pos1: sourceposty;
- 
+
 begin
  finterface:= false;
  fimplementation:= true;
@@ -2221,7 +2221,6 @@ function tdeflist.finddef(const anamepath: stringarty; var scopes: deflistarty;
                //true if found
 var
  ar1: stringarty;
- ar2: deflistarty;
  ar3: definfopoarty;
  findkind1: symbolkindty;
 // po1: pdefinfoty;
@@ -2787,8 +2786,6 @@ function trootdeflist.findparentclass(const adescendent: tdeflist;
 var
  ar1: stringarty;
  ar2: deflistarty;
- list1: trootdeflist;
- po1: pmoduleinfoty;
 begin
  with adescendent do begin
   setlength(ar1,1);

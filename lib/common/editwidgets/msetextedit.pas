@@ -1114,7 +1114,6 @@ var
  int1: integer;
  str1: msestring;
  po1,po2: gridcoordty;
- rect1: rectty;
  grid: tcustomgrid;
 
 begin
@@ -1202,15 +1201,10 @@ begin
        int1:= length(flines[editpos.row-1]);
        if eas_delete in state then begin
         deletetext(makegridcoord(0,editpos.row),makegridcoord(int1,editpos.row-1));
-//        flines.richitems[editpos.row-1]:= richadd(flines.richitems[editpos.row-1],flines.richitems[editpos.row]);
        end
        else begin
         seteditpos(makegridcoord(int1,editpos.row - 1),state = [eas_shift]);
-       end;{
-       if eas_delete in state then begin
-        deletetext(makegridcoord(0,editpos.row+1),makegridcoord(0,editpos.row+2));
        end;
-       }
       end
       else begin
        if not (eas_shift in state) then begin

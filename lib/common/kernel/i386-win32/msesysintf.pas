@@ -857,6 +857,7 @@ function localtimeshift(value: tdatetime; const tolocal: boolean) : integer;
     wo1:= 0;               //0 -> so
    end;
    wo2:= wday; //n't occurence
+   wo3:= 0; //compiler warning
    for int1:= 1 to daysinamonth(ayear,wmonth) do begin
     if wo1 = wdayofweek then begin
      wo3:= int1;

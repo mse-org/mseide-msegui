@@ -792,7 +792,6 @@ function tsourcefo.closepage(const apage: tsourcepage;
 var
  str1: filenamety;
  bo1: boolean;
- int1: integer;
 begin
  result:= apage = nil;
  if not result then begin
@@ -1076,8 +1075,6 @@ begin
 end;
 
 procedure tsourcefo.setbmexec(const sender: TObject);
-var
- int1: integer;
 begin
  setbookmark(activepage,-1,tmenuitem(sender).tag);
 end;

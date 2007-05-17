@@ -51,6 +51,7 @@ type
   function getactioninfopo: pactioninfoty;
   procedure actionchanged;
   function loading: boolean;
+  function shortcutseparator: msechar;
  end;
  
  asynceventty = procedure(const sender: tobject; var atag: integer) of object;
@@ -504,26 +505,30 @@ begin
  end;
 end;
 
-procedure calccaptiontext(var info: actioninfoty);
+procedure calccaptiontext(var info: actioninfoty; const aseparator: msechar);
 var
  str1: msestring;
 begin
  str1:= info.captiontext;
  if (info.shortcut <> 0) and (mao_shortcutcaption in info.options)
            and not (as_disabled in info.state) then begin
+{           
   if mao_shortcutright in info.options then begin
    str1:= str1 + c_tab;
   end
   else begin
    str1:= str1 + ' ';
   end;
-  str1:= str1 + '('+getshortcutname(info.shortcut)+')';
+}
+  str1:= str1 + aseparator + '('+getshortcutname(info.shortcut)+')';
  end;
  captiontorichstring(str1,info.caption1);
 end;
 
 procedure linktoaction(const sender: iactionlink; const aaction: tcustomaction;
                               var info: actioninfoty);
+var
+ sepchar: msechar;
 begin
  with info do begin
   if aaction <> action then begin
@@ -533,13 +538,14 @@ begin
    end
    else begin
     if state * localactionstates <> localactionstates then begin
+     sepchar:= sender.shortcutseparator;
      if not (as_localcaption in state) then begin
       captiontext:= '';
-      calccaptiontext(info);
+      calccaptiontext(info,sepchar);
      end;
      if not (as_localshortcut in state) then begin
       shortcut:= 0;
-      calccaptiontext(info);
+      calccaptiontext(info,sepchar);
      end;
      if not (as_localimagelist in state) then begin
       imagelist:= nil; //do not unink,imagelist is owned by action
@@ -640,7 +646,7 @@ begin
   captiontext:= value;
   include(state,as_localcaption);
  end;
- calccaptiontext(po1^);
+ calccaptiontext(po1^,sender.shortcutseparator);
  sender.actionchanged;
 end;
 
@@ -661,7 +667,7 @@ begin
   shortcut:= value;
   include(state,as_localshortcut);
  end;
- calccaptiontext(po1^);
+ calccaptiontext(po1^,sender.shortcutseparator);
  sender.actionchanged;
 end;
 
@@ -840,7 +846,7 @@ begin
 //   include(state,as_localstate);
    if (mao_shortcutcaption in options) and
            (statebefore * [as_disabled] <> state * [as_disabled]) then begin
-    calccaptiontext(po1^);
+    calccaptiontext(po1^,sender.shortcutseparator);
    end;
   end;
 //  obj1:= sender.getinstance;
@@ -879,7 +885,7 @@ begin
   optionsbefore:= options;
   options:= value;
   if optionsbefore * [mao_shortcutcaption] <> options * [mao_shortcutcaption] then begin
-   calccaptiontext(po1^);
+   calccaptiontext(po1^,sender.shortcutseparator);
   end;
  end;
  sender.actionchanged;
@@ -1136,21 +1142,22 @@ var
  bo1: boolean;
  mask: actionstatesty;
  po1: pactioninfoty;
-
+ sepchar: msechar;
 begin
  bo1:= false;
  po1:= sender.getactioninfopo;
  with po1^ do begin
+  sepchar:= sender.shortcutseparator;
   if not (as_localcaption in state) and
               (captiontext <> finfo.captiontext) then begin
    captiontext:= finfo.captiontext;
-   calccaptiontext(po1^);
+   calccaptiontext(po1^,sepchar);
    bo1:= true;
   end;
   if not (as_localshortcut in state) and
               (shortcut <> finfo.shortcut) then begin
    shortcut:= finfo.shortcut;
-   calccaptiontext(po1^);
+   calccaptiontext(po1^,sepchar);
    bo1:= true;
   end;
   if not (as_localimagelist in state) and

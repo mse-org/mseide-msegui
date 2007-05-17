@@ -89,7 +89,6 @@ type
    function getcaption: captionty;
    procedure setonexecute(const value: notifyeventty);
    procedure setaction(const value: tcustomaction); virtual;
-   function getactioninfopo: pactioninfoty;
    function isonexecutestored: boolean;
    function iscaptionstored: boolean;
    function getstate: actionstatesty;
@@ -107,6 +106,10 @@ type
    procedure setautosize_cx(const avalue: integer);
    procedure setautosize_cy(const avalue: integer);
   protected
+   //iactionlink
+   function getactioninfopo: pactioninfoty;
+   function shortcutseparator: msechar;
+   
    procedure setoptions(const avalue: buttonoptionsty); override;
    function gethint: msestring; override;
    procedure sethint(const Value: msestring); override;
@@ -271,7 +274,6 @@ type
    procedure beginscaling;
    procedure endscaling;
    procedure updateoptionsscale;
-   procedure dochildscaled(const sender: twidget); override;
    procedure dofontheightdelta(var delta: integer); override;
    procedure widgetregionchanged(const sender: twidget); override;
    procedure clientrectchanged; override;
@@ -279,6 +281,7 @@ type
    procedure sizechanged; override;
    procedure visiblepropchanged; override;
   public
+   procedure dochildscaled(const sender: twidget); override;
    property onresize: notifyeventty read fonresize write fonresize;
    property onmove: notifyeventty read fonmove write fonmove;
   published
@@ -532,6 +535,11 @@ end;
 function tcustombutton.getactioninfopo: pactioninfoty;
 begin
  result:= @factioninfo;
+end;
+
+function tcustombutton.shortcutseparator: msechar;
+begin
+ result:= ' ';
 end;
 
 procedure tcustombutton.setaction(const value: tcustomaction);

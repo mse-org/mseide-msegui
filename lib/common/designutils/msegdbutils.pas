@@ -2327,6 +2327,7 @@ var
  ar1: stringarty;
  int1: integer;
 begin
+ ar1:= nil; //compiler warning
  aaddress:= 0;
  result:= getcliresultstring('info address ' + procname,str1);
  if result = gdb_ok then begin

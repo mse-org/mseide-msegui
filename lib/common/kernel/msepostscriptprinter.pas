@@ -630,8 +630,6 @@ begin
 end;
 
 procedure tpostscriptcanvas.initgcstate;
-var
- str1: string;
 begin
  updatescale;
  fps_pagenumber:= 0;
@@ -786,6 +784,7 @@ var
  rect1,rect2: rectty;
  ar1: rectarty;
 begin
+ ar1:= nil; //compiler warning
  with fdrawinfo,gcvalues^ do begin
   if gvm_dashes in mask then begin
    int2:= length(lineinfo.dashes);
@@ -794,7 +793,7 @@ begin
    end;
    str1:= '[';
    for int1:= 1 to int2 do begin
-    str1:= str1 + 
+    str1:= str1 +
          psrealtostr(mmtoprintscale*(byte(lineinfo.dashes[int1])/ppmm))+' ';
    end;
    str1:= str1+'] 0 setdash'+nl;

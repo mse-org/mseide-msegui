@@ -619,6 +619,7 @@ var
  int1: integer;
  ar1: componentarty;
 begin
+ ar1:= nil; //compiler warning
  dec(fstreaming);
  if fstreaming = 0 then begin
   ar1:= copy(fswappedancestors);
@@ -894,7 +895,6 @@ function tdescendentinstancelist.getancestors(
  var
   po1: pointer;
   int1: integer;
-  po2: pmoduleinfoty;
  begin
   po1:= datapo;
   for int1:= 0 to count - 1 do begin
@@ -1193,14 +1193,14 @@ var
  modifiedowners,dependentmodules: moduleinfopoarty;
  streams: streamarty;
  infos: ancestorinfopoarty;
- stream1: tmemorystream;
+// stream1: tmemorystream;
  writer1: twriter;
  reader1: treader;
  comp1,ancestor: tcomponent;
  int1,int2: integer;
  po1: pancestorinfoty;
  po2: pmoduleinfoty;
- rect1: rectty;
+// rect1: rectty;
 
 begin
  if fmodifiedlevel >= 16 then begin
@@ -1249,9 +1249,9 @@ begin
      try
       streams[int1]:= tmemorystream.create;
       writer1:= twriter.create(streams[int1],4096);
+      writer1.onfindancestor:= {$ifdef FPC}@{$endif}fdesigner.findancestor;
+      comp1:= infos[int1]^.descendent;
       try
-       writer1.onfindancestor:= {$ifdef FPC}@{$endif}fdesigner.findancestor;
-       comp1:= infos[int1]^.descendent;
        designer.doswapmethodpointers(comp1,false);
        writer1.writedescendent(comp1,ancestor);
       finally
@@ -1937,7 +1937,6 @@ function tmodulelist.newmodule(const ainherited: boolean;
                                 designmoduleclassname: string): tmoduleinfo;
 var
  po1: pmoduleinfoty;
- int1: integer;
 begin
  po1:= findmodule(afilename);
  if po1 <> nil then begin
@@ -1978,7 +1977,6 @@ begin
    raise;
   end;
  end;
-// add(moduleinfo);
 end;
 
 function tmodulelist.findmethodbyname(const name: string; 
@@ -2385,7 +2383,6 @@ end;
 procedure tdesigner.findmethod2(Reader: TReader; const aMethodName: string;
   var Address: Pointer; var Error: Boolean);
 var
- method: tmethod;
  po2: pmethodinfoty;
 begin
  if error then begin
@@ -2434,7 +2431,6 @@ procedure tdesigner.createcomponent(Reader: TReader; ComponentClass: TComponentC
                    var Component: TComponent);
 var
  asubmoduleinfopo: pmoduleinfoty;
- int1: integer;
 begin
  asubmoduleinfopo:= fsubmoduleinfopo;    //can be recursive
  if asubmoduleinfopo <> nil then begin
@@ -2455,9 +2451,8 @@ procedure tdesigner.docopymethods(const source,dest: tcomponent;
  procedure doprops(const source,desc: tobject);
  var
   ar1: propinfopoarty;
-  int1,int2,int3: integer;
+  int1: integer;
   method1: tmethod;
-  obj1,obj2: tobject;
  begin
   ar1:= getpropinfoar(desc);
   for int1:= 0 to high(ar1) do begin
@@ -2790,11 +2785,10 @@ procedure tdesigner.revert(const acomponent: tcomponent);
 var
  comp1: tcomponent;
  po1: pancestorinfoty;
- po2,po3: pmoduleinfoty;
+ po2: pmoduleinfoty;
  bo1: boolean;
  pos1: pointty;
 begin
- comp1:= nil;
  po2:= fmodules.findmodule(tmsecomponent(acomponent.owner));
  if csinline in acomponent.componentstate then begin
   po1:= fdescendentinstancelist.finddescendentinfo(acomponent);
@@ -3497,11 +3491,6 @@ begin
 end;
 
 procedure tdesigner.releasemethodtable(const amodule: pmoduleinfoty);
-var
- {$ifdef mswindows}
- ca1: cardinal;
- {$endif}
- methodtabpo: ppointer;
 begin
  if amodule <> nil then begin
   with amodule^ do begin
@@ -3519,8 +3508,6 @@ procedure tdesigner.writemodule(const amodule: pmoduleinfoty;
                                      const astream: tstream);
 var
  writer1: twriter;
- ar1: pointarty;
- int1: integer;
  ancestor: tcomponent;
 begin
  buildmethodtable(amodule);
@@ -3924,7 +3911,6 @@ var
  str1: msestring;
  po1: pmoduleinfoty;
  acount: integer;
- ar1: componentarty;
 begin
  result:= nil;
  acount:= 0;
@@ -3983,6 +3969,7 @@ var
  ar1: objectarty;
  int1: integer;
 begin
+ ar1:= nil; //compiler warning
  po1:= findcomponentmodule(acomponent);
  if po1 <> nil then begin
   if newname = '' then begin

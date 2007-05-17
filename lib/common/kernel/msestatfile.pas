@@ -111,6 +111,8 @@ var
  ar1,ar2: stringarty;
  stream1: ttextstream;
 begin
+ ar1:= nil; //compiler warning
+ ar2:= nil; //compiler warning
  if reader <> areader then begin
   if not (sfo_memory in foptions) then begin
    filename:= reader.readstring('filename',ffilename);
@@ -149,6 +151,7 @@ var
  ar1: stringarty;
  stream1: ttextstream;
 begin
+ ar1:= nil;  //compiler warning
  if (writer <> awriter) then begin
   if not (sfo_memory in foptions) then begin
    writer.writestring('filename',ffilename);

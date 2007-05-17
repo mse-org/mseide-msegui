@@ -2139,8 +2139,6 @@ begin
 end;
 
 procedure tdatalist.assigndata(source: tdatalist);
-var
- int1: integer;
 begin
  if source = self then begin
   exit;
