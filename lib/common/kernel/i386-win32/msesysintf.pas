@@ -431,6 +431,19 @@ begin
  end;  
 end;
 
+function sys_deletefile(const filename: filenamety): syserrorty;
+var
+ str1: string;
+begin
+ str1:= winfilepath(filename,'');
+ if windows.deletefile(pchar(str1)) then begin
+  result:= sye_ok;
+ end
+ else begin
+  result:= syelasterror;
+ end;
+end;
+
 function sys_createdir(const path: msestring;
                  const rights: filerightsty): syserrorty;
 var

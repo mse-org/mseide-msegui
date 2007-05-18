@@ -150,6 +150,8 @@ function copyfile(const oldfile,newfile: filenamety;
 function renamefile(const oldname,newname: filenamety; 
                                 const canoverwrite: boolean = true): boolean;
                       //false if newname exists and not canoverwrite
+function deletefile(const filename: filenamety): boolean;
+                      //false if not existing
 procedure createdir(const path: filenamety; 
                                  const rights: filerightsty = defaultdirrights);
 procedure createdirpath(const path: filenamety; 
@@ -262,6 +264,15 @@ begin
   result:= true;
   syserror(sys_renamefile(oldname,newname),'Can not rename File "'+oldname+
             '" to "'+newname+'": ');
+ end;
+end;
+
+function deletefile(const filename: filenamety): boolean;
+                      //false if not existing
+begin
+ result:= findfile(filename);
+ if result then begin
+  syserror(sys_deletefile(filename),'Can not delete file "'+filename+'".');
  end;
 end;
 
