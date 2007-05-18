@@ -950,7 +950,6 @@ function sys_deletefile(const filename: filenamety): syserrorty;
 var
  str1: string;
 begin
-{
  str1:= filename;
  if libc.unlink(pchar(str1)) = -1 then begin
   result:= syelasterror;
@@ -958,7 +957,6 @@ begin
  else begin
   result:= sye_ok;
  end;
- }
 end;
 
 function xstat64(Ver: Integer; FileName: PChar; var StatBuffer: TStatBuf64): Integer; cdecl;
