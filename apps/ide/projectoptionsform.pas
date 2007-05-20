@@ -388,6 +388,7 @@ const
  replacedialogstatname =     'replacedialogfo.sta';
  optionsstatname =           'optionsfo.sta';
  settaborderstatname =       'settaborderfo.sta';
+ setcreateorderstatname =    'setcreateorderfo.sta';
  programparametersstatname = 'programparametersfo.sta';
  settingsstatname =          'settingsfo.sta';
  printerstatname =           'printer.sta';
@@ -632,6 +633,7 @@ begin
   deletememorystatstream(replacedialogstatname);
   deletememorystatstream(optionsstatname);
   deletememorystatstream(settaborderstatname);
+  deletememorystatstream(setcreateorderstatname);
   deletememorystatstream(programparametersstatname);
   deletememorystatstream(printerstatname);
   deletememorystatstream(stringlisteditorstatname);
@@ -837,6 +839,7 @@ begin
   updatememorystatstream('replacedialog',replacedialogstatname);
   updatememorystatstream('options',optionsstatname);
   updatememorystatstream('settaborder',settaborderstatname);
+  updatememorystatstream('setcreateorder',setcreateorderstatname);
   updatememorystatstream('programparameters',programparametersstatname);
   updatememorystatstream('settings',settingsstatname);
   updatememorystatstream('printer',printerstatname);

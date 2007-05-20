@@ -110,6 +110,7 @@ type
    procedure revertexe(const sender: TObject);
    procedure doinsertcomponent(const sender: TObject);
    procedure dotouch(const sender: TObject);
+   procedure dosetcreationorder(const sender: TObject);
   private
    fdesigner: tdesigner;
    fform: twidget;
@@ -302,7 +303,8 @@ implementation
 uses
  formdesigner_mfm,mselist,msekeyboard,mseguiglob,msepointer,msebits,sysutils,
  msestockobjects,msedrawtext,selectsubmoduledialogform,mseshapes,settaborderform,
- msedatalist,objectinspector,projectoptionsform,main,msedatamodules,msetypes;
+ msedatalist,objectinspector,projectoptionsform,main,msedatamodules,msetypes,
+ setcreateorderform;
 
 type
  tcomponent1 = class(tcomponent);
@@ -2517,6 +2519,18 @@ begin
   finally
    fo.Free;
   end;
+ end;
+end;
+
+procedure tformdesignerfo.dosetcreationorder(const sender: TObject);
+var
+ fo: tsetcreateorderfo;
+begin
+ fo:= tsetcreateorderfo.create(module);
+ try
+  fo.show(true,window);
+ finally
+  fo.free;
  end;
 end;
 

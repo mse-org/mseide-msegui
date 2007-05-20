@@ -110,7 +110,8 @@ begin
  end;
 end;
 
-procedure tsettaborderfo.formonclosequery(const sender: tcustommseform; var amodalresult: modalresultty);
+procedure tsettaborderfo.formonclosequery(const sender: tcustommseform;
+           var amodalresult: modalresultty);
 var
  int1: integer;
 begin

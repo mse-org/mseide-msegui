@@ -457,6 +457,7 @@ type
  
 function ownernamepath(const acomponent: tcomponent): string; 
                      //namepath from root to acomponent separated by '.'
+procedure setcomponentorder(const owner: tcomponent; const anames: msestringarty);
 
 function getpropinfoar(const obj: tobject): propinfopoarty;
 
@@ -798,6 +799,20 @@ begin
    comp:= comp.Owner;
   end;
  end;
+end;
+
+procedure setcomponentorder(const owner: tcomponent; const anames: msestringarty);
+var
+ comp1: tcomponent;
+ int1: integer;
+begin
+ for int1:= 0 to high(anames) do begin
+  comp1:= owner.findcomponent(anames[int1]);
+  with tcomponentcracker(owner).fcomponents do begin
+   remove(comp1);
+   add(comp1);
+  end;
+ end; 
 end;
 
 function getlinkedcomponents(const acomponent: tcomponent): componentarty;

@@ -40,7 +40,7 @@ object formdesignerfo: tformdesignerfo
   top = 180
   moduleclassname = 'tmseform'
   object popupme: tpopupmenu
-    menu.submenu.count = 20
+    menu.submenu.count = 21
     menu.submenu.items = <    
       item
         caption = 'Show objectinspector'
@@ -119,6 +119,11 @@ object formdesignerfo: tformdesignerfo
         name = 'settabord'
         state = [as_localcaption, as_localonexecute]
         onexecute = dosettaborder
+      end    
+      item
+        caption = 'Set Creation Order'
+        state = [as_localcaption, as_localonexecute]
+        onexecute = dosetcreationorder
       end    
       item
         caption = 'Sync. to Font Height'
