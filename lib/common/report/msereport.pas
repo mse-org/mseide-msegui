@@ -450,7 +450,8 @@ type
  
  bandoptionty = (bo_once,bo_evenpage,bo_oddpage,
                   //defines hasdata, page nums are null based
-                 bo_visigroupfirst,bo_visigrouplast,
+                 bo_visigroupfirst,bo_visigroupnotfirst,
+                 bo_visigrouplast,bo_visigroupnotlast,
                   //show only on first/last record of group
                  bo_showfirstpage,bo_hidefirstpage,
                  bo_shownormalpage,bo_hidenormalpage,
@@ -3243,6 +3244,10 @@ begin
   if (bo_visigroupfirst in foptions) and (firstrecord or 
                   (fvisigrouplink.field.asinteger <> fgroupnum)) or
          (bo_visigrouplast in foptions) and (lastrecord or 
+                  (fvisigrouplink.field.asinteger <> fnextgroupnum)) or 
+         (bo_visigroupnotfirst in foptions) and not (firstrecord or 
+                  (fvisigrouplink.field.asinteger <> fgroupnum)) or
+         (bo_visigroupnotlast in foptions) and not(lastrecord or 
                   (fvisigrouplink.field.asinteger <> fnextgroupnum)) then begin
    result:= true;
   end
