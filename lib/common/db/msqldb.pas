@@ -201,19 +201,35 @@ type
 
   TCommitRollbackAction = (caNone, caCommit, caCommitRetaining, caRollback,
     caRollbackRetaining);
-
+  transactionoptionty = (tao_fake);
+  transactionoptionsty = set of transactionoptionty;
+  sqltransactioneventty = procedure(const sender: tsqltransaction) of object;
+  
   TSQLTransaction = class (TDBTransaction)
-  private
-   FTrans: TSQLHandle;
-   FAction: TCommitRollbackAction;
-   FParams: TStringList;
-   fstartcount: integer;
-   procedure setparams(const avalue: TStringList);
-  protected
+   private
+    FTrans: TSQLHandle;
+    FAction: TCommitRollbackAction;
+    FParams: TStringList;
+    fstartcount: integer;
+    foptions: transactionoptionsty;
+    fonbeforestart: sqltransactioneventty;
+    fonafterstart: sqltransactioneventty;
+    fonbeforecommit: sqltransactioneventty;
+    fonaftercommit: sqltransactioneventty;
+    fonbeforecommitretaining: sqltransactioneventty;
+    fonaftercommitretaining: sqltransactioneventty;
+    fonbeforerollbackretaining: sqltransactioneventty;
+    fonafterrollbackretaining: sqltransactioneventty;
+    fonbeforerollback: sqltransactioneventty;
+    fonafterrollback: sqltransactioneventty;
+    procedure setparams(const avalue: TStringList);
+    function getdatabase: tcustomsqlconnection;
+    procedure setdatabase1(const avalue: tcustomsqlconnection);
+   protected
     function GetHandle : Pointer; virtual;
     Procedure SetDatabase (Value : TDatabase); override;
     procedure disconnect(const sender: tsqlquery);
-  public
+   public
     constructor Create(AOwner : TComponent); override;
     destructor Destroy; override;
     procedure Commit; virtual;
@@ -223,10 +239,33 @@ type
     procedure StartTransaction; override;
     property Handle: Pointer read GetHandle;
     procedure EndTransaction; override;
-  published
+   published
+    property options: transactionoptionsty read foptions write foptions;
     property Action : TCommitRollbackAction read FAction write FAction;
-    property Database;
+    property Database: tcustomsqlconnection read getdatabase write setdatabase1;
     property Params : TStringList read FParams write setparams;
+    property onbeforestart: sqltransactioneventty read fonbeforestart 
+                                     write fonbeforestart;
+    property onafterstart: sqltransactioneventty read fonafterstart 
+                                     write fonafterstart;
+    property onbeforecommit: sqltransactioneventty read fonbeforecommit
+                                     write fonbeforecommit;
+    property onaftercommit: sqltransactioneventty read fonaftercommit 
+                                     write fonaftercommit;
+    property onbeforecommitretaining: sqltransactioneventty 
+              read fonbeforecommitretaining write fonbeforecommitretaining;
+    property onaftercommitretaining: sqltransactioneventty
+                   read fonaftercommitretaining write fonaftercommitretaining;
+    property onbeforerollback: sqltransactioneventty read fonbeforerollback 
+                                     write fonbeforerollback;
+    property onafterrollback: sqltransactioneventty read fonafterrollback 
+                                     write fonafterrollback;
+    property onbeforerollbackretaining: sqltransactioneventty 
+                            read fonbeforerollbackretaining
+                            write fonbeforerollbackretaining;
+    property onafterrollbackretaining: sqltransactioneventty 
+                            read fonafterrollbackretaining
+                            write fonafterrollbackretaining;
   end;
  
  sqlscripteventty = procedure(const sender: tmsesqlscript;
@@ -990,118 +1029,6 @@ end;
 
 { TSQLTransaction }
 
-procedure TSQLTransaction.EndTransaction;
-
-begin
- case faction of
-  caCommit: commit;
-  caCommitRetaining: commitretaining;
-  caRollbackRetaining: rollbackretaining;
-  else rollback;        //canone,caRollback
- end;
-end;
-
-function TSQLTransaction.GetHandle: pointer;
-begin
-  Result := (Database as tcustomsqlconnection).GetTransactionHandle(FTrans);
-end;
-
-procedure TSQLTransaction.Commit;
-begin
-  if active then
-    begin
-    closedatasets;
-    if (Database as tcustomsqlconnection).commit(FTrans) then
-      begin
-      closeTrans;
-      FreeAndNil(FTrans);
-      end;
-    end;
-end;
-
-procedure TSQLTransaction.CommitRetaining;
-begin
- if active then begin
-  tcustomsqlconnection(database).commitRetaining(FTrans);
- end;
-end;
-
-procedure TSQLTransaction.Rollback;
-begin
- if active then begin
-  closedatasets;
-  if tcustomsqlconnection(database).RollBack(FTrans) then begin
-   CloseTrans;
-   FreeAndNil(FTrans);
-  end;
- end;
-end;
-
-procedure tsqltransaction.disconnect(const sender: tsqlquery);
-var
- int1: integer;
-begin
- with tdbtransactioncracker(self) do begin
-  int1:= 1;
-  if sender.fupdateqry <> nil then begin
-   inc(int1,3); //insert,update,delete
-  end;
-  if fdatasets.count > int1 then begin
-   databaseerror('Offline mode needs exclusive transaction.',sender);
-  end;
-  fdatasets.remove(sender);
-  {
-  with sender do begin
-   if (not IsPrepared) and (assigned(database)) and (assigned(FCursor)) then begin
-        (database as tcustomsqlconnection).UnPrepareStatement(FCursor);
-   end;
-  end;
-  }
-  try
-//   commit;
-   active:= false;
-  finally
-   fdatasets.insert(0,sender);
-  end;
- end;
-end;
-
-procedure TSQLTransaction.RollbackRetaining;
-begin
- if active then begin
-  tcustomsqlconnection(database).RollBackRetaining(FTrans);
- end;
-end;
-
-procedure TSQLTransaction.StartTransaction;
-var 
- db: tcustomsqlconnection;
- int1: integer;
-
-begin
- if Active then begin
-  DatabaseError(SErrTransAlreadyActive);
- end;
- db:= tcustomsqlconnection(database);
- if Db = nil then begin
-  DatabaseError(SErrDatabasenAssigned);
- end;
- inc(fstartcount);
- int1:= fstartcount;
- if not Db.Connected then begin
-  Db.Open;
- end;
- if int1 <> fstartcount then begin
-  exit;
- end;
- if not assigned(FTrans) then begin
-  FTrans:= Db.AllocateTransactionHandle;
- end;
- if Db.StartdbTransaction(FTrans,FParams.CommaText) then begin
-  OpenTrans;
- end;
-end;
-
 constructor TSQLTransaction.Create(AOwner : TComponent);
 begin
   inherited Create(AOwner);
@@ -1121,6 +1048,144 @@ begin
  inherited Destroy;
 end;
 
+procedure TSQLTransaction.StartTransaction;
+var 
+ db: tcustomsqlconnection;
+ int1: integer;
+begin
+ if Active then begin
+  DatabaseError(SErrTransAlreadyActive);
+ end;
+ db:= tcustomsqlconnection(database);
+ if Db = nil then begin
+  DatabaseError(SErrDatabasenAssigned);
+ end;
+ inc(fstartcount);
+ int1:= fstartcount;
+ if checkcanevent(self,tmethod(fonbeforestart)) then begin
+  fonbeforestart(self);
+ end;
+ if not Db.Connected then begin
+  Db.Open;
+ end;
+ if int1 <> fstartcount then begin
+  exit;
+ end;
+ if not assigned(FTrans) then begin
+  FTrans:= Db.AllocateTransactionHandle;
+ end;
+ if (tao_fake in foptions) or 
+             Db.StartdbTransaction(FTrans,FParams.CommaText) then begin
+  OpenTrans;
+ end;
+ if checkcanevent(self,tmethod(fonafterstart)) then begin
+  fonafterstart(self);
+ end;
+end;
+
+procedure TSQLTransaction.EndTransaction;
+
+begin
+ case faction of
+  caCommit: commit;
+  caCommitRetaining: commitretaining;
+  caRollbackRetaining: rollbackretaining;
+  else rollback;        //canone,caRollback
+ end;
+end;
+
+function TSQLTransaction.GetHandle: pointer;
+begin
+  Result := (Database as tcustomsqlconnection).GetTransactionHandle(FTrans);
+end;
+
+procedure TSQLTransaction.Commit;
+var
+ bo1: boolean;
+begin
+ if active then begin
+  if checkcanevent(self,tmethod(fonbeforecommit)) then begin
+   fonbeforecommit(self);
+  end;
+  closedatasets;
+  if (tao_fake in foptions) or tcustomsqlconnection(database).commit(FTrans) then begin
+   closeTrans;
+   FreeAndNil(FTrans);
+  end;
+  if checkcanevent(self,tmethod(fonaftercommit)) then begin
+   fonaftercommit(self);
+  end;
+ end;
+end;
+
+procedure TSQLTransaction.CommitRetaining;
+begin
+ if active then begin
+  if checkcanevent(self,tmethod(fonbeforecommitretaining)) then begin
+   fonbeforecommit(self);
+  end;
+  if not (tao_fake in foptions) then begin
+   tcustomsqlconnection(database).commitRetaining(FTrans);
+  end;
+  if checkcanevent(self,tmethod(fonaftercommitretaining)) then begin
+   fonaftercommit(self);
+  end;
+ end;
+end;
+
+procedure TSQLTransaction.Rollback;
+begin
+ if active then begin
+  if checkcanevent(self,tmethod(fonbeforerollback)) then begin
+   fonbeforerollback(self);
+  end;
+  closedatasets;
+  if (tao_fake in foptions) or tcustomsqlconnection(database).RollBack(FTrans) then begin
+   CloseTrans;
+   FreeAndNil(FTrans);
+  end;
+  if checkcanevent(self,tmethod(fonafterrollback)) then begin
+   fonafterrollback(self);
+  end;
+ end;
+end;
+
+procedure TSQLTransaction.RollbackRetaining;
+begin
+ if active then begin
+  if checkcanevent(self,tmethod(fonbeforerollbackretaining)) then begin
+   fonbeforerollback(self);
+  end;
+  if not (tao_fake in foptions) then begin
+   tcustomsqlconnection(database).RollBackRetaining(FTrans);
+  end;
+  if checkcanevent(self,tmethod(fonafterrollbackretaining)) then begin
+   fonafterrollback(self);
+  end;
+ end;
+end;
+
+procedure tsqltransaction.disconnect(const sender: tsqlquery);
+var
+ int1: integer;
+begin
+ with tdbtransactioncracker(self) do begin
+  int1:= 1;
+  if sender.fupdateqry <> nil then begin
+   inc(int1,3); //insert,update,delete
+  end;
+  if fdatasets.count > int1 then begin
+   databaseerror('Offline mode needs exclusive transaction.',sender);
+  end;
+  fdatasets.remove(sender);
+  try
+   active:= false;
+  finally
+   fdatasets.insert(0,sender);
+  end;
+ end;
+end;
+
 Procedure TSQLTransaction.SetDatabase(Value : TDatabase);
 
 begin
@@ -1134,12 +1199,24 @@ begin
     end;
 end;
 
+function tsqltransaction.getdatabase: tcustomsqlconnection;
+begin
+ result:= tcustomsqlconnection(inherited database);
+end;
+
+procedure tsqltransaction.setdatabase1(const avalue: tcustomsqlconnection);
+begin
+ setdatabase(avalue);
+end;
+
 procedure TSQLTransaction.setparams(const avalue: TStringList);
 begin
  fparams.assign(avalue);
 end;
 
+
 { TSQLQuery }
+
 procedure TSQLQuery.OnChangeSQL(Sender : TObject);
 
 var ParamName : String;
