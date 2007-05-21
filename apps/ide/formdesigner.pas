@@ -2525,8 +2525,17 @@ end;
 procedure tformdesignerfo.dosetcreationorder(const sender: TObject);
 var
  fo: tsetcreateorderfo;
+ str1: string;
 begin
- fo:= tsetcreateorderfo.create(module);
+ with tdesignwindow(window) do begin
+  if (fselections.count = 1) and (selections[0].owner = module) then begin
+   str1:= fselections[0].name;
+  end
+  else begin
+   str1:= '';
+  end;
+ end;
+ fo:= tsetcreateorderfo.create(module,str1);
  try
   fo.show(true,window);
  finally

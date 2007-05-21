@@ -17,7 +17,8 @@ type
   private
    fmodule: tcomponent;
   public
-   constructor create(aowner: tcomponent); override;
+   constructor create(const amodule: tcomponent; const acurrentcompname: string);
+                       reintroduce;
  end;
 var
  setcreateorderfo: tsetcreateorderfo;
@@ -28,18 +29,23 @@ uses
  
 { tsetcreateorderfo }
 
-constructor tsetcreateorderfo.create(aowner: tcomponent);
+constructor tsetcreateorderfo.create(const amodule: tcomponent;
+                         const acurrentcompname: string);
 var
  int1: integer;
+ str1: string;
 begin
  inherited create(nil);
- caption:= 'Set Component create Order of '+aowner.name;
- fmodule:= aowner;
- with aowner do begin
+ caption:= 'Set Component create Order of '+amodule.name;
+ fmodule:= amodule;
+ with amodule do begin
   for int1:= 0 to componentcount - 1 do begin
    with components[int1] do begin
     if not hasparent then begin
      grid.appendrow([msestring(name),msestring(classname)]);
+     if acurrentcompname = name then begin
+      grid.row:=int1;
+     end;
     end;
    end;
   end;
