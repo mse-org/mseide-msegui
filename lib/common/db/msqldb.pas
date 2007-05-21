@@ -204,9 +204,10 @@ type
 
   TSQLTransaction = class (TDBTransaction)
   private
-    FTrans               : TSQLHandle;
-    FAction              : TCommitRollbackAction;
-    FParams              : TStringList;
+   FTrans: TSQLHandle;
+   FAction: TCommitRollbackAction;
+   FParams: TStringList;
+   fstartcount: integer;
    procedure setparams(const avalue: TStringList);
   protected
     function GetHandle : Pointer; virtual;
@@ -1073,23 +1074,32 @@ begin
 end;
 
 procedure TSQLTransaction.StartTransaction;
-
-var db : tcustomsqlconnection;
+var 
+ db: tcustomsqlconnection;
+ int1: integer;
 
 begin
-  if Active then
-    DatabaseError(SErrTransAlreadyActive);
-
-  db := (Database as tcustomsqlconnection);
-
-  if Db = nil then
-    DatabaseError(SErrDatabasenAssigned);
-
-  if not Db.Connected then
-    Db.Open;
-  if not assigned(FTrans) then FTrans := Db.AllocateTransactionHandle;
-
-  if Db.StartdbTransaction(FTrans,FParams.CommaText) then OpenTrans;
+ if Active then begin
+  DatabaseError(SErrTransAlreadyActive);
+ end;
+ db:= tcustomsqlconnection(database);
+ if Db = nil then begin
+  DatabaseError(SErrDatabasenAssigned);
+ end;
+ inc(fstartcount);
+ int1:= fstartcount;
+ if not Db.Connected then begin
+  Db.Open;
+ end;
+ if int1 <> fstartcount then begin
+  exit;
+ end;
+ if not assigned(FTrans) then begin
+  FTrans:= Db.AllocateTransactionHandle;
+ end;
+ if Db.StartdbTransaction(FTrans,FParams.CommaText) then begin
+  OpenTrans;
+ end;
 end;
 
 constructor TSQLTransaction.Create(AOwner : TComponent);

@@ -69,7 +69,7 @@ object setcreateorderfo: tsetcreateorderfo
     bounds_y = 312
     bounds_cx = 58
     bounds_cy = 20
-    anchors = [an_top, an_right]
+    anchors = [an_right, an_bottom]
     taborder = 1
     state = [as_localcaption]
     caption = '&OK'
@@ -82,7 +82,7 @@ object setcreateorderfo: tsetcreateorderfo
     bounds_y = 312
     bounds_cx = 58
     bounds_cy = 20
-    anchors = [an_top, an_right]
+    anchors = [an_right, an_bottom]
     taborder = 2
     state = [as_default, as_localdefault, as_localcaption]
     caption = '&Cancel'
