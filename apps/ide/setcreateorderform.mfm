@@ -1,13 +1,13 @@
 object setcreateorderfo: tsetcreateorderfo
   bounds_x = 223
   bounds_y = 264
-  bounds_cx = 311
+  bounds_cx = 381
   bounds_cy = 340
   taborder = 1
   container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_subfocus, ow_mousetransparent, ow_mousewheel, ow_destroywidgets, ow_autoscale]
   container.bounds_x = 0
   container.bounds_y = 0
-  container.bounds_cx = 311
+  container.bounds_cx = 381
   container.bounds_cy = 340
   container.frame.dummy = 0
   options = [fo_closeonesc, fo_autoreadstat, fo_autowritestat, fo_savepos, fo_savestate]
@@ -19,7 +19,7 @@ object setcreateorderfo: tsetcreateorderfo
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_focusbackonesc, ow_mousewheel, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
     bounds_x = 0
     bounds_y = 0
-    bounds_cx = 311
+    bounds_cx = 381
     bounds_cy = 306
     frame.dummy = 0
     anchors = [an_top, an_bottom]
@@ -28,11 +28,11 @@ object setcreateorderfo: tsetcreateorderfo
     datacols.options = [co_readonly, co_focusselect, co_rowselect, co_proportional, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_mousescrollrow]
     datacols.items = <    
       item
-        width = 134
+        width = 165
         options = [co_readonly, co_focusselect, co_rowselect, co_proportional, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_mousescrollrow]
       end    
       item
-        width = 120
+        width = 159
         options = [co_readonly, co_focusselect, co_rowselect, co_fill, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_mousescrollrow]
         optionsedit = [scoe_undoonesc, scoe_eatreturn, scoe_autoselect, scoe_autoselectonfirstclick, scoe_hintclippedtext]
       end>
@@ -65,7 +65,7 @@ object setcreateorderfo: tsetcreateorderfo
   end
   object tbutton1: tbutton
     optionswidget = [ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
-    bounds_x = 184
+    bounds_x = 254
     bounds_y = 312
     bounds_cx = 58
     bounds_cy = 20
@@ -78,7 +78,7 @@ object setcreateorderfo: tsetcreateorderfo
   end
   object tbutton2: tbutton
     optionswidget = [ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
-    bounds_x = 248
+    bounds_x = 318
     bounds_y = 312
     bounds_cx = 58
     bounds_cy = 20
