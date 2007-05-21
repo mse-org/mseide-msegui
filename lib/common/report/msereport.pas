@@ -2949,7 +2949,7 @@ begin
  fparentintf.updatevisible; //??
  empty:= empty or (rbs_finish in fstate);
  dobeforerender(empty);
- fparentintf.updatevisible;
+// fparentintf.updatevisible;
  if not empty then begin
   if visible then begin
    if fparentintf.beginband(acanvas,self) then begin
@@ -3220,7 +3220,7 @@ begin
   end;
  end;
 end;
-
+{
 function tcustomrecordband.bandisvisible(const checklast: boolean): boolean;
 label
  endlab;
@@ -3256,6 +3256,83 @@ begin
    goto endlab;
   end;
  end; 
+ if checkvisibility(fparentintf,foptions,checklast,result,bo1) then begin
+  if firstrecord then begin
+   if bo_showfirstrecord in foptions then begin
+    result:= true;
+    goto endlab;
+   end
+   else begin
+    if bo_hidefirstrecord in foptions then begin
+     result:= false;
+     bo1:= false;
+    end;
+   end;
+  end;
+  if lastrecord then begin
+   if bo_showlastrecord in foptions then begin
+    result:= true;
+    goto endlab;
+   end
+   else begin
+    if bo_hidelastrecord in foptions then begin
+     result:= false;
+     bo1:= false;
+    end;
+   end;
+  end;
+  if not firstrecord and not lastrecord then begin
+   if bo_shownormalrecord in foptions then begin
+    result:= true;
+    goto endlab;
+   end
+   else begin
+    if bo_hidenormalrecord in foptions then begin
+     result:= false;
+     bo1:= false;
+    end;
+   end;
+  end;
+  if bo1 then begin
+   result:= true;
+  end;
+ end;
+ endlab:
+end;
+}
+function tcustomrecordband.bandisvisible(const checklast: boolean): boolean;
+label
+ endlab;
+var
+ firstrecord,lastrecord: boolean;
+ bo1: boolean;
+begin
+ result:= visible;
+ firstrecord:= isfirstrecord;
+ lastrecord:= islastrecord;
+ if fvisigrouplink.fieldactive then begin
+  if (bo_visigroupfirst in foptions) and (firstrecord or 
+                  (fvisigrouplink.field.asinteger <> fgroupnum)) or
+         (bo_visigrouplast in foptions) and (lastrecord or 
+                  (fvisigrouplink.field.asinteger <> fnextgroupnum)) or 
+         (bo_visigroupnotfirst in foptions) and not (firstrecord or 
+                  (fvisigrouplink.field.asinteger <> fgroupnum)) or
+         (bo_visigroupnotlast in foptions) and not(lastrecord or 
+                  (fvisigrouplink.field.asinteger <> fnextgroupnum)) then begin
+   result:= true;
+  end
+  else begin
+   result:= false;
+  end;
+ end; 
+ if fvisidatalink.fieldactive then begin
+  if fvisidatalink.field.isnull then begin
+   result:= false;
+  end
+  else begin
+   result:= true;
+  end;
+ end;
  if checkvisibility(fparentintf,foptions,checklast,result,bo1) then begin
   if firstrecord then begin
    if bo_showfirstrecord in foptions then begin
