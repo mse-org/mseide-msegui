@@ -65,6 +65,7 @@ type
                                    const aparam: tparam);
    function blobscached: boolean;
 
+   procedure setoptions(const avalue: sqliteoptionsty);
   protected
    function stringquery(const asql: string): stringarty;
    function stringsquery(const asql: string): stringararty;
@@ -117,7 +118,7 @@ type
    property DatabaseName: filenamety read getdatabasename write setdatabasename;
    property Connected: boolean read getconnected write setconnected;
    property controller: tdbcontroller read fcontroller write setcontroller;
-   property options: sqliteoptionsty read foptions write foptions;
+   property options: sqliteoptionsty read foptions write setoptions;
 //    property Password;
    property Transaction;
    property afterconnect;
@@ -862,6 +863,14 @@ function tsqlite3connection.cantransaction: boolean;
 begin
  result:= (slo_transactions in foptions) and 
     ((slo_designtransactions in foptions) or not (csdesigning in componentstate)); 
+end;
+
+procedure tsqlite3connection.setoptions(const avalue: sqliteoptionsty);
+begin
+ if avalue <> foptions then begin
+  checkdisconnected;
+  foptions:= avalue;
+ end;
 end;
 
 end.
