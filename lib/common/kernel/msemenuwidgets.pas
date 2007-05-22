@@ -19,6 +19,7 @@ uses
 type
  menucellinfoty = record
   buttoninfo: shapeinfoty;
+  dimouter: rectty;
  end;
  menucellinfoarty = array of menucellinfoty;
 
@@ -36,6 +37,8 @@ type
   colorglyph: colorty;
   itemframetemplate: tframetemplate;
   itemface: tcustomface;
+  itemframetemplateactive: tframetemplate;
+  itemfaceactive: tcustomface;
  end;
 
  ppopupmenuwidget = ^tpopupmenuwidget;
@@ -477,6 +480,11 @@ begin
   else begin
    size:= nullsize;
   end;
+  for int1:= 0 to count - 1 do begin
+   with cells[int1],buttoninfo do begin
+    dimouter:= inflaterect(dim,framehalfwidth);
+   end;
+  end;
  end;
 end;
 
@@ -507,7 +515,7 @@ end;
 procedure drawmenu(const canvas: tcanvas; const layout: menulayoutinfoty);
 var
  int1: integer;
- po1: pframety;
+ po1,po2: pframety;
 begin
  with layout do begin
   if itemframetemplate <> nil then begin
@@ -516,13 +524,28 @@ begin
   else begin
    po1:= nil;
   end; 
+  if itemframetemplateactive <> nil then begin
+   po2:= @tframetemplate1(itemframetemplateactive).fi.innerframe;
+  end
+  else begin
+   po2:= nil;
+  end; 
   for int1:= 0 to high(cells) do begin
    with cells[int1] do begin
-    if itemframetemplate <> nil then begin
-     itemframetemplate.draw3dframe(canvas,buttoninfo.dim);
+    if int1 = activeitem then begin
+     if itemframetemplateactive <> nil then begin
+      itemframetemplateactive.draw3dframe(canvas,buttoninfo.dim);
+     end;
+     buttoninfo.face:= itemfaceactive;
+     drawmenubutton(canvas,buttoninfo,po2);
+    end
+    else begin
+     if itemframetemplate <> nil then begin
+      itemframetemplate.draw3dframe(canvas,buttoninfo.dim);
+     end;
+     buttoninfo.face:= itemface;
+     drawmenubutton(canvas,buttoninfo,po1);
     end;
-    buttoninfo.face:= itemface;
-    drawmenubutton(canvas,buttoninfo,po1);
    end;
   end;
  end;
@@ -647,6 +670,7 @@ begin
  freeandnil(fnextpopup);
  inherited;
  flayout.itemface.free;
+ flayout.itemfaceactive.free;
 end;
 
 procedure tpopupmenuwidget.release;
@@ -704,6 +728,21 @@ begin
   else begin
    freeandnil(flayout.itemface);
   end;
+  if itemframeactive <> nil then begin
+   flayout.itemframetemplateactive:= itemframeactive.template;
+  end
+  else begin
+   flayout.itemframetemplateactive:= nil;
+  end;
+  if itemfaceactive <> nil then begin
+   if flayout.itemfaceactive = nil then begin
+    flayout.itemfaceactive:= tcustomface.create(iface(self));
+   end;
+   flayout.itemfaceactive.assign(itemfaceactive.template);
+  end
+  else begin
+   freeandnil(flayout.itemfaceactive);
+  end;
   updatelayout;
  end;
 end;
@@ -714,6 +753,8 @@ begin
  setlinkedvar(source.face,tmsecomponent(ftemplates.face));
  setlinkedvar(source.itemframe,tmsecomponent(ftemplates.itemframe));
  setlinkedvar(source.itemface,tmsecomponent(ftemplates.itemface));
+ setlinkedvar(source.itemframeactive,tmsecomponent(ftemplates.itemframeactive));
+ setlinkedvar(source.itemfaceactive,tmsecomponent(ftemplates.itemfaceactive));
  updatetemplates; 
 end;
 
@@ -966,9 +1007,9 @@ begin
     if (fnextpopup <> nil) then begin
      fnextpopup.release;
     end;
-    with cells[activeitem].buttoninfo do begin
+    with cells[activeitem],buttoninfo do begin
      state:= state - [ss_clicked,ss_mouse];
-     invalidaterect(dim);
+     invalidaterect(dimouter);
     end;
    end;
    activeitem:= value1;
@@ -976,17 +1017,12 @@ begin
     if not menu[value1].canactivate then begin
      activeitem:= nextmenuitem(flayout);
     end;
-    with cells[activeitem].buttoninfo do begin
+    with cells[activeitem],buttoninfo do begin
      state:= state + [ss_mouse];
      if aclicked then begin
       include(state,ss_clicked);
      end;
-     invalidaterect(dim);
-     {
-     if mlo_main in options then begin
-      capturekeyboard;
-     end;
-     }
+     invalidaterect(dimouter);
      if not (mlo_childreninactive in options) and
               (tmenuitem1(menu).fsubmenu[activeitem].count > 0) then begin
       tpopupmenuwidget.create(@fnextpopup,tmenuitem1(menu).fsubmenu[activeitem],
@@ -999,10 +1035,6 @@ begin
      end;
     end;
     capturemouse;
-//    if not (not canfocus or setfocus(application.activewindow <> nil) or 
-//                     not(mlo_main in options)) then begin
-//     closepopupstack(nil);
-//    end;
    end
    else begin
     if mlo_main in options then begin

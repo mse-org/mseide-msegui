@@ -190,6 +190,8 @@ type
   face: tfacecomp;
   itemframe: tframecomp;
   itemface: tfacecomp;
+  itemframeactive: tframecomp;
+  itemfaceactive: tfacecomp;
  end;
 
  tcustommenu = class(tmsecomponent)
@@ -205,6 +207,8 @@ type
    procedure setfacetemplate(const avalue: tfacecomp);
    procedure setitemframetemplate(const avalue: tframecomp);
    procedure setitemfacetemplate(const avalue: tfacecomp);
+   procedure setitemframetemplateactive(const avalue: tframecomp);
+   procedure setitemfacetemplateactive(const avalue: tfacecomp);
   protected
    ftransientfor: twidget;
    fmouseinfopo: pmouseeventinfoty;
@@ -235,6 +239,10 @@ type
                             write setitemframetemplate;
    property itemfacetemplate: tfacecomp read ftemplate.itemface 
                             write setitemfacetemplate;
+   property itemframetemplateactive: tframecomp read ftemplate.itemframeactive 
+                            write setitemframetemplateactive;
+   property itemfacetemplateactive: tfacecomp read ftemplate.itemfaceactive 
+                            write setitemfacetemplateactive;
    property template: menutemplatety read ftemplate;
    property options: menuoptionsty read foptions write foptions default defaultmenuoptions;
    property onupdate: menueventty read fonupdate write fonupdate;
@@ -249,6 +257,8 @@ type
    property facetemplate;
    property itemframetemplate;
    property itemfacetemplate;
+   property itemframetemplateactive;
+   property itemfacetemplateactive;
  end;
 
  tpopupmenu = class(tmenu)
@@ -283,6 +293,8 @@ type
    procedure setpopupfacetemplate(const avalue: tfacecomp);
    procedure setpopupitemframetemplate(const avalue: tframecomp);
    procedure setpopupitemfacetemplate(const avalue: tfacecomp);
+   procedure setpopupitemframetemplateactive(const avalue: tframecomp);
+   procedure setpopupitemfacetemplateactive(const avalue: tfacecomp);
   protected
    procedure doidle(var again: boolean);
    procedure menuchanged(const sender: tmenuitem);
@@ -299,6 +311,10 @@ type
                       write setpopupitemframetemplate;
    property popupitemfacetemplate: tfacecomp read fpopuptemplate.itemface
                       write setpopupitemfacetemplate;
+   property popupitemframetemplateactive: tframecomp read fpopuptemplate.itemframeactive
+                      write setpopupitemframetemplateactive;
+   property popupitemfacetemplateactive: tfacecomp read fpopuptemplate.itemfaceactive
+                      write setpopupitemfacetemplateactive;
  end;
  
  tmainmenu = class(tcustommainmenu)
@@ -310,11 +326,15 @@ type
    property facetemplate;
    property itemframetemplate;
    property itemfacetemplate;
+   property itemframetemplateactive;
+   property itemfacetemplateactive;
 
    property popupframetemplate;
    property popupfacetemplate;
    property popupitemframetemplate;
    property popupitemfacetemplate;
+   property popupitemframetemplateactive;
+   property popupitemfacetemplateactive;
  end;
 
  twidgetmainmenu = class(tcustommainmenu)
@@ -326,11 +346,15 @@ type
 //   property facetemplate;
    property itemframetemplate;
    property itemfacetemplate;
+   property itemframetemplateactive;
+   property itemfacetemplateactive;
 
    property popupframetemplate;
    property popupfacetemplate;
    property popupitemframetemplate;
    property popupitemfacetemplate;
+   property popupitemframetemplateactive;
+   property popupitemfacetemplateactive;
  end; 
 procedure freetransientmenu(var amenu: tcustommenu);
 
@@ -500,6 +524,22 @@ procedure tcustommenu.setitemfacetemplate(const avalue: tfacecomp);
 begin
  if avalue <> ftemplate.itemface then begin
   setlinkedvar(avalue,tmsecomponent(ftemplate.itemface));
+  sendchangeevent;
+ end;
+end;
+
+procedure tcustommenu.setitemframetemplateactive(const avalue: tframecomp);
+begin
+ if avalue <> ftemplate.itemframeactive then begin
+  setlinkedvar(avalue,tmsecomponent(ftemplate.itemframeactive));
+  sendchangeevent;
+ end;
+end;
+
+procedure tcustommenu.setitemfacetemplateactive(const avalue: tfacecomp);
+begin
+ if avalue <> ftemplate.itemfaceactive then begin
+  setlinkedvar(avalue,tmsecomponent(ftemplate.itemfaceactive));
   sendchangeevent;
  end;
 end;
@@ -1343,6 +1383,20 @@ procedure tcustommainmenu.setpopupitemfacetemplate(const avalue: tfacecomp);
 begin
  if avalue <> fpopuptemplate.itemface then begin
   setlinkedvar(avalue,tmsecomponent(fpopuptemplate.itemface));
+ end;
+end;
+
+procedure tcustommainmenu.setpopupitemframetemplateactive(const avalue: tframecomp);
+begin
+ if avalue <> fpopuptemplate.itemframeactive then begin
+  setlinkedvar(avalue,tmsecomponent(fpopuptemplate.itemframeactive));
+ end;
+end;
+
+procedure tcustommainmenu.setpopupitemfacetemplateactive(const avalue: tfacecomp);
+begin
+ if avalue <> fpopuptemplate.itemfaceactive then begin
+  setlinkedvar(avalue,tmsecomponent(fpopuptemplate.itemfaceactive));
  end;
 end;
 
