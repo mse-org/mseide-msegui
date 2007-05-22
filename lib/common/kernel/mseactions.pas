@@ -511,7 +511,7 @@ var
 begin
  str1:= info.captiontext;
  if (info.shortcut <> 0) and (mao_shortcutcaption in info.options)
-           and not (as_disabled in info.state) then begin
+           {and not (as_disabled in info.state)} then begin
 {           
   if mao_shortcutright in info.options then begin
    str1:= str1 + c_tab;

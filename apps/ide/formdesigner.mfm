@@ -62,29 +62,33 @@ object formdesignerfo: tformdesignerfo
         options = [mao_separator, mao_shortcutcaption]
       end    
       item
-        caption = 'Copy Component(s) (Ctrl+C)'
+        caption = 'Copy Component(s)'
         name = 'copy'
-        state = [as_localcaption, as_localonexecute]
+        state = [as_localcaption, as_localshortcut, as_localonexecute]
+        shortcut = 16451
         onexecute = copyexe
       end    
       item
-        caption = 'Cut Component(s)(Ctrl+X)'
+        caption = 'Cut Component(s)'
         name = 'cut'
-        state = [as_localcaption, as_localonexecute]
+        state = [as_localcaption, as_localshortcut, as_localonexecute]
         options = [mao_shortcutcaption, mao_asyncexecute]
+        shortcut = 16472
         onexecute = cutexe
       end    
       item
-        caption = 'Paste Component(s) (Ctrl+V)'
+        caption = 'Paste Component(s)'
         name = 'paste'
-        state = [as_localcaption, as_localonexecute]
+        state = [as_localcaption, as_localshortcut, as_localonexecute]
+        shortcut = 16470
         onexecute = pasteexe
       end    
       item
-        caption = 'Delete Component(s) (Del)'
+        caption = 'Delete Component(s)'
         name = 'delete'
-        state = [as_localcaption, as_localonexecute]
+        state = [as_localcaption, as_localshortcut, as_localonexecute]
         options = [mao_shortcutcaption, mao_asyncexecute]
+        shortcut = 4103
         onexecute = deleteexe
       end    
       item
