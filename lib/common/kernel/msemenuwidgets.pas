@@ -293,7 +293,10 @@ begin
   end;
   if itemframetemplate <> nil then begin
    with tframetemplate1(itemframetemplate) do begin
-    framehalfwidth:= (abs(levelo) + abs(leveli) + framewidth);
+    int1:= (abs(levelo) + abs(leveli) + framewidth);
+    if int1 > framehalfwidth then begin
+     framehalfwidth:= int1;
+    end;
     frame1:= fi.innerframe;
     extrasp:= fi.extraspace;
    end;
