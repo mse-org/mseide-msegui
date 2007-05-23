@@ -26,7 +26,8 @@ type
 
                  ss_clicked,ss_mouse,ss_moveclick,ss_focused,
                  ss_horz,ss_vert,ss_opposite,
-                 ss_widgetorg,ss_showfocusrect,ss_showdefaultrect,ss_flat,
+                 ss_widgetorg,ss_showfocusrect,ss_showdefaultrect,
+                 ss_flat,ss_noanimation,
                  ss_checkbutton,
                  ss_submenu);
  shapestatesty = set of shapestatety;
@@ -505,13 +506,15 @@ begin
    else begin
     level:= 1;
    end;
-   if (ss_mouse in state) and not (ss_disabled in state) and 
-           (animatemouseenter or (ss_flat in state)) then begin
-    inc(level);
-   end;
-   if (ss_clicked in state) or
-        (state * [ss_checked,ss_checkbutton] = [ss_checked,ss_checkbutton])  then begin
-    level:= -1;
+   if not (ss_noanimation in state) then begin
+    if (ss_mouse in state) and not (ss_disabled in state) and 
+            (animatemouseenter or (ss_flat in state)) then begin
+     inc(level);
+    end;
+    if (ss_clicked in state) or
+         (state * [ss_checked,ss_checkbutton] = [ss_checked,ss_checkbutton])  then begin
+     level:= -1;
+    end;
    end;
    clientrect:= dim;
    if (state * [ss_focused,ss_showdefaultrect] = [ss_focused,ss_showdefaultrect]) or

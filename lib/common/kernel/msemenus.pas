@@ -18,7 +18,8 @@ uses
  msetypes,msestrings,Classes,msekeyboard,msebitmap;
 
 type
- menuoptionty = (mo_insertfirst,mo_singleregion,mo_shortcutright,mo_activate);
+ menuoptionty = (mo_insertfirst,mo_singleregion,mo_shortcutright,mo_activate,
+                 mo_flat);
  menuoptionsty = set of menuoptionty;
 const
  defaultmenuoptions = [mo_shortcutright];
@@ -134,7 +135,7 @@ type
    procedure doshortcut(var info: keyeventinfoty);
    function count: integer;
    function parentmenu: tmenuitem;
-   function owner: tcustommenu;
+   property owner: tcustommenu read fowner; //can be nil
    function execute: boolean; //true if onexecute fired
    function asyncexecute: boolean;
    function canactivate: boolean;
@@ -209,6 +210,7 @@ type
    procedure setitemfacetemplate(const avalue: tfacecomp);
    procedure setitemframetemplateactive(const avalue: tframecomp);
    procedure setitemfacetemplateactive(const avalue: tfacecomp);
+   procedure setoptions(const avalue: menuoptionsty);
   protected
    ftransientfor: twidget;
    fmouseinfopo: pmouseeventinfoty;
@@ -244,7 +246,7 @@ type
    property itemfacetemplateactive: tfacecomp read ftemplate.itemfaceactive 
                             write setitemfacetemplateactive;
    property template: menutemplatety read ftemplate;
-   property options: menuoptionsty read foptions write foptions default defaultmenuoptions;
+   property options: menuoptionsty read foptions write setoptions default defaultmenuoptions;
    property onupdate: menueventty read fonupdate write fonupdate;
  end;
 
@@ -457,6 +459,7 @@ begin
  if source is tcustommenu then begin
   with tcustommenu(source) do begin
    self.onupdate:= onupdate;
+   self.foptions:= options;
    self.fmenu.Assign(fmenu);
   end;
  end
@@ -564,6 +567,14 @@ begin
  ftemplate:= source.ftemplate;
 end;
 
+procedure tcustommenu.setoptions(const avalue: menuoptionsty);
+begin
+ if avalue <> foptions then begin
+  foptions:= avalue;
+  sendchangeevent;
+ end;
+end;
+
 { tmenufont }
 
 class function tmenufont.getinstancepo(owner: tobject): pfont;
@@ -630,11 +641,6 @@ end;
 function tmenuitem.parentmenu: tmenuitem;
 begin
  result:= fparentmenu;
-end;
-
-function tmenuitem.owner: tcustommenu;
-begin
- result:= fowner;
 end;
 
 procedure tmenuitem.setcaption(const Value: msestring);
@@ -1338,6 +1344,7 @@ begin
  additems(amenu,atransientfor,mouseinfo,items.fmenu.fsubmenu,aseparator,
             mo_insertfirst in items.foptions);
  if bo1 then begin
+  amenu.foptions:= items.foptions;
   amenu.assigntemplate(items);
   amenu.fmenu.ffont:= items.fmenu.ffont;
  end;
