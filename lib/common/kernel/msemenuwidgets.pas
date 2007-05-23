@@ -285,20 +285,24 @@ var
 begin
  ar1:= nil; //compiler warning
  with layout,tmenuitem1(menu) do begin
+  framehalfwidth:= 0;
+  if itemframetemplateactive <> nil then begin
+   with tframetemplate1(itemframetemplateactive) do begin
+    framehalfwidth:= (abs(levelo) + abs(leveli) + framewidth);
+   end;
+  end;
   if itemframetemplate <> nil then begin
    with tframetemplate1(itemframetemplate) do begin
     framehalfwidth:= (abs(levelo) + abs(leveli) + framewidth);
-    framewidth1:= framehalfwidth * 2;
     frame1:= fi.innerframe;
     extrasp:= fi.extraspace;
    end;
   end
   else begin
-   framehalfwidth:= 0;
-   framewidth1:= 0;
    frame1:= nullframe;
    extrasp:= 0;
   end; 
+  framewidth1:= framehalfwidth * 2;
   framewidth1:= framewidth1 + extrasp;
   setlength(cells,count);
   maxheight:= 0;
