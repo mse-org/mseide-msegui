@@ -352,10 +352,18 @@ type
    class function getinstancepo(owner: tobject): pfont; override;
  end;
 
+ tcol = class;
+ 
+ celleventty = procedure(const sender: tobject; var info: celleventinfoty) of object;
+ drawcelleventty = procedure(const sender: tcol; const canvas: tcanvas;
+                          const cellinfo: cellinfoty) of object;
+ beforedrawcelleventty = procedure(const sender: tcol; const canvas: tcanvas;
+                          const cellinfo: cellinfoty; var handled: boolean) of object;
  tcol = class(tgridprop)
   private
    frowfontoffset: integer;
    frowcoloroffset: integer;
+   fonbeforedrawcell: beforedrawcelleventty;
    function getcolindex: integer;
    procedure setfocusrectdist(const avalue: integer);
    procedure updatepropwidth;
@@ -411,13 +419,12 @@ type
    property width: integer read fwidth write setwidth stored iswidthstored;
    property rowcoloroffset: integer read frowcoloroffset write setrowcoloroffset default 0;
    property rowfontoffset: integer read frowfontoffset write setrowfontoffset default 0;
+   property onbeforedrawcell: beforedrawcelleventty read fonbeforedrawcell
+                                write fonbeforedrawcell;
  end;
 
  tdatacol = class;
 
- celleventty = procedure(const sender: tobject; var info: celleventinfoty) of object;
- drawcelleventty = procedure(const sender: tcol; const canvas: tcanvas;
-                          const cellinfo: cellinfoty) of object;
  showcolhinteventty = procedure(const sender: tdatacol; const arow: integer;
                            var info: hintinfoty) of object;
 
@@ -2294,14 +2301,16 @@ end;
 procedure tcol.paint(const info: colpaintinfoty);
 var
  int1: integer;
- bo1: boolean;
+ bo1,bo2: boolean;
  saveindex: integer;
  selectedcolor1: colorty;
  linewidthbefore: integer;
  font1: tfont;
+ canbeforedrawcell: boolean;
 
 begin
  if not (co_invisible in foptions) or (csdesigning in fgrid.ComponentState) then begin
+  canbeforedrawcell:= fgrid.canevent(tmethod(fonbeforedrawcell));
   with info do begin
    fcellinfo.font:= nil;
    bo1:= (fcellinfo.cell.col = fgrid.ffocusedcell.col) and
@@ -2341,19 +2350,25 @@ begin
      fcellinfo.color:= rowcolor(int1);
     end;
     canvas.intersectcliprect(makerect(nullpoint,fcellrect.size));
-    if bo1 and (int1 = fgrid.ffocusedcell.row) then begin
-     canvas.save;
-     try
-      drawfocusedcell(canvas);
-      if co_drawfocus in foptions then begin
-       drawfocus(canvas);
+    bo2:= false;
+    if canbeforedrawcell then begin
+     fonbeforedrawcell(self,canvas,fcellinfo,bo2);
+    end;
+    if not bo2 then begin
+     if bo1 and (int1 = fgrid.ffocusedcell.row) then begin
+      canvas.save;
+      try
+       drawfocusedcell(canvas);
+       if co_drawfocus in foptions then begin
+        drawfocus(canvas);
+       end;
+      finally
+       canvas.restore;
       end;
-     finally
-      canvas.restore;
+     end
+     else begin
+      drawcell(canvas);
      end;
-    end
-    else begin
-     drawcell(canvas);
     end;
     canvas.restore(saveindex);
     canvas.move(makepoint(0,ystep));
