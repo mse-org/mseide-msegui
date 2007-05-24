@@ -358,7 +358,7 @@ type
  drawcelleventty = procedure(const sender: tcol; const canvas: tcanvas;
                           const cellinfo: cellinfoty) of object;
  beforedrawcelleventty = procedure(const sender: tcol; const canvas: tcanvas;
-                          const cellinfo: cellinfoty; var handled: boolean) of object;
+                          var cellinfo: cellinfoty; var handled: boolean) of object;
  tcol = class(tgridprop)
   private
    frowfontoffset: integer;
