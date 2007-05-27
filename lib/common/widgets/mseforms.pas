@@ -106,6 +106,7 @@ type
   protected
    fscrollbox: tformscrollbox;
     //needed to distinguish between scrolled and unscrolled (mainmenu...) widgets
+   function createmainmenuwidget: tframemenuwidget; virtual;
    procedure updateoptions; virtual;
    function getoptions: formoptionsty; virtual;
    procedure updatescrollboxrect;
@@ -804,13 +805,18 @@ begin
  end;
 end;
 
+function tcustommseform.createmainmenuwidget: tframemenuwidget;
+begin
+ result:= tframemenuwidget.create(self,fmainmenu);
+end;
+
 procedure tcustommseform.setmainmenu(const Value: tmainmenu);
 begin
  if value <> fmainmenu then begin
   freeandnil(fmainmenuwidget);
   setlinkedvar(value,tmsecomponent(fmainmenu));
   if value <> nil then begin
-   fmainmenuwidget:= tframemenuwidget.create(self,fmainmenu);
+   fmainmenuwidget:= createmainmenuwidget;
    twidget1(fmainmenuwidget).setdesigning(csdesigning in componentstate);
    updatemainmenutemplates;
   end;
