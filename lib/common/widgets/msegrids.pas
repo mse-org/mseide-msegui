@@ -7271,7 +7271,8 @@ begin     //focuscell
     if int1 = frowcount then begin
      dec(int1);
     end;
-    if int1 >= 0 then begin
+    if (int1 >= 0) and not ((selectaction = fca_exitgrid) and 
+                (gs_rowremoving in fstate)) then begin
      ffocusedcell.row:= int1;
     end;
    end;

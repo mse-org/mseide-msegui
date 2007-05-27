@@ -7,14 +7,18 @@ object stackfo: tstackfo
   frame.grip_size = 10
   frame.grip_options = [go_closebutton, go_fixsizebutton, go_topbutton]
   frame.dummy = 0
+  taborder = 1
   popupmenu = tpopupmenu1
   visible = False
   container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_mousetransparent, ow_destroywidgets, ow_autoscale]
+  container.bounds_x = 0
+  container.bounds_y = 0
   container.bounds_cx = 244
   container.bounds_cy = 180
   container.frame.framei_right = 0
   container.frame.localprops = [frl_firight]
   container.frame.dummy = 0
+  container.onchildscaled = formonchildscaled
   dragdock.splitter_size = 0
   dragdock.caption = 'Stack'
   dragdock.optionsdock = [od_savepos, od_canmove, od_canfloat, od_candock, od_propsize]
@@ -23,6 +27,7 @@ object stackfo: tstackfo
   caption = 'Stack'
   icon.transparentcolor = -2147483648
   icon.options = [bmo_masked]
+  icon.transparency = -2147483648
   icon.image = {
     00000000020000001800000018000000BC000000000000000000000000000000
     0000000000000000000000000000000000000000E0E0E0370000F801E0E0E017
@@ -40,7 +45,8 @@ object stackfo: tstackfo
   onchildscaled = formonchildscaled
   moduleclassname = 'tdockform'
   object grid: tstringgrid
-    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_focusbackonesc, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_focusbackonesc, ow_mousewheel, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+    bounds_x = 0
     bounds_y = 20
     bounds_cx = 244
     bounds_cy = 160
@@ -54,12 +60,12 @@ object stackfo: tstackfo
         color = -2147483646
         width = 31
         options = [co_readonly, co_nofocus, co_focusselect, co_rowselect, co_savestate]
-        textflags = [tf_xcentered, tf_right, tf_ycentered]
+        textflags = [tf_xcentered, tf_ycentered]
       end    
       item
+        colorselect = -1879048185
         width = 54
         options = [co_readonly, co_focusselect, co_rowselect, co_fill]
-        colorselect = -1879048185
         optionsedit = [scoe_eatreturn, scoe_homeonenter]
       end    
       item
@@ -72,31 +78,35 @@ object stackfo: tstackfo
       item
         options = [co_invisible, co_savestate]
       end>
-    datarowheight = 18
+    datarowheight = 16
     oncellevent = gridoncellevent
-    reffontheight = 16
+    reffontheight = 14
   end
   object filedisp: tstringdisp
     bounds_x = 71
+    bounds_y = 0
     bounds_cx = 172
+    bounds_cy = 18
     frame.dummy = 0
     anchors = [an_left, an_top, an_right]
     taborder = 1
-    reffontheight = 16
+    reffontheight = 14
   end
   object address: tstringdisp
     bounds_x = 1
+    bounds_y = 0
     bounds_cx = 70
+    bounds_cy = 18
     frame.dummy = 0
     textflags = [tf_xcentered, tf_ycentered]
-    reffontheight = 16
+    reffontheight = 14
   end
   object tpopupmenu1: tpopupmenu
     menu.submenu.count = 1
     menu.submenu.items = <    
       item
         caption = 'Copy to clipboard'
-        onexecute = copytoclipboard
+        state = [as_localcaption]
       end>
     left = 48
     top = 56
