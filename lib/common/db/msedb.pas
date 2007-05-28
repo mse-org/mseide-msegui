@@ -495,7 +495,7 @@ type
    function getinstance: tfield;
   protected
    function getasvariant: variant; override;
-   procedure setvarvalue(const avalue: variant);
+   procedure setvarvalue(const avalue: variant); override;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
