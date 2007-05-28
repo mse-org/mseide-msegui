@@ -1,69 +1,72 @@
 object mainfo: tmainfo
+  bounds_x = 107
+  bounds_y = 283
+  bounds_cx = 624
+  bounds_cy = 390
+  taborder = 1
+  visible = False
+  container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_subfocus, ow_mousetransparent, ow_mousewheel, ow_destroywidgets, ow_autoscale]
+  container.bounds_x = 0
+  container.bounds_y = 22
+  container.bounds_cx = 624
+  container.bounds_cy = 368
+  container.frame.levelo = 1
+  container.frame.localprops = [frl_levelo]
+  container.frame.sbhorz.facebutton.template = concavex
+  container.frame.sbhorz.facebutton.dummy = 0
+  container.frame.sbhorz.faceendbutton.template = concavex
+  container.frame.sbhorz.faceendbutton.dummy = 0
+  container.frame.sbvert.facebutton.template = concavey
+  container.frame.sbvert.facebutton.dummy = 0
+  container.frame.sbvert.faceendbutton.template = concavey
+  container.frame.sbvert.faceendbutton.dummy = 0
+  container.frame.dummy = 0
   optionswindow = [wo_groupleader]
   mainmenu = mainmenu1
   options = [fo_main, fo_terminateonclose, fo_savepos]
   statfile = projectfo.projectstat
   caption = 'MSEi18n'
+  icon.transparency = -2147483648
   oncreate = tmainfooncreate
   oneventloopstart = tmainfoonloaded
   ondestroy = tmainfoondestroy
   onclosequery = mainclosequery
-  container.frame.levelo = 1
-  container.frame.localprops = [frl_levelo]
-  container.frame.sbhorz.facebutton.template = concavex
-  container.frame.sbhorz.facebutton.dummy = 0
-  container.frame.sbhorz.faceendbutton.template = concavex
-  container.frame.sbhorz.faceendbutton.dummy = 0
-  container.frame.sbvert.facebutton.template = concavey
-  container.frame.sbvert.facebutton.dummy = 0
-  container.frame.sbvert.faceendbutton.template = concavey
-  container.frame.sbvert.faceendbutton.dummy = 0
-  container.frame.dummy = 0
-  container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_subfocus, ow_mousetransparent, ow_destroywidgets, ow_autoscale]
-  container.bounds_y = 19
-  container.bounds_cx = 624
-  container.bounds_cy = 371
-  container.frame.levelo = 1
-  container.frame.localprops = [frl_levelo]
-  container.frame.sbhorz.facebutton.template = concavex
-  container.frame.sbhorz.facebutton.dummy = 0
-  container.frame.sbhorz.faceendbutton.template = concavex
-  container.frame.sbhorz.faceendbutton.dummy = 0
-  container.frame.sbvert.facebutton.template = concavey
-  container.frame.sbvert.facebutton.dummy = 0
-  container.frame.sbvert.faceendbutton.template = concavey
-  container.frame.sbvert.faceendbutton.dummy = 0
-  container.frame.dummy = 0
-  visible = False
-  optionswidget = [ow_arrowfocus, ow_subfocus, ow_mousewheel, ow_destroywidgets, ow_hinton, ow_autoscale]
-  bounds_x = 107
-  bounds_y = 283
-  bounds_cx = 624
-  bounds_cy = 390
-  color = -1879048187
   moduleclassname = 'tmseform'
   object tgroupbox1: tgroupbox
     bounds_x = 1
     bounds_y = 1
     bounds_cx = 622
     bounds_cy = 24
-    frame.levelo = -1
-    frame.leveli = 1
     frame.captiondist = -4
-    frame.captionoffset = 4
     frame.dummy = 0
     face.template = concavex
     face.dummy = 0
     anchors = [an_top]
   end
   object grid: twidgetgrid
+    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_focusbackonesc, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+    bounds_x = 1
+    bounds_y = 25
+    bounds_cx = 622
+    bounds_cy = 342
+    frame.sbvert.facebutton.template = concavey
+    frame.sbvert.facebutton.dummy = 0
+    frame.sbvert.faceendbutton.template = concavey
+    frame.sbvert.faceendbutton.dummy = 0
+    frame.sbhorz.facebutton.template = concavex
+    frame.sbhorz.facebutton.dummy = 0
+    frame.sbhorz.faceendbutton.template = concavex
+    frame.sbhorz.faceendbutton.dummy = 0
+    frame.dummy = 0
+    anchors = [an_left, an_top, an_right, an_bottom]
+    taborder = 5
     optionsgrid = [og_colsizing, og_focuscellonenter, og_colchangeontabkey, og_autopopup]
-    fixcols.linecolor = -1610612734
-    fixrows.linecolor = -1610612734
     fixrows.count = 1
     fixrows.items = <    
       item
-        height = 15
+        face.template = convexx
+        face.dummy = 0
+        height = 18
         captions.count = 5
         captions.items = <        
           item
@@ -81,16 +84,13 @@ object mainfo: tmainfo
           item
             caption = 'Value'
           end>
-        face.template = convexx
-        face.dummy = 0
       end>
-    datacols.options = [co_proportional, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
-    datacols.linecolor = -1610612733
     datacols.count = 5
+    datacols.options = [co_proportional, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
     datacols.items = <    
       item
-        options = [co_readonly, co_proportional, co_savestate]
         width = 210
+        options = [co_readonly, co_proportional, co_savestate]
         widgetname = 'tree'
       end    
       item
@@ -98,234 +98,191 @@ object mainfo: tmainfo
         widgetname = 'typedisp'
       end    
       item
-        options = [co_drawfocus, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
         width = 19
+        options = [co_drawfocus, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
         widgetname = 'donottranslate'
       end    
       item
-        options = [co_proportional, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
         width = 133
+        options = [co_proportional, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
         widgetname = 'comment'
       end    
       item
-        options = [co_readonly, co_proportional, co_savestate]
         width = 110
+        options = [co_readonly, co_proportional, co_savestate]
         widgetname = 'value'
       end>
-    datarowheight = 15
+    datarowheight = 18
     statfile = projectfo.projectstat
-    frame.sbvert.facebutton.template = concavey
-    frame.sbvert.facebutton.dummy = 0
-    frame.sbvert.faceendbutton.template = concavey
-    frame.sbvert.faceendbutton.dummy = 0
-    frame.sbhorz.facebutton.template = concavex
-    frame.sbhorz.facebutton.dummy = 0
-    frame.sbhorz.faceendbutton.template = concavex
-    frame.sbhorz.faceendbutton.dummy = 0
-    frame.dummy = 0
-    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_focusbackonesc, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
-    bounds_x = 1
-    bounds_y = 25
-    bounds_cx = 622
-    bounds_cy = 342
-    frame.sbvert.facebutton.template = concavey
-    frame.sbvert.facebutton.dummy = 0
-    frame.sbvert.faceendbutton.template = concavey
-    frame.sbvert.faceendbutton.dummy = 0
-    frame.sbhorz.facebutton.template = concavex
-    frame.sbhorz.facebutton.dummy = 0
-    frame.sbhorz.faceendbutton.template = concavex
-    frame.sbhorz.faceendbutton.dummy = 0
-    frame.dummy = 0
-    anchors = [an_left, an_top, an_right, an_bottom]
-    taborder = 5
-    reffontheight = 13
+    reffontheight = 16
     object tree: ttreeitemedit
-      options = [teo_treecolnavig]
-      optionsedit = [oe_readonly, oe_undoonesc, oe_checkmrcancel, oe_exitoncursor, oe_savestate]
-      onupdaterowvalues = treeonupdaterowvalues
-      optionsedit = [oe_readonly, oe_undoonesc, oe_checkmrcancel, oe_exitoncursor, oe_savestate]
-      cursor = cr_default
-      visible = False
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight]
+      bounds_x = 0
+      bounds_y = 0
       bounds_cx = 210
-      bounds_cy = 15
+      bounds_cy = 18
       color = -1879048185
       frame.levelo = 0
       frame.colorclient = -2147483646
       frame.localprops = [frl_levelo, frl_colorclient]
       frame.dummy = 0
-      reffontheight = 13
+      taborder = 1
+      visible = False
+      optionsedit = [oe_readonly, oe_undoonesc, oe_checkmrcancel, oe_exitoncursor, oe_savestate]
+      onupdaterowvalues = treeonupdaterowvalues
+      options = [teo_treecolnavig]
+      reffontheight = 16
     end
     object typedisp: tenumtypeedit
-      dropdown.options = [deo_selectonly, deo_autodropdown, deo_disabled]
+      optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight]
+      bounds_x = 211
+      bounds_y = 0
+      bounds_cx = 50
+      bounds_cy = 18
+      color = -1879048185
+      frame.levelo = 0
+      frame.colorclient = -2147483646
+      frame.localprops = [frl_levelo, frl_colorclient]
+      frame.button.visible = False
+      frame.button.enabled = False
+      frame.dummy = 0
+      taborder = 2
+      visible = False
+      optionsedit = [oe_readonly, oe_undoonesc, oe_checkmrcancel, oe_exitoncursor, oe_savestate]
       dropdown.options = [deo_selectonly, deo_autodropdown, deo_disabled]
       dropdown.cols.count = 1
       dropdown.cols.items = <      
         item
         end>
       oninit = typedisponinit
-      frame.button.visible = False
-      frame.button.enabled = False
-      frame.button.imagelist = stockdata.glyphs
-      frame.button.imagenr = 14
-      frame.levelo = 0
-      frame.colorclient = -2147483646
-      frame.localprops = [frl_levelo, frl_colorclient]
-      frame.dummy = 0
-      optionsedit = [oe_readonly, oe_undoonesc, oe_checkmrcancel, oe_exitoncursor, oe_savestate]
-      visible = False
-      optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight]
-      bounds_x = 211
-      bounds_cx = 50
-      bounds_cy = 15
-      color = -1879048185
-      cursor = cr_ibeam
-      frame.button.visible = False
-      frame.button.enabled = False
-      frame.button.imagelist = stockdata.glyphs
-      frame.button.imagenr = 14
-      frame.levelo = 0
-      frame.colorclient = -2147483646
-      frame.localprops = [frl_levelo, frl_colorclient]
-      frame.dummy = 0
-      taborder = 2
-      reffontheight = 13
+      reffontheight = 16
     end
     object donottranslate: tbooleanedit
-      bounds_cx = 19
-      bounds_cy = 15
-      onsetvalue = donottranslateonsetvalue
-      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_eatreturn, oe_resetselectonexit, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_keyexecute, oe_savestate]
-      visible = False
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets]
       bounds_x = 262
+      bounds_y = 0
       bounds_cx = 19
-      bounds_cy = 15
+      bounds_cy = 18
       color = -2147483646
       frame.levelo = 0
       frame.localprops = [frl_levelo]
       frame.dummy = 0
       taborder = 3
+      visible = False
+      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_eatreturn, oe_resetselectonexit, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_keyexecute, oe_savestate]
+      onsetvalue = donottranslateonsetvalue
     end
     object comment: tstringedit
-      onsetvalue = commentonsetvalue
-      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_eatreturn, oe_resetselectonexit, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_keyexecute, oe_savestate]
-      font.height = 12
-      font.name = 'stf_default'
-      font.dummy = 0
-      visible = False
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
       bounds_x = 282
+      bounds_y = 0
       bounds_cx = 133
-      bounds_cy = 15
-      cursor = cr_ibeam
-      frame.levelo = 0
-      frame.colorclient = -2147483646
-      frame.localprops = [frl_levelo, frl_colorclient]
-      frame.dummy = 0
-      taborder = 1
-      reffontheight = 13
-    end
-    object value: tstringedit
-      optionsedit = [oe_readonly, oe_undoonesc, oe_checkmrcancel, oe_exitoncursor, oe_savestate]
-      visible = False
-      optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight]
-      bounds_x = 416
-      bounds_cx = 110
-      bounds_cy = 15
-      color = -1879048185
-      cursor = cr_ibeam
+      bounds_cy = 18
       frame.levelo = 0
       frame.colorclient = -2147483646
       frame.localprops = [frl_levelo, frl_colorclient]
       frame.dummy = 0
       taborder = 4
-      reffontheight = 13
+      visible = False
+      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_eatreturn, oe_resetselectonexit, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_keyexecute, oe_savestate]
+      font.colorshadow = -2147483648
+      font.height = 12
+      font.name = 'stf_default'
+      font.dummy = 0
+      onsetvalue = commentonsetvalue
+      reffontheight = 16
+    end
+    object value: tstringedit
+      optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight]
+      bounds_x = 416
+      bounds_y = 0
+      bounds_cx = 110
+      bounds_cy = 18
+      color = -1879048185
+      frame.levelo = 0
+      frame.colorclient = -2147483646
+      frame.localprops = [frl_levelo, frl_colorclient]
+      frame.dummy = 0
+      taborder = 5
+      visible = False
+      optionsedit = [oe_readonly, oe_undoonesc, oe_checkmrcancel, oe_exitoncursor, oe_savestate]
+      reffontheight = 16
     end
   end
   object flat: tbooleanedit
-    bounds_cx = 30
-    bounds_cy = 15
-    statfile = projectfo.projectstat
-    optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_eatreturn, oe_resetselectonexit, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_keyexecute, oe_checkvaluepaststatread, oe_savevalue, oe_savestate]
-    ondataentered = formatchanged
     bounds_x = 9
-    bounds_y = 5
-    bounds_cx = 30
-    bounds_cy = 15
+    bounds_y = 4
+    bounds_cx = 34
+    bounds_cy = 18
     color = -2147483645
     frame.caption = 'flat'
     frame.dummy = 0
     frame.outerframe = (
       0
-      1
-      17
-      1
+      2
+      21
+      3
     )
     taborder = 1
+    statfile = projectfo.projectstat
+    optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_eatreturn, oe_resetselectonexit, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_keyexecute, oe_checkvaluepaststatread, oe_savevalue, oe_savestate]
+    ondataentered = formatchanged
   end
   object stringonly: tbooleanedit
-    bounds_cx = 63
-    bounds_cy = 15
-    statfile = projectfo.projectstat
-    ondataentered = formatchanged
     bounds_x = 57
-    bounds_y = 5
-    bounds_cx = 63
-    bounds_cy = 15
+    bounds_y = 4
+    bounds_cx = 78
+    bounds_cy = 18
     color = -2147483645
     frame.caption = 'string only'
     frame.dummy = 0
     frame.outerframe = (
       0
-      1
-      50
-      1
+      2
+      65
+      3
     )
     taborder = 2
-  end
-  object nont: tbooleanedit
-    bounds_cx = 46
-    bounds_cy = 15
-    onsetvalue = nontonsetvalue
     statfile = projectfo.projectstat
     ondataentered = formatchanged
+  end
+  object nont: tbooleanedit
     bounds_x = 153
-    bounds_y = 5
-    bounds_cx = 46
-    bounds_cy = 15
+    bounds_y = 4
+    bounds_cx = 51
+    bounds_cy = 18
     color = -2147483645
     frame.caption = 'no NT'
     frame.dummy = 0
     frame.outerframe = (
       0
-      1
-      33
-      1
+      2
+      38
+      3
     )
     taborder = 3
-  end
-  object ntonly: tbooleanedit
-    bounds_cx = 53
-    bounds_cy = 15
-    onsetvalue = ntonlyonsetvalue
     statfile = projectfo.projectstat
     ondataentered = formatchanged
+    onsetvalue = nontonsetvalue
+  end
+  object ntonly: tbooleanedit
     bounds_x = 233
-    bounds_y = 5
-    bounds_cx = 53
-    bounds_cy = 15
+    bounds_y = 4
+    bounds_cx = 61
+    bounds_cy = 18
     color = -2147483645
     frame.caption = 'NT only'
     frame.dummy = 0
     frame.outerframe = (
       0
-      1
-      40
-      1
+      2
+      48
+      3
     )
     taborder = 4
+    statfile = projectfo.projectstat
+    ondataentered = formatchanged
+    onsetvalue = ntonlyonsetvalue
   end
   object mainstatfile: tstatfile
     filename = 'msei18n.sta'
@@ -405,6 +362,7 @@ object mainfo: tmainfo
     onupdate = mainmenuupdate
     facetemplate = convexx
     itemframetemplate = menuitemframe
+    itemframetemplateactive = menuitemframe
     left = 256
     top = 160
   end
@@ -420,6 +378,7 @@ object mainfo: tmainfo
     controller.options = [fdo_checkexist, fdo_chdir]
     controller.captionopen = 'Open translate project'
     controller.captionsave = 'Save translate project'
+    dialogkind = fdk_none
     left = 120
     top = 156
   end
@@ -430,6 +389,7 @@ object mainfo: tmainfo
     top = 115
   end
   object convexx: tfacecomp
+    template.image.transparency = -2147483648
     template.fade_pos.count = 2
     template.fade_pos.items = (
       0
@@ -441,6 +401,7 @@ object mainfo: tmainfo
       -1610612731
     )
     template.fade_direction = gd_up
+    template.fade_transparency = -2147483648
     left = 385
     top = 103
   end
@@ -451,6 +412,7 @@ object mainfo: tmainfo
     top = 227
   end
   object convexy: tfacecomp
+    template.image.transparency = -2147483648
     template.fade_pos.count = 2
     template.fade_pos.items = (
       0
@@ -462,10 +424,12 @@ object mainfo: tmainfo
       -1610612731
     )
     template.fade_direction = gd_left
+    template.fade_transparency = -2147483648
     left = 481
     top = 103
   end
   object concavex: tfacecomp
+    template.image.transparency = -2147483648
     template.fade_pos.count = 2
     template.fade_pos.items = (
       0
@@ -477,10 +441,12 @@ object mainfo: tmainfo
       -1610612731
     )
     template.fade_direction = gd_down
+    template.fade_transparency = -2147483648
     left = 385
     top = 135
   end
   object concavey: tfacecomp
+    template.image.transparency = -2147483648
     template.fade_pos.count = 2
     template.fade_pos.items = (
       0
@@ -491,6 +457,7 @@ object mainfo: tmainfo
       -1610612732
       -1610612731
     )
+    template.fade_transparency = -2147483648
     left = 481
     top = 135
   end
