@@ -7179,10 +7179,10 @@ begin
      transientfor:= app.fwantedactivewindow;
     end
     else begin
-     {$ifndef mswindows}  //on win32 winid wil be destroyed on destroying transientfor
+//     {$ifndef mswindows}  //on win32 winid wil be destroyed on destroying transientfor
       //todo: no ifndef
      transientfor:= app.factivewindow;
-     {$endif}
+//     {$endif}
     end;
    end
    else begin
@@ -11506,33 +11506,33 @@ begin
  checkwindowstack;
  sortzorder;
  ar3:= windowar; //refcount 1
-{
-writeln('*********');
-for int1:= 0 to high(ar3) do begin
-write(ar3[int1].fowner.name,' ');
-if ar3[int1].ftransientfor = nil then begin
- writeln('nil');
-end
-else begin
- writeln(ar3[int1].ftransientfor.fowner.name);
-end;
-end;
-}
+{$ifdef mse_debugzorder}
+ writeln('*********');
+ for int1:= 0 to high(ar3) do begin
+  write(ar3[int1].fowner.name,' ');
+  if ar3[int1].ftransientfor = nil then begin
+   writeln('nil');
+  end
+  else begin
+   writeln(ar3[int1].ftransientfor.fowner.name);
+  end;
+ end;
+{$endif}
  ar4:= copy(ar3);
  sortarray(ar3,{$ifdef FPC}@{$endif}compwindowzorder,sizeof(ar3[0]));
  int2:= -1;
-{
-writeln('++++++++++++');
-for int1:= 0 to high(ar3) do begin
-write(ar3[int1].fowner.name,' ');
-if ar3[int1].ftransientfor = nil then begin
- writeln('nil');
-end
-else begin
- writeln(ar3[int1].ftransientfor.fowner.name);
-end;
-end;
-}
+{$ifdef mse_debugzorder}
+ writeln('++++++++++++');
+ for int1:= 0 to high(ar3) do begin
+  write(ar3[int1].fowner.name,' ');
+  if ar3[int1].ftransientfor = nil then begin
+   writeln('nil');
+  end
+  else begin
+   writeln(ar3[int1].ftransientfor.fowner.name);
+  end;
+ end;
+{$endif}
  for int1:= 0 to high(ar4) do begin
   if ar3[int1] <> ar4[int1] then begin
    int2:= int1; //invalid stackorder

@@ -17,7 +17,9 @@
 program mseide;
 {$ifdef FPC}
  {$mode objfpc}{$h+}{$INTERFACES CORBA}
- {$ifdef mswindows}{$apptype gui}{$endif}
+ {$ifdef mswindows}
+  {$ifdef mse_debug}{$apptype console}{$else}{$apptype gui}{$endif}
+ {$endif}
 {$endif}
 uses
 {$ifdef FPC}{$ifdef linux}
