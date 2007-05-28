@@ -3273,10 +3273,10 @@ var
  spoint,dpoint,tileorig: pointty;
  startx: integer;
  endx,endy: integer;
- endcx,endcy: integer;
+// endcx,endcy: integer;
  stepx,stepy: integer;
  sourcex,sourcey: integer;
- int1: integer;
+ int1,int2: integer;
 // bo1,bo2: boolean;
 
 begin
@@ -3408,9 +3408,9 @@ begin
    stepx:= srect.cx;
    stepy:= srect.cy;
    endx:= rect1.x + rect1.cx;
-   endcx:= endx - stepx;
+//   endcx:= endx - stepx;
    endy:= rect1.y + rect1.cy;
-   endcy:= endy - stepy;
+//   endcy:= endy - stepy;
    sourcex:= srect.x;
    sourcey:= srect.y;
    if not (al_stretchy in aalignment) then begin
@@ -3434,23 +3434,29 @@ begin
 //   bo2:= true;
    repeat
     if not (al_stretchy in aalignment) then begin
-     if (drect.y > endcy) {and not bo2} then begin
+     if drect.y + srect.cy > endy then begin
       srect.cy:= endy - drect.y;
-//      bo2:= false;
      end;
+//     if (drect.y > endcy) and not bo2 then begin
+//      srect.cy:= endy - drect.y;
+//      bo2:= false;
+//     end;
      drect.cy:= srect.cy;
     end;
     drect.x:= startx;
     dec(srect.x,int1);
     dec(drect.x,int1);
     inc(srect.cx,int1);
-//    bo1:= true;
+ //   bo1:= true;
     repeat
      if not (al_stretchx in aalignment) then begin
-      if (drect.x > endcx) {and not bo1} then begin
+      if drect.x + srect.cx > endx then begin
        srect.cx:= endx - drect.x;
       end;
-//      bo1:= false;
+//      if (drect.x > endcx) {and not bo1} then begin
+//       srect.cx:= endx - drect.x;
+//      end;
+ //     bo1:= false;
       drect.cx:= srect.cx;
      end;
      gdi(gdi_copyarea);
