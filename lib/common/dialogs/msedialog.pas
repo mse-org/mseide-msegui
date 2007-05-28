@@ -124,6 +124,9 @@ procedure tcustomdialogstringed.buttonaction(var action: buttonactionty;
   const buttonindex: integer);
 begin
  if action = ba_click then begin
+  if canfocus and not setfocus then begin
+   exit;
+  end;
   internalexecute;
  end;
 end;
