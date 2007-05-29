@@ -115,6 +115,7 @@ object continentseditfo: tcontinentseditfo
           widgetname = 'lbnePlanet'
         end>
       datalink.options = [gdo_propscrollbar, gdo_thumbtrack]
+      datalink.onupdaterowdata = grdcontinentsupdaterowdata
       datarowheight = 22
       reffontheight = 14
       object seContinent: tdbstringedit

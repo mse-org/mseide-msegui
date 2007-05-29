@@ -1,4 +1,5 @@
 object mainfo: tmainfo
+  optionswidget = [ow_arrowfocus, ow_subfocus, ow_destroywidgets, ow_hinton, ow_autoscale]
   bounds_x = 35
   bounds_y = 146
   bounds_cx = 707
@@ -13,6 +14,7 @@ object mainfo: tmainfo
   container.taborder = 1
   optionswindow = [wo_groupleader]
   mainmenu = mnuMain
+  font.colorshadow = -2147483648
   font.dummy = 0
   options = [fo_main, fo_terminateonclose, fo_autoreadstat, fo_autowritestat, fo_savepos, fo_savestate]
   caption = 'The Galaxy Data Keeper'
@@ -227,9 +229,6 @@ object mainfo: tmainfo
     top = 368
   end
   object qryPersons: tmsesqlquery
-    Active = True
-    database = conn
-    Transaction = trans
     params = <>
     SQL.Strings = (
       'select'
@@ -254,6 +253,9 @@ object mainfo: tmainfo
     IndexDefs = <>
     UsePrimaryKeyAsKey = False
     StatementType = stSelect
+    database = conn
+    Active = True
+    Transaction = trans
     FieldDefs = <    
       item
         Name = 'id'
@@ -461,6 +463,8 @@ object mainfo: tmainfo
     left = 24
   end
   object mnuMain: tmainmenu
+    popupitemframetemplate = ftMainMenuPopupItem
+    popupitemframetemplateactive = ftMainMenuPopupItem
     menu.submenu.count = 3
     menu.submenu.items = <    
       item
@@ -516,11 +520,12 @@ object mainfo: tmainfo
         caption = '&Help'
         state = [as_localcaption]
       end>
+    menu.font.colorshadow = -2147483648
     menu.font.height = 13
     menu.font.name = 'stf_helvetica'
     menu.font.dummy = 0
     itemframetemplate = ftMainMenuItem
-    popupitemframetemplate = ftMainMenuPopupItem
+    itemframetemplateactive = ftMainMenuItem
     left = 336
   end
   object ftMainMenuItem: tframecomp

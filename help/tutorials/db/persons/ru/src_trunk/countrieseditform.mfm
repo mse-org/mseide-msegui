@@ -113,6 +113,7 @@ object countrieseditfo: tcountrieseditfo
           widgetname = 'lbneContinent'
         end>
       datalink.options = [gdo_propscrollbar, gdo_thumbtrack]
+      datalink.onupdaterowdata = grdcountriesupdaterowdata
       datarowheight = 22
       reffontheight = 14
       object seCountry: tdbstringedit

@@ -102,6 +102,7 @@ object occupationseditfo: toccupationseditfo
           widgetname = 'seOccupation'
         end>
       datalink.options = [gdo_propscrollbar, gdo_thumbtrack]
+      datalink.onupdaterowdata = grdoccupationsupdaterowdata
       datarowheight = 22
       reffontheight = 14
       object seOccupation: tdbstringedit

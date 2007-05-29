@@ -104,6 +104,7 @@ object featureseditfo: tfeatureseditfo
           widgetname = 'seFeature'
         end>
       datalink.options = [gdo_propscrollbar, gdo_thumbtrack]
+      datalink.onupdaterowdata = grdfeaturesupdaterowdata
       datarowheight = 22
       reffontheight = 14
       object seFeature: tdbstringedit
