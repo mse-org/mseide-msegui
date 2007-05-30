@@ -619,7 +619,7 @@ begin
    rect1:= arect;
    case pos of
     cp_left: begin
-     textflags:= [tf_ycentered,tf_clipo];
+     textflags:= [tf_ycentered,tf_clipi];
      inc(rect1.x,captiondist);
      dec(rect1.cx,captiondist);
      if countchars(caption.text,msechar(c_tab)) = 1 then begin
@@ -628,11 +628,11 @@ begin
      end;
     end;
     cp_right: begin
-     textflags:= [tf_ycentered,tf_right,tf_clipo];
+     textflags:= [tf_ycentered,tf_right,tf_clipi];
      dec(rect1.cx,captiondist);
     end;
     else begin
-     textflags:= [tf_ycentered,tf_xcentered,tf_clipo];
+     textflags:= [tf_ycentered,tf_xcentered,tf_clipi];
     end;
    end;
    if ss_disabled in state then begin

@@ -255,6 +255,10 @@ begin
     x:= x + dist.x;
     y:= y + dist.y;
    end;
+   with cells[int1].dimouter.pos do begin
+    x:= x + dist.x;
+    y:= y + dist.y;
+   end;
   end;
  end;
 end;
@@ -280,6 +284,7 @@ var
  framehalfwidth: integer;
  framewidth1: integer;
  extrasp: integer;
+ imagedi: integer;
  ar1: richstringarty;
  
 begin
@@ -298,12 +303,14 @@ begin
      framehalfwidth:= int1;
     end;
     frame1:= fi.innerframe;
-    extrasp:= fi.extraspace;
+    extrasp:= fextraspace;
+    imagedi:= fimagedist;
    end;
   end
   else begin
    frame1:= nullframe;
    extrasp:= 0;
+   imagedi:= 0;
   end; 
   framewidth1:= framehalfwidth * 2;
   framewidth1:= framewidth1 + extrasp;
@@ -318,6 +325,7 @@ begin
   for int1:= 0 to count - 1 do begin
    with cells[int1].buttoninfo do begin
     captiondist:= defaultshapecaptiondist;
+    imagedist:= imagedi;
     item1:= tmenuitem1(fsubmenu[int1]);
     imagelist:= item1.finfo.imagelist;
     font:= item1.font;
@@ -327,7 +335,7 @@ begin
     atextsize.cy:= atextsize.cy + frame1.top + frame1.bottom;
     inc(atextsize.cy,2); //for 3D level
     if imagelist <> nil then begin
-     tabpos:= -imagelist.width;
+     tabpos:= -(imagelist.width+imagedi);
      atextsize.cx:= atextsize.cx - tabpos;
      if atextsize.cy < imagelist.height then begin
       atextsize.cy:= imagelist.height;
