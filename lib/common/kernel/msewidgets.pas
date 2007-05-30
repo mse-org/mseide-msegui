@@ -1160,6 +1160,7 @@ begin
  foptions:= defaultbuttonoptions;
  inherited;
  optionswidget:= defaultoptionswidget - [ow_mousefocus];
+ initshapeinfo(finfo);
  finfo.dim:= innerclientrect;
  finfo.color:= cl_transparent;
  finfo.colorglyph:= cl_black;

@@ -103,6 +103,7 @@ type
    procedure setcolorglyph(const avalue: colorty);
    function iscolorglyphstored: boolean;
    procedure setcaptionpos(const avalue: captionposty);
+   procedure setcaptiondist(const avalue: integer);
    procedure setautosize_cx(const avalue: integer);
    procedure setautosize_cy(const avalue: integer);
   protected
@@ -139,6 +140,8 @@ type
    property caption: captionty read getcaption write setcaption stored iscaptionstored;
    property captionpos: captionposty read finfo.captionpos write setcaptionpos
                               default cp_center;
+   property captiondist: integer read finfo.captiondist write setcaptiondist
+                            default defaultshapecaptiondist;
    property imagelist: timagelist read factioninfo.imagelist write setimagelist
                     stored isimageliststored;
    property imagenr: integer read factioninfo.imagenr write setimagenr
@@ -166,6 +169,7 @@ type
    property action;
    property caption;
    property captionpos;
+   property captiondist;
    property font;
    property modalresult;
    property imagelist;
@@ -657,6 +661,14 @@ begin
  end;
 end;
 
+procedure tcustombutton.setcaptiondist(const avalue: integer);
+begin
+ if avalue <> finfo.captiondist then begin
+  finfo.captiondist:= avalue;
+  checkautosize;
+ end;
+end;
+
 {
 procedure tcustombutton.setenabled(const Value: boolean);
 begin
@@ -752,6 +764,7 @@ end;
 procedure tcustombutton.getautopaintsize(var asize: sizety);
 begin
  asize:= textrect(getcanvas,finfo.caption,[],font).size;
+ inc(asize.cx,finfo.captiondist);
  if imagelist <> nil then begin
   with imagelist do begin
    if height > asize.cy then begin
@@ -767,7 +780,7 @@ begin
    end;
   end;
  end;
- inc(asize.cx,10+fautosize_cx);
+ inc(asize.cx,8+fautosize_cx);
  inc(asize.cy,6+fautosize_cy);
  if fframe <> nil then begin
   with fframe do begin

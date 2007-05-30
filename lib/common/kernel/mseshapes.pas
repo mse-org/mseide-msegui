@@ -19,6 +19,7 @@ uses
 const
  menuarrowwidth = 8;
  menucheckboxwidth = 13;
+ defaultshapecaptiondist = 2;
 
 type
  shapestatety = (ss_disabled,ss_invisible,ss_checked,ss_default, //actionstatesty
@@ -76,6 +77,7 @@ type
   state: shapestatesty;
   caption: richstringty;
   captionpos: captionposty;
+  captiondist: integer;
   tabpos: integer;
   font: tfont;
   group: integer;
@@ -117,6 +119,7 @@ function updatewidgetshapestate(var info: shapeinfoty; const widget: twidget;
                     const adisabled: boolean = false): boolean;
 function findshapeatpos(const infoar: shapeinfoarty; const apos: pointty;
                const rejectstates: shapestatesty = [ss_disabled,ss_invisible]): integer;
+procedure initshapeinfo(var ainfo: shapeinfoty);
 
 var
  animatemouseenter: boolean = true;
@@ -127,6 +130,13 @@ uses
 var
  buttontab: tcustomtabulators;
  
+procedure initshapeinfo(var ainfo: shapeinfoty);
+begin
+ with ainfo do begin
+  captiondist:= defaultshapecaptiondist;
+ end;
+end;
+
 procedure setchecked(var info: shapeinfoty; const value: boolean;
                       const widget: twidget);
 begin
@@ -606,8 +616,8 @@ begin
    case pos of
     cp_left: begin
      textflags:= [tf_ycentered,tf_clipo];
-     inc(rect1.x,2);
-     dec(rect1.cx,2);
+     inc(rect1.x,captiondist);
+     dec(rect1.cx,captiondist);
      if countchars(caption.text,msechar(c_tab)) = 1 then begin
       tab1:= buttontab;
       tab1[0].pos:= info.tabpos / defaultppmm;
@@ -615,7 +625,7 @@ begin
     end;
     cp_right: begin
      textflags:= [tf_ycentered,tf_right,tf_clipo];
-     dec(rect1.cx,2);
+     dec(rect1.cx,captiondist);
     end;
     else begin
      textflags:= [tf_ycentered,tf_xcentered,tf_clipo];
@@ -654,7 +664,8 @@ begin
    end;
    if imagelist = nil then begin
     pos:= captionpos;
-   end
+   end;
+   {
    else begin
     if captionpos = cp_center then begin
      pos:= cp_center;
@@ -663,6 +674,7 @@ begin
      pos:= cp_left;
     end;
    end;
+   }
    drawbuttoncaption(canvas,info,rect1,pos);
   end;
  end;

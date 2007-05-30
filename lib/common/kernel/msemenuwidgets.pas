@@ -317,6 +317,7 @@ begin
   hascheckbox:= false;
   for int1:= 0 to count - 1 do begin
    with cells[int1].buttoninfo do begin
+    captiondist:= defaultshapecaptiondist;
     item1:= tmenuitem1(fsubmenu[int1]);
     imagelist:= item1.finfo.imagelist;
     font:= item1.font;
