@@ -87,6 +87,7 @@ type
   imagenrdisabled: integer;       //-2 -> grayed
   imagecheckedoffset: integer;
   imagelist: timagelist;
+  imagedist: integer;
   face: tcustomface;
   tag: integer;
   doexecute: tagmouseprocty;
@@ -561,9 +562,12 @@ begin
    case pos of
     cp_right: begin
      align1:= [al_right,al_ycentered];
+     dec(rect1.cx,imagedist);
     end;
     cp_left: begin
      align1:= [al_ycentered];
+     inc(rect1.x,imagedist);
+     dec(rect1.cx,imagedist);
     end
     else begin
      align1:= [al_xcentered,al_ycentered];
@@ -585,7 +589,7 @@ begin
    if colorglyph <> cl_none then begin
     imagelist.paint(canvas,int1,rect1,align1,colorglyph);
    end;
-   int1:= imagelist.width;
+   int1:= imagelist.width + imagedist;
    case pos of
     cp_right: begin
      dec(arect.cx,int1);

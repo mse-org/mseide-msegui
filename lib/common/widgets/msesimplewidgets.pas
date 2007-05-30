@@ -106,6 +106,7 @@ type
    procedure setcaptiondist(const avalue: integer);
    procedure setautosize_cx(const avalue: integer);
    procedure setautosize_cy(const avalue: integer);
+   procedure setimagedist(const avalue: integer);
   protected
    //iactionlink
    function getactioninfopo: pactioninfoty;
@@ -149,6 +150,7 @@ type
    property imagenrdisabled: integer read factioninfo.imagenrdisabled
                               write setimagenrdisabled
                             stored isimagenrdisabledstored default -2;
+   property imagedist: integer read finfo.imagedist write setimagedist;
    property colorglyph: colorty read factioninfo.colorglyph write setcolorglyph
                       stored iscolorglyphstored default cl_glyph;
    property font: twidgetfont read getfont write setfont stored isfontstored;
@@ -175,6 +177,7 @@ type
    property imagelist;
    property imagenr;
    property imagenrdisabled;
+   property imagedist;
    property colorglyph;
    property options;
    property onexecute;
@@ -657,7 +660,8 @@ begin
   else begin
    finfo.captionpos:= cp_center;
   end;
-  invalidate;
+  checkautosize;
+//  invalidate;
  end;
 end;
 
@@ -665,6 +669,14 @@ procedure tcustombutton.setcaptiondist(const avalue: integer);
 begin
  if avalue <> finfo.captiondist then begin
   finfo.captiondist:= avalue;
+  checkautosize;
+ end;
+end;
+
+procedure tcustombutton.setimagedist(const avalue: integer);
+begin
+ if avalue <> finfo.imagedist then begin
+  finfo.imagedist:= avalue;
   checkautosize;
  end;
 end;
@@ -778,6 +790,7 @@ begin
      asize.cx:= width;
     end;
    end;
+   inc(asize.cx,finfo.imagedist);
   end;
  end;
  inc(asize.cx,8+fautosize_cx);
