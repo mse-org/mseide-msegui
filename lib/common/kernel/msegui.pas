@@ -132,7 +132,7 @@ const
 
 type
 
- framelocalpropty = (frl_levelo,frl_leveli,frl_framewidth,frl_extraspace,
+ framelocalpropty = (frl_levelo,frl_leveli,frl_framewidth,{frl_extraspace,}
                      frl_colorframe,frl_colorframeactive,
                      frl_colordkshadow,frl_colorshadow,
                      frl_colorlight,frl_colorhighlight,
@@ -280,7 +280,8 @@ type
   levelo: integer;
   leveli: integer;
   framewidth: integer;
-  extraspace: integer;
+//  extraspace: integer;
+//  imagedist: integer;
   colorframe: colorty;
   colorframeactive: colorty;
   framecolors:framecolorinfoty;
@@ -305,8 +306,10 @@ type
    function iscolorframestored: boolean;
    procedure setcolorframeactive(const avalue: colorty);
    function iscolorframeactivestored: boolean;
-   procedure setextraspace(const avalue: integer);
-   function isextraspacestored: boolean;
+//   procedure setextraspace(const avalue: integer);
+//   function isextraspacestored: boolean;
+//   procedure setimagedist(const avalue: integer);
+//   function isimagediststored: boolean;
    
    procedure setcolordkshadow(const avalue: colorty);
    function iscolordkshadowstored: boolean;
@@ -391,8 +394,10 @@ type
                      stored islevelistored default 0;
    property framewidth: integer read fi.framewidth write setframewidth
                      stored isframewidthstored default 0;
-   property extraspace: integer read fi.extraspace write setextraspace
-                     stored isextraspacestored default 0;
+//   property extraspace: integer read fi.extraspace write setextraspace
+//                     stored isextraspacestored default 0;
+//   property imagedist: integer read fi.imagedist write setimagedist
+//                     stored isimagediststored default 0;
    property colorframe: colorty read fi.colorframe write setcolorframe
                      stored iscolorframestored default cl_transparent;
    property colorframeactive: colorty read fi.colorframeactive 
@@ -443,7 +448,8 @@ type
    property framei_top;
    property framei_right;
    property framei_bottom;
-   property extraspace;
+//   property extraspace;
+//   property imagedist;
    property colorclient;
    property colordkshadow;
    property colorshadow;
@@ -473,10 +479,13 @@ type
    procedure setframei_top(const Value: integer);
    procedure setframewidth(const Value: integer);
    procedure setextraspace(const avalue: integer);
+   procedure setimagedist(const avalue: integer);
    procedure setleveli(const Value: integer);
    procedure setlevelo(const Value: integer);
   protected
    fi: frameinfoty;
+   fextraspace: integer;
+   fimagedist: integer;
    procedure doassignto(dest: tpersistent); override;
    function getinfosize: integer; override;
    function getinfoad: pointer; override;
@@ -502,8 +511,10 @@ type
                       write setframei_right default 0;
    property framei_bottom: integer read fi.innerframe.bottom 
                      write setframei_bottom default 0;
-   property extraspace: integer read fi.extraspace
+   property extraspace: integer read fextraspace
                         write setextraspace default 0;
+   property imagedist: integer read fimagedist
+                        write setimagedist default 0;
    property colorclient: colorty read fi.colorclient write setcolorclient 
                                             default cl_transparent;
    property colordkshadow: colorty read fi.framecolors.shadow.effectcolor
@@ -3008,7 +3019,7 @@ begin
   internalupdatestate;
  end;
 end;
-
+{
 procedure tcustomframe.setextraspace(const avalue: integer);
 begin
  if fi.extraspace <> avalue then begin
@@ -3017,7 +3028,7 @@ begin
   internalupdatestate;
  end;
 end;
-
+}
 procedure tcustomframe.setframei_left(const Value: integer);
 begin
  if fi.innerframe.left <> value then begin
@@ -3160,9 +3171,9 @@ begin
   if not (frl_framewidth in flocalprops) then begin
    framewidth:= ainfo.framewidth;
   end;
-  if not (frl_extraspace in flocalprops) then begin
-   extraspace:= ainfo.extraspace;
-  end;
+//  if not (frl_extraspace in flocalprops) then begin
+//   extraspace:= ainfo.extraspace;
+//  end;
   if not (frl_colorframe in flocalprops) then begin
    colorframe:= ainfo.colorframe;
   end;
@@ -3327,12 +3338,12 @@ function tcustomframe.isframewidthstored: boolean;
 begin
  result:= (ftemplate = nil) or (frl_framewidth in flocalprops);
 end;
-
+{
 function tcustomframe.isextraspacestored: boolean;
 begin
  result:= (ftemplate = nil) or (frl_extraspace in flocalprops);
 end;
-
+}
 function tcustomframe.iscolorframestored: boolean;
 begin
  result:= (ftemplate = nil) or (frl_colorframe in flocalprops);
@@ -3421,7 +3432,7 @@ begin
   leveli:= round(leveli * ascale);
   levelo:= round(levelo * ascale);
   framewidth:= round(framewidth * ascale);
-  extraspace:= round(extraspace * ascale);
+//  extraspace:= round(extraspace * ascale);
   framecolors.shadow.effectwidth:= round(framecolors.shadow.effectwidth*ascale);
   framecolors.light.effectwidth:= round(framecolors.light.effectwidth*ascale);
   framei_left:= round(framei_left * ascale);
@@ -3526,7 +3537,13 @@ end;
 
 procedure tframetemplate.setextraspace(const avalue: integer);
 begin
- fi.extraspace := avalue;
+ fextraspace := avalue;
+ changed;
+end;
+
+procedure tframetemplate.setimagedist(const avalue: integer);
+begin
+ fimagedist := avalue;
  changed;
 end;
 
