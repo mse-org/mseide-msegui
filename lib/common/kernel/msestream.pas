@@ -246,6 +246,9 @@ function decoderecord(const value: msestring;
                    const fields: array of pointer; const types: string;
                const quotechar: msechar = '"';
                const separator: msechar = ','): boolean; overload;
+               
+function readfiledatastring(const afilename: filenamety): string;
+procedure writefiledatastring(const afilename: filenamety; const adata: string);
 
 {$ifdef FPC}
 type
@@ -321,6 +324,30 @@ const
 type
  tstream1 = class(tstream);
  tmemorystream1 = class(tmemorystream);
+
+function readfiledatastring(const afilename: filenamety): string;
+var
+ stream1: tmsefilestream;
+begin
+ stream1:= tmsefilestream.create(afilename);
+ try
+  result:= stream1.readdatastring;
+ finally
+  stream1.free;
+ end;
+end;
+
+procedure writefiledatastring(const afilename: filenamety; const adata: string);
+var
+ stream1: tmsefilestream;
+begin
+ stream1:= tmsefilestream.create(afilename,fm_create);
+ try
+  stream1.writedatastring(adata);
+ finally
+  stream1.free;
+ end;
+end;
 
 procedure streamerror;
 begin
