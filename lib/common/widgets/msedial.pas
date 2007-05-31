@@ -3,7 +3,7 @@ unit msedial;
 interface
 uses
  classes,msewidgets,msegraphutils,msegraphics,msegui,msearrayprops,mseclasses,
- msetypes;
+ msetypes,mseguiglob;
 type
  
  dialstatety = (dis_layoutvalid);
@@ -55,7 +55,7 @@ type
    property value: realty read finfo.value write setvalue stored false;
  end;
 
- tcustomdial = class;
+ tcustomdialcontroller = class;
 
  tdialmarkers = class(townedpersistentarrayprop)
   private
@@ -64,7 +64,7 @@ type
   protected
    procedure dosizechanged; override;
   public
-   constructor create(const aowner: tcustomdial); reintroduce;
+   constructor create(const aowner: tcustomdialcontroller); reintroduce;
    procedure paint(const acanvas: tcanvas);
    property items[const index: integer]: tdialmarker read getitems; default;
  end;
@@ -102,14 +102,20 @@ type
   protected
    procedure dosizechanged; override;
   public
-   constructor create(const aowner: tcustomdial); reintroduce;
+   constructor create(const aowner: tcustomdialcontroller); reintroduce;
    property items[const index: integer]: tdialtick read getitems; default;
  end;
  
  dialoptionty = (do_opposite);
  dialoptionsty = set of dialoptionty;  
+
+ idialcontroller = interface(inullinterface)
+  procedure directionchanged(const dir,dirbefore: graphicdirectionty);
+  function getwidget: twidget;
+  function getdialrect: rectty;
+ end;
  
- tcustomdial = class(tpublishedwidget)
+ tcustomdialcontroller = class(tpersistent)
   private
    fdirection: graphicdirectionty;
    fstate: dialstatesty;
@@ -118,22 +124,22 @@ type
    fmarkers: tdialmarkers;
    fticks: tdialticks;
    foptions: dialoptionsty;
-   procedure setdirection(const avalue: graphicdirectionty);
-   procedure changed;
+   fintf: idialcontroller;
    procedure setoffset(const avalue: real);
    procedure setrange(const avalue: real);
    procedure setmarkers(const avalue: tdialmarkers);
    procedure setoptions(const avalue: dialoptionsty);
    procedure setticks(const avalue: tdialticks);
   protected
-   procedure checklayout;
-   procedure dopaint(const acanvas: tcanvas); override;
-   procedure clientrectchanged; override;
-   procedure loaded; override;
+   procedure setdirection(const avalue: graphicdirectionty); virtual;
+   procedure changed;
    procedure updatemarker(var ainfo: markerinfoty);
+   procedure checklayout;
+   procedure invalidate;
   public
-   constructor create(aowner: tcomponent); override;
+   constructor create(const aintf: idialcontroller);
    destructor destroy; override;
+   procedure paint(const acanvas: tcanvas);
    property direction: graphicdirectionty read fdirection write setdirection
                                        default gd_right;
    property offset: real read foffset write setoffset;//0.0..1.0
@@ -141,20 +147,47 @@ type
    property markers: tdialmarkers read fmarkers write setmarkers;
    property ticks: tdialticks read fticks write setticks;
    property options: dialoptionsty read foptions write setoptions default [];
+ end;
+
+ tdialcontroller = class(tcustomdialcontroller)
+  published
+   property direction;
+   property offset;
+   property range;
+   property markers;
+   property ticks;
+   property options;
+ end;
+ 
+ tcustomdial = class(tpublishedwidget,idialcontroller)
+  private
+   fdial: tdialcontroller;
+   procedure setdial(const avalue: tdialcontroller);
+  protected
+   procedure dopaint(const acanvas: tcanvas); override;
+   procedure clientrectchanged; override;
+          //idialcontroller
+   procedure directionchanged(const dir,dirbefore: graphicdirectionty);
+   function getdialrect: rectty;
+  public
+   constructor create(aowner: tcomponent); override;
+   destructor destroy; override;
+   property dial: tdialcontroller read fdial write setdial;
   published
    property color default cl_transparent;
  end;
  
  tdial = class(tcustomdial)
   published
-   property direction;
-   property offset;
-   property range;
+   property dial;
+//   property direction;
+//   property offset;
+//   property range;
    property bounds_cy default 15;
    property bounds_cx default 100;
-   property markers;
-   property ticks;
-   property options;
+//   property markers;
+//   property ticks;
+//   property options;
  end;
  
 implementation
@@ -173,7 +206,7 @@ end;
 
 procedure tdialmarker.changed;
 begin
- twidget(fowner).invalidate;
+ tcustomdialcontroller(fowner).invalidate;
  flayoutvalid:= false;
 end;
 
@@ -234,7 +267,7 @@ begin
   with finfo do begin
    active:=  not isemptyreal(finfo.value);
    if active then begin
-    tcustomdial(fowner).updatemarker(finfo);
+    tcustomdialcontroller(fowner).updatemarker(finfo);
    end;
   end;
   flayoutvalid:= true;
@@ -271,7 +304,7 @@ end;
 
 { tdialmarkers }
 
-constructor tdialmarkers.create(const aowner: tcustomdial);
+constructor tdialmarkers.create(const aowner: tcustomdialcontroller);
 begin
  inherited create(aowner,tdialmarker);
 end;
@@ -302,7 +335,7 @@ end;
 procedure tdialmarkers.dosizechanged;
 begin
  inherited;
- tcustomdial(fowner).changed;
+ tcustomdialcontroller(fowner).changed;
 end;
 
 { tdialtick }
@@ -315,7 +348,7 @@ end;
 
 procedure tdialtick.changed;
 begin
- tcustomdial(fowner).changed;
+ tcustomdialcontroller(fowner).changed;
 end;
 
 procedure tdialtick.setinterval(const avalue: real);
@@ -330,7 +363,7 @@ procedure tdialtick.setcolor(const avalue: colorty);
 begin
  if finfo.color <> avalue then begin
   finfo.color:= avalue;
-  twidget(fowner).invalidate;
+  tcustomdialcontroller(fowner).invalidate;
  end;
 end;
 
@@ -338,7 +371,7 @@ procedure tdialtick.setwidth(const avalue: integer);
 begin
  if finfo.width <> avalue then begin
   finfo.width:= avalue;
-  twidget(fowner).invalidate;
+  tcustomdialcontroller(fowner).invalidate;
  end;
 end;
 
@@ -360,7 +393,7 @@ end;
 
 { tdialticks }
 
-constructor tdialticks.create(const aowner: tcustomdial);
+constructor tdialticks.create(const aowner: tcustomdialcontroller);
 begin
  inherited create(aowner,tdialtick);
 end;
@@ -373,30 +406,27 @@ end;
 procedure tdialticks.dosizechanged;
 begin
  inherited;
- tcustomdial(fowner).changed;
+ tcustomdialcontroller(fowner).changed;
 end;
 
-{ tcustomdial }
+{ tcustomdialcontroller }
 
-constructor tcustomdial.create(aowner: tcomponent);
+constructor tcustomdialcontroller.create(const aintf: idialcontroller);
 begin
+ fintf:= aintf;
  frange:= 1.0;
  fmarkers:= tdialmarkers.create(self);
  fticks:= tdialticks.create(self);
- inherited;
- size:= makesize(100,15);
- color:= cl_transparent;
 end;
 
-
-destructor tcustomdial.destroy;
+destructor tcustomdialcontroller.destroy;
 begin
  fmarkers.free;
  fticks.free;
  inherited;
 end;
 
-procedure tcustomdial.setdirection(const avalue: graphicdirectionty);
+procedure tcustomdialcontroller.setdirection(const avalue: graphicdirectionty);
 var
  dir1: graphicdirectionty;
 begin
@@ -406,31 +436,28 @@ begin
   if fdirection >= gd_none then begin
    fdirection:= pred(fdirection);
   end;
+  changed;
+  fintf.directionchanged(avalue,dir1);
+ end;
+end;
+
+procedure tcustomdialcontroller.changed;
+begin
+ with fintf.getwidget do begin
   if not (csloading in componentstate) then begin
-   changed;
-   if fframe <> nil then begin
-    rotateframe1(tcustomframe1(fframe).fi.innerframe,dir1,avalue);    
-   end;
-   widgetrect:= changerectdirection(widgetrect,dir1,avalue);
+   exclude(fstate,dis_layoutvalid);
+   invalidate;
+   fmarkers.changed;
   end;
  end;
 end;
 
-procedure tcustomdial.changed;
-begin
- if not (csloading in componentstate) then begin
-  exclude(fstate,dis_layoutvalid);
-  invalidate;
-  fmarkers.changed;
- end;
-end;
-
-procedure tcustomdial.updatemarker(var ainfo: markerinfoty);
+procedure tcustomdialcontroller.updatemarker(var ainfo: markerinfoty);
 var
  rect1: rectty;
  dir1: graphicdirectionty;
 begin
- rect1:= innerclientrect;
+ rect1:= fintf.getdialrect;
  dir1:= fdirection;
  if do_opposite in foptions then begin
   dir1:= graphicdirectionty((ord(fdirection)+2) and $3);
@@ -495,7 +522,7 @@ begin
  end;
 end;
 
-procedure tcustomdial.checklayout;
+procedure tcustomdialcontroller.checklayout;
 var
  rect1: rectty;
  dir1: graphicdirectionty;
@@ -598,7 +625,7 @@ var
  
 begin
  if not (dis_layoutvalid in fstate) then begin
-  rect1:= innerclientrect;
+  rect1:= fintf.getdialrect;
   dir1:= fdirection;
   if do_opposite in foptions then begin
    dir1:= graphicdirectionty((ord(fdirection)+2) and $3);
@@ -610,11 +637,15 @@ begin
  end;
 end;
 
-procedure tcustomdial.dopaint(const acanvas: tcanvas);
+procedure tcustomdialcontroller.invalidate;
+begin
+ fintf.getwidget.invalidate;
+end;
+
+procedure tcustomdialcontroller.paint(const acanvas: tcanvas);
 var
  int1: integer;
 begin
- inherited;
  checklayout;
  for int1:= high(fticks.fitems) downto 0 do begin
   with tdialtick(fticks.fitems[int1]).finfo do begin
@@ -628,13 +659,7 @@ begin
  acanvas.linewidth:= 0;
 end;
 
-procedure tcustomdial.clientrectchanged;
-begin
- changed;
- inherited;
-end;
-
-procedure tcustomdial.setoffset(const avalue: real);
+procedure tcustomdialcontroller.setoffset(const avalue: real);
 begin
  if foffset <> avalue then begin
   foffset:= avalue;
@@ -642,7 +667,7 @@ begin
  end;
 end;
 
-procedure tcustomdial.setrange(const avalue: real);
+procedure tcustomdialcontroller.setrange(const avalue: real);
 begin
  if frange <> avalue then begin
   if avalue = 0 then begin
@@ -653,18 +678,12 @@ begin
  end;
 end;
 
-procedure tcustomdial.setmarkers(const avalue: tdialmarkers);
+procedure tcustomdialcontroller.setmarkers(const avalue: tdialmarkers);
 begin
  fmarkers.assign(avalue);
 end;
 
-procedure tcustomdial.loaded;
-begin
- inherited;
- changed;
-end;
-
-procedure tcustomdial.setoptions(const avalue: dialoptionsty);
+procedure tcustomdialcontroller.setoptions(const avalue: dialoptionsty);
 begin
  if foptions <> avalue then begin
   foptions:= avalue;
@@ -672,9 +691,57 @@ begin
  end;
 end;
 
-procedure tcustomdial.setticks(const avalue: tdialticks);
+procedure tcustomdialcontroller.setticks(const avalue: tdialticks);
 begin
  fticks.assign(avalue);
+end;
+
+{ tcustomdial }
+
+constructor tcustomdial.create(aowner: tcomponent);
+begin
+ fdial:= tdialcontroller.create(idialcontroller(self));
+ inherited;
+ size:= makesize(100,15);
+ color:= cl_transparent;
+end;
+
+destructor tcustomdial.destroy;
+begin
+ fdial.free;
+ inherited;
+end;
+
+procedure tcustomdial.setdial(const avalue: tdialcontroller);
+begin
+ fdial.assign(avalue);
+end;
+
+procedure tcustomdial.directionchanged(const dir,dirbefore: graphicdirectionty);
+begin
+ if not (csloading in componentstate) then begin
+  if fframe <> nil then begin
+   rotateframe1(tcustomframe1(fframe).fi.innerframe,dirbefore,dir);    
+  end;
+  widgetrect:= changerectdirection(widgetrect,dirbefore,dir);
+ end;
+end;
+
+function tcustomdial.getdialrect: rectty;
+begin
+ result:= innerclientrect;
+end;
+
+procedure tcustomdial.dopaint(const acanvas: tcanvas);
+begin
+ inherited;
+ fdial.paint(acanvas);
+end;
+
+procedure tcustomdial.clientrectchanged;
+begin
+ fdial.changed;
+ inherited;
 end;
 
 end.

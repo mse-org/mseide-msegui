@@ -326,10 +326,10 @@ var
  pt1: pointty;
 begin
  pt1:= translatewidgetpoint(avalue,source,reportcontainer);
- xdisp.value:= pt1.x/ppmm - dialh.offset;
- dialh.markers[0].value:= xdisp.value;
- ydisp.value:= pt1.y/ppmm - dialv.offset;
- dialv.markers[0].value:= ydisp.value;
+ xdisp.value:= pt1.x/ppmm - dialh.dial.offset;
+ dialh.dial.markers[0].value:= xdisp.value;
+ ydisp.value:= pt1.y/ppmm - dialv.dial.offset;
+ dialv.dial.markers[0].value:= ydisp.value;
 end;
 
 procedure treportdesignerfo.reportchildmouseevent(const sender: twidget;
@@ -343,8 +343,8 @@ begin
     exclude(fstate,rds_mouseinclient);
     xdisp.value:= emptyreal;
     ydisp.value:= emptyreal;
-    dialh.markers[0].value:= emptyreal;
-    dialv.markers[0].value:= emptyreal;
+    dialh.dial.markers[0].value:= emptyreal;
+    dialv.dial.markers[0].value:= emptyreal;
    end;
    ek_mouseenter: begin
     include(fstate,rds_mouseinclient);
@@ -365,10 +365,10 @@ end;
 
 procedure treportdesignerfo.updatedials;
 begin
- dialh.range:= dialh.bounds_cx / ppmm;
- dialv.range:= dialv.bounds_cy / ppmm;
- dialh.offset:= reportcontainer.clientpos.x / ppmm;
- dialv.offset:= reportcontainer.clientpos.y / ppmm;
+ dialh.dial.range:= dialh.bounds_cx / ppmm;
+ dialv.dial.range:= dialv.bounds_cy / ppmm;
+ dialh.dial.offset:= reportcontainer.clientpos.x / ppmm;
+ dialv.dial.offset:= reportcontainer.clientpos.y / ppmm;
 end;
 
 procedure treportdesignerfo.formresized(const sender: TObject);

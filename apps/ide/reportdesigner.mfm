@@ -46,9 +46,9 @@ inherited reportdesignerfo: treportdesignerfo
     frame.dummy = 0
     anchors = [an_left, an_top, an_right]
     taborder = 4
-    range = 100
-    markers.count = 1
-    markers.items = <    
+    dial.range = 100
+    dial.markers.count = 1
+    dial.markers.items = <    
       item
         color = -1610612729
         val = (
@@ -56,8 +56,8 @@ inherited reportdesignerfo: treportdesignerfo
           True
         )
       end>
-    ticks.count = 3
-    ticks.items = <    
+    dial.ticks.count = 3
+    dial.ticks.items = <    
       item
         interval = 10
       end    
@@ -118,10 +118,10 @@ inherited reportdesignerfo: treportdesignerfo
     color = -1879048185
     anchors = [an_left, an_top, an_bottom]
     taborder = 3
-    direction = gd_down
-    range = 100
-    markers.count = 1
-    markers.items = <    
+    dial.direction = gd_down
+    dial.range = 100
+    dial.markers.count = 1
+    dial.markers.items = <    
       item
         color = -1610612729
         val = (
@@ -129,8 +129,8 @@ inherited reportdesignerfo: treportdesignerfo
           True
         )
       end>
-    ticks.count = 3
-    ticks.items = <    
+    dial.ticks.count = 3
+    dial.ticks.items = <    
       item
         interval = 10
       end    
@@ -144,7 +144,7 @@ inherited reportdesignerfo: treportdesignerfo
         color = -1610612733
         length = 4
       end>
-    options = [do_opposite]
+    dial.options = [do_opposite]
   end
   object tspacer2: tspacer[5]
     bounds_x = 144
@@ -245,7 +245,6 @@ inherited reportdesignerfo: treportdesignerfo
       end    
       item
         caption = 'Add report page'
-        state = [as_localcaption, as_localonexecute]
         onexecute = addpage
       end    
       item

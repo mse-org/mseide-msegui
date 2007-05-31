@@ -244,7 +244,7 @@ implementation
 uses
  regwidgets,regeditwidgets,regkernel,regdialogs,
  {$ifdef FPC}{$ifndef mse_withoutdb}regdb,regreport,{$endif}{$endif}
- regdesignutils,regsysutils,regserialcomm,
+ regdesignutils,regsysutils,regserialcomm,regexperimental,
 {$ifdef morecomponents}
 {$include regcomponents.inc}
 {$endif}
