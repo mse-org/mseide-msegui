@@ -1765,7 +1765,7 @@ end;
 procedure tmainfo.newproject(const fromprogram,empty: boolean);
 var
  aname: filenamety;
- mstr1: msestring;
+ mstr1,mstr2: msestring;
  int1: integer;
  curdir,source,dest: filenamety;
  macrolist: tmacrolist;
@@ -1773,6 +1773,7 @@ var
  bo1: boolean;
  
 begin
+ mstr2:= projecttemplatedir; //use macros of actual project
  if openproject('') then begin
   gdb.closegdb;
   cleardebugdisp;
@@ -1780,7 +1781,7 @@ begin
   mstr1:= '';
   if not fromprogram then begin
    if not empty then begin
-    aname:= projecttemplatedir + 'default.prj';
+    aname:= mstr2 + 'default.prj';
     if filedialog(aname,[fdo_checkexist],'Select project template',
              ['Project files','All files'],['*.prj','*'],'prj') = mr_ok then begin
      readprojectoptions(aname);

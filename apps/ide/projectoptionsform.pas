@@ -352,6 +352,9 @@ procedure initprojectoptions;
 function editprojectoptions: boolean;
     //true if not aborted
 procedure expandprojectmacros;
+function expandprmacros(const atext: msestring): msestring;
+procedure expandprmacros1(var atext: msestring);
+function projecttemplatedir: filenamety;
 function projectfiledialog(var aname: filenamety; save: boolean): modalresultty;
 procedure projectoptionsmodified;
 function checkprojectloadabort: boolean; //true on load abort
@@ -498,7 +501,7 @@ begin
  end;
 end;
 
-procedure expandmacros1(var atext: msestring); overload;
+procedure expandprmacros1(var atext: msestring);
 var
  li: tmacrolist;
 begin
@@ -507,10 +510,16 @@ begin
  li.Free;
 end;
 
-function expandmacros(const atext: msestring): msestring;
+function projecttemplatedir: filenamety;
+begin
+ result:= expandprmacros('${TEMPLATEDIR}');
+// result:= expandmacros(settings.macros[sma_templatedir],getsettingsmacros);
+end;
+
+function expandprmacros(const atext: msestring): msestring;
 begin
  result:= atext;
- expandmacros1(result);
+ expandprmacros1(result);
 end;
 
 procedure expandprojectmacros;
@@ -1373,7 +1382,7 @@ begin
  else begin
   info.caption:= tstringcol(sender)[arow];
  end;
- expandmacros1(info.caption);
+ expandprmacros1(info.caption);
  include(info.flags,hfl_show); //show empty caption
 end;
 
@@ -1382,7 +1391,7 @@ procedure tprojectoptionsfo.hintexpandedmacros(const sender: TObject;
 begin
  storemacros(self);
  info.caption:= tcustomedit(sender).text;
- expandmacros1(info.caption);
+ expandprmacros1(info.caption);
  include(info.flags,hfl_show); //show empty caption
 end;
 
@@ -1395,7 +1404,7 @@ end;
 procedure tprojectoptionsfo.expandfilename(const sender: TObject;
                      var avalue: mseString; var accept: Boolean);
 begin
- expandmacros1(avalue);
+ expandprmacros1(avalue);
 end;
 
 procedure tprojectoptionsfo.showcommandlineonexecute(const sender: TObject);

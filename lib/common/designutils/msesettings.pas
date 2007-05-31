@@ -65,7 +65,6 @@ var
 procedure updatesettings(const filer: tstatfiler);
 function getsettingsmacros: macroinfoarty;
 function getsyssettingsmacros: macroinfoarty;
-function projecttemplatedir: filenamety;
 function getprintcommand: string;
 function editsettings(const caption: msestring = ''): boolean;
  
@@ -97,11 +96,6 @@ begin
  for int1:= 0 to ord(sma_debugger) do begin
   result[int1].value:= tosysfilepath(result[int1].value);
  end;
-end;
-
-function projecttemplatedir: filenamety;
-begin
- result:= expandmacros(settings.macros[sma_templatedir],getsettingsmacros);
 end;
  
 function getprintcommand: string;
