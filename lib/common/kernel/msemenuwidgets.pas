@@ -20,6 +20,8 @@ type
  menucellinfoty = record
   buttoninfo: shapeinfoty;
   dimouter: rectty;
+  fontinactive: tfont;
+  fontactive: tfont;
  end;
  menucellinfoarty = array of menucellinfoty;
 
@@ -265,6 +267,25 @@ end;
 
 procedure calcmenulayout(var layout: menulayoutinfoty; const canvas: tcanvas;
                               const maxsize: integer = bigint);
+ function gettextrect(const acell: menucellinfoty; 
+                                      const atext: richstringty): sizety;
+ var
+  size1: sizety;
+ begin
+  with acell do begin
+   result:= textrect(canvas,atext,[],fontinactive).size;
+   if fontinactive <> fontactive then begin
+    size1:= textrect(canvas,atext,[],fontactive).size;
+    if size1.cx > result.cx then begin
+     result.cx:= size1.cx;
+    end;
+    if size1.cy > result.cy then begin
+     result.cy:= size1.cy;
+    end;
+   end;
+  end;
+ end;
+ 
 const
  shortcutdist = 5;
 var
@@ -323,107 +344,110 @@ begin
   hassubmenu:= false;
   hascheckbox:= false;
   for int1:= 0 to count - 1 do begin
-   with cells[int1].buttoninfo do begin
-    captiondist:= defaultshapecaptiondist;
-    imagedist:= imagedi;
-    item1:= tmenuitem1(fsubmenu[int1]);
-    imagelist:= item1.finfo.imagelist;
-    font:= item1.font;
-    ar1:= splitrichstring(item1.finfo.caption1,msechar(c_tab));
-    atextsize:= textrect(canvas,ar1[0],[],font).size;
-    atextsize.cx:= atextsize.cx + frame1.left + frame1.right;
-    atextsize.cy:= atextsize.cy + frame1.top + frame1.bottom;
-    inc(atextsize.cy,2); //for 3D level
-    if imagelist <> nil then begin
-     tabpos:= -(imagelist.width+imagedi);
-     atextsize.cx:= atextsize.cx - tabpos;
-     if atextsize.cy < imagelist.height then begin
-      atextsize.cy:= imagelist.height;
-     end;
-    end
-    else begin
-     tabpos:= 0;
-    end;
-    tabpos:= tabpos - frame1.right - frame1.left;
-    if atextsize.cy > maxheight then begin
-     maxheight:= atextsize.cy;
-    end;
-    if atextsize.cx > textwidth then begin
-     textwidth:= atextsize.cx;
-    end;
-    if high(ar1) > 0 then begin
-     ashortcutwidth:= textrect(canvas,ar1[1],[],font).cx;
-     if ashortcutwidth > shortcutwidth then begin
-      shortcutwidth:= ashortcutwidth;
-     end;
-    end
-    else begin
-     ashortcutwidth:= 0;
-    end;
-    colorglyph:= layout.colorglyph;
-    caption:= item1.finfo.caption1;
-    imagenr:= item1.finfo.imagenr;
-    imagenrdisabled:= item1.finfo.imagenrdisabled;
-    actionstatestoshapestates(item1.finfo,state);
-    color:= cl_transparent;
-    include(state,ss_flat);
-    if (owner <> nil) and (mo_flat in owner.options) then begin
-     include(state,ss_noanimation) 
-    end
-    else begin
-     exclude(state,ss_noanimation);
-    end;
-   
-    if mlo_horz in layout.options then begin
-     include(state,ss_horz);
-    end
-    else begin
-     exclude(state,ss_horz);
-    end;
-    if item1.count > 0 then begin
-     include(state,ss_submenu);
-    end
-    else begin
-     exclude(state,ss_submenu);
-    end;
-    if not (ss_invisible in state) then begin
-     hassubmenu:= hassubmenu or (ss_submenu in state);
-     hascheckbox:= hascheckbox or (ss_checkbox in state);
-     with dim do begin
-      if mlo_horz in layout.options then begin
-       if ss_separator in state then begin
-        cx:= 2;
-       end
-       else begin
-        cx:= atextsize.cx + 4;
-        if ashortcutwidth > 0 then begin
-         tabpos:= tabpos + atextsize.cx + shortcutdist;
-         cx:= cx + shortcutdist + ashortcutwidth;
-        end;
-        if ss_checkbox in state then begin
-         cx:= cx + menucheckboxwidth;
-        end;
-       end;
-       x:= ax;
-       y:= ay;
-       inc(ax,cx+framewidth1);
-      end
-      else begin
-       y:= ay;
-       if ss_separator in state then begin
-        cy:= 2;
-       end
-       else begin
-        cy:= atextsize.cy;
-       end;
-       inc(ay,cy+framewidth1);
+   item1:= tmenuitem1(fsubmenu[int1]);
+   with cells[int1] do begin
+    fontinactive:= item1.font;
+    fontactive:= item1.fontactive;
+    with buttoninfo do begin
+     captiondist:= defaultshapecaptiondist;
+     imagedist:= imagedi;
+     imagelist:= item1.finfo.imagelist;
+     ar1:= splitrichstring(item1.finfo.caption1,msechar(c_tab));
+     atextsize:= gettextrect(cells[int1],ar1[0]);
+     atextsize.cx:= atextsize.cx + frame1.left + frame1.right;
+     atextsize.cy:= atextsize.cy + frame1.top + frame1.bottom;
+     inc(atextsize.cy,2); //for 3D level
+     if imagelist <> nil then begin
+      tabpos:= -(imagelist.width+imagedi);
+      atextsize.cx:= atextsize.cx - tabpos;
+      if atextsize.cy < imagelist.height then begin
+       atextsize.cy:= imagelist.height;
       end;
+     end
+     else begin
+      tabpos:= 0;
      end;
-    end
-    else begin
-     dim:= nullrect;
-    end;
-   end;
+     tabpos:= tabpos - frame1.right - frame1.left;
+     if atextsize.cy > maxheight then begin
+      maxheight:= atextsize.cy;
+     end;
+     if atextsize.cx > textwidth then begin
+      textwidth:= atextsize.cx;
+     end;
+     if high(ar1) > 0 then begin
+      ashortcutwidth:= gettextrect(cells[int1],ar1[1]).cx;
+      if ashortcutwidth > shortcutwidth then begin
+       shortcutwidth:= ashortcutwidth;
+      end;
+     end
+     else begin
+      ashortcutwidth:= 0;
+     end;
+     colorglyph:= layout.colorglyph;
+     caption:= item1.finfo.caption1;
+     imagenr:= item1.finfo.imagenr;
+     imagenrdisabled:= item1.finfo.imagenrdisabled;
+     actionstatestoshapestates(item1.finfo,state);
+     color:= cl_transparent;
+     include(state,ss_flat);
+     if (owner <> nil) and (mo_flat in owner.options) then begin
+      include(state,ss_noanimation) 
+     end
+     else begin
+      exclude(state,ss_noanimation);
+     end;
+    
+     if mlo_horz in layout.options then begin
+      include(state,ss_horz);
+     end
+     else begin
+      exclude(state,ss_horz);
+     end;
+     if item1.count > 0 then begin
+      include(state,ss_submenu);
+     end
+     else begin
+      exclude(state,ss_submenu);
+     end;
+     if not (ss_invisible in state) then begin
+      hassubmenu:= hassubmenu or (ss_submenu in state);
+      hascheckbox:= hascheckbox or (ss_checkbox in state);
+      with dim do begin
+       if mlo_horz in layout.options then begin
+        if ss_separator in state then begin
+         cx:= 2;
+        end
+        else begin
+         cx:= atextsize.cx + 4;
+         if ashortcutwidth > 0 then begin
+          tabpos:= tabpos + atextsize.cx + shortcutdist;
+          cx:= cx + shortcutdist + ashortcutwidth;
+         end;
+         if ss_checkbox in state then begin
+          cx:= cx + menucheckboxwidth;
+         end;
+        end;
+        x:= ax;
+        y:= ay;
+        inc(ax,cx+framewidth1);
+       end
+       else begin
+        y:= ay;
+        if ss_separator in state then begin
+         cy:= 2;
+        end
+        else begin
+         cy:= atextsize.cy;
+        end;
+        inc(ay,cy+framewidth1);
+       end;
+      end;
+     end
+     else begin
+      dim:= nullrect;
+     end;
+    end;  //with cells[int1].buttoninfo
+   end;   //with cells[int1]
   end;
   if shortcutwidth > 0 then begin
    tabpos1:= textwidth + shortcutdist;
@@ -560,6 +584,7 @@ begin
       itemframetemplateactive.draw3dframe(canvas,buttoninfo.dim);
      end;
      buttoninfo.face:= itemfaceactive;
+     buttoninfo.font:= fontactive;
      drawmenubutton(canvas,buttoninfo,po2);
     end
     else begin
@@ -567,6 +592,7 @@ begin
       itemframetemplate.draw3dframe(canvas,buttoninfo.dim);
      end;
      buttoninfo.face:= itemface;
+     buttoninfo.font:= fontinactive;
      drawmenubutton(canvas,buttoninfo,po1);
     end;
    end;

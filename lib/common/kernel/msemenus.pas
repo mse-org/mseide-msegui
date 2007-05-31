@@ -63,6 +63,11 @@ type
    class function getinstancepo(owner: tobject): pfont; override;
  end;
  
+ tmenufontactive = class(tparentfont)
+  public
+   class function getinstancepo(owner: tobject): pfont; override;
+ end;
+ 
  tcustommenu = class;
 
  tmenuitem = class(teventpersistent,iactionlink)
@@ -73,6 +78,7 @@ type
    fgroup: integer;
    fsource: ievent;
    ffont: tmenufont;
+   ffontactive: tmenufontactive;
    function getsubmenu: tmenuitems;
    procedure setsubmenu(const Value: tmenuitems);
    procedure setcaption(const Value: captionty);
@@ -106,11 +112,16 @@ type
    function isimagenrstored: Boolean;
    procedure setimagenrdisabled(const avalue: integer);
    function isimagenrdisabledstored: Boolean;
+
    function getfont: tmenufont;
+   function getfontactive: tmenufontactive;
    procedure createfont;
-   procedure dofontchanged(const sender: tobject);
+   procedure createfontactive;
    procedure setfont(const avalue: tmenufont);
+   procedure setfontactive(const avalue: tmenufontactive);
    function isfontstored: boolean;
+   function isfontactivestored: boolean;
+   procedure dofontchanged(const sender: tobject);
   protected
    finfo: actioninfoty;
    fowner: tcustommenu;
@@ -170,6 +181,8 @@ type
    property imagenrdisabled: integer read finfo.imagenrdisabled write setimagenrdisabled
                             stored isimagenrdisabledstored default -2;
    property font: tmenufont read getfont write setfont stored isfontstored;
+   property fontactive: tmenufontactive read getfontactive write setfontactive
+                            stored isfontactivestored;
    property onexecute: notifyeventty read finfo.onexecute
                      write setonexecute stored isonexecutestored;
  end;
@@ -580,6 +593,13 @@ end;
 class function tmenufont.getinstancepo(owner: tobject): pfont;
 begin
  result:= @(tmenuitem(owner).ffont);
+end;
+
+{ tmenufontactive }
+
+class function tmenufontactive.getinstancepo(owner: tobject): pfont;
+begin
+ result:= @(tmenuitem(owner).ffontactive);
 end;
 
 { tmenuitem }
@@ -1014,6 +1034,11 @@ begin
  result:= ffont <> nil;
 end;
 
+function tmenuitem.isfontactivestored: boolean;
+begin
+ result:= ffontactive <> nil;
+end;
+
 procedure tmenuitem.dofontchanged(const sender: tobject);
 begin
  actionchanged;
@@ -1024,6 +1049,14 @@ begin
  if ffont = nil then begin
   ffont:= tmenufont.create;
   ffont.onchange:= {$ifdef FPC}@{$endif}dofontchanged;
+ end;
+end;
+
+procedure tmenuitem.createfontactive;
+begin
+ if ffontactive = nil then begin
+  ffontactive:= tmenufontactive.create;
+  ffontactive.onchange:= {$ifdef FPC}@{$endif}dofontchanged;
  end;
 end;
 
@@ -1043,11 +1076,37 @@ begin
  end;
 end;
 
+function tmenuitem.getfontactive: tmenufontactive;
+begin
+ getoptionalobject(fowner.componentstate,ffontactive,
+            {$ifdef FPC}@{$endif}createfontactive);
+ if ffontactive <> nil then begin
+  result:= ffontactive;
+ end
+ else begin
+  if fparentmenu <> nil then begin
+   result:= fparentmenu.getfontactive;
+  end
+  else begin
+   result:= tmenufontactive(stockobjects.fonts[stf_menu]);
+  end;
+ end;
+end;
+
 procedure tmenuitem.setfont(const avalue: tmenufont);
 begin
  if avalue <> ffont then begin
   setoptionalobject(fowner.componentstate,avalue,ffont,
                {$ifdef FPC}@{$endif}createfont);
+  actionchanged;
+ end;
+end;
+
+procedure tmenuitem.setfontactive(const avalue: tmenufontactive);
+begin
+ if avalue <> ffontactive then begin
+  setoptionalobject(fowner.componentstate,avalue,ffontactive,
+               {$ifdef FPC}@{$endif}createfontactive);
   actionchanged;
  end;
 end;
