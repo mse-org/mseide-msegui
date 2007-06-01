@@ -25,6 +25,8 @@ type
    class function getinstancepo(owner: tobject): pfont; override;
  end;
 
+ dialdatakindty = (dtk_real,dtk_datetime);
+ 
  diallineinfoty = record
   color: colorty;
   widthmm: real;
@@ -34,6 +36,7 @@ type
   captiondist: integer;
   font: tdialpropfont;
   caption: msestring;
+  kind: dialdatakindty;
  end;
   
  dialtickinfoty = record
@@ -58,9 +61,11 @@ type
    function isfontstored: boolean;
    procedure createfont;
    procedure fontchanged(const sender: tobject);
+   procedure setkind(const avalue: dialdatakindty);
   protected
    flayoutvalid: boolean;
    procedure changed; virtual;
+   function getactcaption(const avalue: real; const aformat: msestring): msestring;
   public
    constructor create(aowner: tobject); override;   
    destructor destroy; override;
@@ -79,6 +84,7 @@ type
    property captiondist: integer read fli.captiondist write setcaptiondist
                                        default 2;
    property font: tdialpropfont read getfont write setfont stored isfontstored;
+   property kind: dialdatakindty read fli.kind write setkind default dtk_real;
  end;
 
  dialmarkeroptionty = (dmo_opposite);
@@ -330,6 +336,14 @@ begin
  end;
 end;
 
+procedure tdialprop.setkind(const avalue: dialdatakindty);
+begin
+ if fli.kind <> avalue then begin
+  fli.kind:= avalue;
+  changed;
+ end;
+end;
+
 procedure tdialprop.fontchanged(const sender: tobject);
 begin
  changed;
@@ -367,6 +381,16 @@ end;
 function tdialprop.isfontstored: boolean;
 begin
  result:= fli.font <> nil;
+end;
+
+function tdialprop.getactcaption(const avalue: real; const aformat: msestring): msestring;
+begin
+ if fli.kind = dtk_datetime then begin
+  result:= datetimetostring(avalue,aformat);
+ end
+ else begin
+  result:= formatfloatmse(avalue,aformat);
+ end;
 end;
 
 { tdialmarker }
@@ -478,7 +502,7 @@ begin
   end;
   if caption <> '' then begin
    afont:= self.font;
-   acaption:= formatfloatmse(value,caption);
+   acaption:= getactcaption(value,caption);
    int2:= fintf.getwidget.getcanvas.getstringwidth(acaption,afont);
    int3:= afont.ascent - afont.glyphheight div 2;
    case dir1 of
@@ -761,8 +785,7 @@ begin
        system.setlength(captions,system.length(ticks));
        system.setlength(ar1,system.length(ticks));
        for int1:= 0 to high(captions) do begin
-        captions[int1].caption:= 
-                     formatfloatmse(int1*valstep+first,caption);
+        captions[int1].caption:= getactcaption(int1*valstep+first,caption);
         ar1[int1]:= canvas1.getstringwidth(captions[int1].caption,afont);
        end;
        int3:= afont.ascent - afont.glyphheight div 2;
