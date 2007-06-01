@@ -668,7 +668,7 @@ begin
    gd_down: begin
     linestart:= arect.x + arect.cx - indent - 1;
     if length = 0 then begin
-     lineend:= linestart - arect.cx - indent;
+     lineend:= linestart - arect.cx + indent;
     end
     else begin
      lineend:= linestart - length;
@@ -686,7 +686,7 @@ begin
    gd_up: begin
     linestart:= arect.x + indent;
     if length = 0 then begin
-     lineend:= linestart + arect.cx + indent;
+     lineend:= linestart + arect.cx - indent;
     end
     else begin
      lineend:= linestart + length;
