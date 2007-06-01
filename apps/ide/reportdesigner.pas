@@ -326,9 +326,9 @@ var
  pt1: pointty;
 begin
  pt1:= translatewidgetpoint(avalue,source,reportcontainer);
- xdisp.value:= pt1.x/ppmm - dialh.dial.offset;
+ xdisp.value:= pt1.x/ppmm + dialh.dial.offset;
  dialh.dial.markers[0].value:= xdisp.value;
- ydisp.value:= pt1.y/ppmm - dialv.dial.offset;
+ ydisp.value:= pt1.y/ppmm + dialv.dial.offset;
  dialv.dial.markers[0].value:= ydisp.value;
 end;
 
@@ -364,11 +364,21 @@ begin
 end;
 
 procedure treportdesignerfo.updatedials;
+ procedure adjustticks(const adial: tcustomdialcontroller);
+ begin
+  with adial do begin
+   ticks[0].intervalcount:= range/10.0;
+   ticks[1].intervalcount:= range/5.0;
+   ticks[2].intervalcount:= range/1.0;
+  end;
+ end; 
 begin
- dialh.dial.range:= dialh.bounds_cx / ppmm;
- dialv.dial.range:= dialv.bounds_cy / ppmm;
- dialh.dial.offset:= reportcontainer.clientpos.x / ppmm;
- dialv.dial.offset:= reportcontainer.clientpos.y / ppmm;
+ dialh.dial.range:= dialh.bounds_cx / ppmm; //mm
+ dialv.dial.range:= dialv.bounds_cy / ppmm; //mm
+ dialh.dial.offset:= -reportcontainer.clientpos.x / ppmm;
+ dialv.dial.offset:= -reportcontainer.clientpos.y / ppmm;
+ adjustticks(dialh.dial);
+ adjustticks(dialv.dial);
 end;
 
 procedure treportdesignerfo.formresized(const sender: TObject);

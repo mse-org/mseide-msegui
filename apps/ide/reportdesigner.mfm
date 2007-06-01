@@ -59,15 +59,15 @@ inherited reportdesignerfo: treportdesignerfo
     dial.ticks.count = 3
     dial.ticks.items = <    
       item
-        interval = 10
+        intervalcount = 10
       end    
       item
-        interval = 5
+        intervalcount = 20
         color = -1610612733
         length = 6
       end    
       item
-        interval = 1
+        intervalcount = 100
         color = -1610612733
         length = 3
       end>
@@ -132,19 +132,18 @@ inherited reportdesignerfo: treportdesignerfo
     dial.ticks.count = 3
     dial.ticks.items = <    
       item
-        interval = 10
+        intervalcount = 10
       end    
       item
-        interval = 5
+        intervalcount = 20
         color = -1610612733
         length = 6
       end    
       item
-        interval = 1
+        intervalcount = 100
         color = -1610612733
         length = 4
       end>
-    dial.options = [do_opposite]
   end
   object tspacer2: tspacer[5]
     bounds_x = 144

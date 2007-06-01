@@ -566,6 +566,7 @@ begin
   end;
   for int1:= 0 to high(cells) do begin
    with tabs[int1],cells[int1] do begin
+    captiondist:= 2;
     state:= state + options * [ss_vert,ss_opposite];
     if ts_active in fstate then begin
      if fcoloractive = cl_default then begin

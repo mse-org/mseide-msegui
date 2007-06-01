@@ -25,6 +25,8 @@ type
    fxseriesdata: realarty;
    fkind: tracekindty;
    fxseriescount: integer;
+   fwidthmm: real;
+   fdashes: string;
    procedure setxydata(const avalue: complexarty);
    procedure datachange;
    procedure setcolor(const avalue: colorty);
@@ -36,6 +38,8 @@ type
    procedure setxseriesdata(const avalue: realarty);
    procedure setkind(const avalue: tracekindty);
    procedure setxseriescount(const avalue: integer);
+   procedure setwidthmm(const avalue: real);
+   procedure setdashes(const avalue: string);
   protected
    procedure checkgraphic;
    procedure paint(const acanvas: tcanvas);
@@ -46,6 +50,8 @@ type
    property xydata: complexarty read fxydata write setxydata;
   published
    property color: colorty read fcolor write setcolor default cl_black;
+   property widthmm: real read fwidthmm write setwidthmm;   //default 0.3
+   property dashes: string read fdashes write setdashes;
    property xscale: real read fxscale write setxscale;      //default 1.0
    property xoffset: real read fxoffset write setxoffset;
    property yscale: real read fyscale write setyscale;      //default 1.0
@@ -69,12 +75,12 @@ type
   protected
    fscalex: real;
    fscaley: real;
-   procedure change;
+   procedure change; reintroduce;
    procedure clientrectchanged;
    procedure paint(const acanvas: tcanvas);
    procedure checkgraphic;
   public
-   constructor create(const aowner: tcustomchart);
+   constructor create(const aowner: tcustomchart); reintroduce;
    property items[const index: integer]: ttrace read getitems write setitems; default;
   published
  end;
@@ -141,6 +147,7 @@ uses
 constructor ttrace.create(aowner: tobject);
 begin
  fcolor:= cl_black;
+ fwidthmm:= 0.3;
  fxscale:= 1.0;
  fyscale:= 1.0;
  inherited;
@@ -206,7 +213,14 @@ end;
 
 procedure ttrace.paint(const acanvas: tcanvas);
 begin
+ acanvas.linewidthmm:= fwidthmm;
+ if fdashes <> '' then begin
+  acanvas.dashes:= fdashes;
+ end;
  acanvas.drawlines(fdatapoints,false,fcolor);
+ if fdashes <> '' then begin
+  acanvas.dashes:= '';
+ end;
 end;
 
 procedure ttrace.setcolor(const avalue: colorty);
@@ -215,6 +229,18 @@ begin
   fcolor:= avalue;
   tcustomchart(fowner).traces.change;
  end;
+end;
+
+procedure ttrace.setwidthmm(const avalue: real);
+begin
+ fwidthmm:= avalue;
+ tcustomchart(fowner).traces.change;
+end;
+
+procedure ttrace.setdashes(const avalue: string);
+begin
+ fdashes:= avalue;
+ tcustomchart(fowner).traces.change;
 end;
 
 procedure ttrace.setxscale(const avalue: real);
@@ -312,6 +338,7 @@ begin
  for int1:= 0 to high(fitems) do begin
   ptraceaty(fitems)^[int1].paint(acanvas);
  end;
+ acanvas.linewidth:= 0;
 end;
 
 procedure ttraces.checkgraphic;
@@ -369,7 +396,7 @@ begin
   direction:= gd_up;
   ticks.count:= 1;
   with ticks[0] do begin
-   interval:= 0.1;
+   intervalcount:= 10;
    color:= cl_dkgray;
   end;
  end;
@@ -377,7 +404,7 @@ begin
   direction:= gd_right;
   ticks.count:= 1;
   with ticks[0] do begin
-   interval:= 0.1;
+   intervalcount:= 10;
    color:= cl_dkgray;
   end;
  end;
