@@ -11,7 +11,10 @@ type
  tracestatety = (trs_datapointsvalid);
  tracestatesty = set of tracestatety;
  tracekindty = (trk_xseries,trk_xy);
- 
+
+ charttraceoptionty = (cto_adddataright);
+ charttraceoptionsty = set of charttraceoptionty;
+  
  ttrace = class(townedpersistent)
   private
    fxydata: complexarty;
@@ -27,6 +30,7 @@ type
    fxseriescount: integer;
    fwidthmm: real;
    fdashes: string;
+   foptions: charttraceoptionsty;
    procedure setxydata(const avalue: complexarty);
    procedure datachange;
    procedure setcolor(const avalue: colorty);
@@ -40,6 +44,7 @@ type
    procedure setxseriescount(const avalue: integer);
    procedure setwidthmm(const avalue: real);
    procedure setdashes(const avalue: string);
+   procedure setoptions(const avalue: charttraceoptionsty);
   protected
    procedure checkgraphic;
    procedure paint(const acanvas: tcanvas);
@@ -59,6 +64,7 @@ type
    property kind: tracekindty read fkind write setkind default trk_xseries;
    property xseriescount: integer read fxseriescount write setxseriescount default 0;
                       //0-> xseriesdata count
+   property options: charttraceoptionsty read foptions write setoptions;
  end;
 
  traceaty = array[0..0] of ttrace;
@@ -175,6 +181,7 @@ procedure ttrace.checkgraphic;
 var
  int1,int2: integer;
  xo,xs,yo,ys: real;
+ rea1: real;
 begin
  if not (trs_datapointsvalid in fstate) then begin
   yo:= fyoffset - fyscale;
@@ -192,13 +199,17 @@ begin
    else begin //trk_xseries
     setlength(fdatapoints,length(fxseriesdata));
     if high(fdatapoints) >= 0 then begin
+     rea1:= 0;
      if xseriescount > 1 then begin
       int2:= xseriescount - 1;
+      if (int2 > high(fdatapoints)) and (cto_adddataright in foptions) then begin
+       rea1:= 1 - high(fdatapoints) / real(int2);
+      end;
      end
      else begin
       int2:= high(fdatapoints);
      end;
-     xo:= fxoffset * int2;
+     xo:= (rea1 + fxoffset) * int2;
      xs:= tcustomchart(fowner).traces.fscalex / (fxscale * int2);
      for int1:= 0 to high(fdatapoints) do begin
       fdatapoints[int1].x:= round((int1 + xo)* xs);
@@ -250,6 +261,14 @@ begin
  end;
  fxscale:= avalue;
  datachange;
+end;
+
+procedure ttrace.setoptions(const avalue: charttraceoptionsty);
+begin
+ if avalue <> foptions then begin
+  foptions:= avalue;
+  datachange;
+ end;
 end;
 
 procedure ttrace.setxoffset(const avalue: real);
