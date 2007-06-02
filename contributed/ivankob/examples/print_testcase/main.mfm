@@ -45,6 +45,7 @@ object mainfo: tmainfo
     state = [as_localcaption]
     caption = 'Exit'
     font.color = -1610612730
+    font.colorshadow = -2147483648
     font.name = 'stf_default'
     font.dummy = 0
     modalresult = mr_canclose
@@ -95,6 +96,7 @@ object mainfo: tmainfo
           item
             caption = #8470
           end>
+        font.colorshadow = -2147483648
         font.height = 15
         font.extraspace = -7
         font.style = [fs_bold]
@@ -194,6 +196,7 @@ object mainfo: tmainfo
       taborder = 1
       visible = False
       optionsedit = [oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_resetselectonexit, oe_endonenter, oe_autopost, oe_autopopupmenu, oe_keyexecute, oe_savevalue, oe_savestate]
+      font.colorshadow = -2147483648
       font.dummy = 0
       textflags = [tf_wordbreak, tf_noselect]
       textflagsactive = [tf_wordbreak]
@@ -260,6 +263,7 @@ object mainfo: tmainfo
       frame.colorclient = -2147483647
       frame.caption = 'Ctrl + Ins:'
       frame.captionpos = cp_left
+      frame.font.colorshadow = -2147483648
       frame.font.style = [fs_bold]
       frame.font.name = 'stf_default'
       frame.font.dummy = 0
@@ -282,6 +286,7 @@ object mainfo: tmainfo
       color = -2147483645
       frame.caption = 'Ctrl + Del:'
       frame.captionpos = cp_left
+      frame.font.colorshadow = -2147483648
       frame.font.style = [fs_bold]
       frame.font.name = 'stf_default'
       frame.font.dummy = 0
@@ -322,6 +327,8 @@ object mainfo: tmainfo
     linkright = tbutton3
   end
   object mnuMain: tmainmenu
+    popupitemframetemplate = ftMenu
+    popupitemframetemplateactive = ftMenu
     menu.submenu.count = 2
     menu.submenu.items = <    
       item
@@ -347,7 +354,7 @@ object mainfo: tmainfo
         state = [as_localcaption]
       end>
     itemframetemplate = ftMenu
-    popupitemframetemplate = ftMenu
+    itemframetemplateactive = ftMenu
     left = 232
     top = 136
   end
