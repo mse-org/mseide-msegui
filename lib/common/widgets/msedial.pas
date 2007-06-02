@@ -491,13 +491,13 @@ begin
     b.y:= lineend;
    end;
    gd_up: begin
-    a.y:= rect1.y + rect1.cy - round(rect1.cy * (value - foffset)/frange) - 1;
+    a.y:= rect1.y + rect1.cy - round(rect1.cy * (value - foffset)/frange) {- 1};
     b.y:= a.y;
     a.x:= linestart;
     b.x:= lineend;
    end;
    gd_left: begin
-    a.x:= rect1.x + rect1.cx - round(rect1.cx * (value - foffset)/frange) - 1;
+    a.x:= rect1.x + rect1.cx - round(rect1.cx * (value - foffset)/frange) {- 1};
     b.x:= a.x;
     a.y:= linestart;
     b.y:= lineend;
@@ -666,7 +666,7 @@ begin
  with ainfo do begin
   case linedirection of
    gd_right: begin
-    linestart:= arect.y + arect.cy - indent - 1;
+    linestart:= arect.y + arect.cy - indent {- 1};
     if length = 0 then begin
      lineend:= linestart - arect.cy + indent;
     end
@@ -675,7 +675,7 @@ begin
     end;
    end;
    gd_down: begin
-    linestart:= arect.x + arect.cx - indent - 1;
+    linestart:= arect.x + arect.cx - indent {- 1};
     if length = 0 then begin
      lineend:= linestart - arect.cx + indent;
     end
@@ -754,14 +754,14 @@ begin
        offs:= rect1.cx * offs;
        if fdirection = gd_left then begin
         step:= - step;
-        offs:= rect1.cx - offs;
+        offs:= rect1.cx - offs{ + 1};
        end;
        for int1:= 0 to high(ticks) do begin
         with ticks[int1] do begin
          a.x:= rect1.x + round(int1*step+offs);
-         if fdirection = gd_left then begin
-          dec(a.x);
-         end;
+//         if fdirection = gd_left then begin
+//          dec(a.x);
+//         end;
          b.x:= a.x;
          a.y:= linestart;
          b.y:= lineend;
@@ -773,14 +773,14 @@ begin
        offs:= rect1.cy * offs;
        if fdirection = gd_up then begin
         step:= - step;
-        offs:= rect1.cy - offs;
+        offs:= rect1.cy - offs {+ 1};
        end;
        for int1:= 0 to high(ticks) do begin
         with ticks[int1] do begin
          a.y:= rect1.y + round(int1*step+offs);
-         if fdirection = gd_up then begin
-          dec(a.y);
-         end;
+//         if fdirection = gd_up then begin
+//          dec(a.y);
+//         end;
          b.y:= a.y;
          a.x:= linestart;
          b.x:= lineend;
