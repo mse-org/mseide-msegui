@@ -50,6 +50,7 @@ type
   
  dialtickinfoty = record
   ticks: segmentarty;
+  ticksreal: realarty;
   captions: tickcaptionarty;
   intervalcount: real;
   afont: tfont;
@@ -476,6 +477,39 @@ end;
 procedure tdialmarker.updatemarker;
 var
  rect1: rectty;
+ 
+ function snap(const avalue: real): integer;
+            //snap to ticks
+ var
+  int1,int2: integer;
+ begin
+  with tcustomdialcontroller(fowner),fticks do begin
+   for int1:= 0 to count - 1 do begin
+    with tdialtick(fitems[int1]).finfo do begin
+     for int2:= 0 to high(ticksreal) do begin
+      if abs(avalue-ticksreal[int2]) < 0.1 then begin
+       if direction in [gd_right,gd_left] then begin
+        result:= ticks[int2].a.x;
+       end
+       else begin
+        result:= ticks[int2].a.y;
+       end;
+       exit;
+      end;
+     end;
+    end;
+   end;
+   result:= round(avalue);
+   if direction in [gd_right,gd_left] then begin
+    result:= result + rect1.x;
+   end
+   else begin
+    result:= result + rect1.y;
+   end;
+  end;
+ end;
+ 
+var
  linestart,lineend: integer;
  dir1: graphicdirectionty;
  int1,int2,int3: integer;
@@ -485,25 +519,25 @@ begin
   calclineend(fli,dmo_opposite in options,rect1,linestart,lineend,dir1);
   case fdirection of
    gd_right: begin
-    a.x:= rect1.x + round(rect1.cx * (value - foffset)/frange);
+    a.x:= snap(rect1.cx * (value - foffset)/frange);
     b.x:= a.x;
     a.y:= linestart;
     b.y:= lineend;
    end;
    gd_up: begin
-    a.y:= rect1.y + rect1.cy - round(rect1.cy * (value - foffset)/frange) {- 1};
+    a.y:= snap(rect1.cy - (rect1.cy * (value - foffset)/frange));
     b.y:= a.y;
     a.x:= linestart;
     b.x:= lineend;
    end;
    gd_left: begin
-    a.x:= rect1.x + rect1.cx - round(rect1.cx * (value - foffset)/frange) {- 1};
+    a.x:= snap(rect1.cx - (rect1.cx * (value - foffset)/frange));
     b.x:= a.x;
     a.y:= linestart;
     b.y:= lineend;
    end;
    gd_down: begin
-    a.y:= rect1.y + round(rect1.cy * (value - foffset)/frange);
+    a.y:= snap(rect1.cy * (value - foffset)/frange);
     b.y:= a.y;
     a.x:= linestart;
     b.x:= lineend;
@@ -748,7 +782,9 @@ begin
        dec(int1);
       end;
       first:= (first * frange) / intervalcount; //real value
-      system.setlength(ticks,int1+1);
+      inc(int1);
+      system.setlength(ticks,int1);
+      system.setlength(ticksreal,int1);
       if fdirection in [gd_right,gd_left] then begin
        step:= rect1.cx * step;
        offs:= rect1.cx * offs;
@@ -758,7 +794,8 @@ begin
        end;
        for int1:= 0 to high(ticks) do begin
         with ticks[int1] do begin
-         a.x:= rect1.x + round(int1*step+offs);
+         ticksreal[int1]:= int1*step+offs;
+         a.x:= rect1.x + round(ticksreal[int1]);
 //         if fdirection = gd_left then begin
 //          dec(a.x);
 //         end;
@@ -777,7 +814,8 @@ begin
        end;
        for int1:= 0 to high(ticks) do begin
         with ticks[int1] do begin
-         a.y:= rect1.y + round(int1*step+offs);
+         ticksreal[int1]:= int1*step+offs;
+         a.y:= rect1.y + round(ticksreal[int1]);
 //         if fdirection = gd_up then begin
 //          dec(a.y);
 //         end;
