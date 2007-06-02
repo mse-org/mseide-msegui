@@ -13,7 +13,7 @@ interface
 
 uses
  classes,msegui,mseclasses,msearrayprops,msetypes,msegraphics,msegraphutils,
- msewidgets,msesimplewidgets,msedial;
+ msewidgets,msesimplewidgets,msedial,msebitmap;
  
 type
  tcustomchart = class;
@@ -123,17 +123,26 @@ type
    property ticks;
    property options;
  end;
-  
+
+ tchartframe = class(tscrollboxframe)
+  public
+   constructor create(const intf: iframe; const owner: twidget);
+  published
+   property framei_left default 0;
+   property framei_top default 0;
+   property framei_right default 1;
+   property framei_bottom default 1;
+   property colorclient default cl_foreground;
+end;
+   
  tcustomchart = class(tscrollbox,idialcontroller)
   private
-   ftraces: ttraces;
    fdialhorz: tchartdialhorz;
    fdialvert: tchartdialvert;
    fonbeforepaint: painteventty;
    fonpaintbackground: painteventty;
    fonpaint: painteventty;
    fonafterpaint: painteventty;
-   procedure settraces(const avalue: ttraces);
    procedure setdialhorz(const avalue: tchartdialhorz);
    procedure setdialvert(const avalue: tchartdialvert);
   protected
@@ -146,10 +155,10 @@ type
           //idialcontroller
    procedure directionchanged(const dir,dirbefore: graphicdirectionty);
    function getdialrect: rectty;
+   procedure internalcreateframe; override;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
-   property traces: ttraces read ftraces write settraces;
    property dialhorz: tchartdialhorz read fdialhorz write setdialhorz;
    property dialvert: tchartdialvert read fdialvert write setdialvert;
    property onbeforepaint: painteventty read fonbeforepaint write fonbeforepaint;
@@ -160,8 +169,17 @@ type
  end;
 
  tchart = class(tcustomchart)
+  private
+   ftraces: ttraces;
+   procedure settraces(const avalue: ttraces);
+  protected
+   procedure clientrectchanged; override;
+   procedure dopaint(const acanvas: tcanvas); override;
+  public
+   constructor create(aowner: tcomponent); override;
+   destructor destroy; override;
   published
-   property traces;
+   property traces: ttraces read ftraces write settraces;
    property dialhorz;
    property dialvert;
    property onbeforepaint;
@@ -169,7 +187,68 @@ type
    property onpaint;
    property onafterpaint;
  end;
+
+ trecordertrace = class(tvirtualpersistent)
+  private
+   fybefore: integer;
+   foffset: real;
+   frange: real;
+   fcolor: colorty;
+   fwidth: integer;
+   procedure setrange(const avalue: real);
+  public
+   constructor create; override;
+  published
+   property offset: real read foffset write foffset;
+   property range: real read frange write setrange;
+   property color: colorty read fcolor write fcolor default cl_glyph;
+   property width: integer read fwidth write fwidth default 0;
+ end;
+
+ trecordertraces = class(tpersistentarrayprop)
+  public
+   constructor create;
+ end;
   
+ tchartrecorder = class(tcustomchart)
+  private
+   fchart: tbitmap;
+   fcolorchart: colorty;
+   fsamplecount: integer;
+   fstep: real;
+   fstepsum: real;
+   fchartrect: rectty;
+   fchartclientrect: rectty;
+   fchartwindowrect: rectty;
+   ftraces: trecordertraces;
+   fstarted: boolean;
+   procedure setcolorchart(const avalue: colorty);
+   procedure setsamplecount(const avalue: integer);
+   procedure settraces(const avalue: trecordertraces);
+  protected
+   procedure initchart;
+   procedure clientrectchanged; override;
+   procedure dobeforepaintforeground(const canvas: tcanvas); override;
+  public
+   constructor create(aowner: tcomponent); override;
+   destructor destroy; override;
+   procedure addsample(const asamples: array of real);
+   procedure clear;
+  published
+   property colorchart: colorty read fcolorchart write setcolorchart 
+                              default cl_white;
+   property samplecount: integer read fsamplecount write setsamplecount 
+                                default 100;
+   property traces: trecordertraces read ftraces write settraces;
+   
+   property dialhorz;
+   property dialvert;
+   property onbeforepaint;
+   property onpaintbackground;
+   property onpaint;
+   property onafterpaint;
+ end;
+ 
 implementation
 uses
  sysutils;
@@ -188,7 +267,7 @@ end;
 procedure ttrace.datachange;
 begin
  exclude(fstate,trs_datapointsvalid);
- tcustomchart(fowner).traces.change;
+ tchart(fowner).traces.change;
 end;
 
 procedure ttrace.setxydata(const avalue: complexarty);
@@ -211,12 +290,12 @@ var
 begin
  if not (trs_datapointsvalid in fstate) then begin
   yo:= fyoffset - fyscale;
-  ys:= -tcustomchart(fowner).traces.fscaley / fyscale;
+  ys:= -tchart(fowner).traces.fscaley / fyscale;
   case fkind of
    trk_xy: begin     
     setlength(fdatapoints,length(fxydata));
     xo:= fxoffset;
-    xs:= tcustomchart(fowner).traces.fscalex / fxscale;
+    xs:= tchart(fowner).traces.fscalex / fxscale;
     for int1:= 0 to high(fdatapoints) do begin
      fdatapoints[int1].x:= round((fxydata[int1].re + xo)* xs);
      fdatapoints[int1].y:= round((fxydata[int1].im + yo)* ys);
@@ -236,7 +315,7 @@ begin
       int2:= high(fdatapoints);
      end;
      xo:= (rea1 + fxoffset) * int2;
-     xs:= tcustomchart(fowner).traces.fscalex / (fxscale * int2);
+     xs:= tchart(fowner).traces.fscalex / (fxscale * int2);
      for int1:= 0 to high(fdatapoints) do begin
       fdatapoints[int1].x:= round((int1 + xo)* xs);
       fdatapoints[int1].y:= round((fxseriesdata[int1] + yo)* ys);
@@ -264,20 +343,20 @@ procedure ttrace.setcolor(const avalue: colorty);
 begin
  if fcolor <> avalue then begin
   fcolor:= avalue;
-  tcustomchart(fowner).traces.change;
+  tchart(fowner).traces.change;
  end;
 end;
 
 procedure ttrace.setwidthmm(const avalue: real);
 begin
  fwidthmm:= avalue;
- tcustomchart(fowner).traces.change;
+ tchart(fowner).traces.change;
 end;
 
 procedure ttrace.setdashes(const avalue: string);
 begin
  fdashes:= avalue;
- tcustomchart(fowner).traces.change;
+ tchart(fowner).traces.change;
 end;
 
 procedure ttrace.setxscale(const avalue: real);
@@ -430,11 +509,22 @@ begin
  end;
 end;
 
+{ tchartframe }
+
+constructor tchartframe.create(const intf: iframe; const owner: twidget);
+begin
+ inherited;
+ fi.innerframe.left:= 0;
+ fi.innerframe.top:= 0;
+ fi.innerframe.right:= 1;
+ fi.innerframe.bottom:= 1;
+ fi.colorclient:= cl_foreground;
+end;
+
 { tcustomchart }
 
 constructor tcustomchart.create(aowner: tcomponent);
 begin
- ftraces:= ttraces.create(self);
  fdialvert:= tchartdialvert.create(idialcontroller(self));
  fdialhorz:= tchartdialhorz.create(idialcontroller(self));
  with fdialvert do begin
@@ -458,22 +548,15 @@ end;
 
 destructor tcustomchart.destroy;
 begin
- ftraces.free;
  fdialvert.free;
  fdialhorz.free;
  inherited;
-end;
-
-procedure tcustomchart.settraces(const avalue: ttraces);
-begin
- ftraces.assign(avalue);
 end;
 
 procedure tcustomchart.clientrectchanged;
 begin
  fdialhorz.changed;
  fdialvert.changed;
- ftraces.clientrectchanged;
  inherited;
 end;
 
@@ -524,9 +607,6 @@ begin
  inherited;
  fdialhorz.paint(acanvas);
  fdialvert.paint(acanvas);
- acanvas.move(innerclientpos);
- ftraces.paint(acanvas);
- acanvas.remove(innerclientpos);
 end;
 
 procedure tcustomchart.setdialhorz(const avalue: tchartdialhorz);
@@ -548,6 +628,177 @@ end;
 function tcustomchart.getdialrect: rectty;
 begin
  result:= innerclientrect;
+end;
+
+procedure tcustomchart.internalcreateframe;
+begin
+ tchartframe.create(iframe(self),self);
+end;
+
+{ tchart }
+
+constructor tchart.create(aowner: tcomponent);
+begin
+ ftraces:= ttraces.create(self);
+ inherited;
+end;
+
+destructor tchart.destroy;
+begin
+ ftraces.free;
+ inherited;
+end;
+
+procedure tchart.settraces(const avalue: ttraces);
+begin
+ ftraces.assign(avalue);
+end;
+
+procedure tchart.clientrectchanged;
+begin
+ ftraces.clientrectchanged;
+ inherited;
+end;
+
+procedure tchart.dopaint(const acanvas: tcanvas);
+begin
+ inherited;
+ acanvas.save;
+ acanvas.intersectcliprect(innerclientrect);
+ acanvas.move(innerclientpos);
+ ftraces.paint(acanvas);
+ acanvas.restore;
+// acanvas.remove(innerclientpos);
+end;
+
+{ trecordertraces }
+
+constructor trecordertraces.create;
+begin
+ inherited create(trecordertrace);
+end;
+
+{ trecordertrace }
+
+constructor trecordertrace.create;
+begin
+ frange:= 1;
+ fcolor:= cl_glyph;
+ inherited;
+end;
+
+procedure trecordertrace.setrange(const avalue: real);
+begin
+ checknullrange(avalue);
+ frange:= avalue;
+end;
+
+{ tchartrecorder }
+
+constructor tchartrecorder.create(aowner: tcomponent);
+begin
+ fcolorchart:= cl_white;
+ fsamplecount:= 100;
+ fchart:= tbitmap.create(false);
+ ftraces:= trecordertraces.create;
+ inherited;
+end;
+
+destructor tchartrecorder.destroy;
+begin
+ fchart.free;
+ ftraces.free;
+ inherited;
+end;
+
+procedure tchartrecorder.setcolorchart(const avalue: colorty);
+begin
+ if fcolorchart <> avalue then begin
+  fcolorchart:= avalue;
+  initchart;
+ end;
+end;
+
+procedure tchartrecorder.clientrectchanged;
+begin
+ inherited;
+ initchart;
+end;
+
+procedure tchartrecorder.initchart;
+begin
+ if not (csloading in componentstate) then begin
+  fstarted:= false;
+  with fchart do begin
+   fchartclientrect:= innerclientrect;
+   fchartwindowrect.size:= fchartclientrect.size;
+   fchartrect.cx:= fchartclientrect.cx + 10; //room for linewidth
+   fchartrect.cy:= fchartclientrect.cy;
+   size:= fchartrect.size; 
+   fstep:= real(fchartwindowrect.cx) / fsamplecount;
+   fstepsum:= 0;
+   init(fcolorchart);
+   canvas.capstyle:= cs_round;
+  end;
+ end;
+end;
+
+procedure tchartrecorder.dobeforepaintforeground(const canvas: tcanvas);
+begin
+ canvas.copyarea(fchart.canvas,fchartwindowrect,fchartclientrect.pos);
+end;
+
+procedure tchartrecorder.setsamplecount(const avalue: integer);
+begin
+ if fsamplecount <> avalue then begin
+  fsamplecount:= avalue;
+  if fsamplecount <= 0 then begin
+   fsamplecount:=  1;
+  end;
+  initchart;
+ end;  
+end;
+
+procedure tchartrecorder.addsample(const asamples: array of real);
+var
+ int1,int2: integer;
+ ax,ay: integer;
+ acanvas: tcanvas;
+begin
+ fstepsum:= fstepsum + fstep;
+ int1:= round(fstepsum);
+ fstepsum:= fstepsum - int1;
+ with fchart do begin
+  acanvas:= canvas;
+  ax:= fchartwindowrect.cx-int1;
+  acanvas.copyarea(canvas,fchartrect,makepoint(-int1,0));
+  acanvas.fillrect(makerect(fchartrect.cx-int1,0,int1,fchartrect.cy),fcolorchart);
+  for int2:= 0 to high(ftraces.fitems) do begin
+   if int2 > high(asamples) then begin
+    break;
+   end;
+   with trecordertrace(ftraces.fitems[int2]) do begin
+    ay:= round(fchartrect.cy * ((asamples[int2] - foffset)/frange));
+    if fstarted then begin
+     acanvas.linewidth:= fwidth;
+     acanvas.drawline(makepoint(ax,fybefore),makepoint(fchartwindowrect.cx,ay),fcolor);
+    end;
+    fybefore:= ay;
+   end;
+  end;
+  invalidaterect(fchartclientrect);
+  fstarted:= true;
+ end;
+end;
+
+procedure tchartrecorder.settraces(const avalue: trecordertraces);
+begin
+ ftraces.assign(avalue);
+end;
+
+procedure tchartrecorder.clear;
+begin
+ initchart;
 end;
 
 end.

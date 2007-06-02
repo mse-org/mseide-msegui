@@ -7,7 +7,7 @@ uses
  
 procedure Register;
 begin
- registercomponents('Exp',[twindowwidget,tchart]);
+ registercomponents('Exp',[twindowwidget,tchart,tchartrecorder]);
 end;
 initialization
  register;

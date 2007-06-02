@@ -252,6 +252,8 @@ type
    property bounds_cy default 15;
    property bounds_cx default 100;
  end;
+
+procedure checknullrange(const avalue: real);
  
 implementation
 uses
@@ -259,7 +261,14 @@ uses
 type
  tcustomframe1 = class(tcustomframe);
  twidget1 = class(twidget);
- 
+
+procedure checknullrange(const avalue: real);
+begin
+ if avalue = 0 then begin
+  raise exception.create('Range can not be 0.0.');
+ end;
+end;
+
 { tdialpropfont }
 
 class function tdialpropfont.getinstancepo(owner: tobject): pfont;
@@ -925,9 +934,7 @@ end;
 procedure tcustomdialcontroller.setrange(const avalue: real);
 begin
  if frange <> avalue then begin
-  if avalue = 0 then begin
-   raise exception.create('Range can not be 0.0.');
-  end;
+  checknullrange(avalue);
   frange:= avalue;
   changed;
  end;
