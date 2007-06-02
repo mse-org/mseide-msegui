@@ -129,11 +129,19 @@ type
    ftraces: ttraces;
    fdialhorz: tchartdialhorz;
    fdialvert: tchartdialvert;
+   fonbeforepaint: painteventty;
+   fonpaintbackground: painteventty;
+   fonpaint: painteventty;
+   fonafterpaint: painteventty;
    procedure settraces(const avalue: ttraces);
    procedure setdialhorz(const avalue: tchartdialhorz);
    procedure setdialvert(const avalue: tchartdialvert);
   protected
    procedure clientrectchanged; override;
+   procedure dobeforepaint(const canvas: tcanvas); override;
+   procedure dopaintbackground(const canvas: tcanvas); override;
+   procedure doonpaint(const canvas: tcanvas); override;
+   procedure doafterpaint(const canvas: tcanvas); override;
    procedure dopaint(const acanvas: tcanvas); override;
           //idialcontroller
    procedure directionchanged(const dir,dirbefore: graphicdirectionty);
@@ -144,6 +152,11 @@ type
    property traces: ttraces read ftraces write settraces;
    property dialhorz: tchartdialhorz read fdialhorz write setdialhorz;
    property dialvert: tchartdialvert read fdialvert write setdialvert;
+   property onbeforepaint: painteventty read fonbeforepaint write fonbeforepaint;
+   property onpaintbackground: painteventty read fonpaintbackground 
+                                                  write fonpaintbackground;
+   property onpaint: painteventty read fonpaint write fonpaint;
+   property onafterpaint: painteventty read fonafterpaint write fonafterpaint;
  end;
 
  tchart = class(tcustomchart)
@@ -151,6 +164,10 @@ type
    property traces;
    property dialhorz;
    property dialvert;
+   property onbeforepaint;
+   property onpaintbackground;
+   property onpaint;
+   property onafterpaint;
  end;
   
 implementation
@@ -458,6 +475,48 @@ begin
  fdialvert.changed;
  ftraces.clientrectchanged;
  inherited;
+end;
+
+procedure tcustomchart.dobeforepaint(const canvas: tcanvas);
+var
+ pt1: pointty;
+begin
+ inherited;
+ if canevent(tmethod(fonbeforepaint)) then begin
+  pt1:= clientwidgetpos;
+  canvas.move(pt1);
+  fonbeforepaint(self,canvas);
+  canvas.remove(pt1);
+ end;
+end;
+
+procedure tcustomchart.dopaintbackground(const canvas: tcanvas);
+begin
+ inherited;
+ if canevent(tmethod(fonpaintbackground)) then begin
+  fonpaintbackground(self,canvas);
+ end;
+end;
+
+procedure tcustomchart.doonpaint(const canvas: tcanvas);
+begin
+ inherited;
+ if canevent(tmethod(fonpaint)) then begin
+  fonpaint(self,canvas);
+ end;
+end;
+
+procedure tcustomchart.doafterpaint(const canvas: tcanvas);
+var
+ pt1: pointty;
+begin
+ inherited;
+ if canevent(tmethod(fonafterpaint)) then begin
+  pt1:= clientwidgetpos;
+  canvas.move(pt1);
+  fonafterpaint(self,canvas);
+  canvas.remove(pt1);
+ end;
 end;
 
 procedure tcustomchart.dopaint(const acanvas: tcanvas);

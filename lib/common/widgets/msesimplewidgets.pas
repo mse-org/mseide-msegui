@@ -34,12 +34,16 @@ type
    fonbeforepaint: painteventty;
    fonpaint: painteventty;
    fonafterpaint: painteventty;
+   fonpaintbackground: painteventty;
   protected
    procedure dobeforepaint(const canvas: tcanvas); override;
+   procedure dopaintbackground(const canvas: tcanvas); override;
    procedure doonpaint(const canvas: tcanvas); override;
    procedure doafterpaint(const canvas: tcanvas); override;
   published
    property onbeforepaint: painteventty read fonbeforepaint write fonbeforepaint;
+   property onpaintbackground: painteventty read fonpaintbackground 
+                                                  write fonpaintbackground;
    property onpaint: painteventty read fonpaint write fonpaint;
    property onafterpaint: painteventty read fonafterpaint write fonafterpaint;
  end;
@@ -47,10 +51,10 @@ type
  teventwidget = class(tcustomeventwidget)
   published
    property onfocusedwidgetchanged;
-//   property onenter;
-//   property onexit;
-//   property onfocus;
-//   property ondefocus;
+   property onenter;
+   property onexit;
+   property onfocus;
+   property ondefocus;
 
    property onmouseevent;
    property onchildmouseevent;
@@ -64,13 +68,14 @@ type
    property onloaded;
 
    property onbeforepaint;
+   property onpaintbackground;
    property onpaint;
    property onafterpaint;
 
    property onshow;
    property onhide;
- //  property onactivate;
- //  property ondeactivate;
+   property onactivate;
+   property ondeactivate;
    property onresize;
    property onmove;
    property onclosequery;
@@ -1308,14 +1313,22 @@ end;
 
 procedure tpaintbox.dobeforepaint(const canvas: tcanvas);
 var
- saveindex: integer;
+ pt1: pointty;
 begin
  inherited;
  if canevent(tmethod(fonbeforepaint)) then begin
-  saveindex:= canvas.save;
-  canvas.move(clientwidgetpos);
+  pt1:= clientwidgetpos;
+  canvas.move(pt1);
   fonbeforepaint(self,canvas);
-  canvas.restore(saveindex);
+  canvas.remove(pt1);
+ end;
+end;
+
+procedure tpaintbox.dopaintbackground(const canvas: tcanvas);
+begin
+ inherited;
+ if canevent(tmethod(fonpaintbackground)) then begin
+  fonpaintbackground(self,canvas);
  end;
 end;
 
@@ -1329,14 +1342,14 @@ end;
 
 procedure tpaintbox.doafterpaint(const canvas: tcanvas);
 var
- saveindex: integer;
+ pt1: pointty;
 begin
  inherited;
  if canevent(tmethod(fonafterpaint)) then begin
-  saveindex:= canvas.save;
-  canvas.move(clientwidgetpos);
+  pt1:= clientwidgetpos;
+  canvas.move(pt1);
   fonafterpaint(self,canvas);
-  canvas.restore(saveindex);
+  canvas.remove(pt1);
  end;
 end;
 

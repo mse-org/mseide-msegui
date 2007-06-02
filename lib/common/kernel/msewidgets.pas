@@ -499,10 +499,12 @@ type
    fonasyncevent: asynceventeventty;
    fonmouswheeleevent: mousewheeleventty;
    fonfocusedwidgetchanged: focuschangeeventty;
+   fonpaintbackground: painteventty;
   protected
    procedure poschanged; override;
    procedure sizechanged; override;
    procedure dobeforepaint(const canvas: tcanvas); override;
+   procedure dopaintbackground(const canvas: tcanvas); override;
    procedure doonpaint(const canvas: tcanvas); override;
    procedure doafterpaint(const canvas: tcanvas); override;
    procedure mouseevent(var info: mouseeventinfoty); override;
@@ -513,23 +515,23 @@ type
    procedure dokeyup(var info: keyeventinfoty); override;
    procedure doshortcut(var info: keyeventinfoty; const sender: twidget); override;
    procedure dofocuschanged(const oldwidget,newwidget: twidget); override;
-//   procedure doenter; override;
-//   procedure doexit; override;
-//   procedure dofocus; override;
-//   procedure dodefocus; override;
+   procedure doenter; override;
+   procedure doexit; override;
+   procedure dofocus; override;
+   procedure dodefocus; override;
    procedure doloaded; override;
    procedure dohide; override;
    procedure doshow; override;
-//   procedure doactivate; override;
-//   procedure dodeactivate; override;
+   procedure doactivate; override;
+   procedure dodeactivate; override;
    procedure receiveevent(const event: tobjectevent); override;
    procedure doasyncevent(var atag: integer); override;
   public
    function canclose(const newfocus: twidget): boolean; override;
-  // property onenter: notifyeventty read fonenter write fonenter;
-  // property onexit: notifyeventty read fonexit write fonexit;
-  // property onfocus: notifyeventty read fonfocus write fonfocus;
-  // property ondefocus: notifyeventty read fondefocus write fondefocus;
+   property onenter: notifyeventty read fonenter write fonenter;
+   property onexit: notifyeventty read fonexit write fonexit;
+   property onfocus: notifyeventty read fonfocus write fonfocus;
+   property ondefocus: notifyeventty read fondefocus write fondefocus;
    property onfocusedwidgetchanged: focuschangeeventty 
                      read fonfocusedwidgetchanged write fonfocusedwidgetchanged;
 
@@ -548,6 +550,7 @@ type
    property onloaded: notifyeventty read fonloaded write fonloaded;
 
    property onbeforepaint: painteventty read fonbeforepaint write fonbeforepaint;
+   property onpaintbackground: painteventty read fonpaintbackground write fonpaintbackground;
    property onpaint: painteventty read fonpaint write fonpaint;
    property onafterpaint: painteventty read fonafterpaint write fonafterpaint;
 
@@ -3039,17 +3042,24 @@ begin
  end;
 end;
 
-
 procedure tcustomeventwidget.dobeforepaint(const canvas: tcanvas);
 var
- saveindex: integer;
+ pt1: pointty;
 begin
  inherited;
  if canevent(tmethod(fonbeforepaint)) then begin
-  saveindex:= canvas.save;
-  canvas.move(clientwidgetpos);
+  pt1:= clientwidgetpos;
+  canvas.move(pt1);
   fonbeforepaint(self,canvas);
-  canvas.restore(saveindex);
+  canvas.remove(pt1);
+ end;
+end;
+
+procedure tcustomeventwidget.dopaintbackground(const canvas: tcanvas);
+begin
+ inherited;
+ if canevent(tmethod(fonpaintbackground)) then begin
+  fonpaintbackground(self,canvas);
  end;
 end;
 
@@ -3063,17 +3073,41 @@ end;
 
 procedure tcustomeventwidget.doafterpaint(const canvas: tcanvas);
 var
- saveindex: integer;
+ pt1: pointty;
 begin
  inherited;
  if canevent(tmethod(fonafterpaint)) then begin
-  saveindex:= canvas.save;
-  canvas.move(clientwidgetpos);
+  pt1:= clientwidgetpos;
+  canvas.move(pt1);
   fonafterpaint(self,canvas);
-  canvas.restore(saveindex);
+  canvas.remove(pt1);
  end;
 end;
-{
+
+procedure tcustomeventwidget.doloaded;
+begin
+ inherited;
+ if canevent(tmethod(fonloaded)) then begin
+  fonloaded(self);
+ end;
+end;
+
+procedure tcustomeventwidget.poschanged;
+begin
+ inherited;
+ if canevent(tmethod(fonmove)) then begin
+  fonmove(self);
+ end;
+end;
+
+procedure tcustomeventwidget.sizechanged;
+begin
+ inherited;
+ if canevent(tmethod(fonresize)) then begin
+  fonresize(self);
+ end;
+end;
+
 procedure tcustomeventwidget.doenter;
 begin
  inherited;
@@ -3105,31 +3139,7 @@ begin
   fondefocus(self);
  end;
 end;
-}
-procedure tcustomeventwidget.doloaded;
-begin
- inherited;
- if canevent(tmethod(fonloaded)) then begin
-  fonloaded(self);
- end;
-end;
 
-procedure tcustomeventwidget.poschanged;
-begin
- inherited;
- if canevent(tmethod(fonmove)) then begin
-  fonmove(self);
- end;
-end;
-
-procedure tcustomeventwidget.sizechanged;
-begin
- inherited;
- if canevent(tmethod(fonresize)) then begin
-  fonresize(self);
- end;
-end;
-(*
 procedure tcustomeventwidget.doactivate;
 begin
  inherited;
@@ -3153,7 +3163,7 @@ begin
  exclude(fwidgetstate,ws_activated);
  }
 end;
-*)
+
 procedure tcustomeventwidget.dohide;
 begin
  if canevent(tmethod(fonhide)) then begin
