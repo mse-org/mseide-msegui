@@ -373,8 +373,12 @@ procedure treportdesignerfo.updatedials;
   end;
  end; 
 begin
- dialh.dial.range:= dialh.bounds_cx / ppmm; //mm
- dialv.dial.range:= dialv.bounds_cy / ppmm; //mm
+ if dialh.bounds_cx > 0 then begin
+  dialh.dial.range:= dialh.bounds_cx / ppmm; //mm
+ end;
+ if dialv.bounds_cy > 0 then begin
+  dialv.dial.range:= dialv.bounds_cy / ppmm; //mm
+ end;
  dialh.dial.offset:= -reportcontainer.clientpos.x / ppmm;
  dialv.dial.offset:= -reportcontainer.clientpos.y / ppmm;
  adjustticks(dialh.dial);
