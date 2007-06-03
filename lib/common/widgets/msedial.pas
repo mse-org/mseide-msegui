@@ -13,7 +13,10 @@ interface
 uses
  classes,msewidgets,msegraphutils,msegraphics,msegui,msearrayprops,mseclasses,
  msetypes,mseguiglob,msestrings;
- 
+
+const
+ defaultdialcolor = cl_dkgray;
+  
 type
  dialstatety = (dis_layoutvalid);
  dialstatesty = set of dialstatety;
@@ -45,7 +48,7 @@ type
   captiondist: integer;
   font: tdialpropfont;
   caption: msestring;
-  kind: dialdatakindty;
+//  kind: dialdatakindty;
  end;
   
  dialtickinfoty = record
@@ -71,19 +74,20 @@ type
    function isfontstored: boolean;
    procedure createfont;
    procedure fontchanged(const sender: tobject);
-   procedure setkind(const avalue: dialdatakindty);
   protected
    flayoutvalid: boolean;
    procedure changed; virtual;
    function getactcaption(const avalue: real; const aformat: msestring): msestring;
+   function actualcolor: colorty;
+   function actualwidthmm: real;
   public
    constructor create(aowner: tobject); override;   
    destructor destroy; override;
   published
    property color: colorty read fli.color write setcolor
-                             default cl_glyph;
+                             default cl_default;
    property widthmm: real read fli.widthmm write setwidthmm;
-                           //default 0.3
+                           //0 -> withmm of dialcontroller
    property dashes: string read fli.dashes write setdashes;
    property indent: integer read fli.indent 
                      write setindent default 0;
@@ -94,7 +98,6 @@ type
    property captiondist: integer read fli.captiondist write setcaptiondist
                                        default 2;
    property font: tdialpropfont read getfont write setfont stored isfontstored;
-   property kind: dialdatakindty read fli.kind write setkind default dtk_real;
  end;
 
  dialmarkeroptionty = (dmo_opposite);
@@ -165,7 +168,7 @@ type
    property items[const index: integer]: tdialtick read getitems; default;
  end;
  
- dialoptionty = (do_opposite);
+ dialoptionty = (do_opposite,do_sideline,do_boxline);
  dialoptionsty = set of dialoptionty;  
 
  idialcontroller = interface(inullinterface)
@@ -185,6 +188,10 @@ type
    foptions: dialoptionsty;
    fintf: idialcontroller;
    ffont: tdialfont;
+   fcolor: colorty;
+   fwidthmm: real;
+   fboxlines: segmentarty;
+   fkind: dialdatakindty;
    procedure setoffset(const avalue: real);
    procedure setrange(const avalue: real);
    procedure setmarkers(const avalue: tdialmarkers);
@@ -193,6 +200,9 @@ type
    function getfont: tdialfont;
    procedure setfont(const avalue: tdialfont);
    function isfontstored: boolean;
+   procedure setcolor(const avalue: colorty);
+   procedure setwidthmm(const avalue: real);
+   procedure setkind(const avalue: dialdatakindty);
   protected
    procedure setdirection(const avalue: graphicdirectionty); virtual;
    procedure changed;
@@ -207,21 +217,29 @@ type
    constructor create(const aintf: idialcontroller);
    destructor destroy; override;
    procedure paint(const acanvas: tcanvas);
+   procedure afterpaint(const acanvas: tcanvas);
    property direction: graphicdirectionty read fdirection write setdirection
                                        default gd_right;
    property offset: real read foffset write setoffset;//0.0..1.0
    property range: real read frange write setrange; //default 1.0
+   property kind: dialdatakindty read fkind write setkind default dtk_real;
    property markers: tdialmarkers read fmarkers write setmarkers;
    property ticks: tdialticks read fticks write setticks;
+   property color: colorty read fcolor write setcolor default defaultdialcolor;
+   property widthmm: real read fwidthmm write setwidthmm; 
+                //linewidth, default 0.3
    property options: dialoptionsty read foptions write setoptions default [];
    property font: tdialfont read getfont write setfont stored isfontstored;
  end;
 
  tdialcontroller = class(tcustomdialcontroller)
   published
+   property color;
+   property widthmm;
    property direction;
    property offset;
    property range;
+   property kind;
    property markers;
    property ticks;
    property options;
@@ -287,9 +305,9 @@ end;
 
 constructor tdialprop.create(aowner: tobject);
 begin
- fli.color:= cl_glyph;
+ fli.color:= cl_default;
  fli.captiondist:= 2;
- fli.widthmm:= 0.3;
+// fli.widthmm:= 0.3;
  inherited;
 end;
 
@@ -355,14 +373,6 @@ begin
  end;
 end;
 
-procedure tdialprop.setkind(const avalue: dialdatakindty);
-begin
- if fli.kind <> avalue then begin
-  fli.kind:= avalue;
-  changed;
- end;
-end;
-
 procedure tdialprop.fontchanged(const sender: tobject);
 begin
  changed;
@@ -404,11 +414,27 @@ end;
 
 function tdialprop.getactcaption(const avalue: real; const aformat: msestring): msestring;
 begin
- if fli.kind = dtk_datetime then begin
+ if tcustomdialcontroller(fowner).fkind = dtk_datetime then begin
   result:= datetimetostring(avalue,aformat);
  end
  else begin
   result:= formatfloatmse(avalue,aformat);
+ end;
+end;
+
+function tdialprop.actualcolor: colorty;
+begin
+ result:= fli.color;
+ if fli.color = cl_default then begin
+  result:= tcustomdialcontroller(fowner).fcolor;
+ end;
+end;
+
+function tdialprop.actualwidthmm: real;
+begin
+ result:= fli.widthmm;
+ if result = 0 then begin
+  result:= tcustomdialcontroller(fowner).fwidthmm;
  end;
 end;
 
@@ -427,11 +453,11 @@ begin
  checklayout;
  with finfo,fli do begin
   if active then begin
-   acanvas.linewidthmm:= widthmm;
+   acanvas.linewidthmm:= actualwidthmm;
    if dashes <> '' then begin
     acanvas.dashes:= dashes;
    end;
-   acanvas.drawline(line.a,line.b,color);
+   acanvas.drawline(line.a,line.b,actualcolor);
    if dashes <> '' then begin
     acanvas.dashes:= '';
    end;
@@ -561,7 +587,7 @@ begin
     gd_left: begin
      int3:= -afont.descent - captiondist;
      captionpos.x:= line.a.x - int2 div 2;
-     captionpos.y:= line.a.y + int3 - captiondist;
+     captionpos.y:= line.a.y + int3;
     end;
     gd_up: begin
      captionpos.x:= line.a.x - int2 - captiondist;
@@ -572,9 +598,9 @@ begin
      captionpos.y:= line.a.y + int3;
     end;
     else begin //gd_right
-     int3:= afont.ascent;
+     int3:= afont.ascent + captiondist;
      captionpos.x:= line.a.x - int2 div 2;
-     captionpos.y:= line.a.y + int3 + captiondist;
+     captionpos.y:= line.a.y + int3;
     end;
    end;   
   end;
@@ -658,6 +684,8 @@ end;
 constructor tcustomdialcontroller.create(const aintf: idialcontroller);
 begin
  fintf:= aintf;
+ fcolor:= defaultdialcolor;
+ fwidthmm:= 0.3;
  frange:= 1.0;
  fmarkers:= tdialmarkers.create(self);
  fticks:= tdialticks.create(self);
@@ -760,11 +788,60 @@ var
  int1,int2,int3,int4: integer;
  ar1: integerarty;
  dir1: graphicdirectionty;
+ boxlines: array[0..1] of segmentty;
+ bo1: boolean;
  
 begin
  if not (dis_layoutvalid in fstate) then begin
   canvas1:= fintf.getwidget.getcanvas;
   rect1:= fintf.getdialrect;
+  with rect1 do begin
+   if fdirection in [gd_right,gd_left] then begin
+    boxlines[0].a.x:= x;         
+    boxlines[0].b.x:= x + cx;
+    boxlines[1].a.x:= boxlines[0].a.x;
+    boxlines[1].b.x:= boxlines[0].b.x;
+
+    boxlines[0].a.y:= y + cy;
+    boxlines[0].b.y:= boxlines[0].a.y;
+    boxlines[1].a.y:= y;
+    boxlines[1].b.y:= y;
+   end
+   else begin
+    boxlines[0].a.y:= y;         
+    boxlines[0].b.y:= y + cy;
+    boxlines[1].a.y:= boxlines[0].a.y;
+    boxlines[1].b.y:= boxlines[0].b.y;
+
+    boxlines[0].a.x:= x + cx;
+    boxlines[0].b.x:= boxlines[0].a.x;
+    boxlines[1].a.x:= x;
+    boxlines[1].b.x:= x;
+   end;
+  end;
+  bo1:= ((fdirection = gd_left) or (fdirection = gd_up)) xor 
+                             (do_opposite in foptions);
+  if do_sideline in foptions then begin
+   setlength(fboxlines,1);
+   if bo1 then begin
+    fboxlines[0]:= boxlines[1];
+   end
+   else begin
+    fboxlines[0]:= boxlines[0];
+   end;
+  end
+  else begin
+   fboxlines:= nil;
+  end;
+  if do_boxline in foptions then begin
+   setlength(fboxlines,high(fboxlines)+2);
+   if bo1 then begin
+    fboxlines[high(fboxlines)]:= boxlines[0];
+   end
+   else begin
+    fboxlines[high(fboxlines)]:= boxlines[1];
+   end;
+  end;
   for int4:= 0 to high(fticks.fitems) do begin
    with tdialtick(fticks.fitems[int4]) do begin
     finfo.afont:= font;
@@ -851,7 +928,7 @@ begin
          for int1:= 0 to high(captions) do begin
           with captions[int1] do begin
            pos.x:= ticks[int1].a.x - ar1[int1] div 2;
-           pos.y:= ticks[int1].a.y + int3 - captiondist;
+           pos.y:= ticks[int1].a.y + int3;
           end;
          end;
         end;
@@ -872,11 +949,11 @@ begin
          end;
         end;
         else begin //gd_right
-         int3:= afont.ascent;
+         int3:= afont.ascent + captiondist;
          for int1:= 0 to high(captions) do begin
           with captions[int1] do begin
            pos.x:= ticks[int1].a.x - ar1[int1] div 2;
-           pos.y:= ticks[int1].a.y + int3 + captiondist;
+           pos.y:= ticks[int1].a.y + int3;
           end;
          end;
         end;
@@ -903,11 +980,11 @@ begin
  for int1:= high(fticks.fitems) downto 0 do begin
   with tdialtick(fticks.fitems[int1]),finfo do begin
    if ticks <> nil then begin
-    acanvas.linewidthmm:= widthmm;
+    acanvas.linewidthmm:= actualwidthmm;
     if dashes <> '' then begin
      acanvas.dashes:= dashes;
     end;
-    acanvas.drawlinesegments(ticks,color);
+    acanvas.drawlinesegments(ticks,actualcolor);
     if dashes <> '' then begin
      acanvas.dashes:= '';
     end;
@@ -923,6 +1000,17 @@ begin
  acanvas.linewidth:= 0;
 end;
 
+procedure tcustomdialcontroller.afterpaint(const acanvas: tcanvas);
+begin
+ if foptions * [do_sideline,do_boxline] <> [] then begin
+  acanvas.capstyle:= cs_projecting;
+  acanvas.linewidthmm:= fwidthmm;
+  acanvas.drawlinesegments(fboxlines,fcolor);
+  acanvas.capstyle:= cs_butt;
+  acanvas.linewidth:= 0;
+ end;
+end;
+
 procedure tcustomdialcontroller.setoffset(const avalue: real);
 begin
  if foffset <> avalue then begin
@@ -936,6 +1024,14 @@ begin
  if frange <> avalue then begin
   checknullrange(avalue);
   frange:= avalue;
+  changed;
+ end;
+end;
+
+procedure tcustomdialcontroller.setkind(const avalue: dialdatakindty);
+begin
+ if fkind <> avalue then begin
+  fkind:= avalue;
   changed;
  end;
 end;
@@ -995,6 +1091,20 @@ end;
 procedure tcustomdialcontroller.fontchanged(const sender: tobject);
 begin
  changed;
+end;
+
+procedure tcustomdialcontroller.setcolor(const avalue: colorty);
+begin
+ if avalue <> fcolor then begin
+  fcolor:= avalue;
+  fintf.getwidget.invalidate;
+ end;
+end;
+
+procedure tcustomdialcontroller.setwidthmm(const avalue: real);
+begin
+ fwidthmm:= avalue;
+ fintf.getwidget.invalidate;
 end;
 
 { tcustomdial }

@@ -104,9 +104,12 @@ type
   protected
    procedure setdirection(const avalue: graphicdirectionty); override;
   published
+   property color;
+   property widthmm;
    property direction default gd_up;
    property offset;
    property range;
+   property kind;
    property markers;
    property ticks;
    property options;
@@ -116,9 +119,12 @@ type
   protected
    procedure setdirection(const avalue: graphicdirectionty); override;
   published
+   property color;
+   property widthmm;
    property direction default gd_right;
    property offset;
    property range;
+   property kind;
    property markers;
    property ticks;
    property options;
@@ -133,8 +139,11 @@ type
    property framei_right default 1;
    property framei_bottom default 1;
    property colorclient default cl_foreground;
-end;
-   
+ end;
+ 
+ chartstatety = (chs_nocolorchart);
+ chartstatesty = set of chartstatety;
+ 
  tcustomchart = class(tscrollbox,idialcontroller)
   private
    fdialhorz: tchartdialhorz;
@@ -145,7 +154,11 @@ end;
    fonafterpaint: painteventty;
    procedure setdialhorz(const avalue: tchartdialhorz);
    procedure setdialvert(const avalue: tchartdialvert);
+   procedure setcolorchart(const avalue: colorty);
   protected
+   fcolorchart: colorty;
+   fstate: chartstatesty;
+   procedure changed; virtual;
    procedure clientrectchanged; override;
    procedure dobeforepaint(const canvas: tcanvas); override;
    procedure dopaintbackground(const canvas: tcanvas); override;
@@ -159,6 +172,8 @@ end;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
+   property colorchart: colorty read fcolorchart write setcolorchart 
+                              default cl_foreground;
    property dialhorz: tchartdialhorz read fdialhorz write setdialhorz;
    property dialvert: tchartdialvert read fdialvert write setdialvert;
    property onbeforepaint: painteventty read fonbeforepaint write fonbeforepaint;
@@ -180,6 +195,7 @@ end;
    destructor destroy; override;
   published
    property traces: ttraces read ftraces write settraces;
+   property colorchart;
    property dialhorz;
    property dialvert;
    property onbeforepaint;
@@ -213,7 +229,6 @@ end;
  tchartrecorder = class(tcustomchart)
   private
    fchart: tbitmap;
-   fcolorchart: colorty;
    fsamplecount: integer;
    fstep: real;
    fstepsum: real;
@@ -222,11 +237,11 @@ end;
    fchartwindowrect: rectty;
    ftraces: trecordertraces;
    fstarted: boolean;
-   procedure setcolorchart(const avalue: colorty);
    procedure setsamplecount(const avalue: integer);
    procedure settraces(const avalue: trecordertraces);
   protected
    procedure initchart;
+   procedure changed; override;
    procedure clientrectchanged; override;
    procedure dobeforepaintforeground(const canvas: tcanvas); override;
   public
@@ -235,12 +250,11 @@ end;
    procedure addsample(const asamples: array of real);
    procedure clear;
   published
-   property colorchart: colorty read fcolorchart write setcolorchart 
-                              default cl_white;
    property samplecount: integer read fsamplecount write setsamplecount 
                                 default 100;
    property traces: trecordertraces read ftraces write settraces;
    
+   property colorchart;
    property dialhorz;
    property dialvert;
    property onbeforepaint;
@@ -525,6 +539,7 @@ end;
 
 constructor tcustomchart.create(aowner: tcomponent);
 begin
+ fcolorchart:= cl_foreground;
  fdialvert:= tchartdialvert.create(idialcontroller(self));
  fdialhorz:= tchartdialhorz.create(idialcontroller(self));
  with fdialvert do begin
@@ -576,6 +591,10 @@ end;
 procedure tcustomchart.dopaintbackground(const canvas: tcanvas);
 begin
  inherited;
+ if not (chs_nocolorchart in fstate) and 
+                 not (fcolorchart = container.frame.colorclient) then begin
+  canvas.fillrect(innerclientrect,fcolorchart);
+ end;
  if canevent(tmethod(fonpaintbackground)) then begin
   fonpaintbackground(self,canvas);
  end;
@@ -607,6 +626,16 @@ begin
  inherited;
  fdialhorz.paint(acanvas);
  fdialvert.paint(acanvas);
+ fdialhorz.afterpaint(acanvas);
+ fdialvert.afterpaint(acanvas);
+end;
+
+procedure tcustomchart.setcolorchart(const avalue: colorty);
+begin
+ if fcolorchart <> avalue then begin
+  fcolorchart:= avalue;
+  changed;
+ end;
 end;
 
 procedure tcustomchart.setdialhorz(const avalue: tchartdialhorz);
@@ -633,6 +662,11 @@ end;
 procedure tcustomchart.internalcreateframe;
 begin
  tchartframe.create(iframe(self),self);
+end;
+
+procedure tcustomchart.changed;
+begin
+ invalidate;
 end;
 
 { tchart }
@@ -697,11 +731,11 @@ end;
 
 constructor tchartrecorder.create(aowner: tcomponent);
 begin
- fcolorchart:= cl_white;
  fsamplecount:= 100;
  fchart:= tbitmap.create(false);
  ftraces:= trecordertraces.create;
  inherited;
+ include(fstate,chs_nocolorchart);
 end;
 
 destructor tchartrecorder.destroy;
@@ -709,14 +743,6 @@ begin
  fchart.free;
  ftraces.free;
  inherited;
-end;
-
-procedure tchartrecorder.setcolorchart(const avalue: colorty);
-begin
- if fcolorchart <> avalue then begin
-  fcolorchart:= avalue;
-  initchart;
- end;
 end;
 
 procedure tchartrecorder.clientrectchanged;
@@ -797,6 +823,11 @@ begin
 end;
 
 procedure tchartrecorder.clear;
+begin
+ initchart;
+end;
+
+procedure tchartrecorder.changed;
 begin
  initchart;
 end;
