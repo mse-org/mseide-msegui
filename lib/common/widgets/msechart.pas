@@ -322,7 +322,7 @@ begin
      if xseriescount > 1 then begin
       int2:= xseriescount - 1;
       if (int2 > high(fdatapoints)) and (cto_adddataright in foptions) then begin
-       rea1:= 1 - high(fdatapoints) / real(int2);
+       rea1:= {$ifdef FPC}real({$endif}1.0{$ifdef FPC}){$endif} - high(fdatapoints) / int2;
       end;
      end
      else begin
@@ -761,7 +761,7 @@ begin
    fchartrect.cx:= fchartclientrect.cx + 10; //room for linewidth
    fchartrect.cy:= fchartclientrect.cy;
    size:= fchartrect.size; 
-   fstep:= real(fchartwindowrect.cx) / fsamplecount;
+   fstep:= {$ifdef FPC}real({$endif}fchartwindowrect.cx{$ifdef FPC}){$endif} / fsamplecount;
    fstepsum:= 0;
    init(fcolorchart);
    canvas.capstyle:= cs_round;
