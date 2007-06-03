@@ -804,7 +804,7 @@ begin
     break;
    end;
    with trecordertrace(ftraces.fitems[int2]) do begin
-    ay:= round(fchartrect.cy * ((asamples[int2] - foffset)/frange));
+    ay:= fchartrect.cy - round(fchartrect.cy * ((asamples[int2] - foffset)/frange));
     if fstarted then begin
      acanvas.linewidth:= fwidth;
      acanvas.drawline(makepoint(ax,fybefore),makepoint(fchartwindowrect.cx,ay),fcolor);
