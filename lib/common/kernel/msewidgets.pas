@@ -528,10 +528,10 @@ type
    procedure doasyncevent(var atag: integer); override;
   public
    function canclose(const newfocus: twidget): boolean; override;
-   property onenter: notifyeventty read fonenter write fonenter;
-   property onexit: notifyeventty read fonexit write fonexit;
-   property onfocus: notifyeventty read fonfocus write fonfocus;
-   property ondefocus: notifyeventty read fondefocus write fondefocus;
+//   property onenter: notifyeventty read fonenter write fonenter;
+//   property onexit: notifyeventty read fonexit write fonexit;
+//   property onfocus: notifyeventty read fonfocus write fonfocus;
+//   property ondefocus: notifyeventty read fondefocus write fondefocus;
    property onfocusedwidgetchanged: focuschangeeventty 
                      read fonfocusedwidgetchanged write fonfocusedwidgetchanged;
 
