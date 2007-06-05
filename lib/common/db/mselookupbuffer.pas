@@ -803,10 +803,15 @@ begin
     indexcasesensitive:= nil;
     indexcaseinsensitive:= nil;
    end;
+  end; 
+  for int1:= 0 to high(ffloatdata) do begin
+   with ffloatdata[int1] do begin
+    setlength(data,avalue);
+    index:= nil;
+   end;
   end;
   fcount:= avalue;
   exclude(fstate,lbs_buffervalid);
-//  fbuffervalid:= false;
  end;
 end;
 
