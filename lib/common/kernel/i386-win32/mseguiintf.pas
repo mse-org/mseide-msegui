@@ -2718,6 +2718,7 @@ var
  ropbefore: rasteropty;
  destdcbefore: hdc;
  destpointbefore: pointty;
+ rect1posbefore: pointty;
  destbmp,colormaskbmp: hbitmap;
  destbmpdc,maskdc,colormaskdc: hdc;
  destimage,sourceimage,colormaskimage: imagety;
@@ -2766,6 +2767,8 @@ begin
    destrect^.pos:= subpoint(destrect^.pos,rect1.pos);
    handle:= createcompatibledc(0);
    selectobject(handle,bufferbmp);
+   rect1posbefore:= rect1.pos;
+   rect1.pos:= nullpoint;
   end
   else begin
    bufferbmp:= 0;
@@ -2816,12 +2819,10 @@ begin
    transfer;
   end;
   if bufferbmp <> 0 then begin //alpha operation  //todo: optimze
-//   destbmp:= createcompatiblebitmap(handle,destrect^.size.cx,destrect^.size.cy);
+   rect1.pos:= rect1posbefore;
    destbmp:= createcompatiblebitmap(handle,rect1.cx,rect1.cy);
    destbmpdc:= createcompatibledc(0);
    selectobject(destbmpdc,destbmp);
-//   bitblt(destbmpdc,0,0,destrect^.cx,destrect^.cy,destdcbefore,
-//                  destpointbefore.x,destpointbefore.y,srccopy);
    bitblt(destbmpdc,0,0,rect1.cx,rect1.cy,destdcbefore,rect1.x,rect1.y,srccopy);
    gui_pixmaptoimage(destbmp,destimage,destbmpdc);
    gui_pixmaptoimage(bufferbmp,sourceimage,handle);
