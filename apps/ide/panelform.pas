@@ -26,6 +26,7 @@ type
 
  tpanelfo = class(tdockform)
    procedure paneloncalclayout(const sender: twidget; const achildren: widgetarty);
+   procedure onclo(const sender: TObject);
   private
    fmenuitem: tmenuitem;
    fnameindex: integer; //0 for unnumbered
@@ -182,7 +183,30 @@ function tpanelfo.canclose(const newfocus: twidget): boolean;
  
 begin
  result:= inherited canclose(newfocus);
+ {
  if result and (newfocus = nil) and containerempty then begin
+  release;
+ end;
+ }
+end;
+
+procedure tpanelfo.onclo(const sender: TObject);
+ function containerempty: boolean;
+ var
+  int1: integer;
+ begin
+  result:= container.widgetcount = 0;
+  if not result then begin
+   for int1:= 0 to container.widgetcount - 1 do begin
+    if container.widgets[int1].visible then begin
+     exit;
+    end;
+   end;
+  end;
+  result:= true;
+ end;
+begin
+ if containerempty then begin
   release;
  end;
 end;

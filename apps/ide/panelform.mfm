@@ -7,19 +7,24 @@ object panelfo: tpanelfo
   frame.grip_size = 10
   frame.grip_options = [go_closebutton, go_fixsizebutton, go_topbutton, go_backgroundbutton]
   frame.dummy = 0
+  taborder = 1
   visible = False
   container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_mousetransparent, ow_autoscale]
+  container.bounds_x = 0
+  container.bounds_y = 0
   container.bounds_cx = 313
   container.bounds_cy = 195
   container.frame.framei_left = 0
   container.frame.framei_top = 0
   container.frame.framei_right = 0
   container.frame.framei_bottom = 0
+  container.frame.localprops = [frl_fileft, frl_fitop, frl_firight, frl_fibottom]
   container.frame.dummy = 0
-  dragdock.optionsdock = [od_canmove, od_canfloat, od_candock, od_propsize, od_acceptsdock, od_savepos, od_proportional, od_splitvert, od_splithorz, od_tabed]
+  dragdock.optionsdock = [od_savepos, od_canmove, od_canfloat, od_candock, od_acceptsdock, od_splitvert, od_splithorz, od_tabed, od_proportional, od_propsize]
   dragdock.oncalclayout = paneloncalclayout
   options = [fo_globalshortcuts, fo_savepos, fo_savestate]
   statfile = mainfo.projectstatfile
   icon.transparency = -2147483648
+  onclose = onclo
   moduleclassname = 'tdockform'
 end
