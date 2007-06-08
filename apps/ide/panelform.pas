@@ -20,13 +20,13 @@ unit panelform;
 
 interface
 uses
- classes,msegui,mseclasses,mseforms,msemenus,msestat,msestrings;
+ classes,msegui,mseclasses,mseforms,msemenus,msestat,msestrings,msedock;
 
 type
 
  tpanelfo = class(tdockform)
-   procedure paneloncalclayout(const sender: twidget; const achildren: widgetarty);
    procedure onclo(const sender: TObject);
+   procedure panellayoutchanged(const sender: tdockcontroller);
   private
    fmenuitem: tmenuitem;
    fnameindex: integer; //0 for unnumbered
@@ -45,7 +45,7 @@ procedure updatestat(const filer: tstatfiler);
 implementation
 
 uses
- panelform_mfm,main,sysutils,msekeyboard,mselist,msetypes,msedatalist,msedock;
+ panelform_mfm,main,sysutils,msekeyboard,mselist,msetypes,msedatalist;
 
 var
  panellist: tpointerlist;
@@ -211,15 +211,17 @@ begin
  end;
 end;
 
-procedure tpanelfo.paneloncalclayout(const sender: twidget; const achildren: widgetarty);
+procedure tpanelfo.panellayoutchanged(const sender: tdockcontroller);
 var
  intf1: idocktarget;
  mstr1: msestring;
  int1: integer;
+ ar1: widgetarty;
 begin
  mstr1:= '';
- for int1:= 0 to high(achildren) do begin
-  if achildren[int1].getcorbainterface(typeinfo(idocktarget),intf1) then begin
+ ar1:= sender.getitems;
+ for int1:= 0 to high(ar1) do begin
+  if ar1[int1].getcorbainterface(typeinfo(idocktarget),intf1) then begin
    mstr1:= mstr1 + intf1.getdockcontroller.getdockcaption+',';
   end;
  end;

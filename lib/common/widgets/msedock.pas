@@ -31,6 +31,7 @@ const
 type
  optiondockty = (od_savepos,
             od_canmove,od_cansize,od_canfloat,od_candock,od_acceptsdock,
+            od_dockparent,
             od_splitvert,od_splithorz,od_tabed,od_proportional,
             od_propsize,od_fixsize,od_top,od_background);
  optionsdockty = set of optiondockty;
@@ -124,6 +125,8 @@ type
  splitdirty = (sd_none,sd_x,sd_y,sd_tabed);
  mdistatety = (mds_normal,mds_maximized,mds_minimized,mds_floating);
 
+ dockcontrollereventty = procedure(const sender: tdockcontroller) of object;
+ 
  docklayouteventty = procedure(const sender: twidget; 
                                         const achildren: widgetarty) of object;
  mdistatechangedeventty = procedure(const sender: twidget;
@@ -132,6 +135,7 @@ type
  tdockcontroller = class(tdragcontroller)
   private
    foncalclayout: docklayouteventty;
+   fonlayoutchanged: dockcontrollereventty;
    fonfloat: notifyeventty;
    fondock: notifyeventty;
    fonchilddock: widgeteventty;
@@ -229,6 +233,7 @@ type
    function ismdi: boolean;
    function isfloating: boolean;
    function canmdisize: boolean;
+   procedure dolayoutchanged;
   public
    constructor create(aintf: idockcontroller);
    destructor destroy; override;
@@ -253,6 +258,8 @@ type
    procedure statread;
    function getdockcaption: msestring;
    function getfloatcaption: msestring;
+   function getitems: widgetarty; //reference count = 1
+   function getwidget: twidget;
   published
    property dockhandle: tdockhandle read fdockhandle write setdockhandle;
    property splitter_size: integer read fsplitter_size write setsplitter_size default defaultsplittersize;
@@ -284,6 +291,8 @@ type
    property optionsdock: optionsdockty read foptionsdock write setoptionsdock
                       default defaultoptionsdock;
    property oncalclayout: docklayouteventty read foncalclayout write foncalclayout;
+   property onlayoutchanged: dockcontrollereventty read fonlayoutchanged 
+                                                       write fonlayoutchanged;
    property onfloat: notifyeventty read fonfloat write fonfloat;
    property ondock: notifyeventty read fondock write fondock;
    property onchilddock: widgeteventty read fonchilddock write fonchilddock;
@@ -611,6 +620,7 @@ begin
   fcontroller.fsplitterrects:= nil;
   release;
  end;
+ fcontroller.dolayoutchanged;
 end;
 
 { tdocktabpage }
@@ -1519,9 +1529,10 @@ begin
 // if not (dos_layoutvalid in fdockstate) then begin
   sizechanged(true);
  widget1:= fintf.getwidget;
- if twidget1(widget1).canevent(tmethod(foncalclayout)) then begin
+ if widget1.canevent(tmethod(foncalclayout)) then begin
   foncalclayout(widget1,ar1);
  end;
+ dolayoutchanged;
 // end;
 end;
 
@@ -1536,19 +1547,26 @@ var
  x1,y1: integer;
  sd1: splitdirty;
  int1,int2: integer;
+ mouseinhandle: boolean;
 
  function checkaccept: boolean;
  var
   intf1: idocktarget;
+  widget2: twidget;
  begin
   result:= (od_acceptsdock in foptionsdock)  and (info.dragobject^ is tdockdragobject);
-  if result and
-   (tdockdragobject(info.dragobject^).fdock.fintf.getwidget.parentwidget <>
-           widget1.container) and
-   (widget1.parentwidget <> nil) and
-        widget1.parentwidget.getinterface(idocktarget,intf1) and
-         (od_acceptsdock in intf1.getdockcontroller.foptionsdock)then begin
-   result:= false;
+  if result and not mouseinhandle and (od_dockparent in foptionsdock) and 
+     not widget1.checkdescendent(
+          tdockdragobject(info.dragobject^).fdock.fintf.getwidget) then begin    
+   widget2:= widget1.parentwidget;
+   while widget2 <> nil do begin
+    if widget2.getcorbainterface(typeinfo(idocktarget),intf1) and 
+           (od_acceptsdock in intf1.getdockcontroller.foptionsdock) then begin
+     result:= false;
+     break;
+    end;
+    widget2:= widget2.parentwidget;
+   end;
   end;
  end;
 
@@ -1559,12 +1577,13 @@ begin
  result:= false;
  if not(csdesigning in widget1.ComponentState) then begin
   with info do begin
-   case eventkind of
-    dek_begin: begin
-     if (fdockhandle <> nil) and pointinrect(
+   mouseinhandle:= (fdockhandle <> nil) and pointinrect(
      translateclientpoint(info.pos,idockcontroller(fintf).getwidget,fdockhandle),
        fdockhandle.gethandlerect) or
-      pointinrect(info.pos,idockcontroller(fintf).getbuttonrects(dbr_handle)) then begin
+      pointinrect(info.pos,idockcontroller(fintf).getbuttonrects(dbr_handle));
+   case eventkind of
+    dek_begin: begin
+     if mouseinhandle then begin
       if (widget1.parentwidget <> nil)  then  begin
        if od_canmove in foptionsdock then begin
         tdockdragobject.create(self,widget1,dragobject^,fpickpos);
@@ -2560,6 +2579,26 @@ function tdockcontroller.canmdisize: boolean;
 begin
  result:= ismdi and (od_cansize in foptionsdock);
 end;
+
+function tdockcontroller.getitems: widgetarty; //reference count = 1
+var
+ int1: integer;
+begin
+ if ftabwidget <> nil then begin
+  with tdocktabwidget(ftabwidget) do begin
+   setlength(result,count);
+   for int1:= 0 to high(result) do begin
+    result[int1]:= tdocktabpage(items[int1]).ftarget;
+   end;
+  end;
+ end
+ else begin
+  with twidget1(fintf.getwidget.container) do begin
+   result:= copy(fwidgets);
+  end;
+ end;
+end;
+
 {
 procedure tdockcontroller.maximize;
 begin
@@ -2809,6 +2848,30 @@ begin
  if (event = oe_changed) and (ftabwidget <> nil) then begin
   tdocktabwidget(ftabwidget).updateoptions;
  end;
+end;
+
+procedure tdockcontroller.dolayoutchanged;
+var
+ widget1: twidget;
+ intf1: idocktarget;
+begin
+ widget1:= fintf.getwidget;
+ if widget1.canevent(tmethod(fonlayoutchanged)) then begin
+  fonlayoutchanged(self);
+ end;
+ widget1:= widget1.parentwidget;
+ while widget1 <> nil do begin
+  if widget1.getcorbainterface(typeinfo(idocktarget),intf1) then begin
+   intf1.getdockcontroller.dolayoutchanged;
+   break;
+  end;
+  widget1:= widget1.parentwidget;
+ end;   
+end;
+
+function tdockcontroller.getwidget: twidget;
+begin
+ result:= fintf.getwidget;
 end;
 
 { tgripframe }

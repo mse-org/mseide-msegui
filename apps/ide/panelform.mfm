@@ -20,8 +20,8 @@ object panelfo: tpanelfo
   container.frame.framei_bottom = 0
   container.frame.localprops = [frl_fileft, frl_fitop, frl_firight, frl_fibottom]
   container.frame.dummy = 0
-  dragdock.optionsdock = [od_savepos, od_canmove, od_canfloat, od_candock, od_acceptsdock, od_splitvert, od_splithorz, od_tabed, od_proportional, od_propsize]
-  dragdock.oncalclayout = paneloncalclayout
+  dragdock.optionsdock = [od_savepos, od_canmove, od_canfloat, od_candock, od_acceptsdock, od_dockparent, od_splitvert, od_splithorz, od_tabed, od_proportional, od_propsize]
+  dragdock.onlayoutchanged = panellayoutchanged
   options = [fo_globalshortcuts, fo_savepos, fo_savestate]
   statfile = mainfo.projectstatfile
   icon.transparency = -2147483648

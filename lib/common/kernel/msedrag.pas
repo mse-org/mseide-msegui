@@ -13,7 +13,7 @@ unit msedrag;
 
 interface
 uses
- msegui,msegraphutils,mseevent,classes,mseclasses;
+ msegui,msegraphutils,mseevent,classes,mseclasses,mseguiglob;
 
 const
  mindragdist = 4;
@@ -59,7 +59,7 @@ type
    data: string;
  end;
 
- idragcontroller = interface
+ idragcontroller = interface(inullinterface)
   function getwidget: twidget;
  end;
 
@@ -118,7 +118,7 @@ function isobjectdrag(const dragobject: tdragobject; objectclass: tclass): boole
 
 implementation
 uses
- msebits,msepointer,mseguiglob,msekeyboard;
+ msebits,msepointer,msekeyboard;
 
 function isobjectdrag(const dragobject: tdragobject; objectclass: tclass): boolean;
 begin

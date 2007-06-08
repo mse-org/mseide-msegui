@@ -264,7 +264,6 @@ type
    procedure loaded; override;
    procedure sendchangeevent(const aevent: objecteventty = oe_changed);
    function linkcount: integer;
-   function canevent(const event: tmethod): boolean;
    function candestroyevent(const event: tmethod): boolean;
    function gethelpcontext: msestring; virtual;
 
@@ -295,6 +294,7 @@ type
    procedure setinline(value: boolean);
    procedure setancestor(value: boolean);
    {$endif}
+   function canevent(const event: tmethod): boolean;
    procedure setoptionalobject(const value: tpersistent; var instance;
                         createproc: createprocty);
    procedure getoptionalobject(const instance: tobject; createproc: createprocty);
