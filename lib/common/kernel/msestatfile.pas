@@ -43,8 +43,10 @@ type
    procedure setfiledir(const avalue: filenamety);
    procedure setoptions(avalue: statfileoptionsty);
   protected
-   procedure objectevent(const sender: tobject;
-                          const event: objecteventty); override;
+   procedure doactivated; override;
+   procedure dodeactivated; override;
+//   procedure objectevent(const sender: tobject;
+//                          const event: objecteventty); override;
    //istatfile
    procedure dostatread(const reader: tstatreader);
    procedure dostatwrite(const writer: tstatwriter);
@@ -366,6 +368,22 @@ begin
  foptions:= avalue;
 end;
 
+procedure tstatfile.doactivated;
+begin
+ if (sfo_activatorread in foptions) and 
+         not (csdesigning in componentstate) then begin
+  readstat;
+ end;
+end;
+
+procedure tstatfile.dodeactivated;
+begin
+ if (sfo_activatorwrite in foptions) and 
+         not (csdesigning in componentstate) then begin
+  writestat;
+ end;
+end;
+{
 procedure tstatfile.objectevent(const sender: tobject;
                const event: objecteventty);
 begin
@@ -381,7 +399,7 @@ begin
   end;
  end;
 end;
-
+}
 procedure tstatfile.readstat(const aname: msestring;
                                  const statreader: tstatreader);
 var

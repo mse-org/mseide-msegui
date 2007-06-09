@@ -685,7 +685,7 @@ type
 
  twindow = class;
 
- windowoptionty = (wo_popup,wo_message,wo_buttonendmodal,wo_groupleader);
+ windowoptionty = (wo_popup,wo_message,{wo_buttonendmodal,}wo_groupleader);
  windowoptionsty = set of windowoptionty;
 
  windowposty = (wp_normal,wp_screencentered,wp_minimized,wp_maximized,wp_default);
@@ -1272,7 +1272,7 @@ type
  windowstatety = (tws_posvalid,tws_sizevalid,tws_windowvisible,
                   tws_modal,tws_needsdefaultpos,
                   tws_closing,tws_globalshortcuts,tws_localshortcuts,
-                  tws_buttonendmodal,tws_grouphidden,tws_groupminimized,
+                  {tws_buttonendmodal,}tws_grouphidden,tws_groupminimized,
                   tws_grab,tws_painting,tws_activatelocked);
  windowstatesty = set of windowstatety;
 
@@ -1345,8 +1345,8 @@ type
    function getlocalshortcuts: boolean;
    procedure setglobalshortcuts(const Value: boolean);
    procedure setlocalshortcuts(const Value: boolean);
-   function getbuttonendmodal: boolean;
-   procedure setbuttonendmodal(const value: boolean);
+//   function getbuttonendmodal: boolean;
+//   procedure setbuttonendmodal(const value: boolean);
   protected
    fowner: twidget;
    fcanvas: tcanvas;
@@ -1421,7 +1421,7 @@ type
    property focusedwidget: twidget read ffocusedwidget;
    property transientfor: twindow read ftransientfor;
    property modalresult: modalresultty read fmodalresult write setmodalresult;
-   property buttonendmodal: boolean read getbuttonendmodal write setbuttonendmodal;
+//   property buttonendmodal: boolean read getbuttonendmodal write setbuttonendmodal;
    property globalshortcuts: boolean read getglobalshortcuts write setglobalshortcuts;
    property localshortcuts: boolean read getlocalshortcuts write setlocalshortcuts;
    property windowpos: windowposty read getwindowpos write setwindowpos;
@@ -9045,7 +9045,7 @@ begin
   updatebit({$ifdef FPC}longword{$else}word{$endif}(fstate),
                ord(tws_needsdefaultpos),fwindowpos = wp_default);
   with aoptions do begin
-   buttonendmodal:= wo_buttonendmodal in options;
+//   buttonendmodal:= wo_buttonendmodal in options;
    aoptions1.options:= options;
    aoptions1.pos:= fwindowpos;
    if transientfor <> nil then begin
@@ -9573,9 +9573,11 @@ begin
   end;
  end
  else begin
+ {
   if (info.eventkind = ek_buttonpress) and (tws_buttonendmodal in fstate) then begin
    endmodal;
   end;
+  }
  end;
 end;
 
@@ -10051,7 +10053,7 @@ function twindow.normalwindowrect: rectty;
 begin
  result:= fnormalwindowrect;
 end;
-
+{
 function twindow.getbuttonendmodal: boolean;
 begin
  result:= tws_buttonendmodal in fstate;
@@ -10066,7 +10068,7 @@ begin
   exclude(fstate,tws_buttonendmodal);
  end;
 end;
-
+}
 procedure twindow.setzorder(const value: integer);
 begin
  if value = 0 then begin   //!!!!todo
