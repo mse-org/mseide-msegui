@@ -2594,6 +2594,32 @@ var
  bufferbmp: hbitmap;
  rect1: rectty;
 
+ procedure setintpolmode(const ahandle: hdc);
+ var
+  pt1: tpoint;
+ begin
+  with drawinfo.copyarea do begin
+   if (al_intpol in alignment) and not iswin95 then begin
+    getbrushorgex(ahandle,pt1);
+    setstretchbltmode(ahandle,halftone);
+    setbrushorgex(ahandle,pt1.x,pt1.y,nil);
+   end
+   else begin
+    if al_or in alignment then begin
+     setstretchbltmode(ahandle,blackonwhite);
+    end
+    else begin
+     if al_and in alignment then begin
+      setstretchbltmode(ahandle,whiteonblack);
+     end
+     else begin
+      setstretchbltmode(ahandle,coloroncolor);
+     end;
+    end;
+   end;
+  end;
+ end;
+ 
  procedure getstretchedbmps;
  var
   po1: pointty;
@@ -2611,6 +2637,7 @@ var
    end;
    stretchedbmp:= createcompatiblebitmap(source^.gc.handle,rect1.cx,rect1.cy);
    destdc:= createcompatibledc(0);
+   setintpolmode(destdc);
    if mask <> nil then begin
     selectobject(destdc,maskbmp);
     stretchblt(destdc,po1.x,po1.y,destrect^.cx,destrect^.cy,smaskdc,
@@ -2730,24 +2757,7 @@ var
  
 begin
  with drawinfo,copyarea,gc,win32gcty(platformdata) do begin
-  if (al_intpol in alignment) and not iswin95 then begin
-   getbrushorgex(handle,point1);
-   setstretchbltmode(handle,halftone);
-   setbrushorgex(handle,point1.x,point1.y,nil);
-  end
-  else begin
-   if al_or in alignment then begin
-    setstretchbltmode(handle,blackonwhite);
-   end
-   else begin
-    if al_and in alignment then begin
-     setstretchbltmode(handle,whiteonblack);
-    end
-    else begin
-     setstretchbltmode(handle,coloroncolor);
-    end;
-   end;
-  end;
+  setintpolmode(handle);
   getclipbox(handle,trect(rect1));
   winrecttorect(rect1);
   intersectrect(destrect^,rect1,rect1);
@@ -2766,6 +2776,7 @@ begin
    bufferbmp:= createcompatiblebitmap(handle,rect1.cx,rect1.cy);
    destrect^.pos:= subpoint(destrect^.pos,rect1.pos);
    handle:= createcompatibledc(0);
+   setintpolmode(handle);
    selectobject(handle,bufferbmp);
    rect1posbefore:= rect1.pos;
    rect1.pos:= nullpoint;
@@ -2822,6 +2833,7 @@ begin
    rect1.pos:= rect1posbefore;
    destbmp:= createcompatiblebitmap(handle,rect1.cx,rect1.cy);
    destbmpdc:= createcompatibledc(0);
+   setintpolmode(destbmpdc);
    selectobject(destbmpdc,destbmp);
    bitblt(destbmpdc,0,0,rect1.cx,rect1.cy,destdcbefore,rect1.x,rect1.y,srccopy);
    gui_pixmaptoimage(destbmp,destimage,destbmpdc);
@@ -2844,11 +2856,13 @@ begin
    else begin
     colormaskbmp:= createcompatiblebitmap(handle,rect1.cx,rect1.cy);
     colormaskdc:= createcompatibledc(0);
+    setintpolmode(colormaskdc);
     selectobject(colormaskdc,colormaskbmp);
     tcanvas1(colormask.canvas).checkgcstate([cs_gc]);
     with sourcerect^ do begin
      stretchblt(colormaskdc,destrect^.x,destrect^.y,destrect^.cx,destrect^.cy,
-      tcanvas1(colormask.canvas).fdrawinfo.gc.handle,x,y,cx,cy,rasterops3[copymode]);
+      tcanvas1(colormask.canvas).fdrawinfo.gc.handle,x,y,cx,cy,
+                                  rasterops3[rop_copy]);
     end;
     gui_pixmaptoimage(colormaskbmp,colormaskimage,colormaskdc);
     for int1:= 0 to destimage.length - 1 do begin
