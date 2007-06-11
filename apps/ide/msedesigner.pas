@@ -1172,6 +1172,7 @@ var
   objectbinarytotextmse(stream,teststream);
   teststream.position:= 0;
   teststream.writetotext(output);
+  flush(output);
  end;
  procedure debugbinout(const atext: string; const acomp,aancestor: tcomponent);
  var
@@ -2437,7 +2438,8 @@ begin
   component:= copycomponent(asubmoduleinfopo^.instance,asubmoduleinfopo^.instance);
   reader.root.insertcomponent(component);
   tmsecomponent1(component).setinline(true);
-  checkinline(component);
+  tmsecomponent1(component).setancestor(true);
+//  checkinline(component);
   if (submodulecopy = 0) and 
           (reader.root.componentstate * [csinline{,csancestor}] = [])  then begin
    additem(pointerarty(floadedsubmodules),component);

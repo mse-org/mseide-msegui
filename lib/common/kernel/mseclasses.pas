@@ -871,6 +871,9 @@ var
  stream: tmemorystream;
  writer: twriter;
  reader: treader;
+ {$ifdef mse_debugcopycomponent}
+ debugstream: ttextstream;
+ {$endif}
 begin
  result:= tcomponent(source.NewInstance);
  try
@@ -899,6 +902,16 @@ begin
    finally
     reader.free;
    end;
+ {$ifdef mse_debugcopycomponent}
+   debugstream:= ttextstream.create;
+   stream.position:= 0;
+   objectbinarytotext(stream,debugstream);
+   debugstream.position:= 0;
+   writeln(output,'copycomponent');
+   debugstream.writetotext(output);
+   flush(output);
+   debugstream.free;
+ {$endif}
   finally
    stream.Free;
   end;
