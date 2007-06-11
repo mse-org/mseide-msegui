@@ -2082,6 +2082,9 @@ var
 begin
  if acomponent is tcomponent then begin
   comp:= tcomponent(acomponent);
+  while (comp.owner <> nil) and (comp.owner.owner <> nil) do begin
+   comp:= comp.owner; //top level compoent
+  end;
   po1:= datapo;
   for int1:= 0 to count - 1 do begin
    with tmoduleinfo(iobjectlink(po1^[int1]).getinstance) do begin
