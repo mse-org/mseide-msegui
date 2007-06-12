@@ -884,6 +884,7 @@ type
    procedure createwindow; virtual;
    procedure objectevent(const sender: tobject; const event: objecteventty); override;
    procedure receiveevent(const event: tobjectevent); override;
+   procedure setchildorder(child: tcomponent; order: integer); override;
    procedure setparentcomponent(value: tcomponent); override;
    function clearparentwidget: twidget;
              //returns old parentwidget
@@ -8179,6 +8180,15 @@ begin
  if value is twidget then begin
   twidget(value).insertwidget(self,fwidgetrect.pos);
 //  parentwidget:= twidget(value);
+ end;
+end;
+
+procedure twidget.setchildorder(child: tcomponent; order: integer);
+begin
+ with container do begin
+  if removeitem(pointerarty(fwidgets),child) >= 0 then begin
+   insertitem(pointerarty(fwidgets),order,child);
+  end;
  end;
 end;
 
