@@ -491,6 +491,8 @@ procedure reloadchangedmodules;
 
 procedure reloadmsecomponent(Instance: tmsecomponent);
 function initmsecomponent(instance: tcomponent; rootancestor: tclass): boolean;
+function findancestorcomponent(const areader: treader; 
+                 const componentname: string): tcomponent;
 procedure loadmsemodule(const instance: tmsecomponent; const rootancestor: tclass);
 function copycomponent(const source: tcomponent; const aowner: tcomponent = nil;
               const onfindancestor: tfindancestorevent = nil;
@@ -634,6 +636,8 @@ type
   protected
    flocked: integer;
    function findmodulebyname(const name: string): tcomponent;
+   procedure ancestornotfound(Reader: TReader; const ComponentName: string;
+                   ComponentClass: TPersistentClass; var Component: TComponent);
 //   procedure findmethod(Reader: TReader; const MethodName: string;
 //      var Address: Pointer; var Error: Boolean);
          //does not work because method.data is not writable
@@ -1227,6 +1231,7 @@ begin
 //      reader.onfindmethod:= fmodules.findmethod;
        //does not work because method.data is not writable
    end;
+   reader.onancestornotfound:= {$ifdef FPC}@{$endif}fmodules.ancestornotfound;
    reader.readrootcomponent(instance);
   finally
     reader.free;
@@ -1401,6 +1406,24 @@ begin
  {$ifdef FPC} {$checkpointer default} {$endif}
 end;
 
+function findancestorcomponent(const areader: treader; 
+                 const componentname: string): tcomponent;
+var
+ comp1: tcomponent;
+begin
+ result:= nil;
+ if csinline in areader.lookuproot.componentstate then begin
+  comp1:= areader.lookuproot;      //check added component
+  while comp1 <> nil do begin
+   result:= comp1.findcomponent(componentname);
+   if result <> nil then begin
+    break;
+   end;
+   comp1:= comp1.owner;
+  end;
+ end;
+end;
+
  { tmodulelist}
 {
 procedure tmodulelist.findmethod(Reader: TReader; const MethodName: string;
@@ -1439,6 +1462,13 @@ begin
    end;
   end;
  end;
+end;
+
+procedure tmodulelist.ancestornotfound(Reader: TReader;
+               const ComponentName: string; ComponentClass: TPersistentClass;
+               var Component: TComponent);
+begin
+ component:= findancestorcomponent(reader,componentname);
 end;
 
 { tloadedlist }

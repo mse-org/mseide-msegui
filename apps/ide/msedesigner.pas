@@ -773,7 +773,10 @@ procedure treaderrorhandler.ancestornotfound(Reader: TReader;
                    const ComponentName: string;
                    ComponentClass: TPersistentClass; var Component: TComponent);
 begin
- doraise(nil); //changed name
+ component:= findancestorcomponent(reader,componentname);
+ if component = nil then begin
+  doraise(nil); //changed name
+ end;
 end;
 
 procedure treaderrorhandler.onsetname(reader: treader; 
@@ -854,13 +857,19 @@ begin
   fancestorclassname:= ancestorclassname1;
   factualclassname:= actualclassname1;
  end;
+ tcomponent1(comp2).setancestor(true);
+ if not isroot then begin
+  tmsecomponent1(comp2).setinline(true);
+ end;
+ {
  if isroot then begin
   tcomponent1(comp2).setancestor(true);
  end
  else begin
   tmsecomponent1(comp2).setinline(true);
  end;
- checkinline(comp2);
+ }
+// checkinline(comp2);
  fobjectlinker.link(comp2); 
  if isroot then begin
   module^.instance:= comp2;
@@ -1968,6 +1977,7 @@ begin
                                           fdesigner.fsubmodulelist);
     tmsecomponent1(instance).factualclassname:= @moduleclassname;
     tmsecomponent1(instance).fancestorclassname:= designmoduleclassname;
+    instance.setancestor(true);
    end
    else begin
     instance:= createdesignmodule(@result.info,designmoduleclassname,@moduleclassname);
@@ -2429,6 +2439,9 @@ procedure tdesigner.ancestornotfound(Reader: TReader; const ComponentName: strin
                    ComponentClass: TPersistentClass; var Component: TComponent);
 begin
  component:= fmodules.findmoduleinstancebyclass(componentclass);
+ if component = nil then begin
+  component:= findancestorcomponent(reader,componentname);
+ end;
 end;
 
 procedure tdesigner.createcomponent(Reader: TReader; ComponentClass: TComponentClass;
@@ -2896,9 +2909,10 @@ begin
   end;
  end
  else begin
-  if (component.owner <> nil) and (ancestor <> rootancestor) and
-          not (csinline in component.owner.componentstate) and
-          not (csancestor in component.owner.componentstate) then begin
+//  if (component.owner <> nil) and (ancestor <> rootancestor) and
+//          not (csinline in component.owner.componentstate) and
+//          not (csancestor in component.owner.componentstate) then begin
+  if not (csancestor in component.componentstate) then begin
    ancestor:= nil; //has name duplicate
   end;
  end; 

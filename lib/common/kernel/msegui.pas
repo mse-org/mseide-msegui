@@ -8199,9 +8199,16 @@ var
 begin
  for int1:= 0 to widgetcount - 1 do begin
   widget:= fwidgets[int1];
+  if (ws_iswidget in widget.fwidgetstate) and
+     ((widget.owner = root) or 
+        (widget.owner<> nil) and (csinline in root.componentstate) and
+           (issubcomponent(widget.owner,root) or //common owner
+               issubcomponent(root,widget.owner))) then begin
+  {
   if ((widget.owner = root) or (csinline in root.componentstate) and
       not (csancestor in widget.componentstate) and
        issubcomponent(widget.owner,root)) and (ws_iswidget in widget.fwidgetstate) then begin
+       }
    proc(widget);
   end;
  end;

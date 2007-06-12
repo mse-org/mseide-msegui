@@ -1084,11 +1084,14 @@ begin
   result:= ffontactive;
  end
  else begin
-  if fparentmenu <> nil then begin
-   result:= fparentmenu.getfontactive;
-  end
-  else begin
-   result:= tmenufontactive(stockobjects.fonts[stf_menu]);
+  result:= tmenufontactive(ffont);
+  if result = nil then begin
+   if fparentmenu <> nil then begin
+    result:= fparentmenu.getfontactive;
+   end
+   else begin
+    result:= tmenufontactive(stockobjects.fonts[stf_menu]);
+   end;
   end;
  end;
 end;
