@@ -1977,7 +1977,7 @@ begin
                                           fdesigner.fsubmodulelist);
     tmsecomponent1(instance).factualclassname:= @moduleclassname;
     tmsecomponent1(instance).fancestorclassname:= designmoduleclassname;
-    instance.setancestor(true);
+    tmsecomponent1(instance).setancestor(true);
    end
    else begin
     instance:= createdesignmodule(@result.info,designmoduleclassname,@moduleclassname);
