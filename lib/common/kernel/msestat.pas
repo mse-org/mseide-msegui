@@ -106,6 +106,7 @@ type
    constructor create(const stream: ttextstream); overload;
    constructor create(const filename: filenamety); overload;
    destructor destroy; override;
+   function sections: msestringarty;
    function findsection(const name: msestring): boolean; //true if found
    function checkvar(const name: msestring): boolean; //true if found
 
@@ -990,6 +991,16 @@ begin
  end
  else begin
   memorystatstreams.delete(streamname);
+ end;
+end;
+
+function tstatreader.sections: msestringarty;
+var
+ int1: integer;
+begin
+ setlength(result,fsectionlist.count);
+ for int1:= 0 to high(result) do begin
+  result[int1]:= fsectionlist.next^.key;
  end;
 end;
 {

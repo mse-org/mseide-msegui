@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2006 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2007 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -70,6 +70,7 @@ type
    fmask: cardinal;
    fcapacitystep: integer;
    fcount: integer;
+   fstepbucket,fstepindex: integer;
    function getbucketcount: integer;
    procedure setbucketcount(const Value: integer);
    function internalfind(const key: string): pdatastringty; overload;
@@ -90,6 +91,7 @@ type
    function findi(const key: lstringty): pointer; overload; //caseinsensitive
    property bucketcount: integer read getbucketcount write setbucketcount default defaultbucketcount;
    property count: integer read fcount;
+   function next: pdatastringty;
  end;
 
  msedatastringty = record
@@ -108,6 +110,7 @@ type
    fbuckets: msestringbucketarty;
    fmask: cardinal;
    fcapacitystep: integer;
+   fstepbucket,fstepindex: integer;
    function getbucketcount: integer;
    procedure setbucketcount(const Value: integer);
    function internalfind(const key: msestring): pmsedatastringty;
@@ -125,6 +128,7 @@ type
    function findi(const key: lmsestringty): pointer; overload;
    property bucketcount: integer read getbucketcount write setbucketcount default defaultbucketcount;
    property count: integer read fcount;
+   function next: pmsedatastringty;
  end;
 
  thashedmsestringobjects = class(thashedmsestrings)
@@ -433,7 +437,7 @@ begin
  po1:= @po^[0];
  freefound:= false;
  for int1:= 0 to high(po^) do begin
-  if po1^.key = '' then begin
+  if po1^.data = nil then begin
    freefound:= true;
    break;
   end;
@@ -480,15 +484,13 @@ begin
  result:= nil;
  if fcount > 0 then begin
   po:= @fbuckets[stringhash(key) and fmask];
-  if po <> nil then begin
-   po1:= @po^[0];
-   for int1:= 0 to high(po^) do begin
-    if po1^.key = key then begin
-     result:= po1;
-     break;
-    end;
-    inc(po1)
+  po1:= @po^[0];
+  for int1:= 0 to high(po^) do begin
+   if (po1^.data <> nil) and (po1^.key = key) then begin
+    result:= po1;
+    break;
    end;
+   inc(po1)
   end;
  end;
 end;
@@ -502,9 +504,9 @@ begin
  result:= nil;
  if fcount > 0 then begin
   po:= @fbuckets[stringhash(key) and fmask];
-  if po <> nil then begin
-   po1:= @po^[0];
-   for int1:= 0 to high(po^) do begin
+  po1:= @po^[0];
+  for int1:= 0 to high(po^) do begin
+   if po1^.data <> nil then begin
     int2:= length(po1^.key);
     if int2 > 0 then begin
      if int2 < key.len then begin
@@ -515,8 +517,8 @@ begin
       break;
      end;
     end;
-    inc(po1)
    end;
+   inc(po1)
   end;
  end;
 end;
@@ -577,7 +579,7 @@ begin
   if po1 = nil then begin
    break;
   end;
-  po1^.key:= '';
+  po1^.data:= nil;
   dec(fcount);
  end;
 end;
@@ -602,6 +604,32 @@ begin
  setlength(fbuckets,fmask+1);
 end;
 
+function thashedstrings.next: pdatastringty;
+begin
+ result:= nil;
+ if fcount > 0 then begin
+  inc(fstepindex);
+  repeat
+   if fstepbucket > high(fbuckets) then begin
+    fstepbucket:= 0;
+    fstepindex:= 0;
+   end;
+   if fstepindex > high(fbuckets[fstepbucket]) then begin
+    inc(fstepbucket);
+    fstepindex:= 0;
+   end
+   else begin
+    if fbuckets[fstepbucket][fstepindex].data <> nil then begin
+     result:= @fbuckets[fstepbucket][fstepindex];
+    end
+    else begin
+     inc(fstepindex);
+    end;
+   end;
+  until result <> nil;
+ end;
+end;
+
 { thashedmsestrings }
 
 constructor thashedmsestrings.create;
@@ -619,14 +647,14 @@ var
  freefound: boolean;
 begin
  if data = nil then begin
-  raise exception.create('nil not alowed.');
+  raise exception.create('nil not allowed.');
  end;
  inc(fcount);
  po:= @fbuckets[stringhash(key) and fmask];
  po1:= @po^[0];
  freefound:= false;
  for int1:= 0 to high(po^) do begin
-  if po1^.key = '' then begin
+  if po1^.data = nil then begin
    freefound:= true;
    break;
   end;
@@ -673,15 +701,13 @@ begin
  result:= nil;
  if fcount > 0 then begin
   po:= @fbuckets[stringhash(key) and fmask];
-  if po <> nil then begin
-   po1:= @po^[0];
-   for int1:= 0 to high(po^) do begin
-    if po1^.key = key then begin
-     result:= po1;
-     break;
-    end;
-    inc(po1)
+  po1:= @po^[0];
+  for int1:= 0 to high(po^) do begin
+   if (po1^.data <> nil) and (po1^.key = key) then begin
+    result:= po1;
+    break;
    end;
+   inc(po1)
   end;
  end;
 end;
@@ -695,9 +721,9 @@ begin
  result:= nil;
  if fcount > 0 then begin
   po:= @fbuckets[stringhash(key) and fmask];
-  if po <> nil then begin
-   po1:= @po^[0];
-   for int1:= 0 to high(po^) do begin
+  po1:= @po^[0];
+  for int1:= 0 to high(po^) do begin
+   if po1^.data <> nil then begin
     int2:= length(po1^.key);
     if int2 > 0 then begin
      if int2 < key.len then begin
@@ -708,8 +734,8 @@ begin
       break;
      end;
     end;
-    inc(po1)
    end;
+   inc(po1)
   end;
  end;
 end;
@@ -742,7 +768,6 @@ begin
  end;
 end;
 
-
 procedure thashedmsestrings.delete(const key: msestring);
 var
  po1: pmsedatastringty;
@@ -751,7 +776,7 @@ begin
   po1:= internalfind(key);
   if po1 <> nil then begin
    dec(fcount);
-   po1^.key:= '';
+   po1^.data:= nil;
   end;
  until po1 = nil;
 end;
@@ -765,6 +790,32 @@ procedure thashedmsestrings.setbucketcount(const Value: integer);
 begin
  fmask:= maxbitmask(value-1);
  setlength(fbuckets,fmask+1);
+end;
+
+function thashedmsestrings.next: pmsedatastringty;
+begin
+ result:= nil;
+ if fcount > 0 then begin
+  inc(fstepindex);
+  repeat
+   if fstepbucket > high(fbuckets) then begin
+    fstepbucket:= 0;
+    fstepindex:= 0;
+   end;
+   if fstepindex > high(fbuckets[fstepbucket]) then begin
+    inc(fstepbucket);
+    fstepindex:= 0;
+   end
+   else begin
+    if fbuckets[fstepbucket][fstepindex].data <> nil then begin
+     result:= @fbuckets[fstepbucket][fstepindex];
+    end
+    else begin
+     inc(fstepindex);
+    end;
+   end;
+  until result <> nil;
+ end;
 end;
 
 { thashedstringobjects }
@@ -782,7 +833,7 @@ begin
  for int1:= 0 to high(fbuckets) do begin
   if fbuckets[int1] <> nil then begin
    for int2:= 0 to high(fbuckets[int1]) do begin
-    if fbuckets[int1][int2].key <> '' then begin
+    if fbuckets[int1][int2].data <> nil then begin
      tobject(fbuckets[int1][int2].data).free;
     end;
    end;
@@ -805,7 +856,7 @@ begin
   po1:= internalfind(key);
   if po1 <> nil then begin
    tobject(po1^.data).Free;
-   po1^.key:= '';
+   po1^.data:= nil;
    dec(fcount);
   end;
  until po1 = nil;
@@ -846,7 +897,7 @@ begin
  for int1:= 0 to high(fbuckets) do begin
   if fbuckets[int1] <> nil then begin
    for int2:= 0 to high(fbuckets[int1]) do begin
-    if fbuckets[int1][int2].key <> '' then begin
+    if fbuckets[int1][int2].data <> nil then begin
      tobject(fbuckets[int1][int2].data).free;
     end;
    end;
@@ -869,7 +920,7 @@ begin
   po1:= internalfind(key);
   if po1 <> nil then begin
    tobject(po1^.data).Free;
-   po1^.key:= '';
+   po1^.data:= nil;
    dec(fcount);
   end;
  until po1 = nil;

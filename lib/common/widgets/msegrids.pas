@@ -7232,20 +7232,22 @@ begin     //focuscell
     coord1:= invalidcell;
    end;
  
-   int1:= cell.row - ffocusedcell.row;
-   if int1 <> 0 then begin
-    checksort;
-    if (cell.row >= 0) and (ffocusedcell.row >= 0) then begin
-     cell.row:= ffocusedcell.row + int1;
-     if cell.row < 0 then begin
-      cell.row:= 0;
-     end;
-     if cell.row > frowcount then begin
-      cell.row:= frowcount;
+   if cell.row >= 0 then begin
+    int1:= cell.row - ffocusedcell.row;
+    if int1 <> 0 then begin
+     checksort;
+     if (cell.row >= 0) and (ffocusedcell.row >= 0) then begin
+      cell.row:= ffocusedcell.row + int1;
+      if cell.row < 0 then begin
+       cell.row:= 0;
+      end;
+      if cell.row > frowcount then begin
+       cell.row:= frowcount;
+      end;
      end;
     end;
    end;
- 
+    
    if isappend(cell.row) then begin
     if (frowcount = 0) or (og_appendempty in foptionsgrid) or
             not fdatacols.rowempty(frowcount-1) then begin
