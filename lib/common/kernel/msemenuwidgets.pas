@@ -1304,7 +1304,11 @@ var
 begin
  widget1:= self;
  while true do begin
-  widget1.window.endmodal;
+  with widget1 do begin
+   if not (mlo_main in flayout.options) then begin
+    window.endmodal;
+   end;
+  end;
   if widget1.fprevpopup <> nil then begin
    widget1:= widget1.fprevpopup;
   end
