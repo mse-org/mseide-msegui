@@ -274,9 +274,9 @@ windowlayout=235
  activetab=0
  [messagefo]
  splitdir=0
- useroptions=1551
+ useroptions=6171
  parent=mainfo.panel1.container
- visible=1
+ visible=0
  x=0
  y=411
  cx=724

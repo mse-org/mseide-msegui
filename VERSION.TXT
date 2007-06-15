@@ -1,5 +1,8 @@
 MSEide+MSEgui version history
 
+Version 1.2
+2007-06-15
+
 Version 1.2rc2
 2007-05-17 tcustomrealedit.scale -> valuescale.
 2007-05-07 tcustomprogressbar.scale -> valuescale.
