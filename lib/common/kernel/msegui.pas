@@ -9412,9 +9412,13 @@ begin
   if (fmodalwindow = nil) then begin
    if fwantedactivewindow <> nil then begin
     fwantedactivewindow.activate;
+    fwantedactivewindow:= nil;
    end;
   end
   else begin
+   if fmodalwindow = fwantedactivewindow then begin
+    fwantedactivewindow:= nil;
+   end;
    fmodalwindow.activate;
 //   if ftransientfor <> nil then begin
 //    ftransientfor.activate;
