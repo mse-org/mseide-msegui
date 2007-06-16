@@ -465,6 +465,10 @@ const TypeStrings : array[TFieldType] of string =
       'Unknown',  //ftGuid
       'Unknown',  //ftTimeStamp
       'Unknown'   //ftFMTBcd
+      {$ifdef mse_FPC_2_2}
+      ,'Unknown', //ftFixedWideChar
+      'Unknown'   //ftWideMemo
+      {$endif}
     );
 
 
@@ -502,7 +506,7 @@ begin
         end;
        end;
        s[length(s)]:= ')';
-       {$ifdef FPC_2_2}
+       {$ifdef mse_FPC_2_2}
        buf := AParams.ParseSQL(buf,false,false,false,psPostgreSQL);
        {$else}
        buf := AParams.ParseSQL(buf,false,psPostgreSQL);

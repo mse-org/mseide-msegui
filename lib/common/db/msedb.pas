@@ -869,8 +869,12 @@ const
       ft_unknown,ft_largeint,ft_unknown,ft_unknown,ft_unknown,
     //ftDataSet, ftOraBlob, ftOraClob, ftVariant, ftInterface,
       ft_unknown,ft_unknown,ft_unknown,ft_unknown,ft_unknown,
-    //ftIDispatch, ftGuid, ftTimeStamp, ftFMTBcd);
+    //ftIDispatch, ftGuid, ftTimeStamp, ftFMTBcd
       ft_unknown,ft_unknown,ft_unknown,ft_unknown
+      {$ifdef mse_FPC_2_2}
+    //ftFixedWideChar,ftWideMemo
+      ,ft_unknown,    ft_unknown 
+      {$endif}
       );
 
  realfcomp = [ftfloat,ftcurrency];
@@ -899,6 +903,10 @@ const
       [ftDataSet],[ftOraBlob],[ftOraClob],[ftVariant],[ftInterface],
     //ftIDispatch, ftGuid, ftTimeStamp, ftFMTBcd);
       [ftIDispatch],[ftGuid],[ftTimeStamp],[ftFMTBcd]
+    {$ifdef mse_FPC_2_2}
+    //ftFixedWideChar,ftWideMemo
+      ,[ftfixedwidechar],[ftwidememo]   
+    {$endif}
       );
 
 function getmsefieldclass(const afieldtype: tfieldtype): tfieldclass; overload;

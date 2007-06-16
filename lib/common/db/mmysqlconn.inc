@@ -353,7 +353,7 @@ begin
     begin
     FStatement:=Buf;
     if assigned(AParams) and (AParams.count > 0) then
-    {$ifdef FPC_2_2}
+    {$ifdef mse_FPC_2_2}
       FStatement := AParams.ParseSQL(FStatement,false,false,false,psSimulated,
                        paramBinding,ParamReplaceString);
     {$else}

@@ -249,7 +249,7 @@ procedure tsqlite3connection.PrepareStatement(cursor: TSQLCursor;
 begin
  with tsqlite3cursor(cursor) do begin
   if assigned(aparams) and (aparams.count > 0) then begin
-  {$ifdef FPC_2_2}
+  {$ifdef mse_FPC_2_2}
     buf := aparams.parsesql(buf,false,false,false,psinterbase,fparambinding);
   {$else}
     buf := aparams.parsesql(buf,false,psinterbase,fparambinding);

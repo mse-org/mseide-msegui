@@ -614,7 +614,7 @@ implementation
 uses
  rtlconsts,dbconst,msedatalist,sysutils,mseformatstr,msereal,msestream,msesys,
  msefileutils;
-{$ifdef FPC_2_2}
+{$ifdef mse_FPC_2_2}
 const
  snotineditstate = 
  'Operation not allowed, dataset "%s" is not in an edit or insert state.';

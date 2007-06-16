@@ -552,7 +552,7 @@ begin
     tr := aTransaction.Handle;
     
     if assigned(AParams) and (AParams.count > 0) then
-    {$ifdef FPC_2_2}
+    {$ifdef mse_FPC_2_2}
       buf := AParams.ParseSQL(buf,false,false,false,psInterbase,paramBinding);
     {$else}
       buf := AParams.ParseSQL(buf,false,psInterbase,paramBinding);
@@ -799,7 +799,7 @@ begin
      if TransType = ftBCD then begin
       FD.precision:= SQLLen;
      end;
-     {$ifndef FPC_2_2} //???
+     {$ifndef mse_FPC_2_2} //???
      FD.DisplayName:= AliasName;
      {$endif}
     end;
