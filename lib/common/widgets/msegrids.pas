@@ -4816,7 +4816,19 @@ begin
 end;
 
 procedure tdatacols.rowcountchanged(const newcount: integer);
+var
+ int1: integer;
 begin
+ if fselectedrow >= newcount then begin
+  fselectedrow:= -1;
+ end;
+ for int1:= 0 to count - 1 do begin
+  with tdatacol(items[int1]) do begin
+   if fselectedrow >= newcount then begin
+    fselectedrow:= -1;
+   end;
+  end;
+ end;
  frowstate.count:= newcount;
  inherited;
 end;
