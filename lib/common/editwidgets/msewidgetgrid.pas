@@ -2310,7 +2310,17 @@ begin
       inc(int5);
      end;
     finally
-     endupdate;
+     try
+      for int1:= 0 to datacols.count - 1 do begin
+       with twidgetcol(fdatacols[int1]) do begin
+        if fintf <> nil then begin
+         fintf.gridtovalue(-1); //restore grid value
+        end;
+       end;
+      end;
+     finally
+      endupdate;
+     end;
     end;
     result:= true;
    end;
