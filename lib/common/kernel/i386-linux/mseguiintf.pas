@@ -3495,6 +3495,20 @@ begin
  end;
 end;
 
+procedure setfontinfoname(const aname: string; var ainfo: fontinfoty);
+var
+ ar1: stringarty;
+begin
+ ar1:= splitstring(aname,':');
+ if (high(ar1) = 1) and (ar1[0] <> '') and (ar1[1] <> '') then begin
+  ainfo[fn_foundry]:= ar1[0];
+  ainfo[fn_family_name]:= ar1[1];
+ end
+ else begin
+  ainfo[fn_family_name]:= aname;
+ end;
+end;
+
 procedure initdefaultfont;
 var
  int1,int2: integer;
@@ -3539,7 +3553,8 @@ begin
              (ar1[ord(high(fontnamety))+2] ='noxft');
      end
      else begin
-      defaultfontinfo[fn_family_name]:= str1;
+      setfontinfoname(str1,defaultfontinfo);
+//      defaultfontinfo[fn_family_name]:= str1;
       simpledefaultfont:= true;
      end;
      dec(ac^,2); //remove font arguments
@@ -3633,7 +3648,7 @@ begin
    end;
   end;
   if name <> '' then begin
-   fontinfo[fn_family_name]:= name;
+   setfontinfoname(name,fontinfo);
   end
   else begin
   end;
@@ -3645,6 +3660,9 @@ begin
   end;
   if hasxft then begin
    str1:= '';
+   if fontinfo[fn_foundry] <> '*' then begin
+    str1:= str1+':foundry='+fontinfo[fn_foundry];
+   end;
    if (familyoptions = []) then begin
     if (pitchoptions = []) and (fontinfo[fn_family_name] <> '*') then begin
      str1:= str1 + ':family=' + fontinfo[fn_family_name];
@@ -3696,6 +3714,14 @@ begin
    if foo_nonantialiased in antialiasedoptions then begin
     str1:= str1 + ':antialias=0';
    end;
+   {
+   if foo_xcore in xcoreoptions then begin
+    str1:= str1 + ':core=1';
+   end;
+   if foo_noxcore in xcoreoptions then begin
+    str1:= str1 + ':core=0';
+   end;
+   }
    if fontinfo[fn_charset_registry] <> '*' then begin
     str1:= str1 + ':encoding=' + fontinfo[fn_charset_registry];
     if fontinfo[fn_encoding] <> '*' then begin

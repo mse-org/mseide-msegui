@@ -68,15 +68,19 @@ type
                  foo_script,           // 'S'
                  foo_decorative,       // 'D'
                  foo_antialiased,      // 'A'
-                 foo_nonantialiased);  // 'a'
+                 foo_nonantialiased    // 'a'
+//                 foo_xcore,            // 'C'  //seems nt ot wirt with xft2
+//                 foo_noxcore           // 'c'
+                 );
  fontoptionsty = set of fontoptionty;
 
 const
  fontpitchmask = [foo_fixed,foo_proportional];
  fontfamilymask = [foo_helvetica,foo_roman,foo_script,foo_decorative];
  fontantialiasedmask = [foo_antialiased,foo_nonantialiased];
+// fontxcoremask = [foo_xcore,foo_noxcore];
  fontaliasoptionchars : array[fontoptionty] of char =
-                ('p','P','H','R','S','D','A','a');
+                ('p','P','H','R','S','D','A','a'{,'C','c'});
 type
  fontdataty = record
   font: fontty;
@@ -84,7 +88,7 @@ type
   charset: string;
   height: integer;
   width: integer;
-  pitchoptions,familyoptions,antialiasedoptions: fontoptionsty;
+  pitchoptions,familyoptions,antialiasedoptions{,xcoreoptions}: fontoptionsty;
   style: fontstylesty;                    //fs_bold,fs_italic
   ascent,descent,linespacing,caretshift: integer;
   platformdata: array[0..15] of cardinal; //platform dependent
@@ -1293,10 +1297,12 @@ const
  mask1: fontoptionsty = fontpitchmask;
  mask2: fontoptionsty = fontfamilymask;
  mask3: fontoptionsty = fontantialiasedmask;
+// mask4: fontoptionsty = fontxcoremask;
 var
  value1: fontoptionsty;
  value2: fontoptionsty;
  value3: fontoptionsty;
+// value4: fontoptionsty;
 begin
   value1:= fontoptionsty(
          setsinglebit({$ifdef FPC}longword{$else}byte{$endif}(new),
@@ -1310,7 +1316,13 @@ begin
          setsinglebit({$ifdef FPC}longword{$else}byte{$endif}(new),
                       {$ifdef FPC}longword{$else}byte{$endif}(old),
                       {$ifdef FPC}longword{$else}byte{$endif}(mask3)));
-  result:= value1 * mask1 + value2 * mask2 + value3 * mask3;
+{                      
+  value4:= fontoptionsty(
+         setsinglebit({$ifdef FPC}longword{$else}byte{$endif}(new),
+                      {$ifdef FPC}longword{$else}byte{$endif}(old),
+                      {$ifdef FPC}longword{$else}byte{$endif}(mask4)));
+}
+  result:= value1 * mask1 + value2 * mask2 + value3 * mask3 {+ value4 * mask4};
 end;
 
 function fontaliaslist: tfontaliaslist;
@@ -1485,6 +1497,7 @@ var
    data1.familyoptions:= options * fontfamilymask;
    data1.pitchoptions:= options * fontpitchmask;
    data1.antialiasedoptions:= options * fontantialiasedmask;
+//   data1.xcoreoptions:= options * fontxcoremask;
    data1.charset:= charset;
    data1.style:= fontstylesty({$ifdef FPC}longword{$else}byte{$endif}(style) and
                             fontstylehandlemask);
@@ -1504,6 +1517,7 @@ begin
      (data.pitchoptions = options * fontpitchmask) and
      (data.familyoptions = options * fontfamilymask) and
      (data.antialiasedoptions = options * fontantialiasedmask) and
+//     (data.xcoreoptions = options * fontxcoremask) and
      ({$ifdef FPC}longword{$else}byte{$endif}(data.style) = style1) and
      (name = data.name) and
      (charset = data.charset) then begin
@@ -1842,6 +1856,12 @@ begin
       (info.pitchoptions * fontantialiasedmask = []) then begin
     info.antialiasedoptions:= options * fontantialiasedmask;
    end;
+{
+   if (options * fontxcoremask <> []) and 
+      (info.pitchoptions * fontxcoremask = []) then begin
+    info.xcoreoptions:= options * fontxcoremask;
+   end;
+}
   end;
  end;
 end;
