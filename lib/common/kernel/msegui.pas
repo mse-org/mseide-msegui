@@ -7211,7 +7211,9 @@ begin
    transientfor:= nil;
    end;
   fwindow.show(windowevent);
-  fwindow.settransientfor(transientfor,windowevent);
+  if transientfor <> nil then begin
+   fwindow.settransientfor(transientfor,windowevent);
+  end;
   if bo1 then begin
    doshow;
   end;
@@ -11560,7 +11562,7 @@ begin
  sortarray(ar3,{$ifdef FPC}@{$endif}compwindowzorder,sizeof(ar3[0]));
  int2:= -1;
 {$ifdef mse_debugzorder}
- writeln('++++++++++++');
+ writeln('+++');
  for int1:= 0 to high(ar3) do begin
   write(ar3[int1].fowner.name,' ');
   if ar3[int1].ftransientfor = nil then begin
