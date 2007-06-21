@@ -91,6 +91,7 @@ type
   pitchoptions,familyoptions,antialiasedoptions{,xcoreoptions}: fontoptionsty;
   style: fontstylesty;                    //fs_bold,fs_italic
   ascent,descent,linespacing,caretshift: integer;
+  glyph: unicharty;
   platformdata: array[0..15] of cardinal; //platform dependent
  end;
  pfontdataty = ^fontdataty;
@@ -375,6 +376,7 @@ type
   name: string;
   charset: string;
   options: fontoptionsty;
+  glyph: unicharty;
  end;
  pfontinfoty = ^fontinfoty;
 
@@ -382,110 +384,6 @@ type
   procedure gcneeded(const sender: tcanvas);
   function getmonochrome: boolean;
   function getsize: sizety;
- end;
-
- tfont = class(toptionalpersistent,icanvas)
-  private
-   finfopo: pfontinfoty;
-   fhandlepo: ^fontnumty;
-   fonchange: notifyeventty;
-   function getextraspace: integer;
-   procedure setextraspace(const avalue: integer);
-   procedure setcolorbackground(const Value: colorty);
-   function getcolorbackground: colorty;
-   procedure setcolorshadow(const Value: colorty);
-   function getcolorshadow: colorty;
-   procedure setcolor(const Value: colorty);
-   function getcolor: colorty;
-   procedure setheight(const avalue: integer);
-   function getheight: integer;
-   function getwidth: integer;
-   procedure setwidth(const avalue: integer);
-   procedure setstyle(const Value: fontstylesty);
-   function getstyle: fontstylesty;
-   function getascent: integer;
-   function getdescent: integer;
-   function getglyphheight: integer;
-   function getlineheight: integer;
-   function getcaretshift: integer;
-   procedure updatehandlepo;
-   procedure createhandle(const canvas: tcanvas);
-   procedure dochanged(changed: canvasstatesty); virtual;
-   procedure releasehandles(destroying: boolean = false);
-   function getcharset: string;
-   function getname: string;
-   procedure setcharset(const Value: string);
-   function getoptions: fontoptionsty;
-   procedure setoptions(const avalue: fontoptionsty);
-     //icanvas
-   procedure gcneeded(const sender: tcanvas);
-   function getmonochrome: boolean;
-   function getsize: sizety;
-   function getbold: boolean;
-   procedure setbold(const avalue: boolean);
-   function getitalic: boolean;
-   procedure setitalic(const avalue: boolean);
-   function getunderline: boolean;
-   procedure setunderline(const avalue: boolean);
-   function getstrikeout: boolean;
-   procedure setstrikeout(const avalue: boolean);
-  protected
-   finfo: fontinfoty;
-   procedure setname(const Value: string); virtual;
-   function gethandle: fontnumty; virtual;
-   function getdatapo: pfontdataty;
-  public
-   constructor create; override;
-   destructor destroy; override;
-   procedure assign(source: tpersistent); override;
-   procedure scale(const ascale: real); virtual;
-
-   function gethandleforcanvas(const canvas: tcanvas): fontnumty;
-   property handle: fontnumty read gethandle {write sethandle};
-   property ascent: integer read getascent;
-   property descent: integer read getdescent;
-   property glyphheight: integer read getglyphheight;
-                 //ascent + descent
-   property lineheight: integer read getlineheight;
-   property caretshift: integer read getcaretshift;
-   property onchange: notifyeventty read fonchange write fonchange;
-   
-   property bold: boolean read getbold write setbold;
-   property italic: boolean read getitalic write setitalic;
-   property underline: boolean read getunderline write setunderline;
-   property strikeout: boolean read getstrikeout write setstrikeout;
-
-  published
-   property color: colorty read getcolor write setcolor default cl_text;
-   property colorbackground: colorty read getcolorbackground
-                 write setcolorbackground default cl_transparent;
-   property colorshadow: colorty read getcolorshadow
-                 write setcolorshadow default cl_none;
-   property height: integer read getheight write setheight default 0;
-   property width: integer read getwidth write setwidth default 0;
-                  //avg. character width in 1/10 pixel, 0 = default
-   property extraspace: integer read getextraspace write setextraspace default 0;
-   property style: fontstylesty read getstyle write setstyle default [];
-   property name: string read getname write setname;
-   property charset: string read getcharset write setcharset;
-   property options: fontoptionsty read getoptions write setoptions default [];
- end;
- pfont = ^tfont;
-
- tparentfont = class(tfont)
-  public
-   class function getinstancepo(owner: tobject): pfont; virtual; abstract;
- end;
- parentfontclassty = class of tparentfont;
-
- tcanvasfont = class(tfont)
-  private
-   fcanvas: tcanvas;
-   procedure dochanged(changed: canvasstatesty); override;
-  protected
-   function gethandle: fontnumty; override;
-  public
-   constructor create(acanvas: tcanvas); reintroduce;
  end;
 
  gcty = record
@@ -570,6 +468,11 @@ type
   mask: tsimplebitmap;
   transparency: rgbtriplety;
  end;
+ fonthasglyphinfoty = record
+  font: fontty;
+  unichar: unicharty;
+  hasglyph: boolean;
+ end;
 
  rectsty = array[0..bigint div sizeof(rectty)] of rectty;
  prectsty = ^rectsty;
@@ -630,6 +533,115 @@ type
   11: (getfontmetrics: getfontmetricsinfoty);
   12: (copyarea: copyareainfoty);
   13: (regionoperation: regionoperationinfoty);
+  14: (fonthasglyph: fonthasglyphinfoty);
+ end;
+
+ getfontfuncty = function (var drawinfo: drawinfoty): boolean of object;
+
+ tfont = class(toptionalpersistent,icanvas)
+  private
+   finfopo: pfontinfoty;
+   fhandlepo: ^fontnumty;
+   fonchange: notifyeventty;
+   function getextraspace: integer;
+   procedure setextraspace(const avalue: integer);
+   procedure setcolorbackground(const Value: colorty);
+   function getcolorbackground: colorty;
+   procedure setcolorshadow(const Value: colorty);
+   function getcolorshadow: colorty;
+   procedure setcolor(const Value: colorty);
+   function getcolor: colorty;
+   procedure setheight(const avalue: integer);
+   function getheight: integer;
+   function getwidth: integer;
+   procedure setwidth(const avalue: integer);
+   procedure setstyle(const Value: fontstylesty);
+   function getstyle: fontstylesty;
+   function getascent: integer;
+   function getdescent: integer;
+   function getglyphheight: integer;
+   function getlineheight: integer;
+   function getcaretshift: integer;
+   procedure updatehandlepo;
+   procedure createhandle(const canvas: tcanvas);
+   procedure dochanged(changed: canvasstatesty); virtual;
+   procedure releasehandles(destroying: boolean = false);
+   function getcharset: string;
+   function getname: string;
+   procedure setcharset(const Value: string);
+   function getoptions: fontoptionsty;
+   procedure setoptions(const avalue: fontoptionsty);
+     //icanvas
+   procedure gcneeded(const sender: tcanvas);
+   function getmonochrome: boolean;
+   function getsize: sizety;
+   function getbold: boolean;
+   procedure setbold(const avalue: boolean);
+   function getitalic: boolean;
+   procedure setitalic(const avalue: boolean);
+   function getunderline: boolean;
+   procedure setunderline(const avalue: boolean);
+   function getstrikeout: boolean;
+   procedure setstrikeout(const avalue: boolean);
+  protected
+   finfo: fontinfoty;
+   function getfont(var drawinfo: drawinfoty): boolean; virtual;
+   procedure setname(const Value: string); virtual;
+   function gethandle: fontnumty; virtual;
+   function getdatapo: pfontdataty;
+  public
+   constructor create; override;
+   destructor destroy; override;
+   procedure assign(source: tpersistent); override;
+   procedure scale(const ascale: real); virtual;
+
+   function gethandleforcanvas(const canvas: tcanvas): fontnumty;
+   property handle: fontnumty read gethandle {write sethandle};
+   property ascent: integer read getascent;
+   property descent: integer read getdescent;
+   property glyphheight: integer read getglyphheight;
+                 //ascent + descent
+   property lineheight: integer read getlineheight;
+   property caretshift: integer read getcaretshift;
+   property onchange: notifyeventty read fonchange write fonchange;
+   
+   property bold: boolean read getbold write setbold;
+   property italic: boolean read getitalic write setitalic;
+   property underline: boolean read getunderline write setunderline;
+   property strikeout: boolean read getstrikeout write setstrikeout;
+
+  published
+   property color: colorty read getcolor write setcolor default cl_text;
+   property colorbackground: colorty read getcolorbackground
+                 write setcolorbackground default cl_transparent;
+   property colorshadow: colorty read getcolorshadow
+                 write setcolorshadow default cl_none;
+   property height: integer read getheight write setheight default 0;
+   property width: integer read getwidth write setwidth default 0;
+                  //avg. character width in 1/10 pixel, 0 = default
+   property extraspace: integer read getextraspace write setextraspace default 0;
+   property style: fontstylesty read getstyle write setstyle default [];
+   property name: string read getname write setname;
+   property charset: string read getcharset write setcharset;
+   property options: fontoptionsty read getoptions write setoptions default [];
+ end;
+ pfont = ^tfont;
+ fontarty = array of tfont;
+
+ tparentfont = class(tfont)
+  public
+   class function getinstancepo(owner: tobject): pfont; virtual; abstract;
+ end;
+ parentfontclassty = class of tparentfont;
+
+ tcanvasfont = class(tfont)
+  private
+   fcanvas: tcanvas;
+   procedure dochanged(changed: canvasstatesty); override;
+  protected
+   function gethandle: fontnumty; override;
+  public
+   constructor create(acanvas: tcanvas); reintroduce;
  end;
 
  gdifunctionty = procedure(var drawinfo: drawinfoty);
@@ -646,7 +658,7 @@ type
               gdi_regsubrect,gdi_regsubregion,
               gdi_regaddrect,gdi_regaddregion,gdi_regintersectrect,
               gdi_regintersectregion,
-              gdi_copyarea);
+              gdi_copyarea,gdi_fonthasglyph);
 
  gdifunctionaty = array[gdifuncty] of gdifunctionty;
  pgdifunctionaty = ^gdifunctionaty;
@@ -865,9 +877,12 @@ type
    procedure fillxorrect(const arect: rectty; const abrush: tsimplebitmap = nil);
    procedure drawstring(const atext: msestring; const apos: pointty;
                         const afont: tfont = nil; const grayed: boolean = false); overload;
-   procedure drawstring(const atext: pmsechar; acount: integer; const apos: pointty;
+   procedure drawstring(const atext: pmsechar; const acount: integer; const apos: pointty;
                         const afont: tfont = nil; const grayed: boolean = false); overload;
-   function getstringwidth(const atext: msestring; const afont: tfont = nil): integer;
+   function getstringwidth(const atext: msestring; 
+                                 const afont: tfont = nil): integer; overload;
+   function getstringwidth(const atext: pmsechar; const acount: integer;
+                                 const afont: tfont = nil): integer; overload;
                   //sum of cellwidths
    function getfontmetrics(const achar: msechar; const afont: tfont = nil): fontmetricsty;
 
@@ -1052,6 +1067,7 @@ procedure init;
 procedure deinit;
 procedure gdi_lock;   //locks only if not mainthread
 procedure gdi_unlock; //unlocks only if not mainthread
+procedure gdi_call(const func: gdifuncty; var drawinfo: drawinfoty);
 
 procedure allocbuffer(var buffer: bufferty; size: integer);
 procedure freebuffer(var buffer: bufferty);
@@ -1163,6 +1179,29 @@ begin
  with application do begin
   if not ismainthread then begin
    unlock;
+  end;
+ end;
+end;
+
+procedure gdi_call(const func: gdifuncty; var drawinfo: drawinfoty);
+begin
+ with application do begin
+  if not ismainthread then begin
+   lock;
+   try
+    gui_getgdifuncs^[func](drawinfo);
+    if flushgdi then begin
+     gui_flushgdi;
+    end;
+   finally
+    unlock;
+   end;
+  end
+  else begin
+   gui_getgdifuncs^[func](drawinfo);
+   if flushgdi then begin
+    gui_flushgdi;
+   end;
   end;
  end;
 end;
@@ -1482,7 +1521,8 @@ begin
  end;
 end;
 
-function getfontnum(const fontinfo: fontinfoty; var drawinfo: drawinfoty): fontnumty;
+function getfontnum(const fontinfo: fontinfoty; var drawinfo: drawinfoty;
+                     getfont: getfontfuncty): fontnumty;
 var
  int1: integer;
  data1: fontdataty;
@@ -1501,6 +1541,7 @@ var
    data1.charset:= charset;
    data1.style:= fontstylesty({$ifdef FPC}longword{$else}byte{$endif}(style) and
                             fontstylehandlemask);
+   data1.glyph:= glyph;
   end;
  end;
 label
@@ -1512,6 +1553,7 @@ begin
   for int1:= 0 to high(fonts) do begin
    with fonts[int1] do begin
     if (refcount >= 0) and
+     (data.glyph = glyph) and           //unicode substitutes
      (data.height = height) and
      (data.width = width)  and
      (data.pitchoptions = options * fontpitchmask) and
@@ -1520,7 +1562,7 @@ begin
 //     (data.xcoreoptions = options * fontxcoremask) and
      ({$ifdef FPC}longword{$else}byte{$endif}(data.style) = style1) and
      (name = data.name) and
-     (charset = data.charset) then begin
+     (charset = data.charset)then begin
      inc(refcount);
      result:= int1 + 1;
      goto endlab
@@ -1533,7 +1575,7 @@ begin
    ffontaliaslist.updatefontdata(data1);
   end;
   drawinfo.getfont.fontdata:= @data1;
-  if gui_getfont(drawinfo) then begin
+  if getfont(drawinfo) then begin
    getvalues;
    result:= registerfont(data1);
   end
@@ -2404,12 +2446,17 @@ begin
  inherited;
 end;
 
+function tfont.getfont(var drawinfo: drawinfoty): boolean;
+begin
+ result:= gui_getfont(drawinfo);
+end;
+
 procedure tfont.createhandle(const canvas: tcanvas);
 begin
  if (canvas <> nil) then begin
   releasefont(fhandlepo^);
   canvas.checkgcstate([cs_gc]); //windows needs gc
-  fhandlepo^:= getfontnum(finfopo^,canvas.fdrawinfo);
+  fhandlepo^:= getfontnum(finfopo^,canvas.fdrawinfo,{$ifdef FPC}@{$endif}getfont);
   if fhandlepo^ = 0 then begin
    canvas.error(gde_font,finfopo^.name);
   end;
@@ -3790,7 +3837,8 @@ begin
  mseguiintf.drawstring(fdrawinfo);
 end;
 }
-procedure tcanvas.drawstring(const atext: pmsechar; acount: integer; const apos: pointty;
+procedure tcanvas.drawstring(const atext: pmsechar; const acount: integer;
+                        const apos: pointty;
                         const afont: tfont = nil; const grayed: boolean = false);
 var
  afontnum: integer;
@@ -3859,7 +3907,8 @@ begin
  drawstring(pointer(atext),length(atext),apos,afont,grayed);
 end;
 
-function tcanvas.getstringwidth(const atext: msestring; const afont: tfont = nil): integer;
+function tcanvas.getstringwidth(const atext: pmsechar; const acount: integer;
+                                 const afont: tfont = nil): integer;
 var
  afontnum: integer;
 begin
@@ -3874,15 +3923,20 @@ begin
   else begin
    afontnum:= ffont.handle;
   end;
-  with fdrawinfo.gettextwidth do begin
+  with fdrawinfo.gettext16width do begin
    datapo:= getfontdata(afontnum);
-   text:= pointer(atext);
-   count:= length(atext);
+   text:= atext;
+   count:= acount;
   end;
   gdi_lock;
   result:= gui_gettext16width(fdrawinfo);
   gdi_unlock;
  end;
+end;
+
+function tcanvas.getstringwidth(const atext: msestring; const afont: tfont = nil): integer;
+begin
+ result:= getstringwidth(pmsechar(atext),length(atext),afont);
 end;
 
 function tcanvas.getfontmetrics(const achar: msechar;

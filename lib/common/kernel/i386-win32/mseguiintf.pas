@@ -146,8 +146,8 @@ const
 // col1: tagrgbquad = (rgbblue: $ff; rgbgreen: $ff; rgbred: $ff);
 
  defaultfontnames: defaultfontnamesty =
-  //stf_default  stf_menu stf_report   stf_prop      stf_fixed,
-      ('',          '',  'Arial'  ,  'MS Sans Serif','Courier',
+  //stf_default  stf_unicode stf_menu stf_report   stf_prop      stf_fixed,
+      ('',          '',         '',  'Arial'  ,  'MS Sans Serif','Courier',
   //stf_helvetica stf_roman          stf_courier
       'Arial', 'Times New Roman', 'Courier New');
 
@@ -2951,6 +2951,13 @@ begin
  end;
 end;
 
+procedure gui_fonthasglyph(var drawinfo: drawinfoty);
+begin
+ with drawinfo,fonthasglyph do begin
+  hasglyph:= true;
+ end;
+end;
+
 procedure adjustlineend(po: ppointty); //solve lineto lastpixel problem
 var
  po1: ppoint;
@@ -4011,7 +4018,8 @@ const
    {$ifdef FPC}@{$endif}gui_regaddregion,
    {$ifdef FPC}@{$endif}gui_regintersectrect,
    {$ifdef FPC}@{$endif}gui_regintersectregion,
-   {$ifdef FPC}@{$endif}gui_copyarea
+   {$ifdef FPC}@{$endif}gui_copyarea,
+   {$ifdef FPC}@{$endif}gui_fonthasglyph
  );
 
 function gui_getgdifuncs: pgdifunctionaty;

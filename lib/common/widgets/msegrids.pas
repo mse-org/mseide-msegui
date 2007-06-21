@@ -362,17 +362,24 @@ type
  tcol = class(tgridprop)
   private
    frowfontoffset: integer;
+   frowfontoffsetselect: integer;
    frowcoloroffset: integer;
    fonbeforedrawcell: beforedrawcelleventty;
+   frowcoloroffsetselect: integer;
    function getcolindex: integer;
    procedure setfocusrectdist(const avalue: integer);
    procedure updatepropwidth;
-   procedure setrowcoloroffset(const Value: integer);
-   procedure setrowfontoffset(const Value: integer);
+   procedure setrowcoloroffset(const avalue: integer);
+   procedure setrowcoloroffsetselect(const avalue: integer);
+   procedure setrowfontoffset(const avalue: integer);
+   procedure setrowfontoffsetselect(const avalue: integer);
 
    function iswidthstored: boolean;
    function isoptionsstored: boolean;
    function isfocusrectdiststored: boolean;
+   function getfontselect: tcolselectfont;
+   function isfontselectstored: Boolean;
+   procedure setfontselect(const Value: tcolselectfont);
 
   protected
    fwidth: integer;
@@ -380,6 +387,7 @@ type
    fstate: colstatesty;
    ffontselect: tcolselectfont;
    ffocusrectdist: integer;
+   procedure createfontselect;
    function getselected(const row: integer): boolean; virtual;
    procedure setwidth(const Value: integer); virtual;
    procedure setoptions(const Value: coloptionsty); virtual;
@@ -407,6 +415,7 @@ type
   public
    constructor create(const agrid: tcustomgrid; 
                         const aowner: tgridarrayprop); override;
+   destructor destroy; override;
    procedure invalidate;
    function rowcolor(const aindex: integer): colorty;
    function rowfont(const aindex: integer): tfont;
@@ -417,8 +426,16 @@ type
    property colindex: integer read getcolindex;
   published
    property width: integer read fwidth write setwidth stored iswidthstored;
-   property rowcoloroffset: integer read frowcoloroffset write setrowcoloroffset default 0;
-   property rowfontoffset: integer read frowfontoffset write setrowfontoffset default 0;
+   property rowcoloroffset: integer read frowcoloroffset 
+                               write setrowcoloroffset default 0;
+   property rowcoloroffsetselect: integer read frowcoloroffsetselect
+                               write setrowcoloroffsetselect default 0;
+   property rowfontoffset: integer read frowfontoffset write 
+                               setrowfontoffset default 0;
+   property rowfontoffsetselect: integer read frowfontoffsetselect write 
+                               setrowfontoffsetselect default 0;
+   property fontselect: tcolselectfont read getfontselect write
+                     setfontselect stored isfontselectstored;
    property onbeforedrawcell: beforedrawcelleventty read fonbeforedrawcell
                                 write fonbeforedrawcell;
  end;
@@ -518,9 +535,6 @@ type
    function getdatalist: tmsestringdatalist;
    procedure setdatalist(const value: tmsestringdatalist);
 
-   function getfontselect: tcolselectfont;
-   function isfontselectstored: Boolean;
-   procedure setfontselect(const Value: tcolselectfont);
    function istextflagsstored: boolean;
    function istextflagsactivestored: boolean;
    function isoptionseditstored: boolean;
@@ -530,7 +544,6 @@ type
    ftextinfo: drawtextinfoty;
    function getitems(aindex: integer): msestring; virtual;
    procedure setitems(aindex: integer; const Value: msestring);
-   procedure createfontselect;
    function createdatalist: tdatalist; override;
    function getrowtext(const arow: integer): msestring; virtual;
    procedure drawcell(const canvas: tcanvas); override;
@@ -557,8 +570,6 @@ type
                stored isoptionseditstored default defaultstringcoleditoptions;
    property font;
    property datalist: tmsestringdatalist read getdatalist write setdatalist;
-   property fontselect: tcolselectfont read getfontselect write
-                     setfontselect stored isfontselectstored;
    property onsetvalue: setstringeventty read fonsetvalue write fonsetvalue;
    property ondataentered: notifyeventty read fondataentered write fondataentered;
  end;
@@ -2166,6 +2177,11 @@ begin
  flinecolor:= tcols(aowner).flinecolor;
 end;
 
+destructor tcol.destroy;
+begin
+ ffontselect.free;
+end;
+
 procedure tcol.invalidate;
 begin
  fgrid.colchanged(self);
@@ -2212,25 +2228,30 @@ var
  po1: prowstatety;
  by1: byte;
  int1: integer;
+ bo1: boolean;
 begin
  result:= cl_none;
  if aindex >= 0 then begin
-  if getselected(aindex) and (fcolorselect <> cl_none) then begin
+  bo1:= getselected(aindex);
+  if co_rowcolor in foptions then begin
+   po1:= fgrid.fdatacols.frowstate.getitempo(aindex);
+   by1:= po1^.color;
+//   if by1 <> 0 then begin
+    int1:= by1 + frowcoloroffset - 1;
+    if bo1 then begin
+     int1:= int1 + frowcoloroffsetselect;
+    end;
+    if (int1 >= 0) and (int1 < fgrid.frowcolors.count) then begin
+     result:= fgrid.frowcolors[int1];
+    end;
+//   end;
+  end;
+  if bo1 and (result = cl_none) and (fcolorselect <> cl_none) then begin
    if fcolorselect <> cl_default then begin
     result:= fcolorselect;
    end
    else begin
     result:= defaultselectedcellcolor;
-   end;
-  end;
-  if co_rowcolor in foptions then begin
-   po1:= fgrid.fdatacols.frowstate.getitempo(aindex);
-   by1:= po1^.color;
-   if by1 <> 0 then begin
-    int1:= by1 + frowcoloroffset - 1;
-    if (int1 >= 0) and (int1 < fgrid.frowcolors.count) then begin
-     result:= fgrid.frowcolors[int1];
-    end;
    end;
   end;
   if result = cl_none then begin
@@ -2273,27 +2294,30 @@ var
  po1: prowstatety;
  by1: byte;
  int1: integer;
+ bo1: boolean;
 begin
- if (ffontselect <> nil) and getselected(aindex) then begin
-  result:= ffontselect;
- end
- else begin
-  result:= nil;
-  if aindex >= 0 then begin
-   if co_rowfont in foptions then begin
-    po1:= fgrid.fdatacols.frowstate.getitempo(aindex);
-    by1:= po1^.font;
-    if by1 <> 0 then begin
-     int1:= by1 + frowfontoffset - 1;
-     if (int1 >= 0) and (int1 < fgrid.frowfonts.count) then begin
-      result:= tfont(fgrid.frowfonts[int1]);
-     end;
+ result:= nil;
+ if aindex >= 0 then begin
+  bo1:= getselected(aindex);
+  if co_rowfont in foptions then begin
+   po1:= fgrid.fdatacols.frowstate.getitempo(aindex);
+   by1:= po1^.font;
+   if by1 <> 0 then begin
+    int1:= by1 + frowfontoffset - 1;
+    if bo1 then begin
+     int1:= int1 + frowfontoffsetselect;
+    end;
+    if (int1 >= 0) and (int1 < fgrid.frowfonts.count) then begin
+     result:= tfont(fgrid.frowfonts[int1]);
     end;
    end;
   end;
-  if result = nil then begin
-   result:= actualfont;
+  if bo1 and (result = nil) then begin
+   result:= ffontselect;
   end;
+ end;
+ if result = nil then begin
+  result:= actualfont;
  end;
 end;
 
@@ -2303,7 +2327,7 @@ var
  int1: integer;
  bo1,bo2: boolean;
  saveindex: integer;
- selectedcolor1: colorty;
+// selectedcolor1: colorty;
  linewidthbefore: integer;
  font1: tfont;
  canbeforedrawcell: boolean;
@@ -2317,12 +2341,14 @@ begin
        (gs_cellentered in fgrid.fstate);
    canvas.drawinfopo:= @fcellinfo;
    canvas.move(makepoint(fcellrect.x,fcellrect.y + ystep * startrow));
+{
    if fcolorselect <> cl_default then begin
     selectedcolor1:= fcolorselect;
    end
    else begin
     selectedcolor1:= defaultselectedcellcolor;
    end;
+}
    for int1:= startrow to endrow do begin
     font1:= rowfont(int1);
     if font1 <> fcellinfo.font then begin
@@ -2335,6 +2361,7 @@ begin
     fcellinfo.ismousecell:= (fgrid.fmousecell.col = fcellinfo.cell.col) and 
                               (fgrid.fmousecell.row = int1);
     saveindex:= canvas.save;
+    {
     if fcellinfo.selected then begin
      if (selectedcolor1 <> cl_none) then begin
       fcellinfo.color:= selectedcolor1;
@@ -2349,6 +2376,8 @@ begin
     else begin
      fcellinfo.color:= rowcolor(int1);
     end;
+    }
+    fcellinfo.color:= rowcolor(int1);
     canvas.intersectcliprect(makerect(nullpoint,fcellrect.size));
     bo2:= false;
     if canbeforedrawcell then begin
@@ -2516,18 +2545,34 @@ begin
  inherited;
 end;
 
-procedure tcol.setrowcoloroffset(const Value: integer);
+procedure tcol.setrowcoloroffset(const avalue: integer);
 begin
- if frowcoloroffset <> value then begin
-  frowcoloroffset:= Value;
+ if frowcoloroffset <> avalue then begin
+  frowcoloroffset:= avalue;
   invalidate;
  end;
 end;
 
-procedure tcol.setrowfontoffset(const Value: integer);
+procedure tcol.setrowcoloroffsetselect(const avalue: integer);
 begin
- if frowfontoffset <> value then begin
-  frowfontoffset:= Value;
+ if frowcoloroffsetselect <> avalue then begin
+  frowcoloroffsetselect:= avalue;
+  invalidate;
+ end;
+end;
+
+procedure tcol.setrowfontoffset(const avalue: integer);
+begin
+ if frowfontoffset <> avalue then begin
+  frowfontoffset:= avalue;
+  invalidate;
+ end;
+end;
+
+procedure tcol.setrowfontoffsetselect(const avalue: integer);
+begin
+ if frowfontoffsetselect <> avalue then begin
+  frowfontoffsetselect:= avalue;
   invalidate;
  end;
 end;
@@ -2535,6 +2580,38 @@ end;
 function tcol.iswidthstored: boolean;
 begin
  result:= fwidth <> tcols(prop).fwidth;
+end;
+
+function tcol.getfontselect: tcolselectfont;
+begin
+ getoptionalobject(fgrid.componentstate,ffontselect,{$ifdef FPC}@{$endif}createfontselect);
+ if ffontselect <> nil then begin
+  result:= ffontselect;
+ end
+ else begin
+  result:= tcolselectfont(getfont);
+ end;
+end;
+
+procedure tcol.setfontselect(const Value: tcolselectfont);
+begin
+ if value <> ffontselect then begin
+  setoptionalobject(fgrid.ComponentState,value,ffontselect,{$ifdef FPC}@{$endif}createfontselect);
+  changed;
+ end;
+end;
+
+function tcol.isfontselectstored: Boolean;
+begin
+ result:= ffontselect <> nil;
+end;
+
+procedure tcol.createfontselect;
+begin
+ if ffontselect = nil then begin
+  ffontselect:= tcolselectfont.create;
+  ffontselect.onchange:= {$ifdef FPC}@{$endif}fontchanged;
+ end;
 end;
 
 { tcolheaderfont }
@@ -4255,30 +4332,6 @@ begin
  fdata.Assign(value);
 end;
 
-function tcustomstringcol.getfontselect: tcolselectfont;
-begin
- getoptionalobject(fgrid.componentstate,ffontselect,{$ifdef FPC}@{$endif}createfontselect);
- if ffontselect <> nil then begin
-  result:= ffontselect;
- end
- else begin
-  result:= tcolselectfont(getfont);
- end;
-end;
-
-procedure tcustomstringcol.setfontselect(const Value: tcolselectfont);
-begin
- if value <> ffontselect then begin
-  setoptionalobject(fgrid.ComponentState,value,ffontselect,{$ifdef FPC}@{$endif}createfontselect);
-  changed;
- end;
-end;
-
-function tcustomstringcol.isfontselectstored: Boolean;
-begin
- result:= ffontselect <> nil;
-end;
-
 function tcustomstringcol.istextflagsstored: boolean;
 begin
  result:= tstringcols(prop).ftextflags <> ftextinfo.flags;
@@ -4292,14 +4345,6 @@ end;
 function tcustomstringcol.isoptionseditstored: boolean;
 begin
  result:= tstringcols(prop).foptionsedit <> foptionsedit;
-end;
-
-procedure tcustomstringcol.createfontselect;
-begin
- if ffontselect = nil then begin
-  ffontselect:= tcolselectfont.create;
-  ffontselect.onchange:= {$ifdef FPC}@{$endif}fontchanged;
- end;
 end;
 
 procedure tcustomstringcol.readpipe(const pipe: tpipereader;

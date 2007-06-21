@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2006 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2007 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -170,6 +170,8 @@ function Xutf8TextPropertyToTextList(para1:PDisplay; para2:PXTextProperty;
             para3:PPPchar; para4: pinteger): integer; cdecl;
                      external sXlib name 'Xutf8TextPropertyToTextList';
 
+function hasxft: boolean;
+
 implementation
 
 uses
@@ -215,14 +217,14 @@ const
  wholecircle = 360*64;
 
  defaultfontnames: defaultfontnamesty =
-  //stf_default  stf_menu  stf_report   stf_prop      stf_fixed,
-      ('',          '',    'Arial',    'Helvetica',      'Courier',
+  //stf_default  stf_unicode stf_menu  stf_report   stf_prop      stf_fixed,
+      ('',          '',        '',    'Arial',    'Helvetica',      'Courier',
   //stf_swiss    stf_roman          stf_courier
       'Arial', 'Times New Roman', 'Courier New');
 
  xftdefaultfontnames: defaultfontnamesty =
-  //stf_default  stf_menu stf_report stf_prop      stf_fixed,
-      ('',          '',    'Arial',   'sans',      'monospace',
+  //stf_default  stf_unicode stf_menu stf_report stf_prop      stf_fixed,
+      ('',          '',         '',    'Arial',   'sans',      'monospace',
   //stf_swiss stf_roman   stf_courier
       'Arial', 'serif', 'Courier New');
 
@@ -573,7 +575,7 @@ var
  xredshiftleft,xgreenshiftleft,xblueshiftleft: boolean;
  defcolormap: colormap;
  hasxrender: boolean;
- hasxft: boolean;
+ fhasxft: boolean;
  toplevelraise: boolean;
  screenrenderpictformat,bitmaprenderpictformat,alpharenderpictformat: pxrenderpictformat;
 
@@ -641,9 +643,14 @@ var
 // lastshiftstate: shiftstatesty;
  clipboard: msestring;
 
+function hasxft: boolean;
+begin
+ result:= fhasxft;
+end;
+
 function gui_getdefaultfontnames: defaultfontnamesty;
 begin
- if hasxft then begin
+ if fhasxft then begin
   result:= xftdefaultfontnames;
  end
  else begin
@@ -2678,6 +2685,8 @@ var
  XftInit: function(config:Pchar):TFcBool;cdecl;
  XftInitFtLibrary: function ():TFcBool;cdecl;
 
+ XftCharExists: function(dpy:PDisplay; pub:PXftFont; ucs4:TFcChar32):TFcBool;cdecl;
+
 {$ifndef FPC}
 type
  tlibhandle = longword;
@@ -2726,6 +2735,9 @@ begin
   {$ifdef FPC}pointer({$endif}XftInitFtLibrary{$ifdef FPC}){$endif}:=
      getprocaddress(libhandle,'XftInitFtLibrary');
   if {$ifndef FPC}@{$endif}XftInitFtLibrary = nil then exit;
+  {$ifdef FPC}pointer({$endif}XftCharExists{$ifdef FPC}){$endif}:=
+     getprocaddress(libhandle,'XftCharExists');
+  if {$ifndef FPC}@{$endif}XftCharExists = nil then exit;
 
   result:= true;
  end;
@@ -2980,7 +2992,7 @@ begin
    xmask:= xmask or gcjoinstyle;
   end;
   if gvm_font in mask then begin
-   if hasxft then begin
+   if fhasxft then begin
     xftfont:= pxftfont(font);
    end
    else begin
@@ -2991,7 +3003,7 @@ begin
   if gvm_colorbackground in mask then begin
    xmask:= xmask or gcbackground;
    xvalues.background:= colorbackground;
-   if hasxft then begin
+   if fhasxft then begin
     xftcolorbackground.pixel:= colorbackground;
     xftcolorbackground.color:= colortorendercolor(drawinfo.acolorbackground);
    end;
@@ -3000,7 +3012,7 @@ begin
    xmask:= xmask or gcforeground;
    xvalues.foreground:= colorforeground;
    xvalues.fill_style:= fillsolid;
-   if hasxft then begin
+   if fhasxft then begin
     xftcolor.pixel:= colorforeground;
     xftcolor.color:= colortorendercolor(drawinfo.acolorforeground);
    end;
@@ -3101,7 +3113,7 @@ begin
   po2:= resultpo;
 {$ifdef FPC} {$checkpointer off} {$endif}
   with datapo^,x11fontdataty(platformdata),infopo^ do begin
-   if hasxft then begin
+   if fhasxft then begin
     for int1:= 0 to count - 1 do begin //todo: optimize
      xfttextextents16(appdisp,pxftfont(font),po1,1,@glyphinfo);
      po2^:= glyphinfo.xoff;
@@ -3164,7 +3176,7 @@ begin
  with drawinfo.getfontmetrics do begin
 {$ifdef FPC} {$checkpointer off} {$endif}
   with datapo^,x11fontdataty(platformdata),infopo^ do begin
-   if hasxft then begin
+   if fhasxft then begin
     xfttextextents16(appdisp,pxftfont(font),@char,1,@glyphinfo);
     with resultpo^ do begin
      width:= glyphinfo.xoff;
@@ -3224,14 +3236,14 @@ begin
 {$ifdef FPC} {$checkpointer off} {$endif}
  with drawinfo.gettext16width do begin
   with datapo^,x11fontdataty(platformdata),infopo^ do begin
-   if hasxft then begin
-    xfttextextents16(appdisp,pxftfont(font),pmsechar(text),length(text),@glyphinfo);
+   if fhasxft then begin
+    xfttextextents16(appdisp,pxftfont(font),text,count,@glyphinfo);
     result:= glyphinfo.xoff;
    end
    else begin
     case matrixmode of
      fmm_linear: begin
-      for int1:= 1 to length(text) do begin
+      for int1:= 0 to count - 1 do begin
        char:= word(text[int1]);
        if (char >= min_char_or_byte2) and (char <= max_char_or_byte2) then begin
         inc(result,pxcharstruct(pchar(per_char) +
@@ -3243,7 +3255,7 @@ begin
       end;
      end;
      fmm_matrix: begin
-      for int1:= 1 to length(text) do begin
+      for int1:= 0 to count - 1 do begin
        charstructpo:= getmatrixcharstruct(text[int1],x11fontdataty(datapo^.platformdata));
        if charstructpo <> nil then begin
         inc(result,charstructpo^.width);
@@ -3254,7 +3266,7 @@ begin
       end;
      end;
      else begin //fm_fix
-      result:= max_bounds.width * length(text);
+      result:= max_bounds.width * count;
      end;
     end;
    end;
@@ -3569,6 +3581,58 @@ begin
  end;
 end;
 
+procedure getxftfontdata(po: pxftfont; var drawinfo: drawinfoty);
+begin
+{$ifdef FPC} {$checkpointer off} {$endif}
+ with drawinfo.getfont.fontdata^,x11fontdataty(platformdata) do begin
+  font:= cardinal(po);
+  ascent:= po^.ascent;
+  descent:= po^.descent;
+//   linespacing:= ascent + descent;
+  linespacing:= po^.height;
+  caretshift:= 0;
+  infopo:= nil;
+ end;
+{$ifdef FPC} {$checkpointer default} {$endif}
+end;
+
+procedure setupfontinfo(const fontdatapo: pfontdataty;
+                                           var fontinfo: fontinfoty);
+var
+ ar1: stringarty;
+begin
+ ar1:= nil; //compiler warning;
+ fontinfo:= defaultfontinfo;
+ with fontdatapo^ do begin
+  height:= height shr fontsizeshift;
+  width:= width shr fontsizeshift;
+  if height <> 0 then begin
+   fontinfo[fn_pixel_size]:= inttostr(height);
+  end;
+  if width <> 0 then begin
+   fontinfo[fn_average_width]:= inttostr(width);
+  end;
+  if charset <> '' then begin
+   ar1:= splitstring(charset,'-');
+   fontinfo[fn_charset_registry]:= ar1[0];
+   if high(ar1) > 0 then begin
+    fontinfo[fn_encoding]:= ar1[1];
+   end;
+  end;
+  if name <> '' then begin
+   setfontinfoname(name,fontinfo);
+  end
+  else begin
+  end;
+  if fs_bold in style then begin
+   fontinfo[fn_weight_name]:= 'bold';
+  end;
+  if fs_italic in style then begin
+   fontinfo[fn_slant]:= 'i';
+  end;
+ end;
+end;
+
 function gui_getfont(var drawinfo: drawinfoty): boolean;
 
  procedure getfontdata(po: pxfontstruct);
@@ -3605,60 +3669,17 @@ function gui_getfont(var drawinfo: drawinfoty): boolean;
   end;
  end;
 
- procedure getxftfontdata(po: pxftfont);
- begin
-{$ifdef FPC} {$checkpointer off} {$endif}
-  with drawinfo.getfont.fontdata^,x11fontdataty(platformdata) do begin
-   font:= cardinal(po);
-   ascent:= po^.ascent;
-   descent:= po^.descent;
-//   linespacing:= ascent + descent;
-   linespacing:= po^.height;
-   caretshift:= 0;
-   infopo:= nil;
-  end;
-{$ifdef FPC} {$checkpointer default} {$endif}
- end;
-
 var
  po1: pxfontstruct;
  po2: pxftfont;
  fontinfo: fontinfoty;
- ar1: stringarty;
  str1: string;
  int1: integer;
 
 begin
- ar1:= nil; //compiler warning;
- fontinfo:= defaultfontinfo;
+ setupfontinfo(drawinfo.getfont.fontdata,fontinfo);
  with drawinfo.getfont.fontdata^ do begin
-  height:= height shr fontsizeshift;
-  width:= width shr fontsizeshift;
-  if height <> 0 then begin
-   fontinfo[fn_pixel_size]:= inttostr(height);
-  end;
-  if width <> 0 then begin
-   fontinfo[fn_average_width]:= inttostr(width);
-  end;
-  if charset <> '' then begin
-   ar1:= splitstring(charset,'-');
-   fontinfo[fn_charset_registry]:= ar1[0];
-   if high(ar1) > 0 then begin
-    fontinfo[fn_encoding]:= ar1[1];
-   end;
-  end;
-  if name <> '' then begin
-   setfontinfoname(name,fontinfo);
-  end
-  else begin
-  end;
-  if fs_bold in style then begin
-   fontinfo[fn_weight_name]:= 'bold';
-  end;
-  if fs_italic in style then begin
-   fontinfo[fn_slant]:= 'i';
-  end;
-  if hasxft then begin
+  if fhasxft then begin
    str1:= '';
    if fontinfo[fn_foundry] <> '*' then begin
     str1:= str1+':foundry='+fontinfo[fn_foundry];
@@ -3734,7 +3755,7 @@ begin
    if po2 <> nil then begin
     result:= true;
   {$ifdef FPC} {$checkpointer off} {$endif}
-    getxftfontdata(po2);
+    getxftfontdata(po2,drawinfo);
   {$ifdef FPC} {$checkpointer default} {$endif}
    end
    else begin
@@ -3783,7 +3804,7 @@ end;
 
 procedure gui_freefontdata(const data: fontdataty);
 begin
- if hasxft then begin
+ if fhasxft then begin
   xftfontclose(appdisp,pxftfont(data.font));
  end
  else begin
@@ -4251,6 +4272,18 @@ begin
  end;
 end;
 
+procedure gui_fonthasglyph(var drawinfo: drawinfoty);
+begin
+ with drawinfo,fonthasglyph do begin
+  if fhasxft then begin
+   hasglyph:= xftcharexists(appdisp,pxftfont(font),unichar);
+  end
+  else begin
+   hasglyph:= true;
+  end;
+ end;
+end;
+
 procedure gui_drawlines(var drawinfo: drawinfoty);
 var
  int1: integer;
@@ -4261,7 +4294,8 @@ begin
   if closed then begin
    inc(int1);
   end;
-  xdrawlines(appdisp,paintdevice,tgc(gc.handle),buffer.buffer,int1,coordmodeorigin);
+  xdrawlines(appdisp,paintdevice,tgc(gc.handle),buffer.buffer,int1,
+                           coordmodeorigin);
  end;
 end;
 
@@ -4300,7 +4334,7 @@ var
  glyphinfo: txglyphinfo;
 begin
  with drawinfo,drawinfo.text16pos do begin
-  if hasxft then begin
+  if fhasxft then begin
  {$ifdef FPC}{$checkpointer off}{$endif}
    checkxftdraw(drawinfo);
    transformpos(drawinfo);
@@ -5097,12 +5131,12 @@ begin
   alpharenderpictformat:= xrenderfindstandardformat(appdisp,pictstandarda8);
  end;
  if not noxft then begin
-  hasxft:= hasxft and xftdefaulthasrender(appdisp) and (xftgetversion() >= 20000);
-  if hasxft then begin
-   hasxft:= xftinit(nil);
-   if hasxft then begin
-    hasxft:= xftinitftlibrary();
-    if hasxft and not hasdefaultfontarg then begin
+  fhasxft:= fhasxft and xftdefaulthasrender(appdisp) and (xftgetversion() >= 20000);
+  if fhasxft then begin
+   fhasxft:= xftinit(nil);
+   if fhasxft then begin
+    fhasxft:= xftinitftlibrary();
+    if fhasxft and not hasdefaultfontarg then begin
      defaultfontinfo[fn_family_name]:= 'sans';
     end;
    end;
@@ -5279,7 +5313,8 @@ const
    {$ifdef FPC}@{$endif}gui_regaddregion,
    {$ifdef FPC}@{$endif}gui_regintersectrect,
    {$ifdef FPC}@{$endif}gui_regintersectregion,
-   {$ifdef FPC}@{$endif}gui_copyarea
+   {$ifdef FPC}@{$endif}gui_copyarea,
+   {$ifdef FPC}@{$endif}gui_fonthasglyph
  );
 {
 procedure gui_gdifunc(const func: gdifuncty; var drawinfo: drawinfoty);
@@ -5315,7 +5350,7 @@ begin
 end;
 
 initialization
- hasxft:= getxftlib;
+ fhasxft:= getxftlib;
  hasxrender:= getxrenderlib;
  initdefaultfont;
 end.

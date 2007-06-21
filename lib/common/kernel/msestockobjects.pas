@@ -31,7 +31,8 @@ const
  stb_block1 = stb_dens50;
 
 type
- stockfontty = (stf_default,stf_menu,stf_report,stf_proportional,stf_fixed,
+ stockfontty = (stf_default,stf_unicode,stf_menu,stf_report,stf_proportional,
+                stf_fixed,
                 stf_helvetica,stf_roman,stf_courier); //scaleable fonts
  defaultfontnamesty = array[stockfontty] of string;
 type             

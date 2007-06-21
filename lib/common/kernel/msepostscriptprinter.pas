@@ -566,6 +566,11 @@ begin
  postscriptgcty(drawinfo.gc.platformdata).canvas.ps_copyarea;
 end;
    
+procedure gui_fonthasglyph(var drawinfo: drawinfoty);
+begin
+ gdifuncs^[gdi_fonthasglyph](drawinfo);
+end;
+
 const
  gdifunctions: gdifunctionaty = (
    {$ifdef FPC}@{$endif}gui_destroygc,
@@ -595,7 +600,8 @@ const
    {$ifdef FPC}@{$endif}gui_regaddregion,
    {$ifdef FPC}@{$endif}gui_regintersectrect,
    {$ifdef FPC}@{$endif}gui_regintersectregion,
-   {$ifdef FPC}@{$endif}gui_copyarea
+   {$ifdef FPC}@{$endif}gui_copyarea,
+   {$ifdef FPC}@{$endif}gui_fonthasglyph
  );
 
 function psrealtostr(const avalue: real): string;
