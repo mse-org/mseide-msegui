@@ -1355,12 +1355,12 @@ begin
          setsinglebit({$ifdef FPC}longword{$else}byte{$endif}(new),
                       {$ifdef FPC}longword{$else}byte{$endif}(old),
                       {$ifdef FPC}longword{$else}byte{$endif}(mask3)));
-{                      
+(*
   value4:= fontoptionsty(
          setsinglebit({$ifdef FPC}longword{$else}byte{$endif}(new),
                       {$ifdef FPC}longword{$else}byte{$endif}(old),
                       {$ifdef FPC}longword{$else}byte{$endif}(mask4)));
-}
+*)
   result:= value1 * mask1 + value2 * mask2 + value3 * mask3 {+ value4 * mask4};
 end;
 
