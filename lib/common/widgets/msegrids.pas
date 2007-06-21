@@ -362,13 +362,17 @@ type
  tcol = class(tgridprop)
   private
    frowfontoffset: integer;
+   frowfontoffsetselect: integer;
    frowcoloroffset: integer;
    fonbeforedrawcell: beforedrawcelleventty;
+   frowcoloroffsetselect: integer;
    function getcolindex: integer;
    procedure setfocusrectdist(const avalue: integer);
    procedure updatepropwidth;
-   procedure setrowcoloroffset(const Value: integer);
-   procedure setrowfontoffset(const Value: integer);
+   procedure setrowcoloroffset(const avalue: integer);
+   procedure setrowcoloroffsetselect(const avalue: integer);
+   procedure setrowfontoffset(const avalue: integer);
+   procedure setrowfontoffsetselect(const avalue: integer);
 
    function iswidthstored: boolean;
    function isoptionsstored: boolean;
@@ -417,8 +421,14 @@ type
    property colindex: integer read getcolindex;
   published
    property width: integer read fwidth write setwidth stored iswidthstored;
-   property rowcoloroffset: integer read frowcoloroffset write setrowcoloroffset default 0;
-   property rowfontoffset: integer read frowfontoffset write setrowfontoffset default 0;
+   property rowcoloroffset: integer read frowcoloroffset 
+                               write setrowcoloroffset default 0;
+   property rowcoloroffsetselect: integer read frowcoloroffsetselect
+                               write setrowcoloroffsetselect default 0;
+   property rowfontoffset: integer read frowfontoffset write 
+                               setrowfontoffset default 0;
+   property rowfontoffsetselect: integer read frowfontoffsetselect write 
+                               setrowfontoffsetselect default 0;
    property onbeforedrawcell: beforedrawcelleventty read fonbeforedrawcell
                                 write fonbeforedrawcell;
  end;
@@ -2212,10 +2222,12 @@ var
  po1: prowstatety;
  by1: byte;
  int1: integer;
+ bo1: boolean;
 begin
  result:= cl_none;
  if aindex >= 0 then begin
-  if getselected(aindex) and (fcolorselect <> cl_none) then begin
+  bo1:= getselected(aindex);
+  if bo1 and (fcolorselect <> cl_none) then begin
    if fcolorselect <> cl_default then begin
     result:= fcolorselect;
    end
@@ -2228,6 +2240,9 @@ begin
    by1:= po1^.color;
    if by1 <> 0 then begin
     int1:= by1 + frowcoloroffset - 1;
+    if bo1 then begin
+     int1:= int1 + frowcoloroffsetselect;
+    end;
     if (int1 >= 0) and (int1 < fgrid.frowcolors.count) then begin
      result:= fgrid.frowcolors[int1];
     end;
@@ -2273,27 +2288,30 @@ var
  po1: prowstatety;
  by1: byte;
  int1: integer;
+ bo1: boolean;
 begin
- if (ffontselect <> nil) and getselected(aindex) then begin
-  result:= ffontselect;
- end
- else begin
-  result:= nil;
-  if aindex >= 0 then begin
-   if co_rowfont in foptions then begin
-    po1:= fgrid.fdatacols.frowstate.getitempo(aindex);
-    by1:= po1^.font;
-    if by1 <> 0 then begin
-     int1:= by1 + frowfontoffset - 1;
-     if (int1 >= 0) and (int1 < fgrid.frowfonts.count) then begin
-      result:= tfont(fgrid.frowfonts[int1]);
-     end;
+ result:= nil;
+ if aindex >= 0 then begin
+  bo1:= getselected(aindex);
+  if bo1 then begin
+   result:= ffontselect;
+  end;
+  if co_rowfont in foptions then begin
+   po1:= fgrid.fdatacols.frowstate.getitempo(aindex);
+   by1:= po1^.font;
+   if by1 <> 0 then begin
+    int1:= by1 + frowfontoffset - 1;
+    if bo1 then begin
+     int1:= int1 + frowfontoffsetselect;
+    end;
+    if (int1 >= 0) and (int1 < fgrid.frowfonts.count) then begin
+     result:= tfont(fgrid.frowfonts[int1]);
     end;
    end;
   end;
-  if result = nil then begin
-   result:= actualfont;
-  end;
+ end;
+ if result = nil then begin
+  result:= actualfont;
  end;
 end;
 
@@ -2516,18 +2534,34 @@ begin
  inherited;
 end;
 
-procedure tcol.setrowcoloroffset(const Value: integer);
+procedure tcol.setrowcoloroffset(const avalue: integer);
 begin
- if frowcoloroffset <> value then begin
-  frowcoloroffset:= Value;
+ if frowcoloroffset <> avalue then begin
+  frowcoloroffset:= avalue;
   invalidate;
  end;
 end;
 
-procedure tcol.setrowfontoffset(const Value: integer);
+procedure tcol.setrowcoloroffsetselect(const avalue: integer);
 begin
- if frowfontoffset <> value then begin
-  frowfontoffset:= Value;
+ if frowcoloroffsetselect <> avalue then begin
+  frowcoloroffsetselect:= avalue;
+  invalidate;
+ end;
+end;
+
+procedure tcol.setrowfontoffset(const avalue: integer);
+begin
+ if frowfontoffset <> avalue then begin
+  frowfontoffset:= avalue;
+  invalidate;
+ end;
+end;
+
+procedure tcol.setrowfontoffsetselect(const avalue: integer);
+begin
+ if frowfontoffsetselect <> avalue then begin
+  frowfontoffsetselect:= avalue;
   invalidate;
  end;
 end;
