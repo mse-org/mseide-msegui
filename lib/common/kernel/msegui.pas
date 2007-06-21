@@ -9326,7 +9326,8 @@ begin
     end;
     if (application.fmainwindow = self) and not app.terminated then begin
      gui_flushgdi;
-     sleep(0);     //give windowmanager time to unmap all windows
+     sys_sched_yield;
+//     sleep(0);     //give windowmanager time to unmap all windows
      app.sortzorder;
      exclude(fstate,tws_windowvisible);
      include(fstate,tws_grouphidden);
@@ -9354,6 +9355,7 @@ begin
     end;
    end;
   end;
+  settransientfor(nil,windowevent);
  end;
 end;
 
