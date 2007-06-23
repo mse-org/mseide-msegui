@@ -154,11 +154,24 @@ const
      yy: Tdouble;
     end;
     PFcMatrix = ^TFcMatrix;
-    
+
     TFcLangSet = record
      //dummy
     end;
     PFcLangSet = ^TFcLangset;
+
+    TFcCharset =  record
+     //dummy
+    end;
+    PFcCharset = ^TFcCharset;
+    PPFcCharset = ^PFcCharset;
+
+    TFcPattern =  record
+     //dummy
+    end;
+    PFcPattern  = ^TFcPattern;
+    PPFcPattern = ^PFcPattern;
+    pfcpatternpoaty = array[0..0] of PFcPattern;
 
     TFcValue = record
      _type: TFcType;
@@ -176,12 +189,6 @@ const
      end;
     end;
 
-    TFcCharset =  record
-     //dummy
-    end;
-    PFcCharset = ^TFcCharset;
-    PPFcCharset = ^PFcCharset;
-    
     TFcObjectSet = record
      nobject: longint;
      sobject: longint;
@@ -193,13 +200,6 @@ const
      //dummy
     end;
     PFcConfig = ^TFcConfig;
-        
-    TFcPattern =  record
-     //dummy
-    end;
-    PFcPattern  = ^TFcPattern;
-    PPFcPattern = ^PFcPattern;
-    pfcpatternpoaty = array[0..0] of PFcPattern;
 
     
        TXftFont =  record

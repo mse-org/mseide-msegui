@@ -2717,7 +2717,7 @@ begin
      'FcObjectSetAdd',           //3
      'FcObjectSetDestroy',       //4
      'FcFontList',               //5
-     'FcCharSetCreate',          //6          
+     'FcCharSetCreate',          //6
      'FcCharSetDestroy',         //7
      'FcCharSetAddChar',         //8
      'FcPatternAdd',             //9
@@ -2725,30 +2725,30 @@ begin
      'FcConfigSubstitute',       //11
      'FcDefaultSubstitute',      //12
      'FcFontSort',               //13
-     'FcCharSetHasChar',         //14 
+     'FcCharSetHasChar',         //14
      'FcPatternDuplicate',       //15
      'FcPatternGetCharSet',      //16
      'FcFontRenderPrepare'       //17
      ],
      [
-     @FcPatternDestroy,          //0
-     @FcFontSetDestroy,          //1
-     @FcObjectSetCreate,         //2
-     @FcObjectSetAdd,            //3
-     @FcObjectSetDestroy,        //4
-     @FcFontList,                //5
-     @FcCharSetCreate,           //6
-     @FcCharSetDestroy,          //7
-     @FcCharSetAddChar,          //8
-     @FcPatternAdd,              //9
-     @FcPatternCreate,           //10
-     @FcConfigSubstitute,        //11
-     @FcDefaultSubstitute,       //12
-     @FcFontSort,                //13
-     @FcCharSetHasChar,          //14
-     @FcPatternDuplicate,        //15
-     @FcPatternGetCharSet,       //16
-     @FcFontRenderPrepare        //17
+     {$ifndef FPC}@{$endif}@FcPatternDestroy,          //0
+     {$ifndef FPC}@{$endif}@FcFontSetDestroy,          //1
+     {$ifndef FPC}@{$endif}@FcObjectSetCreate,         //2
+     {$ifndef FPC}@{$endif}@FcObjectSetAdd,            //3
+     {$ifndef FPC}@{$endif}@FcObjectSetDestroy,        //4
+     {$ifndef FPC}@{$endif}@FcFontList,                //5
+     {$ifndef FPC}@{$endif}@FcCharSetCreate,           //6
+     {$ifndef FPC}@{$endif}@FcCharSetDestroy,          //7
+     {$ifndef FPC}@{$endif}@FcCharSetAddChar,          //8
+     {$ifndef FPC}@{$endif}@FcPatternAdd,              //9
+     {$ifndef FPC}@{$endif}@FcPatternCreate,           //10
+     {$ifndef FPC}@{$endif}@FcConfigSubstitute,        //11
+     {$ifndef FPC}@{$endif}@FcDefaultSubstitute,       //12
+     {$ifndef FPC}@{$endif}@FcFontSort,                //13
+     {$ifndef FPC}@{$endif}@FcCharSetHasChar,          //14
+     {$ifndef FPC}@{$endif}@FcPatternDuplicate,        //15
+     {$ifndef FPC}@{$endif}@FcPatternGetCharSet,       //16
+     {$ifndef FPC}@{$endif}@FcFontRenderPrepare        //17
      ]);
   getprocaddresses('libXft.so',[
     'XftDrawDestroy',            //0
@@ -2770,28 +2770,28 @@ begin
     'XftDefaultSubstitute'       //16
     ],
     [
-    @XftDrawDestroy,              //0
-    @XftDrawSetClipRectangles,    //1
-    @XftDrawCreate,               //2 
-    @XftDrawSetClip,              //3
-    @XftTextExtents16,            //4 
-    @XftFontOpenName,             //5
-    @XftFontClose,                //6
-    @XftDrawString16,             //7
-    @XftDefaultHasRender,         //8
-    @XftGetVersion,               //9
-    @XftInit,                     //10
-    @XftInitFtLibrary,            //11
-    @XftCharExists,               //12
-    @XftNameParse,                //13
-    @XftFontMatch,                //14
-    @XftFontOpenPattern,          //15
-    @XftDefaultSubstitute         //16
-    ]);            
+    {$ifndef FPC}@{$endif}@XftDrawDestroy,              //0
+    {$ifndef FPC}@{$endif}@XftDrawSetClipRectangles,    //1
+    {$ifndef FPC}@{$endif}@XftDrawCreate,               //2
+    {$ifndef FPC}@{$endif}@XftDrawSetClip,              //3
+    {$ifndef FPC}@{$endif}@XftTextExtents16,            //4
+    {$ifndef FPC}@{$endif}@XftFontOpenName,             //5
+    {$ifndef FPC}@{$endif}@XftFontClose,                //6
+    {$ifndef FPC}@{$endif}@XftDrawString16,             //7
+    {$ifndef FPC}@{$endif}@XftDefaultHasRender,         //8
+    {$ifndef FPC}@{$endif}@XftGetVersion,               //9
+    {$ifndef FPC}@{$endif}@XftInit,                     //10
+    {$ifndef FPC}@{$endif}@XftInitFtLibrary,            //11
+    {$ifndef FPC}@{$endif}@XftCharExists,               //12
+    {$ifndef FPC}@{$endif}@XftNameParse,                //13
+    {$ifndef FPC}@{$endif}@XftFontMatch,                //14
+    {$ifndef FPC}@{$endif}@XftFontOpenPattern,          //15
+    {$ifndef FPC}@{$endif}@XftDefaultSubstitute         //16
+    ]);
  except
   exit;
  end;
-  
+
 {$endif} //not staticxft
  result:= true;
 end;
@@ -2840,16 +2840,16 @@ begin
     'XRenderFindStandardFormat'         //9
     ],
     [
-    @XRenderSetPictureClipRectangles,  //0
-    @XRenderCreatePicture,             //1
-    @XRenderFillRectangle,             //2
-    @XRenderSetPictureTransform,       //3
-    @XRenderSetPictureFilter,          //4
-    @XRenderFreePicture,               //5
-    @XRenderComposite,                 //6
-    @XRenderQueryExtension,            //7
-    @XRenderFindVisualFormat,          //8
-    @XRenderFindStandardFormat         //9
+    {$ifndef FPC}@{$endif}@XRenderSetPictureClipRectangles,  //0
+    {$ifndef FPC}@{$endif}@XRenderCreatePicture,             //1
+    {$ifndef FPC}@{$endif}@XRenderFillRectangle,             //2
+    {$ifndef FPC}@{$endif}@XRenderSetPictureTransform,       //3
+    {$ifndef FPC}@{$endif}@XRenderSetPictureFilter,          //4
+    {$ifndef FPC}@{$endif}@XRenderFreePicture,               //5
+    {$ifndef FPC}@{$endif}@XRenderComposite,                 //6
+    {$ifndef FPC}@{$endif}@XRenderQueryExtension,            //7
+    {$ifndef FPC}@{$endif}@XRenderFindVisualFormat,          //8
+    {$ifndef FPC}@{$endif}@XRenderFindStandardFormat         //9
     ]);
  except
   exit;
