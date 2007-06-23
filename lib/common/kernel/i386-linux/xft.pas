@@ -273,7 +273,7 @@ const
     { fcpat.c }
    function FcPatternCreate: PFcPattern;cdecl;
              external fclib name 'FcPatternCreate';
-   function FcPatternDuplicate(p:PTFcPattern):^TFcPattern;cdecl;
+   function FcPatternDuplicate(p:PFcPattern): PFcPattern;cdecl;
              external fclib name 'FcPatternDuplicate';
    function FcPatternAdd(p:PFcPattern; aobject:Pchar; value:TFcValue;
                            append:TFcBool):TFcBool;cdecl;
