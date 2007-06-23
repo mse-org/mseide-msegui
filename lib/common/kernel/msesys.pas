@@ -13,9 +13,12 @@ unit msesys;
 
 interface
 uses
- mseerror,msetypes,msestrings,dynlibs;
+ mseerror,msetypes,msestrings{$ifdef FPC},dynlibs{$endif};
 
 type
+ {$ifndef FPC}
+ tlibhandle = thandle;
+ {$endif}
  threadty = cardinal;
  internalthreadprocty = function(): integer of object;
 
@@ -24,7 +27,7 @@ type
   children: integerarty;
  end;
  procitemarty = array of procitemty;
- 
+
  threadinfoty = record
   id: threadty;
   threadproc: internalthreadprocty;
@@ -119,7 +122,7 @@ function getcommandlinearguments: stringarty;
 function getcommandlineargument(const index: integer): string;
 procedure deletecommandlineargument(const index: integer);
                 //index 1..argumentcount-1, no action otherwise
-procedure getprocaddresses(const lib: tlibhandle; const anames: array of string; 
+procedure getprocaddresses(const lib: tlibhandle; const anames: array of string;
                              const adest: array of ppointer); overload;
 procedure getprocaddresses(const libname: string; const anames: array of string; 
                              const adest: array of ppointer); overload;
@@ -129,7 +132,8 @@ threadvar
 
 implementation
 uses
- Classes,msestreaming,msesysintf,msedatalist,sysutils;
+ Classes,msestreaming,msesysintf,msedatalist,sysutils
+          {$ifndef FPC}{$ifdef mswindows},windows{$endif}{$endif};
 
 procedure getprocaddresses(const lib: tlibhandle; const anames: array of string; 
                              const adest: array of ppointer);
@@ -140,7 +144,11 @@ begin
   raise exception.create('Invalid parameter.');
  end;
  for int1:= 0 to high(anames) do begin
+ {$ifdef FPC}
   adest[int1]^:= getprocedureaddress(lib,anames[int1]);
+  {$else}
+  adest[int1]^:= getprocaddress(lib,pansichar(anames[int1]));
+  {$endif}
   if adest[int1]^ = nil then begin
    raise exception.create('Function "'+anames[int1]+'" not found.');
   end;
@@ -153,7 +161,11 @@ var
  libha: tlibhandle;
 begin
  libha:= 0;
+ {$ifdef FPC}
  libha:= loadlibrary(libname);
+ {$else}
+ libha:= loadlibrary(pansichar(libname));
+ {$endif}
  if libha = 0 then begin
   raise exception.create('Library "'+libname+'" not found.');
  end;

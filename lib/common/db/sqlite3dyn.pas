@@ -373,7 +373,7 @@ var
 
 implementation
 uses
- sysutils,dynlibs;
+ sysutils,dynlibs,msesys;
 var
  sqlite3libraryhandle: tlibhandle;
  refcount: integer;
