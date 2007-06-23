@@ -1007,9 +1007,11 @@ begin
  if fdatalink = nil then begin
   fdatalink:= tlookupbufferdatalink.create(self);
  end;
- fintegerfields:= tdbfieldnamearrayprop.create(msedb.integerfields,
+ fintegerfields:= tdbfieldnamearrayprop.create(
+                   msedb.integerfields+[ftboolean],
                       {$ifdef FPC}@{$endif}getdatasource);
- ftextfields:= tdbfieldnamearrayprop.create(msedb.textfields,
+ ftextfields:= tdbfieldnamearrayprop.create(
+                   msedb.textfields+[ftboolean],
                   {$ifdef FPC}@{$endif}getdatasource);
  ffloatfields:= tdbfieldnamearrayprop.create(msedb.realfields + msedb.datetimefields,
                       {$ifdef FPC}@{$endif}getdatasource);
