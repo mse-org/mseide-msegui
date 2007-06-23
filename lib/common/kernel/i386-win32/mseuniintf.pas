@@ -21,7 +21,7 @@ uses
  
 function uni_getfontwithglyph(var drawinfo: drawinfoty): boolean;
 begin
- result:= gui_getfont(drawinfo);
+ result:= false;
 end;
 
 end.

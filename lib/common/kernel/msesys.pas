@@ -13,7 +13,7 @@ unit msesys;
 
 interface
 uses
- mseerror,msetypes,msestrings;
+ mseerror,msetypes,msestrings,dynlibs;
 
 type
  threadty = cardinal;
@@ -119,13 +119,46 @@ function getcommandlinearguments: stringarty;
 function getcommandlineargument(const index: integer): string;
 procedure deletecommandlineargument(const index: integer);
                 //index 1..argumentcount-1, no action otherwise
+procedure getprocaddresses(const lib: tlibhandle; const anames: array of string; 
+                             const adest: array of ppointer); overload;
+procedure getprocaddresses(const libname: string; const anames: array of string; 
+                             const adest: array of ppointer); overload;
 
 threadvar
  mselasterror: integer;
 
 implementation
 uses
- Classes,msestreaming,msesysintf,msedatalist;
+ Classes,msestreaming,msesysintf,msedatalist,sysutils;
+
+procedure getprocaddresses(const lib: tlibhandle; const anames: array of string; 
+                             const adest: array of ppointer);
+var
+ int1: integer;
+begin
+ if high(anames) <> high(adest) then begin
+  raise exception.create('Invalid parameter.');
+ end;
+ for int1:= 0 to high(anames) do begin
+  adest[int1]^:= getprocedureaddress(lib,anames[int1]);
+  if adest[int1]^ = nil then begin
+   raise exception.create('Function "'+anames[int1]+'" not found.');
+  end;
+ end;
+end;
+
+procedure getprocaddresses(const libname: string; const anames: array of string; 
+                             const adest: array of ppointer); overload;
+var
+ libha: tlibhandle;
+begin
+ libha:= 0;
+ libha:= loadlibrary(libname);
+ if libha = 0 then begin
+  raise exception.create('Library "'+libname+'" not found.');
+ end;
+ getprocaddresses(libha,anames,adest);
+end;
 
 const
  errortexts: array[syserrorty] of string =

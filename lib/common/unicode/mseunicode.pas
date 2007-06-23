@@ -17,10 +17,12 @@ type
 
  tunisubstfont = class(tunifont)
   private
+   fbase: tunifont;
   protected
    function getfont(var drawinfo: drawinfoty): boolean; override;
+   function gethandle: fontnumty; override;
   public
-   constructor create(const aglyph: unicharty); reintroduce;
+   constructor create(const base: tunifont; const aglyph: unicharty); reintroduce;
  end;
  
  unitextstatety = (uts_fontmatched);
@@ -91,16 +93,20 @@ var
  info: drawinfoty;
 begin
  with info,fonthasglyph do begin
-  font:= getdatapo^.font;
-  unichar:= achar;
-  gdi_call(gdi_fonthasglyph,info);
-  result:= hasglyph;
+  try
+   font:= getdatapo^.font;
+   unichar:= achar;
+   gdi_call(gdi_fonthasglyph,info);
+   result:= hasglyph;
+  except
+   result:= false;
+  end;
  end;
 end;
 
 function tunifont.createfontwithglyph(const achar: unicharty): tunifont;
 begin
- result:= tunisubstfont.create(achar);
+ result:= tunisubstfont.create(self,achar);
  if not result.hasglyph(achar) then begin
   freeandnil(result);
  end;
@@ -108,15 +114,27 @@ end;
 
 { tunisubstfont }
 
-constructor tunisubstfont.create(const aglyph: unicharty);
+constructor tunisubstfont.create(const base: tunifont; const aglyph: unicharty);
 begin
  finfo.glyph:= aglyph;
+ fbase:= base;
  inherited create;
 end;
 
 function tunisubstfont.getfont(var drawinfo: drawinfoty): boolean;
 begin
  result:= uni_getfontwithglyph(drawinfo);
+ if result then begin
+  drawinfo.getfont.basefont:= fbase.getdatapo^.font;
+ end;
+end;
+
+function tunisubstfont.gethandle: fontnumty;
+begin
+ if fhandlepo^ = 0 then begin
+  fhandlepo^:= getfontforglyph(fbase.getdatapo^.font,finfo.glyph);
+ end;
+ result:= inherited gethandle;
 end;
 
 { tunitext }

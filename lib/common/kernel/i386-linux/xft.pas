@@ -67,8 +67,10 @@ const
  XFT_LANG =            'lang';		//* String RFC 3066 langs */
  XFT_FONTVERSION =     'fontversion';	//* Int from 'head' table */
 
+ FC_CHARSET =          'charset';
     const
       External_library='libXft.so';
+      fclib = 'libfontconfig.so';
     Type
 
        TFT_FaceRec =  record //from freetype.h
@@ -135,22 +137,71 @@ const
          _XftFTlibrary : TFT_Library;cvar;external;
 }
     type
-
+     TFcType = (FcTypeVoid,FcTypeInteger,FcTypeDouble,
+         FcTypeString,FcTypeBool,FcTypeMatrix,
+         FcTypeCharSet,FcTypeFTFace,FcTypeLangSet
+         );
+     TFcMatchKind = (FcMatchPattern,FcMatchFont);
+         
     TXftDraw =  record
      //dummy
     end;
     PXftDraw  = ^TXftDraw;
+    TFcMatrix = record
+     xx: Tdouble;
+     xy: Tdouble;
+     yx: Tdouble;
+     yy: Tdouble;
+    end;
+    PFcMatrix = ^TFcMatrix;
+    
+    TFcLangSet = record
+     //dummy
+    end;
+    PFcLangSet = ^TFcLangset;
+
+    TFcValue = record
+     _type: TFcType;
+     u: record
+      case longint of
+       0 : ( s : ^TFcChar8 );
+       1 : ( i : longint );
+       2 : ( b : TFcBool );
+       3 : ( d : Tdouble );
+       4 : ( m : ^TFcMatrix );
+       5 : ( c : ^TFcCharSet );
+       6 : ( f : pointer );
+       7 : ( p : ^TFcPattern );
+       8 : ( l : ^TFcLangSet );
+     end;
+    end;
 
     TFcCharset =  record
      //dummy
     end;
+    PFcCharset = ^TFcCharset;
+    PPFcCharset = ^PFcCharset;
+    
+    TFcObjectSet = record
+     nobject: longint;
+     sobject: longint;
+     objects: ppchar;
+    end;
+    PFcObjectSet = ^TFcObjectSet;
 
+    TFcConfig = record
+     //dummy
+    end;
+    PFcConfig = ^TFcConfig;
+        
     TFcPattern =  record
      //dummy
     end;
     PFcPattern  = ^TFcPattern;
     PPFcPattern = ^PFcPattern;
+    pfcpatternpoaty = array[0..0] of PFcPattern;
 
+    
        TXftFont =  record
             ascent : longint;
             descent : longint;
@@ -210,7 +261,56 @@ const
   PFcFontSet = ^TFcFontSet;
   
 {$ifdef staticxft}
+    { fccharset.c  }
+   function FcCharSetCreate: PFcCharSet;cdecl;
+             external fclib name 'FcCharSetCreate';
+   procedure FcCharSetDestroy(fcs:PFcCharSet);cdecl;
+             external fclib name 'FcCharSetDestroy';
+   function FcCharSetAddChar(fcs:PFcCharSet; ucs4:TFcChar32):TFcBool;cdecl;
+             external fclib name 'FcCharSetAddChar';
+   function FcCharSetHasChar(fcs:PFcCharSet; ucs4:TFcChar32):TFcBool;cdecl;
+             external External_library name 'FcCharSetHasChar';
+    { fcpat.c }
+   function FcPatternCreate: PFcPattern;cdecl;
+             external fclib name 'FcPatternCreate';
+   function FcPatternDuplicate(p:PTFcPattern):^TFcPattern;cdecl;
+             external fclib name 'FcPatternDuplicate';
+   function FcPatternAdd(p:PFcPattern; aobject:Pchar; value:TFcValue;
+                           append:TFcBool):TFcBool;cdecl;
+            external fclib name 'FcPatternAdd';
+   procedure FcPatternDestroy(p: PFcPattern);cdecl;
+            external fclib name 'FcPatternDestroy';
+   function FcPatternGetCharSet(p:PFcPattern; aobject:Pchar; n:longint;
+               c:PPFcCharSet):TFcResult;cdecl;
+            external fclib name 'FcPatternGetCharSet';
+    { fclist.c }
+   function FcObjectSetCreate: PFcObjectSet;cdecl;
+                   external fclib name 'FcObjectSetCreate';
+   function FcObjectSetAdd(os: PFcObjectSet; aobject:Pchar):TFcBool;cdecl;
+                   external fclib name 'FcObjectSetAdd';
+   procedure FcObjectSetDestroy(os: PFcObjectSet);cdecl;
+                   external fclib name 'FcObjectSetDestroy';
+   function FcFontList(config: PFcConfig; p:PFcPattern; 
+             os:PFcObjectSet): PFcFontSet;cdecl;
+                   external fclib name 'FcFontList';
+    { fcmatch.c }
+   function FcFontSort(config:PFcConfig; p:PFcPattern; trim:TFcBool;
+            csp:PPFcCharSet; result:PFcResult): PFcFontSet;cdecl;
+                   external fclib name 'FcFontSort';
+   function FcFontRenderPrepare(config:PFcConfig; pat:PFcPattern;
+                    font:PFcPattern): PFcPattern;cdecl;
+                   external fclib name 'FcFontRenderPrepare';
+    { fcfs.c }            
+   procedure FcFontSetDestroy(s:PFcFontSet);cdecl;
+                    external fclib name 'FcFontSetDestroy';
 
+    { fccfg.c }                     
+   function FcConfigSubstitute(config:PFcConfig; p:PFcPattern;
+                   kind:TFcMatchKind):TFcBool;cdecl;
+                   external fclib name 'FcConfigSubstitute';
+    { fcdefault.c  }
+   procedure FcDefaultSubstitute(pattern:PFcPattern);cdecl;
+                   external fclib name 'FcDefaultSubstitute';
     { xftcolor.c  }
 
    function XftColorAllocName (dpy: PDisplay; visual: PVisual; cmap: TColormap;
@@ -363,7 +463,9 @@ const
 
     { xftlex.l  }
     { xftlist.c  }
-    function XftListFonts(dpy:PDisplay; screen:longint; args:array of const):PFcFontSet;cdecl;external External_library name 'XftListFonts';
+
+    function XftListFonts(dpy:PDisplay; screen:longint;
+              args:array of const):PFcFontSet;cdecl;external External_library name 'XftListFonts';
 
     { xftmatch.c  }
     { xftmatrix.c  }
@@ -371,6 +473,7 @@ const
     function XftNameParse(name:Pchar): PFcPattern;cdecl;external External_library name 'XftNameParse';
 
     { xftpat.c  }
+
     { xftrender.c  }
     procedure XftGlyphRender(dpy:PDisplay; op:longint; src:TPicture; pub:PXftFont; dst:TPicture;
                 srcx:longint; srcy:longint; x:longint; y:longint; glyphs:PFT_UInt;

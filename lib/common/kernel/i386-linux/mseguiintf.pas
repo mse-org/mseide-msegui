@@ -18,7 +18,7 @@ uses
  {$ifdef FPC}xlib{$else}Xlib{$endif},msetypes,msegui,msegraphics,msegraphutils,
  mseevent,msepointer,mseguiglob,msesys,
  msethread{$ifdef FPC},x,xutil,dynlibs{$endif},libc,msesysintf,msestockobjects,
- msestrings;
+ msestrings,xft,xrender;
 
 {$ifdef FPC}
 {$ifdef UNIX}
@@ -170,13 +170,67 @@ function Xutf8TextPropertyToTextList(para1:PDisplay; para2:PXTextProperty;
             para3:PPPchar; para4: pinteger): integer; cdecl;
                      external sXlib name 'Xutf8TextPropertyToTextList';
 
+{$ifndef staticxft}
+var //xft functions
+ FcPatternDestroy: procedure(p:PFcPattern);cdecl;
+ FcFontSetDestroy: procedure(s:PFcFontSet);cdecl;
+ FcObjectSetCreate: function: PFcObjectSet;cdecl;
+ FcObjectSetAdd: function(os: PFcObjectSet; aobject:Pchar):TFcBool;cdecl;
+ FcObjectSetDestroy: procedure(os: PFcObjectSet);cdecl;
+ FcFontList: function(config: PFcConfig; p:PFcPattern; 
+                      os:PFcObjectSet): PFcFontSet;cdecl;
+ FcCharSetCreate: function: PFcCharSet;cdecl;
+ FcCharSetDestroy: procedure(fcs:PFcCharSet);cdecl;
+ FcCharSetAddChar: function(fcs:PFcCharSet; ucs4:TFcChar32):TFcBool;cdecl;
+ FcPatternAdd: function(p:PFcPattern; aobject:Pchar; value:TFcValue;
+                           append:TFcBool):TFcBool;cdecl;
+ FcPatternCreate: function: PFcPattern;cdecl;
+ FcConfigSubstitute: function(config:PFcConfig; p:PFcPattern;
+                   kind:TFcMatchKind):TFcBool;cdecl;
+ FcDefaultSubstitute: procedure (pattern:PFcPattern);cdecl;
+ FcFontSort: function (config:PFcConfig; p:PFcPattern; trim:TFcBool;
+            csp:PPFcCharSet; result:PFcResult): PFcFontSet;cdecl;
+ FcCharSetHasChar: function(fcs:PFcCharSet; ucs4:TFcChar32):TFcBool;cdecl;
+ FcPatternDuplicate: function (p:PFcPattern): PFcPattern;cdecl;
+ FcPatternGetCharSet: function (p:PFcPattern; aobject:Pchar; n:longint;
+               c:PPFcCharSet):TFcResult;cdecl;
+ FcFontRenderPrepare: function(config:PFcConfig; pat:PFcPattern;
+                    font:PFcPattern): PFcPattern;cdecl;
+ 
+ XftDrawDestroy: procedure(draw:PXftDraw); cdecl;
+ XftDrawSetClipRectangles: function (draw:PXftDraw; xOrigin:longint;
+         yOrigin:longint; rects:PXRectangle; n:longint):TFcBool;cdecl;
+ XftDrawCreate: function(dpy:PDisplay; drawable:TDrawable; visual:PVisual;
+       colormap:TColormap): PXftDraw;cdecl;
+ XftDrawSetClip: function(draw:PXftDraw; r:TRegion):TFcBool;cdecl;
+ XftTextExtents16: procedure(dpy:PDisplay; pub:PXftFont;
+  _string: pwidechar{PFcChar16}; len:longint; extents:PXGlyphInfo);cdecl;
+ XftFontOpenName: function(dpy:PDisplay; screen:longint; name:Pchar):PXftFont;cdecl;
+ XftFontClose: procedure(dpy:PDisplay; pub:PXftFont);cdecl;
+ XftDrawString16: procedure(draw:PXftDraw; color:PXftColor; pub:PXftFont; 
+           x:longint; y:longint; _string:pwidechar; len:longint);cdecl;
+ XftDefaultHasRender: function(dpy:PDisplay):TFcBool;cdecl;
+ XftGetVersion: function():longint;cdecl;
+ XftInit: function(config:Pchar):TFcBool;cdecl;
+ XftInitFtLibrary: function ():TFcBool;cdecl;
+
+ XftCharExists: function(dpy:PDisplay; pub:PXftFont; ucs4:TFcChar32):TFcBool;cdecl;
+ XftNameParse: function(name:Pchar): PFcPattern;cdecl;
+ XftFontMatch: function(dpy:PDisplay; screen:longint; pattern:PFcPattern;
+                                  result:PFcResult): PFcPattern;cdecl;
+ XftFontOpenPattern: function(dpy:PDisplay; pattern:PFcPattern):PXftFont;cdecl;
+ XftDefaultSubstitute: procedure(dpy:PDisplay; screen:longint;
+                        pattern:PFcPattern);cdecl;
+{$endif}
 function hasxft: boolean;
+function fontdatatoxftname(const fontdata: fontdataty): ansistring;
+procedure getxftfontdata(po: pxftfont; var drawinfo: drawinfoty);
 
 implementation
 
 uses
- msebits,msekeyboard,sysutils,msesysutils,msefileutils,msedatalist,
- xrender,xft{$ifdef hassm},sm,ice{$endif};
+ msebits,msekeyboard,sysutils,msesysutils,msefileutils,msedatalist
+ {$ifdef hassm},sm,ice{$endif};
  
 var
  pixmapcount: integer;
@@ -531,29 +585,6 @@ const
       defaultshape,defaultshape,defaultshape,defaultshape,
       defaultshape,defaultshape,defaultshape,defaultshape,
       defaultshape);
- {
- copymodety = (cpm_copy,cpm_or,cpm_xor,cpm_and,
-               cpm_notcopy,cpm_notor,cpm_notxor,cpm_notand,
-               cpm_not,cpm_clear,cpm_set,cpm_nop,
-               cpm_andnot,cpm_ornot,cpm_nand,cpm_nor);
- }
-
-{
-procedure XDrawImageString; external sXLib name 'XDrawImageString';
-procedure XDrawImageString16; external sXLib name 'XDrawImageString16';
-procedure XDrawString16; external sXLib name 'XDrawString16';
-function  XSetForeground; external sXLib name 'XSetForeground';
-function XOpenIM; external sXLib name 'XOpenIM';
-function XCloseIM; external sXLib name 'XCloseIM';
-function XCreateIC; external sXLib name 'XCreateIC';
-procedure XDestroyIC; external sXLib name 'XDestroyIC';
-function XSetLocaleModifiers; external sXLib name 'XSetLocaleModifiers';
-function XSetICValues; external sXLib name 'XSetICValues';
-procedure XSetICFocus; external sXLib name 'XSetICFocus';
-procedure XUnsetICFocus; external sXLib name 'XUnsetICFocus';
-function XwcLookupString; external sXLib name 'XwcLookupString';
-function XCreateImage;  external sXLib name 'XCreateImage';
-}
 type
  wmprotocolty = (wm_delete_window
   {$ifdef hassaveyourself},wm_save_yourself{$endif});
@@ -2667,25 +2698,6 @@ begin
  end;
 end;
 
-var
- XftDrawDestroy: procedure(draw:PXftDraw); cdecl;
- XftDrawSetClipRectangles: function (draw:PXftDraw; xOrigin:longint;
-         yOrigin:longint; rects:PXRectangle; n:longint):TFcBool;cdecl;
- XftDrawCreate: function(dpy:PDisplay; drawable:TDrawable; visual:PVisual;
-       colormap:TColormap): PXftDraw;cdecl;
- XftDrawSetClip: function(draw:PXftDraw; r:TRegion):TFcBool;cdecl;
- XftTextExtents16: procedure(dpy:PDisplay; pub:PXftFont;
-  _string: pwidechar{PFcChar16}; len:longint; extents:PXGlyphInfo);cdecl;
- XftFontOpenName: function(dpy:PDisplay; screen:longint; name:Pchar):PXftFont;cdecl;
- XftFontClose: procedure(dpy:PDisplay; pub:PXftFont);cdecl;
- XftDrawString16: procedure(draw:PXftDraw; color:PXftColor; pub:PXftFont; 
-           x:longint; y:longint; _string:pwidechar; len:longint);cdecl;
- XftDefaultHasRender: function(dpy:PDisplay):TFcBool;cdecl;
- XftGetVersion: function():longint;cdecl;
- XftInit: function(config:Pchar):TFcBool;cdecl;
- XftInitFtLibrary: function ():TFcBool;cdecl;
-
- XftCharExists: function(dpy:PDisplay; pub:PXftFont; ucs4:TFcChar32):TFcBool;cdecl;
 
 {$ifndef FPC}
 type
@@ -2693,54 +2705,95 @@ type
 {$endif}
 
 function getxftlib: boolean;
-var
- libhandle: tlibhandle;
 begin
+{$ifndef staticxft}
  result:= false;
- libhandle:= loadlibrary('libXft.so');
- if libhandle <> 0 then begin
-  {$ifdef FPC}pointer({$endif}XftDrawDestroy{$ifdef FPC}){$endif}:=
-     getprocaddress(libhandle,'XftDrawDestroy');
-  if {$ifndef FPC}@{$endif}XftDrawDestroy = nil then exit;
-  {$ifdef FPC}pointer({$endif}XftDrawSetClipRectangles{$ifdef FPC}){$endif}:=
-     getprocaddress(libhandle,'XftDrawSetClipRectangles');
-  if {$ifndef FPC}@{$endif}XftDrawSetClipRectangles = nil then exit;
-  {$ifdef FPC}pointer({$endif}XftDrawCreate{$ifdef FPC}){$endif}:=
-     getprocaddress(libhandle,'XftDrawCreate');
-  if {$ifndef FPC}@{$endif}XftDrawCreate = nil then exit;
-  {$ifdef FPC}pointer({$endif}XftDrawSetClip{$ifdef FPC}){$endif}:=
-     getprocaddress(libhandle,'XftDrawSetClip');
-  if {$ifndef FPC}@{$endif}XftDrawSetClip = nil then exit;
-  {$ifdef FPC}pointer({$endif}XftTextExtents16{$ifdef FPC}){$endif}:=
-     getprocaddress(libhandle,'XftTextExtents16');
-  if {$ifndef FPC}@{$endif}XftTextExtents16 = nil then exit;
-  {$ifdef FPC}pointer({$endif}XftFontOpenName{$ifdef FPC}){$endif}:=
-     getprocaddress(libhandle,'XftFontOpenName');
-  if {$ifndef FPC}@{$endif}XftFontOpenName = nil then exit;
-  {$ifdef FPC}pointer({$endif}XftFontClose{$ifdef FPC}){$endif}:=
-     getprocaddress(libhandle,'XftFontClose');
-  if {$ifndef FPC}@{$endif}XftFontClose = nil then exit;
-  {$ifdef FPC}pointer({$endif}XftDrawString16{$ifdef FPC}){$endif}:=
-     getprocaddress(libhandle,'XftDrawString16');
-  if {$ifndef FPC}@{$endif}XftDrawString16 = nil then exit;
-  {$ifdef FPC}pointer({$endif}XftDefaultHasRender{$ifdef FPC}){$endif}:=
-     getprocaddress(libhandle,'XftDefaultHasRender');
-  if {$ifndef FPC}@{$endif}XftDefaultHasRender = nil then exit;
-  {$ifdef FPC}pointer({$endif}XftGetVersion{$ifdef FPC}){$endif}:=
-     getprocaddress(libhandle,'XftGetVersion');
-  if {$ifndef FPC}@{$endif}XftGetVersion = nil then exit;
-  {$ifdef FPC}pointer({$endif}XftInit{$ifdef FPC}){$endif}:=
-     getprocaddress(libhandle,'XftInit');
-  if {$ifndef FPC}@{$endif}XftGetVersion = nil then exit;
-  {$ifdef FPC}pointer({$endif}XftInitFtLibrary{$ifdef FPC}){$endif}:=
-     getprocaddress(libhandle,'XftInitFtLibrary');
-  if {$ifndef FPC}@{$endif}XftInitFtLibrary = nil then exit;
-  {$ifdef FPC}pointer({$endif}XftCharExists{$ifdef FPC}){$endif}:=
-     getprocaddress(libhandle,'XftCharExists');
-  if {$ifndef FPC}@{$endif}XftCharExists = nil then exit;
-
-  result:= true;
+ try
+  getprocaddresses('libfontconfig.so',
+     [
+     'FcPatternDestroy',         //0
+     'FcFontSetDestroy',         //1
+     'FcObjectSetCreate',        //2
+     'FcObjectSetAdd',           //3
+     'FcObjectSetDestroy',       //4
+     'FcFontList',               //5
+     'FcCharSetCreate',          //6          
+     'FcCharSetDestroy',         //7
+     'FcCharSetAddChar',         //8
+     'FcPatternAdd',             //9
+     'FcPatternCreate',          //10
+     'FcConfigSubstitute',       //11
+     'FcDefaultSubstitute',      //12
+     'FcFontSort',               //13
+     'FcCharSetHasChar',         //14 
+     'FcPatternDuplicate',       //15
+     'FcPatternGetCharSet',      //16
+     'FcFontRenderPrepare'       //17
+     ],
+     [
+     @FcPatternDestroy,          //0
+     @FcFontSetDestroy,          //1
+     @FcObjectSetCreate,         //2
+     @FcObjectSetAdd,            //3
+     @FcObjectSetDestroy,        //4
+     @FcFontList,                //5
+     @FcCharSetCreate,           //6
+     @FcCharSetDestroy,          //7
+     @FcCharSetAddChar,          //8
+     @FcPatternAdd,              //9
+     @FcPatternCreate,           //10
+     @FcConfigSubstitute,        //11
+     @FcDefaultSubstitute,       //12
+     @FcFontSort,                //13
+     @FcCharSetHasChar,          //14
+     @FcPatternDuplicate,        //15
+     @FcPatternGetCharSet,       //16
+     @FcFontRenderPrepare        //17
+     ]);
+  getprocaddresses('libXft.so',[
+    'XftDrawDestroy',            //0
+    'XftDrawSetClipRectangles',  //1
+    'XftDrawCreate',             //2 
+    'XftDrawSetClip',            //3
+    'XftTextExtents16',          //4 
+    'XftFontOpenName',           //5
+    'XftFontClose',              //6
+    'XftDrawString16',           //7
+    'XftDefaultHasRender',       //8
+    'XftGetVersion',             //9
+    'XftInit',                   //10
+    'XftInitFtLibrary',          //11
+    'XftCharExists',             //12
+    'XftNameParse',              //13  
+    'XftFontMatch',              //14
+    'XftFontOpenPattern',        //15
+    'XftDefaultSubstitute'       //16
+    ],
+    [
+    @XftDrawDestroy,              //0
+    @XftDrawSetClipRectangles,    //1
+    @XftDrawCreate,               //2 
+    @XftDrawSetClip,              //3
+    @XftTextExtents16,            //4 
+    @XftFontOpenName,             //5
+    @XftFontClose,                //6
+    @XftDrawString16,             //7
+    @XftDefaultHasRender,         //8
+    @XftGetVersion,               //9
+    @XftInit,                     //10
+    @XftInitFtLibrary,            //11
+    @XftCharExists,               //12
+    @XftNameParse,                //13
+    @XftFontMatch,                //14
+    @XftFontOpenPattern,          //15
+    @XftDefaultSubstitute         //16
+    ]);            
+ except
+  exit;
  end;
+  
+{$endif} //not staticxft
+ result:= true;
 end;
 
 var
@@ -2771,54 +2824,37 @@ var
               format:longint):PXRenderPictFormat; cdecl;
 
 function getxrenderlib: boolean;
-var
- libhandle: tlibhandle;
 begin
  result:= false;
- libhandle:= loadlibrary('libXrender.so');
- if libhandle <> 0 then begin
-  {$ifdef FPC}pointer({$endif}XRenderSetPictureClipRectangles{$ifdef FPC}){$endif}:=
-     getprocaddress(libhandle,'XRenderSetPictureClipRectangles');
-  if {$ifndef FPC}@{$endif}XRenderSetPictureClipRectangles = nil then exit;
-
-  {$ifdef FPC}pointer({$endif}XRenderCreatePicture{$ifdef FPC}){$endif}:=
-     getprocaddress(libhandle,'XRenderCreatePicture');
-  if {$ifndef FPC}@{$endif}XRenderCreatePicture = nil then exit;
-
-  {$ifdef FPC}pointer({$endif}XRenderFillRectangle{$ifdef FPC}){$endif}:=
-     getprocaddress(libhandle,'XRenderFillRectangle');
-  if {$ifndef FPC}@{$endif}XRenderFillRectangle = nil then exit;
-
-  {$ifdef FPC}pointer({$endif}XRenderSetPictureTransform{$ifdef FPC}){$endif}:=
-     getprocaddress(libhandle,'XRenderSetPictureTransform');
-  if {$ifndef FPC}@{$endif}XRenderSetPictureTransform = nil then exit;
-
-  {$ifdef FPC}pointer({$endif}XRenderSetPictureFilter{$ifdef FPC}){$endif}:=
-     getprocaddress(libhandle,'XRenderSetPictureFilter');
-  if {$ifndef FPC}@{$endif}XRenderSetPictureFilter = nil then exit;
-
-  {$ifdef FPC}pointer({$endif}XRenderFreePicture{$ifdef FPC}){$endif}:=
-     getprocaddress(libhandle,'XRenderFreePicture');
-  if {$ifndef FPC}@{$endif}XRenderFreePicture = nil then exit;
-
-  {$ifdef FPC}pointer({$endif}XRenderComposite{$ifdef FPC}){$endif}:=
-     getprocaddress(libhandle,'XRenderComposite');
-  if {$ifndef FPC}@{$endif}XRenderComposite = nil then exit;
-
-  {$ifdef FPC}pointer({$endif}XRenderQueryExtension{$ifdef FPC}){$endif}:=
-     getprocaddress(libhandle,'XRenderQueryExtension');
-  if {$ifndef FPC}@{$endif}XRenderQueryExtension = nil then exit;
-
-  {$ifdef FPC}pointer({$endif}XRenderFindVisualFormat{$ifdef FPC}){$endif}:=
-     getprocaddress(libhandle,'XRenderFindVisualFormat');
-  if {$ifndef FPC}@{$endif}XRenderFindVisualFormat = nil then exit;
-
-  {$ifdef FPC}pointer({$endif}XRenderFindStandardFormat{$ifdef FPC}){$endif}:=
-     getprocaddress(libhandle,'XRenderFindStandardFormat');
-  if {$ifndef FPC}@{$endif}XRenderFindStandardFormat = nil then exit;
-
-  result:= true;
- end;
+ try
+  getprocaddresses('libXrender.so',[
+    'XRenderSetPictureClipRectangles',  //0
+    'XRenderCreatePicture',             //1
+    'XRenderFillRectangle',             //2
+    'XRenderSetPictureTransform',       //3
+    'XRenderSetPictureFilter',          //4
+    'XRenderFreePicture',               //5
+    'XRenderComposite',                 //6
+    'XRenderQueryExtension',            //7
+    'XRenderFindVisualFormat',          //8
+    'XRenderFindStandardFormat'         //9
+    ],
+    [
+    @XRenderSetPictureClipRectangles,  //0
+    @XRenderCreatePicture,             //1
+    @XRenderFillRectangle,             //2
+    @XRenderSetPictureTransform,       //3
+    @XRenderSetPictureFilter,          //4
+    @XRenderFreePicture,               //5
+    @XRenderComposite,                 //6
+    @XRenderQueryExtension,            //7
+    @XRenderFindVisualFormat,          //8
+    @XRenderFindStandardFormat         //9
+    ]);
+ except
+  exit;
+ end;  
+ result:= true;
 end;
 
 //function gui_destroygc(winid: winidty; var gc: gcty): guierrorty;
@@ -3583,27 +3619,29 @@ end;
 
 procedure getxftfontdata(po: pxftfont; var drawinfo: drawinfoty);
 begin
-{$ifdef FPC} {$checkpointer off} {$endif}
- with drawinfo.getfont.fontdata^,x11fontdataty(platformdata) do begin
-  font:= cardinal(po);
-  ascent:= po^.ascent;
-  descent:= po^.descent;
-//   linespacing:= ascent + descent;
-  linespacing:= po^.height;
-  caretshift:= 0;
-  infopo:= nil;
+ if po <> nil then begin
+ {$ifdef FPC} {$checkpointer off} {$endif}
+  with drawinfo.getfont.fontdata^,x11fontdataty(platformdata) do begin
+   font:= cardinal(po);
+   ascent:= po^.ascent;
+   descent:= po^.descent;
+ //   linespacing:= ascent + descent;
+   linespacing:= po^.height;
+   caretshift:= 0;
+   infopo:= nil;
+  end;
+ {$ifdef FPC} {$checkpointer default} {$endif}
  end;
-{$ifdef FPC} {$checkpointer default} {$endif}
 end;
 
-procedure setupfontinfo(const fontdatapo: pfontdataty;
+procedure setupfontinfo(const fontdata: fontdataty;
                                            var fontinfo: fontinfoty);
 var
  ar1: stringarty;
 begin
  ar1:= nil; //compiler warning;
  fontinfo:= defaultfontinfo;
- with fontdatapo^ do begin
+ with pfontdataty(@fontdata)^ do begin
   height:= height shr fontsizeshift;
   width:= width shr fontsizeshift;
   if height <> 0 then begin
@@ -3631,6 +3669,94 @@ begin
    fontinfo[fn_slant]:= 'i';
   end;
  end;
+end;
+
+function buildxftname(const fontdata: fontdataty; 
+                                      const fontinfo: fontinfoty): ansistring;
+var
+ str1: ansistring;
+ int1: integer;
+begin
+ with fontdata do begin
+  str1:= '';
+  if fontinfo[fn_foundry] <> '*' then begin
+   str1:= str1+':foundry='+fontinfo[fn_foundry];
+  end;
+  if (familyoptions = []) then begin
+   if (pitchoptions = []) and (fontinfo[fn_family_name] <> '*') then begin
+    str1:= str1 + ':family=' + fontinfo[fn_family_name];
+   end;
+  end
+  else begin
+   if foo_helvetica in familyoptions then begin
+    str1:= str1 + ':family=sans';
+   end
+   else begin
+    if foo_roman in familyoptions then begin
+     str1:= str1 + ':family=serif';
+    end
+    else begin
+     if foo_decorative in familyoptions then begin
+     end
+     else begin
+      if foo_script in familyoptions then begin
+      end;
+     end;
+    end;
+   end;
+  end;
+  if fs_bold in style then begin
+   str1:= str1 + ':bold';
+  end;
+  if fs_italic in style then begin
+   str1:= str1 + ':italic';
+  end;
+  if fontinfo[fn_pixel_size] <> '*' then begin
+   str1:= str1 + ':pixelsize=' + fontinfo[fn_pixel_size];
+  end;
+  if fontinfo[fn_average_width] <> '*' then begin
+   try
+    int1:= (strtoint(fontinfo[fn_average_width]) + 5) div 10;
+    str1:= str1 + ':charwidth='+inttostr(int1);
+   except
+   end;
+  end;
+  if foo_fixed in pitchoptions then begin
+   str1:= str1 + ':mono';
+  end;
+  if foo_proportional in pitchoptions then begin
+   str1:= str1 + ':proportional';
+  end;
+  if foo_antialiased in antialiasedoptions then begin
+   str1:= str1 + ':antialias=1';
+  end;
+  if foo_nonantialiased in antialiasedoptions then begin
+   str1:= str1 + ':antialias=0';
+  end;
+  {
+  if foo_xcore in xcoreoptions then begin
+   str1:= str1 + ':core=1';
+  end;
+  if foo_noxcore in xcoreoptions then begin
+   str1:= str1 + ':core=0';
+  end;
+  }
+  if fontinfo[fn_charset_registry] <> '*' then begin
+   str1:= str1 + ':encoding=' + fontinfo[fn_charset_registry];
+   if fontinfo[fn_encoding] <> '*' then begin
+    str1:= str1 +'-'+fontinfo[fn_encoding];
+   end;
+  end;
+ end;
+ result:= str1;
+end;
+
+function fontdatatoxftname(const fontdata: fontdataty): ansistring;
+var
+ fontinfo: fontinfoty;
+begin
+ setupfontinfo(fontdata,fontinfo);
+ result:= buildxftname(fontdata,fontinfo);
 end;
 
 function gui_getfont(var drawinfo: drawinfoty): boolean;
@@ -3677,80 +3803,10 @@ var
  int1: integer;
 
 begin
- setupfontinfo(drawinfo.getfont.fontdata,fontinfo);
+ setupfontinfo(drawinfo.getfont.fontdata^,fontinfo);
  with drawinfo.getfont.fontdata^ do begin
   if fhasxft then begin
-   str1:= '';
-   if fontinfo[fn_foundry] <> '*' then begin
-    str1:= str1+':foundry='+fontinfo[fn_foundry];
-   end;
-   if (familyoptions = []) then begin
-    if (pitchoptions = []) and (fontinfo[fn_family_name] <> '*') then begin
-     str1:= str1 + ':family=' + fontinfo[fn_family_name];
-    end;
-   end
-   else begin
-    if foo_helvetica in familyoptions then begin
-     str1:= str1 + ':family=sans';
-    end
-    else begin
-     if foo_roman in familyoptions then begin
-      str1:= str1 + ':family=serif';
-     end
-     else begin
-      if foo_decorative in familyoptions then begin
-      end
-      else begin
-       if foo_script in familyoptions then begin
-       end;
-      end;
-     end;
-    end;
-   end;
-   if fs_bold in style then begin
-    str1:= str1 + ':bold';
-   end;
-   if fs_italic in style then begin
-    str1:= str1 + ':italic';
-   end;
-   if fontinfo[fn_pixel_size] <> '*' then begin
-    str1:= str1 + ':pixelsize=' + fontinfo[fn_pixel_size];
-   end;
-   if fontinfo[fn_average_width] <> '*' then begin
-    try
-     int1:= (strtoint(fontinfo[fn_average_width]) + 5) div 10;
-     str1:= str1 + ':charwidth='+inttostr(int1);
-    except
-    end;
-   end;
-   if foo_fixed in pitchoptions then begin
-    str1:= str1 + ':mono';
-   end;
-   if foo_proportional in pitchoptions then begin
-    str1:= str1 + ':proportional';
-   end;
-   if foo_antialiased in antialiasedoptions then begin
-    str1:= str1 + ':antialias=1';
-   end;
-   if foo_nonantialiased in antialiasedoptions then begin
-    str1:= str1 + ':antialias=0';
-   end;
-   {
-   if foo_xcore in xcoreoptions then begin
-    str1:= str1 + ':core=1';
-   end;
-   if foo_noxcore in xcoreoptions then begin
-    str1:= str1 + ':core=0';
-   end;
-   }
-   if fontinfo[fn_charset_registry] <> '*' then begin
-    str1:= str1 + ':encoding=' + fontinfo[fn_charset_registry];
-    if fontinfo[fn_encoding] <> '*' then begin
-     str1:= str1 +'-'+fontinfo[fn_encoding];
-    end;
-   end;
-//   po2:= xftfontopenxlfd(appdisp,xdefaultscreen(appdisp),
-//            pchar(fontinfotoxlfdname(fontinfo)));
+   str1:= buildxftname(drawinfo.getfont.fontdata^,fontinfo);
    po2:= xftfontopenname(appdisp,xdefaultscreen(appdisp),pchar(str1));
    if po2 <> nil then begin
     result:= true;

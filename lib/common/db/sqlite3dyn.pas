@@ -378,22 +378,6 @@ var
  sqlite3libraryhandle: tlibhandle;
  refcount: integer;
   
-procedure getprocaddress(const lib: tlibhandle; anames: array of string; 
-                             adest: array of ppointer);
-var
- int1: integer;
-begin
- if high(anames) <> high(adest) then begin
-  raise exception.create('Invalid parameter.');
- end;
- for int1:= 0 to high(anames) do begin
-  adest[int1]^:= getprocedureaddress(lib,anames[int1]);
-  if adest[int1]^ = nil then begin
-   raise exception.create('Function "'+anames[int1]+'" not found.');
-  end;
- end;
-end;
-
 function tryinitialisesqlite3(const alibname: string): boolean;
 begin
  result:= true;
@@ -404,7 +388,7 @@ begin
    exit;
   end;
   try
-   getprocaddress(sqlite3libraryhandle,
+   getprocaddresses(sqlite3libraryhandle,
     [
    'sqlite3_close',                //0
    'sqlite3_exec',                 //1
