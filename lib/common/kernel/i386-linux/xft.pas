@@ -283,6 +283,9 @@ const
    function FcPatternGetCharSet(p:PFcPattern; aobject:Pchar; n:longint;
                c:PPFcCharSet):TFcResult;cdecl;
             external fclib name 'FcPatternGetCharSet';
+   function FcPatternAddCharSet(p:PFcPattern; 
+             aobject:Pchar; c:PFcCharSet):TFcBool;cdecl;
+            external fclib name 'FcPatternAddCharSet';
     { fclist.c }
    function FcObjectSetCreate: PFcObjectSet;cdecl;
                    external fclib name 'FcObjectSetCreate';

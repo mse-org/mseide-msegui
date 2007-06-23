@@ -25,7 +25,6 @@ var
  str1: ansistring;
  pat1: pfcpattern;
  charset1,charset2: pfccharset;
- value1: tfcvalue;
  res1: tfcresult;
  fontset1: pfcfontset;
  po1: ppfcpattern;
@@ -35,15 +34,29 @@ var
 begin
  result:= false;
  if hasxft then begin
+{$ifdef FPC} {$checkpointer off} {$endif}
   str1:= fontdatatoxftname(drawinfo.getfont.fontdata^);
   pat1:= xftnameparse(pansichar(str1));
   if pat1 <> nil then begin
    with drawinfo.getfont.fontdata^ do begin
     charset1:= fccharsetcreate();
     fccharsetaddchar(charset1,glyph);
-    value1.u.c:= charset1;
-    fcpatternadd(pat1,fc_charset,value1,true);
+    fcpatternaddcharset(pat1,fc_charset,charset1);
     fccharsetdestroy(charset1);
+    font1:= xftfontopenpattern(msedisplay,
+           xftfontmatch(msedisplay,xdefaultscreen(msedisplay),pat1,@res1));
+    fcpatterndestroy(pat1);
+    if font1 <> nil then begin
+     if xftcharexists(msedisplay,font1,glyph) then begin
+      getxftfontdata(font1,drawinfo);
+      result:= true;
+     end
+     else begin
+      xftfontclose(msedisplay,font1);
+     end;
+    end;
+
+(*    
     fcconfigsubstitute(nil,pat1,fcmatchpattern);
     fcconfigsubstitute(nil,pat1,fcmatchfont);
     xftdefaultsubstitute(msedisplay,xdefaultscreen(msedisplay),pat1);
@@ -60,12 +73,12 @@ begin
          if font1 <> nil then begin
           if xftcharexists(msedisplay,font1,glyph) then begin
            getxftfontdata(font1,drawinfo);
+           result:= true;
           end
           else begin
            xftfontclose(msedisplay,font1);
           end;
         {$ifdef FPC} {$checkpointer default} {$endif}
-          result:= true;
          end;
          break;
         end;
@@ -77,8 +90,10 @@ begin
     fccharsetdestroy(charset1);
     fcpatterndestroy(pat1);
     fcfontsetdestroy(fontset1);    
+    *)
    end;
   end; 
+{$ifdef FPC} {$checkpointer default} {$endif}
  end;
 end;
 

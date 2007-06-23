@@ -196,6 +196,8 @@ var //xft functions
                c:PPFcCharSet):TFcResult;cdecl;
  FcFontRenderPrepare: function(config:PFcConfig; pat:PFcPattern;
                     font:PFcPattern): PFcPattern;cdecl;
+ FcPatternAddCharSet: function(p:PFcPattern; 
+             aobject:Pchar; c:PFcCharSet):TFcBool;cdecl;
  
  XftDrawDestroy: procedure(draw:PXftDraw); cdecl;
  XftDrawSetClipRectangles: function (draw:PXftDraw; xOrigin:longint;
@@ -2728,7 +2730,8 @@ begin
      'FcCharSetHasChar',         //14
      'FcPatternDuplicate',       //15
      'FcPatternGetCharSet',      //16
-     'FcFontRenderPrepare'       //17
+     'FcFontRenderPrepare',      //17
+     'FcPatternAddCharSet'       //18
      ],
      [
      {$ifndef FPC}@{$endif}@FcPatternDestroy,          //0
@@ -2748,7 +2751,8 @@ begin
      {$ifndef FPC}@{$endif}@FcCharSetHasChar,          //14
      {$ifndef FPC}@{$endif}@FcPatternDuplicate,        //15
      {$ifndef FPC}@{$endif}@FcPatternGetCharSet,       //16
-     {$ifndef FPC}@{$endif}@FcFontRenderPrepare        //17
+     {$ifndef FPC}@{$endif}@FcFontRenderPrepare,       //17
+     {$ifndef FPC}@{$endif}@FcPatternAddCharSet        //18
      ]);
   getprocaddresses('libXft.so',[
     'XftDrawDestroy',            //0
