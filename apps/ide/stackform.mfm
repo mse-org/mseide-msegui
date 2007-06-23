@@ -106,8 +106,10 @@ object stackfo: tstackfo
     menu.submenu.items = <    
       item
         caption = 'Copy to clipboard'
-        state = [as_localcaption]
+        state = [as_localcaption, as_localonexecute]
+        onexecute = copytoclipboard
       end>
+    menu.state = [as_localonexecute]
     left = 48
     top = 56
   end
