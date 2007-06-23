@@ -84,6 +84,8 @@ const
 type
  fontdataty = record
   font: fontty;
+  basefont: fontty;
+  glyph: unicharty;
   name: string;
   charset: string;
   height: integer;
@@ -91,7 +93,6 @@ type
   pitchoptions,familyoptions,antialiasedoptions{,xcoreoptions}: fontoptionsty;
   style: fontstylesty;                    //fs_bold,fs_italic
   ascent,descent,linespacing,caretshift: integer;
-  glyph: unicharty;
   platformdata: array[0..15] of cardinal; //platform dependent
  end;
  pfontdataty = ^fontdataty;
@@ -429,6 +430,7 @@ type
  end;
  getfontinfoty = record
   fontdata: pfontdataty;
+  basefont: fontty;
  end;
  gettextwidthinfoty = record
   text: pchar;
@@ -541,7 +543,6 @@ type
  tfont = class(toptionalpersistent,icanvas)
   private
    finfopo: pfontinfoty;
-   fhandlepo: ^fontnumty;
    fonchange: notifyeventty;
    function getextraspace: integer;
    procedure setextraspace(const avalue: integer);
@@ -563,7 +564,6 @@ type
    function getlineheight: integer;
    function getcaretshift: integer;
    procedure updatehandlepo;
-   procedure createhandle(const canvas: tcanvas);
    procedure dochanged(changed: canvasstatesty); virtual;
    procedure releasehandles(destroying: boolean = false);
    function getcharset: string;
@@ -583,8 +583,10 @@ type
    procedure setunderline(const avalue: boolean);
    function getstrikeout: boolean;
    procedure setstrikeout(const avalue: boolean);
+   procedure createhandle(const canvas: tcanvas);
   protected
    finfo: fontinfoty;
+   fhandlepo: ^fontnumty;
    function getfont(var drawinfo: drawinfoty): boolean; virtual;
    procedure setname(const Value: string); virtual;
    function gethandle: fontnumty; virtual;
@@ -1082,6 +1084,7 @@ function unregisterfontalias(const alias: string): boolean;
               //false if alias does not exist
 procedure clearfontalias; //removes all alias which are not fam_fix
 function realfontname(const aliasname: string): string;
+function getfontforglyph(const abasefont: fontty; const glyph: unicharty): fontnumty;
 
 procedure gdierror(error: gdierrorty; const text: string = ''); overload;
 procedure gdierror(error: gdierrorty; sender: tobject; text: string = ''); overload;
@@ -1355,7 +1358,7 @@ begin
          setsinglebit({$ifdef FPC}longword{$else}byte{$endif}(new),
                       {$ifdef FPC}longword{$else}byte{$endif}(old),
                       {$ifdef FPC}longword{$else}byte{$endif}(mask3)));
-(*
+(*                      
   value4:= fontoptionsty(
          setsinglebit({$ifdef FPC}longword{$else}byte{$endif}(new),
                       {$ifdef FPC}longword{$else}byte{$endif}(old),
@@ -1575,8 +1578,10 @@ begin
    ffontaliaslist.updatefontdata(data1);
   end;
   drawinfo.getfont.fontdata:= @data1;
+  drawinfo.getfont.basefont:= 0;
   if getfont(drawinfo) then begin
    getvalues;
+   data1.basefont:= drawinfo.getfont.basefont;
    result:= registerfont(data1);
   end
   else begin
@@ -1587,6 +1592,27 @@ endlab:
  gdi_unlock;
 end;
 
+function getfontforglyph(const abasefont: fontty; const glyph: unicharty): fontnumty;
+var
+ info: drawinfoty;
+ int1: integer;
+begin
+ result:= 0;
+ info.fonthasglyph.unichar:= glyph;  
+ gdi_lock;
+ for int1:= 0 to high(fonts) do begin
+  with fonts[int1],data do begin
+   if (refcount >= 0) and (basefont = abasefont) then begin
+    info.fonthasglyph.font:= font;
+    gui_getgdifuncs^[gdi_fonthasglyph](info);    
+    if info.fonthasglyph.hasglyph then begin
+     result:= int1 + 1;
+    end;
+   end;
+  end;
+ end;
+ gdi_unlock;
+end;
 
 procedure freebuffer(var buffer: bufferty);
 begin
@@ -2474,7 +2500,7 @@ begin
  result:= fhandlepo^;
 end;
 
-function tfont.gethandle: fontty;
+function tfont.gethandle: fontnumty;
 var
  canvas: tcanvas;
 begin
