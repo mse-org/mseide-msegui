@@ -43,6 +43,7 @@ begin
     fccharsetaddchar(charset1,glyph);
     fcpatternaddcharset(pat1,fc_charset,charset1);
     fccharsetdestroy(charset1);
+    {
     font1:= xftfontopenpattern(msedisplay,
            xftfontmatch(msedisplay,xdefaultscreen(msedisplay),pat1,@res1));
     fcpatterndestroy(pat1);
@@ -55,8 +56,8 @@ begin
       xftfontclose(msedisplay,font1);
      end;
     end;
-
-(*    
+    }
+    
     fcconfigsubstitute(nil,pat1,fcmatchpattern);
     fcconfigsubstitute(nil,pat1,fcmatchfont);
     xftdefaultsubstitute(msedisplay,xdefaultscreen(msedisplay),pat1);
@@ -90,7 +91,6 @@ begin
     fccharsetdestroy(charset1);
     fcpatterndestroy(pat1);
     fcfontsetdestroy(fontset1);    
-    *)
    end;
   end; 
 {$ifdef FPC} {$checkpointer default} {$endif}
