@@ -1518,6 +1518,7 @@ type
    fclientmousewidget: twidget;
    fonexception: exceptioneventty;
    fhintedwidget: twidget;
+   fhintforwidget: twidget;
    fhintinfo: hintinfoty;
    flockthread: threadty;
    flockcount: integer;
@@ -7096,6 +7097,9 @@ begin
  if app.fmousewidget = self then begin
   app.setmousewidget(nil);
  end;
+ if app.fhintforwidget = self then begin
+  app.hidehint;
+ end;
  {
  if (window.focusedwidget = self) and 
        (fparentwidget <> nil) and fparentwidget.visible then begin
@@ -9067,14 +9071,15 @@ begin
    buttonendmodal:= wo_buttonendmodal in options;
    aoptions1.options:= options;
    aoptions1.pos:= fwindowpos;
-   if transientfor <> nil then begin
+   if transientfor <> ftransientfor then begin
     checkrecursivetransientfor(transientfor);
-    ftransientfor:= aoptions.transientfor;
-    aoptions1.transientfor:= transientfor.winid;
-   end
-   else begin
-    aoptions1.transientfor:= 0;
-    ftransientfor:= nil;
+    setlinkedvar(transientfor,tlinkedobject(ftransientfor));
+    if transientfor <> nil then begin
+     aoptions1.transientfor:= transientfor.winid;
+    end
+    else begin
+     aoptions1.transientfor:= 0;
+    end;
    end;
    aoptions1.icon:= icon;
    aoptions1.iconmask:= iconmask;
@@ -11607,8 +11612,10 @@ begin
  if fmousewidget = widget then begin
   setmousewidget(nil);
  end;
- if fhintedwidget = widget then begin
+ if fhintforwidget = widget then begin
   deactivatehint;
+ end;
+ if fhintedwidget = widget then begin
   fhintedwidget:= nil;
  end;
  if fclientmousewidget = widget then begin
@@ -12286,6 +12293,7 @@ procedure tapplication.internalshowhint(const sender: twidget);
 var
  window1: twindow;
 begin
+ fhintforwidget:= sender;
  with tinternalapplication(self),fhintinfo do begin
 //  if sender <> nil then begin
 //   window1:= sender.window;
@@ -12441,6 +12449,7 @@ begin
   fhinttimer.enabled:= false;
   finalize(fhintinfo);
   fhintinfo.flags:= [];
+  fhintforwidget:= nil;
  end;
 end;
 
