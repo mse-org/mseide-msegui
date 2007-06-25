@@ -37,6 +37,7 @@ type
   namenum: integer;
   size: integer;
   scalestring: string;
+  rotated: boolean;
   codepages: integerarty;
  end; 
  psfontinfoarty = array of psfontinfoty;
@@ -166,6 +167,22 @@ const
 ' setfont pop'+nl+
 '} bind def'+nl+
               
+'/sfr {'+nl+                    //select font: alias,scale,rotation->
+' matrix rotate'+               //alias,scale,rotmatrix
+' exch dup matrix scale'+       //alias,rotmatrix,scalematrix
+' matrix concatmatrix'+nl+      //alias,concmatrix
+' exch findfont exch makefont dup /FontMatrix get exch dup /FontBBox get'+nl+
+//matrix,font,bbox
+' aload pop'+ //matrix,font,llx,lly,urx,ury
+' 5 index'+   //matrix,font,llx,lly,urx,ury,matrix
+' transform'+ //matrix,font,llx,lly,urx',ury'
+' /asc exch def pop'+ //matrix,font,llx,lly
+' 3 index'+   //matrix,font,llx,lly,matrix
+' transform'+ //matrix,font,llx',lly'
+' -1 mul'+nl+' /desc exch def pop'+ //matrix,font
+' setfont pop'+nl+
+'} bind def'+nl+
+
 '/w {'+nl+    //[[text,font,scale,color,colorbackground],...]-> cx
               //[[text,font,scale,color],...]-> cx
               //[[text,font,scale],...]-> cx
@@ -707,7 +724,8 @@ begin
    additem(ffontnames,str1);
    int2:= high(ffontnames);
                   //alias,encoding,origname
-   streamwrite(encodefontname(int2,acodepage)+fmapnames[acodepage]+' ('+str1+') rf' + nl);
+   streamwrite(encodefontname(int2,acodepage)+fmapnames[acodepage]+
+                  ' ('+str1+') rf' + nl);
             //register font
   end;
   setlength(ffonts,high(ffonts)+2);
@@ -720,7 +738,13 @@ begin
    else begin
     size:= height shr fontsizeshift;
    end;
-   scalestring:= psrealtostr((size / ppmm)*mmtoprintscale);
+   scalestring:= psrealtostr((size / ppmm)*mmtoprintscale) + ' ';
+   if rotation <> 0 then begin
+    scalestring:= scalestring + psrealtostr(rotation*radtodeg) +' sfr'+nl;
+   end
+   else begin
+    scalestring:= scalestring + 'sf'+nl;
+   end;
    additem(codepages,acodepage);
   end;
  end;
@@ -770,7 +794,7 @@ procedure tpostscriptcanvas.selectfont(const afont: fontnumty; const acodepage: 
 begin
  checkfont(afont,acodepage);
  with ffonts[factfont] do begin
-  streamwrite(encodefontname(namenum,acodepage)+scalestring+' sf'+nl);
+  streamwrite(encodefontname(namenum,acodepage)+scalestring);
  end;
 end;
 
