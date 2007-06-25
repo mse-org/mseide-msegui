@@ -318,6 +318,8 @@ type
    function getasstring: string; override;
    procedure setasstring(const avalue: string); override;
    function GetDefaultWidth: Longint; override;
+   function GetAsLongint: Longint; override;
+   procedure SetAsLongint(AValue: Longint); override;
   public
    constructor Create(AOwner: TComponent); override;
    procedure Clear; override;
@@ -2097,6 +2099,26 @@ end;
 function tmsebooleanfield.asoldsql: string;
 begin
  result:= fieldtooldsql(self);
+end;
+
+function tmsebooleanfield.GetAsLongint: Longint;
+begin
+ if getasboolean then begin
+  result:= -1;
+ end
+ else begin
+  result:= 0;
+ end;
+end;
+
+procedure tmsebooleanfield.SetAsLongint(AValue: Longint);
+begin
+ if avalue = 0 then begin
+  setasboolean(false);
+ end
+ else begin
+  setasboolean(true);
+ end;
 end;
 
 { tmsedatetimefield }
