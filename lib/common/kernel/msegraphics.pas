@@ -86,6 +86,7 @@ type
   font: fontty;
   basefont: fontty;
   glyph: unicharty;
+  rotation: real; //0..1 -> 0°..360° CCW
   name: string;
   charset: string;
   height: integer;
@@ -378,6 +379,7 @@ type
   charset: string;
   options: fontoptionsty;
   glyph: unicharty;
+  rotation: real; //0..1 -> 0°..360° CCW
  end;
  pfontinfoty = ^fontinfoty;
 
@@ -584,6 +586,8 @@ type
    function getstrikeout: boolean;
    procedure setstrikeout(const avalue: boolean);
    procedure createhandle(const canvas: tcanvas);
+   function getrotation: real;
+   procedure setrotation(const avalue: real);
   protected
    finfo: fontinfoty;
    fhandlepo: ^fontnumty;
@@ -591,6 +595,9 @@ type
    procedure setname(const Value: string); virtual;
    function gethandle: fontnumty; virtual;
    function getdatapo: pfontdataty;
+   procedure assignproperties(const source: tfont; const handles: boolean);
+   property rotation: real read getrotation write setrotation; 
+                                 //0..1 -> 0°..360° CCW
   public
    constructor create; override;
    destructor destroy; override;
@@ -611,6 +618,7 @@ type
    property italic: boolean read getitalic write setitalic;
    property underline: boolean read getunderline write setunderline;
    property strikeout: boolean read getstrikeout write setstrikeout;
+   
 
   published
    property color: colorty read getcolor write setcolor default cl_text;
@@ -878,9 +886,11 @@ type
                            const awidth: integer = -1;  const abrush: tsimplebitmap = nil); overload;
    procedure fillxorrect(const arect: rectty; const abrush: tsimplebitmap = nil);
    procedure drawstring(const atext: msestring; const apos: pointty;
-                        const afont: tfont = nil; const grayed: boolean = false); overload;
+                        const afont: tfont = nil; const grayed: boolean = false;
+                        const arotation: real = 0); overload;
    procedure drawstring(const atext: pmsechar; const acount: integer; const apos: pointty;
-                        const afont: tfont = nil; const grayed: boolean = false); overload;
+                        const afont: tfont = nil; const grayed: boolean = false;
+                        const arotation: real = 0); overload;
    function getstringwidth(const atext: msestring; 
                                  const afont: tfont = nil): integer; overload;
    function getstringwidth(const atext: pmsechar; const acount: integer;
@@ -1545,6 +1555,7 @@ var
    data1.style:= fontstylesty({$ifdef FPC}longword{$else}byte{$endif}(style) and
                             fontstylehandlemask);
    data1.glyph:= glyph;
+   data1.rotation:= rotation;
   end;
  end;
 label
@@ -1565,7 +1576,8 @@ begin
 //     (data.xcoreoptions = options * fontxcoremask) and
      ({$ifdef FPC}longword{$else}byte{$endif}(data.style) = style1) and
      (name = data.name) and
-     (charset = data.charset)then begin
+     (charset = data.charset) and
+     (rotation = data.rotation) then begin
      inc(refcount);
      result:= int1 + 1;
      goto endlab
@@ -2616,56 +2628,63 @@ begin
  end;
 end;
 
-procedure tfont.assign(source: tpersistent);
+procedure tfont.assignproperties(const source: tfont; const handles: boolean);
 var
- changed: canvasstatesty;
  int1: integer;
+ changed: canvasstatesty;
+begin
+ changed:= [];
+ with tfont(source) do begin
+  if finfopo^.colorbackground <> self.finfopo^.colorbackground then begin
+   self.finfopo^.colorbackground:= finfopo^.colorbackground;
+   include(changed,cs_fontcolorbackground);
+  end;
+  if finfopo^.colorshadow <> self.finfopo^.colorshadow then begin
+   self.finfopo^.colorshadow:= finfopo^.colorshadow;
+   include(changed,cs_fontcolorshadow);
+  end;
+  if finfopo^.color <> self.finfopo^.color then begin
+   self.finfopo^.color:= finfopo^.color;
+   include(changed,cs_fontcolor);
+  end;
+  if self.finfopo^.style <> finfopo^.style then begin
+   self.finfopo^.style:= finfopo^.style;
+   self.updatehandlepo;
+   include(changed,cs_font);
+  end;
+  if self.finfopo^.extraspace <> finfopo^.extraspace then begin
+   self.finfopo^.extraspace:= finfopo^.extraspace;
+   include(changed,cs_font);
+  end;
+//    if self.finfopo^.height <> finfopo^.height then begin
+//     changed:= changed + [cs_font,cs_fonthandle];
+  self.finfopo^.height:= finfopo^.height;
+  self.finfopo^.width:= finfopo^.width;
+  self.finfopo^.name:= finfopo^.name;
+  self.finfopo^.charset:= finfopo^.charset;
+  self.finfopo^.options:= finfopo^.options;
+//    end;
+  if handles then begin
+   for int1:= 0 to high(self.finfopo^.handles) do begin
+    if self.finfopo^.handles[int1] <> finfopo^.handles[int1] then begin
+     releasefont(self.finfopo^.handles[int1]);
+     self.finfopo^.handles[int1]:= finfopo^.handles[int1];
+     addreffont(self.finfopo^.handles[int1]);
+     changed:= changed + [cs_font,cs_fonthandle];
+    end;
+   end;
+  end;
+ end;
+ if changed <> [] then begin
+  dochanged(changed);
+ end;
+end;
+
+procedure tfont.assign(source: tpersistent);
 begin
  if source <> self then begin
   if source is tfont then begin
-   changed:= [];
-   with tfont(source) do begin
-    if finfopo^.colorbackground <> self.finfopo^.colorbackground then begin
-     self.finfopo^.colorbackground:= finfopo^.colorbackground;
-     include(changed,cs_fontcolorbackground);
-    end;
-    if finfopo^.colorshadow <> self.finfopo^.colorshadow then begin
-     self.finfopo^.colorshadow:= finfopo^.colorshadow;
-     include(changed,cs_fontcolorshadow);
-    end;
-    if finfopo^.color <> self.finfopo^.color then begin
-     self.finfopo^.color:= finfopo^.color;
-     include(changed,cs_fontcolor);
-    end;
-    if self.finfopo^.style <> finfopo^.style then begin
-     self.finfopo^.style:= finfopo^.style;
-     self.updatehandlepo;
-     include(changed,cs_font);
-    end;
-    if self.finfopo^.extraspace <> finfopo^.extraspace then begin
-     self.finfopo^.extraspace:= finfopo^.extraspace;
-     include(changed,cs_font);
-    end;
-//    if self.finfopo^.height <> finfopo^.height then begin
-//     changed:= changed + [cs_font,cs_fonthandle];
-    self.finfopo^.height:= finfopo^.height;
-    self.finfopo^.width:= finfopo^.width;
-    self.finfopo^.name:= finfopo^.name;
-    self.finfopo^.charset:= finfopo^.charset;
-    self.finfopo^.options:= finfopo^.options;
-//    end;
-    for int1:= 0 to high(self.finfopo^.handles) do begin
-     if self.finfopo^.handles[int1] <> finfopo^.handles[int1] then begin
-      releasefont(self.finfopo^.handles[int1]);
-      self.finfopo^.handles[int1]:= finfopo^.handles[int1];
-      addreffont(self.finfopo^.handles[int1]);
-      changed:= changed + [cs_font,cs_fonthandle];
-     end;
-    end;
-   end;
-   if changed <> [] then begin
-    dochanged(changed);
-   end;
+   assignproperties(tfont(source),true);
   end
   else begin
    inherited;
@@ -2760,6 +2779,19 @@ procedure tfont.setoptions(const avalue: fontoptionsty);
 begin
  if finfopo^.options <> avalue then begin
   finfopo^.options:= checkfontoptions(avalue,finfopo^.options);
+  releasehandles;
+ end;
+end;
+
+function tfont.getrotation: real;
+begin
+ result:= finfopo^.rotation;
+end;
+
+procedure tfont.setrotation(const avalue: real);
+begin
+ if finfopo^.rotation <> avalue then begin
+  finfopo^.rotation:= avalue;
   releasehandles;
  end;
 end;
@@ -3865,15 +3897,18 @@ end;
 }
 procedure tcanvas.drawstring(const atext: pmsechar; const acount: integer;
                         const apos: pointty;
-                        const afont: tfont = nil; const grayed: boolean = false);
+                        const afont: tfont = nil; const grayed: boolean = false;
+                        const arotation: real = 0);
 var
  afontnum: integer;
  acolorshadow: colorty;
  acolor: colorty;
 begin
+ 
  with fdrawinfo do begin
   if afont <> nil then begin //foreign font
    with afont do begin
+    rotation:= arotation;
     afontnum:= gethandleforcanvas(self);
     afonthandle1:= afontnum;
 //    afonthandle:= getfontdata(afontnum)^.font;
@@ -3883,6 +3918,7 @@ begin
    end;
   end
   else begin
+   ffont.rotation:= arotation;
    afonthandle1:= ffont.gethandle;
 //   afonthandle:= ffont.getdatapo^.font;
    with fvaluepo^.font do begin
@@ -3924,13 +3960,20 @@ begin
     gdi(gdi_drawstring16);
    end;
   end;
+  if afont <> nil then begin
+   afont.rotation:= 0;
+  end
+  else begin
+   ffont.rotation:= 0;
+  end;
  end;
 end;
 
 procedure tcanvas.drawstring(const atext: msestring; const apos: pointty;
-                 const afont: tfont = nil; const grayed: boolean = false);
+                 const afont: tfont = nil; const grayed: boolean = false;
+                 const arotation: real = 0);
 begin
- drawstring(pointer(atext),length(atext),apos,afont,grayed);
+ drawstring(pointer(atext),length(atext),apos,afont,grayed,arotation);
 end;
 
 function tcanvas.getstringwidth(const atext: pmsechar; const acount: integer;

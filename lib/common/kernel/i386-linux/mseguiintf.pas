@@ -196,8 +196,17 @@ var //xft functions
                c:PPFcCharSet):TFcResult;cdecl;
  FcFontRenderPrepare: function(config:PFcConfig; pat:PFcPattern;
                     font:PFcPattern): PFcPattern;cdecl;
- FcPatternAddCharSet: function(p:PFcPattern; 
-             aobject:Pchar; c:PFcCharSet):TFcBool;cdecl;
+ FcMatrixRotate: procedure(m:PFcMatrix; c:Tdouble; s:Tdouble);cdecl;
+ FcMatrixScale: procedure(m:PFcMatrix; sx:Tdouble; sy:Tdouble);cdecl;
+ FcPatternAddInteger: function(p:PFcPattern; aobject:Pchar; i:longint):TFcBool; cdecl;
+ FcPatternAddDouble: function(p:PFcPattern; aobject:Pchar; d:Tdouble):TFcBool; cdecl;
+ FcPatternAddString: function(p:PFcPattern; aobject:Pchar; s: pansichar):TFcBool; cdecl;
+ FcPatternAddMatrix: function(p:PFcPattern; aobject:Pchar; s:PFcMatrix):TFcBool; cdecl;
+ FcPatternAddCharSet: function(p:PFcPattern;
+                       aobject:Pchar; c:PFcCharSet):TFcBool;cdecl;
+ FcPatternAddBool: function(p:PFcPattern; aobject:Pchar; b:TFcBool):TFcBool; cdecl;
+ FcPatternAddLangSet: function(p:PFcPattern; aobject:Pchar; 
+                         ls:PFcLangSet):TFcBool;cdecl;
  
  XftDrawDestroy: procedure(draw:PXftDraw); cdecl;
  XftDrawSetClipRectangles: function (draw:PXftDraw; xOrigin:longint;
@@ -225,7 +234,8 @@ var //xft functions
                         pattern:PFcPattern);cdecl;
 {$endif}
 function hasxft: boolean;
-function fontdatatoxftname(const fontdata: fontdataty): ansistring;
+//function fontdatatoxftname(const fontdata: fontdataty): string;
+function fontdatatoxftpat(const fontdata: fontdataty): pfcpattern;
 procedure getxftfontdata(po: pxftfont; var drawinfo: drawinfoty);
 
 implementation
@@ -2731,7 +2741,15 @@ begin
      'FcPatternDuplicate',       //15
      'FcPatternGetCharSet',      //16
      'FcFontRenderPrepare',      //17
-     'FcPatternAddCharSet'       //18
+     'FcMatrixRotate',           //18
+     'FcMatrixScale',            //19
+     'FcPatternAddInteger',      //20
+     'FcPatternAddDouble',       //21
+     'FcPatternAddString',       //22
+     'FcPatternAddMatrix',       //23
+     'FcPatternAddCharSet',      //24
+     'FcPatternAddBool',         //25
+     'FcPatternAddLangSet'       //26
      ],
      [
      {$ifndef FPC}@{$endif}@FcPatternDestroy,          //0
@@ -2752,7 +2770,15 @@ begin
      {$ifndef FPC}@{$endif}@FcPatternDuplicate,        //15
      {$ifndef FPC}@{$endif}@FcPatternGetCharSet,       //16
      {$ifndef FPC}@{$endif}@FcFontRenderPrepare,       //17
-     {$ifndef FPC}@{$endif}@FcPatternAddCharSet        //18
+     {$ifndef FPC}@{$endif}@FcMatrixRotate,            //18
+     {$ifndef FPC}@{$endif}@FcMatrixScale,             //19
+     {$ifndef FPC}@{$endif}@FcPatternAddInteger,       //20
+     {$ifndef FPC}@{$endif}@FcPatternAddDouble,        //21
+     {$ifndef FPC}@{$endif}@FcPatternAddString,        //22
+     {$ifndef FPC}@{$endif}@FcPatternAddMatrix,        //23
+     {$ifndef FPC}@{$endif}@FcPatternAddCharSet,       //24
+     {$ifndef FPC}@{$endif}@FcPatternAddBool,          //25
+     {$ifndef FPC}@{$endif}@FcPatternAddLangSet        //26
      ]);
   getprocaddresses('libXft.so',[
     'XftDrawDestroy',            //0
@@ -3674,7 +3700,7 @@ begin
   end;
  end;
 end;
-
+(*
 function buildxftname(const fontdata: fontdataty; 
                                       const fontinfo: fontinfoty): ansistring;
 var
@@ -3754,13 +3780,115 @@ begin
  end;
  result:= str1;
 end;
+*)
 
+function buildxftpat(const fontdata: fontdataty; 
+                                      const fontinfo: fontinfoty): pfcpattern;
+var
+ int1: integer;
+ str1: ansistring;
+ mat1: tfcmatrix;
+ rea1: real;
+begin
+ with fontdata do begin
+  if fontinfo[fn_charset_registry] <> '*' then begin
+   str1:= fontinfo[fn_charset_registry];
+   if fontinfo[fn_encoding] <> '*' then begin
+    str1:= str1 +'-'+fontinfo[fn_encoding];
+   end;
+   result:= xftnameparse(pansichar(str1));
+  end
+  else begin
+   result:= fcpatterncreate();
+  end;
+  if fontinfo[fn_foundry] <> '*' then begin
+   fcpatternaddstring(result,fc_foundry,pansichar(fontinfo[fn_foundry]));
+  end;
+  if (familyoptions = []) then begin
+   if (pitchoptions = []) and (fontinfo[fn_family_name] <> '*') then begin
+    fcpatternaddstring(result,fc_family,pansichar(fontinfo[fn_family_name]));
+   end;
+  end
+  else begin
+   if foo_helvetica in familyoptions then begin
+    fcpatternaddstring(result,fc_family,'sans');
+   end
+   else begin
+    if foo_roman in familyoptions then begin
+     fcpatternaddstring(result,fc_family,'serif');
+    end
+    else begin
+     if foo_decorative in familyoptions then begin
+     end
+     else begin
+      if foo_script in familyoptions then begin
+      end;
+     end;
+    end;
+   end;
+  end;
+  if fs_bold in style then begin
+   fcpatternaddinteger(result,fc_weight,fc_weight_bold);
+  end;
+  if fs_italic in style then begin
+   fcpatternaddinteger(result,fc_slant,fc_slant_italic);
+  end;
+  if fontinfo[fn_pixel_size] <> '*' then begin
+   try
+    fcpatternadddouble(result,fc_pixel_size,strtofloat(fontinfo[fn_pixel_size]));
+   except
+   end;
+  end;
+  if fontinfo[fn_average_width] <> '*' then begin
+   try
+    int1:= (strtoint(fontinfo[fn_average_width]) + 5) div 10;
+    fcpatternaddinteger(result,fc_char_width,int1);
+   except
+   end;
+  end;
+  if foo_fixed in pitchoptions then begin
+   fcpatternaddinteger(result,fc_spacing,fc_mono);
+  end;
+  if foo_proportional in pitchoptions then begin
+   fcpatternaddinteger(result,fc_spacing,fc_proportional);
+  end;
+  if foo_antialiased in antialiasedoptions then begin
+   fcpatternaddbool(result,fc_antialias,true);
+  end;
+  if foo_nonantialiased in antialiasedoptions then begin
+   fcpatternaddbool(result,fc_antialias,false);
+  end;
+  if rotation <> 0 then begin
+   fcmatrixinit(mat1);
+   rea1:= 2*pi*rotation;
+   fcmatrixrotate(@mat1,cos(rea1),sin(rea1));
+   fcpatternaddmatrix(result,fc_matrix,@mat1);
+  end;
+  {
+  if foo_xcore in xcoreoptions then begin
+   str1:= str1 + ':core=1';
+  end;
+  if foo_noxcore in xcoreoptions then begin
+   str1:= str1 + ':core=0';
+  end;
+  }
+ end;
+end;
+{
 function fontdatatoxftname(const fontdata: fontdataty): ansistring;
 var
  fontinfo: fontinfoty;
 begin
  setupfontinfo(fontdata,fontinfo);
  result:= buildxftname(fontdata,fontinfo);
+end;
+}
+function fontdatatoxftpat(const fontdata: fontdataty): pfcpattern;
+var
+ fontinfo: fontinfoty;
+begin
+ setupfontinfo(fontdata,fontinfo);
+ result:= buildxftpat(fontdata,fontinfo);
 end;
 
 function gui_getfont(var drawinfo: drawinfoty): boolean;
@@ -3803,23 +3931,27 @@ var
  po1: pxfontstruct;
  po2: pxftfont;
  fontinfo: fontinfoty;
- str1: string;
+// str1: string;
  int1: integer;
-
+ po3,po4: pfcpattern;
+ res1: tfcresult;
 begin
  setupfontinfo(drawinfo.getfont.fontdata^,fontinfo);
+{$ifdef FPC} {$checkpointer off} {$endif}
  with drawinfo.getfont.fontdata^ do begin
   if fhasxft then begin
-   str1:= buildxftname(drawinfo.getfont.fontdata^,fontinfo);
-   po2:= xftfontopenname(appdisp,xdefaultscreen(appdisp),pchar(str1));
-   if po2 <> nil then begin
-    result:= true;
-  {$ifdef FPC} {$checkpointer off} {$endif}
-    getxftfontdata(po2,drawinfo);
-  {$ifdef FPC} {$checkpointer default} {$endif}
-   end
-   else begin
-    result:= false;
+   result:= false;
+   po3:= buildxftpat(drawinfo.getfont.fontdata^,fontinfo);
+   po4:= xftfontmatch(appdisp,xdefaultscreen(appdisp),po3,@res1);
+   fcpatterndestroy(po3);
+   if po4 <> nil then begin
+    po2:= xftfontopenpattern(appdisp,po4);
+//   str1:= buildxftname(drawinfo.getfont.fontdata^,fontinfo);
+//   po2:= xftfontopenname(appdisp,xdefaultscreen(appdisp),pchar(str1));
+    if po2 <> nil then begin
+     result:= true;
+     getxftfontdata(po2,drawinfo);
+    end;
    end;
   end
   else begin
@@ -3850,9 +3982,7 @@ begin
     end;
    end;
    if po1 <> nil then begin
-  {$ifdef FPC} {$checkpointer off} {$endif}
     getfontdata(po1);
-  {$ifdef FPC} {$checkpointer default} {$endif}
     result:= true;
    end
    else begin
@@ -3860,6 +3990,7 @@ begin
    end;
   end;
  end;
+  {$ifdef FPC} {$checkpointer default} {$endif}
 end;
 
 procedure gui_freefontdata(const data: fontdataty);

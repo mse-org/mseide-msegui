@@ -38,36 +38,43 @@ type           //from fontconfig.h, XftCompat.h
     XftTypeLangSet
  );
 const
- XFT_FAMILY =          'family';	//* String */
- XFT_STYLE =           'style';		//* String */
- XFT_SLANT =           'slant';		//* Int */
- XFT_WEIGHT =	       'weight';	//* Int */
- XFT_SIZE =	       'size';		//* Double */
- XFT_ASPECT =	       'aspect';	//* Double */
- XFT_PIXEL_SIZE =      'pixelsize';     //* Double */
- XFT_SPACING =	       'spacing';	//* Int */
- XFT_FOUNDRY =	       'foundry';	//* String */
- XFT_ANTIALIAS =       'antialias';	//* Bool (depends) */
- XFT_HINTING =	       'hinting';	//* Bool (true) */
- XFT_VERTICAL_LAYOUT = 'verticallayout';//* Bool (false) */
- XFT_AUTOHINT =	       'autohint';	//* Bool (false) */
- XFT_GLOBAL_ADVANCE =  'globaladvance';	//* Bool (true) */
- XFT_FILE =	       'file';		//* String */
- XFT_INDEX =	       'index';		//* Int */
- XFT_FT_FACE =	       'ftface';	//* FT_Face */
- XFT_RASTERIZER =      'rasterizer';	//* String */
- XFT_OUTLINE =	       'outline';	//* Bool */
- XFT_SCALABLE =	       'scalable';	//* Bool */
- XFT_SCALE =	       'scale';		//* double */
- XFT_DPI =             'dpi';		//* double */
- XFT_RGBA =            'rgba';		//* Int */
- XFT_MINSPACE =	       'minspace';	//* Bool use minimum line spacing */
- XFT_SOURCE =	       'source';	//* String (X11, freetype) */
- XFT_CHARSET =	       'charset';	//* CharSet */
- XFT_LANG =            'lang';		//* String RFC 3066 langs */
- XFT_FONTVERSION =     'fontversion';	//* Int from 'head' table */
+ FC_FAMILY =          'family';	//* String */
+ FC_STYLE =           'style';		//* String */
+ FC_SLANT =           'slant';		//* Int */
+ FC_WEIGHT =	       'weight';	//* Int */
+ FC_SIZE =	           'size';      //* Double */
+ FC_ASPECT =	       'aspect';	//* Double */
+ FC_PIXEL_SIZE =      'pixelsize';     //* Double */
+ FC_SPACING =	       'spacing';	//* Int */
+ FC_FOUNDRY =	       'foundry';	//* String */
+ FC_ANTIALIAS =       'antialias';	//* Bool (depends) */
+ FC_HINTING =	       'hinting';	//* Bool (true) */
+ FC_VERTICAL_LAYOUT = 'verticallayout';//* Bool (false) */
+ FC_AUTOHINT =	       'autohint';	//* Bool (false) */
+ FC_GLOBAL_ADVANCE =  'globaladvance';	//* Bool (true) */
+ FC_FILE =	       'file';		//* String */
+ FC_INDEX =	       'index';		//* Int */
+ FC_FT_FACE =	       'ftface';	//* FT_Face */
+ FC_RASTERIZER =      'rasterizer';	//* String */
+ FC_OUTLINE =	       'outline';	//* Bool */
+ FC_SCALABLE =	       'scalable';	//* Bool */
+ FC_SCALE =	       'scale';		//* double */
+ FC_DPI =             'dpi';		//* double */
+ FC_RGBA =            'rgba';		//* Int */
+ FC_MINSPACE =	       'minspace';	//* Bool use minimum line spacing */
+ FC_SOURCE =	       'source';	//* String (X11, freetype) */
+ FC_CHARSET =	       'charset';	//* CharSet */
+ FC_LANG =            'lang';		//* String RFC 3066 langs */
+ FC_FONTVERSION =     'fontversion';	//* Int from 'head' table */
 
- FC_CHARSET =          'charset';
+ FC_MATRIX =          'matrix';
+ FC_CHAR_WIDTH =      'charwidth';
+ 
+ FC_WEIGHT_BOLD = 200;
+ FC_SLANT_ITALIC = 100;
+ FC_PROPORTIONAL = 0;
+ FC_MONO = 100;
+
     const
       External_library='libXft.so';
       fclib = 'libfontconfig.so';
@@ -260,6 +267,8 @@ const
   end;
   PFcFontSet = ^TFcFontSet;
   
+  procedure FcMatrixInit(var m: TFcMatrix);
+  
 {$ifdef staticxft}
     { fccharset.c  }
    function FcCharSetCreate: PFcCharSet;cdecl;
@@ -283,9 +292,22 @@ const
    function FcPatternGetCharSet(p:PFcPattern; aobject:Pchar; n:longint;
                c:PPFcCharSet):TFcResult;cdecl;
             external fclib name 'FcPatternGetCharSet';
-   function FcPatternAddCharSet(p:PFcPattern; 
-             aobject:Pchar; c:PFcCharSet):TFcBool;cdecl;
+   function FcPatternAddInteger(p:PFcPattern; aobject:Pchar; i:longint):TFcBool;
+            cdecl;external fclib name 'FcPatternAddInteger';
+   function FcPatternAddDouble(p:PFcPattern; aobject:Pchar; d:Tdouble):TFcBool;
+            cdecl;external fclib name 'FcPatternAddDouble';
+   function FcPatternAddString(p:PFcPattern; aobject:Pchar; s: pansichar):TFcBool;
+            cdecl;external fclib name 'FcPatternAddString';
+   function FcPatternAddMatrix(p:PFcPattern; aobject:Pchar; s:PFcMatrix):TFcBool;
+            cdecl;external fclib name 'FcPatternAddMatrix';
+   function FcPatternAddCharSet(p:PFcPattern;
+                       aobject:Pchar; c:PFcCharSet):TFcBool;cdecl;
             external fclib name 'FcPatternAddCharSet';
+   function FcPatternAddBool(p:PFcPattern; aobject:Pchar; b:TFcBool):TFcBool;
+            cdecl;external fclib name 'FcPatternAddBool';
+   function FcPatternAddLangSet(p:PFcPattern; aobject:Pchar; 
+                         ls:PFcLangSet):TFcBool;cdecl;
+            external fclib name 'FcPatternAddLangSet';
     { fclist.c }
    function FcObjectSetCreate: PFcObjectSet;cdecl;
                    external fclib name 'FcObjectSetCreate';
@@ -314,6 +336,12 @@ const
     { fcdefault.c  }
    procedure FcDefaultSubstitute(pattern:PFcPattern);cdecl;
                    external fclib name 'FcDefaultSubstitute';
+    { fcmatrix-c }
+   procedure FcMatrixRotate(m:PFcMatrix; c:Tdouble; s:Tdouble);cdecl;
+                   external fclib name 'FcMatrixRotate';
+
+   procedure FcMatrixScale(m:PFcMatrix; sx:Tdouble; sy:Tdouble);cdecl;
+                   external fclib name 'FcMatrixScale';
     { xftcolor.c  }
 
    function XftColorAllocName (dpy: PDisplay; visual: PVisual; cmap: TColormap;
@@ -537,6 +565,14 @@ const
 {$endif staticxft}
 
 implementation
+
+procedure FcMatrixInit(var m: TFcMatrix);
+begin
+ m.xx:= 1;
+ m.yy:= 1;
+ m.xy:= 0;
+ m.yx:= 0;
+end;
 
 
 end.

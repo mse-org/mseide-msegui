@@ -119,6 +119,7 @@ begin
  finfo.glyph:= aglyph;
  fbase:= base;
  inherited create;
+ assignproperties(base,false);
 end;
 
 function tunisubstfont.getfont(var drawinfo: drawinfoty): boolean;

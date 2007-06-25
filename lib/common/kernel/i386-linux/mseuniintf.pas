@@ -22,7 +22,7 @@ uses
  
 function uni_getfontwithglyph(var drawinfo: drawinfoty): boolean;
 var
- str1: ansistring;
+// str1: ansistring;
  pat1: pfcpattern;
  charset1,charset2: pfccharset;
  res1: tfcresult;
@@ -30,13 +30,13 @@ var
  po1: ppfcpattern;
  int1: integer;
  font1: pxftfont;
- 
 begin
  result:= false;
  if hasxft then begin
 {$ifdef FPC} {$checkpointer off} {$endif}
-  str1:= fontdatatoxftname(drawinfo.getfont.fontdata^);
-  pat1:= xftnameparse(pansichar(str1));
+//  str1:= fontdatatoxftname(drawinfo.getfont.fontdata^);
+//  pat1:= xftnameparse(pansichar(str1));
+  pat1:= fontdatatoxftpat(drawinfo.getfont.fontdata^);
   if pat1 <> nil then begin
    with drawinfo.getfont.fontdata^ do begin
     charset1:= fccharsetcreate();
@@ -68,7 +68,6 @@ begin
       for int1:= 0 to nfont - 1 do begin
        if fcpatterngetcharset(po1^,fc_charset,0,@charset2) = fcresultmatch then begin
         if fccharsethaschar(charset2,glyph) then begin
-        {$ifdef FPC} {$checkpointer off} {$endif}
          font1:= xftfontopenpattern(msedisplay,
                                      fcfontrenderprepare(nil,pat1,po1^));
          if font1 <> nil then begin
@@ -79,7 +78,6 @@ begin
           else begin
            xftfontclose(msedisplay,font1);
           end;
-        {$ifdef FPC} {$checkpointer default} {$endif}
          end;
          break;
         end;
