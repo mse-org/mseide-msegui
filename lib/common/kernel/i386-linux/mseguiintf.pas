@@ -3788,7 +3788,6 @@ var
  int1: integer;
  str1: ansistring;
  mat1: tfcmatrix;
- rea1: real;
 begin
  with fontdata do begin
   if fontinfo[fn_charset_registry] <> '*' then begin
@@ -3860,8 +3859,7 @@ begin
   end;
   if rotation <> 0 then begin
    fcmatrixinit(mat1);
-   rea1:= 2*pi*rotation;
-   fcmatrixrotate(@mat1,cos(rea1),sin(rea1));
+   fcmatrixrotate(@mat1,cos(rotation),sin(rotation));
    fcpatternaddmatrix(result,fc_matrix,@mat1);
   end;
   {

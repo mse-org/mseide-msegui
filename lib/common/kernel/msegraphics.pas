@@ -566,8 +566,9 @@ type
    function getlineheight: integer;
    function getcaretshift: integer;
    procedure updatehandlepo;
-   procedure dochanged(changed: canvasstatesty); virtual;
-   procedure releasehandles(destroying: boolean = false);
+   procedure dochanged(const changed: canvasstatesty; 
+                                    const nochange: boolean); virtual;
+   procedure releasehandles(const nochanged: boolean = false);
    function getcharset: string;
    function getname: string;
    procedure setcharset(const Value: string);
@@ -597,7 +598,7 @@ type
    function getdatapo: pfontdataty;
    procedure assignproperties(const source: tfont; const handles: boolean);
    property rotation: real read getrotation write setrotation; 
-                                 //0..1 -> 0°..360° CCW
+                                 //0..2*pi-> 0degree..360degree CCW
   public
    constructor create; override;
    destructor destroy; override;
@@ -647,7 +648,8 @@ type
  tcanvasfont = class(tfont)
   private
    fcanvas: tcanvas;
-   procedure dochanged(changed: canvasstatesty); override;
+   procedure dochanged(const changed: canvasstatesty;
+                              const nochange: boolean); override;
   protected
    function gethandle: fontnumty; override;
   public
@@ -888,6 +890,7 @@ type
    procedure drawstring(const atext: msestring; const apos: pointty;
                         const afont: tfont = nil; const grayed: boolean = false;
                         const arotation: real = 0); overload;
+                         //0..2*pi-> 0degree..360degree CCW
    procedure drawstring(const atext: pmsechar; const acount: integer; const apos: pointty;
                         const afont: tfont = nil; const grayed: boolean = false;
                         const arotation: real = 0); overload;
@@ -2474,7 +2477,7 @@ begin
  finfopo^.colorbackground:= cl_transparent;
  finfopo^.colorshadow:= cl_none;
  updatehandlepo;
- dochanged([cs_fontcolor,cs_fontcolorbackground,cs_fontcolorshadow]);
+ dochanged([cs_fontcolor,cs_fontcolorbackground,cs_fontcolorshadow],true);
 end;
 
 destructor tfont.destroy;
@@ -2541,9 +2544,9 @@ begin
  end;
 end;
 }
-procedure tfont.dochanged(changed: canvasstatesty);
+procedure tfont.dochanged(const changed: canvasstatesty; const nochange: boolean);
 begin
- if assigned(fonchange) then begin
+ if assigned(fonchange) and not nochange then begin
   fonchange(self);
  end;
 end;
@@ -2590,7 +2593,7 @@ procedure tfont.setextraspace(const avalue: integer);
 begin
  if finfopo^.extraspace <> avalue then begin
   finfopo^.extraspace := avalue;
-  dochanged([cs_font]);
+  dochanged([cs_font],false);
  end;
 end;
 
@@ -2598,7 +2601,7 @@ procedure tfont.setcolorbackground(const Value: colorty);
 begin
  if finfopo^.colorbackground <> value then begin
   finfopo^.colorbackground := Value;
-  dochanged([cs_fontcolorbackground]);
+  dochanged([cs_fontcolorbackground],false);
  end;
 end;
 
@@ -2611,7 +2614,7 @@ procedure tfont.setcolorshadow(const Value: colorty);
 begin
  if finfopo^.colorshadow <> value then begin
   finfopo^.colorshadow := Value;
-  dochanged([cs_fontcolorshadow]);
+  dochanged([cs_fontcolorshadow],false);
  end;
 end;
 
@@ -2624,7 +2627,7 @@ procedure tfont.setcolor(const Value: colorty);
 begin
  if finfopo^.color <> value then begin
   finfopo^.color := Value;
-  dochanged([cs_fontcolor]);
+  dochanged([cs_fontcolor],false);
  end;
 end;
 
@@ -2676,7 +2679,7 @@ begin
   end;
  end;
  if changed <> [] then begin
-  dochanged(changed);
+  dochanged(changed,false);
  end;
 end;
 
@@ -2704,11 +2707,11 @@ begin
  if finfopo^.style <> value then begin
   finfopo^.style := Value;
   updatehandlepo;
-  dochanged([cs_font]);
+  dochanged([cs_font],false);
  end;
 end;
 
-procedure tfont.releasehandles(destroying: boolean = false);
+procedure tfont.releasehandles(const nochanged: boolean = false);
 var
  int1: integer;
 begin
@@ -2716,9 +2719,7 @@ begin
   releasefont(finfopo^.handles[int1]);
  end;
  fillchar(finfopo^.handles,sizeof(finfopo^.handles),0);
- if not destroying then begin
-  dochanged([cs_font,cs_fonthandle]);
- end;
+ dochanged([cs_font,cs_fonthandle],nochanged);
 end;
 
 function tfont.getcolor: colorty;
@@ -2792,7 +2793,7 @@ procedure tfont.setrotation(const avalue: real);
 begin
  if finfopo^.rotation <> avalue then begin
   finfopo^.rotation:= avalue;
-  releasehandles;
+  releasehandles(true);
  end;
 end;
 
@@ -2908,7 +2909,8 @@ begin
  inherited create;
 end;
 
-procedure tcanvasfont.dochanged(changed: canvasstatesty);
+procedure tcanvasfont.dochanged(const changed: canvasstatesty;
+                                               const nochange: boolean);
 begin
 // inherited;
  fcanvas.valueschanged(changed);
@@ -3903,10 +3905,12 @@ var
  afontnum: integer;
  acolorshadow: colorty;
  acolor: colorty;
+ font1: tfont;
+ ev1: notifyeventty;
 begin
- 
  with fdrawinfo do begin
   if afont <> nil then begin //foreign font
+   font1:= afont;
    with afont do begin
     rotation:= arotation;
     afontnum:= gethandleforcanvas(self);
@@ -3918,6 +3922,7 @@ begin
    end;
   end
   else begin
+   font1:= ffont;
    ffont.rotation:= arotation;
    afonthandle1:= ffont.gethandle;
 //   afonthandle:= ffont.getdatapo^.font;
@@ -3960,12 +3965,7 @@ begin
     gdi(gdi_drawstring16);
    end;
   end;
-  if afont <> nil then begin
-   afont.rotation:= 0;
-  end
-  else begin
-   ffont.rotation:= 0;
-  end;
+  font1.rotation:= 0;
  end;
 end;
 

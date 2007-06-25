@@ -1220,6 +1220,12 @@ begin
      lfquality:= nonantialiased_quality;
     end;
    end;
+   if rotation <> 0 then begin
+    int1:= round(rotation*((10*360)/(2*pi)));
+    lfescapement:= int1;
+    lforientation:= int1;
+    lfoutprecision:= out_tt_only_precis;
+   end;
    font1:= createfontindirect({$ifdef FPC}@{$endif}fontinfo1);
   end;
   if font1 = 0 then begin
