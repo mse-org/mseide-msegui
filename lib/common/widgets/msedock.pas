@@ -3047,7 +3047,7 @@ begin
                                                                  colorbutton);
    end;
    rect1:= frects[dbr_handle];
-   if fgrip_pos in [cp_top,cp_bottom] then begin
+//   if fgrip_pos in [cp_top,cp_bottom] then begin
     info1.text.text:= fcontroller.caption;
     floating:= fcontroller.isfloating;
     if (info1.text.text <> '') and 
@@ -3057,21 +3057,41 @@ begin
      with info1 do begin
       text.format:= nil;
       dest:= rect1;
-      inc(dest.x,1);
-      dec(dest.cx,1);
       font:= self.font;
       tabulators:= nil;
       flags:= [tf_clipi,tf_ycentered];
-      drawtext(canvas,info1);
-      inc(res.cx,1);
-      inc(rect1.x,res.cx);
-      dec(rect1.cx,res.cx);
-      if rect1.cx < 0 then begin
-       goto endlab;
+      if fgrip_pos in [cp_top,cp_bottom] then begin
+       inc(dest.x,1);
+       dec(dest.cx,1);
+       drawtext(canvas,info1);
+       inc(res.cx,1);
+       inc(rect1.x,res.cx);
+       dec(rect1.cx,res.cx);
+       if rect1.cx < 0 then begin
+        goto endlab;
+       end;
+      end
+      else begin
+       inc(dest.y,1);
+       dec(dest.cy,1);
+       int1:= (dest.cx - font.glyphheight) div 2 + dest.x + font.ascent;
+       canvas.save;
+       canvas.intersectcliprect(dest);
+       canvas.drawstring(text.text,makepoint(int1,dest.y+dest.cy-1),font,
+                        false,pi/2);
+       canvas.restore;
+       res:= dest;
+       res.cy:= canvas.getstringwidth(text.text,font);
+       inc(res.cy,1);
+//       inc(rect1.y,res.cy);
+       dec(rect1.cy,res.cy);
+       if rect1.cy < 0 then begin
+        goto endlab;
+       end;
       end;
      end;
     end;
-   end;
+//   end;
    if fgrip_grip = stb_none then begin
     if fintf.getwidget.active then begin
      col1:= fgrip_coloractive;
