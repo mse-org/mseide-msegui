@@ -249,10 +249,12 @@ type
    procedure setlinecolor(const Value: colorty);
    procedure setlinecolorfix(const Value: colorty);
    procedure setcolorselect(const Value: colorty);
+   procedure setcoloractive(const Value: colorty);
    function islinewidthstored: boolean;
    function islinecolorstored: boolean;
    function islinecolorfixstored: boolean;
    function iscolorselectstored : boolean;
+   function iscoloractivestored : boolean;
   protected
    flinepos: integer;
    flinewidth: integer;
@@ -266,6 +268,7 @@ type
    fcellinfo: cellinfoty;
    foptions: coloptionsty;
    fcolorselect: colorty;
+   fcoloractive: colorty;
    procedure updatelayout; virtual;
    procedure changed; virtual;
    procedure updatecellrect(const aframe: tcustomframe);
@@ -315,6 +318,8 @@ type
                    stored islinecolorfixstored default defaultfixlinecolor;
    property colorselect: colorty read fcolorselect write setcolorselect
                   stored iscolorselectstored default cl_default;
+   property coloractive: colorty read fcoloractive write setcoloractive
+                  stored iscoloractivestored default cl_none;
  end;
 
  gridpropclassty = class of tgridprop;
@@ -798,10 +803,12 @@ type
    flinecolor: colorty;
    flinecolorfix: colorty;
    fcolorselect: colorty;
+   fcoloractive: colorty;
    procedure setlinewidth(const Value: integer);
    procedure setlinecolor(const Value: colorty);
    procedure setlinecolorfix(const Value: colorty);
    procedure setcolorselect(const avalue: colorty);
+   procedure setcoloractive(const avalue: colorty);
   protected
    freversedorder: boolean;
    fgrid: tcustomgrid;
@@ -834,6 +841,8 @@ type
                 write setlinecolorfix default defaultfixlinecolor;
    property colorselect: colorty read fcolorselect write setcolorselect
               default cl_default;
+   property coloractive: colorty read fcoloractive write setcoloractive
+              default cl_none;
 end;
 
  tcols = class(tgridarrayprop)
@@ -1857,6 +1866,7 @@ begin
  fgrid:= agrid;
  fcolor:= cl_default;
  fcolorselect:= aowner.fcolorselect;
+ fcoloractive:= aowner.fcoloractive;
  flinecolor:= aowner.linecolor;
  flinecolorfix:= aowner.linecolorfix;
  flinewidth:= aowner.linewidth;
@@ -1929,6 +1939,14 @@ begin
  end;
 end;
 
+procedure tgridprop.setcoloractive(const Value: colorty);
+begin
+ if value <> fcoloractive then begin
+  fcoloractive := Value;
+  changed;
+ end;
+end;
+
 function tgridprop.islinecolorfixstored: Boolean;
 begin
  result:= flinecolorfix <> tgridarrayprop(prop).flinecolorfix;
@@ -1937,6 +1955,11 @@ end;
 function tgridprop.iscolorselectstored: boolean;
 begin
  result:= fcolorselect <> tgridarrayprop(fowner).fcolorselect;
+end;
+
+function tgridprop.iscoloractivestored: boolean;
+begin
+ result:= fcoloractive <> tgridarrayprop(fowner).fcoloractive;
 end;
 
 function tgridprop.getframe: tcellframe;
@@ -2253,6 +2276,9 @@ begin
    else begin
     result:= defaultselectedcellcolor;
    end;
+  end;
+  if (aindex = fgrid.ffocusedcell.row) and (result = cl_none) then begin
+   result:= fcoloractive;
   end;
   if result = cl_none then begin
    if (co_zebracolor in foptions) then begin
@@ -3370,6 +3396,7 @@ begin
  flinewidth:= defaultgridlinewidth;
  flinecolorfix:= defaultfixlinecolor;
  fcolorselect:= cl_default;
+ fcoloractive:= cl_none;
  inherited create(self,aclasstype);
 end;
 
@@ -3417,6 +3444,18 @@ begin
   fcolorselect:= avalue;
   for int1:= 0 to count - 1 do begin
    tgridprop(items[int1]).colorselect:= avalue;
+  end;
+ end;
+end;
+
+procedure tgridarrayprop.setcoloractive(const avalue: colorty);
+var
+ int1: integer;
+begin
+ if fcoloractive <> avalue then begin
+  fcoloractive:= avalue;
+  for int1:= 0 to count - 1 do begin
+   tgridprop(items[int1]).coloractive:= avalue;
   end;
  end;
 end;
