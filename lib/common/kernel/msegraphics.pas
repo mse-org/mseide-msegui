@@ -380,7 +380,7 @@ type
   charset: string;
   options: fontoptionsty;
   glyph: unicharty;
-  rotation: real; //0..1 -> 0°..360° CCW
+  rotation: real; //0..2*pi -> 0deg..360deg CCW
   xscale: real;   //default 1.0
  end;
  pfontinfoty = ^fontinfoty;

@@ -1157,10 +1157,13 @@ begin
    if height <> 0 then begin
     lfheight:= -height; //use character height
    end;
-   if width <> 0 then begin
-    lfwidth:= (width + 5) div 10;
-    if lfwidth = 0 then begin
-     lfwidth:= 1;
+   if xscale = 1 then begin
+    if width <> 0 then begin
+     lfwidth:= (width + 5) div 10;
+     if lfwidth = 0 then begin
+      lfwidth:= 1;
+     end;
+     lfoutprecision:= out_tt_only_precis;
     end;
    end;
    if fs_bold in style then begin
@@ -1240,6 +1243,17 @@ begin
    fontbefore:= selectobject(dc1,font1);
    if not gettextmetricsa(dc1,{$ifdef FPC}@{$endif}textmetricsa) then begin
     closedc;
+    deleteobject(font1);
+    exit;
+   end;
+   if xscale <> 1 then begin
+    closedc;
+    deleteobject(font1);
+    width:= round(xscale * textmetricsa.tmavecharwidth*10+5) shl fontsizeshift; 
+            //round up, font should not be smaller than PS font
+    xscale:= 1.0;
+    height:= height shl fontsizeshift;
+    result:= gui_getfont(drawinfo);
     exit;
    end;
    with win32fontdataty(platformdata) do begin
