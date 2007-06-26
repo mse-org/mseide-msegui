@@ -3047,6 +3047,7 @@ var
  pt1: pointty;
 begin
  inherited;
+ canvas.font:= getfont;
  if canevent(tmethod(fonbeforepaint)) then begin
   pt1:= clientwidgetpos;
   canvas.move(pt1);

@@ -87,6 +87,7 @@ type
   basefont: fontty;
   glyph: unicharty;
   rotation: real; //0..1 -> 0°..360° CCW
+  xscale: real;   //default 1.0
   name: string;
   charset: string;
   height: integer;
@@ -373,13 +374,14 @@ type
   colorshadow: colorty;
   style: fontstylesty;
   height: integer;
-  width: integer;
+  width: integer;       
   extraspace: integer;
   name: string;
   charset: string;
   options: fontoptionsty;
   glyph: unicharty;
   rotation: real; //0..1 -> 0°..360° CCW
+  xscale: real;   //default 1.0
  end;
  pfontinfoty = ^fontinfoty;
 
@@ -589,6 +591,8 @@ type
    procedure createhandle(const canvas: tcanvas);
    function getrotation: real;
    procedure setrotation(const avalue: real);
+   function getxscale: real;
+   procedure setxscale(const avalue: real);
   protected
    finfo: fontinfoty;
    fhandlepo: ^fontnumty;
@@ -635,6 +639,8 @@ type
    property name: string read getname write setname;
    property charset: string read getcharset write setcharset;
    property options: fontoptionsty read getoptions write setoptions default [];
+   property xscale: real read getxscale write setxscale;
+                                 //default 1.0
  end;
  pfont = ^tfont;
  fontarty = array of tfont;
@@ -1559,6 +1565,7 @@ var
                             fontstylehandlemask);
    data1.glyph:= glyph;
    data1.rotation:= rotation;
+   data1.xscale:= xscale;
   end;
  end;
 label
@@ -1580,7 +1587,8 @@ begin
      ({$ifdef FPC}longword{$else}byte{$endif}(data.style) = style1) and
      (name = data.name) and
      (charset = data.charset) and
-     (rotation = data.rotation) then begin
+     (rotation = data.rotation) and
+     (xscale = data.xscale) then begin
      inc(refcount);
      result:= int1 + 1;
      goto endlab
@@ -2476,6 +2484,7 @@ begin
  finfopo^.color:= cl_text;
  finfopo^.colorbackground:= cl_transparent;
  finfopo^.colorshadow:= cl_none;
+ finfopo^.xscale:= 1.0;
  updatehandlepo;
  dochanged([cs_fontcolor,cs_fontcolorbackground,cs_fontcolorshadow],true);
 end;
@@ -2666,6 +2675,7 @@ begin
   self.finfopo^.name:= finfopo^.name;
   self.finfopo^.charset:= finfopo^.charset;
   self.finfopo^.options:= finfopo^.options;
+  self.finfopo^.xscale:= finfopo^.xscale;
 //    end;
   if handles then begin
    for int1:= 0 to high(self.finfopo^.handles) do begin
@@ -2794,6 +2804,19 @@ begin
  if finfopo^.rotation <> avalue then begin
   finfopo^.rotation:= avalue;
   releasehandles(true);
+ end;
+end;
+
+function tfont.getxscale: real;
+begin
+ result:= finfopo^.xscale;
+end;
+
+procedure tfont.setxscale(const avalue: real);
+begin
+ if finfopo^.xscale <> avalue then begin
+  finfopo^.xscale:= avalue;
+  releasehandles;
  end;
 end;
 

@@ -3857,9 +3857,12 @@ begin
   if foo_nonantialiased in antialiasedoptions then begin
    fcpatternaddbool(result,fc_antialias,false);
   end;
-  if rotation <> 0 then begin
+  if (xscale <> 1.0) or (rotation <> 0) then begin
    fcmatrixinit(mat1);
-   fcmatrixrotate(@mat1,cos(rotation),sin(rotation));
+   mat1.xx:= xscale;
+   if rotation <> 0 then begin
+    fcmatrixrotate(@mat1,cos(rotation),sin(rotation));
+   end;
    fcpatternaddmatrix(result,fc_matrix,@mat1);
   end;
   {
@@ -5330,6 +5333,9 @@ begin
     end;
    end;
   end;
+ end
+ else begin
+  fhasxft:= false;
  end;
  defcolormap:= xdefaultcolormapofscreen(defscreen);
  atomatom:= xinternatom(appdisp,'ATOM',

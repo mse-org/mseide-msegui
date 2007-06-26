@@ -154,8 +154,9 @@ const
 'pop'+nl+                 //
 '} bind def'+nl+
 
-'/sf {'+nl+                     //select font: alias,scale->
-' exch findfont exch scalefont dup /FontMatrix get exch dup /FontBBox get'+nl+
+'/sf {'+nl+                     //select font: alias,scalex,scaley->
+' matrix scale'+     //alias,matrix
+' exch findfont exch makefont dup /FontMatrix get exch dup /FontBBox get'+nl+
 //matrix,font,bbox
 ' aload pop'+ //matrix,font,llx,lly,urx,ury
 ' 5 index'+   //matrix,font,llx,lly,urx,ury,matrix
@@ -167,9 +168,9 @@ const
 ' setfont pop'+nl+
 '} bind def'+nl+
               
-'/sfr {'+nl+                    //select font: alias,scale,rotation->
-' matrix rotate'+               //alias,scale,rotmatrix
-' exch dup matrix scale'+       //alias,rotmatrix,scalematrix
+'/sfr {'+nl+                    //select font: alias,rotation,scalex,scaley->
+' matrix scale'+                //alias,rotation,scalematrix
+' exch matrix rotate'+          //alias,scalematrix,rotmatrix
 ' matrix concatmatrix'+nl+      //alias,concmatrix
 ' exch findfont exch makefont dup /FontMatrix get exch dup /FontBBox get'+nl+
 //matrix,font,bbox
@@ -694,6 +695,7 @@ procedure tpostscriptcanvas.definefont(const adata: fontnumty; const acodepage: 
 var
  str1: string;
  int1,int2: integer;
+ rea1: real;
 begin
  with getfontdata(adata)^ do begin
   str1:= realfontname(name);
@@ -738,9 +740,11 @@ begin
    else begin
     size:= height shr fontsizeshift;
    end;
-   scalestring:= psrealtostr((size / ppmm)*mmtoprintscale) + ' ';
+   rea1:= (size / ppmm) * mmtoprintscale;
+   scalestring:= psrealtostr(rea1 * xscale) + ' ' + 
+                             psrealtostr(rea1) + ' ';
    if rotation <> 0 then begin
-    scalestring:= scalestring + psrealtostr(rotation*radtodeg) +' sfr'+nl;
+    scalestring:= psrealtostr(rotation*radtodeg) + ' ' +scalestring + 'sfr'+nl;
    end
    else begin
     scalestring:= scalestring + 'sf'+nl;
