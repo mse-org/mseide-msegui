@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2006 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2007 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -36,7 +36,7 @@ type
   handle: fontnumty;  
   namenum: integer;
   size: integer;
-  scalestring: string;
+  scalestring1: ansistring;
   rotated: boolean;
   codepages: integerarty;
  end; 
@@ -153,22 +153,8 @@ const
 'definefont '+            //dict 
 'pop'+nl+                 //
 '} bind def'+nl+
-
-'/sf {'+nl+                     //select font: alias,scalex,scaley->
-' matrix scale'+     //alias,matrix
-' exch findfont exch makefont dup /FontMatrix get exch dup /FontBBox get'+nl+
-//matrix,font,bbox
-' aload pop'+ //matrix,font,llx,lly,urx,ury
-' 5 index'+   //matrix,font,llx,lly,urx,ury,matrix
-' transform'+ //matrix,font,llx,lly,urx',ury'
-' /asc exch def pop'+ //matrix,font,llx,lly
-' 3 index'+   //matrix,font,llx,lly,matrix
-' transform'+ //matrix,font,llx',lly'
-' -1 mul'+nl+' /desc exch def pop'+ //matrix,font
-' setfont pop'+nl+
-'} bind def'+nl+
               
-'/sfr {'+nl+                    //select font: alias,rotation,scalex,scaley->
+'/sf {'+nl+                     //select font: alias,rotation,scalex,scaley->
 ' matrix scale'+                //alias,rotation,scalematrix
 ' exch matrix rotate'+          //alias,scalematrix,rotmatrix
 ' matrix concatmatrix'+nl+      //alias,concmatrix
@@ -184,47 +170,47 @@ const
 ' setfont pop'+nl+
 '} bind def'+nl+
 
-'/w {'+nl+    //[[text,font,scale,color,colorbackground],...]-> cx
-              //[[text,font,scale,color],...]-> cx
-              //[[text,font,scale],...]-> cx
+'/w {'+nl+    //[[text,font,rot,scalex,scaley,color,colorbackground],...]-> cx
+              //[[text,font,rot,scalex,scaley,color],...]-> cx
+              //[[text,font,rot,scalex,scaley],...]-> cx
               //[[text],...]-> cx
               //calc stringwidth
 ' currentfont exch'+
 ' 0 exch'+    //0,inputarray
-' {dup length 4 ge {0 3 getinterval} if'+nl+  //remove color
-'  dup length 3 eq'+ //array,arraylength = 3
- ' {aload pop selectfont}'+
+' {dup length 6 ge {0 5 getinterval} if'+nl+  //remove color
+'  dup length 5 eq'+ //array,arraylength = 5
+ ' {aload pop sf}'+
  ' {aload pop}'+
   ' ifelse stringwidth pop add'+
   ' } forall'+
 ' exch setfont'+nl+
 '} bind def'+nl+
 
-'/s {'+nl+    //[[text,font,scale,color,colorbackground],...]-> cx
-              //[[text,font,scale,color],...]-> cx
-              //[[text,font,scale],...]-> cx
+'/s {'+nl+    //[[text,font,rot,scalex,scaley,color,colorbackground],...]-> cx
+              //[[text,font,rot,scalex,scaley,color],...]-> cx
+              //[[text,font,rot,scalex,scaley],...]-> cx
               //[[text],...]-> cx
               //select font, print text, ...
 ' {'+
    ' dup'+
-   ' dup length 4 ge'+ //[bak],[text,font,scale,color[,colorbackground]],length >= 4
-   ' {dup 3 get'+ //[bak],[text,font,scale,color[,colorbackground]],[color]
-    ' aload pop setcolor'+ //[bak],[text,font,scale,color[,colorbackground]]
-//    ' dup length 3 eq'+ //[text,font,scale,color[,colorbackground]],[color],length = 3
-//    ' {aload pop setrgbcolor}'+
-//    ' {aload pop setgray}'+
-//    ' ifelse'+nl+       //[bak],[text,font,scale,color] 
-    ' 0 3 getinterval'+  //[bak],[text,font,scale] remove color
+   ' dup length 6 ge'+ //[bak],
+              //[text,font,rot,scalex,scaley,color[,colorbackground]],length >= 6
+   ' {dup 5 get'+ //[bak],
+              //[text,font,rot,scalex,scaley,color[,colorbackground]],[color]
+    ' aload pop setcolor'+ //[bak],
+              //[text,font,rot,scalex,scaley,color[,colorbackground]]
+    ' 0 5 getinterval'+  //[bak],
+              //[text,font,rot,scalex,scaley] remove color
    ' } if'+nl+  
-  ' dup length 3 eq'+ //array,arraylength = 3
-  ' {aload pop selectfont}'+
+  ' dup length 5 eq'+ //array,arraylength = 5
+  ' {aload pop sf}'+
   ' {aload pop}'+ //[bak],text
   ' ifelse '+nl+
   
-  ' exch dup length 5 eq'+ //text,[bak],length = 5 
-  ' {'+ //text,[text,font,scale,color,colorbackground]
-   ' [currentcolor] exch'+ //text,[colbackup],[text,font,scale,color,colorbackground]
-   ' 4 get'+ //text,[colbackup],[colorbackground]
+  ' exch dup length 7 eq'+ //text,[bak],length = 7 
+  ' {'+ //text,[text,font,scalex,scaley,color,colorbackground]
+   ' [currentcolor] exch'+ //text,[colbackup],[text,font,rot,scalex,scaley,color,colorbackground]
+   ' 6 get'+ //text,[colbackup],[colorbackground]
    ' aload pop setcolor exch'+   //[colbackup],text
    ' dup stringwidth pop'+nl+//[colbackup],text,width
    ' currentpoint currentpoint asc add'+nl+ //[colbackup],text,width,x,y,x,y+asc
@@ -238,8 +224,8 @@ const
    ' exch aload pop setcolor'+           //text 
    ' show'+         
   ' }'+nl+
-  ' {'+
-   ' pop'+
+  ' {'+    //text,[text,font,rot,scalex,scaley,color]
+   ' pop'+ //text
    ' show'+
   ' }'+
   ' ifelse'+
@@ -741,14 +727,8 @@ begin
     size:= height shr fontsizeshift;
    end;
    rea1:= (size / ppmm) * mmtoprintscale;
-   scalestring:= psrealtostr(rea1 * xscale) + ' ' + 
-                             psrealtostr(rea1) + ' ';
-   if rotation <> 0 then begin
-    scalestring:= psrealtostr(rotation*radtodeg) + ' ' +scalestring + 'sfr'+nl;
-   end
-   else begin
-    scalestring:= scalestring + 'sf'+nl;
-   end;
+   scalestring1:= psrealtostr(rotation*radtodeg) + 
+              ' ' + psrealtostr(rea1 * xscale) + ' ' + psrealtostr(rea1);
    additem(codepages,acodepage);
   end;
  end;
@@ -798,7 +778,7 @@ procedure tpostscriptcanvas.selectfont(const afont: fontnumty; const acodepage: 
 begin
  checkfont(afont,acodepage);
  with ffonts[factfont] do begin
-  streamwrite(encodefontname(namenum,acodepage)+scalestring);
+  streamwrite(encodefontname(namenum,acodepage)+scalestring1 + ' sf'+nl);
  end;
 end;
 
@@ -1017,7 +997,7 @@ var
   result:= result + '[('+psencode(po2,po1-po2)+')';
   if fontneeded then begin
    with ffonts[factfont] do begin
-    result:= result + ' '+encodefontname(namenum,factcodepage) + scalestring;
+    result:= result + ' '+encodefontname(namenum,factcodepage) + scalestring1;
    end;
   end;
   if acolor <> cl_none then begin
