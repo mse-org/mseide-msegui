@@ -122,6 +122,8 @@ type
    function isfontstored: boolean;
    function isfontactivestored: boolean;
    procedure dofontchanged(const sender: tobject);
+   procedure sethint(const avalue: msestring);
+   function ishintstored: boolean;
   protected
    finfo: actioninfoty;
    fowner: tcustommenu;
@@ -135,6 +137,7 @@ type
                                      const event: objecteventty); override;
    procedure receiveevent(const event: tobjectevent); override;
    function internalexecute(async: boolean): boolean;
+   function canshowhint: boolean;
   public
    constructor create(const parentmenu: tmenuitem = nil;
                       const aowner: tcustommenu = nil); reintroduce;
@@ -164,6 +167,7 @@ type
    property submenu: tmenuitems read getsubmenu write setsubmenu;
    property caption: captionty read finfo.captiontext write setcaption
                      stored iscaptionstored;
+   property hint: msestring read finfo.hint write sethint stored ishintstored;
    property name: string read fname write fname;
    property state: actionstatesty read finfo.state write setstate 
                      stored isstatestored default [];
@@ -673,6 +677,16 @@ begin
  result:= isactioncaptionstored(finfo);
 end;
 
+procedure tmenuitem.sethint(const avalue: msestring);
+begin
+ setactionhint(iactionlink(self),avalue);
+end;
+
+function tmenuitem.ishintstored: boolean;
+begin
+ result:= isactionhintstored(finfo);
+end;
+
 procedure tmenuitem.setstate(const Value: actionstatesty);
 begin
  setactionstate(iactionlink(self),value);
@@ -1120,6 +1134,23 @@ begin
  inherited;
  if (event = oe_changed) and (sender = finfo.imagelist) then begin
   actionchanged;
+ end;
+end;
+
+function tmenuitem.canshowhint: boolean;
+var
+ item1: tmenuitem;
+begin
+ result:= false;
+ if finfo.hint <> '' then begin
+  item1:= self;
+  while item1 <> nil do begin
+   result:= mao_showhint in item1.options;
+   if item1.options * [mao_showhint,mao_noshowhint] <> []then begin
+    break;
+   end;
+   item1:= item1.fparentmenu;
+  end;
  end;
 end;
 

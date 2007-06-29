@@ -46,8 +46,10 @@ type
                   as_localgroup,as_localonexecute);
  actionstatesty = set of actionstatety;
 
- menuactionoptionty = (mao_separator,mao_checkbox,mao_radiobutton,mao_shortcutcaption,
-                           mao_asyncexecute,mao_singleregion);
+ menuactionoptionty = (mao_separator,mao_checkbox,mao_radiobutton,
+                       mao_shortcutcaption,
+                       mao_asyncexecute,mao_singleregion,
+                       mao_showhint,mao_noshowhint);
  menuactionoptionsty = set of menuactionoptionty;
 
 const

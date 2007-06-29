@@ -82,6 +82,7 @@ type
    procedure fontchanged; override;
    procedure internalcreateframe; override;
    function activateoptionset: boolean;
+   procedure showhint(var info: hintinfoty); override;   
   public
    constructor create(instance: ppopupmenuwidget;
        const amenu: tmenuitem; const transientfor: twindow;
@@ -960,6 +961,7 @@ procedure tpopupmenuwidget.mouseevent(var info: mouseeventinfoty);
 var
  bo1: boolean;
  po1: pointty;
+ int1: integer;
 begin
  with info,flayout do begin
   po1:= translatetoscreen(pos);
@@ -980,12 +982,15 @@ begin
    exit;
   end;
   if eventkind in mouseposevents then begin
-//   if not checkprevpopuparea(translatetoscreen(pos)) then begin
    if not checkprevpopuparea(po1) then begin
     if pointinrect(pos,paintrect) then begin
+     int1:= flayout.activeitem;
      internalsetactiveitem(getcellatpos(flayout,
       subpoint(pos,paintrect.pos)),
                        ss_left in info.shiftstate,false);
+     if int1 <> flayout.activeitem then begin
+      application.restarthint(self);
+     end;
     end
     else begin
      if eventkind = ek_buttonpress then begin
@@ -1369,6 +1374,23 @@ end;
 function tpopupmenuwidget.activateoptionset: boolean;
 begin
  result:= (fmenucomp <> nil) and (mo_activate in fmenucomp.options);
+end;
+
+procedure tpopupmenuwidget.showhint(var info: hintinfoty);
+begin
+ inherited;
+ with flayout do begin
+  if (activeitem >= 0) and tmenuitem1(menu.items[activeitem]).canshowhint then begin
+   info.caption:= menu.items[activeitem].hint;
+  end;
+  {
+  else begin
+   if tmenuitem1(menu).canshowhint then begin
+    info.caption:= menu.hint;
+   end;
+  end;
+  }
+ end;
 end;
 
 { tcustommainmenuwidget }

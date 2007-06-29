@@ -875,7 +875,10 @@ begin
  end;
 end;
 
-procedure setactionoptions(const sender: iactionlink; const value: menuactionoptionsty);
+procedure setactionoptions(const sender: iactionlink;
+                                          const value: menuactionoptionsty);
+const
+ mask: menuactionoptionsty = [mao_showhint,mao_noshowhint];
 var
  optionsbefore: menuactionoptionsty;
  po1: pactioninfoty;
@@ -883,8 +886,11 @@ begin
  po1:= sender.getactioninfopo;
  with po1^ do begin
   optionsbefore:= options;
-  options:= value;
-  if optionsbefore * [mao_shortcutcaption] <> options * [mao_shortcutcaption] then begin
+  options:= menuactionoptionsty(setsinglebit({$ifdef FPC}longword{$else}byte{$endif}(value),
+                         {$ifdef FPC}longword{$else}byte{$endif}(options),
+                         {$ifdef FPC}longword{$else}byte{$endif}(mask)));
+  if optionsbefore * [mao_shortcutcaption] <> options * 
+                                     [mao_shortcutcaption] then begin
    calccaptiontext(po1^,sender.shortcutseparator);
   end;
  end;

@@ -1612,6 +1612,7 @@ type
                       ); overload;
    procedure showhint(const sender: twidget; const info: hintinfoty); overload;
    procedure hidehint;
+   procedure restarthint(const sender: twidget);
    function hintedwidget: twidget; //last hinted widget
    function activehintedwidget: twidget; //nil if no hint active
    
@@ -12705,6 +12706,17 @@ var
 begin
  for int1:= 0 to high(fwindows) do begin
   fwindows[int1].fowner.invalidate;
+ end;
+end;
+
+procedure tapplication.restarthint(const sender: twidget);
+begin
+ with tinternalapplication(self) do begin
+  if fhintedwidget = sender then begin
+   deactivatehint;
+   fhinttimer.interval:= -hintdelaytime;
+   fhinttimer.enabled:= true;
+  end;
  end;
 end;
 
