@@ -59,6 +59,7 @@ const
 type
 
  fontstylety = (fs_bold,fs_italic,fs_underline,fs_strikeout,fs_selected);
+                      //order fix
  fontstylesty = set of fontstylety;
                                        //fontalias option char:
  fontoptionty = (foo_fixed,            // 'p'
@@ -348,7 +349,9 @@ type
                  rop_notcopy,rop_notor,rop_nand,rop_set);
 const
  fontstylehandlemask = 3; //[fs_bold,fs_italic]
- fontstylesmamask = $1f;  //[fs_bold,fs_italic,fs_underline,fs_strikeout,fs_selected]
+// fontstylesmamask = $1f;  //[fs_bold,fs_italic,fs_underline,fs_strikeout,fs_selected]
+ fontstylesmamask: fontstylesty = 
+           [fs_bold,fs_italic,fs_underline,fs_strikeout,fs_selected];
 
 type
  tfont = class;

@@ -37,6 +37,7 @@ type
   namenum: integer;
   size: integer;
   scalestring1: ansistring;
+  scalestringfull: ansistring;
   rotated: boolean;
   codepages: integerarty;
  end; 
@@ -64,6 +65,7 @@ type
    function encodefontname(const namenum,codepage: integer): string;
    function checkfont(const afont: fontnumty; const acodepage: integer): integer;
                //returns index in ffonts
+   function getscalestring(const astyle: fontstylesty): ansistring;
    procedure selectfont(const afont: fontnumty; const acodepage: integer);
    procedure definefont(const adata: fontnumty; const acodepage: integer);
    procedure setpslinewidth(const avalue: integer);
@@ -80,7 +82,8 @@ type
    function getshowstring(const avalue: pmsechar; const count: integer;
                    fontneeded: boolean = false;
                    const acolor: colorty = cl_none;
-                   const acolorbackground: colorty = cl_none): string;
+                   const acolorbackground: colorty = cl_none;
+                   const fontstyle: fontstylesty = []): string;
    function createpattern(const sourcerect,destrect: rectty; 
                    const acolorbackground,acolorforeground: colorty;
                    const pixmap: pixmapty; const agchandle: cardinal;
@@ -137,6 +140,7 @@ const
  patpatname = 'pat';
  radtodeg = 360/(2*pi);
  nl = lineend;  
+ maxlinecharcount = 80;
  preamble = 
 '/rf {'+nl+        //register font: alias,encoding,origname->
 'findfont'+nl+         //alias,encoding,font
@@ -153,14 +157,49 @@ const
 'definefont '+            //dict 
 'pop'+nl+                 //
 '} bind def'+nl+
-              
-'/sf {'+nl+                     //select font: alias,rotation,scalex,scaley->
-' matrix scale'+                //alias,rotation,scalematrix
-' exch matrix rotate'+          //alias,scalematrix,rotmatrix
-' matrix concatmatrix'+nl+      //alias,concmatrix
-' exch findfont exch makefont dup /FontMatrix get exch dup /FontBBox get'+nl+
-//matrix,font,bbox
-' aload pop'+ //matrix,font,llx,lly,urx,ury
+                             //                    
+'/sf {'+nl+         //select font:    |-> optional
+                    //[alias,scale(x),scaley,rotation,underline,stroke]->
+'dup'+              //[bak],[alias,scale(x),scaley,rotation]
+' length 2 ge'   +     //[bak], length >= 2
+ ' {dup'+           //[bak][alias,scale(x),scaley]
+ ' dup length 3 ge'+nl+ //[bak],[alias,scale(x),scaley],length >= 3
+  '{1 2 getinterval aload pop}'+ //[bak],scalex,scaley
+  ' {1 get dup}'+       //[bak],scale,scale
+ ' ifelse'+nl+
+ 'matrix scale'+           //[bak],smatrix
+ ' }'+
+ ' {matrix}'+              //[bak],umatrix
+' ifelse'+nl+
+
+' 1 index'+         //[bak],smatrix,[alias,scale(x),scaley,rotation]
+' length 4 ge'+     //[bak],smatrix, length >= 4
+ ' {1 index'+        //[bak],smatrix,[alias,scale(x),scaley,rotation]
+ ' 3 get'+           //[bak],smatrix,rotation
+ ' matrix rotate'+   //[bak],smatrix,rmatrix
+ ' matrix concatmatrix}'+
+' if'+nl+   
+
+'1 index'+             //[bak],rmatrix,[alias,scale(x),scaley,rotation,underline,stroke]
+' dup length 5 ge'   + //[bak],rmatrix,
+                       //[alias,scale(x),scaley,rotation,underline,stroke], length >= 5
+' {dup 4 get}'+        //[bak],rmatrix,[bak],underline
+' {0} ifelse'+         //[bak],rmatrix,[bak],0
+' /uli exch def'+nl+
+'dup length 6 ge'   + //[bak],rmatrix,[bak]
+                      //[alias,scale(x),scaley,rotation,underline,stroke], length >= 6
+' {5 get}'+           //[bak],rmatrix,strokeout
+' {pop 0} ifelse'+    //[bak],rmatrix,0
+' /sou exch def'+nl+  //
+
+'exch '+               //matrix,[alias]
+' 0 get'+              //matrix,alias
+' findfont'+           //matrix,font
+' exch makefont'+            //font
+' dup /FontMatrix get exch'+ //matrix,font 
+' dup /FontBBox get'+nl+
+                       //matrix,font,bbox
+'aload pop'+ //matrix,font,llx,lly,urx,ury
 ' 5 index'+   //matrix,font,llx,lly,urx,ury,matrix
 ' transform'+ //matrix,font,llx,lly,urx',ury'
 ' /asc exch def pop'+ //matrix,font,llx,lly
@@ -170,47 +209,51 @@ const
 ' setfont pop'+nl+
 '} bind def'+nl+
 
-'/w {'+nl+    //[[text,font,rot,scalex,scaley,color,colorbackground],...]-> cx
-              //[[text,font,rot,scalex,scaley,color],...]-> cx
-              //[[text,font,rot,scalex,scaley],...]-> cx
+'/w {'+nl+    //[[text,[font],color,colorbackground],...]-> cx
+              //[[text,[font],color],...]-> cx
+              //[[text,[font]],...]-> cx
               //[[text],...]-> cx
               //calc stringwidth
-' currentfont exch'+
-' 0 exch'+    //0,inputarray
-' {dup length 6 ge {0 5 getinterval} if'+nl+  //remove color
-'  dup length 5 eq'+ //array,arraylength = 5
- ' {aload pop sf}'+
- ' {aload pop}'+
-  ' ifelse stringwidth pop add'+
-  ' } forall'+
+' currentfont exch'+            //fontbak,inputarray
+' 0 exch'+    //fontback,0,inputarray
+' {'+         //fontback,sum,[text,[font],color,colorbackground]
+ ' dup length 2 ge'+ //fontback,sum,[text,[font],color,colorbackground],length>=2
+  '{ dup 1 get sf}'+nl+
+ 'if'+    //fontback,sum,[text,[font],color,colorbackground]
+                            //set font
+ ' 0 get'+              //fontback,sum,text
+ ' stringwidth pop add'+//fontback,sum
+' } forall'+
 ' exch setfont'+nl+
 '} bind def'+nl+
 
-'/s {'+nl+    //[[text,font,rot,scalex,scaley,color,colorbackground],...]-> cx
-              //[[text,font,rot,scalex,scaley,color],...]-> cx
-              //[[text,font,rot,scalex,scaley],...]-> cx
+'/s {'+nl+    //[[text,[font],color,colorbackground],...]-> cx
+              //[[text,[font],color,colorbackground],...]-> cx
+              //[[text,[font],color],...]-> cx
+              //[[text,[font]],...]-> cx
               //[[text],...]-> cx
               //select font, print text, ...
 ' {'+
+   ' currentpoint /ay exch def /ax exch def'+ //backup for underline
    ' dup'+
-   ' dup length 6 ge'+ //[bak],
-              //[text,font,rot,scalex,scaley,color[,colorbackground]],length >= 6
-   ' {dup 5 get'+ //[bak],
-              //[text,font,rot,scalex,scaley,color[,colorbackground]],[color]
+   ' dup length 3 ge'+nl+     //[bak],
+                           //[text,[font],color,colorbackground],length >= 3
+   '{dup 2 get'+          //[bak],
+                           //[text,[font],color,colorbackground],[color]
     ' aload pop setcolor'+ //[bak],
-              //[text,font,rot,scalex,scaley,color[,colorbackground]]
-    ' 0 5 getinterval'+  //[bak],
-              //[text,font,rot,scalex,scaley] remove color
+                           //[text,[font],color,colorbackground]
+    ' 0 2 getinterval'+    //[bak],
+                           //[text,[font]]     remove color
    ' } if'+nl+  
-  ' dup length 5 eq'+ //array,arraylength = 5
-  ' {aload pop sf}'+
-  ' {aload pop}'+ //[bak],text
+  ' dup length 2 eq'+ //array,arraylength = 5
+  ' {aload pop sf}'+  //[bak],text
+  ' {aload pop}'+     //[bak],text
   ' ifelse '+nl+
   
-  ' exch dup length 7 eq'+ //text,[bak],length = 7 
-  ' {'+ //text,[text,font,scalex,scaley,color,colorbackground]
-   ' [currentcolor] exch'+ //text,[colbackup],[text,font,rot,scalex,scaley,color,colorbackground]
-   ' 6 get'+ //text,[colbackup],[colorbackground]
+  ' exch dup length 4 eq'+ //text,[bak],length = 4
+  ' {'+ //text,[text,[font],color,colorbackground]
+   ' [currentcolor] exch'+ //text,[colbackup],[text,[font],color,colorbackground]
+   ' 3 get'+ //text,[colbackup],[colorbackground]
    ' aload pop setcolor exch'+   //[colbackup],text
    ' dup stringwidth pop'+nl+//[colbackup],text,width
    ' currentpoint currentpoint asc add'+nl+ //[colbackup],text,width,x,y,x,y+asc
@@ -228,8 +271,9 @@ const
    ' pop'+ //text
    ' show'+
   ' }'+
-  ' ifelse'+
-  
+  ' ifelse'+nl+
+  ' uli 0 ne {ul} if'+          //underline
+  ' sou 0 ne {so} if'+          //strokeout
 ' } forall'+nl+
 '} bind def'+nl+
 
@@ -258,7 +302,7 @@ const
 ' cy'+          //text,llx,lly,urx,centeredy 
 ' 3 index exch'+ //text,llx,lly,urx,llx,ury-lly-asc-desc/2+lly+desc
 ' moveto '+nl+
-' currentpoint /ay exch def /ax exch def'+ //backup for underline
+//' currentpoint /ay exch def /ax exch def'+ //backup for underline
                        //text,llx,lly,urx
 ' pop pop pop s'+nl+
 '} bind def'+nl+
@@ -270,7 +314,7 @@ const
 ' w'+            //text,llx,lly,newy,urx,cx
 ' sub'+          //text,llx,lly,newy,urx-cx
 ' exch moveto'+      //text,llx,lly
-' currentpoint /ay exch def /ax exch def'+ //text,llx,lly
+//' currentpoint /ay exch def /ax exch def'+ //text,llx,lly
 ' pop pop s'+nl+
 '} bind def'+nl+
 
@@ -286,14 +330,15 @@ const
 ' 4 index add'+nl+ //text,llx,lly,urx,centeredy,(urx-llx-cx)/2+llx
 ' exch'+        //text,llx,lly,urx,newx,centeredy
 ' moveto'+nl+   //text,llx,lly,urx
-' currentpoint /ay exch def /ax exch def'+ //text,llx,lly,urx
+//' currentpoint /ay exch def /ax exch def'+ //text,llx,lly,urx
 ' pop pop pop s'+nl+
 ' } bind def'+nl+
 
 '/slb {'+nl+ //print lefttop text,llx,lly,urx,ury ->
 ' pop pop'+  //text,llx,lly
 ' desc add'+ //text,llx,lly+desc
-' moveto currentpoint /ay exch def /ax exch def'+ //backup for underline
+' moveto'+
+//' currentpoint /ay exch def /ax exch def'+ //backup for underline
              //text
 ' s'+nl+
 '} bind def'+nl+
@@ -307,7 +352,7 @@ const
 ' 3 index'+     //text,llx,lly,urx,ury,urx-cx,lly
 ' desc add'+    //text,llx,lly,urx,ury,urx-cx,lly+desc
 ' moveto'+nl+
-' currentpoint /ay exch def /ax exch def'+ //text,llx,lly,urx,ury
+//' currentpoint /ay exch def /ax exch def'+ //text,llx,lly,urx,ury
 ' pop pop pop pop s'+
 '} bind def'+nl+
 
@@ -320,7 +365,7 @@ const
 ' exch'+       //text,llx,lly,urx,urx-cx,ury
 ' asc sub'+    //text,llx,lly,urx,urx-cx,ury-asc
 ' moveto'+nl+
-' currentpoint /ay exch def /ax exch def'+ //text,llx,lly,urx
+//' currentpoint /ay exch def /ax exch def'+ //text,llx,lly,urx
 ' pop pop pop s'+
 '} bind def'+nl+
  
@@ -336,7 +381,7 @@ const
 ' exch'+        //text,llx,lly,urx,newx,ury
 ' asc sub'+     //text,llx,lly,urx,newx,ury-asc
 ' moveto'+      //text,llx,lly,urx
-' currentpoint /ay exch def /ax exch def'+ //text,llx,lly,urx
+//' currentpoint /ay exch def /ax exch def'+ //text,llx,lly,urx
 ' pop pop pop s'+nl+
 '} bind def'+nl+
 
@@ -352,7 +397,7 @@ const
 ' 3 index'+     //text,llx,lly,urx,ury,newx,lly
 ' desc add'+    //text,llx,lly,urx,ury,newx,lly+desc
 ' moveto'+      //text,llx,lly,urx,ury
-' currentpoint /ay exch def /ax exch def'+ //text,llx,lly,urx,ury
+//' currentpoint /ay exch def /ax exch def'+ //text,llx,lly,urx,ury
 ' pop pop pop pop s'+nl+
 '} bind def'+nl+
 
@@ -610,7 +655,7 @@ const
 
 function psrealtostr(const avalue: real): string;
 begin
- result:= replacechar(formatfloat('0.000',avalue),decimalseparator,'.');
+ result:= replacechar(formatfloat('0.###',avalue),decimalseparator,'.');
           //todo: optimize
 // result:= formatfloatmse(avalue,'0.000');
 end;
@@ -677,7 +722,8 @@ begin
  result:= '/F' + hextostr(codepage,2)+inttostr(namenum)+' ';
 end;
 
-procedure tpostscriptcanvas.definefont(const adata: fontnumty; const acodepage: integer);
+procedure tpostscriptcanvas.definefont(const adata: fontnumty;
+                                 const acodepage: integer);
 var
  str1: string;
  int1,int2: integer;
@@ -720,6 +766,7 @@ begin
   with ffonts[high(ffonts)] do begin
    handle:= adata;
    namenum:= int2;
+   additem(codepages,acodepage);
    if height = 0 then begin
     size:= round(defaultfontheight*ppmm);
    end
@@ -727,9 +774,18 @@ begin
     size:= height shr fontsizeshift;
    end;
    rea1:= (size / ppmm) * mmtoprintscale;
-   scalestring1:= psrealtostr(rotation*radtodeg) + 
-              ' ' + psrealtostr(rea1 * xscale) + ' ' + psrealtostr(rea1);
-   additem(codepages,acodepage);
+   scalestring1:= psrealtostr(rea1 * xscale);     //xscale
+   scalestringfull:= scalestring1;
+   str1:= ' ' + psrealtostr(rea1);                //yscale
+   scalestringfull:= scalestringfull + str1;
+   if (xscale <> 1) or (rotation <> 0) then begin
+    scalestring1:= scalestring1 + str1;
+   end;
+   str1:= ' ' + psrealtostr(rotation*radtodeg);
+   scalestringfull:= scalestringfull + str1;
+   if rotation <> 0 then begin 
+    scalestring1:= scalestring1 + str1;
+   end;
   end;
  end;
 end;
@@ -774,12 +830,37 @@ begin
  factcodepage:= acodepage;
 end;
 
+function tpostscriptcanvas.getscalestring(const astyle: fontstylesty): ansistring;
+begin
+ with ffonts[factfont] do begin
+  if (astyle * [fs_underline,fs_strikeout] <> []) then begin
+   result:= scalestringfull;
+   if fs_underline in astyle then begin
+    result:= result + ' 1';
+   end
+   else begin
+    result:= result + ' 0';
+   end;
+   if fs_strikeout in astyle then begin
+    result:= result + ' 1';
+   end;
+  end
+  else begin
+   result:= scalestring1;
+  end;
+ end;
+end;
+
 procedure tpostscriptcanvas.selectfont(const afont: fontnumty; const acodepage: integer);
 begin
  checkfont(afont,acodepage);
+ streamwrite('['+encodefontname(ffonts[factfont].namenum,acodepage)+
+                            getscalestring(font.style) + '] sf'+nl);
+ {
  with ffonts[factfont] do begin
-  streamwrite(encodefontname(namenum,acodepage)+scalestring1 + ' sf'+nl);
+  streamwrite('['+encodefontname(namenum,acodepage)+scalestring1 + '] sf'+nl);
  end;
+ }
 end;
 
 procedure tpostscriptcanvas.ps_destroygc;
@@ -985,7 +1066,8 @@ end;
 function tpostscriptcanvas.getshowstring(const avalue: pmsechar; 
           const count: integer; fontneeded: boolean = false; 
           const acolor: colorty = cl_none;
-          const acolorbackground: colorty = cl_none): string;
+          const acolorbackground: colorty = cl_none;
+          const fontstyle: fontstylesty = []): string;
 var
  int1: integer;
  wo1,wo2: word;
@@ -997,7 +1079,9 @@ var
   result:= result + '[('+psencode(po2,po1-po2)+')';
   if fontneeded then begin
    with ffonts[factfont] do begin
-    result:= result + ' '+encodefontname(namenum,factcodepage) + scalestring1;
+//    result:= result + ' ['+encodefontname(namenum,factcodepage) + scalestring1+']';
+    result:= result + ' ['+encodefontname(namenum,factcodepage) + 
+                                             getscalestring(fontstyle)+']';
    end;
   end;
   if acolor <> cl_none then begin
@@ -1056,32 +1140,47 @@ end;
 procedure tpostscriptcanvas.textout(const text: richstringty; const dest: rectty;
          const flags: textflagsty; const tabdist: real);
 const
+ fontstylemask = [ni_bold,ni_italic,ni_underline,ni_strikeout];
  mask1 = [tf_xcentered,tf_right];
  mask2 = [tf_ycentered,tf_bottom];
 var
- str1: string;
+ str1: ansistring;
  int1,int2,int3: integer;
  co1,co2: colorty;
  colorchanged: boolean;
+ style1: fontstylesty;
+ lastbreak: integer;
+ 
+ procedure addstring(const astring: ansistring);
+ begin
+  if (length(str1) - lastbreak) + length(astring) > maxlinecharcount then begin
+   str1:= str1+ nl;
+   lastbreak:= length(str1);
+  end;
+  str1:= str1+astring;
+ end;
  
 begin
  if not active {or (text.text = '')} then begin
   exit;
  end;
  colorchanged:= false;
+ lastbreak:= 0;
  str1:= '['; 
  if (text.format = nil) or (text.text = '') then begin
-  str1:= str1 + getshowstring(pmsechar(text.text),length(text.text))+'] ';
+  addstring(getshowstring(pmsechar(text.text),length(text.text),
+                true,cl_none,cl_none,font.style)+'] ');
  end
  else begin
   gcfonthandle1:= 0; //invalid after print
   with text.format[0] do begin
    if index > 0 then begin
-    str1:= str1 + getshowstring(pmsechar(pointer(text.text)),index);
+    addstring(getshowstring(pmsechar(pointer(text.text)),index));
    end;
   end;
   co1:= cl_none;
   co2:= cl_none;
+  style1:= font.style;
   for int1:= 0 to high(text.format) do begin
    with text.format[int1] do begin
     if int1 = high(text.format) then begin
@@ -1097,7 +1196,11 @@ begin
     if int2 > length(text.text) then begin
      int2:= length(text.text);
     end;
-    font.style:= style.fontstyle;
+    if newinfos * fontstylemask <> [] then begin
+     style1:= style1 * fontstylesty(
+           not {$ifdef FPC}longword{$else}byte{$endif}(newinfos)) + style.fontstyle;
+    end;
+    font.style:= style1;
     checkfont(font.handle,(word(text.text[int2]) and $ff00) shr 8);
     int2:= int3 - index;
     if int2 > 0 then begin
@@ -1119,7 +1222,8 @@ begin
        co2:= style.colorbackground^;
       end;
      end;
-     str1:= str1 + getshowstring(pmsechar(pointer(text.text))+index,int2,true,co1,co2);
+     addstring(getshowstring(pmsechar(pointer(text.text))+index,int2,true,co1,co2,
+                               style1));
     end;
    end;   
   end;
@@ -1146,12 +1250,14 @@ begin
         ({$ifdef FPC}longword{$else}word{$endif}(flags*mask2) shr 1); 
         //remove tf_xjustify
  str1:= str1+alignmentsubs[tftopa[int1]];
+{
  if fs_underline in font.style then begin
   str1:= str1 + ' ul';
  end;
  if fs_strikeout in font.style then begin
   str1:= str1 + ' so';
  end;
+}
  if colorchanged then begin
   str1:= str1 + ' '+setcolorstring(font.color);
  end;

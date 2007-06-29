@@ -106,6 +106,7 @@ type
  end;
  
  tsqlscriptsqlpropertyeditor = class(tsqlpropertyeditor)
+                      //todo: implement getutf8
   private
   protected
    procedure doafterclosequery(var amodalresult: modalresultty); override;
