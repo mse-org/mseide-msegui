@@ -1254,16 +1254,22 @@ begin
       exclude(options,mlo_keymode);
       if not isup(factposition) then begin
        deactivatemenu;
-       if (fprevpopup <> nil) and (mlo_main in fprevpopup.flayout.options) then begin
+       if (fprevpopup <> nil) and 
+            (fprevpopup.flayout.options * [mlo_main,mlo_horz] = 
+                                            [mlo_main,mlo_horz]) then begin
         exclude(eventstate,es_processed);
        end;
       end
       else begin
-       with rootpopup do begin
-        if mlo_main in flayout.options then begin
-         exclude(eventstate,es_processed);
-         dokeydown(info);
-         include(eventstate,es_processed);
+       if rootpopup <> self then begin
+        with rootpopup do begin
+         if mlo_main in flayout.options then begin
+          exclude(eventstate,es_processed);
+          swapkeys;
+          dokeydown(info);
+          swapkeys;
+          include(eventstate,es_processed);
+         end;
         end;
        end;
       end;
