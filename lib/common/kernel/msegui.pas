@@ -563,7 +563,6 @@ type
  tfacecomp = class;
  tcustomface = class(toptionalpersistent)
   private
-   fi: faceinfoty;
    flocalprops: facelocalpropsty;
    ftemplate: tfacecomp;
    falphabuffer: tmaskedbitmap;
@@ -586,6 +585,7 @@ type
    procedure setlocalprops(const avalue: facelocalpropsty);
   protected
    fintf: iface;
+   fi: faceinfoty;
    procedure dochange(const sender: tarrayprop; const index: integer);
    procedure change;
    procedure imagechanged(const sender: tobject);

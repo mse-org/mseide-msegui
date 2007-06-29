@@ -319,7 +319,7 @@ const
 
 type
 
- tgripframe = class(tcaptionframe,iobjectpicker)
+ tgripframe = class(tcaptionframe,iobjectpicker,iface)
   private
    fgrip_pos: captionposty;
    fgrip_color: colorty;
@@ -333,6 +333,7 @@ type
    fgrip_colorbutton: colorty;
    fgrip_colorbuttonactive: colorty;
    fgrip_colorglyphactive: colorty;
+   fgrip_face: tface;
    procedure setgrip_color(const avalue: colorty);
    procedure setgrip_grip(const avalue: stockbitmapty);
    procedure setgrip_size(const avalue: integer);
@@ -343,6 +344,9 @@ type
    procedure setgrip_colorbutton(const avalue: colorty);
    procedure setgrip_colorbuttonactive(const avalue: colorty);
    procedure setgrip_colorglyphactive(const avalue: colorty);
+   function getgrip_face: tface;
+   procedure setgrip_face(const avalue: tface);
+   procedure createface;
   protected
    frects: array[dbr_first..dbr_last] of rectty;
    fgriprect: rectty;
@@ -352,8 +356,10 @@ type
    procedure getpaintframe(var frame: framety); override;
    function calcsizingrect(const akind: sizingkindty;
                                 const offset: pointty): rectty;
-      //iobjectpicker
+   //iface
    function getwidget: twidget;
+   function translatecolor(const acolor: colorty): colorty;
+      //iobjectpicker
    function getcursorshape(const pos: pointty; const shiftstate: shiftstatesty; 
                                      var shape: cursorshapety): boolean;
     //true if found
@@ -397,6 +403,7 @@ type
                  setgrip_colorbuttonactive default cl_transparent;
    property grip_options: gripoptionsty read fgrip_options write setgrip_options
                                                      default defaultgripoptions;
+   property grip_face: tface read getgrip_face write setgrip_face;
  end;
 
  tdockpanel = class(tscalingwidget,idockcontroller,idocktarget,istatfile)
@@ -456,6 +463,7 @@ type
  twindow1 = class(twindow);
  tcustomframe1 = class(tcustomframe);
  tcustomtabwidget1 = class(tcustomtabwidget);
+ tface1 = class(tface);
 
 const
  useroptionsmask: optionsdockty = [od_fixsize,od_top,od_background];
@@ -2897,6 +2905,7 @@ end;
 destructor tgripframe.destroy;
 begin
  fobjectpicker.free;
+ fgrip_face.free;
  inherited;
 end;
 
@@ -3001,6 +3010,8 @@ var
  info1: drawtextinfoty;
  floating: boolean;
  colorbutton,colorglyph: colorty;
+ bo1: boolean;
+ dirbefore: graphicdirectionty;
 label
  endlab;
 begin
@@ -3050,6 +3061,21 @@ begin
 //   if fgrip_pos in [cp_top,cp_bottom] then begin
     info1.text.text:= fcontroller.caption;
     floating:= fcontroller.isfloating;
+    if fgrip_face <> nil then begin
+     bo1:= fgrip_pos in [cp_left,cp_right];
+     if bo1 then begin
+      with tface1(fgrip_face).fi do begin
+       dirbefore:= fade_direction;
+       fade_direction:= graphicdirectionty((ord(fade_direction) + 1) and 3);
+      end;
+     end;
+     fgrip_face.paint(canvas,rect1);
+     if bo1 then begin
+      with tface1(fgrip_face).fi do begin
+       fade_direction:= dirbefore;
+      end;
+     end;
+    end;
     if (info1.text.text <> '') and 
       (not floating and (go_showsplitcaption in fgrip_options) or 
       floating and (go_showfloatcaption in fgrip_options) or
@@ -3538,6 +3564,28 @@ procedure tgripframe.updatewidgetstate;
 begin
  inherited;
  fintf.getwidget.invalidaterect(fgriprect,org_widget);
+end;
+
+function tgripframe.getgrip_face: tface;
+begin
+ fintf.getwidget.getoptionalobject(fgrip_face,{$ifdef FPC}@{$endif}createface);
+ result:= fgrip_face;
+end;
+
+procedure tgripframe.setgrip_face(const avalue: tface);
+begin
+ fintf.getwidget.setoptionalobject(avalue,fgrip_face,
+                              {$ifdef FPC}@{$endif}createface);
+end;
+
+procedure tgripframe.createface;
+begin
+ fgrip_face:= tface.create(iface(self));
+end;
+
+function tgripframe.translatecolor(const acolor: colorty): colorty;
+begin
+ result:= fintf.getwidget.translatecolor(acolor);
 end;
 
 { tdockhandle }
