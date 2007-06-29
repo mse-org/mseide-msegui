@@ -214,7 +214,8 @@ registerunitgroup(['msewidgets'],
 	['msestrings','msegraphics','mseguiglob','msetypes','msescrollbar','msegraphutils','mseevent']);
 
 registerunitgroup(['msereport'],
-	['msegraphics','msetypes','msegraphutils','db','msestrings','msestream']);
+	['mserichstring','msegraphics','msetypes','msegraphutils','db','msestrings',
+  'msestream']);
 
 registerunitgroup(['msecommport'],
 	['msethread']);
