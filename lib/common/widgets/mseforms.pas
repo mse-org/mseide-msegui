@@ -166,6 +166,7 @@ type
    function childrencount: integer; override;
 
    function canclose(const newfocus: twidget): boolean; override;
+   function close: boolean; //simulates mr_windowclose, ture if ok
    procedure beforedestruction; override;
    property optionswidget default defaultformwidgetoptions;
    property optionswindow: windowoptionsty read foptionswindow write setoptionswindow default [];
@@ -416,6 +417,8 @@ function createmseform(const aclass: tclass;
                    const aclassname: pshortstring): tmsecomponent;
 function createsubform(const aclass: tclass; 
                    const aclassname: pshortstring): tmsecomponent;
+function simulatemodalresult(const awidget: twidget;
+                              const amodres: modalresultty): boolean;
 
 implementation
 uses
@@ -486,6 +489,30 @@ function createsubform(const aclass: tclass;
 begin
  result:= subformclassty(aclass).create(nil,false);
  tmsecomponent1(result).factualclassname:= aclassname;
+end;
+
+function simulatemodalresult(const awidget: twidget;
+                              const amodres: modalresultty): boolean;
+begin
+ result:= awidget <> nil;
+ if result then begin
+  with twindow1(awidget.window) do begin
+   fmodalresult:= amodres;
+   try
+    result:= awidget.canclose(nil);
+    if result then begin
+     awidget.hide;
+    end;
+   finally
+    if fmodalresult = amodres then begin
+     fmodalresult:= mr_none;
+    end;
+   end;
+  end;
+ end
+ else begin
+  result:= false;
+ end;
 end;
 
 { tformscrollbox}
@@ -671,6 +698,11 @@ begin
    end;
   end;
  end;
+end;
+
+function tcustommseform.close: boolean; //simulates mr_windowclose, ture if ok
+begin
+ simulatemodalresult(self,mr_windowclosed);
 end;
 
 procedure tcustommseform.doterminated(const sender: tobject);

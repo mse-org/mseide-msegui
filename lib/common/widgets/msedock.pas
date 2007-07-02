@@ -207,7 +207,7 @@ type
    foptionsdock: optionsdockty;
    procedure objectevent(const sender: tobject; const event: objecteventty); override;
    
-   procedure doclose(const awidget: twidget);
+   function doclose(const awidget: twidget): boolean;
    procedure setmdistate(const avalue: mdistatety); virtual;
    procedure domdistatechanged(const oldstate,newstate: mdistatety); virtual;
    procedure dofloat(const adist: pointty); virtual;
@@ -260,6 +260,10 @@ type
    function getfloatcaption: msestring;
    function getitems: widgetarty; //reference count = 1
    function getwidget: twidget;
+   function activewidget: twidget; //focused child or active tab
+   function close: boolean; //simulates mr_windowclosed for owner
+   function closeactivewidget: boolean;
+                   //simulates mr_windowclosed for active widget, true if ok
   published
    property dockhandle: tdockhandle read fdockhandle write setdockhandle;
    property splitter_size: integer read fsplitter_size write setsplitter_size default defaultsplittersize;
@@ -456,7 +460,8 @@ type
 
 implementation
 uses
- msedatalist,mseshapes,sysutils,msebits,msetabs,mseguiintf,msedrawtext;
+ msedatalist,mseshapes,sysutils,msebits,msetabs,mseguiintf,msedrawtext,
+ mseforms;
 
 type
  twidget1 = class(twidget);
@@ -2169,12 +2174,16 @@ begin
  end;
 end;
 
-procedure tdockcontroller.doclose(const awidget: twidget);
+function tdockcontroller.doclose(const awidget: twidget): boolean;
 begin
+ result:= simulatemodalresult(awidget,mr_windowclosed);
+ {
+ if awidget <> nil then begin
   with twindow1(awidget.window) do begin
    fmodalresult:= mr_windowclosed;
    try
-    if awidget.canclose(nil) then begin
+    result:= awidget.canclose(nil);
+    if result then begin
      awidget.hide;
     end;
    finally
@@ -2183,6 +2192,11 @@ begin
     end;
    end;
   end;
+ end
+ else begin
+  result:= false;
+ end;
+ }
 end;
 
 procedure tdockcontroller.clientmouseevent(var info: mouseeventinfoty);
@@ -2880,6 +2894,33 @@ end;
 function tdockcontroller.getwidget: twidget;
 begin
  result:= fintf.getwidget;
+end;
+
+function tdockcontroller.activewidget: twidget; //focused child or active tab
+var
+ tab1: tdocktabpage;
+begin
+ result:= nil;
+ if ftabwidget <> nil then begin
+  tab1:= tdocktabpage(tdocktabwidget(ftabwidget).activepage);
+  if tab1 <> nil then begin
+   result:= tab1.ftarget;
+  end;
+ end
+ else begin
+  result:= fintf.getwidget.focusedchild;
+ end;
+end;
+
+function tdockcontroller.close: boolean; //simulates mr_windowclosed for owner
+begin
+ result:= doclose(fintf.getwidget);
+end;
+
+function tdockcontroller.closeactivewidget: boolean;
+                   //simulates mr_windowclosed for active widget, true if ok
+begin
+ result:= doclose(activewidget);
 end;
 
 { tgripframe }
