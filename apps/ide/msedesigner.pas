@@ -257,7 +257,16 @@ type
                              const aname: string; var action: modalresultty) of object;
                                       //mr_ignore,mr_ok, cancel otherwise
  getmoduletypeeventty = procedure(const atypename: string) of object;
-
+ propprocty = procedure(const ainstance: tobject; const data: pointer; 
+                const apropinfo: ppropinfo);
+ 
+ forallmethpropinfoty = record
+  root: tcomponent;
+  dat: pointer;
+  proc: propprocty;
+  dochi: boolean;
+ end;
+ 
  tdesigner = class(tguicomponent,idesigner)
   private
    fselections: tdesignerselections;
@@ -279,6 +288,7 @@ type
    flookupmodule: pmoduleinfoty;
    fnotifydeletedlock: integer;
    fallsaved: boolean;
+   fforallmethpropsinfo: forallmethpropinfoty;
    function formfiletoname(const filename: msestring): msestring;
    procedure findmethod(Reader: TReader; const aMethodName: string;
                    var Address: Pointer; var Error: Boolean);
@@ -304,6 +314,10 @@ type
    procedure buildmethodtable(const amodule: pmoduleinfoty);
    procedure releasemethodtable(const amodule: pmoduleinfoty);
   protected
+   procedure forallmethprop(child: tcomponent);
+   procedure forallmethodproperties(const ainstance: tobject; const data: pointer;
+                              const aproc: propprocty;
+                 const dochildren: boolean);
    procedure componentevent(const event: tcomponentevent); override;
    function checkmodule(const filename: msestring): pmoduleinfoty;
    procedure checkident(const aname: string);
@@ -478,70 +492,6 @@ begin
  if submodulecopy = 0 then begin
   unlockfindglobalcomponent;
   unregisterFindGlobalComponentProc({$ifdef FPC}@{$endif}getglobalcomponent);
- end;
-end;
-
-type
- propprocty = procedure(const ainstance: tobject; const data: pointer; 
-                const apropinfo: ppropinfo);
-                
-procedure forallmethodproperties(const ainstance: tobject; const data: pointer;
-                              const aproc: propprocty; const docomps: boolean);
-var
- ar1: propinfopoarty;
- int1,int2: integer;
- obj1: tobject;
- bo1: boolean;
-begin
- if ainstance is tcomponent then begin
-  bo1:= not (csloading in tcomponent(ainstance).componentstate);
-  if bo1 then begin
-   setloading(tcomponent(ainstance),true);
-  end;
- end
- else begin
-  bo1:= false;
- end;
- ar1:= getpropinfoar(ainstance);
- for int1:= 0 to high(ar1) do begin
-  case ar1[int1]^.proptype^.kind of
-   tkmethod: begin
-    aproc(ainstance,data,ar1[int1]);
-   end;
-   tkclass: begin
-    obj1:= getobjectprop(ainstance,ar1[int1]);
-    if (obj1 <> nil) and (not (obj1 is tcomponent) or 
-              (cssubcomponent in tcomponent(obj1).componentstyle)) then begin
-     forallmethodproperties(obj1,data,aproc,docomps);
-     if obj1 is tpersistentarrayprop then begin
-      with tpersistentarrayprop(obj1) do begin
-       for int2:= 0 to count - 1 do begin
-        forallmethodproperties(items[int2],data,aproc,docomps);
-       end;
-      end;
-     end
-     else begin
-      if obj1 is tcollection then begin
-       with tcollection(obj1) do begin
-        for int2:= 0 to count - 1 do begin
-         forallmethodproperties(items[int2],data,aproc,docomps);
-        end;
-       end;
-      end;
-     end;
-    end;
-   end;
-  end;
- end;
- if docomps and (ainstance is tcomponent) then begin
-  with tcomponent(ainstance) do begin
-   for int1:= 0 to componentcount - 1 do begin
-    forallmethodproperties(components[int1],data,aproc,docomps);
-   end;
-  end;
- end;
- if bo1 then begin
-  setloading(tcomponent(ainstance),false);
  end;
 end;
 
@@ -2623,6 +2573,99 @@ begin
  end;
 end;
 }
+
+procedure tdesigner.forallmethprop(child: tcomponent);
+begin
+ with fforallmethpropsinfo do begin
+  forallmethodproperties(child,dat,proc,dochi);  
+ end; 
+end;
+
+procedure tdesigner.forallmethodproperties(const ainstance: tobject;
+                     const data: pointer; const aproc: propprocty;
+                     const dochildren: boolean);
+var
+ ar1: propinfopoarty;
+ int1,int2: integer;
+ obj1: tobject;
+ bo1: boolean;
+begin
+ if ainstance is tcomponent then begin
+  bo1:= not (csloading in tcomponent(ainstance).componentstate);
+  if bo1 then begin
+   setloading(tcomponent(ainstance),true);
+  end;
+ end
+ else begin
+  bo1:= false;
+ end;
+ ar1:= getpropinfoar(ainstance);
+ for int1:= 0 to high(ar1) do begin
+  case ar1[int1]^.proptype^.kind of
+   tkmethod: begin
+    aproc(ainstance,data,ar1[int1]);
+   end;
+   tkclass: begin
+    obj1:= getobjectprop(ainstance,ar1[int1]);
+    if (obj1 <> nil) and (not (obj1 is tcomponent) or 
+              (cssubcomponent in tcomponent(obj1).componentstyle)) then begin
+     forallmethodproperties(obj1,data,aproc,dochildren);
+     if obj1 is tpersistentarrayprop then begin
+      with tpersistentarrayprop(obj1) do begin
+       for int2:= 0 to count - 1 do begin
+        forallmethodproperties(items[int2],data,aproc,dochildren);
+       end;
+      end;
+     end
+     else begin
+      if obj1 is tcollection then begin
+       with tcollection(obj1) do begin
+        for int2:= 0 to count - 1 do begin
+         forallmethodproperties(items[int2],data,aproc,dochildren);
+        end;
+       end;
+      end;
+     end;
+    end;
+   end;
+  end;
+ end;
+ if (ainstance is tcomponent) then begin
+  with tcomponent(ainstance) do begin
+  {
+   if docomps then begin
+    for int1:= 0 to componentcount - 1 do begin
+     forallmethodproperties(components[int1],data,aproc,docomps,dochildren);
+    end;
+   end;
+   }
+   if dochildren then begin
+    with fforallmethpropsinfo do begin
+     bo1:= proc = nil;
+     try
+      root:= owner;
+      if root = nil then begin
+       root:= tcomponent(ainstance);
+      end;
+      if bo1 then begin
+       dat:= data;
+       proc:= aproc;
+       dochi:= dochildren;
+      end;
+      getchildren(@forallmethprop,root);
+     finally
+      if bo1 then begin
+       proc:= nil;
+      end;
+     end;
+    end;        
+   end;   
+  end;
+ end;
+ if bo1 then begin
+  setloading(tcomponent(ainstance),false);
+ end;
+end;
 
 procedure tdesigner.componentevent(const event: tcomponentevent);
 begin
