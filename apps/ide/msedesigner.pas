@@ -316,7 +316,7 @@ type
   protected
    procedure forallmethprop(child: tcomponent);
    procedure forallmethodproperties(const ainstance: tobject; const data: pointer;
-                              const aproc: propprocty;
+                 const aproc: propprocty;
                  const dochildren: boolean);
    procedure componentevent(const event: tcomponentevent); override;
    function checkmodule(const filename: msestring): pmoduleinfoty;
@@ -2588,7 +2588,8 @@ var
  ar1: propinfopoarty;
  int1,int2: integer;
  obj1: tobject;
- bo1: boolean;
+ bo1,bo2: boolean;
+ rootbefore: tcomponent;
 begin
  if ainstance is tcomponent then begin
   bo1:= not (csloading in tcomponent(ainstance).componentstate);
@@ -2632,29 +2633,33 @@ begin
  end;
  if (ainstance is tcomponent) then begin
   with tcomponent(ainstance) do begin
-  {
-   if docomps then begin
+   if dochildren then begin
+   {
     for int1:= 0 to componentcount - 1 do begin
      forallmethodproperties(components[int1],data,aproc,docomps,dochildren);
     end;
-   end;
-   }
-   if dochildren then begin
+    }
     with fforallmethpropsinfo do begin
-     bo1:= proc = nil;
+     bo2:= proc = nil;
      try
-      root:= owner;
-      if root = nil then begin
-       root:= tcomponent(ainstance);
-      end;
-      if bo1 then begin
+      if bo2 then begin
+       root:= owner;
+       if (root = nil) or (ainstance is tmsecomponent) and 
+         (fmodules.findmodule(tmsecomponent(ainstance)) <> nil) then begin
+        root:= tcomponent(ainstance); //ainstance is a module
+       end;
        dat:= data;
        proc:= aproc;
        dochi:= dochildren;
       end;
+      rootbefore:= root;
+      if csinline in tcomponent(ainstance).componentstate then begin
+       root:= tcomponent(ainstance);
+      end;
       getchildren(@forallmethprop,root);
+      root:= rootbefore;
      finally
-      if bo1 then begin
+      if bo2 then begin
        proc:= nil;
       end;
      end;
