@@ -498,7 +498,7 @@ end;
 
 procedure tdropdowncols.setcount1(acount: integer; doinit: boolean);
 begin
- if not (aps_destroying in fstate) and 
+ if not (aps_destroying in fstate) and (fowner <> nil) and
     (acount <= tcustomdropdownlistcontroller(fowner).fvaluecol) then begin
   acount:= tcustomdropdownlistcontroller(fowner).fvaluecol + 1;
  end;
