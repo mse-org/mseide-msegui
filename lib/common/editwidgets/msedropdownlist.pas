@@ -26,6 +26,25 @@ const
 
 type
 
+ dropdownlistoptionty = (dlo_casesensitive);
+ dropdownlistoptionsty = set of dropdownlistoptionty;
+
+ dropdownliststatety = (dls_firstmousemoved,dls_mousemoved,dls_scrollup{,dls_closing});
+ dropdownliststatesty = set of dropdownliststatety;
+
+ dropdowneditoptionty = (deo_selectonly,deo_forceselect,
+                        deo_autodropdown,
+                        deo_keydropdown,//shift down starts dropdown
+                        deo_casesensitive,
+                        deo_sorted,deo_disabled,deo_autosavehistory,
+                        deo_cliphint);
+ dropdowneditoptionsty = set of dropdowneditoptionty;
+
+const
+ defaultdropdownoptionsedit = [deo_keydropdown];
+type
+ tcustomdropdownlistcontroller = class;
+
  tdropdowncol = class(tmsestringdatalist)
   private
    fwidth: integer;
@@ -39,7 +58,7 @@ type
   protected
    fowner: tobject;
   public
-   constructor create(const aowner: tobject); reintroduce;
+   constructor create(const aowner: tcustomdropdownlistcontroller); reintroduce;
   published
    property width: integer read fwidth write fwidth default griddefaultcolwidth;
    property options: coloptionsty read foptions write setoptions
@@ -61,13 +80,14 @@ type
   protected
    fitemindex: integer;
    fkeyvalue: msestring;
+   procedure setcount1(acount: integer; doinit: boolean); override;
    procedure createitem(const index: integer; var item: tpersistent); override;
    procedure itemchanged(sender: tdatalist; index: integer);
              //sender = nil -> col undefined
    function maxrowcount: integer;
    function getcolclass: dropdowncolclassty; virtual;
   public
-   constructor create(const aowner: tobject); reintroduce;
+   constructor create(const aowner: tcustomdropdownlistcontroller); reintroduce;
    procedure beginupdate;
    procedure endupdate;
    procedure clear;
@@ -119,25 +139,6 @@ type
    constructor create(const agrid: tcustomgrid; 
                              const aowner: tgridarrayprop); override;
  end;
-
- dropdownlistoptionty = (dlo_casesensitive);
- dropdownlistoptionsty = set of dropdownlistoptionty;
-
- dropdownliststatety = (dls_firstmousemoved,dls_mousemoved,dls_scrollup{,dls_closing});
- dropdownliststatesty = set of dropdownliststatety;
-
- dropdowneditoptionty = (deo_selectonly,deo_forceselect,
-                        deo_autodropdown,
-                        deo_keydropdown,//shift down starts dropdown
-                        deo_casesensitive,
-                        deo_sorted,deo_disabled,deo_autosavehistory,
-                        deo_cliphint);
- dropdowneditoptionsty = set of dropdowneditoptionty;
-
-const
- defaultdropdownoptionsedit = [deo_keydropdown];
-type
- tcustomdropdownlistcontroller = class;
 
  titemselectedevent = class(tcomponentevent)
   private
@@ -383,7 +384,7 @@ type
 
 { tdropdowncol }
 
-constructor tdropdowncol.create(const aowner: tobject);
+constructor tdropdowncol.create(const aowner: tcustomdropdownlistcontroller);
 begin
  fowner:= aowner;
  fwidth:= griddefaultcolwidth;
@@ -402,7 +403,7 @@ end;
 
 { tdropdowncols }
 
-constructor tdropdowncols.create(const aowner: tobject);
+constructor tdropdowncols.create(const aowner: tcustomdropdownlistcontroller);
 begin
  inherited create(aowner,nil);
  count:= 1;
@@ -415,7 +416,7 @@ end;
 
 procedure tdropdowncols.createitem(const index: integer; var item: tpersistent);
 begin
- item:= getcolclass.create(fowner);
+ item:= getcolclass.create(tcustomdropdownlistcontroller(fowner));
  with tdropdowncol(item) do begin
   onitemchange:= {$ifdef FPC}@{$endif}itemchanged;
 //  if index = 0 then begin
@@ -493,6 +494,15 @@ begin
    result:= int2;
   end;
  end;
+end;
+
+procedure tdropdowncols.setcount1(acount: integer; doinit: boolean);
+begin
+ if not (aps_destroying in fstate) and 
+    (acount <= tcustomdropdownlistcontroller(fowner).fvaluecol) then begin
+  acount:= tcustomdropdownlistcontroller(fowner).fvaluecol + 1;
+ end;
+ inherited;
 end;
 
 { tcustomdropdownbuttonframe }
@@ -1077,6 +1087,7 @@ end;
 procedure tcustomdropdownlistcontroller.setvaluecol(const avalue: integer);
 begin
  if fvaluecol <> avalue then begin
+  fcols.checkindex(avalue);
   fvaluecol:= avalue;
   valuecolchanged;
  end;
