@@ -294,14 +294,6 @@ type
                    var Address: Pointer; var Error: Boolean);
    procedure findmethod2(Reader: TReader; const aMethodName: string;
                    var Address: Pointer; var Error: Boolean);
-   procedure findcomponentclass(Reader: TReader; const aClassName: string;
-                   var ComponentClass: TComponentClass);
-   procedure ancestornotfound(Reader: TReader; const ComponentName: string;
-                   ComponentClass: TPersistentClass; var Component: TComponent);
-   procedure createcomponent(Reader: TReader; ComponentClass: TComponentClass;
-                   var Component: TComponent);
-   procedure findancestor(Writer: TWriter; Component: TComponent;
-              const aName: string; var Ancestor, RootAncestor: TComponent);
    function getinheritedmodule(const aclassname: string): pmoduleinfoty;
    function findcomponentmodule(const acomponent: tcomponent): pmoduleinfoty;
    procedure selectionchanged;
@@ -344,6 +336,14 @@ type
                //does correct errors quiet for tmethod.data = quiet
    procedure doswapmethodpointers(const ainstance: tobject;
                         const ainit: boolean);
+   procedure ancestornotfound(Reader: TReader; const ComponentName: string;
+                   ComponentClass: TPersistentClass; var Component: TComponent);
+   procedure findcomponentclass(Reader: TReader; const aClassName: string;
+                   var ComponentClass: TComponentClass);
+   procedure findancestor(Writer: TWriter; Component: TComponent;
+              const aName: string; var Ancestor, RootAncestor: TComponent);
+   procedure createcomponent(Reader: TReader; ComponentClass: TComponentClass;
+                   var Component: TComponent);
    
       //idesigner
    procedure componentmodified(const component: tobject);
@@ -1264,13 +1264,20 @@ begin
           dec(submodulecopy);
           designer.doswapmethodpointers(comp1,false);
           try
-           reader1.readrootcomponent(comp1);
-           checkinline(comp1);
-           placemodule;
+           begingloballoading;
+           try
+            reader1.readrootcomponent(comp1);
+            checkinline(comp1);
+            placemodule;
+            notifygloballoading;
+           finally
+            designer.doswapmethodpointers(comp1,true);
+            inc(submodulecopy);
+            endplacement;
+           end;
+           notifygloballoading;
           finally
-           designer.doswapmethodpointers(comp1,true);
-           inc(submodulecopy);
-           endplacement;
+           endgloballoading;
           end;
          end;
         end
@@ -2833,6 +2840,7 @@ begin
  end;
  doswapmethodpointers(source,false);
  try
+  begingloballoading;
   result:= tmsecomponent(mseclasses.copycomponent(source,nil,
             {$ifdef FPC}@{$endif}findancestor,
             {$ifdef FPC}@{$endif}findcomponentclass,
@@ -2842,7 +2850,9 @@ begin
    docopymethods(source,result,false);
   end;
   doswapmethodpointers(result,true);
+  notifygloballoading;
  finally
+  endgloballoading;
   doswapmethodpointers(source,true);
   fdescendentinstancelist.endstreaming;
   endsubmodulecopy;

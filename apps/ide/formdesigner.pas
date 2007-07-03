@@ -1042,6 +1042,9 @@ var
  comp1: tcomponent;
 begin
  comp1:= component.owner;
+ if comp1 <> nil then begin
+  comp1.removecomponent(component);
+ end;
  fdesigner.addcomponent(module,component);
  if csinline in component.ComponentState then begin
   tcomponent1(component).getchildren({$ifdef FPC}@{$endif}doaddcomponent,component);
