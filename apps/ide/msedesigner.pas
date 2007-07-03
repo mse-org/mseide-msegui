@@ -1212,9 +1212,15 @@ begin
       writer1.onfindancestor:= {$ifdef FPC}@{$endif}fdesigner.findancestor;
       comp1:= infos[int1]^.descendent;
       try
+       designer.doswapmethodpointers(ancestor,false);
        designer.doswapmethodpointers(comp1,false);
-       writer1.writedescendent(comp1,ancestor);
+       writer1.root:= modifiedowners[int1]^.instance;
+       writer1.ancestor:= ancestor;
+       writer1.rootancestor:= ancestor;
+       writer1.writecomponent(comp1);
+//       writer1.writedescendent(comp1,ancestor);
       finally
+       designer.doswapmethodpointers(ancestor,true);
        designer.doswapmethodpointers(comp1,true);
        if ismodule(infos[int1]^.descendent.owner) then begin //inherited form
         fdesigner.endstreaming(modifiedowners[int1]);
