@@ -2180,6 +2180,7 @@ end;
 destructor tcol.destroy;
 begin
  ffontselect.free;
+ inherited;
 end;
 
 procedure tcol.invalidate;
