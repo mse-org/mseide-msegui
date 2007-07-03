@@ -166,7 +166,8 @@ type
    function childrencount: integer; override;
 
    function canclose(const newfocus: twidget): boolean; override;
-   function close: boolean; //simulates mr_windowclose, ture if ok
+   function close(const amodalresult: modalresultty = mr_windowclosed): boolean; 
+              //true if ok
    procedure beforedestruction; override;
    property optionswidget default defaultformwidgetoptions;
    property optionswindow: windowoptionsty read foptionswindow write setoptionswindow default [];
@@ -700,9 +701,16 @@ begin
  end;
 end;
 
-function tcustommseform.close: boolean; //simulates mr_windowclose, ture if ok
+function tcustommseform.close(
+        const amodalresult: modalresultty = mr_windowclosed): boolean; 
+                //simulates mr_windowclose, true if ok
 begin
- simulatemodalresult(self,mr_windowclosed);
+ if ownswindow then begin
+  window.modalresult:= amodalresult;
+ end
+ else begin
+  simulatemodalresult(self,amodalresult);
+ end;
 end;
 
 procedure tcustommseform.doterminated(const sender: tobject);
@@ -1221,6 +1229,8 @@ begin
 end;
 
 procedure tcustommseform.dokeydown(var info: keyeventinfoty);
+var
+ modres1: modalresultty;
 begin
  inherited;
  with info do begin
@@ -1232,21 +1242,22 @@ begin
               ((key = key_enter) or (key = key_return)))  then begin
    include(eventstate,es_processed);
    if key = key_f10 then begin
-    window.modalresult:= mr_f10;
+    modres1:= mr_f10;
    end
    else begin
     if key = key_escape then begin
      if fo_cancelonesc in foptions then begin
-      window.modalresult:= mr_cancel;
+      modres1:= mr_cancel;
      end
      else begin
-      window.modalresult:= mr_escape;
+      modres1:= mr_escape;
      end;
     end
     else begin
-     window.modalresult:= mr_ok;
+     modres1:= mr_ok;
     end;
    end;
+   close(modres1);
   end;
  end;
 end;
