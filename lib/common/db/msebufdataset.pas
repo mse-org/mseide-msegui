@@ -2480,6 +2480,9 @@ begin
   with fielddefs[int1] do begin
    field1:= fields.findfield(name);
    if (field1 <> nil) and (field1.fieldkind = fkdata) then begin
+    if fieldno = 0 then begin
+     tfieldcracker(field1).ffieldno:= int1 + 1; //local mode without connection
+    end;
     addfield(int1,datatype,size,field1);
    end;
   end;
@@ -3354,6 +3357,7 @@ begin
   if field1 is tmsestringfield then begin
    int2:= 0;
    if bind then begin
+    int2:= field1.size;
     if field1.fieldkind = fkdata then begin
      fielddef1:= tfielddef(fielddefs.find(field1.fieldname));
                    //needed for FPC 2_2
