@@ -5082,7 +5082,9 @@ begin
      while longint(xchecktypedwindowevent(appdisp,w,configurenotify,@xev))
                    <> 0 do begin end;
       //gnome returns a different pos on window resizing than on window moving!
-     gui_getwindowrect(w,rect1);
+     if not application.deinitializing then begin //there can be an Xerror?
+      gui_getwindowrect(w,rect1); 
+     end;
      result:= twindowrectevent.create(ek_configure,xwindow,rect1);
 //    result:= twindowrectevent.create(ek_configure,xwindow,makerect(x,y,width,height));
     end;

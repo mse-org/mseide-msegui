@@ -1493,7 +1493,7 @@ type
  applicationstatety = (aps_inited,aps_running,aps_terminated,aps_mousecaptured,
                        aps_invalidated,aps_zordervalid,aps_needsupdatewindowstack,
                        aps_focused,aps_activewindowchecked,aps_exitloop,
-                       aps_active,aps_waiting,aps_terminating);
+                       aps_active,aps_waiting,aps_terminating,aps_deinitializing);
  applicationstatesty = set of applicationstatety;
 
  exceptioneventty = procedure (sender: tobject; e: exception) of object;
@@ -1670,6 +1670,7 @@ type
         //calls canclose of all windows except sender and terminatequery
    function terminating: boolean;
    property terminated: boolean read getterminated write setterminated;
+   function deinitializing: boolean;
    property caret: tcaret read fcaret;
    property mouse: tmouse read fmouse;
    procedure mouseparkevent; //simulates mouseparkevent
@@ -11655,19 +11656,24 @@ procedure tapplication.deinitialize;
 begin
  with tinternalapplication(self) do begin
   if aps_inited in fstate then begin
-   if fcaret <> nil then begin
-    fcaret.link(nil,nullpoint,nullrect);
+   include(fstate,aps_deinitializing);
+   try
+    if fcaret <> nil then begin
+     fcaret.link(nil,nullpoint,nullrect);
+    end;
+    msegraphics.deinit;
+    lock;
+    gui_flushgdi;
+    flusheventbuffer;
+    getevents;
+    feventlist.clear;
+    unlock;
+    gui_deinit;
+    msetimer.deinit;
+    exclude(fstate,aps_inited);
+   finally
+    exclude(fstate,aps_deinitializing);
    end;
-   msegraphics.deinit;
-   lock;
-   gui_flushgdi;
-   flusheventbuffer;
-   getevents;
-   feventlist.clear;
-   unlock;
-   gui_deinit;
-   msetimer.deinit;
-   exclude(fstate,aps_inited);
   end;
  end;
 end;
@@ -12673,6 +12679,11 @@ end;
 function tapplication.terminating: boolean;
 begin
  result:= aps_terminating in fstate;
+end;
+
+function tapplication.deinitializing: boolean;
+begin
+ result:= aps_deinitializing in fstate;
 end;
 
 procedure tapplication.terminate(const sender: twindow = nil);
