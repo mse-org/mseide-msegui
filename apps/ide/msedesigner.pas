@@ -2653,7 +2653,7 @@ begin
     end;
     }
     with fforallmethpropsinfo do begin
-     bo2:= proc = nil;
+     bo2:= {$ifndef FPC}@{$endif}proc = nil;
      try
       if bo2 then begin
        root:= owner;
@@ -2669,7 +2669,7 @@ begin
       if csinline in tcomponent(ainstance).componentstate then begin
        root:= tcomponent(ainstance);
       end;
-      getchildren(@forallmethprop,root);
+      getchildren({$ifdef FPC}@{$endif}forallmethprop,root);
       root:= rootbefore;
      finally
       if bo2 then begin
