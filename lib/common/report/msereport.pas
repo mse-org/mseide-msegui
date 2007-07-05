@@ -504,6 +504,8 @@ type
    property optionsrep: bandoptionsty read foptionsrep write setoptionsrep default [];
  end;
  
+ bandareaarty = array of tcustombandarea;
+ 
  tcustomrecordband = class(tcustomscalingwidget,idbeditinfo,ireccontrol,
                                 iobjectpicker,ireportclient)
   private
@@ -524,6 +526,7 @@ type
    fobjectpicker: tobjectpicker;
    fnextband: tcustomrecordband;
    fnextbandifempty: tcustomrecordband;
+   fareas: bandareaarty;
    procedure settabs(const avalue: treptabulators);
    procedure setoptions(const avalue: bandoptionsty);
    function getvisidatasource: tdatasource;
@@ -547,6 +550,8 @@ type
    function getfont: trepwidgetfont;
    function getfontclass: widgetfontclassty; override;
    
+   procedure registerchildwidget(const child: twidget); override;
+   procedure unregisterchildwidget(const child: twidget); override;
    procedure minclientsizechanged;
    procedure objectevent(const sender: tobject;
                           const event: objecteventty); override;
@@ -717,173 +722,6 @@ type
   published
    property format;
  end;
-{  
- tcustomreplookupdisp = class;
- 
- treplookupdatalink = class(tfielddatalink)
-  private
-   fowner: tcustomreplookupdisp;  
-  protected
-   procedure recordchanged(afield: tfield); override;
-  public
-   constructor create(const aowner: tcustomreplookupdisp);
- end;
- 
- tcustomreplookupdisp = class(tcustomrepvaluedisp,idbeditinfo)
-  private
-   fkeydatalink: treplookupdatalink;
-   flookupbuffer: tcustomlookupbuffer;
-   flookupkeyfieldno: integer;
-   flookupvaluefieldno: integer;
-   ftextdefault: msestring;
-   fkeyvalue: integer;
-   procedure setlookupbuffer(const avalue: tcustomlookupbuffer);
-     //idbeditinfo
-   function getdatasource(const aindex: integer): tdatasource; overload;
-   procedure getfieldtypes(out propertynames: stringarty;
-                          out fieldtypes: fieldtypesarty); virtual;
-   function getkeydatasource: tdatasource;
-   procedure setkeydatasource(const avalue: tdatasource);
-   function getkeydatafield: string;
-   procedure setkeydatafield(const avalue: string);
-   procedure setlookupkeyfieldno(const avalue: integer);
-   procedure setlookupvaluefieldno(const avalue: integer);
-   procedure settextdefault(const avalue: msestring);
-   procedure setkeyvalue(const avalue: integer);
-  protected
-   flookuptext: msestring;
-   procedure change;
-   procedure objectevent(const sender: tobject; const event: objecteventty); override;
-   function getdisptext: msestring; override;
-   function getlookuptext: msestring; virtual;
-  public
-   constructor create(aowner: tcomponent); override;
-   destructor destroy; override;
-   property keydatasource: tdatasource read getkeydatasource write setkeydatasource;
-   property keydatafield: string read getkeydatafield write setkeydatafield;
-   property lookupbuffer: tcustomlookupbuffer read flookupbuffer 
-                                      write setlookupbuffer;
-   property lookupkeyfieldno: integer read flookupkeyfieldno 
-                                      write setlookupkeyfieldno default 0;
-   property lookupvaluefieldno: integer read flookupvaluefieldno 
-                                      write setlookupvaluefieldno default 0;
-   property textdefault: msestring read ftextdefault write settextdefault;
-   property keyvalue: integer read fkeyvalue write setkeyvalue;
- end;
-
- trepstringdisplb = class(tcustomreplookupdisp)
-  protected
-   function getlookuptext: msestring; override;
-  published
-   property keydatasource;
-   property keydatafield;
-   property lookupbuffer;
-   property lookupkeyfieldno;
-   property lookupvaluefieldno;
-   property textdefault;
-   property font;
-//   property format;
-   
-   property options;
-   property optionsscale;
-   property onfontheightdelta;
-   property onchildscaled;
-
-   property onbeforerender;
-   property onpaint;
-   property onafterpaint;
-   property ongettext;
- end; 
- 
- trepintegerdisplb = class(tcustomreplookupdisp)
-  private
-   fbase: numbasety;
-   fbitcount: integer;
-   procedure setbase(const avalue: numbasety);
-   procedure setbitcount(const avalue: integer);
-  protected
-   function getlookuptext: msestring; override;
-  public
-   constructor create(aowner: tcomponent); override;
-  published
-   property base: numbasety read fbase write setbase default nb_dec;
-   property bitcount: integer read fbitcount write setbitcount default 32;
-   
-   property keydatasource;
-   property keydatafield;
-   property lookupbuffer;
-   property lookupkeyfieldno;
-   property lookupvaluefieldno;
-   property textdefault;
-   property font;
-//   property format;
-   
-   property options;
-   property optionsscale;
-   property onfontheightdelta;
-   property onchildscaled;
-
-   property onbeforerender;
-   property onpaint;
-   property onafterpaint;
-   property ongettext;
- end; 
- 
- treprealdisplb = class(tcustomreplookupdisp)
-  protected
-   function getlookuptext: msestring; override;
-  published
-   property keydatasource;
-   property keydatafield;
-   property lookupbuffer;
-   property lookupkeyfieldno;
-   property lookupvaluefieldno;
-   property textdefault;
-   property font;
-   property format;
-   
-   property options;
-   property optionsscale;
-   property onfontheightdelta;
-   property onchildscaled;
-
-   property onbeforerender;
-   property onpaint;
-   property onafterpaint;
-   property ongettext;
- end; 
- 
- trepdatetimedisplb = class(tcustomreplookupdisp)
-  private
-   fkind: datetimekindty;
-   procedure setkind(const avalue: datetimekindty);
-  protected
-   function getlookuptext: msestring; override;
-  public
-   constructor create(aowner: tcomponent); override;
-  published
-   property kind: datetimekindty read fkind write setkind default dtk_date;
-
-   property keydatasource;
-   property keydatafield;
-   property lookupbuffer;
-   property lookupkeyfieldno;
-   property lookupvaluefieldno;
-   property textdefault;
-   property font;
-   property format;
-   
-   property options;
-   property optionsscale;
-   property onfontheightdelta;
-   property onchildscaled;
-
-   property onbeforerender;
-   property onpaint;
-   property onafterpaint;
-   property ongettext;
- end; 
- }
  
  recordbandarty = array of tcustomrecordband;
  
@@ -920,6 +758,7 @@ type
    procedure dopaint(const acanvas: tcanvas); override;
    procedure updatevisibility; override;
    function getminbandsize: sizety; override;
+   procedure initpage; override;
    procedure init; override;
    procedure beginrender; override;
    procedure endrender; override;
@@ -967,10 +806,12 @@ type
    fbandnum: integer;
    fsaveindex: integer;
    freportpage: tcustomreportpage;
+   frecordband: tcustomrecordband;
    fonbeforerender: bandareaeventty;
    fonpaint: bandareapainteventty;
    fonafterpaint: bandareapainteventty;
    fonfirstarea: bandareaeventty;
+   forigin: pointty;
    function getareafull: boolean;
    procedure setareafull(const avalue: boolean);
    function getacty: integer;
@@ -991,6 +832,7 @@ type
    procedure doafterpaint1(const acanvas: tcanvas); virtual;
    procedure init; virtual;
    procedure initareapage;
+   procedure initband;
    procedure initpage;
    procedure dobeforenextrecord;
    procedure dosyncnextrecord;
@@ -1043,8 +885,6 @@ type
  reportpagestatety = (rpps_inited,rpps_rendering,rpps_backgroundrendered,
                       rpps_showed,rpps_finish,rpps_notfirstrecord,rpps_lastrecord);
  reportpagestatesty = set of reportpagestatety;
- 
- bandareaarty = array of tcustombandarea;
  
  tcustomreport = class;
    
@@ -2939,6 +2779,7 @@ end;
 procedure tcustomrecordband.render(const acanvas: tcanvas; var empty: boolean);
 var
  widget1: twidget;
+ int1: integer;
 begin
  widget1:= rootwidget;
  if (widget1 is tcustomreport) and 
@@ -2956,6 +2797,9 @@ begin
     exit; //area full
    end;
    try
+    for int1:= 0 to high(fareas) do begin
+     fareas[int1].initband;
+    end;
     inherited paint(acanvas);
    finally
     fparentintf.endband(acanvas,self);
@@ -2966,18 +2810,27 @@ begin
 end;
 
 procedure tcustomrecordband.init;
+var
+ int1: integer;
 begin
  exclude(fstate,rbs_finish);
  if fvisigrouplink.fieldactive then begin
   fgroupnum:= fvisigrouplink.asinteger;
   fnextgroupnum:= fgroupnum;
-//  fgroupnum:= fvisigrouplink.aslargeint;
+ end;
+ for int1:= 0 to high(fareas) do begin
+  fareas[int1].init;
  end;
 end;
 
 procedure tcustomrecordband.initpage;
+var
+ int1: integer;
 begin
  exclude(fstate,rbs_pageshowed);
+ for int1:= 0 to high(fareas) do begin
+  fareas[int1].initpage;
+ end;
 end;
 
 function tcustomrecordband.rendering: boolean;
@@ -3003,6 +2856,8 @@ begin
 end;
 
 procedure tcustomrecordband.beginrender;
+var
+ int1: integer;
 begin
  fstate:= [rbs_rendering];
  include(widgetstate1,ws1_noclipchildren);
@@ -3014,10 +2869,18 @@ begin
    include(fstate,rbs_lastrecord);
   end;
  end; 
+ for int1:= 0 to high(fareas) do begin
+  fareas[int1].beginrender;
+ end;
 end;
 
 procedure tcustomrecordband.endrender;
+var
+ int1: integer;
 begin
+ for int1:= 0 to high(fareas) do begin
+  fareas[int1].endrender;
+ end;
  exclude(fstate,rbs_rendering);
  exclude(widgetstate1,ws1_noclipchildren);
  if fdatalink.active then begin
@@ -3580,6 +3443,20 @@ begin
  setlinkedvar(avalue,fnextbandifempty);
 end;
 
+procedure tcustomrecordband.registerchildwidget(const child: twidget);
+begin
+ inherited;
+ if child is tcustombandarea then begin
+  additem(pointerarty(fareas),child);
+ end;
+end;
+
+procedure tcustomrecordband.unregisterchildwidget(const child: twidget);
+begin
+ removeitem(pointerarty(fareas),child);
+ inherited;
+end;
+
 { tcustombandgroup }
 
 procedure tcustombandgroup.registerchildwidget(const child: twidget);
@@ -3857,6 +3734,16 @@ begin
  end;
 end;
 
+procedure tcustombandgroup.initpage;
+var
+ int1: integer;
+begin
+ inherited;
+ for int1:= 0 to high(fbands) do begin
+  fbands[int1].initpage;
+ end;
+end;
+
 { tcustombandarea }
 
 procedure tcustombandarea.registerchildwidget(const child: twidget);
@@ -3884,12 +3771,28 @@ begin
 end;
 
 procedure tcustombandarea.setparentwidget(const avalue: twidget);
+var
+ widget1: twidget;
 begin
+ if avalue is tcustomrecordband then begin
+  frecordband:= tcustomrecordband(avalue);
+ end
+ else begin
+  frecordband:= nil;
+ end;
  if avalue is tcustomreportpage then begin
   freportpage:= tcustomreportpage(avalue);
  end
  else begin
   freportpage:= nil;
+  widget1:= avalue.parentwidget;
+  while widget1 <> nil do begin
+   if widget1 is tcustomreportpage then begin
+    freportpage:= tcustomreportpage(widget1);
+    break;
+   end;
+   widget1:= widget1.parentwidget;
+  end;
  end;
  inherited;
 end;
@@ -3907,17 +3810,22 @@ begin
  initareapage;
 end;
 
+procedure tcustombandarea.initband;
+begin
+ factiveband:= 0;
+ sortwidgetsyorder(widgetarty(fbands));
+ fstate:= fstate - [bas_areafull,bas_backgroundrendered,bas_notfirstband,
+                             bas_lastband];
+end;
+
 procedure tcustombandarea.initpage;
 var
  int1: integer;
 begin
-  factiveband:= 0;
-  sortwidgetsyorder(widgetarty(fbands));
-  for int1:= 0 to high(fbands) do begin
-   fbands[int1].initpage;
-  end;
- fstate:= fstate - [bas_areafull,bas_backgroundrendered,bas_notfirstband,
-                             bas_lastband];
+ for int1:= 0 to high(fbands) do begin
+  fbands[int1].initpage;
+ end;
+ initband;
 end;
 
 function tcustombandarea.render(const acanvas: tcanvas): boolean;
@@ -3931,7 +3839,9 @@ begin
   dofirstarea;
  end;
  try
-  initpage;
+//  if frecordband = nil then begin
+//   initpage;
+//  end;
   if factiveband <= high(fbands) then begin
    updatevisible;
    dobeforerender;
@@ -3995,7 +3905,7 @@ begin
   if result then begin
    exclude(fstate,bas_inited);
   end;
-  exclude(fstate,bas_rendering);
+//  exclude(fstate,bas_rendering);
  end;
  if bas_backgroundrendered in fstate then begin
   doafterpaint1(acanvas);
@@ -4059,8 +3969,13 @@ end;
 
 procedure tcustombandarea.renderbackground(const acanvas: tcanvas);
 begin
- freportpage.beginarea(acanvas,self);
- acanvas.origin:= pos;
+ if frecordband = nil then begin
+  freportpage.beginarea(acanvas,self);
+  acanvas.origin:= pos;
+ end
+ else begin
+  acanvas.origin:= forigin;
+ end;
  inherited paint(acanvas);
 end;
 
@@ -4095,15 +4010,23 @@ function tcustombandarea.beginband(const acanvas: tcanvas;
                              const sender: tcustomrecordband): boolean;
 var
  bo1: boolean;
+ pt1: pointty;
 begin
  fsaveindex:= acanvas.save;
  bo1:= (bas_backgroundrendered in fstate);
  if not bo1 then begin
   include(fstate,bas_backgroundrendered);
   renderbackground(acanvas);
-  initareapage
+  initareapage;
  end;
- acanvas.origin:= makepoint(sender.bounds_x+bounds_x,facty);
+ if frecordband <> nil then begin
+  pt1.x:= sender.bounds_x + forigin.x;
+  pt1.y:= forigin.y + facty - sender.bounds_y;
+ end
+ else begin
+  pt1:= makepoint(sender.bounds_x+bounds_x,facty);
+ end;
+ acanvas.origin:= pt1;
  factybefore:= facty;
  inc(facty,sender.bandheight);
  include(fstate,bas_bandstarted);
@@ -4143,6 +4066,12 @@ procedure tcustombandarea.paint(const canvas: tcanvas);
 begin
  if not rendering then begin
   inherited;
+ end
+ else begin
+  if (frecordband <> nil) then begin
+   forigin:= canvas.origin;
+   render(canvas);
+  end;
  end;
 end;
 
@@ -4242,12 +4171,22 @@ end;
 
 function tcustombandarea.isfirstrecord: boolean;
 begin
- result:= freportpage.isfirstrecord;
+ if frecordband <> nil then begin
+  result:= frecordband.isfirstrecord;
+ end
+ else begin
+  result:= freportpage.isfirstrecord;
+ end;
 end;
 
 function tcustombandarea.islastrecord: boolean;
 begin
- result:= freportpage.islastrecord;
+ if frecordband <> nil then begin
+  result:= frecordband.islastrecord;
+ end
+ else begin
+  result:= freportpage.islastrecord;
+ end;
 end;
 
 procedure tcustombandarea.dobeforenextrecord;
@@ -4314,17 +4253,11 @@ begin
  if child is tcustombandarea then begin
   additem(pointerarty(fareas),child);
  end;
-// else begin
-//  if child is tcustomrecordband then begin
-//   additem(pointerarty(fbands),child);
-//  end;
-// end;
 end;
 
 procedure tcustomreportpage.unregisterchildwidget(const child: twidget);
 begin
  removeitem(pointerarty(fareas),child);
-// removeitem(pointerarty(fbands),child);
  inherited;
 end;
 
@@ -4445,14 +4378,17 @@ begin
          not ((rpo_once in foptions) and not (rpps_showed in fstate));
   dobeforerender(bo1);
   bo3:= bo1; //customdata empty
+  for int1:= 0 to high(fareas) do begin
+   fareas[int1].initpage;
+  end;
+  for int1:= 0 to high(fbands) do begin
+   fbands[int1].initpage;
+  end;
   updatevisible;
   for int1:= 0 to high(fareas) do begin
    bo1:= fareas[int1].render(acanvas) and bo1;
   end;
   sortwidgetsyorder(widgetarty(fbands),self);
-  for int1:= 0 to high(fbands) do begin
-   fbands[int1].initpage;
-  end;
   bo2:= odd(reppagenum);
   bo5:= true;
   for int1:= 0 to high(fbands) do begin
