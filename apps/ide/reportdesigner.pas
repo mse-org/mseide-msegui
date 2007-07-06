@@ -52,6 +52,7 @@ type
    function getdesignrect: rectty; override;
    function gridrect: rectty; override;
    function insertoffset: pointty; override;
+   function widgetrefpoint: pointty; override;
    function gridsizex: integer; override;
    function gridsizey: integer; override;
    function showgrid: boolean; override;
@@ -123,6 +124,12 @@ end;
 function treportdesignerfo.insertoffset: pointty;
 begin
  result:= translateclientpoint(nullpoint,reportcontainer,self);
+end;
+
+function treportdesignerfo.widgetrefpoint: pointty;
+begin
+ result:= reportcontainer.rootpos;
+ addpoint1(result,reportcontainer.clientpos);
 end;
 
 procedure treportdesignerfo.repchildscaled(const sender: TObject);

@@ -35,8 +35,9 @@ const
 type
 
  tcustommseform = class;
- closequeryeventty = procedure(const sender: tcustommseform; var amodalresult: modalresultty) of object;
- 
+ closequeryeventty = procedure(const sender: tcustommseform;
+                               var amodalresult: modalresultty) of object;
+  
  tformscrollbox = class(tscrollingwidget)
           //for internal use only
   protected
@@ -538,7 +539,6 @@ begin
  inherited;
 end;
 
-
 { tdockformscrollbox }
 
 constructor tdockformscrollbox.create(aowner: tcustomdockform);
@@ -763,9 +763,11 @@ begin
  inherited;
  fscrollbox.getchildren(proc,root);
  if root = self then begin
+// if (root = self) or issubcomponent(root,self) then begin
   for int1:= 0 to componentcount - 1 do begin
    comp1:= components[int1];
-   if not comp1.hasparent then begin
+   if not (cssubcomponent in comp1.componentstyle) and 
+                              not comp1.hasparent then begin
     proc(comp1);
    end;
   end;

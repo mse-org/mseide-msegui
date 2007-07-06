@@ -140,10 +140,14 @@ type
    function insertoffset: pointty; virtual;
    function gridoffset: pointty; virtual;
    function gridrect: rectty; virtual;
+   function widgetrefpoint: pointty; virtual;
+   function compplacementrect: rectty; virtual;
    function gridsizex: integer; virtual;
    function gridsizey: integer; virtual;
    function showgrid: boolean; virtual;
    function snaptogrid: boolean; virtual;
+   procedure recalcclientsize;
+   procedure setcomponentscrollsize(const avalue: sizety); virtual;
    class function fixformsize: boolean; virtual;
    function getdesignrect: rectty; virtual;
    procedure setdesignrect(const arect: rectty); virtual;
@@ -212,7 +216,13 @@ type
    procedure docopy(const noclear: boolean);
    procedure docut;
    procedure recalcclientsize;
+   procedure adjustchildcomponentpos(var apos: pointty);
+   procedure readjustchildcomponentpos(var apos: pointty);
   protected
+   function getcomponentrect(const component: tcomponent): rectty;
+   function getcomponentrect1(const component: tcomponent): rectty;
+   function componentatpos(const pos: pointty): tcomponent;
+ 
    procedure sizechanged; override;
    procedure poschanged; override;
    procedure dispatchmouseevent(var info: mouseeventinfoty; capture: twidget); override;
@@ -224,8 +234,6 @@ type
    function snaptogriddelta(const pos: pointty): pointty;
    function form: twidget;
    function module: tmsecomponent;
-//   function insertoffset: pointty;
-//   function gridoffset: pointty;
    function componentscrollsize: sizety;
    function componentoffset: pointty;
 
@@ -311,6 +319,7 @@ type
  twidget1 = class(twidget);
  tmseform1 = class(tmseform);
  tframe1 = class(tframe);
+ tscrollingwidget1 = class(tscrollingwidget);
 
  designerfoeventty = (fde_none,fde_syncsize,fde_updatecaption,fde_scrolled);
 
@@ -401,7 +410,7 @@ begin
   result.module:= instance;
  end;
 end;
-
+{
 function getcomponentrect(const sender: twidget;
                                     const component: tcomponent): rectty;
 begin
@@ -417,12 +426,51 @@ function getcomponentrect1(const sender: twidget; const component: tcomponent;
                                      const module: tcomponent): rectty;
 var
  comp1: tcomponent;
+ bo1: boolean;
 begin
  result:= getcomponentrect(sender,component);
  if module is twidget then begin
   comp1:= component;
+  bo1:= false;
   while (comp1 <> module) and (comp1 <> nil) do begin
    if comp1 is twidget then begin
+    if not bo1 then begin
+     tdesignwindow(sender.window).adjustchildcomponentpos(result.pos);
+     bo1:= true;
+    end;
+    addpoint1(result.pos,twidget(comp1).pos);
+   end;
+   comp1:= comp1.owner;
+  end;
+ end;
+end;
+}
+
+function tdesignwindow.getcomponentrect(const component: tcomponent): rectty;
+begin
+ result.pos:= getcomponentpos(component);
+ addpoint1(result.pos,componentoffset);
+ result.cx:= componentsize + complabelleftmargin + 
+                 fowner.getcanvas.getstringwidth(component.name) +
+                  complabelrightmargin;
+ result.cy:= componentsize;
+end;
+
+function tdesignwindow.getcomponentrect1(const component: tcomponent): rectty;
+var
+ comp1: tcomponent;
+ bo1: boolean;
+begin
+ result:= getcomponentrect(component);
+ if tformdesignerfo(fowner).fform <> nil then begin
+  comp1:= component;
+  bo1:= false;
+  while (comp1 <> module) and (comp1 <> nil) do begin
+   if comp1 is twidget then begin
+    if not bo1 then begin
+     adjustchildcomponentpos(result.pos);
+     bo1:= true;
+    end;
     addpoint1(result.pos,twidget(comp1).pos);
    end;
    comp1:= comp1.owner;
@@ -430,8 +478,7 @@ begin
  end;
 end;
 
-function componentatpos(const sender: twidget; const module: tmsecomponent;
-                                      const pos: pointty): tcomponent;
+function tdesignwindow.componentatpos(const pos: pointty): tcomponent;
 
 var
  isdatamodule: boolean;
@@ -444,9 +491,12 @@ var
   bo1: boolean;
  begin
   result:= nil;
-  bo1:= component is twidget;
-  if bo1 then begin
+  bo1:= (component is twidget) and not isdatamodule;
+  if bo1 and not toplevel then begin
    po1:= subpoint(pos,twidget(component).pos);
+   if (component.owner = module) and (module is twidget) then begin
+    tdesignwindow(twidget(component).window).readjustchildcomponentpos(po1);
+   end;
   end
   else begin
    po1:= pos;
@@ -454,7 +504,7 @@ var
   if toplevel or 
               not isdatamodule and bo1 and 
               not (cssubcomponent in component.componentstyle) and
-              (csinline in component.componentstate) then begin
+              (component.componentstate * [csinline,csancestor] <> []) then begin
    toplevel:= false;
    for int1:= component.componentcount - 1 downto 0 do begin
     result:= checkcomponent(component.components[int1],po1);
@@ -463,18 +513,18 @@ var
     end;
    end;
   end;
-  if not bo1 or isdatamodule then begin
-   if pointinrect(pos,getcomponentrect(sender,component)) then begin
+  if not bo1 {or isdatamodule} then begin
+   if pointinrect(pos,getcomponentrect(component)) then begin
     result:= component;
    end;
   end;
  end;
  
 begin
- isdatamodule:= not (module is twidget);
+ isdatamodule:= tformdesignerfo(fowner).fform = nil;
  toplevel:= true;
- result:= checkcomponent(module,pos);
- if result = module then begin
+ result:= checkcomponent(tformdesignerfo(fowner).fmodule,pos);
+ if result = tformdesignerfo(fowner).fmodule then begin
   result:= nil;
  end;
 end;
@@ -537,7 +587,7 @@ begin
     else begin
      nohandles:= false;
      if instance is tcomponent then begin
-      rect:= getcomponentrect1(fowner.fowner,tcomponent(instance),fowner.module);
+      rect:= fowner.getcomponentrect1(tcomponent(instance));
      end
      else begin
       rect:= nullrect;
@@ -643,6 +693,7 @@ var
  widget1: twidget;
  comp1: tcomponent;
  rect1,rect2: rectty;
+ pt1: pointty;
 begin
  result:= false;
  if (dist.x <> 0) or (dist.y <> 0) then begin
@@ -676,15 +727,15 @@ begin
       comp1:= comp1.owner;
      end;
      if comp1 = nil then begin
-      rect1:= getcomponentrect1(fowner.fowner,tcomponent(instance),
-                                          fowner.module);
+      rect1:= fowner.getcomponentrect1(tcomponent(instance));
       fowner.fowner.invalidaterect(rect1);
+      pt1:= rect1.pos;
       addpoint1(rect1.pos,dist);
       with tformdesignerfo(fowner.fowner) do begin
-       rect2:= gridrect;
+       rect2:= compplacementrect;
        if form <> nil then begin      
         shiftinrect(rect1,rect2);
-        subpoint1(rect1.pos,rect2.pos);
+//        subpoint1(rect1.pos,rect2.pos);
        end
        else begin
         if rect1.x < rect2.x then begin
@@ -695,7 +746,9 @@ begin
         end;
        end;
       end;
-      setcomponentpos(tcomponent(instance),rect1.pos);
+      setcomponentpos(tcomponent(instance),
+                addpoint(getcomponentpos(tcomponent(instance)),
+                subpoint(rect1.pos,pt1)));
       fowner.fowner.invalidaterect(rect1);
 {                                         
       setcomponentpos(tcomponent(instance),
@@ -961,16 +1014,33 @@ begin
  inherited;
 end;
 
+procedure tdesignwindow.adjustchildcomponentpos(var apos: pointty);
+begin
+ subpoint1(apos,componentoffset);
+ addpoint1(apos,tformdesignerfo(fowner).widgetrefpoint);
+// addpoint1(apos,tformdesignerfo(fowner).insertoffset);
+// addpoint1(apos,tformdesignerfo(fowner).gridrect.pos);
+end;
+
+procedure tdesignwindow.readjustchildcomponentpos(var apos: pointty);
+begin
+ addpoint1(apos,componentoffset);
+ subpoint1(apos,tformdesignerfo(fowner).widgetrefpoint);
+// subpoint1(apos,tformdesignerfo(fowner).insertoffset);
+// subpoint1(apos,tformdesignerfo(fowner).gridrect.pos);
+end;
+
 procedure tdesignwindow.doafterpaint(const canvas: tcanvas);
 
  procedure drawcomponent(const component: tcomponent);
  var
   rect1: rectty;
   int1: integer;
+  pt1: pointty;
  begin
   if ((form = nil) or not (component is twidget)) and 
            not (cssubcomponent in component.componentstyle) then begin
-   rect1:= getcomponentrect(fowner,component);
+   rect1:= getcomponentrect(component);
    rect1.cx:= rect1.cx - complabelrightmargin;
    drawtext(canvas,component.name,rect1,[tf_ycentered,tf_right],
                       stockobjects.fonts[stf_default]);
@@ -978,32 +1048,39 @@ procedure tdesignwindow.doafterpaint(const canvas: tcanvas);
    registeredcomponents.drawcomponenticon(component,canvas,rect1);
   end;
   if (form <> nil) and (component is twidget) and 
-                      not (cssubcomponent in component.componentstyle) and 
-                      (csinline in component.componentstate) then begin
-   canvas.move(twidget(component).pos);
+                      not (cssubcomponent in component.componentstyle){ and 
+                      (csinline in component.componentstate)} then begin
+   pt1:= twidget(component).pos;
+   if component.owner = tformdesignerfo(fowner).fmodule then begin
+    adjustchildcomponentpos(pt1);
+   end;
+   canvas.move(pt1);
    for int1:= 0 to component.componentcount - 1 do begin
     drawcomponent(component.components[int1]);        //components of submodule
    end;
-   canvas.remove(twidget(component).pos);
+   canvas.remove(pt1);
   end;
  end;
  
 var
  int1: integer;
+ rect1: rectty;
 begin
  if tformdesignerfo(fowner).fmodule <> nil then begin
   canvas.intersectcliprect(tformdesignerfo(fowner).gridrect);
-  canvas.move(fowner.container.clientpos);
+//  canvas.move(fowner.container.clientpos);
+//  canvas.move(tformdesignerfo(fowner).gridoffset);
   with tformdesignerfo(fowner).fmodule do begin
    for int1:= 0 to componentcount - 1 do begin
     drawcomponent(components[int1]);
    end;
   end;
+//  canvas.remove(tformdesignerfo(fowner).gridoffset);
   if form <> nil then begin
    drawgrid(canvas);
   end;
   fselections.paint(canvas);
-  canvas.remove(fowner.container.clientpos);
+//  canvas.remove(fowner.container.clientpos);
   showxorpic(canvas);
  end;
 end;
@@ -1018,9 +1095,9 @@ begin
  if tformdesignerfo(fowner).fmodule <> nil then begin
   with tformdesignerfo(fowner).fmodule do begin
    for int1:= 0 to componentcount - 1 do begin
-    component:= Components[int1];
+    component:= components[int1];
     if (form = nil) or not (component is twidget) then begin
-     rect1:= getcomponentrect(fowner,component);
+     rect1:= getcomponentrect(component);
      int2:= rect1.x + rect1.cx;
      if int2 > result.cx then begin
       result.cx:= int2;
@@ -1032,6 +1109,7 @@ begin
     end;
    end;
   end;
+  subsize1(result,sizety(tformdesignerfo(fowner).gridrect.pos));
  end;
  inc(result.cx,handlesize);
  inc(result.cy,handlesize);
@@ -1042,11 +1120,13 @@ var
  comp1: tcomponent;
 begin
  comp1:= component.owner;
- if comp1 <> nil then begin
+ if (comp1 <> nil) and not 
+            issubcomponent(tformdesignerfo(fowner).fmodule,comp1) then begin
   comp1.removecomponent(component);
  end;
  fdesigner.addcomponent(module,component);
- if csinline in component.ComponentState then begin
+// if csinline in component.ComponentState then begin
+ if component.ComponentState * [csancestor,csinline] <> [] then begin
   tcomponent1(component).getchildren({$ifdef FPC}@{$endif}doaddcomponent,component);
  end
  else begin
@@ -1376,12 +1456,7 @@ end;
 
 procedure tdesignwindow.recalcclientsize;
 begin
- if tformdesignerfo(fowner).fform = nil then begin
-  with twidget1(fowner.container) do begin
-   exclude(fwidgetstate,ws_minclientsizevalid);
-   tframe1(frame).updatestate;
-  end;
- end;
+ tformdesignerfo(fowner).recalcclientsize;
 end;
 
 procedure tdesignwindow.dispatchmouseevent(var info: mouseeventinfoty;
@@ -1467,7 +1542,7 @@ var
  rect1: rectty;
  selectmode: selectmodety;
  area1: areaty;
- clipo: pointty;
+// clipo: pointty;
  isinpaintrect: boolean;
  ss1: shiftstatesty;
  po1: pformselectedinfoty;
@@ -1487,12 +1562,8 @@ begin
  with info do begin
   ss1:= shiftstate * shiftstatesmask;
   isinpaintrect:= pointinrect(pos,tformdesignerfo(fowner).gridrect);
-  {
-  isinpaintrect:= pointinrect(translatewidgetpoint(pos,fowner,fowner.container),
-                                     fowner.container.paintrect);
-  }
-  clipo:= fowner.container.clientpos;
-  subpoint1(pos,clipo);
+//  clipo:= fowner.container.clientpos;
+//  subpoint1(pos,clipo);
   posbefore:= pos;
   if eventkind in [ek_buttonpress,ek_buttonrelease] then begin
    fmousepos:= pos;
@@ -1511,7 +1582,7 @@ begin
      end;
      if (factarea in [ar_component,ar_none]) then begin
       if isinpaintrect then begin
-       component:= componentatpos(fowner,module,pos);
+       component:= componentatpos(pos);
        if (component = nil) then begin
         if form <> nil then begin
          component:= widgetatpos(pos,true);
@@ -1566,9 +1637,9 @@ begin
        not ((area1 = ar_component) and 
            not(fselections[int1] is twidget)) and 
        (factarea <> ar_componentmove) then begin
-     addpoint1(pos,clipo);
+//     addpoint1(pos,clipo);
      inherited;
-     subpoint1(pos,clipo);
+//     subpoint1(pos,clipo);
     end;
     pos:= posbefore;
     if bo1 then begin
@@ -1650,8 +1721,7 @@ begin
          for int1:= 0 to module.componentcount - 1 do begin
           component:= module.Components[int1];
           if (form = nil) or (not (component is twidget)) then begin
-           if rectinrect(getcomponentrect1(fowner,component,module),
-                                            rect1) then begin
+           if rectinrect(getcomponentrect1(component),rect1) then begin
             selectcomponent(component,selectmode);
            end;
           end;
@@ -1788,7 +1858,7 @@ begin
     end;
    end;
   end;
-  addpoint1(pos,clipo);
+//  addpoint1(pos,clipo);
  end;
 end;
 
@@ -2137,7 +2207,10 @@ end;
 
 function tdesignwindow.componentoffset: pointty;
 begin
- result:= tformdesignerfo(fowner).gridrect.pos;
+// result:= tformdesignerfo(fowner).gridrect.pos;
+ with tformdesignerfo(fowner) do begin
+  result:= gridoffset;
+ end;
 end;
 
 { tformdesignerfo }
@@ -2587,17 +2660,41 @@ begin
  tdesignwindow(twidget(tmenuitem(sender).owner.owner).window).docut;
 end;
 
+procedure tformdesignerfo.setcomponentscrollsize(const avalue: sizety);
+begin
+ if fform is tcustommseform then begin
+  with tscrollingwidget1(tcustommseform(fform).container) do begin
+   fminminclientsize:= avalue;
+   clientsize:= clientsize;
+  end;
+ end;
+end;
+
 procedure tformdesignerfo.calcscrollsize(const sender: tscrollingwidget;
                var asize: sizety);
 var
  size1: sizety;
 begin
  size1:= tdesignwindow(window).componentscrollsize;
+ setcomponentscrollsize(size1);
  if asize.cx < size1.cx then begin
   asize.cx:= size1.cx;
  end;
  if asize.cy < size1.cy then begin
   asize.cy:= size1.cy;
+ end;
+end;
+
+procedure tformdesignerfo.recalcclientsize;
+begin
+ if fform = nil then begin
+  with twidget1(container) do begin
+   exclude(fwidgetstate,ws_minclientsizevalid);
+   tframe1(frame).updatestate;
+  end;
+ end
+ else begin
+  setcomponentscrollsize(tdesignwindow(window).componentscrollsize);
  end;
 end;
 
@@ -2626,7 +2723,7 @@ end;
 function tformdesignerfo.insertoffset: pointty;
 begin
  if form = nil then begin
-  result:= clientpos;
+  result:= container.clientpos;
  end
  else begin
   result:= translateclientpoint(nullpoint,form.container,form);
@@ -2642,10 +2739,31 @@ end;
 function tformdesignerfo.gridrect: rectty;
 begin
  if form = nil then begin
-  result:= clientrect;
+  result:= container.paintrect;
  end
  else begin
   result:= form.container.paintrect;
+  addpoint1(result.pos,form.container.rootpos);
+ end;
+end;
+
+function tformdesignerfo.widgetrefpoint: pointty;
+begin
+ if form = nil then begin
+  result:= nullpoint;
+ end
+ else begin
+  result:= form.container.rootpos;
+ end;
+end;
+
+function tformdesignerfo.compplacementrect: rectty;
+begin
+ if form = nil then begin
+  result:= clientrect;
+ end
+ else begin
+  result:= form.container.clientwidgetrect;
   addpoint1(result.pos,form.container.rootpos);
  end;
 end;
@@ -2665,6 +2783,9 @@ procedure tformdesignerfo.beginstreaming;
 begin
  if fmodule is twidget then begin
   twidget1(fmodule).fwidgetrect.pos:= modulerect.pos;
+ end;
+ if fform is tcustommseform then begin
+  tcustommseform(fform).container.scrollpos:= nullpoint;
  end;
 end;
 

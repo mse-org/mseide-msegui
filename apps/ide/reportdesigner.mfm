@@ -1,6 +1,6 @@
 inherited reportdesignerfo: treportdesignerfo
-  bounds_x = 425
-  bounds_y = 100
+  bounds_x = 417
+  bounds_y = 127
   bounds_cx = 205
   bounds_cy = 459
   color = -2147483647
@@ -46,30 +46,31 @@ inherited reportdesignerfo: treportdesignerfo
     frame.dummy = 0
     anchors = [an_left, an_top, an_right]
     taborder = 4
-    dial.range = 100
+    dial.widthmm =  2.9999999999999999E-0001
+    dial.range =  1.0000000000000000E+0002
     dial.markers.count = 1
     dial.markers.items = <    
       item
         color = -1610612729
         val = (
-          0
+           0.0000000000000000E+0000
           True
         )
       end>
     dial.ticks.count = 3
     dial.ticks.items = <    
       item
-        intervalcount = 10
+        intervalcount =  1.0000000000000000E+0001
       end    
       item
-        intervalcount = 20
         color = -1610612733
         length = 6
+        intervalcount =  2.0000000000000000E+0001
       end    
       item
-        intervalcount = 100
         color = -1610612733
         length = 3
+        intervalcount =  1.0000000000000000E+0002
       end>
   end
   object tabbar: ttabbar[1]
@@ -118,31 +119,32 @@ inherited reportdesignerfo: treportdesignerfo
     color = -1879048185
     anchors = [an_left, an_top, an_bottom]
     taborder = 3
+    dial.widthmm =  2.9999999999999999E-0001
     dial.direction = gd_down
-    dial.range = 100
+    dial.range =  1.0000000000000000E+0002
     dial.markers.count = 1
     dial.markers.items = <    
       item
         color = -1610612729
         val = (
-          0
+           0.0000000000000000E+0000
           True
         )
       end>
     dial.ticks.count = 3
     dial.ticks.items = <    
       item
-        intervalcount = 10
+        intervalcount =  1.0000000000000000E+0001
       end    
       item
-        intervalcount = 20
         color = -1610612733
         length = 6
+        intervalcount =  2.0000000000000000E+0001
       end    
       item
-        intervalcount = 100
         color = -1610612733
         length = 4
+        intervalcount =  1.0000000000000000E+0002
       end>
   end
   object tspacer2: tspacer[5]
@@ -199,8 +201,12 @@ inherited reportdesignerfo: treportdesignerfo
     offset_bottom = -5
   end
   inherited popupme: tpopupmenu
-    menu.submenu.count = 22
+    menu.submenu.count = 24
     menu.submenu.items = <    
+      item
+      end    
+      item
+      end    
       item
       end    
       item
@@ -244,6 +250,8 @@ inherited reportdesignerfo: treportdesignerfo
       end    
       item
         caption = 'Add report page'
+        name = 'addpage'
+        state = [as_localcaption, as_localonexecute]
         onexecute = addpage
       end    
       item
