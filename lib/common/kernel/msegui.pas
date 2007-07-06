@@ -980,6 +980,7 @@ type
 
    procedure setwidgetrect(const Value: rectty);
    procedure internalsetwidgetrect(Value: rectty; const windowevent: boolean);
+   function getclientpos: pointty;              
    function getclientsize: sizety;
    procedure setclientsize(const asize: sizety); virtual; //used in tscrollingwidget
    function getclientwidth: integer;
@@ -1204,7 +1205,7 @@ type
    property clientsize: sizety read getclientsize write setclientsize;
    property clientwidth: integer read getclientwidth write setclientwidth;
    property clientheight: integer read getclientheight write setclientheight;
-   function clientpos: pointty;              //origin = paintrect.pos;
+   property clientpos: pointty read getclientpos; //origin = paintrect.pos;
    function clientwidgetrect: rectty;        //origin = pos
    function clientwidgetpos: pointty;        //origin = pos
    function clientparentpos: pointty;        //origin = parentwidget.pos
@@ -6622,7 +6623,7 @@ begin
  end;
 end;
 
-function twidget.clientpos: pointty;
+function twidget.getclientpos: pointty;
 begin
  if fframe <> nil then begin
   with frame do begin

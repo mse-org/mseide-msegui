@@ -2663,6 +2663,9 @@ begin
  if fmodule is twidget then begin
   twidget1(fmodule).fwidgetrect.pos:= modulerect.pos;
  end;
+ if fform is tcustommseform then begin
+  tcustommseform(fform).container.scrollpos:= nullpoint;
+ end;
 end;
 
 procedure tformdesignerfo.endstreaming;

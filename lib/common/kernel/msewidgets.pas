@@ -243,7 +243,8 @@ type
   public
    constructor create(const intf: iframe; const owner: twidget);
    procedure updateclientrect; override;
-   procedure showrect(const arect: rectty; const bottomright: boolean); //origin paintpos
+   procedure showrect(const arect: rectty; const bottomright: boolean); 
+                           //origin paintpos
    property clientwidth: integer read fclientwidth write setclientwidth default 0;
    property clientheight: integer read fclientheight write setclientheigth default 0;
    property framei_left default 2;
@@ -653,6 +654,7 @@ type
    fminclientsize: sizety;
    function getframe: tscrollboxframe;
    procedure setframe(const Value: tscrollboxframe);
+   procedure setclientpos(const avalue: pointty);
   protected
    procedure widgetregionchanged(const sender: twidget); override;
    procedure sizechanged; override;
@@ -679,6 +681,7 @@ type
    property onchildscaled: notifyeventty read fonchildscaled write fonchildscaled;
    property oncalcminscrollsize: calcminscrollsizeeventty 
                    read foncalcminscrollsize write foncalcminscrollsize;
+   property scrollpos: pointty read getclientpos write setclientpos;
   published
    property frame: tscrollboxframe read getframe write setframe;
    property optionswidget default defaultoptionswidgetmousewheel;
@@ -2678,7 +2681,8 @@ begin
  end;
 end;
 
-procedure tcustomscrollboxframe.showrect(const arect: rectty; const bottomright: boolean);
+procedure tcustomscrollboxframe.showrect(const arect: rectty; 
+                                     const bottomright: boolean);
 var
  scrollvalue: pointty;
 // po1: pointty;
@@ -3433,6 +3437,11 @@ end;
 function tscrollingwidget.maxclientsize: sizety;
 begin
  result:= makesize(bigint,bigint);
+end;
+
+procedure tscrollingwidget.setclientpos(const avalue: pointty);
+begin
+ frame.showrect(makerect(avalue,paintsize),false);
 end;
 
 { tscrollbarwidget }
