@@ -15,6 +15,13 @@ interface
 uses
  Classes,msetextedit,msesyntaxpainter,mseclasses,mseguiglob,msetypes,mseevent,
  mseeditglob,msestrings,msewidgetgrid,msedatalist;
+ 
+type
+ bracketkindty = (bki_none,bki_round,bki_square,bki_curly);
+ 
+const
+ openbrackets: array[bracketkindty] of msechar = (#0,'(','[','{');
+ closebrackets: array[bracketkindty] of msechar = (#0,')',']','}');
 
 type
  tsyntaxedit = class(tundotextedit)
@@ -25,10 +32,10 @@ type
    flinkpos: gridcoordty;
    flinklength: integer;
    fdefaultsyntax: boolean;
+   fsyntaxchanging: integer;
    procedure setsyntaxpainter(const Value: tsyntaxpainter);
    procedure unregistersyntaxpainter;
    procedure syntaxchanged(const sender: tobject; const index: integer);
-   procedure refreshsyntax(const start,count: integer);
    procedure setdefaultsyntax(const avalue: boolean);
    procedure checkdefaultsyntax;
   protected
@@ -43,6 +50,10 @@ type
    destructor destroy; override;
    procedure setsyntaxdef(const sourcefilename: filenamety); overload; //'' for none
    procedure setsyntaxdef(const handle: integer); overload;
+   procedure refreshsyntax(const start,count: integer);
+
+   function charatpos(const apos: gridcoordty): msechar; //0 if none
+   function charbeforepos(const apos: gridcoordty): msechar; //0 if none
    function wordatpos(const apos: gridcoordty; out word: msestring;
                const delimchars: msestring {= defaultmsedelimchars}): gridcoordty;
    procedure indent(const acount: integer);
@@ -51,12 +62,18 @@ type
    procedure showlink(const apos: gridcoordty;
                        const delimchars: msestring {= defaultmsedelimchars});
    procedure selectword(const apos: gridcoordty; const delimchars: msestring);
+   function matchbracket(const apos: gridcoordty; const akind: bracketkindty;
+                const open: boolean; maxrows: integer = 100): gridcoordty;
+   property syntaxpainterhandle: integer read fsyntaxpainterhandle;
+   function syntaxchanging: boolean;
   published
    property syntaxpainter: tsyntaxpainter read fsyntaxpainter write setsyntaxpainter;
    property defaultsyntax: boolean read fdefaultsyntax 
                              write setdefaultsyntax default false;
    property autoindent: boolean read fautoindent write fautoindent default false;
  end;
+
+function checkbracketkind(const achar: msechar; out open: boolean): bracketkindty;
 
 implementation
 uses
@@ -65,6 +82,27 @@ uses
 type
  tundoinplaceedit1 = class(tundoinplaceedit);
  ttextundolist1 = class(ttextundolist);
+
+function checkbracketkind(const achar: msechar; out open: boolean): bracketkindty;
+var
+ br1: bracketkindty;
+begin
+ for br1:= bki_round to high(bracketkindty) do begin
+  if openbrackets[br1] = achar then begin
+   result:= br1;
+   open:= true;
+   exit;
+  end;
+ end;
+ result:= bki_none;
+ open:= false; 
+ for br1:= bki_round to high(bracketkindty) do begin
+  if closebrackets[br1] = achar then begin
+   result:= br1;
+   break;
+  end;
+ end;
+end;
 
 { tsyntaxedit }
 
@@ -155,9 +193,14 @@ procedure tsyntaxedit.syntaxchanged(const sender: tobject;
   const index: integer);
 begin
  if fgridintf <> nil then begin
-  fgridintf.getcol.cellchanged(index);
-  if index = fgridintf.getrow then begin
-   feditor.richtext:= flines.richitems[index];
+  inc(fsyntaxchanging);
+  try
+   fgridintf.getcol.cellchanged(index);
+   if index = fgridintf.getrow then begin
+    feditor.richtext:= flines.richitems[index];
+   end;
+  finally
+   dec(fsyntaxchanging);
   end;
  end;
 end;
@@ -178,6 +221,42 @@ begin
  end
  else begin
   refreshsyntax(0,bigint);
+ end;
+end;
+
+function tsyntaxedit.charatpos(const apos: gridcoordty): msechar;
+var
+ stringpo: pmsestring;
+begin
+ result:= #0; 
+ if (apos.col >= 0) and (apos.row >= 0) and (apos.row < flines.count) then begin
+  stringpo:= pmsestring(flines.getitempo(apos.row));
+  if apos.col < length(stringpo^) then begin
+   result:= stringpo^[apos.col+1];
+  end;
+ end;
+end;
+
+function tsyntaxedit.charbeforepos(const apos: gridcoordty): msechar;
+var
+ stringpo: pmsestring;
+begin
+ if apos.col = 0 then begin
+  result:= charbeforepos(makegridcoord(bigint,apos.row-1));
+ end
+ else begin
+  result:= #0; 
+  if (apos.row >= 0) and (apos.row < flines.count) and (apos.col >= 0) then begin
+   stringpo:= pmsestring(flines.getitempo(apos.row));
+   if stringpo^ <> '' then begin
+    if apos.col >= length(stringpo^) then begin
+     result:= stringpo^[length(stringpo^)];
+    end
+    else begin
+     result:= stringpo^[apos.col];
+    end;
+   end;
+  end;
  end;
 end;
 
@@ -351,6 +430,76 @@ begin
   setselection(pos1,makegridcoord(pos1.col+length(str1),pos1.row),true);
  end;
 end;
+
+function tsyntaxedit.matchbracket(const apos: gridcoordty;
+                  const akind: bracketkindty;
+                 const open: boolean; maxrows: integer = 100): gridcoordty;
+                 
+var
+ level: integer;
+ strpo: pmsestring;
+ x,y: integer;
+ po1: pmsecharaty;
+ int1: integer;
+ openchar,closechar,mch1: msechar;
+begin
+ result:= invalidcell;
+ level:= 0;
+ x:= apos.col;
+ y:= apos.row;
+ openchar:= openbrackets[akind];
+ closechar:= closebrackets[akind];
+ if open then begin
+  while (maxrows > 0) and (y < flines.count) do begin
+   strpo:= pmsestring(flines.getitempo(y));
+   po1:= pmsecharaty(strpo^);
+   for int1:= x to length(strpo^)-1 do begin
+    mch1:= po1^[int1];
+    if mch1 = openchar then begin
+     inc(level);
+    end;
+    if mch1 = closechar then begin
+     dec(level);
+     if level <= 0 then begin
+      result.row:= y;
+      result.col:= int1;
+      exit;
+     end;
+    end;
+   end;
+   x:= 0;
+   dec(maxrows);
+   inc(y);
+  end; 
+ end
+ else begin
+  strpo:= pmsestring(flines.getitempo(y));
+  while (maxrows > 0) do begin
+   po1:= pmsecharaty(strpo^);
+   for int1:= x downto 0 do begin
+    mch1:= po1^[int1];
+    if mch1 = closechar then begin
+     inc(level);
+    end;
+    if mch1 = openchar then begin
+     dec(level);
+     if level <= 0 then begin
+      result.row:= y;
+      result.col:= int1;
+      exit;
+     end;
+    end;
+   end;
+   dec(maxrows);
+   dec(y);
+   if y < 0 then begin
+    break;
+   end;
+   strpo:= pmsestring(flines.getitempo(y));
+   x:= length(strpo^)-1;
+  end; 
+ end;
+end;
  
 procedure tsyntaxedit.insertlinebreak;
 var
@@ -510,6 +659,11 @@ function tsyntaxedit.createdatalist(const sender: twidgetcol): tdatalist;
 begin
  result:= inherited createdatalist(sender);
  checkdefaultsyntax;
+end;
+
+function tsyntaxedit.syntaxchanging: boolean;
+begin
+ result:= fsyntaxchanging <> 0;
 end;
 
 end.

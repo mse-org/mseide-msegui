@@ -101,6 +101,7 @@ type
   scopestackcachepo: integer;
   list: trichstringdatalist;
   onlinechanged: integerchangedeventty;
+  boldchars: gridcoordarty;
  end;
  pclientinfoty = ^clientinfoty;
  clientinfoarty = array of clientinfoty;
@@ -142,6 +143,8 @@ type
    procedure calcrefreshinfo(var info: refreshinfoty; var startscope: integer);
    procedure setdeftext(const avalue: tmsestringdatalist);
    procedure deflistchanged(const sender: tobject);
+   function getboldchars(index: integer): gridcoordarty;
+   procedure setboldchars(index: integer; const avalue: gridcoordarty);
   protected
 
   public
@@ -164,6 +167,8 @@ type
    function linkdeffile(const sourcefilename: filenamety): integer;
                  //-1 if syntaxdef not found
    property defaultsyntax: integer read fdefaultsyntax;
+   property boldchars[index: integer]: gridcoordarty read getboldchars 
+                                    write setboldchars;
   published
    property linesperslice: integer read flinesperslice write setlinesperslice
                 default defaultlinesperslice;
@@ -180,7 +185,7 @@ type
 
 implementation
 uses
- sysutils,msefileutils,msesys,mseformatstr;
+ sysutils,msefileutils,msesys,mseformatstr,msegraphics;
 
 procedure markstartchars(const str: msestring; var chars: charsty); overload;
 begin
@@ -369,14 +374,20 @@ var
  ar1: msestringarty;
  stok1: starttokenty;
  format: formatinfoarty;
+ firstrow,lastrow: integer;
 
+label
+ endlab;
+ 
 begin
  ar1:= nil; //copilerwarning
  format:= nil; //copilerwarning
+ firstrow:= start;
+ lastrow:= start+count-1;
  with fclients[handle] do begin
   if (syntaxdefhandle < 0) or (syntaxdefhandle > high(fsyntaxdefs)) or
               (fsyntaxdefs[syntaxdefhandle].charstyles = nil) then begin
-   exit;
+   goto endlab;
   end;
   with fsyntaxdefs[syntaxdefhandle] do begin
    if startscopenr = -1 then begin
@@ -390,7 +401,7 @@ begin
     scopeinfopo:= @scopeinfos[startscopenr];
     while count > 0 do begin
      if start >= list.count then begin
-      exit;
+      goto endlab;
      end;
      if (flinesperslice <> 0) and (start mod flinesperslice = 0) then begin
       scopestackcachepo:= start div flinesperslice + 1;
@@ -534,6 +545,18 @@ begin
      end;
      inc(start);
      dec(count);
+    end;
+   end;
+  end;
+endlab:
+  for int1:= 0 to high(boldchars) do begin
+   with boldchars[int1] do begin
+    if (row >= firstrow) and (row <= lastrow) then begin
+     if updatefontstyle(list.richitemspo[row]^.format,col,1,fs_bold,true) then begin
+      if assigned(onlinechanged) then begin
+       onlinechanged(self,row);
+      end;
+     end;
     end;
    end;
   end;
@@ -1205,6 +1228,19 @@ begin
   end;
   fdefaultsyntax:= readdeffile(fdeftext.dataastextstream);
  end;
+end;
+
+function tsyntaxpainter.getboldchars(index: integer): gridcoordarty;
+begin
+ checkarrayindex(fclients,index);
+ result:= fclients[index].boldchars;
+end;
+
+procedure tsyntaxpainter.setboldchars(index: integer;
+               const avalue: gridcoordarty);
+begin
+ checkarrayindex(fclients,index);
+ fclients[index].boldchars:= avalue;
 end;
 
 end.

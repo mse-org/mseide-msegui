@@ -23,7 +23,8 @@ const
  defaultglobalcaretwith = -300; //30% of 'o'
 
 type
- editactionty = (ea_none,ea_textchanged,ea_textedited,ea_textentered,ea_undo,
+ editactionty = (ea_none,ea_beforechange,ea_textchanged,ea_textedited,
+                 ea_textentered,ea_undo,
                  ea_indexmoved,{ea_selectindexmoved,}ea_delchar,
                  {ea_selectstart,ea_selectend,}ea_clearselection,
                  ea_deleteselection,ea_copyselection,ea_pasteselection,
@@ -104,7 +105,8 @@ type
    procedure checkmaxlength;
    procedure movemouseindex(const sender: tobject);
    procedure killrepeater;
-   procedure setrichtext(const Value: richstringty);
+   procedure setrichtext(const avalue: richstringty);
+   procedure setformat(const avalue: formatinfoarty);
    function nofullinvalidateneeded: boolean;
    procedure setfont(const avalue: tfont);
    function gettextrect: rectty;
@@ -131,6 +133,7 @@ type
    procedure setscrollvalue(const avalue: real; const horz: boolean);
    property font: tfont read finfo.font write setfont;
 
+   function beforechange: boolean; //true if not aborted
    procedure begingroup; virtual;
    procedure endgroup; virtual;
    procedure scroll(const dist: pointty; const scrollcaret: boolean = true);
@@ -186,6 +189,7 @@ type
    property text: msestring read finfo.text.text write settext;
    property oldtext: msestring read foldtext write foldtext;
    property richtext: richstringty read finfo.text write setrichtext;
+   property format: formatinfoarty read finfo.text.format write setformat;
    property destrect: rectty read finfo.dest;
    property cliprect: rectty read finfo.clip;
    property textrect: rectty read gettextrect;
@@ -346,6 +350,11 @@ var
 begin
  info:= initactioninfo(aaction);
  result:= checkaction(info);
+end;
+
+function tinplaceedit.beforechange: boolean;
+begin
+ result:= checkaction(ea_beforechange);
 end;
 
 procedure tinplaceedit.killrepeater;
@@ -769,6 +778,7 @@ begin
  end;
  internalupdatecaret(true);
  invalidatetext(true,bo1);
+ notify(ea_indexmoved);
 end;
 
 procedure tinplaceedit.deletechar;
@@ -1327,6 +1337,7 @@ function tinplaceedit.internaldeleteselection(textinput: boolean): boolean;
 var
  aselstart,asellength: integer;
 begin
+ beforechange;
  result:= checkaction(ea_deleteselection);
  if result then begin
   if fsellength > 0 then begin
@@ -1478,10 +1489,20 @@ begin
  end;
 end;
 
-procedure tinplaceedit.setrichtext(const Value: richstringty);
+procedure tinplaceedit.setrichtext(const avalue: richstringty);
 begin
- finfo.text := Value;
+ beforechange;
+ finfo.text := avalue;
  setlength(finfo.text.format,length(finfo.text.format));
+ invalidatetext(false,false);
+ if ies_focused in fstate then begin
+  internalupdatecaret;
+ end;
+end;
+
+procedure tinplaceedit.setformat(const avalue: formatinfoarty);
+begin
+ finfo.text.format:= copy(avalue);
  invalidatetext(false,false);
  if ies_focused in fstate then begin
   internalupdatecaret;

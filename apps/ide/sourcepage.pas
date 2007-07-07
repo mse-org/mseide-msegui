@@ -28,7 +28,7 @@ uses
 
 
 type
- sourcepageasynctagty = (spat_showasform);
+ sourcepageasynctagty = (spat_showasform,spat_checkbracket);
  
  bookmarkty = record
   row: integer;
@@ -71,6 +71,8 @@ type
    ffileloading: integer;
    ffileloaderror: boolean;
    frelpath: filenamety;
+   fbracketsetting: integer;
+   fbracketchecking: integer;
    procedure setactiverow(const Value: integer);
    procedure setgdb(agdb: tgdbmi);
    procedure setfilepath(const value: filenamety);
@@ -89,8 +91,12 @@ type
    finitialfilepath: filenamety;
    finitialeditpos: gridcoordty;
    finitialbookmarks: bookmarkarty;
+   fbracket1,fbracket2: gridcoordty;
    procedure doasyncevent(var atag: integer); override;
    procedure removebookmark(const bookmarknum: integer);
+   procedure callcheckbrackets;
+   procedure checkbrackets;
+   procedure clearbrackets;
   public
    filechanged: boolean;
    ismoduletext: boolean;
@@ -189,6 +195,8 @@ constructor tsourcepage.create(aowner: tcomponent);
 begin
  factiverow:= -1;
  fgotoline:= 1;
+ fbracket1:= invalidcell;
+ fbracket2:= invalidcell;
  inherited create(aowner);
  updatestatvalues;
 end;
@@ -203,7 +211,7 @@ var
  mstr1: filenamety;
  po1: pmoduleinfoty;
 begin
- case sourcepageasynctagty(tag) of
+ case sourcepageasynctagty(atag) of
   spat_showasform: begin
    mstr1:= filepath;
    if sourcefo.closepage(self) then begin
@@ -213,6 +221,10 @@ begin
      designer.modulechanged(po1);
     end;
    end;
+  end;
+  spat_checkbracket: begin
+   dec(fbracketchecking);
+   checkbrackets;
   end;
  end;
 end;
@@ -1021,8 +1033,17 @@ end;
 procedure tsourcepage.editoneditnotification(const sender: tobject;
   var info: editnotificationinfoty);
 begin
- if info.action = ea_indexmoved then begin
-  linedisp.value:= inttostr(edit.editpos.row+1) + ':'+inttostr(edit.editpos.col+1);
+ if (info.action = ea_beforechange) and not edit.syntaxchanging then begin
+  clearbrackets;
+ end
+ else begin
+  if info.action = ea_indexmoved then begin
+   linedisp.value:= inttostr(edit.editpos.row+1) + ':'+inttostr(edit.editpos.col+1);
+  end;
+  if info.action in [ea_indexmoved,ea_delchar,ea_deleteselection,ea_pasteselection,
+                     ea_textentered] then begin
+   callcheckbrackets;
+  end;
  end;
 end;
 
@@ -1237,6 +1258,87 @@ begin
                                              (key = key_tab) then begin
    chars:= charstring(' ',(curindex div tabstops + 1) * tabstops - curindex);
   end;
+ end;
+end;
+
+procedure tsourcepage.clearbrackets;
+begin
+ if (fbracket1.col >= 0) and (fbracketsetting = 0) then begin
+  inc(fbracketsetting);
+  try
+   with edit do begin
+    setfontstyle(fbracket1,makegridcoord(fbracket1.col+1,fbracket1.row),
+                                   fs_bold,false);
+    setfontstyle(fbracket2,makegridcoord(fbracket2.col+1,fbracket2.row),
+                                   fs_bold,false);
+    refreshsyntax(fbracket1.row,1);
+    refreshsyntax(fbracket2.row,1);
+    fbracket1:= invalidcell;
+    fbracket2:= invalidcell;
+    if syntaxpainterhandle >= 0 then begin
+     syntaxpainter.boldchars[syntaxpainterhandle]:= nil;
+    end;
+   end;
+  finally
+   dec(fbracketsetting);
+  end;
+ end;  
+end;
+
+procedure tsourcepage.checkbrackets;
+var
+ mch1: msechar;
+ br1: bracketkindty;
+ open: boolean;
+ pt1,pt2: gridcoordty;
+ ar1: gridcoordarty;
+begin
+ clearbrackets;
+ pt2:= invalidcell;
+ with edit do begin
+  pt1:= editpos;
+  mch1:= charatpos(pt1);
+  br1:= checkbracketkind(mch1,open);
+  if br1 <> bki_none then begin
+   pt2:= matchbracket(pt1,br1,open);
+  end
+  else begin
+   dec(pt1.col);
+   if pt1.col >= 0 then begin
+    mch1:= charatpos(pt1);
+    br1:= checkbracketkind(mch1,open);
+    if br1 <> bki_none then begin
+     pt2:= matchbracket(pt1,br1,open);
+    end;
+   end;
+  end;
+  if pt2.col >= 0 then begin
+   fbracket1:= pt1;
+   fbracket2:= pt2;
+   inc(fbracketsetting);
+   try
+    setfontstyle(pt1,makegridcoord(pt1.col+1,pt1.row),fs_bold,true);
+    setfontstyle(pt2,makegridcoord(pt2.col+1,pt2.row),fs_bold,true);
+   finally
+    dec(fbracketsetting);
+   end;
+   if syntaxpainterhandle >= 0 then begin
+    setlength(ar1,2);
+    ar1[0]:= fbracket1;
+    ar1[1]:= fbracket2;
+    syntaxpainter.boldchars[syntaxpainterhandle]:= ar1;
+    refreshsyntax(fbracket1.row,1);
+    refreshsyntax(fbracket2.row,1);
+   end;
+  end;
+ end;
+end;
+
+procedure tsourcepage.callcheckbrackets;
+begin
+ if (fbracketchecking = 0) and (projectoptions.editmarkbrackets) then begin
+  inc(fbracketchecking);
+  asyncevent(ord(spat_checkbracket));
  end;
 end;
 

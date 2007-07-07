@@ -32,7 +32,7 @@ object projectoptionsfo: tprojectoptionsfo
     frame.dummy = 0
     anchors = [an_top, an_bottom]
     taborder = 1
-    activepageindex = 2
+    activepageindex = 0
     tab_frame.dummy = 0
     tab_size = 20
     statfile = statfile1
@@ -46,6 +46,7 @@ object projectoptionsfo: tprojectoptionsfo
       frame.dummy = 0
       anchors = [an_left, an_top, an_right, an_bottom]
       taborder = 5
+      visible = True
       caption = '&Editor'
       reffontheight = 14
       object dispgrid: twidgetgrid
@@ -64,14 +65,18 @@ object projectoptionsfo: tprojectoptionsfo
           0
         )
         anchors = [an_left, an_top, an_right]
-        taborder = 18
+        taborder = 19
         optionsgrid = [og_rowinserting, og_rowdeleting, og_focuscellonenter, og_autofirstrow, og_autoappend, og_autopopup]
+        fixcols.coloractive = -2147483648
+        fixrows.coloractive = -2147483648
         rowcount = 2
         datacols.count = 1
         datacols.linewidth = 0
+        datacols.coloractive = -2147483648
         datacols.options = [co_fill, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
         datacols.items = <        
           item
+            coloractive = -2147483648
             width = 608
             options = [co_fill, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
             widgetname = 'fontdisp'
@@ -96,6 +101,7 @@ object projectoptionsfo: tprojectoptionsfo
           visible = False
           font.colorshadow = -2147483648
           font.name = 'stf_default'
+          font.xscale =  1.0000000000000000E+0000
           font.dummy = 0
           optionsedit = [oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_linebreak, oe_eatreturn, oe_autoselectonfirstclick, oe_keyexecute, oe_savestate]
           marginlinecolor = -2147483648
@@ -110,11 +116,13 @@ object projectoptionsfo: tprojectoptionsfo
         bounds_cy = 191
         frame.dummy = 0
         anchors = [an_top, an_bottom]
-        taborder = 19
+        taborder = 20
         optionsgrid = [og_colsizing, og_keyrowmoving, og_rowinserting, og_rowdeleting, og_selectedrowsdeleting, og_focuscellonenter, og_autofirstrow, og_autoappend, og_autopopup]
         datacols.count = 2
+        datacols.coloractive = -2147483648
         datacols.items = <        
           item
+            coloractive = -2147483648
             width = 231
             options = [co_rowselect, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
             datalist.data = (
@@ -122,6 +130,7 @@ object projectoptionsfo: tprojectoptionsfo
             )
           end        
           item
+            coloractive = -2147483648
             width = 390
             options = [co_fill]
             onshowhint = colonshowhint
@@ -129,9 +138,12 @@ object projectoptionsfo: tprojectoptionsfo
               'pascal.sdef'
             )
           end>
+        fixcols.coloractive = -2147483648
         fixrows.count = 1
+        fixrows.coloractive = -2147483648
         fixrows.items = <        
           item
+            coloractive = -2147483648
             height = 16
             captions.count = 2
             captions.items = <            
@@ -351,7 +363,7 @@ object projectoptionsfo: tprojectoptionsfo
           0
         )
         anchors = [an_left, an_top, an_right]
-        taborder = 20
+        taborder = 21
       end
       object encoding: tenumedit
         optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
@@ -521,6 +533,22 @@ object projectoptionsfo: tprojectoptionsfo
         )
         taborder = 8
       end
+      object editmarkbrackets: tbooleanedit
+        bounds_x = 447
+        bounds_y = 201
+        bounds_cx = 92
+        bounds_cy = 16
+        frame.caption = 'Mark brackets'
+        frame.dummy = 0
+        frame.outerframe = (
+          0
+          1
+          79
+          2
+        )
+        taborder = 18
+        value = True
+      end
     end
     object debuggerpage: ttabpage
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_destroywidgets]
@@ -660,11 +688,15 @@ object projectoptionsfo: tprojectoptionsfo
             frame.dummy = 0
             anchors = []
             optionsgrid = [og_rowmoving, og_keyrowmoving, og_rowinserting, og_rowdeleting, og_selectedrowsdeleting, og_focuscellonenter, og_autofirstrow, og_autoappend, og_autopopup]
+            fixcols.coloractive = -2147483648
+            fixrows.coloractive = -2147483648
             datacols.count = 1
+            datacols.coloractive = -2147483648
             datacols.options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_cancopy, co_canpaste]
             datacols.items = <            
               item
                 linecolorfix = -1610612733
+                coloractive = -2147483648
                 width = 620
                 options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_fill, co_savevalue, co_cancopy, co_canpaste]
                 onshowhint = colonshowhint
@@ -715,9 +747,12 @@ object projectoptionsfo: tprojectoptionsfo
             frame.dummy = 0
             anchors = []
             optionsgrid = [og_keyrowmoving, og_rowinserting, og_rowdeleting, og_focuscellonenter, og_autofirstrow, og_autoappend, og_colchangeontabkey, og_autopopup]
+            fixcols.coloractive = -2147483648
             fixrows.count = 1
+            fixrows.coloractive = -2147483648
             fixrows.items = <            
               item
+                coloractive = -2147483648
                 height = 16
                 captions.count = 2
                 captions.items = <                
@@ -729,13 +764,16 @@ object projectoptionsfo: tprojectoptionsfo
                   end>
               end>
             datacols.count = 2
+            datacols.coloractive = -2147483648
             datacols.items = <            
               item
+                coloractive = -2147483648
                 width = 22
                 options = [co_drawfocus, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
                 widgetname = 'defon'
               end            
               item
+                coloractive = -2147483648
                 width = 597
                 options = [co_fill, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
                 onshowhint = colonshowhint
@@ -794,9 +832,12 @@ object projectoptionsfo: tprojectoptionsfo
             frame.dummy = 0
             anchors = []
             optionsgrid = [og_colsizing, og_rowdeleting, og_focuscellonenter, og_autofirstrow, og_autoappend, og_sorted, og_autopopup]
+            fixcols.coloractive = -2147483648
             fixrows.count = 1
+            fixrows.coloractive = -2147483648
             fixrows.items = <            
               item
+                coloractive = -2147483648
                 height = 16
                 captions.count = 5
                 captions.items = <                
@@ -818,28 +859,34 @@ object projectoptionsfo: tprojectoptionsfo
                   end>
               end>
             datacols.count = 5
+            datacols.coloractive = -2147483648
             datacols.options = [co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_nosort]
             datacols.items = <            
               item
+                coloractive = -2147483648
                 width = 32
                 options = [co_drawfocus, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_nosort]
                 widgetname = 'sigstop'
               end            
               item
+                coloractive = -2147483648
                 width = 43
                 options = [co_drawfocus, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_nosort]
                 widgetname = 'sighandle'
               end            
               item
+                coloractive = -2147483648
                 options = [co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_nosort]
                 widgetname = 'signum'
               end            
               item
+                coloractive = -2147483648
                 width = 39
                 options = [co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_nosort]
                 widgetname = 'signumto'
               end            
               item
+                coloractive = -2147483648
                 width = 452
                 options = [co_fill, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_nosort]
                 widgetname = 'signame'
@@ -932,9 +979,12 @@ object projectoptionsfo: tprojectoptionsfo
             frame.dummy = 0
             anchors = []
             optionsgrid = [og_colsizing, og_keyrowmoving, og_rowinserting, og_rowdeleting, og_focuscellonenter, og_autofirstrow, og_autoappend, og_colchangeontabkey, og_autopopup]
+            fixcols.coloractive = -2147483648
             fixrows.count = 1
+            fixrows.coloractive = -2147483648
             fixrows.items = <            
               item
+                coloractive = -2147483648
                 height = 16
                 captions.count = 2
                 captions.items = <                
@@ -946,13 +996,16 @@ object projectoptionsfo: tprojectoptionsfo
                   end>
               end>
             datacols.count = 2
+            datacols.coloractive = -2147483648
             datacols.items = <            
               item
+                coloractive = -2147483648
                 width = 47
                 options = [co_drawfocus, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
                 widgetname = 'exceptignore'
               end            
               item
+                coloractive = -2147483648
                 width = 572
                 options = [co_fill, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
                 widgetname = 'exceptclassnames'
@@ -1043,7 +1096,6 @@ object projectoptionsfo: tprojectoptionsfo
       frame.dummy = 0
       anchors = [an_top, an_bottom]
       taborder = 6
-      visible = True
       caption = '&Make'
       onchildscaled = makepageonchildscaled
       object makegroupbox: tgroupbox
@@ -1072,9 +1124,12 @@ object projectoptionsfo: tprojectoptionsfo
           )
           anchors = [an_top]
           optionsgrid = [og_keyrowmoving, og_rowinserting, og_rowdeleting, og_selectedrowsdeleting, og_focuscellonenter, og_autofirstrow, og_autoappend, og_autopopup]
+          fixcols.coloractive = -2147483648
           fixrows.count = 1
+          fixrows.coloractive = -2147483648
           fixrows.items = <          
             item
+              coloractive = -2147483648
               height = 16
               captions.count = 7
               captions.items = <              
@@ -1107,39 +1162,47 @@ object projectoptionsfo: tprojectoptionsfo
                 end>
             end>
           datacols.count = 7
+          datacols.coloractive = -2147483648
           datacols.options = [co_drawfocus, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
           datacols.items = <          
             item
+              coloractive = -2147483648
               width = 13
               options = [co_drawfocus, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
               widgetname = 'makeon'
             end          
             item
+              coloractive = -2147483648
               width = 13
               options = [co_drawfocus, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
               widgetname = 'buildon'
             end          
             item
+              coloractive = -2147483648
               width = 13
               options = [co_drawfocus, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
               widgetname = 'make1on'
             end          
             item
+              coloractive = -2147483648
               width = 13
               options = [co_drawfocus, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
               widgetname = 'make2on'
             end          
             item
+              coloractive = -2147483648
               width = 13
               options = [co_drawfocus, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
               widgetname = 'make3on'
             end          
             item
+              coloractive = -2147483648
               width = 13
               options = [co_drawfocus, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
               widgetname = 'make4on'
             end          
             item
+              coloractive = -2147483648
               width = 536
               options = [co_fill, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
               onshowhint = colonshowhint
@@ -1252,9 +1315,12 @@ object projectoptionsfo: tprojectoptionsfo
           anchors = [an_top, an_bottom]
           taborder = 2
           optionsgrid = [og_keyrowmoving, og_rowinserting, og_rowdeleting, og_selectedrowsdeleting, og_focuscellonenter, og_autofirstrow, og_autoappend, og_autopopup]
+          fixcols.coloractive = -2147483648
           fixrows.count = 1
+          fixrows.coloractive = -2147483648
           fixrows.items = <          
             item
+              coloractive = -2147483648
               height = 16
               captions.count = 11
               captions.items = <              
@@ -1303,53 +1369,65 @@ object projectoptionsfo: tprojectoptionsfo
                 end>
             end>
           datacols.count = 11
+          datacols.coloractive = -2147483648
           datacols.width = 13
           datacols.options = [co_drawfocus, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
           datacols.items = <          
             item
+              coloractive = -2147483648
               options = [co_drawfocus, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
               widgetname = 'dmakeon'
             end          
             item
+              coloractive = -2147483648
               options = [co_drawfocus, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
               widgetname = 'dbuildon'
             end          
             item
+              coloractive = -2147483648
               options = [co_drawfocus, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
               widgetname = 'dmake1on'
             end          
             item
+              coloractive = -2147483648
               options = [co_drawfocus, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
               widgetname = 'dmake2on'
             end          
             item
+              coloractive = -2147483648
               options = [co_drawfocus, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
               widgetname = 'dmake3on'
             end          
             item
               linewidth = 2
               linecolorfix = -1610612733
+              coloractive = -2147483648
               options = [co_drawfocus, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
               widgetname = 'dmake4on'
             end          
             item
+              coloractive = -2147483648
               options = [co_drawfocus, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
               widgetname = 'duniton'
             end          
             item
+              coloractive = -2147483648
               options = [co_drawfocus, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
               widgetname = 'dincludeon'
             end          
             item
+              coloractive = -2147483648
               options = [co_drawfocus, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
               widgetname = 'dlibon'
             end          
             item
+              coloractive = -2147483648
               options = [co_drawfocus, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
               widgetname = 'dobjon'
             end          
             item
               linecolorfix = -1610612733
+              coloractive = -2147483648
               width = 479
               options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_fill, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_cancopy, co_canpaste]
               onshowhint = colonshowhint
@@ -1699,9 +1777,12 @@ object projectoptionsfo: tprojectoptionsfo
         anchors = [an_top, an_bottom]
         taborder = 1
         optionsgrid = [og_colsizing, og_keyrowmoving, og_rowinserting, og_rowdeleting, og_selectedrowsdeleting, og_focuscellonenter, og_autofirstrow, og_autoappend, og_autopopup]
+        fixcols.coloractive = -2147483648
         fixrows.count = 1
+        fixrows.coloractive = -2147483648
         fixrows.items = <        
           item
+            coloractive = -2147483648
             height = 16
             captions.count = 8
             captions.items = <            
@@ -1731,39 +1812,48 @@ object projectoptionsfo: tprojectoptionsfo
               end>
           end>
         datacols.count = 8
+        datacols.coloractive = -2147483648
         datacols.width = 13
         datacols.options = [co_drawfocus, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_fixwidth, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_cancopy, co_canpaste]
         datacols.items = <        
           item
+            coloractive = -2147483648
             options = [co_drawfocus, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_fixwidth, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_cancopy, co_canpaste]
             widgetname = 'e0'
           end        
           item
+            coloractive = -2147483648
             options = [co_drawfocus, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_fixwidth, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_cancopy, co_canpaste]
             widgetname = 'e1'
           end        
           item
+            coloractive = -2147483648
             options = [co_drawfocus, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_fixwidth, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_cancopy, co_canpaste]
             widgetname = 'e2'
           end        
           item
+            coloractive = -2147483648
             options = [co_drawfocus, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_fixwidth, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_cancopy, co_canpaste]
             widgetname = 'e3'
           end        
           item
+            coloractive = -2147483648
             options = [co_drawfocus, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_fixwidth, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_cancopy, co_canpaste]
             widgetname = 'e4'
           end        
           item
+            coloractive = -2147483648
             options = [co_drawfocus, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_fixwidth, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_cancopy, co_canpaste]
             widgetname = 'e5'
           end        
           item
+            coloractive = -2147483648
             width = 146
             options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_cancopy, co_canpaste]
             widgetname = 'macronames'
           end        
           item
+            coloractive = -2147483648
             width = 391
             options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_fill, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_cancopy, co_canpaste]
             widgetname = 'macrovalues'
@@ -1879,16 +1969,21 @@ object projectoptionsfo: tprojectoptionsfo
         anchors = [an_top]
         optionsgrid = [og_keyrowmoving, og_focuscellonenter, og_autopopup]
         fixcols.count = 1
+        fixcols.coloractive = -2147483648
         fixcols.items = <        
           item
+            coloractive = -2147483648
             width = 13
             numstart = 1
             numstep = 1
           end>
+        fixrows.coloractive = -2147483648
         rowcount = 6
         datacols.count = 2
+        datacols.coloractive = -2147483648
         datacols.items = <        
           item
+            coloractive = -2147483648
             width = 14
             options = [co_drawfocus, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
             widgetname = 'activemacroselect'
@@ -1905,6 +2000,7 @@ object projectoptionsfo: tprojectoptionsfo
             )
           end        
           item
+            coloractive = -2147483648
             width = 578
             options = [co_fill, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
             widgetname = 'groupcomment'
@@ -1977,9 +2073,12 @@ object projectoptionsfo: tprojectoptionsfo
         frame.dummy = 0
         anchors = []
         optionsgrid = [og_colsizing, og_keyrowmoving, og_rowinserting, og_rowdeleting, og_focuscellonenter, og_autofirstrow, og_autoappend, og_autopopup]
+        fixcols.coloractive = -2147483648
         fixrows.count = 1
+        fixrows.coloractive = -2147483648
         fixrows.items = <        
           item
+            coloractive = -2147483648
             height = 18
             captions.count = 3
             captions.items = <            
@@ -1994,17 +2093,21 @@ object projectoptionsfo: tprojectoptionsfo
               end>
           end>
         datacols.count = 3
+        datacols.coloractive = -2147483648
         datacols.items = <        
           item
+            coloractive = -2147483648
             width = 98
             widgetname = 'fontalias'
           end        
           item
+            coloractive = -2147483648
             width = 476
             options = [co_fill, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
             widgetname = 'fontname'
           end        
           item
+            coloractive = -2147483648
             width = 46
             widgetname = 'fontheight'
           end>
@@ -2064,14 +2167,18 @@ object projectoptionsfo: tprojectoptionsfo
         anchors = [an_top, an_bottom]
         optionsgrid = [og_rowmoving, og_keyrowmoving, og_focuscellonenter, og_colchangeontabkey, og_autopopup, og_mousescrollcol]
         fixcols.count = 1
+        fixcols.coloractive = -2147483648
         fixcols.items = <        
           item
             color = -1879048185
+            coloractive = -2147483648
             width = 80
           end>
         fixrows.count = 1
+        fixrows.coloractive = -2147483648
         fixrows.items = <        
           item
+            coloractive = -2147483648
             height = 16
             captions.count = 3
             captions.items = <            
@@ -2091,9 +2198,11 @@ object projectoptionsfo: tprojectoptionsfo
           end>
         rowcount = 20
         datacols.count = 3
+        datacols.coloractive = -2147483648
         datacols.options = [co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_mousescrollrow]
         datacols.items = <        
           item
+            coloractive = -2147483648
             width = 22
             options = [co_readonly, co_nofocus, co_drawfocus, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_mousescrollrow]
             widgetname = 'coldi'
@@ -2103,6 +2212,7 @@ object projectoptionsfo: tprojectoptionsfo
             )
           end        
           item
+            coloractive = -2147483648
             width = 97
             options = [co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_cancopy, co_canpaste, co_mousescrollrow]
             widgetname = 'usercolors'
@@ -2133,6 +2243,7 @@ object projectoptionsfo: tprojectoptionsfo
             )
           end        
           item
+            coloractive = -2147483648
             width = 420
             options = [co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_fill, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_cancopy, co_canpaste, co_mousescrollrow]
             widthmin = 100
@@ -2264,10 +2375,13 @@ object projectoptionsfo: tprojectoptionsfo
             frame.dummy = 0
             anchors = []
             optionsgrid = [og_colsizing, og_keycolmoving, og_rowmoving, og_rowinserting, og_rowdeleting, og_focuscellonenter, og_autofirstrow, og_autoappend, og_colchangeontabkey, og_autopopup]
+            fixcols.coloractive = -2147483648
             fixrows.count = 1
+            fixrows.coloractive = -2147483648
             fixrows.items = <            
               item
                 frame.dummy = 0
+                coloractive = -2147483648
                 height = 16
                 captions.count = 4
                 captions.items = <                
@@ -2287,24 +2401,29 @@ object projectoptionsfo: tprojectoptionsfo
                   end>
               end>
             datacols.count = 4
+            datacols.coloractive = -2147483648
             datacols.items = <            
               item
+                coloractive = -2147483648
                 width = 18
                 options = [co_drawfocus, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
                 widgetname = 'loadprojectfile'
               end            
               item
+                coloractive = -2147483648
                 width = 18
                 options = [co_drawfocus, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
                 widgetname = 'expandprojectfilemacros'
               end            
               item
+                coloractive = -2147483648
                 width = 312
                 options = [co_mouseselect, co_keyselect, co_proportional, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_cancopy, co_canpaste]
                 onshowhint = colonshowhint
                 widgetname = 'newprojectfiles'
               end            
               item
+                coloractive = -2147483648
                 width = 271
                 options = [co_fill, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
                 onshowhint = colonshowhint

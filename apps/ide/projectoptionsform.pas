@@ -120,6 +120,7 @@ type
   editfontwidth: integer;
   editfontextraspace: integer;
   editfontantialiased: boolean;
+  editmarkbrackets: boolean;
   backupfilecount: integer;
   encoding: integer;
 
@@ -275,6 +276,7 @@ type
    inheritedsource: tfilenameedit;
    inheritedform: tfilenameedit;
    spacetabs: tbooleanedit;
+   editmarkbrackets: tbooleanedit;
    tbutton1: tbutton;
    usercolors: tcoloredit;
    tgroupbox1: tgroupbox;
@@ -698,6 +700,7 @@ begin
   editfontwidth:= 0;
   editfontextraspace:= 0;
   editfontantialiased:= true;
+  editmarkbrackets:= true;
   backupfilecount:= 2;
   encoding:= 0;
   activateonbreak:= true;
@@ -925,6 +928,7 @@ begin
   updatevalue('editfontwidth',editfontwidth);
   updatevalue('editfontextraspace',editfontextraspace);
   updatevalue('editfontantialiased',editfontantialiased);
+  updatevalue('editmarkbrackets',editmarkbrackets);
   updatevalue('backupfilecount',backupfilecount,0,10);
   updatevalue('encoding',encoding,0,1);
   
@@ -1045,6 +1049,7 @@ begin
   fo.editfontwidth.value:= editfontwidth;
   fo.editfontextraspace.value:= editfontextraspace;
   fo.editfontantialiased.value:= editfontantialiased;
+  fo.editmarkbrackets.value:= editmarkbrackets;
   fo.backupfilecount.value:= backupfilecount;
   fo.encoding.value:= encoding;
   fo.fontalias.gridvalues:= fontalias;
@@ -1202,6 +1207,7 @@ begin
   editfontwidth:= fo.editfontwidth.value;
   editfontextraspace:= fo.editfontextraspace.value;
   editfontantialiased:= fo.editfontantialiased.value;
+  editmarkbrackets:= fo.editmarkbrackets.value;
   backupfilecount:= fo.backupfilecount.value;
   encoding:= fo.encoding.value;
   fontalias:= fo.fontalias.gridvalues;

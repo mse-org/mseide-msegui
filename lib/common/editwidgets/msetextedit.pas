@@ -88,6 +88,7 @@ type
    flines: trichstringdatalist;
    procedure setoptionsedit(const avalue: optionseditty); override;
 
+   function beforechange: boolean; //true if not aborted
    procedure fontchanged; override;
    procedure tabulatorschanged(const sender: tarrayprop; const index: integer);
    procedure dobeforepaintforeground(const canvas: tcanvas); override;
@@ -180,6 +181,8 @@ type
    function selectedtext: msestring;
 
    property optionsedit default defaulttexteditoptions;
+   procedure setfontstyle(const start,stop: gridcoordty;
+                               const astyle: fontstylety; const aset: boolean);
    property selectstart: gridcoordty read fselectstart;
    property selectend: gridcoordty read fselectend;
    procedure setselection(const start,stop: gridcoordty; aseteditpos: boolean = false);
@@ -432,6 +435,11 @@ begin
  end;
 end;
 
+function tcustomtextedit.beforechange: boolean; //true if not aborted
+begin
+ result:= feditor.beforechange;
+end;
+
 procedure tcustomtextedit.fontchanged;
 begin
  inherited;
@@ -673,6 +681,7 @@ end;
 
 procedure tcustomtextedit.clear;
 begin
+ beforechange;
  ffilename:= '';
  if flines <> nil then begin
   flines.clear;
@@ -771,6 +780,7 @@ var
  ar1: msestringarty;
  int1: integer;
 begin
+ beforechange;
  beginupdate;
  feditor.begingroup;
  try
@@ -842,6 +852,7 @@ var
  grid: tcustomwidgetgrid1;
 begin
  if (start.col <> stop.col) or (start.row <> stop.row) then begin
+  beforechange;
   normalizetextrect(start,stop,po1,po2);
   beginupdate;
   bo1:= false;
@@ -1076,6 +1087,32 @@ begin
     updatestyle(true);
    end;
   end;
+ end;
+end;
+
+procedure tcustomtextedit.setfontstyle(const start,stop: gridcoordty;
+                               const astyle: fontstylety; const aset: boolean);
+var
+ a,b: gridcoordty;
+ int1,int2: integer;
+ po1: prichstringty;
+begin
+ normalizetextrect(start,stop,a,b);
+ int2:= bigint;
+ for int1:= a.row to b.row do begin
+  po1:= flines.richitemspo[int1];
+  if int1 = b.row then begin
+   int2:= b.col - a.col;
+  end;
+  if updatefontstyle(po1^.format,a.col,int2,astyle,aset) then begin
+   with fgridintf.getcol do begin
+    invalidatecell(int1);
+    if int1 = grid.row then begin
+     tinplaceedit1(feditor).format:= po1^.format;
+    end;
+   end;
+  end;
+  a.col:= 0;
  end;
 end;
 

@@ -422,6 +422,7 @@ type
                         const aowner: tgridarrayprop); override;
    destructor destroy; override;
    procedure invalidate;
+   procedure invalidatecell(const arow: integer);
    function rowcolor(const aindex: integer): colorty;
    function rowfont(const aindex: integer): tfont;
    procedure changed; override;
@@ -2220,6 +2221,11 @@ end;
 procedure tcol.cellchanged(const row: integer);
 begin
  fgrid.cellchanged(self,row);
+end;
+
+procedure tcol.invalidatecell(const arow: integer);
+begin
+ fgrid.invalidatecell(makegridcoord(colindex,arow));
 end;
 
 procedure tcol.drawcell(const acanvas: tcanvas);
