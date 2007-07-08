@@ -88,7 +88,7 @@ type
 
    fafterconnect: tmsesqlscript;
    fbeforedisconnect: tmsesqlscript;
-   fdatasets: datasetarty;
+   fdatasets1: datasetarty;
    frecnos: integerarty;
    procedure SetTransaction(Value : TSQLTransaction);
    procedure GetDBInfo(const SchemaType : TSchemaType; const SchemaObjectName, ReturnField : string; List: TStrings);
@@ -500,12 +500,26 @@ type
     FOpenAfterRead : boolean;
  end;
 
+{$ifdef mse_FPC_2_2}
+  TDatabasecracker = class(TCustomConnection)
+  private
+    FConnected : Boolean;
+    FDataBaseName : String;
+    FDataSetxx : TList;
+    FTransactionsxx : TList;
+    FDirectory : String;
+    FKeepConnection : Boolean;
+    FParams : TStrings;
+    FSQLBased : Boolean;
+    FOpenAfterRead : boolean;
+  end;
+{$else}
   TDatabasecracker = class(TComponent)
   private
     FConnected : Boolean;
     FDataBaseName : String;
-    FDataSets : TList;
-    FTransactions : TList;
+    FDataSetsxx : TList;
+    FTransactionsxx : TList;
     FDirectory : String;
     FKeepConnection : Boolean;
     FLoginPrompt : Boolean;
@@ -514,8 +528,7 @@ type
     FSQLBased : Boolean;
     FOpenAfterRead : boolean;
   end;
-//copied from dsparams.inc 
-//todo: not needed for FPC 2.1.1
+{$endif}
 
 function SkipComments(var p: PChar) : boolean;
 begin
@@ -843,8 +856,8 @@ begin
      fbeforedisconnect.execute(self,ftransaction);
      ftransaction.commit;
     end;
-    for int1:= fdatasets.count - 1 downto 0 do begin
-     with tsqlquery(fdatasets[int1]) do begin
+    for int1:= datasetcount - 1 downto 0 do begin
+     with tsqlquery(datasets[int1]) do begin
       if (transaction = nil) or (transaction.active) then begin
        close; //not disconnected
       end;
@@ -895,9 +908,9 @@ begin
   if acomponent = fbeforedisconnect then begin
    fbeforedisconnect:= nil;
   end;
-  int1:= finditem(pointerarty(fdatasets),acomponent);
+  int1:= finditem(pointerarty(fdatasets1),acomponent);
   if int1 >= 0 then begin
-   fdatasets[int1]:= nil;
+   fdatasets1[int1]:= nil;
   end;
  end;
  inherited;
@@ -938,11 +951,11 @@ procedure tcustomsqlconnection.closeds;
 var
  int1: integer;
 begin
- setlength(fdatasets,datasetcount);
- setlength(frecnos,length(fdatasets));
- for int1:= high(fdatasets) downto 0 do begin
-  fdatasets[int1]:= datasets[int1];
-  with fdatasets[int1] do begin
+ setlength(fdatasets1,datasetcount);
+ setlength(frecnos,length(fdatasets1));
+ for int1:= high(fdatasets1) downto 0 do begin
+  fdatasets1[int1]:= datasets[int1];
+  with fdatasets1[int1] do begin
    freenotification(self);
    if active then begin
     frecnos[int1]:= recno;
@@ -952,10 +965,10 @@ begin
    end;
   end;
  end;
- for int1:= high(fdatasets) downto 0 do begin
-  if (fdatasets[int1] <> nil) and 
-                 (tdbdataset(fdatasets[int1]).database = self) then begin
-   with fdatasets[int1] do begin
+ for int1:= high(fdatasets1) downto 0 do begin
+  if (fdatasets1[int1] <> nil) and 
+                 (tdbdataset(fdatasets1[int1]).database = self) then begin
+   with fdatasets1[int1] do begin
     active:= false;
    end;
   end;
@@ -966,10 +979,10 @@ procedure tcustomsqlconnection.reopends;
 var
  int1: integer;
 begin
- for int1:= 0 to high(fdatasets) do begin
-  if fdatasets[int1] <> nil then begin
+ for int1:= 0 to high(fdatasets1) do begin
+  if fdatasets1[int1] <> nil then begin
    if frecnos[int1] >= -1 then begin
-    with tdbdataset(fdatasets[int1]) do begin
+    with tdbdataset(fdatasets1[int1]) do begin
      if database = self then begin
       disablecontrols;
       active:= true;
@@ -998,7 +1011,7 @@ begin
     reopends;
    end;
   finally
-   fdatasets:= nil;
+   fdatasets1:= nil;
    frecnos:= nil;
   end;
  end
@@ -1018,7 +1031,7 @@ begin
     reopends;
    end;
   finally
-   fdatasets:= nil;
+   fdatasets1:= nil;
    frecnos:= nil;
   end;
  end
