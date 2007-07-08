@@ -274,6 +274,7 @@ type
  sqlscripterroreventty = procedure(const sender: tmsesqlscript;
                                 const adatabase: tcustomsqlconnection;
              const atransaction: tsqltransaction; const e: exception) of object;
+
  tmsesqlscript = class(tmsecomponent)
   private
    fsql: tstringlist;
@@ -315,7 +316,6 @@ type
    property onerror: sqlscripterroreventty read fonerror write fonerror;
  end;
  
-{ TSQLQuery }
 const
  blobidsize = sizeof(integer);
 type
