@@ -24,6 +24,7 @@ type
  tickcaptionty = record
   caption: msestring;
   pos: pointty;
+  angle: real;
  end;
  tickcaptionarty = array of tickcaptionty;
   
@@ -46,6 +47,8 @@ type
   indent: integer;
   length: integer;
   captiondist: integer;
+  captionoffset: integer;
+  escapement: real;
   font: tdialpropfont;
   caption: msestring;
 //  kind: dialdatakindty;
@@ -69,11 +72,14 @@ type
    procedure setlength(const avalue: integer);
    procedure setcaption(const avalue: msestring);
    procedure setcaptiondist(const avalue: integer);
+   procedure setcaptionoffset(const avalue: integer);
    function getfont: tdialpropfont;
    procedure setfont(const avalue: tdialpropfont);
    function isfontstored: boolean;
    procedure createfont;
    procedure fontchanged(const sender: tobject);
+   procedure setescapement(const avalue: real);
+
   protected
    flayoutvalid: boolean;
    procedure changed; virtual;
@@ -97,7 +103,10 @@ type
    property caption: msestring read fli.caption write setcaption;
    property captiondist: integer read fli.captiondist write setcaptiondist
                                        default 2;
+   property captionoffset: integer read fli.captionoffset write setcaptionoffset
+                                       default 0;
    property font: tdialpropfont read getfont write setfont stored isfontstored;
+   property escapement: real read fli.escapement write setescapement;
  end;
 
  dialmarkeroptionty = (dmo_opposite);
@@ -108,6 +117,7 @@ type
   line: segmentty;
   value: realty;
   captionpos: pointty;
+  aangle: real;
   afont: tfont;
   acaption: msestring;
   options: dialmarkeroptionsty;
@@ -168,7 +178,7 @@ type
    property items[const index: integer]: tdialtick read getitems; default;
  end;
  
- dialoptionty = (do_opposite,do_sideline,do_boxline);
+ dialoptionty = (do_opposite,do_sideline,do_boxline,do_rotatetext);
  dialoptionsty = set of dialoptionty;  
 
  idialcontroller = interface(inullinterface)
@@ -217,8 +227,8 @@ type
                    const arect: rectty; out linestart,lineend: integer;
                    out linedirection: graphicdirectionty);
    procedure adjustcaption(const dir: graphicdirectionty;
-             const captiondist: integer;
-             const stringwidth: integer; const afont: tfont; var pos: pointty);
+                const ainfo: diallineinfoty; const afont: tfont;
+                const stringwidth: integer; var pos: pointty);
    procedure checklayout;
    procedure invalidate;
    procedure createfont;
@@ -386,6 +396,14 @@ begin
  end;
 end;
 
+procedure tdialprop.setcaptionoffset(const avalue: integer);
+begin
+ if fli.captionoffset <> avalue then begin
+  fli.captionoffset:= avalue;
+  changed;
+ end;
+end;
+
 procedure tdialprop.fontchanged(const sender: tobject);
 begin
  changed;
@@ -423,6 +441,14 @@ end;
 function tdialprop.isfontstored: boolean;
 begin
  result:= fli.font <> nil;
+end;
+
+procedure tdialprop.setescapement(const avalue: real);
+begin
+ if avalue <> fli.escapement then begin
+  fli.escapement:= avalue;
+  changed;
+ end;
 end;
 
 function tdialprop.getactcaption(const avalue: real; const aformat: msestring): msestring;
@@ -475,7 +501,7 @@ begin
     acanvas.dashes:= '';
    end;
    if caption <> '' then begin
-    acanvas.drawstring(acaption,captionpos,self.font);
+    acanvas.drawstring(acaption,captionpos,self.font,false,aangle);
    end;
   end;
  end;
@@ -531,18 +557,22 @@ var
  var
   int1,int2: integer;
  begin
-  with tcustomdialcontroller(fowner),fticks do begin
-   for int1:= 0 to count - 1 do begin
-    with tdialtick(fitems[int1]).finfo do begin
-     for int2:= 0 to high(ticksreal) do begin
-      if abs(avalue-ticksreal[int2]) < 0.1 then begin
-       if direction in [gd_right,gd_left] then begin
-        result:= ticks[int2].a.x;
-       end
-       else begin
-        result:= ticks[int2].a.y;
+  with tcustomdialcontroller(fowner) do begin
+   if not (dis_needstransform in fstate) then begin
+    with fticks do begin
+     for int1:= 0 to count - 1 do begin
+      with tdialtick(fitems[int1]).finfo do begin
+       for int2:= 0 to high(ticksreal) do begin
+        if abs(avalue-ticksreal[int2]) < 0.1 then begin
+         if direction in [gd_right,gd_left] then begin
+          result:= ticks[int2].a.x;
+         end
+         else begin
+          result:= ticks[int2].a.y;
+         end;
+         exit;
+        end;
        end;
-       exit;
       end;
      end;
     end;
@@ -560,31 +590,43 @@ var
 var
  linestart,lineend: integer;
  dir1: graphicdirectionty;
+ rea1: real;
 begin
  with tcustomdialcontroller(fowner),fli,finfo,line do begin
   rect1:= fintf.getdialrect;
   calclineend(fli,dmo_opposite in options,rect1,linestart,lineend,dir1);
+  rea1:= (value - foffset)/frange;
+  if do_rotatetext in foptions then begin
+   aangle:= angle * (rea1-0.5) * 2*pi;
+   if fdirection in [gd_left,gd_right] then begin
+    aangle:= -aangle;
+   end;
+   aangle:= aangle + escapement*2*pi;
+  end
+  else begin
+   aangle:= 0;
+  end;
   case fdirection of
    gd_right: begin
-    a.x:= snap(rect1.cx * (value - foffset)/frange);
+    a.x:= snap(rect1.cx * rea1);
     b.x:= a.x;
     a.y:= linestart;
     b.y:= lineend;
    end;
    gd_up: begin
-    a.y:= snap(rect1.cy - (rect1.cy * (value - foffset)/frange));
+    a.y:= snap(rect1.cy - (rect1.cy * rea1));
     b.y:= a.y;
     a.x:= linestart;
     b.x:= lineend;
    end;
    gd_left: begin
-    a.x:= snap(rect1.cx - (rect1.cx * (value - foffset)/frange));
+    a.x:= snap(rect1.cx - (rect1.cx * rea1));
     b.x:= a.x;
     a.y:= linestart;
     b.y:= lineend;
    end;
    gd_down: begin
-    a.y:= snap(rect1.cy * (value - foffset)/frange);
+    a.y:= snap(rect1.cy * rea1);
     b.y:= a.y;
     a.x:= linestart;
     b.x:= lineend;
@@ -594,8 +636,8 @@ begin
    afont:= self.font;
    acaption:= getactcaption(value,caption);
    captionpos:= a;
-   adjustcaption(dir1,captiondist,
-     fintf.getwidget.getcanvas.getstringwidth(acaption,afont),afont,captionpos);
+   adjustcaption(dir1,fli,afont,
+     fintf.getwidget.getcanvas.getstringwidth(acaption,afont),captionpos);
   end;
   transform(a);
   transform(b);
@@ -806,35 +848,58 @@ begin
 end;
 
 procedure tcustomdialcontroller.adjustcaption(const dir: graphicdirectionty;
-             const captiondist: integer;
-             const stringwidth: integer; const afont: tfont; var pos: pointty);
+              const ainfo: diallineinfoty;
+              const afont: tfont; const stringwidth: integer; var pos: pointty);
 begin
- with pos do begin
+ with ainfo,pos do begin
   case dir of 
    gd_right: begin
     y:= y + captiondist;
-    transform(pos);
-    x:= x - stringwidth div 2;
-    y:= y + afont.ascent;
+    x:= x + captionoffset;
+    if escapement = 0 then begin
+     if not(do_rotatetext in foptions) then begin
+      transform(pos);
+     end;
+     x:= x - stringwidth div 2;
+     y:= y + afont.ascent;
+    end;
    end;
    gd_up: begin
     x:= x - captiondist;
-    transform(pos);
-    x:= x - stringwidth;
-    y:= y + afont.ascent - afont.glyphheight div 2;
+    y:= y + captionoffset;
+    if escapement = 0 then begin
+     if not(do_rotatetext in foptions) then begin
+      transform(pos);
+     end;
+     x:= x - stringwidth;
+     y:= y + afont.ascent - afont.glyphheight div 2;
+    end;
    end;
    gd_left: begin
     y:= y - captiondist;
-    transform(pos);
-    x:= x - stringwidth div 2;
-    y:= y - afont.descent;
+    x:= x + captionoffset;
+    if escapement = 0 then begin
+     if not(do_rotatetext in foptions) then begin
+      transform(pos);
+     end;
+     x:= x - stringwidth div 2;
+     y:= y - afont.descent;
+    end;
    end;
    gd_down: begin
     x:= x + captiondist;
-    transform(pos);
-    y:= y + afont.ascent - afont.glyphheight div 2;
+    y:= y + captionoffset;
+    if escapement = 0 then begin
+     if not(do_rotatetext in foptions) then begin
+      transform(pos);
+     end;
+     y:= y + afont.ascent - afont.glyphheight div 2;
+    end;
    end;
   end;
+ end;
+ if do_rotatetext in foptions then begin
+  transform(pos);
  end;
 end;
 
@@ -851,6 +916,7 @@ var
  dir1: graphicdirectionty;
  boxlines: array[0..1] of segmentty;
  bo1: boolean;
+ rea1: real;
  
 begin
  if not (dis_layoutvalid in fstate) then begin
@@ -878,7 +944,8 @@ begin
     include(fstate,dis_needstransform);
     fscalex:= 2.0/int1;
     fr:= int1/2.0;
-    if fangle < 0.25 then begin
+//    if fangle < 0.25 then begin
+    if fangle < 0.5 then begin
      fr:= fr/sin(fp);
     end;
    end;    
@@ -999,19 +1066,35 @@ begin
       end
       else begin
        system.setlength(captions,system.length(ticks));
+       int2:= high(captions) * 2; //2* interval count
+       rea1:= (angle*2*pi) / int2;
+       if fdirection in [gd_left,gd_right] then begin
+        rea1:= -rea1;
+       end;
+       int2:= -int2 div 2;
        for int1:= 0 to high(captions) do begin
         captions[int1].caption:= getactcaption(int1*valstep+first,caption);
         with captions[int1] do begin
          pos:= ticks[int1].a;
-         adjustcaption(dir1,captiondist,
-              canvas1.getstringwidth(caption,afont),afont,pos);
+         adjustcaption(dir1,fli,afont,
+               canvas1.getstringwidth(caption,afont),pos);
+         if do_rotatetext in foptions then begin
+          angle:= int2 * rea1;
+          int2:= int2 + 2;
+         end
+         else begin
+          angle:= 0;
+         end;
+         angle:= angle + escapement * 2*pi;
         end;
        end;
       end;
       if dis_needstransform in fstate then begin
        for int1:= 0 to high(ticks) do begin
-        transform(ticks[int1].a);
-        transform(ticks[int1].b);
+        with ticks[int1] do begin
+         transform(a);
+         transform(b);
+        end;
        end;
       end;
      end;  
@@ -1046,7 +1129,7 @@ begin
    end;
    for int2:= 0 to high(captions) do begin
     with captions[int2] do begin
-     acanvas.drawstring(caption,pos,afont);
+     acanvas.drawstring(caption,pos,afont,false,angle);
     end;
    end;
   end;
