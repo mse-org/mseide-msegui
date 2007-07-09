@@ -856,10 +856,10 @@ begin
    gd_right: begin
     y:= y + captiondist;
     x:= x + captionoffset;
+    if not(do_rotatetext in foptions) then begin
+     transform(pos);
+    end;
     if escapement = 0 then begin
-     if not(do_rotatetext in foptions) then begin
-      transform(pos);
-     end;
      x:= x - stringwidth div 2;
      y:= y + afont.ascent;
     end;
@@ -867,10 +867,10 @@ begin
    gd_up: begin
     x:= x - captiondist;
     y:= y + captionoffset;
+    if not(do_rotatetext in foptions) then begin
+     transform(pos);
+    end;
     if escapement = 0 then begin
-     if not(do_rotatetext in foptions) then begin
-      transform(pos);
-     end;
      x:= x - stringwidth;
      y:= y + afont.ascent - afont.glyphheight div 2;
     end;
@@ -878,10 +878,10 @@ begin
    gd_left: begin
     y:= y - captiondist;
     x:= x + captionoffset;
+    if not(do_rotatetext in foptions) then begin
+     transform(pos);
+    end;
     if escapement = 0 then begin
-     if not(do_rotatetext in foptions) then begin
-      transform(pos);
-     end;
      x:= x - stringwidth div 2;
      y:= y - afont.descent;
     end;
@@ -889,10 +889,10 @@ begin
    gd_down: begin
     x:= x + captiondist;
     y:= y + captionoffset;
+    if not(do_rotatetext in foptions) then begin
+     transform(pos);
+    end;
     if escapement = 0 then begin
-     if not(do_rotatetext in foptions) then begin
-      transform(pos);
-     end;
      y:= y + afont.ascent - afont.glyphheight div 2;
     end;
    end;
