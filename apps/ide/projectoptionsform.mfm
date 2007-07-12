@@ -1294,21 +1294,23 @@ object projectoptionsfo: tprojectoptionsfo
         bounds_x = 0
         bounds_y = 211
         bounds_cx = 627
-        bounds_cy = 306
+        bounds_cy = 310
         anchors = [an_top, an_bottom]
         taborder = 10
-        activepageindex = 1
+        activepageindex = 0
         tab_frame.dummy = 0
         tab_size = 18
+        statfile = statfile1
         reffontheight = 14
         object ttabpage12: ttabpage
           bounds_x = 0
           bounds_y = 18
           bounds_cx = 627
-          bounds_cy = 288
+          bounds_cy = 292
           frame.dummy = 0
           anchors = [an_left, an_top, an_right, an_bottom]
           taborder = 2
+          visible = True
           caption = 'Make options'
           reffontheight = 14
           object makeoptionsgrid: twidgetgrid
@@ -1316,7 +1318,7 @@ object projectoptionsfo: tprojectoptionsfo
             bounds_x = 0
             bounds_y = 0
             bounds_cx = 627
-            bounds_cy = 288
+            bounds_cy = 292
             bounds_cymin = 40
             frame.caption = 'Make &options'
             frame.captionoffset = 3
@@ -1493,11 +1495,10 @@ object projectoptionsfo: tprojectoptionsfo
           bounds_x = 0
           bounds_y = 18
           bounds_cx = 627
-          bounds_cy = 288
+          bounds_cy = 292
           frame.dummy = 0
           anchors = [an_left, an_top, an_right, an_bottom]
           taborder = 1
-          visible = True
           caption = 'Directories'
           reffontheight = 14
           object unitdirgrid: twidgetgrid
@@ -1505,7 +1506,7 @@ object projectoptionsfo: tprojectoptionsfo
             bounds_x = 0
             bounds_y = 47
             bounds_cx = 627
-            bounds_cy = 239
+            bounds_cy = 243
             bounds_cymin = 40
             frame.caption = 'Unit, include and library &directories'
             frame.captionoffset = 3
