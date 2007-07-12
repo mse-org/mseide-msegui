@@ -25,7 +25,7 @@ uses
  msegrids,msesplitter,msesysenv,msegdbutils,msedispwidgets,msesys,mseclasses,
  msegraphutils,mseevent,msetabsglob,msedatalist,msegraphics,msedropdownlist,
  mseformatstr,mseinplaceedit,msedatanodes,mselistbrowser,msebitmap,
- msecolordialog,msedrawtext,msewidgets;
+ msecolordialog,msedrawtext,msewidgets,msepointer;
 
 const
  defaultsourceprintfont = 'Courier';
@@ -65,6 +65,12 @@ type
   sourcedirs: msestringarty;
   defines: msestringarty;
   unitdirs: msestringarty;
+  unitpref: msestring;
+  incpref: msestring;
+  libpref: msestring;
+  objpref: msestring;
+  targpref: msestring;
+  
   makeoptions: msestringarty;
   syntaxdeffiles: msestringarty;
   fontnames: msestringarty;
@@ -185,6 +191,7 @@ type
    dmake3on: tbooleanedit;
    dmake4on: tbooleanedit;
    dmakeon: tbooleanedit;
+   dobjon: tbooleanedit;
    duniton: tbooleanedit;
    gridsizex: tintegeredit;
    gridsizey: tintegeredit;
@@ -195,7 +202,6 @@ type
    makeon: tbooleanedit;
    makeoptions: tstringedit;
    makeoptionsgrid: twidgetgrid;
-   makesplitter: tsplitter;
    moveonfirstclick: tbooleanedit;
    showgrid: tbooleanedit;
    sighandle: tbooleanedit;
@@ -246,7 +252,6 @@ type
    fontalias: tstringedit;
    fontname: tstringedit;
    editfontname: tstringedit;
-   makegroupbox: tgroupbox;
    expandprojectfilemacros: tbooleanedit;
    newprojectfiles: tfilenameedit;
    newprogf: tfilenameedit;
@@ -263,7 +268,6 @@ type
    subfoform: tfilenameedit;
    newprojectfilesdest: tstringedit;
    loadprojectfile: tbooleanedit;
-   dobjon: tbooleanedit;
    showconsole: tbooleanedit;
    exceptignore: tbooleanedit;
    debugtarget: tfilenameedit;
@@ -278,6 +282,18 @@ type
    spacetabs: tbooleanedit;
    editmarkbrackets: tbooleanedit;
    tbutton1: tbutton;
+   tspacer1: tspacer;
+   targpref: tstringedit;
+   tspacer2: tspacer;
+   unitpref: tstringedit;
+   incpref: tstringedit;
+   libpref: tstringedit;
+   objpref: tstringedit;
+   ttabpage11: ttabpage;
+   ttabpage12: ttabpage;
+   makegroupbox: ttabwidget;
+   unitdirgrid: twidgetgrid;
+   unitdirs: tfilenameedit;
    usercolors: tcoloredit;
    tgroupbox1: tgroupbox;
    backupfilecount: tintegeredit;
@@ -309,8 +325,6 @@ type
    exceptionsgrid: twidgetgrid;
    twidgetgrid2: twidgetgrid;
    colgrid: twidgetgrid;
-   unitdirgrid: twidgetgrid;
-   unitdirs: tfilenameedit;
    makepage: ttabpage;
    ok: tbutton;
    cancel: tbutton;
@@ -544,6 +558,11 @@ begin
    li.expandmacros(sourcedirs);
    li.expandmacros(defines);
    li.expandmacros(unitdirs);
+   li.expandmacros(unitpref);
+   li.expandmacros(incpref);
+   li.expandmacros(libpref);
+   li.expandmacros(objpref);
+   li.expandmacros(targpref);
    li.expandmacros(makeoptions);
    li.expandmacros(syntaxdeffiles);
    li.expandmacros(fontnames);
@@ -728,6 +747,11 @@ begin
   unitdirson[1]:= unitson + $20000; //kernel include
   unitdirs:= reversearray(unitdirs);
   unitdirson:= reversearray(unitdirson);
+  unitpref:= '-Fu';
+  incpref:= '-Fi';
+  libpref:= '-Fl';
+  objpref:= '-Fo';
+  targpref:= '-o';
   makecommand:= '${COMPILER}';
   debugcommand:= '${DEBUGGER}';
   debugoptions:= '';
@@ -907,6 +931,11 @@ begin
   updatevalue('defineson',defineson);
   updatevalue('unitdirs',unitdirs);
   updatevalue('unitdirson',unitdirson);
+  updatevalue('unitpref',unitpref);
+  updatevalue('incpref',incpref);
+  updatevalue('libpref',libpref);
+  updatevalue('objpref',objpref);
+  updatevalue('targpref',targpref);
   updatevalue('sourcefilemasks',sourcefilemasks);
   updatevalue('syntaxdeffiles',syntaxdeffiles);
   updatevalue('fontalias',fontalias);
@@ -1115,6 +1144,11 @@ begin
    fo.dobjon.gridupdatetagvalue(int2,unitdirson[int1]);
    dec(int2);
   end;
+  fo.unitpref.value:= unitpref;
+  fo.incpref.value:= incpref;
+  fo.libpref.value:= libpref;
+  fo.objpref.value:= objpref;
+  fo.targpref.value:= targpref;
   fo.activemacroselect[macrogroup]:= true;
   fo.activegroupchanged;
   fo.macronames.gridvalues:= macronames;
@@ -1261,6 +1295,11 @@ begin
       fo.duniton.gridvaluetag(int1,0) or fo.dincludeon.gridvaluetag(int1,0) or
       fo.dlibon.gridvaluetag(int1,0) or fo.dobjon.gridvaluetag(int1,0);
   end;
+  unitpref:= fo.unitpref.value;
+  incpref:= fo.incpref.value;
+  libpref:= fo.libpref.value;
+  objpref:= fo.objpref.value;
+  targpref:= fo.targpref.value;
   storemacros(fo);
   sourcedirs:= reversearray(fo.sourcedirs.gridvalues);
   defines:= fo.def.gridvalues;
@@ -1480,11 +1519,12 @@ procedure tprojectoptionsfo.makepageonchildscaled(const sender: TObject);
 var
  int1: integer;
 begin
- placeyorder(0,[0],[mainfile,targetfile,makecommand,messageoutputfile,
+ placeyorder(0,[0,0,0,0,15],[mainfile,targetfile,makecommand,messageoutputfile,
                     defaultmake,makegroupbox],0);
- int1:= makesplitter.bounds_y;
- placeyorder(0,[0],[makeoptionsgrid,makesplitter,unitdirgrid],0);
- makesplitter.move(makepoint(0,int1-makesplitter.bounds_y)); //restore stat value
+// int1:= makesplitter.bounds_y;
+// placeyorder(0,[0],[makeoptionsgrid,makesplitter,unitdirgrid],0);
+// makesplitter.move(makepoint(0,int1-makesplitter.bounds_y)); //restore stat value
+ aligny(wam_center,[targetfile,targpref]);
  int1:= aligny(wam_center,[defaultmake,showcommandline]);
  with copymessages do begin
   bounds_y:= int1 - bounds_cy - 2;

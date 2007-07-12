@@ -93,11 +93,12 @@ begin
   str3:= quotefilename(tosysfilepath(makecommand));
   str1:= str3;
   if targetfile <> '' then begin
-   str1:= str1 + ' '+quotefilename('-o'+filename(targetfile));
-   wstr1:= removelastpathsection(targetfile);
-   if wstr1 <> '' then begin
-    str1:= str1 + ' '+quotefilename('-FE'+tosysfilepath(wstr1));
-   end;
+   str1:= str1 + ' '+quotefilename(targpref+tosysfilepath(targetfile));
+//   str1:= str1 + ' '+quotefilename('-o'+filename(targetfile));
+//   wstr1:= removelastpathsection(targetfile);
+//   if wstr1 <> '' then begin
+//    str1:= str1 + ' '+quotefilename('-FE'+tosysfilepath(wstr1));
+//   end;
   end;
   int2:= high(unitdirs);
   int1:= high(unitdirson);
@@ -109,16 +110,16 @@ begin
          (unitdirs[int1] <> '') then begin
     str2:= tosysfilepath(trim(unitdirs[int1]));
     if unitdirson[int1] and $10000 <> 0 then begin
-     str1:= str1 + ' ' + quotefilename('-Fu'+str2);
+     str1:= str1 + ' ' + quotefilename(unitpref+str2);
     end;
     if unitdirson[int1] and $20000 <> 0 then begin
-     str1:= str1 + ' ' + quotefilename('-Fi'+str2);
+     str1:= str1 + ' ' + quotefilename(incpref+str2);
     end;
     if unitdirson[int1] and $40000 <> 0 then begin
-     str1:= str1 + ' ' + quotefilename('-Fl'+str2);
+     str1:= str1 + ' ' + quotefilename(libpref+str2);
     end;
     if unitdirson[int1] and $80000 <> 0 then begin
-     str1:= str1 + ' ' + quotefilename('-Fo'+str2);
+     str1:= str1 + ' ' + quotefilename(objpref+str2);
     end;
    end;
   end;
