@@ -64,6 +64,7 @@ Type
     function GetClientInfo: string;
     function GetServerStatus: String;
     procedure ConnectMySQL(var HMySQL : PMySQL;H,U,P : pchar);
+    procedure freeresultbuffer(const cursor: tcursorname);
   protected
 //   function stringtosqltext(const afeildtype: tfieldtype; const avalue: string): string;
     function StrToStatementType(s : string) : TStatementType; override;
@@ -367,11 +368,16 @@ begin
     if mysql_select_db(FQMySQL,pchar(DatabaseName))<>0 then
       MySQLError(FQMySQL,SErrDatabaseSelectFailed,Self);
    }
+     fprepared:= true;
     end
 end;
 
 procedure TConnectionName.UnPrepareStatement(cursor: TSQLCursor);
 begin
+ with tcursorname(cursor) do begin
+  fstatement:= '';
+  fprepared:= false;
+ end;
 {
   With Cursor as TCursorName do
     begin
@@ -381,13 +387,21 @@ begin
 }
 end;
 
+procedure tconnectionname.freeresultbuffer(const cursor: tcursorname);
+begin
+ If (Cursor.FRes<>Nil) then begin
+  Mysql_free_result(Cursor.FRes);
+  Cursor.FRes:=Nil;
+ end;
+end;
+
 procedure TConnectionName.FreeFldBuffers(cursor: TSQLCursor);
 
 Var
   C : TCursorName;
 
 begin
-  C:=Cursor as TCursorName;
+  C:= TCursorName(cursor);
   if c.FStatementType=stSelect then
     c.FNeedData:=False;
 //  if (c.FQMySQL <> Nil) then
@@ -395,11 +409,7 @@ begin
 //    mysql_close(c.FQMySQL);
 //    c.FQMySQL:=Nil;
 //    end;
-  If (C.FRes<>Nil) then
-    begin
-    Mysql_free_result(C.FRes);
-    C.FRes:=Nil;
-    end;
+  freeresultbuffer(c);
   SetLength(c.MapDSRowToMSQLRow,0);
 end;
 
@@ -411,22 +421,25 @@ Var
   i : integer;
 
 begin
-  C:=Cursor as TCursorName;
-  If (C.FRes=Nil) then
-    begin
-    if Assigned(AParams) and (AParams.count > 0) then
-      for i := 0 to AParams.count -1 do
-        C.FStatement := stringreplace(C.FStatement,C.ParamReplaceString+inttostr(AParams[i].Index+1),GetAsSQLText(AParams[i]),[rfReplaceAll,rfIgnoreCase]);
-    if mysql_query(FMySQL,Pchar(C.FStatement))<>0 then
-      MySQLError(FMYSQL,Format(SErrExecuting,[StrPas(mysql_error(FMySQL))]),Self)
-    else
-      begin
-      C.RowsAffected := mysql_affected_rows(FMYSQL);
-      C.LastInsertID := mysql_insert_id(FMYSQL);
-      if C.FNeedData then
-        C.FRes:=mysql_store_result(FMySQL);
-      end;
-    end;
+  C:= TCursorName(cursor);
+  freeresultbuffer(c);
+  if Assigned(AParams) and (AParams.count > 0) then begin
+   for i := 0 to AParams.count -1 do begin
+    C.FStatement:= stringreplace(C.FStatement,
+               C.ParamReplaceString+inttostr(AParams[i].Index+1),
+               GetAsSQLText(AParams[i]),[rfReplaceAll,rfIgnoreCase]);
+   end;
+  end;
+  if mysql_query(FMySQL,Pchar(C.FStatement))<>0 then begin
+   MySQLError(FMYSQL,Format(SErrExecuting,[StrPas(mysql_error(FMySQL))]),Self)
+  end
+  else begin
+   C.RowsAffected := mysql_affected_rows(FMYSQL);
+   C.LastInsertID := mysql_insert_id(FMYSQL);
+   if C.FNeedData then begin
+    C.FRes:= mysql_store_result(FMySQL);
+   end;
+  end;
 end;
 
 //function TConnectionName.MySQLDataType(AType: enum_field_types; ASize, ADecimals: Integer;

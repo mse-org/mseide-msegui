@@ -35,7 +35,8 @@ type
   end;
 
   TIBCursor = Class(TSQLCursor)
-    protected
+   protected
+    fopen: boolean;
     Status               : array [0..19] of ISC_STATUS;
     Statement            : pointer;
     SQLDA                : PXSQLDA;
@@ -578,7 +579,7 @@ begin
       end;
     if FStatementType = stselect then
       begin
-      FPrepared := False;
+///////////////////////      FPrepared := False;
       if isc_dsql_describe(@Status, @Statement, 1, SQLDA) <> 0 then
         CheckError('PrepareSelect', Status);
       if SQLDA^.SQLD > SQLDA^.SQLN then
@@ -609,6 +610,7 @@ begin
   end;
   statement:= nil;
   fprepared:= false;
+  fopen:= false;
  end;
 end;
 
@@ -646,11 +648,21 @@ begin
  if Assigned(APArams) and (AParams.count > 0) then begin
   SetParameters(cursor, AParams);
  end;
- with cursor as TIBCursor do begin
-  if isc_dsql_execute2(@Status,@cursor.ftrans,
-                       @Statement,1,in_SQLDA,nil) <> 0 then begin
-   CheckError('Execute', Status);
+ with TIBCursor(cursor) do begin
+  if fopen then begin
+   if isc_dsql_free_statement(@status, @statement, dsql_close) <> 0 then begin
+    checkerror('close cursor', status);
+   end;
+   fopen:= false;
+//   if isc_dsql_set_cursor_name(@status,@statement,'S',0) <> 0 then begin
+//    checkerror('open cursor',status);
+//   end;
   end;
+  if isc_dsql_execute2(@Status,@cursor.ftrans,
+                        @Statement,1,in_SQLDA,nil) <> 0 then begin
+    CheckError('Execute', Status);
+  end;
+  fopen:= true;  
  end;
 end;
 

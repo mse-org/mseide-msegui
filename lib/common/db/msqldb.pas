@@ -411,6 +411,7 @@ type
    procedure InternalClose; override;
    procedure InternalInitFieldDefs; override;
    procedure connect(const aexecute: boolean);
+   procedure freequery;
    procedure disconnect;
    procedure InternalOpen; override;
    function closetransactiononrefresh: boolean; virtual;
@@ -1406,13 +1407,18 @@ begin
  if connected then begin
   CheckInactive;
  end;
-  if IsPrepared then with Database as tcustomsqlconnection do
-    UnPrepareStatement(FCursor);
+ if IsPrepared and not (bs_refreshing in fbstate) then begin
+  with tcustomsqlconnection(Database) do begin
+   UnPrepareStatement(FCursor);
+  end;
+ end;
 end;
 
 procedure TSQLQuery.FreeFldBuffers;
 begin
-  if assigned(FCursor) then (Database as tcustomsqlconnection).FreeFldBuffers(FCursor);
+ if not (bs_refreshing in fbstate) and assigned(FCursor) then begin
+  tcustomsqlconnection(database).FreeFldBuffers(FCursor);
+ end;
 end;
 
 function TSQLQuery.Fetch : boolean;
@@ -1458,18 +1464,25 @@ begin
   // not implemented - sql dataset
 end;
 
-procedure TSQLQuery.disconnect;
+procedure tsqlquery.freequery;
 begin
- if bs_connected in fbstate then begin
-  if fcursor <> nil then begin
-   fcursor.close;
-  end;
+ if not (bs_refreshing in fbstate) then begin
   if (not IsPrepared) and (assigned(database)) and (assigned(FCursor)) then begin
         (database as tcustomsqlconnection).UnPrepareStatement(FCursor);
   end;
   FreeAndNil(FUpdateQry);
   FreeAndNil(FInsertQry);
   FreeAndNil(FDeleteQry);
+ end;
+end;
+
+procedure TSQLQuery.disconnect;
+begin
+ if bs_connected in fbstate then begin
+  if fcursor <> nil then begin
+   fcursor.close;
+  end;
+  freequery;
   exclude(fbstate,bs_connected);
  end;
 end;
@@ -1818,12 +1831,21 @@ begin
  int1:= recno;
 // disablecontrols;            //there is no updtestate in enablecontols
 // try
-  if closetransactiononrefresh then begin
-   transaction.active:= false;
+  include(fbstate,bs_refreshing);
+  try
+   if closetransactiononrefresh then begin
+    transaction.active:= false;
+   end;
+   active:= false;
+   active:= true;
+   setrecno1(int1,true);
+  finally
+   exclude(fbstate,bs_refreshing);
+   if not active then begin
+    freefieldbuffers;
+    freequery;
+   end;
   end;
-  active:= false;
-  active:= true;
-  setrecno1(int1,true);
 // finally
 //  enablecontrols;
 // end;

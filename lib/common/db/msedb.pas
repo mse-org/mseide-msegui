@@ -471,6 +471,7 @@ type
    function getasvariant: variant; override;
    function getasstring: string; override;
    procedure setasstring(const avalue: string); override;
+   procedure gettext(var atext: string; adisplaytext: boolean); override;
   public
    destructor destroy; override;
    procedure Clear; override;
@@ -498,6 +499,7 @@ type
   protected
    function getasvariant: variant; override;
    procedure setvarvalue(const avalue: variant); override;
+   procedure gettext(var thetext: string; adisplaytext: boolean); override;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -1644,6 +1646,11 @@ begin
  tdataset1(dataset).restorestate(statebefore);
 end;
 
+procedure tmsememofield.gettext(var thetext: string; adisplaytext: boolean);
+begin
+ thetext:= asstring;
+end;
+
 { tmsenumericfield }
 
 function tmsenumericfield.HasParent: Boolean;
@@ -2648,6 +2655,16 @@ procedure tmseblobfield.clearcache;
 begin
  if fcache <> nil then begin
   fcache.clear;
+ end;
+end;
+
+procedure tmseblobfield.gettext(var atext: string; adisplaytext: boolean);
+begin
+ if isnull then begin
+  atext:= '(blob)';
+ end
+ else begin
+  atext:= '(BLOB)';
  end;
 end;
 

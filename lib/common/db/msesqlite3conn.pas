@@ -147,6 +147,7 @@ type
    ftail: pchar;
    fstate: integer;
    fparambinding: integerarty;
+   fopen: boolean;
  end;
   
 { tsqlite3connection }
@@ -257,6 +258,7 @@ begin
   end;
   checkerror(sqlite3_prepare(fhandle,pchar(buf),length(buf),@fstatement,
                                                @ftail));
+  fprepared:= true;
  end;
 end;
 
@@ -266,6 +268,8 @@ var
 begin
  with tsqlite3cursor(cursor) do begin
   int1:= sqlite3_finalize(fstatement);
+  fprepared:= false;
+  fopen:= false;
  end;
 end;
 
@@ -451,6 +455,10 @@ begin
     end;
    end;
   end;
+  if fopen then begin
+   checkerror(sqlite3_reset(fstatement));
+   fopen:= false;
+  end;   
   wo1:= get8087cw;
   set8087cw(wo1 or $1f);             //mask exceptions, Sqlite3 has overflow
   fstate:= sqlite3_step(fstatement);
@@ -461,6 +469,7 @@ begin
   if fstate = sqlite_row then begin
    fstate:= sqliteerrormax; //first row
   end;
+  fopen:= true;
  end;
 end;
 

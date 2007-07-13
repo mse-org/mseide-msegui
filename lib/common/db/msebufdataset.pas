@@ -351,7 +351,9 @@ type
                       bs_blobsfetched,bs_blobscached,bs_blobssorted,
                       bs_indexvalid,
                       bs_editing,bs_append,bs_internalcalc,bs_utf8,
-                      bs_hasfilter,bs_visiblerecordcountvalid);
+                      bs_hasfilter,bs_visiblerecordcountvalid,
+                      bs_refreshing        //used by tsqlquery
+                      );
  bufdatasetstatesty = set of bufdatasetstatety;
 
  internalcalcfieldseventty = procedure(const sender: tmsebufdataset;

@@ -825,8 +825,9 @@ begin
      end;
      if (fplo_autorefresh in foptions) and (destdataset <> nil) and 
                           destdataset.active then begin
-      destdataset.active:= false;
-      destdataset.active:= true;     
+      destdataset.refresh;
+//      destdataset.active:= false;
+//      destdataset.active:= true;     
      end;
     end;
    end;
