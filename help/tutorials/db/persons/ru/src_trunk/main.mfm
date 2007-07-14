@@ -2,19 +2,20 @@ object mainfo: tmainfo
   optionswidget = [ow_arrowfocus, ow_subfocus, ow_destroywidgets, ow_hinton, ow_autoscale]
   bounds_x = 35
   bounds_y = 146
-  bounds_cx = 707
-  bounds_cy = 401
+  bounds_cx = 705
+  bounds_cy = 411
   taborder = 1
   container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_subfocus, ow_mousetransparent, ow_destroywidgets, ow_autoscale]
   container.bounds_x = 0
   container.bounds_y = 22
-  container.bounds_cx = 707
-  container.bounds_cy = 379
+  container.bounds_cx = 705
+  container.bounds_cy = 389
   container.frame.dummy = 0
   container.taborder = 1
   optionswindow = [wo_groupleader]
   mainmenu = mnuMain
   font.colorshadow = -2147483648
+  font.xscale =  1.0000000000000000E+0000
   font.dummy = 0
   options = [fo_main, fo_terminateonclose, fo_autoreadstat, fo_autowritestat, fo_savepos, fo_savestate]
   caption = 'The Galaxy Data Keeper'
@@ -24,8 +25,8 @@ object mainfo: tmainfo
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_focusbackonesc, ow_mousewheel, ow_destroywidgets, ow_hinton, ow_fontglyphheight, ow_autoscale]
     bounds_x = 8
     bounds_y = 8
-    bounds_cx = 689
-    bounds_cy = 306
+    bounds_cx = 688
+    bounds_cy = 322
     frame.dummy = 0
     anchors = [an_left, an_top, an_right, an_bottom]
     popupmenu = pupPersons
@@ -33,6 +34,7 @@ object mainfo: tmainfo
     optionsgrid = [og_colsizing, og_focuscellonenter, og_autofirstrow, og_colchangeontabkey, og_autopopup]
     datacols.count = 7
     datacols.colorselect = -1610612713
+    datacols.coloractive = -2147483648
     datacols.options = [co_readonly, co_focusselect, co_rowselect, co_proportional, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_mousescrollrow]
     datacols.optionsedit = [scoe_undoonesc, scoe_eatreturn, scoe_autoselect, scoe_autoselectonfirstclick, scoe_caretonreadonly]
     datacols.items = <    
@@ -41,6 +43,7 @@ object mainfo: tmainfo
         frame.localprops = [frl_fileft]
         frame.dummy = 0
         colorselect = -1610612713
+        coloractive = -2147483648
         width = 133
         options = [co_readonly, co_focusselect, co_rowselect, co_proportional, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_mousescrollrow]
         onshowhint = shownamehint
@@ -51,6 +54,7 @@ object mainfo: tmainfo
         frame.localprops = [frl_fileft]
         frame.dummy = 0
         colorselect = -1610612713
+        coloractive = -2147483648
         width = 101
         options = [co_readonly, co_focusselect, co_rowselect, co_proportional, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_mousescrollrow]
         datafield = 'country'
@@ -60,6 +64,7 @@ object mainfo: tmainfo
         frame.localprops = [frl_fileft]
         frame.dummy = 0
         colorselect = -1610612713
+        coloractive = -2147483648
         width = 89
         options = [co_readonly, co_focusselect, co_rowselect, co_proportional, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_mousescrollrow]
         datafield = 'occupation'
@@ -69,6 +74,7 @@ object mainfo: tmainfo
         frame.localprops = [frl_fileft]
         frame.dummy = 0
         colorselect = -1610612713
+        coloractive = -2147483648
         width = 94
         options = [co_readonly, co_focusselect, co_rowselect, co_proportional, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_mousescrollrow]
         datafield = 'feature'
@@ -78,6 +84,7 @@ object mainfo: tmainfo
         frame.localprops = [frl_firight]
         frame.dummy = 0
         colorselect = -1610612713
+        coloractive = -2147483648
         width = 70
         options = [co_readonly, co_focusselect, co_rowselect, co_proportional, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_mousescrollrow]
         datafield = 'sexual_potention'
@@ -85,6 +92,7 @@ object mainfo: tmainfo
       end    
       item
         colorselect = -1610612713
+        coloractive = -2147483648
         width = 89
         options = [co_readonly, co_focusselect, co_rowselect, co_proportional, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_mousescrollrow]
         datafield = 'dateofbirth'
@@ -92,20 +100,24 @@ object mainfo: tmainfo
       end    
       item
         colorselect = -1610612713
-        width = 54
+        coloractive = -2147483648
+        width = 53
         options = [co_readonly, co_focusselect, co_rowselect, co_fill, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_mousescrollrow]
         datafield = 'if_happy'
         textflags = [tf_xcentered, tf_ycentered, tf_noselect]
       end>
     datalink.options = [gdo_propscrollbar, gdo_thumbtrack]
     fixcols.count = 1
+    fixcols.coloractive = -2147483648
     fixcols.items = <    
       item
+        coloractive = -2147483648
         width = 32
         numstart = 1
         numstep = 1
       end>
     fixrows.count = 1
+    fixrows.coloractive = -2147483648
     fixrows.items = <    
       item
         frame.levelo = 1
@@ -113,6 +125,7 @@ object mainfo: tmainfo
         frame.colorclient = -1610612716
         frame.localprops = [frl_levelo, frl_leveli, frl_framewidth, frl_colorframe, frl_fitop, frl_fibottom, frl_colorclient]
         frame.dummy = 0
+        coloractive = -2147483648
         height = 36
         captions.count = 7
         captions.items = <        
@@ -148,8 +161,8 @@ object mainfo: tmainfo
     reffontheight = 14
   end
   object btnExit: tbutton
-    bounds_x = 639
-    bounds_y = 341
+    bounds_x = 603
+    bounds_y = 349
     bounds_cx = 58
     bounds_cy = 29
     frame.template = ftButtons
@@ -161,8 +174,8 @@ object mainfo: tmainfo
     caption = 'E&xit'
   end
   object btnEdit: tbutton
-    bounds_x = 214
-    bounds_y = 335
+    bounds_x = 226
+    bounds_y = 343
     bounds_cx = 71
     bounds_cy = 30
     frame.colorclient = 13172680
@@ -176,8 +189,8 @@ object mainfo: tmainfo
     caption = '&Edit..'
   end
   object btnAdd: tbutton
-    bounds_x = 326
-    bounds_y = 335
+    bounds_x = 338
+    bounds_y = 343
     bounds_cx = 79
     bounds_cy = 30
     frame.colorclient = 13158655
@@ -191,8 +204,8 @@ object mainfo: tmainfo
     caption = '&Add..'
   end
   object btnDelete: tbutton
-    bounds_x = 446
-    bounds_y = 335
+    bounds_x = 458
+    bounds_y = 343
     bounds_cx = 79
     bounds_cy = 30
     frame.colorclient = 16763080
@@ -217,7 +230,7 @@ object mainfo: tmainfo
     HostName = 'localhost'
     options = [pqco_closetransactiononfail]
     left = 16
-    top = 344
+    top = 328
   end
   object trans: tmsesqltransaction
     Active = True
@@ -226,7 +239,7 @@ object mainfo: tmainfo
       ''
     )
     left = 16
-    top = 368
+    top = 352
   end
   object qryPersons: tmsesqlquery
     params = <>
@@ -331,7 +344,7 @@ object mainfo: tmainfo
       end>
     onapplyrecupdate = personsupdate
     left = 80
-    top = 344
+    top = 328
     object fldSexPotention: tmsefloatfield
       AlignMent = taRightJustify
       DisplayWidth = 10
@@ -378,7 +391,7 @@ object mainfo: tmainfo
       FieldName = 'id'
       Index = 5
       left = 184
-      top = 336
+      top = 328
     end
     object fldDateOfBirth: tmsedatefield
       DisplayWidth = 10
@@ -454,8 +467,8 @@ object mainfo: tmainfo
   end
   object dsPersons: tmsedatasource
     DataSet = qryPersons
-    left = 88
-    top = 368
+    left = 80
+    top = 352
   end
   object actExit: taction
     shortcut = 16465
@@ -523,6 +536,7 @@ object mainfo: tmainfo
     menu.font.colorshadow = -2147483648
     menu.font.height = 13
     menu.font.name = 'stf_helvetica'
+    menu.font.xscale =  1.0000000000000000E+0000
     menu.font.dummy = 0
     itemframetemplate = ftMainMenuItem
     itemframetemplateactive = ftMainMenuItem
@@ -579,7 +593,7 @@ object mainfo: tmainfo
     template.leveli = 2
     template.colorclient = -1610612712
     left = 544
-    top = 354
+    top = 330
   end
   object actPlanetsEdit: taction
     onexecute = planetseditexecute

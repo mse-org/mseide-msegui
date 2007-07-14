@@ -510,7 +510,7 @@ type
    property cellorigin: pointty read getcellorigin;    //org = grid.paintpos
    property visible: boolean read getvisible write setvisible;
   published
-   property options default defaultdatacoloptions;
+   property options; //default defaultdatacoloptions;
    property widthmin: integer read fwidthmin write setwidthmin default 1;
    property widthmax: integer read fwidthmax write setwidthmax default 0;
    property name: string read fname write fname;
@@ -1190,6 +1190,7 @@ end;
    procedure setzebra_height(const avalue: integer);
    procedure setzebra_step(const avalue: integer);
   protected
+   fpropcolwidthref: integer;
    fzebra_start: integer;
    fzebra_color: colorty;
    fzebra_height: integer;
@@ -2462,7 +2463,8 @@ var
  int1: integer;
 begin
  if not (csloading in fgrid.componentstate) and not (gs_updatelocked in fgrid.fstate) then begin
-  int1:= tgridframe(fgrid.fframe).fpaintrect.cx;
+//  int1:= tgridframe(fgrid.fframe).fpaintrect.cx;
+  int1:= fgrid.fpropcolwidthref;
   if int1 <> 0 then begin
    fpropwidth:= fwidth / int1;
   end;
@@ -4093,7 +4095,8 @@ begin
   updatepropwidth;
  end;
  if (co_proportional in foptions) and (fpropwidth <> 0) then begin
-  fwidth:= round(tgridframe(fgrid.fframe).fpaintrect.cx * fpropwidth);
+  fwidth:= round(fgrid.fpropcolwidthref * fpropwidth);
+//  fwidth:= round(tgridframe(fgrid.fframe).fpaintrect.cx * fpropwidth);
  end;
  if (fwidthmax <> 0) and (fwidth > fwidthmax) then begin
   fwidth:= fwidthmax;
@@ -5850,7 +5853,7 @@ end;
 procedure tcustomgrid.updatelayout;
 var
  scrollstate: framestatesty;
- int1,int2: integer;
+ int1,int2,int3: integer;
 begin
  if (zebra_step <> 0) then begin
   include(fstate,gs_needszebraoffset);
@@ -5863,6 +5866,36 @@ begin
     break;
    end;
   end;
+ end;
+ with tgridframe(fframe) do begin
+  fpropcolwidthref:= self.fwidgetrect.cx -
+                     fouterframe.left - fouterframe.right -
+                     2*(fi.levelo+fi.framewidth+fi.leveli) -
+                     finnerframe.left - finnerframe.right - 
+                     2 * gridframewidth;
+ end;
+ int3:= 0;
+ for int1:= 0 to fdatacols.count - 1 do begin
+  with fdatacols[int1] do begin
+   if not (co_invisible in options) then begin
+    if options * [co_proportional,co_fill] = [] then begin
+     fpropcolwidthref:= fpropcolwidthref - width;
+    end
+    else begin
+     int3:= int3 + widthmin;
+    end;
+   end;
+  end;
+ end;
+ for int1:= 0 to ffixcols.count - 1 do begin
+  with tfixcol(ffixcols.items[int1]) do begin
+   if not (fco_invisible in options) then begin
+    fpropcolwidthref:= fpropcolwidthref - width;
+   end;
+  end;   
+ end;
+ if fpropcolwidthref < int3 then begin
+  fpropcolwidthref:= int3;
  end;
  int2:= 0;
  repeat
