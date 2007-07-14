@@ -1,4 +1,4 @@
-{ MSEide Copyright (c) 1999-2006 by Martin Schreiber
+{ MSEide Copyright (c) 1999-2007 by Martin Schreiber
    
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -25,7 +25,7 @@ uses
  msegrids,msesplitter,msesysenv,msegdbutils,msedispwidgets,msesys,mseclasses,
  msegraphutils,mseevent,msetabsglob,msedatalist,msegraphics,msedropdownlist,
  mseformatstr,mseinplaceedit,msedatanodes,mselistbrowser,msebitmap,
- msecolordialog,msedrawtext,msewidgets,msepointer;
+ msecolordialog,msedrawtext,msewidgets,msepointer,mseguiglob,msepipestream;
 
 const
  defaultsourceprintfont = 'Courier';
@@ -72,7 +72,11 @@ type
   targpref: msestring;
   
   makeoptions: msestringarty;
+  sourcefilemasks: msestringarty;
   syntaxdeffiles: msestringarty;
+  filemasknames: msestringarty;
+  filemasks: msestringarty;
+  
   fontnames: msestringarty;
   newprojectfiles: filenamearty;
   newprojectfilesdest: filenamearty;
@@ -153,8 +157,6 @@ type
   breakpointpaths: msestringarty;
   breakpointconditions: msestringarty;
 
-  sourcefilemasks: msestringarty;
-
   stoponexception: boolean;
   activateonbreak: boolean;
   showconsole: boolean;
@@ -193,6 +195,7 @@ type
    dmakeon: tbooleanedit;
    dobjon: tbooleanedit;
    duniton: tbooleanedit;
+   grid: tstringgrid;
    gridsizex: tintegeredit;
    gridsizey: tintegeredit;
    make1on: tbooleanedit;
@@ -218,7 +221,6 @@ type
    debugcommand: tfilenameedit;
    defaultmake: tenumedit;
    editorpage: ttabpage;
-   grid: tstringgrid;
    mainfile: tfilenameedit;
    makecommand: tfilenameedit;
    debuggerpage: ttabpage;
@@ -285,6 +287,10 @@ type
    tspacer1: tspacer;
    targpref: tstringedit;
    tspacer2: tspacer;
+   filefiltergrid: tstringgrid;
+   ttabpage13: ttabpage;
+   ttabpage14: ttabpage;
+   ttabwidget2: ttabwidget;
    unitpref: tstringedit;
    incpref: tstringedit;
    libpref: tstringedit;
@@ -564,7 +570,10 @@ begin
    li.expandmacros(objpref);
    li.expandmacros(targpref);
    li.expandmacros(makeoptions);
+   li.expandmacros(sourcefilemasks);
    li.expandmacros(syntaxdeffiles);
+   li.expandmacros(filemasknames);
+   li.expandmacros(filemasks);
    li.expandmacros(fontnames);
    li.expandmacros(newprojectfiles);
    li.expandmacros(newprojectfilesdest);
@@ -597,15 +606,19 @@ begin
    end;
    fontaliasnames:= fontalias;
    with sourcefo.syntaxpainter do begin
-    bo1:= not cmparray(defdefs.asarraya,sourcefilemasks) or
+    bo1:= not cmparray(defdefs.asarraya,texp.sourcefilemasks) or
        not cmparray(defdefs.asarrayb,texp.syntaxdeffiles);
-    defdefs.asarraya:= sourcefilemasks;
+    defdefs.asarraya:= texp.sourcefilemasks;
     defdefs.asarrayb:= texp.syntaxdeffiles;
     if bo1 then begin
      for int1:= 0 to sourcefo.count - 1 do begin
       sourcefo.items[int1].edit.setsyntaxdef(sourcefo.items[int1].edit.filename);
      end;
     end;
+   end;
+   with mainfo.openfile.controller.filterlist do begin
+    asarraya:= filemasknames;
+    asarrayb:= filemasks;
    end;
   end;
   ignoreexceptionclasses:= nil;
@@ -758,6 +771,8 @@ begin
   debugtarget:= '';
   sourcefilemasks:= nil;
   syntaxdeffiles:= nil;
+  filemasknames:= nil;
+  filemasks:= nil;
   fontalias:= nil;
   fontnames:= nil;
   fontheights:= nil;
@@ -770,6 +785,13 @@ begin
   additem(sourcefilemasks,'"*.mfm"');
   additem(syntaxdeffiles,'${SYNTAXDEFDIR}objecttext.sdef');
 
+  additem(filemasknames,'Source');
+  additem(filemasks,'"*.pp" "*.pas" "*.inc" "*.dpr"');
+  additem(filemasknames,'Forms');
+  additem(filemasks,'*.mfm');
+  additem(filemasknames,'All Files');
+  additem(filemasks,'*');
+  
   newprojectfiles:= nil;
 //  additem(newprojectfiles,'${TEMPLATEDIR}project1.pas');
 //  additem(newprojectfiles,'${TEMPLATEDIR}main.pas');
@@ -938,6 +960,8 @@ begin
   updatevalue('targpref',targpref);
   updatevalue('sourcefilemasks',sourcefilemasks);
   updatevalue('syntaxdeffiles',syntaxdeffiles);
+  updatevalue('filemasknames',filemasknames);
+  updatevalue('filemasks',filemasks);
   updatevalue('fontalias',fontalias);
   updatevalue('fontnames',fontnames);
   updatevalue('fontheights',fontheights);
@@ -1169,8 +1193,10 @@ begin
   end;
 
   fo.sourcedirs.gridvalues:= reversearray(sourcedirs);
-  fo.grid[0].datalist.asarray:= sourcefilemasks;
-  fo.grid[1].datalist.asarray:= syntaxdeffiles;
+  fo.grid[0].datalist.asarray:= syntaxdeffiles;
+  fo.grid[1].datalist.asarray:= sourcefilemasks;
+  fo.filefiltergrid[0].datalist.asarray:= filemasknames;
+  fo.filefiltergrid[1].datalist.asarray:= filemasks;
   fo.def.gridvalues:= defines;
   fo.defon.gridvalues:= defineson;
   fo.stoponexception.value:= stoponexception;
@@ -1304,8 +1330,10 @@ begin
   sourcedirs:= reversearray(fo.sourcedirs.gridvalues);
   defines:= fo.def.gridvalues;
   defineson:= fo.defon.gridvalues;
-  sourcefilemasks:= fo.grid[0].datalist.asarray;
-  syntaxdeffiles:= fo.grid[1].datalist.asarray;
+  syntaxdeffiles:= fo.grid[0].datalist.asarray;
+  sourcefilemasks:= fo.grid[1].datalist.asarray;
+  filemasknames:= fo.filefiltergrid[0].datalist.asarray;
+  filemasks:= fo.filefiltergrid[1].datalist.asarray;
   stoponexception:= fo.stoponexception.value;
   activateonbreak:= fo.activateonbreak.value;
   showconsole:= fo.showconsole.value;
