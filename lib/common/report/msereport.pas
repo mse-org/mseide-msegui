@@ -1074,7 +1074,7 @@ type
    fppmm: real;
    fonbeforerender: notifyeventty;
    fonafterrender: notifyeventty;
-   fprinter: tprinter;
+   fprinter: tstreamprinter; //preliminary 
    fstream: ttextstream;
    fstreamset: boolean;
    fcommand: string;
@@ -1116,7 +1116,7 @@ type
    freppages: reportpagearty;
    fdefaultprintorientation: pageorientationty;
    procedure insertwidget(const awidget: twidget; const apos: pointty); override;
-   procedure internalrender(const acanvas: tcanvas; const aprinter: tprinter;
+   procedure internalrender(const acanvas: tcanvas; const aprinter: tstreamprinter;
                   const acommand: string; const astream: ttextstream;
                   const anilstream: boolean; const onafterrender: reporteventty);
    procedure unregisterchildwidget(const child: twidget); override;
@@ -1137,9 +1137,9 @@ type
    destructor destroy; override;
    procedure render(const acanvas: tcanvas;
                         const onafterrender: reporteventty = nil); overload;
-   procedure render(const aprinter: tprinter; const command: string = '';
+   procedure render(const aprinter: tstreamprinter; const command: string = '';
                         const onafterrender: reporteventty = nil); overload;
-   procedure render(const aprinter: tprinter; const astream: ttextstream;
+   procedure render(const aprinter: tstreamprinter; const astream: ttextstream;
                         const onafterrender: reporteventty = nil); overload;
    procedure waitfor;         //returns before calling of onafterrender
    function prepass: boolean; //true if in prepass render state
@@ -5091,7 +5091,7 @@ begin
 end;
 
 procedure tcustomreport.internalrender(const acanvas: tcanvas;
-               const aprinter: tprinter; const acommand: string;
+               const aprinter: tstreamprinter; const acommand: string;
                const astream: ttextstream; const anilstream: boolean;
                const onafterrender: reporteventty);
 begin
@@ -5121,14 +5121,14 @@ begin
  internalrender(acanvas,nil,'',nil,false,onafterrender);
 end;
 
-procedure tcustomreport.render(const aprinter: tprinter;
+procedure tcustomreport.render(const aprinter: tstreamprinter;
                const command: string = '';
               const onafterrender: reporteventty = nil);
 begin
  internalrender(aprinter.canvas,aprinter,command,nil,false,onafterrender);
 end;
 
-procedure tcustomreport.render(const aprinter: tprinter;
+procedure tcustomreport.render(const aprinter: tstreamprinter;
                const astream: ttextstream;
               const onafterrender: reporteventty = nil);
 begin

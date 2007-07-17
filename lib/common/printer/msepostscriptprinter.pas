@@ -20,7 +20,7 @@ type
   
  tpostscriptcanvas = class;
 
- tpostscriptprinter = class(tprinter,icanvas)
+ tpostscriptprinter = class(tstreamprinter,icanvas)
   private
    function getcanvas: tpostscriptcanvas;
    //icanvas
@@ -47,7 +47,7 @@ type
                 pa_rightbottom,pa_bottom,pa_leftbottom,pa_left);
  pslevelty = (psl_1,psl_2,psl_3);
 
- tpostscriptcanvas = class(tprintercanvas)
+ tpostscriptcanvas = class(tstreamprintercanvas)
   private
    ffonts: psfontinfoarty;
    ffontnames: stringarty;

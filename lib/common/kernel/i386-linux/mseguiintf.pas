@@ -2692,8 +2692,8 @@ begin
  result:= gue_ok;
 end;
 
-function gui_creategc(paintdevice: paintdevicety; const kind: gckindty;
-                                             var gc: gcty): guierrorty;
+function gui_creategc(paintdevice: paintdevicety; const akind: gckindty;
+     var gc: gcty; const aprintername: ansistring = ''): guierrorty;
 begin
  if paintdevice = 0 then begin
   paintdevice:= mserootwindow;

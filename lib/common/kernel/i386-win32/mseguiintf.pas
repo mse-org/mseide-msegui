@@ -239,7 +239,7 @@ type
   colorbrush: hbrush;
   patternbrush: hbrush;
   foregroundpen: hpen;
-  ispixmap: boolean;
+  kind: gckindty;
   bru: pixmapty;
   rop: rasteropty;
   brushorg: pointty;
@@ -1028,18 +1028,23 @@ begin
  end;
 end;
 
-function gui_creategc(paintdevice: paintdevicety; const kind: gckindty; 
-                          var gc: gcty): guierrorty;
+function gui_creategc(paintdevice: paintdevicety; const akind: gckindty; 
+              var gc: gcty; const aprintername: ansistring = ''): guierrorty;
 begin
- if kind = gck_pixmap then begin
-  gc.handle:= createcompatibledc(0);
-  if gc.handle <> 0 then begin
-   selectobject(gc.handle,paintdevice);
-   win32gcty(gc.platformdata).ispixmap:= true;
+ case akind of
+  gck_pixmap: begin
+   gc.handle:= createcompatibledc(0);
+   if gc.handle <> 0 then begin
+    selectobject(gc.handle,paintdevice);
+    win32gcty(gc.platformdata).kind:= akind;
+   end;
   end;
- end
- else begin
-  gc.handle:= getdc(paintdevice);
+  gck_printer: begin
+   gc.handle:= createdc('WINSPOOL',pansichar(aprintername),nil,nil);
+  end;
+  else begin
+   gc.handle:= getdc(paintdevice);
+  end;
  end;
  if gc.handle = 0 then begin
   result:= gue_creategc;
@@ -1057,7 +1062,7 @@ begin
  with drawinfo,gc,win32gcty(platformdata) do begin
   selectobject(handle,nullpen);
   selectobject(handle,nullbrush);
-  if ispixmap then begin
+  if kind in [gck_pixmap,gck_printer] then begin
 //   bmp1:= createcompatiblebitmap(handle,0,0);
 //   bmp2:= selectobject(handle,bmp1); //select actual bitmap out of dc
                                      //really needed?

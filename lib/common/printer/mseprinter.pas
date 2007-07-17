@@ -67,10 +67,10 @@ const
   );
   
 type
- tprinter = class;
+ tcustomprinter = class;
  tcustomprintercanvas = class;
  tprintercanvas = class;
- printereventty = procedure(const sender: tprinter) of object;
+ printereventty = procedure(const sender: tcustomprinter) of object;
 
  tprintertabulators = class(tcustomtabulators)
   published
@@ -79,7 +79,7 @@ type
  colorspacety = (cos_gray,cos_rgb);
  pageorientationty = (pao_portrait,pao_landscape);
    
- tprinter = class(tmsecomponent,istatfile)
+ tcustomprinter = class(tmsecomponent,istatfile)
   private
    fonpagestart: printereventty;
    fonpageend: printereventty;
@@ -92,11 +92,9 @@ type
    fpa_framebottom: real;
    ftabulators: tprintertabulators;
 //   fppmm: real;
-   fprintcommand: string;
    fstatfile: tstatfile;
    fstatvarname: msestring;
    fpa_orientation: pageorientationty;
-   procedure setstream(const avalue: ttextstream);
    procedure settabulators(const avalue: tprintertabulators);
 //   procedure setppmm(const avalue: real);
    procedure setpa_frameleft(const avalue: real);
@@ -118,8 +116,8 @@ type
    function getwindowsize: sizety;
    
    //istatfile
-   procedure dostatread(const reader: tstatreader);
-   procedure dostatwrite(const writer: tstatwriter);
+   procedure dostatread(const reader: tstatreader); virtual;
+   procedure dostatwrite(const writer: tstatwriter); virtual;
    procedure statreading;
    procedure statread;
    function getstatvarname: msestring;
@@ -129,11 +127,7 @@ type
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
-   procedure beginprint(command: string = ''; const apreamble: string = ''); overload;
-   procedure beginprint(const astream: ttextstream; const apreamble: string = ''); overload;
-    //printer owns the stream, nil -> dummy mode
-   procedure endprint;
-  published
+   procedure endprint; virtual;
    property canvas: tprintercanvas read fcanvas write setcanvas;
    property onpagestart: printereventty read fonpagestart write fonpagestart;
    property onpageend: printereventty read fonpageend write fonpageend;
@@ -148,12 +142,49 @@ type
    property pa_framebottom: real read fpa_framebottom write setpa_framebottom; //mm, default 10
    property tabulators: tprintertabulators read ftabulators write settabulators;
 //   property ppmm: real read fppmm write setppmm; //pixel per mm, default 10
-   property printcommand: string read fprintcommand write fprintcommand;
 //   property colorspace: colorspacety read getcolorspace write setcolorspace;
    property statfile: tstatfile read fstatfile write setstatfile;
    property statvarname: msestring read fstatvarname write fstatvarname;
  end;
 
+ tprinter = class(tcustomprinter)
+  published
+   property canvas;
+   property onpagestart;
+   property onpageend;
+   property pa_width; 
+   property pa_height;
+   property pa_size;
+   property pa_orientation;
+  
+   property pa_frameleft; //mm, default 10
+   property pa_frametop;    //mm, default 10
+   property pa_frameright;  //mm, default 10
+   property pa_framebottom; //mm, default 10
+   property tabulators;
+//   property ppmm: real read fppmm write setppmm; //pixel per mm, default 10
+//   property colorspace: colorspacety read getcolorspace write setcolorspace;
+   property statfile;
+   property statvarname;
+ end;
+
+ tstreamprinter = class(tprinter)
+  private
+   fprintcommand: string;
+   procedure setstream(const avalue: ttextstream);
+  protected
+   procedure dostatread(const reader: tstatreader); override;
+   procedure dostatwrite(const writer: tstatwriter); override;
+  public
+   constructor create(aowner: tcomponent); override;
+   procedure beginprint(command: string = ''; const apreamble: string = ''); overload;
+   procedure beginprint(const astream: ttextstream; const apreamble: string = ''); overload;
+    //printer owns the stream, nil -> dummy mode
+   procedure endprint; override;
+  published
+   property printcommand: string read fprintcommand write fprintcommand;
+ end;
+  
  pagerangety = record
   first,last: integer;
  end;
@@ -188,8 +219,7 @@ type
    flinenumber: integer;
    fpagelinenumber: integer;
    fliney: integer;
-   fstream: ttextstream;
-   fprinter: tprinter;
+   fprinter: tcustomprinter;
    fcolorspace: colorspacety;
    fpreamble: string;
    procedure initprinting(const apreamble: string = '');
@@ -210,18 +240,17 @@ type
    procedure endtextclip; virtual; abstract;
    procedure checknextpage;
    procedure internalwriteln(const avalue: richstringty);
-   procedure streamwrite(const atext: string); //checks fstream = nil
-   procedure streamwriteln(const atext: string); //checks fstream = nil
    procedure setpagesstring(const avalue: msestring);
    procedure internaldrawtext(var info); override;
                        //info = drawtextinfoty
+   function dryrun: boolean; virtual;
   public
-   constructor create(const user: tprinter; const intf: icanvas);
+   constructor create(const user: tcustomprinter; const intf: icanvas);
    
    procedure reset; override;
    
    // if cy of destrect = 0 and tf_ycentered in textflags -> place on baseline
-   procedure drawtext(var info: drawtextinfoty); overload;
+   procedure drawtext(var info: drawtextinfoty); overload; virtual;
    procedure drawtext(const atext: richstringty;
                    const adest: rectty; aflags: textflagsty = [];
                    afont: tfont = nil; atabulators: ttabulators = nil); overload;
@@ -284,18 +313,26 @@ type
    property title;
    property ppmm; //default 10
  end;
- 
+
+ tstreamprintercanvas = class(tprintercanvas)
+  protected
+   fstream: ttextstream;  
+   function dryrun: boolean; override;
+   procedure streamwrite(const atext: string); //checks fstream = nil
+   procedure streamwriteln(const atext: string); //checks fstream = nil
+ end;
+  
  tprintervalueselector = class(tcustomselector)
   private
-   fprinter: tprinter;
-   procedure setprinter(const avalue: tprinter);
+   fprinter: tcustomprinter;
+   procedure setprinter(const avalue: tcustomprinter);
    procedure printerchanged; virtual; abstract;
   protected
    procedure objectevent(const sender: tobject; 
                    const event: objecteventty); override;
   published
    property dropdown;
-   property printer: tprinter read fprinter write setprinter;
+   property printer: tcustomprinter read fprinter write setprinter;
  end;
  
  tpagesizeselector = class(tprintervalueselector)
@@ -388,9 +425,9 @@ begin
  end;
 end;
 
-{ tprinter }
+{ tcustomprinter }
 
-constructor tprinter.create(aowner: tcomponent);
+constructor tcustomprinter.create(aowner: tcomponent);
 begin
 // fppmm:= defaultppmm;
  fpa_size:= sps_a4;
@@ -403,12 +440,11 @@ begin
  fpa_frameright:= defaultframe;
  fpa_framebottom:= defaultframe;
  ftabulators:= tprintertabulators.create;
- fprintcommand:= sys_getprintcommand;
  inherited;
  fcanvas.ppmm:= defaultppmm;
 end;
 
-destructor tprinter.destroy;
+destructor tcustomprinter.destroy;
 begin
  endprint;
  fcanvas.free;
@@ -416,14 +452,14 @@ begin
  inherited;
 end;
 
-procedure tprinter.loaded;
+procedure tcustomprinter.loaded;
 begin
  inherited;
  pagesizechanged;
  fcanvas.updatescale;
 end;
 
-function tprinter.getwindowsize: sizety;
+function tcustomprinter.getwindowsize: sizety;
 var
  rea1: real;
 begin
@@ -437,70 +473,12 @@ begin
  result.cy:= result.cx;
 end;
 
-procedure tprinter.beginprint(command: string = ''; const apreamble: string = '');
-var
- pip1: tpipewriter;
-begin
- if command = '' then begin
-  command:= fprintcommand;
- end;
- if command = '' then begin
-  command:= sys_getprintcommand;
- end;
- pip1:= tpipewriter.create;
- try
-  execmse2(command,pip1);
- except
-  pip1.free;
-  raise;
- end;
- beginprint(pip1,apreamble);
-end;
-
-procedure tprinter.beginprint(const astream: ttextstream; const apreamble: string = '');
-begin
- endprint;
- setstream(astream);
- fcanvas.initprinting(apreamble);
-end;
-
-procedure tprinter.endprint;
-begin
- setstream(nil);
-end;
-
-procedure tprinter.setstream(const avalue: ttextstream);
-begin
- with fcanvas do begin
-  try
-   unlink;
-  except
-  end;
-  fstream.free;
-  fstream:= avalue;
- end;
- {
- with fcanvas do begin
-  if fstream <> avalue then begin
-   if fstream <> nil then begin
-    try
-     unlink;
-    except
-    end;
-    fstream.free;
-   end;
-   fstream:= avalue;
-  end;
- end;
- }
-end;
-
-procedure tprinter.settabulators(const avalue: tprintertabulators);
+procedure tcustomprinter.settabulators(const avalue: tprintertabulators);
 begin
  ftabulators.assign(avalue);
 end;
 
-procedure tprinter.pagesizechanged;
+procedure tcustomprinter.pagesizechanged;
 begin
  if fpa_size <> sps_user then begin
   with stdpagesizes[fpa_size] do begin
@@ -520,74 +498,74 @@ begin
  end;
 end;
 
-procedure tprinter.setpa_width(const avalue: real);
+procedure tcustomprinter.setpa_width(const avalue: real);
 begin
  fpa_width:= avalue;
  fpa_size:= sps_user;
  pagesizechanged;
 end;
 
-procedure tprinter.setpa_height(const avalue: real);
+procedure tcustomprinter.setpa_height(const avalue: real);
 begin
  fpa_height:= avalue;
  fpa_size:= sps_user;
  pagesizechanged;
 end;
 
-procedure tprinter.setpa_size(const avalue: stdpagesizety);
+procedure tcustomprinter.setpa_size(const avalue: stdpagesizety);
 begin
  fpa_size:= avalue;
  pagesizechanged;
 end;
 
-procedure tprinter.setpa_orientation(const avalue: pageorientationty);
+procedure tcustomprinter.setpa_orientation(const avalue: pageorientationty);
 begin
  fpa_orientation:= avalue;
  pagesizechanged;
 end;
 {
-procedure tprinter.setppmm(const avalue: real);
+procedure tcustomprinter.setppmm(const avalue: real);
 begin
  fppmm:= avalue;
  ftabulators.ppmm:= avalue;
  fcanvas.updatescale;
 end;
 }
-procedure tprinter.setpa_frameleft(const avalue: real);
+procedure tcustomprinter.setpa_frameleft(const avalue: real);
 begin
  fpa_frameleft:= avalue;
  fcanvas.updateframe;
 end;
 
-procedure tprinter.setpa_frametop(const avalue: real);
+procedure tcustomprinter.setpa_frametop(const avalue: real);
 begin
  fpa_frametop:= avalue;
  fcanvas.updateframe;
 end;
 
-procedure tprinter.setpa_frameright(const avalue: real);
+procedure tcustomprinter.setpa_frameright(const avalue: real);
 begin
  fpa_frameright:= avalue;
  fcanvas.updateframe;
 end;
 
-procedure tprinter.setpa_framebottom(const avalue: real);
+procedure tcustomprinter.setpa_framebottom(const avalue: real);
 begin
  fpa_framebottom:= avalue;
  fcanvas.updateframe;
 end;
 {
-function tprinter.getcolorspace: colorspacety;
+function tcustomprinter.getcolorspace: colorspacety;
 begin
  result:= fcanvas.colorspace;
 end;
 
-procedure tprinter.setcolorspace(const avalue: colorspacety);
+procedure tcustomprinter.setcolorspace(const avalue: colorspacety);
 begin
  fcanvas.colorspace:= avalue;
 end;
 }
-procedure tprinter.dostatread(const reader: tstatreader);
+procedure tcustomprinter.dostatread(const reader: tstatreader);
 begin
  with reader do begin
   pa_width:= readreal('width',fpa_width);
@@ -602,11 +580,10 @@ begin
   fpa_framebottom:= readreal('framebottom',fpa_framebottom);
   fcanvas.colorspace:= colorspacety(readinteger('colorspace',
                            ord(fcanvas.colorspace),0,ord(high(colorspacety))));
-  printcommand:= readstring('printcommand',printcommand);
  end;
 end;
 
-procedure tprinter.dostatwrite(const writer: tstatwriter);
+procedure tcustomprinter.dostatwrite(const writer: tstatwriter);
 begin
  with writer do begin
   writereal('width',fpa_width);
@@ -618,41 +595,47 @@ begin
   writereal('frameright',fpa_frameright);
   writereal('framebottom',fpa_framebottom);
   writeinteger('colorspace',ord(fcanvas.colorspace));
-  writestring('printcommand',printcommand);
  end;
 end;
 
-procedure tprinter.statreading;
+procedure tcustomprinter.statreading;
 begin
+ //dummy
 end;
 
-procedure tprinter.statread;
+procedure tcustomprinter.statread;
 begin
+ //dummy
 end;
 
-function tprinter.getstatvarname: msestring;
+function tcustomprinter.getstatvarname: msestring;
 begin
  result:= fstatvarname;
 end;
 
-procedure tprinter.setstatfile(const avalue: tstatfile);
+procedure tcustomprinter.setstatfile(const avalue: tstatfile);
 begin
  setstatfilevar(istatfile(self),avalue,fstatfile);
 end;
 
-procedure tprinter.setcanvas(const avalue: tprintercanvas);
+procedure tcustomprinter.setcanvas(const avalue: tprintercanvas);
 begin
  fcanvas.assign(avalue);
 end;
 
-function tprinter.getsize: sizety;
+function tcustomprinter.getsize: sizety;
 begin
  result:= fcanvas.fsize;
 end;
 
+procedure tcustomprinter.endprint;
+begin
+ //dummy
+end;
+
 { tcustomprintercanvas }
 
-constructor tcustomprintercanvas.create(const user: tprinter; const intf: icanvas);
+constructor tcustomprintercanvas.create(const user: tcustomprinter; const intf: icanvas);
 begin
  fprinter:= user;
 // flastpage:= bigint;
@@ -808,7 +791,7 @@ begin
  ar1:= nil; //compiler warning
  save;
  layouttext(self,info,layoutinfo);
- if fstream = nil then begin
+ if dryrun then begin
   goto endlab;
  end;
  ar1:= nil; //compiler warning
@@ -1180,20 +1163,6 @@ begin
  end;
 end;
 
-procedure tcustomprintercanvas.streamwrite(const atext: string);
-begin
- if fstream <> nil then begin
-  fstream.write(atext);
- end;
-end;
-
-procedure tcustomprintercanvas.streamwriteln(const atext: string);
-begin
- if fstream <> nil then begin
-  fstream.writeln(atext);
- end;
-end;
-
 procedure tcustomprintercanvas.setppmm(avalue: real);
 begin
  inherited;
@@ -1217,9 +1186,14 @@ begin
  drawtext(drawtextinfoty(info));
 end;
 
+function tcustomprintercanvas.dryrun: boolean;
+begin
+ result:= false;
+end;
+
 { tprintervalueselector }
 
-procedure tprintervalueselector.setprinter(const avalue: tprinter);
+procedure tprintervalueselector.setprinter(const avalue: tcustomprinter);
 begin
  setlinkedvar(avalue,tmsecomponent(fprinter));
  printerchanged;
@@ -1329,6 +1303,97 @@ begin
   fprinter.pa_orientation:= value;
  end;
  inherited;
+end;
+
+{ tstreamprinter }
+
+constructor tstreamprinter.create(aowner: tcomponent);
+begin
+ fprintcommand:= sys_getprintcommand;
+ inherited;
+end;
+
+procedure tstreamprinter.beginprint(command: string = ''; 
+                                            const apreamble: string = '');
+var
+ pip1: tpipewriter;
+begin
+ if command = '' then begin
+  command:= fprintcommand;
+ end;
+ if command = '' then begin
+  command:= sys_getprintcommand;
+ end;
+ pip1:= tpipewriter.create;
+ try
+  execmse2(command,pip1);
+ except
+  pip1.free;
+  raise;
+ end;
+ beginprint(pip1,apreamble);
+end;
+
+procedure tstreamprinter.beginprint(const astream: ttextstream;
+                                          const apreamble: string = '');
+begin
+ endprint;
+ setstream(astream);
+ fcanvas.initprinting(apreamble);
+end;
+
+procedure tstreamprinter.endprint;
+begin
+ setstream(nil);
+end;
+
+procedure tstreamprinter.setstream(const avalue: ttextstream);
+begin
+ with tstreamprintercanvas(fcanvas) do begin
+  try
+   unlink;
+  except
+  end;
+  fstream.free;
+  fstream:= avalue;
+ end;
+end;
+
+procedure tstreamprinter.dostatread(const reader: tstatreader);
+begin
+ inherited;
+ with reader do begin
+  printcommand:= readstring('printcommand',printcommand);
+ end;
+end;
+
+procedure tstreamprinter.dostatwrite(const writer: tstatwriter);
+begin
+ inherited;
+ with writer do begin
+  writestring('printcommand',printcommand);
+ end;
+end;
+
+{ tstreamprintercanvas }
+
+function tstreamprintercanvas.dryrun: boolean;
+begin
+ result:= fstream = nil
+end;
+
+procedure tstreamprintercanvas.streamwrite(const atext: string);
+begin
+ if fstream <> nil then begin
+  fstream.write(atext);
+ end;
+end;
+
+procedure tstreamprintercanvas.streamwriteln(const atext: string);
+begin
+ if fstream <> nil then begin
+  fstream.writeln(atext);
+ end;
 end;
 
 end.
