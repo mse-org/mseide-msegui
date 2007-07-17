@@ -1028,7 +1028,7 @@ begin
  end;
 end;
 
-function gui_creategc(const paintdevice: paintdevicety; const kind: gckindty; 
+function gui_creategc(paintdevice: paintdevicety; const kind: gckindty; 
                           var gc: gcty): guierrorty;
 begin
  if kind = gck_pixmap then begin
