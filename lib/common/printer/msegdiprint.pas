@@ -97,6 +97,12 @@ begin
           'Can not start print job for "'+fcanvas.title+'".');
 end;
 
+{$else}
+procedure tgdiprinter.beginprint;
+begin
+end;
+{$endif}
+
 procedure tgdiprinter.endprint;
 begin
  with tgdiprintcanvas(fcanvas) do begin
@@ -113,12 +119,6 @@ begin
  end;
  inherited;
 end;
-
-{$else}
-procedure tgdiprinter.beginprint;
-begin
-end;
-{$endif}
 
 { tgdiprintcanvas }
 
