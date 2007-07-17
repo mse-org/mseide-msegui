@@ -28,7 +28,8 @@ function gui_createwindow(const rect: rectty; const options: internalwindowoptio
                                out id: winidty): guierrorty;
 function gui_destroywindow(id: winidty): guierrorty;
 
-function gui_creategc(paintdevice: paintdevicety; ispixmap: boolean; var gc: gcty): guierrorty;
+function gui_creategc(const paintdevice: paintdevicety; const kind: gckindty;
+                               var gc: gcty): guierrorty;
 //function gui_destroygc(winid: winidty; var gc: gcty): guierrorty;
 function gui_flushgdi: guierrorty;
 function gui_showwindow(id: winidty): guierrorty;

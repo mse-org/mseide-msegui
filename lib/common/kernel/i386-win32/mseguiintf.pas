@@ -1028,10 +1028,10 @@ begin
  end;
 end;
 
-function gui_creategc(paintdevice: paintdevicety; ispixmap: boolean; 
-                                                   var gc: gcty): guierrorty;
+function gui_creategc(const paintdevice: paintdevicety; const kind: gckindty; 
+                          var gc: gcty): guierrorty;
 begin
- if ispixmap then begin
+ if kind = gck_pixmap then begin
   gc.handle:= createcompatibledc(0);
   if gc.handle <> 0 then begin
    selectobject(gc.handle,paintdevice);

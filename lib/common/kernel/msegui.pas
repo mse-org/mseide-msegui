@@ -9104,11 +9104,11 @@ begin
   sizeconstraintschanged;
   fstate:= fstate - [tws_posvalid,tws_sizevalid];
   fillchar(gc,sizeof(gcty),0);
-  guierror(gui_creategc(fwinid,false,gc),self);
+  guierror(gui_creategc(fwinid,gck_screen,gc),self);
   fcanvas.linktopaintdevice(fwinid,gc,fowner.fwidgetrect.size,nullpoint);
   finalize(gc);
   fillchar(gc,sizeof(gcty),0);
-  guierror(gui_creategc(fwinid,false,gc),self);
+  guierror(gui_creategc(fwinid,gck_screen,gc),self);
   fasynccanvas.linktopaintdevice(fwinid,gc,fowner.fwidgetrect.size,nullpoint);
   if app <> nil then begin
    tinternalapplication(application).registerwindow(self);

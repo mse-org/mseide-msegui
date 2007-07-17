@@ -36,6 +36,8 @@ type
  regionty = cardinal;
  pixmapty = cardinal;
 
+ gckindty = (gck_screen,gck_pixmap,gck_printer);
+ 
  alignmentty = (al_xcentered,al_right,al_ycentered,al_bottom,al_grayed,
                 al_stretchx,al_stretchy,al_fit,al_tiled,
                 al_intpol,al_or,al_and);
@@ -87,7 +89,7 @@ type
   font: fontty;
   basefont: fontty;
   glyph: unicharty;
-  rotation: real; //0..1 -> 0°..360° CCW
+  rotation: real; //0..1 -> 0deg..360deg CCW
   xscale: real;   //default 1.0
   name: string;
   charset: string;
@@ -2100,7 +2102,7 @@ begin
    include(gc.drawingflags,df_canvasismonochrome);
   end;
   gdi_lock;
-  err:= gui_creategc(fhandle,true,gc);
+  err:= gui_creategc(fhandle,gck_pixmap,gc);
   gdi_unlock;
   guierror(err,self);
   fcanvas.linktopaintdevice(fhandle,gc,fsize,fdefaultcliporigin);
@@ -2844,7 +2846,7 @@ var
 begin
  fillchar(gc,sizeof(gcty),0);
  gdi_lock;
- err:= gui_creategc(0,false,gc);
+ err:= gui_creategc(0,gck_screen,gc);
  gdi_unlock;
  guierror(err,self);
  sender.linktopaintdevice(0,gc,nullsize,nullpoint);
