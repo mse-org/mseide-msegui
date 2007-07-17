@@ -2692,7 +2692,7 @@ begin
  result:= gue_ok;
 end;
 
-function gui_creategc(const paintdevice: paintdevicety; const kind: gckindty;
+function gui_creategc(paintdevice: paintdevicety; const kind: gckindty;
                                              var gc: gcty): guierrorty;
 begin
  if paintdevice = 0 then begin
