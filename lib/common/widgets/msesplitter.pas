@@ -18,7 +18,8 @@ uses
  msesimplewidgets,mseguiglob;
 type
 
- splitteroptionty = (spo_hmove,spo_hprop,spo_vmove,spo_vprop,
+ splitteroptionty = (spo_hmove,spo_hprop,spo_hsizeprop,
+                     spo_vmove,spo_vprop,spo_vsizeprop,
                      spo_dockleft,spo_docktop,spo_dockright,spo_dockbottom);
  splitteroptionsty = set of splitteroptionty;
 
@@ -41,6 +42,7 @@ type
    flinkright: twidget;
    flinkbottom: twidget;
    fhprop,fvprop: real;
+   fhsizeprop,fvsizeprop: real;
    fstatfile: tstatfile;
    fstatvarname: msestring;
    fcolorgrip: colorty;
@@ -65,6 +67,7 @@ type
    function clippoint(const aoffset: pointty): pointty;
    procedure mouseevent(var info: mouseeventinfoty); override;
    procedure poschanged; override;
+   procedure sizechanged; override;
    procedure parentclientrectchanged; override;
    procedure doasyncevent(var atag: integer); override;
    procedure dopaint(const acanvas: tcanvas); override;
@@ -469,50 +472,68 @@ begin
  inherited;
  if (fparentwidget <> nil) then begin
   if not (csloading in componentstate) and (fpropsetting = 0) then begin
+   fhprop:= 0;
+   fvprop:= 0;
    int1:= fparentwidget.clientsize.cx;
    if (int1 > 0) then begin
     fhprop:= parentclientpos.x / {$ifdef FPC} real({$endif}int1{$ifdef FPC}){$endif};
-   end
-   else begin
-    fhprop:= 0;
    end;
-
    int1:= fparentwidget.clientsize.cy;
    if (int1 > 0) then begin
     fvprop:= parentclientpos.y / {$ifdef FPC} real({$endif}int1{$ifdef FPC}){$endif};
-   end
-   else begin
-    fvprop:= 0;
    end;
   end;
- end
- else begin
-  fhprop:= 0;
-  fvprop:= 0;
+ end;
+end;
+
+procedure tsplitter.sizechanged;
+var
+ int1: integer;
+begin
+ inherited;
+ if (fparentwidget <> nil) then begin
+  if not (csloading in componentstate) and (fpropsetting = 0) then begin
+   fhsizeprop:= 0;
+   fvsizeprop:= 0;
+   int1:= fparentwidget.clientsize.cx;
+   if (int1 > 0) then begin
+    fhsizeprop:= fwidgetrect.cx / {$ifdef FPC} real({$endif}int1{$ifdef FPC}){$endif};
+   end;
+   int1:= fparentwidget.clientsize.cy;
+   if (int1 > 0) then begin
+    fvsizeprop:= fwidgetrect.cy / {$ifdef FPC} real({$endif}int1{$ifdef FPC}){$endif};
+   end;
+  end;
  end;
 end;
 
 procedure tsplitter.doasyncevent(var atag: integer);
 var
  pt1,pt2: pointty;
+ size2: sizety;
+ 
  procedure calcoffset;
  var
   size1: sizety;
  begin
-  if fparentwidget <> nil then begin
-   size1:= fparentwidget.clientsize;
-//   size1:= fparentwidget.paintsize;
-   pt1:= nullpoint;
-   if spo_hprop in foptions then begin
-    pt1.x:= round(fhprop * size1.cx) - parentclientpos.x;
-   end;
-   if spo_vprop in foptions then begin
-    pt1.y:= round(fvprop * size1.cy) - parentclientpos.y;
-   end;
-   pt2:= clippoint(pt1);
+  size1:= fparentwidget.clientsize;
+  pt1:= nullpoint;
+  size2:= size;
+  if spo_hsizeprop in foptions then begin
+   size2.cx:= round(size1.cx * fhsizeprop);
   end;
+  if spo_vsizeprop in foptions then begin
+   size2.cy:= round(size1.cy * fvsizeprop);
+  end;
+  if spo_hprop in foptions then begin
+   pt1.x:= round(fhprop * size1.cx) - parentclientpos.x;
+  end;
+  if spo_vprop in foptions then begin
+   pt1.y:= round(fvprop * size1.cy) - parentclientpos.y;
+  end;
+  pt2:= clippoint(pt1);
  end;
- 
+  
 begin //doasyncevent
  inherited;
  case atag of
@@ -520,21 +541,24 @@ begin //doasyncevent
    if atag = updatepropeventtag then begin
     dec(fnotified);
    end;
-   calcoffset;
    try
-    if (([spo_hmove,spo_hprop] * foptions <> []) and (pt1.x <> pt2.x) or 
-        ([spo_vmove,spo_vprop] * foptions <> []) and (pt1.y <> pt2.y)) and
-       (fregionchangedmark <> fregionchangedcount) then begin
-     fregionchangedmark:= fregionchangedcount;
-     inc(fupdating);
-     asyncevent(retrypropeventtag);
-    end
-    else begin
-     inc(fpropsetting);
-     try
-      setclippedpickoffset(pt2);
-     finally
-      dec(fpropsetting);
+    if fparentwidget <> nil then begin
+     calcoffset;
+     if (([spo_hmove,spo_hprop] * foptions <> []) and (pt1.x <> pt2.x) or 
+         ([spo_vmove,spo_vprop] * foptions <> []) and (pt1.y <> pt2.y)) and
+        (fregionchangedmark <> fregionchangedcount) then begin
+      fregionchangedmark:= fregionchangedcount;
+      inc(fupdating);
+      asyncevent(retrypropeventtag);
+     end
+     else begin
+      inc(fpropsetting);
+      try
+       setclippedpickoffset(pt2);
+       size:= size2;
+      finally
+       dec(fpropsetting);
+      end;
      end;
     end;
    finally
@@ -615,7 +639,7 @@ begin
   inc(fupdating);
   po1:= addpoint(pos,pointty(size));
   try  
-   if flinkleft = flinkbottom then begin
+   if flinkleft = flinkright then begin
     if flinkleft <> nil then begin
      flinkleft.widgetrect:= makerect(bounds_x,flinkleft.bounds_y,bounds_cx,
                                          flinkleft.bounds_cy);
