@@ -30,7 +30,7 @@ type
  
 implementation
 uses
- {$ifdef mswindows}windows,{$endif}mseguiintf,mseguiglob,msesys;
+ {$ifdef mswindows}windows,{$endif}mseguiintf,mseguiglob,msesys,sysutils;
  
 {$ifdef mswindows}
 procedure checkprinterror(const aresult: integer; const atext: string = '');
