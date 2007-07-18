@@ -995,6 +995,7 @@ type
    function getdisprect: rectty; virtual; 
                 //origin pos, clamped in view by activate
 
+   function getmintopleft: pointty; virtual;
    function calcminscrollsize: sizety; virtual;
    function getcontainer: twidget; virtual;
    function getchildwidgets(const index: integer): twidget; virtual;
@@ -5262,12 +5263,18 @@ begin
  end;
 end;
 
+function twidget.getmintopleft: pointty;
+begin
+ result:= fwidgetrect.pos;
+end;
+
 function twidget.calcminscrollsize: sizety;
 var
  int1,int2: integer;
  anch: anchorsty;
  indent: framety;
  clientorig: pointty;
+ pt1: pointty;
 begin
 // result.cx:= -bigint;
 // result.cy:= -bigint;
@@ -5286,6 +5293,7 @@ begin
   with fwidgets[int1],fwidgetrect do begin
    if visible and not(ws1_nominsize in fwidgetstate1) or 
                                   (csdesigning in componentstate) then begin
+    pt1:= getmintopleft;
     anch:= fanchors * [an_left,an_right];
     if anch = [an_right] then begin
 //     int2:= cx + indent.left;
@@ -5301,7 +5309,7 @@ begin
        int2:= fparentclientsize.cx - cx + fminsize.cx;
       end
       else begin //[an_left
-       int2:= clientorig.x + x + cx + indent.right;
+       int2:= clientorig.x + pt1.x + cx + indent.right;
       end;
      end;
     end;
@@ -5324,7 +5332,7 @@ begin
        int2:= fparentclientsize.cy - cy + fminsize.cy;
       end
       else begin //[an_top]
-       int2:= clientorig.y + y + cy + indent.bottom;
+       int2:= clientorig.y + pt1.y + cy + indent.bottom;
       end;
      end;
     end;
