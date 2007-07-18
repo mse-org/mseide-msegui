@@ -1031,6 +1031,7 @@ end;
 function gui_creategc(paintdevice: paintdevicety; const akind: gckindty; 
               var gc: gcty; const aprintername: ansistring = ''): guierrorty;
 begin
+ result:= gue_creategc;
  case akind of
   gck_pixmap: begin
    gc.handle:= createcompatibledc(0);
@@ -1046,14 +1047,11 @@ begin
    gc.handle:= getdc(paintdevice);
   end;
  end;
- if gc.handle = 0 then begin
-  result:= gue_creategc;
- end
- else begin
-  result:= gue_ok;
+ if gc.handle <> 0 then begin
   settextalign(gc.handle,ta_left or ta_baseline or ta_noupdatecp);
   setbkmode(gc.handle,transparent);
   setmapmode(gc.handle,mm_text);
+  result:= gue_ok;
  end;
 end;
 

@@ -665,7 +665,7 @@ end;
 constructor tpostscriptcanvas.create(const user: tprinter; const intf: icanvas);
 begin
  fpslevel:= psl_2;
- inherited;
+ inherited create(user,intf);
 end;
 
 function tpostscriptcanvas.getgdifuncs: pgdifunctionaty;

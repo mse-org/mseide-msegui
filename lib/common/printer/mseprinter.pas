@@ -189,7 +189,10 @@ type
   first,last: integer;
  end;
  pagerangearty = array of pagerangety;
-  
+
+ printercanvasstatety = (pcs_matrixvalid);
+ printercanvasstatesty = set of printercanvasstatety;
+ 
  tcustomprintercanvas = class(tcanvas)
   private
    fheaderheight: integer;
@@ -207,6 +210,7 @@ type
    procedure setliney(const avalue: integer);
    procedure setpages(const avalue: pagerangearty);
   protected
+   fpstate: printercanvasstatesty;
    fgcoffsetx: real;
    fgcoffsety: real;
    fgcscale: real;
@@ -664,6 +668,7 @@ procedure tcustomprintercanvas.updatescale;
 begin
  if not (csloading in fprinter.componentstate) then begin
   exclude(fstate,cs_origin);
+  exclude(fpstate,pcs_matrixvalid);
   with fprinter do begin
 //   self.ppmm:= fppmm;
    fgcscale:= mmtoprintscale/ppmm; //map to printerunits
