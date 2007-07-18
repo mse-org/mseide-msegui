@@ -664,7 +664,7 @@ begin
   result.x:= result.x - flinkleft.bounds_cx + flinkleft.bounds_cxmin;
  end;
  if flinktop <> nil then begin
-  result.y:= result.y - flinkleft.bounds_cy + flinkleft.bounds_cymin;
+  result.y:= result.y - flinktop.bounds_cy + flinktop.bounds_cymin;
  end;
 end;
 
