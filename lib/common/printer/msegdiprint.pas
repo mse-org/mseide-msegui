@@ -50,6 +50,7 @@ var
  
 {$ifdef mswindows}
 type
+ WINBOOL = longbool;
  DOCINFOW = record
   cbSize: longint;
   lpszDocName: LPCWSTR;
@@ -269,8 +270,8 @@ begin
      'StartDocW'                                 //1
      ],
      [
-     {$ifdef FPC}@{$endif}SetWorldTransform,     //0
-     {$ifdef FPC}@{$endif}StartDocW              //1
+     {$ifndef FPC}@{$endif}@SetWorldTransform,     //0
+     {$ifndef FPC}@{$endif}@StartDocW              //1
      ]);
    except begin
     haserror:= true;
@@ -283,7 +284,7 @@ begin
      'GetDefaultPrinterW'                        //0
       ],
       [
-     {$ifdef FPC}@{$endif}GetDefaultPrinterW     //0
+     {$ifndef FPC}@{$endif}@GetDefaultPrinterW     //0
       ]);
     except begin
      haserror:= true;
