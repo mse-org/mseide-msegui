@@ -931,7 +931,8 @@ begin
    end;
   end
   else begin
-   if focused and fedited then begin
+   if focused and fedited and 
+       ((fgridintf = nil) or not fgridintf.nocheckvalue) then begin
     result:= checkvalue;
    end;
   end;

@@ -7223,14 +7223,16 @@ begin     //focuscell
   beginnonullcheck;
  end;
  try
-  if ((cell.row <> ffocusedcell.row) or (cell.col <> ffocusedcell.col)) and 
-         (fnocheckvalue = 0) and not docheckcellvalue then begin
-   exit;
-  end;
-  if (cell.row <> ffocusedcell.row) and (ffocusedcell.row >= 0) and 
-           (fnocheckvalue = 0) and container.entered and
+  if (fnocheckvalue = 0) and not (gs_rowremoving in fstate) then begin
+   if ((cell.row <> ffocusedcell.row) or (cell.col <> ffocusedcell.col)) and           
+           not docheckcellvalue then begin
+    exit;
+   end;
+   if (cell.row <> ffocusedcell.row) and (ffocusedcell.row >= 0) and 
+            container.entered and
             not container.canclose(window.focusedwidget) then begin
-   exit;        //for not null check in twidgetgrid
+    exit;        //for not null check in twidgetgrid
+   end;
   end;
   if (selectaction in [fca_focusin,fca_focusinrepeater,fca_focusinforce]) and 
       ((cell.col < 0) or  not fdatacols[cell.col].canfocus(mb_none)) then begin

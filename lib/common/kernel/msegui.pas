@@ -9996,7 +9996,9 @@ end;
 
 procedure twindow.activate;
 begin
- internalactivate(false);
+ if fowner.visible then begin
+  internalactivate(false);
+ end;
 end;
 
 function twindow.active: boolean;
@@ -11348,7 +11350,7 @@ begin
   if bo1 then begin
    lock;
   end;
-  if window1 <> nil then begin
+  if (window1 <> nil) then begin
    window1.activate;
    setlinkedvar(nil,tlinkedobject(window1));
   end;

@@ -35,6 +35,7 @@ type
   procedure widgetpainted(const canvas: tcanvas);
   function nullcheckneeded(const newfocus: twidget): boolean;
   function nonullcheck: boolean;
+  function nocheckvalue: boolean;
   property grid: tcustomwidgetgrid read getgrid;
  end;
 
@@ -87,6 +88,7 @@ type
    procedure widgetpainted(const canvas: tcanvas);
    function nullcheckneeded(const newfocus: twidget): boolean;
    function nonullcheck: boolean;
+   function nocheckvalue: boolean;
 
    function checkcanclose: boolean;
    procedure dofocusedcellchanged(enter: boolean;
@@ -1254,6 +1256,13 @@ end;
 function twidgetcol.nonullcheck: boolean;
 begin
  result:= tcustomgrid1(fgrid).fnonullcheck > 0;
+end;
+
+function twidgetcol.nocheckvalue: boolean;
+begin
+ with tcustomgrid1(fgrid) do begin
+  result:= (fnocheckvalue > 0) or (gs_rowremoving in fstate);
+ end;
 end;
 
 function twidgetcol.getgrid: tcustomwidgetgrid;
