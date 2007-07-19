@@ -29,7 +29,7 @@ function gui_createwindow(const rect: rectty; const options: internalwindowoptio
 function gui_destroywindow(id: winidty): guierrorty;
 
 function gui_creategc(paintdevice: paintdevicety; const akind: gckindty;
-                var gc: gcty; const aprintername: ansistring = ''): guierrorty;
+                var gc: gcty; const aprintername: msestring = ''): guierrorty;
 //function gui_destroygc(winid: winidty; var gc: gcty): guierrorty;
 function gui_flushgdi: guierrorty;
 function gui_showwindow(id: winidty): guierrorty;

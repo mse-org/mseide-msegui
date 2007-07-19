@@ -7,7 +7,7 @@ uses
  
 procedure Register;
 begin
- registercomponents('Gui',[tpostscriptprinter,tgdiprinter]);
+ registercomponents('Gui',[tpostscriptprinter{,tgdiprinter}]);
 end;
 
 initialization

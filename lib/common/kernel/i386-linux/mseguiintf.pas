@@ -2693,7 +2693,7 @@ begin
 end;
 
 function gui_creategc(paintdevice: paintdevicety; const akind: gckindty;
-     var gc: gcty; const aprintername: ansistring = ''): guierrorty;
+     var gc: gcty; const aprintername: msestring = ''): guierrorty;
 begin
  if paintdevice = 0 then begin
   paintdevice:= mserootwindow;

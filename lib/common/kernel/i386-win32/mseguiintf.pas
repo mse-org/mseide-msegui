@@ -1029,9 +1029,14 @@ begin
 end;
 
 function gui_creategc(paintdevice: paintdevicety; const akind: gckindty; 
-              var gc: gcty; const aprintername: ansistring = ''): guierrorty;
+              var gc: gcty; const aprintername: msestring = ''): guierrorty;
 begin
- result:= gue_creategc;
+ if akind = gck_printer then begin
+  result:= gue_createprintergc;
+ end
+ else begin
+  result:= gue_creategc;
+ end;
  case akind of
   gck_pixmap: begin
    gc.handle:= createcompatibledc(0);
@@ -1041,7 +1046,7 @@ begin
    end;
   end;
   gck_printer: begin
-   gc.handle:= createdc('WINSPOOL',pansichar(aprintername),nil,nil);
+   gc.handle:= createdc('WINSPOOL',pansichar(ansistring(aprintername)),nil,nil);
   end;
   else begin
    gc.handle:= getdc(paintdevice);
