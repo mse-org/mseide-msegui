@@ -14,7 +14,8 @@ uses
  classes,msegui,msegraphics,msetypes,msewidgets,msegraphutils,mseclasses,
  msetabs,mseprinter,msestream,msearrayprops,mseguiglob,msesimplewidgets,
  msedrawtext,msestrings,mserichstring,msedb,db,msethread,mseobjectpicker,
- msepointer,mseevent,msesplitter,msestatfile,mselookupbuffer,mseformatstr;
+ msepointer,mseevent,msesplitter,msestatfile,mselookupbuffer,mseformatstr,
+ msegdiprint;
 
 const
  defaultrepppmm = 3;
@@ -1074,7 +1075,8 @@ type
    fppmm: real;
    fonbeforerender: notifyeventty;
    fonafterrender: notifyeventty;
-   fprinter: tstreamprinter; //preliminary 
+//   fprinter: tstreamprinter; //preliminary 
+   fprinter: tcustomprinter; //preliminary 
    fstream: ttextstream;
    fstreamset: boolean;
    fcommand: string;
@@ -1116,7 +1118,7 @@ type
    freppages: reportpagearty;
    fdefaultprintorientation: pageorientationty;
    procedure insertwidget(const awidget: twidget; const apos: pointty); override;
-   procedure internalrender(const acanvas: tcanvas; const aprinter: tstreamprinter;
+   procedure internalrender(const acanvas: tcanvas; const aprinter: tcustomprinter;
                   const acommand: string; const astream: ttextstream;
                   const anilstream: boolean; const onafterrender: reporteventty);
    procedure unregisterchildwidget(const child: twidget); override;
@@ -1141,6 +1143,8 @@ type
                         const onafterrender: reporteventty = nil); overload;
    procedure render(const aprinter: tstreamprinter; const astream: ttextstream;
                         const onafterrender: reporteventty = nil); overload;
+   procedure render(const aprinter: tgdiprinter;
+                           const onafterrender: reporteventty = nil); overload;
    procedure waitfor;         //returns before calling of onafterrender
    function prepass: boolean; //true if in prepass render state
    
@@ -5002,17 +5006,35 @@ begin
      fonpreamble(self,str1);
     end;
     if rs_endpass in fstate then begin
-     if fstreamset then begin
-      stream1:= fstream;
-      fstream:= nil;
-      fprinter.beginprint(stream1,str1);
+     if fprinter is tgdiprinter then begin
+      with tgdiprinter(fprinter) do begin
+       beginprint(false);
+      end;
      end
      else begin
-      fprinter.beginprint(fcommand,str1);
+      with tstreamprinter(fprinter) do begin
+       if fstreamset then begin
+        stream1:= fstream;
+        fstream:= nil;
+        beginprint(stream1,str1);
+       end
+       else begin
+        beginprint(fcommand,str1);
+       end;
+      end;
      end;
     end
     else begin
-     fprinter.beginprint(nil,str1);
+     if fprinter is tgdiprinter then begin
+      with tgdiprinter(fprinter) do begin
+       beginprint(true);
+      end;
+     end
+     else begin
+      with tstreamprinter(fprinter) do begin
+       beginprint(nil,str1);
+      end;
+     end;
     end;
    end;   
    for int1:= 0 to high(freppages) do begin
@@ -5091,7 +5113,7 @@ begin
 end;
 
 procedure tcustomreport.internalrender(const acanvas: tcanvas;
-               const aprinter: tstreamprinter; const acommand: string;
+               const aprinter: tcustomprinter; const acommand: string;
                const astream: ttextstream; const anilstream: boolean;
                const onafterrender: reporteventty);
 begin
@@ -5133,6 +5155,12 @@ procedure tcustomreport.render(const aprinter: tstreamprinter;
               const onafterrender: reporteventty = nil);
 begin
  internalrender(aprinter.canvas,aprinter,'',astream,astream = nil,onafterrender);
+end;
+
+procedure tcustomreport.render(const aprinter: tgdiprinter;
+                                   const onafterrender: reporteventty = nil);
+begin
+ internalrender(aprinter.canvas,aprinter,'',nil,true,onafterrender);
 end;
 
 procedure tcustomreport.getchildren(proc: tgetchildproc; root: tcomponent);

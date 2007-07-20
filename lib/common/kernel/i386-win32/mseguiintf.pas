@@ -1053,6 +1053,7 @@ begin
   end;
  end;
  if gc.handle <> 0 then begin
+  win32gcty(gc.platformdata).kind:= akind;
   settextalign(gc.handle,ta_left or ta_baseline or ta_noupdatecp);
   setbkmode(gc.handle,transparent);
   setmapmode(gc.handle,mm_text);
@@ -2015,11 +2016,21 @@ begin
  result:= createrectrgnindirect(trect(nullrect));
 end;
 
-function createregion(var rect: rectty): regionty; overload;
+function createregion(var rect: rectty; const gc: gcty): regionty; overload;
+var
+ rect1: rectty;
 begin
- recttowinrect(rect);
- result:= createrectrgnindirect(trect(rect));
- winrecttorect(rect);
+ if win32gcty(gc.platformdata).kind = gck_printer then begin
+  rect1:= rect;
+  recttowinrect(rect1);
+  lptodp(gc.handle,{$ifdef FPC}@{$endif}rect1,2);
+  result:= createrectrgnindirect(trect(rect1));   
+ end
+ else begin
+  recttowinrect(rect);
+  result:= createrectrgnindirect(trect(rect));
+  winrecttorect(rect);
+ end;
 end;
 
 procedure gui_createemptyregion(var drawinfo: drawinfoty);
@@ -2052,7 +2063,7 @@ end;
 procedure gui_createrectregion(var drawinfo: drawinfoty);
 begin
  with drawinfo.regionoperation do begin
-  dest:= createregion(rect);
+  dest:= createregion(rect,drawinfo.gc);
  end;
 end;
 
@@ -2060,17 +2071,30 @@ procedure gui_createrectsregion(var drawinfo: drawinfoty);
 var
  reg1: hrgn;
  int1: integer;
+ rect1: rectty;
 begin
  with drawinfo.regionoperation do begin
   dest:= createregion;
   if rectscount > 0 then begin
-   recttowinrect(@rectspo^[0],rectscount);
-   for int1:= 0 to rectscount - 1 do begin
-    reg1:= createrectrgnindirect(trect(rectspo^[int1]));
-    combinergn(dest,dest,reg1,rgn_or);
-    deleteobject(reg1);
+   if win32gcty(drawinfo.gc.platformdata).kind = gck_printer then begin
+    for int1:= 0 to rectscount - 1 do begin
+     rect1:= rectspo^[int1];
+     recttowinrect(rect1);
+     lptodp(drawinfo.gc.handle,{$ifdef FPC}@{$endif}rect1,2);
+     reg1:= createrectrgnindirect(trect(rect1));
+     combinergn(dest,dest,reg1,rgn_or);
+     deleteobject(reg1);
+    end;
+   end
+   else begin
+    recttowinrect(@rectspo^[0],rectscount);
+    for int1:= 0 to rectscount - 1 do begin
+     reg1:= createrectrgnindirect(trect(rectspo^[int1]));
+     combinergn(dest,dest,reg1,rgn_or);
+     deleteobject(reg1);
+    end;
+    winrecttorect(@rectspo^[0],rectscount);
    end;
-   winrecttorect(@rectspo^[0],rectscount);
   end;
  end;
 end;
@@ -2102,6 +2126,9 @@ procedure gui_regionclipbox(var drawinfo: drawinfoty);
 begin
  with drawinfo.regionoperation do begin
   getrgnbox(source,trect(rect));
+  if win32gcty(drawinfo.gc.platformdata).kind = gck_printer then begin
+   dptolp(drawinfo.gc.handle,{$ifdef FPC}@{$endif}rect,2);
+  end;
   winrecttorect(rect);
  end;
 end;
@@ -2131,7 +2158,7 @@ var
  reg1: hrgn;
 begin
  with drawinfo.regionoperation do begin
-  reg1:= createregion(rect);
+  reg1:= createregion(rect,drawinfo.gc);
   combinergn(dest,dest,reg1,rgn_diff);
   deleteobject(reg1);
  end;
@@ -2149,7 +2176,7 @@ var
  reg1: hrgn;
 begin
  with drawinfo.regionoperation do begin
-  reg1:= createregion(rect);
+  reg1:= createregion(rect,drawinfo.gc);
   combinergn(dest,dest,reg1,rgn_or);
   deleteobject(reg1);
  end;
@@ -2167,7 +2194,7 @@ var
  reg1: hrgn;
 begin
  with drawinfo.regionoperation do begin
-  reg1:= createregion(rect);
+  reg1:= createregion(rect,drawinfo.gc);
   combinergn(dest,dest,reg1,rgn_and);
   deleteobject(reg1);
  end;

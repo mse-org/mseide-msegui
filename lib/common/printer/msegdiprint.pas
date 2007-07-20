@@ -32,7 +32,7 @@ type
    function getmonochrome: boolean;
   public
    constructor create(aowner: tcomponent); override;
-   procedure beginprint;
+   procedure beginprint(const adryrun: boolean = false);
    procedure endprint; override;
   published
    property printername: msestring read fprintername write fprintername;
@@ -101,6 +101,7 @@ end;
 
 procedure tgdiprintcanvas.drawtext(var info: drawtextinfoty);
 begin
+ if cs_inactive in fstate then exit;
  msedrawtext.drawtext(self,info);
 end;
 
@@ -108,18 +109,28 @@ procedure tgdiprintcanvas.beginpage;
 begin
  initgcvalues;
  exclude(fpstate,pcs_matrixvalid);
- {$ifdef mswindows}
- checkprinterror(startpage(gchandle)); 
- {$endif}
+ include(fstate,cs_inactive);
+ if not (pcs_dryrun in fpstate) and active then begin
+  exclude(fstate,cs_inactive);
+ end;   
+ if not (cs_inactive in fstate) then begin
+  include(fstate,cs_pagestarted);
+  {$ifdef mswindows}
+  checkprinterror(startpage(gchandle)); 
+  {$endif}
+ end;
  inherited;
 end;
 
 procedure tgdiprintcanvas.endpage;
 begin
  inherited;
- {$ifdef mswindows}
- checkprinterror(windows.endpage(gchandle)); 
- {$endif}
+ if not (cs_inactive in fstate) and (cs_pagestarted in fstate) then begin
+  exclude(fstate,cs_pagestarted);
+  {$ifdef mswindows}
+  checkprinterror(windows.endpage(gchandle)); 
+  {$endif}
+ end;
 end;
 
 procedure tgdiprintcanvas.checkgcstate(state: canvasstatesty);
@@ -185,6 +196,7 @@ begin
   mstr1:= fprintername;
  end;
  with tgdiprintcanvas(sender) do begin
+  exclude(fstate,cs_pagestarted);
   fillchar(gc1,sizeof(gc1),0);
   guierror(gui_creategc(0,gck_printer,gc1,mstr1),'for "'+mstr1+'"');
   checkprinterror(setgraphicsmode(gc1.handle,gm_advanced));
@@ -196,16 +208,29 @@ begin
  end;
 end;
 
-procedure tgdiprinter.beginprint;
+procedure tgdiprinter.beginprint(const adryrun: boolean = false);
 var
  info: tdocinfow;
 begin
  checkgdiprint;
- fillchar(info,sizeof(info),0);
- info.cbsize:= sizeof(info);
- info.lpszdocname:= pwidechar(fcanvas.title);
- checkprinterror(startdocw(fcanvas.gchandle,@info),
-          'Can not start print job for "'+fcanvas.title+'".');
+ endprint;
+ with tgdiprintcanvas(fcanvas) do begin
+  if adryrun then begin
+   include(fpstate,pcs_dryrun)
+  end
+  else begin
+   exclude(fpstate,pcs_dryrun);
+  end;
+  initprinting;
+  if not (pcs_dryrun in fpstate) then begin
+   fillchar(info,sizeof(info),0);
+   info.cbsize:= sizeof(info);
+   info.lpszdocname:= pwidechar(fcanvas.title);
+   checkprinterror(startdocw(fcanvas.gchandle,@info),
+            'Can not start print job for "'+fcanvas.title+'".');
+   beginpage;
+  end;
+ end;
 end;
 
 function defaultprinter: msestring;
@@ -241,14 +266,20 @@ end;
 
 procedure tgdiprinter.endprint;
 begin
+ checkgdiprint;
  with tgdiprintcanvas(fcanvas) do begin
   if fdrawinfo.gc.handle <> 0 then begin
-  {$ifdef mswindows}
-   endpage;
-   enddoc(gchandle);
-  {$endif}
    try
-    unlink;
+    try
+    {$ifdef mswindows}
+     endpage;
+     if not (pcs_dryrun in fpstate) then begin
+      enddoc(gchandle);
+     end;
+    {$endif}
+    finally
+     unlink;
+    end;
    except
    end;
   end;

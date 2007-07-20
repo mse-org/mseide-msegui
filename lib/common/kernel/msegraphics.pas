@@ -337,7 +337,7 @@ type
    cs_dashes,cs_linewidth,cs_capstyle,cs_joinstyle,
    cs_fonthandle,cs_font,cs_fontcolor,cs_fontcolorbackground,cs_fontcolorshadow,
    cs_rasterop,cs_brush,cs_brushorigin,
-   cs_painted,cs_internaldrawtext{,cs_monochrome});
+   cs_painted,cs_internaldrawtext,cs_inactive,cs_pagestarted{,cs_monochrome});
  canvasstatesty = set of canvasstatety;
 
 const
@@ -3639,6 +3639,7 @@ procedure tcanvas.copyarea(asource: tcanvas; const asourcerect: rectty;
                            atransparentcolor: colorty = cl_default;
                            atransparency: colorty = cl_none);
 begin
+ if cs_inactive in fstate then exit;
  internalcopyarea(asource,asourcerect,makerect(adestpoint,asourcerect.size),
               acopymode,atransparentcolor,nil,[],nullpoint,atransparency);
 end;
@@ -3649,6 +3650,7 @@ var
  int1,int2: integer;
  pointar: pointarty;
 begin
+ if cs_inactive in fstate then exit;
  if checkforeground(acolor,true) then begin
   with fdrawinfo.points do begin
    int1:= length(apoints) - first;
@@ -3679,6 +3681,7 @@ end;
 
 procedure tcanvas.drawpoint(const point: pointty; const acolor: colorty = cl_default);
 begin
+ if cs_inactive in fstate then exit;
  drawpoints(point,acolor,0,1);
 end;
 
@@ -3689,6 +3692,7 @@ procedure tcanvas.drawlines(const apoints: array of pointty; const aclosed: bool
 var
  int1: integer;
 begin
+ if cs_inactive in fstate then exit;
  if checkforeground(acolor,true) then begin
   with fdrawinfo.points do begin
    closed:= aclosed;
@@ -3713,6 +3717,7 @@ end;
 
 procedure tcanvas.drawrect(const arect: rectty; const acolor: colorty = cl_default);
 begin
+ if cs_inactive in fstate then exit;
  with arect do begin
   drawlines([pos,makepoint(x+cx,y),makepoint(x+cx,y+cy),makepoint(x,y+cy)],
                           true,acolor);
@@ -3724,6 +3729,7 @@ procedure tcanvas.drawcross(const arect: rectty; const acolor: colorty = cl_defa
 var
  ar1: segmentarty;
 begin
+ if cs_inactive in fstate then exit;
  if (arect.cx > 0) and (arect.cy > 0) then begin
   setlength(ar1,2);
   with arect do begin
@@ -3746,6 +3752,7 @@ end;
 procedure tcanvas.drawlinesegments(const apoints: array of segmentty;
                const acolor: colorty = cl_default);
 begin
+ if cs_inactive in fstate then exit;
  if (high(apoints) >= 0) and checkforeground(acolor,true) then begin
   with fdrawinfo.points do begin
    points:= @apoints[0];
@@ -3758,6 +3765,7 @@ end;
 procedure tcanvas.drawline(const startpoint,endpoint: pointty;
           const acolor: colorty = cl_default);
 begin
+ if cs_inactive in fstate then exit;
  drawlinesegments([segment(startpoint,endpoint)],acolor);
 end;
 
@@ -3767,6 +3775,7 @@ procedure tcanvas.drawvect(const startpoint: pointty; const direction: graphicdi
 var
  endpoint1: pointty;
 begin
+ if cs_inactive in fstate then exit;
  endpoint1:= startpoint;
  case direction of
   gd_right: inc(endpoint1.x,length);
@@ -3787,12 +3796,14 @@ procedure tcanvas.drawvect(const startpoint: pointty; const direction: graphicdi
 var
  po1: pointty;
 begin
+ if cs_inactive in fstate then exit;
  drawvect(startpoint,direction,length,po1,acolor);
 end;
 
 procedure tcanvas.drawellipse(const def: rectty; const acolor: colorty = cl_default);
                              //def.pos = center, def.cx = width, def.cy = height
 begin
+ if cs_inactive in fstate then exit;
  if checkforeground(acolor,true) then begin
   fdrawinfo.rect.rect:= @def;
   gdi(gdi_drawellipse);
@@ -3802,6 +3813,7 @@ end;
 procedure tcanvas.drawarc(const def: rectty; const startang,extentang: real; 
                               const acolor: colorty = cl_default);
 begin
+ if cs_inactive in fstate then exit;
  if checkforeground(acolor,true) then begin
   fdrawinfo.arc.rect:= @def;
   fdrawinfo.arc.startang:= startang;
@@ -3813,6 +3825,7 @@ end;
 procedure tcanvas.fillrect(const arect: rectty; const acolor: colorty = cl_default;
                            const linecolor: colorty = cl_none);
 begin
+ if cs_inactive in fstate then exit;
  if checkforeground(acolor,false) then begin
   with fdrawinfo.rect do begin
    rect:= @arect;
@@ -3827,6 +3840,7 @@ end;
 procedure tcanvas.fillellipse(const def: rectty; const acolor: colorty = cl_default;
                               const linecolor: colorty = cl_none);
 begin
+ if cs_inactive in fstate then exit;
  if checkforeground(acolor,false) then begin
   with fdrawinfo.rect do begin
    rect:= @def;
@@ -3842,6 +3856,7 @@ procedure tcanvas.fillarc(const def: rectty; const startang: real;
                           const extentang: real; const acolor: colorty;
                           const pieslice: boolean);
 begin
+ if cs_inactive in fstate then exit;
  if checkforeground(acolor,false) then begin
   fdrawinfo.arc.rect:= @def;
   fdrawinfo.arc.startang:= startang;
@@ -3870,6 +3885,7 @@ procedure tcanvas.fillarcchord(const def: rectty; const startang: real;
 var
  startpo,endpo: pointty;
 begin
+ if cs_inactive in fstate then exit;
  fillarc(def,startang,extentang,acolor,false);
  if (linecolor <> cl_none) then begin
   getarcinfo(startpo,endpo);
@@ -3884,6 +3900,7 @@ procedure tcanvas.fillarcpieslice(const def: rectty; const startang: real;
 var
  startpo,endpo: pointty;
 begin
+ if cs_inactive in fstate then exit;
  fillarc(def,startang,extentang,acolor,true);
  if (linecolor <> cl_none) then begin
   getarcinfo(startpo,endpo);
@@ -3896,6 +3913,7 @@ procedure tcanvas.fillpolygon(const apoints: array of pointty;
                               const acolor: colorty = cl_default; 
                               const linecolor: colorty = cl_none);
 begin
+ if cs_inactive in fstate then exit;
  if checkforeground(acolor,false) then begin
   with fdrawinfo.points do begin
    points:= @apoints;
@@ -3907,24 +3925,7 @@ begin
   drawlines(apoints,true,linecolor);
  end;
 end;
-{
-procedure tcanvas.checkfont(afont: tfont; grayedmode: integer);
-begin
-end;
-}
-{
-procedure tcanvas.drawstring(const atext: string; const apos: pointty;
-                 const afont: tfont = nil);
-begin
- checkfont(afont);
- with fdrawinfo.textpos do begin
-  pos:= @apos;
-  text:= pointer(atext);
-  count:= length(text);
- end;
- mseguiintf.drawstring(fdrawinfo);
-end;
-}
+
 procedure tcanvas.drawstring(const atext: pmsechar; const acount: integer;
                         const apos: pointty;
                         const afont: tfont = nil; const grayed: boolean = false;
@@ -3936,6 +3937,7 @@ var
  font1: tfont;
  ev1: notifyeventty;
 begin
+ if cs_inactive in fstate then exit;
  with fdrawinfo do begin
   if afont <> nil then begin //foreign font
    font1:= afont;
@@ -4001,6 +4003,7 @@ procedure tcanvas.drawstring(const atext: msestring; const apos: pointty;
                  const afont: tfont = nil; const grayed: boolean = false;
                  const arotation: real = 0);
 begin
+ if cs_inactive in fstate then exit;
  drawstring(pointer(atext),length(atext),apos,afont,grayed,arotation);
 end;
 
@@ -4064,60 +4067,39 @@ procedure tcanvas.drawframe(const arect: rectty; awidth: integer;
                                  const acolor: colorty);
 var
  rect1,rect2: rectty;
-// po1: pointty;
-// xw,yh: integer;
 begin
+ if cs_inactive in fstate then exit;
  if acolor <> cl_transparent then begin
- {
-  if awidth = -1 then begin
-   xw:= arect.x + arect.cx - 1;
-   yh:= arect.y + arect.cy - 1;
-   drawlines([arect.pos,makepoint(xw,arect.y),makepoint(xw,yh),
-          makepoint(arect.x,yh),arect.pos],acolor);
-  end
-  else begin
-   if awidth = 1 then begin
-    xw:= arect.x + arect.cx;
-    yh:= arect.y + arect.cy;
-    po1.x:= arect.x - 1;
-    po1.y:= arect.y - 1;
-    drawlines([po1,makepoint(xw,po1.y),makepoint(xw,yh),
-            makepoint(po1.x,yh),po1],acolor);
+  if awidth <> 0 then begin
+   if awidth < 0 then begin
+    rect2:= arect;
+    awidth:= - awidth;
    end
    else begin
-   }
-    if awidth <> 0 then begin
-     if awidth < 0 then begin
-      rect2:= arect;
-      awidth:= - awidth;
-     end
-     else begin
-      rect2.x:= arect.x - awidth;
-      rect2.y:= arect.y - awidth;
-      rect2.cx:= arect.cx + awidth + awidth;
-      rect2.cy:= arect.cy + awidth + awidth;
+    rect2.x:= arect.x - awidth;
+    rect2.y:= arect.y - awidth;
+    rect2.cx:= arect.cx + awidth + awidth;
+    rect2.cy:= arect.cy + awidth + awidth;
+   end;
+   if checkforeground(acolor,false) then begin
+    with fdrawinfo.rect do begin
+     rect:= @rect1;
+     with rect2 do begin
+      rect1.pos:= pos;
+      rect1.cx:= cx;
+      rect1.cy:= awidth;
+      gdi(gdi_fillrect); //top
+      rect1.pos.y:= y + cy - awidth;
+      gdi(gdi_fillrect); //bottom
+      rect1.pos.y:= y + awidth;
+      rect1.cy:= cy - awidth - awidth;
+      rect1.cx:= awidth;
+      gdi(gdi_fillrect); //left
+      rect1.pos.x:= x + cx - awidth;
+      gdi(gdi_fillrect); //right
      end;
-     if checkforeground(acolor,false) then begin
-      with fdrawinfo.rect do begin
-       rect:= @rect1;
-       with rect2 do begin
-        rect1.pos:= pos;
-        rect1.cx:= cx;
-        rect1.cy:= awidth;
-        gdi(gdi_fillrect); //top
-        rect1.pos.y:= y + cy - awidth;
-        gdi(gdi_fillrect); //bottom
-        rect1.pos.y:= y + awidth;
-        rect1.cy:= cy - awidth - awidth;
-        rect1.cx:= awidth;
-        gdi(gdi_fillrect); //left
-        rect1.pos.x:= x + cx - awidth;
-        gdi(gdi_fillrect); //right
-       end;
-      end;
-     end;{
     end;
-   end;   }
+   end;
   end;
  end;
 end;
@@ -4130,6 +4112,7 @@ var
  brushoriginbefore: pointty;
  int1: integer;
 begin
+ if cs_inactive in fstate then exit;
  int1:= -awidth*2;
  if (abs(arect.cx) < int1) or (abs(arect.cy) < int1) then begin
   fillxorrect(arect,abrush); //avoid xor overlap
@@ -4156,6 +4139,7 @@ end;
 procedure tcanvas.drawxorframe(const po1, po2: pointty; const awidth: integer = -1;
   const abrush: tsimplebitmap = nil);
 begin
+ if cs_inactive in fstate then exit;
  drawxorframe(makerect(po1,makesize(po2.x-po1.x,po2.y-po1.y)),awidth,abrush);
 end;
 
@@ -4165,6 +4149,7 @@ var
  brushbefore: tsimplebitmap;
  brushoriginbefore: pointty;
 begin
+ if cs_inactive in fstate then exit;
  rasteropbefore:= rasterop;
  rasterop:= rop_xor;
  if abrush = nil then begin
@@ -4378,15 +4363,7 @@ end;
 //
 // clip region functions
 //
-{
-function tcanvas.exchangeclipregion(newregion: regionty): regionty;
-begin
- checkregionstate;
- result:= fvaluepo^.clipregion;
- fvaluepo^.clipregion:= newregion;
- exclude(fstate,cs_clipregion);
-end;
-}
+
 procedure tcanvas.setclipregion(const Value: regionty);
 begin
  with fvaluepo^ do begin
@@ -4509,12 +4486,7 @@ begin
   end;
  end;
 end;
-{
-function tcanvas.getclipregion: regionty;
-begin
- result:= fvaluepo^.clipregion;
-end;
-}
+
 function tcanvas.getcolor: colorty;
 begin
  result:= fvaluepo^.color;

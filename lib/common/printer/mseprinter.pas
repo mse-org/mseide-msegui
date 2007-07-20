@@ -184,13 +184,15 @@ type
   published
    property printcommand: string read fprintcommand write fprintcommand;
  end;
-  
+
+ pageskindty = (pk_all,pk_even,pk_odd);
+ 
  pagerangety = record
   first,last: integer;
  end;
  pagerangearty = array of pagerangety;
 
- printercanvasstatety = (pcs_matrixvalid);
+ printercanvasstatety = (pcs_matrixvalid,pcs_dryrun);
  printercanvasstatesty = set of printercanvasstatety;
  
  tcustomprintercanvas = class(tcanvas)
@@ -204,6 +206,7 @@ type
    fpagechanging: integer;
    fpages: pagerangearty;
    fpagesstring: msestring;
+   fpageskind: pageskindty;
    procedure setcolorspace(const avalue: colorspacety);
    function getliney: integer;
    procedure setprintorientation(const avalue: pageorientationty);
@@ -247,11 +250,9 @@ type
    procedure setpagesstring(const avalue: msestring);
    procedure internaldrawtext(var info); override;
                        //info = drawtextinfoty
-   function dryrun: boolean; virtual;
   public
    constructor create(const user: tcustomprinter; const intf: icanvas);
    
-   procedure reset; override;
    
    // if cy of destrect = 0 and tf_ycentered in textflags -> place on baseline
    procedure drawtext(var info: drawtextinfoty); overload; virtual;
@@ -300,6 +301,8 @@ type
    property lastpage: integer read flastpage write flastpage default bigint;
                   //null based
                   }
+   property pageskind: pageskindty read fpageskind write fpageskind; 
+                   //null based
    property pages: pagerangearty read fpages write setpages;
                   //all if nil, null based
    property pagesstring: msestring read fpagesstring write setpagesstring;
@@ -321,7 +324,7 @@ type
  tstreamprintercanvas = class(tprintercanvas)
   protected
    fstream: ttextstream;  
-   function dryrun: boolean; override;
+   procedure reset; override;
    procedure streamwrite(const atext: string); //checks fstream = nil
    procedure streamwriteln(const atext: string); //checks fstream = nil
  end;
@@ -656,14 +659,6 @@ begin
  reset;
 end;
 
-procedure tcustomprintercanvas.reset;
-begin
- restore(1); //do not change the streamed values
- save;
- clipregion:= 0;
- origin:= nullpoint;
-end;
-
 procedure tcustomprintercanvas.updatescale;
 begin
  if not (csloading in fprinter.componentstate) then begin
@@ -793,10 +788,10 @@ var
 label
  endlab;
 begin
- ar1:= nil; //compiler warning
+ if cs_inactive in fstate then exit;
  save;
  layouttext(self,info,layoutinfo);
- if dryrun then begin
+ if pcs_dryrun in fpstate then begin
   goto endlab;
  end;
  ar1:= nil; //compiler warning
@@ -1140,6 +1135,9 @@ begin
    end;
   end;
  end;
+ if result then begin
+  result:= (fpageskind = pk_all) or ((fpageskind = pk_even) xor odd(fpagenumber));
+ end;
 end;
 
 function tcustomprintercanvas.liney1: integer;
@@ -1189,11 +1187,6 @@ end;
 procedure tcustomprintercanvas.internaldrawtext(var info);
 begin
  drawtext(drawtextinfoty(info));
-end;
-
-function tcustomprintercanvas.dryrun: boolean;
-begin
- result:= false;
 end;
 
 { tprintervalueselector }
@@ -1342,9 +1335,17 @@ end;
 procedure tstreamprinter.beginprint(const astream: ttextstream;
                                           const apreamble: string = '');
 begin
- endprint;
- setstream(astream);
- fcanvas.initprinting(apreamble);
+ with tstreamprintercanvas(fcanvas) do begin
+  if astream = nil then begin
+   include(fpstate,pcs_dryrun);
+  end
+  else begin
+   exclude(fpstate,pcs_dryrun);
+  end;
+  endprint;
+  setstream(astream);
+  initprinting(apreamble);
+ end;
 end;
 
 procedure tstreamprinter.endprint;
@@ -1382,9 +1383,12 @@ end;
 
 { tstreamprintercanvas }
 
-function tstreamprintercanvas.dryrun: boolean;
+procedure tstreamprintercanvas.reset;
 begin
- result:= fstream = nil
+ restore(1); //do not change the streamed values
+ save;
+ clipregion:= 0;
+ origin:= nullpoint;
 end;
 
 procedure tstreamprintercanvas.streamwrite(const atext: string);
