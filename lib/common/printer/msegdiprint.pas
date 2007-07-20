@@ -247,7 +247,7 @@ begin
 end;
 
 {$else}
-procedure tgdiprinter.beginprint;
+procedure tgdiprinter.beginprint(const adryrun: boolean = false);
 begin
  checkgdiprint;
 end;
