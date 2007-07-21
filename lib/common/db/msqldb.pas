@@ -1220,14 +1220,20 @@ end;
 Procedure TSQLTransaction.SetDatabase(Value : TDatabase);
 
 begin
-  If Value<>Database then
-    begin
-    CheckInactive;
-    If Assigned(Database) then
-      with Database as tcustomsqlconnection do
-        if Transaction = self then Transaction := nil;
-    inherited SetDatabase(Value);
+ If Value <> Database then begin
+  CheckInactive;
+  If Assigned(Database) then begin
+   with Database as tcustomsqlconnection do begin
+    if ftrans <> nil then begin
+     finalizetransaction(ftrans);
     end;
+    if Transaction = self then begin 
+     Transaction:= nil;
+    end;
+   end; 
+  end;
+  inherited SetDatabase(Value);
+ end;
 end;
 
 function tsqltransaction.getdatabase: tcustomsqlconnection;
