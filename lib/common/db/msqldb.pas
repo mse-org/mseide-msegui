@@ -101,7 +101,8 @@ type
    procedure reopends;
   protected
     FConnOptions: sqlconnoptionsty;
- 
+   
+   procedure finalizetransaction(const atransaction: tsqlhandle); virtual; 
    procedure setconnected(const avalue: boolean);
    procedure notification(acomponent: tcomponent; operation: toperation); override;
    
@@ -868,6 +869,13 @@ begin
      end;
     end;
     Closetransactions;
+    for int1:= 0 to transactioncount - 1 do begin
+     with tsqltransaction(transactions[int1]) do begin
+      if ftrans <> nil then begin
+       finalizetransaction(ftrans);
+      end;
+     end;
+    end;
     DoInternalDisConnect;
     if csloading in ComponentState then begin
      FOpenAfterRead := false;
@@ -1044,6 +1052,11 @@ begin
  end;
 end;
 
+procedure tcustomsqlconnection.finalizetransaction(const atransaction: tsqlhandle);
+begin
+ //dummy
+end;
+
 { TSQLTransaction }
 
 constructor TSQLTransaction.Create(AOwner : TComponent);
@@ -1063,6 +1076,7 @@ begin
  end;
  FreeAndNil(FParams);
  inherited Destroy;
+ freeandnil(ftrans);
 end;
 
 procedure TSQLTransaction.StartTransaction;
@@ -1127,7 +1141,7 @@ begin
   closedatasets;
   if (tao_fake in foptions) or tcustomsqlconnection(database).commit(FTrans) then begin
    closeTrans;
-   FreeAndNil(FTrans);
+//   FreeAndNil(FTrans);
   end;
   if checkcanevent(self,tmethod(fonaftercommit)) then begin
    fonaftercommit(self);
@@ -1159,7 +1173,7 @@ begin
   closedatasets;
   if (tao_fake in foptions) or tcustomsqlconnection(database).RollBack(FTrans) then begin
    CloseTrans;
-   FreeAndNil(FTrans);
+//   FreeAndNil(FTrans);
   end;
   if checkcanevent(self,tmethod(fonafterrollback)) then begin
    fonafterrollback(self);

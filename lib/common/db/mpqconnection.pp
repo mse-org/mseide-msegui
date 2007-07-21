@@ -55,10 +55,19 @@ type
    FHandle: ppgconn;
    FIntegerDateTimes    : boolean;
    feventcontroller: tdbeventcontroller;
+   ftransactionconnectionused: boolean;
    function TranslateFldType(Type_Oid : integer) : TFieldType;
    function geteventinterval: integer;
    procedure seteventinterval(const avalue: integer);
+   procedure closeconnection(var aconnection: ppgconn);
+   procedure openconnection(var aconnection: ppgconn);
+   procedure begintrans(const aconnection: ppgconn);
   protected
+   procedure checkerror(const aconnection: ppgconn; const ares: ppgresult;
+                const amessage: ansistring);
+   procedure checkexec(const aconnection: ppgconn; const asql: ansistring;
+                const amessage: ansistring);
+   procedure finalizetransaction(const atransaction: tsqlhandle); override; 
    procedure DoInternalConnect; override;
    procedure DoInternalDisconnect; override;
    function GetHandle : pointer; override;
@@ -67,7 +76,9 @@ type
    Procedure DeAllocateCursorHandle(var cursor : TSQLCursor); override;
    Function AllocateTransactionHandle : TSQLHandle; override;
 
-   procedure PrepareStatement(cursor: TSQLCursor;ATransaction : TSQLTransaction;buf : string; AParams : TParams); override;
+   procedure PrepareStatement(cursor: TSQLCursor;
+              ATransaction : TSQLTransaction; buf: string;
+              AParams : TParams); override;
    procedure FreeFldBuffers(cursor : TSQLCursor); override;
    procedure Execute(const cursor: TSQLCursor; const atransaction: tsqltransaction;
                                    const AParams : TParams); override;
@@ -203,147 +214,83 @@ begin
   Result := trans;
 end;
 
-function TPQConnection.RollBack(trans : TSQLHandle) : boolean;
-var
-  res : PPGresult;
-  tr  : TPQTrans;
+procedure TPQConnection.checkerror(const aconnection: ppgconn;
+         const ares: ppgresult; const amessage: ansistring);
 begin
-  result := false;
-
-  tr := trans as TPQTrans;
-
-//  res := PQexec(tr.PGConn, 'ROLLBACK');
-  res:= PQexec(tr.fconn, 'ROLLBACK');
-  if (PQresultStatus(res) <> PGRES_COMMAND_OK) then
-    begin
-    PQclear(res);
-    result := false;
-    DatabaseError(SErrRollbackFailed + ' (PostgreSQL: ' + 
-            PQerrorMessage(tr.fconn) + ')',self);
-    end
-  else
-    begin
-    PQclear(res);
-    PQFinish(tr.fconn);
-    result := true;
-    end;
+ if (PQresultStatus(ares) <> PGRES_COMMAND_OK) then begin
+  PQclear(ares);
+  DatabaseError(amessage + ' (PostgreSQL: ' + 
+                          PQerrorMessage(aconnection) + ')',self);
+ end
+ else begin
+  PQclear(ares);
+ end;
 end;
 
-function TPQConnection.Commit(trans : TSQLHandle) : boolean;
-var
-  res : PPGresult;
-  tr  : TPQTrans;
+procedure tpqconnection.checkexec(const aconnection: ppgconn; const asql: ansistring;
+                const amessage: ansistring);
 begin
-  result := false;
+ checkerror(aconnection,pqexec(aconnection,pchar(asql)),amessage);
+end;
 
-  tr := trans as TPQTrans;
-
-  res := PQexec(tr.fconn, 'COMMIT');
-  if (PQresultStatus(res) <> PGRES_COMMAND_OK) then
-    begin
-    PQclear(res);
-    result := false;
-    DatabaseError(SErrCommitFailed + 
-    ' (PostgreSQL: ' + PQerrorMessage(tr.fconn) + ')',self);
-    end
-  else
-    begin
-    PQclear(res);
-    PQFinish(tr.fconn);
-    result := true;
-    end;
+procedure tpqconnection.begintrans(const aconnection: ppgconn);
+begin
+ checkexec(aconnection,'BEGIN',sErrTransactionFailed);
 end;
 
 function TPQConnection.StartdbTransaction(const trans : TSQLHandle;
                const AParams : string) : boolean;
-var
-  res : PPGresult;
-  tr  : TPQTrans;
-  msg : string;             //opens a connection for every transaction!
 begin
- result := false;
- tr := trans as TPQTrans;
- tr.fconn := PQconnectdb(pchar(FConnectString));
- if (PQstatus(tr.fconn) = CONNECTION_BAD) then begin
-  PQFinish(tr.fconn);
-  DatabaseError(SErrConnectionFailed + ' (PostgreSQL: ' + 
-           PQerrorMessage(tr.fconn) + ')',self);
- end
- else begin
-//  tr.ErrorOccured:= False;
-  result := true;
-  res := PQexec(tr.fconn, 'BEGIN');
-  if (PQresultStatus(res) <> PGRES_COMMAND_OK) then begin
-   result := false;
-   PQclear(res);
-   msg := PQerrorMessage(tr.fconn);
-   PQFinish(tr.fconn);
-   DatabaseError(sErrTransactionFailed + ' (PostgreSQL: ' + msg + ')',self);
-  end
-  else begin
-   PQclear(res);
+ with tpqtrans(trans) do begin
+  if fconn = nil then begin
+   if not ftransactionconnectionused then begin
+    fconn:= self.fhandle;
+    ftransactionconnectionused:= true;
+   end
+   else begin
+    openconnection(fconn);
+   end;  
   end;
+  begintrans(fconn);
  end;
+ result:= true;
+end;
+
+function TPQConnection.RollBack(trans : TSQLHandle) : boolean;
+begin
+ checkexec(tpqtrans(trans).fconn,'ROLLBACK',SErrRollbackFailed);
+ result := true;
+end;
+
+function TPQConnection.Commit(trans : TSQLHandle) : boolean;
+begin
+ checkexec(tpqtrans(trans).fconn,'COMMIT',SErrCommitFailed);
+ result:= true;
 end;
 
 procedure TPQConnection.internalRollBackRetaining(trans : TSQLHandle);
-var
-  res : PPGresult;
-  tr  : TPQTrans;
-  msg : string;
 begin
-  tr := trans as TPQTrans;
-  res := PQexec(tr.fconn, 'ROLLBACK');
-  if (PQresultStatus(res) <> PGRES_COMMAND_OK) then
-    begin
-    PQclear(res);
-    DatabaseError(SErrRollbackFailed + ' (PostgreSQL: ' + 
-             PQerrorMessage(tr.fconn) + ')',self);
-    end
-  else
-    begin
-    PQclear(res);
-    res := PQexec(tr.fconn, 'BEGIN');
-    if (PQresultStatus(res) <> PGRES_COMMAND_OK) then
-      begin
-      PQclear(res);
-      msg := PQerrorMessage(tr.fconn);
-      PQFinish(tr.fconn);
-      DatabaseError(sErrTransactionFailed + ' (PostgreSQL: ' + msg + ')',self);
-      end
-    else
-      PQclear(res);
-    end;
+ checkexec(tpqtrans(trans).fconn,'ROLLBACK',SErrRollbackFailed);
+ begintrans(tpqtrans(trans).fconn);
 end;
 
 procedure TPQConnection.internalCommitRetaining(trans : TSQLHandle);
-var
-  res : PPGresult;
-  tr  : TPQTrans;
-  msg : string;
 begin
-  tr := trans as TPQTrans;
-  res := PQexec(tr.fconn, 'COMMIT');
-  if (PQresultStatus(res) <> PGRES_COMMAND_OK) then
-    begin
-    PQclear(res);
-    DatabaseError(SErrCommitFailed + ' (PostgreSQL: ' + 
-             PQerrorMessage(tr.fconn) + ')',self);
-    end
-  else
-    begin
-    PQclear(res);
-    res := PQexec(tr.fconn, 'BEGIN');
-    if (PQresultStatus(res) <> PGRES_COMMAND_OK) then
-      begin
-      PQclear(res);
-      msg := PQerrorMessage(tr.fconn);
-      PQFinish(tr.fconn);
-      DatabaseError(sErrTransactionFailed + ' (PostgreSQL: ' + msg + ')',self);
-      end
-    else
-      PQclear(res);
-    end;
+ checkexec(tpqtrans(trans).fconn,'COMMIT',SErrCommitFailed);
+ begintrans(tpqtrans(trans).fconn);
+end;
+
+procedure TPQConnection.openconnection(var aconnection: ppgconn);
+var
+ msg: ansistring;
+begin
+ aconnection:= PQconnectdb(pchar(FConnectString));
+ if (PQstatus(FHandle) = CONNECTION_BAD) then begin
+  msg:= PQerrorMessage(aconnection);
+  pqfinish(aconnection);
+  aconnection:= nil;
+  DatabaseError(sErrConnectionFailed + ' (PostgreSQL: ' + msg + ')',self);
+ end;
 end;
 
 
@@ -356,7 +303,7 @@ begin
 {$IfDef LinkDynamically}
  InitialisePostgres3;
 {$EndIf}
-
+ ftransactionconnectionused:= false;
  inherited dointernalconnect;
 
  FConnectString := '';
@@ -366,13 +313,7 @@ begin
  if (DatabaseName <> '') then FConnectString := FConnectString + ' dbname=''' + DatabaseName + '''';
  if (Params.Text <> '') then FConnectString := FConnectString + ' '+Params.Text;
 
- FHandle:= PQconnectdb(pchar(FConnectString));
-
- if (PQstatus(FHandle) = CONNECTION_BAD) then begin
-  msg := PQerrorMessage(FHandle);
-  dointernaldisconnect;
-  DatabaseError(sErrConnectionFailed + ' (PostgreSQL: ' + msg + ')',self);
- end;
+ openconnection(fhandle);
 // This does only work for pg>=8.0, so timestamps won't work with earlier versions of pg which are compiled with integer_datetimes on
  FIntegerDatetimes := pqparameterstatus(FHandle,'integer_datetimes') = 'on';
  with tdatabasecracker(self) do begin
@@ -388,7 +329,7 @@ var
  int1: integer;
 begin
  feventcontroller.disconnect;
- PQfinish(FHandle);
+ closeconnection(fhandle);
 {$IfDef LinkDynamically}
  ReleasePostgres3;
 {$EndIf}
@@ -1070,6 +1011,23 @@ end;
 function TPQConnection.getnumboolean: boolean;
 begin
  result:= false;
+end;
+
+procedure TPQConnection.closeconnection(var aconnection: ppgconn);
+begin
+ if aconnection <> nil then begin
+  PQfinish(aconnection);
+  aconnection:= nil;
+ end;  
+end;
+
+procedure TPQConnection.finalizetransaction(const atransaction: tsqlhandle);
+begin
+ with tpqtrans(atransaction) do begin
+  if (fconn <> fhandle) then begin
+   closeconnection(fconn);
+  end;
+ end;
 end;
 
 {
