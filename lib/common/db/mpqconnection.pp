@@ -30,17 +30,20 @@ uses
 type
   TPQTrans = Class(TSQLHandle)
     protected
-    PGConn        : PPGConn;
-    ErrorOccured  : boolean;
+     fconn        : PPGConn;
+//    ErrorOccured  : boolean;
   end;
 
   TPQCursor = Class(TSQLCursor)
-    protected
+   protected
     Statement : string;
     tr        : TPQTrans;
     res       : PPGresult;
     CurTuple  : integer;
     Nr        : string;
+    fopen: boolean;
+   public
+    procedure close; override;
   end;
 
  dbeventarty = array of tdbevent;
@@ -49,7 +52,7 @@ type
   private
    FCursorCount         : word;
    FConnectString       : string;
-   FSQLDatabaseHandle   : pointer;
+   FHandle: ppgconn;
    FIntegerDateTimes    : boolean;
    feventcontroller: tdbeventcontroller;
    function TranslateFldType(Type_Oid : integer) : TFieldType;
@@ -78,7 +81,8 @@ type
    function RollBack(trans : TSQLHandle) : boolean; override;
    function Commit(trans : TSQLHandle) : boolean; override;
    procedure internalCommitRetaining(trans : TSQLHandle); override;
-   function StartdbTransaction(trans : TSQLHandle; AParams : string) : boolean; override;
+   function StartdbTransaction(const trans : TSQLHandle;
+                const AParams : string) : boolean; override;
    procedure internalRollBackRetaining(trans : TSQLHandle); override;
    procedure UpdateIndexDefs(var IndexDefs : TIndexDefs;
                                  const TableName : string); override;
@@ -167,6 +171,17 @@ type
   private
     FConnected : Boolean;
   end;
+
+{ TPQCursor }
+
+procedure TPQCursor.close;
+begin
+ inherited;
+ if fopen then begin
+  fopen:= false;
+  pqclear(res);
+ end;
+end;
   
 { tpqconnection }
   
@@ -197,17 +212,19 @@ begin
 
   tr := trans as TPQTrans;
 
-  res := PQexec(tr.PGConn, 'ROLLBACK');
+//  res := PQexec(tr.PGConn, 'ROLLBACK');
+  res:= PQexec(tr.fconn, 'ROLLBACK');
   if (PQresultStatus(res) <> PGRES_COMMAND_OK) then
     begin
     PQclear(res);
     result := false;
-    DatabaseError(SErrRollbackFailed + ' (PostgreSQL: ' + PQerrorMessage(tr.PGConn) + ')',self);
+    DatabaseError(SErrRollbackFailed + ' (PostgreSQL: ' + 
+            PQerrorMessage(tr.fconn) + ')',self);
     end
   else
     begin
     PQclear(res);
-    PQFinish(tr.PGConn);
+    PQFinish(tr.fconn);
     result := true;
     end;
 end;
@@ -221,57 +238,52 @@ begin
 
   tr := trans as TPQTrans;
 
-  res := PQexec(tr.PGConn, 'COMMIT');
+  res := PQexec(tr.fconn, 'COMMIT');
   if (PQresultStatus(res) <> PGRES_COMMAND_OK) then
     begin
     PQclear(res);
     result := false;
-    DatabaseError(SErrCommitFailed + ' (PostgreSQL: ' + PQerrorMessage(tr.PGConn) + ')',self);
+    DatabaseError(SErrCommitFailed + 
+    ' (PostgreSQL: ' + PQerrorMessage(tr.fconn) + ')',self);
     end
   else
     begin
     PQclear(res);
-    PQFinish(tr.PGConn);
+    PQFinish(tr.fconn);
     result := true;
     end;
 end;
 
-function TPQConnection.StartdbTransaction(trans : TSQLHandle; AParams : string) : boolean;
+function TPQConnection.StartdbTransaction(const trans : TSQLHandle;
+               const AParams : string) : boolean;
 var
   res : PPGresult;
   tr  : TPQTrans;
-  msg : string;
+  msg : string;             //opens a connection for every transaction!
 begin
-  result := false;
-
-  tr := trans as TPQTrans;
-
-  tr.PGConn := PQconnectdb(pchar(FConnectString));
-
-  if (PQstatus(tr.PGConn) = CONNECTION_BAD) then
-    begin
-    result := false;
-    PQFinish(tr.PGConn);
-    DatabaseError(SErrConnectionFailed + ' (PostgreSQL: ' + PQerrorMessage(tr.PGConn) + ')',self);
-    end
-  else
-    begin
-    tr.ErrorOccured := False;
-    res := PQexec(tr.PGConn, 'BEGIN');
-    if (PQresultStatus(res) <> PGRES_COMMAND_OK) then
-      begin
-      result := false;
-      PQclear(res);
-      msg := PQerrorMessage(tr.PGConn);
-      PQFinish(tr.PGConn);
-      DatabaseError(sErrTransactionFailed + ' (PostgreSQL: ' + msg + ')',self);
-      end
-    else
-      begin
-      PQclear(res);
-      result := true;
-      end;
-    end;
+ result := false;
+ tr := trans as TPQTrans;
+ tr.fconn := PQconnectdb(pchar(FConnectString));
+ if (PQstatus(tr.fconn) = CONNECTION_BAD) then begin
+  PQFinish(tr.fconn);
+  DatabaseError(SErrConnectionFailed + ' (PostgreSQL: ' + 
+           PQerrorMessage(tr.fconn) + ')',self);
+ end
+ else begin
+//  tr.ErrorOccured:= False;
+  result := true;
+  res := PQexec(tr.fconn, 'BEGIN');
+  if (PQresultStatus(res) <> PGRES_COMMAND_OK) then begin
+   result := false;
+   PQclear(res);
+   msg := PQerrorMessage(tr.fconn);
+   PQFinish(tr.fconn);
+   DatabaseError(sErrTransactionFailed + ' (PostgreSQL: ' + msg + ')',self);
+  end
+  else begin
+   PQclear(res);
+  end;
+ end;
 end;
 
 procedure TPQConnection.internalRollBackRetaining(trans : TSQLHandle);
@@ -281,21 +293,22 @@ var
   msg : string;
 begin
   tr := trans as TPQTrans;
-  res := PQexec(tr.PGConn, 'ROLLBACK');
+  res := PQexec(tr.fconn, 'ROLLBACK');
   if (PQresultStatus(res) <> PGRES_COMMAND_OK) then
     begin
     PQclear(res);
-    DatabaseError(SErrRollbackFailed + ' (PostgreSQL: ' + PQerrorMessage(tr.PGConn) + ')',self);
+    DatabaseError(SErrRollbackFailed + ' (PostgreSQL: ' + 
+             PQerrorMessage(tr.fconn) + ')',self);
     end
   else
     begin
     PQclear(res);
-    res := PQexec(tr.PGConn, 'BEGIN');
+    res := PQexec(tr.fconn, 'BEGIN');
     if (PQresultStatus(res) <> PGRES_COMMAND_OK) then
       begin
       PQclear(res);
-      msg := PQerrorMessage(tr.PGConn);
-      PQFinish(tr.PGConn);
+      msg := PQerrorMessage(tr.fconn);
+      PQFinish(tr.fconn);
       DatabaseError(sErrTransactionFailed + ' (PostgreSQL: ' + msg + ')',self);
       end
     else
@@ -310,21 +323,22 @@ var
   msg : string;
 begin
   tr := trans as TPQTrans;
-  res := PQexec(tr.PGConn, 'COMMIT');
+  res := PQexec(tr.fconn, 'COMMIT');
   if (PQresultStatus(res) <> PGRES_COMMAND_OK) then
     begin
     PQclear(res);
-    DatabaseError(SErrCommitFailed + ' (PostgreSQL: ' + PQerrorMessage(tr.PGConn) + ')',self);
+    DatabaseError(SErrCommitFailed + ' (PostgreSQL: ' + 
+             PQerrorMessage(tr.fconn) + ')',self);
     end
   else
     begin
     PQclear(res);
-    res := PQexec(tr.PGConn, 'BEGIN');
+    res := PQexec(tr.fconn, 'BEGIN');
     if (PQresultStatus(res) <> PGRES_COMMAND_OK) then
       begin
       PQclear(res);
-      msg := PQerrorMessage(tr.PGConn);
-      PQFinish(tr.PGConn);
+      msg := PQerrorMessage(tr.fconn);
+      PQFinish(tr.fconn);
       DatabaseError(sErrTransactionFailed + ' (PostgreSQL: ' + msg + ')',self);
       end
     else
@@ -352,15 +366,15 @@ begin
  if (DatabaseName <> '') then FConnectString := FConnectString + ' dbname=''' + DatabaseName + '''';
  if (Params.Text <> '') then FConnectString := FConnectString + ' '+Params.Text;
 
- FSQLDatabaseHandle := PQconnectdb(pchar(FConnectString));
+ FHandle:= PQconnectdb(pchar(FConnectString));
 
- if (PQstatus(FSQLDatabaseHandle) = CONNECTION_BAD) then begin
-  msg := PQerrorMessage(FSQLDatabaseHandle);
+ if (PQstatus(FHandle) = CONNECTION_BAD) then begin
+  msg := PQerrorMessage(FHandle);
   dointernaldisconnect;
   DatabaseError(sErrConnectionFailed + ' (PostgreSQL: ' + msg + ')',self);
  end;
 // This does only work for pg>=8.0, so timestamps won't work with earlier versions of pg which are compiled with integer_datetimes on
- FIntegerDatetimes := pqparameterstatus(FSQLDatabaseHandle,'integer_datetimes') = 'on';
+ FIntegerDatetimes := pqparameterstatus(FHandle,'integer_datetimes') = 'on';
  with tdatabasecracker(self) do begin
   bo1:= fconnected;
   fconnected:= true;
@@ -374,7 +388,7 @@ var
  int1: integer;
 begin
  feventcontroller.disconnect;
- PQfinish(FSQLDatabaseHandle);
+ PQfinish(FHandle);
 {$IfDef LinkDynamically}
  ReleasePostgres3;
 {$EndIf}
@@ -513,11 +527,12 @@ begin
        {$endif}
       end;
       s:= s + ' as ' + buf;
-      res := pqexec(tr.PGConn,pchar(s));
+      res := pqexec(tr.fconn,pchar(s));
       if (PQresultStatus(res) <> PGRES_COMMAND_OK) then
         begin
         pqclear(res);
-        DatabaseError(SErrPrepareFailed + ' (PostgreSQL: ' + PQerrorMessage(tr.PGConn) + ')',self)
+        DatabaseError(SErrPrepareFailed + ' (PostgreSQL: ' + 
+              PQerrorMessage(tr.fconn) + ')',self)
         end;
       FPrepared := True;
       end
@@ -529,20 +544,21 @@ end;
 procedure TPQConnection.UnPrepareStatement(cursor : TSQLCursor);
 
 begin
-  with (cursor as TPQCursor) do if FPrepared then
-    begin
-    if not tr.ErrorOccured then
-      begin
-      res := pqexec(tr.PGConn,pchar('deallocate prepst'+nr));
-      if (PQresultStatus(res) <> PGRES_COMMAND_OK) then
-        begin
-        pqclear(res);
-        DatabaseError(SErrPrepareFailed + ' (PostgreSQL: ' + PQerrorMessage(tr.PGConn) + ')',self)
-        end;
-      pqclear(res);
-      end;
-    FPrepared := False;
-    end;
+ with tpqcursor(cursor) do begin
+  if FPrepared then begin
+   close;
+//   if not tr.ErrorOccured then begin
+   res := pqexec(tr.fconn,pchar('deallocate prepst'+nr));
+   if (PQresultStatus(res) <> PGRES_COMMAND_OK) then begin
+    pqclear(res);
+       DatabaseError(SErrPrepareFailed + ' (PostgreSQL: ' + 
+            PQerrorMessage(tr.fconn) + ')',self)
+   end;
+   pqclear(res);
+//  end;
+   FPrepared := False;
+  end;
+ end;
 end;
 
 procedure TPQConnection.FreeFldBuffers(cursor : TSQLCursor);
@@ -591,14 +607,14 @@ begin
       end;
      end;
     end;
-    res := PQexecPrepared(tr.PGConn,pchar('prepst'+nr),Aparams.count,@Ar[0],
+    res := PQexecPrepared(tr.fconn,pchar('prepst'+nr),Aparams.count,@Ar[0],
              pointer(lengths),pointer(formats),1);
     for i := 0 to AParams.count -1 do begin
      FreeMem(ar[i]);
     end;
    end
    else begin
-    res := PQexecPrepared(tr.PGConn,pchar('prepst'+nr),0,nil,nil,nil,1);
+    res := PQexecPrepared(tr.fconn,pchar('prepst'+nr),0,nil,nil,nil,1);
    end;
   end
   else begin
@@ -608,17 +624,20 @@ begin
     //Should be altered, just like in TSQLQuery.ApplyRecUpdate
     if assigned(AParams) then for i := 0 to AParams.count-1 do
       s := stringreplace(s,':'+AParams[i].Name,AParams[i].asstring,[rfReplaceAll,rfIgnoreCase]);
-    res := pqexec(tr.PGConn,pchar(s));
+    res := pqexec(tr.fconn,pchar(s));
   end;
   if not (PQresultStatus(res) in [PGRES_COMMAND_OK,PGRES_TUPLES_OK]) then begin
-      s := PQerrorMessage(tr.PGConn);
+      s := PQerrorMessage(tr.fconn);
       pqclear(res);
 
-      tr.ErrorOccured := True;
+//      tr.ErrorOccured := True;
 // Don't perform the rollback, only make it possible to do a rollback.
 // The other databases also don't do this.
 //      atransaction.Rollback;
       DatabaseError(SErrExecuteFailed + ' (PostgreSQL: ' + s + ')',self);
+  end
+  else begin
+   fopen:= true;
   end;
  end;
 end;
@@ -666,7 +685,7 @@ end;
 
 function TPQConnection.GetHandle: pointer;
 begin
-  Result := FSQLDatabaseHandle;
+  Result := FHandle;
 end;
 
 function TPQConnection.Fetch(cursor : TSQLCursor) : boolean;
@@ -1002,8 +1021,8 @@ function TPQConnection.getdbevent(var aname: string; var aid: int64): boolean;
 var
  info: ppgnotify;
 begin
- pqconsumeinput(fsqldatabasehandle);
- info:= pqnotifies(fsqldatabasehandle);
+ pqconsumeinput(fhandle);
+ info:= pqnotifies(fhandle);
  result:= info <> nil;
  if result then begin
   aname:= info^.relname;
@@ -1027,11 +1046,11 @@ var
  res: ppgresult;
 
 begin
- res:= pqexec(fsqldatabasehandle,pchar(asql));
+ res:= pqexec(fhandle,pchar(asql));
  if pqresultstatus(res) <> pgres_command_ok then begin
   pqclear(res);
   databaseerror('PQExecerror'+ ' (postgresql: ' + 
-                        pqerrormessage(fsqldatabasehandle) + ')',self);
+                        pqerrormessage(fhandle) + ')',self);
  end
  else begin
   pqclear(res);
@@ -1044,7 +1063,7 @@ begin
   result:= 0;
  end
  else begin
-  result:= cardinal(pqbackendpid(fsqldatabasehandle));
+  result:= cardinal(pqbackendpid(fhandle));
  end;
 end;
 

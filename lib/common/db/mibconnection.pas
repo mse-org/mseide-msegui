@@ -42,6 +42,8 @@ type
     SQLDA                : PXSQLDA;
     in_SQLDA             : PXSQLDA;
     ParamBinding         : array of integer;
+   public
+    procedure close; override;
   end;
 
   TIBTrans = Class(TSQLHandle)
@@ -123,7 +125,8 @@ type
     function GetTransactionHandle(trans : TSQLHandle): pointer; override;
     function Commit(trans : TSQLHandle) : boolean; override;
     function RollBack(trans : TSQLHandle) : boolean; override;
-    function StartdbTransaction(trans : TSQLHandle; AParams : string) : boolean; override;
+    function StartdbTransaction(const trans : TSQLHandle;
+                       const AParams : string) : boolean; override;
     procedure internalCommitRetaining(trans : TSQLHandle); override;
     procedure internalRollBackRetaining(trans : TSQLHandle); override;
     procedure UpdateIndexDefs(var IndexDefs : TIndexDefs;
@@ -184,8 +187,8 @@ type
     __tm_zone : Pchar;
   end;
 
-procedure TIBConnection.CheckError(const ProcName : string; 
-                         const Status: statusvectorty);
+procedure CheckError(const ProcName : string; 
+             const Status: statusvectorty; const compname: ansistring);
 var
   buf : array [0..1024] of char;
   p   : pointer;
@@ -199,10 +202,32 @@ begin
     msg := '';
     while isc_interprete(Buf, @p) > 0 do
       Msg := Msg + LineEnding +' -' + StrPas(Buf);
-    E := EIBDatabaseError.CreateFmt('%s : %s : %s',[self.Name,ProcName,Msg]);
+    E := EIBDatabaseError.CreateFmt('%s : %s : %s',[compname,ProcName,Msg]);
     E.GDSErrorCode := Status[1];
     Raise E;
   end;
+end;
+
+{ TIBCursor }
+
+procedure TIBCursor.close;
+begin
+ inherited;
+ if fopen then begin
+  if isc_dsql_free_statement(@status, @statement, dsql_close) <> 0 then begin
+   checkerror('close cursor', status,query.name);
+  end;
+  fopen:= false;
+ end;
+end;
+
+{ tibconnection }
+
+procedure TIBConnection.CheckError(const ProcName : string; 
+                         const Status: statusvectorty);
+  
+begin
+ mibconnection.checkerror(procname,status,name);
 end;
 
 procedure tibconnection.CheckError(const ProcName : string; const Status: integer);
@@ -251,7 +276,8 @@ begin
   else result := true;
 end;
 
-function TIBConnection.StartDBTransaction(trans : TSQLHandle;AParams : String) : boolean;
+function TIBConnection.StartDBTransaction(
+                const trans : TSQLHandle; const AParams : String) : boolean;
 var
   DBHandle : pointer;
   tr       : TIBTrans;
@@ -649,15 +675,6 @@ begin
   SetParameters(cursor, AParams);
  end;
  with TIBCursor(cursor) do begin
-  if fopen then begin
-   if isc_dsql_free_statement(@status, @statement, dsql_close) <> 0 then begin
-    checkerror('close cursor', status);
-   end;
-   fopen:= false;
-//   if isc_dsql_set_cursor_name(@status,@statement,'S',0) <> 0 then begin
-//    checkerror('open cursor',status);
-//   end;
-  end;
   if isc_dsql_execute2(@Status,@cursor.ftrans,
                         @Statement,1,in_SQLDA,nil) <> 0 then begin
     CheckError('Execute', Status);
@@ -1118,9 +1135,9 @@ end;
 
 procedure TIBConnection.UpdateIndexDefs(var IndexDefs : TIndexDefs;
                                const TableName : string);
-
-var qry : TSQLQuery;
-
+var 
+ qry : TSQLQuery;
+ str1: ansistring;
 begin
   if not assigned(Transaction) then
     DatabaseError(SErrConnTransactionnSet);
@@ -1153,19 +1170,24 @@ begin
     open;
     end;
 
-  while not qry.eof do with IndexDefs.AddIndexDef do
-    begin
-    Name := trim(qry.fields[0].asstring);
+  while not qry.eof do begin
+   with IndexDefs.AddIndexDef do begin
+    str1:= qry.fields[0].asstring;
+    Name := trim(str1);
     Fields := trim(qry.Fields[3].asstring);
-    If qry.fields[4].asstring = 'PRIMARY KEY' then options := options + [ixPrimary];
-    If qry.fields[2].asinteger = 1 then options := options + [ixUnique];
-    qry.next;
-    while (name = qry.fields[0].asstring) and (not qry.eof) do
-      begin
-      Fields := Fields + ';' + trim(qry.Fields[3].asstring);
-      qry.next;
-      end;
+    If qry.fields[4].asstring = 'PRIMARY KEY' then begin
+     options := options + [ixPrimary];
     end;
+    If qry.fields[2].asinteger = 1 then begin
+     options := options + [ixUnique];
+    end;
+    qry.next;
+    while (str1 = qry.fields[0].asstring) and (not qry.eof) do begin
+     Fields := Fields + ';' + trim(qry.Fields[3].asstring);
+     qry.next;
+    end;
+   end;
+  end;
   qry.close;
   qry.free;
 end;

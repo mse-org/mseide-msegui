@@ -111,14 +111,17 @@ procedure tmsepqconnection.execute(const cursor: tsqlcursor;
                const atransaction: tsqltransaction; const aparams: tparams);
 const
  savepointname = 'mseinternal$savepoint';
+var
+ bo1: boolean;
 begin
  if fsavepointlock then begin
   inherited;
  end
  else begin
   fsavepointlock:= true;
+  bo1:= (pqco_usesavepoint in foptions) and not (tao_fake in atransaction.options);
   try
-   if pqco_usesavepoint in foptions then begin
+   if bo1 then begin
     executedirect('SAVEPOINT '+savepointname+';',atransaction);
    end;
    try
@@ -128,14 +131,14 @@ begin
      atransaction.active:= false;
     end
     else begin
-     if pqco_usesavepoint in foptions then begin
+     if bo1 then begin
       executedirect('ROLLBACK TO SAVEPOINT '+savepointname+';',atransaction);
       executedirect('RELEASE SAVEPOINT '+savepointname+';',atransaction);
      end;
     end;
     raise;
    end;
-   if pqco_usesavepoint in foptions then begin
+   if bo1 then begin
     executedirect('RELEASE SAVEPOINT '+savepointname+';',atransaction);
    end;
   finally

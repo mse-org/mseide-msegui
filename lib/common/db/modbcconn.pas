@@ -80,7 +80,8 @@ type
     procedure UnPrepareStatement(cursor:TSQLCursor); override;
     // - Transaction handling
     function GetTransactionHandle(trans:TSQLHandle):pointer; override;
-    function StartDBTransaction(trans:TSQLHandle; AParams:string):boolean; override;
+    function StartDBTransaction(const trans:TSQLHandle; 
+                 const AParams:string):boolean; override;
     function Commit(trans:TSQLHandle):boolean; override;
     function Rollback(trans:TSQLHandle):boolean; override;
     procedure internalCommitRetaining(trans:TSQLHandle); override;
@@ -471,7 +472,8 @@ begin
   // Tranactions not implemented yet
 end;
 
-function TODBCConnection.StartDBTransaction(trans: TSQLHandle; AParams:string): boolean;
+function TODBCConnection.StartDBTransaction(const trans: TSQLHandle; 
+                   const AParams:string): boolean;
 begin
   // Tranactions not implemented yet
 end;

@@ -96,8 +96,8 @@ type
    function GetTransactionHandle(trans : TSQLHandle): pointer; override;
    function Commit(trans : TSQLHandle) : boolean; override;
    function RollBack(trans : TSQLHandle) : boolean; override;
-   function StartdbTransaction(trans : TSQLHandle; 
-                aParams : string) : boolean; override;
+   function StartdbTransaction(const trans : TSQLHandle; 
+                const aParams : string) : boolean; override;
    procedure internalCommitRetaining(trans : TSQLHandle); override;
    procedure internalRollBackRetaining(trans : TSQLHandle); override;
    function getblobdatasize: integer; override;
@@ -148,7 +148,30 @@ type
    fstate: integer;
    fparambinding: integerarty;
    fopen: boolean;
+   fconnection: tsqlite3connection;
+  public
+   constructor create(const aquery: tsqlquery; 
+                                const aconnection: tsqlite3connection);
+   procedure close; override;
  end;
+
+{ tsqlite3cursor }
+
+constructor tsqlite3cursor.create(const aquery: tsqlquery; 
+                                const aconnection: tsqlite3connection);
+begin
+ fconnection:= aconnection;
+ inherited create(aquery);
+end;
+
+procedure tsqlite3cursor.close;
+begin
+ inherited;
+ if fopen then begin
+  fconnection.checkerror(sqlite3_reset(fstatement));
+  fopen:= false;
+ end;   
+end;
   
 { tsqlite3connection }
 
@@ -237,7 +260,7 @@ end;
 
 function tsqlite3connection.AllocateCursorHandle(const aowner: tsqlquery): TSQLCursor;
 begin
- result:= tsqlite3cursor.create(aowner);
+ result:= tsqlite3cursor.create(aowner,self);
 end;
 
 procedure tsqlite3connection.DeAllocateCursorHandle(var cursor: TSQLCursor);
@@ -424,15 +447,7 @@ begin
        end;
        ftfloat,ftcurrency,ftdatetime,ftdate,fttime: begin
         do1:= asfloat;
-//        if do1 > 1e15 then begin           //sigfpe in sqlitelib
-//         str1:= floattostr(do1);
-//         stringaddref(str1);
-//         checkerror(sqlite3_bind_text(fstatement,int1+1,pchar(str1),
-//                    length(str1),@freebindstring));
-//        end
-//        else begin
-         checkerror(sqlite3_bind_double(fstatement,int1+1,do1));
-//        end;
+        checkerror(sqlite3_bind_double(fstatement,int1+1,do1));
        end;
        ftstring: begin
         str1:= asstring;
@@ -455,10 +470,6 @@ begin
     end;
    end;
   end;
-  if fopen then begin
-   checkerror(sqlite3_reset(fstatement));
-   fopen:= false;
-  end;   
   wo1:= get8087cw;
   set8087cw(wo1 or $1f);             //mask exceptions, Sqlite3 has overflow
   fstate:= sqlite3_step(fstatement);
@@ -639,8 +650,8 @@ begin
  result:= true;
 end;
 
-function tsqlite3connection.StartdbTransaction(trans: TSQLHandle;
-               aParams: string): boolean;
+function tsqlite3connection.StartdbTransaction(const trans: TSQLHandle;
+               const aParams: string): boolean;
 begin
  if cantransaction then begin
   execsql('BEGIN');

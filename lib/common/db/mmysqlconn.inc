@@ -100,7 +100,8 @@ Type
     function GetTransactionHandle(trans : TSQLHandle): pointer; override;
     function Commit(trans : TSQLHandle) : boolean; override;
     function RollBack(trans : TSQLHandle) : boolean; override;
-    function StartdbTransaction(trans : TSQLHandle; AParams : string) : boolean; override;
+    function StartdbTransaction(const trans : TSQLHandle;
+                const AParams : string) : boolean; override;
     procedure internalCommitRetaining(trans : TSQLHandle); override;
     procedure internalRollBackRetaining(trans : TSQLHandle); override;
     procedure UpdateIndexDefs(var IndexDefs : TIndexDefs;
@@ -873,7 +874,8 @@ begin
   // Do nothing
 end;
 
-function TConnectionName.StartdbTransaction(trans: TSQLHandle; AParams : string): boolean;
+function TConnectionName.StartdbTransaction(const trans: TSQLHandle;
+              const AParams : string): boolean;
 begin
   // Do nothing
 end;

@@ -45,16 +45,18 @@ type
 
   TSQLCursor = Class(TSQLHandle)
    private
-    fquery: tsqlquery;
     fblobs: stringarty;
     fblobcount: integer;
+    fquery: tsqlquery;
+   protected
    public
     FPrepared      : Boolean;
     FInitFieldDef  : Boolean;
     FStatementType : TStatementType;
     ftrans: pointer;
+    property query: tsqlquery read fquery;
     constructor create(const aquery: tsqlquery);
-    procedure close;
+    procedure close; virtual;
     function wantblobfetch: boolean;
     function getcachedblob(const blobid: integer): tstream;
     function addblobdata(const adata: pointer; const alength: integer): integer;
@@ -130,7 +132,8 @@ type
     function GetTransactionHandle(trans : TSQLHandle): pointer; virtual; abstract;
     function Commit(trans : TSQLHandle) : boolean; virtual; abstract;
     function RollBack(trans : TSQLHandle) : boolean; virtual; abstract;
-    function StartdbTransaction(trans : TSQLHandle; aParams : string) : boolean; virtual; abstract;
+    function StartdbTransaction(const trans : TSQLHandle;
+                     const aParams : string) : boolean; virtual; abstract;
     procedure internalcommitretaining(trans : tsqlhandle); virtual; abstract;
     procedure internalrollbackretaining(trans : tsqlhandle); virtual; abstract;
     
@@ -1089,7 +1092,7 @@ begin
   FTrans:= Db.AllocateTransactionHandle;
  end;
  if (tao_fake in foptions) or 
-             Db.StartdbTransaction(FTrans,FParams.CommaText) then begin
+                 Db.StartdbTransaction(FTrans,FParams.CommaText) then begin
   OpenTrans;
  end;
  if checkcanevent(self,tmethod(fonafterstart)) then begin
@@ -1833,10 +1836,11 @@ begin
 // try
   include(fbstate,bs_refreshing);
   try
+   active:= false;
    if closetransactiononrefresh then begin
     transaction.active:= false;
+    transaction.active:= true;
    end;
-   active:= false;
    active:= true;
    setrecno1(int1,true);
   finally
@@ -1943,6 +1947,7 @@ end;
 Procedure TSQLQuery.UpdateIndexDefs;
 
 begin
+ findexdefs.clear;
  if assigned(DataBase) and (ftablename <> '') then begin
   tcustomsqlconnection(database).UpdateIndexDefs(FIndexDefs,FTableName);
  end;
