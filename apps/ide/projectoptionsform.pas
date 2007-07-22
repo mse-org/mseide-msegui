@@ -649,7 +649,7 @@ begin
        if (int1 > high(toolfiles)) or (int1 > high(toolparams)) then begin
         break;
        end;
-       insert(bigint,[toolmenus[int1]],[],[],{$ifdef FPC}@{$endif}mainfo.runtool);
+       insert(bigint,[toolmenus[int1]],[],[],[{$ifdef FPC}@{$endif}mainfo.runtool]);
       end;
      end;
     end

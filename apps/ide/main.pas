@@ -2195,7 +2195,7 @@ var
  str1: ansistring;
 begin
  with tmenuitem(sender),projectoptions.texp do begin
-  str1:= toolfiles[index];
+  str1:= tosysfilepath(toolfiles[index]);
   if str1 <> '' then begin
    if toolparams[index] <> '' then begin
     str1:= str1 + ' ' + toolparams[index];
