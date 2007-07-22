@@ -1164,11 +1164,13 @@ end;
 procedure tmenuitems.dosizechanged;
 begin
  inherited;
+ { too dangerous because of runtime submenu clear in with statement.
  if count = 0 then begin
   tmenuitem(fowner).fsubmenu:= nil;
   fowner:= nil;
   application.postevent(tobjectevent.create(ek_release,ievent(self)));
  end;
+ }
 end;
 
 procedure tmenuitems.dochange(const aindex: integer);
