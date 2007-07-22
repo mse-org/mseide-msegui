@@ -55,7 +55,8 @@ type
                  const onexecutes: array of notifyeventty); overload;
    procedure insertseparator(const index: integer);
    property items[index: integer]: tmenuitem read getmenuitems write setmenuitems; default;
-   function itembyname(const name: string): tmenuitem;
+   function itembyname(const name: ansistring): tmenuitem;
+   function itemindexbyname(const name: ansistring): integer;
  end;
 
  tmenufont = class(tparentfont)
@@ -1195,11 +1196,13 @@ end;
 procedure tmenuitems.dosizechanged;
 begin
  inherited;
+ { too dangerous because of runtime submenu clear in with statement.
  if count = 0 then begin
   tmenuitem(fowner).fsubmenu:= nil;
   fowner:= nil;
   application.postevent(tobjectevent.create(ek_release,ievent(self)));
  end;
+ }
 end;
 
 procedure tmenuitems.dochange(const aindex: integer);
@@ -1329,20 +1332,33 @@ begin
  tmenuitem(getitems(index)).assign(value);
 end;
 
-function tmenuitems.itembyname(const name: string): tmenuitem;
+function tmenuitems.itemindexbyname(const name: ansistring): integer;
 var
  int1: integer;
  po1: pmenuitem;
 begin
- result:= nil;
+ result:= -1;
  po1:= pointer(fitems);
  for int1:= 0 to high(fitems) do begin
   if (po1^.fname = name) or
           (po1^.finfo.action <> nil) and (po1^.finfo.action.Name = name) then begin
-   result:= po1^;
+   result:= int1;
    break;
   end;
   inc(po1);
+ end;
+end;
+
+function tmenuitems.itembyname(const name: ansistring): tmenuitem;
+var
+ int1: integer;
+begin
+ int1:= itemindexbyname(name);
+ if int1 < 0 then begin
+  result:= nil;
+ end
+ else begin
+  result:= tmenuitem(fitems[int1]);
  end;
 end;
 

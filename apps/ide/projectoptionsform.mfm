@@ -32,7 +32,7 @@ object projectoptionsfo: tprojectoptionsfo
     frame.dummy = 0
     anchors = [an_top, an_bottom]
     taborder = 1
-    activepageindex = 0
+    activepageindex = 7
     tab_frame.dummy = 0
     tab_size = 20
     statfile = statfile1
@@ -46,7 +46,6 @@ object projectoptionsfo: tprojectoptionsfo
       frame.dummy = 0
       anchors = [an_left, an_top, an_right, an_bottom]
       taborder = 5
-      visible = True
       caption = '&Editor'
       reffontheight = 14
       object dispgrid: twidgetgrid
@@ -2311,6 +2310,7 @@ object projectoptionsfo: tprojectoptionsfo
           item
             coloractive = -2147483648
             width = 98
+            options = [co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_mousescrollrow]
             widgetname = 'fontalias'
           end        
           item
@@ -2322,6 +2322,7 @@ object projectoptionsfo: tprojectoptionsfo
           item
             coloractive = -2147483648
             width = 46
+            options = [co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_mousescrollrow]
             widgetname = 'fontheight'
           end>
         datarowheight = 16
@@ -3159,6 +3160,128 @@ object projectoptionsfo: tprojectoptionsfo
             controller.ongetfilename = expandfilename
             reffontheight = 14
           end
+        end
+      end
+    end
+    object ttabpage15: ttabpage
+      bounds_x = 1
+      bounds_y = 21
+      bounds_cx = 627
+      bounds_cy = 522
+      frame.dummy = 0
+      anchors = [an_left, an_top, an_right, an_bottom]
+      taborder = 8
+      visible = True
+      caption = 'Tools'
+      reffontheight = 14
+      object twidgetgrid3: twidgetgrid
+        optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_focusbackonesc, ow_mousewheel, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+        bounds_x = 0
+        bounds_y = 0
+        bounds_cx = 627
+        bounds_cy = 522
+        frame.dummy = 0
+        anchors = []
+        optionsgrid = [og_colsizing, og_rowmoving, og_keyrowmoving, og_rowinserting, og_rowdeleting, og_focuscellonenter, og_autofirstrow, og_autoappend, og_colchangeontabkey, og_autopopup, og_mousescrollcol]
+        fixcols.count = 1
+        fixcols.coloractive = -2147483648
+        fixcols.items = <        
+          item
+            coloractive = -2147483648
+            width = 18
+            numstart = 1
+            numstep = 1
+          end>
+        fixrows.count = 1
+        fixrows.coloractive = -2147483648
+        fixrows.items = <        
+          item
+            coloractive = -2147483648
+            height = 16
+            captions.count = 3
+            captions.items = <            
+              item
+                caption = 'Menu'
+              end            
+              item
+                caption = 'File'
+              end            
+              item
+                caption = 'Parameters'
+              end>
+          end>
+        datacols.count = 3
+        datacols.coloractive = -2147483648
+        datacols.options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_proportional, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_cancopy, co_canpaste, co_mousescrollrow]
+        datacols.items = <        
+          item
+            coloractive = -2147483648
+            width = 107
+            options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_proportional, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_cancopy, co_canpaste, co_mousescrollrow]
+            widgetname = 'toolmenu'
+          end        
+          item
+            coloractive = -2147483648
+            width = 251
+            options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_fill, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_cancopy, co_canpaste, co_mousescrollrow]
+            widgetname = 'toolfile'
+          end        
+          item
+            coloractive = -2147483648
+            width = 243
+            options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_proportional, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_cancopy, co_canpaste, co_mousescrollrow]
+            widgetname = 'toolparam'
+          end>
+        datarowheight = 16
+        statfile = statfile1
+        reffontheight = 14
+        object toolmenu: tstringedit
+          optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight]
+          bounds_x = 0
+          bounds_y = 0
+          bounds_cx = 107
+          bounds_cy = 16
+          frame.levelo = 0
+          frame.colorclient = -2147483645
+          frame.localprops = [frl_levelo, frl_colorclient]
+          frame.dummy = 0
+          taborder = 1
+          visible = False
+          optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_keyexecute, oe_savestate]
+          reffontheight = 14
+        end
+        object toolfile: tfilenameedit
+          optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight]
+          bounds_x = 108
+          bounds_y = 0
+          bounds_cx = 251
+          bounds_cy = 16
+          frame.levelo = 0
+          frame.colorclient = -2147483645
+          frame.localprops = [frl_levelo, frl_colorclient]
+          frame.button.color = -1879048187
+          frame.button.imagenr = 17
+          frame.dummy = 0
+          taborder = 2
+          visible = False
+          optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_keyexecute, oe_savestate]
+          controller.include = [fa_xusr, fa_xgrp, fa_xoth]
+          reffontheight = 14
+        end
+        object toolparam: tstringedit
+          optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight]
+          bounds_x = 360
+          bounds_y = 0
+          bounds_cx = 243
+          bounds_cy = 16
+          frame.levelo = 0
+          frame.colorclient = -2147483645
+          frame.localprops = [frl_levelo, frl_colorclient]
+          frame.dummy = 0
+          taborder = 3
+          visible = False
+          optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_keyexecute, oe_savestate]
+          reffontheight = 14
         end
       end
     end

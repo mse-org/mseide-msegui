@@ -8,9 +8,9 @@ object mainfo: tmainfo
   visible = False
   container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_subfocus, ow_mousetransparent, ow_destroywidgets, ow_autoscale]
   container.bounds_x = 0
-  container.bounds_y = 18
+  container.bounds_y = 16
   container.bounds_cx = 429
-  container.bounds_cy = 120
+  container.bounds_cy = 122
   container.frame.framei_left = 0
   container.frame.framei_top = 0
   container.frame.framei_right = 0
@@ -53,15 +53,16 @@ object mainfo: tmainfo
     bounds_x = 0
     bounds_y = 1
     bounds_cx = 429
+    bounds_cy = 18
     frame.dummy = 0
     anchors = [an_top]
     taborder = 1
     font.colorshadow = -2147483648
     font.name = 'stf_default'
-    font.xscale = 1
+    font.xscale =  1.0000000000000000E+0000
     font.dummy = 0
     options = [dwo_hintclippedtext]
-    reffontheight = 16
+    reffontheight = 14
   end
   object gdb: tgdbmi
     onevent = gdbonevent
@@ -187,6 +188,7 @@ object mainfo: tmainfo
             onexecute = exitonexecute
           end>
         caption = '&File'
+        name = 'file'
         state = [as_localcaption]
       end    
       item
@@ -208,6 +210,7 @@ object mainfo: tmainfo
             action = actionsmo.findinfile
           end>
         caption = '&Search'
+        name = 'search'
         state = [as_localcaption]
       end    
       item
@@ -250,6 +253,7 @@ object mainfo: tmainfo
             action = actionsmo.selecteditpage
           end>
         caption = '&Edit'
+        name = 'edit'
         state = [as_localcaption]
       end    
       item
@@ -336,6 +340,7 @@ object mainfo: tmainfo
             options = [mao_checkbox, mao_shortcutcaption]
           end>
         caption = '&Target'
+        name = 'target'
         state = [as_localcaption]
       end    
       item
@@ -632,6 +637,7 @@ object mainfo: tmainfo
             onexecute = configureexecute
           end>
         caption = 'Sett&ings'
+        name = 'settings'
         state = [as_localcaption, as_localonexecute]
         onexecute = aboutonexecute
       end>

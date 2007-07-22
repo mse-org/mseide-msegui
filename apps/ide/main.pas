@@ -224,6 +224,7 @@ type
                                  const aactivate: boolean = false);
    procedure checkbluedots;
    procedure updatesigsettings;
+   procedure runtool(const sender: tobject);
 
    procedure programfinished;
    procedure showfirsterror;
@@ -257,7 +258,7 @@ uses
  objectinspector,msesysutils,msestream,msesys,cpuform,disassform,
  panelform,watchpointsform,threadsform,targetconsole,
  debuggerform,componentpaletteform,messageform,msesettings,mseintegerenter
- {$ifdef linux} ,libc {$endif};
+ {$ifdef linux} ,libc {$endif},mseprocutils;
 
 procedure handleerror(const e: exception; const text: string);
 begin
@@ -2187,6 +2188,21 @@ procedure tmainfo.beforefilesave(const adesigner: idesigner;
                const afilename: filenamety);
 begin
  //dummy
+end;
+
+procedure tmainfo.runtool(const sender: tobject);
+var
+ str1: ansistring;
+begin
+ with tmenuitem(sender),projectoptions.texp do begin
+  str1:= toolfiles[index];
+  if str1 <> '' then begin
+   if toolparams[index] <> '' then begin
+    str1:= str1 + ' ' + toolparams[index];
+   end;
+   execmse(str1);
+  end;
+ end;
 end;
 
 end.

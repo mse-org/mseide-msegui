@@ -76,7 +76,11 @@ type
   syntaxdeffiles: msestringarty;
   filemasknames: msestringarty;
   filemasks: msestringarty;
-  
+
+  toolmenus: msestringarty;
+  toolfiles: msestringarty;
+  toolparams: msestringarty;
+    
   fontnames: msestringarty;
   newprojectfiles: filenamearty;
   newprojectfilesdest: filenamearty;
@@ -284,13 +288,18 @@ type
    spacetabs: tbooleanedit;
    editmarkbrackets: tbooleanedit;
    tbutton1: tbutton;
+   toolfile: tfilenameedit;
    tspacer1: tspacer;
    targpref: tstringedit;
    tspacer2: tspacer;
    filefiltergrid: tstringgrid;
+   toolmenu: tstringedit;
+   toolparam: tstringedit;
    ttabpage13: ttabpage;
    ttabpage14: ttabpage;
+   ttabpage15: ttabpage;
    ttabwidget2: ttabwidget;
+   twidgetgrid3: twidgetgrid;
    unitpref: tstringedit;
    incpref: tstringedit;
    libpref: tstringedit;
@@ -396,7 +405,8 @@ uses
  msedesigner,panelform,watchpointsform,commandlineform,msestream,
  componentpaletteform,mserichstring,msesettings,formdesigner,
  msestringlisteditor,msetexteditor,msepropertyeditors
- {$ifdef FPC}{$ifndef mse_withoutdb},msedbfieldeditor{$endif}{$endif};
+ {$ifdef FPC}{$ifndef mse_withoutdb},msedbfieldeditor{$endif}{$endif},
+ msemenus;
 
 type
 
@@ -549,6 +559,7 @@ var
  li: tmacrolist;
  int1: integer;
  bo1: boolean;
+ item1: tmenuitem;
 begin
  li:= getmacros;
  with projectoptions do begin
@@ -574,6 +585,9 @@ begin
    li.expandmacros(syntaxdeffiles);
    li.expandmacros(filemasknames);
    li.expandmacros(filemasks);
+   li.expandmacros(toolmenus);
+   li.expandmacros(toolfiles);
+   li.expandmacros(toolparams);
    li.expandmacros(fontnames);
    li.expandmacros(newprojectfiles);
    li.expandmacros(newprojectfilesdest);
@@ -619,6 +633,31 @@ begin
    with mainfo.openfile.controller.filterlist do begin
     asarraya:= filemasknames;
     asarrayb:= filemasks;
+   end;
+   with mainfo.mainmenu1.menu.submenu do begin
+    item1:= itembyname('tools');
+    if toolmenus <> nil then begin
+     if item1 = nil then begin
+      item1:= tmenuitem.create;
+      item1.name:= 'tools';
+      item1.caption:= 'T&ools';
+      insert(itemindexbyname('settings'),item1);
+     end;
+     with item1.submenu do begin
+      clear;
+      for int1:= 0 to high(toolmenus) do begin
+       if (int1 > high(toolfiles)) or (int1 > high(toolparams)) then begin
+        break;
+       end;
+       insert(bigint,[toolmenus[int1]],[],[],{$ifdef FPC}@{$endif}mainfo.runtool);
+      end;
+     end;
+    end
+    else begin
+     if item1 <> nil then begin
+      delete(item1.index);
+     end;
+    end;
    end;
   end;
   ignoreexceptionclasses:= nil;
@@ -773,6 +812,9 @@ begin
   syntaxdeffiles:= nil;
   filemasknames:= nil;
   filemasks:= nil;
+  toolmenus:= nil;
+  toolfiles:= nil;
+  toolparams:= nil;
   fontalias:= nil;
   fontnames:= nil;
   fontheights:= nil;
@@ -962,6 +1004,9 @@ begin
   updatevalue('syntaxdeffiles',syntaxdeffiles);
   updatevalue('filemasknames',filemasknames);
   updatevalue('filemasks',filemasks);
+  updatevalue('toolmenus',toolmenus);
+  updatevalue('toolfiles',toolfiles);
+  updatevalue('toolparams',toolparams);
   updatevalue('fontalias',fontalias);
   updatevalue('fontnames',fontnames);
   updatevalue('fontheights',fontheights);
@@ -1197,6 +1242,9 @@ begin
   fo.grid[1].datalist.asarray:= sourcefilemasks;
   fo.filefiltergrid[0].datalist.asarray:= filemasknames;
   fo.filefiltergrid[1].datalist.asarray:= filemasks;
+  fo.toolmenu.gridvalues:= toolmenus;
+  fo.toolfile.gridvalues:= toolfiles;
+  fo.toolparam.gridvalues:= toolparams;
   fo.def.gridvalues:= defines;
   fo.defon.gridvalues:= defineson;
   fo.stoponexception.value:= stoponexception;
@@ -1334,6 +1382,9 @@ begin
   sourcefilemasks:= fo.grid[1].datalist.asarray;
   filemasknames:= fo.filefiltergrid[0].datalist.asarray;
   filemasks:= fo.filefiltergrid[1].datalist.asarray;
+  toolmenus:= fo.toolmenu.gridvalues;
+  toolfiles:= fo.toolfile.gridvalues;
+  toolparams:= fo.toolparam.gridvalues;  
   stoponexception:= fo.stoponexception.value;
   activateonbreak:= fo.activateonbreak.value;
   showconsole:= fo.showconsole.value;
@@ -1402,6 +1453,7 @@ begin
  try
   result:= fo.show(true,nil) = mr_ok;
   if result then begin
+   fo.window.nofocus; //remove empty grid lines
    formtoprojectoptions(fo);
    projectoptionsmodified;
    projectoptionschanged;
