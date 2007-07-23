@@ -2023,7 +2023,8 @@ begin
  if win32gcty(gc.platformdata).kind = gck_printer then begin
   rect1:= rect;
   recttowinrect(rect1);
-  lptodp(gc.handle,{$ifdef FPC}@{$endif}rect1,2);
+  lptodp(gc.handle,
+     {$ifdef FPC}lppoint(@{$endif}rect1{$ifdef FPC}){$endif},2);
   result:= createrectrgnindirect(trect(rect1));   
  end
  else begin
@@ -2080,7 +2081,8 @@ begin
     for int1:= 0 to rectscount - 1 do begin
      rect1:= rectspo^[int1];
      recttowinrect(rect1);
-     lptodp(drawinfo.gc.handle,{$ifdef FPC}@{$endif}rect1,2);
+     lptodp(drawinfo.gc.handle,
+          {$ifdef FPC}lppoint(@{$endif}rect1{$ifdef FPC}){$endif},2);
      reg1:= createrectrgnindirect(trect(rect1));
      combinergn(dest,dest,reg1,rgn_or);
      deleteobject(reg1);
@@ -2127,7 +2129,8 @@ begin
  with drawinfo.regionoperation do begin
   getrgnbox(source,trect(rect));
   if win32gcty(drawinfo.gc.platformdata).kind = gck_printer then begin
-   dptolp(drawinfo.gc.handle,{$ifdef FPC}@{$endif}rect,2);
+   dptolp(drawinfo.gc.handle,
+          {$ifdef FPC}lppoint(@{$endif}rect{$ifdef FPC}){$endif},2);
   end;
   winrecttorect(rect);
  end;
