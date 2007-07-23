@@ -1127,12 +1127,40 @@ const
   (name: 'RUSSIAN'; code: 204),
   (name: 'MAC'; code: 77),
   (name: 'BALTIC'; code: 186));
+  
+type
+ pboolean = ^boolean;
+{$ifdef FPC}
+function fontenumcallback(var _para1:ENUMLOGFONTEX;
+       var _para2:NEWTEXTMETRICEX; _para3:longint; _para4:LPARAM):longint; stdcall;
+{$else}
+function fontenumcallback(var _para1:ENUMLOGFONTEX;
+       var _para2:TNEWTEXTMETRICEXa; _para3:longint; _para4:LPARAM):longint; stdcall;
+{$endif}
+begin
+ pboolean(_para4)^:= true;
+ result:= 0;
+end;
 
 procedure initdefaultfont;
+var
+ dc1: hdc;
+ bo1: boolean;
 begin
  fillchar(defaultfontinfo,sizeof(defaultfontinfo),0);
- defaultfontinfo.lfHeight:= 14;
- defaultfontinfo.lfFaceName:= 'MS Sans Serif';
+ defaultfontinfo.lfHeight:= -11;
+ defaultfontinfo.lfFaceName:= 'Tahoma';
+ dc1:= getdc(0);
+ bo1:= false;
+ {$ifdef FPC}
+ enumfontfamiliesex(dc1,@defaultfontinfo,@fontenumcallback,ptruint(@bo1),0);
+ {$else}
+ enumfontfamiliesex(dc1,defaultfontinfo,@fontenumcallback,ptruint(@bo1),0);
+ {$endif}
+ if not bo1 then begin
+  defaultfontinfo.lfFaceName:= 'MS Sans Serif';
+ end;
+ releasedc(0,dc1);
 end;
 
 function gui_getfont(var drawinfo: drawinfoty): boolean;
