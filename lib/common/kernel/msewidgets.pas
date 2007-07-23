@@ -1441,7 +1441,7 @@ var
 begin
  inherited;
  fra1:= fouterframe;
- if finfo.text.text <> '' then begin
+ if (finfo.text.text <> '') and twidget1(fintf.getwidget).isvisible then begin
   updatebit({$ifdef FPC}longword{$else}word{$endif}(finfo.flags),ord(tf_grayed),fs_disabled in fstate);
   canvas:= fintf.getcanvas;
   canvas.font:= getfont;

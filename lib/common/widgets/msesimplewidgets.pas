@@ -1026,10 +1026,12 @@ begin
     try
      exclude(fwidgetstate1,ws1_scaled);
      size1:= calcminscrollsize;
-     size2:= paintsize;
+//     size2:= paintsize;
+     size2:= size;
      box:= false;
      boy:= false;
-     bo1:= not (visible or (csdesigning in componentstate));
+//     bo1:= not (visible or (csdesigning in componentstate));
+     bo1:= not isvisible;
      if (osc_invisishrinkx in foptionsscale) then begin
       if bo1 then begin
        if fsizebefore.cx = 0 then begin
@@ -1101,6 +1103,9 @@ begin
      end;
      addsize1(rect1.size,fwidgetrect.size);
      internalsetwidgetrect(rect1,false);
+     if bo1 then begin
+      parentwidgetregionchanged(self);
+     end;
     finally
      dec(fscaling)
     end;
