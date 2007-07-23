@@ -2389,7 +2389,7 @@ var
        bitblt(adc,destrect^.x,destrect^.y,cx,cy,source^.gc.handle,x,y,rasterops3[arop]);
       end
       else begin
-       if iswin95 then begin
+       if iswin95 or (win32gcty(gc.platformdata).kind = gck_printer) then begin
 //        win95maskblt(adc,destrect^.x,destrect^.y,cx,cy,source^.gc.handle,
 //                    x,y,mask,maskgchandle,x,y,arop);
         tcanvas1(mask.canvas).checkgcstate([cs_gc]);
@@ -2651,6 +2651,7 @@ var
  smaskdc,destdc: hdc;
  bufferbmp: hbitmap;
  rect1: rectty;
+ nomaskblt: boolean;
 
  procedure setintpolmode(const ahandle: hdc);
  var
@@ -2733,7 +2734,7 @@ var
      end;
     end
     else begin
-     if iswin95 then begin
+     if nomaskblt then begin
       tcanvas1(mask.canvas).checkgcstate([cs_gc]);
       win95maskblt(handle,destrect^.x,destrect^.y,cx,cy,source^.gc.handle,
                     x,y,tsimplebitmap1(mask).fhandle,
@@ -2747,7 +2748,7 @@ var
      if double then begin
       setbkcolor(handle,$000000);
       settextcolor(handle,foregroundcol);
-      if iswin95 then begin
+      if nomaskblt then begin
        win95maskblt(handle,destrect^.x,destrect^.y,cx,cy,source^.gc.handle,
                     x,y,tsimplebitmap1(mask).fhandle,
                     tcanvas1(mask.canvas).fdrawinfo.gc.handle,x,y,rop_or);
@@ -2773,7 +2774,7 @@ var
     end
     else begin
      getstretchedbmps;
-     if iswin95 then begin
+     if nomaskblt then begin
       win95maskblt(handle,rect1.x,rect1.y,rect1.cx,rect1.cy,destdc,
                     0,0,maskbmp,0,0,0,copymode);
      end
@@ -2784,7 +2785,7 @@ var
      if double then begin
       setbkcolor(handle,$000000);
       settextcolor(handle,foregroundcol);
-      if iswin95 then begin
+      if nomaskblt then begin
        win95maskblt(handle,rect1.x,rect1.y,rect1.cx,rect1.cy,destdc,
                     0,0,maskbmp,0,0,0,rop_or);
       end
@@ -2815,6 +2816,7 @@ var
  
 begin
  with drawinfo,copyarea,gc,win32gcty(platformdata) do begin
+  nomaskblt:= iswin95 or (kind = gck_printer);
   setintpolmode(handle);
   getclipbox(handle,trect(rect1));
   winrecttorect(rect1);
@@ -2947,7 +2949,7 @@ begin
    gui_freeimagemem(sourceimage.pixels);
    if mask <> nil then begin
     if maskbmp <> 0 then begin
-     if iswin95 then begin
+     if nomaskblt then begin
       maskdc:= createcompatibledc(0);
       selectobject(maskdc,maskbmp);
       settextcolor(destdcbefore,$000000);
@@ -2969,7 +2971,7 @@ begin
      deleteobject(maskbmp);
     end
     else begin
-     if iswin95 then begin
+     if nomaskblt then begin
       tcanvas1(mask.canvas).checkgcstate([cs_gc]);
       smaskdc:= tcanvas1(mask.canvas).fdrawinfo.gc.handle;
       settextcolor(destdcbefore,$000000);
