@@ -261,6 +261,9 @@ type
    fhelpcontext: msestring;
    function getobjectlinker: tobjectlinker;
    procedure objectevent(const sender: tobject; const event: objecteventty); virtual;
+   procedure beginread; virtual;
+   procedure endread; virtual;
+   procedure readstate(reader: treader); override;
    procedure loaded; override;
    procedure sendchangeevent(const aevent: objecteventty = oe_changed);
    function linkcount: integer;
@@ -2607,6 +2610,41 @@ procedure tmsecomponent.loaded;
 begin
  inherited;
  sendchangeevent;
+end;
+
+procedure tmsecomponent.beginread;
+var
+ int1: integer;
+ comp1: tcomponent;
+begin
+ for int1:= 0 to componentcount - 1 do begin
+  comp1:= components[int1];
+  if (cssubcomponent in comp1.componentstyle) and 
+            (comp1 is tmsecomponent) then begin
+   tmsecomponent(comp1).beginread;
+  end;
+ end;
+end;
+
+procedure tmsecomponent.endread;
+var
+ int1: integer;
+ comp1: tcomponent;
+begin
+ for int1:= 0 to componentcount - 1 do begin
+  comp1:= components[int1];
+  if (cssubcomponent in comp1.componentstyle) and 
+            (comp1 is tmsecomponent) then begin
+   tmsecomponent(comp1).endread;
+  end;
+ end;
+end;
+
+procedure tmsecomponent.readstate(reader: treader);
+begin
+ beginread;
+ inherited;
+ endread;
 end;
 
 procedure tmsecomponent.objectevent(const sender: tobject;

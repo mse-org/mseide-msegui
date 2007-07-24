@@ -92,7 +92,7 @@ type
                  fs_captiondistouter,fs_captionnoclip,
                  fs_drawfocusrect,fs_paintrectfocus,
                  fs_captionfocus,fs_captionhint,fs_rectsvalid,
-                 fs_widgetactive);
+                 fs_widgetactive,fs_paintposinited);
  framestatesty = set of framestatety;
 
  modalresultty = (mr_none,mr_canclose,mr_windowclosed,mr_windowdestroyed,
@@ -899,7 +899,8 @@ type
    procedure getchildren(proc: tgetchildproc; root: tcomponent); override;
 
    function getcaretcliprect: rectty; virtual;  //origin = clientrect.pos
-   procedure readstate(reader: treader); override;
+   procedure beginread; override;
+   procedure endread; override;
    procedure loaded; override;
 
    procedure updatemousestate(const apos: pointty); virtual;
@@ -2930,6 +2931,10 @@ begin
  fpaintrect.size:= fintf.getwidgetrect.size;
  fpaintrect.cx:= fpaintrect.cx - fpaintframe.left - fpaintframe.right;
  fpaintrect.cy:= fpaintrect.cy - fpaintframe.top - fpaintframe.bottom;
+ if not (fs_paintposinited in fstate) then begin
+  fpaintposbefore:= fpaintrect.pos;
+  include(fstate,fs_paintposinited);
+ end;
 end;
 
 procedure tcustomframe.updaterects;
@@ -5123,13 +5128,20 @@ begin
  updatesizerange(avalue,fmaxsize);
 end;
 
-procedure twidget.readstate(reader: treader);
+procedure twidget.beginread;
 begin
+ if fframe <> nil then begin
+  exclude(fframe.fstate,fs_paintposinited);
+ end;
  inherited;
+end;
+
+procedure twidget.endread;
+begin
  if fframe <> nil then begin
   fframe.calcrects; //rects must be valid for parentfontchanged
-  fframe.fpaintposbefore:= fframe.fpaintrect.pos;
  end;
+ inherited;
 end;
 
 procedure twidget.loaded;
