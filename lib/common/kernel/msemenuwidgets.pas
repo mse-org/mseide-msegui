@@ -308,6 +308,7 @@ var
  extrasp: integer;
  imagedi: integer;
  ar1: richstringarty;
+ bo1: boolean;
  
 begin
  ar1:= nil; //compiler warning
@@ -368,13 +369,13 @@ begin
      else begin
       tabpos:= 0;
      end;
+     if mlo_horz in layout.options then begin
+      include(state,ss_horz);
+     end
+     else begin
+      exclude(state,ss_horz);
+     end;
      tabpos:= tabpos - frame1.right - frame1.left;
-     if atextsize.cy > maxheight then begin
-      maxheight:= atextsize.cy;
-     end;
-     if atextsize.cx > textwidth then begin
-      textwidth:= atextsize.cx;
-     end;
      if high(ar1) > 0 then begin
       ashortcutwidth:= gettextrect(cells[int1],ar1[1]).cx;
       if ashortcutwidth > shortcutwidth then begin
@@ -398,12 +399,6 @@ begin
       exclude(state,ss_noanimation);
      end;
     
-     if mlo_horz in layout.options then begin
-      include(state,ss_horz);
-     end
-     else begin
-      exclude(state,ss_horz);
-     end;
      if item1.count > 0 then begin
       include(state,ss_submenu);
      end
@@ -419,6 +414,9 @@ begin
          cx:= 2;
         end
         else begin
+         if ss_checkbox in state then begin
+          inc(atextsize.cx,menucheckboxwidth);
+        end;
          cx:= atextsize.cx + 4;
          if ashortcutwidth > 0 then begin
           tabpos:= tabpos + atextsize.cx + shortcutdist;
@@ -442,6 +440,12 @@ begin
         end;
         inc(ay,cy+framewidth1);
        end;
+      end;
+      if atextsize.cy > maxheight then begin
+       maxheight:= atextsize.cy;
+      end;
+      if atextsize.cx > textwidth then begin
+       textwidth:= atextsize.cx;
       end;
      end
      else begin
@@ -467,9 +471,21 @@ begin
     else begin
      amax:= maxsize;
     end;
+    bo1:= (owner <> nil) and (mo_commonwidth in owner.options);
+    if bo1 then begin
+     ax:= framehalfwidth;
+     textwidth:= textwidth + 4;
+    end;
     for int1:= 0 to count - 1 do begin
      with cells[int1].buttoninfo do begin
       if not (ss_invisible in state) then begin
+       if bo1 then begin
+        dim.x:= ax;
+        if not (ss_separator in state) then begin
+         dim.cx:= textwidth;
+        end;
+        ax:= ax + dim.cx + framewidth1;
+       end;
        dim.x:= dim.x + shift;
        if (int1 > 0) and 
                (dim.x + dim.cx + framewidth1 - extrasp - framehalfwidth > amax) then begin

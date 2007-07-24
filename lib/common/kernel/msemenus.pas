@@ -18,8 +18,8 @@ uses
  msetypes,msestrings,Classes,msekeyboard,msebitmap;
 
 type
- menuoptionty = (mo_insertfirst,mo_singleregion,mo_shortcutright,mo_activate,
-                 mo_flat);
+ menuoptionty = (mo_insertfirst,mo_singleregion,mo_shortcutright,mo_commonwidth,
+                 mo_activate,mo_flat);
  menuoptionsty = set of menuoptionty;
 const
  defaultmenuoptions = [mo_shortcutright];
