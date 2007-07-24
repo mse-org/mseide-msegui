@@ -1,5 +1,7 @@
 MSEide+MSEgui version history
 
+2007-07-24 tspacer.offset_* -> dist_*.
+
 Version 1.2
 2007-06-15
 

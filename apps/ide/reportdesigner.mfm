@@ -109,7 +109,7 @@ inherited reportdesignerfo: treportdesignerfo
     taborder = 2
     linktop = tabbar
     linkbottom = dialh
-    offset_bottom = -5
+    dist_bottom = -5
   end
   object dialv: tdial[4]
     bounds_x = 0
@@ -155,7 +155,7 @@ inherited reportdesignerfo: treportdesignerfo
     taborder = 5
     linktop = dialh
     linkbottom = reportcontainer
-    offset_bottom = -5
+    dist_bottom = -5
   end
   object tspacer3: tspacer[6]
     bounds_x = 7
@@ -165,7 +165,7 @@ inherited reportdesignerfo: treportdesignerfo
     taborder = 6
     linkleft = dialv
     linkright = reportcontainer
-    offset_right = -5
+    dist_right = -5
   end
   object xdisp: trealdisp[7]
     bounds_x = 52
@@ -198,7 +198,7 @@ inherited reportdesignerfo: treportdesignerfo
     taborder = 9
     linktop = dialh
     linkbottom = dialv
-    offset_bottom = -5
+    dist_bottom = -5
   end
   inherited popupme: tpopupmenu
     menu.submenu.count = 24

@@ -122,20 +122,20 @@ type
    flinkright: twidget;
    flinkbottom: twidget;
    fupdating: integer;
-   foffset_left: integer;
-   foffset_top: integer;
-   foffset_right: integer;
-   foffset_bottom: integer;
+   fdist_left: integer;
+   fdist_top: integer;
+   fdist_right: integer;
+   fdist_bottom: integer;
    foptions: spaceroptionsty;
    procedure setlinkleft(const avalue: twidget);
    procedure setlinktop(const avalue: twidget);
    procedure setlinkright(const avalue: twidget);
    procedure setlinkbottom(const avalue: twidget);
    procedure updatespace;
-   procedure setoffset_left(const avalue: integer);
-   procedure setoffset_top(const avalue: integer);
-   procedure setoffset_right(const avalue: integer);
-   procedure setoffset_bottom(const avalue: integer);
+   procedure setdist_left(const avalue: integer);
+   procedure setdist_top(const avalue: integer);
+   procedure setdist_right(const avalue: integer);
+   procedure setdist_bottom(const avalue: integer);
   protected
    procedure loaded; override;
    procedure parentwidgetregionchanged(const sender: twidget); override;
@@ -146,14 +146,14 @@ type
    property linktop: twidget read flinktop write setlinktop;
    property linkright: twidget read flinkright write setlinkright;
    property linkbottom: twidget read flinkbottom write setlinkbottom;
-   property offset_left: integer read foffset_left 
-                                    write setoffset_left default 0;
-   property offset_top: integer read foffset_top 
-                                    write setoffset_top default 0;
-   property offset_right: integer read foffset_right 
-                                    write setoffset_right default 0;
-   property offset_bottom: integer read foffset_bottom 
-                                    write setoffset_bottom default 0;
+   property dist_left: integer read fdist_left 
+                                    write setdist_left default 0;
+   property dist_top: integer read fdist_top 
+                                    write setdist_top default 0;
+   property dist_right: integer read fdist_right 
+                                    write setdist_right default 0;
+   property dist_bottom: integer read fdist_bottom 
+                                    write setdist_bottom default 0;
    property options: spaceroptionsty read foptions write foptions default [];
    property optionswidget default defaultoptionswidgetnofocus;
    property visible default false;
@@ -725,27 +725,27 @@ begin
  updatespace;
 end;
 
-procedure tspacer.setoffset_left(const avalue: integer);
+procedure tspacer.setdist_left(const avalue: integer);
 begin
- foffset_left:= avalue;
+ fdist_left:= avalue;
  updatespace;
 end;
 
-procedure tspacer.setoffset_top(const avalue: integer);
+procedure tspacer.setdist_top(const avalue: integer);
 begin
- foffset_top:= avalue;
+ fdist_top:= avalue;
  updatespace;
 end;
 
-procedure tspacer.setoffset_right(const avalue: integer);
+procedure tspacer.setdist_right(const avalue: integer);
 begin
- foffset_right:= avalue;
+ fdist_right:= avalue;
  updatespace;
 end;
 
-procedure tspacer.setoffset_bottom(const avalue: integer);
+procedure tspacer.setdist_bottom(const avalue: integer);
 begin
- foffset_bottom:= avalue;
+ fdist_bottom:= avalue;
  updatespace;
 end;
 
@@ -761,36 +761,36 @@ begin
    po1:= pos;
    if spao_glueright in foptions then begin
     if flinkright <> nil then begin
-     po1.x:= flinkright.bounds_x - bounds_cx - foffset_right;
+     po1.x:= flinkright.bounds_x - bounds_cx - fdist_right;
     end;
    end
    else begin
     if flinkleft <> nil then begin
-     po1.x:= flinkleft.bounds_x + flinkleft.bounds_cx + foffset_left;
+     po1.x:= flinkleft.bounds_x + flinkleft.bounds_cx + fdist_left;
     end;
    end;
    if spao_gluebottom in foptions then begin
     if flinkbottom <> nil then begin
-     po1.y:= flinkbottom.bounds_y - bounds_cy - foffset_bottom;
+     po1.y:= flinkbottom.bounds_y - bounds_cy - fdist_bottom;
     end;
    end
    else begin
     if flinktop <> nil then begin
-     po1.y:= flinktop.bounds_y + flinktop.bounds_cy + foffset_top;
+     po1.y:= flinktop.bounds_y + flinktop.bounds_cy + fdist_top;
     end;
    end;
    pos:= po1;
    addpoint1(po1,pointty(size));
-   po1.x:= po1.x + foffset_right;
-   po1.y:= po1.y + foffset_bottom;
+   po1.x:= po1.x + fdist_right;
+   po1.y:= po1.y + fdist_bottom;
    if spao_glueright in foptions then begin
     if flinkleft <> nil then begin
      rect1:= flinkleft.widgetrect;
      if an_left in flinkleft.anchors then begin
-      rect1.cx:= bounds_x - foffset_left - flinkleft.bounds_x;
+      rect1.cx:= bounds_x - fdist_left - flinkleft.bounds_x;
      end
      else begin
-      rect1.x:= bounds_x - foffset_left - flinkleft.bounds_cx;
+      rect1.x:= bounds_x - fdist_left - flinkleft.bounds_cx;
      end;
      flinkleft.widgetrect:= rect1;
     end;
@@ -809,10 +809,10 @@ begin
     if flinktop <> nil then begin
      rect1:= flinktop.widgetrect;
      if an_top in flinktop.anchors then begin
-      rect1.cy:= bounds_y - foffset_top - flinktop.bounds_y;
+      rect1.cy:= bounds_y - fdist_top - flinktop.bounds_y;
      end
      else begin
-      rect1.y:= bounds_y - foffset_top - flinktop.bounds_cy;
+      rect1.y:= bounds_y - fdist_top - flinktop.bounds_cy;
      end;
      flinktop.widgetrect:= rect1;
     end;

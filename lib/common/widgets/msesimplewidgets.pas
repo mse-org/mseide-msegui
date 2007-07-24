@@ -1026,18 +1026,17 @@ begin
     try
      exclude(fwidgetstate1,ws1_scaled);
      size1:= calcminscrollsize;
-//     size2:= paintsize;
-     size2:= size;
+     bo1:= not isvisible;
+     size2:= paintsize;
      box:= false;
      boy:= false;
 //     bo1:= not (visible or (csdesigning in componentstate));
-     bo1:= not isvisible;
      if (osc_invisishrinkx in foptionsscale) then begin
       if bo1 then begin
        if fsizebefore.cx = 0 then begin
         fsizebefore.cx:= size2.cx;
        end;
-       size1.cx:= 0;
+       size1.cx:= paintsize.cx-bounds_cx;
       end
       else begin
        if fsizebefore.cx <> 0 then begin
@@ -1055,7 +1054,7 @@ begin
        if fsizebefore.cy = 0 then begin
         fsizebefore.cy:= size2.cy;
        end;
-       size1.cy:= 0;
+       size1.cy:= paintsize.cy-bounds_cy;
       end
       else begin
        if fsizebefore.cy <> 0 then begin
