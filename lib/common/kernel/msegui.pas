@@ -7153,12 +7153,12 @@ var
 begin
  bo1:= ws_visible in fwidgetstate;
  bo2:= false;
- if bo1 and not (csdestroying in componentstate) then begin 
-  updateroot;
-  window.invalidaterect(makerect(frootpos,fwidgetrect.size));
-          //invalidate old position and size
- end;
  if showing then begin
+  if bo1 and not (csdestroying in componentstate) then begin 
+   updateroot;
+   window.invalidaterect(makerect(frootpos,fwidgetrect.size));
+           //invalidate old position and size
+  end;
   exclude(fwidgetstate,ws_visible);
   dohide;
  end
@@ -7210,10 +7210,9 @@ end;
 function twidget.internalshow(const modal: boolean; transientfor: twindow;
              const windowevent: boolean): modalresultty;
 var
- bo1,bo2: boolean;
+ bo1: boolean;
 begin
  bo1:= not showing;
- bo2:= false;
  updateroot; //create window
  if fparentwidget <> nil then begin
   if not (csdesigning in componentstate) then begin
