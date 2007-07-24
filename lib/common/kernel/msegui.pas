@@ -358,6 +358,7 @@ type
    procedure updatestate; virtual;
    procedure checkstate;
    procedure poschanged; virtual;
+   procedure visiblechanged; virtual;
    procedure getpaintframe(var frame: framety); virtual;
         //additional space, (scrollbars,mainmenu...)
    procedure dokeydown(var info: keyeventinfoty); virtual;
@@ -863,7 +864,8 @@ type
    function isvisible: boolean;      //checks designing
    function parentisvisible: boolean;//checks isvisible flags of ancestors
    function parentvisible: boolean;  //checks visible flags of ancestors
-   procedure updateopaque(const children: boolean);
+   function updateopaque(const children: boolean): boolean;
+                   //true if widgetregionchanged called
 
    //iface
    //iframe
@@ -897,6 +899,7 @@ type
    procedure getchildren(proc: tgetchildproc; root: tcomponent); override;
 
    function getcaretcliprect: rectty; virtual;  //origin = clientrect.pos
+   procedure readstate(reader: treader); override;
    procedure loaded; override;
 
    procedure updatemousestate(const apos: pointty); virtual;
@@ -2940,8 +2943,9 @@ var
 begin
  include(fstate,fs_rectsvalid);   //avoid recursion
  updaterects;
- if not (ws_loadedproc in fintf.widgetstate) and
-         not (csloading in fintf.getcomponentstate) and
+ if {not (ws_loadedproc in fintf.widgetstate) and}
+//         not (csloading in fintf.getcomponentstate) and
+         not (csreading in fintf.getcomponentstate) and
          not (fs_nowidget in fstate) then begin
   po1:= subpoint(fpaintrect.pos,fpaintposbefore);
   fintf.scrollwidgets(po1);
@@ -3304,6 +3308,11 @@ begin
 end;
 
 procedure tcustomframe.poschanged;
+begin
+ //dummy
+end;
+
+procedure tcustomframe.visiblechanged;
 begin
  //dummy
 end;
@@ -5114,6 +5123,15 @@ begin
  updatesizerange(avalue,fmaxsize);
 end;
 
+procedure twidget.readstate(reader: treader);
+begin
+ inherited;
+ if fframe <> nil then begin
+  fframe.calcrects; //rects must be valid for parentfontchanged
+  fframe.fpaintposbefore:= fframe.fpaintrect.pos;
+ end;
+end;
+
 procedure twidget.loaded;
 begin
  include(fwidgetstate,ws_loadedproc);
@@ -5123,9 +5141,6 @@ begin
   doloaded;
   sortzorder;
   updatetaborder(nil);
-  if fframe <> nil then begin
-   fframe.calcrects; //rects must be valid for parentfontchanged
-  end;
   parentfontchanged;
   if ffont <> nil then begin
    fontchanged;
@@ -5148,11 +5163,13 @@ begin
  end;
 end;
 
-procedure twidget.updateopaque(const children: boolean);
+function twidget.updateopaque(const children: boolean): boolean;
+                     //true if widgetregionchanged called
 var
  bo1: boolean;
  int1: integer;
 begin
+ result:= false;
  bo1:= ws_opaque in fwidgetstate;
  if isvisible then begin
   include(fwidgetstate,ws_isvisible);
@@ -5169,6 +5186,7 @@ begin
  end;
  if (bo1 <> (ws_opaque in fwidgetstate)) and (fparentwidget <> nil) then begin
   fparentwidget.widgetregionchanged(self);
+  result:= true;
  end;
  if children then begin
   for int1:= 0 to high(fwidgets) do begin
@@ -5231,7 +5249,9 @@ end;
 
 procedure twidget.visiblepropchanged;
 begin
- //dummy
+ if fframe <> nil then begin
+  fframe.visiblechanged;
+ end;
 end;
 
 procedure twidget.visiblechanged;
@@ -7129,22 +7149,28 @@ end;
 
 procedure twidget.internalhide(const windowevent: boolean);
 var
- bo1: boolean;
+ bo1,bo2: boolean;
 begin
  bo1:= ws_visible in fwidgetstate;
+ bo2:= false;
+ if bo1 and not (csdestroying in componentstate) then begin 
+  updateroot;
+  window.invalidaterect(makerect(frootpos,fwidgetrect.size));
+          //invalidate old position and size
+ end;
  if showing then begin
   exclude(fwidgetstate,ws_visible);
   dohide;
  end
  else begin
   exclude(fwidgetstate,ws_visible);
-  updateopaque(false);
+  bo2:= updateopaque(false);
  end;
  if ws_visible in fwidgetstate then begin
   exit; //show called
  end;
  if bo1 then begin
-  if fparentwidget <> nil then begin
+  if not bo2 and (fparentwidget <> nil) then begin
    fparentwidget.widgetregionchanged(self);
   end;
   if ownswindow1 then begin
@@ -7184,9 +7210,10 @@ end;
 function twidget.internalshow(const modal: boolean; transientfor: twindow;
              const windowevent: boolean): modalresultty;
 var
- bo1: boolean;
+ bo1,bo2: boolean;
 begin
  bo1:= not showing;
+ bo2:= false;
  updateroot; //create window
  if fparentwidget <> nil then begin
   if not (csdesigning in componentstate) then begin
@@ -7200,8 +7227,7 @@ begin
  end;
  include(fwidgetstate,ws_visible);
  if bo1 then begin
-  updateopaque(false);
-  if fparentwidget <> nil then begin
+  if not updateopaque(false) and (fparentwidget <> nil) then begin
    fparentwidget.widgetregionchanged(self);
   end;
  end;
@@ -7728,7 +7754,8 @@ end;
 function twidget.isvisible: boolean;
 begin
  result:= (ws_visible in fwidgetstate) or
-  ((csdesigning in componentstate) and not (ws1_nodesignvisible in fwidgetstate1));
+         ((csdesigning in componentstate) and 
+                    not (ws1_nodesignvisible in fwidgetstate1));
 end;
 
 function twidget.parentisvisible: boolean; //checks visible flags of ancestors
@@ -7781,8 +7808,7 @@ begin
    hide;
   end;
   if (ws1_fakevisible in fwidgetstate1) then begin
-   updateopaque(false);
-   if (fparentwidget <> nil) then begin
+   if not updateopaque(false) and (fparentwidget <> nil) then begin
     fparentwidget.widgetregionchanged(self);
    end;
   end;

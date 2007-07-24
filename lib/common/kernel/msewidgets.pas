@@ -51,6 +51,8 @@ type
    ffont: tframefont;
    finfo: drawtextinfoty;
    procedure parentfontchanged; override;
+   procedure visiblechanged; override;
+
    procedure updaterects; override;
    procedure defineproperties(filer: tfiler); override;
    procedure setdisabled(const value: boolean); override;
@@ -1429,6 +1431,14 @@ begin
   if not (ws_loadedproc in fintf.getwidget.widgetstate) then begin
    internalupdatestate;
   end;
+ end;
+end;
+
+procedure tcustomcaptionframe.visiblechanged;
+begin
+ inherited;
+ if finfo.text.text <> '' then begin
+  internalupdatestate;
  end;
 end;
 
