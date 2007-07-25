@@ -18,6 +18,7 @@ uses
 
 const
  menuarrowwidth = 8;
+ menuarrowwidthhorz = 15;
  menucheckboxwidth = 13;
  defaultshapecaptiondist = 2;
 
@@ -741,9 +742,12 @@ begin
  glyph1:= stg_arrowrightsmall;
  if ss_horz in info.state then begin
   glyph1:= stg_arrowdownsmall;
+  int1:= menuarrowwidthhorz;
+ end
+ else begin
+  int1:= menuarrowwidth;
  end;
  alignment:= [al_xcentered,al_ycentered];
- int1:= menuarrowwidth;
  if ss_disabled in info.state then begin
   include(alignment,al_grayed);
   inc(int1);
