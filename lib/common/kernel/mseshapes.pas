@@ -30,7 +30,7 @@ type
                  ss_widgetorg,ss_showfocusrect,ss_showdefaultrect,
                  ss_flat,ss_noanimation,
                  ss_checkbutton,
-                 ss_submenu);
+                 {ss_submenu,}ss_menuarrow);
  shapestatesty = set of shapestatety;
 
  actionstatety = (as_disabled = ord(ss_disabled),as_invisible=ord(ss_invisible),
@@ -736,21 +736,24 @@ procedure drawmenuarrow(const canvas: tcanvas; const info: shapeinfoty; rect: re
 var
  alignment: alignmentsty;
  int1: integer;
+ glyph1: stockglyphty;
 begin
- if not (ss_horz in info.state) then begin
-  alignment:= [al_xcentered,al_ycentered];
-  int1:= menuarrowwidth;
-  if ss_disabled in info.state then begin
-   include(alignment,al_grayed);
-   inc(int1);
-  end;
-  with rect do begin
-   x:= x + cx - int1;
-   cx:= int1;
-  end;
-  stockobjects.glyphs.paint(canvas,ord(stg_arrowrightsmall),rect,alignment,
-                                  info.colorglyph);
+ glyph1:= stg_arrowrightsmall;
+ if ss_horz in info.state then begin
+  glyph1:= stg_arrowdownsmall;
  end;
+ alignment:= [al_xcentered,al_ycentered];
+ int1:= menuarrowwidth;
+ if ss_disabled in info.state then begin
+  include(alignment,al_grayed);
+  inc(int1);
+ end;
+ with rect do begin
+  x:= x + cx - int1;
+  cx:= int1;
+ end;
+ stockobjects.glyphs.paint(canvas,ord(glyph1),rect,alignment,
+                                 info.colorglyph);
 end;
 
 procedure drawmenubutton(const canvas: tcanvas; const info: shapeinfoty;
@@ -761,7 +764,8 @@ begin
  if not (ss_invisible in info.state) and drawbuttonframe(canvas,info,rect1) then begin
   drawbuttonimage(canvas,info,rect1,cp_left);
   drawbuttoncheckbox(canvas,info,rect1,cp_right);
-  if ss_submenu in info.state then begin
+  if (ss_menuarrow in info.state) then begin
+//  if (ss_submenu in info.state)  then begin
    drawmenuarrow(canvas,info,rect1);
   end;
   if innerframe <> nil then begin

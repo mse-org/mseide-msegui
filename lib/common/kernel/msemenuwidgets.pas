@@ -309,11 +309,15 @@ var
  imagedi: integer;
  ar1: richstringarty;
  bo1: boolean;
+ needsmenuarrow: boolean;
  
 begin
  ar1:= nil; //compiler warning
  with layout,tmenuitem1(menu) do begin
   framehalfwidth:= 0;
+  needsmenuarrow:= not (mlo_horz in layout.options) or (owner <> nil) and 
+                        (mo_mainarrow in owner.options);
+
   if itemframetemplateactive <> nil then begin
    with tframetemplate1(itemframetemplateactive) do begin
     framehalfwidth:= (abs(levelo) + abs(leveli) + framewidth);
@@ -399,14 +403,17 @@ begin
       exclude(state,ss_noanimation);
      end;
     
-     if item1.count > 0 then begin
-      include(state,ss_submenu);
+     if needsmenuarrow and (item1.count > 0) then begin
+      include(state,ss_menuarrow);
+      if mlo_horz in layout.options then begin
+       inc(atextsize.cx,menuarrowwidth);
+      end;
      end
      else begin
-      exclude(state,ss_submenu);
+      exclude(state,ss_menuarrow);
      end;
      if not (ss_invisible in state) then begin
-      hassubmenu:= hassubmenu or (ss_submenu in state);
+      hassubmenu:= hassubmenu or (ss_menuarrow in state);
       hascheckbox:= hascheckbox or (ss_checkbox in state);
       with dim do begin
        if mlo_horz in layout.options then begin
