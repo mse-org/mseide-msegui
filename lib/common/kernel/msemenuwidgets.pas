@@ -406,7 +406,7 @@ begin
      if needsmenuarrow and (item1.count > 0) then begin
       include(state,ss_menuarrow);
       if mlo_horz in layout.options then begin
-       inc(atextsize.cx,menuarrowwidth);
+       inc(atextsize.cx,menuarrowwidthhorz);
       end;
      end
      else begin
