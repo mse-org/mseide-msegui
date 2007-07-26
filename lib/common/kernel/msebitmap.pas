@@ -274,7 +274,8 @@ type
    procedure setimage(index: integer; image: tmaskedbitmap; const source: rectty); overload;
    procedure setimage(index: integer; image: tmaskedbitmap); overload;
    procedure getimage(const index: integer; const dest: tmaskedbitmap);
-   function addimage(image: tmaskedbitmap): integer;
+   function addimage(const image: tmaskedbitmap; 
+                              const stretch: boolean = false): integer;
 
    procedure paint(const acanvas: tcanvas; const index: integer;
                    const dest: rectty; const alignment: alignmentsty = [];
@@ -1540,12 +1541,14 @@ begin
   dest.masked:= masked;
   dest.size:= size1;
   tcanvas1(dest.canvas).internalcopyarea(canvas,makerect(nullpoint,size),
-       makerect(nullpoint,size1),rop_copy,cl_none,nil,[al_stretchx,al_stretchy],
+       makerect(nullpoint,size1),rop_copy,cl_none,nil,
+                [al_stretchx,al_stretchy,al_intpol],
        nullpoint,cl_none);
        
   if masked then begin
    tcanvas1(dest.fmask.canvas).internalcopyarea(mask.canvas,makerect(nullpoint,size),
-       makerect(nullpoint,size1),rop_copy,cl_none,nil,[al_stretchx,al_stretchy],
+       makerect(nullpoint,size1),rop_copy,cl_none,nil,
+                [al_stretchx,al_stretchy,al_intpol],
        nullpoint,cl_none);
    include(dest.fstate,pms_maskvalid);
   end;
@@ -2084,10 +2087,11 @@ begin
  end;
 end;
 
-function timagelist.addimage(image: tmaskedbitmap): integer;
-
+function timagelist.addimage(const image: tmaskedbitmap;
+                                      const stretch: boolean = false): integer;
 var
  newcolcount,newrowcount,newcount: integer;
+ bmp1: tmaskedbitmap;
 begin
  if not image.isempty then begin
   result:= fcount;
@@ -2096,12 +2100,23 @@ begin
    if (fsize.cx = 0) or (fsize.cy = 0) then begin
     fsize:= image.fsize;
    end;
-   newcolcount:= (image.size.cx + fsize.cx-1) div fsize.cx;
-   newrowcount:= (image.size.cy + fsize.cy-1) div fsize.cy;
+   if stretch then begin
+    bmp1:= tmaskedbitmap.create(image.monochrome);
+    bmp1.size:= fsize;
+    image.stretch(bmp1);
+   end
+   else begin
+    bmp1:= image;
+   end;     
+   newcolcount:= (bmp1.size.cx + fsize.cx-1) div fsize.cx;
+   newrowcount:= (bmp1.size.cy + fsize.cy-1) div fsize.cy;
    newcount:= newcolcount * newrowcount;
    count:= fcount + newcount;
-   copyimages(image,result);
+   copyimages(bmp1,result);
   finally
+   if stretch then begin
+    bmp1.free;
+   end;
    endupdate;
   end;
  end
