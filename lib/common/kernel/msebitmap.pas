@@ -1464,8 +1464,17 @@ begin
 end;
 
 procedure tmaskedbitmap.setsource(const Value: tbitmapcomp);
+var
+ bmpcomp1: tbitmapcomp;
 begin
  if fsource <> value then begin
+  bmpcomp1:= value;
+  while bmpcomp1 <> nil do begin
+   if bmpcomp1.bitmap = self then begin
+    raise exception.create('Recursive bitmap source.');
+   end;
+   bmpcomp1:= bmpcomp1.bitmap.source;
+  end; 
   beginupdate;
   try
    clear;
