@@ -664,6 +664,12 @@ begin
  result:= gue_ok;
 end;
 
+function eventlater(const atime: cardinal): boolean;
+begin
+ result:= (atime = currenttime) or (lasteventtime = currenttime) or
+                           laterorsame(currenttime,atime);
+end;
+
 function gui_pastefromclipboard(out value: msestring): guierrorty;
 const
  transferbuffersize = 1024 div 4; //1kb
@@ -684,7 +690,7 @@ var
   longoffset: integer;
   time1: cardinal;
   int1: integer;
-  bo1: boolean;
+  bo1,bo2: boolean;
  begin
   result:= gue_clipboard;
   charoffset:= 1;
@@ -698,8 +704,17 @@ var
   time1:= timestep(2000000); //2 sec
   bo1:= true;
   repeat
-   if xcheckwindowevent(appdisp,appid,propertychangemask,@event)
-             {$ifndef FPC} = 0 {$endif} then begin
+   bo1:= not (xcheckwindowevent(appdisp,appid,propertychangemask,@event)
+             {$ifndef FPC} = 0 {$endif});
+   if bo1 then begin
+    with event.xproperty do begin
+     bo1:= eventlater(time) and (atom = convertselectionpropertyatom) and
+             (state = propertynewvalue);
+    end;
+   end;
+//   if xcheckwindowevent(appdisp,appid,propertychangemask,@event)
+//             {$ifndef FPC} = 0 {$endif} then begin
+   if not bo1 then begin
     if timeout(time1) then begin
      exit;
     end;
@@ -713,43 +728,37 @@ var
    end
    else begin
     with event.xproperty do begin
-     if later(lasteventtime,time) then begin
-      if (atom = convertselectionpropertyatom) then begin
-       if state = propertynewvalue then begin
-        nitems1:= 0;
+     nitems1:= 0;
+     bytesafter:= 0;
+     value1:= '';
+     repeat
+      if xgetwindowproperty(appdisp,appid,convertselectionpropertyatom,
+           longoffset,transferbuffersize,{$ifdef FPC} true{$else}1{$endif},
+          anypropertytype,@acttype,@actformat,@nitems,@bytesafter,@po1) = success then begin
+       if (resulttarget = 0) or (acttype = resulttarget) then begin
+        int1:= (actformat div 8) * nitems; //bytecount
+        if nitems > 0 then begin
+         inc(nitems1,nitems);
+         setlength(value1,length(value1) + int1 );
+         move(po1^,value1[charoffset],int1);
+         inc(charoffset,int1);
+         inc(longoffset,int1 div 4); //32 bit
+         result:= gue_ok;
+        end;
+       end
+       else begin
         bytesafter:= 0;
-        value1:= '';
-        repeat
-         if xgetwindowproperty(appdisp,appid,convertselectionpropertyatom,
-              longoffset,transferbuffersize,{$ifdef FPC} true{$else}1{$endif},
-             anypropertytype,@acttype,@actformat,@nitems,@bytesafter,@po1) = success then begin
-          if (resulttarget = 0) or (acttype = resulttarget) then begin
-           int1:= (actformat div 8) * nitems; //bytecount
-           if nitems > 0 then begin
-            inc(nitems1,nitems);
-            setlength(value1,length(value1) + int1 );
-            move(po1^,value1[charoffset],int1);
-            inc(charoffset,int1);
-            inc(longoffset,int1 div 4); //32 bit
-            result:= gue_ok;
-           end;
-          end
-          else begin
-           bytesafter:= 0;
-           result:= gue_clipboard;
-          end;
-          xfree(po1);
-         end
-         else begin
-          if timeout(time1) then begin
-           exit;
-          end;
-         end;
-        until bytesafter = 0;
-        break;
+        result:= gue_clipboard;
+       end;
+       xfree(po1);
+      end
+      else begin
+       if timeout(time1) then begin
+        exit;
        end;
       end;
-     end;
+     until bytesafter = 0;
+     break;
     end;
    end;
   until false;
