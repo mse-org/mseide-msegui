@@ -382,12 +382,26 @@ begin
      tabpos:= tabpos - frame1.right - frame1.left;
      if high(ar1) > 0 then begin
       ashortcutwidth:= gettextrect(cells[int1],ar1[1]).cx;
-      if ashortcutwidth > shortcutwidth then begin
-       shortcutwidth:= ashortcutwidth;
-      end;
      end
      else begin
       ashortcutwidth:= 0;
+     end;
+     if needsmenuarrow and (item1.count > 0) then begin
+      include(state,ss_menuarrow);
+      if mlo_horz in layout.options then begin
+       if ashortcutwidth = 0 then begin
+        inc(atextsize.cx,menuarrowwidthhorz);
+       end
+       else begin
+        inc(ashortcutwidth,menuarrowwidthhorz);
+       end;       
+      end;
+     end
+     else begin
+      exclude(state,ss_menuarrow);
+     end;
+     if ashortcutwidth > shortcutwidth then begin
+      shortcutwidth:= ashortcutwidth;
      end;
      colorglyph:= layout.colorglyph;
      caption:= item1.finfo.caption1;
@@ -403,15 +417,6 @@ begin
       exclude(state,ss_noanimation);
      end;
     
-     if needsmenuarrow and (item1.count > 0) then begin
-      include(state,ss_menuarrow);
-      if mlo_horz in layout.options then begin
-       inc(atextsize.cx,menuarrowwidthhorz);
-      end;
-     end
-     else begin
-      exclude(state,ss_menuarrow);
-     end;
      if not (ss_invisible in state) then begin
       hassubmenu:= hassubmenu or (ss_menuarrow in state);
       hascheckbox:= hascheckbox or (ss_checkbox in state);
