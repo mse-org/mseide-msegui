@@ -47,6 +47,8 @@ function getlasterror: integer;
 function getlasterrortext: string;
 function later(ref,act: cardinal): boolean;
  //true if act > ref, with overflowcorrection
+function laterorsame(ref,act: cardinal): boolean;
+ //true if act >= ref, with overflowcorrection
 
 procedure sleepus(const us: cardinal);
 procedure waitus(us: integer);
@@ -157,6 +159,15 @@ var
 begin
  ca1:= act-ref;
  result:= integer(ca1) > 0;
+// result:= integer(act-ref) > 0; //FPC bug 4768
+end;
+
+function laterorsame(ref,act: cardinal): boolean;
+var
+ ca1: cardinal;
+begin
+ ca1:= act-ref;
+ result:= integer(ca1) >= 0;
 // result:= integer(act-ref) > 0; //FPC bug 4768
 end;
 
