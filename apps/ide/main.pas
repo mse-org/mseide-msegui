@@ -296,6 +296,7 @@ end;
 
 procedure tmainfo.mainfoondestroy(const sender: tobject);
 begin
+ designnotifications.unRegisternotification(idesignnotification(self));
  abortmake;
  sourceupdate.deinit(designer);
 end;

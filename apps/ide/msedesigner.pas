@@ -148,6 +148,7 @@ type
 
   public
    constructor create(adesigner: tdesigner); reintroduce;
+   procedure designformdestroyed(const sender: tmseform);
    function delete(index: integer): pointer; override;
    function findmodule(const filename: msestring): pmoduleinfoty; overload;
    function findmodule(const amodule: tmsecomponent): pmoduleinfoty; overload;
@@ -1762,6 +1763,17 @@ constructor tmodulelist.create(adesigner: tdesigner);
 begin
  fdesigner:= adesigner;
  inherited create(true);
+end;
+
+procedure tmodulelist.designformdestroyed(const sender: tmseform);
+var
+ po1: pmoduleinfoty;
+begin
+ po1:= findform(sender);
+ if po1 <> nil then begin
+  po1^.designform:= nil;
+//  fdesigner.moduledestroyed(po1);
+ end;
 end;
 
 function tmodulelist.getitempo1(const index: integer): pmoduleinfoty;

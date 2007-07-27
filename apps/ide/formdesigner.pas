@@ -2229,6 +2229,7 @@ destructor tformdesignerfo.destroy;
 begin
  fmodule.free;
  inherited;
+ designer.modules.designformdestroyed(self);
 end;
 
 procedure tformdesignerfo.ValidateRename(AComponent: TComponent;

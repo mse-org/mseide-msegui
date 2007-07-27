@@ -1561,6 +1561,7 @@ type
    function getwindows(const index: integer): twindow;
    function dolock: boolean;
    function internalunlock(count: integer): boolean;
+   procedure destroyforms;
   protected  
    procedure eventloop(const once: boolean = false); 
                         //used in win32 wm_queryendsession and wm_entersizemove
@@ -10447,12 +10448,7 @@ end;
 
 destructor tinternalapplication.destroy;
 begin
- while componentcount > 0 do begin
-  components[0].free;  //destroy loaded forms
- end;
- while high(fwindows) >= 0 do begin
-  fwindows[0].fowner.free;
- end;
+ destroyforms;
  inherited;
  fmouseparktimer.free;
  fhinttimer.free;
@@ -11726,6 +11722,16 @@ begin
  end;
 end;
 
+procedure tapplication.destroyforms;
+begin
+ while componentcount > 0 do begin
+  components[0].free;  //destroy loaded forms
+ end;
+ while high(fwindows) >= 0 do begin
+  fwindows[0].fowner.free;
+ end;
+end;
+
 procedure tapplication.run;
 var
  threadbefore: threadty;
@@ -11742,6 +11748,8 @@ begin
    exclude(fstate,aps_running);
   end;
  end;
+ destroyforms; //zeos lib unloads libraries -> 
+               //forms must be destroyed before unit finalization
 end;
 
 function tapplication.getterminated: boolean;
