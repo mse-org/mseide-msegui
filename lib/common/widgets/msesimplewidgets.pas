@@ -135,6 +135,9 @@ type
    function checkfocusshortcut(var info: keyeventinfoty): boolean; override;
    procedure doshortcut(var info: keyeventinfoty; const sender: twidget); override;
    procedure getautopaintsize(var asize: sizety); override;
+   procedure objectevent(const sender: tobject;
+                                     const event: objecteventty); override;
+
   public
    constructor create(aowner: tcomponent); override;
    procedure synctofontheight; override;
@@ -827,6 +830,15 @@ begin
  if fautosize_cy <> avalue then begin
   fautosize_cy:= avalue;
   checkautosize;
+ end;
+end;
+
+procedure tcustombutton.objectevent(const sender: tobject;
+               const event: objecteventty);
+begin
+ inherited;
+ if (event = oe_changed) and (sender = finfo.imagelist) then begin
+  actionchanged;
  end;
 end;
 
