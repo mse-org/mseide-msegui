@@ -4,7 +4,7 @@ interface
 implementation
 uses
  msedesignintf,ZDataset,ZConnection,ZSqlUpdate,ZStoredProcedure,ZSqlMetadata,
- ZSqlProcessor,ZSqlMonitor,ZSequence,msezeos;
+ ZSqlProcessor,ZSqlMonitor,ZSequence,msezeos,regzeoslib_bmp;
  
 procedure Register;
 begin
