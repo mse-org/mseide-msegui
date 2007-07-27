@@ -55,9 +55,8 @@ for more info.
 
 FPC 2.2
 *******
-MSEide+MSEgui does not work with FPC 2.2, see
-http://www.mail-archive.com/fpc-devel%40lists.freepascal.org/msg07520.html
-for more info. It seems that there are widestring bugs in FPC 2.2 for Linux too.
+In patch_fpc_2_1_5 is a patched db.pas file in order to read with 
+FPC 2.0.4 written form files with incompatible fielddefs property.
 
 Debugging
 *********
@@ -66,6 +65,7 @@ Breakpoints don't work on win32 in units compiled with -CX
 String and dynamic array variables of units compiled with 
 -gv (Valgrind debug info) are displayed incorrect.
 gdb 6.5 has bugs with threads and forking on linux. Please update to gdb 6.6.
+FPC 2.2 projects must be compiled with -O- (no optimization) for debugging.
 
 Popup widgets behind the forms
 ******************************
