@@ -42,6 +42,11 @@ type
    function geteditorclass: propertyeditorclassty; override;
  end;
 
+ tsqlpropertyeditor = class(ttextstringspropertyeditor)
+  protected
+   function getsyntaxindex: integer; override;
+ end;
+
 implementation
 uses
  dbconst,classes,msedesignintf,db,typinfo,mseibconnection,
@@ -89,11 +94,6 @@ type
    procedure checkcomponent(const avalue: tcomponent); override;
  end;
  
- tsqlpropertyeditor = class(ttextstringspropertyeditor)
-  protected
-   function getsyntaxindex: integer; override;
- end;
-
  tsqlquerysqlpropertyeditor = class(tsqlpropertyeditor)
   private
    factivebefore: boolean;

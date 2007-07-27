@@ -2,7 +2,7 @@ unit msezeos;
 {$ifdef FPC}{$mode objfpc}{$h+}{$INTERFACES CORBA}{$endif}
 interface
 uses
- classes,db,ZDataset,msedb;
+ classes,db,ZDataset,msedb,ZStoredProcedure;
 type
  tmsezreadonlyquery = class(tzreadonlyquery,imselocate,idscontroller,
                                                              igetdscontroller)
@@ -92,6 +92,49 @@ type
  end;
  
  tmseztable = class(tztable,imselocate,idscontroller,igetdscontroller)
+   private
+   fcontroller: tdscontroller;
+   procedure setcontroller(const avalue: tdscontroller);
+   function getcontroller: tdscontroller;
+       //idscontroller
+   procedure inheritedresync(const mode: tresyncmode);
+   procedure inheriteddataevent(const event: tdataevent; const info: ptrint);
+   procedure inheritedcancel;
+   procedure inheritedpost;
+   function inheritedmoveby(const distance: integer): integer;
+   procedure inheritedinternalinsert;
+   procedure inheritedinternaldelete;
+   procedure inheritedinternalopen;
+   procedure inheritedinternalclose;
+   function getblobdatasize: integer;
+   function getnumboolean: boolean;
+  protected
+   procedure setactive (value : boolean);{ override;}
+   function getactive: boolean;
+   procedure loaded; override;
+   function  getfieldclass(fieldtype: tfieldtype): tfieldclass; override;
+   procedure openlocal;
+   procedure internalopen; override;
+   procedure internalinsert; override;
+   procedure internaldelete; override;
+   procedure internalclose; override;
+  public
+   constructor create(aowner: tcomponent); override;
+   destructor destroy; override;
+   function locate(const key: integer; const field: tfield;
+                   const aoptions: locateoptionsty = []): locateresultty;
+   function locate(const key: string; const field: tfield; 
+                 const aoptions: locateoptionsty = []): locateresultty;
+   procedure AppendRecord(const Values: array of const);
+   procedure cancel; override;
+   procedure post; override;
+   function moveby(const distance: integer): integer;
+  published
+   property controller: tdscontroller read fcontroller write setcontroller;
+   property Active: boolean read getactive write setactive;
+ end;
+
+ tmsezstoredproc = class(tzstoredproc,imselocate,idscontroller,igetdscontroller)
    private
    fcontroller: tdscontroller;
    procedure setcontroller(const avalue: tdscontroller);
@@ -612,6 +655,166 @@ begin
 end;
 
 function tmseztable.getnumboolean: boolean;
+begin
+ result:= true;
+end;
+
+{ tmsezstoredproc }
+
+constructor tmsezstoredproc.create(aowner: tcomponent);
+begin
+ inherited;
+ fcontroller:= tdscontroller.create(self,idscontroller(self));
+end;
+
+destructor tmsezstoredproc.destroy;
+begin
+ fcontroller.free;
+ inherited;
+end;
+
+function tmsezstoredproc.locate(const key: integer; const field: tfield;
+                   const aoptions: locateoptionsty = []): locateresultty;
+begin
+ result:= fcontroller.locate(key,field,aoptions);
+end;
+
+function tmsezstoredproc.locate(const key: string;
+        const field: tfield; const aoptions: locateoptionsty = []): locateresultty;
+begin
+ result:= fcontroller.locate(key,field,aoptions);
+end;
+
+procedure tmsezstoredproc.AppendRecord(const Values: array of const);
+begin
+ fcontroller.appendrecord(values);
+end;
+
+procedure tmsezstoredproc.setcontroller(const avalue: tdscontroller);
+begin
+ fcontroller.assign(avalue);
+end;
+
+function tmsezstoredproc.getactive: boolean;
+begin
+ result:= inherited active;
+end;
+
+procedure tmsezstoredproc.setactive(value: boolean);
+begin
+ if fcontroller.setactive(value) then begin
+  inherited;
+ end;
+end;
+
+procedure tmsezstoredproc.loaded;
+begin
+ inherited;
+ fcontroller.loaded;
+end;
+
+function tmsezstoredproc.getfieldclass(fieldtype: tfieldtype): tfieldclass;
+begin
+ fcontroller.getfieldclass(fieldtype,result);
+end;
+
+function tmsezstoredproc.getcontroller: tdscontroller;
+begin
+ result:= fcontroller;
+end;
+
+procedure tmsezstoredproc.inheritedresync(const mode: tresyncmode);
+begin
+ inherited resync(mode);
+end;
+
+procedure tmsezstoredproc.inheriteddataevent(const event: tdataevent;
+               const info: ptrint);
+begin
+ inherited dataevent(event,info);
+end;
+
+procedure tmsezstoredproc.inheritedcancel;
+begin
+ inherited cancel;
+end;
+
+procedure tmsezstoredproc.cancel;
+begin
+ fcontroller.cancel;
+end;
+
+function tmsezstoredproc.inheritedmoveby(const distance: integer): integer;
+begin
+ result:= inherited moveby(distance);
+end;
+
+procedure tmsezstoredproc.inheritedinternalinsert;
+begin
+ inherited internalinsert;
+end;
+
+procedure tmsezstoredproc.internalinsert;
+begin
+ fcontroller.internalinsert;
+end;
+
+function tmsezstoredproc.moveby(const distance: integer): integer;
+begin
+ result:= fcontroller.moveby(distance);
+end;
+
+procedure tmsezstoredproc.inheritedinternalopen;
+begin
+ inherited internalopen;
+end;
+
+procedure tmsezstoredproc.internalopen;
+begin
+ fcontroller.internalopen;
+end;
+
+procedure tmsezstoredproc.inheritedpost;
+begin
+ inherited post;
+end;
+
+procedure tmsezstoredproc.post;
+begin
+ fcontroller.post;
+end;
+
+procedure tmsezstoredproc.inheritedinternaldelete;
+begin
+ inherited internaldelete;
+end;
+
+procedure tmsezstoredproc.internaldelete;
+begin
+ fcontroller.internaldelete;
+end;
+
+procedure tmsezstoredproc.openlocal;
+begin
+ inherited internalopen;
+end;
+
+procedure tmsezstoredproc.inheritedinternalclose;
+begin
+ inherited internalclose;
+end;
+
+procedure tmsezstoredproc.internalclose;
+begin
+ fcontroller.internalclose;
+end;
+
+function tmsezstoredproc.getblobdatasize: integer;
+begin
+ result:= 0; //no blobs
+end;
+
+function tmsezstoredproc.getnumboolean: boolean;
 begin
  result:= true;
 end;
