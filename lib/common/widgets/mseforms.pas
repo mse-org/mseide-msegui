@@ -88,6 +88,7 @@ type
    fonapplicationactivechanged: booleaneventty;
    fonfontheightdelta: fontheightdeltaeventty;
    ficon: tmaskedbitmap;
+   ficonchanging: integer;
    function getonchildscaled: notifyeventty;
    procedure setonchildscaled(const avalue: notifyeventty);
    procedure setmainmenu(const Value: tmainmenu);
@@ -1343,11 +1344,16 @@ procedure tcustommseform.iconchanged(const sender: tobject);
 var
  icon1,mask1: pixmapty;
 begin
- if ownswindow then begin
-  getwindowicon(ficon,icon1,mask1);
-  gui_setwindowicon(window.winid,icon1,mask1);
-  if (fo_main in foptions) and not (csdesigning in componentstate) then begin
-   gui_setapplicationicon(icon1,mask1);
+ if ficonchanging = 0 then begin
+  inc(ficonchanging);
+  ficon.colormask:= false;
+  dec(ficonchanging); 
+  if ownswindow then begin
+   getwindowicon(ficon,icon1,mask1);
+   gui_setwindowicon(window.winid,icon1,mask1);
+   if (fo_main in foptions) and not (csdesigning in componentstate) then begin
+    gui_setapplicationicon(icon1,mask1);
+   end;
   end;
  end;
 end;

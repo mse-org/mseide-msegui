@@ -1292,15 +1292,18 @@ begin
  if ({$ifdef FPC}longword{$else}byte{$endif}(foptions) xor
      {$ifdef FPC}longword{$else}byte{$endif}(avalue)) and
      {$ifdef FPC}longword{$else}byte{$endif}(mask1) <> 0 then begin
+  foptions:= avalue;
   if fmask <> nil then begin
    checkmask;
    fmask.monochrome:= not (bmo_colormask in avalue);
    change;
   end;
+ end
+ else begin
+  foptions:= avalue;
  end;
- foptions:= avalue;
- monochrome:= bmo_monochrome in avalue;
- masked:= bmo_masked in avalue;
+ monochrome:= bmo_monochrome in foptions;
+ masked:= bmo_masked in foptions;
 end;
 
 procedure tmaskedbitmap.remask;
