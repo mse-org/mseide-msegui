@@ -3725,6 +3725,9 @@ end;
 procedure tcustomface.imagechanged(const sender: tobject);
 begin
  change;
+ if not (csloading in fintf.getwidget.componentstate) then begin
+  include(flocalprops,fal_image);
+ end;
 end;
 
 procedure tcustomface.checktemplate(const sender: tobject);
@@ -4024,7 +4027,6 @@ end;
 
 procedure tcustomface.setimage(const value: tmaskedbitmap);
 begin
- include(flocalprops,fal_image);
  fi.image.assign(value);
 end;
 

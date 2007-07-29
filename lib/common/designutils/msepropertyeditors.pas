@@ -3120,7 +3120,8 @@ begin
     try
      bmp.loadfromfile(filename,graphicfilefilterlabel(filterindex));
      for int1:= 0 to high(fprops) do begin
-      tmaskedbitmap(getordvalue(int1)).assign(bmp);
+//      tmaskedbitmap(getordvalue(int1)).assign(bmp);
+      setordvalue(int1,ptruint(bmp));
      end;
      modified;
     finally
