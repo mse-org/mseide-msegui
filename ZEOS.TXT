@@ -1,20 +1,20 @@
 How to build MSEide with ZeosLib integration
 ********************************************
 
-- Download and install SVN:
+1. Download and install SVN:
 http://subversion.tigris.org/project_packages.html
 
-- Create <yourmsecheckoutdir>.
-- cd <yourmsecheckoutdir>
-- Execute
+2. Create <yourmsecheckoutdir>.
+3. cd <yourmsecheckoutdir>
+4. Execute
 "
 svn co https://mseide-msegui.svn.sourceforge.net/svnroot/mseide-msegui/trunk .
 "
 (note the dot at line end to use the current directory as destination).
 
-- Create <yourzeoscheckoutdir>.
-- cd <yourzeoscheckoutdir>
-- Execute
+5. Create <yourzeoscheckoutdir>.
+6. cd <yourzeoscheckoutdir>
+7. Execute
 "
 svn co svn://firmos.at/zeos/trunk .
 "
@@ -23,21 +23,31 @@ svn co svn://firmos.at/zeos/trunk .
 - Download and install MSEide+MSEgui version 1.2, follow the instructions on:
 http://www.homepage.bluewin.ch/msegui/
 
-- Run <yourdirectory>/bin/i386-linux/mseide on Linux or 
+8. Run <yourdirectory>/bin/i386-linux/mseide on Linux or 
   <yourdirectory>\bin\i386-win32\mseide.exe on Windows.
-- 'Project'-'Open' (not File-Open!!!!!).
-- Select <yourmsecheckoutdir>/apps/ide/mseide_zeos.prj.
-- 'Project'-'Options'-'Macros'.
-- Adjust 'Value' of "msedir" to <yourmsecheckoutdir>/, don't forget
-  the trailing path delimiter.
-- Adjust 'Value' of "zeosdir" to <yourzeoscheckoutdir>/, don't forget
-  the trailing path delimiter.
-- 'Target'-'Continue', the IDE with Zeos integration will be compiled and
-  started in debugger.
+9. 'Project'-'Open' (not File-Open!!!!!).
+10. Select <yourmsecheckoutdir>/apps/ide/templates/zeos.prj.
+11. 'Project'-'Options'-'Macros'.
+12. Adjust 'Value' of "msedir" to <yourmsecheckoutdir>/, don't forget
+ the trailing path delimiter.
+13. Adjust 'Value' of "zeosdir" to <yourzeoscheckoutdir>/, don't forget
+ the trailing path delimiter.
+
+14. 'Project'-'Open' (not File-Open!!!!!).
+15. Select <yourmsecheckoutdir>/apps/ide/mseide_zeos.prj.
+16. 'Project'-'Options'-'Macros'.
+17. Adjust 'Value' of "msedir" to <yourmsecheckoutdir>/, don't forget
+ the trailing path delimiter.
+18. Adjust 'Value' of "zeosdir" to <yourzeoscheckoutdir>/, don't forget
+ the trailing path delimiter.
+19. 'Target'-'Continue', the IDE with Zeos integration will be compiled and
+ started in debugger.
 
 The IDE binary is <yourmsecheckoutdir>/apps/ide/mseide_zeos,
 to remove the debug info run strip or compile the mseide_zeos project with 
 'Project'-'Make 4'.
+To start a new Zeos project select 'Project'-'New'-'From Template'
+<yourmsecheckoutdir>/apps/ide/templates/zeos.prj.
 
 *WARNING* ZeosLib compiled with FPC 2.0.4 has giant memory leaks,
 use FPC 2.0.5 or FPC 2.1.5.
