@@ -23,7 +23,7 @@ options=54
  cy=572
  [projectoptionsfo.tabwidget]
  firsttab=0
- index=1
+ index=3
  [projectoptionsfo.ttabwidget2]
  firsttab=0
  index=1
@@ -585,7 +585,7 @@ windowlayout=322
  [threadsfo]
  splitdir=0
  useroptions=2075
- stackedunder=targetconsolefo
+ stackedunder=componentpalettefo
  parent=
  mdistate=0
  nx=0
@@ -602,7 +602,7 @@ windowlayout=322
  [targetconsolefo]
  splitdir=0
  useroptions=2075
- stackedunder=componentpalettefo
+ stackedunder=
  parent=
  mdistate=0
  nx=0
@@ -615,7 +615,7 @@ windowlayout=322
  cy=347
  wsize=0
  active=0
- visible=1
+ visible=0
  [mainfo.panel1]
  splitdir=2
  useroptions=4091
