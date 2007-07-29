@@ -23,14 +23,14 @@ svn co svn://firmos.at/zeos/trunk .
 - Download and install MSEide+MSEgui version 1.2, follow the instructions on:
 http://www.homepage.bluewin.ch/msegui/
 
-- Run 'yourdirectory/bin/i386-linux/mseide' on linux or 
-  'yourdirectory\bin\i386-win32\mseide.exe' on windows.
+- Run <yourdirectory>/bin/i386-linux/mseide on Linux or 
+  <yourdirectory>\bin\i386-win32\mseide.exe on Windows.
 - 'Project'-'Open' (not File-Open!!!!!).
-- Select "<yourmsecheckoutdir>apps/ide/mseide_zeos.prj".
+- Select <yourmsecheckoutdir>/apps/ide/mseide_zeos.prj.
 - 'Project'-'Options'-'Macros'.
-- Adjust 'Value' of "msedir" to <yourmsecheckoutdir>, don't forget
+- Adjust 'Value' of "msedir" to <yourmsecheckoutdir>/, don't forget
   the trailing path delimiter.
-- Adjust 'Value' of "zeosdir" to <yourzeoscheckoutdir>, don't forget
+- Adjust 'Value' of "zeosdir" to <yourzeoscheckoutdir>/, don't forget
   the trailing path delimiter.
 - 'Target'-'Continue', the IDE with Zeos integration will be compiled and
   started in debugger.
