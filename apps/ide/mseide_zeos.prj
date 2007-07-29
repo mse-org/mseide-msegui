@@ -23,7 +23,7 @@ options=54
  cy=572
  [projectoptionsfo.tabwidget]
  firsttab=0
- index=2
+ index=1
  [projectoptionsfo.ttabwidget2]
  firsttab=0
  index=1
@@ -144,7 +144,9 @@ groupcomments=6
  
  
  
-sourcedirs=3
+sourcedirs=5
+ ${zeosdir}src/*/
+ ${zeosdir}src/
  ${MSELIBDIR}kernel/$TARGET/
  ${MSELIBDIR}*/
  ./
@@ -430,7 +432,7 @@ windowlayout=322
  [objectinspectorfo]
  splitdir=0
  useroptions=2075
- stackedunder=breakpointsfo
+ stackedunder=watchpointsfo
  parent=
  mdistate=0
  nx=0
@@ -450,7 +452,7 @@ windowlayout=322
  [breakpointsfo]
  splitdir=0
  useroptions=2075
- stackedunder=watchpointsfo
+ stackedunder=cpufo
  parent=
  mdistate=0
  nx=0
@@ -501,7 +503,7 @@ windowlayout=322
  [stackfo]
  splitdir=0
  useroptions=2075
- stackedunder=disassfo
+ stackedunder=threadsfo
  parent=
  mdistate=0
  nx=0
@@ -549,7 +551,7 @@ windowlayout=322
  [cpufo]
  splitdir=0
  useroptions=2075
- stackedunder=projecttreefo
+ stackedunder=disassfo
  parent=
  mdistate=0
  nx=0
@@ -566,7 +568,7 @@ windowlayout=322
  [disassfo]
  splitdir=0
  useroptions=2075
- stackedunder=threadsfo
+ stackedunder=projecttreefo
  parent=
  mdistate=0
  nx=0
