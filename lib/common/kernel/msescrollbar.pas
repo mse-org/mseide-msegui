@@ -129,6 +129,7 @@ type
    constructor create(intf: iscrollbar; org: originty = org_client;
               ondimchanged: objectprocty = nil); reintroduce; virtual;
    destructor destroy; override;
+   function checktemplate(const sender: tobject): boolean;
    procedure excludeopaque(const canvas: tcanvas);
    procedure paint(const canvas: tcanvas); virtual;
    function wantmouseevent(const apos: pointty): boolean;
@@ -1009,6 +1010,16 @@ end;
 function tcustomscrollbar.clicked: boolean;
 begin
  result:= fclickedarea <> scrollbarareaty(-1);
+end;
+
+function tcustomscrollbar.checktemplate(const sender: tobject): boolean;
+begin
+ if ffacebutton <> nil then begin
+  ffacebutton.checktemplate(sender);
+ end;
+ if ffaceendbutton <> nil then begin
+  ffaceendbutton.checktemplate(sender);
+ end;
 end;
 
 { tcustomnomoveautoscrollbar }

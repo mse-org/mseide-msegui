@@ -371,6 +371,7 @@ type
   public
    constructor create(const intf: iframe); reintroduce;
    destructor destroy; override;
+   procedure checktemplate(const sender: tobject); virtual;
    procedure assign(source: tpersistent); override;
    procedure scale(const ascale: real); virtual;
 
@@ -597,6 +598,7 @@ type
    constructor create(const owner: twidget); reintroduce; overload;//sets fowner.fframe
    constructor create(const intf: iface); reintroduce; overload;
    destructor destroy; override;
+   procedure checktemplate(const sender: tobject);
    procedure assign(source: tpersistent); override;
    procedure paint(const canvas: tcanvas; const rect: rectty); virtual;
    property options: faceoptionsty read fi.options write setoptions
@@ -3006,8 +3008,8 @@ end;
 
 procedure tcustomframe.setlevelo(const Value: integer);
 begin
+ include(flocalprops,frl_levelo);
  if fi.levelo <> value then begin
-  include(flocalprops,frl_levelo);
   fi.levelo := Value;
   internalupdatestate;
  end;
@@ -3015,8 +3017,8 @@ end;
 
 procedure tcustomframe.setleveli(const Value: integer);
 begin
+ include(flocalprops,frl_leveli);
  if fi.leveli <> value then begin
-  include(flocalprops,frl_leveli);
   fi.leveli := Value;
   internalupdatestate;
  end;
@@ -3024,8 +3026,8 @@ end;
 
 procedure tcustomframe.setframewidth(const Value: integer);
 begin
+ include(flocalprops,frl_framewidth);
  if fi.framewidth <> value then begin
-  include(flocalprops,frl_framewidth);
   if value < 0 then begin
    fi.framewidth:= 0;
   end
@@ -3047,8 +3049,8 @@ end;
 }
 procedure tcustomframe.setframei_left(const Value: integer);
 begin
+ include(flocalprops,frl_fileft);
  if fi.innerframe.left <> value then begin
-  include(flocalprops,frl_fileft);
   fi.innerframe.left:= Value;
   internalupdatestate;
  end;
@@ -3056,8 +3058,8 @@ end;
 
 procedure tcustomframe.setframei_top(const Value: integer);
 begin
+ include(flocalprops,frl_fitop);
  if fi.innerframe.top <> value then begin
-  include(flocalprops,frl_fitop);
   fi.innerframe.top := Value;
   internalupdatestate;
  end;
@@ -3065,8 +3067,8 @@ end;
 
 procedure tcustomframe.setframei_right(const Value: integer);
 begin
+ include(flocalprops,frl_firight);
  if fi.innerframe.right <> value then begin
-  include(flocalprops,frl_firight);
   fi.innerframe.right:= Value;
   internalupdatestate;
  end;
@@ -3074,8 +3076,8 @@ end;
 
 procedure tcustomframe.setframei_bottom(const Value: integer);
 begin
+ include(flocalprops,frl_fibottom);
  if fi.innerframe.bottom <> value then begin
-  include(flocalprops,frl_fibottom);
   fi.innerframe.bottom:= Value;
   internalupdatestate;
  end;
@@ -3083,8 +3085,8 @@ end;
 
 procedure tcustomframe.setcolorclient(const value: colorty);
 begin
+ include(flocalprops,frl_colorclient);
  if fi.colorclient <> value then begin
-  include(flocalprops,frl_colorclient);
   fi.colorclient:= value;
   fintf.invalidate;
  end;
@@ -3092,8 +3094,8 @@ end;
 
 procedure tcustomframe.setcolorframe(const Value: colorty);
 begin
+ include(flocalprops,frl_colorframe);
  if fi.colorframe <> value then begin
-  include(flocalprops,frl_colorframe);
   fi.colorframe:= Value;
   fintf.invalidatewidget;
  end;
@@ -3101,8 +3103,8 @@ end;
 
 procedure tcustomframe.setcolorframeactive(const avalue: colorty);
 begin
+ include(flocalprops,frl_colorframeactive);
  if fi.colorframeactive <> avalue then begin
-  include(flocalprops,frl_colorframeactive);
   fi.colorframeactive:= avalue;
   fintf.invalidatewidget;
  end;
@@ -3110,8 +3112,8 @@ end;
 
 procedure tcustomframe.setcolordkshadow(const avalue: colorty);
 begin
+ include(flocalprops,frl_colordkshadow);
  if fi.framecolors.shadow.effectcolor <> avalue then begin
-  include(flocalprops,frl_colordkshadow);
   fi.framecolors.shadow.effectcolor:= avalue;
   fintf.invalidatewidget;
  end;
@@ -3119,8 +3121,8 @@ end;
 
 procedure tcustomframe.setcolorshadow(const avalue: colorty);
 begin
+ include(flocalprops,frl_colorshadow);
  if fi.framecolors.shadow.color <> avalue then begin
-  include(flocalprops,frl_colorshadow);
   fi.framecolors.shadow.color:= avalue;
   fintf.invalidatewidget;
  end;
@@ -3128,8 +3130,8 @@ end;
 
 procedure tcustomframe.setcolorlight(const avalue: colorty);
 begin
+ include(flocalprops,frl_colorlight);
  if fi.framecolors.light.color <> avalue then begin
-  include(flocalprops,frl_colorlight);
   fi.framecolors.light.color:= avalue;
   fintf.invalidatewidget;
  end;
@@ -3137,8 +3139,8 @@ end;
 
 procedure tcustomframe.setcolorhighlight(const avalue: colorty);
 begin
+ include(flocalprops,frl_colorhighlight);
  if fi.framecolors.light.effectcolor <> avalue then begin
-  include(flocalprops,frl_colorhighlight);
   fi.framecolors.light.effectcolor:= avalue;
   fintf.invalidatewidget;
  end;
@@ -3146,8 +3148,8 @@ end;
 
 procedure tcustomframe.setcolordkwidth(const avalue: integer);
 begin
+ include(flocalprops,frl_colordkwidth);
  if fi.framecolors.shadow.effectwidth <> avalue then begin
-  include(flocalprops,frl_colordkwidth);
   fi.framecolors.shadow.effectwidth:= avalue;
   fintf.invalidatewidget;
  end;
@@ -3155,8 +3157,8 @@ end;
 
 procedure tcustomframe.setcolorhlwidth(const avalue: integer);
 begin
+ include(flocalprops,frl_colorhlwidth);
  if fi.framecolors.light.effectwidth <> avalue then begin
-  include(flocalprops,frl_colorhlwidth);
   fi.framecolors.light.effectwidth:= avalue;
   fintf.invalidatewidget;
  end;
@@ -3292,6 +3294,13 @@ begin
  result:= finnerframe;
 // result:= addframe(fouterframe,fpaintframe);
 // addframe1(result,fi.innerframe);
+end;
+
+procedure tcustomframe.checktemplate(const sender: tobject);
+begin
+ if sender = ftemplate then begin
+  assign(tpersistent(sender));
+ end;
 end;
 
 procedure tcustomframe.assign(source: tpersistent);
@@ -3718,9 +3727,11 @@ begin
  change;
 end;
 
-procedure tcustomface.setimage(const value: tmaskedbitmap);
+procedure tcustomface.checktemplate(const sender: tobject);
 begin
- fi.image.assign(value);
+ if sender = ftemplate then begin
+  assign(tpersistent(sender));
+ end;
 end;
 
 procedure tcustomface.assign(source: tpersistent);
@@ -4011,10 +4022,17 @@ begin
  end;
 end;
 
+procedure tcustomface.setimage(const value: tmaskedbitmap);
+begin
+ include(flocalprops,fal_image);
+ fi.image.assign(value);
+end;
+
 procedure tcustomface.setoptions(const avalue: faceoptionsty);
 var
  optionsbefore: faceoptionsty;
 begin
+ include(flocalprops,fal_options);
  if avalue <> fi.options then begin
   optionsbefore:= fi.options;
   fi.options:= faceoptionsty(
@@ -4032,16 +4050,19 @@ end;
 
 procedure tcustomface.setfade_color(const Value: tcolorarrayprop);
 begin
+ include(flocalprops,fal_facolor);
  fi.fade_color.assign(Value);
 end;
 
 procedure tcustomface.setfade_pos(const Value: trealarrayprop);
 begin
+ include(flocalprops,fal_fapos);
  fi.fade_pos.assign(Value);
 end;
 
 procedure tcustomface.setfade_direction(const Value: graphicdirectionty);
 begin
+ include(flocalprops,fal_fadirection);
  if fi.fade_direction <> value then begin
   fi.fade_direction:= Value;
   change;
@@ -4050,6 +4071,7 @@ end;
 
 procedure tcustomface.setfade_transparency(const avalue: colorty);
 begin
+ include(flocalprops,fal_fatransparency);
  if fi.fade_transparency <> avalue then begin
   fi.fade_transparency:= avalue;
   change;
@@ -4072,7 +4094,10 @@ end;
 }
 
 procedure tcustomface.settemplateinfo(const ainfo: faceinfoty);
+var
+ localbefore: facelocalpropsty;
 begin
+ localbefore:= flocalprops;
  if not (fal_facolor in flocalprops) then begin
   fade_color:= ainfo.fade_color;
  end;
@@ -4091,6 +4116,7 @@ begin
  if not (fal_options in flocalprops) then begin
   options:= ainfo.options;
  end;
+ flocalprops:= localbefore;
 end;
 
 procedure tcustomface.setlocalprops(const avalue: facelocalpropsty);
@@ -8353,14 +8379,13 @@ end;
 
 procedure twidget.objectevent(const sender: tobject; const event: objecteventty);
 begin
+ inherited;
  if (event = oe_changed) then begin
-  if (fface <> nil) and (sender = fface.ftemplate) then begin
-   fface.assign(tpersistent(sender));
-  end
-  else begin
-   if (fframe <> nil) and (sender = frame.ftemplate) then begin
-    fframe.assign(tpersistent(sender));
-   end
+  if fface <> nil then begin
+   fface.checktemplate(sender);
+  end;
+  if fframe <> nil then begin
+   fframe.checktemplate(sender);
   end;
  end;
 end;

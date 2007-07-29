@@ -172,6 +172,8 @@ type
  public
    constructor create(const intf: iframe; const scrollintf: iscrollbar);
    destructor destroy; override;
+   procedure checktemplate(const sender: tobject); override;
+                 //true if match
    procedure updatemousestate(const sender: twidget; const apos: pointty); override;
    procedure dopaintframe(const canvas: tcanvas; const rect: rectty); override;
    procedure mouseevent(var info: mouseeventinfoty); virtual;
@@ -1765,6 +1767,14 @@ begin
  fhorz.Free;
  fvert.free;
  inherited;
+end;
+
+procedure tcustomscrollframe.checktemplate(const sender: tobject);
+                 //true if match
+begin
+ inherited;
+ fhorz.checktemplate(sender);
+ fvert.checktemplate(sender);
 end;
 
 function tcustomscrollframe.getscrollbarclass(vert: boolean): framescrollbarclassty;
