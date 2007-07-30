@@ -62,6 +62,7 @@ type
    procedure setpickoffset(const aoffset: pointty);
    procedure setcolorgrip(const avalue: colorty);
    procedure setgrip(const avalue: stockbitmapty);
+   procedure setoptions(const avalue: splitteroptionsty);
   protected
    function getmintopleft: pointty; override;
    function clippoint(const aoffset: pointty): pointty;
@@ -98,7 +99,8 @@ type
    procedure move(const dist: pointty);
   published
    property optionswidget default defaultoptionswidgetnofocus;
-   property options: splitteroptionsty read foptions write foptions default defaultsplitteroptions;
+   property options: splitteroptionsty read foptions write setoptions 
+                 default defaultsplitteroptions;
    property linkleft: twidget read flinkleft write setlinkleft;
    property linktop: twidget read flinktop write setlinktop;
    property linkright: twidget read flinkright write setlinkright;
@@ -639,34 +641,38 @@ begin
   inc(fupdating);
   po1:= addpoint(pos,pointty(size));
   try  
-   if flinkleft = flinkright then begin
+   if (flinkleft = flinkright) and 
+        (foptions * [spo_dockleft,spo_dockright] = 
+                           [spo_dockleft,spo_dockright])then begin
     if flinkleft <> nil then begin
      flinkleft.widgetrect:= makerect(bounds_x,flinkleft.bounds_y,bounds_cx,
                                          flinkleft.bounds_cy);
     end;
    end
    else begin
-    if flinkleft <> nil then begin
+    if (flinkleft <> nil) and (spo_dockleft in foptions) then begin
      flinkleft.bounds_cx:= bounds_x - flinkleft.bounds_x;
     end;
-    if flinkright <> nil then begin
+    if (flinkright <> nil) and (spo_dockright in foptions) then begin
      rect1:= flinkright.widgetrect;
      rect1.cx:= rect1.cx + (rect1.x - po1.x);
      rect1.pos.x:= po1.x;
      flinkright.widgetrect:= rect1;
     end;
    end;
-   if flinktop = flinkbottom then begin
+   if (flinktop = flinkbottom) and 
+        (foptions * [spo_docktop,spo_dockbottom] = 
+                           [spo_docktop,spo_dockbottom]) then begin
     if flinktop <> nil then begin
      flinktop.widgetrect:= makerect(flinktop.bounds_x,bounds_y,
                                        flinktop.bounds_cx,bounds_cy);
     end;
    end
    else begin
-    if flinktop <> nil then begin
+    if (flinktop <> nil) and (spo_docktop in foptions) then begin
      flinktop.bounds_cy:= bounds_y - flinktop.bounds_y;
     end;
-    if flinkbottom <> nil then begin
+    if (flinkbottom <> nil)  and (spo_dockbottom in foptions) then begin
      rect1:= flinkbottom.widgetrect;
      rect1.cy:= rect1.cy + (rect1.y - po1.y);
      rect1.pos.y:= po1.y;
@@ -689,6 +695,14 @@ begin
  end;
  if flinktop <> nil then begin
   result.y:= result.y - flinktop.bounds_cy + flinktop.bounds_cymin;
+ end;
+end;
+
+procedure tsplitter.setoptions(const avalue: splitteroptionsty);
+begin
+ if foptions <> avalue then begin
+  foptions:= avalue;
+  updatedock;
  end;
 end;
 
