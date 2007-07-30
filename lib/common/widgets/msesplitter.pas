@@ -523,15 +523,21 @@ var
   size2:= size;
   if spo_hsizeprop in foptions then begin
    size2.cx:= round(size1.cx * fhsizeprop);
+   if an_right in fanchors then begin
+    pt1.x:= bounds_cx - size2.cx;
+   end;
   end;
   if spo_vsizeprop in foptions then begin
    size2.cy:= round(size1.cy * fvsizeprop);
+   if an_bottom in fanchors then begin
+    pt1.y:= bounds_cy - size2.cy;
+   end;
   end;
   if spo_hprop in foptions then begin
-   pt1.x:= round(fhprop * size1.cx) - parentclientpos.x;
+   pt1.x:= pt1.x + round(fhprop * size1.cx) - parentclientpos.x;
   end;
   if spo_vprop in foptions then begin
-   pt1.y:= round(fvprop * size1.cy) - parentclientpos.y;
+   pt1.y:= pt1.y + round(fvprop * size1.cy) - parentclientpos.y;
   end;
   pt2:= clippoint(pt1);
  end;
