@@ -5,9 +5,15 @@ implementation
 uses
  Classes,msedesignintf,ZDataset,ZConnection,ZSqlUpdate,ZStoredProcedure,ZSqlMetadata,
  ZSqlProcessor,ZSqlMonitor,ZSequence,msezeos,regzeoslib_bmp,regdb,
- msepropertyeditors,ZSqlStrings,ZAbstractRODataset,msegui,msedb;
+ msepropertyeditors,ZSqlStrings,ZAbstractRODataset,msegui,msedb,msestrings;
  
 type
+ tzprotocolpropertyeditor = class(tstringpropertyeditor)
+  protected
+   function getdefaultstate: propertystatesty; override;
+   function getvalues: msestringarty; override;
+ end;
+ 
  tzquerysqlpropertyeditor = class(tsqlpropertyeditor)
   private
    factivebefore: boolean;
@@ -36,6 +42,8 @@ begin
          tmseztable,
          TZUpdateSQL, tmsezstoredproc, TZSQLMetadata, TZSQLProcessor,
          TZSQLMonitor, TZSequence]);
+ registerpropertyeditor(typeinfo(string),TZConnection,'Protocol',
+                      tzprotocolpropertyeditor);
  registerpropertyeditor(typeinfo(tstrings),TmseZreadonlyQuery,'SQL',
                       tzreadonlyquerysqlpropertyeditor);
  registerpropertyeditor(typeinfo(tstrings),TmseZQuery,'SQL',
@@ -107,6 +115,30 @@ begin
  inherited;
  if not factivebefore then begin
   tmsezreadonlyquery(fprops[0].instance).active:= false;
+ end;
+end;
+
+{ tzprotocolpropertyeditor }
+
+function tzprotocolpropertyeditor.getdefaultstate: propertystatesty;
+begin
+ result:= inherited getdefaultstate + [ps_valuelist,ps_sortlist];
+end;
+
+function tzprotocolpropertyeditor.getvalues: msestringarty;
+var
+ list1: tstringlist;
+ int1: integer;
+begin
+ list1:= tstringlist.create;
+ try
+  tzconnection(fprops[0].instance).getprotocolnames(list1);
+  setlength(result,list1.count);
+  for int1:= 0 to high(result) do begin
+   result[int1]:= list1[int1];
+  end;
+ finally
+  list1.free;
  end;
 end;
 
