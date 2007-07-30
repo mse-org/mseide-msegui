@@ -161,7 +161,7 @@ names list and printer count
 *************************************
 }
 
-function pri_getprinterlist(var printernames: msestringarty): integer;
+function pri_getprinterlist: msestringarty;
 var
   flags: dword;
   needed: dword;
@@ -171,8 +171,7 @@ var
   printercount: dword;
   counter: longint;
 begin
-  result:= 0;
-    
+  result:= nil;
   flags:= 2 or 4;
   needed:= 0;
   level:= 4;
@@ -187,16 +186,15 @@ begin
     
     enumprinters(flags,nil,level,infobuffer,needed,needed,printercount);
     infoptr:= infobuffer;
-    setlength(printernames, printercount);
+    setlength(result, printercount);
     
-    for counter:= 0 to printercount - 1 do
+    for counter:= 0 to high(result) do
       begin
-        printernames[counter]:= (pprinter_info_4(infoptr)^.pprintername);
+        result[counter]:= (pprinter_info_4(infoptr)^.pprintername);
         inc(infoptr,sizeof(printer_info_4));
       end;
     freemem(infobuffer);
     
-    result:= printercount;
   end;
        
   finalizedll;
@@ -209,7 +207,7 @@ default printer name
 *************************************
 }
 
-function pri_getdefaultprinter(): msestring;
+function pri_getdefaultprinter: msestring;
 var
   flags: dword;
   level: dword;
@@ -264,7 +262,8 @@ properties
 *************************************
 }
 
-function pri_getprinterproperties(printername: msestring; var properties: printerpropertiesty): boolean;
+function pri_getprinterproperties(const printername: msestring;
+                      var properties: printerpropertiesty): boolean;
 var
   flags: dword;
   level: dword;
@@ -307,20 +306,15 @@ begin
           properties.location:= strpas(pprinter_info_2(infobuffer)^.plocation);
           properties.description:= strpas(pprinter_info_2(infobuffer)^.pcomment);
       
-          if defaultprinter = strpas(pprinter_info_2(infobuffer)^.pprintername) then
-            properties.is_default:= true
-          else
-            properties.is_default:= false;
+          properties.isdefault:= defaultprinter = 
+                         strpas(pprinter_info_2(infobuffer)^.pprintername);
           
-          if pprinter_info_2(infobuffer)^.attributes or 8 = pprinter_info_2(infobuffer)^.attributes then
-            properties.is_shared:= true
-          else
-            properties.is_shared:= false;
+          properties.isshared:=
+             pprinter_info_2(infobuffer)^.attributes or 8 = 
+                      pprinter_info_2(infobuffer)^.attributes;
+                      //???? mse
           
-          if pprinter_info_2(infobuffer)^.pservername <> nil then
-            properties.is_local:= true
-          else
-            properties.is_local:= true;
+          properties.islocal:= pprinter_info_2(infobuffer)^.pservername <> nil;
           
           result:= true;
           freemem(infobuffer);
