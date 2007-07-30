@@ -13,7 +13,8 @@ unit regdb;
 
 interface
 uses
- msesqldb,msedbedit,msepropertyeditors,msedb,mseclasses,msetypes,msestrings;
+ msesqldb,msedbedit,msepropertyeditors,msedb,mseclasses,msetypes,msestrings,
+ msegui;
  
 type
  tdbfieldnamepropertyeditor = class(tstringpropertyeditor)
@@ -43,17 +44,32 @@ type
  end;
 
  tsqlpropertyeditor = class(ttextstringspropertyeditor)
+  private
+   factivebefore: boolean;
+   fintf: isqlpropertyeditor;
   protected
+   function nocheck: boolean; virtual;
    function getsyntaxindex: integer; override;
+   procedure doafterclosequery(var amodalresult: modalresultty); override;
+   function gettestbutton: boolean; override;
+   function getutf8: boolean; override;
+   function getcaption: msestring; override;
+  public
+   procedure edit; override;
  end;
-
+ 
+ tsqlnocheckpropertyeditor = class(tsqlpropertyeditor)
+  protected
+   function nocheck: boolean; override;
+ end;
+ 
 implementation
 uses
  dbconst,classes,msedesignintf,db,typinfo,mseibconnection,
  msepqconnection,mseodbcconn,msemysql40conn,msemysql41conn,msemysql50conn,{sqldb,}
  mselookupbuffer,msedbf,msesdfdata,msememds,
  msedatalist,msedbfieldeditor,sysutils,msetexteditor,
- msedbdispwidgets,msedbgraphics,regdb_bmp,msegui,msedbdialog,msegrids,
+ msedbdispwidgets,msedbgraphics,regdb_bmp,msedbdialog,msegrids,
  regwidgets,msebufdataset,msedbevents,msesqlite3conn,msqldb
  {$ifdef mse_with_sqlite}
  ,msesqlite3ds
@@ -93,7 +109,7 @@ type
   protected
    procedure checkcomponent(const avalue: tcomponent); override;
  end;
- 
+{ 
  tsqlquerysqlpropertyeditor = class(tsqlpropertyeditor)
   private
    factivebefore: boolean;
@@ -104,7 +120,6 @@ type
   public
    procedure edit; override;
  end;
- 
  tsqlscriptsqlpropertyeditor = class(tsqlpropertyeditor)
                       //todo: implement getutf8
   private
@@ -113,7 +128,7 @@ type
    function gettestbutton: boolean; override;
   public
  end;
- 
+} 
  tonfilterpropertyeditor = class(tmethodpropertyeditor)
   public
    function getdefaultstate: propertystatesty; override;
@@ -233,12 +248,18 @@ begin
         tfielddatasetpropertyeditor);
  registerpropertyeditor(typeinfo(string),tfieldparamlink,'paramname',
         tdbparamnamepropertyeditor);
- registerpropertyeditor(typeinfo(tstringlist),nil,'SQL',
+ registerpropertyeditor(typeinfo(tstrings),nil,'SQL',
         tsqlpropertyeditor);
- registerpropertyeditor(typeinfo(tstringlist),tmsesqlquery,'SQL',
-        tsqlquerysqlpropertyeditor);
- registerpropertyeditor(typeinfo(tstringlist),tmsesqlscript,'SQL',
-        tsqlscriptsqlpropertyeditor);
+ registerpropertyeditor(typeinfo(tstringlist),tsqlquery,'SQLupdate',
+        tsqlnocheckpropertyeditor);
+ registerpropertyeditor(typeinfo(tstringlist),tsqlquery,'SQLinsert',
+        tsqlnocheckpropertyeditor);
+ registerpropertyeditor(typeinfo(tstringlist),tsqlquery,'SQLdelete',
+        tsqlnocheckpropertyeditor);
+// registerpropertyeditor(typeinfo(tstringlist),tmsesqlquery,'SQL',
+//        tsqlquerysqlpropertyeditor);
+// registerpropertyeditor(typeinfo(tstringlist),tmsesqlscript,'SQL',
+//        tsqlscriptsqlpropertyeditor);
  registerpropertyeditor(typeinfo(tdataset),nil,'',
                              tcomponentpropertyeditor);
  registerpropertyeditor(typeinfo(tdataset),tfield,'dataset',
@@ -696,6 +717,61 @@ begin
  result:= sqlindex;
 end;
 
+{ tsqlpropertyeditor }
+
+procedure tsqlpropertyeditor.doafterclosequery(
+                 var amodalresult: modalresultty);
+begin
+ if amodalresult = mr_canclose then begin
+  if fintf <> nil then begin
+   fintf.setactive(true);
+  end;
+ end;
+end;
+
+function tsqlpropertyeditor.gettestbutton: boolean;
+begin
+ result:= fintf <> nil;
+end;
+
+function tsqlpropertyeditor.getutf8: boolean;
+begin
+ result:= (fintf <> nil) and fintf.isutf8;
+end;
+
+procedure tsqlpropertyeditor.edit;
+begin
+ if not nocheck and getcorbainterface(fprops[0].instance,
+                            typeinfo(isqlpropertyeditor),fintf) then begin
+  factivebefore:= fintf.getactive;
+ end
+ else begin
+  fintf:= nil;
+ end;
+ inherited;
+ if not factivebefore and (fintf <> nil) then begin
+  fintf.setactive(false);
+ end;
+end;
+
+function tsqlpropertyeditor.getcaption: msestring;
+begin
+ result:= 'SQL Editor';
+end;
+
+function tsqlpropertyeditor.nocheck: boolean;
+begin
+ result:= false;
+end;
+
+{ tsqlnocheckpropertyeditor }
+
+function tsqlnocheckpropertyeditor.nocheck: boolean;
+begin
+ result:= true;
+end;
+
+(*
 { tsqlquerysqlpropertyeditor }
 
 procedure tsqlquerysqlpropertyeditor.doafterclosequery(
@@ -747,6 +823,7 @@ function tsqlscriptsqlpropertyeditor.gettestbutton: boolean;
 begin
  result:= true;
 end;
+*)
 
 { tonfilterpropertyeditor }
 

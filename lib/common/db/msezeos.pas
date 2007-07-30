@@ -5,11 +5,12 @@ uses
  classes,db,ZDataset,msedb,ZStoredProcedure;
 type
  tmsezreadonlyquery = class(tzreadonlyquery,imselocate,idscontroller,
-                                                             igetdscontroller)
+                               igetdscontroller,isqlpropertyeditor)
    private
    fcontroller: tdscontroller;
    procedure setcontroller(const avalue: tdscontroller);
    function getcontroller: tdscontroller;
+   function isutf8: boolean;
        //idscontroller
    procedure inheritedresync(const mode: tresyncmode);
    procedure inheriteddataevent(const event: tdataevent; const info: ptrint);
@@ -48,11 +49,13 @@ type
    property Active: boolean read getactive write setactive;
  end;
  
- tmsezquery = class(tzquery,imselocate,idscontroller,igetdscontroller)
+ tmsezquery = class(tzquery,imselocate,idscontroller,igetdscontroller,
+                          isqlpropertyeditor)
    private
    fcontroller: tdscontroller;
    procedure setcontroller(const avalue: tdscontroller);
    function getcontroller: tdscontroller;
+   function isutf8: boolean;
        //idscontroller
    procedure inheritedresync(const mode: tresyncmode);
    procedure inheriteddataevent(const event: tdataevent; const info: ptrint);
@@ -339,6 +342,11 @@ begin
  result:= true;
 end;
 
+function tmsezreadonlyquery.isutf8: boolean;
+begin
+ result:= fcontroller.isutf8;
+end;
+
 { tmsezquery }
 
 constructor tmsezquery.create(aowner: tcomponent);
@@ -497,6 +505,11 @@ end;
 function tmsezquery.getnumboolean: boolean;
 begin
  result:= true;
+end;
+
+function tmsezquery.isutf8: boolean;
+begin
+ result:= fcontroller.isutf8;
 end;
 
 { tmseztable }

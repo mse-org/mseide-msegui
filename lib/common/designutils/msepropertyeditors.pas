@@ -401,6 +401,7 @@ type
    function getsyntaxindex: integer; virtual;
    function gettestbutton: boolean; virtual;
    function getutf8: boolean; virtual;
+   function getcaption: msestring; virtual;
   public
    procedure edit; override;
    procedure setvalue(const avalue: msestring); override;
@@ -936,6 +937,32 @@ begin
    end;
 
    if kind = tkclass then begin
+    if (typeclasslevel > atypeclasslevel) and (anamelevel = 1) and 
+               (apropertyownerclasslevel = bigint-1) then begin
+     savelevel;
+    end
+    else begin
+     if typeclasslevel >= atypeclasslevel then begin
+      if (propertyownerclasslevel > apropertyownerclasslevel) and 
+              (anamelevel = 1) then begin
+       savelevel;
+      end
+      else begin
+       if propertyownerclasslevel >= apropertyownerclasslevel then begin
+        if namelevel < anamelevel then begin
+         savelevel;
+        end
+        else begin
+         if (namelevel = anamelevel) and
+          (propertyeditorlevel <= po1^.editorclasslevel) then begin
+          savelevel;
+         end;
+        end;
+       end;
+      end;
+     end;
+    end;
+   {
     if typeclasslevel > atypeclasslevel then begin
      savelevel;
     end
@@ -959,6 +986,7 @@ begin
       end;
      end;
     end;
+    }
    end
    else begin
     if (propertyownerclasslevel > apropertyownerclasslevel) and  (anamelevel = 1) then begin
@@ -3494,6 +3522,7 @@ begin
  utf8:= getutf8;
  try
   with editform do begin
+   caption:= getcaption;
    grid.rowcount:= strings.Count;
    for int1:= 0 to strings.Count - 1 do begin
     if utf8 then begin
@@ -3547,6 +3576,11 @@ begin
   tstrings(getordvalue).clear;
  end;
  inherited;
+end;
+
+function ttextstringspropertyeditor.getcaption: msestring;
+begin
+ result:= 'Texteditor';
 end;
 
 { tdatalistpropertyeditor }

@@ -42,7 +42,8 @@ type
                           const aupdatekind: tupdatekind;
                           var aupdateaction: tupdateaction) of object;
                              
- tmsesqlquery = class(tsqlquery,imselocate,idscontroller,igetdscontroller)
+ tmsesqlquery = class(tsqlquery,imselocate,idscontroller,igetdscontroller,
+                              isqlpropertyeditor)
   private
    fsqlonchangebefore: tnotifyevent;
    fcontroller: tdscontroller;
@@ -766,7 +767,7 @@ end;
 
 function tmsesqlquery.isutf8: boolean;
 begin
- result:= dso_utf8 in fcontroller.options;
+ result:= fcontroller.isutf8;
 end;
 
 function tmsesqlquery.wantblobfetch: boolean;

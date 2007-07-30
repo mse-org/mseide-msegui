@@ -35,6 +35,13 @@ const
  defaultproviderflags = [pfInUpdate,pfInWhere];
  
 type
+ isqlpropertyeditor = interface(inullinterface)
+                            ['{001C24B7-548C-4A4D-A42D-6FBAFBAA7A57}']
+  procedure setactive(avalue: boolean);
+  function getactive: boolean;
+  function isutf8: boolean;
+ end; 
+
  locateresultty = (loc_timeout,loc_notfound,loc_ok); 
  locateoptionty = (loo_caseinsensitive,loo_partialkey,
                         loo_noforeward,loo_nobackward);
@@ -682,6 +689,7 @@ type
                       const arecnooffset: integer = 0;
                       const acancelresync: boolean = true);
    destructor destroy; override;
+   function isutf8: boolean;
    function locate(const key: integer; const field: tfield;
                        const options: locateoptionsty = []): locateresultty;
                        overload;
@@ -3827,6 +3835,11 @@ end;
 procedure tdscontroller.setoptions(const avalue: datasetoptionsty);
 begin
  foptions:= avalue;
+end;
+
+function tdscontroller.isutf8: boolean;
+begin
+ result:= dso_utf8 in foptions;
 end;
 
 { ttacontroller }

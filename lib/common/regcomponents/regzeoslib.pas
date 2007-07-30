@@ -44,11 +44,13 @@ begin
          TZSQLMonitor, TZSequence]);
  registerpropertyeditor(typeinfo(string),TZConnection,'Protocol',
                       tzprotocolpropertyeditor);
+                      {
  registerpropertyeditor(typeinfo(tstrings),TmseZreadonlyQuery,'SQL',
                       tzreadonlyquerysqlpropertyeditor);
  registerpropertyeditor(typeinfo(tstrings),TmseZQuery,'SQL',
                       tzquerysqlpropertyeditor);
- registerpropertyeditor(typeinfo(tstrings),TZUpdateSQL,'DleteSQL',
+                      }
+ registerpropertyeditor(typeinfo(tstrings),TZUpdateSQL,'DeleteSQL',
                       tsqlpropertyeditor);
  registerpropertyeditor(typeinfo(tstrings),TZUpdateSQL,'InsertSQL',
                       tsqlpropertyeditor);
