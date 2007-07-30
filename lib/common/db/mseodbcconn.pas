@@ -11,7 +11,7 @@ unit mseodbcconn;
 {$ifdef FPC}{$mode objfpc}{$h+}{$INTERFACES CORBA}{$endif}
 interface
 uses
- db,classes,modbcconn,msestrings,msedb;
+ db,classes,modbcconn,msestrings,msedb,msedatabase;
 type
  tmseodbcconnection = class(todbcconnection,idbcontroller)
   private

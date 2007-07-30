@@ -12,7 +12,7 @@ unit msesqldb;
 interface
 uses
  classes,db,msebufdataset,
-                   msqldb,msedb,mseclasses,msetypes,mseguiglob;
+                   msqldb,msedb,mseclasses,msetypes,mseguiglob,msedatabase;
   
 type
  tmsesqltransaction = class(tsqltransaction)

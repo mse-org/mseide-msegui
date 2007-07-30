@@ -11,7 +11,7 @@ unit msesqlite3conn;
 {$ifdef FPC}{$mode objfpc}{$h+}{$INTERFACES CORBA}{$endif}
 interface
 uses
- classes,msqldb,msedb,msestrings,db,sqlite3dyn,msetypes;
+ classes,msqldb,msedb,msestrings,db,sqlite3dyn,msetypes,msedatabase;
 { 
       Type name        SQLite storage class  Field type    Data type
 +--------------------+---------------------+-------------+-------------+

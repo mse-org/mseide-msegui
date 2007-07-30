@@ -14,7 +14,7 @@ unit regdb;
 interface
 uses
  msesqldb,msedbedit,msepropertyeditors,msedb,mseclasses,msetypes,msestrings,
- msegui;
+ msegui,msedatabase;
  
 type
  tdbfieldnamepropertyeditor = class(tstringpropertyeditor)

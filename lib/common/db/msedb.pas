@@ -729,13 +729,6 @@ type
                    default defaultdscontrolleroptions;
  end;
  
- ttacontroller = class(tactivatorcontroller)
-  protected
-   procedure setowneractive(const avalue: boolean); override;
-  public
-   constructor create(const aowner: tdbtransaction);
- end;
-
  idbcontroller = interface(inullinterface)
           ['{B26D004A-7FEE-44F2-9919-3B8612BDD598}']
   procedure setinheritedconnected(const avalue: boolean);
@@ -749,29 +742,7 @@ type
  databaseeventty = procedure(const sender: tdatabase) of object;
  databaseerroreventty = procedure(const sender: tdatabase;
              const aexception: exception; var handled: boolean) of object;
- 
- tdbcontroller = class(tactivatorcontroller)
-  private
-   fdatabasename: filenamety;
-   fintf: idbcontroller;
-   fonbeforeconnect: databaseeventty;
-   fonconnecterror: databaseerroreventty;
-   fonafterconnect: databaseeventty;
-  protected
-   procedure setowneractive(const avalue: boolean); override;
-  public
-   constructor create(const aowner: tdatabase; const aintf: idbcontroller);
-   function getdatabasename: filenamety;
-   procedure setdatabasename(const avalue: filenamety);
-  published
-   property onbeforeconnect: databaseeventty read fonbeforeconnect 
-                                   write fonbeforeconnect;  
-   property onafterconnect: databaseeventty read fonafterconnect 
-                                   write fonafterconnect;  
-   property onconnecterror: databaseerroreventty read fonconnecterror 
-                                   write fonconnecterror; 
- end;
-  
+   
  tfieldlink = class;
  
  tfieldlinkdatalink = class(tfielddatalink)
@@ -3842,80 +3813,6 @@ begin
  result:= dso_utf8 in foptions;
 end;
 
-{ ttacontroller }
-
-constructor ttacontroller.create(const aowner: tdbtransaction);
-begin
- inherited create(aowner);
-end;
-
-procedure ttacontroller.setowneractive(const avalue: boolean);
-begin
- tdbtransaction(fowner).active:= avalue;
-end;
-
-{ tdbcontroller }
-
-constructor tdbcontroller.create(const aowner: tdatabase; const aintf: idbcontroller);
-begin
- fintf:= aintf;
- inherited create(aowner);
-end;
-
-procedure tdbcontroller.setowneractive(const avalue: boolean);
-var
- bo1: boolean;
-begin
- if avalue then begin
-  with tdatabase(fowner) do begin
-   if checkcanevent(fowner,tmethod(fonbeforeconnect)) then begin
-    fonbeforeconnect(tdatabase(fowner));
-   end;
-   try
-    fintf.setinheritedconnected(avalue);
-   except
-    on e: exception do begin
-     if checkcanevent(fowner,tmethod(fonconnecterror)) then begin
-      bo1:= false;
-      fonconnecterror(tdatabase(fowner),e,bo1);
-      if not bo1 then begin
-       raise;
-      end;
-     end;
-    end;
-   end;
-   if checkcanevent(fowner,tmethod(fonafterconnect)) then begin
-    fonafterconnect(tdatabase(fowner));
-   end;
-  end;
- end
- else begin
-  fintf.setinheritedconnected(avalue);
-//  tdatabase(fowner).connected:= avalue;
- end;
-end;
-
-function tdbcontroller.getdatabasename: filenamety;
-begin
- result:= fdatabasename;
-end;
-
-procedure tdbcontroller.setdatabasename(const avalue: filenamety);
-var
- str1: filenamety;
-begin
- str1:= trim(avalue);
- if (str1 <> '') and (str1[1] = '''') and 
-                    (str1[length(str1)] = '''') then begin
-  fdatabasename:= str1;
-  tdatabase(fowner).databasename:= copy(str1,2,length(str1)-2);
- end
- else begin
-  fdatabasename:= tomsefilepath(str1);
-  tdatabase(fowner).databasename:= 
-                   tosysfilepath(filepath(str1,fk_default,true));
- end;
-end;
 
 { tmsedatasource }
 

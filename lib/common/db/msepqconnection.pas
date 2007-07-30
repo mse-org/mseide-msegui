@@ -12,7 +12,7 @@ unit msepqconnection;
 
 interface
 uses
- classes,mpqconnection,msestrings,msedb,msetypes,msqldb,db;
+ classes,mpqconnection,msestrings,msedb,msetypes,msqldb,db,msedatabase;
 type
  pqconnectionoptionty = (pqco_usesavepoint,pqco_closetransactiononfail);
  pqconnectionoptionsty = set of pqconnectionoptionty;

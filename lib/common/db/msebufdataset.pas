@@ -24,7 +24,7 @@ interface
 
 uses
  db,classes,variants,msetypes,msearrayprops,mseclasses,mselist,msestrings,
- msedb;
+ msedb,msedatabase;
   
 const
  defaultpacketrecords = 10;
@@ -358,7 +358,7 @@ type
 
  internalcalcfieldseventty = procedure(const sender: tmsebufdataset;
                                               const fetching: boolean) of object;
- tmsebufdataset = class(tdbdataset)
+ tmsebufdataset = class(tmdbdataset)
   private
    fbrecordcount: integer;
    fpacketrecords: integer;

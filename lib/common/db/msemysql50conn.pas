@@ -11,7 +11,7 @@ unit msemysql50conn;
 {$ifdef FPC}{$mode objfpc}{$h+}{$INTERFACES CORBA}{$endif}
 interface
 uses
- db,classes,mmysql50conn,msestrings,msedb,msqldb;
+ db,classes,mmysql50conn,msestrings,msedb,msqldb,msedatabase;
  
 type
  tmsemysql50connection = class(tmysql50connection,idbcontroller)

@@ -23,7 +23,7 @@ unit msqldb;
 interface
 
 uses 
- sysutils,classes,db,msebufdataset,msetypes,msedb,mseclasses;
+ sysutils,classes,db,msebufdataset,msetypes,msedb,mseclasses,msedatabase;
 
 type 
  TSchemaType = (stNoSchema,stTables,stSysTables,stProcedures,stColumns,
@@ -79,7 +79,7 @@ const
 type
  tmsesqlscript = class;
  
- tcustomsqlconnection = class (TDatabase)
+ tcustomsqlconnection = class (TmDatabase)
   private
     FPassword            : string;
     FTransaction         : TSQLTransaction;
@@ -209,7 +209,7 @@ type
   transactionoptionsty = set of transactionoptionty;
   sqltransactioneventty = procedure(const sender: tsqltransaction) of object;
   
-  TSQLTransaction = class (TDBTransaction)
+  TSQLTransaction = class (TmDBTransaction)
    private
     FTrans: TSQLHandle;
     FAction: TCommitRollbackAction;
@@ -231,7 +231,7 @@ type
     procedure setdatabase1(const avalue: tcustomsqlconnection);
    protected
     function GetHandle : Pointer; virtual;
-    Procedure SetDatabase (Value : TDatabase); override;
+    Procedure SetDatabase (Value : tmdatabase); override;
     procedure disconnect(const sender: tsqlquery);
    public
     constructor Create(AOwner : TComponent); override;
@@ -409,8 +409,8 @@ type
           //if bufsize < 0 -> buffer was to small, should be -bufsize
    // abstract & virtual methods of TDataset
    procedure UpdateIndexDefs; override;
-   procedure SetDatabase(Value : TDatabase); override;
-   Procedure SetTransaction(Value : TDBTransaction); override;
+   procedure SetDatabase(Value : tmdatabase); override;
+   Procedure SetTransaction(Value : tmdbtransaction); override;
    procedure InternalAddRecord(Buffer: Pointer; AAppend: Boolean); override;
    procedure InternalClose; override;
    procedure InternalInitFieldDefs; override;
@@ -496,15 +496,15 @@ implementation
 uses 
  dbconst,strutils,msedatalist,msereal,msestream;
 
+(*
 type
  TDBTransactioncracker = Class(TComponent)
   Private
     FActive        : boolean;
-    FDatabase      : TDatabase;
+    FDatabase      : tmdatabase;
     FDataSets      : TList;
     FOpenAfterRead : boolean;
  end;
-
 {$ifdef mse_FPC_2_2}
   TDatabasecracker = class(TCustomConnection)
   private
@@ -534,7 +534,7 @@ type
     FOpenAfterRead : boolean;
   end;
 {$endif}
-
+*)
 function SkipComments(var p: PChar) : boolean;
 begin
   result := false;
@@ -840,7 +840,7 @@ procedure tcustomsqlconnection.setconnected(const avalue: boolean);
 var
  int1: integer;
 begin
- with tdatabasecracker(self) do begin
+// with tdatabasecracker(self) do begin
   If aValue <> FConnected then begin
    If aValue then begin
     if csReading in ComponentState then begin
@@ -883,7 +883,7 @@ begin
    end;
    FConnected:= aValue;
   end;
- end;
+// end;
 end;
 
 procedure tcustomsqlconnection.setafteconnect(const avalue: tmsesqlscript);
@@ -979,7 +979,7 @@ begin
  end;
  for int1:= high(fdatasets1) downto 0 do begin
   if (fdatasets1[int1] <> nil) and 
-                 (tdbdataset(fdatasets1[int1]).database = self) then begin
+                 (tmdbdataset(fdatasets1[int1]).database = self) then begin
    with fdatasets1[int1] do begin
     active:= false;
    end;
@@ -994,7 +994,7 @@ begin
  for int1:= 0 to high(fdatasets1) do begin
   if fdatasets1[int1] <> nil then begin
    if frecnos[int1] >= -1 then begin
-    with tdbdataset(fdatasets1[int1]) do begin
+    with tmdbdataset(fdatasets1[int1]) do begin
      if database = self then begin
       disablecontrols;
       active:= true;
@@ -1200,7 +1200,7 @@ procedure tsqltransaction.disconnect(const sender: tsqlquery);
 var
  int1: integer;
 begin
- with tdbtransactioncracker(self) do begin
+// with tdbtransactioncracker(self) do begin
   int1:= 1;
   if sender.fupdateqry <> nil then begin
    inc(int1,3); //insert,update,delete
@@ -1214,10 +1214,10 @@ begin
   finally
    fdatasets.insert(0,sender);
   end;
- end;
+// end;
 end;
 
-Procedure TSQLTransaction.SetDatabase(Value : TDatabase);
+Procedure TSQLTransaction.SetDatabase(Value : tmdatabase);
 
 begin
  If Value <> Database then begin
@@ -1274,7 +1274,7 @@ begin
   CheckInactive;
 end;
 
-Procedure TSQLQuery.SetTransaction(Value : TDBTransaction);
+Procedure TSQLQuery.SetTransaction(Value : tmdbtransaction);
 
 begin
   if (value <> nil) and not (value is tsqltransaction) then begin
@@ -1284,7 +1284,7 @@ begin
   inherited;
 end;
 
-procedure TSQLQuery.SetDatabase(Value : TDatabase);
+procedure TSQLQuery.SetDatabase(Value : tmdatabase);
 var 
  db: tcustomsqlconnection;
 begin

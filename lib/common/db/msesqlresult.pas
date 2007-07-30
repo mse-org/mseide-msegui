@@ -9,9 +9,11 @@ type
   private
    fsql: tstringlist;
    factive: boolean;
+   fconnection: tsqlconnection;
    procedure setsql(const avalue: tstringlist);
    function getactive: boolean;
    procedure setactive(avalue: boolean);
+   procedure setconnection(const avalue: tsqlconnection);
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -19,6 +21,7 @@ type
    property active: boolean read getactive write setactive;
   published
    property sql: tstringlist read fsql write setsql;
+   property connection: tsqlconnection read fconnection write setconnection;
  end;
  
 implementation
@@ -55,6 +58,11 @@ end;
 function tsqlresult.isutf8: boolean;
 begin
  result:= false; //todo
+end;
+
+procedure tsqlresult.setconnection(const avalue: tsqlconnection);
+begin
+ 
 end;
 
 end.
