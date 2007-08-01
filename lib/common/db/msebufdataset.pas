@@ -24,7 +24,7 @@ interface
 
 uses
  db,classes,variants,msetypes,msearrayprops,mseclasses,mselist,msestrings,
- msedb,msedatabase;
+ msedb,msedatabase,mseguiglob;
   
 const
  defaultpacketrecords = 10;
@@ -358,7 +358,15 @@ type
 
  internalcalcfieldseventty = procedure(const sender: tmsebufdataset;
                                               const fetching: boolean) of object;
- tmsebufdataset = class(tmdbdataset)
+ iblobchache = interface(inullinterface)
+  function blobsarefetched: boolean;
+  function getblobcache: blobcacheinfoarty;
+  function addblobcache(const adata: pointer;
+                    const alength: integer): integer; overload;
+  function addblobcache(const aid: int64; const adata: string): integer; overload;
+ end;
+ 
+ tmsebufdataset = class(tmdbdataset,iblobchache)
   private
    fbrecordcount: integer;
    fpacketrecords: integer;
@@ -462,6 +470,8 @@ type
    fblobcount: integer;
    fcurrentbuf: pintrecordty;
 
+   function blobsarefetched: boolean;
+   function getblobcache: blobcacheinfoarty;
    function findcachedblob(var info: blobcacheinfoty): boolean; overload;
    function findcachedblob(const id: int64; 
                            out info: blobcacheinfoty): boolean; overload;
@@ -2824,6 +2834,16 @@ procedure tmsebufdataset.fetchallblobs;
 begin
  fetchall;
  fetchblobs;
+end;
+
+function tmsebufdataset.blobsarefetched: boolean;
+begin
+ result:= bs_blobsfetched in fbstate;
+end;
+
+function tmsebufdataset.getblobcache: blobcacheinfoarty;
+begin
+ result:= fblobcache;
 end;
 
 function tmsebufdataset.findcachedblob(var info: blobcacheinfoty): boolean;

@@ -42,20 +42,25 @@ type
 
   TSQLHandle = Class(TObject)
   end;
+  
+  icursorclient = interface(iblobchache)
+  end; 
 
   TSQLCursor = Class(TSQLHandle)
    private
     fblobs: stringarty;
     fblobcount: integer;
-    fquery: tsqlquery;
+    fowner: icursorclient;
    protected
    public
     FPrepared      : Boolean;
     FInitFieldDef  : Boolean;
     FStatementType : TStatementType;
     ftrans: pointer;
-    property query: tsqlquery read fquery;
-    constructor create(const aquery: tsqlquery);
+    fname: ansistring;
+//    property query: tsqlquery read fquery;
+    constructor create(const aowner: icursorclient; const aname: ansistring);
+                   //aowner can be nil
     procedure close; virtual;
     function wantblobfetch: boolean;
     function getcachedblob(const blobid: integer): tstream;
@@ -78,7 +83,6 @@ const
 
 type
  tmsesqlscript = class;
- 
  tcustomsqlconnection = class (TmDatabase)
   private
     FPassword            : string;
@@ -102,7 +106,7 @@ type
   protected
     FConnOptions: sqlconnoptionsty;
    
-   procedure finalizetransaction(const atransaction: tsqlhandle); virtual; 
+  procedure finalizetransaction(const atransaction: tsqlhandle); virtual; 
    procedure setconnected(const avalue: boolean);
    procedure notification(acomponent: tcomponent; operation: toperation); override;
    
@@ -114,22 +118,10 @@ type
     function GetHandle : pointer; virtual;
     procedure updateprimarykeyfield(const afield: tfield); virtual;
 
-    Function AllocateCursorHandle(const aowner: tsqlquery) : TSQLCursor; virtual; abstract;
-                        //aowner used as blob cache
-    Procedure DeAllocateCursorHandle(var cursor : TSQLCursor); virtual; abstract;
     Function AllocateTransactionHandle : TSQLHandle; virtual; abstract;
 
-    procedure PrepareStatement(cursor: TSQLCursor;ATransaction : TSQLTransaction;buf : string; AParams : TParams); virtual; abstract;
     procedure Execute(const cursor: TSQLCursor; const atransaction: tsqltransaction;
                                  const AParams : TParams); virtual; abstract;
-    function Fetch(cursor : TSQLCursor) : boolean; virtual; abstract;
-    procedure AddFieldDefs(cursor: TSQLCursor; FieldDefs : TfieldDefs); virtual; abstract;
-    procedure UnPrepareStatement(cursor : TSQLCursor); virtual; abstract;
-
-    procedure FreeFldBuffers(cursor : TSQLCursor); virtual; abstract;
-    function loadfield(const cursor: tsqlcursor; const afield: tfield;
-      const buffer: pointer; var bufsize: integer): boolean; virtual; abstract;
-           //if bufsize < 0 -> buffer was to small, should be -bufsize
     function GetTransactionHandle(trans : TSQLHandle): pointer; virtual; abstract;
     function Commit(trans : TSQLHandle) : boolean; virtual; abstract;
     function RollBack(trans : TSQLHandle) : boolean; virtual; abstract;
@@ -154,6 +146,27 @@ type
     procedure closeds(out activeds: integerarty);
     procedure reopends(const activeds: integerarty);
   public
+    procedure updateutf8(var autf8: boolean); virtual;
+    procedure FreeFldBuffers(cursor : TSQLCursor); virtual; abstract;
+    Function AllocateCursorHandle(const aowner: icursorclient; 
+                const aname: ansistring): TSQLCursor; virtual; abstract;
+                //aowner can be nil
+                        //aowner used as blob cache
+    Procedure DeAllocateCursorHandle(var cursor : TSQLCursor); virtual; abstract;
+    procedure PrepareStatement(cursor: TSQLCursor;ATransaction : TSQLTransaction;buf : string; AParams : TParams); virtual; abstract;
+    procedure UnPrepareStatement(cursor : TSQLCursor); virtual; abstract;
+    procedure AddFieldDefs(cursor: TSQLCursor; FieldDefs : TfieldDefs); virtual; abstract;
+    function Fetch(cursor : TSQLCursor) : boolean; virtual; abstract;
+    function loadfield(const cursor: tsqlcursor; 
+             const datatype: tfieldtype; const fieldnum: integer; //null based
+      const buffer: pointer; var bufsize: integer): boolean; virtual; abstract;
+           //if bufsize < 0 -> buffer was to small, should be -bufsize
+           //buffer can be nil
+           //false if null
+    function fetchblob(const cursor: tsqlcursor;
+                              const fieldnum: integer): ansistring; virtual;
+                              //null based
+    
     procedure Close;
     procedure Open;
     property Handle: Pointer read GetHandle;
@@ -336,7 +349,13 @@ type
   function blobscached: boolean;
  end;
 
-  TSQLQuery = class (tmsebufdataset)
+ isqlclient = interface(idatabaseclient)
+  function getsqltransaction: tsqltransaction;
+  procedure setsqltransaction(const avalue: tsqltransaction);
+  procedure unprepare;
+ end;
+ 
+  TSQLQuery = class (tmsebufdataset,isqlclient,icursorclient)
   private
     FCursor              : TSQLCursor;
     FUpdateable          : boolean;
@@ -383,7 +402,7 @@ type
     Function AddFilter(SQLstr : string) : string;
    function getdatabase1: tcustomsqlconnection;
    procedure setdatabase1(const avalue: tcustomsqlconnection);
-   procedure checkdatabase;
+//   procedure checkdatabase;
    procedure setparams(const avalue: TmseParams);
    function getconnected: boolean;
    procedure setconnected(const avalue: boolean);
@@ -392,6 +411,8 @@ type
    procedure setFSQLInsert(const avalue: TStringlist);
    procedure setFSQLDelete(const avalue: TStringlist);
    procedure setbeforeexecute(const avalue: tmsesqlscript);
+   function getsqltransaction: tsqltransaction;
+   procedure setsqltransaction(const avalue: tsqltransaction);
   protected
    FTableName           : string;
    FReadOnly            : boolean;
@@ -409,8 +430,8 @@ type
           //if bufsize < 0 -> buffer was to small, should be -bufsize
    // abstract & virtual methods of TDataset
    procedure UpdateIndexDefs; override;
-   procedure SetDatabase(Value : tmdatabase); override;
-   Procedure SetTransaction(Value : tmdbtransaction); override;
+   procedure SetDatabase(const Value: tmdatabase); override;
+   Procedure SetTransaction(const Value : tmdbtransaction); override;
    procedure InternalAddRecord(Buffer: Pointer; AAppend: Boolean); override;
    procedure InternalClose; override;
    procedure InternalInitFieldDefs; override;
@@ -489,12 +510,74 @@ type
     property AutoCalcFields;
 //    property Database;
 
-    property Transaction;
+    property Transaction: tsqltransaction read getsqltransaction write setsqltransaction;
   end;
+
+procedure updateparams(const aparams: tparams);
+procedure doexecute(const aparams: tparams; const atransaction: tmdbtransaction;
+                    const acursor: tsqlcursor; adatabase: tmdatabase);
+procedure checksqlconnection(const aname: ansistring; const avalue: tmdatabase);
+procedure dosetsqldatabase(const sender: isqlclient; const avalue: tmdatabase;
+                 var acursor: tsqlcursor; var dest: tmdatabase);
 
 implementation
 uses 
  dbconst,strutils,msedatalist,msereal,msestream;
+ 
+procedure updateparams(const aparams: tparams);
+var
+ int1: integer;
+begin
+ if aparams <> nil then begin
+  for int1:= 0 to aparams.count - 1 do begin
+   with aparams[int1] do begin
+    if not isnull and (datatype in [ftFloat,ftDate,ftTime,ftDateTime]) and
+                               isemptyreal(asfloat) then begin
+     clear;
+    end;
+   end;
+  end;
+ end;
+end;
+
+procedure doexecute(const aparams: tparams; const atransaction: tmdbtransaction;
+                    const acursor: tsqlcursor; adatabase: tmdatabase);
+begin
+ updateparams(aparams);
+ acursor.ftrans:= tsqltransaction(atransaction).handle;
+ tcustomsqlconnection(adatabase).execute(acursor,tsqltransaction(atransaction),aParams);
+end;
+
+procedure checksqlconnection(const aname: ansistring; const avalue: tmdatabase);
+begin
+ if (avalue <> nil) and not (avalue is tcustomsqlconnection) then begin
+  exception.create(aname+': Database must be tcustomsqlconnection.');
+ end;
+end;
+
+procedure checksqltransaction(const aname: ansistring; const avalue: tmdbtransaction);
+begin
+ if (avalue <> nil) and not (avalue is tsqltransaction) then begin
+  exception.create(aname+': Transaction must be tsqltransaction.');
+ end;
+end;
+
+procedure dosetsqldatabase(const sender: isqlclient; const avalue: tmdatabase;
+              var acursor: tsqlcursor; var dest: tmdatabase);
+begin
+ if (dest <> avalue) then begin
+  checksqlconnection(sender.getname,avalue);
+  sender.unprepare;
+  if acursor <> nil then begin
+   tcustomsqlconnection(dest).deallocatecursorhandle(acursor);
+  end;  
+  dosetdatabase(sender,avalue,dest);
+  if (avalue <> nil) and (sender.getsqltransaction = nil) and 
+                    (avalue <> nil) then begin
+   sender.setsqltransaction(tcustomsqlconnection(avalue).transaction);
+  end;
+ end;
+end;
 
 (*
 type
@@ -677,7 +760,7 @@ begin
   if not ATransaction.Active then ATransaction.StartTransaction;
 
   try
-    Cursor := AllocateCursorHandle(nil);
+    Cursor := AllocateCursorHandle(nil,name);
     cursor.ftrans:= atransaction.handle;
 //    SQL := TrimRight(SQL);
 
@@ -1057,6 +1140,17 @@ begin
  //dummy
 end;
 
+function tcustomsqlconnection.fetchblob(const cursor: tsqlcursor;
+               const fieldnum: integer): ansistring;
+begin
+ raise edatabaseerror.create(name+': fetchblob not supported.');
+end;
+
+procedure tcustomsqlconnection.updateutf8(var autf8: boolean);
+begin
+ //dummy
+end;
+
 { TSQLTransaction }
 
 constructor TSQLTransaction.Create(AOwner : TComponent);
@@ -1199,22 +1293,33 @@ end;
 procedure tsqltransaction.disconnect(const sender: tsqlquery);
 var
  int1: integer;
+ intf1: itransactionclient;
 begin
-// with tdbtransactioncracker(self) do begin
-  int1:= 1;
-  if sender.fupdateqry <> nil then begin
-   inc(int1,3); //insert,update,delete
-  end;
-  if fdatasets.count > int1 then begin
-   databaseerror('Offline mode needs exclusive transaction.',sender);
-  end;
-  fdatasets.remove(sender);
-  try
-   active:= false;
-  finally
-   fdatasets.insert(0,sender);
-  end;
-// end;
+ int1:= 1;
+ if sender.fupdateqry <> nil then begin
+  inc(int1,3); //insert,update,delete
+ end;
+ if high(fdatasets) >= int1 then begin 
+  databaseerror('Offline mode needs exclusive transaction.',sender);
+ end;
+ intf1:= itransactionclient(sender);
+ removeitem(pointerarty(fdatasets),intf1);
+ try
+  active:= false;
+ finally
+  insertitem(pointerarty(fdatasets),0,intf1);
+ end;
+ {
+ if fdatasets.count > int1 then begin
+  databaseerror('Offline mode needs exclusive transaction.',sender);
+ end;
+ fdatasets.remove(sender);
+ try
+  active:= false;
+ finally
+  fdatasets.insert(0,sender);
+ end;
+ }
 end;
 
 Procedure TSQLTransaction.SetDatabase(Value : tmdatabase);
@@ -1274,35 +1379,38 @@ begin
   CheckInactive;
 end;
 
-Procedure TSQLQuery.SetTransaction(Value : tmdbtransaction);
-
+Procedure TSQLQuery.SetTransaction(const Value : tmdbtransaction);
 begin
-  if (value <> nil) and not (value is tsqltransaction) then begin
-   exception.create(name+': Transaction must be tsqltransaction.');
-  end;
+ if ftransaction <> value then begin
+  checksqltransaction(name,value);
   UnPrepare;
   inherited;
+ end;
 end;
 
-procedure TSQLQuery.SetDatabase(Value : tmdatabase);
-var 
- db: tcustomsqlconnection;
+procedure TSQLQuery.SetDatabase(const Value : tmdatabase);
 begin
- if (Database <> Value) then begin
-  if (value <> nil) and not (value is tcustomsqlconnection) then begin
-   exception.create(name+': Database must be tcustomsqlconnection.');
-  end;
+ dosetsqldatabase(isqlclient(self),value,fcursor,fdatabase);
+{
+ if (fDatabase <> Value) then begin
+  checksqlconnection(name,value);
   UnPrepare;
   if assigned(FCursor) then begin
    tcustomsqlconnection(database).DeAllocateCursorHandle(FCursor);
   end;
-  db:= value as tcustomsqlconnection;
+  dosetsqldatabase(isqlclient(self),tcustomsqlconnection(value),
+                                          tcustomsqlconnection(fdatabase));
+  }
+  {
   inherited setdatabase(value);
-  if assigned(value) and (Transaction = nil) and 
-                  (Assigned(db.Transaction)) then begin
-   transaction:= Db.Transaction;
+  with tcustomsqlconnection(value) do begin
+   if (value <> nil) and (self.Transaction = nil) and 
+                   (Transaction <> nil) then begin
+    self.transaction:= Transaction;
+   end;
   end;
- end;
+  }
+// end;
 end;
 
 Function TSQLQuery.IsPrepared : Boolean;
@@ -1382,46 +1490,49 @@ end;
 
 procedure TSQLQuery.Prepare;
 var
-  db    : tcustomsqlconnection;
-  sqltr : tsqltransaction;
+ db: tcustomsqlconnection;
+ sqltr: tsqltransaction;
 
 begin
-  if not IsPrepared then
-    begin
-    db := (Database as tcustomsqlconnection);
-    sqltr := (transaction as tsqltransaction);
-    if not assigned(Db) then
-      DatabaseError(SErrDatabasenAssigned);
-    if not assigned(sqltr) then
-      DatabaseError(SErrTransactionnSet);
+ if not IsPrepared then begin
+  db:= tcustomsqlconnection(database);
+  sqltr:= tsqltransaction(transaction);
+  checkdatabase(name,db);
+  checktransaction(name,sqltr);
 
-    if not Db.Connected then db.Open;
-    if not sqltr.Active then sqltr.StartTransaction;
+  if not Db.Connected then begin
+   db.Open;
+  end;
+  if not sqltr.Active then begin
+   sqltr.StartTransaction;
+  end;
 
-//    if assigned(fcursor) then FreeAndNil(fcursor);
-    if not assigned(fcursor) then begin
-     FCursor:= Db.AllocateCursorHandle(self);
-    end;
-    fcursor.ftrans:= sqltr.handle;
-    
-    FSQLBuf := TrimRight(FSQL.Text);
+  if not assigned(fcursor) then begin
+   FCursor:= Db.AllocateCursorHandle(icursorclient(self),name);
+  end;
+  fcursor.ftrans:= sqltr.handle;
+  
+  FSQLBuf:= TrimRight(FSQL.Text);
 
-    if FSQLBuf = '' then
-      DatabaseError(SErrNoStatement);
+  if FSQLBuf = '' then begin
+    DatabaseError(SErrNoStatement);
+  end;
+  SQLParser(FSQLBuf);
 
-    SQLParser(FSQLBuf);
+  if filtered and (filter <> '') then begin
+   Db.PrepareStatement(Fcursor,sqltr,AddFilter(FSQLBuf),FParams)
+  end
+  else begin
+   Db.PrepareStatement(Fcursor,sqltr,FSQLBuf,FParams);
+  end;
 
-    if filtered and (filter <> '') then
-      Db.PrepareStatement(Fcursor,sqltr,AddFilter(FSQLBuf),FParams)
-    else
-      Db.PrepareStatement(Fcursor,sqltr,FSQLBuf,FParams);
-
-    if (FCursor.FStatementType = stSelect) then
-      begin
-      FCursor.FInitFieldDef := True;
-      if not ReadOnly then InitUpdates(FSQLBuf);
-      end;
-    end;
+  if (FCursor.FStatementType = stSelect) then begin
+   FCursor.FInitFieldDef := True;
+   if not ReadOnly then begin
+    InitUpdates(FSQLBuf);
+   end;
+  end;
+ end;
 end;
 
 procedure TSQLQuery.UnPrepare;
@@ -1463,23 +1574,15 @@ begin
  If (FParams.Count>0) and Assigned(FMasterLink) then begin
   FMasterLink.CopyParamsFromMaster(False);
  end;
- for int1:= 0 to fparams.count - 1 do begin
-  with fparams[int1] do begin
-   if not isnull and (datatype in [ftFloat,ftDate,ftTime,ftDateTime]) and
-                              isemptyreal(asfloat) then begin
-    clear;
-   end;
-  end;
- end;
- fcursor.ftrans:= tsqltransaction(transaction).handle;
- tcustomsqlconnection(database).execute(Fcursor,tsqltransaction(transaction),FParams);
+ doexecute(fparams,ftransaction,fcursor,fdatabase);
 end;
 
 function tsqlquery.loadfield(const afield: tfield; const buffer: pointer;
                      var bufsize: integer): boolean;
            //if bufsize < 0 -> buffer was to small, should be -bufsize
 begin
- result:= tcustomsqlconnection(database).LoadField(FCursor,aField,buffer,bufsize)
+ result:= tcustomsqlconnection(database).LoadField(FCursor,aField.datatype,
+         afield.fieldno-1,buffer,bufsize)
 end;
 
 procedure TSQLQuery.InternalAddRecord(Buffer: Pointer; AAppend: Boolean);
@@ -2406,17 +2509,18 @@ procedure TSQLQuery.setdatabase1(const avalue: tcustomsqlconnection);
 begin
  inherited database:= avalue;
 end;
-
+{
 procedure TSQLQuery.checkdatabase;
 begin
+ docheckdatabase(name,fdatabase);
  if inherited database = nil then begin
   databaseerror(serrdatabasenassigned);
  end;
 end;
-
+}
 procedure TSQLQuery.executedirect(const asql: string);
 begin
- checkdatabase;
+ checkdatabase(name,fdatabase);
  database.executedirect(asql,tsqltransaction(transaction)); 
 end;
 
@@ -2500,18 +2604,29 @@ begin
  result:= tcustomsqlconnection(database).getnumboolean;
 end;
 
+function TSQLQuery.getsqltransaction: tsqltransaction;
+begin
+ result:= tsqltransaction(inherited transaction);
+end;
+
+procedure TSQLQuery.setsqltransaction(const avalue: tsqltransaction);
+begin
+ inherited transaction:= avalue;
+end;
+
 { TSQLCursor }
 
-constructor TSQLCursor.create(const aquery: tsqlquery);
+constructor TSQLCursor.create(const aowner: icursorclient; const aname: ansistring);
 begin
- fquery:= aquery;
+ fowner:= aowner;
+ fname:= aname;
  inherited create;
 end;
 
 function TSQLCursor.addblobdata(const adata: pointer;
                                             const alength: integer): integer;
 begin
- if fquery = nil then begin
+ if fowner = nil then begin
   result:= fblobcount;
   inc(fblobcount);
   if result > high(fblobs) then begin
@@ -2523,7 +2638,7 @@ begin
  {$ifdef FPC} {$checkpointer default} {$endif}
  end
  else begin
-  result:= fquery.addblobcache(adata,alength);
+  result:= fowner.addblobcache(adata,alength);
  end;
 end;
 
@@ -2534,7 +2649,7 @@ end;
 
 procedure TSQLCursor.addblobcache(const aid: int64; const adata: string);
 begin
- fquery.addblobcache(aid,adata);
+ fowner.addblobcache(aid,adata);
 end;
 
 procedure TSQLCursor.blobfieldtoparam(const afield: tfield;
@@ -2544,11 +2659,11 @@ var
  str1: string;
 begin
  if afield.getdata(@blobid) then begin
-  if fquery = nil then begin
+  if fowner = nil then begin
    str1:= fblobs[blobid];
   end
   else begin
-   str1:= fquery.fblobcache[blobid].data;
+   str1:= fowner.getblobcache[blobid].data;
   end;
   if asstring then begin
    aparam.asstring:= str1;
@@ -2564,11 +2679,11 @@ end;
 
 function TSQLCursor.getcachedblob(const blobid: integer): tstream;
 begin
- if fquery = nil then begin
+ if fowner = nil then begin
   result:= tstringcopystream.create(fblobs[blobid]);
  end
  else begin
-  result:= tstringcopystream.create(fquery.fblobcache[blobid].data);
+  result:= tstringcopystream.create(fowner.getblobcache[blobid].data);
  end;
 end;
 
@@ -2580,7 +2695,7 @@ end;
 
 function TSQLCursor.wantblobfetch: boolean;
 begin
- result:= (fquery <> nil) and (bs_blobsfetched in fquery.fbstate);
+ result:= (fowner <> nil) and fowner.blobsarefetched;
 end;
 
 { tmsesqlscript }

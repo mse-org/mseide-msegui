@@ -107,7 +107,8 @@ type
     procedure DoInternalDisconnect; override;
     function GetHandle : pointer; override;
 
-    Function AllocateCursorHandle(const aquery: tsqlquery): TSQLCursor; override;
+    Function AllocateCursorHandle(const aowner: icursorclient;
+                       const aname: ansistring): TSQLCursor; override;
     Procedure DeAllocateCursorHandle(var cursor : TSQLCursor); override;
     Function AllocateTransactionHandle : TSQLHandle; override;
 
@@ -119,7 +120,8 @@ type
               const atransaction: tsqltransaction; const AParams : TParams); override;
     procedure AddFieldDefs(cursor: TSQLCursor;FieldDefs : TfieldDefs); override;
     function Fetch(cursor : TSQLCursor) : boolean; override;
-    function loadfield(const cursor: tsqlcursor; const afield: tfield;
+    function loadfield(const cursor: tsqlcursor; 
+                const datatype: tfieldtype; const fieldnum: integer; //null based
       const buffer: pointer; var bufsize: integer): boolean; override;
            //if bufsize < 0 -> buffer was to small, should be -bufsize
     function GetTransactionHandle(trans : TSQLHandle): pointer; override;
@@ -156,6 +158,9 @@ type
   public
     constructor Create(AOwner : TComponent); override;
     destructor destroy; override;
+    function fetchblob(const cursor: tsqlcursor;
+                              const fieldnum: integer): ansistring; override;
+                              //null based
     procedure createdatabase(const asql: string);
   published
     property Dialect  : integer read FDialect write FDialect;
@@ -215,7 +220,7 @@ begin
  inherited;
  if fopen then begin
   if isc_dsql_free_statement(@status, @statement, dsql_close) <> 0 then begin
-   checkerror('close cursor', status,query.name);
+   checkerror('close cursor', status,fname);
   end;
   fopen:= false;
  end;
@@ -530,12 +535,13 @@ begin
  end;
 end;
 
-Function TIBConnection.AllocateCursorHandle(const aquery: tsqlquery): TSQLCursor;
+Function TIBConnection.AllocateCursorHandle(const aowner: icursorclient;
+                 const aname: ansistring): TSQLCursor;
 
 var curs : TIBCursor;
 
 begin
-  curs := TIBCursor.create(aquery);
+  curs := TIBCursor.create(aowner,aname);
   curs.sqlda := nil;
   curs.statement := nil;
   curs.FPrepared := False;
@@ -584,8 +590,11 @@ begin
     {$else}
       buf := AParams.ParseSQL(buf,false,psInterbase,paramBinding);
     {$endif}
-    if isc_dsql_prepare(@Status, @tr, @Statement, 0, @Buf[1], Dialect, nil) <> 0 then
-      CheckError('PrepareStatement', Status);
+    if isc_dsql_prepare(@Status, @tr, @Statement, 0, @Buf[1],
+                        Dialect, nil) <> 0 then begin
+     isc_dsql_free_statement(@fstatus, @statement, dsql_drop);
+     CheckError('PrepareStatement', Status);
+    end;
     FPrepared := True;
     if assigned(AParams) and (AParams.count > 0) then
       begin
@@ -712,7 +721,7 @@ begin
   datatype:= ftstring;
   name:= 'FIELD';
  end;
- fcursor:= fowner.allocatecursorhandle(nil);
+ fcursor:= fowner.allocatecursorhandle(nil,aowner.name);
  fcursor.fstatementtype:= stselect;
  ftransaction:= tsqltransaction.create(nil);
  ftransaction.database:= aowner;
@@ -937,7 +946,8 @@ begin
     end;
 end;
 
-function tibconnection.loadfield(const cursor: tsqlcursor; const afield: tfield;
+function tibconnection.loadfield(const cursor: tsqlcursor;
+          const datatype: tfieldtype; const fieldnum: integer; //null based
       const buffer: pointer; var bufsize: integer): boolean;
            //if bufsize < 0 -> buffer was to small, should be -bufsize
 var
@@ -946,12 +956,15 @@ var
  b: longint;
  c: currency;
 begin
- with TIBCursor(cursor),SQLDA^.SQLVar[afield.fieldno-1] do begin
+ with TIBCursor(cursor),SQLDA^.SQLVar[fieldnum] do begin
   if assigned(SQLInd) and (SQLInd^ = -1) then begin
    result:= false
   end
   else begin
    Result := true;
+   if buffer = nil then begin
+    exit;
+   end;
    if ((SQLType and not 1) = SQL_VARYING) then begin
     Move(SQLData^,VarcharLen,2);
     CurrBuff:= SQLData + 2;
@@ -960,7 +973,7 @@ begin
     CurrBuff:= SQLData;
     VarCharLen:= SQLLen;
    end;
-   case aField.DataType of
+   case DataType of
     ftBCD: begin
      c:= 0;
      Move(CurrBuff^,c,SQLLen);
@@ -973,7 +986,7 @@ begin
 //     Move(CurrBuff^,Buffer^,SQLLen);
      longint(buffer^):= 0;
      Move(CurrBuff^,buffer^,SQLLen);
-     if afield.datatype = ftsmallint then begin
+     if datatype = ftsmallint then begin
       longint(buffer^):= smallint(buffer^);
      end;
     end;
@@ -1303,6 +1316,21 @@ begin
  tmemorystringstream(getblobstream(acursor,blobid,true)).destroyasstring(result);
 end;
 
+function TIBConnection.fetchblob(const cursor: tsqlcursor;
+               const fieldnum: integer): ansistring;
+var
+ blobId : ISC_QUAD;
+ int1: integer;
+begin
+ int1:= sizeof(blobid);
+ if not loadfield(cursor,ftblob,fieldnum,@blobid,int1) then begin
+  result:= '';
+ end
+ else begin
+  result:= getblobstring(cursor,blobid);
+ end;
+end;
+
 function TIBConnection.CreateBlobStream(const Field: TField;
           const Mode: TBlobStreamMode; const acursor: tsqlcursor): TStream;
 var
@@ -1316,6 +1344,7 @@ begin
   result:= getblobstream(acursor,blobid);
  end;
 end;
+
 
 procedure TIBConnection.writeblobdata(const atransaction: tsqltransaction;
                const tablename: string; const acursor: tsqlcursor;

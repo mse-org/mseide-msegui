@@ -83,7 +83,8 @@ Type
 //    function GetAsSQLText(Field : TField) : string; overload; override;
 //    function GetAsSQLText(Param : TParam) : string; overload; override;
 
-    Function AllocateCursorHandle(const aquery: tsqlquery): TSQLCursor; override;
+    Function AllocateCursorHandle(const aowner: icursorclient;
+                           const aname: ansistring): TSQLCursor; override;
     Procedure DeAllocateCursorHandle(var cursor : TSQLCursor); override;
     Function AllocateTransactionHandle : TSQLHandle; override;
 
@@ -94,7 +95,8 @@ Type
              const atransaction:tSQLtransaction; const AParams : TParams); override;
     procedure AddFieldDefs(cursor: TSQLCursor; FieldDefs : TfieldDefs); override;
     function Fetch(cursor : TSQLCursor) : boolean; override;
-    function loadfield(const cursor: tsqlcursor; const afield: tfield;
+    function loadfield(const cursor: tsqlcursor;
+      const datatype: tfieldtype; const fieldnum: integer; //null based
       const buffer: pointer; var bufsize: integer): boolean; override;
            //if bufsize < 0 -> buffer was to small, should be -bufsize
     function GetTransactionHandle(trans : TSQLHandle): pointer; override;
@@ -124,6 +126,9 @@ Type
    function blobscached: boolean;
    
   Public
+    function fetchblob(const cursor: tsqlcursor;
+                              const fieldnum: integer): ansistring; override;
+                              //null based
     function getinsertid: int64; override;
     Property ServerInfo : String Read FServerInfo;
     Property HostInfo : String Read FHostInfo;
@@ -329,9 +334,10 @@ begin
   Result:=FMySQL;
 end;
 
-function TConnectionName.AllocateCursorHandle(const aquery: tsqlquery): TSQLCursor;
+function TConnectionName.AllocateCursorHandle(const aowner: icursorclient;
+                           const aname: ansistring): TSQLCursor;
 begin
-  Result:=TCursorName.Create(aquery);
+  Result:=TCursorName.Create(aowner,aname);
 end;
 
 Procedure TConnectionName.DeAllocateCursorHandle(var cursor : TSQLCursor);
@@ -559,10 +565,9 @@ begin
 end;
 
 function tconnectionname.loadfield(const cursor: tsqlcursor;
-              const afield: tfield;
+      const datatype: tfieldtype; const fieldnum: integer; //null based
       const buffer: pointer; var bufsize: integer): boolean;
            //if bufsize < 0 -> buffer was to small, should be -bufsize
-//todo: implement blobs 2006-11-14 MSE
 
 var
   field: PMYSQL_FIELD;
@@ -574,7 +579,7 @@ begin
 //  Writeln('LoadFieldsFromBuffer');
  result:= false;
  C:= tcursorname(Cursor);
- fno:= afield.fieldno - 1;
+ fno:= fieldnum;
  if C.Row=nil then
     begin
  //   Writeln('LoadFieldsFromBuffer: row=nil');
@@ -584,8 +589,11 @@ begin
  
  inc(Row,c.MapDSRowToMSQLRow[fno]);
  if row^ <> nil then begin
+  if buffer = nil then begin
+   exit;
+  end;
   field:= mysql_fetch_field_direct(C.FRES,c.MapDSRowToMSQLRow[fno]);
-  if afield.datatype = ftstring then begin
+  if datatype = ftstring then begin
 //   alen:= strlen(row^);
    alen:= mysql_fetch_lengths(c.fres)[c.MapDSRowToMSQLRow[fno]];
    if bufsize < alen then begin 
@@ -597,7 +605,7 @@ begin
    end;
   end
   else begin
-   if afield.datatype in [ftmemo,ftgraphic,ftblob] then begin
+   if datatype in [ftmemo,ftgraphic,ftblob] then begin
     alen:= mysql_fetch_lengths(c.fres)[c.MapDSRowToMSQLRow[fno]];
    end
    else begin
@@ -605,7 +613,27 @@ begin
    end;
   end;
   Result:= MySQLWriteData(cursor, field^.ftype,alen,
-       aField.DataType,Row^,Buffer);
+       DataType,Row^,Buffer);
+ end;
+end;
+
+function TConnectionName.fetchblob(const cursor: tsqlcursor;
+               const fieldnum: integer): ansistring;
+var
+ int1: integer;
+ row1: MYSQL_ROW;
+begin
+ result:= '';
+ with tcursorname(cursor) do begin
+  if row <> nil then begin
+   int1:= MapDSRowToMSQLRow[fieldnum];
+   row1:= row;
+   inc(row1,int1);
+   setlength(result,mysql_fetch_lengths(fres)[int1]);
+   if result <> '' then begin
+    move(row1^^,result[1],length(result));
+   end;
+  end;
  end;
 end;
 
@@ -736,6 +764,7 @@ begin
   Result := False;
   if Source = Nil then
     exit;
+  Result := True;
   Src:=StrPas(Source);
   case AType of
     FIELD_TYPE_TINY, FIELD_TYPE_SHORT, FIELD_TYPE_LONG,
@@ -818,7 +847,6 @@ begin
     end;
     
   end;
-  Result := True;
 end;
 
 procedure TConnectionName.UpdateIndexDefs(var IndexDefs : TIndexDefs;

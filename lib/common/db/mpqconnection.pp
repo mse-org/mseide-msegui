@@ -72,7 +72,8 @@ type
    procedure DoInternalDisconnect; override;
    function GetHandle : pointer; override;
 
-   Function AllocateCursorHandle(const aquery: tsqlquery) : TSQLCursor; override;
+   Function AllocateCursorHandle(const aowner: icursorclient;
+                           const aname: ansistring) : TSQLCursor; override;
    Procedure DeAllocateCursorHandle(var cursor : TSQLCursor); override;
    Function AllocateTransactionHandle : TSQLHandle; override;
 
@@ -85,7 +86,8 @@ type
    procedure AddFieldDefs(cursor: TSQLCursor; FieldDefs : TfieldDefs); override;
    function Fetch(cursor : TSQLCursor) : boolean; override;
    procedure UnPrepareStatement(cursor : TSQLCursor); override;
-   function loadfield(const cursor: tsqlcursor; const afield: tfield;
+   function loadfield(const cursor: tsqlcursor;
+            const datatype: tfieldtype; const fieldnum: integer; //null based
               const buffer: pointer; var bufsize: integer): boolean; override;
            //if bufsize < 0 -> buffer was to small, should be -bufsize
    function GetTransactionHandle(trans : TSQLHandle): pointer; override;
@@ -127,6 +129,9 @@ type
   public
    constructor Create(AOwner : TComponent); override;
    destructor destroy; override;
+   function fetchblob(const cursor: tsqlcursor;
+                              const fieldnum: integer): ansistring; override;
+                              //null based
    function backendpid: int64; //0 if not connected
    property eventcontroller: tdbeventcontroller read feventcontroller;
   published
@@ -360,9 +365,10 @@ begin
   end;
 end;
 
-Function TPQConnection.AllocateCursorHandle(const aquery: tsqlquery): TSQLCursor;
+Function TPQConnection.AllocateCursorHandle(const aowner: icursorclient;
+                           const aname: ansistring): TSQLCursor;
 begin
- result:= TPQCursor.create(aquery);
+ result:= TPQCursor.create(aowner,aname);
 end;
 
 Procedure TPQConnection.DeAllocateCursorHandle(var cursor : TSQLCursor);
@@ -642,7 +648,7 @@ begin
 end;
 
 function tpqconnection.loadfield(const cursor: tsqlcursor;
-      const afield: tfield;
+      const datatype: tfieldtype; const fieldnum: integer; //null based
       const buffer: pointer; var bufsize: integer): boolean;
            //if bufsize < 0 -> buffer was to small, should be -bufsize
 
@@ -672,22 +678,18 @@ var
 begin
 {$ifdef FPC}{$checkpointer off}{$endif}
  with TPQCursor(cursor) do begin
-  {
-    for x := 0 to PQnfields(res)-1 do
-      if PQfname(Res, x) = FieldDef.Name then break;
-
-    if PQfname(Res, x) <> FieldDef.Name then
-      DatabaseErrorFmt(SFieldNotFound,[FieldDef.Name],self);
-}
-  x:= afield.fieldno - 1;
+  x:= fieldnum;
   if pqgetisnull(res,CurTuple,x)=1 then begin
    result := false
   end
   else begin
+   if buffer = nil then begin
+    exit;
+   end;
    i:= PQfsize(res, x);
    CurrBuff := pqgetvalue(res,CurTuple,x);
    result := true;
-   case afield.DataType of
+   case DataType of
     ftInteger, ftSmallint, ftLargeInt,ftfloat: begin
      case i of               // postgres returns big-endian numbers
       sizeof(int64) : pint64(buffer)^ := BEtoN(pint64(CurrBuff)^);
@@ -777,6 +779,21 @@ begin
   end;
  end;
 {$ifdef FPC}{$checkpointer default}{$endif}
+end;
+
+function TPQConnection.fetchblob(const cursor: tsqlcursor;
+               const fieldnum: integer): ansistring;
+begin
+ result:= '';
+{$ifdef FPC}{$checkpointer off}{$endif}
+ with TPQCursor(cursor) do begin
+  if pqgetisnull(res,CurTuple,fieldnum) <> 1 then begin
+   setlength(result,pqgetlength(res,curtuple,fieldnum));
+   if result <> '' then begin
+    move(pqgetvalue(res,CurTuple,fieldnum)^,result[1],length(result));
+   end;
+  end;
+ end;
 end;
 
 procedure TPQConnection.UpdateIndexDefs(var IndexDefs : TIndexDefs;

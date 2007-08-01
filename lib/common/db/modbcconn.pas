@@ -16,7 +16,7 @@ unit modbcconn;
 interface
 
 uses
-  Classes, SysUtils, msqldb, db, odbcsqldyn;
+  Classes, SysUtils, msqldb, db, odbcsqldyn,msetypes;
 
 type
 
@@ -27,13 +27,14 @@ type
 
   TODBCCursor = class(TSQLCursor)
   protected
+    ffieldnames: stringarty;
     FSTMTHandle:SQLHSTMT; // ODBC Statement Handle
     FQuery:string;        // last prepared query, with :ParamName converted to ?
     FParamIndex:TParamBinding; // maps the i-th parameter in the query to the TParams passed to PrepareStatement
     FParamBuf:array of pointer; // buffers that can be used to bind the i-th parameter in the query
     FBlobStreams:TList;   // list of Blob TMemoryStreams stored in field buffers (we need this currently as we can't hook into the freeing of TBufDataset buffers)
   public
-    constructor Create(const aquery: tsqlquery;
+    constructor Create(const aowner: icursorclient; const aname: ansistring;
                                       const Connection:TODBCConnection);
     destructor Destroy; override;
   end;
@@ -72,7 +73,8 @@ type
     procedure DoInternalConnect; override;
     procedure DoInternalDisconnect; override;
     // - Handle (de)allocation
-    function AllocateCursorHandle(const aquery: tsqlquery): TSQLCursor; override;
+    function AllocateCursorHandle(const aowner: icursorclient;
+                           const aname: ansistring): TSQLCursor; override;
     procedure DeAllocateCursorHandle(var cursor:TSQLCursor); override;
     function AllocateTransactionHandle:TSQLHandle; override;
     // - Statement handling
@@ -92,7 +94,8 @@ type
     // - Result retrieving
     procedure AddFieldDefs(cursor:TSQLCursor; FieldDefs:TFieldDefs); override;
     function Fetch(cursor:TSQLCursor):boolean; override;
-    function loadfield(const cursor: tsqlcursor; const afield: tfield;
+    function loadfield(const cursor: tsqlcursor;
+      const datatype: tfieldtype; const fieldnum: integer; //null based
       const buffer: pointer; var bufsize: integer): boolean; override;
            //if bufsize < 0 -> buffer was to small, should be -bufsize
     function CreateBlobStream(const Field: TField; const Mode: TBlobStreamMode;
@@ -416,9 +419,10 @@ begin
     ODBCCheckResult(Res,SQL_HANDLE_DBC,FDBCHandle,'Could not free connection handle.');
 end;
 
-function TODBCConnection.AllocateCursorHandle(const aquery: tsqlquery): TSQLCursor;
+function TODBCConnection.AllocateCursorHandle(const aowner: icursorclient;
+                           const aname: ansistring): TSQLCursor;
 begin
-  Result:=TODBCCursor.Create(aquery,self);
+  Result:=TODBCCursor.Create(aowner,aname,self);
 end;
 
 procedure TODBCConnection.DeAllocateCursorHandle(var cursor: TSQLCursor);
@@ -535,8 +539,8 @@ begin
 end;
 
 function todbcconnection.loadfield(const cursor: tsqlcursor;
-       const afield: tfield; const buffer: pointer;
-       var bufsize: integer): boolean;
+       const datatype: tfieldtype; const fieldnum: integer; //null based
+       const buffer: pointer; var bufsize: integer): boolean;
            //if bufsize < 0 -> buffer was to small, should be -bufsize
  //untested!
  //todo: blob implementing 2006-11-14 MSE
@@ -555,34 +559,47 @@ var
   BlobMemoryStream:TMemoryStream;
   Res:SQLRETURN;
   fno: integer;
+  
+  buffer1: pointer;
+  bufsize1: integer;
+  dummybuf: array [0..31] of byte;  
 begin
   ODBCCursor:=cursor as TODBCCursor;
 
   // load the field using SQLGetData
   // Note: optionally we can implement the use of SQLBindCol later for even more speed
   // TODO: finish this
-  fno:= afield.fieldno;
-  case aField.DataType of
+  fno:= fieldnum+1;
+  bufsize1:= bufsize;
+  if buffer = nil then begin
+   buffer1:= @dummybuf;
+   bufsize1:= 0;
+  end
+  else begin
+   bufsize1:= bufsize;
+   buffer1:= buffer;
+  end;
+  case DataType of
     ftFixedChar,ftString: begin // are both mapped to TStringField
       Res:=SQLGetData(ODBCCursor.FSTMTHandle, fno,
-            SQL_C_CHAR, buffer, aField.Size, @StrLenOrInd);
-      bufsize:= strlenorind;                          //untested!!!!!!
+            SQL_C_CHAR, buffer1, bufsize1{aField.Size}, @StrLenOrInd);
+      bufsize1:= strlenorind;                          //untested!!!!!!
     end;
     ftSmallint:           // mapped to TSmallintField
-      Res:=SQLGetData(ODBCCursor.FSTMTHandle, fno, SQL_C_SSHORT, buffer, SizeOf(Smallint), @StrLenOrInd);
+      Res:=SQLGetData(ODBCCursor.FSTMTHandle, fno, SQL_C_SSHORT, buffer1, SizeOf(Smallint), @StrLenOrInd);
     ftInteger,ftWord:     // mapped to TLongintField
-      Res:=SQLGetData(ODBCCursor.FSTMTHandle, fno, SQL_C_SLONG, buffer, SizeOf(Longint), @StrLenOrInd);
+      Res:=SQLGetData(ODBCCursor.FSTMTHandle, fno, SQL_C_SLONG, buffer1, SizeOf(Longint), @StrLenOrInd);
     ftLargeint:           // mapped to TLargeintField
-      Res:=SQLGetData(ODBCCursor.FSTMTHandle, fno, SQL_C_SBIGINT, buffer, SizeOf(Largeint), @StrLenOrInd);
+      Res:=SQLGetData(ODBCCursor.FSTMTHandle, fno, SQL_C_SBIGINT, buffer1, SizeOf(Largeint), @StrLenOrInd);
     ftFloat:              // mapped to TFloatField
-      Res:=SQLGetData(ODBCCursor.FSTMTHandle, fno, SQL_C_DOUBLE, buffer, SizeOf(Double), @StrLenOrInd);
+      Res:=SQLGetData(ODBCCursor.FSTMTHandle, fno, SQL_C_DOUBLE, buffer1, SizeOf(Double), @StrLenOrInd);
     ftTime:               // mapped to TTimeField
     begin
       Res:=SQLGetData(ODBCCursor.FSTMTHandle, fno, SQL_C_TYPE_TIME, @ODBCTimeStruct, SizeOf(SQL_TIME_STRUCT), @StrLenOrInd);
       if StrLenOrInd<>SQL_NULL_DATA then
       begin
         DateTime:=TimeStructToDateTime(@ODBCTimeStruct);
-        Move(DateTime, buffer^, SizeOf(TDateTime));
+        Move(DateTime, buffer1^, SizeOf(TDateTime));
       end;
     end;
     ftDate:               // mapped to TDateField
@@ -591,7 +608,7 @@ begin
       if StrLenOrInd<>SQL_NULL_DATA then
       begin
         DateTime:=DateStructToDateTime(@ODBCDateStruct);
-        Move(DateTime, buffer^, SizeOf(TDateTime));
+        Move(DateTime, buffer1^, SizeOf(TDateTime));
       end;
     end;
     ftDateTime:           // mapped to TDateTimeField
@@ -600,23 +617,23 @@ begin
       if StrLenOrInd<>SQL_NULL_DATA then
       begin
         DateTime:=TimeStampStructToDateTime(@ODBCTimeStampStruct);
-        Move(DateTime, buffer^, SizeOf(TDateTime));
+        Move(DateTime, buffer1^, SizeOf(TDateTime));
       end;
     end;
     ftBoolean:            // mapped to TBooleanField
-      Res:=SQLGetData(ODBCCursor.FSTMTHandle, fno, SQL_C_BIT, buffer, SizeOf(Wordbool), @StrLenOrInd);
+      Res:=SQLGetData(ODBCCursor.FSTMTHandle, fno, SQL_C_BIT, buffer1, SizeOf(Wordbool), @StrLenOrInd);
     ftBytes:              // mapped to TBytesField
-      Res:=SQLGetData(ODBCCursor.FSTMTHandle, fno, SQL_C_BINARY, buffer, aField.Size, @StrLenOrInd);
+      Res:=SQLGetData(ODBCCursor.FSTMTHandle, fno, SQL_C_BINARY, buffer1, bufsize1{aField.Size}, @StrLenOrInd);
     ftVarBytes:           // mapped to TVarBytesField
-      Res:=SQLGetData(ODBCCursor.FSTMTHandle, fno, SQL_C_BINARY, buffer, aField.Size, @StrLenOrInd);
+      Res:=SQLGetData(ODBCCursor.FSTMTHandle, fno, SQL_C_BINARY, buffer1, bufsize1{aField.Size}, @StrLenOrInd);
     ftBlob, ftMemo:       // BLOBs
     begin
       // Try to discover BLOB data length
-      Res:=SQLGetData(ODBCCursor.FSTMTHandle, fno, SQL_C_BINARY, buffer, 0, @StrLenOrInd);
+      Res:=SQLGetData(ODBCCursor.FSTMTHandle, fno, SQL_C_BINARY, buffer1, 0, @StrLenOrInd);
       ODBCCheckResult(Res, SQL_HANDLE_STMT, ODBCCursor.FSTMTHandle, Format('Could not get field data for field ''%s'' (index %d).',
-      [aField.fieldName, fno]));
+      [odbccursor.ffieldNames[fieldnum], fno]));
       // Read the data if not NULL
-      if StrLenOrInd<>SQL_NULL_DATA then
+      if (StrLenOrInd<>SQL_NULL_DATA) and (buffer <> nil) then
       begin
         // Determine size of buffer to use
         if StrLenOrInd<>SQL_NO_TOTAL then
@@ -637,7 +654,7 @@ begin
               Res:=SQLGetData(ODBCCursor.FSTMTHandle, fno, SQL_C_BINARY, BlobBuffer, BlobBufferSize, @StrLenOrInd);
               ODBCCheckResult(Res, SQL_HANDLE_STMT, ODBCCursor.FSTMTHandle,
                Format('Could not get field data for field ''%s'' (index %d).',
-               [aField.fieldname, fno]));
+               [odbccursor.ffieldNames[fieldnum], fno]));
               // Append data in buffer to memorystream
               if (StrLenOrInd=SQL_NO_TOTAL) or (StrLenOrInd>BlobBufferSize) then
                 BytesRead:=BlobBufferSize
@@ -647,7 +664,7 @@ begin
             until Res=SQL_SUCCESS;
           end;
           // Store memorystream pointer in Field buffer and in the cursor's FBlobStreams list
-          TObject(buffer^):=BlobMemoryStream;
+          TObject(buffer1^):=BlobMemoryStream;
           if BlobMemoryStream<>nil then
             ODBCCursor.FBlobStreams.Add(BlobMemoryStream);
           // Set BlobMemoryStream to nil, so it won't get freed in the finally block below
@@ -662,11 +679,12 @@ begin
     // TODO: Loading of other field types
   else
     raise EODBCException.CreateFmt('Tried to load field of unsupported field type %s',
-    [Fieldtypenames[aField.DataType]]);
+    [Fieldtypenames[DataType]]);
   end;
+  bufsize:= bufsize1;
   ODBCCheckResult(Res, SQL_HANDLE_STMT, ODBCCursor.FSTMTHandle,
    Format('Could not get field data for field ''%s'' (index %d).',
-   [aField.fieldName, fno]));
+   [odbccursor.ffieldNames[fieldnum], fno]));
   Result:=StrLenOrInd<>SQL_NULL_DATA; // Result indicates whether the value is non-null
 
 //  writeln(Format('Field.Size: %d; StrLenOrInd: %d',[FieldDef.Size, StrLenOrInd]));
@@ -730,6 +748,7 @@ begin
     SQL_HANDLE_STMT, ODBCCursor.FSTMTHandle, 'Could not determine number of columns in result set.'
   );
 
+  setlength(odbccursor.ffieldnames,columncount);
   for i:=1 to ColumnCount do
   begin
     SetLength(ColName,ColNameDefaultLength); // also garantuees uniqueness
@@ -855,6 +874,7 @@ begin
 
     // add FieldDef
     TFieldDef.Create(FieldDefs, ColName, FieldType, FieldSize, False, i);
+    odbccursor.ffieldnames[i-1]:= colname;
   end;
 end;
 
@@ -906,10 +926,10 @@ end;
 
 { TODBCCursor }
 
-constructor TODBCCursor.Create(const aquery: tsqlquery;
-                                         const Connection:TODBCConnection);
+constructor TODBCCursor.Create(const aowner: icursorclient;
+              const aname: ansistring; const Connection:TODBCConnection);
 begin
- inherited create(aquery);
+ inherited create(aowner,aname);
   // allocate statement handle
   ODBCCheckResult(
     SQLAllocHandle(SQL_HANDLE_STMT, Connection.FDBCHandle, FSTMTHandle),

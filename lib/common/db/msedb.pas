@@ -287,6 +287,7 @@ type
   protected
    function HasParent: Boolean; override;
    function getasfloat: double; override;
+   function getascurrency: currency; override;
    procedure setasfloat(avalue: double); override;
   public
    procedure Clear; override;
@@ -1916,12 +1917,14 @@ end;
 
 function tmsefloatfield.getasfloat: double;
 begin
- if isnull then begin
+ if not getdata(@result) then begin
   result:= emptyreal;
- end
- else begin
-  result:= inherited getasfloat;
  end;
+end;
+
+function tmsefloatfield.getascurrency: currency;
+begin
+ result:= inherited getasfloat;
 end;
 
 procedure tmsefloatfield.setasfloat(avalue: double);
@@ -2131,11 +2134,10 @@ end;
 
 function tmsedatetimefield.getasdatetime: tdatetime;
 begin
- if isnull then begin
+ if not getdata(@result) then begin
   result:= emptydatetime;
  end
  else begin
-  result:= inherited getasdatetime;
   if dtfo_utc in foptions then begin
    result:= utctolocaltime(result);
   end;

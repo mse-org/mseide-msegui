@@ -543,6 +543,11 @@ function finditem(const ar: integerarty; const aitem: integer): integer;
                                             overload; //-1 if none  
 procedure moveitem(var dest: integerarty; const sourceindex: integer;
                        destindex: integer); overload;
+
+function adduniqueitem(var dest: pointerarty; const value: pointer): integer;
+                        //returns index
+
+
 function stackarfunc(const ar1,ar2: integerarty): integerarty;
 procedure stackarray(const source: stringarty; var dest: stringarty); overload;
 procedure stackarray(const source: msestringarty; var dest: msestringarty); overload;
@@ -1151,6 +1156,22 @@ begin
  int1:= dest[sourceindex];
  deleteitem(dest,sourceindex);
  insertitem(dest,destindex,int1);
+end;
+
+function adduniqueitem(var dest: pointerarty; const value: pointer): integer;
+                        //returns index
+var
+ int1: integer;
+begin
+ for int1:= 0 to high(dest) do begin
+  if dest[int1] = value then begin
+   result:= int1;
+   exit;
+  end;
+ end;
+ result:= high(dest) + 1;
+ setlength(dest,result+1);
+ dest[result]:= value;
 end;
 
 function stackarfunc(const ar1,ar2: integerarty): integerarty;

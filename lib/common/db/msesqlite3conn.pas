@@ -53,7 +53,6 @@ type
    function readsequence(const sequencename: string): string;
    function writesequence(const sequencename: string;
                     const avalue: largeint): string;
-   procedure updateutf8(var autf8: boolean);                    
 
           //iblobconnection
    procedure writeblobdata(const atransaction: tsqltransaction;
@@ -76,7 +75,8 @@ type
    procedure DoInternalDisconnect; override;
    function GetHandle : pointer; override;
 
-   Function AllocateCursorHandle(const aowner: tsqlquery) : TSQLCursor; override;
+   Function AllocateCursorHandle(const aowner: icursorclient;
+                           const aname: ansistring) : TSQLCursor; override;
                        //aowner used as blob cache
    Procedure DeAllocateCursorHandle(var cursor : TSQLCursor); override;
    Function AllocateTransactionHandle : TSQLHandle; override;
@@ -90,7 +90,8 @@ type
    procedure UnPrepareStatement(cursor : TSQLCursor); override;
 
    procedure FreeFldBuffers(cursor : TSQLCursor); override;
-   function loadfield(const cursor: tsqlcursor; const afield: tfield;
+   function loadfield(const cursor: tsqlcursor;
+     const datatype: tfieldtype; const fieldnum: integer; //null based
      const buffer: pointer; var bufsize: integer): boolean; override;
           //if bufsize < 0 -> buffer was to small, should be -bufsize
    function GetTransactionHandle(trans : TSQLHandle): pointer; override;
@@ -113,7 +114,11 @@ type
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
+   procedure updateutf8(var autf8: boolean); override;
    function getinsertid: int64; override;
+   function fetchblob(const cursor: tsqlcursor;
+                              const fieldnum: integer): ansistring; override;
+                              //null based
   published
    property DatabaseName: filenamety read getdatabasename write setdatabasename;
    property Connected: boolean read getconnected write setconnected;
@@ -150,18 +155,18 @@ type
    fopen: boolean;
    fconnection: tsqlite3connection;
   public
-   constructor create(const aquery: tsqlquery; 
-                                const aconnection: tsqlite3connection);
+   constructor create(const aowner: icursorclient; const aname: ansistring; 
+                       const aconnection: tsqlite3connection);
    procedure close; override;
  end;
 
 { tsqlite3cursor }
 
-constructor tsqlite3cursor.create(const aquery: tsqlquery; 
-                                const aconnection: tsqlite3connection);
+constructor tsqlite3cursor.create(const aowner: icursorclient;
+              const aname: ansistring; const aconnection: tsqlite3connection);
 begin
  fconnection:= aconnection;
- inherited create(aquery);
+ inherited create(aowner,aname);
 end;
 
 procedure tsqlite3cursor.close;
@@ -258,9 +263,10 @@ begin
  result:= tsqlhandle.create;
 end;
 
-function tsqlite3connection.AllocateCursorHandle(const aowner: tsqlquery): TSQLCursor;
+function tsqlite3connection.AllocateCursorHandle(const aowner: icursorclient;
+                           const aname: ansistring): TSQLCursor;
 begin
- result:= tsqlite3cursor.create(aowner,self);
+ result:= tsqlite3cursor.create(aowner,aname,self);
 end;
 
 procedure tsqlite3connection.DeAllocateCursorHandle(var cursor: TSQLCursor);
@@ -485,8 +491,8 @@ begin
 end;
 
 function tsqlite3connection.loadfield(const cursor: tsqlcursor;
-               const afield: tfield; const buffer: pointer;
-               var bufsize: integer): boolean;
+               const datatype: tfieldtype; const fieldnum: integer; //null based
+               const buffer: pointer; var bufsize: integer): boolean;
 var
  st1: storagetypety;
  fnum: integer;
@@ -498,11 +504,14 @@ var
  year,month,day,hour,minute,second: integer;
 begin
  with tsqlite3cursor(cursor) do begin
-  fnum:= afield.fieldno - 1;
+  fnum:= fieldnum;
   st1:= storagetypety(sqlite3_column_type(fstatement,fnum));
   result:= st1 <> st_null;
   if result then begin
-   case afield.datatype of
+   if buffer = nil then begin
+    exit;
+   end;
+   case datatype of
     ftinteger: begin
      integer(buffer^):= sqlite3_column_int(fstatement,fnum);
     end;
@@ -601,6 +610,20 @@ begin
     else begin
      result:= false; // unknown
     end; 
+   end;
+  end;
+ end;
+end;
+
+function tsqlite3connection.fetchblob(const cursor: tsqlcursor;
+               const fieldnum: integer): ansistring;
+begin
+ result:= '';
+ with tsqlite3cursor(cursor) do begin
+  if storagetypety(sqlite3_column_type(fstatement,fieldnum)) <> st_null then begin
+   setlength(result,sqlite3_column_bytes(fstatement,fieldnum));
+   if result <> '' then begin
+    move(sqlite3_column_blob(fstatement,fieldnum)^,result[1],length(result));
    end;
   end;
  end;

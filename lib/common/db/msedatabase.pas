@@ -18,26 +18,45 @@ unit msedatabase;
 {$ifdef FPC}{$mode objfpc}{$h+}{$INTERFACES CORBA}{$endif}
 interface
 uses
- classes,db,sysutils,msedb,msestrings;
+ classes,db,sysutils,msedb,msestrings,mseclasses,mseguiglob,msetypes;
  
 type
  tmdbdataset = class;
  tmdatabase = class;
+ tmdbtransaction = class;
  
-  tmdbtransactionClass = Class of tmdbtransaction;
-  tmdbtransaction = Class(TComponent)
+ idbclient = interface(inullinterface)
+  function getinstance: tobject;
+  function getname: ansistring;
+  function getactive: boolean;
+  procedure setactive(avalue: boolean);
+ end; 
+ 
+ itransactionclient = interface(idbclient)
+  procedure settransaction(const avalue: tmdbtransaction);
+ end;
+ itransactionclientarty = array of itransactionclient;
+ 
+ idatabaseclient = interface(idbclient)
+  procedure setdatabase(const sender: tmdatabase);
+ end;
+ idatabaseclientarty = array of idatabaseclient;
+ 
+// tmdbtransactionClass = class of tmdbtransaction;
+ tmdbtransaction = class(TComponent)
   Private
     FActive        : boolean;
     FDatabase      : tmdatabase;
     FOpenAfterRead : boolean;
-    Function GetDataSetCount : Longint;
-    Function GetDataset(Index : longint) : tmdbdataset;
-    procedure RegisterDataset (DS : tmdbdataset);
-    procedure UnRegisterDataset (DS : tmdbdataset);
+//    Function GetDataSetCount : Longint;
+//    Function GetDataset(Index : longint) : tmdbdataset;
+    procedure RegisterDataset (const DS: itransactionclient);
+    procedure UnRegisterDataset(const DS: itransactionclient);
     procedure RemoveDataSets;
     procedure SetActive(Value : boolean);
   Protected
-    FDataSets      : TList;
+//    FDataSets      : TList;
+    fdatasets: itransactionclientarty;
     Procedure SetDatabase (Value : tmdatabase); virtual;
     procedure CloseTrans;
     procedure openTrans;
@@ -53,6 +72,7 @@ type
     Destructor destroy; override;
     procedure CloseDataSets;
     Property DataBase : tmdatabase Read FDatabase Write SetDatabase;
+    property datasets: itransactionclientarty read fdatasets;
   published
     property Active : boolean read FActive write setactive;
   end;
@@ -100,12 +120,12 @@ type
   end;
 
 
-  tmdatabaseClass = Class Of tmdatabase;
-
+ // tmdatabaseClass = Class Of tmdatabase;
   tmdatabase = class(TCustomConnection)
   private
     FDataBaseName : String;
-    FDataSets : TList;
+//    FDataSets : TList;
+    fdatasets: idatabaseclientarty;
     FTransactions : TList;
     FDirectory : String;
     FKeepConnection : Boolean;
@@ -113,9 +133,10 @@ type
     FSQLBased : Boolean;
     Function GetTransactionCount : Longint;
     Function GetTransaction(Index : longint) : tmdbtransaction;
-    procedure RegisterDataset (DS : tmdbdataset);
+//    procedure RegisterDataset (DS : tmdbdataset);
+    procedure RegisterDataset(const DS: idatabaseclient);
     procedure RegisterTransaction (TA : tmdbtransaction);
-    procedure UnRegisterDataset (DS : tmdbdataset);
+    procedure UnRegisterDataset(const DS: idatabaseclient);
     procedure UnRegisterTransaction(TA : tmdbtransaction);
     procedure RemoveDataSets;
     procedure RemoveTransactions;
@@ -128,7 +149,7 @@ type
     procedure DoDisconnect; override;
     function GetConnected : boolean; override;
     Function GetDataset(Index : longint) : TDataset; override;
-    Function GetDataSetCount : Longint; override;
+//    Function GetDataSetCount : Longint; override;
     Procedure DoInternalConnect; Virtual;Abstract;
     Procedure DoInternalDisConnect; Virtual;Abstract;
   public
@@ -151,14 +172,17 @@ type
   end;
 
   tmdbdatasetClass = Class of tmdbdataset;
-  tmdbdataset = Class(TDataset)
+  tmdbdataset = Class(TDataset,idatabaseclient,itransactionclient)
     Private
+    Protected
       FDatabase : tmdatabase;
       FTransaction : tmdbtransaction;
-    Protected
-      Procedure SetDatabase (Value : tmdatabase); virtual;
-      Procedure SetTransaction(Value : tmdbtransaction); virtual;
-      Procedure CheckDatabase;
+      Procedure SetDatabase (const Value: tmdatabase); virtual;
+      Procedure SetTransaction(const Value: tmdbtransaction); virtual;
+//      Procedure CheckDatabase;
+      //idbclient
+      function getinstance: tobject;
+      function getname: ansistring;
     Public
       Destructor destroy; override;
       Property DataBase : tmdatabase Read FDatabase Write SetDatabase;
@@ -194,10 +218,84 @@ type
                                    write fonconnecterror; 
  end;
  
+procedure dosetdatabase(const sender: idatabaseclient; const avalue: tmdatabase;
+                 var dest: tmdatabase);
+procedure dosettransaction(const sender: itransactionclient; 
+        const avalue: tmdbtransaction;var dest: tmdbtransaction);
+procedure checkdatabase(const aname: ansistring; const adatabase: tmdatabase);
+procedure checktransaction(const aname: ansistring; const atransaction: tmdbtransaction);
+procedure checkinactive(const active: boolean; const aname: ansistring);
+procedure checkactive(const active: boolean; const aname: ansistring);
+                 
 implementation
 uses
- dbconst,mseclasses,msefileutils;
+ dbconst,msefileutils,msedatalist;
  
+procedure checkdatabase(const aname: ansistring; const adatabase: tmdatabase);
+begin
+ if adatabase = nil then begin
+  raise edatabaseerror.create(aname+': '+serrdatabasenassigned);
+ end;
+end;
+
+procedure checktransaction(const aname: ansistring;
+                                   const atransaction: tmdbtransaction);
+begin
+ if atransaction = nil then begin
+  raise edatabaseerror.create(aname+': '+serrtransactionnset);
+ end;
+end;
+
+procedure checkinactive(const active: boolean; const aname: ansistring);
+begin
+ if active then begin
+  raise edatabaseerror.create(aname+': Component is active.');
+ end;
+end;
+ 
+procedure checkactive(const active: boolean; const aname: ansistring);
+begin
+ if not active then begin
+  raise edatabaseerror.create(aname+': Component is not active.');
+ end;
+end;
+
+procedure dosetdatabase(const sender: idatabaseclient; const avalue: tmdatabase;
+                 var dest: tmdatabase);
+begin
+ if avalue <> dest then begin
+  if sender.getactive then begin
+   raise edatabaseerror('Database client "'+sender.getname+'" is active.');
+  end;
+  if dest <> nil then begin
+   dest.unregisterdataset(sender);
+  end;
+  dest:= nil;
+  if avalue <> nil then begin
+   avalue.registerdataset(sender);
+  end;
+  dest:= avalue;
+ end;
+end;
+
+procedure dosettransaction(const sender: itransactionclient; 
+        const avalue: tmdbtransaction;var dest: tmdbtransaction);
+begin
+ if avalue <> dest then begin
+  if sender.getactive then begin
+   raise edatabaseerror('Transaction client "'+sender.getname+'" is active.');
+  end;
+  if dest <> nil then begin
+   dest.unregisterdataset(sender);
+  end;
+  dest:= nil;
+  if avalue <> nil then begin
+   avalue.registerdataset(sender);
+  end;
+  dest:= avalue;
+ end;
+end;
+
 { tmdatabase }
 
 Procedure tmdatabase.CheckConnected;
@@ -240,7 +338,7 @@ constructor tmdatabase.Create(AOwner: TComponent);
 begin
   Inherited Create(AOwner);
   FParams:=TStringlist.Create;
-  FDatasets:=TList.Create;
+//  FDatasets:=TList.Create;
   FTransactions:=TList.Create;
 end;
 
@@ -250,22 +348,19 @@ begin
   Connected:=False;
   RemoveDatasets;
   RemoveTransactions;
-  FDatasets.Free;
+//  FDatasets.Free;
   FTransactions.Free;
   FParams.Free;
   Inherited Destroy;
 end;
 
 procedure tmdatabase.CloseDataSets;
-
-Var I : longint;
-
+var
+ int1: integer;
 begin
-  If Assigned(FDatasets) then
-    begin
-    For I:=FDatasets.Count-1 downto 0 do
-      TDataset(FDatasets[i]).Close;
-    end;
+ for int1:= 0 to high(fdatasets) do begin
+  fdatasets[int1].setactive(false);
+ end;
 end;
 
 procedure tmdatabase.CloseTransactions;
@@ -281,13 +376,12 @@ begin
 end;
 
 procedure tmdatabase.RemoveDataSets;
-
-Var I : longint;
-
+var
+ int1: integer;
 begin
-  If Assigned(FDatasets) then
-    For I:=FDataSets.Count-1 downto 0 do
-      tmdbdataset(FDataSets[i]).Database:=Nil;
+ for int1:= high(fdatasets) downto 0 do begin
+  fdatasets[int1].setdatabase(nil);
+ end;
 end;
 
 procedure tmdatabase.RemoveTransactions;
@@ -299,7 +393,7 @@ begin
     For I:=FTransactions.Count-1 downto 0 do
       tmdbtransaction(FTransactions[i]).Database:=Nil;
 end;
-
+{
 Function tmdatabase.GetDataSetCount : Longint;
 
 begin
@@ -308,7 +402,7 @@ begin
   else
     Result:=0;
 end;
-
+}
 Function tmdatabase.GetTransactionCount : Longint;
 
 begin
@@ -342,16 +436,14 @@ begin
     end;
 end;
 
-procedure tmdatabase.RegisterDataset (DS : tmdbdataset);
-
-Var I : longint;
-
+procedure tmdatabase.RegisterDataset(const DS: idatabaseclient);
+var
+ int1: integer;
 begin
-  I:=FDatasets.IndexOf(DS);
-  If I=-1 then
-    FDatasets.Add(DS)
-  else
-    DatabaseErrorFmt(SDatasetRegistered,[DS.Name]);
+ int1:= high(fdatasets);
+ if adduniqueitem(pointerarty(fdatasets),ds) <= int1 then begin
+  DatabaseErrorFmt(SDatasetRegistered,[DS.getname]);
+ end;
 end;
 
 procedure tmdatabase.RegisterTransaction (TA : tmdbtransaction);
@@ -366,16 +458,11 @@ begin
     DatabaseErrorFmt(STransactionRegistered,[TA.Name]);
 end;
 
-procedure tmdatabase.UnRegisterDataset (DS : tmdbdataset);
-
-Var I : longint;
-
+procedure tmdatabase.UnRegisterDataset(const DS: idatabaseclient);
 begin
-  I:=FDatasets.IndexOf(DS);
-  If I<>-1 then
-    FDatasets.Delete(I)
-  else
-    DatabaseErrorFmt(SNoDatasetRegistered,[DS.Name]);
+ if removeitem(pointerarty(fdatasets),ds) < 0 then begin
+  DatabaseErrorFmt(SNoDatasetRegistered,[DS.getName]);
+ end;
 end;
 
 procedure tmdatabase.UnRegisterTransaction (TA : tmdbtransaction);
@@ -392,39 +479,54 @@ end;
 
 { tmdbdataset }
 
-Procedure tmdbdataset.SetDatabase (Value : tmdatabase);
+Procedure tmdbdataset.SetDatabase (const Value : tmdatabase);
 
 begin
+ dosetdatabase(idatabaseclient(self),value,fdatabase);
+{
   If Value<>FDatabase then
     begin
     CheckInactive;
     If Assigned(FDatabase) then
-      FDatabase.UnregisterDataset(Self);
+      FDatabase.UnregisterDataset(idatabaseclient(Self));
     If Value<>Nil Then
-      Value.RegisterDataset(Self);
+      Value.RegisterDataset(idatabaseclient(Self));
     FDatabase:=Value;
     end;
+}
 end;
 
-Procedure tmdbdataset.SetTransaction (Value : tmdbtransaction);
-
+Procedure tmdbdataset.SetTransaction (const Value : tmdbtransaction);
 begin
+ dosettransaction(itransactionclient(self),value,ftransaction);
+ {
   CheckInactive;
   If Value<>FTransaction then
     begin
     If Assigned(FTransaction) then
-      FTransaction.UnregisterDataset(Self);
+      FTransaction.UnregisterDataset(itransactionclient(Self));
     If Value<>Nil Then
-      Value.RegisterDataset(Self);
+      Value.RegisterDataset(itransactionclient(Self));
     FTransaction:=Value;
     end;
+}
 end;
-
+{
 Procedure tmdbdataset.CheckDatabase;
 
 begin
   If (FDatabase=Nil) then
     DatabaseError(SErrNoDatabaseAvailable,Self)
+end;
+}
+function tmdbdataset.getinstance: tobject;
+begin
+ result:= self;
+end;
+
+function tmdbdataset.getname: ansistring;
+begin
+ result:= name;
 end;
 
 Destructor tmdbdataset.Destroy;
@@ -442,7 +544,7 @@ begin
   if FActive and (not Value) then
     EndTransaction
   else if (not FActive) and Value then
-    if csLoading in ComponentState then
+    if csreading in ComponentState then
       begin
       FOpenAfterRead := true;
       exit;
@@ -518,7 +620,7 @@ constructor tmdbtransaction.create(AOwner : TComponent);
 
 begin
   inherited create(AOwner);
-  FDatasets:=TList.Create;
+//  FDatasets:=TList.Create;
 end;
 
 Procedure tmdbtransaction.CheckDatabase;
@@ -529,15 +631,12 @@ begin
 end;
 
 procedure tmdbtransaction.CloseDataSets;
-
-Var I : longint;
-
+var
+ int1: integer;
 begin
-  If Assigned(FDatasets) then
-    begin
-    For I:=FDatasets.Count-1 downto 0 do
-      tmdbdataset(FDatasets[i]).Close;
-    end;
+ for int1:= high(fdatasets) downto 0 do begin
+  fdatasets[int1].setactive(false);
+ end;
 end;
 
 Destructor tmdbtransaction.Destroy;
@@ -545,53 +644,44 @@ Destructor tmdbtransaction.Destroy;
 begin
   Database:=Nil;
   RemoveDatasets;
-  FDatasets.Free;
+//  FDatasets.Free;
   Inherited;
 end;
 
 procedure tmdbtransaction.RemoveDataSets;
-
-Var I : longint;
-
+var 
+ int1: integer;
 begin
-  If Assigned(FDatasets) then
-    For I:=FDataSets.Count-1 downto 0 do
-      tmdbdataset(FDataSets[i]).Transaction:=Nil;
+ for int1:= high(fdatasets) downto 0 do begin
+  fdatasets[int1].settransaction(nil);
+ end;
 end;
-
+{
 Function tmdbtransaction.GetDataSetCount : Longint;
-
 begin
   If Assigned(FDatasets) Then
     Result:=FDatasets.Count
   else
     Result:=0;
 end;
-
-procedure tmdbtransaction.UnRegisterDataset (DS : tmdbdataset);
-
-Var I : longint;
-
+}
+procedure tmdbtransaction.UnRegisterDataset(const DS: itransactionclient);
 begin
-  I:=FDatasets.IndexOf(DS);
-  If I<>-1 then
-    FDatasets.Delete(I)
-  else
-    DatabaseErrorFmt(SNoDatasetRegistered,[DS.Name]);
+ if removeitem(pointerarty(fdatasets),ds) < 0 then begin
+  DatabaseErrorFmt(SNoDatasetRegistered,[DS.getName]);
+ end;
 end;
 
-procedure tmdbtransaction.RegisterDataset (DS : tmdbdataset);
-
-Var I : longint;
-
+procedure tmdbtransaction.RegisterDataset(const DS: itransactionclient);
+var
+ int1: integer;
 begin
-  I:=FDatasets.IndexOf(DS);
-  If I=-1 then
-    FDatasets.Add(DS)
-  else
-    DatabaseErrorFmt(SDatasetRegistered,[DS.Name]);
+ int1:= high(fdatasets);
+ if adduniqueitem(pointerarty(fdatasets),ds) <= int1 then begin
+  DatabaseErrorFmt(SDatasetRegistered,[DS.getname]);
+ end;
 end;
-
+{
 Function tmdbtransaction.GetDataset(Index : longint) : tmdbdataset;
 
 begin
@@ -603,7 +693,7 @@ begin
     DatabaseError(SNoDatasets);
   end;
 end;
-
+}
 { TCustomConnection }
 
 procedure TCustomConnection.SetAfterConnect(const AValue: TNotifyEvent);
