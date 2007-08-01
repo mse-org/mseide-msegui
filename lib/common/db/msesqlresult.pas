@@ -145,7 +145,8 @@ type
  end;
  
 // tgraphicdbcol = class(tdbcol);
-  
+ dbcolarty = array of tdbcol;
+   
  tdbcols = class(tpersistentarrayprop)
   private 
    fname: ansistring;
@@ -156,6 +157,8 @@ type
    constructor create(const aname: ansistring);
    function findcol(const aname: ansistring): tdbcol;   
    function colbyname(const aname: ansistring): tdbcol;
+   function colsbyname(const anames: array of ansistring): dbcolarty;
+              //invalid after close!
    property items[const index: integer]: tdbcol read getitems;
  end;
 
@@ -529,6 +532,16 @@ begin
  result:= findcol(aname);
  if result = nil then begin
   raise edatabaseerror.create(fname+': col "'+aname+'" not found.');
+ end;
+end;
+
+function tdbcols.colsbyname(const anames: array of ansistring): dbcolarty;
+var
+ int1: integer;
+begin
+ setlength(result,high(anames)+1);
+ for int1:= 0 to high(result) do begin
+  result[int1]:= colbyname(anames[int1]);
  end;
 end;
 
