@@ -120,7 +120,7 @@ type
     property UserName;     // will be passed as UID connection parameter
     property CharSet;
     property HostName;     // ignored
-    // Redeclare properties from TDatabase
+    // Redeclare properties from TmDatabase
     property Connected;
     property Role;
     property DatabaseName; // will be passed as DSN connection parameter

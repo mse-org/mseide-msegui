@@ -12,7 +12,7 @@ unit msedbevents;
 
 interface
 uses
- classes,msearrayprops,mseclasses,msqldb,db,mseguiglob,msetimer;
+ classes,msearrayprops,mseclasses,msqldb,db,mseguiglob,msetimer,msedatabase;
 
 const
  defaultdbeventinterval = 1000000; //us 
@@ -37,11 +37,11 @@ type
    feventname: string;
    fonexecute: dbeventty;
    flisten: boolean;
-   fdatabase: tdatabase;
+   fdatabase: tmdatabase;
    fintf: idbevent;
    procedure seteventname(const avalue: string);
    procedure setlisten(const avalue: boolean);
-   procedure setdatabase(const avalue: tdatabase);
+   procedure setdatabase(const avalue: tmdatabase);
   protected
    procedure doexecute(const aid: int64); virtual;
    procedure checkinactive;
@@ -52,7 +52,7 @@ type
    destructor destroy; override;
    procedure fire;
   published
-   property database: tdatabase read fdatabase write setdatabase;
+   property database: tmdatabase read fdatabase write setdatabase;
    property eventname: string read feventname write seteventname;
    property listen: boolean read flisten write setlisten default false;
    property onexecute: dbeventty read fonexecute write fonexecute;
@@ -137,7 +137,7 @@ begin
  end;
 end;
 
-procedure tdbevent.setdatabase(const avalue: tdatabase);
+procedure tdbevent.setdatabase(const avalue: tmdatabase);
 begin
  if avalue <> nil then begin
   if not mseclasses.getcorbainterface(avalue,typeinfo(idbevent),fintf) then begin

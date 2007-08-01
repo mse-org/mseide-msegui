@@ -171,6 +171,10 @@ type
     property Params : TStrings read FParams Write FParams;
   end;
 
+ databaseeventty = procedure(const sender: tmdatabase) of object;
+ databaseerroreventty = procedure(const sender: tmdatabase;
+             const aexception: exception; var handled: boolean) of object;
+             
   tmdbdatasetClass = Class of tmdbdataset;
   tmdbdataset = Class(TDataset,idatabaseclient,itransactionclient)
     Private
@@ -844,9 +848,9 @@ var
  bo1: boolean;
 begin
  if avalue then begin
-  with tdatabase(fowner) do begin
+  with tmdatabase(fowner) do begin
    if checkcanevent(fowner,tmethod(fonbeforeconnect)) then begin
-    fonbeforeconnect(tdatabase(fowner));
+    fonbeforeconnect(tmdatabase(fowner));
    end;
    try
     fintf.setinheritedconnected(avalue);
@@ -854,7 +858,7 @@ begin
     on e: exception do begin
      if checkcanevent(fowner,tmethod(fonconnecterror)) then begin
       bo1:= false;
-      fonconnecterror(tdatabase(fowner),e,bo1);
+      fonconnecterror(tmdatabase(fowner),e,bo1);
       if not bo1 then begin
        raise;
       end;
@@ -862,13 +866,13 @@ begin
     end;
    end;
    if checkcanevent(fowner,tmethod(fonafterconnect)) then begin
-    fonafterconnect(tdatabase(fowner));
+    fonafterconnect(tmdatabase(fowner));
    end;
   end;
  end
  else begin
   fintf.setinheritedconnected(avalue);
-//  tdatabase(fowner).connected:= avalue;
+//  tmdatabase(fowner).connected:= avalue;
  end;
 end;
 
@@ -885,11 +889,11 @@ begin
  if (str1 <> '') and (str1[1] = '''') and 
                     (str1[length(str1)] = '''') then begin
   fdatabasename:= str1;
-  tdatabase(fowner).databasename:= copy(str1,2,length(str1)-2);
+  tmdatabase(fowner).databasename:= copy(str1,2,length(str1)-2);
  end
  else begin
   fdatabasename:= tomsefilepath(str1);
-  tdatabase(fowner).databasename:= 
+  tmdatabase(fowner).databasename:= 
                    tosysfilepath(filepath(str1,fk_default,true));
  end;
 end;

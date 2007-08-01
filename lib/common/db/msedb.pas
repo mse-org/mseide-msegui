@@ -739,10 +739,6 @@ type
   procedure ExecuteDirect(const SQL : String);
   procedure updateutf8(var autf8: boolean);
  end;
-
- databaseeventty = procedure(const sender: tdatabase) of object;
- databaseerroreventty = procedure(const sender: tdatabase;
-             const aexception: exception; var handled: boolean) of object;
    
  tfieldlink = class;
  
