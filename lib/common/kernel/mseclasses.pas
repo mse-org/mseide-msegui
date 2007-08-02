@@ -457,7 +457,11 @@ type
    destructor destroy; override;
  end;
 
- 
+ tnotifylist = class(tmethodlist)
+  public 
+   procedure notify(const sender: tobject);
+ end;
+  
 function ownernamepath(const acomponent: tcomponent): string; 
                      //namepath from root to acomponent separated by '.'
 procedure setcomponentorder(const owner: tcomponent; const anames: msestringarty);
@@ -1424,6 +1428,17 @@ begin
    end;
    comp1:= comp1.owner;
   end;
+ end;
+end;
+
+{ tnotifylist }
+
+procedure tnotifylist.notify(const sender: tobject);
+begin
+ factitem:= 0;
+ while (factitem < fcount) do begin
+  notifyeventty(getitempo(factitem)^)(sender);
+  inc(factitem);
  end;
 end;
 
