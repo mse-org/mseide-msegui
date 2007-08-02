@@ -3,13 +3,13 @@ unit regexperimental;
 interface
 implementation
 uses
- msedesignintf,msechart,msewindowwidget,msegdiprint,msesqlresult
- {$ifdef unix},mseopenglwidget{$endif};
+ msedesignintf,msechart,msewindowwidget,msegdiprint,msesqlresult,
+ mseopenglwidget;
  
 procedure Register;
 begin
  registercomponents('Exp',[twindowwidget,
-         {$ifdef unix}topenglwidget,{$endif}tchart,tchartrecorder,tgdiprinter,
+                    topenglwidget,tchart,tchartrecorder,tgdiprinter,
                     tsqlresult]);
 end;
 initialization

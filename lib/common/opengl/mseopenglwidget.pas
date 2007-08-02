@@ -11,7 +11,8 @@ unit mseopenglwidget;
 {$ifdef FPC}{$mode objfpc}{$h+}{$INTERFACES CORBA}{$endif}
 interface
 uses
- msewindowwidget,msegl,mseglx,mseguiintf,x,xlib,msetypes,mseguiglob,mseclasses,
+ msewindowwidget,msegl,{$ifdef unix}mseglx,x,xlib,{$else}windows,{$endif}
+ mseguiintf,msetypes,mseguiglob,mseclasses,
  msegraphutils;
  
 type
@@ -22,12 +23,17 @@ type
  
  tcustomopenglwidget = class(tcustomwindowwidget)
   private
+   {$ifdef unix}
    fcontext: glxcontext;
    fdpy: pdisplay;
-   faspect: real;
-   fscreen: integer;
-   fwin: winidty;
    fcolormap: tcolormap;
+   fscreen: integer;
+   {$else}
+   fdc: hdc;
+   fcontext: hglrc;
+   {$endif}
+   faspect: real;
+   fwin: winidty;
    fonrender: openglrendereventty;
    procedure checkviewport;
   protected
@@ -71,27 +77,43 @@ type
   
 implementation
 uses
- sysutils,xutil;
+ sysutils{$ifdef unix},xutil{$endif};
  
 { tcustomopenglwidget }
 
 procedure tcustomopenglwidget.doclientpaint(const aupdaterect: rectty);
 begin
+ {$ifdef unix}
  glxmakecurrent(fdpy,fwin,fcontext);
+ {$else}
+ wglmakecurrent(fdc,fcontext);
+ {$endif}
  if canevent(tmethod(fonrender)) then begin
   fonrender(self,aupdaterect);
  end;
 // glflush;
+ {$ifdef unix}
  glxswapbuffers(fdpy,fwin);
+ {$else}
+ swapbuffers(fdc);
+ {$endif}
 end;
 
 procedure tcustomopenglwidget.dodestroywinid;
 begin
+ {$ifdef unix}
  if fcontext <> nil then begin
-//  glxmakecurrent(fdpy,fwin,nil);
+  glxmakecurrent(fdpy,fwin,nil);
   glxdestroycontext(fdpy,fcontext);
   fcontext:= nil;
  end;
+ {$else}
+ if fcontext <> 0 then begin
+  wglmakecurrent(0,0);
+  wgldeletecontext(fcontext);
+  releasedc(fwin,fdc);
+ end;
+ {$endif}
  inherited;
 end;
 
@@ -99,9 +121,15 @@ procedure tcustomopenglwidget.checkviewport;
 var
  rect1: rectty;
 begin
+{$ifdef unix}
  if fcontext <> nil then begin
   rect1:= innerclientrect;
   glxmakecurrent(fdpy,fwin,fcontext);
+{$else}
+ if fcontext <> 0 then begin
+  rect1:= innerclientrect;
+  wglmakecurrent(fdc,fcontext);
+{$endif}
   glviewport(0,0,rect1.cx,rect1.cy);  
   if rect1.cy = 0 then begin
    faspect:= 1;
@@ -120,6 +148,7 @@ end;
 
 procedure tcustomopenglwidget.docreatewinid(const aparent: winidty;
                const awidgetrect: rectty; var aid: winidty);
+{$ifdef unix}
 const
   attr: array[0..8] of integer = 
   (GLX_RGBA,GLX_RED_SIZE,8,GLX_GREEN_SIZE,8,GLX_BLUE_SIZE,8,
@@ -151,6 +180,28 @@ begin
  fwin:= aid;
  xfree(visinfo);
  if fcontext = nil then begin
+{$else}
+var
+ pixeldesc: tpixelformatdescriptor;
+ int1: integer; 
+begin
+ aid:= createchildwindow;
+ fwin:= aid;
+ fdc:= getdc(fwin);
+ fillchar(pixeldesc,sizeof(pixeldesc),0);
+ with pixeldesc do begin
+  nsize:= sizeof(pixeldesc);
+  nversion:= 1;
+  dwflags:= pfd_draw_to_window or pfd_support_opengl or pfd_doublebuffer;
+  ipixeltype:= pfd_type_rgba;
+  ccolorbits:= 24;
+  cdepthbits:= 32;
+ end;
+ int1:= choosepixelformat(fdc,@pixeldesc);
+ setpixelformat(fdc,int1,@pixeldesc);
+ fcontext:= wglcreatecontext(fdc);
+ if fcontext = 0 then begin
+{$endif}
   raise exception.create('Could not create an OpenGL rendering context.');
  end;
  checkviewport;

@@ -3544,6 +3544,11 @@ begin
    windowdestroyed(ahwnd);
    eventlist.add(twindowevent.create(ek_destroy,ahwnd));
   end;
+  {
+  wm_erasebkgnd,wm_paint: begin
+   result:= 1;
+  end;
+ }
  end;
  if iswin95 then begin
   result:= defwindowproca(ahwnd,msg,wparam,lparam);
@@ -3911,6 +3916,7 @@ begin
   else begin
    rect1:= rect;
   end;
+  windowstyle:= windowstyle or ws_clipchildren;
   if (transientfor <> 0) or (options * [wo_popup,wo_message] <> []) then begin
    id:= windows.CreateWindowex(windowstyleex,widgetclassname,nil,windowstyle,
          rect1.x,rect1.y,rect1.cx,rect1.cy,transientfor,0,hinstance,nil);
@@ -4025,6 +4031,7 @@ begin
    lpfnwndproc:= @childwindowproc;
    hinstance:= {$ifdef FPC}system{$else}sysinit{$endif}.HInstance;
    style:= classstyle;
+//   hbrbackground:= getstockobject(hollow_brush);
   end;
   childwidgetclass:= registerclassw(classinfow);
   fillchar(classinfow,sizeof(classinfow),0);

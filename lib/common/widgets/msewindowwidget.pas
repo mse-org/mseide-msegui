@@ -53,6 +53,7 @@ type
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
+   function createchildwindow: winidty;
    function hasclientwinid: boolean;
    property clientwinid: winidty read getclientwinid;
    property oncreatewinid: createwinideventty read foncreatewinid 
@@ -131,6 +132,18 @@ begin
  result:= fclientwinid;
 end;
 
+function tcustomwindowwidget.createchildwindow: winidty;
+var
+ options1: internalwindowoptionsty;
+ rect1: rectty;
+begin
+ rect1:= innerwidgetrect;
+ addpoint1(rect1.pos,rootpos);
+ fillchar(options1,sizeof(options1),0);
+ options1.parent:= window.winid;
+ guierror(gui_createwindow(rect1,options1,result),self);
+end;
+
 procedure tcustomwindowwidget.checkclientwinid;
 var
  options1: internalwindowoptionsty;
@@ -141,9 +154,7 @@ begin
   addpoint1(rect1.pos,rootpos);
   docreatewinid(window.winid,rect1,fclientwinid);
   if fclientwinid = 0 then begin
-   fillchar(options1,sizeof(options1),0);
-   options1.parent:= window.winid;
-   guierror(gui_createwindow(rect1,options1,fclientwinid),self);
+   fclientwinid:= createchildwindow;
   end;
   if fwindow <> nil then begin
    fwindow.registeronscroll(@windowscrolled);
