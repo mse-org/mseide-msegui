@@ -2114,6 +2114,9 @@ var
     end;
    end;
   end;
+  if sql_where = '' then begin
+   databaseerror('No "where" part in SQLUpdate statement.',self);
+  end;
   setlength(sql_set,length(sql_set)-1);
   setlength(sql_where,length(sql_where)-5);
   result := 'update ' + FTableName + ' set ' + sql_set + ' where ' + sql_where;
@@ -2154,6 +2157,9 @@ var
    if field1.fieldkind = fkdata then begin
     UpdateWherePart(sql_where,field1);
    end;
+  end;
+  if sql_where = '' then begin
+   databaseerror('No "where" part in SQLDelete statement.',self);
   end;
   setlength(sql_where,length(sql_where)-5);
   result := 'delete from ' + FTableName + ' where ' + sql_where;
