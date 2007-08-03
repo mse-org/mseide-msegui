@@ -307,7 +307,7 @@ procedure freebindstring(astring: pointer); cdecl;
 begin
  string(astring):= '';
 end;
-var testvar: tfieldtype;
+
 procedure tsqlite3connection.AddFieldDefs(const cursor: TSQLCursor;
                const FieldDefs: TfieldDefs);
 const
@@ -348,7 +348,6 @@ begin
  setlength(defsbefore,fielddefs.count);
  for int1:= 0 to high(defsbefore) do begin
   with fielddefs[int1] do begin
-testvar:= datatype;
    defsbefore[int1].datatype:= datatype;
    defsbefore[int1].size:= size;
   end;
@@ -362,58 +361,47 @@ testvar:= datatype;
    size1:= 0;
    if pos('INT',str2) = 1 then begin //or 'INTEGER'
     ft1:= ftinteger;
-//    size1:= sizeof(integer);
    end
    else begin
     if str2 = 'LARGEINT' then begin
      ft1:= ftlargeint;
-//     size1:= sizeof(largeint);
     end
     else begin
      if str2 = 'WORD' then begin
       ft1:= ftword;
-//      size1:= sizeof(word);
      end
      else begin
       if str2 = 'SMALLINT' then begin
        ft1:= ftsmallint;
-//       size1:= sizeof(smallint);
       end
       else begin
        if str2 = 'BOOLEAN' then begin
         ft1:= ftboolean;
-//        size1:= sizeof(wordbool);
        end
        else begin
         if (str2 = 'REAL') or (pos('FLOAT',str2) = 1) or 
                                        (pos('DOUBLE',str2) = 1) then begin     
          ft1:= ftfloat;
-//         size1:= sizeof(double);
         end
         else begin
          if str2 = 'DATETIME' then begin
           ft1:= ftdatetime;
-//          size1:= sizeof(tdatetime);
          end
          else begin
           if str2 = 'DATE' then begin
            ft1:= ftdate;
-//           size1:= sizeof(tdatetime);
           end
           else begin
            if str2 = 'TIME' then begin
             ft1:= fttime;
-//            size1:= sizeof(tdatetime);
            end          
            else begin
             if pos('NUMERIC',str2) = 1 then begin      
              ft1:= ftbcd;
-//             size1:= sizeof(currency);
             end
             else begin
              if str2 = 'CURRENCY' then begin
               ft1:= ftcurrency;
-//              size1:= sizeof(double);
              end
              else begin
               if pos('VARCHAR',str2) = 1 then begin
@@ -433,12 +421,10 @@ testvar:= datatype;
               else begin
                if str2 = 'TEXT' then begin
                 ft1:= ftmemo;
-//                size1:= blobidsize;
                end
                else begin
                 if str2 = 'BLOB' then begin
                  ft1:= ftblob;
-//                 size1:= blobidsize;
                 end;
                end;
               end;
@@ -531,13 +517,13 @@ begin
   set8087cw(wo1 or $1f);             //mask exceptions, Sqlite3 has overflow
   fstate:= sqlite3_step(fstatement);
   set8087cw(wo1);                    //restore
-  if fstate <= sqliteerrormax then begin
-   checkerror(sqlite3_reset(fstatement));
-  end;
   if fstate = sqlite_row then begin
    fstate:= sqliteerrormax; //first row
+   fopen:= true;
+  end
+  else begin
+   checkerror(sqlite3_reset(fstatement));
   end;
-  fopen:= true;
  end;
 end;
 
