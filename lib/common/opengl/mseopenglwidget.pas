@@ -32,18 +32,18 @@ type
    fdc: hdc;
    fcontext: hglrc;
    {$endif}
-   faspect: real;
+//   faspect: real;
    fwin: winidty;
    fonrender: openglrendereventty;
-   procedure checkviewport;
   protected
    procedure docreatewinid(const aparent: winidty; const awidgetrect: rectty;
                   var aid: winidty); override;
    procedure dodestroywinid; override;
    procedure doclientpaint(const aupdaterect: rectty); override;
-   procedure clientrectchanged; override;
+//   procedure clientrectchanged; override;
+   procedure updateviewport(const arect: rectty); override;
   public
-   property aspect: real read faspect;
+//   property aspect: real read faspect;
   published
    property onrender: openglrendereventty read fonrender write fonrender;
    
@@ -103,7 +103,7 @@ procedure tcustomopenglwidget.dodestroywinid;
 begin
  {$ifdef unix}
  if fcontext <> nil then begin
-  glxmakecurrent(fdpy,fwin,nil);
+  glxmakecurrent(fdpy,0,nil);
   glxdestroycontext(fdpy,fcontext);
   fcontext:= nil;
  end;
@@ -117,35 +117,27 @@ begin
  inherited;
 end;
 
-procedure tcustomopenglwidget.checkviewport;
-var
- rect1: rectty;
+procedure tcustomopenglwidget.updateviewport(const arect: rectty);
 begin
 {$ifdef unix}
  if fcontext <> nil then begin
-  rect1:= innerclientrect;
   glxmakecurrent(fdpy,fwin,fcontext);
 {$else}
  if fcontext <> 0 then begin
-  rect1:= innerclientrect;
   wglmakecurrent(fdc,fcontext);
 {$endif}
-  glviewport(0,0,rect1.cx,rect1.cy);  
-  if rect1.cy = 0 then begin
-   faspect:= 1;
-  end
-  else begin
-   faspect:= rect1.cx/rect1.cy;
+  with arect do begin
+   glviewport(x,y,cx,cy);  
   end;
  end;
 end;
-
+{
 procedure tcustomopenglwidget.clientrectchanged;
 begin
  inherited;
  checkviewport;
 end;
-
+}
 procedure tcustomopenglwidget.docreatewinid(const aparent: winidty;
                const awidgetrect: rectty; var aid: winidty);
 {$ifdef unix}
@@ -204,7 +196,7 @@ begin
 {$endif}
   raise exception.create('Could not create an OpenGL rendering context.');
  end;
- checkviewport;
+// checkviewport;
 end;
 
 end.

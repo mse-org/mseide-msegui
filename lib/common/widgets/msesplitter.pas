@@ -540,6 +540,7 @@ var
    pt1.y:= pt1.y + round(fvprop * size1.cy) - parentclientpos.y;
   end;
   pt2:= clippoint(pt1);
+//  pt2:= pt1;
  end;
   
 begin //doasyncevent

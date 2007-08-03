@@ -842,7 +842,6 @@ type
    fhint: msestring;
    fdefaultfocuschild: twidget;
 
-
    procedure defineproperties(filer: tfiler); override;
    function gethelpcontext: msestring; override;
 
@@ -1203,7 +1202,7 @@ type
    function paintrect: rectty;               //origin = pos
    function paintpos: pointty;               //origin = pos
    function paintsize: sizety;
-   function clipedpaintrect: rectty;         //origin = pos, cliped by all parentpaintrects
+   function clippedpaintrect: rectty;        //origin = pos, clipped by all parentpaintrects
    function innerpaintrect: rectty;          //origin = pos
 
    function widgetsizerect: rectty;          //pos = nullpoint
@@ -1318,7 +1317,7 @@ type
    fwindowpos: windowposty;
    fnormalwindowrect: rectty;
    fcaption: msestring;
-   fscrollnotifylist: tnotifylist;
+//   fscrollnotifylist: tnotifylist;
    procedure setcaption(const avalue: msestring);
    procedure widgetdestroyed(widget: twidget);
 
@@ -1384,8 +1383,8 @@ type
   public
    constructor create(aowner: twidget);
    destructor destroy; override;
-   procedure registeronscroll(const method: notifyeventty);
-   procedure unregisteronscroll(const method: notifyeventty);
+//   procedure registeronscroll(const method: notifyeventty);
+//   procedure unregisteronscroll(const method: notifyeventty);
    
    function beginmodal: boolean; //true if window destroyed
    procedure endmodal;
@@ -6082,7 +6081,7 @@ begin
  end;
 end;
 
-function twidget.clipedpaintrect: rectty;    //origin = pos, cliped by all parentpaintrects
+function twidget.clippedpaintrect: rectty;    //origin = pos, cliped by all parentpaintrects
 var
  po1: pointty;
  widget1: twidget;
@@ -8071,9 +8070,11 @@ begin
    end;
   end;
   widgetregioninvalid;
+  {
   if fwindow <> nil then begin
    fwindow.fscrollnotifylist.notify(self);
   end;
+  }
  end;
 end;
 
@@ -8106,18 +8107,18 @@ begin
   if ahascaret then begin
    tcaret1(app.fcaret).remove;
   end;
+  rect1:= rect;
+  if fframe <> nil then begin
+   inc(rect1.x,fframe.fpaintrect.x);
+   inc(rect1.y,fframe.fpaintrect.y); //widget origin
+  end;
   if (ow_noscroll in foptionswidget) {or not (ws_opaque in fwidgetstate)} or
                                   (tws_painting in fwindow.fstate) then begin
-   invalidaterect(rect);
+   invalidaterect(rect1,org_widget);
   end
   else begin
    update;
-   rect1:= rect;
-   if fframe <> nil then begin
-    inc(rect1.x,fframe.fpaintrect.x);
-    inc(rect1.y,fframe.fpaintrect.y); //widget origin
-   end;
-   msegraphutils.intersectrect(rect1,clipedpaintrect,rect1);
+   msegraphutils.intersectrect(rect1,clippedpaintrect,rect1);
    if hasoverlappingsiblings(rect1) then begin
     invalidaterect(rect1,org_widget);
    end
@@ -9100,7 +9101,7 @@ begin
  fowner.fwindow:= self;
  fcanvas:= tcanvas.create(self,icanvas(self));
  fasynccanvas:= tcanvas.create(self,icanvas(self));
- fscrollnotifylist:= tnotifylist.create;
+// fscrollnotifylist:= tnotifylist.create;
  inherited create;
  fowner.rootchanged; //nil all references
 end;
@@ -9119,7 +9120,7 @@ begin
  fasynccanvas.free;
  inherited;
  destroyregion(fupdateregion);
- fscrollnotifylist.free;
+// fscrollnotifylist.free;
 end;
 
 procedure twindow.sizeconstraintschanged;
@@ -10280,7 +10281,7 @@ begin
   checkwindow(false);
  end;
 end;
-
+{
 procedure twindow.registeronscroll(const method: notifyeventty);
 begin
  fscrollnotifylist.add(tmethod(method));
@@ -10290,7 +10291,7 @@ procedure twindow.unregisteronscroll(const method: notifyeventty);
 begin
  fscrollnotifylist.remove(tmethod(method));
 end;
-
+}
 { tonterminatequerylist }
 
 function tonterminatequerylist.doterminatequery: boolean;

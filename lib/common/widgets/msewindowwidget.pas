@@ -27,6 +27,9 @@ type
  tcustomwindowwidget = class(tactionwidget)
   private
    fclientwinid: winidty;
+   fchildrect: rectty;
+   fviewport: rectty;
+   faspect: real;
    foncreatewinid: createwinideventty;
    fondestroywinid: destroywinideventty;
    fonclientpaint: windowwidgetpainteventty;
@@ -35,13 +38,15 @@ type
    fonloaded: windowwidgeteventty;
    function getclientwinid: winidty;
    procedure checkwindowrect;
-   procedure windowscrolled(const sender: tobject);
+//   procedure windowscrolled(const sender: tobject);
+   function getchildrect: rectty;
+   function getviewport: rectty;
   protected
    procedure checkclientwinid;
    procedure checkclientvisible;
    procedure destroyclientwindow;
-   procedure clientrectchanged; override;
-   procedure poschanged; override;
+ //  procedure clientrectchanged; override;
+//   procedure poschanged; override;
    procedure visiblechanged; override;
    procedure winiddestroyed(const awinid: winidty);
    procedure docreatewinid(const aparent: winidty; const awidgetrect: rectty;
@@ -50,12 +55,18 @@ type
    procedure doclientpaint(const aupdaterect: rectty); virtual;
    procedure doonpaint(const acanvas: tcanvas); override;
    procedure doloaded; override;
+   procedure updateviewport(const arect: rectty); virtual;
+   
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
    function createchildwindow: winidty;
    function hasclientwinid: boolean;
    property clientwinid: winidty read getclientwinid;
+   property childrect: rectty read getchildrect;
+   property viewport: rectty read getviewport;
+   property aspect: real read faspect;
+   
    property oncreatewinid: createwinideventty read foncreatewinid 
                                      write foncreatewinid;
    property ondestroywinid: destroywinideventty read fondestroywinid 
@@ -115,9 +126,9 @@ end;
 
 destructor tcustomwindowwidget.destroy;
 begin
- if fwindow <> nil then begin
-  fwindow.unregisteronscroll(@windowscrolled);
- end;
+// if fwindow <> nil then begin
+//  fwindow.unregisteronscroll(@windowscrolled);
+// end;
  if candestroyevent(tmethod(fondestroy)) then begin
   fondestroy(self);
  end;
@@ -156,9 +167,9 @@ begin
   if fclientwinid = 0 then begin
    fclientwinid:= createchildwindow;
   end;
-  if fwindow <> nil then begin
-   fwindow.registeronscroll(@windowscrolled);
-  end;
+//  if fwindow <> nil then begin
+//   fwindow.registeronscroll(@windowscrolled);
+//  end;
   checkclientvisible;
  end;  
 end;
@@ -169,24 +180,48 @@ begin
   dodestroywinid;
   gui_destroywindow(fclientwinid);
   fclientwinid:= 0;
+  fchildrect:= nullrect;
  end;
 end;
 
 procedure tcustomwindowwidget.checkwindowrect;
 var
- rect1: rectty;
+ rect1,rect2: rectty;
+ bo1: boolean;
 begin
  if fclientwinid <> 0 then begin
+  bo1:= false;
   rect1:= innerwidgetrect;
-  addpoint1(rect1.pos,rootpos);
-  gui_reposwindow(fclientwinid,rect1,true);
+  rect2:= intersectrect(rect1,clippedpaintrect);
+  rect1.x:= rect1.x - rect2.x;
+  rect1.y:= rect1.y - rect2.y;
+  addpoint1(rect2.pos,rootpos);
+  if not rectisequal(rect2,fchildrect) then begin
+   bo1:= true;
+   fchildrect:= rect2;
+   gui_reposwindow(fclientwinid,rect2,true);
+  end;
+  if not rectisequal(rect1,fviewport) then begin
+   bo1:= true;
+   if rect1.cy = 0 then begin
+    faspect:= 1;
+   end
+   else begin
+    faspect:= rect1.cx/rect1.cy;
+   end;
+   fviewport:= rect1;
+   updateviewport(fviewport);
+  end;
+  if bo1 and canevent(tmethod(fonclientrectchanged)) then begin
+   fonclientrectchanged(self);
+  end;
  end;
 end;
-
+{
 procedure tcustomwindowwidget.clientrectchanged;
 begin
  inherited;
- checkwindowrect;
+// checkwindowrect;
  if canevent(tmethod(fonclientrectchanged)) then begin
   fonclientrectchanged(self);
  end;
@@ -194,10 +229,10 @@ end;
 
 procedure tcustomwindowwidget.poschanged;
 begin
- checkwindowrect;
+// checkwindowrect;
  inherited;
 end;
-
+}
 procedure tcustomwindowwidget.visiblechanged;
 begin
  inherited;
@@ -252,6 +287,7 @@ procedure tcustomwindowwidget.doonpaint(const acanvas: tcanvas);
 begin
  if not (csdesigning in componentstate) then begin
   checkclientwinid;   
+  checkwindowrect;
   doclientpaint(acanvas.clipbox);
  end;
  inherited;
@@ -270,9 +306,26 @@ begin
  end;
 end;
 
+function tcustomwindowwidget.getchildrect: rectty;
+begin
+ checkwindowrect;
+ result:= fchildrect;
+end;
+
+function tcustomwindowwidget.getviewport: rectty;
+begin
+ checkwindowrect;
+ result:= fviewport;
+end;
+
+procedure tcustomwindowwidget.updateviewport(const arect: rectty);
+begin
+ //dummy
+end;
+{
 procedure tcustomwindowwidget.windowscrolled(const sender: tobject);
 begin
  checkwindowrect;
 end;
-
+}
 end.
