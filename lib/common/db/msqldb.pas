@@ -350,6 +350,11 @@ type
   function blobscached: boolean;
  end;
 
+ tmsemasterparamsdatalink = class(tmasterparamsdatalink)
+  protected
+   procedure domasterchange; override;
+ end;
+ 
  isqlclient = interface(idatabaseclient)
   function getsqltransaction: tsqltransaction;
   procedure setsqltransaction(const avalue: tsqltransaction);
@@ -375,7 +380,7 @@ type
     FWhereStartPos       : integer;
     FWhereStopPos        : integer;
     FParseSQL            : boolean;
-    FMasterLink          : TMasterParamsDatalink;
+    FMasterLink          : TmseMasterParamsDatalink;
 //    FSchemaInfo          : TSchemaInfo;
 
     FUpdateQry,
@@ -2468,7 +2473,7 @@ begin
     If Assigned(AValue) then
       begin
       AValue.FreeNotification(Self);  
-      FMasterLink:=TMasterParamsDataLink.Create(Self);
+      FMasterLink:=TmseMasterParamsDataLink.Create(Self);
       FMasterLink.Datasource:=AValue;
       end
     else
@@ -2870,6 +2875,18 @@ procedure tmsesqlscript.doerror(const adatabase: tcustomsqlconnection;
 begin
  if canevent(tmethod(fonerror)) then begin
   fonerror(self,adatabase,atransaction,e);
+ end;
+end;
+
+{ tmsemasterparamsdatalink }
+
+procedure tmsemasterparamsdatalink.domasterchange;
+begin
+ if assigned(onmasterchange) then begin
+  onmasterchange(self); 
+ end;
+ if assigned(params) and assigned(detaildataset) and detaildataset.active then begin
+  detaildataset.refresh;
  end;
 end;
 
