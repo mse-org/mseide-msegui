@@ -178,6 +178,8 @@ type
    fcols: tdbcols;
    feof: boolean;
    foptions: sqlresultoptionsty;
+   fbeforeopen: tmsesqlscript;
+   fafteropen: tmsesqlscript;
    procedure setsql(const avalue: tstringlist);
    function getactive: boolean;
    procedure setactive(avalue: boolean);
@@ -186,6 +188,8 @@ type
    procedure setsqltransaction(const avalue: tsqltransaction);
    procedure setparams(const avalue: tmseparams);
    procedure onchangesql(sender : tobject);
+   procedure setbeforeopen(const avalue: tmsesqlscript);
+   procedure setafteropen(const avalue: tmsesqlscript);
   protected
    procedure loaded; override;
    procedure freefldbuffers;
@@ -207,9 +211,11 @@ type
    property cols: tdbcols read fcols;
    property eof: boolean read feof;
   published
-   property params : tmseparams read fparams write setparams;
-               //before sql
+   property params : tmseparams read fparams write setparams; //before sql property
+
    property sql: tstringlist read fsql write setsql;
+   property beforeopen: tmsesqlscript read fbeforeopen write setbeforeopen;
+   property afteropen: tmsesqlscript read fafteropen write setafteropen;
    property database: tcustomsqlconnection read fdatabase write setdatabase1;
    property transaction: tsqltransaction read getsqltransaction 
                                       write setsqltransaction;
@@ -632,13 +638,19 @@ end;
 
 procedure tsqlresult.open;
 begin
+ if fbeforeopen <> nil then begin
+  fbeforeopen.execute;
+ end;
  prepare;
  execute;
- ffielddefs.clear;
+// ffielddefs.clear;
  fdatabase.addfielddefs(fcursor,ffielddefs);
  fcols.initfields(self,fcursor,ffielddefs);
  factive:= true;
  next;
+ if fafteropen <> nil then begin
+  fafteropen.execute;
+ end;
 end;
 
 procedure tsqlresult.close;
@@ -748,6 +760,16 @@ begin
  feof:= false;
  execute; 
  next;
+end;
+
+procedure tsqlresult.setbeforeopen(const avalue: tmsesqlscript);
+begin
+ setlinkedvar(avalue,fbeforeopen);
+end;
+
+procedure tsqlresult.setafteropen(const avalue: tmsesqlscript);
+begin
+ setlinkedvar(avalue,fafteropen);
 end;
 
 end.
