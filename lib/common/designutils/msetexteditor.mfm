@@ -12,6 +12,7 @@ object msetexteditorfo: tmsetexteditorfo
   container.bounds_cx = 369
   container.bounds_cy = 268
   container.frame.dummy = 0
+  options = [fo_closeonesc, fo_autoreadstat, fo_autowritestat, fo_savepos, fo_savestate]
   statfile = tstatfile1
   caption = 'Texteditor'
   icon.transparency = -2147483648
@@ -49,16 +50,21 @@ object msetexteditorfo: tmsetexteditorfo
     popupmenu = tpopupmenu1
     optionsgrid = [og_focuscellonenter, og_autofirstrow, og_autoappend, og_colchangeontabkey, og_autopopup]
     fixcols.count = 1
+    fixcols.coloractive = -2147483648
     fixcols.items = <    
       item
         linewidth = 0
+        coloractive = -2147483648
         width = 20
         numstart = 1
         numstep = 1
       end>
+    fixrows.coloractive = -2147483648
     datacols.count = 1
+    datacols.coloractive = -2147483648
     datacols.items = <    
       item
+        coloractive = -2147483648
         width = 2000
         options = [co_leftbuttonfocusonly, co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_mousescrollrow]
         widgetname = 'textedit'

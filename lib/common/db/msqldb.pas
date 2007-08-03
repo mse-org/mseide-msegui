@@ -155,7 +155,8 @@ type
     Procedure DeAllocateCursorHandle(var cursor : TSQLCursor); virtual; abstract;
     procedure PrepareStatement(cursor: TSQLCursor;ATransaction : TSQLTransaction;buf : string; AParams : TParams); virtual; abstract;
     procedure UnPrepareStatement(cursor : TSQLCursor); virtual; abstract;
-    procedure AddFieldDefs(cursor: TSQLCursor; FieldDefs : TfieldDefs); virtual; abstract;
+    procedure AddFieldDefs(const cursor: TSQLCursor;
+                        const FieldDefs: TfieldDefs); virtual; abstract;
     function Fetch(cursor : TSQLCursor) : boolean; virtual; abstract;
     function loadfield(const cursor: tsqlcursor; 
              const datatype: tfieldtype; const fieldnum: integer; //null based
@@ -1636,9 +1637,8 @@ begin
   FLoadingFieldDefs := True;
 
   try
-    FieldDefs.Clear;
-
-    (Database as tcustomsqlconnection).AddFieldDefs(fcursor,FieldDefs);
+//    FieldDefs.Clear;
+    tcustomsqlconnection(database).AddFieldDefs(fcursor,FieldDefs);
   finally
     FLoadingFieldDefs := False;
   end;

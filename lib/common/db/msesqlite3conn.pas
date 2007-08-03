@@ -86,7 +86,8 @@ type
    procedure Execute(const cursor: TSQLCursor; const atransaction: tsqltransaction;
                                 const AParams : TParams); override;
    function Fetch(cursor : TSQLCursor) : boolean; override;
-   procedure AddFieldDefs(cursor: TSQLCursor; FieldDefs : TfieldDefs); override;
+   procedure AddFieldDefs(const cursor: TSQLCursor;
+                   const FieldDefs : TfieldDefs); override;
    procedure UnPrepareStatement(cursor : TSQLCursor); override;
 
    procedure FreeFldBuffers(cursor : TSQLCursor); override;
@@ -306,16 +307,53 @@ procedure freebindstring(astring: pointer); cdecl;
 begin
  string(astring):= '';
 end;
+var testvar: tfieldtype;
+procedure tsqlite3connection.AddFieldDefs(const cursor: TSQLCursor;
+               const FieldDefs: TfieldDefs);
+const
+ fieldsizes: array[tfieldtype] of integer = ( //-1 invalid, -2 use fielddefs
+  //ftUnknown,ftString,ftSmallint,     ftInteger,      ftWord,
+    -1,       -2,     sizeof(smallint),sizeof(integer),sizeof(word),
+  //ftBoolean,       ftFloat,       ftCurrency,    ftBCD,
+    sizeof(wordbool),sizeof(double),sizeof(double),sizeof(currency),
+  //ftDate,           ftTime,           ftDateTime,
+    sizeof(tdatetime),sizeof(tdatetime),sizeof(tdatetime),  
+  //ftBytes,ftVarBytes,ftAutoInc,ftBlob,    ftMemo,    ftGraphic,ftFmtMemo,
+    -1,     -1,        -1,       blobidsize,blobidsize,-1,       -1,
+  //ftParadoxOle,ftDBaseOle,ftTypedBinary,ftCursor,ftFixedChar,
+   -1,           -1,        -1,           -1,      -1,
+  //ftWideString,ftLargeint,      ftADT,ftArray,ftReference,
+   -1,           sizeof(largeint),-1,   -1,     -1,
+  //ftDataSet,ftOraBlob,ftOraClob,ftVariant,ftInterface,
+  -1,         -1,       -1,       -1,       -1,
+  //ftIDispatch,ftGuid,ftTimeStamp,ftFMTBcd,
+  -1,           -1,    -1,         -1 
+  //                   ftFixedWideChar,ftWideMemo
+  {$ifdef mse_FPC_2_2},-1,             -1 {$endif}
+  );
 
-procedure tsqlite3connection.AddFieldDefs(cursor: TSQLCursor;
-               FieldDefs: TfieldDefs);
+type
+ defbeforety = record
+  datatype: tfieldtype;
+  size: integer;
+ end;
 var
  int1: integer;
  str1,str2: string;
  ft1: tfieldtype;
  size1: word;
  ar1: stringarty;
+ defsbefore: array of defbeforety;
 begin
+ setlength(defsbefore,fielddefs.count);
+ for int1:= 0 to high(defsbefore) do begin
+  with fielddefs[int1] do begin
+testvar:= datatype;
+   defsbefore[int1].datatype:= datatype;
+   defsbefore[int1].size:= size;
+  end;
+ end;
+ fielddefs.clear;
  with tsqlite3cursor(cursor) do begin
   for int1:= 0 to sqlite3_column_count(fstatement) - 1 do begin
    str1:= sqlite3_column_name(fstatement,int1);
@@ -324,58 +362,58 @@ begin
    size1:= 0;
    if pos('INT',str2) = 1 then begin //or 'INTEGER'
     ft1:= ftinteger;
-    size1:= sizeof(integer);
+//    size1:= sizeof(integer);
    end
    else begin
     if str2 = 'LARGEINT' then begin
      ft1:= ftlargeint;
-     size1:= sizeof(largeint);
+//     size1:= sizeof(largeint);
     end
     else begin
      if str2 = 'WORD' then begin
       ft1:= ftword;
-      size1:= sizeof(word);
+//      size1:= sizeof(word);
      end
      else begin
       if str2 = 'SMALLINT' then begin
        ft1:= ftsmallint;
-       size1:= sizeof(smallint);
+//       size1:= sizeof(smallint);
       end
       else begin
        if str2 = 'BOOLEAN' then begin
         ft1:= ftboolean;
-        size1:= sizeof(wordbool);
+//        size1:= sizeof(wordbool);
        end
        else begin
         if (str2 = 'REAL') or (pos('FLOAT',str2) = 1) or 
                                        (pos('DOUBLE',str2) = 1) then begin     
          ft1:= ftfloat;
-         size1:= sizeof(double);
+//         size1:= sizeof(double);
         end
         else begin
          if str2 = 'DATETIME' then begin
           ft1:= ftdatetime;
-          size1:= sizeof(tdatetime);
+//          size1:= sizeof(tdatetime);
          end
          else begin
           if str2 = 'DATE' then begin
            ft1:= ftdate;
-           size1:= sizeof(tdatetime);
+//           size1:= sizeof(tdatetime);
           end
           else begin
            if str2 = 'TIME' then begin
             ft1:= fttime;
-            size1:= sizeof(tdatetime);
+//            size1:= sizeof(tdatetime);
            end          
            else begin
             if pos('NUMERIC',str2) = 1 then begin      
              ft1:= ftbcd;
-             size1:= sizeof(currency);
+//             size1:= sizeof(currency);
             end
             else begin
              if str2 = 'CURRENCY' then begin
               ft1:= ftcurrency;
-              size1:= sizeof(double);
+//              size1:= sizeof(double);
              end
              else begin
               if pos('VARCHAR',str2) = 1 then begin
@@ -395,12 +433,12 @@ begin
               else begin
                if str2 = 'TEXT' then begin
                 ft1:= ftmemo;
-                size1:= blobidsize;
+//                size1:= blobidsize;
                end
                else begin
                 if str2 = 'BLOB' then begin
                  ft1:= ftblob;
-                 size1:= blobidsize;
+//                 size1:= blobidsize;
                 end;
                end;
               end;
@@ -414,6 +452,19 @@ begin
       end;
      end;
     end;
+   end;
+   if (ft1 = ftunknown) and (int1 <= high(defsbefore)) then begin
+    ft1:= defsbefore[int1].datatype;
+    if ft1 = ftstring then begin
+     size1:= defsbefore[int1].size;
+    end;
+   end;
+   if ft1 <> ftstring then begin
+    size1:= fieldsizes[ft1];
+   end;
+   if size1 < 0 then begin
+    ft1:= ftunknown;
+    size1:= 0;
    end;
    tfielddef.create(fielddefs,str1,ft1,size1,false,int1+1);
   end;

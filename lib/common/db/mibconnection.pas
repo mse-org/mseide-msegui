@@ -118,7 +118,8 @@ type
     procedure FreeFldBuffers(cursor : TSQLCursor); override;
     procedure Execute(const cursor: TSQLCursor;
               const atransaction: tsqltransaction; const AParams : TParams); override;
-    procedure AddFieldDefs(cursor: TSQLCursor;FieldDefs : TfieldDefs); override;
+    procedure AddFieldDefs(const cursor: TSQLCursor;
+                     const FieldDefs : TfieldDefs); override;
     function Fetch(cursor : TSQLCursor) : boolean; override;
     function loadfield(const cursor: tsqlcursor; 
                 const datatype: tfieldtype; const fieldnum: integer; //null based
@@ -809,7 +810,8 @@ begin
  end;
 end;
   
-procedure TIBConnection.AddFieldDefs(cursor: TSQLCursor; FieldDefs: TfieldDefs);
+procedure TIBConnection.AddFieldDefs(const cursor: TSQLCursor;
+               const FieldDefs: TfieldDefs);
 var
  x: integer;
  lenset: boolean; //what is the use of this?
@@ -819,6 +821,7 @@ var
  chlengetter: tcharlengthgetter;
  int1: integer;
 begin
+ fielddefs.clear;
  chlengetter:= tcharlengthgetter.create(self);
  try
   with tibcursor(cursor) do begin

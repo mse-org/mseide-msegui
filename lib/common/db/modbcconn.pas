@@ -92,7 +92,8 @@ type
     procedure Execute(const cursor:TSQLCursor; 
              const ATransaction:TSQLTransaction; const AParams:TParams); override;
     // - Result retrieving
-    procedure AddFieldDefs(cursor:TSQLCursor; FieldDefs:TFieldDefs); override;
+    procedure AddFieldDefs(const cursor:TSQLCursor; 
+                              const FieldDefs:TFieldDefs); override;
     function Fetch(cursor:TSQLCursor):boolean; override;
     function loadfield(const cursor: tsqlcursor;
       const datatype: tfieldtype; const fieldnum: integer; //null based
@@ -726,7 +727,8 @@ begin
   );
 end;
 
-procedure TODBCConnection.AddFieldDefs(cursor: TSQLCursor; FieldDefs: TFieldDefs);
+procedure TODBCConnection.AddFieldDefs(const cursor: TSQLCursor; 
+                                    const FieldDefs: TFieldDefs);
 const
   ColNameDefaultLength  = 40; // should be > 0, because an ansistring of length 0 is a nil pointer instead of a pointer to a #0
   TypeNameDefaultLength = 80; // idem
@@ -740,6 +742,7 @@ var
   FieldType:TFieldType;
   FieldSize:word;
 begin
+ fielddefs.clear;
   ODBCCursor:=cursor as TODBCCursor;
 
   // get number of columns in result set

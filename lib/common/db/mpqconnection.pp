@@ -83,7 +83,8 @@ type
    procedure FreeFldBuffers(cursor : TSQLCursor); override;
    procedure Execute(const cursor: TSQLCursor; const atransaction: tsqltransaction;
                                    const AParams : TParams); override;
-   procedure AddFieldDefs(cursor: TSQLCursor; FieldDefs : TfieldDefs); override;
+   procedure AddFieldDefs(const cursor: TSQLCursor;
+                  const FieldDefs : TfieldDefs); override;
    function Fetch(cursor : TSQLCursor) : boolean; override;
    procedure UnPrepareStatement(cursor : TSQLCursor); override;
    function loadfield(const cursor: tsqlcursor;
@@ -590,7 +591,8 @@ begin
 end;
 
 
-procedure TPQConnection.AddFieldDefs(cursor: TSQLCursor; FieldDefs : TfieldDefs);
+procedure TPQConnection.AddFieldDefs(const cursor: TSQLCursor;
+                    const FieldDefs : TfieldDefs);
 var
   i         : integer;
   size      : integer;
@@ -599,6 +601,7 @@ var
   nFields   : integer;
 
 begin
+ fielddefs.clear;
  with tpqcursor(cursor) do begin
   nFields:= PQnfields(Res);
   for i:= 0 to nFields-1 do begin

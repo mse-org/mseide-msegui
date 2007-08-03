@@ -93,7 +93,8 @@ Type
     procedure FreeFldBuffers(cursor : TSQLCursor); override;
     procedure Execute(const cursor: TSQLCursor;
              const atransaction:tSQLtransaction; const AParams : TParams); override;
-    procedure AddFieldDefs(cursor: TSQLCursor; FieldDefs : TfieldDefs); override;
+    procedure AddFieldDefs(const cursor: TSQLCursor; 
+                   const FieldDefs : TfieldDefs); override;
     function Fetch(cursor : TSQLCursor) : boolean; override;
     function loadfield(const cursor: tsqlcursor;
       const datatype: tfieldtype; const fieldnum: integer; //null based
@@ -510,8 +511,8 @@ begin
  end;
 end;
 
-procedure TConnectionName.AddFieldDefs(cursor: TSQLCursor;
-  FieldDefs: TfieldDefs);
+procedure TConnectionName.AddFieldDefs(const cursor: TSQLCursor;
+                          const FieldDefs: TfieldDefs);
 
 var
   C : TCursorName;
@@ -521,14 +522,11 @@ var
   DFS: Integer;
 
 begin
-//  Writeln('MySQL: Adding fielddefs');
+ fielddefs.clear;
   C:=(Cursor as TCursorName);
-  If (C.FRes=Nil) then
-    begin
-//    Writeln('res is nil');
+  If (C.FRes=Nil) then begin
     MySQLError(FMySQL,SErrNoQueryResult,Self);
-    end;
-//  Writeln('MySQL: have result');
+  end;
   FC:=mysql_num_fields(C.FRes);
   SetLength(c.MapDSRowToMSQLRow,FC);
 
@@ -541,16 +539,12 @@ begin
      c.fprimarykeyfieldname:= name;
     end;
    end;
-//    Writeln('MySQL: creating fielddef ',I+1);
-
-//    if MySQLDataType(field^.ftype, field^.length, field^.decimals, DFT, DFS) then
    if MySQLDataType(field^,DFT,DFS) then begin
     TFieldDef.Create(FieldDefs,field^.name,DFT,DFS,False,TF);
     c.MapDSRowToMSQLRow[TF-1] := I;
     inc(TF);
    end
   end;
-//  Writeln('MySQL: Finished adding fielddefs');
 end;
 
 function TConnectionName.Fetch(cursor: TSQLCursor): boolean;
