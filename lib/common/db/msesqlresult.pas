@@ -251,6 +251,9 @@ type
                          const agetsqlresult: getsqlresultfuncty);
    property fieldtypes: fieldtypesty read ffieldtypes write ffieldtypes;
  end;
+
+ lbsqoptionty = (olbsq_closesqlresult);
+ lbsqoptionsty = set of lbsqoptionty;
  
  tsqllookupbuffer = class(tdatalookupbuffer)
   private
@@ -258,6 +261,7 @@ type
    ftextcols: tdbcolnamearrayprop;
    fintegercols: tdbcolnamearrayprop;
    ffloatcols: tdbcolnamearrayprop;
+   foptionsdb: lbsqoptionsty;
    procedure setsource(const avalue: tsqlresult);
    function getsqlresult(const aindex: integer): tsqlresult;
    procedure settextcols(const avalue: tdbcolnamearrayprop);
@@ -282,6 +286,7 @@ type
    property textcols: tdbcolnamearrayprop read ftextcols write settextcols;
    property integercols: tdbcolnamearrayprop read fintegercols write setintegercols;
    property floatcols: tdbcolnamearrayprop read ffloatcols write setfloatcols;
+   property optionsdb: lbsqoptionsty read foptionsdb write foptionsdb default [];
    property onchange;
  end;
  
@@ -710,6 +715,7 @@ begin
  fcols.initfields(self,fcursor,ffielddefs);
  factive:= true;
  next;
+ fbof:= true;
  if fafteropen <> nil then begin
   fafteropen.execute;
  end;
@@ -786,7 +792,6 @@ end;
 procedure tsqlresult.execute;
 begin
  doexecute(fparams,ftransaction,fcursor,fdatabase);
- fbof:= true;
 end;
 
 procedure tsqlresult.loaded;
@@ -839,6 +844,7 @@ begin
   feof:= false;
   execute; 
   next;
+  fbof:= true;
   changed;
  end;
 end;
@@ -977,8 +983,8 @@ var
  textf: array of tdbcol;
  integerf: array of tdbcol;
  realf: array of tdbcol;
- bo1: boolean;
  ar1: stringarty;
+ bo1: boolean;
 begin
  application.beginwait;
  beginupdate;
@@ -986,76 +992,84 @@ begin
   clearbuffer;
   include(fstate,lbs_buffervalid);
   with fsource do begin
-   if (fsource <> nil) and active then begin
+   if (fsource <> nil) and (active or (olbsq_closesqlresult in foptionsdb) {and
+               not (csloading in componentstate)}) then begin
     try
+     bo1:= active;
      if not bof then begin
       refresh;
      end;
-     setlength(ar1,ftextcols.count);
-     for int1:= 0 to high(ar1) do begin
-      ar1[int1]:= ftextcols[int1];
-     end;
-     textf:= cols.colsbyname(ar1);
-     setlength(ar1,fintegercols.count);
-     for int1:= 0 to high(ar1) do begin
-      ar1[int1]:= fintegercols[int1];
-     end;
-     integerf:= cols.colsbyname(ar1);
-     setlength(ar1,floatcols.count);
-     for int1:= 0 to high(ar1) do begin
-      ar1[int1]:= ffloatcols[int1];
-     end;
-     realf:= cols.colsbyname(ar1);
-     int3:= 0;
-     int1:= 0;
      try
-      while not fsource.eof do begin
-       if int3 <= int1 then begin
-        int3:= (int3 * 3) div 2 + 100;
-        for int4:= 0 to high(ftextdata) do begin
-         setlength(ftextdata[int4].data,int3);
-        end;
-        for int4:= 0 to high(fintegerdata) do begin
-         setlength(fintegerdata[int4].data,int3);
-        end;
-        for int4:= 0 to high(ffloatdata) do begin
-         setlength(ffloatdata[int4].data,int3);
-        end;
-       end;
-       for int4:= 0 to high(integerf) do begin
-        if integerf[int4] <> nil then begin
-         fintegerdata[int4].data[int1]:= integerf[int4].asinteger;
-        end;
-       end;
-       for int4:= 0 to high(realf) do begin
-        if realf[int4] <> nil then begin
-         if realf[int4].isnull then begin
-          ffloatdata[int4].data[int1]:= emptyreal;
-         end
-         else begin
-          ffloatdata[int4].data[int1]:= realf[int4].asfloat;
+      setlength(ar1,ftextcols.count);
+      for int1:= 0 to high(ar1) do begin
+       ar1[int1]:= ftextcols[int1];
+      end;
+      textf:= cols.colsbyname(ar1);
+      setlength(ar1,fintegercols.count);
+      for int1:= 0 to high(ar1) do begin
+       ar1[int1]:= fintegercols[int1];
+      end;
+      integerf:= cols.colsbyname(ar1);
+      setlength(ar1,floatcols.count);
+      for int1:= 0 to high(ar1) do begin
+       ar1[int1]:= ffloatcols[int1];
+      end;
+      realf:= cols.colsbyname(ar1);
+      int3:= 0;
+      int1:= 0;
+      try
+       while not fsource.eof do begin
+        if int3 <= int1 then begin
+         int3:= (int3 * 3) div 2 + 100;
+         for int4:= 0 to high(ftextdata) do begin
+          setlength(ftextdata[int4].data,int3);
+         end;
+         for int4:= 0 to high(fintegerdata) do begin
+          setlength(fintegerdata[int4].data,int3);
+         end;
+         for int4:= 0 to high(ffloatdata) do begin
+          setlength(ffloatdata[int4].data,int3);
          end;
         end;
-       end;
-       for int4:= 0 to high(textf) do begin
-        if textf[int4] <> nil then begin
-         ftextdata[int4].data[int1]:= textf[int4].asmsestring;
+        for int4:= 0 to high(integerf) do begin
+         if integerf[int4] <> nil then begin
+          fintegerdata[int4].data[int1]:= integerf[int4].asinteger;
+         end;
         end;
+        for int4:= 0 to high(realf) do begin
+         if realf[int4] <> nil then begin
+          if realf[int4].isnull then begin
+           ffloatdata[int4].data[int1]:= emptyreal;
+          end
+          else begin
+           ffloatdata[int4].data[int1]:= realf[int4].asfloat;
+          end;
+         end;
+        end;
+        for int4:= 0 to high(textf) do begin
+         if textf[int4] <> nil then begin
+          ftextdata[int4].data[int1]:= textf[int4].asmsestring;
+         end;
+        end;
+        inc(int1);
+        fsource.next;
        end;
-       inc(int1);
-       fsource.next;
+      finally
+       for int4:= 0 to high(fintegerdata) do begin
+        setlength(fintegerdata[int4].data,int1);
+       end;
+       for int4:= 0 to high(ftextdata) do begin
+        setlength(ftextdata[int4].data,int1);
+       end;
+       for int4:= 0 to high(ffloatdata) do begin
+        setlength(ffloatdata[int4].data,int1);
+       end;
+       fcount:= int1;
       end;
      finally
-      for int4:= 0 to high(fintegerdata) do begin
-       setlength(fintegerdata[int4].data,int1);
+      if not bo1 and (olbsq_closesqlresult in foptionsdb) then begin
+       fsource.active:= false;
       end;
-      for int4:= 0 to high(ftextdata) do begin
-       setlength(ftextdata[int4].data,int1);
-      end;
-      for int4:= 0 to high(ffloatdata) do begin
-       setlength(ffloatdata[int4].data,int1);
-      end;
-      fcount:= int1;
      end;
     except
      if csdesigning in componentstate then begin
@@ -1077,7 +1091,9 @@ procedure tsqllookupbuffer.objectevent(const sender: tobject;
                const event: objecteventty);
 begin
  inherited;
- if (sender = fsource) and (event = oe_changed) and (fupdating = 0) then begin
+ if (sender = fsource) and (event = oe_changed) and (fupdating = 0) and
+     (fsource <> nil) and
+     (fsource.active or not (olbsq_closesqlresult in foptionsdb)) then begin
   invalidatebuffer;
   changed;
  end;
