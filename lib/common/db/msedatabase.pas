@@ -81,17 +81,17 @@ type
 
   TCustomConnection = class(TComponent)
   private
-    FAfterConnect: TNotifyEvent;
-    FAfterDisconnect: TNotifyEvent;
-    FBeforeConnect: TNotifyEvent;
-    FBeforeDisconnect: TNotifyEvent;
+//    FAfterConnect: TNotifyEvent;
+//    FAfterDisconnect: TNotifyEvent;
+//    FBeforeConnect: TNotifyEvent;
+//    FBeforeDisconnect: TNotifyEvent;
     FLoginPrompt: Boolean;
     FOnLogin: TLoginEvent;
     FStreamedConnected: Boolean;
-    procedure SetAfterConnect(const AValue: TNotifyEvent);
-    procedure SetAfterDisconnect(const AValue: TNotifyEvent);
-    procedure SetBeforeConnect(const AValue: TNotifyEvent);
-    procedure SetBeforeDisconnect(const AValue: TNotifyEvent);
+//    procedure SetAfterConnect(const AValue: TNotifyEvent);
+//    procedure SetAfterDisconnect(const AValue: TNotifyEvent);
+//    procedure SetBeforeConnect(const AValue: TNotifyEvent);
+//    procedure SetBeforeDisconnect(const AValue: TNotifyEvent);
   protected
     procedure DoConnect; virtual;
     procedure DoDisconnect; virtual;
@@ -112,10 +112,10 @@ type
     property LoginPrompt: Boolean read FLoginPrompt write FLoginPrompt;
     property Streamedconnected: Boolean read FStreamedConnected write FStreamedConnected;
 
-    property AfterConnect : TNotifyEvent read FAfterConnect write SetAfterConnect;
-    property AfterDisconnect : TNotifyEvent read FAfterDisconnect write SetAfterDisconnect;
-    property BeforeConnect : TNotifyEvent read FBeforeConnect write SetBeforeConnect;
-    property BeforeDisconnect : TNotifyEvent read FBeforeDisconnect write SetBeforeDisconnect;
+//    property AfterConnect : TNotifyEvent read FAfterConnect write fafterconnect;
+//    property AfterDisconnect : TNotifyEvent read FAfterDisconnect write fAfterDisconnect;
+//    property BeforeConnect : TNotifyEvent read FBeforeConnect write fBeforeConnect;
+//    property BeforeDisconnect : TNotifyEvent read FBeforeDisconnect write fBeforeDisconnect;
     property OnLogin: TLoginEvent read FOnLogin write FOnLogin;
   end;
 
@@ -699,13 +699,13 @@ begin
 end;
 }
 { TCustomConnection }
-
+{
 procedure TCustomConnection.SetAfterConnect(const AValue: TNotifyEvent);
 begin
-  if FAfterConnect=AValue then exit;
+//  if FAfterConnect=AValue then exit;
   FAfterConnect:=AValue;
 end;
-
+}
 function TCustomConnection.GetDataSet(Index: Longint): TDataSet;
 begin
   Result := nil;
@@ -723,19 +723,19 @@ begin
   else
     ShowException(ExceptObject,ExceptAddr);
 end;
-
+{
 procedure TCustomConnection.SetAfterDisconnect(const AValue: TNotifyEvent);
 begin
-  if FAfterDisconnect=AValue then exit;
+//  if FAfterDisconnect=AValue then exit;
   FAfterDisconnect:=AValue;
 end;
 
 procedure TCustomConnection.SetBeforeConnect(const AValue: TNotifyEvent);
 begin
-  if FBeforeConnect=AValue then exit;
+//  if FBeforeConnect=AValue then exit;
   FBeforeConnect:=AValue;
 end;
-
+}
 procedure TCustomConnection.SetConnected(Value: boolean);
 begin
   If Value<>Connected then
@@ -749,32 +749,32 @@ begin
         end
       else
         begin
-        if Assigned(BeforeConnect) then
-          BeforeConnect(self);
+//        if Assigned(BeforeConnect) then
+//          BeforeConnect(self);
         if FLoginPrompt then if assigned(FOnLogin) then
           FOnLogin(self,'','');
         DoConnect;
-        if Assigned(AfterConnect) then
-          AfterConnect(self);
+//        if Assigned(AfterConnect) then
+//          AfterConnect(self);
         end;
       end
     else
       begin
-      if Assigned(BeforeDisconnect) then
-        BeforeDisconnect(self);
+//      if Assigned(BeforeDisconnect) then
+//        BeforeDisconnect(self);
       DoDisconnect;
-      if Assigned(AfterDisconnect) then
-        AfterDisconnect(self);
+//      if Assigned(AfterDisconnect) then
+//        AfterDisconnect(self);
       end;
     end;
 end;
-
+{
 procedure TCustomConnection.SetBeforeDisconnect(const AValue: TNotifyEvent);
 begin
-  if FBeforeDisconnect=AValue then exit;
+//  if FBeforeDisconnect=AValue then exit;
   FBeforeDisconnect:=AValue;
 end;
-
+}
 procedure TCustomConnection.DoConnect;
 
 begin
