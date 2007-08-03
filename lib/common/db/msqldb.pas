@@ -935,14 +935,16 @@ begin
      DoInternalConnect;
      if fafterconnect <> nil then begin
       fconnected:= true; //avoid recursion
-      fafterconnect.execute(self,ftransaction);
+//      fafterconnect.execute(self,ftransaction);
+      fafterconnect.execute(self);
      end;
     end;
    end
    else begin
 //    Closedatasets;
     if fbeforedisconnect <> nil then begin
-     fbeforedisconnect.execute(self,ftransaction);
+//     fbeforedisconnect.execute(self,ftransaction);
+     fbeforedisconnect.execute(self);
      ftransaction.commit;
     end;
     for int1:= datasetcount - 1 downto 0 do begin
