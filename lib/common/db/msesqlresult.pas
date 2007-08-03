@@ -3,7 +3,7 @@ unit msesqlresult;
 interface
 uses
  classes,db,msqldb,mseclasses,msedb,msedatabase,msearrayprops,msestrings,msereal,
- msetypes;
+ msetypes,mselookupbuffer,mseguiglob;
  
 type
  tsqlresult = class;
@@ -117,7 +117,7 @@ type
   public
    property value: boolean read getasboolean;
  end;
- tdatetimedbcol = class(tdbcol)
+ tdatetimedbcol = class(tfloatdbcol)
   protected
    function getasdatetime: tdatetime; override;
   public
@@ -146,20 +146,22 @@ type
  
 // tgraphicdbcol = class(tdbcol);
  dbcolarty = array of tdbcol;
-   
+
+ getnamefuncty = function:ansistring of object;
+ 
  tdbcols = class(tpersistentarrayprop)
   private 
-   fname: ansistring;
+   fgetname: getnamefuncty;
    function getitems(const index: integer): tdbcol;
    procedure initfields(const asqlresult: tsqlresult;
                   const acursor: tsqlcursor; const afielddefs: tfielddefs);
   public
-   constructor create(const aname: ansistring);
+   constructor create(const agetname: getnamefuncty);
    function findcol(const aname: ansistring): tdbcol;   
    function colbyname(const aname: ansistring): tdbcol;
    function colsbyname(const anames: array of ansistring): dbcolarty;
               //invalid after close!
-   property items[const index: integer]: tdbcol read getitems;
+   property items[const index: integer]: tdbcol read getitems; default;
  end;
 
  sqlresultoptionty = (sro_utf8);
@@ -177,6 +179,7 @@ type
    ffielddefs: tfielddefs;
    fcols: tdbcols;
    feof: boolean;
+   fbof: boolean;
    foptions: sqlresultoptionsty;
    fbeforeopen: tmsesqlscript;
    fafteropen: tmsesqlscript;
@@ -190,6 +193,7 @@ type
    procedure onchangesql(sender : tobject);
    procedure setbeforeopen(const avalue: tmsesqlscript);
    procedure setafteropen(const avalue: tmsesqlscript);
+   procedure changed;
   protected
    procedure loaded; override;
    procedure freefldbuffers;
@@ -209,6 +213,7 @@ type
    procedure next;
    procedure refresh;
    property cols: tdbcols read fcols;
+   property bof: boolean read fbof;
    property eof: boolean read feof;
   published
    property params : tmseparams read fparams write setparams; //before sql property
@@ -223,9 +228,66 @@ type
    property options: sqlresultoptionsty read foptions write foptions;
  end;
  
+ idbcolinfo = interface(inullinterface)
+                         ['{E246B738-6E4D-4A7D-A5BB-A1A14769C25D}']
+  function getsqlresult(const aindex: integer): tsqlresult;
+  procedure getfieldtypes(out apropertynames: stringarty;
+                          out afieldtypes: fieldtypesarty);
+ end;
+ 
+ getsqlresultfuncty = function(const aindex: integer): tsqlresult of object;
+ 
+ tdbcolnamearrayprop = class(tstringarrayprop,idbcolinfo)
+  private
+   ffieldtypes: fieldtypesty;
+   fgetsqlresult: getsqlresultfuncty;
+  protected
+   //idbcolinfo
+   function getsqlresult(const aindex: integer): tsqlresult;
+   procedure getfieldtypes(out apropertynames: stringarty;
+                          out afieldtypes: fieldtypesarty);
+  public
+   constructor create(const afieldtypes: fieldtypesty;
+                         const agetsqlresult: getsqlresultfuncty);
+   property fieldtypes: fieldtypesty read ffieldtypes write ffieldtypes;
+ end;
+ 
+ tsqllookupbuffer = class(tdatalookupbuffer)
+  private
+   fsource: tsqlresult;
+   ftextcols: tdbcolnamearrayprop;
+   fintegercols: tdbcolnamearrayprop;
+   ffloatcols: tdbcolnamearrayprop;
+   procedure setsource(const avalue: tsqlresult);
+   function getsqlresult(const aindex: integer): tsqlresult;
+   procedure settextcols(const avalue: tdbcolnamearrayprop);
+   procedure setintegercols(const avalue: tdbcolnamearrayprop);
+   procedure setfloatcols(const avalue: tdbcolnamearrayprop);
+  protected
+   function getfieldcounttext: integer; override;
+   function getfieldcountinteger: integer; override;
+   function getfieldcountfloat: integer; override;
+   procedure setfieldcounttext(const avalue: integer); override;
+   procedure setfieldcountinteger(const avalue: integer); override;
+   procedure setfieldcountfloat(const avalue: integer); override;
+   procedure loadbuffer; override;
+   procedure objectevent(const sender: tobject;
+                       const event: objecteventty); override;
+  public 
+   constructor create(aowner: tcomponent); override;
+   destructor destroy; override;
+   procedure clearbuffer; override;
+  published
+   property source: tsqlresult read fsource write setsource;
+   property textcols: tdbcolnamearrayprop read ftextcols write settextcols;
+   property integercols: tdbcolnamearrayprop read fintegercols write setintegercols;
+   property floatcols: tdbcolnamearrayprop read ffloatcols write setfloatcols;
+   property onchange;
+ end;
+ 
 implementation
 uses
- sysutils,dbconst,rtlconsts;
+ sysutils,dbconst,rtlconsts,msegui;
 const 
  msedbcoltypeclasses: array[fieldclasstypety] of dbcolclassty = 
 //        ft_unknown,ft_string,   ft_numeric,
@@ -494,9 +556,9 @@ end;
 
 { tdbcols }
 
-constructor tdbcols.create(const aname: ansistring);
+constructor tdbcols.create(const agetname: getnamefuncty);
 begin
- fname:= aname;
+ fgetname:= agetname;
  inherited create(tdbcol);
 end;
 
@@ -537,7 +599,7 @@ function tdbcols.colbyname(const aname: ansistring): tdbcol;
 begin
  result:= findcol(aname);
  if result = nil then begin
-  raise edatabaseerror.create(fname+': col "'+aname+'" not found.');
+  raise edatabaseerror.create(fgetname()+': col "'+aname+'" not found.');
  end;
 end;
 
@@ -559,7 +621,7 @@ begin
  ffielddefs:= tfielddefs.create(nil);
  fsql:= tstringlist.create;
  fsql.onchange:= @onchangesql;
- fcols:= tdbcols.create(name);
+ fcols:= tdbcols.create(@getname);
  inherited;
 end;
 
@@ -651,16 +713,19 @@ begin
  if fafteropen <> nil then begin
   fafteropen.execute;
  end;
+ changed;
 end;
 
 procedure tsqlresult.close;
 begin
  factive:= false;
  feof:= false;
+ fbof:= false;
  freefldbuffers;
  unprepare;
  ffielddefs.clear;
  fcols.clear;
+ changed;
 end;
 
 procedure tsqlresult.freefldbuffers;
@@ -721,12 +786,22 @@ end;
 procedure tsqlresult.execute;
 begin
  doexecute(fparams,ftransaction,fcursor,fdatabase);
+ fbof:= true;
 end;
 
 procedure tsqlresult.loaded;
 begin
  inherited;
- active:= fopenafterread;
+ try
+  active:= fopenafterread;
+ except
+  if csdesigning in componentstate then begin
+   application.handleexception(self);
+  end
+  else begin
+   raise;
+  end;
+ end;
 end;
 
 procedure tsqlresult.onchangesql(sender: tobject);
@@ -747,6 +822,7 @@ end;
 procedure tsqlresult.next;
 begin
  checkactive(active,name);
+ fbof:= false;
  if feof then begin
   raise edatabaseerror.create(name+': EOF.');
  end;
@@ -755,11 +831,16 @@ end;
 
 procedure tsqlresult.refresh;
 begin
- checkactive(active,name);
- fcursor.close;
- feof:= false;
- execute; 
- next;
+ if not active then begin
+  active:= true;
+ end
+ else begin
+  fcursor.close;
+  feof:= false;
+  execute; 
+  next;
+  changed;
+ end;
 end;
 
 procedure tsqlresult.setbeforeopen(const avalue: tmsesqlscript);
@@ -770,6 +851,236 @@ end;
 procedure tsqlresult.setafteropen(const avalue: tmsesqlscript);
 begin
  setlinkedvar(avalue,fafteropen);
+end;
+
+procedure tsqlresult.changed;
+begin
+ sendchangeevent;
+end;
+
+{ tdbcolnamearrayprop }
+
+constructor tdbcolnamearrayprop.create(const afieldtypes: fieldtypesty;
+               const agetsqlresult: getsqlresultfuncty);
+begin
+ ffieldtypes:= afieldtypes;
+ fgetsqlresult:= agetsqlresult;
+ inherited create;
+end;
+
+function tdbcolnamearrayprop.getsqlresult(const aindex: integer): tsqlresult;
+begin
+ result:= fgetsqlresult(aindex);
+end;
+
+procedure tdbcolnamearrayprop.getfieldtypes(out apropertynames: stringarty;
+               out afieldtypes: fieldtypesarty);
+begin
+ apropertynames:= nil;
+ setlength(afieldtypes,1);
+ afieldtypes[0]:= ffieldtypes;
+end;
+
+{ tsqllookupbuffer }
+
+constructor tsqllookupbuffer.create(aowner: tcomponent);
+begin
+ fintegercols:= tdbcolnamearrayprop.create(
+                   msedb.integerfields+[ftboolean],
+                      {$ifdef FPC}@{$endif}getsqlresult);
+ ftextcols:= tdbcolnamearrayprop.create(
+                   msedb.textfields+[ftboolean],
+                  {$ifdef FPC}@{$endif}getsqlresult);
+ ffloatcols:= tdbcolnamearrayprop.create(msedb.realfields + msedb.datetimefields,
+                      {$ifdef FPC}@{$endif}getsqlresult);
+ fintegercols.onchange:= @fieldschanged;
+ ftextcols.onchange:= @fieldschanged;
+ ffloatcols.onchange:= @fieldschanged;
+ inherited;
+end;
+
+destructor tsqllookupbuffer.destroy;
+begin
+ fintegercols.free;
+ ftextcols.free;
+ ffloatcols.free;
+ inherited;
+end;
+
+procedure tsqllookupbuffer.setsource(const avalue: tsqlresult);
+begin
+ setlinkedvar(avalue,fsource);
+ invalidatebuffer;
+end;
+
+procedure tsqllookupbuffer.settextcols(const avalue: tdbcolnamearrayprop);
+begin
+ ftextcols.assign(avalue);
+end;
+
+procedure tsqllookupbuffer.setintegercols(const avalue: tdbcolnamearrayprop);
+begin
+ fintegercols.assign(avalue);
+end;
+
+procedure tsqllookupbuffer.setfloatcols(const avalue: tdbcolnamearrayprop);
+begin
+ ffloatcols.assign(avalue);
+end;
+
+function tsqllookupbuffer.getsqlresult(const aindex: integer): tsqlresult;
+begin
+ result:= fsource;
+end;
+
+procedure tsqllookupbuffer.clearbuffer;
+begin
+ setlength(fintegerdata,fintegercols.count);
+ setlength(ftextdata,ftextcols.count);
+ setlength(ffloatdata,ffloatcols.count);
+ inherited;
+end;
+
+function tsqllookupbuffer.getfieldcounttext: integer;
+begin
+ result:= ftextcols.count;
+end;
+
+function tsqllookupbuffer.getfieldcountinteger: integer;
+begin
+ result:= fintegercols.count;
+end;
+
+function tsqllookupbuffer.getfieldcountfloat: integer;
+begin
+ result:= ffloatcols.count;
+end;
+
+procedure tsqllookupbuffer.setfieldcounttext(const avalue: integer);
+begin
+ readonlyprop;
+end;
+
+procedure tsqllookupbuffer.setfieldcountinteger(const avalue: integer);
+begin
+ readonlyprop;
+end;
+
+procedure tsqllookupbuffer.setfieldcountfloat(const avalue: integer);
+begin
+ readonlyprop;
+end;
+
+procedure tsqllookupbuffer.loadbuffer;
+var
+ int1,int3,int4: integer;
+ textf: array of tdbcol;
+ integerf: array of tdbcol;
+ realf: array of tdbcol;
+ bo1: boolean;
+ ar1: stringarty;
+begin
+ application.beginwait;
+ beginupdate;
+ try
+  clearbuffer;
+  include(fstate,lbs_buffervalid);
+  with fsource do begin
+   if (fsource <> nil) and active then begin
+    try
+     if not bof then begin
+      refresh;
+     end;
+     setlength(ar1,ftextcols.count);
+     for int1:= 0 to high(ar1) do begin
+      ar1[int1]:= ftextcols[int1];
+     end;
+     textf:= cols.colsbyname(ar1);
+     setlength(ar1,fintegercols.count);
+     for int1:= 0 to high(ar1) do begin
+      ar1[int1]:= fintegercols[int1];
+     end;
+     integerf:= cols.colsbyname(ar1);
+     setlength(ar1,floatcols.count);
+     for int1:= 0 to high(ar1) do begin
+      ar1[int1]:= ffloatcols[int1];
+     end;
+     realf:= cols.colsbyname(ar1);
+     int3:= 0;
+     int1:= 0;
+     try
+      while not fsource.eof do begin
+       if int3 <= int1 then begin
+        int3:= (int3 * 3) div 2 + 100;
+        for int4:= 0 to high(ftextdata) do begin
+         setlength(ftextdata[int4].data,int3);
+        end;
+        for int4:= 0 to high(fintegerdata) do begin
+         setlength(fintegerdata[int4].data,int3);
+        end;
+        for int4:= 0 to high(ffloatdata) do begin
+         setlength(ffloatdata[int4].data,int3);
+        end;
+       end;
+       for int4:= 0 to high(integerf) do begin
+        if integerf[int4] <> nil then begin
+         fintegerdata[int4].data[int1]:= integerf[int4].asinteger;
+        end;
+       end;
+       for int4:= 0 to high(realf) do begin
+        if realf[int4] <> nil then begin
+         if realf[int4].isnull then begin
+          ffloatdata[int4].data[int1]:= emptyreal;
+         end
+         else begin
+          ffloatdata[int4].data[int1]:= realf[int4].asfloat;
+         end;
+        end;
+       end;
+       for int4:= 0 to high(textf) do begin
+        if textf[int4] <> nil then begin
+         ftextdata[int4].data[int1]:= textf[int4].asmsestring;
+        end;
+       end;
+       inc(int1);
+       fsource.next;
+      end;
+     finally
+      for int4:= 0 to high(fintegerdata) do begin
+       setlength(fintegerdata[int4].data,int1);
+      end;
+      for int4:= 0 to high(ftextdata) do begin
+       setlength(ftextdata[int4].data,int1);
+      end;
+      for int4:= 0 to high(ffloatdata) do begin
+       setlength(ffloatdata[int4].data,int1);
+      end;
+      fcount:= int1;
+     end;
+    except
+     if csdesigning in componentstate then begin
+      application.handleexception(self);
+     end
+     else begin
+      raise;
+     end;        
+    end;
+   end;   
+  end;
+ finally
+  application.endwait;
+  endupdate;
+ end;
+end;
+
+procedure tsqllookupbuffer.objectevent(const sender: tobject;
+               const event: objecteventty);
+begin
+ inherited;
+ if (sender = fsource) and (event = oe_changed) and (fupdating = 0) then begin
+  invalidatebuffer;
+  changed;
+ end;
 end;
 
 end.

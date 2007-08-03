@@ -10,7 +10,7 @@ procedure Register;
 begin
  registercomponents('Exp',[twindowwidget,
                     topenglwidget,tchart,tchartrecorder,tgdiprinter,
-                    tsqlresult]);
+                    tsqlresult,tsqllookupbuffer]);
 end;
 initialization
  register;

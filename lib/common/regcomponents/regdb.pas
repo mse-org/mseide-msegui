@@ -14,7 +14,7 @@ unit regdb;
 interface
 uses
  msesqldb,msedbedit,msepropertyeditors,msedb,mseclasses,msetypes,msestrings,
- msegui,msedatabase;
+ msegui,msedatabase,msesqlresult;
  
 type
  tdbfieldnamepropertyeditor = class(tstringpropertyeditor)
@@ -24,6 +24,20 @@ type
   public
    function getvalues: msestringarty; override;
  end;
+ 
+ tdbcolnamepropertyeditor = class(tstringpropertyeditor)
+  protected
+   fdbcolinfointf: idbcolinfo;
+   function getdefaultstate: propertystatesty; override;
+  public
+   function getvalues: msestringarty; override;
+ end;
+ 
+ tdbcolnamearraypropertyeditor = class(tstringarraypropertyeditor)
+  protected
+   function geteditorclass: propertyeditorclassty; override;
+ end;
+
  
  tdbparampropertyeditor = class(tclasspropertyeditor)
   public
@@ -240,6 +254,8 @@ begin
         tdbfieldnamepropertyeditor);
  registerpropertyeditor(typeinfo(tdbfieldnamearrayprop),nil,'',
         tdbfieldnamearraypropertyeditor);
+ registerpropertyeditor(typeinfo(tdbcolnamearrayprop),nil,'',
+        tdbcolnamearraypropertyeditor);
  registerpropertyeditor(typeinfo(tpersistentfields),nil,'',
         tpersistentfieldspropertyeditor);
  registerpropertyeditor(typeinfo(string),tfield,'FieldName',
@@ -419,55 +435,102 @@ begin
    end;
   end;
  end;
- {
- if (fdbeditinfointf <> nil) and (fdbeditinfointf.getdatasource <> nil) then begin
-  ds:= fdbeditinfointf.getdatasource.dataset;
-  if ds <> nil then begin
-   ft:= [];
-   fdbeditinfointf.getfieldtypes(propertynames,fieldtypes);
-   if high(fieldtypes) >= 0 then begin
-    if high(propertynames) >= 0 then begin
-     str1:= fname;
-     for int1:= 0 to high(propertynames) do begin
-      if propertynames[int1] = str1 then begin
-       ft:= fieldtypes[int1];
-       break;
-      end;
-     end; 
-    end
-    else begin
-     ft:= fieldtypes[0];
-    end;
+end;
+
+{ tdbcolnamepropertyeditor }
+
+function tdbcolnamepropertyeditor.getdefaultstate: propertystatesty;
+var
+ sqlresult1: tsqlresult;
+ obj1: tobject;
+ ar1: stringarty;
+ ar2: fieldtypesarty;
+ int1,int2: integer;
+begin
+ result:= inherited getdefaultstate;
+ if fremote <> nil then begin
+  obj1:= tobject(tpropertyeditor1(fremote.getparenteditor).getordvalue);
+  if obj1 <> nil then begin
+   getcorbainterface(obj1,typeinfo(idbcolinfo),fdbcolinfointf);
+  end;
+ end
+ else begin
+  if (high(fprops) = 0) then begin
+   with fprops[0] do begin
+    getcorbainterface(instance,typeinfo(idbcolinfo),fdbcolinfointf);
    end;
-   if ds.active then begin
-    for int1:= 0 to ds.fields.count -1 do begin
-     with ds.fields[int1] do begin
+  end;
+ end;
+ if fdbcolinfointf <> nil then begin
+  fdbcolinfointf.getfieldtypes(ar1,ar2);
+  int2:= 0;
+  for int1:= 0 to high(ar1) do begin
+   if ar1[int1] = name then begin
+    int2:= int1;
+    break;
+   end;
+  end;
+  sqlresult1:= fdbcolinfointf.getsqlresult(int2);
+  if (sqlresult1 <> nil) and (sqlresult1.active)  then begin
+   result:= result + [ps_valuelist,ps_sortlist];
+  end;
+ end; 
+end;
+
+function tdbcolnamepropertyeditor.getvalues: msestringarty;
+var
+ propertynames: stringarty;
+ fieldtypes: fieldtypesarty;
+ ft: fieldtypesty;
+ int1,int2: integer;
+ sqlresult1: tsqlresult;
+ 
+begin
+ result:= nil;
+ if (fdbcolinfointf <> nil) then begin
+  int2:= 0;
+  fdbcolinfointf.getfieldtypes(propertynames,fieldtypes);
+  if high(propertynames) >= 0 then begin
+   for int1:= 0 to high(propertynames) do begin
+    if propertynames[int1] = fname then begin
+     int2:= int1;
+     break;
+    end;
+   end; 
+  end;
+  if int2 <= high(fieldtypes) then begin
+   ft:= fieldtypes[int2];
+  end
+  else begin
+   ft:= [];
+  end;
+  sqlresult1:= fdbcolinfointf.getsqlresult(int2);
+  if sqlresult1 <> nil then begin
+   if sqlresult1.active or (sqlresult1.cols.count > 0) then begin
+    for int1:= 0 to sqlresult1.cols.count -1 do begin
+     with sqlresult1.cols[int1] do begin
       if (ft = []) or (datatype = ftunknown) or (datatype in ft) then begin
        additem(result,msestring(fieldname));
-      end;
-     end;
-    end;
-   end
-   else begin
-    for int1:= 0 to ds.fielddefs.count -1 do begin
-     with ds.fielddefs[int1] do begin
-      if (ft = []) or (datatype = ftunknown) or (datatype in ft) then begin
-       additem(result,msestring(name));
       end;
      end;
     end;
    end;
   end;
  end;
- }
 end;
-
 
 { tdbfieldnamearraypropertyeditor }
 
 function tdbfieldnamearraypropertyeditor.geteditorclass: propertyeditorclassty;
 begin
  result:= tdbfieldnamepropertyeditor;
+end;
+
+{ tdbcolnamearraypropertyeditor }
+
+function tdbcolnamearraypropertyeditor.geteditorclass: propertyeditorclassty;
+begin
+ result:= tdbcolnamepropertyeditor;
 end;
 
 { tpersistentfieldelementeditor }
@@ -478,7 +541,6 @@ begin
 end;
 
 { tpersistentfieldspropertyeditor }
-
 
 function tpersistentfieldspropertyeditor.geteditorclass: propertyeditorclassty;
 begin
@@ -496,7 +558,6 @@ begin
   modified;
  end;
 end;
-
 
 { tfieldfieldnamepropertyeditor }
 

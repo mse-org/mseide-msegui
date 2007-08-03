@@ -63,23 +63,23 @@ const
 type   
  tcustomlookupbuffer = class(tguicomponent)
   private
-   ftextdata: stringindexinfoarty;
-   fintegerdata: integerindexinfoarty;
-   ffloatdata: floatindexinfoarty;
  //  fbuffervalid: boolean;
-   fstate: lookupbufferstatesty;
-   fcount: integer;
-   fupdating: integer;
    fonchange: notifyeventty;
    procedure checkindex(const index: integer);
-   function getfieldcounttext: integer; virtual;
-   function getfieldcountinteger: integer; virtual;
-   function getfieldcountfloat: integer; virtual;
    function internalfind(const avalue; var index: integerarty;
                 var data; const itemsize: integer;
                 compfunc: arraysortcomparety; const filter: lbfiltereventty;
                 out aindex: integer): boolean;//true if exact else next bigger
   protected
+   fupdating: integer;
+   fcount: integer;
+   fstate: lookupbufferstatesty;
+   ftextdata: stringindexinfoarty;
+   fintegerdata: integerindexinfoarty;
+   ffloatdata: floatindexinfoarty;
+   function getfieldcounttext: integer; virtual;
+   function getfieldcountinteger: integer; virtual;
+   function getfieldcountfloat: integer; virtual;
    procedure setfieldcounttext(const avalue: integer); virtual;
    procedure setfieldcountinteger(const avalue: integer); virtual;
    procedure setfieldcountfloat(const avalue: integer); virtual;
@@ -211,10 +211,21 @@ type
    property onchange;
  end;
 
+ tdatalookupbuffer = class(tcustomlookupbuffer)
+  protected
+   procedure loaded; override;
+   procedure setfieldcounttext(const avalue: integer); override;
+   procedure setfieldcountinteger(const avalue: integer); override;
+   procedure setfieldcountfloat(const avalue: integer); override;
+   procedure fieldschanged(const sender: tarrayprop; const index: integer);
+  public
+   function count: integer; override;
+ end;
+  
  lbdboptionty = (olbdb_closedataset,olbdb_invalidateifmodified);
  lbdboptionsty = set of lbdboptionty; 
  
- tcustomdblookupbuffer = class(tcustomlookupbuffer)
+ tcustomdblookupbuffer = class(tdatalookupbuffer)
   private
    fdatalink: tlookupbufferdatalink;
    ftextfields: tdbfieldnamearrayprop;
@@ -226,21 +237,15 @@ type
    procedure settextfields(const avalue: tdbfieldnamearrayprop);
    procedure setintegerfields(const avalue: tdbfieldnamearrayprop);
    procedure setfloatfields(const avalue: tdbfieldnamearrayprop);
-   procedure fieldschanged(const sender: tarrayprop; const index: integer);
    procedure getfields(out aintegerfields,atextfields,afloatfields: fieldarty);
   protected
-   procedure loaded; override;
    function getfieldcounttext: integer; override;
    function getfieldcountinteger: integer; override;
    function getfieldcountfloat: integer; override;
-   procedure setfieldcounttext(const avalue: integer); override;
-   procedure setfieldcountinteger(const avalue: integer); override;
-   procedure setfieldcountfloat(const avalue: integer); override;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
    procedure clearbuffer; override;
-   function count: integer; override;
    property datasource: tdatasource read getdatasource write setdatasource;
    property textfields: tdbfieldnamearrayprop read ftextfields write settextfields;
    property integerfields: tdbfieldnamearrayprop read fintegerfields write setintegerfields;
@@ -992,6 +997,43 @@ begin
  end;
 end;
 
+{ tdatalokupbuffer }
+
+procedure tdatalookupbuffer.loaded;
+begin
+ if not (lbs_buffervalid in fstate) then begin
+  clearbuffer;
+ end;
+ inherited;
+end;
+
+procedure tdatalookupbuffer.setfieldcountinteger(const avalue: integer);
+begin
+ readonlyprop;
+end;
+
+procedure tdatalookupbuffer.setfieldcountfloat(const avalue: integer);
+begin
+ readonlyprop;
+end;
+
+procedure tdatalookupbuffer.setfieldcounttext(const avalue: integer);
+begin
+ readonlyprop;
+end;
+
+function tdatalookupbuffer.count: integer;
+begin
+ checkbuffer;
+ result:= inherited count;
+end;
+
+procedure tdatalookupbuffer.fieldschanged(const sender: tarrayprop;
+                 const index: integer);
+begin
+ invalidatebuffer;
+end;
+
 { tlookupbufferdatalink }
 
 constructor tlookupbufferdatalink.create(const aowner: tcustomlookupbuffer);
@@ -1040,12 +1082,6 @@ begin
  fdatalink.datasource:= avalue;
 end;
 
-procedure tcustomdblookupbuffer.fieldschanged(const sender: tarrayprop;
-                 const index: integer);
-begin
- invalidatebuffer;
-end;
-
 procedure tcustomdblookupbuffer.setintegerfields(const avalue: tdbfieldnamearrayprop);
 begin
  fintegerfields.assign(avalue);
@@ -1069,22 +1105,9 @@ begin
  inherited;
 end;
 
-procedure tcustomdblookupbuffer.loaded;
-begin
- if not (lbs_buffervalid in fstate) then begin
-  clearbuffer;
- end;
- inherited;
-end;
-
 function tcustomdblookupbuffer.getfieldcounttext: integer;
 begin
  result:= ftextfields.count;
-end;
-
-procedure tcustomdblookupbuffer.setfieldcounttext(const avalue: integer);
-begin
- readonlyprop;
 end;
 
 function tcustomdblookupbuffer.getfieldcountinteger: integer;
@@ -1092,26 +1115,11 @@ begin
  result:= fintegerfields.count;
 end;
 
-procedure tcustomdblookupbuffer.setfieldcountinteger(const avalue: integer);
-begin
- readonlyprop;
-end;
-
-procedure tcustomdblookupbuffer.setfieldcountfloat(const avalue: integer);
-begin
- readonlyprop;
-end;
-
 function tcustomdblookupbuffer.getfieldcountfloat: integer;
 begin
  result:= floatfields.count;
 end;
 
-function tcustomdblookupbuffer.count: integer;
-begin
- checkbuffer;
- result:= inherited count;
-end;
 
 procedure tcustomdblookupbuffer.getfields(out aintegerfields,atextfields,
         afloatfields: fieldarty);
@@ -1225,59 +1233,65 @@ begin
        datas.first;
        int3:= 0;
        int1:= 0;
-       while not datas.eof do begin
-        if int3 <= int1 then begin
-         int3:= (int3 * 3) div 2 + 100;
-         for int4:= 0 to high(ftextdata) do begin
-          setlength(ftextdata[int4].data,int3);
-         end;
-         for int4:= 0 to high(fintegerdata) do begin
-          setlength(fintegerdata[int4].data,int3);
-         end;
-         for int4:= 0 to high(ffloatdata) do begin
-          setlength(ffloatdata[int4].data,int3);
-         end;
-        end;
-        for int4:= 0 to high(integerf) do begin
-         if integerf[int4] <> nil then begin
-          fintegerdata[int4].data[int1]:= integerf[int4].asinteger;
-         end;
-        end;
-        for int4:= 0 to high(realf) do begin
-         if realf[int4] <> nil then begin
-          if realf[int4].isnull then begin
-           ffloatdata[int4].data[int1]:= emptyreal;
-          end
-          else begin
-           ffloatdata[int4].data[int1]:= realf[int4].asfloat;
+       try
+        while not datas.eof do begin
+         if int3 <= int1 then begin
+          int3:= (int3 * 3) div 2 + 100;
+          for int4:= 0 to high(ftextdata) do begin
+           setlength(ftextdata[int4].data,int3);
+          end;
+          for int4:= 0 to high(fintegerdata) do begin
+           setlength(fintegerdata[int4].data,int3);
+          end;
+          for int4:= 0 to high(ffloatdata) do begin
+           setlength(ffloatdata[int4].data,int3);
           end;
          end;
-        end;
-        for int4:= 0 to high(textf) do begin
-         if textf[int4] <> nil then begin
-          if ismsestringfield[int4] then begin
-           ftextdata[int4].data[int1]:= tmsestringfield(textf[int4]).asmsestring;
-          end
-          else begin
-           if utf8 then begin
-            ftextdata[int4].data[int1]:= utf8tostring(textf[int4].asstring);
+         for int4:= 0 to high(integerf) do begin
+          if integerf[int4] <> nil then begin
+           fintegerdata[int4].data[int1]:= integerf[int4].asinteger;
+          end;
+         end;
+         for int4:= 0 to high(realf) do begin
+          if realf[int4] <> nil then begin
+           if realf[int4].isnull then begin
+            ffloatdata[int4].data[int1]:= emptyreal;
            end
            else begin
-            ftextdata[int4].data[int1]:= textf[int4].asstring;
+            ffloatdata[int4].data[int1]:= realf[int4].asfloat;
            end;
           end;
          end;
+         for int4:= 0 to high(textf) do begin
+          if textf[int4] <> nil then begin
+           if ismsestringfield[int4] then begin
+            ftextdata[int4].data[int1]:= tmsestringfield(textf[int4]).asmsestring;
+           end
+           else begin
+            if utf8 then begin
+             ftextdata[int4].data[int1]:= utf8tostring(textf[int4].asstring);
+            end
+            else begin
+             ftextdata[int4].data[int1]:= textf[int4].asstring;
+            end;
+           end;
+          end;
+         end;
+         inc(int1);
+         datas.next;
         end;
-        inc(int1);
-        datas.next;
+       finally
+        for int4:= 0 to high(fintegerdata) do begin
+         setlength(fintegerdata[int4].data,int1);
+        end;
+        for int4:= 0 to high(ftextdata) do begin
+         setlength(ftextdata[int4].data,int1);
+        end;
+        for int4:= 0 to high(ffloatdata) do begin
+         setlength(ffloatdata[int4].data,int1);
+        end;
+        fcount:= int1;
        end;
-       for int4:= 0 to high(fintegerdata) do begin
-        setlength(fintegerdata[int4].data,int1);
-       end;
-       for int4:= 0 to high(ftextdata) do begin
-        setlength(ftextdata[int4].data,int1);
-       end;
-       fcount:= int1;
       finally
        datas.bookmark:= bm;
       end;
