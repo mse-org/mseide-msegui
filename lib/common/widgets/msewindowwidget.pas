@@ -39,9 +39,10 @@ type
    fonloaded: windowwidgeteventty;
    fonwindowmouseevent: mouseeventty;
    fwindowmouseentered: boolean;
+   fonwindowmousewheelevent: mousewheeleventty;
    function getclientwinid: winidty;
    procedure checkwindowrect;
-//   procedure windowscrolled(const sender: tobject);
+   procedure windowscrolled(const sender: tobject);
    function getchildrect: rectty;
    function getviewport: rectty;
   protected
@@ -60,6 +61,7 @@ type
    procedure doloaded; override;
    procedure updateviewport(const arect: rectty); virtual;
    procedure clientmouseevent(var info: mouseeventinfoty); override;
+   procedure domousewheelevent(var info: mousewheeleventinfoty); override;
    
   public
    constructor create(aowner: tcomponent); override;
@@ -83,6 +85,8 @@ type
    property ondloaded: windowwidgeteventty read fonloaded write fonloaded;    
    property onwindowmouseevent: mouseeventty read fonwindowmouseevent 
             write fonwindowmouseevent; //origin viewport.pos
+   property onwindowmousewheelevent: mousewheeleventty read 
+                fonwindowmousewheelevent write fonwindowmousewheelevent;
  end;
 
  twindowwidget = class(tcustomwindowwidget)
@@ -113,6 +117,7 @@ type
    property onclientpaint;
    property onclientrectchanged;
    property onwindowmouseevent;
+   property onwindowmousewheelevent;
    property ondestroy;
  end;
  
@@ -133,9 +138,9 @@ end;
 
 destructor tcustomwindowwidget.destroy;
 begin
-// if fwindow <> nil then begin
-//  fwindow.unregisteronscroll(@windowscrolled);
-// end;
+ if fwindow <> nil then begin
+  fwindow.unregisteronscroll(@windowscrolled);
+ end;
  if candestroyevent(tmethod(fondestroy)) then begin
   fondestroy(self);
  end;
@@ -174,9 +179,9 @@ begin
   if fclientwinid = 0 then begin
    fclientwinid:= createchildwindow;
   end;
-//  if fwindow <> nil then begin
-//   fwindow.registeronscroll(@windowscrolled);
-//  end;
+  if fwindow <> nil then begin
+   fwindow.registeronscroll(@windowscrolled);
+  end;
   checkclientvisible;
  end;  
 end;
@@ -201,7 +206,7 @@ begin
   rect1:= innerwidgetrect;
   rect2:= intersectrect(rect1,clippedpaintrect);
   rect1.x:= rect1.x - rect2.x;
-  rect1.y:= rect1.y - rect2.y;
+  rect1.y:= rect2.y + rect2.cy - rect1.y - rect1.cy;
   addpoint1(rect2.pos,rootpos);
   if not rectisequal(rect2,fchildrect) then begin
    bo1:= true;
@@ -214,7 +219,7 @@ begin
     faspect:= 1;
    end
    else begin
-    faspect:= rect1.cx/rect1.cy;
+    faspect:= -rect1.cx/rect1.cy;
    end;
    fviewport:= rect1;
    updateviewport(fviewport);
@@ -381,10 +386,29 @@ begin
  end;
 end;
 
-{
+procedure tcustomwindowwidget.domousewheelevent(var info: mousewheeleventinfoty);
+var
+ rect1: rectty;
+begin
+ if canevent(tmethod(fonwindowmousewheelevent)) then begin
+  rect1:= innerclientrect;
+  if pointinrect(info.pos,rect1) then begin
+   subpoint1(info.pos,rect1.pos);
+   try
+    fonwindowmousewheelevent(self,info);
+   finally
+    addpoint1(info.pos,rect1.pos);
+   end;
+  end;
+ end;
+ if not (es_processed in info.eventstate) then begin
+  inherited;
+ end;
+end;
+
 procedure tcustomwindowwidget.windowscrolled(const sender: tobject);
 begin
  checkwindowrect;
 end;
-}
+
 end.

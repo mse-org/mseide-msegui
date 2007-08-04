@@ -1317,7 +1317,7 @@ type
    fwindowpos: windowposty;
    fnormalwindowrect: rectty;
    fcaption: msestring;
-//   fscrollnotifylist: tnotifylist;
+   fscrollnotifylist: tnotifylist;
    procedure setcaption(const avalue: msestring);
    procedure widgetdestroyed(widget: twidget);
 
@@ -1383,8 +1383,8 @@ type
   public
    constructor create(aowner: twidget);
    destructor destroy; override;
-//   procedure registeronscroll(const method: notifyeventty);
-//   procedure unregisteronscroll(const method: notifyeventty);
+   procedure registeronscroll(const method: notifyeventty);
+   procedure unregisteronscroll(const method: notifyeventty);
    
    function beginmodal: boolean; //true if window destroyed
    procedure endmodal;
@@ -8070,11 +8070,9 @@ begin
    end;
   end;
   widgetregioninvalid;
-  {
   if fwindow <> nil then begin
    fwindow.fscrollnotifylist.notify(self);
   end;
-  }
  end;
 end;
 
@@ -9101,7 +9099,7 @@ begin
  fowner.fwindow:= self;
  fcanvas:= tcanvas.create(self,icanvas(self));
  fasynccanvas:= tcanvas.create(self,icanvas(self));
-// fscrollnotifylist:= tnotifylist.create;
+ fscrollnotifylist:= tnotifylist.create;
  inherited create;
  fowner.rootchanged; //nil all references
 end;
@@ -9120,7 +9118,7 @@ begin
  fasynccanvas.free;
  inherited;
  destroyregion(fupdateregion);
-// fscrollnotifylist.free;
+ fscrollnotifylist.free;
 end;
 
 procedure twindow.sizeconstraintschanged;
@@ -10281,7 +10279,7 @@ begin
   checkwindow(false);
  end;
 end;
-{
+
 procedure twindow.registeronscroll(const method: notifyeventty);
 begin
  fscrollnotifylist.add(tmethod(method));
@@ -10291,7 +10289,7 @@ procedure twindow.unregisteronscroll(const method: notifyeventty);
 begin
  fscrollnotifylist.remove(tmethod(method));
 end;
-}
+
 { tonterminatequerylist }
 
 function tonterminatequerylist.doterminatequery: boolean;

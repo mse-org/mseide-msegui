@@ -78,6 +78,7 @@ type
    property onclientpaint;
    property onclientrectchanged;
    property onwindowmouseevent;
+   property onwindowmousewheelevent;
    property ondestroy;
  end;
   
