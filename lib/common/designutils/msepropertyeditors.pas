@@ -1708,6 +1708,7 @@ begin
    end;
   end;
   setmethodvalue(method1);
+method2:= getmethodvalue;
  end;
 // modified;
 end;

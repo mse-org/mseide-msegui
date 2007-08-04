@@ -502,7 +502,6 @@ type
    fonclosequery: queryeventty;
    fonevent: eventeventty;
    fonasyncevent: asynceventeventty;
-   fonmouswheeleevent: mousewheeleventty;
    fonfocusedwidgetchanged: focuschangeeventty;
    fonpaintbackground: painteventty;
   protected
@@ -545,7 +544,7 @@ type
                         write fonchildmouseevent;
    property onclientmouseevent: mouseeventty read fonclientmouseevent 
                                              write fonclientmouseevent;
-   property onmousewheelevent: mousewheeleventty read fonmouswheeleevent 
+   property onmousewheelevent: mousewheeleventty read fonmousewheelevent 
                                              write fonmousewheelevent;
 
    property onkeydown: keyeventty read fonkeydown write fonkeydown;

@@ -3250,6 +3250,11 @@ begin
  result.y:= smallint(hiword(pos));
 end;
 
+function pointtowinmousepos(pos: pointty): cardinal;
+begin
+ result:= word(pos.x) + (word(pos.y) shl 16);
+end;
+
 function winkeytokey(key: cardinal; shift: shiftstatesty): keyty;
 begin
  case key of
@@ -3359,16 +3364,18 @@ end;
 
 procedure checkmousewindow(window: hwnd; const pos: pointty); forward;
 
-procedure mouseidleproc(hwnd: hwnd; uMsg: cardinal; idEvent: cardinal;
+procedure mouseidleproc(ahwnd: hwnd; uMsg: cardinal; idEvent: cardinal;
           dwTime: cardinal); stdcall;
 var
  po1: tpoint;
+ win1: hwnd;
 begin
  windows.KillTimer(0,mouseidletimer);
  mouseidletimer:= 0;
  if mousewindow <> 0 then begin
   if windows.GetCursorPos(po1) then begin
-   if windowfrompoint(po1) <> mousewindow then begin
+   win1:= windowfrompoint(po1);
+   if (win1 <> mousewindow) and (getparent(win1) <> mousewindow) then begin
     eventlist.add(twindowevent.create(ek_leavewindow,mousewindow));
    end
    else begin
@@ -3536,27 +3543,6 @@ var
  mousewheelpos: integer;
  sizingwindow: hwnd;
  eventlooping: integer;
-
-function childWindowProc(ahWnd: HWND; Msg: UINT; wParam: WPARAM; lParam: LPARAM): LRESULT; stdcall;
-begin
- case msg of
-  wm_destroy: begin
-   windowdestroyed(ahwnd);
-   eventlist.add(twindowevent.create(ek_destroy,ahwnd));
-  end;
-  {
-  wm_erasebkgnd,wm_paint: begin
-   result:= 1;
-  end;
- }
- end;
- if iswin95 then begin
-  result:= defwindowproca(ahwnd,msg,wparam,lparam);
- end
- else begin
-  result:= defwindowprocw(ahwnd,msg,wparam,lparam);
- end;
-end;
 
 function WindowProc(ahWnd: HWND; Msg: UINT; wParam: WPARAM; lParam: LPARAM): LRESULT; stdcall;
 const
@@ -3750,6 +3736,41 @@ begin
   finally
    dec(eventlooping);
   end;
+ end;
+end;
+
+function childWindowProc(ahWnd: HWND; Msg: UINT; wParam: WPARAM;
+            lParam: LPARAM): LRESULT; stdcall;
+var
+ parent: hwnd;
+ pt1: pointty;
+ rect1: trect;
+ rect2: rectty;
+begin
+ parent:= getparent(ahwnd);
+ case msg of
+  wm_destroy: begin
+   windowdestroyed(ahwnd);
+   eventlist.add(twindowevent.create(ek_destroy,ahwnd));
+  end;
+  wm_mousemove,
+  wm_lbuttondown,wm_mbuttondown,wm_rbuttondown,
+  wm_lbuttonup,wm_mbuttonup,wm_rbuttonup,
+  wm_mousewheel: begin
+   getwindowrect(ahwnd,rect1);
+   rect2:= getclientrect(parent);
+   pt1.x:= rect1.left - rect2.x;
+   pt1.y:= rect1.top - rect2.y;
+   pt1:= addpoint(winmousepostopoint(lparam),pt1);
+   result:= windowproc(parent,msg,wparam,pointtowinmousepos(pt1));
+   exit;
+  end;
+ end;
+ if iswin95 then begin
+  result:= defwindowproca(ahwnd,msg,wparam,lparam);
+ end
+ else begin
+  result:= defwindowprocw(ahwnd,msg,wparam,lparam);
  end;
 end;
 
