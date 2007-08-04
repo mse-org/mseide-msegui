@@ -8,9 +8,7 @@ uses
  
 procedure Register;
 begin
- registercomponents('Exp',[twindowwidget,
-                    topenglwidget,tchart,tchartrecorder,tgdiprinter,
-                    tsqlresult,tsqllookupbuffer]);
+// registercomponents('Exp',[]);
 end;
 initialization
  register;
