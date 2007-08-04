@@ -11,7 +11,8 @@ unit msewindowwidget;
 {$ifdef FPC}{$mode objfpc}{$h+}{$INTERFACES CORBA}{$endif}
 interface
 uses
- classes,msegui,msetypes,msegraphutils,mseguiintf,msewidgets,msegraphics;
+ classes,msegui,msetypes,msegraphutils,mseguiintf,msewidgets,msegraphics,
+ msesimplewidgets;
  
 type
  tcustomwindowwidget = class;
@@ -24,7 +25,7 @@ type
  destroywinideventty = procedure(const sender: tcustomwindowwidget;
                        const aid: winidty) of object;
                         
- tcustomwindowwidget = class(tactionwidget)
+ tcustomwindowwidget = class(teventwidget)
   private
    fclientwinid: winidty;
    fchildrect: rectty;
