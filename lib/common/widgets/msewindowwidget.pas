@@ -12,7 +12,7 @@ unit msewindowwidget;
 interface
 uses
  classes,msegui,msetypes,msegraphutils,mseguiintf,msewidgets,msegraphics,
- msesimplewidgets;
+ msesimplewidgets,mseevent;
  
 type
  tcustomwindowwidget = class;
@@ -37,6 +37,8 @@ type
    fonclientrectchanged: windowwidgeteventty;
    fondestroy: windowwidgeteventty;
    fonloaded: windowwidgeteventty;
+   fonwindowmouseevent: mouseeventty;
+   fwindowmouseentered: boolean;
    function getclientwinid: winidty;
    procedure checkwindowrect;
 //   procedure windowscrolled(const sender: tobject);
@@ -57,6 +59,7 @@ type
    procedure doonpaint(const acanvas: tcanvas); override;
    procedure doloaded; override;
    procedure updateviewport(const arect: rectty); virtual;
+   procedure clientmouseevent(var info: mouseeventinfoty); override;
    
   public
    constructor create(aowner: tcomponent); override;
@@ -77,7 +80,9 @@ type
    property onclientrectchanged: windowwidgeteventty read fonclientrectchanged 
                                      write fonclientrectchanged;   
    property ondestroy: windowwidgeteventty read fondestroy write fondestroy;     
-   property ondloaded: windowwidgeteventty read fonloaded write fonloaded;     
+   property ondloaded: windowwidgeteventty read fonloaded write fonloaded;    
+   property onwindowmouseevent: mouseeventty read fonwindowmouseevent 
+            write fonwindowmouseevent; //origin viewport.pos
  end;
 
  twindowwidget = class(tcustomwindowwidget)
@@ -107,6 +112,7 @@ type
    property ondestroywinid;
    property onclientpaint;
    property onclientrectchanged;
+   property onwindowmouseevent;
    property ondestroy;
  end;
  
@@ -323,6 +329,58 @@ procedure tcustomwindowwidget.updateviewport(const arect: rectty);
 begin
  //dummy
 end;
+
+procedure tcustomwindowwidget.clientmouseevent(var info: mouseeventinfoty);
+ procedure enterevent(const aenter: boolean);
+ var
+  info1: mouseeventinfoty;
+ begin
+  if aenter xor fwindowmouseentered then begin
+   fwindowmouseentered:= aenter;
+   info1:= info;
+   if aenter then begin
+    info1.eventkind:= ek_clientmouseenter;
+   end
+   else begin
+    info1.eventkind:= ek_clientmouseleave;
+   end;
+  end;
+  info1.pos:= nullpoint;
+  fonwindowmouseevent(self,info1);
+ end;
+var
+ pt1: pointty;
+ rect1: rectty;
+begin
+ inherited;
+ if canevent(tmethod(fonwindowmouseevent)) then begin
+  if info.eventkind in mouseposevents then begin
+   checkwindowrect;
+   rect1:= innerclientrect;
+   if pointinrect(info.pos,rect1) or 
+           (ws_clientmousecaptured in fwidgetstate) then begin
+    enterevent(true);
+    subpoint1(info.pos,rect1.pos);
+    if not (es_processed in info.eventstate) then begin
+     try
+      fonwindowmouseevent(self,info);
+     finally
+      addpoint1(info.pos,rect1.pos);
+     end;
+    end;
+   end
+   else begin
+    enterevent(false);
+   end;
+  end
+  else begin
+   if info.eventkind = ek_clientmouseleave then begin
+    enterevent(false);
+   end;
+  end;
+ end;
+end;
+
 {
 procedure tcustomwindowwidget.windowscrolled(const sender: tobject);
 begin

@@ -73,6 +73,12 @@ type
    property onshowhint;
    property enabled;
    property visible;
+   property oncreatewinid;
+   property ondestroywinid;
+   property onclientpaint;
+   property onclientrectchanged;
+   property onwindowmouseevent;
+   property ondestroy;
  end;
   
 implementation
