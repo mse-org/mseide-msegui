@@ -1391,6 +1391,7 @@ begin
  registerpropertyeditor(typeinfo(byte),nil,'',tordinalpropertyeditor);
  registerpropertyeditor(typeinfo(currency),nil,'',tcurrencypropertyeditor);
  registerpropertyeditor(typeinfo(real),nil,'',trealpropertyeditor);
+ registerpropertyeditor(typeinfo(double),nil,'',trealpropertyeditor);
  registerpropertyeditor(typeinfo(realty),nil,'',trealtypropertyeditor);
  registerpropertyeditor(typeinfo(tdatetime),nil,'',tdatetimepropertyeditor);
  registerpropertyeditor(typeinfo(char),nil,'',tcharpropertyeditor);
