@@ -32,7 +32,6 @@ type
    fdc: hdc;
    fcontext: hglrc;
    {$endif}
-//   faspect: real;
    fwin: winidty;
    fonrender: openglrendereventty;
   protected
@@ -40,10 +39,9 @@ type
                   var aid: winidty); override;
    procedure dodestroywinid; override;
    procedure doclientpaint(const aupdaterect: rectty); override;
-//   procedure clientrectchanged; override;
    procedure updateviewport(const arect: rectty); override;
   public
-//   property aspect: real read faspect;
+   
   published
    property onrender: openglrendereventty read fonrender write fonrender;
    

@@ -62,7 +62,10 @@ type
    procedure updateviewport(const arect: rectty); virtual;
    procedure clientmouseevent(var info: mouseeventinfoty); override;
    procedure domousewheelevent(var info: mousewheeleventinfoty); override;
-   
+
+   procedure clienttoviewport(var apoint: pointty; const arect: rectty);
+   procedure viewporttoclient(var apoint: pointty; const arect: rectty);
+              
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -335,6 +338,21 @@ begin
  //dummy
 end;
 
+procedure tcustomwindowwidget.clienttoviewport(var apoint: pointty;
+               const arect: rectty);
+begin
+ apoint.x:= apoint.x - arect.x;
+ apoint.y:= arect.cy - apoint.y + arect.y;
+end;
+
+procedure tcustomwindowwidget.viewporttoclient(var apoint: pointty;
+               const arect: rectty);
+begin
+ apoint.x:= apoint.x + arect.x;
+ apoint.y:=  arect.cy + arect.y - apoint.y;
+end;
+
+
 procedure tcustomwindowwidget.clientmouseevent(var info: mouseeventinfoty);
  procedure enterevent(const aenter: boolean);
  var
@@ -365,12 +383,12 @@ begin
    if pointinrect(info.pos,rect1) or 
            (ws_clientmousecaptured in fwidgetstate) then begin
     enterevent(true);
-    subpoint1(info.pos,rect1.pos);
+    clienttoviewport(info.pos,rect1);
     if not (es_processed in info.eventstate) then begin
      try
       fonwindowmouseevent(self,info);
      finally
-      addpoint1(info.pos,rect1.pos);
+      viewporttoclient(info.pos,rect1);
      end;
     end;
    end
@@ -393,11 +411,11 @@ begin
  if canevent(tmethod(fonwindowmousewheelevent)) then begin
   rect1:= innerclientrect;
   if pointinrect(info.pos,rect1) then begin
-   subpoint1(info.pos,rect1.pos);
+   clienttoviewport(info.pos,rect1);
    try
     fonwindowmousewheelevent(self,info);
    finally
-    addpoint1(info.pos,rect1.pos);
+    viewporttoclient(info.pos,rect1);
    end;
   end;
  end;
