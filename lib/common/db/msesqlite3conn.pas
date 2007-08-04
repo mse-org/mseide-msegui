@@ -41,6 +41,7 @@ type
    fcontroller: tdbcontroller;
    fhandle: psqlite3;
    foptions: sqliteoptionsty;
+   fbusytimeoutms: integer;
    function getdatabasename: filenamety;
    procedure setdatabasename(const avalue: filenamety);
    procedure loaded; override;
@@ -65,6 +66,8 @@ type
    function blobscached: boolean;
 
    procedure setoptions(const avalue: sqliteoptionsty);
+   procedure setbusytimeoutms(const avalue: integer);
+   procedure checkbusytimeout;
   protected
    function stringquery(const asql: string): stringarty;
    function stringsquery(const asql: string): stringararty;
@@ -125,6 +128,8 @@ type
    property Connected: boolean read getconnected write setconnected;
    property controller: tdbcontroller read fcontroller write setcontroller;
    property options: sqliteoptionsty read foptions write setoptions;
+   property busytimeoutms: integer read fbusytimeoutms 
+                                        write setbusytimeoutms default 0;
 //    property Password;
    property Transaction;
    property afterconnect;
@@ -752,6 +757,7 @@ begin
  initialisesqlite3;
  str1:= stringtoutf8(mstr1);
  checkerror(sqlite3_open(pchar(str1),@fhandle));
+ checkbusytimeout;
 end;
 
 procedure tsqlite3connection.DoInternalDisconnect;
@@ -950,6 +956,21 @@ begin
  if avalue <> foptions then begin
   checkdisconnected;
   foptions:= avalue;
+ end;
+end;
+
+procedure tsqlite3connection.setbusytimeoutms(const avalue: integer);
+begin
+ if avalue <> fbusytimeoutms then begin
+  fbusytimeoutms:= avalue;
+  checkbusytimeout;
+ end;
+end;
+
+procedure tsqlite3connection.checkbusytimeout;
+begin
+ if fhandle <> nil then begin
+  sqlite3_busy_timeout(fhandle,fbusytimeoutms);
  end;
 end;
 

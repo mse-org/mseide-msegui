@@ -215,13 +215,13 @@ type
     property OnLogin;
  end;
  
-{ TSQLTransaction }
-
   TCommitRollbackAction = (caNone, caCommit, caCommitRetaining, caRollback,
     caRollbackRetaining);
-  transactionoptionty = (tao_fake);
+  transactionoptionty = (tao_fake,tao_catcherror);
   transactionoptionsty = set of transactionoptionty;
   sqltransactioneventty = procedure(const sender: tsqltransaction) of object;
+  commiterroreventty = procedure(const sender: tsqltransaction;
+               const aexception: exception; var handled: boolean) of object;
   
   TSQLTransaction = class (TmDBTransaction)
    private
@@ -240,9 +240,11 @@ type
     fonafterrollbackretaining: sqltransactioneventty;
     fonbeforerollback: sqltransactioneventty;
     fonafterrollback: sqltransactioneventty;
+    foncommiterror: commiterroreventty;
     procedure setparams(const avalue: TStringList);
     function getdatabase: tcustomsqlconnection;
     procedure setdatabase1(const avalue: tcustomsqlconnection);
+    function docommit(const retaining: boolean): boolean;
    protected
     function GetHandle : Pointer; virtual;
     Procedure SetDatabase (Value : tmdatabase); override;
@@ -250,8 +252,8 @@ type
    public
     constructor Create(AOwner : TComponent); override;
     destructor Destroy; override;
-    procedure Commit; virtual;
-    procedure CommitRetaining; virtual;
+    function Commit: boolean; virtual; //true if ok
+    function CommitRetaining: boolean; virtual;
     procedure Rollback; virtual;
     procedure RollbackRetaining; virtual;
     procedure StartTransaction; override;
@@ -262,6 +264,8 @@ type
     property Action : TCommitRollbackAction read FAction write FAction;
     property Database: tcustomsqlconnection read getdatabase write setdatabase1;
     property Params : TStringList read FParams write setparams;
+    property oncommiterror: commiterroreventty read foncommiterror 
+                               write foncommiterror;
     property onbeforestart: sqltransactioneventty read fonbeforestart 
                                      write fonbeforestart;
     property onafterstart: sqltransactioneventty read fonafterstart 
@@ -528,7 +532,7 @@ procedure dosetsqldatabase(const sender: isqlclient; const avalue: tmdatabase;
 
 implementation
 uses 
- dbconst,strutils,msedatalist,msereal,msestream;
+ dbconst,strutils,msedatalist,msereal,msestream,msegui;
  
 procedure updateparams(const aparams: tparams);
 var
@@ -1232,36 +1236,73 @@ begin
   Result := (Database as tcustomsqlconnection).GetTransactionHandle(FTrans);
 end;
 
-procedure TSQLTransaction.Commit;
+function tsqltransaction.docommit(const retaining: boolean): boolean;
+ procedure dofinish;
+ begin
+  if not retaining then begin
+   closetrans;
+   closedatasets;
+  end;
+ end;
 var
  bo1: boolean;
 begin
+ if not (tao_fake in foptions) then begin
+  try
+   if retaining then begin
+    tcustomsqlconnection(database).commitretaining(FTrans);
+   end
+   else begin
+    tcustomsqlconnection(database).commit(FTrans);
+   end;
+  except
+   on e: exception do begin
+    bo1:= false;
+    if checkcanevent(self,tmethod(foncommiterror)) then begin
+     foncommiterror(self,e,bo1);
+    end;
+    if not bo1 then begin
+     if tao_catcherror in foptions then begin
+      application.handleexception(self);
+      exit;
+     end
+     else begin
+      dofinish;
+      raise;
+     end;
+    end;
+   end;
+  end;
+ end;
+ dofinish;
+end;
+
+function TSQLTransaction.Commit: boolean;
+var
+ bo1: boolean;
+begin
+ result:= true;
  if active then begin
   if checkcanevent(self,tmethod(fonbeforecommit)) then begin
    fonbeforecommit(self);
   end;
-  closedatasets;
-  if (tao_fake in foptions) or tcustomsqlconnection(database).commit(FTrans) then begin
-   closeTrans;
-//   FreeAndNil(FTrans);
-  end;
-  if checkcanevent(self,tmethod(fonaftercommit)) then begin
+  result:= docommit(false);
+  if result and checkcanevent(self,tmethod(fonaftercommit)) then begin
    fonaftercommit(self);
   end;
  end;
 end;
 
-procedure TSQLTransaction.CommitRetaining;
+function TSQLTransaction.CommitRetaining: boolean;
 begin
+ result:= true;
  if active then begin
   if checkcanevent(self,tmethod(fonbeforecommitretaining)) then begin
-   fonbeforecommit(self);
+   fonbeforecommitretaining(self);
   end;
-  if not (tao_fake in foptions) then begin
-   tcustomsqlconnection(database).commitRetaining(FTrans);
-  end;
-  if checkcanevent(self,tmethod(fonaftercommitretaining)) then begin
-   fonaftercommit(self);
+  result:= docommit(true);
+  if result and checkcanevent(self,tmethod(fonaftercommitretaining)) then begin
+   fonaftercommitretaining(self);
   end;
  end;
 end;
@@ -1275,7 +1316,6 @@ begin
   closedatasets;
   if (tao_fake in foptions) or tcustomsqlconnection(database).RollBack(FTrans) then begin
    CloseTrans;
-//   FreeAndNil(FTrans);
   end;
   if checkcanevent(self,tmethod(fonafterrollback)) then begin
    fonafterrollback(self);
