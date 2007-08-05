@@ -83,7 +83,6 @@ type
    procedure setfieldcounttext(const avalue: integer); virtual;
    procedure setfieldcountinteger(const avalue: integer); virtual;
    procedure setfieldcountfloat(const avalue: integer); virtual;
-   procedure loadbuffer; virtual;
    procedure invalidatebuffer;
    procedure readonlyprop;
    procedure changed;
@@ -106,6 +105,7 @@ type
    procedure endupdate;
    procedure clearbuffer; virtual;
    procedure checkbuffer; //automatically called
+   procedure loadbuffer; virtual;
 
    function find(const fieldno: integer; const avalue: integer;
          out aindex: integer; const filter: lbfiltereventty = nil): boolean; overload;
@@ -255,9 +255,9 @@ type
    
  tdblookupbuffer = class(tcustomdblookupbuffer)
   protected
-   procedure loadbuffer; override;
   public
    constructor create(aowner: tcomponent); override;
+   procedure loadbuffer; override;
   published
    property onchange;
    property datasource;
@@ -269,9 +269,9 @@ type
   
  tdbmemolookupbuffer = class(tcustomdblookupbuffer)
   protected
-   procedure loadbuffer; override;
   public
    constructor create(aowner: tcomponent); override;
+   procedure loadbuffer; override;
   published
    property onchange;
    property datasource;
