@@ -954,7 +954,7 @@ begin
   canvas.save;
 //  canvas.intersectcliprect(fowner.container.paintrect);
   canvas.intersectcliprect(tformdesignerfo(fowner).gridrect);
-  canvas.move(fowner.container.clientpos);
+//  canvas.move(fowner.container.clientpos);
   case factarea of
    firsthandle..lasthandle: begin
     with canvas do begin
@@ -1098,6 +1098,7 @@ begin
     component:= components[int1];
     if (form = nil) or not (component is twidget) then begin
      rect1:= getcomponentrect(component);
+     subpoint1(rect1.pos,componentoffset);
      int2:= rect1.x + rect1.cx;
      if int2 > result.cx then begin
       result.cx:= int2;
@@ -2761,7 +2762,7 @@ end;
 function tformdesignerfo.compplacementrect: rectty;
 begin
  if form = nil then begin
-  result:= clientrect;
+  result:= container.clientrect;
  end
  else begin
   result:= form.container.clientwidgetrect;

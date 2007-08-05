@@ -1772,6 +1772,7 @@ begin
  po1:= findform(sender);
  if po1 <> nil then begin
   po1^.designform:= nil;
+  removemoduleinfo(po1);
 //  fdesigner.moduledestroyed(po1);
  end;
 end;
