@@ -244,8 +244,8 @@ type
    property sender: tobject read fsender;
  end;
 
- componentstylety = (cs_ismodule);
- componentstylesty = set of componentstylety;
+ msecomponentstatety = (cs_ismodule,cs_loadedproc);
+ msecomponentstatesty = set of msecomponentstatety;
 
  createprocty = procedure of object;
 
@@ -254,7 +254,7 @@ type
    procedure readmoduleclassname(reader: treader);
    procedure writemoduleclassname(writer: twriter);
   protected
-   fmsecomponentstyle: componentstylesty;
+   fmsecomponentstate: msecomponentstatesty;
    fobjectlinker: tobjectlinker;
    factualclassname: pshortstring;
    fancestorclassname: string;
@@ -322,6 +322,7 @@ type
 
    property moduleclassname: string read getmoduleclassname;
    property actualclassname: string read getactualclassname;
+   property msecomponentstate: msecomponentstatesty read fmsecomponentstate;
   published
    property helpcontext: msestring read gethelpcontext write fhelpcontext;
  end;
@@ -430,8 +431,8 @@ type
  tpersistenttemplate = class(tlinkedpersistent)
   private
    fonchange: notifyeventty;
-   fowner: tmsecomponent;
   protected
+   fowner: tmsecomponent;
    procedure changed;
    function getinfosize: integer; virtual; abstract;
    function getinfoad: pointer; virtual; abstract;
@@ -2624,7 +2625,12 @@ end;
 procedure tmsecomponent.loaded;
 begin
  inherited;
- sendchangeevent;
+ include(fmsecomponentstate,cs_loadedproc);
+ try
+  sendchangeevent;
+ finally
+  exclude(fmsecomponentstate,cs_loadedproc);
+ end;
 end;
 
 procedure tmsecomponent.beginread;
@@ -2701,7 +2707,7 @@ begin
  filer.defineproperty(moduleclassnamename,
            {$ifdef FPC}@{$endif}readmoduleclassname,
            {$ifdef FPC}@{$endif}writemoduleclassname,
-                  (cs_ismodule in fmsecomponentstyle) and (filer.Root = self));
+                  (cs_ismodule in fmsecomponentstate) and (filer.Root = self));
 end;
 
 function tmsecomponent.getactualclassname: string;

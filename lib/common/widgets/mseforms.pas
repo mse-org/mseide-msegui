@@ -613,7 +613,7 @@ begin
  optionswidget:= defaultformwidgetoptions;
  color:= cl_background;
  if load and not (csdesigning in componentstate) and
-          (cs_ismodule in fmsecomponentstyle) then begin
+          (cs_ismodule in fmsecomponentstate) then begin
   loadmsemodule(self,tcustommseform);
   if (fstatfile <> nil) and (fo_autoreadstat in foptions) then begin
    fstatfile.readstat;
@@ -1370,7 +1370,7 @@ end;
 
 constructor tmseform.create(aowner: tcomponent; load: boolean);
 begin
- include(fmsecomponentstyle,cs_ismodule);
+ include(fmsecomponentstate,cs_ismodule);
  inherited;
 end;
 
@@ -1568,7 +1568,7 @@ end;
 
 constructor tdockform.create(aowner: tcomponent; load: boolean);
 begin
- include(fmsecomponentstyle,cs_ismodule);
+ include(fmsecomponentstate,cs_ismodule);
  inherited;
 end;
 
@@ -1586,14 +1586,14 @@ end;
 
 constructor tsubform.create(aowner: tcomponent; load: boolean);
 begin
- include(fmsecomponentstyle,cs_ismodule);
+ include(fmsecomponentstate,cs_ismodule);
  fwidgetrect.x:= 100;
  fwidgetrect.y:= 100;
  inherited create(aowner);
  fwidgetrect.cx:= 100;
  fwidgetrect.cy:= 100;
  if load and not (csdesigning in componentstate) and
-          (cs_ismodule in fmsecomponentstyle) then begin
+          (cs_ismodule in fmsecomponentstate) then begin
   loadmsemodule(self,tsubform);
  end;
 end;

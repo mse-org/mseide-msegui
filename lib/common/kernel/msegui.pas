@@ -3169,7 +3169,7 @@ end;
 procedure tcustomframe.settemplate(const avalue: tframecomp);
 begin
  fintf.getwidget.setlinkedvar(avalue,tmsecomponent(ftemplate));
- if avalue <> nil then begin
+ if (avalue <> nil) and not (csloading in avalue.componentstate) then begin
   assign(avalue);
  end;
 end;
@@ -3604,7 +3604,13 @@ end;
 procedure tframetemplate.doassignto(dest: tpersistent);
 begin
  if dest is tcustomframe then begin
-  tcustomframe(dest).settemplateinfo(fi);
+  with tcustomframe(dest) do begin
+   if (cs_loadedproc in fowner.msecomponentstate) or 
+                 (csloading in fintf.getcomponentstate) then begin
+    exclude(fstate,fs_paintposinited);
+   end;
+   settemplateinfo(self.fi);
+  end;
 //  with tcustomframe(dest) do begin
 //   fi:= self.fi;
 //   internalupdatestate;
@@ -4085,17 +4091,10 @@ end;
 procedure tcustomface.settemplate(const avalue: tfacecomp);
 begin
  fintf.getwidget.setlinkedvar(avalue,tmsecomponent(ftemplate));
- if avalue <> nil then begin
+ if (avalue <> nil) and not (csloading in avalue.componentstate) then begin
   assign(avalue);
  end;
 end;
-
-{
-function tcustomface.arepropsstored: boolean;
-begin
- result:= ftemplate = nil;
-end;
-}
 
 procedure tcustomface.settemplateinfo(const ainfo: faceinfoty);
 var

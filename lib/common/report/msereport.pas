@@ -5390,10 +5390,10 @@ end;
 
 constructor treport.create(aowner: tcomponent; load: boolean);
 begin
- include(fmsecomponentstyle,cs_ismodule);
+ include(fmsecomponentstate,cs_ismodule);
  inherited create(aowner);
  if load and not (csdesigning in componentstate) and
-          (cs_ismodule in fmsecomponentstyle) then begin
+          (cs_ismodule in fmsecomponentstate) then begin
   loadmsemodule(self,treport);
   if (fstatfile <> nil) and (reo_autoreadstat in foptions) then begin
    fstatfile.readstat;

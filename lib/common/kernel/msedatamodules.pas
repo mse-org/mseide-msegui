@@ -80,7 +80,7 @@ end;
 constructor tmsedatamodule.create(aowner: tcomponent; load: boolean);
 begin
  foptions:= defaultdatamoduleoptions;
- include(fmsecomponentstyle,cs_ismodule);
+ include(fmsecomponentstate,cs_ismodule);
  designinfo:= 100+(100 shl 16);
  inherited create(aowner);
  if load and not (csdesigning in componentstate) then begin

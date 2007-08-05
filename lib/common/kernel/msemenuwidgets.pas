@@ -999,7 +999,8 @@ var
  int1: integer;
 begin
  with info,flayout do begin
-  po1:= translatetoscreen(pos);
+//  po1:= translatetoscreen(pos);
+  po1:= translatewidgetpoint(info.pos,self,nil);
   if (mlo_keymode in options) and
    (eventkind in [ek_mousemove,ek_buttonpress,ek_buttonrelease,ek_mousepark]) then begin
    if (distance(po1,mousepos) <= 3) and
