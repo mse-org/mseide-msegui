@@ -35,6 +35,8 @@ type
  dropdowneditoptionty = (deo_selectonly,deo_forceselect,
                         deo_autodropdown,
                         deo_keydropdown,//shift down starts dropdown
+                        deo_modifiedbeforedropdown, 
+                        //edit.modified called before dropdown
                         deo_casesensitive,
                         deo_sorted,deo_disabled,deo_autosavehistory,
                         deo_cliphint);
@@ -102,6 +104,7 @@ type
   function getwidget: twidget;
   function geteditor: tinplaceedit;
   function edited: boolean;
+  procedure modified;
   procedure dobeforedropdown;
   procedure doafterclosedropdown;
   function setdropdowntext(const avalue: msestring; const docheckvalue: boolean;
@@ -604,6 +607,9 @@ end;
 procedure tcustomdropdowncontroller.dobeforedropdown;
 begin
  fintf.dobeforedropdown;
+ if deo_modifiedbeforedropdown in foptions then begin
+  fintf.modified;
+ end;
 end;
 
 procedure tcustomdropdowncontroller.doafterclosedropdown;
