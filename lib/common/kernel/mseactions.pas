@@ -218,6 +218,7 @@ procedure initactioninfo(var info: actioninfoty; aoptions: menuactionoptionsty =
 procedure actionstatestoshapestates(const source: actioninfoty; var dest: shapestatesty);
 procedure shapestatestoactionstates(source: shapestatesty;
               var dest: actionstatesty; const mask: actionstatesty = actionshapestatesconst);
+procedure calccaptiontext(var info: actioninfoty; const aseparator: msechar);
 
 implementation
 uses

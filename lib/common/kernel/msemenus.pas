@@ -129,6 +129,7 @@ type
    finfo: actioninfoty;
    fowner: tcustommenu;
    fsubmenu: tmenuitems;
+   procedure updatecaption;
    //iactionlink
    function getactioninfopo: pactioninfoty;
    function loading: boolean;
@@ -270,7 +271,6 @@ type
 
  tmenu = class(tcustommenu)
   published
-   property menu;
    property options;
    property onupdate;
    property frametemplate;
@@ -279,6 +279,7 @@ type
    property itemfacetemplate;
    property itemframetemplateactive;
    property itemfacetemplateactive;
+   property menu; //last
  end;
 
  tpopupmenu = class(tmenu)
@@ -339,7 +340,6 @@ type
  
  tmainmenu = class(tcustommainmenu)
   published
-   property menu;
    property options;
    property onupdate;
    property frametemplate;
@@ -355,11 +355,11 @@ type
    property popupitemfacetemplate;
    property popupitemframetemplateactive;
    property popupitemfacetemplateactive;
+   property menu; //last
  end;
 
  twidgetmainmenu = class(tcustommainmenu)
   published
-   property menu;
    property options;
    property onupdate;
 //   property frametemplate;
@@ -375,6 +375,7 @@ type
    property popupitemfacetemplate;
    property popupitemframetemplateactive;
    property popupitemfacetemplateactive;
+   property menu; //last
  end; 
 procedure freetransientmenu(var amenu: tcustommenu);
 
@@ -586,9 +587,17 @@ begin
 end;
 
 procedure tcustommenu.setoptions(const avalue: menuoptionsty);
+var
+ optionsbefore: menuoptionsty;
 begin
  if avalue <> foptions then begin
+  optionsbefore:= foptions;
   foptions:= avalue;
+  if not (csreading in componentstate) and 
+       ((mo_shortcutright in optionsbefore) xor 
+                        (mo_shortcutright in foptions)) then begin
+   fmenu.updatecaption;
+  end;
   sendchangeevent;
  end;
 end;
@@ -1153,6 +1162,16 @@ begin
    end;
    item1:= item1.fparentmenu;
   end;
+ end;
+end;
+
+procedure tmenuitem.updatecaption;
+var
+ int1: integer;
+begin
+ calccaptiontext(finfo,shortcutseparator);
+ for int1:= 0 to count - 1 do begin
+  fsubmenu[int1].updatecaption;
  end;
 end;
 
