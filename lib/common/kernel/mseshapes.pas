@@ -733,11 +733,13 @@ begin
  end;
 end;
 
-procedure drawmenuarrow(const canvas: tcanvas; const info: shapeinfoty; rect: rectty);
+procedure drawmenuarrow(const canvas: tcanvas; const info: shapeinfoty;
+                          var rect: rectty);
 var
  alignment: alignmentsty;
  int1: integer;
  glyph1: stockglyphty;
+ rect1: rectty;
 begin
  glyph1:= stg_arrowrightsmall;
  if ss_horz in info.state then begin
@@ -752,12 +754,15 @@ begin
   include(alignment,al_grayed);
   inc(int1);
  end;
- with rect do begin
-  x:= x + cx - int1;
+ with rect1 do begin
+  x:= rect.x + rect.cx - int1;
   cx:= int1;
+  y:= rect.y;
+  cy:= rect.cy;
  end;
- stockobjects.glyphs.paint(canvas,ord(glyph1),rect,alignment,
+ stockobjects.glyphs.paint(canvas,ord(glyph1),rect1,alignment,
                                  info.colorglyph);
+ dec(rect.cx,int1);
 end;
 
 procedure drawmenubutton(const canvas: tcanvas; const info: shapeinfoty;
@@ -767,11 +772,11 @@ var
 begin
  if not (ss_invisible in info.state) and drawbuttonframe(canvas,info,rect1) then begin
   drawbuttonimage(canvas,info,rect1,cp_left);
-  drawbuttoncheckbox(canvas,info,rect1,cp_right);
   if (ss_menuarrow in info.state) then begin
 //  if (ss_submenu in info.state)  then begin
    drawmenuarrow(canvas,info,rect1);
   end;
+  drawbuttoncheckbox(canvas,info,rect1,cp_right);
   if innerframe <> nil then begin
    deflaterect1(rect1,innerframe^);
   end;

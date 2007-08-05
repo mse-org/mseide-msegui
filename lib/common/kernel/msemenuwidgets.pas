@@ -308,12 +308,14 @@ var
  extrasp: integer;
  imagedi: integer;
  ar1: richstringarty;
- bo1: boolean;
+ commonwidth: boolean;
  needsmenuarrow: boolean;
  
 begin
  ar1:= nil; //compiler warning
  with layout,tmenuitem1(menu) do begin
+  commonwidth:= (owner <> nil) and (mo_commonwidth in owner.options) and
+                      (mlo_horz in layout.options);
   framehalfwidth:= 0;
   needsmenuarrow:= not (mlo_horz in layout.options) or (owner <> nil) and 
                         (mo_mainarrow in owner.options);
@@ -389,7 +391,8 @@ begin
      if needsmenuarrow and (item1.count > 0) then begin
       include(state,ss_menuarrow);
       if mlo_horz in layout.options then begin
-       if ashortcutwidth = 0 then begin
+       if (ashortcutwidth = 0) or commonwidth then begin
+        dec(tabpos,menuarrowwidthhorz);
         inc(atextsize.cx,menuarrowwidthhorz);
        end
        else begin
@@ -421,28 +424,32 @@ begin
       hassubmenu:= hassubmenu or (ss_menuarrow in state);
       hascheckbox:= hascheckbox or (ss_checkbox in state);
       with dim do begin
-       if mlo_horz in layout.options then begin
+       if mlo_horz in layout.options then begin                //horizonzal
         if ss_separator in state then begin
          cx:= 2;
         end
         else begin
          if ss_checkbox in state then begin
           inc(atextsize.cx,menucheckboxwidth);
-        end;
+          dec(tabpos,menucheckboxwidth);
+         end;
          cx:= atextsize.cx + 4;
-         if ashortcutwidth > 0 then begin
+         if (ashortcutwidth > 0) then begin
           tabpos:= tabpos + atextsize.cx + shortcutdist;
           cx:= cx + shortcutdist + ashortcutwidth;
          end;
-         if ss_checkbox in state then begin
-          cx:= cx + menucheckboxwidth;
-         end;
+//         if ss_checkbox in state then begin
+//          cx:= cx + menucheckboxwidth;
+//         end;
         end;
         x:= ax;
         y:= ay;
+        if commonwidth then begin
+         atextsize.cx:= cx;
+        end;
         inc(ax,cx+framewidth1);
        end
-       else begin
+       else begin                                              //vertical
         y:= ay;
         if ss_separator in state then begin
          cy:= 2;
@@ -466,7 +473,7 @@ begin
     end;  //with cells[int1].buttoninfo
    end;   //with cells[int1]
   end;
-  if shortcutwidth > 0 then begin
+  if (shortcutwidth > 0) and not commonwidth then begin
    tabpos1:= textwidth + shortcutdist;
    textwidth:= tabpos1 + shortcutwidth;
   end
@@ -476,22 +483,22 @@ begin
   if not (as_invisible in state) then begin
    shift:= 0;
    regioncount:= 1;
-   if mlo_horz in layout.options then begin
+   if mlo_horz in layout.options then begin                //horizontal
     if mao_singleregion in layout.menu.options then begin
      amax:= bigint;
     end
     else begin
      amax:= maxsize;
     end;
-    bo1:= (owner <> nil) and (mo_commonwidth in owner.options);
-    if bo1 then begin
+    if commonwidth then begin
      ax:= framehalfwidth;
-     textwidth:= textwidth + 4;
+//     textwidth:= textwidth + 4;
     end;
     for int1:= 0 to count - 1 do begin
      with cells[int1].buttoninfo do begin
       if not (ss_invisible in state) then begin
-       if bo1 then begin
+       if commonwidth then begin
+//        tabpos:= tabpos + tabpos1;
         dim.x:= ax;
         if not (ss_separator in state) then begin
          dim.cx:= textwidth;
@@ -513,7 +520,7 @@ begin
     size.cx:= ax - extrasp - framehalfwidth;
     size.cy:= regioncount * (maxheight + framewidth1) - extrasp;
    end
-   else begin
+   else begin                                              //vertical
     if mao_singleregion in layout.menu.options then begin
      amax:= bigint;
     end
