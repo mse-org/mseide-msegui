@@ -1167,6 +1167,7 @@ end;
    procedure startrepeater(state: gridstatety; time: integer);
    procedure repeatproc(const sender: tobject);
    
+   procedure calcpropcolwidthref;
    procedure updatevisiblerows;
    procedure setdatarowlinewidth(const Value: integer);
    procedure setdatarowlinecolor(const Value: colorty);
@@ -5850,23 +5851,10 @@ begin
  end;
 end;
 
-procedure tcustomgrid.updatelayout;
+procedure tcustomgrid.calcpropcolwidthref;
 var
- scrollstate: framestatesty;
- int1,int2,int3: integer;
+ int1,int3: integer;
 begin
- if (zebra_step <> 0) then begin
-  include(fstate,gs_needszebraoffset);
- end
- else begin
-  exclude(fstate,gs_needszebraoffset);
-  for int1:= 0 to fixcols.count -1 do begin
-   if tfixcol(fixcols.items[int1]).numstep <> 0 then begin
-    include(fstate,gs_needszebraoffset);
-    break;
-   end;
-  end;
- end;
  with tgridframe(fframe) do begin
   fpropcolwidthref:= self.fwidgetrect.cx -
                      fouterframe.left - fouterframe.right -
@@ -5897,8 +5885,28 @@ begin
  if fpropcolwidthref < int3 then begin
   fpropcolwidthref:= int3;
  end;
+end;
+
+procedure tcustomgrid.updatelayout;
+var
+ scrollstate: framestatesty;
+ int1,int2,int3: integer;
+begin
+ if (zebra_step <> 0) then begin
+  include(fstate,gs_needszebraoffset);
+ end
+ else begin
+  exclude(fstate,gs_needszebraoffset);
+  for int1:= 0 to fixcols.count -1 do begin
+   if tfixcol(fixcols.items[int1]).numstep <> 0 then begin
+    include(fstate,gs_needszebraoffset);
+    break;
+   end;
+  end;
+ end;
  int2:= 0;
  repeat
+  calcpropcolwidthref;
   scrollstate:= frame.state;
   fystep:= fdatarowheight + fdatarowlinewidth;
   ffixcols.updatelayout;
