@@ -1503,6 +1503,7 @@ end;
 procedure tcustommainmenuwidget.release;
 begin
  setactiveitem(-1);
+ releasemouse;
 end;
 
 function tcustommainmenuwidget.isinpopuparea(const apos: pointty): boolean;
