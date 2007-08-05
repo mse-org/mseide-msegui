@@ -3,8 +3,7 @@ unit regexperimental;
 interface
 implementation
 uses
- msedesignintf,msechart,msewindowwidget,msegdiprint,msesqlresult,
- mseopenglwidget;
+ msedesignintf;
  
 procedure Register;
 begin

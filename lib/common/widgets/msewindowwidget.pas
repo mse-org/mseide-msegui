@@ -142,7 +142,7 @@ end;
 destructor tcustomwindowwidget.destroy;
 begin
  if fwindow <> nil then begin
-  fwindow.unregisteronscroll(@windowscrolled);
+  fwindow.unregisteronscroll({$ifdef FPC}@{$endif}windowscrolled);
  end;
  if candestroyevent(tmethod(fondestroy)) then begin
   fondestroy(self);
@@ -183,7 +183,7 @@ begin
    fclientwinid:= createchildwindow;
   end;
   if fwindow <> nil then begin
-   fwindow.registeronscroll(@windowscrolled);
+   fwindow.registeronscroll({$ifdef FPC}@{$endif}windowscrolled);
   end;
   checkclientvisible;
  end;  
