@@ -1706,6 +1706,10 @@ begin
     method1:= fdesigner.createmethod(value,fmodule,
                  fprops[0].propinfo^.proptype{$ifndef FPC}^{$endif});
    end;
+  end
+  else begin
+   fdesigner.checkmethod(method1,value,fmodule,
+                 fprops[0].propinfo^.proptype{$ifndef FPC}^{$endif});
   end;
   setmethodvalue(method1);
  end;

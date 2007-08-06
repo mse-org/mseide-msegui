@@ -67,7 +67,7 @@ begin
    trecordfieldedit,
    ttextedit,tterminal]);
  registerpropertyeditor(tdropdowncols.classinfo,nil,'',tdropdowncolpropertyeditor);
- registerpropertyeditor(ttabulators.classinfo,ttextedit,'tabulators',
+ registerpropertyeditor(ttabulators.classinfo,tcustomtextedit,'tabulators',
             toptionalpersistentarraypropertyeditor);
  registerpropertyeditor(tcustomitemlist.classinfo,nil,'',titemlistpropertyeditor);
  registerpropertyeditor(typeinfo(twidgetcols),nil,'',twidgetcolspropertyeditor);

@@ -249,7 +249,7 @@ type
                            write fonafteractivate;
    property onbeforedeactivate: notifyeventty read fonbeforedeactivate 
                             write fonbeforedeactivate;
-   property onafterdeactivate: notifyeventty read fonbeforedeactivate 
+   property onafterdeactivate: notifyeventty read fonafterdeactivate 
                             write fonafterdeactivate;
    property activator;
  end;

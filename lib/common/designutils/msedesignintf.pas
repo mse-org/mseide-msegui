@@ -100,6 +100,8 @@ type
                              const atypeinfo: ptypeinfo);
   function createmethod(const name: string; const module: tmsecomponent;
                  const atype: ptypeinfo): tmethod;
+  procedure checkmethod(const method: tmethod; const name: string;
+               const module: tmsecomponent; const atype: ptypeinfo);
   function getcomponentname(const comp: tcomponent): string;
                    //returns qualified name
   procedure validaterename(const acomponent: tcomponent; const curname, newname: string);
@@ -407,11 +409,6 @@ end;
 procedure registerunitgroup(const adependents,agroup: array of string);
 begin
  unitgroups.registergroups(adependents,agroup);
-end;
-
-procedure registerdesignmodule(const name: string;
-                                      createfunc: createdesignmodulefuncty);
-begin
 end;
 
 { tcomponentclasslist }
@@ -1291,47 +1288,81 @@ begin
 end;
 
 function tunitgroups.getneededunits(const unitname: string): stringarty;
+//todo: optimize
+
+ procedure doget(const aname: string; out resnormal,resupper: stringarty);
+ var
+  po1: punitgroupinfoty;
+  int1,int2,int3,int4: integer;
+ begin
+  resnormal:= nil;
+  po1:= datapo;
+  for int1:= 0 to count - 1 do begin
+   for int2:= 0 to high(po1^.dependents) do begin
+    if aname = po1^.dependents[int2] then begin
+     int3:= length(resnormal);
+     setlength(resnormal,int3+length(po1^.group));
+     for int4:= int3 to high(resnormal) do begin
+      resnormal[int4]:= po1^.group[int4-int3];
+     end;
+     break;
+    end;
+   end;
+   inc(po1);
+  end;
+  setlength(resnormal,high(resnormal)+2);
+  resnormal[high(resnormal)]:= unitname; //add dependent
+  setlength(resupper,length(resnormal));
+  for int1:= 0 to high(resnormal) do begin
+   resupper[int1]:= struppercase(resnormal[int1]);
+  end;
+ end;
+ 
 var
  ar1,ar2: stringarty;
  ar3: integerarty;
+ ar4,ar5n,ar5u: stringarty;
  int1,int2,int3,int4: integer;
- po1: punitgroupinfoty;
  str1: string;
+ level: integer;
+ highbefore: integer;
+ 
 begin
- str1:= struppercase(unitname);
- ar1:= nil;
- po1:= datapo;
- for int1:= 0 to count - 1 do begin
-  for int2:= 0 to high(po1^.dependents) do begin
-   if str1 = po1^.dependents[int2] then begin
-    int3:= length(ar1);
-    setlength(ar1,int3+length(po1^.group));
-    for int4:= int3 to high(ar1) do begin
-     ar1[int4]:= po1^.group[int4-int3];
-    end;
-    break;
+ setlength(ar4,1);
+ ar4[0]:= struppercase(unitname);
+ level:= 0;
+ repeat
+  highbefore:= high(ar4);
+  ar5n:= nil;
+  ar5u:= nil;
+  for int1:= 0 to high(ar4) do begin
+   doget(ar4[int1],ar1,ar2);
+   stackarray(ar1,ar5n);
+   stackarray(ar2,ar5u);
+  end;
+  sortarray(ar5u,{$ifdef FPC}@{$endif}compareasciistring,ar3);
+  setlength(ar4,length(ar5u));
+  setlength(result,length(ar5u));
+  str1:= '';
+  int2:= 0;
+  for int1:= 0 to high(ar5u) do begin
+   if ar5u[int1] <> str1 then begin
+    ar4[int2]:= ar5u[int1];
+    str1:= ar4[int2];
+    result[int2]:= ar5n[ar3[int1]];
+    inc(int2);
    end;
   end;
-  inc(po1);
- end;
- setlength(ar1,high(ar1)+2);
- ar1[high(ar1)]:= unitname; //add dependent
- setlength(ar2,length(ar1));
- for int1:= 0 to high(ar1) do begin
-  ar2[int1]:= struppercase(ar1[int1]);
- end;
- sortarray(ar2,{$ifdef FPC}@{$endif}compareasciistring,ar3);
- setlength(result,length(ar1));
- str1:= '';
- int2:= 0;
- for int1:= 0 to high(ar2) do begin
-  if ar2[int1] <> str1 then begin
-   result[int2]:= ar1[ar3[int1]];
-   inc(int2);
-   str1:= ar2[int1];
-  end;
- end;
- setlength(result,int2);
+  setlength(ar4,int2);
+{
+writeln('**********');
+for int1:= 0 to high(ar4) do begin
+ writeln(int1,' ',ar4[int1]);
+end;
+}
+  inc(level);
+ until (high(ar4) = highbefore) or (level > 16);
+ setlength(result,length(ar4));
 end;
 
 {$ifdef FPC}

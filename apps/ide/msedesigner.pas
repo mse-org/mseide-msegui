@@ -367,6 +367,8 @@ type
                                            const atypeinfo: ptypeinfo);
    function createmethod(const aname: string; const module: tmsecomponent;
                                  const atype: ptypeinfo): tmethod;
+   procedure checkmethod(const method: tmethod; const aname: string;
+                         const module: tmsecomponent; const atype: ptypeinfo);
    
    function getcomponentname(const comp: tcomponent): string;
                    //returns qualified name for foreign modules
@@ -2319,38 +2321,6 @@ begin
  end;
 end;
 
-function tdesigner.createmethod(const aname: string; const module: tmsecomponent;
-                                   const atype: ptypeinfo): tmethod;
-var
- po1: pmoduleinfoty;
-begin
- if module = nil then begin
-  po1:= floadingmodulepo;
- end
- else begin
-  po1:= fmodules.findmodulebyinstance(module);
- end;
- if po1 <> nil then begin
-  with po1^.methods do begin
-   inc(methodaddressdummy);
-   if methodaddressdummy < 256 then begin
-    methodaddressdummy:= 256; //0..255 -> special purpose
-   end;
-//   result.code:= pointer(methodaddressdummy);
-//   result.Data:= po1^.instance;
-   result.data:= pointer(methodaddressdummy);
-   result.code:= nil;
-   addmethod(aname,result.data,atype);
-  end;
-  if atype <> nil then begin
-   designnotifications.methodcreated(idesigner(self),module,aname,atype);
-  end;
- end
- else begin
-  result:= nullmethod;
- end;
-end;
-
 procedure tdesigner.findmethod(Reader: TReader; const aMethodName: string;
   var Address: Pointer; var Error: Boolean);
 var
@@ -3039,6 +3009,50 @@ begin
  po1^.name:= newname;
  po2^.modified:= true;
  designnotifications.methodnamechanged(fdesigner,po2^.instance,newname,oldname,atypeinfo);
+end;
+
+function tdesigner.createmethod(const aname: string; const module: tmsecomponent;
+                                   const atype: ptypeinfo): tmethod;
+var
+ po1: pmoduleinfoty;
+begin
+ if module = nil then begin
+  po1:= floadingmodulepo;
+ end
+ else begin
+  po1:= fmodules.findmodulebyinstance(module);
+ end;
+ if po1 <> nil then begin
+  with po1^.methods do begin
+   inc(methodaddressdummy);
+   if methodaddressdummy < 256 then begin
+    methodaddressdummy:= 256; //0..255 -> special purpose
+   end;
+//   result.code:= pointer(methodaddressdummy);
+//   result.Data:= po1^.instance;
+   result.data:= pointer(methodaddressdummy);
+   result.code:= nil;
+   addmethod(aname,result.data,atype);
+  end;
+  if atype <> nil then begin
+   designnotifications.methodcreated(idesigner(self),module,aname,atype);
+  end;
+ end
+ else begin
+  result:= nullmethod;
+ end;
+end;
+
+procedure tdesigner.checkmethod(const method: tmethod; const aname: string; 
+                const module: tmsecomponent; const atype: ptypeinfo);
+var
+ po1: pmethodinfoty;
+ po2: pmoduleinfoty;
+begin
+ getmethodinfo(method,po2,po1);
+ if (po1 <> nil) and (po2 <> nil) and (atype <> nil) then begin
+  designnotifications.methodcreated(idesigner(self),module,aname,atype);
+ end;
 end;
 
 procedure tdesigner.setactivemodule(const adesignform: tmseform);
