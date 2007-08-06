@@ -4471,13 +4471,13 @@ begin
     field1:= findfield(fieldname);
     if field1 = nil then begin
      databaseerror('Index field "'+fieldname+'" not found.',
-                                                   tmsebufdataset(fowner));
+                                                   tmsebufdataset(self.fowner));
     end;
     with field1 do begin
      if not(fieldkind in [fkdata,fkinternalcalc]) or 
                       not (datatype in indexfieldtypes) then begin
       databaseerror('Invalid index field "'+fieldname+'".',
-                                                   tmsebufdataset(fowner));
+                                                   tmsebufdataset(self.fowner));
      end;
      for kind1:= low(fieldcomparekindty) to high(fieldcomparekindty) do begin
       with comparefuncs[kind1] do begin
