@@ -299,9 +299,19 @@ type
    destructor destroy; override;
    function find(const avalues: array of const; const aisnull: array of boolean;
                  //itemcount of avalues can be smaller than fields count in index
+               out abookmark: bookmarkdataty;
+               const abigger: boolean = false;
+               const partialstring: boolean = false;
+               const nocheckbrowsemode: boolean = false): boolean; overload;
+                //true if found else nearest lower or bigger,
+                //abookmark = '' if no lower or bigger found
+                //string values must be msestring
+   function find(const avalues: array of const; const aisnull: array of boolean;
+                 //itemcount of avalues can be smaller than fields count in index
                out abookmark: string;
                const abigger: boolean = false;
-               const partialstring: boolean = false): boolean; overload;
+               const partialstring: boolean = false;
+               const nocheckbrowsemode: boolean = false): boolean; overload;
                 //true if found else nearest lower or bigger,
                 //abookmark = '' if no lower or bigger found
                 //string values must be msestring
@@ -518,6 +528,7 @@ type
    function getrecord(buffer: pchar; getmode: tgetmode;
                                    docheck: boolean): tgetresult; override;
    function bookmarktostring(const abookmark: bookmarkdataty): string;
+   function stringtobookmark(const abookmark: string): bookmarkdataty;
    procedure checkrecno(const avalue: integer);
    procedure setonfilterrecord(const value: tfilterrecordevent); override;
    procedure setfiltered(value: boolean); override;
@@ -546,6 +557,7 @@ type
    procedure setbookmarkdata(buffer: pchar; data: pointer); override;
    procedure setbookmarkflag(buffer: pchar; value: tbookmarkflag); override;
    procedure getbookmarkdata(buffer: pchar; data: pointer); override;
+   function getbookmarkdata1: bookmarkdataty;
    function getbookmarkflag(buffer: pchar): tbookmarkflag; override;
    function getfielddata(field: tfield; buffer: pointer;
                        nativeformat: boolean): boolean; override;
@@ -609,6 +621,7 @@ type
 //    function locate(const keyfields: string; const keyvalues: variant; options: tlocateoptions) : boolean; override;
    function updatestatus: tupdatestatus; override;
    property changecount : integer read getchangecount;
+   property bookmarkdata: bookmarkdataty read getbookmarkdata1;
   published
    property logfilename: filenamety read flogfilename write flogfilename;
    property packetrecords : integer read fpacketrecords write setpacketrecords 
@@ -1600,6 +1613,11 @@ begin
  move(pdsrecordty(buffer)^.dsheader.bookmark,data^,sizeof(bookmarkdataty));
 end;
 
+function tmsebufdataset.getbookmarkdata1: bookmarkdataty;
+begin
+ getbookmarkdata(activebuffer,@result);
+end;
+
 function tmsebufdataset.getbookmarkflag(buffer: pchar): tbookmarkflag;
 begin
  result:= pdsrecordty(buffer)^.dsheader.bookmark.flag;
@@ -1630,20 +1648,22 @@ procedure tmsebufdataset.internalgotobookmark(abookmark: pointer);
 var
  int1: integer;
 begin
- with pbufbookmarkty(abookmark)^.data do begin
-  if (recno >= fbrecordcount) or (recno < 0) then begin
-   databaseerror('Invalid bookmark recno: '+inttostr(recno)+'.'); 
-  end;
-  if (factindexpo^.ind[recno] <> recordpo) and (recordpo <> nil) then begin
-   int1:= findrecord(recordpo);
-   if int1 < 0 then begin
-    databaseerror('Invalid bookmarkdata.');
+ if abookmark <> nil then begin
+  with pbufbookmarkty(abookmark)^.data do begin
+   if (recno >= fbrecordcount) or (recno < 0) then begin
+    databaseerror('Invalid bookmark recno: '+inttostr(recno)+'.'); 
    end;
-  end
-  else begin
-   int1:= recno;
+   if (factindexpo^.ind[recno] <> recordpo) and (recordpo <> nil) then begin
+    int1:= findrecord(recordpo);
+    if int1 < 0 then begin
+     databaseerror('Invalid bookmarkdata.');
+    end;
+   end
+   else begin
+    int1:= recno;
+   end;
+   internalsetrecno(int1);
   end;
-  internalsetrecno(int1);
  end;
 end;
 
@@ -3450,6 +3470,16 @@ begin
  move(abookmark,pointer(result)^,sizeof(abookmark));
 end;
 
+function tmsebufdataset.stringtobookmark(const abookmark: string): bookmarkdataty;
+begin
+ if abookmark = '' then begin
+  fillchar(result,sizeof(result),0);
+ end
+ else begin
+  move(pointer(abookmark)^,result,sizeof(result));
+ end;
+end;
+
 procedure tmsebufdataset.checkrecno(const avalue: integer);
 begin
  if (avalue > recordcount) or (avalue < 1) then begin
@@ -4488,7 +4518,8 @@ end;
 function tlocalindex.find(const avalues: array of const;
              const aisnull: array of boolean; out abookmark: string;
              const abigger: boolean = false;
-             const partialstring: boolean = false): boolean;
+             const partialstring: boolean = false;
+             const nocheckbrowsemode: boolean = false): boolean;
 var
  int1: integer; 
  v: tvarrec;
@@ -4500,7 +4531,9 @@ var
 label
  endlab;
 begin
- tmsebufdataset(fowner).checkbrowsemode;
+ if not nocheckbrowsemode then begin
+  tmsebufdataset(fowner).checkbrowsemode;
+ end;
  lastind:= high(avalues);
  if lastind > high(findexfieldinfos) then begin
   paramerror;
@@ -4606,6 +4639,22 @@ begin
  end;
 endlab:
  freemem(po1);
+end;
+
+function tlocalindex.find(const avalues: array of const; const aisnull: array of boolean;
+                 //itemcount of avalues can be smaller than fields count in index
+               out abookmark: bookmarkdataty;
+               const abigger: boolean = false;
+               const partialstring: boolean = false;
+               const nocheckbrowsemode: boolean = false): boolean; overload;
+                //true if found else nearest lower or bigger,
+                //abookmark = '' if no lower or bigger found
+                //string values must be msestring
+var
+ str1: string;
+begin
+ result:= find(avalues,aisnull,str1,abigger,partialstring,nocheckbrowsemode);
+ abookmark:=  tmsebufdataset(fowner).stringtobookmark(str1);
 end;
 
 function tlocalindex.find(const avalues: array of const;
