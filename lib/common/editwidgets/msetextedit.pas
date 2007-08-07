@@ -989,22 +989,24 @@ var
  procedure updatestyle(value: boolean);
  var
   int1,int2: integer;
-
+  po1: prichstringty;
  begin
+  po1:= prichstringty(flines.getitempo(astart.row));
   for int1:= astart.row to astop.row do begin //deselect old
    if int1 = astop.row then begin
     int2:= astop.col - astart.col;
    end
    else begin
-    int2:= bigint;
+    int2:= length(po1^.text);
    end;
    if int2 > 0 then begin
-    updatefontstyle(prichstringty(flines.getitempo(int1))^.format,
+    updatefontstyle(po1^.format,
                 astart.col,int2,fs_selected,value);
     cell.row:= int1;
     grid.invalidatecell(cell);
    end;
    astart.col:= 0;
+   inc(po1);
   end;
  end;
 

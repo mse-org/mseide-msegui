@@ -166,7 +166,25 @@ function checkshortcut(var info: keyeventinfoty;
 
 function expandtabs(const s: richstringty; const tabcharcount: integer): richstringty;
 
+{$ifdef FPC}
+function richformatinfotostring(const aformat: formatinfoty): ansistring;
+{$endif}
+
 implementation
+uses
+ typinfo;
+
+{$ifdef FPC} 
+function richformatinfotostring(const aformat: formatinfoty): ansistring;
+begin
+ with aformat do begin
+  result:= inttostr(index)+' '+settostring(ptypeinfo(typeinfo(newinfosty)),
+              integer(newinfos),true)+
+           ' ' + settostring(ptypeinfo(typeinfo(fontstylesty)),
+              integer(style.fontstyle),true);
+ end;
+end;
+{$endif}
 
 function splitrichstring(const avalue: richstringty; const separator: msechar): richstringarty;
 var
