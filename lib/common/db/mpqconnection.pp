@@ -75,7 +75,7 @@ type
    procedure openconnection(var aconnection: ppgconn);
    procedure begintrans(const aconnection: ppgconn);
   protected
-   procedure checkerror(const aconnection: ppgconn; const ares: ppgresult;
+   procedure checkerror(const aconnection: ppgconn; var ares: ppgresult;
                 const amessage: ansistring);
    procedure checkexec(const aconnection: ppgconn; const asql: ansistring;
                 const amessage: ansistring);
@@ -211,7 +211,9 @@ begin
  inherited;
  if fopen then begin
   fopen:= false;
-  pqclear(res); //done in checkerror
+  if res <> nil then begin
+   pqclear(res);
+  end;
  end;
 end;
   
@@ -236,7 +238,7 @@ begin
 end;
 
 procedure TPQConnection.checkerror(const aconnection: ppgconn;
-         const ares: ppgresult; const amessage: ansistring);
+         var ares: ppgresult; const amessage: ansistring);
 var
  err: integer;
  str1: ansistring;
@@ -248,20 +250,25 @@ begin
   str1:= strpas(pqresulterrormessage(ares));
   flasterrormessage:= str1;
   PQclear(ares);
+  ares:= nil;
   raise epqerror.create(self,amessage+' (PostgreSQL: '+str1 + ')',
                             flasterrormessage,flastsqlcode);
  end
  else begin
   if res <> pgres_tuples_ok then begin
    PQclear(ares);
+   ares:= nil;
   end;
  end;
 end;
 
 procedure tpqconnection.checkexec(const aconnection: ppgconn; const asql: ansistring;
                 const amessage: ansistring);
+var
+ res: ppgresult;
 begin
- checkerror(aconnection,pqexec(aconnection,pchar(asql)),amessage);
+ res:= pqexec(aconnection,pchar(asql));
+ checkerror(aconnection,res,amessage);
 end;
 
 procedure tpqconnection.begintrans(const aconnection: ppgconn);
