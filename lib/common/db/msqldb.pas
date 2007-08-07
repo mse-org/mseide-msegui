@@ -23,7 +23,8 @@ unit msqldb;
 interface
 
 uses 
- sysutils,classes,db,msebufdataset,msetypes,msedb,mseclasses,msedatabase;
+ sysutils,classes,db,msebufdataset,msetypes,msedb,mseclasses,msedatabase,
+ msestrings;
 
 type 
  TSchemaType = (stNoSchema,stTables,stSysTables,stProcedures,stColumns,
@@ -82,12 +83,18 @@ const
 
 
 type
+ 
  econnectionerror = class(edatabaseerror)
   private
    ferror: integer;
+   ferrormessage: msestring;
+   fsender: tcustomsqlconnection;
   public
-   constructor create(const amessage: ansistring; const aerror: integer);
+   constructor create(const asender: tcustomsqlconnection; 
+                             const amessage: msestring; const aerror: integer);
+   property sender: tcustomsqlconnection read fsender;
    property error: integer read ferror;
+   property errormessage: msestring read ferrormessage;
  end;
  
  tmsesqlscript = class;
@@ -2940,11 +2947,13 @@ end;
 
 { econnectionerror }
 
-constructor econnectionerror.create(const amessage: ansistring;
-               const aerror: integer);
+constructor econnectionerror.create(const asender: tcustomsqlconnection; 
+      const amessage: msestring; const aerror: integer);
 begin
+ fsender:= sender;
  ferror:= aerror;
- inherited create(amessage);
+ ferrormessage:= amessage;
+ inherited create(asender.name+': '+amessage);
 end;
 
 end.

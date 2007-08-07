@@ -2197,7 +2197,7 @@ begin
      else begin
       Response:= rrSkip;
      end;
-     e.message:= 'An error occured while applying the updates in a record:'+
+     e.message:= 'An error occured while applying the updates in a record: '+
                              e.message;
 //     EUpdErr:= EUpdateError.Create(SOnUpdateError,E.Message,0,0,E);
      try

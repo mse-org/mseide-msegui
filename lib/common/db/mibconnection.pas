@@ -21,6 +21,7 @@ interface
 
 uses
  Classes,SysUtils,msqldb,db,math,dbconst,msebufdataset,msedbevents,msesys,
+ msestrings,
 {$IfDef LinkDynamically}
   ibase60dyn;
 {$Else}
@@ -28,14 +29,21 @@ uses
 {$EndIf}
 
 type
+ tibconnection = class;
+ statusvectorty = array[0..19] of ISC_STATUS;
 
-  EIBDatabaseError = class(EDatabaseError)
-    public
-      GDSErrorCode : Longint;
-  end;
-
+ eib = class(econnectionerror)
+  private
+   fstatus: statusvectorty;
+  public
+   constructor create(const asender: tibconnection; const amessage: msestring;
+                              const aerror: statusvectorty);
+   property status: statusvectorty read fstatus;
+ end;
+ 
   TIBCursor = Class(TSQLCursor)
    protected
+    fconnection: tibconnection;
     fopen: boolean;
     Status               : array [0..19] of ISC_STATUS;
     Statement            : pointer;
@@ -43,6 +51,7 @@ type
     in_SQLDA             : PXSQLDA;
     ParamBinding         : array of integer;
    public
+    constructor create(const aowner: icursorclient; const aconnection: tibconnection);
     procedure close; override;
   end;
 
@@ -63,7 +72,6 @@ type
    count: integer;
   end;
   pfbeventbufferty = ^fbeventbufferty;
-  statusvectorty = array[0..19] of ISC_STATUS;
 
   ibconnectionoptionty = (ibo_embedded);
   ibconnectionoptionsty = set of ibconnectionoptionty;
@@ -71,14 +79,16 @@ type
   TIBConnection = class (TSQLConnection,iblobconnection,
                                                idbevent,idbeventcontroller)
   private
-    FSQLDatabaseHandle   : pointer;
-    FStatus              : statusvectorty; //array [0..19] of ISC_STATUS;
-    FDialect             : integer;
-    feventcontroller: tdbeventcontroller;
-    feventbuffers: array of pfbeventbufferty;
-    feventcount: integer;
-    fmutex: mutexty;
+   FSQLDatabaseHandle   : pointer;
+   FStatus              : statusvectorty; //array [0..19] of ISC_STATUS;
+   FDialect             : integer;
+   feventcontroller: tdbeventcontroller;
+   feventbuffers: array of pfbeventbufferty;
+   feventcount: integer;
+   fmutex: mutexty;
    foptions: ibconnectionoptionsty;
+   flasterror: statusvectorty;
+   flasterrormessage: msestring;
     procedure SetDBDialect;
     procedure AllocSQLDA(var aSQLDA : PXSQLDA;Count : integer);
     procedure TranslateFldType(SQLType,sqlsubtype,SQLLen,SQLScale: integer;
@@ -176,7 +186,7 @@ type
 implementation
 
 uses 
- strutils,msestrings,msesysintf;
+ strutils,msesysintf;
 
 type
   TTm = packed record
@@ -193,27 +203,6 @@ type
     __tm_zone : Pchar;
   end;
 
-procedure CheckError(const ProcName : string; 
-             const Status: statusvectorty; const compname: ansistring);
-var
-  buf : array [0..1024] of char;
-  p   : pointer;
-  Msg : string;
-  E   : EIBDatabaseError;
-  
-begin
-  if ((Status[0] = 1) and (Status[1] <> 0)) then
-  begin
-    p := @Status;
-    msg := '';
-    while isc_interprete(Buf, @p) > 0 do
-      Msg := Msg + LineEnding +' -' + StrPas(Buf);
-    E := EIBDatabaseError.CreateFmt('%s : %s : %s',[compname,ProcName,Msg]);
-    E.GDSErrorCode := Status[1];
-    Raise E;
-  end;
-end;
-
 { TIBCursor }
 
 procedure TIBCursor.close;
@@ -221,19 +210,40 @@ begin
  inherited;
  if fopen then begin
   if isc_dsql_free_statement(@status, @statement, dsql_close) <> 0 then begin
-   checkerror('close cursor', status,fname);
+   fconnection.checkerror('close cursor', status{,fname});
   end;
   fopen:= false;
  end;
+end;
+
+constructor TIBCursor.create(const aowner: icursorclient;
+                                         const aconnection: tibconnection);
+begin
+ fconnection:= aconnection;
+ inherited create(aowner,fconnection.name);
 end;
 
 { tibconnection }
 
 procedure TIBConnection.CheckError(const ProcName : string; 
                          const Status: statusvectorty);
+var
+  buf: array [0..1024] of char;
+  p: pointer;
+  Msg: string;
+  E: eib;
   
 begin
- mibconnection.checkerror(procname,status,name);
+ if ((Status[0] = 1) and (Status[1] <> 0)) then begin
+  p:= @Status;
+  msg:= '';
+  while isc_interprete(Buf, @p) > 0 do begin
+   Msg := Msg + LineEnding +' -' + StrPas(Buf);
+  end;
+  flasterror:= status;
+  flasterrormessage:= msg;
+  raise eib.create(self,msg,status);
+ end;
 end;
 
 procedure tibconnection.CheckError(const ProcName : string; const Status: integer);
@@ -542,7 +552,7 @@ Function TIBConnection.AllocateCursorHandle(const aowner: icursorclient;
 var curs : TIBCursor;
 
 begin
-  curs := TIBCursor.create(aowner,aname);
+  curs := TIBCursor.create(aowner,self);
   curs.sqlda := nil;
   curs.statement := nil;
   curs.FPrepared := False;
@@ -1588,6 +1598,15 @@ begin
  finalize(abuffer^);
  freemem(abuffer);
  abuffer:= nil;
+end;
+
+{ eib }
+
+constructor eib.create(const asender: tibconnection; const amessage: msestring;
+                        const aerror: statusvectorty);
+begin
+ fstatus:= aerror;
+ inherited create(asender,amessage,aerror[1]);
 end;
 
 end.
