@@ -3030,7 +3030,7 @@ begin
         //read arrayhigh
          str3:= '^'+copy(str1,length(dynartoken)+1,bigint)+'('+ptrinttocstr(ad2)+')[';
          result:= '(';
-         if ad2 >= 0 then begin
+         if ad3 >= 0 then begin
           for int1:= 0 to ad3 do begin
            if length(result) > 2000 then begin
             result:= result +'...,';
