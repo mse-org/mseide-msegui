@@ -791,7 +791,7 @@ begin
  if aerror <> sqlite_ok then begin
   flasterror:= aerror;
   flasterrormessage:= utf8tostring(sqlite3_errmsg(fhandle));
-  raise esqlite3.create(flasterrormessage,flasterror);
+  raise esqlite3.create(self,flasterrormessage,flasterrormessage,flasterror);
  end;
 end;
 

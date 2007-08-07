@@ -90,8 +90,8 @@ type
    ferrormessage: msestring;
    fsender: tcustomsqlconnection;
   public
-   constructor create(const asender: tcustomsqlconnection; 
-                             const amessage: msestring; const aerror: integer);
+   constructor create(const asender: tcustomsqlconnection; const amessage: ansistring;
+              const aerrormessage: msestring; const aerror: integer);
    property sender: tcustomsqlconnection read fsender;
    property error: integer read ferror;
    property errormessage: msestring read ferrormessage;
@@ -2948,11 +2948,11 @@ end;
 { econnectionerror }
 
 constructor econnectionerror.create(const asender: tcustomsqlconnection; 
-      const amessage: msestring; const aerror: integer);
+   const amessage: ansistring; const aerrormessage: msestring; const aerror: integer);
 begin
  fsender:= sender;
  ferror:= aerror;
- ferrormessage:= amessage;
+ ferrormessage:= aerrormessage;
  inherited create(asender.name+': '+amessage);
 end;
 

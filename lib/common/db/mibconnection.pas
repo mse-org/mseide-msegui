@@ -1606,7 +1606,7 @@ constructor eib.create(const asender: tibconnection; const amessage: msestring;
                         const aerror: statusvectorty);
 begin
  fstatus:= aerror;
- inherited create(asender,amessage,aerror[1]);
+ inherited create(asender,amessage,amessage,aerror[1]);
 end;
 
 end.
