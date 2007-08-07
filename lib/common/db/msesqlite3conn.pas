@@ -42,6 +42,8 @@ type
    fhandle: psqlite3;
    foptions: sqliteoptionsty;
    fbusytimeoutms: integer;
+   flasterror: integer;
+   flasterrormessage: msestring;
    function getdatabasename: filenamety;
    procedure setdatabasename(const avalue: filenamety);
    procedure loaded; override;
@@ -123,6 +125,8 @@ type
    function fetchblob(const cursor: tsqlcursor;
                               const fieldnum: integer): ansistring; override;
                               //null based
+   property lasterror: integer read flasterror;
+   property lasterrormessage: msestring read flasterrormessage;
   published
    property DatabaseName: filenamety read getdatabasename write setdatabasename;
    property Connected: boolean read getconnected write setconnected;
@@ -780,12 +784,11 @@ begin
 end;
 
 procedure tsqlite3connection.checkerror(const aerror: integer);
-var
- mstr1: msestring;
 begin
  if aerror <> sqlite_ok then begin
-  mstr1:= utf8tostring(sqlite3_errmsg(fhandle));
-  databaseerror(mstr1);
+  flasterror:= aerror;
+  flasterrormessage:= utf8tostring(sqlite3_errmsg(fhandle));
+  databaseerror(flasterrormessage);
  end;
 end;
 
