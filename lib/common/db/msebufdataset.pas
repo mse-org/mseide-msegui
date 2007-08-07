@@ -321,6 +321,7 @@ type
                 const alast: boolean = false;
                 const partialstring: boolean = false): boolean; overload;
                 //sets dataset cursor if found
+   function unique(const avalues: array of const): boolean;
    function getbookmark(const arecno: integer): string;
   published
    property fields: tindexfields read ffields write setfields;
@@ -3472,14 +3473,20 @@ end;
 
 function tmsebufdataset.bookmarktostring(const abookmark: bookmarkdataty): string;
 begin
- setlength(result,sizeof(abookmark));
- move(abookmark,pointer(result)^,sizeof(abookmark));
+ if abookmark.recordpo = nil then begin
+  result:= '';
+ end
+ else begin
+  setlength(result,sizeof(abookmark));
+  move(abookmark,pointer(result)^,sizeof(abookmark));
+ end;
 end;
 
 function tmsebufdataset.stringtobookmark(const abookmark: string): bookmarkdataty;
 begin
  if abookmark = '' then begin
-  fillchar(result,sizeof(result),0);
+  result.recordpo:= nil;
+  result.recno:= -1;
  end
  else begin
   move(pointer(abookmark)^,result,sizeof(result));
@@ -4522,7 +4529,7 @@ begin
 end;
 
 function tlocalindex.find(const avalues: array of const;
-             const aisnull: array of boolean; out abookmark: string;
+             const aisnull: array of boolean; out abookmark: bookmarkdataty;
              const abigger: boolean = false;
              const partialstring: boolean = false;
              const nocheckbrowsemode: boolean = false): boolean;
@@ -4532,7 +4539,6 @@ var
  po1: pintrecordty;
  po2: pointer;
  bo1: boolean;
- bm1: bookmarkdataty;
  lastind: integer;
 label
  endlab;
@@ -4586,7 +4592,9 @@ begin
  end;
  int1:= findboundary(po1,lastind,abigger);
  result:= false;
- abookmark:= '';
+ abookmark.recordpo:= nil;
+ abookmark.recno:= -1;
+// abookmark:= '';
  with tmsebufdataset(fowner) do begin
   with findexes[findexlocal.indexof(self) + 1] do begin
    if abigger then begin
@@ -4637,9 +4645,9 @@ begin
       end;         
      end;
     end;          
-    bm1.recno:= int1;
-    bm1.recordpo:= ind[int1];
-    abookmark:= bookmarktostring(bm1);
+    abookmark.recno:= int1;
+    abookmark.recordpo:= ind[int1];
+//    abookmark:= bookmarktostring(bm1);
    end;
   end;
  end;
@@ -4649,7 +4657,7 @@ end;
 
 function tlocalindex.find(const avalues: array of const; const aisnull: array of boolean;
                  //itemcount of avalues can be smaller than fields count in index
-               out abookmark: bookmarkdataty;
+               out abookmark: string;
                const abigger: boolean = false;
                const partialstring: boolean = false;
                const nocheckbrowsemode: boolean = false): boolean; overload;
@@ -4657,10 +4665,10 @@ function tlocalindex.find(const avalues: array of const; const aisnull: array of
                 //abookmark = '' if no lower or bigger found
                 //string values must be msestring
 var
- str1: string;
+ bm1: bookmarkdataty;
 begin
- result:= find(avalues,aisnull,str1,abigger,partialstring,nocheckbrowsemode);
- abookmark:=  tmsebufdataset(fowner).stringtobookmark(str1);
+ result:= find(avalues,aisnull,bm1,abigger,partialstring,nocheckbrowsemode);
+ abookmark:=  tmsebufdataset(fowner).bookmarktostring(bm1);
 end;
 
 function tlocalindex.find(const avalues: array of const;
@@ -4674,6 +4682,14 @@ begin
  if result then begin
   tmsebufdataset(fowner).bookmark:= str1;
  end;
+end;
+
+function tlocalindex.unique(const avalues: array of const): boolean;
+var
+ bm1: bookmarkdataty;
+begin
+ result:= not find(avalues,[],bm1,false,false,true) or 
+      (bm1.recordpo = tmsebufdataset(fowner).bookmarkdata.recordpo);
 end;
 
 function tlocalindex.getbookmark(const arecno: integer): string;
