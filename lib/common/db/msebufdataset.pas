@@ -213,9 +213,10 @@ type
    procedure readrecord(const arecord: pintrecordty);
  end;
  
-  TResolverErrorEvent = procedure(Sender: TObject; DataSet: tmsebufdataset;
-                          E: EUpdateError; UpdateKind: TUpdateKind;
-                           var Response: TResolverResponse) of object;
+  updateerroreventty = procedure(
+      const sender: tmsebufdataset;
+      const e: edatabaseerror; const updatekind: tupdatekind;
+         var response: tresolverresponse) of object;
   
  tblobbuffer = class(tmemorystream)
   private
@@ -398,7 +399,7 @@ type
    fcalcstringpositions: integerarty;
    
    fbuffercountbefore: integer;
-   fonupdateerror: tresolvererrorevent;
+   fonupdateerror: updateerroreventty;
 
    femptybuffer: pintrecordty;
    ffilterbuffer: pdsrecordty;
@@ -570,7 +571,7 @@ type
    function iscursoropen: boolean; override;
    function  getrecordcount: longint; override;
    procedure applyrecupdate(updatekind : tupdatekind); virtual;
-   procedure setonupdateerror(const avalue: tresolvererrorevent);
+   procedure setonupdateerror(const avalue: updateerroreventty);
    property actindex: integer read factindex write setactindex;
    function findrecord(arecordpo: pintrecordty): integer;
                          //returns index, -1 if not found
@@ -626,7 +627,7 @@ type
    property logfilename: filenamety read flogfilename write flogfilename;
    property packetrecords : integer read fpacketrecords write setpacketrecords 
                                  default defaultpacketrecords;
-   property onupdateerror: tresolvererrorevent read fonupdateerror 
+   property onupdateerror: updateerroreventty read fonupdateerror 
                                  write setonupdateerror;
    property oninternalcalcfields: internalcalcfieldseventty 
                       read foninternalcalcfields write setoninternalcalcfields;
@@ -2148,7 +2149,7 @@ begin
  end;
 end;
 
-procedure tmsebufdataset.SetOnUpdateError(const AValue: TResolverErrorEvent);
+procedure tmsebufdataset.SetOnUpdateError(const AValue: updateerroreventty);
 
 begin
   FOnUpdateError := AValue;
@@ -2167,7 +2168,7 @@ procedure tmsebufdataset.internalapplyupdate(const maxerrors: integer;
  end;
  
 var
- EUpdErr: EUpdateError;
+// EUpdErr: EUpdateError;
  by1: boolean;
 
 begin
@@ -2196,20 +2197,25 @@ begin
      else begin
       Response:= rrSkip;
      end;
-     EUpdErr:= EUpdateError.Create(SOnUpdateError,E.Message,0,0,E);
+     e.message:= 'An error occured while applying the updates in a record:'+
+                             e.message;
+//     EUpdErr:= EUpdateError.Create(SOnUpdateError,E.Message,0,0,E);
      try
       if checkcanevent(self,tmethod(OnUpdateError)) then begin
-       OnUpdateError(Self,Self,EUpdErr,UpdateKind,Response);
+       OnUpdateError(Self,e,UpdateKind,Response);
+//       OnUpdateError(Self,Self,EUpdErr,UpdateKind,Response);
       end;
      finally
       if Response = rrAbort then begin
        try
         checkcancel;
        finally
-        Raise EUpdErr;
+        Raise;
+//        Raise EUpdErr; 
+//does not work because original edatabaseerror will be freed.
        end;
       end;
-      eupderr.free;
+//      eupderr.free;
      end;
     end
     else begin

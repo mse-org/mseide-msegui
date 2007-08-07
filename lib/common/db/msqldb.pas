@@ -82,6 +82,14 @@ const
 
 
 type
+ econnectionerror = class(edatabaseerror)
+  private
+   ferror: integer;
+  public
+   constructor create(const amessage: ansistring; const aerror: integer);
+   property error: integer read ferror;
+ end;
+ 
  tmsesqlscript = class;
  tcustomsqlconnection = class (TmDatabase)
   private
@@ -2928,6 +2936,15 @@ begin
  if assigned(params) and assigned(detaildataset) and detaildataset.active then begin
   detaildataset.refresh;
  end;
+end;
+
+{ econnectionerror }
+
+constructor econnectionerror.create(const amessage: ansistring;
+               const aerror: integer);
+begin
+ ferror:= aerror;
+ inherited create(amessage);
 end;
 
 end.
