@@ -32,13 +32,15 @@ type
  tibconnection = class;
  statusvectorty = array[0..19] of ISC_STATUS;
 
- eib = class(econnectionerror)
+ eiberror = class(econnectionerror)
   private
    fstatus: statusvectorty;
+   fsqlcode: integer;
   public
    constructor create(const asender: tibconnection; const amessage: msestring;
-                              const aerror: statusvectorty);
+                              const aerror: statusvectorty; const asqlcode: integer);
    property status: statusvectorty read fstatus;
+   property sqlcode: integer read fsqlcode;
  end;
  
   TIBCursor = Class(TSQLCursor)
@@ -89,6 +91,7 @@ type
    foptions: ibconnectionoptionsty;
    flasterror: statusvectorty;
    flasterrormessage: msestring;
+   flastsqlcode: integer;
     procedure SetDBDialect;
     procedure AllocSQLDA(var aSQLDA : PXSQLDA;Count : integer);
     procedure TranslateFldType(SQLType,sqlsubtype,SQLLen,SQLScale: integer;
@@ -173,6 +176,9 @@ type
                               const fieldnum: integer): ansistring; override;
                               //null based
     procedure createdatabase(const asql: string);
+    property lasterror: statusvectorty read flasterror;
+    property lasterrormessage: msestring read flasterrormessage;
+    property lastsqlcode: integer read flastsqlcode;
   published
     property Dialect  : integer read FDialect write FDialect;
     property options: ibconnectionoptionsty read foptions write foptions;
@@ -231,7 +237,7 @@ var
   buf: array [0..1024] of char;
   p: pointer;
   Msg: string;
-  E: eib;
+  E: eiberror;
   
 begin
  if ((Status[0] = 1) and (Status[1] <> 0)) then begin
@@ -242,7 +248,8 @@ begin
   end;
   flasterror:= status;
   flasterrormessage:= msg;
-  raise eib.create(self,msg,status);
+  flastsqlcode:= isc_sqlcode(status);
+  raise eiberror.create(self,msg,status,flastsqlcode);
  end;
 end;
 
@@ -1600,12 +1607,13 @@ begin
  abuffer:= nil;
 end;
 
-{ eib }
+{ eiberror }
 
-constructor eib.create(const asender: tibconnection; const amessage: msestring;
-                        const aerror: statusvectorty);
+constructor eiberror.create(const asender: tibconnection; const amessage: msestring;
+                        const aerror: statusvectorty; const asqlcode: integer);
 begin
  fstatus:= aerror;
+ fsqlcode:= asqlcode;
  inherited create(asender,amessage,amessage,aerror[1]);
 end;
 

@@ -33,7 +33,7 @@ uses
 +--------------------+---------------------+-------------+-------------+
 }
 type
- esqlite3 = class(econnectionerror)
+ esqlite3error = class(econnectionerror)
  end;
  
  sqliteoptionty = (slo_transactions,slo_designtransactions);
@@ -791,7 +791,7 @@ begin
  if aerror <> sqlite_ok then begin
   flasterror:= aerror;
   flasterrormessage:= utf8tostring(sqlite3_errmsg(fhandle));
-  raise esqlite3.create(self,flasterrormessage,flasterrormessage,flasterror);
+  raise esqlite3error.create(self,flasterrormessage,flasterrormessage,flasterror);
  end;
 end;
 

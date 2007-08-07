@@ -20,7 +20,7 @@ unit mpqconnection;
 interface
 
 uses
-  Classes, SysUtils, msqldb, db, dbconst,msedbevents,
+  Classes, SysUtils, msqldb, db, dbconst,msedbevents,msestrings,
 {$IfDef LinkDynamically}
   postgres3dyn;
 {$Else}
@@ -28,6 +28,16 @@ uses
 {$EndIf}
 
 type
+ epqerror = class(econnectionerror)
+  private
+   fsqlcode: string;
+  public
+   constructor create(const asender: tcustomsqlconnection; const amessage: ansistring;
+               const aerrormessage: msestring; const asqlcode: string);
+   public
+    property sqlcode: string read fsqlcode;
+ end;
+ 
   TPQTrans = Class(TSQLHandle)
     protected
      fconn        : PPGConn;
@@ -56,6 +66,8 @@ type
    FIntegerDateTimes    : boolean;
    feventcontroller: tdbeventcontroller;
    ftransactionconnectionused: boolean;
+   flastsqlcode: string;
+   flasterrormessage: msestring;
    function TranslateFldType(Type_Oid : integer) : TFieldType;
    function geteventinterval: integer;
    procedure seteventinterval(const avalue: integer);
@@ -135,6 +147,8 @@ type
                               //null based
    function backendpid: int64; //0 if not connected
    property eventcontroller: tdbeventcontroller read feventcontroller;
+   property lastsqlcode: string read flastsqlcode;
+   property lasterrormessage: msestring read flasterrormessage;   
   published
     property DatabaseName;
     property KeepConnection;
@@ -148,7 +162,7 @@ type
 implementation
 
 uses 
- math,msestrings,msestream,msetypes,msedatalist,mseformatstr;
+ math,msestream,msetypes,msedatalist,mseformatstr;
 
 ResourceString
   SErrRollbackFailed = 'Rollback transaction failed';
@@ -178,7 +192,8 @@ const Oid_Bool     = 16;
       oid_date      = 1082;
       oid_time      = 1083;
       oid_numeric   = 1700;
-      
+ pg_diag_sqlstate = 'C';
+ 
  inv_read =  $40000;
  inv_write = $20000;
  invalidoid = 0;
@@ -196,7 +211,7 @@ begin
  inherited;
  if fopen then begin
   fopen:= false;
-  pqclear(res);
+  pqclear(res); //done in checkerror
  end;
 end;
   
@@ -222,14 +237,24 @@ end;
 
 procedure TPQConnection.checkerror(const aconnection: ppgconn;
          const ares: ppgresult; const amessage: ansistring);
+var
+ err: integer;
+ str1: ansistring;
+ res: texecstatustype;
 begin
- if (PQresultStatus(ares) <> PGRES_COMMAND_OK) then begin
+ res:= PQresultStatus(ares);
+ if not(res in [PGRES_COMMAND_OK,PGRES_TUPLES_OK]) then begin
+  flastsqlcode:= strpas(pqresulterrorfield(ares,ord(pg_diag_sqlstate)));
+  str1:= strpas(pqresulterrormessage(ares));
+  flasterrormessage:= str1;
   PQclear(ares);
-  DatabaseError(amessage + ' (PostgreSQL: ' + 
-                          PQerrorMessage(aconnection) + ')',self);
+  raise epqerror.create(self,amessage+' (PostgreSQL: '+str1 + ')',
+                            flasterrormessage,flastsqlcode);
  end
  else begin
-  PQclear(ares);
+  if res <> pgres_tuples_ok then begin
+   PQclear(ares);
+  end;
  end;
 end;
 
@@ -525,7 +550,7 @@ var
  lengths,formats: integerarty;
 
 begin
- with cursor as TPQCursor do begin
+ with TPQCursor(cursor) do begin
   if FStatementType in [stInsert,stUpdate,stDelete,stSelect] then begin
    if Assigned(AParams) and (AParams.count > 0) then begin
     setlength(ar,Aparams.count);
@@ -574,19 +599,8 @@ begin
       s := stringreplace(s,':'+AParams[i].Name,AParams[i].asstring,[rfReplaceAll,rfIgnoreCase]);
     res := pqexec(tr.fconn,pchar(s));
   end;
-  if not (PQresultStatus(res) in [PGRES_COMMAND_OK,PGRES_TUPLES_OK]) then begin
-      s := PQerrorMessage(tr.fconn);
-      pqclear(res);
-
-//      tr.ErrorOccured := True;
-// Don't perform the rollback, only make it possible to do a rollback.
-// The other databases also don't do this.
-//      atransaction.Rollback;
-      DatabaseError(SErrExecuteFailed + ' (PostgreSQL: ' + s + ')',self);
-  end
-  else begin
-   fopen:= true;
-  end;
+  checkerror(tr.fconn,res,'Execution of query failed');
+  fopen:= true;
  end;
 end;
 
@@ -1117,5 +1131,15 @@ begin
  end;
 end;
 }
+
+{ epqerror }
+
+constructor epqerror.create(const asender: tcustomsqlconnection;
+               const amessage: ansistring; const aerrormessage: msestring;
+               const asqlcode: string);
+begin
+ fsqlcode:= asqlcode;
+ inherited create(asender,amessage,aerrormessage,-1);
+end;
 
 end.
