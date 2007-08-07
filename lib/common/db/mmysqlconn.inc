@@ -6,34 +6,50 @@
 interface
 
 uses
-  Classes, SysUtils,msqldb,db,dynlibs,
+  Classes, SysUtils,msqldb,db,dynlibs,msestrings,
 {$IfDef mysql50}
   mysql50dyn;
   {$DEFINE TConnectionName:=TMySQL50Connection}
   {$DEFINE TTransactionName:=TMySQL50Transaction}
   {$DEFINE TCursorName:=TMySQL50Cursor}
+  {$define eerrorname:= emysql50error}
 {$ELSE}
   {$IfDef mysql41}
     mysql41dyn;
     {$DEFINE TConnectionName:=TMySQL41Connection}
     {$DEFINE TTransactionName:=TMySQL41Transaction}
     {$DEFINE TCursorName:=TMySQL41Cursor}
+    {$define eerrorname:= emysql41error}
   {$ELSE}
     {$IFDEF mysql4} // temporary backwards compatibility for Lazarus
       mysql40dyn;
       {$DEFINE TConnectionName:=TMySQLConnection}
       {$DEFINE TTransactionName:=TMySQLTransaction}
       {$DEFINE TCursorName:=TMySQLCursor}
+      {$define eerrorname:= emysqlerror}
     {$ELSE}
       mysql40dyn;
       {$DEFINE TConnectionName:=TMySQL40Connection}
       {$DEFINE TTransactionName:=TMySQL40Transaction}
       {$DEFINE TCursorName:=TMySQL40Cursor}
+      {$define eerrorname:= emysql40error}
     {$EndIf}
   {$EndIf}
 {$EndIf}
 
 Type
+
+ tcursorname = class;
+ 
+ eerrorname = class(econnectionerror)
+  private
+   fsqlcode: string;
+  public
+   constructor create(const asender: tcustomsqlconnection; const amessage: ansistring;
+              const aerrormessage: msestring; const aerror: integer; const asqlcode: string);
+   property sqlcode: string read fsqlcode;
+ end;
+  
   TTransactionName = Class(TSQLHandle)
   protected
   end;
@@ -61,11 +77,16 @@ Type
     FMySQL : PMySQL;
     FDidConnect : Boolean;
    fport: cardinal;
+   flasterror: integer;
+   flasterrormessage: msestring;
+   flastsqlcode: string;
     function GetClientInfo: string;
     function GetServerStatus: String;
     procedure ConnectMySQL(var HMySQL : PMySQL;H,U,P : pchar);
     procedure freeresultbuffer(const cursor: tcursorname);
   protected
+    Procedure checkerror(const Msg: String);
+
 //   function stringtosqltext(const afeildtype: tfieldtype; const avalue: string): string;
     function StrToStatementType(s : string) : TStatementType; override;
     Procedure ConnectToServer; virtual;
@@ -127,14 +148,17 @@ Type
    function blobscached: boolean;
    
   Public
-    function fetchblob(const cursor: tsqlcursor;
+   function fetchblob(const cursor: tsqlcursor;
                               const fieldnum: integer): ansistring; override;
                               //null based
-    function getinsertid: int64; override;
-    Property ServerInfo : String Read FServerInfo;
-    Property HostInfo : String Read FHostInfo;
-    property ClientInfo: string read GetClientInfo;
-    property ServerStatus : String read GetServerStatus;
+   function getinsertid: int64; override;
+   Property ServerInfo : String Read FServerInfo;
+   Property HostInfo : String Read FHostInfo;
+   property ClientInfo: string read GetClientInfo;
+   property ServerStatus : String read GetServerStatus;
+   property lasterror: integer read flasterror;
+   property lasterrormessage: msestring read flasterrormessage;
+   property lastsqlcode: string read flastsqlcode;
   published
     property Dialect  : integer read FDialect write FDialect;
     property port: cardinal read fport write fport default 0;
@@ -146,7 +170,7 @@ Type
     property OnLogin;
   end;
 
-  EMySQLError = Class(Exception);
+//  EMySQLError = Class(Exception);
 
 implementation
 
@@ -170,19 +194,16 @@ Resourcestring
   SErrNotversion41 = 'TMySQL41Connection can not work with the installed MySQL client version (%s).';
   SErrNotversion40 = 'TMySQL40Connection can not work with the installed MySQL client version (%s).';
 
-Procedure MySQlError(R : PMySQL;Msg: String;Comp : TComponent);
-
-Var
-  MySQLMsg : String;
-
+Procedure tconnectionname.checkerror(const Msg: String);
+var
+ str1: ansistring;
 begin
- If (R<>Nil) then
-   begin
-   MySQLMsg:=Strpas(mysql_error(R));
-   DatabaseErrorFmt(Msg,[MySQLMsg],Comp);
-   end
- else
-   DatabaseError(Msg,Comp);
+ str1:= Strpas(mysql_error(fmysql));
+ flasterrormessage:= str1;
+ flasterror:= mysql_errno(fmysql);
+ flastsqlcode:= strpas(mysql_sqlstate(fmysql));
+ raise eerrorname.create(self,format(msg,[str1]),flasterrormessage,
+                      flasterror,flastsqlcode);
 end;
 
 function TConnectionName.StrToStatementType(s : string) : TStatementType;
@@ -224,7 +245,7 @@ begin
   HMySQL := mysql_init(HMySQL);
   HMySQL:=mysql_real_connect(HMySQL,PChar(H),PChar(U),Pchar(P),Nil,fport,Nil,0);
   If (HMySQL=Nil) then
-    MySQlError(Nil,SErrServerConnectFailed,Self);
+    databaseerror(SErrServerConnectFailed,Self);
 end;
 {
 function tconnectionname.stringtosqltext(const afieldtype: tfieldtype;
@@ -296,7 +317,7 @@ end;
 procedure TConnectionName.SelectDatabase;
 begin
   if mysql_select_db(FMySQL,pchar(DatabaseName))<>0 then
-    MySQLError(FMySQL,SErrDatabaseSelectFailed,Self);
+    checkerror(SErrDatabaseSelectFailed);
 end;
 
 procedure TConnectionName.DoInternalConnect;
@@ -439,7 +460,7 @@ begin
    end;
   end;
   if mysql_query(FMySQL,Pchar(C.FStatement))<>0 then begin
-   MySQLError(FMYSQL,Format(SErrExecuting,[StrPas(mysql_error(FMySQL))]),Self)
+   checkerror(Format(SErrExecuting,[StrPas(mysql_error(FMySQL))]))
   end
   else begin
    C.RowsAffected := mysql_affected_rows(FMYSQL);
@@ -525,7 +546,7 @@ begin
  fielddefs.clear;
   C:=(Cursor as TCursorName);
   If (C.FRes=Nil) then begin
-    MySQLError(FMySQL,SErrNoQueryResult,Self);
+    checkerror(SErrNoQueryResult);
   end;
   FC:=mysql_num_fields(C.FRes);
   SetLength(c.MapDSRowToMSQLRow,FC);
@@ -577,7 +598,7 @@ begin
  if C.Row=nil then
     begin
  //   Writeln('LoadFieldsFromBuffer: row=nil');
-    MySQLError(FMySQL,SErrFetchingData,Self);
+    checkerror(SErrFetchingData);
     end;
  Row:=C.Row;
  
@@ -981,6 +1002,16 @@ begin
  with tmsebufdataset1(afield.dataset) do begin
   setcurvalue(afield,getinsertid);
  end;
+end;
+
+{ eerrorname }
+
+constructor eerrorname.create(const asender: tcustomsqlconnection; 
+         const amessage: ansistring; const aerrormessage: msestring;
+         const aerror: integer; const asqlcode: string);
+begin
+ fsqlcode:= asqlcode;
+ inherited create(asender,amessage,aerrormessage,aerror);
 end;
 
 end.

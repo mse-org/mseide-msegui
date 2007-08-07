@@ -147,8 +147,8 @@ type
                               //null based
    function backendpid: int64; //0 if not connected
    property eventcontroller: tdbeventcontroller read feventcontroller;
-   property lastsqlcode: string read flastsqlcode;
    property lasterrormessage: msestring read flasterrormessage;   
+   property lastsqlcode: string read flastsqlcode;
   published
     property DatabaseName;
     property KeepConnection;
