@@ -59,7 +59,7 @@ Type
 //    FQMySQL : PMySQL;
     FRes: PMYSQL_RES;                   { Record pointer }
     FNeedData : Boolean;
-    FStatement : String;
+    fstatement: string;
     Row : MYSQL_ROW;
     RowsAffected : QWord;
     LastInsertID : QWord;
@@ -377,28 +377,22 @@ end;
 procedure TConnectionName.PrepareStatement(cursor: TSQLCursor;
   ATransaction: TSQLTransaction; buf: string;AParams : TParams);
 begin
-//  if assigned(AParams) and (AParams.count > 0) then
-//    DatabaseError('Parameters (not) yet supported for the MySQL SqlDB connection.',self);
-  With Cursor as TCursorName do
-    begin
-    FStatement:=Buf;
-    if assigned(AParams) and (AParams.count > 0) then
-    {$ifdef mse_FPC_2_2}
-      FStatement := AParams.ParseSQL(FStatement,false,false,false,psSimulated,
-                       paramBinding,ParamReplaceString);
-    {$else}
-      FStatement := AParams.ParseSQL(FStatement,false,psSimulated,
-                       paramBinding,ParamReplaceString);
-    {$endif}
-    if FStatementType=stSelect then
-      FNeedData:=True;
-   {
-    ConnectMySQL(FQMySQL,FMySQL^.host,FMySQL^.user,FMySQL^.passwd);
-    if mysql_select_db(FQMySQL,pchar(DatabaseName))<>0 then
-      MySQLError(FQMySQL,SErrDatabaseSelectFailed,Self);
-   }
-     fprepared:= true;
-    end
+ With TCursorName(cursor) do begin
+  FStatement:= Buf;
+  if assigned(AParams) and (AParams.count > 0) then begin
+  {$ifdef mse_FPC_2_2}
+    FStatement := AParams.ParseSQL(FStatement,false,false,false,psSimulated,
+                     paramBinding,ParamReplaceString);
+  {$else}
+    FStatement := AParams.ParseSQL(FStatement,false,psSimulated,
+                     paramBinding,ParamReplaceString);
+  {$endif}
+  end;
+  if FStatementType = stSelect then begin
+   FNeedData:=True;
+  end;
+  fprepared:= true;
+ end;
 end;
 
 procedure TConnectionName.UnPrepareStatement(cursor: TSQLCursor);
@@ -407,13 +401,6 @@ begin
   fstatement:= '';
   fprepared:= false;
  end;
-{
-  With Cursor as TCursorName do
-    begin
-    mysql_close(FQMySQL);
-    FQMysql := nil;
-    end;
-}
 end;
 
 procedure tconnectionname.freeresultbuffer(const cursor: tcursorname);
@@ -433,11 +420,6 @@ begin
   C:= TCursorName(cursor);
   if c.FStatementType=stSelect then
     c.FNeedData:=False;
-//  if (c.FQMySQL <> Nil) then
-//    begin
-//    mysql_close(c.FQMySQL);
-//    c.FQMySQL:=Nil;
-//    end;
   freeresultbuffer(c);
   SetLength(c.MapDSRowToMSQLRow,0);
 end;
@@ -445,21 +427,22 @@ end;
 procedure TConnectionName.Execute(const  cursor: TSQLCursor;
                const atransaction: tSQLtransaction; const AParams : TParams);
 
-Var
-  C : TCursorName;
-  i : integer;
-
+var
+ C: TCursorName;
+ i: integer;
+ str1: ansistring;
 begin
   C:= TCursorName(cursor);
   freeresultbuffer(c);
+  str1:= c.fstatement;
   if Assigned(AParams) and (AParams.count > 0) then begin
    for i := 0 to AParams.count -1 do begin
-    C.FStatement:= stringreplace(C.FStatement,
+    str1:= stringreplace(str1,
                C.ParamReplaceString+inttostr(AParams[i].Index+1),
                GetAsSQLText(AParams[i]),[rfReplaceAll,rfIgnoreCase]);
    end;
   end;
-  if mysql_query(FMySQL,Pchar(C.FStatement))<>0 then begin
+  if mysql_query(FMySQL,Pchar(str1))<>0 then begin
    checkerror(Format(SErrExecuting,[StrPas(mysql_error(FMySQL))]))
   end
   else begin
