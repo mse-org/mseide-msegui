@@ -525,6 +525,7 @@ type
  tmsedatalink = class(tdatalink)
   private
   protected
+   fcanclosing: integer;
    fdscontroller: tdscontroller;
    procedure activechanged; override;
    function getdataset: tdataset;
@@ -535,6 +536,7 @@ type
    property dataset: tdataset read getdataset;
    property dscontroller: tdscontroller read fdscontroller;
    property utf8: boolean read getutf8;
+   function canclose: boolean;
  end;
 
  tfielddatalink = class(tmsedatalink)
@@ -2718,6 +2720,21 @@ begin
  end
  else begin
   result:= inherited getactiverecord;
+ end;
+end;
+
+function tmsedatalink.canclose: boolean;
+begin
+ result:= (fcanclosing > 0) or not active;
+ if not result then begin
+  inc(fcanclosing);
+  try
+   dataset.checkbrowsemode;
+   result:= true;
+  except
+   application.handleexception(nil);
+  end;
+  dec(fcanclosing);
  end;
 end;
 

@@ -256,6 +256,8 @@ type
    property optionswidget default defaulttaboptionswidget;
    property onchildscaled;
    property onfontheightdelta;
+   property onshow;
+   property onhide;
    property onselect: notifyeventty read fonselect write fonselect;
    property ondeselect: notifyeventty read fondeselect write fondeselect;
    property visible default false;

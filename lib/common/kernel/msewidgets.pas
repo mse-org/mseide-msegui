@@ -519,15 +519,15 @@ type
    procedure dokeyup(var info: keyeventinfoty); override;
    procedure doshortcut(var info: keyeventinfoty; const sender: twidget); override;
    procedure dofocuschanged(const oldwidget,newwidget: twidget); override;
-   procedure doenter; override;
-   procedure doexit; override;
-   procedure dofocus; override;
-   procedure dodefocus; override;
+//   procedure doenter; override;
+//   procedure doexit; override;
+//   procedure dofocus; override;
+//   procedure dodefocus; override;
    procedure doloaded; override;
    procedure dohide; override;
    procedure doshow; override;
-   procedure doactivate; override;
-   procedure dodeactivate; override;
+//   procedure doactivate; override;
+//   procedure dodeactivate; override;
    procedure receiveevent(const event: tobjectevent); override;
    procedure doasyncevent(var atag: integer); override;
   public
@@ -3132,7 +3132,7 @@ begin
   fonresize(self);
  end;
 end;
-
+{
 procedure tcustomeventwidget.doenter;
 begin
  inherited;
@@ -3171,10 +3171,6 @@ begin
  if canevent(tmethod(fonactivate)) then begin
   fonactivate(self);
  end;
- {
- include(fwidgetstate,ws_activated);
- exclude(fwidgetstate,ws_deactivated);
- }
 end;
 
 procedure tcustomeventwidget.dodeactivate;
@@ -3183,12 +3179,8 @@ begin
  if canevent(tmethod(fondeactivate)) then begin
   fondeactivate(self);
  end;
- {
- include(fwidgetstate,ws_deactivated);
- exclude(fwidgetstate,ws_activated);
- }
 end;
-
+}
 procedure tcustomeventwidget.dohide;
 begin
  if canevent(tmethod(fonhide)) then begin

@@ -893,11 +893,12 @@ type
    destructor destroy; override;
  end;
 
- griddatalinkoptionty = (gdo_propscrollbar,gdo_thumbtrack);
+ griddatalinkoptionty = (gdo_propscrollbar,gdo_thumbtrack,
+           gdo_checkbrowsemodeonexit);
  griddatalinkoptionsty = set of griddatalinkoptionty;
  updaterowdataeventty = procedure(const sender: tcustomgrid; 
                         const arow: integer; const adataset: tdataset)of object;
-  
+
  tgriddatalink = class(tfielddatalink,ievent,idbeditinfo)
   private
    fgrid: tcustomgrid;
@@ -980,6 +981,7 @@ type
 
    procedure recordchanged(afield: tfield); override;
    procedure datasetchanged; override;
+   function canclose(const newfocus: twidget): boolean;
 
    procedure painted;
    procedure loaded;
@@ -1209,6 +1211,7 @@ type
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
+   function canclose(const newfocus: twidget): boolean; override;
    procedure rowup(const action: focuscellactionty = fca_focusin); override;
    procedure rowdown(const action: focuscellactionty = fca_focusin); override;
    procedure pageup(const action: focuscellactionty = fca_focusin); override;
@@ -5640,6 +5643,12 @@ begin
  result:= @fdummystringbuffer;
 end;
 
+function tgriddatalink.canclose(const newfocus: twidget): boolean;
+begin
+ result:= not (gdo_checkbrowsemodeonexit in foptions) or
+              inherited canclose;
+end;
+
 { tdbwidgetindicatorcol }
 
 constructor tdbwidgetindicatorcol.create(const agrid: tcustomgrid;
@@ -5902,6 +5911,11 @@ procedure tcustomdbwidgetgrid.beforefocuscell(const cell: gridcoordty;
                              const selectaction: focuscellactionty);
 begin
  fdatalink.beforefocuscell(cell,selectaction);
+end;
+
+function tcustomdbwidgetgrid.canclose(const newfocus: twidget): boolean;
+begin
+ result:= inherited canclose(newfocus) and fdatalink.canclose(newfocus);
 end;
 
 { tstringcoldatalink }
@@ -6329,6 +6343,7 @@ function tcustomdbstringgrid.canclose(const newfocus: twidget): boolean;
 begin
  result:= true;
  checkcellvalue(result);
+ result:= result and fdatalink.canclose(newfocus);
 end;
 
 procedure tcustomdbstringgrid.dopaint(const acanvas: tcanvas);
