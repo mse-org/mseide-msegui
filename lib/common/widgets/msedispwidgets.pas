@@ -42,6 +42,7 @@ type
   public
    constructor create(const intf: iframe);
   published
+   property options;
    property levelo default -1;
    property leveli;
    property framewidth;

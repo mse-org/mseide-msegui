@@ -26,12 +26,16 @@ type
    class function getinstancepo(owner: tobject): pfont; override;
  end;
 
+ captionframeoptionty = (cfo_fixleft,cfo_fixright,cfo_fixtop,cfo_fixbottom);
+ captionframeoptionsty = set of captionframeoptionty;
+ 
  tcustomcaptionframe = class(tcustomframe)
   private
    fcaptionpos: captionposty;
    fcaptiondist: integer;
    fcaptionoffset: integer;
    fupdating: integer;
+   foptions: captionframeoptionsty;
    function getcaption: msestring;
    procedure setcaption(const Value: msestring);
    procedure fontchanged(const sender: tobject);
@@ -69,6 +73,7 @@ type
    function pointincaption(const point: pointty): boolean; override;
                 //origin = widgetrect
 
+   property options: captionframeoptionsty read foptions write foptions;
    property caption: msestring read getcaption write setcaption;
    property captionpos: captionposty read fcaptionpos
              write setcaptionpos default cp_topleft;
@@ -84,6 +89,7 @@ type
 
  tcaptionframe = class(tcustomcaptionframe)
   published
+   property options;
    property levelo;
    property leveli;
    property framewidth;
@@ -185,6 +191,7 @@ type
 
  tscrollframe = class(tcustomscrollframe)
   published
+   property options;
    property levelo;
    property leveli;
    property framewidth;
@@ -364,6 +371,7 @@ type
 
  tstepframe = class(tcustomstepframe)
   published
+   property options;
    property levelo;
    property leveli;
    property framewidth;
@@ -1541,7 +1549,31 @@ begin
   if fupdating < 16 then begin
    inc(fupdating);
    try
-    fintf.setwidgetrect(deflaterect(fintf.getwidgetrect,fra1));
+    rect1:= fintf.getwidgetrect;
+    rect2:= deflaterect(rect1,fra1);
+    if cfo_fixleft in foptions then begin
+     rect2.x:= rect1.x;
+     if cfo_fixright in foptions then begin
+      rect2.cx:= rect1.cx;
+     end;
+    end
+    else begin
+     if cfo_fixright in foptions then begin
+      rect2.x:= rect1.x+rect1.cx-rect2.cx;
+     end;
+    end;
+    if cfo_fixtop in foptions then begin
+     rect2.y:= rect1.y;
+     if cfo_fixbottom in foptions then begin
+      rect2.cy:= rect1.cy;
+     end;
+    end
+    else begin
+     if cfo_fixbottom in foptions then begin
+      rect2.y:= rect1.y+rect1.cy-rect2.cy;
+     end;
+    end;
+    fintf.setwidgetrect(rect2);
    finally
     dec(fupdating);
    end;
