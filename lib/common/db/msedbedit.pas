@@ -1265,7 +1265,10 @@ type
  end;
 
  tstringcoldatalink = class(teditwidgetdatalink)
+  private
+   fowner: tcustomstringcol;
   protected
+   procedure updatedata; override;
    procedure layoutchanged; override;
  end;
  
@@ -2092,13 +2095,18 @@ end;
 
 procedure teditwidgetdatalink.updatedata;
 begin
- if fintf.getwidget.canclose(nil) then begin
-  fmodified:= false;
- end
- else begin
-  raise eabort.create('');
+ inc(fcanclosing);
+ try
+  if fintf.getwidget.canclose(nil) then begin
+   fmodified:= false;
+  end
+  else begin
+   raise eabort.create('');
+  end;
+  inherited;
+ finally
+  dec(fcanclosing);
  end;
- inherited;
 end;
 
 function teditwidgetdatalink.dataentered: boolean;
@@ -5646,8 +5654,9 @@ end;
 
 function tgriddatalink.canclose(const newfocus: twidget): boolean;
 begin
- result:= not (gdo_checkbrowsemodeonexit in foptions) or
-              inherited canclose;
+ result:= not (gdo_checkbrowsemodeonexit in foptions) or 
+           (fgrid.widgetstate * [ws_entered,ws_exiting] = [])  or
+           fgrid.checkdescendent(newfocus) or inherited canclose;
 end;
 
 { tdbwidgetindicatorcol }
@@ -5925,6 +5934,19 @@ procedure tstringcoldatalink.layoutchanged;
 begin
  inherited;
  tcustomdbstringgrid(fintf.getwidget).checkautofields;
+end;
+
+procedure tstringcoldatalink.updatedata;
+var
+ grid1: tcustomdbstringgrid;
+begin
+ grid1:=  tcustomdbstringgrid(fintf.getwidget);
+ inc(grid1.fdatalink.fcanclosing);
+ try
+  inherited;
+ finally
+  dec(grid1.fdatalink.fcanclosing);
+ end;
 end;
 
 { tdbstringcol }

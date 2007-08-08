@@ -2046,6 +2046,9 @@ var
  po1: pintrecordty;
  
 begin
+ if state = dsedit then begin
+  internalcancel;
+ end;
  po1:= fcurrentbuf;
  if not getrecordupdatebuffer then begin
   getnewupdatebuffer;

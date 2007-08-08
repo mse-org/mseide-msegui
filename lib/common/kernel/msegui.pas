@@ -59,7 +59,7 @@ type
 
  shortcutty = type word;
  widgetstatety = (ws_visible,ws_enabled,
-                  ws_active,ws_entered,ws_focused,
+                  ws_active,ws_entered,ws_entering,ws_exiting,ws_focused,
                   ws_mouseinclient,ws_wantmousebutton,ws_wantmousemove,
 //                  ws_wantmousewheel,
                   ws_wantmousefocus,ws_iswidget,
@@ -7037,18 +7037,23 @@ end;
 procedure twidget.internaldoenter;
 begin
  if not (ws_entered in fwidgetstate) then begin
-  if fparentwidget <> nil then begin
-   with fparentwidget do begin
-//    if ffocusedchildbefore <> self then begin
-     ffocusedchildbefore:= ffocusedchild;
-//    end;
-    ffocusedchild:= self;
+  include(fwidgetstate,ws_entering);
+  try
+   if fparentwidget <> nil then begin
+    with fparentwidget do begin
+ //    if ffocusedchildbefore <> self then begin
+      ffocusedchildbefore:= ffocusedchild;
+ //    end;
+     ffocusedchild:= self;
+    end;
    end;
-  end;
-  include(fwidgetstate,ws_entered);
-  doenter;
-  if needsfocuspaint then begin
-   invalidatewidget;
+   include(fwidgetstate,ws_entered);
+   doenter;
+   if needsfocuspaint then begin
+    invalidatewidget;
+   end;
+  finally
+   exclude(fwidgetstate,ws_entering);
   end;
  end;
 end;
@@ -7061,18 +7066,23 @@ end;
 procedure twidget.internaldoexit;
 begin
  if ws_entered in fwidgetstate then begin
-  ffocusedchildbefore:= ffocusedchild;
-  ffocusedchild:= nil;
-  exclude(fwidgetstate,ws_entered);
-  if needsfocuspaint then begin
-   invalidatewidget;
-  end;
-  if (ow_canclosenil in foptionswidget) then begin
-   if not canclose(nil) then begin
-    exit;
+  include(fwidgetstate,ws_exiting);
+  try
+   ffocusedchildbefore:= ffocusedchild;
+   ffocusedchild:= nil;
+   exclude(fwidgetstate,ws_entered);
+   if needsfocuspaint then begin
+    invalidatewidget;
    end;
-  end;
-  doexit;
+   if (ow_canclosenil in foptionswidget) then begin
+    if not canclose(nil) then begin
+     exit;
+    end;
+   end;
+   doexit;
+  finally
+   exclude(fwidgetstate,ws_exiting);
+  end;   
  end;
 end;
 
