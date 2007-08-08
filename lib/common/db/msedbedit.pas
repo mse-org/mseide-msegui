@@ -2098,6 +2098,7 @@ begin
  else begin
   raise eabort.create('');
  end;
+ inherited;
 end;
 
 function teditwidgetdatalink.dataentered: boolean;

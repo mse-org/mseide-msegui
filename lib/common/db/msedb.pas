@@ -571,6 +571,7 @@ type
    procedure setfield(const value: tfield); virtual;
    procedure activechanged; override;
    procedure layoutchanged; override;
+   procedure updatedata; override;
   public
    function assql: string;
    function fieldactive: boolean;
@@ -2976,6 +2977,18 @@ function tfielddatalink.fieldactive: boolean;
 begin
  result:= (ffield <> nil) and (dataset <> nil) and (dataset.state <> dsinactive);
 // result:= active and (ffield <> nil); //unreliable
+end;
+
+procedure tfielddatalink.updatedata;
+begin
+ inherited;
+ if (ffield <> nil) then begin
+  with ffield do begin
+   if (defaultexpression <> '') and isnull then begin
+    asstring:= defaultexpression;
+   end;
+  end;
+ end;
 end;
 
 { tactivatorcontroller }
