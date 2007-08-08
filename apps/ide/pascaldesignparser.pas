@@ -468,14 +468,12 @@ begin
   parser:= tpascalparser.create(designer.designfiles,atext);
   try
    with parser do begin
-    if adef^.kind in [syk_procimp,syk_classprocimp] then begin
-     nextnonwhitetoken; //procedure or function
-    end;
+    if adef^.kind in [syk_procdef,syk_classprocimp] then begin
+    nextnonwhitetoken; //procedure or function
     if adef^.kind = syk_classprocimp then begin
      nextnonwhitetoken; //classname
      nextnonwhitetoken; //dot
     end;
-    if adef^.kind in [syk_procdef,syk_classprocimp] then begin
      if checknamenoident and checkoperator('(') then begin
       repeat
        while not eof and not checkoperator(':') do begin

@@ -2,7 +2,7 @@ unit main;
 {$ifdef FPC}{$mode objfpc}{$h+}{$INTERFACES CORBA}{$endif}
 interface
 uses
- msegui,mseclasses,mseforms;
+ msegui,mseclasses,mseevent,mseforms,msegraphics,msemenus,msestat;
 
 type
  tmainfo = class(tmseform)
