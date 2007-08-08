@@ -1015,6 +1015,10 @@ var
  int1: integer;
 
 begin
+ if (start.col < 0) or (start.row < 0) or (stop.col < 0) or 
+                                   (stop.row < 0) then begin
+  exit;
+ end;
  if aseteditpos then begin
   seteditpos(start,false);
   seteditpos(stop,true);
