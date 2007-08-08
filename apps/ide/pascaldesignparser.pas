@@ -469,22 +469,29 @@ begin
   try
    with parser do begin
     if adef^.kind in [syk_procdef,syk_classprocimp] then begin
-    nextnonwhitetoken; //procedure or function
-    if adef^.kind = syk_classprocimp then begin
-     nextnonwhitetoken; //classname
-     nextnonwhitetoken; //dot
-    end;
-     if checknamenoident and checkoperator('(') then begin
+     nextnonwhitetoken; //procedure or function
+     if adef^.kind = syk_classprocimp then begin
+      nextnonwhitetoken; //classname
+      nextnonwhitetoken; //dot
+     end;
+     nextnonwhitetoken;  //procname
+     if checkoperator('(') then begin
       repeat
        while not eof and not checkoperator(':') do begin
         nexttoken;
        end;
        scope.addidents(parser);
        while not eof and not checkoperator(';') do begin
+        if checkoperator(')') then begin
+         break;
+        end;
         nexttoken;
        end;
       until eof;
      end;
+     if checkoperator(':') then begin
+      scope.addidents(parser);
+     end;       
     end
     else begin
 //     ident1:= getident;
