@@ -468,7 +468,7 @@ begin
   parser:= tpascalparser.create(designer.designfiles,atext);
   try
    with parser do begin
-    if adef^.kind in [syk_procdef,syk_classprocimp] then begin
+    if adef^.kind in [syk_procdef,syk_classprocimp,syk_procimp] then begin
      nextnonwhitetoken; //procedure or function
      if adef^.kind = syk_classprocimp then begin
       nextnonwhitetoken; //classname
@@ -2032,6 +2032,8 @@ begin
   end
   else begin
    while not eof do begin
+    skipwhitespace;
+    pos1:= sourcepos;
     int1:= getident;
     case pascalidentty(int1) of
      id_type: begin
@@ -2045,7 +2047,6 @@ begin
      end;
      id_procedure,id_function: begin
       po1:= procedurelist.newitem;
-      pos1:= lasttokenpos;
       if parseprocedureheader(pascalidentty(int1),po1) then begin
        deflist.add(pos1,sourcepos,po1);
       end
