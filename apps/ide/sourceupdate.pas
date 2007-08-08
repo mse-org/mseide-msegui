@@ -741,7 +741,8 @@ function tsourceupdater.getdefinfotext(const adef: pdefinfoty): string;
 var
  item1: sourceitemty;
 begin
- if adef^.kind in [syk_vardef,syk_classdef,syk_procdef,syk_procimp1] then begin
+ if adef^.kind in [syk_vardef,syk_classdef,syk_procdef,syk_procimp,
+                         syk_classprocimp] then begin
   item1.filename:= adef^.pos.filename;
   item1.startoffset:= adef^.pos.offset;
   item1.endoffset:= adef^.stop1.offset;
@@ -803,7 +804,7 @@ begin
     getidents(po1,sourcefo.gettextstream(designer.designfiles.getname(
                               po1^.pos.filename),false));
    end;
-   syk_vardef,syk_classdef,syk_procdef: begin
+   syk_vardef,syk_classdef,syk_procdef,syk_classprocimp,syk_procimp: begin
     parsedef(po1,str1,list1);
     pos1.line:= apos.line - po1^.pos.line;
     if pos1.line = 0 then begin
@@ -857,7 +858,7 @@ begin
   ar1:= getidentpath(infopo,apos,true,scope1);
   if scope1.finddef(ar1,scopes,defs,false,dsl_normal,syk_nopars) then begin
    for int1:= 0 to high(defs) do begin
-    if defs[int1]^.kind in [syk_procdef,syk_procimp1] then begin
+    if defs[int1]^.kind in [syk_procdef,syk_procimp] then begin
      case scopes[int1].kind of
       syk_classdef: begin
        setlength(result,high(result) + 2);
@@ -1025,7 +1026,7 @@ begin
      po2:= scope.parent.find(str1,syk_classprocimp);
     end
     else begin
-     po2:= scope.find(po1^.name,syk_procimp1);
+     po2:= scope.find(po1^.name,syk_procimp);
     end;
    end
    else begin
@@ -1526,7 +1527,7 @@ var
  procinfo: procedureinfoty;
 begin
  result:= nil;
- if adef^.kind in [syk_vardef,syk_procdef,syk_procimp1] then begin
+ if adef^.kind in [syk_vardef,syk_procdef,syk_procimp] then begin
   str1:= getdefinfotext(adef);
   if str1 <> '' then begin
    parser:= tpascaldesignparser.create(designer.designfiles,str1);

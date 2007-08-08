@@ -227,7 +227,7 @@ type
    filename: filenamety;
   end;
   symbolkindty = (syk_none,syk_nopars,syk_substr,syk_deleted,syk_root,syk_classdef,
-                  syk_procdef,syk_procimp1,syk_classprocimp,
+                  syk_procdef,syk_procimp,syk_classprocimp,
                   syk_vardef,syk_constdef,syk_typedef,syk_identuse);
   defnamety = record
    name: string;
@@ -248,7 +248,7 @@ type
    deflist: tdeflist; //can be nil
    case kind: symbolkindty of
     syk_classdef: (classindex: integer);
-    syk_procdef: (procindex: integer);
+    syk_procdef,syk_classprocimp,syk_procimp: (procindex: integer);
     syk_identuse: (identlen: integer; identflags: identflagsty);
     syk_vardef: (varflags: varflagsty);
   end;
@@ -459,6 +459,7 @@ end;
 procedure parsedef(const adef: pdefinfoty; out atext: string; out scope: tdeflist);
 var
  parser: tpascalparser;
+ bo1: boolean;
 // ident1: integer;
 begin
  scope:= tdeflist.create(adef^.kind);
@@ -467,7 +468,14 @@ begin
   parser:= tpascalparser.create(designer.designfiles,atext);
   try
    with parser do begin
-    if adef^.kind = syk_procdef then begin
+    if adef^.kind in [syk_procimp,syk_classprocimp] then begin
+     nextnonwhitetoken; //procedure or function
+    end;
+    if adef^.kind = syk_classprocimp then begin
+     nextnonwhitetoken; //classname
+     nextnonwhitetoken; //dot
+    end;
+    if adef^.kind in [syk_procdef,syk_classprocimp] then begin
      if checknamenoident and checkoperator('(') then begin
       repeat
        while not eof and not checkoperator(':') do begin
@@ -484,7 +492,11 @@ begin
 //     ident1:= getident;
      if checknamenoident then begin
       if adef^.kind = syk_vardef then begin
-       if checkoperator(':') then begin
+       bo1:= true;
+       while bo1 and checkoperator(',') do begin
+        bo1:= checknamenoident;
+       end;
+       if bo1 and checkoperator(':') then begin
         scope.addidents(parser);
        end;
       end
@@ -1822,11 +1834,10 @@ var
        po2:= po1^.procedurelist.newitem;
        setprocinfo(po2);
       end;
-      if po2 <> nil then begin
-       po2^.impheaderstartpos:= pos1;
-       po2^.impheaderendpos:= sourcepos;
-      end;
-      po3^.procindex:= po2^.b.index;
+//      if po2 <> nil then begin
+//       po2^.impheaderstartpos:= pos1;
+//       po2^.impheaderendpos:= sourcepos;
+//      end;
       deflist1.fparentscope:= po1^.deflist;
      end
      else begin
@@ -1837,10 +1848,15 @@ var
       end;
       po3:= funitinfopo^.deflist.beginnode(
                 lstringtostring(procname)+mangleprocparams(methodinfo),
-                syk_procimp1,pos1,sourcepos);
+                syk_procimp,pos1,sourcepos);
       deflist1:= po3^.deflist;
       po3^.procindex:= po2^.b.index;
       po2:= nil;
+     end;
+     if po2 <> nil then begin
+      po3^.procindex:= po2^.b.index;
+      po2^.impheaderstartpos:= pos1;
+      po2^.impheaderendpos:= sourcepos;
      end;
      while not eof do begin
       if getident(aident) then begin
@@ -2284,7 +2300,7 @@ begin
     end;
    end
    else begin
-    if (ar4[int1]^.kind in [syk_vardef,syk_procdef,syk_procimp1]) and (high(anamepath) > 0) then begin
+    if (ar4[int1]^.kind in [syk_vardef,syk_procdef,syk_procimp]) and (high(anamepath) > 0) then begin
      ar1:= sourceupdater.gettype(ar4[int1]);
      stackarray(copy(anamepath,1,bigint),ar1);
      sourceupdater.resetunitsearched;

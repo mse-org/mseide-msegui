@@ -200,6 +200,7 @@ type
    property token: ptokenty read fto;
    property acttoken: tokenidty read getacttoken write setacttoken;
    procedure nexttoken;
+   procedure nextnonwhitetoken;
    procedure lasttoken;
 
    function gettoken: string;
@@ -1025,6 +1026,12 @@ begin
   repeat
   until (fto^.kind <> tk_fileend1) or not exitinclude;
  end;
+end;
+
+procedure tparser.nextnonwhitetoken;
+begin
+ skipwhitespace;
+ nexttoken;
 end;
 
 procedure tparser.lasttoken;
