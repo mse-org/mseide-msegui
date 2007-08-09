@@ -406,27 +406,29 @@ var
  po1: pintegeraty;
  int1,int2: integer;
 begin
- if fexecstamp <> mainfo.execstamp then begin
-  fexecstamp:= mainfo.execstamp;
-  application.beginwait;
-  if mainfo.gdb.listlines(edit.filename,ar1,ar2) = gdb_ok then begin
-   po1:= pintegeraty(dataicon.datalist.datapo);
-   for int1:= 0 to dataicon.datalist.count - 1 do begin
-    po1^[int1]:= po1^[int1] and (bmbitmask or integer($80000000));
-   end;
-   int2:= dataicon.datalist.count;
-   for int1:= 0 to high(ar1) do begin
-    if (ar1[int1] > 0) and (ar1[int1] <= int2) then begin
-     po1^[ar1[int1]-1]:= po1^[ar1[int1]-1] or integer($80000008);
+ if not mainfo.gdb.running then begin
+  if fexecstamp <> mainfo.execstamp then begin
+   fexecstamp:= mainfo.execstamp;
+   application.beginwait;
+   if mainfo.gdb.listlines(edit.filename,ar1,ar2) = gdb_ok then begin
+    po1:= pintegeraty(dataicon.datalist.datapo);
+    for int1:= 0 to dataicon.datalist.count - 1 do begin
+     po1^[int1]:= po1^[int1] and (bmbitmask or integer($80000000));
     end;
+    int2:= dataicon.datalist.count;
+    for int1:= 0 to high(ar1) do begin
+     if (ar1[int1] > 0) and (ar1[int1] <= int2) then begin
+      po1^[ar1[int1]-1]:= po1^[ar1[int1]-1] or integer($80000008);
+     end;
+    end;
+    updatebreakpointicons;
+    dataicon.datalist.change(-1);
+   end
+   else begin
+    cleardebuglines;
    end;
-   updatebreakpointicons;
-   dataicon.datalist.change(-1);
-  end
-  else begin
-   cleardebuglines;
+   application.endwait;
   end;
-  application.endwait;
  end;
 end;
 

@@ -1686,6 +1686,7 @@ begin
      dec(flayoutupdating);
     end;
    end;
+   updatelayout;
   end;
  end;
 end;
