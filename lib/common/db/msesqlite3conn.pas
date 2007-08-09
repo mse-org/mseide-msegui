@@ -802,7 +802,7 @@ var
  int1: integer;
 begin
  err:= nil;
- int1:= sqlite3_exec(fhandle,pchar(asql),nil,nil,@err);
+ int1:= sqlite3_exec(fhandle,pchar(asql),nil,nil^,@err);
  if err <> nil then begin
   str1:= err;
   sqlite3_free(err);
@@ -849,14 +849,14 @@ begin
  result:= true;
 end;
 
-function execcallback(adata: pointer; ncols: longint; //adata = pstringarty
+function execcallback(var adata; ncols: longint; //adata = stringarty
                 avalues: PPchar; anames: PPchar):longint; cdecl;
 var
  int1: integer;
 begin
- setlength(pstringarty(adata)^,ncols);
+ setlength(stringarty(adata),ncols);
  for int1:= 0 to ncols - 1 do begin
-  pstringarty(adata)^[int1]:= pcharpoaty(avalues)^[int1];
+  stringarty(adata)[int1]:= pcharpoaty(avalues)^[int1];
  end;
  result:= 0;
 end;
@@ -864,20 +864,24 @@ end;
 function tsqlite3connection.stringquery(const asql: string): stringarty;
 begin
  result:= nil;
- checkerror(sqlite3_exec(fhandle,pchar(asql),@execcallback,@result,nil));
+ checkerror(sqlite3_exec(fhandle,pchar(asql),@execcallback,result,nil));
 end;
 
-function execscallback(adata: pointer; ncols: longint; //adata = pstringarty
+function execscallback(var adata; ncols: longint; //adata = stringarty
                 avalues: PPchar; anames: PPchar):longint; cdecl;
 var
  int1: integer;
  po1: pstringarty;
+ po2: pstring;
 begin
- setlength(pstringararty(adata)^,high(pstringararty(adata)^)+2);
- po1:= @(pstringararty(adata)^[high(pstringararty(adata)^)]);
+   //@ operator and some indexing do not work with -O2 and FPC 2.2
+ setlength(stringararty(adata),high(stringararty(adata))+2);
+ po1:= pointer(adata) + high(stringararty(adata))*sizeof(pointer);
  setlength(po1^,ncols);
+ po2:= pointer(po1^);
  for int1:= 0 to ncols - 1 do begin
-  po1^[int1]:= pcharpoaty(avalues)^[int1];
+  po2^:= avalues[int1];
+  inc(po2);
  end;
  result:= 0;
 end;
@@ -885,7 +889,8 @@ end;
 function tsqlite3connection.stringsquery(const asql: string): stringararty;
 begin
  result:= nil;
- checkerror(sqlite3_exec(fhandle,pchar(asql),@execscallback,@result,nil));
+// checkerror(sqlite3_exec(fhandle,pchar(asql),@execscallback,@result,nil));
+ checkerror(sqlite3_exec(fhandle,pchar(asql),@execscallback,result,nil));
 end;
 
 function tsqlite3connection.getprimarykeyfield(const atablename: string;

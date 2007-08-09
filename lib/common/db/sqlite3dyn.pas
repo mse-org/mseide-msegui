@@ -96,7 +96,10 @@ type
 //Notice that most functions were named using as prefix the function name that uses them,
 //rather than describing their functions  
 
-  sqlite3_callback = function (_para1:pointer; _para2:longint; _para3:PPchar; _para4:PPchar):longint;cdecl;
+//  sqlite3_callback = function (_para1:pointer; _para2:longint; _para3:PPchar; _para4:PPchar):longint;cdecl;
+  sqlite3_callback = function (var _para1; _para2:longint;
+              _para3:PPchar; _para4:PPchar):longint;cdecl;
+  //@ operator does not work with dynamic arrays, -O2 and FPC 2_2            
   busy_handler_func = function (_para1:pointer; _para2:longint):longint;cdecl;
   sqlite3_set_authorizer_func = function (_para1:pointer; _para2:longint; _para3:Pchar; _para4:Pchar; _para5:Pchar; _para6:Pchar):longint;cdecl;
   sqlite3_trace_func = procedure (_para1:pointer; _para2:Pchar);cdecl;
@@ -190,8 +193,10 @@ Const
 
 var
  sqlite3_close: function(_para1:Psqlite3):longint; cdecl;
+// sqlite3_exec: function(_para1: Psqlite3; sql: Pchar; _para3: sqlite3_callback;
+//              _para4: pointer; errmsg: PPchar): longint; cdecl;
  sqlite3_exec: function(_para1: Psqlite3; sql: Pchar; _para3: sqlite3_callback;
-              _para4: pointer; errmsg: PPchar): longint; cdecl;
+              var _para4; errmsg: PPchar): longint; cdecl;
  sqlite3_last_insert_rowid: function(_para1: Psqlite3): sqlite_int64; cdecl;
  sqlite3_changes: function(_para1: Psqlite3): longint; cdecl;
  sqlite3_total_changes: function(_para1: Psqlite3): longint; cdecl;
