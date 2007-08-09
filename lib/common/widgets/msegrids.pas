@@ -236,6 +236,7 @@ type
   private
    fstart,fend: integer;
    fcellrect: rectty;
+   ftag: integer;
    function getframe: tcellframe;
    procedure setframe(const Value: tcellframe);
    function getface: tcellface;
@@ -320,6 +321,7 @@ type
                   stored iscolorselectstored default cl_default;
    property coloractive: colorty read fcoloractive write setcoloractive
                   stored iscoloractivestored default cl_none;
+   property tag: integer read ftag write ftag;
  end;
 
  gridpropclassty = class of tgridprop;
