@@ -2475,12 +2475,12 @@ end;
 procedure tcol.setwidth(const Value: integer);
 begin
  if fwidth <> value then begin
-//  if value < 1 then begin
-//   fwidth:= 1;
-//  end
-//  else begin
+  if value < 0 then begin
+   fwidth:= 0;
+  end
+  else begin
   fwidth := Value;
-//  end;
+  end;
   fgrid.layoutchanged;
   updatepropwidth;
  end;
