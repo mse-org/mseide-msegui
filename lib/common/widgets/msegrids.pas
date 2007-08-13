@@ -469,6 +469,10 @@ type
    function getcellorigin: pointty;
    function getvisible: boolean;
    procedure setvisible(const avalue: boolean);
+   function getenabled: boolean;
+   procedure setenabled(const avalue: boolean);
+   function getreadonly: boolean;
+   procedure setreadonly(const avalue: boolean);
   protected
    fdata: tdatalist;
    fname: string;
@@ -511,6 +515,8 @@ type
              //row < 0 -> whole col
    property cellorigin: pointty read getcellorigin;    //org = grid.paintpos
    property visible: boolean read getvisible write setvisible;
+   property enabled: boolean read getenabled write setenabled;
+   property readonly: boolean read getreadonly write setreadonly;
   published
    property options; //default defaultdatacoloptions;
    property widthmin: integer read fwidthmin write setwidthmin default 1;
@@ -1118,7 +1124,6 @@ end;
    fnoshowcaretrect: integer;
    finvalidatedcells: gridcoordarty;
 
-   ffocuscount: integer;
    foncellevent: celleventty;
    fonrowsmoved: griddatamovedeventty;
    fonrowdatachanged: griddataeventty;
@@ -1193,6 +1198,7 @@ end;
    procedure setzebra_height(const avalue: integer);
    procedure setzebra_step(const avalue: integer);
   protected
+   ffocuscount: integer;
    fpropcolwidthref: integer;
    fzebra_start: integer;
    fzebra_color: colorty;
@@ -4137,16 +4143,22 @@ const
  mask: coloptionsty = [co_fill,co_proportional];
 var
  optionsbefore: coloptionsty;
+ optionsplusdelta: coloptionsty;
 begin
  optionsbefore:= foptions;
  inherited setoptions(coloptionsty(setsinglebit(
          {$ifdef FPC}longword{$else}longword{$endif}(value),
          {$ifdef FPC}longword{$else}longword{$endif}(foptions),
          {$ifdef FPC}longword{$else}longword{$endif}(mask))));
- if (co_focusselect in
-   coloptionsty((longword(optionsbefore) xor longword(foptions)) and longword(value))) and
+ optionsplusdelta:= coloptionsty((longword(optionsbefore) xor longword(foptions)) and 
+                                                    longword(value));
+ if (co_focusselect in optionsplusdelta) and
    (fgrid.ffocusedcell.col = findex) and (fgrid.ffocusedcell.row >= 0) then begin
-    fgrid.selectcell(makegridcoord(findex,fgrid.ffocusedcell.row),csm_select{true,false});
+    fgrid.selectcell(makegridcoord(findex,fgrid.ffocusedcell.row),csm_select);
+ end;
+ if (co_disabled in optionsplusdelta) and 
+                              (fgrid.ffocusedcell.col = colindex) then begin
+  fgrid.colstep(fca_focusin,1,false);
  end;
 end;
 
@@ -4262,6 +4274,36 @@ begin
  end
  else begin
   options:= options + [co_invisible];
+ end;
+end;
+
+function tdatacol.getenabled: boolean;
+begin
+ result:= not (co_disabled in foptions);
+end;
+
+procedure tdatacol.setenabled(const avalue: boolean);
+begin
+ if avalue then begin
+  options:= options - [co_disabled];
+ end
+ else begin
+  options:= options + [co_disabled];
+ end;
+end;
+
+function tdatacol.getreadonly: boolean;
+begin
+ result:= co_readonly in foptions;
+end;
+
+procedure tdatacol.setreadonly(const avalue: boolean);
+begin
+ if avalue then begin
+  options:= options + [co_readonly];
+ end
+ else begin
+  options:= options - [co_readonly];
  end;
 end;
 

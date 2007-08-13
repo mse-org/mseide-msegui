@@ -36,6 +36,8 @@ type
    fstatfile: tstatfile;
    fstatvarname: msestring;
    procedure setstatfile(const Value: tstatfile);
+   function getreadonly: boolean;
+   procedure setreadonly(const avalue: boolean);
   protected
    fgridintf: iwidgetgrid;
    function getgridintf: iwidgetgrid;
@@ -52,6 +54,7 @@ type
              //used for clipboard paste in widgetgrid
    function datatotext(const data): msestring; virtual; abstract;
    procedure valuetotext;
+   procedure setenabled(const avalue: boolean); override;
    procedure dodefocus; override;
    procedure dofocus; override;
    procedure formatchanged;
@@ -119,6 +122,7 @@ type
    function checkvalue(const quiet: boolean = false): boolean; virtual;
    function canclose(const newfocus: twidget): boolean; override;
    function edited: boolean;
+   property readonly: boolean read getreadonly write setreadonly;
   published
    property statfile: tstatfile read fstatfile write setstatfile;
    property statvarname: msestring read getstatvarname write fstatvarname;
@@ -1552,6 +1556,29 @@ begin
               fgridintf.nullcheckneeded(newfocus);
   end;
  end;
+end;
+
+procedure tdataedit.setenabled(const avalue: boolean);
+begin
+ inherited;
+ if (fgridintf <> nil) and not (csloading in componentstate) then begin
+  fgridintf.getcol.enabled:= avalue;
+ end;
+end;
+
+function tdataedit.getreadonly: boolean;
+begin
+ result:= oe_readonly in foptionsedit;
+end;
+
+procedure tdataedit.setreadonly(const avalue: boolean);
+begin
+ if avalue then begin
+  optionsedit:= optionsedit + [oe_readonly];
+ end
+ else begin
+  optionsedit:= optionsedit - [oe_readonly];
+ end;  
 end;
 
 { tcustomstringedit }

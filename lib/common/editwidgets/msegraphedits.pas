@@ -71,6 +71,8 @@ type
    procedure setcolorglyph(const Value: colorty);
    procedure setstatfile(const Value: tstatfile);
    procedure setoptionsedit(const avalue: optionseditty);
+   function getreadonly: boolean;
+   procedure setreadonly(const avalue: boolean);
   protected
    fgridintf: iwidgetgrid;
    
@@ -78,6 +80,7 @@ type
    procedure updateoptions; virtual;
    procedure loaded; override;
    procedure internalcreateframe; override;
+   procedure setenabled(const avalue: boolean); override;
 
    function getgridintf: iwidgetgrid;
    procedure checkgrid;
@@ -148,6 +151,7 @@ type
 //   property oncellevent: celleventty read foncellevent write foncellevent;
    property colorglyph: colorty read fcolorglyph write setcolorglyph
            default cl_glyph;
+   property readonly: boolean read getreadonly write setreadonly;
   published
    property statfile: tstatfile read fstatfile write setstatfile;
    property statvarname: msestring read getstatvarname write fstatvarname;
@@ -1373,6 +1377,29 @@ begin
  with fgridintf.getcol do begin
   datalist.Assign(tdatalist(value));
  end;
+end;
+
+procedure tgraphdataedit.setenabled(const avalue: boolean);
+begin
+ inherited;
+ if (fgridintf <> nil) and not (csloading in componentstate) then begin
+  fgridintf.getcol.enabled:= avalue;
+ end;
+end;
+
+function tgraphdataedit.getreadonly: boolean;
+begin
+ result:= oe_readonly in foptionsedit;
+end;
+
+procedure tgraphdataedit.setreadonly(const avalue: boolean);
+begin
+ if avalue then begin
+  optionsedit:= optionsedit + [oe_readonly];
+ end
+ else begin
+  optionsedit:= optionsedit - [oe_readonly];
+ end;  
 end;
 
 { ttogglegraphdataedit}

@@ -764,10 +764,12 @@ var
  widget1: twidget;
  activewidgetbefore: twidget;
  intf: igridwidget;
-
+ focuscount: integer;
+ 
 begin
 // inherited;
  with twidgetgrid(fgrid) do begin
+  focuscount:= ffocuscount;
   activewidgetbefore:= factivewidget;
   if not enter then begin
    factivewidget:= nil;
@@ -808,10 +810,14 @@ begin
       setfocus(fgrid.active);
      end;
     end;
-    factivewidget:= widget1;
+    if ffocuscount = focuscount then begin
+     factivewidget:= widget1;
+    end;
    end
    else begin
-    factivewidget:= nil;
+    if ffocuscount = focuscount then begin
+     factivewidget:= nil;
+    end;
    end;
    if (activewidgetbefore = nil) and (cellbefore.col >= 0) then begin
     intf:= twidgetcol(fdatacols[cellbefore.col]).fintf;
