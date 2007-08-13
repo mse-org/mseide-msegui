@@ -167,7 +167,7 @@ type
  sqlresultoptionty = (sro_utf8);
  sqlresultoptionsty = set of sqlresultoptionty;
  
- tsqlresult = class(tmsecomponent,isqlpropertyeditor,isqlclient)
+ tsqlresult = class(tmsecomponent,isqlpropertyeditor,isqlclient,itransactionclient)
   private
    fsql: tstringlist;
    fopenafterread: boolean;
@@ -203,6 +203,7 @@ type
    procedure prepare;
    procedure unprepare;
    procedure execute;
+   procedure settransaction(const avalue: tmdbtransaction);
    //idatabaseclient
    procedure setdatabase(const avalue: tmdatabase);
    function getname: ansistring;
@@ -700,7 +701,12 @@ end;
 
 procedure tsqlresult.setsqltransaction(const avalue: tsqltransaction);
 begin
- ftransaction:= avalue;
+ settransaction(avalue);
+end;
+
+procedure tsqlresult.settransaction(const avalue: tmdbtransaction);
+begin
+ dosettransaction(itransactionclient(self),avalue,ftransaction);
 end;
 
 procedure tsqlresult.open;

@@ -503,26 +503,8 @@ end;
 Procedure tmdbdataset.SetTransaction (const Value : tmdbtransaction);
 begin
  dosettransaction(itransactionclient(self),value,ftransaction);
- {
-  CheckInactive;
-  If Value<>FTransaction then
-    begin
-    If Assigned(FTransaction) then
-      FTransaction.UnregisterDataset(itransactionclient(Self));
-    If Value<>Nil Then
-      Value.RegisterDataset(itransactionclient(Self));
-    FTransaction:=Value;
-    end;
-}
 end;
-{
-Procedure tmdbdataset.CheckDatabase;
 
-begin
-  If (FDatabase=Nil) then
-    DatabaseError(SErrNoDatabaseAvailable,Self)
-end;
-}
 function tmdbdataset.getinstance: tobject;
 begin
  result:= self;
