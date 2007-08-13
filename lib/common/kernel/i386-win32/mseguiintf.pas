@@ -1187,8 +1187,8 @@ var
 begin
  result:= false;
  with drawinfo.getfont.fontdata^ do begin
-  height:= height shr fontsizeshift;
-  width:= width shr fontsizeshift;
+  height:= (height + fontsizeroundvalue) shr fontsizeshift;
+  width:= (width + fontsizeroundvalue) shr fontsizeshift;
   fontinfo1:= defaultfontinfo;
   with fontinfo1 do begin
    if height <> 0 then begin
@@ -1812,7 +1812,7 @@ begin
   if mask * [gvm_linewidth,gvm_dashes,gvm_capstyle,gvm_joinstyle] <> [] then begin
    flags:= flags - [gcf_foregroundpenvalid];
    peninfo:= lineinfo;
-   peninfo.width:= peninfo.width shr linewidthshift;
+   peninfo.width:= (peninfo.width + linewidthroundvalue) shr linewidthshift;
   end;
   if gvm_rasterop in mask then begin
    exclude(flags,gcf_rasterop);

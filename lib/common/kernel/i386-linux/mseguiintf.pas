@@ -3038,7 +3038,7 @@ begin
   end;
   if gvm_linewidth in mask then begin
    xmask:= xmask or gclinewidth;
-   xvalues.line_width:= lineinfo.width shr linewidthshift;
+   xvalues.line_width:= (lineinfo.width + linewidthroundvalue) shr linewidthshift;
   end;
   if gvm_dashes in mask then begin
    with lineinfo do begin
@@ -3682,8 +3682,8 @@ begin
  ar1:= nil; //compiler warning;
  fontinfo:= defaultfontinfo;
  with pfontdataty(@fontdata)^ do begin
-  height:= height shr fontsizeshift;
-  width:= width shr fontsizeshift;
+  height:= (height + fontsizeroundvalue) shr fontsizeshift;
+  width:= (width + fontsizeroundvalue) shr fontsizeshift;
   if height <> 0 then begin
    fontinfo[fn_pixel_size]:= inttostr(height);
   end;

@@ -25,7 +25,9 @@ const
  blueshift = 0;
 
  linewidthshift = 16;
+ linewidthroundvalue = $8000;
  fontsizeshift = 16;
+ fontsizeroundvalue = $8000;
  
  invalidgchandle = cardinal(-1);
  
@@ -2744,7 +2746,7 @@ end;
 
 function tfont.getheight: integer;
 begin
- result:= finfopo^.height shr fontsizeshift;
+ result:= (finfopo^.height + fontsizeroundvalue) shr fontsizeshift;
 end;
 
 procedure tfont.setheight(const avalue: integer);
@@ -2757,7 +2759,7 @@ end;
 
 function tfont.getwidth: integer;
 begin
- result:= finfopo^.width shr fontsizeshift;
+ result:= (finfopo^.width + fontsizeroundvalue) shr fontsizeshift;
 end;
 
 procedure tfont.setwidth(const avalue: integer);
@@ -4528,7 +4530,7 @@ end;
 
 function tcanvas.getlinewidth: integer;
 begin
- result:= fvaluepo^.lineinfo.width shr linewidthshift;
+ result:= (fvaluepo^.lineinfo.width + linewidthroundvalue) shr linewidthshift;
 end;
 
 procedure tcanvas.setlinewidth(Value: integer);

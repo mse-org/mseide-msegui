@@ -1626,6 +1626,9 @@ begin
  end;
  if not FIsEof then begin
   FIsEOF:= not tcustomsqlconnection(database).Fetch(Fcursor);
+  if fiseof then begin
+   fcursor.close;
+  end;
  end;
  Result := not FIsEOF;
 end;

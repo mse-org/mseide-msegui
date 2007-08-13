@@ -771,7 +771,7 @@ begin
     size:= round(defaultfontheight*ppmm);
    end
    else begin
-    size:= height shr fontsizeshift;
+    size:= (height + fontsizeroundvalue) shr fontsizeshift;
    end;
    rea1:= (size / ppmm) * mmtoprintscale;
    scalestring1:= psrealtostr(rea1 * xscale);     //xscale
