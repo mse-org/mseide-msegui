@@ -416,7 +416,7 @@ begin
   Exit;
  end;
  isc_detach_database(@FStatus[0], @FSQLDatabaseHandle);
- CheckError('Close', FStatus);
+// CheckError('Close', FStatus); //no exception on close
 {$IfDef LinkDynamically}
  ReleaseIBase60;
 {$EndIf}
@@ -852,7 +852,7 @@ begin
        translen:= int1;
       end;
      end;
-     FD:= TFieldDef.Create(FieldDefs,AliasName,TransType,
+     FD:= TFieldDef.Create(nil,AliasName,TransType,
                 TransLen,False,(x + 1));
      if TransType = ftBCD then begin
       FD.precision:= SQLLen;
@@ -860,6 +860,7 @@ begin
      {$ifndef mse_FPC_2_2} //???
      FD.DisplayName:= AliasName;
      {$endif}
+     fd.collection:= fielddefs;
     end;
    end;
   end;

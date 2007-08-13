@@ -741,6 +741,7 @@ var
   ColName,TypeName:string;
   FieldType:TFieldType;
   FieldSize:word;
+  fd: tfielddef;
 begin
  fielddefs.clear;
   ODBCCursor:=cursor as TODBCCursor;
@@ -876,7 +877,11 @@ begin
     end;
 
     // add FieldDef
-    TFieldDef.Create(FieldDefs, ColName, FieldType, FieldSize, False, i);
+    fd:= TFieldDef.Create(FieldDefs, ColName, FieldType, FieldSize, False, i);
+    {$ifndef mse_FPC_2_2} 
+    fd.displayname:= colname;
+    {$endif}
+    fd.collection:= fielddefs;
     odbccursor.ffieldnames[i-1]:= colname;
   end;
 end;

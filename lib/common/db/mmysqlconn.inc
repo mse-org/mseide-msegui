@@ -517,13 +517,14 @@ end;
 
 procedure TConnectionName.AddFieldDefs(const cursor: TSQLCursor;
                           const FieldDefs: TfieldDefs);
-
 var
-  C : TCursorName;
-  I, TF, FC: Integer;
-  field: PMYSQL_FIELD;
-  DFT: TFieldType;
-  DFS: Integer;
+ C: TCursorName;
+ I,TF,FC: Integer;
+ field: PMYSQL_FIELD;
+ DFT: TFieldType;
+ DFS: Integer;
+ fd: tfielddef;
+ str1: ansistring;
 
 begin
  fielddefs.clear;
@@ -544,7 +545,13 @@ begin
     end;
    end;
    if MySQLDataType(field^,DFT,DFS) then begin
-    TFieldDef.Create(FieldDefs,field^.name,DFT,DFS,False,TF);
+    str1:= field^.name;
+    fd:= TFieldDef.Create(nil,str1,DFT,DFS,False,TF);
+    {$ifndef mse_FPC_2_2} 
+    fd.displayname:= str1;
+    {$endif}
+    fd.collection:= fielddefs;
+    
     c.MapDSRowToMSQLRow[TF-1] := I;
     inc(TF);
    end

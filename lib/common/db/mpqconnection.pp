@@ -615,12 +615,13 @@ end;
 procedure TPQConnection.AddFieldDefs(const cursor: TSQLCursor;
                     const FieldDefs : TfieldDefs);
 var
-  i         : integer;
-  size      : integer;
-  st        : string;
-  fieldtype : tfieldtype;
-  nFields   : integer;
-
+ i: integer;
+ size: integer;
+ st: string;
+ fieldtype: tfieldtype;
+ nFields: integer;
+ fd: tfielddef;
+ str1: ansistring;
 begin
  fielddefs.clear;
  with tpqcursor(cursor) do begin
@@ -648,7 +649,12 @@ begin
      size:= blobidsize;
     end;
    end;
-   TFieldDef.Create(FieldDefs,PQfname(Res,i),fieldtype,size,False,(i+1));
+   str1:= PQfname(Res,i);
+   fd:= TFieldDef.Create(nil,str1,fieldtype,size,False,(i+1));
+   {$ifndef mse_FPC_2_2} 
+   fd.displayname:= str1;
+   {$endif}
+   fd.collection:= fielddefs;
   end;
   CurTuple:= -1;
  end;

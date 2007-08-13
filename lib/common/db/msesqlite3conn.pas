@@ -356,6 +356,7 @@ var
  size1: word;
  ar1: stringarty;
  defsbefore: array of defbeforety;
+ fd: tfielddef;
 begin
  setlength(defsbefore,fielddefs.count);
  for int1:= 0 to high(defsbefore) do begin
@@ -464,7 +465,11 @@ begin
     ft1:= ftunknown;
     size1:= 0;
    end;
-   tfielddef.create(fielddefs,str1,ft1,size1,false,int1+1);
+   fd:= tfielddef.create(nil,str1,ft1,size1,false,int1+1);
+   {$ifndef mse_FPC_2_2} 
+   fd.displayname:= str1;
+   {$endif}
+   fd.collection:= fielddefs;
   end;
  end;
 end;
