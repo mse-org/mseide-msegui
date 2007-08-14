@@ -168,7 +168,7 @@ ResourceString
   SErrRollbackFailed = 'Rollback transaction failed';
   SErrCommitFailed = 'Commit transaction failed';
   SErrConnectionFailed = 'Connection to database failed';
-  SErrTransactionFailed = 'Start of transacion failed';
+  SErrTransactionFailed = 'Start of transaction failed';
   SErrClearSelection = 'Clear of selection failed';
   SErrExecuteFailed = 'Execution of query failed';
   SErrFieldDefsFailed = 'Can not extract field information from query';
@@ -367,6 +367,7 @@ var
  int1: integer;
 begin
  feventcontroller.disconnect;
+ inherited;
  closeconnection(fhandle);
 {$IfDef LinkDynamically}
  ReleasePostgres3;
@@ -1074,6 +1075,7 @@ begin
   if (fconn <> fhandle) then begin
    closeconnection(fconn);
   end;
+  fconn:= nil;
  end;
 end;
 

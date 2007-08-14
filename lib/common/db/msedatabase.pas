@@ -65,6 +65,8 @@ type
     Procedure CheckInactive;
     procedure EndTransaction; virtual; abstract;
     procedure StartTransaction; virtual; abstract;
+    procedure finalizetransaction; virtual;
+               //called on connection closing
     procedure InternalHandleException; virtual;
     procedure Loaded; override;
   Public
@@ -375,7 +377,10 @@ begin
   If Assigned(FTransactions) then
     begin
     For I:=FTransactions.Count-1 downto 0 do
-      tmdbtransaction(FTransactions[i]).EndTransaction;
+      with tmdbtransaction(FTransactions[i]) do begin
+       EndTransaction;
+       finalizetransaction;
+      end; 
     end;
 end;
 
@@ -666,6 +671,11 @@ begin
  if adduniqueitem(pointerarty(fdatasets),ds) <= int1 then begin
   DatabaseErrorFmt(SDatasetRegistered,[DS.getname]);
  end;
+end;
+
+procedure tmdbtransaction.finalizetransaction;
+begin
+ //dummy
 end;
 {
 Function tmdbtransaction.GetDataset(Index : longint) : tmdbdataset;

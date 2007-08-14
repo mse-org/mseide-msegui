@@ -406,7 +406,7 @@ procedure TODBCConnection.DoInternalDisconnect;
 var
   Res:SQLRETURN;
 begin
-  inherited DoInternalDisconnect;
+  inherited;
 
   // disconnect
   ODBCCheckResult(

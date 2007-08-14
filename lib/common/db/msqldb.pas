@@ -121,7 +121,7 @@ type
   protected
     FConnOptions: sqlconnoptionsty;
    
-  procedure finalizetransaction(const atransaction: tsqlhandle); virtual; 
+   procedure finalizetransaction(const atransaction: tsqlhandle); virtual; 
    procedure setconnected(const avalue: boolean);
    procedure notification(acomponent: tcomponent; operation: toperation); override;
    
@@ -161,6 +161,8 @@ type
     procedure closeds(out activeds: integerarty);
     procedure reopends(const activeds: integerarty);
   public
+    destructor Destroy; override;
+
     procedure updateutf8(var autf8: boolean); virtual;
     procedure FreeFldBuffers(cursor : TSQLCursor); virtual; abstract;
     Function AllocateCursorHandle(const aowner: icursorclient; 
@@ -186,7 +188,6 @@ type
     procedure Close;
     procedure Open;
     property Handle: Pointer read GetHandle;
-    destructor Destroy; override;
     procedure StartTransaction; override;
     procedure EndTransaction; override;
     property ConnOptions: sqlconnoptionsty read FConnOptions;
@@ -264,6 +265,7 @@ type
     function GetHandle : Pointer; virtual;
     Procedure SetDatabase (Value : tmdatabase); override;
     procedure disconnect(const sender: tsqlquery);
+    procedure finalizetransaction; override;
    public
     constructor Create(AOwner : TComponent); override;
     destructor Destroy; override;
@@ -702,6 +704,11 @@ end;
 
 { tcustomsqlconnection }
 
+destructor tcustomsqlconnection.Destroy;
+begin
+ inherited Destroy;
+end;
+
 function tcustomsqlconnection.StrToStatementType(s : string) : TStatementType;
 
 var T : TStatementType;
@@ -740,11 +747,7 @@ end;
 
 procedure tcustomsqlconnection.DoInternalDisconnect;
 begin
-end;
-
-destructor tcustomsqlconnection.Destroy;
-begin
-  inherited Destroy;
+ //dummy
 end;
 
 procedure tcustomsqlconnection.StartTransaction;
@@ -979,6 +982,7 @@ begin
      end;
     end;
     Closetransactions;
+    {
     for int1:= 0 to transactioncount - 1 do begin
      with tsqltransaction(transactions[int1]) do begin
       if ftrans <> nil then begin
@@ -986,6 +990,7 @@ begin
       end;
      end;
     end;
+    }
     DoInternalDisConnect;
     if csloading in ComponentState then begin
      FOpenAfterRead := false;
@@ -1391,10 +1396,8 @@ begin
  If Value <> Database then begin
   CheckInactive;
   If Assigned(Database) then begin
-   with Database as tcustomsqlconnection do begin
-    if ftrans <> nil then begin
-     finalizetransaction(ftrans);
-    end;
+   finalizetransaction;
+   with tcustomsqlconnection(database) do begin
     if Transaction = self then begin 
      Transaction:= nil;
     end;
@@ -1417,6 +1420,13 @@ end;
 procedure TSQLTransaction.setparams(const avalue: TStringList);
 begin
  fparams.assign(avalue);
+end;
+
+procedure TSQLTransaction.finalizetransaction;
+begin
+ if (database <> nil) and (ftrans <> nil) then begin
+  tsqlconnection(database).finalizetransaction(ftrans);
+ end; 
 end;
 
 
