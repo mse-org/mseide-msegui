@@ -573,9 +573,31 @@ end;
 }
 procedure tcustommenu.objectevent(const sender: tobject; const event: objecteventty);
 begin
- if (event = oe_changed) then begin
-  if (sender = ftemplate.face) or (sender = ftemplate.frame) then begin
-   sendchangeevent;
+ case event of
+  oe_changed,oe_destroyed: begin
+   if (sender = ftemplate.face) or (sender = ftemplate.frame) or 
+      (sender = ftemplate.itemface) or (sender = ftemplate.itemframe) or 
+      (sender = ftemplate.itemfaceactive) or 
+      (sender = ftemplate.itemframeactive) then begin
+    if event = oe_destroyed then begin
+     if sender = ftemplate.face then begin
+      ftemplate.face:= nil;
+     end;
+     if sender = ftemplate.frame then begin
+      ftemplate.frame:= nil;
+     end;
+     if sender = ftemplate.itemface then begin
+      ftemplate.itemface:= nil;
+     end;
+     if sender = ftemplate.itemframe then begin
+      ftemplate.itemframe:= nil;
+     end;
+     if sender = ftemplate.itemframeactive then begin
+      ftemplate.itemframeactive:= nil;
+     end;
+    end;
+    sendchangeevent;
+   end;
   end;
  end;
  inherited;
