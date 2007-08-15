@@ -3177,8 +3177,11 @@ begin
   inc(po3);            //segmentend
   po2:= po1;           //counts
   int1:= points.count div 2; //segmentcount
-  bo1:= (win32gcty(gc.platformdata).peninfo.width <= 1) or
-          (win32gcty(gc.platformdata).peninfo.capstyle = cs_butt);
+//  bo1:= (win32gcty(gc.platformdata).peninfo.width <= 1) or
+//          (win32gcty(gc.platformdata).peninfo.capstyle = cs_butt);
+  bo1:= (win32gcty(gc.platformdata).peninfo.width < 1) {or
+          (win32gcty(gc.platformdata).peninfo.capstyle = cs_butt)};
+//  bo1:= false;
   for int2:= 0 to int1 - 1 do begin
    if bo1 then begin
     adjustlineend(po3);

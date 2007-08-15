@@ -1996,8 +1996,8 @@ begin
           end;
          end;
         end;
-        acanvas.drawline(makepoint(int2,fband.clientheight),
-                                              makepoint(int2,0),color);
+        acanvas.drawline(makepoint(int2,fband.clientheight+libottom_dist),
+                                              makepoint(int2,-litop_dist),color);
        end;
       end;
      end;
