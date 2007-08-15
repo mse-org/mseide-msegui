@@ -82,8 +82,11 @@ begin
  registerpropertyeditor(typeinfo(shortcutty),nil,'',tshortcutpropertyeditor);
  registerpropertyeditor(typeinfo(tcollection),nil,'',tcollectionpropertyeditor);
  registerpropertyeditor(typeinfo(tmenuitems),nil,'',tmenuarraypropertyeditor);
- registerpropertyeditor(typeinfo(tcustomframe),twidget,'frame',tframepropertyeditor);
- registerpropertyeditor(typeinfo(tcustomface),twidget,'face',
+// registerpropertyeditor(typeinfo(tcustomframe),twidget,'frame',tframepropertyeditor);
+// registerpropertyeditor(typeinfo(tcustomface),twidget,'face',
+//                             toptionalclasspropertyeditor);
+ registerpropertyeditor(typeinfo(tcustomframe),nil,'',tframepropertyeditor);
+ registerpropertyeditor(typeinfo(tcustomface),nil,'',
                              toptionalclasspropertyeditor);
  registerpropertyeditor(typeinfo(tparentfont),nil,'',
                              tparentfontpropertyeditor);
