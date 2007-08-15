@@ -1570,6 +1570,7 @@ type
    procedure eventloop(const once: boolean = false); 
                         //used in win32 wm_queryendsession and wm_entersizemove
    procedure exitloop;  //used in win32 cancelshutdown
+   procedure receiveevent(const event: tobjectevent); override;
   public
    procedure langchanged;
    procedure checkwindowrect(winid: winidty; var rect: rectty);
@@ -1789,12 +1790,15 @@ type
  tcolorarrayprop1 = class(tcolorarrayprop);
  trealarrayprop1 = class(trealarrayprop);
  tcaret1 = class(tcaret);
-{
- tonterminatedlist = class(tmethodlist)
-  protected
-   procedure doterminated;
+
+ tasyncmessageevent = class(tobjectevent)
+  private
+   fmessage: msestring;
+   fcaption: msestring;
+  public
+   constructor create(const amessage: msestring; const acaption: msestring);
  end;
-}
+ 
  tonterminatequerylist = class(tmethodlist)
   protected
    function doterminatequery: boolean;
@@ -1802,8 +1806,6 @@ type
  end;
  
  tonidlelist = class(tmethodlist)
-//  private
-//   fagain: boolean;
   protected
    function doidle: boolean; //true if again requested
   public
@@ -12130,8 +12132,16 @@ begin
 end;
 
 procedure tapplication.showexception(e: exception; const leadingtext: string = '');
+var
+ str1: ansistring;
 begin
- showmessage(leadingtext + e.Message,'Exception');
+ str1:= leadingtext + e.Message;
+ if not ismainthread then begin
+  postevent(tasyncmessageevent.create(str1,'Exception'));
+ end
+ else begin
+  showmessage(str1,'Exception');
+ end;
 end;
 
 procedure tapplication.handleexception(sender: tobject; const leadingtext: string = '');
@@ -12827,6 +12837,26 @@ begin
    fhinttimer.enabled:= true;
   end;
  end;
+end;
+
+procedure tapplication.receiveevent(const event: tobjectevent);
+begin
+ if (event.kind = ek_user) and (event is tasyncmessageevent) then begin
+  with tasyncmessageevent(event) do begin
+   showmessage(fmessage,fcaption);   
+  end;
+ end;
+ inherited;
+end;
+
+{ tasyncmessageevent }
+
+constructor tasyncmessageevent.create(const amessage: msestring;
+                                            const acaption: msestring);
+begin
+ fmessage:= amessage;
+ fcaption:= acaption;
+ inherited create(ek_user,ievent(application));
 end;
 
 initialization

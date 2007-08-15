@@ -88,7 +88,7 @@ type
 implementation
 
 uses
- msesysintf{,msegui},SysUtils;
+ msesysintf,msegui,SysUtils;
 
 procedure createthread(var info: threadinfoty);
 begin
@@ -168,6 +168,7 @@ begin
   result:= fthreadproc(self);
  except
   result:= -1;
+  application.handleexception(self);
  end;
  fexecresult:= result;
  exclude(fstate,ts_running);

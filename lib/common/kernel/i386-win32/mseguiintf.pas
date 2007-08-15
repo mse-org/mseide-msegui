@@ -198,6 +198,22 @@ type
     tmPitchAndFamily: Byte;
     tmCharSet: Byte;
   end;
+  tGCPRESULTSW = record
+       lStructSize : DWORD;
+       lpOutString : pwidechar;
+       lpOrder : ^UINT;
+       lpDx : ^WINT;
+       lpCaretPos : ^WINT;
+       lpClass : pwidechar;
+       lpGlyphs : ^UINT;
+       nGlyphs : UINT;
+       nMaxFit : UINT;
+    end;
+{$else}
+function GetCharacterPlacementW(DC: HDC; p2: PWideChar; p3, p4: Integer;
+  var p5: TGCPResultsw; p6: DWORD): DWORD; stdcall;
+    external gdi32 name 'GetCharacterPlacementW';
+
 {$endif}
 
 var
@@ -1328,12 +1344,14 @@ begin
      end;
     end
     else begin
+    {
      new(charwidths);
      if not getcharwidth32w(dc1,0,255,charwidths^) then begin
       dispose(charwidths);
       closedc;
       exit;
      end;
+    }
     end;
    end;
    closedc;
@@ -1365,6 +1383,7 @@ var
  overha: integer;
  fh1: hfont;
  gc1: hdc;
+ gcpresults: tgcpresultsw;
 begin
  with drawinfo.gettext16width do begin
   if drawinfo.gc.handle = invalidgchandle then begin
@@ -1375,37 +1394,49 @@ begin
   end;
   fh1:= selectobject(gc1,datapo^.font);
   if fh1 <> 0 then begin
-   result:= 0;
-   int1:= count;
-   po1:= text;
-   with win32fontdataty(datapo^.platformdata) do begin
-    widths:= charwidths;
-    overha:= overhang;
-   end;
-   while int1 > 0 do begin
-    wo1:= word(po1^);
-    if wo1 < 256 then begin
-     inc(result,widths^[wo1]);
-    end
-    else begin
-     int2:= 0;
-     if iswin95 then begin
-      if not getcharwidthw(gc1,wo1,wo1,int2) then begin
-       result:= -1;
-       goto endlab;
-      end;
-      dec(int2,overha);
+   if not iswin95 then begin
+    fillchar(gcpresults,sizeof(gcpresults),0);
+    gcpresults.lstructsize:= sizeof(gcpresults);
+    gcpresults.nglyphs:= count;
+    {$ifdef FPC}
+    result:= getcharacterplacementw(gc1,text,count,0,@gcpresults,0) and $ffff;
+    {$else}
+    result:= getcharacterplacementw(gc1,text,count,0,gcpresults,0) and $ffff;
+    {$endif}
+   end
+   else begin
+    result:= 0;
+    int1:= count;
+    po1:= text;
+    with win32fontdataty(datapo^.platformdata) do begin
+     widths:= charwidths;
+     overha:= overhang;
+    end;
+    while int1 > 0 do begin
+     wo1:= word(po1^);
+     if wo1 < 256 then begin
+      inc(result,widths^[wo1]);
      end
      else begin
-      if not getcharwidth32w(gc1,wo1,wo1,int2) then begin
-       result:= -1;
-       goto endlab;
+      int2:= 0;
+      if iswin95 then begin
+       if not getcharwidthw(gc1,wo1,wo1,int2) then begin
+        result:= -1;
+        goto endlab;
+       end;
+       dec(int2,overha);
+      end
+      else begin
+       if not getcharwidth32w(gc1,wo1,wo1,int2) then begin
+        result:= -1;
+        goto endlab;
+       end;
       end;
+      inc(result,int2);
      end;
-     inc(result,int2);
+     dec(int1);
+     inc(po1);
     end;
-    dec(int1);
-    inc(po1);
    end;
   end
   else begin
@@ -1433,6 +1464,8 @@ var
  overha: integer;
  ahandle: thandle;
  gc1: hdc;
+ gcpresults: tgcpresultsw;
+ 
 begin
  result:= gde_fontmetrics;
  if drawinfo.gc.handle = invalidgchandle then begin
@@ -1444,34 +1477,47 @@ begin
  with drawinfo.getchar16widths do begin
   ahandle:= selectobject(gc1,datapo^.font);
   if ahandle <> 0 then begin
-   po1:= text;
-   po2:= resultpo;
-   with win32fontdataty(datapo^.platformdata) do begin
-    widths:= charwidths;
-    overha:= overhang;
-   end;
-   int1:= count;
-   while int1 > 0 do begin
-    wo1:= word(po1^);
-    if wo1 < 256 then begin
-     po2^:= widths^[wo1];
-    end
-    else begin
-     if iswin95 then begin
-      if not getcharwidthw(gc1,wo1,wo1,po2^) then begin
-       goto endlab;
-      end;
-      dec(po2^,overha);
+   if not iswin95 then begin
+    fillchar(gcpresults,sizeof(gcpresults),0);
+    gcpresults.lstructsize:= sizeof(gcpresults);
+    gcpresults.lpdx:= pointer(resultpo);
+    gcpresults.nglyphs:= count;
+    {$ifdef FPC}
+    getcharacterplacementw(gc1,text,count,0,@gcpresults,0);
+    {$else}
+    getcharacterplacementw(gc1,text,count,0,gcpresults,0);
+    {$endif}
+   end
+   else begin
+    po1:= text;
+    po2:= resultpo;
+    with win32fontdataty(datapo^.platformdata) do begin
+     widths:= charwidths;
+     overha:= overhang;
+    end;
+    int1:= count;
+    while int1 > 0 do begin
+     wo1:= word(po1^);
+     if wo1 < 256 then begin
+      po2^:= widths^[wo1];
      end
      else begin
-      if not getcharwidth32w(gc1,wo1,wo1,po2^) then begin
-       goto endlab;
+      if iswin95 then begin
+       if not getcharwidthw(gc1,wo1,wo1,po2^) then begin
+        goto endlab;
+       end;
+       dec(po2^,overha);
+      end
+      else begin
+       if not getcharwidth32w(gc1,wo1,wo1,po2^) then begin
+        goto endlab;
+       end;
       end;
      end;
+     inc(po1);
+     inc(po2);
+     dec(int1);
     end;
-    inc(po1);
-    inc(po2);
-    dec(int1);
    end;
    selectobject(gc1,ahandle);
    result:= gde_ok;
