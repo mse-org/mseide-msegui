@@ -34,7 +34,7 @@ const
  
 type
 
- dbnavigatoroptionty = (dno_confirmdelete);
+ dbnavigatoroptionty = (dno_confirmdelete,dno_append);
  dbnavigatoroptionsty = set of dbnavigatoroptionty;
 
 const
@@ -1724,6 +1724,9 @@ begin
     bu1:= bu1 + [dbnb_refresh,dbnb_insert,dbnb_delete,dbnb_edit];
    end;
   end;
+  if bof and eof then begin
+   bu1:= bu1 - [dbnb_delete];
+  end;
   if not datasource.dataset.canmodify then begin
    bu1:= bu1 - [dbnb_edit,dbnb_delete,dbnb_insert];
   end;
@@ -1785,9 +1788,17 @@ begin
     dbnb_next: self.moveby(1);
     dbnb_last: last;
     dbnb_insert: begin
+     if dno_append in fintf.getnavigoptions then begin
+      append;
+     end
+     else begin
+      insert;
+     end;
+    {
      if state <> dsinsert then begin
       insert;
      end;
+    }
     end;
     dbnb_delete: begin
      if not (dno_confirmdelete in fintf.getnavigoptions) or 
