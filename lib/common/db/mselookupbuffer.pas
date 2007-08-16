@@ -1204,6 +1204,8 @@ var
  utf8: boolean;
  bo1: boolean;
  ismsestringfield: booleanarty;
+ statebefore: tdatasetstate;
+ eofbefore: boolean;
 begin
  beginupdate;
  try
@@ -1224,6 +1226,8 @@ begin
      datas.active:= true;
      try
       bm:= datas.bookmark;
+      statebefore:= datas.state;
+      eofbefore:= datas.eof;
       try
        getfields(integerf,textf,realf);
        setlength(ismsestringfield,length(textf));
@@ -1294,6 +1298,14 @@ begin
        end;
       finally
        datas.bookmark:= bm;
+       if statebefore = dsinsert then begin
+        if eofbefore then begin
+         datas.append;
+        end
+        else begin
+         datas.insert;
+        end;
+       end;
       end;
      finally
       if not bo1 and (olbdb_closedataset in foptionsdb) then begin
