@@ -312,7 +312,8 @@ type
                                 const atransaction: tsqltransaction) of object;
  sqlscripterroreventty = procedure(const sender: tmsesqlscript;
                                 const adatabase: tcustomsqlconnection;
-             const atransaction: tsqltransaction; const e: exception) of object;
+             const atransaction: tsqltransaction; const e: exception;
+             var handled: boolean) of object;
 
  tmsesqlscript = class(tmsecomponent)
   private
@@ -335,7 +336,8 @@ type
    procedure doafterexecute(const adatabase: tcustomsqlconnection;
                              const atransaction: tsqltransaction);
    procedure doerror(const adatabase: tcustomsqlconnection;
-                            const atransaction: tsqltransaction; const e: exception);
+              const atransaction: tsqltransaction; const e: exception;
+              var handled: boolean);
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -413,7 +415,7 @@ type
 //   fIsPrepared: boolean;
    fbeforeexecute: tmsesqlscript;
     procedure FreeFldBuffers;
-    procedure InitUpdates(ASQL : string);
+//    procedure InitUpdates(ASQL : string);
     function GetIndexDefs : TIndexDefs;
     function GetStatementType : TStatementType;
     procedure SetIndexDefs(AValue : TIndexDefs);
@@ -440,6 +442,7 @@ type
    procedure setbeforeexecute(const avalue: tmsesqlscript);
    function getsqltransaction: tsqltransaction;
    procedure setsqltransaction(const avalue: tsqltransaction);
+   procedure resetparsing;
   protected
    FTableName           : string;
    FReadOnly            : boolean;
@@ -490,7 +493,8 @@ type
     property Prepared : boolean read IsPrepared;
     property connected: boolean read getconnected write setconnected;
   published
-    property ReadOnly : Boolean read FReadOnly write SetReadOnly;
+    property ReadOnly : Boolean read FReadOnly write SetReadOnly default false;
+    property ParseSQL : Boolean read FParseSQL write SetParseSQL default true;
     property params : tmseparams read fparams write setparams;
                        //before SQL
     property SQL : TStringlist read FSQL write setFSQL;
@@ -502,7 +506,6 @@ type
     property UpdateMode : TUpdateMode read FUpdateMode write SetUpdateMode;
     property UsePrimaryKeyAsKey : boolean read FUsePrimaryKeyAsKey write SetUsePrimaryKeyAsKey;
     property StatementType : TStatementType read GetStatementType;
-    property ParseSQL : Boolean read FParseSQL write SetParseSQL;
     Property DataSource : TDatasource Read GetDataSource Write SetDatasource;
     property database: tcustomsqlconnection read getdatabase1 write setdatabase1;
     
@@ -972,7 +975,7 @@ begin
     if fbeforedisconnect <> nil then begin
 //     fbeforedisconnect.execute(self,ftransaction);
      fbeforedisconnect.execute(self);
-     ftransaction.commit;
+//     ftransaction.commit;
     end;
     for int1:= datasetcount - 1 downto 0 do begin
      with tsqlquery(datasets[int1]) do begin
@@ -1598,11 +1601,15 @@ begin
   else begin
    Db.PrepareStatement(Fcursor,sqltr,FSQLBuf,FParams);
   end;
-
+  ftablename:= '';
   if (FCursor.FStatementType = stSelect) then begin
    FCursor.FInitFieldDef := True;
-   if not ReadOnly then begin
-    InitUpdates(FSQLBuf);
+   fupdateable:= not readonly and 
+         (fsqlupdate.count > 0) and (fsqlinsert.count > 0) and 
+                                    (fsqldelete.count > 0);
+   if fparsesql and (pos(',',FFromPart) <= 0) then begin
+    ftablename:= ffrompart;
+    fupdateable:= true;
    end;
   end;
  end;
@@ -1719,6 +1726,14 @@ begin
   end;
 end;
 
+procedure tsqlquery.resetparsing;
+begin
+ FWhereStartPos := 0;
+ FWhereStopPos := 0;
+ ffrompart:= '';
+ ftablename:= '';
+end;
+
 procedure TSQLQuery.SQLParser(var ASQL : string);
 
 type TParsePart = (ppStart,ppSelect,ppWhere,ppFrom,ppGroup,ppOrder,ppComment,ppBogus);
@@ -1731,17 +1746,15 @@ Var
   StrLength               : Integer;
 
 begin
-    PSQL:=Pchar(ASQL);
-    ParsePart := ppStart;
+ PSQL:=Pchar(ASQL);
+ ParsePart := ppStart;
 
-    CurrentP := PSQL-1;
-    PhraseP := PSQL;
+ CurrentP := PSQL-1;
+ PhraseP := PSQL;
+ resetparsing;
 
-    FWhereStartPos := 0;
-    FWhereStopPos := 0;
-
-    repeat begin
-	inc(CurrentP);
+ repeat begin
+ 	inc(CurrentP);
 
         if SkipComments(CurrentP) then
          if ParsePart = ppStart then PhraseP := CurrentP;
@@ -1926,10 +1939,12 @@ begin
     end
 end;
 *)
+{
 procedure TSQLQuery.InitUpdates(ASQL : string);
 begin
  if pos(',',FFromPart) > 0 then begin
-  FUpdateable := False 
+  FUpdateable:= (fsqlupdate.count > 0) and (fsqlinsert.count > 0) and 
+                         (fsqldelete.count > 0);
            // select-statements from more then one table are not updateable
  end
  else begin
@@ -1937,7 +1952,7 @@ begin
   FTableName := FFromPart;
  end;
 end;
-
+}
 procedure TSQLQuery.connect(const aexecute: boolean);
 
   procedure InitialiseModifyQuery(var qry : TSQLQuery; aSQL: TSTringList);  
@@ -2109,27 +2124,31 @@ end;
 procedure TSQLQuery.SetReadOnly(AValue : Boolean);
 
 begin
-  CheckInactive;
-  if not AValue then
-    begin
-    if FParseSQL then FReadOnly := False
-      else DatabaseErrorFmt(SNoParseSQL,['Updating ']);
-    end
-  else FReadOnly := True;
+ CheckInactive;
+ freadonly:= avalue;
+//  if not AValue then
+//    begin
+//    if FParseSQL then FReadOnly := False
+//      else DatabaseErrorFmt(SNoParseSQL,['Updating ']);
+//    end
+//  else FReadOnly := True;
 end;
 
 procedure TSQLQuery.SetParseSQL(AValue : Boolean);
 
 begin
-  CheckInactive;
-  if not AValue then
-    begin
-    FReadOnly := True;
-    Filtered := False;
-    FParseSQL := False;
-    end
-  else
-    FParseSQL := True;
+ CheckInactive;
+ fparsesql:= avalue;
+ if not AValue then begin
+//  FReadOnly := True;
+  Filtered := False;
+//  FParseSQL := False;
+  freequery;
+  resetparsing;
+ end;
+// else begin
+//  FParseSQL := True;
+// end;
 end;
 
 procedure TSQLQuery.SetUsePrimaryKeyAsKey(AValue : Boolean);
@@ -2875,6 +2894,7 @@ var
  str1: string;
  ar1: stringarty;
  int1: integer;
+ bo1: boolean;
 begin
  if adatabase = nil then begin
   adatabase:= fdatabase;
@@ -2899,7 +2919,11 @@ begin
   doafterexecute(adatabase,atransaction);
  except
   on e: exception do begin  
-   doerror(adatabase,atransaction,e);
+   bo1:= false;
+   doerror(adatabase,atransaction,e,bo1);
+   if not bo1 then begin
+    raise;
+   end;
   end;
  end;
 end;
@@ -2940,10 +2964,11 @@ begin
 end;
 
 procedure tmsesqlscript.doerror(const adatabase: tcustomsqlconnection;
-               const atransaction: tsqltransaction; const e: exception);
+               const atransaction: tsqltransaction; const e: exception;
+               var handled: boolean);
 begin
  if canevent(tmethod(fonerror)) then begin
-  fonerror(self,adatabase,atransaction,e);
+  fonerror(self,adatabase,atransaction,e,handled);
  end;
 end;
 
