@@ -208,6 +208,8 @@ var //xft functions
  FcPatternAddLangSet: function(p:PFcPattern; aobject:Pchar; 
                          ls:PFcLangSet):TFcBool;cdecl;
  
+ FcPatternGetString: function(p: PFcPattern; aobject: Pchar; n: integer; 
+                                s: ppchar): tfcresult; cdecl;
  XftDrawDestroy: procedure(draw:PXftDraw); cdecl;
  XftDrawSetClipRectangles: function (draw:PXftDraw; xOrigin:longint;
          yOrigin:longint; rects:PXRectangle; n:longint):TFcBool;cdecl;
@@ -2759,7 +2761,8 @@ begin
      'FcPatternAddMatrix',       //23
      'FcPatternAddCharSet',      //24
      'FcPatternAddBool',         //25
-     'FcPatternAddLangSet'       //26
+     'FcPatternAddLangSet',      //26
+     'FcPatternGetString'        //27
      ],
      [
      {$ifndef FPC}@{$endif}@FcPatternDestroy,          //0
@@ -2788,7 +2791,8 @@ begin
      {$ifndef FPC}@{$endif}@FcPatternAddMatrix,        //23
      {$ifndef FPC}@{$endif}@FcPatternAddCharSet,       //24
      {$ifndef FPC}@{$endif}@FcPatternAddBool,          //25
-     {$ifndef FPC}@{$endif}@FcPatternAddLangSet        //26
+     {$ifndef FPC}@{$endif}@FcPatternAddLangSet,       //26
+     {$ifndef FPC}@{$endif}@FcPatternGetString         //27
      ]);
   getprocaddresses('libXft.so',[
     'XftDrawDestroy',            //0
@@ -3946,6 +3950,9 @@ var
  int1: integer;
  po3,po4: pfcpattern;
  res1: tfcresult;
+ {$ifdef mse_debugxft}
+ po5: pchar;
+ {$endif}
 begin
  setupfontinfo(drawinfo.getfont.fontdata^,fontinfo);
 {$ifdef FPC} {$checkpointer off} {$endif}
@@ -3956,6 +3963,12 @@ begin
    po4:= xftfontmatch(appdisp,xdefaultscreen(appdisp),po3,@res1);
    fcpatterndestroy(po3);
    if po4 <> nil then begin
+   {$ifdef mse_debugxft}
+    if fcpatterngetstring(po4,fc_file,0,@po5) = fcresultmatch then begin
+     writeln('Font found. Name: "'+name+'" Height: '+inttostr(height)+' File:');
+     writeln('"'+string(po5)+'"');
+    end;     
+   {$endif}
     po2:= xftfontopenpattern(appdisp,po4);
 //   str1:= buildxftname(drawinfo.getfont.fontdata^,fontinfo);
 //   po2:= xftfontopenname(appdisp,xdefaultscreen(appdisp),pchar(str1));
