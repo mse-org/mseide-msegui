@@ -1817,11 +1817,12 @@ begin
 	end; { if(1) }
     until CurrentP^=#0; {repeat}
 
-    if (FWhereStartPos > 0) and (FWhereStopPos > 0) then begin
-	system.insert('(',ASQL,FWhereStartPos+1);
-	inc(FWhereStopPos);
-	system.insert(')',ASQL,FWhereStopPos);
-    end;
+ if (FWhereStartPos > 0) and (FWhereStopPos > 0) and 
+              filtered and (filter <> '') then begin
+ 	system.insert('(',ASQL,FWhereStartPos+1);
+ 	inc(FWhereStopPos);
+ 	system.insert(')',ASQL,FWhereStopPos);
+ end;
 //writeln(ASQL);
 end;
 (*
