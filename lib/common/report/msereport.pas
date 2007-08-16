@@ -2970,7 +2970,7 @@ begin
  exclude(fstate,rbs_finish);
  if fvisigrouplink.fieldactive then begin
   fgroupnum:= fvisigrouplink.asinteger;
-  fnextgroupnum:= fgroupnum;
+//  fnextgroupnum:= fgroupnum; set by beginrender
 //  fgroupnum:= fvisigrouplink.aslargeint;
  end;
 end;
@@ -4404,18 +4404,18 @@ var
  bo1,bo2,bo3,bo4,bo5: boolean;
  hascustomdata: boolean;
  
-procedure renderband(const aband: tcustomrecordband);
-begin
- with aband do begin
-  bo4:= bo5 and (bo2 and (bo_oddpage in foptions) or 
-          not bo2 and (bo_evenpage in foptions)); //has data
-  bo4:= not(bo4 or ((bo_once in foptions) and not (rbs_showed in fstate)));
-               //empty
- 
-  render(acanvas,bo4);
-  bo1:= bo1 and bo4;
+ procedure renderband(const aband: tcustomrecordband);
+ begin
+  with aband do begin
+   bo4:= bo5 and (bo2 and (bo_oddpage in foptions) or 
+           not bo2 and (bo_evenpage in foptions)); //has data
+   bo4:= not(bo4 or ((bo_once in foptions) and not (rbs_showed in fstate)));
+                //empty
+  
+   render(acanvas,bo4);
+   bo1:= bo1 and bo4;
+  end;
  end;
-end;
 
 begin
  if not (rpps_inited in fstate) then begin
