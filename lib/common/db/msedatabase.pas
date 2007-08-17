@@ -34,6 +34,8 @@ type
  
  itransactionclient = interface(idbclient)
   procedure settransaction(const avalue: tmdbtransaction);
+  function getactive: boolean;
+  procedure refresh;
  end;
  itransactionclientarty = array of itransactionclient;
  
@@ -73,6 +75,7 @@ type
     constructor Create(AOwner: TComponent); override;
     Destructor destroy; override;
     procedure CloseDataSets;
+    procedure refreshdatasets;
     Property DataBase : tmdatabase Read FDatabase Write SetDatabase;
     property datasets: itransactionclientarty read fdatasets;
   published
@@ -627,6 +630,19 @@ var
 begin
  for int1:= high(fdatasets) downto 0 do begin
   fdatasets[int1].setactive(false);
+ end;
+end;
+
+procedure tmdbtransaction.refreshdatasets;
+var
+ int1: integer;
+begin
+ for int1:= high(fdatasets) downto 0 do begin
+  with fdatasets[int1] do begin
+   if getactive then begin
+    refresh;
+   end;
+  end;
  end;
 end;
 

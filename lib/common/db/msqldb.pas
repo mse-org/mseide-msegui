@@ -233,7 +233,7 @@ type
  
   TCommitRollbackAction = (caNone, caCommit, caCommitRetaining, caRollback,
     caRollbackRetaining);
-  transactionoptionty = (tao_fake,tao_catcherror);
+  transactionoptionty = (tao_fake,tao_catcherror,tao_refreshdatasets);
   transactionoptionsty = set of transactionoptionty;
   sqltransactioneventty = procedure(const sender: tsqltransaction) of object;
   commiterroreventty = procedure(const sender: tsqltransaction;
@@ -1260,13 +1260,20 @@ begin
 end;
 
 function tsqltransaction.docommit(const retaining: boolean): boolean;
+
  procedure dofinish;
  begin
   if not retaining then begin
    closetrans;
    closedatasets;
+  end
+  else begin
+   if tao_refreshdatasets in foptions then begin
+    refreshdatasets;
+   end;
   end;
  end;
+ 
 var
  bo1: boolean;
 begin
@@ -1354,6 +1361,9 @@ begin
   end;
   if not (tao_fake in foptions) then begin
    tcustomsqlconnection(database).RollBackRetaining(FTrans);
+  end;
+  if tao_refreshdatasets in foptions then begin
+   refreshdatasets;
   end;
   if checkcanevent(self,tmethod(fonafterrollbackretaining)) then begin
    fonafterrollback(self);
