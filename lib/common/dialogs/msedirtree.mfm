@@ -1,9 +1,11 @@
 object dirtreefo: tdirtreefo
+  optionswidget = [ow_arrowfocus, ow_subfocus, ow_destroywidgets, ow_hinton, ow_autoscale]
   bounds_x = 80
   bounds_y = 374
   bounds_cx = 300
   bounds_cy = 203
   bounds_cxmin = 200
+  taborder = 1
   visible = False
   container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_subfocus, ow_mousetransparent, ow_destroywidgets, ow_autoscale]
   container.bounds_x = 0
@@ -16,7 +18,7 @@ object dirtreefo: tdirtreefo
   icon.transparency = -2147483648
   moduleclassname = 'tmseform'
   object grid: twidgetgrid
-    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_focusbackonesc, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_focusbackonesc, ow_mousewheel, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
     bounds_x = 0
     bounds_y = 0
     bounds_cx = 300
@@ -27,27 +29,32 @@ object dirtreefo: tdirtreefo
     frame.localprops = [frl_levelo, frl_framewidth, frl_colorframe]
     frame.dummy = 0
     anchors = []
+    fixcols.coloractive = -2147483648
+    fixrows.coloractive = -2147483648
     datacols.count = 1
+    datacols.coloractive = -2147483648
     datacols.items = <    
       item
+        coloractive = -2147483648
         width = 297
         options = [co_readonly, co_fill, co_savevalue]
         widgetname = 'treeitem'
       end>
     datarowlinewidth = 0
-    datarowheight = 15
-    reffontheight = 13
+    datarowheight = 16
+    reffontheight = 14
     object treeitem: ttreeitemedit
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
       bounds_x = 0
       bounds_y = 0
       bounds_cx = 297
-      bounds_cy = 15
+      bounds_cy = 16
       color = -1879048185
       frame.levelo = 0
       frame.colorclient = -2147483646
       frame.localprops = [frl_levelo, frl_colorclient]
       frame.dummy = 0
+      taborder = 1
       visible = False
       optionsedit = [oe_readonly, oe_undoonesc, oe_checkmrcancel, oe_forcereturncheckvalue, oe_locate, oe_savevalue, oe_savestate]
       ondataentered = treeitemondataentered
@@ -58,7 +65,7 @@ object dirtreefo: tdirtreefo
       itemlist.oncreateitem = treeitemoncreateitem
       oncellevent = treeitemoncellevent
       options = [teo_treecolnavig, teo_enteronimageclick]
-      reffontheight = 13
+      reffontheight = 14
     end
   end
 end
