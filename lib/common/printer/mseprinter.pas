@@ -127,6 +127,7 @@ type
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
+   
    procedure endprint; virtual;
    property canvas: tprintercanvas read fcanvas write setcanvas;
    property onpagestart: printereventty read fonpagestart write fonpagestart;
@@ -185,6 +186,9 @@ type
    property printcommand: string read fprintcommand write fprintcommand;
  end;
 
+ tprinterfont = class(tcanvasfont)
+ end;
+ 
  pageskindty = (pk_all,pk_even,pk_odd);
  
  pagerangety = record
@@ -229,6 +233,7 @@ type
    fprinter: tcustomprinter;
    fcolorspace: colorspacety;
    fpreamble: string;
+   function createfont: tcanvasfont; override;
    procedure initprinting(const apreamble: string = '');
    procedure checkgcstate(state: canvasstatesty); override;
    procedure setppmm(avalue: real); override;
@@ -252,8 +257,8 @@ type
                        //info = drawtextinfoty
   public
    constructor create(const user: tcustomprinter; const intf: icanvas);
-   
-   
+   procedure initflags(const dest: tcanvas); override;
+      
    // if cy of destrect = 0 and tf_ycentered in textflags -> place on baseline
    procedure drawtext(var info: drawtextinfoty); overload; virtual;
    procedure drawtext(const atext: richstringty;
@@ -295,12 +300,6 @@ type
    property clientsize: sizety read fclientsize;
    property colorspace: colorspacety read fcolorspace write setcolorspace;
    property pagenumber: integer read fpagenumber;
-   {
-   property firstpage: integer read ffirstpage write ffirstpage default 0;
-                  //null based
-   property lastpage: integer read flastpage write flastpage default bigint;
-                  //null based
-                  }
    property pageskind: pageskindty read fpageskind write fpageskind; 
                    //null based
    property pages: pagerangearty read fpages write setpages;
@@ -382,6 +381,7 @@ uses
  
 type
  tfont1 = class(tfont);
+ tcanvas1 = class(tcanvas);
  
 function stringtopages(const avalue: widestring): pagerangearty;
 var
@@ -642,12 +642,23 @@ end;
 
 { tcustomprintercanvas }
 
-constructor tcustomprintercanvas.create(const user: tcustomprinter; const intf: icanvas);
+constructor tcustomprintercanvas.create(const user: tcustomprinter; 
+                                                       const intf: icanvas);
 begin
  fprinter:= user;
-// flastpage:= bigint;
  inherited create(user,intf);
  include(fstate,cs_internaldrawtext);
+end;
+
+procedure tcustomprintercanvas.initflags(const dest: tcanvas);
+begin
+ inherited;
+ include(tcanvas1(dest).fdrawinfo.gc.drawingflags,df_highresfont);
+end;
+
+function tcustomprintercanvas.createfont: tcanvasfont;
+begin
+ result:= tprinterfont.create(self);
 end;
 
 procedure tcustomprintercanvas.initprinting(const apreamble: string = '');

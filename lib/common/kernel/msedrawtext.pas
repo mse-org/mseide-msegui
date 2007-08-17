@@ -226,7 +226,8 @@ var
  awidth: integer;
  resultpo1: pinteger;
  text1: pmsechar;
-
+ highresfo: boolean;
+ 
  procedure getcharwidths(acount: integer);
  var
   fontmetrics1: fontmetricsty;
@@ -240,6 +241,9 @@ var
    resultpo:= resultpo1;
    text:= text1;
    count:= acount;
+   if highresfo then begin
+    checkhighresfont(datapo,tcanvas1(canvas).fdrawinfo);
+   end;
    gdierror(gui_getchar16widths(drawinfo));
   end;
   if tf_tabtospace in info.flags then begin
@@ -364,7 +368,9 @@ begin
  try
   gdi_lock;
   with info,tcanvas1(canvas),layoutinfo do begin
-   tcanvas1(canvas).checkgcstate([cs_gc]);
+   
+   checkgcstate([cs_gc]);
+   highresfo:= df_highresfont in fdrawinfo.gc.drawingflags;
    canvas.initdrawinfo(drawinfo);
    ascent:= font.ascent;
    descent:= font.descent;

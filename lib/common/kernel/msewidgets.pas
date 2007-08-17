@@ -55,6 +55,7 @@ type
    ffont: tframefont;
    finfo: drawtextinfoty;
    procedure parentfontchanged; override;
+   procedure fontcanvaschanged; override;
    procedure visiblechanged; override;
 
    procedure updaterects; override;
@@ -1350,6 +1351,11 @@ end;
 procedure tcustomcaptionframe.fontchanged(const sender: tobject);
 begin
  internalupdatestate;
+end;
+
+procedure tcustomcaptionframe.fontcanvaschanged;
+begin
+ exclude(fstate,fs_rectsvalid);
 end;
 
 procedure tcustomcaptionframe.dopaintfocusrect(const canvas: tcanvas; const rect: rectty);

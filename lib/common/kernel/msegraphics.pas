@@ -45,7 +45,8 @@ type
                 al_intpol,al_or,al_and);
  alignmentsty = set of alignmentty;
 
- drawingflagty = (df_canvasispixmap,df_canvasismonochrome,df_colorconvert,
+ drawingflagty = (df_canvasispixmap,df_canvasismonochrome,df_highresfont,
+                  df_colorconvert,
                   df_opaque,df_monochrome,df_brush{,df_dashed},df_last = 31);
  drawingflagsty = set of drawingflagty;
 
@@ -74,7 +75,7 @@ type
                  foo_decorative,       // 'D'
                  foo_antialiased,      // 'A'
                  foo_nonantialiased    // 'a'
-//                 foo_xcore,            // 'C'  //seems nt ot wirt with xft2
+//                 foo_xcore,            // 'C'  //seems not to work with xft2
 //                 foo_noxcore           // 'c'
                  );
  fontoptionsty = set of fontoptionty;
@@ -89,6 +90,7 @@ const
 type
  fontdataty = record
   font: fontty;
+  fonthighres: fontty;
   basefont: fontty;
   glyph: unicharty;
   rotation: real; //0..1 -> 0deg..360deg CCW
@@ -353,7 +355,6 @@ type
                  rop_notcopy,rop_notor,rop_nand,rop_set);
 const
  fontstylehandlemask = 3; //[fs_bold,fs_italic]
-// fontstylesmamask = $1f;  //[fs_bold,fs_italic,fs_underline,fs_strikeout,fs_selected]
  fontstylesmamask: fontstylesty = 
            [fs_bold,fs_italic,fs_underline,fs_strikeout,fs_selected];
 
@@ -381,7 +382,7 @@ type
   colorshadow: colorty;
   style: fontstylesty;
   height: integer;
-  width: integer;       
+  width: integer;
   extraspace: integer;
   name: string;
   charset: string;
@@ -516,7 +517,6 @@ type
   colorforeground: pixelty;
   font: fontty;
   fontnum: fontnumty;
-//  brush: pixmapty;
   brush: tsimplebitmap;
   brushorigin: pointty;
   rasterop: rasteropty;
@@ -617,7 +617,7 @@ type
    procedure scale(const ascale: real); virtual;
 
    function gethandleforcanvas(const canvas: tcanvas): fontnumty;
-   property handle: fontnumty read gethandle {write sethandle};
+   property handle: fontnumty read gethandle;
    property ascent: integer read getascent;
    property descent: integer read getdescent;
    property glyphheight: integer read getglyphheight;
@@ -666,7 +666,7 @@ type
   protected
    function gethandle: fontnumty; override;
   public
-   constructor create(acanvas: tcanvas); reintroduce;
+   constructor create(const acanvas: tcanvas); reintroduce;
  end;
 
  gdifunctionty = procedure(var drawinfo: drawinfoty);
@@ -821,6 +821,7 @@ type
    procedure getarcinfo(out startpo,endpo: pointty);
    procedure internaldrawtext(var info); virtual;
                        //info = drawtextinfoty
+   function createfont: tcanvasfont; virtual;
   public
    drawinfopo: pointer; //used to transport additional drawing information
    constructor create(const user: tobject; const intf: icanvas);
@@ -828,6 +829,7 @@ type
    procedure linktopaintdevice(paintdevice: paintdevicety; const gc: gcty;
                 const size: sizety; const cliporigin: pointty);
          //calls reset, resets cliporigin, canvas owns the gc!
+   procedure initflags(const dest: tcanvas); virtual;
    procedure unlink; //frees gc
    procedure initdrawinfo(var adrawinfo: drawinfoty);
    function active: boolean;
@@ -1099,6 +1101,7 @@ procedure gdi_call(const func: gdifuncty; var drawinfo: drawinfoty);
 
 procedure allocbuffer(var buffer: bufferty; size: integer);
 procedure freebuffer(var buffer: bufferty);
+procedure checkhighresfont(const afont: pfontdataty; var drawinfo: drawinfoty);
 function getfontdata(font: fontnumty): pfontdataty;
 function findfontdata(const afont: fontty): pfontdataty;
 function registerfontalias(const alias,name: string;
@@ -1547,6 +1550,25 @@ procedure addreffont(font: fontnumty);
 begin
  if font > 0 then begin
   inc(fonts[font-1].refcount);
+ end;
+end;
+
+procedure checkhighresfont(const afont: pfontdataty; var drawinfo: drawinfoty);
+var
+ fontinfobefore: getfontinfoty;
+begin
+ with afont^ do begin
+  if fonthighres = 0 then begin
+   fontinfobefore:= drawinfo.getfont;
+   with drawinfo.getfont do begin
+    fontdata:= afont;
+    basefont:= 0;
+   end;
+   gdi_lock;
+   gui_getfonthighres(drawinfo);
+   gdi_unlock;   
+   drawinfo.getfont:= fontinfobefore;
+  end;
  end;
 end;
 
@@ -2675,15 +2697,12 @@ begin
    self.finfopo^.extraspace:= finfopo^.extraspace;
    include(changed,cs_font);
   end;
-//    if self.finfopo^.height <> finfopo^.height then begin
-//     changed:= changed + [cs_font,cs_fonthandle];
   self.finfopo^.height:= finfopo^.height;
   self.finfopo^.width:= finfopo^.width;
   self.finfopo^.name:= finfopo^.name;
   self.finfopo^.charset:= finfopo^.charset;
   self.finfopo^.options:= finfopo^.options;
   self.finfopo^.xscale:= finfopo^.xscale;
-//    end;
   if handles then begin
    for int1:= 0 to high(self.finfopo^.handles) do begin
     if self.finfopo^.handles[int1] <> finfopo^.handles[int1] then begin
@@ -2693,6 +2712,9 @@ begin
      changed:= changed + [cs_font,cs_fonthandle];
     end;
    end;
+  end
+  else begin
+   releasehandles;
   end;
  end;
  if changed <> [] then begin
@@ -2932,7 +2954,7 @@ end;
 
 { tcanvasfont }
 
-constructor tcanvasfont.create(acanvas: tcanvas);
+constructor tcanvasfont.create(const acanvas: tcanvas);
 begin
  fcanvas:= acanvas;
  finfopo:= @fcanvas.fvaluepo^.font;
@@ -2964,13 +2986,11 @@ begin
  fintf:= pointer(intf);
  with fvaluestack do begin
   setlength(stack,1);
-//  fillchar(stack[0],sizeof(canvasvaluesty),0);
   count:= 1;
   fvaluepo:= @stack[0];
  end;
- if ffont = nil then begin
-  ffont:= tcanvasfont.create(self);
- end;
+ ffont:= createfont;
+ initflags(self);
  init;
 end;
 
@@ -2980,6 +3000,11 @@ begin
  unlink; //deinit, unregister defaultfont
  ffont.free;
  freebuffer(fdrawinfo.buffer);
+end;
+
+function tcanvas.createfont: tcanvasfont;
+begin
+ result:= tcanvasfont.create(self);
 end;
 
 function tcanvas.getgdifuncs: pgdifunctionaty;
@@ -3027,12 +3052,7 @@ procedure tcanvas.intparametererror(value: integer; const text: string);
 begin
  error(gde_parameter,text + ' ' + inttostr(value));
 end;
-{
-function tcanvas.getgcpo: gcpoty;
-begin
- result:= @fdrawinfo.gc;
-end;
-}
+
 procedure tcanvas.initgcvalues;
 begin
  gccolorbackground:= cl_none;
@@ -3256,6 +3276,7 @@ procedure tcanvas.checkgcstate(state: canvasstatesty);
 var
  values: gcvaluesty;
  bo1,bo2: boolean;
+ po1: pfontdataty;
 begin
  if fdrawinfo.gc.handle = 0 then begin
   icanvas(fintf).gcneeded(self);
@@ -3296,8 +3317,6 @@ begin
    if (df_brush in drawingflags) xor bo2 then begin
     include(values.mask,gvm_brushflag);
    end;
-//   if not (df_brush in drawingflags) and (cs_monochrome in fstate) and
-//         ((acolorforeground <> cl_1) or (then begin
    if (df_brush in drawingflags) and not (cs_brushorigin in fstate) then begin
     include(fstate,cs_brushorigin);
     include(values.mask,gvm_brushorigin);
@@ -3310,7 +3329,6 @@ begin
        include(values.mask,gvm_brush);
        values.brush:= fvaluepo^.brush;
       end;
-//      values.brush:= handle;
       if getmonochrome then begin
        include(drawingflags,df_monochrome);
        include(state,cs_acolorbackground);
@@ -3351,12 +3369,17 @@ begin
    include(drawingflags,df_opaque);
   end;
   if cs_font in state then begin
-   if (afonthandle1 <> gcfonthandle1) {or not (cs_font in fstate)} then begin
+   if (afonthandle1 <> gcfonthandle1) then begin
     include(values.mask,gvm_font);
     values.fontnum:= afonthandle1;
-    values.font:= getfontdata(afonthandle1)^.font;
+    po1:= getfontdata(afonthandle1); 
+    with po1^ do begin
+     values.font:= font;
+     if (df_highresfont in fdrawinfo.gc.drawingflags) then begin
+      checkhighresfont(po1,fdrawinfo);
+     end;
+    end;
     gcfonthandle1:= afonthandle1;
-//    include(fstate,cs_font);
    end;
    include(drawingflags,df_monochrome);
   end;
@@ -3374,7 +3397,6 @@ begin
   if values.mask <> [] then begin
    fdrawinfo.gcvalues:= @values;
    gdi(gdi_changegc);
-//   gui_changegc(fdrawinfo,values);
   end;
  end;
 end;
@@ -5083,6 +5105,15 @@ end;
 procedure tcanvas.internaldrawtext(var info);
 begin
  gdierror(gde_notimplemented);
+end;
+
+procedure tcanvas.initflags(const dest: tcanvas);
+begin
+ with dest do begin
+  exclude(fdrawinfo.gc.drawingflags,df_highresfont);
+  ffont.releasehandles;
+  gcfonthandle1:= 0; //invalid  
+ end; 
 end;
 
 { egdi }

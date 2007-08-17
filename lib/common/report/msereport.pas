@@ -1225,6 +1225,7 @@ uses
 type
  tcustomframe1 = class(tcustomframe);
  twidget1 = class(twidget);
+ twindow1 = class(twindow);
  tmsecomponent1 = class(tmsecomponent);
 
 function checkdashes(const avalue: string): string;
@@ -4995,121 +4996,136 @@ begin
  if not (reo_prepass in foptions) then begin
   include(fstate,rs_endpass);
  end;
- repeat
-  fpagenum:= 0;
-  factivepage:= 0;
-  fakevisible(self,true);
-  try
-   if fprinter <> nil then begin
-    str1:= '';
-    if canevent(tmethod(fonpreamble)) then begin
-     fonpreamble(self,str1);
-    end;
-    if rs_endpass in fstate then begin
-     if fprinter is tgdiprinter then begin
-      with tgdiprinter(fprinter) do begin
-       beginprint(false);
-      end;
-     end
-     else begin
-      with tstreamprinter(fprinter) do begin
-       if fstreamset then begin
-        stream1:= fstream;
-        fstream:= nil;
-        beginprint(stream1,str1);
-       end
-       else begin
-        beginprint(fcommand,str1);
+ application.lock;
+ try
+  twindow1(window).setasynccanvas(fcanvas);
+ finally
+  application.unlock;
+ end;
+ try
+  repeat
+   fpagenum:= 0;
+   factivepage:= 0;
+   fakevisible(self,true);
+   try
+    if fprinter <> nil then begin
+     str1:= '';
+     if canevent(tmethod(fonpreamble)) then begin
+      fonpreamble(self,str1);
+     end;
+     if rs_endpass in fstate then begin
+      if fprinter is tgdiprinter then begin
+       with tgdiprinter(fprinter) do begin
+        beginprint(false);
        end;
-      end;
-     end;
-    end
-    else begin
-     if fprinter is tgdiprinter then begin
-      with tgdiprinter(fprinter) do begin
-       beginprint(true);
-      end;
-     end
-     else begin
-      with tstreamprinter(fprinter) do begin
-       beginprint(nil,str1);
-      end;
-     end;
-    end;
-   end;   
-   for int1:= 0 to high(freppages) do begin
-    freppages[int1].beginrender;
-   end;
-   if canevent(tmethod(fonbeforerender)) then begin
-    application.lock;
-    try
-     fonbeforerender(self);
-    finally
-     application.unlock;
-    end;
-   end;
-  except
-   dofinish(true);
-   raise;
-  end;
-  try
-   if high(freppages) >= factivepage then begin
-    page1:= freppages[factivepage];
-    while true do begin
-     for int1:= finditem(pointerarty(freppages),page1) to high(freppages) do begin
-      if freppages[int1].visiblepage then begin
-       page1:= freppages[int1];
-       break;
-      end;
-     end;
-     if page1.visiblepage and not fthread.terminated then begin
-      exclude(fstate,rs_activepageset);
-      factivepage:= finditem(pointerarty(freppages),page1);
-      bo1:= page1.render(fcanvas);
-      if rs_finish in fstate then begin
-       break;
-      end;
-      if rs_activepageset in fstate then begin
-       page1:= freppages[factivepage];
       end
       else begin
-       if not bo1 and (page1.nextpage <> nil) then begin
-         page1:= page1.nextpage;
-       end
-       else begin
-        if bo1 and (page1.nextpageifempty <> nil) then begin
-         page1:= page1.nextpageifempty;
+       with tstreamprinter(fprinter) do begin
+        if fstreamset then begin
+         stream1:= fstream;
+         fstream:= nil;
+         beginprint(stream1,str1);
         end
         else begin
-         int1:= finditem(pointerarty(freppages),page1);
-         if (int1 >= 0) and (int1 < high(freppages)) then begin
-          page1:= freppages[int1+1];
-         end
-         else begin
-          page1:= nil;
-         end;
+         beginprint(fcommand,str1);
         end;
        end;
       end;
-      if finditem(pointerarty(freppages),page1) < 0 then begin
-       break;
-      end;
      end
      else begin
-      break;
+      if fprinter is tgdiprinter then begin
+       with tgdiprinter(fprinter) do begin
+        beginprint(true);
+       end;
+      end
+      else begin
+       with tstreamprinter(fprinter) do begin
+        beginprint(nil,str1);
+       end;
+      end;
+     end;
+    end;   
+    for int1:= 0 to high(freppages) do begin
+     freppages[int1].beginrender;
+    end;
+    if canevent(tmethod(fonbeforerender)) then begin
+     application.lock;
+     try
+      fonbeforerender(self);
+     finally
+      application.unlock;
      end;
     end;
+   except
+    dofinish(true);
+    raise;
    end;
-  except
-   dofinish(true);
-   raise;
+   try
+    if high(freppages) >= factivepage then begin
+     page1:= freppages[factivepage];
+     while true do begin
+      for int1:= finditem(pointerarty(freppages),page1) to high(freppages) do begin
+       if freppages[int1].visiblepage then begin
+        page1:= freppages[int1];
+        break;
+       end;
+      end;
+      if page1.visiblepage and not fthread.terminated then begin
+       exclude(fstate,rs_activepageset);
+       factivepage:= finditem(pointerarty(freppages),page1);
+       bo1:= page1.render(fcanvas);
+       if rs_finish in fstate then begin
+        break;
+       end;
+       if rs_activepageset in fstate then begin
+        page1:= freppages[factivepage];
+       end
+       else begin
+        if not bo1 and (page1.nextpage <> nil) then begin
+          page1:= page1.nextpage;
+        end
+        else begin
+         if bo1 and (page1.nextpageifempty <> nil) then begin
+          page1:= page1.nextpageifempty;
+         end
+         else begin
+          int1:= finditem(pointerarty(freppages),page1);
+          if (int1 >= 0) and (int1 < high(freppages)) then begin
+           page1:= freppages[int1+1];
+          end
+          else begin
+           page1:= nil;
+          end;
+         end;
+        end;
+       end;
+       if finditem(pointerarty(freppages),page1) < 0 then begin
+        break;
+       end;
+      end
+      else begin
+       break;
+      end;
+     end;
+    end;
+   except
+    dofinish(true);
+    raise;
+   end;
+   dofinish(false);
+   if (rs_endpass in fstate) then begin
+    break;
+   end;
+   fstate:= [rs_endpass];
+  until terminated1;
+ finally
+  application.lock;
+  try
+   twindow1(window).releaseasynccanvas;
+  finally
+   application.unlock;
   end;
-  dofinish(false);
-  if (rs_endpass in fstate) then begin
-   break;
-  end;
-  fstate:= [rs_endpass];
- until terminated1;
+ end;
 end;
 
 procedure tcustomreport.internalrender(const acanvas: tcanvas;

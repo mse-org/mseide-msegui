@@ -79,6 +79,7 @@ function gui_regiontorects(const aregion: regionty): rectarty;
 
 function gui_getdefaultfontnames: defaultfontnamesty;
 function gui_getfont(var drawinfo: drawinfoty): boolean;
+procedure gui_getfonthighres(var drawinfo: drawinfoty);
 procedure gui_freefontdata(const data: fontdataty);
 function gui_gettext16width(var drawinfo: drawinfoty): integer; //-1 on error
 function gui_getchar16widths(var drawinfo: drawinfoty): gdierrorty;

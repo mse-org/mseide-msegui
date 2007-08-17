@@ -1179,6 +1179,10 @@ begin
  releasedc(0,dc1);
 end;
 
+procedure gui_getfonthighres(var drawinfo: drawinfoty);
+begin
+end;
+
 function gui_getfont(var drawinfo: drawinfoty): boolean;
 
 var
@@ -1199,20 +1203,21 @@ var
  str1: string;
  int1: integer;
  ar1: array[0..255] of abc;
+ height1,width1: integer;
 
 begin
  result:= false;
  with drawinfo.getfont.fontdata^ do begin
-  height:= (height + fontsizeroundvalue) shr fontsizeshift;
-  width:= (width + fontsizeroundvalue) shr fontsizeshift;
+  height1:= (height + fontsizeroundvalue) shr fontsizeshift;
+  width1:= (width + fontsizeroundvalue) shr fontsizeshift;
   fontinfo1:= defaultfontinfo;
   with fontinfo1 do begin
-   if height <> 0 then begin
-    lfheight:= -height; //use character height
+   if height1 <> 0 then begin
+    lfheight:= -height1; //use character height
    end;
    if xscale = 1 then begin
-    if width <> 0 then begin
-     lfwidth:= (width + 5) div 10;
+    if width1 <> 0 then begin
+     lfwidth:= (width1 + 5) div 10;
      if lfwidth = 0 then begin
       lfwidth:= 1;
      end;
@@ -1305,7 +1310,7 @@ begin
     width:= round(xscale * textmetricsa.tmavecharwidth*10+5) shl fontsizeshift; 
             //round up, font should not be smaller than PS font
     xscale:= 1.0;
-    height:= height shl fontsizeshift;
+//    height:= height shl fontsizeshift;
     result:= gui_getfont(drawinfo);
     exit;
    end;
@@ -1368,6 +1373,9 @@ begin
   end;
   if font <> 0 then begin
    deleteobject(font);
+  end;
+  if fonthighres <> 0 then begin
+   deleteobject(fonthighres);
   end;
  end;
 end;

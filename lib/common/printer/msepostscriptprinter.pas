@@ -856,11 +856,6 @@ begin
  checkfont(afont,acodepage);
  streamwrite('['+encodefontname(ffonts[factfont].namenum,acodepage)+
                             getscalestring(font.style) + '] sf'+nl);
- {
- with ffonts[factfont] do begin
-  streamwrite('['+encodefontname(namenum,acodepage)+scalestring1 + '] sf'+nl);
- end;
- }
 end;
 
 procedure tpostscriptcanvas.ps_destroygc;
@@ -2072,11 +2067,9 @@ begin
   guierror(gue_invalidcanvas);
  end;
  with tpostscriptcanvas(sender) do begin
-//  if fstream = nil then begin
-//   guierror(gue_invalidstream);
-//  end;
   fillchar(gc1,sizeof(gc1),0);
   gc1.handle:= cardinal(invalidgchandle);
+  gc1.drawingflags:= [df_highresfont];
   linktopaintdevice(ptrint(self),gc1,getwindowsize,nullpoint);
  end;
 end;

@@ -358,6 +358,7 @@ type
    procedure updatestate; virtual;
    procedure checkstate;
    procedure poschanged; virtual;
+   procedure fontcanvaschanged; virtual;
    procedure visiblechanged; virtual;
    procedure getpaintframe(var frame: framety); virtual;
         //additional space, (scrollbars,mainmenu...)
@@ -916,6 +917,7 @@ type
    function getfont1: twidgetfont; //no getoptionalobject
    function getframefont: tfont;
    procedure fontchanged; virtual;
+   procedure fontcanvaschanged; virtual;
 
    procedure parentclientrectchanged; virtual;
    procedure parentwidgetregionchanged(const sender: twidget); virtual;
@@ -1281,7 +1283,8 @@ type
                   tws_modal,tws_needsdefaultpos,
                   tws_closing,tws_globalshortcuts,tws_localshortcuts,
                   tws_buttonendmodal,tws_grouphidden,tws_groupminimized,
-                  tws_grab,tws_painting,tws_activatelocked);
+                  tws_grab,tws_painting,tws_activatelocked,
+                  tws_canvasoverride);
  windowstatesty = set of windowstatety;
 
  internalwindowoptionsty = record
@@ -1361,6 +1364,10 @@ type
    fasynccanvas: tcanvas;
    fmodalresult: modalresultty;
    fupdateregion: regionty;
+   procedure setasynccanvas(const acanvas: tcanvas);
+           //used from treport
+   procedure releaseasynccanvas;
+   
    function getwindowsize: windowsizety;
    procedure setwindowsize(const value: windowsizety);
    function getwindowpos: windowposty;
@@ -3474,6 +3481,11 @@ begin
   framei_right:= round(framei_right * ascale);
   framei_bottom:= round(framei_bottom * ascale);
  end;
+end;
+
+procedure tcustomframe.fontcanvaschanged;
+begin
+ //dummy
 end;
 
 { tframetemplate }
@@ -9102,6 +9114,19 @@ begin
  result:= clientsize;
 end;
 
+procedure twidget.fontcanvaschanged;
+var
+ int1: integer;
+begin
+ for int1:= 0 to high(fwidgets) do begin
+  fwidgets[int1].fontcanvaschanged;
+ end;
+ if frame <> nil then begin
+  fframe.fontcanvaschanged;
+ end;
+ checkautosize;
+end;
+
 { twindow }
 
 constructor twindow.create(aowner: twidget);
@@ -9130,6 +9155,21 @@ begin
  inherited;
  destroyregion(fupdateregion);
  fscrollnotifylist.free;
+end;
+
+procedure twindow.setasynccanvas(const acanvas: tcanvas);
+begin
+ include(fstate,tws_canvasoverride);
+ acanvas.initflags(fasynccanvas);
+ fowner.fontcanvaschanged;
+end;
+
+procedure twindow.releaseasynccanvas;
+begin
+ if tws_canvasoverride in fstate then begin
+  exclude(fstate,tws_canvasoverride);
+  fasynccanvas.initflags(fasynccanvas);
+ end;
 end;
 
 procedure twindow.sizeconstraintschanged;

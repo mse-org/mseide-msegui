@@ -237,7 +237,7 @@ var //xft functions
 {$endif}
 function hasxft: boolean;
 //function fontdatatoxftname(const fontdata: fontdataty): string;
-function fontdatatoxftpat(const fontdata: fontdataty): pfcpattern;
+function fontdatatoxftpat(const fontdata: fontdataty; const highres: boolean): pfcpattern;
 procedure getxftfontdata(po: pxftfont; var drawinfo: drawinfoty);
 
 implementation
@@ -245,6 +245,11 @@ implementation
 uses
  msebits,msekeyboard,sysutils,msesysutils,msefileutils,msedatalist
  {$ifdef hassm},sm,ice{$endif};
+
+const
+ highresfontshift = 6;  //64
+ highresfontfakt = 1 shl highresfontshift;
+ highresfontmask = highresfontfakt - 1; 
  
 var
  pixmapcount: integer;
@@ -3186,6 +3191,8 @@ var
  po2: pinteger;
  charstructpo: pxcharstruct;
  glyphinfo: txglyphinfo;
+ bo1: boolean;
+ po3: pxftfont;
 
 begin
  with drawinfo.getchar16widths do begin
@@ -3194,11 +3201,29 @@ begin
 {$ifdef FPC} {$checkpointer off} {$endif}
   with datapo^,x11fontdataty(platformdata),infopo^ do begin
    if fhasxft then begin
+    bo1:= (df_highresfont in drawinfo.gc.drawingflags) and 
+           (fonthighres <> 0);
+    if bo1 then begin
+     po3:= pxftfont(fonthighres);
+    end
+    else begin
+     po3:= pxftfont(font);
+    end; 
     for int1:= 0 to count - 1 do begin //todo: optimize
-     xfttextextents16(appdisp,pxftfont(font),po1,1,@glyphinfo);
+     xfttextextents16(appdisp,po3,po1,1,@glyphinfo);
      po2^:= glyphinfo.xoff;
      inc(po1);
      inc(po2);
+    end;
+    if bo1 then begin
+     po2:= resultpo;
+     int2:= highresfontfakt div 2; //round up
+     for int1:= 0 to count - 1 do begin
+      int2:= int2 + po2^;
+      po2^:= int2 shr highresfontshift;
+      int2:= int2 and highresfontmask;
+      inc(po2);
+     end;
     end;
    end
    else begin
@@ -3679,20 +3704,21 @@ begin
 end;
 
 procedure setupfontinfo(const fontdata: fontdataty;
-                                           var fontinfo: fontinfoty);
+                               var fontinfo: fontinfoty);
 var
  ar1: stringarty;
+ height1,width1: integer;
 begin
  ar1:= nil; //compiler warning;
  fontinfo:= defaultfontinfo;
  with pfontdataty(@fontdata)^ do begin
-  height:= (height + fontsizeroundvalue) shr fontsizeshift;
-  width:= (width + fontsizeroundvalue) shr fontsizeshift;
-  if height <> 0 then begin
-   fontinfo[fn_pixel_size]:= inttostr(height);
+  height1:= (height + fontsizeroundvalue) shr fontsizeshift;
+  width1:= (width + fontsizeroundvalue) shr fontsizeshift;
+  if height1 <> 0 then begin
+   fontinfo[fn_pixel_size]:= inttostr(height1);
   end;
-  if width <> 0 then begin
-   fontinfo[fn_average_width]:= inttostr(width);
+  if width1 <> 0 then begin
+   fontinfo[fn_average_width]:= inttostr(width1);
   end;
   if charset <> '' then begin
    ar1:= splitstring(charset,'-');
@@ -3797,11 +3823,12 @@ end;
 *)
 
 function buildxftpat(const fontdata: fontdataty; 
-                                      const fontinfo: fontinfoty): pfcpattern;
+                  const fontinfo: fontinfoty; const highres: boolean): pfcpattern;
 var
  int1: integer;
  str1: ansistring;
  mat1: tfcmatrix;
+ rea1: real;
 begin
  with fontdata do begin
   if fontinfo[fn_charset_registry] <> '*' then begin
@@ -3848,7 +3875,11 @@ begin
   end;
   if fontinfo[fn_pixel_size] <> '*' then begin
    try
-    fcpatternadddouble(result,fc_pixel_size,strtofloat(fontinfo[fn_pixel_size]));
+    rea1:= strtofloat(fontinfo[fn_pixel_size]);
+    if highres then begin
+     rea1:= rea1 * highresfontfakt;
+    end;
+    fcpatternadddouble(result,fc_pixel_size,rea1);
    except
    end;
   end;
@@ -3898,12 +3929,30 @@ begin
  result:= buildxftname(fontdata,fontinfo);
 end;
 }
-function fontdatatoxftpat(const fontdata: fontdataty): pfcpattern;
+function fontdatatoxftpat(const fontdata: fontdataty; const highres: boolean): pfcpattern;
 var
  fontinfo: fontinfoty;
 begin
  setupfontinfo(fontdata,fontinfo);
- result:= buildxftpat(fontdata,fontinfo);
+ result:= buildxftpat(fontdata,fontinfo,highres);
+end;
+
+procedure gui_getfonthighres(var drawinfo: drawinfoty);
+var
+ pat1,pat2: pfcpattern;
+ res1: tfcresult;
+ po1: pxftfont;
+begin
+ if hasxft then begin
+  with drawinfo.getfont do begin
+   pat1:= fontdatatoxftpat(fontdata^,true);
+   pat2:= xftfontmatch(appdisp,xdefaultscreen(appdisp),pat1,@res1);
+   if pat2 <> nil then begin
+    fontdata^.fonthighres:= ptruint(xftfontopenpattern(appdisp,pat2));
+   end;
+   fcpatterndestroy(pat1);
+  end;
+ end;
 end;
 
 function gui_getfont(var drawinfo: drawinfoty): boolean;
@@ -3959,9 +4008,8 @@ begin
  with drawinfo.getfont.fontdata^ do begin
   if fhasxft then begin
    result:= false;
-   po3:= buildxftpat(drawinfo.getfont.fontdata^,fontinfo);
+   po3:= buildxftpat(drawinfo.getfont.fontdata^,fontinfo,false);
    po4:= xftfontmatch(appdisp,xdefaultscreen(appdisp),po3,@res1);
-   fcpatterndestroy(po3);
    if po4 <> nil then begin
    {$ifdef mse_debugxft}
     if fcpatterngetstring(po4,fc_file,0,@po5) = fcresultmatch then begin
@@ -3970,13 +4018,12 @@ begin
     end;     
    {$endif}
     po2:= xftfontopenpattern(appdisp,po4);
-//   str1:= buildxftname(drawinfo.getfont.fontdata^,fontinfo);
-//   po2:= xftfontopenname(appdisp,xdefaultscreen(appdisp),pchar(str1));
     if po2 <> nil then begin
      result:= true;
      getxftfontdata(po2,drawinfo);
     end;
    end;
+   fcpatterndestroy(po3);
   end
   else begin
    po1:=  xloadqueryfont(appdisp,pchar(fontinfotoxlfdname(fontinfo)));
@@ -4021,6 +4068,9 @@ procedure gui_freefontdata(const data: fontdataty);
 begin
  if fhasxft then begin
   xftfontclose(appdisp,pxftfont(data.font));
+  if data.fonthighres <> 0 then begin
+   xftfontclose(appdisp,pxftfont(data.fonthighres));
+  end;
  end
  else begin
   with x11fontdataty(data.platformdata) do begin
