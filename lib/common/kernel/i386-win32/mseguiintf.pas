@@ -49,6 +49,10 @@ const
        (ps_endcap_flat,ps_endcap_round,ps_endcap_square);
  joinstyles: array[joinstylety] of longword =
        (ps_join_miter,ps_join_round,ps_join_bevel);
+
+ highresfontshift = 6;  //64
+ highresfontfakt = 1 shl highresfontshift;
+ highresfontmask = highresfontfakt - 1; 
  {
   cursorshapety = (cr_default,cr_none,cr_arrow,cr_cross,cr_wait,cr_ibeam,
              cr_sizever,cr_sizehor,cr_sizebdiag,cr_sizefdiag,cr_sizeall,
@@ -1179,24 +1183,25 @@ begin
  releasedc(0,dc1);
 end;
 
-procedure gui_getfonthighres(var drawinfo: drawinfoty);
-begin
-end;
-
-function gui_getfont(var drawinfo: drawinfoty): boolean;
+function dogetfont(var drawinfo: drawinfoty; const ahighres: boolean): boolean;
 
 var
  dc1: hdc;  //printer gc is invalid -> create temporary gc
  fontbefore: hfont;
+ font1: hfont;
 
  procedure closedc;
  begin
   selectobject(dc1,fontbefore);
   releasedc(0,dc1);
+  with drawinfo.getfont.fontdata^ do begin
+   if (font1 <> font) and (font1 <> fonthighres) then begin
+    deleteobject(font1);
+   end;
+  end;
  end;
   
 var
- font1: hfont;
  fontinfo1: logfont;
 // textmetricsw: ttextmetricw;
  textmetricsa: ttextmetrica;
@@ -1205,6 +1210,9 @@ var
  ar1: array[0..255] of abc;
  height1,width1: integer;
 
+label
+ endlab;
+  
 begin
  result:= false;
  with drawinfo.getfont.fontdata^ do begin
@@ -1287,12 +1295,20 @@ begin
     lforientation:= int1;
     lfoutprecision:= out_tt_only_precis;
    end;
+   if ahighres then begin
+    lfheight:= lfheight * highresfontfakt;
+    lfwidth:= lfwidth * highresfontfakt;
+   end;
+   
    font1:= createfontindirect({$ifdef FPC}@{$endif}fontinfo1);
   end;
   if font1 = 0 then begin
    fontinfo1.lfFaceName:= defaultfontinfo.lfFaceName;
    font1:= createfontindirect({$ifdef FPC}@{$endif}fontinfo1);
    if font1 = 0 then begin
+    if ahighres then begin
+     exit; //no highres font available
+    end;
     font1:= createfontindirect({$ifdef FPC}@{$endif}defaultfontinfo);
    end;
   end;
@@ -1300,21 +1316,22 @@ begin
    dc1:= getdc(0);
    fontbefore:= selectobject(dc1,font1);
    if not gettextmetricsa(dc1,{$ifdef FPC}@{$endif}textmetricsa) then begin
-    closedc;
-    deleteobject(font1);
-    exit;
+    goto endlab;
    end;
    if xscale <> 1 then begin
     closedc;
-    deleteobject(font1);
     width:= round(xscale * textmetricsa.tmavecharwidth*10+5) shl fontsizeshift; 
             //round up, font should not be smaller than PS font
     xscale:= 1.0;
 //    height:= height shl fontsizeshift;
-    result:= gui_getfont(drawinfo);
+    result:= dogetfont(drawinfo,false);
     exit;
    end;
    with win32fontdataty(platformdata) do begin
+    if ahighres then begin
+     fonthighres:= font1;
+     goto endlab;
+    end;
     font:= font1;
     ascent:= textmetricsa.tmAscent;
     descent:= textmetricsa.tmDescent;
@@ -1338,8 +1355,7 @@ begin
      else begin      //no truetype font
       if not getcharwidthw(dc1,0,255,charwidths^) then begin
        dispose(charwidths);
-       closedc;
-       exit;
+       goto endlab;
       end;
       if Overhang <> 0 then begin
        for int1:= 0 to high(charwidths^) do begin
@@ -1359,10 +1375,21 @@ begin
     }
     end;
    end;
-   closedc;
    result:= true;
   end;
  end;
+endlab:
+ closedc; 
+end;
+
+procedure gui_getfonthighres(var drawinfo: drawinfoty);
+begin
+ dogetfont(drawinfo,true);
+end;
+
+function gui_getfont(var drawinfo: drawinfoty): boolean;
+begin
+ result:= dogetfont(drawinfo,false);
 end;
 
 procedure gui_freefontdata(const data: fontdataty);
@@ -1464,7 +1491,7 @@ function gui_getchar16widths(var drawinfo: drawinfoty): gdierrorty;
 label                        //todo: kerning?
  endlab;        
 var
- int1: integer;
+ int1,int2: integer;
  po1: pmsechar;
  po2: {$ifdef FPC}objpas.{$endif}pinteger;
  wo1: word;
@@ -1473,7 +1500,8 @@ var
  ahandle: thandle;
  gc1: hdc;
  gcpresults: tgcpresultsw;
- 
+ fo1: hfont;
+ hires: boolean;
 begin
  result:= gde_fontmetrics;
  if drawinfo.gc.handle = invalidgchandle then begin
@@ -1483,7 +1511,14 @@ begin
   gc1:= drawinfo.gc.handle;
  end;
  with drawinfo.getchar16widths do begin
-  ahandle:= selectobject(gc1,datapo^.font);
+  hires:= (df_highresfont in drawinfo.gc.drawingflags) and 
+                          (datapo^.fonthighres <> 0);
+  if hires then begin
+   ahandle:= selectobject(gc1,datapo^.fonthighres);
+  end
+  else begin
+   ahandle:= selectobject(gc1,datapo^.font);
+  end;
   if ahandle <> 0 then begin
    if not iswin95 then begin
     fillchar(gcpresults,sizeof(gcpresults),0);
@@ -1495,6 +1530,16 @@ begin
     {$else}
     getcharacterplacementw(gc1,text,count,0,gcpresults,0);
     {$endif}
+    if hires then begin
+     po2:= resultpo;
+     int2:= highresfontfakt div 2; //round up
+     for int1:= 0 to count - 1 do begin
+      int2:= int2 + po2^;
+      po2^:= int2 shr highresfontshift;
+      int2:= int2 and highresfontmask;
+      inc(po2);
+     end;
+    end;
    end
    else begin
     po1:= text;
