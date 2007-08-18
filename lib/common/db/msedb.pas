@@ -627,7 +627,8 @@ type
 
  datasetoptionty = (dso_utf8,dso_numboolean,dso_refreshtransaction,
                          dso_cancelupdateonerror,dso_cancelupdatesonerror,                         
-                         dso_autoapply,dso_autocommitret,dso_cacheblobs,
+                         dso_autoapply,dso_autocommitret,dso_refreshafterapply,
+                         dso_cacheblobs,
                          dso_offline, //disconnect database after open
                          dso_local);  //do not connect database on open
  datasetoptionsty = set of datasetoptionty;

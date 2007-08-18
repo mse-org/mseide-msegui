@@ -416,6 +416,9 @@ type
    
    flogfilename: filenamety;
    flogger: tbufstreamwriter;
+   fbeforeapplyupdate: tdatasetnotifyevent;
+   faftereapplyupdate: tdatasetnotifyevent;
+   fafterapplyupdate: tdatasetnotifyevent;
    procedure calcrecordsize;
    procedure alignfieldpos(var avalue: integer);
    function loadbuffer(var buffer: recheaderty): tgetresult;
@@ -577,6 +580,9 @@ type
    function findrecord(arecordpo: pintrecordty): integer;
                          //returns index, -1 if not found
    procedure dofilterrecord(var acceptable: boolean); virtual;
+   procedure dobeforeapplyupdate; virtual;
+   procedure doafterapplyupdate; virtual;
+   
    function islocal: boolean; virtual;
 
  {abstracts, must be overidden by descendents}
@@ -628,11 +634,16 @@ type
    property logfilename: filenamety read flogfilename write flogfilename;
    property packetrecords : integer read fpacketrecords write setpacketrecords 
                                  default defaultpacketrecords;
+   property indexlocal: tlocalindexes read findexlocal write setindexlocal;
+   
    property onupdateerror: updateerroreventty read fonupdateerror 
                                  write setonupdateerror;
    property oninternalcalcfields: internalcalcfieldseventty 
                       read foninternalcalcfields write setoninternalcalcfields;
-   property indexlocal: tlocalindexes read findexlocal write setindexlocal;
+   property beforeapplyupdate: tdatasetnotifyevent read fbeforeapplyupdate 
+                       write  fbeforeapplyupdate;
+   property afterapplyupdate: tdatasetnotifyevent read faftereapplyupdate 
+                       write  fafterapplyupdate;
   end;
    
 function getfieldisnull(nullmask: pbyte; const x: integer): boolean;
@@ -2255,16 +2266,19 @@ var
  int1: integer;
 begin
  checkbrowsemode;
+ dobeforeapplyupdate;
+ checkbrowsemode;
  if getrecordupdatebuffer then begin
   ffailedcount:= 0;
   int1:= fcurrentupdatebuffer;
   internalapplyupdate(0,cancelonerror,response);
   if response = rrapply then begin
-   afterapply;
    deleteitem(fupdatebuffer,typeinfo(recupdatebufferarty),int1);
    fcurrentupdatebuffer:= bigint; //invalid
+   afterapply;
   end;
  end;
+ doafterapplyupdate;
 end;
 
 procedure tmsebufdataset.ApplyUpdates(const MaxErrors: Integer; 
@@ -2274,6 +2288,8 @@ var
  recnobefore: integer;
 
 begin
+ CheckBrowseMode;
+ dobeforeapplyupdate;
  CheckBrowseMode;
  disablecontrols;
  recnobefore:= frecno;
@@ -2302,6 +2318,7 @@ begin
   end;
  end;
  afterapply;
+ doafterapplyupdate;
 end;
 
 procedure tmsebufdataset.ApplyUpdates(const maxerrors: integer = 0);
@@ -4173,6 +4190,20 @@ end;
 function tmsebufdataset.islocal: boolean;
 begin
  result:= false;
+end;
+
+procedure tmsebufdataset.dobeforeapplyupdate;
+begin
+ if checkcanevent(self,tmethod(fbeforeapplyupdate)) then begin
+  fbeforeapplyupdate(self);
+ end;
+end;
+
+procedure tmsebufdataset.doafterapplyupdate;
+begin
+ if checkcanevent(self,tmethod(fafterapplyupdate)) then begin
+  fafterapplyupdate(self);
+ end;
 end;
 
 { tlocalindexes }

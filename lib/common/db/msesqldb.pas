@@ -244,75 +244,6 @@ implementation
 uses
  msestrings,dbconst,msesysutils,typinfo,sysutils,msedatalist,msegui;
  
-//type 
-{
-  TBufDatasetcracker = class(TDBDataSet)
-  private
-    FCurrentRecBuf  : PBufRecLinkItem;
-    FLastRecBuf     : PBufRecLinkItem;
-    FFirstRecBuf    : PBufRecLinkItem;
-    FBRecordCount   : integer;
-
-    FPacketRecords  : integer;
-    FRecordSize     : Integer;
-    FNullmaskSize   : byte;
-    FOpen           : Boolean;
-    FUpdateBuffer   : TRecordsUpdateBuffer;
-    FCurrentUpdateBuffer : integer;
-
-    FFieldBufPositions : array of longint;
-    
-    FAllPacketsFetched : boolean;
-    FOnUpdateError  : TResolverErrorEvent;
-
-  end;
- }
- { 
-  TSQLQuerycracker = class (Tmsebufdataset)
-  private
-    FCursor              : TSQLCursor;
-    FUpdateable          : boolean;
-    FTableName           : string;
-    FSQL                 : TStringList;
-    FUpdateSQL,
-    FInsertSQL,
-    FDeleteSQL           : TStringList;
-    FIsEOF               : boolean;
-    FLoadingFieldDefs    : boolean;
-    FIndexDefs           : TIndexDefs;
-    FReadOnly            : boolean;
-    FUpdateMode          : TUpdateMode;
-    FParams              : TParams;
-    FusePrimaryKeyAsKey  : Boolean;
-    FSQLBuf              : String;
-    FFromPart            : String;
-    FWhereStartPos       : integer;
-    FWhereStopPos        : integer;
-    FParseSQL            : boolean;
-    FMasterLink          : TMasterParamsDatalink;
-//    FSchemaInfo          : TSchemaInfo;
-
-    FUpdateQry,
-    FDeleteQry,
-    FInsertQry           : TSQLQuery;
-  end;
-  }
-{  
-function GetFieldIsNull(NullMask : pbyte;x : longint) : boolean; //inline;
-begin
-  result := ord(NullMask[x div 8]) and (1 shl (x mod 8)) > 0
-end;
-
-procedure unSetFieldIsNull(NullMask : pbyte;x : longint); //inline;
-begin
-  NullMask[x div 8] := (NullMask[x div 8]) and not (1 shl (x mod 8));
-end;
-
-procedure SetFieldIsNull(NullMask : pbyte;x : longint); //inline;
-begin
-  NullMask[x div 8] := (NullMask[x div 8]) or (1 shl (x mod 8));
-end;
-}
 { tmsesqltransaction }
 
 constructor tmsesqltransaction.create(aowner: tcomponent);
@@ -426,9 +357,6 @@ end;
 
 procedure tmsesqlquery.loaded;
 begin
-// if not fwantedreadonly and assigned(fonapplyrecupdate) then begin
-//  readonly:= false;
-// end;
  inherited;
  fcontroller.loaded;
 end;
@@ -477,9 +405,6 @@ begin
   exclude(fmstate,sqs_userapplayrecupdate);
  end;
  fonapplyrecupdate:= avalue;
-// if not assigned(avalue) and not inherited parsesql then begin
-//  freadonly:= true;
-// end;
 end;
 
 function tmsesqlquery.getcanmodify: Boolean;
@@ -487,87 +412,7 @@ begin
  result:= inherited getcanmodify or not readonly and 
                (sqs_userapplayrecupdate in fmstate);
 end;
-{
-function tmsesqlquery.recupdatesql(updatekind: tupdatekind): string;
 
- procedure updatewherepart(var sql_where: string; x: integer);
- begin
-  if (pfinkey in fields[x].providerflags) or
-       ((pfinwhere in fields[x].providerflags) and 
-        ((updatemode = upwhereall) or
-         (updatemode = upwherechanged) and (pfinwhere in fields[x].providerflags)
-                 and fieldchanged(fields[x])
-        )
-       ) then begin
-   sql_where:= sql_where + '(' + fields[x].fieldname + '=' + 
-            fieldtooldsql(fields[x]) + ') and ';
-   end;
-  end;
-
-  function modifyrecquery : string;
-  var
-   x: integer;
-   sql_set: string;
-   sql_where: string;
-  begin
-   sql_set := '';
-   sql_where := '';
-   for x := 0 to fields.count -1 do begin
-    updatewherepart(sql_where,x);
-    if (pfinupdate in fields[x].providerflags) then begin
-     sql_set := sql_set + fields[x].fieldname + '=' + fieldtosql(fields[x]) + ',';
-    end;
-   end;
-   setlength(sql_set,length(sql_set)-1);
-   setlength(sql_where,length(sql_where)-5);
-   result:= 'update ' + ftablename + 
-         ' set ' + sql_set + ' where ' + sql_where;
-  end;
-
-  function insertrecquery: string;
-  var 
-   x: integer;
-   sql_fields: string;
-   sql_values: string;
-
-  begin
-   sql_fields := '';
-   sql_values := '';
-   for x := 0 to fields.count -1 do begin
-    if not fields[x].IsNull then begin
-     sql_fields := sql_fields + fields[x].fieldname + ',';
-     sql_values := sql_values + fieldtosql(fields[x]) + ',';
-    end;
-   end;
-   setlength(sql_fields,length(sql_fields)-1);
-   setlength(sql_values,length(sql_values)-1);
-   result := 'insert into ' + ftablename + 
-               ' (' + sql_fields + ') values (' + sql_values + ')';
-  end;
-
-  function deleterecquery : string;
-  var
-   x: integer;
-   sql_where: string;
-  begin
-   sql_where := '';
-   for x := 0 to fields.Count -1 do begin
-    updatewherepart(sql_where,x);
-   end;
-   setlength(sql_where,length(sql_where)-5);
-   result := 'delete from ' + ftablename +
-                     ' where ' + sql_where;
-  end;
-
-begin
- result:= '';
- case updatekind of
-  ukmodify: result:= modifyrecquery;
-  ukinsert: result:= insertrecquery;
-  ukdelete: result:= deleterecquery;
- end;
-end;
-}
 procedure tmsesqlquery.applyrecupdate(updatekind: tupdatekind);
 var
  bo1: boolean;
@@ -590,7 +435,7 @@ begin
    end;
   end
   else begin
-  internalapplyrecupdate(updatekind);
+   internalapplyrecupdate(updatekind);
   end;
  except
   include(fmstate,sqs_updateerror);
@@ -613,6 +458,9 @@ procedure tmsesqlquery.afterapply;
 begin
  if (dso_autocommitret in fcontroller.options) and (transaction <> nil) then begin
   tsqltransaction(transaction).commitretaining;
+ end;
+ if dso_refreshafterapply in fcontroller.options then begin
+  refresh;
  end;
 end;
 
