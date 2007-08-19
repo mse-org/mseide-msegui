@@ -1,9 +1,9 @@
 MSEide+MSEgui Pascal Cross Platform GUI Development System.
 
-2007-06-15 Version 1.2 
+2007-08-19 Version 1.4
 Copyright (c) 1999-2007 by Martin Schreiber
 
-- Compiles with FPC 2.0.4
+- Compiles with FPC 2.0.4 and FPC 2.2.
 - Tested on i386-linux SuSE 9.0,10.2 and i386-win32 98 and 2000.
 - Links to xlib and gdi32, no external widget library needed.
 - Internal character encoding is UCS2.
@@ -11,6 +11,7 @@ Copyright (c) 1999-2007 by Martin Schreiber
 - All screen drawing is double buffered.
 - Has docking forms and MDI.
 - Has embedded forms (similar to TFrame).
+- Has database access components and data edit widgets.
 - Internationalization functionality with resource modules.
 - Report generator.
 
@@ -150,4 +151,13 @@ tsqlite3connection is available without -dmse_with_sqlite. Field type mapping:
 | TEXT               | TEXT                | ftmemo      | utf8 string |
 | BLOB               | BLOB                | ftblob      | string      |
 +--------------------+---------------------+-------------+-------------+
+
+ZeosLib
+*******
+To install the Zeos components add the path to the Zeos source to 'Project'-
+'Options'-'Make'-'Directories' and compile the IDE with -dmse_with_zeos.
+Dependent of the Zeos version it will be necessary to add -MDelphi to 'Project'-
+'Options'-'Make'-'Make options'.
+There is a predefined IDE project apps/ide/mseide_zeos.prj, update 'Project'-
+'Options'-'Macros' according your installation.
 
