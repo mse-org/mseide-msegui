@@ -1,5 +1,7 @@
 {Modified 2006-2007 by Martin Schreiber}
 
+{$ifdef VER2_1_5} {$define mse_FPC_2_2} {$endif}
+{$ifdef VER2_2} {$define mse_FPC_2_2} {$endif}
 {$mode objfpc}{$H+}
 {$MACRO on}
 

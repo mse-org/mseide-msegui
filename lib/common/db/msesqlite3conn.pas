@@ -8,7 +8,10 @@
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 }
 unit msesqlite3conn;
+{$ifdef VER2_1_5} {$define mse_FPC_2_2} {$endif}
+{$ifdef VER2_2} {$define mse_FPC_2_2} {$endif}
 {$ifdef FPC}{$mode objfpc}{$h+}{$INTERFACES CORBA}{$endif}
+
 interface
 uses
  classes,msqldb,msedb,msestrings,db,sqlite3dyn,msetypes,msedatabase;

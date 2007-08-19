@@ -13,6 +13,8 @@
  
 unit mpqconnection;
 
+{$ifdef VER2_1_5} {$define mse_FPC_2_2} {$endif}
+{$ifdef VER2_2} {$define mse_FPC_2_2} {$endif}
 {$mode objfpc}{$H+}
 
 {$Define LinkDynamically}
