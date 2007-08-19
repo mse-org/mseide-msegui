@@ -1,5 +1,6 @@
 MSEide+MSEgui version history
 
+Version 1.4beta1
 2007-08-07 Modified type of tmsebufdataset.onupdateerror.
 2007-08-01 TDatabase -> tmdatabase, moved to msedatabase.pas.
 2007-07-24 tspacer.offset_* -> dist_*.
