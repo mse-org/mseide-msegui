@@ -13,7 +13,6 @@ order10=0
 order11=0
 order12=0
 [projectoptions]
-projectdir=/home/mse/packs/standard/svn/mse/trunk/apps/ide/templates
 options=54
  [projectoptionsfo]
  stackedunder=
@@ -127,14 +126,11 @@ makeoptionson=4
  31
  34
  32
-macroon=2
+macroon=1
  63
- 63
-macronames=2
- msedir
+macronames=1
  zeosdir
-macrovalues=2
- /home/mse/packs/standard/svn/mse/trunk/
+macrovalues=1
  /home/mse/packs/standard/svn/zeos/trunk/
 macrogroup=0
 groupcomments=6
