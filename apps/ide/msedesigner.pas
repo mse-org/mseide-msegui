@@ -1,4 +1,4 @@
-{ MSEide Copyright (c) 1999-2006 by Martin Schreiber
+{ MSEide Copyright (c) 1999-2007 by Martin Schreiber
    
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -1771,11 +1771,13 @@ procedure tmodulelist.designformdestroyed(const sender: tmseform);
 var
  po1: pmoduleinfoty;
 begin
- po1:= findform(sender);
- if po1 <> nil then begin
-  po1^.designform:= nil;
-  removemoduleinfo(po1);
-//  fdesigner.moduledestroyed(po1);
+ if not destroying then begin
+  po1:= findform(sender);
+  if po1 <> nil then begin
+   po1^.designform:= nil;
+   removemoduleinfo(po1);
+ //  fdesigner.moduledestroyed(po1);
+  end;
  end;
 end;
 

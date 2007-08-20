@@ -350,6 +350,7 @@ type
   public
    constructor create(aownsobjects: boolean);
    destructor destroy; override;
+   function destroying: boolean;
    function add(const value: iobjectlink): integer;
    procedure insert(const index: integer; const value: iobjectlink); reintroduce;
    function getfirst: iobjectlink;
@@ -2793,7 +2794,12 @@ destructor tlinkedqueue.destroy;
 begin
  include(fobjectlinker.fstate,rels_destroying);
  inherited;
- fobjectlinker.Free;
+ freeandnil(fobjectlinker);
+end;
+
+function tlinkedqueue.destroying: boolean;
+begin
+ result:= (fobjectlinker = nil) or (rels_destroying in fobjectlinker.fstate);
 end;
 
 function tlinkedqueue.add(const value: iobjectlink): integer;

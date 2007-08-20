@@ -2738,7 +2738,7 @@ begin
 {$ifndef staticxft}
  result:= false;
  try
-  getprocaddresses(['libfontconfig.so'],
+  getprocaddresses(['libfontconfig.so','libfontconfig.so.1'],
      [
      'FcPatternDestroy',         //0
      'FcFontSetDestroy',         //1
@@ -2876,7 +2876,7 @@ function getxrenderlib: boolean;
 begin
  result:= false;
  try
-  getprocaddresses(['libXrender.so'],[
+  getprocaddresses(['libXrender.so','libXrender.so.1'],[
     'XRenderSetPictureClipRectangles',  //0
     'XRenderCreatePicture',             //1
     'XRenderFillRectangle',             //2
