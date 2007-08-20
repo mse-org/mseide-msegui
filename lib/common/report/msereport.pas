@@ -39,7 +39,9 @@ const
   
 type
  lookupkindty = (lk_text,lk_integer,lk_float,lk_date,lk_time,lk_datetime);
- linevisiblety = (lv_firstofpage,lv_normal,lv_lastofpage,lv_firstrecord,lv_lastrecord);
+ linevisiblety = (lv_firstofpage,lv_normal,lv_lastofpage,
+                  lv_firstofgroup,lv_lastofgroup,
+                  lv_firstrecord,lv_lastrecord);
  linevisiblesty = set of linevisiblety;
   
  tablineinfoty = record
@@ -61,6 +63,7 @@ const
  defaulttablinedashes = '';
  defaulttablinedist = 0;
  defaulttablinevisible = [lv_firstofpage,lv_normal,lv_lastofpage,
+                          lv_firstofgroup,lv_lastofgroup,    
                           lv_firstrecord,lv_lastrecord];
  defaulttablineinfo: tablineinfoty = (widthmm: defaulttablinewidth; 
          color: defaulttablinecolor; colorgap: defaulttablinecolorgap;
@@ -434,6 +437,8 @@ type
   function islastband(const addheight: integer = 0): boolean;
   function isfirstrecord: boolean;
   function islastrecord: boolean;
+//  function isfirstofgroup: boolean;
+//  function islastofgroup: boolean;
   procedure updatevisible;
   function getwidget: twidget;
   function remainingheight: integer;
@@ -604,6 +609,8 @@ type
    procedure finish;
    function isfirstrecord: boolean;
    function islastrecord: boolean;
+   function isfirstofgroup: boolean;
+   function islastofgroup: boolean;
    
    property tabs: treptabulators read ftabs write settabs;
    property font: trepwidgetfont read getfont write setfont stored isfontstored;
@@ -856,6 +863,8 @@ type
    function islastband(const addheight: integer = 0): boolean;
    function isfirstrecord: boolean;
    function islastrecord: boolean;
+//   function isfirstofgroup: boolean;
+//   function islastofgroup: boolean;
    function remainingheight: integer;
    function pagepagenum: integer; //null based
    function reppagenum: integer; //null based
@@ -991,6 +1000,9 @@ type
 
    function isfirstrecord: boolean;
    function islastrecord: boolean;
+//   function isfirstofgroup: boolean;
+//   function islastofgroup: boolean;
+   
    procedure recordchanged;   
    property report: tcustomreport read freport;
    property pagenum: integer read fpagenum write fpagenum; 
@@ -1862,7 +1874,9 @@ begin
  if apaint then begin
   with fband do begin
    if not rendering or (fparentintf = nil) then begin 
-    visiblemask:= [lv_firstofpage,lv_normal,lv_lastofpage,lv_firstrecord,lv_lastrecord];
+    visiblemask:= [lv_firstofpage,lv_normal,lv_lastofpage,
+                   lv_firstofgroup,lv_lastofgroup,
+                   lv_firstrecord,lv_lastrecord];
    end
    else begin
     visiblemask:= [lv_normal];    
@@ -1874,6 +1888,12 @@ begin
      if islastband then begin
       include(visiblemask,lv_lastofpage);
       exclude(visiblemask,lv_normal);
+     end;
+     if fband.isfirstofgroup then begin
+      include(visiblemask,lv_firstofgroup);
+     end;
+     if fband.islastofgroup then begin
+      include(visiblemask,lv_lastofgroup);
      end;
      if isfirstrecord then begin
       include(visiblemask,lv_firstrecord);
@@ -3088,86 +3108,19 @@ begin
   end;
  end;
 end;
-{
-function tcustomrecordband.bandisvisible(const checklast: boolean): boolean;
-label
- endlab;
-var
- firstrecord,lastrecord: boolean;
- bo1: boolean;
+
+function tcustomrecordband.isfirstofgroup: boolean;
 begin
- result:= visible;
- if fvisidatalink.fieldactive then begin
-  if fvisidatalink.field.isnull then begin
-   result:= false;
-   goto endlab;
-  end
-  else begin
-   result:= true;
-  end;
- end;
- firstrecord:= isfirstrecord;
- lastrecord:= islastrecord;
- if fvisigrouplink.fieldactive then begin
-  if (bo_visigroupfirst in foptions) and (firstrecord or 
-                  (fvisigrouplink.field.asinteger <> fgroupnum)) or
-         (bo_visigrouplast in foptions) and (lastrecord or 
-                  (fvisigrouplink.field.asinteger <> fnextgroupnum)) or 
-         (bo_visigroupnotfirst in foptions) and not (firstrecord or 
-                  (fvisigrouplink.field.asinteger <> fgroupnum)) or
-         (bo_visigroupnotlast in foptions) and not(lastrecord or 
-                  (fvisigrouplink.field.asinteger <> fnextgroupnum)) then begin
-   result:= true;
-  end
-  else begin
-   result:= false;
-   goto endlab;
-  end;
- end; 
- if checkvisibility(fparentintf,foptions,checklast,result,bo1) then begin
-  if firstrecord then begin
-   if bo_showfirstrecord in foptions then begin
-    result:= true;
-    goto endlab;
-   end
-   else begin
-    if bo_hidefirstrecord in foptions then begin
-     result:= false;
-     bo1:= false;
-    end;
-   end;
-  end;
-  if lastrecord then begin
-   if bo_showlastrecord in foptions then begin
-    result:= true;
-    goto endlab;
-   end
-   else begin
-    if bo_hidelastrecord in foptions then begin
-     result:= false;
-     bo1:= false;
-    end;
-   end;
-  end;
-  if not firstrecord and not lastrecord then begin
-   if bo_shownormalrecord in foptions then begin
-    result:= true;
-    goto endlab;
-   end
-   else begin
-    if bo_hidenormalrecord in foptions then begin
-     result:= false;
-     bo1:= false;
-    end;
-   end;
-  end;
-  if bo1 then begin
-   result:= true;
-  end;
- end;
- endlab:
+ result:= fvisigrouplink.active and (isfirstrecord or 
+                   (fvisigrouplink.field.asinteger <> fgroupnum));
 end;
-}
+
+function tcustomrecordband.islastofgroup: boolean;
+begin
+ result:= fvisigrouplink.active and (islastrecord or 
+                   (fvisigrouplink.field.asinteger <> fnextgroupnum));
+end;
+
 function tcustomrecordband.bandisvisible(const checklast: boolean): boolean;
 label
  endlab;
@@ -4193,7 +4146,27 @@ begin
   result:= freportpage.islastrecord;
  end;
 end;
+{
+function tcustombandarea.isfirstofgroup: boolean;
+begin
+ if frecordband <> nil then begin
+  result:= frecordband.isfirstofgroup;
+ end
+ else begin
+  result:= freportpage.isfirstofgroup;
+ end;
+end;
 
+function tcustombandarea.islastofgroup: boolean;
+begin
+ if frecordband <> nil then begin
+  result:= frecordband.islastofgroup;
+ end
+ else begin
+  result:= freportpage.islastofgroup;
+ end;
+end;
+}
 procedure tcustombandarea.dobeforenextrecord;
 var
  int1: integer;
@@ -4790,7 +4763,17 @@ begin
   result:= false;
  end;
 end;
+{
+function tcustomreportpage.isfirstofgroup: boolean;
+begin
+ result:= false;
+end;
 
+function tcustomreportpage.islastofgroup: boolean;
+begin
+ result:= false;
+end;
+}
 procedure tcustomreportpage.recordchanged;
 var
  int1: integer;
