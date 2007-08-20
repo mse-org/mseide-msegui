@@ -278,7 +278,7 @@ var
  comp1: tcomponent;
 begin
  comp1:= designer.createnewcomponent(report,treportpage);
- placecomponent(comp1,reportcontainer.rootpos);
+ placecomponent(comp1,reportcontainer.rootpos,report);
 end;
 
 procedure treportdesignerfo.deletepage(const sender: TObject);
