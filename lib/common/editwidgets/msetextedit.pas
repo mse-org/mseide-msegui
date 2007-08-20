@@ -1406,6 +1406,13 @@ begin
    end;
    case eventkind of
     cek_enter: begin
+     with fgridintf.getcol.grid do begin
+      if fselectstart.row >= rowcount then begin
+       fselectstart.row:= rowcount - 1;
+       fselectstart.col:= length(flines[fselectstart.row]);
+              //check for removed empty row
+      end;
+     end; 
      feditor.curindex:= fcolindex;
      int1:= fcolindex;
      feditor.moveindex(feditor.curindex,
