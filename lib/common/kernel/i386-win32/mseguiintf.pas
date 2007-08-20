@@ -1067,6 +1067,7 @@ begin
   end;
   gck_printer: begin
    gc.handle:= createdc('WINSPOOL',pansichar(ansistring(aprintername)),nil,nil);
+   setmapperflags(gc.handle,1); //match font-device aspectratio
   end;
   else begin
    gc.handle:= getdc(paintdevice);
