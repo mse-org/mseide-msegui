@@ -310,7 +310,7 @@ begin
   end;
   if not haserror then begin
    try
-    getprocaddresses('WINSPOOL.DRV',
+    getprocaddresses(['WINSPOOL.DRV'],
       [
      'GetDefaultPrinterW'                        //0
       ],

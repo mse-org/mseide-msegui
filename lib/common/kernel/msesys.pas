@@ -124,7 +124,8 @@ procedure deletecommandlineargument(const index: integer);
                 //index 1..argumentcount-1, no action otherwise
 procedure getprocaddresses(const lib: tlibhandle; const anames: array of string;
                              const adest: array of ppointer); overload;
-procedure getprocaddresses(const libname: string; const anames: array of string; 
+procedure getprocaddresses(const libnames: array of string; 
+                             const anames: array of string; 
                              const adest: array of ppointer); overload;
 
 threadvar
@@ -155,19 +156,30 @@ begin
  end;
 end;
 
-procedure getprocaddresses(const libname: string; const anames: array of string; 
+procedure getprocaddresses(const libnames: array of string; const anames: array of string; 
                              const adest: array of ppointer); overload;
 var
  libha: tlibhandle;
+ int1: integer;
+ str1: string;
 begin
  libha:= 0;
+ for int1:= 0 to high(libnames) do begin
  {$ifdef FPC}
- libha:= loadlibrary(libname);
+  libha:= loadlibrary(libnames[int1]);
  {$else}
- libha:= loadlibrary(pansichar(libname));
+  libha:= loadlibrary(pansichar(libnames[int1]));
  {$endif}
+  if libha <> 0 then begin
+   break;
+  end;
+ end;
  if libha = 0 then begin
-  raise exception.create('Library "'+libname+'" not found.');
+  str1:= '';
+  for int1:= 0 to high(libnames) do begin
+   str1:= str1+'"'+libnames[int1]+'" ';
+  end;
+  raise exception.create('Library '+str1+'not found.');
  end;
  getprocaddresses(libha,anames,adest);
 end;
