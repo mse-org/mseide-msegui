@@ -286,6 +286,8 @@ begin
                               tfielddefspropertyeditor);
  registerpropertyeditor(typeinfo(boolean),tdataset,'Active',
                                          tdatasetactivepropertyeditor);                              
+ registerpropertyeditor(typeinfo(boolean),tsqlresult,'active',
+                                         tdatasetactivepropertyeditor);                              
  registerpropertyeditor(typeinfo(tfielddef),nil,'',tfielddefpropertyeditor);
  registerpropertyeditor(typeinfo(tparam),nil,'',tdbparampropertyeditor);
  registerpropertyeditor(typeinfo(tdbstringcols),nil,'',tdbstringcolseditor);

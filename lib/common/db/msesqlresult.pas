@@ -164,6 +164,11 @@ type
    property items[const index: integer]: tdbcol read getitems; default;
  end;
 
+ tsqlresultfielddefs = class(tfielddefs)
+  private
+   procedure setitemname(aitem: tcollectionitem); override;
+ end;
+ 
  sqlresultoptionty = (sro_utf8);
  sqlresultoptionsty = set of sqlresultoptionty;
  
@@ -176,7 +181,7 @@ type
    ftransaction: tsqltransaction;
    fcursor: tsqlcursor;
    fparams: tmseparams;
-   ffielddefs: tfielddefs;
+   ffielddefs: tsqlresultfielddefs;
    fcols: tdbcols;
    feof: boolean;
    fbof: boolean;
@@ -194,6 +199,7 @@ type
    procedure setbeforeopen(const avalue: tmsesqlscript);
    procedure setafteropen(const avalue: tmsesqlscript);
    procedure changed;
+   procedure setfielddefs(const avalue: tsqlresultfielddefs);
   protected
    procedure loaded; override;
    procedure freefldbuffers;
@@ -227,6 +233,7 @@ type
                                       write setsqltransaction;
    property active: boolean read getactive write setactive;
    property options: sqlresultoptionsty read foptions write foptions;
+   property fielddefs: tsqlresultfielddefs read ffielddefs write setfielddefs;
  end;
  
  idbcolinfo = interface(inullinterface)
@@ -624,7 +631,7 @@ end;
 constructor tsqlresult.create(aowner: tcomponent);
 begin
  fparams:= tmseparams.create(self);
- ffielddefs:= tfielddefs.create(nil);
+ ffielddefs:= tsqlresultfielddefs.create(nil);
  fsql:= tstringlist.create;
  fsql.onchange:= @onchangesql;
  fcols:= tdbcols.create(@getname);
@@ -735,7 +742,7 @@ begin
  fbof:= false;
  freefldbuffers;
  unprepare;
- ffielddefs.clear;
+// ffielddefs.clear; //is now published
  fcols.clear;
  changed;
 end;
@@ -868,6 +875,11 @@ end;
 procedure tsqlresult.changed;
 begin
  sendchangeevent;
+end;
+
+procedure tsqlresult.setfielddefs(const avalue: tsqlresultfielddefs);
+begin
+ ffielddefs.assign(avalue);
 end;
 
 { tdbcolnamearrayprop }
@@ -1102,6 +1114,20 @@ begin
      (fsource.active or not (olbsq_closesqlresult in foptionsdb)) then begin
   invalidatebuffer;
   changed;
+ end;
+end;
+
+{ tsqlresultfielddefs }
+
+procedure tsqlresultfielddefs.setitemname(aitem: tcollectionitem);
+begin
+ with tnameditem(aitem) do begin
+  if name = '' then begin
+   name:= 'fielddef' + inttostr(id+1);
+  end
+  else begin
+   inherited;
+  end;
  end;
 end;
 
