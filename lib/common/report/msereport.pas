@@ -665,6 +665,7 @@ type
    fformat: msestring;
    fongettext: getrepvaluetexteventty;
    procedure setformat(const avalue: msestring);
+   procedure settextflags(const avalue: textflagsty);
   protected
    function calcminscrollsize: sizety; override;
    procedure dopaint(const acanvas: tcanvas); override;
@@ -673,7 +674,7 @@ type
    procedure render(const acanvas: tcanvas; var empty: boolean); override;
   public
    constructor create(aowner: tcomponent); override;
-   property textflags: textflagsty read ftextflags write ftextflags default 
+   property textflags: textflagsty read ftextflags write settextflags default 
                                             defaultrepvaluedisptextflags;
    property format: msestring read fformat write setformat;
    property optionsscale default defaultrepvaluedispoptionsscale;
@@ -5453,18 +5454,28 @@ begin
 // invalidate;
 end;
 
+procedure tcustomrepvaluedisp.settextflags(const avalue: textflagsty);
+begin
+ if ftextflags <> avalue then begin
+  ftextflags:= avalue;
+  minclientsizechanged;
+ end;
+end;
+
 function tcustomrepvaluedisp.calcminscrollsize: sizety;
 var
  size1: sizety;
 begin
  result:= inherited calcminscrollsize;
- size1:= textrect(getcanvas,getdisptext,ftextflags,font).size;
+ size1:= textrect(getcanvas,getdisptext,innerclientrect,ftextflags,font).size;
+ {
  if fframe <> nil then begin
   with fframe do begin
    size1.cx:= size1.cx + framei_left + framei_right;
    size1.cy:= size1.cy + framei_top + framei_bottom;
   end;
  end;
+ }
  if size1.cx > result.cx then begin
   result.cx:= size1.cx;
  end;
