@@ -279,7 +279,8 @@ type
  win32fontdataty = record
   charwidths: pcharwidthsty;
   overhang: integer;
-  local: array[2..15] of cardinal; //plattform dependent
+  xwidth: integer;
+  local: array[3..15] of cardinal; //plattform dependent
  end;
  monochromebitmapinfoty = packed record
   bmiheader: tbitmapinfoheader;
@@ -1210,6 +1211,7 @@ var
  int1: integer;
  ar1: array[0..255] of abc;
  height1,width1: integer;
+ rea1: real;
 
 label
  endlab;
@@ -1321,11 +1323,24 @@ begin
    end;
    if xscale <> 1 then begin
     closedc;
-    width:= round(xscale * textmetricsa.tmavecharwidth*10+5) shl fontsizeshift; 
-            //round up, font should not be smaller than PS font
-    xscale:= 1.0;
-//    height:= height shl fontsizeshift;
-    result:= dogetfont(drawinfo,false);
+    int1:= width;
+    rea1:= xscale;
+    with win32fontdataty(platformdata) do begin
+     if ahighres then begin
+      fontinfo1.lfwidth:= ((xwidth+5) div 10) shl highresfontshift;
+      //round up
+      fonthighres:= createfontindirect({$ifdef FPC}@{$endif}fontinfo1);
+      result:= fonthighres <> 0;
+     end
+     else begin
+      xwidth:= round(xscale * textmetricsa.tmavecharwidth*10);
+      width:= xwidth shl fontsizeshift; 
+      xscale:= 1.0;
+      result:= dogetfont(drawinfo,false);
+     end;
+    end;
+    width:= int1;  //restore
+    xscale:= rea1; 
     exit;
    end;
    with win32fontdataty(platformdata) do begin
