@@ -5468,14 +5468,12 @@ var
 begin
  result:= inherited calcminscrollsize;
  size1:= textrect(getcanvas,getdisptext,innerclientrect,ftextflags,font).size;
- {
  if fframe <> nil then begin
   with fframe do begin
    size1.cx:= size1.cx + framei_left + framei_right;
    size1.cy:= size1.cy + framei_top + framei_bottom;
   end;
  end;
- }
  if size1.cx > result.cx then begin
   result.cx:= size1.cx;
  end;
