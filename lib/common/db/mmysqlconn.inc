@@ -148,6 +148,7 @@ Type
    procedure setupblobdata(const afield: tfield; const acursor: tsqlcursor;
                                    const aparam: tparam);
    function blobscached: boolean;
+   function identquotechar: ansistring; override;
    
   Public
    function fetchblob(const cursor: tsqlcursor;
@@ -995,6 +996,11 @@ begin
  with tmsebufdataset1(afield.dataset) do begin
   setcurvalue(afield,getinsertid);
  end;
+end;
+
+function TConnectionName.identquotechar: ansistring;
+begin
+ result:= '`'; //needed for reserved words as fieldnames
 end;
 
 { eerrorname }

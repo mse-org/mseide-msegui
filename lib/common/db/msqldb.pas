@@ -162,6 +162,7 @@ type
     
     procedure closeds(out activeds: integerarty);
     procedure reopends(const activeds: integerarty);
+    function identquotechar: ansistring; virtual;
   public
     destructor Destroy; override;
 
@@ -1188,6 +1189,11 @@ begin
  //dummy
 end;
 
+function tcustomsqlconnection.identquotechar: ansistring;
+begin
+ result:= '"';
+end;
+
 { TSQLTransaction }
 
 constructor TSQLTransaction.Create(AOwner : TComponent);
@@ -2186,16 +2192,19 @@ end;
 Procedure TSQLQuery.internalApplyRecUpdate(UpdateKind : TUpdateKind);
 var
  s: string;
-
+ 
  procedure UpdateWherePart(var sql_where : string; const afield: tfield);
+ var
+  quotechar: string;
  begin
+  quotechar:= database.identquotechar;
   with afield do begin
    if (pfInKey in ProviderFlags) or
      ((FUpdateMode = upWhereAll) and (pfInWhere in ProviderFlags)) or
      ((FUpdateMode = UpWhereChanged) and 
      (pfInWhere in ProviderFlags) and 
      (value <> oldvalue)) then begin
-    sql_where := sql_where + '(' + FieldName + 
+    sql_where := sql_where + '(' + quotechar+FieldName+quotechar+ 
               '= :OLD_' + FieldName + ') and ';
    end;
   end;
@@ -2207,16 +2216,18 @@ var
   sql_set: string;
   sql_where: string;
   field1: tfield;
+  quotechar: string;
  begin
-  sql_set := '';
-  sql_where := '';
+  quotechar:= database.identquotechar;
+  sql_set:= '';
+  sql_where:= '';
   for x := 0 to Fields.Count -1 do begin
    field1:= fields[x];
    with field1 do begin
     if fieldkind = fkdata then begin
      UpdateWherePart(sql_where,field1);
      if (pfInUpdate in ProviderFlags) then begin
-      sql_set:= sql_set + FieldName + '=:' + FieldName + ',';
+      sql_set:= sql_set + quotechar+FieldName+quotechar + '=:' + FieldName + ',';
      end;
     end;
    end;
@@ -2234,14 +2245,16 @@ var
   x: integer;
   sql_fields: string;
   sql_values: string;
+  quotechar: string;
  begin
+  quotechar:= database.identquotechar;
   sql_fields := '';
   sql_values := '';
   for x := 0 to Fields.Count -1 do begin
    with fields[x] do begin
     if (fieldkind = fkdata) and not IsNull and 
                            (pfInUpdate in ProviderFlags) then begin 
-     sql_fields:= sql_fields + FieldName + ',';
+     sql_fields:= sql_fields + quotechar+FieldName+quotechar+ ',';
      sql_values:= sql_values + ':' + FieldName + ',';
     end;
    end;
