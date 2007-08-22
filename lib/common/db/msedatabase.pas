@@ -115,7 +115,7 @@ type
   published
     property Connected: Boolean read GetConnected write SetConnected;
     property LoginPrompt: Boolean read FLoginPrompt write FLoginPrompt;
-    property Streamedconnected: Boolean read FStreamedConnected write FStreamedConnected;
+//    property Streamedconnected: Boolean read FStreamedConnected write FStreamedConnected;
 
 //    property AfterConnect : TNotifyEvent read FAfterConnect write fafterconnect;
 //    property AfterDisconnect : TNotifyEvent read FAfterDisconnect write fAfterDisconnect;
