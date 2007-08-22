@@ -2004,22 +2004,22 @@ begin
     end;
     if DefaultFields then begin
      CreateFields;
-     if FUpdateable then begin
-      if FusePrimaryKeyAsKey then begin
-       UpdateIndexDefs;
-       for tel := 0 to indexdefs.count-1 do  begin
-        if ixPrimary in indexdefs[tel].options then begin
-   // Todo: If there is more then one field in the key, that must be parsed
-         IndexFields := TStringList.Create;
-         ExtractStrings([';'],[' '],pchar(indexdefs[tel].fields),IndexFields);
-         for fieldc := 0 to IndexFields.Count-1 do begin
-          F := Findfield(IndexFields[fieldc]);
-          if F <> nil then begin
-           F.ProviderFlags := F.ProviderFlags + [pfInKey];
-          end;
+    end;
+    if FUpdateable then begin
+     if FusePrimaryKeyAsKey then begin
+      UpdateIndexDefs;
+      for tel := 0 to indexdefs.count-1 do  begin
+       if ixPrimary in indexdefs[tel].options then begin
+  // Todo: If there is more then one field in the key, that must be parsed
+        IndexFields := TStringList.Create;
+        ExtractStrings([';'],[' '],pchar(indexdefs[tel].fields),IndexFields);
+        for fieldc := 0 to IndexFields.Count-1 do begin
+         F := Findfield(IndexFields[fieldc]);
+         if F <> nil then begin
+          F.ProviderFlags := F.ProviderFlags + [pfInKey];
          end;
-         IndexFields.Free;
         end;
+        IndexFields.Free;
        end;
       end;
      end;
