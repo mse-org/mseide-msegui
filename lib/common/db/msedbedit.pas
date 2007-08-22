@@ -5314,7 +5314,7 @@ begin
   if int1 < 0 then begin
    int1:= 0
   end;
-  fgrid.frame.sbvert.pagesize:= fgrid.rowcount / (int1+1);
+  fgrid.frame.sbvert.pagesize:= fgrid.rowcount / (int1+1+fgrid.rowcount);
  end
  else begin
   fgrid.frame.sbvert.pagesize:= 1;

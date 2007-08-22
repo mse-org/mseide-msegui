@@ -1621,7 +1621,7 @@ begin
                                     (fsqldelete.count > 0);
    if fparsesql and (pos(',',FFromPart) <= 0) then begin
     ftablename:= ffrompart;
-    fupdateable:= true;
+    fupdateable:= not readonly;
    end;
   end;
  end;
