@@ -5,6 +5,7 @@ object mainfo: tmainfo
   bounds_cx = 403
   bounds_cy = 280
   taborder = 1
+  visible = False
   container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_subfocus, ow_mousetransparent, ow_destroywidgets, ow_autoscale]
   container.bounds_x = 0
   container.bounds_y = 0
@@ -123,7 +124,7 @@ object mainfo: tmainfo
         face.localprops = [fal_fadirection]
         face.dummy = 0
         coloractive = -2147483648
-        height = 16
+        height = 15
         captions.count = 3
         captions.items = <        
           item
@@ -136,9 +137,9 @@ object mainfo: tmainfo
             caption = 'text1'
           end>
       end>
-    datarowheight = 16
+    datarowheight = 15
     statfile = tstatfile1
-    reffontheight = 14
+    reffontheight = 13
   end
   object TZConnection1: TZConnection
     Protocol = 'sqlite-3'

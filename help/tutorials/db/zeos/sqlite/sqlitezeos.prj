@@ -3,30 +3,7 @@ order0=0
 order1=0
 order2=0
 order3=0
-order4=23
- 0
- 1
- 2
- 3
- 4
- 5
- 6
- 7
- 8
- 9
- 10
- 11
- 12
- 13
- 14
- 15
- 16
- 17
- 18
- 19
- 20
- 21
- 22
+order4=0
 order5=0
 order6=0
 order7=0
@@ -35,7 +12,7 @@ order9=0
 order10=0
 order11=0
 [projectoptions]
-projectdir=/home/mse/packs/standard/svn/mse/trunk/help/tutorials/db/zeos/sqlite
+projectdir=/C:/proj/mseide-msegui/trunk/help/tutorials/db/zeos/sqlite
 options=54
  [projectoptionsfo]
  stackedunder=
@@ -45,7 +22,7 @@ options=54
  cy=572
  [projectoptionsfo.tabwidget]
  firsttab=0
- index=0
+ index=3
  [projectoptionsfo.ttabwidget2]
  firsttab=0
  index=1
@@ -153,7 +130,7 @@ modulenames=1
 moduletypes=1
  TMAINFO
 modulefiles=1
- /home/mse/packs/standard/svn/mse/trunk/help/tutorials/db/zeos/sqlite/main.mfm
+ /C:/proj/mseide-msegui/trunk/help/tutorials/db/zeos/sqlite/main.mfm
 mainfile=sqlitezeos.pas
 targetfile=sqlitezeos${EXEEXT}
 messageoutputfile=
@@ -357,13 +334,13 @@ files=
 [layout]
 windowlayout=322
  [mainfo]
- stackedunder=formdesignerfo
+ stackedunder=
  x=644
  y=20
  cx=286
  cy=74
  wsize=0
- active=0
+ active=1
  visible=1
  [mainfo.basedock]
  splitdir=2
@@ -414,11 +391,11 @@ windowlayout=322
  x=0
  y=0
  cx=286
- cy=38
+ cy=40
  [componentpalettefo]
  splitdir=0
  useroptions=3099
- stackedunder=mainfo
+ stackedunder=formdesignerfo
  parent=
  mdistate=0
  nx=0
@@ -696,7 +673,7 @@ bookmarks0=0
 bookmarks1=0
 sourcefiles=2
  /home/mse/packs/standard/svn/mse/trunk/help/tutorials/db/zeos/sqlite/sqlitezeos.pas
- /home/mse/packs/standard/svn/mse/trunk/help/tutorials/db/zeos/sqlite/main.pas
+ /C:/proj/mseide-msegui/trunk/help/tutorials/db/zeos/sqlite/main.pas
 relpaths=2
  sqlitezeos.pas
  main.pas
@@ -704,7 +681,7 @@ ismoduletexts=2
  0
  0
 modules=1
- /home/mse/packs/standard/svn/mse/trunk/help/tutorials/db/zeos/sqlite/main.mfm
+ /C:/proj/mseide-msegui/trunk/help/tutorials/db/zeos/sqlite/main.mfm
 visiblemodules=1
  1
 [sourcefo.tabwidget]
