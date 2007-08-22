@@ -1,0 +1,186 @@
+object mainfo: tmainfo
+  optionswidget = [ow_arrowfocus, ow_subfocus, ow_destroywidgets, ow_hinton, ow_autoscale]
+  bounds_x = 159
+  bounds_y = 243
+  bounds_cx = 403
+  bounds_cy = 280
+  taborder = 1
+  container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_subfocus, ow_mousetransparent, ow_destroywidgets, ow_autoscale]
+  container.bounds_x = 0
+  container.bounds_y = 0
+  container.bounds_cx = 403
+  container.bounds_cy = 280
+  container.frame.dummy = 0
+  container.face.fade_direction = gd_up
+  container.face.localprops = [fal_fadirection]
+  container.face.template = tfacecomp1
+  container.face.dummy = 0
+  optionswindow = [wo_groupleader]
+  options = [fo_main, fo_terminateonclose, fo_autoreadstat, fo_autowritestat, fo_savepos, fo_savestate]
+  statfile = tstatfile1
+  caption = 'MSEide+MSEgui+Zeos'
+  icon.transparency = -2147483648
+  moduleclassname = 'tmseform'
+  object tdbnavigator1: tdbnavigator
+    bounds_x = 154
+    bounds_y = 8
+    frame.levelo = 1
+    frame.dummy = 0
+    face.fade_direction = gd_up
+    face.localprops = [fal_fadirection]
+    face.template = tfacecomp1
+    face.dummy = 0
+    anchors = [an_top, an_right]
+    datasource = tmsedatasource1
+  end
+  object tdbstringgrid1: tdbstringgrid
+    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_focusbackonesc, ow_mousewheel, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+    bounds_x = 8
+    bounds_y = 40
+    bounds_cx = 386
+    bounds_cy = 234
+    frame.sbvert.facebutton.template = tfacecomp1
+    frame.sbvert.facebutton.dummy = 0
+    frame.sbvert.faceendbutton.template = tfacecomp1
+    frame.sbvert.faceendbutton.dummy = 0
+    frame.sbhorz.facebutton.fade_direction = gd_down
+    frame.sbhorz.facebutton.localprops = [fal_fadirection]
+    frame.sbhorz.facebutton.template = tfacecomp1
+    frame.sbhorz.facebutton.dummy = 0
+    frame.sbhorz.faceendbutton.fade_direction = gd_down
+    frame.sbhorz.faceendbutton.localprops = [fal_fadirection]
+    frame.sbhorz.faceendbutton.template = tfacecomp1
+    frame.sbhorz.faceendbutton.dummy = 0
+    frame.localprops = [frl_fileft, frl_fitop, frl_firight, frl_fibottom]
+    frame.dummy = 0
+    anchors = [an_left, an_top, an_right, an_bottom]
+    taborder = 1
+    datasource = tmsedatasource1
+    optionsgrid = [og_colsizing, og_rowinserting, og_rowdeleting, og_focuscellonenter, og_autofirstrow, og_autoappend, og_colchangeontabkey, og_autopopup, og_mousescrollcol]
+    datacols.count = 3
+    datacols.coloractive = -2147483648
+    datacols.items = <    
+      item
+        coloractive = -2147483648
+        width = 70
+        options = [co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_mousescrollrow]
+        datafield = 'pk'
+        textflags = [tf_right, tf_ycentered, tf_noselect]
+      end    
+      item
+        coloractive = -2147483648
+        width = 70
+        options = [co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_mousescrollrow]
+        datafield = 'int1'
+        textflags = [tf_right, tf_ycentered, tf_noselect]
+      end    
+      item
+        coloractive = -2147483648
+        width = 140
+        options = [co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_mousescrollrow]
+        datafield = 'text1'
+      end>
+    datalink.options = [gdo_propscrollbar, gdo_thumbtrack, gdo_checkbrowsemodeonexit]
+    fixcols.count = 1
+    fixcols.coloractive = -2147483648
+    fixcols.items = <    
+      item
+        face.image.transparency = -2147483648
+        face.fade_pos.count = 2
+        face.fade_pos.items = (
+           0.0000000000000000E+0000
+           1.0000000000000000E+0000
+        )
+        face.fade_color.count = 2
+        face.fade_color.items = (
+          10794687
+          13951156
+        )
+        face.fade_direction = gd_up
+        face.fade_transparency = -2147483648
+        face.localprops = [fal_fadirection]
+        face.dummy = 0
+        coloractive = -2147483648
+        width = 15
+      end>
+    fixrows.count = 1
+    fixrows.coloractive = -2147483648
+    fixrows.items = <    
+      item
+        face.image.transparency = -2147483648
+        face.fade_pos.count = 2
+        face.fade_pos.items = (
+           0.0000000000000000E+0000
+           1.0000000000000000E+0000
+        )
+        face.fade_color.count = 2
+        face.fade_color.items = (
+          10794687
+          13951156
+        )
+        face.fade_direction = gd_up
+        face.fade_transparency = -2147483648
+        face.localprops = [fal_fadirection]
+        face.dummy = 0
+        coloractive = -2147483648
+        height = 16
+        captions.count = 3
+        captions.items = <        
+          item
+            caption = 'pk'
+          end        
+          item
+            caption = 'int1'
+          end        
+          item
+            caption = 'text1'
+          end>
+      end>
+    datarowheight = 16
+    statfile = tstatfile1
+    reffontheight = 14
+  end
+  object TZConnection1: TZConnection
+    Protocol = 'sqlite-3'
+    Database = 'test.db'
+    Connected = True
+    left = 32
+    top = 104
+  end
+  object tmsezquery1: tmsezquery
+    Connection = TZConnection1
+    Active = True
+    SQL.Strings = (
+      'select * from table1;'
+    )
+    Params = <>
+    left = 152
+    top = 104
+  end
+  object tmsedatasource1: tmsedatasource
+    DataSet = tmsezquery1
+    left = 256
+    top = 104
+  end
+  object tstatfile1: tstatfile
+    filename = 'status.sta'
+    left = 32
+    top = 152
+  end
+  object tfacecomp1: tfacecomp
+    template.image.transparency = -2147483648
+    template.fade_pos.count = 2
+    template.fade_pos.items = (
+       0.0000000000000000E+0000
+       1.0000000000000000E+0000
+    )
+    template.fade_color.count = 2
+    template.fade_color.items = (
+      10794687
+      13951156
+    )
+    template.fade_transparency = -2147483648
+    left = 128
+    top = 152
+  end
+end
