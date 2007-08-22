@@ -306,11 +306,6 @@ type
    function iscolorframestored: boolean;
    procedure setcolorframeactive(const avalue: colorty);
    function iscolorframeactivestored: boolean;
-//   procedure setextraspace(const avalue: integer);
-//   function isextraspacestored: boolean;
-//   procedure setimagedist(const avalue: integer);
-//   function isimagediststored: boolean;
-   
    procedure setcolordkshadow(const avalue: colorty);
    function iscolordkshadowstored: boolean;
    procedure setcolorshadow(const avalue: colorty);
@@ -335,7 +330,6 @@ type
    procedure setcolorclient(const Value: colorty);
    function iscolorclientstored: boolean;
    procedure settemplate(const avalue: tframecomp);
-//   function arepropsstored: boolean;
    procedure setlocalprops(const avalue: framelocalpropsty);
   protected
    fintf: iframe;
@@ -397,10 +391,6 @@ type
                      stored islevelistored default 0;
    property framewidth: integer read fi.framewidth write setframewidth
                      stored isframewidthstored default 0;
-//   property extraspace: integer read fi.extraspace write setextraspace
-//                     stored isextraspacestored default 0;
-//   property imagedist: integer read fi.imagedist write setimagedist
-//                     stored isimagediststored default 0;
    property colorframe: colorty read fi.colorframe write setcolorframe
                      stored iscolorframestored default cl_transparent;
    property colorframeactive: colorty read fi.colorframeactive 
@@ -451,8 +441,6 @@ type
    property framei_top;
    property framei_right;
    property framei_bottom;
-//   property extraspace;
-//   property imagedist;
    property colorclient;
    property colordkshadow;
    property colorshadow;
@@ -584,7 +572,6 @@ type
    procedure setfade_transparency(const avalue: colorty);
    function isfatransparencystored: boolean;
    procedure settemplate(const avalue: tfacecomp);
-//   function arepropsstored: boolean;
    procedure setlocalprops(const avalue: facelocalpropsty);
   protected
    fintf: iface;

@@ -835,8 +835,8 @@ type
    function itematpos(const pos: integer; 
                const getscrollable: boolean = true): integer; //-1 if none
    procedure createitem(const index: integer; var item: tpersistent); override;
-//   function firstopposite: integer;
    procedure fontchanged;
+   procedure checktemplate(const sender: tobject);
   public
    constructor create(aowner: tcustomgrid; aclasstype: gridpropclassty); reintroduce;
    function fixindex(const index: integer): integer;
@@ -1301,6 +1301,7 @@ end;
    function internalsort(sortfunc: gridsorteventty; var refindex: integer): boolean;
             //true if moved
 
+   procedure objectevent(const sender: tobject; const event: objecteventty); override;
    procedure loaded; override;
    procedure doexit; override;
    procedure dofocus; override;
@@ -3717,18 +3718,29 @@ begin
   end;
  end;
 end;
-{
-function tgridarrayprop.firstopposite: integer;
-begin
- result:= -(count-foppositecount)-1;
-end;
-}
+
 procedure tgridarrayprop.fontchanged;
 var
  int1: integer;
 begin
  for int1:= 0 to count -1 do begin
   tgridprop(items[int1]).fontchanged(fgrid);
+ end;
+end;
+
+procedure tgridarrayprop.checktemplate(const sender: tobject);
+var
+ int1: integer;
+begin
+ for int1:= 0 to count - 1 do begin
+  with tgridprop(fitems[int1]) do begin
+   if fframe <> nil then begin
+    fframe.checktemplate(sender);
+   end;
+   if face <> nil then begin
+    fface.checktemplate(sender);
+   end;
+  end;
  end;
 end;
 
@@ -10160,6 +10172,17 @@ begin
   else begin
    result:= acell.row < frowcount;
   end;
+ end;
+end;
+
+procedure tcustomgrid.objectevent(const sender: tobject;
+               const event: objecteventty);
+begin
+ inherited;
+ if event = oe_changed then begin //todo: optimize
+  fdatacols.checktemplate(sender);
+  ffixcols.checktemplate(sender);
+  ffixrows.checktemplate(sender);
  end;
 end;
 
