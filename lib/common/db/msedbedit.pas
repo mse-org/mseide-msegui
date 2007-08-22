@@ -968,7 +968,6 @@ type
    constructor create(const aowner: tcustomgrid);
    destructor destroy; override;
    property firstrecord: integer read getfirstrecord;
-//   function getdisplaytextbuffer(const afield: tfield; const row: integer): pointer;
    function getdummystringbuffer: pstring;
    function getrowfieldisnull(const afield: tfield; const row: integer): boolean;
    function getansistringbuffer(const afield: tfield; const row: integer): pointer;
@@ -1033,6 +1032,7 @@ type
 
 const
  defaultdbdropdownoptions = [deo_selectonly,deo_autodropdown,deo_keydropdown];   
+ defaultdropdowndatalinkoptions = [gdo_propscrollbar,gdo_thumbtrack];
 
 type 
  optiondbty = (odb_copyitems);
@@ -1070,7 +1070,7 @@ type
    property keyfield: string read getkeyfield write setkeyfield;
    property options default defaultdbdropdownoptions;
    property optionsdatalink: griddatalinkoptionsty read foptionsdatalink 
-                                 write foptionsdatalink default [];
+           write foptionsdatalink default defaultdropdowndatalinkoptions;
    property optionsdb: optionsdbty read foptionsdb write foptionsdb default [];
    
    property cols: tdbdropdowncols read getcols write setcols;
@@ -1389,6 +1389,7 @@ type
    procedure setfieldnamedisplayfixrow(const avalue: integer);
    procedure setdatalink(const avalue: tstringgriddatalink);
   protected
+   procedure updatelayout; override;
    procedure editnotification(var info: editnotificationinfoty); override;
    procedure setoptionsgrid(const avalue: optionsgridty); override;
    procedure doasyncevent(var atag: integer); override;
@@ -1396,7 +1397,6 @@ type
    function getoptionsedit: optionseditty; override;
    function createfixcols: tfixcols; override;
    function createdatacols: tdatacols; override;
-   procedure updatelayout; override;
    procedure initcellinfo(var info: cellinfoty); override;
    procedure docellevent(var info: celleventinfoty); override;
    procedure scrollevent(sender: tcustomscrollbar; event: scrolleventty); override;
@@ -4423,6 +4423,7 @@ constructor tdbdropdownlistcontroller.create(const intf: idbdropdownlist;
                       const aisstringkey: boolean);
 begin
  fisstringkey:= aisstringkey;
+ foptionsdatalink:= defaultdropdowndatalinkoptions;
  fdatalink:= tdropdowndatalink.create(self);
  inherited create(intf);
  options:= defaultdbdropdownoptions;
@@ -4537,12 +4538,15 @@ begin
    fdatalink.options:= foptionsdatalink;
    if gdo_propscrollbar in fdatalink.options then begin
     with frame.sbvert do begin
+     pagesize:= 1;
+     {
      if rowcount > 0 then begin
-      pagesize:= rowcount / rowcount;
+      pagesize:= rowcount / rowcount; //???
      end
      else begin
       pagesize:= 1;
      end;
+     }
     end;
    end;
   end;
@@ -5018,29 +5022,7 @@ begin
   activerecord:= int1;
  end;
 end;
-{
-function tgriddatalink.getdisplaytextbuffer(const afield: tfield;
-                      const row: integer): pointer;
-var
- int1: integer;
-begin
- result:= nil;
- if (afield <> nil) and hasdata then begin
-  int1:= activerecord;
-  activerecord:= row;
-  if not afield.isnull then begin
-   result:= @fstringbuffer;
-   if utf8 then begin
-    fstringbuffer:= utf8tostring(afield.displaytext);
-   end
-   else begin
-    fstringbuffer:= afield.displaytext;
-   end;
-  end;
-  activerecord:= int1;
- end;
-end;
-}
+
 function tgriddatalink.getbooleanbuffer(const afield: tfield; 
                                              const row: integer): pointer;
 var
@@ -5104,9 +5086,6 @@ begin
   if not afield.isnull then begin
    result:= @frealtybuffer;
    frealtybuffer:= afield.asdatetime;
-//   if frealtybuffer = 0 then begin
-//    frealtybuffer:= nulltime;
-//   end;
   end;
   activerecord:= int1;
  end;
@@ -5122,6 +5101,7 @@ begin
  end;
  BufferCount:= int1;
  updaterowcount;
+ checkscrollbar;
 end;
 
 procedure tgriddatalink.updaterowcount;
@@ -5131,12 +5111,8 @@ begin
  if not (csdestroying in fgrid.componentstate) then begin
   if active then begin
    int1:= recordcount;
-//   if int1 = 0 then begin
-//    int1:= 1;
-//   end;
   end
   else begin
-//   int1:= 1;
    int1:= 0;
   end;
   fgrid.rowcount:= int1;
@@ -5153,7 +5129,6 @@ begin
    updaterowcount;  //for append
   end;
   inherited;
- // updaterowcount;
   gridinvalidate;
   bo1:= (dataset <> nil) and (dataset.state = dsinsert);
   if bo1 and not finsertingbefore and (fgrid.datacols.newrowcol >= 0) then begin
@@ -5179,7 +5154,6 @@ begin
   fdatasetstatebefore:= dsinactive;
   fdscontroller:= nil;
   inherited firstrecord:= 0;
-//  activerecord:= 0;
  end;
  updaterowcount;
  checkscroll;
@@ -5323,7 +5297,7 @@ var
 begin 
  rea1:= 0.5;
  if active then begin
-  int1:= dataset.recordcount;
+  int1:= dataset.recordcount - 1;
   if bof then begin
    rea1:= 0;
   end
@@ -5337,10 +5311,10 @@ begin
     end;
    end;
   end;
-  if int1 <= 0 then begin
-   int1:= 1
+  if int1 < 0 then begin
+   int1:= 0
   end;
-  fgrid.frame.sbvert.pagesize:= fgrid.rowcount / int1;
+  fgrid.frame.sbvert.pagesize:= fgrid.rowcount / (int1+1);
  end
  else begin
   fgrid.frame.sbvert.pagesize:= 1;

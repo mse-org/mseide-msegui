@@ -187,7 +187,7 @@ implementation
 constructor tmsezreadonlyquery.create(aowner: tcomponent);
 begin
  inherited;
- fcontroller:= tdscontroller.create(self,idscontroller(self));
+ fcontroller:= tdscontroller.create(self,idscontroller(self),-1);
 end;
 
 destructor tmsezreadonlyquery.destroy;
@@ -352,7 +352,7 @@ end;
 constructor tmsezquery.create(aowner: tcomponent);
 begin
  inherited;
- fcontroller:= tdscontroller.create(self,idscontroller(self));
+ fcontroller:= tdscontroller.create(self,idscontroller(self),-1);
 end;
 
 destructor tmsezquery.destroy;
@@ -517,7 +517,7 @@ end;
 constructor tmseztable.create(aowner: tcomponent);
 begin
  inherited;
- fcontroller:= tdscontroller.create(self,idscontroller(self));
+ fcontroller:= tdscontroller.create(self,idscontroller(self),-1);
 end;
 
 destructor tmseztable.destroy;
