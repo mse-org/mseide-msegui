@@ -1,6 +1,8 @@
 unit msesqlresult;
 {$ifdef FPC}{$mode objfpc}{$h+}{$INTERFACES CORBA}{$endif}
 interface
+{$ifdef VER2_1_5} {$define mse_FPC_2_2} {$endif}
+{$ifdef VER2_2} {$define mse_FPC_2_2} {$endif}
 uses
  classes,db,msqldb,mseclasses,msedb,msedatabase,msearrayprops,msestrings,msereal,
  msetypes,mselookupbuffer,mseguiglob;
@@ -18,7 +20,6 @@ type
    fdatatype: tfieldtype;
    ffieldnum: integer;
    futf8: boolean;
-//   fbuffer: array[0..31] of byte;
    fdatasize: integer;
    function accesserror(const typename: string): edatabaseerror;
    function getasboolean: boolean; virtual;
@@ -1121,13 +1122,23 @@ end;
 
 procedure tsqlresultfielddefs.setitemname(aitem: tcollectionitem);
 begin
- with tnameditem(aitem) do begin
-  if name = '' then begin
-   name:= 'fielddef' + inttostr(id+1);
-  end
-  else begin
-   inherited;
+ {$ifdef mse_FPC_2_2}
+ if aitem is tnameditem then begin
+  with tnameditem(aitem) do begin
+  {$else}
+ if aitem is tfielddef then begin
+  with tfielddef(aitem) do begin
+  {$endif}
+   if name = '' then begin
+    name:= 'fielddef' + inttostr(id+1);
+   end
+   else begin
+    inherited;
+   end;
   end;
+ end
+ else begin
+  inherited;
  end;
 end;
 
