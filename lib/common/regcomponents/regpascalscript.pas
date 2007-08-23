@@ -4,12 +4,15 @@ interface
 implementation
 uses
  classes,msedesignintf,msepascalscript,msepropertyeditors,msetypes,msestrings,
- msetexteditor;
+ msetexteditor,msegui,msewidgets;
 type
  tpascaleditor = class(ttextstringspropertyeditor)
   protected
    function getsyntaxindex: integer; override;   
- end;
+   procedure doafterclosequery(var amodalresult: modalresultty); override;
+   function gettestbutton: boolean; override;
+   function getcaption: msestring; override;
+end;
  
 procedure Register;
 begin          
@@ -88,6 +91,38 @@ const
 
 
 { tpascaleditor }
+
+procedure tpascaleditor.doafterclosequery(var amodalresult: modalresultty);
+var
+ str1: ansistring;
+ int1: integer;
+begin
+ if amodalresult = mr_canclose then begin
+  with tmsepsscript(fprops[0].instance) do begin
+   if compile then begin
+//    showmessage('Compile OK');
+   end
+   else begin
+    str1:= '';
+    for int1:= 0 to compilermessagecount - 1 do begin
+     str1:= str1 + compilermessages[int1].messagetostring+lineend;
+    end;
+    showmessage(compilermessagetext,'Compile Error');
+    amodalresult:= mr_none;
+   end;
+  end;
+ end;
+end;
+
+function tpascaleditor.gettestbutton: boolean;
+begin
+ result:= true;
+end;
+
+function tpascaleditor.getcaption: msestring;
+begin
+ result:= 'PascalScript Editor';
+end;
 
 function tpascaleditor.getsyntaxindex: integer;
 begin
