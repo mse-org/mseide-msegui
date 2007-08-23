@@ -1,0 +1,806 @@
+[componentpalette]
+order0=0
+order1=0
+order2=0
+order3=0
+order4=0
+order5=0
+order6=0
+order7=0
+order8=0
+order9=0
+order10=0
+order11=0
+[projectoptions]
+projectdir=/home/mse/packs/standard/svn/mse/trunk/help/tutorials/db/sqlite3
+findinfiledialog=27
+ [findinfileadialogfo]
+ stackedunder=
+ x=268
+ y=415
+ cx=331
+ cy=249
+ [findinfileadialogfo.findtext]
+ value=
+ history=0
+ [findinfileadialogfo.casesensitive]
+ value=0
+ [findinfileadialogfo.wholeword]
+ value=0
+ [findinfileadialogfo.indirectories]
+ value=1
+ [findinfileadialogfo.inopenfiles]
+ value=0
+ [findinfileadialogfo.dir]
+ filenames=0
+ filehistory=0
+ filefilterindex=0
+ filecolwidth=0
+ [findinfileadialogfo.mask]
+ value="*.pas" "*.pp" "*.inc"
+ history=0
+ [findinfileadialogfo.subdirs]
+ value=0
+finddialog=8
+ [finddialogfo]
+ stackedunder=
+ x=319
+ y=205
+ cx=331
+ cy=116
+ [finddialogfo.selectedonly]
+ value=0
+options=54
+ [projectoptionsfo]
+ stackedunder=
+ x=151
+ y=68
+ cx=821
+ cy=572
+ [projectoptionsfo.tabwidget]
+ firsttab=0
+ index=2
+ [projectoptionsfo.ttabwidget2]
+ firsttab=0
+ index=1
+ [projectoptionsfo.filefiltergrid]
+ width0=112
+ width1=673
+ [projectoptionsfo.grid]
+ width1=566
+ [projectoptionsfo.ttabwidget1]
+ firsttab=0
+ index=0
+ [projectoptionsfo.exceptionsgrid]
+ width0=47
+ values1=1
+  EconvertError
+ width1=766
+ [projectoptionsfo.makegroupbox]
+ firsttab=0
+ index=0
+ [projectoptionsfo.macrogrid]
+ width0=13
+ width1=13
+ width2=13
+ width3=13
+ width4=13
+ width5=13
+ width6=146
+ width7=583
+ [projectoptionsfo.macrosplitter]
+ x=0
+ y=178
+ [projectoptionsfo.fontaliasgrid]
+ values0=0
+ width0=98
+ values1=0
+ width1=684
+ values2=0
+ width2=30
+ [projectoptionsfo.newfile]
+ firsttab=0
+ index=0
+ [projectoptionsfo.twidgetgrid3]
+ width0=141
+ width1=332
+ width2=320
+texteditor=15
+ [msetexteditorfo]
+ stackedunder=
+ x=74
+ y=214
+ cx=369
+ cy=268
+ wsize=0
+ active=1
+ visible=1
+ [msetexteditorfo.filedialog]
+ filenames=0
+ lastdir=
+ filehistory=0
+ filefilterindex=0
+ filecolwidth=0
+colordialog=6
+ [colordialogfo]
+ stackedunder=
+ x=140
+ y=234
+ cx=342
+ cy=303
+dbfieldeditor=12
+ [msedbfieldeditorfo]
+ stackedunder=
+ x=29
+ y=248
+ cx=601
+ cy=216
+ wsize=0
+ active=1
+ visible=1
+ [msedbfieldeditorfo.splitter]
+ x=331
+ y=24
+sigsettings=27
+ 1,1,T,F
+ 3,3,T,F
+ 4,4,T,F
+ 6,6,T,F
+ 7,7,T,F
+ 8,8,T,F
+ 9,9,T,F
+ 10,10,T,F
+ 11,11,T,F
+ 12,12,T,F
+ 13,13,T,F
+ 15,15,T,F
+ 16,16,T,F
+ 17,17,F,F
+ 18,18,T,F
+ 19,19,T,F
+ 20,20,T,F
+ 21,21,T,F
+ 22,22,T,F
+ 23,23,T,F
+ 24,24,T,F
+ 25,25,T,F
+ 26,26,T,F
+ 27,27,T,F
+ 28,28,T,F
+ 29,29,T,F
+ 30,30,T,F
+gridsizex=8
+gridsizey=8
+exceptclassnames=1
+ EconvertError
+exceptignore=1
+ 0
+modulenames=1
+ MAINFO
+moduletypes=1
+ TMAINFO
+modulefiles=1
+ /home/mse/packs/standard/svn/mse/trunk/help/tutorials/db/sqlite3/main.mfm
+mainfile=sqlite3demo.pas
+targetfile=sqlite3demo${EXEEXT}
+messageoutputfile=
+copymessages=0
+closemessages=1
+checkmethods=1
+makecommand=${COMPILER}
+debugcommand=${DEBUGGER}
+debugoptions=
+debugtarget=
+defaultmake=1
+makeoptions=4
+ -l -Mobjfpc -Sh ${fpcflags}
+ -gl
+ -B
+ -OG2p3 -XX -Xs
+makeoptionson=4
+ 63
+ 31
+ 34
+ 32
+macroon=7
+ 63
+ 63
+ 61
+ 62
+ 63
+ 61
+ 62
+macronames=7
+ zeosdir
+ msedir
+ fpcdir
+ fpcdir
+ compiler
+ fpcflags
+ fpcflags
+macrovalues=7
+ /home/mse/packs/standard/svn/zeos/trunk/
+ /home/mse/packs/standard/svn/mse/trunk/
+ /home/mse/packs/standard/svn/fp/fixes_2_0/
+ /home/mse/packs/standard/svn/fp/fixes_2_2/
+ ${fpcdir}compiler/ppc386
+ -dsvnfixes
+ -dsvnfixes_2_2 -dmse_fpc_2_2
+macrogroup=1
+groupcomments=6
+ 
+ 
+ 
+ 
+ 
+ 
+sourcedirs=5
+ ${zeosdir}src/*/
+ ${zeosdir}src/
+ ${MSELIBDIR}kernel/$TARGET/
+ ${MSELIBDIR}*/
+ ./
+defines=0
+defineson=0
+unitdirs=5
+ ${zeosdir}src/*/
+ ${zeosdir}src/
+ ${MSELIBDIR}kernel/$TARGET/
+ ${MSELIBDIR}kernel/
+ ${MSELIBDIR}*/
+unitdirson=5
+ 983103
+ 983103
+ 65599
+ 196671
+ 65599
+unitpref=-Fu
+incpref=-Fi
+libpref=-Fl
+objpref=-Fo
+targpref=-o
+sourcefilemasks=3
+ "*.pas" "*.dpr" "*.pp" "*.inc"
+ "*.c" "*.cc" "*.h"
+ "*.mfm"
+syntaxdeffiles=3
+ ${SYNTAXDEFDIR}pascal.sdef
+ ${SYNTAXDEFDIR}cpp.sdef
+ ${SYNTAXDEFDIR}objecttext.sdef
+filemasknames=3
+ Source
+ Forms
+ All Files
+filemasks=3
+ "*.pp" "*.pas" "*.inc" "*.dpr"
+ *.mfm
+ *
+toolmenus=0
+toolfiles=0
+toolparams=0
+fontalias=0
+fontnames=0
+fontheights=0
+usercolors=20
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+usercolorcomment=20
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+showgrid=1
+snaptogrid=1
+moveonfirstclick=1
+autoindent=1
+blockindent=1
+rightmarginon=1
+rightmarginchars=80
+tabstops=4
+spacetabs=0
+editfontname=mseide_source
+editfontheight=14
+editfontwidth=0
+editfontextraspace=0
+editfontantialiased=1
+editmarkbrackets=1
+backupfilecount=2
+encoding=0
+newprojectfiles=4
+ ${TEMPLATEDIR}default/project.pas
+ ${TEMPLATEDIR}default/main.pas
+ ${TEMPLATEDIR}default/main.mfm
+ ${TEMPLATEDIR}default/main_mfm.pas
+newprojectfilesdest=4
+ ${%PROJECTNAME%}.pas
+ 
+ 
+ 
+expandprojectfilemacros=4
+ 1
+ 1
+ 1
+ 0
+loadprojectfile=4
+ 1
+ 1
+ 1
+ 0
+newprogramfile=${TEMPLATEDIR}default/program.pas
+newunitfile=${TEMPLATEDIR}default/unit.pas
+newmainfosource=${TEMPLATEDIR}default/mainform.pas
+newmainfoform=${TEMPLATEDIR}default/mainform.mfm
+newsimplefosource=${TEMPLATEDIR}default/simpleform.pas
+newsimplefoform=${TEMPLATEDIR}default/simpleform.mfm
+newdockingfosource=${TEMPLATEDIR}default/dockingform.pas
+newdockingfoform=${TEMPLATEDIR}default/dockingform.mfm
+newdatamodsource=${TEMPLATEDIR}default/datamodule.pas
+newdatamodform=${TEMPLATEDIR}default/datamodule.mfm
+newsubfosource=${TEMPLATEDIR}default/subform.pas
+newsubfoform=${TEMPLATEDIR}default/subform.mfm
+newreportsource=${TEMPLATEDIR}default/report.pas
+newreportform=${TEMPLATEDIR}default/report.mfm
+newinheritedsource=${TEMPLATEDIR}default/inheritedform.pas
+newinheritedform=${TEMPLATEDIR}default/inheritedform.mfm
+stoponexception=1
+activateonbreak=1
+showconsole=0
+externalconsole=0
+[breakpoints]
+on=6
+ 1
+ 1
+ 1
+ 1
+ 1
+ 1
+path=6
+ /home/mse/packs/standard/svn/mse/trunk/lib/common/db/msqldb.pas
+ /home/mse/packs/standard/svn/zeos/trunk/src/component/ZAbstractDataset.pas
+ /home/mse/packs/standard/svn/zeos/trunk/src/component/ZAbstractDataset.pas
+ /home/mse/packs/standard/svn/zeos/trunk/src/component/ZAbstractDataset.pas
+ /home/mse/packs/standard/svn/zeos/trunk/src/dbc/ZDbcCachedResultSet.pas
+ /home/mse/packs/standard/svn/zeos/trunk/src/dbc/ZDbcGenericResolver.pas
+line=6
+ 2354
+ 823
+ 446
+ 378
+ 1565
+ 758
+ignore=6
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+condition=6
+ 
+ 
+ 
+ 
+ 
+ 
+panels=1
+ panel1
+units=
+ (
+ modulefilenames=0
+ modulenames=0
+ moduleclassnames=0
+ a=0,4132,0,Units
+ )
+files=
+ (
+ a=0,4132,0,Files
+ )
+[layout]
+windowlayout=325
+ [mainfo]
+ stackedunder=formdesignerfo
+ x=644
+ y=20
+ cx=286
+ cy=74
+ wsize=0
+ active=0
+ visible=1
+ [mainfo.basedock]
+ splitdir=2
+ useroptions=6048
+ [mainfo.openfile]
+ filenames=1
+  /home/mse/packs/standard/svn/mse/trunk/help/tutorials/db/sqlite3/main.pas
+ filehistory=10
+  /home/mse/packs/standard/svn/mse/trunk/help/tutorials/db/sqlite3/main.pas
+  /home/mse/packs/standard/svn/mse/trunk/help/tutorials/db/sqlite3/sqlite3demo.pas
+  /home/mse/packs/standard/svn/zeos/trunk/src/dbc/ZDbcSqLiteMetadata.pas
+  /home/mse/packs/standard/svn/zeos/trunk/src/dbc/ZDbcPostgreSqlMetadata.pas
+  /home/mse/packs/standard/svn/zeos/trunk/src/dbc/ZDbcInterbase6Metadata.pas
+  /home/mse/packs/standard/svn/zeos/trunk/src/dbc/ZDbcMySqlMetadata.pas
+  /home/mse/packs/standard/svn/mse/trunk/lib/common/db/msezeos.pas
+  /home/mse/packs/standard/svn/mse/trunk/lib/common/db/msedbedit.pas
+  /home/mse/packs/standard/svn/mse/trunk/help/tutorials/db/zeos/sqlite_mse/main.pas
+  /home/mse/packs/standard/svn/zeos/trunk/src/dbc/ZDbcSqLiteResultSet.pas
+ filefilterindex=0
+ filecolwidth=146
+ [actionsmo.watchesonact]
+ checked=1
+ [actionsmo.bluedotsonact]
+ checked=1
+ [sourcefo]
+ splitdir=0
+ useroptions=2075
+ parent=mainfo.panel1.container
+ visible=1
+ mdistate=0
+ nx=0
+ ny=0
+ ncx=0
+ ncy=0
+ x=0
+ y=0
+ cx=980
+ cy=573
+ [debuggerfo]
+ splitdir=0
+ useroptions=3099
+ parent=mainfo.basedock
+ visible=1
+ mdistate=0
+ nx=0
+ ny=0
+ ncx=0
+ ncy=0
+ x=0
+ y=0
+ cx=286
+ cy=38
+ [componentpalettefo]
+ splitdir=0
+ useroptions=3099
+ stackedunder=targetconsolefo
+ parent=
+ mdistate=0
+ nx=0
+ ny=0
+ ncx=0
+ ncy=0
+ x=335
+ y=24
+ cx=440
+ cy=88
+ wsize=0
+ active=0
+ visible=1
+ [componentpalettefo.componentpages]
+ activetab=2
+ [messagefo]
+ splitdir=0
+ useroptions=6171
+ parent=mainfo.panel1.container
+ visible=0
+ mdistate=0
+ nx=0
+ ny=0
+ ncx=0
+ ncy=0
+ x=0
+ y=493
+ cx=980
+ cy=80
+ [watchfo]
+ splitdir=0
+ useroptions=3099
+ stackedunder=stackfo
+ parent=
+ mdistate=0
+ nx=0
+ ny=0
+ ncx=0
+ ncy=0
+ x=321
+ y=118
+ cx=656
+ cy=389
+ wsize=0
+ active=0
+ visible=1
+ [watchfo.grid]
+ width0=13
+ values1=1
+  str1
+ width1=152
+ values2=1
+  
+ [watchfo.watchon]
+ [watchfo.expression]
+ [watchfo.watcheson]
+ value=1
+ [objectinspectorfo]
+ splitdir=0
+ useroptions=2075
+ stackedunder=mainfo
+ parent=
+ mdistate=0
+ nx=0
+ ny=0
+ ncx=0
+ ncy=0
+ x=670
+ y=179
+ cx=316
+ cy=484
+ wsize=0
+ active=0
+ visible=1
+ [objectinspectorfo.grid]
+ width0=92
+ width1=208
+ [breakpointsfo]
+ splitdir=0
+ useroptions=2075
+ stackedunder=cpufo
+ parent=
+ mdistate=0
+ nx=0
+ ny=0
+ ncx=0
+ ncy=0
+ x=107
+ y=404
+ cx=477
+ cy=128
+ wsize=0
+ active=0
+ visible=0
+ [breakpointsfo.bkptson]
+ value=0
+ [watchpointsfo]
+ splitdir=0
+ useroptions=2075
+ stackedunder=projecttreefo
+ parent=
+ mdistate=0
+ nx=0
+ ny=0
+ ncx=0
+ ncy=0
+ x=537
+ y=26
+ cx=483
+ cy=210
+ wsize=0
+ active=0
+ visible=0
+ [watchpointsfo.grid]
+ width0=16
+ values1=1
+  0
+ width1=33
+ values2=1
+  pinteger(0x126c6b4)^
+ width2=239
+ width4=34
+ values5=1
+  0
+ width5=38
+ values6=1
+  
+ width6=103
+ [stackfo]
+ splitdir=0
+ useroptions=2075
+ stackedunder=objectinspectorfo
+ parent=
+ mdistate=0
+ nx=0
+ ny=0
+ ncx=0
+ ncy=0
+ x=484
+ y=170
+ cx=525
+ cy=542
+ wsize=0
+ active=0
+ visible=1
+ [projecttreefo]
+ splitdir=0
+ useroptions=27
+ stackedunder=findinfilefo
+ parent=
+ mdistate=0
+ nx=0
+ ny=0
+ ncx=0
+ ncy=0
+ x=321
+ y=101
+ cx=698
+ cy=413
+ wsize=0
+ active=0
+ visible=0
+ [findinfilefo]
+ splitdir=0
+ useroptions=2075
+ stackedunder=componentpalettefo
+ parent=
+ mdistate=0
+ nx=0
+ ny=0
+ ncx=0
+ ncy=0
+ x=548
+ y=115
+ cx=369
+ cy=198
+ [cpufo]
+ splitdir=0
+ useroptions=2075
+ stackedunder=disassfo
+ parent=
+ mdistate=0
+ nx=0
+ ny=0
+ ncx=0
+ ncy=0
+ x=192
+ y=451
+ cx=257
+ cy=188
+ wsize=0
+ active=0
+ visible=0
+ [disassfo]
+ splitdir=0
+ useroptions=2075
+ stackedunder=threadsfo
+ parent=
+ mdistate=0
+ nx=0
+ ny=0
+ ncx=0
+ ncy=0
+ x=162
+ y=502
+ cx=564
+ cy=210
+ wsize=0
+ active=0
+ visible=0
+ [threadsfo]
+ splitdir=0
+ useroptions=2075
+ stackedunder=watchpointsfo
+ parent=
+ mdistate=0
+ nx=0
+ ny=0
+ ncx=0
+ ncy=0
+ x=37
+ y=270
+ cx=349
+ cy=276
+ wsize=0
+ active=0
+ visible=0
+ [targetconsolefo]
+ splitdir=0
+ useroptions=2075
+ stackedunder=watchfo
+ parent=
+ mdistate=0
+ nx=0
+ ny=0
+ ncx=0
+ ncy=0
+ x=116
+ y=297
+ cx=904
+ cy=347
+ wsize=0
+ active=0
+ visible=1
+ [mainfo.panel1]
+ splitdir=2
+ useroptions=4091
+ stackedunder=
+ parent=
+ mdistate=0
+ nx=0
+ ny=0
+ ncx=0
+ ncy=0
+ x=4
+ y=140
+ cx=990
+ cy=573
+ wsize=0
+ active=1
+ visible=1
+[edit]
+hintwidth=0
+hintheight=0
+autoindent=1
+blockindent=1
+rightmarginon=1
+rightmarginchars=80
+tabstops=4
+finddtext=quotestring
+findhistory=6
+ quotestring
+ updatela
+ tdbstring
+ propscrollbar
+ calcrange
+ tgriddatalink
+findoptions=1
+editpos=1
+ 0,0
+bookmarks0=0
+sourcefiles=1
+ /home/mse/packs/standard/svn/mse/trunk/help/tutorials/db/sqlite3/main.pas
+relpaths=1
+ main.pas
+ismoduletexts=1
+ 0
+modules=1
+ /home/mse/packs/standard/svn/mse/trunk/help/tutorials/db/sqlite3/main.mfm
+visiblemodules=1
+ 1
+[sourcefo.tabwidget]
+tabsize=134
+firsttab=0
+index=0
+[components]
+[selecteditpage]
+colwidth=100
+x=0
+y=0
+cx=0
+cy=0
+[progparams]
+parameters=
+progparamhistory=0
+workingdirectory=
+envvarons=0
+envvarnames=0
+envvarvalues=0

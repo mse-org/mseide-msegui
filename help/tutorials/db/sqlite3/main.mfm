@@ -1,0 +1,253 @@
+object mainfo: tmainfo
+  optionswidget = [ow_arrowfocus, ow_subfocus, ow_destroywidgets, ow_hinton, ow_autoscale]
+  bounds_x = 159
+  bounds_y = 243
+  bounds_cx = 403
+  bounds_cy = 285
+  taborder = 1
+  visible = False
+  container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_subfocus, ow_mousetransparent, ow_destroywidgets, ow_autoscale]
+  container.bounds_x = 0
+  container.bounds_y = 0
+  container.bounds_cx = 403
+  container.bounds_cy = 285
+  container.frame.dummy = 0
+  container.face.fade_direction = gd_up
+  container.face.localprops = [fal_fadirection]
+  container.face.template = tfacecomp1
+  container.face.dummy = 0
+  optionswindow = [wo_groupleader]
+  options = [fo_main, fo_terminateonclose, fo_autoreadstat, fo_autowritestat, fo_savepos, fo_savestate]
+  statfile = tstatfile1
+  caption = 'MSEide+MSEgui'
+  icon.transparency = -2147483648
+  moduleclassname = 'tmseform'
+  object tdbnavigator1: tdbnavigator
+    optionswidget = [ow_destroywidgets, ow_autoscale, ow_autosize]
+    bounds_x = 173
+    bounds_y = 8
+    bounds_cx = 222
+    frame.levelo = 1
+    frame.dummy = 0
+    face.fade_direction = gd_up
+    face.localprops = [fal_fadirection]
+    face.template = tfacecomp1
+    face.dummy = 0
+    anchors = [an_top, an_right]
+    datasource = tmsedatasource1
+  end
+  object tdbstringgrid1: tdbstringgrid
+    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_focusbackonesc, ow_mousewheel, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+    bounds_x = 8
+    bounds_y = 39
+    bounds_cx = 387
+    bounds_cy = 237
+    color = -2147483645
+    frame.sbvert.facebutton.template = tfacecomp1
+    frame.sbvert.facebutton.dummy = 0
+    frame.sbvert.faceendbutton.template = tfacecomp1
+    frame.sbvert.faceendbutton.dummy = 0
+    frame.sbhorz.facebutton.fade_direction = gd_down
+    frame.sbhorz.facebutton.localprops = [fal_fadirection]
+    frame.sbhorz.facebutton.template = tfacecomp1
+    frame.sbhorz.facebutton.dummy = 0
+    frame.sbhorz.faceendbutton.fade_direction = gd_down
+    frame.sbhorz.faceendbutton.localprops = [fal_fadirection]
+    frame.sbhorz.faceendbutton.template = tfacecomp1
+    frame.sbhorz.faceendbutton.dummy = 0
+    frame.localprops = [frl_fileft, frl_fitop, frl_firight, frl_fibottom]
+    frame.dummy = 0
+    anchors = [an_left, an_top, an_right, an_bottom]
+    taborder = 1
+    datasource = tmsedatasource1
+    optionsgrid = [og_colsizing, og_rowinserting, og_rowdeleting, og_focuscellonenter, og_autofirstrow, og_autoappend, og_colchangeontabkey, og_autopopup, og_mousescrollcol]
+    datacols.count = 3
+    datacols.coloractive = -2147483648
+    datacols.items = <    
+      item
+        coloractive = -2147483648
+        width = 70
+        options = [co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_mousescrollrow]
+        datafield = 'pk'
+        textflags = [tf_right, tf_ycentered, tf_noselect]
+      end    
+      item
+        coloractive = -2147483648
+        width = 70
+        options = [co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_mousescrollrow]
+        datafield = 'int1'
+        textflags = [tf_right, tf_ycentered, tf_noselect]
+      end    
+      item
+        coloractive = -2147483648
+        width = 140
+        options = [co_savevalue, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_mousescrollrow]
+        datafield = 'text1'
+      end>
+    datalink.options = [gdo_propscrollbar, gdo_thumbtrack, gdo_checkbrowsemodeonexit]
+    fixcols.count = 1
+    fixcols.coloractive = -2147483648
+    fixcols.items = <    
+      item
+        face.fade_direction = gd_up
+        face.localprops = [fal_fadirection]
+        face.template = tfacecomp1
+        face.dummy = 0
+        coloractive = -2147483648
+        width = 22
+        numstart = 1
+        numstep = 1
+        font.colorshadow = 15269375
+        font.name = 'stf_default'
+        font.xscale =  1.0000000000000000E+0000
+        font.dummy = 0
+        colorindicator = 23152
+      end>
+    fixrows.count = 1
+    fixrows.coloractive = -2147483648
+    fixrows.items = <    
+      item
+        face.fade_direction = gd_up
+        face.localprops = [fal_fadirection]
+        face.template = tfacecomp1
+        face.dummy = 0
+        coloractive = -2147483648
+        height = 16
+        captions.count = 3
+        captions.items = <        
+          item
+            caption = 'pk'
+          end        
+          item
+            caption = 'int1'
+          end        
+          item
+            caption = 'text1'
+          end>
+        font.colorshadow = 15269869
+        font.name = 'stf_default'
+        font.xscale =  1.0000000000000000E+0000
+        font.dummy = 0
+      end>
+    zebra_height = 1
+    zebra_step = 2
+    datarowheight = 16
+    statfile = tstatfile1
+    reffontheight = 14
+  end
+  object tmsedatasource1: tmsedatasource
+    DataSet = tmsesqlquery1
+    left = 32
+    top = 232
+  end
+  object tstatfile1: tstatfile
+    filename = 'status.sta'
+    left = 32
+    top = 152
+  end
+  object tfacecomp1: tfacecomp
+    template.image.transparency = -2147483648
+    template.fade_pos.count = 2
+    template.fade_pos.items = (
+       0.0000000000000000E+0000
+       1.0000000000000000E+0000
+    )
+    template.fade_color.count = 2
+    template.fade_color.items = (
+      10796735
+      13754548
+    )
+    template.fade_transparency = -2147483648
+    left = 128
+    top = 152
+  end
+  object tmsesqlquery1: tmsesqlquery
+    packetrecords = -1
+    params = <>
+    SQL.Strings = (
+      'select * from table1;'
+    )
+    IndexDefs = <    
+      item
+        Name = '$PRIMARY_KEY$'
+      end>
+    StatementType = stSelect
+    database = tsqlite3connection1
+    Transaction = tmsesqltransaction1
+    FieldDefs = <    
+      item
+        Name = 'pk'
+        DataType = ftInteger
+        Precision = -1
+        Size = 4
+      end    
+      item
+        Name = 'int1'
+        DataType = ftInteger
+        Precision = -1
+        Size = 4
+      end    
+      item
+        Name = 'text1'
+        DataType = ftString
+        Precision = -1
+        Size = 20
+      end>
+    controller.activator = tactivator1
+    controller.fields.count = 3
+    controller.fields.fields = (
+      (
+        ft_longint
+        ft_longint
+        ft_string
+      )
+      <      
+        item
+          AlignMent = taRightJustify
+          DisplayLabel = 'pk'
+          DisplayWidth = 10
+          FieldName = 'PK'
+          ProviderFlags = [pfInUpdate, pfInWhere, pfInKey]
+        end      
+        item
+          AlignMent = taRightJustify
+          DisplayLabel = 'int1'
+          DisplayWidth = 10
+          FieldName = 'INT1'
+          Index = 1
+        end      
+        item
+          DisplayLabel = 'text1'
+          DisplayWidth = 20
+          FieldName = 'TEXT1'
+          Index = 2
+          Size = 0
+        end>
+    )
+    controller.options = [dso_utf8, dso_autoapply, dso_autocommitret]
+    left = 32
+    top = 208
+  end
+  object tsqlite3connection1: tsqlite3connection
+    Connected = True
+    DatabaseName = 'test.db'
+    Transaction = tmsesqltransaction1
+    left = 32
+    top = 184
+  end
+  object tmsesqltransaction1: tmsesqltransaction
+    Active = True
+    Database = tsqlite3connection1
+    left = 176
+    top = 184
+  end
+  object tactivator1: tactivator
+    clients = 1
+    options = [avo_activateonloaded, avo_handleexceptions, avo_quietexceptions]
+    left = 16
+    top = 8
+    clientnames = (
+      'mainfo.tmsesqlquery1'
+    )
+  end
+end
