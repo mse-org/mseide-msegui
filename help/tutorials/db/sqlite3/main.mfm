@@ -43,6 +43,7 @@ object mainfo: tmainfo
     bounds_cx = 387
     bounds_cy = 237
     color = -2147483645
+    frame.sbvert.buttonlength = 0
     frame.sbvert.facebutton.template = tfacecomp1
     frame.sbvert.facebutton.dummy = 0
     frame.sbvert.faceendbutton.template = tfacecomp1
@@ -171,7 +172,6 @@ object mainfo: tmainfo
       item
         Name = '$PRIMARY_KEY$'
       end>
-    StatementType = stSelect
     database = tsqlite3connection1
     Transaction = tmsesqltransaction1
     FieldDefs = <    
