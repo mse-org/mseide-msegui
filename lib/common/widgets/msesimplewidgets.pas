@@ -400,20 +400,16 @@ type
    procedure setframe(const value: tstepboxframe);
   protected
    fdragcontroller: tdragcontroller;
-//   finvisiblebuttons: stepkindsty;
    procedure internalcreateframe; override;
    procedure widgetregionchanged(const sender: twidget); override;
    procedure clientmouseevent(var info: mouseeventinfoty); override;
    procedure mouseevent(var info: mouseeventinfoty); override;
    procedure mousewheelevent(var info: mousewheeleventinfoty); override;
-  procedure dostep(const event: stepkindty); virtual;
+   procedure dostep(const event: stepkindty); virtual;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
-
    property onstep: stepeventty read fonstep write fonstep;
-//   property invisiblebuttons: stepkindsty read finvisiblebuttons write setinvisiblebuttons;
-
   published
    property frame: tstepboxframe read getframe write setframe;
    property optionswidget default defaultoptionswidgetnofocus;
@@ -422,7 +418,6 @@ type
  tstepbox = class(tcustomstepbox)
   published
    property onstep;
-//   property invisiblebuttons;
  end;
 
 implementation

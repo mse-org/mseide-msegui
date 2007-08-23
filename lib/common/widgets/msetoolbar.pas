@@ -154,6 +154,8 @@ type
   stepinfo: framestepinfoty;
 //  maxbuttons: integer;
   lines: integer;
+  buttonsize: sizety;
+  defaultsize: sizety;
  end;
 
  toolbuttoneventty = procedure(const sender: tobject;
@@ -162,6 +164,7 @@ type
  tcustomtoolbar = class(tcustomstepbox,istatfile)
   private
    flayout: toolbarlayoutinfoty;
+   flayoutok: boolean;
    foptions: toolbaroptionsty;
    fonbuttonchanged: toolbuttoneventty;
    fhintedbutton: integer;
@@ -178,6 +181,8 @@ type
    procedure setdragcontroller(const Value: tdragcontroller);
   protected
    procedure buttonchanged(sender: ttoolbutton);
+   procedure checkvert(const asize: sizety);
+   procedure getautopaintsize(var asize: sizety); override;
    procedure updatelayout;
    procedure clientrectchanged; override;
    procedure dopaint(const canvas: tcanvas); override;
@@ -225,40 +230,15 @@ type
    property onbuttonchanged;
    property drag;
   end;
-{
- tdocktoolbar = class(tcustomtoolbar,idockcontroller)
-  protected
-   function getframe: tgripframe;
-   procedure setframe(const avalue: tgripframe);
-   procedure createframe; override;
-   function getdrag: tdockcontroller;
-   procedure setdragcontroller(const avalue: tdockcontroller);
-   //idockcontroller
-   function checkdock(var info: draginfoty): boolean;
-   function gethandlerect: rectty;
-   function gethidebuttonrect: rectty;
-   function getplacementrect: rectty;
-  public
-   constructor create(aowner: tcomponent); override;
-  published
-   property frame: tgripframe read getframe write setframe;
-   property onstep;
-//   property invisiblebuttons;
 
-   property optionswidget default defaultoptionswidgetnofocus;
-   property buttons;
-   property firstbutton;
-   property options;
-   property statfile;
-   property statvarname;
-   property onbuttonchanged;
-   property drag: tdockcontroller read getdrag write setdragcontroller;
- end;
- }
 implementation
 uses
  sysutils,msebits;
-
+const
+ separatorwidth = 3;
+type
+ tcustomstepframe1 = class(tcustomstepframe);
+ 
 procedure drawtoolbuttons(const canvas: tcanvas;
            var layout: toolbarlayoutinfoty);
 var
@@ -331,12 +311,7 @@ function ttoolbutton.isstatestored: Boolean;
 begin
  result:= isactionstatestored(finfo);
 end;
-{
-function ttoolbutton.getimagelist: timagelist;
-begin
- result:= finfo.imagelist;
-end;
-}
+
 procedure ttoolbutton.setimagelist(const Value: timagelist);
 begin
  setactionimagelist(iactionlink(self),value);
@@ -356,12 +331,7 @@ function ttoolbutton.isshortcutstored: Boolean;
 begin
  result:= isactionshortcutstored(finfo);
 end;
-{
-function ttoolbutton.getimagenr: integer;
-begin
- result:= finfo.imagenr;
-end;
-}
+
 procedure ttoolbutton.setimagenr(const Value: integer);
 begin
  setactionimagenr(iactionlink(self),value);
@@ -402,12 +372,6 @@ begin
  result:= isactionimagecheckedoffsetstored(finfo);
 end;
 
-{
-function ttoolbutton.gethint: msestring;
-begin
- result:= finfo.hint;
-end;
-}
 procedure ttoolbutton.sethint(const Value: msestring);
 begin
  setactionhint(iactionlink(self),value);
@@ -427,12 +391,7 @@ function ttoolbutton.isonexecutestored: Boolean;
 begin
  result:= isactiononexecutestored(finfo);
 end;
-{
-function ttoolbutton.getgroup: integer;
-begin
- result:= finfo.group;
-end;
-}
+
 procedure ttoolbutton.setgroup(const Value: integer);
 begin
  setactiongroup(iactionlink(self),value);
@@ -442,19 +401,7 @@ function ttoolbutton.isgroupstored: Boolean;
 begin
  result:= isactiongroupstored(finfo);
 end;
-{
-procedure ttoolbutton.updatestate(const astate: shapestatesty);
-var
- bo1: boolean;
-begin
- bo1:= (ss_checked in astate) xor (as_checked in finfo.state);
- shapestatestoactionstates(astate,finfo.state,[as_checked]);
-// finfo.state:= astate;
- if bo1 then begin
-  changed;
- end;
-end;
-}
+
 procedure ttoolbutton.changed;
 begin
  tcustomtoolbar(fowner).buttonchanged(self);
@@ -502,12 +449,6 @@ begin
  end;
 end;
 
-{
-function ttoolbutton.getobjectlink: iobjectlink;
-begin
- result:= iactionlink(self);
-end;
-}
 function ttoolbutton.getenabled: boolean;
 begin
  result:= not (as_disabled in finfo.state);
@@ -740,219 +681,303 @@ begin
  flayout.buttons.Free;
 end;
 
+procedure tcustomtoolbar.checkvert(const asize: sizety);
+begin
+ with flayout do begin
+  vert:= asize.cy > asize.cx;
+  if (tbo_novert in foptions) then begin
+   vert:= false;
+  end;
+  if (tbo_nohorz in foptions) then begin
+   vert:= true;
+  end;
+  buttonsize:= asize;
+  if vert then begin
+   if buttons.fwidth > 0 then begin
+    buttonsize.cx:= buttons.fwidth;
+   end;
+   if buttons.fheight = 0 then begin
+    buttonsize.cy:= buttonsize.cx;
+   end
+   else begin
+    buttonsize.cy:= buttons.fheight;
+   end;
+  end
+  else begin
+   if buttons.fheight > 0 then begin
+    buttonsize.cy:= buttons.fheight;
+   end;
+   if buttons.fwidth = 0 then begin
+    buttonsize.cx:= buttonsize.cy;
+   end
+   else begin
+    buttonsize.cx:= buttons.fwidth;
+   end;
+  end;
+ end;
+end;
+
+procedure tcustomtoolbar.getautopaintsize(var asize: sizety);
+var
+ int1: integer;
+ size1: sizety;
+begin
+ with flayout do begin
+  if (defaultsize.cx = 0) or (buttons.width = 0) or 
+           (defaultsize.cy = 0) or (buttons.height = 0) then begin
+   size1:= asize;
+   if fframe <> nil then begin
+    size1.cx:= size1.cx - fframe.framei_left - fframe.framei_right;
+    size1.cy:= size1.cy - fframe.framei_top - fframe.framei_bottom;
+   end;
+   checkvert(size1);
+   if vert then begin
+    defaultsize.cx:= buttonsize.cx;
+    for int1:= 0 to buttons.count - 1 do begin
+     with buttons[int1] do begin
+      if not (as_invisible in state) then begin
+       if mao_separator in options then begin
+        inc(defaultsize.cy,separatorwidth);
+       end
+       else begin
+        inc(defaultsize.cy,buttonsize.cy);
+       end;
+      end;
+     end;
+    end;
+   end
+   else begin
+    defaultsize.cy:= buttonsize.cy;
+    for int1:= 0 to buttons.count - 1 do begin
+     with buttons[int1] do begin
+      if not (as_invisible in state) then begin
+       if mao_separator in options then begin
+        inc(defaultsize.cx,separatorwidth);
+       end
+       else begin
+        inc(defaultsize.cx,buttonsize.cx);
+       end;
+      end;
+     end;
+    end;
+   end;
+   if fframe <> nil then begin
+    defaultsize.cx:= defaultsize.cx + fframe.framei_left + fframe.framei_right;
+    defaultsize.cy:= defaultsize.cy + fframe.framei_top + fframe.framei_bottom;
+   end;
+  end;
+  asize:= defaultsize;
+ end;
+end;
+
 procedure tcustomtoolbar.updatelayout;
-const
- separatorwidth = 3;
 var
  int1,int2,int3: integer;
  rect1,rect2: rectty;
  endxy: integer;
  buttonsizecxy: integer;
  bu1: stepbuttonposty;
+ loopcount: integer;
+ size1: sizety; 
 begin
-// if fupdating = 0 then begin
+ if fupdating <> 0 then begin
+  flayoutok:= false;
+ end
+ else begin
   inc(fupdating);
-  rect1:= innerclientrect;
-  rect2:= rect1;
-  with flayout do begin
-   vert:= fwidgetrect.cy > fwidgetrect.cx;
-   if (tbo_novert in foptions) then begin
-    vert:= false;
-   end;
-   if (tbo_nohorz in foptions) then begin
-    vert:= true;
-   end;
-   bu1:= frame.buttonpos;
-   if frame.buttonpos in [sbp_top,sbp_right] then begin
-    if vert then begin
-     frame.buttonpos:= sbp_top;
-    end
-    else begin
-     frame.buttonpos:= sbp_right;
-    end;
-   end
-   else begin
-    if vert then begin
-     frame.buttonpos:= sbp_bottom;
-    end
-    else begin
-     frame.buttonpos:= sbp_left;
-    end;
-   end;
-   if frame.buttonpos <> bu1 then begin
-    exit; //updatelayout allready called
-   end;
-   if vert then begin
-    if buttons.fwidth > 0 then begin
-     rect1.cx:= buttons.fwidth;
-    end;
-    if buttons.fheight = 0 then begin
-     rect1.cy:= rect1.cx;
-    end
-    else begin
-     rect1.cy:= buttons.fheight;
-    end;
-    if rect1.cx > 0 then begin
-     lines:= rect2.cx div rect1.cx;
-     if lines <= 0 then begin
-      lines:= 1;
-     end;
-    end
-    else begin
-     lines:= 1;
-    end;
-   end
-   else begin
-    if buttons.fheight > 0 then begin
-     rect1.cy:= buttons.fheight;
-    end;
-    if buttons.fwidth = 0 then begin
-     rect1.cx:= rect1.cy;
-    end
-    else begin
-     rect1.cx:= buttons.fwidth;
-    end;
-    if rect1.cy > 0 then begin
-     lines:= rect2.cy div rect1.cy;
-     if lines <= 0 then begin
-      lines:= 1;
-     end;
-    end
-    else begin
-     lines:= 1;
-    end;
-   end;
-
-   cells:= nil; //finalize
-   setlength(cells,buttons.count); //max
-   if vert then begin
-    endxy:= rect2.y + rect2.cy;
-   end
-   else begin
-    endxy:= rect2.x + rect2.cx;
-   end;
-   if vert then begin
-    buttonsizecxy:= rect1.cy;
-   end
-   else begin
-    buttonsizecxy:= rect1.cx;
-   end;
-   int3:= lines - 1;
-   with stepinfo do begin
-    pagelast:= buttons.count;
-    pageup:= stepinfo.pagelast;
-    up:= 0;
-    if ffirstbutton >= pagelast then begin
-     ffirstbutton:= 0; //count changed
-    end;
-    for int1:= ffirstbutton to pagelast - 1 do begin
-     with cells[int1] do begin
-      color:= cl_parent;
-      actioninfotoshapeinfo(buttons[int1].finfo,cells[int1]);
-      include(state,ss_flat);
-      if ss_checkbox in state then begin
-       include(state,ss_checkbutton);
+  try
+   loopcount:= 0;
+   tcustomstepframe1(fframe).neededbuttons:= [];
+   repeat
+    flayoutok:= true;
+    rect1:= innerclientrect;
+    rect2:= rect1;
+    inc(loopcount);
+    with flayout do begin
+     defaultsize:= nullsize;
+     checkvert(rect1.size);
+     bu1:= frame.buttonpos;
+     if frame.buttonpos in [sbp_top,sbp_right] then begin
+      if vert then begin
+       frame.buttonpos:= sbp_top;
+      end
+      else begin
+       frame.buttonpos:= sbp_right;
       end;
-      doexecute:= {$ifdef FPC}@{$endif}buttons[int1].doexecute;
-      if not (as_invisible in buttons[int1].state) then begin
-       if mao_separator in buttons[int1].options then begin
-        if vert then begin
-         rect1.cy:= separatorwidth;
-        end
-        else begin
-         rect1.cx:= separatorwidth;
-        end;
-       end
-       else begin
-        if vert then begin
-         rect1.cy:= buttonsizecxy;
-        end
-        else begin
-         rect1.cx:= buttonsizecxy;
-        end;
-        if up = 0 then begin
-         up:= int1 - ffirstbutton;
-        end;
+     end
+     else begin
+      if vert then begin
+       frame.buttonpos:= sbp_bottom;
+      end
+      else begin
+       frame.buttonpos:= sbp_left;
+      end;
+     end;
+     rect1.size:= buttonsize;
+     if vert then begin
+      if rect1.cx > 0 then begin
+       lines:= rect2.cx div rect1.cx;
+       if lines <= 0 then begin
+        lines:= 1;
        end;
-       if vert and (rect1.y + rect1.cy > endxy) or
-           not vert and (rect1.x + rect1.cx > endxy) then begin
-        if stepinfo.pageup = buttons.count then begin //first loop
-         pageup:= int1;
+      end
+      else begin
+       lines:= 1;
+      end;
+     end
+     else begin
+      if rect1.cy > 0 then begin
+       lines:= rect2.cy div rect1.cy;
+       if lines <= 0 then begin
+        lines:= 1;
+       end;
+      end
+      else begin
+       lines:= 1;
+      end;
+     end;
+  
+     cells:= nil; //finalize
+     setlength(cells,buttons.count); //max
+     if vert then begin
+      endxy:= rect2.y + rect2.cy;
+     end
+     else begin
+      endxy:= rect2.x + rect2.cx;
+     end;
+     if vert then begin
+      buttonsizecxy:= rect1.cy;
+     end
+     else begin
+      buttonsizecxy:= rect1.cx;
+     end;
+     int3:= lines - 1;
+     with stepinfo do begin
+      pagelast:= buttons.count;
+      pageup:= stepinfo.pagelast;
+      up:= 0;
+      if ffirstbutton >= pagelast then begin
+       ffirstbutton:= 0; //count changed
+      end;
+      for int1:= ffirstbutton to pagelast - 1 do begin
+       with cells[int1] do begin
+        color:= cl_parent;
+        actioninfotoshapeinfo(buttons[int1].finfo,cells[int1]);
+        include(state,ss_flat);
+        if ss_checkbox in state then begin
+         include(state,ss_checkbutton);
         end;
-        if (int3 > 0) then begin
-         dec(int3);
-         if vert then begin
-          inc(rect1.x,rect1.cx);
-          rect1.y:= rect2.y;
+        doexecute:= {$ifdef FPC}@{$endif}buttons[int1].doexecute;
+        if not (as_invisible in buttons[int1].state) then begin
+         if mao_separator in buttons[int1].options then begin
+          if vert then begin
+           rect1.cy:= separatorwidth;
+          end
+          else begin
+           rect1.cx:= separatorwidth;
+          end;
          end
          else begin
+          if vert then begin
+           rect1.cy:= buttonsizecxy;
+          end
+          else begin
+           rect1.cx:= buttonsizecxy;
+          end;
+          if up = 0 then begin
+           up:= int1 - ffirstbutton;
+          end;
+         end;
+         if vert and (rect1.y + rect1.cy > endxy) or
+             not vert and (rect1.x + rect1.cx > endxy) then begin
+          if stepinfo.pageup = buttons.count then begin //first loop
+           pageup:= int1;
+          end;
+          if (int3 > 0) then begin
+           dec(int3);
+           if vert then begin
+            inc(rect1.x,rect1.cx);
+            rect1.y:= rect2.y;
+           end
+           else begin
+            inc(rect1.y,rect1.cy);
+            rect1.x:= rect2.x;
+           end;
+          end
+          else begin
+           pagelast:= int1;
+           break;
+          end;
+         end;
+         dim:= rect1;
+         if vert then begin
           inc(rect1.y,rect1.cy);
-          rect1.x:= rect2.x;
+         end
+         else begin
+          inc(rect1.x,rect1.cx);
          end;
         end
         else begin
-         pagelast:= int1;
+         include(state,ss_invisible);
+        end;
+       end;
+      end;
+      pagedown:= 0;
+      down:= 0;
+      if vert then begin
+       int2:= rect2.cy;
+      end
+      else begin
+       int2:= rect2.cx;
+      end;
+      for int1:= ffirstbutton - 1 downto 0 do begin
+       if not (as_invisible in buttons[int1].state)then begin
+        if mao_separator in buttons[int1].options then begin
+         dec(int2,separatorwidth);
+        end
+        else begin
+         if vert then begin
+          dec(int2,buttons.height);
+         end
+         else begin
+          dec(int2,buttons.fwidth);
+         end;
+         if down = 0 then begin
+          down:= int1 - ffirstbutton;
+         end;
+        end;
+        if int2 < 0 then begin
+         pagedown:= int1 + 1;
          break;
         end;
        end;
-       dim:= rect1;
-       if vert then begin
-        inc(rect1.y,rect1.cy);
-       end
-       else begin
-        inc(rect1.x,rect1.cx);
-       end;
-      end
-      else begin
-       include(state,ss_invisible);
+      end;
+      pagelast:= pagelast - ffirstbutton;
+      pageup:= pageup - ffirstbutton;
+      pagedown:= pagedown - ffirstbutton;
+      if up = 0 then begin
+       up:= 1;
+      end;
+      if down = 0 then begin
+       down:= -1;
+      end;
+      frame.updatebuttonstate(ffirstbutton,pagelast,buttons.count);
+     end;
+     if flayoutok then begin
+      size1:= self.size;
+      checkautosize;
+      if (size1.cx <> bounds_cx) or (size1.cy <> bounds_cy) then begin
+       tcustomstepframe1(fframe).neededbuttons:= [];
+                  //try again
       end;
      end;
     end;
-    pagedown:= 0;
-    down:= 0;
-    if vert then begin
-     int2:= rect2.cy;
-    end
-    else begin
-     int2:= rect2.cx;
-    end;
-    for int1:= ffirstbutton - 1 downto 0 do begin
-     if not (as_invisible in buttons[int1].state)then begin
-      if mao_separator in buttons[int1].options then begin
-       dec(int2,separatorwidth);
-      end
-      else begin
-       if vert then begin
-        dec(int2,buttons.height);
-       end
-       else begin
-        dec(int2,buttons.fwidth);
-       end;
-       if down = 0 then begin
-        down:= int1 - ffirstbutton;
-       end;
-      end;
-      if int2 < 0 then begin
-       pagedown:= int1 + 1;
-       break;
-      end;
-     end;
-    end;
-    pagelast:= pagelast - ffirstbutton;
-    pageup:= pageup - ffirstbutton;
-    pagedown:= pagedown - ffirstbutton;
-    if up = 0 then begin
-     up:= 1;
-    end;
-    if down = 0 then begin
-     down:= -1;
-    end;
-    frame.updatebuttonstate(ffirstbutton,pagelast,buttons.count);
-   end;
+   until flayoutok or (loopcount > 8);
+   invalidate;
+  finally
+   dec(fupdating);
   end;
-  invalidate;
-  dec(fupdating);
-// end;
+ end;
 end;
 
 procedure tcustomtoolbar.buttonchanged(sender: ttoolbutton);

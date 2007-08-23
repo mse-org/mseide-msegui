@@ -1134,11 +1134,17 @@ type
  end;
 
  tdbwidgetindicatorcol = class(twidgetfixcol)
+  private
+   fcolorindicator: colorty;
+   procedure setcolorindicator(const avalue: colorty);
   protected
    procedure drawcell(const canvas: tcanvas); override;
   public
    constructor create(const agrid: tcustomgrid;
                        const aowner: tgridarrayprop); override;
+  published
+   property colorindicator: colorty read fcolorindicator 
+                   write setcolorindicator default cl_glyph;
  end;
 
  tdbwidgetfixcols = class(twidgetfixcols)
@@ -1326,11 +1332,17 @@ type
  end;
  
  tdbstringindicatorcol = class(tfixcol)
+  private
+   fcolorindicator: colorty;
+   procedure setcolorindicator(const avalue: colorty);
   protected
    procedure drawcell(const canvas: tcanvas); override;
   public
    constructor create(const agrid: tcustomgrid;
                        const aowner: tgridarrayprop); override;
+  published
+   property colorindicator: colorty read fcolorindicator 
+                write setcolorindicator default cl_glyph;
  end;
 
  tdbstringfixcols = class(tfixcols)
@@ -1664,7 +1676,8 @@ type
  tdataset1 = class(tdataset);
  tdatasource1 = class(tdatasource);
 
-procedure drawindicatorcell(const canvas: tcanvas; datalink: tgriddatalink);
+procedure drawindicatorcell(const canvas: tcanvas; const datalink: tgriddatalink;
+                             const acolor: colorty);
 var
  glyph: stockglyphty;
 begin
@@ -1679,7 +1692,7 @@ begin
     end;
     if ord(glyph) >= 0 then begin
      stockobjects.glyphs.paint(canvas,ord(glyph),innerrect,
-            [al_xcentered,al_ycentered]);
+            [al_xcentered,al_ycentered],acolor);
     end;
 //   end;
   end;
@@ -5649,6 +5662,7 @@ end;
 constructor tdbwidgetindicatorcol.create(const agrid: tcustomgrid;
                                             const aowner: tgridarrayprop);
 begin
+ fcolorindicator:= cl_glyph;
  inherited;
  width:= 15;
 end;
@@ -5659,11 +5673,19 @@ begin
   if fdatalink.active and (cell.row = fdatalink.activerecord) then begin
    notext:= true;
    inherited;
-   drawindicatorcell(canvas,fdatalink);
+   drawindicatorcell(canvas,fdatalink,fcolorindicator);
   end
   else begin
    inherited;
   end;
+ end;
+end;
+
+procedure tdbwidgetindicatorcol.setcolorindicator(const avalue: colorty);
+begin
+ if fcolorindicator <> avalue then begin
+  fcolorindicator:= avalue;
+  changed;
  end;
 end;
 
@@ -6104,6 +6126,7 @@ end;
 constructor tdbstringindicatorcol.create(const agrid: tcustomgrid;
                                             const aowner: tgridarrayprop);
 begin
+ fcolorindicator:= cl_glyph;
  inherited;
  width:= 15;
 end;
@@ -6114,11 +6137,19 @@ begin
   if fdatalink.active and (cell.row = fdatalink.activerecord) then begin
    notext:= true;
    inherited;
-   drawindicatorcell(canvas,fdatalink);
+   drawindicatorcell(canvas,fdatalink,fcolorindicator);
   end
   else begin
    inherited;
   end;
+ end;
+end;
+
+procedure tdbstringindicatorcol.setcolorindicator(const avalue: colorty);
+begin
+ if fcolorindicator <> avalue then begin
+  fcolorindicator:= avalue;
+  changed;
  end;
 end;
 
