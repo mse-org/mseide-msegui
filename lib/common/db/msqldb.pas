@@ -156,7 +156,8 @@ type
                                           const TableName : string); virtual;
     function getprimarykeyfield(const atablename: string;
                       const acursor: tsqlcursor): string; virtual;
-    function GetSchemaInfoSQL(SchemaType : TSchemaType; SchemaObjectName, SchemaPattern : string) : string; virtual;
+    function GetSchemaInfoSQL(SchemaType : TSchemaType;
+              SchemaObjectName, SchemaPattern : string) : string; virtual;
     function CreateBlobStream(const Field: TField; const Mode: TBlobStreamMode;
                  const acursor: tsqlcursor): TStream; virtual;
     
@@ -173,7 +174,8 @@ type
                 //aowner can be nil
                         //aowner used as blob cache
     Procedure DeAllocateCursorHandle(var cursor : TSQLCursor); virtual; abstract;
-    procedure PrepareStatement(cursor: TSQLCursor;ATransaction : TSQLTransaction;buf : string; AParams : TParams); virtual; abstract;
+    procedure PrepareStatement(cursor: TSQLCursor; ATransaction : TSQLTransaction;
+                  buf : string; AParams : TParams); virtual; abstract;
     procedure UnPrepareStatement(cursor : TSQLCursor); virtual; abstract;
     procedure AddFieldDefs(const cursor: TSQLCursor;
                         const FieldDefs: TfieldDefs); virtual; abstract;
@@ -387,54 +389,43 @@ type
   procedure unprepare;
  end;
  
-  TSQLQuery = class (tmsebufdataset,isqlclient,icursorclient)
-  private
-    FCursor              : TSQLCursor;
-    FUpdateable          : boolean;
-    FSQL                 : TStringList;
-    FSQLUpdate,
-    FSQLInsert,
-    FSQLDelete           : TStringList;
-    FIsEOF               : boolean;
-    FLoadingFieldDefs    : boolean;
-    FIndexDefs           : TIndexDefs;
-    FUpdateMode          : TUpdateMode;
-    FParams              : TmseParams;
-    FusePrimaryKeyAsKey  : Boolean;
-    FSQLBuf              : String;
-    FFromPart            : String;
-    FWhereStartPos       : integer;
-    FWhereStopPos        : integer;
-    FParseSQL            : boolean;
-    FMasterLink          : TmseMasterParamsDatalink;
-//    FSchemaInfo          : TSchemaInfo;
-
-    FUpdateQry,
-    FDeleteQry,
-    FInsertQry           : TSQLQuery;
-
-    fblobintf: iblobconnection;
-   
-//   fIsPrepared: boolean;
+ TSQLQuery = class (tmsebufdataset,isqlclient,icursorclient)
+ private
+   FCursor: TSQLCursor;
+   FUpdateable: boolean;
+   FSQL: TStringList;
+   FSQLUpdate,FSQLInsert,FSQLDelete: TStringList;
+   FIsEOF: boolean;
+   FLoadingFieldDefs: boolean;
+   FIndexDefs: TIndexDefs;
+   FUpdateMode: TUpdateMode;
+   FParams: TmseParams;
+   FusePrimaryKeyAsKey: Boolean;
+   FSQLBuf: String;
+   FFromPart: String;
+   FWhereStartPos: integer;
+   FWhereStopPos: integer;
+   FParseSQL: boolean;
+   FMasterLink: TmseMasterParamsDatalink;
+   FUpdateQry,FDeleteQry,FInsertQry: TSQLQuery;
+   fblobintf: iblobconnection;   
    fbeforeexecute: tmsesqlscript;
-    procedure FreeFldBuffers;
-//    procedure InitUpdates(ASQL : string);
-    function GetIndexDefs : TIndexDefs;
-    function GetStatementType : TStatementType;
-    procedure SetIndexDefs(AValue : TIndexDefs);
-    procedure SetReadOnly(AValue : Boolean);
-    procedure SetParseSQL(AValue : Boolean);
-    procedure SetUsePrimaryKeyAsKey(AValue : Boolean);
-    procedure SetUpdateMode(AValue : TUpdateMode);
-    procedure OnChangeSQL(Sender : TObject);
-    procedure OnChangeModifySQL(Sender : TObject);
-    procedure Execute;
-    Procedure SQLParser(var ASQL : string);
-    procedure ApplyFilter;
-    Function AddFilter(SQLstr : string) : string;
+   procedure FreeFldBuffers;
+   function GetIndexDefs : TIndexDefs;
+   function GetStatementType : TStatementType;
+   procedure SetIndexDefs(AValue : TIndexDefs);
+   procedure SetReadOnly(AValue : Boolean);
+   procedure SetParseSQL(AValue : Boolean);
+   procedure SetUsePrimaryKeyAsKey(AValue : Boolean);
+   procedure SetUpdateMode(AValue : TUpdateMode);
+   procedure OnChangeSQL(Sender : TObject);
+   procedure OnChangeModifySQL(Sender : TObject);
+   procedure Execute;
+   Procedure SQLParser(var ASQL : string);
+   procedure ApplyFilter;
+   Function AddFilter(SQLstr : string) : string;
    function getdatabase1: tcustomsqlconnection;
    procedure setdatabase1(const avalue: tcustomsqlconnection);
-//   procedure checkdatabase;
    procedure setparams(const avalue: TmseParams);
    function getconnected: boolean;
    procedure setconnected(const avalue: boolean);
@@ -447,12 +438,10 @@ type
    procedure setsqltransaction(const avalue: tsqltransaction);
    procedure resetparsing;
   protected
-   FTableName           : string;
-   FReadOnly            : boolean;
-   fprimarykeyfield: tfield;
-      
-   procedure notification(acomponent: tcomponent; operation: toperation); override;
-   
+   FTableName: string;
+   FReadOnly: boolean;
+   fprimarykeyfield: tfield;      
+   procedure notification(acomponent: tcomponent; operation: toperation); override;   
    // abstract & virtual methods of TBufDataset
    function Fetch : boolean; override;
    function getblobdatasize: integer; override;
@@ -482,8 +471,7 @@ type
    procedure SetFiltered(Value: Boolean); override;
    procedure SetFilterText(const Value: string); override;
    Function GetDataSource : TDatasource; override;
-   Procedure SetDataSource(AValue : TDatasource); 
-   
+   Procedure SetDataSource(AValue : TDatasource);    
   public
     constructor Create(AOwner : TComponent); override;
     destructor Destroy; override;
@@ -1470,7 +1458,9 @@ end;
 procedure TSQLQuery.OnChangeModifySQL(Sender : TObject);
 
 begin
+ if not (csdesigning in componentstate) then begin
   CheckInactive;
+ end;
 end;
 
 Procedure TSQLQuery.SetTransaction(const Value : tmdbtransaction);
@@ -2036,9 +2026,13 @@ begin
       fprimarykeyfield:= fields.findfield(str1);
      end;
     end;
-    if FUpdateable then begin
+    if FUpdateable or (fsqldelete.count > 0) then begin
      InitialiseModifyQuery(FDeleteQry,FSQLDelete);
+    end;
+    if FUpdateable or (fsqlupdate.count > 0) then begin
      InitialiseModifyQuery(FUpdateQry,FSQLUpdate);
+    end;
+    if FUpdateable or (fsqlinsert.count > 0) then begin
      InitialiseModifyQuery(FInsertQry,FSQLInsert);
     end;
    end
@@ -2289,7 +2283,7 @@ var
  qry: tsqlquery;
  x: integer;
  Fld : TField;
- param1: tparam;
+ param1,param2: tparam;
  int1: integer;
  blobspo: pblobinfoarty;
  str1: string;
@@ -2301,19 +2295,19 @@ begin
  case UpdateKind of
   ukModify: begin
    qry:= FUpdateQry;
-   if trim(qry.sql.Text) = '' then begin
+   if qry.sql.count = 0 then begin
     qry.SQL.Add(ModifyRecQuery);
    end;
   end;
   ukInsert: begin
    qry:= FInsertQry;
-   if trim(qry.sql.Text) = '' then begin
+   if qry.sql.count = 0 then begin
     qry.SQL.Add(InsertRecQuery);
    end;
   end;
   ukDelete : begin
    qry := FDeleteQry;
-   if trim(qry.sql.Text) = '' then begin
+   if qry.sql.count = 0 then begin
     qry.SQL.Add(DeleteRecQuery);
    end;
   end;
@@ -2331,35 +2325,45 @@ begin
  //     AssignFieldValue(Fld,Fld.OldValue);
      end
      else begin
-      Fld:= self.FieldByName(name);
-      if fld is tblobfield and (self.fblobintf <> nil) then begin
-       if fld.isnull then begin
-        clear;
-        datatype:= fld.datatype;
+      fld:= self.findfield(name);
+      if fld = nil then begin     //search for param
+       param2:= self.params.findparam(name);
+       if param2 = nil then begin
+        fieldbyname(name); //raise exception
        end
        else begin
-        bo1:= false;
-        for int1:= 0 to high(blobspo^) do begin
-         if blobspo^[int1].field = fld then begin
-          self.fblobintf.writeblobdata(tsqltransaction(self.transaction),
-               self.ftablename,self.fcursor,
-               blobspo^[int1].data,blobspo^[int1].datalength,fld,params[x],str1);
-          if str1 <> '' then begin
-           self.setdatastringvalue(fld,str1);
-           additem(freeblobar,fld);
-          end;
-          bo1:= true;
-          break;
-         end;
-        end;
-        if not bo1 then begin
-         self.fblobintf.setupblobdata(fld,self.fcursor,params[x]);
-        end;
+        value:= param2.value;
        end;
       end
-      else begin
-       self.fieldtoparam(fld,param1);
- //      AssignFieldValue(Fld,Fld.Value);
+      else begin             //use field
+       if fld is tblobfield and (self.fblobintf <> nil) then begin
+        if fld.isnull then begin
+         clear;
+         datatype:= fld.datatype;
+        end
+        else begin
+         bo1:= false;
+         for int1:= 0 to high(blobspo^) do begin
+          if blobspo^[int1].field = fld then begin
+           self.fblobintf.writeblobdata(tsqltransaction(self.transaction),
+                self.ftablename,self.fcursor,
+                blobspo^[int1].data,blobspo^[int1].datalength,fld,params[x],str1);
+           if str1 <> '' then begin
+            self.setdatastringvalue(fld,str1);
+            additem(freeblobar,fld);
+           end;
+           bo1:= true;
+           break;
+          end;
+         end;
+         if not bo1 then begin
+          self.fblobintf.setupblobdata(fld,self.fcursor,params[x]);
+         end;
+        end;
+       end
+       else begin
+        self.fieldtoparam(fld,param1);
+       end;
       end;
      end;
     end;

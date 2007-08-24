@@ -271,7 +271,7 @@ var
                                                  _para2:longint):Pchar;cdecl;
  sqlite3_bind_parameter_index: function(_para1:Psqlite3_stmt;
                                                   zName:Pchar):longint;cdecl;
-//function sqlite3_clear_bindings(_para1:Psqlite3_stmt):longint;cdecl;
+ sqlite3_clear_bindings: function(_para1:Psqlite3_stmt):longint;cdecl;
  sqlite3_column_count: function(pStmt:Psqlite3_stmt):longint;cdecl;
  sqlite3_column_name: function(_para1:Psqlite3_stmt;
                                           _para2:longint):Pchar;cdecl;
@@ -488,7 +488,8 @@ begin
    'sqlite3_collation_needed16',   //90
    'sqlite3_libversion',           //91
    'sqlite3_version',              //92
-   'sqlite3_libversion_number'     //93
+   'sqlite3_libversion_number',    //93
+   'sqlite3_clear_bindings'        //94 
      ],
      [
    @sqlite3_close,                 //0
@@ -584,7 +585,8 @@ begin
    @sqlite3_collation_needed16,    //90
    @sqlite3_libversion,            //91
    @sqlite3_version,               //92
-   @sqlite3_libversion_number      //93
+   @sqlite3_libversion_number,     //93
+   @sqlite3_clear_bindings         //94
      ]);
   except
    on e: exception do begin

@@ -77,6 +77,7 @@ type
    procedure setbusytimeoutms(const avalue: integer);
    procedure checkbusytimeout;
   protected
+   procedure resetstatement(const astatement: psqlite3_stmt);
    function stringquery(const asql: string): stringarty;
    function stringsquery(const asql: string): stringararty;
    procedure checkerror(const aerror: integer);
@@ -153,7 +154,7 @@ type
 //    property Params;
 //    property OnLogin;
  end;
- 
+
 implementation
 uses
  msesqldb,msebufdataset,dbconst,sysutils,typinfo,dateutils,msesysintf,msedate;
@@ -189,7 +190,7 @@ procedure tsqlite3cursor.close;
 begin
  inherited;
  if fopen then begin
-  fconnection.checkerror(sqlite3_reset(fstatement));
+  fconnection.resetstatement(fstatement);
   fopen:= false;
  end;   
 end;
@@ -477,6 +478,12 @@ begin
  end;
 end;
 
+procedure tsqlite3connection.resetstatement(const astatement: psqlite3_stmt);
+begin
+ checkerror(sqlite3_reset(astatement));
+ checkerror(sqlite3_clear_bindings(astatement));
+end;
+
 procedure tsqlite3connection.Execute(const cursor: TSQLCursor;
                const atransaction: tsqltransaction; const AParams: TParams);
 var
@@ -542,7 +549,7 @@ begin
    fopen:= true;
   end
   else begin
-   checkerror(sqlite3_reset(fstatement));
+   resetstatement(fstatement);
   end;
  end;
 end;
