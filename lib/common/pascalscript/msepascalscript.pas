@@ -33,6 +33,7 @@ var
  int1: integer;
 begin
  result:= nil;
+ setlength(result,compilermessagecount);
  for int1:= 0 to compilermessagecount - 1 do begin
   result[int1]:= compilermessages[int1].messagetostring;
  end;
