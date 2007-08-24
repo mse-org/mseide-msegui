@@ -164,6 +164,8 @@ type
     procedure closeds(out activeds: integerarty);
     procedure reopends(const activeds: integerarty);
     function identquotechar: ansistring; virtual;
+    procedure beginupdate; virtual;
+    procedure endupdate; virtual;
   public
     destructor Destroy; override;
 
@@ -465,6 +467,8 @@ type
    procedure internalrefresh; override;
    function  GetCanModify: Boolean; override;
    Procedure internalApplyRecUpdate(UpdateKind : TUpdateKind);
+   procedure applyupdates(const maxerrors: integer;
+                   const cancelonerror: boolean); override;
    procedure ApplyRecUpdate(UpdateKind : TUpdateKind); override;
    Function IsPrepared: Boolean; virtual;
    Procedure SetActive (Value : Boolean); override;
@@ -1180,6 +1184,16 @@ end;
 function tcustomsqlconnection.identquotechar: ansistring;
 begin
  result:= '"';
+end;
+
+procedure tcustomsqlconnection.beginupdate;
+begin
+ //dummy
+end;
+
+procedure tcustomsqlconnection.endupdate;
+begin
+ //dummy
 end;
 
 { TSQLTransaction }
@@ -2743,6 +2757,18 @@ procedure TSQLQuery.setsqltransaction(const avalue: tsqltransaction);
 begin
  inherited transaction:= avalue;
 end;
+
+procedure TSQLQuery.applyupdates(const maxerrors: integer;
+               const cancelonerror: boolean);
+begin
+ tcustomsqlconnection(fdatabase).beginupdate;
+ try
+  inherited;
+ finally
+  tcustomsqlconnection(fdatabase).endupdate;
+ end;
+end;
+
 
 { TSQLCursor }
 

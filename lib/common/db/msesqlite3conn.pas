@@ -124,6 +124,8 @@ type
    function getprimarykeyfield(const atablename: string;
                                      const acursor: tsqlcursor): string; override;
    procedure updateprimarykeyfield(const afield: tfield); override;
+   procedure beginupdate; override;
+   procedure endupdate; override;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -997,6 +999,20 @@ procedure tsqlite3connection.checkbusytimeout;
 begin
  if fhandle <> nil then begin
   sqlite3_busy_timeout(fhandle,fbusytimeoutms);
+ end;
+end;
+
+procedure tsqlite3connection.beginupdate;
+begin
+ if not (slo_transactions in foptions) then begin
+  execsql('BEGIN');
+ end;
+end;
+
+procedure tsqlite3connection.endupdate;
+begin
+ if not (slo_transactions in foptions) then begin
+  execsql('COMMIT');
  end;
 end;
 
