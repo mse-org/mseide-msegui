@@ -770,10 +770,10 @@ type
    fdestdatalink: tfieldlinkdatalink;
    fonupdatedata: fieldeventty;
    foptions: fieldlinkoptionsty;
-   function getdataset: tdataset;
-   procedure setdataset(const avalue: tdataset);
-   function getdatafield: string;
-   procedure setdatafield(const avalue: string);
+   function getdestdataset: tdataset;
+   procedure setdestdataset(const avalue: tdataset);
+   function getdestdatafield: string;
+   procedure setdestdatafield(const avalue: string);
    //idbeditinfo
    procedure getfieldtypes(out propertynames: stringarty;
                           out fieldtypes: fieldtypesarty);
@@ -785,8 +785,8 @@ type
    destructor destroy; override;
    function field: tfield;
   published
-   property dataset: tdataset read getdataset write setdataset;
-   property datafield: string read getdatafield write setdatafield;
+   property destdataset: tdataset read getdestdataset write setdestdataset;
+   property destdatafield: string read getdestdatafield write setdestdatafield;
    property options: fieldlinkoptionsty read foptions write foptions default [];
    property onupdatedata: fieldeventty read fonupdatedata write fonupdatedata;
  end;
@@ -799,8 +799,8 @@ type
  tfieldfieldlink = class(tfieldlink,idbeditinfo)
   private
    fsourcedatalink: tfielddatalink;
-   function getsourcedatafield: string;
-   procedure setsourcedatafield(const avalue: string);
+   function getdatafield: string;
+   procedure setdatafield(const avalue: string);
    function getdatasource: tdatasource; overload;
    function getdatasource(const aindex: integer): tdatasource; overload;
    procedure setdatasource(const avalue: tdatasource);
@@ -814,8 +814,8 @@ type
    destructor destroy; override;
    function sourcefield: tfield;
   published
-   property sourcedatafield: string read getsourcedatafield 
-                             write setsourcedatafield;
+   property datafield: string read getdatafield 
+                             write setdatafield;
    property datasource: tdatasource read getdatasource write setdatasource;
  end;
  
@@ -3889,22 +3889,22 @@ begin
  inherited;
 end;
 
-procedure tfieldlink.setdataset(const avalue: tdataset);
+procedure tfieldlink.setdestdataset(const avalue: tdataset);
 begin
  fdestdatalink.fdatasource.dataset:= avalue;
 end;
 
-function tfieldlink.getdataset: tdataset;
+function tfieldlink.getdestdataset: tdataset;
 begin
  result:= fdestdatalink.dataset;
 end;
 
-function tfieldlink.getdatafield: string;
+function tfieldlink.getdestdatafield: string;
 begin
  result:= fdestdatalink.fieldname;
 end;
 
-procedure tfieldlink.setdatafield(const avalue: string);
+procedure tfieldlink.setdestdatafield(const avalue: string);
 begin
  fdestdatalink.fieldname:= avalue;
 end;
@@ -3947,12 +3947,12 @@ begin
  inherited;
 end;
 
-function tfieldfieldlink.getsourcedatafield: string;
+function tfieldfieldlink.getdatafield: string;
 begin
  result:= fsourcedatalink.fieldname;
 end;
 
-procedure tfieldfieldlink.setsourcedatafield(const avalue: string);
+procedure tfieldfieldlink.setdatafield(const avalue: string);
 begin
  fsourcedatalink.fieldname:= avalue;
 end;
@@ -3987,7 +3987,7 @@ procedure tfieldfieldlink.getfieldtypes(out propertynames: stringarty;
 begin
  setlength(propertynames,2);
  propertynames[0]:= 'datafield';
- propertynames[1]:= 'sourcedatafield';
+ propertynames[1]:= 'destdatafield';
  setlength(fieldtypes,2);
  fieldtypes[0]:= [];
  fieldtypes[1]:= [];

@@ -13,16 +13,26 @@ unit regdb;
 
 interface
 uses
- msesqldb,msedbedit,msepropertyeditors,msedb,mseclasses,msetypes,msestrings,
- msegui,msedatabase,msesqlresult;
+ classes,typinfo,msesqldb,msedbedit,msepropertyeditors,msedb,mseclasses,msetypes,msestrings,
+ msegui,msedatabase,msesqlresult,msedesignintf;
  
 type
  tdbfieldnamepropertyeditor = class(tstringpropertyeditor)
+  private
+   fnocalc: boolean;
   protected
    fdbeditinfointf: idbeditinfo;
    function getdefaultstate: propertystatesty; override;
   public
    function getvalues: msestringarty; override;
+ end;
+ 
+ tdbfieldnamenocalcpropertyeditor = class(tdbfieldnamepropertyeditor)
+  public
+   constructor create(const adesigner: idesigner;
+        const amodule: tmsecomponent; const acomponent: tcomponent;
+            const aobjectinspector: iobjectinspector;
+            const aprops: propinstancearty; atypeinfo: ptypeinfo); override;  
  end;
  
  tdbcolnamepropertyeditor = class(tstringpropertyeditor)
@@ -79,7 +89,7 @@ type
  
 implementation
 uses
- dbconst,classes,msedesignintf,db,typinfo,mseibconnection,
+ dbconst,db,mseibconnection,
  msepqconnection,mseodbcconn,msemysql40conn,msemysql41conn,msemysql50conn,{sqldb,}
  mselookupbuffer,msedbf,msesdfdata,msememds,
  msedatalist,msedbfieldeditor,sysutils,msetexteditor,
@@ -246,8 +256,12 @@ begin
         tnolistdropdowncolpropertyeditor);
  registerpropertyeditor(typeinfo(string),nil,'datafield',
         tdbfieldnamepropertyeditor);
- registerpropertyeditor(typeinfo(string),tfieldfieldlink,'sourcedatafield',
+ registerpropertyeditor(typeinfo(string),tfieldfieldlink,'datafield',
+        tdbfieldnamenocalcpropertyeditor);
+ registerpropertyeditor(typeinfo(string),tfieldlink,'destdatafield',
         tdbfieldnamepropertyeditor);
+ registerpropertyeditor(typeinfo(string),tfieldparamlink,'datafield',
+        tdbfieldnamenocalcpropertyeditor);
  registerpropertyeditor(typeinfo(string),nil,'keyfield',
         tdbfieldnamepropertyeditor);
  registerpropertyeditor(typeinfo(string),tgriddatalink,'',
@@ -420,7 +434,8 @@ begin
    if ds.active or (ds.fields.count > 0) then begin
     for int1:= 0 to ds.fields.count -1 do begin
      with ds.fields[int1] do begin
-      if (ft = []) or (datatype = ftunknown) or (datatype in ft) then begin
+      if ((ft = []) or (datatype = ftunknown) or (datatype in ft)) and
+             (not fnocalc or (fieldkind <> fkcalculated)) then begin
        additem(result,msestring(fieldname));
       end;
      end;
@@ -1052,6 +1067,17 @@ end;
 function tlocalindexespropertyeditor.geteditorclass: propertyeditorclassty;
 begin
  result:= tlocalindexpropertyeditor;
+end;
+
+{ tdbfieldnamenocalcpropertyeditor }
+
+constructor tdbfieldnamenocalcpropertyeditor.create(const adesigner: idesigner;
+               const amodule: tmsecomponent; const acomponent: tcomponent;
+               const aobjectinspector: iobjectinspector;
+               const aprops: propinstancearty; atypeinfo: ptypeinfo);
+begin
+ fnocalc:= true;
+ inherited;
 end;
 
 initialization

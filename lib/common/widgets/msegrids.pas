@@ -9903,10 +9903,12 @@ begin
     end;
     fdatacols.rearange(list);
     ffixcols.rearange(list);
-    for int1:= 0 to list.count-1 do begin   //neue position bestimmen
-     if list.items[int1] = refindex then break;
+    if refindex >= 0 then begin
+     for int1:= 0 to list.count-1 do begin   //neue position bestimmen
+      if list.items[int1] = refindex then break;
+     end;
+     refindex:= int1;
     end;
-    refindex:= int1;
    end;
   finally
    list.free;
