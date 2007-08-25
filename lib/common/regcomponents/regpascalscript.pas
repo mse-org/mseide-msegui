@@ -4,7 +4,8 @@ interface
 implementation
 uses
  classes,msedesignintf,msepascalscript,msepropertyeditors,msetypes,msestrings,
- msetexteditor,msegui,msewidgets;
+ msetexteditor,msegui,msewidgets,uPSComponent,uPSComponent_Default,
+ psimportmsegui;
 type
  tpascaleditor = class(ttextstringspropertyeditor)
   protected
@@ -16,7 +17,8 @@ end;
  
 procedure Register;
 begin          
- registercomponents('PaSc',[tmsepsscript]);
+ registercomponents('PaSc',[tmsepsscript,tpsdllplugin,tpsimport_classes,
+                            tpsimport_dateutils,tpsimportmsegui]);
  registerpropertyeditor(typeinfo(tstrings),tmsepsscript,'Script',tpascaleditor);
 end;
 

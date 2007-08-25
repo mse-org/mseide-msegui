@@ -419,7 +419,6 @@ type
    flogfilename: filenamety;
    flogger: tbufstreamwriter;
    fbeforeapplyupdate: tdatasetnotifyevent;
-   faftereapplyupdate: tdatasetnotifyevent;
    fafterapplyupdate: tdatasetnotifyevent;
    procedure calcrecordsize;
    procedure alignfieldpos(var avalue: integer);
@@ -644,7 +643,7 @@ type
                       read foninternalcalcfields write setoninternalcalcfields;
    property beforeapplyupdate: tdatasetnotifyevent read fbeforeapplyupdate 
                        write  fbeforeapplyupdate;
-   property afterapplyupdate: tdatasetnotifyevent read faftereapplyupdate 
+   property afterapplyupdate: tdatasetnotifyevent read fafterapplyupdate 
                        write  fafterapplyupdate;
   end;
    

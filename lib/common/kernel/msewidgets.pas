@@ -792,6 +792,8 @@ function showmessage(const atext,caption: msestring;
                      const minwidth: integer = 0): modalresultty; overload;
 function showmessage(const atext: msestring; const caption: msestring = '';
                      const minwidth: integer = 0): modalresultty; overload;
+procedure showmessage1(const atext: msestring; const caption: msestring);
+            //for ps
 procedure showerror(const atext: msestring; const caption: msestring = 'ERROR';
                      const minwidth: integer = 0);
 function askok(const atext: msestring; const caption: msestring = '';
@@ -1131,6 +1133,12 @@ function showmessage(const atext: msestring; const caption: msestring = '';
                         const minwidth: integer = 0): modalresultty;
 begin
  result:= showmessage(atext,caption,[mr_ok],mr_ok,[],minwidth);
+end;
+
+procedure showmessage1(const atext: msestring; const caption: msestring);
+            //for ps
+begin
+ showmessage(atext,caption);
 end;
 
 procedure showerror(const atext: msestring; const caption: msestring = 'ERROR';
