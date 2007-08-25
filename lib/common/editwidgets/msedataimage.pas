@@ -49,6 +49,7 @@ type
    procedure statdataread; virtual;
    procedure griddatasourcechanged; virtual;
   public
+   function seteditfocus: boolean;
    procedure changed; override;
    property value: string write setvalue;
    property gridvalue[const index: integer]: string read getgridvalue 
@@ -85,6 +86,26 @@ begin
   bitmap.clear;
  end;
  changed;
+end;
+
+function tcustomdataimage.seteditfocus: boolean;
+begin
+ if fgridintf = nil then begin
+  if canfocus then begin
+   setfocus;
+  end;
+ end
+ else begin
+  with fgridintf.getcol do begin
+   grid.col:= index;
+   if grid.canfocus then begin
+    if not focused then begin
+     grid.setfocus;
+    end;
+   end; 
+  end;
+ end;
+ result:= focused;
 end;
 
 procedure tcustomdataimage.changed;

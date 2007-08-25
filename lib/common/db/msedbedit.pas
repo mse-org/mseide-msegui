@@ -120,6 +120,7 @@ type
   function getgridintf: iwidgetgrid;
   function getgriddatasource: tdatasource;
   function edited: boolean;
+  function seteditfocus: boolean;
   procedure initfocus;
   function checkvalue(const quiet: boolean = false): boolean;
   procedure valuetofield;
@@ -1296,6 +1297,7 @@ type
    function getgriddatasource: tdatasource; virtual;
    function getgridintf: iwidgetgrid;
    function getwidget: twidget;
+   function seteditfocus: boolean;
    function edited: boolean;
    procedure initfocus;
    function checkvalue(const quiet: boolean = false): boolean;
@@ -2076,6 +2078,15 @@ begin
 end;
 
 procedure teditwidgetdatalink.focuscontrol(afield: tfieldref);
+begin
+ if (afield^ = field) and (field <> nil) then begin
+  if fintf.seteditfocus then begin
+   afield^:= nil;
+  end;
+ end;
+end;
+{
+procedure teditwidgetdatalink.focuscontrol(afield: tfieldref);
 var
  widget1: twidget;
 begin
@@ -2087,7 +2098,7 @@ begin
   end;
  end;
 end;
-
+}
 procedure teditwidgetdatalink.recordchanged(afield: tfield);
 begin
  if (afield = nil) or (afield = field) then begin
@@ -6025,6 +6036,19 @@ end;
 function tdbstringcol.getwidget: twidget;
 begin
  result:= fgrid;
+end;
+
+function tdbstringcol.seteditfocus: boolean;
+begin
+ if not readonly then begin
+  grid.col:= index;
+  if not grid.focused then begin
+   if grid.canfocus then begin
+    grid.setfocus;
+   end;
+  end;
+ end;
+ result:= grid.entered and (grid.col = index);
 end;
 
 function tdbstringcol.edited: boolean;

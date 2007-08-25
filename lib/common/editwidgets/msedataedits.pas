@@ -122,6 +122,8 @@ type
    function checkvalue(const quiet: boolean = false): boolean; virtual;
    function canclose(const newfocus: twidget): boolean; override;
    function edited: boolean;
+   function seteditfocus: boolean;
+   
    property readonly: boolean read getreadonly write setreadonly;
   published
    property statfile: tstatfile read fstatfile write setstatfile;
@@ -1579,6 +1581,28 @@ begin
  else begin
   optionsedit:= optionsedit - [oe_readonly];
  end;  
+end;
+
+function tdataedit.seteditfocus: boolean;
+begin
+ if not readonly then begin
+  if fgridintf = nil then begin
+   if canfocus then begin
+    setfocus;
+   end;
+  end
+  else begin
+   with fgridintf.getcol do begin
+    grid.col:= index;
+    if grid.canfocus then begin
+     if not focused then begin
+      grid.setfocus;
+     end;
+    end; 
+   end;
+  end;
+ end;
+ result:= focused;
 end;
 
 { tcustomstringedit }

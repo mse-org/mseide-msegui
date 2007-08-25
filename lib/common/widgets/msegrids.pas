@@ -955,6 +955,9 @@ end;
                    //invalidaxis if none
    function rowempty(const arow: integer): boolean;
    property cols[const index: integer]: tdatacol read getcols write setcols; default;
+   function colbyname(const aname: string): tdatacol;
+                  //name is case sensitive
+   
    function selectedcellcount: integer;
    property selectedcells: gridcoordarty read getselectedcells write setselectedcells;
    property selected[const cell: gridcoordty]: boolean read Getselected write Setselected;
@@ -1411,6 +1414,8 @@ end;
                    selectaction: focuscellactionty = fca_focusin;
                    const selectmode: selectcellmodety = scm_cell): boolean; 
                                                //true if ok
+   procedure focuscolbyname(const aname: string);
+                 //case sensitive
    function focusedcellvalid: boolean;
    function scrollingcol: boolean;   //true if focusedcolvalid and no co_nohscroll
    function noscrollingcol: boolean; //true if focusedcolvalid and co_nohscroll
@@ -5443,6 +5448,19 @@ procedure tdatacols.dosizechanged;
 begin
  checkindexrange;
  inherited;
+end;
+
+function tdatacols.colbyname(const aname: string): tdatacol;
+var
+ int1: integer;
+begin
+ result:= nil;
+ for int1:= 0 to count - 1 do begin
+  if tdatacol(fitems[int1]).fname = aname then begin
+   result:= tdatacol(fitems[int1]);
+   break;
+  end;
+ end;
 end;
 
 { tdrawcols }
@@ -10185,6 +10203,19 @@ begin
   fdatacols.checktemplate(sender);
   ffixcols.checktemplate(sender);
   ffixrows.checktemplate(sender);
+ end;
+end;
+
+procedure tcustomgrid.focuscolbyname(const aname: string);
+var
+ col1: tdatacol;
+begin
+ col1:= fdatacols.colbyname(aname);
+ if col1 <> nil then begin
+  col:= col1.index;
+  if not entered then begin
+   setfocus;
+  end;
  end;
 end;
 

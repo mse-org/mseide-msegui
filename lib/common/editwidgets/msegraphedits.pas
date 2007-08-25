@@ -145,6 +145,7 @@ type
    function griddata: tdatalist;
 
    function checkvalue: boolean; virtual; abstract;
+   function seteditfocus: boolean;
 
    property objectlinker: tobjectlinker read getobjectlinker
                 {$ifdef msehasimplements}implements istatfile{$endif};
@@ -1170,6 +1171,28 @@ begin
  if fgridintf = nil then begin
   raise exception.Create('No grid.');
  end;
+end;
+
+function tgraphdataedit.seteditfocus: boolean;
+begin
+ if not readonly then begin
+  if fgridintf = nil then begin
+   if canfocus then begin
+    setfocus;
+   end;
+  end
+  else begin
+   with fgridintf.getcol do begin
+    grid.col:= index;
+    if grid.canfocus then begin
+     if not focused then begin
+      grid.setfocus;
+     end;
+    end; 
+   end;
+  end;
+ end;
+ result:= focused;
 end;
 
 function tgraphdataedit.griddata: tdatalist;

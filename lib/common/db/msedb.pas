@@ -706,7 +706,7 @@ type
    procedure appendrecord(const values: array of const);
    procedure getfieldclass(const fieldtype: tfieldtype; out result: tfieldclass);
    
-   procedure dataevent(const event: tdataevent; const info: ptrint);
+   procedure dataevent(const event: tdataevent; info: ptrint);
    procedure cancel;
    property recno: integer read getrecno write setrecno;
    property recnonullbased: integer read getrecnonullbased 
@@ -3537,7 +3537,9 @@ begin
  end;
 end;
 
-procedure tdscontroller.dataevent(const event: tdataevent; const info: ptrint);
+procedure tdscontroller.dataevent(const event: tdataevent; info: ptrint);
+var
+ field1: tfield;
 begin
  case event of
   dedatasetscroll: begin
@@ -3549,6 +3551,10 @@ begin
   end;
   defieldlistchange: begin
    updatelinkedfields;
+  end;
+  defocuscontrol: begin
+   field1:= tfield(info); //workaround for fpc bug
+   info:= ptrint(@field1);
   end;
  end;
  if not fmovebylock or (event <> dedatasetchange) then begin
