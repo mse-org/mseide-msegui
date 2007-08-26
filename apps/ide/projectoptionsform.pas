@@ -391,6 +391,7 @@ procedure projectoptionsmodified;
 function checkprojectloadabort: boolean; //true on load abort
 
 function getsigname(const anum: integer): string;
+procedure projectoptionstofont(const afont: tfont);
 
 var
  projectoptions: projectoptionsty;
@@ -474,6 +475,22 @@ begin
  end;
  if result = '' then begin
   result:= 'SIG'+inttostr(anum);
+ end;
+end;
+
+procedure projectoptionstofont(const afont: tfont);
+begin
+ with projectoptions,afont do begin
+  name:= editfontname;
+  height:= editfontheight;
+  width:= editfontwidth;
+  extraspace:= editfontextraspace;
+  if editfontantialiased then begin
+   options:= options + [foo_antialiased];
+  end
+  else begin
+   options:= options + [foo_nonantialiased];
+  end;
  end;
 end;
 
@@ -914,13 +931,11 @@ begin
     setlength(modulenames,int2);
     setlength(moduletypes,int2);
     setlength(modulefilenames,int2);
-//    setlength(modulefilenamesrel,int2);
     for int1:= 0 to high(modulenames) do begin
      with pmoduleinfoty(submenu[int1+int3].tag)^ do begin
       modulenames[int1]:= struppercase(instance.name);
       moduletypes[int1]:= struppercase(string(moduleclassname));
       modulefilenames[int1]:= filename;
-//      modulefilenamesrel[int1]:= relativepath(filename);
      end;
     end;
    end;
@@ -928,12 +943,6 @@ begin
   registeredcomponents.updatestat(statfiler);
   setsection('projectoptions');
   updatevalue('projectdir',projectdir);
-//  updatevalue('projecthistory',projecthistory); stored in mainstat
-//  updatevalue('titleprintfont',titleprintfont);
-//  updatevalue('sourceprintfont',sourceprintfont);
-//  updatevalue('printfontsize',printfontsize);
-//  updatevalue('printlinenumbers',printlinenumbers);
-//  updatevalue('printcolor',printcolor);
   updatememorystatstream('findinfiledialog',findinfiledialogstatname);
   updatememorystatstream('finddialog',finddialogstatname);
   updatememorystatstream('replacedialog',replacedialogstatname);
@@ -971,7 +980,6 @@ begin
   updatevalue('modulenames',modulenames);
   updatevalue('moduletypes',moduletypes);
   updatevalue('modulefiles',modulefilenames);
-//  updatevalue('modulefilesrel',modulefilenamesrel);
   updatevalue('mainfile',mainfile);
   updatevalue('targetfile',targetfile);
   updatevalue('messageoutputfile',messageoutputfile);
@@ -1037,7 +1045,6 @@ begin
   
   updatevalue('newprogramfile',newprogramfile);
   updatevalue('newunitfile',newunitfile);
-//  updatevalue('newtextfile',newtextfile);
   updatevalue('newmainfosource',newmainfosource);
   updatevalue('newmainfoform',newmainfoform);
   updatevalue('newsimplefosource',newsimplefosource);
@@ -1069,11 +1076,11 @@ begin
 
   setsection('layout');
   mainfo.projectstatfile.updatestat('windowlayout',statfiler);
-//  updatestatfile('windowlayout',mainfo.projectstatfile);
   sourcefo.updatestat(statfiler);
   setsection('components');
   selecteditpageform.updatestat(statfiler);
   programparametersform.updatestat(statfiler);
+  projectoptionstofont(textpropertyfont);
   modified:= false;
   savechecked:= false;
  end;

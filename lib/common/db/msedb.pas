@@ -3553,7 +3553,7 @@ begin
    updatelinkedfields;
   end;
   defocuscontrol: begin
-   field1:= tfield(info); //workaround for fpc bug
+   field1:= tfield(info); //workaround for fpc bug 
    info:= ptrint(@field1);
   end;
  end;

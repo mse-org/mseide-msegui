@@ -1082,20 +1082,9 @@ var
  int1: integer;
 begin
  if edit <> nil then begin
+  projectoptionstofont(edit.font);
+  grid.datarowheight:= edit.font.lineheight;
   with projectoptions do begin
-   with edit.font do begin
-    name:= editfontname;
-    height:= editfontheight;
-    width:= editfontwidth;
-    extraspace:= editfontextraspace;
-    if editfontantialiased then begin
-     options:= options + [foo_antialiased];
-    end
-    else begin
-     options:= options + [foo_nonantialiased];
-    end;
-    grid.datarowheight:= lineheight;
-   end;
    int1:= edit.getcanvas.getstringwidth('oo') div 2;
    if rightmarginon then begin
     edit.marginlinecolor:= cl_gray;

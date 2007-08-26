@@ -14,7 +14,7 @@ unit msepropertyeditors;
 interface
 uses
  Classes,TypInfo,msedesignintf,msetypes,msestrings,sysutils,msedatalist,msemenus,
- mseevent,msegui,mseclasses,mseforms;
+ mseevent,msegui,mseclasses,mseforms,msegraphics;
 
 const
  bmpfiledialogstatname = 'bmpfile.sta';
@@ -678,7 +678,8 @@ type
 
 var
  fontaliasnames: msestringarty;
- 
+
+function textpropertyfont: tfont; 
 function propertyeditors: tpropertyeditors;
 procedure registerpropertyeditor(propertytype: ptypeinfo;
   propertyownerclass: tclass; const propertyname: string;
@@ -688,7 +689,7 @@ implementation
 uses
  mseformatstr,msebits,msearrayprops,msebitmap,
  msefiledialog,mseimagelisteditor,msereal,msewidgets,
- msegraphics,mseactions,mseguiglob,msehash,
+ mseactions,mseguiglob,msehash,
  msestringlisteditor,msedoublestringlisteditor,msereallisteditor,
  mseintegerlisteditor,
  msecolordialog,
@@ -709,7 +710,16 @@ type
  tdesigner1 = class(tdesigner);
 
 var
- apropertyeditors: tpropertyeditors;
+ fpropertyeditors: tpropertyeditors;
+ ftextpropertyfont: tfont;
+
+function textpropertyfont: tfont;
+begin
+ if ftextpropertyfont = nil then begin
+  ftextpropertyfont:= tfont.create;
+ end;
+ result:= ftextpropertyfont;
+end;
 
 Function  GetOrdProp1(Instance: TObject; PropInfo : PPropInfo) : Longint;
 begin
@@ -718,10 +728,10 @@ end;
 
 function propertyeditors: tpropertyeditors;
 begin
- if apropertyeditors = nil then begin
-  apropertyeditors:= tpropertyeditors.create;
+ if fpropertyeditors = nil then begin
+  fpropertyeditors:= tpropertyeditors.create;
  end;
- result:= apropertyeditors;
+ result:= fpropertyeditors;
 end;
 
 procedure registerpropertyeditor(propertytype: ptypeinfo;
@@ -3523,6 +3533,8 @@ begin
  strings:= tstrings(getordvalue);
  editform:= tmsetexteditorfo.create({$ifdef FPC}@{$endif}closequery,
         msetexteditor.syntaxpainter,getsyntaxindex,gettestbutton);
+ editform.textedit.createfont;
+ editform.textedit.font.assign(textpropertyfont);
  utf8:= getutf8;
  try
   with editform do begin
@@ -3891,5 +3903,6 @@ end;
 initialization
 // apropertyeditors:= tpropertyeditors.Create;
 finalization
- freeandnil(apropertyeditors);
+ freeandnil(fpropertyeditors);
+ freeandnil(ftextpropertyfont);
 end.

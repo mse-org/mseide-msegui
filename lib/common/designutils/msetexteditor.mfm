@@ -39,7 +39,7 @@ object msetexteditorfo: tmsetexteditorfo
     modalresult = mr_cancel
   end
   object grid: twidgetgrid
-    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_focusbackonesc, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_focusbackonesc, ow_mousewheel, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
     bounds_x = 0
     bounds_y = 0
     bounds_cx = 369
@@ -70,16 +70,24 @@ object msetexteditorfo: tmsetexteditorfo
         widgetname = 'textedit'
       end>
     datarowlinewidth = 0
-    datarowheight = 16
+    datarowheight = 14
     reffontheight = 14
     object textedit: tsyntaxedit
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontlineheight, ow_autoscale]
       bounds_x = 0
       bounds_y = 0
       bounds_cx = 2000
-      bounds_cy = 16
+      bounds_cy = 14
+      frame.levelo = 0
+      frame.framei_top = 0
+      frame.framei_bottom = 0
+      frame.localprops = [frl_levelo, frl_fileft, frl_fitop, frl_firight, frl_fibottom]
+      frame.dummy = 0
       taborder = 1
       visible = False
+      font.colorshadow = -2147483648
+      font.xscale =  1.0000000000000000E+0000
+      font.dummy = 0
       optionsedit = [oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_linebreak, oe_eatreturn, oe_keyexecute, oe_savevalue, oe_savestate]
       marginlinecolor = -2147483648
       oneditnotifcation = editnotify
@@ -108,6 +116,7 @@ object msetexteditorfo: tmsetexteditorfo
     onexecute = testexe
   end
   object tpopupmenu1: tpopupmenu
+    onupdate = popupuponupdate
     menu.submenu.count = 8
     menu.submenu.items = <    
       item
@@ -156,7 +165,6 @@ object msetexteditorfo: tmsetexteditorfo
         state = [as_localcaption, as_localonexecute]
         onexecute = savefileexe
       end>
-    onupdate = popupuponupdate
     left = 80
     top = 64
   end
