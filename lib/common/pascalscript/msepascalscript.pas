@@ -2,7 +2,7 @@ unit msepascalscript;
 {$ifdef FPC}{$mode objfpc}{$h+}{$INTERFACES CORBA}{$endif}
 interface
 uses
- uPSComponent,msestrings;
+ classes,uPSComponent,msestrings,mseforms,mseclasses;
  
 type 
  tmsepsscript = class(tpsscript)
@@ -11,7 +11,34 @@ type
    function compilermessagear: msestringarty;
  end;
 
+ tscriptform = class(tmseform)
+  private
+   fscript: tmsepsscript;
+   procedure setscript(const avalue: tmsepsscript);
+  protected
+   class function getmoduleclassname: string; override;
+  public
+   constructor create(aowner: tcomponent; load: boolean); override;
+   destructor destroy; override;
+  published
+   property script: tmsepsscript read fscript write setscript;
+ end;
+ 
+ scriptformclassty = class of tscriptform;
+ 
+function createscriptform(const aclass: tclass; 
+                   const aclassname: pshortstring): tmsecomponent;
+
 implementation
+type
+ tmsecomponent1 = class(tmsecomponent);
+ 
+function createscriptform(const aclass: tclass; 
+                   const aclassname: pshortstring): tmsecomponent;
+begin
+ result:= scriptformclassty(aclass).create(nil,false);
+ tmsecomponent1(result).factualclassname:= aclassname;
+end;
 
 { tmsepsscript }
 
@@ -37,6 +64,31 @@ begin
  for int1:= 0 to compilermessagecount - 1 do begin
   result[int1]:= compilermessages[int1].messagetostring;
  end;
+end;
+
+{ tscriptform }
+
+constructor tscriptform.create(aowner: tcomponent; load: boolean);
+begin
+ fscript:= tmsepsscript.create(nil);
+ fscript.setsubcomponent(true);
+ inherited;
+end;
+
+destructor tscriptform.destroy;
+begin
+ fscript.free;
+ inherited;
+end;
+
+class function tscriptform.getmoduleclassname: string;
+begin
+ result:= 'tscriptform';
+end;
+
+procedure tscriptform.setscript(const avalue: tmsepsscript);
+begin
+ fscript.assign(avalue);
 end;
 
 end.

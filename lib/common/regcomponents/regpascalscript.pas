@@ -5,7 +5,7 @@ implementation
 uses
  classes,msedesignintf,msepascalscript,msepropertyeditors,msetypes,msestrings,
  msetexteditor,msegui,msewidgets,uPSComponent,uPSComponent_Default,
- psimportmsegui;
+ psimportmsegui,formdesigner;
 type
  tpascaleditor = class(ttextstringspropertyeditor)
   protected
@@ -14,12 +14,18 @@ type
    function gettestbutton: boolean; override;
    function getcaption: msestring; override;
 end;
+
+const
+ scriptformintf: designmoduleintfty = 
+  (createfunc: {$ifdef FPC}@{$endif}createscriptform;
+     initnewcomponent: nil; getscale: nil);
  
 procedure Register;
 begin          
  registercomponents('PaSc',[tmsepsscript,tpsdllplugin,tpsimport_classes,
                             tpsimport_dateutils,tpsimportmsegui]);
  registerpropertyeditor(typeinfo(tstrings),tmsepsscript,'Script',tpascaleditor);
+ registerdesignmoduleclass(tscriptform,scriptformintf);
 end;
 
 var
