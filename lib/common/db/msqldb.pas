@@ -412,6 +412,7 @@ type
    FUpdateQry,FDeleteQry,FInsertQry: TSQLQuery;
    fblobintf: iblobconnection;   
    fbeforeexecute: tmsesqlscript;
+   ftransactionwrite: tsqltransaction;
    procedure FreeFldBuffers;
    function GetIndexDefs : TIndexDefs;
    function GetStatementType : TStatementType;
@@ -438,6 +439,7 @@ type
    procedure setbeforeexecute(const avalue: tmsesqlscript);
    function getsqltransaction: tsqltransaction;
    procedure setsqltransaction(const avalue: tsqltransaction);
+   procedure settransactionwrite(const avalue: tsqltransaction);
    procedure resetparsing;
   protected
    FTableName: string;
@@ -467,6 +469,7 @@ type
    procedure internalrefresh; override;
    function  GetCanModify: Boolean; override;
    Procedure internalApplyRecUpdate(UpdateKind : TUpdateKind);
+   procedure dobeforeapplyupdate; override;
    procedure applyupdates(const maxerrors: integer;
                    const cancelonerror: boolean); override;
    procedure ApplyRecUpdate(UpdateKind : TUpdateKind); override;
@@ -479,6 +482,8 @@ type
   public
     constructor Create(AOwner : TComponent); override;
     destructor Destroy; override;
+    function writetransaction: tsqltransaction;
+                   //self.transaction if self.transactionwrite = nil
     procedure Prepare; virtual;
     procedure UnPrepare; virtual;
     procedure ExecSQL; virtual;
@@ -503,6 +508,8 @@ type
     property StatementType : TStatementType read GetStatementType;
     Property DataSource : TDatasource Read GetDataSource Write SetDatasource;
     property database: tcustomsqlconnection read getdatabase1 write setdatabase1;
+    property transactionwrite: tsqltransaction read ftransactionwrite 
+                                                  write settransactionwrite;
     
 //    property SchemaInfo : TSchemaInfo read FSchemaInfo default stNoSchema;
     // redeclared data set properties
@@ -1387,8 +1394,16 @@ var
  intf1: itransactionclient;
 begin
  int1:= 1;
- if sender.fupdateqry <> nil then begin
-  inc(int1,3); //insert,update,delete
+ if (self <> sender.ftransactionwrite) then begin
+  if sender.fupdateqry <> nil then begin
+   inc(int1);
+  end;
+  if sender.fdeleteqry <> nil then begin
+   inc(int1);
+  end;
+  if sender.finsertqry <> nil then begin
+   inc(int1);
+  end;
  end;
  if high(fdatasets) >= int1 then begin 
   databaseerror('Offline mode needs exclusive transaction.',sender);
@@ -1984,7 +1999,7 @@ procedure TSQLQuery.connect(const aexecute: boolean);
     with qry do begin
      ParseSQL:= False;
      DataBase:= Self.DataBase;
-     Transaction:= Self.Transaction;
+     Transaction:= self.writetransaction;
      SQL.Assign(aSQL);
     end;
    end;
@@ -2631,6 +2646,9 @@ begin
   if acomponent = fbeforeexecute then begin
    fbeforeexecute:= nil;
   end;
+  if acomponent = ftransactionwrite then begin
+   ftransactionwrite:= nil;
+  end;
  end;
 end;
 
@@ -2758,6 +2776,18 @@ begin
  inherited transaction:= avalue;
 end;
 
+procedure TSQLQuery.settransactionwrite(const avalue: tsqltransaction);
+begin
+ checkinactive;
+ if ftransactionwrite <> nil then begin
+  ftransactionwrite.removefreenotification(self);
+ end;
+ ftransactionwrite:= avalue;
+ if ftransactionwrite <> nil then begin
+  ftransaction.freenotification(self);
+ end;
+end;
+
 procedure TSQLQuery.applyupdates(const maxerrors: integer;
                const cancelonerror: boolean);
 begin
@@ -2767,6 +2797,20 @@ begin
  finally
   tcustomsqlconnection(fdatabase).endupdate;
  end;
+end;
+
+function TSQLQuery.writetransaction: tsqltransaction;
+begin
+ result:= ftransactionwrite;
+ if result = nil then begin
+  result:= transaction;
+ end;
+end;
+
+procedure TSQLQuery.dobeforeapplyupdate;
+begin
+ inherited;
+ writetransaction.active:= true;
 end;
 
 

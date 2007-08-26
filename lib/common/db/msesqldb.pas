@@ -430,7 +430,7 @@ begin
  {$ifdef debugsqlquery}  
      debugwriteln(getenumname(typeinfo(tupdatekind),ord(updatekind))+' '+str1);
  {$endif}  
-     tsqlconnection(database).executedirect(str1,tsqltransaction(transaction));
+     tsqlconnection(database).executedirect(str1,writetransaction);
     end;
    end;
   end
@@ -456,8 +456,15 @@ end;
 
 procedure tmsesqlquery.afterapply;
 begin
- if (dso_autocommitret in fcontroller.options) and (transaction <> nil) then begin
-  tsqltransaction(transaction).commitretaining;
+ if (dso_autocommitret in fcontroller.options) and 
+                (writetransaction <> nil) then begin
+  if transactionwrite = nil then begin
+   writetransaction.commitretaining;
+             //common transaction
+  end
+  else begin
+   writetransaction.commit;
+  end;
  end;
  if dso_refreshafterapply in fcontroller.options then begin
   refresh;
