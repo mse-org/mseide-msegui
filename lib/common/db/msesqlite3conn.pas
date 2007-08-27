@@ -1041,6 +1041,22 @@ end;
 
 function tsqlite3connection.getassqltext(const param: tparam): string;
 begin
+ if param.isnull then begin
+  result:= inherited getassqltext(param);
+ end
+ else begin
+  case param.datatype of
+   ftdate,ftdatetime,fttime: begin
+    result:= encodesqlfloat(param.asdatetime);
+   end;
+   ftbcd: begin
+    result:= inttostr(int64(param.ascurrency));
+   end;
+   else begin
+    result:= inherited getassqltext(param);
+   end;
+  end;
+ end;
 end;
 
 end.
