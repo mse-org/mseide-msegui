@@ -14,14 +14,19 @@ type
  tscriptform = class(tmseform)
   private
    fscript: tmsepsscript;
-   procedure setscript(const avalue: tmsepsscript);
+   function getps_script: tstrings;
+   procedure setps_script(const avalue: tstrings);
+   function getps_plugins: tpsplugins;
+   procedure setps_plugins(const avalue: tpsplugins);
   protected
    class function getmoduleclassname: string; override;
   public
    constructor create(aowner: tcomponent; load: boolean); override;
    destructor destroy; override;
+   property script: tmsepsscript read fscript;
   published
-   property script: tmsepsscript read fscript write setscript;
+   property ps_script: tstrings read getps_script write setps_script;
+   property ps_plugins: tpsplugins read getps_plugins write setps_plugins;
  end;
  
  scriptformclassty = class of tscriptform;
@@ -196,9 +201,24 @@ begin
  result:= 'tscriptform';
 end;
 
-procedure tscriptform.setscript(const avalue: tmsepsscript);
+function tscriptform.getps_script: tstrings;
 begin
- fscript.assign(avalue);
+ result:= fscript.script;
+end;
+
+procedure tscriptform.setps_script(const avalue: tstrings);
+begin
+ fscript.script.assign(avalue); 
+end;
+
+function tscriptform.getps_plugins: tpsplugins;
+begin
+ result:= fscript.plugins;
+end;
+
+procedure tscriptform.setps_plugins(const avalue: tpsplugins);
+begin
+ fscript.plugins.assign(avalue);
 end;
 
 end.

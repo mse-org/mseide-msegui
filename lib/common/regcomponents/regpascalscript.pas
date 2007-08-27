@@ -9,12 +9,18 @@ uses
 type
  tpascaleditor = class(ttextstringspropertyeditor)
   protected
+   function getscript: tmsepsscript; virtual;
    function getsyntaxindex: integer; override;   
    procedure doafterclosequery(var amodalresult: modalresultty); override;
    function gettestbutton: boolean; override;
    function getcaption: msestring; override;
-end;
-
+ end;
+ 
+ tpsscriptformeditor = class(tpascaleditor)
+  protected
+   function getscript: tmsepsscript; override;  
+ end;
+ 
 const
  scriptformintf: designmoduleintfty = 
   (createfunc: {$ifdef FPC}@{$endif}createscriptform;
@@ -25,6 +31,8 @@ begin
  registercomponents('PaSc',[tmsepsscript,tpsdllplugin,tpsimport_classes,
                             tpsimport_dateutils,tpsimportmsegui]);
  registerpropertyeditor(typeinfo(tstrings),tmsepsscript,'Script',tpascaleditor);
+ registerpropertyeditor(typeinfo(tstrings),tscriptform,'ps_script',
+                            tpsscriptformeditor);
  registerdesignmoduleclass(tscriptform,scriptformintf);
 end;
 
@@ -100,13 +108,18 @@ const
 
 { tpascaleditor }
 
+function tpascaleditor.getscript: tmsepsscript;
+begin
+ result:= tmsepsscript(getordvalue(0));
+end;
+
 procedure tpascaleditor.doafterclosequery(var amodalresult: modalresultty);
 var
  str1: ansistring;
  int1: integer;
 begin
  if amodalresult = mr_canclose then begin
-  with tmsepsscript(fprops[0].instance) do begin
+  with getscript do begin
    if compile then begin
 //    showmessage('Compile OK');
    end
@@ -138,6 +151,13 @@ begin
   pascalindex:= msetexteditor.syntaxpainter.readdeffile(pascalsyntax);
  end;
  result:= pascalindex;
+end;
+
+{ tpsscriptformeditor }
+
+function tpsscriptformeditor.getscript: tmsepsscript;
+begin
+ result:= tscriptform(component).script;
 end;
 
 initialization
