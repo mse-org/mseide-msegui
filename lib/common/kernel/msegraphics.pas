@@ -563,10 +563,10 @@ type
    function getcolorshadow: colorty;
    procedure setcolor(const Value: colorty);
    function getcolor: colorty;
-   procedure setheight(const avalue: integer);
+   procedure setheight(avalue: integer);
    function getheight: integer;
    function getwidth: integer;
-   procedure setwidth(const avalue: integer);
+   procedure setwidth(avalue: integer);
    procedure setstyle(const Value: fontstylesty);
    function getstyle: fontstylesty;
    function getascent: integer;
@@ -2771,8 +2771,11 @@ begin
  result:= (finfopo^.height + fontsizeroundvalue) shr fontsizeshift;
 end;
 
-procedure tfont.setheight(const avalue: integer);
+procedure tfont.setheight(avalue: integer);
 begin
+ if avalue < 0 then begin
+  avalue:= 0;
+ end;
  if finfopo^.height <> avalue then begin
   finfopo^.height:= avalue shl fontsizeshift;
   releasehandles;
@@ -2784,8 +2787,11 @@ begin
  result:= (finfopo^.width + fontsizeroundvalue) shr fontsizeshift;
 end;
 
-procedure tfont.setwidth(const avalue: integer);
+procedure tfont.setwidth(avalue: integer);
 begin
+ if avalue < 0 then begin
+  avalue:= 0;
+ end;
  if finfopo^.width <> avalue then begin
   finfopo^.width:= avalue shl fontsizeshift;
   releasehandles;
