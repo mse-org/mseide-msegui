@@ -151,6 +151,8 @@ type
     procedure RollBackRetaining(trans : TSQLHandle); virtual;
     function getblobdatasize: integer; virtual; abstract;
     function getnumboolean: boolean; virtual;
+    function getfloatdate: boolean; virtual;
+    function getint64currency: boolean; virtual;
 
     procedure UpdateIndexDefs(var IndexDefs : TIndexDefs;
                                           const TableName : string); virtual;
@@ -453,6 +455,8 @@ type
    function Fetch : boolean; override;
    function getblobdatasize: integer; override;
    function getnumboolean: boolean; virtual;
+   function getfloatdate: boolean; virtual;
+   function getint64currency: boolean; virtual;
    function blobscached: boolean; override;
    function loadfield(const afield: tfield; const buffer: pointer;
                     var bufsize: integer): boolean; override;
@@ -1057,6 +1061,17 @@ function tcustomsqlconnection.getnumboolean: boolean;
 begin
  result:= true;
 end;
+
+function tcustomsqlconnection.getfloatdate: boolean;
+begin
+ result:= false;
+end;
+
+function tcustomsqlconnection.getint64currency: boolean;
+begin
+ result:= false;
+end;
+
 
 function tcustomsqlconnection.getinsertid: int64;
 begin
@@ -2777,6 +2792,16 @@ begin
  result:= tcustomsqlconnection(database).getnumboolean;
 end;
 
+function TSQLQuery.getfloatdate: boolean;
+begin
+ result:= tcustomsqlconnection(database).getfloatdate;
+end;
+
+function TSQLQuery.getint64currency: boolean;
+begin
+ result:= tcustomsqlconnection(database).getint64currency;
+end;
+
 function TSQLQuery.getsqltransaction: tsqltransaction;
 begin
  result:= tsqltransaction(inherited transaction);
@@ -2823,7 +2848,6 @@ begin
  inherited;
  writetransaction.active:= true;
 end;
-
 
 { TSQLCursor }
 

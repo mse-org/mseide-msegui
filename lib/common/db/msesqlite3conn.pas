@@ -77,6 +77,9 @@ type
    procedure setbusytimeoutms(const avalue: integer);
    procedure checkbusytimeout;
   protected
+   function getfloatdate: boolean; override;
+   function getint64currency: boolean; override;
+   
    function getassqltext(const field : tfield) : string; override;
    function getassqltext(const param : tparam) : string; override;
    
@@ -1057,6 +1060,16 @@ begin
    end;
   end;
  end;
+end;
+
+function tsqlite3connection.getfloatdate: boolean;
+begin
+ result:= true;
+end;
+
+function tsqlite3connection.getint64currency: boolean;
+begin
+ result:= true;
 end;
 
 end.

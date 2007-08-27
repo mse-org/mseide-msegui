@@ -32,6 +32,8 @@ type
    procedure inheritedinternalclose;
    function getblobdatasize: integer;
    function getnumboolean: boolean;
+   function getfloatdate: boolean;
+   function getint64currency: boolean;
   protected
    procedure setactive (value : boolean); {override;}
    function getactive: boolean;
@@ -237,6 +239,16 @@ begin
 end;
 
 function tmsedbf.getnumboolean: boolean;
+begin
+ result:= false;
+end;
+
+function tmsedbf.getfloatdate: boolean;
+begin
+ result:= false;
+end;
+
+function tmsedbf.getint64currency: boolean;
 begin
  result:= false;
 end;

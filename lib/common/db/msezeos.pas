@@ -23,6 +23,8 @@ type
    procedure inheritedinternalclose;
    function getblobdatasize: integer;
    function getnumboolean: boolean;
+   function getfloatdate: boolean;
+   function getint64currency: boolean;
   protected
    procedure setactive (value : boolean);{ override;}
    function getactive: boolean;
@@ -68,6 +70,8 @@ type
    procedure inheritedinternalclose;
    function getblobdatasize: integer;
    function getnumboolean: boolean;
+   function getfloatdate: boolean;
+   function getint64currency: boolean;
   protected
    procedure setactive (value : boolean);{ override;}
    function getactive: boolean;
@@ -111,6 +115,8 @@ type
    procedure inheritedinternalclose;
    function getblobdatasize: integer;
    function getnumboolean: boolean;
+   function getfloatdate: boolean;
+   function getint64currency: boolean;
   protected
    procedure setactive (value : boolean);{ override;}
    function getactive: boolean;
@@ -154,6 +160,8 @@ type
    procedure inheritedinternalclose;
    function getblobdatasize: integer;
    function getnumboolean: boolean;
+   function getfloatdate: boolean;
+   function getint64currency: boolean;
   protected
    procedure setactive (value : boolean);{ override;}
    function getactive: boolean;
@@ -347,6 +355,16 @@ begin
  result:= fcontroller.isutf8;
 end;
 
+function tmsezreadonlyquery.getfloatdate: boolean;
+begin
+ result:= false;
+end;
+
+function tmsezreadonlyquery.getint64currency: boolean;
+begin
+ result:= false;
+end;
+
 { tmsezquery }
 
 constructor tmsezquery.create(aowner: tcomponent);
@@ -512,6 +530,16 @@ begin
  result:= fcontroller.isutf8;
 end;
 
+function tmsezquery.getfloatdate: boolean;
+begin
+ result:= false;
+end;
+
+function tmsezquery.getint64currency: boolean;
+begin
+ result:= false;
+end;
+
 { tmseztable }
 
 constructor tmseztable.create(aowner: tcomponent);
@@ -672,6 +700,16 @@ begin
  result:= true;
 end;
 
+function tmseztable.getfloatdate: boolean;
+begin
+ result:= false;
+end;
+
+function tmseztable.getint64currency: boolean;
+begin
+ result:= false;
+end;
+
 { tmsezstoredproc }
 
 constructor tmsezstoredproc.create(aowner: tcomponent);
@@ -830,6 +868,16 @@ end;
 function tmsezstoredproc.getnumboolean: boolean;
 begin
  result:= true;
+end;
+
+function tmsezstoredproc.getfloatdate: boolean;
+begin
+ result:= false;
+end;
+
+function tmsezstoredproc.getint64currency: boolean;
+begin
+ result:= false;
 end;
 
 end.

@@ -648,6 +648,8 @@ type
   procedure inheritedinternaldelete;
   function getblobdatasize: integer;
   function getnumboolean: boolean;
+  function getfloatdate: boolean;
+  function getint64currency: boolean;
  end;
 
  igetdscontroller = interface(inullinterface)
@@ -727,6 +729,8 @@ type
    function assql(const avalue: msestring): string; overload;
    function assql(const avalue: integer): string; overload;
    function assql(const avalue: int64): string; overload;
+   function assql(const avalue: currency): string; overload;
+   function assqlcurrency(const avalue: realty): string; overload;
    function assql(const avalue: realty): string; overload;
    function assql(const avalue: tdatetime): string; overload;
    function assqldate(const avalue: tdatetime): string;
@@ -3755,13 +3759,38 @@ begin
  end;
 end;
 
+function tdscontroller.assqlcurrency(const avalue: realty): string;
+begin
+ if isemptyreal(avalue) then begin
+  result:= 'NULL';
+ end
+ else begin
+  result:= assql(currency(avalue));
+ end;
+end;
+
+function tdscontroller.assql(const avalue: currency): string;
+begin
+ if fintf.getint64currency then begin
+  result:= inttostr(int64(avalue));
+ end
+ else begin
+  result:= encodesqlcurrency(avalue);
+ end;
+end;
+
 function tdscontroller.assql(const avalue: tdatetime): string;
 begin
  if isemptydatetime(avalue) then begin
   result:= 'NULL';
  end
  else begin
-  result:= encodesqldatetime(avalue);
+  if fintf.getfloatdate then begin
+   result:= encodesqlfloat(avalue);
+  end
+  else begin
+   result:= encodesqldatetime(avalue);
+  end;
  end;
 end;
 
@@ -3771,7 +3800,12 @@ begin
   result:= 'NULL';
  end
  else begin
-  result:= encodesqldate(avalue);
+  if fintf.getfloatdate then begin
+   result:= inttostr(trunc(avalue));
+  end
+  else begin
+   result:= encodesqldate(avalue);
+  end;
  end;
 end;
 
@@ -3781,7 +3815,12 @@ begin
   result:= 'NULL';
  end
  else begin
-  result:= encodesqltime(avalue);
+  if fintf.getfloatdate then begin
+   result:= encodesqlfloat(frac(avalue));
+  end
+  else begin
+   result:= encodesqltime(avalue);
+  end;
  end;
 end;
 

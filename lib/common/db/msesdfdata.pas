@@ -33,6 +33,8 @@ type
    procedure inheritedinternalclose;
    function getblobdatasize: integer;
    function getnumboolean: boolean;
+   function getfloatdate: boolean;
+   function getint64currency: boolean;
   protected
    procedure setactive (value : boolean);{ override;}
    function getactive: boolean;
@@ -80,6 +82,8 @@ type
    procedure inheritedinternalclose;
    function getblobdatasize: integer;
    function getnumboolean: boolean;
+   function getfloatdate: boolean;
+   function getint64currency: boolean;
   protected
    procedure setactive (value : boolean);{ override;}
    function getactive: boolean;
@@ -289,6 +293,16 @@ begin
  result:= true;
 end;
 
+function tmsefixedformatdataset.getfloatdate: boolean;
+begin
+ result:= false;
+end;
+
+function tmsefixedformatdataset.getint64currency: boolean;
+begin
+ result:= false;
+end;
+
 { tmsesdfdataset }
 
 constructor tmsesdfdataset.create(aowner: tcomponent);
@@ -464,6 +478,16 @@ end;
 function tmsesdfdataset.getnumboolean: boolean;
 begin
  result:= true;
+end;
+
+function tmsesdfdataset.getfloatdate: boolean;
+begin
+ result:= false;
+end;
+
+function tmsesdfdataset.getint64currency: boolean;
+begin
+ result:= false;
 end;
 
 end.

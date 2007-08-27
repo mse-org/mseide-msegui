@@ -31,6 +31,8 @@ type
    procedure inheritedinternalclose;
    function getblobdatasize: integer;
    function getnumboolean: boolean;
+   function getfloatdate: boolean;
+   function getint64currency: boolean;
   protected
    procedure setactive (value : boolean);
    function getactive: boolean;
@@ -238,6 +240,16 @@ end;
 function tmsesqlite3dataset.getnumboolean: boolean;
 begin
  result:= true;
+end;
+
+function tmsesqlite3dataset.getfloatdate: boolean;
+begin
+ result:= false;
+end;
+
+function tmsesqlite3dataset.getint64currency: boolean;
+begin
+ result:= false;
 end;
 
 end.
