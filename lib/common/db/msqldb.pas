@@ -462,6 +462,7 @@ type
    procedure InternalClose; override;
    procedure InternalInitFieldDefs; override;
    procedure connect(const aexecute: boolean);
+   procedure freemodifyqueries;
    procedure freequery;
    procedure disconnect;
    procedure InternalOpen; override;
@@ -1710,15 +1711,22 @@ begin
   // not implemented - sql dataset
 end;
 
+procedure tsqlquery.freemodifyqueries;
+begin
+ FreeAndNil(FUpdateQry);
+ FreeAndNil(FInsertQry);
+ FreeAndNil(FDeleteQry);
+end;
+
 procedure tsqlquery.freequery;
 begin
  if not (bs_refreshing in fbstate) then begin
   if (not IsPrepared) and (assigned(database)) and (assigned(FCursor)) then begin
         (database as tcustomsqlconnection).UnPrepareStatement(FCursor);
   end;
-  FreeAndNil(FUpdateQry);
-  FreeAndNil(FInsertQry);
-  FreeAndNil(FDeleteQry);
+  if ftransactionwrite = nil then begin
+   freemodifyqueries;
+  end;
  end;
 end;
 
@@ -1738,13 +1746,13 @@ begin
 // Database and FCursor could be nil, for example if the database is not
 // assigned, and .open is called
  disconnect;
+ freemodifyqueries;
  fblobintf:= nil;
  fprimarykeyfield:= nil;
  if StatementType = stSelect then FreeFldBuffers;
  if DefaultFields then
    DestroyFields;
  FIsEOF := False;
-//  FRecordSize := 0;
  inherited internalclose;
 end;
 

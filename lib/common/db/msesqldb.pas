@@ -54,17 +54,13 @@ type
    procedure setactive(value : boolean); {override;}
    function getactive: boolean;
    procedure setonapplyrecupdate(const avalue: applyrecupdateeventty);
-//   function getreadonly: boolean;
-//   procedure setreadonly(const avalue: boolean);
-//   function getparsesql: boolean;
-//   procedure setparsesql(const avalue: boolean);
-//   function recupdatesql(updatekind : tupdatekind): string;
    function getcontroller: tdscontroller;
    function getindexdefs: TIndexDefs;
    procedure setindexdefs(const avalue: TIndexDefs);
    function getetstatementtype: TStatementType;
    procedure setstatementtype(const avalue: TStatementType);
    procedure afterapply; override;
+   procedure checkcanupdate;
   protected
    procedure updateindexdefs; override;
    procedure sqlonchange(sender: tobject);
@@ -73,7 +69,6 @@ type
    procedure internalclose; override;
    procedure internalinsert; override;
    procedure internaldelete; override;
-//   procedure internalpost; override;
    procedure applyrecupdate(updatekind: tupdatekind); override;
    function  getcanmodify: boolean; override;
    function  getfieldclass(fieldtype: tfieldtype): tfieldclass; override;
@@ -471,12 +466,17 @@ begin
  end;
 end;
 
+procedure tmsesqlquery.checkcanupdate;
+begin
+ if not islocal and (transactionwrite = nil) then begin
+  checkconnected;
+ end;
+end;
+
 procedure tmsesqlquery.applyupdates(const maxerrors: integer;
                 const cancelonerror: boolean = false);
 begin
- if not islocal then begin
-  checkconnected;
- end;
+ checkcanupdate;
  try
   fmstate:= fmstate - [sqs_updateabort,sqs_updateerror];
   inherited;
@@ -496,9 +496,7 @@ end;
 
 procedure tmsesqlquery.applyupdate;
 begin
- if not islocal then begin
-  checkconnected;
- end;
+ checkcanupdate;
  inherited applyupdate(fcontroller.options *
       [dso_cancelupdateonerror,dso_cancelupdatesonerror] <> []);
 end;
