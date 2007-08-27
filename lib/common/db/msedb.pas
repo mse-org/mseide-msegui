@@ -913,6 +913,15 @@ function checkfieldcompatibility(const afield: tfield;
            //true if ok
 function vartorealty(const avalue: variant): realty;
 
+function encodesqlstring(const avalue: string): string;
+function encodesqlblob(const avalue: string): string;
+function encodesqldatetime(const avalue: tdatetime): string;
+function encodesqldate(const avalue: tdatetime): string;
+function encodesqltime(const avalue: tdatetime): string;
+function encodesqlfloat(const avalue: real): string;
+function encodesqlcurrency(const avalue: currency): string;
+function encodesqlboolean(const avalue: boolean): string;
+
 implementation
 uses
  rtlconsts,msefileutils,typinfo,dbconst,msedatalist,mseformatstr,

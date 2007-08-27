@@ -130,8 +130,8 @@ type
     function StrToStatementType(s : string) : TStatementType; virtual;
     procedure DoInternalConnect; override;
     procedure DoInternalDisconnect; override;
-    function GetAsSQLText(Field : TField) : string; overload; virtual;
-    function GetAsSQLText(Param : TParam) : string; overload; virtual;
+    function GetAsSQLText(const Field : TField) : string; overload; virtual;
+    function GetAsSQLText(const Param : TParam) : string; overload; virtual;
     function GetHandle : pointer; virtual;
     procedure updateprimarykeyfield(const afield: tfield); virtual;
 
@@ -206,6 +206,9 @@ type
     procedure GetProcedureNames(List : TStrings); virtual;
     procedure GetFieldNames(const TableName : string; List :  TStrings); virtual;
     function getinsertid: int64; virtual;
+    function fieldtosql(const afield: tfield): string;
+    function fieldtooldsql(const afield: tfield): string;
+    function paramtosql(const aparam: tparam): string;
     
     property Password : string read FPassword write FPassword;
     property Transaction : TSQLTransaction read FTransaction write SetTransaction;
@@ -556,7 +559,9 @@ procedure dosetsqldatabase(const sender: isqlclient; const avalue: tmdatabase;
 implementation
 uses 
  dbconst,strutils,msedatalist,msereal,msestream,msegui;
- 
+type
+ tdataset1 = class(tdataset);
+  
 procedure updateparams(const aparams: tparams);
 var
  int1: integer;
@@ -855,36 +860,14 @@ begin
   GetDBInfo(stColumns,TableName,'column_name',List);
 end;
 
-function tcustomsqlconnection.GetAsSQLText(Field : TField) : string;
-
+function tcustomsqlconnection.GetAsSQLText(const Field: TField): string;
 begin
- result:= fieldtosql(field);
- {
-  if (not assigned(field)) or field.IsNull then Result := 'Null'
-  else case field.DataType of
-    ftString   : Result := '''' + field.asstring + '''';
-    ftDate     : Result := '''' + FormatDateTime('yyyy-mm-dd',Field.AsDateTime) + '''';
-    ftDateTime : Result := '''' + FormatDateTime('yyyy-mm-dd hh:mm:ss',Field.AsDateTime) + ''''
-  else
-    Result := field.asstring;
-  end; 
-  }
+ result:= msedb.fieldtosql(field);
 end;
 
-function tcustomsqlconnection.GetAsSQLText(Param: TParam) : string;
-
+function tcustomsqlconnection.GetAsSQLText(const Param: TParam): string;
 begin
- result:= paramtosql(param);
- {
-  if (not assigned(param)) or param.IsNull then Result := 'Null'
-  else case param.DataType of
-    ftString   : Result := '''' + param.asstring + '''';
-    ftDate     : Result := '''' + FormatDateTime('yyyy-mm-dd',Param.AsDateTime) + '''';
-    ftDateTime : Result := '''' + FormatDateTime('yyyy-mm-dd hh:mm:ss',Param.AsDateTime) + ''''
-  else
-    Result := Param.asstring;
-  end;
- }
+ result:= msedb.paramtosql(param);
 end;
 
 
@@ -1202,6 +1185,26 @@ end;
 procedure tcustomsqlconnection.endupdate;
 begin
  //dummy
+end;
+
+function tcustomsqlconnection.fieldtosql(const afield: tfield): string;
+begin
+ result:= getassqltext(afield);
+end;
+
+function tcustomsqlconnection.fieldtooldsql(const afield: tfield): string;
+var
+ statebefore: tdatasetstate;
+begin
+ statebefore:= afield.dataset.state;
+ tdataset1(afield.dataset).settempstate(dsoldvalue);
+ result:= fieldtosql(afield);
+ tdataset1(afield.dataset).restorestate(statebefore);
+end;
+
+function tcustomsqlconnection.paramtosql(const aparam: tparam): string;
+begin
+ result:= getassqltext(aparam);
 end;
 
 { TSQLTransaction }

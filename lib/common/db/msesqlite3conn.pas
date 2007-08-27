@@ -14,7 +14,7 @@ unit msesqlite3conn;
 
 interface
 uses
- classes,msqldb,msedb,msestrings,db,sqlite3dyn,msetypes,msedatabase;
+ classes,msedb,msqldb,msestrings,db,sqlite3dyn,msetypes,msedatabase;
 { 
       Type name        SQLite storage class  Field type    Data type
 +--------------------+---------------------+-------------+-------------+
@@ -77,6 +77,9 @@ type
    procedure setbusytimeoutms(const avalue: integer);
    procedure checkbusytimeout;
   protected
+   function getassqltext(const field : tfield) : string; override;
+   function getassqltext(const param : tparam) : string; override;
+   
    procedure resetstatement(const astatement: psqlite3_stmt);
    function stringquery(const asql: string): stringarty;
    function stringsquery(const asql: string): stringararty;
@@ -1014,6 +1017,30 @@ begin
  if not (slo_transactions in foptions) then begin
   execsql('COMMIT');
  end;
+end;
+
+function tsqlite3connection.getassqltext(const field: tfield): string;
+begin
+ if field.isnull then begin
+  result:= inherited getassqltext(field);
+ end
+ else begin
+  case field.datatype of
+   ftdate,ftdatetime,fttime: begin
+    result:= encodesqlfloat(field.asdatetime);
+   end;
+   ftbcd: begin
+    result:= inttostr(int64(field.ascurrency));
+   end;
+   else begin
+    result:= inherited getassqltext(field);
+   end;
+  end;
+ end;
+end;
+
+function tsqlite3connection.getassqltext(const param: tparam): string;
+begin
 end;
 
 end.
