@@ -1533,6 +1533,7 @@ type
    fexceptionactive: integer;
    fwaitcount: integer;
    fidlecount: integer;
+   fcheckoverloadlock: integer;
    fcursorshape: cursorshapety;
    feventlooping: integer;
 //   facursorshape: cursorshapety;
@@ -12076,6 +12077,9 @@ end;
 function tapplication.unlockall: integer;
 begin
  with tinternalapplication(self) do begin
+  if ismainthread then begin
+   inc(fcheckoverloadlock);
+  end;
   result:= flockcount;
   if not internalunlock(flockcount) then begin
    result:= 0;
@@ -12090,6 +12094,9 @@ begin
   dec(count);
   while count > 0 do begin
    sys_mutexlock(tinternalapplication(self).fmutex);
+  end;
+  if ismainthread then begin
+   dec(fcheckoverloadlock);
   end;
  end;
 end;
@@ -12139,13 +12146,14 @@ function tapplication.checkoverload(const asleepus: integer = 100000): boolean;
 var
  int1: integer;
 begin
- result:= (fidlecount = 0) and not (aps_waiting in fstate);
+ result:= (fidlecount = 0) and not (aps_waiting in fstate) and 
+                                                 (fcheckoverloadlock = 0);
  fidlecount:= 0;
  if result and (asleepus >= 0) and not ismainthread then begin
   int1:= unlockall;
   repeat
    sleepus(asleepus);
-  until (fidlecount > 0) or (aps_waiting in fstate);
+  until (fidlecount > 0) or (aps_waiting in fstate) or (fcheckoverloadlock <> 0);
   relockall(int1);
  end;
 end;

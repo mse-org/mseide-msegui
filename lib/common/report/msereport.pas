@@ -4969,7 +4969,7 @@ var
  str1: string;
  
 begin
- fstate:= [];
+ fstate:= [rs_running];
  result:= 0; 
  fdefaultprintorientation:= pao_portrait;
  if fprinter <> nil then begin
@@ -4995,7 +4995,12 @@ begin
     if fprinter <> nil then begin
      str1:= '';
      if canevent(tmethod(fonpreamble)) then begin
-      fonpreamble(self,str1);
+      application.lock;
+      try
+       fonpreamble(self,str1);
+      finally
+       application.unlock;
+      end;
      end;
      if rs_endpass in fstate then begin
       if fprinter is tgdiprinter then begin

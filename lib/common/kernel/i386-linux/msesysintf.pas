@@ -682,23 +682,38 @@ function sys_semwait(var sem: semty;  timeoutusec: integer): syserrorty;
           //timeoutus = 0 -> no timeout;
 var
  time1: ttimespec;
+ err: integer;
 begin
- result:= sye_ok;
+ result:= sye_semaphore;
  with linuxsemty(sem) do begin
   if destroyed <> 0 then begin
-   result:= sye_semaphore;
    exit;
   end;
   if timeoutusec = 0 then begin
-   sem_wait(sema);
+   while sem_wait(sema) <> 0 do begin
+    if sys_getlasterror <> eintr then begin
+     exit;
+    end;
+   end;
   end
   else begin
    time1:= gettimestamp(timeoutusec);
-   if sem_timedwait(sema,@time1) <> 0 then begin
-    result:= sye_timeout;
+   while sem_timedwait(sema,@time1) <> 0 do begin
+    case sys_getlasterror of
+     eintr: begin
+     end;
+     etimedout: begin
+      result:= sye_timeout;
+      exit;
+     end
+     else begin
+      exit;
+     end;
+    end;
    end;
   end;
  end;
+ result:= sye_ok;
 end;
 
 function sys_semtrywait(var sem: semty): boolean;
@@ -708,7 +723,9 @@ begin
    result:= false;
    exit;
   end;
-  result:= sem_trywait(sema) = 0;
+  repeat
+   result:= sem_trywait(sema) = 0;
+  until result or (sys_getlasterror <> eintr);
  end;
 end;
 

@@ -12,8 +12,13 @@ type
  end;
 
  tformscript = class(tmsepsscript)
+  private
+   fowner: tmsecomponent;
+  protected
+   procedure docompile(sender: tpsscript);
+   procedure doexecute(sender: tpsscript);
   public
-   constructor create(aowner: tcomponent);
+   constructor create(aowner: tmsecomponent);
  end;
  
  tscriptform = class(tmseform)
@@ -190,7 +195,7 @@ end;
 
 constructor tscriptform.create(aowner: tcomponent; load: boolean);
 begin
- fscript:= tformscript.create(nil);
+ fscript:= tformscript.create(self);
  fscript.setsubcomponent(true);
  inherited;
 end;
@@ -228,10 +233,30 @@ end;
 
 { tformscript }
 
-constructor tformscript.create(aowner: tcomponent);
+constructor tformscript.create(aowner: tmsecomponent);
 begin
- inherited;
+ fowner:= aowner;
+ inherited create(nil);
  compileroptions:= [icAllowNoBegin,icAllowNoEnd,icBooleanShortCircuit];
+ oncompile:= @docompile;
+ onexecute:= @doexecute;
+end;
+
+procedure tformscript.docompile(sender: tpsscript);
+var
+ int1: integer;
+begin
+ with fowner do begin
+  for int1:= 0 to componentcount - 1 do begin
+   with components[int1] do begin
+    sender.addregisteredvariable(name,classname);
+   end;
+  end;
+ end;
+end;
+
+procedure tformscript.doexecute(sender: tpsscript);
+begin
 end;
 
 end.
