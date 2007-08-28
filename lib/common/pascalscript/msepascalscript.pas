@@ -11,9 +11,14 @@ type
    function compilermessagear: msestringarty;
  end;
 
+ tformscript = class(tmsepsscript)
+  public
+   constructor create(aowner: tcomponent);
+ end;
+ 
  tscriptform = class(tmseform)
   private
-   fscript: tmsepsscript;
+   fscript: tformscript;
    function getps_script: tstrings;
    procedure setps_script(const avalue: tstrings);
    function getps_plugins: tpsplugins;
@@ -23,7 +28,7 @@ type
   public
    constructor create(aowner: tcomponent; load: boolean); override;
    destructor destroy; override;
-   property script: tmsepsscript read fscript;
+   property script: tformscript read fscript;
   published
    property ps_script: tstrings read getps_script write setps_script;
    property ps_plugins: tpsplugins read getps_plugins write setps_plugins;
@@ -185,7 +190,7 @@ end;
 
 constructor tscriptform.create(aowner: tcomponent; load: boolean);
 begin
- fscript:= tmsepsscript.create(nil);
+ fscript:= tformscript.create(nil);
  fscript.setsubcomponent(true);
  inherited;
 end;
@@ -219,6 +224,14 @@ end;
 procedure tscriptform.setps_plugins(const avalue: tpsplugins);
 begin
  fscript.plugins.assign(avalue);
+end;
+
+{ tformscript }
+
+constructor tformscript.create(aowner: tcomponent);
+begin
+ inherited;
+ compileroptions:= [icAllowNoBegin,icAllowNoEnd,icBooleanShortCircuit];
 end;
 
 end.

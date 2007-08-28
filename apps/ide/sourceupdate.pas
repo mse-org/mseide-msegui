@@ -331,11 +331,13 @@ begin
   aunit:= updatemodule(amodule);
   if aunit <> nil then begin
    with aunit^ do begin
-    start:= implementationstart;
+    start:= implementationbodystart;
+    if isemptysourcepos(start) then begin
+     start:= implementationstart;
+    end;
     stop:= implementationend;
-    if not isemptysourcepos(implementationstart) and not 
-                            isemptysourcepos(implementationend) then begin
-     adest:= gettext(aunit,implementationstart,implementationend);
+    if not isemptysourcepos(start) then begin
+     adest:= gettext(aunit,start,stop);
      result:= true;
     end;
    end;

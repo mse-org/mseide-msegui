@@ -5,7 +5,8 @@ implementation
 uses
  classes,msedesignintf,msepascalscript,msepropertyeditors,msetypes,msestrings,
  msetexteditor,msegui,msewidgets,uPSComponent,uPSComponent_Default,
- psimportmsegui,formdesigner,sourceupdate,mseparser,pascaldesignparser;
+ psimportmsegui,formdesigner,sourceupdate,mseparser,pascaldesignparser,
+ msedesigner;
 type
  tpascaleditor = class(ttextstringspropertyeditor)
   protected
@@ -17,9 +18,13 @@ type
  end;
  
  tpsscriptformeditor = class(tpascaleditor)
+  private
+   fmoduleprefix: ansistring;
   protected
    function getscript: tmsepsscript; override;  
    procedure edit; override;
+   procedure doafterclosequery(var amodalresult: modalresultty); override;
+   procedure updateline(var aline: ansistring); override;
  end;
  
 const
@@ -158,16 +163,56 @@ procedure tpsscriptformeditor.edit;
 var
  bo1: boolean;
  po1: punitinfoty;
+ po2: pmoduleinfoty;
  mstr1: msestring;
  start,stop: sourceposty;
 begin
  bo1:= getimplementationtext(fmodule,po1,start,stop,mstr1);
  if bo1 then begin
+  po2:= designer.modules.findmodule(fmodule);
+  fmoduleprefix:= struppercase(po2^.moduleclassname)+'.';
   getscript.script.text:= mstr1;
+ end
+ else begin
+  fmoduleprefix:= '';
  end;
  inherited;
  if bo1 and (fmodalresult = mr_ok) then begin
-  sourceupdater.replacetext(po1,start,stop,msestring(getscript.script.text));
+  sourceupdater.replacetext(po1,start,stop,
+        concatstrings(forigtext,msestring(lineend)));
+ end;
+end;
+
+procedure tpsscriptformeditor.doafterclosequery(var amodalresult: modalresultty);
+begin
+ if amodalresult in [mr_canclose,mr_ok] then begin
+ end;
+ inherited; 
+end;
+
+procedure tpsscriptformeditor.updateline(var aline: ansistring);
+var                       //todo: patch PascalScript to accept classname
+ int1: integer;
+ po1,po2,po3: pchar;
+begin                  //remove module prefix
+ if fmoduleprefix <> '' then begin
+  po1:= pchar(aline);
+  while po1^ <> #0 do begin
+   po2:= pchar(fmoduleprefix);
+   po3:= po1;
+   while (upperchars[po1^] = po2^) and (po1^ <> #0) do begin
+    inc(po1);
+    inc(po2);
+   end;
+   if po2^ = #0 then begin //found
+    for int1:= 0 to (po2 - pchar(fmoduleprefix)) - 1 do begin
+     po3[int1]:= ' ';
+    end;
+   end
+   else begin
+    po1:= po3+1;   //next char
+   end;
+  end;
  end;
 end;
 

@@ -77,6 +77,7 @@ begin
    end;
    try
     if show(true) = mr_ok then begin
+     fo.window.nofocus; //remove empty last line
      result:= true;
      setlength(ar1,fields.rowcount-dataset.fields.count);
      for int1:= 0 to high(ar1) do begin

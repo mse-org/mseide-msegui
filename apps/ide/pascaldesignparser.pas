@@ -374,6 +374,7 @@ type
    formfilename: filenamety;
    sourcefilename: filenamety;
    implementationstart: sourceposty;
+   implementationbodystart: sourceposty;
    implementationend: sourceposty;
    unitend: sourceposty;
    initializationstart: sourceposty;
@@ -1924,11 +1925,12 @@ var
 
 var
  aident: integer;
-
+ 
 begin
  finterface:= false;
  fimplementation:= true;
  funitinfopo^.implementationstart:= sourcepos;
+ funitinfopo^.implementationbodystart:= funitinfopo^.implementationstart;
  procnestinglevel:= 0;
  while not eof do begin
   if getident(aident) then begin;
@@ -1957,6 +1959,9 @@ begin
       add(getorignamelist);
       fendpos:= sourcepos;
      end;
+     checkoperator(';');     
+     checknewline;
+     funitinfopo^.implementationbodystart:= sourcepos;
     end;
     id_begin: begin
      if funitinfopo^.isprogram then begin
@@ -1986,6 +1991,10 @@ begin
   end;
  end;
  funitinfopo^.unitend:= sourcepos;
+ if isemptysourcepos(funitinfopo^.implementationend) then begin
+  lasttoken;
+  funitinfopo^.implementationend:= sourcepos;
+ end;
 end;
 
 procedure tpascaldesignparser.parse;

@@ -14,7 +14,7 @@ unit msepropertyeditors;
 interface
 uses
  Classes,TypInfo,msedesignintf,msetypes,msestrings,sysutils,msedatalist,msemenus,
- mseevent,msegui,mseclasses,mseforms,msegraphics;
+ mseevent,msegui,mseclasses,mseforms,msegraphics,mserichstring;
 
 const
  bmpfiledialogstatname = 'bmpfile.sta';
@@ -396,6 +396,7 @@ type
  ttextstringspropertyeditor = class(tdialogclasspropertyeditor)
   protected
    fmodalresult: modalresultty;
+   forigtext: msestringarty;
    procedure closequery(const sender: tcustommseform;
                        var amodalresult: modalresultty);
    procedure doafterclosequery(var amodalresult: modalresultty); virtual;                    
@@ -403,6 +404,7 @@ type
    function gettestbutton: boolean; virtual;
    function getutf8: boolean; virtual;
    function getcaption: msestring; virtual;
+   procedure updateline(var aline: ansistring); virtual;
   public
    procedure edit; override;
    procedure setvalue(const avalue: msestring); override;
@@ -3496,22 +3498,27 @@ procedure ttextstringspropertyeditor.closequery(const sender: tcustommseform;
 var
  int1: integer;
  utf8: boolean;
+ str1: ansistring;
 begin
  fmodalresult:= amodalresult;
+ forigtext:= nil;
  if (amodalresult = mr_ok) or (amodalresult = mr_canclose) then begin
   utf8:= getutf8;
   try
    with tmsetexteditorfo(sender),tstrings(getordvalue) do begin
+    forigtext:= textedit.datalist.asmsestringarray;
     beginupdate;
     try
      clear;
      for int1:= 0 to grid.rowcount-1 do begin
       if utf8 then begin
-       add(stringtoutf8(textedit[int1]));
+       str1:= stringtoutf8(textedit[int1]);
       end
       else begin
-       add(textedit[int1]);
+       str1:= textedit[int1];
       end;
+      updateline(str1);
+      add(str1);
      end;
     finally
      endupdate
@@ -3600,6 +3607,11 @@ end;
 function ttextstringspropertyeditor.getcaption: msestring;
 begin
  result:= 'Texteditor';
+end;
+
+procedure ttextstringspropertyeditor.updateline(var aline: ansistring);
+begin
+ //dummy
 end;
 
 { tdatalistpropertyeditor }
