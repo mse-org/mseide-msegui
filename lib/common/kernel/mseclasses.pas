@@ -244,7 +244,7 @@ type
    property sender: tobject read fsender;
  end;
 
- msecomponentstatety = (cs_ismodule,cs_loadedproc);
+ msecomponentstatety = (cs_ismodule,cs_endreadproc,cs_loadedproc);
  msecomponentstatesty = set of msecomponentstatety;
 
  createprocty = procedure of object;
@@ -253,6 +253,7 @@ type
   private
    procedure readmoduleclassname(reader: treader);
    procedure writemoduleclassname(writer: twriter);
+   procedure endread;
   protected
    fmsecomponentstate: msecomponentstatesty;
    fobjectlinker: tobjectlinker;
@@ -262,7 +263,7 @@ type
    function getobjectlinker: tobjectlinker;
    procedure objectevent(const sender: tobject; const event: objecteventty); virtual;
    procedure beginread; virtual;
-   procedure endread; virtual;
+   procedure doendread; virtual;
    procedure readstate(reader: treader); override;
    procedure loaded; override;
    procedure sendchangeevent(const aevent: objecteventty = oe_changed);
@@ -1680,7 +1681,7 @@ end;
 procedure getoptionalobject(const componentstate: tcomponentstate;
                        const instance: tobject; createproc: createprocty);
 begin
- if (instance = nil) and (csreading{csloading} in componentstate) then begin
+ if (instance = nil) and (csreading in componentstate) then begin
   createproc;
  end;
 end;
@@ -2612,9 +2613,12 @@ begin
  end;
 end;
 
-procedure tmsecomponent.getoptionalobject(const instance: tobject; createproc: createprocty);
+procedure tmsecomponent.getoptionalobject(const instance: tobject; 
+                               createproc: createprocty);
 begin
- mseclasses.getoptionalobject(componentstate,instance,createproc);
+ if not (cs_endreadproc in fmsecomponentstate) then begin
+  mseclasses.getoptionalobject(componentstate,instance,createproc);
+ end;
 end;
 
 procedure tmsecomponent.setoptionalobject(const value: tpersistent; 
@@ -2653,13 +2657,19 @@ var
  int1: integer;
  comp1: tcomponent;
 begin
- for int1:= 0 to componentcount - 1 do begin
-  comp1:= components[int1];
-  if (cssubcomponent in comp1.componentstyle) and 
-            (comp1 is tmsecomponent) then begin
-   tmsecomponent(comp1).endread;
+ include(fmsecomponentstate,cs_endreadproc);
+ try
+  doendread;
+  for int1:= 0 to componentcount - 1 do begin
+   comp1:= components[int1];
+   if (cssubcomponent in comp1.componentstyle) and 
+             (comp1 is tmsecomponent) then begin
+    tmsecomponent(comp1).endread;
+   end;
   end;
- end;
+ finally
+  exclude(fmsecomponentstate,cs_endreadproc);
+ end;  
 end;
 
 procedure tmsecomponent.readstate(reader: treader);
@@ -2779,6 +2789,11 @@ end;
 function tmsecomponent.loading: boolean;
 begin
  result:= csloading in componentstate;
+end;
+
+procedure tmsecomponent.doendread;
+begin
+ //dummy
 end;
 
 { tlinkedqueue }

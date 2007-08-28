@@ -889,7 +889,7 @@ type
 
    function getcaretcliprect: rectty; virtual;  //origin = clientrect.pos
    procedure beginread; override;
-   procedure endread; override;
+   procedure doendread; override;
    procedure loaded; override;
 
    procedure updatemousestate(const apos: pointty); virtual;
@@ -5167,7 +5167,7 @@ begin
  inherited;
 end;
 
-procedure twidget.endread;
+procedure twidget.doendread;
 begin
  if fframe <> nil then begin
   fframe.calcrects; //rects must be valid for parentfontchanged

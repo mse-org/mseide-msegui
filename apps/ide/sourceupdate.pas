@@ -118,10 +118,6 @@ type
    procedure getincludefile(const sender: tparser; const scanner: tscanner);
    procedure updateunit(const infopo: punitinfoty;
                           const interfaceonly: boolean); overload;
-   function gettext(const infopo: punitinfoty;
-                          const startpos,endpos: sourceposty): string;
-   procedure replacetext(const infopo: punitinfoty; 
-                      const startpos,endpos: sourceposty; const newtext: string);
    function composeproceduretext(const name: string; const info: methodparaminfoty;
                                  const withdefault: boolean): string; overload;
    function composeprocedureheader(const name: string; const info: methodparaminfoty;
@@ -181,6 +177,11 @@ type
    function updatesourceunit(const asourcefilename: filenamety;
                 out filenum: integer; const interfaceonly: boolean): punitinfoty;
 
+   function gettext(const infopo: punitinfoty;
+                          const startpos,endpos: sourceposty): string;
+   procedure replacetext(const infopo: punitinfoty; 
+                      const startpos,endpos: sourceposty; const newtext: string);
+
    function getmatchingmethods(const amodule: tmsecomponent; const atype: ptypeinfo): msestringarty;
    function parsemodule(const amodule: tmsecomponent): pclassinfoty;
    function findunitfile(const unitname: msestring): msestring;
@@ -218,6 +219,9 @@ function listsourceitems(const filename: filenamety;
    //true if found
 function completeclass(const filename: filenamety; var pos: sourceposty): boolean;
    //true if source changed 
+function getimplementationtext(const amodule: tmsecomponent; out aunit: punitinfoty;
+                out start,stop: sourceposty; out adest: msestring): boolean;
+                //false if not found
 implementation
 uses
  sysutils,msesys,msefileutils,sourceform,sourcepage,projectoptionsform,
@@ -313,6 +317,28 @@ begin
   end
   else begin
    result:= false;
+  end;
+ end;
+end;
+
+function getimplementationtext(const amodule: tmsecomponent; 
+              out aunit: punitinfoty;
+              out start,stop: sourceposty; out adest: msestring): boolean;
+                //false if not found
+begin
+ result:= false;
+ with sourceupdater do begin
+  aunit:= updatemodule(amodule);
+  if aunit <> nil then begin
+   with aunit^ do begin
+    start:= implementationstart;
+    stop:= implementationend;
+    if not isemptysourcepos(implementationstart) and not 
+                            isemptysourcepos(implementationend) then begin
+     adest:= gettext(aunit,implementationstart,implementationend);
+     result:= true;
+    end;
+   end;
   end;
  end;
 end;

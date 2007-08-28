@@ -1418,7 +1418,8 @@ end;
 
 function tcustomcaptionframe.getfont: tframefont;
 begin
- getoptionalobject(fintf.getcomponentstate,ffont,{$ifdef FPC}@{$endif}createfont);
+// getoptionalobject(fintf.getcomponentstate,ffont,{$ifdef FPC}@{$endif}createfont);
+ fintf.getwidget.getoptionalobject(ffont,{$ifdef FPC}@{$endif}createfont);
  if ffont <> nil then begin
   result:= ffont;
  end

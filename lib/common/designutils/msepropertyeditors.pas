@@ -395,6 +395,7 @@ type
 
  ttextstringspropertyeditor = class(tdialogclasspropertyeditor)
   protected
+   fmodalresult: modalresultty;
    procedure closequery(const sender: tcustommseform;
                        var amodalresult: modalresultty);
    procedure doafterclosequery(var amodalresult: modalresultty); virtual;                    
@@ -3496,6 +3497,7 @@ var
  int1: integer;
  utf8: boolean;
 begin
+ fmodalresult:= amodalresult;
  if (amodalresult = mr_ok) or (amodalresult = mr_canclose) then begin
   utf8:= getutf8;
   try
@@ -3530,6 +3532,7 @@ var
  strings: tstrings;
  utf8: boolean;
 begin
+ fmodalresult:= mr_cancel;
  strings:= tstrings(getordvalue);
  editform:= tmsetexteditorfo.create({$ifdef FPC}@{$endif}closequery,
         msetexteditor.syntaxpainter,getsyntaxindex,gettestbutton);

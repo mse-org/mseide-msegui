@@ -5,7 +5,7 @@ implementation
 uses
  classes,msedesignintf,msepascalscript,msepropertyeditors,msetypes,msestrings,
  msetexteditor,msegui,msewidgets,uPSComponent,uPSComponent_Default,
- psimportmsegui,formdesigner;
+ psimportmsegui,formdesigner,sourceupdate,mseparser,pascaldesignparser;
 type
  tpascaleditor = class(ttextstringspropertyeditor)
   protected
@@ -19,6 +19,7 @@ type
  tpsscriptformeditor = class(tpascaleditor)
   protected
    function getscript: tmsepsscript; override;  
+   procedure edit; override;
  end;
  
 const
@@ -114,9 +115,6 @@ begin
 end;
 
 procedure tpascaleditor.doafterclosequery(var amodalresult: modalresultty);
-var
- str1: ansistring;
- int1: integer;
 begin
  if amodalresult = mr_canclose then begin
   with getscript do begin
@@ -124,10 +122,6 @@ begin
 //    showmessage('Compile OK');
    end
    else begin
-    str1:= '';
-    for int1:= 0 to compilermessagecount - 1 do begin
-     str1:= str1 + compilermessages[int1].messagetostring+lineend;
-    end;
     showmessage(compilermessagetext,'Compile Error');
     amodalresult:= mr_none;
    end;
@@ -158,6 +152,23 @@ end;
 function tpsscriptformeditor.getscript: tmsepsscript;
 begin
  result:= tscriptform(component).script;
+end;
+
+procedure tpsscriptformeditor.edit;
+var
+ bo1: boolean;
+ po1: punitinfoty;
+ mstr1: msestring;
+ start,stop: sourceposty;
+begin
+ bo1:= getimplementationtext(fmodule,po1,start,stop,mstr1);
+ if bo1 then begin
+  getscript.script.text:= mstr1;
+ end;
+ inherited;
+ if bo1 and (fmodalresult = mr_ok) then begin
+  sourceupdater.replacetext(po1,start,stop,msestring(getscript.script.text));
+ end;
 end;
 
 initialization
