@@ -969,11 +969,11 @@ type
    procedure doonpaint(const acanvas: tcanvas); override;
    procedure doafterpaint1(const acanvas: tcanvas); virtual;
    procedure doafterlastpage; virtual;
-   procedure init; virtual;
    procedure dobeforenextrecord;
    procedure dosyncnextrecord;
    property ppmm: real read fppmm write setppmm; //pixel per mm
    
+   procedure init; virtual;
    function render(const acanvas: tcanvas): boolean;
           //true if empty
 
@@ -1014,6 +1014,7 @@ type
    property visiblepage: boolean read fvisiblepage write fvisiblepage default true;
    procedure activatepage;
    procedure finish;
+   procedure restart;
 
    
    property pagewidth: real read fpagewidth write setpagewidth;
@@ -4730,6 +4731,11 @@ end;
 procedure tcustomreportpage.finish;
 begin
  include(fstate,rpps_finish);
+end;
+
+procedure tcustomreportpage.restart;
+begin
+ beginrender;
 end;
 
 procedure tcustomreportpage.setoptions(const avalue: reportpageoptionsty);
