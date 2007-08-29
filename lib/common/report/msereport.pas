@@ -2807,7 +2807,6 @@ procedure tcustomrecordband.render(const acanvas: tcanvas; var empty: boolean);
 var
  widget1: twidget;
  int1: integer;
- bo1: boolean;
 begin
  widget1:= rootwidget;
  if (widget1 is tcustomreport) and 
@@ -2818,7 +2817,6 @@ begin
  fparentintf.updatevisible; //??
  include(fstate,rbs_visibilitychecked);
  empty:= empty or (rbs_finish in fstate);
- bo1:= empty;
  dobeforerender(empty);
  if not empty then begin
   if not (rbs_visibilitychecked in fstate) then begin
@@ -3833,7 +3831,7 @@ begin
       bo2:= bo2 and (bo_oddpage in foptions) or 
             not bo2 and (bo_evenpage in foptions); //has data
       bo1:= ((rbs_showed in fstate) or not(bo_once in foptions)) and
-            ((rbs_pageshowed in fstate) or not bo2);   //empty    
+            (not(rbs_pageshowed in fstate) or not bo2);   //empty    
       render(acanvas,bo1);
       if bas_activebandchanged in self.fstate then begin
        continue;
@@ -4381,7 +4379,8 @@ begin
   end;
   sortwidgetsyorder(widgetarty(fbands),self);
   bo2:= odd(reppagenum);
-  bo5:= true;
+//  bo5:= true;
+  bo5:= rpps_backgroundrendered in fstate;
   for int1:= 0 to high(fbands) do begin
    if not (fbands[int1] is tcustomrepvaluedisp) then begin
     renderband(fbands[int1]);
@@ -5508,7 +5507,7 @@ procedure tcustomrepvaluedisp.render(const acanvas: tcanvas;
                var empty: boolean);
 begin
  inherited;
- empty:= true;
+// empty:= true;
 end;
 
 { trepvaluedisp }
