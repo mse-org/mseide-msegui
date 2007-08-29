@@ -798,8 +798,8 @@ type
  end;
  
  bandareastatety = (bas_inited,bas_backgroundrendered,bas_areafull,
-                    bas_rendering,bas_notfirstband,bas_lastband,bas_bandstarted{,
-                    bas_lastchecking,bas_lastchecked});
+                    bas_rendering,bas_notfirstband,bas_lastband,bas_bandstarted,
+                    bas_activebandchanged);
  bandareastatesty = set of bandareastatety; 
    
  bandareaeventty = procedure(const sender: tcustombandarea) of object;
@@ -3827,6 +3827,7 @@ begin
      inc(factiveband);
     end;
     if factiveband <= high(fbands) then begin
+     exclude(fstate,bas_activebandchanged);
      with fbands[factiveband] do begin
       bo2:= odd(fparentintf.reppagenum);
       bo2:= bo2 and (bo_oddpage in foptions) or 
@@ -3834,6 +3835,9 @@ begin
       bo1:= ((rbs_showed in fstate) or not(bo_once in foptions)) and
             ((rbs_pageshowed in fstate) or not bo2);   //empty    
       render(acanvas,bo1);
+      if bas_activebandchanged in self.fstate then begin
+       continue;
+      end;
       bo1:= bo1 or bo2{(bv_everypage in fvisibility)};
 //      fstate:= fstate + [rbs_showed,rbs_pageshowed];
       result:= bo1;
@@ -4168,27 +4172,7 @@ begin
   result:= freportpage.islastrecord;
  end;
 end;
-{
-function tcustombandarea.isfirstofgroup: boolean;
-begin
- if frecordband <> nil then begin
-  result:= frecordband.isfirstofgroup;
- end
- else begin
-  result:= freportpage.isfirstofgroup;
- end;
-end;
 
-function tcustombandarea.islastofgroup: boolean;
-begin
- if frecordband <> nil then begin
-  result:= frecordband.islastofgroup;
- end
- else begin
-  result:= freportpage.islastofgroup;
- end;
-end;
-}
 procedure tcustombandarea.dobeforenextrecord;
 var
  int1: integer;
@@ -4224,6 +4208,8 @@ end;
 
 procedure tcustombandarea.restart;
 begin
+ factiveband:= 0;
+ include(fstate,bas_activebandchanged);
  beginrender(true);
 end;
 
