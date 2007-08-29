@@ -1123,7 +1123,6 @@ type
  
  tkeystringeditdb = class(tkeystringedit,idbdropdownlist)
   private
-//   fkeyvalue: msestring;
    function getdropdown: tdbdropdownlistcontroller;
    procedure setdropdown(const avalue: tdbdropdownlistcontroller);
   protected
@@ -1236,8 +1235,6 @@ type
    property optionsgrid;
    property fixcols;
    property fixrows;
-//   property rowcount;
-//   property rowcountmax;
    property font;
    property gridframecolor;
    property gridframewidth;
@@ -1288,7 +1285,6 @@ type
    procedure getfieldtypes(out propertynames: stringarty;
                           out fieldtypes: fieldtypesarty);
    function getdatasource(const aindex: integer): tdatasource;
-//   function getdatasource: tdatasource;
   protected
    function getitems(aindex: integer): msestring; override;
    procedure modified; override;
@@ -2137,6 +2133,13 @@ begin
   end
   else begin
    raise eabort.create('');
+  end;
+  if (field <> nil) then begin
+   with field do begin
+    if (defaultexpression <> '') and isnull and dataset.modified then begin
+     asstring:= defaultexpression;
+    end;
+   end;
   end;
   inherited;
  finally

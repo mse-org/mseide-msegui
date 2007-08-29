@@ -574,7 +574,6 @@ type
    procedure setfield(const value: tfield); virtual;
    procedure activechanged; override;
    procedure layoutchanged; override;
-   procedure updatedata; override;
   public
    function assql: string;
    function fieldactive: boolean;
@@ -628,7 +627,8 @@ type
    property items[const index: integer]: tfield read getitems write setitems; default;
  end;
 
- datasetoptionty = (dso_utf8,dso_numboolean,dso_refreshtransaction,
+ datasetoptionty = (dso_utf8,dso_numboolean,dso_initinternalcalc,
+                         dso_refreshtransaction,
                          dso_cancelupdateonerror,dso_cancelupdatesonerror,                         
                          dso_autoapply,dso_autocommitret,dso_refreshafterapply,
                          dso_cacheblobs,
@@ -2994,18 +2994,6 @@ function tfielddatalink.fieldactive: boolean;
 begin
  result:= (ffield <> nil) and (dataset <> nil) and (dataset.state <> dsinactive);
 // result:= active and (ffield <> nil); //unreliable
-end;
-
-procedure tfielddatalink.updatedata;
-begin
- inherited;
- if (ffield <> nil) then begin
-  with ffield do begin
-   if (defaultexpression <> '') and isnull then begin
-    asstring:= defaultexpression;
-   end;
-  end;
- end;
 end;
 
 { tactivatorcontroller }

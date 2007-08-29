@@ -2281,6 +2281,9 @@ var
     end;
    end;
   end;
+  if sql_set = '' then begin
+   databaseerror('No "set" part in SQLUpdate statement.',self);
+  end;
   if sql_where = '' then begin
    databaseerror('No "where" part in SQLUpdate statement.',self);
   end;
@@ -2301,12 +2304,15 @@ var
   sql_values := '';
   for x := 0 to Fields.Count -1 do begin
    with fields[x] do begin
-    if (fieldkind = fkdata) and not IsNull and 
+    if (fieldkind = fkdata) {and not IsNull} and 
                            (pfInUpdate in ProviderFlags) then begin 
      sql_fields:= sql_fields + quotechar+FieldName+quotechar+ ',';
      sql_values:= sql_values + ':' + FieldName + ',';
     end;
    end;
+  end;
+  if sql_fields = '' then begin
+   databaseerror('No "values" part in SQLInsert statement.',self);
   end;
   setlength(sql_fields,length(sql_fields)-1);
   setlength(sql_values,length(sql_values)-1);

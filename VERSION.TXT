@@ -1,5 +1,6 @@
 MSEide+MSEgui version history
 
+2007-08-29 Defaultvalue of tmsebufdataset.packetrecords = -1.
 2007-08-25 
  tfieldlink.dataset -> destdataset.
  tfieldlink.datafield -> destdatafield.

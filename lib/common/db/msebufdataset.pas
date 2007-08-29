@@ -29,7 +29,7 @@ uses
  msedb,msedatabase,mseguiglob;
   
 const
- defaultpacketrecords = 10;
+ defaultpacketrecords = -1;
  integerindexfields = [ftsmallint,ftinteger,ftword,ftboolean];
  largeintindexfields = [ftlargeint];
  floatindexfields = [ftfloat,ftdatetime,ftdate,fttime];
@@ -361,7 +361,7 @@ type
  
  bufdatasetstatety = (bs_opening,bs_loading,bs_fetching,bs_applying,
                       bs_connected,
-                      bs_hasindex,bs_fetchall,
+                      bs_hasindex,bs_fetchall,bs_initinternalcalc,
                       bs_blobsfetched,bs_blobscached,bs_blobssorted,
                       bs_indexvalid,
                       bs_editing,bs_append,bs_internalcalc,bs_utf8,
@@ -1684,9 +1684,13 @@ end;
 function tmsebufdataset.getnextpacket(const all: boolean): integer;
 var
  state1: tdatasetstate;
- int1,int2: integer;
+ int1,int2,int3: integer;
  recnobefore: integer;
  bufbefore: pointer;
+ bo1,bo2: boolean;
+ ar1: fieldarty;
+ field1: tfield;
+ 
 begin
  result:= 0;
  if fallpacketsfetched then  begin
@@ -1699,7 +1703,23 @@ begin
   femptybuffer:= intallocrecord;
   inc(result);
  end;
- if checkcanevent(self,tmethod(foninternalcalcfields)) then begin
+ bo1:= checkcanevent(self,tmethod(foninternalcalcfields));
+ bo2:= (bs_initinternalcalc in fbstate);
+ if bo2 then begin
+  setlength(ar1,fields.count);
+  int3:= 0;
+  for int1:= 0 to high(ar1) do begin
+   field1:= fields[int1];
+   with field1 do begin
+    if (fieldkind = fkinternalcalc) and (defaultexpression <> '') then begin
+     ar1[int3]:= field1;
+     inc(int3);
+    end;
+   end;
+  end;
+  setlength(ar1,int3);
+ end;
+ if bo1 or bo2 then begin
   state1:= settempstate(dsinternalcalc);
   fbstate:= fbstate + [bs_internalcalc,bs_fetching];
   recnobefore:= frecno;
@@ -1708,7 +1728,16 @@ begin
    for int1:= int2 to fbrecordcount-1 do begin
     frecno:= int1;
     fcurrentbuf:= findexes[0].ind[int1];
-    foninternalcalcfields(self,true);
+    if bo2 then begin
+     for int3:= 0 to high(ar1) do begin
+      with ar1[int3] do begin
+       asstring:= defaultexpression;
+      end;
+     end;
+    end;
+    if bo1 then begin
+     foninternalcalcfields(self,true);
+    end;
    end;
   finally
    frecno:= recnobefore;

@@ -371,6 +371,12 @@ var
  intf1: idbcontroller;
  bo1: boolean;
 begin
+ if dso_initinternalcalc in fcontroller.options then begin
+  include(fbstate,bs_initinternalcalc);
+ end
+ else begin
+  exclude(fbstate,bs_initinternalcalc);
+ end;
  if (database <> nil) and 
           getcorbainterface(database,typeinfo(idbcontroller),intf1) then begin
   bo1:= dso_utf8 in fcontroller.options;
