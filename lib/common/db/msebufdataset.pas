@@ -321,7 +321,8 @@ type
    function find(const avalues: array of const; const aisnull: array of boolean;
                  //itemcount of avalues can be smaller than fields count in index   
                 const alast: boolean = false;
-                const partialstring: boolean = false): boolean; overload;
+                const partialstring: boolean = false;
+                const nocheckbrowsemode: boolean = false): boolean; overload;
                 //sets dataset cursor if found
    function unique(const avalues: array of const): boolean;
    function getbookmark(const arecno: integer): string;
@@ -4737,12 +4738,13 @@ end;
 
 function tlocalindex.find(const avalues: array of const;
     const aisnull: array of boolean;
-    const alast: boolean = false; const partialstring: boolean = false): boolean;
+    const alast: boolean = false; const partialstring: boolean = false;
+    const nocheckbrowsemode: boolean = false): boolean;
                 //sets dataset cursor if found
 var
  str1: string;
 begin
- result:= find(avalues,aisnull,str1,alast,partialstring);
+ result:= find(avalues,aisnull,str1,alast,partialstring,nocheckbrowsemode);
  if result then begin
   tmsebufdataset(fowner).bookmark:= str1;
  end;

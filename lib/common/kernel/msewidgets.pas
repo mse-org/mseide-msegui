@@ -577,7 +577,6 @@ type
 
    property onevent: eventeventty read fonevent write fonevent;
    property onasyncevent: asynceventeventty read fonasyncevent write fonasyncevent;
-
  end;
 
  const

@@ -177,8 +177,7 @@ type
    procedure setactivator(const avalue: tactivator);
   protected
    fdesignchangedlock: integer;
-   procedure receiveevent(const event: tobjectevent); override;
-   procedure doasyncevent(var atag: integer); virtual;
+//   procedure receiveevent(const event: tobjectevent); override;
    procedure designchanged; //for designer notify
    procedure loaded; override;
    procedure doactivated; virtual;
@@ -186,9 +185,6 @@ type
    procedure objectevent(const sender: tobject;
                           const event: objecteventty); override;
   public
-   procedure asyncevent(atag: integer = 0);
-                          //posts event for doasyncevent to self
-   procedure postcomponentevent(const event: tcomponentevent);
    property activator: tactivator read factivator write setactivator;
  end;
 
@@ -2408,37 +2404,6 @@ begin
 end;
 
 { tguicomponent }
-
-procedure tguicomponent.receiveevent(const event: tobjectevent);
-var
- int1: integer;
-begin
- case event.kind of
-  ek_async: begin
-   int1:= tasyncevent(event).tag;
-   doasyncevent(int1);
-  end;
-  ek_component: begin
-   sendcomponentevent(event as tcomponentevent,false);
-  end;
- end;
-end;
-
-procedure tguicomponent.asyncevent(atag: integer = 0);
-begin
- application.postevent(tasyncevent.create(ievent(self),atag));
-end;
-
-procedure tguicomponent.doasyncevent(var atag: integer);
-begin
- //dummy
-end;
-
-procedure tguicomponent.postcomponentevent(const event: tcomponentevent);
-begin
- event.create(event.kind,ievent(self));
- application.postevent(event);
-end;
 
 procedure tguicomponent.designchanged; //for designer notify
 begin

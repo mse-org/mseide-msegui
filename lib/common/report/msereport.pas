@@ -421,6 +421,7 @@ type
   procedure updatevisibility;
   procedure beginrender(const arestart: boolean);
   procedure endrender;
+  procedure adddatasets(var adatasets: datasetarty);
   procedure init;
  end;
  ireportclientarty = array of ireportclient;
@@ -505,6 +506,7 @@ type
    procedure updatevisibility;
    procedure beginrender(const arestart: boolean);
    procedure endrender;
+   procedure adddatasets(var adatasets: datasetarty);
    procedure init;
   published
    property optionsrep: bandoptionsty read foptionsrep write setoptionsrep default [];
@@ -528,7 +530,6 @@ type
    foptions: bandoptionsty;
    fgroupnum: integer;
    fnextgroupnum: integer;
-   frecnobefore: integer;
    fobjectpicker: tobjectpicker;
    fnextband: tcustomrecordband;
    fnextbandifempty: tcustomrecordband;
@@ -572,6 +573,7 @@ type
    procedure initpage; virtual;
    procedure beginrender(const arestart: boolean); virtual;
    procedure endrender; virtual;
+   procedure adddatasets(var adatasets: datasetarty); virtual;
    procedure dopaint(const acanvas: tcanvas); override;
    procedure doonpaint(const acanvas: tcanvas); override;
    procedure doafterpaint(const acanvas: tcanvas); override;
@@ -772,6 +774,7 @@ type
    procedure init; override;
    procedure beginrender(const arestart: boolean); override;
    procedure endrender; override;
+   procedure adddatasets(var adatasets: datasetarty); override;
    function lastbandheight: integer; override;
   public
    property font: trepwidgetfont read getfont write setfont stored isfontstored;
@@ -836,6 +839,7 @@ type
    function rendering: boolean;
    procedure beginrender(const arestart: boolean);
    procedure endrender;
+   procedure adddatasets(var adatasets: datasetarty);
    procedure dofirstarea; virtual;
    procedure dobeforerender; virtual;
    procedure doonpaint(const acanvas: tcanvas); override;
@@ -938,7 +942,6 @@ type
    foptions: reportpageoptionsty;
    fprintstarttime: tdatetime;
    freccontrols: pointerarty;
-   frecnobefore: integer;
    fprintorientation: reppageorientationty;
    flastpagecount: integer;
    procedure setpagewidth(const avalue: real);
@@ -965,6 +968,7 @@ type
    procedure renderbackground(const acanvas: tcanvas);
    procedure beginrender;
    procedure endrender;
+   procedure adddatasets(var adatasets: datasetarty);
    function rendering: boolean;
    procedure beginarea(const acanvas: tcanvas; const sender: tcustombandarea);
    procedure dofirstpage; virtual;
@@ -2734,6 +2738,11 @@ begin
  exclude(widgetstate1,ws1_noclipchildren);
 end;
 
+procedure trepspacer.adddatasets(var adatasets: datasetarty);
+begin
+ //dummy
+end;
+
 procedure trepspacer.init;
 begin
  //dummy
@@ -2897,11 +2906,14 @@ begin
  end;
  include(widgetstate1,ws1_noclipchildren);
  if fdatalink.active then begin
-  frecnobefore:= fdatalink.dataset.recno;
-  fdatalink.dataset.disablecontrols;
-  fdatalink.dataset.first;
-  if checkislastrecord(fdatalink,@dosyncnextrecord) then begin
-   include(fstate,rbs_lastrecord);
+  application.lock;
+  try
+   fdatalink.dataset.first;
+   if checkislastrecord(fdatalink,@dosyncnextrecord) then begin
+    include(fstate,rbs_lastrecord);
+   end;
+  finally
+   application.unlock;
   end;
  end; 
  for int1:= 0 to high(fareas) do begin
@@ -2923,13 +2935,18 @@ begin
  end;
  exclude(fstate,rbs_rendering);
  exclude(widgetstate1,ws1_noclipchildren);
- if fdatalink.active then begin
-  try
-   fdatalink.dataset.recno:= frecnobefore;
-  except
-  end;
-  fdatalink.dataset.enablecontrols;
- end; 
+end;
+
+procedure tcustomrecordband.adddatasets(var adatasets: datasetarty);
+var
+ int1: integer;
+begin
+ for int1:= 0 to high(fareas) do begin
+  fareas[int1].adddatasets(adatasets);
+ end;
+ if fdatalink.dataset <> nil then begin
+  adduniqueitem(pointerarty(adatasets),fdatalink.dataset);
+ end;
 end;
 
 procedure tcustomrecordband.settabs(const avalue: treptabulators);
@@ -2961,15 +2978,15 @@ begin
   application.lock;
   try
    fdatalink.dataset.next;
+   if setflag then begin
+    if checkislastrecord(fdatalink,@dosyncnextrecord) then begin
+     include(fstate,rbs_lastrecord);
+    end; 
+    fparentintf.getreppage.recordchanged;
+   end;
   finally
    application.unlock;
   end;
- end;
- if setflag then begin
-  if checkislastrecord(fdatalink,@dosyncnextrecord) then begin
-   include(fstate,rbs_lastrecord);
-  end; 
-  fparentintf.getreppage.recordchanged;
  end;
 end;
 
@@ -3615,6 +3632,16 @@ begin
  end;
 end;
 
+procedure tcustombandgroup.adddatasets(var adatasets: datasetarty);
+var
+ int1: integer;
+begin
+ inherited;
+ for int1:= 0 to high(fbands) do begin
+  fbands[int1].adddatasets(adatasets);
+ end;
+end;
+
 function tcustombandgroup.beginband(const acanvas: tcanvas;
                const sender: tcustomrecordband): boolean;
 begin
@@ -4084,6 +4111,15 @@ begin
  end;
 end;
 
+procedure tcustombandarea.adddatasets(var adatasets: datasetarty);
+var
+ int1: integer;
+begin
+ for int1:= 0 to high(fbands) do begin
+  fbands[int1].adddatasets(adatasets);
+ end;
+end;
+
 function tcustombandarea.isfirstband: boolean;
 begin
  result:= (factiveband <= high(fbands)) and 
@@ -4515,11 +4551,14 @@ begin
  include(fwidgetstate1,ws1_noclipchildren);
  with fdatalink do begin
   if active then begin
-   frecnobefore:= dataset.recno;
-   dataset.disablecontrols;
-   dataset.first;
-   if checkislastrecord(fdatalink,@dosyncnextrecord) then begin
-    include(fstate,rpps_lastrecord);
+   application.lock;
+   try
+    dataset.first;
+    if checkislastrecord(fdatalink,@dosyncnextrecord) then begin
+     include(fstate,rpps_lastrecord);
+    end;
+   finally
+    application.unlock;
    end;
   end;
  end;
@@ -4544,13 +4583,6 @@ begin
  freccontrols:= nil;
  exclude(fstate,rpps_rendering);
  exclude(fwidgetstate1,ws1_noclipchildren);
- if fdatalink.active then begin
-  try
-   fdatalink.dataset.recno:= frecnobefore;
-  except
-  end;
-  fdatalink.dataset.enablecontrols;
- end; 
  {
  for int1:= 0 to high(fbands) do begin
   fbands[int1].endrender;
@@ -4561,6 +4593,21 @@ begin
  end;
  for int1:= 0 to high(fareas) do begin
   fareas[int1].endrender;
+ end;
+end;
+
+procedure tcustomreportpage.adddatasets(var adatasets: datasetarty);
+var
+ int1: integer;
+begin
+ if fdatalink.dataset <> nil then begin
+  adduniqueitem(pointerarty(adatasets),fdatalink.dataset);
+ end;
+ for int1:= 0 to high(fclients) do begin
+  fclients[int1].adddatasets(adatasets);
+ end;
+ for int1:= 0 to high(fareas) do begin
+  fareas[int1].adddatasets(adatasets);
  end;
 end;
 
@@ -4949,6 +4996,8 @@ function tcustomreport.exec(thread: tmsethread): integer;
 
 var
  terminated1: boolean; 
+ datasets: datasetarty;
+ recnos: integerarty;
  
  procedure dofinish(const islast: boolean);
  var
@@ -4971,6 +5020,20 @@ var
     end;
     fcanvas.ppmm:= fppmmbefore;
     asyncevent(endrendertag);
+    for int1:= 0 to high(datasets) do begin
+     with datasets[int1] do begin
+      if active then begin
+       try
+        recno:= recnos[int1];
+       except;
+       end;
+      end;
+      try
+       enablecontrols;
+      except
+      end;
+     end;
+    end;
    end;
   finally
    application.unlock;
@@ -5001,6 +5064,16 @@ begin
   twindow1(window).setasynccanvas(fcanvas);
  finally
   application.unlock;
+ end;
+ for int1:= 0 to high(freppages) do begin
+  freppages[int1].adddatasets(datasets);
+ end;
+ setlength(recnos,length(datasets));
+ for int1:= 0 to high(datasets) do begin
+  with datasets[int1] do begin
+   disablecontrols;
+   recnos[int1]:= recno;
+  end;
  end;
  try
   repeat

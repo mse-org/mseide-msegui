@@ -31,6 +31,7 @@ type
    foptions: datamoduleoptionsty;
    fstatfile: tstatfile;
    fonloaded: notifyeventty;
+   fonasyncevent: asynceventeventty;
    procedure writesize(writer: twriter);
    procedure readsize(reader: treader);
    procedure setstatfile(const avalue: tstatfile);
@@ -40,6 +41,7 @@ type
    procedure defineproperties(filer: tfiler); override;
    procedure doonloaded; virtual;
    procedure loaded; override;
+   procedure doasyncevent(var atag: integer); override;
   public
    constructor create(aowner: tcomponent); overload; override;
    constructor create(aowner: tcomponent; load: boolean); reintroduce; overload;
@@ -54,6 +56,7 @@ type
    property onloaded: notifyeventty read fonloaded write fonloaded;
    property ondestroy: notifyeventty read fondestroy write fondestroy;
    property ondestroyed: notifyeventty read fondestroyed write fondestroyed;
+   property onasyncevent: asynceventeventty read fonasyncevent write fonasyncevent;
  end;
  datamoduleclassty = class of tmsedatamodule;
  
@@ -183,6 +186,14 @@ end;
 procedure tmsedatamodule.setstatfile(const avalue: tstatfile);
 begin
  setlinkedvar(avalue,tmsecomponent(fstatfile));
+end;
+
+procedure tmsedatamodule.doasyncevent(var atag: integer);
+begin
+ if canevent(tmethod(fonasyncevent)) then begin
+  fonasyncevent(self,atag);
+ end;
+ inherited;
 end;
 
 end.

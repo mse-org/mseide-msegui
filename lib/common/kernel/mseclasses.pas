@@ -290,6 +290,7 @@ type
    class function getmoduleclassname: string; virtual;
    procedure defineproperties(filer: tfiler); override;
    procedure componentevent(const event: tcomponentevent); virtual;
+   procedure doasyncevent(var atag: integer); virtual;
 
   public
    destructor destroy; override;
@@ -320,6 +321,9 @@ type
    procedure sendrootcomponentevent(const event: tcomponentevent;
                                         const destroyevent: boolean = true);
                   //event will be destroyed if not async
+   procedure asyncevent(atag: integer = 0);
+                          //posts event for doasyncevent to self
+   procedure postcomponentevent(const event: tcomponentevent);
 
    property moduleclassname: string read getmoduleclassname;
    property actualclassname: string read getactualclassname;
@@ -557,7 +561,7 @@ uses
 {$ifdef mswindows}
  windows,
 {$endif}
- msestream,msesys,msedatalist,msedatamodules;
+ msegui,msestream,msesys,msedatalist,msedatamodules;
 
 type
  {$ifdef FPC}
@@ -2453,6 +2457,37 @@ begin
             (componentstate * [csloading,csdesigning] = []);
 end;
 
+procedure tmsecomponent.receiveevent(const event: tobjectevent);
+var
+ int1: integer;
+begin
+ case event.kind of
+  ek_async: begin
+   int1:= tasyncevent(event).tag;
+   doasyncevent(int1);
+  end;
+  ek_component: begin
+   sendcomponentevent(event as tcomponentevent,false);
+  end;
+ end;
+end;
+
+procedure tmsecomponent.asyncevent(atag: integer = 0);
+begin
+ application.postevent(tasyncevent.create(ievent(self),atag));
+end;
+
+procedure tmsecomponent.doasyncevent(var atag: integer);
+begin
+ //dummy
+end;
+
+procedure tmsecomponent.postcomponentevent(const event: tcomponentevent);
+begin
+ event.create(event.kind,ievent(self));
+ application.postevent(event);
+end;
+
 {$ifdef FPC}
 {
 procedure tmsecomponent.setsubcomponent(avalue: boolean); //todo remove for 1.99 !!!!!
@@ -2553,11 +2588,6 @@ end;
 function tmsecomponent.getinstance: tobject;
 begin
  result:= self;
-end;
-
-procedure tmsecomponent.receiveevent(const event: tobjectevent);
-begin
- //dummy
 end;
 
 procedure tmsecomponent.componentevent(const event: tcomponentevent);
