@@ -4,7 +4,7 @@ interface
 uses
  msegui,mseclasses,mseforms,msesimplewidgets,msewidgetgrid,msesyntaxedit,
  msemenus,msefiledialog,msestat,msestatfile,msesyntaxpainter,msedispwidgets,
- mseinplaceedit;
+ mseinplaceedit,mseactions;
 
 const
  texteditorstatname =  'texteditor.sta';
@@ -13,6 +13,8 @@ type
    ok: tbutton;
    cancel: tbutton;
    filedialog: tfiledialog;
+   undoact: taction;
+   redoact: taction;
    test: tbutton;
    tpopupmenu1: tpopupmenu;
    textedit: tsyntaxedit;
@@ -29,6 +31,8 @@ type
    procedure cutexe(const sender: TObject);
    procedure pasteexe(const sender: TObject);
    procedure testexe(const sender: TObject);
+   procedure undoupda(const sender: tcustomaction);
+   procedure redoupda(const sender: tcustomaction);
   public
    constructor create(const aonclosequery: closequeryeventty;
                 const asyntaxpainter: tsyntaxpainter;
@@ -126,6 +130,14 @@ begin
  if modres = mr_canclose then begin
   showmessage('Test OK');
  end;
+end;
+
+procedure tmsetexteditorfo.undoupda(const sender: tcustomaction);
+begin
+end;
+
+procedure tmsetexteditorfo.redoupda(const sender: tcustomaction);
+begin
 end;
 
 initialization

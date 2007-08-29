@@ -120,16 +120,12 @@ object msetexteditorfo: tmsetexteditorfo
     menu.submenu.count = 8
     menu.submenu.items = <    
       item
-        caption = '&Undo'
+        action = undoact
         name = 'undo'
-        state = [as_localcaption, as_localonexecute]
-        onexecute = undoexe
       end    
       item
-        caption = '&Redo'
+        action = redoact
         name = 'redo'
-        state = [as_localcaption, as_localonexecute]
-        onexecute = redoexe
       end    
       item
         caption = '&Copy'
@@ -181,5 +177,21 @@ object msetexteditorfo: tmsetexteditorfo
     options = [sfo_memory]
     left = 80
     top = 152
+  end
+  object undoact: taction
+    caption = '&Undo'
+    shortcut = 16474
+    options = [ao_globalshortcut]
+    onexecute = undoexe
+    left = 216
+    top = 72
+  end
+  object redoact: taction
+    caption = '&Redo'
+    shortcut = 24666
+    options = [ao_globalshortcut]
+    onexecute = redoexe
+    left = 216
+    top = 112
   end
 end
