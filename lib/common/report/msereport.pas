@@ -413,13 +413,13 @@ type
  end;
   
  recordbandstatety = (rbs_rendering,rbs_showed,rbs_pageshowed,rbs_finish,
-                      rbs_notfirstrecord,rbs_lastrecord);
+                      rbs_notfirstrecord,rbs_lastrecord,rbs_visibilitychecked);
  recordbandstatesty = set of recordbandstatety; 
  
  ireportclient = interface(inullinterface)
   function getwidget: twidget;
   procedure updatevisibility;
-  procedure beginrender;
+  procedure beginrender(const arestart: boolean);
   procedure endrender;
   procedure init;
  end;
@@ -503,7 +503,7 @@ type
   protected
    procedure parentchanged; override; //update fparentintf
    procedure updatevisibility;
-   procedure beginrender;
+   procedure beginrender(const arestart: boolean);
    procedure endrender;
    procedure init;
   published
@@ -570,7 +570,7 @@ type
    procedure render(const acanvas: tcanvas; var empty: boolean); virtual;
    procedure init; virtual;
    procedure initpage; virtual;
-   procedure beginrender; virtual;
+   procedure beginrender(const arestart: boolean); virtual;
    procedure endrender; virtual;
    procedure dopaint(const acanvas: tcanvas); override;
    procedure doonpaint(const acanvas: tcanvas); override;
@@ -611,6 +611,7 @@ type
    function islastrecord: boolean;
    function isfirstofgroup: boolean;
    function islastofgroup: boolean;
+   procedure restart;
    
    property tabs: treptabulators read ftabs write settabs;
    property font: trepwidgetfont read getfont write setfont stored isfontstored;
@@ -769,7 +770,7 @@ type
    function getminbandsize: sizety; override;
    procedure initpage; override;
    procedure init; override;
-   procedure beginrender; override;
+   procedure beginrender(const arestart: boolean); override;
    procedure endrender; override;
    function lastbandheight: integer; override;
   public
@@ -833,7 +834,7 @@ type
    function render(const acanvas: tcanvas): boolean;
           //true if finished
    function rendering: boolean;
-   procedure beginrender;
+   procedure beginrender(const arestart: boolean);
    procedure endrender;
    procedure dofirstarea; virtual;
    procedure dobeforerender; virtual;
@@ -873,6 +874,8 @@ type
    function repprintstarttime: tdatetime;
    function getreppage: tcustomreportpage;
 
+   procedure restart;
+   
    property acty: integer read getacty;
    property areafull: boolean read getareafull write setareafull;
    
@@ -1001,8 +1004,6 @@ type
 
    function isfirstrecord: boolean;
    function islastrecord: boolean;
-//   function isfirstofgroup: boolean;
-//   function islastofgroup: boolean;
    
    procedure recordchanged;   
    property report: tcustomreport read freport;
@@ -1015,7 +1016,6 @@ type
    procedure activatepage;
    procedure finish;
    procedure restart;
-
    
    property pagewidth: real read fpagewidth write setpagewidth;
    property pageheight: real read fpageheight write setpageheight;
@@ -2724,7 +2724,7 @@ begin
  inherited;
 end;
 
-procedure trepspacer.beginrender;
+procedure trepspacer.beginrender(const arestart: boolean);
 begin
  include(widgetstate1,ws1_noclipchildren);
 end;
@@ -2807,6 +2807,7 @@ procedure tcustomrecordband.render(const acanvas: tcanvas; var empty: boolean);
 var
  widget1: twidget;
  int1: integer;
+ bo1: boolean;
 begin
  widget1:= rootwidget;
  if (widget1 is tcustomreport) and 
@@ -2815,10 +2816,14 @@ begin
  end;
  application.checkoverload;
  fparentintf.updatevisible; //??
+ include(fstate,rbs_visibilitychecked);
  empty:= empty or (rbs_finish in fstate);
+ bo1:= empty;
  dobeforerender(empty);
-// fparentintf.updatevisible;
  if not empty then begin
+  if not (rbs_visibilitychecked in fstate) then begin
+   fparentintf.updatevisible;
+  end;
   if visible then begin
    if fparentintf.beginband(acanvas,self) then begin
     exit; //area full
@@ -2882,11 +2887,16 @@ begin
  end;
 end;
 
-procedure tcustomrecordband.beginrender;
+procedure tcustomrecordband.beginrender(const arestart: boolean);
 var
  int1: integer;
 begin
- fstate:= [rbs_rendering];
+ if arestart then begin
+  fstate:= (fstate * [rbs_pageshowed]) + [rbs_rendering]
+ end
+ else begin
+  fstate:= [rbs_rendering];
+ end;
  include(widgetstate1,ws1_noclipchildren);
  if fdatalink.active then begin
   frecnobefore:= fdatalink.dataset.recno;
@@ -2897,8 +2907,13 @@ begin
   end;
  end; 
  for int1:= 0 to high(fareas) do begin
-  fareas[int1].beginrender;
+  fareas[int1].beginrender(arestart);
  end;
+end;
+
+procedure tcustomrecordband.restart;
+begin
+ beginrender(true);
 end;
 
 procedure tcustomrecordband.endrender;
@@ -3582,13 +3597,13 @@ begin
  end;
 end;
 
-procedure tcustombandgroup.beginrender;
+procedure tcustombandgroup.beginrender(const arestart: boolean);
 var
  int1: integer;
 begin
  inherited;
  for int1:= 0 to high(fbands) do begin
-  fbands[int1].beginrender;
+  fbands[int1].beginrender(arestart);
  end;
 end;
 
@@ -4040,14 +4055,19 @@ begin
  result:= bas_rendering in fstate;
 end;
 
-procedure tcustombandarea.beginrender;
+procedure tcustombandarea.beginrender(const arestart: boolean);
 var
  int1: integer;
 begin
- fstate:= [bas_rendering];
+ if arestart then begin
+  fstate:= fstate - [bas_notfirstband];
+ end
+ else begin
+  fstate:= [bas_rendering];
+ end;
  include(fwidgetstate1,ws1_noclipchildren);
  for int1:= 0 to high(fbands) do begin
-  fbands[int1].beginrender;
+  fbands[int1].beginrender(false);
  end;
 end;
 
@@ -4200,6 +4220,11 @@ end;
 function tcustombandarea.getfontclass: widgetfontclassty;
 begin
  result:= trepwidgetfont;
+end;
+
+procedure tcustombandarea.restart;
+begin
+ beginrender(true);
 end;
 
 { tcustomreportpage }
@@ -4519,10 +4544,10 @@ begin
  end;
  }
  for int1:= 0 to high(fclients) do begin
-  fclients[int1].beginrender;
+  fclients[int1].beginrender(false);
  end;
  for int1:= 0 to high(fareas) do begin
-  fareas[int1].beginrender;
+  fareas[int1].beginrender(false);
  end;
 end;
 
