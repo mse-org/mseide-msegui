@@ -6,7 +6,7 @@ uses
  classes,msedesignintf,msepascalscript,msepropertyeditors,msetypes,msestrings,
  msetexteditor,msegui,msewidgets,uPSComponent,uPSComponent_Default,
  psimportmsegui,formdesigner,sourceupdate,mseparser,pascaldesignparser,
- msedesigner;
+ msedesigner,mserichstring,mseclasses;
 type
  tpascaleditor = class(ttextstringspropertyeditor)
   protected
@@ -26,11 +26,13 @@ type
    procedure doafterclosequery(var amodalresult: modalresultty); override;
    procedure updateline(var aline: ansistring); override;
  end;
- 
+
+function sourcetoformscript(const amodule: tmsecomponent;
+                      const asource: trichstringdatalist): boolean; forward;
 const
  scriptformintf: designmoduleintfty = 
   (createfunc: {$ifdef FPC}@{$endif}createscriptform;
-     initnewcomponent: nil; getscale: nil);
+     initnewcomponent: nil; getscale: nil; sourcetoform: @sourcetoformscript);
  
 procedure Register;
 begin          
@@ -40,6 +42,58 @@ begin
  registerpropertyeditor(typeinfo(tstrings),tscriptform,'ps_script',
                             tpsscriptformeditor);
  registerdesignmoduleclass(tscriptform,scriptformintf);
+end;
+
+procedure doupdateline(aline: pchar; const moduleprefix: ansistring);
+var                       //todo: patch PascalScript to accept classname
+ int1: integer;
+ po1,po2,po3: pchar;
+begin                  //remove module prefix
+ if (moduleprefix <> '') and (aline <> nil) then begin
+  po1:= pchar(aline);
+  while po1^ <> #0 do begin
+   po2:= pchar(moduleprefix);
+   po3:= po1;
+   while (upperchars[po1^] = po2^) and (po1^ <> #0) do begin
+    inc(po1);
+    inc(po2);
+   end;
+   if po2^ = #0 then begin //found
+    for int1:= 0 to (po2 - pchar(moduleprefix)) - 1 do begin
+     po3[int1]:= ' ';
+    end;
+   end
+   else begin
+    po1:= po3+1;   //next char
+   end;
+  end;
+ end;
+end;
+
+function sourcetoformscript(const amodule: tmsecomponent;
+                      const asource: trichstringdatalist): boolean;
+var
+ bo1: boolean;
+ po1: punitinfoty;
+ po2: pmoduleinfoty;
+ mstr1: msestring;
+ start,stop: sourceposty;
+ prefix: ansistring;
+ int1: integer;
+begin
+ bo1:= getimplementationtext(amodule,po1,start,stop,mstr1);
+ if bo1 then begin
+  po2:= designer.modules.findmodule(amodule);
+  prefix:= struppercase(po2^.moduleclassname)+'.';
+  with tscriptform(amodule).script.script do begin
+   text:= mstr1;
+   for int1:= 0 to count - 1 do begin
+    doupdateline(pchar(strings[int1]),prefix);
+   end;
+  end;
+  designer.componentmodified(amodule);
+ end;
+ result:= true;
 end;
 
 var
@@ -191,29 +245,9 @@ begin
 end;
 
 procedure tpsscriptformeditor.updateline(var aline: ansistring);
-var                       //todo: patch PascalScript to accept classname
- int1: integer;
- po1,po2,po3: pchar;
-begin                  //remove module prefix
- if fmoduleprefix <> '' then begin
-  po1:= pchar(aline);
-  while po1^ <> #0 do begin
-   po2:= pchar(fmoduleprefix);
-   po3:= po1;
-   while (upperchars[po1^] = po2^) and (po1^ <> #0) do begin
-    inc(po1);
-    inc(po2);
-   end;
-   if po2^ = #0 then begin //found
-    for int1:= 0 to (po2 - pchar(fmoduleprefix)) - 1 do begin
-     po3[int1]:= ' ';
-    end;
-   end
-   else begin
-    po1:= po3+1;   //next char
-   end;
-  end;
- end;
+                       //todo: patch PascalScript to accept classname
+begin
+ doupdateline(pchar(aline),fmoduleprefix);
 end;
 
 initialization

@@ -325,6 +325,7 @@ type
    procedure begincomponentmodify;
    procedure endcomponentmodify;
    
+   function beforemake: boolean; //true if ok
    procedure modulechanged(const amodule: pmoduleinfoty);
    function changemodulename(const filename: msestring; const avalue: string): string;
    function changemoduleclassname(const filename: msestring; const avalue: string): string;
@@ -442,8 +443,8 @@ implementation
 uses
  msestream,msefileutils,{$ifdef mswindows}windows{$else}libc{$endif},
  designer_bmp,msesys,msewidgets,formdesigner,mseevent,objectinspector,
- msefiledialog,projectoptionsform,sourceupdate,sourceform,pascaldesignparser,
- msearrayprops;
+ msefiledialog,projectoptionsform,sourceupdate,sourceform,sourcepage,
+ pascaldesignparser,msearrayprops;
 
 type
  tcomponent1 = class(tcomponent);
@@ -2727,7 +2728,8 @@ begin
  componentmodified(amodule^.instance);
 end;
 
-function tdesigner.changemodulename(const filename: msestring; const avalue: string): string;
+function tdesigner.changemodulename(const filename: msestring; 
+                                                  const avalue: string): string;
 var
  po1: pmoduleinfoty;
  str1: string;
@@ -4125,6 +4127,24 @@ end;
 procedure tdesigner.savecanceled;
 begin
  fallsaved:= false;
+end;
+
+function tdesigner.beforemake: boolean;
+var
+ int1: integer;
+ page1: tsourcepage;
+begin
+ result:= true;
+ for int1:= 0 to fmodules.count - 1 do begin
+  with fmodules.itempo[int1]^ do begin
+   if assigned(moduleintf^.sourcetoform) then begin
+    page1:= sourcefo.findsourcepage(replacefileext(filename,pasfileext),true,true);
+    if (page1 <> nil) then begin
+     moduleintf^.sourcetoform(instance,page1.source);
+    end;
+   end;
+  end;
+ end;
 end;
 
 { tcomponentslink }

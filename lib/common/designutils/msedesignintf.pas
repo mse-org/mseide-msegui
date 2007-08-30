@@ -15,7 +15,7 @@ interface
 uses
  classes,msegraphutils,mselist,sysutils,typinfo,msebitmap,
  msetypes,msestrings,msegraphics,msegui,
- mseclasses,mseforms,msestat;
+ mseclasses,mseforms,msestat,mserichstring;
 const
  defaultmoduleclassname = 'tmseform';
 type
@@ -285,11 +285,14 @@ type
  initdesigncomponentprocty = procedure(const amodule: tcomponent; 
                                                 const acomponent: tcomponent);
  getdesignscalefuncty = function(const amodule: tcomponent): real;
- 
+ sourcetoformfuncty = function(const amodule: tmsecomponent;
+                                 const source: trichstringdatalist): boolean; 
+                          //true if ok
  designmoduleintfty = record
   createfunc: createdesignmodulefuncty;
   initnewcomponent: initdesigncomponentprocty;
   getscale: getdesignscalefuncty;
+  sourcetoform: sourcetoformfuncty;
  end;
  pdesignmoduleintfty = ^designmoduleintfty;
  

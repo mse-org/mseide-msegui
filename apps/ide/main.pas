@@ -2017,7 +2017,8 @@ end;
 procedure tmainfo.domake(atag: integer);
 begin
  unloadexec;
- if (checksavecancel(sourcefo.saveall(true)) <> mr_cancel) and
+ if designer.beforemake and 
+         (checksavecancel(sourcefo.saveall(true)) <> mr_cancel) and
          (checksavecancel(designer.saveall(true,true)) <> mr_cancel) then begin
   updatemodifiedforms;
   make.domake(atag);

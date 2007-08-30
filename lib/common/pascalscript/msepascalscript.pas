@@ -2,7 +2,7 @@ unit msepascalscript;
 {$ifdef FPC}{$mode objfpc}{$h+}{$INTERFACES CORBA}{$endif}
 interface
 uses
- classes,uPSComponent,msestrings,mseforms,mseclasses;
+ classes,uPSComponent,uPSCompiler,uPSRuntime,msestrings,mseforms,mseclasses;
  
 type 
  tmsepsscript = class(tpsscript)
@@ -15,7 +15,10 @@ type
   private
    fowner: tmsecomponent;
   protected
+   procedure docompimport(Sender: TObject; x: TPSPascalCompiler);
    procedure docompile(sender: tpsscript);
+   procedure doexecimport(Sender: TObject; se: TPSExec;
+                                      x: TPSRuntimeClassImporter);
    procedure doexecute(sender: tpsscript);
   public
    constructor create(aowner: tmsecomponent);
@@ -238,8 +241,25 @@ begin
  fowner:= aowner;
  inherited create(nil);
  compileroptions:= [icAllowNoBegin,icAllowNoEnd,icBooleanShortCircuit];
+ oncompimport:= @docompimport;
  oncompile:= @docompile;
+ onexecimport:= @doexecimport;
  onexecute:= @doexecute;
+end;
+
+procedure tformscript.docompimport(Sender: TObject; x: TPSPascalCompiler);
+var
+ int1: integer;
+begin
+ with fowner do begin
+  for int1:= 0 to componentcount - 1 do begin
+   with components[int1] do begin
+    if x.findclass(classname) = nil then begin
+     x.addclassn(x.findclass('TCOMPONENT'),classname);
+    end;
+   end;
+  end;
+ end;
 end;
 
 procedure tformscript.docompile(sender: tpsscript);
@@ -255,8 +275,25 @@ begin
  end;
 end;
 
-procedure tformscript.doexecute(sender: tpsscript);
+procedure tformscript.doexecimport(Sender: TObject; se: TPSExec;
+               x: TPSRuntimeClassImporter);
 begin
+end;
+
+procedure tformscript.doexecute(sender: tpsscript);
+var
+ int1: integer;
+ comp1: tcomponent;
+begin
+ with sender do begin
+  setvartoinstance('SELF',owner);
+  with fowner do begin
+   for int1:= 0 to componentcount - 1 do begin
+    comp1:= components[int1];
+    setvartoinstance(struppercase(comp1.name),comp1);
+   end;
+  end;
+ end;
 end;
 
 end.

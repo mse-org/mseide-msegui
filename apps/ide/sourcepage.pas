@@ -24,7 +24,7 @@ uses
  msetextedit,msewidgetgrid,mseforms,classes,msegdbutils,msegraphedits,mseevent,
  msehash,msebitmap,msetabs,msetypes,msegui,msesyntaxedit,mseeditglob,
  mseinplaceedit,msedispwidgets,msegraphutils,msegrids,breakpointsform,
- pascaldesignparser,msefilechange,msestrings;
+ pascaldesignparser,msefilechange,msestrings,mserichstring;
 
 
 type
@@ -118,6 +118,7 @@ type
    procedure save(newname: filenamety);
    function checksave(noconfirm,multiple: boolean): modalresultty;
    function modified: boolean;
+   function source: trichstringdatalist;
    procedure doline;
    procedure dofind;
    procedure repeatfind;
@@ -1331,6 +1332,11 @@ begin
   inc(fbracketchecking);
   asyncevent(ord(spat_checkbracket));
  end;
+end;
+
+function tsourcepage.source: trichstringdatalist;
+begin
+ result:= edit.datalist;
 end;
 
 end.
