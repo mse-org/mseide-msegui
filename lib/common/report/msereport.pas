@@ -1165,6 +1165,7 @@ type
                            const onafterrender: reporteventty = nil); overload;
    procedure waitfor;         //returns before calling of onafterrender
    function prepass: boolean; //true if in prepass render state
+   procedure restart;
    
    property ppmm: real read fppmm write setppmm; //pixel per mm
    function reppagecount: integer;
@@ -5473,6 +5474,16 @@ end;
 function tcustomreport.prepass: boolean;
 begin
  result:= not (rs_endpass in fstate);
+end;
+
+procedure tcustomreport.restart;
+var
+ int1: integer;
+begin
+ for int1:= 0 to high(freppages) do begin
+  freppages[int1].restart;
+ end;
+ activepage:= 0;
 end;
 
  {treport}
