@@ -2826,7 +2826,7 @@ begin
  end;
  ftransactionwrite:= avalue;
  if ftransactionwrite <> nil then begin
-  ftransaction.freenotification(self);
+  ftransactionwrite.freenotification(self);
  end;
 end;
 
