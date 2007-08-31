@@ -11,6 +11,15 @@ type
    function compilermessagear: msestringarty;
  end;
 
+ ttestobj = class
+  private
+   fprop: string;
+  public
+   procedure testproc;
+   procedure testproc1; virtual;
+   property prop: string read fprop write fprop;
+ end;
+ 
  tformscript = class(tmsepsscript)
   private
    fowner: tmsecomponent;
@@ -252,6 +261,10 @@ var
  int1: integer;
 begin
  with fowner do begin
+  with x.addclassn(x.findclass('TOBJECT'),'ttestobj') do begin
+   registermethod('procedure testproc;');
+   registermethod('procedure testproc1;');
+  end;
   for int1:= 0 to componentcount - 1 do begin
    with components[int1] do begin
     if x.findclass(classname) = nil then begin
@@ -278,6 +291,10 @@ end;
 procedure tformscript.doexecimport(Sender: TObject; se: TPSExec;
                x: TPSRuntimeClassImporter);
 begin
+ with x.add(ttestobj) do begin
+  registermethod(@ttestobj.testproc,'TESTPROC');
+  registervirtualmethod(@ttestobj.testproc1,'TESTPROC1');
+ end;
 end;
 
 procedure tformscript.doexecute(sender: tpsscript);
@@ -294,6 +311,18 @@ begin
    end;
   end;
  end;
+end;
+
+{ ttestobj }
+
+procedure ttestobj.testproc;
+begin
+ msegui.beep;
+end;
+
+procedure ttestobj.testproc1;
+begin
+ msegui.beep;
 end;
 
 end.

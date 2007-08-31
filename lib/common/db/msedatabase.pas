@@ -543,6 +543,7 @@ Destructor tmdbdataset.Destroy;
 begin
   Database:=Nil;
   Transaction:=Nil;
+  transactionwrite:= nil;
   Inherited;
 end;
 
