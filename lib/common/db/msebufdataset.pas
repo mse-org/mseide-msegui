@@ -360,7 +360,8 @@ type
 
  recupdatebufferarty = array of recupdatebufferty;
  
- bufdatasetstatety = (bs_opening,bs_loading,bs_fetching,bs_applying,
+ bufdatasetstatety = (bs_opening,bs_loading,bs_fetching,
+                      bs_applying,bs_recapplying,
                       bs_connected,
                       bs_hasindex,bs_fetchall,bs_initinternalcalc,
                       bs_blobsfetched,bs_blobscached,bs_blobssorted,
@@ -1243,7 +1244,7 @@ end;
 
 function tmsebufdataset.getintblobpo: pblobinfoarty;
 begin
- if bs_applying in fbstate then begin
+ if bs_recapplying in fbstate then begin
   result:= @fnewvaluebuffer^.header.blobinfo;
  end
  else begin
@@ -1586,7 +1587,7 @@ function tmsebufdataset.getrecordupdatebuffer : boolean;
 var 
  int1: integer;
 begin
- if bs_applying in fbstate then begin
+ if bs_recapplying in fbstate then begin
   result:= true; //fcurrentupdatebuffer is valid
  end
  else begin
@@ -1870,7 +1871,7 @@ begin
     end;
    end
    else begin
-    if bs_applying in fbstate then begin
+    if bs_recapplying in fbstate then begin
      buffer:= @fnewvaluebuffer^.header;
     end
     else begin
@@ -1952,7 +1953,7 @@ var
  po1: pointer;
  int1: integer;
 begin
- if bs_applying in fbstate then begin
+ if bs_recapplying in fbstate then begin
   int1:= afield.fieldno - 1;
   if int1 >= 0 then begin
    po1:= @fupdatebuffer[fcurrentupdatebuffer].bookmark.recordpo^.header;
@@ -1999,7 +2000,7 @@ begin
     end;
    end
    else begin
-    if bs_applying in fbstate then begin
+    if bs_recapplying in fbstate then begin
      result:= @fnewvaluebuffer^.header;
     end
     else begin
@@ -2218,7 +2219,7 @@ var
  by1: boolean;
 
 begin
- include(fbstate,bs_applying);
+ include(fbstate,bs_recapplying);
  by1:= not islocal;
  with fupdatebuffer[fcurrentupdatebuffer] do begin
   try
@@ -2280,7 +2281,7 @@ begin
     checkcancel;
    end;
   finally
-   exclude(fbstate,bs_applying);
+   exclude(fbstate,bs_recapplying);
    finalizecalcstrings(fnewvaluebuffer^.header);
   end;
  end;
@@ -2296,20 +2297,27 @@ var
  response: tresolverresponse;
  int1: integer;
 begin
- checkbrowsemode;
- dobeforeapplyupdate;
- checkbrowsemode;
- if getrecordupdatebuffer then begin
-  ffailedcount:= 0;
-  int1:= fcurrentupdatebuffer;
-  internalapplyupdate(0,cancelonerror,response);
-  if response = rrapply then begin
-   deleteitem(fupdatebuffer,typeinfo(recupdatebufferarty),int1);
-   fcurrentupdatebuffer:= bigint; //invalid
-   afterapply;
+ if not (bs_applying in fbstate) then begin
+  include(fbstate,bs_applying);
+  try
+   checkbrowsemode;
+   dobeforeapplyupdate;
+   checkbrowsemode;
+   if getrecordupdatebuffer then begin
+    ffailedcount:= 0;
+    int1:= fcurrentupdatebuffer;
+    internalapplyupdate(0,cancelonerror,response);
+    if response = rrapply then begin
+     deleteitem(fupdatebuffer,typeinfo(recupdatebufferarty),int1);
+     fcurrentupdatebuffer:= bigint; //invalid
+     afterapply;
+    end;
+   end;
+   doafterapplyupdate;
+  finally
+   exclude(fbstate,bs_applying);
   end;
  end;
- doafterapplyupdate;
 end;
 
 procedure tmsebufdataset.ApplyUpdates(const MaxErrors: Integer; 
@@ -2319,37 +2327,44 @@ var
  recnobefore: integer;
 
 begin
- CheckBrowseMode;
- dobeforeapplyupdate;
- CheckBrowseMode;
- disablecontrols;
- recnobefore:= frecno;
- try
-  fapplyindex := 0;
-  fFailedCount := 0;
-  Response := rrApply;
-  while (fapplyindex <= high(FUpdateBuffer)) and (Response <> rrAbort) do begin
-   fcurrentupdatebuffer:= fapplyindex;
-   if FUpdateBuffer[fcurrentupdatebuffer].Bookmark.recordpo <> nil then begin
-    internalapplyupdate(maxerrors,cancelonerror,response);
+ if not (bs_applying in fbstate) then begin
+  include(fbstate,bs_applying);
+  try
+   CheckBrowseMode;
+   dobeforeapplyupdate;
+   CheckBrowseMode;
+   disablecontrols;
+   recnobefore:= frecno;
+   try
+    fapplyindex := 0;
+    fFailedCount := 0;
+    Response := rrApply;
+    while (fapplyindex <= high(FUpdateBuffer)) and (Response <> rrAbort) do begin
+     fcurrentupdatebuffer:= fapplyindex;
+     if FUpdateBuffer[fcurrentupdatebuffer].Bookmark.recordpo <> nil then begin
+      internalapplyupdate(maxerrors,cancelonerror,response);
+     end;
+     inc(fapplyindex);
+    end;
+    if ffailedcount = 0 then begin
+     fupdatebuffer:= nil;
+    end;
+   finally 
+    if active then begin
+     internalsetrecno(recnobefore);
+     Resync([]);
+     enablecontrols;
+    end
+    else begin
+     enablecontrols;
+    end;
    end;
-   inc(fapplyindex);
-  end;
-  if ffailedcount = 0 then begin
-   fupdatebuffer:= nil;
-  end;
- finally 
-  if active then begin
-   internalsetrecno(recnobefore);
-   Resync([]);
-   enablecontrols;
-  end
-  else begin
-   enablecontrols;
+   afterapply;
+   doafterapplyupdate;
+  finally
+   exclude(fbstate,bs_applying);
   end;
  end;
- afterapply;
- doafterapplyupdate;
 end;
 
 procedure tmsebufdataset.ApplyUpdates(const maxerrors: integer = 0);
@@ -3087,7 +3102,7 @@ var
  po1: pbyte;
  int1: integer;
 begin
- if bs_applying in fbstate then begin
+ if bs_recapplying in fbstate then begin
   po1:= pbyte(@fupdatebuffer[fcurrentupdatebuffer].bookmark.recordpo^.header);
  end
  else begin

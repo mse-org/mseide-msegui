@@ -211,6 +211,7 @@ type
    procedure unprepare;
    procedure execute;
    procedure settransaction(const avalue: tmdbtransaction);
+   procedure settransactionwrite(const avalue: tmdbtransaction);
    //idatabaseclient
    procedure setdatabase(const avalue: tmdatabase);
    function getname: ansistring;
@@ -714,7 +715,12 @@ end;
 
 procedure tsqlresult.settransaction(const avalue: tmdbtransaction);
 begin
- dosettransaction(itransactionclient(self),avalue,ftransaction);
+ dosettransaction(itransactionclient(self),avalue,ftransaction,false);
+end;
+
+procedure tsqlresult.settransactionwrite(const avalue: tmdbtransaction);
+begin
+ //dummy
 end;
 
 procedure tsqlresult.open;

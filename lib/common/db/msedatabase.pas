@@ -34,10 +34,12 @@ type
  
  itransactionclient = interface(idbclient)
   procedure settransaction(const avalue: tmdbtransaction);
+  procedure settransactionwrite(const avalue: tmdbtransaction);
   function getactive: boolean;
   procedure refresh;
  end;
  itransactionclientarty = array of itransactionclient;
+ pitransactionclientarty = ^itransactionclientarty;
  
  idatabaseclient = interface(idbclient)
   procedure setdatabase(const sender: tmdatabase);
@@ -52,13 +54,14 @@ type
     FOpenAfterRead : boolean;
 //    Function GetDataSetCount : Longint;
 //    Function GetDataset(Index : longint) : tmdbdataset;
-    procedure RegisterDataset (const DS: itransactionclient);
-    procedure UnRegisterDataset(const DS: itransactionclient);
+    procedure RegisterDataset (const DS: itransactionclient; const awrite: boolean);
+    procedure UnRegisterDataset(const DS: itransactionclient; const awrite: boolean);
     procedure RemoveDataSets;
     procedure SetActive(Value : boolean);
   Protected
 //    FDataSets      : TList;
     fdatasets: itransactionclientarty;
+    fwritedatasets: itransactionclientarty;
     Procedure SetDatabase (Value : tmdatabase); virtual;
     procedure CloseTrans;
     procedure openTrans;
@@ -75,9 +78,10 @@ type
     constructor Create(AOwner: TComponent); override;
     Destructor destroy; override;
     procedure CloseDataSets;
-    procedure refreshdatasets;
+    procedure refreshdatasets(const writeonly: boolean = false);
     Property DataBase : tmdatabase Read FDatabase Write SetDatabase;
     property datasets: itransactionclientarty read fdatasets;
+    property writedatasets: itransactionclientarty read fdatasets;
   published
     property Active : boolean read FActive write setactive;
   end;
@@ -186,8 +190,10 @@ type
     Protected
       FDatabase : tmdatabase;
       FTransaction : tmdbtransaction;
+      ftransactionwrite : tmdbtransaction;
       Procedure SetDatabase (const Value: tmdatabase); virtual;
       Procedure SetTransaction(const Value: tmdbtransaction); virtual;
+      procedure settransactionwrite(const value: tmdbtransaction); virtual;
 //      Procedure CheckDatabase;
       //idbclient
       function getinstance: tobject;
@@ -196,6 +202,8 @@ type
       Destructor destroy; override;
       Property DataBase : tmdatabase Read FDatabase Write SetDatabase;
       Property Transaction : tmdbtransaction Read FTransaction Write SetTransaction;
+      property transactionwrite : tmdbtransaction read ftransactionwrite 
+                             write settransactionwrite;
     end;
 
  ttacontroller = class(tactivatorcontroller)
@@ -230,7 +238,8 @@ type
 procedure dosetdatabase(const sender: idatabaseclient; const avalue: tmdatabase;
                  var dest: tmdatabase);
 procedure dosettransaction(const sender: itransactionclient; 
-        const avalue: tmdbtransaction;var dest: tmdbtransaction);
+        const avalue: tmdbtransaction; var dest: tmdbtransaction;
+        const awrite: boolean);
 procedure checkdatabase(const aname: ansistring; const adatabase: tmdatabase);
 procedure checktransaction(const aname: ansistring; const atransaction: tmdbtransaction);
 procedure checkinactive(const active: boolean; const aname: ansistring);
@@ -288,18 +297,19 @@ begin
 end;
 
 procedure dosettransaction(const sender: itransactionclient; 
-        const avalue: tmdbtransaction;var dest: tmdbtransaction);
+        const avalue: tmdbtransaction; var dest: tmdbtransaction;
+        const awrite: boolean);
 begin
  if avalue <> dest then begin
-  if sender.getactive then begin
+  if not awrite and sender.getactive then begin
    raise edatabaseerror('Transaction client "'+sender.getname+'" is active.');
   end;
   if dest <> nil then begin
-   dest.unregisterdataset(sender);
+   dest.unregisterdataset(sender,awrite);
   end;
   dest:= nil;
   if avalue <> nil then begin
-   avalue.registerdataset(sender);
+   avalue.registerdataset(sender,awrite);
   end;
   dest:= avalue;
  end;
@@ -510,7 +520,12 @@ end;
 
 Procedure tmdbdataset.SetTransaction (const Value : tmdbtransaction);
 begin
- dosettransaction(itransactionclient(self),value,ftransaction);
+ dosettransaction(itransactionclient(self),value,ftransaction,false);
+end;
+
+procedure tmdbdataset.settransactionwrite(const value : tmdbtransaction);
+begin
+ dosettransaction(itransactionclient(self),value,ftransactionwrite,true);
 end;
 
 function tmdbdataset.getinstance: tobject;
@@ -633,12 +648,19 @@ begin
  end;
 end;
 
-procedure tmdbtransaction.refreshdatasets;
+procedure tmdbtransaction.refreshdatasets(const writeonly: boolean = false);
 var
  int1: integer;
+ ar1: itransactionclientarty;
 begin
- for int1:= high(fdatasets) downto 0 do begin
-  with fdatasets[int1] do begin
+ if writeonly then begin
+  ar1:= fwritedatasets;
+ end
+ else begin
+  ar1:= fdatasets;
+ end;
+ for int1:= high(ar1) downto 0 do begin
+  with ar1[int1] do begin
    if getactive then begin
     refresh;
    end;
@@ -662,6 +684,9 @@ begin
  for int1:= high(fdatasets) downto 0 do begin
   fdatasets[int1].settransaction(nil);
  end;
+ for int1:= high(fwritedatasets) downto 0 do begin
+  fwritedatasets[int1].settransactionwrite(nil);
+ end;
 end;
 {
 Function tmdbtransaction.GetDataSetCount : Longint;
@@ -672,19 +697,36 @@ begin
     Result:=0;
 end;
 }
-procedure tmdbtransaction.UnRegisterDataset(const DS: itransactionclient);
+procedure tmdbtransaction.UnRegisterDataset(const DS: itransactionclient;
+                              const awrite: boolean);
+var
+ ar1: pitransactionclientarty;
 begin
- if removeitem(pointerarty(fdatasets),ds) < 0 then begin
+ if awrite then begin
+  ar1:= @fwritedatasets;
+ end
+ else begin
+  ar1:= @fdatasets;
+ end;
+ if removeitem(pointerarty(ar1^),ds) < 0 then begin
   DatabaseErrorFmt(SNoDatasetRegistered,[DS.getName]);
  end;
 end;
 
-procedure tmdbtransaction.RegisterDataset(const DS: itransactionclient);
+procedure tmdbtransaction.RegisterDataset(const DS: itransactionclient;
+                   const awrite: boolean);
 var
  int1: integer;
+ ar1: pitransactionclientarty;
 begin
- int1:= high(fdatasets);
- if adduniqueitem(pointerarty(fdatasets),ds) <= int1 then begin
+ if awrite then begin
+  ar1:= @fwritedatasets;
+ end
+ else begin
+  ar1:= @fdatasets;
+ end;
+ int1:= high(ar1^);
+ if adduniqueitem(pointerarty(ar1^),ds) <= int1 then begin
   DatabaseErrorFmt(SDatasetRegistered,[DS.getname]);
  end;
 end;

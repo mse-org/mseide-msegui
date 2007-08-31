@@ -417,7 +417,6 @@ type
    FUpdateQry,FDeleteQry,FInsertQry: TSQLQuery;
    fblobintf: iblobconnection;   
    fbeforeexecute: tmsesqlscript;
-   ftransactionwrite: tsqltransaction;
    procedure FreeFldBuffers;
    function GetIndexDefs : TIndexDefs;
    function GetStatementType : TStatementType;
@@ -444,7 +443,8 @@ type
    procedure setbeforeexecute(const avalue: tmsesqlscript);
    function getsqltransaction: tsqltransaction;
    procedure setsqltransaction(const avalue: tsqltransaction);
-   procedure settransactionwrite(const avalue: tsqltransaction);
+   function getsqltransactionwrite: tsqltransaction;
+   procedure setsqltransactionwrite(const avalue: tsqltransaction);
    procedure resetparsing;
   protected
    FTableName: string;
@@ -516,8 +516,6 @@ type
     property StatementType : TStatementType read GetStatementType;
     Property DataSource : TDatasource Read GetDataSource Write SetDatasource;
     property database: tcustomsqlconnection read getdatabase1 write setdatabase1;
-    property transactionwrite: tsqltransaction read ftransactionwrite 
-                                                  write settransactionwrite;
     
 //    property SchemaInfo : TSchemaInfo read FSchemaInfo default stNoSchema;
     // redeclared data set properties
@@ -551,6 +549,8 @@ type
 //    property Database;
 
     property Transaction: tsqltransaction read getsqltransaction write setsqltransaction;
+    property transactionwrite: tsqltransaction read getsqltransactionwrite
+                                    write setsqltransactionwrite;
   end;
 
 procedure updateparams(const aparams: tparams);
@@ -1302,17 +1302,16 @@ function tsqltransaction.docommit(const retaining: boolean): boolean;
   if not retaining then begin
    closetrans;
    closedatasets;
-  end
-  else begin
-   if tao_refreshdatasets in foptions then begin
-    refreshdatasets;
-   end;
+  end;
+  if tao_refreshdatasets in foptions then begin
+   refreshdatasets(not retaining);
   end;
  end;
  
 var
  bo1: boolean;
 begin
+ result:= false;
  if not (tao_fake in foptions) then begin
   try
    if retaining then begin
@@ -1341,6 +1340,7 @@ begin
   end;
  end;
  dofinish;
+ result:= true;
 end;
 
 function TSQLTransaction.Commit: boolean;
@@ -2678,9 +2678,6 @@ begin
   if acomponent = fbeforeexecute then begin
    fbeforeexecute:= nil;
   end;
-  if acomponent = ftransactionwrite then begin
-   ftransactionwrite:= nil;
-  end;
  end;
 end;
 
@@ -2818,16 +2815,14 @@ begin
  inherited transaction:= avalue;
 end;
 
-procedure TSQLQuery.settransactionwrite(const avalue: tsqltransaction);
+function TSQLQuery.getsqltransactionwrite: tsqltransaction;
 begin
- checkinactive;
- if ftransactionwrite <> nil then begin
-  ftransactionwrite.removefreenotification(self);
- end;
- ftransactionwrite:= avalue;
- if ftransactionwrite <> nil then begin
-  ftransactionwrite.freenotification(self);
- end;
+ result:= tsqltransaction(inherited transactionwrite);
+end;
+
+procedure TSQLQuery.setsqltransactionwrite(const avalue: tsqltransaction);
+begin
+ inherited transactionwrite:= avalue;
 end;
 
 procedure TSQLQuery.applyupdates(const maxerrors: integer;
@@ -2843,7 +2838,7 @@ end;
 
 function TSQLQuery.writetransaction: tsqltransaction;
 begin
- result:= ftransactionwrite;
+ result:= tsqltransaction(ftransactionwrite);
  if result = nil then begin
   result:= transaction;
  end;
