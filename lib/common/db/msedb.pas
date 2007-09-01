@@ -630,7 +630,8 @@ type
  datasetoptionty = (dso_utf8,dso_numboolean,dso_initinternalcalc,
                          dso_refreshtransaction,
                          dso_cancelupdateonerror,dso_cancelupdatesonerror,                         
-                         dso_autoapply,dso_autocommitret,dso_refreshafterapply,
+                         dso_autoapply,dso_autocommitret,dso_autocommit,
+                         dso_refreshafterapply,
                          dso_cacheblobs,
                          dso_offline, //disconnect database after open
                          dso_local);  //do not connect database on open
@@ -3878,8 +3879,11 @@ begin
 end;
 
 procedure tdscontroller.setoptions(const avalue: datasetoptionsty);
+const
+ mask: datasetoptionsty = [dso_autocommitret,dso_autocommit];
 begin
- foptions:= avalue;
+ foptions:= datasetoptionsty(setsinglebit(longword(avalue),longword(foptions),
+                    longword(mask)));
 end;
 
 function tdscontroller.isutf8: boolean;

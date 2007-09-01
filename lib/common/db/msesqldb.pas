@@ -457,6 +457,13 @@ end;
 
 procedure tmsesqlquery.afterapply;
 begin
+ if dso_autocommitret in fcontroller.options then begin
+  writetransaction.commitretaining;
+ end;
+ if dso_autocommit in fcontroller.options then begin
+  writetransaction.commit;
+ end;
+{
  if (dso_autocommitret in fcontroller.options) and 
                 (writetransaction <> nil) then begin
   if transactionwrite = nil then begin
@@ -467,6 +474,7 @@ begin
    writetransaction.commit;
   end;
  end;
+ }
  if dso_refreshafterapply in fcontroller.options then begin
   refresh;
  end;
