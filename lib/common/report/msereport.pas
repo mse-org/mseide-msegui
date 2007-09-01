@@ -1084,7 +1084,7 @@ type
  preambleeventty = procedure(const sender: tcustomreport; var apreamble: string) of object;
  
 
- reportoptionty = (reo_autorelease,reo_prepass,
+ reportoptionty = (reo_autorelease,reo_prepass,reo_nothread,
                       reo_autoreadstat,reo_autowritestat);
  reportoptionsty = set of reportoptionty;
  
@@ -1101,6 +1101,7 @@ type
    fcanvas: tcanvas;
    fpagenum: integer;
    fthread: tmsethread;
+   fcanceled: boolean;
    fppmmbefore: real;
    fstate: repstatesty;
    factivepage: integer;
@@ -2820,7 +2821,7 @@ var
 begin
  widget1:= rootwidget;
  if (widget1 is tcustomreport) and 
-                       tcustomreport(widget1).fthread.terminated then begin
+                       tcustomreport(widget1).canceled then begin
   abort;
  end;
  application.checkoverload;
@@ -4977,6 +4978,11 @@ end;
 
 function tcustomreport.exec(thread: tmsethread): integer;
 
+ function checkterminated: boolean;
+ begin
+  result:= (thread <> nil) and thread.terminated or fcanceled;
+ end;
+ 
  procedure fakevisible(const awidget: twidget; const aset: boolean);
  var 
   int1: integer;
@@ -5011,7 +5017,7 @@ var
    for int1:= 0 to high(freppages) do begin
     freppages[int1].endrender;
    end;
-   terminated1:= thread.terminated;
+   terminated1:= checkterminated;
    if islast or (rs_endpass in fstate) or terminated1 then begin
     exclude(fstate,rs_running);
     fstream.free;
@@ -5149,7 +5155,7 @@ begin
         break;
        end;
       end;
-      if page1.visiblepage and not fthread.terminated then begin
+      if page1.visiblepage and not checkterminated then begin
        exclude(fstate,rs_activepageset);
        factivepage:= finditem(pointerarty(freppages),page1);
        bo1:= page1.render(fcanvas);
@@ -5229,7 +5235,13 @@ begin
  fstreamset:= (astream <> nil) or nilstream;
  fcommand:= acommand;
  freeandnil(fthread);
- fthread:= tmsethread.create({$ifdef FPC}@{$endif}exec);
+ fcanceled:= false;
+ if reo_nothread in foptions then begin
+  exec(nil);
+ end
+ else begin
+  fthread:= tmsethread.create({$ifdef FPC}@{$endif}exec);
+ end;
 end;
 
 procedure tcustomreport.render(const acanvas: tcanvas;
@@ -5372,11 +5384,12 @@ end;
 
 function tcustomreport.getcanceled: boolean;
 begin
- result:= (fthread <> nil) and fthread.terminated;
+ result:= (fthread <> nil) and fthread.terminated or fcanceled;
 end;
 
 procedure tcustomreport.setcanceled(const avalue: boolean);
 begin
+ fcanceled:= fcanceled or avalue;
  if avalue and (fthread <> nil) then begin
   fthread.terminate;
  end;
@@ -5394,7 +5407,7 @@ procedure tcustomreport.waitfor;
 var
  int1: integer;
 begin
- if running then begin
+ if running and (fthread <> nil) then begin
   int1:= application.unlockall;
   fthread.waitfor;
   application.relockall(int1);

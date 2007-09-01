@@ -11,10 +11,11 @@ type
    function compilermessagear: msestringarty;
  end;
 
- ttestobj = class
+ ttestobj = class(tcomponent)
   private
    fprop: string;
   public
+   constructor create;
    procedure testproc;
    procedure testproc1; virtual;
    property prop: string read fprop write fprop;
@@ -261,9 +262,10 @@ var
  int1: integer;
 begin
  with fowner do begin
-  with x.addclassn(x.findclass('TOBJECT'),'ttestobj') do begin
+  with x.addclassn(x.findclass('TCOMPONENT'),'ttestobj') do begin
    registermethod('procedure testproc;');
    registermethod('procedure testproc1;');
+   registermethod('constructor create;');
   end;
   for int1:= 0 to componentcount - 1 do begin
    with components[int1] do begin
@@ -294,6 +296,7 @@ begin
  with x.add(ttestobj) do begin
   registermethod(@ttestobj.testproc,'TESTPROC');
   registervirtualmethod(@ttestobj.testproc1,'TESTPROC1');
+  registerconstructor(@ttestobj.create,'CREATE');
  end;
 end;
 
@@ -323,6 +326,12 @@ end;
 procedure ttestobj.testproc1;
 begin
  msegui.beep;
+end;
+
+constructor ttestobj.create;
+begin
+ inherited create(nil);
+ name:= 'qwertz';
 end;
 
 end.
