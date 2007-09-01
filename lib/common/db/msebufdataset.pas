@@ -3469,16 +3469,25 @@ var
 begin
  for int1:= fields.count - 1 downto 0 do begin
   field1:= fields[int1];
+  if bind then begin
+   if field1.fieldkind = fkdata then begin
+    fielddef1:= tfielddef(fielddefs.find(field1.fieldname));
+                   //needed for FPC 2_2
+    if fielddef1 <> nil then begin
+     field1.fieldname:= fielddef1.name;
+          //get exact name for quoting in update statements
+    end;
+   end
+   else begin
+    fielddef1:= nil;
+   end;
+  end;
   if field1 is tmsestringfield then begin
    int2:= 0;
    if bind then begin
     int2:= field1.size;
-    if field1.fieldkind = fkdata then begin
-     fielddef1:= tfielddef(fielddefs.find(field1.fieldname));
-                   //needed for FPC 2_2
-     if fielddef1 <> nil then begin
-      int2:= fielddef1.size;
-     end;
+    if fielddef1 <> nil then begin
+     int2:= fielddef1.size;
     end;
     tmsestringfield1(field1).setismsestring(@getmsestringdata,
                                                   @setmsestringdata,int2);
