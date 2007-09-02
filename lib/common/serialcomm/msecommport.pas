@@ -1440,7 +1440,7 @@ end;
 function tasciicommthread.checkabort(const sender: tobject): boolean;
 begin
  result:= inherited checkabort(sender) or
-     timeoutstarted and (gettickus - zeitstempel < $80000000);
+     timeoutstarted and later(zeitstempel,gettickus);
 end;
 
 procedure tasciicommthread.closetimeout;
