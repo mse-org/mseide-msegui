@@ -152,6 +152,9 @@ tsqlite3connection is available without -dmse_with_sqlite. Field type mapping:
 | BLOB               | BLOB                | ftblob      | string      |
 +--------------------+---------------------+-------------+-------------+
 
+*** Do not use Sqlite3 in multi-threaded applications. Set treport.options 
+reo_nothread to true for rendering a Sqlite3 report ***.
+
 ZeosLib
 *******
 To install the Zeos components add the path to the Zeos source to 'Project'-
