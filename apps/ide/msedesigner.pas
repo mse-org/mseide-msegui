@@ -355,7 +355,8 @@ type
                                  const aclass: tcomponentclass): tcomponent;
    function createcurrentcomponent(const module: tmsecomponent): tcomponent;
    function hascurrentcomponent: boolean;
-   procedure addcomponent(const module: tmsecomponent; const acomponent: tcomponent);
+   procedure addcomponent(const module: tmsecomponent;
+                              const acomponent: tcomponent);
    procedure deleteselection(adoall: boolean = false);
    procedure deletecomponent(const acomponent: tcomponent);
    procedure clearselection;
@@ -444,7 +445,7 @@ uses
  msestream,msefileutils,{$ifdef mswindows}windows{$else}libc{$endif},
  designer_bmp,msesys,msewidgets,formdesigner,mseevent,objectinspector,
  msefiledialog,projectoptionsform,sourceupdate,sourceform,sourcepage,
- pascaldesignparser,msearrayprops;
+ pascaldesignparser,msearrayprops,rtlconsts;
 
 type
  tcomponent1 = class(tcomponent);
@@ -2173,7 +2174,8 @@ begin
  //dummy
 end;
 
-procedure tdesigner.addcomponent(const module: tmsecomponent; const acomponent: tcomponent);
+procedure tdesigner.addcomponent(const module: tmsecomponent; 
+                           const acomponent: tcomponent);
 var
  int1,int2: integer;
  str1: string;
@@ -4082,6 +4084,7 @@ var
  po1: pmoduleinfoty;
  ar1: objectarty;
  int1: integer;
+ comp1: tcomponent;
 begin
  ar1:= nil; //compiler warning
  po1:= findcomponentmodule(acomponent);
@@ -4090,6 +4093,10 @@ begin
    raise exception.Create('Invalid component name,');
   end;
   if acomponent.name <> newname then begin
+   comp1:= acomponent.getparentcomponent;
+   if (comp1 <> nil) and (comp1.findcomponent(newname) <> nil) then begin
+    raise EComponentError.Createfmt(SDuplicateName,[newname]);
+   end;
    po1^.components.namechanged(acomponent,newname);
    designnotifications.componentnamechanging(idesigner(self),po1^.instance,
                                       acomponent,newname);

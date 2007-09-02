@@ -291,6 +291,7 @@ type
    procedure defineproperties(filer: tfiler); override;
    procedure componentevent(const event: tcomponentevent); virtual;
    procedure doasyncevent(var atag: integer); virtual;
+   procedure doafterload; virtual;
 
   public
    destructor destroy; override;
@@ -469,6 +470,20 @@ type
    procedure notify(const sender: tobject);
  end;
   
+ tmodulelist = class(tcomponentqueue)
+  protected
+   flocked: integer;
+   procedure ancestornotfound(Reader: TReader; const ComponentName: string;
+                   ComponentClass: TPersistentClass; var Component: TComponent);
+//   procedure findmethod(Reader: TReader; const MethodName: string;
+//      var Address: Pointer; var Error: Boolean);
+         //does not work because method.data is not writable
+  public
+   function findmodulebyname(const name: string): tcomponent;
+   procedure lock;
+   procedure unlock;
+ end;
+ 
 function ownernamepath(const acomponent: tcomponent): string; 
                      //namepath from root to acomponent separated by '.'
 procedure setcomponentorder(const owner: tcomponent; const anames: msestringarty);
@@ -552,7 +567,7 @@ procedure objectbinarytotextmse(input, output: tstream);
 
 function setloading(const acomponent: tcomponent; const avalue: boolean): boolean;
            //returns old value
-                    
+
 implementation
 uses
 {$ifdef debugobjectlink}
@@ -645,17 +660,6 @@ type
    procedure resetchanged;
    procedure reloadchanged;
  end;
-
- tmodulelist = class(tcomponentqueue)
-  protected
-   flocked: integer;
-   function findmodulebyname(const name: string): tcomponent;
-   procedure ancestornotfound(Reader: TReader; const ComponentName: string;
-                   ComponentClass: TPersistentClass; var Component: TComponent);
-//   procedure findmethod(Reader: TReader; const MethodName: string;
-//      var Address: Pointer; var Error: Boolean);
-         //does not work because method.data is not writable
- end;
  
  tloadedlist = class(tcomponent)
   protected
@@ -667,6 +671,14 @@ var
  fmodules: tmodulelist;
  floadedlist: tloadedlist;
  fmodulestoregister: msecomponentarty;
+
+function modules: tmodulelist;
+begin
+ if fmodules = nil then begin
+  fmodules:= tmodulelist.create(false);
+ end;
+ result:= fmodules;
+end;
 
 function setloading(const acomponent: tcomponent; const avalue: boolean): boolean;
 begin
@@ -790,17 +802,17 @@ end;
 
 procedure lockfindglobalcomponent;   //switch of findglobalcomponent
 begin
- inc(fmodules.flocked);
+ modules.lock;
 end;
 
 procedure unlockfindglobalcomponent; //switch on findglobalcomponent
 begin
- dec(fmodules.flocked);
+ modules.unlock;
 end;
 
 function findglobalcomponentlocked: boolean;
 begin
- result:= fmodules.flocked <> 0;
+ result:= modules.flocked <> 0;
 end;
 
 function ownernamepath(const acomponent: tcomponent): string;
@@ -1164,9 +1176,6 @@ var
  instance: tmsecomponent;
 begin
  instance := tmsecomponent(instanceclass.newinstance);
- if fmodules = nil then begin
-  fmodules:= tmodulelist.create(false);
- end;
  additem(pointerarty(fmodulestoregister),instance);
 // fmodules.add(instance); //not before completely loaded, 
                         //submodules call globalfixupreferences
@@ -1241,11 +1250,13 @@ begin
    reader := treader.create(stream, 4096);
   end;
   try
+  {
    if fmodules <> nil then begin
 //      reader.onfindmethod:= fmodules.findmethod;
        //does not work because method.data is not writable
    end;
-   reader.onancestornotfound:= {$ifdef FPC}@{$endif}fmodules.ancestornotfound;
+   }
+   reader.onancestornotfound:= {$ifdef FPC}@{$endif}modules.ancestornotfound;
    reader.readrootcomponent(instance);
   finally
     reader.free;
@@ -1303,7 +1314,7 @@ begin
   try
    doload(instance.classtype);
    if finditem(pointerarty(fmodulestoregister),instance) >= 0 then begin
-    fmodules.add(tmsecomponent(instance));
+    modules.add(tmsecomponent(instance));
     globalfixupreferences;
    end;
    if loadingstarted and (moduleloadlevel = 1) then begin
@@ -1494,6 +1505,16 @@ procedure tmodulelist.ancestornotfound(Reader: TReader;
                var Component: TComponent);
 begin
  component:= findancestorcomponent(reader,componentname);
+end;
+
+procedure tmodulelist.lock;
+begin
+ inc(flocked);
+end;
+
+procedure tmodulelist.unlock;
+begin
+ dec(flocked);
 end;
 
 { tloadedlist }
@@ -2826,6 +2847,11 @@ begin
  //dummy
 end;
 
+procedure tmsecomponent.doafterload;
+begin
+ //dummy
+end;
+
 { tlinkedqueue }
 
 constructor tlinkedqueue.create(aownsobjects: boolean);
@@ -3205,7 +3231,7 @@ end;
 
 function findmodulebyname(const name: string): tcomponent;
 begin
- result:= fmodules.findmodulebyname(name);
+ result:= modules.findmodulebyname(name);
 end;
 
 function findcomponentbynamepath(const namepath: string): tcomponent;
@@ -3216,7 +3242,7 @@ begin
  result:= nil;
  ar1:= splitstring(namepath,'.');
  if high(ar1) >= 0 then begin
-  result:= fmodules.findmodulebyname(ar1[0]);
+  result:= modules.findmodulebyname(ar1[0]);
   for int1:= 1 to high(ar1) do begin
    if result = nil then begin
     break;

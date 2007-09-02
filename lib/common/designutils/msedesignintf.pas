@@ -86,7 +86,8 @@ type
   procedure componentmodified(const component: tobject);
   function createcurrentcomponent(const module: tmsecomponent): tcomponent;
   function hascurrentcomponent: boolean;
-  procedure addcomponent(const module: tmsecomponent; const acomponent: tcomponent);
+  procedure addcomponent(const module: tmsecomponent;
+                                         const acomponent: tcomponent);
   procedure deleteselection(adoall: Boolean = False);
   procedure deletecomponent(const acomponent: tcomponent);
   procedure clearselection;

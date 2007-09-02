@@ -85,6 +85,14 @@ type
    procedure linkmethods(const ascript: tmsepsscript);
  end;
 
+var
+ fscriptmodules: tmodulelist;
+
+function findscriptmodulebyname(const name: string): tcomponent;
+begin
+ result:= fscriptmodules.findmodulebyname(name);
+end;
+
 function loadscriptform(const filename: filenamety): tscriptform;
 var
  methlist: tmethproplist;
@@ -96,21 +104,36 @@ begin
  stream1:= nil;
  stream2:= nil;
  reader1:= nil;
+ lockfindglobalcomponent;
+ fscriptmodules.unlock;
+ begingloballoading;
  try
-  result:= tscriptform.create(application,false);
-  stream1:= ttextstream.create(filename,fm_read);
-  stream2:= tmemorystream.create;
-  objecttexttobinary(stream1,stream2);
-  stream2.position:= 0;
-  reader1:= treader.create(stream2,4048);
-  reader1.onsetmethodproperty:= @methlist.dosetmethodprop;
-  reader1.readrootcomponent(result);
-  if not result.fscript.compile then begin
-   raise exception.create('Error compiling script of '+result.name+':'+lineend+
-            result.fscript.compilermessagetext);
+  try
+   result:= tscriptform.create(application,false);
+   stream1:= ttextstream.create(filename,fm_read);
+   stream2:= tmemorystream.create;
+   objecttexttobinary(stream1,stream2);
+   stream2.position:= 0;
+   reader1:= treader.create(stream2,4048);
+   reader1.onsetmethodproperty:= @methlist.dosetmethodprop;
+   reader1.readrootcomponent(result);
+   if not result.fscript.compile then begin
+    raise exception.create('Error compiling script of '+result.name+':'+lineend+
+             result.fscript.compilermessagetext);
+   end;
+   methlist.linkmethods(result.fscript);
+   fscriptmodules.add(result);
+   globalfixupreferences;
+   notifygloballoading;
+   result.doafterload;
+  except
+   result.free;
+   raise;
   end;
-  methlist.linkmethods(result.fscript);
  finally
+  endgloballoading;
+  fscriptmodules.lock;
+  unlockfindglobalcomponent;
   reader1.free;
   stream1.free;
   stream2.free;
@@ -334,4 +357,10 @@ begin
  name:= 'qwertz';
 end;
 
+initialization
+ fscriptmodules:= tmodulelist.create(false);
+ fscriptmodules.lock;
+ registerfindglobalcomponentproc({$ifdef FPC}@{$endif}findscriptmodulebyname);
+finalization
+ freeandnil(fscriptmodules);
 end.

@@ -15,14 +15,15 @@ procedure registermsegui_r(s: tpsexec);
 
 implementation
 uses
- msewidgets,upsutils;
+ msewidgets,upsutils,msegui;
  
 procedure registermsegui_c(s: tpspascalcompiler);
 begin
  with s do begin
   addtype('msestring',btwidestring);
   adddelphifunction(
-  'procedure showmessage1(const atext: msestring; const caption: msestring);')
+  'procedure showmessage1(const atext: msestring; const caption: msestring);');
+  adddelphifunction('procedure beep;');
  end;
 end;
 
@@ -30,6 +31,7 @@ procedure registermsegui_r(s: tpsexec);
 begin
  with s do begin
   registerdelphifunction(@showmessage1,'SHOWMESSAGE1',cdregister);
+  registerdelphifunction(@msegui.beep,'BEEP',cdregister);
  end;
 end;
 

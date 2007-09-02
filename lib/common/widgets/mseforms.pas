@@ -105,6 +105,7 @@ type
    procedure setonpaint(const Value: painteventty);
    procedure seticon(const avalue: tmaskedbitmap);
    procedure iconchanged(const sender: tobject);
+   procedure registerhandlers;
   protected
    fscrollbox: tformscrollbox;
     //needed to distinguish between scrolled and unscrolled (mainmenu...) widgets
@@ -159,6 +160,7 @@ type
    function getbuttonrects(const index: dockbuttonrectty): rectty;  
    function getplacementrect: rectty;
    function getminimizedsize(out apos: captionposty): sizety;
+   procedure doafterload; override;
   public
    constructor create(aowner: tcomponent); overload; override;
    constructor create(aowner: tcomponent; load: boolean); reintroduce; overload;  virtual;
@@ -587,17 +589,6 @@ end;
 
 constructor tcustommseform.create(aowner: tcomponent; load: boolean);
 
- procedure registerhandlers;
- begin
-  application.registeronterminated({$ifdef FPC}@{$endif}doterminated);
-  application.registeronterminate({$ifdef FPC}@{$endif}doterminatequery);
-  application.registeronidle({$ifdef FPC}@{$endif}doidle);
-  application.registeronactivechanged({$ifdef FPC}@{$endif}dowindowactivechanged);
-  application.registeronwindowdestroyed({$ifdef FPC}@{$endif}dowindowdestroyed);
-  application.registeronapplicationactivechanged(
-        {$ifdef FPC}@{$endif}doapplicationactivechanged);
- end;
- 
 begin
  ficon:= tmaskedbitmap.create(false);
  ficon.onchange:= {$ifdef FPC}@{$endif}iconchanged;
@@ -615,15 +606,32 @@ begin
  if load and not (csdesigning in componentstate) and
           (cs_ismodule in fmsecomponentstate) then begin
   loadmsemodule(self,tcustommseform);
-  if (fstatfile <> nil) and (fo_autoreadstat in foptions) then begin
-   fstatfile.readstat;
-  end;
-  registerhandlers;
-  doonloaded;
+  doafterload;
  end
  else begin
   registerhandlers;
  end;
+end;
+
+procedure tcustommseform.registerhandlers;
+begin
+ application.registeronterminated({$ifdef FPC}@{$endif}doterminated);
+ application.registeronterminate({$ifdef FPC}@{$endif}doterminatequery);
+ application.registeronidle({$ifdef FPC}@{$endif}doidle);
+ application.registeronactivechanged({$ifdef FPC}@{$endif}dowindowactivechanged);
+ application.registeronwindowdestroyed({$ifdef FPC}@{$endif}dowindowdestroyed);
+ application.registeronapplicationactivechanged(
+       {$ifdef FPC}@{$endif}doapplicationactivechanged);
+end;
+ 
+
+procedure tcustommseform.doafterload;
+begin
+ if (fstatfile <> nil) and (fo_autoreadstat in foptions) then begin
+  fstatfile.readstat;
+ end;
+ registerhandlers;
+ doonloaded;
 end;
 
 constructor tcustommseform.create(aowner: tcomponent);

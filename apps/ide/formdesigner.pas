@@ -2493,6 +2493,10 @@ var
 // widget1: twidget;
  po1: pointty;
  rea1: real;
+ str1,str2: string;
+ int1,int2: integer;
+ ar1: componentarty;
+ bo1: boolean;
 begin
  with tdesignwindow(window) do begin
   try
@@ -2510,6 +2514,31 @@ begin
      aparent:= widgetatpos(apos,true);
     end;
     if aparent <> nil then begin
+     if aparent.findcomponent(component.name) <> nil then begin
+      str1:= component.name;
+      int1:= length(str1);
+      while (int1 > 1) and (str1[int1] >= '0') and (str1[int1] <= '9') do begin
+       dec(int1);
+      end;
+      setlength(str1,int1);     //remove trailing nums
+      int1:= 1;
+      ar1:= designer.descendentinstancelist.getdescendents(fmodule);
+      additem(pointerarty(ar1),module);
+      additem(pointerarty(ar1),aparent);
+      str2:= str1+'1';
+      repeat
+       bo1:= true;
+       for int2:= 0 to high(ar1) do begin
+        if ar1[int2].findcomponent(str2) <> nil then begin
+         inc(int1);
+         str2:= str1 + inttostr(int1);
+         bo1:= false;
+         break;
+        end;
+       end;
+      until bo1;
+      component.name:= str2;
+     end;
      po1:= subpoint(dosnaptogrid(apos),form.rootpos);
      twidget(aparent).insertwidget(twidget(component),
              translatewidgetpoint(po1,form,twidget(aparent)));

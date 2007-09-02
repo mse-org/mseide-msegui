@@ -4417,7 +4417,7 @@ end;
 
 function twidget.getwidgets(const index: integer): twidget;
 begin
- if (index < 0) or (index >= length(fwidgets)) then begin
+ if (index < 0) or (index > high(fwidgets)) then begin
   tlist.error(slistindexerror,index);
  end;
  result:= fwidgets[index]; //fwidgets can be nil -> exception
@@ -8250,6 +8250,12 @@ end;
 procedure twidget.setchildorder(child: tcomponent; order: integer);
 begin
  with container do begin
+  if order < 0 then begin
+   order:= 0;
+  end;
+  if order > high(fwidgets) then begin
+   order:= high(fwidgets);
+  end;
   if removeitem(pointerarty(fwidgets),child) >= 0 then begin
    insertitem(pointerarty(fwidgets),order,child);
   end;
@@ -8258,10 +8264,10 @@ end;
 
 procedure twidget.getchildren(proc: tgetchildproc; root: tcomponent);
 var
-  int1: integer;
-  widget: twidget;
+ int1: integer;
+ widget: twidget;
 begin
- for int1:= 0 to widgetcount - 1 do begin
+ for int1:= 0 to high(fwidgets) do begin
   widget:= fwidgets[int1];
   if (ws_iswidget in widget.fwidgetstate) and
      ((widget.owner = root) or 
