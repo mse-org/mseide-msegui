@@ -56,6 +56,7 @@ const
                          (anzeigetext:'COM9'; dropdowntext:'9 COM9'; commnr: cnr_9)
                         );
   {$else}
+
  comminfo: comminfoty = ((anzeigetext:'ttyS0'; dropdowntext:'0 ttyS0'; commnr: cnr_1),
                          (anzeigetext:'ttyS1'; dropdowntext:'1 ttyS1'; commnr: cnr_2),
                          (anzeigetext:'ttyS2'; dropdowntext:'2 ttyS2'; commnr: cnr_3),
@@ -66,6 +67,18 @@ const
                          (anzeigetext:'ttyS7'; dropdowntext:'7 ttyS7'; commnr: cnr_8),
                          (anzeigetext:'ttyS8'; dropdowntext:'8 ttyS8'; commnr: cnr_9)
                          );
+  {
+ comminfo: comminfoty = ((anzeigetext:'ttys0'; dropdowntext:'0 ttys0'; commnr: cnr_1),
+                         (anzeigetext:'ttys1'; dropdowntext:'1 ttys1'; commnr: cnr_2),
+                         (anzeigetext:'ttys2'; dropdowntext:'2 ttys2'; commnr: cnr_3),
+                         (anzeigetext:'ttys3'; dropdowntext:'3 ttys3'; commnr: cnr_4),
+                         (anzeigetext:'ttys4'; dropdowntext:'4 ttys4'; commnr: cnr_5),
+                         (anzeigetext:'ttys5'; dropdowntext:'5 ttys5'; commnr: cnr_6),
+                         (anzeigetext:'ttys6'; dropdowntext:'6 ttys6'; commnr: cnr_7),
+                         (anzeigetext:'ttys7'; dropdowntext:'7 ttys7'; commnr: cnr_8),
+                         (anzeigetext:'ttys8'; dropdowntext:'8 ttys8'; commnr: cnr_9)
+                         );
+  }
   {$endif}
 
 

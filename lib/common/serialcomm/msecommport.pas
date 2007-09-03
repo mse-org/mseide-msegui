@@ -101,8 +101,13 @@ type
 
 const
  {$ifdef UNIX}
+
  commname: array[commnrty] of string = ('ttyS0','ttyS1','ttyS3','ttyS4','ttyS5',
                                         'ttyS6','ttyS7','ttyS8','ttyS9');
+ {
+ commname: array[commnrty] of string = ('ttys0','ttys1','ttys3','ttys4','ttys5',
+                                        'ttys6','ttys7','ttys8','ttys9');
+ }
  invalidfilehandle = cardinal(-1);
  infinitemse = cardinal(-1);
  B57600 =   $1001; //0010001
