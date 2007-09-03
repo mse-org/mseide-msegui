@@ -827,6 +827,7 @@ end;
 
 function tmenuitem.internalexecute(async: boolean): boolean;
 begin
+
  if mao_checkbox in finfo.options then begin
   if mao_radiobutton in finfo.options then begin
    checked:= true;
@@ -835,10 +836,12 @@ begin
    checked:= not checked;
   end;
  end;
- result:= canactivate and assigned(finfo.onexecute);
+
+ result:= canactivate {and assigned(finfo.onexecute)};
  if result then begin
   if async then begin
-   finfo.onexecute(self);
+   doactionexecute(self,finfo,true);
+//   finfo.onexecute(self);
   end
   else begin
    fowner.execitem:= self;
@@ -853,7 +856,7 @@ end;
 
 function tmenuitem.asyncexecute: boolean;
 begin
- result:= canactivate and assigned(finfo.onexecute);
+ result:= canactivate {and assigned(finfo.onexecute)};
  if result then begin
   if fsource <> nil then begin
    application.postevent(tobjectevent.create(ek_execute,fsource));

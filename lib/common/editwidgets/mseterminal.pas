@@ -38,6 +38,10 @@ type
    function getinputfd: integer;
    procedure setinoutfd(const Value: integer);
    procedure setoptions(const avalue: terminaloptionsty);
+   function getoutputfd: integer;
+   procedure setoutputfd(const avalue: integer);
+   function geterrorfd: integer;
+   procedure seterrorfd(const avalue: integer);
   protected
    procedure doinputavailable(const sender: tpipereader);
    procedure dopipebroken(const sender: tpipereader);
@@ -56,11 +60,15 @@ type
    procedure addchars(const avalue: msestring);
    procedure addline(const avalue: msestring); //thread save
    property inputfd: integer read getinputfd write setinoutfd;
+   property outputfd: integer read getoutputfd write setoutputfd;
+   property errorfd: integer read geterrorfd write seterrorfd;
   published
    property tabulators;
    property font;
-   property oninputpipebroken: notifyeventty read foninputpipebroken write foninputpipebroken;
-   property onerrorpipebroken: notifyeventty read fonerrorpipebroken write fonerrorpipebroken;
+   property oninputpipebroken: notifyeventty read foninputpipebroken 
+                                                   write foninputpipebroken;
+   property onerrorpipebroken: notifyeventty read fonerrorpipebroken 
+                                                   write fonerrorpipebroken;
    property onsendtext: sendtexteventty read fonsendtext write fonsendtext;
    property options: terminaloptionsty read foptions write setoptions default [];
  end;
@@ -281,6 +289,26 @@ begin
  if (teo_readonly in foptions) then begin
   optionsedit:= optionsedit + [oe_readonly];
  end;
+end;
+
+function tterminal.getoutputfd: integer;
+begin
+ result:= foutput.handle;
+end;
+
+procedure tterminal.setoutputfd(const avalue: integer);
+begin
+ foutput.handle:= avalue;
+end;
+
+function tterminal.geterrorfd: integer;
+begin
+ result:= ferrorinput.handle;
+end;
+
+procedure tterminal.seterrorfd(const avalue: integer);
+begin
+ ferrorinput.handle:= avalue;
 end;
 
 end.

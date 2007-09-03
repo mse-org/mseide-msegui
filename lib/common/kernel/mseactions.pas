@@ -99,6 +99,7 @@ type
    procedure doidle(var again: boolean);
    procedure doshortcut(const sender: twidget; var info: keyeventinfoty);
    procedure doasyncevent(var atag: integer); override;
+   procedure eventfired(const sender: tobject; const ainfo: actioninfoty);
 
    //istatfile, saves state of as_checked
    procedure dostatread(const reader: tstatreader);
@@ -211,7 +212,8 @@ function getshortcutname(key: shortcutty): msestring;
 function getshortcutcode(const info: keyeventinfoty): shortcutty;
 function doactionshortcut(const sender: tobject; var info: actioninfoty;
                         var keyinfo: keyeventinfoty): boolean; //true if done
-function doactionexecute(const sender: tobject; var info: actioninfoty): boolean;
+function doactionexecute(const sender: tobject; var info: actioninfoty;
+                               const nocheckbox: boolean = false): boolean;
       //true if local checked changed
 
 procedure initactioninfo(var info: actioninfoty; aoptions: menuactionoptionsty = []);
@@ -239,13 +241,14 @@ var
  shortcutkeys: integerarty;
  shortcutnames: msestringarty;
 
-function doactionexecute(const sender: tobject; var info: actioninfoty): boolean;
+function doactionexecute(const sender: tobject; var info: actioninfoty;
+                         const nocheckbox: boolean = false): boolean;
       //true if local checked changed
 begin
  result:= false;
  with info do begin
   if not (as_disabled in state) then begin
-   if mao_checkbox in info.options then begin
+   if not nocheckbox and (mao_checkbox in info.options) then begin
     if action <> nil then begin
      action.checked:= not action.checked;
     end
@@ -253,6 +256,9 @@ begin
      togglebit1(longword(info.state),ord(as_checked));
      result:= true;
     end;
+   end;
+   if info.action <> nil then begin
+    info.action.eventfired(sender,info); 
    end;
    if assigned(info.onexecute) then begin
     info.onexecute(sender);
@@ -1390,6 +1396,15 @@ begin
  if canevent(tmethod(fonasyncevent)) then begin
   fonasyncevent(self,atag);
  end;
+end;
+
+procedure tcustomaction.eventfired(const sender: tobject;
+               const ainfo: actioninfoty);
+begin
+// if (tmethod(finfo.onexecute).data = tmethod(ainfo.onexecute).data) and
+//    (tmethod(finfo.onexecute).code = tmethod(ainfo.onexecute).code) then begin
+  sendchangeevent(oe_fired);
+// end;
 end;
 
 end.

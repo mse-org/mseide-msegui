@@ -453,9 +453,10 @@ end;
 
 procedure tcustombutton.doexecute;
 begin
- if assigned(factioninfo.onexecute) then begin
-  factioninfo.onexecute(self);
- end;
+ doactionexecute(self,factioninfo);
+// if assigned(factioninfo.onexecute) then begin
+//  factioninfo.onexecute(self);
+// end;
  if fmodalresult <> mr_none then begin
   window.modalresult:= fmodalresult;
  end;

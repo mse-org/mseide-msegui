@@ -157,6 +157,11 @@ type
    function getvalue: msestring; override;
  end;
 
+ trefreshstringpropertyeditor = class(tstringpropertyeditor)
+  protected
+   function getdefaultstate: propertystatesty; override;
+ end;
+ 
  tnamepropertyeditor = class(tstringpropertyeditor)
   procedure setvalue(const value: msestring); override;
  end;
@@ -3913,6 +3918,13 @@ begin
   raise exception.create('Invalid component name '''+value+'''.');
  end;
  inherited;
+end;
+
+{ trefreshstringpropertyeditor }
+
+function trefreshstringpropertyeditor.getdefaultstate: propertystatesty;
+begin
+ result:= inherited getdefaultstate + [ps_refresh];
 end;
 
 initialization
