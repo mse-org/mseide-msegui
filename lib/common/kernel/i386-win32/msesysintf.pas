@@ -162,17 +162,17 @@ function Process32Next(hSnapshot: thandle; lppe: PPROCESSENTRY32): BOOL;
 
 function sys_stdin: integer;
 begin
-// result:= stdin;
+ result:= getstdhandle(std_input_handle);
 end;
 
 function sys_stdout: integer;
 begin
-// result:= stdout;
+ result:= getstdhandle(std_output_handle);
 end;
 
 function sys_stderr: integer;
 begin
-// result:= stderr;
+ result:= getstdhandle(std_error_handle);
 end;
 
 function sys_getprintcommand: string;
