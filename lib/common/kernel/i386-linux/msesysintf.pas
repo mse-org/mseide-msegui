@@ -323,6 +323,21 @@ type
   platformdata: array[3..7] of cardinal;
  end;
 
+function sys_stdin: integer;
+begin
+ result:= stdin;
+end;
+
+function sys_stdout: integer;
+begin
+ result:= stdout;
+end;
+
+function sys_stderr: integer;
+begin
+ result:= stderr;
+end;
+
 function sys_getprintcommand: string;
 begin
  result:= 'lp -';

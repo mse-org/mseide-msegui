@@ -160,6 +160,21 @@ function Process32First(hSnapshot: thandle; lppe: PPROCESSENTRY32): BOOL;
 function Process32Next(hSnapshot: thandle; lppe: PPROCESSENTRY32): BOOL;
               stdcall; external kernel32 name 'Process32Next';
 
+function sys_stdin: integer;
+begin
+// result:= stdin;
+end;
+
+function sys_stdout: integer;
+begin
+// result:= stdout;
+end;
+
+function sys_stderr: integer;
+begin
+// result:= stderr;
+end;
+
 function sys_getprintcommand: string;
 begin
  result:= 'gswin32c.exe -dNOPAUSE -sDEVICE=mswinpr2 -';

@@ -78,6 +78,9 @@ function sys_closefile(const handle: integer): syserrorty;
 function sys_read(fd: longint; buf: pointer; nbytes: longword): integer;
 function sys_write(fd: longint; buf: pointer; nbytes: longword): integer;
 function sys_errorout(const atext: string): syserrorty;
+function sys_stdin: integer;
+function sys_stdout: integer;
+function sys_stderr: integer;
 
 function sys_getfileinfo(const path: filenamety; var info: fileinfoty): boolean;
 function sys_opendirstream(var stream: dirstreamty): syserrorty;

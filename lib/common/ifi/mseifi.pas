@@ -65,6 +65,7 @@ type
    destructor destroy; override;
   published
    property application: string read fapplication write fapplication;
+            //stdin, stdout if ''
  end;
   
  tcustomformlink = class(tmsecomponent)
@@ -92,7 +93,7 @@ type
   
 implementation
 uses
- sysutils,msedatalist,mseprocutils;
+ sysutils,msedatalist,mseprocutils,msesysintf;
  
 { tcustomiochannel }
 
@@ -107,6 +108,9 @@ begin
  if not commio then begin
   close;
   open;
+  if not commio then begin
+   //error message
+  end;
  end;
 end;
 
@@ -135,7 +139,13 @@ end;
 
 procedure tpipeiochannel.open;
 begin
- fprochandle:= execmse2(fapplication,fwriter,freader);
+ if fapplication <> '' then begin
+  fprochandle:= execmse2(fapplication,fwriter,freader);
+ end
+ else begin
+  freader.handle:= sys_stdin;
+  fwriter.handle:= sys_stdout;
+ end;
 end;
 
 procedure tpipeiochannel.close;
@@ -154,7 +164,8 @@ end;
 
 function tpipeiochannel.commio: boolean;
 begin
- result:= (fprochandle <> invalidprochandle) and freader.active;
+ result:= ((fapplication = '') or (fprochandle <> invalidprochandle))
+                     and freader.active;
 end;
 
 procedure tpipeiochannel.internalsenddata(const adata: ansistring);
