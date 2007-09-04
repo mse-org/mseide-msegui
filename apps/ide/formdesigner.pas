@@ -321,7 +321,8 @@ type
  tframe1 = class(tframe);
  tscrollingwidget1 = class(tscrollingwidget);
 
- designerfoeventty = (fde_none,fde_syncsize,fde_updatecaption,fde_scrolled);
+ designerfoeventty = (fde_none,fde_syncsize,fde_updatecaption,fde_scrolled,
+                      fde_showastext);
 
  designmoduleinfoty = record
   classtype: tcomponentclass;
@@ -2323,6 +2324,9 @@ begin
   fde_scrolled: begin
    tdesignwindow(window).fselections.change;
   end;
+  fde_showastext: begin
+   fdesigner.showastext(fdesigner.modules.findmodule(fmodule));
+  end;
  end;
 end;  
 
@@ -2439,7 +2443,7 @@ end;
 
 procedure tformdesignerfo.doshowastext(const sender: tobject);
 begin
- fdesigner.showastext(fdesigner.modules.findmodule(fmodule));
+ asyncevent(ord(fde_showastext));
 end;
 
 procedure tformdesignerfo.doeditcomponent(const sender: tobject);

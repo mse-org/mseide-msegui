@@ -40,6 +40,7 @@ type
  tcustomiochannel = class(tmsecomponent)
   protected
    procedure checkopen;
+   procedure datareceived(const adata: ansistring);
    procedure senddata(const adata: ansistring);   
    procedure open; virtual; abstract;
    procedure close; virtual; abstract;
@@ -118,6 +119,10 @@ procedure tcustomiochannel.senddata(const adata: ansistring);
 begin
  checkopen;
  internalsenddata(adata);
+end;
+
+procedure tcustomiochannel.datareceived(const adata: ansistring);
+begin
 end;
 
 { tpipeiochannel }

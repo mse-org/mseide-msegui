@@ -2093,6 +2093,7 @@ begin
   internalcancel;
  end;
  po1:= fcurrentbuf;
+ deleterecord(frecno);
  if not getrecordupdatebuffer then begin
   getnewupdatebuffer;
   with fupdatebuffer[fcurrentupdatebuffer] do begin
@@ -2112,7 +2113,6 @@ begin
    end;
   end;
  end;
- deleterecord(frecno);
  fupdatebuffer[fcurrentupdatebuffer].updatekind := ukdelete;
  if flogger <> nil then begin
   logupdatebuffer(flogger,fupdatebuffer[fcurrentupdatebuffer],po1,true,lf_update);
@@ -3164,6 +3164,9 @@ begin
   for int1:= 1 to high(findexes) do begin
    if int1 <> factindex then begin
     int2:= findexlocal[int1-1].findrecord(arecord);
+    if int2 < 0 then begin
+     databaseerror('Internal error: Indexed record not found.');
+    end;
     with findexes[int1] do begin
      move(ind[int2+1],ind[int2],(fbrecordcount-int2-1)*sizeof(pointer));
     end;

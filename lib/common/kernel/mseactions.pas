@@ -257,11 +257,11 @@ begin
      result:= true;
     end;
    end;
-   if info.action <> nil then begin
-    info.action.eventfired(sender,info); 
-   end;
    if assigned(info.onexecute) then begin
     info.onexecute(sender);
+   end;
+   if info.action <> nil then begin
+    info.action.eventfired(sender,info); 
    end;
   end;
  end;
