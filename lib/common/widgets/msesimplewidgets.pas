@@ -123,6 +123,7 @@ type
    function ishintstored: boolean; override;
 
    procedure actionchanged;
+   procedure setenabled(const avalue: boolean); override;
    procedure readstate(reader: treader); override;
    procedure loaded; override;
    procedure enabledchanged; override;
@@ -648,6 +649,17 @@ begin
  setactionstate(iactionlink(self),value);
  visible:= not (as_invisible in factioninfo.state);
  enabled:= not (as_disabled in factioninfo.state);
+end;
+
+procedure tcustombutton.setenabled(const avalue: boolean);
+begin
+ if avalue then begin
+  exclude(factioninfo.state,as_disabled);
+ end
+ else begin
+  include(factioninfo.state,as_disabled);
+ end;
+ inherited;
 end;
 
 function tcustombutton.isstatestored: boolean;

@@ -6,6 +6,32 @@ uses
  mseguiglob,msestream,msepipestream;
 type
 
+ ifireckindty = (ik_none,ik_data,ik_actionfired);
+ ifinamety = array[0..0] of char; //null terminated
+ 
+ actionfiredty = record
+  tag: integer;
+  name: ifinamety;
+ end;
+  
+ ifiheaderty = record
+  size: integer;  //overall size
+  kind: ifireckindty;
+ end;
+ pifiheaderty = ^ifiheaderty;
+ 
+ ifirecty = record
+  header: ifiheaderty;
+  case ifireckindty of
+   ik_data:(
+    data: array[0..0] of byte;
+   );
+   ik_actionfired:(
+    actionfired: actionfiredty;
+   );
+ end;
+ pifirecty = ^ifirecty;
+  
  tlinkactions = class;
  
  tlinkaction = class(townedeventpersistent)
@@ -13,6 +39,7 @@ type
    faction: tcustomaction;
    fprop: tlinkactions;
    fname: ansistring;
+   ftag: integer;
    procedure setaction(const avalue: tcustomaction);
   protected
    procedure objectevent(const sender: tobject;
@@ -22,6 +49,7 @@ type
   published
    property action: tcustomaction read faction write setaction;
    property name: ansistring read fname write fname;
+   property tag: integer read ftag write ftag;
  end;
 
  tcustomformlink = class;
@@ -76,6 +104,10 @@ type
    procedure setactions(const avalue: tlinkactions);
    procedure setchannel(const avalue: tcustomiochannel);
   protected
+   procedure stringtoifiname(const source: string; out dest: ifinamety);
+   procedure initifirec(var arec: string; const akind: ifireckindty; 
+                             const datalength: integer);
+   function encodeactionfired(const atag: integer; const aname: string): string;
    procedure actionfired(const sender: tlinkaction); virtual;
   public
    constructor create(aowner: tcomponent); override;
@@ -95,6 +127,13 @@ type
 implementation
 uses
  sysutils,msedatalist,mseprocutils,msesysintf;
+
+const
+ headersizes: array[ifireckindty] of integer = (
+  sizeof(ifiheaderty),                       //ik_none
+  sizeof(ifiheaderty),                       //ik_data
+  sizeof(ifiheaderty)+sizeof(actionfiredty)  //ik_actionfiredty
+ );
  
 { tcustomiochannel }
 
@@ -263,13 +302,46 @@ end;
 procedure tcustomformlink.actionfired(const sender: tlinkaction);
 begin
  if fchannel <> nil then begin
-  fchannel.senddata('ACTIONFIRED '+sender.name);
+  fchannel.senddata(encodeactionfired(sender.tag,sender.name));
  end;
 end;
 
 procedure tcustomformlink.setchannel(const avalue: tcustomiochannel);
 begin
  setlinkedvar(avalue,fchannel);
+end;
+
+function tcustomformlink.encodeactionfired(const atag: integer;
+               const aname: string): string;
+begin
+ initifirec(result,ik_actionfired,length(aname));
+ with pifirecty(result)^.actionfired do begin
+  tag:= atag;
+  stringtoifiname(aname,name);
+ end;
+end;
+
+procedure tcustomformlink.stringtoifiname(const source: string;
+               out dest: ifinamety);
+begin
+ if source <> '' then begin
+  move(source[1],dest,length(source));
+ end;
+ pchar(@dest)[length(source)]:= #0;
+end;
+
+procedure tcustomformlink.initifirec(var arec: string;
+               const akind: ifireckindty; const datalength: integer);
+var
+ int1: integer;
+begin
+ int1:= headersizes[akind] + datalength;
+ setlength(arec,int1);
+ fillchar(arec[1],int1,0);
+ with pifiheaderty(arec)^ do begin
+  size:= int1;
+  kind:= akind;
+ end;
 end;
 
 
