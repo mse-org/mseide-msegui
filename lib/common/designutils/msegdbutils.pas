@@ -798,12 +798,13 @@ begin
  if getcliresult('info program',ar1) = gdb_ok then begin
   for int1:= 0 to high(ar1) do begin
    if (pos('child thread',ar1[int1]) > 0) or 
-       (pos('attached thread',ar1[int1]) > 0) then begin
+       (pos('attached thread',ar1[int1]) > 0) or 
+       (pos('attached LWP',ar1[int1]) > 0) then begin
     splitstring(ar1[int1],ar2,' ');
     if high(ar2) > 0 then begin
      ar1:= nil;
      splitstring(ar2[high(ar2)],ar1,'.');
-     if high(ar1) > 1 then begin
+     if high(ar1) > 0 then begin
       try
        aprocid:= strtointvalue(ar1[0]);
        result:= true;

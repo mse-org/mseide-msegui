@@ -30,6 +30,9 @@ type
  pmsechar = pwidechar;
 
 const
+ c_dle = #$10;
+ c_stx = #$02;
+ c_etx = #$03;
  c_linefeed = #$0a;
  c_return = #$0d;
  c_tab = #$09;

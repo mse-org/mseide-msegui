@@ -323,6 +323,11 @@ type
   platformdata: array[3..7] of cardinal;
  end;
 
+function sys_getpid: integer;
+begin
+ result:= libc.getpid;
+end;
+
 function sys_stdin: integer;
 begin
  result:= stdin;
@@ -1290,7 +1295,11 @@ procedure sigtest(SigNum: Integer); cdecl;
 begin
 end;
 
+procedure sigdummy(SigNum: Integer); cdecl;
+begin
+end;
+
 initialization
- signal(sigio,__sighandler_t(sig_ign)); 
+ signal(sigio,__sighandler_t(@sigdummy)); 
 // signal(sigio,__sighandler_t(@sigtest)); 
 end.

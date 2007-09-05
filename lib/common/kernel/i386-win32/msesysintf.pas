@@ -160,6 +160,11 @@ function Process32First(hSnapshot: thandle; lppe: PPROCESSENTRY32): BOOL;
 function Process32Next(hSnapshot: thandle; lppe: PPROCESSENTRY32): BOOL;
               stdcall; external kernel32 name 'Process32Next';
 
+function sys_getpid: integer;
+begin
+ result:= getcurrentprocessid;
+end;
+
 function sys_stdin: integer;
 begin
  result:= getstdhandle(std_input_handle);

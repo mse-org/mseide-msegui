@@ -8,6 +8,7 @@ type
 
  ifireckindty = (ik_none,ik_data,ik_actionfired);
  ifinamety = array[0..0] of char; //null terminated
+ pifinamety = ^ifinamety;
  
  actionfiredty = record
   tag: integer;
@@ -66,6 +67,10 @@ type
  end;
  
  tcustomiochannel = class(tmsecomponent)
+  private
+   frxdata: string;
+   factive: boolean;
+   procedure setactive(const avalue: boolean);
   protected
    procedure checkopen;
    procedure datareceived(const adata: ansistring);
@@ -74,27 +79,42 @@ type
    procedure close; virtual; abstract;
    function commio: boolean; virtual; abstract;
    procedure internalsenddata(const adata: ansistring); virtual; abstract;
+   procedure loaded; override;
   public
    destructor destroy; override;
+   property active: boolean read factive write setactive;
+   property rxdata: string read frxdata write frxdata;
  end;
 
+ pipeiostatety = (pis_rxstarted);
+ pipeiostatesty = set of pipeiostatety;
+ 
  tpipeiochannel = class(tcustomiochannel)
   private
    freader: tpipereader;
    fwriter: tpipewriter;
    fapplication: string;
    fprochandle: integer;
+   fbuffer: string;
+   fstate: pipeiostatesty;
+   frxcheckedindex: integer;
+   function stuff(const adata: string): string;
+   function unstuff(const adata: string): string;
+   procedure resetrxbuffer;
+   procedure addata(const adata: string);
   protected
    procedure open; override;
    procedure close; override;   
    function commio: boolean; override;
    procedure internalsenddata(const adata: ansistring); override;
+   procedure doinputavailable(const sender: tpipereader);
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
   published
    property application: string read fapplication write fapplication;
             //stdin, stdout if ''
+   property active;
  end;
   
  tcustomformlink = class(tmsecomponent)
@@ -104,11 +124,15 @@ type
    procedure setactions(const avalue: tlinkactions);
    procedure setchannel(const avalue: tcustomiochannel);
   protected
-   procedure stringtoifiname(const source: string; out dest: ifinamety);
+   function stringtoifiname(const source: string; const dest: pifinamety): integer;
+   function ifinametostring(const source: pifinamety; out dest: string): integer;
+                    //returns source size
    procedure initifirec(var arec: string; const akind: ifireckindty; 
                              const datalength: integer);
    function encodeactionfired(const atag: integer; const aname: string): string;
    procedure actionfired(const sender: tlinkaction); virtual;
+   procedure objectevent(const sender: tobject; const event: objecteventty); override;
+   procedure processdata(const adata: pifirecty);
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -134,6 +158,9 @@ const
   sizeof(ifiheaderty),                       //ik_data
   sizeof(ifiheaderty)+sizeof(actionfiredty)  //ik_actionfiredty
  );
+ stuffchar = c_dle;
+ stx = c_dle + c_stx;
+ etx = c_dle + c_etx;
  
 { tcustomiochannel }
 
@@ -162,6 +189,31 @@ end;
 
 procedure tcustomiochannel.datareceived(const adata: ansistring);
 begin
+ frxdata:= adata;
+ sendchangeevent(oe_dataready);
+end;
+
+procedure tcustomiochannel.setactive(const avalue: boolean);
+begin
+ if factive <> avalue then begin
+  factive:= avalue;
+  if componentstate * [csloading,csdesigning] = [] then begin
+   if avalue then begin
+    open;
+   end
+   else begin
+    close;
+   end;
+  end;
+ end;
+end;
+
+procedure tcustomiochannel.loaded;
+begin
+ inherited;
+ if factive and not (csdesigning in componentstate) then begin
+  open;
+ end;
 end;
 
 { tpipeiochannel }
@@ -171,6 +223,7 @@ begin
  freader:= tpipereader.create;
  fwriter:= tpipewriter.create;
  fprochandle:= invalidprochandle;
+ freader.oninputavailable:= @doinputavailable;
  inherited;
 end;
 
@@ -199,6 +252,7 @@ begin
  freader.terminate; 
  fwriter.close;
  freader.close;
+ fbuffer:= '';
  if fprochandle <> invalidprochandle then begin
   int1:= fprochandle;
   fprochandle:= invalidprochandle;
@@ -214,7 +268,97 @@ end;
 
 procedure tpipeiochannel.internalsenddata(const adata: ansistring);
 begin
- fwriter.writestr(adata);
+ fwriter.writestr(stx+stuff(adata)+etx);
+end;
+
+procedure tpipeiochannel.resetrxbuffer;
+begin
+ fbuffer:= '';
+ exclude(fstate,pis_rxstarted); 
+ frxcheckedindex:= 0;
+end;
+
+procedure tpipeiochannel.addata(const adata: string);
+var
+ int1,int2: integer;
+ po1: pchar;
+ str1: string;
+begin
+ fbuffer:= fbuffer + adata;
+ int1:= length(fbuffer);
+ if (pis_rxstarted in fstate) then begin
+  if (int1 >= 2) then begin
+   for int2:= int1 downto frxcheckedindex + 2 do begin
+    if (fbuffer[int2] = c_etx) and (fbuffer[int2-1] = c_dle) then begin
+     str1:= copy(fbuffer,int2+1,int1); //next frame
+     setlength(fbuffer,int2-2);
+     datareceived(unstuff(fbuffer));
+     resetrxbuffer;
+     if str1 <> '' then begin
+      addata(str1);
+     end;
+     exit;
+    end;
+   end;
+  end;
+  frxcheckedindex:= int1 - 1;
+ end
+ else begin
+  for int2:= 1 to int1-1 do begin
+   if (fbuffer[int2] = c_dle) and (fbuffer[int2+1] = c_stx) then begin
+    fbuffer:= copy(fbuffer,int2+2,int1);
+    include(fstate,pis_rxstarted);
+    addata('');
+    break;
+   end;
+  end;
+ end;
+end;
+
+procedure tpipeiochannel.doinputavailable(const sender: tpipereader);
+var
+ int1: integer;
+begin
+ addata(sender.readdatastring);
+end;
+
+function tpipeiochannel.stuff(const adata: string): string;
+var
+ int1: integer;
+ po1,po2: pchar;
+begin
+ setlength(result,2*length(adata)); //max
+ po1:= pointer(adata);
+ po2:= pointer(result);
+ for int1:= 0 to length(adata) - 1 do begin
+  po2^:= po1[int1];
+  if po2^ = stuffchar then begin
+   inc(po2);
+   po2^:= stuffchar;
+  end;
+  inc(po2);
+ end;
+ setlength(result,po2-pointer(result));
+end;
+
+function tpipeiochannel.unstuff(const adata: string): string;
+var
+ int1: integer;
+ po1,po2,po3: pchar;
+begin
+ setlength(result,length(adata)); //max
+ po1:= pointer(adata);
+ po3:= po1 + length(adata);
+ po2:= pointer(result);
+ while po1 < po3 do begin
+  po2^:= po1^;
+  if (po1^ = stuffchar) and (po1[1] = stuffchar) then begin
+   inc(po1);
+  end;
+  inc(po1);
+  inc(po2);
+ end;
+ setlength(result,po2-pointer(result));
 end;
 
 { tlinkaction }
@@ -317,17 +461,28 @@ begin
  initifirec(result,ik_actionfired,length(aname));
  with pifirecty(result)^.actionfired do begin
   tag:= atag;
-  stringtoifiname(aname,name);
+  stringtoifiname(aname,@name);
  end;
 end;
 
-procedure tcustomformlink.stringtoifiname(const source: string;
-               out dest: ifinamety);
+function tcustomformlink.stringtoifiname(const source: string;
+               const dest: pifinamety): integer;
+var
+ int1: integer;
 begin
- if source <> '' then begin
-  move(source[1],dest,length(source));
+ int1:= length(source);
+ if int1 > 0 then begin
+  move(source[1],dest^,int1);
  end;
- pchar(@dest)[length(source)]:= #0;
+ pchar(dest)[int1]:= #0;
+ result:= int1 + 1;
+end;
+
+function tcustomformlink.ifinametostring(const source: pifinamety;
+               out dest: string): integer;
+begin
+ dest:= pchar(source);
+ result:= length(dest) + 1;
 end;
 
 procedure tcustomformlink.initifirec(var arec: string;
@@ -344,5 +499,40 @@ begin
  end;
 end;
 
+procedure tcustomformlink.objectevent(const sender: tobject;
+               const event: objecteventty);
+var
+ po1: pifirecty;
+begin
+ if (event = oe_dataready) and (sender = fchannel) then begin
+  if (length(fchannel.rxdata) >= sizeof(ifiheaderty)) then begin
+   with fchannel do begin
+    po1:= pifirecty(rxdata);
+    with po1^.header do begin
+     if size = length(rxdata) then begin
+      processdata(po1);
+     end;
+    end;
+   end;
+  end;
+ end;
+end;
+
+procedure tcustomformlink.processdata(const adata: pifirecty);
+var
+ tag1: integer;
+ str1: string;
+begin
+ with adata^ do begin
+  case header.kind of
+   ik_actionfired: begin
+    with actionfired do begin
+     tag1:= tag;
+     ifinametostring(@name,str1);
+    end;
+   end;
+  end;
+ end;
+end;
 
 end.

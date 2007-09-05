@@ -59,7 +59,7 @@ type
  end;
 
  objecteventty = (oe_destroyed,oe_connect,oe_changed,oe_designchanged,
-                  oe_activate,oe_deactivate,oe_fired);
+                  oe_activate,oe_deactivate,oe_fired,oe_dataready);
  objectlinkeventty = procedure(const sender: tobject;
                     const event: objecteventty) of object;
  iobjectlink = interface(inullinterface)

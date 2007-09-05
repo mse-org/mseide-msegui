@@ -218,6 +218,11 @@ begin
    if fwritehandle <> invalidfilehandle then begin
     by1:= 0;
     sys_write(fwritehandle,@by1,1); //wake up thread
+   end
+   else begin
+    {$ifdef linux}
+    pthread_kill(fthread.id,sigio);
+    {$endif}
    end;
    writehandle:= invalidfilehandle;
   end;
@@ -313,24 +318,39 @@ end;
 function tpipereader.execthread(thread: tmsethread): integer;
 var
  int1: integer;
+ {$ifdef linux}
+ fdsetr,fdsete: tfdset;
+ {$endif}
 begin                          
  fthread:= tsemthread(thread);
+ {$ifdef linux}
+ fd_zero(fdsetr);
+ fd_zero(fdsete);
+ {$endif}
  with fthread do begin
   while not terminated and not (tss_error in fstate) do begin
-   int1:= sys_read(Handle,@fmsBuf, buflen);
-   if not terminated then begin
-    if {$ifdef mswindows}int1 < 0{$else}(int1 <= 0){$endif} then begin
-                     //on win32 int1 can be 0
-     include(fstate,tss_error); //broken pipe
-    end
-    else begin
-     fmsbufcount:= int1;
-    end;
-    if (int1 > 0) or (tss_error in fstate) then begin
-     include(fstate,tss_pipeactive);
-     doinputavailable;
-     if not terminated and not (tss_error in fstate) then begin
-      semwait;
+  {$ifdef linux}
+   fd_set(handle,fdsetr);
+   fd_set(handle,fdsete);
+   if select(fd_setsize,@fdsetr,nil,@fdsete,nil) > 0 then begin
+  {$else}
+   if true then begin
+  {$endif}
+    int1:= sys_read(Handle,@fmsBuf, buflen);
+    if not terminated then begin
+     if {$ifdef mswindows}int1 < 0{$else}(int1 <= 0){$endif} then begin
+                      //on win32 int1 can be 0
+      include(fstate,tss_error); //broken pipe
+     end
+     else begin
+      fmsbufcount:= int1;
+     end;
+     if (int1 > 0) or (tss_error in fstate) then begin
+      include(fstate,tss_pipeactive);
+      doinputavailable;
+      if not terminated and not (tss_error in fstate) then begin
+       semwait;
+      end;
      end;
     end;
    end;
