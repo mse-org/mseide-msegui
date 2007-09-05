@@ -222,6 +222,8 @@ begin
    else begin
     {$ifdef linux}
     pthread_kill(fthread.id,sigio);
+    {$else}
+    inherited sethandle(invalidfilehandle);
     {$endif}
    end;
    writehandle:= invalidfilehandle;
