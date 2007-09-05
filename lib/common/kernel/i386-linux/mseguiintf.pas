@@ -4704,7 +4704,10 @@ end;
 
 procedure gui_beep;
 begin
+ gdi_lock;
  xbell(appdisp,0);
+ gdi_unlock;
+ xflush(appdisp); 
 end;
 
 function gui_flushgdi: guierrorty;

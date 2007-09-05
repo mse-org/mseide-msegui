@@ -43,8 +43,6 @@ type
    ftag: integer;
    procedure setaction(const avalue: tcustomaction);
   protected
-   procedure objectevent(const sender: tobject;
-                                  const event: objecteventty); override;
   public
    destructor destroy; override;
   published
@@ -52,9 +50,18 @@ type
    property name: ansistring read fname write fname;
    property tag: integer read ftag write ftag;
  end;
-
+ linkactionclassty = class of tlinkaction;
+ 
+ trxlinkaction = class(tlinkaction)
+ end;
+ ttxlinkaction = class(tlinkaction)
+  protected
+   procedure objectevent(const sender: tobject;
+                                  const event: objecteventty); override;
+ end;
+ 
  tcustomformlink = class;
-  
+ 
  tlinkactions = class(tpersistentarrayprop)
   private
    fowner: tcustomformlink;
@@ -62,8 +69,23 @@ type
   protected
    procedure createitem(const index: integer; var item: tpersistent); override;
   public
-   constructor create(const aowner: tcustomformlink);
+   constructor create(const aowner: tcustomformlink; 
+                           const aitemclass: linkactionclassty);
    property items[const index: integer]: tlinkaction read getitems; default;
+ end;
+
+ trxlinkactions = class(tlinkactions)
+  private
+   fonexecute: integerchangedeventty;
+  public
+   constructor create(const aowner: tcustomformlink);
+  published
+   property onexecute: integerchangedeventty read fonexecute write fonexecute;
+ end;
+ 
+ ttxlinkactions = class(tlinkactions)
+  public
+   constructor create(const aowner: tcustomformlink);
  end;
  
  tcustomiochannel = class(tmsecomponent)
@@ -119,9 +141,11 @@ type
   
  tcustomformlink = class(tmsecomponent)
   private
-   factions: tlinkactions;
+   factionsrx: trxlinkactions;
+   factionstx: ttxlinkactions;
    fchannel: tcustomiochannel;
-   procedure setactions(const avalue: tlinkactions);
+   procedure setactionsrx(const avalue: trxlinkactions);
+   procedure setactionstx(const avalue: ttxlinkactions);
    procedure setchannel(const avalue: tcustomiochannel);
   protected
    function stringtoifiname(const source: string; const dest: pifinamety): integer;
@@ -131,6 +155,7 @@ type
                              const datalength: integer);
    function encodeactionfired(const atag: integer; const aname: string): string;
    procedure actionfired(const sender: tlinkaction); virtual;
+   procedure actionreceived(const atag: integer; const aname: string);
    procedure objectevent(const sender: tobject; const event: objecteventty); override;
    procedure processdata(const adata: pifirecty);
   public
@@ -138,13 +163,15 @@ type
    destructor destroy; override;
    procedure updatecomponent(const anamepath: ansistring;
                                 const aobjecttext: ansistring);
-   property actions: tlinkactions read factions write setactions;
+   property actionsrx: trxlinkactions read factionsrx write setactionsrx;
+   property actionstx: ttxlinkactions read factionstx write setactionstx;
    property channel: tcustomiochannel read fchannel write setchannel;
  end;
 
  tformlink = class(tcustomformlink)
   published
-   property actions;
+   property actionsrx;
+   property actionstx;
    property channel;
  end;
   
@@ -374,7 +401,11 @@ begin
  setlinkedvar(avalue,faction);
 end;
 
-procedure tlinkaction.objectevent(const sender: tobject;
+{ trxlinkaction }
+
+ { ttxlinkaction }
+ 
+procedure ttxlinkaction.objectevent(const sender: tobject;
                const event: objecteventty);
 begin
  if (event = oe_fired) and (sender = faction) then begin
@@ -384,15 +415,16 @@ end;
 
 { tlinkactions }
 
-constructor tlinkactions.create(const aowner: tcustomformlink);
+constructor tlinkactions.create(const aowner: tcustomformlink; 
+                                   const aitemclass: linkactionclassty);
 begin
  fowner:= aowner;
- inherited create(tlinkaction);
+ inherited create(aitemclass);
 end;
 
 procedure tlinkactions.createitem(const index: integer; var item: tpersistent);
 begin
- item:= tlinkaction.create(fowner);
+ item:= linkactionclassty(fitemclasstype).create(fowner);
  tlinkaction(item).fprop:= self;
 end;
 
@@ -401,23 +433,44 @@ begin
  result:= tlinkaction(inherited getitems(index));
 end;
 
+{ trxlinkactions }
+
+constructor trxlinkactions.create(const aowner: tcustomformlink);
+begin
+ inherited create(aowner,trxlinkaction);
+end;
+
+{ ttxlinkactions }
+
+constructor ttxlinkactions.create(const aowner: tcustomformlink);
+begin
+ inherited create(aowner,ttxlinkaction);
+end;
+
 { tcustomformlink }
 
 constructor tcustomformlink.create(aowner: tcomponent);
 begin
- factions:= tlinkactions.create(self);
+ factionsrx:= trxlinkactions.create(self);
+ factionstx:= ttxlinkactions.create(self);
  inherited;
 end;
 
 destructor tcustomformlink.destroy;
 begin
- factions.free;
+ factionsrx.free;
+ factionstx.free;
  inherited;
 end;
 
-procedure tcustomformlink.setactions(const avalue: tlinkactions);
+procedure tcustomformlink.setactionsrx(const avalue: trxlinkactions);
 begin
- factions.assign(avalue);
+ factionsrx.assign(avalue);
+end;
+
+procedure tcustomformlink.setactionstx(const avalue: ttxlinkactions);
+begin
+ factionstx.assign(avalue);
 end;
 
 procedure tcustomformlink.updatecomponent(const anamepath: ansistring;
@@ -529,10 +582,35 @@ begin
     with actionfired do begin
      tag1:= tag;
      ifinametostring(@name,str1);
+     actionreceived(tag,str1);
     end;
    end;
   end;
  end;
+end;
+
+procedure tcustomformlink.actionreceived(const atag: integer;
+               const aname: string);
+var
+ act1: tlinkaction;
+ int1: integer;
+begin
+ with factionsrx do begin
+  for int1:= 0 to high(fitems) do begin
+   act1:= trxlinkaction(fitems[int1]);
+   with act1 do begin
+    if name = aname then begin
+     if assigned(fonexecute) then begin
+      fonexecute(act1,atag);
+     end;
+     if (faction <> nil) and faction.enabled then begin
+      action.execute;
+     end;
+     break;
+    end;
+   end;
+  end;
+ end;    
 end;
 
 end.
