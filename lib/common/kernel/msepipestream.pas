@@ -183,13 +183,8 @@ procedure tpipereader.sethandle(value: integer);
 begin
  if handle <> invalidfilehandle then begin
   terminateandwait;
-  freeandnil(fthread);
-//  inherited sethandle(invalidfilehandle);
-//  if fthread.running then begin
-//   fthread.terminate;
-//   fthread.sempost;
-//  fthread.kill;
  end;
+ freeandnil(fthread);
  inherited;
  if value <> invalidfilehandle then begin
   writehandle:= invalidfilehandle;
