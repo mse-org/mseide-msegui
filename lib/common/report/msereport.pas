@@ -791,6 +791,7 @@ type
    property optionsscale;
    property visidatasource;
    property visidatafield;
+   property visigroupfield;
 
    property onfontheightdelta;
    property onchildscaled;
