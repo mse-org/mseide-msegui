@@ -462,23 +462,6 @@ type
                   //defines hasdata, page nums are null based
                  bo_visigroupfirst,bo_visigroupnotfirst,
                  bo_visigrouplast,bo_visigroupnotlast,
-                  //show only on first/last record of group
-                 bo_showfirstpage,bo_hidefirstpage,
-                 bo_shownormalpage,bo_hidenormalpage,
-                  //checks current treportpage
-                 bo_showevenpage,bo_hideevenpage,
-                 bo_showoddpage,bo_hideoddpage,
-                  //checks the printed page number
-                 bo_showtopofpage,bo_hidetopofpage,
-                 bo_shownottopofpage,bo_hidenottopofpage,
-                 bo_showfirstofpage,bo_hidefirstofpage,
-                 bo_shownormalofpage,bo_hidenormalofpage,                 
-                 bo_showlastofpage,bo_hidelastofpage,
-                  //checks the position in the bandarea                 
-                 bo_showfirstrecord,bo_hidefirstrecord, 
-                 bo_shownormalrecord,bo_hidenormalrecord,
-                 bo_showlastrecord,bo_hidelastrecord,
-                  //checks the connected dataset
                  bo_localvalue 
                   //used in treppagenumdisp to show the number of the current 
                   //treportpage instead the number of the printed pages
@@ -487,27 +470,48 @@ type
                  );
  bandoptionsty = set of bandoptionty;
 
+ bandoptionshowty = (
+                   //show only on first/last record of group
+                 bos_showfirstpage,bos_hidefirstpage,
+                 bos_shownormalpage,bos_hidenormalpage,
+                  //checks current treportpage
+                 bos_showevenpage,bos_hideevenpage,
+                 bos_showoddpage,bos_hideoddpage,
+                  //checks the printed page number
+                 bos_showtopofpage,bos_hidetopofpage,
+                 bos_shownottopofpage,bos_hidenottopofpage,
+                 bos_showfirstofpage,bos_hidefirstofpage,
+                 bos_shownormalofpage,bos_hidenormalofpage,                 
+                 bos_showlastofpage,bos_hidelastofpage,
+                  //checks the position in the bandarea                 
+                 bos_showfirstrecord,bos_hidefirstrecord, 
+                 bos_shownormalrecord,bos_hidenormalrecord,
+                 bos_showlastrecord,bos_hidelastrecord
+                  //checks the connected dataset
+                  );
+ bandoptionshowsty = set of bandoptionshowty;
+
 const 
- visibilitymask = [bo_showfirstpage,bo_hidefirstpage,
-                   bo_shownormalpage,bo_hidenormalpage,
-                   bo_showevenpage,bo_hideevenpage,
-                   bo_showoddpage,bo_hideoddpage,
-                   bo_showtopofpage,bo_hidetopofpage,
-                   bo_shownottopofpage,bo_hidenottopofpage,
-                   bo_showfirstofpage,bo_hidefirstofpage,
-                   bo_shownormalofpage,bo_hidenormalofpage,
-                   bo_showlastofpage,bo_hidelastofpage,
-                   bo_showfirstrecord,bo_hidefirstrecord,
-                   bo_shownormalrecord,bo_hidenormalrecord,
-                   bo_showlastrecord,bo_hidelastrecord
+ visibilitymask = [bos_showfirstpage,bos_hidefirstpage,
+                   bos_shownormalpage,bos_hidenormalpage,
+                   bos_showevenpage,bos_hideevenpage,
+                   bos_showoddpage,bos_hideoddpage,
+                   bos_showtopofpage,bos_hidetopofpage,
+                   bos_shownottopofpage,bos_hidenottopofpage,
+                   bos_showfirstofpage,bos_hidefirstofpage,
+                   bos_shownormalofpage,bos_hidenormalofpage,
+                   bos_showlastofpage,bos_hidelastofpage,
+                   bos_showfirstrecord,bos_hidefirstrecord,
+                   bos_shownormalrecord,bos_hidenormalrecord,
+                   bos_showlastrecord,bos_hidelastrecord
                    ];
  defaultrepvaluedispoptions = [bo_evenpage,bo_oddpage];
 type                     
  trepspacer = class(tspacer,ireportclient)
   private
-   foptionsrep: bandoptionsty;   
+   foptionsrep: bandoptionshowsty;   
    fparentintf: ibandparent;
-   procedure setoptionsrep(const avalue: bandoptionsty);
+   procedure setoptionsrep(const avalue: bandoptionshowsty);
   protected
    procedure parentchanged; override; //update fparentintf
    procedure updatevisibility;
@@ -516,7 +520,8 @@ type
    procedure adddatasets(var adatasets: datasetarty);
    procedure init;
   published
-   property optionsrep: bandoptionsty read foptionsrep write setoptionsrep default [];
+   property optionsrep: bandoptionshowsty read foptionsrep 
+                                        write setoptionsrep default [];
  end;
  
  bandareaarty = array of tcustombandarea;
@@ -535,6 +540,7 @@ type
    fvisidatalink: tfielddatalink;
    fvisigrouplink: tfielddatalink;
    foptions: bandoptionsty;
+   foptionsshow: bandoptionshowsty;
    fgroupnum: integer;
    fnextgroupnum: integer;
    fobjectpicker: tobjectpicker;
@@ -542,7 +548,7 @@ type
    fnextbandifempty: tcustomrecordband;
    fareas: bandareaarty;
    procedure settabs(const avalue: treptabulators);
-   procedure setoptions(const avalue: bandoptionsty);
+   procedure setoptionsshow(const avalue: bandoptionshowsty);
    function getvisidatasource: tdatasource;
    procedure setvisidatasource(const avalue: tdatasource);
    function getvisidatafield: string;
@@ -630,7 +636,8 @@ type
    property visidatafield: string read getvisidatafield write setvisidatafield;
                //controls visibility not null -> visible
    property visigroupfield: string read getvisigroupfield write setvisigroupfield;
-   property options: bandoptionsty read foptions write setoptions default [];
+   property options: bandoptionsty read foptions write foptions default [];
+   property optionsshow: bandoptionshowsty read foptionsshow write setoptionsshow default [];
    property nextband: tcustomrecordband read fnextband write setnextband;
                        //used by tcustombandarea
    property nextbandifempty: tcustomrecordband read fnextbandifempty 
@@ -651,6 +658,7 @@ type
    property tabs;
    property datasource;
    property options;
+   property optionsshow;
    property optionsscale;
    property visidatasource;
    property visidatafield;
@@ -708,6 +716,7 @@ type
 //   property datasource;
    property textflags;
    property options;
+   property optionsshow;
    property optionsscale;
    property onfontheightdelta;
    property onchildscaled;
@@ -796,6 +805,7 @@ type
    property nextband;
    property nextbandifempty;
    property options;
+   property optionsshow;
    property optionsscale;
    property visidatasource;
    property visidatafield;
@@ -2559,45 +2569,52 @@ begin
  end;
 end;
 
-procedure setbandoptions(const avalue: bandoptionsty; var foptions: bandoptionsty);
+procedure setbandoptionsshow(const avalue: bandoptionshowsty;
+                                           var foptions: bandoptionshowsty);
 const
- firstmask: bandoptionsty = [bo_showfirstpage,bo_hidefirstpage];
- normalmask: bandoptionsty = [bo_shownormalpage,bo_hidenormalpage];
- evenmask: bandoptionsty = [bo_showevenpage,bo_hideevenpage];
- oddmask: bandoptionsty = [bo_showoddpage,bo_hideoddpage];
- firstofpagemask: bandoptionsty = [bo_showfirstofpage,bo_hidefirstofpage];
- normalofpagemask: bandoptionsty = [bo_shownormalofpage,bo_hidenormalofpage];
- lastofpagemask: bandoptionsty = [bo_showlastofpage,bo_hidelastofpage];
- firstrecmask: bandoptionsty = [bo_showfirstrecord,bo_hidefirstrecord];
- normalrecmask: bandoptionsty = [bo_shownormalrecord,bo_hidenormalrecord];
- lastrecmask: bandoptionsty = [bo_showlastrecord,bo_hidelastrecord];
+ topmask: bandoptionshowsty = [bos_showtopofpage,bos_hidetopofpage];
+ nottopmask: bandoptionshowsty = [bos_shownottopofpage,bos_hidenottopofpage];
+ firstmask: bandoptionshowsty = [bos_showfirstpage,bos_hidefirstpage];
+ normalmask: bandoptionshowsty = [bos_shownormalpage,bos_hidenormalpage];
+ evenmask: bandoptionshowsty = [bos_showevenpage,bos_hideevenpage];
+ oddmask: bandoptionshowsty = [bos_showoddpage,bos_hideoddpage];
+ firstofpagemask: bandoptionshowsty = [bos_showfirstofpage,bos_hidefirstofpage];
+ normalofpagemask: bandoptionshowsty = [bos_shownormalofpage,bos_hidenormalofpage];
+ lastofpagemask: bandoptionshowsty = [bos_showlastofpage,bos_hidelastofpage];
+ firstrecmask: bandoptionshowsty = [bos_showfirstrecord,bos_hidefirstrecord];
+ normalrecmask: bandoptionshowsty = [bos_shownormalrecord,bos_hidenormalrecord];
+ lastrecmask: bandoptionshowsty = [bos_showlastrecord,bos_hidelastrecord];
 var
- vis1: bandoptionsty;
+ vis1: bandoptionshowsty;
 begin
- vis1:= bandoptionsty(setsinglebit(longword(avalue),longword(foptions),
+ vis1:= bandoptionshowsty(setsinglebit(longword(avalue),longword(foptions),
+                                 longword(topmask)));
+ vis1:= bandoptionshowsty(setsinglebit(longword(avalue),longword(foptions),
+                                 longword(nottopmask)));
+ vis1:= bandoptionshowsty(setsinglebit(longword(avalue),longword(foptions),
                                  longword(firstmask)));
- vis1:= bandoptionsty(setsinglebit(longword(vis1),longword(foptions),
+ vis1:= bandoptionshowsty(setsinglebit(longword(vis1),longword(foptions),
                                  longword(normalmask)));
- vis1:= bandoptionsty(setsinglebit(longword(vis1),longword(foptions),
+ vis1:= bandoptionshowsty(setsinglebit(longword(vis1),longword(foptions),
                                  longword(evenmask)));
- vis1:= bandoptionsty(setsinglebit(longword(vis1),longword(foptions),
+ vis1:= bandoptionshowsty(setsinglebit(longword(vis1),longword(foptions),
                                  longword(oddmask)));
- vis1:= bandoptionsty(setsinglebit(longword(vis1),longword(foptions),
+ vis1:= bandoptionshowsty(setsinglebit(longword(vis1),longword(foptions),
                                  longword(firstofpagemask)));
- vis1:= bandoptionsty(setsinglebit(longword(vis1),longword(foptions),
+ vis1:= bandoptionshowsty(setsinglebit(longword(vis1),longword(foptions),
                                  longword(normalofpagemask)));
- vis1:= bandoptionsty(setsinglebit(longword(vis1),
+ vis1:= bandoptionshowsty(setsinglebit(longword(vis1),
                                  longword(foptions),longword(lastofpagemask)));
- vis1:= bandoptionsty(setsinglebit(longword(vis1),longword(foptions),
+ vis1:= bandoptionshowsty(setsinglebit(longword(vis1),longword(foptions),
                                  longword(firstrecmask)));
- vis1:= bandoptionsty(setsinglebit(longword(vis1),longword(foptions),
+ vis1:= bandoptionshowsty(setsinglebit(longword(vis1),longword(foptions),
                                  longword(normalrecmask)));
- foptions:= bandoptionsty(setsinglebit(longword(vis1),longword(foptions),
+ foptions:= bandoptionshowsty(setsinglebit(longword(vis1),longword(foptions),
                                  longword(lastrecmask)));
 end;
 
 function checkvisibility(const fparentintf: ibandparent;
-                 const foptions: bandoptionsty; checklast: boolean;
+                 const foptions: bandoptionshowsty; checklast: boolean;
                  var aresult: boolean; out show: boolean): boolean;
                   //true if more checks possible
 label
@@ -2611,90 +2628,90 @@ begin
  if foptions * visibilitymask <> [] then begin
   if fparentintf <> nil then begin
    first1:= fparentintf.pagepagenum = 0;
-   if first1 and (bo_hidefirstpage in foptions) then begin
+   if first1 and (bos_hidefirstpage in foptions) then begin
     aresult:= false;
     goto endlab;
    end;
-   if first1 and (bo_showfirstpage in foptions) then begin
+   if first1 and (bos_showfirstpage in foptions) then begin
     aresult:= true;
     goto endlab;
    end;
-   if not first1 and (bo_hidenormalpage in foptions) then begin
+   if not first1 and (bos_hidenormalpage in foptions) then begin
     aresult:= false;
     goto endlab;
    end;
-   if not first1 and (bo_shownormalpage in foptions) then begin
+   if not first1 and (bos_shownormalpage in foptions) then begin
     aresult:= true;
     goto endlab;
    end;
 
    even1:= not odd(fparentintf.reppagenum);
-   if even1 and (bo_hideevenpage in foptions) then begin
+   if even1 and (bos_hideevenpage in foptions) then begin
     aresult:= false;
     goto endlab;
    end;
-   if not even1 and (bo_hideoddpage in foptions) then begin
+   if not even1 and (bos_hideoddpage in foptions) then begin
     aresult:= false;
     goto endlab;
    end;
-   show:= even1 and (bo_showevenpage in foptions);
-   show:= show or not even1 and (bo_showoddpage in foptions);
+   show:= even1 and (bos_showevenpage in foptions);
+   show:= show or not even1 and (bos_showoddpage in foptions);
 
    topofpage:= fparentintf.istopband;
    firstofpage:= fparentintf.isfirstband;
    lastofpage:= checklast and fparentintf.islastband;
    if topofpage then begin
-    if bo_showtopofpage in foptions then begin
+    if bos_showtopofpage in foptions then begin
      aresult:= true;
      goto endlab;
     end
     else begin
-     if bo_hidetopofpage in foptions then begin
+     if bos_hidetopofpage in foptions then begin
       aresult:= false;
      end;
     end;
    end
    else begin
-    if bo_shownottopofpage in foptions then begin
+    if bos_shownottopofpage in foptions then begin
      aresult:= true;
      goto endlab;
     end
     else begin
-     if bo_hidenottopofpage in foptions then begin
+     if bos_hidenottopofpage in foptions then begin
       aresult:= false;
      end;
     end;
    end;
    if firstofpage then begin
-    if bo_showfirstofpage in foptions then begin
+    if bos_showfirstofpage in foptions then begin
      aresult:= true;
      goto endlab;
     end
     else begin
-     if bo_hidefirstofpage in foptions then begin
+     if bos_hidefirstofpage in foptions then begin
       aresult:= false;
      end;
     end;
    end;
    if lastofpage then begin
-    if bo_showlastofpage in foptions then begin
+    if bos_showlastofpage in foptions then begin
      aresult:= true;
      goto endlab;
     end
     else begin
-     if bo_hidelastofpage in foptions then begin
+     if bos_hidelastofpage in foptions then begin
       aresult:= false;
       show:= false;
      end;
     end;
    end;
    if not firstofpage and not lastofpage then begin
-    if bo_shownormalofpage in foptions then begin
+    if bos_shownormalofpage in foptions then begin
      aresult:= true;
      goto endlab;
     end
     else begin
-     if bo_hidenormalofpage in foptions then begin
+     if bos_hidenormalofpage in foptions then begin
       aresult:= false;
       show:= false;
      end;
@@ -2744,18 +2761,18 @@ begin
  visible:= bo1 or bo2;
 end;
 
-procedure trepspacer.setoptionsrep(const avalue: bandoptionsty);
+procedure trepspacer.setoptionsrep(const avalue: bandoptionshowsty);
 const
  spacerbandoptions =  [
-//                 bo_once,bo_evenpage,bo_oddpage,
-//                 bo_visigroupfirst,bo_visigrouplast,
-                 bo_showfirstpage,bo_hidefirstpage,
-                 bo_shownormalpage,bo_hidenormalpage,
-                 bo_showevenpage,bo_hideevenpage,
-                 bo_showoddpage,bo_hideoddpage,
-                 bo_showfirstofpage,bo_hidefirstofpage,
-                 bo_shownormalofpage,bo_hidenormalofpage,                 
-                 bo_showlastofpage,bo_hidelastofpage
+                 bos_showtopofpage,bos_hidetopofpage,
+                 bos_shownottopofpage,bos_hidenottopofpage,
+                 bos_showfirstpage,bos_hidefirstpage,
+                 bos_shownormalpage,bos_hidenormalpage,
+                 bos_showevenpage,bos_hideevenpage,
+                 bos_showoddpage,bos_hideoddpage,
+                 bos_showfirstofpage,bos_hidefirstofpage,
+                 bos_shownormalofpage,bos_hidenormalofpage,                 
+                 bos_showlastofpage,bos_hidelastofpage
  //                bo_showfirstrecord,bo_hidefirstrecord, 
  //                bo_shownormalrecord,bo_hidenormalrecord,
  //                bo_showlastrecord,bo_hidelastrecord,
@@ -2765,7 +2782,7 @@ const
                  
 
 begin
- setbandoptions(avalue * spacerbandoptions,foptionsrep);
+ setbandoptionsshow(avalue * spacerbandoptions,foptionsrep);
 end;
 
 procedure trepspacer.parentchanged;
@@ -3147,9 +3164,9 @@ begin
  result:= fdatalink.datasource;
 end;
 
-procedure tcustomrecordband.setoptions(const avalue: bandoptionsty);
+procedure tcustomrecordband.setoptionsshow(const avalue: bandoptionshowsty);
 begin
- setbandoptions(avalue,foptions);
+ setbandoptionsshow(avalue,foptionsshow);
 end;
 
 procedure tcustomrecordband.synctofontheight;
@@ -3232,38 +3249,38 @@ begin
    result:= true;
   end;
  end;
- if checkvisibility(fparentintf,foptions,checklast,result,bo1) then begin
+ if checkvisibility(fparentintf,foptionsshow,checklast,result,bo1) then begin
   if firstrecord then begin
-   if bo_showfirstrecord in foptions then begin
+   if bos_showfirstrecord in foptionsshow then begin
     result:= true;
     goto endlab;
    end
    else begin
-    if bo_hidefirstrecord in foptions then begin
+    if bos_hidefirstrecord in foptionsshow then begin
      result:= false;
      bo1:= false;
     end;
    end;
   end;
   if lastrecord then begin
-   if bo_showlastrecord in foptions then begin
+   if bos_showlastrecord in foptionsshow then begin
     result:= true;
     goto endlab;
    end
    else begin
-    if bo_hidelastrecord in foptions then begin
+    if bos_hidelastrecord in foptionsshow then begin
      result:= false;
      bo1:= false;
     end;
    end;
   end;
   if not firstrecord and not lastrecord then begin
-   if bo_shownormalrecord in foptions then begin
+   if bos_shownormalrecord in foptionsshow then begin
     result:= true;
     goto endlab;
    end
    else begin
-    if bo_hidenormalrecord in foptions then begin
+    if bos_hidenormalrecord in foptionsshow then begin
      result:= false;
      bo1:= false;
     end;
@@ -3635,8 +3652,8 @@ begin
   int2:= innerclientframewidth.cy;
   for int1:= 0 to high(fbands) do begin
    with fbands[int1] do begin
-    if bandisvisible(false) and not (bo_hidelastofpage in options) or 
-           (bo_showlastofpage in options) then begin
+    if bandisvisible(false) and not (bos_hidelastofpage in foptionsshow) or 
+           (bos_showlastofpage in foptionsshow) then begin
      int2:= int2 + bounds_cy;
     end;
    end;
