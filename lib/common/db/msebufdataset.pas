@@ -2089,18 +2089,19 @@ end;
 procedure tmsebufdataset.internaldelete;
 var
  po1: pintrecordty;
- 
+ recnobefore: integer;
 begin
  if state = dsedit then begin
   internalcancel;
  end;
  po1:= fcurrentbuf;
+ recnobefore:= frecno;
  deleterecord(frecno);
  if not getrecordupdatebuffer then begin
   getnewupdatebuffer;
   with fupdatebuffer[fcurrentupdatebuffer] do begin
-   bookmark.recno:= frecno;
-   bookmark.recordpo:= fcurrentbuf;
+   bookmark.recno:= recnobefore;
+   bookmark.recordpo:= po1;
    oldvalues:= bookmark.recordpo;
   end;
  end
