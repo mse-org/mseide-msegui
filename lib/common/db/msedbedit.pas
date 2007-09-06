@@ -38,7 +38,7 @@ type
  dbnavigatoroptionsty = set of dbnavigatoroptionty;
 
 const
- defaultdbnavigatoroptions = [dno_confirmdelete];
+ defaultdbnavigatoroptions = [dno_confirmdelete,dno_append];
  designdbnavigbuttons = [dbnb_first,dbnb_prior,dbnb_next,dbnb_last];
  
 type  

@@ -39,7 +39,8 @@ const
   
 type
  lookupkindty = (lk_text,lk_integer,lk_float,lk_date,lk_time,lk_datetime);
- linevisiblety = (lv_firstofpage,lv_normal,lv_lastofpage,
+ linevisiblety = (lv_topofpage,lv_nottopofpage,
+                  lv_firstofpage,lv_normal,lv_lastofpage,
                   lv_firstofgroup,lv_lastofgroup,
                   lv_firstrecord,lv_lastrecord);
  linevisiblesty = set of linevisiblety;
@@ -62,7 +63,8 @@ const
  defaulttablinecapstyle = cs_projecting;
  defaulttablinedashes = '';
  defaulttablinedist = 0;
- defaulttablinevisible = [lv_firstofpage,lv_normal,lv_lastofpage,
+ defaulttablinevisible = [lv_topofpage,lv_nottopofpage,
+                          lv_firstofpage,lv_normal,lv_lastofpage,
                           lv_firstofgroup,lv_lastofgroup,    
                           lv_firstrecord,lv_lastrecord];
  defaulttablineinfo: tablineinfoty = (widthmm: defaulttablinewidth; 
@@ -434,6 +436,7 @@ type
                               const sender: tcustomrecordband): boolean;
                    //true if area full
   procedure endband(const acanvas: tcanvas; const sender: tcustomrecordband);  
+  function istopband: boolean;
   function isfirstband: boolean;
   function islastband(const addheight: integer = 0): boolean;
   function isfirstrecord: boolean;
@@ -466,6 +469,8 @@ type
                  bo_showevenpage,bo_hideevenpage,
                  bo_showoddpage,bo_hideoddpage,
                   //checks the printed page number
+                 bo_showtopofpage,bo_hidetopofpage,
+                 bo_shownottopofpage,bo_hidenottopofpage,
                  bo_showfirstofpage,bo_hidefirstofpage,
                  bo_shownormalofpage,bo_hidenormalofpage,                 
                  bo_showlastofpage,bo_hidelastofpage,
@@ -487,6 +492,8 @@ const
                    bo_shownormalpage,bo_hidenormalpage,
                    bo_showevenpage,bo_hideevenpage,
                    bo_showoddpage,bo_hideoddpage,
+                   bo_showtopofpage,bo_hidetopofpage,
+                   bo_shownottopofpage,bo_hidenottopofpage,
                    bo_showfirstofpage,bo_hidefirstofpage,
                    bo_shownormalofpage,bo_hidenormalofpage,
                    bo_showlastofpage,bo_hidelastofpage,
@@ -748,6 +755,7 @@ type
                               const sender: tcustomrecordband): boolean;
                    //true if area full
    procedure endband(const acanvas: tcanvas; const sender: tcustomrecordband);  
+   function istopband: boolean;
    function isfirstband: boolean;
    function islastband(const addheight: integer = 0): boolean;
    procedure updatevisible;
@@ -802,7 +810,8 @@ type
  end;
  
  bandareastatety = (bas_inited,bas_backgroundrendered,bas_areafull,
-                    bas_rendering,bas_notfirstband,bas_lastband,bas_bandstarted,
+                    bas_rendering,
+                    bas_top,bas_notfirstband,bas_lastband,bas_bandstarted,
                     bas_activebandchanged);
  bandareastatesty = set of bandareastatety; 
    
@@ -866,6 +875,7 @@ type
    function getfont: trepwidgetfont;
    function getfontclass: widgetfontclassty; override;
   public
+   function istopband: boolean;
    function isfirstband: boolean;
    function islastband(const addheight: integer = 0): boolean;
    function isfirstrecord: boolean;
@@ -991,6 +1001,7 @@ type
    function beginband(const acanvas: tcanvas;
                                const sender: tcustomrecordband): boolean;
    procedure endband(const acanvas: tcanvas; const sender: tcustomrecordband);  
+   function istopband: boolean;
    function isfirstband: boolean;
    function islastband(const addheight: integer = 0): boolean;
    procedure updatevisible;
@@ -1883,13 +1894,22 @@ begin
  if apaint then begin
   with fband do begin
    if not rendering or (fparentintf = nil) then begin 
-    visiblemask:= [lv_firstofpage,lv_normal,lv_lastofpage,
+    visiblemask:= [lv_topofpage,lv_nottopofpage,
+                   lv_firstofpage,lv_normal,lv_lastofpage,
                    lv_firstofgroup,lv_lastofgroup,
                    lv_firstrecord,lv_lastrecord];
    end
    else begin
     visiblemask:= [lv_normal];    
     with fparentintf do begin
+     if istopband then begin
+      include(visiblemask,lv_topofpage);
+      exclude(visiblemask,lv_nottopofpage);
+     end
+     else begin
+      include(visiblemask,lv_nottopofpage);
+      exclude(visiblemask,lv_topofpage);
+     end;
      if isfirstband then begin
       include(visiblemask,lv_firstofpage);
       exclude(visiblemask,lv_normal);
@@ -2583,7 +2603,7 @@ function checkvisibility(const fparentintf: ibandparent;
 label
  endlab;
 var
- firstofpage,lastofpage: boolean;
+ topofpage,firstofpage,lastofpage: boolean;
  even1,first1: boolean;
 begin
  result:= false;
@@ -2620,8 +2640,31 @@ begin
    show:= even1 and (bo_showevenpage in foptions);
    show:= show or not even1 and (bo_showoddpage in foptions);
 
+   topofpage:= fparentintf.istopband;
    firstofpage:= fparentintf.isfirstband;
    lastofpage:= checklast and fparentintf.islastband;
+   if topofpage then begin
+    if bo_showtopofpage in foptions then begin
+     aresult:= true;
+     goto endlab;
+    end
+    else begin
+     if bo_hidetopofpage in foptions then begin
+      aresult:= false;
+     end;
+    end;
+   end
+   else begin
+    if bo_shownottopofpage in foptions then begin
+     aresult:= true;
+     goto endlab;
+    end
+    else begin
+     if bo_hidenottopofpage in foptions then begin
+      aresult:= false;
+     end;
+    end;
+   end;
    if firstofpage then begin
     if bo_showfirstofpage in foptions then begin
      aresult:= true;
@@ -3657,6 +3700,11 @@ begin
  fparentintf.endband(acanvas,sender);
 end;
 
+function tcustombandgroup.istopband: boolean;
+begin
+ result:= fparentintf.istopband;
+end;
+
 function tcustombandgroup.isfirstband: boolean;
 begin
  result:= fparentintf.isfirstband;
@@ -3825,6 +3873,7 @@ procedure tcustombandarea.initpage;
 var
  int1: integer;
 begin
+ include(fstate,bas_top);
  for int1:= 0 to high(fbands) do begin
   fbands[int1].initpage;
  end;
@@ -3864,6 +3913,7 @@ begin
             (not(rbs_pageshowed in fstate) or not bo2);   //empty    
       render(acanvas,bo1);
       if bas_activebandchanged in self.fstate then begin
+       updatevisible;
        continue;
       end;
       bo1:= bo1 or bo2{(bv_everypage in fvisibility)};
@@ -3922,6 +3972,7 @@ end;
 procedure tcustombandarea.initareapage;
 begin
  exclude(fstate,bas_notfirstband);
+ include(fstate,bas_top);
  facty:= innerclientwidgetpos.y + bounds_y;
  fbandnum:= 0;
 end;
@@ -4050,6 +4101,7 @@ procedure tcustombandarea.endband(const acanvas: tcanvas;
 begin
  acanvas.restore(fsaveindex); 
  include(fstate,bas_notfirstband);
+ exclude(fstate,bas_top);
  sender.fstate:= sender.fstate + [rbs_showed,rbs_pageshowed];
  inc(fbandnum);
 end;
@@ -4121,6 +4173,11 @@ begin
  for int1:= 0 to high(fbands) do begin
   fbands[int1].adddatasets(adatasets);
  end;
+end;
+
+function tcustombandarea.istopband: boolean;
+begin
+ result:= bas_top in fstate;
 end;
 
 function tcustombandarea.isfirstband: boolean;
@@ -4719,6 +4776,11 @@ procedure tcustomreportpage.endband(const acanvas: tcanvas;
 begin
  acanvas.restore(fsaveindex);
  include(sender.fstate,rbs_showed);
+end;
+
+function tcustomreportpage.istopband: boolean;
+begin
+ result:= false;
 end;
 
 function tcustomreportpage.isfirstband: boolean;
