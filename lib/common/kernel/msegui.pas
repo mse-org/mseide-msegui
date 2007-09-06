@@ -17,7 +17,7 @@ uses
  {$ifdef FPC}classes{$else}Classes{$endif},sysutils,msegraphics,msetypes,
  msestrings,mseerror,msegraphutils,
  msepointer,mseevent,msekeyboard,mseclasses,mseguiglob,mselist,msesys,msethread,
- msebitmap,msearrayprops{,msedatamodules};
+ msebitmap,msearrayprops,mseguithread{,msedatamodules};
 
 const
  mseguiversiontext = '1.3 unstable';
@@ -1490,10 +1490,12 @@ type
    constructor create(const dest: ievent; const asize: sizety);
  end;
 
- applicationstatety = (aps_inited,aps_running,aps_terminated,aps_mousecaptured,
-                       aps_invalidated,aps_zordervalid,aps_needsupdatewindowstack,
-                       aps_focused,aps_activewindowchecked,aps_exitloop,
-                       aps_active,aps_waiting,aps_terminating,aps_deinitializing);
+ applicationstatety = 
+        (aps_inited,aps_running,aps_terminated,aps_mousecaptured,
+         aps_invalidated,aps_zordervalid,aps_needsupdatewindowstack,
+         aps_focused,aps_activewindowchecked,aps_exitloop,
+         aps_active,aps_waiting,aps_terminating,aps_deinitializing,
+         aps_waitstarted,aps_waitcanceled,aps_waitterminated,aps_waitok);
  applicationstatesty = set of applicationstatety;
 
  exceptioneventty = procedure (sender: tobject; e: exception) of object;
@@ -1537,6 +1539,8 @@ type
    fbuttonreleasewidgetbefore: twidget;
    factmousewindow: twindow;
    fdelayedmouseshift: pointty;
+   fmodalwindowbeforewaitdialog: twindow;
+   fonterminatebefore: threadcompeventty;
    function getterminated: boolean;
    procedure setterminated(const Value: boolean);
    procedure invalidated;
@@ -1557,6 +1561,7 @@ type
    function dolock: boolean;
    function internalunlock(count: integer): boolean;
    procedure destroyforms;
+   procedure dothreadterminated(const sender: tthreadcomp);
   protected  
    procedure eventloop(const once: boolean = false); 
                         //used in win32 wm_queryendsession and wm_entersizemove
@@ -1593,6 +1598,17 @@ type
    procedure beginwait;
    procedure endwait;
    function waiting: boolean;
+
+   procedure resetwaitdialog;   
+   function waitdialog(const athread: tthreadcomp = nil; const atext: msestring = '';
+                              const caption: msestring = ''): boolean;
+              //true if not canceled
+   procedure terminatewait;
+   procedure cancelwait;
+   function waitstarted: boolean;
+   function waitcanceled: boolean;
+   function waitterminated: boolean;
+   
    function checkoverload(const asleepus: integer = 100000): boolean;
               //true if never idle since last call,
               // unlocks application and calls sleep if not mainthread and asleepus >= 0
@@ -12853,6 +12869,111 @@ begin
   end;
  end;
  inherited;
+end;
+
+function tapplication.waitdialog(const athread: tthreadcomp = nil;
+               const atext: msestring = '';
+               const caption: msestring = ''): boolean;
+var
+ res1: modalresultty;
+begin
+ if not ismainthread then begin
+  raise exception.create('Waitdialog must be called from main thread.');
+ end;
+ result:= false;
+ if not (aps_waitstarted in fstate) then begin
+  with tinternalapplication(self) do begin
+   fmodalwindowbeforewaitdialog:= fmodalwindow;
+   resetwaitdialog;
+   include(fstate,aps_waitstarted);
+//   beginwait;
+   try
+    if athread <> nil then begin
+     fonterminatebefore:= athread.onterminate;
+     athread.onterminate:= {$ifdef FPC}@{$endif}dothreadterminated;
+     athread.run;
+    end;
+    repeat
+    until showmessage(atext,caption,[mr_cancel]) = mr_cancel;
+    result:= aps_waitok in fstate;
+    if not result then begin
+     include(fstate,aps_waitcanceled);
+    end
+    else begin
+     include(fstate,aps_waitterminated);
+    end;
+    if athread <> nil then begin
+     athread.terminate;
+     athread.waitfor;
+    end;
+   finally
+    exclude(fstate,aps_waitstarted);
+    if athread <> nil then begin
+     athread.onterminate:= fonterminatebefore;
+    end;
+//    endwait;
+   end;
+  end;
+ end;
+end;
+
+procedure tapplication.cancelwait;
+begin
+ lock;
+ with tinternalapplication(self) do begin
+  if not waitcanceled and (fmodalwindow <> fmodalwindowbeforewaitdialog) and
+             (fmodalwindow <> nil) then begin
+   fmodalwindow.modalresult:= mr_cancel;
+  end;
+ end;
+ unlock;
+end;
+
+procedure tapplication.terminatewait;
+begin
+ lock;
+ include(fstate,aps_waitok);
+ cancelwait;
+ unlock;
+end;
+
+procedure tapplication.resetwaitdialog;
+begin
+ lock;
+ fstate:= fstate - [aps_waitstarted,aps_waitcanceled,aps_waitterminated,
+                                          aps_waitok];
+ unlock;
+end;
+
+function tapplication.waitstarted: boolean;
+begin
+ lock;
+ result:= aps_waitstarted in fstate;
+ unlock;
+end;
+
+function tapplication.waitcanceled: boolean;
+begin
+ lock;
+ result:= aps_waitcanceled in fstate;
+ unlock;
+end;
+
+function tapplication.waitterminated: boolean;
+begin
+ lock;
+ result:= aps_waitterminated in fstate;
+ unlock;
+end;
+
+procedure tapplication.dothreadterminated(const sender: tthreadcomp);
+begin
+ if not waitcanceled then begin
+  terminatewait;
+ end;
+ if assigned(fonterminatebefore) then begin
+  fonterminatebefore(sender);
+ end;
 end;
 
 { tasyncmessageevent }

@@ -1090,9 +1090,9 @@ begin
   inc(widget.info.dest.x,textoffset div 2);
   dec(widget.info.dest.cx,textoffset);
   result:= widget.show(true,transientfor);
-  if result = mr_windowclosed then begin
-   result:= mr_cancel;
-  end;
+//  if result = mr_windowclosed then begin
+//   result:= mr_cancel;
+//  end;
  finally
   widget1.free;
   widget.Free;

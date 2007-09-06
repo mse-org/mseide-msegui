@@ -13,7 +13,7 @@ unit mseguithread;
 
 interface
 uses
- mseclasses,msethread,classes,mseevent,msetypes;
+ mseclasses,msethread,classes,mseevent,msetypes,msestrings;
 
 type
  tthreadcomp = class;
@@ -27,6 +27,8 @@ type
    fonexecute: threadcompeventty;
    factive: boolean;
    fdatapo: pointer;
+   fdialogtext: msestring;
+   fdialogcaption: msestring;
    function getthread: teventthread;
    function getterminated: boolean;
    function threadproc(sender: tmsethread): integer;
@@ -41,6 +43,8 @@ type
 
    property datapo: pointer read fdatapo;
    procedure run(const adatapo: pointer = nil);
+   function runwithwaitdialog: boolean;
+        //true if not canceled
    procedure terminate;
    procedure waitfor;  //does unlock,relock before waiting
 
@@ -54,6 +58,8 @@ type
 
   published
    property active: boolean read getactive write setactive default false;
+   property dialogtext: msestring read fdialogtext write fdialogtext;
+   property dialogcaption: msestring read fdialogcaption write fdialogcaption;
    property onstart: threadcompeventty read fonstart write fonstart;
    property onexecute: threadcompeventty read fonexecute write fonexecute;
    property onterminate: threadcompeventty read fonterminate write fonterminate;
@@ -91,6 +97,11 @@ begin
  terminateandwait;
  fdatapo:= adatapo;
  fthread:= teventthread.create({$ifdef FPC}@{$endif}threadproc);
+end;
+
+function tthreadcomp.runwithwaitdialog: boolean;
+begin
+ result:= application.waitdialog(self,fdialogtext,fdialogcaption);
 end;
 
 function tthreadcomp.lock: boolean;

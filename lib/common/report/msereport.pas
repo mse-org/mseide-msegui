@@ -1106,7 +1106,7 @@ type
  preambleeventty = procedure(const sender: tcustomreport; var apreamble: string) of object;
  
 
- reportoptionty = (reo_autorelease,reo_prepass,reo_nothread,
+ reportoptionty = (reo_autorelease,reo_prepass,reo_nothread,reo_waitdialog,
                       reo_autoreadstat,reo_autowritestat);
  reportoptionsty = set of reportoptionty;
  
@@ -1138,6 +1138,8 @@ type
    fondestroyed: notifyeventty;
    fstatfile: tstatfile;
    fonpreamble: preambleeventty;
+   fdialogtext: msestring;
+   fdialogcaption: msestring;
    procedure setppmm(const avalue: real);
    function getreppages(index: integer): tcustomreportpage;
    procedure setreppages(index: integer; const avalue: tcustomreportpage);
@@ -1211,6 +1213,8 @@ type
    property canceled: boolean read getcanceled write setcanceled;
    property running: boolean read getrunning;
    property options: reportoptionsty read foptions write foptions;
+   property dialogtext: msestring read fdialogtext write fdialogtext;
+   property dialogcaption: msestring read fdialogcaption write fdialogcaption;
 
    property onpreamble: preambleeventty read fonpreamble write fonpreamble;
    property onbeforerender: notifyeventty read fonbeforerender
@@ -1243,6 +1247,8 @@ type
    property grid_snap;
    property grid_size;
    property options;
+   property dialogtext;
+   property dialogcaption;
    property onpreamble;
    property onbeforerender;
    property onafterrender;
@@ -5290,6 +5296,9 @@ begin
   finally
    application.unlock;
   end;
+  if (fthread <> nil) and (reo_waitdialog in foptions) then begin
+   application.terminatewait;
+  end;
  end;
 end;
 
@@ -5317,10 +5326,22 @@ begin
  freeandnil(fthread);
  fcanceled:= false;
  if reo_nothread in foptions then begin
-  exec(nil);
+  application.beginwait;
+  try
+   exec(nil);
+  finally
+   application.endwait;
+  end;
  end
  else begin
+  if reo_waitdialog in foptions then begin
+   application.resetwaitdialog;
+  end;
   fthread:= tmsethread.create({$ifdef FPC}@{$endif}exec);
+  if reo_waitdialog in foptions then begin
+   application.waitdialog(nil,fdialogtext,fdialogcaption);
+   waitfor;
+  end;
  end;
 end;
 
@@ -5464,7 +5485,9 @@ end;
 
 function tcustomreport.getcanceled: boolean;
 begin
- result:= (fthread <> nil) and fthread.terminated or fcanceled;
+ result:= (fthread <> nil) and 
+                (fthread.terminated or ((reo_waitdialog in foptions) and 
+                            application.waitcanceled)) or fcanceled;
 end;
 
 procedure tcustomreport.setcanceled(const avalue: boolean);
