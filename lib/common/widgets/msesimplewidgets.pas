@@ -486,7 +486,7 @@ begin
        (info.key = key_return) and (info.shiftstate = []) then begin
    include(info.eventstate,es_processed);
 //   if (fmodalresult = mr_cancel) or window.candefocus and isenabled then begin
-   doexecute;
+   internalexecute;
 //   end
 //   else begin
 //    exclude(info.eventstate,es_processed);

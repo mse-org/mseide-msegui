@@ -735,6 +735,7 @@ type
  end;
 
  buttonoptionty = (bo_executeonclick,bo_executeonkey,bo_executeonshortcut,
+                   bo_asyncexecute,
                    bo_focusonshortcut, //for tcustombutton
                    bo_flat 
                    );
@@ -751,8 +752,10 @@ type
   protected
    finfo: shapeinfoty;
    procedure setoptions(const avalue: buttonoptionsty); virtual;
+   procedure internalexecute;
    procedure doshapeexecute(const atag: integer; const info: mouseeventinfoty);
    procedure doexecute; virtual;
+   procedure doasyncevent(var atag: integer); override;
    procedure statechanged; override;
    procedure clientmouseevent(var info: mouseeventinfoty); override;
    procedure dokeydown(var info: keyeventinfoty); override;
@@ -1205,10 +1208,27 @@ begin
  //dummy
 end;
 
+procedure tactionsimplebutton.doasyncevent(var atag: integer);
+begin
+ if atag = 0 then begin
+  doexecute;
+ end;
+end;
+
+procedure tactionsimplebutton.internalexecute;
+begin
+ if bo_asyncexecute in foptions then begin
+  asyncevent;
+ end
+ else begin
+  doexecute;
+ end;
+end;
+
 procedure tactionsimplebutton.doshapeexecute(const atag: integer;
                   const info: mouseeventinfoty);
 begin
- doexecute;
+ internalexecute;
 end;
 
 procedure tactionsimplebutton.dopaint(const canvas: tcanvas);
@@ -1237,7 +1257,7 @@ begin
   else begin
    if info.key = key_return then begin
     include(info.eventstate,es_processed);
-    doexecute;
+    internalexecute;
    end;
   end;
  end;
@@ -1251,7 +1271,7 @@ begin
   invalidaterect(finfo.dim);
   if (info.shiftstate = []) and (bo_executeonkey in foptions) then begin
    include(info.eventstate,es_processed);
-   doexecute;
+   internalexecute;
   end;
  end;
 end;
@@ -1295,7 +1315,7 @@ procedure tmessagebutton.doshortcut(var info: keyeventinfoty; const sender: twid
 begin
  if checkshortcut(info,finfo.caption,true) then begin
   include(info.eventstate,es_processed);
-  doexecute;
+  internalexecute;
  end
  else begin
   inherited;
