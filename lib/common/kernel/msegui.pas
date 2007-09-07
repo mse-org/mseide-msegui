@@ -1594,6 +1594,7 @@ type
    procedure relockall(count: integer);
    procedure synchronize(proc: objectprocty);
    procedure waitforthread(athread: tmsethread); //does unlock-relock before waiting
+   procedure processmessages; //handle with care!
 
    procedure beginwait;
    procedure endwait;
@@ -12125,6 +12126,16 @@ begin
  finally
   relockall(int1);
  end;
+end;
+
+procedure tapplication.processmessages;
+begin
+ if not ismainthread then begin
+  raise exception.create('processmessages must be called from main thread.');
+ end;
+ gui_flushgdi;
+ sys_sched_yield;
+ eventloop(true);
 end;
 
 function tapplication.checkoverload(const asleepus: integer = 100000): boolean;
