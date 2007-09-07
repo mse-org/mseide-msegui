@@ -3661,6 +3661,17 @@ var
  mousewheelpos: integer;
  sizingwindow: hwnd;
  eventlooping: integer;
+ escapepressed: boolean;
+ 
+function gui_escapepressed: boolean;
+begin
+ result:= escapepressed;
+end;
+
+procedure gui_resetescapepressed;
+begin
+ escapepressed:= false;
+end;
 
 function WindowProc(ahWnd: HWND; Msg: UINT; wParam: WPARAM; lParam: LPARAM): LRESULT; stdcall;
 const
@@ -3829,6 +3840,9 @@ begin
   wm_keydown,wm_syskeydown: begin
    shiftstate:= winkeystatetoshiftstate(lparam);
    key1:= winkeytokey(wparam,shiftstate);
+   if key1 = key_escape then begin
+    escapepressed:= true;
+   end;
    eventlist.add(tkeyevent.create(ahwnd,false,key1,key1,shiftstate,
                                     msestring(charbuffer)));
    setlength(charbuffer,0);

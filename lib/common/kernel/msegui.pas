@@ -1601,6 +1601,7 @@ type
    procedure beginwait;
    procedure endwait;
    function waiting: boolean;
+   function waitescaped: boolean; //true if escape pressed while waiting
 
    procedure resetwaitdialog;   
    function waitdialog(const athread: tthreadcomp = nil; const atext: msestring = '';
@@ -12776,6 +12777,9 @@ procedure tapplication.beginwait;
 begin
  lock;
  try
+  if fwaitcount = 0 then begin
+   gui_resetescapepressed;
+  end;
   inc(fwaitcount);
   mouse.shape:= cr_wait;
  finally
@@ -12803,6 +12807,17 @@ end;
 function tapplication.waiting: boolean;
 begin
  result:= fwaitcount > 0;
+end;
+
+function tapplication.waitescaped: boolean;
+begin
+ lock;
+ result:= waiting and gui_escapepressed;
+ if not result then begin
+  tinternalapplication(self).getevents;
+  result:= gui_escapepressed;
+ end;
+ unlock;
 end;
 
 procedure tapplication.langchanged;

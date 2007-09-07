@@ -22,6 +22,8 @@ function gui_settimer(us: cardinal): guierrorty;
 
 function gui_hasevent: boolean;         //false if no event pending
 function gui_getevent: tevent;          //can be nil
+function gui_escapepressed: boolean;
+procedure gui_resetescapepressed;
 
 
 function gui_createwindow(const rect: rectty; const options: internalwindowoptionsty;

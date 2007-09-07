@@ -4816,6 +4816,19 @@ begin
  {$endif}
 end;
 
+var
+ escapepressed: boolean;
+ 
+function gui_escapepressed: boolean;
+begin
+ result:= escapepressed;
+end;
+
+procedure gui_resetescapepressed;
+begin
+ escapepressed:= false;
+end;
+
 function getkeynomod(const xev: {$ifdef FPC}txkeyevent{$else}
                               xkeyevent{$endif}): keyty;
 var
@@ -5071,6 +5084,9 @@ begin
      xlookupkeysym_: chars:= '';
     end;
     key1:= xkeytokey(akey);
+    if key1 = key_escape then begin
+     escapepressed:= true;
+    end;
     shiftstate1:= xtoshiftstate(state,key1,mb_none,false);
     result:= tkeyevent.create(xwindow,false,key1,getkeynomod(xev.xkey),shiftstate1,chars);
    end;
