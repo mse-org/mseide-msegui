@@ -20,7 +20,7 @@ type
  
 procedure register;
 begin
- registercomponents('Ifi',[tformlink,tpipeiochannel,tifidataset]); 
+ registercomponents('Ifi',[tformlink,tpipeiochannel,ttxdataset,trxdataset]); 
  registerpropertyeditor(typeinfo(tlinkactions),nil,'',tlinkactionseditor);
 end;
 
