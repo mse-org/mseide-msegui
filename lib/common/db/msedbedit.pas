@@ -952,6 +952,7 @@ type
    procedure datasetscrolled(distance: integer); override;
    procedure activechanged; override;
    procedure updatedata; override;
+   procedure focuscell(var cell: gridcoordty);
    procedure cellevent(var info: celleventinfoty);
    function scrollevent(sender: tcustomscrollbar; event: scrolleventty): boolean;
              //true if processed
@@ -1213,7 +1214,10 @@ type
    procedure dodeleterow(const sender: tobject); override;
    procedure beforefocuscell(const cell: gridcoordty;
                              const selectaction: focuscellactionty); override;
-
+   function focuscell(cell: gridcoordty;
+           selectaction: focuscellactionty = fca_focusin;
+         const selectmode: selectcellmodety = scm_cell): boolean; override;
+                                 //true if ok
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -1408,6 +1412,10 @@ type
    function createfixcols: tfixcols; override;
    function createdatacols: tdatacols; override;
    procedure initcellinfo(var info: cellinfoty); override;
+   function focuscell(cell: gridcoordty;
+           selectaction: focuscellactionty = fca_focusin;
+         const selectmode: selectcellmodety = scm_cell): boolean; override;
+                                 //true if ok
    procedure docellevent(var info: celleventinfoty); override;
    procedure scrollevent(sender: tcustomscrollbar; event: scrolleventty); override;
    function getzebrastart: integer; override;
@@ -5671,6 +5679,14 @@ begin
            fgrid.checkdescendent(newfocus) or inherited canclose;
 end;
 
+procedure tgriddatalink.focuscell(var cell: gridcoordty);
+begin
+ if cell.row >= 0 then begin
+  moveby(cell.row-activerecord);
+  cell.row:= activerecord;
+ end;
+end;
+
 { tdbwidgetindicatorcol }
 
 constructor tdbwidgetindicatorcol.create(const agrid: tcustomgrid;
@@ -5947,6 +5963,14 @@ end;
 function tcustomdbwidgetgrid.canclose(const newfocus: twidget): boolean;
 begin
  result:= inherited canclose(newfocus) and fdatalink.canclose(newfocus);
+end;
+
+function tcustomdbwidgetgrid.focuscell(cell: gridcoordty;
+               selectaction: focuscellactionty = fca_focusin;
+               const selectmode: selectcellmodety = scm_cell): boolean;
+begin
+ fdatalink.focuscell(cell);
+ result:= inherited focuscell(cell,selectaction,selectmode);
 end;
 
 { tstringcoldatalink }
@@ -6587,6 +6611,14 @@ begin
    datacols[ffocusedcell.col].fdatalink.cuttext(feditor.text,int1) then begin
   feditor.text:= copy(feditor.text,1,int1);
  end;
+end;
+
+function tcustomdbstringgrid.focuscell(cell: gridcoordty;
+               selectaction: focuscellactionty = fca_focusin;
+               const selectmode: selectcellmodety = scm_cell): boolean;
+begin
+ fdatalink.focuscell(cell);
+ result:= inherited focuscell(cell,selectaction,selectmode);
 end;
 
 { tlbdropdowncol }

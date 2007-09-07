@@ -1412,7 +1412,7 @@ end;
 
    function focuscell(cell: gridcoordty;
                    selectaction: focuscellactionty = fca_focusin;
-                   const selectmode: selectcellmodety = scm_cell): boolean; 
+                   const selectmode: selectcellmodety = scm_cell): boolean; virtual;
                                                //true if ok
    procedure focuscolbyname(const aname: string);
                  //case sensitive
