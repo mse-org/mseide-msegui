@@ -12788,15 +12788,25 @@ begin
 end;
 
 procedure tapplication.endwait;
+var
+ int1: integer;
+ po1: ^tevent;
 begin
  lock;
  try
   if fwaitcount > 0 then begin
    dec(fwaitcount);
    if fwaitcount = 0 then begin
-    tinternalapplication(self).checkcursorshape;
-//    facursorshape:= fcursorshape;
-//    mouse.shape:= fcursorshape;
+    with tinternalapplication(self) do begin
+     po1:= pointer(feventlist.datapo);
+     for int1:= 0 to getevents - 1 do begin
+      if (po1^ <> nil) and (po1^.kind in waitignoreevents) then begin
+       freeandnil(po1^);
+      end;
+      inc(po1);
+     end;
+     checkcursorshape;
+    end;
    end;
   end;
  finally

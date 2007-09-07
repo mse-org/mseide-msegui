@@ -43,7 +43,8 @@ const
                       {ek_mousecapturebegin,}ek_mousecaptureend,
                       ek_clientmouseenter,ek_clientmouseleave];
  mouseposevents = [ek_buttonpress,ek_buttonrelease,ek_mousemove,ek_mousepark];
-
+ waitignoreevents = [ek_keypress,ek_buttonpress,ek_mousewheel];
+ 
 type
  eventstatety = (es_processed,es_child,es_broadcast,es_modal,es_drag,
                  es_reflected,es_nofocus);
