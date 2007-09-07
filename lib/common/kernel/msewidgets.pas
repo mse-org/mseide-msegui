@@ -723,14 +723,17 @@ type
  tmessagewidget = class(tcaptionwidget)
   private
    fpopuptransient: boolean;
+   fhasaction: boolean;
   protected
    procedure updatewindowinfo(var info: windowinfoty); override;
    procedure dokeydown(var info: keyeventinfoty); override;
    function getcaption: msestring; override;
    procedure setcaption(const Value: msestring); override;
    procedure internalcreateframe; override;
+   function canclose(const newfocus: twidget): boolean; override;
   public
-   constructor create(const aowner: tcomponent; const apopuptransient: boolean);
+   constructor create(const aowner: tcomponent; const apopuptransient: boolean;
+                        const ahasaction: boolean);
                                reintroduce;
  end;
 
@@ -784,6 +787,12 @@ function showmessage(const atext,caption: msestring;
                      const defaultbutton: modalresultty = mr_cancel;
                      const noshortcut: modalresultsty = [];
                      const minwidth: integer = 0): modalresultty; overload;
+function showmessage(const atext,caption: msestring;
+                     const buttons: array of modalresultty;
+                     const defaultbutton: modalresultty;
+                     const noshortcut: modalresultsty;
+                     const minwidth: integer;
+                     const actions: array of notifyeventty): modalresultty; overload;
 function showmessage(const atext,caption: msestring;
                      const buttons: array of modalresultty;
                      const adest: rectty; const awidget: twidget = nil;
@@ -844,6 +853,8 @@ type
    modalresult: modalresultty;
    procedure doexecute; override;
    procedure doshortcut(var info: keyeventinfoty; const sender: twidget); override;
+  public
+   onexecute: notifyeventty;
  end;
 
  tshowmessagewidget = class(tmessagewidget)
@@ -973,7 +984,7 @@ function internalshowmessage(const atext,caption: msestring;
                   defaultbutton: modalresultty;
                   noshortcut: modalresultsty;
                   placementrect: prectty; placement: captionposty;
-                  minwidth: integer): modalresultty;
+                  minwidth: integer; actions: array of notifyeventty): modalresultty;
 const
  maxtextwidth = 500;
  verttextdist = 10;
@@ -997,7 +1008,8 @@ begin
  widget1.visible:= false;
        //stays invisible, no wm_configured processing on win32
  widget:= tshowmessagewidget.create(nil,(transientfor <> nil) and 
-             (wo_popup in transientfor.options) and transientfor.owner.visible);
+             (wo_popup in transientfor.options) and transientfor.owner.visible,
+             high(actions) >= 0);
  widget.parentwidget:= widget1; //do not create window handle of widget
  try
   acanvas:= widget1.getcanvas; 
@@ -1080,6 +1092,9 @@ begin
      captiontorichstring(stockobjects.modalresulttext[buttons[int1]],
                              finfo.caption);
     end;
+    if int1 <= high(actions) then begin
+     onexecute:= actions[int1];
+    end;
     modalresult:= buttons[int1];
    end;
    if buttons[int1] = defaultbutton then begin
@@ -1106,7 +1121,18 @@ function showmessage(const atext,caption: msestring;
                      const minwidth: integer = 0): modalresultty;
 begin
  result:= internalshowmessage(atext,caption,buttons,defaultbutton,
-                 noshortcut,nil,cp_bottomleft,minwidth);
+                 noshortcut,nil,cp_bottomleft,minwidth,[]);
+end;
+
+function showmessage(const atext,caption: msestring;
+                     const buttons: array of modalresultty;
+                     const defaultbutton: modalresultty;
+                     const noshortcut: modalresultsty;
+                     const minwidth: integer;
+                     const actions: array of notifyeventty): modalresultty;
+begin
+ result:= internalshowmessage(atext,caption,buttons,defaultbutton,
+                 noshortcut,nil,cp_bottomleft,minwidth,actions);
 end;
 
 function showmessage(const atext,caption: msestring;
@@ -1128,7 +1154,7 @@ begin
  end;
  rect1.size:= adest.size;
  result:= internalshowmessage(atext,caption,buttons,defaultbutton,noshortcut,
-                @rect1,placement,minwidth);
+                @rect1,placement,minwidth,[]);
 end;
 
 function showmessage(const atext: msestring; const caption: msestring = '';
@@ -1308,6 +1334,9 @@ end;
 
 procedure tmessagebutton.doexecute;
 begin
+ if assigned(onexecute) then begin
+  onexecute(self);
+ end;
  window.modalresult:= modalresult;
 end;
 
@@ -3620,9 +3649,10 @@ end;
 { tmessagewidget }
 
 constructor tmessagewidget.create(const aowner: tcomponent;
-               const apopuptransient: boolean);
+               const apopuptransient: boolean; const ahasaction: boolean);
 begin
  fpopuptransient:= apopuptransient;
+ fhasaction:= ahasaction;
  inherited create(aowner);
  if apopuptransient then begin
   color:= cl_active;
@@ -3678,6 +3708,11 @@ end;
 procedure tmessagewidget.internalcreateframe;
 begin
  tcustomcaptionframe.create(self);
+end;
+
+function tmessagewidget.canclose(const newfocus: twidget): boolean;
+begin
+ result:= not fhasaction or (window.modalresult <> mr_windowclosed);
 end;
 
 { tcustomthumbtrackscrollframe }

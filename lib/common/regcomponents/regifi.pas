@@ -3,7 +3,9 @@ unit regifi;
 interface
 implementation
 uses
- mseifi,msedesignintf,msepropertyeditors,msestrings,msedesigner,mseclasses;
+ mseifi,msedesignintf,msepropertyeditors,msestrings,msedesigner,mseclasses,
+ mseifids;
+ 
 type
  tlinkactionitemeditor = class(tclasselementeditor)
   protected
@@ -18,7 +20,7 @@ type
  
 procedure register;
 begin
- registercomponents('Ifi',[tformlink,tpipeiochannel]); 
+ registercomponents('Ifi',[tformlink,tpipeiochannel,tifidataset]); 
  registerpropertyeditor(typeinfo(tlinkactions),nil,'',tlinkactionseditor);
 end;
 

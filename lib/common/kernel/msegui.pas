@@ -1541,6 +1541,7 @@ type
    fdelayedmouseshift: pointty;
    fmodalwindowbeforewaitdialog: twindow;
    fonterminatebefore: threadcompeventty;
+   fexecuteaction: notifyeventty;
    function getterminated: boolean;
    procedure setterminated(const Value: boolean);
    procedure invalidated;
@@ -1562,6 +1563,7 @@ type
    function internalunlock(count: integer): boolean;
    procedure destroyforms;
    procedure dothreadterminated(const sender: tthreadcomp);
+   procedure dowaitidle(var again: boolean);
   protected  
    procedure eventloop(const once: boolean = false); 
                         //used in win32 wm_queryendsession and wm_entersizemove
@@ -1602,7 +1604,9 @@ type
 
    procedure resetwaitdialog;   
    function waitdialog(const athread: tthreadcomp = nil; const atext: msestring = '';
-                              const caption: msestring = ''): boolean;
+                              const caption: msestring = '';
+                              const acancelaction: notifyeventty = nil;
+                              const aexecuteaction: notifyeventty = nil): boolean;
               //true if not canceled
    procedure terminatewait;
    procedure cancelwait;
@@ -10978,18 +10982,20 @@ begin
     window.activated;
    end
    else begin
-    if not fmodalwindow.visible then begin
-     gui_showwindow(fmodalwindow.fwinid);
-    end;
-    if ffocuslockwindow <> nil then begin //reactivate modal window
-     if ffocuslocktransientfor <> nil then begin
-      gui_setwindowfocus(ffocuslocktransientfor.winid);
+    if fmodalwindow.fwinid <> 0 then begin
+     if not fmodalwindow.visible then begin
+      gui_showwindow(fmodalwindow.fwinid);
      end;
-    end
-    else begin
-     gui_setwindowfocus(fmodalwindow.fwinid);
+     if ffocuslockwindow <> nil then begin //reactivate modal window
+      if ffocuslocktransientfor <> nil then begin
+       gui_setwindowfocus(ffocuslocktransientfor.winid);
+      end;
+     end
+     else begin
+      gui_setwindowfocus(fmodalwindow.fwinid);
+     end;
+     gui_raisewindow(fmodalwindow.fwinid);
     end;
-    gui_raisewindow(fmodalwindow.fwinid);
    end;
   end;
  finally
@@ -12882,9 +12888,18 @@ begin
  inherited;
 end;
 
+procedure tapplication.dowaitidle(var again: boolean);
+begin
+ unregisteronidle({$ifdef FPC}@{$endif}dowaitidle);
+ processmessages;
+ fexecuteaction(self);
+end;
+
 function tapplication.waitdialog(const athread: tthreadcomp = nil;
                const atext: msestring = '';
-               const caption: msestring = ''): boolean;
+               const caption: msestring = '';
+               const acancelaction: notifyeventty = nil;
+               const aexecuteaction: notifyeventty = nil): boolean;
 var
  res1: modalresultty;
 begin
@@ -12897,7 +12912,10 @@ begin
    fmodalwindowbeforewaitdialog:= fmodalwindow;
    resetwaitdialog;
    include(fstate,aps_waitstarted);
-//   beginwait;
+   fexecuteaction:= aexecuteaction;
+   if assigned(aexecuteaction) then begin
+    registeronidle({$ifdef FPC}@{$endif}dowaitidle);
+   end;
    try
     if athread <> nil then begin
      fonterminatebefore:= athread.onterminate;
@@ -12905,7 +12923,8 @@ begin
      athread.run;
     end;
     repeat
-    until showmessage(atext,caption,[mr_cancel]) = mr_cancel;
+    until showmessage(atext,caption,[mr_cancel],mr_cancel,[],0,
+                                              [acancelaction]) = mr_cancel;
     result:= aps_waitok in fstate;
     if not result then begin
      include(fstate,aps_waitcanceled);
@@ -12922,7 +12941,6 @@ begin
     if athread <> nil then begin
      athread.onterminate:= fonterminatebefore;
     end;
-//    endwait;
    end;
   end;
  end;

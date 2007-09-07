@@ -1156,6 +1156,8 @@ type
    procedure setcanceled(const avalue: boolean);
    function getrunning: boolean;
    procedure setactivepage(const avalue: integer);
+   procedure doexec(const sender: tobject);
+   procedure docancel(const sender: tobject);
   protected
    frepdesigninfo: repdesigninfoty;
    freppages: reportpagearty;
@@ -5296,10 +5298,20 @@ begin
   finally
    application.unlock;
   end;
-  if (fthread <> nil) and (reo_waitdialog in foptions) then begin
+  if {(fthread <> nil) and }(reo_waitdialog in foptions) then begin
    application.terminatewait;
   end;
  end;
+end;
+
+procedure tcustomreport.doexec(const sender: tobject);
+begin
+ exec(nil);
+end;
+
+procedure tcustomreport.docancel(const sender: tobject);
+begin
+ canceled:= true;
 end;
 
 procedure tcustomreport.internalrender(const acanvas: tcanvas;
@@ -5328,7 +5340,15 @@ begin
  if reo_nothread in foptions then begin
   application.beginwait;
   try
-   exec(nil);
+   if reo_waitdialog in foptions then begin
+    application.waitdialog(nil,fdialogtext,fdialogcaption,@docancel,@doexec);
+    if not canceled then begin
+     application.terminatewait;
+    end;
+   end
+   else begin
+    exec(nil);
+   end;
   finally
    application.endwait;
   end;
@@ -5540,6 +5560,9 @@ begin
    application.unlock;
   end;
  end;  
+ if (fthread = nil) and (reo_waitdialog in foptions) and not canceled then begin
+  application.processmessages;
+ end;
 end;
 
 procedure tcustomreport.doasyncevent(var atag: integer);
