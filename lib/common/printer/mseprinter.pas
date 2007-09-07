@@ -78,7 +78,10 @@ type
  end;
  colorspacety = (cos_gray,cos_rgb);
  pageorientationty = (pao_portrait,pao_landscape);
-   
+
+ printeroptionty = (pro_inactivewindow); //win32: start exe with inactive window
+ printeroptionsty = set of printeroptionty;
+ 
  tcustomprinter = class(tmsecomponent,istatfile)
   private
    fonpagestart: printereventty;
@@ -95,6 +98,7 @@ type
    fstatfile: tstatfile;
    fstatvarname: msestring;
    fpa_orientation: pageorientationty;
+   foptions: printeroptionsty;
    procedure settabulators(const avalue: tprintertabulators);
 //   procedure setppmm(const avalue: real);
    procedure setpa_frameleft(const avalue: real);
@@ -146,6 +150,7 @@ type
 //   property colorspace: colorspacety read getcolorspace write setcolorspace;
    property statfile: tstatfile read fstatfile write setstatfile;
    property statvarname: msestring read fstatvarname write fstatvarname;
+   property options: printeroptionsty read foptions write foptions;
  end;
 
  tprinter = class(tcustomprinter)
@@ -184,6 +189,7 @@ type
    procedure endprint; override;
   published
    property printcommand: string read fprintcommand write fprintcommand;
+   property options;
  end;
 
  tprinterfont = class(tcanvasfont)
@@ -1335,7 +1341,7 @@ begin
  end;
  pip1:= tpipewriter.create;
  try
-  execmse2(command,pip1);
+  execmse2(command,pip1,nil,nil,false,-1,pro_inactivewindow in foptions);
  except
   pip1.free;
   raise;
