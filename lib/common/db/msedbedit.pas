@@ -5680,10 +5680,15 @@ begin
 end;
 
 procedure tgriddatalink.focuscell(var cell: gridcoordty);
+var
+ int1: integer;
 begin
  if cell.row >= 0 then begin
-  moveby(cell.row-activerecord);
-  cell.row:= activerecord;
+  int1:= cell.row-activerecord;
+  if int1 <> 0 then begin
+   moveby(int1);
+   cell.row:= activerecord;
+  end;
  end;
 end;
 
