@@ -82,6 +82,8 @@ type
   function state: componenteditorstatesty;
  end;
 
+ compfilterfuncty = function(const acomponent: tcomponent): boolean of object;
+ 
  idesigner = interface
   procedure componentmodified(const component: tobject);
   function createcurrentcomponent(const module: tmsecomponent): tcomponent;
@@ -114,10 +116,12 @@ type
                    //handles qualified names for foreign forms
   function componentcanedit: boolean;
   function getcomponenteditor: icomponenteditor;
-  function getcomponentlist(const acomponentclass: tcomponentclass): componentarty;
+  function getcomponentlist(const acomponentclass: tcomponentclass;
+                               const filter: compfilterfuncty = nil): componentarty;
   function getcomponentnamelist(const acomponentclass: tcomponentclass;
                           const includeinherited: boolean;
-                          const aowner: tcomponent = nil): msestringarty;
+                          const aowner: tcomponent = nil;
+                          const filter: compfilterfuncty = nil): msestringarty;
   procedure setactivemodule(const adesignform: tmseform);
   procedure setmodulex(const amodule: tmsecomponent; avalue: integer);
   procedure setmoduley(const amodule: tmsecomponent; avalue: integer);

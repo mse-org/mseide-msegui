@@ -18,7 +18,7 @@ uses
  msewidgets,mseeditglob,msestockobjects,msestat,msestatfile,
  mseclasses,msesimplewidgets,
  msegrids,msewidgetgrid,msedatalist,msebitmap,msetypes,msestrings,msearrayprops,
- msedrawtext,mseshapes;
+ msedrawtext,mseshapes{$ifdef mse_with_ifi},mseifi,mseifiglob{$endif};
 
 const
  defaultsliderwidth = 200;
@@ -59,7 +59,8 @@ type
    property template;
  end;
 
- tgraphdataedit = class(tpublishedwidget,igridwidget,istatfile)
+ tgraphdataedit = class(tpublishedwidget,igridwidget,istatfile
+                  {$ifdef mse_with_ifi},iifiwidget{$endif})
   private
    fonchange: notifyeventty;
    fondataentered: notifyeventty;
@@ -68,6 +69,11 @@ type
    fstatfile: tstatfile;
    foptionsedit: optionseditty;
    fedited: boolean;
+{$ifdef mse_with_ifi}
+   fifiserverintf: iifiserver;
+   procedure setifiserverintf(const aintf: iifiserver);
+   function getifiserverintf: iifiserver;
+{$endif}   
    procedure setcolorglyph(const Value: colorty);
    procedure setstatfile(const Value: tstatfile);
    procedure setoptionsedit(const avalue: optionseditty);
@@ -1011,9 +1017,15 @@ end;
 
 procedure tgraphdataedit.dochange;
 begin
- if not (ws_loadedproc in fwidgetstate) and 
-                   canevent(tmethod(fonchange)) then begin
-  fonchange(self);
+ if not (ws_loadedproc in fwidgetstate) then begin
+  if canevent(tmethod(fonchange)) then begin
+   fonchange(self);
+  end;
+{$ifdef mse_with_ifi}
+  if fifiserverintf <> nil then begin
+   fifiserverintf.valuechanged(iifiwidget(self));
+  end;
+{$endif}
  end;
  invalidate;
 end;
@@ -1424,6 +1436,18 @@ begin
   optionsedit:= optionsedit - [oe_readonly];
  end;  
 end;
+
+{$ifdef mse_with_ifi}
+procedure tgraphdataedit.setifiserverintf(const aintf: iifiserver);
+begin
+ fifiserverintf:= aintf;
+end;
+
+function tgraphdataedit.getifiserverintf: iifiserver;
+begin
+ result:= fifiserverintf;
+end;
+{$endif}
 
 { ttogglegraphdataedit}
 

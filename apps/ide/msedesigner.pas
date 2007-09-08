@@ -385,10 +385,12 @@ type
                    //handles qualified names for foreign forms
    function componentcanedit: boolean;
    function getcomponenteditor: icomponenteditor;
-   function getcomponentlist(const acomponentclass: tcomponentclass): componentarty;
+   function getcomponentlist(const acomponentclass: tcomponentclass;
+                              const filter: compfilterfuncty = nil): componentarty;
    function getcomponentnamelist(const acomponentclass: tcomponentclass;
                                  const includeinherited: boolean;
-                                 const aowner: tcomponent = nil): msestringarty;
+                                 const aowner: tcomponent = nil;
+                                 const filter: compfilterfuncty = nil): msestringarty;
    procedure setmodulex(const amodule: tmsecomponent; avalue: integer);
    procedure setmoduley(const amodule: tmsecomponent; avalue: integer);
 
@@ -3982,7 +3984,8 @@ begin
 end;
 
 function tdesigner.getcomponentlist(
-             const acomponentclass: tcomponentclass): componentarty;
+             const acomponentclass: tcomponentclass;
+             const filter: compfilterfuncty = nil): componentarty;
 var
  int1,int2: integer;
  comp1: tcomponent;
@@ -3993,7 +3996,8 @@ begin
    int2:= 0;
    for int1:= 0 to high(result) do begin
     comp1:= next^.instance;
-    if comp1.InheritsFrom(acomponentclass) then begin
+    if comp1.InheritsFrom(acomponentclass) and 
+         ((filter = nil) or filter(comp1)) then begin
      result[int2]:= comp1;
      inc(int2);
     end;
@@ -4020,7 +4024,8 @@ end;
 
 function tdesigner.getcomponentnamelist(const acomponentclass: tcomponentclass;
                             const includeinherited: boolean;
-                            const aowner: tcomponent = nil): msestringarty;
+                            const aowner: tcomponent = nil;
+                            const filter: compfilterfuncty = nil): msestringarty;
 var
  int1,int2: integer;
  comp1: tcomponent;
@@ -4041,7 +4046,8 @@ begin
   with po1^.components do begin
    for int2:= 0 to count - 1 do begin
     comp1:= next^.instance;
-    if comp1.InheritsFrom(acomponentclass) then begin
+    if comp1.InheritsFrom(acomponentclass) and 
+            ((filter = nil) or filter(comp1)) then begin
      if ((aowner = nil) or (aowner = comp1.owner)) and 
               (includeinherited or 
               (comp1.componentstate * [csinline,csancestor] = [])) then begin

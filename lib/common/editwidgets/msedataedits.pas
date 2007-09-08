@@ -1635,7 +1635,7 @@ end;
 
 procedure tcustomstringedit.setvalue(const Value: msestring);
 begin
- fvalue := Value;
+ fvalue:= Value;
  valuechanged;
 end;
 

@@ -16,7 +16,7 @@ uses
  msegui,mseeditglob,msegraphics,msegraphutils,msedatalist,
  mseevent,mseguiglob,mseinplaceedit,msegrids,msetypes,mseshapes,msewidgets,
  msedrawtext,classes,msereal,mseclasses,msearrayprops,msebitmap,msemenus,
- msesimplewidgets,msepointer,msestrings,msescrollbar;
+ msesimplewidgets,msepointer,msestrings,msescrollbar,mseifiglob;
 
 const
  defaulteditwidgetoptions = defaultoptionswidget+[ow_fontglyphheight,ow_autoscale];
@@ -239,13 +239,19 @@ type
                         var atext: msestring) of object;
                       
  
- tcustomedit = class(tpublishedwidget,iedit)
+ tcustomedit = class(tpublishedwidget,iedit{$ifdef mse_with_ifi},iifiwidget{$endif})
   private
    fonchange: notifyeventty;
    fontextedited: texteditedeventty;
    ftextflags: textflagsty;
    ftextflagsactive: textflagsty;
    fonkeydown: keyeventty;
+{$ifdef mse_with_ifi}
+   fifiserverintf: iifiserver;
+   //iifiwidget
+   procedure setifiserverintf(const aintf: iifiserver);
+   function getifiserverintf: iifiserver;
+{$endif}   
    function getmaxlength: integer;
    function getpasswordchar: msechar;
    procedure setmaxlength(const Value: integer);
@@ -262,6 +268,7 @@ type
    procedure onpaste(const sender: tobject);
    function getcaretwidth: integer;
    procedure setcaretwidth(const Value: integer);
+   
   protected
    feditor: tinplaceedit;
    foptionsedit: optionseditty;
@@ -1000,9 +1007,15 @@ end;
 
 procedure tcustomedit.dochange;
 begin
- if not (ws_loadedproc in fwidgetstate) and 
-                  canevent(tmethod(fonchange)) then begin
-  fonchange(self);
+ if not (ws_loadedproc in fwidgetstate) then begin
+  if canevent(tmethod(fonchange)) then begin
+   fonchange(self);
+  end;
+{$ifdef mse_with_ifi}
+  if fifiserverintf <> nil then begin
+   fifiserverintf.valuechanged(iifiwidget(self));
+  end;
+{$endif}
  end;
 end;
 
@@ -1172,4 +1185,15 @@ begin
  inherited;
 end;
 
+{$ifdef mse_with_ifi}
+procedure tcustomedit.setifiserverintf(const aintf: iifiserver);
+begin
+ fifiserverintf:= aintf;
+end;
+
+function tcustomedit.getifiserverintf: iifiserver;
+begin
+ result:= fifiserverintf;
+end;
+{$endif}
 end.

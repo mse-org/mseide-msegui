@@ -5,7 +5,7 @@ uses
  classes,db,mseifi,mseclasses,mseguiglob,mseevent;
  
 type
-
+//single record dataset, not implemented yet
  tifidataset = class(tdataset,ievent)
   private
    fchannel: tcustomiochannel;

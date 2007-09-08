@@ -307,6 +307,7 @@ type
    function issubcomponent(const index: integer = 0): boolean;
    function getdefaultstate: propertystatesty; override;
    procedure checkcomponent(const avalue: tcomponent); virtual;
+   function filtercomponent(const acomponent: tcomponent): boolean; virtual;
   public
    function allequal: boolean; override;
    function getvalue: msestring; override;
@@ -858,6 +859,8 @@ end;
 function tpropertyeditors.geteditorclass(apropertytype: ptypeinfo;
                apropertyownerclass: tclass;
                apropertyname: string): propertyeditorclassty;
+               
+               //todo: optimize
 var
  int1: integer;
  po1: ppropertyeditorinfoty;
@@ -1998,7 +2001,8 @@ begin
  end
  else begin
   if ps_link in fstate then begin
-   ar1:= fdesigner.getcomponentlist(tcomponentclass(typedata^.classtype));
+   ar1:= fdesigner.getcomponentlist(tcomponentclass(typedata^.classtype),
+             {$ifdef FPC}@{$endif}filtercomponent);
    if ps_local in fstate then begin
     co1:= fcomponent.owner;
     for int1:= high(ar1) downto 0 do begin
@@ -2007,6 +2011,7 @@ begin
      end;
     end;
    end;
+
    for int1:= 0 to high(ar1) do begin
     with tdesigner1(designer).selections do begin
      for int2:= count - 1 downto 0 do begin
@@ -2031,7 +2036,8 @@ begin
     co1:= nil;
    end;
    result:= fdesigner.getcomponentnamelist(
-                  tcomponentclass(typedata^.classtype),false,co1);
+                  tcomponentclass(typedata^.classtype),false,co1,
+                  {$ifdef FPC}@{$endif}filtercomponent);
   end;
  end;
 end;
@@ -2066,6 +2072,11 @@ end;
 procedure tcomponentpropertyeditor.checkcomponent(const avalue: tcomponent);
 begin
  //dummy
+end;
+
+function tcomponentpropertyeditor.filtercomponent(const acomponent: tcomponent): boolean;
+begin
+ result:= true;
 end;
 
 { tsisterwidgetpropertyeditor }
