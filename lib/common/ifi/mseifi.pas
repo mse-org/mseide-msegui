@@ -10,7 +10,7 @@ type
  ifinamety = array[0..0] of char; //null terminated
  pifinamety = ^ifinamety;
 
- ifidatakindty = (idk_none,idk_int64,idk_real,idk_msestring);
+ ifidatakindty = (idk_none,idk_int64,idk_real,idk_msestring,idk_ansistring);
  
  datarecty = record //dummy
  end;
@@ -78,6 +78,7 @@ type
   public
    constructor create(const aowner: tcustomformlink; 
                            const aitemclass: formlinkpropclassty);
+   function byname(const aname: string): tformlinkprop;
  end; 
  
  tlinkaction = class(tformlinkprop)
@@ -101,24 +102,29 @@ type
  
  tlinkactions = class(tformlinkarrayprop)
   private
-   function getitems(const index: integer): tlinkaction;
   protected
   public
-   property items[const index: integer]: tlinkaction read getitems; default;
  end;
 
  trxlinkactions = class(tlinkactions)
   private
    fonexecute: integerchangedeventty;
+   function getitems(const index: integer): trxlinkaction;
   public
    constructor create(const aowner: tcustomformlink);
+   function byname(const aname: string): trxlinkaction;
+   property items[const index: integer]: trxlinkaction read getitems; default;
   published
    property onexecute: integerchangedeventty read fonexecute write fonexecute;
  end;
  
  ttxlinkactions = class(tlinkactions)
+  private
+   function getitems(const index: integer): ttxlinkaction;
   public
    constructor create(const aowner: tcustomformlink);
+   function byname(const aname: string): ttxlinkaction;
+   property items[const index: integer]: ttxlinkaction read getitems; default;
  end;
 
  tlinkdatawidget = class;
@@ -134,6 +140,7 @@ type
    fint64value: int64;
    fdoublevalue: double;
    fmsestringvalue: msestring;
+   fansistringvalue: ansistring;
    fdatakind: ifidatakindty;
    fupdatelock: integer;
    fonpropertychanged: propertychangedeventty;
@@ -148,6 +155,8 @@ type
    procedure setasfloat(const avalue: double);
    function getasmsestring: msestring;
    procedure setasmsestring(const avalue: msestring);
+   function getasansistring: ansistring;
+   procedure setasansistring(const avalue: ansistring);
   protected
    procedure initpropertyrecord(out arec: string; const apropertyname: string;
        const akind: ifidatakindty; const datasize: integer; out datapo: pchar);
@@ -155,12 +164,13 @@ type
    procedure sendvalue(const aname: string; const avalue: int64); overload;
    procedure sendvalue(const aname: string; const avalue: double); overload;
    procedure sendvalue(const aname: string; const avalue: msestring); overload;
+   procedure sendvalue(const aname: string; const avalue: ansistring); overload;
   public
    property asinteger: integer read getasinteger write setasinteger;
    property aslargeint: int64 read getaslargeint write setaslargeint;
    property asfloat: double read getasfloat write setasfloat;
    property asmsestring: msestring read getasmsestring write setasmsestring;
-   
+   property asstring: string read getasansistring write setasansistring;
   published
    property widget: twidget read fwidget write setwidget;
    property onpropertychanged: propertychangedeventty read fonpropertychanged 
@@ -168,9 +178,13 @@ type
  end;
 
  tlinkdatawidgets = class(tformlinkarrayprop) 
+  private
+   function getitems(const index: integer): tlinkdatawidget;
   protected
   public
    constructor create(const aowner: tcustomformlink);
+   function byname(const aname: string): tlinkdatawidget;
+   property items[const index: integer]: tlinkdatawidget read getitems; default;   
  end;
  
  tcustomiochannel = class(tmsecomponent)
@@ -283,7 +297,8 @@ const
   sizeof(ifidataty),                  //idk_none
   sizeof(ifidataty)+sizeof(int64),    //idk_int64
   sizeof(ifidataty)+sizeof(double),   //idk_real
-  sizeof(ifidataty)+sizeof(ifinamety) //idk_msestring
+  sizeof(ifidataty)+sizeof(ifinamety),//idk_msestring
+  sizeof(ifidataty)+sizeof(ifinamety) //idk_ansistring
   );
 
  stuffchar = c_dle;
@@ -523,10 +538,10 @@ end;
 
 { trxlinkaction }
 
- { ttxlinkaction }
+{ ttxlinkaction }
  
 procedure ttxlinkaction.objectevent(const sender: tobject;
-               const event: objecteventty);
+                                          const event: objecteventty);
 begin
  if (event = oe_fired) and (sender = faction) then begin
   tcustomformlink(fowner).actionfired(self);
@@ -548,12 +563,20 @@ begin
  tformlinkprop(item).fprop:= self;
 end;
 
-{ tlinkactions }
-
-function tlinkactions.getitems(const index: integer): tlinkaction;
+function tformlinkarrayprop.byname(const aname: string): tformlinkprop;
+var
+ int1: integer;
 begin
- result:= tlinkaction(inherited getitems(index));
+ for int1:= 0 to high(fitems) do begin
+  if tformlinkprop(fitems[int1]).fname = aname then begin
+   result:= tformlinkprop(fitems[int1]);
+   exit;
+  end;
+ end;
+ raise exception.create(fowner.name+': array property "'+aname+'" not found.');
 end;
+
+{ tlinkactions }
 
 { trxlinkactions }
 
@@ -562,11 +585,31 @@ begin
  inherited create(aowner,trxlinkaction);
 end;
 
+function trxlinkactions.getitems(const index: integer): trxlinkaction;
+begin
+ result:= trxlinkaction(inherited getitems(index));
+end;
+
+function trxlinkactions.byname(const aname: string): trxlinkaction;
+begin
+ result:= trxlinkaction(inherited byname(aname));
+end;
+
 { ttxlinkactions }
 
 constructor ttxlinkactions.create(const aowner: tcustomformlink);
 begin
  inherited create(aowner,ttxlinkaction);
+end;
+
+function ttxlinkactions.getitems(const index: integer): ttxlinkaction;
+begin
+ result:= ttxlinkaction(inherited getitems(index));
+end;
+
+function ttxlinkactions.byname(const aname: string): ttxlinkaction;
+begin
+ result:= ttxlinkaction(inherited byname(aname));
 end;
 
 { tlinkdatawidget }
@@ -607,6 +650,9 @@ begin
    tkWString: begin
     sendvalue(aproperty^.name,getwidestrprop(fwidget,aproperty));
    end;
+   tkSString,tkLString,tkAString: begin
+    sendvalue(aproperty^.name,getstrprop(fwidget,aproperty));
+   end;
   end;
  end;
 end;
@@ -637,6 +683,16 @@ begin
  str2:= stringtoutf8(avalue);
  initpropertyrecord(str1,aname,idk_msestring,length(str2),po1);
  stringtoifiname(str2,pifinamety(po1));
+ tcustomformlink(fowner).fchannel.senddata(str1);
+end;
+
+procedure tlinkdatawidget.sendvalue(const aname: string; const avalue: ansistring);
+var
+ str1: string;
+ po1: pchar;
+begin
+ initpropertyrecord(str1,aname,idk_ansistring,length(avalue),po1);
+ stringtoifiname(avalue,pifinamety(po1));
  tcustomformlink(fowner).fchannel.senddata(str1);
 end;
 
@@ -676,6 +732,10 @@ begin
     ifinametostring(pifinamety(@data),str1);
     fmsestringvalue:= utf8tostring(str1);
    end;
+   idk_ansistring: begin
+    ifinametostring(pifinamety(@data),str1);
+    fansistringvalue:= str1;
+   end;
   end;
   if fvalueproperty <> nil then begin
    inc(fupdatelock);
@@ -689,6 +749,9 @@ begin
      end;
      tkWString: begin
       setwidestrprop(fwidget,fvalueproperty,asmsestring);
+     end;
+     tkSString,tkLString,tkAString: begin
+      setstrprop(fwidget,fvalueproperty,asstring);
      end;
     end;
    finally
@@ -726,6 +789,7 @@ procedure tlinkdatawidget.setaslargeint(const avalue: int64);
 begin
  fdatakind:= idk_int64;
  fint64value:= avalue;
+ sendvalue('value',fint64value);
 end;
 
 function tlinkdatawidget.getasfloat: double;
@@ -738,18 +802,43 @@ procedure tlinkdatawidget.setasfloat(const avalue: double);
 begin
  fdatakind:= idk_real;
  fdoublevalue:= avalue;
+ sendvalue('value',fdoublevalue);
 end;
 
 function tlinkdatawidget.getasmsestring: msestring;
 begin
- checkdatakind(idk_msestring);
- result:= fmsestringvalue;
+ if fdatakind = idk_ansistring then begin
+  fansistringvalue;
+ end
+ else begin
+  checkdatakind(idk_msestring);
+  result:= fmsestringvalue;
+ end;
 end;
 
 procedure tlinkdatawidget.setasmsestring(const avalue: msestring);
 begin
  fdatakind:= idk_msestring;
  fmsestringvalue:= avalue;
+ sendvalue('value',fmsestringvalue);
+end;
+
+function tlinkdatawidget.getasansistring: ansistring;
+begin
+ if fdatakind = idk_msestring then begin
+  fmsestringvalue;
+ end
+ else begin
+  checkdatakind(idk_ansistring);
+  result:= fansistringvalue;
+ end;
+end;
+
+procedure tlinkdatawidget.setasansistring(const avalue: ansistring);
+begin
+ fdatakind:= idk_ansistring;
+ fansistringvalue:= avalue;
+ sendvalue('value',fansistringvalue);
 end;
 
 { tlinkdatawidgets }
@@ -757,6 +846,16 @@ end;
 constructor tlinkdatawidgets.create(const aowner: tcustomformlink);
 begin
  inherited create(aowner,tlinkdatawidget);
+end;
+
+function tlinkdatawidgets.getitems(const index: integer): tlinkdatawidget;
+begin
+ result:= tlinkdatawidget(inherited getitems(index));
+end;
+
+function tlinkdatawidgets.byname(const aname: string): tlinkdatawidget;
+begin
+ result:= tlinkdatawidget(inherited byname(aname));
 end;
 
 { tcustomformlink }

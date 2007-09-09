@@ -14,7 +14,7 @@ unit msedispwidgets;
 interface
 uses
  classes,msegui,mseguiglob,msewidgets,msegraphics,msedrawtext,msegraphutils,
-   msetypes,msestrings,mseformatstr;
+   msetypes,msestrings,mseformatstr,mseifiglob;
 
 const
  defaultdisptextflags = [tf_ycentered];
@@ -73,11 +73,17 @@ type
  dispwidgetoptionty = (dwo_hintclippedtext,dwo_nogray);
  dispwidgetoptionsty = set of dispwidgetoptionty;
  
- tdispwidget = class(tpublishedwidget)
+ tdispwidget = class(tpublishedwidget{$ifdef mse_with_ifi},iifiwidget{$endif})
   private
    finfo: drawtextinfoty;
    foptions: dispwidgetoptionsty;
    ftextflags: textflagsty;
+{$ifdef mse_with_ifi}
+   fifiserverintf: iifiserver;
+   //iifiwidget
+   procedure setifiserverintf(const aintf: iifiserver);
+   function getifiserverintf: iifiserver;
+{$endif}   
    procedure updatetextflags;
    procedure settextflags(const value: textflagsty);
    procedure setoptions(const avalue: dispwidgetoptionsty);
@@ -89,7 +95,7 @@ type
    procedure clientrectchanged; override;
    procedure fontchanged; override;
    procedure internalcreateframe; override;
-   procedure loaded; override;
+   procedure doloaded; override;
    procedure showhint(var info: hintinfoty); override;
    procedure enabledchanged; override;
   public
@@ -335,6 +341,13 @@ procedure tdispwidget.valuechanged;
 begin
  finfo.text.text:= getvaluetext;
  invalidate;
+{$ifdef mse_with_ifi}
+ if not (ws_loadedproc in fwidgetstate) then begin
+  if fifiserverintf <> nil then begin
+   fifiserverintf.valuechanged(iifiwidget(self));
+  end;
+ end;
+{$endif}
 end;
 
 procedure tdispwidget.formatchanged;
@@ -343,7 +356,7 @@ begin
  invalidate;
 end;
 
-procedure tdispwidget.loaded;
+procedure tdispwidget.doloaded;
 begin
  inherited;
  valuechanged;
@@ -390,6 +403,18 @@ begin
   invalidate;
  end;
 end;
+
+{$ifdef mse_with_ifi}
+procedure tdispwidget.setifiserverintf(const aintf: iifiserver);
+begin
+ fifiserverintf:= aintf;
+end;
+
+function tdispwidget.getifiserverintf: iifiserver;
+begin
+ result:= fifiserverintf;
+end;
+{$endif}
 
 { tcustomstringdisp }
 
