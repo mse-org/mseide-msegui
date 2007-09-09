@@ -31,11 +31,18 @@ type
  tifidatawidgeteditor = class(tcomponentpropertyeditor)
   protected
    function filtercomponent(const acomponent: tcomponent): boolean; override;
+   procedure checkcomponent(const avalue: tcomponent); override;
   public
-   constructor create(const adesigner: idesigner;
-        const amodule: tmsecomponent; const acomponent: tcomponent;
-            const aobjectinspector: iobjectinspector;
-            const aprops: propinstancearty; atypeinfo: ptypeinfo); override;
+ end;
+
+ tformlinkdatawidgetitemeditor = class(tformlinkitemeditor)
+  protected
+   function getvalue: msestring; override;
+ end;
+ 
+ tformlinkdatawidgetseditor = class(tpersistentarraypropertyeditor)
+  protected
+   function geteditorclass: propertyeditorclassty; override;
  end;
   
 procedure register;
@@ -43,6 +50,7 @@ begin
  registercomponents('Ifi',[tformlink,tpipeiochannel,ttxdataset,trxdataset]); 
  registerpropertyeditor(typeinfo(tformlinkarrayprop),nil,'',tformlinkeditor);
  registerpropertyeditor(typeinfo(tlinkactions),nil,'',tformlinkactionseditor);
+ registerpropertyeditor(typeinfo(tlinkdatawidgets),nil,'',tformlinkdatawidgetseditor);
  registerpropertyeditor(typeinfo(twidget),tlinkdatawidget,'widget',tifidatawidgeteditor);
 end;
 
@@ -106,12 +114,42 @@ begin
  result:= getcorbainterface(acomponent,typeinfo(iifiwidget),intf1);
 end;
 
-constructor tifidatawidgeteditor.create(const adesigner: idesigner;
-               const amodule: tmsecomponent; const acomponent: tcomponent;
-               const aobjectinspector: iobjectinspector;
-               const aprops: propinstancearty; atypeinfo: ptypeinfo);
+{ tformlinkdatawidgetitemeditor }
+
+function tformlinkdatawidgetitemeditor.getvalue: msestring;
+var
+ mstr1: msestring;
+begin
+ result:= inherited getvalue;
+ with tlinkdatawidget(getordvalue) do begin
+  if widget = nil then begin
+   result:= result+'<>';
+  end
+  else begin
+   mstr1:= fdesigner.getcomponentname(widget);
+   if mstr1 = '' then begin
+    ownernamepath(widget);
+   end;
+   result:= result+'<'+mstr1+'>';
+  end;
+ end;
+end;
+
+{ tformlinkdatawidgetseditor }
+
+function tformlinkdatawidgetseditor.geteditorclass: propertyeditorclassty;
+begin
+ result:= tformlinkdatawidgetitemeditor;
+end;
+
+procedure tifidatawidgeteditor.checkcomponent(const avalue: tcomponent);
 begin
  inherited;
+ with tlinkdatawidget(fprops[0].instance) do begin
+  if name = '' then begin
+   name:= avalue.name;
+  end;
+ end; 
 end;
 
 initialization
