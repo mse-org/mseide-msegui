@@ -808,7 +808,7 @@ end;
 function tlinkdatawidget.getasmsestring: msestring;
 begin
  if fdatakind = idk_ansistring then begin
-  fansistringvalue;
+  result:= fansistringvalue;
  end
  else begin
   checkdatakind(idk_msestring);
@@ -826,7 +826,7 @@ end;
 function tlinkdatawidget.getasansistring: ansistring;
 begin
  if fdatakind = idk_msestring then begin
-  fmsestringvalue;
+  result:= fmsestringvalue;
  end
  else begin
   checkdatakind(idk_ansistring);
