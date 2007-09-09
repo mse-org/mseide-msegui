@@ -6,7 +6,8 @@ uses
  mseguiglob,msestream,msepipestream,msegui,mseifiglob,typinfo;
 type
 
- ifireckindty = (ik_none,ik_data,ik_actionfired,ik_propertychanged);
+ ifireckindty = (ik_none,ik_data,ik_itemheader,ik_actionfired,ik_propertychanged,
+                 ik_widgetcommand);
  ifinamety = array[0..0] of char; //null terminated
  pifinamety = ^ifinamety;
 
@@ -20,20 +21,35 @@ type
   data: datarecty; //variable length
  end;
  pifidataty = ^ifidataty;
-  
- actionfiredty = record
+
+ itemheaderty = record  
   tag: integer;
   name: ifinamety;
  end;
+ pitemheaderty = ^itemheaderty;
+  
+ actionfiredty = record
+  header: itemheaderty;
+ end;
 
  propertychangedty = record
-  tag: integer;
-  name: ifinamety;
+  header: itemheaderty;
   propertyname: ifinamety;
   data: ifidataty;
  end;
  ppropertychangedty = ^propertychangedty;
-  
+
+ ifiwidgetcommandty = (iwc_enable,iwc_disable,iwc_show,iwc_hide);
+ pifiwidgetcommandty = ^ifiwidgetcommandty;
+ widgetcommandty = record
+  header: itemheaderty;
+  command: ifiwidgetcommandty;
+ end;
+ 
+const
+ ifiitemkinds = [ik_actionfired,ik_propertychanged,ik_widgetcommand];
+ 
+type 
  ifiheaderty = record
   size: integer;  //overall size
   kind: ifireckindty;
@@ -46,11 +62,17 @@ type
    ik_data:(
     data: ifidataty;
    );
+   ik_itemheader:(
+    itemheader: itemheaderty;
+   );
    ik_actionfired:(
     actionfired: actionfiredty;
    );
    ik_propertychanged:(
     propertychanged: propertychangedty;
+   );
+   ik_widgetcommand: (
+    widgetcommand: widgetcommandty;
    );
  end;
  pifirecty = ^ifirecty;
@@ -78,6 +100,7 @@ type
   public
    constructor create(const aowner: tcustomformlink; 
                            const aitemclass: formlinkpropclassty);
+   function finditem(const aname: string): tformlinkprop;
    function byname(const aname: string): tformlinkprop;
  end; 
  
@@ -132,6 +155,7 @@ type
  propertychangedeventty = procedure(const sender: tlinkdatawidget;
                  const tag: integer; const propertyname: string) of object;
 
+//todo: beginupdate/endupdate
  tlinkdatawidget = class(tformlinkprop)
   private
    fwidget: twidget;
@@ -157,7 +181,12 @@ type
    procedure setasmsestring(const avalue: msestring);
    function getasansistring: ansistring;
    procedure setasansistring(const avalue: ansistring);
+   procedure setenabled(const avalue: boolean);
+   procedure setvisible(const avalue: boolean);
   protected
+   procedure inititemheader(out arec: string;
+                  const akind: ifireckindty; const datasize: integer;
+                  out datapo: pchar);
    procedure initpropertyrecord(out arec: string; const apropertyname: string;
        const akind: ifidatakindty; const datasize: integer; out datapo: pchar);
    procedure sendvalue(const aproperty: ppropinfo); overload;
@@ -165,12 +194,15 @@ type
    procedure sendvalue(const aname: string; const avalue: double); overload;
    procedure sendvalue(const aname: string; const avalue: msestring); overload;
    procedure sendvalue(const aname: string; const avalue: ansistring); overload;
+   procedure sendcommand(const acommand: ifiwidgetcommandty);
   public
    property asinteger: integer read getasinteger write setasinteger;
    property aslargeint: int64 read getaslargeint write setaslargeint;
    property asfloat: double read getasfloat write setasfloat;
    property asmsestring: msestring read getasmsestring write setasmsestring;
    property asstring: string read getasansistring write setasansistring;
+   property enabled: boolean write setenabled;
+   property visible: boolean write setvisible;
   published
    property widget: twidget read fwidget write setwidget;
    property onpropertychanged: propertychangedeventty read fonpropertychanged 
@@ -257,8 +289,11 @@ type
    procedure actionreceived(const atag: integer; const aname: string);
    procedure propertychangereceived(const atag: integer; const aname: string;
                       const apropertyname: string; const adata: pifidataty);
+   procedure widgetcommandreceived(const atag: integer; const aname: string;
+                      const acommand: ifiwidgetcommandty);
    procedure objectevent(const sender: tobject; const event: objecteventty); override;
    procedure processdata(const adata: pifirecty);
+   procedure senddata(const adata: ansistring);
    //iifiserver
    procedure valuechanged(const sender: iifiwidget);
   public
@@ -287,18 +322,20 @@ uses
 
 const
  headersizes: array[ifireckindty] of integer = (
-  sizeof(ifiheaderty),                          //ik_none
-  sizeof(ifiheaderty),                          //ik_data
-  sizeof(ifiheaderty)+sizeof(actionfiredty),    //ik_actionfired
-  sizeof(ifiheaderty)+sizeof(propertychangedty) //ik_propertychanged
+  sizeof(ifiheaderty),                           //ik_none
+  sizeof(ifiheaderty),                           //ik_data
+  sizeof(ifiheaderty)+sizeof(itemheaderty),      //ik_itemheader
+  sizeof(ifiheaderty)+sizeof(actionfiredty),     //ik_actionfired
+  sizeof(ifiheaderty)+sizeof(propertychangedty), //ik_propertychanged
+  sizeof(ifiheaderty)+sizeof(widgetcommandty)    //ik_widgetcommand
  );
 
  datarecsizes: array[ifidatakindty] of integer = (
-  sizeof(ifidataty),                  //idk_none
-  sizeof(ifidataty)+sizeof(int64),    //idk_int64
-  sizeof(ifidataty)+sizeof(double),   //idk_real
-  sizeof(ifidataty)+sizeof(ifinamety),//idk_msestring
-  sizeof(ifidataty)+sizeof(ifinamety) //idk_ansistring
+  sizeof(ifidataty),                             //idk_none
+  sizeof(ifidataty)+sizeof(int64),               //idk_int64
+  sizeof(ifidataty)+sizeof(double),              //idk_real
+  sizeof(ifidataty)+sizeof(ifinamety),           //idk_msestring
+  sizeof(ifidataty)+sizeof(ifinamety)            //idk_ansistring
   );
 
  stuffchar = c_dle;
@@ -563,10 +600,11 @@ begin
  tformlinkprop(item).fprop:= self;
 end;
 
-function tformlinkarrayprop.byname(const aname: string): tformlinkprop;
+function tformlinkarrayprop.finditem(const aname: string): tformlinkprop;
 var
  int1: integer;
 begin
+ result:= nil;
  for int1:= 0 to high(fitems) do begin
   if tformlinkprop(fitems[int1]).fname = aname then begin
    result:= tformlinkprop(fitems[int1]);
@@ -574,6 +612,14 @@ begin
   end;
  end;
  raise exception.create(fowner.name+': array property "'+aname+'" not found.');
+end;
+
+function tformlinkarrayprop.byname(const aname: string): tformlinkprop;
+begin
+ result:= finditem(aname);
+ if result = nil then begin
+  raise exception.create(fowner.name+': array property "'+aname+'" not found.');
+ end;
 end;
 
 { tlinkactions }
@@ -664,6 +710,7 @@ var
 begin
  initpropertyrecord(str1,aname,idk_real,0,po1); 
  pint64(po1)^:= avalue;
+ tcustomformlink(fowner).senddata(str1);
 end;
 
 procedure tlinkdatawidget.sendvalue(const aname: string; const avalue: double);
@@ -673,6 +720,7 @@ var
 begin
  initpropertyrecord(str1,aname,idk_real,0,po1);
  pdouble(po1)^:= avalue;
+ tcustomformlink(fowner).senddata(str1);
 end;
 
 procedure tlinkdatawidget.sendvalue(const aname: string; const avalue: msestring);
@@ -683,7 +731,7 @@ begin
  str2:= stringtoutf8(avalue);
  initpropertyrecord(str1,aname,idk_msestring,length(str2),po1);
  stringtoifiname(str2,pifinamety(po1));
- tcustomformlink(fowner).fchannel.senddata(str1);
+ tcustomformlink(fowner).senddata(str1);
 end;
 
 procedure tlinkdatawidget.sendvalue(const aname: string; const avalue: ansistring);
@@ -693,7 +741,23 @@ var
 begin
  initpropertyrecord(str1,aname,idk_ansistring,length(avalue),po1);
  stringtoifiname(avalue,pifinamety(po1));
- tcustomformlink(fowner).fchannel.senddata(str1);
+ tcustomformlink(fowner).senddata(str1);
+end;
+
+procedure tlinkdatawidget.inititemheader(out arec: string;
+                  const akind: ifireckindty; const datasize: integer;
+                  out datapo: pchar);
+var
+ po1: pchar; 
+begin
+ tcustomformlink(fowner).initifirec(arec,akind,datasize-sizeof(ifiheaderty)+
+                        length(fname),po1);
+ with pitemheaderty(po1)^ do begin
+  tag:= ftag;
+  po1:= @name;
+ end;
+ inc(po1,stringtoifiname(fname,pifinamety(po1)));
+ datapo:= po1;
 end;
 
 procedure tlinkdatawidget.initpropertyrecord(out arec: string;
@@ -702,17 +766,23 @@ procedure tlinkdatawidget.initpropertyrecord(out arec: string;
 var
  po1: pchar; 
 begin
- tcustomformlink(fowner).initifirec(arec,ik_propertychanged,
-       (sizeof(propertychangedty)-sizeof(ifidataty))+datarecsizes[akind]+
-       length(fname)+length(apropertyname)+datasize,po1);
- with ppropertychangedty(po1)^ do begin
-  tag:= ftag;
-  po1:= @name;
- end;
- inc(po1,stringtoifiname(fname,pifinamety(po1)));
+ inititemheader(arec,ik_propertychanged,sizeof(propertychangedty)+
+                datarecsizes[akind]+
+                length(apropertyname)+datasize,po1);
+       
  inc(po1,stringtoifiname(apropertyname,pifinamety(po1)));
  pifidataty(po1)^.kind:= akind;
  datapo:= po1 + sizeof(ifidataty.kind);
+end;
+
+procedure tlinkdatawidget.sendcommand(const acommand: ifiwidgetcommandty);
+var
+ str1: string;
+ po1: pchar;
+begin
+ inititemheader(str1,ik_widgetcommand,sizeof(widgetcommandty),po1);
+ pifiwidgetcommandty(po1)^:= acommand;
+ tcustomformlink(fowner).senddata(str1);
 end;
 
 procedure tlinkdatawidget.setdata(const adata: pifidataty);
@@ -841,6 +911,26 @@ begin
  sendvalue('value',fansistringvalue);
 end;
 
+procedure tlinkdatawidget.setenabled(const avalue: boolean);
+begin
+ if avalue then begin
+  sendcommand(iwc_enable);
+ end
+ else begin
+  sendcommand(iwc_disable);
+ end;
+end;
+
+procedure tlinkdatawidget.setvisible(const avalue: boolean);
+begin
+ if avalue then begin
+  sendcommand(iwc_show);
+ end
+ else begin
+  sendcommand(iwc_hide);
+ end;
+end;
+
 { tlinkdatawidgets }
 
 constructor tlinkdatawidgets.create(const aowner: tcustomformlink);
@@ -927,7 +1017,7 @@ var
  po1: pchar;
 begin
  initifirec(result,ik_actionfired,length(aname),po1);
- with pifirecty(result)^.actionfired do begin
+ with pifirecty(result)^.actionfired.header do begin
   tag:= atag;
   stringtoifiname(aname,@name);
  end;
@@ -969,27 +1059,32 @@ begin
 end;
 
 procedure tcustomformlink.processdata(const adata: pifirecty);
-var
+var 
  tag1: integer;
  str1,str2: string;
  po1: pchar;
-begin
+ command1: ifiwidgetcommandty;
+begin 
  with adata^ do begin
-  case header.kind of
-   ik_actionfired: begin
-    with actionfired do begin
-     tag1:= tag;
-     ifinametostring(@name,str1);
+  if header.kind in ifiitemkinds then begin
+   with itemheader do begin 
+    tag1:= tag;
+    po1:= @name;
+   end;
+   inc(po1,ifinametostring(pifinamety(po1),str1));
+   case header.kind of
+    ik_actionfired: begin
      actionreceived(tag1,str1);
     end;
-   end;
-   ik_propertychanged: begin
-    with propertychanged do begin
-     tag1:= tag;
-     po1:= @name;
-     inc(po1,ifinametostring(pifinamety(po1),str1));
-     inc(po1,ifinametostring(pifinamety(po1),str2));
-     propertychangereceived(tag1,str1,str2,pifidataty(po1));
+    ik_propertychanged: begin
+     with propertychanged.header do begin
+      inc(po1,ifinametostring(pifinamety(po1),str2));
+      propertychangereceived(tag1,str1,str2,pifidataty(po1));
+     end;
+    end;
+    ik_widgetcommand: begin
+     command1:= pifiwidgetcommandty(po1)^;
+     widgetcommandreceived(tag1,str1,command1);
     end;
    end;
   end;
@@ -999,25 +1094,22 @@ end;
 procedure tcustomformlink.actionreceived(const atag: integer;
                const aname: string);
 var
- act1: tlinkaction;
+ act1: trxlinkaction;
  int1: integer;
 begin
  with factionsrx do begin
-  for int1:= 0 to high(fitems) do begin
-   act1:= trxlinkaction(fitems[int1]);
+  act1:= trxlinkaction(finditem(aname));
+  if act1 <> nil then begin
+   if assigned(fonexecute) then begin
+    fonexecute(act1,atag);
+   end;
    with act1 do begin
-    if name = aname then begin
-     if assigned(fonexecute) then begin
-      fonexecute(act1,atag);
-     end;
-     if (faction <> nil) and faction.enabled then begin
-      action.execute;
-     end;
-     break;
+    if (faction <> nil) and faction.enabled then begin
+     faction.execute;
     end;
    end;
   end;
- end;    
+ end;
 end;
 
 procedure tcustomformlink.propertychangereceived(const atag: integer;
@@ -1025,18 +1117,38 @@ procedure tcustomformlink.propertychangereceived(const atag: integer;
                      const adata: pifidataty);
 var
  wi1: tlinkdatawidget;
- int1: integer;
 begin
- with fdatawidgets do begin
-  for int1:= 0 to high(fitems) do begin
-   wi1:= tlinkdatawidget(fitems[int1]);
-   with wi1 do begin
-    if name = aname then begin
-     setdata(adata);
-     if assigned(fonpropertychanged) then begin
-      fonpropertychanged(wi1,atag,apropertyname);
-     end;
-     break;
+ wi1:= tlinkdatawidget(fdatawidgets.finditem(aname));
+ if wi1 <> nil then begin
+  with wi1 do begin
+   setdata(adata);
+   if assigned(fonpropertychanged) then begin
+    fonpropertychanged(wi1,atag,apropertyname);
+   end;
+  end;
+ end;    
+end;
+
+procedure tcustomformlink.widgetcommandreceived(const atag: integer;
+             const aname: string; const acommand: ifiwidgetcommandty);
+var
+ wi1: tlinkdatawidget;
+begin
+ wi1:= tlinkdatawidget(fdatawidgets.finditem(aname));
+ if (wi1 <> nil) and (wi1.fwidget <> nil) then begin
+  with wi1.widget do begin
+   case acommand of
+    iwc_enable: begin
+     enabled:= true;
+    end;
+    iwc_disable: begin
+     enabled:= false;
+    end;
+    iwc_show: begin
+     visible:= true;
+    end;
+    iwc_hide: begin
+     visible:= false;
     end;
    end;
   end;
@@ -1071,6 +1183,14 @@ end;
 function tcustomformlink.hasconnection: boolean;
 begin
  result:= (fchannel <> nil) and fchannel.checkconnection;
+end;
+
+procedure tcustomformlink.senddata(const adata: ansistring);
+begin
+ if fchannel = nil then begin
+  raise exception.create(name+': No IO channel assigned.');
+ end;
+ fchannel.senddata(adata);
 end;
 
 end.
