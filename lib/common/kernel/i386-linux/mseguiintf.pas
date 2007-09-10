@@ -2379,7 +2379,7 @@ end;
 
 function getrootpath(id: winidty; out rootpath: cardinalarty): boolean;
 var
- root,parent: {$ifdef FPC}twindow{$else}xlib.twindow{$endif};
+ root,parent: {$ifdef FPC}dword{$else}xlib.twindow{$endif};
  children: pwindow;
  count: integer;
  ca1: cardinal;
