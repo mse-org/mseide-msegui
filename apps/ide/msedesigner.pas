@@ -3997,7 +3997,7 @@ begin
    for int1:= 0 to high(result) do begin
     comp1:= next^.instance;
     if comp1.InheritsFrom(acomponentclass) and 
-         ((filter = nil) or filter(comp1)) then begin
+         (({$ifndef FPC}@{$endif}filter = nil) or filter(comp1)) then begin
      result[int2]:= comp1;
      inc(int2);
     end;
@@ -4047,7 +4047,7 @@ begin
    for int2:= 0 to count - 1 do begin
     comp1:= next^.instance;
     if comp1.InheritsFrom(acomponentclass) and 
-            ((filter = nil) or filter(comp1)) then begin
+            (({$ifndef FPC}@{$endif}filter = nil) or filter(comp1)) then begin
      if ((aowner = nil) or (aowner = comp1.owner)) and 
               (includeinherited or 
               (comp1.componentstate * [csinline,csancestor] = [])) then begin

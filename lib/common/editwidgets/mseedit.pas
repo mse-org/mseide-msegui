@@ -16,7 +16,8 @@ uses
  msegui,mseeditglob,msegraphics,msegraphutils,msedatalist,
  mseevent,mseguiglob,mseinplaceedit,msegrids,msetypes,mseshapes,msewidgets,
  msedrawtext,classes,msereal,mseclasses,msearrayprops,msebitmap,msemenus,
- msesimplewidgets,msepointer,msestrings,msescrollbar,mseifiglob;
+ msesimplewidgets,msepointer,msestrings,msescrollbar
+         {$ifdef mse_with_ifi},mseifiglob{$endif};
 
 const
  defaulteditwidgetoptions = defaultoptionswidget+[ow_fontglyphheight,ow_autoscale];
