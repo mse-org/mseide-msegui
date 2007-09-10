@@ -86,6 +86,7 @@ type
    procedure setcoloractive(const avalue: colorty);
   protected
    procedure createitem(const index: integer; var item: tpersistent); override;
+   procedure checktemplate(const sender: tobject);
   public
    constructor create(const aowner: tcustomtabbar; aclasstype: indexpersistentclassty);
                                          reintroduce;
@@ -150,6 +151,7 @@ type
    procedure doshortcut(var info: keyeventinfoty; const sender: twidget); override;
    procedure clientrectchanged; override;
    procedure dofontheightdelta(var delta: integer); override;
+   procedure objectevent(const sender: tobject; const event: objecteventty); override;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -933,11 +935,21 @@ begin
  inherited items[index].assign(value);
 end;
 
+procedure ttabs.checktemplate(const sender: tobject);
+begin
+ if fface <> nil then begin
+  fface.checktemplate(sender);
+ end;
+ if ffaceactive <> nil then begin
+  ffaceactive.checktemplate(sender);
+ end;
+end;
+
 { tcustomtabbar }
 
 constructor tcustomtabbar.create(aowner: tcomponent);
 begin
- flayoutinfo.tabs:= ttabs.Create(self,nil);
+ flayoutinfo.tabs:= ttabs.create(self,nil);
  flayoutinfo.tabs.onchange:= {$ifdef FPC}@{$endif}tabschanged;
  flayoutinfo.activetab:= -1;
  flayoutinfo.lasttab:= -1;
@@ -1442,6 +1454,15 @@ begin
  fdragcontroller.afterdragevent(info);
  if not info.accept then begin
   inherited;
+ end;
+end;
+
+procedure tcustomtabbar.objectevent(const sender: tobject;
+               const event: objecteventty);
+begin
+ inherited;
+ if event = oe_changed then begin
+  flayoutinfo.tabs.checktemplate(sender);
  end;
 end;
 
