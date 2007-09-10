@@ -922,6 +922,7 @@ type
    ffontdatalink: tfielddatalink;
    frowexited: integer;
    feditingbefore: boolean;
+   finserting: boolean;
    finsertingbefore: boolean;
    procedure checkscroll;
    procedure checkscrollbar;
@@ -989,7 +990,7 @@ type
    procedure beforefocuscell(const cell: gridcoordty;
                              const selectaction: focuscellactionty);
    function moveby(distance: integer): integer; override;
-   function rowtorecno(const row: integer): integer;
+   function rowtorecnonullbased(const row: integer): integer;
   published
    property options: griddatalinkoptionsty read foptions write foptions default [];
    property onupdaterowdata: updaterowdataeventty read fonupdaterowdata 
@@ -5156,20 +5157,20 @@ end;
 
 procedure tgriddatalink.datasetchanged;
 var
- bo1: boolean;
+// bo1: boolean;
  state1: tdatasetstate;
 begin
  if fdatasetchangedlock = 0 then begin
+  finserting:= (dataset <> nil) and (dataset.state = dsinsert);
   if recordcount > fgrid.rowcount then begin
    updaterowcount;  //for append
   end;
   inherited;
   gridinvalidate;
-  bo1:= (dataset <> nil) and (dataset.state = dsinsert);
-  if bo1 and not finsertingbefore and (fgrid.datacols.newrowcol >= 0) then begin
+  if finserting and not finsertingbefore and (fgrid.datacols.newrowcol >= 0) then begin
    fgrid.col:= fgrid.datacols.newrowcol;
   end;
-  finsertingbefore:= bo1;
+  finsertingbefore:= finserting;
  end;
 end;
 
@@ -5309,16 +5310,10 @@ begin
  end;
 end;
 
-function tgriddatalink.rowtorecno(const row: integer): integer;
+function tgriddatalink.rowtorecnonullbased(const row: integer): integer;
 begin
  if active then begin
-  if fdscontroller <> nil then begin
-   result:= fdscontroller.recnonullbased - fdscontroller.recnooffset;
-  end
-  else begin
-   result:= dataset.recno;
-  end;
-  result:=  result + row - activerecord;
+  result:= recnonullbased + row - activerecord;
  end
  else begin
   result:= -1;
@@ -5681,14 +5676,32 @@ end;
 
 procedure tgriddatalink.focuscell(var cell: gridcoordty);
 var
- int1: integer;
+ int1,int2,int3,int4: integer;
+ ds1: tdataset;
 begin
- if cell.row >= 0 then begin
-  int1:= cell.row-activerecord;
-  if int1 <> 0 then begin
-   moveby(int1);
+ if (cell.row >= 0) and (cell.row <> fgrid.row) then begin
+  ds1:= dataset;
+  if (ds1 <> nil) then begin
+   int1:= rowtorecnonullbased(cell.row);
+   if not (finserting and not finsertingbefore) then begin
+    int3:= recnonullbased;
+    ds1.checkbrowsemode;
+    int4:= recnonullbased;
+    if (int1 < int3) and (int1 >= int4) then begin
+     inc(int1);
+    end
+    else begin
+     if (int1 > int3) and (int1 <= int4) then begin
+      dec(int1);
+     end;
+    end;
+   end;
+   int2:= ds1.recordcount;
+   if (int1 >= 0) and (int1 < int2) then begin
+    dataset.moveby(int1-recnonullbased);
+   end;
    cell.row:= activerecord;
-  end;
+  end;   
  end;
 end;
 

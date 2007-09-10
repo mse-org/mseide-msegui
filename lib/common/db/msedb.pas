@@ -527,6 +527,8 @@ type
  
  tmsedatalink = class(tdatalink)
   private
+   function getrecnonullbased: integer;
+   procedure setrecnonullbased(const avalue: integer);
   protected
    fcanclosing: integer;
    fdscontroller: tdscontroller;
@@ -540,6 +542,8 @@ type
    property dscontroller: tdscontroller read fdscontroller;
    property utf8: boolean read getutf8;
    function canclose: boolean;
+   property recnonullbased: integer read getrecnonullbased 
+                                          write setrecnonullbased;
  end;
 
  tfielddatalink = class(tmsedatalink)
@@ -2754,6 +2758,37 @@ begin
    application.handleexception(nil);
   end;
   dec(fcanclosing);
+ end;
+end;
+
+function tmsedatalink.getrecnonullbased: integer;
+var
+ ds1: tdataset;
+begin
+ result:= -1;
+ if fdscontroller <> nil then begin
+  result:= fdscontroller.recnonullbased;
+ end
+ else begin
+  ds1:= dataset;
+  if (ds1 <> nil) and ds1.active then begin
+   result:= ds1.recno -1;
+  end;
+ end;
+end;
+
+procedure tmsedatalink.setrecnonullbased(const avalue: integer);
+var
+ ds1: tdataset;
+begin
+ if fdscontroller <> nil then begin
+  fdscontroller.recnonullbased:= avalue;
+ end
+ else begin
+  ds1:= dataset;
+  if (ds1 <> nil) and ds1.active then begin
+   ds1.recno:= avalue + 1;
+  end;
  end;
 end;
 
