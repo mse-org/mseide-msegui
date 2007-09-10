@@ -12798,8 +12798,9 @@ begin
    dec(fwaitcount);
    if fwaitcount = 0 then begin
     with tinternalapplication(self) do begin
+     getevents;
      po1:= pointer(feventlist.datapo);
-     for int1:= 0 to getevents - 1 do begin
+     for int1:= 0 to feventlist.count - 1 do begin
       if (po1^ <> nil) and (po1^.kind in waitignoreevents) then begin
        freeandnil(po1^);
       end;
