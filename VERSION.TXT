@@ -1,9 +1,9 @@
 MSEide+MSEgui version history
 
+Version 1.4
 2007-09-06
  Default value of tdbnaviagator.options = [dno_confirmdelete,dno_append].
  tcustomrecordband.options bo_show*/bo_hide* -> optionsshow bos_show*/bos_hide*
-  
 2007-08-29 Defaultvalue of tmsebufdataset.packetrecords = -1.
 2007-08-25 
  tfieldlink.dataset -> destdataset.
