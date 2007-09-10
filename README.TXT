@@ -56,7 +56,7 @@ for more info.
 
 FPC 2.2
 *******
-In patch_fpc_2_1_5 is a patched db.pas file in order to read with 
+In patch_fpc_2_2 is a patched db.pas file in order to read with 
 FPC 2.0.4 written form files with incompatible fielddefs property.
 
 Debugging
