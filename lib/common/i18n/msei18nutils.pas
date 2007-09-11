@@ -2,9 +2,14 @@ unit msei18nutils;
 {$ifdef FPC}{$mode objfpc}{$h+}{$INTERFACES CORBA}{$endif}
 {$ifndef FPC}{$ifdef linux} {$define UNIX} {$endif}{$endif}
 
+{$undef internalresstrhandling}
+{$ifdef FPC}{$ifndef VER2_2}{$define internalresstrhandling}{$endif}{$endif}
+
 interface
 uses
  msei18nglob;
+//todo: optimize resourcestring loading
+//      wide resourcestrings
 
 function loadlangunit(aname: string): boolean;
             //'' -> reset to builtin
@@ -16,7 +21,9 @@ procedure unregistermodule(datapo: pointer; //pobjectdataty
                               const objectclassname: shortstring;
                               const name: shortstring); cdecl;
 procedure registerresourcestrings(datapo: pointer); cdecl;
+{$ifdef internalresstrhandling}
 procedure unregisterresourcestrings(datapo: pointer); cdecl;
+{$endif}
 
 implementation
 uses
@@ -42,6 +49,7 @@ type
    function find(const aname: string; out po: presourcestringinfoty): boolean;
  end;
 
+{$ifdef internalresstrhandling}
 Type          //copied from objpas.pp
 
   PResourceStringRecord = ^TResourceStringRecord;
@@ -64,7 +72,6 @@ Type          //copied from objpas.pp
      end;
 
 
-{$ifdef FPC}
 Var
   ResourceStringTable : TResourceTablelist; External Name 'FPC_RESOURCESTRINGTABLES';
 {$endif}
@@ -87,6 +94,34 @@ begin
  unregisterobjectdata(objectclassname,name);
 end;
 
+{$ifndef internalresstrhandling}
+Function setresstr(Name,Value: AnsiString; Hash: Longint;
+                         arg: pointer) : AnsiString;
+var
+ po1: presourcestringinfoty;
+begin
+ if tresourcestringlist(arg).find(name,po1) then begin
+  result:= po1^.value;
+ end
+ else begin
+  result:= '';
+ end;
+end;
+
+Function unsetresstr(Name,Value: AnsiString; Hash: Longint;
+                         arg: pointer) : AnsiString;
+var
+ po1: presourcestringinfoty;
+begin
+ if tresourcestringlist(arg).find(name,po1) then begin
+  result:= value;
+ end
+ else begin
+  result:= '';
+ end;
+end;
+{$endif}
+
 procedure registerresourcestrings(datapo: pointer); cdecl;
 {$ifdef FPC}
 var
@@ -99,6 +134,9 @@ begin
  list1:= tresourcestringlist.create;
  try
   list1.readvalues(pobjectdataty(datapo));
+{$ifndef internalresstrhandling}
+  setresourcestrings(@setresstr,list1);
+{$else}
   for int1:= 0 to resourcestringtable.count - 1 do begin
    with resourcestringtable.tables[int1]^ do begin
     for int2:= 0 to count - 1 do begin
@@ -110,6 +148,7 @@ begin
     end;
    end;
   end;
+{$endif}
  finally
   list1.free;
  end;
@@ -122,10 +161,12 @@ var
  list1: tresourcestringlist;
  po1: presourcestringinfoty;
 begin
-{$ifdef FPC}
  list1:= tresourcestringlist.create;
  try
   list1.readvalues(pobjectdataty(datapo));
+{$ifndef internalresstrhandling}
+  setresourcestrings(@unsetresstr,list1);
+{$else}
   for int1:= 0 to resourcestringtable.count - 1 do begin
    with resourcestringtable.tables[int1]^ do begin
     for int2:= 0 to count - 1 do begin
@@ -137,10 +178,10 @@ begin
     end;
    end;
   end;
+{$endif}
  finally
   list1.free;
  end;
-{$endif}
 end;
 
 function loadlangunit(aname: string): boolean;

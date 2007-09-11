@@ -922,6 +922,15 @@ begin
         if int3 <> 0 then begin
          addmessage('Exec error '+inttostr(int3)+'.');
          error:= true;
+        end
+        else begin
+         mstr1:= macroar[1].value;
+         {$ifdef mswindows}
+         mstr1:= mstr1+'.dll';
+         {$else}
+         mstr1:= 'lib'+aname+'.so';
+         {$endif}
+         copyfile(mstr1,'../'+mstr1,true);
         end;
        end;
       finally

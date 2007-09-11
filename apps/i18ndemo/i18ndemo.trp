@@ -3,11 +3,11 @@ colwidths=2
  60
  56
 [projectfo]
-stackedunder=mainfo
-x=0
-y=0
-cx=0
-cy=0
+stackedunder=
+x=149
+y=167
+cx=683
+cy=388
 wsize=0
 active=0
 visible=0
@@ -40,7 +40,7 @@ values1=2
  ./de/
  ./fr/
 [projectfo.makecommand]
-value=${COMPILER} -Fu${MSELIBDIR}i18n -FE.. -FU. ${LIBFILE}
+value=${COMPILER} -Fu${MSELIBDIR}i18n ${LIBFILE}
 [projectfo.makeon]
 value=1
 [projectfo.impexpfiledialog]
