@@ -928,7 +928,7 @@ begin
          {$ifdef mswindows}
          mstr1:= mstr1+'.dll';
          {$else}
-         mstr1:= 'lib'+aname+'.so';
+         mstr1:= 'lib'+mstr1+'.so';
          {$endif}
          copyfile(mstr1,'../'+mstr1,true);
         end;
