@@ -20,7 +20,7 @@ uses
  msebitmap,msearrayprops,mseguithread{,msedatamodules};
 
 const
- mseguiversiontext = '1.4';
+ mseguiversiontext = '1.5 unstable';
  
  defaultwidgetcolor = cl_default;
  defaulttoplevelwidgetcolor = cl_background;
