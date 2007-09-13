@@ -220,6 +220,15 @@ type
    destructor destroy; override;
    function write(const Buffer; Count: Longint): Longint; override;
  end;
+
+ tmemorycopystream = class(tmemorystream)
+  private
+  protected
+  public
+   constructor create(const adata: pointer; const asize: integer);
+   destructor destroy; override;
+   function write(const Buffer; Count: Longint): Longint; override;
+ end;
  
 function getnextbufferline(var data: pchar; len: integer): string;
                   //data = nil -> fertig
@@ -1524,7 +1533,6 @@ begin
  result:= inherited write(buffer,count);
 end;
 
-
 { tstringcopystream }
 
 constructor tstringcopystream.create(const adata: string);
@@ -1543,6 +1551,25 @@ begin
 end;
 
 function tstringcopystream.write(const Buffer; Count: Longint): Longint;
+begin
+ result:= 0;
+end;
+
+{ tmemorycopystream }
+
+constructor tmemorycopystream.create(const adata: pointer; const asize: integer);
+begin
+ inherited create;
+ setpointer(adata,asize);
+end;
+
+destructor tmemorycopystream.destroy;
+begin
+ setpointer(nil,0);
+ inherited;
+end;
+
+function tmemorycopystream.write(const Buffer; Count: Longint): Longint;
 begin
  result:= 0;
 end;

@@ -26,6 +26,7 @@ type
   length: integer;
   data: datarecty;
  end;
+ pifibytesty = ^ifibytesty;
  
  itemheaderty = record  
   tag: integer;
@@ -53,11 +54,12 @@ type
 
  widgetpropertiesty = record
   header: itemheaderty;
-  sreamdata: ifibytesty;
+  streamdata: ifibytesty;
  end;
+ pwidgetpropertiesty = ^widgetpropertiesty;
   
 const
- ifiitemkinds = [ik_actionfired,ik_propertychanged,ik_widgetcommand];
+ ifiitemkinds = [ik_actionfired,ik_propertychanged,ik_widgetcommand,ik_widgetproperties];
  
 type 
  ifiheaderty = record
@@ -193,6 +195,7 @@ type
    procedure setasansistring(const avalue: ansistring);
    procedure setenabled(const avalue: boolean);
    procedure setvisible(const avalue: boolean);
+   procedure checkwidget;
   protected
    procedure inititemheader(out arec: string;
                   const akind: ifireckindty; const datasize: integer;
@@ -205,8 +208,8 @@ type
    procedure sendvalue(const aname: string; const avalue: msestring); overload;
    procedure sendvalue(const aname: string; const avalue: ansistring); overload;
    procedure sendcommand(const acommand: ifiwidgetcommandty);
-   procedure sendproperties;
   public
+   procedure sendproperties;
    property asinteger: integer read getasinteger write setasinteger;
    property aslargeint: int64 read getaslargeint write setaslargeint;
    property asfloat: double read getasfloat write setasfloat;
@@ -302,6 +305,8 @@ type
                       const apropertyname: string; const adata: pifidataty);
    procedure widgetcommandreceived(const atag: integer; const aname: string;
                       const acommand: ifiwidgetcommandty);
+   procedure widgetpropertiesreceived(const atag: integer; const aname: string;
+                      const adata: pifibytesty);
    procedure objectevent(const sender: tobject; const event: objecteventty); override;
    procedure processdata(const adata: pifirecty);
    procedure senddata(const adata: ansistring);
@@ -372,6 +377,14 @@ function ifinametostring(const source: pifinamety;
 begin
  dest:= pchar(source);
  result:= length(dest) + 1;
+end;
+
+function setifibytes(const source: pointer; const size: integer;
+                 const dest: pifibytesty): integer;
+begin
+ result:= sizeof(ifibytesty) + size;
+ dest^.length:= size;
+ move(source^,dest^.data,size);
 end;
 
 { tcustomiochannel }
@@ -762,8 +775,7 @@ procedure tlinkdatawidget.inititemheader(out arec: string;
 var
  po1: pchar; 
 begin
- tcustomformlink(fowner).initifirec(arec,akind,datasize-sizeof(ifiheaderty)+
-                        length(fname),po1);
+ tcustomformlink(fowner).initifirec(arec,akind,datasize+length(fname),po1);
  with pitemheaderty(po1)^ do begin
   tag:= ftag;
   po1:= @name;
@@ -778,8 +790,7 @@ procedure tlinkdatawidget.initpropertyrecord(out arec: string;
 var
  po1: pchar; 
 begin
- inititemheader(arec,ik_propertychanged,sizeof(propertychangedty)+
-                datarecsizes[akind]+
+ inititemheader(arec,ik_propertychanged,datarecsizes[akind]+
                 length(apropertyname)+datasize,po1);
        
  inc(po1,stringtoifiname(apropertyname,pifinamety(po1)));
@@ -792,10 +803,29 @@ var
  str1: string;
  po1: pchar;
 begin
- inititemheader(str1,ik_widgetcommand,sizeof(widgetcommandty),po1);
+ inititemheader(str1,ik_widgetcommand,0,po1);
  pifiwidgetcommandty(po1)^:= acommand;
  tcustomformlink(fowner).senddata(str1);
 end;
+
+procedure tlinkdatawidget.sendproperties;
+var
+ stream1: tmemorystream;
+ str1: string;
+ po1: pchar;
+begin
+ checkwidget;
+ stream1:= tmemorystream.create;
+ try
+  stream1.writecomponent(fwidget);
+  inititemheader(str1,ik_widgetproperties,stream1.size,po1);
+  setifibytes(stream1.memory,stream1.size,pifibytesty(po1));
+ finally
+  stream1.free;
+ end;
+ tcustomformlink(fowner).senddata(str1);
+end;
+
 
 procedure tlinkdatawidget.setdata(const adata: pifidataty);
 var
@@ -943,8 +973,11 @@ begin
  end;
 end;
 
-procedure tlinkdatawidget.sendproperties;
+procedure tlinkdatawidget.checkwidget;
 begin
+ if fwidget = nil then begin
+  exception.create(tcustomformlink(fowner).name+': No widget.');
+ end;
 end;
 
 { tlinkdatawidgets }
@@ -1102,6 +1135,9 @@ begin
      command1:= pifiwidgetcommandty(po1)^;
      widgetcommandreceived(tag1,str1,command1);
     end;
+    ik_widgetproperties: begin
+     widgetpropertiesreceived(tag1,str1,pifibytesty(po1));     
+    end;
    end;
   end;
  end;
@@ -1169,6 +1205,27 @@ begin
    end;
   end;
  end;    
+end;
+
+procedure tcustomformlink.widgetpropertiesreceived(const atag: integer;
+                     const aname: string; const adata: pifibytesty);
+var
+ wi1: tlinkdatawidget;
+ stream1: tmemorystream;
+ reader1: treader;
+begin
+ wi1:= tlinkdatawidget(fdatawidgets.finditem(aname));
+ if (wi1 <> nil) and (wi1.fwidget <> nil) then begin
+  stream1:= tmemorycopystream.create(@adata^.data,adata^.length);
+//  reader1:= treader.create(stream1,4096);
+  try
+//   reader1.readcomponent(wi1.fwidget);
+   stream1.readcomponent(wi1.fwidget);
+  finally
+//   reader1.free;
+   stream1.free;
+  end;
+ end;
 end;
 
 procedure tcustomformlink.setdatawidgets(const avalue: tlinkdatawidgets);
