@@ -7,7 +7,7 @@ uses
 type
 
  ifireckindty = (ik_none,ik_data,ik_itemheader,ik_actionfired,ik_propertychanged,
-                 ik_widgetcommand);
+                 ik_widgetcommand,ik_widgetproperties);
  ifinamety = array[0..0] of char; //null terminated
  pifinamety = ^ifinamety;
 
@@ -22,6 +22,11 @@ type
  end;
  pifidataty = ^ifidataty;
 
+ ifibytesty = record
+  length: integer;
+  data: datarecty;
+ end;
+ 
  itemheaderty = record  
   tag: integer;
   name: ifinamety;
@@ -45,7 +50,12 @@ type
   header: itemheaderty;
   command: ifiwidgetcommandty;
  end;
- 
+
+ widgetpropertiesty = record
+  header: itemheaderty;
+  sreamdata: ifibytesty;
+ end;
+  
 const
  ifiitemkinds = [ik_actionfired,ik_propertychanged,ik_widgetcommand];
  
@@ -195,6 +205,7 @@ type
    procedure sendvalue(const aname: string; const avalue: msestring); overload;
    procedure sendvalue(const aname: string; const avalue: ansistring); overload;
    procedure sendcommand(const acommand: ifiwidgetcommandty);
+   procedure sendproperties;
   public
    property asinteger: integer read getasinteger write setasinteger;
    property aslargeint: int64 read getaslargeint write setaslargeint;
@@ -327,7 +338,8 @@ const
   sizeof(ifiheaderty)+sizeof(itemheaderty),      //ik_itemheader
   sizeof(ifiheaderty)+sizeof(actionfiredty),     //ik_actionfired
   sizeof(ifiheaderty)+sizeof(propertychangedty), //ik_propertychanged
-  sizeof(ifiheaderty)+sizeof(widgetcommandty)    //ik_widgetcommand
+  sizeof(ifiheaderty)+sizeof(widgetcommandty),   //ik_widgetcommand
+  sizeof(ifiheaderty)+sizeof(widgetpropertiesty) //ik_widgetproperties
  );
 
  datarecsizes: array[ifidatakindty] of integer = (
@@ -929,6 +941,10 @@ begin
  else begin
   sendcommand(iwc_hide);
  end;
+end;
+
+procedure tlinkdatawidget.sendproperties;
+begin
 end;
 
 { tlinkdatawidgets }

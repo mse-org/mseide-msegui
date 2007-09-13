@@ -1109,10 +1109,15 @@ type
  preambleeventty = procedure(const sender: tcustomreport; var apreamble: string) of object;
  
 
- reportoptionty = (reo_autorelease,reo_prepass,reo_nothread,reo_waitdialog,
+ reportoptionty = (reo_autorelease,reo_prepass,reo_nodisablecontrols,
+                   reo_nothread,reo_waitdialog,
                       reo_autoreadstat,reo_autowritestat);
  reportoptionsty = set of reportoptionty;
+
+const
+ defaultreportoptions = [];
  
+type 
  tcustomreport = class(twidget)
   private
    fppmm: real;
@@ -1217,7 +1222,8 @@ type
    property grid_size: real read frepdesigninfo.gridsize write setgrid_size;   
    property canceled: boolean read getcanceled write setcanceled;
    property running: boolean read getrunning;
-   property options: reportoptionsty read foptions write foptions;
+   property options: reportoptionsty read foptions write foptions 
+                                  default defaultreportoptions;
    property dialogtext: msestring read fdialogtext write fdialogtext;
    property dialogcaption: msestring read fdialogcaption write fdialogcaption;
 
@@ -4976,6 +4982,7 @@ constructor tcustomreport.create(aowner: tcomponent);
 begin
  fprintstarttime:= now;
  fppmm:= defaultrepppmm;
+ foptions:= defaultreportoptions;
  with frepdesigninfo do begin
   widgetrect:= makerect(50,50,50,50);
   gridsize:= 2; //mm
@@ -5126,9 +5133,11 @@ var
        except;
        end;
       end;
-      try
-       enablecontrols;
-      except
+      if not (reo_nodisablecontrols in foptions) then begin
+       try
+        enablecontrols;
+       except
+       end;
       end;
      end;
     end;
@@ -5169,7 +5178,9 @@ begin
  setlength(recnos,length(datasets));
  for int1:= 0 to high(datasets) do begin
   with datasets[int1] do begin
-   disablecontrols;
+   if not (reo_nodisablecontrols in foptions) then begin
+    disablecontrols;
+   end;
    recnos[int1]:= recno;
   end;
  end;

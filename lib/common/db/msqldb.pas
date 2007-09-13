@@ -565,7 +565,42 @@ uses
  dbconst,strutils,msedatalist,msereal,msestream,msegui;
 type
  tdataset1 = class(tdataset);
-  
+{
+  TDataSetcracker = class(TComponent)
+  Private
+    FOpenAfterRead : boolean;
+    FActiveRecord: Longint;
+    FAfterCancel: TDataSetNotifyEvent;
+    FAfterClose: TDataSetNotifyEvent;
+    FAfterDelete: TDataSetNotifyEvent;
+    FAfterEdit: TDataSetNotifyEvent;
+    FAfterInsert: TDataSetNotifyEvent;
+    FAfterOpen: TDataSetNotifyEvent;
+    FAfterPost: TDataSetNotifyEvent;
+    FAfterRefresh: TDataSetNotifyEvent;
+    FAfterScroll: TDataSetNotifyEvent;
+    FAutoCalcFields: Boolean;
+    FBOF: Boolean;
+    FBeforeCancel: TDataSetNotifyEvent;
+    FBeforeClose: TDataSetNotifyEvent;
+    FBeforeDelete: TDataSetNotifyEvent;
+    FBeforeEdit: TDataSetNotifyEvent;
+    FBeforeInsert: TDataSetNotifyEvent;
+    FBeforeOpen: TDataSetNotifyEvent;
+    FBeforePost: TDataSetNotifyEvent;
+    FBeforeRefresh: TDataSetNotifyEvent;
+    FBeforeScroll: TDataSetNotifyEvent;
+    FBlobFieldCount: Longint;
+    FBookmarkSize: Longint;
+    FBuffers : TBufferArray;
+    FBufferCount: Longint;
+    FCalcBuffer: PChar;
+    FCalcFieldsSize: Longint;
+    FConstraints: TCheckConstraints;
+    FDisableControlsCount : Integer;
+    FDisableControlsState : TDatasetState;
+  end;  
+}  
 procedure updateparams(const aparams: tparams);
 var
  int1: integer;
@@ -2111,9 +2146,11 @@ end;
 procedure tsqlquery.internalrefresh;
 var
  int1: integer;
+// statebefore: tdatasetstate;
 begin
  int1:= recno;
-// disablecontrols;            //there is no updtestate in enablecontols
+// statebefore:= state;
+// disablecontrols;            
 // try
   include(fbstate,bs_refreshing);
   try
@@ -2132,6 +2169,11 @@ begin
    end;
   end;
 // finally
+//  if active and (statebefore <> dsinactive) then begin
+//   tdatasetcracker(self).fdisablecontrolsstate:= dsinactive;
+//   //there is no updtestate in enablecontrols otherwise
+//   //...does not work because TDatasource has its own state transition recognition
+//  end;
 //  enablecontrols;
 // end;
 end;

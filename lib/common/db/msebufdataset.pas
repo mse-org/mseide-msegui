@@ -599,6 +599,7 @@ type
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
    procedure Append;
+   procedure refresh(const aenablecontrols: boolean = false);
 
    procedure recover; //loads from logfile
    procedure savetostream(const astream: tstream);
@@ -683,6 +684,41 @@ type
    FFieldName : String;
    FFieldNo : Longint;
  end;
+ 
+  TDataSetcracker = class(TComponent)
+  Private
+    FOpenAfterRead : boolean;
+    FActiveRecord: Longint;
+    FAfterCancel: TDataSetNotifyEvent;
+    FAfterClose: TDataSetNotifyEvent;
+    FAfterDelete: TDataSetNotifyEvent;
+    FAfterEdit: TDataSetNotifyEvent;
+    FAfterInsert: TDataSetNotifyEvent;
+    FAfterOpen: TDataSetNotifyEvent;
+    FAfterPost: TDataSetNotifyEvent;
+    FAfterRefresh: TDataSetNotifyEvent;
+    FAfterScroll: TDataSetNotifyEvent;
+    FAutoCalcFields: Boolean;
+    FBOF: Boolean;
+    FBeforeCancel: TDataSetNotifyEvent;
+    FBeforeClose: TDataSetNotifyEvent;
+    FBeforeDelete: TDataSetNotifyEvent;
+    FBeforeEdit: TDataSetNotifyEvent;
+    FBeforeInsert: TDataSetNotifyEvent;
+    FBeforeOpen: TDataSetNotifyEvent;
+    FBeforePost: TDataSetNotifyEvent;
+    FBeforeRefresh: TDataSetNotifyEvent;
+    FBeforeScroll: TDataSetNotifyEvent;
+    FBlobFieldCount: Longint;
+    FBookmarkSize: Longint;
+    FBuffers : TBufferArray;
+    FBufferCount: Longint;
+    FCalcBuffer: PChar;
+    FCalcFieldsSize: Longint;
+    FConstraints: TCheckConstraints;
+    FDisableControlsCount : Integer;
+    FDisableControlsState : TDatasetState;
+  end;  
    
 function compblobcache(const a,b): integer;
 var
@@ -4264,6 +4300,26 @@ procedure tmsebufdataset.doafterapplyupdate;
 begin
  if checkcanevent(self,tmethod(fafterapplyupdate)) then begin
   fafterapplyupdate(self);
+ end;
+end;
+
+procedure tmsebufdataset.refresh(const aenablecontrols: boolean = false);
+var
+ int1: integer;
+begin
+ if aenablecontrols then begin
+  with tdatasetcracker(self) do begin
+   int1:= fdisablecontrolscount;
+   fdisablecontrolscount:= 0;
+   try
+    inherited refresh;
+   finally
+    fdisablecontrolscount:= int1;
+   end;
+  end;
+ end
+ else begin
+  inherited refresh;
  end;
 end;
 
