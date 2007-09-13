@@ -718,6 +718,9 @@ type
    property options;
    property optionsshow;
    property optionsscale;
+   property visidatasource;
+   property visidatafield;
+   property visigroupfield;
    property onfontheightdelta;
    property onchildscaled;
 
@@ -3214,13 +3217,13 @@ end;
 
 function tcustomrecordband.isfirstofgroup: boolean;
 begin
- result:= fvisigrouplink.active and (isfirstrecord or 
+ result:= fvisigrouplink.fieldactive and (isfirstrecord or 
                    (fvisigrouplink.field.asinteger <> fgroupnum));
 end;
 
 function tcustomrecordband.islastofgroup: boolean;
 begin
- result:= fvisigrouplink.active and (islastrecord or 
+ result:= fvisigrouplink.fieldactive and (islastrecord or 
                    (fvisigrouplink.field.asinteger <> fnextgroupnum));
 end;
 
