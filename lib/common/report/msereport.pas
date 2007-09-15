@@ -415,7 +415,8 @@ type
  end;
   
  recordbandstatety = (rbs_rendering,rbs_showed,rbs_pageshowed,rbs_finish,
-                      rbs_notfirstrecord,rbs_lastrecord,rbs_visibilitychecked);
+                      rbs_notfirstrecord,rbs_lastrecord,rbs_visibilitychecked{,
+                      rbs_empty});
  recordbandstatesty = set of recordbandstatety; 
  
  ireportclient = interface(inullinterface)
@@ -3565,10 +3566,12 @@ end;
 procedure tcustombandgroup.dobeforerender(var empty: boolean);
 var
  int1: integer;
+ bo1: boolean;
 begin
  inherited;
  for int1:= 0 to high(fbands) do begin
-  fbands[int1].dobeforerender(empty);
+  bo1:= empty;
+  fbands[int1].dobeforerender(bo1);
  end;
 end;
 
@@ -3589,8 +3592,8 @@ begin
      inheritedpaint(acanvas);
      inc(int3,bounds_cy);
 //     acanvas.move(makepoint(0,bounds_cy));
+     nextrecord;
     end;
-    nextrecord;
    end;
   end;
   acanvas.origin:= pt1;
@@ -3633,7 +3636,9 @@ begin
  inherited;
  beginscaling;
  for int1:= 0 to high(fbands) do begin
-  fbands[int1].updatevisibility;
+  with fbands[int1] do begin
+   updatevisibility;
+  end;
  end;
  endscaling;
 end;
