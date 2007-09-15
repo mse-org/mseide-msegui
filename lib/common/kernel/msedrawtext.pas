@@ -41,6 +41,7 @@ type
   linepos: integer;
   textpos: integer;
   width: integer;
+  cellwidth: integer;
  end;
  tabulatorarty = array of tabulatorty;
 
@@ -1326,6 +1327,12 @@ begin
   sortarray(ftabs,{$ifdef FPC}@{$endif}cmptab,sizeof(ftabs[0]));
   for int1:= 0 to high(ftabs) do begin
    with ftabs[int1],ttabulatoritem(fitems[index]) do begin
+    if int1 < high(ftabs) then begin
+     cellwidth:= ftabs[int1+1].linepos - linepos;
+    end
+    else begin
+     cellwidth:= 0;
+    end;
     case tabkind of 
      tak_right,tak_decimal: begin
       width:= -round(fdistleft*fppmm);

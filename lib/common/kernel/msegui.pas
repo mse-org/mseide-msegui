@@ -411,7 +411,7 @@ type
    property colorhlwidth: integer read fi.framecolors.light.effectwidth
               write setcolorhlwidth
                      stored iscolorhlwidthstored default -1;
-
+   property framei: framety read fi.innerframe;
    property framei_left: integer read fi.innerframe.left write setframei_left
                      stored isfileftstored default 0;
    property framei_top: integer read fi.innerframe.top  write setframei_top

@@ -137,6 +137,7 @@ type
    flookupvaluefieldno: integer;
    flookupkind: lookupkindty;
    fformat: msestring;
+   fcolor: colorty;
    procedure setvalue(const avalue: msestring);
    procedure setrichvalue(const avalue: richstringty);
    function getdisptext: richstringty;
@@ -187,6 +188,7 @@ type
    procedure setlookupvaluefieldno(const avalue: integer);
    procedure setlookupkind(const avalue: lookupkindty);
    procedure setformat(const avalue: msestring);
+   procedure setcolor(const avalue: colorty);
   protected
    function xlineoffset: integer;
   public 
@@ -196,6 +198,7 @@ type
   published
    property value: msestring read fvalue.text write setvalue;
    property font: treptabfont read getfont write setfont stored isfontstored;
+   property color: colorty read fcolor write setcolor default cl_none;
    property textflags: textflagsty read ftextflags write settextflags 
                    default defaultreptabtextflags;
    property datafield: string read getdatafield write setdatafield;
@@ -1426,6 +1429,7 @@ constructor treptabulatoritem.create(aowner: tobject);
 var
  kind1: tablinekindty;
 begin
+ fcolor:= cl_none;
  ftextflags:= defaultreptabtextflags;
  fdatalink:= treptabitemdatalink.create(self);
  for kind1:= low(tablinekindty) to high(tablinekindty) do begin
@@ -1788,6 +1792,14 @@ begin
  changed;
 end;
 
+procedure treptabulatoritem.setcolor(const avalue: colorty);
+begin
+ if fcolor <> avalue then begin
+  fcolor:= avalue;
+  treptabulators(fowner).fband.invalidate;  
+ end
+end;
+
 { treptabulators }
 
 constructor treptabulators.create(const aowner: tcustomrecordband);
@@ -1914,13 +1926,18 @@ var
  rstr1: richstringty;
  rect1: rectty;
  isdecimal: boolean;
+ cellrect: rectty;
  
 begin
  fminsize:= nullsize;
  bandcx:= fband.innerclientsize.cx;
  bo1:= false;
- if apaint then begin
+ if apaint then begin  
   with fband do begin
+   cellrect:= adest;
+   if fframe <> nil then begin
+    inflaterect1(cellrect,fframe.innerframe);
+   end;
    if not rendering or (fparentintf = nil) then begin 
     visiblemask:= [lv_topofpage,lv_nottopofpage,
                    lv_firstofpage,lv_normal,lv_lastofpage,
@@ -1987,8 +2004,13 @@ begin
       else begin
        dest.cx:= width;
       end;
+      dest.x:= adest.x + textpos;
+      if apaint and (fcolor <> cl_none) then begin
+       cellrect.x:= linepos;
+       cellrect.cx:= cellwidth;
+       acanvas.fillrect(cellrect,fcolor);
+      end;
      end;
-     dest.x:= adest.x + textpos;
      isdecimal:= tabkind = tak_decimal;
      case tabkind of 
       tak_centered: begin
