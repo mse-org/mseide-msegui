@@ -523,6 +523,9 @@ function initmsecomponent(instance: tcomponent; rootancestor: tclass): boolean;
 function findancestorcomponent(const areader: treader; 
                  const componentname: string): tcomponent;
 procedure loadmsemodule(const instance: tmsecomponent; const rootancestor: tclass);
+function findmoduledata(const aclassname: string; 
+                            out aparentclassname: string): pobjectdataty;
+
 function copycomponent(const source: tcomponent; const aowner: tcomponent = nil;
               const onfindancestor: tfindancestorevent = nil;
               const onfindcomponentclass: tfindcomponentclassevent = nil;
@@ -1227,6 +1230,20 @@ begin
 end;
 
 {$endif}
+
+function findmoduledata(const aclassname: string; 
+                  out aparentclassname: string): pobjectdataty;
+var
+ po1: pobjectdatainfoty;
+begin
+ result:= nil;
+ aparentclassname:= '';
+ po1:= objectdatalist.find(aclassname,'');
+ if po1 <> nil then begin
+  aparentclassname:= po1^.objectclass.classparent.classname;
+  result:= po1^.objectdata;
+ end;
+end;
 
 procedure loadmodule(const instance: tcomponent;
                         const po1: pobjectdatainfoty; asinherited: boolean);

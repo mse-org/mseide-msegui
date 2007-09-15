@@ -7,7 +7,7 @@ uses
 type
 
  ifireckindty = (ik_none,ik_data,ik_itemheader,ik_actionfired,ik_propertychanged,
-                 ik_widgetcommand,ik_widgetproperties);
+                 ik_widgetcommand,ik_widgetproperties,ik_requestmodule,ik_moduledata);
  ifinamety = array[0..0] of char; //null terminated
  pifinamety = ^ifinamety;
 
@@ -57,13 +57,32 @@ type
   streamdata: ifibytesty;
  end;
  pwidgetpropertiesty = ^widgetpropertiesty;
+
+ requestmodulety = record
+  header: itemheaderty;
+  moduleclassname: ifinamety;
+ end;
+ 
+ moduledatadataty = record
+  sequence: longword;
+  parentclass: ifinamety;
+  data: ifibytesty;
+ end;
+ pmoduledatadataty = ^moduledatadataty;
+ 
+ moduledataty = record
+  header: itemheaderty;
+  data: moduledatadataty;
+ end;
   
 const
- ifiitemkinds = [ik_actionfired,ik_propertychanged,ik_widgetcommand,ik_widgetproperties];
+ ifiitemkinds = [ik_actionfired,ik_propertychanged,ik_widgetcommand,
+                 ik_widgetproperties,ik_requestmodule,ik_moduledata];
  
 type 
  ifiheaderty = record
   size: integer;  //overall size
+  sequence: longword;
   kind: ifireckindty;
  end;
  pifiheaderty = ^ifiheaderty;
@@ -86,6 +105,12 @@ type
    ik_widgetcommand: (
     widgetcommand: widgetcommandty;
    );
+   ik_requestmodule: (
+    requestmodule: requestmodulety;
+   );
+   ik_moduledata: (
+    moduledata: moduledataty;
+   )
  end;
  pifirecty = ^ifirecty;
   
@@ -96,7 +121,11 @@ type
    fprop: tformlinkarrayprop;
    fname: ansistring;
    ftag: integer;
-  published
+  protected
+   procedure inititemheader(out arec: string;
+                  const akind: ifireckindty; const datasize: integer;
+                  out datapo: pchar); virtual;
+ published
    property name: ansistring read fname write fname;
    property tag: integer read ftag write ftag;
  end;
@@ -197,9 +226,6 @@ type
    procedure setvisible(const avalue: boolean);
    procedure checkwidget;
   protected
-   procedure inititemheader(out arec: string;
-                  const akind: ifireckindty; const datasize: integer;
-                  out datapo: pchar);
    procedure initpropertyrecord(out arec: string; const apropertyname: string;
        const akind: ifidatakindty; const datasize: integer; out datapo: pchar);
    procedure sendvalue(const aproperty: ppropinfo); overload;
@@ -231,6 +257,52 @@ type
    constructor create(const aowner: tcustomformlink);
    function byname(const aname: string): tlinkdatawidget;
    property items[const index: integer]: tlinkdatawidget read getitems; default;   
+ end;
+
+ tlinkmodule = class(tformlinkprop)
+ end;
+ 
+ ttxlinkmodule = class(tlinkmodule)
+  private
+   fmoduleclassname: string;
+  published
+   property moduleclassname: string read fmoduleclassname write fmoduleclassname;
+ end;
+  
+ ttxlinkmodules = class(tformlinkarrayprop)
+  private
+   function getitems(const index: integer): ttxlinkmodule;
+  protected
+  public
+   constructor create(const aowner: tcustomformlink);
+   function byname(const aname: string): ttxlinkmodule;
+   property items[const index: integer]: ttxlinkmodule read getitems; default;   
+ end;
+
+ trxlinkmodule = class;
+ rxlinkmoduleeventty = procedure(sender: trxlinkmodule) of object;
+
+ trxlinkmodule = class(tlinkmodule)
+  private
+   fmodule: tmsecomponent;
+   fonmodulereceived: rxlinkmoduleeventty;
+   fsequence: longword;
+  public
+   procedure requestmodule;
+   property module: tmsecomponent read fmodule;
+  published
+   property onmodulereceived: rxlinkmoduleeventty read fonmodulereceived 
+                         write fonmodulereceived;
+ end;
+  
+ trxlinkmodules = class(tformlinkarrayprop)
+  private
+   function getitems(const index: integer): trxlinkmodule;
+  protected
+  public
+   constructor create(const aowner: tcustomformlink);
+   function byname(const aname: string): trxlinkmodule;
+   property items[const index: integer]: trxlinkmodule read getitems; default;   
  end;
  
  tcustomiochannel = class(tmsecomponent)
@@ -290,11 +362,16 @@ type
    factionstx: ttxlinkactions;
    fdatawidgets: tlinkdatawidgets;
    fchannel: tcustomiochannel;
+   fsequence: longword;
+   fmodulestx: ttxlinkmodules;
+   fmodulesrx: trxlinkmodules;
    procedure setactionsrx(const avalue: trxlinkactions);
    procedure setactionstx(const avalue: ttxlinkactions);
    procedure setchannel(const avalue: tcustomiochannel);
    procedure setdatawidgets(const avalue: tlinkdatawidgets);
    function hasconnection: boolean;
+   procedure setmodulestx(const avalue: ttxlinkmodules);
+   procedure setmodulesrx(const avalue: trxlinkmodules);
   protected
    procedure initifirec(out arec: string; const akind: ifireckindty; 
                              const datalength: integer; out datapo: pchar);
@@ -307,6 +384,10 @@ type
                       const acommand: ifiwidgetcommandty);
    procedure widgetpropertiesreceived(const atag: integer; const aname: string;
                       const adata: pifibytesty);
+   procedure requestmodulereceived(const atag: integer; const aname: string;
+                                    const asequence: longword);
+   procedure moduledatareceived(const atag: integer; const aname: string;
+                                    const adata: pmoduledatadataty);
    procedure objectevent(const sender: tobject; const event: objecteventty); override;
    procedure processdata(const adata: pifirecty);
    procedure senddata(const adata: ansistring);
@@ -321,6 +402,8 @@ type
    property actionstx: ttxlinkactions read factionstx write setactionstx;
    property datawidgets: tlinkdatawidgets read fdatawidgets 
                                          write setdatawidgets;
+   property modulesrx: trxlinkmodules read fmodulesrx write setmodulesrx;
+   property modulestx: ttxlinkmodules read fmodulestx write setmodulestx;
    property channel: tcustomiochannel read fchannel write setchannel;
  end;
 
@@ -329,12 +412,14 @@ type
    property actionsrx;
    property actionstx;
    property datawidgets;
+   property modulesrx;
+   property modulestx;
    property channel;
  end;
   
 implementation
 uses
- sysutils,msedatalist,mseprocutils,msesysintf;
+ sysutils,msedatalist,mseprocutils,msesysintf,mseforms;
 
 const
  headersizes: array[ifireckindty] of integer = (
@@ -344,7 +429,9 @@ const
   sizeof(ifiheaderty)+sizeof(actionfiredty),     //ik_actionfired
   sizeof(ifiheaderty)+sizeof(propertychangedty), //ik_propertychanged
   sizeof(ifiheaderty)+sizeof(widgetcommandty),   //ik_widgetcommand
-  sizeof(ifiheaderty)+sizeof(widgetpropertiesty) //ik_widgetproperties
+  sizeof(ifiheaderty)+sizeof(widgetpropertiesty),//ik_widgetproperties
+  sizeof(ifiheaderty)+sizeof(requestmodulety),   //ik_requestmodule
+  sizeof(ifiheaderty)+sizeof(moduledataty)       //ik_moduledata
  );
 
  datarecsizes: array[ifidatakindty] of integer = (
@@ -585,6 +672,23 @@ begin
  setlength(result,po2-pointer(result));
 end;
 
+{ tformlinkprop }
+
+procedure tformlinkprop.inititemheader(out arec: string;
+               const akind: ifireckindty; const datasize: integer;
+               out datapo: pchar);
+var
+ po1: pchar; 
+begin
+ tcustomformlink(fowner).initifirec(arec,akind,datasize+length(fname),po1);
+ with pitemheaderty(po1)^ do begin
+  tag:= ftag;
+  po1:= @name;
+ end;
+ inc(po1,stringtoifiname(fname,pifinamety(po1)));
+ datapo:= po1;
+end;
+
 { tlinkaction }
 
 destructor tlinkaction.destroy;
@@ -636,7 +740,6 @@ begin
    exit;
   end;
  end;
- raise exception.create(fowner.name+': array property "'+aname+'" not found.');
 end;
 
 function tformlinkarrayprop.byname(const aname: string): tformlinkprop;
@@ -646,8 +749,6 @@ begin
   raise exception.create(fowner.name+': array property "'+aname+'" not found.');
  end;
 end;
-
-{ tlinkactions }
 
 { trxlinkactions }
 
@@ -769,21 +870,6 @@ begin
  tcustomformlink(fowner).senddata(str1);
 end;
 
-procedure tlinkdatawidget.inititemheader(out arec: string;
-                  const akind: ifireckindty; const datasize: integer;
-                  out datapo: pchar);
-var
- po1: pchar; 
-begin
- tcustomformlink(fowner).initifirec(arec,akind,datasize+length(fname),po1);
- with pitemheaderty(po1)^ do begin
-  tag:= ftag;
-  po1:= @name;
- end;
- inc(po1,stringtoifiname(fname,pifinamety(po1)));
- datapo:= po1;
-end;
-
 procedure tlinkdatawidget.initpropertyrecord(out arec: string;
           const apropertyname: string; const akind: ifidatakindty;
           const datasize: integer; out datapo: pchar);
@@ -825,7 +911,6 @@ begin
  end;
  tcustomformlink(fowner).senddata(str1);
 end;
-
 
 procedure tlinkdatawidget.setdata(const adata: pifidataty);
 var
@@ -997,6 +1082,52 @@ begin
  result:= tlinkdatawidget(inherited byname(aname));
 end;
 
+{ trxlinkmodule }
+
+procedure trxlinkmodule.requestmodule;
+var
+ str1: string;
+ po1: pchar;
+begin
+ inititemheader(str1,ik_requestmodule,0,po1);
+ fsequence:= tcustomformlink(fowner).fsequence;
+ tcustomformlink(fowner).senddata(str1);
+end;
+
+{ ttxlinkmodules }
+
+constructor ttxlinkmodules.create(const aowner: tcustomformlink);
+begin
+ inherited create(aowner,ttxlinkmodule);
+end;
+
+function ttxlinkmodules.getitems(const index: integer): ttxlinkmodule;
+begin
+ result:= ttxlinkmodule(inherited getitems(index));
+end;
+
+function ttxlinkmodules.byname(const aname: string): ttxlinkmodule;
+begin
+ result:= ttxlinkmodule(inherited byname(aname));
+end;
+
+{ trxlinkmodules }
+
+constructor trxlinkmodules.create(const aowner: tcustomformlink);
+begin
+ inherited create(aowner,trxlinkmodule);
+end;
+
+function trxlinkmodules.getitems(const index: integer): trxlinkmodule;
+begin
+ result:= trxlinkmodule(inherited getitems(index));
+end;
+
+function trxlinkmodules.byname(const aname: string): trxlinkmodule;
+begin
+ result:= trxlinkmodule(inherited byname(aname));
+end;
+
 { tcustomformlink }
 
 constructor tcustomformlink.create(aowner: tcomponent);
@@ -1004,6 +1135,8 @@ begin
  factionsrx:= trxlinkactions.create(self);
  factionstx:= ttxlinkactions.create(self);
  fdatawidgets:= tlinkdatawidgets.create(self);
+ fmodulestx:= ttxlinkmodules.create(self);
+ fmodulesrx:= trxlinkmodules.create(self);
  inherited;
 end;
 
@@ -1012,6 +1145,8 @@ begin
  factionsrx.free;
  factionstx.free;
  fdatawidgets.free;
+ fmodulesrx.free;
+ fmodulestx.free;
  inherited;
 end;
 
@@ -1081,8 +1216,13 @@ begin
  int1:= headersizes[akind] + datalength;
  setlength(arec,int1);
  fillchar(arec[1],int1,0);
+ inc(fsequence);
+ if fsequence = 0 then begin
+  inc(fsequence);
+ end;
  with pifiheaderty(arec)^ do begin
   size:= int1;
+  sequence:= fsequence;
   kind:= akind;
  end;
  datapo:= pointer(arec) + sizeof(ifiheaderty);
@@ -1137,6 +1277,12 @@ begin
     end;
     ik_widgetproperties: begin
      widgetpropertiesreceived(tag1,str1,pifibytesty(po1));     
+    end;
+    ik_requestmodule: begin
+     requestmodulereceived(tag1,str1,adata^.header.sequence);          
+    end;
+    ik_moduledata: begin
+     moduledatareceived(tag1,str1,pmoduledatadataty(po1));
     end;
    end;
   end;
@@ -1212,18 +1358,88 @@ procedure tcustomformlink.widgetpropertiesreceived(const atag: integer;
 var
  wi1: tlinkdatawidget;
  stream1: tmemorystream;
- reader1: treader;
 begin
  wi1:= tlinkdatawidget(fdatawidgets.finditem(aname));
  if (wi1 <> nil) and (wi1.fwidget <> nil) then begin
   stream1:= tmemorycopystream.create(@adata^.data,adata^.length);
-//  reader1:= treader.create(stream1,4096);
   try
-//   reader1.readcomponent(wi1.fwidget);
    stream1.readcomponent(wi1.fwidget);
   finally
-//   reader1.free;
    stream1.free;
+  end;
+ end;
+end;
+
+procedure tcustomformlink.requestmodulereceived(const atag: integer;
+            const aname: string; const asequence: longword);
+var
+ mo1: ttxlinkmodule;
+ po1: pobjectdataty;
+ str1,str2: string;
+ po2,po3: pchar;
+begin
+ mo1:= ttxlinkmodule(fmodulestx.finditem(aname));
+ if (mo1 <> nil) and (mo1.fmoduleclassname <> '') then begin
+  po1:= findmoduledata(mo1.fmoduleclassname,str2);
+  if po1 <> nil then begin
+   mo1.inititemheader(str1,ik_moduledata,length(str2)+po1^.size,po2);
+   with pmoduledatadataty(po2)^ do begin
+    sequence:= asequence;
+    po3:= @parentclass;
+    inc(po3,stringtoifiname(str2,pifinamety(po3)));
+    setifibytes(@po1^.data,po1^.size,pifibytesty(po3));
+   end;
+   senddata(str1);
+  end;
+ end;
+end;
+
+procedure tcustomformlink.moduledatareceived(const atag: integer;
+ const aname: string; const adata: pmoduledatadataty);
+var
+ mo1: trxlinkmodule;
+ comp1: tmsecomponent;
+ stream1: tmemorycopystream;
+ str1: string;
+ po1: pchar;
+ class1: tpersistentclass;
+begin
+ mo1:= trxlinkmodule(fmodulesrx.finditem(aname));
+ if mo1 <> nil then begin
+  if mo1.fsequence = adata^.sequence then begin
+   po1:= @adata^.parentclass;
+   inc(po1,ifinametostring(pifinamety(po1),str1));
+   class1:= findclass(str1);
+   if (class1 <> nil) and class1.inheritsfrom(tmseform) then begin
+    with mo1 do begin
+     freeandnil(fmodule);
+     fmodule:= tmseform.create(application,false);
+     setlinkedvar(fmodule,fmodule);
+    end;
+    lockfindglobalcomponent;
+//    fscriptmodules.unlock;
+    begingloballoading;
+    try    
+     try
+      with pifibytesty(po1)^ do begin
+       stream1:= tmemorycopystream.create(@data,length);
+       try
+        stream1.readcomponent(mo1.fmodule);
+       finally
+        stream1.free;
+       end;
+      end;
+      globalfixupreferences;
+      notifygloballoading;
+     except
+      freeandnil(mo1.fmodule);
+     end;
+    finally
+     endgloballoading;
+//     fscriptmodules.lock;
+     unlockfindglobalcomponent;
+    end;
+   end;
   end;
  end;
 end;
@@ -1264,6 +1480,16 @@ begin
   raise exception.create(name+': No IO channel assigned.');
  end;
  fchannel.senddata(adata);
+end;
+
+procedure tcustomformlink.setmodulestx(const avalue: ttxlinkmodules);
+begin
+ fmodulestx.assign(avalue);
+end;
+
+procedure tcustomformlink.setmodulesrx(const avalue: trxlinkmodules);
+begin
+ fmodulesrx.assign(avalue);
 end;
 
 end.
