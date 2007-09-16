@@ -158,7 +158,7 @@ reo_nothread to true for rendering a Sqlite3 report ***.
 ZeosLib
 *******
 To install the Zeos components add the path to the Zeos source to 'Project'-
-'Options'-'Make'-'Directories' and compile the IDE with -dmse_with_zeos.
+'Options'-'Make'-'Directories' and compile the IDE with -dmse_with_zeoslib.
 Dependent of the Zeos version it will be necessary to add -MDelphi to 'Project'-
 'Options'-'Make'-'Make options'.
 There is a predefined IDE project apps/ide/mseide_zeos.prj, update 'Project'-
