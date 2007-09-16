@@ -4372,6 +4372,9 @@ begin
  factiveband:= 0;
  include(fstate,bas_activebandchanged);
  beginrender(true);
+ if freportpage <> nil then begin
+  freportpage.recordchanged;
+ end;
 end;
 
 { tcustomreportpage }
@@ -4687,6 +4690,7 @@ begin
    finally
     application.unlock;
    end;
+   self.recordchanged;
   end;
  end;
  {
@@ -4925,6 +4929,7 @@ end;
 procedure tcustomreportpage.restart;
 begin
  beginrender;
+ recordchanged;
 end;
 
 procedure tcustomreportpage.setoptions(const avalue: reportpageoptionsty);
