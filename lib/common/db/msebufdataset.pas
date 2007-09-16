@@ -540,6 +540,7 @@ type
    procedure checkrecno(const avalue: integer);
    procedure setonfilterrecord(const value: tfilterrecordevent); override;
    procedure setfiltered(value: boolean); override;
+   procedure setactive(value: boolean); override;
 
    procedure loaded; override;                              
    procedure internalopen; override;
@@ -599,7 +600,9 @@ type
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
    procedure Append;
-   procedure refresh(const aenablecontrols: boolean = false);
+//   procedure refresh(const aenablecontrols: boolean = false);
+        //no more needed
+   procedure notifycontrols; //calls enablecontrols/disablecontrols
 
    procedure recover; //loads from logfile
    procedure savetostream(const astream: tstream);
@@ -684,7 +687,7 @@ type
    FFieldName : String;
    FFieldNo : Longint;
  end;
- 
+{ 
   TDataSetcracker = class(TComponent)
   Private
     FOpenAfterRead : boolean;
@@ -719,7 +722,7 @@ type
     FDisableControlsCount : Integer;
     FDisableControlsState : TDatasetState;
   end;  
-   
+}   
 function compblobcache(const a,b): integer;
 var
  lint1: int64;
@@ -3632,6 +3635,17 @@ begin
  filterchanged; 
 end;
 
+procedure tmsebufdataset.setactive(value: boolean);
+var
+ bo1: boolean;
+begin
+ bo1:= active;
+ inherited;
+ if bo1 <> active then begin
+  notifycontrols;
+ end;
+end;
+
 procedure tmsebufdataset.filterchanged;
 begin
  exclude(fbstate,bs_visiblerecordcountvalid);
@@ -4302,24 +4316,51 @@ begin
   fafterapplyupdate(self);
  end;
 end;
-
+{
 procedure tmsebufdataset.refresh(const aenablecontrols: boolean = false);
 var
  int1: integer;
 begin
  if aenablecontrols then begin
-  with tdatasetcracker(self) do begin
-   int1:= fdisablecontrolscount;
-   fdisablecontrolscount:= 0;
+//  with tdatasetcracker(self) do begin
+   int1:= 0;
+   while controlsdisabled do begin
+    inc(int1);
+    restorestate(state);
+   end;
+//   int1:= fdisablecontrolscount;
+//   fdisablecontrolscount:= 0;
    try
     inherited refresh;
    finally
-    fdisablecontrolscount:= int1;
+    while int1 > 0 do begin
+     dec(int1);
+     settempstate(state);
+    end;
+//    fdisablecontrolscount:= int1;
    end;
-  end;
+//  end;
  end
  else begin
   inherited refresh;
+ end;
+end;
+}
+procedure tmsebufdataset.notifycontrols;
+var
+ int1: integer;
+begin
+ int1:= 0;
+ try
+  while controlsdisabled do begin
+   inc(int1);
+   enablecontrols;
+  end;
+ finally
+  while int1 > 0 do begin
+   dec(int1);
+   disablecontrols;
+  end;
  end;
 end;
 

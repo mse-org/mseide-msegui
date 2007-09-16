@@ -250,12 +250,12 @@ end;
 
 procedure debugwrite(const value: string);
 begin
- writestderr(value,true);
+ writestderr(value,false);
 end;
 
 procedure debugwriteln(const value: string);
 begin
- debugwrite(value+lineend);
+ writestderr(value,true);
 end;
 
 procedure errorhalt(errortext: string; exitcode: integer = 1);

@@ -1152,6 +1152,7 @@ type
    fonpreamble: preambleeventty;
    fdialogtext: msestring;
    fdialogcaption: msestring;
+   fdatasets: datasetarty;
    procedure setppmm(const avalue: real);
    function getreppages(index: integer): tcustomreportpage;
    procedure setreppages(index: integer; const avalue: tcustomreportpage);
@@ -1205,6 +1206,8 @@ type
    procedure waitfor;         //returns before calling of onafterrender
    function prepass: boolean; //true if in prepass render state
    procedure restart;
+   procedure recordchanged;  
+     //calls recordchanged of active page
    
    property ppmm: real read fppmm write setppmm; //pixel per mm
    function reppagecount: integer;
@@ -3015,6 +3018,7 @@ begin
    if checkislastrecord(fdatalink,@dosyncnextrecord) then begin
     include(fstate,rbs_lastrecord);
    end;
+   recchanged;
   finally
    application.unlock;
   end;
@@ -4212,7 +4216,9 @@ begin
  end;
  include(fwidgetstate1,ws1_noclipchildren);
  for int1:= 0 to high(fbands) do begin
-  fbands[int1].beginrender(false);
+  with fbands[int1] do begin
+   beginrender(false);
+  end;
  end;
 end;
 
@@ -5128,7 +5134,6 @@ function tcustomreport.exec(thread: tmsethread): integer;
 
 var
  terminated1: boolean; 
- datasets: datasetarty;
  recnos: integerarty;
  
  procedure dofinish(const islast: boolean);
@@ -5152,8 +5157,8 @@ var
     end;
     fcanvas.ppmm:= fppmmbefore;
     asyncevent(endrendertag);
-    for int1:= 0 to high(datasets) do begin
-     with datasets[int1] do begin
+    for int1:= 0 to high(fdatasets) do begin
+     with fdatasets[int1] do begin
       if active then begin
        try
         recno:= recnos[int1];
@@ -5168,6 +5173,7 @@ var
       end;
      end;
     end;
+    fdatasets:= nil;
    end;
   finally
    application.unlock;
@@ -5200,11 +5206,11 @@ begin
   application.unlock;
  end;
  for int1:= 0 to high(freppages) do begin
-  freppages[int1].adddatasets(datasets);
+  freppages[int1].adddatasets(fdatasets);
  end;
- setlength(recnos,length(datasets));
- for int1:= 0 to high(datasets) do begin
-  with datasets[int1] do begin
+ setlength(recnos,length(fdatasets));
+ for int1:= 0 to high(fdatasets) do begin
+  with fdatasets[int1] do begin
    if not (reo_nodisablecontrols in foptions) then begin
     disablecontrols;
    end;
@@ -5666,6 +5672,32 @@ begin
  activepage:= 0;
 end;
 
+procedure tcustomreport.recordchanged;
+begin
+ freppages[factivepage].recordchanged;
+end;
+
+{
+procedure tcustomreport.notifycontrols;
+var
+ int1: integer;
+begin
+ if running then begin
+  application.lock;
+  try
+   for int1:= 0 to high(fdatasets) do begin
+    try
+     fdatasets[int1].enablecontrols;
+    finally
+     fdatasets[int1].disablecontrols;
+    end;
+   end;
+  finally
+   application.unlock;
+  end;
+ end;
+end;
+}
  {treport}
  
 constructor treport.create(aowner: tcomponent);
