@@ -554,6 +554,8 @@ type
    fnextbandifempty: tcustomrecordband;
    fareas: bandareaarty;
    fonbeforepaint: painteventty;
+   fonbeforenextrecord: notifyeventty;
+   fonafternextrecord: notifyeventty;
    procedure settabs(const avalue: treptabulators);
    procedure setoptionsshow(const avalue: bandoptionshowsty);
    function getvisidatasource: tdatasource;
@@ -655,6 +657,10 @@ type
    property onbeforepaint: painteventty read fonbeforepaint write fonbeforepaint;
    property onpaint: painteventty read fonpaint write fonpaint;
    property onafterpaint: painteventty read fonafterpaint write fonafterpaint;
+   property onbeforenextrecord: notifyeventty read fonbeforenextrecord 
+                                                 write fonbeforenextrecord;
+   property onafternextrecord: notifyeventty read fonafternextrecord 
+                                                 write fonafternextrecord;
   published
    property anchors default defaultbandanchors;
    property optionswidget default defaultbandoptionswidget;
@@ -680,6 +686,8 @@ type
    property onbeforepaint;
    property onpaint;
    property onafterpaint;
+   property onbeforenextrecord;
+   property onafternextrecord;
   end;
 
  tcustomrepvaluedisp = class; 
@@ -977,6 +985,8 @@ type
    freccontrols: pointerarty;
    fprintorientation: reppageorientationty;
    flastpagecount: integer;
+   fonbeforenextrecord: notifyeventty;
+   fonafternextrecord: notifyeventty;
    procedure setpagewidth(const avalue: real);
    procedure setpageheight(const avalue: real);
    procedure updatepagesize;
@@ -1075,6 +1085,10 @@ type
    property onpaint: reportpagepainteventty read fonpaint write fonpaint;
    property onafterpaint: reportpagepainteventty read fonafterpaint 
                         write fonafterpaint;
+   property onbeforenextrecord: notifyeventty read fonbeforenextrecord 
+                                                 write fonbeforenextrecord;
+   property onafternextrecord: notifyeventty read fonafternextrecord 
+                                                 write fonafternextrecord;
    property onafterlastpage: reportpageeventty read fonafterlastpage
                                write fonafterlastpage;
  end;
@@ -1101,6 +1115,8 @@ type
    property onbeforerender;
    property onpaint;   
    property onafterpaint;
+   property onbeforenextrecord;
+   property onafternextrecord;
    property onafterlastpage;
  end;
 
@@ -3082,13 +3098,16 @@ end;
 
 procedure tcustomrecordband.nextrecord(const setflag: boolean = true);
 begin
- if setflag then begin
-  include(fstate,rbs_notfirstrecord);
-  dobeforenextrecord;
- end;
- if fdatalink.active then begin
-  application.lock;
-  try
+ application.lock;
+ try
+  if canevent(tmethod(fonbeforenextrecord)) then begin
+   fonbeforenextrecord(self);
+  end;
+  if setflag then begin
+   include(fstate,rbs_notfirstrecord);
+   dobeforenextrecord;
+  end;
+  if fdatalink.active then begin
    fdatalink.dataset.next;
    if setflag then begin
     if checkislastrecord(fdatalink,@dosyncnextrecord) then begin
@@ -3096,9 +3115,12 @@ begin
     end; 
     fparentintf.getreppage.recordchanged;
    end;
-  finally
-   application.unlock;
   end;
+  if canevent(tmethod(fonafternextrecord)) then begin
+   fonafternextrecord(self);
+  end;
+ finally
+  application.unlock;
  end;
 end;
 
@@ -4576,11 +4598,17 @@ begin
     bo1:= false;
     application.lock;
     try
+     if canevent(tmethod(fonbeforenextrecord)) then begin
+      fonbeforenextrecord(self);
+     end;
      dobeforenextrecord;
      fdatalink.dataset.next;
      if checkislastrecord(fdatalink,@dosyncnextrecord) then begin
       include(fstate,rpps_lastrecord);
      end; 
+     if canevent(tmethod(fonafternextrecord)) then begin
+      fonafternextrecord(self);
+     end;
     finally
      application.unlock;
     end;
