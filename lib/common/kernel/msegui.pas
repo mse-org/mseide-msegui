@@ -1542,6 +1542,7 @@ type
    fmodalwindowbeforewaitdialog: twindow;
    fonterminatebefore: threadcompeventty;
    fexecuteaction: notifyeventty;
+   fexceptioncount: longword;
    function getterminated: boolean;
    procedure setterminated(const Value: boolean);
    procedure invalidated;
@@ -1713,6 +1714,7 @@ type
    property dblclicktime: integer read fdblclicktime write fdblclicktime default
                  defaultdblclicktime; //us
    property onexception: exceptioneventty read fonexception write fonexception;
+   property exceptioncount: longword read fexceptioncount;
  end;
 
 function translatewidgetpoint(const point: pointty;
@@ -12192,6 +12194,7 @@ begin
    inc(fexceptionactive);
    try
     if not (exceptobject is eabort) then begin
+     inc(fexceptioncount);
      if assigned(fonexception) then begin
       fonexception(sender, exception(exceptobject))
      end
@@ -12929,11 +12932,13 @@ function tapplication.waitdialog(const athread: tthreadcomp = nil;
                const aexecuteaction: notifyeventty = nil): boolean;
 var
  res1: modalresultty;
+ wo1: longword;
 begin
  if not ismainthread then begin
   raise exception.create('Waitdialog must be called from main thread.');
  end;
  result:= false;
+ wo1:= exceptioncount;
  if not (aps_waitstarted in fstate) then begin
   with tinternalapplication(self) do begin
    fmodalwindowbeforewaitdialog:= fmodalwindow;
@@ -12952,6 +12957,9 @@ begin
     repeat
     until showmessage(atext,caption,[mr_cancel],mr_cancel,[],0,
                                               [acancelaction]) = mr_cancel;
+    if wo1 <> exceptioncount then begin
+     sysutils.abort;
+    end;
     result:= aps_waitok in fstate;
     if not result then begin
      include(fstate,aps_waitcanceled);
