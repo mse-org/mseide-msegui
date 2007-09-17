@@ -123,7 +123,20 @@ type
 
  getrichstringeventty = procedure(const sender: tobject; 
                                    var avalue: richstringty) of object;
+ reptabulatoritemoptionty = (rto_sum,rto_shownull);
+ reptabulatoritemoptionsty = set of reptabulatoritemoptionty;
 
+ itemsumty = record
+  count: integer;
+  resetpending: boolean;
+  reset: boolean;
+  case tfieldtype of
+   ftinteger,ftword,ftsmallint,ftboolean: (integervalue: integer);
+   ftlargeint: (largeintvalue: int64);
+   ftfloat: (floatvalue: double);
+   ftbcd: (bcdvalue: currency);
+ end;
+  
  treptabulatoritem = class(ttabulatoritem,idbeditinfo)
   private
    fvalue: richstringty;
@@ -139,6 +152,8 @@ type
    fformat: msestring;
    fcolor: colorty;
    ftag: integer;
+   foptions: reptabulatoritemoptionsty;
+   fsum: itemsumty;
    procedure setvalue(const avalue: msestring);
    procedure setrichvalue(const avalue: richstringty);
    function getdisptext: richstringty;
@@ -190,14 +205,25 @@ type
    procedure setlookupkind(const avalue: lookupkindty);
    procedure setformat(const avalue: msestring);
    procedure setcolor(const avalue: colorty);
+   function getsumasinteger: integer;
+   function getsumaslargeint: int64;
+   function getsumasfloat: double;
+   function getsumascurrency: currency;
   protected
    function xlineoffset: integer;
+   procedure dobeforenextrecord(const adatasource: tdatasource);
   public 
    constructor create(aowner: tobject); override;
    destructor destroy; override;
+   procedure resetsum(const skipcurrent: boolean);
+   property sumasinteger: integer read getsumasinteger;
+   property sumaslargeint: int64 read getsumaslargeint;
+   property sumasfloat: double read getsumasfloat;
+   property sumascurrency: currency read getsumascurrency;
    property richvalue: richstringty read fvalue write setrichvalue;
   published
    property tag: integer read ftag write ftag;
+   property options: reptabulatoritemoptionsty read foptions write foptions;
    property value: msestring read fvalue.text write setvalue;
    property font: treptabfont read getfont write setfont stored isfontstored;
    property color: colorty read fcolor write setcolor default cl_none;
@@ -333,8 +359,10 @@ type
    procedure sourcechanged;
    procedure dochange(const aindex: integer); override;
    procedure setcount1(acount: integer; doinit: boolean); override;
+   procedure dobeforenextrecord(const adatasource: tdatasource);
   public
    constructor create(const aowner: tcustomrecordband);
+   procedure resetsums(const skipcurrent: boolean);
    property items[const index: integer]: treptabulatoritem read getitems 
                        write setitems; default;
  published
@@ -599,7 +627,7 @@ type
    procedure dopaint(const acanvas: tcanvas); override;
    procedure doonpaint(const acanvas: tcanvas); override;
    procedure doafterpaint(const acanvas: tcanvas); override;
-   procedure dobeforenextrecord; virtual;
+   procedure dobeforenextrecord(const adatasource: tdatasource); virtual;
    procedure dosyncnextrecord; virtual;
    
    procedure nextrecord(const setflag: boolean = true);
@@ -797,7 +825,7 @@ type
    function pageprintstarttime: tdatetime;
    function repprintstarttime: tdatetime;
    function getreppage: tcustomreportpage;
-   procedure dobeforenextrecord; override;
+   procedure dobeforenextrecord(const adatasource: tdatasource); override;
    procedure dosyncnextrecord; override;
   protected
    procedure setparentwidget(const avalue: twidget); override;   
@@ -888,7 +916,7 @@ type
    procedure initareapage;
    procedure initband;
    procedure initpage;
-   procedure dobeforenextrecord;
+   procedure dobeforenextrecord(const adatasource: tdatasource);
    procedure dosyncnextrecord;
    function checkareafull(ay: integer): boolean;
            //ibandparent
@@ -1019,7 +1047,7 @@ type
    procedure doonpaint(const acanvas: tcanvas); override;
    procedure doafterpaint1(const acanvas: tcanvas); virtual;
    procedure doafterlastpage; virtual;
-   procedure dobeforenextrecord;
+   procedure dobeforenextrecord(const adatasource: tdatasource);
    procedure dosyncnextrecord;
    property ppmm: real read fppmm write setppmm; //pixel per mm
    
@@ -1592,9 +1620,7 @@ var
  key: integer;
  mstr1: msestring;
  int1: integer;
- rea1: realty;
- 
- 
+ rea1: realty; 
 begin
  if fdatalink.fieldactive then begin
   result.format:= nil;
@@ -1610,7 +1636,8 @@ begin
      lk_integer: begin
       int1:= flookupbuffer.lookupinteger(flookupkeyfieldno,
                    flookupvaluefieldno,key);
-      result.text:= inttostr(int1);
+//      result.text:= inttostr(int1);
+      result.text:= realtytostr(int1,fformat);
      end;
      lk_float: begin
       rea1:= flookupbuffer.lookupfloat(flookupkeyfieldno,
@@ -1632,7 +1659,33 @@ begin
    end;
   end
   else begin
-   result.text:= fdatalink.msedisplaytext(fformat);
+   if rto_sum in foptions then begin
+    with fdatalink.field do begin
+     if not (rto_shownull in foptions) and (fsum.resetpending or isnull) and 
+                             (fsum.count = 0) then begin
+      result.text:= '';
+     end
+     else begin
+      case datatype of 
+       ftinteger,ftword,ftsmallint,ftboolean: begin
+        result.text:= realtytostr(sumasinteger,fformat);
+       end;
+       ftlargeint: begin
+        result.text:= realtytostr(sumaslargeint,fformat);
+       end;
+       ftfloat: begin
+        result.text:= realtytostr(sumasfloat,fformat);
+       end;
+       ftbcd: begin
+        result.text:= realtytostr(sumascurrency,fformat);
+       end;
+      end;
+     end;
+    end;
+   end
+   else begin
+    result.text:= fdatalink.msedisplaytext(fformat);
+   end;
   end;
  end
  else begin
@@ -1824,6 +1877,83 @@ begin
  end
 end;
 
+procedure treptabulatoritem.resetsum(const skipcurrent: boolean);
+begin
+ fillchar(fsum,sizeof(fsum),0);
+ fsum.resetpending:= skipcurrent;
+ fsum.reset:= true;
+end;
+
+procedure treptabulatoritem.dobeforenextrecord(const adatasource: tdatasource);
+begin
+ if (rto_sum in foptions) and (fdatalink.datasource = adatasource) and 
+           fdatalink.fieldactive then begin
+  with fdatalink.field,fsum do begin
+   if not isnull then begin
+    inc(count);
+    case datatype of
+     ftinteger,ftword,ftsmallint,ftboolean: begin
+      integervalue:= integervalue + asinteger;
+     end;
+     ftlargeint: begin
+      largeintvalue:= largeintvalue + aslargeint;
+     end;
+     ftfloat: begin
+      floatvalue:= floatvalue + asfloat;
+     end;
+     ftbcd: begin
+      bcdvalue:= bcdvalue + ascurrency;
+     end;
+    end;
+   end;
+  end;
+  if fsum.resetpending then begin
+   resetsum(false);
+  end;
+  fsum.reset:= false;
+ end;
+end;
+
+function treptabulatoritem.getsumasinteger: integer;
+begin
+ if fsum.resetpending and fsum.reset or not fdatalink.fieldactive then begin
+  result:= 0;
+ end
+ else begin
+  result:= fsum.integervalue + fdatalink.field.asinteger;
+ end;
+end;
+
+function treptabulatoritem.getsumaslargeint: int64;
+begin
+ if fsum.resetpending and fsum.reset or not fdatalink.fieldactive then begin
+  result:= 0;
+ end
+ else begin
+  result:= fsum.largeintvalue + fdatalink.field.aslargeint;
+ end;
+end;
+
+function treptabulatoritem.getsumasfloat: double;
+begin
+ if fsum.resetpending and fsum.reset or not fdatalink.fieldactive then begin
+  result:= 0;
+ end
+ else begin
+  result:= fsum.floatvalue + fdatalink.field.asfloat;
+ end;
+end;
+
+function treptabulatoritem.getsumascurrency: currency;
+begin
+ if fsum.resetpending and fsum.reset or not fdatalink.fieldactive then begin
+  result:= 0;
+ end
+ else begin
+  result:= fsum.bcdvalue + fdatalink.field.ascurrency;
+ end;
+end;
+
 { treptabulators }
 
 constructor treptabulators.create(const aowner: tcustomrecordband);
@@ -2012,6 +2142,9 @@ begin
     with ftabs[int1] do begin
      with treptabulatoritem(fitems[index]) do begin
       text:= getdisptext;
+      if apaint and (rto_sum in foptions) then begin
+       fsum.resetpending:= true;
+      end;
       finfo.font:= font;
       flags:= ftextflags;
       dest:= adest;
@@ -2633,6 +2766,24 @@ begin
  end;
 end;
 
+procedure treptabulators.resetsums(const skipcurrent: boolean);
+var
+ int1: integer;
+begin
+ for int1:= 0 to high(fitems) do begin
+  treptabulatoritem(fitems[int1]).resetsum(skipcurrent);
+ end;
+end;
+
+procedure treptabulators.dobeforenextrecord(const adatasource: tdatasource);
+var
+ int1: integer;
+begin
+ for int1:= 0 to high(fitems) do begin
+  treptabulatoritem(fitems[int1]).dobeforenextrecord(adatasource);
+ end;
+end;
+
 procedure setbandoptionsshow(const avalue: bandoptionshowsty;
                                            var foptions: bandoptionshowsty);
 const
@@ -3025,6 +3176,7 @@ procedure tcustomrecordband.beginrender(const arestart: boolean);
 var
  int1: integer;
 begin
+ ftabs.resetsums(false);
  if arestart then begin
   fstate:= (fstate * [rbs_pageshowed]) + [rbs_rendering]
  end
@@ -3082,8 +3234,9 @@ begin
  ftabs.assign(avalue);
 end;
 
-procedure tcustomrecordband.dobeforenextrecord;
+procedure tcustomrecordband.dobeforenextrecord(const adatasource: tdatasource);
 begin
+ ftabs.dobeforenextrecord(adatasource);
  if fvisigrouplink.fieldactive then begin
   fgroupnum:= fvisigrouplink.field.asinteger;
  end;
@@ -3105,7 +3258,7 @@ begin
   end;
   if setflag then begin
    include(fstate,rbs_notfirstrecord);
-   dobeforenextrecord;
+   dobeforenextrecord(fdatalink.datasource);
   end;
   if fdatalink.active then begin
    fdatalink.dataset.next;
@@ -3860,13 +4013,13 @@ begin
  result:= fparentintf.getreppage;
 end;
 
-procedure tcustombandgroup.dobeforenextrecord;
+procedure tcustombandgroup.dobeforenextrecord(const adatasource: tdatasource);
 var
  int1: integer;
 begin
  inherited;
  for int1:= 0 to high(fbands) do begin
-  fbands[int1].dobeforenextrecord;
+  fbands[int1].dobeforenextrecord(adatasource);
  end;
 end;
 
@@ -4364,12 +4517,12 @@ begin
  end;
 end;
 
-procedure tcustombandarea.dobeforenextrecord;
+procedure tcustombandarea.dobeforenextrecord(const adatasource: tdatasource);
 var
  int1: integer;
 begin
  for int1:= 0 to high(fbands) do begin
-  fbands[int1].dobeforenextrecord;
+  fbands[int1].dobeforenextrecord(adatasource);
  end;
 end;
 
@@ -4504,15 +4657,15 @@ begin
  end;
 end;
 
-procedure tcustomreportpage.dobeforenextrecord;
+procedure tcustomreportpage.dobeforenextrecord(const adatasource: tdatasource);
 var
  int1: integer;
 begin
  for int1:= 0 to high(fareas) do begin
-  fareas[int1].dobeforenextrecord;
+  fareas[int1].dobeforenextrecord(adatasource);
  end;
  for int1:= 0 to high(fbands) do begin
-  fbands[int1].dobeforenextrecord;
+  fbands[int1].dobeforenextrecord(adatasource);
  end;
 end;
 
@@ -4601,7 +4754,7 @@ begin
      if canevent(tmethod(fonbeforenextrecord)) then begin
       fonbeforenextrecord(self);
      end;
-     dobeforenextrecord;
+     dobeforenextrecord(fdatalink.datasource);
      fdatalink.dataset.next;
      if checkislastrecord(fdatalink,@dosyncnextrecord) then begin
       include(fstate,rpps_lastrecord);
