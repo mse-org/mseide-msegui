@@ -138,6 +138,7 @@ type
    flookupkind: lookupkindty;
    fformat: msestring;
    fcolor: colorty;
+   ftag: integer;
    procedure setvalue(const avalue: msestring);
    procedure setrichvalue(const avalue: richstringty);
    function getdisptext: richstringty;
@@ -196,6 +197,7 @@ type
    destructor destroy; override;
    property richvalue: richstringty read fvalue write setrichvalue;
   published
+   property tag: integer read ftag write ftag;
    property value: msestring read fvalue.text write setvalue;
    property font: treptabfont read getfont write setfont stored isfontstored;
    property color: colorty read fcolor write setcolor default cl_none;
@@ -551,6 +553,7 @@ type
    fnextband: tcustomrecordband;
    fnextbandifempty: tcustomrecordband;
    fareas: bandareaarty;
+   fonbeforepaint: painteventty;
    procedure settabs(const avalue: treptabulators);
    procedure setoptionsshow(const avalue: bandoptionshowsty);
    function getvisidatasource: tdatasource;
@@ -649,6 +652,7 @@ type
                        //used by tcustombandarea
    property onbeforerender: beforerenderrecordeventty read fonbeforerender
                                write fonbeforerender;
+   property onbeforepaint: painteventty read fonbeforepaint write fonbeforepaint;
    property onpaint: painteventty read fonpaint write fonpaint;
    property onafterpaint: painteventty read fonafterpaint write fonafterpaint;
   published
@@ -673,6 +677,7 @@ type
    property onchildscaled;
 
    property onbeforerender;
+   property onbeforepaint;
    property onpaint;
    property onafterpaint;
   end;
@@ -3134,6 +3139,9 @@ end;
 
 procedure tcustomrecordband.dopaint(const acanvas: tcanvas);
 begin
+ if canevent(tmethod(fonbeforepaint)) then begin
+  fonbeforepaint(self,acanvas);
+ end;
  inherited;
  ftabs.paint(acanvas,innerclientrect);
 end;
