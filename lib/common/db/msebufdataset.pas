@@ -2710,7 +2710,15 @@ begin
  checkrecno(value);
  bm.data.recordpo:= nil;
  bm.data.recno:= value-1;
- gotobookmark(@bm);
+ if nocheck then begin
+  try
+   gotobookmark(@bm);
+  except        //catch exception by filter
+  end;
+ end
+ else begin
+  gotobookmark(@bm);
+ end;
 end;
 
 procedure tmsebufdataset.setrecno(value: longint);
