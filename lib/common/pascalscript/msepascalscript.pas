@@ -43,6 +43,7 @@ type
    procedure setps_plugins(const avalue: tpsplugins);
   protected
    class function getmoduleclassname: string; override;
+   procedure readstate(reader: treader); override;
   public
    constructor create(aowner: tcomponent; load: boolean); override;
    destructor destroy; override;
@@ -85,6 +86,50 @@ type
    procedure linkmethods(const ascript: tmsepsscript);
  end;
 
+procedure tscriptform.readstate(reader: treader);
+var
+ methlist: tmethproplist;
+begin
+ if not (csdesigning in componentstate) then begin
+  methlist:= tmethproplist.create;
+  try
+   reader.onsetmethodproperty:= @methlist.dosetmethodprop;
+   inherited;
+   if not fscript.compile then begin
+    raise exception.create('Error compiling script of '+name+':'+lineend+
+             fscript.compilermessagetext);
+   end;
+   methlist.linkmethods(fscript);
+  finally
+   methlist.free;
+  end;
+ end
+ else begin
+  inherited;
+ end;
+end;
+
+function loadscriptform(const filename: filenamety): tscriptform;
+var
+ stream1: ttextstream;
+ stream2: tmemorystream;
+ reader1: treader;
+begin
+ stream1:= nil;
+ stream2:= nil;
+ try
+  result:= tscriptform.create(application,false);
+  stream1:= ttextstream.create(filename,fm_read);
+  stream2:= tmemorystream.create;
+  objecttexttobinary(stream1,stream2);
+  stream2.position:= 0;
+  result:= tscriptform(createtmpmodule('tscriptform',stream2));
+ finally
+  stream1.free;
+  stream2.free;
+ end;
+end;
+{ 
 function loadscriptform(const filename: filenamety): tscriptform;
 var
  methlist: tmethproplist;
@@ -125,7 +170,7 @@ begin
   methlist.free;
  end;
 end;
- 
+} 
 function createscriptform(const aclass: tclass; 
                    const aclassname: pshortstring): tmsecomponent;
 begin
@@ -342,4 +387,6 @@ begin
  name:= 'qwertz';
 end;
 
+initialization
+ registerclass(tscriptform);
 end.
