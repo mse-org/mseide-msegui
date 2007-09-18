@@ -123,7 +123,7 @@ type
 
  getrichstringeventty = procedure(const sender: tobject; 
                                    var avalue: richstringty) of object;
- reptabulatoritemoptionty = (rto_sum,rto_shownull);
+ reptabulatoritemoptionty = (rto_sum,rto_shownull,rto_noreset);
  reptabulatoritemoptionsty = set of reptabulatoritemoptionty;
 
  itemsumty = record
@@ -2142,7 +2142,7 @@ begin
     with ftabs[int1] do begin
      with treptabulatoritem(fitems[index]) do begin
       text:= getdisptext;
-      if apaint and (rto_sum in foptions) then begin
+      if apaint and (foptions*[rto_sum,rto_noreset]=[rto_sum]) then begin
        fsum.resetpending:= true;
       end;
       finfo.font:= font;
