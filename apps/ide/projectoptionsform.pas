@@ -382,6 +382,7 @@ procedure saveprojectoptions(filename: filenamety = '');
 procedure initprojectoptions;
 function editprojectoptions: boolean;
     //true if not aborted
+function getprojectmacros: macroinfoarty;
 procedure expandprojectmacros;
 function expandprmacros(const atext: msestring): msestring;
 procedure expandprmacros1(var atext: msestring);
@@ -478,6 +479,21 @@ begin
  end;
 end;
 
+function getprojectmacros: macroinfoarty;
+begin
+ setlength(result,2);
+ with projectoptions do begin
+  with result[0] do begin
+   name:= 'PROJECTNAME';
+   value:= removefileext(filename(projectfilename))
+  end;
+  with result[1] do begin
+   name:= 'PROJECTDIR';
+   value:= getcurrentdir;
+  end;
+ end;
+end;
+
 procedure projectoptionstofont(const afont: tfont);
 begin
  with projectoptions,afont do begin
@@ -534,6 +550,7 @@ begin
  with projectoptions do begin
   result:= tmacrolist.create([mao_caseinsensitive]);
   result.add(getsettingsmacros);
+  result.add(getprojectmacros);
   mask:= bits[macrogroup];
   setlength(macrovalues,length(macronames));
   setlength(ar1,length(macronames)); //max

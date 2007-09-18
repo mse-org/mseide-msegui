@@ -1747,6 +1747,7 @@ begin
     else begin
      projectoptions.projectfilename:= projectfilebefore;
      projectoptions.projectdir:= projectdirbefore;
+     expandprojectmacros;
      setprojectname(namebefore);
     end;
    end;
@@ -1763,6 +1764,7 @@ begin
   saveprojectoptions(aname);
   if not ascopy then begin
    setprojectname(aname);
+   expandprojectmacros;
   end;
  end;
 end;
@@ -1803,7 +1805,7 @@ begin
      with t do begin
       mainfile:= filename(aname);
       aname:= removefileext(mainfile);
-      targetfile:= aname + '${EXEEXT}';
+      targetfile:= aname+'${EXEEXT}'
      end;
      expandprojectmacros;
     end;
@@ -1817,10 +1819,14 @@ begin
    if not fromprogram then begin
     mstr1:= removefileext(filename(aname));
     with projectoptions do begin
+     projectfilename:= aname;
+     projectdir:= curdir;
+    {
      with t do begin
       mainfile:= mstr1 + '.pas';
       targetfile:= mstr1 + '${EXEEXT}';
      end;
+     }
      expandprojectmacros;
      with texp do begin  
       setlength(copiedfiles,length(newprojectfiles));
