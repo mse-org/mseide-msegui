@@ -636,7 +636,7 @@ end;
 
 constructor tcustommseform.create(aowner: tcomponent);
 begin
- create(aowner,true);
+ create(aowner,not (cs_noload in fmsecomponentstate));
 end;
 
 destructor tcustommseform.destroy;
@@ -1589,7 +1589,7 @@ end;
 
 constructor tsubform.create(aowner: tcomponent);
 begin
- create(aowner,true);
+ create(aowner,not (cs_noload in fmsecomponentstate));
 end;
 
 constructor tsubform.create(aowner: tcomponent; load: boolean);
@@ -1627,5 +1627,9 @@ begin
  end;
 end;
 
+initialization
+ registerclass(tmseform);
+ registerclass(tdockform);
+ registerclass(tsubform);
 end.
 

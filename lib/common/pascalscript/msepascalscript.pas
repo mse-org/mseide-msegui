@@ -60,7 +60,7 @@ function loadscriptform(const filename: filenamety): tscriptform;
 
 implementation
 uses
- typinfo,mselist,msestream,msegui,msesys,sysutils;
+ typinfo,mselist,msestream,msegui,msesys,sysutils,msetmpmodules;
 type
  tmsecomponent1 = class(tmsecomponent);
  
@@ -85,14 +85,6 @@ type
    procedure linkmethods(const ascript: tmsepsscript);
  end;
 
-var
- fscriptmodules: tmodulelist;
-
-function findscriptmodulebyname(const name: string): tcomponent;
-begin
- result:= fscriptmodules.findmodulebyname(name);
-end;
-
 function loadscriptform(const filename: filenamety): tscriptform;
 var
  methlist: tmethproplist;
@@ -104,9 +96,7 @@ begin
  stream1:= nil;
  stream2:= nil;
  reader1:= nil;
- lockfindglobalcomponent;
- fscriptmodules.unlock;
- begingloballoading;
+ beginloadtmpmodule;
  try
   try
    result:= tscriptform.create(application,false);
@@ -122,18 +112,13 @@ begin
              result.fscript.compilermessagetext);
    end;
    methlist.linkmethods(result.fscript);
-   fscriptmodules.add(result);
-   globalfixupreferences;
-   notifygloballoading;
-   result.doafterload;
+   addtmpmodule(result);
   except
    result.free;
    raise;
   end;
  finally
-  endgloballoading;
-  fscriptmodules.lock;
-  unlockfindglobalcomponent;
+  endloadtmpmodule;
   reader1.free;
   stream1.free;
   stream2.free;
@@ -357,10 +342,4 @@ begin
  name:= 'qwertz';
 end;
 
-initialization
- fscriptmodules:= tmodulelist.create(false);
- fscriptmodules.lock;
- registerfindglobalcomponentproc({$ifdef FPC}@{$endif}findscriptmodulebyname);
-finalization
- freeandnil(fscriptmodules);
 end.

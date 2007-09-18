@@ -244,7 +244,7 @@ type
    property sender: tobject read fsender;
  end;
 
- msecomponentstatety = (cs_ismodule,cs_endreadproc,cs_loadedproc);
+ msecomponentstatety = (cs_ismodule,cs_endreadproc,cs_loadedproc,cs_noload);
  msecomponentstatesty = set of msecomponentstatety;
 
  createprocty = procedure of object;
@@ -1367,7 +1367,7 @@ begin
  end;
  loadmodule(instance,po1,true);
 end;
-
+(*
 procedure registerclassproperties(aclass: tclass);
 type
   PFieldClassTable = ^TFieldClassTable;
@@ -1427,9 +1427,9 @@ begin
    end;
   end;
 end;
-
+*)
 procedure loadmsemodule(const instance: tmsecomponent; const rootancestor: tclass);
-
+{
  procedure doregister(aclass: tclass);
  begin
   if (aclass <> rootancestor) and (aclass <> tcomponent) then begin
@@ -1437,9 +1437,9 @@ procedure loadmsemodule(const instance: tmsecomponent; const rootancestor: tclas
    registerclassproperties(aclass);
   end;
  end;
- 
+}
 begin
-  doregister(instance.classtype);
+//  doregister(instance.classtype);
   if not initmsecomponent(instance,rootancestor) then begin
    if not initinheritedcomponent(instance,rootancestor) then begin
     guierror(gue_resnotfound,instance);

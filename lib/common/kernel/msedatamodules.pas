@@ -77,7 +77,7 @@ end;
 
 constructor tmsedatamodule.create(aowner: tcomponent);
 begin
- create(aowner,true);
+ create(aowner,not (cs_noload in fmsecomponentstate));
 end;
 
 constructor tmsedatamodule.create(aowner: tcomponent; load: boolean);
@@ -196,4 +196,6 @@ begin
  inherited;
 end;
 
+initialization
+ registerclass(tmsedatamodule);
 end.

@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2006 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2007 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -275,7 +275,7 @@ const
  cursorkeynames: array[key_home..key_pagedown] of msestring =
   ('Home','End','Left','Up','Right','Down','PageUp','PageDown');
 
-function keytomsechar(key: keyty): msechar; //only 0..1, a..z
+function keytomsechar(key: keyty): msechar; //only 0..9, a..z
 
 implementation
 

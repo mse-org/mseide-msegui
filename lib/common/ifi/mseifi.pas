@@ -419,7 +419,7 @@ type
   
 implementation
 uses
- sysutils,msedatalist,mseprocutils,msesysintf,mseforms;
+ sysutils,msedatalist,mseprocutils,msesysintf,mseforms,msetmpmodules;
 
 const
  headersizes: array[ifireckindty] of integer = (
@@ -1402,43 +1402,23 @@ var
  stream1: tmemorycopystream;
  str1: string;
  po1: pchar;
- class1: tpersistentclass;
 begin
  mo1:= trxlinkmodule(fmodulesrx.finditem(aname));
  if mo1 <> nil then begin
   if mo1.fsequence = adata^.sequence then begin
    po1:= @adata^.parentclass;
    inc(po1,ifinametostring(pifinamety(po1),str1));
-   class1:= findclass(str1);
-   if (class1 <> nil) and class1.inheritsfrom(tmseform) then begin
-    with mo1 do begin
-     freeandnil(fmodule);
-     fmodule:= tmseform.create(application,false);
-     setlinkedvar(fmodule,fmodule);
-    end;
-    lockfindglobalcomponent;
-//    fscriptmodules.unlock;
-    begingloballoading;
-    try    
+   with mo1 do begin
+    freeandnil(fmodule);
+    with pifibytesty(po1)^ do begin
+     stream1:= tmemorycopystream.create(@data,length);
      try
-      with pifibytesty(po1)^ do begin
-       stream1:= tmemorycopystream.create(@data,length);
-       try
-        stream1.readcomponent(mo1.fmodule);
-       finally
-        stream1.free;
-       end;
-      end;
-      globalfixupreferences;
-      notifygloballoading;
-     except
-      freeandnil(mo1.fmodule);
+      fmodule:= createtmpmodule(str1,stream1);
+     finally
+      stream1.free;
      end;
-    finally
-     endgloballoading;
-//     fscriptmodules.lock;
-     unlockfindglobalcomponent;
     end;
+    setlinkedvar(fmodule,fmodule);
    end;
   end;
  end;

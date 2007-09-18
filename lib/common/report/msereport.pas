@@ -6412,4 +6412,6 @@ begin
  change;
 end;
 *)
+initialization
+ registerclass(treport);
 end.
