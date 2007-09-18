@@ -205,10 +205,12 @@ type
    procedure setlookupkind(const avalue: lookupkindty);
    procedure setformat(const avalue: msestring);
    procedure setcolor(const avalue: colorty);
+   
    function getsumasinteger: integer;
    function getsumaslargeint: int64;
    function getsumasfloat: double;
    function getsumascurrency: currency;
+   procedure initsum;
   protected
    function xlineoffset: integer;
    procedure dobeforenextrecord(const adatasource: tdatasource);
@@ -360,6 +362,7 @@ type
    procedure dochange(const aindex: integer); override;
    procedure setcount1(acount: integer; doinit: boolean); override;
    procedure dobeforenextrecord(const adatasource: tdatasource);
+   procedure initsums;
   public
    constructor create(const aowner: tcustomrecordband);
    procedure resetsums(const skipcurrent: boolean);
@@ -1885,6 +1888,11 @@ begin
  fsum.reset:= true;
 end;
 
+procedure treptabulatoritem.initsum;
+begin
+ fillchar(fsum,sizeof(fsum),0);
+end;
+
 procedure treptabulatoritem.dobeforenextrecord(const adatasource: tdatasource);
 begin
  if (rto_sum in foptions) and (fdatalink.datasource = adatasource) and 
@@ -1909,9 +1917,8 @@ begin
    end;
   end;
   if fsum.resetpending then begin
-   resetsum(false);
+   initsum;
   end;
-  fsum.reset:= false;
  end;
 end;
 
@@ -2797,6 +2804,15 @@ begin
  end;
 end;
 
+procedure treptabulators.initsums;
+var
+ int1: integer;
+begin
+ for int1:= 0 to high(fitems) do begin
+  treptabulatoritem(fitems[int1]).initsum;
+ end;
+end;
+
 procedure setbandoptionsshow(const avalue: bandoptionshowsty;
                                            var foptions: bandoptionshowsty);
 const
@@ -3189,7 +3205,7 @@ procedure tcustomrecordband.beginrender(const arestart: boolean);
 var
  int1: integer;
 begin
- ftabs.resetsums(false);
+ ftabs.initsums;
  if arestart then begin
   fstate:= (fstate * [rbs_pageshowed]) + [rbs_rendering]
  end
