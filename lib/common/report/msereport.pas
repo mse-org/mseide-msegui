@@ -123,7 +123,7 @@ type
 
  getrichstringeventty = procedure(const sender: tobject; 
                                    var avalue: richstringty) of object;
- reptabulatoritemoptionty = (rto_sum,rto_shownull,rto_noreset);
+ reptabulatoritemoptionty = (rto_sum,rto_shownull,rto_nocurrentvalue,rto_noreset);
  reptabulatoritemoptionsty = set of reptabulatoritemoptionty;
 
  itemsumty = record
@@ -1661,7 +1661,8 @@ begin
   else begin
    if rto_sum in foptions then begin
     with fdatalink.field do begin
-     if not (rto_shownull in foptions) and (fsum.resetpending or isnull) and 
+     if not (rto_shownull in foptions) and 
+      ((rto_nocurrentvalue in foptions) or fsum.resetpending or isnull) and 
                              (fsum.count = 0) then begin
       result.text:= '';
      end
@@ -1920,7 +1921,10 @@ begin
   result:= 0;
  end
  else begin
-  result:= fsum.integervalue + fdatalink.field.asinteger;
+  result:= fsum.integervalue;
+  if not (rto_nocurrentvalue in foptions) then begin
+   result:= result + fdatalink.field.asinteger;
+  end;
  end;
 end;
 
@@ -1930,7 +1934,10 @@ begin
   result:= 0;
  end
  else begin
-  result:= fsum.largeintvalue + fdatalink.field.aslargeint;
+  result:= fsum.largeintvalue;
+  if not (rto_nocurrentvalue in foptions) then begin
+   result:= result + fdatalink.field.aslargeint;
+  end;
  end;
 end;
 
@@ -1940,7 +1947,10 @@ begin
   result:= 0;
  end
  else begin
-  result:= fsum.floatvalue + fdatalink.field.asfloat;
+  result:= fsum.floatvalue;
+  if not (rto_nocurrentvalue in foptions) then begin
+   result:= result + fdatalink.field.asfloat;
+  end;
  end;
 end;
 
@@ -1950,7 +1960,10 @@ begin
   result:= 0;
  end
  else begin
-  result:= fsum.bcdvalue + fdatalink.field.ascurrency;
+  result:= fsum.bcdvalue;
+  if not (rto_nocurrentvalue in foptions) then begin
+   result:= result + fdatalink.field.ascurrency;
+  end;
  end;
 end;
 
