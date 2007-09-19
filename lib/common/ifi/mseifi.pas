@@ -286,11 +286,14 @@ type
  trxlinkmodule = class;
  rxlinkmoduleeventty = procedure(sender: trxlinkmodule) of object;
 
- trxlinkmodule = class(tlinkmodule)
+ trxlinkmodule = class(tlinkaction)
   private
    fmodule: tmsecomponent;
    fonmodulereceived: rxlinkmoduleeventty;
    fsequence: longword;
+  protected
+   procedure objectevent(const sender: tobject;
+                                  const event: objecteventty); override;
   public
    procedure requestmodule;
    property module: tmsecomponent read fmodule;
@@ -1095,18 +1098,6 @@ begin
  result:= tlinkdatawidget(inherited byname(aname));
 end;
 
-{ trxlinkmodule }
-
-procedure trxlinkmodule.requestmodule;
-var
- str1: string;
- po1: pchar;
-begin
- inititemheader(str1,ik_requestmodule,0,po1);
- fsequence:= tcustomformlink(fowner).fsequence;
- tcustomformlink(fowner).senddata(str1);
-end;
-
 { ttxlinkmodules }
 
 constructor ttxlinkmodules.create(const aowner: tcustomformlink);
@@ -1122,6 +1113,26 @@ end;
 function ttxlinkmodules.byname(const aname: string): ttxlinkmodule;
 begin
  result:= ttxlinkmodule(inherited byname(aname));
+end;
+
+{ trxlinkmodule }
+
+procedure trxlinkmodule.requestmodule;
+var
+ str1: string;
+ po1: pchar;
+begin
+ inititemheader(str1,ik_requestmodule,0,po1);
+ fsequence:= tcustomformlink(fowner).fsequence;
+ tcustomformlink(fowner).senddata(str1);
+end;
+
+procedure trxlinkmodule.objectevent(const sender: tobject;
+               const event: objecteventty);
+begin
+ if (event = oe_fired) and (sender = faction) then begin
+  requestmodule;
+ end;
 end;
 
 { trxlinkmodules }

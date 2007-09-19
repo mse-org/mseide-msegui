@@ -453,9 +453,12 @@ end;
 function tcustommenu.checkexec: boolean;
 begin
  result:= fexecitem <> nil;
- if result and canevent(tmethod(fexecitem.onexecute)) then begin
-  fexecitem.onexecute(fexecitem);
+ if result then begin
+  doactionexecute(fexecitem,fexecitem.finfo);
  end;
+// if result and canevent(tmethod(fexecitem.onexecute)) then begin
+//  fexecitem.onexecute(fexecitem);
+// end;
  fexecitem:= nil;
 end;
 
