@@ -960,6 +960,7 @@ begin
   registeredcomponents.updatestat(statfiler);
   setsection('projectoptions');
   updatevalue('projectdir',projectdir);
+  updatevalue('projectfilename',projectfilename);
   updatememorystatstream('findinfiledialog',findinfiledialogstatname);
   updatememorystatstream('finddialog',finddialogstatname);
   updatememorystatstream('replacedialog',replacedialogstatname);
