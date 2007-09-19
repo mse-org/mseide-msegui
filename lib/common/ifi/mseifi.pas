@@ -339,7 +339,7 @@ type
   private
    freader: tpipereader;
    fwriter: tpipewriter;
-   fapplication: string;
+   fserverapp: string;
    fprochandle: integer;
    fbuffer: string;
    fstate: pipeiostatesty;
@@ -358,7 +358,7 @@ type
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
   published
-   property application: string read fapplication write fapplication;
+   property serverapp: string read fserverapp write fserverapp;
             //stdin, stdout if ''
    property active;
  end;
@@ -435,7 +435,7 @@ type
   
 implementation
 uses
- sysutils,msedatalist,mseprocutils,msesysintf,mseforms,msetmpmodules;
+ sysutils,msedatalist,mseprocutils,msesysintf,mseforms,msetmpmodules,msesysutils;
 
 const
  headersizes: array[ifireckindty] of integer = (
@@ -563,8 +563,9 @@ end;
 
 procedure tpipeiochannel.open;
 begin
- if fapplication <> '' then begin
-  fprochandle:= execmse2(fapplication,fwriter,freader);
+ resetrxbuffer;
+ if fserverapp <> '' then begin
+  fprochandle:= execmse2(fserverapp,fwriter,freader);
  end
  else begin
   freader.handle:= sys_stdin;
@@ -589,7 +590,7 @@ end;
 
 function tpipeiochannel.commio: boolean;
 begin
- result:= ((fapplication = '') or (fprochandle <> invalidprochandle))
+ result:= ((fserverapp = '') or (fprochandle <> invalidprochandle))
                      and freader.active;
 end;
 
@@ -613,13 +614,19 @@ var
 begin
  fbuffer:= fbuffer + adata;
  int1:= length(fbuffer);
- if (pis_rxstarted in fstate) then begin
-  if (int1 >= 2) then begin
-   for int2:= int1 downto frxcheckedindex + 2 do begin
-    if (fbuffer[int2] = c_etx) and (fbuffer[int2-1] = c_dle) then begin
-     str1:= copy(fbuffer,int2+1,int1); //next frame
-     setlength(fbuffer,int2-2);
-     datareceived(unstuff(fbuffer));
+ if (int1 >= 2) then begin
+  po1:= pointer(fbuffer);
+  if (pis_rxstarted in fstate) then begin
+   for int2:= frxcheckedindex to int1-2 do begin
+    if (po1[int2] = c_dle) and (po1[int2+1] = c_etx) and
+     ((int2 = 0) or (po1[int2-1] <> c_dle))  then begin
+     str1:= copy(fbuffer,int2+3,int1); //next frame
+     setlength(fbuffer,int2);
+     try
+      datareceived(unstuff(fbuffer));
+     except
+      application.handleexception(self);
+     end;
      resetrxbuffer;
      if str1 <> '' then begin
       addata(str1);
@@ -627,18 +634,22 @@ begin
      exit;
     end;
    end;
-  end;
-  frxcheckedindex:= int1 - 1;
- end
- else begin
-  for int2:= 1 to int1-1 do begin
-   if (fbuffer[int2] = c_dle) and (fbuffer[int2+1] = c_stx) then begin
-    fbuffer:= copy(fbuffer,int2+2,int1);
-    include(fstate,pis_rxstarted);
-    addata('');
-    break;
+  end
+  else begin
+   for int2:= 0 to int1-2 do begin
+    if (po1[int2] = c_dle) and (po1[int2+1] = c_stx) and
+         ((int2 = 0) or (po1[int2-1] <> c_dle)) then begin
+     fbuffer:= copy(fbuffer,int2+3,int1);
+     include(fstate,pis_rxstarted);
+     addata('');
+     exit;
+    end;
    end;
   end;
+  repeat
+   dec(int1);
+  until (int1 = 0) or (po1[int1] <> c_dle);
+  frxcheckedindex:= int1;
  end;
 end;
 
@@ -1403,6 +1414,7 @@ var
  str1,str2: string;
  po2,po3: pchar;
 begin
+debugwriteln('requestmodule '+aname);
  mo1:= ttxlinkmodule(fmodulestx.finditem(aname));
  if (mo1 <> nil) and (mo1.fmoduleclassname <> '') then begin
   po1:= findmoduledata(mo1.fmoduleclassname,str2);

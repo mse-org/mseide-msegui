@@ -2,7 +2,8 @@ unit msepascalscript;
 {$ifdef FPC}{$mode objfpc}{$h+}{$INTERFACES CORBA}{$endif}
 interface
 uses
- classes,uPSComponent,uPSCompiler,uPSRuntime,msestrings,mseforms,mseclasses;
+ classes,uPSComponent,uPSCompiler,uPSRuntime,msestrings,mseforms,mseclasses,
+ typinfo,mselist;
  
 type 
  tmsepsscript = class(tpsscript)
@@ -34,37 +35,6 @@ type
    constructor create(aowner: tmsecomponent);
  end;
  
- tscriptform = class(tmseform)
-  private
-   fscript: tformscript;
-   function getps_script: tstrings;
-   procedure setps_script(const avalue: tstrings);
-   function getps_plugins: tpsplugins;
-   procedure setps_plugins(const avalue: tpsplugins);
-  protected
-   class function getmoduleclassname: string; override;
-   procedure readstate(reader: treader); override;
-  public
-   constructor create(aowner: tcomponent; load: boolean); override;
-   destructor destroy; override;
-   property script: tformscript read fscript;
-  published
-   property ps_script: tstrings read getps_script write setps_script;
-   property ps_plugins: tpsplugins read getps_plugins write setps_plugins;
- end;
- 
- scriptformclassty = class of tscriptform;
- 
-function createscriptform(const aclass: tclass; 
-                   const aclassname: pshortstring): tmsecomponent;
-function loadscriptform(const filename: filenamety): tscriptform;
-
-implementation
-uses
- typinfo,mselist,msestream,msegui,msesys,sysutils,msetmpmodules;
-type
- tmsecomponent1 = class(tmsecomponent);
- 
  methpropinfoty = record
   propinfo: ppropinfo;
   instance: tobject;
@@ -86,15 +56,48 @@ type
    procedure linkmethods(const ascript: tmsepsscript);
  end;
 
+ tscriptform = class(tmseform)
+  private
+   fscript: tformscript;
+   fmethlist: tmethproplist;
+   function getps_script: tstrings;
+   procedure setps_script(const avalue: tstrings);
+   function getps_plugins: tpsplugins;
+   procedure setps_plugins(const avalue: tpsplugins);
+  protected
+   class function getmoduleclassname: string; override;
+   procedure readstate(reader: treader); override;
+   procedure doafterload; override;
+  public
+   constructor create(aowner: tcomponent; load: boolean); override;
+   destructor destroy; override;
+   property script: tformscript read fscript;
+  published
+   property ps_script: tstrings read getps_script write setps_script;
+   property ps_plugins: tpsplugins read getps_plugins write setps_plugins;
+ end;
+ 
+ scriptformclassty = class of tscriptform;
+ 
+function createscriptform(const aclass: tclass; 
+                   const aclassname: pshortstring): tmsecomponent;
+function loadscriptform(const filename: filenamety): tscriptform;
+
+implementation
+uses
+ msestream,msegui,msesys,sysutils,msetmpmodules;
+type
+ tmsecomponent1 = class(tmsecomponent);
+ 
 procedure tscriptform.readstate(reader: treader);
-var
- methlist: tmethproplist;
 begin
  if not (csdesigning in componentstate) then begin
-  methlist:= tmethproplist.create;
-  try
-   reader.onsetmethodproperty:= @methlist.dosetmethodprop;
+  freeandnil(fmethlist);
+  fmethlist:= tmethproplist.create;
+//  try
+   reader.onsetmethodproperty:= @fmethlist.dosetmethodprop;
    inherited;
+   {
    if not fscript.compile then begin
     raise exception.create('Error compiling script of '+name+':'+lineend+
              fscript.compilermessagetext);
@@ -103,9 +106,25 @@ begin
   finally
    methlist.free;
   end;
+  }
  end
  else begin
   inherited;
+ end;
+end;
+
+procedure tscriptform.doafterload;
+begin
+ if not (csdesigning in componentstate) then begin
+  try
+   if not fscript.compile then begin
+    raise exception.create('Error compiling script of '+name+':'+lineend+
+             fscript.compilermessagetext);
+   end;
+   fmethlist.linkmethods(fscript);
+  finally
+   freeandnil(fmethlist);
+  end;
  end;
 end;
 
@@ -268,6 +287,7 @@ end;
 
 destructor tscriptform.destroy;
 begin
+ fmethlist.free;
  fscript.free;
  inherited;
 end;
