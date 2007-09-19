@@ -1821,12 +1821,6 @@ begin
     with projectoptions do begin
      projectfilename:= aname;
      projectdir:= curdir;
-    {
-     with t do begin
-      mainfile:= mstr1 + '.pas';
-      targetfile:= mstr1 + '${EXEEXT}';
-     end;
-     }
      expandprojectmacros;
      with texp do begin  
       setlength(copiedfiles,length(newprojectfiles));
