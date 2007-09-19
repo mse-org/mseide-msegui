@@ -125,7 +125,9 @@ type
    procedure inititemheader(out arec: string;
                   const akind: ifireckindty; const datasize: integer;
                   out datapo: pchar); virtual;
- published
+  public
+   property prop: tformlinkarrayprop read fprop;
+  published
    property name: ansistring read fname write fname;
    property tag: integer read ftag write ftag;
  end;
@@ -143,6 +145,7 @@ type
                            const aitemclass: formlinkpropclassty);
    function finditem(const aname: string): tformlinkprop;
    function byname(const aname: string): tformlinkprop;
+   property owner: tcustomformlink read fowner;
  end; 
  
  tlinkaction = class(tformlinkprop)
@@ -180,6 +183,7 @@ type
    property items[const index: integer]: trxlinkaction read getitems; default;
   published
    property onexecute: integerchangedeventty read fonexecute write fonexecute;
+               //sender = item, avalue = tx tag
  end;
  
  ttxlinkactions = class(tlinkactions)
@@ -356,6 +360,11 @@ type
    property active;
  end;
   
+ formlinkoptionty = (flo_useclientchannel);
+ formlinkoptionsty = set of formlinkoptionty;
+const
+ defaultformlinkoptions = [flo_useclientchannel];
+type 
  tcustomformlink = class(tmsecomponent,iifiserver)
   private
    factionsrx: trxlinkactions;
@@ -365,6 +374,7 @@ type
    fsequence: longword;
    fmodulestx: ttxlinkmodules;
    fmodulesrx: trxlinkmodules;
+   foptions: formlinkoptionsty;
    procedure setactionsrx(const avalue: trxlinkactions);
    procedure setactionstx(const avalue: ttxlinkactions);
    procedure setchannel(const avalue: tcustomiochannel);
@@ -405,6 +415,8 @@ type
    property modulesrx: trxlinkmodules read fmodulesrx write setmodulesrx;
    property modulestx: ttxlinkmodules read fmodulestx write setmodulestx;
    property channel: tcustomiochannel read fchannel write setchannel;
+   property options: formlinkoptionsty read foptions write foptions
+                                      default defaultformlinkoptions;
  end;
 
  tformlink = class(tcustomformlink)
@@ -415,6 +427,7 @@ type
    property modulesrx;
    property modulestx;
    property channel;
+   property options;
  end;
   
 implementation
@@ -1132,6 +1145,7 @@ end;
 
 constructor tcustomformlink.create(aowner: tcomponent);
 begin
+ foptions:= defaultformlinkoptions;
  factionsrx:= trxlinkactions.create(self);
  factionstx:= ttxlinkactions.create(self);
  fdatawidgets:= tlinkdatawidgets.create(self);
@@ -1402,6 +1416,8 @@ var
  stream1: tmemorycopystream;
  str1: string;
  po1: pchar;
+ int1: integer;
+ comp2: tcomponent;
 begin
  mo1:= trxlinkmodule(fmodulesrx.finditem(aname));
  if mo1 <> nil then begin
@@ -1414,6 +1430,18 @@ begin
      stream1:= tmemorycopystream.create(@data,length);
      try
       fmodule:= createtmpmodule(str1,stream1);
+      with fmodule do begin
+       for int1:= 0 to componentcount - 1 do begin
+        comp2:= components[int1];
+        if comp2 is tcustomformlink then begin
+         with tcustomformlink(comp2) do begin
+          if flo_useclientchannel in options then begin
+           channel:= self.channel;
+          end;
+         end;
+        end; 
+       end;
+      end;
      finally
       stream1.free;
      end;
