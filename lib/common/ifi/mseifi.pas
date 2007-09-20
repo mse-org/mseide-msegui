@@ -306,6 +306,7 @@ type
   private
    function getitems(const index: integer): trxlinkmodule;
   protected
+   function finditem(const asequence: longword): trxlinkmodule; overload;
   public
    constructor create(const aowner: tcustomformlink);
    function byname(const aname: string): trxlinkmodule;
@@ -378,6 +379,7 @@ type
    fmodulestx: ttxlinkmodules;
    fmodulesrx: trxlinkmodules;
    foptions: formlinkoptionsty;
+   flinkname: string;
    procedure setactionsrx(const avalue: trxlinkactions);
    procedure setactionstx(const avalue: ttxlinkactions);
    procedure setchannel(const avalue: tcustomiochannel);
@@ -411,6 +413,7 @@ type
    destructor destroy; override;
    procedure updatecomponent(const anamepath: ansistring;
                                 const aobjecttext: ansistring);
+   property linkname: string read flinkname write flinkname;
    property actionsrx: trxlinkactions read factionsrx write setactionsrx;
    property actionstx: ttxlinkactions read factionstx write setactionstx;
    property datawidgets: tlinkdatawidgets read fdatawidgets 
@@ -424,6 +427,7 @@ type
 
  tformlink = class(tcustomformlink)
   published
+   property linkname;
    property actionsrx;
    property actionstx;
    property datawidgets;
@@ -1163,6 +1167,19 @@ begin
  result:= trxlinkmodule(inherited byname(aname));
 end;
 
+function trxlinkmodules.finditem(const asequence: longword): trxlinkmodule;
+var
+ int1: integer;
+begin
+ for int1:= 0 to high(fitems) do begin
+  if trxlinkmodule(fitems[int1]).fsequence = asequence then begin
+   result:= trxlinkmodule(fitems[int1]);
+   exit;
+  end;
+ end;
+ result:= nil;
+end;
+
 { tcustomformlink }
 
 constructor tcustomformlink.create(aowner: tcomponent);
@@ -1284,11 +1301,13 @@ begin
 end;
 
 procedure tcustomformlink.processdata(const adata: pifirecty);
+         //todo: optimize link name check
 var 
  tag1: integer;
  str1,str2: string;
  po1: pchar;
  command1: ifiwidgetcommandty;
+ ar1: stringarty;
 begin 
  with adata^ do begin
   if header.kind in ifiitemkinds then begin
@@ -1297,6 +1316,13 @@ begin
     po1:= @name;
    end;
    inc(po1,ifinametostring(pifinamety(po1),str1));
+   ar1:= splitstring(str1,'.');
+   if high(ar1) = 1 then begin
+    if ar1[0] <> flinkname then begin
+     exit;
+    end;
+    str1:= ar1[1];
+   end;
    case header.kind of
     ik_actionfired: begin
      actionreceived(tag1,str1);
@@ -1442,35 +1468,33 @@ var
  int1: integer;
  comp2: tcomponent;
 begin
- mo1:= trxlinkmodule(fmodulesrx.finditem(aname));
+ mo1:= fmodulesrx.finditem(adata^.sequence);
  if mo1 <> nil then begin
-  if mo1.fsequence = adata^.sequence then begin
-   po1:= @adata^.parentclass;
-   inc(po1,ifinametostring(pifinamety(po1),str1));
-   with mo1 do begin
-    freeandnil(fmodule);
-    with pifibytesty(po1)^ do begin
-     stream1:= tmemorycopystream.create(@data,length);
-     try
-      fmodule:= createtmpmodule(str1,stream1);
-      with fmodule do begin
-       for int1:= 0 to componentcount - 1 do begin
-        comp2:= components[int1];
-        if comp2 is tcustomformlink then begin
-         with tcustomformlink(comp2) do begin
-          if flo_useclientchannel in options then begin
-           channel:= self.channel;
-          end;
+  po1:= @adata^.parentclass;
+  inc(po1,ifinametostring(pifinamety(po1),str1));
+  with mo1 do begin
+   freeandnil(fmodule);
+   with pifibytesty(po1)^ do begin
+    stream1:= tmemorycopystream.create(@data,length);
+    try
+     fmodule:= createtmpmodule(str1,stream1);
+     with fmodule do begin
+      for int1:= 0 to componentcount - 1 do begin
+       comp2:= components[int1];
+       if comp2 is tcustomformlink then begin
+        with tcustomformlink(comp2) do begin
+         if flo_useclientchannel in options then begin
+          channel:= self.channel;
          end;
-        end; 
-       end;
+        end;
+       end; 
       end;
-     finally
-      stream1.free;
      end;
+    finally
+     stream1.free;
     end;
-    setlinkedvar(fmodule,fmodule);
    end;
+   setlinkedvar(fmodule,fmodule);
   end;
  end;
 end;

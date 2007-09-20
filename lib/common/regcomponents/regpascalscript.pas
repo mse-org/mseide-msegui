@@ -36,7 +36,7 @@ const
  
 procedure Register;
 begin          
- registercomponents('PaSc',[tmsepsscript,tpsdllplugin,tpsimport_classes,
+ registercomponents('Ifi',[tmsepsscript,tpsdllplugin,tpsimport_classes,
                             tpsimport_dateutils,tpsimportmsegui]);
  registerpropertyeditor(typeinfo(tstrings),tmsepsscript,'Script',tpascaleditor);
  registerpropertyeditor(typeinfo(tstrings),tscriptform,'ps_script',
