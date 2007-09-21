@@ -74,7 +74,8 @@ type
  tintegeravltree = class(tavltree)
   public
    constructor create;
-   function addnode(const akey: integer): tintegeravlnode;
+   function addnode(const akey: integer): tintegeravlnode; overload;
+   procedure addnode(const anode: tintegeravlnode); overload;
    function find(const akey: integer; out anode: tintegeravlnode): boolean; overload;
    procedure traverse(const aproc: integernodeprocty);
  end;
@@ -667,6 +668,11 @@ end;
 procedure tintegeravltree.traverse(const aproc: integernodeprocty);
 begin
  inherited traverse(nodeprocty(aproc));
+end;
+
+procedure tintegeravltree.addnode(const anode: tintegeravlnode);
+begin
+ inherited;
 end;
 
 { tint64avlnode }

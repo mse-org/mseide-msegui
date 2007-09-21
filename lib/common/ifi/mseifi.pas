@@ -3,15 +3,20 @@ unit mseifi;
 interface
 uses
  classes,mseclasses,msearrayprops,mseactions,msestrings,msetypes,mseevent,
- mseguiglob,msestream,msepipestream,msegui,mseifiglob,typinfo;
+ mseguiglob,msestream,msepipestream,msegui,mseifiglob,typinfo,msebintree,
+ msesys;
 type
-
+ 
+ sequencety = longword;
+ 
  ifireckindty = (ik_none,ik_data,ik_itemheader,ik_actionfired,ik_propertychanged,
-                 ik_widgetcommand,ik_widgetproperties,ik_requestmodule,ik_moduledata);
+                 ik_widgetcommand,ik_widgetproperties,ik_requestmodule,ik_moduledata,
+                 ik_requestfielddefs,ik_fielddefsdata);
  ifinamety = array[0..0] of char; //null terminated
  pifinamety = ^ifinamety;
 
- ifidatakindty = (idk_none,idk_int64,idk_real,idk_msestring,idk_ansistring);
+ ifidatakindty = (idk_none,idk_int64,idk_real,idk_msestring,idk_ansistring,
+                  idk_bytes);
  
  datarecty = record //dummy
  end;
@@ -64,7 +69,7 @@ type
  end;
  
  moduledatadataty = record
-  sequence: longword;
+//  sequence: sequencety;
   parentclass: ifinamety;
   data: ifibytesty;
  end;
@@ -74,7 +79,20 @@ type
   header: itemheaderty;
   data: moduledatadataty;
  end;
-  
+
+ requestfielddefsty = record
+  header: itemheaderty;
+ end;   
+ fielddefsdatadataty = record
+//  sequence: longint;
+  data: datarecty; //dummy
+ end;
+ pfielddefsdatadataty = ^fielddefsdatadataty;
+ 
+ fielddefsdataty = record
+  header: itemheaderty;
+  data: fielddefsdatadataty;
+ end;
 const
  ifiitemkinds = [ik_actionfired,ik_propertychanged,ik_widgetcommand,
                  ik_widgetproperties,ik_requestmodule,ik_moduledata];
@@ -82,7 +100,8 @@ const
 type 
  ifiheaderty = record
   size: integer;  //overall size
-  sequence: longword;
+  sequence: sequencety;
+  answersequence: sequencety;
   kind: ifireckindty;
  end;
  pifiheaderty = ^ifiheaderty;
@@ -110,6 +129,12 @@ type
    );
    ik_moduledata: (
     moduledata: moduledataty;
+   );
+   ik_requestfielddefs: (
+    requestfielddefs: requestfielddefsty;
+   );
+   ik_fielddefsdata: (
+    fielddefsdata: fielddefsdataty;
    )
  end;
  pifirecty = ^ifirecty;
@@ -123,7 +148,8 @@ type
    ftag: integer;
   protected
    procedure inititemheader(out arec: string;
-                  const akind: ifireckindty; const datasize: integer;
+                  const akind: ifireckindty; const asequence: sequencety;
+                  const datasize: integer;
                   out datapo: pchar); virtual;
   public
    property prop: tformlinkarrayprop read fprop;
@@ -290,7 +316,7 @@ type
   private
    fmodule: tmsecomponent;
    fonmodulereceived: rxlinkmoduleeventty;
-   fsequence: longword;
+   fsequence: sequencety;
   protected
    procedure objectevent(const sender: tobject;
                                   const event: objecteventty); override;
@@ -306,22 +332,51 @@ type
   private
    function getitems(const index: integer): trxlinkmodule;
   protected
-   function finditem(const asequence: longword): trxlinkmodule; overload;
+   function finditem(const asequence: sequencety): trxlinkmodule; overload;
   public
    constructor create(const aowner: tcustomformlink);
    function byname(const aname: string): trxlinkmodule;
    property items[const index: integer]: trxlinkmodule read getitems; default;   
+ end;
+
+ twaitingclient = class(tintegeravlnode)
+  private
+   fsem: semty;
+  public
+   constructor create(const asequence: sequencety);
+   destructor destroy; override;
+   procedure answered;
+   function wait(const awaitus: integer): boolean;
+ end;
+ 
+ tiosynchronizer = class
+  private
+   fwaitingclients: tintegeravltree;
+  protected
+   procedure datareceived(var adata: string); virtual; abstract;
+   procedure answerreceived(const asequence: sequencety);
+   function waitforanswer(const asequence: sequencety; 
+                   const waitus: integer): boolean; //false on timeout
+  public
+   constructor create;
+   destructor destroy; override;
+ end;
+ 
+ tifisynchronizer = class(tiosynchronizer)
+  protected
+   procedure datareceived(var adata: string); override;
  end;
  
  tcustomiochannel = class(tmsecomponent)
   private
    frxdata: string;
    factive: boolean;
+   fsequence: sequencety;
    procedure setactive(const avalue: boolean);
   protected
+   fsynchronizer: tiosynchronizer;
    function checkconnection: boolean;
    procedure datareceived(const adata: ansistring);
-   procedure senddata(const adata: ansistring);   
    procedure open; virtual; abstract;
    procedure close; virtual; abstract;
    function commio: boolean; virtual; abstract;
@@ -329,10 +384,14 @@ type
    procedure loaded; override;
   public
    destructor destroy; override;
+   procedure senddata(const adata: ansistring);   
+   function sequence: sequencety;
+   function waitforanswer(const asequence: sequencety; 
+                                     const atimeoutus: integer): boolean;
    property active: boolean read factive write setactive;
    property rxdata: string read frxdata write frxdata;
  end;
-
+ 
  pipeiostatety = (pis_rxstarted);
  pipeiostatesty = set of pipeiostatety;
  
@@ -363,7 +422,12 @@ type
             //stdin, stdout if ''
    property active;
  end;
-  
+ 
+ tpipeifichannel = class(tpipeiochannel)
+  public
+   constructor create(aowner: tcomponent); override;
+ end;
+ 
  formlinkoptionty = (flo_useclientchannel);
  formlinkoptionsty = set of formlinkoptionty;
 const
@@ -375,7 +439,6 @@ type
    factionstx: ttxlinkactions;
    fdatawidgets: tlinkdatawidgets;
    fchannel: tcustomiochannel;
-   fsequence: longword;
    fmodulestx: ttxlinkmodules;
    fmodulesrx: trxlinkmodules;
    foptions: formlinkoptionsty;
@@ -388,8 +451,6 @@ type
    procedure setmodulestx(const avalue: ttxlinkmodules);
    procedure setmodulesrx(const avalue: trxlinkmodules);
   protected
-   procedure initifirec(out arec: string; const akind: ifireckindty; 
-                             const datalength: integer; out datapo: pchar);
    function encodeactionfired(const atag: integer; const aname: string): string;
    procedure actionfired(const sender: tlinkaction); virtual;
    procedure actionreceived(const atag: integer; const aname: string);
@@ -400,12 +461,13 @@ type
    procedure widgetpropertiesreceived(const atag: integer; const aname: string;
                       const adata: pifibytesty);
    procedure requestmodulereceived(const atag: integer; const aname: string;
-                                    const asequence: longword);
+                                    const asequence: sequencety);
    procedure moduledatareceived(const atag: integer; const aname: string;
-                                    const adata: pmoduledatadataty);
+                   const asequence: sequencety; const adata: pmoduledatadataty);
    procedure objectevent(const sender: tobject; const event: objecteventty); override;
    procedure processdata(const adata: pifirecty);
-   procedure senddata(const adata: ansistring);
+   function senddata(const adata: ansistring): sequencety;
+                //returns sequence number
    //iifiserver
    procedure valuechanged(const sender: iifiwidget);
   public
@@ -436,6 +498,16 @@ type
    property channel;
    property options;
  end;
+
+procedure initifirec(out arec: string; const akind: ifireckindty; 
+      const asequence: sequencety; const datalength: integer; out datapo: pchar);
+procedure inititemheader(const atag: integer; const aname: string; 
+       out arec: string; const akind: ifireckindty; 
+        const asequence: sequencety; const datasize: integer; out datapo: pchar);
+function ifinametostring(const source: pifinamety;
+               out dest: string): integer;
+function stringtoifiname(const source: string;
+               const dest: pifinamety): integer;
   
 implementation
 uses
@@ -451,7 +523,9 @@ const
   sizeof(ifiheaderty)+sizeof(widgetcommandty),   //ik_widgetcommand
   sizeof(ifiheaderty)+sizeof(widgetpropertiesty),//ik_widgetproperties
   sizeof(ifiheaderty)+sizeof(requestmodulety),   //ik_requestmodule
-  sizeof(ifiheaderty)+sizeof(moduledataty)       //ik_moduledata
+  sizeof(ifiheaderty)+sizeof(moduledataty),      //ik_moduledata
+  sizeof(ifiheaderty)+sizeof(requestfielddefsty),//ik_requestfielddefs
+  sizeof(ifiheaderty)+sizeof(fielddefsdataty)    //ik_fielddefsdata
  );
 
  datarecsizes: array[ifidatakindty] of integer = (
@@ -459,12 +533,31 @@ const
   sizeof(ifidataty)+sizeof(int64),               //idk_int64
   sizeof(ifidataty)+sizeof(double),              //idk_real
   sizeof(ifidataty)+sizeof(ifinamety),           //idk_msestring
-  sizeof(ifidataty)+sizeof(ifinamety)            //idk_ansistring
-  );
+  sizeof(ifidataty)+sizeof(ifinamety),           //idk_ansistring
+  sizeof(ifidataty)+sizeof(ifibytesty)           //idk_bytes
+ );
 
  stuffchar = c_dle;
  stx = c_dle + c_stx;
  etx = c_dle + c_etx;
+
+procedure initifirec(out arec: string; const akind: ifireckindty;
+                      const asequence: sequencety; const datalength: integer;
+                      out datapo: pchar);
+var
+ int1: integer;
+begin
+ int1:= headersizes[akind] + datalength;
+ setlength(arec,int1);
+ fillchar(arec[1],int1,0);
+ with pifiheaderty(arec)^ do begin
+  size:= int1;
+  answersequence:= asequence;
+//  sequence:= fsequence;
+  kind:= akind;
+ end;
+ datapo:= pointer(arec) + sizeof(ifiheaderty);
+end;
 
 function stringtoifiname(const source: string;
                const dest: pifinamety): integer;
@@ -498,6 +591,7 @@ end;
 
 destructor tcustomiochannel.destroy;
 begin
+ fsynchronizer.free;
  close;
  inherited;
 end;
@@ -512,6 +606,14 @@ begin
  end;
 end;
 
+function tcustomiochannel.sequence: sequencety;
+begin
+ inc(fsequence);
+ if fsequence = 0 then begin
+  inc(fsequence);
+ end;
+end;
+
 procedure tcustomiochannel.senddata(const adata: ansistring);
 begin
  checkconnection;
@@ -522,6 +624,9 @@ procedure tcustomiochannel.datareceived(const adata: ansistring);
 begin
  frxdata:= adata;
  sendchangeevent(oe_dataready);
+ if fsynchronizer <> nil then begin
+  fsynchronizer.datareceived(frxdata);
+ end;
 end;
 
 procedure tcustomiochannel.setactive(const avalue: boolean);
@@ -544,6 +649,15 @@ begin
  inherited;
  if factive and not (csdesigning in componentstate) then begin
   open;
+ end;
+end;
+
+function tcustomiochannel.waitforanswer(const asequence: sequencety;
+               const atimeoutus: integer): boolean;
+begin
+ result:= false;
+ if fsynchronizer <> nil then begin
+  result:= fsynchronizer.waitforanswer(asequence,atimeoutus);
  end;
 end;
 
@@ -705,19 +819,26 @@ end;
 
 { tformlinkprop }
 
-procedure tformlinkprop.inititemheader(out arec: string;
-               const akind: ifireckindty; const datasize: integer;
-               out datapo: pchar);
+procedure inititemheader(const atag: integer; const aname: string; 
+       out arec: string; const akind: ifireckindty;  const asequence: sequencety;
+       const datasize: integer; out datapo: pchar);
 var
  po1: pchar; 
 begin
- tcustomformlink(fowner).initifirec(arec,akind,datasize+length(fname),po1);
+ initifirec(arec,akind,asequence,datasize+length(aname),po1);
  with pitemheaderty(po1)^ do begin
-  tag:= ftag;
+  tag:= atag;
   po1:= @name;
  end;
- inc(po1,stringtoifiname(fname,pifinamety(po1)));
+ inc(po1,stringtoifiname(aname,pifinamety(po1)));
  datapo:= po1;
+end;
+
+procedure tformlinkprop.inititemheader(out arec: string;
+               const akind: ifireckindty; const asequence: sequencety; 
+               const datasize: integer; out datapo: pchar);
+begin
+ mseifi.inititemheader(ftag,fname,arec,akind,asequence,datasize,datapo);
 end;
 
 { tlinkaction }
@@ -907,7 +1028,7 @@ procedure tlinkdatawidget.initpropertyrecord(out arec: string;
 var
  po1: pchar; 
 begin
- inititemheader(arec,ik_propertychanged,datarecsizes[akind]+
+ inititemheader(arec,ik_propertychanged,0,datarecsizes[akind]+
                 length(apropertyname)+datasize,po1);
        
  inc(po1,stringtoifiname(apropertyname,pifinamety(po1)));
@@ -920,7 +1041,7 @@ var
  str1: string;
  po1: pchar;
 begin
- inititemheader(str1,ik_widgetcommand,0,po1);
+ inititemheader(str1,ik_widgetcommand,0,0,po1);
  pifiwidgetcommandty(po1)^:= acommand;
  tcustomformlink(fowner).senddata(str1);
 end;
@@ -935,7 +1056,7 @@ begin
  stream1:= tmemorystream.create;
  try
   stream1.writecomponent(fwidget);
-  inititemheader(str1,ik_widgetproperties,stream1.size,po1);
+  inititemheader(str1,ik_widgetproperties,0,stream1.size,po1);
   setifibytes(stream1.memory,stream1.size,pifibytesty(po1));
  finally
   stream1.free;
@@ -1137,9 +1258,8 @@ var
  str1: string;
  po1: pchar;
 begin
- inititemheader(str1,ik_requestmodule,0,po1);
- fsequence:= tcustomformlink(fowner).fsequence;
- tcustomformlink(fowner).senddata(str1);
+ inititemheader(str1,ik_requestmodule,0,0,po1);
+ fsequence:= tcustomformlink(fowner).senddata(str1);
 end;
 
 procedure trxlinkmodule.objectevent(const sender: tobject;
@@ -1167,7 +1287,7 @@ begin
  result:= trxlinkmodule(inherited byname(aname));
 end;
 
-function trxlinkmodules.finditem(const asequence: longword): trxlinkmodule;
+function trxlinkmodules.finditem(const asequence: sequencety): trxlinkmodule;
 var
  int1: integer;
 begin
@@ -1253,32 +1373,11 @@ function tcustomformlink.encodeactionfired(const atag: integer;
 var
  po1: pchar;
 begin
- initifirec(result,ik_actionfired,length(aname),po1);
+ initifirec(result,ik_actionfired,0,length(aname),po1);
  with pifirecty(result)^.actionfired.header do begin
   tag:= atag;
   stringtoifiname(aname,@name);
  end;
-end;
-
-procedure tcustomformlink.initifirec(out arec: string;
-               const akind: ifireckindty; const datalength: integer;
-               out datapo: pchar);
-var
- int1: integer;
-begin
- int1:= headersizes[akind] + datalength;
- setlength(arec,int1);
- fillchar(arec[1],int1,0);
- inc(fsequence);
- if fsequence = 0 then begin
-  inc(fsequence);
- end;
- with pifiheaderty(arec)^ do begin
-  size:= int1;
-  sequence:= fsequence;
-  kind:= akind;
- end;
- datapo:= pointer(arec) + sizeof(ifiheaderty);
 end;
 
 procedure tcustomformlink.objectevent(const sender: tobject;
@@ -1344,7 +1443,7 @@ begin
      requestmodulereceived(tag1,str1,adata^.header.sequence);          
     end;
     ik_moduledata: begin
-     moduledatareceived(tag1,str1,pmoduledatadataty(po1));
+     moduledatareceived(tag1,str1,header.answersequence,pmoduledatadataty(po1));
     end;
    end;
   end;
@@ -1433,7 +1532,7 @@ begin
 end;
 
 procedure tcustomformlink.requestmodulereceived(const atag: integer;
-            const aname: string; const asequence: longword);
+            const aname: string; const asequence: sequencety);
 var
  mo1: ttxlinkmodule;
  po1: pobjectdataty;
@@ -1445,9 +1544,9 @@ debugwriteln('requestmodule '+aname);
  if (mo1 <> nil) and (mo1.fmoduleclassname <> '') then begin
   po1:= findmoduledata(mo1.fmoduleclassname,str2);
   if po1 <> nil then begin
-   mo1.inititemheader(str1,ik_moduledata,length(str2)+po1^.size,po2);
+   mo1.inititemheader(str1,ik_moduledata,asequence,length(str2)+po1^.size,po2);
    with pmoduledatadataty(po2)^ do begin
-    sequence:= asequence;
+//    sequence:= asequence;
     po3:= @parentclass;
     inc(po3,stringtoifiname(str2,pifinamety(po3)));
     setifibytes(@po1^.data,po1^.size,pifibytesty(po3));
@@ -1458,7 +1557,7 @@ debugwriteln('requestmodule '+aname);
 end;
 
 procedure tcustomformlink.moduledatareceived(const atag: integer;
- const aname: string; const adata: pmoduledatadataty);
+ const aname: string; const asequence: sequencety; const adata: pmoduledatadataty);
 var
  mo1: trxlinkmodule;
  comp1: tmsecomponent;
@@ -1468,7 +1567,7 @@ var
  int1: integer;
  comp2: tcomponent;
 begin
- mo1:= fmodulesrx.finditem(adata^.sequence);
+ mo1:= fmodulesrx.finditem(asequence);
  if mo1 <> nil then begin
   po1:= @adata^.parentclass;
   inc(po1,ifinametostring(pifinamety(po1),str1));
@@ -1529,10 +1628,14 @@ begin
  result:= (fchannel <> nil) and fchannel.checkconnection;
 end;
 
-procedure tcustomformlink.senddata(const adata: ansistring);
+function tcustomformlink.senddata(const adata: ansistring): sequencety;
 begin
  if fchannel = nil then begin
   raise exception.create(name+': No IO channel assigned.');
+ end;
+ result:= fchannel.sequence;
+ with pifirecty(adata)^.header do begin
+  sequence:= result;
  end;
  fchannel.senddata(adata);
 end;
@@ -1545,6 +1648,90 @@ end;
 procedure tcustomformlink.setmodulesrx(const avalue: trxlinkmodules);
 begin
  fmodulesrx.assign(avalue);
+end;
+
+{ tpipeifichannel }
+
+constructor tpipeifichannel.create(aowner: tcomponent);
+begin
+ fsynchronizer:= tifisynchronizer.create;
+ inherited;
+end;
+
+{ tiosynchronizer }
+
+constructor tiosynchronizer.create;
+begin
+ fwaitingclients:= tintegeravltree.create;
+end;
+
+destructor tiosynchronizer.destroy;
+begin
+ fwaitingclients.free;
+ inherited;
+end;
+
+procedure tiosynchronizer.answerreceived(const asequence: sequencety);
+var
+ client1: twaitingclient;
+begin
+ if fwaitingclients.find(integer(asequence),client1) then begin
+  client1.answered;
+ end;
+end;
+
+function tiosynchronizer.waitforanswer(const asequence: sequencety;
+               const waitus: integer): boolean;
+var
+ client1: twaitingclient;
+ int1: integer;
+begin
+ client1:= twaitingclient.create(asequence);
+ fwaitingclients.addnode(client1);
+ int1:= application.unlockall;
+ try
+  result:= client1.wait(waitus);
+ finally
+  application.relockall(int1);
+ end;
+ fwaitingclients.removenode(client1);
+ client1.free;
+end;
+
+{ tifisynchronizer }
+
+procedure tifisynchronizer.datareceived(var adata: string);
+begin
+ if length(adata) >= sizeof(ifiheaderty) then begin
+  with pifiheaderty(adata)^ do begin
+   if answersequence <> 0 then begin
+    answerreceived(answersequence);
+   end;
+  end;
+ end;
+end;
+
+{ twaitingclient }
+
+constructor twaitingclient.create(const asequence: sequencety);
+begin
+ sys_semcreate(fsem,0);
+ inherited create(integer(asequence));
+end;
+
+destructor twaitingclient.destroy;
+begin
+ sys_semdestroy(fsem);
+end;
+
+procedure twaitingclient.answered;
+begin
+ sys_sempost(fsem);
+end;
+
+function twaitingclient.wait(const awaitus: integer): boolean;
+begin
+ result:= sys_semwait(fsem,awaitus) = sye_ok;
 end;
 
 end.
