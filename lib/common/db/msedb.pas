@@ -934,7 +934,7 @@ function encodesqlboolean(const avalue: boolean): string;
 implementation
 uses
  rtlconsts,msefileutils,typinfo,dbconst,msedatalist,mseformatstr,
- msereal,variants,msebits,msedate,msedbgraphics;
+ msereal,variants,msebits,msedate,msedbgraphics{$ifdef unix},cwstring{$endif};
 const
  msefieldtypeclasses: array[fieldclasstypety] of fieldclassty = 
           (tmsefield,tmsestringfield,tmsenumericfield,
@@ -1383,7 +1383,20 @@ begin
   result:= utf8tostring(sender.asstring);
  end
  else begin
+  {$ifdef unix}
+  try
+   result:= sender.asstring;
+  except
+   on e: eiconv do begin
+    //no crash by iconverror
+   end
+   else begin
+    raise;
+   end;
+  end;
+  {$else}
   result:= sender.asstring;
+  {$endif}
  end;
 end;
 

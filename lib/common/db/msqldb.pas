@@ -2870,11 +2870,16 @@ end;
 procedure TSQLQuery.applyupdates(const maxerrors: integer;
                const cancelonerror: boolean);
 begin
- tcustomsqlconnection(fdatabase).beginupdate;
- try
+ if fdatabase = nil then begin
   inherited;
- finally
-  tcustomsqlconnection(fdatabase).endupdate;
+ end
+ else begin
+  tcustomsqlconnection(fdatabase).beginupdate;
+  try
+   inherited;
+  finally
+   tcustomsqlconnection(fdatabase).endupdate;
+  end;
  end;
 end;
 
@@ -2889,7 +2894,9 @@ end;
 procedure TSQLQuery.dobeforeapplyupdate;
 begin
  inherited;
- writetransaction.active:= true;
+ if writetransaction <> nil then begin
+  writetransaction.active:= true;
+ end;
 end;
 
 { TSQLCursor }

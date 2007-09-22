@@ -18,6 +18,11 @@
 unit cwstring;
 
 interface
+uses
+ sysutils;
+type
+ eiconv = class(econverterror)
+ end;
 
 procedure SetCWidestringManager;
 
@@ -37,7 +42,7 @@ Uses
   ctypes,
   unix,
   unixtype,
-  sysutils,
+//  sysutils,
   initc;
 
 Const
@@ -93,6 +98,7 @@ const
 {$endif  FPC_LITTLE_ENDIAN}
 
 type
+ 
   piconv_t = ^iconv_t;
   iconv_t = pointer;
   nl_item = cint;
@@ -180,7 +186,7 @@ procedure Wide2AnsiMove(source:pwidechar;var dest:ansistring;len:SizeInt);
           else
             begin
               unlockiconv(lock_wide2ansi);
-              raise EConvertError.Create('iconv error '+IntToStr(fpgetCerrno));
+              raise eiconv.Create('iconv error '+IntToStr(fpgetCerrno));
             end;
         end;
       end;
@@ -237,7 +243,7 @@ procedure Ansi2WideMove(source:pchar;var dest:widestring;len:SizeInt);
           else
             begin
               unlockiconv(lock_ansi2wide);
-              raise EConvertError.Create('iconv error '+IntToStr(fpgetCerrno));
+              raise eiconv.Create('iconv error '+IntToStr(fpgetCerrno));
             end;
         end;
       end;
@@ -303,7 +309,7 @@ procedure Ansi2UCS4Move(source:pchar;var dest:UCS4String;len:SizeInt);
           else
             begin
               unlockiconv(lock_ansi2ucs4);
-              raise EConvertError.Create('iconv error '+IntToStr(fpgetCerrno));
+              raise eiconv.Create('iconv error '+IntToStr(fpgetCerrno));
             end;
         end;
       end;

@@ -589,6 +589,9 @@ end;
 
 procedure tifidataset.calcrecordsize;
 begin
+// fstringfields:= nil;
+// fmsestringfields:= nil;
+ 
 end;
 
 procedure tifidataset.waitforanswer(const asequence: sequencety; 
