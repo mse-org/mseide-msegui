@@ -113,7 +113,9 @@ type
    fbeforedisconnect: tmsesqlscript;
    fdatasets1: datasetarty;
    frecnos: integerarty;
-   procedure SetTransaction(Value : TSQLTransaction);
+   ftransactionwrite: tsqltransaction;
+   procedure settransaction(const avalue : tsqltransaction);
+   procedure settransactionwrite(const avalue: tsqltransaction);
    procedure GetDBInfo(const SchemaType : TSchemaType; const SchemaObjectName, ReturnField : string; List: TStrings);
    function getconnected: boolean;
    procedure setafteconnect(const avalue: tmsesqlscript);
@@ -214,6 +216,8 @@ type
     
     property Password : string read FPassword write FPassword;
     property Transaction : TSQLTransaction read FTransaction write SetTransaction;
+    property transactionwrite : tsqltransaction read ftransactionwrite 
+                                                   write settransactionwrite;
     property UserName : string read FUserName write FUserName;
     property CharSet : string read FCharSet write FCharSet;
     property HostName : string Read FHostName Write FHostName;
@@ -228,6 +232,7 @@ type
   published
     property Password;
     property Transaction;
+    property transactionwrite;
     property UserName;
     property CharSet;
     property HostName;
@@ -393,6 +398,8 @@ type
  isqlclient = interface(idatabaseclient)
   function getsqltransaction: tsqltransaction;
   procedure setsqltransaction(const avalue: tsqltransaction);
+  function getsqltransactionwrite: tsqltransaction;
+  procedure setsqltransactionwrite(const avalue: tsqltransaction);
   procedure unprepare;
  end;
  
@@ -649,9 +656,13 @@ begin
    tcustomsqlconnection(dest).deallocatecursorhandle(acursor);
   end;  
   dosetdatabase(sender,avalue,dest);
-  if (avalue <> nil) and (sender.getsqltransaction = nil) and 
-                    (avalue <> nil) then begin
-   sender.setsqltransaction(tcustomsqlconnection(avalue).transaction);
+  if (avalue <> nil) then begin
+   if (sender.getsqltransaction = nil) then begin
+    sender.setsqltransaction(tcustomsqlconnection(avalue).transaction);
+   end;
+   if (sender.getsqltransactionwrite = nil) then begin
+    sender.setsqltransactionwrite(tcustomsqlconnection(avalue).transactionwrite);
+   end;
   end;
  end;
 end;
@@ -770,17 +781,32 @@ begin
       Exit(t);
 end;
 
-procedure tcustomsqlconnection.SetTransaction(Value : TSQLTransaction);
+procedure tcustomsqlconnection.settransaction(const avalue : tsqltransaction);
 begin
-  if FTransaction<>value then
-    begin
-    if Assigned(FTransaction) and FTransaction.Active then
-      DatabaseError(SErrAssTransaction);
-    if Assigned(Value) then
-      Value.Database := Self;
-    FTransaction := Value;
-    end;
+ if ftransaction <> avalue then begin
+  if assigned(ftransaction) and ftransaction.active then begin
+   databaseerror(serrasstransaction);
+  end;
+  if assigned(avalue) then begin
+   avalue.database:= self;
+  end;
+  ftransaction:= avalue;
+ end;
 end;
+
+procedure tcustomsqlconnection.settransactionwrite(const avalue : tsqltransaction);
+begin
+ if ftransactionwrite <> avalue then begin
+  if assigned(ftransactionwrite) and ftransactionwrite.active then begin
+   databaseerror(serrasstransaction);
+  end;
+  if assigned(avalue) then begin
+   avalue.database:= self;
+  end;
+  ftransactionwrite:= avalue;
+ end;
+end;
+
 
 procedure tcustomsqlconnection.UpdateIndexDefs(var IndexDefs : TIndexDefs;
                                   const TableName : string);
@@ -1492,6 +1518,9 @@ begin
    with tcustomsqlconnection(database) do begin
     if Transaction = self then begin 
      Transaction:= nil;
+    end;
+    if Transactionwrite = self then begin 
+     Transactionwrite:= nil;
     end;
    end; 
   end;

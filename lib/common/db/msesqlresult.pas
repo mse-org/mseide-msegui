@@ -212,9 +212,11 @@ type
    procedure execute;
    procedure settransaction(const avalue: tmdbtransaction);
    procedure settransactionwrite(const avalue: tmdbtransaction);
-   //idatabaseclient
+   //isqlclient
    procedure setdatabase(const avalue: tmdatabase);
    function getname: ansistring;
+   function getsqltransactionwrite: tsqltransaction;
+   procedure setsqltransactionwrite(const avalue: tsqltransaction);
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -887,6 +889,16 @@ end;
 procedure tsqlresult.setfielddefs(const avalue: tsqlresultfielddefs);
 begin
  ffielddefs.assign(avalue);
+end;
+
+function tsqlresult.getsqltransactionwrite: tsqltransaction;
+begin
+ result:= nil;
+end;
+
+procedure tsqlresult.setsqltransactionwrite(const avalue: tsqltransaction);
+begin
+ //dummy
 end;
 
 { tdbcolnamearrayprop }

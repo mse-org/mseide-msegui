@@ -423,7 +423,6 @@ type
    fbeforeapplyupdate: tdatasetnotifyevent;
    fafterapplyupdate: tdatasetnotifyevent;
    procedure calcrecordsize;
-   procedure alignfieldpos(var avalue: integer);
    function loadbuffer(var buffer: recheaderty): tgetresult;
    function getfieldsize(const datatype: tfieldtype; 
                                    out isstring: boolean) : longint;
@@ -654,6 +653,7 @@ type
   end;
    
 function getfieldisnull(nullmask: pbyte; const x: integer): boolean;
+procedure alignfieldpos(var avalue: integer);
 
 implementation
 uses
@@ -815,6 +815,14 @@ const
                                     compfunci: @compcurrency),
    (datatypes: stringindexfields; cvtype: vtwidestring; compfunc: @compstring;
                                   compfunci: @compstringi));
+
+procedure alignfieldpos(var avalue: integer);
+const
+ step = sizeof(pointer);
+begin
+ avalue:= (avalue + step - 1) and -step; //align to pointer
+end;
+
 const
  ormask:  array[0..7] of byte = (%00000001,%00000010,%00000100,%00001000,
                                  %00010000,%00100000,%01000000,%10000000);
@@ -2566,13 +2574,6 @@ begin
   end;
  end;
  fbstate:= fbstate - [bs_editing,bs_append];
-end;
-
-procedure tmsebufdataset.alignfieldpos(var avalue: integer);
-const
- step = sizeof(pointer);
-begin
- avalue:= (avalue + step - 1) and -step; //align to pointer
 end;
 
 procedure tmsebufdataset.calcrecordsize;
