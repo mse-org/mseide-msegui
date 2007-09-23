@@ -10,7 +10,7 @@
 unit msedb;
 
 {$ifdef VER2_1_5} {$define mse_FPC_2_2} {$endif}
-{$ifdef VER2_2} {$define mse_FPC_2_2} {$endif}
+{$ifdef VER2_2} {$define mse_FPC_2_2} {$define hasaswidestring} {$endif}
 {$ifdef FPC}{$mode objfpc}{$h+}{$INTERFACES CORBA}{$endif}
 
 interface
@@ -133,6 +133,10 @@ type
    procedure setasmsestring(const avalue: msestring);
   protected
    function HasParent: Boolean; override;
+  {$ifdef hasaswidestring}
+   function getaswidestring: widestring; override;
+   procedure setaswidestring(const avalue: widestring); override;
+  {$endif}
   public
    procedure Clear; override;
    property asmsestring: msestring read getasmsestring write setasmsestring;
@@ -160,6 +164,10 @@ type
    procedure setdsintf(const avalue: idsfieldcontroller);
    function getinstance: tfield;
   protected
+  {$ifdef hasaswidestring}
+   function getaswidestring: widestring; override;
+   procedure setaswidestring(const avalue: widestring); override;
+  {$endif}
    procedure setismsestring(const getter: getmsestringdataty;
                                              const setter: setmsestringdataty;
                                              const acharacterlength: integer);
@@ -187,6 +195,10 @@ type
    function getasmsestring: msestring;
    procedure setasmsestring(const avalue: msestring);
   protected
+  {$ifdef hasaswidestring}
+   function getaswidestring: widestring; override;
+   procedure setaswidestring(const avalue: widestring); override;
+  {$endif}
    function HasParent: Boolean; override;
   public
    procedure Clear; override;
@@ -203,6 +215,10 @@ type
    procedure setasmsestring(const avalue: msestring);
    procedure setasenum(const avalue: integer);
   protected
+  {$ifdef hasaswidestring}
+   function getaswidestring: widestring; override;
+   procedure setaswidestring(const avalue: widestring); override;
+  {$endif}
    function HasParent: Boolean; override;
    function getasboolean: boolean; override;
    procedure setasboolean(avalue: boolean); override;
@@ -221,6 +237,10 @@ type
    function getasmsestring: msestring;
    procedure setasmsestring(const avalue: msestring);
   protected
+  {$ifdef hasaswidestring}
+   function getaswidestring: widestring; override;
+   procedure setaswidestring(const avalue: widestring); override;
+  {$endif}
    function HasParent: Boolean; override;
    function getasboolean: boolean; override;
    procedure setasboolean(avalue: boolean); override;
@@ -239,6 +259,10 @@ type
    function getasmsestring: msestring;
    procedure setasmsestring(const avalue: msestring);
   protected
+  {$ifdef hasaswidestring}
+   function getaswidestring: widestring; override;
+   procedure setaswidestring(const avalue: widestring); override;
+  {$endif}
    function HasParent: Boolean; override;
    function getasboolean: boolean; override;
    procedure setasboolean(avalue: boolean); override;
@@ -256,6 +280,10 @@ type
    function getasmsestring: msestring;
    procedure setasmsestring(const avalue: msestring);
   protected
+  {$ifdef hasaswidestring}
+   function getaswidestring: widestring; override;
+   procedure setaswidestring(const avalue: widestring); override;
+  {$endif}
    function HasParent: Boolean; override;
    function getasboolean: boolean; override;
    procedure setasboolean(avalue: boolean); override;
@@ -273,6 +301,10 @@ type
    function getasmsestring: msestring;
    procedure setasmsestring(const avalue: msestring);
   protected
+  {$ifdef hasaswidestring}
+   function getaswidestring: widestring; override;
+   procedure setaswidestring(const avalue: widestring); override;
+  {$endif}
    function HasParent: Boolean; override;
   public
    procedure Clear; override;
@@ -288,6 +320,10 @@ type
    function getasmsestring: msestring;
    procedure setasmsestring(const avalue: msestring);
   protected
+  {$ifdef hasaswidestring}
+   function getaswidestring: widestring; override;
+   procedure setaswidestring(const avalue: widestring); override;
+  {$endif}
    function HasParent: Boolean; override;
    function getasfloat: double; override;
    function getascurrency: currency; override;
@@ -306,6 +342,10 @@ type
    function getasmsestring: msestring;
    procedure setasmsestring(const avalue: msestring);
   protected
+  {$ifdef hasaswidestring}
+   function getaswidestring: widestring; override;
+   procedure setaswidestring(const avalue: widestring); override;
+  {$endif}
    function HasParent: Boolean; override;
    procedure setasfloat(avalue: double); override;
   public
@@ -325,6 +365,10 @@ type
    function getasmsestring: msestring;
    procedure setasmsestring(const avalue: msestring);
   protected
+  {$ifdef hasaswidestring}
+   function getaswidestring: widestring; override;
+   procedure setaswidestring(const avalue: widestring); override;
+  {$endif}
    function HasParent: Boolean; override;
    function getasstring: string; override;
    procedure setasstring(const avalue: string); override;
@@ -353,6 +397,10 @@ type
    procedure setasmsestring(const avalue: msestring);
    procedure setoptions(const avalue: datetimefieldoptionsty);
   protected
+  {$ifdef hasaswidestring}
+   function getaswidestring: widestring; override;
+   procedure setaswidestring(const avalue: widestring); override;
+  {$endif}
    function HasParent: Boolean; override;
    function getasdatetime: tdatetime; override;
    procedure setasdatetime(avalue: tdatetime); override;
@@ -382,6 +430,10 @@ type
    function getasmsestring: msestring;
    procedure setasmsestring(const avalue: msestring);
   protected
+  {$ifdef hasaswidestring}
+   function getaswidestring: widestring; override;
+   procedure setaswidestring(const avalue: widestring); override;
+  {$endif}
    function HasParent: Boolean; override;
   public
    procedure Clear; override;
@@ -397,6 +449,10 @@ type
    function getasmsestring: msestring;
    procedure setasmsestring(const avalue: msestring);
   protected
+  {$ifdef hasaswidestring}
+   function getaswidestring: widestring; override;
+   procedure setaswidestring(const avalue: widestring); override;
+  {$endif}
    function HasParent: Boolean; override;
   public
    procedure Clear; override;
@@ -412,6 +468,10 @@ type
    function getasmsestring: msestring;
    procedure setasmsestring(const avalue: msestring);
   protected
+  {$ifdef hasaswidestring}
+   function getaswidestring: widestring; override;
+   procedure setaswidestring(const avalue: widestring); override;
+  {$endif}
    function HasParent: Boolean; override;
   public
    procedure Clear; override;
@@ -427,6 +487,10 @@ type
    function getasmsestring: msestring;
    procedure setasmsestring(const avalue: msestring);
   protected
+  {$ifdef hasaswidestring}
+   function getaswidestring: widestring; override;
+   procedure setaswidestring(const avalue: widestring); override;
+  {$endif}
    function HasParent: Boolean; override;
    procedure setasfloat(avalue: double); override;
   public
@@ -1422,6 +1486,18 @@ begin
  setdata(nil);
 end;
 
+{$ifdef hasaswidestring}
+function tmsefield.getaswidestring: widestring;
+begin
+ result:= asmsestring;
+end;
+
+procedure tmsefield.setaswidestring(const avalue: widestring);
+begin
+ asmsestring:= avalue;
+end;
+{$endif}
+
 { tmsestringfield }
 
 destructor tmsestringfield.destroy;
@@ -1461,6 +1537,18 @@ begin
   fieldsetmsestring(avalue,self,fdsintf);
  end;
 end;
+
+{$ifdef hasaswidestring}
+function tmsestringfield.getaswidestring: widestring;
+begin
+ result:= asmsestring;
+end;
+
+procedure tmsestringfield.setaswidestring(const avalue: widestring);
+begin
+ asmsestring:= avalue;
+end;
+{$endif}
 
 procedure tmsestringfield.setdsintf(const avalue: idsfieldcontroller);
 begin
@@ -1687,6 +1775,18 @@ begin
  result:= asstring;
 end;
 
+{$ifdef hasaswidestring}
+function tmsenumericfield.getaswidestring: widestring;
+begin
+ result:= asmsestring;
+end;
+
+procedure tmsenumericfield.setaswidestring(const avalue: widestring);
+begin
+ asmsestring:= avalue;
+end;
+{$endif}
+
 procedure tmsenumericfield.Clear;
 begin
  setdata(nil);
@@ -1718,6 +1818,18 @@ function tmselongintfield.getasmsestring: msestring;
 begin
  result:= asstring;
 end;
+
+{$ifdef hasaswidestring}
+function tmselongintfield.getaswidestring: widestring;
+begin
+ result:= asmsestring;
+end;
+
+procedure tmselongintfield.setaswidestring(const avalue: widestring);
+begin
+ asmsestring:= avalue;
+end;
+{$endif}
 
 function tmselongintfield.getasboolean: boolean;
 begin
@@ -1776,6 +1888,18 @@ begin
  result:= asstring;
 end;
 
+{$ifdef hasaswidestring}
+function tmselargeintfield.getaswidestring: widestring;
+begin
+ result:= asmsestring;
+end;
+
+procedure tmselargeintfield.setaswidestring(const avalue: widestring);
+begin
+ asmsestring:= avalue;
+end;
+{$endif}
+
 function tmselargeintfield.getasboolean: boolean;
 begin
  result:= asinteger <> 0;
@@ -1822,6 +1946,18 @@ function tmsesmallintfield.getasmsestring: msestring;
 begin
  result:= asstring;
 end;
+
+{$ifdef hasaswidestring}
+function tmsesmallintfield.getaswidestring: widestring;
+begin
+ result:= asmsestring;
+end;
+
+procedure tmsesmallintfield.setaswidestring(const avalue: widestring);
+begin
+ asmsestring:= avalue;
+end;
+{$endif}
 
 function tmsesmallintfield.getasboolean: boolean;
 begin
@@ -1870,6 +2006,18 @@ begin
  result:= asstring;
 end;
 
+{$ifdef hasaswidestring}
+function tmsewordfield.getaswidestring: widestring;
+begin
+ result:= asmsestring;
+end;
+
+procedure tmsewordfield.setaswidestring(const avalue: widestring);
+begin
+ asmsestring:= avalue;
+end;
+{$endif}
+
 function tmsewordfield.getasboolean: boolean;
 begin
  result:= asinteger <> 0;
@@ -1917,6 +2065,18 @@ begin
  result:= asstring;
 end;
 
+{$ifdef hasaswidestring}
+function tmseautoincfield.getaswidestring: widestring;
+begin
+ result:= asmsestring;
+end;
+
+procedure tmseautoincfield.setaswidestring(const avalue: widestring);
+begin
+ asmsestring:= avalue;
+end;
+{$endif}
+
 procedure tmseautoincfield.Clear;
 begin
  setdata(nil);
@@ -1948,6 +2108,18 @@ function tmsefloatfield.getasmsestring: msestring;
 begin
  result:= asstring;
 end;
+
+{$ifdef hasaswidestring}
+function tmsefloatfield.getaswidestring: widestring;
+begin
+ result:= asmsestring;
+end;
+
+procedure tmsefloatfield.setaswidestring(const avalue: widestring);
+begin
+ asmsestring:= avalue;
+end;
+{$endif}
 
 function tmsefloatfield.getasfloat: double;
 begin
@@ -2002,6 +2174,18 @@ function tmsecurrencyfield.getasmsestring: msestring;
 begin
  result:= asstring;
 end;
+
+{$ifdef hasaswidestring}
+function tmsecurrencyfield.getaswidestring: widestring;
+begin
+ result:= asmsestring;
+end;
+
+procedure tmsecurrencyfield.setaswidestring(const avalue: widestring);
+begin
+ asmsestring:= avalue;
+end;
+{$endif}
 
 procedure tmsecurrencyfield.Clear;
 begin
@@ -2076,6 +2260,18 @@ begin
   result:='';
  end;
 end;
+
+{$ifdef hasaswidestring}
+function tmsebooleanfield.getaswidestring: widestring;
+begin
+ result:= asmsestring;
+end;
+
+procedure tmsebooleanfield.setaswidestring(const avalue: widestring);
+begin
+ asmsestring:= avalue;
+end;
+{$endif}
 
 procedure tmsebooleanfield.Clear;
 begin
@@ -2165,6 +2361,18 @@ function tmsedatetimefield.getasmsestring: msestring;
 begin
  result:= asstring;
 end;
+
+{$ifdef hasaswidestring}
+function tmsedatetimefield.getaswidestring: widestring;
+begin
+ result:= asmsestring;
+end;
+
+procedure tmsedatetimefield.setaswidestring(const avalue: widestring);
+begin
+ asmsestring:= avalue;
+end;
+{$endif}
 
 function tmsedatetimefield.getasdatetime: tdatetime;
 begin
@@ -2386,6 +2594,18 @@ begin
  result:= asstring;
 end;
 
+{$ifdef hasaswidestring}
+function tmsebinaryfield.getaswidestring: widestring;
+begin
+ result:= asmsestring;
+end;
+
+procedure tmsebinaryfield.setaswidestring(const avalue: widestring);
+begin
+ asmsestring:= avalue;
+end;
+{$endif}
+
 procedure tmsebinaryfield.Clear;
 begin
  setdata(nil);
@@ -2417,6 +2637,18 @@ function tmsebytesfield.getasmsestring: msestring;
 begin
  result:= asstring;
 end;
+
+{$ifdef hasaswidestring}
+function tmsebytesfield.getaswidestring: widestring;
+begin
+ result:= asmsestring;
+end;
+
+procedure tmsebytesfield.setaswidestring(const avalue: widestring);
+begin
+ asmsestring:= avalue;
+end;
+{$endif}
 
 procedure tmsebytesfield.Clear;
 begin
@@ -2450,6 +2682,18 @@ begin
  result:= asstring;
 end;
 
+{$ifdef hasaswidestring}
+function tmsevarbytesfield.getaswidestring: widestring;
+begin
+ result:= asmsestring;
+end;
+
+procedure tmsevarbytesfield.setaswidestring(const avalue: widestring);
+begin
+ asmsestring:= avalue;
+end;
+{$endif}
+
 procedure tmsevarbytesfield.Clear;
 begin
  setdata(nil);
@@ -2481,6 +2725,18 @@ function tmsebcdfield.getasmsestring: msestring;
 begin
  result:= asstring;
 end;
+
+{$ifdef hasaswidestring}
+function tmsebcdfield.getaswidestring: widestring;
+begin
+ result:= asmsestring;
+end;
+
+procedure tmsebcdfield.setaswidestring(const avalue: widestring);
+begin
+ asmsestring:= avalue;
+end;
+{$endif}
 
 procedure tmsebcdfield.Clear;
 begin
