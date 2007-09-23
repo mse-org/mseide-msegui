@@ -1187,7 +1187,8 @@ type
    function paintrect: rectty;               //origin = pos
    function paintpos: pointty;               //origin = pos
    function paintsize: sizety;
-   function clippedpaintrect: rectty;        //origin = pos, clipped by all parentpaintrects
+   function clippedpaintrect: rectty;        //origin = pos, 
+                                             //clipped by all parentpaintrects
    function innerpaintrect: rectty;          //origin = pos
 
    function widgetsizerect: rectty;          //pos = nullpoint
@@ -1203,10 +1204,10 @@ type
    property parentclientpos: pointty read getparentclientpos write setparentclientpos;
                                              //origin = parentwidget.clientpos
    function paintparentpos: pointty;         //origin = parentwidget.pos
-   function paintrectparent: rectty; //origin = paintpos,
-                                         //nullrect if parent = nil,
-   function clientrectparent: rectty; //origin = paintpos,
-                                         //nullrect if parent = nil,
+   function paintrectparent: rectty;         //origin = paintpos,
+                                             //nullrect if parent = nil,
+   function clientrectparent: rectty;        //origin = paintpos,
+                                             //nullrect if parent = nil,
    function innerwidgetrect: rectty;         //origin = pos
    function innerclientrect: rectty;         //origin = clientpos
    function innerclientsize: sizety;

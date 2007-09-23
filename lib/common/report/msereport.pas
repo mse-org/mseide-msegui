@@ -3684,10 +3684,16 @@ end;
 procedure tcustomrecordband.getpickobjects(const arect: rectty;
                const ashiftstate: shiftstatesty; var aobjects: integerarty);
 var
- int1,int2: integer;
+ int1,int2,int3: integer;
 begin
+ if fframe <> nil then begin
+  int3:= arect.x - frame.framei_left;
+ end
+ else begin
+  int3:= arect.x;
+ end;
  for int1:= 0 to ftabs.count - 1 do begin
-  int2:= abs(arect.x - ftabs.linepos[int1]);
+  int2:= abs(int3 - ftabs.linepos[int1]);
   if int2 < tabpickthreshold then begin
    setlength(aobjects,1);
    aobjects[0]:= int1;
