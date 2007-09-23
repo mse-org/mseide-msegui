@@ -2104,14 +2104,15 @@ var
  
 begin
  fminsize:= nullsize;
- bandcx:= fband.innerclientsize.cx;
+// bandcx:= fband.innerclientsize.cx;
+ bandcx:= adest.cx;
  bo1:= false;
  if apaint then begin  
   with fband do begin
    cellrect:= adest;
-   if fframe <> nil then begin
-    inflaterect1(cellrect,fframe.innerframe);
-   end;
+//   if fframe <> nil then begin
+//    inflaterect1(cellrect,fframe.innerframe);
+//   end;
    if not rendering or (fparentintf = nil) then begin 
     visiblemask:= [lv_topofpage,lv_nottopofpage,
                    lv_firstofpage,lv_normal,lv_lastofpage,
@@ -2183,8 +2184,13 @@ begin
       end;
       dest.x:= adest.x + textpos;
       if apaint and (fcolor <> cl_none) then begin
-       cellrect.x:= linepos;
-       cellrect.cx:= cellwidth;
+       cellrect.x:= adest.x + linepos;
+       if int1 < high(ftabs) then begin
+        cellrect.cx:= cellwidth;
+       end
+       else begin
+        cellrect.cx:= adest.cx - linepos;
+       end;
        acanvas.fillrect(cellrect,fcolor);
       end;
      end;
