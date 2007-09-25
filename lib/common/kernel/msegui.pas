@@ -9179,6 +9179,7 @@ var
  aoptions1: internalwindowoptionsty;
 begin
  if fwinid = 0 then begin
+  fnormalwindowrect:= fowner.fwidgetrect;
   fillchar(aoptions,sizeof(aoptions),0);
   fillchar(aoptions1,sizeof(aoptions1),0);
   aoptions.groupleader:= application.mainwindow;
