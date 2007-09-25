@@ -12245,7 +12245,7 @@ begin
      end;
     end
     else begin
-     sysutils.showexception(exceptobject, exceptaddr);
+//     sysutils.showexception(exceptobject, exceptaddr);
     end;
    finally
     dec(fexceptionactive);
