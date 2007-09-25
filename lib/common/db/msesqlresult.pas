@@ -22,6 +22,8 @@ type
    futf8: boolean;
    fdatasize: integer;
    function accesserror(const typename: string): edatabaseerror;
+   function getvariantvar: variant; virtual;
+   function getasvariant: variant; virtual;
    function getasboolean: boolean; virtual;
    function getascurrency: currency; virtual;
    function getaslargeint: largeint; virtual;
@@ -41,7 +43,8 @@ type
    property datatype: tfieldtype read fdatatype;
    property fieldname: ansistring read ffieldname;
    property datasize: integer read fdatasize;
-      
+
+   property asvariant: variant read getasvariant;      
    property asboolean: boolean read getasboolean;
    property ascurrency: currency read getascurrency;
    property aslargeint: largeint read getaslargeint;
@@ -56,8 +59,10 @@ type
  dbcolclassty = class of tdbcol;
 
  tstringdbcol = class(tdbcol)
+  private
   protected
    function getasstring: ansistring; override;
+   function getvariantvar: variant; override;
   public
    property value: msestring read getasmsestring;
  end;
@@ -65,9 +70,10 @@ type
  tnumericdbcol = class(tdbcol)
   private
   protected
+   function getvariantvar: variant; override;
  end;
  
- tlongintdbcol = class(tdbcol)
+ tlongintdbcol = class(tnumericdbcol)
   protected
    function getasinteger: integer; override;
   public
@@ -75,9 +81,11 @@ type
  end;
  
  tlargeintdbcol = class(tnumericdbcol)
+  private
   protected
    function getaslargeint: largeint; override;
    function getasinteger: integer; override;
+   function getvariantvar: variant; override;
   public
    property value: largeint read getaslargeint;
  end;
@@ -99,28 +107,36 @@ type
 // tautoincdbcol = class(tdbcol);
 
  tfloatdbcol = class(tdbcol)
+  private
   protected
    function getasfloat: double; override;
    function getascurrency: currency; override;
+   function getvariantvar: variant; override;
   public
    property value: double read getasfloat;
  end;
  tcurrencydbcol = class(tdbcol)
+  private
   protected
    function getascurrency: currency; override;
    function getasfloat: double; override;
+   function getvariantvar: variant; override;
   public
    property value: currency read getascurrency;
  end;
  tbooleandbcol = class(tdbcol)
+  private
   protected
    function getasboolean: boolean; override;
+   function getvariantvar: variant; override;
   public
    property value: boolean read getasboolean;
  end;
  tdatetimedbcol = class(tfloatdbcol)
+  private
   protected
    function getasdatetime: tdatetime; override;
+   function getvariantvar: variant; override;
   public
    property value: tdatetime read getasdatetime;
  end;
@@ -136,11 +152,15 @@ type
   private
   protected 
    function getasstring: ansistring; override;
+   function getvariantvar: variant; override;
   public
    property value: ansistring read getasstring;
  end;
  
  tmemodbcol = class(tblobdbcol)
+  private
+  protected
+   function getvariantvar: variant; override;
   public
    property value: msestring read getasmsestring;
  end;
@@ -172,7 +192,10 @@ type
  
  sqlresultoptionty = (sro_utf8);
  sqlresultoptionsty = set of sqlresultoptionty;
- 
+
+ variantarty = array of variant;
+ variantararty = array of variantarty;
+  
  tsqlresult = class(tmsecomponent,isqlpropertyeditor,isqlclient,itransactionclient)
   private
    fsql: tstringlist;
@@ -223,6 +246,12 @@ type
    function isutf8: boolean;
    procedure next;
    procedure refresh;
+   procedure asvariant(out avalue: variant); overload;
+                            //value of first field of first row
+   procedure asvariant(out avalue: variantarty); overload; 
+                            //first row;
+   procedure asvariant(out avalue: variantararty); overload; 
+                            //whole resultset
    property cols: tdbcols read fcols;
    property bof: boolean read fbof;
    property eof: boolean read feof;
@@ -304,7 +333,7 @@ type
  
 implementation
 uses
- sysutils,dbconst,rtlconsts,msegui;
+ sysutils,dbconst,rtlconsts,msegui,variants;
 const 
  msedbcoltypeclasses: array[fieldclasstypety] of dbcolclassty = 
 //        ft_unknown,ft_string,   ft_numeric,
@@ -346,6 +375,21 @@ end;
 function tdbcol.accesserror(const typename: string): edatabaseerror;
 begin
  result:= edatabaseerror.createfmt(sinvalidtypeconversion,[typename,ffieldname]);
+end;
+
+function tdbcol.getvariantvar: variant;
+begin
+ raise accesserror('variant');
+end;
+
+function tdbcol.getasvariant: variant;
+begin
+ if isnull then begin
+  result:= null;
+ end
+ else begin
+  result:= getvariantvar;
+ end;
 end;
 
 function tdbcol.getasboolean: boolean;
@@ -450,6 +494,11 @@ begin
  result:= getaslargeint;
 end;
 
+function tlargeintdbcol.getvariantvar: variant;
+begin
+ result:= aslargeint;
+end;
+
 { tsmallintdbcol }
 
 function tsmallintdbcol.getasinteger: integer;
@@ -499,6 +548,11 @@ begin
  end;
 end;
 
+function tfloatdbcol.getvariantvar: variant;
+begin
+ result:= asfloat;
+end;
+
 { tcurrencydbcol }
 
 function tcurrencydbcol.getascurrency: currency;
@@ -511,6 +565,11 @@ end;
 function tcurrencydbcol.getasfloat: double;
 begin
  result:= getascurrency;
+end;
+
+function tcurrencydbcol.getvariantvar: variant;
+begin
+ result:= asfloat;
 end;
 
 { tbooleandbcol }
@@ -527,6 +586,11 @@ begin
  end;
 end;
 
+function tbooleandbcol.getvariantvar: variant;
+begin
+ result:= asboolean;
+end;
+
 { tdatetimedbcol }
 
 function tdatetimedbcol.getasdatetime: tdatetime;
@@ -534,6 +598,11 @@ begin
  if not loadfield(@result) then begin
   result:= emptydatetime;
  end
+end;
+
+function tdatetimedbcol.getvariantvar: variant;
+begin
+ result:= asdatetime;
 end;
 
 { tstringdbcol }
@@ -557,6 +626,11 @@ begin
  end;
 end;
 
+function tstringdbcol.getvariantvar: variant;
+begin
+ result:= asmsestring;
+end;
+
 { tblobdbcol }
 
 function tblobdbcol.getasstring: ansistring;
@@ -569,6 +643,11 @@ begin
    result:= '';
   end;
  end;
+end;
+
+function tblobdbcol.getvariantvar: variant;
+begin
+ result:= asstring;
 end;
 
 { tdbcols }
@@ -900,6 +979,108 @@ procedure tsqlresult.setsqltransactionwrite(const avalue: tsqltransaction);
 begin
  //dummy
 end;
+{
+function tsqlresult.asvariant: variant;
+var
+ int1,int2: integer;
+ var1: variant;
+begin
+ refresh;
+ if eof or (cols.count = 0) then begin
+  result:= null;
+ end
+ else begin
+  var1:= vararraycreate([0,cols.count-1],varvariant);
+  for int1:= 0 to cols.count - 1 do begin
+   var1[int1]:= cols[int1].asvariant;
+  end;
+  next;
+  if eof then begin
+   result:= var1;
+  end
+  else begin
+   result:= vararraycreate([0,cols.count-1,0,1],varvariant);
+   for int1:= 0 to cols.count - 1 do begin
+    result[int1,0]:= var1[int1];
+   end;
+   int2:= 1;
+   while true do begin
+    for int1:= 0 to cols.count - 1 do begin
+     result[int1,int2]:= cols[int1].asvariant;
+    end;
+    next;
+    if eof then begin
+     break;
+    end;
+    inc(int2);
+    vararrayredim(result,int2);
+   end;
+  end;
+ end;
+end;
+}
+
+procedure tsqlresult.asvariant(out avalue: variant);
+begin
+ refresh;
+ if eof or (cols.count = 0) then begin
+  avalue:= null;
+ end
+ else begin
+  avalue:= cols[0].asvariant;
+ end;
+ while not eof do begin
+  next; //eat the rest;
+ end;
+end;
+
+procedure tsqlresult.asvariant(out avalue: variantarty);
+var
+ int1: integer;
+begin
+ refresh;
+ if eof or (cols.count = 0) then begin
+  avalue:= null;
+ end
+ else begin
+  setlength(avalue,cols.count);
+  for int1:= 0 to high(avalue) do begin
+   avalue[int1]:= cols[int1].asvariant;
+  end;
+ end;
+ while not eof do begin
+  next; //eat the rest;
+ end;
+end;
+
+procedure tsqlresult.asvariant(out avalue: variantararty);
+var
+ int1,int2: integer;
+begin
+ refresh;
+ if eof or (cols.count = 0) then begin
+  avalue:= null;
+  while not eof do begin
+   next; //eat the rest;
+  end;
+ end
+ else begin
+  setlength(avalue,256);
+  int2:= 0;
+  while not eof do begin
+   if int2 > high(avalue) then begin
+    setlength(avalue,high(avalue)*2);
+   end;
+   setlength(avalue[int2],cols.count);
+   for int1:= 0 to cols.count - 1 do begin
+    avalue[int2][int1]:= tdbcol(fcols.fitems[int1]).asvariant;
+   end;
+   inc(int2);
+   next;
+  end;
+  setlength(avalue,int2);
+ end;
+end;
 
 { tdbcolnamearrayprop }
 
@@ -1158,6 +1339,20 @@ begin
  else begin
   inherited;
  end;
+end;
+
+{ tnumericdbcol }
+
+function tnumericdbcol.getvariantvar: variant;
+begin
+ result:= asinteger;
+end;
+
+{ tmemodbcol }
+
+function tmemodbcol.getvariantvar: variant;
+begin
+ result:= asmsestring;
 end;
 
 end.
