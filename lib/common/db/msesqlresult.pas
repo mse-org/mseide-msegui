@@ -246,11 +246,14 @@ type
    function isutf8: boolean;
    procedure next;
    procedure refresh;
-   procedure asvariant(out avalue: variant); overload;
+//   procedure asvariant(out avalue: variant); overload; //internal compiler error
+   function asvariant: variant; 
                             //value of first field of first row
-   procedure asvariant(out avalue: variantarty); overload; 
+//   procedure asvariant(out avalue: variantarty); overload; 
+   function asvariantar: variantarty;
                             //first row;
-   procedure asvariant(out avalue: variantararty); overload; 
+//   procedure asvariant(out avalue: variantararty); overload; 
+   function asvariantarar: variantararty;
                             //whole resultset
    property cols: tdbcols read fcols;
    property bof: boolean read fbof;
@@ -330,7 +333,17 @@ type
    property optionsdb: lbsqoptionsty read foptionsdb write foptionsdb default [];
    property onchange;
  end;
- 
+
+procedure getsqlresult(out avalue: variant; const atransaction: tsqltransaction;
+                      const asql: string; const aparams: array of variant); overload;
+           //first field of first row
+procedure getsqlresult(out avalue: variantarty; const atransaction: tsqltransaction;
+                      const asql: string; const aparams: array of variant); overload;
+           //first row
+procedure getsqlresult(out avalue: variantararty; const atransaction: tsqltransaction;
+                      const asql: string; const aparams: array of variant); overload;
+           //whole resultset
+                      
 implementation
 uses
  sysutils,dbconst,rtlconsts,msegui,variants;
@@ -355,7 +368,70 @@ const
  SLargeInt = 'LargeInt';
  SVariant = 'Variant';
  SString = 'String';
-           
+
+function dogetsqlresult(const atransaction: tsqltransaction; const asql: string;
+                        const aparams: array of variant): tsqlresult;           
+var
+ int1: integer;
+begin
+ result:= tsqlresult.create(nil);
+ try
+  result.database:= atransaction.database;
+  result.transaction:= atransaction;
+  result.sql.text:= asql;
+  result.prepare;
+  for int1:= 0 to high(aparams) do begin
+   result.params[int1].value:= aparams[int1];
+  end;
+ except
+  result.free;
+  raise
+ end;
+end;
+                        
+procedure getsqlresult(out avalue: variant; const atransaction: tsqltransaction;
+                     const asql: string; const aparams: array of variant); overload;
+           //first field of first row
+var
+ sqlresult: tsqlresult;
+begin
+ sqlresult:= dogetsqlresult(atransaction,asql,aparams);
+ try
+//  sqlresult.asvariant(avalue); //internal error 2006122804
+  avalue:= sqlresult.asvariant;
+ finally
+  sqlresult.free;
+ end;
+end;
+
+procedure getsqlresult(out avalue: variantarty; const atransaction: tsqltransaction;
+                      const asql: string; const aparams: array of variant); overload;
+           //first row
+var
+ sqlresult: tsqlresult;
+begin
+ sqlresult:= dogetsqlresult(atransaction,asql,aparams);
+ try
+  avalue:= sqlresult.asvariantar;
+ finally
+  sqlresult.free;
+ end;
+end;
+
+procedure getsqlresult(out avalue: variantararty; const atransaction: tsqltransaction;
+                      const asql: string; const aparams: array of variant); overload;
+           //whole resultset
+var
+ sqlresult: tsqlresult;
+begin
+ sqlresult:= dogetsqlresult(atransaction,asql,aparams);
+ try
+  avalue:= sqlresult.asvariantarar;
+ finally
+  sqlresult.free;
+ end;
+end;
+                      
 { tdbcol }
 
 constructor tdbcol.create(const asqlresult: tsqlresult;
@@ -1020,32 +1096,32 @@ begin
 end;
 }
 
-procedure tsqlresult.asvariant(out avalue: variant);
+function tsqlresult.asvariant: variant;
 begin
  refresh;
  if eof or (cols.count = 0) then begin
-  avalue:= null;
+  result:= null;
  end
  else begin
-  avalue:= cols[0].asvariant;
+  result:= cols[0].asvariant;
  end;
  while not eof do begin
   next; //eat the rest;
  end;
 end;
 
-procedure tsqlresult.asvariant(out avalue: variantarty);
+function tsqlresult.asvariantar: variantarty;
 var
  int1: integer;
 begin
  refresh;
  if eof or (cols.count = 0) then begin
-  avalue:= null;
+  result:= null;
  end
  else begin
-  setlength(avalue,cols.count);
-  for int1:= 0 to high(avalue) do begin
-   avalue[int1]:= cols[int1].asvariant;
+  setlength(result,cols.count);
+  for int1:= 0 to high(result) do begin
+   result[int1]:= cols[int1].asvariant;
   end;
  end;
  while not eof do begin
@@ -1053,32 +1129,32 @@ begin
  end;
 end;
 
-procedure tsqlresult.asvariant(out avalue: variantararty);
+function tsqlresult.asvariantarar: variantararty;
 var
  int1,int2: integer;
 begin
  refresh;
  if eof or (cols.count = 0) then begin
-  avalue:= null;
+  result:= null;
   while not eof do begin
    next; //eat the rest;
   end;
  end
  else begin
-  setlength(avalue,256);
+  setlength(result,256);
   int2:= 0;
   while not eof do begin
-   if int2 > high(avalue) then begin
-    setlength(avalue,high(avalue)*2);
+   if int2 > high(result) then begin
+    setlength(result,high(result)*2);
    end;
-   setlength(avalue[int2],cols.count);
+   setlength(result[int2],cols.count);
    for int1:= 0 to cols.count - 1 do begin
-    avalue[int2][int1]:= tdbcol(fcols.fitems[int1]).asvariant;
+    result[int2][int1]:= tdbcol(fcols.fitems[int1]).asvariant;
    end;
    inc(int2);
    next;
   end;
-  setlength(avalue,int2);
+  setlength(result,int2);
  end;
 end;
 
