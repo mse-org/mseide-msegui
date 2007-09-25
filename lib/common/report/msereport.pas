@@ -773,6 +773,7 @@ type
    property onchildscaled;
 
    property onbeforerender;
+   property onbeforepaint;
    property onpaint;
    property onafterpaint;
    property ongettext;
