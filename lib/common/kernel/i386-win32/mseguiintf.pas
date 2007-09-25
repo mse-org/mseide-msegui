@@ -38,9 +38,25 @@ implementation
 uses
  sysutils,mselist,msekeyboard,msebits,msedatalist,msesysutils;
 
+type
+ wndextrainfoty = record
+  flags: longword;
+  stylebackup: longword;
+//  l,t,r,b: integer;
+ end;
+ 
 const
+ flagsoffs =       0*sizeof(integer); //for setwindowlong
+ stylebackupoffs = 1*sizeof(integer);
+// loffs =           2*sizeof(integer);
+// toffs =           3*sizeof(integer);
+// roffs =           4*sizeof(integer);
+// boffs =           5*sizeof(integer);
+ 
  widgetclassname = 'msetoplevelwidget';
  childwidgetclassname = 'msechildwidget';
+ wndextrabytes = sizeof(wndextrainfoty);
+ 
  msemessage = wm_user + $3694;
  wakeupmessage = msemessage + 1;
  destroymessage = msemessage + 2;
@@ -477,12 +493,17 @@ function gui_getwindowsize(id: winidty): windowsizety;
 var
  placement: twindowplacement;
 begin
- result:= wsi_normal;
- placement.length:= sizeof(placement);
- if getwindowplacement(id,{$ifndef FPC}@{$endif}placement) then begin
-  case placement.showcmd of
-   sw_showmaximized: result:= wsi_maximized;
-   sw_showminimized: result:= wsi_minimized;
+ if getwindowlong(id,flagsoffs) <> 0 then begin
+  result:= wsi_fullscreen;
+ end
+ else begin
+  result:= wsi_normal;
+  placement.length:= sizeof(placement);
+  if getwindowplacement(id,{$ifndef FPC}@{$endif}placement) then begin
+   case placement.showcmd of
+    sw_showmaximized: result:= wsi_maximized;
+    sw_showminimized: result:= wsi_minimized;
+   end;
   end;
  end;
 end;
@@ -495,16 +516,66 @@ end;
 function gui_setwindowstate(id: winidty; size: windowsizety; visible: boolean): guierrorty;
 var
  int1: integer;
+ wo1: longword;
+// placement: twindowplacement;
 begin
  result:= gue_ok;
- case size of
-  wsi_maximized: int1:= sw_maximize;
-  wsi_minimized: int1:= sw_minimize;
-  else int1:= sw_shownoactivate;
- end;
- showwindow(id,int1);
- if not visible then begin
-  showwindow(id,sw_hide);
+ int1:= getwindowlong(id,flagsoffs);
+ if size = wsi_fullscreen then begin
+  if int1 = 0 then begin
+   wo1:= getwindowlong(id,gwl_style);
+   setwindowlong(id,stylebackupoffs,wo1);
+   setwindowlong(id,flagsoffs,1);
+   wo1:= wo1 and not 
+    (ws_border or ws_dlgframe or ws_overlapped or ws_thickframe) or (ws_popup);
+   setwindowlong(id,gwl_style,wo1);
+   (*
+   placement.length:= sizeof(placement);
+   if getwindowplacement(id,{$ifndef FPC}@{$endif}placement) then begin
+    with placement.rcnormalposition do begin
+     setwindowlong(id,loffs,left);
+     setwindowlong(id,toffs,top);
+     setwindowlong(id,roffs,right);
+     setwindowlong(id,boffs,bottom);
+    end;
+   end;
+   *)
+   setwindowpos(id,0,0,0,getsystemmetrics(sm_cxscreen),
+                      getsystemmetrics(sm_cyscreen),
+                      swp_framechanged {or swp_nomove or swp_nosize} or swp_nozorder);
+  end;
+  if visible then begin
+   showwindow(id,sw_shownoactivate);
+  end;
+ end
+ else begin
+  if int1 <> 0 then begin
+   wo1:= getwindowlong(id,stylebackupoffs);
+   setwindowlong(id,gwl_style,getwindowlong(id,stylebackupoffs));
+   setwindowpos(id,0,0,0,0,0,
+           swp_framechanged or swp_nomove or swp_nosize or swp_nozorder);
+//   setwindowpos(id,0,getwindowlong(id,loffs),getwindowlong(id,toffs),
+//                     getwindowlong(id,roffs),getwindowlong(id,boffs),
+//           swp_framechanged {or swp_nomove or swp_nosize} or swp_nozorder);
+   setwindowlong(id,flagsoffs,0);
+  end;   
+  case size of
+   wsi_maximized: begin
+    int1:= sw_maximize;
+   end;
+   wsi_minimized: begin
+    int1:= sw_minimize;
+   end;
+   else begin
+    int1:= sw_shownoactivate;
+   end;
+  end;
+  if visible or (size = wsi_minimized) then begin
+   showwindow(id,int1);
+  end;
+//  if not visible then begin
+//   showwindow(id,sw_hide);
+//  end;
  end;
 end;
 
@@ -4166,6 +4237,7 @@ begin
    lpfnwndproc:= @childwindowproc;
    hinstance:= {$ifdef FPC}system{$else}sysinit{$endif}.HInstance;
    style:= classstyle;
+   cbwndextra:= wndextrabytes;
   end;
   childwidgetclass:= registerclassa(classinfoa);
   fillchar(classinfoa,sizeof(classinfoa),0);
@@ -4174,6 +4246,7 @@ begin
    lpfnwndproc:= @windowproc;
    hinstance:= {$ifdef FPC}system{$else}sysinit{$endif}.HInstance;
    style:= classstyle;
+   cbwndextra:= wndextrabytes;
   end;
   widgetclass:= registerclassa(classinfoa);
  end
@@ -4184,6 +4257,7 @@ begin
    lpfnwndproc:= @childwindowproc;
    hinstance:= {$ifdef FPC}system{$else}sysinit{$endif}.HInstance;
    style:= classstyle;
+   cbwndextra:= wndextrabytes;
 //   hbrbackground:= getstockobject(hollow_brush);
   end;
   childwidgetclass:= registerclassw(classinfow);
@@ -4193,6 +4267,7 @@ begin
    lpfnwndproc:= @windowproc;
    hinstance:= {$ifdef FPC}system{$else}sysinit{$endif}.HInstance;
    style:= classstyle;
+   cbwndextra:= wndextrabytes;
   end;
   widgetclass:= registerclassw(classinfow);
  end;

@@ -162,6 +162,8 @@ var
 begin
  int1:= first^.nexttime-reftime;
  if int1 < 1000 then begin
+//writeln('post');
+//flush(output);
   application.postevent(tevent.create(ek_timer));
  end
  else begin
@@ -174,6 +176,8 @@ var
  po: ptimerinfoty;
  time: cardinal;
 begin
+//writeln('set ',ainterval);
+//flush(output);
  new(po);
  sys_mutexlock(mutex);
  time:= sys_gettimeus;
@@ -215,7 +219,7 @@ begin
   time:= sys_gettimeus;
   po:= first;
 //  while (po <> nil) and (integer(po^.nexttime - time) < 0) do begin//todo!!!!!: FPC bug 4768
-  while (po <> nil) and later(po^.nexttime,time) do begin
+  while (po <> nil) and laterorsame(po^.nexttime,time) do begin
    extract(po);
    ontimer:= po^.ontimer;
    po2:= po^.nextpo;

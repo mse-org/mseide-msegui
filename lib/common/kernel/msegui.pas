@@ -7864,6 +7864,9 @@ begin
   end
   else begin
    exclude(fwidgetstate,ws_visible);
+   if not (csloading in componentstate) and ownswindow then begin
+    gui_hidewindow(fwindow.fwinid);
+   end;
   end;
  end;
 end;
@@ -9496,7 +9499,7 @@ begin
    include(app.fstate,aps_needsupdatewindowstack);
    if not (csdesigning in fowner.ComponentState) then begin
     if not windowevent then begin
-     if fwindowpos <> wp_minimized then begin
+//     if fwindowpos <> wp_minimized then begin
       case fwindowpos of
        wp_normal: begin
         size1:= wsi_normal;
@@ -9509,8 +9512,8 @@ begin
        end;
       end;
       gui_setwindowstate(winid,size1,true);
-     end;
-     gui_showwindow(winid);
+//     end;
+//     gui_showwindow(winid);
      if (fwindowpos = wp_normal) and 
                                not (tws_needsdefaultpos in fstate) then begin
 //      gui_reposwindow(fwinid,fowner.fwidgetrect);
@@ -10292,6 +10295,7 @@ begin
   bo1:= (tws_windowvisible in fstate) {or (wpo1 = wp_minimized)};
   case value of
    wp_screencentered: begin
+    gui_setwindowstate(winid,wsi_normal,bo1{tws_windowvisible in fstate});
     rect2:= app.workarea(self);
     with fowner do begin
      rect1:= widgetrect;
@@ -10315,6 +10319,10 @@ begin
   end;
  end;
  fwindowpos := Value;
+ if (wpo1 = wp_fullscreen) and (value = wp_normal) then begin
+  gui_reposwindow(fwinid,fnormalwindowrect);
+       //needed for win32
+ end;
 end;
 
 function twindow.updaterect: rectty;
@@ -11116,6 +11124,8 @@ begin
   end;
  end;
  checksynchronize;
+//writeln('idle',fidlecount);
+//flush(output);
 end;
 
 procedure tinternalapplication.checkshortcut(const sender: twindow;
@@ -11299,6 +11309,8 @@ begin       //eventloop
     getevents;
     event:= tevent(feventlist.getfirst);
     if event <> nil then begin
+//writeln('event ',getenumname(typeinfo(eventkindty),ord(event.kind)));
+//flush(output);
      try
       try
        case event.kind of
