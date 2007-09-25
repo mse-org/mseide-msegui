@@ -665,6 +665,7 @@ type
  netatomty = (net_supported,net_workarea,
        net_wm_state,
        net_wm_state_maximized_vert,net_wm_state_maximized_horz,
+       net_wm_state_fullscreen,
        net_wm_pid,
        net_none);
  netwmstateoperationty = (nso_remove,nso_add,nso_toggle);
@@ -672,9 +673,10 @@ const
  netatomnames: array[netatomty] of string = ('_NET_SUPPORTED','_NET_WORKAREA',
        '_NET_WM_STATE',
        '_NET_WM_STATE_MAXIMIZED_VERT','_NET_WM_STATE_MAXIMIZED_HORZ',
-       '_NET_WM_PID', //not needed
+       '_NET_WM_STATE_FULLSCREEN', //not needed
+       '_NET_WM_PID', 
        ''); 
- needednetatom = netatomty(ord(high(netatomty))-2);
+ needednetatom = netatomty(ord(high(netatomty))-3);
 var
  netatoms: array[netatomty] of atom;
  netsupported: boolean;
@@ -1066,6 +1068,10 @@ begin
    result:= wsi_normal;
    if netsupported and readatomproperty(id,netatoms[net_wm_state],atomar) then begin
     for int1:= 0 to high(atomar) do begin
+     if atomar[int1] = netatoms[net_wm_state_fullscreen] then begin
+      result:= wsi_fullscreen;
+      break;
+     end;
      if (atomar[int1] = netatoms[net_wm_state_maximized_vert]) or
         (atomar[int1] = netatoms[net_wm_state_maximized_horz]) then begin
       result:= wsi_maximized;
@@ -1102,27 +1108,58 @@ begin
  end;
 end;
 
+function waitfordecoration(id: winidty; raiseexception: boolean = true): boolean;
+var
+ int1: integer;
+begin
+ int1:= 0;
+ result:= false;
+ repeat
+  xflush(appdisp);    //windowmanager has to work
+  if gui_windowvisible(id) then begin
+   result:= true;
+   break;
+  end;
+//  xflush(appdisp);    //windowmanager has to work
+  sleep(5*int1);
+  inc(int1);
+ until (int1 > 45);
+ if raiseexception and not result then begin
+  raise exception.Create('not decorated');
+ end;
+end;
+
 function gui_setwindowstate(id: winidty; size: windowsizety; visible: boolean): guierrorty;
 begin
  result:= gue_ok;
- case size of
-  wsi_minimized: begin
-   if xiconifywindow(appdisp,id,0) = 0 then begin
-    result:= gue_show;
+ if visible then begin
+  xmapwindow(appdisp,id);
+//  waitfordecoration(id,false);
+ end;
+ if size = wsi_fullscreen then begin
+  changenetwmstate(id,nso_add,
+                  net_wm_state_fullscreen);
+ end
+ else begin
+  changenetwmstate(id,nso_remove,
+                  net_wm_state_fullscreen);
+  case size of
+   wsi_minimized: begin
+//    if visible then begin
+//     xmapwindow(appdisp,id);
+//    end;
+    if xiconifywindow(appdisp,id,0) = 0 then begin
+     result:= gue_show;
+    end;
+    exit;
    end;
-  end;
-  wsi_maximized: begin
-   changenetwmstate(id,nso_add,
-                 net_wm_state_maximized_horz,net_wm_state_maximized_vert);
-   if visible then begin
-    xmapwindow(appdisp,id);
-   end;
-  end
-  else begin
-   changenetwmstate(id,nso_remove,
-                 net_wm_state_maximized_horz,net_wm_state_maximized_vert);
-   if visible then begin
-    xmapwindow(appdisp,id);
+   wsi_maximized: begin
+    changenetwmstate(id,nso_add,
+                  net_wm_state_maximized_horz,net_wm_state_maximized_vert);
+   end
+   else begin
+    changenetwmstate(id,nso_remove,
+                  net_wm_state_maximized_horz,net_wm_state_maximized_vert);
    end;
   end;
  end;
@@ -1820,27 +1857,6 @@ var
 begin
  xgetwindowattributes(appdisp,id,@attributes);
  result:= attributes.map_state = isviewable;
-end;
-
-function waitfordecoration(id: winidty; raiseexception: boolean = true): boolean;
-var
- int1: integer;
-begin
- int1:= 0;
- result:= false;
- repeat
-  xflush(appdisp);    //windowmanager has to work
-  if gui_windowvisible(id) then begin
-   result:= true;
-   break;
-  end;
-//  xflush(appdisp);    //windowmanager has to work
-  sleep(5*int1);
-  inc(int1);
- until (int1 > 45);
- if raiseexception and not result then begin
-  raise exception.Create('not decorated');
- end;
 end;
 
 function hasoverrideredirect(const id: winidty): boolean;
@@ -5495,7 +5511,13 @@ begin
    break;
   end;
  end;
-
+ if netsupported and (netatoms[net_wm_state_fullscreen] = 0) then begin
+  netatoms[net_wm_state_fullscreen]:= xinternatom(appdisp,
+          @netatomnames[net_wm_state_fullscreen],
+           {$ifdef FPC}false{$else}0{$endif});
+           //fake
+ end;
+ 
  result:= gue_ok;
  {$ifdef mse_flushgdi}
  xsynchronize(appdisp,{$ifdef FPC}true{$else}1{$endif});

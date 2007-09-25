@@ -675,7 +675,8 @@ type
  windowoptionty = (wo_popup,wo_message,wo_buttonendmodal,wo_groupleader);
  windowoptionsty = set of windowoptionty;
 
- windowposty = (wp_normal,wp_screencentered,wp_minimized,wp_maximized,wp_default);
+ windowposty = (wp_normal,wp_screencentered,wp_minimized,wp_maximized,wp_default,
+                wp_fullscreen);
 
  windowinfoty = record
   options: windowoptionsty;
@@ -1287,7 +1288,7 @@ type
   modalwindowbefore: twindow;
  end;
 
- windowsizety = (wsi_normal,wsi_minimized,wsi_maximized);
+ windowsizety = (wsi_normal,wsi_minimized,wsi_maximized,wsi_fullscreen);
 
  twindow = class(teventobject,icanvas)
   private
@@ -9276,7 +9277,8 @@ begin
            [tws_posvalid,tws_sizevalid] then begin
     if visible and not windowevent and not (tws_needsdefaultpos in fstate) and
         (fmoving <= 0) then begin
-     guierror(gui_reposwindow(fwinid,fowner.fwidgetrect),self);
+     fnormalwindowrect:= fowner.fwidgetrect;
+     guierror(gui_reposwindow(fwinid,fnormalwindowrect),self);
      fstate:= fstate + [tws_posvalid,tws_sizevalid];
     end;
    end;
@@ -9494,9 +9496,25 @@ begin
    include(app.fstate,aps_needsupdatewindowstack);
    if not (csdesigning in fowner.ComponentState) then begin
     if not windowevent then begin
+     if fwindowpos <> wp_minimized then begin
+      case fwindowpos of
+       wp_normal: begin
+        size1:= wsi_normal;
+       end;
+       wp_maximized: begin
+        size1:= wsi_maximized;
+       end;
+       wp_fullscreen: begin
+        size1:= wsi_fullscreen;
+       end;
+      end;
+      gui_setwindowstate(winid,size1,true);
+     end;
      gui_showwindow(winid);
-     if not (tws_needsdefaultpos in fstate) then begin
-      gui_reposwindow(fwinid,fowner.fwidgetrect);
+     if (fwindowpos = wp_normal) and 
+                               not (tws_needsdefaultpos in fstate) then begin
+//      gui_reposwindow(fwinid,fowner.fwidgetrect);
+      gui_reposwindow(fwinid,fnormalwindowrect);
      end;
     end;
     exclude(fstate,tws_grouphidden);
@@ -9590,7 +9608,7 @@ begin
    include(fstate,tws_sizevalid);
   end;
  end;
- if not (windowpos in [wp_minimized,wp_maximized]) then begin
+ if not (windowpos in [wp_minimized,wp_maximized,wp_fullscreen]) then begin
   fnormalwindowrect:= fowner.fwidgetrect;
  end;
 end;
@@ -10249,8 +10267,11 @@ begin
   wsi_maximized: begin
    result:= wp_maximized;
   end;
+  wsi_fullscreen: begin
+   result:= wp_fullscreen;
+  end;
   else begin //wsi_normal
-   if fwindowpos in [wp_minimized,wp_maximized,wp_screencentered] then begin
+   if fwindowpos in [wp_minimized,wp_maximized,wp_fullscreen,wp_screencentered] then begin
     result:= wp_normal;
    end
    else begin
@@ -10263,8 +10284,12 @@ end;
 procedure twindow.setwindowpos(const Value: windowposty);
 var
  rect1,rect2: rectty;
+ bo1: boolean;
+ wpo1: windowposty;
 begin
- if getwindowpos <> value then begin
+ wpo1:= getwindowpos;
+ if wpo1 <> value then begin
+  bo1:= (tws_windowvisible in fstate) {or (wpo1 = wp_minimized)};
   case value of
    wp_screencentered: begin
     rect2:= app.workarea(self);
@@ -10276,13 +10301,16 @@ begin
     end;
    end;
    wp_minimized: begin
-    gui_setwindowstate(winid,wsi_minimized,tws_windowvisible in fstate);
+    gui_setwindowstate(winid,wsi_minimized,bo1{tws_windowvisible in fstate});
    end;
    wp_maximized: begin
-    gui_setwindowstate(winid,wsi_maximized,tws_windowvisible in fstate);
+    gui_setwindowstate(winid,wsi_maximized,bo1);
+   end;
+   wp_fullscreen: begin
+    gui_setwindowstate(winid,wsi_fullscreen,bo1);
    end
    else begin
-    gui_setwindowstate(winid,wsi_normal,tws_windowvisible in fstate);
+    gui_setwindowstate(winid,wsi_normal,bo1{tws_windowvisible in fstate});
    end;
   end;
  end;

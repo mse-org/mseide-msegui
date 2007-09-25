@@ -18,7 +18,9 @@ uses
  msebitmap;
 
 type
- formoptionty = (fo_main,fo_terminateonclose,fo_freeonclose,fo_defaultpos,fo_screencentered,
+ formoptionty = (fo_main,fo_terminateonclose,fo_freeonclose,
+               fo_defaultpos,fo_screencentered,
+               fo_minimized,fo_maximized,fo_fullscreen,
                fo_closeonesc,fo_cancelonesc,fo_closeonenter,fo_closeonf10,
                fo_globalshortcuts,fo_localshortcuts,
                fo_autoreadstat,fo_autowritestat,fo_savepos,fo_savestate);
@@ -900,14 +902,19 @@ procedure tcustommseform.setoptions(const Value: formoptionsty);
 const
  mask1: formoptionsty = [fo_screencentered,fo_defaultpos];
  mask2: formoptionsty = [fo_closeonesc,fo_cancelonesc];
+ mask3: formoptionsty = [fo_maximized,fo_minimized,fo_fullscreen];
 var
- opt1: formoptionsty;
+ opt1,opt2: formoptionsty;
 begin
  if foptions <> value then begin
   opt1:= formoptionsty(setsinglebit(
        {$ifdef FPC}longword{$else}word{$endif}(value),
        {$ifdef FPC}longword{$else}word{$endif}(foptions),
        {$ifdef FPC}longword{$else}word{$endif}(mask2)));
+  opt2:= formoptionsty(setsinglebit(
+       {$ifdef FPC}longword{$else}word{$endif}(value),
+       {$ifdef FPC}longword{$else}word{$endif}(foptions),
+       {$ifdef FPC}longword{$else}word{$endif}(mask3)));
   foptions:= formoptionsty(setsinglebit(
        {$ifdef FPC}longword{$else}word{$endif}(value),
        {$ifdef FPC}longword{$else}word{$endif}(foptions),
@@ -916,6 +923,10 @@ begin
        {$ifdef FPC}longword{$else}word{$endif}(opt1),
        {$ifdef FPC}longword{$else}word{$endif}(foptions),
        {$ifdef FPC}longword{$else}word{$endif}(mask2)));
+  foptions:= formoptionsty(replacebits(
+       {$ifdef FPC}longword{$else}word{$endif}(opt2),
+       {$ifdef FPC}longword{$else}word{$endif}(foptions),
+       {$ifdef FPC}longword{$else}word{$endif}(mask3)));
   updateoptions;
  end;
 end;
@@ -928,12 +939,27 @@ begin
   if (fo_main in foptions) and not (csdesigning in componentstate) then begin
    application.mainwindow:= fwindow;
   end;
-  if fo_screencentered in foptions then begin
-   fwindow.windowpos:= wp_screencentered;
+  if fo_fullscreen in foptions then begin
+   fwindow.windowpos:= wp_fullscreen;
   end
   else begin
-   if fo_defaultpos in foptions then begin
-    fwindow.windowpos:= wp_default;
+   if fo_maximized in foptions then begin
+    fwindow.windowpos:= wp_maximized;
+   end
+   else begin
+    if fo_minimized in foptions then begin
+     fwindow.windowpos:= wp_minimized;
+    end
+    else begin
+     if fo_screencentered in foptions then begin
+      fwindow.windowpos:= wp_screencentered;
+     end
+     else begin
+      if fo_defaultpos in foptions then begin
+       fwindow.windowpos:= wp_default;
+      end;
+     end;
+    end;
    end;
   end;
  end;
@@ -1009,10 +1035,10 @@ begin
     bo1:= readboolean('visible',visible);
     bo1:= visible or bo1;
     if bo1 then begin
-     window.windowpos:= pos1;
      if pos1 <> wp_minimized then begin
       show;
      end;
+     window.windowpos:= pos1; //does not work with kde and invisible window
     end;
     if readboolean('active',active) then begin
      activate;
@@ -1103,8 +1129,18 @@ procedure tcustommseform.updatewindowinfo(var info: windowinfoty);
 begin
  inherited;
  info.options:= foptionswindow;
- if fo_defaultpos in foptions then begin
-  info.initialwindowpos:= wp_default;
+ if fo_maximized in foptions then begin
+  info.initialwindowpos:= wp_maximized;
+ end
+ else begin
+  if fo_minimized in foptions then begin
+   info.initialwindowpos:= wp_minimized;
+  end
+  else begin   
+   if fo_defaultpos in foptions then begin
+    info.initialwindowpos:= wp_default;
+   end;
+  end;
  end;
  getwindowicon(ficon,info.icon,info.iconmask);
 end;
