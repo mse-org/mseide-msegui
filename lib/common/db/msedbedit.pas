@@ -5632,6 +5632,9 @@ begin
  try 
   if checkvalue then begin
    inherited;
+  end
+  else begin
+   abort;
   end;
  finally
   tcustomgrid1(fgrid).endnonullcheck;
