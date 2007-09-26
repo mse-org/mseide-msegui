@@ -7374,7 +7374,12 @@ var
  nullchecklocked: boolean;
  
 begin     //focuscell
+ inc(ffocuscount);
+ focuscount:= ffocuscount;
  beforefocuscell(cell,selectaction);
+ if focuscount <> ffocuscount then begin
+  exit;
+ end;
  result:= false;
  exclude(fstate,gs_mousecellredirected);
  nullchecklocked:= false;
@@ -7385,7 +7390,7 @@ begin     //focuscell
  try
   if (fnocheckvalue = 0) and not (gs_rowremoving in fstate) then begin
    if ((cell.row <> ffocusedcell.row) or (cell.col <> ffocusedcell.col)) and           
-           not docheckcellvalue then begin
+           not docheckcellvalue or (focuscount <> ffocuscount) then begin
     exit;
    end;
    if (cell.row <> ffocusedcell.row) and (ffocusedcell.row >= 0) and 
@@ -7437,8 +7442,8 @@ begin     //focuscell
         (selectaction in [fca_entergrid,fca_focusinforce]) or 
         (gs_restorerow in fstate) then begin
    exclude(fstate,gs_restorerow);
-   inc(ffocuscount);
-   focuscount:= ffocuscount;
+//   inc(ffocuscount);
+//   focuscount:= ffocuscount;
    coord1:= ffocusedcell;
    if (selectaction <> fca_entergrid) and isdatacell(coord1) then begin
     include(fstate,gs_cellexiting);
