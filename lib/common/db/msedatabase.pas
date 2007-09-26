@@ -377,8 +377,13 @@ procedure tmdatabase.CloseDataSets;
 var
  int1: integer;
 begin
- for int1:= 0 to high(fdatasets) do begin
+ int1:= high(fdatasets);
+ while int1 > 0 do begin
   fdatasets[int1].setactive(false);
+  dec(int1);
+  if int1 > high(fdatasets) then begin
+   int1:= high(fdatasets);  //could be destroyed
+  end;
  end;
 end;
 

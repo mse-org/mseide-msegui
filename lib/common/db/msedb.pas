@@ -1570,7 +1570,7 @@ var
  statebefore: tdatasetstate;
 begin
  statebefore:= tdataset1(dataset).settempstate(dsoldvalue);
- aisnull:= getdata(nil);
+ aisnull:= not getdata(nil);
  result:= getasmsestring;
  tdataset1(dataset).restorestate(statebefore);
 end;
