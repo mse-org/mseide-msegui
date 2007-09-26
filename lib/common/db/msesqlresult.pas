@@ -343,6 +343,15 @@ procedure getsqlresult(out avalue: variantarty; const atransaction: tsqltransact
 procedure getsqlresult(out avalue: variantararty; const atransaction: tsqltransaction;
                       const asql: string; const aparams: array of variant); overload;
            //whole resultset
+function getsqlresultvar( const atransaction: tsqltransaction;
+                      const asql: string; 
+                      const aparams: array of variant): variant;
+function getsqlresultvarar( const atransaction: tsqltransaction;
+                      const asql: string; 
+                      const aparams: array of variant): variantarty;
+function getsqlresultvararar( const atransaction: tsqltransaction;
+                      const asql: string; 
+                      const aparams: array of variant): variantararty;
                       
 implementation
 uses
@@ -431,6 +440,28 @@ begin
   sqlresult.free;
  end;
 end;
+
+function getsqlresultvar( const atransaction: tsqltransaction;
+                      const asql: string; 
+                      const aparams: array of variant): variant;
+begin
+ getsqlresult(result,atransaction,asql,aparams);
+end;
+
+function getsqlresultvarar( const atransaction: tsqltransaction;
+                      const asql: string; 
+                      const aparams: array of variant): variantarty;
+begin
+ getsqlresult(result,atransaction,asql,aparams);
+end;
+
+function getsqlresultvararar( const atransaction: tsqltransaction;
+                      const asql: string; 
+                      const aparams: array of variant): variantararty;
+begin
+ getsqlresult(result,atransaction,asql,aparams);
+end;
+                      
                       
 { tdbcol }
 

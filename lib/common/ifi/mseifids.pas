@@ -5,11 +5,66 @@ uses
  classes,db,mseifi,mseclasses,mseguiglob,mseevent,msedb,msetypes,msebufdataset,
  msestrings;
 
+//single record dataset
+
 const
  defaultifidstimeout = 10000000; //10 second
-type
 
-//single record dataset
+type
+ recheaderty = record
+  blobinfo: blobinfoarty;
+  fielddata: fielddataty;   
+ end;
+ precheaderty = ^recheaderty;
+   
+ intheaderty = record
+ end;
+
+ intrecordty = record              
+  intheader: intheaderty;
+  header: recheaderty;      
+ end;
+ pintrecordty = ^intrecordty;
+
+ bookmarkdataty = record
+  recno: integer;
+  recordpo: pintrecordty;
+ end;
+ pbookmarkdataty = ^bookmarkdataty;
+ 
+ bufbookmarkty = record
+  data: bookmarkdataty;
+  flag : tbookmarkflag;
+ end;
+ pbufbookmarkty = ^bufbookmarkty;
+
+ dsheaderty = record
+  bookmark: bufbookmarkty;
+ end;
+ dsrecordty = record
+  dsheader: dsheaderty;
+  header: recheaderty;
+ end;
+ pdsrecordty = ^dsrecordty;
+ 
+const
+ intheadersize = sizeof(intrecordty.intheader);
+ dsheadersize = sizeof(dsrecordty.dsheader);
+type
+     
+// structure of internal recordbuffer:
+//                 +---------<frecordsize>---------+
+// intrecheaderty, |recheaderty,fielddata          |
+//                 |moved to tdataset buffer header|
+//                 |fieldoffsets are in ffieldinfos[].offset
+//                 |                               |
+// structure of dataset recordbuffer:
+//                 +----------------------<fcalcrecordsize>----------+
+//                 +---------<frecordsize>---------+                 |
+// dsrecheaderty,  |recheaderty,fielddata          |calcfields       |
+//                 |moved to internal buffer header|                 | 
+//                 |<-field offsets are in ffieldinfos[].offset      |
+//                 |<-calcfield offsets are in fcalcfieldbufpositions|
 
  ifidsstatety = (ids_openpending,ids_fielddefsreceived);
  ifidsstatesty = set of ifidsstatety;
@@ -25,12 +80,14 @@ type
    fcontroller: tdscontroller;
    fstate: ifidsstatesty;
    fdefaulttimeout: integer;
-   fstringpositions: integerarty;
    fmsestringpositions: integerarty;
+   fansistringpositions: integerarty;
    Ffieldinfos: fieldinfoarty;
    frecordsize: integer;
    fcalcrecordsize: integer;
    fnullmasksize: integer;
+   
+   fintbuffer: pintrecordty;
    
    procedure setchannel(const avalue: tcustomiochannel);
    procedure setcontroller(const avalue: tdscontroller);
@@ -49,6 +106,16 @@ type
    function getnumboolean: boolean;
    function getfloatdate: boolean;
    function getint64currency: boolean;
+
+   function  intallocrecord: pintrecordty;    
+   procedure finalizestrings(var header: recheaderty);
+   procedure finalizecalcstrings(var header: recheaderty);
+   procedure finalizechangedstrings(const tocompare: recheaderty; 
+                                      var tofinalize: recheaderty);
+   procedure addrefstrings(var header: recheaderty);
+   procedure intfinalizerecord(const buffer: pintrecordty);
+   procedure intfreerecord(var buffer: pintrecordty);
+   
   protected
    ffielddefsequence: sequencety;
    procedure processdata(const adata: pifirecty);
@@ -147,66 +214,13 @@ type
 implementation
 uses
  sysutils,msedatalist;
-type
- recheaderty = record
-  blobinfo: blobinfoarty;
-  fielddata: fielddataty;   
- end;
- precheaderty = ^recheaderty;
-   
- intheaderty = record
- end;
-
- intrecordty = record              
-  intheader: intheaderty;
-  header: recheaderty;      
- end;
- pintrecordty = ^intrecordty;
-
- bookmarkdataty = record
-  recno: integer;
-  recordpo: pintrecordty;
- end;
- pbookmarkdataty = ^bookmarkdataty;
- 
- bufbookmarkty = record
-  data: bookmarkdataty;
-  flag : tbookmarkflag;
- end;
- pbufbookmarkty = ^bufbookmarkty;
-
- dsheaderty = record
-  bookmark: bufbookmarkty;
- end;
- dsrecordty = record
-  dsheader: dsheaderty;
-  header: recheaderty;
- end;
- pdsrecordty = ^dsrecordty;
- 
-const
- intheadersize = sizeof(intrecordty.intheader);
- dsheadersize = sizeof(dsrecordty.dsheader);
-     
-// structure of internal recordbuffer:
-//                 +---------<frecordsize>---------+
-// intrecheaderty, |recheaderty,fielddata          |
-//                 |moved to tdataset buffer header|
-//                 |fieldoffsets are in ffieldinfos[].offset
-//                 |                               |
-// structure of dataset recordbuffer:
-//                 +----------------------<fcalcrecordsize>----------+
-//                 +---------<frecordsize>---------+                 |
-// dsrecheaderty,  |recheaderty,fielddata          |calcfields       |
-//                 |moved to internal buffer header|                 | 
-//                 |<-field offsets are in ffieldinfos[].offset      |
-//                 |<-calcfield offsets are in fcalcfieldbufpositions|
 
 const
  ifidskinds = [ik_requestfielddefs,ik_fielddefsdata];
  openflags = [ids_openpending,ids_fielddefsreceived];
  
 type
+ 
  fdefitemty = record
   datatype: tfieldtype;
   name: ifinamety;
@@ -277,6 +291,227 @@ begin
  fcontroller.free;
  inherited;
  fobjectlinker.free;
+end;
+
+function tifidataset.intallocrecord: pintrecordty;
+begin
+ result:= allocmem(frecordsize+intheadersize);
+ fillchar(result^,frecordsize+intheadersize,0);
+end;
+
+procedure tifidataset.finalizestrings(var header: recheaderty);
+var
+ int1: integer;
+begin
+ for int1:= high(fmsestringpositions) downto 0 do begin
+  pmsestring(pointer(@header)+fmsestringpositions[int1])^:= '';
+ end;
+ for int1:= high(fansistringpositions) downto 0 do begin
+  pansistring(pointer(@header)+fansistringpositions[int1])^:= '';
+ end;
+end;
+
+procedure tifidataset.finalizecalcstrings(var header: recheaderty);
+begin
+end;
+
+procedure tifidataset.finalizechangedstrings(const tocompare: recheaderty;
+               var tofinalize: recheaderty);
+var
+ int1: integer;
+begin
+ for int1:= high(fmsestringpositions) downto 0 do begin
+  if ppointer(pointer(@tocompare)+fmsestringpositions[int1])^ <>
+     ppointer(pointer(@tofinalize)+fmsestringpositions[int1])^ then begin
+   pmsestring(pointer(@tofinalize)+fmsestringpositions[int1])^:= '';
+  end;
+ end;
+ for int1:= high(fansistringpositions) downto 0 do begin
+  if ppointer(pointer(@tocompare)+fansistringpositions[int1])^ <>
+     ppointer(pointer(@tofinalize)+fansistringpositions[int1])^ then begin
+   pansistring(pointer(@tofinalize)+fansistringpositions[int1])^:= '';
+  end;
+ end;
+end;
+
+procedure tifidataset.addrefstrings(var header: recheaderty);
+var
+ int1: integer;
+begin
+ for int1:= high(fmsestringpositions) downto 0 do begin
+  stringaddref(pmsestring(pointer(@header)+fmsestringpositions[int1])^);
+ end;
+ for int1:= high(fansistringpositions) downto 0 do begin
+  stringaddref(pansistring(pointer(@header)+fansistringpositions[int1])^);
+ end;
+end;
+
+procedure tifidataset.intfinalizerecord(const buffer: pintrecordty);
+begin
+// freeblobs(buffer^.header.blobinfo);
+ finalizestrings(buffer^.header);
+end;
+
+procedure tifidataset.intfreerecord(var buffer: pintrecordty);
+begin
+ if buffer <> nil then begin
+  intfinalizerecord(buffer);  
+  freemem(buffer);
+  buffer:= nil;
+ end;
+end;
+
+function tifidataset.AllocRecordBuffer: PChar;
+begin
+ result := allocmem(dsheadersize+fcalcrecordsize);
+ initrecord(result);
+end;
+
+procedure tifidataset.FreeRecordBuffer(var Buffer: PChar);
+begin
+ if buffer <> nil then begin
+  reallocmem(buffer,0);
+ end;
+end;
+
+procedure tifidataset.GetBookmarkData(Buffer: PChar; Data: Pointer);
+begin
+end;
+
+function tifidataset.GetBookmarkFlag(Buffer: PChar): TBookmarkFlag;
+begin
+end;
+{
+function tifidataset.GetDataSource: TDataSource;
+begin
+end;
+}
+function tifidataset.GetRecord(Buffer: PChar; GetMode: TGetMode;
+               DoCheck: Boolean): TGetResult;
+begin
+end;
+
+function tifidataset.GetRecordSize: Word;
+begin
+end;
+
+procedure tifidataset.InternalAddRecord(Buffer: Pointer; AAppend: Boolean);
+begin
+end;
+
+procedure tifidataset.InternalFirst;
+begin
+end;
+
+procedure tifidataset.InternalGotoBookmark(ABookmark: Pointer);
+begin
+end;
+{
+procedure tifidataset.InternalHandleException;
+begin
+end;
+}
+procedure tifidataset.InternalInitFieldDefs;
+begin
+end;
+
+procedure tifidataset.InternalInitRecord(Buffer: PChar);
+begin
+ with pdsrecordty(buffer)^ do begin
+  fillchar(header,fcalcrecordsize, #0);
+ end;
+end;
+
+procedure tifidataset.InternalLast;
+begin
+end;
+
+procedure tifidataset.InternalPost;
+begin
+end;
+
+procedure tifidataset.InternalSetToRecord(Buffer: PChar);
+begin
+end;
+
+function tifidataset.IsCursorOpen: Boolean;
+begin
+ result:= frecbuffer <> nil;
+end;
+
+procedure tifidataset.SetBookmarkFlag(Buffer: PChar; Value: TBookmarkFlag);
+begin
+end;
+
+procedure tifidataset.SetBookmarkData(Buffer: PChar; Data: Pointer);
+begin
+end;
+
+procedure tifidataset.notimplemented(const atext: string);
+begin
+ raise exception.create(name+': '+atext+' not implemented.');
+end;
+
+procedure tifidataset.calcrecordsize;
+var
+ int1,int2,int3: integer;
+ field1: tfield;
+begin
+ fmsestringpositions:= nil;
+ fansistringpositions:= nil;
+ int1:= fielddefs.count;
+ frecordsize:= 0;
+ fnullmasksize:= (int1+7) div 8;
+ inc(frecordsize,fnullmasksize);
+ alignfieldpos(frecordsize);
+ setlength(ffieldinfos,int1);
+ for int2:= 0 to int1 - 1 do begin
+  with fielddefs[int2] do begin
+   field1:= fields.findfield(name);
+   if (field1 <> nil) and (field1.fieldkind = fkdata) then begin
+    case datatype of
+     ftstring,ftfixedchar: begin
+      additem(fmsestringpositions,frecordsize);
+      int3:= sizeof(msestring);
+     end;
+     ftsmallint,ftinteger,ftword: begin
+      int3:= sizeof(longint);
+     end;
+     ftboolean: begin
+      int3:= sizeof(wordbool);
+     end;
+     ftbcd: begin
+      int3:= sizeof(currency);
+     end;
+     ftfloat,ftcurrency: begin
+      int3:= sizeof(double);
+     end;
+     ftlargeint: begin
+      int3:= sizeof(largeint);
+     end;
+     fttime,ftdate,ftdatetime: begin
+      int3:= sizeof(tdatetime);
+     end;
+     ftmemo,ftblob: begin
+      additem(fansistringpositions,frecordsize);
+      int3:= sizeof(string);
+     end;
+     else begin
+      int3:= 0;
+     end;
+    end;
+   end;
+   with ffieldinfos[int2] do begin
+    offset:= frecordsize;
+    inc(frecordsize,int3);
+    alignfieldpos(frecordsize);
+    size:= int3;
+    fieldtype:= datatype;
+    field:= field1;
+   end;
+  end;
+ end;
+ fcalcrecordsize:= frecordsize; //no calcfields
 end;
 
 function tifidataset.locate(const key: integer; const field: tfield;
@@ -380,6 +615,7 @@ end;
 
 procedure tifidataset.inheritedinternalopen;
 begin
+ fintbuffer:= intallocrecord;
 // inherited internalopen;
 end;
 
@@ -418,6 +654,7 @@ end;
 procedure tifidataset.inheritedinternalclose;
 begin
  cancelconnection;
+ intfreerecord(fintbuffer);
 // inherited internalclose;
 end;
 
@@ -499,97 +736,6 @@ begin
  //dummy
 end;
 
-function tifidataset.AllocRecordBuffer: PChar;
-begin
- result := allocmem(dsheadersize+fcalcrecordsize);
- initrecord(result);
-end;
-
-procedure tifidataset.FreeRecordBuffer(var Buffer: PChar);
-begin
- if buffer <> nil then begin
-  reallocmem(buffer,0);
- end;
-end;
-
-procedure tifidataset.GetBookmarkData(Buffer: PChar; Data: Pointer);
-begin
-end;
-
-function tifidataset.GetBookmarkFlag(Buffer: PChar): TBookmarkFlag;
-begin
-end;
-{
-function tifidataset.GetDataSource: TDataSource;
-begin
-end;
-}
-function tifidataset.GetRecord(Buffer: PChar; GetMode: TGetMode;
-               DoCheck: Boolean): TGetResult;
-begin
-end;
-
-function tifidataset.GetRecordSize: Word;
-begin
-end;
-
-procedure tifidataset.InternalAddRecord(Buffer: Pointer; AAppend: Boolean);
-begin
-end;
-
-procedure tifidataset.InternalFirst;
-begin
-end;
-
-procedure tifidataset.InternalGotoBookmark(ABookmark: Pointer);
-begin
-end;
-{
-procedure tifidataset.InternalHandleException;
-begin
-end;
-}
-procedure tifidataset.InternalInitFieldDefs;
-begin
-end;
-
-procedure tifidataset.InternalInitRecord(Buffer: PChar);
-begin
- with pdsrecordty(buffer)^ do begin
-  fillchar(header,fcalcrecordsize, #0);
- end;
-end;
-
-procedure tifidataset.InternalLast;
-begin
-end;
-
-procedure tifidataset.InternalPost;
-begin
-end;
-
-procedure tifidataset.InternalSetToRecord(Buffer: PChar);
-begin
-end;
-
-function tifidataset.IsCursorOpen: Boolean;
-begin
- result:= frecbuffer <> nil;
-end;
-
-procedure tifidataset.SetBookmarkFlag(Buffer: PChar; Value: TBookmarkFlag);
-begin
-end;
-
-procedure tifidataset.SetBookmarkData(Buffer: PChar; Data: Pointer);
-begin
-end;
-
-procedure tifidataset.notimplemented(const atext: string);
-begin
- raise exception.create(name+': '+atext+' not implemented.');
-end;
-
 procedure tifidataset.inititemheader(out arec: string;
                const akind: ifireckindty; const asequence: sequencety; 
                 const datasize: integer; out datapo: pchar);
@@ -657,67 +803,6 @@ begin
  //dummy
 end;
 
-procedure tifidataset.calcrecordsize;
-var
- int1,int2,int3: integer;
- field1: tfield;
-begin
- fstringpositions:= nil;
- fmsestringpositions:= nil;
- int1:= fielddefs.count;
- frecordsize:= 0;
- fnullmasksize:= (int1+7) div 8;
- inc(frecordsize,fnullmasksize);
- alignfieldpos(frecordsize);
- setlength(ffieldinfos,int1);
- for int2:= 0 to int1 - 1 do begin
-  with fielddefs[int2] do begin
-   field1:= fields.findfield(name);
-   if (field1 <> nil) and (field1.fieldkind = fkdata) then begin
-    case datatype of
-     ftstring,ftfixedchar: begin
-      additem(fmsestringpositions,frecordsize);
-      int3:= sizeof(msestring);
-     end;
-     ftsmallint,ftinteger,ftword: begin
-      int3:= sizeof(longint);
-     end;
-     ftboolean: begin
-      int3:= sizeof(wordbool);
-     end;
-     ftbcd: begin
-      int3:= sizeof(currency);
-     end;
-     ftfloat,ftcurrency: begin
-      int3:= sizeof(double);
-     end;
-     ftlargeint: begin
-      int3:= sizeof(largeint);
-     end;
-     fttime,ftdate,ftdatetime: begin
-      int3:= sizeof(tdatetime);
-     end;
-     ftmemo,ftblob: begin
-      additem(fstringpositions,frecordsize);
-      int3:= sizeof(string);
-     end;
-     else begin
-      int3:= 0;
-     end;
-    end;
-   end;
-   with ffieldinfos[int2] do begin
-    offset:= frecordsize;
-    inc(frecordsize,int3);
-    alignfieldpos(frecordsize);
-    size:= int3;
-    fieldtype:= datatype;
-    field:= field1;
-   end;
-  end;
- end;
-end;
-
 procedure tifidataset.waitforanswer(const asequence: sequencety; 
                                                  waitus: integer = 0);
 begin
@@ -743,6 +828,10 @@ begin
   end;
   bindfields(true);
   calcrecordsize;
+  inherited;
+ end
+ else begin
+  //error
  end;
 end;
 
