@@ -170,6 +170,9 @@ type
     function identquotechar: ansistring; virtual;
     procedure beginupdate; virtual;
     procedure endupdate; virtual;
+    Procedure internalExecuteDirect(const aSQL: String;
+          ATransaction: TSQLTransaction;
+          const aparams: tparams; aparamvars: array of variant);
   public
     destructor Destroy; override;
 
@@ -206,6 +209,9 @@ type
     procedure executedirect(const asql: string;
          atransaction: tsqltransaction;
          const aparams: tparams = nil); overload;
+    Procedure ExecuteDirect(const aSQL: String;
+          ATransaction: TSQLTransaction;
+          const aparams: array of variant); overload;
     procedure GetTableNames(List : TStrings; SystemTables : Boolean = false); virtual;
     procedure GetProcedureNames(List : TStrings); virtual;
     procedure GetFieldNames(const TableName : string; List :  TStrings); virtual;
@@ -847,39 +853,70 @@ begin
  executedirect(asql,ftransaction);
 end;
 
-Procedure tcustomsqlconnection.ExecuteDirect(const aSQL: String;
+Procedure tcustomsqlconnection.internalExecuteDirect(const aSQL: String;
           ATransaction: TSQLTransaction;
-          const aparams: tparams = nil);
-
+          const aparams: tparams; aparamvars: array of variant);
 var 
  Cursor: TSQLCursor;
+ params1: tparams;
+ bo1: boolean; 
+ int1: integer;
 begin
  if atransaction = nil then begin
   atransaction:= ftransaction;
  end;
+ bo1:= (aparams = nil) and (high(aparamvars) >= 0);
+ if bo1 then begin
+  params1:= tparams.create;
+  params1.parsesql(asql,true);
+  for int1:= 0 to high(aparamvars) do begin
+   params1[int1].value:= aparamvars[int1];
+  end;
+ end
+ else begin
+  params1:= aparams;
+ end;
+ try
   if not assigned(ATransaction) then
     DatabaseError(SErrTransactionnSet);
   connected:= true;
-//  if not Connected then Open;
   if not ATransaction.Active then ATransaction.StartTransaction;
 
   try
     Cursor := AllocateCursorHandle(nil,name);
     cursor.ftrans:= atransaction.handle;
-//    SQL := TrimRight(SQL);
 
     if trimright(asql) = '' then
       DatabaseError(SErrNoStatement);
 
     Cursor.FStatementType := stNone;
 
-    PrepareStatement(cursor,ATransaction,aSQL,aparams);
+    PrepareStatement(cursor,ATransaction,aSQL,params1);
     cursor.ftrans:= atransaction.handle;
-    execute(cursor,atransaction,aparams);
+    execute(cursor,atransaction,params1);
     UnPrepareStatement(Cursor);
   finally;
     DeAllocateCursorHandle(Cursor);
   end;
+ finally
+  if bo1 then begin
+   params1.free;
+  end;
+ end;
+end;
+
+Procedure tcustomsqlconnection.ExecuteDirect(const aSQL: String;
+          ATransaction: TSQLTransaction;
+          const aparams: tparams = nil);
+begin
+ internalexecutedirect(asql,atransaction,aparams,[]);
+end;
+
+Procedure tcustomsqlconnection.ExecuteDirect(const aSQL: String;
+          ATransaction: TSQLTransaction;
+          const aparams: array of variant);
+begin
+ internalexecutedirect(asql,atransaction,nil,aparams);
 end;
 
 procedure tcustomsqlconnection.GetDBInfo(const SchemaType : TSchemaType; const SchemaObjectName, ReturnField : string; List: TStrings);
