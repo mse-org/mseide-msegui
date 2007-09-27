@@ -44,7 +44,8 @@ type
    property fieldname: ansistring read ffieldname;
    property datasize: integer read fdatasize;
 
-   property asvariant: variant read getasvariant;      
+   property asvariant: variant read getasvariant;
+              //empty variant returned for null fields
    property asboolean: boolean read getasboolean;
    property ascurrency: currency read getascurrency;
    property aslargeint: largeint read getaslargeint;
@@ -248,13 +249,13 @@ type
    procedure refresh;
 //   procedure asvariant(out avalue: variant); overload; //internal compiler error
    function asvariant: variant; 
-                            //value of first field of first row
+          //value of first field of first row, empty variant returned for null fields
 //   procedure asvariant(out avalue: variantarty); overload; 
    function asvariantar: variantarty;
-                            //first row;
+          //first row, empty variant returned for null fields
 //   procedure asvariant(out avalue: variantararty); overload; 
    function asvariantarar: variantararty;
-                            //whole resultset
+          //whole resultset, empty variant returned for null fields
    property cols: tdbcols read fcols;
    property bof: boolean read fbof;
    property eof: boolean read feof;
@@ -334,6 +335,7 @@ type
    property onchange;
  end;
 
+//empty variant returned for null fields
 procedure getsqlresult(out avalue: variant; const atransaction: tsqltransaction;
                       const asql: string; const aparams: array of variant); overload;
            //first field of first row
@@ -492,7 +494,7 @@ end;
 function tdbcol.getasvariant: variant;
 begin
  if isnull then begin
-  result:= null;
+  result:= unassigned;
  end
  else begin
   result:= getvariantvar;
@@ -1131,7 +1133,7 @@ function tsqlresult.asvariant: variant;
 begin
  refresh;
  if eof or (cols.count = 0) then begin
-  result:= null;
+  result:= unassigned;
  end
  else begin
   result:= cols[0].asvariant;
@@ -1147,7 +1149,7 @@ var
 begin
  refresh;
  if eof or (cols.count = 0) then begin
-  result:= null;
+  result:= unassigned;
  end
  else begin
   setlength(result,cols.count);
@@ -1166,7 +1168,7 @@ var
 begin
  refresh;
  if eof or (cols.count = 0) then begin
-  result:= null;
+  result:= unassigned;
   while not eof do begin
    next; //eat the rest;
   end;
