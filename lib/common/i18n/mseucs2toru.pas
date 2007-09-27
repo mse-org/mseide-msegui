@@ -38,20 +38,14 @@ function ucs2to866(const avalue: widechar): char;
 var
     i: cardinal;
 begin
-    result:= char(32);
     i:= cardinal(avalue);
 
-    if (i < 127) then begin
-		result:= char(avalue);
-    end else if (i >= 1040) and (i <= 1087) then begin
-		result:= char(cp866_1[i]);
-    end else if (i >= 9552) and (i <= 9580) then begin
-		result:= char(cp866_2[i]);
-    end else begin
 		case i of
+  0..127:     result:= char(avalue);
 	    	164:	result:= char(253);
 	    	176,186:	result:= char(248);  
 	    	183:	result:= char(250);	 
+  1040..1087: result:= char(cp866_1[i]);
 	    	9472:	result:= char(196);
 	    	9474:	result:= char(179);
 	    	9484:	result:= char(218);
@@ -63,6 +57,7 @@ begin
 	    	9516:	result:= char(194);
 	    	9524:	result:= char(193);
 	    	9532:	result:= char(197);
+  9552..9580: result:= char(cp866_2[i]);
 	    	9600:	result:= char(223);
 	    	9604:	result:= char(220);
 	    	9608:	result:= char(219);
@@ -75,7 +70,8 @@ begin
 	    	9642:	result:= char(249);
 	    	8730:	result:= char(251);
 	    	8470:	result:= char(252);
-		end;
+ else
+  result:= char(32);
     end;
 
 end;
@@ -87,9 +83,12 @@ var
 begin
     i1:= length(avalue);
     setlength(result,i1);
-    for i:= 0 to i1 do begin
+
+ for i:= 0 to i1-1 do begin
 		result[i]:= ucs2to866(avalue[i]);
     end;
+
 end;
+
 
 end.
