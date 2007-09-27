@@ -877,24 +877,27 @@ begin
   params1:= aparams;
  end;
  try
-  if not assigned(ATransaction) then
-    DatabaseError(SErrTransactionnSet);
+  if not assigned(ATransaction) then begin
+   DatabaseError(SErrTransactionnSet);
+  end;
   connected:= true;
-  if not ATransaction.Active then ATransaction.StartTransaction;
-
+  if not ATransaction.Active then begin
+   ATransaction.StartTransaction;
+  end;
   try
-    Cursor := AllocateCursorHandle(nil,name);
-    cursor.ftrans:= atransaction.handle;
-
-    if trimright(asql) = '' then
-      DatabaseError(SErrNoStatement);
-
-    Cursor.FStatementType := stNone;
-
-    PrepareStatement(cursor,ATransaction,aSQL,params1);
-    cursor.ftrans:= atransaction.handle;
+   Cursor:= AllocateCursorHandle(nil,name);
+   cursor.ftrans:= atransaction.handle;
+   if trimright(asql) = '' then begin
+    DatabaseError(SErrNoStatement);
+   end;   
+   Cursor.FStatementType := stNone;
+   PrepareStatement(cursor,ATransaction,aSQL,params1);
+   cursor.ftrans:= atransaction.handle;
+   try    
     execute(cursor,atransaction,params1);
+   finally
     UnPrepareStatement(Cursor);
+   end;
   finally;
     DeAllocateCursorHandle(Cursor);
   end;
