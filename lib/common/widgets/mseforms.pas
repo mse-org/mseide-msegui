@@ -908,25 +908,25 @@ var
 begin
  if foptions <> value then begin
   opt1:= formoptionsty(setsinglebit(
-       {$ifdef FPC}longword{$else}word{$endif}(value),
-       {$ifdef FPC}longword{$else}word{$endif}(foptions),
-       {$ifdef FPC}longword{$else}word{$endif}(mask2)));
+       {$ifdef FPC}longword{$else}longword{$endif}(value),
+       {$ifdef FPC}longword{$else}longword{$endif}(foptions),
+       {$ifdef FPC}longword{$else}longword{$endif}(mask2)));
   opt2:= formoptionsty(setsinglebit(
-       {$ifdef FPC}longword{$else}word{$endif}(value),
-       {$ifdef FPC}longword{$else}word{$endif}(foptions),
-       {$ifdef FPC}longword{$else}word{$endif}(mask3)));
+       {$ifdef FPC}longword{$else}longword{$endif}(value),
+       {$ifdef FPC}longword{$else}longword{$endif}(foptions),
+       {$ifdef FPC}longword{$else}longword{$endif}(mask3)));
   foptions:= formoptionsty(setsinglebit(
-       {$ifdef FPC}longword{$else}word{$endif}(value),
-       {$ifdef FPC}longword{$else}word{$endif}(foptions),
-       {$ifdef FPC}longword{$else}word{$endif}(mask1)));
+       {$ifdef FPC}longword{$else}longword{$endif}(value),
+       {$ifdef FPC}longword{$else}longword{$endif}(foptions),
+       {$ifdef FPC}longword{$else}longword{$endif}(mask1)));
   foptions:= formoptionsty(replacebits(
-       {$ifdef FPC}longword{$else}word{$endif}(opt1),
-       {$ifdef FPC}longword{$else}word{$endif}(foptions),
-       {$ifdef FPC}longword{$else}word{$endif}(mask2)));
+       {$ifdef FPC}longword{$else}longword{$endif}(opt1),
+       {$ifdef FPC}longword{$else}longword{$endif}(foptions),
+       {$ifdef FPC}longword{$else}longword{$endif}(mask2)));
   foptions:= formoptionsty(replacebits(
-       {$ifdef FPC}longword{$else}word{$endif}(opt2),
-       {$ifdef FPC}longword{$else}word{$endif}(foptions),
-       {$ifdef FPC}longword{$else}word{$endif}(mask3)));
+       {$ifdef FPC}longword{$else}longword{$endif}(opt2),
+       {$ifdef FPC}longword{$else}longword{$endif}(foptions),
+       {$ifdef FPC}longword{$else}longword{$endif}(mask3)));
   updateoptions;
  end;
 end;
@@ -1430,7 +1430,7 @@ end;
 procedure tformdockcontroller.setoptionsdock(const avalue: optionsdockty);
 begin
  inherited;
- updatebit({$ifdef FPC}longword{$else}word{$endif}(tdockform(fintf.getwidget).foptions),
+ updatebit({$ifdef FPC}longword{$else}longword{$endif}(tdockform(fintf.getwidget).foptions),
              ord(fo_savepos),od_savepos in foptionsdock);
 end;
 
