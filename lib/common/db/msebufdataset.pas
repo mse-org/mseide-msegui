@@ -653,6 +653,8 @@ type
   end;
    
 function getfieldisnull(nullmask: pbyte; const x: integer): boolean;
+procedure setfieldisnull(nullmask: pbyte; const x: integer);
+procedure unsetfieldisnull(nullmask: pbyte; const x: integer);
 procedure alignfieldpos(var avalue: integer);
 
 implementation

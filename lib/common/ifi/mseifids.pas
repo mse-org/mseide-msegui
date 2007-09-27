@@ -85,12 +85,14 @@ type
    frecordsize: integer;
    fcalcrecordsize: integer;
    fnullmasksize: integer;
+   fmodifiedfields: string; //same layout as nullmask
    
    fintbuffer: pintrecordty;
    frecno: integer;
    fbrecordcount: integer; //always 1 if open
    fcurrentbuf: pintrecordty;
-   
+
+   procedure initmodifiedfields;   
    procedure setchannel(const avalue: tcustomiochannel);
    procedure setcontroller(const avalue: tdscontroller);
    function getcontroller: tdscontroller;
@@ -148,6 +150,7 @@ type
      //ievent
    procedure receiveevent(const event: tobjectevent); virtual;
    
+   procedure bindfields(const bind: boolean);
    function AllocRecordBuffer: PChar; override;
    procedure FreeRecordBuffer(var Buffer: PChar); override;
    procedure GetBookmarkData(Buffer: PChar; Data: Pointer); override;
@@ -173,6 +176,9 @@ type
    procedure setfielddata(field: tfield; buffer: pointer;
                                     nativeformat: boolean); override;
    procedure setfielddata(field: tfield; buffer: pointer); override;
+
+   procedure InternalCancel; override;
+   procedure internaledit; override;
 
    procedure InternalAddRecord(Buffer: Pointer; AAppend: Boolean); override;
    procedure InternalClose; override;
@@ -236,9 +242,17 @@ type
   
 implementation
 uses
- sysutils,msedatalist;
-
+ sysutils,msedatalist,dbconst;
+type
+ tmsestringfield1 = class(tmsestringfield);
+ 
 const
+{$ifdef mse_FPC_2_2}
+ snotineditstate = 
+ 'Operation not allowed, dataset "%s" is not in an edit or insert state.';
+            //name changed in FPC 2_2
+{$endif}
+
  ifidskinds = [ik_requestfielddefs,ik_fielddefsdata];
  openflags = [ids_openpending,ids_fielddefsreceived];
  
@@ -482,17 +496,222 @@ begin
  result:= frecordsize;
 end;
 
+procedure tifidataset.bindfields(const bind: boolean);
+var
+ int1: integer;
+ field1: tfield;
+ int2: integer;
+ fielddef1: tfielddef;
+begin
+ for int1:= fields.count - 1 downto 0 do begin
+  field1:= fields[int1];
+  if bind then begin
+   if field1.fieldkind = fkdata then begin
+    fielddef1:= tfielddef(fielddefs.find(field1.fieldname));
+                   //needed for FPC 2_2
+    if fielddef1 <> nil then begin
+     field1.fieldname:= fielddef1.name;
+          //get exact name for quoting in update statements
+    end;
+   end
+   else begin
+    fielddef1:= nil;
+   end;
+  end;
+  if field1 is tmsestringfield then begin
+   int2:= 0;
+   if bind then begin
+    int2:= field1.size;
+    if fielddef1 <> nil then begin
+     int2:= fielddef1.size;
+    end;
+    tmsestringfield1(field1).setismsestring(@getmsestringdata,
+                                                  @setmsestringdata,int2);
+   end
+   else begin
+    tmsestringfield1(field1).setismsestring(nil,nil,int2);
+   end;
+  end
+  else begin
+   if field1 is tmseblobfield then begin
+   {
+    if bind then begin
+     tmseblobfield1(field1).fgetblobid:= @getfieldblobid;
+    end
+    else begin
+     tmseblobfield1(field1).fgetblobid:= nil;
+    end;
+    }
+   end;
+  end;
+ end;
+ inherited;
+end;
 
 function tifidataset.getfieldbuffer(const afield: tfield; out buffer: pointer;
                out datasize: integer): boolean;
              //read, true if not null
-begin
+var
+ int1: integer;
+begin 
+ result:= false;
+ if not active then begin
+  buffer:= nil;
+  exit;
+ end;
+ int1:= afield.fieldno - 1;
+ case ord(state) of
+  ord(dscalcfields): begin
+//   buffer:= @pdsrecordty(calcbuffer)^.header;
+  end;
+  dscheckfilter: begin
+//   buffer:= @fcheckfilterbuffer^.header;
+  end;
+  ord(dsfilter): begin
+//   buffer:= @ffilterbuffer^.header;
+  end;
+  ord(dscurvalue): begin
+//   buffer:= @fcurrentbuf^.header;
+  end;
+  else begin
+    buffer:= @pdsrecordty(activebuffer)^.header;
+   {
+   if bs_internalcalc in fbstate then begin
+    if int1 < 0 then begin//calc field
+     buffer:= @pdsrecordty(activebuffer)^.header;
+     //values invalid!
+    end
+    else begin
+     buffer:= @fcurrentbuf^.header;
+    end;
+   end
+   else begin
+    if bs_recapplying in fbstate then begin
+     buffer:= @fnewvaluebuffer^.header;
+    end
+    else begin
+     buffer:= @pdsrecordty(activebuffer)^.header;
+    end;
+   end;
+   }
+  end;
+ end;
+ if int1 >= 0 then begin // data field
+  result:= false;
+  {
+  if state = dsoldvalue then begin
+   if getrecordupdatebuffer then begin
+    buffer:= fupdatebuffer[fcurrentupdatebuffer].oldvalues;
+    if buffer <> nil then begin
+     buffer:= @pintrecordty(buffer)^.header;
+    end;
+   end
+   else begin
+    buffer:= @fcurrentbuf^.header   //there is no old value available
+   end;
+  end;
+  }
+  if buffer <> nil then begin
+   result:= not getfieldisnull(precheaderty(buffer)^.fielddata.nullmask,int1);
+   inc(buffer,ffieldinfos[int1].offset{ffieldbufpositions[int1]});
+   datasize:= ffieldinfos[int1].size{ffieldsizes[int1]};
+  end
+  else begin
+   datasize:= 0;
+  end;
+ end
+ else begin   
+  int1:= -2 - int1;
+  if int1 >= 0 then begin //calc field
+  {
+   result:= not getfieldisnull(pbyte(buffer+frecordsize),int1);
+   inc(buffer,fcalcfieldbufpositions[int1]);
+   datasize:= fcalcfieldsizes[int1];
+  }
+  end
+  else begin
+   buffer:= nil;
+   datasize:= 0;
+  end;
+ end;
 end;
 
 function tifidataset.getfieldbuffer(const afield: tfield; const isnull: boolean;
                out datasize: integer): pointer;
              //write
-begin
+var
+ int1: integer;
+begin 
+ if not ((state in dswritemodes - [dsinternalcalc,dscalcfields]) or 
+       (afield.fieldkind = fkinternalcalc) and 
+                                (state = dsinternalcalc) or
+       (afield.fieldkind = fkcalculated) and 
+                                (state = dscalcfields)) then begin
+  databaseerrorfmt(snotineditstate,[name],self);
+ end;
+ int1:= afield.fieldno-1;
+ case state of
+  dscalcfields: begin
+//   result:= @pdsrecordty(calcbuffer)^.header;
+  end;
+  dsfilter:  begin 
+//   result:= @ffilterbuffer^.header;
+  end;
+  else begin
+   result:= @pdsrecordty(activebuffer)^.header;
+  {
+   if bs_internalcalc in fbstate then begin
+    if int1 < 0 then begin//calc field
+     result:= @pdsrecordty(activebuffer)^.header;
+     //values invalid!
+    end
+    else begin
+     result:= @fcurrentbuf^.header;
+    end;
+   end
+   else begin
+    if bs_recapplying in fbstate then begin
+     result:= @fnewvaluebuffer^.header;
+    end
+    else begin
+     result:= @pdsrecordty(activebuffer)^.header;
+    end;
+   end;
+   }
+  end;
+ end;
+ if int1 >= 0 then begin // data field
+  unsetfieldisnull(pointer(fmodifiedfields),int1);
+  if isnull then begin
+   setfieldisnull(precheaderty(result)^.fielddata.nullmask,int1);
+  end
+  else begin
+   unsetfieldisnull(precheaderty(result)^.fielddata.nullmask,int1);
+  end;
+  inc(result,ffieldinfos[int1].offset{ffieldbufpositions[int1]});
+  datasize:= ffieldinfos[int1].size{ffieldsizes[int1]};
+ end
+ else begin
+  int1:= -2 - int1;
+  result:= nil;
+  datasize:= 0;
+  {
+  if int1 >= 0 then begin //calc field
+   if isnull then begin
+    setfieldisnull(pbyte(result+frecordsize),int1);
+   end
+   else begin
+    unsetfieldisnull(pbyte(result+frecordsize),int1);
+   end;
+   inc(result,fcalcfieldbufpositions[int1]);
+   datasize:= fcalcfieldsizes[int1];
+  end
+  else begin
+   result:= nil;
+   datasize:= 0;
+  end;
+  }
+ end;
 end;
 
 function tifidataset.getmsestringdata(const sender: tmsestringfield;
@@ -566,6 +785,40 @@ begin
  end;
 end;
 
+procedure tifidataset.initmodifiedfields;
+begin
+ setlength(fmodifiedfields,fnullmasksize);
+ fillchar(pointer(fmodifiedfields)^,fnullmasksize,#0);
+end;
+
+procedure tifidataset.InternalCancel;
+begin
+ with pdsrecordty(activebuffer)^,header do begin
+  finalizestrings(header);
+ end;
+end;
+
+procedure tifidataset.internaledit;
+begin
+ initmodifiedfields;
+ addrefstrings(pdsrecordty(activebuffer)^.header);
+ inherited;
+end;
+
+procedure tifidataset.InternalPost;
+var
+ int1: integer;
+begin
+ with pdsrecordty(activebuffer)^ do begin
+  finalizestrings(fcurrentbuf^.header);
+  move(header,fcurrentbuf^.header,frecordsize); //get new field values
+  for int1:= 0 to high(ffieldinfos) do begin
+   if not getfieldisnull(pointer(fmodifiedfields),int1) then begin
+   end;
+  end;
+ end;
+end;
+
 procedure tifidataset.InternalAddRecord(Buffer: Pointer; AAppend: Boolean);
 begin
  notimplemented('Add record');
@@ -628,10 +881,6 @@ end;
 procedure tifidataset.InternalLast;
 begin
  internalsetrecno(fbrecordcount)
-end;
-
-procedure tifidataset.InternalPost;
-begin
 end;
 
 procedure tifidataset.InternalSetToRecord(Buffer: PChar);
