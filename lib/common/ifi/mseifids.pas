@@ -75,7 +75,6 @@ type
    fobjectlinker: tobjectlinker;
    fstrings: integerarty;
    fmsestrings: integerarty;
-   frecbuffer: pointer;
    fifiname: string;
    fcontroller: tdscontroller;
    fstate: ifidsstatesty;
@@ -88,6 +87,9 @@ type
    fnullmasksize: integer;
    
    fintbuffer: pintrecordty;
+   frecno: integer;
+   fbrecordcount: integer; //always 1 if open
+   fcurrentbuf: pintrecordty;
    
    procedure setchannel(const avalue: tcustomiochannel);
    procedure setcontroller(const avalue: tdscontroller);
@@ -115,6 +117,9 @@ type
    procedure addrefstrings(var header: recheaderty);
    procedure intfinalizerecord(const buffer: pintrecordty);
    procedure intfreerecord(var buffer: pintrecordty);
+   procedure internalsetrecno(const avalue: integer);
+   function findrecord(arecordpo: pintrecordty): integer;
+                         //returns index, -1 if not found
    
   protected
    ffielddefsequence: sequencety;
@@ -151,6 +156,24 @@ type
    function GetRecord(Buffer: PChar; GetMode: TGetMode;
                                 DoCheck: Boolean): TGetResult; override;
    function GetRecordSize: Word; override;
+
+   function getfieldbuffer(const afield: tfield;
+             out buffer: pointer; out datasize: integer): boolean; overload; 
+             //read, true if not null
+   function getfieldbuffer(const afield: tfield;
+             const isnull: boolean; out datasize: integer): pointer; overload;
+             //write
+   function getmsestringdata(const sender: tmsestringfield; 
+                               out avalue: msestring): boolean;
+   procedure setmsestringdata(const sender: tmsestringfield; const avalue: msestring);
+
+   function getfielddata(field: tfield; buffer: pointer;
+                       nativeformat: boolean): boolean; override;
+   function getfielddata(field: tfield; buffer: pointer): boolean; override;
+   procedure setfielddata(field: tfield; buffer: pointer;
+                                    nativeformat: boolean); override;
+   procedure setfielddata(field: tfield; buffer: pointer); override;
+
    procedure InternalAddRecord(Buffer: Pointer; AAppend: Boolean); override;
    procedure InternalClose; override;
    procedure InternalDelete; override;
@@ -278,11 +301,13 @@ end;
 
 constructor tifidataset.create(aowner: tcomponent);
 begin
+ frecno:= -1;
  fdefaulttimeout:= defaultifidstimeout;
  fobjectlinker:= tobjectlinker.create(ievent(self),
                            {$ifdef FPC}@{$endif}objectevent);
- setunidirectional(true);
+// setunidirectional(true);
  inherited;
+ bookmarksize := sizeof(bufbookmarkty);
  fcontroller:= tdscontroller.create(self,idscontroller(self));
 end;
 
@@ -376,35 +401,212 @@ end;
 
 procedure tifidataset.GetBookmarkData(Buffer: PChar; Data: Pointer);
 begin
+ move(pdsrecordty(buffer)^.dsheader.bookmark,data^,sizeof(bookmarkdataty));
 end;
 
 function tifidataset.GetBookmarkFlag(Buffer: PChar): TBookmarkFlag;
 begin
+ result:= pdsrecordty(buffer)^.dsheader.bookmark.flag;
 end;
 {
 function tifidataset.GetDataSource: TDataSource;
 begin
 end;
 }
+procedure tifidataset.internalsetrecno(const avalue: integer);
+begin
+ frecno:= avalue;
+ if (avalue < 0) or (avalue >= fbrecordcount)  then begin
+  fcurrentbuf:= nil;
+ end
+ else begin
+  fcurrentbuf:= fintbuffer;
+ end;
+end;
+
 function tifidataset.GetRecord(Buffer: PChar; GetMode: TGetMode;
                DoCheck: Boolean): TGetResult;
 begin
+ result:= grok;
+ case getmode of
+  gmprior: begin
+   if frecno <= 0 then begin
+    result := grbof;
+   end
+   else begin
+    internalsetrecno(frecno-1);
+   end;
+  end;
+  gmcurrent: begin
+   if (frecno < 0) or (frecno >= fbrecordcount) or (fcurrentbuf = nil) then begin
+    result := grerror;
+   end;
+  end;
+  gmnext: begin
+   if frecno >= fbrecordcount - 1 then begin
+    result:= greof;
+   end
+   else begin
+    internalsetrecno(frecno+1);
+   end;
+  end;
+ end;
+ if result = grok then begin
+  with pdsrecordty(buffer)^ do begin
+   with dsheader.bookmark do  begin
+    data.recno:= frecno;
+    data.recordpo:= fcurrentbuf;
+    flag:= bfcurrent;
+   end;
+   move(fcurrentbuf^.header,header,frecordsize);
+   {
+   getcalcfields(buffer);
+   if filtered then begin
+    state1:= settempstate(tdatasetstate(dscheckfilter));
+    try
+     dofilterrecord(acceptable);
+    finally
+     restorestate(state1);
+    end;
+   end;
+   if (getmode = gmcurrent) and not acceptable then begin
+    result:= grerror;
+   end;
+   }
+  end;
+ end;
 end;
 
 function tifidataset.GetRecordSize: Word;
 begin
+ result:= frecordsize;
+end;
+
+
+function tifidataset.getfieldbuffer(const afield: tfield; out buffer: pointer;
+               out datasize: integer): boolean;
+             //read, true if not null
+begin
+end;
+
+function tifidataset.getfieldbuffer(const afield: tfield; const isnull: boolean;
+               out datasize: integer): pointer;
+             //write
+begin
+end;
+
+function tifidataset.getmsestringdata(const sender: tmsestringfield;
+               out avalue: msestring): boolean;
+var
+ po1: pointer;
+ int1: integer;
+begin
+ result:= getfieldbuffer(sender,po1,int1);
+ if result then begin
+  avalue:= msestring(po1^);
+ end
+ else begin
+  avalue:= '';
+ end;
+end;
+
+procedure tifidataset.setmsestringdata(const sender: tmsestringfield;
+               const avalue: msestring);
+var
+ po1: pointer;
+ int1: integer;
+begin
+ po1:= getfieldbuffer(sender,false,int1);
+ msestring(po1^):= avalue;
+ if (sender.characterlength > 0) and 
+                     (length(avalue) > sender.characterlength) then begin
+  setlength(msestring(po1^),sender.characterlength);
+ end;
+ if (sender.fieldno > 0) and not 
+                 (state in [dscalcfields,dsinternalcalc,{dsfilter,}dsnewvalue]) then begin
+  dataevent(defieldchange,ptrint(sender));
+ end;
+end;
+
+function tifidataset.getfielddata(field: tfield; buffer: pointer;
+               nativeformat: boolean): boolean;
+begin
+ result:= getfielddata(field,buffer);
+end;
+
+function tifidataset.getfielddata(field: tfield; buffer: pointer): boolean;
+var 
+ po1: pointer;
+ datasize: integer;
+begin
+ result:= getfieldbuffer(field,po1,datasize);
+ if (buffer <> nil) and result then begin 
+  move(po1^,buffer^,datasize);
+ end;
+end;
+
+procedure tifidataset.setfielddata(field: tfield; buffer: pointer;
+               nativeformat: boolean);
+begin
+ setfielddata(field,buffer);
+end;
+
+procedure tifidataset.setfielddata(field: tfield; buffer: pointer);
+var 
+ po1: pointer;
+ datasize: integer;
+begin
+ po1:= getfieldbuffer(field,buffer = nil,datasize);
+ if buffer <> nil then begin
+  move(buffer^,po1^,datasize);
+ end;
+ if (field.fieldno > 0) and not 
+                 (state in [dscalcfields,dsinternalcalc,{dsfilter,}dsnewvalue]) then begin
+  dataevent(defieldchange, ptrint(field));
+ end;
 end;
 
 procedure tifidataset.InternalAddRecord(Buffer: Pointer; AAppend: Boolean);
 begin
+ notimplemented('Add record');
 end;
 
 procedure tifidataset.InternalFirst;
 begin
+ internalsetrecno(-1);
+end;
+
+function tifidataset.findrecord(arecordpo: pintrecordty): integer;
+begin
+ if arecordpo = fintbuffer then begin
+  result:= 0;
+ end
+ else begin
+  result:= 1;
+ end;
 end;
 
 procedure tifidataset.InternalGotoBookmark(ABookmark: Pointer);
+var
+ int1: integer;
 begin
+ if abookmark <> nil then begin
+  with pbufbookmarkty(abookmark)^.data do begin
+   if (recno >= fbrecordcount) or (recno < 0) then begin
+    databaseerror('Invalid bookmark recno: '+inttostr(recno)+'.'); 
+   end;
+   {
+   int1:= findrecord(recordpo);
+   if int1 < 0 then begin
+    databaseerror('Invalid bookmarkdata.');
+   end
+   else begin
+    int1:= recno;
+   end;
+   }
+   internalsetrecno(int1);
+  end;
+ end;
 end;
 {
 procedure tifidataset.InternalHandleException;
@@ -413,6 +615,7 @@ end;
 }
 procedure tifidataset.InternalInitFieldDefs;
 begin
+ //dummy
 end;
 
 procedure tifidataset.InternalInitRecord(Buffer: PChar);
@@ -424,6 +627,7 @@ end;
 
 procedure tifidataset.InternalLast;
 begin
+ internalsetrecno(fbrecordcount)
 end;
 
 procedure tifidataset.InternalPost;
@@ -432,19 +636,22 @@ end;
 
 procedure tifidataset.InternalSetToRecord(Buffer: PChar);
 begin
+ internalsetrecno(pdsrecordty(buffer)^.dsheader.bookmark.data.recno);
 end;
 
 function tifidataset.IsCursorOpen: Boolean;
 begin
- result:= frecbuffer <> nil;
+ result:= fintbuffer <> nil;
 end;
 
 procedure tifidataset.SetBookmarkFlag(Buffer: PChar; Value: TBookmarkFlag);
 begin
+ pdsrecordty(buffer)^.dsheader.bookmark.flag:= value;
 end;
 
 procedure tifidataset.SetBookmarkData(Buffer: PChar; Data: Pointer);
 begin
+ move(data^,pdsrecordty(buffer)^.dsheader.bookmark,sizeof(bookmarkdataty));
 end;
 
 procedure tifidataset.notimplemented(const atext: string);
@@ -616,6 +823,7 @@ end;
 procedure tifidataset.inheritedinternalopen;
 begin
  fintbuffer:= intallocrecord;
+ fbrecordcount:= 1;
 // inherited internalopen;
 end;
 
@@ -655,6 +863,9 @@ procedure tifidataset.inheritedinternalclose;
 begin
  cancelconnection;
  intfreerecord(fintbuffer);
+ frecno:= -1;
+ fcurrentbuf:= nil;
+ fbrecordcount:= 0;
 // inherited internalclose;
 end;
 

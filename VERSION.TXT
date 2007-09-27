@@ -1,5 +1,7 @@
 MSEide+MSEgui version history
 
+2007-09-27 menuoptinonsty mo_flat -> mo_noanim.
+
 Version 1.4
 2007-09-06
  Default value of tdbnaviagator.options = [dno_confirmdelete,dno_append].

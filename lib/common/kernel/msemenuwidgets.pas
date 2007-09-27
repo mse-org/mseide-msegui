@@ -413,7 +413,7 @@ begin
      actionstatestoshapestates(item1.finfo,state);
      color:= cl_transparent;
      include(state,ss_flat);
-     if (owner <> nil) and (mo_flat in owner.options) then begin
+     if (owner <> nil) and (mo_noanim in owner.options) then begin
       include(state,ss_noanimation) 
      end
      else begin

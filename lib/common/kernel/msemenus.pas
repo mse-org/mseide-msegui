@@ -19,7 +19,7 @@ uses
 
 type
  menuoptionty = (mo_insertfirst,mo_singleregion,mo_shortcutright,mo_commonwidth,
-                 mo_activate,mo_flat,mo_mainarrow);
+                 mo_activate,mo_noanim,mo_mainarrow);
  menuoptionsty = set of menuoptionty;
 const
  defaultmenuoptions = [mo_shortcutright];

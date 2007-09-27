@@ -740,7 +740,7 @@ type
  buttonoptionty = (bo_executeonclick,bo_executeonkey,bo_executeonshortcut,
                    bo_asyncexecute,
                    bo_focusonshortcut, //for tcustombutton
-                   bo_flat 
+                   bo_flat,bo_noanim 
                    );
  buttonoptionsty = set of buttonoptionty;
 
@@ -1325,6 +1325,12 @@ begin
   end
   else begin
    exclude(finfo.state,ss_flat);
+  end;
+  if bo_noanim in avalue then begin
+   include(finfo.state,ss_noanimation);
+  end
+  else begin
+   exclude(finfo.state,ss_noanimation);
   end;
   invalidate;
  end;
