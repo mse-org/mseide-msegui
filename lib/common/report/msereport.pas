@@ -874,7 +874,7 @@ type
  bandareastatety = (bas_inited,bas_backgroundrendered,bas_areafull,
                     bas_rendering,
                     bas_top,bas_notfirstband,bas_lastband,bas_bandstarted,
-                    bas_activebandchanged);
+                    bas_activebandchanged,bas_finished);
  bandareastatesty = set of bandareastatety; 
    
  bandareaeventty = procedure(const sender: tcustombandarea) of object;
@@ -4174,6 +4174,7 @@ function tcustombandarea.render(const acanvas: tcanvas): boolean;
 var                     //true if finished
  bo1,bo2: boolean;
  int1,int2: integer;
+ isfinished: boolean;
 begin
  result:= true;
  if not (bas_inited in fstate) then begin
@@ -4187,6 +4188,7 @@ begin
   if factiveband <= high(fbands) then begin
    updatevisible;
    dobeforerender;
+   isfinished:= true;
    while (factiveband <= high(fbands)) and not areafull do begin
     exclude(fstate,bas_bandstarted);
     while (factiveband <= high(fbands)) and 
@@ -4196,20 +4198,28 @@ begin
     if factiveband <= high(fbands) then begin
      exclude(fstate,bas_activebandchanged);
      with fbands[factiveband] do begin
-      bo2:= odd(fparentintf.reppagenum);
-      bo2:= bo2 and (bo_oddpage in foptions) or 
-            not bo2 and (bo_evenpage in foptions); //has data
+      if not (bas_finished in self.fstate) then begin
+       bo2:= odd(fparentintf.reppagenum);
+       bo2:= bo2 and (bo_oddpage in foptions) or 
+             not bo2 and (bo_evenpage in foptions); //has data
+      end
+      else begin
+       bo2:= false;
+      end;
       bo1:= ((rbs_showed in fstate) or not(bo_once in foptions)) and
-            (not(rbs_pageshowed in fstate) or not bo2);   //empty    
+            ((rbs_pageshowed in fstate) or not bo2);   //empty    
       render(acanvas,bo1);
       if bas_activebandchanged in self.fstate then begin
        updatevisible;
        continue;
       end;
+      if not bo2 then begin
+       isfinished:= bo1;
+      end;
       bo1:= bo1 or bo2{(bv_everypage in fvisibility)};
 //      fstate:= fstate + [rbs_showed,rbs_pageshowed];
-      result:= bo1;
-//      result:= result and bo1;
+//      result:= bo1;
+      result:= result and bo1;
       if bo1 then begin //empty
        if fnextbandifempty <> nil then begin
         for int1:= 0 to high(fbands) do begin
@@ -4246,6 +4256,9 @@ begin
       end;
      end;
     end;
+   end;
+   if isfinished then begin
+    include(fstate,bas_finished);
    end;
   end;
  finally
@@ -4434,7 +4447,7 @@ var
  int1: integer;
 begin
  if arestart then begin
-  fstate:= fstate - [bas_notfirstband];
+  fstate:= fstate - [bas_notfirstband,bas_finished];
  end
  else begin
   fstate:= [bas_rendering];
