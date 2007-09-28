@@ -5067,7 +5067,10 @@ begin
   end;
   enternotify: begin
    with xev.xcrossing do begin
-    result:= twindowevent.create(ek_enterwindow,xwindow);
+//    result:= twindowevent.create(ek_enterwindow,xwindow);
+    result:= tmouseenterevent.create(xwindow,
+                makepoint(x,y),xtoshiftstate(state,key_none,mb_none,false),
+                 time*1000);
    end;
   end;
   leavenotify: begin

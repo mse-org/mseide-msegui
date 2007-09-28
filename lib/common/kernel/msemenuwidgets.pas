@@ -1024,7 +1024,8 @@ begin
      internalsetactiveitem(getcellatpos(flayout,
       subpoint(pos,paintrect.pos)),
                        ss_left in info.shiftstate,false);
-     if int1 <> flayout.activeitem then begin
+     if (int1 <> flayout.activeitem) and (activeitem >= 0) and 
+               tmenuitem1(menu.items[activeitem]).canshowhint then begin
       application.restarthint(self);
      end;
     end
@@ -1043,6 +1044,10 @@ begin
       exclude(options,mlo_childreninactive);
       activeitem:= -1;
       mouseevent(info);
+      if (activeitem >= 0) and 
+                     tmenuitem1(menu.items[activeitem]).canshowhint then begin
+       application.hidehint;
+      end;
       exit;
      end;
      with cells[activeitem].buttoninfo do begin
@@ -1058,7 +1063,12 @@ begin
       exclude(state,ss_clicked);
       invalidaterect(dim);
       if bo1 then begin
+       int1:= activeitem;
        selectmenu;
+       if (activeitem < 0) and (application.mousecapturewidget = nil) and 
+                 (int1 <= high(cells)) then begin
+        activeitem:= int1; //restore mouseactivating
+       end;
       end;
      end;
     end;
@@ -1509,9 +1519,13 @@ begin
 end;
 
 procedure tcustommainmenuwidget.release;
+//var
+// int1: integer;
 begin
+// int1:= activeitem;
  setactiveitem(-1);
  releasemouse;
+// activeitem:= int1;
 end;
 
 function tcustommainmenuwidget.isinpopuparea(const apos: pointty): boolean;

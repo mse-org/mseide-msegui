@@ -78,7 +78,7 @@ type
  pkeyeventinfoty = ^keyeventinfoty;
 
  tevent = class(tnullinterfacedobject)
-  private
+  protected
    fkind: eventkindty;
   public
    constructor create(const akind: eventkindty);

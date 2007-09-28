@@ -1473,6 +1473,12 @@ type
                       //button = none for mousemove
  end;
 
+ tmouseenterevent = class(tmouseevent)
+  public
+   constructor create(const winid: winidty; const pos: pointty;
+                      const shiftstate: shiftstatesty; atimestamp: cardinal);
+ end;
+ 
  tkeyevent = class(twindowevent)
   private
   public
@@ -1907,6 +1913,7 @@ type
    procedure processshowingevent(event: twindowevent);
    procedure processmouseevent(event: tmouseevent);
    procedure processkeyevent(event: tkeyevent);
+   procedure processleavewindow;
    procedure processwindowcrossingevent(event: twindowevent);
 
    function getmousewinid: winidty; //for  tmouse.setshape
@@ -9547,9 +9554,13 @@ begin
 end;
 
 function twindow.beginmodal: boolean; //true if destroyed
+var
+ pt1: pointty;
+ event1: tmouseevent;
 begin
  fmodalresult:= mr_none;
  with app do begin
+  deactivatehint;
   if (fmousecapturewidget <> nil) and
          not fowner.checkdescendent(fmousecapturewidget) then begin
    fmousecapturewidget.releasemouse;
@@ -9557,6 +9568,7 @@ begin
   if fmodalwindow = nil then begin
    fwantedactivewindow:= nil; //init for lowest level
   end;
+  processleavewindow;
   result:= beginmodal(self);
   if (fmodalwindow = nil) then begin
    if fwantedactivewindow <> nil then begin
@@ -9572,6 +9584,18 @@ begin
 //   if ftransientfor <> nil then begin
 //    ftransientfor.activate;
 //   end;
+  end;
+  if factivewindow <> nil then begin
+   pt1:= mouse.pos;
+   if pointinrect(pt1,factivewindow.fowner.fwidgetrect) then begin
+    event1:= tmouseevent.create(factivewindow.winid,false,mb_none,mw_none,
+        subpoint(pt1,factivewindow.fowner.fwidgetrect.pos),[],0,false);
+    try 
+     app.processmouseevent(event1); //simulate mousemove
+    finally
+     event1.free;
+    end;
+   end;
   end;
  end;
 end;
@@ -9705,9 +9729,11 @@ var
  int1: integer;
  po1: peventaty;
 begin
+{
  if info.eventkind in [ek_mouseenter,ek_mouseleave] then begin
   exit;
  end;
+ }
  if info.eventkind = ek_mousewheel then begin
   capture:= fowner.mouseeventwidget(info);
  end
@@ -10675,6 +10701,31 @@ begin
  end;
 end;
 
+procedure tinternalapplication.processleavewindow;
+begin
+ fmouseparktimer.enabled:= false;
+ {
+ if factmousewindow <> nil then begin
+  fillchar(info,sizeof(info),0);
+  info.eventkind:= ek_mouseleave;
+  factmousewindow.dispatchmouseevent(info,nil);
+ end;
+ }
+ factmousewindow:= nil;
+ if fmousecapturewidget = nil then begin
+  setmousewidget(nil);
+//    deactivatehint;
+//    fhintedwidget:= nil;
+ end
+ else begin
+  if (fclientmousewidget <> nil) and
+     not (ws_clientmousecaptured in fclientmousewidget.fwidgetstate) then begin
+   setclientmousewidget(nil);
+  end;
+ end;
+ fmousewinid:= 0;
+end;
+
 procedure tinternalapplication.processwindowcrossingevent(event: twindowevent);
 var
  window: twindow;
@@ -10682,25 +10733,7 @@ var
 begin
  if findwindow(event.fwinid,window) then begin
   if event.kind = ek_leavewindow then begin
-   fmouseparktimer.enabled:= false;
-   if factmousewindow <> nil then begin
-    fillchar(info,sizeof(info),0);
-    info.eventkind:= ek_mouseleave;
-    factmousewindow.dispatchmouseevent(info,nil);
-   end;
-   factmousewindow:= nil;
-   if fmousecapturewidget = nil then begin
-    setmousewidget(nil);
-//    deactivatehint;
-//    fhintedwidget:= nil;
-   end
-   else begin
-    if (fclientmousewidget <> nil) and
-       not (ws_clientmousecaptured in fclientmousewidget.fwidgetstate) then begin
-     setclientmousewidget(nil);
-    end;
-   end;
-   fmousewinid:= 0;
+   processleavewindow;
   end
   else begin
    fmousewinid:= event.fwinid;
@@ -10713,7 +10746,8 @@ end;
 
 procedure tinternalapplication.mouseparktimer(const sender: tobject);
 begin
- if factmousewindow <> nil then begin
+ if (factmousewindow <> nil) and ((fmodalwindow = nil) or 
+                            (fmodalwindow = factmousewindow)) then begin
   factmousewindow.mouseparked;
  end;
 end;
@@ -10737,7 +10771,12 @@ begin
     if freflected then begin
      include(eventstate,es_reflected);
     end;
-    info.eventkind:= kind;
+    if kind = ek_enterwindow then begin
+     info.eventkind:= ek_mousemove;
+    end
+    else begin
+     info.eventkind:= kind;
+    end;
     if kind = ek_mousewheel then begin
      mousewheeleventinfoty(info).wheel:= fwheel;
     end
@@ -10789,12 +10828,14 @@ begin
     end;
    end;
    fmouseparkeventinfo:= info;
+   {
    if factmousewindow <> window then begin
     ek1:= info.eventkind;
     info.eventkind:= ek_mouseenter;
     window.dispatchmouseevent(info,nil);
     info.eventkind:= ek1;
    end;
+   }
    factmousewindow:= window;
    fmouseparktimer.interval:= -mouseparktime;
    fmouseparktimer.enabled:= true;
@@ -11382,7 +11423,10 @@ begin       //eventloop
          processconfigureevent(twindowrectevent(event));
         end;
         ek_enterwindow: begin
-         processwindowcrossingevent(twindowevent(event))
+         processwindowcrossingevent(twindowevent(event));
+         if event is tmouseenterevent then begin
+          processmouseevent(tmouseenterevent(event));
+         end;
         end;
         ek_leavewindow: begin
          getevents;
@@ -11420,7 +11464,7 @@ begin       //eventloop
          end;
         end;
         ek_buttonpress,ek_buttonrelease,ek_mousewheel: begin
-        processmouseevent(tmouseevent(event));
+         processmouseevent(tmouseevent(event));
         end;
         ek_keypress,ek_keyrelease: begin
          processkeyevent(tkeyevent(event));
@@ -13090,6 +13134,15 @@ begin
  fmessage:= amessage;
  fcaption:= acaption;
  inherited create(ek_user,ievent(application));
+end;
+
+{ tmousenterevent }
+
+constructor tmouseenterevent.create(const winid: winidty; const pos: pointty;
+               const shiftstate: shiftstatesty; atimestamp: cardinal);
+begin
+ inherited create(winid,false,mb_none,mw_none,pos,shiftstate,atimestamp);
+ fkind:= ek_enterwindow;
 end;
 
 initialization
