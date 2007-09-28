@@ -2058,13 +2058,15 @@ procedure tobjectlinker.setlinkedvar(const linkintf: iobjectlink;
 var
  ba: tlinkedobject;
 begin
- ba:= dest;
- dest:= source;
- if source <> nil then begin
-  link(linkintf,iobjectlink(source),@dest);
- end;
- if ba <> nil then begin
-  unlink(linkintf,iobjectlink(ba),@dest);
+ if source <> dest then begin
+  ba:= dest;
+  dest:= source;
+  if source <> nil then begin
+   link(linkintf,iobjectlink(source),@dest);
+  end;
+  if ba <> nil then begin
+   unlink(linkintf,iobjectlink(ba),@dest);
+  end;
  end;
 end;
 
@@ -2073,13 +2075,15 @@ procedure tobjectlinker.setlinkedvar(const linkintf: iobjectlink;
 var
  ba: tlinkedpersistent;
 begin
- ba:= dest;
- dest:= source;
- if source <> nil then begin
-  link(linkintf,iobjectlink(source),@dest);
- end;
- if ba <> nil then begin
-  unlink(linkintf,iobjectlink(ba),@dest);
+ if source <> dest then begin
+  ba:= dest;
+  dest:= source;
+  if source <> nil then begin
+   link(linkintf,iobjectlink(source),@dest);
+  end;
+  if ba <> nil then begin
+   unlink(linkintf,iobjectlink(ba),@dest);
+  end;
  end;
 end;
 
@@ -2088,13 +2092,15 @@ procedure tobjectlinker.setlinkedvar(const linkintf: iobjectlink;
 var
  ba: tmsecomponent;
 begin
- ba:= dest;
- dest:= source;
- if source <> nil then begin
-  link(linkintf,ievent(source),@dest);
- end;
- if ba <> nil then begin
-  unlink(linkintf,ievent(ba),@dest);
+ if source <> dest then begin
+  ba:= dest;
+  dest:= source;
+  if source <> nil then begin
+   link(linkintf,ievent(source),@dest);
+  end;
+  if ba <> nil then begin
+   unlink(linkintf,ievent(ba),@dest);
+  end;
  end;
 end;
 
