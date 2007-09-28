@@ -12583,12 +12583,12 @@ procedure tapplication.showhint(const sender: twidget; const hint: msestring;
                       );
 begin
  deactivatehint;
- if (sender = nil) or not sender.focused then begin
-  fhintedwidget:= nil;
- end
- else begin
+// if (sender = nil) or not sender.focused then begin
+//  fhintedwidget:= nil;
+// end
+// else begin
   fhintedwidget:= sender;
- end;
+// end;
  with fhintinfo do begin
   mouserefpos:= fmouse.pos;
   flags:= {[hfl_custom] +} aflags;

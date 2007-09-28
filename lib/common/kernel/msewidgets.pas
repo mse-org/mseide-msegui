@@ -718,6 +718,7 @@ type
   public
    constructor create(aowner: tcomponent; transientfor: twindow;
                              var info: hintinfoty);
+destructor destroy; override;
  end;
 
  tmessagewidget = class(tcaptionwidget)
@@ -3650,6 +3651,11 @@ procedure thintwidget.dopaint(const canvas: tcanvas);
 begin
  inherited;
  drawtext(canvas,fcaption,innerclientrect,[tf_wordbreak]);
+end;
+
+destructor thintwidget.destroy;
+begin
+ inherited;
 end;
 
 { tmessagewidget }
