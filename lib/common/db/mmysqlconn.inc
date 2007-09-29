@@ -8,7 +8,7 @@
 interface
 
 uses
-  Classes, SysUtils,msqldb,db,dynlibs,msestrings,
+  Classes, SysUtils,msqldb,db,dynlibs,msestrings,msedb,
 {$IfDef mysql50}
   mysql50dyn;
   {$DEFINE TConnectionName:=TMySQL50Connection}
@@ -111,11 +111,11 @@ Type
     Procedure DeAllocateCursorHandle(var cursor : TSQLCursor); override;
     Function AllocateTransactionHandle : TSQLHandle; override;
 
-    procedure PrepareStatement(cursor: TSQLCursor;ATransaction : TSQLTransaction;buf : string; AParams : TParams); override;
+    procedure PrepareStatement(cursor: TSQLCursor;ATransaction : TSQLTransaction;buf : string; AParams : TmseParams); override;
     procedure UnPrepareStatement(cursor:TSQLCursor); override;
     procedure FreeFldBuffers(cursor : TSQLCursor); override;
     procedure Execute(const cursor: TSQLCursor;
-             const atransaction:tSQLtransaction; const AParams : TParams); override;
+             const atransaction:tSQLtransaction; const AParams : TmseParams); override;
     procedure AddFieldDefs(const cursor: TSQLCursor; 
                    const FieldDefs : TfieldDefs); override;
     function Fetch(cursor : TSQLCursor) : boolean; override;
@@ -378,7 +378,7 @@ begin
 end;
 
 procedure TConnectionName.PrepareStatement(cursor: TSQLCursor;
-  ATransaction: TSQLTransaction; buf: string;AParams : TParams);
+  ATransaction: TSQLTransaction; buf: string;AParams : TmseParams);
 begin
  With TCursorName(cursor) do begin
   FStatement:= Buf;
@@ -428,7 +428,7 @@ begin
 end;
 
 procedure TConnectionName.Execute(const  cursor: TSQLCursor;
-               const atransaction: tSQLtransaction; const AParams : TParams);
+               const atransaction: tSQLtransaction; const AParams : TmseParams);
 
 var
  C: TCursorName;

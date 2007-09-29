@@ -100,9 +100,9 @@ type
    Function AllocateTransactionHandle : TSQLHandle; override;
 
    procedure PrepareStatement(cursor: TSQLCursor; ATransaction : TSQLTransaction; 
-                         buf: string; AParams : TParams); override;
+                         buf: string; AParams : TmseParams); override;
    procedure Execute(const cursor: TSQLCursor; const atransaction: tsqltransaction;
-                                const AParams : TParams); override;
+                                const AParams : TmseParams); override;
    function Fetch(cursor : TSQLCursor) : boolean; override;
    procedure AddFieldDefs(const cursor: TSQLCursor;
                    const FieldDefs : TfieldDefs); override;
@@ -301,7 +301,7 @@ begin
 end;
 
 procedure tsqlite3connection.PrepareStatement(cursor: TSQLCursor;
-               ATransaction: TSQLTransaction; buf: string; AParams: TParams);
+               ATransaction: TSQLTransaction; buf: string; AParams: TmseParams);
 begin
  with tsqlite3cursor(cursor) do begin
   if assigned(aparams) and (aparams.count > 0) then begin
@@ -494,7 +494,7 @@ begin
 end;
 
 procedure tsqlite3connection.Execute(const cursor: TSQLCursor;
-               const atransaction: tsqltransaction; const AParams: TParams);
+               const atransaction: tsqltransaction; const AParams: TmseParams);
 var
  int1: integer;
  str1: string;
@@ -529,7 +529,7 @@ begin
         checkerror(sqlite3_bind_double(fstatement,int1+1,do1));
        end;
        ftstring: begin
-        str1:= asstring;
+        str1:= aparams.asdbstring(int1);
         stringaddref(str1);
         checkerror(sqlite3_bind_text(fstatement,int1+1,pchar(str1),
                     length(str1),@freebindstring));

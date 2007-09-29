@@ -221,7 +221,8 @@ begin
       tlookupbuffer,tdblookupbuffer,tdbmemolookupbuffer,
       tmsedatasource,
       tmsedbf,tmsefixedformatdataset,tmsesdfdataset,tmsememdataset,
-      tmsesqlquery,tmsesqltransaction,tmsesqlscript,tsqlresult,tsqllookupbuffer,
+      tmsesqlquery,tmsesqltransaction,
+      tsqlstatement,tmsesqlscript,tsqlresult,tsqllookupbuffer,
       tmseibconnection,tmsepqconnection,tsqlite3connection,tmseodbcconnection,
       tmsemysql40connection,tmsemysql41connection,tmsemysql50connection
       {$ifdef mse_with_sqlite}

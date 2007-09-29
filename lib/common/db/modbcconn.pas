@@ -18,7 +18,7 @@ unit modbcconn;
 interface
 
 uses
-  Classes, SysUtils, msqldb, db, odbcsqldyn,msetypes;
+  Classes, SysUtils, msqldb, db, odbcsqldyn,msetypes,msedb;
 
 type
 
@@ -66,7 +66,7 @@ type
     FDBCHandle:SQLHDBC; // ODBC Connection Handle
     FFileDSN: string;
 
-    procedure SetParameters(ODBCCursor:TODBCCursor; AParams:TParams);
+    procedure SetParameters(ODBCCursor:TODBCCursor; AParams:TmseParams);
     procedure FreeParamBuffers(ODBCCursor:TODBCCursor);
   protected
     // Overrides from TSQLConnection
@@ -80,7 +80,8 @@ type
     procedure DeAllocateCursorHandle(var cursor:TSQLCursor); override;
     function AllocateTransactionHandle:TSQLHandle; override;
     // - Statement handling
-    procedure PrepareStatement(cursor:TSQLCursor; ATransaction:TSQLTransaction; buf:string; AParams:TParams); override;
+    procedure PrepareStatement(cursor:TSQLCursor; ATransaction:TSQLTransaction;
+                       buf:string; AParams:TmseParams); override;
     procedure UnPrepareStatement(cursor:TSQLCursor); override;
     // - Transaction handling
     function GetTransactionHandle(trans:TSQLHandle):pointer; override;
@@ -92,7 +93,7 @@ type
     procedure internalRollbackRetaining(trans:TSQLHandle); override;
     // - Statement execution
     procedure Execute(const cursor:TSQLCursor; 
-             const ATransaction:TSQLTransaction; const AParams:TParams); override;
+             const ATransaction:TSQLTransaction; const AParams:TmseParams); override;
     // - Result retrieving
     procedure AddFieldDefs(const cursor:TSQLCursor; 
                               const FieldDefs:TFieldDefs); override;
@@ -269,7 +270,7 @@ begin
   end;
 end;
 
-procedure TODBCConnection.SetParameters(ODBCCursor: TODBCCursor; AParams: TParams);
+procedure TODBCConnection.SetParameters(ODBCCursor: TODBCCursor; AParams: TmseParams);
 var
   ParamIndex:integer;
   Buf:pointer;
@@ -314,7 +315,7 @@ begin
         end;
       ftString:
         begin
-          StrVal:=AParams[ParamIndex].AsString;
+          StrVal:=AParams.AsdbString(paramindex);
           StrLen:=Length(StrVal);
           Buf:=GetMem(SizeOf(SQLINTEGER)+StrLen);
           Move(StrLen,    buf^,                    SizeOf(SQLINTEGER));
@@ -442,7 +443,8 @@ begin
   Result:=nil; // not yet supported; will move connection handles to transaction handles later
 end;
 
-procedure TODBCConnection.PrepareStatement(cursor: TSQLCursor; ATransaction: TSQLTransaction; buf: string; AParams: TParams);
+procedure TODBCConnection.PrepareStatement(cursor: TSQLCursor;
+               ATransaction: TSQLTransaction; buf: string; AParams: TmseParams);
 var
   ODBCCursor:TODBCCursor;
 begin
@@ -506,7 +508,7 @@ begin
 end;
 
 procedure TODBCConnection.Execute(const cursor: TSQLCursor;
-      const ATransaction: TSQLTransaction; const AParams: TParams);
+      const ATransaction: TSQLTransaction; const AParams: TmseParams);
 var
   ODBCCursor:TODBCCursor;
 begin

@@ -1001,7 +1001,7 @@ end;
 
 procedure tsqlresult.execute;
 begin
- doexecute(fparams,ftransaction,fcursor,fdatabase);
+ doexecute(fparams,ftransaction,fcursor,fdatabase,isutf8);
 end;
 
 procedure tsqlresult.loaded;

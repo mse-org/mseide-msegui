@@ -1,5 +1,8 @@
 MSEide+MSEgui version history
 
+2007-09-29 
+ sqlscripteventty -> sqlstatementeventty
+ sqlscripterroreventty -> sqlstatementerroreventty
 2007-09-27 menuoptinonsty mo_flat -> mo_noanim.
 
 Version 1.4

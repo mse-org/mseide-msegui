@@ -35,7 +35,7 @@ type
    procedure setoptions(const avalue: pqconnectionoptionsty);
   protected
    procedure execute(const cursor: tsqlcursor; const atransaction: tsqltransaction;
-                             const aparams: tparams); override;
+                             const aparams: tmseparams); override;
    //idbcontroller
    procedure setinheritedconnected(const avalue: boolean);
    function readsequence(const sequencename: string): string;
@@ -108,7 +108,7 @@ begin
 end;
 
 procedure tmsepqconnection.execute(const cursor: tsqlcursor; 
-               const atransaction: tsqltransaction; const aparams: tparams);
+               const atransaction: tsqltransaction; const aparams: tmseparams);
 const
  savepointname = 'mseinternal$savepoint';
 var

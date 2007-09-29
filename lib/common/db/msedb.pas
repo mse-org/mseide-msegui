@@ -893,6 +893,8 @@ type
  end;
  
  tmseparams = class(tparams)
+  private
+   fisutf8: boolean;
   public
    function  parsesql(const sql: string; const docreate: boolean; 
           const  parameterstyle : tparamstyle; var parambinding: tparambinding; 
@@ -904,6 +906,8 @@ type
                             const parameterstyle : tparamstyle): string; overload;
    function  parsesql(const sql: string; const docreate: boolean): string; overload;
    function expandvalues(const sql: string): string;
+   function asdbstring(const index: integer): string;
+   property isutf8: boolean read fisutf8 write fisutf8;
  end;
  
 const
@@ -1266,8 +1270,14 @@ begin
   end
   else begin
    case datatype of
-    ftstring: begin
-     result:= encodesqlstring(asstring);
+    ftstring,ftwidestring: begin
+     if (aparam.collection is tmseparams) and 
+                         tmseparams(aparam.collection).isutf8 then begin
+      result:= encodesqlstring(stringtoutf8(aswidestring));
+     end
+     else begin
+      result:= encodesqlstring(asstring);
+     end;
     end;
     ftmemo: begin
      result:= encodesqlstring(asstring);
@@ -4635,6 +4645,23 @@ begin
  end
  else begin
   result:= str2;   
+ end;
+end;
+
+function tmseparams.asdbstring(const index: integer): string;
+begin
+ with items[index] do begin
+  if isutf8 then begin
+   if vartype(value) = varolestr then begin
+    result:= stringtoutf8(aswidestring);
+   end
+   else begin
+    result:= stringtoutf8(asstring);
+   end;
+  end
+  else begin
+   result:= asstring;
+  end;
  end;
 end;
 

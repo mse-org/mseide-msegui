@@ -23,7 +23,7 @@ interface
 
 uses
  Classes,SysUtils,msqldb,db,math,dbconst,msebufdataset,msedbevents,msesys,
- msestrings,
+ msestrings,msedb,
 {$IfDef LinkDynamically}
   ibase60dyn;
 {$Else}
@@ -109,7 +109,7 @@ type
     procedure CheckError(const ProcName : string;
                              const Status: integer); overload;
     function getMaxBlobSize(blobHandle : TIsc_Blob_Handle) : longInt;
-    procedure SetParameters(cursor : TSQLCursor;AParams : TParams);
+    procedure SetParameters(cursor : TSQLCursor;AParams : TmseParams);
     procedure FreeSQLDABuffer(var aSQLDA : PXSQLDA);
     function getblobstream(const acursor: tsqlcursor; const blobid: isc_quad;
                        const forstring: boolean = false): tmemorystream;
@@ -128,11 +128,11 @@ type
     Function AllocateTransactionHandle : TSQLHandle; override;
 
     procedure PrepareStatement(cursor: TSQLCursor; ATransaction: TSQLTransaction;
-                         buf: string; AParams: TParams); override;
+                         buf: string; AParams: TmseParams); override;
     procedure UnPrepareStatement(cursor : TSQLCursor); override;
     procedure FreeFldBuffers(cursor : TSQLCursor); override;
     procedure Execute(const cursor: TSQLCursor;
-              const atransaction: tsqltransaction; const AParams : TParams); override;
+              const atransaction: tsqltransaction; const AParams : TmseParams); override;
     procedure AddFieldDefs(const cursor: TSQLCursor;
                      const FieldDefs : TfieldDefs); override;
     function Fetch(cursor : TSQLCursor) : boolean; override;
@@ -588,7 +588,7 @@ begin
 end;
 
 procedure TIBConnection.PrepareStatement(cursor: TSQLCursor;
-          ATransaction : TSQLTransaction;buf : string; AParams : TParams);
+          ATransaction : TSQLTransaction;buf : string; AParams : TmseParams);
 
 var dh    : pointer;
     tr    : pointer;
@@ -698,7 +698,7 @@ begin
 end;
 
 procedure TIBConnection.Execute(const cursor: TSQLCursor;
-                const atransaction: tsqltransaction; const AParams : TParams);
+                const atransaction: tsqltransaction; const AParams : TmseParams);
 begin
  if Assigned(APArams) and (AParams.count > 0) then begin
   SetParameters(cursor, AParams);
@@ -718,7 +718,7 @@ type
    ftransaction: tsqltransaction;
    fcursor: tsqlcursor;
    fowner: tibconnection;
-   fparams: tparams;
+   fparams: tmseparams;
    frelationlen,ffieldlen: integer;
   public
    constructor create(const aowner: tibconnection);
@@ -732,7 +732,7 @@ type
 constructor tcharlengthgetter.create(const aowner: tibconnection);
 begin
  fowner:= aowner;
- fparams:= tparams.create;
+ fparams:= tmseparams.create;
  with tparam.create(fparams,ptoutput) do begin
   datatype:= ftstring;
   name:= 'RELATION';
@@ -889,7 +889,7 @@ begin
  Result:= (retcode <> 100);
 end;
 
-procedure TIBConnection.SetParameters(cursor : TSQLCursor;AParams : TParams);
+procedure TIBConnection.SetParameters(cursor : TSQLCursor;AParams : TmseParams);
 
 var ParNr,SQLVarNr : integer;
     s               : string;
@@ -929,7 +929,7 @@ begin
         end;
         ftString,ftFixedChar  :
           begin
-          s:= AParams[ParNr].AsString;
+          s:= AParams.AsdbString(parnr);
           w:= length(s);
           with in_sqlda^.SQLvar[SQLVarNr] do begin
            if ((SQLType and not 1) = SQL_VARYING) then begin

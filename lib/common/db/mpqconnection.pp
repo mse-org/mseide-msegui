@@ -22,7 +22,7 @@ unit mpqconnection;
 interface
 
 uses
-  Classes, SysUtils, msqldb, db, dbconst,msedbevents,msestrings,
+  Classes, SysUtils, msqldb, db, dbconst,msedbevents,msestrings,msedb,
 {$IfDef LinkDynamically}
   postgres3dyn;
 {$Else}
@@ -93,10 +93,10 @@ type
 
    procedure PrepareStatement(cursor: TSQLCursor;
               ATransaction : TSQLTransaction; buf: string;
-              AParams : TParams); override;
+              AParams : TmseParams); override;
    procedure FreeFldBuffers(cursor : TSQLCursor); override;
    procedure Execute(const cursor: TSQLCursor; const atransaction: tsqltransaction;
-                                   const AParams : TParams); override;
+                                   const AParams : TmseParams); override;
    procedure AddFieldDefs(const cursor: TSQLCursor;
                   const FieldDefs : TfieldDefs); override;
    function Fetch(cursor : TSQLCursor) : boolean; override;
@@ -420,7 +420,7 @@ begin
 end;
 
 procedure TPQConnection.PrepareStatement(cursor: TSQLCursor;
-            ATransaction : TSQLTransaction;buf : string; AParams : TParams);
+            ATransaction : TSQLTransaction;buf : string; AParams : TmseParams);
 
 const TypeStrings : array[TFieldType] of string =
     (
@@ -551,7 +551,7 @@ begin
 end;
 
 procedure TPQConnection.Execute(const cursor: TSQLCursor; 
-           const atransaction: tsqltransaction; const AParams : TParams);
+           const atransaction: tsqltransaction; const AParams : TmseParams);
 
 var
  ar: array of pointer;
@@ -575,7 +575,7 @@ begin
         ftfloat,ftcurrency: s:= realtostr(asfloat);
         ftbcd: s:= realtostr(ascurrency);
         else begin
-         s:= AParams[i].asstring;
+         s:= AParams.asdbstring(i);
          if datatype = ftblob then begin
           lengths[i]:= length(s);
           formats[i]:= 1; //binary
