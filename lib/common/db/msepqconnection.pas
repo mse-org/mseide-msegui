@@ -57,7 +57,7 @@ end;
  
 implementation
 uses
- msefileutils,msebits,sysutils,msedatalist,msesqldb,msebufdataset;
+ msefileutils,msebits,sysutils,msedatalist,msesqldb,msebufdataset,postgres3dyn;
  
 { tmsepqconnection }
 
@@ -113,16 +113,19 @@ const
  savepointname = 'mseinternal$savepoint';
 var
  bo1: boolean;
+ conn1: ppgconn;
 begin
  if fsavepointlock then begin
   inherited;
  end
  else begin
+  conn1:= TPQTrans(aTransaction.Handle).conn;
   fsavepointlock:= true;
   bo1:= (pqco_usesavepoint in foptions) and not (tao_fake in atransaction.options);
   try
    if bo1 then begin
-    executedirect('SAVEPOINT '+savepointname+';',atransaction);
+//    executedirect('SAVEPOINT '+savepointname+';',atransaction);
+    dopqexec('SAVEPOINT '+savepointname+';',conn1);
    end;
    try
     inherited;
@@ -132,14 +135,17 @@ begin
     end
     else begin
      if bo1 then begin
-      executedirect('ROLLBACK TO SAVEPOINT '+savepointname+';',atransaction);
-      executedirect('RELEASE SAVEPOINT '+savepointname+';',atransaction);
+//      executedirect('ROLLBACK TO SAVEPOINT '+savepointname+';',atransaction);
+      dopqexec('ROLLBACK TO SAVEPOINT '+savepointname+';',conn1);
+//      executedirect('RELEASE SAVEPOINT '+savepointname+';',atransaction);
+      dopqexec('RELEASE SAVEPOINT '+savepointname+';',conn1);
      end;
     end;
     raise;
    end;
    if bo1 then begin
-    executedirect('RELEASE SAVEPOINT '+savepointname+';',atransaction);
+//    executedirect('RELEASE SAVEPOINT '+savepointname+';',atransaction);
+    dopqexec('RELEASE SAVEPOINT '+savepointname+';',conn1);
    end;
   finally
    fsavepointlock:= false;

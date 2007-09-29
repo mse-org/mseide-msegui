@@ -434,15 +434,16 @@ var
  C: TCursorName;
  i: integer;
  str1: ansistring;
+ par1: tparam;
 begin
   C:= TCursorName(cursor);
   freeresultbuffer(c);
   str1:= c.fstatement;
-  if Assigned(AParams) and (AParams.count > 0) then begin
+  if Assigned(AParams) then begin
    for i := 0 to AParams.count -1 do begin
-    str1:= stringreplace(str1,
-               C.ParamReplaceString+inttostr(AParams[i].Index+1),
-               GetAsSQLText(AParams[i]),[rfReplaceAll,rfIgnoreCase]);
+    par1:= AParams[i];
+    str1:= stringreplace(str1,C.ParamReplaceString+inttostr(par1.Index+1),
+               GetAsSQLText(par1),[rfReplaceAll,rfIgnoreCase]);
    end;
   end;
   if mysql_query(FMySQL,Pchar(str1))<>0 then begin

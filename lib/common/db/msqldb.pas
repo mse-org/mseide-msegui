@@ -409,6 +409,7 @@ type
  tsqlstatement = class(tcustomsqlstatement)
   private
    FCursor: TSQLCursor;
+   fstatementtype: tstatementtype;
    procedure setactive(avalue: boolean); override;
   protected
    procedure dosqlchange(sender: tobject); override;
@@ -419,6 +420,8 @@ type
    procedure unprepare;
    procedure execute; overload;
    procedure execute(const aparams: array of variant); overload;
+  published
+   property statementtype : tstatementtype read fstatementtype write fstatementtype;
  end;
   
 const
@@ -3367,6 +3370,7 @@ begin
    FCursor:= fdatabase.AllocateCursorHandle(nil,name);
   end;
   fcursor.ftrans:= ftransaction.handle;
+  fcursor.fstatementtype:= fstatementtype;
   str1:= TrimRight(FSQL.Text);
   if str1 = '' then begin
     DatabaseError(SErrNoStatement);

@@ -41,9 +41,11 @@ type
  end;
  
   TPQTrans = Class(TSQLHandle)
-    protected
-     fconn        : PPGConn;
+   protected
+    fconn        : PPGConn;
 //    ErrorOccured  : boolean;
+   public
+    property conn: ppgconn read fconn;
   end;
 
   TPQCursor = Class(TSQLCursor)
@@ -54,6 +56,8 @@ type
     CurTuple  : integer;
     Nr        : string;
     fopen: boolean;
+    ParamBinding : TParamBinding;
+    ParamReplaceString : String;
    public
     procedure close; override;
   end;
@@ -115,7 +119,8 @@ type
    procedure UpdateIndexDefs(var IndexDefs : TIndexDefs;
                                  const TableName : string); override;
    function GetSchemaInfoSQL(SchemaType : TSchemaType; SchemaObjectName, SchemaPattern : string) : string; override;
-   procedure dopqexec(const asql: string);
+   procedure dopqexec(const asql: string); overload;
+   procedure dopqexec(const asql: string; const aconnection: ppgconn); overload;
 
    function CreateBlobStream(const Field: TField; const Mode: TBlobStreamMode;
                       const acursor: tsqlcursor): TStream; override;
@@ -520,7 +525,9 @@ begin
       FPrepared := True;
       end
     else
-      statement := buf;
+    Statement := AParams.ParseSQL(buf,false,false,false,psSimulated,
+                     paramBinding,ParamReplaceString);
+//      statement := buf;
     end;
 end;
 
@@ -558,6 +565,7 @@ var
  i: integer;
  s: string;
  lengths,formats: integerarty;
+ par1: tparam;
 
 begin
  with TPQCursor(cursor) do begin
@@ -601,13 +609,17 @@ begin
    end;
   end
   else begin
-    tr := TPQTrans(cursor.ftrans);
+   tr := TPQTrans(cursor.ftrans);
 
-    s := statement;
-    //Should be altered, just like in TSQLQuery.ApplyRecUpdate
-    if assigned(AParams) then for i := 0 to AParams.count-1 do
-      s := stringreplace(s,':'+AParams[i].Name,AParams[i].asstring,[rfReplaceAll,rfIgnoreCase]);
-    res := pqexec(tr.fconn,pchar(s));
+   s:= statement;
+   if aparams <> nil then begin
+    for i := 0 to AParams.count -1 do begin
+     par1:= aparams[i];
+     s:= stringreplace(s,ParamReplaceString+inttostr(par1.Index+1),
+               GetAsSQLText(par1),[rfReplaceAll,rfIgnoreCase]);
+    end;
+   end;
+   res:= pqexec(tr.fconn,pchar(s));
   end;
   checkerror(tr.fconn,res,'Execution of query failed');
   fopen:= true;
@@ -1032,20 +1044,24 @@ begin
  feventcontroller.eventinterval:= avalue;
 end;
 
-procedure tpqconnection.dopqexec(const asql: string);
+procedure tpqconnection.dopqexec(const asql: string; const aconnection: ppgconn);
 var
  res: ppgresult;
-
 begin
- res:= pqexec(fhandle,pchar(asql));
+ res:= pqexec(aconnection,pchar(asql));
  if pqresultstatus(res) <> pgres_command_ok then begin
   pqclear(res);
   databaseerror('PQExecerror'+ ' (postgresql: ' + 
-                        pqerrormessage(fhandle) + ')',self);
+                        pqerrormessage(aconnection) + ')',self);
  end
  else begin
   pqclear(res);
  end;
+end;
+
+procedure tpqconnection.dopqexec(const asql: string);
+begin
+ dopqexec(asql,fhandle);
 end;
 
 function TPQConnection.backendpid: int64;
