@@ -140,7 +140,7 @@ type
     Function AllocateTransactionHandle : TSQLHandle; virtual; abstract;
 
     procedure Execute(const cursor: TSQLCursor; const atransaction: tsqltransaction;
-                                 const AParams : TParams); virtual; abstract;
+                                 const AParams : TmseParams); virtual; abstract;
     function GetTransactionHandle(trans : TSQLHandle): pointer; virtual; abstract;
     function Commit(trans : TSQLHandle) : boolean; virtual; abstract;
     function RollBack(trans : TSQLHandle) : boolean; virtual; abstract;
@@ -172,7 +172,7 @@ type
     procedure endupdate; virtual;
     Procedure internalExecuteDirect(const aSQL: String;
           ATransaction: TSQLTransaction;
-          const aparams: tparams; aparamvars: array of variant);
+          const aparams: tmseparams; aparamvars: array of variant);
   public
     destructor Destroy; override;
 
@@ -184,7 +184,7 @@ type
                         //aowner used as blob cache
     Procedure DeAllocateCursorHandle(var cursor : TSQLCursor); virtual; abstract;
     procedure PrepareStatement(cursor: TSQLCursor; ATransaction : TSQLTransaction;
-                  buf : string; AParams : TParams); virtual; abstract;
+                  buf : string; AParams : TmseParams); virtual; abstract;
     procedure UnPrepareStatement(cursor : TSQLCursor); virtual; abstract;
     procedure AddFieldDefs(const cursor: TSQLCursor;
                         const FieldDefs: TfieldDefs); virtual; abstract;
@@ -208,7 +208,7 @@ type
     procedure executedirect(const asql: string); overload;
     procedure executedirect(const asql: string;
          atransaction: tsqltransaction;
-         const aparams: tparams = nil); overload;
+         const aparams: tmseparams = nil); overload;
     Procedure ExecuteDirect(const aSQL: String;
           ATransaction: TSQLTransaction;
           const aparams: array of variant); overload;
@@ -329,31 +329,46 @@ type
                             read fonafterrollbackretaining
                             write fonafterrollbackretaining;
   end;
+
+ tcustomsqlstatement = class;
  
- sqlscripteventty = procedure(const sender: tmsesqlscript;
+ sqlstatementeventty = procedure(const sender: tcustomsqlstatement;
                                 const adatabase: tcustomsqlconnection;
                                 const atransaction: tsqltransaction) of object;
- sqlscripterroreventty = procedure(const sender: tmsesqlscript;
+ sqlstatementerroreventty = procedure(const sender: tcustomsqlstatement;
                                 const adatabase: tcustomsqlconnection;
              const atransaction: tsqltransaction; const e: exception;
              var handled: boolean) of object;
 
- tmsesqlscript = class(tmsecomponent)
+ sqlstatementoptionty = (sso_utf8,sso_autocommit,sso_autocommitret);
+ sqlstatementoptionsty = set of sqlstatementoptionty;
+ 
+ tcustomsqlstatement = class(tmsecomponent,itransactionclient,idatabaseclient)
   private
    fsql: tstringlist;
    fdatabase: tcustomsqlconnection;
    ftransaction: tsqltransaction;
    fparams: tmseparams;
-   fstatementnr: integer;
-   fonbeforeexecute: sqlscripteventty;
-   fonafterexecute: sqlscripteventty;
-   fonerror: sqlscripterroreventty;
+   fonbeforeexecute: sqlstatementeventty;
+   fonafterexecute: sqlstatementeventty;
+   fonerror: sqlstatementerroreventty;
+   foptions: sqlstatementoptionsty;
    procedure setsql(const avalue: tstringlist);
-   procedure setdatabase(const avalue: tcustomsqlconnection);
-   procedure settransaction(const avalue: tsqltransaction);
+   procedure setdatabase1(const avalue: tcustomsqlconnection);
    procedure setparams(const avalue: tmseparams);
+   procedure settransaction1(const avalue: tsqltransaction);
+   procedure setoptions(const avalue: sqlstatementoptionsty);
+   //itransactionclient
+   function getname: string;
+   function getactive: boolean;
+   procedure setactive(avalue: boolean); virtual;
+   procedure settransaction(const avalue: tmdbtransaction);
+   procedure settransactionwrite(const avalue: tmdbtransaction);
+   procedure refresh;
+   //idbclient
+   procedure setdatabase(const avalue: tmdatabase);
   protected
-   procedure notification(acomponent: tcomponent; operation: toperation); override;
+   
    procedure dobeforeexecute(const adatabase: tcustomsqlconnection;
                               const atransaction: tsqltransaction);
    procedure doafterexecute(const adatabase: tcustomsqlconnection;
@@ -361,25 +376,51 @@ type
    procedure doerror(const adatabase: tcustomsqlconnection;
               const atransaction: tsqltransaction; const e: exception;
               var handled: boolean);
+   procedure dosqlchange(sender: tobject); virtual;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
-   procedure execute(adatabase: tcustomsqlconnection = nil;
-                        atransaction: tsqltransaction = nil); overload;
-   property statementnr: integer read fstatementnr; //null based
+   function isutf8: boolean; overload;
+   function isutf8(const adatabase): boolean; overload;
   published
    property params : tmseparams read fparams write setparams;
    property sql: tstringlist read fsql write setsql;
-   property database: tcustomsqlconnection read fdatabase write setdatabase;
-   property transaction: tsqltransaction read ftransaction write settransaction;
+   property database: tcustomsqlconnection read fdatabase write setdatabase1;
+   property transaction: tsqltransaction read ftransaction write settransaction1;
                   //can be nil
-   property onbeforeexecute: sqlscripteventty read fonbeforeexecute 
+   property options: sqlstatementoptionsty read foptions write setoptions;
+   property onbeforeexecute: sqlstatementeventty read fonbeforeexecute 
                                                      write fonbeforeexecute;
-   property onafterexecute: sqlscripteventty read fonafterexecute 
+   property onafterexecute: sqlstatementeventty read fonafterexecute 
                                                      write fonafterexecute;
-   property onerror: sqlscripterroreventty read fonerror write fonerror;
+   property onerror: sqlstatementerroreventty read fonerror write fonerror;
  end;
- 
+  
+ tmsesqlscript = class(tcustomsqlstatement)
+  private
+   fstatementnr: integer;
+  protected
+  public
+   procedure execute(adatabase: tcustomsqlconnection = nil;
+                        atransaction: tsqltransaction = nil); overload;
+   property statementnr: integer read fstatementnr; //null based
+ end;
+
+ tsqlstatement = class(tcustomsqlstatement)
+  private
+   FCursor: TSQLCursor;
+   procedure setactive(avalue: boolean); override;
+  protected
+   procedure dosqlchange(sender: tobject); override;
+   procedure prepare;
+  public
+   constructor create(aowner: tcomponent); override;
+   destructor destroy; override;
+   procedure unprepare;
+   procedure execute; overload;
+   procedure execute(const aparams: array of variant); overload;
+ end;
+  
 const
  blobidsize = sizeof(integer);
 type
@@ -566,16 +607,17 @@ type
                                     write setsqltransactionwrite;
   end;
 
-procedure updateparams(const aparams: tparams);
-procedure doexecute(const aparams: tparams; const atransaction: tmdbtransaction;
-                    const acursor: tsqlcursor; adatabase: tmdatabase);
+procedure updateparams(const aparams: tmseparams; const autf8: boolean);
+procedure doexecute(const aparams: tmseparams; const atransaction: tmdbtransaction;
+                    const acursor: tsqlcursor; adatabase: tmdatabase;
+                    const autf8: boolean);
 procedure checksqlconnection(const aname: ansistring; const avalue: tmdatabase);
 procedure dosetsqldatabase(const sender: isqlclient; const avalue: tmdatabase;
                  var acursor: tsqlcursor; var dest: tmdatabase);
 
 implementation
 uses 
- dbconst,strutils,msedatalist,msereal,msestream,msegui;
+ dbconst,strutils,msedatalist,msereal,msestream,msegui,msebits;
 type
  tdataset1 = class(tdataset);
 {
@@ -614,11 +656,12 @@ type
     FDisableControlsState : TDatasetState;
   end;  
 }  
-procedure updateparams(const aparams: tparams);
+procedure updateparams(const aparams: tmseparams; const autf8: boolean);
 var
  int1: integer;
 begin
  if aparams <> nil then begin
+  aparams.isutf8:= autf8;
   for int1:= 0 to aparams.count - 1 do begin
    with aparams[int1] do begin
     if not isnull and (datatype in [ftFloat,ftDate,ftTime,ftDateTime]) and
@@ -630,10 +673,11 @@ begin
  end;
 end;
 
-procedure doexecute(const aparams: tparams; const atransaction: tmdbtransaction;
-                    const acursor: tsqlcursor; adatabase: tmdatabase);
+procedure doexecute(const aparams: tmseparams; const atransaction: tmdbtransaction;
+                    const acursor: tsqlcursor; adatabase: tmdatabase;
+                    const autf8: boolean);
 begin
- updateparams(aparams);
+ updateparams(aparams,autf8);
  acursor.ftrans:= tsqltransaction(atransaction).handle;
  tcustomsqlconnection(adatabase).execute(acursor,tsqltransaction(atransaction),aParams);
 end;
@@ -855,10 +899,10 @@ end;
 
 Procedure tcustomsqlconnection.internalExecuteDirect(const aSQL: String;
           ATransaction: TSQLTransaction;
-          const aparams: tparams; aparamvars: array of variant);
+          const aparams: tmseparams; aparamvars: array of variant);
 var 
  Cursor: TSQLCursor;
- params1: tparams;
+ params1: tmseparams;
  bo1: boolean; 
  int1: integer;
 begin
@@ -867,7 +911,7 @@ begin
  end;
  bo1:= (aparams = nil) and (high(aparamvars) >= 0);
  if bo1 then begin
-  params1:= tparams.create;
+  params1:= tmseparams.create;
   params1.parsesql(asql,true);
   for int1:= 0 to high(aparamvars) do begin
    params1[int1].value:= aparamvars[int1];
@@ -910,7 +954,7 @@ end;
 
 Procedure tcustomsqlconnection.ExecuteDirect(const aSQL: String;
           ATransaction: TSQLTransaction;
-          const aparams: tparams = nil);
+          const aparams: tmseparams = nil);
 begin
  internalexecutedirect(asql,atransaction,aparams,[]);
 end;
@@ -1405,7 +1449,7 @@ function tsqltransaction.docommit(const retaining: boolean): boolean;
    closedatasets;
   end;
   if tao_refreshdatasets in foptions then begin
-   refreshdatasets(not retaining);
+   refreshdatasets(true,retaining);
   end;
  end;
  
@@ -1817,7 +1861,7 @@ begin
  If (FParams.Count>0) and Assigned(FMasterLink) then begin
   FMasterLink.CopyParamsFromMaster(False);
  end;
- doexecute(fparams,ftransaction,fcursor,fdatabase);
+ doexecute(fparams,ftransaction,fcursor,fdatabase,isutf8);
 end;
 
 function tsqlquery.loadfield(const afield: tfield; const buffer: pointer;
@@ -3052,48 +3096,145 @@ begin
  result:= (fowner <> nil) and fowner.blobsarefetched;
 end;
 
-{ tmsesqlscript }
+{ tcustomsqlstatement }
 
-constructor tmsesqlscript.create(aowner: tcomponent);
+constructor tcustomsqlstatement.create(aowner: tcomponent);
 begin
  fparams:= tmseparams.create(self);
  fsql:= tstringlist.create;
+ fsql.onchange:= @dosqlchange;
  inherited;
 end;
 
-destructor tmsesqlscript.destroy;
+destructor tcustomsqlstatement.destroy;
 begin
+ database:= nil;
+ transaction:= nil;
  fparams.free;
  fsql.free;
  inherited;
 end;
 
-procedure tmsesqlscript.setsql(const avalue: tstringlist);
+procedure tcustomsqlstatement.setsql(const avalue: tstringlist);
 begin
  fsql.assign(avalue);
 end;
 
-procedure tmsesqlscript.setdatabase(const avalue: tcustomsqlconnection);
+procedure tcustomsqlstatement.setdatabase1(const avalue: tcustomsqlconnection);
 begin
- if fdatabase <> nil then begin
-  fdatabase.removefreenotification(self);
- end;
- fdatabase:= avalue;
- if fdatabase <> nil then begin
-  fdatabase.freenotification(self);
+ setdatabase(avalue);
+end;
+
+procedure tcustomsqlstatement.setparams(const avalue: tmseparams);
+begin
+ fparams.assign(avalue);
+end;
+
+procedure tcustomsqlstatement.dobeforeexecute(const adatabase: tcustomsqlconnection;
+               const atransaction: tsqltransaction);
+begin
+ if canevent(tmethod(fonbeforeexecute)) then begin
+  fonbeforeexecute(self,adatabase,atransaction);
  end;
 end;
 
-procedure tmsesqlscript.settransaction(const avalue: tsqltransaction);
+procedure tcustomsqlstatement.doafterexecute(const adatabase: tcustomsqlconnection;
+               const atransaction: tsqltransaction);
 begin
- if ftransaction <> nil then begin
-  ftransaction.removefreenotification(self);
- end;
- ftransaction:= avalue;
- if ftransaction <> nil then begin
-  ftransaction.freenotification(self);
+ if canevent(tmethod(fonafterexecute)) then begin
+  fonafterexecute(self,adatabase,atransaction);
  end;
 end;
+
+procedure tcustomsqlstatement.doerror(const adatabase: tcustomsqlconnection;
+               const atransaction: tsqltransaction; const e: exception;
+               var handled: boolean);
+begin
+ if canevent(tmethod(fonerror)) then begin
+  fonerror(self,adatabase,atransaction,e,handled);
+ end;
+end;
+
+procedure tcustomsqlstatement.dosqlchange(sender: tobject);
+begin
+ fparams.parsesql(fsql.text,true);
+end;
+
+procedure tcustomsqlstatement.settransaction1(const avalue: tsqltransaction);
+begin
+ settransaction(avalue);
+end;
+
+function tcustomsqlstatement.getname: string;
+begin
+ result:= name;
+end;
+
+function tcustomsqlstatement.getactive: boolean;
+begin
+ result:= false;
+end;
+
+procedure tcustomsqlstatement.setactive(avalue: boolean);
+begin
+ //dummy
+end;
+
+procedure tcustomsqlstatement.settransaction(const avalue: tmdbtransaction);
+begin
+ dosettransaction(itransactionclient(self),avalue,ftransaction,false);
+end;
+
+procedure tcustomsqlstatement.settransactionwrite(const avalue: tmdbtransaction);
+begin
+ //dummy
+end;
+
+procedure tcustomsqlstatement.refresh;
+begin
+ //dummy
+end;
+
+procedure tcustomsqlstatement.setdatabase(const avalue: tmdatabase);
+var
+ intf1: idbcontroller;
+ bo1: boolean;
+begin
+ dosetdatabase(idatabaseclient(self),avalue,fdatabase);
+ if (avalue <> nil) and 
+    mseclasses.getcorbainterface(database,typeinfo(idbcontroller),intf1) then begin
+  bo1:= sso_utf8 in foptions;
+  intf1.updateutf8(bo1);
+  if bo1 then begin
+   foptions:= foptions + [sso_utf8];
+  end
+  else begin
+   foptions:= foptions - [sso_utf8];
+  end;
+ end;
+end;
+
+function tcustomsqlstatement.isutf8: boolean;
+begin
+ result:= sso_utf8 in foptions;
+end;
+
+function tcustomsqlstatement.isutf8(const adatabase): boolean;
+begin
+ result:= sso_utf8 in foptions;
+end;
+
+procedure tcustomsqlstatement.setoptions(const avalue: sqlstatementoptionsty);
+const
+ mask: sqlstatementoptionsty = [sso_autocommit,sso_autocommitret];
+begin
+ if foptions <> avalue then begin
+  foptions:= sqlstatementoptionsty(setsinglebit(
+           longword(avalue),longword(foptions),longword(mask)));
+ end;
+end;
+
+{ tmsesqlscript }
 
 function splitsql(const asql: string): stringarty;
 var
@@ -3160,6 +3301,7 @@ begin
  end;
  dobeforeexecute(adatabase,atransaction);
  try
+  updateparams(fparams,isutf8(adatabase));
   str1:= fsql.text;
   ar1:= splitsql(str1);
   if high(ar1) < 0 then begin
@@ -3170,6 +3312,14 @@ begin
    adatabase.executedirect(ar1[int1],atransaction,fparams);
   end;
   doafterexecute(adatabase,atransaction);
+  if sso_autocommit in foptions then begin
+   atransaction.commit;
+  end
+  else begin
+   if sso_autocommitret in foptions then begin
+    atransaction.commitretaining;
+   end;
+  end;
  except
   on e: exception do begin  
    bo1:= false;
@@ -3181,48 +3331,107 @@ begin
  end;
 end;
 
-procedure tmsesqlscript.notification(acomponent: tcomponent;
-                                             operation: toperation);
+{ tsqlstatement }
+
+constructor tsqlstatement.create(aowner: tcomponent);
 begin
- if operation = opremove then begin
-  if (acomponent = fdatabase) then begin
-   fdatabase:= nil;
-  end;
-  if (acomponent = ftransaction) then begin
-   ftransaction:= nil;
-  end;
- end;
  inherited;
 end;
 
-procedure tmsesqlscript.setparams(const avalue: tmseparams);
+destructor tsqlstatement.destroy;
 begin
- fparams.assign(avalue);
+ setactive(false);
+ inherited;
 end;
 
-procedure tmsesqlscript.dobeforeexecute(const adatabase: tcustomsqlconnection;
-               const atransaction: tsqltransaction);
+procedure tsqlstatement.dosqlchange(sender: tobject);
 begin
- if canevent(tmethod(fonbeforeexecute)) then begin
-  fonbeforeexecute(self,adatabase,atransaction);
+ unprepare;
+ inherited;
+end;
+
+procedure tsqlstatement.prepare;
+var
+ str1: string;
+begin
+ if (fcursor = nil) or not fcursor.fprepared then begin
+  checkdatabase(name,fdatabase);
+  checktransaction(name,ftransaction);
+  if not fdatabase.Connected then begin
+   fdatabase.Open;
+  end;
+  if not ftransaction.Active then begin
+   ftransaction.StartTransaction;
+  end;
+  if not assigned(fcursor) then begin
+   FCursor:= fdatabase.AllocateCursorHandle(nil,name);
+  end;
+  fcursor.ftrans:= ftransaction.handle;
+  str1:= TrimRight(FSQL.Text);
+  if str1 = '' then begin
+    DatabaseError(SErrNoStatement);
+  end;
+  fdatabase.PrepareStatement(Fcursor,ftransaction,str1,FParams);
  end;
 end;
 
-procedure tmsesqlscript.doafterexecute(const adatabase: tcustomsqlconnection;
-               const atransaction: tsqltransaction);
+procedure tsqlstatement.unprepare;
 begin
- if canevent(tmethod(fonafterexecute)) then begin
-  fonafterexecute(self,adatabase,atransaction);
+ if (fcursor <> nil) and fcursor.fprepared then begin
+  fdatabase.unpreparestatement(fcursor);
  end;
 end;
 
-procedure tmsesqlscript.doerror(const adatabase: tcustomsqlconnection;
-               const atransaction: tsqltransaction; const e: exception;
-               var handled: boolean);
+procedure tsqlstatement.execute;
+var
+ bo1: boolean;
 begin
- if canevent(tmethod(fonerror)) then begin
-  fonerror(self,adatabase,atransaction,e,handled);
+ dobeforeexecute(fdatabase,ftransaction);
+ prepare;
+ updateparams(fparams,isutf8);
+ fcursor.ftrans:= tsqltransaction(ftransaction).handle;
+ try
+  tcustomsqlconnection(fdatabase).execute(fcursor,tsqltransaction(ftransaction),
+                             fparams);
+//  fcursor.close;
+  if sso_autocommit in foptions then begin
+   ftransaction.commit;
+  end
+  else begin
+   if sso_autocommitret in foptions then begin
+    ftransaction.commitretaining;
+   end;
+  end;
+  doafterexecute(fdatabase,ftransaction);
+ except
+  on e: exception do begin  
+   bo1:= false;
+   doerror(fdatabase,ftransaction,e,bo1);
+   if not bo1 then begin
+    raise;
+   end;
+  end;
  end;
+end;
+
+procedure tsqlstatement.setactive(avalue: boolean);
+begin
+ if not avalue then begin
+  unprepare;
+  if fcursor <> nil then begin
+   fdatabase.deallocatecursorhandle(fcursor);
+  end;
+ end;
+end;
+
+procedure tsqlstatement.execute(const aparams: array of variant);
+var
+ int1: integer;
+begin
+ for int1:= 0 to high(aparams) do begin
+  fparams[int1].value:= aparams[int1];
+ end;
+ execute;
 end;
 
 { tmsemasterparamsdatalink }

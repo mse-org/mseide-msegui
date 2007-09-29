@@ -78,7 +78,8 @@ type
     constructor Create(AOwner: TComponent); override;
     Destructor destroy; override;
     procedure CloseDataSets;
-    procedure refreshdatasets(const writeonly: boolean = false);
+    procedure refreshdatasets(const awrite: boolean = true; 
+                                  const aread: boolean = true);
     Property DataBase : tmdatabase Read FDatabase Write SetDatabase;
     property datasets: itransactionclientarty read fdatasets;
     property writedatasets: itransactionclientarty read fdatasets;
@@ -510,17 +511,6 @@ Procedure tmdbdataset.SetDatabase (const Value : tmdatabase);
 
 begin
  dosetdatabase(idatabaseclient(self),value,fdatabase);
-{
-  If Value<>FDatabase then
-    begin
-    CheckInactive;
-    If Assigned(FDatabase) then
-      FDatabase.UnregisterDataset(idatabaseclient(Self));
-    If Value<>Nil Then
-      Value.RegisterDataset(idatabaseclient(Self));
-    FDatabase:=Value;
-    end;
-}
 end;
 
 Procedure tmdbdataset.SetTransaction (const Value : tmdbtransaction);
@@ -654,21 +644,26 @@ begin
  end;
 end;
 
-procedure tmdbtransaction.refreshdatasets(const writeonly: boolean = false);
+procedure tmdbtransaction.refreshdatasets(const awrite: boolean = true; 
+                          const aread: boolean = true);
 var
  int1: integer;
- ar1: itransactionclientarty;
 begin
- if writeonly then begin
-  ar1:= fwritedatasets;
- end
- else begin
-  ar1:= fdatasets;
+ if awrite then begin
+  for int1:= high(fwritedatasets) downto 0 do begin
+   with fwritedatasets[int1] do begin
+    if getactive then begin
+     refresh;
+    end;
+   end;
+  end;
  end;
- for int1:= high(ar1) downto 0 do begin
-  with ar1[int1] do begin
-   if getactive then begin
-    refresh;
+ if aread then begin
+  for int1:= high(fdatasets) downto 0 do begin
+   with fdatasets[int1] do begin
+    if getactive then begin
+     refresh;
+    end;
    end;
   end;
  end;
