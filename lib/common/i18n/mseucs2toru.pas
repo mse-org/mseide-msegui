@@ -15,24 +15,14 @@ interface
 function ucs2to866(const avalue: widechar): char;
 function ucs2to866(const avalue: widestring): ansistring;
 
-
 implementation
 
 const 
 
-    cp866_1: array[1040..1103] of byte = (
-		128,129,130,131,132,133,134,135,136,137,138,139,140,141,142,143,
-		144,145,146,147,148,149,150,151,152,153,154,155,156,157,158,159,
-		160,161,162,163,164,165,166,167,167,169,170,171,172,173,174,175,
-		224,225,226,227,228,229,230,231,232,233,234,235,236,237,238,239
+ cp866_2: array[$2550..$256C] of byte = (
+  $cd,$ba,$d5,$d6,$c9,$b8,$b7,$bb,$d4,$d3,$c8,$be,$bd,$bc,$c6,
+  $c7,$cc,$b5,$b6,$b9,$d1,$d2,$cb,$cf,$d0,$ca,$d8,$d7,$ce
     );
-
-
-    cp866_2: array[9552..9580] of byte = (
-		205,186,213,214,201,184,183,187,212,211,200,190,189,188,198,
-		199,204,181,182,185,209,210,203,207,208,202,216,215,206
-    );
-
 
 function ucs2to866(const avalue: widechar): char;
 var
@@ -41,37 +31,47 @@ begin
     i:= cardinal(avalue);
 
 		case i of
-  0..127:     result:= char(avalue);
-	    	164:	result:= char(253);
-	    	176,186:	result:= char(248);  
-	    	183:	result:= char(250);	 
-  1040..1087: result:= char(cp866_1[i]);
-	    	9472:	result:= char(196);
-	    	9474:	result:= char(179);
-	    	9484:	result:= char(218);
-	    	9488:	result:= char(191);
-	    	9492:	result:= char(192);
-	    	9496:	result:= char(217);
-	    	9500:	result:= char(195);
-	    	9508:	result:= char(180);
-	    	9516:	result:= char(194);
-	    	9524:	result:= char(193);
-	    	9532:	result:= char(197);
-  9552..9580: result:= char(cp866_2[i]);
-	    	9600:	result:= char(223);
-	    	9604:	result:= char(220);
-	    	9608:	result:= char(219);
-	    	9612:	result:= char(221);
-	    	9616:	result:= char(222);
-	    	9617:	result:= char(176);
-	    	9618:	result:= char(177);
-	    	9619:	result:= char(178);
-	    	9632:	result:= char(254);
-	    	9642:	result:= char(249);
-	    	8730:	result:= char(251);
-	    	8470:	result:= char(252);
+  $0..$7f:      result:= char(avalue);
+  $A0:          result:= char($ff);
+  $A4:          result:= char($fd);
+  $B0,$BA:      result:= char($f8);
+  $B7:          result:= char($fa);
+  $401:         result:= char($f0);
+  $404:         result:= char($f2);
+  $407:         result:= char($f4);
+  $40E:         result:= char($f6);
+  $410..$43f:   result:= char(i-$390);
+  $440..$44f:   result:= char(i-$360);
+  $451:         result:= char($f1);
+  $454:         result:= char($f3);
+  $457:         result:= char($f5);
+  $45E:         result:= char($f7);
+  $2116:        result:= char($fc);
+  $2219:        result:= char($f9);
+  $221A:        result:= char($fb);
+  $2500:        result:= char($c4);
+  $2502:        result:= char($b3);
+  $250C:        result:= char($da);
+  $2510:        result:= char($bf);
+  $2514:        result:= char($c0);
+  $2518:        result:= char($d9);
+  $251C:        result:= char($c3);
+  $2524:        result:= char($b4);
+  $252C:        result:= char($c2);
+  $2534:        result:= char($c1);
+  $253C:        result:= char($c5);
+  $2550..$256C: result:= char(cp866_2[i]);
+  $2580:        result:= char($df);
+  $2584:        result:= char($dc);
+  $2588:        result:= char($db);
+  $258C:        result:= char($dd);
+  $2590:        result:= char($de);
+  $2591:        result:= char($b0);
+  $2592:        result:= char($b1);
+  $2593:        result:= char($b2);
+  $25A0:        result:= char($fe);
  else
-  result:= char(32);
+  result:= char($20);
     end;
 
 end;
@@ -84,7 +84,7 @@ begin
     i1:= length(avalue);
     setlength(result,i1);
 
- for i:= 0 to i1-1 do begin
+ for i:= 1 to i1 do begin
 		result[i]:= ucs2to866(avalue[i]);
     end;
 
