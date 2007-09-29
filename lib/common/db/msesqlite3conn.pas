@@ -151,6 +151,7 @@ type
                                         write setbusytimeoutms default 0;
 //    property Password;
    property Transaction;
+   property transactionwrite;
    property afterconnect;
    property beforedisconnect;
 //    property UserName;
