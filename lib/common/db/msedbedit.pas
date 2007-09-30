@@ -2145,7 +2145,9 @@ begin
   end;
   if (field <> nil) then begin
    with field do begin
-    if (defaultexpression <> '') and isnull and dataset.modified then begin
+    if (defaultexpression <> '') and isnull and 
+         (dataset.modified or 
+           (fdscontroller <> nil) and fdscontroller.posting) then begin
      asstring:= defaultexpression;
     end;
    end;

@@ -11,8 +11,7 @@ unit msesqldb;
 {$ifdef FPC}{$mode objfpc}{$h+}{$INTERFACES CORBA}{$endif}
 interface
 uses
- classes,db,msebufdataset,
-                   msqldb,msedb,mseclasses,msetypes,mseguiglob,msedatabase;
+ classes,db,msebufdataset,msqldb,msedb,mseclasses,msetypes,mseguiglob,msedatabase;
   
 type
  tmsesqltransaction = class(tsqltransaction)
@@ -205,6 +204,7 @@ type
    fdatabase: tsqlconnection;
    fdbintf: idbcontroller;
    fdatalink: tfielddatalink;
+   fonupdatevalue: updateint64eventty;
    procedure checkintf;
    procedure setdatabase(const avalue: tsqlconnection);
    procedure setsequencename(const avalue: string);
@@ -233,6 +233,8 @@ type
    property datasource: tdatasource read getdatasource write setdatasource;
    property datafield: string read getdatafield write setdatafield;
    property sequencename: string read fsequencename write setsequencename;
+
+   property onupdatevalue: updateint64eventty read fonupdatevalue write fonupdatevalue;
  end;
  
 implementation
@@ -817,8 +819,9 @@ procedure tsequencedatalink.updatedata;
 begin
  inherited;
  if (field <> nil) and field.isnull and (dataset <> nil) and 
-                                               (dataset.modified) then begin
-  if field is tlargeintfield then begin
+      ((dataset.modified) or 
+               (fdscontroller <> nil) and fdscontroller.posting) then begin
+  if field.datatype in [ftlargeint,ftfloat,ftbcd] then begin
    field.aslargeint:= fowner.aslargeint;
   end
   else begin
@@ -891,6 +894,9 @@ begin
   result:= ds1.fields[0].aslargeint;
  finally
   ds1.free;
+ end;
+ if canevent(tmethod(fonupdatevalue)) then begin
+  fonupdatevalue(self,result);
  end;
 end;
 

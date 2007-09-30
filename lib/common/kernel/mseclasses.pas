@@ -46,6 +46,9 @@ type
                             const avalue: realty) of object;
 
  getintegereventty = function :integer of object;
+ 
+ updateint64eventty = procedure(const sender: tobject; var avalue: int64) of object;
+ 
  setbooleaneventty = procedure(const sender: tobject; var avalue: boolean;
                           var accept: boolean) of object;
  setstringeventty = procedure(const sender: tobject; var avalue: msestring;
