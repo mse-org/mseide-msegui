@@ -244,7 +244,7 @@ var
 begin
  if ((Status[0] = 1) and (Status[1] <> 0)) then begin
   p:= @Status;
-  msg:= '';
+  msg:= procname;
   while isc_interprete(Buf, @p) > 0 do begin
    Msg := Msg + LineEnding +' -' + StrPas(Buf);
   end;
@@ -882,11 +882,12 @@ var
 begin
  with TIBCursor(cursor) do begin
   retcode:= isc_dsql_fetch(@Status,@Statement,1,SQLDA);
-  if (retcode <> 0) and (retcode <> 100) then begin
+  if (retcode <> 0) and (retcode <> 100) and (retcode <> 335544364) then begin
+                     //request synchronizing error, FireBird bug?
    CheckError('Fetch',Status);
   end;
  end;
- Result:= (retcode <> 100);
+ Result:= retcode = 0;
 end;
 
 procedure TIBConnection.SetParameters(cursor : TSQLCursor;AParams : TmseParams);
