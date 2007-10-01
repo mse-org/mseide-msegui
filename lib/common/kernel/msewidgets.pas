@@ -739,6 +739,7 @@ destructor destroy; override;
  end;
 
  buttonoptionty = (bo_executeonclick,bo_executeonkey,bo_executeonshortcut,
+                   bo_executedefaultonenterkey,
                    bo_asyncexecute,
                    bo_focusonshortcut, //for tcustombutton
                    bo_flat,bo_noanim 

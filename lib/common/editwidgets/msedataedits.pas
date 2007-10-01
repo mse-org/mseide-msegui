@@ -1029,8 +1029,8 @@ begin
  case info.action of
   ea_textentered: begin
    if fedited or (oe_forcereturncheckvalue in foptionsedit) then begin
-    checkvalue;
-    if oe_eatreturn in foptionsedit then begin
+//    checkvalue;
+    if not checkvalue or (oe_eatreturn in foptionsedit) then begin
      info.action:= ea_none;
     end;
    end;

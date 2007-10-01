@@ -11,7 +11,7 @@ type
  
  ifireckindty = (ik_none,ik_data,ik_itemheader,ik_actionfired,ik_propertychanged,
                  ik_widgetcommand,ik_widgetproperties,ik_requestmodule,ik_moduledata,
-                 ik_requestfielddefs,ik_fielddefsdata);
+                 ik_requestfielddefs,ik_fielddefsdata,ik_fieldrec);
  ifinamety = array[0..0] of char; //null terminated
  pifinamety = ^ifinamety;
 
@@ -84,7 +84,6 @@ type
   header: itemheaderty;
  end;   
  fielddefsdatadataty = record
-//  sequence: longint;
   data: datarecty; //dummy
  end;
  pfielddefsdatadataty = ^fielddefsdatadataty;
@@ -93,6 +92,22 @@ type
   header: itemheaderty;
   data: fielddefsdatadataty;
  end;
+
+ fielddataty = record
+  index: integer;
+  data: ifidataty;
+ end;
+ 
+ fieldrecdataty = record
+  count: integer; 
+  data: datarecty; //dummy, array[count] of fielddataty
+ end;
+ 
+ fieldrecty = record
+  header: itemheaderty;
+  data: fieldrecdataty;
+ end;
+ 
 const
  ifiitemkinds = [ik_actionfired,ik_propertychanged,ik_widgetcommand,
                  ik_widgetproperties,ik_requestmodule,ik_moduledata];
@@ -135,6 +150,9 @@ type
    );
    ik_fielddefsdata: (
     fielddefsdata: fielddefsdataty;
+   );
+   ik_fieldrec: (
+    fieldrec: fieldrecty;
    )
  end;
  pifirecty = ^ifirecty;
@@ -525,7 +543,8 @@ const
   sizeof(ifiheaderty)+sizeof(requestmodulety),   //ik_requestmodule
   sizeof(ifiheaderty)+sizeof(moduledataty),      //ik_moduledata
   sizeof(ifiheaderty)+sizeof(requestfielddefsty),//ik_requestfielddefs
-  sizeof(ifiheaderty)+sizeof(fielddefsdataty)    //ik_fielddefsdata
+  sizeof(ifiheaderty)+sizeof(fielddefsdataty),   //ik_fielddefsdata
+  sizeof(ifiheaderty)+sizeof(fieldrecty)         //ik_fieldrec
  );
 
  datarecsizes: array[ifidatakindty] of integer = (

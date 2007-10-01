@@ -141,6 +141,8 @@ type
    procedure inititemheader(out arec: string; const akind: ifireckindty; 
                     const asequence: sequencety; const datasize: integer;
                     out datapo: pchar);
+   procedure postrecord;
+   
    procedure notimplemented(const atext: string);
    procedure objectevent(const sender: tobject; const event: objecteventty); virtual;   
     //iobjectlink
@@ -808,16 +810,12 @@ begin
 end;
 
 procedure tifidataset.InternalPost;
-var
- int1: integer;
 begin
  with pdsrecordty(activebuffer)^ do begin
   finalizestrings(fcurrentbuf^.header);
   move(header,fcurrentbuf^.header,frecordsize); //get new field values
-  for int1:= 0 to high(ffieldinfos) do begin
-   if not getfieldisnull(pointer(fmodifiedfields),int1) then begin
-   end;
-  end;
+  postrecord;
+  fillchar(pointer(fmodifiedfields)^,fnullmasksize,0);
  end;
 end;
 
@@ -1272,6 +1270,25 @@ begin
   waitus:= fdefaulttimeout;
  end;
  fchannel.waitforanswer(asequence,fdefaulttimeout);
+end;
+
+procedure tifidataset.postrecord;
+ function encodefielddata(const ainfo: fieldinfoty): string;
+ begin
+ end;
+ 
+var
+ int1,int2: integer;
+ str1: string;
+ ar1: stringarty;
+begin
+ setlength(ar1,length(ffieldinfos)); //max
+ int2:= 0;
+ for int1:= 0 to high(ffieldinfos) do begin
+  if not getfieldisnull(pointer(fmodifiedfields),int1) then begin
+   ar1[int2]:= encodefielddata(ffieldinfos[int1]);
+  end;
+ end;
 end;
 
 { trxdataset }

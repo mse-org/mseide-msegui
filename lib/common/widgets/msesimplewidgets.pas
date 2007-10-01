@@ -483,7 +483,10 @@ begin
            mserichstring.checkshortcut(info,factioninfo.caption1,true) and
            not (ss_disabled in finfo.state) or
      (finfo.state * [ss_invisible,ss_disabled,ss_default] = [ss_default]) and
-       (info.key = key_return) and (info.shiftstate = []) then begin
+       ((info.key = key_return) or 
+               (info.key = key_enter) and 
+               (bo_executedefaultonenterkey in options)) and 
+       (info.shiftstate = []) then begin
    include(info.eventstate,es_processed);
 //   if (fmodalresult = mr_cancel) or window.candefocus and isenabled then begin
    internalexecute;
