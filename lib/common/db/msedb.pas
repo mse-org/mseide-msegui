@@ -1014,7 +1014,11 @@ const
            tmsebcdfield,tmseblobfield,tmsememofield,tmsegraphicfield);
            
 type
+ {$ifdef mse_FPC_2_2}
+ TFieldDefcracker = class(TNamedItem)
+ {$else}
  TFieldDefcracker = class(TCollectionItem)
+ {$endif}
   Private
     FDataType : TFieldType;
     FFieldNo : Longint;

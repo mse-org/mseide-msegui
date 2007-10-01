@@ -15,23 +15,26 @@ type
  ifinamety = array[0..0] of char; //null terminated
  pifinamety = ^ifinamety;
 
- ifidatakindty = (idk_none,idk_int64,idk_real,idk_msestring,idk_ansistring,
-                  idk_bytes);
+ ifidatakindty = (idk_none,idk_int64,idk_currency,idk_real,
+                  idk_msestring,{idk_ansistring,}idk_bytes);
  
  datarecty = record //dummy
  end;
- 
- ifidataty = record
-  kind: ifidatakindty;
-  data: datarecty; //variable length
- end;
- pifidataty = ^ifidataty;
 
  ifibytesty = record
   length: integer;
   data: datarecty;
  end;
  pifibytesty = ^ifibytesty;
+
+ ifidataheaderty = record
+  kind: ifidatakindty;
+ end;   
+ ifidataty = record
+  header: ifidataheaderty;
+  data: datarecty; //variable length
+ end;
+ pifidataty = ^ifidataty;
  
  itemheaderty = record  
   tag: integer;
@@ -93,15 +96,20 @@ type
   data: fielddefsdatadataty;
  end;
 
- fielddataty = record
+ fielddataheaderty = record
   index: integer;
+ end;
+ fielddataty = record
+  header: fielddataheaderty;
   data: ifidataty;
  end;
- 
+ pfielddataty = ^fielddataty;
+  
  fieldrecdataty = record
   count: integer; 
   data: datarecty; //dummy, array[count] of fielddataty
  end;
+ pfieldrecdataty = ^fieldrecdataty;
  
  fieldrecty = record
   header: itemheaderty;
@@ -253,7 +261,7 @@ type
    fint64value: int64;
    fdoublevalue: double;
    fmsestringvalue: msestring;
-   fansistringvalue: ansistring;
+//   fansistringvalue: ansistring;
    fdatakind: ifidatakindty;
    fupdatelock: integer;
    fonpropertychanged: propertychangedeventty;
@@ -526,7 +534,22 @@ function ifinametostring(const source: pifinamety;
                out dest: string): integer;
 function stringtoifiname(const source: string;
                const dest: pifinamety): integer;
-  
+               
+function encodeifidata(const avalue: integer; 
+                       const headersize: integer = 0): string; overload;
+function encodeifidata(const avalue: int64; 
+                       const headersize: integer = 0): string; overload;
+function encodeifidata(const avalue: currency; 
+                       const headersize: integer = 0): string; overload;
+function encodeifidata(const avalue: real; 
+                       const headersize: integer = 0): string; overload;
+function encodeifidata(const avalue: msestring; 
+                       const headersize: integer = 0): string; overload;
+function encodeifidata(const avalue: ansistring; 
+                       const headersize: integer = 0): string; overload;
+
+function decodeifidata(const source: pifidataty; var dest: msestring): integer;
+
 implementation
 uses
  sysutils,msedatalist,mseprocutils,msesysintf,mseforms,msetmpmodules,msesysutils;
@@ -550,15 +573,104 @@ const
  datarecsizes: array[ifidatakindty] of integer = (
   sizeof(ifidataty),                             //idk_none
   sizeof(ifidataty)+sizeof(int64),               //idk_int64
+  sizeof(ifidataty)+sizeof(currency),            //idk_currency
   sizeof(ifidataty)+sizeof(double),              //idk_real
   sizeof(ifidataty)+sizeof(ifinamety),           //idk_msestring
-  sizeof(ifidataty)+sizeof(ifinamety),           //idk_ansistring
+//  sizeof(ifidataty)+sizeof(ifinamety),           //idk_ansistring
   sizeof(ifidataty)+sizeof(ifibytesty)           //idk_bytes
  );
 
  stuffchar = c_dle;
  stx = c_dle + c_stx;
  etx = c_dle + c_etx;
+
+function setifibytes(const source: pointer; const size: integer;
+                 const dest: pifibytesty): integer; overload;
+begin
+ result:= sizeof(ifibytesty) + size;
+ dest^.length:= size;
+ move(source^,dest^.data,size);
+end;
+
+function setifibytes(const source: string;
+                 const dest: pifibytesty): integer; overload;
+var
+ int1: integer;
+begin
+ int1:= length(source);
+ result:= sizeof(ifibytesty) + int1;
+ dest^.length:= int1;
+ move(pointer(source)^,dest^.data,int1);
+end;
+
+function initdataheader(const headersize: integer; const kind: ifidatakindty;
+                        const datasize: integer; out data: string): pchar;
+begin
+ setlength(data,headersize+datarecsizes[kind]+datasize);
+ result:= pointer(data);
+ fillchar(result^,headersize,0);
+ inc(result,headersize);
+ pifidataty(result)^.header.kind:= kind;
+ inc(result,sizeof(ifidataty.header));
+end;
+
+function encodeifidata(const avalue: integer; 
+                       const headersize: integer = 0): string; overload;
+begin
+ result:= encodeifidata(int64(avalue),headersize);
+end;
+
+function encodeifidata(const avalue: int64; 
+                       const headersize: integer = 0): string; overload;
+begin
+ pint64(initdataheader(headersize,idk_int64,0,result))^:= avalue;
+end;
+
+function encodeifidata(const avalue: currency; 
+                       const headersize: integer = 0): string; overload;
+begin
+ pcurrency(initdataheader(headersize,idk_currency,0,result))^:= avalue;
+end;
+
+function encodeifidata(const avalue: real; 
+                       const headersize: integer = 0): string; overload;
+begin
+ preal(initdataheader(headersize,idk_real,0,result))^:= avalue;
+end;
+
+function encodeifidata(const avalue: msestring; 
+                       const headersize: integer = 0): string; overload;
+var
+ str1: string;
+begin
+ str1:= stringtoutf8(avalue);
+ stringtoifiname(str1,pifinamety(
+      initdataheader(headersize,idk_msestring,length(str1),result)));
+end;
+
+function encodeifidata(const avalue: ansistring; 
+                       const headersize: integer = 0): string; overload;
+begin
+ setifibytes(avalue,pifibytesty(
+        initdataheader(headersize,idk_bytes,length(avalue),result))); 
+end;
+
+procedure datakinderror;
+begin
+ raise exception.create('Wrong datakind.');
+end;
+
+function decodeifidata(const source: pifidataty; var dest: msestring): integer;
+var
+ str1: string;
+begin
+ if source^.header.kind <> idk_msestring then begin
+  datakinderror;
+ end;
+ ifinametostring(pifinamety(@source^.data),str1);
+ dest:= utf8tostring(str1);
+ result:= datarecsizes[idk_msestring] + length(str1);
+end;
 
 procedure initifirec(out arec: string; const akind: ifireckindty;
                       const asequence: sequencety; const datalength: integer;
@@ -596,14 +708,6 @@ function ifinametostring(const source: pifinamety;
 begin
  dest:= pchar(source);
  result:= length(dest) + 1;
-end;
-
-function setifibytes(const source: pointer; const size: integer;
-                 const dest: pifibytesty): integer;
-begin
- result:= sizeof(ifibytesty) + size;
- dest^.length:= size;
- move(source^,dest^.data,size);
 end;
 
 { tcustomiochannel }
@@ -1032,6 +1136,11 @@ begin
 end;
 
 procedure tlinkdatawidget.sendvalue(const aname: string; const avalue: ansistring);
+begin
+ sendvalue(aname,msestring(avalue));
+end;
+{
+procedure tlinkdatawidget.sendvalue(const aname: string; const avalue: ansistring);
 var
  str1: string;
  po1: pchar;
@@ -1040,7 +1149,7 @@ begin
  stringtoifiname(avalue,pifinamety(po1));
  tcustomformlink(fowner).senddata(str1);
 end;
-
+}
 procedure tlinkdatawidget.initpropertyrecord(out arec: string;
           const apropertyname: string; const akind: ifidatakindty;
           const datasize: integer; out datapo: pchar);
@@ -1051,8 +1160,8 @@ begin
                 length(apropertyname)+datasize,po1);
        
  inc(po1,stringtoifiname(apropertyname,pifinamety(po1)));
- pifidataty(po1)^.kind:= akind;
- datapo:= po1 + sizeof(ifidataty.kind);
+ pifidataty(po1)^.header.kind:= akind;
+ datapo:= po1 + sizeof(ifidataty.header);
 end;
 
 procedure tlinkdatawidget.sendcommand(const acommand: ifiwidgetcommandty);
@@ -1088,7 +1197,7 @@ var
  str1: string;
 begin
  with adata^ do begin
-  fdatakind:= kind;
+  fdatakind:= header.kind;
   case fdatakind of
    idk_int64: begin
     fint64value:= pint64(@data)^;
@@ -1100,10 +1209,12 @@ begin
     ifinametostring(pifinamety(@data),str1);
     fmsestringvalue:= utf8tostring(str1);
    end;
+   {
    idk_ansistring: begin
     ifinametostring(pifinamety(@data),str1);
     fansistringvalue:= str1;
    end;
+   }
   end;
   if fvalueproperty <> nil then begin
    inc(fupdatelock);
@@ -1175,6 +1286,9 @@ end;
 
 function tlinkdatawidget.getasmsestring: msestring;
 begin
+ checkdatakind(idk_msestring);
+ result:= fmsestringvalue;
+{
  if fdatakind = idk_ansistring then begin
   result:= fansistringvalue;
  end
@@ -1182,6 +1296,7 @@ begin
   checkdatakind(idk_msestring);
   result:= fmsestringvalue;
  end;
+ }
 end;
 
 procedure tlinkdatawidget.setasmsestring(const avalue: msestring);
@@ -1193,6 +1308,8 @@ end;
 
 function tlinkdatawidget.getasansistring: ansistring;
 begin
+ result:= getasmsestring;
+ {
  if fdatakind = idk_msestring then begin
   result:= fmsestringvalue;
  end
@@ -1200,13 +1317,17 @@ begin
   checkdatakind(idk_ansistring);
   result:= fansistringvalue;
  end;
+ }
 end;
 
 procedure tlinkdatawidget.setasansistring(const avalue: ansistring);
 begin
+ setasmsestring(avalue);
+ {
  fdatakind:= idk_ansistring;
  fansistringvalue:= avalue;
  sendvalue('value',fansistringvalue);
+ }
 end;
 
 procedure tlinkdatawidget.setenabled(const avalue: boolean);

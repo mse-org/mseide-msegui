@@ -127,10 +127,12 @@ type
    
   protected
    ffielddefsequence: sequencety;
+   fbindings: integerarty;
    procedure processdata(const adata: pifirecty);
    procedure requestfielddefsreceived(const asequence: sequencety); virtual;
    procedure fielddefsdatareceived( const asequence: sequencety; 
                                  const adata: pfielddefsdatadataty); virtual;
+   procedure fieldrecdatareceived(const adata: pfieldrecdataty); virtual;
    procedure waitforanswer(const asequence: sequencety; waitus: integer = 0);
                       //0 -> defaulttimeout
    
@@ -238,8 +240,10 @@ type
  end;
  
  ttxdataset = class(tifidataset)
+  private
   protected
    procedure requestfielddefsreceived(const asequence: sequencety); override;
+   procedure inheritedinternalopen; override;
   published
    property fielddefs;
  end;
@@ -257,7 +261,7 @@ const
             //name changed in FPC 2_2
 {$endif}
 
- ifidskinds = [ik_requestfielddefs,ik_fielddefsdata];
+ ifidskinds = [ik_requestfielddefs,ik_fielddefsdata,ik_fieldrec];
  openflags = [ids_openpending,ids_fielddefsreceived];
  
 type
@@ -1070,10 +1074,27 @@ begin
 end;
 
 procedure tifidataset.inheritedinternalopen;
+var
+ int1: integer;
+ field1: tfield;
 begin
+ if defaultfields then begin
+  createfields;
+ end;
+ bindfields(true);
+ calcrecordsize;
+ setlength(fbindings,fielddefs.count);
+ for int1:= 0 to high(fbindings) do begin
+  field1:= findfield(fielddefs[int1].name);
+  if field1 <> nil then begin
+   fbindings[int1]:= field1.index;
+  end
+  else begin
+   fbindings[int1]:= -1;
+  end;
+ end;
  fintbuffer:= intallocrecord;
  fbrecordcount:= 1;
-// inherited internalopen;
 end;
 
 procedure tifidataset.internalopen;
@@ -1246,6 +1267,9 @@ begin
      ik_fielddefsdata: begin
       fielddefsdatareceived(header.answersequence,pfielddefsdatadataty(po1));
      end;
+     ik_fieldrec: begin
+      fieldrecdatareceived(pfieldrecdataty(po1));
+     end;
     end;
    end;
   end;
@@ -1258,7 +1282,7 @@ begin
 end;
 
 procedure tifidataset.fielddefsdatareceived(const asequence: sequencety;
-                                        const adata: pfielddefsdatadataty);
+               const adata: pfielddefsdatadataty);
 begin
  //dummy
 end;
@@ -1275,44 +1299,110 @@ end;
 procedure tifidataset.postrecord;
  function encodefielddata(const ainfo: fieldinfoty): string;
  begin
+  with ainfo do begin
+   case fieldtype of
+    ftinteger,ftlargeint: begin
+     result:= encodeifidata(field.aslargeint,sizeof(fielddataheaderty));
+    end;
+    ftfloat: begin
+     result:= encodeifidata(field.asfloat,sizeof(fielddataheaderty));
+    end;
+    ftbcd: begin
+     result:= encodeifidata(field.ascurrency,sizeof(fielddataheaderty));
+    end;
+    ftblob,ftgraphic: begin
+     result:= encodeifidata(field.asstring,sizeof(fielddataheaderty));
+    end;
+    ftstring: begin
+     if field is tmsestringfield then begin
+      result:= encodeifidata(tmsestringfield(field).asmsestring,
+                                                   sizeof(fielddataheaderty));
+     end
+     else begin
+      result:= encodeifidata(msestring(field.asstring),sizeof(fielddataheaderty));
+     end;
+    end;
+    else begin
+     result:='';
+     exit;
+    end;
+   end;
+   with pfielddataty(result)^ do begin
+    header.index:= field.fieldno-1;
+   end;
+  end;   
  end;
  
 var
- int1,int2: integer;
+ int1,int2,int3: integer;
  str1: string;
  ar1: stringarty;
-begin
+ po1: pfieldrecdataty;
+ po2: pchar;
+begin                 //postrecord
  setlength(ar1,length(ffieldinfos)); //max
  int2:= 0;
  for int1:= 0 to high(ffieldinfos) do begin
   if not getfieldisnull(pointer(fmodifiedfields),int1) then begin
    ar1[int2]:= encodefielddata(ffieldinfos[int1]);
+   if ar1[int2] <> '' then begin
+    inc(int2);
+   end;
+  end;
+ end;
+ int3:= 0;
+ for int1:= 0 to int2 - 1 do begin
+  int3:= int3 + length(ar1[int1]);
+ end;
+ inititemheader(str1,ik_fieldrec,0,int3+sizeof(fieldrecdataty),pchar(po1));
+ po1^.count:= int2;
+ po2:= @po1^.data;
+ for int1:= 0 to int2 - 1 do begin
+  int3:= length(ar1[int1]);
+  move(ar1[int1][1],po2^,int3);
+  inc(po2,int3);
+ end;
+ senddata(str1);
+end;
+
+procedure tifidataset.fieldrecdatareceived(const adata: pfieldrecdataty);
+var
+ int1: integer;
+ index1: integer;
+ po1: pchar;
+ mstr1: msestring;
+ field1: tfield;
+ bo1: boolean;
+begin
+ if active then begin
+  po1:= @adata^.data;
+  for int1:= 0 to adata^.count - 1 do begin
+   index1:= pfielddataty(po1)^.header.index;
+   if (index1 >= 0) and (index1 <= high(fbindings)) and 
+                                       (fbindings[index1] >= 0) then begin
+    if state = dsbrowse then begin
+     edit;
+    end;
+    field1:= fields[fbindings[index1]];
+    inc(po1,sizeof(mseifi.fielddataty.header));
+    case pifidataty(po1)^.header.kind of
+     idk_msestring: begin
+      inc(po1,decodeifidata(pifidataty(po1),mstr1));
+      if field1 is tmsestringfield then begin
+       tmsestringfield(field1).asmsestring:= mstr1;
+      end
+      else begin
+       field1.asstring:= mstr1;
+      end;
+     end;
+    end;
+   end;
+   setfieldisnull(pointer(fmodifiedfields),index1); //reset changeflag
   end;
  end;
 end;
 
 { trxdataset }
-
-procedure trxdataset.inheritedinternalopen;
-var
- str1: ansistring;
- po1: pointer;
-begin
- inititemheader(str1,ik_requestfielddefs,0,0,po1);
- include(fstate,ids_openpending);
- if senddataandwait(str1,ffielddefsequence) and 
-            (ids_fielddefsreceived in fstate) then begin
-  if defaultfields then begin
-   createfields;
-  end;
-  bindfields(true);
-  calcrecordsize;
-  inherited;
- end
- else begin
-  //error
- end;
-end;
 
 procedure trxdataset.fielddefsdatareceived(const asequence: sequencety; 
                                     const adata: pfielddefsdatadataty);
@@ -1330,7 +1420,28 @@ begin
  end; 
 end;
 
+procedure trxdataset.inheritedinternalopen;
+var
+ str1: ansistring;
+ po1: pointer;
+begin
+ inititemheader(str1,ik_requestfielddefs,0,0,po1);
+ include(fstate,ids_openpending);
+ if senddataandwait(str1,ffielddefsequence) and 
+            (ids_fielddefsreceived in fstate) then begin
+  inherited;
+ end
+ else begin
+  //error
+ end;
+end;
+
 { ttxdataset }
+
+procedure ttxdataset.inheritedinternalopen;
+begin
+ inherited;
+end;
 
 procedure ttxdataset.requestfielddefsreceived(const asequence: sequencety);
 var
@@ -1345,5 +1456,6 @@ begin
  end;
  senddata(str1);
 end;
+
 
 end.
