@@ -3314,7 +3314,6 @@ begin
    fstatementnr:= int1;
    adatabase.executedirect(ar1[int1],atransaction,fparams);
   end;
-  doafterexecute(adatabase,atransaction);
   if sso_autocommit in foptions then begin
    atransaction.commit;
   end
@@ -3323,6 +3322,7 @@ begin
     atransaction.commitretaining;
    end;
   end;
+  doafterexecute(adatabase,atransaction);
  except
   on e: exception do begin  
    bo1:= false;
