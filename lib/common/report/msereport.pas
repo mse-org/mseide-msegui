@@ -123,7 +123,8 @@ type
 
  getrichstringeventty = procedure(const sender: tobject; 
                                    var avalue: richstringty) of object;
- reptabulatoritemoptionty = (rto_sum,rto_shownull,rto_nocurrentvalue,rto_noreset);
+ reptabulatoritemoptionty = (rto_count,rto_sum,rto_average,rto_shownull,
+                             rto_nocurrentvalue,rto_noreset);
  reptabulatoritemoptionsty = set of reptabulatoritemoptionty;
 
  itemsumty = record
@@ -211,6 +212,8 @@ type
    function getsumasfloat: double;
    function getsumascurrency: currency;
    procedure initsum;
+   procedure setoptions(const avalue: reptabulatoritemoptionsty);
+   function getsumcount: integer;
   protected
    function xlineoffset: integer;
    procedure dobeforenextrecord(const adatasource: tdatasource);
@@ -218,6 +221,7 @@ type
    constructor create(aowner: tobject); override;
    destructor destroy; override;
    procedure resetsum(const skipcurrent: boolean);
+   property sumcount: integer read getsumcount;
    property sumasinteger: integer read getsumasinteger;
    property sumaslargeint: int64 read getsumaslargeint;
    property sumasfloat: double read getsumasfloat;
@@ -225,7 +229,7 @@ type
    property richvalue: richstringty read fvalue write setrichvalue;
   published
    property tag: integer read ftag write ftag;
-   property options: reptabulatoritemoptionsty read foptions write foptions;
+   property options: reptabulatoritemoptionsty read foptions write setoptions;
    property value: msestring read fvalue.text write setvalue;
    property font: treptabfont read getfont write setfont stored isfontstored;
    property color: colorty read fcolor write setcolor default cl_none;
@@ -1663,26 +1667,56 @@ begin
    end;
   end
   else begin
-   if rto_sum in foptions then begin
+   if foptions * [rto_sum,rto_count,rto_average] <> [] then begin
     with fdatalink.field do begin
      if not (rto_shownull in foptions) and 
-      ((rto_nocurrentvalue in foptions) or fsum.resetpending or isnull) and 
-                             (fsum.count = 0) then begin
+      ((rto_nocurrentvalue in foptions) or fsum.resetpending or 
+                   isnull and not (rto_count in foptions)) and 
+                                               (fsum.count = 0) then begin
       result.text:= '';
      end
      else begin
-      case datatype of 
-       ftinteger,ftword,ftsmallint,ftboolean: begin
-        result.text:= realtytostr(sumasinteger,fformat);
-       end;
-       ftlargeint: begin
-        result.text:= realtytostr(sumaslargeint,fformat);
-       end;
-       ftfloat: begin
-        result.text:= realtytostr(sumasfloat,fformat);
-       end;
-       ftbcd: begin
-        result.text:= realtytostr(sumascurrency,fformat);
+      if rto_count in foptions then begin
+       result.text:= realtytostr(sumcount,fformat);
+      end
+      else begin
+       if rto_average in foptions then begin
+        int1:= sumcount;
+        if int1 = 0 then begin
+         result.text:= realtytostr(0,fformat);
+        end
+        else begin
+         case datatype of 
+          ftinteger,ftword,ftsmallint,ftboolean: begin
+           result.text:= realtytostr(sumasinteger/int1,fformat);
+          end;
+          ftlargeint: begin
+           result.text:= realtytostr(sumaslargeint/int1,fformat);
+          end;
+          ftfloat: begin
+           result.text:= realtytostr(sumasfloat/int1,fformat);
+          end;
+          ftbcd: begin
+           result.text:= realtytostr(sumascurrency/int1,fformat);
+          end;
+         end;
+        end;
+       end
+       else begin
+        case datatype of 
+         ftinteger,ftword,ftsmallint,ftboolean: begin
+          result.text:= realtytostr(sumasinteger,fformat);
+         end;
+         ftlargeint: begin
+          result.text:= realtytostr(sumaslargeint,fformat);
+         end;
+         ftfloat: begin
+          result.text:= realtytostr(sumasfloat,fformat);
+         end;
+         ftbcd: begin
+          result.text:= realtytostr(sumascurrency,fformat);
+         end;
+        end;
        end;
       end;
      end;
@@ -1694,7 +1728,19 @@ begin
   end;
  end
  else begin
-  result:= fvalue;
+  if rto_count in foptions then begin
+   if not (rto_shownull in foptions) and 
+        ((rto_nocurrentvalue in foptions) or 
+                     fsum.resetpending or (fsum.count = 0)) then begin
+    result.text:= '';
+   end
+   else begin
+    result.text:= realtytostr(sumcount,fformat);
+   end
+  end
+  else begin
+   result:= fvalue;
+  end;
  end;
  if treptabulators(fowner).fband.canevent(tmethod(fongetvalue)) then begin
   fongetvalue(self,result);
@@ -1896,23 +1942,30 @@ end;
 
 procedure treptabulatoritem.dobeforenextrecord(const adatasource: tdatasource);
 begin
- if (rto_sum in foptions) and (fdatalink.datasource = adatasource) and 
-           fdatalink.fieldactive then begin
-  with fdatalink.field,fsum do begin
-   if not isnull then begin
-    inc(count);
-    case datatype of
-     ftinteger,ftword,ftsmallint,ftboolean: begin
-      integervalue:= integervalue + asinteger;
-     end;
-     ftlargeint: begin
-      largeintvalue:= largeintvalue + aslargeint;
-     end;
-     ftfloat: begin
-      floatvalue:= floatvalue + asfloat;
-     end;
-     ftbcd: begin
-      bcdvalue:= bcdvalue + ascurrency;
+ if (foptions * [rto_count,rto_sum,rto_average] <>  []) and 
+          (fdatalink.datasource = adatasource) then begin
+  if fdatalink.active then begin
+   if fdatalink.field = nil then begin
+    inc(fsum.count);
+   end
+   else begin
+    with fdatalink.field,fsum do begin
+     if not isnull then begin
+      inc(count);
+      case datatype of
+       ftinteger,ftword,ftsmallint,ftboolean: begin
+        integervalue:= integervalue + asinteger;
+       end;
+       ftlargeint: begin
+        largeintvalue:= largeintvalue + aslargeint;
+       end;
+       ftfloat: begin
+        floatvalue:= floatvalue + asfloat;
+       end;
+       ftbcd: begin
+        bcdvalue:= bcdvalue + ascurrency;
+       end;
+      end;
      end;
     end;
    end;
@@ -1972,6 +2025,30 @@ begin
   if not (rto_nocurrentvalue in foptions) then begin
    result:= result + fdatalink.field.ascurrency;
   end;
+ end;
+end;
+
+function treptabulatoritem.getsumcount: integer;
+begin
+ if fsum.resetpending and fsum.reset or not fdatalink.active then begin
+  result:= 0;
+ end
+ else begin
+  result:= fsum.count;
+  if not (rto_nocurrentvalue in foptions) then begin
+   result:= result + 1;
+  end;
+ end;
+end;
+
+procedure treptabulatoritem.setoptions(const avalue: reptabulatoritemoptionsty);
+var
+ mask: reptabulatoritemoptionsty = [rto_count,rto_sum,rto_average];
+begin
+ if avalue <> foptions then begin
+  foptions:= reptabulatoritemoptionsty(setsinglebit(longword(avalue),
+                                 longword(foptions),longword(mask)));
+  changed;
  end;
 end;
 
