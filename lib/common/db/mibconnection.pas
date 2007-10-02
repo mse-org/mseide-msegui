@@ -23,7 +23,7 @@ interface
 
 uses
  Classes,SysUtils,msqldb,db,math,dbconst,msebufdataset,msedbevents,msesys,
- msestrings,msedb,
+ msestrings,msedb,msetypes,
 {$IfDef LinkDynamically}
   ibase60dyn;
 {$Else}
@@ -54,6 +54,7 @@ type
     SQLDA                : PXSQLDA;
     in_SQLDA             : PXSQLDA;
     ParamBinding         : array of integer;
+    paramtypes: fieldtypearty;
    public
     constructor create(const aowner: icursorclient; const aconnection: tibconnection);
     procedure close; override;
@@ -595,6 +596,9 @@ var dh    : pointer;
     p     : pchar;
     x     : shortint;
     i     : integer;
+ TransLen: word;
+ TransType: TFieldType;
+ lenset: boolean;
 
 begin
   with cursor as TIBcursor do
@@ -616,22 +620,31 @@ begin
      CheckError('PrepareStatement', Status);
     end;
     FPrepared := True;
-    if assigned(AParams) and (AParams.count > 0) then
-      begin
-      AllocSQLDA(in_SQLDA,Length(ParamBinding));
-      if isc_dsql_describe_bind(@Status, @Statement, 1, in_SQLDA) <> 0 then
-        CheckError('PrepareStatement', Status);
-      if in_SQLDA^.SQLD > in_SQLDA^.SQLN then
-        DatabaseError(SParameterCountIncorrect,self);
-      for x := 0 to in_SQLDA^.SQLD - 1 do with in_SQLDA^.SQLVar[x] do
-        begin
-        if ((SQLType and not 1) = SQL_VARYING) then
-          SQLData := AllocMem(in_SQLDA^.SQLVar[x].SQLLen+2)
-        else
-          SQLData := AllocMem(in_SQLDA^.SQLVar[x].SQLLen);
-        if (sqltype and 1) = 1 then New(SQLInd);
-        end;
+    if assigned(AParams) and (AParams.count > 0) then begin
+     AllocSQLDA(in_SQLDA,Length(ParamBinding));
+     if isc_dsql_describe_bind(@Status, @Statement, 1, in_SQLDA) <> 0 then begin
+       CheckError('PrepareStatement', Status);
+     end;
+     if in_SQLDA^.SQLD > in_SQLDA^.SQLN then begin
+       DatabaseError(SParameterCountIncorrect,self);
+     end;
+     setlength(paramtypes,in_SQLDA^.SQLD);
+     for x := 0 to in_SQLDA^.SQLD - 1 do begin
+      with in_SQLDA^.SQLVar[x] do begin
+       TranslateFldType(SQLType,sqlsubtype,SQLLen,SQLScale,lenset,TransType,TransLen);
+       paramtypes[x]:= transtype;
+       if ((SQLType and not 1) = SQL_VARYING) then begin
+         SQLData := AllocMem(in_SQLDA^.SQLVar[x].SQLLen+2)
+       end
+       else begin
+         SQLData := AllocMem(in_SQLDA^.SQLVar[x].SQLLen);
+       end;
+       if (sqltype and 1) = 1 then begin
+        New(SQLInd);
+       end;
       end;
+     end;
+    end;
     if FStatementType = stselect then
       begin
 ///////////////////////      FPrepared := False;
@@ -913,7 +926,7 @@ begin
       begin
       if assigned(in_sqlda^.SQLvar[SQLVarNr].SQLInd) then in_sqlda^.SQLvar[SQLVarNr].SQLInd^ := 0;
 
-      case AParams[ParNr].DataType of
+      case paramtypes[ParNr] of
         ftInteger,ftsmallint :
           begin
           i := AParams[ParNr].AsInteger;

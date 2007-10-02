@@ -678,7 +678,7 @@ end;
 
 function tcurrencydbcol.getvariantvar: variant;
 begin
- result:= asfloat;
+ result:= ascurrency;
 end;
 
 { tbooleandbcol }
