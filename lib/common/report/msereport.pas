@@ -2550,97 +2550,127 @@ procedure treptabulators.setlivert_widthmm(const avalue: real);
 var
  int1: integer;
 begin
- if (avalue <> flineinfos[tlk_vert].widthmm) then begin
+// if (avalue <> flineinfos[tlk_vert].widthmm) then begin
   flineinfos[tlk_vert].widthmm:= avalue;
   if not (csloading in fband.componentstate) then begin
    for int1:= 0 to high(fitems) do begin
     treptabulatoritem(fitems[int1]).livert_widthmm:= avalue;
    end;
   end;
- end;
+// end;
 end;
 
 procedure treptabulators.setlivert_color(const avalue: colorty);
 var
  int1: integer;
 begin
- if (avalue <> flineinfos[tlk_vert].color) then begin
+// if (avalue <> flineinfos[tlk_vert].color) then begin
   flineinfos[tlk_vert].color:= avalue;
   if not (csloading in fband.componentstate) then begin
    for int1:= 0 to high(fitems) do begin
     treptabulatoritem(fitems[int1]).livert_color:= avalue;
    end;
   end;
- end;
+// end;
 end;
 
 procedure treptabulators.setlivert_colorgap(const avalue: colorty);
 var
  int1: integer;
 begin
- if (avalue <> flineinfos[tlk_vert].colorgap) then begin
+// if (avalue <> flineinfos[tlk_vert].colorgap) then begin
   flineinfos[tlk_vert].colorgap:= avalue;
   if not (csloading in fband.componentstate) then begin
    for int1:= 0 to high(fitems) do begin
     treptabulatoritem(fitems[int1]).livert_colorgap:= avalue;
    end;
   end;
- end;
+// end;
 end;
 
 procedure treptabulators.setlivert_capstyle(const avalue: capstylety);
 var
  int1: integer;
 begin
- if (avalue <> flineinfos[tlk_vert].capstyle) then begin
+// if (avalue <> flineinfos[tlk_vert].capstyle) then begin
   flineinfos[tlk_vert].capstyle:= avalue;
   if not (csloading in fband.componentstate) then begin
    for int1:= 0 to high(fitems) do begin
     treptabulatoritem(fitems[int1]).livert_capstyle:= avalue;
    end;
   end;
- end;
+// end;
 end;
 
 procedure treptabulators.setlivert_dashes(const avalue: string);
 var
  int1: integer;
 begin
- if (avalue <> flineinfos[tlk_vert].dashes) then begin
+// if (avalue <> flineinfos[tlk_vert].dashes) then begin
   flineinfos[tlk_vert].dashes:= checkdashes(avalue);
   if not (csloading in fband.componentstate) then begin
    for int1:= 0 to high(fitems) do begin
     treptabulatoritem(fitems[int1]).livert_dashes:= checkdashes(avalue);
    end;
   end;
- end;
+// end;
 end;
 
 procedure treptabulators.setlivert_dist(const avalue: integer);
 var
  int1: integer;
 begin
- if (avalue <> flineinfos[tlk_vert].dist) then begin
+// if (avalue <> flineinfos[tlk_vert].dist) then begin
   flineinfos[tlk_vert].dist:= avalue;
   if not (csloading in fband.componentstate) then begin
    for int1:= 0 to high(fitems) do begin
     treptabulatoritem(fitems[int1]).livert_dist:= avalue;
    end;
   end;
- end;
+// end;
 end;
 
 procedure treptabulators.setlivert_visible(const avalue: linevisiblesty);
 var
  int1: integer;
 begin
- if (avalue <> flineinfos[tlk_vert].visible) and 
-              not (csloading in fband.componentstate) then begin
+// if (avalue <> flineinfos[tlk_vert].visible) and 
+//              not (csloading in fband.componentstate) then begin
   flineinfos[tlk_vert].visible:= avalue;
-  for int1:= 0 to high(fitems) do begin
-   treptabulatoritem(fitems[int1]).livert_visible:= avalue;
+  if not (csloading in fband.componentstate) then begin
+   for int1:= 0 to high(fitems) do begin
+    treptabulatoritem(fitems[int1]).livert_visible:= avalue;
+   end;
   end;
- end;
+// end;
+end;
+
+procedure treptabulators.setdistleft(const avalue: real);
+var
+ int1: integer;
+begin
+// if avalue <> fdistleft then begin
+  fdistleft:= avalue;
+  if not (csloading in fband.componentstate) then begin
+   for int1:= 0 to high(fitems) do begin
+    treptabulatoritem(fitems[int1]).distleft:= fdistleft;
+   end;
+  end;
+// end;
+end;
+
+procedure treptabulators.setdistright(const avalue: real);
+var
+ int1: integer;
+begin
+// if avalue <> fdistright then begin
+  fdistright:= avalue;
+  if not (csloading in fband.componentstate) then begin
+   for int1:= 0 to high(fitems) do begin
+    treptabulatoritem(fitems[int1]).distright:= fdistright;
+   end;
+  end;
+// end;
 end;
 
 procedure treptabulators.setliright_widthmm(const avalue: real);
@@ -2752,40 +2782,6 @@ begin
  if avalue <> flineinfos[tlk_bottom].visible then begin
   flineinfos[tlk_bottom].visible:= avalue;
   fband.invalidate;
- end;
-end;
-
-procedure treptabulators.setdistleft(const avalue: real);
-var
- int1: integer;
-begin
- if avalue <> fdistleft then begin
-  fdistleft:= avalue;
-  {
-  if isemptyreal(fdistleft) then begin
-   fdistleft:= 0;
-  end;
-  }
-  for int1:= 0 to high(fitems) do begin
-   treptabulatoritem(fitems[int1]).distleft:= fdistleft;
-  end;
- end;
-end;
-
-procedure treptabulators.setdistright(const avalue: real);
-var
- int1: integer;
-begin
- if avalue <> fdistright then begin
-  fdistright:= avalue;
-  {
-  if isemptyreal(fdistright) then begin
-   fdistright:= 0;
-  end;
-  }
-  for int1:= 0 to high(fitems) do begin
-   treptabulatoritem(fitems[int1]).distright:= fdistright;
-  end;
  end;
 end;
 
