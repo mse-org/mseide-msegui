@@ -2241,7 +2241,8 @@ begin
     with ftabs[int1] do begin
      with treptabulatoritem(fitems[index]) do begin
       text:= getdisptext;
-      if apaint and (foptions*[rto_sum,rto_noreset]=[rto_sum]) then begin
+      if apaint and (foptions*[rto_count,rto_sum,rto_average] <> []) and 
+                        not (rto_noreset in foptions) then begin
        fsum.resetpending:= true;
       end;
       finfo.font:= font;
