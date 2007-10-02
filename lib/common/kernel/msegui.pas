@@ -9906,17 +9906,25 @@ end;
 procedure twindow.doshortcut(var info: keyeventinfoty; const sender: twidget);
 begin
  if not (es_broadcast in info.eventstate) then begin
-  if not (es_processed in info.eventstate) and not (tws_localshortcuts in fstate){ and
-                        not (tws_modal in fstate)} then begin
+  if not (es_processed in info.eventstate) then begin
    if tws_modal in fstate then begin
     include(info.eventstate,es_modal);
    end;
    try
-    app.checkshortcut(self,sender,info);
+    include(info.eventstate,es_local);
+    try
+     app.fonshortcutlist.dokeyevent(sender,info);
+    finally
+     exclude(info.eventstate,es_local);
+    end;
+    if not (es_processed in info.eventstate) and 
+                                not (tws_localshortcuts in fstate) then begin
+     app.checkshortcut(self,sender,info);
+    end;
    finally
     exclude(info.eventstate,es_modal);
    end;
-  end
+  end;
  end
  else begin
   if tws_globalshortcuts in fstate then begin

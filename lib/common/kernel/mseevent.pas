@@ -46,7 +46,7 @@ const
  waitignoreevents = [ek_keypress,ek_buttonpress,ek_mousewheel];
  
 type
- eventstatety = (es_processed,es_child,es_broadcast,es_modal,es_drag,
+ eventstatety = (es_processed,es_child,es_local,es_broadcast,es_modal,es_drag,
                  es_reflected,es_nofocus);
  eventstatesty = set of eventstatety;
  mouseeventinfoty = record //same layout as mousewheeleventinfoty!

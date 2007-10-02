@@ -56,7 +56,7 @@ type
  
  asynceventty = procedure(const sender: tobject; var atag: integer) of object;
  
- actionoptionty = (ao_updateonidle,ao_globalshortcut);
+ actionoptionty = (ao_updateonidle,ao_globalshortcut,ao_localshortcut);
  actionoptionsty = set of actionoptionty;
 
  tcustomaction = class(tguicomponent,istatfile)
@@ -953,50 +953,6 @@ begin
  end;
 end;
 
-{
-procedure setactionenabled(const sender: iactionlink; const value: boolean);
-begin
- with sender.getactioninfopo^ do begin
-  if value then begin
-   exclude(state,ss_disabled);
-  end
-  else begin
-   include(state,ss_disabled);
-  end;
-  include(state,ss_localdisabled);
- end;
- sender.actionchanged;
-end;
-
-procedure setactionvisible(const sender: iactionlink; const value: boolean);
-begin
- with sender.getactioninfopo^ do begin
-  if value then begin
-   exclude(state,ss_invisible);
-  end
-  else begin
-   include(state,ss_invisible);
-  end;
-  include(state,ss_localinvisible);
- end;
- sender.actionchanged;
-end;
-
-procedure setactionchecked(const sender: iactionlink; const value: boolean);
-begin
- with sender.getactioninfopo^ do begin
-  if value then begin
-   include(state,ss_checked);
-  end
-  else begin
-   exclude(state,ss_checked);
-  end;
-  include(state,ss_localchecked);
- end;
- sender.actionchanged;
-end;
-}
-
  {tcustomaction}
 
 constructor tcustomaction.create(aowner: tcomponent);
@@ -1281,9 +1237,12 @@ end;
 
 procedure tcustomaction.doshortcut(const sender: twidget; var info: keyeventinfoty);
 begin
- doupdate;
- if doactionshortcut(self,finfo,info) then begin
-  changed;
+ if not (es_local in info.eventstate) or (ao_localshortcut in foptions) and
+                (owner <> nil) and issubcomponent(owner,sender) then begin
+  doupdate;
+  if doactionshortcut(self,finfo,info) then begin
+   changed;
+  end;
  end;
 end;
 
@@ -1354,8 +1313,8 @@ begin
      application.unregisteronidle({$ifdef FPC}@{$endif}doidle);
     end;
    end;
-   if ao_globalshortcut in delta then begin
-    if ao_globalshortcut in value then begin
+   if [ao_globalshortcut,ao_localshortcut] * delta <> [] then begin
+    if [ao_globalshortcut,ao_localshortcut] * value <> [] then begin
      application.registeronshortcut({$ifdef FPC}@{$endif}doshortcut);
     end
     else begin
