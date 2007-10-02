@@ -1730,8 +1730,8 @@ begin
  else begin
   if rto_count in foptions then begin
    if not (rto_shownull in foptions) and 
-        ((rto_nocurrentvalue in foptions) or 
-                     fsum.resetpending or (fsum.count = 0)) then begin
+        ((rto_nocurrentvalue in foptions) or fsum.resetpending) and 
+                                               (fsum.count = 0) then begin
     result.text:= '';
    end
    else begin
