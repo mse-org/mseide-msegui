@@ -9557,6 +9557,7 @@ function twindow.beginmodal: boolean; //true if destroyed
 var
  pt1: pointty;
  event1: tmouseevent;
+ win1: winidty;
 begin
  fmodalresult:= mr_none;
  with app do begin
@@ -9568,7 +9569,10 @@ begin
   if fmodalwindow = nil then begin
    fwantedactivewindow:= nil; //init for lowest level
   end;
+  app.cursorshape:= cr_default;
+  win1:= fmousewinid;
   processleavewindow;
+  fmousewinid:= win1;
   result:= beginmodal(self);
   if (fmodalwindow = nil) then begin
    if fwantedactivewindow <> nil then begin
@@ -9581,9 +9585,6 @@ begin
     fwantedactivewindow:= nil;
    end;
    fmodalwindow.activate;
-//   if ftransientfor <> nil then begin
-//    ftransientfor.activate;
-//   end;
   end;
   if factivewindow <> nil then begin
    pt1:= mouse.pos;
