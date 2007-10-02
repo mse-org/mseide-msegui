@@ -56,7 +56,7 @@ type
  
  asynceventty = procedure(const sender: tobject; var atag: integer) of object;
  
- actionoptionty = (ao_updateonidle,ao_globalshortcut,ao_localshortcut);
+ actionoptionty = (ao_updateonidle,ao_localshortcut,ao_globalshortcut);
  actionoptionsty = set of actionoptionty;
 
  tcustomaction = class(tguicomponent,istatfile)
@@ -1237,7 +1237,8 @@ end;
 
 procedure tcustomaction.doshortcut(const sender: twidget; var info: keyeventinfoty);
 begin
- if not (es_local in info.eventstate) or (ao_localshortcut in foptions) and
+ if not (es_local in info.eventstate) and (ao_globalshortcut in foptions) or 
+        (es_local in info.eventstate) and (ao_localshortcut in foptions) and
                 (owner <> nil) and issubcomponent(owner,sender) then begin
   doupdate;
   if doactionshortcut(self,finfo,info) then begin
