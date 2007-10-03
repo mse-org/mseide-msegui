@@ -1591,15 +1591,15 @@ var
  hires: boolean;
 begin
  result:= gde_fontmetrics;
- if drawinfo.gc.handle = invalidgchandle then begin
-  gc1:= getdc(0);  //use default dc
- end
- else begin
-  gc1:= drawinfo.gc.handle;
- end;
  with drawinfo.getchar16widths do begin
   hires:= (df_highresfont in drawinfo.gc.drawingflags) and 
                           (datapo^.fonthighres <> 0);
+  if (drawinfo.gc.handle = invalidgchandle) or hires then begin
+   gc1:= getdc(0);  //use default dc
+  end
+  else begin
+   gc1:= drawinfo.gc.handle;
+  end;
   if hires then begin
    ahandle:= selectobject(gc1,datapo^.fonthighres);
   end
@@ -1659,7 +1659,7 @@ begin
      dec(int1);
     end;
    end;
-   selectobject(gc1,ahandle);
+//   selectobject(gc1,ahandle);
    result:= gde_ok;
   end;
  end;
@@ -1668,7 +1668,7 @@ endlab:
  if ahandle <> 0 then begin
   selectobject(gc1,ahandle);
  end;
- if drawinfo.gc.handle = invalidgchandle then begin
+ if (drawinfo.gc.handle = invalidgchandle) or hires then begin
   releasedc(0,gc1);
  end;
 end;

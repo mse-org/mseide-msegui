@@ -1488,7 +1488,7 @@ begin
    rect2:= textrect(canvas1,datatotext(datalist.getitempo(arow)^),
                    acellrect,feditor.textflags,font);
    result:= not rectinrect(rect2,acellrect);
-   translateclientpoint1(acellrect.pos,grid1,self);
+//   translateclientpoint1(acellrect.pos,grid1,self);
   end
   else begin
    acellrect:= nullrect;

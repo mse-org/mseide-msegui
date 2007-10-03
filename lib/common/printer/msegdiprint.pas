@@ -198,6 +198,7 @@ begin
  with tgdiprintcanvas(sender) do begin
   exclude(fstate,cs_pagestarted);
   fillchar(gc1,sizeof(gc1),0);
+  include(gc1.drawingflags,df_highresfont);
   guierror(gui_creategc(0,gck_printer,gc1,mstr1),'for "'+mstr1+'"');
   checkprinterror(setgraphicsmode(gc1.handle,gm_advanced));
   fppinchx:= getdevicecaps(gc1.handle,logpixelsx);

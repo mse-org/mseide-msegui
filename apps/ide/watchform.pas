@@ -66,12 +66,14 @@ procedure twatchfo.resultcellevent(const sender: TObject; var info: celleventinf
 var
  rect1: rectty;
 begin
+{
  with info,expresult do begin
   if (eventkind = cek_firstmousepark) and textclipped(cell.row,rect1) then begin
    inc(rect1.cy,12);
-   application.showhint(expresult,gridvalue[cell.row],rect1,cp_bottomleft,-1);
+   application.showhint(grid,gridvalue[cell.row],rect1,cp_bottomleft,-1);
   end;
  end;
+ }
 end;
 
 procedure twatchfo.watchesononchange(const sender: TObject);

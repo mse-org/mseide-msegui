@@ -1,9 +1,10 @@
 object watchfo: twatchfo
   optionswidget = [ow_tabfocus, ow_subfocus, ow_destroywidgets]
-  bounds_x = 510
-  bounds_y = 325
+  bounds_x = 291
+  bounds_y = 247
   bounds_cx = 310
   bounds_cy = 245
+  frame.options = []
   frame.grip_size = 10
   frame.grip_options = [go_closebutton, go_fixsizebutton, go_topbutton]
   frame.dummy = 0
@@ -16,6 +17,7 @@ object watchfo: twatchfo
   container.bounds_cy = 245
   container.frame.dummy = 0
   dragdock.splitter_size = 0
+  dragdock.tab_size = 0
   dragdock.caption = 'Watches'
   dragdock.optionsdock = [od_savepos, od_canmove, od_canfloat, od_candock, od_proportional, od_propsize]
   options = [fo_savepos, fo_savestate]
@@ -52,7 +54,7 @@ object watchfo: twatchfo
     000000BF000000080000000000000000}
   moduleclassname = 'tdockform'
   object grid: twidgetgrid
-    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_focusbackonesc, ow_mousewheel, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_focusbackonesc, ow_mousewheel, ow_destroywidgets, ow_hinton, ow_fontglyphheight, ow_autoscale]
     bounds_x = 0
     bounds_y = 24
     bounds_cx = 300
@@ -63,15 +65,21 @@ object watchfo: twatchfo
     popupmenu = gripopup
     optionsgrid = [og_colsizing, og_rowmoving, og_keyrowmoving, og_rowinserting, og_rowdeleting, og_focuscellonenter, og_autofirstrow, og_autoappend, og_autopopup]
     fixcols.count = 1
+    fixcols.coloractive = -2147483648
     fixcols.items = <
       item
+        coloractive = -2147483648
+        tag = 0
         width = 18
         numstart = 1
         numstep = 1
       end>
     fixrows.count = 1
+    fixrows.coloractive = -2147483648
     fixrows.items = <
       item
+        coloractive = -2147483648
+        tag = 0
         height = 15
         captions.count = 3
         captions.items = <
@@ -95,22 +103,31 @@ object watchfo: twatchfo
     rowfonts.items = <
       item
         color = -1610612729
+        colorshadow = -2147483648
         name = 'stf_default'
+        xscale = 1.000000000000000000
         dummy = 0
       end>
     datacols.count = 3
+    datacols.coloractive = -2147483648
     datacols.items = <
       item
+        coloractive = -2147483648
+        tag = 0
         width = 13
         options = [co_drawfocus, co_savestate, co_rowcolor, co_zebracolor]
         widgetname = 'watchon'
       end
       item
+        coloractive = -2147483648
+        tag = 0
         width = 152
         options = [co_savevalue, co_savestate]
         widgetname = 'expression'
       end
       item
+        coloractive = -2147483648
+        tag = 0
         width = 109
         options = [co_fill, co_savevalue, co_rowfont]
         widthmin = 50
@@ -141,6 +158,7 @@ object watchfo: twatchfo
       taborder = 2
       visible = False
       statfile = mainfo.projectstatfile
+      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_hintclippedtext, oe_autopopupmenu, oe_keyexecute, oe_savevalue, oe_savestate]
       ondataentered = expressionondataentered
       reffontheight = 13
     end
@@ -152,6 +170,7 @@ object watchfo: twatchfo
       bounds_cy = 15
       taborder = 3
       visible = False
+      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_hintclippedtext, oe_autopopupmenu, oe_keyexecute, oe_savevalue, oe_savestate]
       onsetvalue = expresultonsetvalue
       reffontheight = 13
     end
@@ -159,14 +178,15 @@ object watchfo: twatchfo
   object watcheson: tbooleanedit
     bounds_x = 8
     bounds_y = 4
-    bounds_cx = 74
+    bounds_cx = 73
     bounds_cy = 15
+    frame.options = []
     frame.caption = 'Watches on'
     frame.dummy = 0
     frame.outerframe = (
       0
       1
-      61
+      60
       1)
     statfile = mainfo.projectstatfile
     optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_eatreturn, oe_resetselectonexit, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_checkvaluepaststatread, oe_savevalue, oe_savestate]
