@@ -77,6 +77,7 @@ begin
   end;
   inc(po1);
  end;
+ result:= trimright(result);
  if result = '' then begin
   result:= defaultvalue;
  end;
@@ -104,6 +105,7 @@ procedure initformatsettings;
 var
  int1: integer;
  ch1,ch2,ch3: char;
+ str1,str2: string;
 const
  currfo: array[0..1,0..1] of byte = ((1,3),(0,2));
            //[p_cs_precedes,p_sep_by_space]
@@ -122,7 +124,14 @@ begin
   longdaynames[int1]:= getlocstr(day_1 + int1 - 1,longdaynames[int1]);
  end;
  shortdateformat:= convertcformatstring(getlocstr(d_fmt,''),shortdateformat);
- longdateformat:= convertcformatstring(getlocstr(d_t_fmt,''),longdateformat);
+ str1:= getlocstr(d_t_fmt,'');
+ str2:= getlocstr(t_fmt,''); 
+ int1:= pos(str2,str1);
+ if int1 > 0 then begin
+  str1:= trimright(copy(str1,1,int1-1));
+ end;
+ longdateformat:= convertcformatstring(str1,longdateformat);   
+// longdateformat:= convertcformatstring(getlocstr(d_t_fmt,''),longdateformat);   
  shorttimeformat:= convertcformatstring(getlocstr(t_fmt,''),shorttimeformat);
  longtimeformat:= convertcformatstring(getlocstr(t_fmt_ampm,''),longtimeformat);
  findfirstchar(shortdateformat,'./-',dateseparator);
