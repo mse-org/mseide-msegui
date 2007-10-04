@@ -1432,7 +1432,7 @@ begin
     end;
     if iswin95 then begin
      new(charwidths);
-     if getcharabcwidths(dc1,0,255,ar1) then begin
+     if false {getcharabcwidths(dc1,0,255,ar1)} then begin
       for int1:= 0 to high(ar1) do begin
        with ar1[int1] do begin
         charwidths^[int1]:= abca + integer(abcb) + abcc;
@@ -1678,7 +1678,7 @@ var
  data: abc;
  bo1: boolean;
  ahandle: thandle;
-
+ 
 begin
  result:= gde_fontmetrics;
  with drawinfo,drawinfo.getfontmetrics do begin
@@ -1686,12 +1686,15 @@ begin
   if ahandle <> 0 then begin
    fillchar(data,sizeof(data),0);
    if iswin95 then begin
+    bo1:= getcharabcwidthsw(gc.handle,cardinal(char),cardinal(char),data);
+   {
     if ord(char) < 256 then begin
      bo1:= getcharabcwidthsa(gc.handle,cardinal(char),cardinal(char),data);
     end
     else begin
      bo1:= false;
     end;
+    }
    end
    else begin
     bo1:= getcharabcwidthsw(gc.handle,cardinal(char),cardinal(char),data);
@@ -3980,6 +3983,7 @@ end;
 procedure dispatchevents;
 var
  msg,msg1: tmsg;
+ str1: string;
 begin
  if eventlooping > 0 then begin
   exit;
@@ -3999,12 +4003,14 @@ begin
      end;
      wm_keydown,wm_keyup,wm_syskeydown,wm_syskeyup: begin
       translatemessage(msg);
+      str1:= '';
       while peekmessagea(msg1,msg.hwnd,wm_char,wm_char,pm_remove) do begin
-       charbuffer:= charbuffer + char(msg1.wparam);
+       str1:= str1 + char(msg1.wparam);
       end;
       while peekmessagea(msg1,msg.hwnd,wm_syschar,wm_syschar,pm_remove) do begin
-       charbuffer:= charbuffer + char(msg1.wparam);
+       str1:= str1 + char(msg1.wparam);
       end;
+      charbuffer:= charbuffer + str1;
       dispatchmessagea(msg);
      end
      else begin
