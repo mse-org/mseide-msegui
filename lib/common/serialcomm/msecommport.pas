@@ -275,7 +275,6 @@ type
   protected
    ftimeout: integer;
    procedure portchanged; virtual;
-   property thread: tcommthread read fthread;
 //   function createdatascanner(slavenr,adresse,anzahl,zykluszeit: integer;
 //                   empfaengerproc: empfaengerprocty): tdatascanner; virtual;
 //   function waitresult(const data: portdataty): boolean;
@@ -299,6 +298,7 @@ type
       //bricht laufende auftraege mit timeout ab, wird automatisch rueckgesetzt
    function geterrortext(error: integer): msestring;  virtual;
    function getlastresulttext: msestring;
+   property thread: tcommthread read fthread;
    property opened: boolean read getopened;
    property busy: boolean read getbusy;
    property halfduplex: boolean read gethalfduplex write sethalfduplex default false;
