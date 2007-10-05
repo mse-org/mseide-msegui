@@ -438,13 +438,8 @@ var
 begin
   C:= TCursorName(cursor);
   freeresultbuffer(c);
-  str1:= c.fstatement;
   if Assigned(AParams) then begin
-   for i := 0 to AParams.count -1 do begin
-    par1:= AParams[i];
-    str1:= stringreplace(str1,C.ParamReplaceString+inttostr(par1.Index+1),
-               GetAsSQLText(par1),[rfReplaceAll,rfIgnoreCase]);
-   end;
+   str1:= aparams.expandvalues(c.fstatement,c.parambinding,c.paramreplacestring);
   end;
   if mysql_query(FMySQL,Pchar(str1))<>0 then begin
    checkerror(Format(SErrExecuting,[StrPas(mysql_error(FMySQL))]))

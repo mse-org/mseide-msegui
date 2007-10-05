@@ -565,7 +565,7 @@ var
  i: integer;
  s: string;
  lengths,formats: integerarty;
- par1: tparam;
+// par1: tparam;
 
 begin
  with TPQCursor(cursor) do begin
@@ -610,14 +610,11 @@ begin
   end
   else begin
    tr := TPQTrans(cursor.ftrans);
-
-   s:= statement;
    if aparams <> nil then begin
-    for i := 0 to AParams.count -1 do begin
-     par1:= aparams[i];
-     s:= stringreplace(s,ParamReplaceString+inttostr(par1.Index+1),
-               GetAsSQLText(par1),[rfReplaceAll,rfIgnoreCase]);
-    end;
+    s:= aparams.expandvalues(statement,parambinding,paramreplacestring);
+   end
+   else begin
+    s:= statement;
    end;
    res:= pqexec(tr.fconn,pchar(s));
   end;
