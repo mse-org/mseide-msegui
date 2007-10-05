@@ -111,7 +111,7 @@ begin
    else begin
     grid.rowfontstate[index]:= -1;
    end;
-   expresult[index]:= mstr1;
+   expresult[index]:= removelinebreaks(mstr1);
   end
   else begin
    grid.rowfontstate[index]:= -1;
