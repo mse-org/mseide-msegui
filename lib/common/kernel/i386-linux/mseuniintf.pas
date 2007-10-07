@@ -12,13 +12,15 @@ unit mseuniintf; //i386-linux
 {$ifdef FPC}{$mode objfpc}{$h+}{$INTERFACES CORBA}{$endif}
 interface
 uses
- msegraphics;
+ msegraphics,msestrings;
  
 {$include ../mseuniintf.inc}
 
+function uni_listfontswithglyph(achar: msechar): msestringarty;
+
 implementation
 uses
- mseguiintf,xft,xlib;
+ mseguiintf,xft,xlib,msetypes;
  
 function uni_getfontwithglyph(var drawinfo: drawinfoty): boolean;
 var
@@ -36,7 +38,7 @@ begin
 {$ifdef FPC} {$checkpointer off} {$endif}
 //  str1:= fontdatatoxftname(drawinfo.getfont.fontdata^);
 //  pat1:= xftnameparse(pansichar(str1));
-  pat1:= fontdatatoxftpat(drawinfo.getfont.fontdata^);
+  pat1:= fontdatatoxftpat(drawinfo.getfont.fontdata^,false);
   if pat1 <> nil then begin
    with drawinfo.getfont.fontdata^ do begin
     charset1:= fccharsetcreate();
@@ -93,6 +95,56 @@ begin
   end; 
 {$ifdef FPC} {$checkpointer default} {$endif}
  end;
+end;
+
+function uni_listfontswithglyph(achar: msechar): msestringarty;
+var
+// str1: ansistring;
+ pat1: pfcpattern;
+ charset1,charset2: pfccharset;
+ res1: tfcresult;
+ fontset1: pfcfontset;
+ po1: ppfcpattern;
+ int1,int2: integer;
+ font1: pxftfont;
+ po2: pchar;
+begin
+ result:= nil;
+ if hasxft then begin
+{$ifdef FPC} {$checkpointer off} {$endif}
+  pat1:= fcpatterncreate();
+  charset1:= fccharsetcreate();
+  fccharsetaddchar(charset1,longword(achar));
+  fcpatternaddcharset(pat1,fc_charset,charset1);
+  fccharsetdestroy(charset1);
+  fcconfigsubstitute(nil,pat1,fcmatchpattern);
+  fcconfigsubstitute(nil,pat1,fcmatchfont);
+  xftdefaultsubstitute(msedisplay,xdefaultscreen(msedisplay),pat1);
+  fontset1:= fcfontsort(nil,pat1,true,@charset1,@res1);
+  if fccharsethaschar(charset1,longword(achar)) then begin
+   with fontset1^ do begin
+    po1:= fonts;
+    setlength(result,nfont);
+    int2:= 0;
+    for int1:= 0 to nfont - 1 do begin
+     if fcpatterngetcharset(po1^,fc_charset,0,@charset2) = fcresultmatch then begin
+      if fccharsethaschar(charset2,longword(achar)) then begin
+       if fcpatterngetstring(po1^,fc_family,0,@po2) = fcresultmatch then begin
+        result[int2]:= po2;
+       end;
+       inc(int2);
+      end;
+     end;
+     inc(po1);
+    end;
+    setlength(result,int2);
+   end;        
+  end;
+  fccharsetdestroy(charset1);
+  fcpatterndestroy(pat1);
+  fcfontsetdestroy(fontset1);    
+ end;
+{$ifdef FPC} {$checkpointer default} {$endif}
 end;
 
 end.
