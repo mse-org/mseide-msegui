@@ -548,7 +548,11 @@ function encodeifidata(const avalue: msestring;
 function encodeifidata(const avalue: ansistring; 
                        const headersize: integer = 0): string; overload;
 
-function decodeifidata(const source: pifidataty; var dest: msestring): integer;
+function decodeifidata(const source: pifidataty; out dest: msestring): integer;
+function decodeifidata(const source: pifidataty; out dest: string): integer;
+function decodeifidata(const source: pifidataty; out dest: int64): integer;
+function decodeifidata(const source: pifidataty; out dest: real): integer;
+function decodeifidata(const source: pifidataty; out dest: currency): integer;
 
 implementation
 uses
@@ -660,7 +664,7 @@ begin
  raise exception.create('Wrong datakind.');
 end;
 
-function decodeifidata(const source: pifidataty; var dest: msestring): integer;
+function decodeifidata(const source: pifidataty; out dest: msestring): integer;
 var
  str1: string;
 begin
@@ -670,6 +674,47 @@ begin
  ifinametostring(pifinamety(@source^.data),str1);
  dest:= utf8tostring(str1);
  result:= datarecsizes[idk_msestring] + length(str1);
+end;
+
+function decodeifidata(const source: pifidataty; out dest: string): integer;
+begin
+ if source^.header.kind <> idk_bytes then begin
+  datakinderror;
+ end;
+ with pifibytesty(@source^.data)^ do begin
+  setlength(dest,length);
+  if length > 0 then begin
+   move(data,pointer(dest)^,length);
+  end;
+  result:= datarecsizes[idk_bytes] + length;
+ end;
+end;
+
+function decodeifidata(const source: pifidataty; out dest: int64): integer;
+begin
+ if source^.header.kind <> idk_int64 then begin
+  datakinderror;
+ end;
+ dest:= pint64(@source^.data)^;
+ result:= datarecsizes[idk_int64];
+end;
+
+function decodeifidata(const source: pifidataty; out dest: real): integer;
+begin
+ if source^.header.kind <> idk_real then begin
+  datakinderror;
+ end;
+ dest:= preal(@source^.data)^;
+ result:= datarecsizes[idk_real];
+end;
+
+function decodeifidata(const source: pifidataty; out dest: currency): integer;
+begin
+ if source^.header.kind <> idk_currency then begin
+  datakinderror;
+ end;
+ dest:= pcurrency(@source^.data)^;
+ result:= datarecsizes[idk_currency];
 end;
 
 procedure initifirec(out arec: string; const akind: ifireckindty;

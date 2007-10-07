@@ -222,6 +222,8 @@ type
    function HasParent: Boolean; override;
    function getasboolean: boolean; override;
    procedure setasboolean(avalue: boolean); override;
+   procedure setaslargeint(avalue: largeint); override;
+   function getaslargeint: largeint; override;
   public
    procedure Clear; override;
    function assql: string;
@@ -1893,6 +1895,19 @@ end;
 function tmselongintfield.asoldsql: string;
 begin
  result:= fieldtooldsql(self);
+end;
+
+procedure tmselongintfield.setaslargeint(avalue: largeint);
+begin
+ if (avalue < minint) or (avalue > maxint) then begin
+  rangeerror(avalue,minint,maxint);
+ end;
+ setaslongint(avalue);
+end;
+
+function tmselongintfield.getaslargeint: largeint;
+begin
+ result:= getaslongint;
 end;
 
 { tmselargeintfield }

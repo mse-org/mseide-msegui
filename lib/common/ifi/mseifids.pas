@@ -14,7 +14,7 @@ const
 
 type
  recheaderty = record
-  blobinfo: blobinfoarty;
+//  blobinfo: blobinfoarty;
   fielddata: fielddataty;   
  end;
  precheaderty = ^recheaderty;
@@ -68,10 +68,10 @@ type
 //                 |<-field offsets are in ffieldinfos[].offset      |
 //                 |<-calcfield offsets are in fcalcfieldbufpositions|
 
- ifidsstatety = (ids_openpending,ids_fielddefsreceived);
+ ifidsstatety = (ids_openpending,ids_fielddefsreceived,ids_remotedata,ids_append);
  ifidsstatesty = set of ifidsstatety;
  
- tifidataset = class(tdataset,ievent,idscontroller)
+ tifidataset = class(tdataset,ievent,idscontroller,igetdscontroller)
   private
    fchannel: tcustomiochannel;
    fobjectlinker: tobjectlinker;
@@ -79,7 +79,7 @@ type
    fmsestrings: integerarty;
    fifiname: string;
    fcontroller: tdscontroller;
-   fstate: ifidsstatesty;
+   fistate: ifidsstatesty;
    fdefaulttimeout: integer;
    fmsestringpositions: integerarty;
    fansistringpositions: integerarty;
@@ -89,11 +89,14 @@ type
    fnullmasksize: integer;
    fmodifiedfields: string; //same layout as nullmask
    
-   fintbuffer: pintrecordty;
+//   fintbuffer: pintrecordty;
    frecno: integer;
    fbrecordcount: integer; //always 1 if open
    fcurrentbuf: pintrecordty;
+   fbufs: pointerarty;
+   fopen: boolean;
 
+   fremotedatachange: notifyeventty;
    procedure initmodifiedfields;   
    procedure setchannel(const avalue: tcustomiochannel);
    procedure setcontroller(const avalue: tdscontroller);
@@ -128,11 +131,13 @@ type
   protected
    ffielddefsequence: sequencety;
    fbindings: integerarty;
+   procedure checkrecno(const avalue: integer);
    procedure processdata(const adata: pifirecty);
    procedure requestfielddefsreceived(const asequence: sequencety); virtual;
    procedure fielddefsdatareceived( const asequence: sequencety; 
                                  const adata: pfielddefsdatadataty); virtual;
    procedure fieldrecdatareceived(const adata: pfieldrecdataty); virtual;
+   procedure doremotedatachange;
    procedure waitforanswer(const asequence: sequencety; waitus: integer = 0);
                       //0 -> defaulttimeout
    
@@ -165,6 +170,9 @@ type
    function GetRecord(Buffer: PChar; GetMode: TGetMode;
                                 DoCheck: Boolean): TGetResult; override;
    function GetRecordSize: Word; override;
+   function getrecno: integer; override;
+   procedure setrecno(value: longint); override;
+   function  GetRecordCount: Longint; override;
 
    function getfieldbuffer(const afield: tfield;
              out buffer: pointer; out datasize: integer): boolean; overload; 
@@ -182,6 +190,7 @@ type
    procedure setfielddata(field: tfield; buffer: pointer;
                                     nativeformat: boolean); override;
    procedure setfielddata(field: tfield; buffer: pointer); override;
+   procedure dataevent(event: tdataevent; info: ptrint); override;
 
    procedure InternalCancel; override;
    procedure internaledit; override;
@@ -214,6 +223,7 @@ type
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
+   procedure Append;
    function locate(const key: integer; const field: tfield;
                    const options: locateoptionsty = []): locateresultty;
    function locate(const key: string; const field: tfield; 
@@ -222,6 +232,7 @@ type
    procedure cancel; override;
    procedure post; override;
    function moveby(const distance: integer): integer;
+   property ifistate: ifidsstatesty read fistate;
   published
    property controller: tdscontroller read fcontroller write setcontroller;
    property Active: boolean read getactive write setactive;
@@ -229,6 +240,8 @@ type
    property ifiname: string read fifiname write fifiname;
    property timeoutus: integer read fdefaulttimeout write fdefaulttimeout 
                        default defaultifidstimeout;
+   property remotedatachange: notifyeventty read fremotedatachange 
+                                              write fremotedatachange;
  end;
  
  trxdataset = class(tifidataset)
@@ -237,6 +250,8 @@ type
   protected
    procedure fielddefsdatareceived(const asequence: sequencety; 
                                   const adata: pfielddefsdatadataty); override;
+  published
+   property fielddefs;
  end;
  
  ttxdataset = class(tifidataset)
@@ -262,7 +277,7 @@ const
 {$endif}
 
  ifidskinds = [ik_requestfielddefs,ik_fielddefsdata,ik_fieldrec];
- openflags = [ids_openpending,ids_fielddefsreceived];
+ openflags = [ids_openpending,ids_fielddefsreceived,ids_append];
  
 type
  
@@ -330,7 +345,7 @@ begin
 // setunidirectional(true);
  inherited;
  bookmarksize := sizeof(bufbookmarkty);
- fcontroller:= tdscontroller.create(self,idscontroller(self));
+ fcontroller:= tdscontroller.create(self,idscontroller(self),-1,false);
 end;
 
 destructor tifidataset.destroy;
@@ -442,7 +457,7 @@ begin
   fcurrentbuf:= nil;
  end
  else begin
-  fcurrentbuf:= fintbuffer;
+  fcurrentbuf:= fbufs[avalue];
  end;
 end;
 
@@ -804,6 +819,7 @@ begin
  with pdsrecordty(activebuffer)^,header do begin
   finalizestrings(header);
  end;
+ exclude(fistate,ids_append);
 end;
 
 procedure tifidataset.internaledit;
@@ -816,11 +832,26 @@ end;
 procedure tifidataset.InternalPost;
 begin
  with pdsrecordty(activebuffer)^ do begin
-  finalizestrings(fcurrentbuf^.header);
+  if state = dsinsert then begin
+   fcurrentbuf:= intallocrecord;
+   dsheader.bookmark.data.recordpo:= fcurrentbuf;
+   dsheader.bookmark.data.recno:= frecno;
+   if fbrecordcount >= high(fbufs) then begin
+    setlength(fbufs,(high(fbufs)+7)*2);
+   end;
+   move(fbufs[frecno],fbufs[frecno+1],(fbrecordcount-frecno)*sizeof(pointer));
+   fbufs[frecno]:= fcurrentbuf;
+   inc(fbrecordcount);
+  end
+  else begin
+   finalizestrings(fcurrentbuf^.header);
+  end;
+
   move(header,fcurrentbuf^.header,frecordsize); //get new field values
   postrecord;
   fillchar(pointer(fmodifiedfields)^,fnullmasksize,0);
  end;
+ exclude(fistate,ids_append);
 end;
 
 procedure tifidataset.InternalAddRecord(Buffer: Pointer; AAppend: Boolean);
@@ -834,12 +865,26 @@ begin
 end;
 
 function tifidataset.findrecord(arecordpo: pintrecordty): integer;
+var
+ int1: integer;
 begin
- if arecordpo = fintbuffer then begin
-  result:= 0;
+ if arecordpo = fcurrentbuf then begin
+  result:= frecno;
  end
  else begin
-  result:= 1;
+  for int1:= frecno to fbrecordcount - 1 do begin
+   if fbufs[int1] = arecordpo then begin
+    result:= int1;
+    exit;
+   end;
+  end;
+  for int1:= frecno downto 0 do begin
+   if fbufs[int1] = arecordpo then begin
+    result:= int1;
+    exit;
+   end;
+  end;
+  result:= -1;
  end;
 end;
 
@@ -894,7 +939,7 @@ end;
 
 function tifidataset.IsCursorOpen: Boolean;
 begin
- result:= fintbuffer <> nil;
+ result:= fopen;
 end;
 
 procedure tifidataset.SetBookmarkFlag(Buffer: PChar; Value: TBookmarkFlag);
@@ -1003,7 +1048,7 @@ end;
 
 procedure tifidataset.cancelconnection;
 begin
- fstate:= fstate - openflags;
+ fistate:= fistate - openflags;
 end;
 
 procedure tifidataset.setactive(value: boolean);
@@ -1037,12 +1082,6 @@ begin
  inherited resync(mode);
 end;
 
-procedure tifidataset.inheriteddataevent(const event: tdataevent;
-               const info: ptrint);
-begin
- inherited dataevent(event,info);
-end;
-
 procedure tifidataset.inheritedcancel;
 begin
  inherited cancel;
@@ -1060,6 +1099,11 @@ end;
 
 procedure tifidataset.inheritedinternalinsert;
 begin
+ initmodifiedfields;
+ with pdsrecordty(activebuffer)^.dsheader.bookmark.data do begin
+  recordpo:= nil;
+  recno:= frecno;
+ end;
  inherited internalinsert;
 end;
 
@@ -1093,8 +1137,9 @@ begin
    fbindings[int1]:= -1;
   end;
  end;
- fintbuffer:= intallocrecord;
- fbrecordcount:= 1;
+ fopen:= true;
+// fintbuffer:= intallocrecord;
+// fbrecordcount:= 1;
 end;
 
 procedure tifidataset.internalopen;
@@ -1114,8 +1159,12 @@ end;
 
 procedure tifidataset.inheritedinternaldelete;
 begin
- notimplemented('delete');
-// inherited internaldelete;
+ if state = dsedit then begin
+  internalcancel;
+ end;
+ intfreerecord(fcurrentbuf);
+ dec(fbrecordcount);
+ move(fbufs[frecno+1],fbufs[frecno],(fbrecordcount-frecno)*sizeof(pointer));
 end;
 
 procedure tifidataset.internaldelete;
@@ -1125,14 +1174,22 @@ end;
 
 procedure tifidataset.openlocal;
 begin
-// inherited internalopen;
  inheritedinternalopen;
 end;
 
 procedure tifidataset.inheritedinternalclose;
+var
+ int1: integer;
 begin
  cancelconnection;
- intfreerecord(fintbuffer);
+ fopen:= false;
+ bindfields(false);
+ if defaultfields then begin
+  destroyfields;
+ end;
+ for int1:= 0 to fbrecordcount - 1 do begin
+  intfreerecord(fbufs[int1]);
+ end;
  frecno:= -1;
  fcurrentbuf:= nil;
  fbrecordcount:= 0;
@@ -1301,7 +1358,7 @@ procedure tifidataset.postrecord;
  begin
   with ainfo do begin
    case fieldtype of
-    ftinteger,ftlargeint: begin
+    ftlargeint,ftinteger: begin
      result:= encodeifidata(field.aslargeint,sizeof(fielddataheaderty));
     end;
     ftfloat: begin
@@ -1340,6 +1397,10 @@ var
  po1: pfieldrecdataty;
  po2: pchar;
 begin                 //postrecord
+
+exit; /////////////////////
+
+
  setlength(ar1,length(ffieldinfos)); //max
  int2:= 0;
  for int1:= 0 to high(ffieldinfos) do begin
@@ -1371,35 +1432,142 @@ var
  index1: integer;
  po1: pchar;
  mstr1: msestring;
+ int641: int64;
+ rea1: real;
+ cu1: currency;
+ str1: string;
+ 
  field1: tfield;
  bo1: boolean;
 begin
  if active then begin
-  po1:= @adata^.data;
-  for int1:= 0 to adata^.count - 1 do begin
-   index1:= pfielddataty(po1)^.header.index;
-   if (index1 >= 0) and (index1 <= high(fbindings)) and 
-                                       (fbindings[index1] >= 0) then begin
-    if state = dsbrowse then begin
-     edit;
-    end;
-    field1:= fields[fbindings[index1]];
-    inc(po1,sizeof(mseifi.fielddataty.header));
-    case pifidataty(po1)^.header.kind of
-     idk_msestring: begin
-      inc(po1,decodeifidata(pifidataty(po1),mstr1));
-      if field1 is tmsestringfield then begin
-       tmsestringfield(field1).asmsestring:= mstr1;
-      end
-      else begin
-       field1.asstring:= mstr1;
+  include(fistate,ids_remotedata);
+  try
+   po1:= @adata^.data;
+   for int1:= 0 to adata^.count - 1 do begin
+    index1:= pfielddataty(po1)^.header.index;
+    if (index1 >= 0) and (index1 <= high(fbindings)) and 
+                                        (fbindings[index1] >= 0) then begin
+     if state = dsbrowse then begin
+      edit;
+     end;
+     field1:= fields[fbindings[index1]];
+     inc(po1,sizeof(mseifi.fielddataty.header));
+     case pifidataty(po1)^.header.kind of
+      idk_int64: begin
+       inc(po1,decodeifidata(pifidataty(po1),int641));
+       field1.aslargeint:= int641;
+      end;
+      idk_real: begin
+       inc(po1,decodeifidata(pifidataty(po1),rea1));
+       field1.asfloat:= rea1;
+      end;
+      idk_currency: begin
+       inc(po1,decodeifidata(pifidataty(po1),cu1));
+       field1.ascurrency:= cu1;
+      end;
+      idk_bytes: begin
+       inc(po1,decodeifidata(pifidataty(po1),str1));
+       field1.asstring:= str1;
+      end;
+      idk_msestring: begin
+       inc(po1,decodeifidata(pifidataty(po1),mstr1));
+       if field1 is tmsestringfield then begin
+        tmsestringfield(field1).asmsestring:= mstr1;
+       end
+       else begin
+        field1.asstring:= mstr1;
+       end;
       end;
      end;
     end;
-   end;
-   setfieldisnull(pointer(fmodifiedfields),index1); //reset changeflag
+    setfieldisnull(pointer(fmodifiedfields),index1); //reset changeflag
+    doremotedatachange;
+  end;
+  finally
+   exclude(fistate,ids_remotedata);  
   end;
  end;
+end;
+
+procedure tifidataset.doremotedatachange;
+begin
+ if checkcanevent(self,tmethod(fremotedatachange)) then begin
+  fremotedatachange(self);
+ end;
+end;
+
+procedure tifidataset.inheriteddataevent(const event: tdataevent;
+               const info: ptrint);
+begin
+ if (event = defieldchange) and not (ids_remotedata in fistate) then begin
+  if TField(Info).FieldKind in [fkData,fkInternalCalc] then begin
+   SetModified(True);
+  end;
+  exit;
+ end;
+ inherited dataevent(event,info);
+end;
+
+procedure tifidataset.dataevent(event: tdataevent; info: ptrint);
+begin
+ fcontroller.dataevent(event,info);
+end;
+
+procedure tifidataset.Append;
+begin
+ include(fistate,ids_append);
+ inherited;
+end;
+
+procedure tifidataset.checkrecno(const avalue: integer);
+begin
+ if (avalue > recordcount) or (avalue < 1) then begin
+  databaseerror(snosuchrecord,self);
+ end;
+end;
+
+function tifidataset.getrecno: integer;
+begin
+// if bs_internalcalc in fbstate then begin
+//  result:= frecno + 1;
+// end
+// else begin
+  result:= 0;
+  if activebuffer <> nil then begin
+   with pdsrecordty(activebuffer)^.dsheader.bookmark do begin
+    if state = dsinsert  then begin
+     if (ids_append in fistate) or (fbrecordcount = 0) then begin
+      result:= fbrecordcount + 1;
+     end
+     else begin
+      result:= data.recno + 1;
+     end;
+    end
+    else begin
+     if fbrecordcount > 0 then begin
+      result:= data.recno + 1;
+     end;
+    end;
+   end;
+  end;
+// end;
+end;
+
+procedure tifidataset.setrecno(value: longint);
+var
+ bm: bufbookmarkty;
+begin
+ checkbrowsemode;
+ checkrecno(value);
+ bm.data.recordpo:= nil;
+ bm.data.recno:= value-1;
+ gotobookmark(@bm);
+end;
+
+function tifidataset.GetRecordCount: Longint;
+begin
+ result:= fbrecordcount;
 end;
 
 { trxdataset }
@@ -1407,11 +1575,11 @@ end;
 procedure trxdataset.fielddefsdatareceived(const asequence: sequencety; 
                                     const adata: pfielddefsdatadataty);
 begin
- if (ids_openpending in fstate) and 
+ if (ids_openpending in fistate) and 
               (asequence = ffielddefsequence) then begin
   if decodefielddefs(@adata^.data,fielddefs) then begin
-   exclude(fstate,ids_openpending);
-   include(fstate,ids_fielddefsreceived);
+   exclude(fistate,ids_openpending);
+   include(fistate,ids_fielddefsreceived);
 //  active:= true;
   end
   else begin
@@ -1426,9 +1594,9 @@ var
  po1: pointer;
 begin
  inititemheader(str1,ik_requestfielddefs,0,0,po1);
- include(fstate,ids_openpending);
+ include(fistate,ids_openpending);
  if senddataandwait(str1,ffielddefsequence) and 
-            (ids_fielddefsreceived in fstate) then begin
+            (ids_fielddefsreceived in fistate) then begin
   inherited;
  end
  else begin
