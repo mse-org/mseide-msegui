@@ -104,8 +104,11 @@ type
   data: ifidataty;
  end;
  pfielddataty = ^fielddataty;
-  
+
+ fieldreckindty = (frk_edit,frk_insert,frk_delete);  
  fieldrecdataty = record
+  kind: fieldreckindty;
+  recno: integer;
   count: integer; 
   data: datarecty; //dummy, array[count] of fielddataty
  end;

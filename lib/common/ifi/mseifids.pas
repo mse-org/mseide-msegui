@@ -148,7 +148,7 @@ type
    procedure inititemheader(out arec: string; const akind: ifireckindty; 
                     const asequence: sequencety; const datasize: integer;
                     out datapo: pchar);
-   procedure postrecord;
+   procedure postrecord(const akind: fieldreckindty);
    
    procedure notimplemented(const atext: string);
    procedure objectevent(const sender: tobject; const event: objecteventty); virtual;   
@@ -848,7 +848,14 @@ begin
   end;
 
   move(header,fcurrentbuf^.header,frecordsize); //get new field values
-  postrecord;
+  if not (ids_remotedata in fistate) then begin
+   if state = dsinsert then begin
+    postrecord(frk_insert);
+   end
+   else begin
+    postrecord(frk_edit);
+   end;
+  end;
   fillchar(pointer(fmodifiedfields)^,fnullmasksize,0);
  end;
  exclude(fistate,ids_append);
@@ -891,22 +898,36 @@ end;
 procedure tifidataset.InternalGotoBookmark(ABookmark: Pointer);
 var
  int1: integer;
+ int2: integer;
 begin
  if abookmark <> nil then begin
   with pbufbookmarkty(abookmark)^.data do begin
    if (recno >= fbrecordcount) or (recno < 0) then begin
     databaseerror('Invalid bookmark recno: '+inttostr(recno)+'.'); 
    end;
-   {
-   int1:= findrecord(recordpo);
-   if int1 < 0 then begin
-    databaseerror('Invalid bookmarkdata.');
+   int1:= recno;
+   if recordpo <> nil then begin
+    int2:= -1;
+    for int1:= frecno to high(fbufs) do begin
+     if fbufs[int1] = recordpo then begin
+      int2:= int1;
+      break;
+     end;
+    end;
+    for int1:= frecno downto 0 do begin
+     if fbufs[int1] = recordpo then begin
+      int2:= int1;
+      break;
+     end;
+    end;
+    if int2 < 0 then begin
+     databaseerror('Invalid bookmarkdata.');
+    end;
    end
    else begin
-    int1:= recno;
+    int2:= recno;
    end;
-   }
-   internalsetrecno(int1);
+   internalsetrecno(int2);
   end;
  end;
 end;
@@ -1165,6 +1186,9 @@ begin
  intfreerecord(fcurrentbuf);
  dec(fbrecordcount);
  move(fbufs[frecno+1],fbufs[frecno],(fbrecordcount-frecno)*sizeof(pointer));
+ if not (ids_remotedata in fistate) then begin
+  postrecord(frk_delete);
+ end;
 end;
 
 procedure tifidataset.internaldelete;
@@ -1353,7 +1377,7 @@ begin
  fchannel.waitforanswer(asequence,fdefaulttimeout);
 end;
 
-procedure tifidataset.postrecord;
+procedure tifidataset.postrecord(const akind: fieldreckindty);
  function encodefielddata(const ainfo: fieldinfoty): string;
  begin
   with ainfo do begin
@@ -1396,26 +1420,27 @@ var
  ar1: stringarty;
  po1: pfieldrecdataty;
  po2: pchar;
+ 
 begin                 //postrecord
-
-exit; /////////////////////
-
-
  setlength(ar1,length(ffieldinfos)); //max
  int2:= 0;
- for int1:= 0 to high(ffieldinfos) do begin
-  if not getfieldisnull(pointer(fmodifiedfields),int1) then begin
-   ar1[int2]:= encodefielddata(ffieldinfos[int1]);
-   if ar1[int2] <> '' then begin
-    inc(int2);
+ int3:= 0;
+ if akind <> frk_delete then begin
+  for int1:= 0 to high(ffieldinfos) do begin
+   if not getfieldisnull(pointer(fmodifiedfields),int1) then begin
+    ar1[int2]:= encodefielddata(ffieldinfos[int1]);
+    if ar1[int2] <> '' then begin
+     inc(int2);
+    end;
    end;
   end;
- end;
- int3:= 0;
- for int1:= 0 to int2 - 1 do begin
-  int3:= int3 + length(ar1[int1]);
+  for int1:= 0 to int2 - 1 do begin
+   int3:= int3 + length(ar1[int1]);
+  end;
  end;
  inititemheader(str1,ik_fieldrec,0,int3+sizeof(fieldrecdataty),pchar(po1));
+ po1^.kind:= akind;
+ po1^.recno:= recno;
  po1^.count:= int2;
  po2:= @po1^.data;
  for int1:= 0 to int2 - 1 do begin
@@ -1435,57 +1460,84 @@ var
  int641: int64;
  rea1: real;
  cu1: currency;
- str1: string;
- 
+ str1: string; 
  field1: tfield;
  bo1: boolean;
+ bm: string;
+ 
 begin
  if active then begin
+  checkbrowsemode;
+  disablecontrols;
   include(fistate,ids_remotedata);
+  bm:= bookmark;
   try
-   po1:= @adata^.data;
-   for int1:= 0 to adata^.count - 1 do begin
-    index1:= pfielddataty(po1)^.header.index;
-    if (index1 >= 0) and (index1 <= high(fbindings)) and 
-                                        (fbindings[index1] >= 0) then begin
-     if state = dsbrowse then begin
-      edit;
+   if adata^.kind = frk_delete then begin
+    recno:= adata^.recno;
+    delete;
+   end
+   else begin
+    bo1:= adata^.kind = frk_insert;
+    if bo1 then begin
+     if adata^.recno >= recordcount then begin
+      append;
+     end
+     else begin
+      recno:= adata^.recno;
+      insert;
      end;
-     field1:= fields[fbindings[index1]];
-     inc(po1,sizeof(mseifi.fielddataty.header));
-     case pifidataty(po1)^.header.kind of
-      idk_int64: begin
-       inc(po1,decodeifidata(pifidataty(po1),int641));
-       field1.aslargeint:= int641;
-      end;
-      idk_real: begin
-       inc(po1,decodeifidata(pifidataty(po1),rea1));
-       field1.asfloat:= rea1;
-      end;
-      idk_currency: begin
-       inc(po1,decodeifidata(pifidataty(po1),cu1));
-       field1.ascurrency:= cu1;
-      end;
-      idk_bytes: begin
-       inc(po1,decodeifidata(pifidataty(po1),str1));
-       field1.asstring:= str1;
-      end;
-      idk_msestring: begin
-       inc(po1,decodeifidata(pifidataty(po1),mstr1));
-       if field1 is tmsestringfield then begin
-        tmsestringfield(field1).asmsestring:= mstr1;
-       end
-       else begin
-        field1.asstring:= mstr1;
+    end
+    else begin
+     recno:= adata^.recno;
+     edit;
+    end;
+    po1:= @adata^.data;
+    for int1:= 0 to adata^.count - 1 do begin
+     index1:= pfielddataty(po1)^.header.index;
+     if (index1 >= 0) and (index1 <= high(fbindings)) and 
+                                         (fbindings[index1] >= 0) then begin
+      field1:= fields[fbindings[index1]];
+      inc(po1,sizeof(mseifi.fielddataty.header));
+      case pifidataty(po1)^.header.kind of
+       idk_int64: begin
+        inc(po1,decodeifidata(pifidataty(po1),int641));
+        field1.aslargeint:= int641;
+       end;
+       idk_real: begin
+        inc(po1,decodeifidata(pifidataty(po1),rea1));
+        field1.asfloat:= rea1;
+       end;
+       idk_currency: begin
+        inc(po1,decodeifidata(pifidataty(po1),cu1));
+        field1.ascurrency:= cu1;
+       end;
+       idk_bytes: begin
+        inc(po1,decodeifidata(pifidataty(po1),str1));
+        field1.asstring:= str1;
+       end;
+       idk_msestring: begin
+        inc(po1,decodeifidata(pifidataty(po1),mstr1));
+        if field1 is tmsestringfield then begin
+         tmsestringfield(field1).asmsestring:= mstr1;
+        end
+        else begin
+         field1.asstring:= mstr1;
+        end;
        end;
       end;
      end;
+     setfieldisnull(pointer(fmodifiedfields),index1); //reset changeflag
     end;
-    setfieldisnull(pointer(fmodifiedfields),index1); //reset changeflag
-    doremotedatachange;
-  end;
+    post;
+   end;
+   doremotedatachange;
+   try
+    bookmark:= bm;
+   except
+   end;
   finally
    exclude(fistate,ids_remotedata);  
+   enablecontrols;
   end;
  end;
 end;
