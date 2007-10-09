@@ -334,12 +334,15 @@ type
    procedure setformat(const avalue: string);
    procedure settextflags(const avalue: textflagsty);
    procedure setbar_frame(const avalue: tbarframe);
+   procedure readformat(reader: treader);
+   procedure writeformat(writer: twriter);
   protected
    procedure clientrectchanged; override;
    procedure dochange; override;
    procedure paintglyph(const canvas: tcanvas; 
                   const avalue; const arect: rectty); override;
    procedure internalcreateframe; override;
+   procedure defineproperties(filer: tfiler); override;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -357,7 +360,7 @@ type
    property bar_face: tbarface read fbar_face write setbar_face;
    property bar_frame: tbarframe read fbar_frame write setbar_frame;
    property valuescale: real read fvaluescale write setvaluescale; //default 0.01
-   property format: string read fformat write setformat;
+   property format: string read fformat write setformat stored false;
                    //default '0%', '' for no numeric
    property textflags: textflagsty read ftextflags write settextflags default
                               [tf_ycentered,tf_xcentered];
@@ -2699,6 +2702,22 @@ begin
  finally
   application.unlock;
  end;
+end;
+
+procedure tcustomprogressbar.defineproperties(filer: tfiler);
+begin
+ filer.defineproperty('format',{$ifdef FPC}@{$endif}readformat,
+                                    {$ifdef FPC}@{$endif}writeformat,true);
+end;
+
+procedure tcustomprogressbar.readformat(reader: treader);
+begin
+ fformat:= reader.readwidestring;
+end;
+
+procedure tcustomprogressbar.writeformat(writer: twriter);
+begin
+ writer.writewidestring(fformat);
 end;
 
 end.

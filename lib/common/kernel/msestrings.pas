@@ -382,6 +382,7 @@ function utf8tostring(const value: pchar): msestring; overload;
 function utf8tostring(const value: utf8string): msestring; overload;
 function stringtolatin1(const value: msestring): string;
 function latin1tostring(const value: string): msestring;
+function ucs4tostring(const achar: dword): msestring;
 
 type
 // getkeystringfuncty = function (const index: integer;
@@ -614,6 +615,19 @@ begin
  setlength(result,length(value));
  for int1:= 1 to length(result) do begin
   result[int1]:= widechar(value[int1]);
+ end;
+end;
+
+function ucs4tostring(const achar: dword): msestring;
+begin
+ if achar < $10000 then begin
+  setlength(result,1);
+  result[1]:= msechar(achar);
+ end
+ else begin
+  setlength(result,2);
+  result[1]:= msechar(word((achar shr 10) and $3ff or $d800));
+  result[2]:= msechar(word(achar) and $3ff or $dc00);
  end;
 end;
 

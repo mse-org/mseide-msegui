@@ -252,6 +252,7 @@ var
  mousecursor: hcursor;
  keystate: tkeyboardstate;
  charbuffer: msestring;
+ shiftstate: shiftstatesty;
 
  cursors: array[cursorshapety] of cardinal;
 
@@ -3755,11 +3756,26 @@ var
  size1: sizety;
  button: mousebuttonty;
  po1: pointty;
- shiftstate: shiftstatesty;
  key1: keyty;
+ str1: string;
 begin
  result:= 1;
  case msg of
+  wm_ime_char: begin
+   if iswin95 then begin
+    str1:= char(wparam);
+    if wparam and $ff00 <> 0 then begin
+     str1:= char(wparam shr 8) + str1;
+    end;
+    charbuffer:= charbuffer + str1;    
+   end
+   else begin
+    charbuffer:= charbuffer + ucs4tostring(wparam);
+   end;
+   eventlist.add(tkeyevent.create(ahwnd,false,key_none,key_none,shiftstate,
+                                    charbuffer));
+   charbuffer:= '';
+  end;
   wm_close: begin
    eventlist.add(twindowevent.create(ek_close,ahwnd));
    result:= 0;
@@ -3918,8 +3934,8 @@ begin
     escapepressed:= true;
    end;
    eventlist.add(tkeyevent.create(ahwnd,false,key1,key1,shiftstate,
-                                    msestring(charbuffer)));
-   setlength(charbuffer,0);
+                                    charbuffer));
+   charbuffer:= '';
    result:= 0;
    exit;
   end;
@@ -4228,6 +4244,7 @@ begin
  mousecursor:= 0;
  applicationwindow:= 0;
  fillchar(keystate,sizeof(keystate),0);
+ shiftstate:= [];
  charbuffer:= '';
  gui_setmainthread;
  eventlist:= tobjectqueue.create(true);

@@ -478,7 +478,7 @@ begin
    finfo.text.text:= stringfromchar(fpasswordchar,length(wstr1));
   end;
   fcaretpos:= textindextopos(canvas,finfo,fcurindex);
-  postotextindex(canvas,finfo,fcaretpos,fcurindex);
+//  postotextindex(canvas,finfo,fcaretpos,fcurindex);
   if fpasswordchar <> #0 then begin
    finfo.text.text:= wstr1;
   end;
