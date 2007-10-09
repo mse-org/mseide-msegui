@@ -11,11 +11,12 @@ type
  
  ifireckindty = (ik_none,ik_data,ik_itemheader,ik_actionfired,ik_propertychanged,
                  ik_widgetcommand,ik_widgetproperties,ik_requestmodule,ik_moduledata,
-                 ik_requestfielddefs,ik_fielddefsdata,ik_fieldrec);
+                 ik_requestfielddefs,ik_fielddefsdata,ik_fieldrec,
+                 ik_requestopends,ik_dsdata);
  ifinamety = array[0..0] of char; //null terminated
  pifinamety = ^ifinamety;
 
- ifidatakindty = (idk_none,idk_int64,idk_currency,idk_real,
+ ifidatakindty = (idk_none,idk_null,idk_int64,idk_currency,idk_real,
                   idk_msestring,{idk_ansistring,}idk_bytes);
  
  datarecty = record //dummy
@@ -105,6 +106,9 @@ type
  end;
  pfielddataty = ^fielddataty;
 
+ requestopendsty = record
+  header: itemheaderty;
+ end;   
  fieldreckindty = (frk_edit,frk_insert,frk_delete);  
  fieldrecdataty = record
   kind: fieldreckindty;
@@ -117,6 +121,19 @@ type
  fieldrecty = record
   header: itemheaderty;
   data: fieldrecdataty;
+ end;
+
+ recdataty = record
+  count: integer; //recordcount
+  data: datarecty; //dummy, array[count] of 
+                            //array[fielddef count] of ifidataty
+ end;
+ precdataty = ^recdataty;
+ 
+ dsdataty = record
+  header: itemheaderty;
+  fileddefs: fielddefsdatadataty;
+  recdata: recdataty;
  end;
  
 const
@@ -164,6 +181,9 @@ type
    );
    ik_fieldrec: (
     fieldrec: fieldrecty;
+   );
+   ik_requestopends: (
+    requestopends: requestopendsty;
    )
  end;
  pifirecty = ^ifirecty;
@@ -537,7 +557,8 @@ function ifinametostring(const source: pifinamety;
                out dest: string): integer;
 function stringtoifiname(const source: string;
                const dest: pifinamety): integer;
-               
+
+function encodeifinull(const headersize: integer = 0): string;               
 function encodeifidata(const avalue: integer; 
                        const headersize: integer = 0): string; overload;
 function encodeifidata(const avalue: int64; 
@@ -551,6 +572,7 @@ function encodeifidata(const avalue: msestring;
 function encodeifidata(const avalue: ansistring; 
                        const headersize: integer = 0): string; overload;
 
+function skipifidata(const source: pifidataty): integer;
 function decodeifidata(const source: pifidataty; out dest: msestring): integer;
 function decodeifidata(const source: pifidataty; out dest: string): integer;
 function decodeifidata(const source: pifidataty; out dest: int64): integer;
@@ -574,11 +596,14 @@ const
   sizeof(ifiheaderty)+sizeof(moduledataty),      //ik_moduledata
   sizeof(ifiheaderty)+sizeof(requestfielddefsty),//ik_requestfielddefs
   sizeof(ifiheaderty)+sizeof(fielddefsdataty),   //ik_fielddefsdata
-  sizeof(ifiheaderty)+sizeof(fieldrecty)         //ik_fieldrec
+  sizeof(ifiheaderty)+sizeof(fieldrecty),        //ik_fieldrec
+  sizeof(ifiheaderty)+sizeof(requestopendsty),    //ik_requestopends
+  sizeof(ifiheaderty)+sizeof(dsdataty)           //ik_dsdata
  );
 
  datarecsizes: array[ifidatakindty] of integer = (
   sizeof(ifidataty),                             //idk_none
+  sizeof(ifidataty),                             //idk_null
   sizeof(ifidataty)+sizeof(int64),               //idk_int64
   sizeof(ifidataty)+sizeof(currency),            //idk_currency
   sizeof(ifidataty)+sizeof(double),              //idk_real
@@ -619,6 +644,11 @@ begin
  inc(result,headersize);
  pifidataty(result)^.header.kind:= kind;
  inc(result,sizeof(ifidataty.header));
+end;
+
+function encodeifinull(const headersize: integer = 0): string;               
+begin
+ initdataheader(headersize,idk_null,0,result)
 end;
 
 function encodeifidata(const avalue: integer; 
@@ -665,6 +695,25 @@ end;
 procedure datakinderror;
 begin
  raise exception.create('Wrong datakind.');
+end;
+
+function skipifidata(const source: pifidataty): integer;
+var
+ str1: string;
+begin
+ case source^.header.kind of
+  idk_msestring: begin
+   ifinametostring(pifinamety(@source^.data),str1);
+   result:= length(str1);
+  end;
+  idk_bytes: begin
+   result:= pifibytesty(@source^.data)^.length;
+  end;
+  else begin
+   result:= 0;
+  end;
+ end;
+ result:= result + datarecsizes[source^.header.kind];
 end;
 
 function decodeifidata(const source: pifidataty; out dest: msestring): integer;

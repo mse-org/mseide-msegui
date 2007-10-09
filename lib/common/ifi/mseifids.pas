@@ -134,7 +134,10 @@ type
    procedure checkrecno(const avalue: integer);
    procedure processdata(const adata: pifirecty);
    procedure requestfielddefsreceived(const asequence: sequencety); virtual;
+   procedure requestopendsreceived(const asequence: sequencety); virtual;
    procedure fielddefsdatareceived( const asequence: sequencety; 
+                                 const adata: pfielddefsdatadataty); virtual;
+   procedure dsdatareceived( const asequence: sequencety; 
                                  const adata: pfielddefsdatadataty); virtual;
    procedure fieldrecdatareceived(const adata: pfieldrecdataty); virtual;
    procedure doremotedatachange;
@@ -149,6 +152,10 @@ type
                     const asequence: sequencety; const datasize: integer;
                     out datapo: pchar);
    procedure postrecord(const akind: fieldreckindty);
+   function encoderecords: string;
+   function encoderecord(const aindex: integer; const recpo: pintrecordty): string;
+   procedure decoderecord(var adata: pointer; const dest: pintrecordty);
+   function decoderecords(const adata: precdataty; out asize: integer): boolean;
    
    procedure notimplemented(const atext: string);
    procedure objectevent(const sender: tobject; const event: objecteventty); virtual;   
@@ -250,6 +257,8 @@ type
   protected
    procedure fielddefsdatareceived(const asequence: sequencety; 
                                   const adata: pfielddefsdatadataty); override;
+   procedure dsdatareceived(const asequence: sequencety; 
+                                  const adata: pfielddefsdatadataty); override;
   published
    property fielddefs;
  end;
@@ -258,6 +267,7 @@ type
   private
   protected
    procedure requestfielddefsreceived(const asequence: sequencety); override;
+   procedure requestopendsreceived(const asequence: sequencety); override;
    procedure inheritedinternalopen; override;
   published
    property fielddefs;
@@ -276,7 +286,8 @@ const
             //name changed in FPC 2_2
 {$endif}
 
- ifidskinds = [ik_requestfielddefs,ik_fielddefsdata,ik_fieldrec];
+ ifidskinds = [ik_requestfielddefs,ik_requestopends,ik_fielddefsdata,
+               ik_fieldrec,ik_dsdata];
  openflags = [ids_openpending,ids_fielddefsreceived,ids_append];
  
 type
@@ -301,7 +312,7 @@ begin
  for int1:= 0 to fielddefs.count - 1 do begin
   int2:= int2 + length(fielddefs[int1].name);
  end;
- setlength(result,sizeof(fdefdataty)+fielddefs.count*sizeof(fdefitemty)+int2);
+ setlength(result,sizeof(fdefdataty)+fielddefs.count*sizeof(fdefitemty)+int2*6);
  with pfdefdataty(result)^ do begin
   count:= fielddefs.count;
   po1:= @items;
@@ -313,10 +324,11 @@ begin
    inc(po1,stringtoifiname(name,pifinamety(po1)));
   end;
  end;
+ setlength(result,pointer(po1)-pointer(result));
 end;
 
 function decodefielddefs(const adata: pfdefdataty;
-                  const fielddefs: tfielddefs): boolean;
+                  const fielddefs: tfielddefs; out asize: integer): boolean;
 var
  po1: pchar;
  int1: integer;
@@ -331,6 +343,7 @@ begin
   inc(po1,ifinametostring(pifinamety(po1),str1));
   tfielddef.create(fielddefs,str1,datatype1,0,false,int1+1);
  end;
+ asize:= pointer(po1) - pointer(adata);
  result:= true;
 end;
  
@@ -1345,8 +1358,14 @@ begin
      ik_requestfielddefs: begin
       requestfielddefsreceived(header.sequence);
      end;
+     ik_requestopends: begin
+      requestopendsreceived(header.sequence);
+     end;
      ik_fielddefsdata: begin
       fielddefsdatareceived(header.answersequence,pfielddefsdatadataty(po1));
+     end;
+     ik_dsdata: begin
+      dsdatareceived(header.answersequence,pfielddefsdatadataty(po1));
      end;
      ik_fieldrec: begin
       fieldrecdatareceived(pfieldrecdataty(po1));
@@ -1362,7 +1381,18 @@ begin
  //dummy
 end;
 
+procedure tifidataset.requestopendsreceived(const asequence: sequencety);
+begin
+ //dummy
+end;
+
 procedure tifidataset.fielddefsdatareceived(const asequence: sequencety;
+               const adata: pfielddefsdatadataty);
+begin
+ //dummy
+end;
+
+procedure tifidataset.dsdatareceived(const asequence: sequencety;
                const adata: pfielddefsdatadataty);
 begin
  //dummy
@@ -1377,30 +1407,32 @@ begin
  fchannel.waitforanswer(asequence,fdefaulttimeout);
 end;
 
-procedure tifidataset.postrecord(const akind: fieldreckindty);
- function encodefielddata(const ainfo: fieldinfoty): string;
- begin
-  with ainfo do begin
+function encodefielddata(const ainfo: fieldinfoty; const headersize: integer): string;
+begin
+ with ainfo do begin
+  if field.isnull then begin
+   result:= encodeifinull;
+  end
+  else begin
    case fieldtype of
     ftlargeint,ftinteger: begin
-     result:= encodeifidata(field.aslargeint,sizeof(fielddataheaderty));
+     result:= encodeifidata(field.aslargeint,headersize);
     end;
     ftfloat: begin
-     result:= encodeifidata(field.asfloat,sizeof(fielddataheaderty));
+     result:= encodeifidata(field.asfloat,headersize);
     end;
     ftbcd: begin
-     result:= encodeifidata(field.ascurrency,sizeof(fielddataheaderty));
+     result:= encodeifidata(field.ascurrency,headersize);
     end;
     ftblob,ftgraphic: begin
-     result:= encodeifidata(field.asstring,sizeof(fielddataheaderty));
+     result:= encodeifidata(field.asstring,headersize);
     end;
     ftstring: begin
      if field is tmsestringfield then begin
-      result:= encodeifidata(tmsestringfield(field).asmsestring,
-                                                   sizeof(fielddataheaderty));
+      result:= encodeifidata(tmsestringfield(field).asmsestring,headersize);
      end
      else begin
-      result:= encodeifidata(msestring(field.asstring),sizeof(fielddataheaderty));
+      result:= encodeifidata(msestring(field.asstring),headersize);
      end;
     end;
     else begin
@@ -1408,8 +1440,53 @@ procedure tifidataset.postrecord(const akind: fieldreckindty);
      exit;
     end;
    end;
+  end;
+ end;
+end;
+
+function tifidataset.encoderecord(const aindex: integer; const recpo: pintrecordty): string;
+begin
+ if getfieldisnull(pbyte(@recpo^.header.fielddata.nullmask),aindex) then begin
+  result:= encodeifinull;
+ end
+ else begin
+  with ffieldinfos[aindex] do begin
+   case fieldtype of
+    ftinteger: begin
+     result:= encodeifidata(pinteger(pointer(recpo)+offset)^);
+    end;
+    ftlargeint: begin
+     result:= encodeifidata(plargeint(pointer(recpo)+offset)^);
+    end;
+    ftfloat: begin
+     result:= encodeifidata(pdouble(pointer(recpo)+offset)^);
+    end;
+    ftbcd: begin
+     result:= encodeifidata(pcurrency(pointer(recpo)+offset)^);
+    end;
+    ftblob,ftgraphic: begin
+     result:= encodeifidata(pstring(pointer(recpo)+offset)^);
+    end;
+    ftstring: begin
+     result:= encodeifidata(pmsestring(pointer(recpo)+offset)^);
+    end;
+    else begin
+     result:='';
+     exit;
+    end;
+   end;
+  end;
+ end;
+end;
+
+procedure tifidataset.postrecord(const akind: fieldreckindty);
+
+ function encodefdat(const ainfo: fieldinfoty): string;
+ begin
+  result:= encodefielddata(ainfo,sizeof(fielddataheaderty));
+  if result <> '' then begin
    with pfielddataty(result)^ do begin
-    header.index:= field.fieldno-1;
+    header.index:= ainfo.field.fieldno-1;
    end;
   end;   
  end;
@@ -1428,7 +1505,7 @@ begin                 //postrecord
  if akind <> frk_delete then begin
   for int1:= 0 to high(ffieldinfos) do begin
    if not getfieldisnull(pointer(fmodifiedfields),int1) then begin
-    ar1[int2]:= encodefielddata(ffieldinfos[int1]);
+    ar1[int2]:= encodefdat(ffieldinfos[int1]);
     if ar1[int2] <> '' then begin
      inc(int2);
     end;
@@ -1499,6 +1576,10 @@ begin
       field1:= fields[fbindings[index1]];
       inc(po1,sizeof(mseifi.fielddataty.header));
       case pifidataty(po1)^.header.kind of
+       idk_null: begin
+        field1.clear;
+        inc(po1,sizeof(ifidataty));
+       end;
        idk_int64: begin
         inc(po1,decodeifidata(pifidataty(po1),int641));
         field1.aslargeint:= int641;
@@ -1622,17 +1703,143 @@ begin
  result:= fbrecordcount;
 end;
 
+function tifidataset.encoderecords: string;
+            //todo: optimize
+var
+ ind1: integer;
+
+ procedure put(const avalue: string; const alength: integer);
+ begin
+  if ind1 + alength > length(result) then begin
+   setlength(result,length(result)*2);
+  end;
+  move(avalue,result[ind1],alength);
+  inc(ind1,alength);
+ end;
+ 
+var
+ int1,int2: integer;
+ str1: string;
+  
+begin
+ setlength(result,16);
+ ind1:= 1;
+ move(fbrecordcount,result[1],sizeof(fbrecordcount));
+ inc(ind1,sizeof(fbrecordcount));
+ for int1:= 0 to fbrecordcount - 1 do begin
+  for int2:= 0 to high(fbindings) do begin
+   if fbindings[int2] >= 0 then begin
+    str1:= encoderecord(int2,fbufs[int1]);
+    if ind1 + length(str1) > length(result) then begin
+     setlength(result,length(result)*2+length(str1));
+    end;
+    move(str1[1],result[ind1],length(str1));
+    inc(ind1,length(str1));
+   end;
+  end;
+ end;
+ setlength(result,ind1 - 1);
+end;
+
+procedure tifidataset.decoderecord(var adata: pointer; const dest: pintrecordty);
+var
+ int641: int64;
+ double1: double;
+ cur1: currency;
+ mstr1: msestring;
+ str1: string; 
+ int1: integer;
+begin
+ for int1:= 0 to high(fbindings) do begin
+  if fbindings[int1] >= 0 then begin
+   if pifidataty(adata)^.header.kind <> idk_null then begin
+    unsetfieldisnull(pbyte(@dest^.header.fielddata.nullmask),fbindings[int1]);
+    with ffieldinfos[fbindings[int1]] do begin
+     case fieldtype of 
+      ftinteger: begin
+       inc(adata,decodeifidata(pifidataty(adata),int641));
+       pinteger(pointer(dest)+offset)^:= int641;
+      end;
+      ftlargeint: begin
+       inc(adata,decodeifidata(pifidataty(adata),int641));
+       plargeint(pointer(dest)+offset)^:= int641;
+      end;
+      ftfloat: begin
+       inc(adata,decodeifidata(pifidataty(adata),double1));
+       pdouble(pointer(dest)+offset)^:= double1;
+      end;
+      ftbcd: begin
+       inc(adata,decodeifidata(pifidataty(adata),cur1));
+       pcurrency(pointer(dest)+offset)^:= cur1;
+      end;
+      ftblob,ftgraphic: begin
+       inc(adata,decodeifidata(pifidataty(adata),str1));
+       pstring(pointer(dest)+offset)^:= str1;
+      end;
+      ftstring: begin
+       inc(adata,decodeifidata(pifidataty(adata),mstr1));
+       pmsestring(pointer(dest)+offset)^:= mstr1;
+      end;
+     end;
+    end;
+   end;
+  end
+  else begin
+   inc(adata,skipifidata(pifidataty(adata)));
+  end;
+ end;
+end;
+
+function tifidataset.decoderecords(const adata: precdataty;
+               out asize: integer): boolean;
+var
+ int1: integer;
+ po1: pointer;
+begin
+ result:= true;
+ fbrecordcount:= adata^.count;
+ setlength(fbufs,fbrecordcount);
+ po1:= @adata^.data;
+ for int1:= 0 to high(fbufs) do begin
+  fbufs[int1]:= intallocrecord;  
+  decoderecord(po1,fbufs[int1]);
+ end;
+ asize:= po1 -  pointer(adata);
+end;
+
 { trxdataset }
 
 procedure trxdataset.fielddefsdatareceived(const asequence: sequencety; 
                                     const adata: pfielddefsdatadataty);
+var
+ int1: integer;
 begin
  if (ids_openpending in fistate) and 
               (asequence = ffielddefsequence) then begin
-  if decodefielddefs(@adata^.data,fielddefs) then begin
+  if decodefielddefs(@adata^.data,fielddefs,int1) then begin
    exclude(fistate,ids_openpending);
    include(fistate,ids_fielddefsreceived);
 //  active:= true;
+  end
+  else begin
+   cancelconnection;
+  end;
+ end; 
+end;
+
+procedure trxdataset.dsdatareceived(const asequence: sequencety; 
+                                    const adata: pfielddefsdatadataty);
+var
+ int1,int2: integer;
+begin
+ if (ids_openpending in fistate) and 
+              (asequence = ffielddefsequence) then begin
+  if decodefielddefs(@adata^.data,fielddefs,int1) then begin
+   inherited inheritedinternalopen;
+   if decoderecords(@adata^.data+int1,int2) then begin
+    exclude(fistate,ids_openpending);
+    include(fistate,ids_fielddefsreceived);
+   end;
   end
   else begin
    cancelconnection;
@@ -1645,13 +1852,14 @@ var
  str1: ansistring;
  po1: pointer;
 begin
- inititemheader(str1,ik_requestfielddefs,0,0,po1);
+ inititemheader(str1,ik_requestopends,0,0,po1);
  include(fistate,ids_openpending);
  if senddataandwait(str1,ffielddefsequence) and 
             (ids_fielddefsreceived in fistate) then begin
-  inherited;
+//  inherited;
  end
  else begin
+  sysutils.abort;
   //error
  end;
 end;
@@ -1676,6 +1884,22 @@ begin
  end;
  senddata(str1);
 end;
-
+var testvar: integer;
+procedure ttxdataset.requestopendsreceived(const asequence: sequencety);
+var
+ str1,str2,str3: ansistring;
+ po1: pchar;
+begin
+ str2:= encodefielddefs(fielddefs);
+ str3:= encoderecords;
+ inititemheader(str1,ik_dsdata,asequence,length(str2)+length(str3),po1); 
+ with pfielddefsdatadataty(po1)^ do begin
+//  sequence:= asequence;
+  move(str2[1],data,length(str2));
+  move(str3[1],(@data+length(str2))^,length(str3));
+ end;
+ senddata(str1);
+testvar:= length(str2);
+end;
 
 end.
