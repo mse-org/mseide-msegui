@@ -4464,9 +4464,14 @@ var
  str1: string;
  bo1: boolean;
  int1: integer;
+ mstr1: msestring;
 begin
  if processeditchars then begin
-  datalist.addchars(pipe.readdatastring);
+  try
+   mstr1:= pipe.readdatastring;
+  except
+  end;
+  datalist.addchars(mstr1);
  end
  else begin
   inc(fgrid.fnoshowcaretrect);
@@ -4479,7 +4484,11 @@ begin
     repeat
      int1:= grid.rowhigh;
      bo1:= pipe.readuln(str1);
-     items[int1]:= items[int1]+str1;
+     try
+      mstr1:= str1;
+     except
+     end;
+     items[int1]:= items[int1]+mstr1;
      if bo1 then begin
       grid.appendrow;
      end;
@@ -4497,14 +4506,19 @@ procedure tcustomstringcol.readpipe(const text: string; const processeditchars: 
 var
  ar1: stringarty;
  int1: integer;
+ mstr1: string;
 begin
  ar1:= nil; //compiler warning
  if text <> '' then begin
+  try
+   mstr1:= text;
+  except
+  end;
   if processeditchars then begin
-   datalist.addchars(text);
+   datalist.addchars(mstr1);
   end
   else begin
-   ar1:= breaklines(text);
+   ar1:= breaklines(mstr1);
    inc(fgrid.fnoshowcaretrect);
    try
     grid.beginupdate;
