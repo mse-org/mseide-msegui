@@ -209,7 +209,7 @@ procedure actioninfotoshapeinfo(const sender: twidget; var actioninfo: actioninf
 
 procedure getshortcutlist(out keys: integerarty; out names: msestringarty);
 function getshortcutname(key: shortcutty): msestring;
-function getshortcutcode(const info: keyeventinfoty): shortcutty;
+function checkshortcutcode(const shortcut: shortcutty; const info: keyeventinfoty): boolean;
 function doactionshortcut(const sender: tobject; var info: actioninfoty;
                         var keyinfo: keyeventinfoty): boolean; //true if done
 function doactionexecute(const sender: tobject; var info: actioninfoty;
@@ -277,8 +277,7 @@ begin
  with info do begin
   if (shortcut <> 0) and not (as_disabled in state) and
                          not (es_processed in keyinfo.eventstate) then begin
-   key:= getshortcutcode(keyinfo);
-   if key = shortcut then begin
+   if checkshortcutcode(shortcut,keyinfo) then begin
     doactionexecute(sender,info);
     include(keyinfo.eventstate,es_processed);
     result:= true;
@@ -444,15 +443,31 @@ begin
  end;
 end;
 
-function getshortcutcode(const info: keyeventinfoty): shortcutty;
+function checkshortcutcode(const shortcut: shortcutty;
+                             const info: keyeventinfoty): boolean;
+var
+ acode: shortcutty;
 begin
  with info do begin
-  if (key >= key_0) and (key <= key_9) then begin
-   result:= ord(info.keynomod);
-  end
-  else begin   
-   result:= ord(info.key);
+  acode:= 0;
+  if ss_shift in info.shiftstate then begin
+   acode:= acode or key_modshift;
   end;
+  if ss_ctrl in info.shiftstate then begin
+   acode:= acode or key_modctrl;
+  end;
+  if ss_alt in info.shiftstate then begin
+   acode:= acode or key_modalt;
+  end;
+  result:= (acode or ord(info.key) = shortcut) or 
+                     (acode or ord(info.keynomod) = shortcut);
+ end;
+end;
+
+function getshortcutcodenomod(const info: keyeventinfoty): shortcutty;
+begin
+ with info do begin
+  result:= ord(info.keynomod);
   if ss_shift in info.shiftstate then begin
    result:= result or key_modshift;
   end;

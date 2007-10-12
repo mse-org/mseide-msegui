@@ -1942,12 +1942,10 @@ end;
 procedure tdbnavigator.doshortcut(var info: keyeventinfoty; const sender: twidget);
 var
  bu1: dbnavigbuttonty;
- wo1: word;
 begin
  if not (csdesigning in componentstate) then begin
-  wo1:= getshortcutcode(info);
   for bu1:= low(dbnavigbuttonty) to high(dbnavigbuttonty) do begin
-   if wo1 = fshortcuts[bu1] then begin
+   if checkshortcutcode(fshortcuts[bu1],info) then begin
     if buttons[ord(bu1)].enabled then begin
      fdatalink.execbutton(bu1);
      include(info.eventstate,es_processed);
