@@ -27,8 +27,9 @@ procedure gui_resetescapepressed;
 
 
 function gui_createwindow(const rect: rectty; const options: internalwindowoptionsty;
-                               out id: winidty): guierrorty;
-function gui_destroywindow(id: winidty): guierrorty;
+                               var awindow: windowty): guierrorty;
+function gui_destroywindow(var awindow: windowty): guierrorty;
+                      //id can be 0
 
 function gui_creategc(paintdevice: paintdevicety; const akind: gckindty;
                 var gc: gcty; const aprintername: msestring = ''): guierrorty;
@@ -48,6 +49,12 @@ function gui_setsizeconstraints(id: winidty; const min,max: sizety): guierrorty;
 function gui_reposwindow(id: winidty; const rect: rectty;
                               const embedded: boolean = false): guierrorty;
 function gui_setwindowfocus(id: winidty): guierrorty;
+function gui_setimefocus(var awindow: windowty): guierrorty;
+function gui_unsetimefocus(var awindow: windowty): guierrorty;
+{
+function gui_windowgetfocus(var awindow: windowty): guierrorty;
+function gui_windowloosefocus(var awindow: windowty): guierrorty;
+}
 function gui_setappfocus(id: winidty): guierrorty;
 function gui_setwindowgroup(id: winidty; group: winidty): guierrorty;
 function gui_settransientfor(id: winidty; transientfor: winidty): guierrorty;

@@ -27,7 +27,7 @@ type
                         
  tcustomwindowwidget = class(teventwidget)
   private
-   fclientwinid: winidty;
+   fclientwindow: windowty;
    fchildrect: rectty;
    fviewport: rectty;
    faspect: real;
@@ -69,7 +69,7 @@ type
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
-   function createchildwindow: winidty;
+   procedure createchildwindow;
    function hasclientwinid: boolean;
    property clientwinid: winidty read getclientwinid;
    property childrect: rectty read getchildrect;
@@ -155,10 +155,10 @@ end;
 function tcustomwindowwidget.getclientwinid: winidty;
 begin
  checkclientwinid;
- result:= fclientwinid;
+ result:= fclientwindow.id;
 end;
 
-function tcustomwindowwidget.createchildwindow: winidty;
+procedure tcustomwindowwidget.createchildwindow;
 var
  options1: internalwindowoptionsty;
  rect1: rectty;
@@ -167,7 +167,8 @@ begin
  addpoint1(rect1.pos,rootpos);
  fillchar(options1,sizeof(options1),0);
  options1.parent:= window.winid;
- guierror(gui_createwindow(rect1,options1,result),self);
+ guierror(gui_createwindow(rect1,options1,fclientwindow),self);
+// result:= fclientwindow.id;
 end;
 
 procedure tcustomwindowwidget.checkclientwinid;
@@ -175,12 +176,12 @@ var
  options1: internalwindowoptionsty;
  rect1: rectty;
 begin
- if fclientwinid = 0 then begin
+ if fclientwindow.id = 0 then begin
   rect1:= innerwidgetrect;
   addpoint1(rect1.pos,rootpos);
-  docreatewinid(window.winid,rect1,fclientwinid);
-  if fclientwinid = 0 then begin
-   fclientwinid:= createchildwindow;
+  docreatewinid(window.winid,rect1,fclientwindow.id);
+  if fclientwindow.id = 0 then begin
+   createchildwindow;
   end;
   if fwindow <> nil then begin
    fwindow.registeronscroll({$ifdef FPC}@{$endif}windowscrolled);
@@ -191,12 +192,12 @@ end;
 
 procedure tcustomwindowwidget.destroyclientwindow;
 begin
- if fclientwinid <> 0 then begin
+ if fclientwindow.id <> 0 then begin
   dodestroywinid;
-  gui_destroywindow(fclientwinid);
-  fclientwinid:= 0;
-  fchildrect:= nullrect;
  end;
+ gui_destroywindow(fclientwindow);
+ fillchar(fclientwindow,sizeof(fclientwindow),0);
+ fchildrect:= nullrect;
 end;
 
 procedure tcustomwindowwidget.checkwindowrect;
@@ -204,7 +205,7 @@ var
  rect1,rect2: rectty;
  bo1: boolean;
 begin
- if fclientwinid <> 0 then begin
+ if fclientwindow.id <> 0 then begin
   bo1:= false;
   rect1:= innerwidgetrect;
   rect2:= intersectrect(rect1,clippedpaintrect);
@@ -214,7 +215,7 @@ begin
   if not rectisequal(rect2,fchildrect) then begin
    bo1:= true;
    fchildrect:= rect2;
-   gui_reposwindow(fclientwinid,rect2,true);
+   gui_reposwindow(fclientwindow.id,rect2,true);
   end;
   if not rectisequal(rect1,fviewport) then begin
    bo1:= true;
@@ -256,20 +257,20 @@ end;
 
 procedure tcustomwindowwidget.checkclientvisible;
 begin
- if fclientwinid <> 0 then begin
+ if fclientwindow.id <> 0 then begin
   if isvisible and parentisvisible then begin
-   gui_showwindow(fclientwinid);
+   gui_showwindow(fclientwindow.id);
   end
   else begin
-   gui_hidewindow(fclientwinid);
+   gui_hidewindow(fclientwindow.id);
   end;
  end;
 end;
 
 procedure tcustomwindowwidget.winiddestroyed(const awinid: winidty);
 begin
- if awinid = fclientwinid then begin
-  fclientwinid:= 0;
+ if awinid = fclientwindow.id then begin
+  fclientwindow.id:= 0;
  end;
  if (fwindow <> nil) and (fwindow.haswinid) then begin
   destroyclientwindow;
@@ -287,7 +288,7 @@ end;
 procedure tcustomwindowwidget.dodestroywinid;
 begin
  if canevent(tmethod(fondestroywinid)) then begin
-  fondestroywinid(self,fclientwinid);
+  fondestroywinid(self,fclientwindow.id);
  end;
 end;
 
@@ -310,7 +311,7 @@ end;
 
 function tcustomwindowwidget.hasclientwinid: boolean;
 begin
- result:= fclientwinid <> 0;
+ result:= fclientwindow.id <> 0;
 end;
 
 procedure tcustomwindowwidget.doloaded;

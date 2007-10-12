@@ -347,6 +347,26 @@ begin
   bottom:= abottom;
  end;
 end;
+{
+function gui_windowgetfocus(var awindow: windowty): guierrorty;
+begin
+ result:= gue_ok;
+end;
+
+function gui_windowloosefocus(var awindow: windowty): guierrorty;
+begin
+ result:= gue_ok;
+end;
+}
+function gui_setimefocus(var awindow: windowty): guierorty;
+begin
+ result:= gue_ok;
+end;
+
+function gui_unsetimefocus(var awindow: windowty): guierorty;
+begin
+ result:= gue_ok;
+end;
 
 function gui_regiontorects(const aregion: regionty): rectarty;
 var
@@ -1738,20 +1758,24 @@ begin
  end;
 end;
 
-function gui_destroywindow(id: winidty): guierrorty;
+function gui_destroywindow(var awindow: windowty): guierrorty;
 begin
- if windows.DestroyWindow(id) then begin
-  result:= gue_ok;
- end
- else begin //foreign thread
-  if windows.postthreadmessage(mainthread,destroymessage,id,0) then begin
-   result:= gue_ok;
-  end
-  else begin
-   result:= gue_destroywindow;
+ with awindow do begin
+  if id <> 0 then begin
+   if windows.DestroyWindow(id) then begin
+    result:= gue_ok;
+   end
+   else begin //foreign thread
+    if windows.postthreadmessage(mainthread,destroymessage,id,0) then begin
+     result:= gue_ok;
+    end
+    else begin
+     result:= gue_destroywindow;
+    end;
+   end;
+   windowdestroyed(id);
   end;
  end;
- windowdestroyed(id);
 end;
 
 function gui_showwindow(id: winidty): guierrorty;
@@ -4132,13 +4156,13 @@ begin
 end;
 
 function gui_createwindow(const rect: rectty; const options: internalwindowoptionsty;
-                             out id: winidty): guierrorty;
+                             var awindow: windowty): guierrorty;
 var
  windowstyle,windowstyleex,ca2: cardinal;
  rect1: rectty;
  classname: string;
 begin
- with options do begin
+ with awindow,options do begin
   windowstyleex:= 0;
   if wo_popup in options then begin
    windowstyle:= ws_popup;

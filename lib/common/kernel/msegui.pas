@@ -1290,9 +1290,13 @@ type
 
  windowsizety = (wsi_normal,wsi_minimized,wsi_maximized,wsi_fullscreen);
 
+ windowty = record
+  id: winidty;
+  platformdata: array[0..7] of pointer;
+ end;
+ 
  twindow = class(teventobject,icanvas)
   private
-   fwinid: winidty;
    fstate: windowstatesty;
    ffocuscount: cardinal; //for recursive setwidgetfocus
    factivecount: cardinal; //for recursive activate,deactivate
@@ -1344,6 +1348,7 @@ type
    function getbuttonendmodal: boolean;
    procedure setbuttonendmodal(const value: boolean);
   protected
+   fwindow: windowty;
    fowner: twidget;
    fcanvas: tcanvas;
    fasynccanvas: tcanvas;
@@ -1560,7 +1565,6 @@ type
    procedure setclientmousewidget(const widget: twidget);
    procedure capturemouse(sender: twidget; grab: boolean);
                //sender = nil for release
-   function findwindow(id: winidty; out window: twindow): boolean;
    procedure activatehint;
    procedure deactivatehint;
    procedure hinttimer(const sender: tobject);
@@ -1580,6 +1584,7 @@ type
    procedure receiveevent(const event: tobjectevent); override;
   public
    procedure langchanged;
+   function findwindow(id: winidty; out window: twindow): boolean;
    procedure checkwindowrect(winid: winidty; var rect: rectty);
                //callback from win32 wm_sizing
    function ismainthread: boolean;
@@ -5897,7 +5902,7 @@ end;
 
 function twidget.ownswindow: boolean;
 begin
- result:= (fwindow <> nil) and (fwindow.fowner = self) and (fwindow.fwinid <> 0);
+ result:= (fwindow <> nil) and (fwindow.fowner = self) and (fwindow.fwindow.id <> 0);
 end;
 
 function twidget.updaterect: rectty; //invalidated area, origin = clientpos
@@ -7872,7 +7877,7 @@ begin
   else begin
    exclude(fwidgetstate,ws_visible);
    if not (csloading in componentstate) and ownswindow then begin
-    gui_hidewindow(fwindow.fwinid);
+    gui_hidewindow(fwindow.fwindow.id);
    end;
   end;
  end;
@@ -9169,14 +9174,14 @@ end;
 
 procedure twindow.sizeconstraintschanged;
 begin
- if fwinid <> 0 then begin
-  guierror(gui_setsizeconstraints(fwinid,fowner.fminsize,fowner.fmaxsize));
+ if fwindow.id <> 0 then begin
+  guierror(gui_setsizeconstraints(fwindow.id,fowner.fminsize,fowner.fmaxsize));
  end;
 end;
 
 function twindow.haswinid: boolean;
 begin
- result:= fwinid <> 0;
+ result:= fwindow.id <> 0;
 end;
 
 procedure twindow.createwindow;
@@ -9185,7 +9190,7 @@ var
  aoptions: windowinfoty;
  aoptions1: internalwindowoptionsty;
 begin
- if fwinid = 0 then begin
+ if fwindow.id = 0 then begin
   fnormalwindowrect:= fowner.fwidgetrect;
   fillchar(aoptions,sizeof(aoptions),0);
   fillchar(aoptions1,sizeof(aoptions1),0);
@@ -9227,21 +9232,21 @@ begin
    end;
   end;
 
-  guierror(gui_createwindow(fowner.fwidgetrect,aoptions1,fwinid),self);
+  guierror(gui_createwindow(fowner.fwidgetrect,aoptions1,fwindow),self);
   sizeconstraintschanged;
   fstate:= fstate - [tws_posvalid,tws_sizevalid];
   fillchar(gc,sizeof(gcty),0);
-  guierror(gui_creategc(fwinid,gck_screen,gc),self);
-  fcanvas.linktopaintdevice(fwinid,gc,fowner.fwidgetrect.size,nullpoint);
+  guierror(gui_creategc(fwindow.id,gck_screen,gc),self);
+  fcanvas.linktopaintdevice(fwindow.id,gc,fowner.fwidgetrect.size,nullpoint);
   finalize(gc);
   fillchar(gc,sizeof(gcty),0);
-  guierror(gui_creategc(fwinid,gck_screen,gc),self);
-  fasynccanvas.linktopaintdevice(fwinid,gc,fowner.fwidgetrect.size,nullpoint);
+  guierror(gui_creategc(fwindow.id,gck_screen,gc),self);
+  fasynccanvas.linktopaintdevice(fwindow.id,gc,fowner.fwidgetrect.size,nullpoint);
   if app <> nil then begin
    tinternalapplication(application).registerwindow(self);
   end;
   if fcaption <> '' then begin
-   gui_setwindowcaption(fwinid,fcaption);
+   gui_setwindowcaption(fwindow.id,fcaption);
   end;
   fowner.windowcreated;
  end
@@ -9263,24 +9268,24 @@ begin
  end;
  fcanvas.unlink;
  fasynccanvas.unlink;
- if fwinid <> 0 then begin
-  app.windowdestroyed(fwinid);
-  gui_destroywindow(fwinid);
-  fwinid:= 0;
+ if fwindow.id <> 0 then begin
+  app.windowdestroyed(fwindow.id);
  end;
+ gui_destroywindow(fwindow);
+ fillchar(fwindow,sizeof(fwindow),0);
  exclude(fstate,tws_windowvisible);
 end;
 
 procedure twindow.windowdestroyed;
 begin
- fwinid:= 0;
+ fwindow.id:= 0;
  destroywindow;
 end;
 
 procedure twindow.checkwindow(windowevent: boolean);
 begin
  if (app <> nil) and (aps_inited in app.fstate) then begin
-  if fwinid = 0 then begin
+  if fwindow.id = 0 then begin
    createwindow;
   end
   else begin
@@ -9289,7 +9294,7 @@ begin
     if visible and not windowevent and not (tws_needsdefaultpos in fstate) and
         (fmoving <= 0) then begin
      fnormalwindowrect:= fowner.fwidgetrect;
-     guierror(gui_reposwindow(fwinid,fnormalwindowrect),self);
+     guierror(gui_reposwindow(fwindow.id,fnormalwindowrect),self);
      fstate:= fstate + [tws_posvalid,tws_sizevalid];
     end;
    end;
@@ -9308,7 +9313,7 @@ procedure twindow.internalactivate(const windowevent: boolean;
    app.ffocuslocktransientfor:= ftransientfor;
   end;
   if app.ffocuslockwindow = nil then begin
-   guierror(gui_setwindowfocus(fwinid),self);
+   guierror(gui_setwindowfocus(fwindow.id),self);
   end;
  end;
  
@@ -9353,6 +9358,7 @@ begin
 //     if factivecount <> activecountbefore then begin
 //      exit;
 //     end;
+     gui_setimefocus(fwindow);
      if not windowevent then begin
       setwinfoc;
      end
@@ -9420,6 +9426,7 @@ begin
    app.fonactivechangelist.doactivechange(app.factivewindow,nil);
    if factivecount = activecountbefore then begin
     app.factivewindow:= nil;
+    gui_unsetimefocus(fwindow);
    end;
   end;
  end
@@ -9455,7 +9462,7 @@ var
 begin
  releasemouse;
  if not(ws_visible in fowner.fwidgetstate) then begin
-  if fwinid <> 0 then begin
+  if fwindow.id <> 0 then begin
    if tws_windowvisible in fstate then begin
     if not windowevent or (app.factivewindow = self) then begin
      endmodal;
@@ -9470,8 +9477,8 @@ begin
      include(fstate,tws_groupminimized);
      for int1:= 0 to high(app.fwindows) do begin
       window1:= app.fwindows[int1];
-      if (window1 <> self) and (window1.fwinid <> 0) and 
-                        gui_windowvisible(window1.fwinid) then begin
+      if (window1 <> self) and (window1.fwindow.id <> 0) and 
+                        gui_windowvisible(window1.fwindow.id) then begin
        with window1 do begin
         include(fstate,tws_grouphidden);
         if tws_windowvisible in fstate then begin
@@ -9487,7 +9494,7 @@ begin
     end;
     if not windowevent then begin
      exclude(fstate,tws_grouphidden);
-     gui_hidewindow(fwinid);
+     gui_hidewindow(fwindow.id);
     end;
    end;
   end;
@@ -9525,7 +9532,7 @@ begin
      if (fwindowpos = wp_normal) and 
                                not (tws_needsdefaultpos in fstate) then begin
 //      gui_reposwindow(fwinid,fowner.fwidgetrect);
-      gui_reposwindow(fwinid,fnormalwindowrect);
+      gui_reposwindow(fwindow.id,fnormalwindowrect);
      end;
     end;
     exclude(fstate,tws_grouphidden);
@@ -9955,7 +9962,7 @@ begin
   for int1:= 0 to app.feventlist.count - 1 do begin
    event:= twindowrectevent(app.feventlist[int1]);
    if (event <> nil) and (event.kind = ek_expose) and
-             (event.fwinid = fwinid) then begin
+             (event.fwinid = fwindow.id) then begin
     invalidaterect(event.frect);
     app.feventlist[int1]:= nil;
     event.free;
@@ -9969,7 +9976,7 @@ end;
 procedure twindow.movewindowrect(const dist: pointty;
   const rect: rectty);
 begin
- gui_movewindowrect(fwinid,dist,rect);
+ gui_movewindowrect(fwindow.id,dist,rect);
 end;
 
 function twindow.getsize: sizety;
@@ -10113,12 +10120,12 @@ begin
     inc(ftransientfor.ftransientforcount);
    end;
 //   getobjectlinker.setlinkedvar(iobjectlink(self),value,tlinkedobject(ftransientfor));
-   if fwinid <> 0 then begin
+   if fwindow.id <> 0 then begin
     if value <> nil then begin
-     gui_settransientfor(fwinid,value.winid);
+     gui_settransientfor(fwindow.id,value.winid);
     end
     else begin
-     gui_settransientfor(fwinid,0);
+     gui_settransientfor(fwindow.id,0);
     end;
    end;
   end;
@@ -10128,7 +10135,7 @@ end;
 function twindow.winid: winidty;
 begin
  checkwindow(false);
- result:= fwinid;
+ result:= fwindow.id;
 end;
 
 procedure twindow.hidden;
@@ -10175,8 +10182,8 @@ end;
 procedure twindow.setcaption(const avalue: msestring);
 begin
  fcaption:= avalue;
- if fwinid <> 0 then begin
-  gui_setwindowcaption(fwinid,fcaption);
+ if fwindow.id <> 0 then begin
+  gui_setwindowcaption(fwindow.id,fcaption);
  end;
 end;
 
@@ -10251,7 +10258,7 @@ end;
 function twindow.visible: boolean;
 begin
  result:= fowner.visible and (tws_windowvisible in fstate) and
-      (fwinid <> 0) and (gui_getwindowsize(fwinid) <> wsi_minimized);
+      (fwindow.id <> 0) and (gui_getwindowsize(fwindow.id) <> wsi_minimized);
 end;
 
 function twindow.normalwindowrect: rectty;
@@ -10356,7 +10363,7 @@ begin
  end;
  fwindowpos := Value;
  if (wpo1 = wp_fullscreen) and (value = wp_normal) then begin
-  gui_reposwindow(fwinid,fnormalwindowrect);
+  gui_reposwindow(fwindow.id,fnormalwindowrect);
        //needed for win32
  end;
 end;
@@ -11073,9 +11080,9 @@ begin
     window.activated;
    end
    else begin
-    if fmodalwindow.fwinid <> 0 then begin
+    if fmodalwindow.fwindow.id <> 0 then begin
      if not fmodalwindow.visible then begin
-      gui_showwindow(fmodalwindow.fwinid);
+      gui_showwindow(fmodalwindow.fwindow.id);
      end;
      if ffocuslockwindow <> nil then begin //reactivate modal window
       if ffocuslocktransientfor <> nil then begin
@@ -11083,9 +11090,9 @@ begin
       end;
      end
      else begin
-      gui_setwindowfocus(fmodalwindow.fwinid);
+      gui_setwindowfocus(fmodalwindow.fwindow.id);
      end;
-     gui_raisewindow(fmodalwindow.fwinid);
+     gui_raisewindow(fmodalwindow.fwindow.id);
     end;
    end;
   end;
@@ -11136,7 +11143,7 @@ begin
  lock;
  try
   removeitem(pointerarty(fwindows),window);
-  if window.fwinid = fmousewinid then begin
+  if window.fwindow.id = fmousewinid then begin
    fmousewinid:= 0;
   end;
  finally
@@ -12034,7 +12041,7 @@ var
 begin
  for int1:= 0 to high(fwindows) do begin
   with fwindows[int1] do begin
-   if fwinid <> id then begin
+   if fwindow.id <> id then begin
     exclude(fstate,tws_grab);
    end;
   end;
@@ -12328,7 +12335,7 @@ var
 begin
  result:= false;
  for int1:= 0 to high(fwindows) do begin
-  if fwindows[int1].fwinid = id then begin
+  if fwindows[int1].fwindow.id = id then begin
    window:= fwindows[int1];
    result:= true;
    exit;
@@ -12349,11 +12356,11 @@ begin
  id:= 0;
  if awindow = nil then begin
   if factivewindow <> nil then begin
-   id:= factivewindow.fwinid;
+   id:= factivewindow.fwindow.id;
   end;
  end
  else begin
-  id:= awindow.fwinid;
+  id:= awindow.fwindow.id;
  end;
  result:= gui_getworkarea(id);
 end;
@@ -12730,8 +12737,8 @@ begin
    id:= value.winid;
    for int1:= 0 to high(fwindows) do begin
     with fwindows[int1] do begin
-     if fwinid <> 0 then begin
-      gui_setwindowgroup(fwinid,id);
+     if fwindow.id <> 0 then begin
+      gui_setwindowgroup(fwindow.id,id);
      end;
     end;
    end;

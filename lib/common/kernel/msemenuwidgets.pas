@@ -1578,9 +1578,9 @@ begin
      end;
     end
     else begin
-     if activateoptionset then begin
+//     if activateoptionset then begin
       window.stackover(nil);
-     end;
+//     end;
     end;
    end;
   end;

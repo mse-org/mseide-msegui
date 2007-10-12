@@ -141,6 +141,8 @@ function XSetLocaleModifiers(modifier_list: pchar): pchar; cdecl;
                               external sXLib name 'XSetLocaleModifiers';
 function XSetICValues(IC: XIC): PChar; cdecl; varargs;
                               external sXLib name 'XSetICValues';
+function XGetICValues(IC: XIC): PChar; cdecl; varargs;
+                              external sXLib name 'XGetICValues';
 procedure XSetICFocus(IC: XIC); cdecl;
                               external sXLib name 'XSetICFocus';
 procedure XUnsetICFocus(IC: XIC); cdecl;
@@ -256,6 +258,7 @@ var
  
 type
  tsimplebitmap1 = class(tsimplebitmap);
+ twindow1 = class(msegui.twindow);
 
 {$ifdef FPC}
  {$macro on}
@@ -340,6 +343,11 @@ type
  end;
  pxregion = ^xregion;
 
+ x11windowty = record
+  ic: xic;
+  platformdata: array[1..7] of pointer;
+ end;
+ 
  xftstatety = (xfts_clipregionvalid{,xfts_colorvalid});
  xftstatesty = set of xftstatety;
  x11gcty = record
@@ -689,7 +697,9 @@ var
 // cursorshape: cursorshapety;
  screencursor: cursor;
  im: xim;
- ic: xic;
+ appic: xic;
+ appicmask: longword;
+ icwindow: windowty;
  errorhandlerbefore: xerrorhandler;
  lasteventtime: cardinal;
 // lastshiftstate: shiftstatesty;
@@ -1908,12 +1918,61 @@ begin
   end;
  end;
 end;
+{
+procedure printwindowname(aid: winidty; const atext: string);
+var
+ window1: twindow1;
+begin
+ if application.findwindow(aid,window1) then begin
+  writeln(window1.fowner.name,' ',atext);
+ end;
+end;
+}
+function getic(const awindow: winidty): xic;
+var
+ window1: twindow1;
+begin
+ result:= appic;
+ if application.findwindow(awindow,window1) then begin
+  with x11windowty(window1.fwindow.platformdata) do begin
+   if ic <> nil then begin
+    result:= ic;
+   end;
+  end;
+ end;
+end;
 
 function gui_setwindowfocus(id: winidty): guierrorty;
 begin
+// xseticfocus(getic(id));
  waitfordecoration(id);
  xsetinputfocus(appdisp,id,reverttoparent,currenttime);
  result:= gue_ok;
+end;
+
+function gui_setimefocus(var awindow: windowty): guierrorty;
+begin
+ result:= gue_ok;
+ with awindow,x11windowty(platformdata) do begin
+  if ic <> nil then begin
+   xseticvalues(ic,pchar(xnfocuswindow),id);
+   xseticfocus(ic);
+  end
+  else begin
+   xseticvalues(appic,pchar(xnfocuswindow),id);
+   xseticfocus(appic);
+  end;
+ end;
+end;
+
+function gui_unsetimefocus(var awindow: windowty): guierrorty;
+begin
+ result:= gue_ok;
+ with x11windowty(awindow.platformdata) do begin
+  if ic <> nil then begin
+   xunseticfocus(ic);
+  end;
+ end;
 end;
 
 function gui_setappfocus(id: winidty): guierrorty;
@@ -2511,102 +2570,159 @@ begin
 end;
 
 function gui_createwindow(const rect: rectty; const options: internalwindowoptionsty;
-                               out id: winidty): guierrorty;
+                               var awindow: windowty): guierrorty;
 var
  attributes: xsetwindowattributes;
  valuemask: longword;
  width,height: integer;
  id1: winidty;
+ icmask: longword;
 begin
- valuemask:= 0;
- if wo_popup in options.options then begin
-  attributes.override_redirect:= {$ifdef FPC}true{$else}1{$endif};
-  valuemask:= valuemask or cwoverrideredirect;
- end;
- {
- if (wo_popup in options.options) and (options.transientfor <> 0) then begin
-  xraisewindow(appdisp,options.transientfor);
-    //transientforhint not used by overrideredirect
- end;
- }
- if rect.cx <= 0 then begin
-  width:= 1;
- end
- else begin
-  width:= rect.cx;
- end;
- if rect.cy <= 0 then begin
-  height:= 1;
- end
- else begin
-  height:= rect.cy;
- end;
- if msecolormap <> 0 then begin
-  attributes.colormap:= msecolormap;
-  valuemask:= valuemask or cwcolormap;
- end;
- if options.parent <> 0 then begin
-  id1:= options.parent;
- end
- else begin
-  id1:= rootid;
- end;
- id:= xcreatewindow(appdisp,id1,rect.x,rect.y,width,height,0,
-     copyfromparent,copyfromparent,xlib.pvisual(copyfromparent),
-     valuemask,@attributes);
- if id = 0 then begin
-  result:= gue_createwindow;
-  exit;
- end;
- result:= gue_ok;
- if options.parent <> 0 then begin
-  xselectinput(appdisp,id,structurenotifymask);
-  exit;          //embedded window
- end;
- if (options.transientfor <> 0) or
-         (options.options * [wo_popup,wo_message] <> []) then begin
-  settransientforhint(id,options.transientfor);
- end;
- with options do begin
-  if icon <> 0 then begin
-   gui_setwindowicon(id,icon,iconmask);
+ with awindow,x11windowty(platformdata) do begin
+  valuemask:= 0;
+  if wo_popup in options.options then begin
+   attributes.override_redirect:= {$ifdef FPC}true{$else}1{$endif};
+   valuemask:= valuemask or cwoverrideredirect;
   end;
- end;
- if options.setgroup then begin
-  if options.groupleader = 0 then begin
-   gui_setwindowgroup(id,id);
+  {
+  if (wo_popup in options.options) and (options.transientfor <> 0) then begin
+   xraisewindow(appdisp,options.transientfor);
+     //transientforhint not used by overrideredirect
+  end;
+  }
+  if rect.cx <= 0 then begin
+   width:= 1;
   end
   else begin
-   gui_setwindowgroup(id,options.groupleader);
+   width:= rect.cx;
   end;
- end;
- if options.pos <> wp_default then begin
-  gui_reposwindow(id,rect);
- end;
- xselectinput(appdisp,id,
-		      KeyPressMask or KeyReleaseMask or
-                      buttonpressmask or buttonreleasemask or
-                      pointermotionmask or
-//		      KeymapStateMask or
-		      EnterWindowMask or LeaveWindowMask or
-		      FocusChangeMask or PropertyChangeMask or
-                      exposuremask or structurenotifymask);
- xsetwmprotocols(appdisp,id,@wmprotocols[low(wmprotocolty)],
-             integer(high(wmprotocolty))+1);
- setstringproperty(id,wmclassatom,
-      filename(sys_getapplicationpath)+#0+application.applicationname);
- if netatoms[net_wm_pid] <> 0 then begin
-  setcardinalproperty(id,netatoms[net_wm_pid],getpid);
- end;
- if (wo_popup in options.options) and (options.transientfor <> 0) then begin
-  gui_raisewindow(options.transientfor);
-    //transientforhint not used by overrideredirect
- end;
- if (wo_popup in options.options) then begin
-  gui_raisewindow(id);
+  if rect.cy <= 0 then begin
+   height:= 1;
+  end
+  else begin
+   height:= rect.cy;
+  end;
+  if msecolormap <> 0 then begin
+   attributes.colormap:= msecolormap;
+   valuemask:= valuemask or cwcolormap;
+  end;
+  if options.parent <> 0 then begin
+   id1:= options.parent;
+  end
+  else begin
+   id1:= rootid;
+  end;
+  id:= xcreatewindow(appdisp,id1,rect.x,rect.y,width,height,0,
+      copyfromparent,copyfromparent,xlib.pvisual(copyfromparent),
+      valuemask,@attributes);
+  if id = 0 then begin
+   result:= gue_createwindow;
+   exit;
+  end;
+  result:= gue_ok;
+  if options.parent <> 0 then begin
+   xselectinput(appdisp,id,structurenotifymask);
+   exit;          //embedded window
+  end;
+  if (options.transientfor <> 0) or
+          (options.options * [wo_popup,wo_message] <> []) then begin
+   settransientforhint(id,options.transientfor);
+  end;
+  with options do begin
+   if icon <> 0 then begin
+    gui_setwindowicon(id,icon,iconmask);
+   end;
+  end;
+  if options.setgroup then begin
+   if options.groupleader = 0 then begin
+    gui_setwindowgroup(id,id);
+   end
+   else begin
+    gui_setwindowgroup(id,options.groupleader);
+   end;
+  end;
+  if options.pos <> wp_default then begin
+   gui_reposwindow(id,rect);
+  end;
+{
+  ic:= xcreateic(im,pchar(xninputstyle),
+          ximstatusnothing or ximpreeditnothing,
+          pchar(xnclientwindow),id,nil);
+}
+  icmask:= appicmask;
+  if ic <> nil then begin
+   xgeticvalues(ic,pchar(xnfilterevents),@icmask);
+   xseticvalues(ic,pchar(xnresetstate),pchar(ximpreservestate));
+  end;
+  xselectinput(appdisp,id,icmask or
+              KeymapStateMask or
+ 		      KeyPressMask or KeyReleaseMask or
+                       buttonpressmask or buttonreleasemask or
+                       pointermotionmask or
+ 		      EnterWindowMask or LeaveWindowMask or
+ 		      FocusChangeMask or PropertyChangeMask or
+                       exposuremask or structurenotifymask
+                       );
+  xsetwmprotocols(appdisp,id,@wmprotocols[low(wmprotocolty)],
+              integer(high(wmprotocolty))+1);
+  setstringproperty(id,wmclassatom,
+       filename(sys_getapplicationpath)+#0+application.applicationname);
+  if netatoms[net_wm_pid] <> 0 then begin
+   setcardinalproperty(id,netatoms[net_wm_pid],getpid);
+  end;
+  if (wo_popup in options.options) and (options.transientfor <> 0) then begin
+   gui_raisewindow(options.transientfor);
+     //transientforhint not used by overrideredirect
+  end;
+  if (wo_popup in options.options) then begin
+   gui_raisewindow(id);
+  end;
  end;
 end;
 
+function gui_destroywindow(var awindow: windowty): guierrorty;
+begin
+ with awindow,x11windowty(platformdata) do begin
+  if ic <> nil then begin
+//   xunseticfocus(ic);
+   xdestroyic(ic);
+   ic:= nil;
+  end;
+  if id <> 0 then begin
+   {$ifdef hassaveyourself}
+   if id <> saveyourselfwindow then begin
+    xdestroywindow(appdisp,id);
+   end;
+   {$else}
+   xdestroywindow(appdisp,id);
+   {$endif}
+  end;
+ end;
+ result:= gue_ok;
+end;
+{
+function gui_windowgetfocus(var awindow: windowty): guierrorty;
+begin
+ result:= gue_ok;
+ icwindow:= awindow;
+ with awindow,x11windowty(platformdata) do begin
+  if ic <> nil then begin
+   xseticfocus(ic);
+  end;
+ end;
+end;
+
+function gui_windowloosefocus(var awindow: windowty): guierrorty;
+begin
+ result:= gue_ok;
+ with awindow,x11windowty(platformdata) do begin
+  if ic <> nil then begin
+   xunseticfocus(ic);
+  end;
+ end;
+ fillchar(icwindow,sizeof(icwindow),0);
+end;
+}
 function gui_getwindowrect(id: winidty; out rect: rectty): guierrorty;
 var
  int1: integer;
@@ -2703,18 +2819,6 @@ begin
  {$ifdef FPC} {$checkpointer default} {$endif}
  xsetwmnormalhints(appdisp,id,sizehints);
  xfree(sizehints);
- result:= gue_ok;
-end;
-
-function gui_destroywindow(id: winidty): guierrorty;
-begin
- {$ifdef hassaveyourself}
- if id <> saveyourselfwindow then begin
-  xdestroywindow(appdisp,id);
- end;
- {$else}
-  xdestroywindow(appdisp,id);
- {$endif}
  result:= gue_ok;
 end;
 
@@ -4885,7 +4989,8 @@ var
  textprop: xtextproperty;
  bo1: boolean;
  rect1: rectty;
-  
+ aic: xic;
+   
 begin
  while true do begin
   if gui_hasevent then begin
@@ -5089,12 +5194,13 @@ begin
   end;
   keypress: begin
    with xev.xkey do begin
+    aic:= getic(window);
     lasteventtime:= time;
     setlength(buffer,20);
-    int1:= xutf8lookupstring(ic,@xev.xkey,@buffer[1],length(buffer),@akey,@icstatus);
+    int1:= xutf8lookupstring(aic,@xev.xkey,@buffer[1],length(buffer),@akey,@icstatus);
     setlength(buffer,int1);
     if icstatus = xbufferoverflow then begin
-     xutf8lookupstring(ic,@xev.xkey,@buffer[1],length(buffer),@akey,@icstatus);
+     xutf8lookupstring(aic,@xev.xkey,@buffer[1],length(buffer),@akey,@icstatus);
     end;
     chars:= utf8tostring(buffer);
     case icstatus of
@@ -5146,6 +5252,9 @@ begin
     end;
    end;
   end;
+  mappingnotify: begin
+   xrefreshkeyboardmapping(@xev.xkeymap);
+  end;
   mapnotify: begin
    with xev.xmap do begin
     result:= twindowevent.create(ek_show,xwindow);
@@ -5158,14 +5267,15 @@ begin
   end;
   focusin,focusout: begin
    with xev.xfocus do begin
+    aic:= getic(window);
     if xtype = focusin then begin
      eventkind:= ek_focusin;
-     xseticvalues(ic,pchar(xnfocuswindow),window,nil);
-     xseticfocus(ic);
+     xseticvalues(aic,pchar(xnfocuswindow),window,nil);
+     xseticfocus(aic);
     end
     else begin
      eventkind:= ek_focusout;
-     xunseticfocus(ic);
+     xunseticfocus(aic);
     end;
     if mode <> notifypointer then begin
      result:= twindowevent.create(eventkind,window);
@@ -5296,6 +5406,7 @@ var
  netnum: netatomty;
  int1,int2: integer;
  ar1: stringarty;
+ po1: pchar;
 {$ifdef hassm}
  smcb: smccallbacks;
  clientid: pchar;
@@ -5343,7 +5454,7 @@ begin
  {$endif}
  lasteventtime:= currenttime;
  setlocale(lc_all,'');
- xsetlocalemodifiers(pchar('@im=local'));
+// xsetlocalemodifiers(pchar('@im=local'));
 // cursorshape:= cursorshapety(-1);
  terminated:= false;
  result:= gue_nodisplay;
@@ -5354,16 +5465,18 @@ begin
  if appdisp = nil then begin
   goto error;
  end;
+ xsetlocalemodifiers('');
  im:= xopenim(appdisp,nil,nil,nil);
  if im = nil then begin
   result:= gue_inputmanager;
   goto error;
  end;
- ic:= xcreateic(im,pchar(xninputstyle),ximstatusnothing or ximpreeditnothing,nil);
- if ic = nil then begin
+ appic:= xcreateic(im,pchar(xninputstyle),ximstatusnothing or ximpreeditnothing,nil);
+ if appic = nil then begin
   result:= gue_inputcontext;
   goto error;
  end;
+ xgeticvalues(appic,pchar(xnfilterevents),@appicmask);
  defscreen:= xdefaultscreenofdisplay(appdisp);
  rootid:= xrootwindowofscreen(defscreen);
  defvisual:= msepvisual(xdefaultvisualofscreen(defscreen));
@@ -5578,9 +5691,9 @@ begin
   xfreecursor(appdisp,screencursor);
   screencursor:= 0;
  end;
- if ic <> nil then begin
-  xdestroyic(ic);
-  ic:= nil;
+ if appic <> nil then begin
+  xdestroyic(appic);
+  appic:= nil;
  end;
  if im <> nil then begin
   xcloseim(im);
