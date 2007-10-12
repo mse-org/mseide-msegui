@@ -2644,7 +2644,7 @@ begin
   if options.pos <> wp_default then begin
    gui_reposwindow(id,rect);
   end;
-{
+{           //single ic for whole application
   ic:= xcreateic(im,pchar(xninputstyle),
           ximstatusnothing or ximpreeditnothing,
           pchar(xnclientwindow),id,nil);
@@ -5468,8 +5468,16 @@ begin
  xsetlocalemodifiers('');
  im:= xopenim(appdisp,nil,nil,nil);
  if im = nil then begin
-  result:= gue_inputmanager;
-  goto error;
+  xsetlocalemodifiers('@im=local');
+  im:= xopenim(appdisp,nil,nil,nil);
+  if im = nil then begin
+   xsetlocalemodifiers('@im=');
+   im:= xopenim(appdisp,nil,nil,nil);
+   if im = nil then begin
+    result:= gue_inputmanager;
+    goto error;
+   end;
+  end;
  end;
  appic:= xcreateic(im,pchar(xninputstyle),ximstatusnothing or ximpreeditnothing,nil);
  if appic = nil then begin
