@@ -358,12 +358,12 @@ begin
  result:= gue_ok;
 end;
 }
-function gui_setimefocus(var awindow: windowty): guierorty;
+function gui_setimefocus(var awindow: windowty): guierrorty;
 begin
  result:= gue_ok;
 end;
 
-function gui_unsetimefocus(var awindow: windowty): guierorty;
+function gui_unsetimefocus(var awindow: windowty): guierrorty;
 begin
  result:= gue_ok;
 end;

@@ -69,7 +69,7 @@ type
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
-   procedure createchildwindow;
+   function createchildwindow: winidty;
    function hasclientwinid: boolean;
    property clientwinid: winidty read getclientwinid;
    property childrect: rectty read getchildrect;
@@ -158,7 +158,7 @@ begin
  result:= fclientwindow.id;
 end;
 
-procedure tcustomwindowwidget.createchildwindow;
+function tcustomwindowwidget.createchildwindow: winidty;
 var
  options1: internalwindowoptionsty;
  rect1: rectty;
@@ -168,7 +168,7 @@ begin
  fillchar(options1,sizeof(options1),0);
  options1.parent:= window.winid;
  guierror(gui_createwindow(rect1,options1,fclientwindow),self);
-// result:= fclientwindow.id;
+ result:= fclientwindow.id;
 end;
 
 procedure tcustomwindowwidget.checkclientwinid;
