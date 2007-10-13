@@ -349,6 +349,9 @@ function countleadingchars(const str: string; char: char): integer; overload;
           //-1 = leer
 function breaklines(const source: string): stringarty; overload;
 function breaklines(const source: msestring): msestringarty; overload;
+function breaklines(const source: msestring;
+                       maxlength: integer): msestringarty; overload;
+
 procedure splitstring(source: string;
                      var dest: stringarty; separator: char = c_tab;
                      trim: boolean = false); overload;
@@ -403,7 +406,7 @@ uses
  sysutils,msedatalist,msesysintf;
 type
  tmemorystream1 = class(tmemorystream);
- 
+
 function locatestring(const afilter: msestring; const getkeystringfunc: getkeystringfuncty;
            const options: locatestringoptionsty;
            const count: integer; var aindex: integer): boolean;
@@ -930,6 +933,104 @@ begin
  end;
 end;
 
+function breaklines(const source: msestring; maxlength: integer): msestringarty;
+var
+ charindex,charindexbefore,rowindex,lineend,lastbreak: integer;
+ int1,int2,len: integer;
+ po1: pmsechar;
+ mch1: msechar;
+ bo1: boolean;
+begin
+ len:= length(source);
+ setlength(result,len div 10 + 1);
+ if source <> '' then begin
+  if maxlength <= 0 then begin
+   maxlength:= 1;
+  end;
+  rowindex:= 0;
+  charindex:= 1;
+  while charindex <= length(source) do begin
+   if rowindex > high(result) then begin
+    setlength(result,length(result)*2);
+   end;
+   charindexbefore:= charindex;
+   charindex:= length(source);
+   lineend:= 0;
+   lastbreak:= 0;
+   int2:= 1;
+   bo1:= false;
+   for int1:= charindexbefore to len do begin
+    mch1:= source[int1];
+    if mch1 = c_return then begin
+     lineend:= int1;
+     charindex:= int1;
+     if source[charindex+1] = c_linefeed then begin
+      inc(charindex);
+     end;
+     break;
+    end;
+    if mch1 = c_linefeed then begin
+     lineend:= int1;
+     charindex:= int1;
+     break;
+    end;
+    if (int2 <= maxlength) and ((mch1 = c_softhyphen) or (mch1 = '-') or 
+       (mch1 = ' ') or  (mch1 = c_tab)) then begin
+     lastbreak:= int1;
+    end;
+    if bo1 then begin
+     break;
+    end;
+    if mch1 <> c_softhyphen then begin
+     inc(int2);
+    end;
+    if int2 > maxlength then begin
+     charindex:= int1;
+     if int1 = len then begin
+      lineend:= int1 + 1;
+     end;
+     bo1:= true;
+    end;
+   end;
+   inc(charindex);
+   if lineend = 0 then begin
+    if int2 <= maxlength then begin
+     lineend:= charindex;
+    end
+    else begin
+     lineend:= lastbreak;
+     if lineend = 0 then begin
+      lineend:= charindex;
+     end
+     else begin
+      charindex:= lineend + 1;
+      mch1:= source[lineend];
+      if (mch1 = c_softhyphen) or (mch1 = '-') then begin
+       inc(lineend);
+      end;
+     end;
+    end;
+   end;
+   setlength(result[rowindex],lineend-charindexbefore); //max
+   po1:= pointer(result[rowindex]);
+   if po1 <> nil then begin
+    for int1:= charindexbefore to lineend - 1 do begin
+     po1^:= source[int1];
+     if po1^ <> c_softhyphen then begin
+      inc(po1);
+     end;
+    end;
+    if source[lineend-1] = c_softhyphen then begin
+     inc(po1);
+    end;
+    setlength(result[rowindex],po1-pmsechar(result[rowindex]));
+   end;
+   inc(rowindex);
+  end;  
+  setlength(result,rowindex);
+ end;
+end;
+ 
 procedure splitstring(source: string;
                      var dest: stringarty; separator: char = c_tab;
                      trim: boolean = false);

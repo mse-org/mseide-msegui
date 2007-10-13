@@ -1594,6 +1594,7 @@ end;
    procedure setupeditor(const acell: gridcoordty);
   protected
    feditor: tinplaceedit;
+   function canclose(const newfocus: twidget): boolean; override;
    procedure dofontheightdelta(var delta: integer); override;
    procedure checkcellvalue(var accept: boolean); override;
    procedure rootchanged; override;
@@ -10765,6 +10766,14 @@ end;
 function tcustomstringgrid.getcaretcliprect: rectty;
 begin
  result:= intersectrect(moverect(fdatarect,clientpos),cellrect(ffocusedcell));
+end;
+
+function tcustomstringgrid.canclose(const newfocus: twidget): boolean;
+begin
+ result:= inherited canclose(newfocus);
+ if result then begin
+  checkcellvalue(result);
+ end;
 end;
 
 { trowfontarrayprop }
