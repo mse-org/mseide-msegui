@@ -489,7 +489,7 @@ begin
   end;
   with result[1] do begin
    name:= 'PROJECTDIR';
-   value:= getcurrentdir;
+   value:= getcurrentdir+directoryseparator;
   end;
  end;
 end;
@@ -772,7 +772,7 @@ begin
   additem(makeoptions,'-l -Mobjfpc -Sh');
   additem(makeoptions,'-gl');
   additem(makeoptions,'-B');
-  additem(makeoptions,'-OG2p3 -XX -Xs');
+  additem(makeoptions,'-OG2p3 -XX -XC -Xs');
   setlength(makeoptionson,length(makeoptions));
   for int1:= 0 to high(makeoptionson) do begin
    makeoptionson[int1]:= alloptionson;

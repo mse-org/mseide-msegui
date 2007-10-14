@@ -4367,14 +4367,16 @@ var
  ax,ay: integer;
  aformat: pxrenderpictformat;
  color1: txrendercolor;
- pixmap1: pixmapty;
+ pixmap1,pixmap2: pixmapty;
  areg: region;
  arect: xrectangle;
  needstransform: boolean;
  pictop: integer;
  colormask: boolean;
  bo1: boolean;
- 
+label
+ endlab;
+  
  procedure updatetransform(const apic: tpicture);
  begin
   if needstransform then begin
@@ -4533,40 +4535,36 @@ begin
    xrenderfreepicture(appdisp,dpic);
   end
   else begin
+   pixmap2:= 0;
    if copymode <> gcrasterop then begin
     xsetfunction(appdisp,tgc(gc.handle),integer(copymode));
    end;
    if mask <> nil then begin
     amask:= tsimplebitmap1(mask).handle;
     if gcclipregion <> 0 then begin
-     pixmap:= gui_createpixmap(size,0,true);
-     maskgc.handle:= cardinal(xcreategc(appdisp,pixmap,0,@xvalues));
+     pixmap2:= gui_createpixmap(size,0,true);
+     maskgc.handle:= cardinal(xcreategc(appdisp,pixmap2,0,@xvalues));
 //xsetforeground(appdisp,tgc(maskgc.handle),$1);
 //xfillrectangle(appdisp,mask,tgc(maskgc.handle),0,0,100,100);
- //    pixmapgc:= xcreategc(appdisp,pixmap,0,@xvalues);
-     xfillrectangle(appdisp,pixmap,tgc(maskgc.handle),0,0,cx,cy);
+ //    pixmapgc:= xcreategc(appdisp,pixmap2,0,@xvalues);
+     xfillrectangle(appdisp,pixmap2,tgc(maskgc.handle),0,0,cx,cy);
      maskgc.cliporigin:= subpoint(cliporigin,destrect^.pos);
      setregion(maskgc,region(gcclipregion));
  //    xsetregion(appdisp,pixmapgc,region(gcclipregion));    //??? cliporigin gc?
  //    xvalues.clip_x_origin:= -dest^.x+;
  //    xvalues.clip_y_origin:= -dest^.y;
  //    xchangegc(appdisp,pixmapgc,gcclipxorigin or gcclipyorigin,@xvalues);
-     xcopyarea(appdisp,amask,pixmap,tgc(maskgc.handle),x,y,cx,cy,0,0);
-//     xsetclipmask(appdisp,tgc(gc.handle),pixmap);
+     xcopyarea(appdisp,amask,pixmap2,tgc(maskgc.handle),x,y,cx,cy,0,0);
+//     xsetclipmask(appdisp,tgc(gc.handle),pixmap2);
      xvalues.clip_x_origin:= destrect^.x;
      xvalues.clip_y_origin:= destrect^.y;
-     xvalues.clip_mask:= pixmap;
+     xvalues.clip_mask:= pixmap2;
      xchangegc(appdisp,tgc(gc.handle),gcclipxorigin or gcclipyorigin or
                   gcclipmask,@xvalues);
      xfreegc(appdisp,tgc(maskgc.handle));
-     xflushgc(appdisp,tgc(gc.handle)); //aquire pixmap
-     xfreepixmap(appdisp,pixmap);
-    {
-     xvalues.xfunction:= gxand;
-     pixmapgc:= xcreategc(appdisp,xvalues.clip_mask,gcfunction,@xvalues);
-     xcopyarea(appdisp,mask,xvalues.clip_mask,pixmapgc,0,0,cx,cy,0,0);
-     xfreegc(appdisp,pixmapgc);
-     }
+//     xflushgc(appdisp,tgc(gc.handle)); //aquire pixmap
+//     xfreepixmap(appdisp,pixmap2);
+         //xlib assertion error!
     end
     else begin
 //     xsetclipmask(appdisp,tgc(gc.handle),mask);
@@ -4583,7 +4581,7 @@ begin
                         //convert to monochrome
      pixmap:= gui_createpixmap(size);
      if pixmap = 0 then begin
-      exit;
+      goto endlab;
      end;
      pixmapgc:= xcreategc(appdisp,pixmap,gcgraphicsexposures,@xvalues);
      if pixmapgc <> nil then begin
@@ -4654,6 +4652,10 @@ begin
    if copymode <> gcrasterop then begin
     xsetfunction(appdisp,tgc(gc.handle),integer(gcrasterop));
    end;
+  end;
+endlab:
+  if pixmap2 <> 0 then begin
+   xfreepixmap(appdisp,pixmap2);
   end;
  end;
 end;
