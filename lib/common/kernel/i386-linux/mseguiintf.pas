@@ -737,7 +737,7 @@ end;
 function eventlater(const atime: cardinal): boolean;
 begin
  result:= (atime = currenttime) or (lasteventtime = currenttime) or
-                           laterorsame(currenttime,atime);
+                           laterorsame(lasteventtime,atime);
 end;
 
 function gui_pastefromclipboard(out value: msestring): guierrorty;
