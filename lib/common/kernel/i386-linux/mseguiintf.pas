@@ -4652,10 +4652,10 @@ begin
    if copymode <> gcrasterop then begin
     xsetfunction(appdisp,tgc(gc.handle),integer(gcrasterop));
    end;
-  end;
 endlab:
-  if pixmap2 <> 0 then begin
-   xfreepixmap(appdisp,pixmap2);
+   if pixmap2 <> 0 then begin
+    xfreepixmap(appdisp,pixmap2);
+   end;
   end;
  end;
 end;
