@@ -1256,7 +1256,7 @@ end;
 
 function ttreelistitem.createsubnode: ttreelistitem;
 begin
- result:= treelistitemclassty(classtype).create;
+ result:= treelistitemclassty(classtype).create(fowner);
 end;
 
 procedure ttreelistitem.swap(const a,b: integer);
