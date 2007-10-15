@@ -961,6 +961,10 @@ begin
    bo1:= false;
    for int1:= charindexbefore to len do begin
     mch1:= source[int1];
+    if bo1 and ((mch1 = ' ') or (mch1 = c_tab)) then begin
+     lineend:= int1;
+     charindex:= int1;
+    end;
     if mch1 = c_return then begin
      lineend:= int1;
      charindex:= int1;
