@@ -437,8 +437,8 @@ function sys_closesocket(const handle: integer): syserrorty;
 begin
  result:= sye_notimplemented;
 end;
-}
-unction sys_connectlocalsocket(const handle: integer;
+
+function sys_connectlocalsocket(const handle: integer;
                         const path: filenamety): syserrorty;
 begin
  result:= sye_notimplemented;
