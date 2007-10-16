@@ -196,6 +196,17 @@ const
  NR_sendfile = 187;
 type
  tcondvar = array[0..47] of byte;
+ 
+ datarecty = record
+  //dummy
+ end;
+ 
+ locsockaddrty = record
+                  sa_family: sa_family_t;
+                  sa_data: datarecty;
+                 end;
+ plocsockaddrty = ^locsockaddrty;
+
 
 function sigactionex(SigNum: Integer; var Action: TSigActionex; OldAction: PSigAction): Integer;
 begin
@@ -552,6 +563,110 @@ begin
  end
  else begin
   result:= syelasterror;
+ end;
+end;
+
+function sys_dup(const source: integer; out dest: integer): syserrorty;
+begin
+ dest:= dup(source);
+ if dest = -1 then begin
+  result:= syelasterror;
+ end
+ else begin
+  result:= sye_ok;
+ end;
+end;
+
+function sys_opensocket(const kind: socketkindty; out handle: integer): syserrorty;
+begin
+ handle:= socket(pf_local,sock_stream,0);
+ if handle = -1 then begin
+  result:= syelasterror;
+ end
+ else begin
+  result:= sye_ok;
+ end;
+end;
+
+function sys_closesocket(const handle: integer): syserrorty;
+begin
+ if libc.__close(handle) = 0 then begin
+  result:= sye_ok;
+ end
+ else begin
+  result:= syelasterror;  
+ end;
+end;
+
+function sys_connectlocalsocket(const handle: integer;
+                        const path: filenamety): syserrorty;
+var
+ str1: string;
+ po1: plocsockaddrty;
+ int1,int2: integer;
+begin
+ str1:= tosysfilepath(path);
+ int1:= sizeof(locsockaddrty)+length(str1)+1;
+ po1:= getmem(int1);
+ po1^.sa_family:= af_local;
+ move(str1[1],po1^.sa_data,length(str1));
+ pchar(@po1^.sa_data)[length(str1)]:= #0;
+ if connect(handle,pointer(po1),int1) <> 0 then begin
+  result:= syelasterror;
+ end
+ else begin
+  result:= sye_ok;
+ end;
+ freemem(po1);
+end;
+
+function sys_bindlocalsocket(const handle: integer;
+                        const path: filenamety): syserrorty;
+var
+ str1: string;
+ po1: plocsockaddrty;
+ int1,int2: integer;
+begin
+ str1:= tosysfilepath(path);
+ int1:= sizeof(locsockaddrty)+length(str1)+1;
+ po1:= getmem(int1);
+ po1^.sa_family:= af_local;
+ move(str1[1],po1^.sa_data,length(str1));
+ pchar(@po1^.sa_data)[length(str1)]:= #0;
+ int2:= bind(handle,pointer(po1),int1);
+ if (int2 <> 0) and (sys_getlasterror = EADDRINUSE) then begin
+  libc.unlink(pchar(str1));
+  int2:= bind(handle,pointer(po1),int1);
+ end;
+ if int2 <> 0 then begin
+  result:= syelasterror;
+ end
+ else begin
+  result:= sye_ok;
+ end;
+ freemem(po1);
+end;
+
+function sys_listen(const handle: integer; const maxconnections: integer): syserrorty;
+begin
+ if listen(handle,maxconnections) <> 0 then begin
+  result:= syelasterror;
+ end
+ else begin
+  result:= sye_ok;
+ end;
+end;
+
+function sys_accept(const handle: integer; out conn: integer;
+                                 out addr: socketaddrty): syserrorty;
+begin
+ addr.size:= length( addr.platformdata);
+ conn:= accept(handle,@addr.platformdata,@addr.size);
+ if conn = -1 then begin
+  result:= syelasterror;
+ end
+ else begin
+  result:= sye_ok;
  end;
 end;
 

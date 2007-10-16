@@ -37,6 +37,10 @@ type
  mutexty = array[0..7] of cardinal;
  semty = array[0..7] of cardinal;
  condty = array[0..31] of cardinal;
+ socketaddrty = record
+  size: integer;
+  platformdata: array[0..31] of pointer;
+ end;
 
 const
  invalidfilehandle = -1;
@@ -60,6 +64,9 @@ type
                     fa_all);
 
  fileattributesty = set of fileattributety;
+ 
+ socketkindty = (sok_local,sok_inet);
+ 
 type
  fileinfolevelty = (fil_name,fil_ext1,fil_ext2);
 
@@ -99,7 +106,7 @@ type
 
  syserrorty = (sye_ok,sye_lasterror,sye_busy,sye_dirstream,sye_network,
                 sye_thread,sye_mutex,sye_semaphore,sye_cond,sye_timeout,
-                sye_copyfile,sye_createdir,sye_noconsole
+                sye_copyfile,sye_createdir,sye_noconsole,sye_notimplemented
                );
 
  esys = class(eerror)
@@ -194,7 +201,8 @@ const
     'Time out',
     'Copy file error',
     'Can not create directory',
-    'No console'
+    'No console',
+    'Not implemented'
    );
 
 var

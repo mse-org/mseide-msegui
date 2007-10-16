@@ -423,6 +423,44 @@ begin
  end;
 end;
 
+function sys_dup(const source: integer; out dest: integer): syserrorty;
+begin
+ result:= sye_notimplemented;
+end;
+
+function sys_opensocket(const kind: socketkindty; out handle: integer): syserrorty;
+begin
+ result:= sye_notimplemented;
+end;
+
+function sys_closesocket(const handle: integer): syserrorty;
+begin
+ result:= sye_notimplemented;
+end;
+}
+unction sys_connectlocalsocket(const handle: integer;
+                        const path: filenamety): syserrorty;
+begin
+ result:= sye_notimplemented;
+end;
+
+function sys_bindlocalsocket(const handle: integer;
+                        const path: filenamety): syserrorty;
+begin
+ result:= sye_notimplemented;
+end;
+
+function sys_listen(const handle: integer; const maxconnections: integer): syserrorty;
+begin
+ result:= sye_notimplemented;
+end;
+
+function sys_accept(const handle: integer;  out conn: integer;
+                              out addr: socketaddrty): syserrorty;
+begin
+ result:= sye_notimplemented;
+end;
+
 function sys_copyfile(const oldfile,newfile: msestring): syserrorty;
 var
  str1,str2: string;

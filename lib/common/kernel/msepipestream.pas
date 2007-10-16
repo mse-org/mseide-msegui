@@ -89,13 +89,13 @@ type
    property text: string read fpipebuffer;
    property writehandle: integer read fwritehandle write setwritehandle;
    property overloadsleepus: integer read foverloadsleepus 
-                  write foverloadsleepus default -1;
-            //checks application.checkoverload before calling oninputavaliable
-            //if >= 0
+                 write foverloadsleepus default -1;
+           //checks application.checkoverload before calling oninputavaliable
+           //if >= 0
    property oninputavailable: pipereadereventty read foninputavailable 
                          write foninputavailable;
    property onpipebroken: pipereadereventty read fonpipebroken write fonpipebroken;
- end;
+end;
 
  tpipereadercomp = class(tmsecomponent)
   private

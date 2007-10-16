@@ -4,7 +4,7 @@ interface
 implementation
 uses
  classes,mseifi,msedesignintf,msepropertyeditors,msestrings,msedesigner,
- mseclasses,mseifids,mseifiglob,msegui,typinfo;
+ mseclasses,mseifids,mseifiglob,msegui,typinfo,msesockets;
  
 type
  tformlinkitemeditor = class(tclasselementeditor)
@@ -47,7 +47,8 @@ type
   
 procedure register;
 begin
- registercomponents('Ifi',[tformlink,tpipeifichannel,ttxdataset,trxdataset]); 
+ registercomponents('Ifi',[tformlink,tpipeifichannel,ttxdataset,trxdataset,
+                     tsocketclient,tsocketserver]); 
  registerpropertyeditor(typeinfo(tformlinkarrayprop),nil,'',tformlinkeditor);
  registerpropertyeditor(typeinfo(tlinkactions),nil,'',tformlinkactionseditor);
  registerpropertyeditor(typeinfo(tlinkdatawidgets),nil,'',tformlinkdatawidgetseditor);
