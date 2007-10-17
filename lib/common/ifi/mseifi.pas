@@ -506,6 +506,21 @@ type
    destructor destroy; override;
  end;
 
+ tsocketserveriochannel = class(tstuffediochannel)
+  private
+   fpipes: tcustomsocketpipes;
+  protected
+   procedure open; override;
+   procedure close; override;   
+   function commio: boolean; override;
+   procedure internalsenddata(const adata: ansistring); override;
+   procedure doinputavailable(const sender: tpipereader);
+   procedure unlink;
+  public
+   destructor destroy; override;
+   procedure link(const apipes: tcustomsocketpipes);
+ end;
+ 
  tsocketclientifichannel = class(tsocketclientiochannel)
   public
    constructor create(aowner: tcomponent); override;
@@ -2060,6 +2075,53 @@ constructor tsocketclientifichannel.create(aowner: tcomponent);
 begin
  fsynchronizer:= tifisynchronizer.create;
  inherited;
+end;
+
+{ tsocketserveriochannel }
+
+destructor tsocketserveriochannel.destroy;
+begin
+ unlink;
+ inherited;
+end;
+
+procedure tsocketserveriochannel.unlink;
+begin
+ if fpipes <> nil then begin
+  fpipes.reader.oninputavailable:= nil;
+  fpipes:= nil;
+ end;
+end;
+
+procedure tsocketserveriochannel.link(const apipes: tcustomsocketpipes);
+begin
+ unlink;
+ fpipes:= apipes;
+end;
+
+procedure tsocketserveriochannel.open;
+begin
+ raise exception.create('Not implemented.');
+end;
+
+procedure tsocketserveriochannel.close;
+begin
+ unlink;
+end;
+
+function tsocketserveriochannel.commio: boolean;
+begin
+ result:= (fpipes <> nil) and fpipes.reader.active;
+end;
+
+procedure tsocketserveriochannel.internalsenddata(const adata: ansistring);
+begin
+ fpipes.writer.writestr(stx+stuff(adata)+etx);
+end;
+
+procedure tsocketserveriochannel.doinputavailable(const sender: tpipereader);
+begin
+ addata(sender.readdatastring);
 end;
 
 end.

@@ -91,12 +91,15 @@ type
  tsocketserver = class;
  socketaccepteventty = procedure(const sender: tsocketserver;
                      const addr: socketaddrty; var accept: boolean) of object;
-
+ socketacceptedeventty = procedure(const sender: tsocketserver;
+                     const apipes: tcustomsocketpipes) of object;
+ 
  tsocketserver = class(tsocketcomp)
   private
    fthread: tmsethread;
    fmaxconnections: integer;
    fonaccept: socketaccepteventty;
+   fonaccepted: socketacceptedeventty;
    fpipes: socketpipesarty;
    foverloadsleepus: integer;
    foninputavailable: socketpipeseventty;
@@ -112,6 +115,7 @@ type
    property maxconnections: integer read fmaxconnections write fmaxconnections 
                              default defaultmaxconnections;
    property onaccept: socketaccepteventty read fonaccept write fonaccept;
+   property onaccepted: socketacceptedeventty read fonaccepted write fonaccepted;
    property overloadsleepus: integer read foverloadsleepus 
                   write foverloadsleepus default -1;
             //checks application.checkoverload before calling oninputavaliable
@@ -370,40 +374,47 @@ var
 begin
  while not thread.terminated do begin
   if sys_accept(fhandle,conn,addr) = sye_ok then begin
-   application.lock;
    try
-    if canevent(tmethod(fonaccept)) then begin
-     bo1:= false;
-     fonaccept(self,addr,bo1);
-    end
-    else begin
-     bo1:= true;
-    end;
-    if bo1 then begin
-     int2:= -1;
-     for int1:= 0 to high(fpipes) do begin
-      if fpipes[int1] = nil then begin
-       int2:= int1;
-       break;
+    application.lock;
+    try
+     if canevent(tmethod(fonaccept)) then begin
+      bo1:= false;
+      fonaccept(self,addr,bo1);
+     end
+     else begin
+      bo1:= true;
+     end;
+     if bo1 then begin
+      int2:= -1;
+      for int1:= 0 to high(fpipes) do begin
+       if fpipes[int1] = nil then begin
+        int2:= int1;
+        break;
+       end;
       end;
+      if int2 < 0 then begin
+       setlength(fpipes,high(fpipes)+2);
+       int2:= high(fpipes);
+      end;
+      fpipes[int2]:= tserversocketpipes.create(self);
+      with fpipes[int2] do begin
+       overloadsleepus:= self.foverloadsleepus;
+       oninputavailable:= self.foninputavailable;
+       onsocketbroken:= self.fonsocketbroken;
+       handle:= conn;
+      end;
+      if canevent(tmethod(fonaccepted)) then begin
+       fonaccepted(self,fpipes[int1]);
+      end;
+     end
+     else begin
+      sys_closesocket(conn);
      end;
-     if int2 < 0 then begin
-      setlength(fpipes,high(fpipes)+2);
-      int2:= high(fpipes);
-     end;
-     fpipes[int2]:= tserversocketpipes.create(self);
-     with fpipes[int2] do begin
-      overloadsleepus:= self.foverloadsleepus;
-      oninputavailable:= self.foninputavailable;
-      onsocketbroken:= self.fonsocketbroken;
-      handle:= conn;
-     end;
-    end
-    else begin
-     sys_closesocket(conn);
+    finally
+     application.unlock;
     end;
-   finally
-    application.unlock;
+   except
+    application.handleexception(self);
    end;
   end;
  end;

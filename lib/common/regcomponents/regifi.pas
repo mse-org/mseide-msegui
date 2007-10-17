@@ -47,7 +47,8 @@ type
   
 procedure register;
 begin
- registercomponents('Ifi',[tformlink,tpipeifichannel,tsocketclientifichannel,
+ registercomponents('Ifi',[tformlink,tpipeifichannel,
+                     tsocketclientifichannel,tsocketserveriochannel,
                      ttxdataset,trxdataset,
                      tsocketclient,tsocketserver]); 
  registerpropertyeditor(typeinfo(tformlinkarrayprop),nil,'',tformlinkeditor);
