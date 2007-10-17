@@ -4,7 +4,7 @@ interface
 uses
  classes,mseclasses,msearrayprops,mseactions,msestrings,msetypes,mseevent,
  mseguiglob,msestream,msepipestream,msegui,mseifiglob,typinfo,msebintree,
- msesys;
+ msesys,msesockets;
 type
  
  sequencety = longword;
@@ -440,23 +440,28 @@ type
    property active: boolean read factive write setactive;
    property rxdata: string read frxdata write frxdata;
  end;
- 
+
  pipeiostatety = (pis_rxstarted);
  pipeiostatesty = set of pipeiostatety;
  
- tpipeiochannel = class(tcustomiochannel)
+ tstuffediochannel = class(tcustomiochannel)
+  private
+   fbuffer: string;
+   fstate: pipeiostatesty;
+   frxcheckedindex: integer;
+  protected
+   function stuff(const adata: string): string;
+   function unstuff(const adata: string): string;
+   procedure resetrxbuffer;
+   procedure addata(const adata: string);
+ end;
+  
+ tpipeiochannel = class(tstuffediochannel)
   private
    freader: tpipereader;
    fwriter: tpipewriter;
    fserverapp: string;
    fprochandle: integer;
-   fbuffer: string;
-   fstate: pipeiostatesty;
-   frxcheckedindex: integer;
-   function stuff(const adata: string): string;
-   function unstuff(const adata: string): string;
-   procedure resetrxbuffer;
-   procedure addata(const adata: string);
   protected
    procedure open; override;
    procedure close; override;   
@@ -476,7 +481,36 @@ type
   public
    constructor create(aowner: tcomponent); override;
  end;
+
+ tifisocketclientpipes = class(tcustomsocketpipes)
+  published
+   property overloadsleepus;
+ end;
  
+ tifisocketclient = class(tsocketclient)
+  public
+   constructor create(aowner: tcomponent); override;
+ end;
+ 
+ tsocketclientiochannel = class(tstuffediochannel)
+  private
+   fsocket: tifisocketclient;
+  protected
+   procedure open; override;
+   procedure close; override;   
+   function commio: boolean; override;
+   procedure internalsenddata(const adata: ansistring); override;
+   procedure doinputavailable(const sender: tpipereader);
+  public
+   constructor create(aowner: tcomponent); override;
+   destructor destroy; override;
+ end;
+
+ tsocketclientifichannel = class(tsocketclientiochannel)
+  public
+   constructor create(aowner: tcomponent); override;
+ end;
+   
  formlinkoptionty = (flo_useclientchannel);
  formlinkoptionsty = set of formlinkoptionty;
 const
@@ -881,6 +915,101 @@ begin
  end;
 end;
 
+{ tstuffediochannel }
+
+procedure tstuffediochannel.resetrxbuffer;
+begin
+ fbuffer:= '';
+ exclude(fstate,pis_rxstarted); 
+ frxcheckedindex:= 0;
+end;
+
+procedure tstuffediochannel.addata(const adata: string);
+var
+ int1,int2: integer;
+ po1: pchar;
+ str1: string;
+begin
+ fbuffer:= fbuffer + adata;
+ int1:= length(fbuffer);
+ if (int1 >= 2) then begin
+  po1:= pointer(fbuffer);
+  if (pis_rxstarted in fstate) then begin
+   for int2:= frxcheckedindex to int1-2 do begin
+    if (po1[int2] = c_dle) and (po1[int2+1] = c_etx) and
+     ((int2 = 0) or (po1[int2-1] <> c_dle))  then begin
+     str1:= copy(fbuffer,int2+3,int1); //next frame
+     setlength(fbuffer,int2);
+     try
+      datareceived(unstuff(fbuffer));
+     except
+      application.handleexception(self);
+     end;
+     resetrxbuffer;
+     if str1 <> '' then begin
+      addata(str1);
+     end;
+     exit;
+    end;
+   end;
+  end
+  else begin
+   for int2:= 0 to int1-2 do begin
+    if (po1[int2] = c_dle) and (po1[int2+1] = c_stx) and
+         ((int2 = 0) or (po1[int2-1] <> c_dle)) then begin
+     fbuffer:= copy(fbuffer,int2+3,int1);
+     include(fstate,pis_rxstarted);
+     addata('');
+     exit;
+    end;
+   end;
+  end;
+  repeat
+   dec(int1);
+  until (int1 = 0) or (po1[int1] <> c_dle);
+  frxcheckedindex:= int1;
+ end;
+end;
+
+function tstuffediochannel.stuff(const adata: string): string;
+var
+ int1: integer;
+ po1,po2: pchar;
+begin
+ setlength(result,2*length(adata)); //max
+ po1:= pointer(adata);
+ po2:= pointer(result);
+ for int1:= 0 to length(adata) - 1 do begin
+  po2^:= po1[int1];
+  if po2^ = stuffchar then begin
+   inc(po2);
+   po2^:= stuffchar;
+  end;
+  inc(po2);
+ end;
+ setlength(result,po2-pointer(result));
+end;
+
+function tstuffediochannel.unstuff(const adata: string): string;
+var
+ int1: integer;
+ po1,po2,po3: pchar;
+begin
+ setlength(result,length(adata)); //max
+ po1:= pointer(adata);
+ po3:= po1 + length(adata);
+ po2:= pointer(result);
+ while po1 < po3 do begin
+  po2^:= po1^;
+  if (po1^ = stuffchar) and (po1[1] = stuffchar) then begin
+   inc(po1);
+  end;
+  inc(po1);
+  inc(po2);
+ end;
+ setlength(result,po2-pointer(result));
+end;
+
 { tpipeiochannel }
 
 constructor tpipeiochannel.create(aowner: tcomponent);
@@ -937,104 +1066,9 @@ begin
  fwriter.writestr(stx+stuff(adata)+etx);
 end;
 
-procedure tpipeiochannel.resetrxbuffer;
-begin
- fbuffer:= '';
- exclude(fstate,pis_rxstarted); 
- frxcheckedindex:= 0;
-end;
-
-procedure tpipeiochannel.addata(const adata: string);
-var
- int1,int2: integer;
- po1: pchar;
- str1: string;
-begin
- fbuffer:= fbuffer + adata;
- int1:= length(fbuffer);
- if (int1 >= 2) then begin
-  po1:= pointer(fbuffer);
-  if (pis_rxstarted in fstate) then begin
-   for int2:= frxcheckedindex to int1-2 do begin
-    if (po1[int2] = c_dle) and (po1[int2+1] = c_etx) and
-     ((int2 = 0) or (po1[int2-1] <> c_dle))  then begin
-     str1:= copy(fbuffer,int2+3,int1); //next frame
-     setlength(fbuffer,int2);
-     try
-      datareceived(unstuff(fbuffer));
-     except
-      application.handleexception(self);
-     end;
-     resetrxbuffer;
-     if str1 <> '' then begin
-      addata(str1);
-     end;
-     exit;
-    end;
-   end;
-  end
-  else begin
-   for int2:= 0 to int1-2 do begin
-    if (po1[int2] = c_dle) and (po1[int2+1] = c_stx) and
-         ((int2 = 0) or (po1[int2-1] <> c_dle)) then begin
-     fbuffer:= copy(fbuffer,int2+3,int1);
-     include(fstate,pis_rxstarted);
-     addata('');
-     exit;
-    end;
-   end;
-  end;
-  repeat
-   dec(int1);
-  until (int1 = 0) or (po1[int1] <> c_dle);
-  frxcheckedindex:= int1;
- end;
-end;
-
 procedure tpipeiochannel.doinputavailable(const sender: tpipereader);
-var
- int1: integer;
 begin
  addata(sender.readdatastring);
-end;
-
-function tpipeiochannel.stuff(const adata: string): string;
-var
- int1: integer;
- po1,po2: pchar;
-begin
- setlength(result,2*length(adata)); //max
- po1:= pointer(adata);
- po2:= pointer(result);
- for int1:= 0 to length(adata) - 1 do begin
-  po2^:= po1[int1];
-  if po2^ = stuffchar then begin
-   inc(po2);
-   po2^:= stuffchar;
-  end;
-  inc(po2);
- end;
- setlength(result,po2-pointer(result));
-end;
-
-function tpipeiochannel.unstuff(const adata: string): string;
-var
- int1: integer;
- po1,po2,po3: pchar;
-begin
- setlength(result,length(adata)); //max
- po1:= pointer(adata);
- po3:= po1 + length(adata);
- po2:= pointer(result);
- while po1 < po3 do begin
-  po2^:= po1^;
-  if (po1^ = stuffchar) and (po1[1] = stuffchar) then begin
-   inc(po1);
-  end;
-  inc(po1);
-  inc(po2);
- end;
- setlength(result,po2-pointer(result));
 end;
 
 { tformlinkprop }
@@ -1969,6 +2003,63 @@ end;
 function twaitingclient.wait(const awaitus: integer): boolean;
 begin
  result:= sys_semwait(fsem,awaitus) = sye_ok;
+end;
+
+{ tifisocketclient }
+
+constructor tifisocketclient.create(aowner: tcomponent);
+begin
+ fpipes:= tifisocketclientpipes.create(self);
+ inherited;
+end;
+
+{ tsocketclientiochannel }
+
+constructor tsocketclientiochannel.create(aowner: tcomponent);
+begin
+ fsocket:= tifisocketclient.create(nil);
+ fsocket.setsubcomponent(true);
+ fsocket.pipes.reader.oninputavailable:= @doinputavailable;
+ inherited;
+end;
+
+destructor tsocketclientiochannel.destroy;
+begin
+ fsocket.free;
+ inherited;
+end;
+
+procedure tsocketclientiochannel.open;
+begin
+ fsocket.active:= true;
+end;
+
+procedure tsocketclientiochannel.close;
+begin
+ fsocket.active:= false;
+end;
+
+function tsocketclientiochannel.commio: boolean;
+begin
+ result:= fsocket.active and fsocket.pipes.reader.active;
+end;
+
+procedure tsocketclientiochannel.internalsenddata(const adata: ansistring);
+begin
+ fsocket.pipes.writer.writestr(stx+stuff(adata)+etx);
+end;
+
+procedure tsocketclientiochannel.doinputavailable(const sender: tpipereader);
+begin
+ addata(sender.readdatastring);
+end;
+
+{ tsocketclientifichannel }
+
+constructor tsocketclientifichannel.create(aowner: tcomponent);
+begin
+ fsynchronizer:= tifisynchronizer.create;
+ inherited;
 end;
 
 end.

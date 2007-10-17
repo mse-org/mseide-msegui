@@ -8,10 +8,10 @@ const
  defaultmaxconnections = 16;
   
 type
- tsocketpipes = class;
- socketpipeseventty = procedure(const sender: tsocketpipes) of object;
+ tcustomsocketpipes = class;
+ socketpipeseventty = procedure(const sender: tcustomsocketpipes) of object;
 
- tsocketpipes = class(tpersistent)
+ tcustomsocketpipes = class(tpersistent)
   private
    freader: tpipereader;
    fwriter: tpipewriter;
@@ -32,7 +32,6 @@ type
    property handle: integer read gethandle write sethandle;
    property reader: tpipereader read freader;
    property writer: tpipewriter read fwriter;
-  published
    property overloadsleepus: integer read getoverloadsleepus 
                   write setoverloadsleepus default -1;
             //checks application.checkoverload before calling oninputavaliable
@@ -41,8 +40,18 @@ type
    property onsocketbroken: socketpipeseventty read fonsocketbroken write setonsocketbroken;
  end;
 
- socketpipesarty = array of tsocketpipes;
+ socketpipesarty = array of tcustomsocketpipes;
+
+ tclientsocketpipes = class(tcustomsocketpipes)
+  published
+   property overloadsleepus;
+   property oninputavailable;
+   property onsocketbroken;
+ end;
  
+ tserversocketpipes = class(tcustomsocketpipes)
+ end;
+  
  tsocketcomp = class(tguicomponent)
   private
    fhandle: integer;
@@ -67,21 +76,22 @@ type
 
  tsocketclient = class(tsocketcomp)
   private
-   fpipes: tsocketpipes;
-   procedure setpipes(const avalue: tsocketpipes);
+   procedure setpipes(const avalue: tcustomsocketpipes);
   protected
+   fpipes: tcustomsocketpipes;
    procedure connect; override;
    procedure disconnect; override;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
   published
-   property pipes: tsocketpipes read fpipes write setpipes;
+   property pipes: tcustomsocketpipes read fpipes write setpipes;
  end;
 
  tsocketserver = class;
  socketaccepteventty = procedure(const sender: tsocketserver;
                      const addr: socketaddrty; var accept: boolean) of object;
+
  tsocketserver = class(tsocketcomp)
   private
    fthread: tmsethread;
@@ -125,28 +135,28 @@ begin
  end;
 end;
 
-{ tsocketpipes }
+{ tcustomsocketpipes }
 
-constructor tsocketpipes.create(const aowner: tmsecomponent);
+constructor tcustomsocketpipes.create(const aowner: tmsecomponent);
 begin
  fowner:= aowner;
  freader:= tpipereader.create;
  fwriter:= tpipewriter.create;
 end;
 
-destructor tsocketpipes.destroy;
+destructor tcustomsocketpipes.destroy;
 begin
  freader.free;
  fwriter.free;
  inherited;
 end;
 
-function tsocketpipes.gethandle: integer;
+function tcustomsocketpipes.gethandle: integer;
 begin
  result:= fwriter.handle;
 end;
 
-procedure tsocketpipes.sethandle(const avalue: integer);
+procedure tcustomsocketpipes.sethandle(const avalue: integer);
 var
  int1: integer;
 begin
@@ -158,17 +168,17 @@ begin
  freader.handle:= int1;
 end;
 
-function tsocketpipes.getoverloadsleepus: integer;
+function tcustomsocketpipes.getoverloadsleepus: integer;
 begin
  result:= freader.overloadsleepus;
 end;
 
-procedure tsocketpipes.setoverloadsleepus(const avalue: integer);
+procedure tcustomsocketpipes.setoverloadsleepus(const avalue: integer);
 begin
  freader.overloadsleepus:= avalue;
 end;
 
-procedure tsocketpipes.setoninputavailable(const avalue: socketpipeseventty);
+procedure tcustomsocketpipes.setoninputavailable(const avalue: socketpipeseventty);
 begin
  foninputavailable:= avalue;
  if assigned(avalue) then begin
@@ -179,7 +189,7 @@ begin
  end;
 end;
 
-procedure tsocketpipes.setonsocketbroken(const avalue: socketpipeseventty);
+procedure tcustomsocketpipes.setonsocketbroken(const avalue: socketpipeseventty);
 begin
  fonsocketbroken:= avalue;
  if assigned(avalue) then begin
@@ -190,14 +200,14 @@ begin
  end;
 end;
 
-procedure tsocketpipes.doinputavailable(const sender: tpipereader);
+procedure tcustomsocketpipes.doinputavailable(const sender: tpipereader);
 begin
  if fowner.canevent(tmethod(foninputavailable)) then begin
   foninputavailable(self);
  end;
 end;
 
-procedure tsocketpipes.dopipebroken(const sender: tpipereader);
+procedure tcustomsocketpipes.dopipebroken(const sender: tpipereader);
 begin
  if fowner.canevent(tmethod(fonsocketbroken)) then begin
   fonsocketbroken(self);
@@ -269,8 +279,10 @@ end;
 
 constructor tsocketclient.create(aowner: tcomponent);
 begin
+ if fpipes = nil then begin
+  fpipes:= tclientsocketpipes.create(self);
+ end;
  inherited;
- fpipes:= tsocketpipes.create(self);
 end;
 
 destructor tsocketclient.destroy;
@@ -279,7 +291,7 @@ begin
  inherited;
 end;
 
-procedure tsocketclient.setpipes(const avalue: tsocketpipes);
+procedure tsocketclient.setpipes(const avalue: tcustomsocketpipes);
 begin
  fpipes.assign(avalue);
 end;
@@ -379,7 +391,7 @@ begin
       setlength(fpipes,high(fpipes)+2);
       int2:= high(fpipes);
      end;
-     fpipes[int2]:= tsocketpipes.create(self);
+     fpipes[int2]:= tserversocketpipes.create(self);
      with fpipes[int2] do begin
       overloadsleepus:= self.foverloadsleepus;
       oninputavailable:= self.foninputavailable;
