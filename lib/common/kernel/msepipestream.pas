@@ -372,11 +372,13 @@ begin
   end;
   application.lock;
   try
-   if assigned(foninputavailable) then begin
-    foninputavailable(self);
-   end;
-   if eof and assigned(fonpipebroken) then begin
-    fonpipebroken(self);
+   if not fthread.terminated then begin
+    if assigned(foninputavailable) then begin
+     foninputavailable(self);
+    end;
+    if eof and assigned(fonpipebroken) then begin
+     fonpipebroken(self);
+    end;
    end;
   finally
    application.unlock;

@@ -22,7 +22,7 @@ type
 
  threadprocty = function(thread: tmsethread): integer of object;
 
- threadstatety = (ts_running,ts_terminated);
+ threadstatety = (ts_started,ts_running,ts_terminated);
  threadstatesty = set of threadstatety;
 
  tmsethread = class
@@ -106,7 +106,7 @@ constructor tmsethread.create(athreadproc: threadprocty);
 begin
  sys_semcreate(fwaitforsem,0);
  fthreadproc:= athreadproc;
- fstate:= [ts_running];
+ fstate:= [ts_running,ts_started];
  with finfo do begin
   threadproc:= {$ifdef FPC}@{$endif}internalthreadproc;
  end;
@@ -131,7 +131,8 @@ end;
 
 function tmsethread.waitfor: integer;
 begin
- if ts_running in fstate then begin
+ if ts_started in fstate then begin
+  exclude(fstate,ts_started);
   sys_semwait(fwaitforsem,0);
  end;
  result:= fexecresult;

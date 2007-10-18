@@ -66,6 +66,7 @@ type
  fileattributesty = set of fileattributety;
  
  socketkindty = (sok_local,sok_inet);
+ socketshutdownkindty = (ssk_rx,ssk_tx,ssk_both);
  
 type
  fileinfolevelty = (fil_name,fil_ext1,fil_ext2);

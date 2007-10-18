@@ -78,6 +78,8 @@ function sys_openfile(const path: filenamety; const openmode: fileopenmodety;
 function sys_closefile(const handle: integer): syserrorty;
 function sys_dup(const source: integer; out dest: integer): syserrorty;
 function sys_opensocket(const kind: socketkindty; out handle: integer): syserrorty;
+function sys_shutdownsocket(const handle: integer;
+                   const kind: socketshutdownkindty): syserrorty;
 function sys_closesocket(const handle: integer): syserrorty;
 function sys_connectlocalsocket(const handle: integer;
                         const path: filenamety): syserrorty;

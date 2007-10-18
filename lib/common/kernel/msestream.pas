@@ -29,6 +29,7 @@ type
   protected
    fmemorystream: tmemorystream;
    procedure sethandle(value: integer); virtual;
+   procedure closehandle(const ahandle: integer); virtual;
   public
    constructor Create(const FileName: filenamety; openmode: fileopenmodety = fm_read;
                                  accessmode: fileaccessmodesty = [];
@@ -742,10 +743,15 @@ begin
  fmemorystream.Free;
 end;
 
+procedure tmsefilestream.closehandle(const ahandle: integer);
+begin
+ sys_closefile(ahandle);
+end;
+ 
 procedure tmsefilestream.sethandle(value: integer);
 begin
  if handle <> invalidfilehandle then begin
-  sys_closefile(handle);
+  closehandle(handle);
  end;
  {$ifdef FPC}
  thandlestreamcracker(self).fhandle:= value;

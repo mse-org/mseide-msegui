@@ -6,18 +6,35 @@ uses
 
 const
  defaultmaxconnections = 16;
+ closepipestag = 836915;
   
 type
  tcustomsocketpipes = class;
  socketpipeseventty = procedure(const sender: tcustomsocketpipes) of object;
 
- tcustomsocketpipes = class(tpersistent)
+ tsocketreader = class(tpipereader)
+  protected
+   procedure closehandle(const ahandle: integer); override;
+ end;
+ 
+ tsocketwriter = class(tpipewriter)
+  protected
+   procedure closehandle(const ahandle: integer); override;
+ end;
+ 
+ tsocketcomp = class;
+ 
+ tcustomsocketpipes = class(tlinkedpersistent)
   private
-   freader: tpipereader;
-   fwriter: tpipewriter;
+   freader: tsocketreader;
+   fwriter: tsocketwriter;
    foninputavailable: socketpipeseventty;
    fonsocketbroken: socketpipeseventty;
-   fowner: tmsecomponent;
+   fowner: tsocketcomp;
+   fonbeforeconnect: socketpipeseventty;
+   fonafterconnect: socketpipeseventty;
+   fonbeforedisconnect: socketpipeseventty;
+   fonafterdisconnect: socketpipeseventty;
    function gethandle: integer;
    procedure sethandle(const avalue: integer);
    function getoverloadsleepus: integer;
@@ -26,44 +43,71 @@ type
    procedure setonsocketbroken(const avalue: socketpipeseventty);
    procedure doinputavailable(const sender: tpipereader);
    procedure dopipebroken(const sender: tpipereader);   
+   procedure internalclose;
+  protected
+   property onsocketbroken: socketpipeseventty read fonsocketbroken write setonsocketbroken;
   public
-   constructor create(const aowner: tmsecomponent);
+   constructor create(const aowner: tsocketcomp);
    destructor destroy; override;
+   procedure close;
    property handle: integer read gethandle write sethandle;
-   property reader: tpipereader read freader;
-   property writer: tpipewriter read fwriter;
+   property reader: tsocketreader read freader;
+   property writer: tsocketwriter read fwriter;
    property overloadsleepus: integer read getoverloadsleepus 
                   write setoverloadsleepus default -1;
             //checks application.checkoverload before calling oninputavaliable
             //if >= 0
+   property onbeforeconnect: socketpipeseventty read fonbeforeconnect 
+                                                      write fonbeforeconnect;
+   property onafterconnect: socketpipeseventty read fonafterconnect 
+                                                      write fonafterconnect;
+   property onbeforedisconnect: socketpipeseventty read fonbeforedisconnect 
+                                                      write fonbeforedisconnect;
+   property onafterdisconnect: socketpipeseventty read fonafterdisconnect 
+                                                      write fonafterdisconnect;
    property oninputavailable: socketpipeseventty read foninputavailable write setoninputavailable;
-   property onsocketbroken: socketpipeseventty read fonsocketbroken write setonsocketbroken;
  end;
 
- socketpipesarty = array of tcustomsocketpipes;
-
+ tsocketclient = class;
+ 
  tclientsocketpipes = class(tcustomsocketpipes)
+  public
+   constructor create(const aowner: tsocketclient);
   published
    property overloadsleepus;
    property oninputavailable;
    property onsocketbroken;
  end;
- 
- tserversocketpipes = class(tcustomsocketpipes)
- end;
+
+ tsocketserver = class;
   
+ tserversocketpipes = class(tcustomsocketpipes)
+  public
+   constructor create(const aowner: tsocketserver);
+ end;
+ socketpipesarty = array of tserversocketpipes;
+
+ socketeventty = procedure(sender: tsocketcomp) of object;  
+ 
  tsocketcomp = class(tguicomponent)
   private
    fhandle: integer;
    furl: msestring;
    factive: boolean;
+   fonbeforeconnect: socketeventty;
+   fonafterconnect: socketeventty;
+   fonbeforedisconnect: socketeventty;
+   fonafterdisconnect: socketeventty;
    procedure seturl(const avalue: filenamety);
    procedure setactive(const avalue: boolean);
   protected
    procedure doactivated; override;
    procedure dodeactivated; override;
-   procedure connect; virtual; abstract;
-   procedure disconnect; virtual;
+   procedure internalconnect; virtual; abstract;
+   procedure internaldisconnect; virtual;
+   procedure closepipes(const sender: tcustomsocketpipes); virtual; abstract;
+   procedure connect;
+   procedure disconnect;
    procedure checkinactive;
   public
    constructor create(aowner: tcomponent); override;
@@ -72,50 +116,77 @@ type
    property active: boolean read factive write setactive;
    property url: filenamety read furl write seturl;
    property activator;
+   property onbeforeconnect: socketeventty read fonbeforeconnect 
+                                                write fonbeforeconnect;
+   property onafterconnect: socketeventty read fonafterconnect 
+                                                write fonafterconnect;
+   property onbeforedisconnect: socketeventty read fonbeforedisconnect 
+                                                write fonbeforedisconnect;
+   property onafterdisconnect: socketeventty read fonafterdisconnect 
+                                                write fonafterdisconnect;
  end;
 
  tsocketclient = class(tsocketcomp)
   private
-   procedure setpipes(const avalue: tcustomsocketpipes);
+   procedure setpipes(const avalue: tclientsocketpipes);
   protected
-   fpipes: tcustomsocketpipes;
-   procedure connect; override;
-   procedure disconnect; override;
+   fpipes: tclientsocketpipes;
+   procedure internalconnect; override;
+   procedure internaldisconnect; override;
+   procedure closepipes(const sender: tcustomsocketpipes); override;
+   procedure doasyncevent(var atag: integer); override;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
   published
-   property pipes: tcustomsocketpipes read fpipes write setpipes;
+   property pipes: tclientsocketpipes read fpipes write setpipes;
  end;
 
- tsocketserver = class;
  socketaccepteventty = procedure(const sender: tsocketserver;
                      const addr: socketaddrty; var accept: boolean) of object;
- socketacceptedeventty = procedure(const sender: tsocketserver;
+ socketserverconnecteventty = procedure(const sender: tsocketserver;
                      const apipes: tcustomsocketpipes) of object;
+
+ socketserverstatety = (sss_closepipespending);
+ socketserverstatesty = set of socketserverstatety;
  
  tsocketserver = class(tsocketcomp)
   private
+   fstate: socketserverstatesty;
    fthread: tmsethread;
    fmaxconnections: integer;
    fonaccept: socketaccepteventty;
-   fonaccepted: socketacceptedeventty;
+   fonbeforechconnect: socketserverconnecteventty;
+   fonafterchconnect: socketserverconnecteventty;
+   fonbeforechdisconnect: socketserverconnecteventty;
+   fonafterchdisconnect: socketserverconnecteventty;
    fpipes: socketpipesarty;
    foverloadsleepus: integer;
    foninputavailable: socketpipeseventty;
    fonsocketbroken: socketpipeseventty;
+   fconnectioncount: integer;
    function execthread(thread: tmsethread): integer;
   protected
-   procedure connect; override;
-   procedure disconnect; override;
+   procedure internalconnect; override;
+   procedure internaldisconnect; override;
+   procedure closepipes(const sender: tcustomsocketpipes); override;
+   procedure doasyncevent(var atag: integer); override;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
+   property connectioncount: integer read fconnectioncount;
   published
    property maxconnections: integer read fmaxconnections write fmaxconnections 
                              default defaultmaxconnections;
    property onaccept: socketaccepteventty read fonaccept write fonaccept;
-   property onaccepted: socketacceptedeventty read fonaccepted write fonaccepted;
+   property onbeforechconnect: socketserverconnecteventty read fonbeforechconnect
+                               write fonbeforechconnect;
+   property onafterchconnect: socketserverconnecteventty read fonafterchconnect
+                               write fonafterchconnect;
+   property onbeforechdisconnect: socketserverconnecteventty read fonbeforechdisconnect
+                               write fonbeforechconnect;
+   property onafterchdisconnect: socketserverconnecteventty read fonafterchdisconnect
+                               write fonafterchdisconnect;
    property overloadsleepus: integer read foverloadsleepus 
                   write foverloadsleepus default -1;
             //checks application.checkoverload before calling oninputavaliable
@@ -141,18 +212,20 @@ end;
 
 { tcustomsocketpipes }
 
-constructor tcustomsocketpipes.create(const aowner: tmsecomponent);
+constructor tcustomsocketpipes.create(const aowner: tsocketcomp);
 begin
  fowner:= aowner;
- freader:= tpipereader.create;
- fwriter:= tpipewriter.create;
+ freader:= tsocketreader.create;
+ freader.onpipebroken:= @dopipebroken;
+ fwriter:= tsocketwriter.create;
 end;
 
 destructor tcustomsocketpipes.destroy;
 begin
+ inherited;
+ close;
  freader.free;
  fwriter.free;
- inherited;
 end;
 
 function tcustomsocketpipes.gethandle: integer;
@@ -196,12 +269,14 @@ end;
 procedure tcustomsocketpipes.setonsocketbroken(const avalue: socketpipeseventty);
 begin
  fonsocketbroken:= avalue;
+ {
  if assigned(avalue) then begin
   freader.onpipebroken:= @dopipebroken;
  end
  else begin
   freader.onpipebroken:= nil;
  end;
+ }
 end;
 
 procedure tcustomsocketpipes.doinputavailable(const sender: tpipereader);
@@ -213,9 +288,42 @@ end;
 
 procedure tcustomsocketpipes.dopipebroken(const sender: tpipereader);
 begin
- if fowner.canevent(tmethod(fonsocketbroken)) then begin
+ if assigned(fonsocketbroken) then begin
   fonsocketbroken(self);
+ end
+ else begin
+  close;
  end;
+end;
+
+procedure tcustomsocketpipes.internalclose;
+begin
+ fowner.closepipes(self);
+end;
+
+procedure tcustomsocketpipes.close;
+begin
+ if fowner.canevent(tmethod(fonbeforedisconnect)) then begin
+  fonbeforedisconnect(self);
+ end;
+ internalclose;
+ if fowner.canevent(tmethod(fonafterdisconnect)) then begin
+  fonafterdisconnect(self);
+ end; 
+end;
+
+{ tserversocketpipes }
+
+constructor tserversocketpipes.create(const aowner: tsocketserver);
+begin
+ inherited;
+end;
+
+{ tclientsocketpipes }
+
+constructor tclientsocketpipes.create(const aowner: tsocketclient);
+begin
+ inherited;
 end;
 
 { tsocketcomp }
@@ -249,7 +357,7 @@ begin
  furl:= avalue;
 end;
 
-procedure tsocketcomp.disconnect;
+procedure tsocketcomp.internaldisconnect;
 begin
  fhandle:= invalidfilehandle;
  factive:= false;
@@ -279,6 +387,28 @@ begin
  end;
 end;
 
+procedure tsocketcomp.connect;
+begin
+ if canevent(tmethod(fonbeforeconnect)) then begin
+  fonbeforeconnect(self);
+ end;
+ internalconnect;
+ if canevent(tmethod(fonafterconnect)) then begin
+  fonafterconnect(self);
+ end; 
+end;
+
+procedure tsocketcomp.disconnect;
+begin
+ if canevent(tmethod(fonbeforedisconnect)) then begin
+  fonbeforedisconnect(self);
+ end;
+ internaldisconnect;
+ if canevent(tmethod(fonafterdisconnect)) then begin
+  fonafterdisconnect(self);
+ end; 
+end;
+
 { tsocketclient }
 
 constructor tsocketclient.create(aowner: tcomponent);
@@ -295,12 +425,12 @@ begin
  inherited;
 end;
 
-procedure tsocketclient.setpipes(const avalue: tcustomsocketpipes);
+procedure tsocketclient.setpipes(const avalue: tclientsocketpipes);
 begin
  fpipes.assign(avalue);
 end;
 
-procedure tsocketclient.connect;
+procedure tsocketclient.internalconnect;
 begin
  syserror(sys_opensocket(sok_local,fhandle));
  try
@@ -313,16 +443,28 @@ begin
  try
   fpipes.handle:= fhandle;
  except
-  disconnect;
+  internaldisconnect;
   raise;
  end;
  factive:= true;
 end;
 
-procedure tsocketclient.disconnect;
+procedure tsocketclient.internaldisconnect;
 begin
  fpipes.handle:= invalidfilehandle;
  inherited
+end;
+
+procedure tsocketclient.closepipes(const sender: tcustomsocketpipes);
+begin
+ asyncevent(closepipestag);
+end;
+
+procedure tsocketclient.doasyncevent(var atag: integer);
+begin
+ if atag = closepipestag then begin
+  disconnect;
+ end;
 end;
 
 { tsocketserver }
@@ -338,6 +480,7 @@ destructor tsocketserver.destroy;
 var
  int1: integer;
 begin
+ disconnect;
  inherited;
  freeandnil(fthread);
  for int1:= 0 to high(fpipes) do begin
@@ -345,7 +488,7 @@ begin
  end;
 end;
 
-procedure tsocketserver.connect;
+procedure tsocketserver.internalconnect;
 begin
  syserror(sys_opensocket(sok_local,fhandle));
  try
@@ -358,7 +501,7 @@ begin
  try
   syserror(sys_listen(fhandle,fmaxconnections));
  except
-  disconnect;
+  internaldisconnect;
   raise;
  end;
  factive:= true;
@@ -372,8 +515,9 @@ var
  bo1: boolean;
  int1,int2: integer;
 begin
- while not thread.terminated do begin
-  if sys_accept(fhandle,conn,addr) = sye_ok then begin
+ result:= 0;
+ while not thread.terminated and (sys_accept(fhandle,conn,addr) = sye_ok) do begin
+  if not thread.terminated then begin
    try
     application.lock;
     try
@@ -397,17 +541,22 @@ begin
        int2:= high(fpipes);
       end;
       fpipes[int2]:= tserversocketpipes.create(self);
+      inc(fconnectioncount);
       with fpipes[int2] do begin
        overloadsleepus:= self.foverloadsleepus;
        oninputavailable:= self.foninputavailable;
        onsocketbroken:= self.fonsocketbroken;
+       if canevent(tmethod(fonbeforechconnect)) then begin
+        fonbeforechconnect(self,fpipes[int2]);
+       end;
        handle:= conn;
-      end;
-      if canevent(tmethod(fonaccepted)) then begin
-       fonaccepted(self,fpipes[int1]);
+       if canevent(tmethod(fonafterchconnect)) then begin
+        fonafterchconnect(self,fpipes[int2]);
+       end;
       end;
      end
      else begin
+      sys_shutdownsocket(conn,ssk_both);
       sys_closesocket(conn);
      end;
     finally
@@ -420,13 +569,80 @@ begin
  end;
 end;
 
-procedure tsocketserver.disconnect;
+procedure tsocketserver.internaldisconnect;
+var
+ int1: integer;
 begin
  if fthread <> nil then begin
   fthread.terminate;
  end;
+ for int1:= 0 to high(fpipes) do begin
+  if fpipes[int1] <> nil then begin
+   try
+    closepipes(fpipes[int1]);
+   except
+   end;
+  end;
+ end;
+ if fhandle <> invalidfilehandle then begin
+  sys_shutdownsocket(fhandle,ssk_rx);
+ end;
  inherited;
+ if fthread <> nil then begin
+  application.waitforthread(fthread);
+ end;
  freeandnil(fthread);
+ sys_closesocket(fhandle);
+ fhandle:= invalidfilehandle;
+end;
+
+procedure tsocketserver.closepipes(const sender: tcustomsocketpipes);
+begin
+ if sender.writer.handle <> invalidfilehandle then begin
+  if canevent(tmethod(fonbeforechdisconnect)) then begin
+   fonbeforechdisconnect(self,sender);
+  end;
+  sender.writer.handle:= invalidfilehandle;
+  dec(fconnectioncount);
+  if not (sss_closepipespending in fstate) then begin
+   include(fstate,sss_closepipespending);  
+   asyncevent(closepipestag);
+  end;
+  if canevent(tmethod(fonafterchdisconnect)) then begin
+   fonafterchdisconnect(self,sender);
+  end;
+ end;
+end;
+
+procedure tsocketserver.doasyncevent(var atag: integer);
+var
+ int1: integer;
+begin
+ if atag = closepipestag then begin
+  exclude(fstate,sss_closepipespending);
+  for int1:= 0 to high(fpipes) do begin
+   if (fpipes[int1] <> nil) and 
+               (fpipes[int1].writer.handle = invalidfilehandle) then begin
+    freeandnil(fpipes[int1]);
+   end;
+  end;
+ end;
+end;
+
+{ tsocketreader }
+
+procedure tsocketreader.closehandle(const ahandle: integer);
+begin
+ sys_shutdownsocket(ahandle,ssk_rx);
+ inherited;
+end;
+
+{ tsocketwriter }
+
+procedure tsocketwriter.closehandle(const ahandle: integer);
+begin
+// sys_shutdownsocket(ahandle,ssk_tx);
+ inherited;
 end;
 
 end.

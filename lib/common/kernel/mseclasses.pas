@@ -288,6 +288,9 @@ type
               const linkintf: iobjectlink = nil); overload;
    procedure setlinkedvar(const source: tlinkedobject; var dest: tlinkedobject;
               const linkintf: iobjectlink = nil); overload;
+   procedure setlinkedvar(const source: tlinkedpersistent;
+              var dest: tlinkedpersistent;
+              const linkintf: iobjectlink = nil); overload;
    procedure writestate(writer: twriter); override;
    function getactualclassname: string;
    class function getmoduleclassname: string; virtual;
@@ -2473,6 +2476,17 @@ end;
 
 procedure tmsecomponent.setlinkedvar(const source: tlinkedobject;
                    var dest: tlinkedobject; const linkintf: iobjectlink = nil);
+begin
+ if linkintf = nil then begin
+  getobjectlinker.setlinkedvar(ievent(self),source,dest);
+ end
+ else begin
+  getobjectlinker.setlinkedvar(linkintf,source,dest);
+ end;
+end;
+
+procedure tmsecomponent.setlinkedvar(const source: tlinkedpersistent;
+                   var dest: tlinkedpersistent; const linkintf: iobjectlink = nil);
 begin
  if linkintf = nil then begin
   getobjectlinker.setlinkedvar(ievent(self),source,dest);

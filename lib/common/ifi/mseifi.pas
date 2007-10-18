@@ -416,21 +416,31 @@ type
    procedure datareceived(var adata: string); override;
  end;
  
+ tcustomiochannel = class;
+ iochanneleventty = procedure(const sender: tcustomiochannel) of object;
+  
  tcustomiochannel = class(tmsecomponent)
   private
    frxdata: string;
    factive: boolean;
    fsequence: sequencety;
+   fonbeforeconnect: iochanneleventty;
+   fonafterconnect: iochanneleventty;
+   fonbeforedisconnect: iochanneleventty;
+   fonafterdisconnect: iochanneleventty;
    procedure setactive(const avalue: boolean);
   protected
    fsynchronizer: tiosynchronizer;
    function checkconnection: boolean;
+   function canconnect: boolean; virtual;
    procedure datareceived(const adata: ansistring);
-   procedure open; virtual; abstract;
-   procedure close; virtual; abstract;
+   procedure internalconnect; virtual; abstract;
+   procedure internaldisconnect; virtual; abstract;
    function commio: boolean; virtual; abstract;
    procedure internalsenddata(const adata: ansistring); virtual; abstract;
    procedure loaded; override;
+   procedure connect;
+   procedure disconnect;
   public
    destructor destroy; override;
    procedure senddata(const adata: ansistring);   
@@ -439,6 +449,15 @@ type
                                      const atimeoutus: integer): boolean;
    property active: boolean read factive write setactive;
    property rxdata: string read frxdata write frxdata;
+  published
+   property onbeforeconnect: iochanneleventty read fonbeforeconnect 
+                                              write fonbeforeconnect;
+   property onafterconnect: iochanneleventty read fonafterconnect 
+                                              write fonafterconnect;
+   property onbeforedisconnect: iochanneleventty read fonbeforedisconnect 
+                                              write fonbeforedisconnect;
+   property onafterdisconnect: iochanneleventty read fonafterdisconnect 
+                                              write fonafterdisconnect;
  end;
 
  pipeiostatety = (pis_rxstarted);
@@ -463,8 +482,8 @@ type
    fserverapp: string;
    fprochandle: integer;
   protected
-   procedure open; override;
-   procedure close; override;   
+   procedure internalconnect; override;
+   procedure internaldisconnect; override;   
    function commio: boolean; override;
    procedure internalsenddata(const adata: ansistring); override;
    procedure doinputavailable(const sender: tpipereader);
@@ -482,7 +501,7 @@ type
    constructor create(aowner: tcomponent); override;
  end;
 
- tifisocketclientpipes = class(tcustomsocketpipes)
+ tifisocketclientpipes = class(tclientsocketpipes)
   published
    property overloadsleepus;
  end;
@@ -495,33 +514,45 @@ type
  tsocketclientiochannel = class(tstuffediochannel)
   private
    fsocket: tifisocketclient;
+   procedure setsocket(const avalue: tifisocketclient);
   protected
-   procedure open; override;
-   procedure close; override;   
+   procedure internalconnect; override;
+   procedure internaldisconnect; override;   
    function commio: boolean; override;
    procedure internalsenddata(const adata: ansistring); override;
    procedure doinputavailable(const sender: tpipereader);
+   procedure dobeforedisconnect(const sender: tcustomsocketpipes);
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
+  published
+   property socket: tifisocketclient read fsocket write setsocket;
  end;
 
  tsocketserveriochannel = class(tstuffediochannel)
   private
    fpipes: tcustomsocketpipes;
+   funlinking: integer;
   protected
-   procedure open; override;
-   procedure close; override;   
+   procedure internalconnect; override;
+   procedure internaldisconnect; override;   
    function commio: boolean; override;
    procedure internalsenddata(const adata: ansistring); override;
    procedure doinputavailable(const sender: tpipereader);
+   procedure dobeforedisconnect(const sender: tcustomsocketpipes);
    procedure unlink;
+   function canconnect: boolean; override;
   public
    destructor destroy; override;
    procedure link(const apipes: tcustomsocketpipes);
  end;
  
  tsocketclientifichannel = class(tsocketclientiochannel)
+  public
+   constructor create(aowner: tcomponent); override;
+ end;
+ 
+ tsocketserverifichannel = class(tsocketserveriochannel)
   public
    constructor create(aowner: tcomponent); override;
  end;
@@ -861,7 +892,7 @@ end;
 destructor tcustomiochannel.destroy;
 begin
  fsynchronizer.free;
- close;
+ disconnect;
  inherited;
 end;
 
@@ -869,9 +900,11 @@ function tcustomiochannel.checkconnection: boolean;
 begin
  result:= commio;
  if not result then begin
-  close;
-  open;
-  result:= commio;
+  disconnect;
+  if canconnect then begin
+   connect;
+   result:= commio;
+  end;
  end;
 end;
 
@@ -904,10 +937,10 @@ begin
   factive:= avalue;
   if componentstate * [csloading,csdesigning] = [] then begin
    if avalue then begin
-    open;
+    connect;
    end
    else begin
-    close;
+    disconnect;
    end;
   end;
  end;
@@ -917,7 +950,7 @@ procedure tcustomiochannel.loaded;
 begin
  inherited;
  if factive and not (csdesigning in componentstate) then begin
-  open;
+  connect;
  end;
 end;
 
@@ -928,6 +961,33 @@ begin
  if fsynchronizer <> nil then begin
   result:= fsynchronizer.waitforanswer(asequence,atimeoutus);
  end;
+end;
+
+procedure tcustomiochannel.connect;
+begin
+ if canevent(tmethod(fonbeforeconnect)) then begin
+  fonbeforeconnect(self);
+ end;
+ internalconnect;
+ if canevent(tmethod(fonafterconnect)) then begin
+  fonafterconnect(self);
+ end;
+end;
+
+procedure tcustomiochannel.disconnect;
+begin
+ if canevent(tmethod(fonbeforedisconnect)) then begin
+  fonbeforedisconnect(self);
+ end;
+ internaldisconnect;
+ if canevent(tmethod(fonafterdisconnect)) then begin
+  fonafterdisconnect(self);
+ end;
+end;
+
+function tcustomiochannel.canconnect: boolean;
+begin
+ result:= true;
 end;
 
 { tstuffediochannel }
@@ -1043,7 +1103,7 @@ begin
  freader.free;
 end;
 
-procedure tpipeiochannel.open;
+procedure tpipeiochannel.internalconnect;
 begin
  resetrxbuffer;
  if fserverapp <> '' then begin
@@ -1055,7 +1115,7 @@ begin
  end;
 end;
 
-procedure tpipeiochannel.close;
+procedure tpipeiochannel.internaldisconnect;
 var
  int1: integer;
 begin
@@ -2035,21 +2095,22 @@ begin
  fsocket:= tifisocketclient.create(nil);
  fsocket.setsubcomponent(true);
  fsocket.pipes.reader.oninputavailable:= @doinputavailable;
+ fsocket.pipes.onbeforedisconnect:= @dobeforedisconnect;
  inherited;
 end;
 
 destructor tsocketclientiochannel.destroy;
 begin
- fsocket.free;
  inherited;
+ fsocket.free;
 end;
 
-procedure tsocketclientiochannel.open;
+procedure tsocketclientiochannel.internalconnect;
 begin
  fsocket.active:= true;
 end;
 
-procedure tsocketclientiochannel.close;
+procedure tsocketclientiochannel.internaldisconnect;
 begin
  fsocket.active:= false;
 end;
@@ -2067,6 +2128,16 @@ end;
 procedure tsocketclientiochannel.doinputavailable(const sender: tpipereader);
 begin
  addata(sender.readdatastring);
+end;
+
+procedure tsocketclientiochannel.setsocket(const avalue: tifisocketclient);
+begin
+ fsocket.assign(avalue);
+end;
+
+procedure tsocketclientiochannel.dobeforedisconnect(const sender: tcustomsocketpipes);
+begin
+ //nothing to do
 end;
 
 { tsocketclientifichannel }
@@ -2087,26 +2158,38 @@ end;
 
 procedure tsocketserveriochannel.unlink;
 begin
- if fpipes <> nil then begin
-  fpipes.reader.oninputavailable:= nil;
-  fpipes:= nil;
+ if funlinking = 0 then begin
+  inc(funlinking);
+  try
+   if fpipes <> nil then begin
+    fpipes.reader.oninputavailable:= nil;
+    fpipes.close;
+   end;
+  finally
+   fpipes:= nil;
+   dec(funlinking);
+  end;
  end;
 end;
 
 procedure tsocketserveriochannel.link(const apipes: tcustomsocketpipes);
 begin
  unlink;
- fpipes:= apipes;
+ setlinkedvar(apipes,fpipes);
+ fpipes.onbeforedisconnect:= @dobeforedisconnect;
+ fpipes.reader.oninputavailable:= @doinputavailable;
 end;
 
-procedure tsocketserveriochannel.open;
+procedure tsocketserveriochannel.internalconnect;
 begin
  raise exception.create('Not implemented.');
 end;
 
-procedure tsocketserveriochannel.close;
+procedure tsocketserveriochannel.internaldisconnect;
 begin
- unlink;
+ if fpipes <> nil then begin
+  fpipes.close;
+ end;
 end;
 
 function tsocketserveriochannel.commio: boolean;
@@ -2122,6 +2205,24 @@ end;
 procedure tsocketserveriochannel.doinputavailable(const sender: tpipereader);
 begin
  addata(sender.readdatastring);
+end;
+
+procedure tsocketserveriochannel.dobeforedisconnect(const sender: tcustomsocketpipes);
+begin
+ unlink;
+end;
+
+function tsocketserveriochannel.canconnect: boolean;
+begin
+ result:= false;
+end;
+
+{ tsocketserverifichannel }
+
+constructor tsocketserverifichannel.create(aowner: tcomponent);
+begin
+ fsynchronizer:= tifisynchronizer.create;
+ inherited;
 end;
 
 end.

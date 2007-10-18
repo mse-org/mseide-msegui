@@ -588,6 +588,17 @@ begin
  end;
 end;
 
+function sys_shutdownsocket(const handle: integer;
+                           const kind: socketshutdownkindty): syserrorty;
+begin
+ if libc.shutdown(handle,ord(kind)) <> 0 then begin
+  result:= syelasterror;
+ end
+ else begin
+  result:= sye_ok;
+ end;
+end;
+
 function sys_closesocket(const handle: integer): syserrorty;
 begin
  if libc.__close(handle) = 0 then begin

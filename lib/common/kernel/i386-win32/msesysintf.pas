@@ -433,6 +433,12 @@ begin
  result:= sye_notimplemented;
 end;
 
+function sys_shutdownsocket(const handle: integer;
+                            const kind: socketshutdownkindty): syserrorty;
+begin
+ result:= sye_notimplemented;
+end;
+
 function sys_closesocket(const handle: integer): syserrorty;
 begin
  result:= sye_notimplemented;
