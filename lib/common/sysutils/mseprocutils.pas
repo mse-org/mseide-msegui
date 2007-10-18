@@ -30,7 +30,9 @@ function getprocessexitcode(prochandle: integer; out exitcode: integer;
                  //true if ok, close handle
 function waitforprocess(prochandle: integer): integer;
 
-function execmse(const commandline: string): boolean;
+function execmse(const commandline: string;
+                    const inactive: boolean = true //windows only
+                ): boolean;
 //startet programm, true wenn gelungen
 function execmse1(const commandline: string; topipe: pinteger = nil;
              frompipe: pinteger = nil;
@@ -402,12 +404,14 @@ begin
  end;
 end;
 
-function execmse(const commandline: string): boolean;
+function execmse(const commandline: string;
+                     const inactive: boolean = true //windows only
+                           ): boolean;
 var
  prochandle: integer;
 begin
  result:= false;
- prochandle:= execmse1(commandline);
+ prochandle:= execmse1(commandline,nil,nil,nil,false,-1,inactive);
  if prochandle <> invalidprochandle then begin
   closehandle(prochandle);
   result:= true;

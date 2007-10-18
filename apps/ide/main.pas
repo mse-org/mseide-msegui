@@ -2205,7 +2205,7 @@ begin
    if toolparams[index] <> '' then begin
     str1:= str1 + ' ' + toolparams[index];
    end;
-   execmse(str1);
+   execmse(str1,false);
   end;
  end;
 end;
