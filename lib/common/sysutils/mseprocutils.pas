@@ -696,7 +696,8 @@ begin
  end;
 end;
 
-function execmse(const commandline: string): boolean;
+function execmse(const commandline: string;
+                    const inactive: boolean = true): boolean;
 begin
  result:= true;
  try
