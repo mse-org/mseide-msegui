@@ -489,7 +489,7 @@ begin
   end;
   with result[1] do begin
    name:= 'PROJECTDIR';
-   value:= getcurrentdir+directoryseparator;
+   value:= getcurrentdir+pathdelim;
   end;
  end;
 end;
