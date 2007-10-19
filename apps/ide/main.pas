@@ -243,6 +243,7 @@ procedure handleerror(const e: exception; const text: string);
 
 implementation
 uses
+ mseparser,
  regwidgets,regeditwidgets,regkernel,regdialogs,regprinter,
  {$ifdef FPC}{$ifndef mse_withoutdb}regdb,regreport,{$endif}{$endif}
  {$ifdef mse_with_ifi}regifi,{$endif}
@@ -1992,29 +1993,7 @@ begin
   openproject(mstr1);
  end;
 end;
-{
-procedure tmainfo.makefinished(const exitcode: integer);
-begin
- if exitcode <> 0 then begin
-  setstattext('Make ***ERROR*** '+inttostr(exitcode)+'.',mtk_error);
-  showfirsterror;
- end
- else begin
-  setstattext('Make OK.',mtk_finished);
-  fcurrent:= true;
-  fnoremakecheck:= false;
-  messagefo.messages.lastrow;
-  if projectoptions.closemessages then begin
-   messagefo.hide;
-  end;
-  if fstartcommand <> sc_none then begin
-   if loadexec(false) then begin
-    gdb.run;
-   end;
-  end;
- end;
-end;
-}
+
 procedure tmainfo.domake(atag: integer);
 begin
  unloadexec;
@@ -2198,14 +2177,61 @@ end;
 procedure tmainfo.runtool(const sender: tobject);
 var
  str1: ansistring;
+ mstr1: msestring;
+ macrolist: tmacrolist;
+ gridcoord1: gridcoordty;
+ cursourcefile,curmodulefile,
+ cursselection,cursword,cursdefinition: msestring;
+ spos1: sourceposty;
+ 
 begin
- with tmenuitem(sender),projectoptions.texp do begin
+ with tmenuitem(sender),projectoptions,texp do begin
   str1:= tosysfilepath(toolfiles[index]);
   if str1 <> '' then begin
-   if toolparams[index] <> '' then begin
-    str1:= str1 + ' ' + toolparams[index];
+   if (index <= high(toolfiles)) and (toolparams[index] <> '') then begin
+    if (index <= high(toolsave)) and toolsave[index] then begin
+     actionsmo.saveallactonexecute(nil);
+    end;
+    if sourcefo.activepage <> nil then begin
+     with sourcefo.activepage do begin
+      cursourcefile:= filepath;
+      cursselection:= edit.selectedtext;
+      cursword:= getpascalvarname(edit,edit.editpos,gridcoord1);
+      if (index <= high(toolparse)) and toolparse[index] then begin
+       spos1.pos:= edit.editpos;
+       spos1.filename:= designer.designfiles.find(edit.filename);
+       application.beginwait;
+       try
+        findlinkdest(edit,spos1,cursdefinition);
+       finally
+        application.endwait;
+       end;
+      end;
+     end
+    end
+    else begin
+     cursourcefile:= '';
+     cursselection:= '';
+     cursword:= '';
+     cursdefinition:= '';
+    end;
+    if factivedesignmodule <> nil then begin
+     curmodulefile:= factivedesignmodule^.filename;
+    end
+    else begin
+     curmodulefile:= '';
+    end;
+    mstr1:= toolparams[index];
+    macrolist:= tmacrolist.create([mao_caseinsensitive]);
+    macrolist.add(['CURSOURCEFILE','CURMODULEFILE',
+                   'CURSSELECTION','CURSWORD','CURSDEFINITION'],
+                   [cursourcefile,curmodulefile,
+                    cursselection,cursword,cursdefinition]);
+    macrolist.expandmacros(mstr1);
+    macrolist.free;
+    str1:= str1 + ' ' + mstr1;
    end;
-   execmse(str1,false,true);
+   execmse(str1,not((index > high(toolhide)) or toolhide[index]),true);
   end;
  end;
 end;
