@@ -209,6 +209,7 @@ type
   public
    destructor destroy; override;
    property expanded: boolean read getexpanded write setexpanded;
+   function rootpath: msestring;
  end;
 
 var
@@ -457,6 +458,30 @@ begin
    break;
   end;
  end;
+end;
+
+function tpropertyitem.rootpath: msestring;
+
+var
+ prop1: tpropertyitem;
+begin
+ prop1:= self;
+ while prop1 <> nil do begin
+  if (prop1.feditor is tarrayelementeditor) or 
+              (prop1.feditor is tcollectionitemeditor) then begin
+   result:= '[]'+result;
+  end
+  else begin
+   if prop1.feditor is trecordpropertyeditor then begin
+    result:= '.'+prop1.feditor.propertyname+'_'+copy(result,2,bigint);
+   end
+   else begin
+    result:= '.'+prop1.feditor.propertyname+result;
+   end;
+  end;
+  prop1:= tpropertyitem(prop1.parent);
+ end;
+ result:= copy(result,2,bigint);
 end;
 
 { tpropertyvalue }

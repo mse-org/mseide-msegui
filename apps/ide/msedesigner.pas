@@ -346,6 +346,7 @@ type
               const aName: string; var Ancestor, RootAncestor: TComponent);
    procedure createcomponent(Reader: TReader; ComponentClass: TComponentClass;
                    var Component: TComponent);
+   function selectedcomponents: componentarty;
    
       //idesigner
    procedure componentmodified(const component: tobject);
@@ -4158,6 +4159,12 @@ begin
    end;
   end;
  end;
+end;
+
+function tdesigner.selectedcomponents: componentarty;
+begin
+ setlength(result,fselections.count);
+ move(fselections.datapo^,result[0],length(result)*sizeof(pointer)); 
 end;
 
 { tcomponentslink }

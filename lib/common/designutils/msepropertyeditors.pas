@@ -121,6 +121,7 @@ type
    destructor destroy; override;
    procedure setremote(intf: iremotepropertyeditor);
 
+   function propertyname: msestring; virtual;
    function name: msestring; virtual;
    function allequal: boolean; virtual;
    function subproperties: propertyeditorarty; virtual;
@@ -348,6 +349,7 @@ type
                              reintroduce; virtual;
   
    function allequal: boolean; override;
+   function propertyname: msestring; override;
    function name: msestring; override;
    function getvalue: msestring; override;
    function getvalues: msestringarty; override;
@@ -1543,6 +1545,11 @@ begin
  end;
 end;
 
+function tpropertyeditor.propertyname: msestring;
+begin
+ result:= fname;
+end;
+
 { tordinalpropertyeditor }
 
 function tordinalpropertyeditor.allequal: boolean;
@@ -1875,6 +1882,11 @@ begin
  else begin
   exclude(fstate,ps_modified);
  end;
+end;
+
+function tsetelementeditor.propertyname: msestring;
+begin
+ result:= name;
 end;
 
 { tclasspropertyeditor }

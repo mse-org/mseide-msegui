@@ -2182,7 +2182,10 @@ var
  gridcoord1: gridcoordty;
  cursourcefile,curmodulefile,
  cursselection,cursword,cursdefinition: msestring;
+ curcomponentclass,curproperty: msestring;
  spos1: sourceposty;
+ ar1: componentarty;
+ propit: tpropertyitem;
  
 begin
  with tmenuitem(sender),projectoptions,texp do begin
@@ -2215,8 +2218,20 @@ begin
      cursword:= '';
      cursdefinition:= '';
     end;
+    curcomponentclass:= '';
+    curproperty:= '';
     if factivedesignmodule <> nil then begin
      curmodulefile:= factivedesignmodule^.filename;
+     ar1:= designer.selectedcomponents;
+     if high(ar1) = 0 then begin
+      with gettypedata(ar1[0].classinfo)^ do begin
+       curcomponentclass:= uppercase(unitname+'.'+ar1[0].classname);
+      end;
+      propit:= tpropertyitem(objectinspectorfo.props.item);
+      if propit <> nil then begin
+       curproperty:= curcomponentclass+'.' + uppercase(propit.rootpath);
+      end;
+     end;
     end
     else begin
      curmodulefile:= '';
@@ -2224,9 +2239,11 @@ begin
     mstr1:= toolparams[index];
     macrolist:= tmacrolist.create([mao_caseinsensitive]);
     macrolist.add(['CURSOURCEFILE','CURMODULEFILE',
-                   'CURSSELECTION','CURSWORD','CURSDEFINITION'],
+                   'CURSSELECTION','CURSWORD','CURSDEFINITION',
+                   'CURCOMPONENTCLASS','CURPROPERTY'],
                    [cursourcefile,curmodulefile,
-                    cursselection,cursword,cursdefinition]);
+                    cursselection,cursword,cursdefinition,
+                    curcomponentclass,curproperty]);
     macrolist.expandmacros(mstr1);
     macrolist.free;
     str1:= str1 + ' ' + mstr1;
