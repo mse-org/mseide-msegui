@@ -25,7 +25,8 @@ uses
  msegrids,msesplitter,msesysenv,msegdbutils,msedispwidgets,msesys,mseclasses,
  msegraphutils,mseevent,msetabsglob,msedatalist,msegraphics,msedropdownlist,
  mseformatstr,mseinplaceedit,msedatanodes,mselistbrowser,msebitmap,
- msecolordialog,msedrawtext,msewidgets,msepointer,mseguiglob,msepipestream;
+ msecolordialog,msedrawtext,msewidgets,msepointer,mseguiglob,msepipestream,
+ msemenus,sysutils;
 
 const
  defaultsourceprintfont = 'Courier';
@@ -184,6 +185,11 @@ type
   //templates
   expandprojectfilemacros: longboolarty;
   loadprojectfile: longboolarty;
+  
+  //tools
+  toolsave: longboolarty;
+  toolhide: longboolarty;
+  toolparse: longboolarty;
  end;
 
  tprojectoptionsfo = class(tmseform)
@@ -287,6 +293,9 @@ type
    inheritedform: tfilenameedit;
    spacetabs: tbooleanedit;
    editmarkbrackets: tbooleanedit;
+   toolsave: tbooleanedit;
+   toolparse: tbooleanedit;
+   toolhide: tbooleanedit;
    tbutton1: tbutton;
    toolfile: tfilenameedit;
    tspacer1: tspacer;
@@ -402,13 +411,12 @@ implementation
 uses
  projectoptionsform_mfm,breakpointsform,sourceform,
  objectinspector,msebits,msefileutils,msedesignintf,
- watchform,stackform,main,projecttreeform,findinfileform,sysutils,
+ watchform,stackform,main,projecttreeform,findinfileform,
  selecteditpageform,programparametersform,sourceupdate,mseedit,
  msedesigner,panelform,watchpointsform,commandlineform,msestream,
  componentpaletteform,mserichstring,msesettings,formdesigner,
- msestringlisteditor,msetexteditor,msepropertyeditors
- {$ifdef FPC}{$ifndef mse_withoutdb},msedbfieldeditor{$endif}{$endif},
- msemenus;
+ msestringlisteditor,msetexteditor,msepropertyeditors,mseshapes
+ {$ifdef FPC}{$ifndef mse_withoutdb},msedbfieldeditor{$endif}{$endif};
 
 type
 
@@ -683,7 +691,8 @@ begin
        if (int1 > high(toolfiles)) or (int1 > high(toolparams)) then begin
         break;
        end;
-       insert(bigint,[toolmenus[int1]],[],[],[{$ifdef FPC}@{$endif}mainfo.runtool]);
+       insert(bigint,[toolmenus[int1]],[[mao_asyncexecute]],
+                               [],[{$ifdef FPC}@{$endif}mainfo.runtool]);
       end;
      end;
     end
@@ -846,6 +855,9 @@ begin
   syntaxdeffiles:= nil;
   filemasknames:= nil;
   filemasks:= nil;
+  toolsave:= nil;
+  toolhide:= nil;
+  toolparse:= nil;
   toolmenus:= nil;
   toolfiles:= nil;
   toolparams:= nil;
@@ -1030,6 +1042,9 @@ begin
   updatevalue('syntaxdeffiles',syntaxdeffiles);
   updatevalue('filemasknames',filemasknames);
   updatevalue('filemasks',filemasks);
+  updatevalue('toolsave',toolsave);
+  updatevalue('toolhide',toolhide);
+  updatevalue('toolparse',toolparse);
   updatevalue('toolmenus',toolmenus);
   updatevalue('toolfiles',toolfiles);
   updatevalue('toolparams',toolparams);
@@ -1267,6 +1282,9 @@ begin
   fo.grid[1].datalist.asarray:= sourcefilemasks;
   fo.filefiltergrid[0].datalist.asarray:= filemasknames;
   fo.filefiltergrid[1].datalist.asarray:= filemasks;
+  fo.toolsave.gridvalues:= toolsave;
+  fo.toolhide.gridvalues:= toolhide;
+  fo.toolparse.gridvalues:= toolparse;
   fo.toolmenu.gridvalues:= toolmenus;
   fo.toolfile.gridvalues:= toolfiles;
   fo.toolparam.gridvalues:= toolparams;
@@ -1407,6 +1425,9 @@ begin
   sourcefilemasks:= fo.grid[1].datalist.asarray;
   filemasknames:= fo.filefiltergrid[0].datalist.asarray;
   filemasks:= fo.filefiltergrid[1].datalist.asarray;
+  toolsave:= fo.toolsave.gridvalues;
+  toolhide:= fo.toolhide.gridvalues;
+  toolparse:= fo.toolparse.gridvalues;
   toolmenus:= fo.toolmenu.gridvalues;
   toolfiles:= fo.toolfile.gridvalues;
   toolparams:= fo.toolparam.gridvalues;  

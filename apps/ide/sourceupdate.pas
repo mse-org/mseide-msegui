@@ -208,7 +208,8 @@ procedure deinit(const adesigner: tdesigner);
 procedure sourcechanged(const filename: filenamety);
 function switchheaderimplementation(const filename: filenamety;
                     var astart,astop: sourceposty): boolean;
-function findlinkdest(const edit: tsyntaxedit; var apos: sourceposty): boolean;
+function findlinkdest(const edit: tsyntaxedit; var apos: sourceposty;
+                         out definition: msestring): boolean;
   //true if dest found
 function listprocheaders(const filename: filenamety;
                      var apos: sourceposty): procedureinfoarty;
@@ -345,20 +346,19 @@ begin
  end;
 end;
 
-function findlinkdest(const edit: tsyntaxedit; var apos: sourceposty): boolean;
+function findlinkdest(const edit: tsyntaxedit; var apos: sourceposty;
+                             out definition: msestring): boolean;
 var
-// po1: punitinfoty;
-// info1: sourceiteminfoty;
  po1: punitinfoty;
  po2: psourceitemty;
  str1: msestring;
  coord1: gridcoordty;
  po3: pdefinfoty;
-// ar1: stringarty;
-// scope: tdeflist;
+ int1: integer;
 
 begin
  result:= false;
+ definition:= '';
  with sourceupdater do begin
   po1:= updatesourceunit(edit.filename,apos.filenum,false);
   if updateline(po1,apos) then begin
@@ -368,6 +368,7 @@ begin
      sik_uses: begin
       coord1:= edit.wordatpos(apos.pos,str1,defaultdelimchars + ',;{}/');
       if str1 <> '' then begin
+       definition:= str1;
        str1:= findunitfile(str1);
        if str1 <> '' then begin
         result:= true;
@@ -380,6 +381,7 @@ begin
      sik_include: begin
       apos.filename:=
           designer.designfiles.find(po1^.includestatements[po2^.index].filename);
+      definition:= designer.designfiles.getname(apos.filename);
       apos.pos.col:= 0;
       apos.pos.row:= 0;
       result:= true;
@@ -389,6 +391,18 @@ begin
    else begin
     po3:= finddef(po1,apos);
     if po3 <> nil then begin
+     if po3^.deflist <> nil then begin
+      definition:= po3^.deflist.rootnamepath;
+     end
+     else begin
+      definition:= po3^.owner.rootnamepath+'.'+uppercase(po3^.name);
+      if po3^.kind = syk_procdef then begin
+       int1:= findchar(definition,'$');
+       if int1> 0 then begin
+        setlength(definition,int1-1);
+       end;
+      end;
+     end;
      apos.filename:= po3^.pos.filename;
      apos.pos:= po3^.pos.pos;
      result:= true;

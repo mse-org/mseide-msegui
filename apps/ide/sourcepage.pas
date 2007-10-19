@@ -1018,7 +1018,7 @@ begin
     if mouseeventinfopo^.shiftstate = [ss_ctrl,ss_left] then begin
      pos1.pos:= info.pos;
      pos1.filename:= designer.designfiles.find(edit.filename);
-     if findlinkdest(edit,pos1) then begin
+     if findlinkdest(edit,pos1,str1) then begin
       sourcefo.naviglist.showsource(pos1,true);
      end;
     end

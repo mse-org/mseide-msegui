@@ -245,6 +245,7 @@ type
   definfoty = record
    name: string;      //'' -> statment
    pos,stop1: sourceposty;
+   owner: tdeflist;
    deflist: tdeflist; //can be nil
    case kind: symbolkindty of
     syk_classdef: (classindex: integer);
@@ -274,7 +275,7 @@ type
     procedure comp(const l,r; out result: integer);
     procedure compnopars(const l,r; out result: integer);
     procedure compsubstr(const l,r; out result: integer);
-    function getname: string;
+    function getname: string; virtual;
     function getdefinfopo: pdefinfoty;
     function getrootlist: trootdeflist;
     function incinfocount: integer;
@@ -312,6 +313,7 @@ type
                out ascope: tdeflist): pdefinfoty; overload;
     function finditem(const apos: sourceposty; const firstidentuse: boolean;
                            out scope: tdeflist): pdefinfoty;
+    function rootnamepath: string;
     property parent: tdeflist read fparent;
     property parentid: nameidty read fparentid;
     property parentscope: tdeflist read fparent;
@@ -330,6 +332,7 @@ type
     funitinfopo: punitinfoty;
     flastunitindex: integer;
    protected
+    function getname: string; override;
     function beginnode(const aname: string; const akind: symbolkindty;
                         const apos,astop: sourceposty): pdefinfoty; overload;
    public
@@ -2150,6 +2153,7 @@ begin
  po1^.id:= incinfocount;
  result:= @finfos[po1^.id];
  with result^ do begin
+  owner:= self;
   name:= aname;
   kind:= akind;
   pos:= apos;
@@ -2165,6 +2169,7 @@ begin
  int1:= incinfocount;
  result:= @finfos[int1];
  with result^ do begin
+  owner:= self;
   kind:= akind;
   pos:= apos;
   stop1:= astop;
@@ -2653,6 +2658,18 @@ begin
  fcompareproc:= {$ifdef FPC}@{$endif}comp;
 end;
 
+function tdeflist.rootnamepath: string;
+var
+ pa: tdeflist;
+begin
+ result:= name;
+ pa:= parentscope;
+ while pa <> nil do begin
+  result:= pa.name + '.' + result;
+  pa:= pa.parentscope;
+ end; 
+end;
+
 { trootdeflist}
 
 constructor trootdeflist.create(const aunitinfopo: punitinfoty);
@@ -2841,6 +2858,11 @@ begin
    end;
   end;
  end;
+end;
+
+function trootdeflist.getname: string;
+begin
+ result:= funitinfopo^.unitname;
 end;
 
 end.

@@ -32,7 +32,7 @@ object projectoptionsfo: tprojectoptionsfo
     frame.dummy = 0
     anchors = [an_top, an_bottom]
     taborder = 1
-    activepageindex = 2
+    activepageindex = 7
     tab_frame.dummy = 0
     tab_size = 20
     statfile = statfile1
@@ -1190,7 +1190,6 @@ object projectoptionsfo: tprojectoptionsfo
       frame.dummy = 0
       anchors = [an_top, an_bottom]
       taborder = 6
-      visible = True
       caption = '&Make'
       onchildscaled = makepageonchildscaled
       object mainfile: tfilenameedit
@@ -1415,15 +1414,8 @@ object projectoptionsfo: tprojectoptionsfo
             bounds_cx = 627
             bounds_cy = 305
             bounds_cymin = 40
-            frame.caption = 'Make &options'
             frame.captionoffset = 3
             frame.dummy = 0
-            frame.outerframe = (
-              0
-              17
-              0
-              0
-            )
             anchors = []
             optionsgrid = [og_keyrowmoving, og_rowinserting, og_rowdeleting, og_selectedrowsdeleting, og_focuscellonenter, og_autofirstrow, og_autoappend, og_autopopup]
             fixcols.coloractive = -2147483648
@@ -3172,6 +3164,7 @@ object projectoptionsfo: tprojectoptionsfo
       frame.dummy = 0
       anchors = [an_left, an_top, an_right, an_bottom]
       taborder = 8
+      visible = True
       caption = 'Tools'
       reffontheight = 14
       object twidgetgrid3: twidgetgrid
@@ -3198,8 +3191,20 @@ object projectoptionsfo: tprojectoptionsfo
           item
             coloractive = -2147483648
             height = 16
-            captions.count = 3
+            captions.count = 6
             captions.items = <            
+              item
+                caption = 'S'
+                hint = 'Save files'
+              end            
+              item
+                caption = 'P'
+                hint = 'Parse source'
+              end            
+              item
+                caption = 'H'
+                hint = 'Hide console (win32 only)'
+              end            
               item
                 caption = 'Menu'
               end            
@@ -3210,10 +3215,34 @@ object projectoptionsfo: tprojectoptionsfo
                 caption = 'Parameters'
               end>
           end>
-        datacols.count = 3
+        datacols.count = 6
         datacols.coloractive = -2147483648
         datacols.options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_proportional, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_cancopy, co_canpaste, co_mousescrollrow]
         datacols.items = <        
+          item
+            coloractive = -2147483648
+            width = 13
+            options = [co_drawfocus, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_fixwidth, co_proportional, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_cancopy, co_canpaste, co_mousescrollrow]
+            widthmin = 13
+            widthmax = 13
+            widgetname = 'toolsave'
+          end        
+          item
+            coloractive = -2147483648
+            width = 13
+            options = [co_drawfocus, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_fixwidth, co_proportional, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_cancopy, co_canpaste, co_mousescrollrow]
+            widthmin = 13
+            widthmax = 13
+            widgetname = 'toolparse'
+          end        
+          item
+            coloractive = -2147483648
+            width = 13
+            options = [co_drawfocus, co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_fixwidth, co_proportional, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_cancopy, co_canpaste, co_mousescrollrow]
+            widthmin = 13
+            widthmax = 13
+            widgetname = 'toolhide'
+          end        
           item
             coloractive = -2147483648
             width = 107
@@ -3222,7 +3251,7 @@ object projectoptionsfo: tprojectoptionsfo
           end        
           item
             coloractive = -2147483648
-            width = 251
+            width = 209
             options = [co_focusselect, co_mouseselect, co_keyselect, co_multiselect, co_rowselect, co_fill, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_cancopy, co_canpaste, co_mousescrollrow]
             widgetname = 'toolfile'
           end        
@@ -3237,7 +3266,7 @@ object projectoptionsfo: tprojectoptionsfo
         reffontheight = 14
         object toolmenu: tstringedit
           optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight]
-          bounds_x = 0
+          bounds_x = 42
           bounds_y = 0
           bounds_cx = 107
           bounds_cy = 16
@@ -3252,9 +3281,9 @@ object projectoptionsfo: tprojectoptionsfo
         end
         object toolfile: tfilenameedit
           optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight]
-          bounds_x = 108
+          bounds_x = 150
           bounds_y = 0
-          bounds_cx = 251
+          bounds_cx = 209
           bounds_cy = 16
           frame.levelo = 0
           frame.colorclient = -2147483645
@@ -3282,6 +3311,45 @@ object projectoptionsfo: tprojectoptionsfo
           visible = False
           optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_keyexecute, oe_savestate]
           reffontheight = 14
+        end
+        object toolparse: tbooleanedit
+          optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets]
+          bounds_x = 14
+          bounds_y = 0
+          bounds_cy = 16
+          frame.levelo = 0
+          frame.colorclient = -2147483645
+          frame.localprops = [frl_levelo, frl_leveli, frl_fileft, frl_fitop, frl_firight, frl_fibottom, frl_colorclient]
+          frame.dummy = 0
+          taborder = 4
+          visible = False
+          optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_keyexecute, oe_savestate]
+        end
+        object toolhide: tbooleanedit
+          optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets]
+          bounds_x = 28
+          bounds_y = 0
+          bounds_cy = 16
+          frame.levelo = 0
+          frame.colorclient = -2147483645
+          frame.localprops = [frl_levelo, frl_leveli, frl_fileft, frl_fitop, frl_firight, frl_fibottom, frl_colorclient]
+          frame.dummy = 0
+          taborder = 5
+          visible = False
+          optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_keyexecute, oe_savestate]
+        end
+        object toolsave: tbooleanedit
+          optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets]
+          bounds_x = 0
+          bounds_y = 0
+          bounds_cy = 16
+          frame.levelo = 0
+          frame.colorclient = -2147483645
+          frame.localprops = [frl_levelo, frl_leveli, frl_fileft, frl_fitop, frl_firight, frl_fibottom, frl_colorclient]
+          frame.dummy = 0
+          taborder = 6
+          visible = False
+          optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_keyexecute, oe_savestate]
         end
       end
     end
