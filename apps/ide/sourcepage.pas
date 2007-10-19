@@ -144,7 +144,7 @@ type
    property filetag: cardinal read ffiletag;
  end;
 
-function getpascalvarname(const edit: tsyntaxedit; const pos: gridcoordty;
+function getpascalvarname(const edit: tsyntaxedit; pos: gridcoordty;
                                   out startpos: gridcoordty): msestring; overload;
 function getpascalvarname(const edit: tsyntaxedit; const pos: pointty): msestring; overload;
 
@@ -162,12 +162,16 @@ const
  bmbitshift = 4;
  bmbitmask = integer($3ff0);
 
-function getpascalvarname(const edit: tsyntaxedit; const pos: gridcoordty;
+function getpascalvarname(const edit: tsyntaxedit; pos: gridcoordty;
                           out startpos: gridcoordty): msestring;
 var
  int1: integer;
 begin
  startpos:= edit.wordatpos(pos,result,pascaldelims);
+ if (result = '') and (pos.col > 0) then begin
+  dec(pos.col);
+  startpos:= edit.wordatpos(pos,result,pascaldelims);
+ end; 
  if result <> '' then begin
   for int1:= pos.col - startpos.col + 1 to length(result) do begin
    if result[int1] = '.' then begin
