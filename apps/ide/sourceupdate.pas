@@ -396,11 +396,11 @@ begin
      end
      else begin
       definition:= po3^.owner.rootnamepath+'.'+uppercase(po3^.name);
-      if po3^.kind = syk_procdef then begin
-       int1:= findchar(definition,'$');
-       if int1> 0 then begin
-        setlength(definition,int1-1);
-       end;
+     end;
+     if po3^.kind in [syk_procdef,syk_procimp] then begin
+      int1:= findchar(definition,'$');
+      if int1> 0 then begin
+       setlength(definition,int1-1);
       end;
      end;
      apos.filename:= po3^.pos.filename;
