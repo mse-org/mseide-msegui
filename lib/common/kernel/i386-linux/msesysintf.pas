@@ -207,6 +207,16 @@ type
                  end;
  plocsockaddrty = ^locsockaddrty;
 
+ linuxsockadty = record
+  case integer of
+   0: (addr: sockaddr_in);
+   1: (addr6: sockaddr_in6);
+ end;
+ 
+ linuxsockaddrty = record
+  ad: linuxsockadty;
+  platformdata: array[7..32] of longword;
+ end;
 
 function sigactionex(SigNum: Integer; var Action: TSigActionex; OldAction: PSigAction): Integer;
 begin
@@ -405,14 +415,14 @@ end;
 function sys_getlasterror: Integer;
 begin
  {$ifdef FPC}{$checkpointer off}{$endif}
- Result := __errno_location^;
+ Result := __errno_location()^;
  {$ifdef FPC}{$checkpointer default}{$endif}
 end;
 
 procedure sys_setlasterror(const avalue: integer);
 begin
  {$ifdef FPC}{$checkpointer off}{$endif}
- __errno_location^:= avalue;
+ __errno_location()^:= avalue;
  {$ifdef FPC}{$checkpointer default}{$endif}
 end;
 
@@ -426,6 +436,11 @@ begin
  result:= ''; //compilerwarning
  po1:= strerror_r(aerror,pchar(@buffer),buflen);
  setstring(result,po1,strlen(po1));
+end;
+
+function sys_getsockaddrerrortext(aerror: integer): string;
+begin
+ result:= strpas(gai_strerror(aerror));
 end;
 
 function sys_filesystemiscaseinsensitive: boolean;
@@ -536,10 +551,8 @@ function sys_openfile(const path: msestring; const openmode: fileopenmodety;
           const accessmode: fileaccessmodesty;
           const rights: filerightsty; out handle: integer): syserrorty;
 var
-// ca1: cardinal;
  str1: string;
  str2: msestring;
-// ahandle: integer;
 
 begin
  str2:= path;
@@ -577,9 +590,38 @@ begin
  end;
 end;
 
-function sys_opensocket(const kind: socketkindty; out handle: integer): syserrorty;
+function sys_setblocksocket(const handle: integer; const ablock: boolean): syserrorty;
+var
+ int1: integer;
 begin
- handle:= socket(pf_local,sock_stream,0);
+ result:= sye_ok;
+ int1:= fcntl(handle,f_getfl,0);
+ if int1 = -1 then begin
+  result:= syelasterror
+ end
+ else begin
+  if ablock then begin
+   int1:= int1 and not o_nonblock;
+  end
+  else begin
+   int1:= int1 or o_nonblock;
+  end;
+  if fcntl(handle,f_setfl,int1) = -1 then begin
+   result:= sye_lasterror;
+  end;
+ end;
+end;
+
+function sys_opensocket(const kind: socketkindty; out handle: integer): syserrorty;
+var
+ int1: integer;
+begin
+ case kind of 
+  sok_local: int1:= pf_local;
+  sok_inet: int1:= pf_inet;
+  sok_inet6: int1:= pf_inet6;
+ end;
+ handle:= socket(int1,sock_stream,0);
  if handle = -1 then begin
   result:= syelasterror;
  end
@@ -609,53 +651,68 @@ begin
  end;
 end;
 
-function sys_connectlocalsocket(const handle: integer;
-                        const path: filenamety): syserrorty;
+function sys_connectsocket(const handle: integer;
+                                      const addr: socketaddrty): syserrorty;
 var
  str1: string;
  po1: plocsockaddrty;
  int1,int2: integer;
+ po2: pointer;
 begin
- str1:= tosysfilepath(path);
- int1:= sizeof(locsockaddrty)+length(str1)+1;
- po1:= getmem(int1);
- po1^.sa_family:= af_local;
- move(str1[1],po1^.sa_data,length(str1));
- pchar(@po1^.sa_data)[length(str1)]:= #0;
- if connect(handle,pointer(po1),int1) <> 0 then begin
-  result:= syelasterror;
- end
- else begin
-  result:= sye_ok;
+ result:= sye_ok;
+ with addr do begin
+  if kind = sok_local then begin
+   str1:= tosysfilepath(url);
+   int1:= sizeof(locsockaddrty)+length(str1)+1;
+   po1:= getmem(int1);
+   po1^.sa_family:= af_local;
+   move(str1[1],po1^.sa_data,length(str1));
+   pchar(@po1^.sa_data)[length(str1)]:= #0;
+   if connect(handle,pointer(po1),int1) <> 0 then begin
+    result:= syelasterror;
+   end;
+   freemem(po1);
+  end
+  else begin
+   with linuxsockaddrty(platformdata) do begin
+    int1:= __libc_sa_len(ad.addr.sa_family);
+    if connect(handle,@ad.addr,int1) <> 0 then begin
+     result:= syelasterror;
+    end;
+   end;
+  end;
  end;
- freemem(po1);
 end;
 
-function sys_bindlocalsocket(const handle: integer;
-                        const path: filenamety): syserrorty;
+function sys_bindsocket(const handle: integer; 
+                                     const addr: socketaddrty): syserrorty;
 var
  str1: string;
  po1: plocsockaddrty;
  int1,int2: integer;
 begin
- str1:= tosysfilepath(path);
- int1:= sizeof(locsockaddrty)+length(str1)+1;
- po1:= getmem(int1);
- po1^.sa_family:= af_local;
- move(str1[1],po1^.sa_data,length(str1));
- pchar(@po1^.sa_data)[length(str1)]:= #0;
- int2:= bind(handle,pointer(po1),int1);
- if (int2 <> 0) and (sys_getlasterror = EADDRINUSE) then begin
-  libc.unlink(pchar(str1));
-  int2:= bind(handle,pointer(po1),int1);
+ with addr do begin
+  if kind = sok_local then begin
+   str1:= tosysfilepath(url);
+   int1:= sizeof(locsockaddrty)+length(str1)+1;
+   po1:= getmem(int1);
+   po1^.sa_family:= af_local;
+   move(str1[1],po1^.sa_data,length(str1));
+   pchar(@po1^.sa_data)[length(str1)]:= #0;
+   int2:= bind(handle,pointer(po1),int1);
+   if (int2 <> 0) and (sys_getlasterror = EADDRINUSE) then begin
+    libc.unlink(pchar(str1));
+    int2:= bind(handle,pointer(po1),int1);
+   end;
+   if int2 <> 0 then begin
+    result:= syelasterror;
+   end
+   else begin
+    result:= sye_ok;
+   end;
+   freemem(po1);
+  end;
  end;
- if int2 <> 0 then begin
-  result:= syelasterror;
- end
- else begin
-  result:= sye_ok;
- end;
- freemem(po1);
 end;
 
 function sys_listen(const handle: integer; const maxconnections: integer): syserrorty;
@@ -671,7 +728,6 @@ end;
 function sys_accept(const handle: integer; out conn: integer;
                                  out addr: socketaddrty): syserrorty;
 begin
- addr.size:= length( addr.platformdata);
  conn:= accept(handle,@addr.platformdata,@addr.size);
  if conn = -1 then begin
   result:= syelasterror;
@@ -679,6 +735,90 @@ begin
  else begin
   result:= sye_ok;
  end;
+end;
+
+function sys_urltoaddr(var addr: socketaddrty): syserrorty;
+var
+ str1: string;
+ int1: integer;
+ str2: string;
+ err: integer;
+ info1: addrinfo;
+ po1: paddrinfo;
+begin
+ result:= sye_ok;
+ with addr,linuxsockaddrty(platformdata) do begin
+  str1:= url;
+  fillchar(info1,sizeof(addrinfo),0);
+  with info1 do begin
+   ai_socktype:= ord(sock_stream);
+   case kind of
+    sok_inet: begin
+     ai_family:= af_inet;
+    end;
+    sok_inet6: begin
+     ai_family:= af_inet6;
+    end;
+   end;  
+  end;
+  int1:= getaddrinfo(pchar(str1),nil,@info1,@po1);
+  if int1 <> 0 then begin
+   mselasterror:= int1;
+   result:= sye_sockaddr;
+  end
+  else begin
+   with po1^ do begin
+    move(ai_addr^,ad,ai_addrlen);
+    if port <> 0 then begin
+     case ai_family of
+      af_inet: begin
+       ad.addr.sin_port:= htons(port);
+      end;
+      af_inet6: begin
+       ad.addr6.sin6_port:= htons(port);
+      end;
+     end;
+    end;
+   end;
+   freeaddrinfo(po1);
+  end;
+ end;
+end;
+
+function sys_getsockaddr(const addr: socketaddrty): string;
+begin
+ with linuxsockaddrty(addr.platformdata).ad do begin
+  case addr.sa_family of
+   af_inet: begin
+    setlength(result,sizeof(addr.sin_addr));
+    move(addr.sin_addr,result[1],length(result));
+   end;
+   af_inet6: begin
+    setlength(result,sizeof(addr6.sin6_addr));
+    move(addr6.sin6_addr,result[1],length(result));
+   end;
+   else begin
+    result:= '';
+   end;
+  end;
+ end; 
+end;
+
+function sys_getsockport(const addr: socketaddrty): integer;
+begin
+ with linuxsockaddrty(addr.platformdata).ad do begin
+  case addr.sa_family of
+   af_inet: begin
+    result:= ntohs(addr.sin_port);
+   end;
+   af_inet6: begin
+    result:= ntohs(addr6.sin6_port);
+   end;
+   else begin
+    result:= 0;
+   end;
+  end;
+ end; 
 end;
 
 function sys_read(fd:longint; buf:pointer; nbytes: dword): integer;

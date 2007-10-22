@@ -11,6 +11,8 @@
 function sys_getlasterror: integer;
 procedure sys_setlasterror(const avalue: integer);
 function sys_geterrortext(aerror: integer): string;
+function sys_getsockaddrerrortext(aerror: integer): string;
+
 function sys_gettimeus: cardinal;
                //systemtime in microseconds, origin undefined
 function sys_getpid: integer;
@@ -77,17 +79,23 @@ function sys_openfile(const path: filenamety; const openmode: fileopenmodety;
           const rights: filerightsty; out handle: integer): syserrorty;
 function sys_closefile(const handle: integer): syserrorty;
 function sys_dup(const source: integer; out dest: integer): syserrorty;
+
 function sys_opensocket(const kind: socketkindty; out handle: integer): syserrorty;
 function sys_shutdownsocket(const handle: integer;
                    const kind: socketshutdownkindty): syserrorty;
 function sys_closesocket(const handle: integer): syserrorty;
-function sys_connectlocalsocket(const handle: integer;
-                        const path: filenamety): syserrorty;
-function sys_bindlocalsocket(const handle: integer;
-                        const path: filenamety): syserrorty;
-function sys_listen(const handle: integer; const maxconnections: integer): syserrorty;
+function sys_connectsocket(const handle: integer; 
+                                   const addr: socketaddrty): syserrorty;
+function sys_bindsocket(const handle: integer;
+                                   const addr: socketaddrty): syserrorty;
+function sys_listen(const handle: integer;
+                                   const maxconnections: integer): syserrorty;
 function sys_accept(const handle: integer;  out conn: integer;
                                       out addr: socketaddrty): syserrorty;
+function sys_urltoaddr(var addr: socketaddrty): syserrorty;
+function sys_getsockaddr(const addr: socketaddrty): string;
+                   //address bytes
+function sys_getsockport(const addr: socketaddrty): integer;
 
 function sys_read(fd: longint; buf: pointer; nbytes: longword): integer;
 function sys_write(fd: longint; buf: pointer; nbytes: longword): integer;

@@ -205,6 +205,19 @@ begin
  int1:= formatmessage(format_message_from_system,nil,aerror,0,pchar(result),maxlen,nil);
  setlength(result,int1);
 end;
+
+function sys_getsockaddrerrortext(aerror: integer): string;
+begin
+end;
+
+function sys_getsockaddr(const addr: socketaddrty): string;
+begin
+end;
+
+function sys_getsockport(const addr: socketaddrty): integer;
+begin
+end;
+
 {
 function sys_towupper(char: msechar): msechar;
 begin
@@ -444,14 +457,14 @@ begin
  result:= sye_notimplemented;
 end;
 
-function sys_connectlocalsocket(const handle: integer;
-                        const path: filenamety): syserrorty;
+function sys_bindsocket(const handle: integer;
+                                  const addr: socketaddrty): syserrorty;
 begin
  result:= sye_notimplemented;
 end;
 
-function sys_bindlocalsocket(const handle: integer;
-                        const path: filenamety): syserrorty;
+function sys_connectsocket(const handle: integer;
+                             const addr: socketaddrty): syserrorty;
 begin
  result:= sye_notimplemented;
 end;
@@ -463,6 +476,11 @@ end;
 
 function sys_accept(const handle: integer;  out conn: integer;
                               out addr: socketaddrty): syserrorty;
+begin
+ result:= sye_notimplemented;
+end;
+
+function sys_urltoaddr(var addr: socketaddrty): syserrorty;
 begin
  result:= sye_notimplemented;
 end;

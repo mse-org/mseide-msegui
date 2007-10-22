@@ -2197,7 +2197,7 @@ begin
     end;
     if sourcefo.activepage <> nil then begin
      with sourcefo.activepage do begin
-      cursourcefile:= filepath;
+      cursourcefile:= tosysfilepath(filepath);
       cursselection:= edit.selectedtext;
       cursword:= getpascalvarname(edit,edit.editpos,gridcoord1);
       if (index <= high(toolparse)) and toolparse[index] then begin
@@ -2221,7 +2221,7 @@ begin
     curcomponentclass:= '';
     curproperty:= '';
     if factivedesignmodule <> nil then begin
-     curmodulefile:= factivedesignmodule^.filename;
+     curmodulefile:= tosysfilepath(factivedesignmodule^.filename);
      ar1:= designer.selectedcomponents;
      if high(ar1) = 0 then begin
       with gettypedata(ar1[0].classinfo)^ do begin

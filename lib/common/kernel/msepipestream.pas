@@ -40,6 +40,9 @@ type
  //todo: no thread.kill, single thread for all pipreaders
  bufferty = array[0..defaultbuflen-1] of char;
 
+ pipereaderoptionty = (pro_nolock);
+ pipereaderoptionsty = set of pipereaderoptionty;
+ 
  tpipereader = class(tpipewriter)
   private
    fpipebuffer: string;
@@ -52,6 +55,7 @@ type
    finputcond: condty;
    fwritehandle: integer;
    foverloadsleepus: integer;
+   foptions: pipereaderoptionsty;
    function execthread(thread: tmsethread): integer;
    function checkdata: pr_piperesultty;
    procedure clearpipebuffer;
@@ -92,6 +96,7 @@ type
                  write foverloadsleepus default -1;
            //checks application.checkoverload before calling oninputavaliable
            //if >= 0
+   property options: pipereaderoptionsty read foptions write foptions;
    property oninputavailable: pipereadereventty read foninputavailable 
                          write foninputavailable;
    property onpipebroken: pipereadereventty read fonpipebroken write fonpipebroken;
@@ -363,6 +368,8 @@ begin
 end;
 
 procedure tpipereader.doinputavailable;
+var
+ needslock: boolean;
 begin
  if assigned(foninputavailable) or assigned(fonpipebroken) then begin
   if foverloadsleepus >= 0 then begin
@@ -370,7 +377,10 @@ begin
     sleepus(foverloadsleepus);
    end;
   end;
-  application.lock;
+  needslock:= not (pro_nolock in foptions);
+  if needslock then begin
+   application.lock;
+  end;
   try
    if not fthread.terminated then begin
     if assigned(foninputavailable) then begin
@@ -381,7 +391,9 @@ begin
     end;
    end;
   finally
-   application.unlock;
+   if needslock then begin
+    application.unlock;
+   end;
   end;
  end;
  sys_condlock(finputcond);

@@ -37,9 +37,16 @@ type
  mutexty = array[0..7] of cardinal;
  semty = array[0..7] of cardinal;
  condty = array[0..31] of cardinal;
+ 
+ socketkindty = (sok_local,sok_inet,sok_inet6);
+ socketshutdownkindty = (ssk_rx,ssk_tx,ssk_both);
+ 
  socketaddrty = record
+  kind: socketkindty;
+  url: filenamety;
+  port: integer;
   size: integer;
-  platformdata: array[0..31] of pointer;
+  platformdata: array[0..32] of longword;
  end;
 
 const
@@ -64,10 +71,7 @@ type
                     fa_all);
 
  fileattributesty = set of fileattributety;
- 
- socketkindty = (sok_local,sok_inet);
- socketshutdownkindty = (ssk_rx,ssk_tx,ssk_both);
- 
+  
 type
  fileinfolevelty = (fil_name,fil_ext1,fil_ext2);
 
@@ -107,7 +111,8 @@ type
 
  syserrorty = (sye_ok,sye_lasterror,sye_busy,sye_dirstream,sye_network,
                 sye_thread,sye_mutex,sye_semaphore,sye_cond,sye_timeout,
-                sye_copyfile,sye_createdir,sye_noconsole,sye_notimplemented
+                sye_copyfile,sye_createdir,sye_noconsole,sye_notimplemented,
+                sye_sockaddr
                );
 
  esys = class(eerror)
@@ -203,7 +208,8 @@ const
     'Copy file error',
     'Can not create directory',
     'No console',
-    'Not implemented'
+    'Not implemented',
+    'Socket address error'
    );
 
 var
@@ -269,7 +275,12 @@ begin
   raise esys.create(error,text+sys_geterrortext(mselasterror));
  end
  else begin
-  raise esys.create(error,text);
+  if error = sye_sockaddr then begin
+   raise esys.create(error,text+sys_getsockaddrerrortext(mselasterror));
+  end
+  else begin
+   raise esys.create(error,text);
+  end;
  end;
 end;
 

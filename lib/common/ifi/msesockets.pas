@@ -40,12 +40,13 @@ type
    function getoverloadsleepus: integer;
    procedure setoverloadsleepus(const avalue: integer);
    procedure setoninputavailable(const avalue: socketpipeseventty);
-   procedure setonsocketbroken(const avalue: socketpipeseventty);
    procedure doinputavailable(const sender: tpipereader);
    procedure dopipebroken(const sender: tpipereader);   
    procedure internalclose;
+   function getoptionsreader: pipereaderoptionsty;
+   procedure setoptionsreader(const avalue: pipereaderoptionsty);
   protected
-   property onsocketbroken: socketpipeseventty read fonsocketbroken write setonsocketbroken;
+   property onsocketbroken: socketpipeseventty read fonsocketbroken write fonsocketbroken;
   public
    constructor create(const aowner: tsocketcomp);
    destructor destroy; override;
@@ -57,6 +58,7 @@ type
                   write setoverloadsleepus default -1;
             //checks application.checkoverload before calling oninputavaliable
             //if >= 0
+   property optionsreader: pipereaderoptionsty read getoptionsreader write setoptionsreader;
    property onbeforeconnect: socketpipeseventty read fonbeforeconnect 
                                                       write fonbeforeconnect;
    property onafterconnect: socketpipeseventty read fonafterconnect 
@@ -74,6 +76,7 @@ type
   public
    constructor create(const aowner: tsocketclient);
   published
+   property optionsreader;
    property overloadsleepus;
    property oninputavailable;
    property onsocketbroken;
@@ -98,9 +101,11 @@ type
    fonafterconnect: socketeventty;
    fonbeforedisconnect: socketeventty;
    fonafterdisconnect: socketeventty;
+   fkind: socketkindty;
    procedure seturl(const avalue: filenamety);
    procedure setactive(const avalue: boolean);
   protected
+   function getsockaddr: socketaddrty;
    procedure doactivated; override;
    procedure dodeactivated; override;
    procedure internalconnect; virtual; abstract;
@@ -114,6 +119,7 @@ type
    destructor destroy; override;
   published
    property active: boolean read factive write setactive;
+   property kind: socketkindty read fkind write fkind;
    property url: filenamety read furl write seturl;
    property activator;
    property onbeforeconnect: socketeventty read fonbeforeconnect 
@@ -165,6 +171,7 @@ type
    foninputavailable: socketpipeseventty;
    fonsocketbroken: socketpipeseventty;
    fconnectioncount: integer;
+   foptionsreader: pipereaderoptionsty;
    function execthread(thread: tmsethread): integer;
   protected
    procedure internalconnect; override;
@@ -191,6 +198,7 @@ type
                   write foverloadsleepus default -1;
             //checks application.checkoverload before calling oninputavaliable
             //if >= 0
+   property optionsreader: pipereaderoptionsty read foptionsreader write foptionsreader;
    property oninputavailable: socketpipeseventty read foninputavailable 
                                  write foninputavailable;
    property onsocketbroken: socketpipeseventty read fonsocketbroken 
@@ -266,19 +274,6 @@ begin
  end;
 end;
 
-procedure tcustomsocketpipes.setonsocketbroken(const avalue: socketpipeseventty);
-begin
- fonsocketbroken:= avalue;
- {
- if assigned(avalue) then begin
-  freader.onpipebroken:= @dopipebroken;
- end
- else begin
-  freader.onpipebroken:= nil;
- end;
- }
-end;
-
 procedure tcustomsocketpipes.doinputavailable(const sender: tpipereader);
 begin
  if fowner.canevent(tmethod(foninputavailable)) then begin
@@ -288,11 +283,16 @@ end;
 
 procedure tcustomsocketpipes.dopipebroken(const sender: tpipereader);
 begin
- if assigned(fonsocketbroken) then begin
-  fonsocketbroken(self);
- end
- else begin
-  close;
+ application.lock;
+ try
+  if assigned(fonsocketbroken) then begin
+   fonsocketbroken(self);
+  end
+  else begin
+   close;
+  end;
+ finally
+  application.unlock;
  end;
 end;
 
@@ -310,6 +310,16 @@ begin
  if fowner.canevent(tmethod(fonafterdisconnect)) then begin
   fonafterdisconnect(self);
  end; 
+end;
+
+function tcustomsocketpipes.getoptionsreader: pipereaderoptionsty;
+begin
+ result:= freader.options;
+end;
+
+procedure tcustomsocketpipes.setoptionsreader(const avalue: pipereaderoptionsty);
+begin
+ freader.options:= avalue;
 end;
 
 { tserversocketpipes }
@@ -409,6 +419,24 @@ begin
  end; 
 end;
 
+function tsocketcomp.getsockaddr: socketaddrty;
+begin
+ with result do begin
+  kind:= fkind;
+  fillchar(platformdata,sizeof(platformdata),0);
+  size:= 0;
+  url:= '';
+  case fkind of
+   sok_local: begin
+    url:= furl;
+   end;
+   sok_inet,sok_inet6: begin
+    syserror(sys_urltoaddr(result));
+   end;
+  end;
+ end;  
+end;
+
 { tsocketclient }
 
 constructor tsocketclient.create(aowner: tcomponent);
@@ -432,9 +460,9 @@ end;
 
 procedure tsocketclient.internalconnect;
 begin
- syserror(sys_opensocket(sok_local,fhandle));
+ syserror(sys_opensocket(fkind,fhandle));
  try
-  syserror(sys_connectlocalsocket(fhandle,furl));
+  syserror(sys_connectsocket(fhandle,getsockaddr));
  except
   sys_closefile(fhandle);
   fhandle:= invalidfilehandle;
@@ -492,7 +520,7 @@ procedure tsocketserver.internalconnect;
 begin
  syserror(sys_opensocket(sok_local,fhandle));
  try
-  syserror(sys_bindlocalsocket(fhandle,furl));
+  syserror(sys_bindsocket(fhandle,getsockaddr));
  except
   sys_closefile(fhandle);
   fhandle:= invalidfilehandle;
@@ -516,6 +544,8 @@ var
  int1,int2: integer;
 begin
  result:= 0;
+ addr.kind:= fkind;
+ addr.size:= sizeof(addr.platformdata);
  while not thread.terminated and (sys_accept(fhandle,conn,addr) = sye_ok) do begin
   if not thread.terminated then begin
    try
@@ -543,6 +573,7 @@ begin
       fpipes[int2]:= tserversocketpipes.create(self);
       inc(fconnectioncount);
       with fpipes[int2] do begin
+       optionsreader:= self.foptionsreader;
        overloadsleepus:= self.foverloadsleepus;
        oninputavailable:= self.foninputavailable;
        onsocketbroken:= self.fonsocketbroken;

@@ -5776,7 +5776,10 @@ var
  debugungrabbed: boolean;
  
 procedure GUI_DEBUGBEGIN;
+var
+ int1: integer;
 begin
+ int1:= sys_getlasterror;
  if pointergrabbed then begin
   debugungrabbed:= true;
   gui_ungrabpointer;
@@ -5784,12 +5787,17 @@ begin
  if appdisp <> nil then begin
   xflush(appdisp);
  end;
+ sys_setlasterror(int1);
 end;
 
 procedure GUI_DEBUGEND;
+var
+ int1: integer;
 begin
  if debugungrabbed then begin
+  int1:= sys_getlasterror;
   gui_grabpointer(grabwinid);
+  sys_setlasterror(int1);
   debugungrabbed:= false;
  end;
 end;
