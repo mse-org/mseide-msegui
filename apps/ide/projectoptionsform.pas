@@ -497,7 +497,7 @@ begin
   end;
   with result[1] do begin
    name:= 'PROJECTDIR';
-   value:= getcurrentdir+pathdelim;
+   value:= tosysfilepath(getcurrentdir)+pathdelim;
   end;
  end;
 end;
