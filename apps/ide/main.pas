@@ -2237,16 +2237,18 @@ begin
      curmodulefile:= '';
     end;
     mstr1:= toolparams[index];
-    macrolist:= tmacrolist.create([mao_caseinsensitive]);
-    macrolist.add(['CURSOURCEFILE','CURMODULEFILE',
-                   'CURSSELECTION','CURSWORD','CURSDEFINITION',
-                   'CURCOMPONENTCLASS','CURPROPERTY'],
-                   [cursourcefile,curmodulefile,
-                    cursselection,cursword,cursdefinition,
-                    curcomponentclass,curproperty]);
-    macrolist.expandmacros(mstr1);
-    macrolist.free;
-    str1:= str1 + ' ' + mstr1;
+    if mstr1 <> '' then begin
+     macrolist:= tmacrolist.create([mao_caseinsensitive]);
+     macrolist.add(['CURSOURCEFILE','CURMODULEFILE',
+                    'CURSSELECTION','CURSWORD','CURSDEFINITION',
+                    'CURCOMPONENTCLASS','CURPROPERTY'],
+                    [cursourcefile,curmodulefile,
+                     cursselection,cursword,cursdefinition,
+                     curcomponentclass,curproperty]);
+     macrolist.expandmacros(mstr1);
+     macrolist.free;
+     str1:= str1 + ' ' + mstr1;
+    end;
    end;
    execmse(str1,not((index > high(toolhide)) or toolhide[index]),true);
   end;
