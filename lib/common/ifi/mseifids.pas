@@ -1884,7 +1884,7 @@ begin
  end;
  senddata(str1);
 end;
-var testvar: integer;
+
 procedure ttxdataset.requestopendsreceived(const asequence: sequencety);
 var
  str1,str2,str3: ansistring;
@@ -1899,7 +1899,6 @@ begin
   move(str3[1],(@data+length(str2))^,length(str3));
  end;
  senddata(str1);
-testvar:= length(str2);
 end;
 
 end.

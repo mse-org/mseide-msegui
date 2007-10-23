@@ -2094,7 +2094,7 @@ constructor tsocketclientiochannel.create(aowner: tcomponent);
 begin
  fsocket:= tifisocketclient.create(nil);
  fsocket.setsubcomponent(true);
- fsocket.pipes.reader.oninputavailable:= @doinputavailable;
+ fsocket.pipes.rx.oninputavailable:= @doinputavailable;
  fsocket.pipes.onbeforedisconnect:= @dobeforedisconnect;
  inherited;
 end;
@@ -2117,12 +2117,12 @@ end;
 
 function tsocketclientiochannel.commio: boolean;
 begin
- result:= fsocket.active and fsocket.pipes.reader.active;
+ result:= fsocket.active and fsocket.pipes.rx.active;
 end;
 
 procedure tsocketclientiochannel.internalsenddata(const adata: ansistring);
 begin
- fsocket.pipes.writer.writestr(stx+stuff(adata)+etx);
+ fsocket.pipes.tx.writestr(stx+stuff(adata)+etx);
 end;
 
 procedure tsocketclientiochannel.doinputavailable(const sender: tpipereader);
@@ -2137,7 +2137,7 @@ end;
 
 procedure tsocketclientiochannel.dobeforedisconnect(const sender: tcustomsocketpipes);
 begin
- //nothing to do
+ disconnect;
 end;
 
 { tsocketclientifichannel }
@@ -2162,7 +2162,7 @@ begin
   inc(funlinking);
   try
    if fpipes <> nil then begin
-    fpipes.reader.oninputavailable:= nil;
+    fpipes.rx.oninputavailable:= nil;
     fpipes.close;
    end;
   finally
@@ -2177,7 +2177,7 @@ begin
  unlink;
  setlinkedvar(apipes,fpipes);
  fpipes.onbeforedisconnect:= @dobeforedisconnect;
- fpipes.reader.oninputavailable:= @doinputavailable;
+ fpipes.rx.oninputavailable:= @doinputavailable;
 end;
 
 procedure tsocketserveriochannel.internalconnect;
@@ -2194,12 +2194,12 @@ end;
 
 function tsocketserveriochannel.commio: boolean;
 begin
- result:= (fpipes <> nil) and fpipes.reader.active;
+ result:= (fpipes <> nil) and fpipes.rx.active;
 end;
 
 procedure tsocketserveriochannel.internalsenddata(const adata: ansistring);
 begin
- fpipes.writer.writestr(stx+stuff(adata)+etx);
+ fpipes.tx.writestr(stx+stuff(adata)+etx);
 end;
 
 procedure tsocketserveriochannel.doinputavailable(const sender: tpipereader);
@@ -2209,6 +2209,7 @@ end;
 
 procedure tsocketserveriochannel.dobeforedisconnect(const sender: tcustomsocketpipes);
 begin
+ disconnect;
  unlink;
 end;
 

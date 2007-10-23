@@ -55,7 +55,8 @@ const
  defaultbuflen = 256;
 
 type
- textstreamstatety = (tss_eof,tss_error,tss_notopen,tss_pipeactive,tss_response);
+ textstreamstatety = (tss_eof,tss_error,tss_notopen,tss_pipeactive,tss_response,
+                      tss_nosigio,tss_unblocked);
  textstreamstatesty = set of textstreamstatety;
 
  charencodingty = (ce_ansi,ce_utf8n,ce_ascii);  //ce_ascii -> 7Bit,

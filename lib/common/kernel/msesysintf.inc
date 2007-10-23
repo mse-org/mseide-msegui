@@ -80,22 +80,31 @@ function sys_openfile(const path: filenamety; const openmode: fileopenmodety;
 function sys_closefile(const handle: integer): syserrorty;
 function sys_dup(const source: integer; out dest: integer): syserrorty;
 
-function sys_opensocket(const kind: socketkindty; out handle: integer): syserrorty;
+function sys_opensocket(const kind: socketkindty; const nonblock: boolean;
+                                    out handle: integer): syserrorty;
 function sys_shutdownsocket(const handle: integer;
                    const kind: socketshutdownkindty): syserrorty;
 function sys_closesocket(const handle: integer): syserrorty;
 function sys_connectsocket(const handle: integer; 
-                                   const addr: socketaddrty): syserrorty;
+                           const addr: socketaddrty; const timeoutms: integer): syserrorty;
 function sys_bindsocket(const handle: integer;
                                    const addr: socketaddrty): syserrorty;
 function sys_listen(const handle: integer;
                                    const maxconnections: integer): syserrorty;
-function sys_accept(const handle: integer;  out conn: integer;
-                                      out addr: socketaddrty): syserrorty;
+function sys_accept(const handle: integer; const nonblock: boolean; out conn: integer;
+                       out addr: socketaddrty; const timeoutms: integer): syserrorty;
 function sys_urltoaddr(var addr: socketaddrty): syserrorty;
 function sys_getsockaddr(const addr: socketaddrty): string;
                    //address bytes
 function sys_getsockport(const addr: socketaddrty): integer;
+function sys_setnonblocksocket(const handle: integer;
+                                     const nonblock: boolean): syserrorty;
+function sys_readsocket(const fd: longint; const buf: pointer;
+                        const nbytes: longword;
+            out readbytes: integer; const timeoutms: integer): syserrorty;
+function sys_setsockrxtimeout(const handle: integer; const ms: integer): syserrorty;
+function sys_setsocktxtimeout(const handle: integer; const ms: integer): syserrorty;
+
 
 function sys_read(fd: longint; buf: pointer; nbytes: longword): integer;
 function sys_write(fd: longint; buf: pointer; nbytes: longword): integer;

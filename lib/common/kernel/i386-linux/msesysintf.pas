@@ -186,7 +186,7 @@ procedure setcloexec(const fd: integer);
 
 implementation
 uses
- sysutils,msefileutils{$ifdef FPC},dateutils{$else},DateUtils{$endif};
+ sysutils,msesysutils,msefileutils{$ifdef FPC},dateutils{$else},DateUtils{$endif};
 {$ifdef FPC}
 const
  recursive = PTHREAD_MUTEX_RECURSIVE;
@@ -467,6 +467,14 @@ begin
  end;
 end;
 
+function timestampms: cardinal;
+var
+ t1: timeval;
+begin
+ gettimeofday(@t1,ptimezone(nil));
+ result:= t1.tv_sec * 1000 + t1.tv_usec div 1000;
+end;
+
 function gettimestamp(timeoutusec: integer): timespec;
 var
  ti: timeval;
@@ -590,7 +598,7 @@ begin
  end;
 end;
 
-function sys_setblocksocket(const handle: integer; const ablock: boolean): syserrorty;
+function sys_setnonblocksocket(const handle: integer; const nonblock: boolean): syserrorty;
 var
  int1: integer;
 begin
@@ -600,11 +608,11 @@ begin
   result:= syelasterror
  end
  else begin
-  if ablock then begin
-   int1:= int1 and not o_nonblock;
+  if nonblock then begin
+   int1:= int1 or o_nonblock;
   end
   else begin
-   int1:= int1 or o_nonblock;
+   int1:= int1 and not o_nonblock;
   end;
   if fcntl(handle,f_setfl,int1) = -1 then begin
    result:= sye_lasterror;
@@ -612,7 +620,8 @@ begin
  end;
 end;
 
-function sys_opensocket(const kind: socketkindty; out handle: integer): syserrorty;
+function sys_opensocket(const kind: socketkindty; const nonblock: boolean;
+                                 out handle: integer): syserrorty;
 var
  int1: integer;
 begin
@@ -626,7 +635,7 @@ begin
   result:= syelasterror;
  end
  else begin
-  result:= sye_ok;
+  result:= sys_setnonblocksocket(handle,nonblock);
  end;
 end;
 
@@ -651,13 +660,72 @@ begin
  end;
 end;
 
-function sys_connectsocket(const handle: integer;
-                                      const addr: socketaddrty): syserrorty;
+type
+ selectkindty = (seka_read,seka_write,seka_except);
+ selectkindsty = set of selectkindty;
+
+function doselect(const handle: integer; const kind: selectkindsty;
+                            const timeoutms: longword): syserrorty;
+                             //0 -> no timeout
+                             //for blocking mode
+var
+ int1,int2: integer;
+ lwo1,lwo2: longword;
+ info: pollfd;
+begin
+ fillchar(info,sizeof(info),0);
+ with info do begin
+  fd:= handle;
+  if seka_read in kind then begin
+   events:= events or pollin;
+  end;
+  if seka_write in kind then begin
+   events:= events or pollout;
+  end;
+  if seka_except in kind then begin
+   events:= events or pollpri;
+  end;
+ end;
+ if timeoutms > 0 then begin
+  lwo1:= timestampms + timeoutms;
+  int2:= timeoutms;
+ end
+ else begin
+  int2:= -1;
+ end;
+ while true do begin  
+  int1:= poll(@info,1,int2);
+  if (int1 >= 0) or (sys_getlasterror <> eintr) then begin
+   break;
+  end;
+  if timeoutms > 0 then begin
+   lwo2:= lwo1 - timestampms;
+   if integer(lwo2) <= 0 then begin
+    int1:= 0;
+    break;
+   end;
+   int2:= lwo2;
+  end;
+ end;
+ if int1 < 0 then begin
+  result:= syelasterror;
+ end
+ else begin
+  if int1 = 0 then begin
+   result:= sye_timeout;
+  end
+  else begin
+   result:= sye_ok;
+  end;
+ end;
+end;
+
+function sys_connectsocket(const handle: integer; const addr: socketaddrty;
+                               const timeoutms: integer): syserrorty;
 var
  str1: string;
  po1: plocsockaddrty;
  int1,int2: integer;
- po2: pointer;
 begin
  result:= sye_ok;
  with addr do begin
@@ -669,18 +737,47 @@ begin
    move(str1[1],po1^.sa_data,length(str1));
    pchar(@po1^.sa_data)[length(str1)]:= #0;
    if connect(handle,pointer(po1),int1) <> 0 then begin
-    result:= syelasterror;
+    result:= doselect(handle,[seka_write],timeoutms);
+    if result = sye_ok then begin
+     if connect(handle,pointer(po1),int1) <> 0 then begin
+      result:= syelasterror;
+     end;
+    end;
    end;
    freemem(po1);
   end
   else begin
    with linuxsockaddrty(platformdata) do begin
     int1:= __libc_sa_len(ad.addr.sa_family);
-    if connect(handle,@ad.addr,int1) <> 0 then begin
-     result:= syelasterror;
+    po1:= @ad.addr;
+    if connect(handle,pointer(po1),int1) <> 0 then begin
+     result:= doselect(handle,[seka_write],timeoutms);
+     if result = sye_ok then begin
+      if connect(handle,pointer(po1),int1) <> 0 then begin
+       result:= syelasterror;
+      end;
+     end;
     end;
    end;
   end;
+ end;
+end;
+
+function sys_readsocket(const fd: longint; const buf: pointer;
+                        const nbytes: longword;
+                    out readbytes: integer; const timeoutms: integer): syserrorty;
+begin
+ result:= sye_ok;
+ result:= doselect(fd,[seka_read],timeoutms);
+ if result = sye_ok then begin
+  readbytes:= __read(fd,buf^,nbytes);
+  if readbytes <= 0 then begin
+   readbytes:= 0;
+   result:= syelasterror;
+  end;
+ end
+ else begin
+  readbytes:= 0;
  end;
 end;
 
@@ -725,16 +822,44 @@ begin
  end;
 end;
 
-function sys_accept(const handle: integer; out conn: integer;
-                                 out addr: socketaddrty): syserrorty;
+function sys_accept(const handle: integer; const nonblock: boolean; out conn: integer;
+             out addr: socketaddrty; const timeoutms: integer): syserrorty;
 begin
- conn:= accept(handle,@addr.platformdata,@addr.size);
- if conn = -1 then begin
+ result:= doselect(handle,[seka_read],timeoutms);
+ if result = sye_ok then begin
+  conn:= accept(handle,@addr.platformdata,@addr.size);
+  if conn = -1 then begin
+   result:= syelasterror;
+  end
+  else begin
+   result:= sys_setnonblocksocket(conn,nonblock);
+  end;
+ end;
+end;
+
+function setsocktimeout(const handle: integer; const ms: integer;
+      const optname: integer): syserrorty;
+var
+ ti: ttimeval;
+begin
+ ti.tv_sec:= ms div 1000;
+ ti.tv_usec:= (ms mod 1000) * 1000;
+ if setsockopt(handle,sol_socket,optname,@ti,sizeof(ti)) <> 0 then begin
   result:= syelasterror;
  end
  else begin
   result:= sye_ok;
  end;
+end;
+
+function sys_setsockrxtimeout(const handle: integer; const ms: integer): syserrorty;
+begin
+ result:= setsocktimeout(handle,ms,so_rcvtimeo);
+end;
+
+function sys_setsocktxtimeout(const handle: integer; const ms: integer): syserrorty;
+begin
+ result:= setsocktimeout(handle,ms,so_sndtimeo);
 end;
 
 function sys_urltoaddr(var addr: socketaddrty): syserrorty;
@@ -1565,7 +1690,18 @@ procedure sigdummy(SigNum: Integer); cdecl;
 begin
 end;
 
+procedure setsighandlers;
+var
+ info: tsigaction;
+begin
+ fillchar(info,sizeof(info),0);
+ with info do begin
+  sa_handler:= @sigdummy;
+  sa_flags:= sa_restart;
+ end;
+ sigaction(sigio,@info,nil);
+end;
+
 initialization
- signal(sigio,__sighandler_t(@sigdummy)); 
-// signal(sigio,__sighandler_t(@sigtest)); 
+ setsighandlers;
 end.

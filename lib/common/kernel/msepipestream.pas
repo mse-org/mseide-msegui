@@ -47,22 +47,22 @@ type
   private
    fpipebuffer: string;
    fdatastatus: pr_piperesultty;
-   fthread: tsemthread;         //simulate nonblocking pipes on windows
-   fmsbuf: bufferty;
-   fmsbufcount: integer;
    foninputavailable: pipereadereventty;
    fonpipebroken: pipereadereventty;
    finputcond: condty;
    fwritehandle: integer;
    foverloadsleepus: integer;
    foptions: pipereaderoptionsty;
-   function execthread(thread: tmsethread): integer;
    function checkdata: pr_piperesultty;
    procedure clearpipebuffer;
    function getresponseflag: boolean;
    procedure setresponseflag(const Value: boolean);
    procedure setwritehandle(const Value: integer);
   protected
+   fthread: tsemthread;         //simulate nonblocking pipes on windows
+   fmsbuf: bufferty;
+   fmsbufcount: integer;
+   function execthread(thread: tmsethread): integer; virtual;
    procedure sethandle(value: integer); override;
    procedure setbuflen(const Value: integer); override;
    function readbytes(var buf): integer; override;
@@ -220,10 +220,11 @@ begin
     sys_write(fwritehandle,@by1,1); //wake up thread
    end
    else begin
-    {$ifdef linux}
-    pthread_kill(fthread.id,sigio);
-    {$else}
     inherited sethandle(invalidfilehandle);
+    {$ifdef linux}
+    if not (tss_nosigio in fstate) then begin
+     pthread_kill(fthread.id,sigio);
+    end;
     {$endif}
    end;
    writehandle:= invalidfilehandle;
@@ -273,9 +274,13 @@ function tpipereader.readbytes(var buf): integer;
    fmsbufcount:= 0;
   end;
   {$else}
-  setfilenonblock(handle,true);
+  if not (tss_unblocked in fstate) then begin
+   setfilenonblock(handle,true);
+  end;
   int1:= sys_read(Handle,@fmsBuf,defaultbuflen);
-  setfilenonblock(handle,false);
+  if not (tss_unblocked in fstate) then begin
+   setfilenonblock(handle,false);
+  end;
   if int1 <= 0 then begin
    fmsbufcount:= 0;
    if sys_getlasterror <> EAGAIN then begin
@@ -321,20 +326,18 @@ function tpipereader.execthread(thread: tmsethread): integer;
 var
  int1: integer;
  {$ifdef linux}
- fdsetr,fdsete: tfdset;
+ info: pollfd;
  {$endif}
 begin                          
  fthread:= tsemthread(thread);
  {$ifdef linux}
- fd_zero(fdsetr);
- fd_zero(fdsete);
+ info.fd:= handle;
+ info.events:= pollin;
  {$endif}
  with fthread do begin
   while not terminated and not (tss_error in fstate) do begin
   {$ifdef linux}
-   fd_set(handle,fdsetr);
-   fd_set(handle,fdsete);
-   if select(fd_setsize,@fdsetr,nil,@fdsete,nil) > 0 then begin
+   if (poll(@info,1,-1) > 0) and not terminated then begin
   {$else}
    if true then begin
   {$endif}

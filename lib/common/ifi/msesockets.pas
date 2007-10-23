@@ -2,7 +2,8 @@ unit msesockets;
 {$ifdef FPC}{$mode objfpc}{$h+}{$INTERFACES CORBA}{$endif}
 interface
 uses
- classes,mseclasses,msesys,msestrings,msepipestream,msegui,msethread;
+ classes,mseguiglob,mseclasses,msesys,msestrings,msepipestream,msegui,msethread,
+ mseevent;
 
 const
  defaultmaxconnections = 16;
@@ -13,21 +14,36 @@ type
  socketpipeseventty = procedure(const sender: tcustomsocketpipes) of object;
 
  tsocketreader = class(tpipereader)
+  private
+   ftimeoutms: integer;
+   procedure settimeoutms(const avalue: integer);
   protected
    procedure closehandle(const ahandle: integer); override;
+   function execthread(thread: tmsethread): integer; override;
+  public
+   constructor create;
+   property timeoutms: integer read ftimeoutms write settimeoutms;
  end;
  
  tsocketwriter = class(tpipewriter)
+  private
+   ftimeoutms: integer;
+   procedure settimeoutms(const avalue: integer);
   protected
    procedure closehandle(const ahandle: integer); override;
+  public
+   property timeoutms: integer read ftimeoutms write settimeoutms;
  end;
  
  tsocketcomp = class;
  
- tcustomsocketpipes = class(tlinkedpersistent)
+ socketpipesstatety = (sops_open,sops_closing);
+ socketpipesstatesty = set of socketpipesstatety;
+ 
+ tcustomsocketpipes = class(tlinkedpersistent,ievent)
   private
-   freader: tsocketreader;
-   fwriter: tsocketwriter;
+   frx: tsocketreader;
+   ftx: tsocketwriter;
    foninputavailable: socketpipeseventty;
    fonsocketbroken: socketpipeseventty;
    fowner: tsocketcomp;
@@ -35,6 +51,7 @@ type
    fonafterconnect: socketpipeseventty;
    fonbeforedisconnect: socketpipeseventty;
    fonafterdisconnect: socketpipeseventty;
+   fstate: socketpipesstatesty;
    function gethandle: integer;
    procedure sethandle(const avalue: integer);
    function getoverloadsleepus: integer;
@@ -45,15 +62,23 @@ type
    procedure internalclose;
    function getoptionsreader: pipereaderoptionsty;
    procedure setoptionsreader(const avalue: pipereaderoptionsty);
+   function getrxtimeoutms: integer;
+   procedure setrxtimeoutms(const avalue: integer);
+   function gettxtimeoutms: integer;
+   procedure settxtimeoutms(const avalue: integer);
   protected
+   procedure receiveevent(const event: tobjectevent);
    property onsocketbroken: socketpipeseventty read fonsocketbroken write fonsocketbroken;
   public
    constructor create(const aowner: tsocketcomp);
    destructor destroy; override;
    procedure close;
    property handle: integer read gethandle write sethandle;
-   property reader: tsocketreader read freader;
-   property writer: tsocketwriter read fwriter;
+   property rx: tsocketreader read frx;
+   property tx: tsocketwriter read ftx;
+   property rxtimeoutms: integer read getrxtimeoutms write setrxtimeoutms;
+   property txtimeoutms: integer read gettxtimeoutms write settxtimeoutms;
+   
    property overloadsleepus: integer read getoverloadsleepus 
                   write setoverloadsleepus default -1;
             //checks application.checkoverload before calling oninputavaliable
@@ -172,6 +197,8 @@ type
    fonsocketbroken: socketpipeseventty;
    fconnectioncount: integer;
    foptionsreader: pipereaderoptionsty;
+   frxtimeoutms: integer;
+   ftxtimeoutms: integer;
    function execthread(thread: tmsethread): integer;
   protected
    procedure internalconnect; override;
@@ -185,6 +212,9 @@ type
   published
    property maxconnections: integer read fmaxconnections write fmaxconnections 
                              default defaultmaxconnections;
+   property rxtimeoutms: integer read frxtimeoutms write frxtimeoutms;
+   property txtimeoutms: integer read ftxtimeoutms write ftxtimeoutms;
+   
    property onaccept: socketaccepteventty read fonaccept write fonaccept;
    property onbeforechconnect: socketserverconnecteventty read fonbeforechconnect
                                write fonbeforechconnect;
@@ -209,7 +239,7 @@ procedure checksyserror(const aresult: integer);
 
 implementation
 uses
- msefileutils,msesysintf,sysutils;
+ msefileutils,msesysintf,sysutils,msestream;
   
 procedure checksyserror(const aresult: integer);
 begin
@@ -223,54 +253,60 @@ end;
 constructor tcustomsocketpipes.create(const aowner: tsocketcomp);
 begin
  fowner:= aowner;
- freader:= tsocketreader.create;
- freader.onpipebroken:= @dopipebroken;
- fwriter:= tsocketwriter.create;
+ frx:= tsocketreader.create;
+ frx.onpipebroken:= @dopipebroken;
+ ftx:= tsocketwriter.create;
 end;
 
 destructor tcustomsocketpipes.destroy;
 begin
  inherited;
  close;
- freader.free;
- fwriter.free;
+ frx.free;
+ ftx.free;
 end;
 
 function tcustomsocketpipes.gethandle: integer;
 begin
- result:= fwriter.handle;
+ result:= ftx.handle;
 end;
 
 procedure tcustomsocketpipes.sethandle(const avalue: integer);
 var
  int1: integer;
 begin
- fwriter.handle:= avalue;
+ ftx.handle:= avalue;
  int1:= avalue;
  if avalue <> invalidfilehandle then begin
   syserror(sys_dup(avalue,int1));
  end;
- freader.handle:= int1;
+ frx.handle:= int1;
+ if avalue <> invalidfilehandle then begin
+  include(fstate,sops_open);
+ end
+ else begin
+  exclude(fstate,sops_open);
+ end;
 end;
 
 function tcustomsocketpipes.getoverloadsleepus: integer;
 begin
- result:= freader.overloadsleepus;
+ result:= frx.overloadsleepus;
 end;
 
 procedure tcustomsocketpipes.setoverloadsleepus(const avalue: integer);
 begin
- freader.overloadsleepus:= avalue;
+ frx.overloadsleepus:= avalue;
 end;
 
 procedure tcustomsocketpipes.setoninputavailable(const avalue: socketpipeseventty);
 begin
  foninputavailable:= avalue;
  if assigned(avalue) then begin
-  freader.oninputavailable:= @doinputavailable;
+  frx.oninputavailable:= @doinputavailable;
  end
  else begin
-  freader.oninputavailable:= nil;
+  frx.oninputavailable:= nil;
  end;
 end;
 
@@ -281,19 +317,21 @@ begin
  end;
 end;
 
-procedure tcustomsocketpipes.dopipebroken(const sender: tpipereader);
+procedure tcustomsocketpipes.receiveevent(const event: tobjectevent);
 begin
- application.lock;
- try
+ if (event is tuserevent) and (tuserevent(event).tag = closepipestag) then begin
   if assigned(fonsocketbroken) then begin
    fonsocketbroken(self);
   end
   else begin
    close;
   end;
- finally
-  application.unlock;
  end;
+end;
+
+procedure tcustomsocketpipes.dopipebroken(const sender: tpipereader);
+begin
+ application.postevent(tuserevent.create(ievent(self),closepipestag));
 end;
 
 procedure tcustomsocketpipes.internalclose;
@@ -303,23 +341,50 @@ end;
 
 procedure tcustomsocketpipes.close;
 begin
- if fowner.canevent(tmethod(fonbeforedisconnect)) then begin
-  fonbeforedisconnect(self);
+ if fstate * [sops_open,sops_closing] = [sops_open] then begin
+  include(fstate,sops_closing);
+  try
+   if fowner.canevent(tmethod(fonbeforedisconnect)) then begin
+    fonbeforedisconnect(self);
+   end;
+   internalclose;
+   if fowner.canevent(tmethod(fonafterdisconnect)) then begin
+    fonafterdisconnect(self);
+   end; 
+  finally
+   fstate:= fstate - [sops_closing,sops_open];
+  end;
  end;
- internalclose;
- if fowner.canevent(tmethod(fonafterdisconnect)) then begin
-  fonafterdisconnect(self);
- end; 
 end;
 
 function tcustomsocketpipes.getoptionsreader: pipereaderoptionsty;
 begin
- result:= freader.options;
+ result:= frx.options;
 end;
 
 procedure tcustomsocketpipes.setoptionsreader(const avalue: pipereaderoptionsty);
 begin
- freader.options:= avalue;
+ frx.options:= avalue;
+end;
+
+function tcustomsocketpipes.getrxtimeoutms: integer;
+begin
+ result:= frx.timeoutms;
+end;
+
+procedure tcustomsocketpipes.setrxtimeoutms(const avalue: integer);
+begin
+ frx.timeoutms:= avalue;
+end;
+
+function tcustomsocketpipes.gettxtimeoutms: integer;
+begin
+ result:= ftx.timeoutms;
+end;
+
+procedure tcustomsocketpipes.settxtimeoutms(const avalue: integer);
+begin
+ ftx.timeoutms:= avalue;
 end;
 
 { tserversocketpipes }
@@ -460,9 +525,9 @@ end;
 
 procedure tsocketclient.internalconnect;
 begin
- syserror(sys_opensocket(fkind,fhandle));
+ syserror(sys_opensocket(fkind,true,fhandle));
  try
-  syserror(sys_connectsocket(fhandle,getsockaddr));
+  syserror(sys_connectsocket(fhandle,getsockaddr,fpipes.tx.timeoutms));
  except
   sys_closefile(fhandle);
   fhandle:= invalidfilehandle;
@@ -518,7 +583,7 @@ end;
 
 procedure tsocketserver.internalconnect;
 begin
- syserror(sys_opensocket(sok_local,fhandle));
+ syserror(sys_opensocket(sok_local,true,fhandle));
  try
   syserror(sys_bindsocket(fhandle,getsockaddr));
  except
@@ -546,7 +611,7 @@ begin
  result:= 0;
  addr.kind:= fkind;
  addr.size:= sizeof(addr.platformdata);
- while not thread.terminated and (sys_accept(fhandle,conn,addr) = sye_ok) do begin
+ while not thread.terminated and (sys_accept(fhandle,true,conn,addr,0) = sye_ok) do begin
   if not thread.terminated then begin
    try
     application.lock;
@@ -573,6 +638,8 @@ begin
       fpipes[int2]:= tserversocketpipes.create(self);
       inc(fconnectioncount);
       with fpipes[int2] do begin
+       rx.timeoutms:= frxtimeoutms;
+       tx.timeoutms:= ftxtimeoutms;
        optionsreader:= self.foptionsreader;
        overloadsleepus:= self.foverloadsleepus;
        oninputavailable:= self.foninputavailable;
@@ -629,11 +696,11 @@ end;
 
 procedure tsocketserver.closepipes(const sender: tcustomsocketpipes);
 begin
- if sender.writer.handle <> invalidfilehandle then begin
+ if sender.rx.handle <> invalidfilehandle then begin
   if canevent(tmethod(fonbeforechdisconnect)) then begin
    fonbeforechdisconnect(self,sender);
   end;
-  sender.writer.handle:= invalidfilehandle;
+  sender.tx.handle:= invalidfilehandle;
   dec(fconnectioncount);
   if not (sss_closepipespending in fstate) then begin
    include(fstate,sss_closepipespending);  
@@ -653,7 +720,7 @@ begin
   exclude(fstate,sss_closepipespending);
   for int1:= 0 to high(fpipes) do begin
    if (fpipes[int1] <> nil) and 
-               (fpipes[int1].writer.handle = invalidfilehandle) then begin
+               (fpipes[int1].tx.handle = invalidfilehandle) then begin
     freeandnil(fpipes[int1]);
    end;
   end;
@@ -662,10 +729,53 @@ end;
 
 { tsocketreader }
 
+constructor tsocketreader.create;
+begin
+ inherited;
+ fstate:= fstate + [tss_nosigio,tss_unblocked];
+end;
+
 procedure tsocketreader.closehandle(const ahandle: integer);
 begin
  sys_shutdownsocket(ahandle,ssk_rx);
  inherited;
+end;
+
+procedure tsocketreader.settimeoutms(const avalue: integer);
+begin
+ ftimeoutms:= avalue;
+ if handle <> invalidfilehandle then begin
+  sys_setsockrxtimeout(handle,avalue);
+ end;
+end;
+
+function tsocketreader.execthread(thread: tmsethread): integer;
+var
+ int1: integer;
+begin                          
+ fthread:= tsemthread(thread);
+ with fthread do begin
+  while not terminated and not (tss_error in fstate) do begin
+   sys_readsocket(handle,@fmsbuf,buflen,int1,ftimeoutms);
+   if not terminated then begin
+    if int1 <= 0 then begin
+     include(fstate,tss_error); //broken socket
+    end
+    else begin
+     fmsbufcount:= int1;
+    end;
+    if (int1 > 0) or (tss_error in fstate) then begin
+     include(fstate,tss_pipeactive);
+     doinputavailable;
+     if not terminated and not (tss_error in fstate) then begin
+      semwait;
+     end;
+    end;
+   end;
+  end;
+  include(fstate,tss_eof);
+ end;
+ result:= 0;
 end;
 
 { tsocketwriter }
@@ -674,6 +784,14 @@ procedure tsocketwriter.closehandle(const ahandle: integer);
 begin
 // sys_shutdownsocket(ahandle,ssk_tx);
  inherited;
+end;
+
+procedure tsocketwriter.settimeoutms(const avalue: integer);
+begin
+ ftimeoutms:= avalue;
+ if handle <> invalidfilehandle then begin
+  sys_setsocktxtimeout(handle,avalue);
+ end;
 end;
 
 end.

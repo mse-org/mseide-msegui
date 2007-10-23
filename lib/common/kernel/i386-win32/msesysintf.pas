@@ -206,18 +206,6 @@ begin
  setlength(result,int1);
 end;
 
-function sys_getsockaddrerrortext(aerror: integer): string;
-begin
-end;
-
-function sys_getsockaddr(const addr: socketaddrty): string;
-begin
-end;
-
-function sys_getsockport(const addr: socketaddrty): integer;
-begin
-end;
-
 {
 function sys_towupper(char: msechar): msechar;
 begin
@@ -441,7 +429,8 @@ begin
  result:= sye_notimplemented;
 end;
 
-function sys_opensocket(const kind: socketkindty; out handle: integer): syserrorty;
+function sys_opensocket(const kind: socketkindty; const nonblock: boolean;
+                          out handle: integer): syserrorty;
 begin
  result:= sye_notimplemented;
 end;
@@ -463,8 +452,15 @@ begin
  result:= sye_notimplemented;
 end;
 
-function sys_connectsocket(const handle: integer;
-                             const addr: socketaddrty): syserrorty;
+function sys_connectsocket(const handle: integer; const addr: socketaddrty;
+                               const timeoutms: integer): syserrorty;
+begin
+ result:= sye_notimplemented;
+end;
+
+function sys_readsocket(const fd: longint; const buf: pointer;
+                        const nbytes: longword;
+            out readbytes: integer; const timeoutms: integer): syserrorty;
 begin
  result:= sye_notimplemented;
 end;
@@ -474,13 +470,40 @@ begin
  result:= sye_notimplemented;
 end;
 
-function sys_accept(const handle: integer;  out conn: integer;
-                              out addr: socketaddrty): syserrorty;
+function sys_accept(const handle: integer;  const nonblock: boolean; 
+                  out conn: integer; out addr: socketaddrty): syserrorty;
 begin
  result:= sye_notimplemented;
 end;
 
 function sys_urltoaddr(var addr: socketaddrty): syserrorty;
+begin
+ result:= sye_notimplemented;
+end;
+
+function sys_getsockaddrerrortext(aerror: integer): string;
+begin
+end;
+
+function sys_getsockaddr(const addr: socketaddrty): string;
+begin
+end;
+
+function sys_getsockport(const addr: socketaddrty): integer;
+begin
+end;
+
+function sys_setnonblocksocket(const handle: integer; const nonblock: boolean): syserrorty;
+begin
+ result:= sye_notimplemented;
+end;
+
+function sys_setsockrxtimeout(const handle: integer; const ms: integer): syserrorty;
+begin
+ result:= sye_notimplemented;
+end;
+
+function sys_setsocktxtimeout(const handle: integer; const ms: integer): syserrorty;
 begin
  result:= sye_notimplemented;
 end;
