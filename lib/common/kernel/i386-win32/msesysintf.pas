@@ -470,8 +470,9 @@ begin
  result:= sye_notimplemented;
 end;
 
-function sys_accept(const handle: integer;  const nonblock: boolean; 
-                  out conn: integer; out addr: socketaddrty): syserrorty;
+function sys_accept(const handle: integer;  const nonblock: boolean;                 
+                  out conn: integer; out addr: socketaddrty;
+                  const timeoutms: integer): syserrorty;
 begin
  result:= sye_notimplemented;
 end;
