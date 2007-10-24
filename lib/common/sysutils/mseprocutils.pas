@@ -24,7 +24,7 @@ type
   readdes: integer;
   writedes: integer;
  end;
- 
+
 function getprocessexitcode(prochandle: integer; out exitcode: integer;
                               const timeoutus: cardinal = 0): boolean;
                  //true if ok, close handle
@@ -35,7 +35,8 @@ function execmse(const commandline: string;
                     const nostdhandle: boolean = false
                                //windows only
                 ): boolean;
-//startet programm, true wenn gelungen
+//starts program, true if OK
+
 function execmse1(const commandline: string; topipe: pinteger = nil;
              frompipe: pinteger = nil;
              errorpipe: pinteger = nil;
@@ -47,9 +48,11 @@ function execmse1(const commandline: string; topipe: pinteger = nil;
              tty: boolean = false;
              nostdhandle: boolean = false
                               //windows only
-): integer;
-//startet programm, bringt processhandle, execerror wenn misslungen
-//fuer windows invalidprochandle, closehandle nicht vergessen!
+                 ): integer;
+//starts program, returns processhandle, execerror on error
+//don't forget closehandle on windows!
+//creates pipes
+
 function execmse2(const commandline: string; topipe: tpipewriter = nil;
                       frompipe: tpipereader = nil;
                       errorpipe: tpipereader = nil;
@@ -60,9 +63,26 @@ function execmse2(const commandline: string; topipe: tpipewriter = nil;
              tty: boolean = false;
              nostdhandle: boolean = false
                               //windows only
-): integer;
-//startet programm, bringt processhandle, execerror wenn misslungen
-//fuer windows invalidprochandle, closehandle nicht vergessen!
+                 ): integer;
+//starts program, returns processhandle, execerror on error
+//don't forget closehandle on windows!
+//creates pipes
+
+function execmse3(const commandline: string; topipe: pinteger = nil;
+             frompipe: pinteger = nil;
+             errorpipe: pinteger = nil;
+             sessionleader: boolean = false;
+             groupid: integer = -1; //-1 -> keine, 0 = childpid
+             inactive: boolean = true; //windows only
+             frompipewritehandle: pinteger = nil;
+             errorpipewritehandle: pinteger = nil;
+             tty: boolean = false;
+             nostdhandle: boolean = false
+                              //windows only
+                 ): integer;
+//starts program, returns processhandle, execerror on error
+//don't forget closehandle on windows!
+//uses existing file handles
 
 function execwaitmse(const commandline: string): integer;
 //startet programm, wartet auf ende, bringt exitcode
@@ -121,6 +141,7 @@ type
   processor: integer;
  end;
 
+function getpid: integer; 
 function getprocinfo(pid: integer): procinfoty;
 function getchildpid(pid: integer): integerarty;
 function getinnerstpid(pid: integer): integer;
@@ -137,6 +158,11 @@ implementation
 uses 
  {$ifdef mswindows}windows{$else}libc{$endif},msesysintf,msestrings,msedatalist,
  mseguiintf,mseguiglob;
+
+function getpid: integer;
+begin
+ result:= sys_getpid;
+end;
 
 function compprocitem(const l,r): integer;
 begin
@@ -308,7 +334,7 @@ begin
  end;
 end;
 
-function execmse1(const commandline: string; topipe: pinteger = nil;
+function execmse0(const commandline: string; topipe: pinteger = nil;
              frompipe: pinteger = nil;
              errorpipe: pinteger = nil;
              sessionleader: boolean = false;
@@ -362,24 +388,44 @@ begin
  errorpipehandles.readdes:= invalidfilehandle;
 
  if topipe <> nil then begin
-  if not pipe(topipehandles,true) then execerr;
-  topipe^:= topipehandles.WriteDes;
-  startupinfo.hStdInput:= topipehandles.readdes;
+  if topipe^ = invalidfilehandle then begin
+   if not pipe(topipehandles,true) then execerr;
+   topipe^:= topipehandles.WriteDes;
+   startupinfo.hStdInput:= topipehandles.readdes;
+  end
+  else begin
+   startupinfo.hStdInput:= topipe^;
+  end;
  end;
  if frompipe <> nil then begin
-  if not pipe(frompipehandles,false) then execerr;
-  frompipe^:= frompipehandles.readDes;
-  startupinfo.hStdoutput:= frompipehandles.writedes;
+  if frompipe^ = invalidfilehandle then begin
+   if not pipe(frompipehandles,false) then execerr;
+   frompipe^:= frompipehandles.readDes;
+   startupinfo.hStdoutput:= frompipehandles.writedes;
+  end
+  else begin
+   startupinfo.hStdoutput:= frompipe^;
+  end;
  end;
  if errorpipe <> nil then begin
   if errorpipe <> frompipe then begin
-   if not pipe(errorpipehandles,false) then execerr;
-   errorpipe^:= errorpipehandles.readdes;
-   startupinfo.hStderror:= errorpipehandles.writedes;
+   if errorpipe^ = invalidfilehandle then begin
+    if not pipe(errorpipehandles,false) then execerr;
+    errorpipe^:= errorpipehandles.readdes;
+    startupinfo.hStderror:= errorpipehandles.writedes;
+   end
+   else begin
+    startupinfo.hStderror:= errorpipe^;
+   end;
   end
   else begin
-   errorpipe^:= frompipehandles.readdes;
-   startupinfo.hStderror:= frompipehandles.writedes;
+   if frompipe^ <> invalidfilehandle then begin
+    errorpipe^:= frompipehandles.readdes;
+    startupinfo.hStderror:= frompipehandles.writedes;
+   end
+   else begin
+    startupinfo.hStderror:= frompipe^;
+   end;
   end;
  end;
  if not nostdhandle then begin
@@ -531,7 +577,7 @@ begin
  result:= libc.pipe(tpipedescriptors(desc)) = 0;
 end;
 
-function execmse1(const commandline: string; topipe: pinteger = nil;
+function execmse0(const commandline: string; topipe: pinteger = nil;
              frompipe: pinteger = nil;
              errorpipe: pinteger = nil;
              sessionleader: boolean = false;
@@ -608,20 +654,35 @@ begin
  errorpipehandles.readdes:= invalidfilehandle;
 
  if topipe <> nil then begin
-  openpipe(topipehandles);
-  setcloexec(topipehandles.writedes);
-  topipe^:= topipehandles.writedes;
+  if topipe^ = invalidfilehandle then begin
+   openpipe(topipehandles);
+   setcloexec(topipehandles.writedes);
+   topipe^:= topipehandles.writedes;
+  end
+  else begin
+   topipehandles.readdes:= topipe^;
+  end;
  end;
  if frompipe <> nil then begin
-  openpipe(frompipehandles);
-  setcloexec(topipehandles.readdes);
-  frompipe^:= frompipehandles.readdes;
+  if frompipe^ = invalidfilehandle then begin
+   openpipe(frompipehandles);
+   setcloexec(topipehandles.readdes);
+   frompipe^:= frompipehandles.readdes;
+  end
+  else begin
+   frompipehandles.writedes:= frompipe^;
+  end;
  end;
  if errorpipe <> nil then begin
   if errorpipe <> frompipe then begin
-   openpipe(errorpipehandles);
-   setcloexec(topipehandles.readdes);
-   errorpipe^:= errorpipehandles.readdes;
+   if errorpipe^ = invalidfilehandle then begin
+    openpipe(errorpipehandles);
+    setcloexec(topipehandles.readdes);
+    errorpipe^:= errorpipehandles.readdes;
+   end
+   else begin
+    errorpipehandles.writedes:= errorpipe^;
+   end;
   end;
  end;
  procid:= libc.vfork;
@@ -886,6 +947,53 @@ begin
 end;
 
 {$endif}
+
+function execmse1(const commandline: string; topipe: pinteger = nil;
+             frompipe: pinteger = nil;
+             errorpipe: pinteger = nil;
+             sessionleader: boolean = false;
+             groupid: integer = -1; //-1 -> keine, 0 = childpid
+             inactive: boolean = true; //windows only
+             frompipewritehandle: pinteger = nil;
+             errorpipewritehandle: pinteger = nil;
+             tty: boolean = false;
+             nostdhandle: boolean = false
+                              //windows only
+                         ): integer;
+        //creates pipes
+begin
+ if topipe <> nil then begin
+  topipe^:= invalidfilehandle;
+ end;
+ if frompipe <> nil then begin
+  frompipe^:= invalidfilehandle;
+ end;
+ if errorpipe <> nil then begin
+  errorpipe^:= invalidfilehandle;
+ end;
+ result:= execmse0(commandline,topipe,frompipe,errorpipe,sessionleader,
+           groupid,inactive,frompipewritehandle,errorpipewritehandle,
+           tty,nostdhandle);
+end;
+
+function execmse3(const commandline: string; topipe: pinteger = nil;
+             frompipe: pinteger = nil;
+             errorpipe: pinteger = nil;
+             sessionleader: boolean = false;
+             groupid: integer = -1; //-1 -> keine, 0 = childpid
+             inactive: boolean = true; //windows only
+             frompipewritehandle: pinteger = nil;
+             errorpipewritehandle: pinteger = nil;
+             tty: boolean = false;
+             nostdhandle: boolean = false
+                              //windows only
+                         ): integer;
+    //uses existing file handles
+begin
+ result:= execmse0(commandline,topipe,frompipe,errorpipe,sessionleader,
+           groupid,inactive,frompipewritehandle,errorpipewritehandle,
+           tty,nostdhandle);
+end;
 
 function execmse2(const commandline: string; topipe: tpipewriter = nil;
              frompipe: tpipereader = nil;

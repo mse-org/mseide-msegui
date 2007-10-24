@@ -37,7 +37,7 @@ type
  
  tsocketcomp = class;
  
- socketpipesstatety = (sops_open,sops_closing);
+ socketpipesstatety = (sops_open,sops_closing,sops_detached);
  socketpipesstatesty = set of socketpipesstatety;
  
  tcustomsocketpipes = class(tlinkedpersistent,ievent)
@@ -73,6 +73,10 @@ type
    constructor create(const aowner: tsocketcomp);
    destructor destroy; override;
    procedure close;
+   {
+   procedure runhandlerapp(const commandline: filenamety);
+                   //connects to input/output
+                   }
    property handle: integer read gethandle write sethandle;
    property rx: tsocketreader read frx;
    property tx: tsocketwriter read ftx;
@@ -174,6 +178,7 @@ type
  end;
 
  socketaccepteventty = procedure(const sender: tsocketserver;
+                     const asocket: integer;
                      const addr: socketaddrty; var accept: boolean) of object;
  socketserverconnecteventty = procedure(const sender: tsocketserver;
                      const apipes: tcustomsocketpipes) of object;
@@ -208,6 +213,7 @@ type
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
+   procedure runhandlerapp(const asocket: integer; const acommandline: filenamety);
    property connectioncount: integer read fconnectioncount;
   published
    property maxconnections: integer read fmaxconnections write fmaxconnections 
@@ -239,7 +245,7 @@ procedure checksyserror(const aresult: integer);
 
 implementation
 uses
- msefileutils,msesysintf,sysutils,msestream;
+ msefileutils,msesysintf,sysutils,msestream,mseprocutils;
   
 procedure checksyserror(const aresult: integer);
 begin
@@ -386,7 +392,21 @@ procedure tcustomsocketpipes.settxtimeoutms(const avalue: integer);
 begin
  ftx.timeoutms:= avalue;
 end;
-
+{
+procedure tcustomsocketpipes.runhandlerapp(const commandline: filenamety);
+var
+ rxha,txha: integer;
+ str1: string;
+begin
+ rxha:= frx.handle;
+ txha:= ftx.handle;
+ frx.releasehandle;
+ ftx.releasehandle;
+ include(fstate,sops_detached);
+ internalclose;
+ execmse1(commandline,@rxha,@txha);
+end;
+}
 { tserversocketpipes }
 
 constructor tserversocketpipes.create(const aowner: tsocketserver);
@@ -618,7 +638,7 @@ begin
     try
      if canevent(tmethod(fonaccept)) then begin
       bo1:= false;
-      fonaccept(self,addr,bo1);
+      fonaccept(self,conn,addr,bo1);
      end
      else begin
       bo1:= true;
@@ -654,7 +674,7 @@ begin
       end;
      end
      else begin
-      sys_shutdownsocket(conn,ssk_both);
+//      sys_shutdownsocket(conn,ssk_both);
       sys_closesocket(conn);
      end;
     finally
@@ -685,18 +705,19 @@ begin
  if fhandle <> invalidfilehandle then begin
   sys_shutdownsocket(fhandle,ssk_rx);
  end;
- inherited;
  if fthread <> nil then begin
   application.waitforthread(fthread);
  end;
  freeandnil(fthread);
  sys_closesocket(fhandle);
- fhandle:= invalidfilehandle;
+ inherited;
 end;
 
 procedure tsocketserver.closepipes(const sender: tcustomsocketpipes);
 begin
- if sender.rx.handle <> invalidfilehandle then begin
+ if (sender.rx.handle <> invalidfilehandle) or 
+             (sops_detached in sender.fstate) then begin
+  exclude(sender.fstate,sops_detached);
   if canevent(tmethod(fonbeforechdisconnect)) then begin
    fonbeforechdisconnect(self,sender);
   end;
@@ -725,6 +746,16 @@ begin
    end;
   end;
  end;
+end;
+
+procedure tsocketserver.runhandlerapp(const asocket: integer;
+               const acommandline: filenamety);
+var
+ int1,int2: integer;
+begin
+ syserror(sys_dup(asocket,int1));
+ syserror(sys_dup(asocket,int2));
+ execmse3(acommandline,@int1,@int2);
 end;
 
 { tsocketreader }

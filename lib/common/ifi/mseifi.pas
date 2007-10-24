@@ -490,17 +490,24 @@ type
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
-  published
    property serverapp: string read fserverapp write fserverapp;
             //stdin, stdout if ''
+  published
    property active;
  end;
  
  tpipeifichannel = class(tpipeiochannel)
   public
    constructor create(aowner: tcomponent); override;
+  published
+   property serverapp;
  end;
 
+ tsocketpipeifichannel = class(tpipeifichannel)
+  public
+   constructor create(aowner: tcomponent); override;
+ end;
+ 
  tifisocketclientpipes = class(tclientsocketpipes)
   published
    property overloadsleepus;
@@ -1089,8 +1096,12 @@ end;
 
 constructor tpipeiochannel.create(aowner: tcomponent);
 begin
- freader:= tpipereader.create;
- fwriter:= tpipewriter.create;
+ if freader = nil then begin
+  freader:= tpipereader.create;
+ end;
+ if fwriter = nil then begin
+  fwriter:= tpipewriter.create;
+ end;
  fprochandle:= invalidprochandle;
  freader.oninputavailable:= @doinputavailable;
  inherited;
@@ -2001,6 +2012,19 @@ end;
 constructor tpipeifichannel.create(aowner: tcomponent);
 begin
  fsynchronizer:= tifisynchronizer.create;
+ inherited;
+end;
+
+{ tsocketpipeifichannel }
+
+constructor tsocketpipeifichannel.create(aowner: tcomponent);
+begin
+ if freader = nil then begin
+  freader:= tsocketreader.create;
+ end;
+ if fwriter = nil then begin
+  fwriter:= tsocketwriter.create;
+ end;
  inherited;
 end;
 

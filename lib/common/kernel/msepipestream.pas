@@ -222,9 +222,9 @@ begin
    else begin
     inherited sethandle(invalidfilehandle);
     {$ifdef linux}
-    if not (tss_nosigio in fstate) then begin
+//    if not (tss_nosigio in fstate) then begin
      pthread_kill(fthread.id,sigio);
-    end;
+//    end;
     {$endif}
    end;
    writehandle:= invalidfilehandle;
