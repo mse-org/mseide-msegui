@@ -28,6 +28,7 @@ type
  msestring = widestring;
  msechar = widechar;
  pmsechar = pwidechar;
+ stringposty = (sp_left,sp_center,sp_right);
 
 const
  c_dle = #$10;
@@ -351,6 +352,10 @@ function breaklines(const source: string): stringarty; overload;
 function breaklines(const source: msestring): msestringarty; overload;
 function breaklines(const source: msestring;
                        maxlength: integer): msestringarty; overload;
+function fitstring(const source: msestring; const len: integer;
+                         const pos: stringposty = sp_left;
+                         const cutchar: msechar = #0): msestring;
+                  //cutchar = 0 -> no cutchar
 
 procedure splitstring(source: string;
                      var dest: stringarty; separator: char = c_tab;
@@ -1032,6 +1037,61 @@ begin
    inc(rowindex);
   end;  
   setlength(result,rowindex);
+ end;
+end;
+
+function fitstring(const source: msestring; const len: integer;
+           const pos: stringposty = sp_left;
+           const cutchar: msechar = #0): msestring;
+                  //cutchar = 0 -> no cutchar
+ procedure pad(const dest: pmsechar; const count: integer);
+ var
+  int1: integer;
+ begin
+  for int1:= 0 to count-1 do begin
+   {$ifdef FPC}
+   dest[int1]:= ' ';
+   {$else}
+   pmsecharaty(dest)^[int1]:= ' ';
+   {$endif}
+  end;
+ end;
+ 
+var
+ copylen,padlen: integer;
+ int1: integer; 
+begin //fitstring
+ if (length(source) > len) and (cutchar <> #0) then begin
+  result:= charstring(cutchar,len);
+ end
+ else begin
+  setlength(result,len);
+  if len > 0 then begin
+   copylen:= length(source);
+   padlen:= len - copylen;
+   if padlen < 0 then begin
+    copylen:= len;
+    padlen:= 0;
+   end;
+   case pos of
+    sp_center: begin
+     int1:= padlen div 2;
+     move((pmsechar(pointer(source))+(length(source)-copylen) div 2)^,
+             (pmsechar(pointer(result))+int1)^,copylen*sizeof(msechar));
+     pad(pointer(result),int1);
+     pad(pmsechar(pointer(result))+int1+copylen,len-copylen-int1);     
+    end;
+    sp_right: begin
+     move((pmsechar(pointer(source))+length(source)-copylen)^,
+             (pmsechar(pointer(result))+padlen)^,copylen*sizeof(msechar));
+     pad(pmsechar(pointer(result)),padlen);
+    end;
+    else begin //sp_left
+     move(pointer(source)^,pointer(result)^,copylen*sizeof(msechar));
+     pad(pmsechar(pointer(result))+copylen,padlen);
+    end;
+   end;
+  end;
  end;
 end;
  
