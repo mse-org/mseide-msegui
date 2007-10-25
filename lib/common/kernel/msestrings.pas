@@ -354,7 +354,8 @@ function breaklines(const source: msestring;
                        maxlength: integer): msestringarty; overload;
 function fitstring(const source: msestring; const len: integer;
                          const pos: stringposty = sp_left;
-                         const cutchar: msechar = #0): msestring;
+                         const cutchar: msechar = #0;
+                         const padchar: msechar = ' '): msestring;
                   //cutchar = 0 -> no cutchar
 
 procedure splitstring(source: string;
@@ -1042,17 +1043,20 @@ end;
 
 function fitstring(const source: msestring; const len: integer;
            const pos: stringposty = sp_left;
-           const cutchar: msechar = #0): msestring;
+           const cutchar: msechar = #0;
+           const padchar: msechar = ' '): msestring;
                   //cutchar = 0 -> no cutchar
  procedure pad(const dest: pmsechar; const count: integer);
  var
   int1: integer;
+  ch1: msechar;
  begin
+  ch1:= padchar;
   for int1:= 0 to count-1 do begin
    {$ifdef FPC}
-   dest[int1]:= ' ';
+   dest[int1]:= ch1;
    {$else}
-   pmsecharaty(dest)^[int1]:= ' ';
+   pmsecharaty(dest)^[int1]:= ch1;
    {$endif}
   end;
  end;
