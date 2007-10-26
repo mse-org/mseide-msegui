@@ -29,6 +29,13 @@ var                         //!!!!todo: link with correct location
 
 type
 
+ linuxsemty = record
+//  outoforder: boolean;
+  destroyed: integer;
+  sema: tsemaphore;
+  platformdata: array[5..7] of cardinal;
+ end;
+
 TSigActionHandlerEx = procedure(Signal: Integer; SignalInfo: PSigInfo; P: Pointer); cdecl;
 
 TSigActionEx = packed record
@@ -322,13 +329,6 @@ type
  linuxmutexty = record
   mutex: pthread_mutex_t;
   platformdata: array[6..7] of cardinal;
- end;
-
- linuxsemty = record
-//  outoforder: boolean;
-  destroyed: integer;
-  sema: tsemaphore;
-  platformdata: array[5..7] of cardinal;
  end;
 
  linuxcondty = record

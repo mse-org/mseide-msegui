@@ -36,6 +36,7 @@ type
 
  mutexty = array[0..7] of cardinal;
  semty = array[0..7] of cardinal;
+ psemty = ^semty;
  condty = array[0..31] of cardinal;
  
  socketkindty = (sok_local,sok_inet,sok_inet6);

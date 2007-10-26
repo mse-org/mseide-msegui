@@ -2039,7 +2039,8 @@ var
  timerval: itimerval;
 begin
  fillchar(timerval,sizeof(timerval),0);
- timerval.it_value.tv_usec:= us;
+ timerval.it_value.tv_sec:= us div 1000000;
+ timerval.it_value.tv_usec:= us mod 1000000;
  if libc.setitimer(itimer_real,{$ifdef FPC}@{$endif}timerval,nil) = 0 then begin
   result:= gue_ok;
  end

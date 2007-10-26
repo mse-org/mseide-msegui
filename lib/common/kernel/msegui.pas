@@ -1467,7 +1467,6 @@ type
    procedure initialize;
    procedure deinitialize;
 
-   procedure createdatamodule(instanceclass: msecomponentclassty; var reference);
    procedure createform(instanceclass: widgetclassty; var reference);
    procedure invalidate; //invalidates all registered forms
    
@@ -1514,7 +1513,6 @@ type
                 //returns helpcontext of active widget, '' if none;
    function mousehelpcontext: msestring;
                 //returns helpcontext of mouse widget, '' if none;
-   function running: boolean; //true if eventloop entered
    function active: boolean;
    function screensize: sizety;
    function workarea(awindow: twindow): rectty;
@@ -1743,9 +1741,11 @@ type
    procedure processwindowcrossingevent(event: twindowevent);
 
    function getmousewinid: winidty; //for  tmouse.setshape
-   function getevents: integer; //application has to be locked
-                  //returns count of queued events
-   procedure waitevent;         //application has to be locked
+   function getevents: integer; override;
+    //application must be locked
+    //returns count of queued events
+   procedure waitevent;         
+    //application must be locked
    procedure checkactivewindow;
    procedure checkapplicationactive;
    function eventloop(const amodalwindow: twindow; const once: boolean = false): boolean;
@@ -1765,7 +1765,6 @@ type
    procedure dopostevent(const aevent: tevent); override;
    procedure flushmousemove;
    procedure doterminate(const shutdown: boolean);
-   procedure doidle;
    procedure checkshortcut(const sender: twindow; const awidget: twidget;
                      var info: keyeventinfoty);
    procedure doeventloop; override;
@@ -10610,24 +10609,6 @@ begin
  end;
 end;
 
-procedure tinternalapplication.doidle;
-var
- int1: integer;
-begin
- while true do begin
-  if not fonidlelist.doidle then begin
-   break;
-  end;
-  int1:= getevents;
-  if int1 <> 0 then begin
-   break;
-  end;
- end;
- checksynchronize;
-//writeln('idle',fidlecount);
-//flush(output);
-end;
-
 procedure tinternalapplication.checkshortcut(const sender: twindow;
                const awidget: twidget; var info: keyeventinfoty);
 var
@@ -11472,12 +11453,6 @@ begin
  end;
 end;
 
-procedure tguiapplication.createdatamodule(instanceclass: msecomponentclassty;
-                                                          var reference);
-begin
- mseclasses.createmodule(self,instanceclass,reference);
-end;
-
 procedure tguiapplication.createform(instanceclass: widgetclassty; var reference);
 begin
  mseclasses.createmodule(self,instanceclass,reference);
@@ -11528,11 +11503,6 @@ begin
  else begin
   showmessage(str1,'Exception');
  end;
-end;
-
-function tguiapplication.running: boolean;
-begin
- result:= aps_running in fstate;
 end;
 
 function tguiapplication.active: boolean;

@@ -161,15 +161,22 @@ type
    fonterminatequerylist: tonterminatequerylist;
    fonidlelist: tonidlelist;
    procedure flusheventbuffer;
+   procedure doidle;
    procedure dopostevent(const aevent: tevent); virtual; abstract;
+   function getevents: integer; virtual; abstract;
+    //application must be locked
+    //returns count of queued events
    procedure doeventloop; virtual; abstract;
    procedure incidlecount;
+   procedure dobeforerun; virtual;
    procedure doafterrun; virtual;
    property eventlist: tobjectqueue read feventlist;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
+   procedure createdatamodule(instanceclass: msecomponentclassty; var reference);
    procedure run;
+   function running: boolean; //true if eventloop entered
    
    procedure postevent(event: tevent);
    function checkoverload(const asleepus: integer = 100000): boolean;
@@ -902,6 +909,7 @@ procedure tcustomapplication.run;
 var
  threadbefore: threadty;
 begin
+ dobeforerun;
  threadbefore:= fthread;
  fthread:= sys_getcurrentthread;
  include(fstate,aps_running);
@@ -915,11 +923,42 @@ begin
  doafterrun;
 end;
 
+function tcustomapplication.running: boolean;
+begin
+ result:= aps_running in fstate;
+end;
+
+procedure tcustomapplication.dobeforerun;
+begin
+ //dummy
+end;
+
 procedure tcustomapplication.doafterrun;
 begin
  //dummy
 end;
 
+procedure tcustomapplication.doidle;
+var
+ int1: integer;
+begin
+ while true do begin
+  if not fonidlelist.doidle then begin
+   break;
+  end;
+  int1:= getevents;
+  if int1 <> 0 then begin
+   break;
+  end;
+ end;
+ checksynchronize;
+end;
+
+procedure tcustomapplication.createdatamodule(instanceclass: msecomponentclassty;
+                                                          var reference);
+begin
+ mseclasses.createmodule(self,instanceclass,reference);
+end;
 
 finalization
  appinst.Free;

@@ -65,7 +65,7 @@ procedure deinit;
 
 implementation
 uses
- msesysintf,mseguiintf,SysUtils,mseapplication,msesys,msesysutils;
+ msesysintf,SysUtils,mseapplication,msesys,msesysutils;
 
 type
  ptimerinfoty = ^timerinfoty;
