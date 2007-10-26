@@ -13,7 +13,8 @@ unit mseguiintf; //i386-win32
 
 interface
 uses
- windows,messages,msegui,msetypes,msegraphics,msegraphutils,mseevent,msepointer,
+ windows,messages,mseapplication,msegui,msetypes,msegraphics,msegraphutils,
+ mseevent,msepointer,
  mseguiglob,msethread,mseformatstr,msesysintf,msestockobjects,msestrings;
  
 var
@@ -257,7 +258,7 @@ var
  cursors: array[cursorshapety] of cardinal;
 
 type
- tapplication1 = class(tapplication);
+ tapplication1 = class(tguiapplication);
  tsimplebitmap1 = class(tsimplebitmap);
  tcanvas1 = class(tcanvas);
  gcflagty = (gcf_backgroundbrushvalid,
