@@ -171,22 +171,24 @@ end;
 
 procedure tterminal.dokeydown(var info: keyeventinfoty);
 begin
- with info do begin
-  if shiftstate - [ss_shift] = [] then begin
-   if (chars <> '') and
-    ((editpos.row < datalist.count - 1) or 
-                 (editpos.col < finputcolindex)) then begin
-    editpos:= makegridcoord(bigint,bigint);
-   end
-   else begin
-    if (key = key_home) and (editpos.row = datalist.count - 1) then begin
-     editor.moveindex(finputcolindex,ss_shift in shiftstate);
-     include(eventstate,es_processed);
-    end;
-   end; 
-  end;
-  if not (es_processed in info.eventstate) then begin
-   inherited;
+ if fgridintf <> nil then begin
+  with info do begin
+   if shiftstate - [ss_shift] = [] then begin
+    if (chars <> '') and
+     ((editpos.row < datalist.count - 1) or 
+                  (editpos.col < finputcolindex)) then begin
+     editpos:= makegridcoord(bigint,bigint);
+    end
+    else begin
+     if (key = key_home) and (editpos.row = datalist.count - 1) then begin
+      editor.moveindex(finputcolindex,ss_shift in shiftstate);
+      include(eventstate,es_processed);
+     end;
+    end; 
+   end;
+   if not (es_processed in info.eventstate) then begin
+    inherited;
+   end;
   end;
  end;
 end;
@@ -195,11 +197,13 @@ procedure tterminal.updateeditpos;
 var
  int1: integer;
 begin
- int1:= datalist.count-1;
- if int1 >= 0 then begin
-  finputcolindex:= length(datalist[int1]);
+ if fgridintf <> nil then begin
+  int1:= datalist.count-1;
+  if int1 >= 0 then begin
+   finputcolindex:= length(datalist[int1]);
+  end;
+  editpos:= makegridcoord(finputcolindex,int1);
  end;
- editpos:= makegridcoord(finputcolindex,int1);
 end;
 
 procedure tterminal.doinputavailable(const sender: tpipereader);
