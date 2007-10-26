@@ -138,6 +138,7 @@ type
 
  tcustomapplication = class(tmsecomponent)
   private
+   fapplicationname: filenamety;
    flockthread: threadty;
    flockcount: integer;
    fmutex: mutexty;
@@ -177,6 +178,7 @@ type
    procedure createdatamodule(instanceclass: msecomponentclassty; var reference);
    procedure run;
    function running: boolean; //true if eventloop entered
+   property applicationname: msestring read fapplicationname write fapplicationname;
    
    procedure postevent(event: tevent);
    function checkoverload(const asleepus: integer = 100000): boolean;
@@ -233,7 +235,7 @@ var
  
 implementation
 uses
- msedatalist,msebits,msesysintf,msesysutils;
+ msedatalist,msebits,msesysintf,msesysutils,msefileutils;
  
 var
  appinst: tcustomapplication;
@@ -618,6 +620,7 @@ begin
   raise exception.create('Application already created.');
  end;
  appinst:= self;
+ fapplicationname:= filename(sys_getapplicationpath);
  fthread:= sys_getcurrentthread;
  feventlist:= tobjectqueue.create(true);
  fonterminatedlist:= tnotifylist.create;
@@ -960,6 +963,7 @@ begin
  mseclasses.createmodule(self,instanceclass,reference);
 end;
 
+initialization
 finalization
  appinst.Free;
  appinst:= nil;

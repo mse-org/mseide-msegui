@@ -17,13 +17,21 @@ uses
 
 {$include ..\msesysintf.inc}
 
+type
+ win32semty = record
+  event: cardinal;
+  semacount: integer;
+  destroyed: integer;
+  platformdata: array[3..7] of cardinal;
+ end;
+
 var
  iswin95: boolean;
  iswin98: boolean;
 
 implementation
 uses
- sysutils,windows,msebits,msefileutils,mseguiintf,msedatalist,dateutils;
+ sysutils,windows,msebits,msefileutils,msedatalist,dateutils;
 
 //todo: correct unicode implementation, long filepaths, stubs for win95
 
@@ -61,13 +69,6 @@ type
   mutex: trtlcriticalsection;
   trycount: integer;
   platformdata: array[7..7] of cardinal;
- end;
-
- win32semty = record
-  event: cardinal;
-  semacount: integer;
-  destroyed: integer;
-  platformdata: array[3..7] of cardinal;
  end;
 
  condeventsty = (ce_signal,ce_broadcast);
@@ -720,7 +721,7 @@ end;
 function sempost1(var sem: semty): syserrorty;
 begin
  with win32semty(sem) do begin
-  if interlockedincrement(semacount) <= 0 then begin
+  if interlockedincrement(semacount) >= 0 then begin
    setevent(event);
   end;
   result:= sye_ok;

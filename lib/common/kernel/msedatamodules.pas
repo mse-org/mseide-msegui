@@ -13,7 +13,7 @@ unit msedatamodules;
 
 interface
 uses
- classes,mseclasses,msetypes,msegraphutils,msestatfile;
+ classes,mseclasses,msetypes,msegraphutils,msestatfile,mseevent;
  
 type
  datamoduleoptionty = (dmo_autoreadstat,dmo_autowritestat);
@@ -32,6 +32,7 @@ type
    fstatfile: tstatfile;
    fonloaded: notifyeventty;
    fonasyncevent: asynceventeventty;
+   foneventloopstart: notifyeventty;
    procedure writesize(writer: twriter);
    procedure readsize(reader: treader);
    procedure setstatfile(const avalue: tstatfile);
@@ -42,6 +43,8 @@ type
    procedure doonloaded; virtual;
    procedure loaded; override;
    procedure doasyncevent(var atag: integer); override;
+   procedure doeventloopstart; virtual;
+   procedure receiveevent(const event: tobjectevent); override;
   public
    constructor create(aowner: tcomponent); overload; override;
    constructor create(aowner: tcomponent; load: boolean); reintroduce; overload;
@@ -54,6 +57,8 @@ type
    property statfile: tstatfile read fstatfile write setstatfile;
    property oncreate: notifyeventty read foncreate write foncreate;
    property onloaded: notifyeventty read fonloaded write fonloaded;
+   property oneventloopstart: notifyeventty read foneventloopstart 
+                                   write foneventloopstart;
    property ondestroy: notifyeventty read fondestroy write fondestroy;
    property ondestroyed: notifyeventty read fondestroyed write fondestroyed;
    property onasyncevent: asynceventeventty read fonasyncevent write fonasyncevent;
@@ -63,6 +68,9 @@ type
 function createmsedatamodule(const aclass: tclass;
                      const aclassname: pshortstring): tmsecomponent;
 implementation
+uses
+ mseapplication;
+ 
 type
  tmsecomponent1 = class(tmsecomponent);
   
@@ -178,6 +186,7 @@ end;
 procedure tmsedatamodule.loaded;
 begin
  inherited;
+ application.postevent(tobjectevent.create(ek_loaded,ievent(self)));
  if canevent(tmethod(foncreate)) then begin
   foncreate(self);
  end;
@@ -196,6 +205,20 @@ begin
  inherited;
 end;
 
+procedure tmsedatamodule.doeventloopstart;
+begin
+ if canevent(tmethod(foneventloopstart)) then begin
+  foneventloopstart(self);
+ end;
+end;
+
+procedure tmsedatamodule.receiveevent(const event: tobjectevent);
+begin
+ inherited;
+ if event.kind = ek_loaded then begin
+  doeventloopstart;
+ end;
+end;
 initialization
  registerclass(tmsedatamodule);
 end.

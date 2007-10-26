@@ -1422,7 +1422,6 @@ type
    fhintforwidget: twidget;
    fhintinfo: hintinfoty;
    fmainwindow: twindow;
-   fapplicationname: filenamety;
    fdblclicktime: integer;
    fcursorshape: cursorshapety;
 //   facursorshape: cursorshapety;
@@ -1565,7 +1564,6 @@ type
    property mousewidget: twidget read fmousewidget;
    property mousecapturewidget: twidget read fmousecapturewidget;
    property mainwindow: twindow read fmainwindow write setmainwindow;
-   property applicationname: msestring read fapplicationname write fapplicationname;
    property thread: threadty read fthread;
 
    property buttonpresswidgetbefore: twidget read fbuttonpresswidgetbefore;
@@ -10042,7 +10040,6 @@ begin
  inherited;
  appinst:= self;
  fdblclicktime:= defaultdblclicktime;
- fapplicationname:= filename(sys_getapplicationpath);
 // inherited;
  fonkeypresslist:= tonkeyeventlist.create;
  fonshortcutlist:= tonkeyeventlist.create;

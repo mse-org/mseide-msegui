@@ -60,8 +60,8 @@ end;
 
 destructor tnoguiapplication.destroy;
 begin
- deinitialize;
  inherited;
+ deinitialize;
  sys_semdestroy(feventsem);
 end;
 
@@ -105,6 +105,13 @@ begin
      end;
      ek_terminate: begin
       terminated:= true;
+     end;
+     else begin
+      if event1 is tobjectevent then begin
+       with tobjectevent(event1) do begin
+        deliver;
+       end;
+      end;
      end;
     end;
    except
