@@ -14,7 +14,7 @@ unit msefiledialog;
 interface
 
 uses
- msegui,mseforms,Classes,mseclasses,msewidgets,msegrids,mselistbrowser,mseedit,
+ mseguiglob,msegui,mseforms,Classes,mseclasses,msewidgets,msegrids,mselistbrowser,mseedit,
  msesimplewidgets,msedataedits,msedialog,msetypes,msestrings,msesys,
  msedispwidgets,msedatalist,msestat,msestatfile,msebitmap,msedatanodes,
  msefileutils,msedropdownlist,mseevent,msegraphedits,mseeditglob,msesplitter;
@@ -345,7 +345,7 @@ procedure updatefileinfo(const item: tlistitem; const info: fileinfoty;
 
 implementation
 uses
- msefiledialog_mfm,sysutils,mseguiglob,msebits,
+ msefiledialog_mfm,sysutils,msebits,
  msestringenter,msedirtree,msefiledialogres,msekeyboard,
  msestockobjects;
 

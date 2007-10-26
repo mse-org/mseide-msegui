@@ -65,7 +65,7 @@ procedure deinit;
 
 implementation
 uses
- msesysintf,mseguiintf,SysUtils,msegui,msesys,msesysutils;
+ msesysintf,mseguiintf,SysUtils,mseapplication,msesys,msesysutils;
 
 type
  ptimerinfoty = ^timerinfoty;
@@ -167,7 +167,7 @@ begin
   application.postevent(tevent.create(ek_timer));
  end
  else begin
-  gui_settimer(int1);
+  application.settimer(int1);
  end;
 end;
 

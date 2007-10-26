@@ -16,7 +16,7 @@ interface
 
 uses
  mseclasses,SysUtils,msethread,msefileutils,msesys,
- msetypes,msestrings,classes,msegui,mseevent;
+ msetypes,msestrings,classes,mseapplication,mseevent;
 
 {$ifdef UNIX}
 const
@@ -89,7 +89,7 @@ type
     //onchanged = nil -> onchanged nicht auswerten. tag = 0 -> tag nicht auswerten
   end;
 
- tfilechangenotifyer = class(tguicomponent)
+ tfilechangenotifyer = class(tactcomponent)
   private
    fonfilechanged: filechangedeventty;
    fpath: filenamety;

@@ -5,7 +5,7 @@ implementation
 uses
  Classes,msedesignintf,ZDataset,ZConnection,ZSqlUpdate,ZStoredProcedure,ZSqlMetadata,
  ZSqlProcessor,ZSqlMonitor,ZSequence,msezeos,regzeoslib_bmp,regdb,
- msepropertyeditors,ZSqlStrings,ZAbstractRODataset,msegui,msedb,msestrings;
+ msepropertyeditors,ZSqlStrings,ZAbstractRODataset,mseguiglob,msegui,msedb,msestrings;
  
 type
  tzprotocolpropertyeditor = class(tstringpropertyeditor)

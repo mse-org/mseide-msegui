@@ -21,7 +21,7 @@ interface
 uses
  mseforms,msefiledialog,msestat,msestatfile,msesimplewidgets,msegrids,msewidgetgrid,
  mselistbrowser,msedataedits,typinfo,msedatanodes,msegraphedits,msestream,
- msemenus,classes,msetypes,msestrings,mseguithread,msegui,mseresourceparser;
+ msemenus,classes,msetypes,msestrings,mseguithread,mseguiglob,msegui,mseresourceparser;
 
 const
  drcext = '_DRC.rc';

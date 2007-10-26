@@ -4,7 +4,7 @@ interface
 implementation
 uses
  classes,msedesignintf,msepascalscript,msepropertyeditors,msetypes,msestrings,
- msetexteditor,msegui,msewidgets,uPSComponent,uPSComponent_Default,
+ msetexteditor,mseguiglob,msegui,msewidgets,uPSComponent,uPSComponent_Default,
  psimportmsegui,formdesigner,sourceupdate,mseparser,pascaldesignparser,
  msedesigner,mserichstring,mseclasses;
 type

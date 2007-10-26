@@ -42,7 +42,7 @@ procedure updatestat(const filer: tstatfiler);
 
 implementation
 uses
- programparametersform_mfm,projectoptionsform,msegui;
+ programparametersform_mfm,projectoptionsform,mseguiglob,msegui;
 
 procedure editprogramparameters;
 var

@@ -28,7 +28,7 @@ procedure unregisterresourcestrings(datapo: pointer); cdecl;
 implementation
 uses
  {$ifdef FPC}dynlibs,{$ifdef UNIX}dl,{$endif}{$endif}sysutils,mseclasses,
-                           mselist,msestrings,msegui;
+                           mselist,msestrings,mseapplication;
  
 type
  resourcestringinfoty = record

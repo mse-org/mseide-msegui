@@ -2,7 +2,7 @@ unit msesockets;
 {$ifdef FPC}{$mode objfpc}{$h+}{$INTERFACES CORBA}{$endif}
 interface
 uses
- classes,mseguiglob,mseclasses,msesys,msestrings,msepipestream,msegui,msethread,
+ classes,mseguiglob,mseclasses,msesys,msestrings,msepipestream,mseapplication,msethread,
  mseevent;
 
 const
@@ -101,27 +101,26 @@ type
 
  tsocketclient = class;
  
- tclientsocketpipes = class(tcustomsocketpipes)
-  public
-   constructor create(const aowner: tsocketclient);
+ tsocketpipes = class(tcustomsocketpipes)
   published
    property optionsreader;
    property overloadsleepus;
    property oninputavailable;
    property onsocketbroken;
  end;
-
+ 
+ tclientsocketpipes = class(tsocketpipes)
+ end;
+ 
  tsocketserver = class;
   
  tserversocketpipes = class(tcustomsocketpipes)
-  public
-   constructor create(const aowner: tsocketserver);
  end;
  socketpipesarty = array of tserversocketpipes;
 
  socketeventty = procedure(sender: tsocketcomp) of object;  
  
- tsocketcomp = class(tguicomponent)
+ tsocketcomp = class(tactcomponent)
   private
    fhandle: integer;
    furl: msestring;
@@ -131,6 +130,7 @@ type
    fonbeforedisconnect: socketeventty;
    fonafterdisconnect: socketeventty;
    fkind: socketkindty;
+   fport: word;
    procedure seturl(const avalue: filenamety);
    procedure setactive(const avalue: boolean);
   protected
@@ -150,6 +150,7 @@ type
    property active: boolean read factive write setactive;
    property kind: socketkindty read fkind write fkind;
    property url: filenamety read furl write seturl;
+   property port: word read fport write fport;
    property activator;
    property onbeforeconnect: socketeventty read fonbeforeconnect 
                                                 write fonbeforeconnect;
@@ -177,6 +178,22 @@ type
    property pipes: tclientsocketpipes read fpipes write setpipes;
  end;
 
+ tsocketstdio = class(tsocketcomp)
+  private
+   procedure setpipes(const avalue: tsocketpipes);
+  protected
+   fpipes: tsocketpipes;
+   procedure internalconnect; override;
+   procedure internaldisconnect; override;
+   procedure closepipes(const sender: tcustomsocketpipes); override;
+   procedure doasyncevent(var atag: integer); override;
+  public
+   constructor create(aowner: tcomponent); override;
+   destructor destroy; override;
+  published
+   property pipes: tsocketpipes read fpipes write setpipes;
+ end;
+ 
  socketaccepteventty = procedure(const sender: tsocketserver;
                      const asocket: integer;
                      const addr: socketaddrty; var accept: boolean) of object;
@@ -407,19 +424,6 @@ begin
  execmse1(commandline,@rxha,@txha);
 end;
 }
-{ tserversocketpipes }
-
-constructor tserversocketpipes.create(const aowner: tsocketserver);
-begin
- inherited;
-end;
-
-{ tclientsocketpipes }
-
-constructor tclientsocketpipes.create(const aowner: tsocketclient);
-begin
- inherited;
-end;
 
 { tsocketcomp }
 
@@ -508,18 +512,64 @@ function tsocketcomp.getsockaddr: socketaddrty;
 begin
  with result do begin
   kind:= fkind;
+  port:= fport;
   fillchar(platformdata,sizeof(platformdata),0);
   size:= 0;
-  url:= '';
+  url:= furl;
   case fkind of
    sok_local: begin
-    url:= furl;
    end;
    sok_inet,sok_inet6: begin
     syserror(sys_urltoaddr(result));
    end;
   end;
  end;  
+end;
+
+{ tsocketstdio }
+
+constructor tsocketstdio.create(aowner: tcomponent);
+begin
+ if fpipes = nil then begin
+  fpipes:= tsocketpipes.create(self);
+ end;
+ inherited;
+end;
+
+destructor tsocketstdio.destroy;
+begin
+ fpipes.free;
+ inherited;
+end;
+
+procedure tsocketstdio.setpipes(const avalue: tsocketpipes);
+begin
+ fpipes.assign(avalue);
+end;
+
+procedure tsocketstdio.internalconnect;
+begin
+ fpipes.tx.handle:= sys_stdout;
+ fpipes.rx.handle:= sys_stdin;
+ factive:= true;
+end;
+
+procedure tsocketstdio.internaldisconnect;
+begin
+ fpipes.handle:= invalidfilehandle;
+ inherited
+end;
+
+procedure tsocketstdio.closepipes(const sender: tcustomsocketpipes);
+begin
+ asyncevent(closepipestag);
+end;
+
+procedure tsocketstdio.doasyncevent(var atag: integer);
+begin
+ if atag = closepipestag then begin
+  disconnect;
+ end;
 end;
 
 { tsocketclient }

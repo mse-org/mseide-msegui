@@ -23,7 +23,7 @@ uses
  classes,msegraphutils,mseguiglob,msedesignintf,
  mseforms,mselist,msedatalist,msebitmap,msetypes,sysutils,msehash,mseclasses,
  mseformdatatools,typinfo,msepropertyeditors,msecomponenteditors,msegraphics,
- msegui,msestrings;
+ mseapplication,msegui,msestrings;
 
 const
  formfileext = 'mfm';
@@ -268,7 +268,7 @@ type
   dochi: boolean;
  end;
  
- tdesigner = class(tguicomponent,idesigner)
+ tdesigner = class(tactcomponent,idesigner)
   private
    fselections: tdesignerselections;
    factmodulepo: pmoduleinfoty;

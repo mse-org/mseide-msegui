@@ -53,7 +53,7 @@ function editpersistentfields(const instance: tpersistentfields): boolean;
 
 implementation
 uses
- msedbfieldeditor_mfm,typinfo,msetypes,msewidgets;
+ mseguiglob,msedbfieldeditor_mfm,typinfo,msetypes,msewidgets;
  
 type
  tpersistentfields1 = class(tpersistentfields);

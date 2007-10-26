@@ -71,7 +71,7 @@ type
 
 implementation
 uses
- msegui,
+ mseapplication,
 {$ifdef UNIX}
  Libc;
 {$else}

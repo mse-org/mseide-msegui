@@ -239,7 +239,7 @@ type
  
 implementation
 uses
- msestrings,dbconst,msesysutils,typinfo,sysutils,msedatalist,msegui;
+ msestrings,dbconst,msesysutils,typinfo,sysutils,msedatalist,mseapplication;
  
 { tmsesqltransaction }
 

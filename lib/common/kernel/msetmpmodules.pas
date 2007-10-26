@@ -13,7 +13,7 @@ function createtmpmodule(const aclassname: string;
 
 implementation
 uses
- sysutils,msegui;
+ sysutils,mseapplication;
 type
  tmsecomponent1 = class(tmsecomponent);
  

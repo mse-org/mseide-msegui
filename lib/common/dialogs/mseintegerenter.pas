@@ -13,7 +13,7 @@ unit mseintegerenter;
 
 interface
 uses
- mseforms,msedataedits,msesimplewidgets,msetypes,msegui,msedialog,msestrings;
+ mseforms,msedataedits,msesimplewidgets,msetypes,mseguiglob,msegui,msedialog,msestrings;
 
 type
  tintegerenterfo = class(tdialogform)

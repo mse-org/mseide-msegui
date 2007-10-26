@@ -2,7 +2,7 @@ unit msetexteditor;
 {$ifdef FPC}{$mode objfpc}{$h+}{$INTERFACES CORBA}{$endif}
 interface
 uses
- msegui,mseclasses,mseforms,msesimplewidgets,msewidgetgrid,msesyntaxedit,
+ msegui,mseguiglob,mseclasses,mseforms,msesimplewidgets,msewidgetgrid,msesyntaxedit,
  msemenus,msefiledialog,msestat,msestatfile,msesyntaxpainter,msedispwidgets,
  mseinplaceedit,mseactions;
 

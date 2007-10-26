@@ -42,7 +42,8 @@ procedure print;
 implementation
 uses
  printform_mfm,main,sourceform,msestream,msesys,msegraphutils,msedrawtext,
- msesettings,msereal,msewidgets,sysutils,projectoptionsform,mserichstring;
+ msesettings,msereal,msewidgets,sysutils,projectoptionsform,mserichstring,
+ mseguiglob;
 
 procedure tprintfo.printidle(var again: Boolean);
 begin

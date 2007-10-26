@@ -15,7 +15,7 @@ interface
 
 uses
  {$ifdef FPC}classes{$else}Classes{$endif},sysutils,msegraphics,msetypes,
- msestrings,mseerror,msegraphutils,
+ msestrings,mseerror,msegraphutils,mseapplication,
  msepointer,mseevent,msekeyboard,mseclasses,mseguiglob,mselist,msesys,msethread,
  msebitmap,msearrayprops,mseguithread{,msedatamodules};
 
@@ -57,7 +57,6 @@ type
  anchorty = (an_left,an_top,an_right,an_bottom);
  anchorsty = set of anchorty;
 
- shortcutty = type word;
  widgetstatety = (ws_visible,ws_enabled,
                   ws_active,ws_entered,ws_entering,ws_exiting,ws_focused,
                   ws_mouseinclient,ws_wantmousebutton,ws_wantmousemove,
@@ -94,12 +93,6 @@ type
                  fs_captionfocus,fs_captionhint,fs_rectsvalid,
                  fs_widgetactive,fs_paintposinited);
  framestatesty = set of framestatety;
-
- modalresultty = (mr_none,mr_canclose,mr_windowclosed,mr_windowdestroyed,
-                  mr_escape,mr_f10, 
-                  mr_exception,
-                  mr_cancel,mr_abort,mr_ok,mr_yes,mr_no,mr_all,mr_noall,mr_ignore);
- modalresultsty = set of modalresultty;
 
  hintflagty = (hfl_show,hfl_custom,{hfl_left,hfl_top,hfl_right,hfl_bottom,}
                hfl_noautohidemove);
@@ -155,100 +148,7 @@ const
                     [fal_options,fal_fadirection,fal_image,fal_fapos,fal_facolor,
                     fal_fatransparency];
 type
- iactivator = interface(inullinterface)
- end;
- iactivatorclient = interface(inullinterface)
- end;
 
- activatoroptionty = (avo_activateonloaded,avo_activatedelayed,
-                avo_deactivateonterminated,
-                avo_handleexceptions,avo_quietexceptions,
-                avo_abortonexception);
- activatoroptionsty = set of activatoroptionty;
-const
- defaultactivatoroptions = [avo_handleexceptions,avo_quietexceptions];
-
-type
- tactivator = class;
-
- tguicomponent = class(tmsecomponent,iactivator)
-  private
-   factivator: tactivator;
-   procedure setactivator(const avalue: tactivator);
-  protected
-   fdesignchangedlock: integer;
-//   procedure receiveevent(const event: tobjectevent); override;
-   procedure designchanged; //for designer notify
-   procedure loaded; override;
-   procedure doactivated; virtual;
-   procedure dodeactivated; virtual;
-   procedure objectevent(const sender: tobject;
-                          const event: objecteventty); override;
-  public
-   property activator: tactivator read factivator write setactivator;
- end;
-
- activateerroreventty = procedure(const sender: tactivator; 
-                 const aclient: tobject; const aexception: exception;
-                 var handled: boolean) of object;
- 
- tactivator = class(tguicomponent)
-  private
-   foptions: activatoroptionsty;
-   fonbeforeactivate: notifyeventty;
-   fonafteractivate: notifyeventty;
-   fonbeforedeactivate: notifyeventty;
-   fonafterdeactivate: notifyeventty;
-   factive: boolean;
-   factivated: boolean;
-   fonactivateerror: activateerroreventty;
-   procedure readclientnames(reader: treader);
-   procedure writeclientnames(writer: twriter);
-   function getclients: integer;
-   procedure setclients(const avalue: integer);
-   procedure setoptions(const avalue: activatoroptionsty);
-   procedure setactive(const avalue: boolean);
-  protected
-   fclientnames: stringarty;
-   fclients: pointerarty;
-   procedure registerclient(const aclient: iobjectlink);
-   procedure unregisterclient(const aclient: iobjectlink);
-   procedure updateorder;
-   function getclientname(const avalue: tobject; const aindex: integer): string;
-   function getclientnames: stringarty;
-   procedure defineproperties(filer: tfiler); override;
-   procedure doasyncevent(var atag: integer); override;
-   procedure loaded; override;
-   procedure unlink(const source,dest: iobjectlink; valuepo: pointer = nil); override;
-   procedure objevent(const sender: iobjectlink;
-                         const event: objecteventty); override;
-   procedure doterminated(const sender: tobject);   
-  public
-   constructor create(aowner: tcomponent); override;
-   destructor destroy; override;
-   class procedure addclient(const aactivator: tactivator; 
-              const aclient: iobjectlink; var dest: tactivator);
-   procedure activateclients;
-   procedure deactivateclients;
-   property activated: boolean read factivated;
-  published
-   property clients: integer read getclients write setclients; 
-                                  //hook for object inspector
-   property options: activatoroptionsty read foptions write setoptions 
-                    default defaultactivatoroptions;
-   property active: boolean read factive write setactive;
-   property onbeforeactivate: notifyeventty read fonbeforeactivate
-                           write fonbeforeactivate;
-   property onactivateerror: activateerroreventty read fonactivateerror 
-                                   write fonactivateerror;                              
-   property onafteractivate: notifyeventty read fonafteractivate 
-                           write fonafteractivate;
-   property onbeforedeactivate: notifyeventty read fonbeforedeactivate 
-                            write fonbeforedeactivate;
-   property onafterdeactivate: notifyeventty read fonafterdeactivate 
-                            write fonafterdeactivate;
-   property activator;
- end;
  
  twidget = class;
  tcustomframe = class;
@@ -734,7 +634,7 @@ type
  widgetalignmodety = (wam_start,wam_center,wam_end);
  widgetclassty = class of twidget;
  
- twidget = class(tguicomponent,iframe,iface)
+ twidget = class(tactcomponent,iframe,iface)
   private
    fwidgetregion: regionty;
    frootpos: pointty;   //position in rootwindow
@@ -1503,19 +1403,7 @@ type
    constructor create(const dest: ievent; const asize: sizety);
  end;
 
- applicationstatety = 
-        (aps_inited,aps_running,aps_terminated,aps_mousecaptured,
-         aps_invalidated,aps_zordervalid,aps_needsupdatewindowstack,
-         aps_focused,aps_activewindowchecked,aps_exitloop,
-         aps_active,aps_waiting,aps_terminating,aps_deinitializing,
-         aps_waitstarted,aps_waitcanceled,aps_waitterminated,aps_waitok);
- applicationstatesty = set of applicationstatety;
-
- exceptioneventty = procedure (sender: tobject; e: exception) of object;
- terminatequeryeventty = procedure (var terminate: boolean) of object;
- idleeventty = procedure (var again: boolean) of object;
-
- tapplication = class(tmsecomponent)
+ tguiapplication = class(tcustomapplication)
   private
    finiting: integer;
    fwindows: windowarty;
@@ -1524,29 +1412,19 @@ type
    finactivewindow: twindow;
    ffocuslockwindow: twindow;
    ffocuslocktransientfor: twindow;
-   fstate: applicationstatesty;
    fmouse: tmouse;
    fcaret: tcaret;
    fmousecapturewidget: twidget;
    fmousewidget: twidget;
    fkeyboardcapturewidget: twidget;
    fclientmousewidget: twidget;
-   fonexception: exceptioneventty;
    fhintedwidget: twidget;
    fhintforwidget: twidget;
    fhintinfo: hintinfoty;
-   flockthread: threadty;
-   flockcount: integer;
    fmainwindow: twindow;
    fapplicationname: filenamety;
-   fthread: threadty;
    fdblclicktime: integer;
-   fexceptionactive: integer;
-   fwaitcount: integer;
-   fidlecount: integer;
-   fcheckoverloadlock: integer;
    fcursorshape: cursorshapety;
-   feventlooping: integer;
 //   facursorshape: cursorshapety;
    fbuttonpresswidgetbefore: twidget;
    fbuttonreleasewidgetbefore: twidget;
@@ -1555,9 +1433,7 @@ type
    fmodalwindowbeforewaitdialog: twindow;
    fonterminatebefore: threadcompeventty;
    fexecuteaction: notifyeventty;
-   fexceptioncount: longword;
-   function getterminated: boolean;
-   procedure setterminated(const Value: boolean);
+   feventlooping: integer;
    procedure invalidated;
    function grabpointer(const id: winidty): boolean;
    function ungrabpointer: boolean;
@@ -1572,70 +1448,49 @@ type
    procedure setmainwindow(const Value: twindow);
    procedure setcursorshape(const Value: cursorshapety);
    function getwindows(const index: integer): twindow;
-   function dolock: boolean;
-   function internalunlock(count: integer): boolean;
    procedure destroyforms;
    procedure dothreadterminated(const sender: tthreadcomp);
    procedure dowaitidle(var again: boolean);
   protected  
+   procedure dopostevent(const aevent: tevent); override;
    procedure eventloop(const once: boolean = false); 
                         //used in win32 wm_queryendsession and wm_entersizemove
    procedure exitloop;  //used in win32 cancelshutdown
    procedure receiveevent(const event: tobjectevent); override;
+   procedure doafterrun; override;
   public
-   procedure langchanged;
+   procedure langchanged; override;
+   procedure settimer(const us: integer); override;
    function findwindow(id: winidty; out window: twindow): boolean;
    procedure checkwindowrect(winid: winidty; var rect: rectty);
                //callback from win32 wm_sizing
-   function ismainthread: boolean;
-   procedure wakeupguithread;
    procedure initialize;
    procedure deinitialize;
-   procedure run;
+
    procedure createdatamodule(instanceclass: msecomponentclassty; var reference);
    procedure createform(instanceclass: widgetclassty; var reference);
    procedure invalidate; //invalidates all registered forms
    
-   function trylock: boolean;
-   function lock: boolean;
-    //synchronizes calling thread with main event loop (mutex),
-    //false if calling thread allready holds the mutex
-    //mutex is recursive
-   function unlock: boolean;
-    //release mutex if calling thread holds the mutex,
-    //false if no unlock done
-   function unlockall: integer;
-    //release mutex recursive if calling thread holds the mutex,
-    //returns count for relockall
-   procedure relockall(count: integer);
-   procedure synchronize(proc: objectprocty);
-   procedure waitforthread(athread: tmsethread); //does unlock-relock before waiting
    procedure processmessages; //handle with care!
 
-   procedure beginwait;
-   procedure endwait;
+   procedure beginwait; override;
+   procedure endwait; override;
    function waiting: boolean;
    function waitescaped: boolean; //true if escape pressed while waiting
 
    procedure resetwaitdialog;   
    function waitdialog(const athread: tthreadcomp = nil; const atext: msestring = '';
-                              const caption: msestring = '';
-                              const acancelaction: notifyeventty = nil;
-                              const aexecuteaction: notifyeventty = nil): boolean;
+                   const caption: msestring = '';
+                   const acancelaction: notifyeventty = nil;
+                   const aexecuteaction: notifyeventty = nil): boolean; override;
               //true if not canceled
    procedure terminatewait;
    procedure cancelwait;
    function waitstarted: boolean;
    function waitcanceled: boolean;
-   function waitterminated: boolean;
-   
-   function checkoverload(const asleepus: integer = 100000): boolean;
-              //true if never idle since last call,
-              // unlocks application and calls sleep if not mainthread and asleepus >= 0
+   function waitterminated: boolean;   
 
-   procedure handleexception(sender: tobject; const leadingtext: string = '');
-   procedure showexception(e: exception; const leadingtext: string = '');
-   procedure postevent(event: tevent);
+   procedure showexception(e: exception; const leadingtext: string = ''); override;
    procedure inithintinfo(var info: hintinfoty; const ahintedwidget: twidget);
    procedure showhint(const sender: twidget; const hint: msestring;
               const aposrect: rectty; const aplacement: captionposty = cp_bottomleft;
@@ -1686,12 +1541,6 @@ type
    function candefocus: boolean;
       //checks candefocus of all windows
 
-   procedure registeronterminated(const method: notifyeventty);
-   procedure unregisteronterminated(const method: notifyeventty);
-   procedure registeronterminate(const method: terminatequeryeventty);
-   procedure unregisteronterminate(const method: terminatequeryeventty);
-   procedure registeronidle(const method: idleeventty);
-   procedure unregisteronidle(const method: idleeventty);
    procedure registeronkeypress(const method: keyeventty);
    procedure unregisteronkeypress(const method: keyeventty);
    procedure registeronshortcut(const method: keyeventty);
@@ -1708,7 +1557,6 @@ type
    procedure terminate(const sender: twindow = nil); 
         //calls canclose of all windows except sender and terminatequery
    function terminating: boolean;
-   property terminated: boolean read getterminated write setterminated;
    function deinitializing: boolean;
    property caret: tcaret read fcaret;
    property mouse: tmouse read fmouse;
@@ -1726,8 +1574,6 @@ type
    property buttonreleasewidgetbefore: twidget read fbuttonreleasewidgetbefore;
    property dblclicktime: integer read fdblclicktime write fdblclicktime default
                  defaultdblclicktime; //us
-   property onexception: exceptioneventty read fonexception write fonexception;
-   property exceptioncount: longword read fexceptioncount;
  end;
 
 function translatewidgetpoint(const point: pointty;
@@ -1782,8 +1628,7 @@ procedure wsetbounds_cxmax(const awidget: twidget; const avalue: integer);
 function wbounds_cymax(const awidget: twidget): integer;
 procedure wsetbounds_cymax(const awidget: twidget; const avalue: integer);
 
-function application: tapplication;
-function applicationallocated: boolean;
+function application: tguiapplication;
 function mousebuttontoshiftstate(button: mousebuttonty): shiftstatesty;
 
 procedure beep;
@@ -1799,10 +1644,6 @@ function needswidgetnamewriting(const ar: widgetarty): boolean;
 procedure designeventloop;
 procedure freedesigncomponent(const acomponent: tcomponent);
 
-var
- ondesignchanged: notifyeventty;
- onfreedesigncomponent: componenteventty;
- 
 implementation
 
 uses
@@ -1827,18 +1668,6 @@ type
    constructor create(const amessage: msestring; const acaption: msestring);
  end;
  
- tonterminatequerylist = class(tmethodlist)
-  protected
-   function doterminatequery: boolean;
-           //true if accepted
- end;
- 
- tonidlelist = class(tmethodlist)
-  protected
-   function doidle: boolean; //true if again requested
-  public
- end;
-
  tonkeyeventlist = class(tmethodlist)
   protected
    procedure dokeyevent(const sender: twidget; var info: keyeventinfoty);
@@ -1871,13 +1700,9 @@ type
  end;
  windowstackinfoarty = array of windowstackinfoty;
 
- tinternalapplication = class(tapplication,imouse)
+ tinternalapplication = class(tguiapplication,imouse)
          //avoid circular interface references
   private
-   feventlist: tobjectqueue;
-   fonterminatedlist: tnotifylist;
-   fonterminatequerylist: tonterminatequerylist;
-   fonidlelist: tonidlelist;
    fonkeypresslist: tonkeyeventlist;
    fonshortcutlist: tonkeyeventlist;
    fonactivechangelist: tonactivechangelist;
@@ -1887,9 +1712,6 @@ type
 
    fcaretwidget: twidget;
    fmousewinid: winidty;
-   fmutex: mutexty;
-   feventlock: mutexty;
-   fpostedevents: eventarty;
    fdesigning: boolean;
    fmodalwindow: twindow;
    fhintwidget: thintwidget;
@@ -1904,7 +1726,6 @@ type
    fwindowstack: windowstackinfoarty;
    ftimertick: boolean;
 
-   procedure flusheventbuffer;
    procedure twindowdestroyed(const sender: twindow);
    procedure windowdestroyed(id: winidty);
    procedure setwindowfocus(winid: winidty);
@@ -1941,18 +1762,20 @@ type
 
    procedure mouseparktimer(const sender: tobject);
   protected
+   procedure dopostevent(const aevent: tevent); override;
    procedure flushmousemove;
    procedure doterminate(const shutdown: boolean);
    procedure doidle;
    procedure checkshortcut(const sender: twindow; const awidget: twidget;
                      var info: keyeventinfoty);
+   procedure doeventloop; override;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
  end;
 
 var
- app: tinternalapplication;
+ appinst: tinternalapplication;
 
 function wbounds_x(const awidget: twidget): integer;
 begin
@@ -2287,9 +2110,9 @@ end;
 
 procedure designeventloop;
 begin
- if app <> nil then begin
-  app.fdesigning:= true;
-  tinternalapplication(app).eventloop(nil);
+ if appinst <> nil then begin
+  appinst.fdesigning:= true;
+  tinternalapplication(appinst).eventloop(nil);
  end;
 end;
 
@@ -2332,18 +2155,13 @@ begin
  end;
 end;
 
-function application: tapplication;
+function application: tguiapplication;
 begin
- if app = nil then begin
-  app:= tinternalapplication.create(nil);
-  app.initialize;
+ if appinst = nil then begin
+  tinternalapplication.create(nil);
+  appinst.initialize;
  end;
- result:= app;
-end;
-
-function applicationallocated: boolean;
-begin
- result:= app <> nil;
+ result:= appinst;
 end;
 
 function mousebuttontoshiftstate(button: mousebuttonty): shiftstatesty;
@@ -2439,326 +2257,6 @@ end;
 class function twidgetfont.getinstancepo(owner: tobject): pfont;
 begin
  result:= @twidget(owner).ffont;
-end;
-
-{ tguicomponent }
-
-procedure tguicomponent.designchanged; //for designer notify
-begin
- if assigned(ondesignchanged) and (fdesignchangedlock = 0) and 
-       (componentstate*[csdesigning,csloading] = [csdesigning]) then begin
-  ondesignchanged(self);
- end;
-end;
-
-procedure tguicomponent.setactivator(const avalue: tactivator);
-begin
- tactivator.addclient(avalue,ievent(self),factivator);
-end;
-
-procedure tguicomponent.loaded;
-begin
- inherited;
- if (factivator = nil) or factivator.activated then begin
-  doactivated;
- end;
-end;
-
-procedure tguicomponent.doactivated;
-begin
- //dummy;
-end;
-
-procedure tguicomponent.dodeactivated;
-begin
- //dummy;
-end;
-
-procedure tguicomponent.objectevent(const sender: tobject; 
-                               const event: objecteventty);
-begin
- inherited;
- if (sender = factivator) then begin
-  case event of
-   oe_activate: begin
-    doactivated;
-   end;
-   oe_deactivate: begin
-    dodeactivated;
-   end;
-  end;
- end;
-end;
-
-{ tactivator }
-
-constructor tactivator.create(aowner: tcomponent);
-begin
- foptions:= defaultactivatoroptions;
- inherited;
- application.registeronterminated({$ifdef FPC}@{$endif}doterminated);
-end;
-
-destructor tactivator.destroy;
-begin
- application.unregisteronterminated({$ifdef FPC}@{$endif}doterminated);
- inherited;
-end;
-
-class procedure tactivator.addclient(const aactivator: tactivator; 
-                    const aclient: iobjectlink; var dest: tactivator);
-var
- act1: tactivator;
-begin
- if dest <> nil then begin
-  dest.unregisterclient(aclient);
- end;
- if aactivator <> nil then begin
-  act1:= tactivator(aclient.getinstance);
-  if act1 is tactivator then begin
-   repeat  
-    if act1 = aactivator then begin
-     raise exception.create('Circular reference.');
-    end;
-    act1:= act1.activator;
-   until act1 = nil;
-  end;
-  aclient.link(aclient,ievent(aactivator),@dest);
-  aactivator.registerclient(aclient);
- end;
- dest:= aactivator;
-end;
-
-procedure tactivator.registerclient(const aclient: iobjectlink);
-begin
- additem(fclients,pointer(aclient));
-end;
-
-procedure tactivator.unregisterclient(const aclient: iobjectlink);
-begin
- removeitem(fclients,pointer(aclient));
-end;
-
-procedure tactivator.updateorder;
-var
- int1,int2: integer;
- ar1: stringarty;
- ar2,ar3: integerarty;
-begin
- ar1:= nil; //compilerwarning
- if fclientnames <> nil then begin
-  ar1:= getclientnames;
-  setlength(ar2,length(ar1));
-  for int1:= 0 to high(fclientnames) do begin
-   for int2:= 0 to high(ar1) do begin
-    if ar1[int2] = fclientnames[int1] then begin
-     ar2[int2]:= int1-bigint; //not found items last
-     ar1[int2]:= '';
-    end;
-   end;
-  end;
-  sortarray(ar2,ar3);
-  orderarray(ar3,fclients);
- end;
-end;
-
-procedure tactivator.doasyncevent(var atag: integer);
-begin
- activateclients;
-end;
-
-procedure tactivator.loaded;
-begin
- inherited;
- if not (csdesigning in componentstate) or factive then begin
-  if avo_activateonloaded in foptions then begin   
-   if csdesigning in componentstate then begin
-    try
-     activateclients;
-    except
-     application.handleexception(self);
-    end;
-   end
-   else begin
-    activateclients;
-   end;   
-  end;
-  if avo_activatedelayed in foptions then begin
-   asyncevent;
-  end;
- end;
-end;
-
-procedure tactivator.doterminated(const sender: tobject);
-begin
- if avo_deactivateonterminated in foptions then begin
-  deactivateclients;
- end;
-end;
-
-function tactivator.getclientname(const avalue: tobject;
-                   const aindex: integer): string;
-begin
- if avalue is tcomponent then begin
-  with tcomponent(avalue) do begin
-   if owner <> nil then begin
-    if not (csdesigning in componentstate) or 
-             ((owner.owner <> nil) and (owner.owner.owner = nil)) then begin
-     result:= owner.name+'.'+name;
-    end
-    else begin
-     result:= name;
-    end;
-   end
-   else begin
-    result:= '';
-   end;
-  end;
- end
- else begin
-  result:= inttostr(aindex)+'<'+avalue.classname+'>';
- end;
-end;
-
-function tactivator.getclientnames: stringarty;
-var
- int1: integer;
-begin
- setlength(result,length(fclients));
- for int1:= 0 to high(result) do begin 
-  result[int1]:= getclientname(iobjectlink(fclients[int1]).getinstance,int1);
- end;
-end;
-
-procedure tactivator.readclientnames(reader: treader);
-begin
- readstringar(reader,fclientnames);
-end;
-
-procedure tactivator.writeclientnames(writer: twriter);
-begin
- writestringar(writer,getclientnames);
-end;
-
-procedure tactivator.defineproperties(filer: tfiler);
-begin
- inherited;
- filer.defineproperty('clientnames',{$ifdef FPC}@{$endif}readclientnames,
-            {$ifdef FPC}@{$endif}writeclientnames,high(fclients) >= 0);
-end;
-
-procedure tactivator.objevent(const sender: iobjectlink; const event: objecteventty);
-begin
- inherited;
- if (event = oe_activate) and (sender.getinstance = activator) then begin
-  activateclients;
- end;
-end;
-
-procedure tactivator.unlink(const source,dest: iobjectlink; valuepo: pointer = nil);
-begin
- removeitem(fclients,pointer(dest));
- inherited;
-end;
-
-function tactivator.getclients: integer;
-begin
- result:= length(fclients);
-end;
-
-procedure tactivator.setclients(const avalue: integer);
-begin
- // dummy;
-end;
-
-procedure tactivator.activateclients;
-var
- int1: integer;
- bo1,bo2: boolean;
-begin
- factive:= true;
- factivated:= true;
- if canevent(tmethod(fonbeforeactivate)) then begin
-  fonbeforeactivate(self);
- end;
- if factive then begin
-  bo2:= canevent(tmethod(fonactivateerror));
-  for int1:= 0 to high(fclients) do begin
-   try
-    iobjectlink(fclients[int1]).objevent(ievent(self),oe_activate);
-   except
-    on e: exception do begin
-     bo1:= false;
-     if bo2 then begin
-      fonactivateerror(self,iobjectlink(fclients[int1]).getinstance,e,bo1);
-     end;
-     if not bo1 then begin
-      if avo_handleexceptions in foptions then begin
-       if not (avo_quietexceptions in foptions) then begin
-        application.showexception(e);
-       end;
-      end
-      else begin
-       raise;
-      end;
-     end;
-     if avo_abortonexception in foptions then begin
-      break;
-     end;
-    end;
-   end;
-  end;
-  if canevent(tmethod(fonafteractivate)) then begin
-   fonafteractivate(self);
-  end;
- end;
-end;
-
-procedure tactivator.deactivateclients;
-var
- int1: integer;
-begin
- factive:= false;
- if canevent(tmethod(fonbeforedeactivate)) then begin
-  fonbeforedeactivate(self);
- end;
- if not active then begin
-  for int1:= high(fclients) downto 0 do begin
-   iobjectlink(fclients[int1]).objevent(ievent(self),oe_deactivate);
-  end;
-  if canevent(tmethod(fonafterdeactivate)) then begin
-   fonafterdeactivate(self);
-  end;
- end;
-end;
-
-procedure tactivator.setactive(const avalue: boolean);
-begin
- if avalue <> factive then begin
-  if componentstate * [csloading,csdesigning] = [csloading,csdesigning] then begin
-   factive:= avalue;
-  end
-  else begin
-   if not (csloading in componentstate) then begin
-    if avalue then begin
-     activateclients;
-    end
-    else begin
-     deactivateclients;
-    end;
-   end;
-  end;
- end;
-end;
-
-procedure tactivator.setoptions(const avalue: activatoroptionsty);
-const 
- mask: activatoroptionsty = [avo_activateonloaded,avo_activatedelayed];
-begin
- foptions:= activatoroptionsty(setsinglebit(
-                         {$ifdef FPC}longword{$else}byte{$endif}(avalue),
-                         {$ifdef FPC}longword{$else}byte{$endif}(foptions),
-                         {$ifdef FPC}longword{$else}byte{$endif}(mask)));
 end;
 
 { tresizeevent }
@@ -4351,8 +3849,8 @@ end;
 destructor twidget.destroy;
 begin
  include(fwidgetstate,ws_destroying);
- if (app <> nil) then begin
-  app.widgetdestroyed(self);
+ if (appinst <> nil) then begin
+  appinst.widgetdestroyed(self);
  end;
  updateroot;
  if fwindow <> nil then begin
@@ -5568,7 +5066,7 @@ begin
   window.endmodal;
  end;
  if not (ws1_releasing in fwidgetstate1) then begin
-  app.postevent(tobjectevent.create(ek_release,ievent(self)));
+  appinst.postevent(tobjectevent.create(ek_release,ievent(self)));
   include(fwidgetstate1,ws1_releasing);
  end;
 end;
@@ -6499,10 +5997,10 @@ var
  widget: twidget;
  cursor1: cursorshapety;
 begin
- if (app <> nil) then begin
-  if force or (app.fclientmousewidget = self) or
-    (app.cursorshape = cr_default) and
-      checkdescendent(app.fclientmousewidget) then begin
+ if (appinst <> nil) then begin
+  if force or (appinst.fclientmousewidget = self) or
+    (appinst.cursorshape = cr_default) and
+      checkdescendent(appinst.fclientmousewidget) then begin
    widget:= self;
    repeat
     cursor1:= widget.fcursor;
@@ -6511,7 +6009,7 @@ begin
    if (widget = nil) and (cursor1 = cr_default) then begin
     cursor1:= cr_arrow;
    end;
-   app.cursorshape:= cursor1;
+   appinst.cursorshape:= cursor1;
   end;
  end;
 end;
@@ -6535,9 +6033,9 @@ begin
   if not (es_processed in eventstate) or (info.eventkind = ek_mousemove) then begin
    updatemousestate(pos);
    if [ws_mouseinclient,ws_clientmousecaptured] * fwidgetstate <> [] then begin
-    if (app.fclientmousewidget <> self) and not (es_child in eventstate) then begin
+    if (appinst.fclientmousewidget <> self) and not (es_child in eventstate) then begin
                        //call updaterootwidget
-     app.setclientmousewidget(self);
+     appinst.setclientmousewidget(self);
     end;
     result:= true;
     if fframe <> nil then begin
@@ -6545,7 +6043,7 @@ begin
     end;
    end
    else begin
-    app.setclientmousewidget(nil);
+    appinst.setclientmousewidget(nil);
     result:= false;
    end;
   end
@@ -6588,12 +6086,12 @@ begin
      end;
     end;
     ek_clientmouseleave: begin
-     if app.fmousewidget = self then begin
+     if appinst.fmousewidget = self then begin
       if fparentwidget <> nil then begin
        fparentwidget.updatecursorshape(true);
       end
       else begin
-       app.cursorshape:= cr_default;
+       appinst.cursorshape:= cr_default;
       end;
      end;
      clientmouseevent(info);
@@ -6606,7 +6104,7 @@ begin
      if button = mb_left then begin
       include(fwidgetstate,ws_clicked);
      end;
-     app.capturemouse(self,true);
+     appinst.capturemouse(self,true);
      if isclientmouseevent(info) then begin
       include(fwidgetstate,ws_clientmousecaptured);
       clientmouseevent(info);
@@ -6631,15 +6129,15 @@ begin
    if button = mb_left then begin
     exclude(fwidgetstate,ws_clicked);
    end;
-   if (app <> nil) and ((shiftstate - mousebuttontoshiftstate(button)) *
+   if (appinst <> nil) and ((shiftstate - mousebuttontoshiftstate(button)) *
                             mousebuttons = []) and
-                           (app.fmousecapturewidget = self) then begin
+                           (appinst.fmousecapturewidget = self) then begin
     if not (ws_mousecaptured in fwidgetstate) then begin
-     app.capturemouse(nil,false);
+     appinst.capturemouse(nil,false);
     end
     else begin
      fwidgetstate:= fwidgetstate - [ws_clientmousecaptured];
-     app.ungrabpointer;
+     appinst.ungrabpointer;
     end;
    end;
   end;
@@ -6681,7 +6179,7 @@ end;
 
 procedure twidget.setclientclick;
 begin
- app.capturemouse(self,true);
+ appinst.capturemouse(self,true);
  fwidgetstate:= fwidgetstate + [ws_clicked,ws_clientmousecaptured];
 end;
 
@@ -7179,14 +6677,14 @@ var
  int1: integer;
 begin
  visiblechanged;
- if app.fmousecapturewidget = self then begin
+ if appinst.fmousecapturewidget = self then begin
   releasemouse;
  end;
- if app.fmousewidget = self then begin
-  app.setmousewidget(nil);
+ if appinst.fmousewidget = self then begin
+  appinst.setmousewidget(nil);
  end;
- if app.fhintforwidget = self then begin
-  app.hidehint;
+ if appinst.fhintforwidget = self then begin
+  appinst.hidehint;
  end;
  {
  if (window.focusedwidget = self) and 
@@ -7289,19 +6787,19 @@ begin
  end;
  if ownswindow1 then begin
   if modal and (transientfor = nil) then begin
-   if app.fmodalwindow = nil then begin
-    if app.fwantedactivewindow <> nil then begin
-     transientfor:= app.fwantedactivewindow;
+   if appinst.fmodalwindow = nil then begin
+    if appinst.fwantedactivewindow <> nil then begin
+     transientfor:= appinst.fwantedactivewindow;
     end
     else begin
 //     {$ifndef mswindows}  //on win32 winid wil be destroyed on destroying transientfor
       //todo: no ifndef
-     transientfor:= app.factivewindow;
+     transientfor:= appinst.factivewindow;
 //     {$endif}
     end;
    end
    else begin
-    transientfor:= app.fmodalwindow;
+    transientfor:= appinst.fmodalwindow;
    end;
   end;
   if transientfor = window then begin
@@ -7660,7 +7158,7 @@ begin
  with info do begin
   result:= (button = mb_left) and pointinrect(pos,clientrect) and
        (eventkind = ek_buttonpress) and (ss_double in shiftstate) and 
-        (app.fbuttonpresswidgetbefore = self);
+        (appinst.fbuttonpresswidgetbefore = self);
  end;
 end;
 
@@ -7670,8 +7168,8 @@ function twidget.isdblclicked(const info: mouseeventinfoty): boolean;
 begin
  with info do begin
   result:= (button = mb_left) and (ss_double in shiftstate) and 
-    ((eventkind = ek_buttonpress) and (app.fbuttonpresswidgetbefore = self) or
-     (eventkind = ek_buttonrelease) and (app.fbuttonreleasewidgetbefore = self));
+    ((eventkind = ek_buttonpress) and (appinst.fbuttonpresswidgetbefore = self) or
+     (eventkind = ek_buttonrelease) and (appinst.fbuttonreleasewidgetbefore = self));
  end;
 end;
 
@@ -7793,8 +7291,8 @@ end;
 
 function twidget.activeentered: boolean;
 begin
- result:= entered and ((app.regularactivewindow = window) or 
-                (app.finactivewindow = window));
+ result:= entered and ((appinst.regularactivewindow = window) or 
+                (appinst.finactivewindow = window));
 end;
 
 function twidget.focused: boolean;
@@ -7995,7 +7493,7 @@ end;
 procedure twidget.reclipcaret;
 begin
  if hascaret then begin
-  with app,fcaret,fcaretwidget do begin
+  with appinst,fcaret,fcaretwidget do begin
    cliprect:= moverect(clipcaret,subpoint(fcaretwidget.frootpos,origin));
   end;
  end;
@@ -8003,15 +7501,15 @@ end;
 
 function twidget.hascaret: boolean;
 begin
- result:= (app <> nil) and checkdescendent(app.fcaretwidget)
+ result:= (appinst <> nil) and checkdescendent(appinst.fcaretwidget)
 end;
 
 procedure twidget.getcaret;
 begin
- if (app <> nil) then begin
-  app.caret.link(window.fcanvas,addpoint(frootpos,clientwidgetpos),
+ if (appinst <> nil) then begin
+  appinst.caret.link(window.fcanvas,addpoint(frootpos,clientwidgetpos),
                  removerect(clipcaret,clientwidgetpos));
-  app.fcaretwidget:= self;
+  appinst.fcaretwidget:= self;
  end;
 end;
 
@@ -8022,31 +7520,31 @@ end;
                      
 procedure twidget.capturemouse(grab: boolean = true);
 begin
- if app <> nil then begin
-  app.capturemouse(self,grab);
+ if appinst <> nil then begin
+  appinst.capturemouse(self,grab);
   include(fwidgetstate,ws_mousecaptured);
  end;
 end;
 
 procedure twidget.releasemouse;
 begin
- if (app <> nil) and (app.fmousecapturewidget = self) then begin
-  app.capturemouse(nil,false);
+ if (appinst <> nil) and (appinst.fmousecapturewidget = self) then begin
+  appinst.capturemouse(nil,false);
   exclude(fwidgetstate,ws_mousecaptured);
  end;
 end;
 
 procedure twidget.capturekeyboard;
 begin
- if app <> nil then begin
-  app.fkeyboardcapturewidget:= self;
+ if appinst <> nil then begin
+  appinst.fkeyboardcapturewidget:= self;
  end;
 end;
 
 procedure twidget.releasekeyboard;
 begin
- if (app <> nil) and (app.fkeyboardcapturewidget = self) then begin
-  app.fkeyboardcapturewidget:= nil;
+ if (appinst <> nil) and (appinst.fkeyboardcapturewidget = self) then begin
+  appinst.fkeyboardcapturewidget:= nil;
  end;
 end;
 
@@ -8082,7 +7580,7 @@ begin
     addpoint1(frootpos,dist);
     rootchanged;
    end;
-   if app.fcaretwidget = widget1 then begin
+   if appinst.fcaretwidget = widget1 then begin
     widget1.reclipcaret;
    end;
   end;
@@ -8096,7 +7594,7 @@ end;
 procedure twidget.scrollcaret(const dist: pointty);
 begin
  if hascaret then begin
-  tcaret1(app.fcaret).scroll(dist,app.fcaretwidget <> self);
+  tcaret1(appinst.fcaret).scroll(dist,appinst.fcaretwidget <> self);
   reclipcaret;
  end;
 end;
@@ -8120,7 +7618,7 @@ begin
  if (fwindow <> nil) {and canpaint} then begin
   ahascaret:= hascaret;
   if ahascaret then begin
-   tcaret1(app.fcaret).remove;
+   tcaret1(appinst.fcaret).remove;
   end;
   rect1:= rect;
   if fframe <> nil then begin
@@ -8175,17 +7673,17 @@ begin
   end;
   if ahascaret then begin
    if scrollcaret then begin
-    tcaret1(app.fcaret).scroll(dist,app.fcaretwidget <> self);
+    tcaret1(appinst.fcaret).scroll(dist,appinst.fcaretwidget <> self);
     reclipcaret;
    end;
-   tcaret1(app.fcaret).restore;
+   tcaret1(appinst.fcaret).restore;
   end;
-  if (app.factmousewindow = fwindow) then begin
-   with app.fmouseparkeventinfo do begin
+  if (appinst.factmousewindow = fwindow) then begin
+   with appinst.fmouseparkeventinfo do begin
     if pointinrect(pos,
          makerect(addpoint(addpoint(rootpos,paintpos),rect.pos),rect.size)) then begin
           //replay last mousepos
-     app.feventlist.insert(0,tmouseevent.create(fwindow.winid,false,
+     appinst.eventlist.insert(0,tmouseevent.create(fwindow.winid,false,
                     mb_none,mw_none,pos,shiftstate,0));
     end;
    end;
@@ -8394,7 +7892,7 @@ begin
    end
    else begin
     if ownswindow then begin
-     app.updatewindowstack;
+     appinst.updatewindowstack;
     end;
    end;
   end;
@@ -8517,7 +8015,7 @@ procedure twidget.postchildscaled;
 begin
  if not (ws1_childscaled in fwidgetstate1) then begin
   include(fwidgetstate1,ws1_childscaled);
-  app.postevent(tobjectevent.create(ek_childscaled,ievent(self)));
+  appinst.postevent(tobjectevent.create(ek_childscaled,ievent(self)));
  end;
 end;
 
@@ -8606,11 +8104,11 @@ begin
   if not (eventkind in mouseregionevents) then begin
    po1:= translatewidgetpoint(pos,self,nil);
    id:= gui_windowatpos(po1);
-   if (id = 0) or not app.findwindow(id,window1) then begin
+   if (id = 0) or not appinst.findwindow(id,window1) then begin
     window1:= fwindow;
    end;
    subpoint1(po1,window1.fowner.fwidgetrect.pos);
-   app.feventlist.insert(0,tmouseevent.create(window1.winid,
+   appinst.eventlist.insert(0,tmouseevent.create(window1.winid,
      eventkind = ek_buttonrelease,button,mw_none,po1,shiftstate,info.timestamp,
      true));
   end;
@@ -9142,7 +8640,7 @@ end;
 
 destructor twindow.destroy;
 begin
- app.twindowdestroyed(self);
+ appinst.twindowdestroyed(self);
  if ftransientfor <> nil then begin
   dec(ftransientfor.ftransientforcount);
  end;
@@ -9242,7 +8740,7 @@ begin
   fillchar(gc,sizeof(gcty),0);
   guierror(gui_creategc(fwindow.id,gck_screen,gc),self);
   fasynccanvas.linktopaintdevice(fwindow.id,gc,fowner.fwidgetrect.size,nullpoint);
-  if app <> nil then begin
+  if appinst <> nil then begin
    tinternalapplication(application).registerwindow(self);
   end;
   if fcaption <> '' then begin
@@ -9259,17 +8757,17 @@ procedure twindow.destroywindow;
 begin
  releasemouse;
 // endmodal;
- if app <> nil then begin
-  if app.caret.islinkedto(fcanvas) then begin
-   app.caret.hide;
+ if appinst <> nil then begin
+  if appinst.caret.islinkedto(fcanvas) then begin
+   appinst.caret.hide;
 //   tcaret1(app.fcaret).remove;
   end;
-  app.unregisterwindow(self);
+  appinst.unregisterwindow(self);
  end;
  fcanvas.unlink;
  fasynccanvas.unlink;
  if fwindow.id <> 0 then begin
-  app.windowdestroyed(fwindow.id);
+  appinst.windowdestroyed(fwindow.id);
  end;
  gui_destroywindow(fwindow);
  fillchar(fwindow,sizeof(fwindow),0);
@@ -9284,7 +8782,7 @@ end;
 
 procedure twindow.checkwindow(windowevent: boolean);
 begin
- if (app <> nil) and (aps_inited in app.fstate) then begin
+ if (appinst <> nil) and (aps_inited in appinst.fstate) then begin
   if fwindow.id = 0 then begin
    createwindow;
   end
@@ -9307,12 +8805,12 @@ procedure twindow.internalactivate(const windowevent: boolean;
 
  procedure setwinfoc;
  begin
-  if (ftransientfor <> nil) and (force or (app.ffocuslockwindow = nil)) and 
+  if (ftransientfor <> nil) and (force or (appinst.ffocuslockwindow = nil)) and 
                                 (wo_popup in foptions) then begin
-   app.ffocuslockwindow:= self;
-   app.ffocuslocktransientfor:= ftransientfor;
+   appinst.ffocuslockwindow:= self;
+   appinst.ffocuslocktransientfor:= ftransientfor;
   end;
-  if app.ffocuslockwindow = nil then begin
+  if appinst.ffocuslockwindow = nil then begin
    guierror(gui_setwindowfocus(fwindow.id),self);
   end;
  end;
@@ -9323,15 +8821,15 @@ var
  widgetar: widgetarty;
  int1: integer;
 begin
- if app.finactivewindow = self then begin
-  app.finactivewindow:= nil;
+ if appinst.finactivewindow = self then begin
+  appinst.finactivewindow:= nil;
  end;
- activewindowbefore:= app.factivewindow;
+ activewindowbefore:= appinst.factivewindow;
  show(windowevent);
  widgetar:= nil; //compilerwarning
  if  activewindowbefore <> self then begin
-  if force or (app.fmodalwindow = nil) or (app.fmodalwindow = self) or 
-                        (ftransientfor = app.fmodalwindow) then begin
+  if force or (appinst.fmodalwindow = nil) or (appinst.fmodalwindow = self) or 
+                        (ftransientfor = appinst.fmodalwindow) then begin
    if (ffocusedwidget = nil) and fowner.canfocus then begin
     fowner.setfocus(true);
     exit;
@@ -9339,7 +8837,7 @@ begin
    if activewindowbefore <> nil then begin
     activewindowbefore.deactivate;
    end;
-   if app.factivewindow = nil then begin
+   if appinst.factivewindow = nil then begin
     if not (ws_active in fowner.fwidgetstate) then begin
      if not (tws_activatelocked in fstate) then begin
       inc(factivecount);
@@ -9354,7 +8852,7 @@ begin
        end;
       end;
      end;
-     app.factivewindow:= self;
+     appinst.factivewindow:= self;
 //     if factivecount <> activecountbefore then begin
 //      exit;
 //     end;
@@ -9363,14 +8861,14 @@ begin
       setwinfoc;
      end
      else begin
-      app.ffocuslockwindow:= nil;
+      appinst.ffocuslockwindow:= nil;
      end;
     end;
    end;
-   app.fonactivechangelist.doactivechange(activewindowbefore,self);
+   appinst.fonactivechangelist.doactivechange(activewindowbefore,self);
   end
   else begin
-   app.fwantedactivewindow:= self;
+   appinst.fwantedactivewindow:= self;
   end;
  end
  else begin
@@ -9415,24 +8913,24 @@ procedure twindow.deactivate;
 var
  activecountbefore: cardinal;
 begin
- if app.ffocuslockwindow = self then begin
-  app.ffocuslockwindow:= nil;
+ if appinst.ffocuslockwindow = self then begin
+  appinst.ffocuslockwindow:= nil;
  end;
  if ws_active in fowner.fwidgetstate then begin
   noactivewidget;
-  if app.factivewindow = self then begin
+  if appinst.factivewindow = self then begin
    inc(factivecount);
    activecountbefore:= factivecount;
-   app.fonactivechangelist.doactivechange(app.factivewindow,nil);
+   appinst.fonactivechangelist.doactivechange(appinst.factivewindow,nil);
    if factivecount = activecountbefore then begin
-    app.factivewindow:= nil;
+    appinst.factivewindow:= nil;
     gui_unsetimefocus(fwindow);
    end;
   end;
  end
  else begin
-  if app.factivewindow = self then begin
-   app.factivewindow:= nil; //should never happen
+  if appinst.factivewindow = self then begin
+   appinst.factivewindow:= nil; //should never happen
   end;
  end;
 end;
@@ -9440,18 +8938,18 @@ end;
 function twindow.deactivateintermediate: boolean;
 begin
  deactivate;
- if app.factivewindow = nil then begin
+ if appinst.factivewindow = nil then begin
   result:= true;
-  app.finactivewindow:= self;
+  appinst.finactivewindow:= self;
  end
  else begin
   result:= false;
  end;
 end;
 
-procedure twindow.reactivate; //clears app.finactivewindow
+procedure twindow.reactivate; //clears appinst.finactivewindow
 begin
- app.finactivewindow:= nil;
+ appinst.finactivewindow:= nil;
  activate;
 end;
 
@@ -9464,19 +8962,19 @@ begin
  if not(ws_visible in fowner.fwidgetstate) then begin
   if fwindow.id <> 0 then begin
    if tws_windowvisible in fstate then begin
-    if not windowevent or (app.factivewindow = self) then begin
+    if not windowevent or (appinst.factivewindow = self) then begin
      endmodal;
     end;
-    if (application.fmainwindow = self) and not app.terminated then begin
+    if (application.fmainwindow = self) and not appinst.terminated then begin
      gui_flushgdi;
      sys_sched_yield;
 //     sleep(0);     //give windowmanager time to unmap all windows
-     app.sortzorder;
+     appinst.sortzorder;
      exclude(fstate,tws_windowvisible);
      include(fstate,tws_grouphidden);
      include(fstate,tws_groupminimized);
-     for int1:= 0 to high(app.fwindows) do begin
-      window1:= app.fwindows[int1];
+     for int1:= 0 to high(appinst.fwindows) do begin
+      window1:= appinst.fwindows[int1];
       if (window1 <> self) and (window1.fwindow.id <> 0) and 
                         gui_windowvisible(window1.fwindow.id) then begin
        with window1 do begin
@@ -9511,7 +9009,7 @@ begin
  if (ws_visible in fowner.fwidgetstate) then begin
   if not visible then begin
    include(fstate,tws_windowvisible);
-   include(app.fstate,aps_needsupdatewindowstack);
+   include(appinst.fstate,aps_needsupdatewindowstack);
    if not (csdesigning in fowner.ComponentState) then begin
     if not windowevent then begin
 //     if fwindowpos <> wp_minimized then begin
@@ -9537,8 +9035,8 @@ begin
     end;
     exclude(fstate,tws_grouphidden);
     exclude(fstate,tws_groupminimized);
-    for int1:= 0 to high(app.fwindows) do begin
-     window1:= app.fwindows[int1];
+    for int1:= 0 to high(appinst.fwindows) do begin
+     window1:= appinst.fwindows[int1];
      if window1 <> self then begin
       with window1 do begin
        if tws_grouphidden in fstate then begin
@@ -9567,7 +9065,7 @@ var
  win1: winidty;
 begin
  fmodalresult:= mr_none;
- with app do begin
+ with appinst do begin
   deactivatehint;
   if (fmousecapturewidget <> nil) and
          not fowner.checkdescendent(fmousecapturewidget) then begin
@@ -9576,7 +9074,7 @@ begin
   if fmodalwindow = nil then begin
    fwantedactivewindow:= nil; //init for lowest level
   end;
-  app.cursorshape:= cr_default;
+  appinst.cursorshape:= cr_default;
   win1:= fmousewinid;
   processleavewindow;
   fmousewinid:= win1;
@@ -9599,7 +9097,7 @@ begin
     event1:= tmouseevent.create(factivewindow.winid,false,mb_none,mw_none,
         subpoint(pt1,factivewindow.fowner.fwidgetrect.pos),[],0,false);
     try 
-     app.processmouseevent(event1); //simulate mousemove
+     appinst.processmouseevent(event1); //simulate mousemove
     finally
      event1.free;
     end;
@@ -9610,7 +9108,7 @@ end;
 
 procedure twindow.endmodal;
 begin
- app.endmodal(self);
+ appinst.endmodal(self);
 end;
 
 procedure twindow.poschanged;
@@ -9661,10 +9159,10 @@ begin
   checkwindow(false); //ev. reposition window
   fcanvas.reset;
   fcanvas.clipregion:= fupdateregion;
-  bo1:= app.caret.islinkedto(fcanvas) and
-   testintersectrect(fcanvas.clipbox,app.caret.rootcliprect);
+  bo1:= appinst.caret.islinkedto(fcanvas) and
+   testintersectrect(fcanvas.clipbox,appinst.caret.rootcliprect);
   if bo1 then begin
-   tcaret1(app.fcaret).remove;
+   tcaret1(appinst.fcaret).remove;
   end;
   include(fstate,tws_painting);
   if flushgdi then begin
@@ -9674,7 +9172,7 @@ begin
     fowner.paint(fcanvas);
    finally
     if bo1 then begin
-     tcaret1(app.fcaret).restore;
+     tcaret1(appinst.fcaret).restore;
     end;
    end;
   end
@@ -9701,7 +9199,7 @@ begin
    finally
     bmp.Free;
     if bo1 then begin
-     tcaret1(app.fcaret).restore;
+     tcaret1(appinst.fcaret).restore;
     end;
    end;
   end;
@@ -9713,10 +9211,10 @@ procedure twindow.mouseparked;
 var
  info: mouseeventinfoty;
 begin
- info:= app.fmouseparkeventinfo;
+ info:= appinst.fmouseparkeventinfo;
  info.eventkind:= ek_mousepark;
  exclude(info.eventstate,es_processed);
- dispatchmouseevent(info,app.fmousecapturewidget);
+ dispatchmouseevent(info,appinst.fmousecapturewidget);
 end;
 
 procedure twindow.checkmousewidget(const info: mouseeventinfoty; var capture: twidget);
@@ -9727,7 +9225,7 @@ begin
    capture:= fowner;
   end;
  end;
- app.setmousewidget(capture);
+ appinst.setmousewidget(capture);
 end;
 
 procedure twindow.dispatchmouseevent(var info: mouseeventinfoty;
@@ -9752,7 +9250,7 @@ begin
   with capture do begin
    subpoint1(info.pos,rootpos);
    posbefore:= info.pos;
-   app.fdelayedmouseshift:= nullpoint;
+   appinst.fdelayedmouseshift:= nullpoint;
    if info.eventkind = ek_mousewheel then begin
     mousewheelevent(mousewheeleventinfoty(info));
    end
@@ -9760,13 +9258,13 @@ begin
     mouseevent(info);
    end;
    posbefore:= subpoint(info.pos,posbefore);
-   addpoint1(posbefore,app.fdelayedmouseshift);
+   addpoint1(posbefore,appinst.fdelayedmouseshift);
    if (posbefore.x <> 0) or (posbefore.y <> 0) then begin
     gui_flushgdi;
-    with app do begin
+    with appinst do begin
      getevents;
-     po1:= peventaty(feventlist.datapo);
-     for int1:= 0 to feventlist.count -1 do begin
+     po1:= peventaty(eventlist.datapo);
+     for int1:= 0 to eventlist.count -1 do begin
       if (po1^[int1] <> nil) and (po1^[int1].kind = ek_mousemove) then begin
        freeandnil(po1^[int1]); //remove invalid events
       end;
@@ -9788,8 +9286,8 @@ procedure twindow.dispatchkeyevent(const eventkind: eventkindty;
 var
  widget1: twidget;
 begin
- if app.fkeyboardcapturewidget <> nil then begin
-  widget1:= app.fkeyboardcapturewidget;
+ if appinst.fkeyboardcapturewidget <> nil then begin
+  widget1:= appinst.fkeyboardcapturewidget;
  end
  else begin
   widget1:= ffocusedwidget;
@@ -9870,7 +9368,7 @@ begin
     end;
    end;
 //   bo1:= ws_active in fowner.fwidgetstate;
-   bo1:= app.factivewindow = self;
+   bo1:= appinst.factivewindow = self;
    for int1:= int2-1 downto 0 do begin
     widgetar[int1].internaldoenter;
     if ffocuscount <> focuscountbefore then begin
@@ -9905,8 +9403,8 @@ begin
   else begin
    regaddrect(fupdateregion,arect);
   end;
-  if app <> nil then begin
-   app.invalidated;
+  if appinst <> nil then begin
+   appinst.invalidated;
   end;
  end;
 end;
@@ -9921,13 +9419,13 @@ begin
    try
     include(info.eventstate,es_local);
     try
-     app.fonshortcutlist.dokeyevent(sender,info);
+     appinst.fonshortcutlist.dokeyevent(sender,info);
     finally
      exclude(info.eventstate,es_local);
     end;
     if not (es_processed in info.eventstate) and 
                                 not (tws_localshortcuts in fstate) then begin
-     app.checkshortcut(self,sender,info);
+     appinst.checkshortcut(self,sender,info);
     end;
    finally
     exclude(info.eventstate,es_modal);
@@ -9956,15 +9454,15 @@ var
  int1: integer;
  event: twindowrectevent;
 begin
- if app <> nil then begin
+ if appinst <> nil then begin
   gui_flushgdi;
-  app.getevents;
-  for int1:= 0 to app.feventlist.count - 1 do begin
-   event:= twindowrectevent(app.feventlist[int1]);
+  appinst.getevents;
+  for int1:= 0 to appinst.eventlist.count - 1 do begin
+   event:= twindowrectevent(appinst.eventlist[int1]);
    if (event <> nil) and (event.kind = ek_expose) and
              (event.fwinid = fwindow.id) then begin
     invalidaterect(event.frect);
-    app.feventlist[int1]:= nil;
+    appinst.eventlist[int1]:= nil;
     event.free;
    end;
   end;
@@ -10003,20 +9501,20 @@ end;
 procedure twindow.bringtofront;
 begin
  gui_raisewindow(winid);
- include(app.fstate,aps_needsupdatewindowstack);
+ include(appinst.fstate,aps_needsupdatewindowstack);
 end;
 
 procedure twindow.sendtoback;
 begin
  gui_lowerwindow(winid);
- include(app.fstate,aps_needsupdatewindowstack);
+ include(appinst.fstate,aps_needsupdatewindowstack);
 end;
 
 procedure twindow.stackunder(const predecessor: twindow);
 begin
  if (predecessor <> self) then begin
-  app.stackunder(self,predecessor);
-  include(app.fstate,aps_needsupdatewindowstack);
+  appinst.stackunder(self,predecessor);
+  include(appinst.fstate,aps_needsupdatewindowstack);
  end;
 end;
 
@@ -10026,16 +9524,16 @@ var
 begin
  ar1:= nil; //compiler warning
  if predecessor = nil then begin
-  app.sortzorder;
-  ar1:= app.windowar;
+  appinst.sortzorder;
+  ar1:= appinst.windowar;
   if high(ar1) >= 0 then begin
    stackunder(ar1[0]);
   end;
  end
  else begin
   if (predecessor <> self) and (predecessor <> nil) then begin
-   app.stackover(self,predecessor);
-   include(app.fstate,aps_needsupdatewindowstack);
+   appinst.stackover(self,predecessor);
+   include(appinst.fstate,aps_needsupdatewindowstack);
   end;
  end;
 end;
@@ -10046,8 +9544,8 @@ var
  int1: integer;
 
 begin
- app.sortzorder;
- ar1:= app.windowar;
+ appinst.sortzorder;
+ ar1:= appinst.windowar;
  result:= nil;
  for int1:= high(ar1) downto 1 do begin
   if ar1[int1] = self then begin
@@ -10063,8 +9561,8 @@ var
  int1: integer;
 
 begin
- app.sortzorder;
- ar1:= app.windowar;
+ appinst.sortzorder;
+ ar1:= appinst.windowar;
  result:= nil;
  for int1:= 0 to high(ar1)-1 do begin
   if ar1[int1] = self then begin
@@ -10081,7 +9579,7 @@ end;
 
 procedure twindow.capturemouse;
 begin
- if app.grabpointer(winid) then begin
+ if appinst.grabpointer(winid) then begin
   include(fstate,tws_grab);
  end;
 end;
@@ -10090,7 +9588,7 @@ procedure twindow.releasemouse;
 begin
  if tws_grab in fstate then begin
   exclude(fstate,tws_grab);
-  app.ungrabpointer;
+  appinst.ungrabpointer;
  end;
 end;
 
@@ -10164,7 +9662,7 @@ end;
 
 function twindow.canactivate: boolean;
 begin
- result:= (app <> nil) and (app.fmodalwindow = nil) or (app.fmodalwindow = self);
+ result:= (appinst <> nil) and (appinst.fmodalwindow = nil) or (appinst.fmodalwindow = self);
 end;
 
 procedure twindow.activate;
@@ -10176,7 +9674,7 @@ end;
 
 function twindow.active: boolean;
 begin
- result:= app.factivewindow = self;
+ result:= appinst.factivewindow = self;
 end;
 
 procedure twindow.setcaption(const avalue: msestring);
@@ -10339,7 +9837,7 @@ begin
   case value of
    wp_screencentered: begin
     gui_setwindowstate(winid,wsi_normal,bo1{tws_windowvisible in fstate});
-    rect2:= app.workarea(self);
+    rect2:= appinst.workarea(self);
     with fowner do begin
      rect1:= widgetrect;
      rect1.x:= rect2.x + (rect2.cx - rect1.cx) div 2;
@@ -10402,34 +9900,6 @@ end;
 procedure twindow.unregisteronscroll(const method: notifyeventty);
 begin
  fscrollnotifylist.remove(tmethod(method));
-end;
-
-{ tonterminatequerylist }
-
-function tonterminatequerylist.doterminatequery: boolean;
-begin
- factitem:= 0;
- result:= true;
- while (factitem < fcount) and result do begin
-  terminatequeryeventty(getitempo(factitem)^)(result);
-  inc(factitem);
- end;
-end;
-
-{ tonidlelist}
-
-function tonidlelist.doidle: boolean;
-var
- bo1: boolean;
-begin
- result:= false;
- factitem:= 0;
- while factitem < fcount do begin
-  bo1:= false;
-  idleeventty(getitempo(factitem)^)(bo1);
-  result:= result or bo1;
-  inc(factitem);
- end;
 end;
 
 { tonkeyeventlist}
@@ -10570,13 +10040,11 @@ end;
 
 constructor tinternalapplication.create(aowner: tcomponent);
 begin
+ inherited;
+ appinst:= self;
  fdblclicktime:= defaultdblclicktime;
  fapplicationname:= filename(sys_getapplicationpath);
- fthread:= sys_getcurrentthread;
- inherited;
- fonterminatedlist:= tnotifylist.create;
- fonterminatequerylist:= tonterminatequerylist.create;
- fonidlelist:= tonidlelist.create;
+// inherited;
  fonkeypresslist:= tonkeyeventlist.create;
  fonshortcutlist:= tonkeyeventlist.create;
  fonactivechangelist:= tonactivechangelist.create;
@@ -10584,55 +10052,29 @@ begin
  fonwiniddestroyedlist:= tonwinideventlist.create;
  fonapplicationactivechangedlist:= tonapplicationactivechangedlist.create;
 // fwindows:= tpointerlist.create;
- feventlist:= tobjectqueue.create(true);
  fcaret:= tcaret.create;
  fmouse:= tmouse.create(imouse(self));
  fhinttimer:= tsimpletimer.create(0,{$ifdef FPC}@{$endif}hinttimer,false);
  fmouseparktimer:= tsimpletimer.create(0,{$ifdef FPC}@{$endif}mouseparktimer,false);
- sys_mutexcreate(fmutex);
- sys_mutexcreate(feventlock);
 end;
 
 destructor tinternalapplication.destroy;
 begin
  destroyforms;
- inherited;
  fmouseparktimer.free;
  fhinttimer.free;
  fhintwidget.free;
  freeandnil(fcaret);
- deinitialize;
  fmouse.free;
+ deinitialize;
+ inherited;
 // fwindows.free;
- feventlist.free;
- fonidlelist.free;
- fonterminatedlist.free;
- fonterminatequerylist.free;
  fonkeypresslist.free;
  fonshortcutlist.free;
  fonactivechangelist.free;
  fonwindowdestroyedlist.free;
  fonwiniddestroyedlist.free;
  fonapplicationactivechangedlist.free;
- sys_mutexdestroy(fmutex);
- sys_mutexdestroy(feventlock);
-end;
-
-procedure tinternalapplication.flusheventbuffer;
-var
- int1: integer;
-begin
- sys_mutexlock(feventlock);
- for int1:= 0 to high(fpostedevents) do begin
-  if feventlooping = 0 then begin
-   gui_postevent(fpostedevents[int1]);
-  end
-  else begin
-   feventlist.add(fpostedevents[int1]);
-  end;
- end;
- fpostedevents:= nil;
- sys_mutexunlock(feventlock);
 end;
 
 procedure tinternalapplication.twindowdestroyed(const sender: twindow);
@@ -11009,20 +10451,20 @@ end;
 function tinternalapplication.getevents: integer;
 begin
  while gui_hasevent do begin
-  feventlist.add(gui_getevent);
+  eventlist.add(gui_getevent);
  end;
- result:= feventlist.count;
+ result:= eventlist.count;
 end;
 
 procedure tinternalapplication.waitevent;
 begin
  while gui_hasevent do begin
-  feventlist.add(gui_getevent);
+  eventlist.add(gui_getevent);
  end;
- if feventlist.count = 0 then begin
-  inc(fidlecount);
+ if eventlist.count = 0 then begin
+  incidlecount;
   include(fstate,aps_waiting);
-  feventlist.add(gui_getevent);
+  eventlist.add(gui_getevent);
   exclude(fstate,aps_waiting);
  end
 end;
@@ -11034,11 +10476,11 @@ var
 begin
  gui_flushgdi;
  getevents;
- for int1:= 0 to feventlist.count - 1 do begin
-  event:= tevent(feventlist[int1]);
+ for int1:= 0 to eventlist.count - 1 do begin
+  event:= tevent(eventlist[int1]);
   if (event <> nil) and (event.kind = ek_mousemove) then begin
    event.free;
-   feventlist[int1]:= nil;
+   eventlist[int1]:= nil;
   end;
  end;
 end;
@@ -11051,7 +10493,7 @@ begin
  fonwiniddestroyedlist.doevent(id);
  if not terminated then begin
   for int1:= 0 to getevents - 1 do begin
-   event:= tevent(feventlist[int1]);
+   event:= tevent(eventlist[int1]);
    if (event is twindowevent) and (twindowevent(event).fwinid = id) then begin
    {
     case event.kind of
@@ -11060,7 +10502,7 @@ begin
     end;
     }
     event.Free;
-    feventlist[int1]:= nil;
+    eventlist[int1]:= nil;
    end;
   end;
  end;
@@ -11201,7 +10643,7 @@ begin
   end;
  end;
  if not (es_processed in info.eventstate) then begin
-  app.fonshortcutlist.dokeyevent(awidget,info);
+  appinst.fonshortcutlist.dokeyevent(awidget,info);
  end;
 end;
 
@@ -11256,8 +10698,8 @@ function tinternalapplication.eventloop(const amodalwindow: twindow;
   int1: integer;
  begin
   po2:= nil;
-  po1:= pointer(feventlist.datapo);
-  for int1:= 0 to feventlist.count - 1 do begin
+  po1:= pointer(eventlist.datapo);
+  for int1:= 0 to eventlist.count - 1 do begin
            //check if last
    if po1^ <> nil then begin
     with po1^ do begin
@@ -11365,7 +10807,7 @@ begin       //eventloop
      break;
     end;
     getevents;
-    event:= tevent(feventlist.getfirst);
+    event:= tevent(eventlist.getfirst);
     if event <> nil then begin
 //writeln('event ',getenumname(typeinfo(eventkindty),ord(event.kind)));
 //flush(output);
@@ -11399,10 +10841,10 @@ begin       //eventloop
         end;
         ek_focusin: begin
          getevents;
-         po1:= pointer(feventlist.datapo);
+         po1:= pointer(eventlist.datapo);
          bo1:= true;
  
-         for int1:= 0 to feventlist.count - 1 do begin
+         for int1:= 0 to eventlist.count - 1 do begin
           if po1^ <> nil then begin
            with po1^ do begin
             if (kind = ek_focusout) and (fwinid = twindowevent(event).fwinid) then begin
@@ -11447,9 +10889,9 @@ begin       //eventloop
         ek_leavewindow: begin
          getevents;
          ar1:= nil;
-         po1:= pointer(feventlist.datapo);
+         po1:= pointer(eventlist.datapo);
          bo1:= true;
-         for int1:= 0 to feventlist.count - 1 do begin
+         for int1:= 0 to eventlist.count - 1 do begin
           if po1^ <> nil then begin
            with po1^ do begin
             if kind in [ek_enterwindow,ek_leavewindow] then begin
@@ -11468,7 +10910,7 @@ begin       //eventloop
           processwindowcrossingevent(twindowevent(event))
          end
          else begin
-          po1:= pointer(feventlist.datapo);
+          po1:= pointer(eventlist.datapo);
           for int1:= 0 to high(ar1) do begin
            freeandnil(pobjectaty(po1)^[ar1[int1]]);
           end;
@@ -11568,7 +11010,7 @@ procedure tinternalapplication.endmodal(const sender: twindow);
 begin
  with sender do begin
   if tws_modal in fstate then begin
-   if not app.terminated then begin
+   if not appinst.terminated then begin
     fmodalinfopo^.modalend:= true;
    end;
    exclude(fstate,tws_modal);
@@ -11847,9 +11289,9 @@ begin
  end;
 end;
 
-{ tapplication }
+{ tguiapplication }
 
-procedure tapplication.initialize;
+procedure tguiapplication.initialize;
 begin
  with tinternalapplication(self) do begin
   if not (aps_inited in fstate) and (finiting = 0) then begin
@@ -11868,7 +11310,7 @@ begin
  end;
 end;
 
-procedure tapplication.deinitialize;
+procedure tguiapplication.deinitialize;
 begin
  with tinternalapplication(self) do begin
   if aps_inited in fstate then begin
@@ -11882,7 +11324,7 @@ begin
     gui_flushgdi;
     flusheventbuffer;
     getevents;
-    feventlist.clear;
+    eventlist.clear;
     unlock;
     gui_deinit;
     msetimer.deinit;
@@ -11894,7 +11336,7 @@ begin
  end;
 end;
 
-procedure tapplication.destroyforms;
+procedure tguiapplication.destroyforms;
 begin
  while componentcount > 0 do begin
   components[0].free;  //destroy loaded forms
@@ -11904,84 +11346,7 @@ begin
  end;
 end;
 
-procedure tapplication.run;
-var
- threadbefore: threadty;
-begin
- with tinternalapplication(self) do begin
-  threadbefore:= fthread;
-  fthread:= sys_getcurrentthread;
-  include(fstate,aps_running);
-  try
-   eventloop(nil);
-   fonterminatedlist.notify(application);
-  finally
-   fthread:= threadbefore;
-   exclude(fstate,aps_running);
-  end;
- end;
- destroyforms; //zeos lib unloads libraries -> 
-               //forms must be destroyed before unit finalization
-end;
-
-function tapplication.getterminated: boolean;
-begin
- result:= aps_terminated in fstate;
-end;
-
-procedure tapplication.setterminated(const Value: boolean);
-begin
- if value then begin
-  lock;
-  include(fstate,aps_terminated);
-  if not ismainthread then begin
-   wakeupguithread;
-  end;
-  unlock;
- end;
-end;
-
-procedure tapplication.postevent(event: tevent);
-begin
- if csdestroying in componentstate then begin
-  event.free;
- end
- else begin
-  if trylock then begin
-   try
-    tinternalapplication(self).flusheventbuffer;
-    if feventlooping = 0 then begin
-     guierror(gui_postevent(event),self);
-    end
-    else begin
-     tinternalapplication(self).feventlist.add(event);
-    end;
-   except
-    event.free;
-    unlock;
-    raise;
-   end;
-   unlock;
-  end
-  else begin
-   with tinternalapplication(self) do begin
-    sys_mutexlock(feventlock);
-    setlength(fpostedevents,high(fpostedevents) + 2);
-    fpostedevents[high(fpostedevents)]:= event;
-    sys_mutexunlock(feventlock);
-   end;
-  end;
- end;
-end;
-
-procedure tapplication.wakeupguithread;
-begin
- if aps_running in fstate then begin
-  postevent(tevent.create(ek_wakeup));
- end;
-end;
-
-procedure tapplication.checkwindowrect(winid: winidty; var rect: rectty);
+procedure tguiapplication.checkwindowrect(winid: winidty; var rect: rectty);
 var
  window: twindow;
 begin
@@ -11990,7 +11355,7 @@ begin
  end;
 end;
 
-procedure tapplication.setclientmousewidget(const widget: twidget);
+procedure tguiapplication.setclientmousewidget(const widget: twidget);
 var
  info: mouseeventinfoty;
 begin
@@ -12009,7 +11374,7 @@ begin
  end;
 end;
 
-procedure tapplication.setmousewidget(const widget: twidget);
+procedure tguiapplication.setmousewidget(const widget: twidget);
 var
  info: mouseeventinfoty;
  widget1: twidget;
@@ -12035,7 +11400,7 @@ begin
  end;
 end;
 
-function tapplication.grabpointer(const id: winidty): boolean;
+function tguiapplication.grabpointer(const id: winidty): boolean;
 var
  int1: integer;
 begin
@@ -12059,7 +11424,7 @@ begin
  end;
 end;
 
-function tapplication.ungrabpointer: boolean;
+function tguiapplication.ungrabpointer: boolean;
 var
  int1: integer;
 begin
@@ -12074,7 +11439,7 @@ begin
  result:= true;
 end;
 
-procedure tapplication.capturemouse(sender: twidget; grab: boolean);
+procedure tguiapplication.capturemouse(sender: twidget; grab: boolean);
 var
  widget: twidget;
  info: mouseeventinfoty;
@@ -12107,101 +11472,18 @@ begin
  end;
 end;
 
-procedure tapplication.createdatamodule(instanceclass: msecomponentclassty;
+procedure tguiapplication.createdatamodule(instanceclass: msecomponentclassty;
                                                           var reference);
 begin
  mseclasses.createmodule(self,instanceclass,reference);
 end;
 
-procedure tapplication.createform(instanceclass: widgetclassty; var reference);
+procedure tguiapplication.createform(instanceclass: widgetclassty; var reference);
 begin
  mseclasses.createmodule(self,instanceclass,reference);
 end;
 
-function tapplication.dolock: boolean;
-var
- athread: threadty;
-begin
- inc(flockcount);
- athread:= sys_getcurrentthread;
- if not sys_issamethread(flockthread,athread) then begin
-  result:= true;
-  flockthread:= athread;
- end
- else begin
-  result:= false;
- end;
-end;
-
-function tapplication.lock: boolean;
-begin
- with tinternalapplication(self) do begin
-  syserror(sys_mutexlock(fmutex));
- end;
- result:= dolock;
-end;
-
-function tapplication.trylock: boolean;
-begin
- with tinternalapplication(self) do begin
-  result:= sys_mutextrylock(fmutex) = sye_ok;
- end;
- if result then begin
-  dolock;
- end;
-end;
-
-function tapplication.internalunlock(count: integer): boolean;
-begin
- with tinternalapplication(self) do begin
-  result:= sys_issamethread(flockthread,sys_getcurrentthread);
-  if result then begin
-   flusheventbuffer;
-   while count > 0 do begin
-    dec(count);
-    dec(flockcount);
-    if flockcount = 0 then begin
-     flockthread:= 0;
-    end;
-    sys_mutexunlock(fmutex);
-   end;
-  end;
- end;
-end;
-
-function tapplication.unlock: boolean;
-begin
- result:= internalunlock(1);
-end;
-
-function tapplication.unlockall: integer;
-begin
- with tinternalapplication(self) do begin
-  if ismainthread then begin
-   inc(fcheckoverloadlock);
-  end;
-  result:= flockcount;
-  if not internalunlock(flockcount) then begin
-   result:= 0;
-  end;
- end;
-end;
-
-procedure tapplication.relockall(count: integer);
-begin
- if count > 0 then begin
-  lock;
-  dec(count);
-  while count > 0 do begin
-   sys_mutexlock(tinternalapplication(self).fmutex);
-  end;
-  if ismainthread then begin
-   dec(fcheckoverloadlock);
-  end;
- end;
-end;
-
-procedure tapplication.eventloop(const once: boolean = false);
+procedure tguiapplication.eventloop(const once: boolean = false);
              //used in win32 wm_queryendsession and wm_entersizemove
 begin
  inc(feventlooping);
@@ -12212,35 +11494,12 @@ begin
  end;
 end;
 
-procedure tapplication.exitloop;  //used in win32 cancelshutdown
+procedure tguiapplication.exitloop;  //used in win32 cancelshutdown
 begin
  include(fstate,aps_exitloop);
 end;
 
-procedure tapplication.synchronize(proc: objectprocty);
-begin
- lock;
- try
-  proc;
- finally
-  unlock;
- end;
-end;
-
-procedure tapplication.waitforthread(athread: tmsethread);
-         //does unlock-relock before waiting
-var
- int1: integer;
-begin
- int1:= unlockall;
- try
-  athread.waitfor;
- finally
-  relockall(int1);
- end;
-end;
-
-procedure tapplication.processmessages;
+procedure tguiapplication.processmessages;
 begin
  if not ismainthread then begin
   raise exception.create('processmessages must be called from main thread.');
@@ -12250,25 +11509,7 @@ begin
  eventloop(true);
 end;
 
-function tapplication.checkoverload(const asleepus: integer = 100000): boolean;
-              //true if never idle since last call,
-              // unlocks application and calls sleep if not mainthread and asleepus >= 0
-var
- int1: integer;
-begin
- result:= (fidlecount = 0) and not (aps_waiting in fstate) and 
-                                                 (fcheckoverloadlock = 0);
- fidlecount:= 0;
- if result and (asleepus >= 0) and not ismainthread then begin
-  int1:= unlockall;
-  repeat
-   sleepus(asleepus);
-  until (fidlecount > 0) or (aps_waiting in fstate) or (fcheckoverloadlock <> 0);
-  relockall(int1);
- end;
-end;
-
-procedure tapplication.invalidated;
+procedure tguiapplication.invalidated;
 begin
  if not (aps_invalidated in fstate) then begin
   wakeupguithread;
@@ -12276,7 +11517,7 @@ begin
  include(fstate,aps_invalidated);
 end;
 
-procedure tapplication.showexception(e: exception; const leadingtext: string = '');
+procedure tguiapplication.showexception(e: exception; const leadingtext: string = '');
 var
  str1: ansistring;
 begin
@@ -12289,47 +11530,17 @@ begin
  end;
 end;
 
-procedure tapplication.handleexception(sender: tobject; const leadingtext: string = '');
-begin
- if fexceptionactive = 0 then begin //do not handle subsequent exceptions
-  if exceptobject is exception then begin
-   inc(fexceptionactive);
-   try
-    if not (exceptobject is eabort) then begin
-     inc(fexceptioncount);
-     if assigned(fonexception) then begin
-      fonexception(sender, exception(exceptobject))
-     end
-     else begin
-      showexception(exception(exceptobject),leadingtext);
-     end;
-    end
-    else begin
-//     sysutils.showexception(exceptobject, exceptaddr);
-    end;
-   finally
-    dec(fexceptionactive);
-   end;
-  end;
- end;
-end;
-
-function tapplication.ismainthread: boolean;
-begin
- result:= sys_getcurrentthread = fthread;
-end;
-
-function tapplication.running: boolean;
+function tguiapplication.running: boolean;
 begin
  result:= aps_running in fstate;
 end;
 
-function tapplication.active: boolean;
+function tguiapplication.active: boolean;
 begin
  result:= aps_active in fstate;
 end;
 
-function tapplication.findwindow(id: winidty; out window: twindow): boolean;
+function tguiapplication.findwindow(id: winidty; out window: twindow): boolean;
 var
  int1: integer;
 begin
@@ -12344,12 +11555,12 @@ begin
  window:= nil;
 end;
 
-function tapplication.screensize: sizety;
+function tguiapplication.screensize: sizety;
 begin
  result:= gui_getscreensize;
 end;
 
-function tapplication.workarea(awindow: twindow): rectty;
+function tguiapplication.workarea(awindow: twindow): rectty;
 var
  id: winidty;
 begin
@@ -12365,12 +11576,12 @@ begin
  result:= gui_getworkarea(id);
 end;
 
-function tapplication.activewindow: twindow;
+function tguiapplication.activewindow: twindow;
 begin
  result:= factivewindow;
 end;
 
-function tapplication.regularactivewindow: twindow;
+function tguiapplication.regularactivewindow: twindow;
 begin
  result:= factivewindow;
  while (result <> nil) and (result.ftransientfor <> nil) do begin
@@ -12378,7 +11589,7 @@ begin
  end;
 end;
 
-function tapplication.unreleasedactivewindow: twindow;
+function tguiapplication.unreleasedactivewindow: twindow;
 begin
  result:= factivewindow;
  while (result <> nil) and (ws1_releasing in result.fowner.fwidgetstate1) do begin
@@ -12386,7 +11597,7 @@ begin
  end;
 end;
 
-function tapplication.activewidget: twidget;
+function tguiapplication.activewidget: twidget;
 begin
  if factivewindow <> nil then begin
   result:= factivewindow.ffocusedwidget;
@@ -12396,7 +11607,7 @@ begin
  end;
 end;
 
-function tapplication.activerootwidget: twidget;
+function tguiapplication.activerootwidget: twidget;
 begin
  if factivewindow <> nil then begin
   result:= factivewindow.fowner;
@@ -12406,7 +11617,7 @@ begin
  end;
 end;
 
-function tapplication.windowatpos(const pos: pointty): twindow;
+function tguiapplication.windowatpos(const pos: pointty): twindow;
 var
  id: winidty;
 begin
@@ -12419,7 +11630,7 @@ begin
  end;
 end;
 
-function tapplication.findwidget(const namepath: string; out awidget: twidget): boolean;
+function tguiapplication.findwidget(const namepath: string; out awidget: twidget): boolean;
                 //false if invalid namepath, '' -> nil and true
                 //last name = '' -> widget.container
 var
@@ -12449,7 +11660,7 @@ begin
  end;
 end;
 
-function tapplication.windowar: windowarty;
+function tguiapplication.windowar: windowarty;
 begin
  setlength(result,length(fwindows));
  if result <> nil then begin
@@ -12457,7 +11668,7 @@ begin
  end;
 end;
 
-function tapplication.winidar: winidarty;
+function tguiapplication.winidar: winidarty;
 var
  ar1: windowarty;
  int1: integer;
@@ -12469,13 +11680,13 @@ begin
  end;
 end;
 
-function tapplication.getwindows(const index: integer): twindow;
+function tguiapplication.getwindows(const index: integer): twindow;
 begin
  checkarrayindex(fwindows,index);
  result:= fwindows[index];
 end;
 
-function tapplication.windowcount: integer;
+function tguiapplication.windowcount: integer;
 begin
  result:= length(fwindows);
 end;
@@ -12500,7 +11711,7 @@ begin
  end;
 end;
 
-procedure tapplication.sortzorder; //top is last, invisibles first
+procedure tguiapplication.sortzorder; //top is last, invisibles first
 var
  ar1: winidarty;
  ar2,ar3: integerarty;
@@ -12520,7 +11731,7 @@ begin
  end;
 end;
 
-function tapplication.bottomwindow: twindow;
+function tguiapplication.bottomwindow: twindow;
     //lowest visible window in stackorder, calls sortzorder
 var
  int1: integer;
@@ -12535,7 +11746,7 @@ begin
  end;
 end;
 
-function tapplication.topwindow: twindow;
+function tguiapplication.topwindow: twindow;
    //highest visible window in stackorder, calls sortzorder
 var
  int1: integer;
@@ -12550,7 +11761,7 @@ begin
  end;
 end;
 
-procedure tapplication.internalshowhint(const sender: twidget);
+procedure tguiapplication.internalshowhint(const sender: twidget);
 var
  window1: twindow;
 begin
@@ -12571,7 +11782,7 @@ begin
  end;
 end;
 
-procedure tapplication.inithintinfo(var info: hintinfoty; const ahintedwidget: twidget);
+procedure tguiapplication.inithintinfo(var info: hintinfoty; const ahintedwidget: twidget);
 begin
  finalize(info);
  fillchar(info,sizeof(info),0);
@@ -12591,7 +11802,7 @@ begin
  end;
 end;
 
-procedure tapplication.showhint(const sender: twidget; const hint: msestring;
+procedure tguiapplication.showhint(const sender: twidget; const hint: msestring;
               const aposrect: rectty; const aplacement: captionposty = cp_bottomleft;
               const ashowtime: integer = defaulthintshowtime; //0 -> inifinite,
                  // -1 defaultshowtime if ow_timedhint in sender.optionswidget
@@ -12629,7 +11840,7 @@ begin
  internalshowhint(sender);
 end;
 
-procedure tapplication.showhint(const sender: twidget; const hint: msestring;
+procedure tguiapplication.showhint(const sender: twidget; const hint: msestring;
               const apos: pointty;
               const ashowtime: integer = defaulthintshowtime; //0 -> inifinite,
                  // -1 defaultshowtime if ow_timedhint in sender.optionswidget
@@ -12639,7 +11850,7 @@ begin
  showhint(sender,hint,makerect(apos,nullsize),cp_bottomleft,ashowtime,aflags);
 end;
 
-procedure tapplication.showhint(const sender: twidget; const info: hintinfoty);
+procedure tguiapplication.showhint(const sender: twidget; const info: hintinfoty);
 begin
  with info do begin
   if (hfl_show in flags) or (caption <> '') then begin
@@ -12648,17 +11859,17 @@ begin
  end;
 end;
 
-procedure tapplication.hidehint;
+procedure tguiapplication.hidehint;
 begin
  deactivatehint;
 end;
 
-function tapplication.hintedwidget: twidget;
+function tguiapplication.hintedwidget: twidget;
 begin
  result:= fhintedwidget;
 end;
 
-function tapplication.activehintedwidget: twidget;
+function tguiapplication.activehintedwidget: twidget;
 begin
  if tinternalapplication(self).fhintwidget = nil then begin
   result:= nil;
@@ -12668,7 +11879,7 @@ begin
  end;
 end;
 
-function tapplication.activehelpcontext: msestring;
+function tguiapplication.activehelpcontext: msestring;
 begin
  if activewidget = nil then begin
   result:= '';
@@ -12678,7 +11889,7 @@ begin
  end;
 end;
 
-function tapplication.mousehelpcontext: msestring;
+function tguiapplication.mousehelpcontext: msestring;
 begin
  if mousewidget = nil then begin
   result:= '';
@@ -12688,7 +11899,7 @@ begin
  end;
 end;
 
-procedure tapplication.activatehint;
+procedure tguiapplication.activatehint;
 begin
  deactivatehint;
  if (fhintedwidget <> nil) and (factivewindow <> nil) then begin
@@ -12703,7 +11914,7 @@ begin
  end;
 end;
 
-procedure tapplication.deactivatehint;
+procedure tguiapplication.deactivatehint;
 begin
  with tinternalapplication(self) do begin
   freeandnil(fhintwidget);
@@ -12714,7 +11925,7 @@ begin
  end;
 end;
 
-procedure tapplication.hinttimer(const sender: tobject);
+procedure tguiapplication.hinttimer(const sender: tobject);
 begin
  with tinternalapplication(self) do begin
   if fhintwidget = nil then begin
@@ -12726,7 +11937,7 @@ begin
  end;
 end;
 
-procedure tapplication.setmainwindow(const Value: twindow);
+procedure tguiapplication.setmainwindow(const Value: twindow);
 var
  int1: integer;
  id: winidty;
@@ -12746,104 +11957,74 @@ begin
  end;
 end;
 
-procedure tapplication.mouseparkevent; //simulates mouseparkevent
+procedure tguiapplication.mouseparkevent; //simulates mouseparkevent
 begin
  if fmousewidget <> nil then begin
   fmousewidget.window.mouseparked;
  end;
 end;
 
-procedure tapplication.registeronterminated(const method: notifyeventty);
-begin
- tinternalapplication(self).fonterminatedlist.add(tmethod(method));
-end;
-
-procedure tapplication.unregisteronterminated(const method: notifyeventty);
-begin
- tinternalapplication(self).fonterminatedlist.remove(tmethod(method));
-end;
-
-procedure tapplication.registeronterminate(const method: terminatequeryeventty);
-begin
- tinternalapplication(self).fonterminatequerylist.add(tmethod(method));
-end;
-
-procedure tapplication.unregisteronterminate(const method: terminatequeryeventty);
-begin
- tinternalapplication(self).fonterminatequerylist.remove(tmethod(method));
-end;
-
-procedure tapplication.registeronidle(const method: idleeventty);
-begin
- tinternalapplication(self).fonidlelist.add(tmethod(method));
-end;
-
-procedure tapplication.unregisteronidle(const method: idleeventty);
-begin
- tinternalapplication(self).fonidlelist.remove(tmethod(method));
-end;
-
-procedure tapplication.registeronkeypress(const method: keyeventty);
+procedure tguiapplication.registeronkeypress(const method: keyeventty);
 begin
  tinternalapplication(self).fonkeypresslist.add(tmethod(method));
 end;
 
-procedure tapplication.unregisteronkeypress(const method: keyeventty);
+procedure tguiapplication.unregisteronkeypress(const method: keyeventty);
 begin
  tinternalapplication(self).fonkeypresslist.remove(tmethod(method));
 end;
 
-procedure tapplication.registeronshortcut(const method: keyeventty);
+procedure tguiapplication.registeronshortcut(const method: keyeventty);
 begin
  tinternalapplication(self).fonshortcutlist.add(tmethod(method));
 end;
 
-procedure tapplication.unregisteronshortcut(const method: keyeventty);
+procedure tguiapplication.unregisteronshortcut(const method: keyeventty);
 begin
  tinternalapplication(self).fonshortcutlist.remove(tmethod(method));
 end;
 
-procedure tapplication.registeronactivechanged(const method: activechangeeventty);
+procedure tguiapplication.registeronactivechanged(const method: activechangeeventty);
 begin
  tinternalapplication(self).fonactivechangelist.add(tmethod(method));
 end;
 
-procedure tapplication.unregisteronactivechanged(const method: activechangeeventty);
+procedure tguiapplication.unregisteronactivechanged(const method: activechangeeventty);
 begin
  tinternalapplication(self).fonactivechangelist.remove(tmethod(method));
 end;
 
-procedure tapplication.registeronwindowdestroyed(const method: windoweventty);
+procedure tguiapplication.registeronwindowdestroyed(const method: windoweventty);
 begin
  tinternalapplication(self).fonwindowdestroyedlist.add(tmethod(method));
 end;
 
-procedure tapplication.unregisteronwindowdestroyed(const method: windoweventty);
+procedure tguiapplication.unregisteronwindowdestroyed(const method: windoweventty);
 begin
  tinternalapplication(self).fonwindowdestroyedlist.remove(tmethod(method));
 end;
 
-procedure tapplication.registeronwiniddestroyed(const method: winideventty);
+procedure tguiapplication.registeronwiniddestroyed(const method: winideventty);
 begin
  tinternalapplication(self).fonwiniddestroyedlist.add(tmethod(method));
 end;
 
-procedure tapplication.unregisteronwiniddestroyed(const method: winideventty);
+procedure tguiapplication.unregisteronwiniddestroyed(const method: winideventty);
 begin
  tinternalapplication(self).fonwiniddestroyedlist.remove(tmethod(method));
 end;
 
-procedure tapplication.registeronapplicationactivechanged(const method: booleaneventty);
+procedure tguiapplication.registeronapplicationactivechanged(const method: booleaneventty);
 begin
  tinternalapplication(self).fonapplicationactivechangedlist.add(tmethod(method));
 end;
 
-procedure tapplication.unregisteronapplicationactivechanged(const method: booleaneventty);
+procedure tguiapplication.unregisteronapplicationactivechanged(const method: booleaneventty);
 begin
  tinternalapplication(self).fonapplicationactivechangedlist.remove(tmethod(method));
 end;
 
-procedure tapplication.updatecursorshape; //restores cursorshape of mousewidget
+procedure tguiapplication.updatecursorshape; //restores cursorshape of mousewidget
 begin
  if fclientmousewidget <> nil then begin
   fclientmousewidget.updatecursorshape(true);
@@ -12853,7 +12034,7 @@ begin
  end;
 end;
 
-procedure tapplication.setcursorshape(const Value: cursorshapety);
+procedure tguiapplication.setcursorshape(const Value: cursorshapety);
 begin
  fcursorshape:= Value; //wanted shape
  if not waiting then begin
@@ -12879,7 +12060,17 @@ begin
 // end;
 end;
 
-procedure tapplication.beginwait;
+procedure tinternalapplication.dopostevent(const aevent: tevent);
+begin
+ gui_postevent(aevent);
+end;
+
+procedure tinternalapplication.doeventloop;
+begin
+ eventloop(nil);
+end;
+
+procedure tguiapplication.beginwait;
 begin
  lock;
  try
@@ -12893,7 +12084,7 @@ begin
  end;
 end;
 
-procedure tapplication.endwait;
+procedure tguiapplication.endwait;
 var
  int1: integer;
  po1: ^tevent;
@@ -12905,8 +12096,8 @@ begin
    if fwaitcount = 0 then begin
     with tinternalapplication(self) do begin
      getevents;
-     po1:= pointer(feventlist.datapo);
-     for int1:= 0 to feventlist.count - 1 do begin
+     po1:= pointer(eventlist.datapo);
+     for int1:= 0 to eventlist.count - 1 do begin
       if (po1^ <> nil) and (po1^.kind in waitignoreevents) then begin
        freeandnil(po1^);
       end;
@@ -12921,12 +12112,12 @@ begin
  end;
 end;
 
-function tapplication.waiting: boolean;
+function tguiapplication.waiting: boolean;
 begin
  result:= fwaitcount > 0;
 end;
 
-function tapplication.waitescaped: boolean;
+function tguiapplication.waitescaped: boolean;
 begin
  lock;
  result:= waiting and gui_escapepressed;
@@ -12937,12 +12128,13 @@ begin
  unlock;
 end;
 
-procedure tapplication.langchanged;
+procedure tguiapplication.langchanged;
 begin
+ inherited;
  invalidate;
 end;
 
-function tapplication.candefocus: boolean;
+function tguiapplication.candefocus: boolean;
 var
  int1: integer;
 begin
@@ -12955,17 +12147,17 @@ begin
  end;
 end;
 
-function tapplication.terminating: boolean;
+function tguiapplication.terminating: boolean;
 begin
  result:= aps_terminating in fstate;
 end;
 
-function tapplication.deinitializing: boolean;
+function tguiapplication.deinitializing: boolean;
 begin
  result:= aps_deinitializing in fstate;
 end;
 
-procedure tapplication.terminate(const sender: twindow = nil);
+procedure tguiapplication.terminate(const sender: twindow = nil);
 var
  int1: integer;
 begin
@@ -12985,12 +12177,12 @@ begin
  end;
 end;
 
-procedure tapplication.delayedmouseshift(const ashift: pointty);
+procedure tguiapplication.delayedmouseshift(const ashift: pointty);
 begin
  addpoint1(fdelayedmouseshift,ashift);
 end;
 
-procedure tapplication.invalidate;
+procedure tguiapplication.invalidate;
 var
  int1: integer;
 begin
@@ -12999,7 +12191,7 @@ begin
  end;
 end;
 
-procedure tapplication.restarthint(const sender: twidget);
+procedure tguiapplication.restarthint(const sender: twidget);
 begin
  with tinternalapplication(self) do begin
   if fhintedwidget = sender then begin
@@ -13010,7 +12202,7 @@ begin
  end;
 end;
 
-procedure tapplication.receiveevent(const event: tobjectevent);
+procedure tguiapplication.receiveevent(const event: tobjectevent);
 begin
  if (event.kind = ek_user) and (event is tasyncmessageevent) then begin
   with tasyncmessageevent(event) do begin
@@ -13020,14 +12212,14 @@ begin
  inherited;
 end;
 
-procedure tapplication.dowaitidle(var again: boolean);
+procedure tguiapplication.dowaitidle(var again: boolean);
 begin
  unregisteronidle({$ifdef FPC}@{$endif}dowaitidle);
  processmessages;
  fexecuteaction(self);
 end;
 
-function tapplication.waitdialog(const athread: tthreadcomp = nil;
+function tguiapplication.waitdialog(const athread: tthreadcomp = nil;
                const atext: msestring = '';
                const caption: msestring = '';
                const acancelaction: notifyeventty = nil;
@@ -13083,7 +12275,7 @@ begin
  end;
 end;
 
-procedure tapplication.cancelwait;
+procedure tguiapplication.cancelwait;
 begin
  lock;
  with tinternalapplication(self) do begin
@@ -13095,7 +12287,7 @@ begin
  unlock;
 end;
 
-procedure tapplication.terminatewait;
+procedure tguiapplication.terminatewait;
 begin
  lock;
  include(fstate,aps_waitok);
@@ -13103,7 +12295,7 @@ begin
  unlock;
 end;
 
-procedure tapplication.resetwaitdialog;
+procedure tguiapplication.resetwaitdialog;
 begin
  lock;
  fstate:= fstate - [aps_waitstarted,aps_waitcanceled,aps_waitterminated,
@@ -13111,28 +12303,28 @@ begin
  unlock;
 end;
 
-function tapplication.waitstarted: boolean;
+function tguiapplication.waitstarted: boolean;
 begin
  lock;
  result:= aps_waitstarted in fstate;
  unlock;
 end;
 
-function tapplication.waitcanceled: boolean;
+function tguiapplication.waitcanceled: boolean;
 begin
  lock;
  result:= aps_waitcanceled in fstate;
  unlock;
 end;
 
-function tapplication.waitterminated: boolean;
+function tguiapplication.waitterminated: boolean;
 begin
  lock;
  result:= aps_waitterminated in fstate;
  unlock;
 end;
 
-procedure tapplication.dothreadterminated(const sender: tthreadcomp);
+procedure tguiapplication.dothreadterminated(const sender: tthreadcomp);
 begin
  if not waitcanceled then begin
   terminatewait;
@@ -13140,6 +12332,27 @@ begin
  if assigned(fonterminatebefore) then begin
   fonterminatebefore(sender);
  end;
+end;
+
+procedure tguiapplication.dopostevent(const aevent: tevent);
+begin
+ if feventlooping = 0 then begin
+  gui_postevent(aevent);
+ end
+ else begin
+  eventlist.add(aevent);
+ end;
+end;
+
+procedure tguiapplication.settimer(const us: integer);
+begin
+ gui_settimer(us);
+end;
+
+procedure tguiapplication.doafterrun;
+begin
+ destroyforms; //zeos lib unloads libraries -> 
+               //forms must be destroyed before unit finalization
 end;
 
 { tasyncmessageevent }
@@ -13162,8 +12375,5 @@ begin
 end;
 
 initialization
-// app:= tapplication.create;
-finalization
- app.Free;
- app:= nil;
+ registerapplicationclass(tinternalapplication);
 end.

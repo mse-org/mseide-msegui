@@ -20,6 +20,7 @@ uses
 
 type
  unicharty = longword;
+ shortcutty = type word;
  
  originty = (org_screen,org_widget,org_client,org_inner);
  captionposty = (cp_center,cp_rightbottom,cp_right,cp_righttop,
@@ -27,6 +28,13 @@ type
                  cp_lefttop,cp_left,cp_leftbottom,
                  cp_bottomleft,cp_bottom,cp_bottomright
                  );
+                 
+ modalresultty = (mr_none,mr_canclose,mr_windowclosed,mr_windowdestroyed,
+                  mr_escape,mr_f10, 
+                  mr_exception,
+                  mr_cancel,mr_abort,mr_ok,mr_yes,mr_no,mr_all,mr_noall,mr_ignore);
+ modalresultsty = set of modalresultty;
+
 
  mousebuttonty = (mb_none,mb_left,mb_right,mb_middle);
  mousewheelty = (mw_none,mw_up,mw_down);

@@ -620,7 +620,7 @@ procedure dosetsqldatabase(const sender: isqlclient; const avalue: tmdatabase;
 
 implementation
 uses 
- dbconst,strutils,msedatalist,msereal,msestream,msegui,msebits;
+ dbconst,strutils,msedatalist,msereal,msestream,mseapplication,msebits;
 type
  tdataset1 = class(tdataset);
 {

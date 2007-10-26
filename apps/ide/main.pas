@@ -21,7 +21,7 @@ unit main;
 interface
 
 uses
- mseforms,msesimplewidgets,msegui,msegdbutils,mseactions,msedispwidgets,
+ mseforms,msesimplewidgets,mseguiglob,msegui,msegdbutils,mseactions,msedispwidgets,
  msedataedits,msestat,msestatfile,msemenus,msebitmap,msetoolbar,msegrids,
  msefiledialog,msetypes,sourcepage,msetabs,msedesignintf,msedesigner,classes,
  mseclasses,msegraphutils,typinfo,msedock,sysutils,msesysenv,msestrings,
@@ -255,7 +255,7 @@ uses
 {$endif}
 
  main_mfm,sourceform,watchform,breakpointsform,stackform,
-       projectoptionsform,make,mseguiglob,msewidgets,msepropertyeditors,
+       projectoptionsform,make,msewidgets,msepropertyeditors,
  skeletons,msedatamodules,
  mseformdatatools,mseshapes,msefileutils,projecttreeform,mseeditglob,
  findinfileform,formdesigner,sourceupdate,actionsmodule,programparametersform,

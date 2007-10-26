@@ -15,7 +15,7 @@ interface
 
 uses
  {$ifdef FPC}classes{$else}Classes{$endif},mseclasses,mseshapes,mserichstring,
- msetypes,mseguiglob,msegui,
+ msetypes,mseguiglob,mseapplication,msegui,
  msebitmap,msekeyboard,mseevent,msestat,msestatfile,msestrings,msegraphics;
 
 const
@@ -59,7 +59,7 @@ type
  actionoptionty = (ao_updateonidle,ao_localshortcut,ao_globalshortcut);
  actionoptionsty = set of actionoptionty;
 
- tcustomaction = class(tguicomponent,istatfile)
+ tcustomaction = class(tactcomponent,istatfile)
   private
    fonupdate: actioneventty;
    foptions: actionoptionsty;

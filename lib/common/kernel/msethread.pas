@@ -88,7 +88,7 @@ type
 implementation
 
 uses
- msesysintf,msegui,SysUtils;
+ msesysintf,mseapplication,SysUtils;
 
 procedure createthread(var info: threadinfoty);
 begin

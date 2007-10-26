@@ -405,7 +405,7 @@ function asciitobin(const chars: string): string;
 implementation
 uses
  {$ifdef UNIX} kernelioctl, {$endif}
- sysutils,msegui,msesysintf,msesysutils,msetypes;
+ sysutils,mseapplication,msesysintf,msesysutils,msetypes;
 
 const
  asciipufferlaenge = 255;

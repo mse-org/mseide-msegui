@@ -141,7 +141,7 @@ function rotatedirection(const olddest,newvalue,
 
 implementation
 uses
- SysUtils,msegui;
+ SysUtils;
 
 function rotateframe(const aframe: framety; const olddirection,
                   newdirection: graphicdirectionty): framety;

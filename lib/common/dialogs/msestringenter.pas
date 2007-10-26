@@ -13,7 +13,7 @@ unit msestringenter;
 
 interface
 uses
- mseforms,msedataedits,msesimplewidgets,msetypes,msegui,msedialog,msestrings;
+ mseforms,msedataedits,msesimplewidgets,msetypes,msegui,mseguiglob,msedialog,msestrings;
 
 type
  tstringenterfo = class(tdialogform)

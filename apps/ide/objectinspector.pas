@@ -21,8 +21,8 @@ unit objectinspector;
 interface
 
 uses
- mseforms, msewidgets, msegrids, msewidgetgrid, classes, mseclasses,
- msepropertyeditors,msegui, mseedit, msedataedits, mselistbrowser, msedatanodes,
+ mseforms,msewidgets,msegrids,msewidgetgrid,classes,mseclasses,
+ msepropertyeditors,mseguiglob,msegui,mseedit,msedataedits,mselistbrowser,msedatanodes,
  msedesignintf,typinfo,msecomponenteditors,msesimplewidgets,msegraphutils,
  msemenus,mseevent,msedesigner,msetypes,msestrings,mselist;
 

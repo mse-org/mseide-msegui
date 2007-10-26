@@ -357,7 +357,7 @@ function getsqlresultvararar( const atransaction: tsqltransaction;
                       
 implementation
 uses
- sysutils,dbconst,rtlconsts,msegui,variants;
+ sysutils,dbconst,rtlconsts,mseapplication,variants;
 const 
  msedbcoltypeclasses: array[fieldclasstypety] of dbcolclassty = 
 //        ft_unknown,ft_string,   ft_numeric,

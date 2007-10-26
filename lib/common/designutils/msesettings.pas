@@ -2,7 +2,7 @@ unit msesettings;
 {$ifdef FPC}{$mode objfpc}{$h+}{$INTERFACES CORBA}{$endif}
 interface
 uses
- msegui,mseclasses,mseforms,msestat,msestatfile,msesimplewidgets,msefiledialog,
+ mseguiglob,msegui,mseclasses,mseforms,msestat,msestatfile,msesimplewidgets,msefiledialog,
  msestrings,msesysenv,msedataedits;
 
 type

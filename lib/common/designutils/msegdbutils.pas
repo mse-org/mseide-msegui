@@ -15,7 +15,7 @@ unit msegdbutils;
 interface
 uses
  msestream,mseclasses,classes,msetypes,mseevent,msehash,msepipestream,msestrings,
- msegui,msedatalist;
+ mseapplication,msegui,msedatalist;
 
 //todo: 64bit,
 //non native pointersize and byte endian for remote debugging
@@ -200,7 +200,7 @@ type
  end;
 {$endif} 
 
- tgdbmi = class(tguicomponent)
+ tgdbmi = class(tactcomponent)
   private
    fpointersize: integer;
    fgdbto: tpipewriter;

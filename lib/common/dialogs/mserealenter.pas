@@ -13,7 +13,8 @@ unit mserealenter;
 
 interface
 uses
- mseforms,msedataedits,msesimplewidgets,msetypes,msegui,msedialog,msereal,msestrings;
+ mseforms,msedataedits,msesimplewidgets,msetypes,mseguiglob,msegui,msedialog,
+ msereal,msestrings;
 
 type
  trealenterfo = class(tdialogform)

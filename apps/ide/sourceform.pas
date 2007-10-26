@@ -23,7 +23,7 @@ interface
 uses
  msetextedit,msewidgetgrid,mseforms,Classes,msegdbutils,msegraphedits,mseevent,
  msehash,msebitmap,msetabs,sourcepage,
- msetypes,msestrings,msegui,msesyntaxpainter,msemenus,
+ msetypes,msestrings,mseguiglob,msegui,msesyntaxpainter,msemenus,
  mseactions,msesyntaxedit,msestat,finddialogform,msestream,msefilechange,
  breakpointsform,mseparser,msesimplewidgets,msegrids,msegraphutils;
 

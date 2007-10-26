@@ -28,11 +28,11 @@ function buildmakecommandline(const atag: integer): string;
 implementation
 uses
  mseprocutils,main,msestream,projectoptionsform,sysutils,msegrids,msetypes,
- sourceform,mseclasses,msegui,mseeditglob,msefileutils,msesys,msepipestream,
+ sourceform,mseclasses,mseapplication,mseeditglob,msefileutils,msesys,msepipestream,
  msesysutils,msegraphics,msestrings,messageform,msedesignintf,msedesigner;
 
 type
- tmaker = class(tguicomponent)
+ tmaker = class(tactcomponent)
   private
    fexitcode: integer;
    fmessagefile: ttextstream;

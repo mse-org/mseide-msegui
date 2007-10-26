@@ -581,11 +581,13 @@ implementation
 uses
 {$ifdef debugobjectlink}
  msegui,mseformatstr,
+{$else}
+ mseapplication,
 {$endif}
 {$ifdef mswindows}
  windows,
 {$endif}
- msegui,msestream,msesys,msedatalist,msedatamodules;
+ msestream,msesys,msedatalist,msedatamodules;
 
 type
  {$ifdef FPC}

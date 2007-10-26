@@ -2,7 +2,8 @@ unit msestatfile;
 {$ifdef FPC}{$mode objfpc}{$h+}{$INTERFACES CORBA}{$endif}
 interface
 uses
- classes,msestat,msegui,msetypes,msestrings,mseclasses,msestream,mseguiglob;
+ classes,msestat,{msegui}mseapplication,msetypes,msestrings,mseclasses,msestream,
+ mseguiglob;
 type
  statupdateeventty = procedure(const sender: tobject; const filer: tstatfiler) of object;
  statreadeventty = procedure(const sender: tobject; const reader: tstatreader) of object;
@@ -15,7 +16,7 @@ const
  defaultstatfileoptions = [sfo_activatorread,sfo_activatorwrite];
  
 type
- tstatfile = class(tguicomponent,istatfile)
+ tstatfile = class(tactcomponent,istatfile)
   private
    ffilename: filenamety;
    ffiledir: filenamety;

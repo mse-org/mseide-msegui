@@ -22,7 +22,7 @@ interface
 
 uses
  msetextedit,msewidgetgrid,mseforms,classes,msegdbutils,msegraphedits,mseevent,
- msehash,msebitmap,msetabs,msetypes,msegui,msesyntaxedit,mseeditglob,
+ msehash,msebitmap,msetabs,msetypes,mseguiglob,msegui,msesyntaxedit,mseeditglob,
  mseinplaceedit,msedispwidgets,msegraphutils,msegrids,breakpointsform,
  pascaldesignparser,msefilechange,msestrings,mserichstring;
 
@@ -152,7 +152,7 @@ implementation
 
 uses
  sourcepage_mfm,msefileutils,sourceform,main,
- sysutils,msewidgets,finddialogform,replacedialogform,msekeyboard,mseguiglob,
+ sysutils,msewidgets,finddialogform,replacedialogform,msekeyboard,
  sourceupdate,mseparser,msefiledialog,mseintegerenter,msedesigner,
  projectoptionsform,msesys,make,actionsmodule,msegraphics,sourcehintform,
  mseedit,msedrawtext,msebits,msedatalist,msestream,msedesignintf;

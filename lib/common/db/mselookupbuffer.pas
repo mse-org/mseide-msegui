@@ -3,7 +3,8 @@ unit mselookupbuffer;
 interface
 
 uses
- classes,db,msedb,msetypes,msestrings,mseclasses,msearrayprops,mselist,msegui;
+ classes,db,msedb,msetypes,msestrings,mseclasses,msearrayprops,mselist,
+ mseapplication;
  
 type
  
@@ -61,7 +62,7 @@ type
 const
  changeeventtag = 85839;
 type   
- tcustomlookupbuffer = class(tguicomponent)
+ tcustomlookupbuffer = class(tactcomponent)
   private
  //  fbuffervalid: boolean;
    fonchange: notifyeventty;

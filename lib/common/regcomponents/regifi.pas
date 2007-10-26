@@ -50,7 +50,7 @@ begin
  registercomponents('Ifi',[tformlink,tpipeifichannel,tsocketpipeifichannel,
                      tsocketclientifichannel,tsocketserverifichannel,
                      ttxdataset,trxdataset,
-                     tsocketclient,tsocketserver]); 
+                     tsocketstdio,tsocketclient,tsocketserver]); 
  registerpropertyeditor(typeinfo(tformlinkarrayprop),nil,'',tformlinkeditor);
  registerpropertyeditor(typeinfo(tlinkactions),nil,'',tformlinkactionseditor);
  registerpropertyeditor(typeinfo(tlinkdatawidgets),nil,'',tformlinkdatawidgetseditor);

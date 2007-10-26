@@ -67,7 +67,7 @@ type
 
 implementation
 uses
- sysutils,msegui,msesys;
+ sysutils,mseapplication,msesys;
 
 { tthreadcomp }
 

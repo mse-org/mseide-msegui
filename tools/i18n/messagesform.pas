@@ -2,7 +2,7 @@ unit messagesform;
 {$ifdef FPC}{$mode objfpc}{$h+}{$INTERFACES CORBA}{$endif}
 interface
 uses
- msegui,mseclasses,mseforms,mseterminal,msewidgetgrid,mseguithread;
+ mseguiglob,msegui,mseclasses,mseforms,mseterminal,msewidgetgrid,mseguithread;
 
 type
  tmessagesfo = class(tmseform)

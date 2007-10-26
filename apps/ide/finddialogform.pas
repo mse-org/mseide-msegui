@@ -42,7 +42,7 @@ function finddialogexecute(var info: findinfoty): boolean;
 
 implementation
 uses
- msegui,finddialogform_mfm;
+ mseguiglob,msegui,finddialogform_mfm;
 
 function finddialogexecute(var info: findinfoty): boolean;
 var

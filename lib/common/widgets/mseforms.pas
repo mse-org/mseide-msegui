@@ -13,7 +13,7 @@ unit mseforms;
 
 interface
 uses
- msewidgets,msemenus,msegraphics,msegui,msegraphutils,mseevent,msetypes,msestrings,
+ msewidgets,msemenus,msegraphics,mseapplication,msegui,msegraphutils,mseevent,msetypes,msestrings,
  mseguiglob,msemenuwidgets,msestat,msestatfile,mseclasses,Classes,msedock,
  msebitmap;
 

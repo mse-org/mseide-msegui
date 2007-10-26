@@ -140,7 +140,8 @@ implementation
 uses
  main,make,actionsmodule_mfm,msemenus,sourceform,msedesigner,msetypes,msefiledialog,
  projectoptionsform,findinfileform,breakpointsform,watchform,selecteditpageform,
- msewidgets,disassform,printform,msegdbutils,mseintegerenter,msesettings;
+ msewidgets,disassform,printform,msegdbutils,mseintegerenter,msesettings,
+ mseguiglob;
 
 procedure configureide;
 begin
