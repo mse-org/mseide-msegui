@@ -19,7 +19,7 @@ uses
 
 procedure Register;
 begin
- registercomponents('Gui',[tsysenvmanager,tfilechangenotifyer]);
+ registercomponents('NoGui',[tsysenvmanager,tfilechangenotifyer]);
 end;
 
 initialization

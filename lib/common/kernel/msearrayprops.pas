@@ -15,7 +15,7 @@ interface
 
 uses
   {$ifdef FPC}sysutils,classes{$else}SysUtils,Classes{$endif},typinfo,mselist,
-  msegraphics,msetypes,msestrings,mseclasses,mseguiglob,msestat;
+  msegraphutils,msegraphics,msetypes,msestrings,mseclasses,mseguiglob,msestat;
 
 type
  earraystreamerror = class(estreamerror);

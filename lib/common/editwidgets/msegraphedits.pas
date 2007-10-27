@@ -698,7 +698,8 @@ type
  
 implementation
 uses
- SysUtils,msekeyboard,msebits,msereal,msedispwidgets,mseformatstr,mserichstring;
+ SysUtils,msekeyboard,msebits,msereal,msedispwidgets,mseformatstr,mserichstring,
+ mseactions;
 
 type
  tcustomframe1 = class(tcustomframe);

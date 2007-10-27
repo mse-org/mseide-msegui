@@ -700,7 +700,7 @@ implementation
 uses
  mseformatstr,msebits,msearrayprops,msebitmap,
  msefiledialog,mseimagelisteditor,msereal,msewidgets,
- mseactions,msehash,
+ mseactions,msehash,msegraphutils,
  msestringlisteditor,msedoublestringlisteditor,msereallisteditor,
  mseintegerlisteditor,
  msecolordialog,

@@ -42,7 +42,8 @@ var
 
 implementation
 uses
- componentpaletteform_mfm,main,projectoptionsform,msedesignintf,mseshapes,classes;
+ componentpaletteform_mfm,main,projectoptionsform,msedesignintf,mseshapes,
+ mseactions,classes;
 
 procedure tcomponentpalettefo.componentpalettedragdrop(const sender: TObject;
       const apos: pointty; var dragobject: tdragobject; var processed: boolean);

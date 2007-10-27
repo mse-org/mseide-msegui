@@ -839,7 +839,8 @@ procedure getwindowicon(const abitmap: tmaskedbitmap; out aicon,amask: pixmapty)
 implementation
 
 uses
- msebits,mseguiintf,msestockobjects,msekeyboard,sysutils,msemenuwidgets;
+ msebits,mseguiintf,msestockobjects,msekeyboard,sysutils,msemenuwidgets,
+ mseactions;
 
 const
  captionmargin = 1; //distance focusrect to caption in tcaptionframe

@@ -13,7 +13,7 @@ unit msestrings;
 
 interface
 uses
- classes,msegraphutils,msetypes{$ifdef FPC},strings{$endif};
+ classes,{msegraphutils,}msetypes{$ifdef FPC},strings{$endif};
 {$ifdef FPC}
  {$ifdef FPC_WINLIKEWIDESTRING}
   {$define msestringsarenotrefcounted}
@@ -337,7 +337,6 @@ function checkfirstchar(const value: string; achar: char): pchar;
            //nil wenn erster char nicht space <> achar, ^achar sonst
 function firstline(atext: msestring): msestring;
 function lastline(atext: msestring): msestring;
-function textendpoint(const start: pointty; const text: msestring): pointty;
 procedure textdim(const atext: msestring; out firstx,lastx,y: integer);
 
 function shrinkpathellipse(var value: msestring): boolean;
@@ -2034,20 +2033,6 @@ begin
  else begin
   lastx:= length(lastline(atext));
   firstx:= length(firstline(atext));
- end;
-end;
-
-function textendpoint(const start: pointty; const text: msestring): pointty;
-var
- y: integer;
-begin
- y:= countchars(text,c_linefeed);
- result.y:= start.y + y;
- if y = 0 then begin
-  result.x:= start.x + length(text);
- end
- else begin
-  result.x:= length(lastline(text));
  end;
 end;
 

@@ -1699,7 +1699,7 @@ function cellkeypress(const info: celleventinfoty): keyty;
 
 implementation
 uses
- mseguiintf,mseshapes,msestockobjects;
+ mseguiintf,mseshapes,msestockobjects,mseactions;
 type
  tframe1 = class(tcustomframe);
  tdatalist1 = class(tdatalist);

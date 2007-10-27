@@ -25,7 +25,8 @@ uses
  msehash,msebitmap,msetabs,sourcepage,
  msetypes,msestrings,mseguiglob,msegui,msesyntaxpainter,msemenus,
  mseactions,msesyntaxedit,msestat,finddialogform,msestream,msefilechange,
- breakpointsform,mseparser,msesimplewidgets,msegrids,msegraphutils;
+ breakpointsform,mseparser,msesimplewidgets,msegrids,msegraphutils,
+ mseguiactions;
 
 type
  tsourcefo = class;

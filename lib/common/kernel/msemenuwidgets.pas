@@ -185,7 +185,7 @@ function showpopupmenu(const menu: tmenuitem; const transientfor: twidget;
 implementation
 uses
  msedrawtext,mserichstring,msestockobjects,sysutils,msekeyboard,msebits,
- mseactions,mseguiintf,msestrings;
+ mseactions,mseguiintf,msestrings,msebitmap;
 
 type
  tmenuitem1 = class(tmenuitem);
@@ -359,7 +359,7 @@ begin
     with buttoninfo do begin
      captiondist:= defaultshapecaptiondist;
      imagedist:= imagedi;
-     imagelist:= item1.finfo.imagelist;
+     imagelist:= timagelist(item1.finfo.imagelist);
      ar1:= splitrichstring(item1.finfo.caption1,msechar(c_tab));
      atextsize:= gettextrect(cells[int1],ar1[0]);
      atextsize.cx:= atextsize.cx + frame1.left + frame1.right;

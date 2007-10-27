@@ -76,7 +76,7 @@ var
 
 implementation
 uses
- cpuform_mfm,main,sysutils,mseformatstr,msebits,msestrings;
+ cpuform_mfm,main,sysutils,mseformatstr,msebits,msestrings,msegraphutils;
 
 { tcpufo }
 

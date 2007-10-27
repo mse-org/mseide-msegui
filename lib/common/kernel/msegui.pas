@@ -1640,12 +1640,17 @@ function needswidgetnamewriting(const ar: widgetarty): boolean;
 procedure designeventloop;
 procedure freedesigncomponent(const acomponent: tcomponent);
 
+function activateprocesswindow(const procid: integer; 
+                    const araise: boolean = true): boolean;
+         //true if ok
+
 implementation
 
 uses
  mseguiintf,msesysintf,typinfo,msestreaming,msetimer,msebits,msewidgets,
  mseshapes,msestockobjects,msefileutils,msedatalist,Math,msesysutils,
- {$ifdef FPCc} rtlconst {$else} RtlConsts{$endif},mseformatstr;
+ {$ifdef FPCc} rtlconst {$else} RtlConsts{$endif},mseformatstr,
+ mseprocutils;
 
 const
  faceoptionsmask: faceoptionsty = [fao_alphafadeimage,fao_alphafadenochildren,
@@ -1873,6 +1878,28 @@ function translatewidgetpoint(const point: pointty;
 begin
  result:= point;
  translatewidgetpoint1(result,source,dest);
+end;
+
+function activateprocesswindow(const procid: integer; 
+                    const araise: boolean = true): boolean;
+         //true if ok
+var
+ winid: winidty;
+ ar1: integerarty;
+begin
+ result:= false;
+ ar1:= getallprocesschildren(procid);
+ winid:= gui_pidtowinid(ar1);
+ if winid <> 0 then begin
+  if gui_showwindow(winid) = gue_ok then begin
+   if araise and (gui_raisewindow(winid) <> gue_ok) then begin
+    exit;
+   end;
+   if gui_setappfocus(winid) = gue_ok then begin
+    result:= true;
+   end;
+  end;
+ end;
 end;
 
 function translatewidgetrect(const rect: rectty;

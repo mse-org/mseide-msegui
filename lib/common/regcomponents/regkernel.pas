@@ -16,7 +16,8 @@ interface
 implementation
 
 uses
- classes,mseguithread,msebitmap,msetimer,msestatfile,mseactions,mseshapes,
+ classes,mseguithread,msebitmap,msetimer,msestatfile,mseactions,mseguiactions,
+ mseshapes,
  msedesignintf,msepropertyeditors,msemenus,msegui,msepipestream,sysutils,
  msegraphutils,regkernel_bmp,msegraphics,msestrings,msepostscriptprinter,
  mseprinter,msetypes,msedatalist,msedatamodules,mseclasses,formdesigner,
@@ -71,10 +72,10 @@ const
 
 procedure Register;
 begin
+ registercomponents('NoGui',[tstatfile,tnoguiaction,tactivator,
+                             ttimer,tthreadcomp,tpipereadercomp]);
  registercomponents('Gui',[tmainmenu,tpopupmenu,tfacecomp,tframecomp,
-                    tbitmapcomp,timagelist,
-                    tstatfile,taction,tactivator,
-                    ttimer,tthreadcomp,tpipereadercomp]);
+                    tbitmapcomp,timagelist,taction]);
  registercomponents('Dialog',[tpagesizeselector,tpageorientationselector]);
 // registerpropertyeditor(typeinfo(twidget),nil,'',tcomponentpropertyeditor);
  registerpropertyeditor(typeinfo(tcustomaction),nil,'',tactionpropertyeditor);

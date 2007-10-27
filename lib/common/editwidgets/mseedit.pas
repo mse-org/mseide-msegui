@@ -356,7 +356,7 @@ type
 
 implementation
 uses
- SysUtils,msekeyboard,msebits,msedataedits,msestockobjects;
+ SysUtils,msekeyboard,msebits,msedataedits,msestockobjects,mseactions;
 
 type
  twidget1 = class(twidget);

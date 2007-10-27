@@ -14,7 +14,7 @@ unit mseshapes;
 interface
 uses
  msegraphics,msegraphutils,mseguiglob,msegui,mseevent,mserichstring,msebitmap,
-  msetypes;
+ msetypes,mseactions;
 
 const
  menuarrowwidth = 8;
@@ -22,56 +22,8 @@ const
  menucheckboxwidth = 13;
  defaultshapecaptiondist = 2;
 
-type
- shapestatety = (ss_disabled,ss_invisible,ss_checked,ss_default, //actionstatesty
-                 ss_separator,ss_checkbox,ss_radiobutton,        //menuactionoptionty
-
-                 ss_clicked,ss_mouse,ss_moveclick,ss_focused,
-                 ss_horz,ss_vert,ss_opposite,
-                 ss_widgetorg,ss_showfocusrect,ss_showdefaultrect,
-                 ss_flat,ss_noanimation,
-                 ss_checkbutton,
-                 {ss_submenu,}ss_menuarrow);
- shapestatesty = set of shapestatety;
-
- actionstatety = (as_disabled = ord(ss_disabled),as_invisible=ord(ss_invisible),
-                  as_checked=ord(ss_checked),as_default=ord(ss_default),
-//                  as_checkbox=ord(ss_checkbox),as_radiobutton=ord(ss_radiobutton),
-                  {as_shortcutcaption,}
-                  as_localdisabled,as_localinvisible,as_localchecked,as_localdefault,
-                  as_localcaption,
-                  as_localimagelist,as_localimagenr,as_localimagenrdisabled,
-                  as_localimagecheckedoffset,
-                  as_localcolorglyph,as_localcolor,
-                  as_localhint,as_localshortcut,as_localtag,
-                  as_localgroup,as_localonexecute);
- actionstatesty = set of actionstatety;
-
- menuactionoptionty = (mao_separator,mao_checkbox,mao_radiobutton,
-                       mao_shortcutcaption,
-                       mao_asyncexecute,mao_singleregion,
-                       mao_showhint,mao_noshowhint);
- menuactionoptionsty = set of menuactionoptionty;
-
-const
- actionstatesmask: actionstatesty = [as_disabled,as_checked,as_invisible,as_default];
- actionshapestatesconst = [as_disabled,as_invisible,as_checked,as_default];
- actionshapestates: actionstatesty = actionshapestatesconst;
- actionoptionshapestates: menuactionoptionsty = [mao_separator,mao_checkbox,mao_radiobutton];
- actionoptionshapelshift = ord(ss_separator);
 
 // styleactionstates: actionstatesty = [as_shortcutcaption,as_radiobutton];
- localactionstates: actionstatesty =
-                  [as_localdisabled,as_localinvisible,as_localchecked,as_localdefault,
-                  as_localcaption,
-                  as_localimagelist,as_localimagenr,as_localimagenrdisabled,
-                  as_localimagecheckedoffset,
-                  as_localcolorglyph,as_localcolor,
-                  as_localhint,as_localshortcut,as_localtag,
-                  as_localgroup,as_localonexecute];
- localactionlshift = ord(as_localdisabled);
- localactionstatestates: actionstatesty =
-                  [as_localdisabled,as_localinvisible,as_localchecked,as_localdefault];
 type
  tagmouseprocty = procedure (const tag: integer; const info: mouseeventinfoty) of object;
 
@@ -125,6 +77,11 @@ function findshapeatpos(const infoar: shapeinfoarty; const apos: pointty;
                const rejectstates: shapestatesty = [ss_disabled,ss_invisible]): integer;
 procedure initshapeinfo(var ainfo: shapeinfoty);
 
+procedure actioninfotoshapeinfo(var actioninfo: actioninfoty;
+            var shapeinfo: shapeinfoty); overload;
+procedure actioninfotoshapeinfo(const sender: twidget; var actioninfo: actioninfoty;
+                                    var shapeinfo: shapeinfoty); overload;
+
 var
  animatemouseenter: boolean = true;
  
@@ -133,6 +90,42 @@ uses
  classes,msedrawtext,msestockobjects,msebits,msestrings;
 var
  buttontab: tcustomtabulators;
+
+procedure actioninfotoshapeinfo(var actioninfo: actioninfoty;
+            var shapeinfo: shapeinfoty);
+begin
+ with actioninfo do begin
+  actionstatestoshapestates(actioninfo,shapeinfo.state);
+  shapeinfo.caption:= caption1;
+  shapeinfo.imagelist:= timagelist(imagelist);
+  shapeinfo.imagenr:= imagenr;
+  shapeinfo.imagenrdisabled:= imagenrdisabled;
+  shapeinfo.colorglyph:= colorglyph;
+  shapeinfo.color:= color;
+  shapeinfo.imagecheckedoffset:= imagecheckedoffset;
+ end;
+end;
+
+procedure actioninfotoshapeinfo(const sender: twidget; var actioninfo: actioninfoty;
+                                    var shapeinfo: shapeinfoty);
+var
+ statebefore: actionstatesty;
+begin
+ if not (csloading in sender.componentstate) then begin
+  with actioninfo do begin
+   statebefore:= state;
+   if (sender.enabled) <> not (as_disabled in state) then begin
+    sender.enabled:= not(as_disabled in state);
+   end;
+   if (sender.visible) <> not (as_invisible in state) then begin
+    sender.visible:= not(as_invisible in state);
+   end;
+   state:= statebefore; //restore localflag
+   actioninfotoshapeinfo(actioninfo,shapeinfo);
+   sender.invalidate;
+  end;
+ end;
+end;
  
 procedure initshapeinfo(var ainfo: shapeinfoty);
 begin

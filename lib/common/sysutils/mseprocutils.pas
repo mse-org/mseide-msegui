@@ -93,9 +93,11 @@ function terminateprocess(handle: integer): integer;
 function getprocesstree: procitemarty;
 function getprocesschildren(const pid: integer): integerarty;
 function getallprocesschildren(const pid: integer): integerarty;
+{moved to msegui
 function activateprocesswindow(const procid: integer; 
                     const araise: boolean = true): boolean;
          //true if ok
+}
 
  {$ifdef UNIX}
 type
@@ -157,7 +159,7 @@ type
 implementation
 uses 
  {$ifdef mswindows}windows{$else}libc{$endif},msesysintf,msestrings,msedatalist,
- mseguiintf,mseguiglob;
+ {mseguiintf,}mseguiglob;
 
 function getpid: integer;
 begin
@@ -225,28 +227,6 @@ begin
  setlength(result,1);
  result[0]:= pid;
  addproc(pid);
-end;
-
-function activateprocesswindow(const procid: integer; 
-                    const araise: boolean = true): boolean;
-         //true if ok
-var
- winid: winidty;
- ar1: integerarty;
-begin
- result:= false;
- ar1:= getallprocesschildren(procid);
- winid:= gui_pidtowinid(ar1);
- if winid <> 0 then begin
-  if gui_showwindow(winid) = gue_ok then begin
-   if araise and (gui_raisewindow(winid) <> gue_ok) then begin
-    exit;
-   end;
-   if gui_setappfocus(winid) = gue_ok then begin
-    result:= true;
-   end;
-  end;
- end;
 end;
 
 procedure execerror(const errno: integer; const commandline: string);

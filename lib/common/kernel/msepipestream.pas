@@ -127,7 +127,7 @@ end;
 implementation
 uses
   {$ifdef UNIX}libc, {$else}windows, {$endif}
- msegui,msesysintf,sysutils,msesysutils;
+ mseapplication,msesysintf,sysutils,msesysutils;
 
 { tpipewriter }
 

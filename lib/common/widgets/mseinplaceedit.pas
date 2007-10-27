@@ -295,12 +295,28 @@ type
 var
  globalcaretwidth: integer = defaultglobalcaretwith;
 
+function textendpoint(const start: pointty; const text: msestring): pointty;
+
 implementation
 uses
  msekeyboard,sysutils,msesysutils,msebits,msewidgets,classes;
  
 var
  overwrite: boolean; //insertstate
+
+function textendpoint(const start: pointty; const text: msestring): pointty;
+var
+ y: integer;
+begin
+ y:= countchars(text,c_linefeed);
+ result.y:= start.y + y;
+ if y = 0 then begin
+  result.x:= start.x + length(text);
+ end
+ else begin
+  result.x:= length(lastline(text));
+ end;
+end;
 
 { tinplaceedit }
 

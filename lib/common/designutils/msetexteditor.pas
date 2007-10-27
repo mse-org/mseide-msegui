@@ -4,7 +4,7 @@ interface
 uses
  msegui,mseguiglob,mseclasses,mseforms,msesimplewidgets,msewidgetgrid,msesyntaxedit,
  msemenus,msefiledialog,msestat,msestatfile,msesyntaxpainter,msedispwidgets,
- mseinplaceedit,mseactions;
+ mseinplaceedit,mseactions,mseguiactions;
 
 const
  texteditorstatname =  'texteditor.sta';

@@ -107,6 +107,7 @@ type
    procedure setenabled(const avalue: boolean);
    function getvisible: boolean;
    procedure setvisible(const avalue: boolean);
+   function getimagelist: timagelist;
    procedure setimagelist(const avalue: timagelist);
    function isimageliststored: Boolean;
    procedure setimagenr(const avalue: integer);
@@ -180,7 +181,7 @@ type
    property tag: integer read finfo.tag write settag stored istagstored default 0;
    property group: integer read finfo.group write setgroup 
                      stored isgroupstored default 0;
-   property imagelist: timagelist read finfo.imagelist write setimagelist
+   property imagelist: timagelist read getimagelist write setimagelist
                      stored isimageliststored;
    property imagenr: integer read finfo.imagenr write setimagenr
                             stored isimagenrstored default -1;
@@ -381,7 +382,8 @@ procedure freetransientmenu(var amenu: tcustommenu);
 
 implementation
 uses
- sysutils,msestockobjects,rtlconsts,msebits,msemenuwidgets,msedatalist;
+ sysutils,msestockobjects,rtlconsts,msebits,msemenuwidgets,msedatalist,
+ mseguiactions;
 
 procedure freetransientmenu(var amenu: tcustommenu);
 begin
@@ -1050,6 +1052,11 @@ begin
  else begin
   state:= state + [as_invisible];
  end;
+end;
+
+function tmenuitem.getimagelist: timagelist;
+begin
+ result:= timagelist(finfo.imagelist);
 end;
 
 procedure tmenuitem.setimagelist(const avalue: timagelist);

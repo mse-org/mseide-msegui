@@ -14,16 +14,65 @@ unit mseactions;
 interface
 
 uses
- {$ifdef FPC}classes{$else}Classes{$endif},mseclasses,mseshapes,mserichstring,
- msetypes,mseguiglob,mseapplication,msegui,
- msebitmap,msekeyboard,mseevent,msestat,msestatfile,msestrings,msegraphics;
+ {$ifdef FPC}classes{$else}Classes{$endif},mseclasses,{mseshapes,}mserichstring,
+ msetypes,mseguiglob,mseapplication,{msegui,}
+ {msebitmap,}msekeyboard,mseevent,msestat,msestatfile,msestrings,
+ msegraphutils{,msegraphics};
 
 const
  defaultactionstates = [];
 type
-// menuoptionty = (mo_shortcutcaption,ss_checkbox,ss_radiobutton,);
-// actionstylesty = set of actionstylety;
+ shapestatety = (ss_disabled,ss_invisible,ss_checked,ss_default, //actionstatesty
+                 ss_separator,ss_checkbox,ss_radiobutton,        //menuactionoptionty
 
+                 ss_clicked,ss_mouse,ss_moveclick,ss_focused,
+                 ss_horz,ss_vert,ss_opposite,
+                 ss_widgetorg,ss_showfocusrect,ss_showdefaultrect,
+                 ss_flat,ss_noanimation,
+                 ss_checkbutton,
+                 {ss_submenu,}ss_menuarrow);
+ shapestatesty = set of shapestatety;
+
+ actionstatety = (as_disabled = ord(ss_disabled),as_invisible=ord(ss_invisible),
+                  as_checked=ord(ss_checked),as_default=ord(ss_default),
+//                  as_checkbox=ord(ss_checkbox),as_radiobutton=ord(ss_radiobutton),
+                  {as_shortcutcaption,}
+                  as_localdisabled,as_localinvisible,as_localchecked,as_localdefault,
+                  as_localcaption,
+                  as_localimagelist,as_localimagenr,as_localimagenrdisabled,
+                  as_localimagecheckedoffset,
+                  as_localcolorglyph,as_localcolor,
+                  as_localhint,as_localshortcut,as_localtag,
+                  as_localgroup,as_localonexecute);
+ actionstatesty = set of actionstatety;
+
+ menuactionoptionty = (mao_separator,mao_checkbox,mao_radiobutton,
+                       mao_shortcutcaption,
+                       mao_asyncexecute,mao_singleregion,
+                       mao_showhint,mao_noshowhint);
+ menuactionoptionsty = set of menuactionoptionty;
+
+const
+ actionstatesmask: actionstatesty = 
+                            [as_disabled,as_checked,as_invisible,as_default];
+ actionshapestatesconst = [as_disabled,as_invisible,as_checked,as_default];
+ actionshapestates: actionstatesty = actionshapestatesconst;
+ actionoptionshapestates: menuactionoptionsty = 
+                                [mao_separator,mao_checkbox,mao_radiobutton];
+ actionoptionshapelshift = ord(ss_separator);
+
+ localactionstates: actionstatesty =
+                  [as_localdisabled,as_localinvisible,as_localchecked,as_localdefault,
+                  as_localcaption,
+                  as_localimagelist,as_localimagenr,as_localimagenrdisabled,
+                  as_localimagecheckedoffset,
+                  as_localcolorglyph,as_localcolor,
+                  as_localhint,as_localshortcut,as_localtag,
+                  as_localgroup,as_localonexecute];
+ localactionlshift = ord(as_localdisabled);
+ localactionstatestates: actionstatesty =
+                  [as_localdisabled,as_localinvisible,as_localchecked,as_localdefault];
+type
  tcustomaction = class;
  actioneventty = procedure(const sender: tcustomaction) of object;
 
@@ -40,7 +89,7 @@ type
   colorglyph: colorty;
   color: colorty;
   imagecheckedoffset: integer;
-  imagelist: timagelist;
+  imagelist: tobject; //timagelist
   hint: msestring;
   tag: integer;
   onexecute: notifyeventty;
@@ -62,7 +111,6 @@ type
  tcustomaction = class(tactcomponent,istatfile)
   private
    fonupdate: actioneventty;
-   foptions: actionoptionsty;
    fstatvarname: msestring;
    fstatfile: tstatfile;
    fonchange: notifyeventty;
@@ -75,7 +123,6 @@ type
    procedure setcolorglyph(const avalue: colorty);
    procedure setcolor(const avalue: colorty);
    procedure setimagecheckedoffset(const Value: integer);
-   procedure setimagelist(const Value: timagelist);
    function getstate: actionstatesty;
    procedure setstate(const Value: actionstatesty);
    function getgroup: integer;
@@ -93,13 +140,15 @@ type
    procedure setstatfile(const Value: tstatfile);
   protected
    finfo: actioninfoty;
+   foptions: actionoptionsty;
+   procedure registeronshortcut(const avalue: boolean); virtual;
    procedure loaded; override;
    procedure changed;
    procedure objectevent(const sender: tobject; const event: objecteventty); override;
    procedure doidle(var again: boolean);
-   procedure doshortcut(const sender: twidget; var info: keyeventinfoty);
    procedure doasyncevent(var atag: integer); override;
    procedure eventfired(const sender: tobject; const ainfo: actioninfoty);
+   procedure doafterunlink; virtual;
 
    //istatfile, saves state of as_checked
    procedure dostatread(const reader: tstatreader);
@@ -118,7 +167,6 @@ type
    property enabled: boolean read getenabled write setenabled;
    property checked: boolean read getchecked write setchecked;
    property group: integer read getgroup write setgroup default 0;
-   property imagelist: timagelist read finfo.imagelist write setimagelist;
    property imagenr: integer read finfo.imagenr write setimagenr default -1;
    property imagenrdisabled: integer read finfo.imagenrdisabled 
                       write setimagenrdisabled default -2;
@@ -138,13 +186,14 @@ type
    property onasyncevent: asynceventty read fonasyncevent write fonasyncevent;
  end;
 
- taction = class(tcustomaction)
+ tnoguiaction = class(tcustomaction)
+  protected
   published
    property caption;
    property state;
    property group;
    property tagaction;
-   property imagelist;
+//   property imagelist;
    property imagenr;
    property imagenrdisabled;
    property colorglyph;
@@ -160,7 +209,7 @@ type
    property onchange;
    property onasyncevent;
  end;
-
+ 
 procedure linktoaction(const sender: iactionlink; const aaction: tcustomaction;
                       var info: actioninfoty);
                   //remove existing link, copy action to instance
@@ -168,8 +217,6 @@ procedure setactionchecked(const sender: iactionlink; const value: boolean);
 procedure setactioncaption(const sender: iactionlink; const value: msestring);
 function isactioncaptionstored(const info: actioninfoty): boolean;
 
-procedure setactionimagelist(const sender: iactionlink; const value: timagelist);
-function isactionimageliststored(const info: actioninfoty): boolean;
 procedure setactionimagenr(const sender: iactionlink; const value: integer);
 function isactionimagenrstored(const info: actioninfoty): boolean;
 procedure setactionimagenrdisabled(const sender: iactionlink; const value: integer);
@@ -202,11 +249,6 @@ procedure actionbeginload(const sender: iactionlink);
 procedure actionendload(const sender: iactionlink);
 
 //procedure actiondoidle(const info: actioninfoty);
-procedure actioninfotoshapeinfo(var actioninfo: actioninfoty;
-            var shapeinfo: shapeinfoty); overload;
-procedure actioninfotoshapeinfo(const sender: twidget; var actioninfo: actioninfoty;
-                                    var shapeinfo: shapeinfoty); overload;
-
 procedure getshortcutlist(out keys: integerarty; out names: msestringarty);
 function getshortcutname(key: shortcutty): msestring;
 function checkshortcutcode(const shortcut: shortcutty; const info: keyeventinfoty): boolean;
@@ -491,42 +533,6 @@ begin
  sender.actionchanged;
 end;
 
-procedure actioninfotoshapeinfo(var actioninfo: actioninfoty;
-            var shapeinfo: shapeinfoty);
-begin
- with actioninfo do begin
-  actionstatestoshapestates(actioninfo,shapeinfo.state);
-  shapeinfo.caption:= caption1;
-  shapeinfo.imagelist:= imagelist;
-  shapeinfo.imagenr:= imagenr;
-  shapeinfo.imagenrdisabled:= imagenrdisabled;
-  shapeinfo.colorglyph:= colorglyph;
-  shapeinfo.color:= color;
-  shapeinfo.imagecheckedoffset:= imagecheckedoffset;
- end;
-end;
-
-procedure actioninfotoshapeinfo(const sender: twidget; var actioninfo: actioninfoty;
-                                    var shapeinfo: shapeinfoty);
-var
- statebefore: actionstatesty;
-begin
- if not (csloading in sender.componentstate) then begin
-  with actioninfo do begin
-   statebefore:= state;
-   if (sender.enabled) <> not (as_disabled in state) then begin
-    sender.enabled:= not(as_disabled in state);
-   end;
-   if (sender.visible) <> not (as_invisible in state) then begin
-    sender.visible:= not(as_invisible in state);
-   end;
-   state:= statebefore; //restore localflag
-   actioninfotoshapeinfo(actioninfo,shapeinfo);
-   sender.invalidate;
-  end;
- end;
-end;
-
 procedure calccaptiontext(var info: actioninfoty; const aseparator: msechar);
 var
  str1: msestring;
@@ -718,26 +724,6 @@ begin
  with info do begin
   result:= (as_localtag in state) and
          not ((action = nil) and (tag = 0));
- end;
-end;
-
-procedure setactionimagelist(const sender: iactionlink; const value: timagelist);
-begin
- with sender.getactioninfopo^ do begin
-  if not (as_localimagelist in state) then begin
-   imagelist:= nil; //do not unink,imagelist is owned by action
-  end;
-  setlinkedcomponent(sender,value,tmsecomponent(imagelist));
-  include(state,as_localimagelist);
- end;
- sender.actionchanged;
-end;
-
-function isactionimageliststored(const info: actioninfoty): boolean;
-begin
- with info do begin
-  result:= (as_localimagelist in state) and
-         not ((action = nil) and (imagelist = nil));
  end;
 end;
 
@@ -987,7 +973,7 @@ begin
  if fobjectlinker <> nil then begin
   fobjectlinker.forall({$ifdef FPC}@{$endif}dounlinkaction,typeinfo(iactionlink));
  end;
- imagelist:= nil;
+ doafterunlink;
  options:= [];
  inherited;
 end;
@@ -1013,13 +999,6 @@ begin
  result:= finfo.imagelist;
 end;
 }
-procedure tcustomaction.setimagelist(const Value: timagelist);
-begin
- if value <> finfo.imagelist then begin
-  setlinkedvar(value,tmsecomponent(finfo.imagelist));
-  changed;
- end;
-end;
 {
 function tcustomaction.getimagenr: integer;
 begin
@@ -1250,18 +1229,6 @@ begin
  doupdate;
 end;
 
-procedure tcustomaction.doshortcut(const sender: twidget; var info: keyeventinfoty);
-begin
- if not (es_local in info.eventstate) and (ao_globalshortcut in foptions) or 
-        (es_local in info.eventstate) and (ao_localshortcut in foptions) and
-                (owner <> nil) and issubcomponent(owner,sender) then begin
-  doupdate;
-  if doactionshortcut(self,finfo,info) then begin
-   changed;
-  end;
- end;
-end;
-
 procedure tcustomaction.execute;
 begin
  if doactionexecute(self,finfo) then begin
@@ -1330,12 +1297,7 @@ begin
     end;
    end;
    if [ao_globalshortcut,ao_localshortcut] * delta <> [] then begin
-    if [ao_globalshortcut,ao_localshortcut] * value <> [] then begin
-     application.registeronshortcut({$ifdef FPC}@{$endif}doshortcut);
-    end
-    else begin
-     application.unregisteronshortcut({$ifdef FPC}@{$endif}doshortcut);
-    end;
+    registeronshortcut([ao_globalshortcut,ao_localshortcut] * value <> []);
    end;
   end;
  end;
@@ -1380,6 +1342,16 @@ begin
 //    (tmethod(finfo.onexecute).code = tmethod(ainfo.onexecute).code) then begin
   sendchangeevent(oe_fired);
 // end;
+end;
+
+procedure tcustomaction.registeronshortcut(const avalue: boolean);
+begin
+ //dummy
+end;
+
+procedure tcustomaction.doafterunlink;
+begin
+ //dummy
 end;
 
 end.

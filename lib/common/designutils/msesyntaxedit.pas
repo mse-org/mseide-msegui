@@ -77,7 +77,8 @@ function checkbracketkind(const achar: msechar; out open: boolean): bracketkindt
 
 implementation
 uses
- msegrids,mserichstring,mseinplaceedit,msegraphics,msekeyboard,msegui;
+ msegrids,mserichstring,mseinplaceedit,msegraphics,msekeyboard,msegui,
+ msegraphutils;
 
 type
  tundoinplaceedit1 = class(tundoinplaceedit);

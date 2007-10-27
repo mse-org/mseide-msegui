@@ -39,6 +39,7 @@ type
    function isimagenrstored: Boolean;
    function isimagecheckedoffsetstored: Boolean;
    function isimageliststored: Boolean;
+   function getimagelist: timagelist;
    procedure setimagelist(const Value: timagelist);
    function isgroupstored: Boolean;
    procedure setgroup(const Value: integer);
@@ -76,7 +77,7 @@ type
    function index: integer;
    property checked: boolean read getchecked write setchecked;
   published
-   property imagelist: timagelist read finfo.imagelist write setimagelist
+   property imagelist: timagelist read getimagelist write setimagelist
                     stored isimageliststored;
    property imagenr: integer read finfo.imagenr write setimagenr
                             stored isimagenrstored default -1;
@@ -233,7 +234,8 @@ type
 
 implementation
 uses
- sysutils,msebits;
+ sysutils,msebits,mseguiactions;
+ 
 const
  separatorwidth = 3;
 type
@@ -310,6 +312,11 @@ end;
 function ttoolbutton.isstatestored: Boolean;
 begin
  result:= isactionstatestored(finfo);
+end;
+
+function ttoolbutton.getimagelist: timagelist;
+begin
+ result:= timagelist(finfo.imagelist);
 end;
 
 procedure ttoolbutton.setimagelist(const Value: timagelist);
@@ -1002,7 +1009,7 @@ begin
      imagenr:= buttons[int1].finfo.imagenr;
      colorglyph:= buttons[int1].finfo.colorglyph;
      color:= buttons[int1].finfo.color;
-     imagelist:= buttons[int1].finfo.imagelist;
+     imagelist:= timagelist(buttons[int1].finfo.imagelist);
      doexecute:= {$ifdef FPC}@{$endif}buttons[int1].doexecute;
      invalidaterect(dim);
      if bo1 then begin

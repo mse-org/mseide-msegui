@@ -99,6 +99,7 @@ type
    function getstate: actionstatesty;
    procedure setstate(const value: actionstatesty); virtual;
    function isstatestored: boolean;
+   function getimagelist: timagelist;
    procedure setimagelist(const Value: timagelist);
    function isimageliststored: Boolean;
    procedure setimagenr(const Value: integer);
@@ -152,7 +153,7 @@ type
                               default cp_center;
    property captiondist: integer read finfo.captiondist write setcaptiondist
                             default defaultshapecaptiondist;
-   property imagelist: timagelist read factioninfo.imagelist write setimagelist
+   property imagelist: timagelist read getimagelist write setimagelist
                     stored isimageliststored;
    property imagenr: integer read factioninfo.imagenr write setimagenr
                             stored isimagenrstored default -1;
@@ -423,7 +424,7 @@ type
 
 implementation
 uses
- msekeyboard,sysutils;
+ msekeyboard,sysutils,mseguiactions;
 
 { tcustombutton }
 
@@ -585,6 +586,11 @@ end;
 function tcustombutton.iscaptionstored: boolean;
 begin
  result:= isactioncaptionstored(factioninfo);
+end;
+
+function tcustombutton.getimagelist: timagelist;
+begin
+ result:= timagelist(factioninfo.imagelist);
 end;
 
 procedure tcustombutton.setimagelist(const Value: timagelist);

@@ -20,6 +20,7 @@ type
   protected
    procedure closehandle(const ahandle: integer); override;
    function execthread(thread: tmsethread): integer; override;
+   procedure sethandle(value: integer); override;
   public
    constructor create;
    property timeoutms: integer read ftimeoutms write settimeoutms;
@@ -857,6 +858,14 @@ begin
   include(fstate,tss_eof);
  end;
  result:= 0;
+end;
+
+procedure tsocketreader.sethandle(value: integer);
+begin
+ if value <> invalidfilehandle then begin
+  sys_setnonblocksocket(value,true);
+ end;
+ inherited;
 end;
 
 { tsocketwriter }

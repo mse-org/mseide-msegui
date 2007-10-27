@@ -415,7 +415,7 @@ uses
  selecteditpageform,programparametersform,sourceupdate,mseedit,
  msedesigner,panelform,watchpointsform,commandlineform,msestream,
  componentpaletteform,mserichstring,msesettings,formdesigner,
- msestringlisteditor,msetexteditor,msepropertyeditors,mseshapes
+ msestringlisteditor,msetexteditor,msepropertyeditors,mseshapes,mseactions
  {$ifdef FPC}{$ifndef mse_withoutdb},msedbfieldeditor{$endif}{$endif};
 
 type

@@ -15,7 +15,7 @@ interface
 uses
  msetabsglob,msewidgets,mseclasses,msearrayprops,classes,mseshapes,
  mserichstring,msetypes,msegraphics,msegraphutils,mseevent,mseguiglob,msegui,
- mseforms,rtlconsts,msesimplewidgets,msedrag,
+ mseforms,rtlconsts,msesimplewidgets,msedrag,mseactions,
  mseobjectpicker,msepointer,msestat,msestatfile,msestrings,msemenus;
 
 const

@@ -57,7 +57,7 @@ type
 implementation
 uses
  findinfilepage_mfm,sourcepage,sourceform,mseeditglob,sysutils,mserichstring,
- msegraphics,msestream,msefileutils,msesys,findinfiledialogform;
+ msegraphics,msestream,msefileutils,msesys,findinfiledialogform,msegraphutils;
  
 { tfindinfilepagefo}
  

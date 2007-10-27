@@ -17,12 +17,6 @@ uses
  msegraphutils,mseguiglob,mseclasses;
 
 const
- redmask = $ff0000;
- redshift = 16;
- greenmask = $00ff00;
- greenshift = 8;
- bluemask = $0000ff;
- blueshift = 0;
 
  linewidthshift = 16;
  linewidthroundvalue = $8000;
@@ -33,7 +27,6 @@ const
  
 type
  paintdevicety = cardinal;
- pixelty = cardinal;
  fontty = cardinal;
  regionty = cardinal;
  pixmapty = cardinal;
@@ -62,10 +55,6 @@ const
  da_dashdot = dashesstringty(#3#1#1#1);
 
 type
-
- fontstylety = (fs_bold,fs_italic,fs_underline,fs_strikeout,fs_selected);
-                      //order fix
- fontstylesty = set of fontstylety;
                                        //fontalias option char:
  fontoptionty = (foo_fixed,            // 'p'
                  foo_proportional,     // 'P'
@@ -114,226 +103,6 @@ type
  end;
  pfontmetricsty = ^fontmetricsty;
 
-type
- colorty = type longword;
- pcolorty = ^colorty;
- colorarty = array of colorty;
-
- rgbtriplety = packed record
-  blue: byte;
-  green: byte;
-  red: byte;
-  res: byte;
- end;
- prgbtriplety = ^rgbtriplety;
- rgbtripleaty = array[0..0] of rgbtriplety;
- prgbtripleaty = ^rgbtripleaty;
-
-const
- speccolormask =         $f0000000;
- speccolorshift = 28;
- cl_functional = colorty($80000000);
- cl_mapped =     colorty($90000000);
- cl_namedrgb =   colorty($a0000000);
- cl_user =       colorty($b0000000);
-
- cl_none =                   cl_functional + 0;
- cl_default =                cl_functional + 1;
- cl_parent =                 cl_functional + 2;
- cl_transparent =            cl_functional + 3;
- cl_brush =                  cl_functional + 4;
- cl_brushcanvas =            cl_functional + 5;
- cl_lastfunctional =         cl_functional + 6;
-
- cl_dkshadow =               cl_mapped + 0;
- cl_shadow =                 cl_mapped + 1;
- cl_mid =                    cl_mapped + 2;
- cl_light =                  cl_mapped + 3;
- cl_highlight =              cl_mapped + 4;
- cl_background =             cl_mapped + 5;
- cl_foreground =             cl_mapped + 6;
- cl_active =                 cl_mapped + 7;
- cl_noedit =                 cl_mapped + 8;
- cl_text =                   cl_mapped + 9;
- cl_selectedtext =           cl_mapped + 10;
- cl_selectedtextbackground = cl_mapped + 11;
- cl_infobackground =         cl_mapped + 12;
- cl_glyph =                  cl_mapped + 13;
- cl_activegrip =             cl_mapped + 14;
- cl_lastmapped =             cl_mapped + 15;
-
- cl_0 =                      cl_namedrgb + 0; //select colorbackground for monochrome bitmaps
- cl_1 =                      cl_namedrgb + 1; //select colorforeground
- cl_black =                  cl_namedrgb + 2;
- cl_dkgray =                 cl_namedrgb + 3;
- cl_gray =                   cl_namedrgb + 4;
- cl_ltgray =                 cl_namedrgb + 5;
- cl_white =                  cl_namedrgb + 6;
-
- cl_red =                    cl_namedrgb + 7;
- cl_green =                  cl_namedrgb + 8;
- cl_blue =                   cl_namedrgb + 9;
- cl_cyan =                   cl_namedrgb + 10;
- cl_magenta =                cl_namedrgb + 11;
- cl_yellow =                 cl_namedrgb + 12;
-
- cl_dkred =                  cl_namedrgb + 13;
- cl_dkgreen =                cl_namedrgb + 14;
- cl_dkblue =                 cl_namedrgb + 15;
- cl_dkcyan =                 cl_namedrgb + 16;
- cl_dkmagenta =              cl_namedrgb + 17;
- cl_dkyellow =               cl_namedrgb + 18;
-
- cl_ltred =                  cl_namedrgb + 19;
- cl_ltgreen =                cl_namedrgb + 20;
- cl_ltblue =                 cl_namedrgb + 21;
- cl_ltcyan =                 cl_namedrgb + 22;
- cl_ltmagenta =              cl_namedrgb + 23;
- cl_ltyellow =               cl_namedrgb + 24;
-
- cl_lastnamedrgb =           cl_namedrgb + 25;
- 
- cl_user0 =                  cl_user     + 0;
- cl_user1 =                  cl_user     + 1;
- cl_user2 =                  cl_user     + 2;
- cl_user3 =                  cl_user     + 3;
- cl_user4 =                  cl_user     + 4;
- cl_user5 =                  cl_user     + 5;
- cl_user6 =                  cl_user     + 6;
- cl_user7 =                  cl_user     + 7;
- cl_user8 =                  cl_user     + 8;
- cl_user9 =                  cl_user     + 9;
- cl_user10 =                 cl_user     + 10;
- cl_user11 =                 cl_user     + 11;
- cl_user12 =                 cl_user     + 12;
- cl_user13 =                 cl_user     + 13;
- cl_user14 =                 cl_user     + 14;
- cl_user15 =                 cl_user     + 15;
- cl_user16 =                 cl_user     + 16;
- cl_user17 =                 cl_user     + 17;
- cl_user18 =                 cl_user     + 18;
- cl_user19 =                 cl_user     + 19;
- 
- cl_lastuser =               cl_user     + 20;
-
-type
-
- colorinfoty = record
-                name: string;
-                rgb: rgbtriplety;
-               end;
- pcolorinfoty = ^colorinfoty;
- colorinfoarty = array of colorinfoty;
-
- colormapsty = (cm_rgb,cm_functional,cm_mapped,cm_namedrgb,cm_user);
- colormapty = array[colormapsty] of cardinalarty;
-
-const
- functionalcolorcount = integer(cl_lastfunctional)-integer(cl_functional);
- mappedcolorcount = integer(cl_lastmapped)-integer(cl_mapped);
- namedrgbcolorcount = integer(cl_lastnamedrgb)-integer(cl_namedrgb);
- usercolorcount = integer(cl_lastuser)-integer(cl_user);
- mapcolorcounts: array[colormapsty] of integer = (
-              0,
-              functionalcolorcount,
-              mappedcolorcount,
-              namedrgbcolorcount,
-              usercolorcount
-            );
-
- defaultfunctional: array[0..functionalcolorcount-1]
-                     of colorinfoty =
-   (
-    (name: 'cl_none';  rgb:                  (blue: $00; green: $00; red: $00; res: $00)), //0
-    (name: 'cl_default'; rgb:                (blue: $00; green: $00; red: $00; res: $00)), //1
-    (name: 'cl_parent';  rgb:                (blue: $00; green: $00; red: $00; res: $00)), //2
-    (name: 'cl_transparent'; rgb:            (blue: $00; green: $00; red: $00; res: $00)), //3
-    (name: 'cl_brush';  rgb:                 (blue: $00; green: $00; red: $00; res: $00)), //4
-    (name: 'cl_brushcanvas'; rgb:            (blue: $00; green: $00; red: $00; res: $00))  //5
-//    (name: 'cl_mask'; rgb:                   (blue: $00; green: $00; red: $00; res: $00))
-//    (name: 'cl_grayed'; rgb:                 (blue: $80; green: $80; red: $80; res: $00))
-   );
-
- defaultmapped: array[0..mappedcolorcount-1]
-                     of colorinfoty =
-   (
-    (name: 'cl_dkshadow'; rgb:               (blue: $00; green: $00; red: $00; res: $00)), //0
-    (name: 'cl_shadow'; rgb:                 (blue: $80; green: $80; red: $80; res: $00)), //1
-    (name: 'cl_mid'; rgb:                    (blue: $c0; green: $c0; red: $c0; res: $00)), //2
-    (name: 'cl_light'; rgb:                  (blue: $e0; green: $e0; red: $e0; res: $00)), //3
-    (name: 'cl_highlight'; rgb:              (blue: $ff; green: $ff; red: $ff; res: $00)), //4
-    (name: 'cl_background';  rgb:            (blue: $d0; green: $d0; red: $d0; res: $00)), //5
-    (name: 'cl_foreground';  rgb:            (blue: $ff; green: $ff; red: $ff; res: $00)), //6
-    (name: 'cl_active';  rgb:                (blue: $e0; green: $e0; red: $e0; res: $00)), //7
-    (name: 'cl_noedit';  rgb:                (blue: $e0; green: $e0; red: $e0; res: $00)), //8
-                                //canvas defaultcolors
-    (name: 'cl_text';  rgb:                  (blue: $00; green: $00; red: $00; res: $00)), //9
-    (name: 'cl_selectedtext'; rgb:           (blue: $ff; green: $ff; red: $ff; res: $00)), //10
-    (name: 'cl_selectedtextbackground'; rgb: (blue: $c0; green: $00; red: $00; res: $00)), //11
-    (name: 'cl_infobackground'; rgb:         (blue: $e0; green: $ff; red: $ff; res: $00)), //12
-    (name: 'cl_glyph'; rgb:                  (blue: $00; green: $00; red: $00; res: $00)), //13
-    (name: 'cl_activegrip'; rgb:             (blue: $90; green: $20; red: $20; res: $00))  //14
-   );
-
- defaultnamedrgb: array[0..namedrgbcolorcount-1]
-                     of colorinfoty =
-   (
-    (name: 'cl_0';  rgb:                     (blue: $00; green: $00; red: $00; res: $00)), //0
-    (name: 'cl_1';  rgb:                     (blue: $ff; green: $ff; red: $ff; res: $00)), //1
-
-    (name: 'cl_black'; rgb:                  (blue: $00; green: $00; red: $00; res: $00)), //2
-    (name: 'cl_dkgray';  rgb:                (blue: $80; green: $80; red: $80; res: $00)), //3
-    (name: 'cl_gray';  rgb:                  (blue: $c0; green: $c0; red: $c0; res: $00)), //4
-    (name: 'cl_ltgray';  rgb:                (blue: $e0; green: $e0; red: $e0; res: $00)), //5
-    (name: 'cl_white';  rgb:                 (blue: $ff; green: $ff; red: $ff; res: $00)), //6
-
-    (name: 'cl_red';   rgb:                  (blue: $00; green: $00; red: $ff; res: $00)), //7
-    (name: 'cl_green'; rgb:                  (blue: $00; green: $ff; red: $00; res: $00)), //8
-    (name: 'cl_blue';  rgb:                  (blue: $ff; green: $00; red: $00; res: $00)), //9
-    (name: 'cl_cyan';  rgb:                  (blue: $ff; green: $ff; red: $00; res: $00)), //10
-    (name: 'cl_magenta';  rgb:               (blue: $ff; green: $00; red: $ff; res: $00)), //11
-    (name: 'cl_yellow';  rgb:                (blue: $00; green: $ff; red: $ff; res: $00)), //12
-
-    (name: 'cl_dkred';   rgb:                (blue: $00; green: $00; red: $c0; res: $00)), //13
-    (name: 'cl_dkgreen'; rgb:                (blue: $00; green: $c0; red: $00; res: $00)), //14
-    (name: 'cl_dkblue';  rgb:                (blue: $c0; green: $00; red: $00; res: $00)), //15
-    (name: 'cl_dkcyan';  rgb:                (blue: $80; green: $80; red: $00; res: $00)), //16
-    (name: 'cl_dkmagenta';  rgb:             (blue: $80; green: $00; red: $80; res: $00)), //17
-    (name: 'cl_dkyellow';  rgb:              (blue: $00; green: $80; red: $80; res: $00)), //18
-
-    (name: 'cl_ltred';   rgb:                (blue: $a0; green: $a0; red: $ff; res: $00)), //19
-    (name: 'cl_ltgreen'; rgb:                (blue: $a0; green: $ff; red: $a0; res: $00)), //20
-    (name: 'cl_ltblue';  rgb:                (blue: $ff; green: $a0; red: $a0; res: $00)), //21
-    (name: 'cl_ltcyan';  rgb:                (blue: $ff; green: $ff; red: $a0; res: $00)), //22
-    (name: 'cl_ltmagenta';  rgb:             (blue: $ff; green: $a0; red: $ff; res: $00)), //23
-    (name: 'cl_ltyellow';  rgb:              (blue: $a0; green: $ff; red: $ff; res: $00))  //24
-   );
-
- defaultuser: array[0..usercolorcount-1]
-                     of colorinfoty =
-   (
-    (name: 'cl_user0';  rgb:                 (blue: $00; green: $00; red: $00; res: $00)), //0
-    (name: 'cl_user1';  rgb:                 (blue: $00; green: $00; red: $00; res: $00)), //1
-    (name: 'cl_user2';  rgb:                 (blue: $00; green: $00; red: $00; res: $00)), //2
-    (name: 'cl_user3';  rgb:                 (blue: $00; green: $00; red: $00; res: $00)), //3
-    (name: 'cl_user4';  rgb:                 (blue: $00; green: $00; red: $00; res: $00)), //4
-    (name: 'cl_user5';  rgb:                 (blue: $00; green: $00; red: $00; res: $00)), //5
-    (name: 'cl_user6';  rgb:                 (blue: $00; green: $00; red: $00; res: $00)), //6
-    (name: 'cl_user7';  rgb:                 (blue: $00; green: $00; red: $00; res: $00)), //7
-    (name: 'cl_user8';  rgb:                 (blue: $00; green: $00; red: $00; res: $00)), //8
-    (name: 'cl_user9';  rgb:                 (blue: $00; green: $00; red: $00; res: $00)), //9
-    (name: 'cl_user10';  rgb:                (blue: $00; green: $00; red: $00; res: $00)), //10
-    (name: 'cl_user11';  rgb:                (blue: $00; green: $00; red: $00; res: $00)), //11
-    (name: 'cl_user12';  rgb:                (blue: $00; green: $00; red: $00; res: $00)), //12
-    (name: 'cl_user13';  rgb:                (blue: $00; green: $00; red: $00; res: $00)), //13
-    (name: 'cl_user14';  rgb:                (blue: $00; green: $00; red: $00; res: $00)), //14
-    (name: 'cl_user15';  rgb:                (blue: $00; green: $00; red: $00; res: $00)), //15
-    (name: 'cl_user16';  rgb:                (blue: $00; green: $00; red: $00; res: $00)), //16
-    (name: 'cl_user17';  rgb:                (blue: $00; green: $00; red: $00; res: $00)), //17
-    (name: 'cl_user18';  rgb:                (blue: $00; green: $00; red: $00; res: $00)), //18
-    (name: 'cl_user19';  rgb:                (blue: $00; green: $00; red: $00; res: $00))  //19
-   );
-   
 type
  canvasstatety =
   (cs_regioncopy,cs_clipregion,cs_origin,cs_gc,
@@ -720,21 +489,6 @@ type
  edgeinfoty = (kin_dark,kin_reverseend,kin_reversestart);
  edgeinfosty = set of edgeinfoty;
 
- gdierrorty = (gde_ok,
-               gde_invalidgc,
-               gde_notruecolor,
-               gde_invalidcolor,
-               gde_invalidsaveindex,
-               gde_parameter,
-               gde_font,
-               gde_pixmap,gde_freepixmap,
-               gde_invalidcopymode,gde_mustbebitmap,
-               gde_notmonochrome,gde_unmatchedmonochrome,
-               gde_fontmetrics,gde_image,gde_invalidrect,gde_invalidfileformat,
-               gde_invalidindex,
-               gde_notimplemented
-              );
-
  gdiintffuncty = procedure (func: gdifuncty; var drawinfo: drawinfoty);
 
  tcanvas = class(tpersistent)
@@ -1065,14 +819,6 @@ type
    property monochrome: boolean read getmonochrome write setmonochrome;
  end;
 
- egdi = class(eerror)
-  private
-   ferror1: gdierrorty;
-  public
-   constructor create(aerror: gdierrorty; atext: string);
-   property error: gdierrorty read ferror1;
- end;
-
 const
  {$ifdef FPC}
   {$warnings off}
@@ -1115,15 +861,9 @@ procedure clearfontalias; //removes all alias which are not fam_fix
 function realfontname(const aliasname: string): string;
 function getfontforglyph(const abasefont: fontty; const glyph: unicharty): fontnumty;
 
-procedure gdierror(error: gdierrorty; const text: string = ''); overload;
-procedure gdierror(error: gdierrorty; sender: tobject; text: string = ''); overload;
 procedure gdierrorlocked(error: gdierrorty; const text: string = ''); overload;
 procedure gdierrorlocked(error: gdierrorty; sender: tobject; text: string = ''); overload;
 
-function stringtocolor(value: string): colorty;
-function colortostring(value: colorty): string;
-function getcolornames: msestringarty;
-function getcolorvalues: colorarty;
 function colortorgb(color: colorty): rgbtriplety;
 function colortopixel(color: colorty): pixelty;
 function rgbtocolor(const red,green,blue: integer): colorty;
@@ -1140,27 +880,6 @@ uses
  SysUtils,msegui,mseguiintf,msestreaming,mseformatstr,msestockobjects,
  msedatalist,mselist,msesys,msebits,msewidgets;
 const
- errortexts: array[gdierrorty] of string = (
-   '',
-   'Invalid GC',
-   'Color mode must be truecolor',
-   'Invalid color',
-   'Invalid saveindex',
-   'Invalid parameter',
-   'Invalid font',
-   'Invalid pixmap',
-   'Can not free pixmap',
-   'Invalid copymode',
-   'Must be bitmap',
-   'Must be monochrome',
-   'Unmatched monochrome',
-   'Invalid fontmetrics',
-   'Can not create image',
-   'Invalid rect',
-   'Invalid file format',
-   'Invalid index',
-   'Not implemented'
- );
  maxfontcount = 64;
 
 type
@@ -1244,124 +963,6 @@ var
  lastreusedfont: integer;
  ffontaliaslist: tfontaliaslist;
  inited: boolean;
-
-function stringtocolor(value: string): colorty;
-var
- ca1: cardinal;
-begin
- result:= cl_none;
- try
-  result:= colorty(strtohex(value));
-  if cardinal(result) > $00ffffff then begin
-   gdierror(gde_invalidcolor);
-  end;
- except
-  value:= lowercase(value);
-  for ca1:= 0 to mapcolorcounts[cm_namedrgb] - 1 do begin
-   if defaultnamedrgb[ca1].name = value then begin
-    result:= colorty(ca1 + cardinal(cl_namedrgb));
-    exit;
-   end;
-  end;
-  for ca1:= 0 to mapcolorcounts[cm_mapped] - 1 do begin
-   if defaultmapped[ca1].name = value then begin
-    result:= colorty(ca1 + cardinal(cl_mapped));
-    exit;
-   end;
-  end;
-  for ca1:= 0 to mapcolorcounts[cm_functional] - 1 do begin
-   if defaultfunctional[ca1].name = value then begin
-    result:= colorty(ca1 + cardinal(cl_functional));
-    exit;
-   end;
-  end;
-  for ca1:= 0 to mapcolorcounts[cm_user] - 1 do begin
-   if defaultuser[ca1].name = value then begin
-    result:= colorty(ca1 + cardinal(cl_user));
-    exit;
-   end;
-  end;
-  gdierror(gde_invalidcolor);
- end;
-end;
-
-function colortostring(value: colorty): string;
-begin
- if cardinal(value) <= $00ffffff then begin
-  result:= '$'+hextostr(cardinal(value),6);
- end
- else begin
-  if (cardinal(value) >= cardinal(cl_namedrgb)) and
-       (cardinal(value) < cardinal(cl_lastnamedrgb)) then begin
-   result:= defaultnamedrgb[cardinal(value) - cardinal(cl_namedrgb)].name;
-  end
-  else begin
-   if (cardinal(value) >= cardinal(cl_mapped)) and
-        (cardinal(value) < cardinal(cl_lastmapped)) then begin
-    result:= defaultmapped[cardinal(value) - cardinal(cl_mapped)].name;
-   end
-   else begin
-    if (cardinal(value) >= cardinal(cl_functional)) and
-         (cardinal(value) < cardinal(cl_lastfunctional)) then begin
-     result:= defaultfunctional[cardinal(value) - cardinal(cl_functional)].name;
-    end
-    else begin
-     if (cardinal(value) >= cardinal(cl_user)) and
-          (cardinal(value) < cardinal(cl_lastuser)) then begin
-      result:= defaultuser[cardinal(value) - cardinal(cl_user)].name;
-     end
-     else begin
-      result:= 'Invalid ($'+hextostr(cardinal(value),8)+')';
-     end;
-    end;
-   end;
-  end;
- end;
-end;
-
-function getcolornames: msestringarty;
-var
- int1,int2: integer;
-begin
- setlength(result,namedrgbcolorcount+mappedcolorcount+functionalcolorcount+usercolorcount);
- for int1:= 0 to high(defaultnamedrgb) do begin
-  result[int1]:= defaultnamedrgb[int1].name;
- end;
- int2:= namedrgbcolorcount;
- for int1:= 0 to high(defaultmapped) do begin
-  result[int1+int2]:= defaultmapped[int1].name;
- end;
- inc(int2,mappedcolorcount);
- for int1:= 0 to high(defaultfunctional) do begin
-  result[int1+int2]:= defaultfunctional[int1].name;
- end;
- inc(int2,functionalcolorcount);
- for int1:= 0 to high(defaultuser) do begin
-  result[int1+int2]:= defaultuser[int1].name;
- end;
-end;
-
-function getcolorvalues: colorarty;
-var
- int1,int2: integer;
-begin
- setlength(result,namedrgbcolorcount+mappedcolorcount+functionalcolorcount+usercolorcount);
- for int1:= 0 to high(defaultnamedrgb) do begin
-  result[int1]:= cl_namedrgb + cardinal(int1);
- end;
- int2:= namedrgbcolorcount;
- for int1:= 0 to high(defaultmapped) do begin
-  result[int1+int2]:= cl_mapped + cardinal(int1);
- end;
- inc(int2,mappedcolorcount);
- for int1:= 0 to high(defaultfunctional) do begin
-  result[int1+int2]:= cl_functional + cardinal(int1);
- end;
- inc(int2,functionalcolorcount);
- for int1:= 0 to high(defaultuser) do begin
-  result[int1+int2]:= cl_user + cardinal(int1);
- end;
-end;
 
 function checkfontoptions(const new,old: fontoptionsty): fontoptionsty;
 const
@@ -1685,32 +1286,9 @@ begin
  end;
 end;
 
-procedure gdierror(error: gdierrorty; const text: string = ''); overload;
-begin
- if error = gde_ok then begin
-  exit;
- end;
- raise egdi.create(error,text);
-end;
-
 procedure gdierrorlocked(error: gdierrorty; const text: string = ''); overload;
 begin
  gdi_unlock;
- gdierror(error,text);
-end;
-
-procedure gdierror(error: gdierrorty; sender: tobject;
-                       text: string = ''); overload;
-begin
- if error = gde_ok then begin
-  exit;
- end;
- if sender <> nil then begin
-  text:= sender.classname + ' ' + text;
-  if sender is tcomponent then begin
-   text:= text + ' ' + fullcomponentname(tcomponent(sender));
-  end;
- end;
  gdierror(error,text);
 end;
 
@@ -5120,13 +4698,6 @@ begin
   ffont.releasehandles;
   gcfonthandle1:= 0; //invalid  
  end; 
-end;
-
-{ egdi }
-
-constructor egdi.create(aerror: gdierrorty; atext: string);
-begin
- inherited create(integer(aerror),atext,errortexts);
 end;
 
 initialization

@@ -20,7 +20,7 @@ unit actionsmodule;
 
 interface
 uses
- mseclasses,mseactions,msebitmap,msestrings,msegui,msedatamodules;
+ mseclasses,mseactions,mseguiactions,msebitmap,msestrings,msegui,msedatamodules;
  
 type
  tactionsmo = class(tmsedatamodule)
