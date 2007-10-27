@@ -721,7 +721,7 @@ end;
 function sempost1(var sem: semty): syserrorty;
 begin
  with win32semty(sem) do begin
-  if interlockedincrement(semacount) >= 0 then begin
+  if interlockedincrement(semacount) <= 0 then begin
    setevent(event);
   end;
   result:= sye_ok;
