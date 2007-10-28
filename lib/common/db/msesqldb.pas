@@ -11,7 +11,8 @@ unit msesqldb;
 {$ifdef FPC}{$mode objfpc}{$h+}{$INTERFACES CORBA}{$endif}
 interface
 uses
- classes,db,msebufdataset,msqldb,msedb,mseclasses,msetypes,mseguiglob,msedatabase;
+ classes,db,msebufdataset,msqldb,msedb,mseclasses,msetypes,mseguiglob,
+ msedatabase,sysutils;
   
 type
  tmsesqltransaction = class(tsqltransaction)
@@ -239,7 +240,7 @@ type
  
 implementation
 uses
- msestrings,dbconst,msesysutils,typinfo,sysutils,msedatalist,mseapplication;
+ msestrings,dbconst,msesysutils,typinfo,msedatalist,mseapplication;
  
 { tmsesqltransaction }
 

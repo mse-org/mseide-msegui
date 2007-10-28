@@ -13,7 +13,7 @@ interface
 
 uses
  classes,msegui,mseclasses,msearrayprops,msetypes,msegraphics,msegraphutils,
- msewidgets,msesimplewidgets,msedial,msebitmap;
+ msewidgets,msesimplewidgets,msedial,msebitmap,msemenus,mseevent;
  
 type
  tcustomchart = class;

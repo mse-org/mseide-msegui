@@ -262,7 +262,8 @@ uses
  objectinspector,msesysutils,msestream,msesys,cpuform,disassform,
  panelform,watchpointsform,threadsform,targetconsole,
  debuggerform,componentpaletteform,messageform,msesettings,mseintegerenter
- {$ifdef linux} ,libc {$endif},mseprocutils;
+ {$ifdef linux} ,libc {$endif},mseprocutils
+ {$ifdef mse_dumpunitgroups},dumpunitgroups{$endif};
 
 procedure handleerror(const e: exception; const text: string);
 begin
@@ -1284,6 +1285,9 @@ begin
  finally
   mainfo.activate;
  end;
+ {$ifdef mse_dumpunitgroups}
+ dumpunitgr;
+ {$endif}
 end;
 
 function getmodulename(const aname,suffix: string): string;

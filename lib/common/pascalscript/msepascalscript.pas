@@ -3,8 +3,8 @@ unit msepascalscript;
 interface
 uses
  classes,uPSComponent,uPSCompiler,uPSRuntime,msestrings,mseforms,mseclasses,
- typinfo,mselist;
- 
+ typinfo,mselist,uPSPreProcessor;
+
 type 
  tmsepsscript = class(tpsscript)
   public

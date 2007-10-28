@@ -14,7 +14,8 @@ unit msesyntaxedit;
 interface
 uses
  Classes,msetextedit,msesyntaxpainter,mseclasses,mseguiglob,msetypes,mseevent,
- mseeditglob,msestrings,msewidgetgrid,msedatalist;
+ mseeditglob,msestrings,msewidgetgrid,msedatalist,msemenus,msegui,mseinplaceedit,
+ msegrids;
  
 type
  bracketkindty = (bki_none,bki_round,bki_square,bki_curly);
@@ -77,7 +78,7 @@ function checkbracketkind(const achar: msechar; out open: boolean): bracketkindt
 
 implementation
 uses
- msegrids,mserichstring,mseinplaceedit,msegraphics,msekeyboard,msegui,
+ mserichstring,msegraphics,msekeyboard,
  msegraphutils;
 
 type

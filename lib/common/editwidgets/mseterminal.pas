@@ -14,7 +14,7 @@ unit mseterminal;
 interface
 uses
  msegrids,Classes,msestream,mseclasses,msepipestream,mseevent,mseinplaceedit,
- msetextedit,msestrings,msesys,mseeditglob;
+ msetextedit,msestrings,msesys,mseeditglob,msemenus,msegui;
 const
  defaultterminaleditoptions = (defaulttexteditoptions + [oe_caretonreadonly])-
                             [oe_linebreak];
@@ -75,7 +75,7 @@ type
 
 implementation
 uses
- msesysutils,msegui,mseprocutils,msewidgets,mseguiglob,msetypes,
+ msesysutils,mseprocutils,msewidgets,mseguiglob,msetypes,
  msekeyboard,sysutils;
 
 { tterminal }

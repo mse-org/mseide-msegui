@@ -14,7 +14,8 @@ unit msedbgraphics;
 interface
 uses
  classes,db,mseimage,msedataimage,msedbdispwidgets,msedb,msetypes,msedbedit,
- msegrids,msewidgetgrid,msedatalist,msebitmap,msebintree,msegraphics;
+ msegrids,msewidgetgrid,msedatalist,msebitmap,msebintree,msegraphics,
+ msemenus,mseevent,msegui;
 
 { add the needed graphic format units to your project:
  mseformatbmpico,mseformatjpg,mseformatpng,

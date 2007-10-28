@@ -16,7 +16,7 @@ uses
  msewidgets,classes,msedrag,msegui,msegraphutils,mseevent,mseclasses,
  msegraphics,msestockobjects,mseguiglob,msestat,msestatfile,msepointer,
  msesplitter,msesimplewidgets,msetypes,msestrings,msebitmap,mseobjectpicker,
- msetabsglob;
+ msetabsglob,msemenus;
  
 //todo: optimize
 

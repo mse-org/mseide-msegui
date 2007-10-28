@@ -12,7 +12,7 @@ unit mseopenglwidget;
 interface
 uses
  msewindowwidget,msegl,{$ifdef unix}mseglx,x,xlib,{$else}windows,{$endif}
- mseguiintf,msetypes,mseguiglob,mseclasses,
+ mseguiintf,msetypes,mseguiglob,mseclasses,msemenus,mseevent,msegui,msegraphics,
  msegraphutils;
  
 type

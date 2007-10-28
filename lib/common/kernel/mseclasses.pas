@@ -495,6 +495,7 @@ function ownernamepath(const acomponent: tcomponent): string;
 procedure setcomponentorder(const owner: tcomponent; const anames: msestringarty);
 
 function getpropinfoar(const obj: tobject): propinfopoarty;
+function getpropinfoar(const atypeinfo: ptypeinfo): propinfopoarty;
 
 procedure createobjectlinker(const owner: iobjectlink; onevent: objectlinkeventty;
                                   var instance: tobjectlinker);
@@ -870,16 +871,19 @@ begin
  end;
 end;
 
-function getpropinfoar(const obj: tobject): propinfopoarty;
+function getpropinfoar(const atypeinfo: ptypeinfo): propinfopoarty;
 var
- po: ptypeinfo;
  po1: ptypedata;
 begin
+ po1:= gettypedata(atypeinfo);
+ setlength(result,po1^.PropCount);
+ getpropinfos(atypeinfo,pointer(result));
+end;
+
+function getpropinfoar(const obj: tobject): propinfopoarty;
+begin
  if obj <> nil then begin
-  po:= obj.classinfo;
-  po1:= gettypedata(po);
-  setlength(result,po1^.PropCount);
-  getpropinfos(po,pointer(result));
+  result:= getpropinfoar(obj.classinfo);
  end
  else begin
   result:= nil;

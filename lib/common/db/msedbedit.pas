@@ -18,7 +18,7 @@ uses
  msewidgetgrid,msedatalist,msetypes,msegrids,msegraphics,mseevent,msekeyboard,
  msegraphedits,msestrings,{sqldb,}msegraphutils,mselist,msedropdownlist,
  msescrollbar,msedataedits,msewidgets,msearrayprops,msedb,mselookupbuffer,
- msedialog,mseinplaceedit;
+ msedialog,mseinplaceedit,msemenus,mseedit;
 
 type
 

@@ -14,7 +14,7 @@ unit mseimage;
 interface
 uses
  {$ifdef FPC}classes{$else}Classes{$endif},msegraphics,msegraphutils,msewidgets,
-  msebitmap,msegui;
+  msebitmap,msegui,msemenus,mseevent;
 
 type
  timage = class(tscrollingwidget)

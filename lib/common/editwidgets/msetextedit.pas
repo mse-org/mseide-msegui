@@ -15,7 +15,7 @@ interface
 uses
  mseeditglob,mseedit,msewidgetgrid,classes,msedatalist,msegraphics,msestream,
  msetypes,mserichstring,msestat,msestatfile,mseclasses,mseinplaceedit,msegrids,
- mseevent,msegui,msegraphutils,msestrings,msedrawtext,msearrayprops;
+ mseevent,msegui,msegraphutils,msestrings,msedrawtext,msearrayprops,msemenus;
 
 const
  defaulttexteditoptions =  (defaultoptionsedit + [oe_linebreak]) -

@@ -192,7 +192,10 @@ type
    function composeprocedureheader(const infopo: pprocedureinfoty;
                      const withdefault: boolean): string; overload;
    function gettype(const adef: pdefinfoty): stringarty;
-   function finddef(const infopo: punitinfoty; const apos: sourceposty): pdefinfoty;
+   function finddef(const infopo: punitinfoty;
+                   const apos: sourceposty): pdefinfoty; overload;
+   function finddef(const infopo: punitinfoty;
+                   const typename: string): pdefinfoty; overload;
    function getitemtext(const aitem: sourceitemty): string;
    function getdefinfotext(const adef: pdefinfoty): string;
    property maxlinelength: integer read fmaxlinelength write fmaxlinelength default 80;
@@ -881,6 +884,23 @@ begin
  finally
   application.endwait;
  end;
+end;
+
+function tsourceupdater.finddef(const infopo: punitinfoty;
+                   const typename: string): pdefinfoty;
+var
+ ar1: stringarty;
+ scope: tdeflist;
+ scopes: deflistarty;
+ defs: definfopoarty;
+begin
+ result:= nil;
+ resetunitsearched;
+ ar1:= splitstring(typename,'.');
+ scope:= infopo^.deflist;
+ if scope.finddef(ar1,scopes,defs,true,dsl_normal,syk_nopars) then begin
+  result:= defs[0];
+ end; 
 end;
 
 function tsourceupdater.listprocheaders(const infopo: punitinfoty;

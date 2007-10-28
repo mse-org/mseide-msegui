@@ -17,7 +17,7 @@ uses
  msetypes,msestrings,msedatalist,
  mseguiglob,mseevent,msegraphutils,msedrawtext,msestat,msestatfile,mseclasses,
  msearrayprops,msegrids,msewidgetgrid,msedropdownlist,msedrag,mseforms,
- mseformatstr,typinfo,
+ mseformatstr,typinfo,msemenus,
  msescrollbar,msewidgets,msepopupcalendar,msekeyboard;
 
 type

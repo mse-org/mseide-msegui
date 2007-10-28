@@ -14,7 +14,8 @@ unit msedialog;
 interface
 
 uses
- mseclasses,msegui,mseguiglob,mseforms,msedataedits,mseedit,classes,mseevent,msestrings;
+ mseclasses,msegui,mseguiglob,mseforms,msedataedits,mseedit,classes,mseevent,
+ msemenus,msestrings;
 
 type
  tdialogform = class(tmseform)

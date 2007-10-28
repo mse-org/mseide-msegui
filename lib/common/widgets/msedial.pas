@@ -12,7 +12,7 @@ unit msedial;
 interface
 uses
  classes,msewidgets,msegraphutils,msegraphics,msegui,msearrayprops,mseclasses,
- msetypes,mseguiglob,msestrings;
+ msetypes,mseguiglob,msestrings,msemenus,mseevent;
 
 const
  defaultdialcolor = cl_dkgray;

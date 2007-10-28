@@ -14,7 +14,8 @@ unit msedispwidgets;
 interface
 uses
  classes,msegui,mseguiglob,msewidgets,msegraphics,msedrawtext,msegraphutils,
-   msetypes,msestrings,mseformatstr{$ifdef mse_with_ifi},mseifiglob{$endif};
+ msemenus,msetypes,msestrings,mseformatstr,mseevent
+ {$ifdef mse_with_ifi},mseifiglob{$endif};
 
 const
  defaultdisptextflags = [tf_ycentered];

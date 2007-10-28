@@ -16,7 +16,7 @@ interface
 uses
  msegui,mseguiglob,msetypes,msestrings,msegraphics,mseevent,mseactions,msewidgets,
  mserichstring,mseshapes,Classes,mseclasses,msebitmap,msedrawtext,
- msedrag,msestockobjects,msegraphutils;
+ msedrag,msestockobjects,msegraphutils,msemenus;
 
 const
  defaultbuttonwidth = 50;

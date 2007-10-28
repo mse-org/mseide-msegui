@@ -13,7 +13,7 @@ unit msewidgetgrid;
 
 interface
 uses
- msegrids,msegui,msegraphutils,mseguiglob,mseeditglob,Classes,
+ msegrids,msegui,msegraphutils,mseguiglob,mseeditglob,Classes,msemenus,
  msegraphics,mseevent,msedatalist,msetypes,msepointer,msestrings;
 
 type

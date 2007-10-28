@@ -16,7 +16,7 @@ uses
  {$ifdef FPC}classes{$else}Classes{$endif},msegui,mseguiglob,msescrollbar,
  msegraphutils,msegraphics,mseevent,
  msewidgets,mseeditglob,msestockobjects,msestat,msestatfile,
- mseclasses,msesimplewidgets,
+ mseclasses,msesimplewidgets,msemenus,
  msegrids,msewidgetgrid,msedatalist,msebitmap,msetypes,msestrings,msearrayprops,
  msedrawtext,mseshapes{$ifdef mse_with_ifi},mseifi,mseifiglob{$endif};
 

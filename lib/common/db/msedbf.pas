@@ -11,7 +11,8 @@ unit msedbf;
 {$ifdef FPC}{$mode objfpc}{$h+}{$INTERFACES CORBA}{$endif}
 interface
 uses
- classes,db,dbf,msedb,msestrings;
+ classes,db,dbf,msedb,msestrings,dbf_idxfile;
+ 
 type
  tmsedbf = class(tdbf,imselocate,idscontroller,igetdscontroller)
   private

@@ -15,7 +15,8 @@ unit msedbdialog;
 interface
 uses
  classes,msefiledialog,db,mseinplaceedit,msedbedit,msegui,msewidgetgrid,
- msedatalist,mseeditglob,msegrids,msetypes,msedb;
+ msedatalist,mseeditglob,msegrids,msetypes,msedb,msemenus,mseedit,
+ msedataedits,mseevent,msestrings;
  
 type
  tdbfilenameedit = class(tcustomfilenameedit,idbeditfieldlink,idbeditinfo,

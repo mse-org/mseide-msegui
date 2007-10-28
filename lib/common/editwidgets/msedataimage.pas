@@ -12,7 +12,7 @@ unit msedataimage;
 interface
 uses
  classes,msegui,mseimage,msewidgetgrid,msegrids,msedatalist,msegraphutils,
- msegraphics,mseclasses,mseeditglob,msebitmap;
+ msegraphics,mseclasses,mseeditglob,msebitmap,msemenus,mseevent;
  
 type
  tcustomdataimage = class(timage,igridwidget)
