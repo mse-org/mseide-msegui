@@ -1632,6 +1632,7 @@ procedure enablewidgets(awidgets: array of twidget);
 procedure disablewidgets(awidgets: array of twidget);
 procedure showwidgets(awidgets: array of twidget);
 procedure hidewidgets(awidgets: array of twidget);
+function showmodalwidget(const aclass: widgetclassty): modalresultty;
 
 
 procedure writewidgetnames(const writer: twriter; const ar: widgetarty);
@@ -2129,6 +2130,19 @@ var
 begin
  for int1:= 0 to high(awidgets) do begin
   awidgets[int1].visible:= false;
+ end;
+end;
+
+function showmodalwidget(const aclass: widgetclassty): modalresultty;
+var
+ widget1: twidget;
+begin
+ widget1:= nil;
+ application.setlinkedvar(aclass.create(nil),widget1);
+ try
+  result:= widget1.show(true);
+ finally
+  widget1.free;
  end;
 end;
 

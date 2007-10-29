@@ -199,6 +199,14 @@ type
    procedure unregisteronidle(const method: idleeventty);
    procedure settimer(const us: integer); virtual; abstract;
 
+   procedure setlinkedvar(const source: tmsecomponent; var dest: tmsecomponent;
+              const linkintf: iobjectlink = nil); overload;
+   procedure setlinkedvar(const source: tlinkedobject; var dest: tlinkedobject;
+              const linkintf: iobjectlink = nil); overload;
+   procedure setlinkedvar(const source: tlinkedpersistent;
+              var dest: tlinkedpersistent;
+              const linkintf: iobjectlink = nil); overload;
+
    function trylock: boolean;
    function lock: boolean;
     //synchronizes calling thread with main event loop (mutex),
@@ -962,6 +970,24 @@ procedure tcustomapplication.createdatamodule(instanceclass: msecomponentclassty
                                                           var reference);
 begin
  mseclasses.createmodule(self,instanceclass,reference);
+end;
+
+procedure tcustomapplication.setlinkedvar(const source: tmsecomponent;
+               var dest: tmsecomponent; const linkintf: iobjectlink = nil);
+begin
+ inherited;
+end;
+
+procedure tcustomapplication.setlinkedvar(const source: tlinkedobject;
+               var dest: tlinkedobject; const linkintf: iobjectlink = nil);
+begin
+ inherited;
+end;
+
+procedure tcustomapplication.setlinkedvar(const source: tlinkedpersistent;
+               var dest: tlinkedpersistent; const linkintf: iobjectlink = nil);
+begin
+ inherited;
 end;
 
 initialization
