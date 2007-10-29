@@ -13,7 +13,7 @@ unit mserealenter;
 
 interface
 uses
- mseforms,msedataedits,msesimplewidgets,msetypes,mseguiglob,msegui,msedialog,
+ mseglob,mseforms,msedataedits,msesimplewidgets,msetypes,mseguiglob,msegui,msedialog,
  msereal,msestrings;
 
 type

@@ -2,8 +2,7 @@ unit ${%UNITNAME%};
 {$ifdef FPC}{$mode objfpc}{$h+}{$INTERFACES CORBA}{$endif}
 interface
 uses
- msegui,mseclasses,mseforms;
-
+ mseglob,msestat,msemenus,msegui,msegraphics,mseevent,mseclasses,mseforms;
 type
  t${%FORMNAME%} = class(tsubform)
  end;
