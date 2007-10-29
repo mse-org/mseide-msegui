@@ -2,7 +2,7 @@ unit ${%UNITNAME%};
 {$ifdef FPC}{$mode objfpc}{$h+}{$INTERFACES CORBA}{$endif}
 interface
 uses
- msegui,mseclasses,msereport;
+ mseglob,msegraphics,msegui,mseclasses,msereport;
 
 type
  t${%FORMNAME%} = class(treport)
