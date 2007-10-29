@@ -208,7 +208,7 @@ type
 implementation
 
 uses
- msestockobjects,sysutils,msekeyboard,msebits,msepointer,mseactions;
+ msestockobjects,sysutils,msekeyboard,msebits,msepointer,mseact;
 
 { tcustomscrollbar }
 

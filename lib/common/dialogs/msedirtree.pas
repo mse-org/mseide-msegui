@@ -14,7 +14,7 @@ unit msedirtree;
 interface
 uses
  mseforms,msewidgetgrid,mselistbrowser,msedatanodes,msefileutils,
- msetypes,msestrings,msegui,
+ msetypes,msestrings,msegui,mseglob,
  mseclasses,msegrids,msesys;
 type
 

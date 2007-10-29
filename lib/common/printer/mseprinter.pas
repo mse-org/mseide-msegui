@@ -5,7 +5,7 @@ interface
 uses
  mseclasses,msegraphics,msegraphutils,msestrings,msestream,msedrawtext,
  mserichstring,classes,msetypes,msestat,msestatfile,msedataedits,msedropdownlist,
- mseevent,mseguiglob,msemenus,mseedit,msegui;
+ mseevent,mseglob,mseguiglob,msemenus,mseedit,msegui;
  
 const
  defaultppmm = 10;

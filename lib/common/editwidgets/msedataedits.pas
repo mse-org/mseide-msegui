@@ -14,8 +14,8 @@ unit msedataedits;
 interface
 uses
  Classes,msegui,mseinplaceedit,mseeditglob,msegraphics,mseedit,
- msetypes,msestrings,msedatalist,
- mseguiglob,mseevent,msegraphutils,msedrawtext,msestat,msestatfile,mseclasses,
+ msetypes,msestrings,msedatalist,mseglob,mseguiglob,
+ mseevent,msegraphutils,msedrawtext,msestat,msestatfile,mseclasses,
  msearrayprops,msegrids,msewidgetgrid,msedropdownlist,msedrag,mseforms,
  mseformatstr,typinfo,msemenus,
  msescrollbar,msewidgets,msepopupcalendar,msekeyboard;

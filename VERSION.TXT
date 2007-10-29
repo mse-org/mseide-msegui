@@ -1,5 +1,10 @@
 MSEide+MSEgui version history
 
+2007-10-29
+ Refactoring for GUI independent MSEifi:
+ modalresultty moved to mseglob.
+ Action basics moved to mseact.
+ 
 2007-09-29 
  sqlscripteventty -> sqlstatementeventty
  sqlscripterroreventty -> sqlstatementerroreventty

@@ -13,7 +13,7 @@ unit msedropdownlist;
  
 interface
 uses
- mseclasses,mseedit,mseevent,mseguiglob,msegrids,msedatalist,msegui,
+ mseclasses,mseedit,mseevent,mseglob,mseguiglob,msegrids,msedatalist,msegui,
  mseinplaceedit,msearrayprops,classes,msegraphics,msedrawtext,msegraphutils,
  msetimer,mseforms,msetypes,msestrings,msestockobjects,msescrollbar,
  msekeyboard;

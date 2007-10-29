@@ -2,8 +2,8 @@ unit mseifi;
 {$ifdef FPC}{$mode objfpc}{$h+}{$INTERFACES CORBA}{$endif}
 interface
 uses
- classes,mseclasses,msearrayprops,mseactions,msestrings,msetypes,mseevent,
- mseguiglob,msestream,msepipestream,msegui,mseifiglob,typinfo,msebintree,
+ classes,mseclasses,msearrayprops,mseact,msestrings,msetypes,mseevent,
+ mseglob,{mseguiglob,}msestream,msepipestream,msegui,mseifiglob,typinfo,msebintree,
  msesys,msesockets;
 type
  

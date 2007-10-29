@@ -13,7 +13,8 @@ unit mseimagelisteditor;
 
 interface
 uses
- mseforms,msegui,mseguiglob,msebitmap,msesimplewidgets,msegraphics,mselistbrowser,msegrids,
+ mseforms,msegui,mseglob,mseguiglob,
+ msebitmap,msesimplewidgets,msegraphics,mselistbrowser,msegrids,
  msefiledialog,msestat,msestatfile,msestrings,msegraphedits,msecolordialog;
 
 type

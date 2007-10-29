@@ -13,7 +13,7 @@ unit msedatanodes;
 
 interface
 uses
- classes,msegraphutils,msedrawtext,msegraphics,msedatalist,mseguiglob,msebitmap,
+ classes,msegraphutils,msedrawtext,msegraphics,msedatalist,mseglob,mseguiglob,msebitmap,
  mseclasses,mseevent,msegrids,msetypes,msestrings,mseinplaceedit,msestat;
 
 type

@@ -13,7 +13,7 @@ unit msesys;
 
 interface
 uses
- mseerror,msetypes,msestrings{$ifdef FPC},dynlibs{$endif};
+ mseerr,msetypes,msestrings{$ifdef FPC},dynlibs{$endif};
 
 type
  {$ifndef FPC}
@@ -147,7 +147,7 @@ threadvar
 
 implementation
 uses
- Classes,msestreaming,msesysintf,msedatalist,sysutils
+ Classes,msestreaming,msesysintf,msedatalist,sysutils,mseglob
           {$ifndef FPC}{$ifdef mswindows},windows{$endif}{$endif};
 
 procedure getprocaddresses(const lib: tlibhandle; const anames: array of string; 

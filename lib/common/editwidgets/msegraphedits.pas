@@ -13,8 +13,8 @@ unit msegraphedits;
 
 interface
 uses
- {$ifdef FPC}classes{$else}Classes{$endif},msegui,mseguiglob,msescrollbar,
- msegraphutils,msegraphics,mseevent,
+ {$ifdef FPC}classes{$else}Classes{$endif},msegui,
+ mseglob,mseguiglob,msescrollbar,msegraphutils,msegraphics,mseevent,
  msewidgets,mseeditglob,msestockobjects,msestat,msestatfile,
  mseclasses,msesimplewidgets,msemenus,
  msegrids,msewidgetgrid,msedatalist,msebitmap,msetypes,msestrings,msearrayprops,
@@ -699,7 +699,7 @@ type
 implementation
 uses
  SysUtils,msekeyboard,msebits,msereal,msedispwidgets,mseformatstr,mserichstring,
- mseactions;
+ mseact;
 
 type
  tcustomframe1 = class(tcustomframe);

@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2006 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2007 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -13,14 +13,13 @@ unit mseguiglob;
 
 interface
 uses
- Classes,msegraphutils,msetypes,msekeyboard,mseerror;
+ Classes,msegraphutils,msetypes,msekeyboard,mseerr;
 {$ifdef FPC}
  {$interfaces corba}
 {$endif}
 
 type
  unicharty = longword;
- shortcutty = type word;
  
  originty = (org_screen,org_widget,org_client,org_inner);
  captionposty = (cp_center,cp_rightbottom,cp_right,cp_righttop,
@@ -29,13 +28,6 @@ type
                  cp_bottomleft,cp_bottom,cp_bottomright
                  );
                  
- modalresultty = (mr_none,mr_canclose,mr_windowclosed,mr_windowdestroyed,
-                  mr_escape,mr_f10, 
-                  mr_exception,
-                  mr_cancel,mr_abort,mr_ok,mr_yes,mr_no,mr_all,mr_noall,mr_ignore);
- modalresultsty = set of modalresultty;
-
-
  mousebuttonty = (mb_none,mb_left,mb_right,mb_middle);
  mousewheelty = (mw_none,mw_up,mw_down);
 
@@ -54,32 +46,6 @@ const
 //                   ss_left,ss_right,ss_middle,ss_double];
 
 type
-
- inullinterface = interface
-  //no referencecount, only for fpc, not available in delphi
- end;
-
- tnullinterfacedobject = class(tobject)
-  protected
-   function _addref: integer; stdcall;
-   function _release: integer; stdcall;
-   function QueryInterface(const IID: TGUID; out Obj): HResult; stdcall;
- end;
-
- objecteventty = (oe_destroyed,oe_connect,oe_changed,oe_designchanged,
-                  oe_activate,oe_deactivate,oe_fired,oe_dataready);
- objectlinkeventty = procedure(const sender: tobject;
-                    const event: objecteventty) of object;
- iobjectlink = interface(inullinterface)
-  procedure link(const source,dest: iobjectlink; valuepo: pointer = nil;
-                        ainterfacetype: pointer = nil; once: boolean = false);
-  procedure unlink(const source,dest: iobjectlink; valuepo: pointer = nil);
-               //source = 1 -> dest destroyed
-  procedure objevent(const sender: iobjectlink; const event: objecteventty);
-  function getinstance: tobject;
- end;
-
-type
  guierrorty = (gue_ok,gue_error,
                gue_alreadyregistered,gue_notregistered,
                gue_postevent,gue_timer,
@@ -94,7 +60,7 @@ type
                gue_cannotfocus,gue_invalidwidget,
                gue_cursor,gue_rootwidget,
                gue_inputmanager,gue_inputcontext,gue_timerlist,
-               gue_resnotfound,gue_capturemouse,gue_mousepos,
+               {gue_resnotfound,}gue_capturemouse,gue_mousepos,
                gue_registerclass,gue_scroll,gue_clipboard,gue_recursivetransientfor,
                gue_notlocked,
                gue_characterencoding,gue_invalidstream,gue_invalidcanvas
@@ -117,7 +83,7 @@ procedure guierror(error: guierrorty; sender: tobject; text: string = ''); overl
 implementation
 
 uses
- mseclasses,msestreaming;
+ mseglob,mseclasses,msestreaming;
 
 const
  errortexts: array[guierrorty] of string =
@@ -154,8 +120,8 @@ const
    'Invalid rootwidget',
    'Invalid inputmanager',
    'Invalid inputcontext',
-   'Corrupted timerlist',
-   'Resource not found',
+   'Corrupted timerlist',   
+{   'Resource not found',}
    'Can not capture mouse',
    'Can not set mouse pos',
    'Can not register class',
@@ -202,23 +168,6 @@ end;
 function egui.geterror: guierrorty;
 begin
  result:= guierrorty(ferror);
-end;
-
-{ tnullinterfacedobject }
-
-function tnullinterfacedobject._addref: integer; stdcall;
-begin
- result:= -1;
-end;
-
-function tnullinterfacedobject._release: integer; stdcall;
-begin
- result:= -1;
-end;
-
-function tnullinterfacedobject.QueryInterface(const IID: TGUID; out Obj): HResult; stdcall;
-begin
- result:= hresult(e_nointerface);
 end;
 
 end.

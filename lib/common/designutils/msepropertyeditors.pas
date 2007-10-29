@@ -14,7 +14,8 @@ unit msepropertyeditors;
 interface
 uses
  Classes,TypInfo,msedesignintf,msetypes,msestrings,sysutils,msedatalist,msemenus,
- mseevent,msegui,mseguiglob,mseclasses,mseforms,msegraphics,mserichstring;
+ mseevent,msegui,mseglob,mseguiglob,
+ mseclasses,mseforms,msegraphics,mserichstring;
 
 const
  bmpfiledialogstatname = 'bmpfile.sta';
@@ -702,7 +703,7 @@ uses
  msefiledialog,mseimagelisteditor,msereal,msewidgets,
  mseactions,msehash,msegraphutils,
  msestringlisteditor,msedoublestringlisteditor,msereallisteditor,
- mseintegerlisteditor,
+ mseintegerlisteditor,mseact,
  msecolordialog,
  mseshapes,msestockobjects,msetexteditor,
  msegraphicstream,

@@ -14,7 +14,7 @@ unit mselist;
 interface
 
 uses
- msetypes,msestrings,mseguiglob,Classes,sysutils;
+ msetypes,msestrings,mseglob,Classes,sysutils;
 
 type
  arraysortcomparety = function (const l,r): integer;

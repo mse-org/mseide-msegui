@@ -14,7 +14,7 @@ unit msedock;
 interface
 uses
  msewidgets,classes,msedrag,msegui,msegraphutils,mseevent,mseclasses,
- msegraphics,msestockobjects,mseguiglob,msestat,msestatfile,msepointer,
+ msegraphics,msestockobjects,mseglob,mseguiglob,msestat,msestatfile,msepointer,
  msesplitter,msesimplewidgets,msetypes,msestrings,msebitmap,mseobjectpicker,
  msetabsglob,msemenus;
  

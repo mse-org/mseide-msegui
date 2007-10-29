@@ -4,7 +4,7 @@ unit mseifids;
 {$ifdef FPC}{$mode objfpc}{$h+}{$INTERFACES CORBA}{$endif}
 interface
 uses
- classes,db,mseifi,mseclasses,mseguiglob,mseevent,msedb,msetypes,msebufdataset,
+ classes,db,mseifi,mseclasses,mseglob,mseevent,msedb,msetypes,msebufdataset,
  msestrings;
 
 //single record dataset

@@ -20,7 +20,7 @@ unit programparametersform;
 
 interface
 uses
- mseforms,msestat,msestatfile,msesimplewidgets,msedataedits,msefiledialog,
+ mseforms,msestat,mseglob,msestatfile,msesimplewidgets,msedataedits,msefiledialog,
  msewidgetgrid,msegraphedits;
 
 type

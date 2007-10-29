@@ -16,7 +16,7 @@ unit msedb;
 interface
 
 uses
- classes,db,mseclasses,mseguiglob,msestrings,msetypes,msearrayprops,mseapplication,
+ classes,db,mseclasses,mseglob,msestrings,msetypes,msearrayprops,mseapplication,
  msestockobjects,sysutils,msebintree;
  
 type

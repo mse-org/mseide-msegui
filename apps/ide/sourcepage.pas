@@ -22,7 +22,8 @@ interface
 
 uses
  msetextedit,msewidgetgrid,mseforms,classes,msegdbutils,msegraphedits,mseevent,
- msehash,msebitmap,msetabs,msetypes,mseguiglob,msegui,msesyntaxedit,mseeditglob,
+ msehash,msebitmap,msetabs,msetypes,
+ mseglob,mseguiglob,msegui,msesyntaxedit,mseeditglob,
  mseinplaceedit,msedispwidgets,msegraphutils,msegrids,breakpointsform,
  pascaldesignparser,msefilechange,msestrings,mserichstring;
 

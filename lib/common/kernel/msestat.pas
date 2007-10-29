@@ -13,8 +13,8 @@ unit msestat;
 
 interface
 uses
- Classes,mseclasses,mselist,msestream,mseguiglob,msereal,msetypes,msestrings,
- msehash,msedatalist,msesys{,msegui};
+ Classes,mseclasses,mselist,msestream,mseglob,msereal,msetypes,msestrings,
+ msehash,msedatalist,msesys;
 
 const
  defaultstatfilename = 'status.sta';

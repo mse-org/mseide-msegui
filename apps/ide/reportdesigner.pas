@@ -4,7 +4,7 @@ interface
 uses
  classes,msegui,mseclasses,mseforms,formdesigner,msesimplewidgets,msetabs,
  msesplitter,msegraphutils,msedesigner,msedesignintf,msereport,msetypes,
- mseevent,mseguiglob,msemenus,msedial,msedispwidgets;
+ mseevent,mseglob,mseguiglob,msemenus,msedial,msedispwidgets;
 
 const
  updatetabtag = 83684;

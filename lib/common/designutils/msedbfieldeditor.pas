@@ -3,7 +3,8 @@ unit msedbfieldeditor;
 interface
 uses
  db,msegui,mseclasses,mseforms,msedb,msestat,msestatfile,msesimplewidgets,msegrids,
- msewidgetgrid,msesplitter,msedataedits,msestrings,mseeditglob,msegraphedits;
+ msewidgetgrid,msesplitter,msedataedits,msestrings,mseeditglob,msegraphedits,
+ mseglob;
 
 const
  dbfieldeditorstatname =  'dbfieldeditor.sta';

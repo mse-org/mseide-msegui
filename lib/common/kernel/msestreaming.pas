@@ -16,8 +16,6 @@ interface
 uses
  {$ifdef FPC}Classes{$else}classes{$endif},msetypes,msegraphutils;
 
-function fullcomponentname(component: tcomponent): string;
-
 function readrealty(const reader: treader): realty;
 procedure writerealty(const writer: twriter; const value: realty);
 function readrectty(const reader: treader): rectty;
@@ -42,15 +40,6 @@ uses
 type
  treader1 = class(treader);
  twriter1 = class(twriter);
-
-function fullcomponentname(component: tcomponent): string;
-begin
- result:= component.name;
- while component.owner <> nil do begin
-  component:= component.owner;
-  result:= component.name + '.' + result;
- end;
-end;
 
 function readrealty(const reader: treader): realty;
 begin

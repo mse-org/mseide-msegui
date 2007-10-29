@@ -13,7 +13,8 @@ unit msesyntaxedit;
 
 interface
 uses
- Classes,msetextedit,msesyntaxpainter,mseclasses,mseguiglob,msetypes,mseevent,
+ Classes,msetextedit,msesyntaxpainter,mseclasses,
+ mseglob,mseguiglob,msetypes,mseevent,
  mseeditglob,msestrings,msewidgetgrid,msedatalist,msemenus,msegui,mseinplaceedit,
  msegrids;
  

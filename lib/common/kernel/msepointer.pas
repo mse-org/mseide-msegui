@@ -13,7 +13,7 @@ unit msepointer;
 
 interface
 uses
- msegraphics,msegraphutils,msetimer,msetypes,mseguiglob;
+ msegraphics,msegraphutils,msetimer,msetypes,mseglob;
 
 const
  defaultcaretblinkperiodetime = 1000000; //us

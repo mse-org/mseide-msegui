@@ -21,7 +21,7 @@ unit finddialogform;
 interface
 uses
  mseforms,msesimplewidgets,msedataedits,msegraphedits,msetextedit,msestrings,
- msetypes,msestat,msestatfile,projectoptionsform;
+ msetypes,msestat,msestatfile,projectoptionsform,mseglob;
 
 type
 

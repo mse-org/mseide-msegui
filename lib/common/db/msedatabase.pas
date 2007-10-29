@@ -18,7 +18,7 @@ unit msedatabase;
 {$ifdef FPC}{$mode objfpc}{$h+}{$INTERFACES CORBA}{$endif}
 interface
 uses
- classes,db,sysutils,msedb,msestrings,mseclasses,mseguiglob,msetypes;
+ classes,db,sysutils,msedb,msestrings,mseclasses,mseglob,mseguiglob,msetypes;
  
 type
  tmdbdataset = class;

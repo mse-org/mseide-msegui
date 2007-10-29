@@ -13,7 +13,7 @@ unit mseclasses;
 
 interface
 uses
- classes,mseguiglob,mseevent,msetypes,msestrings,sysutils,typinfo,mselist,
+ classes,mseglob,mseevent,msetypes,msestrings,sysutils,typinfo,mselist,
  msegraphutils;
 
 { $define debugobjectlink}
@@ -1454,7 +1454,7 @@ begin
 //  doregister(instance.classtype);
   if not initmsecomponent(instance,rootancestor) then begin
    if not initinheritedcomponent(instance,rootancestor) then begin
-    guierror(gue_resnotfound,instance);
+    mseerror(mse_resnotfound,instance);
    end;
   end;
  {$ifdef FPC} {$checkpointer default} {$endif}

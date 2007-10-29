@@ -14,7 +14,8 @@ unit msesimplewidgets;
 interface
 
 uses
- msegui,mseguiglob,msetypes,msestrings,msegraphics,mseevent,mseactions,msewidgets,
+ msegui,mseglob,mseguiglob,msetypes,msestrings,msegraphics,mseevent,
+ mseact,msewidgets,
  mserichstring,mseshapes,Classes,mseclasses,msebitmap,msedrawtext,
  msedrag,msestockobjects,msegraphutils,msemenus;
 
@@ -117,6 +118,7 @@ type
    //iactionlink
    function getactioninfopo: pactioninfoty;
    function shortcutseparator: msechar;
+   procedure calccaptiontext(var ainfo: actioninfoty);
    
    procedure setoptions(const avalue: buttonoptionsty); override;
    function gethint: msestring; override;
@@ -424,7 +426,7 @@ type
 
 implementation
 uses
- msekeyboard,sysutils,mseguiactions;
+ msekeyboard,sysutils,mseactions;
 
 { tcustombutton }
 
@@ -556,6 +558,11 @@ end;
 function tcustombutton.shortcutseparator: msechar;
 begin
  result:= ' ';
+end;
+
+procedure tcustombutton.calccaptiontext(var ainfo: actioninfoty);
+begin
+ mseactions.calccaptiontext(ainfo,shortcutseparator);
 end;
 
 procedure tcustombutton.setaction(const value: tcustomaction);

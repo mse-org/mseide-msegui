@@ -15,7 +15,7 @@ interface
 uses
  {$ifdef FPC}classes,sysutils{$else}Classes,SysUtils{$endif},mseclasses,msegui,
  msegraphics,msetypes,msestrings,msegraphutils,
- msescrollbar,msearrayprops,mseguiglob,
+ msescrollbar,msearrayprops,mseglob,mseguiglob,
  msedatalist,msedrawtext,msewidgets,mseevent,mseinplaceedit,mseeditglob,
  mseobjectpicker,msepointer,msetimer,msebits,msestat,msestatfile,msekeyboard,
  msestream,msedrag,msemenus,msepipestream;
@@ -1699,7 +1699,7 @@ function cellkeypress(const info: celleventinfoty): keyty;
 
 implementation
 uses
- mseguiintf,mseshapes,msestockobjects,mseactions;
+ mseguiintf,mseshapes,msestockobjects,mseact;
 type
  tframe1 = class(tcustomframe);
  tdatalist1 = class(tdatalist);

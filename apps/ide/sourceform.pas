@@ -22,11 +22,11 @@ interface
 
 uses
  msetextedit,msewidgetgrid,mseforms,Classes,msegdbutils,msegraphedits,mseevent,
- msehash,msebitmap,msetabs,sourcepage,
+ msehash,msebitmap,msetabs,sourcepage,mseglob,
  msetypes,msestrings,mseguiglob,msegui,msesyntaxpainter,msemenus,
  mseactions,msesyntaxedit,msestat,finddialogform,msestream,msefilechange,
  breakpointsform,mseparser,msesimplewidgets,msegrids,msegraphutils,
- mseguiactions;
+ mseact;
 
 type
  tsourcefo = class;

@@ -13,7 +13,7 @@ unit mseobjectpicker;
 
 interface
 uses
- mseevent,mseguiglob,mseclasses,msegui,msegraphics,msegraphutils,msepointer,
+ mseevent,mseglob,mseguiglob,mseclasses,msegui,msegraphics,msegraphutils,msepointer,
  msetypes;
 {$ifdef FPC}
  { $interfaces corba}

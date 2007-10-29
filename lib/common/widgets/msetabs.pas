@@ -14,8 +14,9 @@ unit msetabs;
 interface
 uses
  msetabsglob,msewidgets,mseclasses,msearrayprops,classes,mseshapes,
- mserichstring,msetypes,msegraphics,msegraphutils,mseevent,mseguiglob,msegui,
- mseforms,rtlconsts,msesimplewidgets,msedrag,mseactions,
+ mserichstring,msetypes,msegraphics,msegraphutils,mseevent,
+ mseglob,mseguiglob,msegui,
+ mseforms,rtlconsts,msesimplewidgets,msedrag,mseact,
  mseobjectpicker,msepointer,msestat,msestatfile,msestrings,msemenus;
 
 const

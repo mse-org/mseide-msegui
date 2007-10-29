@@ -15,7 +15,7 @@ uses
  msetabs,mseprinter,msestream,msearrayprops,mseguiglob,msesimplewidgets,
  msedrawtext,msestrings,mserichstring,msedb,db,msethread,mseobjectpicker,
  msepointer,mseevent,msesplitter,msestatfile,mselookupbuffer,mseformatstr,
- msegdiprint,msemenus;
+ msegdiprint,msemenus,mseglob;
 
 const
  defaultrepppmm = 3;

@@ -14,7 +14,8 @@ unit msedialog;
 interface
 
 uses
- mseclasses,msegui,mseguiglob,mseforms,msedataedits,mseedit,classes,mseevent,
+ mseclasses,msegui,mseglob,mseguiglob,
+ mseforms,msedataedits,mseedit,classes,mseevent,
  msemenus,msestrings;
 
 type

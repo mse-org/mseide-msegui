@@ -14,7 +14,7 @@ unit msedbedit;
 
 interface
 uses
- db,classes,mseguiglob,mseclasses,msegui,msetoolbar,mseeditglob,
+ db,classes,mseguiglob,mseclasses,msegui,msetoolbar,mseeditglob,mseglob,
  msewidgetgrid,msedatalist,msetypes,msegrids,msegraphics,mseevent,msekeyboard,
  msegraphedits,msestrings,{sqldb,}msegraphutils,mselist,msedropdownlist,
  msescrollbar,msedataedits,msewidgets,msearrayprops,msedb,mselookupbuffer,
@@ -1672,7 +1672,8 @@ type
  
 implementation
 uses
- msestockobjects,mseshapes,msereal,mseactions,rtlconsts,msedrawtext,sysutils;
+ msestockobjects,mseshapes,msereal,
+ mseactions,mseact,rtlconsts,msedrawtext,sysutils;
 
 type
  tcomponent1 = class(tcomponent);

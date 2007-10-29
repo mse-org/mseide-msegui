@@ -13,7 +13,7 @@ unit msegraphics;
 
 interface
 uses
- {$ifdef FPC}classes{$else}Classes{$endif},msetypes,msestrings,mseerror,
+ {$ifdef FPC}classes{$else}Classes{$endif},msetypes,msestrings,mseerr,
  msegraphutils,mseguiglob,mseclasses;
 
 const

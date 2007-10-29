@@ -22,7 +22,7 @@ interface
 uses
  classes,mseforms,msegui,mseevent,msegraphutils,msegraphics,msedesignintf,
  mseclasses,msemenuwidgets,msemenus,msefiledialog,msedesigner,typinfo,
- componentpaletteform,msestrings,msewidgets
+ componentpaletteform,msestrings,msewidgets,mseglob
   {$ifdef FPC}{$ifndef mse_withoutdb},msereport{$endif}{$endif};
 
 type

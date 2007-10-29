@@ -11,7 +11,7 @@ unit mseapplication;
 {$ifdef FPC}{$mode objfpc}{$h+}{$INTERFACES CORBA}{$endif}
 interface
 uses
- classes,mseclasses,mseevent,mseguiglob,sysutils,msetypes,mselist,
+ classes,mseclasses,mseevent,mseglob,sysutils,msetypes,mselist,
      msethread,msesys,mseguithread,msestrings;
  
 type

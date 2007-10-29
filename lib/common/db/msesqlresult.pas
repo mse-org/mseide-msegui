@@ -5,7 +5,7 @@ interface
 {$ifdef VER2_2} {$define mse_FPC_2_2} {$endif}
 uses
  classes,db,msqldb,mseclasses,msedb,msedatabase,msearrayprops,msestrings,msereal,
- msetypes,mselookupbuffer,mseguiglob;
+ msetypes,mselookupbuffer,mseglob;
  
 type
  tsqlresult = class;

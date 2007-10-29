@@ -14,7 +14,7 @@ unit msemenuwidgets;
 interface
 uses
  classes,msewidgets,mseshapes,msemenus,msegraphutils,msegraphics,msetypes,
- msegui,mseguiglob,mseevent,mseclasses;
+ msegui,mseglob,mseguiglob,mseevent,mseclasses;
 
 type
  menucellinfoty = record
@@ -185,7 +185,7 @@ function showpopupmenu(const menu: tmenuitem; const transientfor: twidget;
 implementation
 uses
  msedrawtext,mserichstring,msestockobjects,sysutils,msekeyboard,msebits,
- mseactions,mseguiintf,msestrings,msebitmap;
+ mseact,mseguiintf,msestrings,msebitmap;
 
 type
  tmenuitem1 = class(tmenuitem);
@@ -1063,6 +1063,7 @@ begin
       exclude(state,ss_clicked);
       invalidaterect(dim);
       if bo1 then begin
+       include(info.eventstate,es_processed);
        int1:= activeitem;
        selectmenu;
        if (activeitem < 0) and (application.mousecapturewidget = nil) and 

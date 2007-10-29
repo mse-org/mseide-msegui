@@ -25,7 +25,7 @@ uses
  msedataedits,msestat,msestatfile,msemenus,msebitmap,msetoolbar,msegrids,
  msefiledialog,msetypes,sourcepage,msetabs,msedesignintf,msedesigner,classes,
  mseclasses,msegraphutils,typinfo,msedock,sysutils,msesysenv,msestrings,
- msepostscriptprinter,msegraphics;
+ msepostscriptprinter,msegraphics,mseglob;
 const
  versiontext = '1.5 unstable';
  idecaption = 'MSEide';
@@ -256,7 +256,7 @@ uses
 
  main_mfm,sourceform,watchform,breakpointsform,stackform,
        projectoptionsform,make,msewidgets,msepropertyeditors,
- skeletons,msedatamodules,
+ skeletons,msedatamodules,mseact,
  mseformdatatools,mseshapes,msefileutils,projecttreeform,mseeditglob,
  findinfileform,formdesigner,sourceupdate,actionsmodule,programparametersform,
  objectinspector,msesysutils,msestream,msesys,cpuform,disassform,

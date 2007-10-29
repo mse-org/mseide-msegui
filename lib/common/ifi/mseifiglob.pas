@@ -2,7 +2,7 @@ unit mseifiglob;
 {$ifdef FPC}{$mode objfpc}{$h+}{$INTERFACES CORBA}{$endif}
 interface
 uses
- mseguiglob;
+ mseglob;
 type
 
  iifiwidget = interface;

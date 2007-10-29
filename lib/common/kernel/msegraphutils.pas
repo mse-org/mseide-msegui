@@ -11,7 +11,7 @@ unit msegraphutils;
 {$ifdef FPC}{$mode objfpc}{$h+}{$INTERFACES CORBA}{$endif}
 interface
 uses
- msetypes,msestrings,mseerror;
+ msetypes,msestrings,mseerr;
  
 const
  redmask = $ff0000;
@@ -402,7 +402,7 @@ function rotatedirection(const olddest,newvalue,
 
 implementation
 uses
- SysUtils,mseformatstr,classes,msestreaming;
+ mseglob,SysUtils,mseformatstr,classes,msestreaming;
 const
  errortexts: array[gdierrorty] of string = (
    '',

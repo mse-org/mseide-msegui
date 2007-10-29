@@ -26,7 +26,7 @@ uses
  msegraphutils,mseevent,msetabsglob,msedatalist,msegraphics,msedropdownlist,
  mseformatstr,mseinplaceedit,msedatanodes,mselistbrowser,msebitmap,
  msecolordialog,msedrawtext,msewidgets,msepointer,mseguiglob,msepipestream,
- msemenus,sysutils;
+ msemenus,sysutils,mseglob;
 
 const
  defaultsourceprintfont = 'Courier';
@@ -409,7 +409,7 @@ var
 
 implementation
 uses
- projectoptionsform_mfm,breakpointsform,sourceform,
+ projectoptionsform_mfm,breakpointsform,sourceform,mseact,
  objectinspector,msebits,msefileutils,msedesignintf,
  watchform,stackform,main,projecttreeform,findinfileform,
  selecteditpageform,programparametersform,sourceupdate,mseedit,

@@ -21,7 +21,7 @@ unit selecteditpageform;
 interface
 uses
  mseforms,mselistbrowser,msetypes,msestrings,msegrids,msegui,msedispwidgets,
- msestat,msesimplewidgets;
+ msestat,msesimplewidgets,mseglob;
 
 type
  tselecteditpagefo = class(tmseform)

@@ -14,7 +14,8 @@ unit msecolordialog;
 interface
 uses
  msegui,mseclasses,mseforms,msegraphedits,msewidgets,msesimplewidgets,
- msedataedits,msegraphics,mseguiglob,msedialog,classes,msetypes,msedropdownlist,
+ msedataedits,msegraphics,mseglob,mseguiglob,msedialog,
+ classes,msetypes,msedropdownlist,
  msestrings,mseedit,msestat,msestatfile,msegraphutils,msemenus,mseevent;
 
 const

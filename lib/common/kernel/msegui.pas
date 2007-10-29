@@ -15,8 +15,8 @@ interface
 
 uses
  {$ifdef FPC}classes{$else}Classes{$endif},sysutils,msegraphics,msetypes,
- msestrings,mseerror,msegraphutils,mseapplication,
- msepointer,mseevent,msekeyboard,mseclasses,mseguiglob,mselist,msesys,msethread,
+ msestrings,mseerr,msegraphutils,mseapplication,
+ msepointer,mseevent,msekeyboard,mseclasses,mseglob,mseguiglob,mselist,msesys,msethread,
  msebitmap,msearrayprops,mseguithread{,msedatamodules};
 
 const
@@ -9115,7 +9115,8 @@ begin
    end;
    fmodalwindow.activate;
   end;
-  if factivewindow <> nil then begin
+  if (factivewindow <> nil) and not 
+   (ws1_releasing in factivewindow.fowner.fwidgetstate1) then begin
    pt1:= mouse.pos;
    if pointinrect(pt1,factivewindow.fowner.fwidgetrect) then begin
     event1:= tmouseevent.create(factivewindow.winid,false,mb_none,mw_none,

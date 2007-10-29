@@ -2,9 +2,10 @@ unit msetexteditor;
 {$ifdef FPC}{$mode objfpc}{$h+}{$INTERFACES CORBA}{$endif}
 interface
 uses
- msegui,mseguiglob,mseclasses,mseforms,msesimplewidgets,msewidgetgrid,msesyntaxedit,
+ msegui,mseglob,mseguiglob,mseclasses,mseforms,
+ msesimplewidgets,msewidgetgrid,msesyntaxedit,
  msemenus,msefiledialog,msestat,msestatfile,msesyntaxpainter,msedispwidgets,
- mseinplaceedit,mseactions,mseguiactions;
+ mseinplaceedit,mseact,mseactions;
 
 const
  texteditorstatname =  'texteditor.sta';

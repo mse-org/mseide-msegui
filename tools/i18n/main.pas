@@ -20,7 +20,7 @@ unit main;
 interface
 uses
  mseforms,msefiledialog,msestat,msestatfile,msesimplewidgets,msegrids,msewidgetgrid,
- mselistbrowser,msedataedits,typinfo,msedatanodes,msegraphedits,msestream,
+ mselistbrowser,msedataedits,typinfo,msedatanodes,msegraphedits,msestream,mseglob,
  msemenus,classes,msetypes,msestrings,mseguithread,mseguiglob,msegui,mseresourceparser;
 
 const

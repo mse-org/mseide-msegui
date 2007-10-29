@@ -13,7 +13,7 @@ unit msecomponenteditors;
 
 interface
 uses
- Classes,msedesignintf,mseguiglob,mseclasses,mselist,msetypes;
+ Classes,msedesignintf,mseglob,mseguiglob,mseclasses,mselist,msetypes;
 
 type
 

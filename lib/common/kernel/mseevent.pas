@@ -13,7 +13,7 @@ unit mseevent;
 
 interface
 uses
- mselist,mseguiglob,msegraphutils,msekeyboard,msetypes,msestrings,msesys;
+ mselist,mseglob,mseguiglob,msegraphutils,msekeyboard,msetypes,msestrings,msesys;
 
 {$ifdef FPC}
  { $interfaces corba}

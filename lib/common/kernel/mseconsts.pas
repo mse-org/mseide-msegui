@@ -12,7 +12,7 @@ unit mseconsts;
 interface
 
 uses
- msestockobjects,mseguiglob,msestrings,mseapplication;
+ msestockobjects,mseglob,msestrings,mseapplication;
  
 type
  stockcaptionty = array[stockcaptionsty] of widestring;

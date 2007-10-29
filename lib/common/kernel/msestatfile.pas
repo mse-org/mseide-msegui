@@ -2,8 +2,8 @@ unit msestatfile;
 {$ifdef FPC}{$mode objfpc}{$h+}{$INTERFACES CORBA}{$endif}
 interface
 uses
- classes,msestat,{msegui}mseapplication,msetypes,msestrings,mseclasses,msestream,
- mseguiglob;
+ classes,msestat,mseapplication,msetypes,msestrings,mseclasses,msestream,
+ mseglob;
 type
  statupdateeventty = procedure(const sender: tobject; const filer: tstatfiler) of object;
  statreadeventty = procedure(const sender: tobject; const reader: tstatreader) of object;

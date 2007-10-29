@@ -3,7 +3,7 @@ unit setcreateorderform;
 interface
 uses
  classes,msegui,mseclasses,mseforms,msestat,msestatfile,msestrings,msedatalist,
- msedrawtext,mseevent,msegraphics,msegraphutils,msegrids,mseguiglob,
+ msedrawtext,mseevent,msegraphics,msegraphutils,msegrids,mseguiglob,mseglob,
  msepipestream,msetypes,msesimplewidgets,msewidgets;
 
 type

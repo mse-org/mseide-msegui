@@ -13,7 +13,7 @@ unit msedrag;
 
 interface
 uses
- msegui,msegraphutils,mseevent,classes,mseclasses,mseguiglob;
+ msegui,msegraphutils,mseevent,classes,mseclasses,mseglob,mseguiglob;
 
 const
  mindragdist = 4;

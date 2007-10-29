@@ -14,7 +14,7 @@ unit mseshapes;
 interface
 uses
  msegraphics,msegraphutils,mseguiglob,msegui,mseevent,mserichstring,msebitmap,
- msetypes,mseactions;
+ msetypes,mseact;
 
 const
  menuarrowwidth = 8;

@@ -12,7 +12,7 @@ unit msedbevents;
 
 interface
 uses
- classes,msearrayprops,mseclasses,msqldb,db,mseguiglob,msetimer,msedatabase;
+ classes,msearrayprops,mseclasses,msqldb,db,mseglob,msetimer,msedatabase;
 
 const
  defaultdbeventinterval = 1000000; //us 

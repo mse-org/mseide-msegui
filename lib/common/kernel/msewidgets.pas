@@ -14,7 +14,7 @@ unit msewidgets;
 interface
 uses
  classes,msegui,msetypes,msestrings,msegraphutils,msegraphics,mseevent,
- msescrollbar,msemenus,mserichstring,msedrawtext,mseguiglob,mseshapes,
+ msescrollbar,msemenus,mserichstring,msedrawtext,mseglob,mseguiglob,mseshapes,
  mseclasses,msebitmap;
 
 type
@@ -840,7 +840,7 @@ implementation
 
 uses
  msebits,mseguiintf,msestockobjects,msekeyboard,sysutils,msemenuwidgets,
- mseactions;
+ mseact;
 
 const
  captionmargin = 1; //distance focusrect to caption in tcaptionframe

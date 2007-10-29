@@ -13,8 +13,8 @@ unit msemenus;
 
 interface
 uses
- mseactions,msegui,msearrayprops,mseclasses,msegraphutils,
- msedrawtext,msegraphics,mseevent,mseguiglob,mseshapes,mserichstring,
+ mseact,msegui,msearrayprops,mseclasses,msegraphutils,
+ msedrawtext,msegraphics,mseevent,mseglob,mseguiglob,mseshapes,mserichstring,
  msetypes,msestrings,Classes,msekeyboard,msebitmap;
 
 type
@@ -135,6 +135,7 @@ type
    function getactioninfopo: pactioninfoty;
    function loading: boolean;
    function shortcutseparator: msechar;
+   procedure calccaptiontext(var ainfo: actioninfoty);
    
    procedure objectevent(const sender: tobject;
                                      const event: objecteventty); override;
@@ -383,7 +384,7 @@ procedure freetransientmenu(var amenu: tcustommenu);
 implementation
 uses
  sysutils,msestockobjects,rtlconsts,msebits,msemenuwidgets,msedatalist,
- mseguiactions;
+ mseactions;
 
 procedure freetransientmenu(var amenu: tcustommenu);
 begin
@@ -904,6 +905,11 @@ begin
  end;
 end;
 
+procedure tmenuitem.calccaptiontext(var ainfo: actioninfoty);
+begin
+ mseactions.calccaptiontext(ainfo,shortcutseparator);
+end;
+
 procedure tmenuitem.beginload;
 var
  int1: integer;
@@ -1204,7 +1210,7 @@ procedure tmenuitem.updatecaption;
 var
  int1: integer;
 begin
- calccaptiontext(finfo,shortcutseparator);
+ mseactions.calccaptiontext(finfo,shortcutseparator);
  for int1:= 0 to count - 1 do begin
   fsubmenu[int1].updatecaption;
  end;

@@ -14,8 +14,9 @@ unit msetoolbar;
 interface
 uses
  Classes,msewidgets,msearrayprops,mseclasses,msebitmap,
- mseactions,mseshapes,msemenus,
- msegraphutils,msegraphics,mseevent,mseguiglob,msegui,msesimplewidgets,
+ mseact,mseshapes,msemenus,
+ msegraphutils,msegraphics,mseevent,
+ mseglob,mseguiglob,msegui,msesimplewidgets,
  msestat,msestatfile,msedrag,msestrings;
 
 type
@@ -68,6 +69,7 @@ type
    function getinstance: tobject; override;
    function loading: boolean;
    function shortcutseparator: msechar;
+   procedure calccaptiontext(var ainfo: actioninfoty);
    
   public
    constructor create(const aowner: tobject;
@@ -234,7 +236,7 @@ type
 
 implementation
 uses
- sysutils,msebits,mseguiactions;
+ sysutils,msebits,mseactions;
  
 const
  separatorwidth = 3;
@@ -500,6 +502,11 @@ end;
 function ttoolbutton.shortcutseparator: msechar;
 begin
  result:= ' ';
+end;
+
+procedure ttoolbutton.calccaptiontext(var ainfo: actioninfoty);
+begin
+ mseactions.calccaptiontext(ainfo,shortcutseparator);
 end;
 
 { ttoolbuttons }

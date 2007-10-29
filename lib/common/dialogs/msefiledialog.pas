@@ -14,7 +14,8 @@ unit msefiledialog;
 interface
 
 uses
- mseguiglob,msegui,mseforms,Classes,mseclasses,msewidgets,msegrids,mselistbrowser,mseedit,
+ mseglob,mseguiglob,msegui,mseforms,Classes,mseclasses,msewidgets,msegrids,
+ mselistbrowser,mseedit,
  msesimplewidgets,msedataedits,msedialog,msetypes,msestrings,msesys,
  msedispwidgets,msedatalist,msestat,msestatfile,msebitmap,msedatanodes,
  msefileutils,msedropdownlist,mseevent,msegraphedits,mseeditglob,msesplitter,
