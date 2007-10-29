@@ -10065,8 +10065,8 @@ end;
 
 constructor tinternalapplication.create(aowner: tcomponent);
 begin
- inherited;
  appinst:= self;
+ inherited;
  fdblclicktime:= defaultdblclicktime;
 // inherited;
  fonkeypresslist:= tonkeyeventlist.create;

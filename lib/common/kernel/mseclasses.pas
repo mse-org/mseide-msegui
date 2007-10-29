@@ -494,8 +494,8 @@ function ownernamepath(const acomponent: tcomponent): string;
                      //namepath from root to acomponent separated by '.'
 procedure setcomponentorder(const owner: tcomponent; const anames: msestringarty);
 
-function getpropinfoar(const obj: tobject): propinfopoarty;
-function getpropinfoar(const atypeinfo: ptypeinfo): propinfopoarty;
+function getpropinfoar(const obj: tobject): propinfopoarty; overload;
+function getpropinfoar(const atypeinfo: ptypeinfo): propinfopoarty; overload;
 
 procedure createobjectlinker(const owner: iobjectlink; onevent: objectlinkeventty;
                                   var instance: tobjectlinker);

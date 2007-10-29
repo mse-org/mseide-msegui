@@ -236,19 +236,20 @@ var
 implementation
 uses
  msedatalist,msebits,msesysintf,msesysutils,msefileutils;
- 
+
 var
  appinst: tcustomapplication;
  appclass: applicationclassty;
- 
+
 function application: tcustomapplication;
 begin
  if appinst = nil then begin
   if appclass = nil then begin
    raise exception.create('No application class registered.');
   end;
-  appinst:= appclass.create(nil);
+  appclass.create(nil);
  end;
+ result:= appinst;
 end;
 
 function applicationallocated: boolean;
@@ -268,7 +269,7 @@ end;
 
 procedure tactcomponent.designchanged; //for designer notify
 begin
- if assigned(ondesignchanged) and (fdesignchangedlock = 0) and 
+ if assigned(ondesignchanged) and (fdesignchangedlock = 0) and
        (componentstate*[csdesigning,csloading] = [csdesigning]) then begin
   ondesignchanged(self);
  end;
