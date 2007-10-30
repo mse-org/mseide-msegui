@@ -113,7 +113,7 @@ type
  tclientsocketpipes = class(tsocketpipes)
  end;
  
- tsocketserver = class;
+ tcustomsocketserver = class;
   
  tserversocketpipes = class(tcustomsocketpipes)
  end;
@@ -124,18 +124,13 @@ type
  tsocketcomp = class(tactcomponent)
   private
    fhandle: integer;
-   furl: msestring;
    factive: boolean;
    fonbeforeconnect: socketeventty;
    fonafterconnect: socketeventty;
    fonbeforedisconnect: socketeventty;
    fonafterdisconnect: socketeventty;
-   fkind: socketkindty;
-   fport: word;
-   procedure seturl(const avalue: filenamety);
    procedure setactive(const avalue: boolean);
   protected
-   function getsockaddr: socketaddrty;
    procedure doactivated; override;
    procedure dodeactivated; override;
    procedure internalconnect; virtual; abstract;
@@ -149,9 +144,6 @@ type
    destructor destroy; override;
   published
    property active: boolean read factive write setactive;
-   property kind: socketkindty read fkind write fkind;
-   property url: filenamety read furl write seturl;
-   property port: word read fport write fport;
    property activator;
    property onbeforeconnect: socketeventty read fonbeforeconnect 
                                                 write fonbeforeconnect;
@@ -163,7 +155,27 @@ type
                                                 write fonafterdisconnect;
  end;
 
- tsocketclient = class(tsocketcomp)
+ tcustomurlsocketcomp = class(tsocketcomp)
+  private
+   fkind: socketkindty;
+   furl: msestring;
+   fport: word;
+   procedure seturl(const avalue: filenamety);
+  protected
+   function getsockaddr: socketaddrty;
+   property kind: socketkindty read fkind write fkind;
+   property url: filenamety read furl write seturl;
+   property port: word read fport write fport;
+ end;
+
+ turlsocketcomp = class(tcustomurlsocketcomp)
+  published
+   property kind;
+   property url;
+   property port;
+ end;
+  
+ tsocketclient = class(turlsocketcomp)
   private
    procedure setpipes(const avalue: tclientsocketpipes);
   protected
@@ -195,16 +207,16 @@ type
    property pipes: tsocketpipes read fpipes write setpipes;
  end;
  
- socketaccepteventty = procedure(const sender: tsocketserver;
+ socketaccepteventty = procedure(const sender: tcustomsocketserver;
                      const asocket: integer;
                      const addr: socketaddrty; var accept: boolean) of object;
- socketserverconnecteventty = procedure(const sender: tsocketserver;
+ socketserverconnecteventty = procedure(const sender: tcustomsocketserver;
                      const apipes: tcustomsocketpipes) of object;
 
  socketserverstatety = (sss_closepipespending);
  socketserverstatesty = set of socketserverstatety;
  
- tsocketserver = class(tsocketcomp)
+ tcustomsocketserver = class(tcustomurlsocketcomp)
   private
    fstate: socketserverstatesty;
    fthread: tmsethread;
@@ -224,7 +236,6 @@ type
    ftxtimeoutms: integer;
    function execthread(thread: tmsethread): integer;
   protected
-   procedure internalconnect; override;
    procedure internaldisconnect; override;
    procedure closepipes(const sender: tcustomsocketpipes); override;
    procedure doasyncevent(var atag: integer); override;
@@ -258,7 +269,23 @@ type
    property onsocketbroken: socketpipeseventty read fonsocketbroken 
                                  write fonsocketbroken;
  end;
-   
+
+ tsocketserver = class(tcustomsocketserver)
+  protected
+   procedure internalconnect; override;
+  published
+   property kind;
+   property url;
+   property port;
+ end;
+
+ tsocketserverstdio = class(tcustomsocketserver)
+  protected
+   procedure internalconnect; override;
+  public
+   constructor create(aowner: tcomponent); override;  
+ end;
+     
 procedure checksyserror(const aresult: integer);
 
 implementation
@@ -451,12 +478,6 @@ begin
  active:= false;
 end;
 
-procedure tsocketcomp.seturl(const avalue: filenamety);
-begin
- checkinactive;
- furl:= avalue;
-end;
-
 procedure tsocketcomp.internaldisconnect;
 begin
  fhandle:= invalidfilehandle;
@@ -509,7 +530,15 @@ begin
  end; 
 end;
 
-function tsocketcomp.getsockaddr: socketaddrty;
+{ tcustomurlsocketcomp}
+
+procedure tcustomurlsocketcomp.seturl(const avalue: filenamety);
+begin
+ checkinactive;
+ furl:= avalue;
+end;
+
+function tcustomurlsocketcomp.getsockaddr: socketaddrty;
 begin
  with result do begin
   kind:= fkind;
@@ -631,16 +660,16 @@ begin
  end;
 end;
 
-{ tsocketserver }
+{ tcustomsocketserver }
 
-constructor tsocketserver.create(aowner: tcomponent);
+constructor tcustomsocketserver.create(aowner: tcomponent);
 begin
  fmaxconnections:= defaultmaxconnections;
  foverloadsleepus:= -1;
  inherited;
 end;
 
-destructor tsocketserver.destroy;
+destructor tcustomsocketserver.destroy;
 var
  int1: integer;
 begin
@@ -652,27 +681,7 @@ begin
  end;
 end;
 
-procedure tsocketserver.internalconnect;
-begin
- syserror(sys_opensocket(sok_local,true,fhandle));
- try
-  syserror(sys_bindsocket(fhandle,getsockaddr));
- except
-  sys_closefile(fhandle);
-  fhandle:= invalidfilehandle;
-  raise;
- end;
- try
-  syserror(sys_listen(fhandle,fmaxconnections));
- except
-  internaldisconnect;
-  raise;
- end;
- factive:= true;
- fthread:= tmsethread.create(@execthread);
-end;
-
-function tsocketserver.execthread(thread: tmsethread): integer;
+function tcustomsocketserver.execthread(thread: tmsethread): integer;
 var
  addr: socketaddrty;
  conn: integer;
@@ -738,7 +747,7 @@ begin
  end;
 end;
 
-procedure tsocketserver.internaldisconnect;
+procedure tcustomsocketserver.internaldisconnect;
 var
  int1: integer;
 begin
@@ -764,7 +773,7 @@ begin
  inherited;
 end;
 
-procedure tsocketserver.closepipes(const sender: tcustomsocketpipes);
+procedure tcustomsocketserver.closepipes(const sender: tcustomsocketpipes);
 begin
  if (sender.rx.handle <> invalidfilehandle) or 
              (sops_detached in sender.fstate) then begin
@@ -784,7 +793,7 @@ begin
  end;
 end;
 
-procedure tsocketserver.doasyncevent(var atag: integer);
+procedure tcustomsocketserver.doasyncevent(var atag: integer);
 var
  int1: integer;
 begin
@@ -799,7 +808,7 @@ begin
  end;
 end;
 
-procedure tsocketserver.runhandlerapp(const asocket: integer;
+procedure tcustomsocketserver.runhandlerapp(const asocket: integer;
                const acommandline: filenamety);
 var
  int1,int2: integer;
@@ -807,6 +816,43 @@ begin
  syserror(sys_dup(asocket,int1));
  syserror(sys_dup(asocket,int2));
  execmse3(acommandline,@int1,@int2);
+end;
+
+{ tsocketserver }
+
+procedure tsocketserver.internalconnect;
+begin
+ syserror(sys_opensocket(sok_local,true,fhandle));
+ try
+  syserror(sys_bindsocket(fhandle,getsockaddr));
+ except
+  sys_closefile(fhandle);
+  fhandle:= invalidfilehandle;
+  raise;
+ end;
+ try
+  syserror(sys_listen(fhandle,fmaxconnections));
+ except
+  internaldisconnect;
+  raise;
+ end;
+ factive:= true;
+ fthread:= tmsethread.create(@execthread);
+end;
+
+{ tsocketserverstdio }
+
+constructor tsocketserverstdio.create(aowner: tcomponent);
+begin
+ inherited;
+ fkind:= sok_inet;
+end;
+
+procedure tsocketserverstdio.internalconnect;
+begin
+ syserror(sys_dup(sys_stdin,fhandle));
+ factive:= true;
+ fthread:= tmsethread.create(@execthread);
 end;
 
 { tsocketreader }
