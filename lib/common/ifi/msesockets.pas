@@ -8,6 +8,7 @@ uses
 const
  defaultmaxconnections = 16;
  closepipestag = 836915;
+ closeconnectiontag = closepipestag + 1;
   
 type
  tcustomsocketpipes = class;
@@ -221,6 +222,7 @@ type
    fstate: socketserverstatesty;
    fthread: tmsethread;
    fmaxconnections: integer;
+   faccepttimeoutms: integer;
    fonaccept: socketaccepteventty;
    fonbeforechconnect: socketserverconnecteventty;
    fonafterchconnect: socketserverconnecteventty;
@@ -247,6 +249,7 @@ type
   published
    property maxconnections: integer read fmaxconnections write fmaxconnections 
                              default defaultmaxconnections;
+   property accepttimeoutms: integer read faccepttimeoutms write faccepttimeoutms;
    property rxtimeoutms: integer read frxtimeoutms write frxtimeoutms;
    property txtimeoutms: integer read ftxtimeoutms write ftxtimeoutms;
    
@@ -256,7 +259,7 @@ type
    property onafterchconnect: socketserverconnecteventty read fonafterchconnect
                                write fonafterchconnect;
    property onbeforechdisconnect: socketserverconnecteventty read fonbeforechdisconnect
-                               write fonbeforechconnect;
+                               write fonbeforechdisconnect;
    property onafterchdisconnect: socketserverconnecteventty read fonafterchdisconnect
                                write fonafterchdisconnect;
    property overloadsleepus: integer read foverloadsleepus 
@@ -290,7 +293,7 @@ procedure checksyserror(const aresult: integer);
 
 implementation
 uses
- msefileutils,msesysintf,sysutils,msestream,mseprocutils;
+ msefileutils,msesysintf,sysutils,msestream,mseprocutils,msesysutils;
   
 procedure checksyserror(const aresult: integer);
 begin
@@ -687,61 +690,73 @@ var
  conn: integer;
  bo1: boolean;
  int1,int2: integer;
+ err: syserrorty;
 begin
  result:= 0;
  addr.kind:= fkind;
  addr.size:= sizeof(addr.platformdata);
- while not thread.terminated and (sys_accept(fhandle,true,conn,addr,0) = sye_ok) do begin
+ while not thread.terminated do begin
+debugwriteln('acceptstart');
+  err:= sys_accept(fhandle,true,conn,addr,0);
+debugwriteln('acceptend '+inttostr(ord(err)));
   if not thread.terminated then begin
-   try
-    application.lock;
+   if err = sye_ok then begin
     try
-     if canevent(tmethod(fonaccept)) then begin
-      bo1:= false;
-      fonaccept(self,conn,addr,bo1);
-     end
-     else begin
-      bo1:= true;
+     application.lock;
+     try
+      if canevent(tmethod(fonaccept)) then begin
+       bo1:= false;
+       fonaccept(self,conn,addr,bo1);
+      end
+      else begin
+       bo1:= true;
+      end;
+      if bo1 then begin
+       int2:= -1;
+       for int1:= 0 to high(fpipes) do begin
+        if fpipes[int1] = nil then begin
+         int2:= int1;
+         break;
+        end;
+       end;
+       if int2 < 0 then begin
+        setlength(fpipes,high(fpipes)+2);
+        int2:= high(fpipes);
+       end;
+       fpipes[int2]:= tserversocketpipes.create(self);
+       inc(fconnectioncount);
+       with fpipes[int2] do begin
+        rx.timeoutms:= frxtimeoutms;
+        tx.timeoutms:= ftxtimeoutms;
+        optionsreader:= self.foptionsreader;
+        overloadsleepus:= self.foverloadsleepus;
+        oninputavailable:= self.foninputavailable;
+        onsocketbroken:= self.fonsocketbroken;
+        if canevent(tmethod(fonbeforechconnect)) then begin
+         fonbeforechconnect(self,fpipes[int2]);
+        end;
+        handle:= conn;
+        if canevent(tmethod(fonafterchconnect)) then begin
+         fonafterchconnect(self,fpipes[int2]);
+        end;
+       end;
+      end
+      else begin
+ //      sys_shutdownsocket(conn,ssk_both);
+       sys_closesocket(conn);
+      end;
+     finally
+      application.unlock;
      end;
-     if bo1 then begin
-      int2:= -1;
-      for int1:= 0 to high(fpipes) do begin
-       if fpipes[int1] = nil then begin
-        int2:= int1;
-        break;
-       end;
-      end;
-      if int2 < 0 then begin
-       setlength(fpipes,high(fpipes)+2);
-       int2:= high(fpipes);
-      end;
-      fpipes[int2]:= tserversocketpipes.create(self);
-      inc(fconnectioncount);
-      with fpipes[int2] do begin
-       rx.timeoutms:= frxtimeoutms;
-       tx.timeoutms:= ftxtimeoutms;
-       optionsreader:= self.foptionsreader;
-       overloadsleepus:= self.foverloadsleepus;
-       oninputavailable:= self.foninputavailable;
-       onsocketbroken:= self.fonsocketbroken;
-       if canevent(tmethod(fonbeforechconnect)) then begin
-        fonbeforechconnect(self,fpipes[int2]);
-       end;
-       handle:= conn;
-       if canevent(tmethod(fonafterchconnect)) then begin
-        fonafterchconnect(self,fpipes[int2]);
-       end;
-      end;
-     end
-     else begin
-//      sys_shutdownsocket(conn,ssk_both);
-      sys_closesocket(conn);
-     end;
-    finally
-     application.unlock;
+    except
+     application.handleexception(self);
     end;
-   except
-    application.handleexception(self);
+   end
+   else begin
+    if (err <> sye_timeout) or (fconnectioncount = 0) then begin
+     asyncevent(closeconnectiontag);
+     break;
+    end;
    end;
   end;
  end;
@@ -797,13 +812,18 @@ procedure tcustomsocketserver.doasyncevent(var atag: integer);
 var
  int1: integer;
 begin
- if atag = closepipestag then begin
-  exclude(fstate,sss_closepipespending);
-  for int1:= 0 to high(fpipes) do begin
-   if (fpipes[int1] <> nil) and 
-               (fpipes[int1].tx.handle = invalidfilehandle) then begin
-    freeandnil(fpipes[int1]);
+ case atag of
+  closepipestag: begin
+   exclude(fstate,sss_closepipespending);
+   for int1:= 0 to high(fpipes) do begin
+    if (fpipes[int1] <> nil) and 
+                (fpipes[int1].tx.handle = invalidfilehandle) then begin
+     freeandnil(fpipes[int1]);
+    end;
    end;
+  end;
+  closeconnectiontag: begin
+   active:= false;
   end;
  end;
 end;
@@ -822,19 +842,21 @@ end;
 
 procedure tsocketserver.internalconnect;
 begin
- syserror(sys_opensocket(sok_local,true,fhandle));
- try
-  syserror(sys_bindsocket(fhandle,getsockaddr));
- except
-  sys_closefile(fhandle);
-  fhandle:= invalidfilehandle;
-  raise;
- end;
- try
-  syserror(sys_listen(fhandle,fmaxconnections));
- except
-  internaldisconnect;
-  raise;
+ if not (csdesigning in componentstate) then begin
+  syserror(sys_opensocket(sok_local,true,fhandle));
+  try
+   syserror(sys_bindsocket(fhandle,getsockaddr));
+  except
+   sys_closefile(fhandle);
+   fhandle:= invalidfilehandle;
+   raise;
+  end;
+  try
+   syserror(sys_listen(fhandle,fmaxconnections));
+  except
+   internaldisconnect;
+   raise;
+  end;
  end;
  factive:= true;
  fthread:= tmsethread.create(@execthread);
@@ -850,7 +872,9 @@ end;
 
 procedure tsocketserverstdio.internalconnect;
 begin
- syserror(sys_dup(sys_stdin,fhandle));
+ if not (csdesigning in componentstate) then begin
+  syserror(sys_dup(sys_stdin,fhandle));
+ end;
  factive:= true;
  fthread:= tmsethread.create(@execthread);
 end;

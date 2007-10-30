@@ -32,7 +32,7 @@ object projectoptionsfo: tprojectoptionsfo
     frame.dummy = 0
     anchors = [an_top, an_bottom]
     taborder = 1
-    activepageindex = 7
+    activepageindex = 3
     tab_frame.dummy = 0
     tab_size = 20
     statfile = statfile1
@@ -1969,6 +1969,7 @@ object projectoptionsfo: tprojectoptionsfo
       frame.dummy = 0
       anchors = [an_left, an_top, an_right, an_bottom]
       taborder = 3
+      visible = True
       caption = 'M&acros'
       onchildscaled = macronchildscaled
       object macrogrid: twidgetgrid
@@ -3164,7 +3165,6 @@ object projectoptionsfo: tprojectoptionsfo
       frame.dummy = 0
       anchors = [an_left, an_top, an_right, an_bottom]
       taborder = 8
-      visible = True
       caption = 'Tools'
       reffontheight = 14
       object twidgetgrid3: twidgetgrid
@@ -3264,6 +3264,45 @@ object projectoptionsfo: tprojectoptionsfo
         datarowheight = 16
         statfile = statfile1
         reffontheight = 14
+        object toolsave: tbooleanedit
+          optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets]
+          bounds_x = 0
+          bounds_y = 0
+          bounds_cy = 16
+          frame.levelo = 0
+          frame.colorclient = -2147483645
+          frame.localprops = [frl_levelo, frl_leveli, frl_fileft, frl_fitop, frl_firight, frl_fibottom, frl_colorclient]
+          frame.dummy = 0
+          taborder = 1
+          visible = False
+          optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_keyexecute, oe_savestate]
+        end
+        object toolparse: tbooleanedit
+          optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets]
+          bounds_x = 14
+          bounds_y = 0
+          bounds_cy = 16
+          frame.levelo = 0
+          frame.colorclient = -2147483645
+          frame.localprops = [frl_levelo, frl_leveli, frl_fileft, frl_fitop, frl_firight, frl_fibottom, frl_colorclient]
+          frame.dummy = 0
+          taborder = 2
+          visible = False
+          optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_keyexecute, oe_savestate]
+        end
+        object toolhide: tbooleanedit
+          optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets]
+          bounds_x = 28
+          bounds_y = 0
+          bounds_cy = 16
+          frame.levelo = 0
+          frame.colorclient = -2147483645
+          frame.localprops = [frl_levelo, frl_leveli, frl_fileft, frl_fitop, frl_firight, frl_fibottom, frl_colorclient]
+          frame.dummy = 0
+          taborder = 3
+          visible = False
+          optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_keyexecute, oe_savestate]
+        end
         object toolmenu: tstringedit
           optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight]
           bounds_x = 42
@@ -3274,9 +3313,9 @@ object projectoptionsfo: tprojectoptionsfo
           frame.colorclient = -2147483645
           frame.localprops = [frl_levelo, frl_colorclient]
           frame.dummy = 0
-          taborder = 1
+          taborder = 4
           visible = False
-          optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_keyexecute, oe_savestate]
+          optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_endonenter, oe_autopopupmenu, oe_keyexecute, oe_savestate]
           reffontheight = 14
         end
         object toolfile: tfilenameedit
@@ -3291,9 +3330,9 @@ object projectoptionsfo: tprojectoptionsfo
           frame.button.color = -1879048187
           frame.button.imagenr = 17
           frame.dummy = 0
-          taborder = 2
+          taborder = 5
           visible = False
-          optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_keyexecute, oe_savestate]
+          optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_endonenter, oe_autopopupmenu, oe_keyexecute, oe_savestate]
           controller.include = [fa_xusr, fa_xgrp, fa_xoth]
           reffontheight = 14
         end
@@ -3307,49 +3346,10 @@ object projectoptionsfo: tprojectoptionsfo
           frame.colorclient = -2147483645
           frame.localprops = [frl_levelo, frl_colorclient]
           frame.dummy = 0
-          taborder = 3
-          visible = False
-          optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_keyexecute, oe_savestate]
-          reffontheight = 14
-        end
-        object toolparse: tbooleanedit
-          optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets]
-          bounds_x = 14
-          bounds_y = 0
-          bounds_cy = 16
-          frame.levelo = 0
-          frame.colorclient = -2147483645
-          frame.localprops = [frl_levelo, frl_leveli, frl_fileft, frl_fitop, frl_firight, frl_fibottom, frl_colorclient]
-          frame.dummy = 0
-          taborder = 4
-          visible = False
-          optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_keyexecute, oe_savestate]
-        end
-        object toolhide: tbooleanedit
-          optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets]
-          bounds_x = 28
-          bounds_y = 0
-          bounds_cy = 16
-          frame.levelo = 0
-          frame.colorclient = -2147483645
-          frame.localprops = [frl_levelo, frl_leveli, frl_fileft, frl_fitop, frl_firight, frl_fibottom, frl_colorclient]
-          frame.dummy = 0
-          taborder = 5
-          visible = False
-          optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_keyexecute, oe_savestate]
-        end
-        object toolsave: tbooleanedit
-          optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets]
-          bounds_x = 0
-          bounds_y = 0
-          bounds_cy = 16
-          frame.levelo = 0
-          frame.colorclient = -2147483645
-          frame.localprops = [frl_levelo, frl_leveli, frl_fileft, frl_fitop, frl_firight, frl_fibottom, frl_colorclient]
-          frame.dummy = 0
           taborder = 6
           visible = False
-          optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_keyexecute, oe_savestate]
+          optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_endonenter, oe_autopopupmenu, oe_keyexecute, oe_savestate]
+          reffontheight = 14
         end
       end
     end
