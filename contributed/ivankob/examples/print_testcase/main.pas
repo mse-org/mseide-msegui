@@ -5,7 +5,7 @@ unit main;
 interface
 
 uses
- msegui,mseclasses,mseforms,msesimplewidgets,msemenus,msereport,msedbedit,
+ mseglob,msegui,mseclasses,mseforms,msesimplewidgets,msemenus,msereport,msedbedit,
  msesqldb,msedb,msedbgraphics,mseevent,mseactions,msebitmap,mseibconnection,
  msefiledialog, msestrings,msesplitter;
 

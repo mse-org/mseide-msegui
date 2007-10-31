@@ -2,7 +2,7 @@ unit dmprint;
 {$ifdef FPC}{$mode objfpc}{$h+}{$INTERFACES CORBA}{$endif}
 interface
 uses
- msegui,mseclasses,mseforms,msepostscriptprinter, msestrings,
+ mseglob,msegui,mseclasses,mseforms,msepostscriptprinter, msestrings,
  msetypes,mseactions,msestat,msedatamodules,msestatfile, mseprinter; 
 
 type
