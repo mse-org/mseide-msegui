@@ -17,7 +17,7 @@ uses
  msedataedits,msegraphics,mseguiglob,msedialog,classes,msetypes,msedropdownlist,
  msestrings,mseedit,msestat,msestatfile,msedatalist,mseevent,mseformatstr,
  mseinplaceedit,msewidgetgrid,msedrawtext,msegraphutils,
- msebitmap,mserichstring;
+ msebitmap,mserichstring, mseglob;
 
 const
  themesdialogstatname = 'themesdialog.sta';
