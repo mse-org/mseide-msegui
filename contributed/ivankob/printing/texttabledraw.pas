@@ -13,7 +13,7 @@ unit texttabledraw;
 interface
 
 uses
- msetypes, msestrings, sysutils;
+ msetypes, msestrings, sysutils, msestream;
 
 {
  Pseudo-graphic chars to construct table frames
@@ -62,37 +62,37 @@ const
 
  cond_ratio = 132/80;
 
- epson_lh_cmd = #27'3';
- ibm_lh_cmd   = #27'3';
- lj_lh_cmd    = #27'3';
+ epson_lh_cmd = #0027'3';
+ ibm_lh_cmd   = #0027'3';
+ lj_lh_cmd    = #0027'3';
 
- epson_deflh_cmd = #27'2';
- ibm_deflh_cmd   = #27'3'#36;
- lj_deflh_cmd    = #27'2';
+ epson_deflh_cmd = #0027'2';
+ ibm_deflh_cmd   = #0027'3'#0036;
+ lj_deflh_cmd    = #0027'2';
 
- epson_hs_cmd = #27'U0'#27'x0'#27'F'#27'H';
- ibm_hs_cmd   = #27'U0'#27'I0'#27'F'#27'H';
- lj_hs_cmd    = #27'U0'#27'x0'#27'F'#27'H';
+ epson_hs_cmd = #0027'U0'#0027'x0'#0027'F'#0027'H';
+ ibm_hs_cmd   = #0027'U0'#0027'I0'#0027'F'#0027'H';
+ lj_hs_cmd    = #0027'U0'#0027'x0'#0027'F'#0027'H';
 
- epson_hq_cmd = #27'x1';
- ibm_hq_cmd   = #27'I1';
- lj_hq_cmd    = #27'x1';
+ epson_hq_cmd = #0027'x1';
+ ibm_hq_cmd   = #0027'I1';
+ lj_hq_cmd    = #0027'x1';
  
- epson_10cpi_cmd = #18#27'P';
- ibm_10cpi_cmd   = #18;
- lj_10cpi_cmd    = #18#27'P';
+ epson_10cpi_cmd = #0018#0027'P';
+ ibm_10cpi_cmd   = #0018;
+ lj_10cpi_cmd    = #0018#0027'P';
  
- epson_12cpi_cmd = #18#27'M';
- ibm_12cpi_cmd   = #18#27':';
- lj_12cpi_cmd    = #18#27'M';
+ epson_12cpi_cmd = #0018#0027'M';
+ ibm_12cpi_cmd   = #0018#0027':';
+ lj_12cpi_cmd    = #0018#0027'M';
 
- epson_cond_cmd = #15;
- ibm_cond_cmd   = #15;
- lj_cond_cmd    = #15;
+ epson_cond_cmd = #0015;
+ ibm_cond_cmd   = #0015;
+ lj_cond_cmd    = #0015;
 
- epson_reset_cmd = #17#27'@';
- ibm_reset_cmd   = #17#27'[K';
- lj_reset_cmd    = #17#27'@';
+ epson_reset_cmd = #0017#0027'@';
+ ibm_reset_cmd   = #0017#0027'[K';
+ lj_reset_cmd    = #0017#0027'@';
 
  epson_init_cmd = epson_reset_cmd + epson_deflh_cmd + epson_10cpi_cmd + epson_hs_cmd ;
  ibm_init_cmd   = ibm_reset_cmd   + ibm_deflh_cmd   + ibm_10cpi_cmd   + ibm_hs_cmd ;
@@ -114,6 +114,7 @@ type
  clipoptarty = array of clip_opts;
 
  prn_type = (prn_epson, prn_ibm, prn_lj);
+ output_encoding = (enc_latin1, enc_ru866);
 
  ttextprinter = class
  private
@@ -128,15 +129,35 @@ type
   fdpi_coeff: integer;
   fcpi10_cmd: shortstring;
   fcpi12_cmd: shortstring;
-  fcond_cmd: shortstring;  
+  fcond_cmd: shortstring; 
+  fdebugfilename: msestring;
+  fdebugstream: ttextstream;
+  fdebugprint: boolean;
+  fautoprint: boolean;
+  fisprinting: boolean;
+  foutputencoding: output_encoding;
+  
+  procedure internalchecklst;
+  procedure internalendprint;
+  
  protected
   { Initializes the printer settings for a choosen type }   
   procedure settype(const atype: prn_type);
+  procedure setdebugprint(const avalue: boolean);  
  
  public
   constructor Create(const atype: prn_type = prn_epson);
+  destructor Destroy;  
   property printer_type: prn_type read ftype write settype;
+  property outputencoding: output_encoding read foutputencoding write foutputencoding;
   property graphoff : boolean read fgraphoff write fgraphoff;
+
+  property debugprint : boolean read fdebugprint write setdebugprint;  
+  property debugfilename: msestring read fdebugfilename write fdebugfilename;  
+  property isprinting: boolean read fisprinting;  
+  
+  { Causes the printer to print GETDATALINE/GETFRAMELINE return automatically }
+  property autoprint: boolean read fautoprint write fautoprint;  
 
   { Returns the printer command of reset }
   property reset_cmd: shortstring read freset_cmd;
@@ -156,6 +177,14 @@ type
   { Returns the printer command of setting char horizontal density acc to the suplied switch }
   function dens_cmd(const avalue: prn_density): shortstring;
 
+  procedure writelnp(const avalue: msestring);
+  procedure writep(const avalue: msestring);
+  
+  procedure beginprint;
+  procedure endprint;
+  
+ //==========================
+  
 
  { ==================================================================
 
@@ -163,7 +192,7 @@ type
  
    Example of usage :
 
-    var 
+   var 
     ar1: msestringarty;
 
     begin:
@@ -180,7 +209,7 @@ type
       mkclipoptar([clo_pad,clo_break,clo_pad,clo_pad,clo_pad]),
       mktextalignar([sp_center,sp_left,sp_center,sp_right,sp_right])
      );
-     for i:=0 to high(ar1) do writeln(ucs2to866(ar1[i]));
+     for i:=0 to high(ar1) do writelnp(ucs2to866(ar1[i]));
   }
 
   function getdataline(
@@ -197,7 +226,7 @@ type
  
   Example of usage :
 
-    writeln(ucs2to866(getframeline(
+    writelnp(ucs2to866(getframeline(
      mktabar([0,4,34,44,54,67]),
      fl_bottom,
      mktabar([0,4,5]
@@ -214,22 +243,6 @@ type
 
   
  end;
-
-{
- prn_info_recty = record
-  reset_cmd: shortstring;
-  init_cmd: shortstring;
-  deflh_cmd: shortstring;
-  hs_cmd: shortstring;
-  hq_cmd: shortstring;
-  lh_cmd: shortstring;
-  dpi_coeff: integer;
-  cpi10_cmd: shortstring;
-  cpi12_cmd: shortstring;
-  cond_cmd: shortstring;  
- end;
-}
-
 
 { ================================================================== }
 
@@ -248,7 +261,10 @@ implementation
 
 uses
  strutils,
- msedatalist;
+ msedatalist,
+ printer,
+ msesys,
+ mseucs2toru;
 
 
 // ==================== GENERIC TEXT PROCESSING FUNCTIONS ====================
@@ -264,7 +280,7 @@ function ttextprinter.getdataline(
   i,j,i1,tabhigh,valhigh,brkhigh,alhigh,valhigh1: integer;
   value_len,tab_len: integer;
   ar1: msestringararty;
-  s1: msestring;
+  s1,s2: msestring;
   ar2: integerarty;
   rc, mc,lc: widechar;
   ipadchar: widechar;
@@ -294,6 +310,12 @@ function ttextprinter.getdataline(
   // поочередно по всем табуляторам
   setlength(ar1,length(avalues)); // массив выходных столбцов строк
   i1:= 0;
+  
+  // определение левого отступа, если табуляторы начинаются не с начала строки
+  if tabpos[0] > 0 then
+   s2:= charstring(#$0020, tabpos[0])
+  else
+   s2:= '';
 
   for i:= 0 to tabhigh - 1 do begin // кроме последнего табулятора
 
@@ -371,7 +393,11 @@ function ttextprinter.getdataline(
   // настроить результат на максимальное найденное число строк
   setlength(result, i1+1); 
   for i:= 0 to i1 do begin // вниз
-   result[i]:= lc; // каждый столбец начинается с верт. линии
+
+   // каждый столбец начинается с верт. линии,  
+   // с учетом поправки на самый левый табулятор > 0      
+   result[i]:= s2 + lc; 
+
    for j:= 0 to valhigh do begin // вправо
 
     if i > (length(ar1[j])-1) then  // столбец содержит меньше значений, чем максимальное
@@ -382,9 +408,17 @@ function ttextprinter.getdataline(
     if j < valhigh then 
      result[i]:= result[i] + s1 + mc
     else 
-     result[i]:= result[i] + s1 + rc
-     
+     result[i]:= result[i] + s1 + rc;
+
    end;
+  end;
+  
+  if fautoprint then begin // распечатать  сразу, как готовы вызодные данные
+
+   for i:=0 to high(result) 
+    do writelnp(result[i]);
+
+   setlength(result,0);  // со сбросом результата в конце
   end;
 
  end;
@@ -400,7 +434,7 @@ function ttextprinter.getframeline (
 var
  c1,rcs,mcs,lcs, rcl,mcl,lcl, hc: widechar;
  i,j,i1: integer;
- s1: msestring;
+ s1,s2: msestring;
  b1: boolean;
 begin
  rcs:= #$0020; mcs:= #$0020; lcs:= #$0020; 
@@ -557,6 +591,12 @@ begin
  if i1 < 1 
   then raise exception.create('TEXTTABLEDRAW.GETFRAMELINE: At least 2 tabulators are required !');
 
+ // определение левого отступа, если табуляторы начинаются не с начала строки
+ if tabpos[0] > 0 then
+  s2:= charstring(#$0020, tabpos[0])
+ else
+  s2:= '';
+
  for i:= 0 to i1 do begin // for-begin
 
   b1:= false;
@@ -590,6 +630,14 @@ begin
   end;
  
  end; // end-for
+ 
+ // поправка на самый левый табулятор > 0
+ result:=  s2 + result;
+ 
+ if fautoprint then begin // распечатать  сразу, как готовы вызодные данные
+  writelnp(result); 
+  setlength(result,0); // со сбросом результата в конце
+ end;
 
 end;
  
@@ -661,7 +709,8 @@ end;
 
 procedure ttextprinter.settype(const atype: prn_type);
 begin
-// with prninfo do begin
+  ftype:= atype;
+  
   case atype of 
    prn_ibm: begin
     fdeflh_cmd:= ibm_deflh_cmd;
@@ -700,20 +749,17 @@ begin
     fcond_cmd:=  epson_cond_cmd;
    end;
   end;
-// end;
 end;
 
 //---------------------------------
 
 function ttextprinter.dens_cmd(const avalue: prn_density): shortstring;
 begin
-// with prninfo do begin
   case avalue of
    pd_10cpi: result:= fcpi10_cmd;
    pd_12cpi: result:= fcpi10_cmd;
    pd_cond : result:= fcpi10_cmd;
   end; 
-// end;
 end;
 
 //---------------------------------
@@ -723,9 +769,129 @@ begin
  ftype:= atype;
  settype(ftype);
  fgraphoff:= false; // to use pseudographics by default
+ fdebugfilename:= gettempfilename(gettempdir ,'textprinterdbg');
+ fdebugprint:= false;
+ fautoprint:= false;
+ fdebugstream:= nil;
+ fisprinting:= false;
+ foutputencoding:= enc_latin1;
 end;
 
 //---------------------------------
 
+procedure ttextprinter.internalchecklst;
+begin
+ if not islstavailable then begin
+  raise exception.create('TTEXTTABLEDRAW.TTEXTPRINTER: the RAW text printer (LST) is not available!'); 
+ end;
+end;
+
+
+procedure ttextprinter.internalendprint;
+begin
+ if fdebugprint then begin // отладка печати
+  if (fdebugstream <> nil) then begin
+   if fdebugstream.isopen then fdebugstream.close;
+   freeandnil(fdebugstream);
+  end;
+ end else begin // реальная печать
+  internalchecklst;
+  system.close(lst);
+ end;
+end;
+
+//---------------------------------
+
+destructor ttextprinter.Destroy;
+begin
+ internalendprint;
+end;
+
+//---------------------------------
+
+procedure ttextprinter.setdebugprint(const avalue: boolean);
+var
+ s1: msestring;
+begin
+ if fisprinting then
+  raise exception.create('TTEXTTABLEDRAW.TTEXTPRINTER.SETPRINTERDEBUG: operation is only allowed before BEGINPRINT!');
+ fdebugprint:= avalue;
+end;
+
+//---------------------------------
+
+procedure ttextprinter.writelnp(const avalue: msestring);
+var
+ s1: ansistring;
+begin
+ if not fisprinting then
+  raise exception.create('TTEXTTABLEDRAW.TTEXTPRINTER.WRITELNP: operation is only allowed between BEGINPRINT and ENDPRINT!');
+
+ case foutputencoding of
+  enc_ru866: s1:= ucs2to866(avalue);
+  else
+  s1:= stringtolatin1(avalue);
+ end;
+
+ if fdebugprint then // отладка печати
+  fdebugstream.writeln(s1)
+ else begin
+  system.writeln(lst,s1);  
+ end;
+end;
+
+//---------------------------------
+procedure ttextprinter.writep(const avalue: msestring);
+var
+ s1: ansistring;
+begin
+ if not fisprinting then
+  raise exception.create('TTEXTTABLEDRAW.TTEXTPRINTER.WRITEP: operation is only allowed between BEGINPRINT and ENDPRINT!'); 
+
+ case foutputencoding of
+  enc_ru866: s1:= ucs2to866(avalue);
+  else
+  s1:= stringtolatin1(avalue);
+ end;
+
+ if fdebugprint then // отладка печати
+  fdebugstream.write(s1)  
+ else begin
+  system.write(lst,s1);  
+ end;
+end;
+//---------------------------------
+
+procedure ttextprinter.beginprint;
+var
+ s1: msestring;
+begin
+ if fdebugprint then begin // отладка печати
+
+  if trim(fdebugfilename) = '' then
+   fdebugfilename:= gettempfilename(gettempdir ,'textprinterdbg');
+   
+  if fdebugstream = nil then
+   fdebugstream:= ttextstream.create(fdebugfilename,fm_create); 
+   
+ end else begin // реальная печать
+  internalchecklst;
+  system.append(lst); // переоткрыть принтер
+ end;
+ fisprinting:= true;  
+ writep(finit_cmd); // на всякий случай сбросить принтер
+end;
+
+//---------------------------------
+procedure ttextprinter.endprint;
+begin
+ if not fisprinting then
+  raise exception.create('TTEXTTABLEDRAW.TTEXTPRINTER.ENDPRINT: operation is only allowed after BEGINPRINT!');
+
+ writep(finit_cmd); // cбросить принтер, чтобы не влиять на последующие задания 
+ fisprinting:= false;
+ internalendprint;
+end;
+//---------------------------------
 
 end.
