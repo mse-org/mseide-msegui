@@ -1091,20 +1091,6 @@ begin
  end;
 end;
 
-function gui_postevent(event: tevent): guierrorty;
-var
- int1: integer;
-begin
- result:= gue_postevent;
- for int1:= 0 to 15 do begin
-  if windows.postthreadmessage(mainthread,msemessage,cardinal(event),0) then begin
-   result:= gue_ok;
-   break;
-  end;
-  sleep(0);
- end;
-end;
-
 procedure gui_beep;
 begin
  windows.MessageBeep($ffffffff);
@@ -3752,17 +3738,37 @@ begin
  end;
 end;
 
-procedure gui_wakeup;
-begin
- windows.postthreadmessage(mainthread,wakeupmessage,0,0);
-end;
-
 var
  mousewheelpos: integer;
  sizingwindow: hwnd;
  eventlooping: integer;
  escapepressed: boolean;
  
+procedure gui_wakeup;
+begin
+ windows.postthreadmessage(mainthread,wakeupmessage,0,0);
+end;
+
+function gui_postevent(event: tevent): guierrorty;
+var
+ int1: integer;
+begin
+ if eventlooping > 0 then begin
+  result:= gue_ok;
+  eventlist.add(event); //threadmessages are lost while window sizing
+ end
+ else begin
+  result:= gue_postevent;
+  for int1:= 0 to 15 do begin
+   if windows.postthreadmessage(mainthread,msemessage,cardinal(event),0) then begin
+    result:= gue_ok;
+    break;
+   end;
+   sleep(0);
+  end;
+ end;
+end;
+
 function gui_escapepressed: boolean;
 begin
  result:= escapepressed;
@@ -3783,6 +3789,7 @@ var
  po1: pointty;
  key1: keyty;
  str1: string;
+ int1: integer;
 begin
  result:= 1;
  case msg of
@@ -3870,29 +3877,7 @@ begin
    else begin
     eventlist.add(twindowevent.create(ek_hide,ahwnd));
    end;
-   {
-   if msg = wm_size then begin
-    if wparam = size_minimized then begin
-     eventlist.add(twindowevent.create(ek_hide,ahwnd));
-    end
-    else begin
-     if (wparam = size_restored) or (wparam = size_maximized) then begin
-      eventlist.add(twindowevent.create(ek_show,ahwnd));
-     end;
-    end;
-   end;
-   }
   end;
-{
-  wm_showwindow: begin
-   if wparam = 0 then begin
-    eventlist.add(twindowevent.create(ek_hide,ahwnd));
-   end
-   else begin
-    eventlist.add(twindowevent.create(ek_show,ahwnd));
-   end;
-  end;
-}
   wm_queryopen: begin
    eventlist.add(twindowevent.create(ek_show,ahwnd));
   end;
@@ -3921,13 +3906,11 @@ begin
     while mousewheelpos >= wheelstep do begin
     eventlist.add(tmouseevent.create(mousewindow,false,mb_none,mw_up,po1,
             winmousekeyflagstoshiftstate(wparam),timestamp));
- //    eventlist.add(tkeyevent.create(ahwnd,false,key_wheelup,key_wheelup,shiftstate,''));
      dec(mousewheelpos,wheelstep);
     end;
     while mousewheelpos <= -wheelstep do begin
      eventlist.add(tmouseevent.create(mousewindow,false,mb_none,mw_down,po1,
             winmousekeyflagstoshiftstate(wparam),timestamp));
- //    eventlist.add(tkeyevent.create(ahwnd,false,key_wheeldown,key_wheeldown,shiftstate,''));
      inc(mousewheelpos,wheelstep);
     end;
     result:= 0;
