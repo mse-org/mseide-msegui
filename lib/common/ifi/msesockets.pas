@@ -239,6 +239,7 @@ type
    function execthread(thread: tmsethread): integer;
   protected
    procedure internaldisconnect; override;
+   procedure doclosepipes;
    procedure closepipes(const sender: tcustomsocketpipes); override;
    procedure doasyncevent(var atag: integer); override;
   public
@@ -653,7 +654,12 @@ end;
 
 procedure tsocketclient.closepipes(const sender: tcustomsocketpipes);
 begin
- asyncevent(closepipestag);
+ if (csdestroying in componentstate) and application.ismainthread then begin
+  disconnect;
+ end
+ else begin
+  asyncevent(closepipestag);
+ end;
 end;
 
 procedure tsocketclient.doasyncevent(var atag: integer);
@@ -696,9 +702,12 @@ begin
  addr.kind:= fkind;
  addr.size:= sizeof(addr.platformdata);
  while not thread.terminated do begin
-debugwriteln('acceptstart');
+debugwriteln('acceptstart '+ inttostr(fhandle));
   err:= sys_accept(fhandle,true,conn,addr,0);
 debugwriteln('acceptend '+inttostr(ord(err)));
+if err = sye_lasterror then begin
+debugwriteln(sys_geterrortext(mselasterror));
+end;
   if not thread.terminated then begin
    if err = sye_ok then begin
     try
@@ -788,19 +797,40 @@ begin
  inherited;
 end;
 
+procedure tcustomsocketserver.doclosepipes;
+var
+ int1: integer;
+begin
+ for int1:= 0 to high(fpipes) do begin
+  if (fpipes[int1] <> nil) and 
+              (fpipes[int1].tx.handle = invalidfilehandle) then begin
+   freeandnil(fpipes[int1]);
+  end;
+ end;
+end;
+
 procedure tcustomsocketserver.closepipes(const sender: tcustomsocketpipes);
 begin
  if (sender.rx.handle <> invalidfilehandle) or 
              (sops_detached in sender.fstate) then begin
   exclude(sender.fstate,sops_detached);
   if canevent(tmethod(fonbeforechdisconnect)) then begin
-   fonbeforechdisconnect(self,sender);
+   try
+    fonbeforechdisconnect(self,sender);
+   except
+    application.handleexception(self);
+   end;
   end;
   sender.tx.handle:= invalidfilehandle;
   dec(fconnectioncount);
-  if not (sss_closepipespending in fstate) then begin
-   include(fstate,sss_closepipespending);  
-   asyncevent(closepipestag);
+  if (csdestroying in componentstate) and application.ismainthread then begin
+   doclosepipes;
+  end
+  else begin
+   if not (sss_closepipespending in fstate) then begin
+    include(fstate,sss_closepipespending);  
+    asyncevent(closepipestag);
+   end;
   end;
   if canevent(tmethod(fonafterchdisconnect)) then begin
    fonafterchdisconnect(self,sender);
@@ -809,18 +839,11 @@ begin
 end;
 
 procedure tcustomsocketserver.doasyncevent(var atag: integer);
-var
- int1: integer;
 begin
  case atag of
   closepipestag: begin
    exclude(fstate,sss_closepipespending);
-   for int1:= 0 to high(fpipes) do begin
-    if (fpipes[int1] <> nil) and 
-                (fpipes[int1].tx.handle = invalidfilehandle) then begin
-     freeandnil(fpipes[int1]);
-    end;
-   end;
+   doclosepipes;
   end;
   closeconnectiontag: begin
    active:= false;
@@ -874,9 +897,12 @@ procedure tsocketserverstdio.internalconnect;
 begin
  if not (csdesigning in componentstate) then begin
   syserror(sys_dup(sys_stdin,fhandle));
+  factive:= true;
+  fthread:= tmsethread.create(@execthread);
+ end
+ else begin
+  factive:= true;
  end;
- factive:= true;
- fthread:= tmsethread.create(@execthread);
 end;
 
 { tsocketreader }
@@ -908,7 +934,9 @@ begin
  fthread:= tsemthread(thread);
  with fthread do begin
   while not terminated and not (tss_error in fstate) do begin
+debugwriteln('readstart');
    sys_readsocket(handle,@fmsbuf,buflen,int1,ftimeoutms);
+debugwriteln('readend '+inttostr(int1));
    if not terminated then begin
     if int1 <= 0 then begin
      include(fstate,tss_error); //broken socket

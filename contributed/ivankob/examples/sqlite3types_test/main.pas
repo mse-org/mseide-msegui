@@ -3,7 +3,7 @@ unit main;
 interface
 
 uses
- msegui,mseclasses,mseforms,msesimplewidgets,msesqlite3conn,msesqldb,msedb,
+ mseglob,msegui,mseclasses,mseforms,msesimplewidgets,msesqlite3conn,msesqldb,msedb,
  msedbedit,msedbgraphics, mseformatjpg,msemenus,msefiledialog, mseevent;
  
 type

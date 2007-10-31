@@ -4,7 +4,7 @@ interface
 implementation
 uses
  classes,mseifi,msedesignintf,msepropertyeditors,msestrings,msedesigner,
- mseclasses,mseifids,mseifiglob,msegui,typinfo,msesockets;
+ mseclasses,mseifids,mseifiglob,msegui,typinfo,msesockets,mseifigui;
  
 type
  tformlinkitemeditor = class(tclasselementeditor)
