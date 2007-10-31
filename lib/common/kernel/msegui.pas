@@ -2138,7 +2138,7 @@ var
  widget1: twidget;
 begin
  widget1:= nil;
- application.setlinkedvar(aclass.create(nil),widget1);
+ application.setlinkedvar(aclass.create(nil),tmsecomponent(widget1));
  try
   result:= widget1.show(true);
  finally

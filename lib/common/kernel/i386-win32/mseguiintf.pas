@@ -3746,13 +3746,21 @@ var
  
 procedure gui_wakeup;
 begin
- windows.postthreadmessage(mainthread,wakeupmessage,0,0);
+ windows.postmessage(applicationwindow,wakeupmessage,0,0);
+// windows.postthreadmessage(mainthread,wakeupmessage,0,0);
 end;
 
 function gui_postevent(event: tevent): guierrorty;
-var
- int1: integer;
+//var
+// int1: integer;
 begin
+ if windows.postmessage(applicationwindow,msemessage,cardinal(event),0) then begin
+  result:= gue_ok;
+ end
+ else begin
+  result:= gue_postevent;
+ end;
+{
  if eventlooping > 0 then begin
   result:= gue_ok;
   eventlist.add(event); //threadmessages are lost while window sizing
@@ -3767,6 +3775,7 @@ begin
    sleep(0);
   end;
  end;
+ }
 end;
 
 function gui_escapepressed: boolean;
@@ -3793,6 +3802,14 @@ var
 begin
  result:= 1;
  case msg of
+  msemessage: begin
+   eventlist.add(tevent(wparam));
+   exit;
+  end;
+  wakeupmessage: begin
+   eventlist.add(nil);
+   exit;
+  end;
   wm_ime_char: begin
    if iswin95 then begin
     str1:= char(wparam);
@@ -4016,12 +4033,14 @@ begin
   while peekmessagea(msg,0,0,0,pm_remove) do begin
    with msg do begin
     case message of
+    {
      msemessage: begin
       eventlist.add(tevent(wparam));
      end;
      wakeupmessage: begin
       eventlist.add(nil);
      end;
+     }
      destroymessage: begin
       windows.destroywindow(msg.wparam);
      end;
@@ -4048,12 +4067,14 @@ begin
   while peekmessagew(msg,0,0,0,pm_remove) do begin
    with msg do begin
     case message of
+    {
      msemessage: begin
       eventlist.add(tevent(wparam));
      end;
      wakeupmessage: begin
       eventlist.add(nil);
      end;
+     }
      destroymessage: begin
       windows.destroywindow(msg.wparam);
      end;
