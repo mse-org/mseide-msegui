@@ -34,10 +34,14 @@ type
  activateerroreventty = procedure(const sender: tactivator; 
                  const aclient: tobject; const aexception: exception;
                  var handled: boolean) of object;
- 
+
+ actcomponentstatety = (acs_releasing);
+ actcomponentstatesty = set of actcomponentstatety;
+  
  tactcomponent = class(tmsecomponent,iactivator)
   private
    factivator: tactivator;
+   fstate: actcomponentstatesty;
    procedure setactivator(const avalue: tactivator);
   protected
    fdesignchangedlock: integer;
@@ -49,6 +53,8 @@ type
    procedure objectevent(const sender: tobject;
                           const event: objecteventty); override;
   public
+   procedure release; virtual;
+   function releasing: boolean;
    property activator: tactivator read factivator write setactivator;
  end;
 
@@ -320,6 +326,19 @@ begin
    end;
   end;
  end;
+end;
+
+procedure tactcomponent.release;
+begin
+ if not (acs_releasing in fstate) then begin
+  appinst.postevent(tobjectevent.create(ek_release,ievent(self)));
+  include(fstate,acs_releasing);
+ end;
+end;
+
+function tactcomponent.releasing: boolean;
+begin
+ result:= acs_releasing in fstate;
 end;
 
 { tactivator }

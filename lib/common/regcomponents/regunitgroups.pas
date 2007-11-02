@@ -23,7 +23,7 @@ uses
  
 procedure reggroups;
 begin
- registerunitgroup(['mseapplication'],['sysutils']);
+registerunitgroup(['mseapplication'],['sysutils']);
  registerunitgroup(['msestatfile'],['msestat']);
  registerunitgroup(['msemenuwidgets'],['msemenus','mseevent','msegui']);
  registerunitgroup(['mseactions'],['mseact']);

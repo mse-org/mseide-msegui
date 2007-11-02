@@ -13,7 +13,7 @@ unit msedatamodules;
 
 interface
 uses
- classes,mseclasses,msetypes,msegraphutils,msestatfile,mseevent;
+ classes,mseclasses,msetypes,msegraphutils,msestatfile,mseevent,mseapplication;
  
 type
  datamoduleoptionty = (dmo_autoreadstat,dmo_autowritestat);
@@ -22,7 +22,7 @@ const
  defaultdatamoduleoptions = [dmo_autoreadstat,dmo_autowritestat];
  
 type
- tmsedatamodule = class(tmsecomponent)
+ tmsedatamodule = class(tactcomponent)
   private
    fsize: sizety;
    foncreate: notifyeventty;
@@ -68,8 +68,6 @@ type
 function createmsedatamodule(const aclass: tclass;
                      const aclassname: pshortstring): tmsecomponent;
 implementation
-uses
- mseapplication;
  
 type
  tmsecomponent1 = class(tmsecomponent);

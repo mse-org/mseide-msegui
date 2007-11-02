@@ -72,7 +72,7 @@ type
                   ws_isvisible
                  );
  widgetstatesty = set of widgetstatety;
- widgetstate1ty = (ws1_releasing,ws1_childscaled,ws1_fontheightlock,
+ widgetstate1ty = ({ws1_releasing,}ws1_childscaled,ws1_fontheightlock,
                    ws1_widgetregionvalid,ws1_rootvalid,
                    ws1_anchorsizing,ws1_isstreamed,
                    ws1_scaled, //used in tcustomscalingwidget
@@ -949,7 +949,7 @@ type
    procedure sendwidgetevent(const event: twidgetevent);
                               //event will be destroyed
 
-   procedure release; virtual;
+   procedure release; override;
    function show(const modal: boolean = false;
             const transientfor: twindow = nil): modalresultty; virtual;
    procedure hide;
@@ -5103,10 +5103,7 @@ begin
  if ownswindow1 then begin
   window.endmodal;
  end;
- if not (ws1_releasing in fwidgetstate1) then begin
-  appinst.postevent(tobjectevent.create(ek_release,ievent(self)));
-  include(fwidgetstate1,ws1_releasing);
- end;
+ inherited;
 end;
 
 procedure twidget.dobeforepaint(const canvas: tcanvas);
@@ -9129,8 +9126,7 @@ begin
    end;
    fmodalwindow.activate;
   end;
-  if (factivewindow <> nil) and not 
-   (ws1_releasing in factivewindow.fowner.fwidgetstate1) then begin
+  if (factivewindow <> nil) and not factivewindow.fowner.releasing then begin
    pt1:= mouse.pos;
    if pointinrect(pt1,factivewindow.fowner.fwidgetrect) then begin
     event1:= tmouseevent.create(factivewindow.winid,false,mb_none,mw_none,
@@ -11601,7 +11597,7 @@ end;
 function tguiapplication.unreleasedactivewindow: twindow;
 begin
  result:= factivewindow;
- while (result <> nil) and (ws1_releasing in result.fowner.fwidgetstate1) do begin
+ while (result <> nil) and result.fowner.releasing do begin
   result:= result.ftransientfor;
  end;
 end;

@@ -413,7 +413,7 @@ const
  );
 implementation
 uses
- sysutils,msedatalist,mseprocutils,msesysintf,mseforms,msetmpmodules,msesysutils;
+ sysutils,msedatalist,mseprocutils,msesysintf,{mseforms,}msetmpmodules,msesysutils;
 
 const
  headersizes: array[ifireckindty] of integer = (

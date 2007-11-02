@@ -4,26 +4,27 @@ interface
 implementation
 uses
  classes,mseifi,msedesignintf,msepropertyeditors,msestrings,msedesigner,
- mseclasses,mseifids,mseifiglob,msegui,typinfo,msesockets,mseifigui;
+ mseclasses,mseifids,mseifiglob,msegui,typinfo,msesockets,mseifigui,
+ mseifilink;
  
 type
- tformlinkitemeditor = class(tclasselementeditor)
+ tmodulelinkitemeditor = class(tclasselementeditor)
   protected
    function getdefaultstate: propertystatesty; override;
    function getvalue: msestring; override;
  end;
  
- tformlinkeditor = class(tpersistentarraypropertyeditor)
+ tmodulelinkeditor = class(tpersistentarraypropertyeditor)
   protected
    function geteditorclass: propertyeditorclassty; override;
  end;
  
- tformlinkactionitemeditor = class(tformlinkitemeditor)
+ tmodulelinkactionitemeditor = class(tmodulelinkitemeditor)
   protected
    function getvalue: msestring; override;
  end;
  
- tformlinkactionseditor = class(tpersistentarraypropertyeditor)
+ tmodulelinkactionseditor = class(tpersistentarraypropertyeditor)
   protected
    function geteditorclass: propertyeditorclassty; override;
  end;
@@ -35,43 +36,44 @@ type
   public
  end;
 
- tformlinkdatawidgetitemeditor = class(tformlinkitemeditor)
+ tvaluewidgetlinkitemeditor = class(tmodulelinkitemeditor)
   protected
    function getvalue: msestring; override;
  end;
  
- tformlinkdatawidgetseditor = class(tpersistentarraypropertyeditor)
+ tvaluewidgetlinkseditor = class(tpersistentarraypropertyeditor)
   protected
    function geteditorclass: propertyeditorclassty; override;
  end;
   
 procedure register;
 begin
- registercomponents('Ifi',[tformlink,tpipeifichannel,tsocketpipeifichannel,
+ registercomponents('Ifi',[tmodulelink,tformlink,
+                     tpipeifichannel,tsocketpipeifichannel,
                      tsocketclientifichannel,tsocketserverifichannel,
                      ttxdataset,trxdataset,
                      tsocketstdio,tsocketclient,
                      tsocketserver,tsocketserverstdio]); 
- registerpropertyeditor(typeinfo(tformlinkarrayprop),nil,'',tformlinkeditor);
- registerpropertyeditor(typeinfo(tlinkactions),nil,'',tformlinkactionseditor);
- registerpropertyeditor(typeinfo(tlinkdatawidgets),nil,'',tformlinkdatawidgetseditor);
- registerpropertyeditor(typeinfo(twidget),tlinkdatawidget,'widget',tifidatawidgeteditor);
+ registerpropertyeditor(typeinfo(tmodulelinkarrayprop),nil,'',tmodulelinkeditor);
+ registerpropertyeditor(typeinfo(tlinkactions),nil,'',tmodulelinkactionseditor);
+ registerpropertyeditor(typeinfo(tvaluewidgetlinks),nil,'',tvaluewidgetlinkseditor);
+ registerpropertyeditor(typeinfo(twidget),tvaluewidgetlink,'widget',tifidatawidgeteditor);
 end;
 
-{ tformlinkitemeditor }
+{ tmodulelinkitemeditor }
 
-function tformlinkitemeditor.getvalue: msestring;
+function tmodulelinkitemeditor.getvalue: msestring;
 var
  mstr1: msestring;
 begin
- with tformlinkprop(getordvalue) do begin
+ with tmodulelinkprop(getordvalue) do begin
   result:= '<'+name+'>';
  end;
 end;
 
-{ tformlinkactionitemeditor }
+{ tmodulelinkactionitemeditor }
 
-function tformlinkactionitemeditor.getvalue: msestring;
+function tmodulelinkactionitemeditor.getvalue: msestring;
 var
  mstr1: msestring;
 begin
@@ -90,23 +92,23 @@ begin
  end;
 end;
 
-function tformlinkitemeditor.getdefaultstate: propertystatesty;
+function tmodulelinkitemeditor.getdefaultstate: propertystatesty;
 begin
  result:= inherited getdefaultstate + [ps_refresh];
 end;
 
-{ tformlinkeditor }
+{ tmodulelinkeditor }
 
-function tformlinkeditor.geteditorclass: propertyeditorclassty;
+function tmodulelinkeditor.geteditorclass: propertyeditorclassty;
 begin
- result:= tformlinkitemeditor;
+ result:= tmodulelinkitemeditor;
 end;
 
-{ tformlinkactionseditor }
+{ tmodulelinkactionseditor }
 
-function tformlinkactionseditor.geteditorclass: propertyeditorclassty;
+function tmodulelinkactionseditor.geteditorclass: propertyeditorclassty;
 begin
- result:= tformlinkactionitemeditor;
+ result:= tmodulelinkactionitemeditor;
 end;
 
 { tifidatawidgeteditor }
@@ -118,14 +120,14 @@ begin
  result:= getcorbainterface(acomponent,typeinfo(iifiwidget),intf1);
 end;
 
-{ tformlinkdatawidgetitemeditor }
+{ tvaluewidgetlinkitemeditor }
 
-function tformlinkdatawidgetitemeditor.getvalue: msestring;
+function tvaluewidgetlinkitemeditor.getvalue: msestring;
 var
  mstr1: msestring;
 begin
  result:= inherited getvalue;
- with tlinkdatawidget(getordvalue) do begin
+ with tvaluewidgetlink(getordvalue) do begin
   if widget = nil then begin
    result:= result+'<>';
   end
@@ -139,17 +141,19 @@ begin
  end;
 end;
 
-{ tformlinkdatawidgetseditor }
+{ tvaluewidgetlinkseditor }
 
-function tformlinkdatawidgetseditor.geteditorclass: propertyeditorclassty;
+function tvaluewidgetlinkseditor.geteditorclass: propertyeditorclassty;
 begin
- result:= tformlinkdatawidgetitemeditor;
+ result:= tvaluewidgetlinkitemeditor;
 end;
+
+{ tifidatawidgeteditor }
 
 procedure tifidatawidgeteditor.checkcomponent(const avalue: tcomponent);
 begin
  inherited;
- with tlinkdatawidget(fprops[0].instance) do begin
+ with tvaluewidgetlink(fprops[0].instance) do begin
   if name = '' then begin
    name:= avalue.name;
   end;
