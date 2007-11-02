@@ -3961,8 +3961,8 @@ begin
    eventlist.add(tkeyevent.create(ahwnd,false,key1,key1,shiftstate,
                                     charbuffer));
    charbuffer:= '';
-   result:= 0;
-   exit;
+//   result:= 0;  //evaluaze alt F4
+//   exit;
   end;
   wm_keyup,wm_syskeyup: begin
    shiftstate:= winkeystatetoshiftstate(lparam);
