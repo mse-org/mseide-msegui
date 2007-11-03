@@ -1121,8 +1121,8 @@ begin
    if updatemouseshapestate(cells,info,self) then begin
 //    shapeinfotobuttons;
    end;
-   checkbuttonhint(self,info,fhintedbutton,flayout.cells,@getbuttonhint,
-                           @gethintpos);
+   checkbuttonhint(self,info,fhintedbutton,flayout.cells,
+          {$ifdef FPC}@{$endif}getbuttonhint,{$ifdef FPC}@{$endif}gethintpos);
   end;
  end;
 end;

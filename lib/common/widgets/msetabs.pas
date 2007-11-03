@@ -1277,8 +1277,8 @@ begin
  if not (csdesigning in componentstate) or 
                             (ws1_designactive in fwidgetstate1) then begin
   with flayoutinfo do begin
-   checkbuttonhint(self,info,fhintedbutton,cells,@getbuttonhint,
-                           @gethintpos);
+   checkbuttonhint(self,info,fhintedbutton,cells,{$ifdef FPC}@{$endif}getbuttonhint,
+                           {$ifdef FPC}@{$endif}gethintpos);
   end;
  end;
 end;
