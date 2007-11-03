@@ -372,11 +372,15 @@ type
    procedure setaswidestring(const avalue: widestring); override;
   {$endif}
    function HasParent: Boolean; override;
+   function GetDataSize: Word; override;
+   function GetAsBoolean: Boolean; override;
+   procedure SetAsBoolean(AValue: Boolean); override;
    function getasstring: string; override;
    procedure setasstring(const avalue: string); override;
    function GetDefaultWidth: Longint; override;
    function GetAsLongint: Longint; override;
    procedure SetAsLongint(AValue: Longint); override;
+   function GetAsVariant: variant; override;
   public
    constructor Create(AOwner: TComponent); override;
    procedure Clear; override;
@@ -962,14 +966,15 @@ const
  datetimefcomp = [ftdate,fttime,ftdatetime];
  blobfcomp = [ftblob,ftgraphic,ftmemo];
  memofcomp = [ftmemo];
- longintfcomp = [ftsmallint,ftinteger,ftword];
+ longintfcomp = [ftboolean,ftsmallint,ftinteger,ftword];
  stringfcomp = [ftstring,ftfixedchar];
+ booleanfcomp = [ftboolean,ftsmallint,ftinteger,ftword];
       
  fieldcompatibility: array[tfieldtype] of fieldtypesty = (
     //ftUnknown, ftString,    ftSmallint,    ftInteger,     ftWord,
       [ftunknown],stringfcomp,longintfcomp,longintfcomp,longintfcomp,
     //ftBoolean,   ftFloat, ftCurrency, ftBCD,
-      [ftboolean],realfcomp,realfcomp,[ftbcd],
+      booleanfcomp,realfcomp,realfcomp,[ftbcd],
     //ftDate,        ftTime,       tDateTime,
       datetimefcomp,datetimefcomp,datetimefcomp,
     //ftBytes, ftVarBytes, ftAutoInc,
@@ -2294,11 +2299,11 @@ end;
 
 function tmsebooleanfield.getasmsestring: msestring;
 var 
- bo1: wordbool;
+ int1: integer;
 begin
- bo1:= false;
- if getdata(@bo1) then begin
-  result:= fdisplays[false,bo1]
+ int1:= 0;
+ if getdata(@int1) then begin
+  result:= fdisplays[false,int1 <> 0]
  end
  else begin
   result:='';
@@ -2381,6 +2386,50 @@ begin
  end
  else begin
   setasboolean(true);
+ end;
+end;
+
+function tmsebooleanfield.GetDataSize: Word;
+begin
+ result:= sizeof(longbool);
+end;
+
+function tmsebooleanfield.GetAsBoolean: Boolean;
+var
+ int1: integer;
+begin
+ int1:= 0;
+ if getdata(@int1) then begin
+  result:= int1 <> 0;
+ end
+ else begin
+  result:= false;
+ end;
+end;
+
+procedure tmsebooleanfield.SetAsBoolean(AValue: Boolean);
+var
+ int1: integer;
+begin
+ if avalue then begin
+  int1:= -1;
+ end
+ else begin
+  int1:= 0;
+ end;
+ setdata(@int1);
+end;
+
+function tmsebooleanfield.GetAsVariant: variant;
+var
+ int1: integer;
+begin
+ int1:= 0;
+ if getdata(@int1) then begin
+  result:= int1 <>  0;
+ end
+ else begin
+  result:= null;
  end;
 end;
 

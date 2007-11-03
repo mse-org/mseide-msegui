@@ -592,7 +592,8 @@ type
    function fetch : boolean; virtual; abstract;
    function getblobdatasize: integer; virtual; abstract;
    function blobscached: boolean; virtual; abstract;
-   function loadfield(const afield: tfield; const buffer: pointer;
+   function loadfield(const afieldno: integer; const afieldtype: tfieldtype{const afield: tfield}; 
+                const buffer: pointer;
                     var bufsize: integer): boolean; virtual; abstract;
            //if bufsize < 0 -> buffer was to small, should be -bufsize
   public
@@ -1810,7 +1811,7 @@ begin
    result:= sizeof(msestring);
   end;
   ftsmallint,ftinteger,ftword: result:= sizeof(longint);
-  ftboolean: result:= sizeof(wordbool);
+  ftboolean: result:= sizeof(longbool);
   ftbcd: result:= sizeof(currency);
   ftfloat,ftcurrency: result:= sizeof(double);
   ftlargeint: result:= sizeof(largeint);
@@ -1845,14 +1846,14 @@ begin
      if field1.datatype in charfields then begin
       int2:= int2*4+4; //room for multibyte encodings
       setlength(str1,int2); 
-      if not loadfield(field1,pointer(str1),int2) then begin
+      if not loadfield(fno,fieldtype,pointer(str1),int2) then begin
        setfieldisnull(buffer.fielddata.nullmask,fno);
       end
       else begin
        if int2 < 0 then begin //buffer to small
         int2:= -int2;
         setlength(str1,int2);
-        loadfield(field1,pointer(str1),int2);
+        loadfield(fno,fieldtype,pointer(str1),int2);
        end;
        setlength(str1,int2);
        po2:= pointer(@buffer) + offset;
@@ -1868,7 +1869,7 @@ begin
       end;
      end
      else begin
-      if not loadfield(field1,pointer(@buffer)+offset,int2) or 
+      if not loadfield(fno,fieldtype,pointer(@buffer)+offset,int2) or 
                            (int2 < 0)then begin
        setfieldisnull(buffer.fielddata.nullmask,fno);        //buffer too small
       end;

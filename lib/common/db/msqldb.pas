@@ -515,8 +515,8 @@ type
    function getfloatdate: boolean; virtual;
    function getint64currency: boolean; virtual;
    function blobscached: boolean; override;
-   function loadfield(const afield: tfield; const buffer: pointer;
-                    var bufsize: integer): boolean; override;
+   function loadfield(const afieldno: integer; const afieldtype: tfieldtype;
+           const buffer: pointer; var bufsize: integer): boolean; override;
           //if bufsize < 0 -> buffer was to small, should be -bufsize
    // abstract & virtual methods of TDataset
    procedure UpdateIndexDefs; override;
@@ -1867,12 +1867,13 @@ begin
  doexecute(fparams,ftransaction,fcursor,fdatabase,isutf8);
 end;
 
-function tsqlquery.loadfield(const afield: tfield; const buffer: pointer;
+function tsqlquery.loadfield(const afieldno: integer;
+                     const afieldtype: tfieldtype; const buffer: pointer;
                      var bufsize: integer): boolean;
            //if bufsize < 0 -> buffer was to small, should be -bufsize
 begin
- result:= tcustomsqlconnection(database).LoadField(FCursor,aField.datatype,
-         afield.fieldno-1,buffer,bufsize)
+ result:= tcustomsqlconnection(database).LoadField(FCursor,aFieldtype,
+         afieldno,buffer,bufsize)
 end;
 
 procedure TSQLQuery.InternalAddRecord(Buffer: Pointer; AAppend: Boolean);
