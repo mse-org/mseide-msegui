@@ -54,6 +54,8 @@ begin
                      ttxdataset,trxdataset,
                      tsocketstdio,tsocketclient,
                      tsocketserver,tsocketserverstdio]); 
+ registercomponenttabhints(['Ifi'],
+   ['Internet Form Interpreter and PascalScript Components']);
  registerpropertyeditor(typeinfo(tmodulelinkarrayprop),nil,'',tmodulelinkeditor);
  registerpropertyeditor(typeinfo(tlinkactions),nil,'',tmodulelinkactionseditor);
  registerpropertyeditor(typeinfo(tvaluewidgetlinks),nil,'',tvaluewidgetlinkseditor);

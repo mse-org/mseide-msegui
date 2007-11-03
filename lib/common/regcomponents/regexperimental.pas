@@ -8,6 +8,7 @@ uses
 procedure Register;
 begin
 // registercomponents('Exp',[]);
+ registercomponenttabhints(['Exp'],['Experimental Components']);
 end;
 initialization
  register;

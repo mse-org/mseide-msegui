@@ -63,9 +63,12 @@ begin
    tintegeredit,trealedit,tdatetimeedit,tcalendardatetimeedit,tkeystringedit,
    tenumedit,tenumtypeedit,tselector,
    {tstringlistedit,}
-   tlistview,titemedit,tdropdownitemedit,tmbdropdownitemedit,ttreeitemedit,
+   titemedit,tdropdownitemedit,tmbdropdownitemedit,ttreeitemedit,
    trecordfieldedit,
    ttextedit,tterminal]);
+ registercomponenttabhints(['Edit'],
+ ['Edit Widgets, twidgetgrid and Widgets'+c_linefeed+
+  'which can be placed into twidgetgrid']);
  registerpropertyeditor(tdropdowncols.classinfo,nil,'',tdropdowncolpropertyeditor);
  registerpropertyeditor(ttabulators.classinfo,tcustomtextedit,'tabulators',
             toptionalpersistentarraypropertyeditor);

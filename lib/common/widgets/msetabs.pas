@@ -33,6 +33,7 @@ type
   private
 //   ftabbar: ttabbar;
    fcaption: richstringty;
+   fhint: msestring;
    fstate: tabstatesty;
    fcolor: colorty;
    fcoloractive: colorty;
@@ -61,6 +62,7 @@ type
    property coloractive: colorty read fcoloractive
                  write setcoloractive default cl_default;
    property tag: integer read ftag write ftag default 0;
+   property hint: msestring read fhint write fhint;
  end;
 
  ttabs = class;
@@ -74,6 +76,7 @@ type
    fcoloractive: colorty;
    fface: tface;
    ffaceactive: tface;
+   fhint: msestring;
    foncreatetab: createtabeventty;
    procedure setitems(const index: integer; const Value: ttab);
    function getitems(const index: integer): ttab; reintroduce;
@@ -105,6 +108,7 @@ type
                   write setcoloractive default cl_active;
    property face: tface read getface write setface;
    property faceactive: tface read getfaceactive write setfaceactive;
+   property hint: msestring read fhint write fhint;
  end;
 
  tabbarlayoutinfoty = record
@@ -126,6 +130,7 @@ type
  tcustomtabbar = class(tcustomstepbox)
   private
    flayoutinfo: tabbarlayoutinfoty;
+   fhintedbutton: integer;
    fonactivetabchange: notifyeventty;
    fupdating: integer;
    finternaltabchange: objectprocty;
@@ -140,6 +145,8 @@ type
    procedure tabschanged(const sender: tarrayprop; const index: integer);
    procedure setfirsttab(Value: integer);
    procedure setoptions(const avalue: tabbaroptionsty);
+   function gethintpos(const aindex: integer): rectty;
+   function getbuttonhint(const aindex: integer): msestring;
   protected
    foptions: tabbaroptionsty;
    procedure dostep(const event: stepkindty); override;
@@ -213,6 +220,7 @@ type
   function gettabwidget: tcustomtabwidget;
   function getwidget: twidget;
   function getcaption: msestring;
+  function gettabhint: msestring;
   function getcolortab: colorty;
   function getcoloractivetab: colorty;
   procedure doselect;
@@ -223,11 +231,14 @@ type
   private
    ftabwidget: tcustomtabwidget;
    fcaption: msestring;
+   ftabhint: msestring;
    fcolortab,fcoloractivetab: colorty;
    fonselect: notifyeventty;
    fondeselect: notifyeventty;
    function getcaption: captionty;
    procedure setcaption(const Value: captionty);
+   function gettabhint: msestring;
+   procedure settabhint(const avalue: msestring);
    function getcolortab: colorty;
    procedure setcolortab(const avalue: colorty);
    function getcoloractivetab: colorty;
@@ -252,6 +263,7 @@ type
    property tabindex: integer read gettabindex write settabindex;
   published
    property caption: captionty read getcaption write setcaption;
+   property tabhint: msestring read gettabhint write settabhint;
    property colortab: colorty read getcolortab
                   write setcolortab default cl_default;
    property coloractivetab: colorty read getcoloractivetab
@@ -270,6 +282,7 @@ type
   private
    ftabwidget: tcustomtabwidget;
    fcolortab,fcoloractivetab: colorty;
+   ftabhint: msestring;
    fonselect: notifyeventty;
    fondeselect: notifyeventty;
    procedure settabwidget(const value: tcustomtabwidget);
@@ -281,6 +294,8 @@ type
    procedure setcoloractivetab(const avalue: colorty);
    function gettabindex: integer;
    procedure settabindex(const avalue: integer);
+   function gettabhint: msestring;
+   procedure settabhint(const avalue: msestring);
   protected
    procedure visiblechanged; override;
    procedure setcaption(const value: msestring); override;
@@ -297,6 +312,7 @@ type
                   write setcolortab default cl_default;
    property coloractivetab: colorty read getcolortab
                   write setcoloractivetab default cl_active;
+   property tabhint: msestring read gettabhint write settabhint;
    property onselect: notifyeventty read fonselect write fonselect;
    property ondeselect: notifyeventty read fondeselect write fondeselect;
    property visible default false;
@@ -954,6 +970,7 @@ begin
  flayoutinfo.tabs.onchange:= {$ifdef FPC}@{$endif}tabschanged;
  flayoutinfo.activetab:= -1;
  flayoutinfo.lasttab:= -1;
+ fhintedbutton:= -2;
  inherited;
  fwidgetrect.cy:= font.glyphheight + 4;
 end;
@@ -1257,6 +1274,13 @@ begin
 //  invalidate;
   include(info.eventstate,es_processed);
  end;
+ if not (csdesigning in componentstate) or 
+                            (ws1_designactive in fwidgetstate1) then begin
+  with flayoutinfo do begin
+   checkbuttonhint(self,info,fhintedbutton,cells,@getbuttonhint,
+                           @gethintpos);
+  end;
+ end;
 end;
 
 procedure tcustomtabbar.doshortcut(var info: keyeventinfoty; const sender: twidget);
@@ -1467,6 +1491,17 @@ begin
  end;
 end;
 
+function tcustomtabbar.gethintpos(const aindex: integer): rectty;
+begin
+ result:= flayoutinfo.cells[aindex].dim;
+ inc(result.cy,12);
+end;
+
+function tcustomtabbar.getbuttonhint(const aindex: integer): msestring;
+begin
+ result:= flayoutinfo.tabs[aindex].hint;
+end;
+
 { ttabbar }
 
 procedure ttabbar.dostatread(const reader: tstatreader);
@@ -1540,6 +1575,17 @@ end;
 procedure ttabpage.setcaption(const Value: captionty);
 begin
  fcaption:= value;
+ changed;
+end;
+
+function ttabpage.gettabhint: msestring;
+begin
+ result:= ftabhint;
+end;
+
+procedure ttabpage.settabhint(const avalue: msestring);
+begin
+ ftabhint:= avalue;
  changed;
 end;
 
@@ -1706,6 +1752,17 @@ begin
  changed;
 end;
 
+function ttabform.gettabhint: msestring;
+begin
+ result:= ftabhint;
+end;
+
+procedure ttabform.settabhint(const avalue: msestring);
+begin
+ ftabhint:= avalue;
+ changed;
+end;
+
 procedure ttabform.settabwidget(const value: tcustomtabwidget);
 begin
  ftabwidget:= value;
@@ -1799,6 +1856,7 @@ begin
   if not (csloading in componentstate) then begin
    activepageindexbefore:= factivepageindex;
    ftabs.tabs[int1].caption:= sender.getcaption;
+   ftabs.tabs[int1].hint:= sender.gettabhint;
    ftabs.tabs[int1].color:= sender.getcolortab;
    ftabs.tabs[int1].coloractive:= sender.getcoloractivetab;
    if not widget1.enabled then begin

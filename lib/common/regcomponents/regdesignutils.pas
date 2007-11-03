@@ -20,6 +20,7 @@ uses
 procedure Register;
 begin
  registercomponents('Design',[tgdbmi,tsyntaxedit,tsyntaxpainter]);
+ registercomponenttabhints(['Design'],['Design Utils']);
 end;
 
 initialization

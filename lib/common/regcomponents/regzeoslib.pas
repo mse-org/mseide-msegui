@@ -42,6 +42,7 @@ begin
          tmseztable,
          TZUpdateSQL, tmsezstoredproc, TZSQLMetadata, TZSQLProcessor,
          TZSQLMonitor, TZSequence]);
+ registercomponenttabhints(['Zeos'],['ZeosLib Database Components']);
  registerpropertyeditor(typeinfo(string),TZConnection,'Protocol',
                       tzprotocolpropertyeditor);
                       {

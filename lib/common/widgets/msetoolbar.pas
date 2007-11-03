@@ -177,7 +177,8 @@ type
    fstatvarname: msestring;
    procedure setbuttons(const Value: ttoolbuttons);
    procedure setoptions(const Value: toolbaroptionsty);
-   function gethintpos(index: integer): rectty;
+   function gethintpos(const aindex: integer): rectty;
+   function getbuttonhint(const aindex: integer): msestring;
    procedure setfirstbutton(value: integer);
    procedure buttonschanged(const sender: tarrayprop; const index: integer);
    procedure setstatfile(const Value: tstatfile);
@@ -242,6 +243,7 @@ const
  separatorwidth = 3;
 type
  tcustomstepframe1 = class(tcustomstepframe);
+ twidget1 = class(twidget);
  
 procedure drawtoolbuttons(const canvas: tcanvas;
            var layout: toolbarlayoutinfoty);
@@ -1099,16 +1101,18 @@ begin
  drawtoolbuttons(canvas,flayout)
 end;
 
-function tcustomtoolbar.gethintpos(index: integer): rectty;
+function tcustomtoolbar.gethintpos(const aindex: integer): rectty;
 begin
- result:= flayout.cells[index].dim;
+ result:= flayout.cells[aindex].dim;
  inc(result.cy,12);
 end;
 
-procedure tcustomtoolbar.clientmouseevent(var info: mouseeventinfoty);
+function tcustomtoolbar.getbuttonhint(const aindex: integer): msestring;
+begin
+ result:= buttons[aindex].hint;
+end;
 
-var
- int1: integer;
+procedure tcustomtoolbar.clientmouseevent(var info: mouseeventinfoty);
 begin
  inherited;
  if not (csdesigning in componentstate) or 
@@ -1117,39 +1121,8 @@ begin
    if updatemouseshapestate(cells,info,self) then begin
 //    shapeinfotobuttons;
    end;
-   if info.eventkind = ek_clientmouseleave then begin
-    if fhintedbutton >= 0 then begin
-     application.hidehint;
-     fhintedbutton:= -1;
-    end;
-   end;
-   if (info.eventkind in [ek_mousemove,ek_mousepark]) then begin
-    int1:= getmouseshape(flayout.cells);
-    if (int1 >= 0) then begin
-     if int1 <> fhintedbutton then begin
-      if getshowhint and (info.eventkind = ek_mousepark) or 
-                  (application.activehintedwidget = self) then begin
-       if not (ss_separator in flayout.cells[int1].state) then begin
-        fhintedbutton:= int1;
-        if (buttons[int1].hint <> '') and application.active then begin
-         application.showhint(self,buttons[int1].hint,gethintpos(int1),cp_bottomleft,
-                        -1,[hfl_noautohidemove]);
-        end
-        else begin
-         application.hidehint;
-        end;
-       end;
-      end
-      else begin
-       application.hidehint;
-      end;
-     end;
-    end
-    else begin
-     application.hidehint;
-     fhintedbutton:= -1;
-    end;
-   end;
+   checkbuttonhint(self,info,fhintedbutton,flayout.cells,@getbuttonhint,
+                           @gethintpos);
   end;
  end;
 end;

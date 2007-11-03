@@ -22,6 +22,7 @@ begin
  registercomponents('Dialog',[tfilelistview,tfiledialog,
                      tfilenameedit,{thistoryfilenameedit,}
                      tdirdropdownedit,tcoloredit]);
+ registercomponenttabhints(['Dialog'],['User Dialogs']);
 end;
 
 initialization

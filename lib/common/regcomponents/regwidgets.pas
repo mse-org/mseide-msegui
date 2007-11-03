@@ -36,7 +36,7 @@ type
 implementation
 uses
  sysutils,classes,msesimplewidgets,msegrids,msemenus,mseimage,msedispwidgets,
- msetoolbar,msetabs,msedesignintf,regwidgets_bmp,
+ msetoolbar,msetabs,msedesignintf,regwidgets_bmp,mselistbrowser,
  msesplitter,msedock,mseforms,mseclasses,typinfo,msearrayprops,
  msegui,formdesigner,msedial,msemenuwidgets,msewindowwidget,msechart
  {$ifdef FPC},mseopenglwidget{$endif};
@@ -97,14 +97,15 @@ const
 procedure Register;
 begin
  registercomponents('Widget',[teventwidget,tbutton,tstockglyphbutton,
-  tdrawgrid,tstringgrid,tmainmenuwidget,
-  tlabel,tpaintbox,timage,tintegerdisp,trealdisp,tdatetimedisp,
-  tstringdisp,
-  tbytestringdisp,tbooleandisp,
+  tdrawgrid,tstringgrid,tlistview,
+  tlabel,tpaintbox,timage,
+  tintegerdisp,trealdisp,tdatetimedisp,tstringdisp,tbytestringdisp,tbooleandisp,
   tgroupbox,tscrollbox,tstepbox,tdockpanel,tdockhandle,tmseformwidget,
-  tdockformwidget,
-  tsplitter,tspacer,ttoolbar,{tdocktoolbar,}ttabbar,ttabwidget,ttabpage,
+  tdockformwidget,tmainmenuwidget,
+  tsplitter,tspacer,ttoolbar,ttabbar,ttabwidget,ttabpage,
   tdial,tchart,tchartrecorder,twindowwidget{$ifdef FPC},topenglwidget{$endif}]);
+ registercomponenttabhints(['Widget'],
+         ['Display Widgets, Widgets which can''t be placed into twidgetgrid']);
  registerpropertyeditor(typeinfo(tcellframe),nil,'',
                             toptionalclasspropertyeditor);
  registerpropertyeditor(typeinfo(tdatacols),nil,'',tdatacolseditor);

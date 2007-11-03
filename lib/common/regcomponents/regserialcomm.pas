@@ -21,6 +21,7 @@ procedure Register;
 begin
  registercomponents('Comm',[tcommport,tasciicommport,tasciiprotport,
                                                             tcommselector]);
+ registercomponenttabhints(['Comm'],['Components for serial Port (RS232)']);
 end;
 
 initialization

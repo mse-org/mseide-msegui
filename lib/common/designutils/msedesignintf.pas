@@ -28,17 +28,24 @@ type
  end;
  pcomponentclassinfoty = ^componentclassinfoty;
 
+ comppagety = record
+  caption: msestring;
+  hint: msestring;
+ end;
+ comppagearty = array of comppagety;
+ 
  tcomponentclasslist = class(torderedrecordlist)
   private
    fselectedclass: tcomponentclass;
    fimagelist: timagelist;
-   fpagenames: msestringarty;
+   fpagenames: comppagearty;
    fpagecomporders: integerararty;
    function getpagecomporders(const index: integer): integerarty;
    procedure setpagecomporders(const index: integer;
       const Value: integerarty);
    procedure checkpageindex(const index: integer);
   protected
+   function findpage(const pagename: msestring): integer;
    function addpage(const pagename: msestring): integer;
    function getcompareproc: compareprocty; override;
    procedure compare(const l,r; out result: integer);
@@ -52,8 +59,11 @@ type
    function itempo(const index: integer): pcomponentclassinfoty;
    procedure registercomponents(const page: msestring;
                  const componentclasses: array of tcomponentclass);
+   procedure registercomponenttabhints(const pages: array of msestring;
+                       const hints: array of msestring);
+                       //pages are case sensitive, pages mustexist
    function pagehigh: integer;
-   function pagenames: msestringarty;
+   function pagenames: comppagearty;
    property pagecomporders[const index: integer]: integerarty
                   read getpagecomporders write setpagecomporders;
    procedure drawcomponenticon(const acomponent: tcomponent;
@@ -303,6 +313,9 @@ type
  
 procedure registercomponents(const page: msestring;
                           const componentclasses: array of tcomponentclass);
+procedure registercomponenttabhints(const pages: array of msestring;
+                       const hints: array of msestring);
+                       //pages are case sensitive, pages mustexist
 function registeredcomponents: tcomponentclasslist;
 function unitgroups: tunitgroups;
 procedure registerunitgroup(const adependents,agroup: array of string);
@@ -414,6 +427,13 @@ begin
  registeredcomponents.registercomponents(page,componentclasses);
 end;
 
+procedure registercomponenttabhints(const pages: array of msestring;
+                       const hints: array of msestring);
+                       //pages are case sensitive, pages mustexist
+begin
+ registeredcomponents.registercomponenttabhints(pages,hints);
+end;
+
 procedure registerunitgroup(const adependents,agroup: array of string);
 begin
  unitgroups.registergroups(adependents,agroup);
@@ -486,6 +506,28 @@ begin
  end;
 end;
 
+procedure tcomponentclasslist.registercomponenttabhints(
+              const pages: array of msestring; const hints: array of msestring);
+                       //pages are case sensitive, pages mustexist
+var
+ int1: integer;
+ int2: integer;
+begin
+ for int1:= 0 to high(pages) do begin
+  int2:= findpage(pages[int1]);
+  if (int2 >= 0) then begin
+   with fpagenames[int2] do begin
+    if int1 <= high(hints) then begin
+     hint:= hints[int1];
+    end
+    else begin
+     hint:= '';
+    end;
+   end;
+  end;
+ end;
+end;
+
 function tcomponentclasslist.indexof(
   const value: tcomponentclass): integer;
 begin
@@ -498,23 +540,31 @@ begin
  result:= pcomponentclassinfoty(getitempo(index));
 end;
 
-function tcomponentclasslist.addpage(const pagename: msestring): integer;
+function tcomponentclasslist.findpage(const pagename: msestring): integer;
 var
  int1: integer;
 begin
+ result:= -1;
  for int1:= 0 to high(fpagenames) do begin
-  if fpagenames[int1] = pagename then begin
+  if fpagenames[int1].caption = pagename then begin
    result:= int1;
-   exit;
+   break;
   end;
  end;
- setlength(fpagenames,length(fpagenames) + 1);
- setlength(fpagecomporders,length(fpagenames));
- result:= high(fpagenames);
- fpagenames[result]:= pagename;
 end;
 
-function tcomponentclasslist.pagenames: msestringarty;
+function tcomponentclasslist.addpage(const pagename: msestring): integer;
+begin
+ result:= findpage(pagename);
+ if result < 0 then begin
+  setlength(fpagenames,length(fpagenames) + 1);
+  setlength(fpagecomporders,length(fpagenames));
+  result:= high(fpagenames);
+  fpagenames[result].caption:= pagename;
+ end;
+end;
+
+function tcomponentclasslist.pagenames: comppagearty;
 begin
  result:= fpagenames;
 end;
@@ -524,8 +574,8 @@ begin
  result:= high(fpagenames);
 end;
 
-procedure tcomponentclasslist.drawcomponenticon(
-  const acomponent: tcomponent; const canvas: tcanvas; const dest: rectty);
+procedure tcomponentclasslist.drawcomponenticon(const acomponent: tcomponent;
+                                    const canvas: tcanvas; const dest: rectty);
 var
  int1: integer;
 begin

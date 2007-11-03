@@ -14,7 +14,7 @@ unit mseshapes;
 interface
 uses
  msegraphics,msegraphutils,mseguiglob,msegui,mseevent,mserichstring,msebitmap,
- msetypes,mseact;
+ msetypes,mseact,msestrings;
 
 const
  menuarrowwidth = 8;
@@ -51,6 +51,9 @@ type
 
  shapeinfoarty = array of shapeinfoty;
  pshapeinfoarty = ^shapeinfoarty;
+ 
+ getbuttonhintty = function(const aindex: integer): msestring of object;
+ getbuttonhintposty = function(const aindex: integer): rectty of object;
 
 procedure draw3dframe(const canvas: tcanvas; const arect: rectty; level: integer;
                                  colorinfo: framecolorinfoty);
@@ -81,15 +84,65 @@ procedure actioninfotoshapeinfo(var actioninfo: actioninfoty;
             var shapeinfo: shapeinfoty); overload;
 procedure actioninfotoshapeinfo(const sender: twidget; var actioninfo: actioninfoty;
                                     var shapeinfo: shapeinfoty); overload;
+procedure checkbuttonhint(const awidget: twidget; info: mouseeventinfoty;
+    var hintedbutton: integer; const cells: shapeinfoarty;
+     const getbuttonhint: getbuttonhintty; 
+     const gethintpos: getbuttonhintposty);
 
 var
  animatemouseenter: boolean = true;
  
 implementation
 uses
- classes,msedrawtext,msestockobjects,msebits,msestrings;
+ classes,msedrawtext,msestockobjects,msebits;
+type
+ twidget1 = class(twidget);
 var
  buttontab: tcustomtabulators;
+
+procedure checkbuttonhint(const awidget: twidget; info: mouseeventinfoty;
+                   var hintedbutton: integer; const cells: shapeinfoarty;
+                   const getbuttonhint: getbuttonhintty; 
+                   const gethintpos: getbuttonhintposty);
+var
+ int1: integer;
+ mstr1: msestring;
+begin
+ if info.eventkind = ek_clientmouseleave then begin
+  if hintedbutton >= 0 then begin
+   application.hidehint;
+   hintedbutton:= -1;
+  end;
+ end;
+ if (info.eventkind in [ek_mousemove,ek_mousepark]) then begin
+  int1:= getmouseshape(cells);
+  if (int1 >= 0) then begin
+   if int1 <> hintedbutton then begin
+    if twidget1(awidget).getshowhint and (info.eventkind = ek_mousepark) or 
+                (application.activehintedwidget = awidget) then begin
+     if not (ss_separator in cells[int1].state) then begin
+      hintedbutton:= int1;
+      mstr1:= getbuttonhint(int1);
+      if (mstr1 <> '') and application.active then begin
+        application.showhint(awidget,mstr1,gethintpos(int1),
+        cp_bottomleft,-1,[hfl_noautohidemove]);
+      end
+      else begin
+       application.hidehint;
+      end;
+     end;
+    end
+    else begin
+     application.hidehint;
+    end;
+   end;
+  end
+  else begin
+   application.hidehint;
+   hintedbutton:= -1;
+  end;
+ end;
+end;
 
 procedure actioninfotoshapeinfo(var actioninfo: actioninfoty;
             var shapeinfo: shapeinfoty);

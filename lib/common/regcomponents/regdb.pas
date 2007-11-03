@@ -229,6 +229,7 @@ begin
        ,tmsesqlite3dataset
       {$endif}
       ]);
+ registercomponenttabhints(['DB'],['Database Components']);
  registercomponents('DBe',[tdbwidgetgrid,
       tenumeditdb,tkeystringeditdb,tenumeditlb,tkeystringeditlb,
       tdbmemoedit,tdbstringedit,tdbdropdownlistedit,tdbdialogstringedit,
@@ -240,6 +241,7 @@ begin
       tdbcalendardatetimeedit,tdbfilenameedit,
       tdbbooleanedit,tdbbooleaneditradio
       ]);
+ registercomponenttabhints(['DBe'],['Data edit Components']);
  registercomponents('DBf',[
       tfieldparamlink,tfieldlink,ttimestampfieldlink,tfieldfieldlink,
       tsequencelink,tdbevent,
@@ -252,6 +254,7 @@ begin
       tdbrealdisp,tdbdatetimedisp,
       tdbstringdisplb,tdbintegerdisplb,tdbrealdisplb,tdbdatetimedisplb
       ]);
+ registercomponenttabhints(['DBf'],['Datafield and Data display Components']);
  registerpropertyeditor(typeinfo(tnolistdropdowncol),nil,'',tclasspropertyeditor);
  registerpropertyeditor(typeinfo(tnolistdropdowncols),nil,'',
         tnolistdropdowncolpropertyeditor);

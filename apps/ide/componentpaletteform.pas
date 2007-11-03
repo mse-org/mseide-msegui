@@ -82,18 +82,25 @@ end;
 procedure tcomponentpalettefo.updatecomponentpalette(init: boolean);
 var
  int1,int2: integer;
+ ar1: comppagearty;
 begin
  if init then begin
   with componentpages do begin
    beginupdate;
    try
     tabs.count:= 0;
-    tabs.additems(registeredcomponents.pagenames);
+    ar1:= registeredcomponents.pagenames;
+    tabs.count:= length(ar1);
+//    tabs.additems(registeredcomponents.pagenames);
     if tabs.count > 0 then begin
      activetab:= 0;
     end;
     for int1:= 0 to tabs.count - 1 do begin
-     tabs[int1].tag:= int1 + 1;
+     with tabs[int1] do begin
+      tag:= int1 + 1;
+      caption:= ar1[int1].caption;
+      hint:= ar1[int1].hint;
+     end;
     end;
    finally
     componentpages.endupdate;

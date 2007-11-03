@@ -74,9 +74,12 @@ procedure Register;
 begin
  registercomponents('NoGui',[tstatfile,tnoguiaction,tactivator,
                              ttimer,tthreadcomp,tpipereadercomp]);
+ registercomponenttabhints(['NoGui'],['Components without GUI Dependence']);
  registercomponents('Gui',[tmainmenu,tpopupmenu,tfacecomp,tframecomp,
                     tbitmapcomp,timagelist,taction]);
+ registercomponenttabhints(['Gui'],['Non visual Components with GUI Dependence']);
  registercomponents('Dialog',[tpagesizeselector,tpageorientationselector]);
+
 // registerpropertyeditor(typeinfo(twidget),nil,'',tcomponentpropertyeditor);
  registerpropertyeditor(typeinfo(tcustomaction),nil,'',tactionpropertyeditor);
  registerpropertyeditor(typeinfo(string),tfont,'name',tfontnamepropertyeditor);
