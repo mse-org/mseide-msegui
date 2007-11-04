@@ -895,7 +895,7 @@ end;
 
 procedure ttab.setimagelist(const avalue: timagelist);
 begin
- setlinkedvar(avalue,fimagelist);
+ setlinkedvar(avalue,tmsecomponent(fimagelist));
 end;
 
 procedure ttab.setimagenr(const avalue: integer);
@@ -1808,7 +1808,7 @@ end;
 
 procedure ttabpage.setimagelist(const avalue: timagelist);
 begin
- setlinkedvar(avalue,fimagelist);
+ setlinkedvar(avalue,tmsecomponent(fimagelist));
 end;
 
 function ttabpage.getimagenr: integer;
@@ -1994,7 +1994,7 @@ end;
 
 procedure ttabform.setimagelist(const avalue: timagelist);
 begin
- setlinkedvar(avalue,fimagelist);
+ setlinkedvar(avalue,tmsecomponent(fimagelist));
 end;
 
 function ttabform.getimagenr: integer;

@@ -111,9 +111,9 @@ begin
  if (info.eventkind = ek_clientmouseleave) then begin
   if hintedbutton >= 0 then begin
    application.hidehint;
-   hintedbutton:= -1;
-   exit;
   end;
+  hintedbutton:= -1;
+  exit;
  end;
  int1:= getmouseshape(cells);
  if (info.eventkind in [ek_buttonpress,ek_buttonrelease]) then begin
