@@ -10863,6 +10863,10 @@ begin       //eventloop
          for int1:= 0 to eventlist.count - 1 do begin
           if po1^ <> nil then begin
            with po1^ do begin
+            if (kind = ek_destroy) and 
+                            (fwinid = twindowevent(event).fwinid) then begin
+             bo1:= false;
+            end;
             if (kind = ek_focusout) and (fwinid = twindowevent(event).fwinid) then begin
              bo1:= false;
              freeandnil(po1^); 
