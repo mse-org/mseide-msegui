@@ -15,13 +15,12 @@ interface
 uses
  msetabsglob,msewidgets,mseclasses,msearrayprops,classes,mseshapes,
  mserichstring,msetypes,msegraphics,msegraphutils,mseevent,
- mseglob,mseguiglob,msegui,
+ mseglob,mseguiglob,msegui,msebitmap,
  mseforms,rtlconsts,msesimplewidgets,msedrag,mseact,
  mseobjectpicker,msepointer,msestat,msestatfile,msestrings,msemenus;
 
 const
  defaulttaboptionswidget = defaultoptionswidget + [ow_subfocus,ow_fontglyphheight];
-// defaulttabsize = 20;
 
 type
 
@@ -31,13 +30,16 @@ type
 
  ttab = class(tindexpersistent)
   private
-//   ftabbar: ttabbar;
    fcaption: richstringty;
    fhint: msestring;
    fstate: tabstatesty;
    fcolor: colorty;
    fcoloractive: colorty;
    fident: integer;
+   fimagelist: timagelist;
+   fimagenr: integer;
+//   fimagenractive: integer;
+   fimagenrdisabled: integer;
    function getcaption: captionty;
    procedure setcaption(const Value: captionty);
    procedure changed;
@@ -46,10 +48,16 @@ type
    procedure setcoloractive(const Value: colorty);
    function getactive: boolean;
    procedure setactive(const Value: boolean);
+   procedure setimagelist(const avalue: timagelist);
+   procedure setimagenr(const avalue: integer);
+//   procedure setimagenractive(const avalue: integer);
+   procedure setimagenrdisabled(const avalue: integer);
   protected
    ftag: integer;
    procedure execute(const tag: integer; const info: mouseeventinfoty);
    procedure doshortcut(var info: keyeventinfoty; const sender: twidget);
+   procedure objectevent(const sender: tobject;
+                                     const event: objecteventty); override;
   public
    constructor create(const aowner: tcustomtabbar); reintroduce;
    function tabbar: tcustomtabbar;
@@ -61,6 +69,13 @@ type
    property color: colorty read fcolor write setcolor default cl_default;
    property coloractive: colorty read fcoloractive
                  write setcoloractive default cl_default;
+   property imagelist: timagelist read fimagelist write setimagelist;
+   property imagenr: integer read fimagenr write setimagenr default -1;
+//   property imagenractive: integer read fimagenractive 
+//                                           write setimagenractive default -2;
+   property imagenrdisabled: integer read fimagenrdisabled 
+                                           write setimagenrdisabled default -2;
+                //-2 -> same as imagenr
    property tag: integer read ftag write ftag default 0;
    property hint: msestring read fhint write fhint;
  end;
@@ -153,6 +168,7 @@ type
    procedure doactivetabchanged;
    procedure tabchanged(const sender: ttab);
    procedure tabclicked(const sender: ttab; const info: mouseeventinfoty);
+   procedure enabledchanged; override;
    procedure loaded; override;
    procedure dopaint(const canvas: tcanvas); override;
    procedure clientmouseevent(var info: mouseeventinfoty); override;
@@ -223,6 +239,10 @@ type
   function gettabhint: msestring;
   function getcolortab: colorty;
   function getcoloractivetab: colorty;
+  function getimagelist: timagelist;
+  function getimagenr: integer;
+//  function getimagenractive: integer;
+  function getimagenrdisabled: integer;
   procedure doselect;
   procedure dodeselect;
  end;
@@ -232,6 +252,10 @@ type
    ftabwidget: tcustomtabwidget;
    fcaption: msestring;
    ftabhint: msestring;
+   fimagelist: timagelist;
+   fimagenr: integer;
+//   fimagenractive: integer;
+   fimagenrdisabled: integer;
    fcolortab,fcoloractivetab: colorty;
    fonselect: notifyeventty;
    fondeselect: notifyeventty;
@@ -247,6 +271,14 @@ type
    function gettabwidget: tcustomtabwidget;
    function gettabindex: integer;
    procedure settabindex(const avalue: integer);
+   function getimagelist: timagelist;
+   procedure setimagelist(const avalue: timagelist);
+   function getimagenr: integer;
+   procedure setimagenr(const avalue: integer);
+//   function getimagenractive: integer;
+//   procedure setimagenractive(const avalue: integer);
+   function getimagenrdisabled: integer;
+   procedure setimagenrdisabled(const avalue: integer);
   protected
    procedure changed;
    procedure visiblechanged; override;
@@ -256,6 +288,8 @@ type
    procedure doselect; virtual;
    procedure dodeselect; virtual;
    procedure loaded; override;
+   procedure objectevent(const sender: tobject;
+                                     const event: objecteventty); override;
   public
    constructor create(aowner: tcomponent); override;
    function isactivepage: boolean;
@@ -268,6 +302,13 @@ type
                   write setcolortab default cl_default;
    property coloractivetab: colorty read getcoloractivetab
                   write setcoloractivetab default cl_default;
+   property imagelist: timagelist read getimagelist write setimagelist;
+   property imagenr: integer read getimagenr write setimagenr default -1;
+//   property imagenractive: integer read getimagenractive 
+//                                           write setimagenractive default -2;
+   property imagenrdisabled: integer read getimagenrdisabled 
+                                           write setimagenrdisabled default -2;
+                //-2 -> same as imagenr
    property optionswidget default defaulttaboptionswidget;
    property onchildscaled;
    property onfontheightdelta;
@@ -281,6 +322,10 @@ type
  ttabform = class(tmseform,itabpage)
   private
    ftabwidget: tcustomtabwidget;
+   fimagelist: timagelist;
+   fimagenr: integer;
+//   fimagenractive: integer;
+   fimagenrdisabled: integer;
    fcolortab,fcoloractivetab: colorty;
    ftabhint: msestring;
    fonselect: notifyeventty;
@@ -296,12 +341,22 @@ type
    procedure settabindex(const avalue: integer);
    function gettabhint: msestring;
    procedure settabhint(const avalue: msestring);
+   function getimagelist: timagelist;
+   procedure setimagelist(const avalue: timagelist);
+   function getimagenr: integer;
+   procedure setimagenr(const avalue: integer);
+//   function getimagenractive: integer;
+//   procedure setimagenractive(const avalue: integer);
+   function getimagenrdisabled: integer;
+   procedure setimagenrdisabled(const avalue: integer);
   protected
    procedure visiblechanged; override;
    procedure setcaption(const value: msestring); override;
    procedure doselect; virtual;
    procedure dodeselect; virtual;
    procedure loaded; override;
+   procedure objectevent(const sender: tobject;
+                                     const event: objecteventty); override;
   public
    constructor create(aowner: tcomponent); override;
    function isactivepage: boolean;
@@ -313,6 +368,13 @@ type
    property coloractivetab: colorty read getcolortab
                   write setcoloractivetab default cl_active;
    property tabhint: msestring read gettabhint write settabhint;
+   property imagelist: timagelist read getimagelist write setimagelist;
+   property imagenr: integer read getimagenr write setimagenr default -1;
+//   property imagenractive: integer read getimagenractive 
+//                                           write setimagenractive default -2;
+   property imagenrdisabled: integer read getimagenrdisabled 
+                                           write setimagenrdisabled default -2;
+                //-2 -> same as imagenr
    property onselect: notifyeventty read fonselect write fonselect;
    property ondeselect: notifyeventty read fondeselect write fondeselect;
    property visible default false;
@@ -504,11 +566,26 @@ type
 
 procedure calctablayout(var layout: tabbarlayoutinfoty;
                      const canvas: tcanvas);
+ procedure docommon(const tab: ttab; var cell: shapeinfoty; var textrect: rectty);
+ begin
+  with tab,cell do begin
+   imagelist:= fimagelist;
+   imagenr:= fimagenr;
+//   if getactive and (fimagenractive <> -2) then begin
+//    imagenr:= fimagenractive;
+//   end;
+   imagenrdisabled:= fimagenrdisabled;
+   if imagelist <> nil then begin
+    inc(textrect.cx,fimagelist.width);
+   end;
+  end;
+ end;
 var
  int1: integer;
  aval: integer;
  endval: integer;
  rect1: rectty;
+ bo1: boolean;
 begin
  with layout do begin
   cells:= nil;
@@ -522,10 +599,10 @@ begin
    endval:= dim.y + dim.cy;
    for int1:= 0 to high(cells) do begin
     with tabs[int1],cells[int1] do begin
-//     font:=   canvas.font;
-     caption:= fcaption;
      dim.y:= aval;
+     caption:= fcaption;
      rect1:= textrect(canvas,caption,makerect(layout.dim.x,aval,layout.dim.cx,bigint));
+     docommon(tabs[int1],cells[int1],rect1);
      dim.cy:= rect1.cy+4;
      if (ts_invisible in fstate) or (int1 < firsttab) or (aval >= endval) then begin
       include(state,ss_invisible);
@@ -556,10 +633,10 @@ begin
    endval:= dim.x + dim.cx;
    for int1:= 0 to high(cells) do begin
     with tabs[int1],cells[int1] do begin
-//     font:=   canvas.font;
-     caption:= fcaption;
      dim.x:= aval;
+     caption:= fcaption;
      rect1:= textrect(canvas,caption,makerect(aval,layout.dim.y,bigint,layout.dim.cy));
+     docommon(tabs[int1],cells[int1],rect1);
      dim.cx:= rect1.cx+6;
      if (ts_invisible in fstate) or (int1 < firsttab) or (aval >= endval) then begin
       include(state,ss_invisible);
@@ -585,6 +662,7 @@ begin
     end;
    end;
   end;
+  bo1:= not twidget(tabs.fowner).isenabled;
   for int1:= 0 to high(cells) do begin
    with tabs[int1],cells[int1] do begin
     captiondist:= 2;
@@ -609,7 +687,7 @@ begin
      face:= tabs.face;
      state:= state + [ss_radiobutton];
     end;
-    if ts_disabled in fstate then begin
+    if bo1 or (ts_disabled in fstate) then begin
      include(state,ss_disabled);
     end;
     doexecute:= {$ifdef FPC}@{$endif}execute;
@@ -719,10 +797,11 @@ end;
 
 constructor ttab.create(const aowner: tcustomtabbar);
 begin
-// fcolor:= aowner.colortab;
-// fcoloractive:= aowner.coloractivetab;
  fcolor:= cl_default;
  fcoloractive:= cl_default;
+ fimagenr:= -1;
+// fimagenractive:= -2;
+ fimagenrdisabled:= -2;
  inherited create(aowner,aowner.flayoutinfo.tabs);
 end;
 
@@ -811,6 +890,51 @@ begin
  end
  else begin
   state:= fstate - [ts_active];
+ end;
+end;
+
+procedure ttab.setimagelist(const avalue: timagelist);
+begin
+ setlinkedvar(avalue,fimagelist);
+end;
+
+procedure ttab.setimagenr(const avalue: integer);
+begin
+ if fimagenr <> avalue then begin
+  fimagenr:= avalue;
+  changed;
+ end;
+end;
+{
+procedure ttab.setimagenractive(const avalue: integer);
+begin
+ if fimagenractive <> avalue then begin
+  fimagenractive:= avalue;
+  changed;
+ end;
+end;
+}
+procedure ttab.setimagenrdisabled(const avalue: integer);
+begin
+ if fimagenrdisabled <> avalue then begin
+  fimagenrdisabled:= avalue;
+  changed;
+ end;
+end;
+
+procedure ttab.objectevent(const sender: tobject; const event: objecteventty);
+begin
+ inherited;
+ if sender = fimagelist then begin
+  if event = oe_destroyed then begin
+   fimagelist:= nil;
+   changed;
+  end
+  else begin
+   if event = oe_changed then begin
+    changed;
+   end;
+  end;
  end;
 end;
 
@@ -1126,9 +1250,9 @@ begin
  if (tabo_clickedtabfirst in foptions) or 
     (tabo_dblclickedtabfirst in foptions) and (ss_double in info.shiftstate) then begin
   movetab(sender.findex,0);
-//  flayoutinfo.tabs.move(sender.findex,0);
  end;
  sender.active:= true;
+ include(flayoutinfo.cells[sender.index].state,ss_mouse);
 end;
 
 procedure tcustomtabbar.tabschanged(const sender: tarrayprop;
@@ -1150,33 +1274,9 @@ var
  color1: colorty;
  rect1: rectty;
 begin
-// color1:= canvas.color;
  inherited;
  with flayoutinfo do begin
   for int1:= firsttab to lasttab do begin
-   {
-   cells[int1].font:= canvas.font;
-   if cells[int1].color <> cl_default then begin
-    canvas.fillrect(cells[int1].dim,cells[int1].color);
-   end;
-   if cells[int1].state * [ss_mouse] <> [] then begin
-    int2:= -2;
-   end
-   else begin
-    int2:= -1;
-   end;
-   if int1 = activetab then begin
-    if faceactive <> nil then begin
-     faceactive.paint(canvas,inflaterect(cells[int1].dim,int1));
-    end
-   end
-   else begin
-    if face <> nil then begin
-     face.paint(canvas,inflaterect(cells[int1].dim,int1));
-    end
-   end;
-   canvas.color:= color1;
-   }
    drawtab(canvas,cells[int1]);
   end;
   int1:= high(cells);
@@ -1328,10 +1428,20 @@ begin
 end;
 
 procedure tcustomtabbar.synctofontheight;
+var
+ int1,int2: integer;
 begin
  inherited;
  if not (tabo_vertical in options) then begin
-  bounds_cy:= font.glyphheight + fframe.innerframewidth.cy + 4;
+  int2:= font.glyphheight;
+  for int1:= 0 to flayoutinfo.tabs.count - 1 do begin
+   with flayoutinfo.tabs[int1] do begin
+    if (imagelist <> nil) and (imagelist.height > int2) then begin
+     int2:= imagelist.height;
+    end;
+   end;
+  end;
+  bounds_cy:= int2 + fframe.innerframewidth.cy + 4;
  end;
 end;
 
@@ -1419,15 +1529,7 @@ begin
   end;
  end;
 end;
-{
-procedure tcustomtabbar.setinvisiblebuttons(const Value: stepkindsty);
-begin
- inherited;
- if not (csloading in componentstate) then begin
-  updatelayout;
- end;
-end;
-}
+
 procedure tcustomtabbar.dragevent(var info: draginfoty);
 var
  int1: integer;
@@ -1469,7 +1571,6 @@ begin
     end;
     dek_drop: begin
      if candest then begin
-//      flayoutinfo.tabs.move(ttagdragobject(dragobject^).tag,int1);
       movetab(ttagdragobject(dragobject^).tag,int1);
      end;
     end;
@@ -1500,6 +1601,14 @@ end;
 function tcustomtabbar.getbuttonhint(const aindex: integer): msestring;
 begin
  result:= flayoutinfo.tabs[aindex].hint;
+end;
+
+procedure tcustomtabbar.enabledchanged;
+begin
+ inherited;
+ if not (ws_loadedproc in fwidgetstate) then begin
+  layoutchanged;
+ end;
 end;
 
 { ttabbar }
@@ -1548,6 +1657,9 @@ begin
  inherited;
  fcolortab:= cl_default;
  fcoloractivetab:= cl_default;
+ fimagenr:= -1;
+// fimagenractive:= -2;
+ fimagenrdisabled:= -2;
  foptionswidget:= defaulttaboptionswidget;
  exclude(fwidgetstate,ws_visible);
 end;
@@ -1689,12 +1801,81 @@ begin
  end;
 end;
 
+function ttabpage.getimagelist: timagelist;
+begin
+ result:= fimagelist
+end;
+
+procedure ttabpage.setimagelist(const avalue: timagelist);
+begin
+ setlinkedvar(avalue,fimagelist);
+end;
+
+function ttabpage.getimagenr: integer;
+begin
+ result:= fimagenr;
+end;
+
+procedure ttabpage.setimagenr(const avalue: integer);
+begin
+ if fimagenr <> avalue then begin
+  fimagenr:= avalue;
+  changed;
+ end;
+end;
+{
+function ttabpage.getimagenractive: integer;
+begin
+ result:= fimagenractive;
+end;
+
+procedure ttabpage.setimagenractive(const avalue: integer);
+begin
+ if fimagenractive <> avalue then begin
+  fimagenractive:= avalue;
+  changed;
+ end;
+end;
+}
+function ttabpage.getimagenrdisabled: integer;
+begin
+ result:= fimagenrdisabled;
+end;
+
+procedure ttabpage.setimagenrdisabled(const avalue: integer);
+begin
+ if fimagenrdisabled <> avalue then begin
+  fimagenrdisabled:= avalue;
+  changed;
+ end;
+end;
+
+procedure ttabpage.objectevent(const sender: tobject;
+               const event: objecteventty);
+begin
+ inherited;
+ if sender = fimagelist then begin
+  if event = oe_destroyed then begin
+   fimagelist:= nil;
+   changed;
+  end
+  else begin
+   if event = oe_changed then begin
+    changed;
+   end;
+  end;
+ end;
+end;
+
 { ttabform }
 
 constructor ttabform.create(aowner: tcomponent);
 begin
  fcolortab:= cl_default;
  fcoloractivetab:= cl_active;
+ fimagenr:= -1;
+// fimagenractive:= -2;
+ fimagenrdisabled:= -2;
  inherited create(aowner);
  exclude(fwidgetstate,ws_visible);
 end;
@@ -1805,6 +1986,73 @@ begin
  end;
 end;
 
+
+function ttabform.getimagelist: timagelist;
+begin
+ result:= fimagelist
+end;
+
+procedure ttabform.setimagelist(const avalue: timagelist);
+begin
+ setlinkedvar(avalue,fimagelist);
+end;
+
+function ttabform.getimagenr: integer;
+begin
+ result:= fimagenr;
+end;
+
+procedure ttabform.setimagenr(const avalue: integer);
+begin
+ if fimagenr <> avalue then begin
+  fimagenr:= avalue;
+  changed;
+ end;
+end;
+{
+function ttabform.getimagenractive: integer;
+begin
+ result:= fimagenractive;
+end;
+
+procedure ttabform.setimagenractive(const avalue: integer);
+begin
+ if fimagenractive <> avalue then begin
+  fimagenractive:= avalue;
+  changed;
+ end;
+end;
+}
+function ttabform.getimagenrdisabled: integer;
+begin
+ result:= fimagenrdisabled;
+end;
+
+procedure ttabform.setimagenrdisabled(const avalue: integer);
+begin
+ if fimagenrdisabled <> avalue then begin
+  fimagenrdisabled:= avalue;
+  changed;
+ end;
+end;
+
+procedure ttabform.objectevent(const sender: tobject;
+               const event: objecteventty);
+begin
+ inherited;
+ if sender = fimagelist then begin
+  if event = oe_destroyed then begin
+   fimagelist:= nil;
+   changed;
+  end
+  else begin
+   if event = oe_changed then begin
+    changed;
+   end;
+  end;
+ end;
+end;
+
 { tcustomtabwidget }
 
 constructor tcustomtabwidget.create(aowner: tcomponent);
@@ -1853,35 +2101,40 @@ begin
  if not (ws_destroying in fwidgetstate) then begin
   widget1:= twidget1(sender.getwidget);
   int1:= indexof(widget1);
-  if not (csloading in componentstate) then begin
-   activepageindexbefore:= factivepageindex;
-   ftabs.tabs[int1].caption:= sender.getcaption;
-   ftabs.tabs[int1].hint:= sender.gettabhint;
-   ftabs.tabs[int1].color:= sender.getcolortab;
-   ftabs.tabs[int1].coloractive:= sender.getcoloractivetab;
-   if not widget1.enabled then begin
-    ftabs.tabs[int1].state:= ftabs.tabs[int1].state + [ts_disabled];
-   end
-   else begin
-    ftabs.tabs[int1].state:= ftabs.tabs[int1].state - [ts_disabled];
-   end;
-   
-   if widget1.isvisible and (widget1.enabled or 
-                    (csdesigning in widget1.componentstate)) then begin
-    ftabs.tabs[int1].state:= ftabs.tabs[int1].state - [ts_invisible];
-    setactivepageindex(int1);
-   end
-   else begin
-    if (activepageindexbefore = int1) and not (csdestroying in componentstate) then begin
-     changepage(1);
-     if factivepageindex = activepageindexbefore then begin
-      setactivepageindex(-1); //select none
+  with ftabs.tabs[int1] do begin
+   if not (csloading in componentstate) then begin
+    activepageindexbefore:= factivepageindex;
+    caption:= sender.getcaption;
+    hint:= sender.gettabhint;
+    color:= sender.getcolortab;
+    coloractive:= sender.getcoloractivetab;
+    imagelist:= sender.getimagelist;
+    imagenr:= sender.getimagenr;
+//    imagenractive:= sender.getimagenractive;
+    imagenrdisabled:= sender.getimagenrdisabled;
+
+    if not widget1.enabled then begin
+     state:= state + [ts_disabled];
+    end
+    else begin
+     state:= state - [ts_disabled];
+    end;   
+    if widget1.isvisible and (widget1.enabled or 
+                     (csdesigning in widget1.componentstate)) then begin
+     state:= state - [ts_invisible];
+     setactivepageindex(int1);
+    end
+    else begin
+     if (activepageindexbefore = int1) and 
+                            not (csdestroying in componentstate) then begin
+      changepage(1);
+      if factivepageindex = activepageindexbefore then begin
+       setactivepageindex(-1); //select none
+      end;
      end;
     end;
-   end;
-  end
-  else begin
-   with ftabs.tabs[int1] do begin
+   end
+   else begin
     include(fstate,ts_updating);
     caption:= sender.getcaption; //no updatelayout
     exclude(fstate,ts_updating);

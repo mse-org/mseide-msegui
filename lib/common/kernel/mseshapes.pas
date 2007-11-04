@@ -108,19 +108,27 @@ var
  int1: integer;
  mstr1: msestring;
 begin
- if info.eventkind = ek_clientmouseleave then begin
+ if (info.eventkind = ek_clientmouseleave) then begin
   if hintedbutton >= 0 then begin
    application.hidehint;
    hintedbutton:= -1;
+   exit;
   end;
  end;
+ int1:= getmouseshape(cells);
+ if (info.eventkind in [ek_buttonpress,ek_buttonrelease]) then begin
+  if hintedbutton >= 0 then begin
+   application.hidehint;
+  end;
+  hintedbutton:= -(int1+3);
+  exit;
+ end;
  if (info.eventkind in [ek_mousemove,ek_mousepark]) then begin
-  int1:= getmouseshape(cells);
   if (int1 >= 0) then begin
-   if int1 <> hintedbutton then begin
+   if (int1 <> hintedbutton) and (-(int1+3) <> hintedbutton) then begin
     if twidget1(awidget).getshowhint and (info.eventkind = ek_mousepark) or 
                 (application.activehintedwidget = awidget) then begin
-     if not (ss_separator in cells[int1].state) then begin
+     if cells[int1].state * [ss_separator,ss_clicked] = [] then begin
       hintedbutton:= int1;
       mstr1:= getbuttonhint(int1);
       if (mstr1 <> '') and application.active then begin
@@ -138,8 +146,10 @@ begin
    end;
   end
   else begin
-   application.hidehint;
-   hintedbutton:= -1;
+   if hintedbutton >= 0 then begin
+    application.hidehint;
+    hintedbutton:= -1;
+   end;
   end;
  end;
 end;
