@@ -7913,12 +7913,16 @@ end;
 procedure twidget.setoptionswidget(const avalue: optionswidgetty);
 const
  mask1: optionswidgetty = [ow_fontglyphheight,ow_fontlineheight];
+ mask2: optionswidgetty = [ow_hinton,ow_hintoff];
 var
- value,delta: optionswidgetty;
+ value,value1,value2,delta: optionswidgetty;
 begin
  if avalue <> foptionswidget then begin
-  value:= optionswidgetty(setsinglebit(longword(avalue),
+  value1:= optionswidgetty(setsinglebit(longword(avalue),
           longword(foptionswidget),longword(mask1)));
+  value2:= optionswidgetty(setsinglebit(longword(avalue),
+          longword(foptionswidget),longword(mask2)));
+  value:= value1 * mask1 + value2 * mask2 + (avalue - (mask1 + mask2));
   delta:= optionswidgetty(longword(value) xor longword(foptionswidget));
   foptionswidget:= value;
   if (delta * [ow_background,ow_top] <> []) then begin
