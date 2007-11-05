@@ -735,6 +735,7 @@ end;
 constructor tcustomaction.create(aowner: tcomponent);
 begin
  initactioninfo(finfo);
+ finfo.action:= self;
  inherited;
 end;
 
