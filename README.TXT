@@ -72,7 +72,12 @@ Popup widgets behind the forms
 ******************************
 If the popup widgets are showed behind the forms, try to start the 
 MSEgui program with the option '--TOPLEVELRAISE'. Do *not* use this option
-if is not necessary (KDE, Gnome, IceWM... work well without).
+if is not necessary (KDE, Gnome... work well without).
+
+Blinking taskbar widgets in IceWM
+*********************************
+Newer revisions of IceWM let the taskbar icons of MSEgui applications blink.
+Start the MSEgui application with the option '--TOPLEVELRAISE'.
 
 Invalid inputmanager for Ubuntu
 *******************************

@@ -141,6 +141,10 @@ function XSetLocaleModifiers(modifier_list: pchar): pchar; cdecl;
                               external sXLib name 'XSetLocaleModifiers';
 function XSetICValues(IC: XIC): PChar; cdecl; varargs;
                               external sXLib name 'XSetICValues';
+function XSetIMValues(IC: XIM): PChar; cdecl; varargs;
+                              external sXLib name 'XSetIMValues';
+//function XSetICValues(para1:XIC; dotdotdot:array of const):Pchar;cdecl;
+//                              external sXLib name 'XSetICValues';
 function XGetICValues(IC: XIC): PChar; cdecl; varargs;
                               external sXLib name 'XGetICValues';
 procedure XSetICFocus(IC: XIC); cdecl;
@@ -701,6 +705,7 @@ var
  appic: xic;
  appicmask: longword;
  icwindow: windowty;
+ imewinid: winidty;
  errorhandlerbefore: xerrorhandler;
  lasteventtime: cardinal;
 // lastshiftstate: shiftstatesty;
@@ -1956,13 +1961,23 @@ begin
  result:= gue_ok;
  with awindow,x11windowty(platformdata) do begin
   if ic <> nil then begin
-   xseticvalues(ic,pchar(xnfocuswindow),id);
+   xseticvalues(ic,pchar(xnfocuswindow),id,nil);
    xseticfocus(ic);
   end
   else begin
-   xseticvalues(appic,pchar(xnfocuswindow),id);
+   xseticvalues(appic,pchar(xnfocuswindow),id,nil);
+   imewinid:= id;
    xseticfocus(appic);
   end;
+ end;
+end;
+
+procedure unsetime(const awindow: winidty);
+begin
+ if awindow = imewinid then begin
+  xunseticfocus(appic);
+  xseticvalues(appic,pchar(xnfocuswindow),appid,nil);
+  imewinid:= 0;
  end;
 end;
 
@@ -1972,6 +1987,9 @@ begin
  with x11windowty(awindow.platformdata) do begin
   if ic <> nil then begin
    xunseticfocus(ic);
+  end
+  else begin
+   unsetime(awindow.id);
   end;
  end;
 end;
@@ -2653,8 +2671,8 @@ begin
 }
   icmask:= appicmask;
   if ic <> nil then begin
-   xgeticvalues(ic,pchar(xnfilterevents),@icmask);
-   xseticvalues(ic,pchar(xnresetstate),pchar(ximpreservestate));
+   xgeticvalues(ic,pchar(xnfilterevents),@icmask,nil);
+   xseticvalues(ic,pchar(xnresetstate),pchar(ximpreservestate),nil);
   end;
   xselectinput(appdisp,id,icmask or
               KeymapStateMask or
@@ -2691,13 +2709,14 @@ begin
    ic:= nil;
   end;
   if id <> 0 then begin
-   {$ifdef hassaveyourself}
+  {$ifdef hassaveyourself}
    if id <> saveyourselfwindow then begin
+  {$endif}
+    unsetime(id);
     xdestroywindow(appdisp,id);
+  {$ifdef hassaveyourself}
    end;
-   {$else}
-   xdestroywindow(appdisp,id);
-   {$endif}
+  {$endif}
   end;
  end;
  result:= gue_ok;
@@ -2826,6 +2845,7 @@ end;
 
 function gui_hidewindow(id: winidty): guierrorty;
 begin
+ unsetime(id);
  xunmapwindow(appdisp,id);
  result:= gue_ok;
 end;
@@ -5276,15 +5296,15 @@ begin
   end;
   focusin,focusout: begin
    with xev.xfocus do begin
-    aic:= getic(window);
+//    aic:= getic(window);
     if xtype = focusin then begin
      eventkind:= ek_focusin;
-     xseticvalues(aic,pchar(xnfocuswindow),window,nil);
-     xseticfocus(aic);
+//     xseticvalues(aic,pchar(xnfocuswindow),window,nil);
+//     xseticfocus(aic);
     end
     else begin
      eventkind:= ek_focusout;
-     xunseticfocus(aic);
+//     xunseticfocus(aic);
     end;
     if mode <> notifypointer then begin
      result:= twindowevent.create(eventkind,window);
@@ -5406,6 +5426,74 @@ begin
   xstorecolors(appdisp,msecolormap,@map1,256);
  end;
 end;
+{
+function createappic: boolean; forward;
+function icdestroyed(ic: txic; client_data: txpointer; 
+                               call_data: txpointer): longbool; cdecl;
+begin
+ result:= false;
+ appic:= nil;
+ if not terminated then begin
+  if not createappic then begin
+   debugwriteln('Input context lost.');
+   halt(1);
+  end;
+ end;
+end;
+}
+function createappic: boolean;
+var
+ xiccallback: txiccallback;
+begin
+ appic:= xcreateic(im,pchar(xninputstyle),ximstatusnothing or ximpreeditnothing,nil);
+ result:= appic <> nil;
+ if result then begin
+ {
+  xiccallback.client_data:= nil;
+  xiccallback.callback:= @icdestroyed;
+  }
+  xseticvalues(appic,pchar(xnclientwindow),appid,
+                         {pchar(xndestroycallback)@,xiccallback,}nil);
+  xgeticvalues(appic,pchar(xnfilterevents),@appicmask,nil);
+ end;
+end;
+
+function createim: boolean; forward;
+
+procedure imdestroyed(ic: txim; client_data: txpointer;
+                                          call_data: txpointer); cdecl;
+begin
+ im:= nil;
+ appic:= nil;
+ if not terminated then begin
+  if not createim or not createappic then begin
+   debugwriteln('Input method lost.');
+   halt(1);
+  end;
+ end;
+end;
+
+function createim: boolean;
+var
+ ximcallback: tximcallback;
+begin
+ xsetlocalemodifiers('');
+ im:= xopenim(appdisp,nil,nil,nil);
+ if im = nil then begin
+  xsetlocalemodifiers('@im=local');
+  im:= xopenim(appdisp,nil,nil,nil);
+  if im = nil then begin
+   xsetlocalemodifiers('@im=');
+   im:= xopenim(appdisp,nil,nil,nil);
+  end;
+ end;
+ result:= im <> nil;
+ if result then begin
+  ximcallback.client_data:= nil;
+  ximcallback.callback:= @imdestroyed;
+ end;
+ xsetimvalues(im,pchar(xndestroycallback),@ximcallback,nil);
+end;
 
 function gui_init: guierrorty;
 label
@@ -5423,7 +5511,7 @@ var
  clientid: pchar;
  smerror: array[0..255] of char;
 {$endif}
-
+ 
 begin
  {$ifdef mse_flushgdi}
  xinitthreads;
@@ -5476,26 +5564,10 @@ begin
  if appdisp = nil then begin
   goto error;
  end;
- xsetlocalemodifiers('');
- im:= xopenim(appdisp,nil,nil,nil);
- if im = nil then begin
-  xsetlocalemodifiers('@im=local');
-  im:= xopenim(appdisp,nil,nil,nil);
-  if im = nil then begin
-   xsetlocalemodifiers('@im=');
-   im:= xopenim(appdisp,nil,nil,nil);
-   if im = nil then begin
-    result:= gue_inputmanager;
-    goto error;
-   end;
-  end;
- end;
- appic:= xcreateic(im,pchar(xninputstyle),ximstatusnothing or ximpreeditnothing,nil);
- if appic = nil then begin
-  result:= gue_inputcontext;
+ if not createim then begin
+  result:= gue_inputmanager;
   goto error;
- end;
- xgeticvalues(appic,pchar(xnfilterevents),@appicmask);
+ end; 
  defscreen:= xdefaultscreenofdisplay(appdisp);
  rootid:= xrootwindowofscreen(defscreen);
  defvisual:= msepvisual(xdefaultvisualofscreen(defscreen));
@@ -5507,6 +5579,10 @@ begin
   result:= gue_createwindow;
   goto error;
  end;
+ if not createappic then begin
+  result:= gue_inputcontext;
+  goto error;
+ end;  
  {$ifdef FPC} {$checkpointer off} {$endif}
  {$ifdef FPC}
  is8bitcolor:= defaultdepthofscreen(defscreen) = 8;
@@ -5702,14 +5778,6 @@ begin
   setstringproperty(saveyourselfwindow,wmcommandatom,'');
  end;
 {$endif}
- if appid <> 0 then begin
-  xdestroywindow(appdisp,appid);
-  appid:= 0;
- end;
- if screencursor <> 0 then begin
-  xfreecursor(appdisp,screencursor);
-  screencursor:= 0;
- end;
  if appic <> nil then begin
   xdestroyic(appic);
   appic:= nil;
@@ -5717,6 +5785,14 @@ begin
  if im <> nil then begin
   xcloseim(im);
   im:= nil;
+ end;
+ if appid <> 0 then begin
+  xdestroywindow(appdisp,appid);
+  appid:= 0;
+ end;
+ if screencursor <> 0 then begin
+  xfreecursor(appdisp,screencursor);
+  screencursor:= 0;
  end;
  if appdisp <> nil then begin
   if msecolormap <> 0 then begin
