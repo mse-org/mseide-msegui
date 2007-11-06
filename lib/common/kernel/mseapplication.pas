@@ -344,6 +344,7 @@ end;
 
 procedure tactcomponent.receiveevent(const event: tobjectevent);
 begin
+ inherited;
  case event.kind of
   ek_release: begin
    free;
