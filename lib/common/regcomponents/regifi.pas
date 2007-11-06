@@ -5,7 +5,7 @@ implementation
 uses
  classes,mseifi,msedesignintf,msepropertyeditors,msestrings,msedesigner,
  mseclasses,mseifids,mseifiglob,msegui,typinfo,msesockets,mseifigui,
- mseifilink;
+ mseifilink,msessl;
  
 type
  tmodulelinkitemeditor = class(tclasselementeditor)
@@ -53,7 +53,8 @@ begin
                      tsocketclientifichannel,tsocketserverifichannel,
                      ttxdataset,trxdataset,
                      tsocketstdio,tsocketclient,
-                     tsocketserver,tsocketserverstdio]); 
+                     tsocketserver,tsocketserverstdio,
+                     tssl]); 
  registercomponenttabhints(['Ifi'],
    ['Internet Form Interpreter and PascalScript Components']);
  registerpropertyeditor(typeinfo(tmodulelinkarrayprop),nil,'',tmodulelinkeditor);

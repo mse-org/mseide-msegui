@@ -2,8 +2,8 @@ unit msesockets;
 {$ifdef FPC}{$mode objfpc}{$h+}{$INTERFACES CORBA}{$endif}
 interface
 uses
- classes,mseguiglob,mseclasses,msesys,msestrings,msepipestream,mseapplication,msethread,
- mseevent;
+ classes,mseguiglob,mseclasses,msesys,msestrings,msepipestream,mseapplication,
+ msethread,mseevent,msecryptio;
 
 const
  defaultmaxconnections = 16;
@@ -130,7 +130,9 @@ type
    fonafterconnect: socketeventty;
    fonbeforedisconnect: socketeventty;
    fonafterdisconnect: socketeventty;
+   fcrypto: tcryptio;
    procedure setactive(const avalue: boolean);
+   procedure setcrypto(const avalue: tcryptio);
   protected
    procedure doactivated; override;
    procedure dodeactivated; override;
@@ -146,6 +148,8 @@ type
   published
    property active: boolean read factive write setactive;
    property activator;
+   property crypto: tcryptio read fcrypto write setcrypto;
+   
    property onbeforeconnect: socketeventty read fonbeforeconnect 
                                                 write fonbeforeconnect;
    property onafterconnect: socketeventty read fonafterconnect 
@@ -534,6 +538,11 @@ begin
  end; 
 end;
 
+procedure tsocketcomp.setcrypto(const avalue: tcryptio);
+begin
+ setlinkedvar(avalue,fcrypto);
+end;
+
 { tcustomurlsocketcomp}
 
 procedure tcustomurlsocketcomp.seturl(const avalue: filenamety);
@@ -702,12 +711,7 @@ begin
  addr.kind:= fkind;
  addr.size:= sizeof(addr.platformdata);
  while not thread.terminated do begin
-debugwriteln('acceptstart '+ inttostr(fhandle));
   err:= sys_accept(fhandle,true,conn,addr,0);
-debugwriteln('acceptend '+inttostr(ord(err)));
-if err = sye_lasterror then begin
-debugwriteln(sys_geterrortext(mselasterror));
-end;
   if not thread.terminated then begin
    if err = sye_ok then begin
     try
@@ -934,9 +938,7 @@ begin
  fthread:= tsemthread(thread);
  with fthread do begin
   while not terminated and not (tss_error in fstate) do begin
-debugwriteln('readstart');
    sys_readsocket(handle,@fmsbuf,buflen,int1,ftimeoutms);
-debugwriteln('readend '+inttostr(int1));
    if not terminated then begin
     if int1 <= 0 then begin
      include(fstate,tss_error); //broken socket

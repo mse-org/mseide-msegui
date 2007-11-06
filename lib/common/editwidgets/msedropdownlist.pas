@@ -1310,7 +1310,13 @@ begin
   arowcount:= frowcount;
  end;
  datarowheight:= font.lineheight;
- rect1.cy:= arowcount * ystep + fframe.paintframewidth.cy;
+ if arowcount = 0 then begin
+  rect1.cy:= ystep div 2;
+ end
+ else begin
+  rect1.cy:= arowcount * ystep;
+ end;
+ rect1.cy:= rect1.cy + fframe.paintframewidth.cy;
  widgetrect:= rect1;
  fcontroller.updatedropdownpos;
  ffiltertext:= afiltertext;
