@@ -52,6 +52,7 @@ type
    procedure dodeactivated; virtual;
    procedure objectevent(const sender: tobject;
                           const event: objecteventty); override;
+   procedure receiveevent(const event: tobjectevent); override;
   public
    procedure release; virtual;
    function releasing: boolean;
@@ -339,6 +340,15 @@ end;
 function tactcomponent.releasing: boolean;
 begin
  result:= acs_releasing in fstate;
+end;
+
+procedure tactcomponent.receiveevent(const event: tobjectevent);
+begin
+ case event.kind of
+  ek_release: begin
+   free;
+  end;
+ end;
 end;
 
 { tactivator }

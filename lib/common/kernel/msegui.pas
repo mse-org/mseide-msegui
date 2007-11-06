@@ -7961,9 +7961,6 @@ procedure twidget.receiveevent(const event: tobjectevent);
 begin
  inherited;
  case event.kind of
-  ek_release: begin
-   free;
-  end;
   ek_activate: begin
 //   window.internalactivate(false);
    window.activate;
