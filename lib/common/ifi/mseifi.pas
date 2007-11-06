@@ -238,6 +238,8 @@ type
    function commio: boolean; virtual; abstract;
    procedure internalsenddata(const adata: ansistring); virtual; abstract;
    procedure loaded; override;
+   procedure dobeforeconnect;
+   procedure doafterconnect;
    procedure connect;
    procedure disconnect;
   public
@@ -704,15 +706,25 @@ begin
  end;
 end;
 
-procedure tcustomiochannel.connect;
+procedure tcustomiochannel.dobeforeconnect;
 begin
  if canevent(tmethod(fonbeforeconnect)) then begin
   fonbeforeconnect(self);
  end;
- internalconnect;
+end;
+
+procedure tcustomiochannel.doafterconnect;
+begin
  if canevent(tmethod(fonafterconnect)) then begin
   fonafterconnect(self);
  end;
+end;
+
+procedure tcustomiochannel.connect;
+begin
+ dobeforeconnect;
+ internalconnect;
+ doafterconnect;
 end;
 
 procedure tcustomiochannel.disconnect;
@@ -1099,9 +1111,11 @@ end;
 procedure tsocketserveriochannel.link(const apipes: tcustomsocketpipes);
 begin
  unlink;
+ dobeforeconnect;
  setlinkedvar(apipes,fpipes);
  fpipes.onbeforedisconnect:= @dobeforedisconnect;
  fpipes.rx.oninputavailable:= @doinputavailable;
+ doafterconnect; 
 end;
 
 procedure tsocketserveriochannel.internalconnect;
