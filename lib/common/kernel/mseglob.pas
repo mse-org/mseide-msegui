@@ -20,6 +20,8 @@ type
                   mr_cancel,mr_abort,mr_ok,mr_yes,mr_no,mr_all,mr_noall,mr_ignore);
  modalresultsty = set of modalresultty;
 
+ proceventty = procedure of object;
+ 
  inullinterface = interface
   //no referencecount, only for fpc, not available in delphi
  end;

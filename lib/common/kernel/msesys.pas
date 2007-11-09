@@ -34,13 +34,16 @@ type
   platformdata: array[0..3] of cardinal;
  end;
 
- mutexty = array[0..7] of cardinal;
- semty = array[0..7] of cardinal;
+ mutexty = array[0..7] of pointer;
+ semty = array[0..7] of pointer;
  psemty = ^semty;
- condty = array[0..31] of cardinal;
+ condty = array[0..31] of pointer;
  
  socketkindty = (sok_local,sok_inet,sok_inet6);
  socketshutdownkindty = (ssk_rx,ssk_tx,ssk_both);
+ pollkindty = (poka_read,poka_write,poka_except);
+ pollkindsty = set of pollkindty;
+
  
  socketaddrty = record
   kind: socketkindty;
@@ -138,9 +141,9 @@ procedure deletecommandlineargument(const index: integer);
                 //index 1..argumentcount-1, no action otherwise
 procedure getprocaddresses(const lib: tlibhandle; const anames: array of string;
                              const adest: array of ppointer); overload;
-procedure getprocaddresses(const libnames: array of string; 
+function getprocaddresses(const libnames: array of string; 
                              const anames: array of string; 
-                             const adest: array of ppointer); overload;
+                             const adest: array of ppointer): tlibhandle; overload;
 
 threadvar
  mselasterror: integer;
@@ -170,32 +173,31 @@ begin
  end;
 end;
 
-procedure getprocaddresses(const libnames: array of string; const anames: array of string; 
-                             const adest: array of ppointer); overload;
+function getprocaddresses(const libnames: array of string; const anames: array of string; 
+                             const adest: array of ppointer): tlibhandle; overload;
 var
- libha: tlibhandle;
  int1: integer;
  str1: string;
 begin
- libha:= 0;
+ result:= 0;
  for int1:= 0 to high(libnames) do begin
  {$ifdef FPC}
-  libha:= loadlibrary(libnames[int1]);
+  result:= loadlibrary(libnames[int1]);
  {$else}
   libha:= loadlibrary(pansichar(libnames[int1]));
  {$endif}
-  if libha <> 0 then begin
+  if result <> 0 then begin
    break;
   end;
  end;
- if libha = 0 then begin
+ if result = 0 then begin
   str1:= '';
   for int1:= 0 to high(libnames) do begin
    str1:= str1+'"'+libnames[int1]+'" ';
   end;
   raise exception.create('Library '+str1+'not found.');
  end;
- getprocaddresses(libha,anames,adest);
+ getprocaddresses(result,anames,adest);
 end;
 
 const

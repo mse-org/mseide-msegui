@@ -325,9 +325,9 @@ const
  {$endif}
 const
  {$ifdef mswindows}
- eor: array[0..1] of byte = ($0d,$0a);
+ eor: array[0..1] of char = (#$0d,#$0a);
  {$else}
- eor: array[0..0] of byte = ($0a);
+ eor: array[0..0] of char = (#$0a);
  {$endif}
 
 const
@@ -1063,20 +1063,20 @@ end;
 
 procedure ttextstream.writestrln(const value: string);
 begin
- write(value);
- writebuffer(eor,sizeof(eor));
+ write(value+eor);
+// writebuffer(eor,sizeof(eor));
 end;
 
 procedure ttextstream.writeln(const value: string);
 begin
- write(value);
- writebuffer(eor,sizeof(eor));
+ write(value+eor);
+// writebuffer(eor,sizeof(eor));
 end;
 
 procedure ttextstream.writeln(const value: msestring);
 begin
- write(value);
- writebuffer(eor,sizeof(eor));
+ write(value+eor);
+// writebuffer(eor,sizeof(eor));
 end;
 
 procedure ttextstream.writeln(const value: real);

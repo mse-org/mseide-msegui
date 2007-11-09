@@ -100,11 +100,16 @@ function sys_getsockport(const addr: socketaddrty): integer;
 function sys_setnonblocksocket(const handle: integer;
                                      const nonblock: boolean): syserrorty;
 function sys_readsocket(const fd: longint; const buf: pointer;
-                        const nbytes: longword;
-            out readbytes: integer; const timeoutms: integer): syserrorty;
+                        const nbytes: longword; out readbytes: integer;
+                        const timeoutms: integer): syserrorty;
+                 //atimeoutms < 0 -> nonblocked,
+                 //result = 0 -> no data, < 0 - error
 function sys_setsockrxtimeout(const handle: integer; const ms: integer): syserrorty;
 function sys_setsocktxtimeout(const handle: integer; const ms: integer): syserrorty;
-
+function sys_poll(const handle: integer; const kind: pollkindsty;
+                            const timeoutms: longword): syserrorty;
+                             //0 -> no timeout
+                             //for blocking mode
 
 function sys_read(fd: longint; buf: pointer; nbytes: longword): integer;
 function sys_write(fd: longint; buf: pointer; nbytes: longword): integer;

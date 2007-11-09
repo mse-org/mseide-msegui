@@ -2,8 +2,8 @@ unit msesockets;
 {$ifdef FPC}{$mode objfpc}{$h+}{$INTERFACES CORBA}{$endif}
 interface
 uses
- classes,mseguiglob,mseclasses,msesys,msestrings,msepipestream,mseapplication,
- msethread,mseevent,msecryptio;
+ classes,mseglob,mseguiglob,mseclasses,msesys,msestrings,msepipestream,
+ mseapplication,msethread,mseevent,msecryptio;
 
 const
  defaultmaxconnections = 16;
@@ -17,7 +17,12 @@ type
  tsocketreader = class(tpipereader)
   private
    ftimeoutms: integer;
+   fonafterconnect: proceventty;
+   fonthreadterminate: proceventty;
+   fcrypt: pcryptioinfoty;
    procedure settimeoutms(const avalue: integer);
+   function doread(var buf; const acount: integer;
+                    const nonblocked: boolean = false): integer; override;
   protected
    procedure closehandle(const ahandle: integer); override;
    function execthread(thread: tmsethread): integer; override;
@@ -30,10 +35,12 @@ type
  tsocketwriter = class(tpipewriter)
   private
    ftimeoutms: integer;
+   fcrypt: pcryptioinfoty;
    procedure settimeoutms(const avalue: integer);
   protected
    procedure closehandle(const ahandle: integer); override;
   public
+   function Write(const Buffer; Count: Longint): Longint; override;
    property timeoutms: integer read ftimeoutms write settimeoutms;
  end;
  
@@ -69,6 +76,10 @@ type
    function gettxtimeoutms: integer;
    procedure settxtimeoutms(const avalue: integer);
   protected
+   fcryptioinfo: cryptioinfoty;
+   procedure doafterconnect; virtual;
+   procedure dothreadterminate;
+   procedure setcryptio(const acryptio: tcryptio);
    procedure receiveevent(const event: tobjectevent);
    property onsocketbroken: socketpipeseventty read fonsocketbroken write fonsocketbroken;
   public
@@ -112,11 +123,15 @@ type
  end;
  
  tclientsocketpipes = class(tsocketpipes)
+  protected
+   procedure doafterconnect; override;
  end;
  
  tcustomsocketserver = class;
   
  tserversocketpipes = class(tcustomsocketpipes)
+  protected
+   procedure doafterconnect; override;
  end;
  socketpipesarty = array of tserversocketpipes;
 
@@ -130,9 +145,9 @@ type
    fonafterconnect: socketeventty;
    fonbeforedisconnect: socketeventty;
    fonafterdisconnect: socketeventty;
-   fcrypto: tcryptio;
+   fcryptio: tcryptio;
    procedure setactive(const avalue: boolean);
-   procedure setcrypto(const avalue: tcryptio);
+   procedure setcryptio(const avalue: tcryptio);
   protected
    procedure doactivated; override;
    procedure dodeactivated; override;
@@ -142,13 +157,14 @@ type
    procedure connect;
    procedure disconnect;
    procedure checkinactive;
+   procedure doafterconnect(const sender: tcustomsocketpipes);
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
   published
    property active: boolean read factive write setactive;
    property activator;
-   property crypto: tcryptio read fcrypto write setcrypto;
+   property cryptio: tcryptio read fcryptio write setcryptio;
    
    property onbeforeconnect: socketeventty read fonbeforeconnect 
                                                 write fonbeforeconnect;
@@ -246,6 +262,7 @@ type
    procedure doclosepipes;
    procedure closepipes(const sender: tcustomsocketpipes); override;
    procedure doasyncevent(var atag: integer); override;
+   procedure doafterchconnect(const sender: tcustomsocketpipes);
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -313,7 +330,9 @@ constructor tcustomsocketpipes.create(const aowner: tsocketcomp);
 begin
  fowner:= aowner;
  frx:= tsocketreader.create;
+ frx.fonafterconnect:= @doafterconnect;
  frx.onpipebroken:= @dopipebroken;
+ frx.fonthreadterminate:= @dothreadterminate;
  ftx:= tsocketwriter.create;
 end;
 
@@ -330,6 +349,19 @@ begin
  result:= ftx.handle;
 end;
 
+procedure tcustomsocketpipes.doafterconnect;
+begin
+ if assigned(fonafterconnect) then begin
+  fonafterconnect(self);
+ end;  
+end;
+
+procedure tcustomsocketpipes.dothreadterminate;
+begin
+ tcryptio.threadterminate(fcryptioinfo);
+ //dummy
+end;
+
 procedure tcustomsocketpipes.sethandle(const avalue: integer);
 var
  int1: integer;
@@ -344,7 +376,18 @@ begin
   include(fstate,sops_open);
  end
  else begin
+  setcryptio(nil);
   exclude(fstate,sops_open);
+ end;
+end;
+
+procedure tcustomsocketpipes.setcryptio(const acryptio: tcryptio);
+begin
+ with fcryptioinfo do begin
+  tcryptio.unlink(fcryptioinfo);
+  ftx.fcrypt:= nil;
+  frx.fcrypt:= nil;
+  handler:= acryptio;
  end;
 end;
 
@@ -460,7 +503,6 @@ begin
  execmse1(commandline,@rxha,@txha);
 end;
 }
-
 { tsocketcomp }
 
 constructor tsocketcomp.create(aowner: tcomponent);
@@ -516,15 +558,24 @@ begin
  end;
 end;
 
+procedure tsocketcomp.doafterconnect(const sender: tcustomsocketpipes);
+begin
+ if canevent(tmethod(fonafterconnect)) then begin
+  application.lock;
+  try
+   fonafterconnect(self);
+  finally
+   application.unlock;
+  end;
+ end; 
+end;
+
 procedure tsocketcomp.connect;
 begin
  if canevent(tmethod(fonbeforeconnect)) then begin
   fonbeforeconnect(self);
  end;
  internalconnect;
- if canevent(tmethod(fonafterconnect)) then begin
-  fonafterconnect(self);
- end; 
 end;
 
 procedure tsocketcomp.disconnect;
@@ -538,9 +589,9 @@ begin
  end; 
 end;
 
-procedure tsocketcomp.setcrypto(const avalue: tcryptio);
+procedure tsocketcomp.setcryptio(const avalue: tcryptio);
 begin
- setlinkedvar(avalue,fcrypto);
+ setlinkedvar(avalue,fcryptio);
 end;
 
 { tcustomurlsocketcomp}
@@ -615,6 +666,19 @@ begin
  end;
 end;
 
+{ tclientsocketpipes }
+
+procedure tclientsocketpipes.doafterconnect;
+begin
+ if fcryptioinfo.handler <> nil then begin
+  ftx.fcrypt:= @fcryptioinfo;
+  frx.fcrypt:= @fcryptioinfo;
+  fcryptioinfo.handler.link(ftx.handle,frx.handle,fcryptioinfo);
+  cryptconnect(fcryptioinfo,frx.timeoutms);
+ end;
+ inherited;
+end;
+
 { tsocketclient }
 
 constructor tsocketclient.create(aowner: tcomponent);
@@ -647,6 +711,8 @@ begin
   raise;
  end;
  try
+  fpipes.onafterconnect:= @doafterconnect;
+  fpipes.setcryptio(fcryptio);
   fpipes.handle:= fhandle;
  except
   internaldisconnect;
@@ -678,6 +744,19 @@ begin
  end;
 end;
 
+{ tserversocketpipes }
+
+procedure tserversocketpipes.doafterconnect;
+begin
+ if fcryptioinfo.handler <> nil then begin
+  ftx.fcrypt:= @fcryptioinfo;
+  frx.fcrypt:= @fcryptioinfo;
+  fcryptioinfo.handler.link(ftx.handle,frx.handle,fcryptioinfo);
+  cryptaccept(fcryptioinfo,frx.timeoutms);
+ end;
+ inherited;
+end;
+
 { tcustomsocketserver }
 
 constructor tcustomsocketserver.create(aowner: tcomponent);
@@ -699,6 +778,19 @@ begin
  end;
 end;
 
+procedure tcustomsocketserver.doafterchconnect(const sender: tcustomsocketpipes);
+begin
+ debugwriteln('afterchconnect');
+ if canevent(tmethod(fonafterchconnect)) then begin
+  application.lock;
+  try
+   fonafterchconnect(self,sender);
+  finally
+   application.unlock;
+  end;
+ end;
+end;
+
 function tcustomsocketserver.execthread(thread: tmsethread): integer;
 var
  addr: socketaddrty;
@@ -706,6 +798,7 @@ var
  bo1: boolean;
  int1,int2: integer;
  err: syserrorty;
+ cryptioinfo: cryptioinfoty;
 begin
  result:= 0;
  addr.kind:= fkind;
@@ -745,13 +838,12 @@ begin
         overloadsleepus:= self.foverloadsleepus;
         oninputavailable:= self.foninputavailable;
         onsocketbroken:= self.fonsocketbroken;
+        onafterconnect:= @self.doafterchconnect;
         if canevent(tmethod(fonbeforechconnect)) then begin
          fonbeforechconnect(self,fpipes[int2]);
         end;
+        setcryptio(fcryptio);
         handle:= conn;
-        if canevent(tmethod(fonafterchconnect)) then begin
-         fonafterchconnect(self,fpipes[int2]);
-        end;
        end;
       end
       else begin
@@ -931,33 +1023,68 @@ begin
  end;
 end;
 
+function tsocketreader.doread(var buf; const acount: integer;
+                   const nonblocked: boolean = false): integer;
+var
+ int1: integer;
+begin
+ if nonblocked then begin
+  int1:= -1;
+ end
+ else begin
+  int1:= ftimeoutms;
+ end;
+ if fcrypt <> nil then begin
+  result:= cryptread(fcrypt^,@buf,acount,int1);
+ end
+ else begin  
+  sys_readsocket(handle,@buf,acount,result,int1);
+ end;
+end;
+
 function tsocketreader.execthread(thread: tmsethread): integer;
 var
  int1: integer;
 begin                          
  fthread:= tsemthread(thread);
- with fthread do begin
-  while not terminated and not (tss_error in fstate) do begin
-   sys_readsocket(handle,@fmsbuf,buflen,int1,ftimeoutms);
-   if not terminated then begin
-    if int1 <= 0 then begin
-     include(fstate,tss_error); //broken socket
-    end
-    else begin
-     fmsbufcount:= int1;
-    end;
-    if (int1 > 0) or (tss_error in fstate) then begin
-     include(fstate,tss_pipeactive);
-     doinputavailable;
-     if not terminated and not (tss_error in fstate) then begin
-      semwait;
+ try
+  if assigned(fonafterconnect) then begin
+   try
+    fonafterconnect;
+   except
+    include(fstate,tss_error);   
+    include(fstate,tss_eof);
+    doinputavailable;
+    raise;
+   end;
+  end;
+  with fthread do begin
+   while not terminated and not (tss_error in fstate) do begin
+    int1:= doread(fmsbuf,sizeof(fmsbuf));
+    if not terminated then begin
+     if int1 <= 0 then begin
+      include(fstate,tss_error); //broken socket
+     end
+     else begin
+      fmsbufcount:= int1;
+     end;
+     if (int1 > 0) or (tss_error in fstate) then begin
+      include(fstate,tss_pipeactive);
+      doinputavailable;
+      if not terminated and not (tss_error in fstate) then begin
+       semwait;
+      end;
      end;
     end;
    end;
+   include(fstate,tss_eof);
   end;
-  include(fstate,tss_eof);
+  result:= 0;
+ finally
+  if assigned(fonthreadterminate) then begin
+   fonthreadterminate;
+  end;
  end;
- result:= 0;
 end;
 
 procedure tsocketreader.sethandle(value: integer);
@@ -981,6 +1108,16 @@ begin
  ftimeoutms:= avalue;
  if handle <> invalidfilehandle then begin
   sys_setsocktxtimeout(handle,avalue);
+ end;
+end;
+
+function tsocketwriter.Write(const Buffer; Count: Longint): Longint;
+begin
+ if fcrypt <> nil then begin
+  result:= cryptwrite(fcrypt^,@buffer,count,ftimeoutms);
+ end
+ else begin
+  result:= inherited write(buffer,count);
  end;
 end;
 

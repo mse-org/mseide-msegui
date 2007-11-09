@@ -660,11 +660,7 @@ begin
  end;
 end;
 
-type
- selectkindty = (seka_read,seka_write,seka_except);
- selectkindsty = set of selectkindty;
-
-function doselect(const handle: integer; const kind: selectkindsty;
+function sys_poll(const handle: integer; const kind: pollkindsty;
                             const timeoutms: longword): syserrorty;
                              //0 -> no timeout
                              //for blocking mode
@@ -676,13 +672,13 @@ begin
  fillchar(info,sizeof(info),0);
  with info do begin
   fd:= handle;
-  if seka_read in kind then begin
+  if poka_read in kind then begin
    events:= events or pollin;
   end;
-  if seka_write in kind then begin
+  if poka_write in kind then begin
    events:= events or pollout;
   end;
-  if seka_except in kind then begin
+  if poka_except in kind then begin
    events:= events or pollpri;
   end;
  end;
@@ -737,7 +733,7 @@ begin
    move(str1[1],po1^.sa_data,length(str1));
    pchar(@po1^.sa_data)[length(str1)]:= #0;
    if connect(handle,pointer(po1),int1) <> 0 then begin
-    result:= doselect(handle,[seka_write],timeoutms);
+    result:= sys_poll(handle,[poka_write],timeoutms);
     if result = sye_ok then begin
      if connect(handle,pointer(po1),int1) <> 0 then begin
       result:= syelasterror;
@@ -751,7 +747,7 @@ begin
     int1:= __libc_sa_len(ad.addr.sa_family);
     po1:= @ad.addr;
     if connect(handle,pointer(po1),int1) <> 0 then begin
-     result:= doselect(handle,[seka_write],timeoutms);
+     result:= sys_poll(handle,[poka_write],timeoutms);
      if result = sye_ok then begin
       if connect(handle,pointer(po1),int1) <> 0 then begin
        result:= syelasterror;
@@ -764,20 +760,34 @@ begin
 end;
 
 function sys_readsocket(const fd: longint; const buf: pointer;
-                        const nbytes: longword;
-                    out readbytes: integer; const timeoutms: integer): syserrorty;
+                    const nbytes: longword; out readbytes: integer;
+                    const timeoutms: integer): syserrorty;
+                    //atimeoutms < 0 -> nonblocked
+
 begin
  result:= sye_ok;
- result:= doselect(fd,[seka_read],timeoutms);
+ if timeoutms >= 0 then begin
+  result:= sys_poll(fd,[poka_read],timeoutms);
+ end;
  if result = sye_ok then begin
   readbytes:= __read(fd,buf^,nbytes);
   if readbytes <= 0 then begin
-   readbytes:= 0;
-   result:= syelasterror;
+   if (timeoutms < 0) then begin
+    if not ((sys_getlasterror = ewouldblock) or 
+             (sys_getlasterror = eagain)) then begin
+     result:= syelasterror;
+    end
+    else begin
+     readbytes:= 0;
+    end;
+   end
+   else begin
+    result:= syelasterror;    
+   end;
   end;
  end
  else begin
-  readbytes:= 0;
+  readbytes:= -1;
  end;
 end;
 
@@ -825,7 +835,7 @@ end;
 function sys_accept(const handle: integer; const nonblock: boolean; out conn: integer;
              out addr: socketaddrty; const timeoutms: integer): syserrorty;
 begin
- result:= doselect(handle,[seka_read],timeoutms);
+ result:= sys_poll(handle,[poka_read],timeoutms);
  if result = sye_ok then begin
   conn:= accept(handle,@addr.platformdata,@addr.size);
   if conn = -1 then begin

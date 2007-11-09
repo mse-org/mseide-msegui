@@ -65,6 +65,9 @@ type
    function execthread(thread: tmsethread): integer; virtual;
    procedure sethandle(value: integer); override;
    procedure setbuflen(const Value: integer); override;
+   function doread(var buf; const acount: integer;
+                  const nonblocked: boolean = false): integer; virtual;
+          //nonblocked -> result = 0 for no data, < = for error
    function readbytes(var buf): integer; override;
    procedure doinputavailable;
   public
@@ -250,6 +253,28 @@ begin
  end;
 end;
 
+function tpipereader.doread(var buf; const acount: integer;
+                             const nonblocked: boolean = false): integer;
+var
+ bo1: boolean;
+begin
+{$ifdef mswindows}
+ result:= fileRead(Handle,buf,acount)
+{$else}
+ bo1:= nonblocked and not (tss_unblocked in fstate);
+ if bo1 then begin
+  setfilenonblock(handle,true);
+ end;
+ result:= sys_read(Handle,@buf,acount);
+ if bo1 then begin
+  if (result < 0) and (sys_getlasterror = EAGAIN) then begin 
+   result:= 0;
+  end;
+  setfilenonblock(handle,false);
+ end;
+{$endif}
+end;
+
 function tpipereader.readbytes(var buf): integer;
  
  procedure getmorebytes;
@@ -258,10 +283,11 @@ function tpipereader.readbytes(var buf): integer;
  begin
   {$ifdef mswindows}
   if peeknamedpipe(handle,nil,0,nil,@int1,nil) and (int1 > 0) then begin
-   if int1 > defaultbuflen then begin
-    int1:= defaultbuflen;
+   if int1 > sizeof(fmsbuf) then begin
+    int1:= sizeof(fmsbuf);
    end;
-   int1:= fileRead(Handle,fmsBuf,int1);
+   int1:= doread(fmsbuf,int1);
+//   int1:= fileRead(Handle,fmsBuf,int1);
    if (int1 < 0) then begin
     fmsbufcount:= 0;
     fstate:= fstate + [tss_error,tss_eof];
@@ -274,16 +300,10 @@ function tpipereader.readbytes(var buf): integer;
    fmsbufcount:= 0;
   end;
   {$else}
-  if not (tss_unblocked in fstate) then begin
-   setfilenonblock(handle,true);
-  end;
-  int1:= sys_read(Handle,@fmsBuf,defaultbuflen);
-  if not (tss_unblocked in fstate) then begin
-   setfilenonblock(handle,false);
-  end;
+  int1:= doread(fmsbuf,sizeof(fmsbuf),true);
   if int1 <= 0 then begin
    fmsbufcount:= 0;
-   if sys_getlasterror <> EAGAIN then begin
+   if int1 < 0 then begin
     fstate:= fstate + [tss_error,tss_eof]; //broken pipe
    end
   end
@@ -341,7 +361,7 @@ begin
   {$else}
    if true then begin
   {$endif}
-    int1:= sys_read(Handle,@fmsBuf, buflen);
+    int1:= sys_read(Handle,@fmsBuf,sizeof(fmsbuf));
     if not terminated then begin
      if {$ifdef mswindows}int1 < 0{$else}(int1 <= 0){$endif} then begin
                       //on win32 int1 can be 0

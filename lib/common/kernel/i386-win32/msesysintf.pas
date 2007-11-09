@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2006 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2007 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -430,6 +430,13 @@ begin
  result:= sye_notimplemented;
 end;
 
+function sys_poll(const handle: integer; const kind: pollkindsty;
+                            const timeoutms: longword): syserrorty;
+                             //0 -> no timeout
+                             //for blocking mode
+begin
+ result:= sye_notimplemented;
+end;
 function sys_opensocket(const kind: socketkindty; const nonblock: boolean;
                           out handle: integer): syserrorty;
 begin
@@ -460,8 +467,8 @@ begin
 end;
 
 function sys_readsocket(const fd: longint; const buf: pointer;
-                        const nbytes: longword;
-            out readbytes: integer; const timeoutms: integer): syserrorty;
+            const nbytes: longword; out readbytes: integer;
+            const timeoutms: integer): syserrorty;
 begin
  result:= sye_notimplemented;
 end;
