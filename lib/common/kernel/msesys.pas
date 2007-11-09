@@ -184,7 +184,7 @@ begin
  {$ifdef FPC}
   result:= loadlibrary(libnames[int1]);
  {$else}
-  libha:= loadlibrary(pansichar(libnames[int1]));
+  result:= loadlibrary(pansichar(libnames[int1]));
  {$endif}
   if result <> 0 then begin
    break;
