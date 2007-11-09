@@ -287,6 +287,30 @@ type
  {$define xlookupkeysym_:=xlookupkeysymval}
  {$define c_class:= _class}
  {$define xtextproperty:= txtextproperty}
+
+{$else}
+ txpointer = pointer;
+   PXIM = ^TXIM;
+   TXIM = record
+     end;
+
+   PXIC = ^TXIC;
+   TXIC = record
+     end;
+   TXIMProc = procedure (para1:TXIM; para2:TXPointer; para3:TXPointer);cdecl;
+
+   TXICProc = function (para1:TXIC; para2:TXPointer; para3:TXPointer):TBool;cdecl;
+   PXIMCallback = ^TXIMCallback;
+   TXIMCallback = record
+        client_data : TXPointer;
+        callback : TXIMProc;
+     end;
+
+   PXICCallback = ^TXICCallback;
+   TXICCallback = record
+        client_data : TXPointer;
+        callback : TXICProc;
+     end;
 {$endif}
 
 const
@@ -1939,7 +1963,11 @@ var
  window1: twindow1;
 begin
  result:= appic;
+ {$ifdef FPC}
  if application.findwindow(awindow,window1) then begin
+ {$else}
+ if application.findwindow(awindow,twindow(window1)) then begin
+ {$endif}
   with x11windowty(window1.fwindow.platformdata) do begin
    if ic <> nil then begin
     result:= ic;
@@ -5220,7 +5248,11 @@ begin
   end;
   keypress: begin
    with xev.xkey do begin
+    {$ifdef FPC}
     aic:= getic(window);
+    {$else}
+    aic:= getic(xwindow);
+    {$endif}
     lasteventtime:= time;
     setlength(buffer,20);
     int1:= xutf8lookupstring(aic,@xev.xkey,@buffer[1],length(buffer),@akey,@icstatus);

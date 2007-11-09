@@ -162,6 +162,18 @@ type
         __tm_zone : Pchar;
      end;
 
+  Paddrinfo = ^addrinfo;
+  addrinfo = record
+       ai_flags : longint;
+       ai_family : longint;
+       ai_socktype : longint;
+       ai_protocol : longint;
+       ai_addrlen : socklen_t;
+       ai_addr : Psockaddr;
+       ai_canonname : Pchar;
+       ai_next : Paddrinfo;
+    end;
+
  const
   threadslib = libpthreadmodulename;
   clib = libcmodulename;
@@ -728,14 +740,22 @@ begin
   if kind = sok_local then begin
    str1:= tosysfilepath(url);
    int1:= sizeof(locsockaddrty)+length(str1)+1;
-   po1:= getmem(int1);
+   getmem(po1,int1);
    po1^.sa_family:= af_local;
    move(str1[1],po1^.sa_data,length(str1));
    pchar(@po1^.sa_data)[length(str1)]:= #0;
+   {$ifdef FPC}
    if connect(handle,pointer(po1),int1) <> 0 then begin
+   {$else}
+   if connect(handle,psockaddr(po1)^,int1) <> 0 then begin
+   {$endif}
     result:= sys_poll(handle,[poka_write],timeoutms);
     if result = sye_ok then begin
+    {$ifdef FPC}
      if connect(handle,pointer(po1),int1) <> 0 then begin
+    {$else}
+     if connect(handle,psockaddr(po1)^,int1) <> 0 then begin
+    {$endif}
       result:= syelasterror;
      end;
     end;
@@ -746,10 +766,18 @@ begin
    with linuxsockaddrty(platformdata) do begin
     int1:= __libc_sa_len(ad.addr.sa_family);
     po1:= @ad.addr;
+    {$ifdef FPC}
     if connect(handle,pointer(po1),int1) <> 0 then begin
+    {$else}
+    if connect(handle,psockaddr(po1)^,int1) <> 0 then begin
+    {$endif};
      result:= sys_poll(handle,[poka_write],timeoutms);
      if result = sye_ok then begin
+      {$ifdef FPC}
       if connect(handle,pointer(po1),int1) <> 0 then begin
+      {$else}
+      if connect(handle,psockaddr(po1)^,int1) <> 0 then begin
+      {$endif}
        result:= syelasterror;
       end;
      end;
@@ -802,14 +830,22 @@ begin
   if kind = sok_local then begin
    str1:= tosysfilepath(url);
    int1:= sizeof(locsockaddrty)+length(str1)+1;
-   po1:= getmem(int1);
+   getmem(po1,int1);
    po1^.sa_family:= af_local;
    move(str1[1],po1^.sa_data,length(str1));
    pchar(@po1^.sa_data)[length(str1)]:= #0;
+   {$ifdef FPC}
    int2:= bind(handle,pointer(po1),int1);
+   {$else}
+   int2:= bind(handle,psockaddr(po1)^,int1);
+   {$endif}
    if (int2 <> 0) and (sys_getlasterror = EADDRINUSE) then begin
     libc.unlink(pchar(str1));
+    {$ifdef FPC}
     int2:= bind(handle,pointer(po1),int1);
+    {$else}
+    int2:= bind(handle,psockaddr(po1)^,int1);
+    {$endif}
    end;
    if int2 <> 0 then begin
     result:= syelasterror;
@@ -894,9 +930,13 @@ begin
     sok_inet6: begin
      ai_family:= af_inet6;
     end;
-   end;  
+   end;
   end;
+  {$ifdef FPC}
   int1:= getaddrinfo(pchar(str1),nil,@info1,@po1);
+  {$else}
+  int1:= getaddrinfo(pchar(str1),nil,@info1,paddressinfo(po1));
+  {$endif}
   if int1 <> 0 then begin
    mselasterror:= int1;
    result:= sye_sockaddr;
@@ -915,7 +955,11 @@ begin
      end;
     end;
    end;
+   {$ifdef FPC}
    freeaddrinfo(po1);
+   {$else}
+   freeaddrinfo(paddressinfo(po1));
+   {$endif}
   end;
  end;
 end;
@@ -1706,7 +1750,11 @@ var
 begin
  fillchar(info,sizeof(info),0);
  with info do begin
+ {$ifdef FPC}
   sa_handler:= @sigdummy;
+ {$else}
+  __sigaction_handler:= @sigdummy;
+ {$endif}
   sa_flags:= sa_restart;
  end;
  sigaction(sigio,@info,nil);
