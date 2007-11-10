@@ -197,25 +197,31 @@ type
    procedure answered;
    function wait(const awaitus: integer): boolean;
  end;
+
+ tiosynchronizer = class;
+ datasynchronizeprocty = procedure(const sender: tiosynchronizer; var adata: string);
  
  tiosynchronizer = class
   private
-   fwaitingclients: tintegeravltree;
+   fwaitingclients: tintegeravltree;   
+   fonsynchronize: datasynchronizeprocty;
   protected
-   procedure datareceived(var adata: string); virtual; abstract;
+   procedure datareceived(var adata: string);
    procedure answerreceived(const asequence: sequencety);
    function waitforanswer(const asequence: sequencety; 
                    const waitus: integer): boolean; //false on timeout
   public
    constructor create;
    destructor destroy; override;
+   property onsynchronize: datasynchronizeprocty read fonsynchronize 
+                                                          write fonsynchronize;
  end;
- 
+{ 
  tifisynchronizer = class(tiosynchronizer)
   protected
    procedure datareceived(var adata: string); override;
  end;
- 
+ }
  tcustomiochannel = class;
  iochanneleventty = procedure(const sender: tcustomiochannel) of object;
   
@@ -243,6 +249,7 @@ type
    procedure connect;
    procedure disconnect;
   public
+   constructor create(aowner: tcomponent); override;
    destructor destroy; override;
    function checkconnection: boolean;
    procedure senddata(const adata: ansistring);   
@@ -292,38 +299,39 @@ type
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
-   property serverapp: string read fserverapp write fserverapp;
-            //stdin, stdout if ''
   published
    property active;
+   property serverapp: string read fserverapp write fserverapp;
+            //stdin, stdout if ''
  end;
- 
+{ 
  tpipeifichannel = class(tpipeiochannel)
   public
    constructor create(aowner: tcomponent); override;
   published
    property serverapp;
  end;
-
- tsocketpipeifichannel = class(tpipeifichannel)
+}
+ tsocketpipeiochannel = class(tpipeiochannel)
   public
    constructor create(aowner: tcomponent); override;
  end;
- 
+{ 
  tifisocketclientpipes = class(tclientsocketpipes)
   published
    property overloadsleepus;
  end;
- 
+} 
+{
  tifisocketclient = class(tsocketclient)
   public
    constructor create(aowner: tcomponent); override;
  end;
- 
+}
  tsocketclientiochannel = class(tstuffediochannel)
   private
-   fsocket: tifisocketclient;
-   procedure setsocket(const avalue: tifisocketclient);
+   fsocket: tsocketclient;
+   procedure setsocket(const avalue: tsocketclient);
   protected
    procedure internalconnect; override;
    procedure internaldisconnect; override;   
@@ -335,7 +343,7 @@ type
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
   published
-   property socket: tifisocketclient read fsocket write setsocket;
+   property socket: tsocketclient read fsocket write setsocket;
  end;
 
  tsocketserveriochannel = class(tstuffediochannel)
@@ -355,18 +363,39 @@ type
    destructor destroy; override;
    procedure link(const apipes: tcustomsocketpipes);
  end;
- 
+{
+ tsocketserverstdiochannel = class(tsocketserveriochannel)
+  public
+   constructor create(aowner: tcomponent); override;
+ end;
+}  
+{
  tsocketclientifichannel = class(tsocketclientiochannel)
   public
    constructor create(aowner: tcomponent); override;
  end;
- 
+}
+{
  tsocketserverifichannel = class(tsocketserveriochannel)
   public
    constructor create(aowner: tcomponent); override;
  end;
-   
-
+}
+{   
+ tsocketserverstdifichannel = class(tsocketserverstdiochannel)
+  public
+   constructor create(aowner: tcomponent); override;
+ end;
+}
+ tifiiolinkcomponent = class(tmsecomponent)
+  private
+   procedure setchannel(const avalue: tcustomiochannel);
+  protected
+   fchannel: tcustomiochannel;
+  published
+   property channel: tcustomiochannel read fchannel write setchannel;
+ end;
+ 
 procedure initifirec(out arec: string; const akind: ifireckindty; 
       const asequence: sequencety; const datalength: integer; out datapo: pchar);
 procedure inititemheader(const atag: integer; const aname: string; 
@@ -630,7 +659,24 @@ begin
  result:= length(dest) + 1;
 end;
 
+procedure ifidatasynchronize(const sender: tiosynchronizer; var adata: string);
+begin
+ if length(adata) >= sizeof(ifiheaderty) then begin
+  with pifiheaderty(adata)^ do begin
+   if answersequence <> 0 then begin
+    sender.answerreceived(answersequence);
+   end;
+  end;
+ end;
+end;
+
 { tcustomiochannel }
+
+constructor tcustomiochannel.create(aowner: tcomponent);
+begin
+ fsynchronizer:= tiosynchronizer.create;
+ inherited;
+end;
 
 destructor tcustomiochannel.destroy;
 begin
@@ -669,9 +715,9 @@ procedure tcustomiochannel.datareceived(const adata: ansistring);
 begin
  frxdata:= adata;
  sendchangeevent(oe_dataready);
- if fsynchronizer <> nil then begin
-  fsynchronizer.datareceived(frxdata);
- end;
+// if fsynchronizer <> nil then begin
+ fsynchronizer.datareceived(frxdata);
+// end;
 end;
 
 procedure tcustomiochannel.setactive(const avalue: boolean);
@@ -700,10 +746,10 @@ end;
 function tcustomiochannel.waitforanswer(const asequence: sequencety;
                const atimeoutus: integer): boolean;
 begin
- result:= false;
- if fsynchronizer <> nil then begin
-  result:= fsynchronizer.waitforanswer(asequence,atimeoutus);
- end;
+// result:= false;
+// if fsynchronizer <> nil then begin
+ result:= fsynchronizer.waitforanswer(asequence,atimeoutus);
+// end;
 end;
 
 procedure tcustomiochannel.dobeforeconnect;
@@ -920,16 +966,16 @@ begin
 end;
 
 { tpipeifichannel }
-
+{
 constructor tpipeifichannel.create(aowner: tcomponent);
 begin
  fsynchronizer:= tifisynchronizer.create;
  inherited;
 end;
+}
+{ tsocketpipeiochannel }
 
-{ tsocketpipeifichannel }
-
-constructor tsocketpipeifichannel.create(aowner: tcomponent);
+constructor tsocketpipeiochannel.create(aowner: tcomponent);
 begin
  if freader = nil then begin
   freader:= tsocketreader.create;
@@ -980,16 +1026,10 @@ begin
  client1.free;
 end;
 
-{ tifisynchronizer }
-
-procedure tifisynchronizer.datareceived(var adata: string);
+procedure tiosynchronizer.datareceived(var adata: string);
 begin
- if length(adata) >= sizeof(ifiheaderty) then begin
-  with pifiheaderty(adata)^ do begin
-   if answersequence <> 0 then begin
-    answerreceived(answersequence);
-   end;
-  end;
+ if assigned(fonsynchronize) then begin
+  fonsynchronize(self,adata);
  end;
 end;
 
@@ -1017,18 +1057,18 @@ begin
 end;
 
 { tifisocketclient }
-
+{
 constructor tifisocketclient.create(aowner: tcomponent);
 begin
  fpipes:= tifisocketclientpipes.create(self);
  inherited;
 end;
-
+}
 { tsocketclientiochannel }
 
 constructor tsocketclientiochannel.create(aowner: tcomponent);
 begin
- fsocket:= tifisocketclient.create(nil);
+ fsocket:= tsocketclient.create(nil);
  fsocket.setsubcomponent(true);
  fsocket.pipes.rx.oninputavailable:= @doinputavailable;
  fsocket.pipes.onbeforedisconnect:= @dobeforedisconnect;
@@ -1066,7 +1106,7 @@ begin
  addata(sender.readdatastring);
 end;
 
-procedure tsocketclientiochannel.setsocket(const avalue: tifisocketclient);
+procedure tsocketclientiochannel.setsocket(const avalue: tsocketclient);
 begin
  fsocket.assign(avalue);
 end;
@@ -1077,13 +1117,13 @@ begin
 end;
 
 { tsocketclientifichannel }
-
+{
 constructor tsocketclientifichannel.create(aowner: tcomponent);
 begin
  fsynchronizer:= tifisynchronizer.create;
  inherited;
 end;
-
+}
 { tsocketserveriochannel }
 
 destructor tsocketserveriochannel.destroy;
@@ -1156,12 +1196,28 @@ begin
  result:= false;
 end;
 
-{ tsocketserverifichannel }
+{ tifiiolinkcomponent }
 
+procedure tifiiolinkcomponent.setchannel(const avalue: tcustomiochannel);
+begin
+ setlinkedvar(avalue,fchannel);
+ avalue.fsynchronizer.onsynchronize:= @ifidatasynchronize;
+end;
+
+{ tsocketserverifichannel }
+{
 constructor tsocketserverifichannel.create(aowner: tcomponent);
 begin
  fsynchronizer:= tifisynchronizer.create;
  inherited;
 end;
-
+}
+{ tsocketserverstdifichannel }
+{
+constructor tsocketserverstdifichannel.create(aowner: tcomponent);
+begin
+ fsynchronizer:= tifisynchronizer.create;
+ inherited;
+end;
+}
 end.

@@ -208,18 +208,17 @@ type
 const
  defaultformlinkoptions = [flo_useclientchannel];
 type 
- tcustommodulelink = class(tmsecomponent,iifiserver)
+
+ tcustommodulelink = class(tifiiolinkcomponent,iifiserver)
   private
    factionsrx: trxlinkactions;
    factionstx: ttxlinkactions;
-   fchannel: tcustomiochannel;
    fmodulestx: ttxlinkmodules;
    fmodulesrx: trxlinkmodules;
    foptions: formlinkoptionsty;
    flinkname: string;
    procedure setactionsrx(const avalue: trxlinkactions);
    procedure setactionstx(const avalue: ttxlinkactions);
-   procedure setchannel(const avalue: tcustomiochannel);
    procedure setmodulestx(const avalue: ttxlinkmodules);
    procedure setmodulesrx(const avalue: trxlinkmodules);
    procedure setvalues(const avalue: tvaluelinks);
@@ -254,7 +253,6 @@ type
    property modulesrx: trxlinkmodules read fmodulesrx write setmodulesrx;
    property modulestx: ttxlinkmodules read fmodulestx write setmodulestx;
    property values: tvaluelinks read fvalues write setvalues;
-   property channel: tcustomiochannel read fchannel write setchannel;
    property options: formlinkoptionsty read foptions write foptions
                                       default defaultformlinkoptions;
  end;
@@ -753,11 +751,6 @@ begin
  if fchannel <> nil then begin
   fchannel.senddata(encodeactionfired(sender.tag,sender.name));
  end;
-end;
-
-procedure tcustommodulelink.setchannel(const avalue: tcustomiochannel);
-begin
- setlinkedvar(avalue,fchannel);
 end;
 
 function tcustommodulelink.encodeactionfired(const atag: integer;

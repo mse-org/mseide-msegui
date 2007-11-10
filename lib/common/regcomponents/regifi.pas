@@ -49,9 +49,11 @@ type
 procedure register;
 begin
  registercomponents('Ifi',[tmodulelink,tformlink,
-                     tpipeifichannel,tsocketpipeifichannel,
-                     tsocketclientifichannel,tsocketserverifichannel,
+                     {tpipeifichannel,tsocketpipeifichannel,
+                     tsocketclientifichannel,tsocketserverifichannel,}
                      ttxdataset,trxdataset,
+                     tpipeiochannel,tsocketpipeiochannel,
+                     tsocketclientiochannel,tsocketserveriochannel,
                      tsocketstdio,tsocketclient,
                      tsocketserver,tsocketserverstdio,
                      tssl]); 
