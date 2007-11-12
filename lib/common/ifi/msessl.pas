@@ -45,11 +45,11 @@ type
    class procedure internalthreadterminate; override;
    function waitforio(const aerror: integer; var ainfo: cryptioinfoty; 
               const atimeoutms: integer; const resultpo: pinteger = nil): boolean;
-   procedure connect(var ainfo: cryptioinfoty; const atimeoutms: integer);  override;
-   procedure accept(var ainfo: cryptioinfoty; const atimeoutms: integer);  override;
-   function write(var ainfo: cryptioinfoty; const buffer: pointer;
+   class procedure connect(var ainfo: cryptioinfoty; const atimeoutms: integer);  override;
+   class procedure accept(var ainfo: cryptioinfoty; const atimeoutms: integer);  override;
+   class function write(var ainfo: cryptioinfoty; const buffer: pointer;
            const count: integer; const atimeoutms: integer): integer; override;
-   function read(var ainfo: cryptioinfoty; const buffer: pointer; const count: integer; 
+   class function read(var ainfo: cryptioinfoty; const buffer: pointer; const count: integer; 
                   const atimeoutms: integer): integer; override;
   public
    constructor create(aowner: tcomponent); override;
@@ -230,7 +230,7 @@ begin
  end;
 end;
 
-procedure tssl.connect(var ainfo: cryptioinfoty; const atimeoutms: integer);
+class procedure tssl.connect(var ainfo: cryptioinfoty; const atimeoutms: integer);
 var
  int1,int2: integer;
  err1: syserrorty;
@@ -242,7 +242,7 @@ begin
  end;
 end;
 
-procedure tssl.accept(var ainfo: cryptioinfoty; const atimeoutms: integer);
+class procedure tssl.accept(var ainfo: cryptioinfoty; const atimeoutms: integer);
 var
  int1,int2: integer;
  err1: syserrorty;
@@ -259,7 +259,7 @@ begin
  fcipherlist.assign(avalue);
 end;
 
-function tssl.write(var ainfo: cryptioinfoty; const buffer: pointer;
+class function tssl.write(var ainfo: cryptioinfoty; const buffer: pointer;
                const count: integer; const atimeoutms: integer): integer;
 begin
  with ainfo,sslinfoty(cryptdata) do begin
@@ -273,7 +273,7 @@ begin
  end;
 end;
 
-function tssl.read(var ainfo: cryptioinfoty; const buffer: pointer;
+class function tssl.read(var ainfo: cryptioinfoty; const buffer: pointer;
                const count: integer; const atimeoutms: integer): integer;
 begin
  result:= 0;

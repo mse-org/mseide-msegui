@@ -150,7 +150,7 @@ threadvar
 
 implementation
 uses
- Classes,msestreaming,msesysintf,msedatalist,sysutils,mseglob
+ Classes,msestreaming,msesysintf,msedatalist,sysutils,mseglob,msesysutils
           {$ifndef FPC}{$ifdef mswindows},windows{$endif}{$endif};
 
 procedure getprocaddresses(const lib: tlibhandle; const anames: array of string; 
@@ -313,6 +313,37 @@ function esys.geterror: syserrorty;
 begin
  result:= syserrorty(ferror);
 end;
+{$ifdef FPC}
 
+ {$ifopt S+}
+ {$define STACKCHECK_WAS_ON}
+ {$S-}
+ {$endif OPT S }
 
+Procedure CatchUnhandledExcept (Obj : TObject; Addr: Pointer; FrameCount: Longint; Frames: PPointer);
+Var
+  Message : String;
+  i : longint;
+begin
+  debugWriteln('An unhandled exception occurred at $'+
+              HexStr(Ptrint(Addr),sizeof(PtrInt)*2)+' :');
+  if Obj is exception then
+   begin
+     Message:=Exception(Obj).ClassName+' : '+Exception(Obj).Message;
+     debugWriteln(Message);
+   end
+  else
+   debugWriteln('Exception object '+Obj.ClassName+' is not of class Exception.');
+  debugWriteln(BackTraceStrFunc(Addr));
+  if (FrameCount>0) then
+    begin
+      for i:=0 to FrameCount-1 do
+        debugWriteln(BackTraceStrFunc(Frames[i]));
+    end;
+  debugWriteln('');
+end;
+
+initialization
+ exceptproc:= @catchunhandledexcept;
+{$endif} 
 end.

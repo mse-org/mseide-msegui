@@ -52,7 +52,7 @@ begin
                      {tpipeifichannel,tsocketpipeifichannel,
                      tsocketclientifichannel,tsocketserverifichannel,}
                      ttxdataset,trxdataset,
-                     tpipeiochannel,tsocketpipeiochannel,
+                     tpipeiochannel,tsocketstdiochannel,
                      tsocketclientiochannel,tsocketserveriochannel,
                      tsocketstdio,tsocketclient,
                      tsocketserver,tsocketserverstdio,

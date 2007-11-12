@@ -4,7 +4,7 @@ interface
 uses
  classes,mseapplication,mseclasses,msearrayprops,mseact,msestrings,msetypes,mseevent,
  mseglob,msestream,msepipestream,{msegui,}mseifiglob,typinfo,msebintree,
- msesys,msesockets;
+ msesys,msesockets,msecryptio;
 type
  
  sequencety = longword;
@@ -245,7 +245,7 @@ type
    procedure internalsenddata(const adata: ansistring); virtual; abstract;
    procedure loaded; override;
    procedure dobeforeconnect;
-   procedure doafterconnect;
+   procedure doafterconnect; virtual;
    procedure connect;
    procedure disconnect;
   public
@@ -284,10 +284,10 @@ type
    procedure addata(const adata: string);
  end;
   
- tpipeiochannel = class(tstuffediochannel)
+ tcustompipeiochannel = class(tstuffediochannel)
   private
-   freader: tpipereader;
-   fwriter: tpipewriter;
+   frx: tpipereader;
+   ftx: tpipewriter;
    fserverapp: string;
    fprochandle: integer;
   protected
@@ -296,14 +296,38 @@ type
    function commio: boolean; override;
    procedure internalsenddata(const adata: ansistring); override;
    procedure doinputavailable(const sender: tpipereader);
+   procedure dopipebroken(const sender: tpipereader);
+   procedure doasyncevent(var atag: integer); override;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
   published
    property active;
+ end;
+
+ tpipeiochannel = class(tcustompipeiochannel)
+  published
    property serverapp: string read fserverapp write fserverapp;
             //stdin, stdout if ''
  end;
+ 
+ tsocketstdiochannel = class(tcustompipeiochannel)
+  private
+   fcryptio: tcryptio;
+   fcryptioinfo: cryptioinfoty;
+   procedure setcryptio(const avalue: tcryptio);
+  protected
+   procedure internalconnect; override;
+//   procedure doafterconnect;
+   procedure internaldisconnect; override;
+  public
+   constructor create(aowner: tcomponent); override;
+  published
+   property cryptio: tcryptio read fcryptio write setcryptio;
+   property cryptiokindt: cryptiokindty read fcryptioinfo.kind
+                               write fcryptioinfo.kind;
+ end;
+
 { 
  tpipeifichannel = class(tpipeiochannel)
   public
@@ -312,10 +336,6 @@ type
    property serverapp;
  end;
 }
- tsocketpipeiochannel = class(tpipeiochannel)
-  public
-   constructor create(aowner: tcomponent); override;
- end;
 { 
  tifisocketclientpipes = class(tclientsocketpipes)
   published
@@ -346,7 +366,7 @@ type
    property socket: tsocketclient read fsocket write setsocket;
  end;
 
- tsocketserveriochannel = class(tstuffediochannel)
+ tcustomsocketserveriochannel = class(tstuffediochannel)
   private
    fpipes: tcustomsocketpipes;
    funlinking: integer;
@@ -361,8 +381,13 @@ type
    function canconnect: boolean; override;
   public
    destructor destroy; override;
+ end;
+
+ tsocketserveriochannel = class(tcustomsocketserveriochannel)
+  public
    procedure link(const apipes: tcustomsocketpipes);
  end;
+ 
 {
  tsocketserverstdiochannel = class(tsocketserveriochannel)
   public
@@ -445,7 +470,10 @@ const
 implementation
 uses
  sysutils,msedatalist,mseprocutils,msesysintf,{mseforms,}msetmpmodules,msesysutils;
-
+type
+ tsocketreader1 = class(tsocketreader);
+ tsocketwriter1 = class(tsocketwriter);
+ 
 const
  headersizes: array[ifireckindty] of integer = (
   sizeof(ifiheaderty),                           //ik_none
@@ -670,6 +698,21 @@ begin
  end;
 end;
 
+procedure inititemheader(const atag: integer; const aname: string; 
+       out arec: string; const akind: ifireckindty;  const asequence: sequencety;
+       const datasize: integer; out datapo: pchar);
+var
+ po1: pchar; 
+begin
+ initifirec(arec,akind,asequence,datasize+length(aname),po1);
+ with pitemheaderty(po1)^ do begin
+  tag:= atag;
+  po1:= @name;
+ end;
+ inc(po1,stringtoifiname(aname,pifinamety(po1)));
+ datapo:= po1;
+end;
+
 { tcustomiochannel }
 
 constructor tcustomiochannel.create(aowner: tcomponent);
@@ -884,47 +927,49 @@ begin
  setlength(result,po2-pointer(result));
 end;
 
-{ tpipeiochannel }
+{ tcustompipeiochannel }
 
-constructor tpipeiochannel.create(aowner: tcomponent);
+constructor tcustompipeiochannel.create(aowner: tcomponent);
 begin
- if freader = nil then begin
-  freader:= tpipereader.create;
+ if frx = nil then begin
+  frx:= tpipereader.create;
  end;
- if fwriter = nil then begin
-  fwriter:= tpipewriter.create;
+ if ftx = nil then begin
+  ftx:= tpipewriter.create;
  end;
  fprochandle:= invalidprochandle;
- freader.oninputavailable:= @doinputavailable;
+ frx.oninputavailable:= @doinputavailable;
+ frx.onpipebroken:= @dopipebroken;
  inherited;
 end;
 
-destructor tpipeiochannel.destroy;
+destructor tcustompipeiochannel.destroy;
 begin
  inherited;
- fwriter.free;
- freader.free;
+ ftx.free;
+ frx.free;
 end;
 
-procedure tpipeiochannel.internalconnect;
+procedure tcustompipeiochannel.internalconnect;
 begin
  resetrxbuffer;
  if fserverapp <> '' then begin
-  fprochandle:= execmse2(fserverapp,fwriter,freader);
+  fprochandle:= execmse2(fserverapp,ftx,frx);
  end
  else begin
-  freader.handle:= sys_stdin;
-  fwriter.handle:= sys_stdout;
+debugwriteln('internalconnect');
+  ftx.handle:= sys_stdout;
+  frx.handle:= sys_stdin;
  end;
 end;
 
-procedure tpipeiochannel.internaldisconnect;
+procedure tcustompipeiochannel.internaldisconnect;
 var
  int1: integer;
 begin
- freader.terminate; 
- fwriter.close;
- freader.close;
+ frx.terminate; 
+ ftx.close;
+ frx.close;
  fbuffer:= '';
  if fprochandle <> invalidprochandle then begin
   int1:= fprochandle;
@@ -933,36 +978,35 @@ begin
  end; 
 end;
 
-function tpipeiochannel.commio: boolean;
+function tcustompipeiochannel.commio: boolean;
 begin
  result:= ((fserverapp = '') or (fprochandle <> invalidprochandle))
-                     and freader.active;
+                     and frx.active;
 end;
 
-procedure tpipeiochannel.internalsenddata(const adata: ansistring);
+procedure tcustompipeiochannel.internalsenddata(const adata: ansistring);
 begin
- fwriter.writestr(stx+stuff(adata)+etx);
+ ftx.writestr(stx+stuff(adata)+etx);
 end;
 
-procedure tpipeiochannel.doinputavailable(const sender: tpipereader);
+procedure tcustompipeiochannel.doinputavailable(const sender: tpipereader);
 begin
  addata(sender.readdatastring);
 end;
 
-
-procedure inititemheader(const atag: integer; const aname: string; 
-       out arec: string; const akind: ifireckindty;  const asequence: sequencety;
-       const datasize: integer; out datapo: pchar);
-var
- po1: pchar; 
+procedure tcustompipeiochannel.dopipebroken(const sender: tpipereader);
 begin
- initifirec(arec,akind,asequence,datasize+length(aname),po1);
- with pitemheaderty(po1)^ do begin
-  tag:= atag;
-  po1:= @name;
- end;
- inc(po1,stringtoifiname(aname,pifinamety(po1)));
- datapo:= po1;
+ asyncevent(closepipestag);
+end;
+
+procedure tcustompipeiochannel.doasyncevent(var atag: integer);
+begin
+ if atag = closepipestag then begin
+  disconnect;
+ end
+ else begin
+  inherited;
+ end; 
 end;
 
 { tpipeifichannel }
@@ -974,7 +1018,7 @@ begin
 end;
 }
 { tsocketpipeiochannel }
-
+{
 constructor tsocketpipeiochannel.create(aowner: tcomponent);
 begin
  if freader = nil then begin
@@ -985,7 +1029,7 @@ begin
  end;
  inherited;
 end;
-
+}
 { tiosynchronizer }
 
 constructor tiosynchronizer.create;
@@ -1124,15 +1168,15 @@ begin
  inherited;
 end;
 }
-{ tsocketserveriochannel }
+{ tcustomsocketserveriochannel }
 
-destructor tsocketserveriochannel.destroy;
+destructor tcustomsocketserveriochannel.destroy;
 begin
  unlink;
  inherited;
 end;
 
-procedure tsocketserveriochannel.unlink;
+procedure tcustomsocketserveriochannel.unlink;
 begin
  if funlinking = 0 then begin
   inc(funlinking);
@@ -1148,6 +1192,46 @@ begin
  end;
 end;
 
+procedure tcustomsocketserveriochannel.internalconnect;
+begin
+ raise exception.create('Not implemented.');
+end;
+
+procedure tcustomsocketserveriochannel.internaldisconnect;
+begin
+ if fpipes <> nil then begin
+  fpipes.close;
+ end;
+end;
+
+function tcustomsocketserveriochannel.commio: boolean;
+begin
+ result:= (fpipes <> nil) and fpipes.rx.active;
+end;
+
+procedure tcustomsocketserveriochannel.internalsenddata(const adata: ansistring);
+begin
+ fpipes.tx.writestr(stx+stuff(adata)+etx);
+end;
+
+procedure tcustomsocketserveriochannel.doinputavailable(const sender: tpipereader);
+begin
+ addata(sender.readdatastring);
+end;
+
+procedure tcustomsocketserveriochannel.dobeforedisconnect(const sender: tcustomsocketpipes);
+begin
+ disconnect;
+ unlink;
+end;
+
+function tcustomsocketserveriochannel.canconnect: boolean;
+begin
+ result:= false;
+end;
+
+{ tsocketserveriochannel }
+
 procedure tsocketserveriochannel.link(const apipes: tcustomsocketpipes);
 begin
  unlink;
@@ -1156,44 +1240,6 @@ begin
  fpipes.onbeforedisconnect:= @dobeforedisconnect;
  fpipes.rx.oninputavailable:= @doinputavailable;
  doafterconnect; 
-end;
-
-procedure tsocketserveriochannel.internalconnect;
-begin
- raise exception.create('Not implemented.');
-end;
-
-procedure tsocketserveriochannel.internaldisconnect;
-begin
- if fpipes <> nil then begin
-  fpipes.close;
- end;
-end;
-
-function tsocketserveriochannel.commio: boolean;
-begin
- result:= (fpipes <> nil) and fpipes.rx.active;
-end;
-
-procedure tsocketserveriochannel.internalsenddata(const adata: ansistring);
-begin
- fpipes.tx.writestr(stx+stuff(adata)+etx);
-end;
-
-procedure tsocketserveriochannel.doinputavailable(const sender: tpipereader);
-begin
- addata(sender.readdatastring);
-end;
-
-procedure tsocketserveriochannel.dobeforedisconnect(const sender: tcustomsocketpipes);
-begin
- disconnect;
- unlink;
-end;
-
-function tsocketserveriochannel.canconnect: boolean;
-begin
- result:= false;
 end;
 
 { tifiiolinkcomponent }
@@ -1220,4 +1266,39 @@ begin
  inherited;
 end;
 }
+{ tsocketstdiochannel }
+
+constructor tsocketstdiochannel.create(aowner: tcomponent);
+begin
+ frx:= tsocketreader.create;
+ tsocketreader1(frx).fonafterconnect:= @doafterconnect;
+ ftx:= tsocketwriter.create;
+ inherited;
+end;
+
+procedure tsocketstdiochannel.setcryptio(const avalue: tcryptio);
+begin
+ setlinkedvar(avalue,fcryptio);
+end;
+{
+procedure tsocketstdiochannel.doafterconnect;
+begin
+ fcryptioinfo.handler:= fcryptio;
+ connectcryptio(tsocketwriter(ftx),tsocketreader(frx),fcryptioinfo);
+end;
+}
+procedure tsocketstdiochannel.internalconnect;
+begin
+// fcryptioinfo.handler:= fcryptio;
+ connectcryptio(fcryptio,tsocketwriter(ftx),tsocketreader(frx),fcryptioinfo,
+                           sys_stdout,sys_stdin);
+ inherited;
+end;
+
+procedure tsocketstdiochannel.internaldisconnect;
+begin
+ inherited;
+ cryptunlink(fcryptioinfo);
+end;
+
 end.

@@ -138,10 +138,6 @@ begin
  end;
 end;
 
-procedure tnoguiapplication.doafterrun;
-begin
-end;
-
 procedure tnoguiapplication.initialize;
 begin
  nogui_init(@feventsem); 
@@ -152,6 +148,13 @@ procedure tnoguiapplication.deinitialize;
 begin
  msetimer.deinit;
  nogui_deinit; 
+end;
+
+procedure tnoguiapplication.doafterrun;
+begin
+ while componentcount > 0 do begin
+  components[0].free;  //destroy loaded modules
+ end;
 end;
 
 initialization

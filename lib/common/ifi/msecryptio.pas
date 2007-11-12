@@ -20,9 +20,11 @@ type
 
  tcryptio = class; 
  cryptioclassty = class of tcryptio;
- 
+ cryptiokindty = (cyk_none,cyk_server,cyk_client);
+  
  cryptioinfoty = record
-  handler: tcryptio;
+//  handler: tcryptio;
+  kind: cryptiokindty;
   classtype: cryptioclassty;
   rxfd: integer;
   txfd: integer;
@@ -30,28 +32,30 @@ type
  end;
  pcryptioinfoty = ^cryptioinfoty;
 
- connectionkiundty = (cok_server,cok_client); 
+ connectionkindty = (cok_server,cok_client); 
  
  tcryptio = class(tmsecomponent)
   protected
    class procedure internalunlink(var ainfo: cryptioinfoty); virtual;
    class procedure internalthreadterminate; virtual;
-   procedure connect(var ainfo: cryptioinfoty; 
+   class procedure connect(var ainfo: cryptioinfoty; 
                           const atimeoutms: integer);  virtual; abstract;
-   procedure accept(var ainfo: cryptioinfoty; 
+   class procedure accept(var ainfo: cryptioinfoty; 
                           const atimeoutms: integer);  virtual; abstract;
-   function write(var ainfo: cryptioinfoty; const buffer: pointer; 
+   class function write(var ainfo: cryptioinfoty; const buffer: pointer; 
                   const count: integer; 
                   const atimeoutms: integer): integer; virtual; abstract;
-   function read(var ainfo: cryptioinfoty; const buffer: pointer;
+   class function read(var ainfo: cryptioinfoty; const buffer: pointer;
                   const count: integer; 
                   const atimeoutms: integer): integer; virtual; abstract;
                     //atimeoutms < 0 -> nonblocked
  public
    procedure link(const atxfd,arxfd: integer; 
                           out ainfo: cryptioinfoty); virtual;
+   {
    class procedure unlink(var ainfo: cryptioinfoty);
    class procedure threadterminate(var ainfo: cryptioinfoty);
+   }
  end;
 
 procedure cryptconnect(var ainfo: cryptioinfoty; const atimeoutms: integer);
@@ -61,6 +65,8 @@ function cryptwrite(var ainfo: cryptioinfoty; const buffer: pointer;
 function cryptread(var ainfo: cryptioinfoty; const buffer: pointer;
                     const count: integer; const atimeoutms: integer): integer;
                     //atimeoutms < 0 -> nonblocked
+procedure cryptunlink(var ainfo: cryptioinfoty);
+procedure cryptthreadterminate(var ainfo: cryptioinfoty);
 
 implementation
 uses
@@ -68,24 +74,46 @@ uses
  
 procedure cryptconnect(var ainfo: cryptioinfoty; const atimeoutms: integer);
 begin
- ainfo.handler.connect(ainfo,atimeoutms);
+ if ainfo.classtype <> nil then begin
+  ainfo.classtype.connect(ainfo,atimeoutms);
+ end;
 end;
 
 procedure cryptaccept(var ainfo: cryptioinfoty; const atimeoutms: integer);
 begin
- ainfo.handler.accept(ainfo,atimeoutms);
+ if ainfo.classtype <> nil then begin
+  ainfo.classtype.accept(ainfo,atimeoutms);
+ end;
 end;
 
 function cryptwrite(var ainfo: cryptioinfoty; const buffer: pointer;
                  const count: integer; const atimeoutms: integer): integer;
 begin
- result:= ainfo.handler.write(ainfo,buffer,count,atimeoutms);
+ if ainfo.classtype <> nil then begin
+  result:= ainfo.classtype.write(ainfo,buffer,count,atimeoutms);
+ end;
 end;
 
 function cryptread(var ainfo: cryptioinfoty; const buffer: pointer;
            const count: integer; const atimeoutms: integer): integer;
 begin
- result:= ainfo.handler.read(ainfo,buffer,count,atimeoutms);
+ if ainfo.classtype <> nil then begin
+  result:= ainfo.classtype.read(ainfo,buffer,count,atimeoutms);
+ end;
+end;
+
+procedure cryptunlink(var ainfo: cryptioinfoty);
+begin
+ if ainfo.classtype <> nil then begin
+  ainfo.classtype.internalunlink(ainfo);
+ end;
+end;
+
+procedure cryptthreadterminate(var ainfo: cryptioinfoty);
+begin
+ if ainfo.classtype <> nil then begin
+  ainfo.classtype.internalthreadterminate;
+ end;
 end;
 
 { tcryptio }
@@ -93,7 +121,7 @@ end;
 class procedure tcryptio.internalunlink(var ainfo: cryptioinfoty);
 begin
  with ainfo do begin
-  handler:= nil;
+//  handler:= nil;
   classtype:= nil;
   txfd:= invalidfilehandle;
   rxfd:= invalidfilehandle;
@@ -105,24 +133,10 @@ begin
  //dummy
 end;
 
-class procedure tcryptio.unlink(var ainfo: cryptioinfoty);
-begin
- if ainfo.classtype <> nil then begin
-  ainfo.classtype.internalunlink(ainfo);
- end;
-end;
-
-class procedure tcryptio.threadterminate(var ainfo: cryptioinfoty);
-begin
- if ainfo.classtype <> nil then begin
-  ainfo.classtype.internalthreadterminate;
- end;
-end;
-
 procedure tcryptio.link(const atxfd,arxfd: integer; 
                           out ainfo: cryptioinfoty);
 begin
- ainfo.handler:= self;
+// ainfo.handler:= self;
  ainfo.classtype:= cryptioclassty(classtype);
  ainfo.rxfd:= arxfd;
  ainfo.txfd:= atxfd;

@@ -17,13 +17,13 @@ type
  tsocketreader = class(tpipereader)
   private
    ftimeoutms: integer;
-   fonafterconnect: proceventty;
    fonthreadterminate: proceventty;
-   fcrypt: pcryptioinfoty;
    procedure settimeoutms(const avalue: integer);
    function doread(var buf; const acount: integer;
                     const nonblocked: boolean = false): integer; override;
   protected
+   fcrypt: pcryptioinfoty;
+   fonafterconnect: proceventty;
    procedure closehandle(const ahandle: integer); override;
    function execthread(thread: tmsethread): integer; override;
    procedure sethandle(value: integer); override;
@@ -35,9 +35,9 @@ type
  tsocketwriter = class(tpipewriter)
   private
    ftimeoutms: integer;
-   fcrypt: pcryptioinfoty;
    procedure settimeoutms(const avalue: integer);
   protected
+   fcrypt: pcryptioinfoty;
    procedure closehandle(const ahandle: integer); override;
   public
    function Write(const Buffer; Count: Longint): Longint; override;
@@ -76,6 +76,7 @@ type
    function gettxtimeoutms: integer;
    procedure settxtimeoutms(const avalue: integer);
   protected
+   fcryptio: tcryptio;
    fcryptioinfo: cryptioinfoty;
    procedure doafterconnect; virtual;
    procedure dothreadterminate;
@@ -83,7 +84,7 @@ type
    procedure receiveevent(const event: tobjectevent);
    property onsocketbroken: socketpipeseventty read fonsocketbroken write fonsocketbroken;
   public
-   constructor create(const aowner: tsocketcomp);
+   constructor create(const aowner: tsocketcomp; const acryptkind: cryptiokindty);
    destructor destroy; override;
    procedure close;
    {
@@ -121,19 +122,20 @@ type
    property oninputavailable;
    property onsocketbroken;
  end;
- 
+{ 
  tclientsocketpipes = class(tsocketpipes)
   protected
    procedure doafterconnect; override;
  end;
  
- tcustomsocketserver = class;
   
  tserversocketpipes = class(tcustomsocketpipes)
   protected
    procedure doafterconnect; override;
  end;
- socketpipesarty = array of tserversocketpipes;
+}
+ socketpipesarty = array of tsocketpipes;
+ tcustomsocketserver = class;
 
  socketeventty = procedure(sender: tsocketcomp) of object;  
  
@@ -198,22 +200,6 @@ type
   
  tsocketclient = class(turlsocketcomp)
   private
-   procedure setpipes(const avalue: tclientsocketpipes);
-  protected
-   fpipes: tclientsocketpipes;
-   procedure internalconnect; override;
-   procedure internaldisconnect; override;
-   procedure closepipes(const sender: tcustomsocketpipes); override;
-   procedure doasyncevent(var atag: integer); override;
-  public
-   constructor create(aowner: tcomponent); override;
-   destructor destroy; override;
-  published
-   property pipes: tclientsocketpipes read fpipes write setpipes;
- end;
-
- tsocketstdio = class(tsocketcomp)
-  private
    procedure setpipes(const avalue: tsocketpipes);
   protected
    fpipes: tsocketpipes;
@@ -227,7 +213,28 @@ type
   published
    property pipes: tsocketpipes read fpipes write setpipes;
  end;
+
+ tsocketstdio = class(tsocketcomp)
+  private
+   procedure setpipes(const avalue: tsocketpipes);
+   function getcryptokind: cryptiokindty;
+   procedure setcryptokind(const avalue: cryptiokindty);
+  protected
+   fpipes: tsocketpipes;
+   procedure internalconnect; override;
+   procedure internaldisconnect; override;
+   procedure closepipes(const sender: tcustomsocketpipes); override;
+   procedure doasyncevent(var atag: integer); override;
+  public
+   constructor create(aowner: tcomponent); override;
+   destructor destroy; override;
+  published
+   property pipes: tsocketpipes read fpipes write setpipes;
+   property cryptokind: cryptiokindty read getcryptokind write setcryptokind
+                             default cyk_none;
+ end;
  
+  
  socketaccepteventty = procedure(const sender: tcustomsocketserver;
                      const asocket: integer;
                      const addr: socketaddrty; var accept: boolean) of object;
@@ -313,6 +320,11 @@ type
      
 procedure checksyserror(const aresult: integer);
 
+procedure connectcryptio(const acryptio: tcryptio; const tx: tsocketwriter;
+                         const rx: tsocketreader;
+                         var cryptioinfo: cryptioinfoty;
+                         txfd: integer = invalidfilehandle;
+                         rxfd: integer = invalidfilehandle);
 implementation
 uses
  msefileutils,msesysintf,sysutils,msestream,mseprocutils,msesysutils;
@@ -324,9 +336,39 @@ begin
  end;
 end;
 
+procedure connectcryptio(const acryptio: tcryptio; const tx: tsocketwriter;
+                         const rx: tsocketreader;
+                         var cryptioinfo: cryptioinfoty;
+                         txfd: integer = invalidfilehandle;
+                         rxfd: integer = invalidfilehandle);
+begin
+ if (acryptio <> nil) and (cryptioinfo.kind <> cyk_none) then begin
+  if txfd = invalidfilehandle then begin
+   txfd:= tx.handle;
+  end;
+  if rxfd = invalidfilehandle then begin
+   rxfd:= rx.handle;
+  end;
+  tx.fcrypt:= @cryptioinfo;
+  rx.fcrypt:= @cryptioinfo;
+  acryptio.link(txfd,rxfd,cryptioinfo);
+  if cryptioinfo.kind = cyk_server then begin
+   cryptaccept(cryptioinfo,rx.timeoutms);
+  end
+  else begin
+   cryptconnect(cryptioinfo,rx.timeoutms);
+  end;
+ end
+ else begin
+  tx.fcrypt:= nil;
+  rx.fcrypt:= nil;
+ end;
+end;
+
 { tcustomsocketpipes }
 
-constructor tcustomsocketpipes.create(const aowner: tsocketcomp);
+constructor tcustomsocketpipes.create(const aowner: tsocketcomp; 
+                                              const acryptkind: cryptiokindty);
 begin
  fowner:= aowner;
  frx:= tsocketreader.create;
@@ -334,6 +376,8 @@ begin
  frx.onpipebroken:= @dopipebroken;
  frx.fonthreadterminate:= @dothreadterminate;
  ftx:= tsocketwriter.create;
+ setlinkedvar(aowner.fcryptio,fcryptio);
+ fcryptioinfo.kind:= acryptkind;
 end;
 
 destructor tcustomsocketpipes.destroy;
@@ -351,6 +395,7 @@ end;
 
 procedure tcustomsocketpipes.doafterconnect;
 begin
+ connectcryptio(fcryptio,ftx,frx,fcryptioinfo);
  if assigned(fonafterconnect) then begin
   fonafterconnect(self);
  end;  
@@ -358,7 +403,7 @@ end;
 
 procedure tcustomsocketpipes.dothreadterminate;
 begin
- tcryptio.threadterminate(fcryptioinfo);
+ cryptthreadterminate(fcryptioinfo);
  //dummy
 end;
 
@@ -383,11 +428,11 @@ end;
 
 procedure tcustomsocketpipes.setcryptio(const acryptio: tcryptio);
 begin
+ fcryptio:= acryptio;
  with fcryptioinfo do begin
-  tcryptio.unlink(fcryptioinfo);
+  cryptunlink(fcryptioinfo);
   ftx.fcrypt:= nil;
   frx.fcrypt:= nil;
-  handler:= acryptio;
  end;
 end;
 
@@ -625,7 +670,7 @@ end;
 constructor tsocketstdio.create(aowner: tcomponent);
 begin
  if fpipes = nil then begin
-  fpipes:= tsocketpipes.create(self);
+  fpipes:= tsocketpipes.create(self,cyk_none);
  end;
  inherited;
 end;
@@ -666,8 +711,18 @@ begin
  end;
 end;
 
-{ tclientsocketpipes }
+function tsocketstdio.getcryptokind: cryptiokindty;
+begin
+ result:= fpipes.fcryptioinfo.kind;
+end;
 
+procedure tsocketstdio.setcryptokind(const avalue: cryptiokindty);
+begin
+ fpipes.fcryptioinfo.kind:= avalue;
+end;
+
+{ tclientsocketpipes }
+{
 procedure tclientsocketpipes.doafterconnect;
 begin
  if fcryptioinfo.handler <> nil then begin
@@ -678,13 +733,13 @@ begin
  end;
  inherited;
 end;
-
+}
 { tsocketclient }
 
 constructor tsocketclient.create(aowner: tcomponent);
 begin
  if fpipes = nil then begin
-  fpipes:= tclientsocketpipes.create(self);
+  fpipes:= tsocketpipes.create(self,cyk_client);
  end;
  inherited;
 end;
@@ -695,7 +750,7 @@ begin
  inherited;
 end;
 
-procedure tsocketclient.setpipes(const avalue: tclientsocketpipes);
+procedure tsocketclient.setpipes(const avalue: tsocketpipes);
 begin
  fpipes.assign(avalue);
 end;
@@ -745,7 +800,7 @@ begin
 end;
 
 { tserversocketpipes }
-
+{
 procedure tserversocketpipes.doafterconnect;
 begin
  if fcryptioinfo.handler <> nil then begin
@@ -756,7 +811,7 @@ begin
  end;
  inherited;
 end;
-
+}
 { tcustomsocketserver }
 
 constructor tcustomsocketserver.create(aowner: tcomponent);
@@ -829,7 +884,7 @@ begin
         setlength(fpipes,high(fpipes)+2);
         int2:= high(fpipes);
        end;
-       fpipes[int2]:= tserversocketpipes.create(self);
+       fpipes[int2]:= tsocketpipes.create(self,cyk_server);
        inc(fconnectioncount);
        with fpipes[int2] do begin
         rx.timeoutms:= frxtimeoutms;

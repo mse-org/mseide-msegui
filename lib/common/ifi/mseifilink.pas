@@ -58,6 +58,8 @@ type
   protected
    procedure objectevent(const sender: tobject;
                                   const event: objecteventty); override;
+  public
+   procedure execute;
  end;
  
  tlinkactions = class(tmodulelinkarrayprop)
@@ -299,11 +301,16 @@ end;
 
 { ttxlinkaction }
  
+procedure ttxlinkaction.execute;
+begin
+ tcustommodulelink(fowner).actionfired(self);
+end;
+
 procedure ttxlinkaction.objectevent(const sender: tobject;
                                           const event: objecteventty);
 begin
  if (event = oe_fired) and (sender = faction) then begin
-  tcustommodulelink(fowner).actionfired(self);
+  execute;
  end;
 end;
 
