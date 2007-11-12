@@ -1210,6 +1210,9 @@ type
    fdialogtext: msestring;
    fdialogcaption: msestring;
    fdatasets: datasetarty;
+   fonpagebeforerender: beforerenderpageeventty;
+   fonpageafterpaint: reportpagepainteventty;
+   fonpagepaint: reportpagepainteventty;
    procedure setppmm(const avalue: real);
    function getreppages(index: integer): tcustomreportpage;
    procedure setreppages(index: integer; const avalue: tcustomreportpage);
@@ -1232,6 +1235,13 @@ type
    frepdesigninfo: repdesigninfoty;
    freppages: reportpagearty;
    fdefaultprintorientation: pageorientationty;
+   procedure dopagebeforerender(const sender: tcustomreportpage;
+                                          var empty: boolean);
+   procedure dopagepaint(const sender: tcustomreportpage;
+                              const acanvas: tcanvas);
+   procedure dopageafterpaint(const sender: tcustomreportpage;
+                              const acanvas: tcanvas);
+   
    procedure insertwidget(const awidget: twidget; const apos: pointty); override;
    procedure internalrender(const acanvas: tcanvas; const aprinter: tcustomprinter;
                   const acommand: string; const astream: ttextstream;
@@ -1297,6 +1307,12 @@ type
    property onafterrender: notifyeventty read fonafterrender
                                write fonafterrender;
         //executed in main thread context
+   property onpagebeforerender: beforerenderpageeventty read fonpagebeforerender
+                               write fonpagebeforerender;
+   property onpagepaint: reportpagepainteventty read fonpagepaint 
+                        write fonpagepaint;
+   property onpageafterpaint: reportpagepainteventty read fonpageafterpaint 
+                        write fonpageafterpaint;
    property onprogress: notifyeventty read fonprogress write fonprogress;
    property oncreate: notifyeventty read foncreate write foncreate;
    property ondestroy: notifyeventty read fondestroy write fondestroy;
@@ -1327,6 +1343,9 @@ type
    property onpreamble;
    property onbeforerender;
    property onafterrender;
+   property onpagebeforerender;
+   property onpagepaint;
+   property onpageafterpaint;
    property onprogress;
    property oncreate;
    property onloaded: notifyeventty read fonloaded write fonloaded;
@@ -4921,10 +4940,12 @@ begin
    application.unlock;
   end;
  end;
+ freport.dopagebeforerender(self,empty);
 end;
 
 procedure tcustomreportpage.doonpaint(const acanvas: tcanvas);
 begin
+ freport.dopagepaint(self,acanvas);
  if canevent(tmethod(fonpaint)) then begin
   application.lock;
   try
@@ -4945,6 +4966,7 @@ begin
    application.unlock;
   end;
  end;
+ freport.dopageafterpaint(self,acanvas);
 end;
 
 procedure tcustomreportpage.renderbackground(const acanvas: tcanvas);
@@ -5998,6 +6020,45 @@ end;
 procedure tcustomreport.recordchanged;
 begin
  freppages[factivepage].recordchanged;
+end;
+
+procedure tcustomreport.dopagebeforerender(const sender: tcustomreportpage;
+               var empty: boolean);
+begin
+ if canevent(tmethod(fonpagebeforerender)) then begin
+  application.lock;
+  try
+   fonpagebeforerender(sender,empty);
+  finally
+   application.unlock;
+  end;
+ end;
+end;
+
+procedure tcustomreport.dopageafterpaint(const sender: tcustomreportpage;
+               const acanvas: tcanvas);
+begin
+ if canevent(tmethod(fonpageafterpaint)) then begin
+  application.lock;
+  try
+   fonpageafterpaint(sender,acanvas);
+  finally
+   application.unlock;
+  end;
+ end;
+end;
+
+procedure tcustomreport.dopagepaint(const sender: tcustomreportpage;
+               const acanvas: tcanvas);
+begin
+ if canevent(tmethod(fonpagepaint)) then begin
+  application.lock;
+  try
+   fonpagepaint(sender,acanvas);
+  finally
+   application.unlock;
+  end;
+ end;
 end;
 
 {
