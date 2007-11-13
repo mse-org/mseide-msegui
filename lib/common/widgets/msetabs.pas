@@ -21,6 +21,9 @@ uses
 
 const
  defaulttaboptionswidget = defaultoptionswidget + [ow_subfocus,ow_fontglyphheight];
+ defaultcaptiondist = 1;
+ defaultimagedist = 0;
+ defaultcaptionpos = cp_right;
 
 type
 
@@ -89,6 +92,9 @@ type
   private
    fcolor: colorty;
    fcoloractive: colorty;
+   fcaptionpos: captionposty;
+   fcaptionframe: framety;
+   fimagedist: integer;
    fface: tface;
    ffaceactive: tface;
    fhint: msestring;
@@ -103,6 +109,12 @@ type
    procedure createfaceactive;
    procedure setcolor(const avalue: colorty);
    procedure setcoloractive(const avalue: colorty);
+   procedure setcaptionpos(const avalue: captionposty);
+   procedure setcaptionframe_left(const avalue: integer);
+   procedure setcaptionframe_top(const avalue: integer);
+   procedure setcaptionframe_right(const avalue: integer);
+   procedure setcaptionframe_bottom(const avalue: integer);
+   procedure setimagedist(const avalue: integer);
   protected
    procedure createitem(const index: integer; var item: tpersistent); override;
    procedure checktemplate(const sender: tobject);
@@ -121,6 +133,18 @@ type
                   write setcolor default cl_transparent;
    property coloractive: colorty read fcoloractive
                   write setcoloractive default cl_active;
+   property captionpos: captionposty read fcaptionpos write
+                          setcaptionpos default defaultcaptionpos;
+   property captionframe_left: integer read fcaptionframe.left write
+                          setcaptionframe_left default defaultcaptiondist;
+   property captionframe_top: integer read fcaptionframe.top write
+                          setcaptionframe_top default defaultcaptiondist;
+   property captionframe_right: integer read fcaptionframe.right write
+                          setcaptionframe_right default defaultcaptiondist;
+   property captionframe_bottom: integer read fcaptionframe.bottom write
+                          setcaptionframe_bottom default defaultcaptiondist;
+   property imagedist: integer read fimagedist write setimagedist 
+                                                       default defaultimagedist;
    property face: tface read getface write setface;
    property faceactive: tface read getfaceactive write setfaceactive;
    property hint: msestring read fhint write fhint;
@@ -428,6 +452,18 @@ type
    procedure settab_faceactivetab(const avalue: tface);
    function checktabsizingpos(const apos: pointty): boolean;
    function getidents: integerarty;
+   function gettab_captionpos: captionposty;
+   procedure settab_captionpos(const avalue: captionposty);
+   function gettab_captionframe_left: integer;
+   procedure settab_captionframe_left(const avalue: integer);
+   function gettab_captionframe_top: integer;
+   procedure settab_captionframe_top(const avalue: integer);
+   function gettab_captionframe_right: integer;
+   procedure settab_captionframe_right(const avalue: integer);
+   function gettab_captionframe_bottom: integer;
+   procedure settab_captionframe_bottom(const avalue: integer);
+   function gettab_imagedist: integer;
+   procedure settab_imagedist(const avalue: integer);
   protected
    fpopuptab: integer;
    procedure internaladd(const page: itabpage; aindex: integer);
@@ -501,6 +537,18 @@ type
                         write settab_colortab default cl_transparent;
    property tab_coloractivetab: colorty read gettab_coloractivetab 
                         write settab_coloractivetab default cl_active;
+   property tab_captionpos: captionposty read gettab_captionpos write
+                          settab_captionpos default defaultcaptionpos;
+   property tab_captionframe_left: integer read gettab_captionframe_left write
+                          settab_captionframe_left default defaultcaptiondist;
+   property tab_captionframe_top: integer read gettab_captionframe_top write
+                          settab_captionframe_top default defaultcaptiondist;
+   property tab_captionframe_right: integer read gettab_captionframe_right write
+                          settab_captionframe_right default defaultcaptiondist;
+   property tab_captionframe_bottom: integer read gettab_captionframe_bottom write
+                          settab_captionframe_bottom default defaultcaptiondist;
+   property tab_imagedist: integer read gettab_imagedist write settab_imagedist 
+                                                       default defaultimagedist;
    property tab_facetab: tface read gettab_facetab write settab_facetab;
    property tab_faceactivetab: tface read gettab_faceactivetab write settab_faceactivetab;
    property tab_size: integer read ftab_size write settab_size;
@@ -546,6 +594,12 @@ type
    property tab_frame;
    property tab_face;
    property tab_color;
+   property tab_captionpos;
+   property tab_captionframe_left;
+   property tab_captionframe_top;
+   property tab_captionframe_right;
+   property tab_captionframe_bottom;
+   property tab_imagedist;
    property tab_colortab;
    property tab_coloractivetab;
    property tab_facetab;
@@ -569,6 +623,10 @@ procedure calctablayout(var layout: tabbarlayoutinfoty;
  procedure docommon(const tab: ttab; var cell: shapeinfoty; var textrect: rectty);
  begin
   with tab,cell do begin
+   caption:= fcaption;
+//   captiondist:= layout.tabs.fcaptiondist;
+   imagedist:= layout.tabs.fimagedist;
+   captionpos:= layout.tabs.fcaptionpos;
    imagelist:= fimagelist;
    imagenr:= fimagenr;
 //   if getactive and (fimagenractive <> -2) then begin
@@ -576,7 +634,7 @@ procedure calctablayout(var layout: tabbarlayoutinfoty;
 //   end;
    imagenrdisabled:= fimagenrdisabled;
    if imagelist <> nil then begin
-    inc(textrect.cx,fimagelist.width);
+    inc(textrect.cx,fimagelist.width+imagedist);
    end;
   end;
  end;
@@ -586,6 +644,8 @@ var
  endval: integer;
  rect1: rectty;
  bo1: boolean;
+ cxinflate: integer;
+ cyinflate: integer;
 begin
  with layout do begin
   cells:= nil;
@@ -594,16 +654,20 @@ begin
    firsttab:= 0;
   end;
   lasttab:= -1;
+  cxinflate:= tabs.fcaptionframe.left + tabs.fcaptionframe.right + 2;
+  cyinflate:= tabs.fcaptionframe.top + tabs.fcaptionframe.bottom + 2;
   if ss_vert in options then begin
    aval:= dim.y;
    endval:= dim.y + dim.cy;
    for int1:= 0 to high(cells) do begin
     with tabs[int1],cells[int1] do begin
      dim.y:= aval;
-     caption:= fcaption;
-     rect1:= textrect(canvas,caption,makerect(layout.dim.x,aval,layout.dim.cx,bigint));
+     rect1:= textrect(canvas,fcaption,makerect(layout.dim.x,aval,layout.dim.cx,bigint));
      docommon(tabs[int1],cells[int1],rect1);
-     dim.cy:= rect1.cy+4;
+     dim.cy:= rect1.cy+cyinflate;
+     if (imagelist <> nil) and (imagelist.height > dim.cy) then begin
+      dim.cy:= imagelist.height;
+     end;
      if (ts_invisible in fstate) or (int1 < firsttab) or (aval >= endval) then begin
       include(state,ss_invisible);
      end
@@ -634,10 +698,9 @@ begin
    for int1:= 0 to high(cells) do begin
     with tabs[int1],cells[int1] do begin
      dim.x:= aval;
-     caption:= fcaption;
-     rect1:= textrect(canvas,caption,makerect(aval,layout.dim.y,bigint,layout.dim.cy));
+     rect1:= textrect(canvas,fcaption,makerect(aval,layout.dim.y,bigint,layout.dim.cy));
      docommon(tabs[int1],cells[int1],rect1);
-     dim.cx:= rect1.cx+6;
+     dim.cx:= rect1.cx + cxinflate;
      if (ts_invisible in fstate) or (int1 < firsttab) or (aval >= endval) then begin
       include(state,ss_invisible);
      end
@@ -665,7 +728,6 @@ begin
   bo1:= not twidget(tabs.fowner).isenabled;
   for int1:= 0 to high(cells) do begin
    with tabs[int1],cells[int1] do begin
-    captiondist:= 2;
     state:= state + options * [ss_vert,ss_opposite];
     if ts_active in fstate then begin
      if fcoloractive = cl_default then begin
@@ -895,7 +957,10 @@ end;
 
 procedure ttab.setimagelist(const avalue: timagelist);
 begin
- setlinkedvar(avalue,tmsecomponent(fimagelist));
+ if avalue <> fimagelist then begin
+  setlinkedvar(avalue,tmsecomponent(fimagelist));
+  changed;
+ end;
 end;
 
 procedure ttab.setimagenr(const avalue: integer);
@@ -940,10 +1005,17 @@ end;
 
 { ttabs }
 
-constructor ttabs.create(const aowner: tcustomtabbar; aclasstype: indexpersistentclassty);
+constructor ttabs.create(const aowner: tcustomtabbar;
+                                  aclasstype: indexpersistentclassty);
 begin
  fcolor:= cl_transparent;
  fcoloractive:= cl_active;
+ fcaptionpos:= defaultcaptionpos;
+ fcaptionframe.left:= defaultcaptiondist;
+ fcaptionframe.top:= defaultcaptiondist;
+ fcaptionframe.right:= defaultcaptiondist;
+ fcaptionframe.bottom:= defaultcaptiondist;
+ fimagedist:= defaultimagedist;
  inherited create(aowner,aclasstype);
 end;
 
@@ -1004,6 +1076,54 @@ begin
   fcoloractive:= avalue;
   tcustomtabbar(fowner).layoutchanged;
  end;
+end;
+
+procedure ttabs.setcaptionpos(const avalue: captionposty);
+begin
+ if avalue <> fcaptionpos then begin
+  fcaptionpos:= avalue;
+  tcustomtabbar(fowner).layoutchanged;
+ end;
+end;
+
+procedure ttabs.setcaptionframe_left(const avalue: integer);
+begin
+ if avalue <> fcaptionframe.left then begin
+  fcaptionframe.left:= avalue;
+  tcustomtabbar(fowner).layoutchanged;
+ end;
+end;
+
+procedure ttabs.setcaptionframe_top(const avalue: integer);
+begin
+ if avalue <> fcaptionframe.top then begin
+  fcaptionframe.top:= avalue;
+  tcustomtabbar(fowner).layoutchanged;
+ end;
+end;
+
+procedure ttabs.setcaptionframe_right(const avalue: integer);
+begin
+ if avalue <> fcaptionframe.right then begin
+  fcaptionframe.right:= avalue;
+  tcustomtabbar(fowner).layoutchanged;
+ end;
+end;
+
+procedure ttabs.setcaptionframe_bottom(const avalue: integer);
+begin
+ if avalue <> fcaptionframe.bottom then begin
+  fcaptionframe.bottom:= avalue;
+  tcustomtabbar(fowner).layoutchanged;
+ end;
+end;
+
+procedure ttabs.setimagedist(const avalue: integer);
+begin
+ if avalue <> fimagedist then begin
+  fimagedist:= avalue;
+  tcustomtabbar(fowner).layoutchanged;
+ end;  
 end;
 
 procedure ttabs.add(const item: ttab);
@@ -1277,7 +1397,7 @@ begin
  inherited;
  with flayoutinfo do begin
   for int1:= firsttab to lasttab do begin
-   drawtab(canvas,cells[int1]);
+   drawtab(canvas,cells[int1],@tabs.fcaptionframe);
   end;
   int1:= high(cells);
   rect1:= innerclientrect;
@@ -1433,7 +1553,9 @@ var
 begin
  inherited;
  if not (tabo_vertical in options) then begin
-  int2:= font.glyphheight;
+  with flayoutinfo.tabs.fcaptionframe do begin
+   int2:= font.glyphheight + top + bottom;
+  end;
   for int1:= 0 to flayoutinfo.tabs.count - 1 do begin
    with flayoutinfo.tabs[int1] do begin
     if (imagelist <> nil) and (imagelist.height > int2) then begin
@@ -1441,7 +1563,7 @@ begin
     end;
    end;
   end;
-  bounds_cy:= int2 + fframe.innerframewidth.cy + 4;
+  bounds_cy:= int2 + fframe.innerframewidth.cy + 2;
  end;
 end;
 
@@ -1808,7 +1930,10 @@ end;
 
 procedure ttabpage.setimagelist(const avalue: timagelist);
 begin
- setlinkedvar(avalue,tmsecomponent(fimagelist));
+ if fimagelist <> avalue then begin
+  setlinkedvar(avalue,tmsecomponent(fimagelist));
+  changed;
+ end;
 end;
 
 function ttabpage.getimagenr: integer;
@@ -1986,7 +2111,6 @@ begin
  end;
 end;
 
-
 function ttabform.getimagelist: timagelist;
 begin
  result:= fimagelist
@@ -1994,7 +2118,10 @@ end;
 
 procedure ttabform.setimagelist(const avalue: timagelist);
 begin
- setlinkedvar(avalue,tmsecomponent(fimagelist));
+ if fimagelist <> avalue then begin
+  setlinkedvar(avalue,tmsecomponent(fimagelist));
+  changed;
+ end;
 end;
 
 function ttabform.getimagenr: integer;
@@ -2891,6 +3018,66 @@ end;
 procedure tcustomtabwidget.settab_faceactivetab(const avalue: tface);
 begin
  ftabs.tabs.faceactive:= avalue;
+end;
+
+function tcustomtabwidget.gettab_captionpos: captionposty;
+begin
+ result:= ftabs.tabs.captionpos;
+end;
+
+procedure tcustomtabwidget.settab_captionpos(const avalue: captionposty);
+begin
+ ftabs.tabs.captionpos:= avalue;
+end;
+
+function tcustomtabwidget.gettab_captionframe_left: integer;
+begin
+ result:= ftabs.tabs.captionframe_left;
+end;
+
+procedure tcustomtabwidget.settab_captionframe_left(const avalue: integer);
+begin
+ ftabs.tabs.captionframe_left:= avalue;
+end;
+
+function tcustomtabwidget.gettab_captionframe_top: integer;
+begin
+ result:= ftabs.tabs.captionframe_top;
+end;
+
+procedure tcustomtabwidget.settab_captionframe_top(const avalue: integer);
+begin
+ ftabs.tabs.captionframe_top:= avalue;
+end;
+
+function tcustomtabwidget.gettab_captionframe_right: integer;
+begin
+ result:= ftabs.tabs.captionframe_right;
+end;
+
+procedure tcustomtabwidget.settab_captionframe_right(const avalue: integer);
+begin
+ ftabs.tabs.captionframe_right:= avalue;
+end;
+
+function tcustomtabwidget.gettab_captionframe_bottom: integer;
+begin
+ result:= ftabs.tabs.captionframe_bottom;
+end;
+
+procedure tcustomtabwidget.settab_captionframe_bottom(const avalue: integer);
+begin
+ ftabs.tabs.captionframe_bottom:= avalue;
+end;
+
+function tcustomtabwidget.gettab_imagedist: integer;
+begin
+ result:= ftabs.tabs.imagedist;
+end;
+
+procedure tcustomtabwidget.settab_imagedist(const avalue: integer);
+begin
+ ftabs.tabs.imagedist:= avalue;
 end;
 
 procedure tcustomtabwidget.createpagetab(const sender: tcustomtabbar;

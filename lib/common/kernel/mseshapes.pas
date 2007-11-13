@@ -62,7 +62,8 @@ procedure drawtoolbutton(const canvas: tcanvas; const info: shapeinfoty);
 procedure drawbutton(const canvas: tcanvas; const info: shapeinfoty);
 procedure drawmenubutton(const canvas: tcanvas; const info: shapeinfoty;
                            const innerframe: pframety = nil);
-procedure drawtab(const canvas: tcanvas; const info: shapeinfoty);
+procedure drawtab(const canvas: tcanvas; const info: shapeinfoty;
+                               const innerframe: pframety = nil);
 function updatemouseshapestate(var info: shapeinfoty;
                  const mouseevent: mouseeventinfoty;
                  const widget: twidget;
@@ -666,7 +667,7 @@ begin
 end;
 
 procedure drawbuttoncaption(const canvas: tcanvas; const info: shapeinfoty;
-        const arect: rectty; const pos: captionposty);
+        const arect: rectty; const pos: captionposty; const outerrect: prectty);
 var
  textflags: textflagsty;
  rect1: rectty;
@@ -697,7 +698,14 @@ begin
    if ss_disabled in state then begin
     include(textflags,tf_grayed);
    end;
-   drawtext(canvas,caption,rect1,arect,textflags,font,tab1);
+   if outerrect <> nil then begin
+    exclude(textflags,tf_clipi);
+    include(textflags,tf_clipo);
+    drawtext(canvas,caption,rect1,outerrect^,textflags,font,tab1);
+   end
+   else begin
+    drawtext(canvas,caption,rect1,arect,textflags,font,tab1);
+   end;
   end;
  end;
 end;
@@ -738,7 +746,7 @@ begin
     end;
    end;
    }
-   drawbuttoncaption(canvas,info,rect1,pos);
+   drawbuttoncaption(canvas,info,rect1,pos,nil);
   end;
  end;
 end;
@@ -836,17 +844,37 @@ begin
   if innerframe <> nil then begin
    deflaterect1(rect1,innerframe^);
   end;
-  drawbuttoncaption(canvas,info,rect1,cp_left);
+  drawbuttoncaption(canvas,info,rect1,cp_left,nil);
  end;
 end;
 
-procedure drawtab(const canvas: tcanvas; const info: shapeinfoty);
+procedure drawtab(const canvas: tcanvas; const info: shapeinfoty; 
+                                   const innerframe: pframety = nil);
 var
  int1: integer;
  color1: colorty;
+ rect1,rect2: rectty;
+ pos1,pos2: captionposty;
 begin
  with canvas,info do begin
-  drawmenubutton(canvas,info);
+  if not (ss_invisible in state) and 
+                      drawbuttonframe(canvas,info,rect1) then begin
+   if captionpos = cp_left then begin
+    pos1:= cp_right;
+    pos2:= cp_left;
+   end
+   else begin
+    pos1:= cp_left;
+    pos2:= cp_right;
+   end;
+   drawbuttonimage(canvas,info,rect1,pos1);
+   drawbuttoncheckbox(canvas,info,rect1,pos2);
+   rect2:= rect1; //outerframe
+   if innerframe <> nil then begin
+    deflaterect1(rect1,innerframe^);
+   end;
+   drawbuttoncaption(canvas,info,rect1,pos1,@rect2);
+  end;
   if not (ss_checked in state) then begin
    if ss_opposite in state then begin
     color1:= defaultframecolors.shadow.color;

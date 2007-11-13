@@ -8,6 +8,7 @@ object sourcefo: tsourcefo
   frame.grip_options = [go_closebutton, go_fixsizebutton, go_topbutton]
   frame.dummy = 0
   taborder = 1
+  onactivate = sourcefoonactivate
   visible = False
   container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_mousetransparent, ow_destroywidgets, ow_autoscale]
   container.bounds_x = 0
@@ -51,7 +52,6 @@ object sourcefo: tsourcefo
   }
   onclosequery = sourcefoonclosequery
   onidle = formonidle
-  onactivate = sourcefoonactivate
   moduleclassname = 'tdockform'
   object tabwidget: ttabwidget
     bounds_x = 0
@@ -67,6 +67,10 @@ object sourcefo: tsourcefo
     tab_frame.buttonslast = True
     tab_frame.buttonsvisible = [sk_right, sk_up, sk_left, sk_down, sk_first, sk_last]
     tab_frame.dummy = 0
+    tab_captionframe_left = 1
+    tab_captionframe_top = 1
+    tab_captionframe_right = 1
+    tab_captionframe_bottom = 1
     tab_size = 104
     tab_sizemin = 60
     reffontheight = 14
@@ -246,6 +250,7 @@ object sourcefo: tsourcefo
     top = 40
   end
   object formpopup: tpopupmenu
+    onupdate = popupmonupdate
     menu.submenu.count = 29
     menu.submenu.items = <    
       item
@@ -504,7 +509,6 @@ object sourcefo: tsourcefo
         caption = 'Complete Class at Cursor'
         state = [as_localcaption]
       end>
-    onupdate = popupmonupdate
     left = 176
     top = 40
   end
