@@ -2343,7 +2343,9 @@ end;
 
 procedure titemedit.mouseevent(var info: mouseeventinfoty);
 begin
- tcustombuttonframe(fframe).mouseevent(info);
+ if fframe <> nil then begin
+  tcustombuttonframe(fframe).mouseevent(info);
+ end;
  inherited;
 end;
 
