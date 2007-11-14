@@ -334,10 +334,15 @@ uses
 
 procedure socketerror(const error: syserrorty; const text: string = '');
 begin
- if error <> sye_ok then begin
-  if error = sye_sockaddr then begin
-   raise esys.create(error,text+soc_getsockaddrerrortext(mselasterror));
-  end
+ case error of
+  sye_ok: begin
+  end;
+  sye_sockaddr: begin
+   raise esys.create(error,text+soc_getaddrerrortext(mselasterror));
+  end;
+  sye_socket: begin
+   raise esys.create(error,text+soc_geterrortext(mselasterror));
+  end;
   else begin
    syserror(error,text);
   end;
@@ -772,9 +777,9 @@ end;
 
 procedure tsocketclient.internalconnect;
 begin
- syserror(soc_opensocket(fkind,true,fhandle));
+ syserror(soc_open(fkind,true,fhandle));
  try
-  syserror(soc_connectsocket(fhandle,getsockaddr,fpipes.tx.timeoutms));
+  syserror(soc_connect(fhandle,getsockaddr,fpipes.tx.timeoutms));
  except
   sys_closefile(fhandle);
   fhandle:= invalidfilehandle;
@@ -918,7 +923,7 @@ begin
       end
       else begin
  //      sys_shutdownsocket(conn,ssk_both);
-       soc_closesocket(conn);
+       soc_close(conn);
       end;
      finally
       application.unlock;
@@ -953,13 +958,13 @@ begin
   end;
  end;
  if fhandle <> invalidfilehandle then begin
-  soc_shutdownsocket(fhandle,ssk_rx);
+  soc_shutdown(fhandle,ssk_rx);
  end;
  if fthread <> nil then begin
   application.waitforthread(fthread);
  end;
  freeandnil(fthread);
- soc_closesocket(fhandle);
+ soc_close(fhandle);
  inherited;
 end;
 
@@ -1032,9 +1037,9 @@ end;
 procedure tsocketserver.internalconnect;
 begin
  if not (csdesigning in componentstate) then begin
-  syserror(soc_opensocket(sok_local,true,fhandle));
+  syserror(soc_open(sok_local,true,fhandle));
   try
-   syserror(soc_bindsocket(fhandle,getsockaddr));
+   syserror(soc_bind(fhandle,getsockaddr));
   except
    sys_closefile(fhandle);
    fhandle:= invalidfilehandle;
@@ -1081,7 +1086,7 @@ end;
 
 procedure tsocketreader.closehandle(const ahandle: integer);
 begin
- soc_shutdownsocket(ahandle,ssk_rx);
+ soc_shutdown(ahandle,ssk_rx);
  inherited;
 end;
 
@@ -1089,7 +1094,7 @@ procedure tsocketreader.settimeoutms(const avalue: integer);
 begin
  ftimeoutms:= avalue;
  if handle <> invalidfilehandle then begin
-  soc_setsockrxtimeout(handle,avalue);
+  soc_setrxtimeout(handle,avalue);
  end;
 end;
 
@@ -1108,7 +1113,7 @@ begin
   result:= cryptread(fcrypt^,@buf,acount,int1);
  end
  else begin  
-  soc_readsocket(handle,@buf,acount,result,int1);
+  soc_read(handle,@buf,acount,result,int1);
  end;
 end;
 
@@ -1160,7 +1165,7 @@ end;
 procedure tsocketreader.sethandle(value: integer);
 begin
  if value <> invalidfilehandle then begin
-  soc_setnonblocksocket(value,true);
+  soc_setnonblock(value,true);
  end;
  inherited;
 end;
@@ -1177,7 +1182,7 @@ procedure tsocketwriter.settimeoutms(const avalue: integer);
 begin
  ftimeoutms:= avalue;
  if handle <> invalidfilehandle then begin
-  soc_setsocktxtimeout(handle,avalue);
+  soc_settxtimeout(handle,avalue);
  end;
 end;
 

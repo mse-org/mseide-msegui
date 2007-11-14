@@ -41,12 +41,17 @@ type
   platformdata: array[7..32] of longword;
  end;
 
-function soc_getsockaddrerrortext(aerror: integer): string;
+function soc_getaddrerrortext(aerror: integer): string;
 begin
  result:= strpas(gai_strerror(aerror));
 end;
+
+function soc_geterrortext(aerror: integer): string;
+begin
+ result:= inttostr(aerror);
+end;
  
-function soc_setnonblocksocket(const handle: integer; const nonblock: boolean): syserrorty;
+function soc_setnonblock(const handle: integer; const nonblock: boolean): syserrorty;
 var
  int1: integer;
 begin
@@ -68,7 +73,7 @@ begin
  end;
 end;
 
-function soc_opensocket(const kind: socketkindty; const nonblock: boolean;
+function soc_open(const kind: socketkindty; const nonblock: boolean;
                                  out handle: integer): syserrorty;
 var
  int1: integer;
@@ -83,11 +88,11 @@ begin
   result:= syelasterror;
  end
  else begin
-  result:= soc_setnonblocksocket(handle,nonblock);
+  result:= soc_setnonblock(handle,nonblock);
  end;
 end;
 
-function soc_shutdownsocket(const handle: integer;
+function soc_shutdown(const handle: integer;
                            const kind: socketshutdownkindty): syserrorty;
 begin
  if libc.shutdown(handle,ord(kind)) <> 0 then begin
@@ -98,7 +103,7 @@ begin
  end;
 end;
 
-function soc_closesocket(const handle: integer): syserrorty;
+function soc_close(const handle: integer): syserrorty;
 begin
  if libc.__close(handle) = 0 then begin
   result:= sye_ok;
@@ -108,7 +113,7 @@ begin
  end;
 end;
 
-function soc_connectsocket(const handle: integer; const addr: socketaddrty;
+function soc_connect(const handle: integer; const addr: socketaddrty;
                                const timeoutms: integer): syserrorty;
 var
  str1: string;
@@ -167,7 +172,7 @@ begin
  end;
 end;
 
-function soc_readsocket(const fd: longint; const buf: pointer;
+function soc_read(const fd: longint; const buf: pointer;
                     const nbytes: longword; out readbytes: integer;
                     const timeoutms: integer): syserrorty;
                     //atimeoutms < 0 -> nonblocked
@@ -199,7 +204,7 @@ begin
  end;
 end;
 
-function soc_bindsocket(const handle: integer; 
+function soc_bind(const handle: integer; 
                                      const addr: socketaddrty): syserrorty;
 var
  str1: string;
@@ -258,7 +263,7 @@ begin
    result:= syelasterror;
   end
   else begin
-   result:= soc_setnonblocksocket(conn,nonblock);
+   result:= soc_setnonblock(conn,nonblock);
   end;
  end;
 end;
@@ -278,12 +283,12 @@ begin
  end;
 end;
 
-function soc_setsockrxtimeout(const handle: integer; const ms: integer): syserrorty;
+function soc_setrxtimeout(const handle: integer; const ms: integer): syserrorty;
 begin
  result:= setsocktimeout(handle,ms,so_rcvtimeo);
 end;
 
-function soc_setsocktxtimeout(const handle: integer; const ms: integer): syserrorty;
+function soc_settxtimeout(const handle: integer; const ms: integer): syserrorty;
 begin
  result:= setsocktimeout(handle,ms,so_sndtimeo);
 end;
@@ -344,7 +349,7 @@ begin
  end;
 end;
 
-function soc_getsockaddr(const addr: socketaddrty): string;
+function soc_getaddr(const addr: socketaddrty): string;
 begin
  with linuxsockaddrty(addr.platformdata).ad do begin
   case addr.sa_family of
@@ -419,7 +424,7 @@ begin
  end;
 end;
 
-function soc_getsockport(const addr: socketaddrty): integer;
+function soc_getport(const addr: socketaddrty): integer;
 begin
  with linuxsockaddrty(addr.platformdata).ad do begin
   case addr.sa_family of

@@ -117,7 +117,7 @@ type
  syserrorty = (sye_ok,sye_lasterror,sye_busy,sye_dirstream,sye_network,
                 sye_thread,sye_mutex,sye_semaphore,sye_cond,sye_timeout,
                 sye_copyfile,sye_createdir,sye_noconsole,sye_notimplemented,
-                sye_sockaddr
+                sye_sockaddr,sye_socket
                );
 
  esys = class(eerror)
@@ -220,7 +220,8 @@ const
     'Can not create directory',
     'No console',
     'Not implemented',
-    'Socket address error'
+    'Socket address error',
+    'Socket error'
    );
 
 var
