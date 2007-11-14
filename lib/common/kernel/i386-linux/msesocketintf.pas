@@ -17,7 +17,7 @@ uses
 
 implementation
 uses
- libc,msefileutils,msesysintf,msesysutils;
+ libc,msefileutils,msesysintf,msesysutils,sysutils;
  
 type
  datarecty = record
