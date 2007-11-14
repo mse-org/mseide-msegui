@@ -11,7 +11,7 @@ unit msetabsglob;
 {$ifdef FPC}{$mode objfpc}{$h+}{$INTERFACES CORBA}{$endif}
 interface
 const
- defaulttabsizemin = 20;
+ defaulttabsizemin = 15;
  defaulttabsizemax = 200;
 
 type
