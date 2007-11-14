@@ -23,6 +23,8 @@ const
  defaultcellwidth = 50;
  defaultcellheight = 50;
  defaultcellwidthmin = 10;
+ defaultitemedittextflags = defaulttextflags + [tf_clipo];
+ defaultitemedittextflagsactive = defaulttextflagsactive + [tf_clipo];
 
 type
  listviewoptionty = (lvo_readonly,lvo_mousemoving,lvo_keymoving,lvo_horz,
@@ -449,8 +451,8 @@ type
    property font;
    property passwordchar;
    property maxlength;
-   property textflags;
-   property textflagsactive;
+   property textflags default defaultitemedittextflags;
+   property textflagsactive default defaultitemedittextflagsactive;
    property onchange;
    property onbuttonaction: buttoneventty read fonbuttonaction write fonbuttonaction;
    property onupdaterowvalues: itemindexeventty read fonupdaterowvalues write fonupdaterowvalues;
@@ -1972,6 +1974,8 @@ begin
   fitemlist:=  titemeditlist.create(iitemlist(self),self);
  end;
  inherited;
+ textflags:= defaultitemedittextflags;
+ textflagsactive:= defaultitemedittextflagsactive;
 // createframe;
 end;
 
