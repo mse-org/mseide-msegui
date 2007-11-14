@@ -128,8 +128,9 @@ type
    property error: syserrorty read geterror;
  end;
 
-procedure syserror(error: syserrorty; text: string = ''); overload;
-procedure syserror(error: syserrorty; sender: tobject; text: string = ''); overload;
+procedure syserror(const error: syserrorty; const text: string = ''); overload;
+procedure syserror(const error: syserrorty;
+                  const sender: tobject; text: string = ''); overload;
 
 function syelasterror: syserrorty; //returns sye_lasterror, sets mselasterror
 function syeseterror(aerror: integer): syserrorty;
@@ -151,8 +152,7 @@ threadvar
 
 implementation
 uses
- Classes,msestreaming,msesysintf,msedatalist,sysutils,mseglob,msesysutils,
- msesocketintf;
+ Classes,msestreaming,msesysintf,msedatalist,sysutils,mseglob,msesysutils;
 {$ifdef FPC}
  {$ifdef MSWINDOWS}
 Procedure CatchUnhandledException (Obj : TObject; Addr: Pointer;
@@ -277,7 +277,7 @@ begin
  mselasterror:= sys_getlasterror;
 end;
 
-procedure syserror(error: syserrorty; text: string); overload;
+procedure syserror(const error: syserrorty; const text: string); overload;
 begin
  if error = sye_ok then begin
   exit;
@@ -286,16 +286,11 @@ begin
   raise esys.create(error,text+sys_geterrortext(mselasterror));
  end
  else begin
-  if error = sye_sockaddr then begin
-   raise esys.create(error,text+soc_getsockaddrerrortext(mselasterror));
-  end
-  else begin
-   raise esys.create(error,text);
-  end;
+  raise esys.create(error,text);
  end;
 end;
 
-procedure syserror(error: syserrorty; sender: tobject;
+procedure syserror(const error: syserrorty; const sender: tobject;
                        text: string = ''); overload;
 begin
  if error = sye_ok then begin

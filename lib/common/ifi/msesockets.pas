@@ -325,10 +325,24 @@ procedure connectcryptio(const acryptio: tcryptio; const tx: tsocketwriter;
                          var cryptioinfo: cryptioinfoty;
                          txfd: integer = invalidfilehandle;
                          rxfd: integer = invalidfilehandle);
+procedure socketerror(const error: syserrorty; const text: string = '');
+
 implementation
 uses
  msefileutils,msesysintf,sysutils,msestream,mseprocutils,msesysutils,
  msesocketintf;
+
+procedure socketerror(const error: syserrorty; const text: string = '');
+begin
+ if error <> sye_ok then begin
+  if error = sye_sockaddr then begin
+   raise esys.create(error,text+soc_getsockaddrerrortext(mselasterror));
+  end
+  else begin
+   syserror(error,text);
+  end;
+ end;
+end;
   
 procedure checksyserror(const aresult: integer);
 begin
@@ -660,7 +674,7 @@ begin
    sok_local: begin
    end;
    sok_inet,sok_inet6: begin
-    syserror(soc_urltoaddr(result));
+    socketerror(soc_urltoaddr(result));
    end;
   end;
  end;  
