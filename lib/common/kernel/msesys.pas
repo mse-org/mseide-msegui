@@ -151,7 +151,8 @@ threadvar
 
 implementation
 uses
- Classes,msestreaming,msesysintf,msedatalist,sysutils,mseglob,msesysutils;
+ Classes,msestreaming,msesysintf,msedatalist,sysutils,mseglob,msesysutils,
+ msesocketintf;
 {$ifdef FPC}
  {$ifdef MSWINDOWS}
 Procedure CatchUnhandledException (Obj : TObject; Addr: Pointer;
@@ -286,7 +287,7 @@ begin
  end
  else begin
   if error = sye_sockaddr then begin
-   raise esys.create(error,text+sys_getsockaddrerrortext(mselasterror));
+   raise esys.create(error,text+soc_getsockaddrerrortext(mselasterror));
   end
   else begin
    raise esys.create(error,text);

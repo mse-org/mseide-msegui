@@ -327,7 +327,8 @@ procedure connectcryptio(const acryptio: tcryptio; const tx: tsocketwriter;
                          rxfd: integer = invalidfilehandle);
 implementation
 uses
- msefileutils,msesysintf,sysutils,msestream,mseprocutils,msesysutils;
+ msefileutils,msesysintf,sysutils,msestream,mseprocutils,msesysutils,
+ msesocketintf;
   
 procedure checksyserror(const aresult: integer);
 begin
@@ -659,7 +660,7 @@ begin
    sok_local: begin
    end;
    sok_inet,sok_inet6: begin
-    syserror(sys_urltoaddr(result));
+    syserror(soc_urltoaddr(result));
    end;
   end;
  end;  
@@ -757,9 +758,9 @@ end;
 
 procedure tsocketclient.internalconnect;
 begin
- syserror(sys_opensocket(fkind,true,fhandle));
+ syserror(soc_opensocket(fkind,true,fhandle));
  try
-  syserror(sys_connectsocket(fhandle,getsockaddr,fpipes.tx.timeoutms));
+  syserror(soc_connectsocket(fhandle,getsockaddr,fpipes.tx.timeoutms));
  except
   sys_closefile(fhandle);
   fhandle:= invalidfilehandle;
@@ -859,7 +860,7 @@ begin
  addr.kind:= fkind;
  addr.size:= sizeof(addr.platformdata);
  while not thread.terminated do begin
-  err:= sys_accept(fhandle,true,conn,addr,0);
+  err:= soc_accept(fhandle,true,conn,addr,0);
   if not thread.terminated then begin
    if err = sye_ok then begin
     try
@@ -903,7 +904,7 @@ begin
       end
       else begin
  //      sys_shutdownsocket(conn,ssk_both);
-       sys_closesocket(conn);
+       soc_closesocket(conn);
       end;
      finally
       application.unlock;
@@ -938,13 +939,13 @@ begin
   end;
  end;
  if fhandle <> invalidfilehandle then begin
-  sys_shutdownsocket(fhandle,ssk_rx);
+  soc_shutdownsocket(fhandle,ssk_rx);
  end;
  if fthread <> nil then begin
   application.waitforthread(fthread);
  end;
  freeandnil(fthread);
- sys_closesocket(fhandle);
+ soc_closesocket(fhandle);
  inherited;
 end;
 
@@ -1017,16 +1018,16 @@ end;
 procedure tsocketserver.internalconnect;
 begin
  if not (csdesigning in componentstate) then begin
-  syserror(sys_opensocket(sok_local,true,fhandle));
+  syserror(soc_opensocket(sok_local,true,fhandle));
   try
-   syserror(sys_bindsocket(fhandle,getsockaddr));
+   syserror(soc_bindsocket(fhandle,getsockaddr));
   except
    sys_closefile(fhandle);
    fhandle:= invalidfilehandle;
    raise;
   end;
   try
-   syserror(sys_listen(fhandle,fmaxconnections));
+   syserror(soc_listen(fhandle,fmaxconnections));
   except
    internaldisconnect;
    raise;
@@ -1066,7 +1067,7 @@ end;
 
 procedure tsocketreader.closehandle(const ahandle: integer);
 begin
- sys_shutdownsocket(ahandle,ssk_rx);
+ soc_shutdownsocket(ahandle,ssk_rx);
  inherited;
 end;
 
@@ -1074,7 +1075,7 @@ procedure tsocketreader.settimeoutms(const avalue: integer);
 begin
  ftimeoutms:= avalue;
  if handle <> invalidfilehandle then begin
-  sys_setsockrxtimeout(handle,avalue);
+  soc_setsockrxtimeout(handle,avalue);
  end;
 end;
 
@@ -1093,7 +1094,7 @@ begin
   result:= cryptread(fcrypt^,@buf,acount,int1);
  end
  else begin  
-  sys_readsocket(handle,@buf,acount,result,int1);
+  soc_readsocket(handle,@buf,acount,result,int1);
  end;
 end;
 
@@ -1145,7 +1146,7 @@ end;
 procedure tsocketreader.sethandle(value: integer);
 begin
  if value <> invalidfilehandle then begin
-  sys_setnonblocksocket(value,true);
+  soc_setnonblocksocket(value,true);
  end;
  inherited;
 end;
@@ -1162,7 +1163,7 @@ procedure tsocketwriter.settimeoutms(const avalue: integer);
 begin
  ftimeoutms:= avalue;
  if handle <> invalidfilehandle then begin
-  sys_setsocktxtimeout(handle,avalue);
+  soc_setsocktxtimeout(handle,avalue);
  end;
 end;
 

@@ -7,7 +7,7 @@
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 }
-unit msesysintf; //i386-linux
+unit msesysintf; //i386-win32
 
 {$ifdef FPC}{$mode objfpc}{$h+}{$INTERFACES CORBA}{$endif}
 
@@ -31,7 +31,7 @@ var
 
 implementation
 uses
- sysutils,windows,msebits,msefileutils,msedatalist,dateutils;
+ sysutils,windows,msebits,msefileutils,msedatalist,dateutils,winsock2;
 
 //todo: correct unicode implementation, long filepaths, stubs for win95
 
@@ -437,86 +437,6 @@ function sys_poll(const handle: integer; const kind: pollkindsty;
 begin
  result:= sye_notimplemented;
 end;
-function sys_opensocket(const kind: socketkindty; const nonblock: boolean;
-                          out handle: integer): syserrorty;
-begin
- result:= sye_notimplemented;
-end;
-
-function sys_shutdownsocket(const handle: integer;
-                            const kind: socketshutdownkindty): syserrorty;
-begin
- result:= sye_notimplemented;
-end;
-
-function sys_closesocket(const handle: integer): syserrorty;
-begin
- result:= sye_notimplemented;
-end;
-
-function sys_bindsocket(const handle: integer;
-                                  const addr: socketaddrty): syserrorty;
-begin
- result:= sye_notimplemented;
-end;
-
-function sys_connectsocket(const handle: integer; const addr: socketaddrty;
-                               const timeoutms: integer): syserrorty;
-begin
- result:= sye_notimplemented;
-end;
-
-function sys_readsocket(const fd: longint; const buf: pointer;
-            const nbytes: longword; out readbytes: integer;
-            const timeoutms: integer): syserrorty;
-begin
- result:= sye_notimplemented;
-end;
-
-function sys_listen(const handle: integer; const maxconnections: integer): syserrorty;
-begin
- result:= sye_notimplemented;
-end;
-
-function sys_accept(const handle: integer;  const nonblock: boolean;                 
-                  out conn: integer; out addr: socketaddrty;
-                  const timeoutms: integer): syserrorty;
-begin
- result:= sye_notimplemented;
-end;
-
-function sys_urltoaddr(var addr: socketaddrty): syserrorty;
-begin
- result:= sye_notimplemented;
-end;
-
-function sys_getsockaddrerrortext(aerror: integer): string;
-begin
-end;
-
-function sys_getsockaddr(const addr: socketaddrty): string;
-begin
-end;
-
-function sys_getsockport(const addr: socketaddrty): integer;
-begin
-end;
-
-function sys_setnonblocksocket(const handle: integer; const nonblock: boolean): syserrorty;
-begin
- result:= sye_notimplemented;
-end;
-
-function sys_setsockrxtimeout(const handle: integer; const ms: integer): syserrorty;
-begin
- result:= sye_notimplemented;
-end;
-
-function sys_setsocktxtimeout(const handle: integer; const ms: integer): syserrorty;
-begin
- result:= sye_notimplemented;
-end;
-
 function sys_copyfile(const oldfile,newfile: msestring): syserrorty;
 var
  str1,str2: string;
