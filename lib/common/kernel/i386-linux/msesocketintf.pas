@@ -211,6 +211,7 @@ var
  po1: plocsockaddrty;
  int1,int2: integer;
 begin
+ result:= sye_ok;
  with addr do begin
   if kind = sok_local then begin
    str1:= tosysfilepath(url);
@@ -234,11 +235,15 @@ begin
    end;
    if int2 <> 0 then begin
     result:= syelasterror;
-   end
-   else begin
-    result:= sye_ok;
    end;
    freemem(po1);
+  end
+  else begin
+   with linuxsockaddrty(platformdata) do begin
+    if bind(handle,@ad,sa_len(ad.addr.sa_family)) <> 0 then begin
+     result:= syelasterror;
+    end;
+   end;
   end;
  end;
 end;
