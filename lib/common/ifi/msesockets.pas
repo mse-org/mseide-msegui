@@ -777,9 +777,9 @@ end;
 
 procedure tsocketclient.internalconnect;
 begin
- syserror(soc_open(fkind,true,fhandle));
+ socketerror(soc_open(fkind,true,fhandle));
  try
-  syserror(soc_connect(fhandle,getsockaddr,fpipes.tx.timeoutms));
+  socketerror(soc_connect(fhandle,getsockaddr,fpipes.tx.timeoutms));
  except
   sys_closefile(fhandle);
   fhandle:= invalidfilehandle;
@@ -1037,7 +1037,7 @@ end;
 procedure tsocketserver.internalconnect;
 begin
  if not (csdesigning in componentstate) then begin
-  syserror(soc_open(sok_local,true,fhandle));
+  syserror(soc_open(fkind,true,fhandle));
   try
    syserror(soc_bind(fhandle,getsockaddr));
   except
