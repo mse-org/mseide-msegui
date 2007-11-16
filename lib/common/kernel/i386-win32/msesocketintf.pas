@@ -132,7 +132,7 @@ end;
 function soc_shutdown(const handle: integer;
                             const kind: socketshutdownkindty): syserrorty;
 begin
- result:= sye_notimplemented;
+ result:= checkerror(shutdown(handle,ord(kind)));
 end;
 
 function soc_close(const handle: integer): syserrorty;
@@ -212,6 +212,38 @@ begin
  end
  else begin
   readbytes:= -1;
+ end;
+end;
+
+function soc_write(const fd: longint; buf: pointer;
+                        nbytes: longword; out writebytes: integer;
+                        const timeoutms: integer): syserrorty;
+var        //todo: correct timeout value for multiple runs
+ int1,int2: integer;
+ pollres: pollkindsty;
+begin
+ writebytes:= -1;
+ int2:= 0;
+ repeat
+  result:= soc_poll(fd,[poka_write],timeoutms,pollres);  
+  if result <> sye_ok then begin
+   exit;
+  end;
+  int1:= send(fd,buf,nbytes,0);
+  if int1 <= 0 then begin
+   writebytes:= int1;
+   break;
+  end;
+  inc(int2,int1);
+  inc(pchar(buf),int1);
+  dec(nbytes,int1);
+ until integer(nbytes) <= 0;
+ if nbytes = 0 then begin
+  result:= sye_ok;
+  writebytes:= int2;
+ end
+ else begin
+  result:= setsocketerror;
  end;
 end;
 

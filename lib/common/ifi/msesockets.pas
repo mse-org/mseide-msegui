@@ -39,8 +39,8 @@ type
   protected
    fcrypt: pcryptioinfoty;
    procedure closehandle(const ahandle: integer); override;
+   function dowrite(const buffer; count: longint): longint; override;
   public
-   function Write(const Buffer; Count: Longint): Longint; override;
    property timeoutms: integer read ftimeoutms write settimeoutms;
  end;
  
@@ -963,12 +963,13 @@ begin
  end;
  if fhandle <> invalidfilehandle then begin
   soc_shutdown(fhandle,ssk_rx);
+  soc_close(fhandle);
  end;
  if fthread <> nil then begin
   application.waitforthread(fthread);
  end;
  freeandnil(fthread);
- soc_close(fhandle);
+// soc_close(fhandle);
  inherited;
 end;
 
@@ -1111,7 +1112,7 @@ begin
   int1:= -1;
  end
  else begin
-  int1:= ftimeoutms;
+  int1:= 0;
  end;
  if fcrypt <> nil then begin
   result:= cryptread(fcrypt^,@buf,acount,int1);
@@ -1190,13 +1191,13 @@ begin
  end;
 end;
 
-function tsocketwriter.Write(const Buffer; Count: Longint): Longint;
+function tsocketwriter.dowrite(const buffer; count: longint): longint;
 begin
  if fcrypt <> nil then begin
   result:= cryptwrite(fcrypt^,@buffer,count,ftimeoutms);
  end
  else begin
-  result:= inherited write(buffer,count);
+  soc_write(handle,@buffer,count,result,0);
  end;
 end;
 

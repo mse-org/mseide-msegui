@@ -34,6 +34,9 @@ function soc_read(const fd: longint; const buf: pointer;
                         const timeoutms: integer): syserrorty;
                  //atimeoutms < 0 -> nonblocked,
                  //result = 0 -> no data, < 0 - error
+function soc_write(const fd: longint; buf: pointer;
+                        nbytes: longword; out writebytes: integer;
+                        const timeoutms: integer): syserrorty;
 function soc_setrxtimeout(const handle: integer; const ms: integer): syserrorty;
 function soc_settxtimeout(const handle: integer; const ms: integer): syserrorty;
 

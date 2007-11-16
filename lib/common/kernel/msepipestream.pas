@@ -22,12 +22,14 @@ type
  pr_piperesultty = (pr_empty,pr_data,pr_line);
 
  tpipewriter = class(ttextstream)
+  private
   protected
    procedure sethandle(value: integer); override;
+   function dowrite(const buffer; count: longint): longint; virtual;
   public
    constructor create; reintroduce;
 //   destructor destroy; override;
-
+   function Write(const Buffer; Count: Longint): Longint; override;
    function releasehandle: integer; virtual;
    property handle: integer read fhandle write sethandle;
     //nimmt handle in besitz
@@ -159,6 +161,16 @@ procedure tpipewriter.sethandle(value: integer);
 begin
  inherited;
  bufoffset:= nil;
+end;
+
+function tpipewriter.dowrite(const buffer; count: longint): longint;
+begin
+ result:= inherited write(buffer,count);
+end;
+
+function tpipewriter.Write(const Buffer; Count: Longint): Longint;
+begin
+ result:= dowrite(buffer,count);
 end;
 
 { tpipereader }
