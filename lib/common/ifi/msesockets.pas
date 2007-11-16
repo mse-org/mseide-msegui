@@ -431,12 +431,16 @@ procedure tcustomsocketpipes.sethandle(const avalue: integer);
 var
  int1: integer;
 begin
+ ftx.releasehandle;
  ftx.handle:= avalue;
+ frx.handle:= avalue;
+ {
  int1:= avalue;
  if avalue <> invalidfilehandle then begin
   syserror(sys_dup(avalue,int1));
  end;
  frx.handle:= int1;
+ }
  if avalue <> invalidfilehandle then begin
   include(fstate,sops_open);
  end
