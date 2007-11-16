@@ -164,6 +164,7 @@ function soc_connect(const handle: integer; const addr: socketaddrty;
 var
  str1: string;
  int1,int2: integer;
+ pollres: pollkindsty;
 begin
  result:= sye_ok;
  with addr do begin
@@ -176,13 +177,11 @@ begin
 testvar:= wsagetlasterror;
     if connect(handle,ad.addr,int1) <> 0 then begin
      if wsagetlasterror = wsaewouldblock then begin
-      result:= soc_poll(handle,[poka_write,poka_except],timeoutms);
+      result:= soc_poll(handle,[poka_write,poka_except],timeoutms,pollres);
 testvar:= wsagetlasterror;
-      if result = sye_ok then begin
-       if connect(handle,ad.addr,int1) <> 0 then begin
-testvar:= wsagetlasterror;
-        result:= setsocketerror;
-       end;
+      if (result = sye_ok) and (poka_except in pollres) then begin
+//       connect(handle,ad.addr,int1);
+       result:= setsocketerror;
       end;
      end
      else begin
@@ -197,8 +196,23 @@ end;
 function soc_read(const fd: longint; const buf: pointer;
             const nbytes: longword; out readbytes: integer;
             const timeoutms: integer): syserrorty;
+var
+ pollres: pollkindsty;
+ err: integer;
 begin
- result:= sye_notimplemented;
+ result:= sye_ok;
+ if timeoutms >= 0 then begin
+  result:= soc_poll(fd,[poka_read],timeoutms,pollres);
+ end;
+ if result = sye_ok then begin
+  readbytes:= recv(fd,buf^,nbytes,0);
+  if readbytes < 0 then begin
+   result:= setsocketerror;
+  end;
+ end
+ else begin
+  readbytes:= -1;
+ end;
 end;
 
 function soc_listen(const handle: integer; const maxconnections: integer): syserrorty;
@@ -209,9 +223,12 @@ end;
 function soc_accept(const handle: integer;  const nonblock: boolean;                 
                   out conn: integer; out addr: socketaddrty;
                   const timeoutms: integer): syserrorty;
+var
+ pollres: pollkindsty;
 begin
- result:= soc_poll(handle,[poka_read],timeoutms);
+ result:= soc_poll(handle,[poka_read],timeoutms,pollres);
  if result = sye_ok then begin
+  addr.size:= sizeof(win32sockadty);
   conn:= accept(handle,@addr.platformdata,@addr.size);
   if conn = -1 then begin
    result:= syelasterror;
@@ -301,7 +318,8 @@ begin
 end;
 
 function soc_poll(const handle: integer; const kind: pollkindsty;
-                            const timeoutms: longword): syserrorty;
+                            const timeoutms: longword;
+                            out pollres: pollkindsty): syserrorty;
                              //0 -> no timeout
                              //for blocking mode
 var
@@ -311,6 +329,7 @@ var
  pti: ptimeval;
  int1: integer;
 begin
+ pollres:= [];
  if timeoutms <> 0 then begin
   ti.tv_sec:= timeoutms div 1000;
   ti.tv_usec:= (timeoutms mod 1000) * 1000;
@@ -347,6 +366,15 @@ testvar:= wsagetlasterror;
  int1:= select(0,prset,pwset,peset,pti);
 testvar:= wsagetlasterror;
  if int1 > 0 then begin
+  if (poka_read in kind) and fd_isset(handle,rset) then begin
+   include(pollres,poka_read);
+  end;
+  if (poka_write in kind) and fd_isset(handle,wset) then begin
+   include(pollres,poka_write);
+  end;
+  if (poka_except in kind) and fd_isset(handle,eset) then begin
+   include(pollres,poka_except);
+  end;
   result:= sye_ok;
  end
  else begin

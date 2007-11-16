@@ -38,7 +38,8 @@ function soc_setrxtimeout(const handle: integer; const ms: integer): syserrorty;
 function soc_settxtimeout(const handle: integer; const ms: integer): syserrorty;
 
 function soc_poll(const handle: integer; const kind: pollkindsty;
-                            const timeoutms: longword): syserrorty;
+                            const timeoutms: longword; 
+                            out pollres: pollkindsty): syserrorty;
                              //0 -> no timeout
                              //for blocking mode
 

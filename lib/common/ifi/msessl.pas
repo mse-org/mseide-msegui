@@ -188,6 +188,7 @@ function tssl.waitforio(const aerror: integer; var ainfo: cryptioinfoty;
 var
  int1: integer;
  err1: syserrorty;
+ pollres: pollkindsty;
 begin
  with ainfo,sslinfoty(cryptdata) do begin
   sys_mutexunlock(mutex);
@@ -198,13 +199,13 @@ begin
     int1:= ssl_get_error(ssl,aerror);
     if (int1 = ssl_error_want_read) then begin
      if atimeoutms >= 0 then begin
-      err1:= soc_poll(rxfd,[poka_read],atimeoutms);
+      err1:= soc_poll(rxfd,[poka_read],atimeoutms,pollres);
      end;
     end
     else begin
      if (int1 = ssl_error_want_write) then begin
       if atimeoutms >= 0 then begin
-       err1:= soc_poll(txfd,[poka_write],atimeoutms);
+       err1:= soc_poll(txfd,[poka_write],atimeoutms,pollres);
       end;
      end
      else begin
@@ -275,12 +276,14 @@ end;
 
 class function tssl.read(var ainfo: cryptioinfoty; const buffer: pointer;
                const count: integer; const atimeoutms: integer): integer;
+var
+ pollres: pollkindsty;
 begin
  result:= 0;
  with ainfo,sslinfoty(cryptdata) do begin
   try
    if (atimeoutms < 0) or 
-    (soc_poll(ainfo.rxfd,[poka_read],atimeoutms) = sye_ok) then begin
+    (soc_poll(ainfo.rxfd,[poka_read],atimeoutms,pollres) = sye_ok) then begin
     repeat
      sys_mutexlock(mutex);
     until waitforio(ssl_read(ssl,buffer,count),ainfo,atimeoutms,@result) or 

@@ -119,6 +119,7 @@ var
  str1: string;
  po1: plocsockaddrty;
  int1,int2: integer;
+ pollres: pollkindsty;
 begin
  result:= sye_ok;
  with addr do begin
@@ -134,7 +135,7 @@ begin
    {$else}
    if connect(handle,psockaddr(po1)^,int1) <> 0 then begin
    {$endif}
-    result:= soc_poll(handle,[poka_write],timeoutms);
+    result:= soc_poll(handle,[poka_write],timeoutms,pollres);
     if result = sye_ok then begin
     {$ifdef FPC}
      if connect(handle,pointer(po1),int1) <> 0 then begin
@@ -156,7 +157,7 @@ begin
     {$else}
     if connect(handle,psockaddr(po1)^,int1) <> 0 then begin
     {$endif};
-     result:= soc_poll(handle,[poka_write],timeoutms);
+     result:= soc_poll(handle,[poka_write],timeoutms,pollres);
      if result = sye_ok then begin
       {$ifdef FPC}
       if connect(handle,pointer(po1),int1) <> 0 then begin
@@ -176,11 +177,12 @@ function soc_read(const fd: longint; const buf: pointer;
                     const nbytes: longword; out readbytes: integer;
                     const timeoutms: integer): syserrorty;
                     //atimeoutms < 0 -> nonblocked
-
+var
+ pollres: pollkindsty;
 begin
  result:= sye_ok;
  if timeoutms >= 0 then begin
-  result:= soc_poll(fd,[poka_read],timeoutms);
+  result:= soc_poll(fd,[poka_read],timeoutms,pollres);
  end;
  if result = sye_ok then begin
   readbytes:= __read(fd,buf^,nbytes);
@@ -260,9 +262,12 @@ end;
 
 function soc_accept(const handle: integer; const nonblock: boolean; out conn: integer;
              out addr: socketaddrty; const timeoutms: integer): syserrorty;
+var
+ pollres: pollkindsty;
 begin
- result:= soc_poll(handle,[poka_read],timeoutms);
+ result:= soc_poll(handle,[poka_read],timeoutms,pollres);
  if result = sye_ok then begin
+  addr.size:= sizeof(linuxsockadty);
   conn:= accept(handle,@addr.platformdata,@addr.size);
   if conn = -1 then begin
    result:= syelasterror;
@@ -374,7 +379,8 @@ begin
 end;
 
 function soc_poll(const handle: integer; const kind: pollkindsty;
-                            const timeoutms: longword): syserrorty;
+                            const timeoutms: longword; 
+                            out pollres: pollkindsty): syserrorty;
                              //0 -> no timeout
                              //for blocking mode
 var
@@ -382,6 +388,7 @@ var
  lwo1,lwo2: longword;
  info: pollfd;
 begin
+ pollres:= [];
  fillchar(info,sizeof(info),0);
  with info do begin
   fd:= handle;
@@ -424,6 +431,17 @@ begin
    result:= sye_timeout;
   end
   else begin
+   with info do begin
+    if revents and not pollin <> 0 then begin
+     include(pollres,poka_read);
+    end;
+    if revents and not pollout <> 0 then begin
+     include(pollres,poka_write);
+    end;
+    if revents and not pollpri <> 0 then begin
+     include(pollres,poka_except);
+    end;
+   end;
    result:= sye_ok;
   end;
  end;
