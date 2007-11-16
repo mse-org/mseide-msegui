@@ -212,7 +212,7 @@ function soc_write(const fd: longint; buf: pointer;
 begin
  writebytes:= sys_write(fd,buf,nbytes);
  if writebytes > 0 then begin
-  result:= gue_ok;
+  result:= sye_ok;
  end
  else begin
   result:= syelasterror;
