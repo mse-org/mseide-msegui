@@ -749,6 +749,7 @@ begin
  fcaptionpos:= cp_right;
  flevelstep:= defaultlevelstep;
  inherited create;
+ fitemclass:= tlistitem;
 end;
 
 destructor tcustomitemlist.destroy;

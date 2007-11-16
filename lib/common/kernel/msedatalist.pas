@@ -442,6 +442,8 @@ type
    function Getitems(index: integer): tobject;
    procedure setitems(index: integer; const Value: tobject);
   protected
+   fitemclass: tclass;
+   procedure checkitemclass(const aitem: tobject);
    procedure freedata(var data); override;
    procedure copyinstance(var data); override;
    procedure initinstance(var data); override;
@@ -4955,8 +4957,16 @@ begin
  finternaloptions:= (finternaloptions - [ilo_needscopy]) + [ilo_needsinit];
 end;
 
+procedure tobjectdatalist.checkitemclass(const aitem: tobject);
+begin
+ if (fitemclass <> nil) and not (aitem is fitemclass) then begin
+  raise exception.create('Item must be "'+fitemclass.classname+'".');
+ end;
+end;
+
 function tobjectdatalist.add(const aitem: tobject): integer;
 begin
+ checkitemclass(aitem);
  result:= adddata(aitem);
 end;
 

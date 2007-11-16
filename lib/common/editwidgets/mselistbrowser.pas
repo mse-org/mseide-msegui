@@ -1891,6 +1891,7 @@ procedure tcustomitemeditlist.add(const anode: tlistitem);
 var
  int1: integer;
 begin
+ checkitemclass(anode);
  beginupdate;
  try
   int1:= internaladddata(anode,false);
@@ -2687,6 +2688,7 @@ constructor ttreeitemeditlist.create(const intf: iitemlist; const aowner: ttreei
 begin
  fcolorline:= cl_dkgray;
  inherited create(intf,aowner);
+ fitemclass:= ttreelistedititem;
 end;
 
 procedure ttreeitemeditlist.setcolorline(const value: colorty);
