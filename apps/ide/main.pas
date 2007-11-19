@@ -646,6 +646,12 @@ begin
     end
     else begin
      page1:= sourcefo.findsourcepage(str1);
+     if page1 = nil then begin //mfm not loaded in editor
+      po1:= designer.loadformfile(str1);      
+      if po1 <> nil then begin
+       po1^.designform.activate(true);
+      end;
+     end;
     end;
    end
    else begin
@@ -662,7 +668,10 @@ begin
  else begin
   po1:= designer.actmodulepo;
   if po1 <> nil then begin
-   sourcefo.openfile(replacefileext(po1^.filename,pasfileext),true);
+   str1:= replacefileext(po1^.filename,pasfileext);
+   if sourcefo.openfile(str1,true) = nil then begin
+    raise exception.create('Unable to open file "'+str1+'".');
+   end;
   end
   else begin
    if designer.modules.count > 0 then begin
