@@ -947,7 +947,8 @@ begin
  end;
 end;
 
-procedure updateprojectoptions(const statfiler: tstatfiler);
+procedure updateprojectoptions(const statfiler: tstatfiler;
+                  const afilename: filenamety);
 var
  int1,int2,int3: integer;
 begin
@@ -973,6 +974,7 @@ begin
   setsection('projectoptions');
   updatevalue('projectdir',projectdir);
   updatevalue('projectfilename',projectfilename);
+  projectfilename:= afilename;
   updatememorystatstream('findinfiledialog',findinfiledialogstatname);
   updatememorystatstream('finddialog',finddialogstatname);
   updatememorystatstream('replacedialog',replacedialogstatname);
@@ -1458,8 +1460,8 @@ begin
   statreader:= tstatreader.create(filename);
   try
    application.beginwait;
-   updateprojectoptions(statreader);
-   projectoptions.projectfilename:= filename;
+   updateprojectoptions(statreader,filename);
+//   projectoptions.projectfilename:= filename;
   finally
    statreader.free;
    application.endwait;
@@ -1482,8 +1484,8 @@ begin
  end;
  statwriter:= tstatwriter.create(filename);
  try
-  updateprojectoptions(statwriter);
-  projectoptions.projectfilename:= filename;
+  updateprojectoptions(statwriter,filename);
+//  projectoptions.projectfilename:= filename;
  finally
   statwriter.free;
  end;
