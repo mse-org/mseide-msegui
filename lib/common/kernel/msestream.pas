@@ -108,7 +108,7 @@ type
    function readstrln(out value: string): boolean; overload; virtual;
                                               //no encoding
    procedure writetotext(var dest: text);   //no encoding
-                 
+
    procedure write(const value: string); reintroduce; overload;
    procedure writeln(const value: string); overload; virtual;
    procedure write(const value: msestring); reintroduce; overload;

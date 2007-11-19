@@ -31,7 +31,7 @@ var
 
 implementation
 uses
- sysutils,windows,msebits,msefileutils,msedatalist,dateutils,winsock2;
+ sysutils,windows,msebits,msefileutils,msedatalist,dateutils;
 
 //todo: correct unicode implementation, long filepaths, stubs for win95
 

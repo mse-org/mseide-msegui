@@ -29,7 +29,10 @@ type
   public
    constructor create; reintroduce;
 //   destructor destroy; override;
+{$ifdef FPC}
    function Write(const Buffer; Count: Longint): Longint; override;
+{$endif}
+
    function releasehandle: integer; virtual;
    property handle: integer read fhandle write sethandle;
     //nimmt handle in besitz
@@ -44,7 +47,7 @@ type
 
  pipereaderoptionty = (pro_nolock);
  pipereaderoptionsty = set of pipereaderoptionty;
- 
+
  tpipereader = class(tpipewriter)
   private
    fpipebuffer: string;
@@ -167,12 +170,12 @@ function tpipewriter.dowrite(const buffer; count: longint): longint;
 begin
  result:= inherited write(buffer,count);
 end;
-
+{$ifdef FPC}
 function tpipewriter.Write(const Buffer; Count: Longint): Longint;
 begin
  result:= dowrite(buffer,count);
 end;
-
+{$endif}
 { tpipereader }
 
 constructor tpipereader.create;
