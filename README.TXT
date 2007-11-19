@@ -33,7 +33,8 @@ Installation:
 *************
 1. Download and install FPC 2.2, you can get it from 
    http://www.freepascal.org/download.var
-2. Download src and bin zip's.
+2. Download mseide_msegui_src_1_6.zip and mseide_bin_1_6.zip
+   http://sourceforge.net/project/showfiles.php?group_id=165409
 3. Extract them to a directory of your choice ('yourdirectory') .
 4. Run 'yourdirectory/bin/i386-linux/mseide' on linux or 
    'yourdirectory\bin\i386-win32\mseide.exe' on windows.
@@ -50,9 +51,10 @@ If you wish to to compile the IDE:
 
 Version 1.4 to 1.6
 ******************
-The MSEgui base units have been refactored to implement a GUI independent
-tapplication class. It is possible that you need to add mseapplication,
-mseact, mseguiglob and mseglob to uses.
+The MSEgui base units have been refactored in order to implement a GUI
+independent tapplication class.
+It is possible that you need to add mseapplication, mseact, mseguiglob and 
+mseglob to uses.
 
 FPC 2.2
 *******
