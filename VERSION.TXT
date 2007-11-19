@@ -1,5 +1,7 @@
 MSEide+MSEgui version history
 
+Version 1.6
+2007-11-19
 2007-10-29
  Refactoring for GUI independent MSEifi:
  modalresultty moved to mseglob.
