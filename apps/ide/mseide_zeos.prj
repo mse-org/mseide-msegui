@@ -12,9 +12,11 @@ order9=0
 order10=0
 order11=0
 order12=0
+order13=0
 [projectoptions]
 projectdir=/home/mse/packs/standard/svn/mse/trunk/apps/ide
-options=54
+projectfilename=/home/mse/packs/standard/svn/mse/trunk/apps/ide/mseide_zeos.prj
+options=57
  [projectoptionsfo]
  stackedunder=
  x=151
@@ -66,9 +68,12 @@ options=54
  firsttab=0
  index=0
  [projectoptionsfo.twidgetgrid3]
- width0=141
- width1=332
- width2=320
+ width0=13
+ width1=13
+ width2=13
+ width3=141
+ width4=290
+ width5=320
 sigsettings=27
  1,1,T,F
  3,3,T,F
@@ -127,14 +132,11 @@ makeoptionson=4
  31
  34
  32
-macroon=2
+macroon=1
  63
- 63
-macronames=2
- msedir
+macronames=1
  zeosdir
-macrovalues=2
- /home/mse/packs/standard/svn/mse/trunk/
+macrovalues=1
  /home/mse/packs/standard/svn/zeos/trunk/
 macrogroup=0
 groupcomments=6
@@ -185,6 +187,9 @@ filemasks=3
  "*.pp" "*.pas" "*.inc" "*.dpr"
  *.mfm
  *
+toolsave=0
+toolhide=0
+toolparse=0
 toolmenus=0
 toolfiles=0
 toolparams=0
@@ -312,13 +317,13 @@ files=
 [layout]
 windowlayout=322
  [mainfo]
- stackedunder=
+ stackedunder=mainfo.panel1
  x=4
  y=24
  cx=286
  cy=74
  wsize=0
- active=0
+ active=1
  visible=1
  [mainfo.basedock]
  splitdir=2
@@ -358,7 +363,7 @@ windowlayout=322
  cy=491
  [debuggerfo]
  splitdir=0
- useroptions=2075
+ useroptions=3099
  parent=mainfo.basedock
  visible=1
  mdistate=0
@@ -372,8 +377,8 @@ windowlayout=322
  cy=38
  [componentpalettefo]
  splitdir=0
- useroptions=2075
- stackedunder=mainfo.panel1
+ useroptions=3099
+ stackedunder=mainfo
  parent=
  mdistate=0
  nx=0
@@ -406,7 +411,7 @@ windowlayout=322
  [watchfo]
  splitdir=0
  useroptions=3099
- stackedunder=objectinspectorfo
+ stackedunder=breakpointsfo
  parent=
  mdistate=0
  nx=0
@@ -452,7 +457,7 @@ windowlayout=322
  [breakpointsfo]
  splitdir=0
  useroptions=2075
- stackedunder=cpufo
+ stackedunder=stackfo
  parent=
  mdistate=0
  nx=0
@@ -471,7 +476,7 @@ windowlayout=322
  [watchpointsfo]
  splitdir=0
  useroptions=2075
- stackedunder=stackfo
+ stackedunder=projecttreefo
  parent=
  mdistate=0
  nx=0
@@ -503,7 +508,7 @@ windowlayout=322
  [stackfo]
  splitdir=0
  useroptions=2075
- stackedunder=threadsfo
+ stackedunder=cpufo
  parent=
  mdistate=0
  nx=0
@@ -520,7 +525,7 @@ windowlayout=322
  [projecttreefo]
  splitdir=0
  useroptions=27
- stackedunder=findinfilefo
+ stackedunder=targetconsolefo
  parent=
  mdistate=0
  nx=0
@@ -537,7 +542,7 @@ windowlayout=322
  [findinfilefo]
  splitdir=0
  useroptions=2075
- stackedunder=watchfo
+ stackedunder=componentpalettefo
  parent=
  mdistate=0
  nx=0
@@ -568,7 +573,7 @@ windowlayout=322
  [disassfo]
  splitdir=0
  useroptions=2075
- stackedunder=projecttreefo
+ stackedunder=threadsfo
  parent=
  mdistate=0
  nx=0
@@ -585,7 +590,7 @@ windowlayout=322
  [threadsfo]
  splitdir=0
  useroptions=2075
- stackedunder=componentpalettefo
+ stackedunder=objectinspectorfo
  parent=
  mdistate=0
  nx=0
@@ -602,7 +607,7 @@ windowlayout=322
  [targetconsolefo]
  splitdir=0
  useroptions=2075
- stackedunder=
+ stackedunder=findinfilefo
  parent=
  mdistate=0
  nx=0
@@ -619,7 +624,7 @@ windowlayout=322
  [mainfo.panel1]
  splitdir=2
  useroptions=4091
- stackedunder=mainfo
+ stackedunder=
  parent=
  mdistate=0
  nx=0
@@ -631,7 +636,7 @@ windowlayout=322
  cx=734
  cy=491
  wsize=0
- active=1
+ active=0
  visible=1
 [edit]
 hintwidth=0
