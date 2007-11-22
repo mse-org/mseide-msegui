@@ -79,6 +79,7 @@ type
    fupdating1: integer;
    fonitemchange: indexeventty;
    function getitems(const index: integer): tdropdowncol;
+   procedure setrowcount(const avalue: integer);
   protected
    fitemindex: integer;
    fkeyvalue: msestring;
@@ -95,6 +96,7 @@ type
    procedure clear;
    function addrow(const aitems: array of msestring): integer; //returns itemindex
    function getrow(const aindex: integer): msestringarty;
+   property rowcount: integer read maxrowcount write setrowcount;
    property onitemchange: indexeventty read fonitemchange write fonitemchange;
    property items[const index: integer]: tdropdowncol read getitems; default;
  end;
@@ -519,6 +521,15 @@ begin
   result[int1]:= pmsestring(tdropdowncol(fitems[int1]).fdatapo +
                                           aindex * sizeof(msestring))^;
  end; 
+end;
+
+procedure tdropdowncols.setrowcount(const avalue: integer);
+var
+ int1: integer;
+begin
+ for int1:= 0 to high(fitems) do begin
+  tdropdowncol(fitems[int1]).count:= avalue;
+ end;
 end;
 
 { tcustomdropdownbuttonframe }
@@ -1206,17 +1217,19 @@ end;
 
 procedure tdropdownlist.initcols(const acols: tdropdowncols);
 var
- int1: integer;
+ int1,int2: integer;
  col1: tdropdowncol;
 begin
  if acols.count > 0 then begin
   rowcount:= acols[0].count;
   fdatacols.count:= acols.count;
-  for int1:= 0 to acols.count - 1 do begin
-   if acols[int1].count <> frowcount then begin
-    error(gre_differentrowcount);
-   end;
+  int2:= acols.maxrowcount;
+  for int1:= 0 to acols.count - 1 do begin  
+//   if acols[int1].count <> frowcount then begin
+//    error(gre_differentrowcount);
+//   end;
    col1:= acols[int1];
+   col1.count:= int2;
    with tstringcol1(fdatacols[int1]) do begin
     fdata:= col1;
     options:= col1.foptions;
