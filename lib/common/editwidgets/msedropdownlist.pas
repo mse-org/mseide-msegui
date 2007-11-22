@@ -94,6 +94,7 @@ type
    procedure endupdate;
    procedure clear;
    function addrow(const aitems: array of msestring): integer; //returns itemindex
+   function getrow(const aindex: integer): msestringarty;
    property onitemchange: indexeventty read fonitemchange write fonitemchange;
    property items[const index: integer]: tdropdowncol read getitems; default;
  end;
@@ -506,6 +507,18 @@ begin
   acount:= tcustomdropdownlistcontroller(fowner).fvaluecol + 1;
  end;
  inherited;
+end;
+
+function tdropdowncols.getrow(const aindex: integer): msestringarty;
+var
+ int1: integer;
+begin
+ checkindex(aindex);
+ setlength(result,count);
+ for int1:= 0 to high(fitems) do begin
+  result[int1]:= pmsestring(tdropdowncol(fitems[int1]).fdatapo +
+                                          aindex * sizeof(msestring))^;
+ end; 
 end;
 
 { tcustomdropdownbuttonframe }
