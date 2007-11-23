@@ -56,7 +56,7 @@ type
    ftextflags: textflagsty;
    fcolorselect: colorty;
    ffontcolorselect: colorty;
-   procedure setoptions(const Value: coloptionsty);
+   procedure setoptions(const avalue: coloptionsty);
   protected
    fowner: tobject;
   public
@@ -405,9 +405,9 @@ begin
  inherited create;
 end;
 
-procedure tdropdowncol.setoptions(const Value: coloptionsty);
+procedure tdropdowncol.setoptions(const avalue: coloptionsty);
 begin
-  foptions := Value + [co_focusselect];
+ foptions:= avalue + [co_focusselect];
 end;
 
 { tdropdowncols }
@@ -416,6 +416,7 @@ constructor tdropdowncols.create(const aowner: tcustomdropdownlistcontroller);
 begin
  inherited create(aowner,nil);
  count:= 1;
+// items[0].options:= items[0].options + [co_fill];
 end;
 
 function tdropdowncols.getcolclass: dropdowncolclassty;
@@ -1258,17 +1259,22 @@ begin
  aparent:= fcontroller.getwidget;
  inherited create(nil);
  visible:= false;
- datarowlinewidth:= acontroller.fdatarowlinewidth;
- datarowlinecolor:= acontroller.fdatarowlinecolor;
- exclude(foptionsgrid,og_focuscellonenter);
- ffocusedcell.col:= 0;
- color:= cl_background;
- fdatacols.options:= fdatacols.options + [co_focusselect,co_readonly];
- font:= twidget1(aparent).getfont;
- frame.levelo:= 0;
- fframe.framewidth:= 1;
- fframe.colorframe:= cl_black;
- initcols(acols);
+ beginupdate;
+ try
+  datarowlinewidth:= acontroller.fdatarowlinewidth;
+  datarowlinecolor:= acontroller.fdatarowlinecolor;
+  exclude(foptionsgrid,og_focuscellonenter);
+  ffocusedcell.col:= 0;
+  color:= cl_background;
+  fdatacols.options:= fdatacols.options + [co_focusselect,co_readonly];
+  font:= twidget1(aparent).getfont;
+  frame.levelo:= 0;
+  fframe.framewidth:= 1;
+  fframe.colorframe:= cl_black;
+  initcols(acols);
+ finally
+  endupdate;
+ end;
 end;
 
 destructor tdropdownlist.destroy;
