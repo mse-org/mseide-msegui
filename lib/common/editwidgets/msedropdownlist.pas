@@ -89,12 +89,15 @@ type
              //sender = nil -> col undefined
    function maxrowcount: integer;
    function getcolclass: dropdowncolclassty; virtual;
+   procedure checkrowindex(const aindex: integer);
   public
    constructor create(const aowner: tcustomdropdownlistcontroller); reintroduce;
    procedure beginupdate;
    procedure endupdate;
    procedure clear;
    function addrow(const aitems: array of msestring): integer; //returns itemindex
+   procedure insertrow(const aindex: integer; const aitems: array of msestring);
+   procedure deleterow(const aindex: integer);
    function getrow(const aindex: integer): msestringarty;
    property rowcount: integer read maxrowcount write setrowcount;
    property onitemchange: indexeventty read fonitemchange write fonitemchange;
@@ -380,7 +383,7 @@ type
 
 implementation
 uses
- sysutils,msewidgets,mseeditglob,mseguiintf;
+ sysutils,msewidgets,mseeditglob,mseguiintf,rtlconsts;
 
 type
  twidget1 = class(twidget);
@@ -471,24 +474,6 @@ begin
  end;
 end;
 
-function tdropdowncols.addrow(const aitems: array of msestring): integer;
-var
- int1: integer;
-begin
- result:= maxrowcount;
- beginupdate;
- try
-  for int1:= 0 to count - 1 do begin
-   items[int1].count:= result + 1;
-   if int1 < length(aitems) then begin
-    items[int1][result]:= aitems[int1];
-   end;
-  end;
- finally
-  endupdate;
- end;
-end;
-
 function tdropdowncols.maxrowcount: integer;
 var
  int1,int2: integer;
@@ -523,12 +508,89 @@ begin
  end; 
 end;
 
+function tdropdowncols.addrow(const aitems: array of msestring): integer;
+var
+ int1: integer;
+begin
+ result:= maxrowcount;
+ beginupdate;
+ try
+  for int1:= 0 to count - 1 do begin
+   items[int1].count:= result + 1;
+   if int1 < length(aitems) then begin
+    items[int1][result]:= aitems[int1];
+   end;
+  end;
+ finally
+  endupdate;
+ end;
+end;
+
 procedure tdropdowncols.setrowcount(const avalue: integer);
 var
  int1: integer;
 begin
  for int1:= 0 to high(fitems) do begin
   tdropdowncol(fitems[int1]).count:= avalue;
+ end;
+end;
+
+procedure tdropdowncols.checkrowindex(const aindex: integer);
+begin
+ if count = 0 then begin
+  raise exception.create('No columns.');
+ end;
+ if (aindex < 0) or (aindex >= maxrowcount) then begin
+  tlist.error(slistindexerror,aindex);
+ end; 
+end;
+
+procedure tdropdowncols.insertrow(const aindex: integer;
+               const aitems: array of msestring);
+var
+ int1,int2: integer;
+begin
+ int2:= maxrowcount;
+ if aindex = int2 then begin
+  addrow(aitems);
+ end
+ else begin
+  checkindex(aindex);  
+  beginupdate;
+  try
+   for int1:= 0 to count - 1 do begin
+    with items[int1] do begin
+     count:= int2;
+     if int1 <= high(aitems) then begin
+      insert(aindex,aitems[int1]);
+     end
+     else begin
+      insert(aindex,'');
+     end;
+    end;
+   end;
+  finally
+   endupdate;
+  end;
+ end;
+end;
+
+procedure tdropdowncols.deleterow(const aindex: integer);
+var
+ int1,int2: integer;
+begin
+ checkindex(aindex);
+ int2:= maxrowcount;
+ beginupdate;
+ try
+  for int1:= 0 to count - 1 do begin
+   with items[int1] do begin
+    count:= int2;
+    deletedata(aindex);
+   end;
+  end;
+ finally
+  endupdate;
  end;
 end;
 
