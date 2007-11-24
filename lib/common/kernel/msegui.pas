@@ -280,7 +280,7 @@ type
    procedure dokeydown(var info: keyeventinfoty); virtual;
    function checkshortcut(var info: keyeventinfoty): boolean; virtual;
    procedure parentfontchanged; virtual;
-   procedure dopaintframe(const canvas: tcanvas; const rect: rectty); virtual;
+   procedure dopaintframe(const canvas: tcanvas; const arect: rectty); virtual;
    procedure dopaintfocusrect(const canvas: tcanvas; const rect: rectty); virtual;
    procedure updatewidgetstate; virtual;
    procedure updatemousestate(const sender: twidget; const apos: pointty); virtual;
@@ -292,7 +292,7 @@ type
    procedure scale(const ascale: real); virtual;
 
    procedure paint(const canvas: tcanvas; const rect: rectty); virtual;
-   procedure paintoverlay(const canvas: tcanvas; const rect: rectty);
+//   procedure paintoverlay(const canvas: tcanvas; const rect: rectty);
    procedure afterpaint(const canvas: tcanvas); virtual;
    function outerframewidth: sizety; //widgetsize - framesize
    function frameframewidth: sizety; //widgetsize - (paintsize + paintframe)
@@ -2472,12 +2472,14 @@ begin
  end;
 end;
 
-procedure tcustomframe.dopaintframe(const canvas: tcanvas; const rect: rectty);
+procedure tcustomframe.dopaintframe(const canvas: tcanvas; const arect: rectty);
 var
- rect1: rectty;
+ rect1,rect2: rectty;
  col1: colorty;
+ imageoffs: integer;
 begin
- rect1:= deflaterect(rect,fouterframe);
+ rect1:= deflaterect(arect,fouterframe);
+ rect2:= rect1;
  if fi.levelo <> 0 then begin
   draw3dframe(canvas,rect1,fi.levelo,fi.framecolors);
   inflaterect1(rect1,-abs(fi.levelo));
@@ -2495,8 +2497,49 @@ begin
  if fi.leveli <> 0 then begin
   draw3dframe(canvas,rect1,fi.leveli,fi.framecolors);
  end;
- rect1:= deflaterect(rect,fpaintframe);
+ if fi.frameimage_list <> nil then begin
+//  rect1:= deflaterect(rect,fpaintframe);
+  imageoffs:= fi.frameimage_offset;
+  with fintf.getwidget do begin
+   if active then begin
+    imageoffs:= imageoffs + fi.frameimage_offsetactive;
+   end;
+   if ws_clicked in widgetstate then begin
+    imageoffs:= imageoffs + fi.frameimage_offsetclicked;
+   end
+   else begin
+    if ws_mouseinclient in widgetstate then begin
+     imageoffs:= imageoffs + fi.frameimage_offsetmouse;
+    end;
+   end;
+  end;
+  if imageoffs >= 0 then begin
+   fi.frameimage_list.paint(canvas,imageoffs,rect2.pos);
+   fi.frameimage_list.paint(canvas,imageoffs+1,
+   makerect(rect2.x,rect2.y+fi.frameimage_list.height,
+            fi.frameimage_list.width,rect2.cy-2*fi.frameimage_list.height),
+            [al_stretchy]);
+   fi.frameimage_list.paint(canvas,imageoffs+2,rect2,[al_bottom]);
+   fi.frameimage_list.paint(canvas,imageoffs+3,
+   makerect(rect2.x+fi.frameimage_list.width,
+            rect2.y+rect2.cy-fi.frameimage_list.height,
+            rect2.cx-2*fi.frameimage_list.width,fi.frameimage_list.height),
+            [al_stretchx]);
+   fi.frameimage_list.paint(canvas,imageoffs+4,rect2,[al_bottom,al_right]);
+   fi.frameimage_list.paint(canvas,imageoffs+5,
+   makerect(rect2.x+rect2.cx-fi.frameimage_list.width,
+            rect2.y+fi.frameimage_list.height,
+            fi.frameimage_list.width,rect2.cy-2*fi.frameimage_list.height),
+            [al_stretchy]);
+   fi.frameimage_list.paint(canvas,imageoffs+6,rect2,[al_right]);
+   fi.frameimage_list.paint(canvas,imageoffs+7,
+   makerect(rect2.x+fi.frameimage_list.width,rect2.y,
+            rect2.cx-2*fi.frameimage_list.width,
+            fi.frameimage_list.height),[al_stretchx]);
+  end;
+ end;
  if fi.colorclient <> cl_transparent then begin
+  rect1:= deflaterect(arect,fpaintframe);
   canvas.fillrect(rect1,fi.colorclient);
  end;
 end;
@@ -2519,57 +2562,8 @@ begin
  canvas.move(addpoint(fpaintrect.pos,fclientrect.pos));
 end;
 
-procedure tcustomframe.paintoverlay(const canvas: tcanvas; const rect: rectty);
-var
-// rect1: rectty;
- imageoffs: integer;
-begin
- if fi.frameimage_list <> nil then begin
-//  rect1:= deflaterect(rect,fpaintframe);
-  imageoffs:= fi.frameimage_offset;
-  with fintf.getwidget do begin
-   if active then begin
-    imageoffs:= imageoffs + fi.frameimage_offsetactive;
-   end;
-   if ws_clicked in widgetstate then begin
-    imageoffs:= imageoffs + fi.frameimage_offsetclicked;
-   end
-   else begin
-    if ws_mouseinclient in widgetstate then begin
-     imageoffs:= imageoffs + fi.frameimage_offsetmouse;
-    end;
-   end;
-  end;
-  if imageoffs >= 0 then begin
-   fi.frameimage_list.paint(canvas,imageoffs,rect.pos);
-   fi.frameimage_list.paint(canvas,imageoffs+1,
-   makerect(rect.x,rect.y+fi.frameimage_list.height,
-            fi.frameimage_list.width,rect.cy-2*fi.frameimage_list.height),
-            [al_stretchy]);
-   fi.frameimage_list.paint(canvas,imageoffs+2,rect,[al_bottom]);
-   fi.frameimage_list.paint(canvas,imageoffs+3,
-   makerect(rect.x+fi.frameimage_list.width,
-            rect.y+rect.cy-fi.frameimage_list.height,
-            rect.cx-2*fi.frameimage_list.width,fi.frameimage_list.height),
-            [al_stretchx]);
-   fi.frameimage_list.paint(canvas,imageoffs+4,rect,[al_bottom,al_right]);
-   fi.frameimage_list.paint(canvas,imageoffs+5,
-   makerect(rect.x+rect.cx-fi.frameimage_list.width,
-            rect.y+fi.frameimage_list.height,
-            fi.frameimage_list.width,rect.cy-2*fi.frameimage_list.height),
-            [al_stretchy]);
-   fi.frameimage_list.paint(canvas,imageoffs+6,rect,[al_right]);
-   fi.frameimage_list.paint(canvas,imageoffs+7,
-   makerect(rect.x+fi.frameimage_list.width,rect.y,
-            rect.cx-2*fi.frameimage_list.width,
-            fi.frameimage_list.height),[al_stretchx]);
-  end;
- end;
-end;
-
 procedure tcustomframe.afterpaint(const canvas: tcanvas);
 begin
- paintoverlay(canvas,inflaterect(fpaintrect,fwidth));
  //dummy
 end;
 
@@ -2609,8 +2603,16 @@ procedure tcustomframe.calcrects;
 begin
  fwidth.left:= abs(fi.levelo) + fi.framewidth + abs(fi.leveli);
  fwidth.top:= fwidth.left;
+ if fi.frameimage_list <> nil then begin
+  if fi.frameimage_list.width > fwidth.left then begin
+   fwidth.left:= fi.frameimage_list.width;
+  end;
+  if fi.frameimage_list.height > fwidth.top then begin
+   fwidth.top:= fi.frameimage_list.height;
+  end;
+ end;
  fwidth.right:= fwidth.left;
- fwidth.bottom:= fwidth.left;
+ fwidth.bottom:= fwidth.top;
  fpaintframedelta:= nullframe;
  getpaintframe(fpaintframedelta);
  fpaintframe:= addframe(fpaintframedelta,fouterframe);
