@@ -379,6 +379,10 @@ type
    property framei_bottom;
 
    property frameimage_list;
+   property frameimage_left;
+   property frameimage_top;
+   property frameimage_right;
+   property frameimage_bottom;
    property frameimage_offset;
    property frameimage_offsetmouse;
    property frameimage_offsetclicked;

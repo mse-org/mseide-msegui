@@ -132,7 +132,9 @@ type
                      frl_colorlight,frl_colorhighlight,
                      frl_colordkwidth,frl_colorhlwidth,
                      frl_fileft,frl_fitop,frl_firight,frl_fibottom,
-                     frl_frameimagelist,frl_frameimageoffset,
+                     frl_frameimagelist,frl_frameimageleft,frl_frameimagetop,
+                     frl_frameimageright,frl_frameimagebottom,
+                     frl_frameimageoffset,
                      frl_frameimageoffsetmouse,
                      frl_frameimageoffsetclicked,frl_frameimageoffsetactive,
                      frl_colorclient,
@@ -189,6 +191,10 @@ type
   colorclient: colorty;
   innerframe: framety;
 
+  frameimage_left: integer;
+  frameimage_top: integer;
+  frameimage_right: integer;
+  frameimage_bottom: integer;
   frameimage_offset: integer;
   frameimage_offsetmouse: integer;
   frameimage_offsetclicked: integer;
@@ -239,6 +245,15 @@ type
    
    procedure setframeimage_list(const avalue: timagelist);
    function isframeimage_liststored: boolean;
+   procedure setframeimage_left(const avalue: integer);
+   function isframeimage_leftstored: boolean;
+   procedure setframeimage_top(const avalue: integer);
+   function isframeimage_topstored: boolean;
+   procedure setframeimage_right(const avalue: integer);
+   function isframeimage_rightstored: boolean;
+   procedure setframeimage_bottom(const avalue: integer);
+   function isframeimage_bottomstored: boolean;
+   
    procedure setframeimage_offset(const avalue: integer);
    function isframeimage_offsetstored: boolean;
    procedure setframeimage_offsetmouse(const avalue: integer);
@@ -292,7 +307,7 @@ type
    procedure scale(const ascale: real); virtual;
 
    procedure paint(const canvas: tcanvas; const rect: rectty); virtual;
-//   procedure paintoverlay(const canvas: tcanvas; const rect: rectty);
+   procedure paintoverlay(const canvas: tcanvas; const arect: rectty);
    procedure afterpaint(const canvas: tcanvas); virtual;
    function outerframewidth: sizety; //widgetsize - framesize
    function frameframewidth: sizety; //widgetsize - (paintsize + paintframe)
@@ -351,6 +366,15 @@ type
                     write setframeimage_list stored isframeimage_liststored;
      //imagenr 0 = topleft, 1 = left, 2 = bottomleft, 3 = bottom, 4 = bottomright
      //5 = right, 6 = topright, 7 = top
+   property frameimage_left: integer read fi.frameimage_left
+                    write setframeimage_left stored isframeimage_leftstored;
+   property frameimage_top: integer read fi.frameimage_top
+                    write setframeimage_top stored isframeimage_topstored;
+   property frameimage_right: integer read fi.frameimage_right
+                    write setframeimage_right stored isframeimage_rightstored;
+   property frameimage_bottom: integer read fi.frameimage_bottom
+                    write setframeimage_bottom stored isframeimage_bottomstored;
+                    //added to imagelist size.
    property frameimage_offset: integer read fi.frameimage_offset
                     write setframeimage_offset stored isframeimage_offsetstored;
    property frameimage_offsetmouse: integer read fi.frameimage_offsetmouse 
@@ -381,6 +405,10 @@ type
    property framei_bottom;
 
    property frameimage_list;
+   property frameimage_left;
+   property frameimage_right;
+   property frameimage_top;
+   property frameimage_bottom;
    property frameimage_offset;
    property frameimage_offsetmouse;
    property frameimage_offsetclicked;
@@ -420,6 +448,10 @@ type
    procedure setlevelo(const Value: integer);
 
    procedure setframeimage_list(const avalue: timagelist);
+   procedure setframeimage_left(const avalue: integer);
+   procedure setframeimage_top(const avalue: integer);
+   procedure setframeimage_right(const avalue: integer);
+   procedure setframeimage_bottom(const avalue: integer);
    procedure setframeimage_offset(const avalue: integer);
    procedure setframeimage_offsetmouse(const avalue: integer);
    procedure setframeimage_offsetclicked(const avalue: integer);
@@ -460,6 +492,15 @@ type
                      write setframeimage_list;
      //imagenr 0 = topleft, 1 = left, 2 = bottomleft, 3 = bottom, 4 = bottomright
      //5 = right, 6 = topright, 7 = top
+   property frameimage_left: integer read fi.frameimage_left
+                    write setframeimage_left;
+   property frameimage_top: integer read fi.frameimage_top
+                    write setframeimage_top;
+   property frameimage_right: integer read fi.frameimage_right
+                    write setframeimage_right;
+   property frameimage_bottom: integer read fi.frameimage_bottom
+                    write setframeimage_bottom;
+                    //added to imagelist size.
    property frameimage_offset: integer read fi.frameimage_offset
                      write setframeimage_offset;
    property frameimage_offsetmouse: integer read fi.frameimage_offsetmouse 
@@ -2474,12 +2515,10 @@ end;
 
 procedure tcustomframe.dopaintframe(const canvas: tcanvas; const arect: rectty);
 var
- rect1,rect2: rectty;
+ rect1: rectty;
  col1: colorty;
- imageoffs: integer;
 begin
  rect1:= deflaterect(arect,fouterframe);
- rect2:= rect1;
  if fi.levelo <> 0 then begin
   draw3dframe(canvas,rect1,fi.levelo,fi.framecolors);
   inflaterect1(rect1,-abs(fi.levelo));
@@ -2497,8 +2536,19 @@ begin
  if fi.leveli <> 0 then begin
   draw3dframe(canvas,rect1,fi.leveli,fi.framecolors);
  end;
+ if fi.colorclient <> cl_transparent then begin
+  rect1:= deflaterect(arect,fpaintframe);
+  canvas.fillrect(rect1,fi.colorclient);
+ end;
+end;
+
+procedure tcustomframe.paintoverlay(const canvas: tcanvas; const arect: rectty);
+var
+ imageoffs: integer;
+ rect2: rectty;
+begin
  if fi.frameimage_list <> nil then begin
-//  rect1:= deflaterect(rect,fpaintframe);
+  rect2:= deflaterect(arect,fouterframe);
   imageoffs:= fi.frameimage_offset;
   with fintf.getwidget do begin
    if active then begin
@@ -2537,10 +2587,6 @@ begin
             rect2.cx-2*fi.frameimage_list.width,
             fi.frameimage_list.height),[al_stretchx]);
   end;
- end;
- if fi.colorclient <> cl_transparent then begin
-  rect1:= deflaterect(arect,fpaintframe);
-  canvas.fillrect(rect1,fi.colorclient);
  end;
 end;
 
@@ -2600,19 +2646,31 @@ begin
 end;
 
 procedure tcustomframe.calcrects;
+var
+ int1: integer;
 begin
  fwidth.left:= abs(fi.levelo) + fi.framewidth + abs(fi.leveli);
  fwidth.top:= fwidth.left;
- if fi.frameimage_list <> nil then begin
-  if fi.frameimage_list.width > fwidth.left then begin
-   fwidth.left:= fi.frameimage_list.width;
-  end;
-  if fi.frameimage_list.height > fwidth.top then begin
-   fwidth.top:= fi.frameimage_list.height;
-  end;
- end;
  fwidth.right:= fwidth.left;
  fwidth.bottom:= fwidth.top;
+ if fi.frameimage_list <> nil then begin
+  int1:= fi.frameimage_list.width + fi.frameimage_left;
+  if int1 > fwidth.left then begin
+   fwidth.left:= int1;
+  end;
+  int1:= fi.frameimage_list.width + fi.frameimage_right;
+  if int1 > fwidth.right then begin
+   fwidth.right:= int1;
+  end;
+  int1:= fi.frameimage_list.height + fi.frameimage_top;
+  if int1 > fwidth.top then begin
+   fwidth.top:= int1;
+  end;
+  int1:= fi.frameimage_list.height + fi.frameimage_bottom;
+  if int1 > fwidth.bottom then begin
+   fwidth.bottom:= int1;
+  end;
+ end;
  fpaintframedelta:= nullframe;
  getpaintframe(fpaintframedelta);
  fpaintframe:= addframe(fpaintframedelta,fouterframe);
@@ -2776,6 +2834,42 @@ begin
  include(flocalprops,frl_frameimagelist);
  if fi.frameimage_list <> avalue then begin
   fintf.getwidget.setlinkedvar(avalue,tmsecomponent(fi.frameimage_list));
+  internalupdatestate;
+ end;
+end;
+
+procedure tcustomframe.setframeimage_left(const avalue: integer);
+begin
+ include(flocalprops,frl_frameimageleft);
+ if fi.frameimage_left <> avalue then begin
+  fi.frameimage_left:= avalue;
+  internalupdatestate;
+ end;
+end;
+
+procedure tcustomframe.setframeimage_right(const avalue: integer);
+begin
+ include(flocalprops,frl_frameimageright);
+ if fi.frameimage_right <> avalue then begin
+  fi.frameimage_right:= avalue;
+  internalupdatestate;
+ end;
+end;
+
+procedure tcustomframe.setframeimage_top(const avalue: integer);
+begin
+ include(flocalprops,frl_frameimagetop);
+ if fi.frameimage_top <> avalue then begin
+  fi.frameimage_top:= avalue;
+  internalupdatestate;
+ end;
+end;
+
+procedure tcustomframe.setframeimage_bottom(const avalue: integer);
+begin
+ include(flocalprops,frl_frameimagebottom);
+ if fi.frameimage_bottom <> avalue then begin
+  fi.frameimage_bottom:= avalue;
   internalupdatestate;
  end;
 end;
@@ -2964,6 +3058,18 @@ begin
   if not (frl_frameimagelist in flocalprops) then begin
    fintf.getwidget.setlinkedvar(ainfo.frameimage_list,
    tmsecomponent(frameimage_list));
+  end;
+  if not (frl_frameimageleft in flocalprops) then begin
+   frameimage_left:= ainfo.frameimage_left;
+  end;
+  if not (frl_frameimageright in flocalprops) then begin
+   frameimage_right:= ainfo.frameimage_right;
+  end;
+  if not (frl_frameimagetop in flocalprops) then begin
+   frameimage_top:= ainfo.frameimage_top;
+  end;
+  if not (frl_frameimagebottom in flocalprops) then begin
+   frameimage_bottom:= ainfo.frameimage_bottom;
   end;
   if not (frl_frameimageoffset in flocalprops) then begin
    frameimage_offset:= ainfo.frameimage_offset;
@@ -3190,6 +3296,26 @@ begin
  result:= (ftemplate = nil) or (frl_frameimagelist in flocalprops);
 end;
 
+function tcustomframe.isframeimage_leftstored: boolean;
+begin
+ result:= (ftemplate = nil) or (frl_frameimageleft in flocalprops);
+end;
+
+function tcustomframe.isframeimage_rightstored: boolean;
+begin
+ result:= (ftemplate = nil) or (frl_frameimageright in flocalprops);
+end;
+
+function tcustomframe.isframeimage_topstored: boolean;
+begin
+ result:= (ftemplate = nil) or (frl_frameimagetop in flocalprops);
+end;
+
+function tcustomframe.isframeimage_bottomstored: boolean;
+begin
+ result:= (ftemplate = nil) or (frl_frameimagebottom in flocalprops);
+end;
+
 function tcustomframe.isframeimage_offsetstored: boolean;
 begin
  result:= (ftemplate = nil) or (frl_frameimageoffset in flocalprops);
@@ -3373,6 +3499,30 @@ end;
 procedure tframetemplate.setframeimage_list(const avalue: timagelist);
 begin
  setlinkedvar(avalue,tmsecomponent(fi.frameimage_list));
+ changed;
+end;
+
+procedure tframetemplate.setframeimage_left(const avalue: integer);
+begin
+ fi.frameimage_left:= avalue;
+ changed;
+end;
+
+procedure tframetemplate.setframeimage_right(const avalue: integer);
+begin
+ fi.frameimage_right:= avalue;
+ changed;
+end;
+
+procedure tframetemplate.setframeimage_top(const avalue: integer);
+begin
+ fi.frameimage_top:= avalue;
+ changed;
+end;
+
+procedure tframetemplate.setframeimage_bottom(const avalue: integer);
+begin
+ fi.frameimage_bottom:= avalue;
  changed;
 end;
 
@@ -5544,6 +5694,7 @@ end;
 procedure twidget.doafterpaint(const canvas: tcanvas);
 begin
  if fframe <> nil then begin
+  fframe.paintoverlay(canvas,makerect(nullpoint,fwidgetrect.size));
   fframe.afterpaint(canvas);
   if needsfocuspaint and (fwidgetstate * [ws_focused,ws_active] =
                 [ws_focused,ws_active]) then begin

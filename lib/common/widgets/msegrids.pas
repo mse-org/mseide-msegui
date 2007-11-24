@@ -1076,6 +1076,17 @@ end;
    property framei_top default 0;
    property framei_right default 0;
    property framei_bottom default 0;
+
+   property frameimage_list;
+   property frameimage_left;
+   property frameimage_top;
+   property frameimage_right;
+   property frameimage_bottom;
+   property frameimage_offset;
+   property frameimage_offsetmouse;
+   property frameimage_offsetclicked;
+   property frameimage_offsetactive;
+
    property sbvert;
    property sbhorz;
    property caption;
@@ -2435,12 +2446,10 @@ begin
      end;
     end;
     canvas.restore(saveindex);
-    {
     if not bo2 and (fframe <> nil) and 
                           (fframe.frameimage_list <> nil) then begin
      frame.paintoverlay(canvas,fcellrect);
     end;
-    }
     canvas.move(makepoint(0,ystep));
    end;
    if flinewidth > 0 then begin
@@ -3138,11 +3147,9 @@ begin
    end;
   end;
   canvas.restore;
-  {
   if (frame1 <> nil) and (frame1.frameimage_list <> nil) then begin
    frame1.paintoverlay(canvas,fcellrect);
   end;
-  }
   if flinewidth > 0 then begin
    linewidthbefore:= canvas.linewidth;
    if flinewidth = 1 then begin
