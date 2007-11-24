@@ -57,7 +57,8 @@ procedure Register;
 begin
  registercomponents('Edit',[twidgetgrid,tedit,tslider,tprogressbar,
    tbooleanedit,tbooleaneditradio,
-   tdatabutton,tstockglyphdatabutton,tdataicon,tdataimage,tpointeredit,
+   tdatabutton,tstockglyphdatabutton,trichbutton,tdataicon,tdataimage,
+   tpointeredit,
    tstringedit,tdropdownlistedit,thistoryedit,tdialogstringedit,
    thexstringedit,tmemoedit,
    tintegeredit,trealedit,tdatetimeedit,tcalendardatetimeedit,tkeystringedit,

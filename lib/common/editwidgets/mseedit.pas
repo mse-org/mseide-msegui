@@ -49,6 +49,13 @@ type
    property framei_top default 1;
    property framei_right default 1;
    property framei_bottom default 1;
+
+   property image_list;
+   property image_offset;
+   property image_offsetmouse;
+   property image_offsetclicked;
+   property image_offsetactive;
+
    property colorclient default cl_foreground;
    property caption;
    property captionpos;

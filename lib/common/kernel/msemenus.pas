@@ -457,7 +457,7 @@ function tcustommenu.checkexec: boolean;
 begin
  result:= fexecitem <> nil;
  if result then begin
-  doactionexecute(fexecitem,fexecitem.finfo);
+  doactionexecute(fexecitem,fexecitem.finfo,true);
  end;
 // if result and canevent(tmethod(fexecitem.onexecute)) then begin
 //  fexecitem.onexecute(fexecitem);
@@ -1021,7 +1021,7 @@ begin
     with item1 do begin
      if (finfo.options * [mao_checkbox,mao_radiobutton] = [mao_checkbox,mao_radiobutton]) and
              (fgroup = self.fgroup) then begin
-      setactionchecked(iactionlink(self),false);
+      setactionchecked(iactionlink(item1),false);
      end;
     end;
    end;

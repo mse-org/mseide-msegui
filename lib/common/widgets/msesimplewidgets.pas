@@ -377,6 +377,13 @@ type
    property framei_top;
    property framei_right;
    property framei_bottom;
+
+   property image_list;
+   property image_offset;
+   property image_offsetmouse;
+   property image_offsetclicked;
+   property image_offsetactive;
+
    property caption;
    property captionpos;
    property captiondist;

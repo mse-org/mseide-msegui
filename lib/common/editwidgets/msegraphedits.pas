@@ -47,6 +47,13 @@ type
    property framei_top;
    property framei_right;
    property framei_bottom;
+
+   property image_list;
+   property image_offset;
+   property image_offsetmouse;
+   property image_offsetclicked;
+   property image_offsetactive;
+
    property colorclient default cl_foreground;
    property caption;
    property captionpos default cp_right;
@@ -381,6 +388,7 @@ type
    foptions: buttonoptionsty;
   protected
    fcheckcaption: boolean;
+   procedure setoptions(const avalue: buttonoptionsty); virtual;
    procedure togglevalue; virtual; abstract;
    procedure mouseevent(var info: mouseeventinfoty); override;
    procedure dokeyup(var info: keyeventinfoty); override;
@@ -388,7 +396,7 @@ type
   public
    constructor create(aowner: tcomponent); override;
   published
-   property options: buttonoptionsty read foptions write foptions
+   property options: buttonoptionsty read foptions write setoptions
                default defaultbuttonoptions;
    property colorglyph;
  end;
@@ -586,6 +594,7 @@ type
    procedure setgridintf(const intf: iwidgetgrid); override;
    function checkfocusshortcut(var info: keyeventinfoty): boolean; override;
    function actualimagenr(const avalue: integer): integer;
+   procedure setoptions(const avalue: buttonoptionsty); override;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -656,6 +665,30 @@ type
    property max;
  end; 
  
+ trichbutton = class(tdatabutton)
+  private
+   ffaceactive: tcustomface;
+   ffacemouse: tcustomface;
+   ffaceclicked: tcustomface;
+   function getfaceactive: tcustomface;
+   procedure setfaceactive(const avalue: tcustomface);
+   function getfacemouse: tcustomface;
+   procedure setfacemouse(const avalue: tcustomface);
+   function getfaceclicked: tcustomface;
+   procedure setfaceclicked(const avalue: tcustomface);
+   procedure createfaceactive;
+   procedure createfacemouse;
+   procedure createfaceclicked;
+  protected
+   function getactface: tcustomface; override;
+  public
+   destructor destroy; override;
+  published
+   property faceactive: tcustomface read getfaceactive write setfaceactive;
+   property facemouse: tcustomface read getfacemouse write setfacemouse;
+   property faceclicked: tcustomface read getfaceclicked write setfaceclicked;
+ end;
+  
  tcustomdataicon = class(tcustomintegergraphdataedit)
  //if value = -1 then blank else
  // if value < 0 then imagenums[0..30] are painted if bit[0..30] is 1
@@ -1499,6 +1532,11 @@ begin
  inherited;
 end;
 
+procedure ttogglegraphdataedit.setoptions(const avalue: buttonoptionsty);
+begin
+ foptions:= avalue;
+end;
+
 { tcustombooleanedit }
 
 procedure tcustombooleanedit.internalcheckvalue(var avalue; var accept: boolean);
@@ -2322,6 +2360,26 @@ begin
  fimagenums.assign(avalue);
 end;
 
+procedure tcustomdatabutton.setoptions(const avalue: buttonoptionsty);
+begin
+ if foptions <> avalue then begin
+  foptions:= avalue;
+  if bo_flat in avalue then begin
+   include(finfo.state,ss_flat);
+  end
+  else begin
+   exclude(finfo.state,ss_flat);
+  end;
+  if bo_noanim in avalue then begin
+   include(finfo.state,ss_noanimation);
+  end
+  else begin
+   exclude(finfo.state,ss_noanimation);
+  end;
+  invalidate;
+ end;
+end;
+
 { tstockglyphdatabutton }
 
 constructor tstockglyphdatabutton.create(aowner: tcomponent);
@@ -2719,6 +2777,91 @@ end;
 procedure tcustomprogressbar.writeformat(writer: twriter);
 begin
  writer.writewidestring(fformat);
+end;
+
+{ trichbutton }
+
+destructor trichbutton.destroy;
+begin
+ inherited;
+ ffaceactive.free;
+ ffacemouse.free;
+ ffaceclicked.free;
+end;
+
+function trichbutton.getfaceactive: tcustomface;
+begin
+ getoptionalobject(ffaceactive,{$ifdef FPC}@{$endif}createfaceactive);
+ result:= ffaceactive;
+end;
+
+procedure trichbutton.setfaceactive(const avalue: tcustomface);
+begin
+ setoptionalobject(avalue,ffaceactive,{$ifdef FPC}@{$endif}createfaceactive);
+ invalidate;
+end;
+
+function trichbutton.getfacemouse: tcustomface;
+begin
+ getoptionalobject(ffacemouse,{$ifdef FPC}@{$endif}createfacemouse);
+ result:= ffacemouse;
+end;
+
+procedure trichbutton.setfacemouse(const avalue: tcustomface);
+begin
+ setoptionalobject(avalue,ffacemouse,{$ifdef FPC}@{$endif}createfacemouse);
+ invalidate;
+end;
+
+function trichbutton.getfaceclicked: tcustomface;
+begin
+ getoptionalobject(ffaceclicked,{$ifdef FPC}@{$endif}createfaceclicked);
+ result:= ffaceclicked;
+end;
+
+procedure trichbutton.setfaceclicked(const avalue: tcustomface);
+begin
+ setoptionalobject(avalue,ffaceclicked,{$ifdef FPC}@{$endif}createfaceclicked);
+ invalidate;
+end;
+
+procedure trichbutton.createfaceactive;
+begin
+ ffaceactive:= tface.create(iface(self));
+end;
+
+procedure trichbutton.createfacemouse;
+begin
+ ffacemouse:= tface.create(iface(self));
+end;
+
+procedure trichbutton.createfaceclicked;
+begin
+ ffaceclicked:= tface.create(iface(self));
+end;
+
+function trichbutton.getactface: tcustomface;
+begin
+ result:= inherited getactface;
+ if active then begin
+  if ffaceactive <> nil then begin
+   result:= ffaceactive;
+  end;
+ end
+ else begin
+  if ws_clicked in fwidgetstate then begin
+   if ffaceclicked <> nil then begin
+    result:= ffaceclicked;
+   end;
+  end
+  else begin
+   if ws_mouseinclient in fwidgetstate then begin
+    if ffacemouse <> nil then begin
+     result:= ffacemouse;
+    end;    
+   end;
+  end;
+ end;
 end;
 
 end.

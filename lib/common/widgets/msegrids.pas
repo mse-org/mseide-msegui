@@ -2093,23 +2093,20 @@ begin
  end
  else begin
   aframe.paint(acanvas,makerect(nullpoint,fcellrect.size));
-  //  fframe.paint(acanvas,fcellrect);
   if tframe1(aframe).fi.colorclient = cl_transparent then begin
    acanvas.fillrect(makerect(nullpoint,fcellinfo.rect.size),fcellinfo.color);
   end;
  end;
  if aface <> nil then begin
   aface.paint(acanvas,makerect(nullpoint,fcellinfo.rect.size));
-  {
-  if aframe = nil then begin
-   aface.paint(acanvas,makerect(nullpoint,fcellinfo.rect.size));
-  end
-  else begin
-   aface.paint(acanvas,deflaterect(makerect(nullpoint,fcellinfo.rect.size),
-                   tframe1(aframe).fpaintframe));
-  end;
-  }
  end;
+ {
+ if (aframe <> nil) and (aframe.image_list <> nil) then begin
+  aframe.paintoverlay(acanvas,makerect(-tframe1(aframe).fpaintrect.x,
+                 -tframe1(aframe).fpaintrect.y,
+                 fcellrect.cx,fcellrect.cy));
+ end
+ }
 end;
 
 procedure tgridprop.setcolor(const Value: colorty);
@@ -2450,6 +2447,10 @@ begin
      end;
     end;
     canvas.restore(saveindex);
+    if not bo2 and (fframe <> nil) and 
+                          (fframe.image_list <> nil) then begin
+     frame.paintoverlay(canvas,fcellrect);
+    end;
     canvas.move(makepoint(0,ystep));
    end;
    if flinewidth > 0 then begin
@@ -3147,6 +3148,9 @@ begin
    end;
   end;
   canvas.restore;
+  if (frame1 <> nil) and (frame1.image_list <> nil) then begin
+   frame1.paintoverlay(canvas,fcellrect);
+  end;
   if flinewidth > 0 then begin
    linewidthbefore:= canvas.linewidth;
    if flinewidth = 1 then begin

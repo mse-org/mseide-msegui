@@ -16,7 +16,8 @@ interface
 uses
  {$ifdef FPC}classes{$else}Classes{$endif},sysutils,msegraphics,msetypes,
  msestrings,mseerr,msegraphutils,mseapplication,
- msepointer,mseevent,msekeyboard,mseclasses,mseglob,mseguiglob,mselist,msesys,msethread,
+ msepointer,mseevent,msekeyboard,mseclasses,mseglob,mseguiglob,mselist,msesys,
+ msethread,
  msebitmap,msearrayprops,mseguithread{,msedatamodules};
 
 const
@@ -130,7 +131,10 @@ type
                      frl_colordkshadow,frl_colorshadow,
                      frl_colorlight,frl_colorhighlight,
                      frl_colordkwidth,frl_colorhlwidth,
-                     frl_fileft,frl_fitop,frl_firight,frl_fibottom,frl_colorclient,
+                     frl_fileft,frl_fitop,frl_firight,frl_fibottom,
+                     frl_imagelist,frl_imageoffset,frl_imageoffsetmouse,
+                     frl_imageoffsetclicked,frl_imageoffsetactive,
+                     frl_colorclient,
                      frl_nodisable);
  framelocalpropsty = set of framelocalpropty;
 
@@ -140,7 +144,7 @@ const
                      frl_fileft,frl_fitop,frl_firight,frl_fibottom,frl_colorclient];
 type
  facelocalpropty = (fal_options,fal_fadirection,fal_image,fal_fapos,fal_facolor,
-                    fal_fatransparency);
+                    fal_fatransparency,fal_frameimagelist,fal_frameimageoffset);
  facelocalpropsty = set of facelocalpropty;
 
 const
@@ -183,6 +187,14 @@ type
   framecolors:framecolorinfoty;
   colorclient: colorty;
   innerframe: framety;
+
+  image_offset: integer;
+  image_offsetmouse: integer;
+  image_offsetclicked: integer;
+  image_offsetactive: integer;
+
+  image_list: timagelist; //last!
+
  end;
 
  tframecomp = class;
@@ -223,6 +235,18 @@ type
    function isfirightstored: boolean;
    procedure setframei_top(const Value: integer);
    function isfitopstored: boolean;
+   
+   procedure setimage_list(const avalue: timagelist);
+   function isimage_liststored: boolean;
+   procedure setimage_offset(const avalue: integer);
+   function isimage_offsetstored: boolean;
+   procedure setimage_offsetmouse(const avalue: integer);
+   function isimage_offsetmousestored: boolean;
+   procedure setimage_offsetclicked(const avalue: integer);
+   function isimage_offsetclickedstored: boolean;
+   procedure setimage_offsetactive(const avalue: integer);
+   function isimage_offsetactivestored: boolean;
+  
    procedure setcolorclient(const Value: colorty);
    function iscolorclientstored: boolean;
    procedure settemplate(const avalue: tframecomp);
@@ -267,6 +291,7 @@ type
    procedure scale(const ascale: real); virtual;
 
    procedure paint(const canvas: tcanvas; const rect: rectty); virtual;
+   procedure paintoverlay(const canvas: tcanvas; const rect: rectty);
    procedure afterpaint(const canvas: tcanvas); virtual;
    function outerframewidth: sizety; //widgetsize - framesize
    function frameframewidth: sizety; //widgetsize - (paintsize + paintframe)
@@ -321,6 +346,22 @@ type
    property framei_bottom: integer read fi.innerframe.bottom write setframei_bottom
                      stored isfibottomstored default 0;
 
+   property image_list: timagelist read fi.image_list write setimage_list
+                     stored isimage_liststored;
+     //imagenr 0 = topleft, 1 = left, 2 = bottomleft, 3 = bottom, 4 = bottomright
+     //5 = right, 6 = topright, 7 = top
+   property image_offset: integer read fi.image_offset write setimage_offset
+                     stored isimage_offsetstored;
+   property image_offsetmouse: integer read fi.image_offsetmouse 
+                     write setimage_offsetmouse
+                     stored isimage_offsetmousestored;
+   property image_offsetclicked: integer read fi.image_offsetclicked
+                     write setimage_offsetclicked
+                     stored isimage_offsetclickedstored;
+   property image_offsetactive: integer read fi.image_offsetactive
+                     write setimage_offsetactive
+                     stored isimage_offsetactivestored;
+
    property colorclient: colorty read fi.colorclient write setcolorclient
                      stored iscolorclientstored default cl_transparent;
    property localprops: framelocalpropsty read flocalprops write setlocalprops default []; 
@@ -337,6 +378,13 @@ type
    property framei_top;
    property framei_right;
    property framei_bottom;
+
+   property image_list;
+   property image_offset;
+   property image_offsetmouse;
+   property image_offsetclicked;
+   property image_offsetactive;
+
    property colorclient;
    property colordkshadow;
    property colorshadow;
@@ -369,6 +417,13 @@ type
    procedure setimagedist(const avalue: integer);
    procedure setleveli(const Value: integer);
    procedure setlevelo(const Value: integer);
+
+   procedure setimage_list(const avalue: timagelist);
+   procedure setimage_offset(const avalue: integer);
+   procedure setimage_offsetmouse(const avalue: integer);
+   procedure setimage_offsetclicked(const avalue: integer);
+   procedure setimage_offsetactive(const avalue: integer);
+
   protected
    fi: frameinfoty;
    fextraspace: integer;
@@ -376,6 +431,7 @@ type
    procedure doassignto(dest: tpersistent); override;
    function getinfosize: integer; override;
    function getinfoad: pointer; override;
+   procedure copyinfo(const source: tpersistenttemplate); override;
   public
    constructor create(const owner: tmsecomponent;
                   const onchange: notifyeventty); override;
@@ -398,6 +454,18 @@ type
                       write setframei_right default 0;
    property framei_bottom: integer read fi.innerframe.bottom 
                      write setframei_bottom default 0;
+                     
+   property image_list: timagelist read fi.image_list write setimage_list;
+     //imagenr 0 = topleft, 1 = left, 2 = bottomleft, 3 = bottom, 4 = bottomright
+     //5 = right, 6 = topright, 7 = top
+   property image_offset: integer read fi.image_offset write setimage_offset;
+   property image_offsetmouse: integer read fi.image_offsetmouse 
+                     write setimage_offsetmouse;
+   property image_offsetclicked: integer read fi.image_offsetclicked
+                     write setimage_offsetclicked;
+   property image_offsetactive: integer read fi.image_offsetactive
+                     write setimage_offsetactive;
+
    property extraspace: integer read fextraspace
                         write setextraspace default 0;
    property imagedist: integer read fimagedist
@@ -439,7 +507,10 @@ type
  faceoptionsty = set of faceoptionty;
 
  faceinfoty = record
+  frameimage_offset: integer;
   options: faceoptionsty;
+
+  frameimage_list: timagelist;
   fade_direction: graphicdirectionty;
   image: tmaskedbitmap;
   fade_pos: trealarrayprop;
@@ -467,6 +538,10 @@ type
    function isfadirectionstored: boolean;
    procedure setfade_transparency(const avalue: colorty);
    function isfatransparencystored: boolean;
+   procedure setframeimage_list(const avalue: timagelist);
+   function isframeimage_liststored: boolean;
+   procedure setframeimage_offset(const avalue: integer);
+   function isframeimage_offsetstored: boolean;
    procedure settemplate(const avalue: tfacecomp);
    procedure setlocalprops(const avalue: facelocalpropsty);
   protected
@@ -497,6 +572,14 @@ type
                 write setfade_direction stored isfadirectionstored default gd_right ;
    property fade_transparency: colorty read fi.fade_transparency
               write setfade_transparency stored isfatransparencystored default cl_none;
+
+   property frameimage_list: timagelist read fi.frameimage_list 
+                     write setframeimage_list stored isframeimage_liststored;
+     //imagenr 0 = topleft, 1 = left, 2 = bottomleft, 3 = bottom, 4 = bottomright
+     //5 = right, 6 = topright, 7 = top
+   property frameimage_offset: integer read fi.frameimage_offset
+                     write setframeimage_offset stored isframeimage_offsetstored;
+
    property localprops: facelocalpropsty read flocalprops write setlocalprops default []; 
                                    //before template
    property template: tfacecomp read ftemplate write settemplate;
@@ -510,6 +593,8 @@ type
    property fade_color;
    property fade_direction;
    property fade_transparency;
+   property frameimage_list;
+   property frameimage_offset;
    property localprops;          //before template
    property template;
  end;
@@ -525,6 +610,8 @@ type
    procedure setimage(const Value: tmaskedbitmap);
    procedure doimagechange(const sender: tobject);
    procedure dochange(const sender: tarrayprop; const index: integer);
+   procedure setframeimage_list(const avalue: timagelist);
+   procedure setframeimage_offset(const avalue: integer);
   protected
    procedure doassignto(dest: tpersistent); override;
    function getinfosize: integer; override;
@@ -543,6 +630,13 @@ type
                 write setfade_direction default gd_right;
    property fade_transparency: colorty read fi.fade_transparency
               write setfade_transparency default cl_none;
+
+   property frameimage_list: timagelist read fi.frameimage_list 
+                     write setframeimage_list;
+     //imagenr 0 = topleft, 1 = left, 2 = bottomleft, 3 = bottom, 4 = bottomright
+     //5 = right, 6 = topright, 7 = top
+   property frameimage_offset: integer read fi.frameimage_offset
+                     write setframeimage_offset;
  end;
 
  tfacecomp = class(ttemplatecontainer)
@@ -827,6 +921,7 @@ type
                     //origin paintpos
 
    function needsdesignframe: boolean; virtual;
+   function getactface: tcustomface; virtual;
    procedure dobeforepaint(const canvas: tcanvas); virtual;
    procedure dopaintbackground(const canvas: tcanvas); virtual;
    procedure dopaint(const canvas: tcanvas); virtual;
@@ -2397,8 +2492,9 @@ begin
  if fi.leveli <> 0 then begin
   draw3dframe(canvas,rect1,fi.leveli,fi.framecolors);
  end;
+ rect1:= deflaterect(rect,fpaintframe);
  if fi.colorclient <> cl_transparent then begin
-  canvas.fillrect(deflaterect(rect,fpaintframe),fi.colorclient);
+  canvas.fillrect(rect1,fi.colorclient);
  end;
 end;
 
@@ -2420,8 +2516,51 @@ begin
  canvas.move(addpoint(fpaintrect.pos,fclientrect.pos));
 end;
 
+procedure tcustomframe.paintoverlay(const canvas: tcanvas; const rect: rectty);
+var
+// rect1: rectty;
+ imageoffs: integer;
+begin
+ if fi.image_list <> nil then begin
+//  rect1:= deflaterect(rect,fpaintframe);
+  imageoffs:= fi.image_offset;
+  with fintf.getwidget do begin
+   if active then begin
+    imageoffs:= imageoffs + fi.image_offsetactive;
+   end;
+   if ws_clicked in widgetstate then begin
+    imageoffs:= imageoffs + fi.image_offsetclicked;
+   end
+   else begin
+    if ws_mouseinclient in widgetstate then begin
+     imageoffs:= imageoffs + fi.image_offsetmouse;
+    end;
+   end;
+  end;
+  if imageoffs >= 0 then begin
+   fi.image_list.paint(canvas,imageoffs,rect.pos);
+   fi.image_list.paint(canvas,imageoffs+1,
+   makerect(rect.x,rect.y+fi.image_list.height,
+            fi.image_list.width,rect.cy-2*fi.image_list.height),[al_stretchy]);
+   fi.image_list.paint(canvas,imageoffs+2,rect,[al_bottom]);
+   fi.image_list.paint(canvas,imageoffs+3,
+   makerect(rect.x+fi.image_list.width,rect.y+rect.cy-fi.image_list.height,
+            rect.cx-2*fi.image_list.width,fi.image_list.height),[al_stretchx]);
+   fi.image_list.paint(canvas,imageoffs+4,rect,[al_bottom,al_right]);
+   fi.image_list.paint(canvas,imageoffs+5,
+   makerect(rect.x+rect.cx-fi.image_list.width,rect.y+fi.image_list.height,
+            fi.image_list.width,rect.cy-2*fi.image_list.height),[al_stretchy]);
+   fi.image_list.paint(canvas,imageoffs+6,rect,[al_right]);
+   fi.image_list.paint(canvas,imageoffs+7,
+   makerect(rect.x+fi.image_list.width,rect.y,
+            rect.cx-2*fi.image_list.width,fi.image_list.height),[al_stretchx]);
+  end;
+ end;
+end;
+
 procedure tcustomframe.afterpaint(const canvas: tcanvas);
 begin
+ paintoverlay(canvas,inflaterect(fpaintrect,fwidth));
  //dummy
 end;
 
@@ -2621,6 +2760,51 @@ begin
  end;
 end;
 
+procedure tcustomframe.setimage_list(const avalue: timagelist);
+begin
+ include(flocalprops,frl_imagelist);
+ if fi.image_list <> avalue then begin
+  fintf.getwidget.setlinkedvar(avalue,fi.image_list);
+  internalupdatestate;
+ end;
+end;
+
+procedure tcustomframe.setimage_offset(const avalue: integer);
+begin
+ include(flocalprops,frl_imageoffset);
+ if fi.image_offset <> avalue then begin
+  fi.image_offset:= avalue;
+  internalupdatestate;
+ end;
+end;
+
+procedure tcustomframe.setimage_offsetmouse(const avalue: integer);
+begin
+ include(flocalprops,frl_imageoffsetmouse);
+ if fi.image_offsetmouse <> avalue then begin
+  fi.image_offsetmouse:= avalue;
+  internalupdatestate;
+ end;
+end;
+
+procedure tcustomframe.setimage_offsetclicked(const avalue: integer);
+begin
+ include(flocalprops,frl_imageoffsetclicked);
+ if fi.image_offsetclicked <> avalue then begin
+  fi.image_offsetclicked:= avalue;
+  internalupdatestate;
+ end;
+end;
+
+procedure tcustomframe.setimage_offsetactive(const avalue: integer);
+begin
+ include(flocalprops,frl_imageoffsetactive);
+ if fi.image_offsetactive <> avalue then begin
+  fi.image_offsetactive:= avalue;
+  internalupdatestate;
+ end;
+end;
+
 procedure tcustomframe.setcolorclient(const value: colorty);
 begin
  include(flocalprops,frl_colorclient);
@@ -2765,6 +2949,23 @@ begin
   if not (frl_fibottom in flocalprops) then begin
    innerframe.bottom:= ainfo.innerframe.bottom;
   end;
+
+  if not (frl_imagelist in flocalprops) then begin
+   fintf.getwidget.setlinkedvar(ainfo.image_list,image_list);
+  end;
+  if not (frl_imageoffset in flocalprops) then begin
+   image_offset:= ainfo.image_offset;
+  end;
+  if not (frl_imageoffsetmouse in flocalprops) then begin
+   image_offsetmouse:= ainfo.image_offsetmouse;
+  end;
+  if not (frl_imageoffsetclicked in flocalprops) then begin
+   image_offsetclicked:= ainfo.image_offsetclicked;
+  end;
+  if not (frl_imageoffsetactive in flocalprops) then begin
+   image_offsetactive:= ainfo.image_offsetactive;
+  end;
+
   if not (frl_colorclient in flocalprops) then begin
    colorclient:= ainfo.colorclient;
   end;
@@ -2972,6 +3173,31 @@ begin
  result:= (ftemplate = nil) or (frl_fitop in flocalprops);
 end;
 
+function tcustomframe.isimage_liststored: boolean;
+begin
+ result:= (ftemplate = nil) or (frl_imagelist in flocalprops);
+end;
+
+function tcustomframe.isimage_offsetstored: boolean;
+begin
+ result:= (ftemplate = nil) or (frl_imageoffset in flocalprops);
+end;
+
+function tcustomframe.isimage_offsetmousestored: boolean;
+begin
+ result:= (ftemplate = nil) or (frl_imageoffsetmouse in flocalprops);
+end;
+
+function tcustomframe.isimage_offsetclickedstored: boolean;
+begin
+ result:= (ftemplate = nil) or (frl_imageoffsetclicked in flocalprops);
+end;
+
+function tcustomframe.isimage_offsetactivestored: boolean;
+begin
+ result:= (ftemplate = nil) or (frl_imageoffsetactive in flocalprops);
+end;
+
 function tcustomframe.iscolorclientstored: boolean;
 begin
  result:= (ftemplate = nil) or (frl_colorclient in flocalprops);
@@ -3132,9 +3358,39 @@ begin
  changed;
 end;
 
+procedure tframetemplate.setimage_list(const avalue: timagelist);
+begin
+ setlinkedvar(avalue,fi.image_list);
+ changed;
+end;
+
+procedure tframetemplate.setimage_offset(const avalue: integer);
+begin
+ fi.image_offset:= avalue;
+ changed;
+end;
+
+procedure tframetemplate.setimage_offsetmouse(const avalue: integer);
+begin
+ fi.image_offsetmouse:= avalue;
+ changed;
+end;
+
+procedure tframetemplate.setimage_offsetclicked(const avalue: integer);
+begin
+ fi.image_offsetclicked:= avalue;
+ changed;
+end;
+
+procedure tframetemplate.setimage_offsetactive(const avalue: integer);
+begin
+ fi.image_offsetactive:= avalue;
+ changed;
+end;
+
 function tframetemplate.getinfosize: integer;
 begin
- result:= sizeof(fi);
+ result:= sizeof(fi) - sizeof(fi.image_list);
 end;
 
 function tframetemplate.getinfoad: pointer;
@@ -3178,6 +3434,11 @@ begin
   inflaterect1(rect1,abs(fi.levelo));
   mseshapes.draw3dframe(acanvas,rect1,fi.levelo,fi.framecolors);
  end;
+end;
+
+procedure tframetemplate.copyinfo(const source: tpersistenttemplate);
+begin
+ setlinkedvar(tframetemplate(source).image_list,fi.image_list);
 end;
 
 { tframecomp }
@@ -3563,6 +3824,32 @@ begin
     doalphablend(canvas);
    end;
   end;
+  if fi.frameimage_list <> nil then begin
+   fi.frameimage_list.paint(canvas,fi.frameimage_offset,rect.pos);
+   fi.frameimage_list.paint(canvas,fi.frameimage_offset+1,
+   makerect(rect.x,
+            rect.y+fi.frameimage_list.height,
+            fi.frameimage_list.width,
+            rect.cy-2*fi.frameimage_list.height),[al_stretchy]);
+   fi.frameimage_list.paint(canvas,fi.frameimage_offset+2,rect,[al_bottom]);
+   fi.frameimage_list.paint(canvas,fi.frameimage_offset+3,
+   makerect(rect.x+fi.frameimage_list.width,
+            rect.y+rect.cy-fi.frameimage_list.height,
+            rect.cx-2*fi.frameimage_list.width,
+            fi.frameimage_list.height),[al_stretchx]);
+   fi.frameimage_list.paint(canvas,fi.frameimage_offset+4,rect,
+                                                [al_bottom,al_right]);
+   fi.frameimage_list.paint(canvas,fi.frameimage_offset+5,
+   makerect(rect.x+rect.cx-fi.frameimage_list.width,
+            rect.y+fi.frameimage_list.height,
+            fi.frameimage_list.width,
+            rect.cy-2*fi.frameimage_list.height),[al_stretchy]);
+   fi.frameimage_list.paint(canvas,fi.frameimage_offset+6,rect,[al_right]);
+   fi.frameimage_list.paint(canvas,fi.frameimage_offset+7,
+   makerect(rect.x+fi.frameimage_list.width,rect.y,
+            rect.cx-2*fi.frameimage_list.width,
+            fi.frameimage_list.height),[al_stretchx]);
+  end;
  end;
 end;
 
@@ -3629,6 +3916,25 @@ begin
  end;
 end;
 
+procedure tcustomface.setframeimage_list(const avalue: timagelist);
+begin
+ include(flocalprops,fal_frameimagelist);
+ if fi.frameimage_list <> avalue then begin
+  fintf.getwidget.setlinkedvar(avalue,fi.frameimage_list);
+  change;
+ end;
+end;
+
+procedure tcustomface.setframeimage_offset(const avalue: integer);
+begin
+ include(flocalprops,fal_frameimageoffset);
+ if fi.frameimage_offset <> avalue then begin
+  fi.frameimage_offset:= avalue;
+  change;
+ end;
+end;
+
+
 procedure tcustomface.settemplate(const avalue: tfacecomp);
 begin
  fintf.getwidget.setlinkedvar(avalue,tmsecomponent(ftemplate));
@@ -3656,6 +3962,12 @@ begin
  end;
  if not (fal_fatransparency in flocalprops) then begin
   fade_transparency:= ainfo.fade_transparency;
+ end;
+ if not (fal_frameimagelist in flocalprops) then begin
+  fintf.getwidget.setlinkedvar(ainfo.frameimage_list,fi.frameimage_list);
+ end;
+ if not (fal_frameimageoffset in flocalprops) then begin
+  fi.frameimage_offset:= ainfo.frameimage_offset;
  end;
  if not (fal_options in flocalprops) then begin
   options:= ainfo.options;
@@ -3701,6 +4013,16 @@ end;
 function tcustomface.isfatransparencystored: boolean;
 begin
  result:= (ftemplate = nil) or (fal_fatransparency in flocalprops);
+end;
+
+function tcustomface.isframeimage_liststored: boolean;
+begin
+ result:= (ftemplate = nil) or (fal_frameimagelist in flocalprops);
+end;
+
+function tcustomface.isframeimage_offsetstored: boolean;
+begin
+ result:= (ftemplate = nil) or (fal_frameimageoffset in flocalprops);
 end;
 
 { tfacetemplate }
@@ -3780,6 +4102,18 @@ begin
  changed;
 end;
 
+procedure tfacetemplate.setframeimage_list(const avalue: timagelist);
+begin
+ setlinkedvar(avalue,fi.frameimage_list);
+ changed;
+end;
+
+procedure tfacetemplate.setframeimage_offset(const avalue: integer);
+begin
+ fi.frameimage_offset:= avalue;
+ changed;
+end;
+
 procedure tfacetemplate.doassignto(dest: tpersistent);
 begin
  if dest is tcustomface then begin
@@ -3790,6 +4124,7 @@ end;
 procedure tfacetemplate.copyinfo(const source: tpersistenttemplate);
 begin
  with tfacetemplate(source) do begin
+  self.setlinkedvar(frameimage_list,self.fi.frameimage_list);
   self.fi.image.assign(image);
   self.fi.fade_pos.beginupdate;
   self.fi.fade_color.beginupdate;
@@ -3802,7 +4137,7 @@ end;
 
 function tfacetemplate.getinfosize: integer;
 begin
- result:= sizeof(fi.fade_direction);
+ result:= sizeof(integer) + sizeof(fi.fade_direction);
 end;
 
 function tfacetemplate.getinfoad: pointer;
@@ -4828,6 +5163,10 @@ begin
  if (ws_focused in fwidgetstate) and needsfocuspaint then begin
   invalidatewidget;
  end;
+ if (frame <> nil) and (fframe.fi.image_list <> nil) and 
+        (fframe.fi.image_offsetactive <> 0) then begin
+        invalidate;
+ end;
 end;
 
 procedure twidget.visiblepropchanged;
@@ -5119,6 +5458,7 @@ end;
 procedure twidget.dopaintbackground(const canvas: tcanvas);
 var
  colorbefore: colorty;
+ face1: tcustomface;
 begin
  if frame <> nil then begin
   colorbefore:= canvas.color;
@@ -5126,16 +5466,24 @@ begin
   fframe.paint(canvas,makerect(nullpoint,fwidgetrect.size));
   canvas.color:= colorbefore;
  end;
- if fface <> nil then begin
+ face1:= getactface;
+ if face1 <> nil then begin
   if fframe <> nil then begin
    canvas.remove(fframe.fclientrect.pos);
-   fface.paint(canvas,makerect(nullpoint,fframe.fpaintrect.size));
+   face1.paint(canvas,makerect(nullpoint,fframe.fpaintrect.size));
    canvas.move(fframe.fclientrect.pos);
   end
   else begin
-   fface.paint(canvas,makerect(nullpoint,fwidgetrect.size));
+   face1.paint(canvas,makerect(nullpoint,fwidgetrect.size));
   end;
  end;
+ {
+ if (fframe <> nil) and (fframe.image_list <> nil) then begin
+  fframe.paintoverlay(canvas,makerect(-fframe.fpaintrect.x,
+                 -fframe.fpaintrect.y,
+                 fwidgetrect.cx,fwidgetrect.cy));
+ end
+ }
 end;
 
 procedure twidget.dopaint(const canvas: tcanvas);
@@ -5182,10 +5530,10 @@ procedure twidget.doafterpaint(const canvas: tcanvas);
 begin
  if fframe <> nil then begin
   fframe.afterpaint(canvas);
- end;
- if needsfocuspaint and (fwidgetstate * [ws_focused,ws_active] =
-               [ws_focused,ws_active]) then begin
-  fframe.dopaintfocusrect(canvas,makerect(nullpoint,fwidgetrect.size));
+  if needsfocuspaint and (fwidgetstate * [ws_focused,ws_active] =
+                [ws_focused,ws_active]) then begin
+   fframe.dopaintfocusrect(canvas,makerect(nullpoint,fwidgetrect.size));
+  end;
  end;
 end;
 
@@ -6121,6 +6469,10 @@ begin
      end;
     end;
     ek_clientmouseleave: begin
+     if (fframe <> nil) and (fframe.fi.image_list <> nil) and 
+               (fframe.fi.image_offsetmouse <> 0) then begin
+      invalidate;
+     end;
      if appinst.fmousewidget = self then begin
       if fparentwidget <> nil then begin
        fparentwidget.updatecursorshape(true);
@@ -6132,12 +6484,20 @@ begin
      clientmouseevent(info);
     end;
     ek_clientmouseenter: begin
+     if (fframe <> nil) and (fframe.fi.image_list <> nil) and 
+               (fframe.fi.image_offsetmouse <> 0) then begin
+      invalidate;
+     end;
      updatecursorshape(true);
      clientmouseevent(info);
     end;
     ek_buttonpress: begin
      if button = mb_left then begin
       include(fwidgetstate,ws_clicked);
+      if (frame <> nil) and (fframe.fi.image_list <> nil) and 
+             (fframe.fi.image_offsetclicked <> 0) then begin
+             invalidate;
+      end;
      end;
      appinst.capturemouse(self,true);
      if isclientmouseevent(info) then begin
@@ -6152,6 +6512,11 @@ begin
      end;
     end;
     ek_buttonrelease: begin
+     if (button = mb_left) and (frame <> nil) and 
+            (fframe.fi.image_list <> nil) and 
+            (fframe.fi.image_offsetclicked <> 0) then begin
+            invalidate;
+     end;
      if isclientmouseevent(info) then begin
       clientmouseevent(info);
       clientoffset:= getclientoffset;
@@ -8659,6 +9024,11 @@ begin
   fframe.fontcanvaschanged;
  end;
  checkautosize;
+end;
+
+function twidget.getactface: tcustomface;
+begin
+ result:= fface;
 end;
 
 { twindow }
@@ -11384,6 +11754,7 @@ begin
   fillchar(info,sizeof(info),0);
   if (fclientmousewidget <> nil) and
              not (csdestroying in fclientmousewidget.componentstate) then begin
+   exclude(fclientmousewidget.fwidgetstate,ws_mouseinclient);
    info.eventkind:= ek_clientmouseleave;
    fclientmousewidget.mouseevent(info);
   end;

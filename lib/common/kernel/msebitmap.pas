@@ -278,10 +278,14 @@ type
                               const stretch: boolean = false): integer;
 
    procedure paint(const acanvas: tcanvas; const index: integer;
+                   const dest: pointty; const acolor: colorty = cl_default
+               //used for monochrome bitmaps, cl_default-> acanvas.color
+            ); overload;
+   procedure paint(const acanvas: tcanvas; const index: integer;
                    const dest: rectty; const alignment: alignmentsty = [];
                    const acolor: colorty = cl_default
                //used for monochrome bitmaps, cl_default-> acanvas.color
-            );
+            ); overload;
    procedure assign(sender: tpersistent); override;
 
    property size: sizety read fsize write setsize;
@@ -1900,6 +1904,14 @@ begin
  if (index >= 0) and (index < count) then begin
   fbitmap.paint(acanvas,dest,makerect(indextoorg(index),fsize),alignment,acolor);
  end;
+end;
+
+procedure timagelist.paint(const acanvas: tcanvas; const index: integer;
+                   const dest: pointty; const acolor: colorty = cl_default
+               //used for monochrome bitmaps, cl_default-> acanvas.color
+            ); overload;
+begin
+ paint(acanvas,index,makerect(dest,size),[],acolor);
 end;
 
 function timagelist.gettransparentcolor: colorty;
