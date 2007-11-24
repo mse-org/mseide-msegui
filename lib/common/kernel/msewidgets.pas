@@ -795,6 +795,7 @@ type
    procedure dokeyup(var info: keyeventinfoty); override;
    procedure dopaint(const canvas: tcanvas); override;
    procedure clientrectchanged; override;
+   procedure setoptionswidget(const avalue: optionswidgetty); override;
   public
    constructor create(aowner: tcomponent); override;
    property options: buttonoptionsty read foptions write setoptions
@@ -1252,6 +1253,17 @@ begin
  finfo.colorglyph:= cl_black;
  finfo.doexecute:= {$ifdef FPC}@{$endif}doshapeexecute;
  finfo.state:= finfo.state+[ss_showfocusrect,ss_showdefaultrect];
+end;
+
+procedure tactionsimplebutton.setoptionswidget(const avalue: optionswidgetty);
+begin
+ if ow_nofocusrect in avalue then begin
+  exclude(finfo.state,ss_showfocusrect);
+ end
+ else begin
+  include(finfo.state,ss_showfocusrect);
+ end;
+ inherited;
 end;
 
 procedure tactionsimplebutton.clientrectchanged;

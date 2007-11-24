@@ -33,14 +33,14 @@ const
  mousebuttons = [ss_left,ss_right,ss_middle];
 
 type
- optionwidgetty = (ow_background,ow_top,ow_noautosizing,
+ optionwidgetty = (ow_background,ow_top,ow_noautosizing,ow_nofocusrect,
                    ow_mousefocus,ow_tabfocus,ow_parenttabfocus,ow_arrowfocus,
                    ow_arrowfocusin,ow_arrowfocusout,
                    ow_subfocus, //reflects focus to children
                    ow_focusbackonesc,
-                   ow_nochildshortcut, //do not propagate shortcuts to parent
+                   ow_nochildshortcut,  //do not propagate shortcuts to parent
                    ow_noparentshortcut, //do not react to shortcuts from parent
-                   ow_canclosenil, //canclose calls canclose(nil)
+                   ow_canclosenil,      //canclose calls canclose(nil)
                    ow_mousetransparent,ow_mousewheel,ow_noscroll,ow_destroywidgets,
                    ow_hinton,ow_hintoff,ow_multiplehint,ow_timedhint,
                    ow_fontglyphheight, 
@@ -5505,7 +5505,8 @@ end;
 
 function twidget.needsfocuspaint: boolean;
 begin
- result:= (fframe <> nil) and (fs_drawfocusrect in fframe.fstate);
+ result:= not (ow_nofocusrect in foptionswidget) and (fframe <> nil) and 
+                             (fs_drawfocusrect in fframe.fstate);
 end;
 
 function twidget.getshowhint: boolean;
@@ -8306,6 +8307,9 @@ begin
   end;
   if (ow_autosize in delta) and (ow_autosize in avalue) then begin
    checkautosize;
+  end;
+  if ow_nofocusrect in delta then begin
+   invalidate;
   end;
  end;
 end;

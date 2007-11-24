@@ -595,6 +595,7 @@ type
    function checkfocusshortcut(var info: keyeventinfoty): boolean; override;
    function actualimagenr(const avalue: integer): integer;
    procedure setoptions(const avalue: buttonoptionsty); override;
+   procedure setoptionswidget(const avalue: optionswidgetty); override;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -2378,6 +2379,17 @@ begin
   end;
   invalidate;
  end;
+end;
+
+procedure tcustomdatabutton.setoptionswidget(const avalue: optionswidgetty);
+begin
+ if ow_nofocusrect in avalue then begin
+  exclude(finfo.state,ss_showfocusrect);
+ end
+ else begin
+  include(finfo.state,ss_showfocusrect);
+ end;
+ inherited;
 end;
 
 { tstockglyphdatabutton }
