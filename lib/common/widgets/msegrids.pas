@@ -2448,7 +2448,7 @@ begin
     end;
     canvas.restore(saveindex);
     if not bo2 and (fframe <> nil) and 
-                          (fframe.image_list <> nil) then begin
+                          (fframe.frameimage_list <> nil) then begin
      frame.paintoverlay(canvas,fcellrect);
     end;
     canvas.move(makepoint(0,ystep));
@@ -3148,7 +3148,7 @@ begin
    end;
   end;
   canvas.restore;
-  if (frame1 <> nil) and (frame1.image_list <> nil) then begin
+  if (frame1 <> nil) and (frame1.frameimage_list <> nil) then begin
    frame1.paintoverlay(canvas,fcellrect);
   end;
   if flinewidth > 0 then begin

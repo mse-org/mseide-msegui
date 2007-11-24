@@ -107,11 +107,11 @@ type
    property framei_right;
    property framei_bottom;
 
-   property image_list;
-   property image_offset;
-   property image_offsetmouse;
-   property image_offsetclicked;
-   property image_offsetactive;
+   property frameimage_list;
+   property frameimage_offset;
+   property frameimage_offsetmouse;
+   property frameimage_offsetclicked;
+   property frameimage_offsetactive;
 
    property colorclient;
    property caption;
@@ -216,11 +216,11 @@ type
    property framei_right;
    property framei_bottom;
 
-   property image_list;
-   property image_offset;
-   property image_offsetmouse;
-   property image_offsetclicked;
-   property image_offsetactive;
+   property frameimage_list;
+   property frameimage_offset;
+   property frameimage_offsetmouse;
+   property frameimage_offsetclicked;
+   property frameimage_offsetactive;
 
    property sbhorz; 
    property sbvert;
@@ -300,11 +300,11 @@ type
    property framei_right;
    property framei_bottom;
 
-   property image_list;
-   property image_offset;
-   property image_offsetmouse;
-   property image_offsetclicked;
-   property image_offsetactive;
+   property frameimage_list;
+   property frameimage_offset;
+   property frameimage_offsetmouse;
+   property frameimage_offsetclicked;
+   property frameimage_offsetactive;
 
    property caption;
    property captionpos;
@@ -412,11 +412,11 @@ type
    property framei_right;
    property framei_bottom;
 
-   property image_list;
-   property image_offset;
-   property image_offsetmouse;
-   property image_offsetclicked;
-   property image_offsetactive;
+   property frameimage_list;
+   property frameimage_offset;
+   property frameimage_offsetmouse;
+   property frameimage_offsetclicked;
+   property frameimage_offsetactive;
  
    property caption;
    property captionpos;

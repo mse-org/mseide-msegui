@@ -50,11 +50,11 @@ type
    property framei_right default 1;
    property framei_bottom default 1;
 
-   property image_list;
-   property image_offset;
-   property image_offsetmouse;
-   property image_offsetclicked;
-   property image_offsetactive;
+   property frameimage_list;
+   property frameimage_offset;
+   property frameimage_offsetmouse;
+   property frameimage_offsetclicked;
+   property frameimage_offsetactive;
 
    property colorclient default cl_foreground;
    property caption;
