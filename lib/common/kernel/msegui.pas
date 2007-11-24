@@ -2764,7 +2764,7 @@ procedure tcustomframe.setimage_list(const avalue: timagelist);
 begin
  include(flocalprops,frl_imagelist);
  if fi.image_list <> avalue then begin
-  fintf.getwidget.setlinkedvar(avalue,fi.image_list);
+  fintf.getwidget.setlinkedvar(avalue,tmsecomponent(fi.image_list));
   internalupdatestate;
  end;
 end;
@@ -2951,7 +2951,7 @@ begin
   end;
 
   if not (frl_imagelist in flocalprops) then begin
-   fintf.getwidget.setlinkedvar(ainfo.image_list,image_list);
+   fintf.getwidget.setlinkedvar(ainfo.image_list,tmsecomponent(image_list));
   end;
   if not (frl_imageoffset in flocalprops) then begin
    image_offset:= ainfo.image_offset;
@@ -3360,7 +3360,7 @@ end;
 
 procedure tframetemplate.setimage_list(const avalue: timagelist);
 begin
- setlinkedvar(avalue,fi.image_list);
+ setlinkedvar(avalue,tmsecomponent(fi.image_list));
  changed;
 end;
 
@@ -3438,7 +3438,7 @@ end;
 
 procedure tframetemplate.copyinfo(const source: tpersistenttemplate);
 begin
- setlinkedvar(tframetemplate(source).image_list,fi.image_list);
+ setlinkedvar(tframetemplate(source).image_list,tmsecomponent(fi.image_list));
 end;
 
 { tframecomp }
@@ -3920,7 +3920,7 @@ procedure tcustomface.setframeimage_list(const avalue: timagelist);
 begin
  include(flocalprops,fal_frameimagelist);
  if fi.frameimage_list <> avalue then begin
-  fintf.getwidget.setlinkedvar(avalue,fi.frameimage_list);
+  fintf.getwidget.setlinkedvar(avalue,tmsecomponent(fi.frameimage_list));
   change;
  end;
 end;
@@ -3964,7 +3964,8 @@ begin
   fade_transparency:= ainfo.fade_transparency;
  end;
  if not (fal_frameimagelist in flocalprops) then begin
-  fintf.getwidget.setlinkedvar(ainfo.frameimage_list,fi.frameimage_list);
+  fintf.getwidget.setlinkedvar(ainfo.frameimage_list,
+                tmsecomponent(fi.frameimage_list));
  end;
  if not (fal_frameimageoffset in flocalprops) then begin
   fi.frameimage_offset:= ainfo.frameimage_offset;
@@ -4104,7 +4105,7 @@ end;
 
 procedure tfacetemplate.setframeimage_list(const avalue: timagelist);
 begin
- setlinkedvar(avalue,fi.frameimage_list);
+ setlinkedvar(avalue,tmsecomponent(fi.frameimage_list));
  changed;
 end;
 
@@ -4124,7 +4125,7 @@ end;
 procedure tfacetemplate.copyinfo(const source: tpersistenttemplate);
 begin
  with tfacetemplate(source) do begin
-  self.setlinkedvar(frameimage_list,self.fi.frameimage_list);
+  self.setlinkedvar(frameimage_list,tmsecomponent(self.fi.frameimage_list));
   self.fi.image.assign(image);
   self.fi.fade_pos.beginupdate;
   self.fi.fade_color.beginupdate;

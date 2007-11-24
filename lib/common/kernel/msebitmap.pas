@@ -1909,7 +1909,7 @@ end;
 procedure timagelist.paint(const acanvas: tcanvas; const index: integer;
                    const dest: pointty; const acolor: colorty = cl_default
                //used for monochrome bitmaps, cl_default-> acanvas.color
-            ); overload;
+            );
 begin
  paint(acanvas,index,makerect(dest,size),[],acolor);
 end;
