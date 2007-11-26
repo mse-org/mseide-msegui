@@ -116,6 +116,7 @@ type
    fstatfile: tstatfile;
    fonchange: notifyeventty;
    fonasyncevent: asynceventty;
+   fonexecuteaction: actioneventty;
    function getcaption: captionty;
    procedure setcaption(const Value: captionty);
    procedure setonexecute(const Value: notifyeventty);
@@ -181,6 +182,7 @@ type
    property statvarname: msestring read getstatvarname write fstatvarname;
 
    property onexecute: notifyeventty read finfo.onexecute write setonexecute;
+   property onexecuteaction: actioneventty read fonexecuteaction write fonexecuteaction;
    property onupdate: actioneventty read fonupdate write fonupdate;
    property onchange: notifyeventty read fonchange write fonchange;
    property onasyncevent: asynceventty read fonasyncevent write fonasyncevent;
@@ -1109,10 +1111,10 @@ end;
 procedure tcustomaction.eventfired(const sender: tobject;
                const ainfo: actioninfoty);
 begin
-// if (tmethod(finfo.onexecute).data = tmethod(ainfo.onexecute).data) and
-//    (tmethod(finfo.onexecute).code = tmethod(ainfo.onexecute).code) then begin
+ if canevent(tmethod(fonexecuteaction)) then begin
+  fonexecuteaction(self);
+ end;
   sendchangeevent(oe_fired);
-// end;
 end;
 
 procedure tcustomaction.registeronshortcut(const avalue: boolean);

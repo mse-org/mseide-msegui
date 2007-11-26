@@ -44,6 +44,7 @@ type
    property statvarname;
    property options;
    property onexecute;
+   property onexecuteaction;
    property onupdate;
    property onchange;
    property onasyncevent;
