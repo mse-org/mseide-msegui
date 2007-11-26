@@ -1022,7 +1022,7 @@ begin
     if pointinrect(pos,paintrect) then begin
      int1:= flayout.activeitem;
      internalsetactiveitem(getcellatpos(flayout,
-      subpoint(pos,paintrect.pos)),
+      subpoint(pos,innerpaintrect.pos)),
                        ss_left in info.shiftstate,false);
      if (int1 <> flayout.activeitem) and (activeitem >= 0) and 
                tmenuitem1(menu.items[activeitem]).canshowhint then begin
