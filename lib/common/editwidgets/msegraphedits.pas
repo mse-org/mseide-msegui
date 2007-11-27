@@ -675,6 +675,11 @@ type
    ffaceactive: tcustomface;
    ffacemouse: tcustomface;
    ffaceclicked: tcustomface;
+   fonbeforepaint: painteventty;
+   fonpaintbackground: painteventty;
+   fonpaint: painteventty;
+   fonafterpaint: painteventty;
+   fonmouseevent: mouseeventty;
    function getfaceactive: tcustomface;
    procedure setfaceactive(const avalue: tcustomface);
    function getfacemouse: tcustomface;
@@ -686,12 +691,23 @@ type
    procedure createfaceclicked;
   protected
    function getactface: tcustomface; override;
+   procedure dobeforepaint(const canvas: tcanvas); override;
+   procedure dopaintbackground(const canvas: tcanvas); override;
+   procedure doonpaint(const canvas: tcanvas); override;
+   procedure doafterpaint(const canvas: tcanvas); override;
+   procedure mouseevent(var info: mouseeventinfoty); override;
   public
    destructor destroy; override;
   published
    property faceactive: tcustomface read getfaceactive write setfaceactive;
    property facemouse: tcustomface read getfacemouse write setfacemouse;
    property faceclicked: tcustomface read getfaceclicked write setfaceclicked;
+   property onmouseevent: mouseeventty read fonmouseevent write fonmouseevent;
+   property onbeforepaint: painteventty read fonbeforepaint write fonbeforepaint;
+   property onpaintbackground: painteventty read fonpaintbackground 
+                                                  write fonpaintbackground;
+   property onpaint: painteventty read fonpaint write fonpaint;
+   property onafterpaint: painteventty read fonafterpaint write fonafterpaint;
  end;
   
  tcustomdataicon = class(tcustomintegergraphdataedit)
@@ -2877,6 +2893,44 @@ begin
     end;    
    end;
   end;
+ end;
+end;
+
+procedure trichbutton.dobeforepaint(const canvas: tcanvas);
+begin
+ if canevent(tmethod(fonbeforepaint)) then begin
+  fonbeforepaint(self,canvas);
+ end;
+end;
+
+procedure trichbutton.dopaintbackground(const canvas: tcanvas);
+begin
+ if canevent(tmethod(fonpaintbackground)) then begin
+  fonpaintbackground(self,canvas);
+ end;
+end;
+
+procedure trichbutton.doonpaint(const canvas: tcanvas);
+begin
+ if canevent(tmethod(fonpaint)) then begin
+  fonpaint(self,canvas);
+ end;
+end;
+
+procedure trichbutton.doafterpaint(const canvas: tcanvas);
+begin
+ if canevent(tmethod(fonafterpaint)) then begin
+  fonafterpaint(self,canvas);
+ end;
+end;
+
+procedure trichbutton.mouseevent(var info: mouseeventinfoty);
+begin
+ if canevent(tmethod(fonmouseevent)) then begin
+  fonmouseevent(self,info);
+ end;
+ if not (es_processed in info.eventstate) then begin
+  inherited;
  end;
 end;
 
