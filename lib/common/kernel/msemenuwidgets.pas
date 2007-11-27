@@ -34,7 +34,7 @@ type
   popupdirection: graphicdirectionty;
   mousepos: pointty;
   options: menulayoutoptionsty;
-  size: sizety;
+  sizerect: rectty;
   cells: menucellinfoarty;
   colorglyph: colorty;
   itemframetemplate: tframetemplate;
@@ -253,6 +253,7 @@ var
  int1: integer;
 begin
  with layout do begin
+  addpoint1(sizerect.pos,dist);
   for int1:= 0 to high(cells) do begin
    with cells[int1].buttoninfo.dim.pos do begin
     x:= x + dist.x;
@@ -314,6 +315,7 @@ var
 begin
  ar1:= nil; //compiler warning
  with layout,tmenuitem1(menu) do begin
+  sizerect.pos:= nullpoint;
   commonwidth:= (owner <> nil) and (mo_commonwidth in owner.options) and
                       (mlo_horz in layout.options);
   framehalfwidth:= 0;
@@ -517,8 +519,8 @@ begin
       end;
      end;
     end;
-    size.cx:= ax - extrasp - framehalfwidth;
-    size.cy:= regioncount * (maxheight + framewidth1) - extrasp;
+    sizerect.cx:= ax - extrasp - framehalfwidth;
+    sizerect.cy:= regioncount * (maxheight + framewidth1) - extrasp;
    end
    else begin                                              //vertical
     if mao_singleregion in layout.menu.options then begin
@@ -556,12 +558,12 @@ begin
       cx:= textwidth;
      end;
     end;
-    size.cx:=  regioncount * (textwidth  + framewidth1) - extrasp;
-    size.cy:= maxheight - framehalfwidth - extrasp;
+    sizerect.cx:=  regioncount * (textwidth  + framewidth1) - extrasp;
+    sizerect.cy:= maxheight - framehalfwidth - extrasp;
    end;
   end
   else begin
-   size:= nullsize;
+   sizerect.size:= nullsize;
   end;
   for int1:= 0 to count - 1 do begin
    with cells[int1],buttoninfo do begin
@@ -576,8 +578,7 @@ var
  int1: integer;
 begin
  with info do begin
-  if (pos.x >= 0) and (pos.y >= 0) and 
-                     (pos.x < size.cx) and (pos.y < size.cy) then begin
+  if pointinrect(pos,sizerect) then begin
    result:= -2;
    for int1:= 0 to high(cells) do begin
     with cells[int1].buttoninfo do begin
@@ -854,7 +855,7 @@ var
  workarea: rectty;
  int1: integer;
 begin
- rect1.size:= addsize(flayout.size,innerclientframewidth);
+ rect1.size:= addsize(flayout.sizerect.size,innerclientframewidth);
  workarea:= application.workarea(self.window);
  factposition:= fposition;
  int1:= 0;
@@ -1022,7 +1023,7 @@ begin
     if pointinrect(pos,paintrect) then begin
      int1:= flayout.activeitem;
      internalsetactiveitem(getcellatpos(flayout,
-      subpoint(pos,innerpaintrect.pos)),
+      subpoint(pos,paintpos)),
                        ss_left in info.shiftstate,false);
      if (int1 <> flayout.activeitem) and (activeitem >= 0) and 
                tmenuitem1(menu.items[activeitem]).canshowhint then begin
@@ -1461,7 +1462,7 @@ end;
 
 procedure tcustommainmenuwidget.getautopaintsize(var asize: sizety);
 begin
- asize:= addsize(flayout.size,innerframewidth);
+ asize:= addsize(flayout.sizerect.size,innerframewidth);
 end;
 
 procedure tcustommainmenuwidget.updatelayout;
@@ -1487,13 +1488,13 @@ begin
    movemenulayout(flayout,innerclientrect.pos);
    rect1:= fwidgetrect;
    if mlo_horz in flayout.options then begin
-    rect1.cy:= flayout.size.cy + innerclientframewidth.cy;
+    rect1.cy:= flayout.sizerect.size.cy + innerclientframewidth.cy;
     if an_bottom in fanchors then begin
      rect1.y:= rect1.y + fwidgetrect.cy - rect1.cy;
     end;
    end
    else begin
-    rect1.cx:= flayout.size.cx + innerclientframewidth.cx;
+    rect1.cx:= flayout.sizerect.size.cx + innerclientframewidth.cx;
     if an_right in fanchors then begin
      rect1.x:= rect1.x + fwidgetrect.cx - rect1.cx;
     end;
