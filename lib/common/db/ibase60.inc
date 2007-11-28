@@ -342,6 +342,7 @@ type
      isc_tr_handle = pointer;
      isc_win_handle = pointer;
      isc_callback = procedure ;extdecl;
+     isc_versioncallback = procedure(user_arg: pointer; atext: pchar) ;extdecl;
      isc_resv_handle = ISC_LONG;
      tisc_att_handle = isc_att_handle;
      tisc_blob_handle = isc_blob_handle;
@@ -1983,8 +1984,12 @@ type
 
   procedure isc_vtov(_para1:Pchar; _para2:Pchar; _para3:smallint); extdecl; external gdslib;
 
-  function isc_version(_para1:Pisc_db_handle; _para2:isc_callback; _para3:pointer):longint; extdecl; external gdslib;
+  function isc_version(_para1:Pisc_db_handle; _para2:isc_versioncallback; _para3:pointer):longint; extdecl; external gdslib;
 
+  procedure isc_get_client_version(aversion: pchar); extdecl; external gdslib;
+  function isc_get_client_major_version: integer; extdecl; external gdslib;
+  function isc_get_client_minor_version: integer; extdecl; external gdslib;
+  
 {$IFDEF Unix}
   function isc_reset_fpe(_para1:word):ISC_LONG; extdecl; external gdslib;
 {$ENDIF}
@@ -2405,7 +2410,11 @@ var
   isc_qtoq : procedure (_para1:PISC_QUAD; _para2:PISC_QUAD); extdecl;
   isc_vtof : procedure (_para1:Pchar; _para2:Pchar; _para3:word); extdecl;
   isc_vtov : procedure (_para1:Pchar; _para2:Pchar; _para3:smallint); extdecl;
-  isc_version : function (_para1:Pisc_db_handle; _para2:isc_callback; _para3:pointer):longint; extdecl;
+  isc_version : function (_para1:Pisc_db_handle; _para2:isc_versioncallback;
+                                _para3:pointer):longint; extdecl;
+  isc_get_client_version: procedure (aversion: pchar); extdecl;
+  isc_get_client_major_version: function: integer; extdecl;
+  isc_get_client_minor_version: function: integer; extdecl;
 {$IFDEF Unix}
   isc_reset_fpe : function (_para1:word):ISC_LONG; extdecl;
 {$ENDIF}
@@ -2621,6 +2630,12 @@ begin
   pointer(isc_vtof) := GetProcedureAddress(IBaseLibraryHandle,'isc_vtof');
   pointer(isc_vtov) := GetProcedureAddress(IBaseLibraryHandle,'isc_vtov');
   pointer(isc_version) := GetProcedureAddress(IBaseLibraryHandle,'isc_version');
+  pointer(isc_get_client_version):= GetProcedureAddress(IBaseLibraryHandle,
+              'isc_get_client_version');
+  pointer(isc_get_client_major_version):= GetProcedureAddress(IBaseLibraryHandle,
+              'isc_get_client_major_version');
+  pointer(isc_get_client_minor_version):= GetProcedureAddress(IBaseLibraryHandle,
+              'isc_get_client_minor_version');
 {$IFDEF Unix}
   pointer(isc_reset_fpe) := GetProcedureAddress(IBaseLibraryHandle,'isc_reset_fpe');
 {$ENDIF}
