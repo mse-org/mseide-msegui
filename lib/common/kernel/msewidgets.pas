@@ -116,6 +116,8 @@ type
    property frameimage_offsetmouse;
    property frameimage_offsetclicked;
    property frameimage_offsetactive;
+   property frameimage_offsetactivemouse;
+   property frameimage_offsetactiveclicked;
 
    property colorclient;
    property caption;
@@ -229,6 +231,8 @@ type
    property frameimage_offsetmouse;
    property frameimage_offsetclicked;
    property frameimage_offsetactive;
+   property frameimage_offsetactivemouse;
+   property frameimage_offsetactiveclicked;
 
    property sbhorz; 
    property sbvert;
@@ -317,6 +321,8 @@ type
    property frameimage_offsetmouse;
    property frameimage_offsetclicked;
    property frameimage_offsetactive;
+   property frameimage_offsetactivemouse;
+   property frameimage_offsetactiveclicked;
 
    property caption;
    property captionpos;
@@ -433,6 +439,8 @@ type
    property frameimage_offsetmouse;
    property frameimage_offsetclicked;
    property frameimage_offsetactive;
+   property frameimage_offsetactivemouse;
+   property frameimage_offsetactiveclicked;
  
    property caption;
    property captionpos;
@@ -812,6 +820,8 @@ type
    procedure dopaint(const canvas: tcanvas); override;
    procedure clientrectchanged; override;
    procedure setoptionswidget(const avalue: optionswidgetty); override;
+   function getframeclicked: boolean; override;
+   function getframemouse: boolean; override;
   public
    constructor create(aowner: tcomponent); override;
    property options: buttonoptionsty read foptions write setoptions
@@ -1393,6 +1403,16 @@ begin
   end;
   invalidate;
  end;
+end;
+
+function tactionsimplebutton.getframeclicked: boolean;
+begin
+ result:= ss_clicked in finfo.state;
+end;
+
+function tactionsimplebutton.getframemouse: boolean;
+begin
+ result:= ss_mouse in finfo.state;
 end;
 
 { tmessagebutton }

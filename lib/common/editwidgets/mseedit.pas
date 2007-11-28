@@ -59,6 +59,8 @@ type
    property frameimage_offsetmouse;
    property frameimage_offsetclicked;
    property frameimage_offsetactive;
+   property frameimage_offsetactivemouse;
+   property frameimage_offsetactiveclicked;
 
    property colorclient default cl_foreground;
    property caption;

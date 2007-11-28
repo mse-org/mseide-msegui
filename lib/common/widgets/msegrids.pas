@@ -1086,6 +1086,8 @@ end;
    property frameimage_offsetmouse;
    property frameimage_offsetclicked;
    property frameimage_offsetactive;
+   property frameimage_offsetactivemouse;
+   property frameimage_offsetactiveclicked;
 
    property sbvert;
    property sbhorz;
