@@ -601,11 +601,11 @@ begin
    if fdirection in [gd_left,gd_right] then begin
     aangle:= -aangle;
    end;
-   aangle:= aangle + escapement*2*pi;
   end
   else begin
    aangle:= 0;
   end;
+  aangle:= aangle + escapement*2*pi;
   case fdirection of
    gd_right: begin
     a.x:= snap(rect1.cx * rea1);
