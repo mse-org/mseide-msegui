@@ -12,10 +12,11 @@ order9=0
 order10=0
 order11=0
 order12=0
+order13=0
 [projectoptions]
-projectdir=/home/mse/packs/standard/svn/mse/trunk/apps/demo
-projectfilename=/home/mse/packs/standard/svn/mse/trunk/apps/demo/demo.prj
-options=41
+projectdir=/C:/proj/mseide-msegui/trunk/apps/demo
+projectfilename=/C:/proj/mseide-msegui/trunk/apps/demo/demo.prj
+options=57
  [projectoptionsfo]
  stackedunder=
  x=151
@@ -25,6 +26,25 @@ options=41
  [projectoptionsfo.tabwidget]
  firsttab=0
  index=3
+ [projectoptionsfo.ttabwidget2]
+ firsttab=0
+ index=1
+ [projectoptionsfo.filefiltergrid]
+ width0=112
+ width1=673
+ [projectoptionsfo.grid]
+ width1=566
+ [projectoptionsfo.ttabwidget1]
+ firsttab=0
+ index=0
+ [projectoptionsfo.exceptionsgrid]
+ width0=47
+ values1=1
+  EconvertError
+ width1=766
+ [projectoptionsfo.makegroupbox]
+ firsttab=0
+ index=0
  [projectoptionsfo.macrogrid]
  width0=13
  width1=13
@@ -44,19 +64,16 @@ options=41
  width1=684
  values2=0
  width2=30
- [projectoptionsfo.grid]
- width0=231
- [projectoptionsfo.makesplitter]
- x=0
- y=161
- [projectoptionsfo.ttabwidget1]
+ [projectoptionsfo.newfile]
  firsttab=0
  index=0
- [projectoptionsfo.exceptionsgrid]
- width0=47
- values1=1
-  EconvertError
- width1=764
+ [projectoptionsfo.twidgetgrid3]
+ width0=13
+ width1=13
+ width2=13
+ width3=141
+ width4=290
+ width5=320
 sigsettings=27
  1,1,T,F
  3,3,T,F
@@ -96,7 +113,7 @@ modulenames=1
 moduletypes=1
  TMAINFO
 modulefiles=1
- /home/mse/packs/standard/svn/mse/trunk/apps/demo/main.mfm
+ /C:/proj/mseide-msegui/trunk/apps/demo/main.mfm
 mainfile=demo.pas
 targetfile=demo${EXEEXT}
 messageoutputfile=
@@ -301,7 +318,7 @@ windowlayout=312
  x=0
  y=0
  cx=286
- cy=38
+ cy=40
  [componentpalettefo]
  splitdir=0
  useroptions=3099
@@ -583,7 +600,7 @@ bookmarks0=0
 bookmarks1=0
 sourcefiles=2
  demo.pas
- /home/mse/packs/standard/svn/mse/trunk/apps/demo/main.pas
+ /C:/proj/mseide-msegui/trunk/apps/demo/main.pas
 relpaths=2
  demo.pas
  main.pas
@@ -591,7 +608,7 @@ ismoduletexts=2
  0
  0
 modules=1
- /home/mse/packs/standard/svn/mse/trunk/apps/demo/main.mfm
+ /C:/proj/mseide-msegui/trunk/apps/demo/main.mfm
 visiblemodules=1
  1
 [sourcefo.tabwidget]

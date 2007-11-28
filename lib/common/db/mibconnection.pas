@@ -201,7 +201,8 @@ type
 function clientversion: string;
 function clientmajorversion: integer;
 function clientminorversion: integer;
-
+           //library must be inited before calling
+           
 implementation
 
 uses 
@@ -211,18 +212,31 @@ function clientversion: string;
 var
  buf: array[0..255] of char;
 begin
- isc_get_client_version(@buf);
- result:= buf;
+ result:= '';
+ if assigned(isc_get_client_version) then begin
+  isc_get_client_version(@buf);
+  result:= buf;
+ end;
 end;
 
 function clientmajorversion: integer;
 begin
- result:= isc_get_client_major_version();
+ if assigned(isc_get_client_major_version) then begin
+  result:= isc_get_client_major_version();
+ end
+ else begin
+  result:= -1;
+ end;
 end;
 
 function clientminorversion: integer;
 begin
- result:= isc_get_client_minor_version();
+ if assigned(isc_get_client_minor_version) then begin
+  result:= isc_get_client_minor_version();
+ end
+ else begin
+  result:= -1;
+ end;
 end;
 
 type
@@ -1551,7 +1565,7 @@ begin
 end;
 
 procedure eventcallback(adata: pointer; alength: smallint; aupdated: pchar); 
-                           {$ifdef mswindows}stdcall{$else}cdecl{$endif};
+                                                         cdecl;
 var
  status: statusvectorty; 
 begin
@@ -1653,8 +1667,7 @@ begin
  abuffer:= nil;
 end;
 
-procedure versioncallback(user_arg: pointer; atext: pchar); 
-                 {$ifdef mswindows}stdcall{$else}cdecl{$endif};
+procedure versioncallback(user_arg: pointer; atext: pchar); cdecl;
 begin
  setlength(stringarty(user_arg^),high(stringarty(user_arg^))+2);
  stringarty(user_arg^)[high(stringarty(user_arg^))]:= atext;
@@ -1667,7 +1680,8 @@ var
 begin
  checkconnected;
  ar1:= nil;
- if isc_version(@fsqldatabasehandle,@versioncallback,@ar1) <> 0 then begin
+ if isc_version(@fsqldatabasehandle,@versioncallback,
+                                   @ar1) <> 0 then begin
   raise edatabaseerror(name+': Can not get version info.');
  end;
  with result do begin
