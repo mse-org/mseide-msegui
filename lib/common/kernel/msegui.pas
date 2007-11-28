@@ -930,6 +930,7 @@ type
    
    function getframeclicked: boolean; virtual;
    function getframemouse: boolean; virtual;
+   function getframeactive: boolean; virtual;
    
    //igridcomp,itabwidget
    function getwidget: twidget;
@@ -2584,7 +2585,7 @@ begin
   rect2:= deflaterect(arect,fouterframe);
   imageoffs:= fi.frameimage_offset;
   with fintf.getwidget do begin
-   if active then begin
+   if getframeactive then begin
     if getframeclicked then begin
      imageoffs:= imageoffs + fi.frameimage_offsetactiveclicked;
     end
@@ -9049,6 +9050,11 @@ end;
 function twidget.getframemouse: boolean;
 begin
  result:= ws_mouseinclient in widgetstate;
+end;
+
+function twidget.getframeactive: boolean;
+begin
+ result:= ws_active in fwidgetstate;
 end;
 
 procedure twidget.setframeinstance(instance: tcustomframe);

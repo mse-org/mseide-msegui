@@ -822,6 +822,7 @@ type
    procedure setoptionswidget(const avalue: optionswidgetty); override;
    function getframeclicked: boolean; override;
    function getframemouse: boolean; override;
+   function getframeactive: boolean; override;
   public
    constructor create(aowner: tcomponent); override;
    property options: buttonoptionsty read foptions write setoptions
@@ -1413,6 +1414,11 @@ end;
 function tactionsimplebutton.getframemouse: boolean;
 begin
  result:= ss_mouse in finfo.state;
+end;
+
+function tactionsimplebutton.getframeactive: boolean;
+begin
+ result:= (ss_default in finfo.state) or active;
 end;
 
 { tmessagebutton }
