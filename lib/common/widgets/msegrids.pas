@@ -7130,6 +7130,7 @@ end;
 procedure tcustomgrid.docellevent(var info: celleventinfoty);
 begin
  with info do begin
+  grid:= self;
  {
   case eventkind of
    cek_enter: begin
