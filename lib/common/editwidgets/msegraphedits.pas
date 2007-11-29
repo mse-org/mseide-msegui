@@ -2914,6 +2914,7 @@ end;
 
 procedure trichbutton.dobeforepaint(const canvas: tcanvas);
 begin
+ inherited;
  if canevent(tmethod(fonbeforepaint)) then begin
   fonbeforepaint(self,canvas);
  end;
@@ -2921,6 +2922,7 @@ end;
 
 procedure trichbutton.dopaintbackground(const canvas: tcanvas);
 begin
+ inherited;
  if canevent(tmethod(fonpaintbackground)) then begin
   fonpaintbackground(self,canvas);
  end;
@@ -2928,6 +2930,7 @@ end;
 
 procedure trichbutton.doonpaint(const canvas: tcanvas);
 begin
+ inherited;
  if canevent(tmethod(fonpaint)) then begin
   fonpaint(self,canvas);
  end;
@@ -2935,6 +2938,7 @@ end;
 
 procedure trichbutton.doafterpaint(const canvas: tcanvas);
 begin
+ inherited;
  if canevent(tmethod(fonafterpaint)) then begin
   fonafterpaint(self,canvas);
  end;
