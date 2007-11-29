@@ -17,6 +17,16 @@ uses
   msebitmap,msegui,msemenus,mseevent;
 
 type
+ timageframe = class(tscrollboxframe)
+  protected
+   procedure initinnerframe; override;
+  published
+   property framei_left default 0;
+   property framei_top default 0;
+   property framei_right default 0;
+   property framei_bottom default 0;
+ end;
+ 
  timage = class(tscrollingwidget)
   private
    fbitmap: tmaskedbitmap;
@@ -31,6 +41,7 @@ type
                           const dest: rectty);
    procedure dopaint(const canvas: tcanvas); override;
    function calcminscrollsize: sizety; override;
+   procedure internalcreateframe; override;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -81,7 +92,8 @@ begin
  col2:= acanvas.colorbackground;
  acanvas.color:= fcolorforeground;
  acanvas.colorbackground:= fcolorbackground;
- abmp.paint(acanvas,makerect(nullpoint,clientsize));
+// abmp.paint(acanvas,makerect(nullpoint,clientsize));
+ abmp.paint(acanvas,innerclientrect);
  acanvas.color:= col1;
  acanvas.colorbackground:= col2;
 end;
@@ -133,6 +145,18 @@ begin
    result.cy:= size1.cy;
   end;
  end;
+end;
+
+procedure timage.internalcreateframe;
+begin
+ timageframe.create(iframe(self),self);
+end;
+
+{ timageframe }
+
+procedure timageframe.initinnerframe;
+begin
+ //dummy
 end;
 
 initialization

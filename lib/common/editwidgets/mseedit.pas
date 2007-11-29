@@ -235,7 +235,7 @@ type
    function buttonframe: framety;
    procedure updatemousestate(const sender: twidget; const apos: pointty); override;
    procedure updatewidgetstate; override;
-   procedure dopaintframe(const canvas: tcanvas; const rect: rectty); override;
+   procedure paintoverlay(const canvas: tcanvas; const arect: rectty); override;
    procedure mouseevent(var info: mouseeventinfoty);
    procedure initgridframe; override;
    property buttons: tframebuttons read fbuttons write setbuttons;
@@ -760,7 +760,7 @@ begin
  end;
 end;
 
-procedure tcustombuttonframe.dopaintframe(const canvas: tcanvas; const rect: rectty);
+procedure tcustombuttonframe.paintoverlay(const canvas: tcanvas; const arect: rectty);
 var
  int1: integer;
  color2: colorty;

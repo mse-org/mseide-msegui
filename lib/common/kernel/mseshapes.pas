@@ -21,6 +21,7 @@ const
  menuarrowwidthhorz = 15;
  menucheckboxwidth = 13;
  defaultshapecaptiondist = 2;
+ defaultshapefocusrectdist = 1;
 
 
 // styleactionstates: actionstatesty = [as_shortcutcaption,as_radiobutton];
@@ -29,6 +30,7 @@ type
 
  shapeinfoty = record
   dim: rectty;
+  focusrectdist: integer;
   state: shapestatesty;
   caption: richstringty;
   captionpos: captionposty;
@@ -195,6 +197,7 @@ procedure initshapeinfo(var ainfo: shapeinfoty);
 begin
  with ainfo do begin
   captiondist:= defaultshapecaptiondist;
+  focusrectdist:= defaultshapefocusrectdist;
  end;
 end;
 
@@ -221,10 +224,10 @@ begin
   result:= state <> statebefore;
   if result then begin
    if ss_widgetorg in state then begin
-    widget.invalidaterect(dim,org_widget);
+    widget.invalidateframestaterect(dim,org_widget);
    end
    else begin
-    widget.invalidaterect(dim);
+    widget.invalidateframestaterect(dim);
    end;
   end;
  end;
@@ -339,7 +342,7 @@ begin
   end;
   result:= result or (state <> statebefore);
   if result and (widget <> nil) then begin
-   widget.invalidaterect(dim);
+   widget.invalidateframestaterect(dim);
   end;
  end;
 end;
@@ -731,7 +734,7 @@ begin
   drawbuttonimage(canvas,info,rect1,pos);
   with canvas,info do begin
    if state * [ss_focused,ss_showfocusrect] = [ss_focused,ss_showfocusrect] then begin
-    drawfocusrect(canvas,inflaterect(rect2,-1));
+    drawfocusrect(canvas,inflaterect(rect2,-focusrectdist));
    end;
    if imagelist = nil then begin
     pos:= captionpos;

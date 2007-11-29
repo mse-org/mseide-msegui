@@ -382,7 +382,7 @@ type
    procedure updatemousestate(const sender: twidget;
                                                 const apos: pointty); override;
    procedure mouseevent(var info: mouseeventinfoty);
-   procedure dopaintframe(const canvas: tcanvas; const rect: rectty); override;
+   procedure paintoverlay(const canvas: tcanvas; const arect: rectty); override;
    property buttonrects[const index:  dockbuttonrectty]: rectty 
                                                  read getbuttonrects;
    function getminimizedsize(out apos: captionposty): sizety;
@@ -3039,7 +3039,7 @@ begin
  end;  
 end;
 
-procedure tgripframe.dopaintframe(const canvas: tcanvas; const rect: rectty);
+procedure tgripframe.paintoverlay(const canvas: tcanvas; const arect: rectty);
 
 var
  brushbefore: tsimplebitmap;

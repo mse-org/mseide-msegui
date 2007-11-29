@@ -192,6 +192,7 @@ type
    property imagedist;
    property colorglyph;
    property options;
+   property focusrectdist;
    property onexecute;
  end;
 
@@ -808,7 +809,7 @@ begin
      if as_default in factioninfo.state then begin
       if not (ss_default in finfo.state) then begin
        include(finfo.state,ss_default);
-       invalidate;
+       invalidateframestate;
       end;
      end;
     end;

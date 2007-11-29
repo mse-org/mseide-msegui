@@ -543,6 +543,7 @@ type
    property imagelist;
    property imagenr;
    property options;
+   property focusrectdist;
    property onexecute;
    property onsetvalue;
    property min; 

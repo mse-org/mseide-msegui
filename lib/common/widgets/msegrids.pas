@@ -306,6 +306,7 @@ type
    destructor destroy; override;
    procedure drawcellbackground(const acanvas: tcanvas;
                  const aframe: tcustomframe; const aface: tcustomface);
+   procedure drawcelloverlay(const acanvas: tcanvas; const aframe: tcustomframe);
    property grid: tcustomgrid read fgrid;
   published
    property color: colorty read fcolor write setcolor default cl_default;
@@ -2103,10 +2104,18 @@ procedure tgridprop.drawcellbackground(const acanvas: tcanvas;
 begin
  acanvas.fillrect(makerect(nullpoint,fcellrect.size),fcellinfo.color);
  if aframe <> nil then begin
-  aframe.paint(acanvas,makerect(nullpoint,fcellrect.size));
+  aframe.paintbackground(acanvas,makerect(nullpoint,fcellrect.size));
  end;
  if aface <> nil then begin
   aface.paint(acanvas,makerect(nullpoint,fcellinfo.rect.size));
+ end;
+end;
+
+procedure tgridprop.drawcelloverlay(const acanvas: tcanvas;
+                const aframe: tcustomframe);
+begin
+ if aframe <> nil then begin
+  aframe.paintoverlay(acanvas,makerect(nullpoint,fcellrect.size));
  end;
 end;
 
@@ -2432,26 +2441,27 @@ begin
      fonbeforedrawcell(self,canvas,fcellinfo,bo2);
     end;
     if not bo2 then begin
-     if bo1 and (int1 = fgrid.ffocusedcell.row) then begin
-      canvas.save;
-      try
+      if bo1 and (int1 = fgrid.ffocusedcell.row) then begin
        drawfocusedcell(canvas);
-       if co_drawfocus in foptions then begin
-        drawfocus(canvas);
-       end;
-      finally
-       canvas.restore;
+      end
+      else begin
+       drawcell(canvas);
       end;
-     end
-     else begin
-      drawcell(canvas);
-     end;
     end;
     canvas.restore(saveindex);
+    if not bo2 then begin
+     drawcelloverlay(canvas,fframe);
+    end;
+    if bo1 and (int1 = fgrid.ffocusedcell.row) and 
+                                 (co_drawfocus in foptions) then begin
+     drawfocus(canvas);
+    end;
+    {
     if not bo2 and (fframe <> nil) and 
                           (fframe.frameimage_list <> nil) then begin
      frame.paintoverlay(canvas,fcellrect);
     end;
+    }
     canvas.move(makepoint(0,ystep));
    end;
    if flinewidth > 0 then begin
@@ -3149,9 +3159,12 @@ begin
    end;
   end;
   canvas.restore;
+  drawcelloverlay(canvas,frame1);
+  {
   if (frame1 <> nil) and (frame1.frameimage_list <> nil) then begin
    frame1.paintoverlay(canvas,fcellrect);
   end;
+  }
   if flinewidth > 0 then begin
    linewidthbefore:= canvas.linewidth;
    if flinewidth = 1 then begin

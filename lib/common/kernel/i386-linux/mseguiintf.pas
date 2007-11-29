@@ -4450,16 +4450,22 @@ begin
 //    pictop:= pictopover;
     pictop:= pictopsrc;
     transform:= unitytransform;
-    transform[0,0]:= cx * 65536 div destrect^.cx;
-    transform[1,1]:= cy * 65536 div destrect^.cy;
-    if cx > 0 then begin
-     ax:= (x * destrect^.cx + cx div 2) div cx; //round
+//    transform[0,0]:= (cx * 65536 - destrect^.cx div 2) div destrect^.cx;
+//    transform[1,1]:= (cy * 65536 - destrect^.cy div 2) div destrect^.cy;
+    transform[0,0]:= (cx * 65536 - $300) div destrect^.cx;
+    transform[1,1]:= (cy * 65536 - $300) div destrect^.cy;
+                 //round up scale
+    if transform[0,0] > 0 then begin
+//     ax:= (x * destrect^.cx + cx div 2) div cx; //round 
+     ax:= (x * 65536+$300) div transform[0,0];
+               //shift pixel boundary
     end
     else begin
      ax:= x * 65536; //very big
     end;
-    if cy > 0 then begin
-     ay:= (y * destrect^.cy + cy div 2) div cy; //round
+    if transform[1,1] > 0 then begin
+     ay:= (y * 65536+$300) div transform[1,1];
+//     ay:= (y * destrect^.cy + cy div 2) div cy; //round
     end
     else begin
      ay:= y * 65536; //very big

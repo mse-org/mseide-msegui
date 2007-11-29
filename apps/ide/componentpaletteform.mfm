@@ -4,7 +4,6 @@ object componentpalettefo: tcomponentpalettefo
   bounds_y = 289
   bounds_cx = 738
   bounds_cy = 69
-  frame.options = []
   frame.grip_size = 10
   frame.grip_options = [go_closebutton, go_fixsizebutton, go_topbutton]
   frame.dummy = 0
@@ -17,7 +16,6 @@ object componentpalettefo: tcomponentpalettefo
   container.bounds_cy = 69
   container.frame.dummy = 0
   container.onchildscaled = componentgrouponchildscaled
-  dragdock.tab_size = 0
   dragdock.caption = 'Component Palette'
   dragdock.optionsdock = [od_savepos, od_canmove, od_canfloat, od_candock, od_proportional, od_propsize]
   options = [fo_savepos, fo_savestate]
@@ -50,7 +48,8 @@ object componentpalettefo: tcomponentpalettefo
     80808016804CF0300000000900FEFF09FEFFFFBFFEFFFF08FEFFFFBFFEFFFF00
     FEFFFFBFFEFFFFB7FEFFFF00FEFFFFBFFEFFFF00FEFFFF02FEFFFF00FEFFFF00
     FEFFFFBFFEFFFF08FEFFFF00FEFFFF02FEFFFF40FEFFFF00FEFFFFB7FEFFFFB7
-    000000BF00000008}
+    000000BF00000008
+  }
   onstatread = foonreadstat
   onchildscaled = componentgrouponchildscaled
   moduleclassname = 'tdockform'
@@ -68,23 +67,23 @@ object componentpalettefo: tcomponentpalettefo
     options = [tbo_dragsource, tbo_dragdest]
     onbuttonchanged = componentpalettebuttonchanged
     drag.onafterdragdrop = componentpalettedragdrop
-    Left = 128
-    Top = 8
+    left = 128
+    top = 8
   end
   object componentpages: ttabbar
     optionswidget = [ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
     bounds_x = 0
     bounds_y = 0
     bounds_cx = 728
-    bounds_cy = 17
+    bounds_cy = 18
     bounds_cymin = 15
     frame.dummy = 0
     anchors = [an_top]
     statfile = mainfo.projectstatfile
     onactivetabchange = componentpagesactivetabchange
     options = [tabo_dragsource, tabo_dragdest]
-    Left = 128
-    Top = 72
-    reffontheight = 13
+    left = 128
+    top = 72
+    reffontheight = 14
   end
 end

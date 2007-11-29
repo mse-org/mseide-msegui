@@ -13,8 +13,8 @@ unit msewidgets;
 
 interface
 uses
- classes,msegui,msetypes,msestrings,msegraphutils,msegraphics,mseevent,
- msescrollbar,msemenus,mserichstring,msedrawtext,mseglob,mseguiglob,mseshapes,
+ classes,msegui,mseguiglob,msetypes,msestrings,msegraphutils,msegraphics,mseevent,
+ msescrollbar,msemenus,mserichstring,msedrawtext,mseglob,mseact,mseshapes,
  mseclasses,msebitmap;
 
 type
@@ -66,10 +66,11 @@ type
   public
    constructor create(const intf: iframe);
    destructor destroy; override;
+   procedure paintoverlay(const canvas: tcanvas; const arect: rectty); override;
    procedure scale(const ascale: real); override;
    procedure createfont;
-   procedure dopaintframe(const canvas: tcanvas; const rect: rectty); override;
-   procedure afterpaint(const canvas: tcanvas); override;
+//   procedure paintoverlay(const canvas: tcanvas; const arect: rectty);
+//   procedure afterpaint(const canvas: tcanvas); override;
    procedure updatemousestate(const sender: twidget; const apos: pointty); override;
    function pointincaption(const point: pointty): boolean; override;
                 //origin = widgetrect
@@ -195,7 +196,7 @@ type
    procedure checktemplate(const sender: tobject); override;
                  //true if match
    procedure updatemousestate(const sender: twidget; const apos: pointty); override;
-   procedure dopaintframe(const canvas: tcanvas; const rect: rectty); override;
+   procedure paintoverlay(const canvas: tcanvas; const arect: rectty); override;
    procedure mouseevent(var info: mouseeventinfoty); virtual;
    procedure domousewheelevent(var info: mousewheeleventinfoty); virtual;
    property state: framestatesty read fstate;
@@ -270,6 +271,7 @@ type
    procedure calcclientrect(var aclientrect: rectty);
    function getwidget: twidget;
   protected
+   procedure initinnerframe; virtual;
    function getscrollbarclass(vert: boolean): framescrollbarclassty; override;
    procedure updatevisiblescrollbars; override;
    procedure scrollevent(sender: tcustomscrollbar; event: scrolleventty); virtual;
@@ -391,7 +393,7 @@ type
    procedure updatemousestate(const sender: twidget; const apos: pointty); override;
    procedure mouseevent(var info: mouseeventinfoty); virtual;
    procedure domousewheelevent(var info: mousewheeleventinfoty); virtual;
-   procedure dopaintframe(const canvas: tcanvas; const rect: rectty); override;
+   procedure paintoverlay(const canvas: tcanvas; const arect: rectty); override;
    procedure updatebuttonstate(const first,delta,count: integer);
    function executestepevent(const event: stepkindty; const stepinfo: framestepinfoty;
                const aindex: integer): integer;
@@ -794,7 +796,8 @@ destructor destroy; override;
                    bo_executedefaultonenterkey,
                    bo_asyncexecute,
                    bo_focusonshortcut, //for tcustombutton
-                   bo_flat,bo_noanim 
+                   bo_flat,bo_noanim,bo_nofocusrect,bo_nodefaultrect,
+                   bo_nodefaultframeactive
                    );
  buttonoptionsty = set of buttonoptionty;
 
@@ -819,7 +822,7 @@ type
    procedure dokeyup(var info: keyeventinfoty); override;
    procedure dopaint(const canvas: tcanvas); override;
    procedure clientrectchanged; override;
-   procedure setoptionswidget(const avalue: optionswidgetty); override;
+//   procedure setoptionswidget(const avalue: optionswidgetty); override;
    function getframeclicked: boolean; override;
    function getframemouse: boolean; override;
    function getframeactive: boolean; override;
@@ -829,6 +832,8 @@ type
                  default defaultbuttonoptions;
    property colorglyph: colorty read finfo.colorglyph write setcolorglyph
                     default cl_black;
+   property focusrectdist: integer read finfo.focusrectdist 
+                write finfo.focusrectdist default defaultshapefocusrectdist;
   published
    property optionswidget default defaultoptionswidget - [ow_mousefocus];
  end;
@@ -892,11 +897,13 @@ function placepopuprect(const awidget: twidget; const adest: rectty; //clientori
                  const placement: captionposty; const asize: sizety): rectty; overload;
 procedure getwindowicon(const abitmap: tmaskedbitmap; out aicon,amask: pixmapty);
 
+procedure buttonoptionstoshapestate(avalue: buttonoptionsty;
+                                              var astate: shapestatesty);
+
 implementation
 
 uses
- msebits,mseguiintf,msestockobjects,msekeyboard,sysutils,msemenuwidgets,
- mseact;
+ msebits,mseguiintf,msestockobjects,msekeyboard,sysutils,msemenuwidgets;
 
 const
  captionmargin = 1; //distance focusrect to caption in tcaptionframe
@@ -921,6 +928,34 @@ type
    info: drawtextinfoty;
    procedure dopaint(const canvas: tcanvas); override;
    procedure dokeydown(var ainfo: keyeventinfoty); override;
+end;
+
+procedure buttonoptionstoshapestate(avalue: buttonoptionsty; var astate: shapestatesty);
+begin
+ if bo_flat in avalue then begin
+  include(astate,ss_flat);
+ end
+ else begin
+  exclude(astate,ss_flat);
+ end;
+ if bo_noanim in avalue then begin
+  include(astate,ss_noanimation);
+ end
+ else begin
+  exclude(astate,ss_noanimation);
+ end;
+ if bo_nofocusrect in avalue then begin
+  exclude(astate,ss_showfocusrect);
+ end
+ else begin
+  include(astate,ss_showfocusrect);
+ end;
+ if bo_nodefaultrect in avalue then begin
+  exclude(astate,ss_showdefaultrect);
+ end
+ else begin
+  include(astate,ss_showdefaultrect);
+ end;
 end;
 
 procedure copytoclipboard(const value: msestring);
@@ -1281,7 +1316,7 @@ begin
  finfo.doexecute:= {$ifdef FPC}@{$endif}doshapeexecute;
  finfo.state:= finfo.state+[ss_showfocusrect,ss_showdefaultrect];
 end;
-
+{
 procedure tactionsimplebutton.setoptionswidget(const avalue: optionswidgetty);
 begin
  if ow_nofocusrect in avalue then begin
@@ -1292,7 +1327,7 @@ begin
  end;
  inherited;
 end;
-
+}
 procedure tactionsimplebutton.clientrectchanged;
 begin
  inherited;
@@ -1348,7 +1383,7 @@ begin
  if (info.shiftstate = []) and (bo_executeonkey in foptions) then begin
   if (info.key = key_space) then begin
    include(finfo.state,ss_clicked);
-   invalidaterect(finfo.dim);
+   invalidateframestaterect(finfo.dim);
   end
   else begin
    if info.key = key_return then begin
@@ -1364,7 +1399,7 @@ begin
  inherited;
  if (info.key = key_space) and (ss_clicked in finfo.state) then begin
   exclude(finfo.state,ss_clicked);
-  invalidaterect(finfo.dim);
+  invalidateframestaterect(finfo.dim);
   if (info.shiftstate = []) and (bo_executeonkey in foptions) then begin
    include(info.eventstate,es_processed);
    internalexecute;
@@ -1390,18 +1425,7 @@ procedure tactionsimplebutton.setoptions(const avalue: buttonoptionsty);
 begin
  if foptions <> avalue then begin
   foptions:= avalue;
-  if bo_flat in avalue then begin
-   include(finfo.state,ss_flat);
-  end
-  else begin
-   exclude(finfo.state,ss_flat);
-  end;
-  if bo_noanim in avalue then begin
-   include(finfo.state,ss_noanimation);
-  end
-  else begin
-   exclude(finfo.state,ss_noanimation);
-  end;
+  buttonoptionstoshapestate(avalue,finfo.state);
   invalidate;
  end;
 end;
@@ -1418,7 +1442,8 @@ end;
 
 function tactionsimplebutton.getframeactive: boolean;
 begin
- result:= (ss_default in finfo.state) or active;
+ result:= not (bo_nodefaultframeactive in foptions) and 
+                           (ss_default in finfo.state) or active;
 end;
 
 { tmessagebutton }
@@ -1505,7 +1530,8 @@ begin
  exclude(fstate,fs_rectsvalid);
 end;
 
-procedure tcustomcaptionframe.dopaintfocusrect(const canvas: tcanvas; const rect: rectty);
+procedure tcustomcaptionframe.dopaintfocusrect(const canvas: tcanvas;
+                            const rect: rectty);
 begin
  if (fs_captionfocus in fstate) and (finfo.text.text <> '') then begin
   drawfocusrect(canvas,inflaterect(finfo.dest,captionmargin));
@@ -1515,8 +1541,8 @@ begin
  end;
 end;
 
-procedure tcustomcaptionframe.dopaintframe(const canvas: tcanvas;
-  const rect: rectty);
+procedure tcustomcaptionframe.paintoverlay(const canvas: tcanvas;
+                                  const arect: rectty);
 var
  reg1: regionty;
 begin
@@ -1530,14 +1556,11 @@ begin
  if reg1 <> 0 then begin
   canvas.clipregion:= reg1;
  end;
- {
  if finfo.text.text <> '' then begin
-  canvas.clipregion:= reg;
   drawtext(canvas,finfo);
  end;
- }
 end;
-
+{
 procedure tcustomcaptionframe.afterpaint(const canvas: tcanvas);
 begin
  if finfo.text.text <> '' then begin
@@ -1545,7 +1568,7 @@ begin
  end;
  inherited;
 end;
-
+}
 procedure tcustomcaptionframe.createfont;
 begin
  if ffont = nil then begin
@@ -2021,8 +2044,8 @@ begin
  end;
 end;
 
-procedure tcustomscrollframe.dopaintframe(const canvas: tcanvas;
-  const rect: rectty);
+procedure tcustomscrollframe.paintoverlay(const canvas: tcanvas;
+                                 const arect: rectty);
 begin
  inherited;
  if fs_sbverton in fstate then begin
@@ -2291,7 +2314,7 @@ begin
  end;
 end;
 
-procedure tcustomstepframe.dopaintframe(const canvas: tcanvas; const rect: rectty);
+procedure tcustomstepframe.paintoverlay(const canvas: tcanvas; const arect: rectty);
 var
  int1: integer;
 begin
@@ -2485,6 +2508,7 @@ var
  akind: stepkindty;
  bo1: boolean;
  bo2: boolean;
+ color1: colorty;
 
 begin             //updatelayout
  setlength(fbuttons,ord(high(stepkindty)) + 1);
@@ -2557,12 +2581,16 @@ begin             //updatelayout
     ay:= fpaintrect.y + fpaintrect.cy;
    end;
   end;
+  color1:= fcolorbutton;
+  if (color1 = cl_parent) or (color1 = cl_default) then begin
+   color1:= fintf.getwidget.actualcolor;
+  end;
   for int1:= 0 to high(fbuttons) do begin
    with fbuttons[int1] do begin
     imagelist:= stockobjects.glyphs;
     imagenr:= integer(stg_arrowrightsmall) + int1;
     imagenrdisabled:= -2;
-    color:= fcolorbutton;
+    color:= color1;
     tag:= int1;
     doexecute:= {$ifdef FPC}@{$endif}execute;
     dim.cx:= acx;
@@ -2672,12 +2700,17 @@ constructor tcustomscrollboxframe.create(const intf: iframe; const owner: twidge
 begin
  fowner:= owner;
  inherited create(intf,iscrollbox(self));
+ initinnerframe;
+ internalupdatestate;
+// options:= defaultscrolloptions;
+end;
+
+procedure tcustomscrollboxframe.initinnerframe;
+begin
  fi.innerframe.left:= 2;
  fi.innerframe.top:= 2;
  fi.innerframe.right:= 2;
  fi.innerframe.bottom:= 2;
- internalupdatestate;
-// options:= defaultscrolloptions;
 end;
 
 procedure tcustomscrollboxframe.clientrecttoscrollbar(const rect: rectty);

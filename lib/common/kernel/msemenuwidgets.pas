@@ -70,7 +70,7 @@ type
    function checkprevpopuparea(const apos: pointty): boolean; virtual;
    procedure activatemenu(keymode: boolean; aclicked: boolean); virtual;
    procedure deactivatemenu; virtual;
-   procedure selectmenu; virtual;
+   procedure selectmenu(const keymode: boolean); virtual;
    function rootpopup: tpopupmenuwidget;
    procedure closepopupstack(aselecteditem: tmenuitem);
    procedure updatepos; virtual;
@@ -126,7 +126,7 @@ type
    procedure childdeactivated(const sender: tpopupmenuwidget); override;
    procedure activatemenu(keymode: boolean; aclicked: boolean); override;
    procedure deactivatemenu; override;
-   procedure selectmenu; override;
+   procedure selectmenu(const keymode: boolean); override;
    procedure internalcreateframe; override;
    procedure loaded; override;
    procedure mouseevent(var info: mouseeventinfoty); override;
@@ -1066,7 +1066,7 @@ begin
       if bo1 then begin
        include(info.eventstate,es_processed);
        int1:= activeitem;
-       selectmenu;
+       selectmenu(false);
        if (activeitem < 0) and (application.mousecapturewidget = nil) and 
                  (int1 <= high(cells)) then begin
         activeitem:= int1; //restore mouseactivating
@@ -1185,7 +1185,7 @@ begin
  end;
 end;
 
-procedure tpopupmenuwidget.selectmenu;
+procedure tpopupmenuwidget.selectmenu(const keymode: boolean);
 var
  int1: integer;
  bo1: boolean;
@@ -1197,7 +1197,7 @@ begin
   end;
  end;
  if fnextpopup <> nil then begin
-  fnextpopup.activatemenu(true,false);
+  fnextpopup.activatemenu(keymode,false);
  end
  else begin
   with flayout do begin
@@ -1252,7 +1252,7 @@ procedure tpopupmenuwidget.dokeydown(var info: keyeventinfoty);
      setactiveitem(int1);
      beginkeymode;
      if not bo1 then begin
-      selectmenu;
+      selectmenu(true);
      end;
     end;
    end;
@@ -1291,7 +1291,7 @@ begin
    beginkeymode;
    case key of
     key_return,key_space: begin
-     selectmenu;
+     selectmenu(true);
     end;
     key_up: begin
      setactiveitem(prevmenuitem(flayout));
@@ -1647,7 +1647,7 @@ begin
  flayout.menu.owner.checkexec;
 end;
 
-procedure tcustommainmenuwidget.selectmenu;
+procedure tcustommainmenuwidget.selectmenu(const keymode: boolean);
 begin
  checkactivate(true);
  inherited;

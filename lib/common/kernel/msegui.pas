@@ -33,7 +33,7 @@ const
  mousebuttons = [ss_left,ss_right,ss_middle];
 
 type
- optionwidgetty = (ow_background,ow_top,ow_noautosizing,ow_nofocusrect,
+ optionwidgetty = (ow_background,ow_top,ow_noautosizing,{ow_nofocusrect,}
                    ow_mousefocus,ow_tabfocus,ow_parenttabfocus,ow_arrowfocus,
                    ow_arrowfocusin,ow_arrowfocusout,
                    ow_subfocus, //reflects focus to children
@@ -309,7 +309,8 @@ type
    procedure dokeydown(var info: keyeventinfoty); virtual;
    function checkshortcut(var info: keyeventinfoty): boolean; virtual;
    procedure parentfontchanged; virtual;
-   procedure dopaintframe(const canvas: tcanvas; const arect: rectty); virtual;
+//   procedure dopaintbackground(const canvas: tcanvas; const arect: rectty); virtual;
+//   procedure dopaintframe(const canvas: tcanvas; const arect: rectty); virtual;
    procedure dopaintfocusrect(const canvas: tcanvas; const rect: rectty); virtual;
    procedure updatewidgetstate; virtual;
    procedure updatemousestate(const sender: twidget; const apos: pointty); virtual;
@@ -320,9 +321,9 @@ type
    procedure assign(source: tpersistent); override;
    procedure scale(const ascale: real); virtual;
 
-   procedure paint(const canvas: tcanvas; const rect: rectty); virtual;
-   procedure paintoverlay(const canvas: tcanvas; const arect: rectty);
-   procedure afterpaint(const canvas: tcanvas); virtual;
+   procedure paintbackground(const canvas: tcanvas; const arect: rectty); virtual;
+   procedure paintoverlay(const canvas: tcanvas; const arect: rectty); virtual;
+//   procedure afterpaint(const canvas: tcanvas); virtual;
    function outerframewidth: sizety; //widgetsize - framesize
    function frameframewidth: sizety; //widgetsize - (paintsize + paintframe)
    function paintframewidth: sizety; //widgetsize - paintsize
@@ -1005,6 +1006,7 @@ type
    procedure dopaint(const canvas: tcanvas); virtual;
    procedure dobeforepaintforeground(const canvas: tcanvas); virtual;
    procedure doonpaint(const canvas: tcanvas); virtual;
+   procedure dopaintoverlay(const canvas: tcanvas); virtual;
    procedure doafterpaint(const canvas: tcanvas); virtual;
 
    procedure doscroll(const dist: pointty); virtual;
@@ -1075,6 +1077,7 @@ type
    procedure internalcreateface; virtual;
    function getfontclass: widgetfontclassty; virtual;
    procedure internalcreatefont; virtual;
+   
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -1155,6 +1158,9 @@ type
    procedure invalidatewidget;     //invalidates whole widget
    procedure invalidate;           //invalidates clientrect
    procedure invalidaterect(const rect: rectty; org: originty = org_client);
+   procedure invalidateframestate;
+   procedure invalidateframestaterect(const rect: rectty; 
+                                        const org: originty = org_client);   
    function hasoverlappingsiblings(arect: rectty): boolean; //origin = pos
 //   procedure invalidatesiblings(arect: rectty); //origin = pos
 
@@ -2547,12 +2553,28 @@ begin
  end;
 end;
 
-procedure tcustomframe.dopaintframe(const canvas: tcanvas; const arect: rectty);
+procedure tcustomframe.paintbackground(const canvas: tcanvas;
+                               const arect: rectty);
+var
+ rect1: rectty;
+begin
+ rect1:= deflaterect(arect,fpaintframe);
+ if fi.colorclient <> cl_transparent then begin
+  canvas.fillrect(rect1,fi.colorclient);
+ end;
+ canvas.intersectcliprect(rect1);
+ canvas.move(addpoint(fpaintrect.pos,fclientrect.pos));
+end;
+
+procedure tcustomframe.paintoverlay(const canvas: tcanvas; const arect: rectty);
 var
  rect1: rectty;
  col1: colorty;
+ imageoffs: integer;
+ rect2: rectty;
 begin
  rect1:= deflaterect(arect,fouterframe);
+ rect2:= rect1;
  if fi.levelo <> 0 then begin
   draw3dframe(canvas,rect1,fi.levelo,fi.framecolors);
   inflaterect1(rect1,-abs(fi.levelo));
@@ -2570,12 +2592,66 @@ begin
  if fi.leveli <> 0 then begin
   draw3dframe(canvas,rect1,fi.leveli,fi.framecolors);
  end;
+ if fi.frameimage_list <> nil then begin
+  imageoffs:= fi.frameimage_offset;
+  with fintf.getwidget do begin
+   if getframeactive then begin
+    if getframeclicked then begin
+     imageoffs:= imageoffs + fi.frameimage_offsetactiveclicked;
+    end
+    else begin
+     if getframemouse then begin
+      imageoffs:= imageoffs + fi.frameimage_offsetactivemouse;
+     end
+     else begin
+      imageoffs:= imageoffs + fi.frameimage_offsetactive;
+     end;
+    end;
+   end
+   else begin
+    if getframeclicked then begin
+     imageoffs:= imageoffs + fi.frameimage_offsetclicked;
+    end
+    else begin
+     if getframemouse then begin
+      imageoffs:= imageoffs + fi.frameimage_offsetmouse;
+     end;
+    end;
+   end;
+  end;
+  if imageoffs >= 0 then begin
+   fi.frameimage_list.paint(canvas,imageoffs,rect2.pos);
+   fi.frameimage_list.paint(canvas,imageoffs+1,
+      makerect(rect2.x,rect2.y+fi.frameimage_list.height,
+               fi.frameimage_list.width,rect2.cy-2*fi.frameimage_list.height),
+               [al_stretchy]);
+   fi.frameimage_list.paint(canvas,imageoffs+2,rect2,[al_bottom]);
+   fi.frameimage_list.paint(canvas,imageoffs+3,
+      makerect(rect2.x+fi.frameimage_list.width,
+               rect2.y+rect2.cy-fi.frameimage_list.height,
+               rect2.cx-2*fi.frameimage_list.width,fi.frameimage_list.height),
+               [al_stretchx]);
+   fi.frameimage_list.paint(canvas,imageoffs+4,rect2,[al_bottom,al_right]);
+   fi.frameimage_list.paint(canvas,imageoffs+5,
+      makerect(rect2.x+rect2.cx-fi.frameimage_list.width,
+               rect2.y+fi.frameimage_list.height,
+               fi.frameimage_list.width,rect2.cy-2*fi.frameimage_list.height),
+               [al_stretchy]);
+   fi.frameimage_list.paint(canvas,imageoffs+6,rect2,[al_right]);
+   fi.frameimage_list.paint(canvas,imageoffs+7,
+      makerect(rect2.x+fi.frameimage_list.width,rect2.y,
+               rect2.cx-2*fi.frameimage_list.width,
+               fi.frameimage_list.height),[al_stretchx]);
+  end;
+ end;
+ {
  if fi.colorclient <> cl_transparent then begin
   rect1:= deflaterect(arect,fpaintframe);
   canvas.fillrect(rect1,fi.colorclient);
  end;
+ }
 end;
-
+{
 procedure tcustomframe.paintoverlay(const canvas: tcanvas; const arect: rectty);
 var
  imageoffs: integer;
@@ -2635,7 +2711,7 @@ begin
   end;
  end;
 end;
-
+}
 procedure tcustomframe.dopaintfocusrect(const canvas: tcanvas; const rect: rectty);
 var
  rect1: rectty;
@@ -2646,19 +2722,23 @@ begin
   drawfocusrect(canvas,rect1);
  end;
 end;
-
+(*
 procedure tcustomframe.paint(const canvas: tcanvas; const rect: rectty);
 begin
  dopaintframe(canvas,rect);
+ dopaintbackground(canvas,rect);
+ {
  canvas.intersectcliprect(deflaterect(rect,fpaintframe));
  canvas.move(addpoint(fpaintrect.pos,fclientrect.pos));
+ }
 end;
-
+*)
+{
 procedure tcustomframe.afterpaint(const canvas: tcanvas);
 begin
  //dummy
 end;
-
+}
 function tcustomframe.checkshortcut(var info: keyeventinfoty): boolean;
 begin
  result:= false;
@@ -5420,9 +5500,15 @@ begin
  if (ws_focused in fwidgetstate) and needsfocuspaint then begin
   invalidatewidget;
  end;
- if (frame <> nil) and (fframe.fi.frameimage_list <> nil) and 
-        (fframe.fi.frameimage_offsetactive <> 0) then begin
-        invalidate;
+ if (frame <> nil) then begin
+  with fframe.fi do begin
+   if (frameimage_list <> nil) and 
+     ((frameimage_offsetactive <> 0) or 
+     (frameimage_offsetactivemouse <> frameimage_offsetmouse) or
+     (frameimage_offsetactiveclicked <> frameimage_offsetclicked)) then begin
+    invalidatewidget;
+   end;
+  end;
  end;
 end;
 
@@ -5720,7 +5806,8 @@ begin
  if frame <> nil then begin
   colorbefore:= canvas.color;
   canvas.color:= actualcolor;
-  fframe.paint(canvas,makerect(nullpoint,fwidgetrect.size));
+  fframe.paintbackground(canvas,makerect(nullpoint,fwidgetrect.size));
+//  fframe.paint(canvas,makerect(nullpoint,fwidgetrect.size));
   canvas.color:= colorbefore;
  end;
  face1:= getactface;
@@ -5754,6 +5841,13 @@ begin
  //dummy
 end;
 
+procedure twidget.dopaintoverlay(const canvas: tcanvas);
+begin
+ if fframe <> nil then begin
+  fframe.paintoverlay(canvas,makerect(nullpoint,fwidgetrect.size));
+ end;
+end;
+
 function twidget.isgroupleader: boolean;
 begin
  result:= false;
@@ -5761,7 +5855,7 @@ end;
 
 function twidget.needsfocuspaint: boolean;
 begin
- result:= not (ow_nofocusrect in foptionswidget) and (fframe <> nil) and 
+ result:= {not (ow_nofocusrect in foptionswidget) and} (fframe <> nil) and 
                              (fs_drawfocusrect in fframe.fstate);
 end;
 
@@ -5787,8 +5881,8 @@ end;
 procedure twidget.doafterpaint(const canvas: tcanvas);
 begin
  if fframe <> nil then begin
-  fframe.paintoverlay(canvas,makerect(nullpoint,fwidgetrect.size));
-  fframe.afterpaint(canvas);
+//  fframe.paintoverlay(canvas,makerect(nullpoint,fwidgetrect.size));
+//  fframe.afterpaint(canvas);
   if needsfocuspaint and (fwidgetstate * [ws_focused,ws_active] =
                 [ws_focused,ws_active]) then begin
    fframe.dopaintfocusrect(canvas,makerect(nullpoint,fwidgetrect.size));
@@ -5824,7 +5918,8 @@ var
  reg1: regionty;
  rect1: rectty;
  widget1: twidget;
-
+ bo1: boolean;
+ face1: tcustomface;
 begin
  canvas.save;
  rect1.pos:= nullpoint;
@@ -5843,7 +5938,8 @@ begin
    updatewidgetregion;
    canvas.subclipregion(fwidgetregion);
   end;
-  if not canvas.clipregionisempty then begin
+  bo1:= not canvas.clipregionisempty;
+  if bo1 then begin
    if ws_opaque in fwidgetstate then begin
     canvas.fillrect(rect1,actcolor);
    end;
@@ -5854,11 +5950,17 @@ begin
    canvas.color:= actcolor;
    dopaint(canvas);
    doonpaint(canvas);
-   if (fface <> nil) and (fao_alphafadenochildren in fface.fi.options) then begin
-    fface.doalphablend(canvas);
-   end;
   end;
   canvas.restore(saveindex);
+  if bo1 then begin
+   face1:= getactface;
+//   dopaintoverlay(canvas);
+   if (face1 <> nil) and (fao_alphafadenochildren in face1.fi.options) then begin
+    canvas.move(paintpos);
+    face1.doalphablend(canvas);
+    canvas.remove(paintpos);
+   end;
+  end;
   if (csdesigning in componentstate) and needsdesignframe then begin
    canvas.dashes:= #2#3;
    canvas.drawrect(makerect(0,0,rect1.cx-1,rect1.cy-1),cl_black);
@@ -5904,11 +6006,13 @@ begin
   end;
  end;
  canvas.restore;
- if (fface <> nil) and (fao_alphafadeall in fface.fi.options) then begin
+ face1:= getactface;
+ if (face1 <> nil) and (fao_alphafadeall in face1.fi.options) then begin
   canvas.move(paintpos);
   fface.doalphablend(canvas);
   canvas.remove(paintpos);
  end;
+ dopaintoverlay(canvas);
  doafterpaint(canvas);
  canvas.restore;
 end;
@@ -6423,6 +6527,28 @@ begin
   fwindow.invalidaterect(rect1,self);
  end;
 end;
+
+procedure twidget.invalidateframestaterect(const rect: rectty; 
+                                        const org: originty = org_client);
+begin
+ if (fframe = nil) or (fframe.fi.frameimage_list = nil) then begin
+  invalidaterect(rect,org);
+ end
+ else begin
+  invalidatewidget;
+ end;
+end;
+
+procedure twidget.invalidateframestate;
+begin
+ if (fframe = nil) or (fframe.fi.frameimage_list = nil) then begin
+  invalidate;
+ end
+ else begin
+  invalidatewidget;
+ end;
+end;
+
 {
 procedure twidget.invalidatesiblings(arect: rectty);
 var
@@ -6728,9 +6854,14 @@ begin
      end;
     end;
     ek_clientmouseleave: begin
-     if (fframe <> nil) and (fframe.fi.frameimage_list <> nil) and 
-               (fframe.fi.frameimage_offsetmouse <> 0) then begin
-      invalidate;
+     if (fframe <> nil) then begin
+      with fframe.fi do begin
+       if (frameimage_list <> nil) and 
+               ((frameimage_offsetmouse <> 0) or 
+                (frameimage_offsetactivemouse <> 0))then begin
+        invalidatewidget;
+       end;
+      end;
      end;
      if appinst.fmousewidget = self then begin
       if fparentwidget <> nil then begin
@@ -6743,9 +6874,14 @@ begin
      clientmouseevent(info);
     end;
     ek_clientmouseenter: begin
-     if (fframe <> nil) and (fframe.fi.frameimage_list <> nil) and 
-               (fframe.fi.frameimage_offsetmouse <> 0) then begin
-      invalidate;
+     if (fframe <> nil) then begin
+      with fframe.fi do begin
+       if (frameimage_list <> nil) and 
+               ((frameimage_offsetmouse <> 0) or 
+                (frameimage_offsetactivemouse <> 0))then begin
+        invalidatewidget;
+       end;
+      end;
      end;
      updatecursorshape(true);
      clientmouseevent(info);
@@ -6753,9 +6889,14 @@ begin
     ek_buttonpress: begin
      if button = mb_left then begin
       include(fwidgetstate,ws_clicked);
-      if (frame <> nil) and (fframe.fi.frameimage_list <> nil) and 
-             (fframe.fi.frameimage_offsetclicked <> 0) then begin
-             invalidate;
+      if (fframe <> nil) then begin
+       with fframe.fi do begin
+        if (frameimage_list <> nil) and 
+                ((frameimage_offsetclicked <> 0) or 
+                 (frameimage_offsetactiveclicked <> 0))then begin
+         invalidatewidget;
+        end;
+       end;
       end;
      end;
      appinst.capturemouse(self,true);
@@ -6771,10 +6912,14 @@ begin
      end;
     end;
     ek_buttonrelease: begin
-     if (button = mb_left) and (frame <> nil) and 
-            (fframe.fi.frameimage_list <> nil) and 
-            (fframe.fi.frameimage_offsetclicked <> 0) then begin
-            invalidate;
+     if (button = mb_left) and (fframe <> nil) then begin
+      with fframe.fi do begin
+       if (frameimage_list <> nil) and 
+               ((frameimage_offsetclicked <> 0) or 
+                (frameimage_offsetactiveclicked <> 0))then begin
+        invalidatewidget;
+       end;
+      end;
      end;
      if isclientmouseevent(info) then begin
       clientmouseevent(info);
@@ -8565,9 +8710,11 @@ begin
   if (ow_autosize in delta) and (ow_autosize in avalue) then begin
    checkautosize;
   end;
+  {
   if ow_nofocusrect in delta then begin
    invalidate;
   end;
+  }
  end;
 end;
 

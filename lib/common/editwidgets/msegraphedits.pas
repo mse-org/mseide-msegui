@@ -594,6 +594,9 @@ type
    procedure dokeydown(var info: keyeventinfoty); override;
    procedure dokeyup(var info: keyeventinfoty); override;
    procedure clientrectchanged; override;
+   function getframeclicked: boolean; override;
+   function getframemouse: boolean; override;
+   function getframeactive: boolean; override;
    procedure paintglyph(const canvas: tcanvas; const avalue;
                     const arect: rectty); override;
    procedure internalcreateframe; override;
@@ -601,7 +604,7 @@ type
    function checkfocusshortcut(var info: keyeventinfoty): boolean; override;
    function actualimagenr(const avalue: integer): integer;
    procedure setoptions(const avalue: buttonoptionsty); override;
-   procedure setoptionswidget(const avalue: optionswidgetty); override;
+//   procedure setoptionswidget(const avalue: optionswidgetty); override;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -621,6 +624,8 @@ type
    property imagenums: tintegerarrayprop read fimagenums write setimagenums;
 
    property options;
+   property focusrectdist: integer read finfo.focusrectdist write finfo.focusrectdist 
+                   default defaultshapefocusrectdist;
    property onexecute: notifyeventty read fonexecute write fonexecute;
    property onsetvalue;
    property value default -1;
@@ -641,6 +646,7 @@ type
    property imageoffset;
    property imagenums;
    property options;
+   property focusrectdist;
    property onexecute;
    property onsetvalue;
    property value;
@@ -664,6 +670,7 @@ type
    property caption;
    property captionpos;
    property options;
+   property focusrectdist;
    property onexecute;
    property onsetvalue;
    property value;
@@ -2147,6 +2154,7 @@ begin
  fmax:= 0;
  fvaluefaces:= tvaluefacearrayprop.create(self);
  optionswidget:= defaultoptionswidget - [ow_mousefocus];
+ initshapeinfo(finfo);
  finfo.dim:= innerclientrect;
  finfo.color:= cl_transparent;
  finfo.colorglyph:= cl_black;
@@ -2177,6 +2185,22 @@ procedure tcustomdatabutton.clientrectchanged;
 begin
  inherited;
  finfo.dim:= innerclientrect;
+end;
+
+function tcustomdatabutton.getframeclicked: boolean;
+begin
+ result:= ss_clicked in finfo.state;
+end;
+
+function tcustomdatabutton.getframemouse: boolean;
+begin
+ result:= ss_mouse in finfo.state;
+end;
+
+function tcustomdatabutton.getframeactive: boolean;
+begin
+ result:= not (bo_nodefaultframeactive in foptions) and 
+                           (ss_default in finfo.state) or active;
 end;
 
 procedure tcustomdatabutton.doexecute;
@@ -2387,22 +2411,11 @@ procedure tcustomdatabutton.setoptions(const avalue: buttonoptionsty);
 begin
  if foptions <> avalue then begin
   foptions:= avalue;
-  if bo_flat in avalue then begin
-   include(finfo.state,ss_flat);
-  end
-  else begin
-   exclude(finfo.state,ss_flat);
-  end;
-  if bo_noanim in avalue then begin
-   include(finfo.state,ss_noanimation);
-  end
-  else begin
-   exclude(finfo.state,ss_noanimation);
-  end;
+  buttonoptionstoshapestate(avalue,finfo.state);
   invalidate;
  end;
 end;
-
+{
 procedure tcustomdatabutton.setoptionswidget(const avalue: optionswidgetty);
 begin
  if ow_nofocusrect in avalue then begin
@@ -2413,7 +2426,7 @@ begin
  end;
  inherited;
 end;
-
+}
 { tstockglyphdatabutton }
 
 constructor tstockglyphdatabutton.create(aowner: tcomponent);
@@ -2738,10 +2751,11 @@ begin
  end;
  if not isemptyreal(rea1) then begin
   canvas.save;
-  fbar_frame.paint(canvas,po2^); //moves origin to paintrect and sets cliprect
+  fbar_frame.paintbackground(canvas,po2^); //moves origin to paintrect and sets cliprect
   canvas.intersectcliprect(po3^);
   fbar_face.paint(canvas,po1^);
   canvas.restore;
+  fbar_frame.paintoverlay(canvas,po2^);
   if fformat <> '' then begin
    if fvaluescale <> 0 then begin
     rea1:= rea1/fvaluescale;
