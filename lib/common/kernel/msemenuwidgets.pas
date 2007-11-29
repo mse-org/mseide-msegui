@@ -1065,12 +1065,12 @@ begin
       invalidaterect(dim);
       if bo1 then begin
        include(info.eventstate,es_processed);
-       int1:= activeitem;
+//       int1:= activeitem;
        selectmenu(false);
-       if (activeitem < 0) and (application.mousecapturewidget = nil) and 
-                 (int1 <= high(cells)) then begin
-        activeitem:= int1; //restore mouseactivating
-       end;
+//       if (activeitem < 0) and (application.mousecapturewidget = nil) and 
+//                 (int1 <= high(cells)) then begin
+//        activeitem:= int1; //restore mouseactivating
+//       end;
       end;
      end;
     end;
@@ -1163,7 +1163,9 @@ begin
   exclude(flayout.options,mlo_keymode);
  end;
  if (flayout.menu.count > 0) and (flayout.activeitem < 0) then begin
-  internalsetactiveitem(0,aclicked,true);
+  if keymode then begin
+   internalsetactiveitem(0,aclicked,true);
+  end;
   if (show(true,nil) <> mr_windowdestroyed) and (fprevpopup = nil) then begin
    flayout.menu.owner.checkexec;
   end;
@@ -1196,8 +1198,13 @@ begin
    internalsetactiveitem(activeitem,false,true);
   end;
  end;
- if fnextpopup <> nil then begin
-  fnextpopup.activatemenu(keymode,false);
+ if (fnextpopup <> nil) then begin
+  if keymode then begin
+   fnextpopup.activatemenu(keymode,false);
+  end
+  else begin
+   fnextpopup.window.bringtofront; //win32 workaround
+  end;
  end
  else begin
   with flayout do begin
