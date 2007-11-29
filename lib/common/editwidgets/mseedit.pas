@@ -180,6 +180,7 @@ type
   public
    constructor create(aowner: tobject); override;
    destructor destroy; override;
+   procedure checktemplate(const sender: tobject);
    procedure updatewidgetstate(const awidget: twidget);
    procedure assign(source: tpersistent); override;
   published
@@ -219,6 +220,7 @@ type
    function wantmouseevent(const apos: pointty): boolean;
   public
    property items[const index: integer]: tframebutton read getitems1; default;
+   procedure checktemplate(const sender: tobject);
  end;
 
  tcustombuttonframe = class(teditframe)
@@ -229,6 +231,7 @@ type
    fbuttonintf: ibutton;
    procedure getpaintframe(var frame: framety); override;
    function getbuttonclass: framebuttonclassty; virtual;
+   procedure checktemplate(const sender: tobject); override;
   public
    constructor create(const intf: iframe; const buttonintf: ibutton); reintroduce;
    destructor destroy; override;
@@ -600,6 +603,13 @@ begin
  end;
 end;
 
+procedure tframebutton.checktemplate(const sender: tobject);
+begin
+ if finfo.face <> nil then begin
+  finfo.face.checktemplate(sender);
+ end;
+end;
+
 { tstockglyphframebutton}
 
 constructor tstockglyphframebutton.create(aowner: tobject);
@@ -666,6 +676,15 @@ begin
     break;
    end;
   end;
+ end;
+end;
+
+procedure tframebuttons.checktemplate(const sender: tobject);
+var
+ int1: integer;
+begin
+ for int1:= 0 to high(fitems) do begin
+  tframebutton(fitems[int1]).checktemplate(sender);
  end;
 end;
 
@@ -804,6 +823,12 @@ procedure tcustombuttonframe.updatewidgetstate;
 begin
  inherited;
  fbuttons.updatewidgetstate;
+end;
+
+procedure tcustombuttonframe.checktemplate(const sender: tobject);
+begin
+ inherited;
+ fbuttons.checktemplate(sender);
 end;
 
 { tcustomedit }

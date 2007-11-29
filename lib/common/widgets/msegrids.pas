@@ -2454,14 +2454,14 @@ begin
     end;
     if bo1 and (int1 = fgrid.ffocusedcell.row) and 
                                  (co_drawfocus in foptions) then begin
+     if fframe <> nil then begin
+      canvas.move(fframe.fpaintrect.pos);
+     end;
      drawfocus(canvas);
+     if fframe <> nil then begin
+      canvas.remove(fframe.fpaintrect.pos);
+     end;
     end;
-    {
-    if not bo2 and (fframe <> nil) and 
-                          (fframe.frameimage_list <> nil) then begin
-     frame.paintoverlay(canvas,fcellrect);
-    end;
-    }
     canvas.move(makepoint(0,ystep));
    end;
    if flinewidth > 0 then begin
