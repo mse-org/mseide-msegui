@@ -104,7 +104,7 @@ const
  standardcursors: array[cursorshapety] of pchar{makeintresource} =
                      (idc_arrow,idc_arrow,idc_arrow,idc_cross,idc_wait,idc_ibeam,
                      idc_sizens,idc_sizewe,idc_sizenesw,idc_sizenwse,idc_sizeall,
-                     idc_arrow,idc_arrow,idc_arrow,idc_no,
+                     idc_arrow,idc_arrow,idc_hand,idc_no,
                      idc_arrow, //cr_drag
                      idc_sizenwse,idc_sizenesw,
                      idc_sizenwse,idc_sizenesw,
