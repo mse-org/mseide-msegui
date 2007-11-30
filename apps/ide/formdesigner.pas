@@ -2501,6 +2501,7 @@ var
  int1,int2: integer;
  ar1: componentarty;
  bo1: boolean;
+ comp1: tcomponent;
 begin
  with tdesignwindow(window) do begin
   try
@@ -2518,7 +2519,8 @@ begin
      aparent:= widgetatpos(apos,true);
     end;
     if aparent <> nil then begin
-     if aparent.findcomponent(component.name) <> nil then begin
+     comp1:= aparent.findcomponent(component.name);
+     if (comp1 <> nil) and (comp1 <> component) then begin
       str1:= component.name;
       int1:= length(str1);
       while (int1 > 1) and (str1[int1] >= '0') and (str1[int1] <= '9') do begin

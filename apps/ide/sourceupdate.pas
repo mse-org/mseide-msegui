@@ -1802,6 +1802,7 @@ begin
  str1:= uppercase(aitem.Name);
  pos1:= emptysourcepos;
  if po2 <> nil then begin
+  {
   with po2^.componentlist do begin
    for int1:= 0 to count - 1 do begin
     with items[int1]^ do begin
@@ -1812,6 +1813,7 @@ begin
     end;
    end;
   end;
+   }
   if (csinline in aitem.componentstate) and 
            designer.checksubmodule(aitem,po3) then begin
    classna:= po3^.moduleclassname;
