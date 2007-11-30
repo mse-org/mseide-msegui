@@ -873,6 +873,9 @@ begin
    fmainmenuwidget:= createmainmenuwidget;
    twidget1(fmainmenuwidget).setdesigning(csdesigning in componentstate);
    updatemainmenutemplates;
+  end
+  else begin
+   updatescrollboxrect;
   end;
  end;
 end;
