@@ -256,7 +256,7 @@ type
    function getbuttonclass: framebuttonclassty; virtual;
    procedure checktemplate(const sender: tobject); override;
   public
-   constructor create(const intf: icaptionframe; const buttonintf: ibutton);
+   constructor create(const intf: icaptionframe; const buttonintf: ibutton); virtual
                                                    reintroduce;
    destructor destroy; override;
    function buttonframe: framety;

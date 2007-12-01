@@ -1,7 +1,8 @@
 MSEide+MSEgui version history
 
 2007-12-01
- tframebuttom.visible,enabled and left no more published, use options.
+ tcoloredit.buttonellipse moved to frame.
+ tframebutton.visible,enabled and left no more published, use options.
  
 Version 1.6
 2007-11-19

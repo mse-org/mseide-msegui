@@ -214,6 +214,7 @@ type
   protected
    function getbuttonclass: framebuttonclassty; override;
   public
+   constructor create(const intf: icaptionframe; const buttonintf: ibutton); override;                                                  
    procedure updatedropdownoptions(const avalue: dropdowneditoptionsty);
    property activebutton: integer read factivebutton write setactivebutton default 0;
    property readonly: boolean read freadonly write setreadonly default false;
@@ -597,15 +598,23 @@ end;
 
 { tcustomdropdownbuttonframe }
 
+constructor tcustomdropdownbuttonframe.create(const intf: icaptionframe;
+               const buttonintf: ibutton);
+begin
+ inherited;
+ buttons.count:= 1;
+ setactivebutton(0);
+end;
+
 procedure tcustomdropdownbuttonframe.setactivebutton(const avalue: integer);
 begin
- factivebutton := avalue;
+ factivebutton:= avalue;
 end;
 
 procedure tcustomdropdownbuttonframe.setreadonly(const Value: boolean);
 begin
  if (freadonly <> value) and (factivebutton < buttons.count) then begin
-  freadonly := Value;
+  freadonly:= Value;
   buttons[factivebutton].enabled:= not value;
  end;
 end;
@@ -661,11 +670,13 @@ begin
  if twidget1(widget).fframe = nil then begin
   getbuttonframeclass.create(iscrollframe(widget),ibutton(self));
  end;
+{
  with tcustomdropdownbuttonframe(twidget1(widget).fframe) do begin
   fbuttonintf:= ibutton(self);
   buttons.count:= 1;
   setactivebutton(0);
  end;
+}
  updatereadonlystate;
 end;
 
