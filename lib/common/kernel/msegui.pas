@@ -9867,14 +9867,14 @@ begin
     if not windowevent then begin
 //     if fwindowpos <> wp_minimized then begin
       case fwindowpos of
-       wp_normal: begin
-        size1:= wsi_normal;
-       end;
        wp_maximized: begin
         size1:= wsi_maximized;
        end;
        wp_fullscreen: begin
         size1:= wsi_fullscreen;
+       end
+       else begin
+        size1:= wsi_normal;
        end;
       end;
       gui_setwindowstate(winid,size1,true);

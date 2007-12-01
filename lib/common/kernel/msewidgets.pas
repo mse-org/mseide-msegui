@@ -794,11 +794,11 @@ destructor destroy; override;
    function getcaption: msestring; override;
    procedure setcaption(const Value: msestring); override;
    procedure internalcreateframe; override;
-   function canclose(const newfocus: twidget): boolean; override;
   public
    constructor create(const aowner: tcomponent; const apopuptransient: boolean;
                         const ahasaction: boolean);
                                reintroduce;
+   function canclose(const newfocus: twidget): boolean; override;
  end;
 
  buttonoptionty = (bo_executeonclick,bo_executeonkey,bo_executeonshortcut,
@@ -1498,7 +1498,7 @@ constructor tcustomcaptionframe.create(const intf: icaptionframe);
 begin
  fcaptionpos:= cp_topleft;
  fcaptiondist:= 1;
- inherited;
+ inherited create(intf);
  if ffont = nil then begin
   finfo.font:= icaptionframe(fintf).getframefont;
  end;
