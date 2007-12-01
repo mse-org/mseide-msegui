@@ -1479,7 +1479,7 @@ end;
 
 procedure tcustomdockform.internalcreateframe;
 begin
- tgripframe.create(iframe(self),fdragdock);
+ tgripframe.create(iscrollframe(self),fdragdock);
 end;
 
 procedure tcustomdockform.dragevent(var info: draginfoty);

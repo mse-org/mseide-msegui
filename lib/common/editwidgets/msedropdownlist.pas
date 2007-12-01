@@ -659,7 +659,7 @@ var
 begin
  widget:= fintf.getwidget;
  if twidget1(widget).fframe = nil then begin
-  getbuttonframeclass.create(widget,ibutton(self));
+  getbuttonframeclass.create(iscrollframe(widget),ibutton(self));
  end;
  with tcustomdropdownbuttonframe(twidget1(widget).fframe) do begin
   fbuttonintf:= ibutton(self);

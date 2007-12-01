@@ -281,7 +281,7 @@ type
    function getwidget: twidget;
    procedure setframeinstance(instance: tcustomframe);
    function getwidgetrect: rectty;
-   procedure setwidgetrect(const rect: rectty);
+//   procedure setwidgetrect(const rect: rectty);
    procedure setstaticframe(value: boolean);
    function widgetstate: widgetstatesty;
    procedure scrollwidgets(const dist: pointty);
@@ -290,10 +290,13 @@ type
    procedure invalidate;
    procedure invalidatewidget;
    procedure invalidaterect(const rect: rectty; org: originty = org_client);
-   function getframefont: tfont;
-   function getcanvas(aorigin: originty = org_client): tcanvas;
-   function canfocus: boolean;
-   function setfocus(aactivate: boolean = true): boolean;
+//   function getframefont: tfont;
+//   function getcanvas(aorigin: originty = org_client): tcanvas;
+//   function canfocus: boolean;
+//   function setfocus(aactivate: boolean = true): boolean;
+   function getframeclicked: boolean;
+   function getframemouse: boolean;
+   function getframeactive: boolean;
    
    //iface
    function translatecolor(const acolor: colorty): colorty;
@@ -691,7 +694,7 @@ type
    function getwidget: twidget;
    procedure setframeinstance(instance: tcustomframe);
    function getwidgetrect: rectty;
-   procedure setwidgetrect(const rect: rectty);
+//   procedure setwidgetrect(const rect: rectty);
    procedure setstaticframe(value: boolean);
    function widgetstate: widgetstatesty;
    procedure scrollwidgets(const dist: pointty);
@@ -700,10 +703,13 @@ type
    procedure invalidate;
    procedure invalidatewidget;
    procedure invalidaterect(const rect: rectty; org: originty = org_client);
-   function getframefont: tfont;
-   function getcanvas(aorigin: originty = org_client): tcanvas;
-   function canfocus: boolean;
-   function setfocus(aactivate: boolean = true): boolean;
+//   function getframefont: tfont;
+//   function getcanvas(aorigin: originty = org_client): tcanvas;
+//   function canfocus: boolean;
+//   function setfocus(aactivate: boolean = true): boolean;
+   function getframeclicked: boolean;
+   function getframemouse: boolean;
+   function getframeactive: boolean;
 
    //iface
    function translatecolor(const acolor: colorty): colorty;
@@ -1058,7 +1064,7 @@ end;
   protected
    function getscrollbarclass(vert: boolean): framescrollbarclassty; override;
   public
-   constructor create(const intf: iframe; const owner: twidget;
+   constructor create(const intf: iscrollframe; const owner: twidget;
                              const autoscrollintf: iautoscrollframe);
   published
    property levelo default -2;
@@ -1865,7 +1871,7 @@ end;
 
 { tgridframe }
 
-constructor tgridframe.create(const intf: iframe; const owner: twidget;
+constructor tgridframe.create(const intf: iscrollframe; const owner: twidget;
                            const autoscrollintf: iautoscrollframe);
 begin
  inherited;
@@ -2021,15 +2027,15 @@ function tgridprop.getwidgetrect: rectty;
 begin
  result:= fcellrect;
 end;
-
+{
 procedure tgridprop.setwidgetrect(const rect: rectty);
 begin
  twidget1(getwidget).setwidgetrect(rect);
 end;
-
+}
 procedure tgridprop.setstaticframe(value: boolean);
 begin
- twidget1(getwidget).setstaticframe(value);
+ //dummy
 end;
 
 function tgridprop.widgetstate: widgetstatesty;
@@ -2066,7 +2072,7 @@ procedure tgridprop.invalidaterect(const rect: rectty; org: originty = org_clien
 begin
  getwidget.invalidaterect(rect,org);
 end;
-
+{
 function tgridprop.getframefont: tfont;
 begin
  result:= twidget1(getwidget).getfont;
@@ -2086,7 +2092,7 @@ function tgridprop.setfocus(aactivate: boolean = true): boolean;
 begin
  result:= getwidget.setfocus(aactivate);
 end;
-
+}
 procedure tgridprop.setframe(const Value: tcellframe);
 begin
  fgrid.setoptionalobject(value,fframe,{$ifdef FPC}@{$endif}createframe);
@@ -2204,6 +2210,21 @@ begin
   ffont:= tgridpropfont.create;
   ffont.onchange:= {$ifdef FPC}@{$endif}fontchanged;
  end;
+end;
+
+function tgridprop.getframeclicked: boolean;
+begin
+ result:= false;
+end;
+
+function tgridprop.getframemouse: boolean;
+begin
+ result:= false;
+end;
+
+function tgridprop.getframeactive: boolean;
+begin
+ result:= false;
 end;
 
 { tcolselectfont }
@@ -2762,12 +2783,12 @@ begin
  result:= nullrect;
 // result:= fcellrect;
 end;
-
+{
 procedure tcolheader.setwidgetrect(const rect: rectty);
 begin
 // twidget1(getwidget).setwidgetrect(rect);
 end;
-
+}
 procedure tcolheader.setstaticframe(value: boolean);
 begin
 // twidget1(getwidget).setstaticframe(value);
@@ -2811,7 +2832,7 @@ begin
  changed;
 // getwidget.invalidaterect(rect,org);
 end;
-
+{
 function tcolheader.getframefont: tfont;
 begin
  result:= twidget1(getwidget).getfont;
@@ -2831,7 +2852,7 @@ function tcolheader.setfocus(aactivate: boolean = true): boolean;
 begin
  result:= getwidget.setfocus(aactivate);
 end;
-
+}
 //iface
 function tcolheader.translatecolor(const acolor: colorty): colorty;
 begin
@@ -2904,6 +2925,21 @@ begin
    fgrid.updatelayout; //check colheaders.count
   end;
  end;
+end;
+
+function tcolheader.getframeclicked: boolean;
+begin
+ result:= false;
+end;
+
+function tcolheader.getframemouse: boolean;
+begin
+ result:= false;
+end;
+
+function tcolheader.getframeactive: boolean;
+begin
+ result:= false;
 end;
 
 { tcolheaders }
@@ -6579,7 +6615,7 @@ end;
 
 procedure tcustomgrid.internalcreateframe;
 begin
- tgridframe.create(iframe(self),self,iautoscrollframe(self));
+ tgridframe.create(iscrollframe(self),self,iautoscrollframe(self));
 end;
 
 procedure tcustomgrid.dorowcountchanged(const countbefore,newcount: integer);

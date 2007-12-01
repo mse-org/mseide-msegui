@@ -34,7 +34,7 @@ type
    function getbutton: tframebutton;
    procedure setbutton(const avalue: tframebutton);
   public
-   constructor create(const intf: iframe; const buttonintf: ibutton);
+   constructor create(const intf: icaptionframe; const buttonintf: ibutton);
   published
    property button: tframebutton read getbutton write setbutton;
  end;
@@ -101,7 +101,7 @@ end;
 
 { tellipsebuttonframe }
 
-constructor tellipsebuttonframe.create(const intf: iframe;
+constructor tellipsebuttonframe.create(const intf: icaptionframe;
   const buttonintf: ibutton);
 begin
  inherited;
@@ -141,7 +141,7 @@ end;
 
 procedure tcustomdialogstringed.internalcreateframe;
 begin
- tellipsebuttonframe.create(iframe(self),ibutton(self));
+ tellipsebuttonframe.create(iscrollframe(self),ibutton(self));
  updatereadonlystate;
 end;
 

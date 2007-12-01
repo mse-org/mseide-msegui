@@ -26,7 +26,8 @@ type
    class function getinstancepo(owner: tobject): pfont; override;
  end;
 
- captionframeoptionty = (cfo_fixleft,cfo_fixright,cfo_fixtop,cfo_fixbottom);
+ captionframeoptionty = (cfo_fixleft,cfo_fixright,cfo_fixtop,cfo_fixbottom,
+                         cfo_nofocusrect);
  captionframeoptionsty = set of captionframeoptionty;
  
  tcustomcaptionframe = class(tcustomframe)
@@ -63,8 +64,9 @@ type
    procedure setdisabled(const value: boolean); override;
    procedure dopaintfocusrect(const canvas: tcanvas; const rect: rectty); override;
    function checkshortcut(var info: keyeventinfoty): boolean; override;
+   function needsfocuspaint: boolean; override;
   public
-   constructor create(const intf: iframe);
+   constructor create(const intf: icaptionframe);
    destructor destroy; override;
    procedure paintoverlay(const canvas: tcanvas; const arect: rectty); override;
    procedure scale(const ascale: real); override;
@@ -150,6 +152,9 @@ type
    property buttonminlength;
    property facebutton;
    property faceendbutton;
+   property framebutton;
+   property frameendbutton1;
+   property frameendbutton2;
    property color;
    property colorpattern;
    property colorglyph;
@@ -172,6 +177,9 @@ type
    property buttonminlength;
    property facebutton;
    property faceendbutton;
+   property framebutton;
+   property frameendbutton1;
+   property frameendbutton2;
    property color;
  end;
  
@@ -190,8 +198,9 @@ type
    procedure updaterects; override;
    procedure getpaintframe(var frame: framety); override;
    function getscrollbarclass(vert: boolean): framescrollbarclassty; virtual;
+   procedure activechanged; override;
  public
-   constructor create(const intf: iframe; const scrollintf: iscrollbar);
+   constructor create(const intf: iscrollframe; const scrollintf: iscrollbar);
    destructor destroy; override;
    procedure checktemplate(const sender: tobject); override;
                  //true if match
@@ -281,7 +290,7 @@ type
     //iscrollbox
    function getscrollsize: sizety;
   public
-   constructor create(const intf: iframe; const owner: twidget);
+   constructor create(const intf: iscrollframe; const owner: twidget);
    procedure updateclientrect; override;
    procedure showrect(const arect: rectty; const bottomright: boolean); 
                            //origin paintpos
@@ -389,7 +398,7 @@ type
    procedure execute(const tag: integer; const info: mouseeventinfoty);
    property neededbuttons: stepkindsty read fneededbuttons write setneededbuttons;
   public
-   constructor create(const intf: iframe; const stepintf: istepbar);
+   constructor create(const intf: icaptionframe; const stepintf: istepbar);
    procedure updatemousestate(const sender: twidget; const apos: pointty); override;
    procedure mouseevent(var info: mouseeventinfoty); virtual;
    procedure domousewheelevent(var info: mousewheeleventinfoty); virtual;
@@ -689,7 +698,7 @@ type
    procedure scrollevent(sender: tcustomscrollbar; event: scrolleventty); override;
    procedure updaterects; override;
   public
-   constructor create(const intf: iframe; const owner: twidget;
+   constructor create(const intf: iscrollframe; const owner: twidget;
                  const autoscrollintf: iautoscrollframe);
    procedure updateclientrect; override;
    property scrollpos: pointty read getscrollpos write setscrollpos;
@@ -1485,13 +1494,13 @@ end;
 
 { tcustomcaptionframe }
 
-constructor tcustomcaptionframe.create(const intf: iframe);
+constructor tcustomcaptionframe.create(const intf: icaptionframe);
 begin
  fcaptionpos:= cp_topleft;
  fcaptiondist:= 1;
  inherited;
  if ffont = nil then begin
-  finfo.font:= fintf.getframefont;
+  finfo.font:= icaptionframe(fintf).getframefont;
  end;
 end;
 
@@ -1581,12 +1590,13 @@ end;
 function tcustomcaptionframe.getfont: tframefont;
 begin
 // getoptionalobject(fintf.getcomponentstate,ffont,{$ifdef FPC}@{$endif}createfont);
- fintf.getwidget.getoptionalobject(ffont,{$ifdef FPC}@{$endif}createfont);
+ icaptionframe(fintf).getwidget.getoptionalobject(ffont,
+                                         {$ifdef FPC}@{$endif}createfont);
  if ffont <> nil then begin
   result:= ffont;
  end
  else begin
-  result:= tframefont(fintf.getframefont);
+  result:= tframefont(icaptionframe(fintf).getframefont);
  end;
 end;
 
@@ -1599,7 +1609,7 @@ begin
    finfo.font:= ffont;
   end
   else begin
-   finfo.font:= fintf.getframefont;
+   finfo.font:= icaptionframe(fintf).getframefont;
   end;
  end;
 end;
@@ -1613,8 +1623,8 @@ procedure tcustomcaptionframe.parentfontchanged;
 begin
  inherited;
  if ffont = nil then begin
-  finfo.font:= fintf.getframefont;
-  if not (ws_loadedproc in fintf.getwidget.widgetstate) then begin
+  finfo.font:= icaptionframe(fintf).getframefont;
+  if not (ws_loadedproc in icaptionframe(fintf).getwidget.widgetstate) then begin
    internalupdatestate;
   end;
  end;
@@ -1637,12 +1647,14 @@ var
 begin
  inherited;
  fra1:= fouterframe;
- if (finfo.text.text <> '') and twidget1(fintf.getwidget).isvisible then begin
+ if (finfo.text.text <> '') and 
+             twidget1(icaptionframe(fintf).getwidget).isvisible then begin
   updatebit({$ifdef FPC}longword{$else}word{$endif}(finfo.flags),ord(tf_grayed),fs_disabled in fstate);
-  canvas:= fintf.getcanvas;
+  canvas:= icaptionframe(fintf).getcanvas;
   canvas.font:= getfont;
   finfo.dest:= textrect(canvas,finfo.text);
-  rect1:= deflaterect(makerect(nullpoint,fintf.getwidgetrect.size),fouterframe);
+  rect1:= deflaterect(makerect(nullpoint,icaptionframe(fintf).getwidgetrect.size),
+                                 fouterframe);
   bo1:= fs_captiondistouter in fstate;
   rect2:= inflaterect(finfo.dest,captionmargin);
   with rect2 do begin
@@ -1726,7 +1738,7 @@ begin
   if fupdating < 16 then begin
    inc(fupdating);
    try
-    rect1:= fintf.getwidgetrect;
+    rect1:= icaptionframe(fintf).getwidgetrect;
     rect2:= deflaterect(rect1,fra1);
     if cfo_fixleft in foptions then begin
      rect2.x:= rect1.x;
@@ -1750,7 +1762,7 @@ begin
       rect2.y:= rect1.y+rect1.cy-rect2.cy;
      end;
     end;
-    fintf.setwidgetrect(rect2);
+    icaptionframe(fintf).setwidgetrect(rect2);
    finally
     dec(fupdating);
    end;
@@ -1789,7 +1801,7 @@ begin
   if (fintf.getcomponentstate * [csdesigning,csloading] = [csdesigning]) and
                             (caption <> '') then begin
    size1.cy:= font.glyphheight + 2 * captionmargin;
-   size1.cx:= fintf.getcanvas.getstringwidth(caption,getfont) + 
+   size1.cx:= icaptionframe(fintf).getcanvas.getstringwidth(caption,getfont) + 
                         2 * captionmargin;
    case captionpos of
     cp_center: begin
@@ -1956,9 +1968,15 @@ begin
  inherited;
 end;
 
+function tcustomcaptionframe.needsfocuspaint: boolean;
+begin
+ result:= inherited needsfocuspaint and not (cfo_nofocusrect in foptions);
+end;
+
 { tcustomscrollframe }
 
-constructor tcustomscrollframe.create(const intf: iframe; const scrollintf: iscrollbar);
+constructor tcustomscrollframe.create(const intf: iscrollframe;
+                                                const scrollintf: iscrollbar);
 begin
  intf.setstaticframe(true);
  inherited create(intf);
@@ -2002,7 +2020,7 @@ end;
 
 procedure tcustomscrollframe.mouseevent(var info: mouseeventinfoty);
 begin
- if not (ws_clientmousecaptured in fintf.widgetstate) then begin
+ if not (ws_clientmousecaptured in iscrollframe(fintf).widgetstate) then begin
   if fs_sbhorzon in fstate then begin
    fhorz.mouseevent(info);
   end;
@@ -2228,7 +2246,7 @@ begin
  if ({$ifdef FPC}longword{$else}longword{$endif}(statebefore) xor
      {$ifdef FPC}longword{$else}longword{$endif}(fstate)) and
      {$ifdef FPC}longword{$else}longword{$endif}(scrollbarframestates) <> 0 then begin
-  fintf.getwidget.invalidatewidget;
+  iscrollframe(fintf).getwidget.invalidatewidget;
  end;
 end;
 
@@ -2252,9 +2270,16 @@ begin
  fvert.assign(Value);
 end;
 
+procedure tcustomscrollframe.activechanged;
+begin
+ inherited;
+ fvert.activechanged;
+ fhorz.activechanged;
+end;
+
 { tcustomstepframe }
 
-constructor tcustomstepframe.create(const intf: iframe;
+constructor tcustomstepframe.create(const intf: icaptionframe;
   const stepintf: istepbar);
 begin
  fstepintf:= stepintf;
@@ -2293,7 +2318,7 @@ procedure tcustomstepframe.layoutchanged;
 var
  widget: twidget;
 begin
- widget:= fintf.getwidget;
+ widget:= icaptionframe(fintf).getwidget;
  if not (csloading in widget.ComponentState) then begin
   updatestate;
   widget.invalidaterect(fdim,org_widget);
@@ -2306,7 +2331,7 @@ var
 begin
  for int1:= 0 to high(fbuttons) do begin
   if updatemouseshapestate(fbuttons[int1],info,nil) then begin
-   fintf.getwidget.invalidaterect(fbuttons[int1].dim,org_widget);
+   icaptionframe(fintf).getwidget.invalidaterect(fbuttons[int1].dim,org_widget);
    if info.eventkind in [ek_buttonpress,ek_buttonrelease] then begin
     include(info.eventstate,es_processed);
    end;
@@ -2418,7 +2443,7 @@ begin
  if fcolorbutton <> avalue then begin
   fcolorbutton:= avalue;
   updatelayout;
-  fintf.getwidget.invalidaterect(fdim,org_widget);
+  icaptionframe(fintf).getwidget.invalidaterect(fdim,org_widget);
  end;
 end;
 
@@ -2583,7 +2608,7 @@ begin             //updatelayout
   end;
   color1:= fcolorbutton;
   if (color1 = cl_parent) or (color1 = cl_default) then begin
-   color1:= fintf.getwidget.actualcolor;
+   color1:= icaptionframe(fintf).getwidget.actualcolor;
   end;
   for int1:= 0 to high(fbuttons) do begin
    with fbuttons[int1] do begin
@@ -2696,7 +2721,7 @@ end;
 
 { tcustomscrollboxframe }
 
-constructor tcustomscrollboxframe.create(const intf: iframe; const owner: twidget);
+constructor tcustomscrollboxframe.create(const intf: iscrollframe; const owner: twidget);
 begin
  fowner:= owner;
  inherited create(intf,iscrollbox(self));
@@ -2994,7 +3019,7 @@ end;
 
 { tcustomautoscrollframe }
 
-constructor tcustomautoscrollframe.create(const intf: iframe; const owner: twidget;
+constructor tcustomautoscrollframe.create(const intf: iscrollframe; const owner: twidget;
                     const autoscrollintf: iautoscrollframe);
 begin
  fintf1:= autoscrollintf;
@@ -3165,7 +3190,7 @@ end;
 
 procedure tactionwidget.internalcreateframe;
 begin
- tcaptionframe.create(iframe(self));
+ tcaptionframe.create(iscrollframe(self));
 end;
 
 procedure tactionwidget.enabledchanged;
@@ -3530,7 +3555,7 @@ end;
 
 procedure tscrollingwidget.internalcreateframe;
 begin
- tscrollboxframe.create(iframe(self),self);
+ tscrollboxframe.create(iscrollframe(self),self);
 end;
 
 function tscrollingwidget.getframe: tscrollboxframe;
@@ -3836,7 +3861,7 @@ end;
 
 procedure tmessagewidget.internalcreateframe;
 begin
- tcustomcaptionframe.create(self);
+ tcustomcaptionframe.create(iscrollframe(self));
 end;
 
 function tmessagewidget.canclose(const newfocus: twidget): boolean;

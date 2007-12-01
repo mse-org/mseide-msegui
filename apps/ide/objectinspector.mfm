@@ -4,7 +4,6 @@ object objectinspectorfo: tobjectinspectorfo
   bounds_y = 403
   bounds_cx = 254
   bounds_cy = 248
-  frame.options = []
   frame.grip_size = 10
   frame.grip_options = [go_closebutton, go_fixsizebutton, go_topbutton, go_backgroundbutton]
   frame.dummy = 0
@@ -18,7 +17,6 @@ object objectinspectorfo: tobjectinspectorfo
   container.frame.dummy = 0
   container.onchildscaled = objectinspectoronchildscaled
   dragdock.splitter_size = 0
-  dragdock.tab_size = 0
   dragdock.caption = 'Objectinspector'
   dragdock.optionsdock = [od_savepos, od_canmove, od_canfloat, od_candock, od_propsize]
   options = [fo_savepos, fo_savestate]
@@ -38,31 +36,31 @@ object objectinspectorfo: tobjectinspectorfo
     F8000008C0C0C010F8000008C0C0C010F8000008C0C0C010F8000008C0C0C026
     0000000000000000F00000BFF8010008FC030000FC030000FC030000FC030000
     F8010200F00007000000070000800F0300C01F0000E03F0000E03FBFFCF37F08
-    FCF37F00FC030003FC030040FC030000FC030000FC030000FC03000000000000}
+    FCF37F00FC030003FC030040FC030000FC030000FC030000FC03000000000000
+  }
   oncreate = tmseformcreate
   oneventloopstart = objectinspectorfoonloaded
   onchildscaled = objectinspectoronchildscaled
-  Left = 239
-  Top = 180
+  left = 239
+  top = 180
   moduleclassname = 'tdockform'
   object compselector: tdropdownlistedit
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
     bounds_x = 0
     bounds_y = 1
     bounds_cx = 220
-    bounds_cy = 19
-    frame.options = []
+    bounds_cy = 20
     frame.dummy = 0
     anchors = [an_left, an_top, an_right]
     taborder = 2
     onsetvalue = compselectoronsetvalue
     dropdown.options = [deo_selectonly, deo_autodropdown, deo_keydropdown]
     dropdown.cols.count = 1
-    dropdown.cols.items = <
+    dropdown.cols.items = <    
       item
       end>
     onbeforedropdown = compselectorbeforedropdown
-    reffontheight = 13
+    reffontheight = 14
   end
   object grid: twidgetgrid
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_focusbackonesc, ow_mousewheel, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
@@ -78,70 +76,68 @@ object objectinspectorfo: tobjectinspectorfo
     optionsgrid = [og_colsizing, og_colmoving, og_focuscellonenter, og_colchangeontabkey]
     fixcols.coloractive = -2147483648
     fixrows.coloractive = -2147483648
-    rowcount = 0
     rowcolors.count = 1
     rowcolors.items = (
-      16777202)
+      16777202
+    )
     rowfonts.count = 6
-    rowfonts.items = <
+    rowfonts.items = <    
       item
         colorshadow = -2147483648
         name = 'stf_default'
-        xscale = 1.000000000000000000
+        xscale =  1.0000000000000000E+0000
         dummy = 0
-      end
-      item
-        color = 32768
-        colorshadow = -2147483648
-        name = 'stf_default'
-        xscale = 1.000000000000000000
-        dummy = 0
-      end
+      end    
       item
         color = 32768
         colorshadow = -2147483648
         name = 'stf_default'
-        xscale = 1.000000000000000000
+        xscale =  1.0000000000000000E+0000
         dummy = 0
-      end
+      end    
+      item
+        color = 32768
+        colorshadow = -2147483648
+        name = 'stf_default'
+        xscale =  1.0000000000000000E+0000
+        dummy = 0
+      end    
       item
         color = -1610612723
         colorshadow = -2147483648
         name = 'stf_default'
-        xscale = 1.000000000000000000
+        xscale =  1.0000000000000000E+0000
         dummy = 0
-      end
+      end    
       item
         colorshadow = -2147483648
         style = [fs_bold]
         name = 'stf_default'
-        xscale = 1.000000000000000000
+        xscale =  1.0000000000000000E+0000
         dummy = 0
-      end
+      end    
       item
         colorshadow = -2147483648
         style = [fs_bold]
         name = 'stf_default'
-        xscale = 1.000000000000000000
+        xscale =  1.0000000000000000E+0000
         dummy = 0
       end>
     datacols.count = 2
     datacols.coloractive = -2147483648
-    datacols.items = <
+    datacols.items = <    
       item
         linecolor = -1610612731
         linecolorfix = -1610612733
         coloractive = -2147483648
-        tag = 0
         width = 90
         options = [co_readonly, co_drawfocus, co_proportional, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
         onshowhint = col0onshowhint
         widgetname = 'props'
-      end
+      end    
       item
         linecolorfix = -1610612733
         coloractive = -2147483648
-        tag = 0
         width = 148
         rowfontoffset = 4
         options = [co_fill, co_savestate, co_rowfont, co_zebracolor]
@@ -149,22 +145,21 @@ object objectinspectorfo: tobjectinspectorfo
         widgetname = 'values'
       end>
     datarowlinecolor = -1610612731
-    datarowheight = 15
+    datarowheight = 16
     statfile = mainfo.projectstatfile
     onrowsdatachanged = gridrowsdatachanged
     oncellevent = gridcellevent
     drag.onbeforedragbegin = gridondragbegin
     drag.onbeforedragover = gridondragover
     drag.onbeforedragdrop = gridondragdrop
-    reffontheight = 13
+    reffontheight = 14
     object props: ttreeitemedit
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
       bounds_x = 0
       bounds_y = 0
       bounds_cx = 90
-      bounds_cy = 15
+      bounds_cy = 16
       color = -1879048185
-      frame.options = []
       frame.levelo = 0
       frame.colorclient = -2147483646
       frame.localprops = [frl_levelo, frl_colorclient]
@@ -176,30 +171,30 @@ object objectinspectorfo: tobjectinspectorfo
       onupdaterowvalues = propupdaterowvalue
       options = [teo_treecolnavig, teo_keyrowmoving]
       oncheckrowmove = propsoncheckrowmove
-      reffontheight = 13
+      reffontheight = 14
     end
     object values: tmbdropdownitemedit
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight]
       bounds_x = 91
       bounds_y = 0
       bounds_cx = 148
-      bounds_cy = 15
+      bounds_cy = 16
       color = -1879048185
-      frame.options = []
       frame.levelo = 0
       frame.colorclient = -2147483646
       frame.localprops = [frl_levelo, frl_colorclient]
       frame.button.width = 15
       frame.button.color = -1879048187
+      frame.button.options = [fbo_invisible]
       frame.buttons.count = 2
-      frame.buttons.items = <
+      frame.buttons.items = <      
         item
           width = 15
           color = -1879048187
-        end
+          options = [fbo_invisible]
+        end      
         item
           width = 15
-          visible = False
           color = -1879048187
           imagenr = 17
         end>
@@ -209,7 +204,7 @@ object objectinspectorfo: tobjectinspectorfo
       optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_forcereturncheckvalue, oe_eatreturn, oe_resetselectonexit, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_savestate]
       font.colorshadow = -2147483648
       font.name = 'stf_default'
-      font.xscale = 1.000000000000000000
+      font.xscale =  1.0000000000000000E+0000
       font.dummy = 0
       onkeydown = valueskeydown
       onsetvalue = valuessetvalue
@@ -219,11 +214,11 @@ object objectinspectorfo: tobjectinspectorfo
       dropdown.options = [deo_autodropdown, deo_keydropdown, deo_cliphint]
       dropdown.dropdownrowcount = 16
       dropdown.cols.count = 1
-      dropdown.cols.items = <
+      dropdown.cols.items = <      
         item
         end>
       onbeforedropdown = valuesbeforedropdown
-      reffontheight = 13
+      reffontheight = 14
     end
   end
   object compedit: tbutton
@@ -231,25 +226,22 @@ object objectinspectorfo: tobjectinspectorfo
     bounds_x = 223
     bounds_y = 2
     bounds_cx = 19
-    bounds_cy = 17
+    bounds_cy = 18
     anchors = [an_top, an_right]
     state = [as_disabled, as_localdisabled, as_localcaption, as_localonexecute]
-    autosize_cx = 0
-    autosize_cy = 0
     caption = 'ED'
-    imagedist = 0
     onexecute = compeditonexecute
-    reffontheight = 13
+    reffontheight = 14
   end
   object tpopupmenu1: tpopupmenu
     menu.submenu.count = 1
-    menu.submenu.items = <
+    menu.submenu.items = <    
       item
         caption = 'Collapse tree'
         state = [as_localcaption, as_localonexecute]
         onexecute = collapseexe
       end>
-    Left = 112
-    Top = 80
+    left = 112
+    top = 80
   end
 end

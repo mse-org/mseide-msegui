@@ -132,7 +132,7 @@ type
 
  tchartframe = class(tscrollboxframe)
   public
-   constructor create(const intf: iframe; const owner: twidget);
+   constructor create(const intf: iscrollframe; const owner: twidget);
   published
    property framei_left default 0;
    property framei_top default 0;
@@ -525,7 +525,7 @@ end;
 
 { tchartframe }
 
-constructor tchartframe.create(const intf: iframe; const owner: twidget);
+constructor tchartframe.create(const intf: iscrollframe; const owner: twidget);
 begin
  inherited;
  fi.innerframe.left:= 0;
@@ -661,7 +661,7 @@ end;
 
 procedure tcustomchart.internalcreateframe;
 begin
- tchartframe.create(iframe(self),self);
+ tchartframe.create(iscrollframe(self),self);
 end;
 
 procedure tcustomchart.changed;

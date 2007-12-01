@@ -149,7 +149,7 @@ end;
 
 procedure timage.internalcreateframe;
 begin
- timageframe.create(iframe(self),self);
+ timageframe.create(iscrollframe(self),self);
 end;
 
 { timageframe }

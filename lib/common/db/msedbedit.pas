@@ -1187,7 +1187,7 @@ type
    function getscrollbarclass(vert: boolean): framescrollbarclassty; override;
    procedure scrollevent(sender: tcustomscrollbar; event: scrolleventty); override;
   public
-   constructor create(const intf: iframe; const owner: twidget;
+   constructor create(const intf: iscrollframe; const owner: twidget;
                              const autoscrollintf: iautoscrollframe);
  end;
  
@@ -4389,7 +4389,7 @@ end;
 
 procedure tdbdropdownlist.internalcreateframe;
 begin
- tdbgridframe.create(iframe(self),self,iautoscrollframe(self));
+ tdbgridframe.create(iscrollframe(self),self,iautoscrollframe(self));
 end;
 
 procedure tdbdropdownlist.createdatacol(const index: integer; out item: tdatacol);
@@ -5804,7 +5804,7 @@ end;
 
 { tdbgridframe }
 
-constructor tdbgridframe.create(const intf: iframe; const owner: twidget;
+constructor tdbgridframe.create(const intf: iscrollframe; const owner: twidget;
                const autoscrollintf: iautoscrollframe);
 begin
  inherited;
@@ -5855,7 +5855,7 @@ end;
 
 procedure tcustomdbwidgetgrid.internalcreateframe;
 begin
- tdbgridframe.create(iframe(self),self,iautoscrollframe(self));
+ tdbgridframe.create(iscrollframe(self),self,iautoscrollframe(self));
 end;
 
 function tcustomdbwidgetgrid.createfixcols: tfixcols;
@@ -6363,7 +6363,7 @@ end;
 
 procedure tcustomdbstringgrid.internalcreateframe;
 begin
- tdbgridframe.create(iframe(self),self,iautoscrollframe(self));
+ tdbgridframe.create(iscrollframe(self),self,iautoscrollframe(self));
 end;
 
 function tcustomdbstringgrid.getoptionsedit: optionseditty;
@@ -7469,7 +7469,7 @@ end;
 
 procedure tlbdropdownlist.internalcreateframe;
 begin
- tdbgridframe.create(iframe(self),self,iautoscrollframe(self));
+ tdbgridframe.create(iscrollframe(self),self,iautoscrollframe(self));
 end;
 
 procedure tlbdropdownlist.createdatacol(const index: integer; out item: tdatacol);

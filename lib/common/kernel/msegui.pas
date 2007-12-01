@@ -170,23 +170,30 @@ type
 
  iframe = interface(inullinterface)
   procedure setframeinstance(instance: tcustomframe);
-  function getwidgetrect: rectty;
-  procedure setwidgetrect(const rect: rectty);
   procedure setstaticframe(value: boolean);
-  function widgetstate: widgetstatesty;
   procedure scrollwidgets(const dist: pointty);
   procedure clientrectchanged;
   function getcomponentstate: tcomponentstate;
   procedure invalidate;
   procedure invalidatewidget;
   procedure invalidaterect(const rect: rectty; org: originty = org_client);
-  function getframefont: tfont;
-  function getcanvas(aorigin: originty = org_client): tcanvas;
-  function canfocus: boolean;
-  function setfocus(aactivate: boolean = true): boolean;
   function getwidget: twidget;
+  function getwidgetrect: rectty;
+  function getframeclicked: boolean;
+  function getframemouse: boolean;
+  function getframeactive: boolean;
  end;
 
+ icaptionframe = interface(iframe)
+  function getcanvas(aorigin: originty = org_client): tcanvas;
+  function getframefont: tfont;
+  procedure setwidgetrect(const rect: rectty);
+ end;
+
+ iscrollframe = interface(icaptionframe)
+  function widgetstate: widgetstatesty;
+ end;
+  
  frameinfoty = record
   levelo: integer;
   leveli: integer;
@@ -309,11 +316,11 @@ type
    procedure dokeydown(var info: keyeventinfoty); virtual;
    function checkshortcut(var info: keyeventinfoty): boolean; virtual;
    procedure parentfontchanged; virtual;
-//   procedure dopaintbackground(const canvas: tcanvas; const arect: rectty); virtual;
-//   procedure dopaintframe(const canvas: tcanvas; const arect: rectty); virtual;
    procedure dopaintfocusrect(const canvas: tcanvas; const rect: rectty); virtual;
    procedure updatewidgetstate; virtual;
    procedure updatemousestate(const sender: twidget; const apos: pointty); virtual;
+   procedure activechanged; virtual;
+   function needsfocuspaint: boolean; virtual;
   public
    constructor create(const intf: iframe); reintroduce;
    destructor destroy; override;
@@ -323,7 +330,7 @@ type
 
    procedure paintbackground(const canvas: tcanvas; const arect: rectty); virtual;
    procedure paintoverlay(const canvas: tcanvas; const arect: rectty); virtual;
-//   procedure afterpaint(const canvas: tcanvas); virtual;
+
    function outerframewidth: sizety; //widgetsize - framesize
    function frameframewidth: sizety; //widgetsize - (paintsize + paintframe)
    function paintframewidth: sizety; //widgetsize - paintsize
@@ -803,7 +810,7 @@ type
  widgetalignmodety = (wam_start,wam_center,wam_end);
  widgetclassty = class of twidget;
  
- twidget = class(tactcomponent,iframe,iface)
+ twidget = class(tactcomponent,iscrollframe,iface)
   private
    fwidgetregion: regionty;
    frootpos: pointty;   //position in rootwindow
@@ -943,6 +950,7 @@ type
    function getinnerstframe: framety; virtual;
 
    procedure createwindow; virtual;
+   procedure objectchanged(const sender: tobject); virtual;
    procedure objectevent(const sender: tobject; const event: objecteventty); override;
    procedure receiveevent(const event: tobjectevent); override;
    procedure setchildorder(child: tcomponent; order: integer); override;
@@ -2553,6 +2561,23 @@ begin
  end;
 end;
 
+procedure tcustomframe.activechanged;
+begin
+ with fi do begin
+  if (frameimage_list <> nil) and 
+    ((frameimage_offsetactive <> 0) or 
+    (frameimage_offsetactivemouse <> frameimage_offsetmouse) or
+    (frameimage_offsetactiveclicked <> frameimage_offsetclicked)) then begin
+   fintf.getwidget.invalidatewidget;
+  end;
+ end;
+end;
+
+function tcustomframe.needsfocuspaint: boolean;
+begin
+ result:= fs_drawfocusrect in fstate;
+end;
+
 procedure tcustomframe.paintbackground(const canvas: tcanvas;
                                const arect: rectty);
 var
@@ -2594,7 +2619,7 @@ begin
  end;
  if fi.frameimage_list <> nil then begin
   imageoffs:= fi.frameimage_offset;
-  with fintf.getwidget do begin
+  with fintf do begin
    if getframeactive then begin
     if getframeclicked then begin
      imageoffs:= imageoffs + fi.frameimage_offsetactiveclicked;
@@ -5501,14 +5526,7 @@ begin
   invalidatewidget;
  end;
  if (frame <> nil) then begin
-  with fframe.fi do begin
-   if (frameimage_list <> nil) and 
-     ((frameimage_offsetactive <> 0) or 
-     (frameimage_offsetactivemouse <> frameimage_offsetmouse) or
-     (frameimage_offsetactiveclicked <> frameimage_offsetclicked)) then begin
-    invalidatewidget;
-   end;
-  end;
+  fframe.activechanged;
  end;
 end;
 
@@ -5856,7 +5874,7 @@ end;
 function twidget.needsfocuspaint: boolean;
 begin
  result:= {not (ow_nofocusrect in foptionswidget) and} (fframe <> nil) and 
-                             (fs_drawfocusrect in fframe.fstate);
+                fframe.needsfocuspaint;
 end;
 
 function twidget.getshowhint: boolean;
@@ -6454,7 +6472,7 @@ end;
 
 procedure twidget.internalcreateframe;
 begin
- tframe.create(self);
+ tframe.create(iscrollframe(self));
 end;
 
 function twidget.invalidateneeded: boolean;
@@ -8718,16 +8736,21 @@ begin
  end;
 end;
 
+procedure twidget.objectchanged(const sender: tobject);
+begin
+ if fface <> nil then begin
+  fface.checktemplate(sender);
+ end;
+ if fframe <> nil then begin
+  fframe.checktemplate(sender);
+ end;
+end;
+
 procedure twidget.objectevent(const sender: tobject; const event: objecteventty);
 begin
  inherited;
  if (event = oe_changed) then begin
-  if fface <> nil then begin
-   fface.checktemplate(sender);
-  end;
-  if fframe <> nil then begin
-   fframe.checktemplate(sender);
-  end;
+  objectchanged(sender);
  end;
 end;
 

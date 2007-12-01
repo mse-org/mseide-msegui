@@ -264,7 +264,7 @@ type
  
  tgroupboxframe = class(tcaptionframe)
   public
-   constructor create(const intf: iframe);
+   constructor create(const intf: icaptionframe);
   published
    property framei_left default 2;
    property framei_top default 2;
@@ -1016,7 +1016,7 @@ end;
 
 { tgroupboxframe }
 
-constructor tgroupboxframe.create(const intf: iframe);
+constructor tgroupboxframe.create(const intf: icaptionframe);
 begin
  inherited;
  fi.levelo:= -1;
@@ -1232,7 +1232,7 @@ end;
 
 procedure tgroupbox.internalcreateframe;
 begin
- tgroupboxframe.create(iframe(self));
+ tgroupboxframe.create(iscrollframe(self));
 end;
 
 procedure tgroupbox.dofocuschanged(const oldwidget: twidget;
@@ -1256,7 +1256,7 @@ end;
 
 procedure tscrollbox.internalcreateframe;
 begin
- tscrollboxframe.create(iframe(self),self);
+ tscrollboxframe.create(iscrollframe(self),self);
 end;
 
 function tscrollbox.getframe: tscrollboxframe;
@@ -1317,7 +1317,7 @@ end;
 
 procedure tcustomstepbox.internalcreateframe;
 begin
- tstepboxframe.create(iframe(self),istepbar(self));
+ tstepboxframe.create(iscrollframe(self),istepbar(self));
 end;
 
 procedure tcustomstepbox.clientmouseevent(var info: mouseeventinfoty);

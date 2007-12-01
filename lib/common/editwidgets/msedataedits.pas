@@ -1814,7 +1814,7 @@ end;
 
 procedure tcustommemoedit.internalcreateframe;
 begin
- tscrolleditframe.create(iframe(self),iscrollbar(self));
+ tscrolleditframe.create(iscrollframe(self),iscrollbar(self));
  with frame do begin
   sbhorz.pagesize:= 1;
   sbvert.pagesize:= 1;

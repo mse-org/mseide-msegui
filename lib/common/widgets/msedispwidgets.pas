@@ -41,7 +41,7 @@ type
 
  tdispframe = class(tcustomcaptionframe)
   public
-   constructor create(const intf: iframe);
+   constructor create(const intf: icaptionframe);
   published
    property options;
    property levelo default -1;
@@ -289,7 +289,7 @@ uses
 
 { tdispframe }
 
-constructor tdispframe.create(const intf: iframe);
+constructor tdispframe.create(const intf: icaptionframe);
 begin
  inherited;
 // clientcolor:= cl_foreground;
@@ -348,7 +348,7 @@ end;
 
 procedure tdispwidget.internalcreateframe;
 begin
- tdispframe.create(iframe(self));
+ tdispframe.create(iscrollframe(self));
 end;
 
 procedure tdispwidget.valuechanged;

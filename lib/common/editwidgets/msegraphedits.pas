@@ -29,7 +29,7 @@ const
 type
  tgrapheditframe = class(tcustomcaptionframe)
   public
-   constructor create(const intf: iframe);
+   constructor create(const intf: icaptionframe);
   published
    property options;
    property levelo default -2;
@@ -242,6 +242,9 @@ type
    property colorglyph;
    property facebutton;
    property faceendbutton;
+   property framebutton;
+   property frameendbutton1;
+   property frameendbutton2;
    property face: tface read fface write setface;
  end;
 
@@ -287,12 +290,14 @@ type
    fupdating: boolean;
    procedure setscrollbar(const avalue: tsliderscrollbar);
   protected
+   procedure objectchanged(const sender: tobject); override;
    procedure clientrectchanged; override;
    procedure dopaint(const acanvas: tcanvas); override;
    procedure clientmouseevent(var info: mouseeventinfoty); override;
    procedure dokeydown(var info: keyeventinfoty); override;
    procedure doenter; override;
    procedure doexit; override;
+   procedure activechanged; override;
    procedure scrollevent(sender: tcustomscrollbar; event: scrolleventty);
 
    procedure dochange; override;
@@ -776,7 +781,7 @@ const
 
 { tgrapheditframe }
 
-constructor tgrapheditframe.create(const intf: iframe);
+constructor tgrapheditframe.create(const intf: icaptionframe);
 begin
  inherited;
  fstate:= fstate + [fs_drawfocusrect,fs_captionfocus,fs_captionhint,
@@ -1027,6 +1032,12 @@ begin
  inherited;
 end;
 
+procedure tslider.activechanged;
+begin
+ fscrollbar.activechanged;
+ inherited;
+end;
+
 procedure tslider.setscrollbar(const avalue: tsliderscrollbar);
 begin
  fscrollbar.assign(avalue);
@@ -1036,6 +1047,12 @@ procedure tslider.dochange;
 begin
  fscrollbar.value:= fvalue;
  inherited;
+end;
+
+procedure tslider.objectchanged(const sender: tobject);
+begin
+ inherited;
+ fscrollbar.checktemplate(sender);
 end;
 
 { tgraphdataedit }
@@ -1049,7 +1066,7 @@ end;
 
 procedure tgraphdataedit.internalcreateframe;
 begin
- tgrapheditframe.create(iframe(self));
+ tgrapheditframe.create(iscrollframe(self));
 end;
 
 procedure tgraphdataedit.setcolorglyph(const Value: colorty);
@@ -2316,7 +2333,7 @@ end;
 
 procedure tcustomdatabutton.internalcreateframe;
 begin
- tcaptionframe.create(iframe(self));
+ tcaptionframe.create(iscrollframe(self));
 end;
 
 procedure tcustomdatabutton.initgridwidget;
@@ -2614,7 +2631,7 @@ constructor tbarframe.create(const aowner: tcustomprogressbar);
 begin
  fowner:= aowner;
  fstate:= [fs_nowidget,fs_nosetinstance];
- inherited create(iframe(aowner));
+ inherited create(iscrollframe(aowner));
 end;
 
 { tcustomprogressbar }
@@ -2767,7 +2784,7 @@ end;
 
 procedure tcustomprogressbar.internalcreateframe;
 begin
- tdispframe.create(self);
+ tdispframe.create(iscrollframe(self));
 end;
 
 procedure tcustomprogressbar.setvaluescale(const avalue: real);

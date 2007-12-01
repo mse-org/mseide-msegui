@@ -377,7 +377,8 @@ type
                     const arect: rectty; 
                     const acolorglyph,acolorbutton: colorty); virtual;
   public
-   constructor create(const intf: iframe; const acontroller: tdockcontroller);
+   constructor create(const intf: icaptionframe;
+                                     const acontroller: tdockcontroller);
    destructor destroy; override;
    procedure updatemousestate(const sender: twidget;
                                                 const apos: pointty); override;
@@ -2925,7 +2926,7 @@ end;
 
 { tgripframe }
 
-constructor tgripframe.create(const intf: iframe;
+constructor tgripframe.create(const intf: icaptionframe;
                        const acontroller: tdockcontroller);
 begin
  fgrip_color:= defaultgripcolor;
@@ -3759,7 +3760,7 @@ end;
 
 procedure tdockpanel.internalcreateframe;
 begin
- tgripframe.create(iframe(self),fdragdock);
+ tgripframe.create(iscrollframe(self),fdragdock);
 end;
 
 procedure tdockpanel.dragevent(var info: draginfoty);

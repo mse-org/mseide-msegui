@@ -31,7 +31,7 @@ type
 
  teditframe = class(tcustomcaptionframe)
   public
-   constructor create(const intf: iframe);
+   constructor create(const intf: icaptionframe);
   published
    property options;
    property levelo default -2;
@@ -76,7 +76,7 @@ type
  
  tscrolleditframe = class(tcustomthumbtrackscrollframe)
   public
-   constructor create(const intf: iframe; const scrollintf: iscrollbar);
+   constructor create(const intf: iscrollframe; const scrollintf: iscrollbar);
   published
    property levelo default -2;
    property leveli;
@@ -109,7 +109,7 @@ type
 
  tscrollboxeditframe = class(tcustomscrollboxframe)
   public
-   constructor create(const intf: iframe; const owner: twidget);
+   constructor create(const intf: iscrollframe; const owner: twidget);
   published
    property levelo default -2;
    property leveli;
@@ -146,12 +146,12 @@ type
  end;
  buttoneventty = procedure(const sender: tobject; var action: buttonactionty;
                        const buttonindex: integer) of object;
- framebuttonoptionty = (fbo_left,fbo_invisible,fbo_disabled);
+ framebuttonoptionty = (fbo_left,fbo_invisible,fbo_disabled,fbo_flat,fbo_noanim);
  framebuttonoptionsty = set of framebuttonoptionty;
 
  tcustombuttonframe = class;
-
- tframebutton = class(townedeventpersistent)
+ 
+ tframebutton = class(townedeventpersistent,iframe)
   private
    fbuttonwidth: integer;
    foptions: framebuttonoptionsty;
@@ -170,10 +170,30 @@ type
    procedure setimagelist(const Value: timagelist);
    procedure setimagenr(const Value: integer);
    procedure createface;
+   procedure createframe;
    function getface: tface;
    procedure setface(const avalue: tface);
+   function getframe: tframe;
+   procedure setframe(const avalue: tframe);
+   //iframe
+   procedure setframeinstance(instance: tcustomframe);
+   procedure setstaticframe(value: boolean);
+   function getwidgetrect: rectty;
+   function getcomponentstate: tcomponentstate;
+   procedure scrollwidgets(const dist: pointty);
+   procedure clientrectchanged;
+   procedure invalidate;
+   procedure invalidatewidget;
+   procedure invalidaterect(const rect: rectty; org: originty = org_client);
+   function getwidget: twidget;
+   
+   function getframeclicked: boolean; virtual;
+   function getframemouse: boolean; virtual;
+   function getframeactive: boolean; virtual;
   protected
+   fframerect: rectty;
    finfo: shapeinfoty;
+   fframe: tframe;
    procedure mouseevent(var info: mouseeventinfoty;
                  const intf: iframe; const buttonintf: ibutton;
                  const index: integer);
@@ -183,16 +203,19 @@ type
    procedure checktemplate(const sender: tobject);
    procedure updatewidgetstate(const awidget: twidget);
    procedure assign(source: tpersistent); override;
-  published
-   property width: integer read fbuttonwidth write setbuttonwidth default 0;
    property visible: boolean read getvisible write setvisible default true;
    property enabled: boolean read getenabled write setenabled default true;
    property left: boolean read getleft write setleft default false;
+  published
+   property width: integer read fbuttonwidth write setbuttonwidth default 0;
    property color: colorty read finfo.color write setcolor default cl_parent;
    property colorglyph: colorty read finfo.colorglyph write setcolorglyph default cl_glyph;
    property face: tface read getface write setface;
+   property frame: tframe read getframe write setframe;
    property imagelist: timagelist read finfo.imagelist write setimagelist;
    property imagenr: integer read finfo.imagenr write setimagenr default -1;
+   property options: framebuttonoptionsty read foptions write setoptions
+                                            default [];
    property onexecute: notifyeventty read fonexecute write fonexecute;
  end;
 
@@ -229,11 +252,12 @@ type
    procedure setbuttons(const Value: tframebuttons);
   protected
    fbuttonintf: ibutton;
-   procedure getpaintframe(var frame: framety); override;
+   procedure getpaintframe(var aframe: framety); override;
    function getbuttonclass: framebuttonclassty; virtual;
    procedure checktemplate(const sender: tobject); override;
   public
-   constructor create(const intf: iframe; const buttonintf: ibutton); reintroduce;
+   constructor create(const intf: icaptionframe; const buttonintf: ibutton);
+                                                   reintroduce;
    destructor destroy; override;
    function buttonframe: framety;
    procedure updatemousestate(const sender: twidget; const apos: pointty); override;
@@ -383,7 +407,7 @@ type
 
 { teditframe }
 
-constructor teditframe.create(const intf: iframe);
+constructor teditframe.create(const intf: icaptionframe);
 begin
  inherited;
  fi.colorclient:= cl_foreground;
@@ -394,7 +418,7 @@ end;
 
 { tscrolleditframe }
 
-constructor tscrolleditframe.create(const intf: iframe; const scrollintf: iscrollbar);
+constructor tscrolleditframe.create(const intf: iscrollframe; const scrollintf: iscrollbar);
 begin
  inherited;
  colorclient:= cl_foreground;
@@ -405,7 +429,8 @@ end;
 
 { tscrollboxeditframe }
 
-constructor tscrollboxeditframe.create(const intf: iframe; const owner: twidget);
+constructor tscrollboxeditframe.create(const intf: iscrollframe;
+                                                  const owner: twidget);
 begin
  inherited;
  colorclient:= cl_foreground;
@@ -416,9 +441,27 @@ end;
 
 { tframebutton }
 
+constructor tframebutton.create(aowner: tobject);
+begin
+ finfo.color:= cl_parent;
+ finfo.colorglyph:= cl_glyph;
+ finfo.imagenr:= -1;
+ finfo.imagenrdisabled:= -2;
+ include(finfo.state,ss_widgetorg);
+ inherited;
+end;
+
+destructor tframebutton.destroy;
+begin
+ inherited;
+ finfo.face.free;
+ fframe.free;
+end;
+
 procedure tframebutton.changed;
 begin
- if not (csloading in tcustombuttonframe(fowner).fintf.getwidget.componentstate) then begin
+ if not (csloading in tcustombuttonframe(fowner).
+                        fintf.getwidget.componentstate) then begin
   tcustombuttonframe(fowner).updatestate;
  end;
 end;
@@ -429,6 +472,8 @@ begin
   foptions:= Value;
   updatebit(cardinal(finfo.state),ord(ss_invisible),fbo_invisible in value);
   updatebit(cardinal(finfo.state),ord(ss_disabled),fbo_disabled in value);
+  updatebit(cardinal(finfo.state),ord(ss_flat),fbo_flat in value);
+  updatebit(cardinal(finfo.state),ord(ss_noanimation),fbo_noanim in value);
   changed;
  end;
 end;
@@ -511,7 +556,7 @@ begin
  with finfo do begin
   bo1:= ss_clicked in state;
   if updatemouseshapestate(finfo,info,nil) then begin
-   intf.invalidaterect(dim,org_widget);
+   invalidate;
   end;
   if ss_clicked in state then begin
    if not bo1 then begin
@@ -535,22 +580,6 @@ begin
  end;
 end;
 
-constructor tframebutton.create(aowner: tobject);
-begin
- finfo.color:= cl_parent;
- finfo.colorglyph:= cl_glyph;
- finfo.imagenr:= -1;
- finfo.imagenrdisabled:= -2;
- include(finfo.state,ss_widgetorg);
- inherited;
-end;
-
-destructor tframebutton.destroy;
-begin
- inherited;
- finfo.face.free;
-end;
-
 procedure tframebutton.setimagelist(const Value: timagelist);
 begin
  setlinkedcomponent(iobjectlink(self),value,tmsecomponent(finfo.imagelist));
@@ -570,6 +599,11 @@ begin
  finfo.face:= tface.create(iface(tcustombuttonframe(fowner).fintf.getwidget));
 end;
 
+procedure tframebutton.createframe;
+begin
+ tframe.create(iframe(self));
+end;
+
 function tframebutton.getface: tface;
 begin
  tcustombuttonframe(fowner).fintf.getwidget.getoptionalobject(finfo.face,
@@ -583,6 +617,21 @@ begin
                                {$ifdef FPC}@{$endif}createface);
  tcustombuttonframe(fowner).fintf.getwidget.invalidate;
 end;
+
+function tframebutton.getframe: tframe;
+begin
+ tcustombuttonframe(fowner).fintf.getwidget.getoptionalobject(fframe,
+                               {$ifdef FPC}@{$endif}createframe);
+ result:= fframe;
+end;
+
+procedure tframebutton.setframe(const avalue: tframe);
+begin
+ tcustombuttonframe(fowner).fintf.getwidget.setoptionalobject(avalue,fframe,
+                               {$ifdef FPC}@{$endif}createframe);
+ tcustombuttonframe(fowner).fintf.getwidget.invalidate;
+end;
+
 
 procedure tframebutton.updatewidgetstate(const awidget: twidget);
 begin
@@ -599,6 +648,8 @@ begin
    self.imagelist:= imagelist;
    self.imagenr:= imagenr;
    self.onexecute:= onexecute;
+   self.frame:= frame;
+   self.face:= face;
   end;
  end;
 end;
@@ -608,6 +659,76 @@ begin
  if finfo.face <> nil then begin
   finfo.face.checktemplate(sender);
  end;
+ if fframe <> nil then begin
+  fframe.checktemplate(sender);
+ end;
+end;
+
+procedure tframebutton.setframeinstance(instance: tcustomframe);
+begin
+ fframe:= tframe(instance);
+end;
+
+procedure tframebutton.setstaticframe(value: boolean);
+begin
+ //dummy
+end;
+
+function tframebutton.getwidgetrect: rectty;
+begin
+ result:= nullrect;
+end;
+
+function tframebutton.getcomponentstate: tcomponentstate;
+begin
+ result:= tcustombuttonframe(fowner).fintf.getwidget.componentstate;
+end;
+
+procedure tframebutton.scrollwidgets(const dist: pointty);
+begin
+ //dummy
+end;
+
+procedure tframebutton.clientrectchanged;
+begin
+ changed;
+end;
+
+procedure tframebutton.invalidate;
+begin
+ tcustombuttonframe(fowner).fintf.getwidget.invalidaterect(
+                                                 fframerect,org_widget);
+end;
+
+procedure tframebutton.invalidatewidget;
+begin
+ invalidate;
+end;
+
+procedure tframebutton.invalidaterect(const rect: rectty;
+               org: originty = org_client);
+begin
+ invalidate;
+end;
+
+function tframebutton.getwidget: twidget;
+begin
+ result:= tcustombuttonframe(fowner).fintf.getwidget
+end;
+
+function tframebutton.getframeclicked: boolean;
+begin
+ result:= ss_clicked in finfo.state;
+end;
+
+function tframebutton.getframemouse: boolean;
+begin
+ result:= ss_mouse in finfo.state;
+end;
+
+function tframebutton.getframeactive: boolean;
+begin
+ result:= getwidget.active;
 end;
 
 { tstockglyphframebutton}
@@ -671,7 +792,7 @@ begin
  result:= false;
  for int1:= 0 to high(fitems) do begin
   with tframebutton(fitems[int1]) do begin
-   if not (fbo_invisible in foptions) and pointinrect(apos,finfo.dim) then begin
+   if not (fbo_invisible in foptions) and pointinrect(apos,fframerect) then begin
     result:= true;
     break;
    end;
@@ -690,7 +811,7 @@ end;
 
 { tcustombuttonframe }
 
-constructor tcustombuttonframe.create(const intf: iframe; const buttonintf: ibutton);
+constructor tcustombuttonframe.create(const intf: icaptionframe; const buttonintf: ibutton);
 begin
  fbuttons:= tframebuttons.create(self,getbuttonclass);
  fbuttonintf:= buttonintf;
@@ -718,40 +839,46 @@ begin
   with fbuttons[int1],finfo do begin
    if not (ss_invisible in state) then begin
     if fbo_left in foptions then begin
-     inc(result.left,dim.cx);
+     inc(result.left,fframerect.cx);
     end
     else begin
-     inc(result.right,dim.cx);
+     inc(result.right,fframerect.cx);
     end;
    end;
   end;
  end;
 end;
 
-procedure tcustombuttonframe.getpaintframe(var frame: framety);
+procedure tcustombuttonframe.getpaintframe(var aframe: framety);
 var
  int1: integer;
 begin
  inherited;
  for int1:= 0 to fbuttons.count-1 do begin
-  with fbuttons[int1],finfo do begin
+  with fbuttons[int1],finfo,fframerect do begin
    if not (ss_invisible in state) then begin
-    dim.cy:= fintf.getwidgetrect.cy - frameframewidth.cy;
+    cy:= fintf.getwidgetrect.cy - frameframewidth.cy;
     if fbuttonwidth = 0 then begin
-     dim.cx:= dim.cy;
+     cx:= cy;
     end
     else begin
-     dim.cx:= fbuttonwidth;
+     cx:= fbuttonwidth;
     end;
-    dim.y:= fouterframe.top + fwidth.top;
+    y:= fouterframe.top + fwidth.top;
     if fbo_left in foptions then begin
-     dim.x:= fouterframe.left + fwidth.left + frame.left;
-     inc(frame.left,dim.cx);
+     x:= fouterframe.left + fwidth.left + aframe.left;
+     inc(aframe.left,cx);
     end
     else begin
-     dim.x:= fintf.getwidgetrect.cx -
-       (fouterframe.right + fwidth.right + dim.cx + frame.right);
-     inc(frame.right,dim.cx);
+     x:= fintf.getwidgetrect.cx -
+       (fouterframe.right + fwidth.right + cx + aframe.right);
+     inc(aframe.right,cx);
+    end;
+    if fframe <> nil then begin
+     finfo.dim:= deflaterect(fframerect,fframe.innerframe);
+    end
+    else begin
+     finfo.dim:= fframerect;
     end;
    end;
   end;
@@ -779,7 +906,8 @@ begin
  end;
 end;
 
-procedure tcustombuttonframe.paintoverlay(const canvas: tcanvas; const arect: rectty);
+procedure tcustombuttonframe.paintoverlay(const canvas: tcanvas;
+                                                     const arect: rectty);
 var
  int1: integer;
  color2: colorty;
@@ -787,6 +915,11 @@ begin
  color2:= cl_none;
  for int1:= 0 to fbuttons.count-1 do begin
   with fbuttons[int1] do begin
+   if fframe <> nil then begin
+    canvas.save;
+    fframe.paintbackground(canvas,fframerect);
+    canvas.restore;
+   end;
    if color = cl_parent then begin
     if color2 = cl_none then begin
      color2:= fintf.getwidget.parentcolor;
@@ -797,6 +930,9 @@ begin
    end
    else begin
     drawtoolbutton(canvas,finfo);
+   end;
+   if fframe <> nil then begin
+    fframe.paintoverlay(canvas,fframerect);
    end;
   end;
  end;
@@ -991,7 +1127,7 @@ end;
 
 procedure tcustomedit.internalcreateframe;
 begin
- teditframe.create(self);
+ teditframe.create(iscrollframe(self));
 end;
 
 function tcustomedit.gettext: msestring;
@@ -1236,4 +1372,5 @@ begin
  result:= fifiserverintf;
 end;
 {$endif}
+
 end.

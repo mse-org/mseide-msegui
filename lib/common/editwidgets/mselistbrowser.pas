@@ -1069,7 +1069,7 @@ end;
 
 procedure tcustomlistview.createcellframe;
 begin
- tcellframe.create(iframe(self));
+ tcellframe.create(iscrollframe(self));
 end;
 
 function tcustomlistview.getcellframe: tcellframe;
@@ -2335,7 +2335,7 @@ end;
 
 procedure titemedit.internalcreateframe;
 begin
- tcustombuttonframe.create(self,ibutton(self));
+ tcustombuttonframe.create(iscrollframe(self),ibutton(self));
 end;
 
 procedure titemedit.buttonaction(var action: buttonactionty;
