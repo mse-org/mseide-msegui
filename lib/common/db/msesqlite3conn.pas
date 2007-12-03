@@ -361,9 +361,10 @@ type
  defbeforety = record
   datatype: tfieldtype;
   size: integer;
+  name: string;
  end;
 var
- int1: integer;
+ int1,int2,int3: integer;
  str1,str2: string;
  ft1: tfieldtype;
  size1: word;
@@ -376,6 +377,7 @@ begin
   with fielddefs[int1] do begin
    defsbefore[int1].datatype:= datatype;
    defsbefore[int1].size:= size;
+   defsbefore[int1].name:= name;
   end;
  end;
  fielddefs.clear;
@@ -465,10 +467,21 @@ begin
      end;
     end;
    end;
-   if (ft1 = ftunknown) and (int1 <= high(defsbefore)) then begin
-    ft1:= defsbefore[int1].datatype;
-    if ft1 = ftstring then begin
-     size1:= defsbefore[int1].size;
+   if (ft1 = ftunknown) then begin
+    int3:= -1;
+    for int2:= 0 to high(defsbefore) do begin
+     if defsbefore[int2].name = str1 then begin
+      int3:= int2;
+      break;
+     end;
+    end;
+    if int3 >= 0 then begin
+     with defsbefore[int3] do begin
+      ft1:= datatype;
+      if ft1 = ftstring then begin
+       size1:= size;
+      end;
+     end;
     end;
    end;
    if ft1 <> ftstring then begin

@@ -2372,7 +2372,8 @@ end;
 function tmsebooleanfield.GetAsLongint: Longint;
 begin
  if getasboolean then begin
-  result:= -1;
+//  result:= -1;
+  result:= 1;
  end
  else begin
   result:= 0;
@@ -2412,7 +2413,8 @@ var
  int1: integer;
 begin
  if avalue then begin
-  int1:= -1;
+//  int1:= -1;
+  int1:= 1;
  end
  else begin
   int1:= 0;
