@@ -96,7 +96,7 @@ const
 
 procedure Register;
 begin
- registercomponents('Widget',[teventwidget,tbutton,tstockglyphbutton,
+ registercomponents('Widget',[teventwidget,tbutton,trichbutton,tstockglyphbutton,
   tdrawgrid,tstringgrid,tlistview,
   tlabel,tpaintbox,timage,
   tintegerdisp,trealdisp,tdatetimedisp,tstringdisp,tbytestringdisp,tbooleandisp,

@@ -114,6 +114,8 @@ type
    procedure setautosize_cx(const avalue: integer);
    procedure setautosize_cy(const avalue: integer);
    procedure setimagedist(const avalue: integer);
+   procedure setshortcut(const avalue: shortcutty);
+   function isshortcutstored: boolean;
   protected
    //iactionlink
    function getactioninfopo: pactioninfoty;
@@ -168,6 +170,8 @@ type
    property font: twidgetfont read getfont write setfont stored isfontstored;
    property modalresult: modalresultty read fmodalresult write fmodalresult
                                 default mr_none;
+   property shortcut: shortcutty read factioninfo.shortcut write setshortcut
+                            stored isshortcutstored;
    property onexecute: notifyeventty read factioninfo.onexecute
                             write setonexecute stored isonexecutestored;
    property autosize_cx: integer read fautosize_cx write setautosize_cx;
@@ -182,6 +186,7 @@ type
    property autosize_cy;
    property action;
    property caption;
+   property shortcut;
    property captionpos;
    property captiondist;
    property font;
@@ -210,6 +215,7 @@ type
    property autosize_cy;
    property action;
    property caption;
+   property shortcut;
    property captionpos;
    property font;
    property modalresult;
@@ -218,6 +224,46 @@ type
    property onexecute;
  end;
 
+ trichbutton = class(tstockglyphbutton)
+  private
+   ffaceactive: tcustomface;
+   ffacemouse: tcustomface;
+   ffaceclicked: tcustomface;
+   fonbeforepaint: painteventty;
+   fonpaintbackground: painteventty;
+   fonpaint: painteventty;
+   fonafterpaint: painteventty;
+   fonmouseevent: mouseeventty;
+   function getfaceactive: tcustomface;
+   procedure setfaceactive(const avalue: tcustomface);
+   function getfacemouse: tcustomface;
+   procedure setfacemouse(const avalue: tcustomface);
+   function getfaceclicked: tcustomface;
+   procedure setfaceclicked(const avalue: tcustomface);
+   procedure createfaceactive;
+   procedure createfacemouse;
+   procedure createfaceclicked;
+  protected
+   function getactface: tcustomface; override;
+   procedure dobeforepaint(const canvas: tcanvas); override;
+   procedure dopaintbackground(const canvas: tcanvas); override;
+   procedure doonpaint(const canvas: tcanvas); override;
+   procedure doafterpaint(const canvas: tcanvas); override;
+   procedure mouseevent(var info: mouseeventinfoty); override;
+  public
+   destructor destroy; override;
+  published
+   property faceactive: tcustomface read getfaceactive write setfaceactive;
+   property facemouse: tcustomface read getfacemouse write setfacemouse;
+   property faceclicked: tcustomface read getfaceclicked write setfaceclicked;
+   property onmouseevent: mouseeventty read fonmouseevent write fonmouseevent;
+   property onbeforepaint: painteventty read fonbeforepaint write fonbeforepaint;
+   property onpaintbackground: painteventty read fonpaintbackground 
+                                                  write fonpaintbackground;
+   property onpaint: painteventty read fonpaint write fonpaint;
+   property onafterpaint: painteventty read fonafterpaint write fonafterpaint;
+ end;
+  
  labeloptionty = (lao_nogray);
  labeloptionsty = set of labeloptionty;
  
@@ -461,6 +507,12 @@ begin
  else begin
   include(fwidgetstate1,ws1_nodesignframe);
  end;
+ if bo_shortcutcaption in avalue then begin
+  setactionoptions(iactionlink(self),factioninfo.options + [mao_shortcutcaption]);
+ end
+ else begin
+  setactionoptions(iactionlink(self),factioninfo.options - [mao_shortcutcaption]);
+ end;
 end;
 
 procedure tcustombutton.synctofontheight;
@@ -472,9 +524,6 @@ end;
 procedure tcustombutton.doexecute;
 begin
  doactionexecute(self,factioninfo);
-// if assigned(factioninfo.onexecute) then begin
-//  factioninfo.onexecute(self);
-// end;
  if fmodalresult <> mr_none then begin
   window.modalresult:= fmodalresult;
  end;
@@ -497,7 +546,8 @@ procedure tcustombutton.doshortcut(var info: keyeventinfoty; const sender: twidg
 begin
  if not (es_processed in info.eventstate) then begin
   if (bo_executeonshortcut in options) and
-           mserichstring.checkshortcut(info,factioninfo.caption1,true) and
+           (checkshortcutcode(factioninfo.shortcut,info) or
+           mserichstring.checkshortcut(info,factioninfo.caption1,true)) and
            not (ss_disabled in finfo.state) or
      (finfo.state * [ss_invisible,ss_disabled,ss_default] = [ss_default]) and
        ((info.key = key_return) or 
@@ -667,6 +717,16 @@ end;
 function tcustombutton.ishintstored: boolean;
 begin
  result:= isactionhintstored(factioninfo);
+end;
+
+procedure tcustombutton.setshortcut(const avalue: shortcutty);
+begin
+ setactionshortcut(iactionlink(self),avalue);
+end;
+
+function tcustombutton.isshortcutstored: boolean;
+begin
+ result:= isactionshortcutstored(factioninfo);
 end;
 
 function tcustombutton.getstate: actionstatesty;
@@ -886,6 +946,133 @@ begin
  result:= iactionlink(self);
 end;
 }
+{ trichbutton }
+
+destructor trichbutton.destroy;
+begin
+ inherited;
+ ffaceactive.free;
+ ffacemouse.free;
+ ffaceclicked.free;
+end;
+
+function trichbutton.getfaceactive: tcustomface;
+begin
+ getoptionalobject(ffaceactive,{$ifdef FPC}@{$endif}createfaceactive);
+ result:= ffaceactive;
+end;
+
+procedure trichbutton.setfaceactive(const avalue: tcustomface);
+begin
+ setoptionalobject(avalue,ffaceactive,{$ifdef FPC}@{$endif}createfaceactive);
+ invalidate;
+end;
+
+function trichbutton.getfacemouse: tcustomface;
+begin
+ getoptionalobject(ffacemouse,{$ifdef FPC}@{$endif}createfacemouse);
+ result:= ffacemouse;
+end;
+
+procedure trichbutton.setfacemouse(const avalue: tcustomface);
+begin
+ setoptionalobject(avalue,ffacemouse,{$ifdef FPC}@{$endif}createfacemouse);
+ invalidate;
+end;
+
+function trichbutton.getfaceclicked: tcustomface;
+begin
+ getoptionalobject(ffaceclicked,{$ifdef FPC}@{$endif}createfaceclicked);
+ result:= ffaceclicked;
+end;
+
+procedure trichbutton.setfaceclicked(const avalue: tcustomface);
+begin
+ setoptionalobject(avalue,ffaceclicked,{$ifdef FPC}@{$endif}createfaceclicked);
+ invalidate;
+end;
+
+procedure trichbutton.createfaceactive;
+begin
+ ffaceactive:= tface.create(iface(self));
+end;
+
+procedure trichbutton.createfacemouse;
+begin
+ ffacemouse:= tface.create(iface(self));
+end;
+
+procedure trichbutton.createfaceclicked;
+begin
+ ffaceclicked:= tface.create(iface(self));
+end;
+
+function trichbutton.getactface: tcustomface;
+begin
+ result:= inherited getactface;
+ if active then begin
+  if ffaceactive <> nil then begin
+   result:= ffaceactive;
+  end;
+ end
+ else begin
+  if ws_clicked in fwidgetstate then begin
+   if ffaceclicked <> nil then begin
+    result:= ffaceclicked;
+   end;
+  end
+  else begin
+   if ws_mouseinclient in fwidgetstate then begin
+    if ffacemouse <> nil then begin
+     result:= ffacemouse;
+    end;    
+   end;
+  end;
+ end;
+end;
+
+procedure trichbutton.dobeforepaint(const canvas: tcanvas);
+begin
+ inherited;
+ if canevent(tmethod(fonbeforepaint)) then begin
+  fonbeforepaint(self,canvas);
+ end;
+end;
+
+procedure trichbutton.dopaintbackground(const canvas: tcanvas);
+begin
+ inherited;
+ if canevent(tmethod(fonpaintbackground)) then begin
+  fonpaintbackground(self,canvas);
+ end;
+end;
+
+procedure trichbutton.doonpaint(const canvas: tcanvas);
+begin
+ inherited;
+ if canevent(tmethod(fonpaint)) then begin
+  fonpaint(self,canvas);
+ end;
+end;
+
+procedure trichbutton.doafterpaint(const canvas: tcanvas);
+begin
+ inherited;
+ if canevent(tmethod(fonafterpaint)) then begin
+  fonafterpaint(self,canvas);
+ end;
+end;
+
+procedure trichbutton.mouseevent(var info: mouseeventinfoty);
+begin
+ if canevent(tmethod(fonmouseevent)) then begin
+  fonmouseevent(self,info);
+ end;
+ if not (es_processed in info.eventstate) then begin
+  inherited;
+ end;
+end;
+
 { tstockglyphbutton }
 
 constructor tstockglyphbutton.create(aowner: tcomponent);

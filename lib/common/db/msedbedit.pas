@@ -542,10 +542,16 @@ type
    property captionpos;
    property imagelist;
    property imagenr;
+   property imagenrdisabled;
+   property imageoffset;
+   property imageoffsetdisabled;
+   property imagenums;
    property options;
    property focusrectdist;
    property onexecute;
    property onsetvalue;
+   property value;
+   property valuedefault;
    property min; 
    property max;
  end;

@@ -581,6 +581,8 @@ type
    fimageoffset: integer;
    fimagenums: tintegerarrayprop;
    fimagenr: integer;
+   fimagenrdisabled: integer;
+   fimageoffsetdisabled: integer;
    procedure setcolorglyph(const avalue: colorty);
    procedure setvaluefaces(const avalue: tvaluefacearrayprop);
    procedure setcaption(const avalue: captionty);
@@ -589,6 +591,8 @@ type
    procedure setimagenr(const avalue: integer);
    procedure setimageoffset(const avalue: integer);
    procedure setimagenums(const avalue: tintegerarrayprop);
+   procedure setimagenrdisable(const avalue: integer);
+   procedure setimageoffsetdisabled(const avalue: integer);
   protected
    finfo: shapeinfoty;
    procedure setnullvalue;
@@ -607,7 +611,7 @@ type
    procedure internalcreateframe; override;
    procedure setgridintf(const intf: iwidgetgrid); override;
    function checkfocusshortcut(var info: keyeventinfoty): boolean; override;
-   function actualimagenr(const avalue: integer): integer;
+   procedure setactualimagenr(const avalue: integer);
    procedure setoptions(const avalue: buttonoptionsty); override;
 //   procedure setoptionswidget(const avalue: optionswidgetty); override;
   public
@@ -625,7 +629,12 @@ type
    property imagelist: timagelist read finfo.imagelist write setimagelist;
    property imagenr: integer read fimagenr 
                                          write setimagenr default -1;
+   property imagenrdisabled: integer read fimagenrdisabled
+                                         write setimagenrdisable default -2;
+                      //-1 = none, -2 = grayed, -3 = imageoffsetdisabled
    property imageoffset: integer read fimageoffset write setimageoffset default 0;
+   property imageoffsetdisabled: integer read fimageoffsetdisabled
+                                 write setimageoffsetdisabled default 0;
    property imagenums: tintegerarrayprop read fimagenums write setimagenums;
 
    property options;
@@ -648,7 +657,9 @@ type
    property captionpos;
    property imagelist;
    property imagenr;
+   property imagenrdisabled;
    property imageoffset;
+   property imageoffsetdisabled;
    property imagenums;
    property options;
    property focusrectdist;
@@ -684,46 +695,6 @@ type
    property max;
  end; 
  
- trichbutton = class(tdatabutton)
-  private
-   ffaceactive: tcustomface;
-   ffacemouse: tcustomface;
-   ffaceclicked: tcustomface;
-   fonbeforepaint: painteventty;
-   fonpaintbackground: painteventty;
-   fonpaint: painteventty;
-   fonafterpaint: painteventty;
-   fonmouseevent: mouseeventty;
-   function getfaceactive: tcustomface;
-   procedure setfaceactive(const avalue: tcustomface);
-   function getfacemouse: tcustomface;
-   procedure setfacemouse(const avalue: tcustomface);
-   function getfaceclicked: tcustomface;
-   procedure setfaceclicked(const avalue: tcustomface);
-   procedure createfaceactive;
-   procedure createfacemouse;
-   procedure createfaceclicked;
-  protected
-   function getactface: tcustomface; override;
-   procedure dobeforepaint(const canvas: tcanvas); override;
-   procedure dopaintbackground(const canvas: tcanvas); override;
-   procedure doonpaint(const canvas: tcanvas); override;
-   procedure doafterpaint(const canvas: tcanvas); override;
-   procedure mouseevent(var info: mouseeventinfoty); override;
-  public
-   destructor destroy; override;
-  published
-   property faceactive: tcustomface read getfaceactive write setfaceactive;
-   property facemouse: tcustomface read getfacemouse write setfacemouse;
-   property faceclicked: tcustomface read getfaceclicked write setfaceclicked;
-   property onmouseevent: mouseeventty read fonmouseevent write fonmouseevent;
-   property onbeforepaint: painteventty read fonbeforepaint write fonbeforepaint;
-   property onpaintbackground: painteventty read fonpaintbackground 
-                                                  write fonpaintbackground;
-   property onpaint: painteventty read fonpaint write fonpaint;
-   property onafterpaint: painteventty read fonafterpaint write fonafterpaint;
- end;
-  
  tcustomdataicon = class(tcustomintegergraphdataedit)
  //if value = -1 then blank else
  // if value < 0 then imagenums[0..30] are painted if bit[0..30] is 1
@@ -2165,6 +2136,7 @@ begin
  inherited;
  fimagenums:= tintegerarrayprop.create;
  fimagenr:= -1;
+ fimagenrdisabled:= -2;
  fvalue:= -1;
  fvaluedefault:= -1;
  fmin:= -1;
@@ -2281,15 +2253,31 @@ begin
  end;
 end;
 
-function tcustomdatabutton.actualimagenr(const avalue: integer): integer;
+procedure tcustomdatabutton.setactualimagenr(const avalue: integer);
 begin
- if (avalue >= 0) and (avalue < fimagenums.count) then begin
-  result:= fimagenums[avalue];
- end
- else begin
-  result:= fimagenr;
+ with finfo do begin 
+  if (avalue >= 0) and (avalue < fimagenums.count) then begin
+   imagenr:= fimagenums[avalue];
+  end
+  else begin
+   imagenr:= fimagenr;
+  end;
+  if ss_disabled in finfo.state then begin
+   if fimagenrdisabled = -3 then begin
+    if imagenr >= 0 then begin
+     imagenrdisabled:= imagenr + fimageoffsetdisabled;
+    end;
+   end
+   else begin
+    imagenrdisabled:= fimagenrdisabled;
+   end;
+  end
+  else begin
+   if imagenr >= 0 then begin
+    inc(imagenr,fimageoffset);
+   end;
+  end;
  end;
- inc(result,fimageoffset);
 end;
 
 procedure tcustomdatabutton.paintglyph(const canvas: tcanvas; const avalue;
@@ -2310,6 +2298,7 @@ var
  dimbefore: rectty;
 begin
  finfo.colorglyph:= fcolorglyph;
+ finfo.imagenrdisabled:= fimagenrdisabled;
  if (@avalue <> nil) then begin
   finfo.face:= actualface(integer(avalue));
   statebefore:= finfo.state;
@@ -2319,14 +2308,14 @@ begin
   if pcellinfoty(canvas.drawinfopo)^.ismousecell then begin
    include(finfo.state,ss_mouse);
   end;
-  finfo.imagenr:= actualimagenr(integer(avalue));
+  setactualimagenr(integer(avalue));
   drawbutton(canvas,finfo);
   finfo.state:= statebefore;
   finfo.dim:= dimbefore;
  end
  else begin
   finfo.face:= actualface(fvalue);
-  finfo.imagenr:= actualimagenr(fvalue);
+  setactualimagenr(fvalue);
   drawbutton(canvas,finfo);
  end;
 end;
@@ -2386,6 +2375,14 @@ begin
  end;
 end;
 
+procedure tcustomdatabutton.setimagenrdisable(const avalue: integer);
+begin
+ if avalue <> fimagenrdisabled then begin
+  fimagenrdisabled:= avalue;
+  formatchanged;
+ end;
+end;
+
 procedure tcustomdatabutton.setnullvalue;
 begin
  value:= -1;
@@ -2419,6 +2416,14 @@ begin
  end;
 end;
 
+procedure tcustomdatabutton.setimageoffsetdisabled(const avalue: integer);
+begin
+ if fimageoffsetdisabled <> avalue then begin
+  fimageoffsetdisabled := avalue;
+  formatchanged;
+ end;
+end;
+
 procedure tcustomdatabutton.setimagenums(const avalue: tintegerarrayprop);
 begin
  fimagenums.assign(avalue);
@@ -2427,11 +2432,12 @@ end;
 procedure tcustomdatabutton.setoptions(const avalue: buttonoptionsty);
 begin
  if foptions <> avalue then begin
-  foptions:= avalue;
-  buttonoptionstoshapestate(avalue,finfo.state);
+  foptions:= avalue - [bo_shortcutcaption];
+  buttonoptionstoshapestate(foptions,finfo.state);
   invalidate;
  end;
 end;
+
 {
 procedure tcustomdatabutton.setoptionswidget(const avalue: optionswidgetty);
 begin
@@ -2842,133 +2848,6 @@ end;
 procedure tcustomprogressbar.writeformat(writer: twriter);
 begin
  writer.writewidestring(fformat);
-end;
-
-{ trichbutton }
-
-destructor trichbutton.destroy;
-begin
- inherited;
- ffaceactive.free;
- ffacemouse.free;
- ffaceclicked.free;
-end;
-
-function trichbutton.getfaceactive: tcustomface;
-begin
- getoptionalobject(ffaceactive,{$ifdef FPC}@{$endif}createfaceactive);
- result:= ffaceactive;
-end;
-
-procedure trichbutton.setfaceactive(const avalue: tcustomface);
-begin
- setoptionalobject(avalue,ffaceactive,{$ifdef FPC}@{$endif}createfaceactive);
- invalidate;
-end;
-
-function trichbutton.getfacemouse: tcustomface;
-begin
- getoptionalobject(ffacemouse,{$ifdef FPC}@{$endif}createfacemouse);
- result:= ffacemouse;
-end;
-
-procedure trichbutton.setfacemouse(const avalue: tcustomface);
-begin
- setoptionalobject(avalue,ffacemouse,{$ifdef FPC}@{$endif}createfacemouse);
- invalidate;
-end;
-
-function trichbutton.getfaceclicked: tcustomface;
-begin
- getoptionalobject(ffaceclicked,{$ifdef FPC}@{$endif}createfaceclicked);
- result:= ffaceclicked;
-end;
-
-procedure trichbutton.setfaceclicked(const avalue: tcustomface);
-begin
- setoptionalobject(avalue,ffaceclicked,{$ifdef FPC}@{$endif}createfaceclicked);
- invalidate;
-end;
-
-procedure trichbutton.createfaceactive;
-begin
- ffaceactive:= tface.create(iface(self));
-end;
-
-procedure trichbutton.createfacemouse;
-begin
- ffacemouse:= tface.create(iface(self));
-end;
-
-procedure trichbutton.createfaceclicked;
-begin
- ffaceclicked:= tface.create(iface(self));
-end;
-
-function trichbutton.getactface: tcustomface;
-begin
- result:= inherited getactface;
- if active then begin
-  if ffaceactive <> nil then begin
-   result:= ffaceactive;
-  end;
- end
- else begin
-  if ws_clicked in fwidgetstate then begin
-   if ffaceclicked <> nil then begin
-    result:= ffaceclicked;
-   end;
-  end
-  else begin
-   if ws_mouseinclient in fwidgetstate then begin
-    if ffacemouse <> nil then begin
-     result:= ffacemouse;
-    end;    
-   end;
-  end;
- end;
-end;
-
-procedure trichbutton.dobeforepaint(const canvas: tcanvas);
-begin
- inherited;
- if canevent(tmethod(fonbeforepaint)) then begin
-  fonbeforepaint(self,canvas);
- end;
-end;
-
-procedure trichbutton.dopaintbackground(const canvas: tcanvas);
-begin
- inherited;
- if canevent(tmethod(fonpaintbackground)) then begin
-  fonpaintbackground(self,canvas);
- end;
-end;
-
-procedure trichbutton.doonpaint(const canvas: tcanvas);
-begin
- inherited;
- if canevent(tmethod(fonpaint)) then begin
-  fonpaint(self,canvas);
- end;
-end;
-
-procedure trichbutton.doafterpaint(const canvas: tcanvas);
-begin
- inherited;
- if canevent(tmethod(fonafterpaint)) then begin
-  fonafterpaint(self,canvas);
- end;
-end;
-
-procedure trichbutton.mouseevent(var info: mouseeventinfoty);
-begin
- if canevent(tmethod(fonmouseevent)) then begin
-  fonmouseevent(self,info);
- end;
- if not (es_processed in info.eventstate) then begin
-  inherited;
- end;
 end;
 
 end.

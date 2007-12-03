@@ -805,6 +805,7 @@ destructor destroy; override;
                    bo_executedefaultonenterkey,
                    bo_asyncexecute,
                    bo_focusonshortcut, //for tcustombutton
+                   bo_shortcutcaption,
                    bo_flat,bo_noanim,bo_nofocusrect,bo_nodefaultrect,
                    bo_nodefaultframeactive
                    );
