@@ -2507,8 +2507,6 @@ object projectoptionsfo: tprojectoptionsfo
           frame.levelo = 0
           frame.colorclient = -2147483645
           frame.localprops = [frl_levelo, frl_colorclient]
-          frame.button.color = -1879048187
-          frame.buttonellipse.color = -1879048187
           frame.buttonellipse.imagenr = 17
           frame.dummy = 0
           taborder = 2
