@@ -1604,7 +1604,7 @@ end;
 
 procedure tprojectoptionsfo.signumtoonsetvalue(const sender: TObject; var avalue: Integer; var accept: Boolean);
 begin
- if avalue < signum.value then begin
+ if avalue <= signum.value then begin
   signum.value:= avalue;
   signame.value:= avalue;
  end

@@ -3176,7 +3176,8 @@ end;
 procedure tcustomselector.dobeforedropdown;
 begin
  inherited;
- fdropdownenums:= nil;
+// fdropdownenums:= nil;
+ fdropdownenums:= copy(enums);
  getdropdowninfo(fdropdownenums,fdropdownitems);
  tdropdowncols1(fdropdownitems).fitemindex:= getindex1(fvalue1,fdropdownenums);
 end;
