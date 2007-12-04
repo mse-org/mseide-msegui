@@ -88,6 +88,7 @@ type
    procedure itemchanged(sender: tdatalist; index: integer);
              //sender = nil -> col undefined
    function maxrowcount: integer;
+   function minrowcount: integer;
    function getcolclass: dropdowncolclassty; virtual;
    procedure checkrowindex(const aindex: integer);
   public
@@ -489,6 +490,24 @@ begin
  end;
 end;
 
+function tdropdowncols.minrowcount: integer;
+var
+ int1,int2: integer;
+begin
+ if count > 0 then begin
+  result:= bigint;
+  for int1:= 0 to count - 1 do begin
+   int2:= items[int1].count;
+   if int2 < result then begin
+    result:= int2;
+   end;
+  end;
+ end
+ else begin
+  result:= 0;
+ end;
+end;
+
 procedure tdropdowncols.setcount1(acount: integer; doinit: boolean);
 begin
  if not (aps_destroying in fstate) and (fowner <> nil) and
@@ -502,7 +521,9 @@ function tdropdowncols.getrow(const aindex: integer): msestringarty;
 var
  int1: integer;
 begin
- checkindex(aindex);
+ if (aindex < 0) or (aindex >= minrowcount) then begin
+  tlist.error({$ifndef fpc}@{$endif}slistindexerror, aindex);
+ end;
  setlength(result,count);
  for int1:= 0 to high(fitems) do begin
   result[int1]:= pmsestring(tdropdowncol(fitems[int1]).fdatapo +
