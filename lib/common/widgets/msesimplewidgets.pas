@@ -545,22 +545,19 @@ end;
 procedure tcustombutton.doshortcut(var info: keyeventinfoty; const sender: twidget);
 begin
  if not (es_processed in info.eventstate) then begin
-  if (bo_executeonshortcut in options) and
-           (checkshortcutcode(factioninfo.shortcut,info) or
-           mserichstring.checkshortcut(info,factioninfo.caption1,true)) and
-           not (ss_disabled in finfo.state) or
-     (finfo.state * [ss_invisible,ss_disabled,ss_default] = [ss_default]) and
+  if checkshortcutcode(factioninfo.shortcut,info) or
+    (bo_executeonshortcut in options) and not (ss_disabled in finfo.state) and
+           mserichstring.checkshortcut(info,factioninfo.caption1,true) or
+    (finfo.state * [ss_invisible,ss_disabled,ss_default] = [ss_default]) and
        ((info.key = key_return) or 
-               (info.key = key_enter) and 
-               (bo_executedefaultonenterkey in options)) and 
+        (info.key = key_enter) and (bo_executedefaultonenterkey in options)) and 
        (info.shiftstate = []) then begin
+   exclude(info.eventstate,es_processed); //set by checkshortcut
+   if checkfocusshortcut(info) then begin
+    setfocus;
+   end;
    include(info.eventstate,es_processed);
-//   if (fmodalresult = mr_cancel) or window.candefocus and isenabled then begin
    internalexecute;
-//   end
-//   else begin
-//    exclude(info.eventstate,es_processed);
-//   end;
   end;
   if not (es_processed in info.eventstate) then begin
    inherited;
