@@ -966,9 +966,18 @@ var
  db: tcustomsqlconnection;
  trans: tsqltransaction;
  str1: msestring;
+ bo1: boolean;
 begin
  if not isprepared then begin
   checkdatabase(name,fdatabase);
+  bo1:= sro_utf8 in foptions;
+  fdatabase.updateutf8(bo1);
+  if bo1 then begin
+   foptions:= foptions + [sro_utf8];
+  end
+  else begin
+   foptions:= foptions - [sro_utf8];
+  end;  
   checktransaction(name,ftransaction);
   str1:= trimright(fsql.text);
   if str1 = '' then begin
