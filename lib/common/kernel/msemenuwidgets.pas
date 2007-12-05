@@ -1762,7 +1762,11 @@ end;
 procedure tmainmenuwidget.initnewcomponent(const ascale: real);
 begin
  inherited;
- fmenucomp.menu.submenu.insert(0,['Item0'],[],[],[]);
+ with fmenucomp.menu.submenu do begin
+  if count = 0 then begin
+   insert(0,['Item0'],[],[],[]);
+  end;
+ end;
  bounds_cx:= 100;
 end;
 
