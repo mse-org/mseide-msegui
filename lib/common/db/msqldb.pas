@@ -52,7 +52,7 @@ type
   protected
    procedure defineproperties(filer: tfiler); override;
   public
-   property text1: msestring read gettext write settext;
+   property text: msestring read gettext write settext;
  end;
   
   TSQLHandle = Class(TObject)
@@ -1898,7 +1898,7 @@ begin
   UnPrepare;
   if (FSQL <> nil) then
     begin
-    FParams.ParseSQL(FSQL.Text1,True);
+    FParams.ParseSQL(FSQL.Text,True);
     If Assigned(FMasterLink) then
       FMasterLink.RefreshParamNames;
     end;
@@ -2045,7 +2045,7 @@ begin
   end;
   fcursor.ftrans:= sqltr.handle;
   
-  FSQLBuf:= TrimRight(FSQL.Text1);
+  FSQLBuf:= TrimRight(FSQL.Text);
 
   if FSQLBuf = '' then begin
     DatabaseError(SErrNoStatement);
@@ -3411,7 +3411,7 @@ end;
 
 procedure tcustomsqlstatement.dosqlchange(const sender: tobject);
 begin
- fparams.parsesql(fsql.text1,true);
+ fparams.parsesql(fsql.text,true);
 end;
 
 procedure tcustomsqlstatement.settransaction1(const avalue: tsqltransaction);
@@ -3556,7 +3556,7 @@ begin
  dobeforeexecute(adatabase,atransaction);
  try
   updateparams(fparams,isutf8(adatabase));
-  str1:= fsql.text1;
+  str1:= fsql.text;
   ar1:= splitsql(str1);
   if high(ar1) < 0 then begin
    databaseerror(serrnostatement,self);
@@ -3629,7 +3629,7 @@ begin
   end;
   fdatabase.PrepareStatement(Fcursor,ftransaction,str1,FParams);
   }
-  fdatabase.PrepareStatement(Fcursor,ftransaction,fsql.text1,FParams);
+  fdatabase.PrepareStatement(Fcursor,ftransaction,fsql.text,FParams);
  end;
 end;
 

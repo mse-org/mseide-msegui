@@ -199,7 +199,7 @@ type
   
  tsqlresult = class(tmsecomponent,isqlpropertyeditor,isqlclient,itransactionclient)
   private
-   fsql: tstringlist;
+   fsql: tsqlstringlist;
    fopenafterread: boolean;
    factive: boolean;
    fdatabase: tcustomsqlconnection;
@@ -213,14 +213,14 @@ type
    foptions: sqlresultoptionsty;
    fbeforeopen: tmsesqlscript;
    fafteropen: tmsesqlscript;
-   procedure setsql(const avalue: tstringlist);
+   procedure setsql(const avalue: tsqlstringlist);
    function getactive: boolean;
    procedure setactive(avalue: boolean);
    procedure setdatabase1(const avalue: tcustomsqlconnection);
    function getsqltransaction: tsqltransaction;
    procedure setsqltransaction(const avalue: tsqltransaction);
    procedure setparams(const avalue: tmseparams);
-   procedure onchangesql(sender : tobject);
+   procedure onchangesql(const sender : tobject);
    procedure setbeforeopen(const avalue: tmsesqlscript);
    procedure setafteropen(const avalue: tmsesqlscript);
    procedure changed;
@@ -262,7 +262,7 @@ type
   published
    property params : tmseparams read fparams write setparams; //before sql property
 
-   property sql: tstringlist read fsql write setsql;
+   property sql: tsqlstringlist read fsql write setsql;
    property beforeopen: tmsesqlscript read fbeforeopen write setbeforeopen;
    property afteropen: tmsesqlscript read fafteropen write setafteropen;
    property database: tcustomsqlconnection read fdatabase write setdatabase1;
@@ -337,22 +337,22 @@ type
 
 //empty variant returned for null fields
 procedure getsqlresult(out avalue: variant; const atransaction: tsqltransaction;
-                      const asql: string; const aparams: array of variant); overload;
+                      const asql: msestring; const aparams: array of variant); overload;
            //first field of first row
 procedure getsqlresult(out avalue: variantarty; const atransaction: tsqltransaction;
-                      const asql: string; const aparams: array of variant); overload;
+                      const asql: msestring; const aparams: array of variant); overload;
            //first row
 procedure getsqlresult(out avalue: variantararty; const atransaction: tsqltransaction;
-                      const asql: string; const aparams: array of variant); overload;
+                      const asql: msestring; const aparams: array of variant); overload;
            //whole resultset
 function getsqlresultvar( const atransaction: tsqltransaction;
-                      const asql: string; 
+                      const asql: msestring; 
                       const aparams: array of variant): variant;
 function getsqlresultvarar( const atransaction: tsqltransaction;
-                      const asql: string; 
+                      const asql: msestring; 
                       const aparams: array of variant): variantarty;
 function getsqlresultvararar( const atransaction: tsqltransaction;
-                      const asql: string; 
+                      const asql: msestring; 
                       const aparams: array of variant): variantararty;
                       
 implementation
@@ -380,7 +380,7 @@ const
  SVariant = 'Variant';
  SString = 'String';
 
-function dogetsqlresult(const atransaction: tsqltransaction; const asql: string;
+function dogetsqlresult(const atransaction: tsqltransaction; const asql: msestring;
                         const aparams: array of variant): tsqlresult;           
 var
  int1: integer;
@@ -401,7 +401,7 @@ begin
 end;
                         
 procedure getsqlresult(out avalue: variant; const atransaction: tsqltransaction;
-                     const asql: string; const aparams: array of variant); overload;
+                     const asql: msestring; const aparams: array of variant); overload;
            //first field of first row
 var
  sqlresult: tsqlresult;
@@ -416,7 +416,7 @@ begin
 end;
 
 procedure getsqlresult(out avalue: variantarty; const atransaction: tsqltransaction;
-                      const asql: string; const aparams: array of variant); overload;
+                      const asql: msestring; const aparams: array of variant); overload;
            //first row
 var
  sqlresult: tsqlresult;
@@ -430,7 +430,7 @@ begin
 end;
 
 procedure getsqlresult(out avalue: variantararty; const atransaction: tsqltransaction;
-                      const asql: string; const aparams: array of variant); overload;
+                      const asql: msestring; const aparams: array of variant); overload;
            //whole resultset
 var
  sqlresult: tsqlresult;
@@ -444,21 +444,21 @@ begin
 end;
 
 function getsqlresultvar( const atransaction: tsqltransaction;
-                      const asql: string; 
+                      const asql: msestring; 
                       const aparams: array of variant): variant;
 begin
  getsqlresult(result,atransaction,asql,aparams);
 end;
 
 function getsqlresultvarar( const atransaction: tsqltransaction;
-                      const asql: string; 
+                      const asql: msestring; 
                       const aparams: array of variant): variantarty;
 begin
  getsqlresult(result,atransaction,asql,aparams);
 end;
 
 function getsqlresultvararar( const atransaction: tsqltransaction;
-                      const asql: string; 
+                      const asql: msestring; 
                       const aparams: array of variant): variantararty;
 begin
  getsqlresult(result,atransaction,asql,aparams);
@@ -824,7 +824,7 @@ constructor tsqlresult.create(aowner: tcomponent);
 begin
  fparams:= tmseparams.create(self);
  ffielddefs:= tsqlresultfielddefs.create(nil);
- fsql:= tstringlist.create;
+ fsql:= tsqlstringlist.create;
  fsql.onchange:= @onchangesql;
  fcols:= tdbcols.create(@getname);
  inherited;
@@ -842,7 +842,7 @@ begin
  fcols.free;
 end;
 
-procedure tsqlresult.setsql(const avalue: tstringlist);
+procedure tsqlresult.setsql(const avalue: tsqlstringlist);
 begin
  fsql.assign(avalue);
 end;
@@ -965,7 +965,7 @@ procedure tsqlresult.prepare;
 var
  db: tcustomsqlconnection;
  trans: tsqltransaction;
- str1: ansistring;
+ str1: msestring;
 begin
  if not isprepared then begin
   checkdatabase(name,fdatabase);
@@ -1019,7 +1019,7 @@ begin
  end;
 end;
 
-procedure tsqlresult.onchangesql(sender: tobject);
+procedure tsqlresult.onchangesql(const sender: tobject);
 var
  bo1: boolean;
 begin
