@@ -45,7 +45,7 @@ type
  tmsesqlquery = class(tsqlquery,imselocate,idscontroller,igetdscontroller,
                               isqlpropertyeditor)
   private
-   fsqlonchangebefore: tnotifyevent;
+   fsqlonchangebefore: notifyeventty;
    fcontroller: tdscontroller;
    fmstate: sqlquerystatesty;
    fonapplyrecupdate: applyrecupdateeventty;
@@ -63,7 +63,7 @@ type
    procedure checkcanupdate;
   protected
    procedure updateindexdefs; override;
-   procedure sqlonchange(sender: tobject);
+   procedure sqlonchange(const sender: tobject);
    procedure loaded; override;
    procedure internalopen; override;
    procedure internalclose; override;
@@ -329,7 +329,7 @@ begin
  fcontroller.appendrecord(values);
 end;
 
-procedure tmsesqlquery.sqlonchange(sender: tobject);
+procedure tmsesqlquery.sqlonchange(const sender: tobject);
 begin
  if (csdesigning in componentstate) and active then begin
   active:= false;

@@ -133,8 +133,9 @@ type
     Procedure DeAllocateCursorHandle(var cursor : TSQLCursor); override;
     Function AllocateTransactionHandle : TSQLHandle; override;
 
-    procedure PrepareStatement(cursor: TSQLCursor; ATransaction: TSQLTransaction;
-                         buf: string; AParams: TmseParams); override;
+    procedure preparestatement(const cursor: tsqlcursor; 
+                  const atransaction : tsqltransaction;
+                  const asql: msestring; const aparams : tmseparams); override;
     procedure UnPrepareStatement(cursor : TSQLCursor); override;
     procedure FreeFldBuffers(cursor : TSQLCursor); override;
     procedure Execute(const cursor: TSQLCursor;
@@ -630,8 +631,9 @@ begin
   result := TIBTrans.create;
 end;
 
-procedure TIBConnection.PrepareStatement(cursor: TSQLCursor;
-          ATransaction : TSQLTransaction;buf : string; AParams : TmseParams);
+procedure tibconnection.preparestatement(const cursor: tsqlcursor; 
+                  const atransaction : tsqltransaction;
+                  const asql: msestring; const aparams : tmseparams);
 
 var dh    : pointer;
     tr    : pointer;
@@ -641,6 +643,7 @@ var dh    : pointer;
  TransLen: word;
  TransType: TFieldType;
  lenset: boolean;
+ str1: string;
 
 begin
   with cursor as TIBcursor do
@@ -650,13 +653,14 @@ begin
       CheckError('PrepareStatement', Status);
     tr := aTransaction.Handle;
     
-    if assigned(AParams) and (AParams.count > 0) then
-    {$ifdef mse_FPC_2_2}
-      buf := AParams.ParseSQL(buf,false,false,false,psInterbase,paramBinding);
-    {$else}
-      buf := AParams.ParseSQL(buf,false,psInterbase,paramBinding);
-    {$endif}
-    if isc_dsql_prepare(@Status, @tr, @Statement, 0, @Buf[1],
+    if assigned(AParams) and (AParams.count > 0) then begin
+     str1:= todbstring(AParams.ParseSQL(asql,false,false,false,psInterbase,
+                              paramBinding));
+    end
+    else begin
+     str1:= todbstring(asql);
+    end;
+    if isc_dsql_prepare(@Status, @tr, @Statement, 0, @str1[1],
                         Dialect, nil) <> 0 then begin
      isc_dsql_free_statement(@fstatus, @statement, dsql_drop);
      CheckError('PrepareStatement', Status);

@@ -18,7 +18,7 @@ unit modbcconn;
 interface
 
 uses
-  Classes, SysUtils, msqldb, db, odbcsqldyn,msetypes,msedb;
+  Classes, SysUtils, msqldb, db, odbcsqldyn,msetypes,msedb,msestrings;
 
 type
 
@@ -80,8 +80,10 @@ type
     procedure DeAllocateCursorHandle(var cursor:TSQLCursor); override;
     function AllocateTransactionHandle:TSQLHandle; override;
     // - Statement handling
-    procedure PrepareStatement(cursor:TSQLCursor; ATransaction:TSQLTransaction;
-                       buf:string; AParams:TmseParams); override;
+
+    procedure preparestatement(const cursor: tsqlcursor; 
+                  const atransaction : tsqltransaction;
+                  const asql: msestring; const aparams : tmseparams); override;
     procedure UnPrepareStatement(cursor:TSQLCursor); override;
     // - Transaction handling
     function GetTransactionHandle(trans:TSQLHandle):pointer; override;
@@ -443,10 +445,12 @@ begin
   Result:=nil; // not yet supported; will move connection handles to transaction handles later
 end;
 
-procedure TODBCConnection.PrepareStatement(cursor: TSQLCursor;
-               ATransaction: TSQLTransaction; buf: string; AParams: TmseParams);
+procedure todbcconnection.preparestatement(const cursor: tsqlcursor; 
+                  const atransaction : tsqltransaction;
+                  const asql: msestring; const aparams : tmseparams);
 var
   ODBCCursor:TODBCCursor;
+  str1: string;
 begin
   ODBCCursor:=cursor as TODBCCursor;
 
@@ -455,20 +459,20 @@ begin
   //       ODBCCursor.FParamIndex will map th i-th ? token in the (modified) query to an index for AParams
 
   // Parse the SQL and build FParamIndex
-  if assigned(AParams) and (AParams.count > 0) then
-  {$ifdef mse_FPC_2_2}
-    buf := AParams.ParseSQL(buf,false,false,false,psInterbase,ODBCCursor.FParamIndex);
-  {$else}
-    buf := AParams.ParseSQL(buf,false,psInterbase,ODBCCursor.FParamIndex);
-  {$endif}
-
+  if assigned(AParams) and (AParams.count > 0) then begin
+   str1:= todbstring(AParams.ParseSQL(asql,false,false,false,psInterbase,
+                            ODBCCursor.FParamIndex));
+  end
+  else begin
+   str1:= todbstring(asql);
+  end;
   // prepare statement
   ODBCCheckResult(
-    SQLPrepare(ODBCCursor.FSTMTHandle, PChar(buf), Length(buf)),
+    SQLPrepare(ODBCCursor.FSTMTHandle, PChar(str1), Length(str1)),
     SQL_HANDLE_STMT, ODBCCursor.FSTMTHandle, 'Could not prepare statement.'
   );
 
-  ODBCCursor.FQuery:=Buf;
+  ODBCCursor.FQuery:= str1;
 end;
 
 procedure TODBCConnection.UnPrepareStatement(cursor: TSQLCursor);

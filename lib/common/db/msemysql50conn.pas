@@ -16,7 +16,6 @@ uses
 type
  tmsemysql50connection = class(tmysql50connection,idbcontroller)
   private
-   fcontroller: tdbcontroller;
    function getdatabasename: filenamety;
    procedure setdatabasename(const avalue: filenamety);
    procedure loaded; override;
@@ -24,21 +23,12 @@ type
    function getconnected: boolean;
    procedure setconnected(const avalue: boolean);
   protected
-   //idbcontroller
-   procedure setinheritedconnected(const avalue: boolean);
-   function readsequence(const sequencename: string): string;
-   function writesequence(const sequencename: string;
-                    const avalue: largeint): string;
    function CreateBlobStream(const Field: TField; const Mode: TBlobStreamMode;
                          const acursor: tsqlcursor): TStream; override;
-   procedure updateutf8(var autf8: boolean);                    
   public
-   constructor create(aowner: tcomponent); override;
-   destructor destroy; override;
   published
    property DatabaseName: filenamety read getdatabasename write setdatabasename;
    property Connected: boolean read getconnected write setconnected;
-   property controller: tdbcontroller read fcontroller write setcontroller;
  end;
  
 implementation
@@ -46,18 +36,6 @@ uses
  msefileutils,msesqldb,msebufdataset;
  
 { tmsemysql50connection }
-
-constructor tmsemysql50connection.create(aowner: tcomponent);
-begin
- inherited;
- fcontroller:= tdbcontroller.create(self,idbcontroller(self));
-end;
-
-destructor tmsemysql50connection.destroy;
-begin
- fcontroller.free;
- inherited;
-end;
 
 procedure tmsemysql50connection.setdatabasename(const avalue: filenamety);
 begin
@@ -90,27 +68,6 @@ begin
  if fcontroller.setactive(avalue) then begin
   inherited connected:= avalue;
  end;
-end;
-
-function tmsemysql50connection.readsequence(const sequencename: string): string;
-begin
- result:= '';
-end;
-
-function tmsemysql50connection.writesequence(const sequencename: string;
-               const avalue: largeint): string;
-begin
- result:= '';
-end;
-
-procedure tmsemysql50connection.updateutf8(var autf8: boolean);
-begin
- //dummy
-end;
-
-procedure tmsemysql50connection.setinheritedconnected(const avalue: boolean);
-begin
- inherited connected:= avalue;
 end;
 
 function tmsemysql50connection.CreateBlobStream(const Field: TField;

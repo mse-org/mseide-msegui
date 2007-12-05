@@ -61,7 +61,7 @@ Type
 //    FQMySQL : PMySQL;
     FRes: PMYSQL_RES;                   { Record pointer }
     FNeedData : Boolean;
-    fstatement: string;
+    fstatementm: msestring;
     Row : MYSQL_ROW;
     RowsAffected : QWord;
     LastInsertID : QWord;
@@ -111,7 +111,9 @@ Type
     Procedure DeAllocateCursorHandle(var cursor : TSQLCursor); override;
     Function AllocateTransactionHandle : TSQLHandle; override;
 
-    procedure PrepareStatement(cursor: TSQLCursor;ATransaction : TSQLTransaction;buf : string; AParams : TmseParams); override;
+    procedure preparestatement(const cursor: tsqlcursor; 
+                  const atransaction : tsqltransaction;
+                  const asql: msestring; const aparams : tmseparams); override;
     procedure UnPrepareStatement(cursor:TSQLCursor); override;
     procedure FreeFldBuffers(cursor : TSQLCursor); override;
     procedure Execute(const cursor: TSQLCursor;
@@ -377,19 +379,15 @@ begin
   Result := nil;
 end;
 
-procedure TConnectionName.PrepareStatement(cursor: TSQLCursor;
-  ATransaction: TSQLTransaction; buf: string;AParams : TmseParams);
+procedure tconnectionname.preparestatement(const cursor: tsqlcursor; 
+                  const atransaction : tsqltransaction;
+                  const asql: msestring; const aparams : tmseparams);
 begin
  With TCursorName(cursor) do begin
-  FStatement:= Buf;
+  FStatementm:= asql;
   if assigned(AParams) and (AParams.count > 0) then begin
-  {$ifdef mse_FPC_2_2}
-    FStatement := AParams.ParseSQL(FStatement,false,false,false,psSimulated,
+    FStatementm:= AParams.ParseSQL(FStatementm,false,false,false,psSimulated,
                      paramBinding,ParamReplaceString);
-  {$else}
-    FStatement := AParams.ParseSQL(FStatement,false,psSimulated,
-                     paramBinding,ParamReplaceString);
-  {$endif}
   end;
   if FStatementType = stSelect then begin
    FNeedData:=True;
@@ -401,7 +399,7 @@ end;
 procedure TConnectionName.UnPrepareStatement(cursor: TSQLCursor);
 begin
  with tcursorname(cursor) do begin
-  fstatement:= '';
+  fstatementm:= '';
   fprepared:= false;
  end;
 end;
@@ -438,8 +436,12 @@ var
 begin
   C:= TCursorName(cursor);
   freeresultbuffer(c);
-  if Assigned(AParams) then begin
-   str1:= aparams.expandvalues(c.fstatement,c.parambinding,c.paramreplacestring);
+  if Assigned(AParams) and (aparams.count > 0) then begin
+   str1:= todbstring(aparams.expandvalues(c.fstatementm,
+                          c.parambinding,c.paramreplacestring));
+  end
+  else begin
+   str1:= todbstring(c.fstatementm);
   end;
   if mysql_query(FMySQL,Pchar(str1))<>0 then begin
    checkerror(Format(SErrExecuting,[StrPas(mysql_error(FMySQL))]))

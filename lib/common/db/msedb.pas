@@ -710,7 +710,7 @@ type
                          dso_offline, //disconnect database after open
                          dso_local);  //do not connect database on open
  datasetoptionsty = set of datasetoptionty;
- 
+
  idscontroller = interface(inullinterface)
   procedure inheriteddataevent(const event: tdataevent; const info: ptrint);
   procedure inheritedcancel;
@@ -822,7 +822,7 @@ type
   function readsequence(const sequencename: string): string;
   function writesequence(const sequencename: string;
                     const avalue: largeint): string;
-  procedure ExecuteDirect(const SQL : String);
+  procedure ExecuteDirect(const SQL : mseString);
   procedure updateutf8(var autf8: boolean);
  end;
    
@@ -902,31 +902,22 @@ type
   private
    fisutf8: boolean;
   public
-   Function  ParseSQL(const SQL: String; const DoCreate: Boolean): String; overload;
-   Function  ParseSQL(const SQL: String;
+   Function  ParseSQL(const SQL: mseString; const DoCreate: Boolean): mseString; overload;
+   Function  ParseSQL(const SQL: mseString;
                       const DoCreate,EscapeSlash,EscapeRepeat: Boolean;
-                      const ParameterStyle : TParamStyle): String; overload;
-   Function  ParseSQL(const SQL: String;
+                      const ParameterStyle : TParamStyle): mseString; overload;
+   Function  ParseSQL(const SQL: mseString;
                       const DoCreate,EscapeSlash,EscapeRepeat: Boolean;
                       const ParameterStyle : TParamStyle;
-                      var ParamBinding: TParambinding): String; overload;
-   Function  ParseSQL(const SQL: String;
+                      var ParamBinding: TParambinding): mseString; overload;
+   Function  ParseSQL(const SQL: mseString;
                const DoCreate,EscapeSlash,EscapeRepeat: Boolean;
                const ParameterStyle : TParamStyle; var ParamBinding: TParambinding;
-               var ReplaceString : string): String; overload;
-//   function  parsesql(const sql: string; const docreate: boolean; 
-//          const  parameterstyle : tparamstyle; var parambinding: tparambinding; 
-//           var replacestring : string): string; overload;
-//   function  parsesql(const sql: string; const docreate: boolean;
-//        parameterstyle : tparamstyle; var parambinding: tparambinding): string;
-//                                                overload;
-//   function  parsesql(const sql: string; const docreate: boolean;
-//                            const parameterstyle : tparamstyle): string; overload;
-//   function  parsesql(const sql: string; const docreate: boolean): string; overload;
-   function expandvalues(sql: string; const aparambindings: tparambinding;
-                         const aparamreplacestring: string): string; overload;
+               var ReplaceString : msestring): mseString; overload;
+   function expandvalues(sql: msestring; const aparambindings: tparambinding;
+                         const aparamreplacestring: msestring): msestring; overload;
                                 //sql parsed with psSimulated
-   function expandvalues(const sql: string): string; overload;
+   function expandvalues(const sql: msestring): msestring; overload;
    function asdbstring(const index: integer): string;
    property isutf8: boolean read fisutf8 write fisutf8;
  end;
@@ -998,9 +989,9 @@ const
 function getmsefieldclass(const afieldtype: tfieldtype): tfieldclass; overload;
 function getmsefieldclass(const afieldtype: fieldclasstypety): tfieldclass; overload;
 function fieldclasstoclasstyp(const fieldclass: fieldclassty): fieldclasstypety;
-function fieldtosql(const field: tfield): string;
-function fieldtooldsql(const field: tfield): string;
-function paramtosql(const aparam: tparam): string;
+function fieldtosql(const field: tfield): msestring;
+function fieldtooldsql(const field: tfield): msestring;
+function paramtosql(const aparam: tparam): msestring;
 function fieldchanged(const field: tfield): boolean;
 function curfieldchanged(const field: tfield): boolean;
 procedure fieldtoparam(const field: tfield; const param: tparam);
@@ -1012,14 +1003,14 @@ function checkfieldcompatibility(const afield: tfield;
            //true if ok
 function vartorealty(const avalue: variant): realty;
 
-function encodesqlstring(const avalue: string): string;
-function encodesqlblob(const avalue: string): string;
-function encodesqldatetime(const avalue: tdatetime): string;
-function encodesqldate(const avalue: tdatetime): string;
-function encodesqltime(const avalue: tdatetime): string;
-function encodesqlfloat(const avalue: real): string;
-function encodesqlcurrency(const avalue: currency): string;
-function encodesqlboolean(const avalue: boolean): string;
+function encodesqlstring(const avalue: msestring): msestring;
+function encodesqlblob(const avalue: string): msestring;
+function encodesqldatetime(const avalue: tdatetime): msestring;
+function encodesqldate(const avalue: tdatetime): msestring;
+function encodesqltime(const avalue: tdatetime): msestring;
+function encodesqlfloat(const avalue: real): msestring;
+function encodesqlcurrency(const avalue: currency): msestring;
+function encodesqlboolean(const avalue: boolean): msestring;
 
 implementation
 uses
@@ -1144,15 +1135,15 @@ begin
  }
 end;
 
-function encodesqlstring(const avalue: string): string;
+function encodesqlstring(const avalue: msestring): msestring;
 var
  int1: integer;
- str1: string;
- po1: pchar;
+ str1: msestring;
+ po1: pmsechar;
 begin
  str1:= avalue;
  setlength(result,length(str1)*2 + 2); //max
- po1:= pchar(result);
+ po1:= pmsechar(result);
  po1^:= '''';
  inc(po1);
  for int1:= 1 to length(str1) do begin
@@ -1164,18 +1155,18 @@ begin
   inc(po1);
  end;
  po1^:= '''';
- setlength(result,po1-pchar(result)+1);
+ setlength(result,po1-pmsechar(result)+1);
 end;
 
-function encodesqlblob(const avalue: string): string;
+function encodesqlblob(const avalue: string): msestring;
 var
  int1: integer;
- po1: pchar;
+ po1: pmsechar;
  po2: pbyte;
 
 begin
  setlength(result,length(avalue)*2+3);
- po1:= pchar(result);
+ po1:= pmsechar(result);
  po1^:= 'x';
  inc(po1);
  po1^:= '''';
@@ -1191,34 +1182,34 @@ begin
  po1^:= '''';
 end;
 
-function encodesqldatetime(const avalue: tdatetime): string;
+function encodesqldatetime(const avalue: tdatetime): msestring;
 begin
  result := '''' + formatdatetime('yyyy-mm-dd hh:mm:ss',avalue) + '''';
 end;
 
-function encodesqldate(const avalue: tdatetime): string;
+function encodesqldate(const avalue: tdatetime): msestring;
 begin
  result:= '''' + formatdatetime('yyyy-mm-dd',avalue) + '''';
 end;
 
-function encodesqltime(const avalue: tdatetime): string;
+function encodesqltime(const avalue: tdatetime): msestring;
 begin
  result:= '''' + formatdatetime('hh:mm:ss',avalue) + '''';
 end;
 
-function encodesqlfloat(const avalue: real): string;
+function encodesqlfloat(const avalue: real): msestring;
 begin
  result:= replacechar(floattostr(avalue),decimalseparator,'.');
 //( result:= formatfloatmse(avalue,'');
 end;
 
-function encodesqlcurrency(const avalue: currency): string;
+function encodesqlcurrency(const avalue: currency): msestring;
 begin
  result:= replacechar(formatfloat('0.####',avalue),decimalseparator,'.')
 // result:= formatfloatmse(avalue,'0.####');
 end;
 
-function encodesqlboolean(const avalue: boolean): string;
+function encodesqlboolean(const avalue: boolean): msestring;
 begin
  if avalue then begin
   result:= '''t''';
@@ -1228,7 +1219,7 @@ begin
  end;
 end;
 
-function fieldtosql(const field: tfield): string;
+function fieldtosql(const field: tfield): msestring;
 begin
  if (field = nil) or field.isnull then begin
   result:= 'NULL'
@@ -1236,19 +1227,25 @@ begin
  else begin
   case field.datatype of
    ftstring: begin
-    if not (field is tmsestringfield) or 
-         (tmsestringfield(field).fdsintf = nil) then begin
+    if not (field is tmsestringfield) {or 
+         (tmsestringfield(field).fdsintf = nil)} then begin
      result:= encodesqlstring(field.asstring);
 //     result:= tmsestringfield(field).assql;
     end
     else begin
      with tmsestringfield(field) do begin
-      result:= fdsintf.getcontroller.assql(asmsestring);     
+      result:= encodesqlstring(asmsestring);
+//      result:= fdsintf.getcontroller.assql(asmsestring);     
      end;
     end;
    end;
    ftmemo: begin
-    result:= encodesqlstring(field.asstring);
+    if field is tmsememofield then begin
+     encodesqlstring(tmsememofield(field).asmsestring);
+    end
+    else begin
+     result:= encodesqlstring(field.asstring);
+    end;
    end;
    ftblob,ftgraphic: begin
     result:= encodesqlblob(field.asstring);
@@ -1278,7 +1275,7 @@ begin
  end;
 end;
 
-function fieldtooldsql(const field: tfield): string;
+function fieldtooldsql(const field: tfield): msestring;
 var
  statebefore: tdatasetstate;
 begin
@@ -1288,7 +1285,7 @@ begin
  tdataset1(field.dataset).restorestate(statebefore);
 end;
  
-function paramtosql(const aparam: tparam): string;
+function paramtosql(const aparam: tparam): msestring;
 begin
  with aparam do begin
   if (aparam = nil) or isnull then begin
@@ -4456,11 +4453,11 @@ end;
 
 { tmseparams }
 
-function tmseparams.parsesql(const sql: string;
+function tmseparams.parsesql(const sql: msestring;
                const docreate,EscapeSlash,EscapeRepeat: boolean;
                const parameterstyle: tparamstyle;
                var parambinding: tparambinding;
-               var replacestring: string): string;
+               var replacestring: msestring): msestring;
 
 type
   // used for ParamPart
@@ -4473,15 +4470,15 @@ const
 
 var
   IgnorePart:boolean;
-  p,ParamNameStart,BufStart:PChar;
-  ParamName:string;
+  p,ParamNameStart,BufStart: PmseChar;
+  ParamName: msestring;
   QuestionMarkParamCount,ParameterIndex,NewLength:integer;
   ParamCount:integer; // actual number of parameters encountered so far;
                       // always <= Length(ParamPart) = Length(Parambinding)
                       // Parambinding will have length ParamCount in the end
   ParamPart:array of TStringPart; // describe which parts of buf are parameters
 //  NewQueryLength:integer;
-  NewQuery:string;
+  NewQuery: msestring;
   NewQueryIndex,BufIndex,CopyLen,i:integer;    // Parambinding will have length ParamCount in the end
   b:integer;
   tmpParam:TParam;
@@ -4500,7 +4497,7 @@ begin
  if ParameterStyle = psSimulated then
    while pos(ReplaceString,SQL) > 0 do ReplaceString := ReplaceString+'$';
 
- p:=PChar(SQL);
+ p:= PmseChar(SQL);
  BufStart:=p; // used to calculate ParamPart.Start values
  repeat
    case p^ of
@@ -4645,7 +4642,7 @@ begin
   BufIndex:=1;
   for i:=0 to High(ParamPart) do begin
    CopyLen:=ParamPart[i].Start-BufIndex;
-   Move(SQL[BufIndex],NewQuery[NewQueryIndex],CopyLen);
+   Move(SQL[BufIndex],NewQuery[NewQueryIndex],CopyLen*sizeof(msechar));
    Inc(NewQueryIndex,CopyLen);
    case ParameterStyle of
     psInterbase : NewQuery[NewQueryIndex]:='?';
@@ -4667,7 +4664,7 @@ begin
    BufIndex:=ParamPart[i].Stop;
   end;
   CopyLen:=Length(SQL)+1-BufIndex;
-  Move(SQL[BufIndex],NewQuery[NewQueryIndex],CopyLen);
+  Move(SQL[BufIndex],NewQuery[NewQueryIndex],CopyLen*sizeof(msechar));
   setlength(newquery,newqueryindex+copylen-1);
  end
  else begin
@@ -4676,46 +4673,46 @@ begin
  Result:= NewQuery;
 end;
 
-function  tmseparams.parsesql(const sql: string;
+function  tmseparams.parsesql(const sql: msestring;
         const docreate,EscapeSlash,EscapeRepeat: boolean;
-        const parameterstyle : tparamstyle; var parambinding: tparambinding): string;
+        const parameterstyle : tparamstyle; var parambinding: tparambinding): msestring;
 var
- rs: string;
+ rs: msestring;
 begin
  result := parsesql(sql,docreate,escapeslash,escaperepeat,parameterstyle,
                       parambinding,rs);
 end;
 
-function tmseparams.parsesql(const sql: string;
+function tmseparams.parsesql(const sql: msestring;
                const docreate,EscapeSlash,EscapeRepeat: boolean;
-               const parameterstyle: tparamstyle): string;
+               const parameterstyle: tparamstyle): msestring;
 var
  pb: tparambinding;
- rs: string;
+ rs: msestring;
 begin
  result:= parsesql(sql,docreate,escapeslash,escaperepeat,parameterstyle,pb,rs);
 end;
 
-function tmseparams.parsesql(const sql: string; const docreate: boolean): string;
+function tmseparams.parsesql(const sql: msestring; const docreate: boolean): msestring;
 var
  pb: TParamBinding;
- rs: string;
+ rs: msestring;
 begin
  result:= parsesql(sql,docreate,false,false,psinterbase,pb,rs);
 end;
 
-function tmseparams.expandvalues(sql: string;
+function tmseparams.expandvalues(sql: msestring;
           const aparambindings: tparambinding;
-          const aparamreplacestring: string): string; overload;
+          const aparamreplacestring: msestring): msestring; overload;
 var
  int1,int2,int3,int4: integer;
- po1: pchar;
+ po1: pmsechar;
 begin
  if high(aparambindings) >= 0 then begin
   int3:= 1;
   result:= '';
   uniquestring(sql);
-  po1:= pchar(sql)-1;
+  po1:= pmsechar(sql)-1;
   for int1:= 0 to high(aparambindings) do begin
    int2:= pos(aparamreplacestring,sql);
    for int4:= int2 to int2+length(aparamreplacestring)-1 do begin
@@ -4735,10 +4732,10 @@ begin
  end;
 end;
 
-function tmseparams.expandvalues(const sql: string): string;
+function tmseparams.expandvalues(const sql: msestring): msestring;
 var
  pb: tparambinding;
- str1,str2: string;
+ str1,str2: msestring;
 begin
  str2:= parsesql(sql,false,false,false,pssimulated,pb,str1);
  result:= expandvalues(str2,pb,str1);

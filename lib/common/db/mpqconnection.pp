@@ -95,9 +95,9 @@ type
    Procedure DeAllocateCursorHandle(var cursor : TSQLCursor); override;
    Function AllocateTransactionHandle : TSQLHandle; override;
 
-   procedure PrepareStatement(cursor: TSQLCursor;
-              ATransaction : TSQLTransaction; buf: string;
-              AParams : TmseParams); override;
+    procedure preparestatement(const cursor: tsqlcursor; 
+                  const atransaction : tsqltransaction;
+                  const asql: msestring; const aparams : tmseparams); override;
    procedure FreeFldBuffers(cursor : TSQLCursor); override;
    procedure Execute(const cursor: TSQLCursor; const atransaction: tsqltransaction;
                                    const AParams : TmseParams); override;
@@ -424,8 +424,9 @@ begin
   result := TPQTrans.create;
 end;
 
-procedure TPQConnection.PrepareStatement(cursor: TSQLCursor;
-            ATransaction : TSQLTransaction;buf : string; AParams : TmseParams);
+procedure tpqconnection.preparestatement(const cursor: tsqlcursor; 
+                  const atransaction : tsqltransaction;
+                  const asql: msestring; const aparams : tmseparams);
 
 const TypeStrings : array[TFieldType] of string =
     (
@@ -474,61 +475,59 @@ const TypeStrings : array[TFieldType] of string =
     );
 
 
-var s : string;
-    i : integer;
-
+var 
+ s: string;
+ i: integer;
+ str1: string;
 begin
-  with (cursor as TPQCursor) do
-    begin
-    FPrepared := False;
-    nr := inttostr(FCursorcount);
-    inc(FCursorCount);
-    // Prior to v8 there is no support for cursors and parameters.
-    // So that's not supported.
-    if FStatementType in [stInsert,stUpdate,stDelete, stSelect] then
-      begin
-      tr := TPQTrans(aTransaction.Handle);
-      // Only available for pq 8.0, so don't use it...
-      // Res := pqprepare(tr,'prepst'+name+nr,pchar(buf),params.Count,pchar(''));
-      s := 'prepare prepst'+nr+' ';
-      if Assigned(AParams) and (AParams.count > 0) then begin
-       s:= s + '(';
-       for i := 0 to AParams.count-1 do begin
-        if TypeStrings[AParams[i].DataType] <> 'Unknown' then begin
-         s:= s + TypeStrings[AParams[i].DataType] + ','
-        end
-        else begin
-         if AParams[i].DataType = ftUnknown then begin
-          DatabaseErrorFmt(SUnknownParamFieldType,[AParams[i].Name],self);
-         end
-         else begin
-          DatabaseErrorFmt(SUnsupportedParameter,
-                       [Fieldtypenames[AParams[i].DataType]],self);
-         end;
-        end;
-       end;
-       s[length(s)]:= ')';
-       {$ifdef mse_FPC_2_2}
-       buf := AParams.ParseSQL(buf,false,false,false,psPostgreSQL);
-       {$else}
-       buf := AParams.ParseSQL(buf,false,psPostgreSQL);
-       {$endif}
-      end;
-      s:= s + ' as ' + buf;
-      res := pqexec(tr.fconn,pchar(s));
-      if (PQresultStatus(res) <> PGRES_COMMAND_OK) then
-        begin
-        pqclear(res);
-        DatabaseError(SErrPrepareFailed + ' (PostgreSQL: ' + 
-              PQerrorMessage(tr.fconn) + ')',self)
-        end;
-      FPrepared := True;
+ with (cursor as TPQCursor) do begin
+  FPrepared := False;
+  nr:= inttostr(FCursorcount);
+  inc(FCursorCount);
+  // Prior to v8 there is no support for cursors and parameters.
+  // So that's not supported.
+  if FStatementType in [stInsert,stUpdate,stDelete,stSelect] then begin
+   tr:= TPQTrans(aTransaction.Handle);
+   // Only available for pq 8.0, so don't use it...
+   // Res := pqprepare(tr,'prepst'+name+nr,pchar(buf),params.Count,pchar(''));
+   s:= 'prepare prepst'+nr+' ';
+   if Assigned(AParams) and (AParams.count > 0) then begin
+    s:= s + '(';
+    for i := 0 to AParams.count-1 do begin
+     if TypeStrings[AParams[i].DataType] <> 'Unknown' then begin
+      s:= s + TypeStrings[AParams[i].DataType] + ','
+     end
+     else begin
+      if AParams[i].DataType = ftUnknown then begin
+       DatabaseErrorFmt(SUnknownParamFieldType,[AParams[i].Name],self);
       end
-    else
-    Statement := AParams.ParseSQL(buf,false,false,false,psSimulated,
-                     paramBinding,ParamReplaceString);
-//      statement := buf;
+      else begin
+       DatabaseErrorFmt(SUnsupportedParameter,
+                    [Fieldtypenames[AParams[i].DataType]],self);
+      end;
+     end;
     end;
+    s[length(s)]:= ')';
+    str1:= todbstring(AParams.ParseSQL(asql,false,false,false,psPostgreSQL));
+   end
+   else begin
+    str1:= todbstring(asql);
+   end;
+   s:= s + ' as ' + str1;
+   res := pqexec(tr.fconn,pchar(s));
+   if (PQresultStatus(res) <> PGRES_COMMAND_OK) then begin
+     pqclear(res);
+     DatabaseError(SErrPrepareFailed + ' (PostgreSQL: ' + 
+           PQerrorMessage(tr.fconn) + ')',self)
+   end;
+   FPrepared := True;
+  end
+  else begin
+   Statement:= todbstring(AParams.ParseSQL(asql,false,false,false,psSimulated,
+                  paramBinding,ParamReplaceString));
+//      statement := buf;
+  end;
+ end;
 end;
 
 procedure TPQConnection.UnPrepareStatement(cursor : TSQLCursor);

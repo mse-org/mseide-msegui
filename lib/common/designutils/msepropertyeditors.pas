@@ -414,6 +414,7 @@ type
    function getutf8: boolean; virtual;
    function getcaption: msestring; virtual;
    procedure updateline(var aline: ansistring); virtual;
+   function ismsestring: boolean; virtual;
   public
    procedure edit; override;
    procedure setvalue(const avalue: msestring); override;
@@ -3532,25 +3533,42 @@ begin
  fmodalresult:= amodalresult;
  forigtext:= nil;
  if (amodalresult = mr_ok) or (amodalresult = mr_canclose) then begin
-  utf8:= getutf8;
   try
-   with tmsetexteditorfo(sender),tstrings(getordvalue) do begin
+   with tmsetexteditorfo(sender) do begin
     forigtext:= textedit.datalist.asmsestringarray;
-    beginupdate;
-    try
-     clear;
-     for int1:= 0 to grid.rowcount-1 do begin
-      if utf8 then begin
-       str1:= stringtoutf8(textedit[int1]);
-      end
-      else begin
-       str1:= textedit[int1];
+    if ismsestring then begin
+     with tmsestringdatalist(getordvalue) do begin
+      beginupdate;
+      try
+       clear;
+       for int1:= 0 to grid.rowcount-1 do begin
+        add(textedit[int1]);
+       end;
+      finally
+       endupdate
       end;
-      updateline(str1);
-      add(str1);
      end;
-    finally
-     endupdate
+    end
+    else begin
+     with tstrings(getordvalue) do begin
+      utf8:= getutf8;
+      beginupdate;
+      try
+       clear;
+       for int1:= 0 to grid.rowcount-1 do begin
+        if utf8 then begin
+         str1:= stringtoutf8(textedit[int1]);
+        end
+        else begin
+         str1:= textedit[int1];
+        end;
+        updateline(str1);
+        add(str1);
+       end;
+      finally
+       endupdate
+      end;
+     end;
     end;
    end;
    doafterclosequery(amodalresult);
@@ -3566,10 +3584,10 @@ var
  editform: tmsetexteditorfo;
  int1: integer;
  strings: tstrings;
+ mstrings: tmsestringdatalist;
  utf8: boolean;
 begin
  fmodalresult:= mr_cancel;
- strings:= tstrings(getordvalue);
  editform:= tmsetexteditorfo.create({$ifdef FPC}@{$endif}closequery,
         msetexteditor.syntaxpainter,getsyntaxindex,gettestbutton);
  editform.textedit.createfont;
@@ -3578,13 +3596,23 @@ begin
  try
   with editform do begin
    caption:= getcaption;
-   grid.rowcount:= strings.Count;
-   for int1:= 0 to strings.Count - 1 do begin
-    if utf8 then begin
-     textedit[int1]:= utf8tostring(strings[int1]);
-    end
-    else begin
-     textedit[int1]:= strings[int1];
+   if ismsestring then begin
+    mstrings:= tmsestringdatalist(getordvalue);
+    grid.rowcount:= mstrings.Count;
+    for int1:= 0 to mstrings.Count - 1 do begin
+     textedit[int1]:= mstrings[int1];
+    end;
+   end
+   else begin
+    strings:= tstrings(getordvalue);
+    grid.rowcount:= strings.Count;
+    for int1:= 0 to strings.Count - 1 do begin
+     if utf8 then begin
+      textedit[int1]:= utf8tostring(strings[int1]);
+     end
+     else begin
+      textedit[int1]:= strings[int1];
+     end;
     end;
    end;
    show(true,nil);
@@ -3597,11 +3625,21 @@ end;
 
 function ttextstringspropertyeditor.getvalue: msestring;
 begin
- if tstrings(getordvalue).count = 0 then begin
-  result:= '<empty>';
+ if ismsestring then begin
+  if tmsestringdatalist(getordvalue).count = 0 then begin
+   result:= '<empty>';
+  end
+  else begin
+   result:= inherited getvalue;
+  end;
  end
  else begin
-  result:= inherited getvalue;
+  if tstrings(getordvalue).count = 0 then begin
+   result:= '<empty>';
+  end
+  else begin
+   result:= inherited getvalue;
+  end;
  end;
 end;
 
@@ -3628,7 +3666,12 @@ end;
 procedure ttextstringspropertyeditor.setvalue(const avalue: msestring);
 begin
  if (avalue = '') and askok('Do you wish to clear "'+fname+'"?') then begin
-  tstrings(getordvalue).clear;
+  if ismsestring then begin
+   tmsestringdatalist(getordvalue).clear;
+  end
+  else begin
+   tstrings(getordvalue).clear;
+  end;
  end;
  inherited;
 end;
@@ -3641,6 +3684,11 @@ end;
 procedure ttextstringspropertyeditor.updateline(var aline: ansistring);
 begin
  //dummy
+end;
+
+function ttextstringspropertyeditor.ismsestring: boolean;
+begin
+ result:= false;
 end;
 
 { tdatalistpropertyeditor }

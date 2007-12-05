@@ -21,6 +21,9 @@ uses
  classes,db,sysutils,msedb,msestrings,mseclasses,mseglob,mseguiglob,msetypes;
  
 type
+ databaseoptionty = (dbo_utf8,dbo_noutf8);
+ databaseoptionsty = set of databaseoptionty;
+ 
  tmdbdataset = class;
  tmdatabase = class;
  tmdbtransaction = class;
@@ -129,62 +132,61 @@ type
     property OnLogin: TLoginEvent read FOnLogin write FOnLogin;
   end;
 
-
- // tmdatabaseClass = Class Of tmdatabase;
-  tmdatabase = class(TCustomConnection)
-  private
-    FDataBaseName : String;
-//    FDataSets : TList;
-    fdatasets: idatabaseclientarty;
-    FTransactions : TList;
-    FDirectory : String;
-    FKeepConnection : Boolean;
-    FParams : TStrings;
-    FSQLBased : Boolean;
-    Function GetTransactionCount : Longint;
-    Function GetTransaction(Index : longint) : tmdbtransaction;
-//    procedure RegisterDataset (DS : tmdbdataset);
-    procedure RegisterDataset(const DS: idatabaseclient);
-    procedure RegisterTransaction (TA : tmdbtransaction);
-    procedure UnRegisterDataset(const DS: idatabaseclient);
-    procedure UnRegisterTransaction(TA : tmdbtransaction);
-    procedure RemoveDataSets;
-    procedure RemoveTransactions;
-  protected
-    FConnected : Boolean;
-    FOpenAfterRead : boolean;
-    Procedure CheckConnected;
-    Procedure CheckDisConnected;
-    procedure DoConnect; override;
-    procedure DoDisconnect; override;
-    function GetConnected : boolean; override;
-    Function GetDataset(Index : longint) : TDataset; override;
-//    Function GetDataSetCount : Longint; override;
-    Procedure DoInternalConnect; Virtual;Abstract;
-    Procedure DoInternalDisConnect; Virtual;Abstract;
-  public
-    constructor Create(AOwner: TComponent); override;
-    destructor Destroy; override;
-    procedure CloseDataSets;
-    procedure CloseTransactions;
-//    procedure ApplyUpdates;
-    procedure StartTransaction; virtual; abstract;
-    procedure EndTransaction; virtual; abstract;
-    property TransactionCount: Longint read GetTransactionCount;
-    property Transactions[Index: Longint]: tmdbtransaction read GetTransaction;
-    property Directory: string read FDirectory write FDirectory;
-    property IsSQLBased: Boolean read FSQLBased;
-  published
-    property Connected: Boolean read FConnected write SetConnected;
-    property DatabaseName: string read FDatabaseName write FDatabaseName;
-    property KeepConnection: Boolean read FKeepConnection write FKeepConnection;
-    property Params : TStrings read FParams Write FParams;
-  end;
-
  databaseeventty = procedure(const sender: tmdatabase) of object;
  databaseerroreventty = procedure(const sender: tmdatabase;
              const aexception: exception; var handled: boolean) of object;
              
+ // tmdatabaseClass = Class Of tmdatabase;
+  tmdatabase = class(TCustomConnection)
+  private
+   FDataBaseName : String;
+//    FDataSets : TList;
+   fdatasets: idatabaseclientarty;
+   FTransactions : TList;
+   FDirectory : String;
+   FKeepConnection : Boolean;
+   FParams : TStrings;
+   FSQLBased : Boolean;
+   Function GetTransactionCount : Longint;
+   Function GetTransaction(Index : longint) : tmdbtransaction;
+//    procedure RegisterDataset (DS : tmdbdataset);
+   procedure RegisterDataset(const DS: idatabaseclient);
+   procedure RegisterTransaction (TA : tmdbtransaction);
+   procedure UnRegisterDataset(const DS: idatabaseclient);
+   procedure UnRegisterTransaction(TA : tmdbtransaction);
+   procedure RemoveDataSets;
+   procedure RemoveTransactions;
+  protected
+   FConnected : Boolean;
+   FOpenAfterRead : boolean;
+   Procedure CheckConnected;
+   Procedure CheckDisConnected;
+   procedure DoConnect; override;
+   procedure DoDisconnect; override;
+   function GetConnected : boolean; override;
+   Function GetDataset(Index : longint) : TDataset; override;
+//    Function GetDataSetCount : Longint; override;
+   Procedure DoInternalConnect; Virtual;Abstract;
+   Procedure DoInternalDisConnect; Virtual;Abstract;
+  public
+   constructor Create(AOwner: TComponent); override;
+   destructor Destroy; override;
+   procedure CloseDataSets;
+   procedure CloseTransactions;
+//    procedure ApplyUpdates;
+   procedure StartTransaction; virtual; abstract;
+   procedure EndTransaction; virtual; abstract;
+   property TransactionCount: Longint read GetTransactionCount;
+   property Transactions[Index: Longint]: tmdbtransaction read GetTransaction;
+   property Directory: string read FDirectory write FDirectory;
+   property IsSQLBased: Boolean read FSQLBased;
+  published
+   property Connected: Boolean read FConnected write SetConnected;
+   property DatabaseName: string read FDatabaseName write FDatabaseName;
+   property KeepConnection: Boolean read FKeepConnection write FKeepConnection;
+   property Params : TStrings read FParams Write FParams;
+  end;
+
   tmdbdatasetClass = Class of tmdbdataset;
   tmdbdataset = Class(TDataset,idatabaseclient,itransactionclient)
     Private
@@ -214,27 +216,6 @@ type
    constructor create(const aowner: tmdbtransaction);
  end;
 
- tdbcontroller = class(tactivatorcontroller)
-  private
-   fdatabasename: filenamety;
-   fintf: idbcontroller;
-   fonbeforeconnect: databaseeventty;
-   fonconnecterror: databaseerroreventty;
-   fonafterconnect: databaseeventty;
-  protected
-   procedure setowneractive(const avalue: boolean); override;
-  public
-   constructor create(const aowner: tmdatabase; const aintf: idbcontroller);
-   function getdatabasename: filenamety;
-   procedure setdatabasename(const avalue: filenamety);
-  published
-   property onbeforeconnect: databaseeventty read fonbeforeconnect 
-                                   write fonbeforeconnect;  
-   property onafterconnect: databaseeventty read fonafterconnect 
-                                   write fonafterconnect;  
-   property onconnecterror: databaseerroreventty read fonconnecterror 
-                                   write fonconnecterror; 
- end;
  
 procedure dosetdatabase(const sender: idatabaseclient; const avalue: tmdatabase;
                  var dest: tmdatabase);
@@ -248,7 +229,7 @@ procedure checkactive(const active: boolean; const aname: ansistring);
                  
 implementation
 uses
- dbconst,msefileutils,msedatalist;
+ dbconst,msefileutils,msedatalist,msebits;
  
 procedure checkdatabase(const aname: ansistring; const adatabase: tmdatabase);
 begin
@@ -354,24 +335,21 @@ begin
 end;
 
 constructor tmdatabase.Create(AOwner: TComponent);
-
 begin
-  Inherited Create(AOwner);
-  FParams:=TStringlist.Create;
-//  FDatasets:=TList.Create;
-  FTransactions:=TList.Create;
+ inherited create(aowner);
+ fparams:= tstringlist.create;
+ ftransactions:= tlist.create;
 end;
 
 destructor tmdatabase.Destroy;
 
 begin
-  Connected:=False;
-  RemoveDatasets;
-  RemoveTransactions;
-//  FDatasets.Free;
-  FTransactions.Free;
-  FParams.Free;
-  Inherited Destroy;
+ connected:=false;
+ removedatasets;
+ removetransactions;
+ ftransactions.free;
+ fparams.free;
+ inherited destroy;
 end;
 
 procedure tmdatabase.CloseDataSets;
@@ -884,69 +862,6 @@ end;
 procedure ttacontroller.setowneractive(const avalue: boolean);
 begin
  tmdbtransaction(fowner).active:= avalue;
-end;
-
-{ tdbcontroller }
-
-constructor tdbcontroller.create(const aowner: tmdatabase; const aintf: idbcontroller);
-begin
- fintf:= aintf;
- inherited create(aowner);
-end;
-
-procedure tdbcontroller.setowneractive(const avalue: boolean);
-var
- bo1: boolean;
-begin
- if avalue then begin
-  with tmdatabase(fowner) do begin
-   if checkcanevent(fowner,tmethod(fonbeforeconnect)) then begin
-    fonbeforeconnect(tmdatabase(fowner));
-   end;
-   try
-    fintf.setinheritedconnected(avalue);
-   except
-    on e: exception do begin
-     if checkcanevent(fowner,tmethod(fonconnecterror)) then begin
-      bo1:= false;
-      fonconnecterror(tmdatabase(fowner),e,bo1);
-      if not bo1 then begin
-       raise;
-      end;
-     end;
-    end;
-   end;
-   if checkcanevent(fowner,tmethod(fonafterconnect)) then begin
-    fonafterconnect(tmdatabase(fowner));
-   end;
-  end;
- end
- else begin
-  fintf.setinheritedconnected(avalue);
-//  tmdatabase(fowner).connected:= avalue;
- end;
-end;
-
-function tdbcontroller.getdatabasename: filenamety;
-begin
- result:= fdatabasename;
-end;
-
-procedure tdbcontroller.setdatabasename(const avalue: filenamety);
-var
- str1: filenamety;
-begin
- str1:= trim(avalue);
- if (str1 <> '') and (str1[1] = '''') and 
-                    (str1[length(str1)] = '''') then begin
-  fdatabasename:= str1;
-  tmdatabase(fowner).databasename:= copy(str1,2,length(str1)-2);
- end
- else begin
-  fdatabasename:= tomsefilepath(str1);
-  tmdatabase(fowner).databasename:= 
-                   tosysfilepath(filepath(str1,fk_default,true));
- end;
 end;
 
 end.

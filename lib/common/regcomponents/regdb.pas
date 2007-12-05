@@ -81,8 +81,29 @@ type
   public
    procedure edit; override;
  end;
+
+ tmsesqlpropertyeditor = class(ttextstringspropertyeditor)
+  private
+   factivebefore: boolean;
+   fintf: isqlpropertyeditor;
+  protected
+   function ismsestring: boolean; override;
+   function nocheck: boolean; virtual;
+   function getsyntaxindex: integer; override;
+   procedure doafterclosequery(var amodalresult: modalresultty); override;
+   function gettestbutton: boolean; override;
+   function getutf8: boolean; override;
+   function getcaption: msestring; override;
+  public
+   procedure edit; override;
+ end;
  
  tsqlnocheckpropertyeditor = class(tsqlpropertyeditor)
+  protected
+   function nocheck: boolean; override;
+ end;
+
+ tmsesqlnocheckpropertyeditor = class(tmsesqlpropertyeditor)
   protected
    function nocheck: boolean; override;
  end;
@@ -133,26 +154,7 @@ type
   protected
    procedure checkcomponent(const avalue: tcomponent); override;
  end;
-{ 
- tsqlquerysqlpropertyeditor = class(tsqlpropertyeditor)
-  private
-   factivebefore: boolean;
-  protected
-   procedure doafterclosequery(var amodalresult: modalresultty); override;
-   function gettestbutton: boolean; override;
-   function getutf8: boolean; override;
-  public
-   procedure edit; override;
- end;
- tsqlscriptsqlpropertyeditor = class(tsqlpropertyeditor)
-                      //todo: implement getutf8
-  private
-  protected
-   procedure doafterclosequery(var amodalresult: modalresultty); override;
-   function gettestbutton: boolean; override;
-  public
- end;
-} 
+
  tonfilterpropertyeditor = class(tmethodpropertyeditor)
   public
    function getdefaultstate: propertystatesty; override;
@@ -284,16 +286,24 @@ begin
         tdbparamnamepropertyeditor);
  registerpropertyeditor(typeinfo(tstrings),nil,'SQL',
         tsqlpropertyeditor);
+ registerpropertyeditor(typeinfo(tsqlstringlist),nil,'',
+        tmsesqlpropertyeditor);
+ registerpropertyeditor(typeinfo(tsqlstringlist),nil,'SQLupdate',
+        tmsesqlnocheckpropertyeditor);
+ registerpropertyeditor(typeinfo(tsqlstringlist),nil,'SQLinsert',
+        tmsesqlnocheckpropertyeditor);
+ registerpropertyeditor(typeinfo(tsqlstringlist),nil,'SQLdelete',
+        tmsesqlnocheckpropertyeditor);
+{        
+ registerpropertyeditor(typeinfo(tmsestringdatalist),nil,'SQL',
+        tmsesqlpropertyeditor);
  registerpropertyeditor(typeinfo(tstringlist),tsqlquery,'SQLupdate',
         tsqlnocheckpropertyeditor);
  registerpropertyeditor(typeinfo(tstringlist),tsqlquery,'SQLinsert',
         tsqlnocheckpropertyeditor);
  registerpropertyeditor(typeinfo(tstringlist),tsqlquery,'SQLdelete',
         tsqlnocheckpropertyeditor);
-// registerpropertyeditor(typeinfo(tstringlist),tmsesqlquery,'SQL',
-//        tsqlquerysqlpropertyeditor);
-// registerpropertyeditor(typeinfo(tstringlist),tmsesqlscript,'SQL',
-//        tsqlscriptsqlpropertyeditor);
+}
  registerpropertyeditor(typeinfo(tdataset),nil,'',
                              tcomponentpropertyeditor);
  registerpropertyeditor(typeinfo(tdataset),tfield,'dataset',
@@ -799,8 +809,6 @@ begin
  result:= sqlindex;
 end;
 
-{ tsqlpropertyeditor }
-
 procedure tsqlpropertyeditor.doafterclosequery(
                  var amodalresult: modalresultty);
 begin
@@ -846,6 +854,66 @@ begin
  result:= false;
 end;
 
+{ tmsesqlpropertyeditor }
+
+function tmsesqlpropertyeditor.getsyntaxindex: integer;
+begin
+ if sqlindex < 0 then begin
+  sqlindex:= msetexteditor.syntaxpainter.readdeffile(sqlsyntax);
+ end;
+ result:= sqlindex;
+end;
+
+procedure tmsesqlpropertyeditor.doafterclosequery(
+                 var amodalresult: modalresultty);
+begin
+ if amodalresult = mr_canclose then begin
+  if fintf <> nil then begin
+   fintf.setactive(true);
+  end;
+ end;
+end;
+
+function tmsesqlpropertyeditor.gettestbutton: boolean;
+begin
+ result:= fintf <> nil;
+end;
+
+function tmsesqlpropertyeditor.getutf8: boolean;
+begin
+ result:= (fintf <> nil) and fintf.isutf8;
+end;
+
+procedure tmsesqlpropertyeditor.edit;
+begin
+ if not nocheck and getcorbainterface(fprops[0].instance,
+                            typeinfo(isqlpropertyeditor),fintf) then begin
+  factivebefore:= fintf.getactive;
+ end
+ else begin
+  fintf:= nil;
+ end;
+ inherited;
+ if not factivebefore and (fintf <> nil) then begin
+  fintf.setactive(false);
+ end;
+end;
+
+function tmsesqlpropertyeditor.getcaption: msestring;
+begin
+ result:= 'SQL Editor';
+end;
+
+function tmsesqlpropertyeditor.nocheck: boolean;
+begin
+ result:= false;
+end;
+
+function tmsesqlpropertyeditor.ismsestring: boolean;
+begin
+ result:= true;
+end;
+
 { tsqlnocheckpropertyeditor }
 
 function tsqlnocheckpropertyeditor.nocheck: boolean;
@@ -853,59 +921,12 @@ begin
  result:= true;
 end;
 
-(*
-{ tsqlquerysqlpropertyeditor }
+{ tmsesqlnocheckpropertyeditor }
 
-procedure tsqlquerysqlpropertyeditor.doafterclosequery(
-                 var amodalresult: modalresultty);
-begin
- if amodalresult = mr_canclose then begin
-  tmsesqlquery(fprops[0].instance).active:= true;
- end;
-end;
-
-function tsqlquerysqlpropertyeditor.gettestbutton: boolean;
+function tmsesqlnocheckpropertyeditor.nocheck: boolean;
 begin
  result:= true;
 end;
-
-function tsqlquerysqlpropertyeditor.getutf8: boolean;
-begin
- result:= dso_utf8 in tmsesqlquery(fprops[0].instance).controller.options;
-end;
-
-procedure tsqlquerysqlpropertyeditor.edit;
-begin
- factivebefore:= tmsesqlquery(fprops[0].instance).active;
- inherited;
- if not factivebefore then begin
-  tmsesqlquery(fprops[0].instance).active:= false;
- end;
-end;
-
-{ tsqlscriptsqlpropertyeditor }
-
-procedure tsqlscriptsqlpropertyeditor.doafterclosequery(var amodalresult: modalresultty);
-begin
- if amodalresult = mr_canclose then begin
-  with tmsesqlscript(fprops[0].instance) do begin
-   try
-    execute;
-   except
-    on e: exception do begin
-     e.message:= 'Statement ' + inttostr(statementnr+1)+':'+lineend+e.message;
-     raise;
-    end;
-   end;
-  end;
- end;
-end;
-
-function tsqlscriptsqlpropertyeditor.gettestbutton: boolean;
-begin
- result:= true;
-end;
-*)
 
 { tonfilterpropertyeditor }
 

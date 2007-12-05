@@ -542,6 +542,7 @@ type
    procedure setactive(value: boolean); override;
 
    procedure loaded; override;                              
+   procedure OpenCursor(InfoQuery: Boolean); override;
    procedure internalopen; override;
    procedure internalclose; override;
    procedure clearbuffers; override;
@@ -690,7 +691,7 @@ type
    FFieldName : String;
    FFieldNo : Longint;
  end;
-{ 
+ 
   TDataSetcracker = class(TComponent)
   Private
     FOpenAfterRead : boolean;
@@ -706,6 +707,7 @@ type
     FAfterScroll: TDataSetNotifyEvent;
     FAutoCalcFields: Boolean;
     FBOF: Boolean;
+    {
     FBeforeCancel: TDataSetNotifyEvent;
     FBeforeClose: TDataSetNotifyEvent;
     FBeforeDelete: TDataSetNotifyEvent;
@@ -724,8 +726,9 @@ type
     FConstraints: TCheckConstraints;
     FDisableControlsCount : Integer;
     FDisableControlsState : TDatasetState;
+    }
   end;  
-}   
+   
 function compblobcache(const a,b): integer;
 var
  lint1: int64;
@@ -4374,6 +4377,12 @@ begin
    disablecontrols;
   end;
  end;
+end;
+
+procedure tmsebufdataset.OpenCursor(InfoQuery: Boolean);
+begin
+ inherited;
+ tdatasetcracker(self).fbof:= true;
 end;
 
 { tlocalindexes }

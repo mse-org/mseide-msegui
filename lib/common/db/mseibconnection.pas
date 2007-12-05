@@ -16,7 +16,6 @@ uses
 type
  tmseibconnection = class(tibconnection,idbcontroller)
   private
-   fcontroller: tdbcontroller;
    function getdatabasename: filenamety;
    procedure setdatabasename(const avalue: filenamety);
    procedure loaded; override;
@@ -25,22 +24,17 @@ type
    procedure setconnected(const avalue: boolean);
    
    //idbcontroller
-   procedure setinheritedconnected(const avalue: boolean);
-   function readsequence(const sequencename: string): string;
+   function readsequence(const sequencename: string): string; override;
    function writesequence(const sequencename: string;
-                    const avalue: largeint): string;
-   procedure updateutf8(var autf8: boolean);                    
+                    const avalue: largeint): string; override;
                     
   protected
    function CreateBlobStream(const Field: TField; const Mode: TBlobStreamMode; 
                        const acursor: tsqlcursor): TStream; override;
   public
-   constructor create(aowner: tcomponent); override;
-   destructor destroy; override;
   published
    property DatabaseName: filenamety read getdatabasename write setdatabasename;
    property Connected: boolean read getconnected write setconnected;
-   property controller: tdbcontroller read fcontroller write setcontroller;
  end;
  
 implementation
@@ -48,18 +42,6 @@ uses
  msefileutils,sysutils;
 
 { tmseibconnection }
-
-constructor tmseibconnection.create(aowner: tcomponent);
-begin
- inherited;
- fcontroller:= tdbcontroller.create(self,idbcontroller(self));
-end;
-
-destructor tmseibconnection.destroy;
-begin
- fcontroller.free;
- inherited;
-end;
 
 procedure tmseibconnection.setdatabasename(const avalue: filenamety);
 begin
@@ -114,16 +96,6 @@ begin
  else begin
   result:= inherited createblobstream(field,mode,acursor);
  end;
-end;
-
-procedure tmseibconnection.updateutf8(var autf8: boolean);
-begin
- //dummy
-end;
-
-procedure tmseibconnection.setinheritedconnected(const avalue: boolean);
-begin
- inherited connected:= avalue;
 end;
 
 end.

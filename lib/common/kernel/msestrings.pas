@@ -388,6 +388,8 @@ function parsecommandline(const s: pchar): stringarty;
 function stringtoutf8(const value: msestring): utf8string;
 function utf8tostring(const value: pchar): msestring; overload;
 function utf8tostring(const value: utf8string): msestring; overload;
+function checkutf8(const value: ansistring): boolean;
+              //true if valid utf8
 function stringtolatin1(const value: msestring): string;
 function latin1tostring(const value: string): msestring;
 function ucs4tostring(const achar: dword): msestring;
@@ -594,6 +596,50 @@ begin
   inc(po1);
  end;
  setlength(result,po1-pmsechar(pointer(result)));
+end;
+
+function checkutf8(const value: ansistring): boolean;
+              //true if valid utf8
+var
+ po1: pbyte;
+begin
+ result:= true;
+ if value <> '' then begin
+  po1:= pointer(value);
+  while po1^ <> $00 do begin
+   if po1^ >= $80 then begin
+    case po1^ and $e0 of
+     $c0: begin //two bytes
+      inc(po1);
+      if po1^ and $c0 <> $80 then begin
+       result:= false;
+       exit;
+      end;
+     end;
+     $e0: begin //three bytes
+      inc(po1);
+      if po1^ and $c0 <> $80 then begin
+       result:= false;
+       exit;
+      end;
+      inc(po1);
+      if po1^ and $c0 <> $80 then begin
+       result:= false;
+       exit;
+      end;
+     end;
+     else begin
+      result:= false;
+      exit;
+     end;
+    end;
+   end;
+   inc(po1);
+  end;
+  if pointer(po1) <> pchar(value) + length(value) then begin
+   result:= false;    //#0 in string
+  end;
+ end;
 end;
 
 function utf8tostring(const value: utf8string): msestring;

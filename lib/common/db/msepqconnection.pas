@@ -23,7 +23,6 @@ const
 type 
  tmsepqconnection = class(tpqconnection,idbcontroller)
   private
-   fcontroller: tdbcontroller;
    foptions: pqconnectionoptionsty;
    fsavepointlock: boolean;
    function getdatabasename: filenamety;
@@ -36,21 +35,17 @@ type
   protected
    procedure execute(const cursor: tsqlcursor; const atransaction: tsqltransaction;
                              const aparams: tmseparams); override;
+   function CreateBlobStream(const Field: TField; const Mode: TBlobStreamMode;
+                         const acursor: tsqlcursor): TStream; override;
    //idbcontroller
-   procedure setinheritedconnected(const avalue: boolean);
    function readsequence(const sequencename: string): string;
    function writesequence(const sequencename: string;
                     const avalue: largeint): string;
-   function CreateBlobStream(const Field: TField; const Mode: TBlobStreamMode;
-                         const acursor: tsqlcursor): TStream; override;
-   procedure updateutf8(var autf8: boolean);                    
   public
    constructor create(aowner: tcomponent); override;
-   destructor destroy; override;
   published
    property DatabaseName: filenamety read getdatabasename write setdatabasename;
    property Connected: boolean read getconnected write setconnected;
-   property controller: tdbcontroller read fcontroller write setcontroller;
    property options: pqconnectionoptionsty read foptions write setoptions 
                                  default defaultpqconnectionoptionsty;
 end;
@@ -64,13 +59,6 @@ uses
 constructor tmsepqconnection.create(aowner: tcomponent);
 begin
  foptions:= defaultpqconnectionoptionsty;
- inherited;
- fcontroller:= tdbcontroller.create(self,idbcontroller(self));
-end;
-
-destructor tmsepqconnection.destroy;
-begin
- fcontroller.free;
  inherited;
 end;
 
@@ -181,16 +169,6 @@ begin
  else begin
   result:= inherited createblobstream(field,mode,acursor);
  end;
-end;
-
-procedure tmsepqconnection.updateutf8(var autf8: boolean);
-begin
- //dummy
-end;
-
-procedure tmsepqconnection.setinheritedconnected(const avalue: boolean);
-begin
- inherited connected:= avalue;
 end;
 
 end.

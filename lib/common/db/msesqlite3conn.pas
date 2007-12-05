@@ -44,7 +44,6 @@ type
  
  tsqlite3connection = class(tcustomsqlconnection,idbcontroller,iblobconnection)
   private
-   fcontroller: tdbcontroller;
    fhandle: psqlite3;
    foptions: sqliteoptionsty;
    fbusytimeoutms: integer;
@@ -57,12 +56,6 @@ type
    function getconnected: boolean;
    procedure setconnected(const avalue: boolean);
    
-   //idbcontroller
-   procedure setinheritedconnected(const avalue: boolean);
-   function readsequence(const sequencename: string): string;
-   function writesequence(const sequencename: string;
-                    const avalue: largeint): string;
-
           //iblobconnection
    procedure writeblobdata(const atransaction: tsqltransaction;
              const tablename: string; const acursor: tsqlcursor;
@@ -99,8 +92,9 @@ type
    Procedure DeAllocateCursorHandle(var cursor : TSQLCursor); override;
    Function AllocateTransactionHandle : TSQLHandle; override;
 
-   procedure PrepareStatement(cursor: TSQLCursor; ATransaction : TSQLTransaction; 
-                         buf: string; AParams : TmseParams); override;
+   procedure preparestatement(const cursor: tsqlcursor; 
+                  const atransaction : tsqltransaction;
+                  const asql: msestring; const aparams : tmseparams); override;
    procedure Execute(const cursor: TSQLCursor; const atransaction: tsqltransaction;
                                 const AParams : TmseParams); override;
    function Fetch(cursor : TSQLCursor) : boolean; override;
@@ -134,7 +128,6 @@ type
    procedure endupdate; override;
   public
    constructor create(aowner: tcomponent); override;
-   destructor destroy; override;
    procedure updateutf8(var autf8: boolean); override;
    function getinsertid: int64; override;
    function fetchblob(const cursor: tsqlcursor;
@@ -209,14 +202,7 @@ end;
 constructor tsqlite3connection.create(aowner: tcomponent);
 begin
  inherited;
- fcontroller:= tdbcontroller.create(self,idbcontroller(self));
  fconnoptions:= fconnoptions + [sco_supportparams,sco_emulateretaining];
-end;
-
-destructor tsqlite3connection.destroy;
-begin
- fcontroller.free;
- inherited;
 end;
 
 function tsqlite3connection.getdatabasename: filenamety;
@@ -250,17 +236,6 @@ begin
  if fcontroller.setactive(avalue) then begin
   inherited connected:= avalue;
  end;
-end;
-
-function tsqlite3connection.readsequence(const sequencename: string): string;
-begin
- //todo
-end;
-
-function tsqlite3connection.writesequence(const sequencename: string;
-               const avalue: largeint): string;
-begin
- //todo
 end;
 
 function tsqlite3connection.CreateBlobStream(const Field: TField;
@@ -300,18 +275,21 @@ begin
  freeandnil(cursor);
 end;
 
-procedure tsqlite3connection.PrepareStatement(cursor: TSQLCursor;
-               ATransaction: TSQLTransaction; buf: string; AParams: TmseParams);
+procedure tsqlite3connection.preparestatement(const cursor: tsqlcursor; 
+                  const atransaction : tsqltransaction;
+                  const asql: msestring; const aparams : tmseparams);
+var
+ str1: string;
 begin
  with tsqlite3cursor(cursor) do begin
   if assigned(aparams) and (aparams.count > 0) then begin
-  {$ifdef mse_FPC_2_2}
-    buf := aparams.parsesql(buf,false,false,false,psinterbase,fparambinding);
-  {$else}
-    buf := aparams.parsesql(buf,false,psinterbase,fparambinding);
-  {$endif}
+   str1:= todbstring(aparams.parsesql(asql,false,false,false,
+                        psinterbase,fparambinding));
+  end
+  else begin
+   str1:= todbstring(asql);
   end;
-  checkerror(sqlite3_prepare(fhandle,pchar(buf),length(buf),@fstatement,
+  checkerror(sqlite3_prepare(fhandle,pchar(str1),length(str1),@fstatement,
                                                @ftail));
   fprepared:= true;
  end;
@@ -976,10 +954,6 @@ begin
  end;
 end;
 }
-procedure tsqlite3connection.setinheritedconnected(const avalue: boolean);
-begin
- inherited connected:= avalue;
-end;
 
 function tsqlite3connection.getinsertid: int64;
 begin
