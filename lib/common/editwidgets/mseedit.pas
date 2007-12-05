@@ -256,8 +256,8 @@ type
    function getbuttonclass: framebuttonclassty; virtual;
    procedure checktemplate(const sender: tobject); override;
   public
-   constructor create(const intf: icaptionframe; const buttonintf: ibutton); virtual
-                                                   reintroduce;
+   constructor create(const intf: icaptionframe; const buttonintf: ibutton);
+                                                   reintroduce; virtual;
    destructor destroy; override;
    function buttonframe: framety;
    procedure updatemousestate(const sender: twidget; const apos: pointty); override;
