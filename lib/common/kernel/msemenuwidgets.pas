@@ -1156,6 +1156,7 @@ end;
 procedure tpopupmenuwidget.activatemenu(keymode: boolean; aclicked: boolean);
 begin
  capturekeyboard;
+ capturemouse;
  if keymode then begin
   beginkeymode;
  end

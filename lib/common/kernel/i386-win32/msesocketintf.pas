@@ -158,7 +158,6 @@ begin
  end;
 end;
 
-var testvar: integer;
 function soc_connect(const handle: integer; const addr: socketaddrty;
                                const timeoutms: integer): syserrorty;
 var
@@ -174,11 +173,9 @@ begin
   else begin
    with win32sockaddrty(platformdata) do begin
     int1:= sa_len(ad.addr.sa_family);
-testvar:= wsagetlasterror;
     if connect(handle,ad.addr,int1) <> 0 then begin
      if wsagetlasterror = wsaewouldblock then begin
       result:= soc_poll(handle,[poka_write,poka_except],timeoutms,pollres);
-testvar:= wsagetlasterror;
       if (result = sye_ok) and (poka_except in pollres) then begin
 //       connect(handle,ad.addr,int1);
        result:= setsocketerror;
@@ -394,9 +391,7 @@ begin
  else begin
   peset:= nil;
  end;
-testvar:= wsagetlasterror;
  int1:= select(0,prset,pwset,peset,pti);
-testvar:= wsagetlasterror;
  if int1 > 0 then begin
   if (poka_read in kind) and fd_isset(handle,rset) then begin
    include(pollres,poka_read);
