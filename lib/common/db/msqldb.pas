@@ -1034,7 +1034,7 @@ end;
 
 procedure tcustomsqlconnection.setinheritedconnected(const avalue: boolean);
 begin
- inherited connected:= avalue;
+ connected:= avalue;
 end;
 
 function tcustomsqlconnection.readsequence(const sequencename: string): string;
