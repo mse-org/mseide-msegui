@@ -251,11 +251,13 @@ type
    procedure setlinecolorfix(const Value: colorty);
    procedure setcolorselect(const Value: colorty);
    procedure setcoloractive(const Value: colorty);
+   {
    function islinewidthstored: boolean;
    function islinecolorstored: boolean;
    function islinecolorfixstored: boolean;
    function iscolorselectstored : boolean;
    function iscoloractivestored : boolean;
+   }
   protected
    flinepos: integer;
    flinewidth: integer;
@@ -316,15 +318,15 @@ type
    property frame: tcellframe read getframe write setframe;
    property face: tcellface read getface write setface;
    property linewidth: integer read flinewidth write setlinewidth 
-                   stored islinewidthstored default defaultgridlinewidth;
-   property linecolor: colorty read flinecolor write setlinecolor 
-                   stored islinecolorstored;
+                   {stored islinewidthstored} default defaultgridlinewidth;
+   property linecolor: colorty read flinecolor write setlinecolor;
+//                   stored islinecolorstored;
    property linecolorfix: colorty read flinecolorfix write setlinecolorfix 
-                   stored islinecolorfixstored default defaultfixlinecolor;
+                   {stored islinecolorfixstored} default defaultfixlinecolor;
    property colorselect: colorty read fcolorselect write setcolorselect
-                  stored iscolorselectstored default cl_default;
+                  {stored iscolorselectstored} default cl_default;
    property coloractive: colorty read fcoloractive write setcoloractive
-                  stored iscoloractivestored default cl_none;
+                  {stored iscoloractivestored} default cl_none;
    property tag: integer read ftag write ftag;
  end;
 
@@ -384,10 +386,11 @@ type
    procedure setrowcoloroffsetselect(const avalue: integer);
    procedure setrowfontoffset(const avalue: integer);
    procedure setrowfontoffsetselect(const avalue: integer);
-
+{
    function iswidthstored: boolean;
    function isoptionsstored: boolean;
    function isfocusrectdiststored: boolean;
+}
    function getfontselect: tcolselectfont;
    function isfontselectstored: Boolean;
    procedure setfontselect(const Value: tcolselectfont);
@@ -419,10 +422,10 @@ type
                   const count: integer = 1); virtual; abstract;
    procedure deleterow(const aindex: integer;
                   const count: integer = 1); virtual; abstract;
-   property options: coloptionsty read foptions write setoptions
-                  stored isoptionsstored default [];
+   property options: coloptionsty read foptions write setoptions;
+//                  stored isoptionsstored nodefault; //default [];
    property focusrectdist: integer read ffocusrectdist write setfocusrectdist
-                  stored isfocusrectdiststored default 0;
+                  {stored isfocusrectdiststored} default 0;
   public
    constructor create(const agrid: tcustomgrid; 
                         const aowner: tgridarrayprop); override;
@@ -437,7 +440,8 @@ type
    function actualfont: tfont; virtual;
    property colindex: integer read getcolindex;
   published
-   property width: integer read fwidth write setwidth stored iswidthstored;
+   property width: integer read fwidth write setwidth 
+                 {stored iswidthstored} default griddefaultcolwidth;
    property rowcoloroffset: integer read frowcoloroffset 
                                write setrowcoloroffset default 0;
    property rowcoloroffsetselect: integer read frowcoloroffsetselect
@@ -522,7 +526,7 @@ type
    property enabled: boolean read getenabled write setenabled;
    property readonly: boolean read getreadonly write setreadonly;
   published
-   property options; //default defaultdatacoloptions;
+   property options default defaultdatacoloptions;
    property widthmin: integer read fwidthmin write setwidthmin default 1;
    property widthmax: integer read fwidthmax write setwidthmax default 0;
    property name: string read fname write fname;
@@ -552,10 +556,11 @@ type
    procedure settextflags(const avalue: textflagsty);
    function getdatalist: tmsestringdatalist;
    procedure setdatalist(const value: tmsestringdatalist);
-
+{
    function istextflagsstored: boolean;
    function istextflagsactivestored: boolean;
    function isoptionseditstored: boolean;
+}
    function getoptionsedit: optionseditty;
    procedure settextflagsactive(const avalue: textflagsty);
   protected
@@ -580,12 +585,12 @@ type
                       const processeditchars: boolean = false); overload;
    property items[aindex: integer]: msestring read getitems write setitems; default;
    property textflags: textflagsty read ftextinfo.flags write settextflags
-               stored istextflagsstored default defaultcoltextflags;
+               {stored istextflagsstored} default defaultcoltextflags;
    property textflagsactive: textflagsty read ftextflagsactive
-             write settextflagsactive stored istextflagsactivestored 
+             write settextflagsactive {stored istextflagsactivestored}
                     default defaultactivecoltextflags;
    property optionsedit: stringcoleditoptionsty read foptionsedit write foptionsedit
-               stored isoptionseditstored default defaultstringcoleditoptions;
+               {stored isoptionseditstored} default defaultstringcoleditoptions;
    property font;
    property datalist: tmsestringdatalist read getdatalist write setdatalist;
    property onsetvalue: setstringeventty read fonsetvalue write fonsetvalue;
@@ -1942,12 +1947,12 @@ begin
   fgrid.layoutchanged;
  end;
 end;
-
+{
 function tgridprop.islinewidthstored: Boolean;
 begin
  result:= flinewidth <> tcols(prop).flinewidth;
 end;
-
+}
 procedure tgridprop.setlinecolor(const Value: colorty);
 begin
  if flinecolor <> value then begin
@@ -1955,12 +1960,12 @@ begin
   fgrid.layoutchanged;
  end;
 end;
-
+{
 function tgridprop.islinecolorstored: Boolean;
 begin
  result:= flinecolor <> tcols(prop).flinecolor;
 end;
-
+}
 procedure tgridprop.setlinecolorfix(const Value: colorty);
 begin
  if flinecolorfix <> value then begin
@@ -1984,7 +1989,7 @@ begin
   changed;
  end;
 end;
-
+{
 function tgridprop.islinecolorfixstored: Boolean;
 begin
  result:= flinecolorfix <> tgridarrayprop(prop).flinecolorfix;
@@ -1992,14 +1997,14 @@ end;
 
 function tgridprop.iscolorselectstored: boolean;
 begin
- result:= fcolorselect <> tgridarrayprop(fowner).fcolorselect;
+ result:= fcolorselect <> tgridarrayprop(prop).fcolorselect;
 end;
 
 function tgridprop.iscoloractivestored: boolean;
 begin
- result:= fcoloractive <> tgridarrayprop(fowner).fcoloractive;
+ result:= fcoloractive <> tgridarrayprop(prop).fcoloractive;
 end;
-
+}
 function tgridprop.getframe: tcellframe;
 begin
  fgrid.getoptionalobject(fframe,{$ifdef FPC}@{$endif}createframe);
@@ -2527,7 +2532,7 @@ begin
    fwidth:= 0;
   end
   else begin
-  fwidth := Value;
+   fwidth:= Value;
   end;
   fgrid.layoutchanged;
   updatepropwidth;
@@ -2602,17 +2607,17 @@ begin
  drawfocusrect(acanvas,inflaterect(makerect(nullpoint,fcellinfo.rect.size),
                     -ffocusrectdist));
 end;
-
+{
 function tcol.isoptionsstored: Boolean;
 begin
- result:= foptions <> tcols(fowner).foptions;
+ result:= foptions <> tcols(prop).foptions;
 end;
 
 function tcol.isfocusrectdiststored: boolean;
 begin
- result:= ffocusrectdist <> tcols(fowner).ffocusrectdist;
+ result:= ffocusrectdist <> tcols(prop).ffocusrectdist;
 end;
-
+}
 procedure tcol.updatelayout;
 begin
  fcellrect.size.cy:= fgrid.fdatarowheight;
@@ -2660,12 +2665,12 @@ begin
   invalidate;
  end;
 end;
-
+{
 function tcol.iswidthstored: boolean;
 begin
  result:= fwidth <> tcols(prop).fwidth;
 end;
-
+}
 function tcol.getfontselect: tcolselectfont;
 begin
  getoptionalobject(fgrid.componentstate,ffontselect,{$ifdef FPC}@{$endif}createfontselect);
@@ -3485,8 +3490,10 @@ var
 begin
  if flinewidth <> value then begin
   flinewidth := Value;
-  for int1:= 0 to count - 1 do begin
-   tgridprop(items[int1]).linewidth:= value;
+  if not (csloading in fgrid.componentstate) then begin
+   for int1:= 0 to count - 1 do begin
+    tgridprop(items[int1]).linewidth:= value;
+   end;
   end;
  end;
 end;
@@ -3497,8 +3504,10 @@ var
 begin
  if flinecolor <> value then begin
   flinecolor := Value;
-  for int1:= 0 to count - 1 do begin
-   tgridprop(items[int1]).linecolor:= value;
+  if not (csloading in fgrid.componentstate) then begin
+   for int1:= 0 to count - 1 do begin
+    tgridprop(items[int1]).linecolor:= value;
+   end;
   end;
  end;
 end;
@@ -3509,8 +3518,10 @@ var
 begin
  if flinecolorfix <> value then begin
   flinecolorfix := Value;
-  for int1:= 0 to count - 1 do begin
-   tgridprop(items[int1]).linecolorfix:= value;
+  if not (csloading in fgrid.componentstate) then begin
+   for int1:= 0 to count - 1 do begin
+    tgridprop(items[int1]).linecolorfix:= value;
+   end;
   end;
  end;
 end;
@@ -3521,8 +3532,10 @@ var
 begin
  if fcolorselect <> avalue then begin
   fcolorselect:= avalue;
-  for int1:= 0 to count - 1 do begin
-   tgridprop(items[int1]).colorselect:= avalue;
+  if not (csloading in fgrid.componentstate) then begin
+   for int1:= 0 to count - 1 do begin
+    tgridprop(items[int1]).colorselect:= avalue;
+   end;
   end;
  end;
 end;
@@ -3533,8 +3546,10 @@ var
 begin
  if fcoloractive <> avalue then begin
   fcoloractive:= avalue;
-  for int1:= 0 to count - 1 do begin
-   tgridprop(items[int1]).coloractive:= avalue;
+  if not (csloading in fgrid.componentstate) then begin
+   for int1:= 0 to count - 1 do begin
+    tgridprop(items[int1]).coloractive:= avalue;
+   end;
   end;
  end;
 end;
@@ -4497,7 +4512,7 @@ procedure tcustomstringcol.setdatalist(const value: tmsestringdatalist);
 begin
  fdata.Assign(value);
 end;
-
+{
 function tcustomstringcol.istextflagsstored: boolean;
 begin
  result:= tstringcols(prop).ftextflags <> ftextinfo.flags;
@@ -4512,7 +4527,7 @@ function tcustomstringcol.isoptionseditstored: boolean;
 begin
  result:= tstringcols(prop).foptionsedit <> foptionsedit;
 end;
-
+}
 procedure tcustomstringcol.readpipe(const pipe: tpipereader;
                             const processeditchars: boolean = false);
 var
@@ -4894,8 +4909,10 @@ var
 begin
  if fwidth <> value then begin
   fwidth:= value;
-  for int1:= 0 to count - 1 do begin
-   tcol(items[int1]).width:= value;
+  if not (csloading in fgrid.componentstate) then begin
+   for int1:= 0 to count - 1 do begin
+    tcol(items[int1]).width:= value;
+   end;
   end;
  end;
 end;
@@ -4908,9 +4925,11 @@ begin
  if foptions <> value then begin
   mask:= longword(value) xor longword(foptions);
   foptions := Value;
-  for int1:= 0 to count - 1 do begin
-   tcol(items[int1]).options:= coloptionsty(replacebits(longword(value),
-                  longword(tcol(items[int1]).options),mask));
+  if not (csloading in fgrid.componentstate) then begin
+   for int1:= 0 to count - 1 do begin
+    tcol(items[int1]).options:= coloptionsty(replacebits(longword(value),
+                   longword(tcol(items[int1]).options),mask));
+   end;
   end;
  end;
 end;
@@ -4920,8 +4939,10 @@ var
  int1: integer;
 begin
  if ffocusrectdist <> avalue then begin
-  for int1:= 0 to count - 1 do begin
-   tcol(items[int1]).focusrectdist:= avalue;
+  if not (csloading in fgrid.componentstate) then begin
+   for int1:= 0 to count - 1 do begin
+    tcol(items[int1]).focusrectdist:= avalue;
+   end;
   end;
  end;
 end;
@@ -5574,10 +5595,12 @@ begin
   mask:= {$ifdef FPC}longword{$else}word{$endif}(avalue) xor
   {$ifdef FPC}longword{$else}word{$endif}(ftextflags);
   ftextflags:= avalue;
-  for int1:= 0 to count - 1 do begin
-   tstringcol(items[int1]).textflags:=
-        textflagsty(replacebits({$ifdef FPC}longword{$else}word{$endif}(avalue),
-        {$ifdef FPC}longword{$else}word{$endif}(tstringcol(items[int1]).textflags),mask));
+  if not (csloading in fgrid.componentstate) then begin
+   for int1:= 0 to count - 1 do begin
+    tstringcol(items[int1]).textflags:=
+         textflagsty(replacebits({$ifdef FPC}longword{$else}word{$endif}(avalue),
+         {$ifdef FPC}longword{$else}word{$endif}(tstringcol(items[int1]).textflags),mask));
+   end;
   end;
  end;
 end;
@@ -5592,10 +5615,12 @@ begin
   mask:= {$ifdef FPC}longword{$else}word{$endif}(avalue) xor
          {$ifdef FPC}longword{$else}word{$endif}(ftextflagsactive);
   ftextflagsactive := avalue;
-  for int1:= 0 to count - 1 do begin
-   tstringcol(items[int1]).textflagsactive:=
-          textflagsty(replacebits({$ifdef FPC}longword{$else}word{$endif}(avalue),
-        {$ifdef FPC}longword{$else}word{$endif}(tstringcol(items[int1]).textflagsactive),mask));
+  if not (csloading in fgrid.componentstate) then begin
+   for int1:= 0 to count - 1 do begin
+    tstringcol(items[int1]).textflagsactive:=
+           textflagsty(replacebits({$ifdef FPC}longword{$else}word{$endif}(avalue),
+         {$ifdef FPC}longword{$else}word{$endif}(tstringcol(items[int1]).textflagsactive),mask));
+   end;
   end;
  end;
 end;
@@ -5609,10 +5634,12 @@ begin
   mask:= {$ifdef FPC}longword{$else}word{$endif}(avalue) xor
   {$ifdef FPC}longword{$else}word{$endif}(foptionsedit);
   foptionsedit := avalue;
-  for int1:= 0 to count - 1 do begin
-   tstringcol(items[int1]).optionsedit:= stringcoleditoptionsty(
-                  replacebits({$ifdef FPC}longword{$else}word{$endif}(avalue),
-                  {$ifdef FPC}longword{$else}word{$endif}(tstringcol(items[int1]).optionsedit),mask));
+  if not (csloading in fgrid.componentstate) then begin
+   for int1:= 0 to count - 1 do begin
+    tstringcol(items[int1]).optionsedit:= stringcoleditoptionsty(
+                   replacebits({$ifdef FPC}longword{$else}word{$endif}(avalue),
+                   {$ifdef FPC}longword{$else}word{$endif}(tstringcol(items[int1]).optionsedit),mask));
+   end;
   end;
  end;
 end;
