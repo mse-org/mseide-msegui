@@ -1414,19 +1414,25 @@ end;
 }
 function checkislastrecord(const adatalink: tmsedatalink; 
                                const syncproc: synceventty): boolean;
+var
+ bm: string;
 begin                     
  with adatalink do begin          //todo: optimize   
   if active then begin
    if not dataset.eof then begin
+    bm:= dataset.bookmark;
     dataset.next;
-    if assigned(syncproc) then begin
+    result:= dataset.eof;
+    if assigned(syncproc) and not result then begin
      syncproc;
     end;
-    result:= dataset.eof;
+    dataset.bookmark:= bm;
+    {
     dataset.prior;
     if result and not dataset.bof then begin
      dataset.next;
     end;
+    }
    end
    else begin
     result:= true;

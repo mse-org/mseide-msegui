@@ -534,6 +534,8 @@ type
    function  getcanmodify: boolean; override;
    function getrecord(buffer: pchar; getmode: tgetmode;
                                    docheck: boolean): tgetresult; override;
+   function  GetNextRecord: Boolean; override;
+   function  GetNextRecords: Longint; override;
    function bookmarktostring(const abookmark: bookmarkdataty): string;
    function stringtobookmark(const abookmark: string): bookmarkdataty;
    procedure checkrecno(const avalue: integer);
@@ -3370,6 +3372,9 @@ begin
   checkindex(false);
   fcurrentbuf:= factindexpo^.ind[avalue];
  end;
+ if frecno = 0 then begin
+  tdatasetcracker(self).fbof:= true;
+ end;
 end;
 
 procedure tmsebufdataset.clearindex;
@@ -4382,7 +4387,23 @@ end;
 procedure tmsebufdataset.OpenCursor(InfoQuery: Boolean);
 begin
  inherited;
- tdatasetcracker(self).fbof:= true;
+// tdatasetcracker(self).fbof:= true;
+end;
+
+function tmsebufdataset.GetNextRecord: Boolean;
+begin
+ result:= inherited getnextrecord;
+// if frecno = 0 then begin
+//  tdatasetcracker(self).fbof:= true;
+// end;
+end;
+
+function tmsebufdataset.GetNextRecords: Longint;
+begin
+ result:= inherited getnextrecords;
+// if frecno = 0 then begin
+//  tdatasetcracker(self).fbof:= true;
+// end;
 end;
 
 { tlocalindexes }
