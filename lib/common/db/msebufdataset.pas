@@ -3374,9 +3374,7 @@ begin
   checkindex(false);
   fcurrentbuf:= factindexpo^.ind[avalue];
  end;
- if frecno = 0 then begin
-  tdatasetcracker(self).fbof:= true;
- end;
+ tdatasetcracker(self).fbof:= frecno = 0;
 end;
 
 procedure tmsebufdataset.clearindex;
