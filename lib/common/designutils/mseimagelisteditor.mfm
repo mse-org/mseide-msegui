@@ -73,6 +73,8 @@ object imagelisteditorfo: timagelisteditorfo
     anchors = [an_top, an_bottom]
     taborder = 7
     cellheight = 62
+    fixcols.coloractive = -2147483648
+    fixrows.coloractive = -2147483648
     optionsgrid = [og_colsizing, og_rowsizing, og_focuscellonenter, og_rotaterow, og_autopopup]
     options = [lvo_mousemoving, lvo_keymoving, lvo_horz, lvo_drawfocus, lvo_focusselect, lvo_mouseselect, lvo_keyselect, lvo_multiselect]
     itemlist.captionpos = cp_bottom
@@ -128,6 +130,8 @@ object imagelisteditorfo: timagelisteditorfo
     frame.caption = 'Transparent color'
     frame.captionpos = cp_right
     frame.button.width = 13
+    frame.buttonellipse.width = 13
+    frame.buttonellipse.imagenr = 17
     frame.dummy = 0
     frame.outerframe = (
       0
@@ -140,8 +144,6 @@ object imagelisteditorfo: timagelisteditorfo
     statfile = statfile1
     value = -2147483647
     valuedefault = -2147483648
-    buttonellipse.width = 13
-    buttonellipse.imagenr = 17
     dropdown.options = [deo_autodropdown, deo_keydropdown]
     reffontheight = 14
   end
