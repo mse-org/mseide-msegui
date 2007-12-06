@@ -366,7 +366,8 @@ type
                       bs_hasindex,bs_fetchall,bs_initinternalcalc,
                       bs_blobsfetched,bs_blobscached,bs_blobssorted,
                       bs_indexvalid,
-                      bs_editing,bs_append,bs_internalcalc,bs_utf8,
+                      bs_editing,bs_append,bs_internalcalc,bs_startedit,
+                      bs_utf8,
                       bs_hasfilter,bs_visiblerecordcountvalid,
                       bs_refreshing        //used by tsqlquery
                       );
@@ -1553,7 +1554,8 @@ end;
 procedure tmsebufdataset.internaledit;
 begin
  addrefstrings(pdsrecordty(activebuffer)^.header);
- include(fbstate,bs_editing);
+ fbstate:= fbstate + [bs_startedit,bs_editing];
+// include(fbstate,bs_editing);
  inherited;
 end;
 
@@ -3594,12 +3596,25 @@ begin
 end;
 
 procedure tmsebufdataset.dataevent(event: tdataevent; info: ptrint);
+var
+ int1: integer;
+ field1: tfield;
 begin
  if event in [deupdaterecord,dedatasetchange] then begin
   exclude(fbstate,bs_visiblerecordcountvalid);
  end;
  if (event = deupdatestate) and (state = dsbrowse) then begin
   updatecursorpos; //update fcurrentbuf after open
+ end;
+ if (bs_startedit in fbstate) and (event = derecordchange) and (info = 0) then begin
+  exclude(fbstate,bs_startedit);
+  for int1:= 0 to fields.count - 1 do begin
+   field1:= fields[int1];
+   if field1.fieldkind = fkcalculated then begin
+    dataevent(defieldchange,ptrint(field1));
+   end;
+   exit;
+  end;
  end;
  inherited;
  case event of
