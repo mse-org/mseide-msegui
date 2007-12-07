@@ -451,7 +451,7 @@ begin
         end
         else begin
          licount:= int1 - liindex; //no whitespace to break
-         liwidth:= awidth - charwidths[int1];
+         liwidth:= awidth - charwidths[int1-1];
         end;
        end;
        setlength(lineinfos,high(lineinfos) + 2);
@@ -471,11 +471,15 @@ begin
      liwidth:= awidth;
     end;
    end
-   else begin
+   else begin //no linebreak
     if (info.tabulators = nil) or 
       (info.tabulators.count = 0) and (info.tabulators.defaultdist = 0) or
                                       (tf_tabtospace in flags) then begin
      while int1 <= textlen do begin
+      if (tf_softhyphen in info.flags) and (info.text.text[int1] = c_softhyphen) then begin
+       charwidths[int1-1]:= 0;
+       additem(lineinfos[high(lineinfos)].tabchars,int1);
+      end;
       if not checklinebreak(int1) then begin
        inc(awidth,charwidths[int1-1]);
        inc(int1);
@@ -490,6 +494,10 @@ begin
      rea1:= info.tabulators.defaultdist * info.tabulators.ppmm;
      nexttab:= -1;
      while int1 <= textlen do begin
+      if (tf_softhyphen in info.flags) and (info.text.text[int1] = c_softhyphen) then begin
+       charwidths[int1-1]:= 0;
+       additem(lineinfos[high(lineinfos)].tabchars,int1);
+      end;
       if not checklinebreak(int1) then begin 
        if info.text.text[int1] = c_tab then begin
         if tabs <> nil then begin

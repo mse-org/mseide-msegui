@@ -1,5 +1,8 @@
 MSEide+MSEgui version history
 
+2007-12-07
+ cl_none changed from $80000000 to $80000006, $80000000 can not be used
+ as default property value.
 2007-12-01
  tcoloredit.buttonellipse moved to frame.
  tframebutton.visible,enabled and left no more published, use options.
