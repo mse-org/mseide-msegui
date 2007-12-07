@@ -56,13 +56,15 @@ const
  cl_namedrgb =   colorty($a0000000);
  cl_user =       colorty($b0000000);
 
- cl_none =                   cl_functional + 0;
+ cl_invalid =                cl_functional + 0; 
+                 //can not be used as default value
  cl_default =                cl_functional + 1;
  cl_parent =                 cl_functional + 2;
  cl_transparent =            cl_functional + 3;
  cl_brush =                  cl_functional + 4;
  cl_brushcanvas =            cl_functional + 5;
- cl_lastfunctional =         cl_functional + 6;
+ cl_none =                   cl_functional + 6; cl_nonenum = 6;
+ cl_lastfunctional =         cl_functional + 7;
 
  cl_dkshadow =               cl_mapped + 0;
  cl_shadow =                 cl_mapped + 1;
@@ -150,12 +152,13 @@ const
  defaultfunctional: array[0..functionalcolorcount-1]
                      of colorinfoty =
    (
-    (name: 'cl_none';  rgb:                  (blue: $00; green: $00; red: $00; res: $00)), //0
+    (name: 'cl_invalid';  rgb:               (blue: $00; green: $00; red: $00; res: $00)), //0
     (name: 'cl_default'; rgb:                (blue: $00; green: $00; red: $00; res: $00)), //1
     (name: 'cl_parent';  rgb:                (blue: $00; green: $00; red: $00; res: $00)), //2
     (name: 'cl_transparent'; rgb:            (blue: $00; green: $00; red: $00; res: $00)), //3
     (name: 'cl_brush';  rgb:                 (blue: $00; green: $00; red: $00; res: $00)), //4
-    (name: 'cl_brushcanvas'; rgb:            (blue: $00; green: $00; red: $00; res: $00))  //5
+    (name: 'cl_brushcanvas'; rgb:            (blue: $00; green: $00; red: $00; res: $00)), //5
+    (name: 'cl_none';  rgb:                  (blue: $00; green: $00; red: $00; res: $00))  //6
 //    (name: 'cl_mask'; rgb:                   (blue: $00; green: $00; red: $00; res: $00))
 //    (name: 'cl_grayed'; rgb:                 (blue: $80; green: $80; red: $80; res: $00))
    );
@@ -504,7 +507,8 @@ function getcolornames: msestringarty;
 var
  int1,int2: integer;
 begin
- setlength(result,namedrgbcolorcount+mappedcolorcount+functionalcolorcount+usercolorcount);
+ setlength(result,namedrgbcolorcount+mappedcolorcount+
+          functionalcolorcount+usercolorcount-1);
  for int1:= 0 to high(defaultnamedrgb) do begin
   result[int1]:= defaultnamedrgb[int1].name;
  end;
@@ -513,10 +517,14 @@ begin
   result[int1+int2]:= defaultmapped[int1].name;
  end;
  inc(int2,mappedcolorcount);
- for int1:= 0 to high(defaultfunctional) do begin
+ result[int2]:= defaultfunctional[cl_nonenum].name;
+ for int1:= 1 to cl_nonenum-1 do begin
   result[int1+int2]:= defaultfunctional[int1].name;
  end;
- inc(int2,functionalcolorcount);
+ for int1:= cl_nonenum+1 to high(defaultfunctional) do begin
+  result[int1+int2-1]:= defaultfunctional[int1].name;
+ end;
+ inc(int2,functionalcolorcount-1);
  for int1:= 0 to high(defaultuser) do begin
   result[int1+int2]:= defaultuser[int1].name;
  end;
@@ -526,7 +534,8 @@ function getcolorvalues: colorarty;
 var
  int1,int2: integer;
 begin
- setlength(result,namedrgbcolorcount+mappedcolorcount+functionalcolorcount+usercolorcount);
+ setlength(result,namedrgbcolorcount+mappedcolorcount+
+                     functionalcolorcount+usercolorcount-1);
  for int1:= 0 to high(defaultnamedrgb) do begin
   result[int1]:= cl_namedrgb + cardinal(int1);
  end;
@@ -535,10 +544,14 @@ begin
   result[int1+int2]:= cl_mapped + cardinal(int1);
  end;
  inc(int2,mappedcolorcount);
- for int1:= 0 to high(defaultfunctional) do begin
+ result[int2]:= cl_functional+cl_nonenum;
+ for int1:= 1 to cl_nonenum-1 do begin
   result[int1+int2]:= cl_functional + cardinal(int1);
  end;
- inc(int2,functionalcolorcount);
+ for int1:= cl_nonenum + 1 to high(defaultfunctional) do begin
+  result[int1+int2-1]:= cl_functional + cardinal(int1);
+ end;
+ inc(int2,functionalcolorcount-1);
  for int1:= 0 to high(defaultuser) do begin
   result[int1+int2]:= cl_user + cardinal(int1);
  end;

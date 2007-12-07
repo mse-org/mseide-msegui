@@ -250,7 +250,7 @@ type
    procedure setlinecolor(const Value: colorty);
    procedure setlinecolorfix(const Value: colorty);
    procedure setcolorselect(const Value: colorty);
-   procedure setcoloractive(const Value: colorty);
+   procedure setcoloractive(avalue: colorty);
    {
    function islinewidthstored: boolean;
    function islinecolorstored: boolean;
@@ -829,7 +829,7 @@ type
    procedure setlinecolor(const Value: colorty);
    procedure setlinecolorfix(const Value: colorty);
    procedure setcolorselect(const avalue: colorty);
-   procedure setcoloractive(const avalue: colorty);
+   procedure setcoloractive(avalue: colorty);
   protected
    freversedorder: boolean;
    fgrid: tcustomgrid;
@@ -1982,10 +1982,13 @@ begin
  end;
 end;
 
-procedure tgridprop.setcoloractive(const Value: colorty);
+procedure tgridprop.setcoloractive(avalue: colorty);
 begin
- if value <> fcoloractive then begin
-  fcoloractive := Value;
+ if avalue = cl_invalid then begin
+  avalue:= cl_none;
+ end;
+ if avalue <> fcoloractive then begin
+  fcoloractive := avalue;
   changed;
  end;
 end;
@@ -3540,10 +3543,13 @@ begin
  end;
 end;
 
-procedure tgridarrayprop.setcoloractive(const avalue: colorty);
+procedure tgridarrayprop.setcoloractive(avalue: colorty);
 var
  int1: integer;
 begin
+ if avalue = cl_invalid then begin
+  avalue:= cl_none;
+ end;
  if fcoloractive <> avalue then begin
   fcoloractive:= avalue;
   if not (csloading in fgrid.componentstate) then begin

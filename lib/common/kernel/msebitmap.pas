@@ -50,7 +50,7 @@ type
    function checkindex(const index: pointty): integer; overload;
    function checkindex(const x,y: integer): integer; overload;
    procedure setalignment(const Value: alignmentsty);
-   procedure settransparency(const avalue: colorty);
+   procedure settransparency(avalue: colorty);
    procedure updatealignment(const dest,source: rectty;
                const alignment: alignmentsty; out newdest,newsource: rectty;
                out tileorigin: pointty);
@@ -250,7 +250,7 @@ type
    function getmasked: boolean;
    procedure setmasked(const Value: boolean);
    function gettransparentcolor: colorty;
-   procedure settransparentcolor(const Value: colorty);
+   procedure settransparentcolor(avalue: colorty);
    procedure setheight(const Value: integer);
    procedure setwidth(const Value: integer);
    procedure setbitmap(const Value: tmaskedbitmap);
@@ -828,8 +828,11 @@ begin
  end;
 end;
 
-procedure tbitmap.settransparency(const avalue: colorty);
+procedure tbitmap.settransparency(avalue: colorty);
 begin
+ if avalue = cl_invalid then begin
+  avalue:= cl_none;
+ end;
  if ftransparency <> avalue then begin
   ftransparency:= avalue;
   change;
@@ -1919,9 +1922,12 @@ begin
  result:= fbitmap.ftransparentcolor;
 end;
 
-procedure timagelist.settransparentcolor(const Value: colorty);
+procedure timagelist.settransparentcolor(avalue: colorty);
 begin
- fbitmap.transparentcolor:= value;
+ if avalue = cl_invalid then begin
+  avalue:= cl_none;
+ end;
+ fbitmap.transparentcolor:= avalue;
 end;
 
 procedure timagelist.setimage(index: integer; image: tmaskedbitmap;

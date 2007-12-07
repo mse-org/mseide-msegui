@@ -69,9 +69,9 @@ type
  tcoloredit = class(tcustomenumedit)
   private
    function getvalue: colorty;
-   procedure setvalue(const avalue: colorty);
+   procedure setvalue(avalue: colorty);
    function getvaluedefault: colorty;
-   procedure setvaluedefault(const avalue: colorty);
+   procedure setvaluedefault(avalue: colorty);
 //   function getbuttonellipse: tdropdownbutton;
 //   procedure setbuttonellipse(const avalue: tdropdownbutton);
    
@@ -265,8 +265,11 @@ begin
  result:= inherited value;
 end;
 
-procedure tcoloredit.setvalue(const avalue: colorty);
+procedure tcoloredit.setvalue(avalue: colorty);
 begin
+ if avalue = cl_invalid then begin
+  avalue:= cl_none;
+ end;
  inherited value:= avalue;
 end;
 
@@ -275,8 +278,11 @@ begin
  result:= inherited valuedefault;
 end;
 
-procedure tcoloredit.setvaluedefault(const avalue: colorty);
+procedure tcoloredit.setvaluedefault(avalue: colorty);
 begin
+ if avalue = cl_invalid then begin
+  avalue:= cl_none;
+ end;
  inherited valuedefault:= avalue;
 end;
 {

@@ -75,7 +75,7 @@ type
 
    procedure mousepostotextpos1(const row: integer; const mousepos: pointty;
                var textpos: gridcoordty; var result: boolean);
-   procedure setmarginlinecolor(const avalue: colorty);
+   procedure setmarginlinecolor(avalue: colorty);
    procedure setmarginlinepos(const avalue: integer);
    procedure colchanged;
    function gettabulators: ttabulators;
@@ -1817,8 +1817,11 @@ begin
  end;
 end;
 
-procedure tcustomtextedit.setmarginlinecolor(const avalue: colorty);
+procedure tcustomtextedit.setmarginlinecolor(avalue: colorty);
 begin
+ if avalue = cl_invalid then begin
+  avalue:= cl_none;
+ end;
  if fmarginlinecolor <> avalue then begin
   fmarginlinecolor := avalue;
   colchanged;

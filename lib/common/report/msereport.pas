@@ -205,7 +205,7 @@ type
    procedure setlookupvaluefieldno(const avalue: integer);
    procedure setlookupkind(const avalue: lookupkindty);
    procedure setformat(const avalue: msestring);
-   procedure setcolor(const avalue: colorty);
+   procedure setcolor(avalue: colorty);
    
    function getsumasinteger: integer;
    function getsumaslargeint: int64;
@@ -1945,8 +1945,11 @@ begin
  changed;
 end;
 
-procedure treptabulatoritem.setcolor(const avalue: colorty);
+procedure treptabulatoritem.setcolor(avalue: colorty);
 begin
+ if avalue = cl_invalid then begin
+  avalue:= cl_none;
+ end;
  if fcolor <> avalue then begin
   fcolor:= avalue;
   treptabulators(fowner).fband.invalidate;  

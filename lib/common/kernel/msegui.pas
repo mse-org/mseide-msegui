@@ -618,7 +618,7 @@ type
    function isfaposstored: boolean;
    procedure setfade_direction(const Value: graphicdirectionty);
    function isfadirectionstored: boolean;
-   procedure setfade_transparency(const avalue: colorty);
+   procedure setfade_transparency(avalue: colorty);
    function isfatransparencystored: boolean;
    procedure setframeimage_list(const avalue: timagelist);
    function isframeimage_liststored: boolean;
@@ -688,7 +688,7 @@ type
    procedure setfade_color(const Value: tcolorarrayprop);
    procedure setfade_direction(const Value: graphicdirectionty);
    procedure setfade_pos(const Value: trealarrayprop);
-   procedure setfade_transparency(const avalue: colorty);
+   procedure setfade_transparency(avalue: colorty);
    procedure setimage(const Value: tmaskedbitmap);
    procedure doimagechange(const sender: tobject);
    procedure dochange(const sender: tarrayprop; const index: integer);
@@ -3546,17 +3546,19 @@ end;
 
 procedure tcustomframe.scale(const ascale: real);
 begin
- with fi do begin
-  leveli:= round(leveli * ascale);
-  levelo:= round(levelo * ascale);
-  framewidth:= round(framewidth * ascale);
-//  extraspace:= round(extraspace * ascale);
-  framecolors.shadow.effectwidth:= round(framecolors.shadow.effectwidth*ascale);
-  framecolors.light.effectwidth:= round(framecolors.light.effectwidth*ascale);
-  framei_left:= round(framei_left * ascale);
-  framei_top:= round(framei_top * ascale);
-  framei_right:= round(framei_right * ascale);
-  framei_bottom:= round(framei_bottom * ascale);
+ if ascale <> 1 then begin
+  with fi do begin
+   leveli:= round(leveli * ascale);
+   levelo:= round(levelo * ascale);
+   framewidth:= round(framewidth * ascale);
+ //  extraspace:= round(extraspace * ascale);
+   framecolors.shadow.effectwidth:= round(framecolors.shadow.effectwidth*ascale);
+   framecolors.light.effectwidth:= round(framecolors.light.effectwidth*ascale);
+   framei_left:= round(framei_left * ascale);
+   framei_top:= round(framei_top * ascale);
+   framei_right:= round(framei_right * ascale);
+   framei_bottom:= round(framei_bottom * ascale);
+  end;
  end;
 end;
 
@@ -4268,8 +4270,11 @@ begin
  end;
 end;
 
-procedure tcustomface.setfade_transparency(const avalue: colorty);
+procedure tcustomface.setfade_transparency(avalue: colorty);
 begin
+ if avalue = cl_invalid then begin
+  avalue:= cl_none;
+ end;
  include(flocalprops,fal_fatransparency);
  if fi.fade_transparency <> avalue then begin
   fi.fade_transparency:= avalue;
@@ -4452,8 +4457,11 @@ begin
  fi.fade_pos.Assign(Value);
 end;
 
-procedure tfacetemplate.setfade_transparency(const avalue: colorty);
+procedure tfacetemplate.setfade_transparency(avalue: colorty);
 begin
+ if avalue = cl_invalid then begin
+  avalue:= cl_none;
+ end;
  fi.fade_transparency:= avalue;
  changed;
 end;

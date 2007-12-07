@@ -328,7 +328,7 @@ type
    procedure setextraspace(const avalue: integer);
    procedure setcolorbackground(const Value: colorty);
    function getcolorbackground: colorty;
-   procedure setcolorshadow(const Value: colorty);
+   procedure setcolorshadow(avalue: colorty);
    function getcolorshadow: colorty;
    procedure setcolor(const Value: colorty);
    function getcolor: colorty;
@@ -2226,10 +2226,13 @@ begin
  result:= finfopo^.colorbackground;
 end;
 
-procedure tfont.setcolorshadow(const Value: colorty);
+procedure tfont.setcolorshadow(avalue: colorty);
 begin
- if finfopo^.colorshadow <> value then begin
-  finfopo^.colorshadow := Value;
+ if avalue = cl_invalid then begin
+  avalue:= cl_none;
+ end;
+ if finfopo^.colorshadow <> avalue then begin
+  finfopo^.colorshadow:= avalue;
   dochanged([cs_fontcolorshadow],false);
  end;
 end;
