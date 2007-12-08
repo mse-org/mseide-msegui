@@ -127,6 +127,7 @@ type
    procedure internalsetrecno(const avalue: integer);
    function findrecord(arecordpo: pintrecordty): integer;
                          //returns index, -1 if not found
+   function getfiltereditkind: filtereditkindty;
    
   protected
    ffielddefsequence: sequencety;
@@ -1805,6 +1806,11 @@ begin
   decoderecord(po1,fbufs[int1]);
  end;
  asize:= po1 -  pointer(adata);
+end;
+
+function tifidataset.getfiltereditkind: filtereditkindty;
+begin
+ result:= fek_filter;
 end;
 
 { trxdataset }

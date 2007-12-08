@@ -12,7 +12,7 @@ unit msesqlite3ds;
 {$ifdef FPC}{$mode objfpc}{$h+}{$INTERFACES CORBA}{$endif}
 interface
 uses
- classes,db,sqlite3ds,msedb;
+ classes,db,sqlite3ds,msedb,msestrings;
 type
  tmsesqlite3dataset = class(tsqlite3dataset,imselocate,idscontroller,igetdscontroller)
   private
@@ -33,6 +33,7 @@ type
    function getnumboolean: boolean;
    function getfloatdate: boolean;
    function getint64currency: boolean;
+   function getfiltereditkind: filtereditkindty;
   protected
    procedure setactive (value : boolean);
    function getactive: boolean;
@@ -49,7 +50,7 @@ type
    destructor destroy; override;
    function locate(const key: integer; const field: tfield;
                    const options: locateoptionsty = []): locateresultty;
-   function locate(const key: string; const field: tfield; 
+   function locate(const key: msestring; const field: tfield; 
                  const options: locateoptionsty = []): locateresultty;
    procedure AppendRecord(const Values: array of const);
    procedure cancel; override;
@@ -102,7 +103,7 @@ begin
  result:= fcontroller.locate(key,field,options);
 end;
 
-function tmsesqlite3dataset.locate(const key: string;
+function tmsesqlite3dataset.locate(const key: msestring;
         const field: tfield; const options: locateoptionsty = []): locateresultty;
 begin
  result:= fcontroller.locate(key,field,options);
@@ -250,6 +251,11 @@ end;
 function tmsesqlite3dataset.getint64currency: boolean;
 begin
  result:= false;
+end;
+
+function tmsesqlite3dataset.getfiltereditkind: filtereditkindty;
+begin
+ result:= fek_filter;
 end;
 
 end.

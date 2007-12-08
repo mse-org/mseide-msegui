@@ -81,6 +81,7 @@ type
    fstatvarname: msestring;
    fstatfile: tstatfile;
    foptionsedit: optionseditty;
+   foptionsdb: optionseditdbty;
    fedited: boolean;
 {$ifdef mse_with_ifi}
    fifiserverintf: iifiserver;
@@ -96,6 +97,7 @@ type
    fgridintf: iwidgetgrid;
    
    function getoptionsedit: optionseditty; virtual;
+   function getoptionsdb: optionseditdbty;
    procedure updateoptions; virtual;
    procedure loaded; override;
    procedure internalcreateframe; override;
@@ -151,6 +153,7 @@ type
    procedure readstatoptions(const reader: tstatreader); virtual;
    procedure writestatoptions(const writer: tstatwriter); virtual;
 
+   property optionsdb: optionseditdbty read foptionsdb write foptionsdb;   
   public
    constructor create(aowner: tcomponent); override;
    procedure initnewcomponent(const ascale: real); override;
@@ -1328,6 +1331,11 @@ begin
  result := foptionsedit;
 end;
 
+function tgraphdataedit.getoptionsdb: optionseditdbty;
+begin
+ result := foptionsdb;
+end;
+
 procedure tgraphdataedit.updateoptions;
 begin
  //dummy
@@ -1335,8 +1343,11 @@ end;
 
 procedure tgraphdataedit.setoptionsedit(const avalue: optionseditty);
 begin
+ if oe_autopost in avalue then begin
+  include(foptionsdb,oed_autopost);
+ end;
  if foptionsedit <> avalue then begin
-  foptionsedit:= avalue;
+  foptionsedit:= avalue - [oe_autopost];
   if fgridintf <> nil then begin
    fgridintf.updateeditoptions(foptionsedit);
   end;

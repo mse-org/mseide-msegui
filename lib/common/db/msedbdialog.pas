@@ -55,6 +55,7 @@ type
   published
    property datafield: string read getdatafield write setdatafield;
    property datasource: tdatasource read getdatasource write setdatasource;
+   property optionsdb;
 
    property frame;
    property passwordchar;

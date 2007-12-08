@@ -44,7 +44,7 @@ type
                     oe_casesensitive,
                     oe_notnull,
                     oe_locate,    //used by titemedit     
-                    oe_autopost,  //used by db edits
+                    oe_autopost,  //depreciated, moved to optiondeditbty
                     oe_autopopupmenu,
                     oe_keyexecute, //shift-down-key starts dialog
                     oe_checkvaluepaststatread,
@@ -52,6 +52,9 @@ type
                     );
 
  optionseditty = set of optioneditty;
+ optioneditdbty = (oed_autopost,oed_nofilteredit,oed_nofilterminedit,
+                   oed_nofiltermaxedit,oed_nofindedit);
+ optionseditdbty = set of optioneditdbty;
 
 const
  defaultoptionsedit = [oe_undoonesc,oe_closequery,oe_exitoncursor,

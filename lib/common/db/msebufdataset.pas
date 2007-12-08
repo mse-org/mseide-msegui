@@ -382,7 +382,9 @@ type
                     const alength: integer): integer; overload;
   function addblobcache(const aid: int64; const adata: string): integer; overload;
  end;
- 
+
+ filterediteventty = procedure(const sender: tmsebufdataset;
+                             const akind: filtereditkindty) of object;
  tmsebufdataset = class(tmdbdataset,iblobchache)
   private
    fbrecordcount: integer;
@@ -408,7 +410,7 @@ type
    fonupdateerror: updateerroreventty;
 
    femptybuffer: pintrecordty;
-   ffilterbuffer: pdsrecordty;
+   ffilterbuffer: array[filtereditkindty] of pdsrecordty;
    fcheckfilterbuffer: pdsrecordty;
    fnewvaluebuffer: pdsrecordty; //buffer for applyupdates
    
@@ -423,6 +425,12 @@ type
    flogger: tbufstreamwriter;
    fbeforeapplyupdate: tdatasetnotifyevent;
    fafterapplyupdate: tdatasetnotifyevent;
+   fbeforebeginfilteredit: filterediteventty;
+   fafterbeginfilteredit: filterediteventty;
+   fbeforeendfilteredit: filterediteventty;
+   fafterendfilteredit: filterediteventty;
+   ffiltereditkind: filtereditkindty;
+   
    procedure calcrecordsize;
    function loadbuffer(var buffer: recheaderty): tgetresult;
    function getfieldsize(const datatype: tfieldtype; 
@@ -488,6 +496,7 @@ type
    fblobcount: integer;
    fcurrentbuf: pintrecordty;
 
+   function getfiltereditkind: filtereditkindty;
    function blobsarefetched: boolean;
    function getblobcache: blobcacheinfoarty;
    function findcachedblob(var info: blobcacheinfoty): boolean; overload;
@@ -622,9 +631,16 @@ type
    procedure stringtoparam(const source: msestring; const dest: tparam);
                   //takes care about utf8 conversion
    procedure clearrecord;
-   procedure beginfilteredit;
+   procedure beginfilteredit(const akind: filtereditkindty);
    procedure endfilteredit;
+   function fieldfiltervalue(const afield: tfield): variant;
+   function fieldfiltervalueisnull(const afield: tfield): boolean;
    procedure filterchanged;
+   function locate(const key: integer; const field: tfield;
+                   const options: locateoptionsty = []): locateresultty;
+   function locate(const key: msestring; const field: tfield; 
+                 const options: locateoptionsty = []): locateresultty;
+
    function countvisiblerecords: integer;
    procedure fetchall;
    procedure resetindex; //deactivates all indexes
@@ -641,6 +657,7 @@ type
    function updatestatus: tupdatestatus; override;
    property changecount : integer read getchangecount;
    property bookmarkdata: bookmarkdataty read getbookmarkdata1;
+   property filtereditkind: filtereditkindty read ffiltereditkind write ffiltereditkind;
   published
    property logfilename: filenamety read flogfilename write flogfilename;
    property packetrecords : integer read fpacketrecords write setpacketrecords 
@@ -655,6 +672,14 @@ type
                        write  fbeforeapplyupdate;
    property afterapplyupdate: tdatasetnotifyevent read fafterapplyupdate 
                        write  fafterapplyupdate;
+   property beforebeginfilteredit: filterediteventty
+                       read fbeforebeginfilteredit write fbeforebeginfilteredit;
+   property afterbeginfilteredit: filterediteventty
+                       read fafterbeginfilteredit write fafterbeginfilteredit;
+   property beforeendfilteredit: filterediteventty
+                       read fbeforeendfilteredit write fbeforeendfilteredit;
+   property afterendfilteredit: filterediteventty
+                       read fafterendfilteredit write fafterendfilteredit;
   end;
    
 function getfieldisnull(nullmask: pbyte; const x: integer): boolean;
@@ -694,7 +719,7 @@ type
    FFieldName : String;
    FFieldNo : Longint;
  end;
- 
+{ 
   TDataSetcracker = class(TComponent)
   Private
     FOpenAfterRead : boolean;
@@ -710,7 +735,6 @@ type
     FAfterScroll: TDataSetNotifyEvent;
     FAutoCalcFields: Boolean;
     FBOF: Boolean;
-    {
     FBeforeCancel: TDataSetNotifyEvent;
     FBeforeClose: TDataSetNotifyEvent;
     FBeforeDelete: TDataSetNotifyEvent;
@@ -729,9 +753,8 @@ type
     FConstraints: TCheckConstraints;
     FDisableControlsCount : Integer;
     FDisableControlsState : TDatasetState;
-    }
   end;  
-   
+ }  
 function compblobcache(const a,b): integer;
 var
  lint1: int64;
@@ -1402,6 +1425,7 @@ end;
 procedure tmsebufdataset.dointernalopen;
 var
  int1: integer;
+ kind1: filtereditkindty;
 begin
  for int1:= 0 to fields.count - 1 do begin
   with fields[int1] do begin
@@ -1429,7 +1453,9 @@ begin
  calcrecordsize;
  findexlocal.bindfields;
  femptybuffer:= intallocrecord;
- ffilterbuffer:= pdsrecordty(allocrecordbuffer);
+ for kind1:= low(filtereditkindty) to high(filtereditkindty) do begin
+  ffilterbuffer[kind1]:= pdsrecordty(allocrecordbuffer);
+ end;
  fnewvaluebuffer:= pdsrecordty(allocrecordbuffer);
  updatestate;
  fallpacketsfetched:= false;
@@ -1480,6 +1506,7 @@ end;
 procedure tmsebufdataset.dointernalclose;
 var 
  int1: integer;
+ kind1: filtereditkindty;
 begin
  exclude(fbstate,bs_opening);
  closelogger;
@@ -1493,8 +1520,10 @@ begin
    end;
   end;
   intfreerecord(femptybuffer);
-  intfinalizerecord(@ffilterbuffer^.header);
-  freerecordbuffer(pchar(ffilterbuffer));
+  for kind1:= low(filtereditkindty) to high(filtereditkindty) do begin
+   intfinalizerecord(@ffilterbuffer[kind1]^.header);
+   freerecordbuffer(pchar(ffilterbuffer[kind1]));
+  end;
  // pointer(fnewvaluebuffer^.header.blobinfo):= nil;
  // freerecordbuffer(pchar(fnewvaluebuffer));
   freemem(fnewvaluebuffer); //allways copied by move, needs no finalize
@@ -1912,7 +1941,7 @@ begin
    buffer:= @fcheckfilterbuffer^.header;
   end;
   ord(dsfilter): begin
-   buffer:= @ffilterbuffer^.header;
+   buffer:= @ffilterbuffer[ffiltereditkind]^.header;
   end;
   ord(dscurvalue): begin
    buffer:= @fcurrentbuf^.header;
@@ -2046,7 +2075,7 @@ begin
    result:= @pdsrecordty(calcbuffer)^.header;
   end;
   dsfilter:  begin 
-   result:= @ffilterbuffer^.header;
+   result:= @ffilterbuffer[ffiltereditkind]^.header;
   end;
   else begin
    if bs_internalcalc in fbstate then begin
@@ -3374,7 +3403,7 @@ begin
   checkindex(false);
   fcurrentbuf:= factindexpo^.ind[avalue];
  end;
- tdatasetcracker(self).fbof:= frecno = 0;
+// tdatasetcracker(self).fbof:= frecno = 0;
 end;
 
 procedure tmsebufdataset.clearindex;
@@ -3688,14 +3717,33 @@ begin
  end;
 end;
 
-procedure tmsebufdataset.beginfilteredit;
+function tmsebufdataset.locate(const key: integer; const field: tfield;
+                      const options: locateoptionsty = []): locateresultty;
+begin
+ result:= locaterecord(self,key,field,options);
+end;
+                     
+function tmsebufdataset.locate(const key: msestring; const field: tfield; 
+                      const options: locateoptionsty = []): locateresultty;
+begin
+ result:= locaterecord(self,isutf8,key,field,options);
+end;
+
+procedure tmsebufdataset.beginfilteredit(const akind: filtereditkindty);
 begin
  if state <> dsfilter then begin
+  ffiltereditkind:= akind;
   checkbrowsemode;
+  if checkcanevent(self,tmethod(fbeforebeginfilteredit)) then begin
+   fbeforebeginfilteredit(self,akind);
+  end;
   fbuffercountbefore:= buffercount;
   setbuflistsize(1);
   setstate(dsfilter);
   dataevent(dedatasetchange,0);
+  if checkcanevent(self,tmethod(fafterbeginfilteredit)) then begin
+   fafterbeginfilteredit(self,akind);
+  end;
  end;
 end;
 
@@ -3703,10 +3751,34 @@ procedure tmsebufdataset.endfilteredit;
 begin
  if state = dsfilter then begin
   dataevent(deupdaterecord, 0);
+  if checkcanevent(self,tmethod(fbeforeendfilteredit)) then begin
+   fbeforeendfilteredit(self,ffiltereditkind);
+  end;
   setbuflistsize(fbuffercountbefore);
   setstate(dsbrowse);
   resync([]);
+  if checkcanevent(self,tmethod(fafterendfilteredit)) then begin
+   fafterendfilteredit(self,ffiltereditkind);
+  end;
  end;
+end;
+
+function tmsebufdataset.fieldfiltervalue(const afield: tfield): variant;
+var
+ statebefore: tdatasetstate;
+begin
+ statebefore:= settempstate(dsfilter);
+ result:= afield.asvariant;
+ restorestate(statebefore);
+end;
+
+function tmsebufdataset.fieldfiltervalueisnull(const afield: tfield): boolean;
+var
+ statebefore: tdatasetstate;
+begin
+ statebefore:= settempstate(dsfilter);
+ result:= afield.isnull;
+ restorestate(statebefore);
 end;
 
 procedure tmsebufdataset.checkfilterstate;
@@ -4417,6 +4489,11 @@ begin
 // if frecno = 0 then begin
 //  tdatasetcracker(self).fbof:= true;
 // end;
+end;
+
+function tmsebufdataset.getfiltereditkind: filtereditkindty;
+begin
+ result:= ffiltereditkind;
 end;
 
 { tlocalindexes }

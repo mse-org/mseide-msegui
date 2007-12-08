@@ -35,6 +35,7 @@ type
    function getnumboolean: boolean;
    function getfloatdate: boolean;
    function getint64currency: boolean;
+   function getfiltereditkind: filtereditkindty;
   protected
    procedure setactive (value : boolean); {override;}
    function getactive: boolean;
@@ -51,7 +52,7 @@ type
    destructor destroy; override;
    function locate(const key: integer; const field: tfield;
                    const options: locateoptionsty = []): locateresultty;
-   function locate(const key: string; const field: tfield; 
+   function locate(const key: msestring; const field: tfield; 
                  const options: locateoptionsty = []): locateresultty;
    procedure AppendRecord(const Values: array of const);
    function moveby(const distance: integer): integer;
@@ -87,7 +88,7 @@ begin
  result:= fcontroller.locate(key,field,options);
 end;
 
-function tmsedbf.locate(const key: string; const field: tfield;
+function tmsedbf.locate(const key: msestring; const field: tfield;
                         const options: locateoptionsty = []): locateresultty;
 begin
  result:= fcontroller.locate(key,field,options);
@@ -252,6 +253,11 @@ end;
 function tmsedbf.getint64currency: boolean;
 begin
  result:= false;
+end;
+
+function tmsedbf.getfiltereditkind: filtereditkindty;
+begin
+ result:= fek_filter;
 end;
 
 end.

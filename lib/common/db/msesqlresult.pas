@@ -822,6 +822,8 @@ end;
 
 constructor tsqlresult.create(aowner: tcomponent);
 begin
+ fbof:= true;
+ feof:= true;
  fparams:= tmseparams.create(self);
  ffielddefs:= tsqlresultfielddefs.create(nil);
  fsql:= tsqlstringlist.create;
@@ -924,6 +926,7 @@ begin
  fdatabase.addfielddefs(fcursor,ffielddefs);
  fcols.initfields(self,fcursor,ffielddefs);
  factive:= true;
+ feof:= false;
  next;
  fbof:= true;
  if fafteropen <> nil then begin
@@ -935,8 +938,8 @@ end;
 procedure tsqlresult.close;
 begin
  factive:= false;
- feof:= false;
- fbof:= false;
+ feof:= true;
+ fbof:= true;
  freefldbuffers;
  unprepare;
 // ffielddefs.clear; //is now published

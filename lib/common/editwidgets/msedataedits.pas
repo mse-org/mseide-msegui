@@ -1553,7 +1553,7 @@ begin
    }
   end
   else begin
-   result:= (edited and (oe_autopost in foptionsedit)){ and 
+   result:= (edited and (oed_autopost in foptionsdb)){ and 
                           not (fgridintf.nonullcheck)} or 
               fgridintf.nullcheckneeded(newfocus);
   end;

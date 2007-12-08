@@ -92,10 +92,6 @@ type
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
    function isutf8: boolean; override;
-   function locate(const key: integer; const field: tfield;
-                   const options: locateoptionsty = []): locateresultty;
-   function locate(const key: string; const field: tfield; 
-                 const options: locateoptionsty = []): locateresultty;
    procedure appendrecord(const values: array of const);
    function moveby(const distance: integer): integer;
    procedure cancel; override;
@@ -310,18 +306,6 @@ procedure tmsesqlquery.updateindexdefs;
 begin
  indexdefs.clear;
  inherited;
-end;
-
-function tmsesqlquery.locate(const key: integer; const field: tfield;
-                      const options: locateoptionsty = []): locateresultty;
-begin
- result:= fcontroller.locate(key,field,options);
-end;
-                     
-function tmsesqlquery.locate(const key: string; const field: tfield; 
-                      const options: locateoptionsty = []): locateresultty;
-begin
- result:= fcontroller.locate(key,field,options);
 end;
 
 procedure tmsesqlquery.appendrecord(const values: array of const);

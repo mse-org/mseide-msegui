@@ -1427,12 +1427,6 @@ begin
      syncproc;
     end;
     dataset.bookmark:= bm;
-    {
-    dataset.prior;
-    if result and not dataset.bof then begin
-     dataset.next;
-    end;
-    }
    end
    else begin
     result:= true;

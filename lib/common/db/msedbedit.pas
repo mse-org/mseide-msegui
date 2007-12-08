@@ -117,6 +117,8 @@ type
 
  idbeditfieldlink = interface(inullinterface)
   function getwidget: twidget;
+  function getenabled: boolean;
+  procedure setenabled(const avalue: boolean);
   function getgridintf: iwidgetgrid;
   function getgriddatasource: tdatasource;
   function edited: boolean;
@@ -127,16 +129,22 @@ type
   procedure fieldtovalue;
   procedure setnullvalue;
   function getoptionsedit: optionseditty;
+  function getoptionsdb: optionseditdbty;
   procedure updatereadonlystate;
  end;
 
  tgriddatalink = class;
  
+ editwidgetdatalinkstatety = (ewds_editing,ewds_modified,ewds_filterediting,
+                              ewds_filtereditdisabled);
+ editwidgetdatalinkstatesty = set of editwidgetdatalinkstatety;
+ 
  teditwidgetdatalink = class(tfielddatalink)
   private
-   fediting: boolean;
-   fmodified: boolean;
-   ffilterediting: boolean;
+//   fediting: boolean;
+//   fmodified: boolean;
+//   ffilterediting: boolean;
+   fstate: editwidgetdatalinkstatesty;
    frecordchange: integer;
    fbeginedit: integer;
    fmaxlength: integer;
@@ -199,6 +207,7 @@ type
   published
    property datafield: string read getdatafield write setdatafield;
    property datasource: tdatasource read getdatasource write setdatasource;
+   property optionsdb;
 
    property passwordchar;
    property maxlength;
@@ -239,6 +248,7 @@ type
   published
    property datafield: string read getdatafield write setdatafield;
    property datasource: tdatasource read getdatasource write setdatasource;
+   property optionsdb;
 
    property passwordchar;
    property maxlength;
@@ -279,13 +289,13 @@ type
    property datalink: teditwidgetdatalink read fdatalink;
    property datafield: string read getdatafield write setdatafield;
    property datasource: tdatasource read getdatasource write setdatasource;
-
  end;
  
  tdbdropdownlistedit = class(tcustomdbdropdownlistedit)
   published
    property datafield;
    property datasource;
+   property optionsdb;
    property dropdown;
    property onsetvalue;
    property onbeforedropdown;
@@ -327,6 +337,7 @@ type
    property datafield: string read getdatafield write setdatafield;
    property datasource: tdatasource read getdatasource write setdatasource;
 
+   property optionsdb;
    property valuedefault;
    property onsetvalue;
    property dropdown;
@@ -370,6 +381,7 @@ type
    property datafield: string read getdatafield write setdatafield;
    property datasource: tdatasource read getdatasource write setdatasource;
 
+   property optionsdb;
    property onsetvalue;
    property frame;
  end;
@@ -413,6 +425,7 @@ type
    property datafield: string read getdatafield write setdatafield;
    property datasource: tdatasource read getdatasource write setdatasource;
 
+   property optionsdb;
    property base;
    property bitcount;
    property min;
@@ -453,6 +466,7 @@ type
   published
    property datafield: string read getdatafield write setdatafield;
    property datasource: tdatasource read getdatasource write setdatasource;
+   property optionsdb;
 
    property onsetvalue;
    property bounds_cx  default defaultboxsize;
@@ -493,6 +507,7 @@ type
   published
    property datafield: string read getdatafield write setdatafield;
    property datasource: tdatasource read getdatasource write setdatasource;
+   property optionsdb;
 
    property onsetvalue;
    property min; 
@@ -535,6 +550,7 @@ type
   published
    property datafield: string read getdatafield write setdatafield;
    property datasource: tdatasource read getdatasource write setdatasource;
+   property optionsdb;
    property optionswidget;
    property valuefaces;
    property font;
@@ -589,6 +605,7 @@ type
   published
    property datafield: string read getdatafield write setdatafield;
    property datasource: tdatasource read getdatasource write setdatasource;
+   property optionsdb;
 
    property onsetvalue;
    property bounds_cx  default defaultboxsize;
@@ -630,6 +647,7 @@ type
   published
    property datafield: string read getdatafield write setdatafield;
    property datasource: tdatasource read getdatasource write setdatasource;
+   property optionsdb;
 
    property min stored false;
    property max stored false;
@@ -668,6 +686,7 @@ type
   published
    property datafield: string read getdatafield write setdatafield;
    property datasource: tdatasource read getdatasource write setdatasource;
+   property optionsdb;
  end;
  
  tdbdatetimeedit = class(tcustomdatetimeedit,idbeditfieldlink,idbeditinfo,ireccontrol)
@@ -704,6 +723,7 @@ type
   published
    property datafield: string read getdatafield write setdatafield;
    property datasource: tdatasource read getdatasource write setdatasource;
+   property optionsdb;
 
    property min stored false;
    property max stored false;
@@ -747,6 +767,7 @@ type
   published
    property datafield: string read getdatafield write setdatafield;
    property datasource: tdatasource read getdatasource write setdatasource;
+   property optionsdb;
 
    property min stored false;
    property max stored false;
@@ -796,6 +817,7 @@ type
   published
    property datafield;
    property datasource;
+   property optionsdb;
    property valuedefault;
    property base;
    property bitcount;
@@ -833,6 +855,7 @@ type
    property text_true: msestring read ftext_true write settext_true;
    property datafield;
    property datasource;
+   property optionsdb;
    property valuedefault;
    property onsetvalue;
  end;
@@ -1320,6 +1343,7 @@ type
    property datalink: tstringcoldatalink read fdatalink;
   published
    property datafield: string read getdatafield write setdatafield;
+   property optionsdb: optionseditdbty read foptionsdb write foptionsdb;
    property focusrectdist;
    property textflags;
    property textflagsactive;
@@ -1333,12 +1357,16 @@ type
 
  tdbstringcols = class(tstringcols)
   private
+   foptionsdb: optionseditdbty;
    function getcols(const index: integer): tdbstringcol;
+   procedure setoptionsdb(const avalue: optionseditdbty);
   protected
    function getcolclass: stringcolclassty; override;
    procedure datasourcechanged;
   public
    property cols[const index: integer]: tdbstringcol read getcols; default; //last!
+  published
+   property optionsdb: optionseditdbty read foptionsdb write setoptionsdb default [];
  end;
  
  tdbstringindicatorcol = class(tfixcol)
@@ -1679,7 +1707,7 @@ type
  
 implementation
 uses
- msestockobjects,mseshapes,msereal,
+ msestockobjects,mseshapes,msereal,msebits,
  mseactions,mseact,rtlconsts,msedrawtext,sysutils;
 
 type
@@ -1995,9 +2023,16 @@ end;
 
 procedure teditwidgetdatalink.setediting(avalue: boolean);
 begin
- if fediting <> avalue then begin
-  fediting := avalue;
-  fmodified := False;
+ if (ewds_editing in fstate) <> avalue then begin
+  if avalue then begin
+   include(fstate,ewds_editing);
+  end
+  else begin
+   exclude(fstate,ewds_editing);
+  end;
+//  fediting := avalue;
+//  fmodified := False;
+  exclude(fstate,ewds_modified);
  end;
 end;
 
@@ -2006,18 +2041,20 @@ begin
  if canmodify then begin
   inherited edit;
  end;
- result:= fediting;
+ result:= ewds_editing in fstate;
 end;
 
 function teditwidgetdatalink.canmodify: Boolean;
 begin
  result:= (field <> nil) and 
-           (ffilterediting or not readonly and not field.readonly);
+           ((ewds_filterediting in fstate) or not readonly and 
+                           not field.readonly);
 end;
 
 procedure teditwidgetdatalink.modified;
 begin
- if not editing and (frecordchange = 0) and not ffilterediting then begin
+ if not editing and (frecordchange = 0) and 
+                    not (ewds_filterediting in fstate) then begin
   inc(fbeginedit);
   try
    edit;
@@ -2025,7 +2062,7 @@ begin
    dec(fbeginedit);
   end;
  end;
- fmodified := True;
+ include(fstate,ewds_modified);
 end;
 
 procedure teditwidgetdatalink.updateoptionsedit(var aoptions: optionseditty);
@@ -2034,7 +2071,7 @@ var
 begin
  state1:= fintf.getwidget.ComponentState;
  if state1 * [cswriting,csdesigning] = [] then begin
-  if not ffilterediting and ((datasource = nil) or
+  if not (ewds_filterediting in fstate) and ((datasource = nil) or
           not editing and not (canmodify and datasource.AutoEdit)) then begin
    include(aoptions,oe_readonly);
   end;
@@ -2050,13 +2087,40 @@ end;
 procedure teditwidgetdatalink.dataevent(event: tdataevent; info: ptrint);
 var
  bo1: boolean;
+ bo2: boolean;
+ aoptions: optionseditdbty;
 begin
- bo1:= ffilterediting;
+ bo1:= ewds_filterediting in fstate;
  if event = deupdatestate then begin
-  ffilterediting:= (dataset <> nil) and (dataset.state = dsfilter);
+//  ffilterediting:= (dataset <> nil) and (dataset.state = dsfilter);
+  if (dataset <> nil) and (dataset.state = dsfilter) then begin
+   include(fstate,ewds_filterediting);
+  end
+  else begin
+   exclude(fstate,ewds_filterediting);
+  end;
  end;
  inherited;
- if bo1 <> ffilterediting then begin
+ if bo1 <> (ewds_filterediting in fstate) then begin
+  if bo1 then begin
+   if ewds_filtereditdisabled in fstate then begin
+    exclude(fstate,ewds_filtereditdisabled);
+    fintf.setenabled(true);
+   end;
+  end
+  else begin
+   aoptions:= fintf.getoptionsdb;
+   case filtereditkind of 
+    fek_filtermin: bo2:= oed_nofilterminedit in aoptions;
+    fek_filtermax: bo2:= oed_nofiltermaxedit in aoptions;
+    fek_find: bo2:= oed_nofindedit in aoptions;
+    else bo2:= oed_nofilteredit in aoptions; //fek_filter
+   end;
+   if bo2 then begin
+    include(fstate,ewds_filtereditdisabled);
+    fintf.setenabled(false);
+   end;
+  end;
   fintf.updatereadonlystate;
  end;
 end;
@@ -2064,7 +2128,7 @@ end;
 procedure teditwidgetdatalink.activechanged;
 begin
  if not active then begin
-  ffilterediting:= false;
+  fstate:= fstate - [ewds_filterediting,ewds_filtereditdisabled];
  end;
  fintf.updatereadonlystate;
  try
@@ -2117,7 +2181,8 @@ begin
    inc(frecordchange);
    try
     if (field <> nil) and active and 
-      not (dataset.eof and dataset.bof and (dataset.state <> dsinsert)) then begin
+      not (dataset.eof and dataset.bof and 
+              not (dataset.state in [dsinsert,dsfilter])) then begin
      if field.isnull then begin
       fintf.setnullvalue;
      end
@@ -2135,7 +2200,7 @@ begin
     dec(frecordchange);
    end;
   end;
-  fmodified := False;
+  exclude(fstate,ewds_modified);
  end;
 end;
 
@@ -2144,7 +2209,7 @@ begin
  inc(fcanclosing);
  try
   if fintf.getwidget.canclose(nil) then begin
-   fmodified:= false;
+   exclude(fstate,ewds_modified);
   end
   else begin
    raise eabort.create('');
@@ -2174,13 +2239,13 @@ begin
   widget1:= fintf.getwidget;
   if (field <> nil) and not ((oe_checkmrcancel in fintf.getoptionsedit) and
              (widget1.window.modalresult = mr_cancel)) then begin
-   if ffilterediting then begin
+   if ewds_filterediting in fstate then begin
     fintf.valuetofield;
    end
    else begin
     if editing then begin
      fintf.valuetofield;
-     if (oe_autopost in fintf.getoptionsedit) and active then begin
+     if (oed_autopost in fintf.getoptionsdb) and active then begin
       widget1:= widget1.parentwidget;
       try
        inc(fposting);
@@ -6028,6 +6093,7 @@ end;
 constructor tdbstringcol.create(const agrid: tcustomgrid; 
                          const aowner: tgridarrayprop);
 begin
+ foptionsdb:= tdbstringcols(aowner).foptionsdb;
  fdatalink:= tstringcoldatalink.create(idbeditfieldlink(self));
  inherited;
  fdatalink.griddatasourcechanged;
@@ -6109,7 +6175,7 @@ end;
 
 function tdbstringcol.edited: boolean;
 begin
- result:= fdatalink.fmodified;
+ result:= ewds_modified in fdatalink.fstate;
 end;
 
 procedure tdbstringcol.initfocus;
@@ -6198,6 +6264,26 @@ var
 begin
  for int1:= 0 to count - 1 do begin
   cols[int1].fdatalink.griddatasourcechanged;
+ end;
+end;
+
+procedure tdbstringcols.setoptionsdb(const avalue: optionseditdbty);
+var
+ int1: integer;
+ mask: {$ifdef FPC}longword{$else}byte{$endif};
+begin
+ if foptionsdb <> avalue then begin
+  mask:= {$ifdef FPC}longword{$else}word{$endif}(avalue) xor
+  {$ifdef FPC}longword{$else}word{$endif}(foptionsdb);
+  foptionsdb := avalue;
+  if not (csloading in fgrid.componentstate) then begin
+   for int1:= 0 to count - 1 do begin
+    tdbstringcol(items[int1]).optionsdb:= optionseditdbty(
+        replacebits({$ifdef FPC}longword{$else}word{$endif}(avalue),
+  {$ifdef FPC}longword{$else}word{$endif}(tdbstringcol(items[int1]).optionsdb),
+                             mask));
+   end;
+  end;
  end;
 end;
 
@@ -6451,7 +6537,7 @@ begin
  inherited;
  if accept and (ffocusedcell.col >= 0) then begin
   with datacols[ffocusedcell.col] do begin;
-   if fdatalink.fmodified and self.fdatalink.active then begin
+   if (ewds_modified in fdatalink.fstate) and self.fdatalink.active then begin
     fdatalink.dataentered;
    end;
   end;

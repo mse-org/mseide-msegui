@@ -11,7 +11,7 @@ unit msememds;
 {$ifdef FPC}{$mode objfpc}{$h+}{$INTERFACES CORBA}{$endif}
 interface
 uses
- classes,db,memds,msedb;
+ classes,db,memds,msedb,msestrings;
 type
  tmsememdataset = class(tmemdataset,imselocate,idscontroller,igetdscontroller)
   private
@@ -32,6 +32,7 @@ type
    function getnumboolean: boolean;
    function getfloatdate: boolean;
    function getint64currency: boolean;
+   function getfiltereditkind: filtereditkindty;
   protected
    procedure setactive (value : boolean);{ override;}
    function getactive: boolean;
@@ -47,7 +48,7 @@ type
    destructor destroy; override;
    function locate(const key: integer; const field: tfield;
                    const options: locateoptionsty = []): locateresultty;
-   function locate(const key: string; const field: tfield; 
+   function locate(const key: msestring; const field: tfield; 
                  const options: locateoptionsty = []): locateresultty;
    procedure AppendRecord(const Values: array of const);
    procedure cancel; override;
@@ -80,7 +81,7 @@ begin
  result:= fcontroller.locate(key,field,options);
 end;
 
-function tmsememdataset.locate(const key: string;
+function tmsememdataset.locate(const key: msestring;
         const field: tfield; const options: locateoptionsty = []): locateresultty;
 begin
  result:= fcontroller.locate(key,field,options);
@@ -231,6 +232,11 @@ end;
 function tmsememdataset.getint64currency: boolean;
 begin
  result:= false;
+end;
+
+function tmsememdataset.getfiltereditkind: filtereditkindty;
+begin
+ result:= fek_filter;
 end;
 
 end.

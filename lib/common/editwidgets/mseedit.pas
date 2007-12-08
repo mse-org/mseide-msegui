@@ -314,6 +314,7 @@ type
   protected
    feditor: tinplaceedit;
    foptionsedit: optionseditty;
+   foptionsdb: optionseditdbty;
    function geteditor: tinplaceedit;
    function geteditfont: tfont; virtual;
    procedure setupeditor; virtual;
@@ -323,6 +324,7 @@ type
    procedure enabledchanged; override;
 
    function getoptionsedit: optionseditty; virtual;//iedit
+   function getoptionsdb: optionseditdbty;
    function hasselection: boolean; virtual;
    procedure setoptionsedit(const avalue: optionseditty); virtual;
    procedure updatereadonlystate; virtual;
@@ -344,7 +346,7 @@ type
    procedure readpwchar(reader: treader);
    procedure writepwchar(writer: twriter);
    procedure defineproperties(filer: tfiler); override;
-   
+   property optionsdb: optionseditdbty read foptionsdb write foptionsdb;   
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -1058,10 +1060,18 @@ begin
  result:= foptionsedit;
 end;
 
+function tcustomedit.getoptionsdb: optionseditdbty;
+begin
+ result:= foptionsdb;
+end;
+
 procedure tcustomedit.setoptionsedit(const avalue: optionseditty);
 begin
+ if oe_autopost in avalue then begin
+  include(foptionsdb,oed_autopost);
+ end;
  if foptionsedit <> avalue then begin
-  foptionsedit:= avalue;
+  foptionsedit:= avalue - [oe_autopost];
   updatereadonlystate;
  end;
 end;

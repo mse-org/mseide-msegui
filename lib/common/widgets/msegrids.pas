@@ -78,7 +78,7 @@ type
                     scoe_uppercase,
                     scoe_lowercase,
                     
-                    scoe_autopost,
+                    scoe_autopost, //depreciated, moved to optionsdb
                     scoe_hintclippedtext
                           );
 
@@ -550,7 +550,6 @@ type
  tcustomstringcol = class(tdatacol)
   private
    ftextflagsactive: textflagsty;
-   foptionsedit: stringcoleditoptionsty;
    fonsetvalue: setstringeventty;
    fondataentered: notifyeventty;
    procedure settextflags(const avalue: textflagsty);
@@ -561,10 +560,14 @@ type
    function istextflagsactivestored: boolean;
    function isoptionseditstored: boolean;
 }
-   function getoptionsedit: optionseditty;
    procedure settextflagsactive(const avalue: textflagsty);
+   procedure setoptionsedit(const avalue: stringcoleditoptionsty);
   protected
    ftextinfo: drawtextinfoty;
+   foptionsedit: stringcoleditoptionsty;
+   foptionsdb: optionseditdbty;
+   function getoptionsedit: optionseditty;
+   function getoptionsdb: optionseditdbty;
    function getitems(aindex: integer): msestring; virtual;
    procedure setitems(aindex: integer; const Value: msestring);
    function createdatalist: tdatalist; override;
@@ -585,12 +588,11 @@ type
                       const processeditchars: boolean = false); overload;
    property items[aindex: integer]: msestring read getitems write setitems; default;
    property textflags: textflagsty read ftextinfo.flags write settextflags
-               {stored istextflagsstored} default defaultcoltextflags;
+                          default defaultcoltextflags;
    property textflagsactive: textflagsty read ftextflagsactive
-             write settextflagsactive {stored istextflagsactivestored}
-                    default defaultactivecoltextflags;
-   property optionsedit: stringcoleditoptionsty read foptionsedit write foptionsedit
-               {stored isoptionseditstored} default defaultstringcoleditoptions;
+             write settextflagsactive default defaultactivecoltextflags;
+   property optionsedit: stringcoleditoptionsty read foptionsedit 
+               write setoptionsedit default defaultstringcoleditoptions;
    property font;
    property datalist: tmsestringdatalist read getdatalist write setdatalist;
    property onsetvalue: setstringeventty read fonsetvalue write fonsetvalue;
@@ -1007,7 +1009,7 @@ end;
    function getcols(const index: integer): tstringcol;
    procedure settextflags(avalue: textflagsty);
    procedure settextflagsactive(avalue: textflagsty);
-   procedure setoptionsedit(const avalue: stringcoleditoptionsty);
+   procedure setoptionsedit(avalue: stringcoleditoptionsty);
   protected
    function getcolclass: stringcolclassty; virtual;
   public
@@ -1857,9 +1859,6 @@ begin
                longword({$ifdef FPC}longword{$else}word{$endif}(source)) 
                             shl stringcoloptionseditshift,
                longword(dest),longword(stringcoloptionseditmask)));
- if scoe_autopost in source then begin
-  include(dest,oe_autopost);
- end;
 end;
 
 { tcellframe }
@@ -4651,6 +4650,11 @@ begin
  stringcoltooptionsedit(foptionsedit,result);
 end;
 
+function tcustomstringcol.getoptionsdb: optionseditdbty;
+begin
+ result:= foptionsdb;
+end;
+
 procedure tcustomstringcol.docellevent(var info: celleventinfoty);
 var
  hintinfo: hintinfoty;
@@ -4664,6 +4668,14 @@ begin
   application.showhint(fgrid,hintinfo);
  end;
  inherited;
+end;
+
+procedure tcustomstringcol.setoptionsedit(const avalue: stringcoleditoptionsty);
+begin
+ if scoe_autopost in avalue then begin
+  include(foptionsdb,oed_autopost);
+ end;
+ foptionsedit:= avalue - [scoe_autopost];
 end;
 
 { tfixcol }
@@ -5631,11 +5643,12 @@ begin
  end;
 end;
 
-procedure tstringcols.setoptionsedit(const avalue: stringcoleditoptionsty);
+procedure tstringcols.setoptionsedit(avalue: stringcoleditoptionsty);
 var
  int1: integer;
  mask: {$ifdef FPC}longword{$else}byte{$endif};
 begin
+ exclude(avalue,scoe_autopost);
  if foptionsedit <> avalue then begin
   mask:= {$ifdef FPC}longword{$else}word{$endif}(avalue) xor
   {$ifdef FPC}longword{$else}word{$endif}(foptionsedit);

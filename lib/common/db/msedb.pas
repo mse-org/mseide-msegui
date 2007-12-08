@@ -45,6 +45,7 @@ type
   function isutf8: boolean;
  end; 
 
+ filtereditkindty = (fek_filter,fek_filtermin,fek_filtermax,fek_find);
  locateresultty = (loc_timeout,loc_notfound,loc_ok); 
  locateoptionty = (loo_caseinsensitive,loo_partialkey,
                         loo_noforeward,loo_nobackward);
@@ -54,7 +55,7 @@ type
  imselocate = interface(inullinterface)['{2680958F-F954-DA11-9015-00C0CA1308FF}']
    function locate(const key: integer; const field: tfield;
                      const options: locateoptionsty = []): locateresultty;
-   function locate(const key: string; const field: tfield;
+   function locate(const key: msestring; const field: tfield;
                  const options: locateoptionsty = []): locateresultty;
  end;
   
@@ -605,12 +606,14 @@ type
    procedure activechanged; override;
    function getdataset: tdataset;
    function getutf8: boolean;
+   function getfiltereditkind: filtereditkindty;
    function  GetActiveRecord: Integer; override;
   public
    function moveby(distance: integer): integer; override;
    property dataset: tdataset read getdataset;
    property dscontroller: tdscontroller read fdscontroller;
    property utf8: boolean read getutf8;
+   property filtereditkind: filtereditkindty read getfiltereditkind;
    function canclose: boolean;
    property recnonullbased: integer read getrecnonullbased 
                                           write setrecnonullbased;
@@ -725,6 +728,7 @@ type
   function getnumboolean: boolean;
   function getfloatdate: boolean;
   function getint64currency: boolean;
+  function getfiltereditkind: filtereditkindty;
  end;
 
  igetdscontroller = interface(inullinterface)
@@ -775,6 +779,7 @@ type
                       const acancelresync: boolean = true);
    destructor destroy; override;
    function isutf8: boolean;
+   function filtereditkind: filtereditkindty;
    function locate(const key: integer; const field: tfield;
                        const options: locateoptionsty = []): locateresultty;
                        overload;
@@ -1002,6 +1007,12 @@ function checkfieldcompatibility(const afield: tfield;
                      const adatatype: tfieldtype): boolean;
            //true if ok
 function vartorealty(const avalue: variant): realty;
+function locaterecord(const adataset: tdataset; const autf8: boolean; 
+                         const key: msestring; const field: tfield;
+                         const options: locateoptionsty = []): locateresultty;
+function locaterecord(const adataset: tdataset; const key: integer;
+                       const field: tfield;
+                       const options: locateoptionsty = []): locateresultty;
 
 function encodesqlstring(const avalue: msestring): msestring;
 function encodesqlblob(const avalue: string): msestring;
@@ -1494,6 +1505,215 @@ begin
   {$else}
   result:= sender.asstring;
   {$endif}
+ end;
+end;
+
+procedure docheckbrowsemode(const adataset: tdataset);
+begin
+ with adataset do begin
+  checkbrowsemode;
+  if state <> dsbrowse then begin
+   databaseerror('Dataset not in browse mode.',adataset);
+  end;
+ end;
+end;
+
+function locaterecord(const adataset: tdataset; const key: integer;
+                       const field: tfield;
+                       const options: locateoptionsty = []): locateresultty;
+var
+ bm: string;
+begin
+ docheckbrowsemode(adataset);
+ with adataset do begin
+  result:= loc_notfound;
+  bm:= bookmark;
+  disablecontrols;
+  try
+   if not (loo_noforeward in options) then begin
+    while not eof do begin
+     if field.asinteger = key then begin
+      result:= loc_ok;
+      exit;
+     end;
+     next;
+    end;
+   end;
+   bookmark:= bm;
+   if not (loo_nobackward in options) then begin
+    while true do begin
+     if field.asinteger = key then begin
+      result:= loc_ok;
+      exit;
+     end;
+     if bof then begin
+      break;
+     end;
+     prior;
+    end;
+   end;
+  finally
+   try
+    if result <> loc_ok then begin
+     bookmark:= bm;
+    end;
+   finally
+    enablecontrols;
+   end;
+  end;
+ end;
+end;
+
+function locaterecord(const adataset: tdataset; const autf8: boolean; 
+                         const key: msestring; const field: tfield;
+                         const options: locateoptionsty = []): locateresultty;
+var
+ int2: integer;
+ str1,str2,bm: string;
+ mstr1,mstr2: msestring;
+ caseinsensitive: boolean;
+ ismsestringfield: boolean;
+ 
+ function checkmsestring: boolean;
+ var
+  int1: integer;
+ begin
+  if ismsestringfield then begin
+   mstr2:= tmsestringfield(field).asmsestring;
+  end
+  else begin
+   if autf8 then begin
+    mstr2:= utf8tostring(field.asstring);
+   end
+   else begin
+    mstr2:= field.asstring;
+   end;
+  end;
+  if caseinsensitive then begin
+   mstr2:= mseuppercase(mstr2);      //todo: optimize
+  end;
+  result:= true;
+  for int1:= 0 to int2 - 1 do begin
+   if pmsechar(mstr1)[int1] <> pmsechar(mstr2)[int1] then begin
+    result:= false;
+    break;
+   end;
+   if pmsechar(mstr1)[int1] = #0 then begin
+    break;
+   end;
+  end;
+ end;
+ 
+ function checkcasesensitive: boolean;
+ var
+  int1: integer;
+ begin
+  str2:= field.asstring;
+  result:= true;
+  for int1:= 0 to int2 - 1 do begin
+   if pchar(str1)[int1] <> pchar(str2)[int1] then begin
+    result:= false;
+    break;
+   end;
+   if pchar(str1)[int1] = #0 then begin
+    break;
+   end;
+  end;
+ end;
+ 
+begin
+ ismsestringfield:= field is tmsestringfield;
+ docheckbrowsemode(adataset);
+ with adataset do begin
+  result:= loc_notfound;
+  bm:= bookmark;
+  caseinsensitive:= loo_caseinsensitive in options;
+  if caseinsensitive or ismsestringfield then begin 
+   if caseinsensitive then begin
+    mstr1:= mseuppercase(key);
+   end
+   else begin
+    mstr1:= key;
+   end;     
+   if loo_partialkey in options then begin
+    int2:= length(mstr1);
+   end
+   else begin
+    int2:= bigint;
+   end;
+  end
+  else begin
+   if autf8 then begin
+    str1:= stringtoutf8(key);
+   end
+   else begin
+    str1:= key;
+   end;
+   if loo_partialkey in options then begin
+    int2:= length(str1);
+   end
+   else begin
+    int2:= bigint;
+   end;
+  end;
+  disablecontrols;
+  try
+   if not (loo_noforeward in options) then begin
+    if caseinsensitive or ismsestringfield then begin
+     while not eof do begin
+      if checkmsestring then begin
+       result:= loc_ok;
+       exit;
+      end;
+      next;
+     end;
+    end
+    else begin
+     while not eof do begin
+      if checkcasesensitive then begin
+       result:= loc_ok;
+       exit;
+      end;
+      next;
+     end;
+    end;
+    bookmark:= bm;
+   end;
+   if not (loo_nobackward in options) then begin
+    if caseinsensitive or ismsestringfield then begin
+     while true do begin
+      if checkmsestring then begin
+       result:= loc_ok;
+       exit;
+      end;
+      if bof then begin
+       break;
+      end;
+      prior;
+     end;
+    end
+    else begin
+     while true do begin
+      if checkcasesensitive then begin
+       result:= loc_ok;
+       exit;
+      end;
+      if bof then begin
+       break;
+      end;
+      prior;
+     end;
+    end;
+   end;
+  finally
+   try
+    if result <> loc_ok then begin
+     bookmark:= bm;
+    end;
+   finally
+    enablecontrols;
+   end;
+  end;
  end;
 end;
 
@@ -3074,6 +3294,14 @@ begin
  result:= (fdscontroller <> nil) and (dso_utf8 in fdscontroller.foptions);
 end;
 
+function tmsedatalink.getfiltereditkind: filtereditkindty;
+begin
+ result:= fek_filter;
+ if fdscontroller <> nil then begin
+  result:= fdscontroller.filtereditkind;
+ end;
+end;
+
 function tmsedatalink.getdataset: tdataset;
 begin
  if datasource <> nil then begin
@@ -3615,188 +3843,14 @@ end;
 
 function tdscontroller.locate(const key: integer; const field: tfield;
                               const options: locateoptionsty = []): locateresultty;
-var
- bm: string;
 begin
- with tdataset(fowner) do begin
-  result:= loc_notfound;
-  bm:= bookmark;
-  disablecontrols;
-  try
-   if not (loo_noforeward in options) then begin
-    while not eof do begin
-     if field.asinteger = key then begin
-      result:= loc_ok;
-      exit;
-     end;
-     next;
-    end;
-   end;
-   bookmark:= bm;
-   if not (loo_nobackward in options) then begin
-    while not bof do begin
-     if field.asinteger = key then begin
-      result:= loc_ok;
-      exit;
-     end;
-     prior;
-    end;
-   end;
-  finally
-   try
-    if result <> loc_ok then begin
-     bookmark:= bm;
-    end;
-   finally
-    enablecontrols;
-   end;
-  end;
- end;
+ result:= locaterecord(tdataset(fowner),key,field,options);
 end;
 
 function tdscontroller.locate(const key: msestring; const field: tfield;
                          const options: locateoptionsty = []): locateresultty;
-var
- int2: integer;
- str1,str2,bm: string;
- mstr1,mstr2: msestring;
- caseinsensitive: boolean;
- ismsestringfield: boolean;
- 
- function checkmsestring: boolean;
- var
-  int1: integer;
- begin
-  if ismsestringfield then begin
-   mstr2:= tmsestringfield(field).asmsestring;
-  end
-  else begin
-   if dso_utf8 in foptions then begin
-    mstr2:= utf8tostring(field.asstring);
-   end
-   else begin
-    mstr2:= field.asstring;
-   end;
-  end;
-  if caseinsensitive then begin
-   mstr2:= mseuppercase(mstr2);      //todo: optimize
-  end;
-  result:= true;
-  for int1:= 0 to int2 - 1 do begin
-   if pmsechar(mstr1)[int1] <> pmsechar(mstr2)[int1] then begin
-    result:= false;
-    break;
-   end;
-   if pmsechar(mstr1)[int1] = #0 then begin
-    break;
-   end;
-  end;
- end;
- 
- function checkcasesensitive: boolean;
- var
-  int1: integer;
- begin
-  str2:= field.asstring;
-  result:= true;
-  for int1:= 0 to int2 - 1 do begin
-   if pchar(str1)[int1] <> pchar(str2)[int1] then begin
-    result:= false;
-    break;
-   end;
-   if pchar(str1)[int1] = #0 then begin
-    break;
-   end;
-  end;
- end;
- 
 begin
- ismsestringfield:= field is tmsestringfield;
- with tdataset(fowner) do begin
-  result:= loc_notfound;
-  bm:= bookmark;
-  caseinsensitive:= loo_caseinsensitive in options;
-  if caseinsensitive or ismsestringfield then begin 
-   if caseinsensitive then begin
-    mstr1:= mseuppercase(key);
-   end
-   else begin
-    mstr1:= key;
-   end;     
-   if loo_partialkey in options then begin
-    int2:= length(mstr1);
-   end
-   else begin
-    int2:= bigint;
-   end;
-  end
-  else begin
-   if dso_utf8 in foptions then begin
-    str1:= stringtoutf8(key);
-   end
-   else begin
-    str1:= key;
-   end;
-   if loo_partialkey in options then begin
-    int2:= length(str1);
-   end
-   else begin
-    int2:= bigint;
-   end;
-  end;
-  disablecontrols;
-  try
-   if not (loo_noforeward in options) then begin
-    if caseinsensitive or ismsestringfield then begin
-     while not eof do begin
-      if checkmsestring then begin
-       result:= loc_ok;
-       exit;
-      end;
-      next;
-     end;
-    end
-    else begin
-     while not eof do begin
-      if checkcasesensitive then begin
-       result:= loc_ok;
-       exit;
-      end;
-      next;
-     end;
-    end;
-    bookmark:= bm;
-   end;
-   if not (loo_nobackward in options) then begin
-    if caseinsensitive or ismsestringfield then begin
-     while not bof do begin
-      if checkmsestring then begin
-       result:= loc_ok;
-       exit;
-      end;
-      prior;
-     end;
-    end
-    else begin
-     while not bof do begin
-      if checkcasesensitive then begin
-       result:= loc_ok;
-       exit;
-      end;
-      prior;
-     end;
-    end;
-   end;
-  finally
-   try
-    if result <> loc_ok then begin
-     bookmark:= bm;
-    end;
-   finally
-    enablecontrols;
-   end;
-  end;
- end;
+ result:= locaterecord(tdataset(fowner),dso_utf8 in foptions,key,field,options);
 end;
 
 procedure tdscontroller.appendrecord(const values: array of const);
@@ -4287,6 +4341,10 @@ begin
  result:= dso_utf8 in foptions;
 end;
 
+function tdscontroller.filtereditkind: filtereditkindty;
+begin
+ result:= fintf.getfiltereditkind;
+end;
 
 { tmsedatasource }
 

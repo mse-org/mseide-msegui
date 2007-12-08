@@ -2,7 +2,7 @@ unit msezeos;
 {$ifdef FPC}{$mode objfpc}{$h+}{$INTERFACES CORBA}{$endif}
 interface
 uses
- classes,db,ZDataset,msedb,ZStoredProcedure;
+ classes,db,ZDataset,msedb,ZStoredProcedure,msestrings;
 type
  tmsezreadonlyquery = class(tzreadonlyquery,imselocate,idscontroller,
                                igetdscontroller,isqlpropertyeditor)
@@ -25,6 +25,7 @@ type
    function getnumboolean: boolean;
    function getfloatdate: boolean;
    function getint64currency: boolean;
+   function getfiltereditkind: filtereditkindty;
   protected
    procedure setactive (value : boolean);{ override;}
    function getactive: boolean;
@@ -40,7 +41,7 @@ type
    destructor destroy; override;
    function locate(const key: integer; const field: tfield;
                    const aoptions: locateoptionsty = []): locateresultty;
-   function locate(const key: string; const field: tfield; 
+   function locate(const key: msestring; const field: tfield; 
                  const aoptions: locateoptionsty = []): locateresultty;
    procedure AppendRecord(const Values: array of const);
    procedure cancel; override;
@@ -72,6 +73,7 @@ type
    function getnumboolean: boolean;
    function getfloatdate: boolean;
    function getint64currency: boolean;
+   function getfiltereditkind: filtereditkindty;
   protected
    procedure setactive (value : boolean);{ override;}
    function getactive: boolean;
@@ -87,7 +89,7 @@ type
    destructor destroy; override;
    function locate(const key: integer; const field: tfield;
                    const aoptions: locateoptionsty = []): locateresultty;
-   function locate(const key: string; const field: tfield; 
+   function locate(const key: msestring; const field: tfield; 
                  const aoptions: locateoptionsty = []): locateresultty;
    procedure AppendRecord(const Values: array of const);
    procedure cancel; override;
@@ -117,6 +119,7 @@ type
    function getnumboolean: boolean;
    function getfloatdate: boolean;
    function getint64currency: boolean;
+   function getfiltereditkind: filtereditkindty;
   protected
    procedure setactive (value : boolean);{ override;}
    function getactive: boolean;
@@ -132,7 +135,7 @@ type
    destructor destroy; override;
    function locate(const key: integer; const field: tfield;
                    const aoptions: locateoptionsty = []): locateresultty;
-   function locate(const key: string; const field: tfield; 
+   function locate(const key: msestring; const field: tfield; 
                  const aoptions: locateoptionsty = []): locateresultty;
    procedure AppendRecord(const Values: array of const);
    procedure cancel; override;
@@ -162,6 +165,7 @@ type
    function getnumboolean: boolean;
    function getfloatdate: boolean;
    function getint64currency: boolean;
+   function getfiltereditkind: filtereditkindty;
   protected
    procedure setactive (value : boolean);{ override;}
    function getactive: boolean;
@@ -177,7 +181,7 @@ type
    destructor destroy; override;
    function locate(const key: integer; const field: tfield;
                    const aoptions: locateoptionsty = []): locateresultty;
-   function locate(const key: string; const field: tfield; 
+   function locate(const key: msestring; const field: tfield; 
                  const aoptions: locateoptionsty = []): locateresultty;
    procedure AppendRecord(const Values: array of const);
    procedure cancel; override;
@@ -210,7 +214,7 @@ begin
  result:= fcontroller.locate(key,field,aoptions);
 end;
 
-function tmsezreadonlyquery.locate(const key: string;
+function tmsezreadonlyquery.locate(const key: msestring;
         const field: tfield; const aoptions: locateoptionsty = []): locateresultty;
 begin
  result:= fcontroller.locate(key,field,aoptions);
@@ -365,6 +369,11 @@ begin
  result:= false;
 end;
 
+function tmsezreadonlyquery.getfiltereditkind: filtereditkindty;
+begin
+ result:= fek_filter;
+end;
+
 { tmsezquery }
 
 constructor tmsezquery.create(aowner: tcomponent);
@@ -385,7 +394,7 @@ begin
  result:= fcontroller.locate(key,field,aoptions);
 end;
 
-function tmsezquery.locate(const key: string;
+function tmsezquery.locate(const key: msestring;
         const field: tfield; const aoptions: locateoptionsty = []): locateresultty;
 begin
  result:= fcontroller.locate(key,field,aoptions);
@@ -540,6 +549,11 @@ begin
  result:= false;
 end;
 
+function tmsezquery.getfiltereditkind: filtereditkindty;
+begin
+ result:= fek_filter;
+end;
+
 { tmseztable }
 
 constructor tmseztable.create(aowner: tcomponent);
@@ -560,7 +574,7 @@ begin
  result:= fcontroller.locate(key,field,aoptions);
 end;
 
-function tmseztable.locate(const key: string;
+function tmseztable.locate(const key: msestring;
         const field: tfield; const aoptions: locateoptionsty = []): locateresultty;
 begin
  result:= fcontroller.locate(key,field,aoptions);
@@ -710,6 +724,11 @@ begin
  result:= false;
 end;
 
+function tmseztable.getfiltereditkind: filtereditkindty;
+begin
+ result:= fek_filter;
+end;
+
 { tmsezstoredproc }
 
 constructor tmsezstoredproc.create(aowner: tcomponent);
@@ -730,7 +749,7 @@ begin
  result:= fcontroller.locate(key,field,aoptions);
 end;
 
-function tmsezstoredproc.locate(const key: string;
+function tmsezstoredproc.locate(const key: msestring;
         const field: tfield; const aoptions: locateoptionsty = []): locateresultty;
 begin
  result:= fcontroller.locate(key,field,aoptions);
@@ -878,6 +897,11 @@ end;
 function tmsezstoredproc.getint64currency: boolean;
 begin
  result:= false;
+end;
+
+function tmsezstoredproc.getfiltereditkind: filtereditkindty;
+begin
+ result:= fek_filter;
 end;
 
 end.
