@@ -54,7 +54,7 @@ const
   'Ignorar'     //mr_ignore
   );
 
- es_stockcaption: stockcaptionty = (
+ es_stockcaption: stockcaptionaty = (
   '',                           //sc_none
   'es inv'#225'lido',           //sc_is_invalid
   'Error de formato',           //sc_Format_error
@@ -95,7 +95,24 @@ const
   'Todo',                              //sc_All
   'Confirme',                          //sc_Confirmation
   #191'Borrar el registro?',           //sc_Delete_record
-  'Cerrar p'#225'gina'                 //sc_close_page
+  'Cerrar p'#225'gina',                 //sc_close_page
+  'First',              //sc_first
+  'Prior',              //sc_prior
+  'Next',               //sc_next
+  'Last',               //sc_last
+  'Append',             //sc_append
+  'Delete',             //sc_delete
+  'Edit',               //sc_edit
+  'Post',               //sc_post
+  'Cancel',             //sc_cancel
+  'Refresh',            //sc_refresh
+  'Edit filter',        //sc_filter_filter
+  'Edit filter minimum',//sc_edit_filter_min
+  'Edit filter maximum',//sc_filter_edit_max
+  'Filter on',          //sc_filter_on
+  'Search',             //sc_search
+  'Insert',             //sc_insert
+  'Filter off'         //sc_filter_off
 );
     
 initialization

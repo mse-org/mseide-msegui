@@ -77,6 +77,7 @@ type
    procedure setvisiblebuttons(const avalue: dbnavigbuttonsty);
    function getcolorglyph: colorty;
    procedure setcolorglyph(const avalue: colorty);
+   procedure setoptions(const avalue: dbnavigatoroptionsty);
   protected
    procedure doexecute(const sender: tobject);
    procedure loaded; override;
@@ -116,7 +117,7 @@ type
                   write fshortcuts[dbnb_cancel] default ord(key_none);
    property shortcut_refresh: shortcutty read fshortcuts[dbnb_refresh]
                   write fshortcuts[dbnb_refresh] default ord(key_none);
-   property options: dbnavigatoroptionsty read foptions write foptions 
+   property options: dbnavigatoroptionsty read foptions write setoptions 
                   default defaultdbnavigatoroptions;
  end;
 
@@ -1921,6 +1922,7 @@ begin
    imagenr:= int1 + ord(stg_dbfirst);
    tag:= int1;
    onexecute:= {$ifdef FPC}@{$endif}doexecute;
+   hint:= stockobjects.captions[stockcaptionty(int1+ord(sc_first))];
   end;
  end;
  fdatalink:= tnavigdatalink.Create(idbnaviglink(self));
@@ -1953,9 +1955,11 @@ begin
   with buttons[ord(dbnb_filteronoff)] do begin
    if afiltered then begin
     imagenr:= ord(stg_dbfilteroff);
+    hint:= stockobjects.captions[sc_filter_off];
    end
    else begin
     imagenr:= ord(stg_dbfilteron);
+    hint:= stockobjects.captions[sc_filter_on];
    end;
   end;
   for bu1:= low(dbnavigbuttonty) to high(dbnavigbuttonty) do begin
@@ -2046,6 +2050,21 @@ end;
 function tdbnavigator.getnavigoptions: dbnavigatoroptionsty;
 begin
  result:= foptions;
+end;
+
+procedure tdbnavigator.setoptions(const avalue: dbnavigatoroptionsty);
+begin
+ if avalue <> foptions then begin
+  foptions:= avalue;
+  with buttons[ord(dbnb_insert)] do begin
+   if dno_append in self.options then begin
+    hint:= stockobjects.captions[sc_append];
+   end
+   else begin
+    hint:= stockobjects.captions[sc_insert];
+   end;
+  end;
+ end;
 end;
 
 { teditwidgetdatalink }

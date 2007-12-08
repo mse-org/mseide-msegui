@@ -56,7 +56,7 @@ const
   #1052#1072#1085' '#1101#1090#1080#1096	 //mr_ignore => Nevazhno
   );
 
- uzcyr_stockcaption: stockcaptionty = (
+ uzcyr_stockcaption: stockcaptionaty = (
   '',                                        //sc_none
   '- '#1085#1086#1072#1085#1080#1179 ,       //sc_is_invalid => - neverno
   #1060#1086#1088#1084#1072#1090' '#1085#1086#1090#1118#1171#1088#1080 ,   
@@ -100,7 +100,24 @@ const
   #1041#1072#1088#1095#1072 ,                //sc_All
   #1058#1072#1089#1076#1080#1179#1083#1072#1096 ,       //sc_Confirmation
   #1025#1079#1091#1074#1085#1080' '#1118#1095#1080#1088#1080#1096,     //sc_Delete_record
-  'Close page'          //sc_close_page
+  'Close page',          //sc_close_page
+  'First',              //sc_first
+  'Prior',              //sc_prior
+  'Next',               //sc_next
+  'Last',               //sc_last
+  'Append',             //sc_append
+  'Delete',             //sc_delete
+  'Edit',               //sc_edit
+  'Post',               //sc_post
+  'Cancel',             //sc_cancel
+  'Refresh',            //sc_refresh
+  'Edit filter',        //sc_filter_filter
+  'Edit filter minimum',//sc_edit_filter_min
+  'Edit filter maximum',//sc_filter_edit_max
+  'Filter on',          //sc_filter_on
+  'Search',             //sc_search
+  'Insert',             //sc_insert
+  'Filter off'         //sc_filter_off
   );
     
 initialization

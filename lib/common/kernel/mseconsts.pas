@@ -15,8 +15,8 @@ uses
  msestockobjects,mseglob,msestrings,mseapplication;
  
 type
- stockcaptionty = array[stockcaptionsty] of widestring;
- pstockcaptionty = ^stockcaptionty;
+ stockcaptionaty = array[stockcaptionty] of widestring;
+ pstockcaptionaty = ^stockcaptionaty;
  defaultmodalresulttextty = array[modalresultty] of msestring;
  pdefaultmodalresulttextty = ^defaultmodalresulttextty;
  langty = (la_none,la_en,la_de,la_ru,la_es,la_uzcyr);
@@ -25,12 +25,13 @@ const
 
  function modalresulttext(const index: modalresultty): msestring;
  function modalresulttextnoshortcut(const index: modalresultty): msestring;
- function stockcaptions(const index: stockcaptionsty): widestring;
+ function stockcaptions(const index: stockcaptionty): widestring;
  function uc(const index: integer): msestring; //get user caption
 
  procedure registeruserlangconsts(name: string;
                                       const caption: array of msestring);
- procedure registerlangconsts(const name: string; const stockcaption: stockcaptionty;
+ procedure registerlangconsts(const name: string;
+               const stockcaption: stockcaptionaty;
             const modalresulttext: defaultmodalresulttextty;
             const modalresulttextnoshortcut: defaultmodalresulttextty);
  function setlangconsts(const name: string): boolean;
@@ -43,7 +44,7 @@ uses
 type
  langinfoty = record
   name: string;
-  stockcaption: pstockcaptionty;
+  stockcaption: pstockcaptionaty;
   modalresulttext: pdefaultmodalresulttextty;
   modalresulttextnoshortcut: pdefaultmodalresulttextty;
  end;
@@ -95,7 +96,7 @@ const
   'Ignore'   //mr_ignore
   );
 
- en_stockcaption: stockcaptionty = (
+ en_stockcaption: stockcaptionaty = (
   '',                   //sc_none
   'is invalid',         //sc_is_invalid
   'Format error',       //sc_Format_error
@@ -136,10 +137,29 @@ const
   'All',                //sc_All
   'Confirmation',       //sc_Confirmation
   'Delete record?',     //sc_Delete_record
-  'Close page'          //sc_close_page
+  'Close page',         //sc_close_page
+  'First',              //sc_first
+  'Prior',              //sc_prior
+  'Next',               //sc_next
+  'Last',               //sc_last
+  'Append',             //sc_append
+  'Delete',             //sc_delete
+  'Edit',               //sc_edit
+  'Post',               //sc_post
+  'Cancel',             //sc_cancel
+  'Refresh',            //sc_refresh
+  'Edit filter',        //sc_filter_filter
+  'Edit filter minimum',//sc_edit_filter_min
+  'Edit filter maximum',//sc_filter_edit_max
+  'Filter on',          //sc_filter_on
+  'Search',             //sc_search
+  'Insert',             //sc_insert
+  'Filter off'         //sc_filter_off
+
                        );
 
-procedure registerlangconsts(const name: string; const stockcaption: stockcaptionty;
+procedure registerlangconsts(const name: string; 
+                const stockcaption: stockcaptionaty;
             const modalresulttext: defaultmodalresulttextty;
             const modalresulttextnoshortcut: defaultmodalresulttextty);
  procedure setitem(var item: langinfoty);
@@ -283,7 +303,7 @@ begin
  result:= lang.modalresulttextnoshortcut^[index];
 end;
 
-function stockcaptions(const index: stockcaptionsty): widestring;
+function stockcaptions(const index: stockcaptionty): widestring;
 begin
  checklang;
  result:= lang.stockcaption^[index];

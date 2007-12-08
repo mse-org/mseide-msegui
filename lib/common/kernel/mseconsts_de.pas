@@ -51,7 +51,7 @@ const
   'Ignorieren'  //mr_ignore
   );
 
- de_stockcaption: stockcaptionty = (
+ de_stockcaption: stockcaptionaty = (
   '',                        //sc_none
   'ist ung'#252'ltig',       //sc_is_invalid
   'Format Fehler',           //sc_Format_error
@@ -92,7 +92,24 @@ const
   'Alle',                 //sc_All
   'Best'#228'tigung',     //sc_Confirmation
   'Datensatz l'#246'schen?', //sc_Delete_record
-  'Seite schliessen'        //sc_close_page
+  'Seite schliessen',        //sc_close_page
+  'Erster',                  //sc_first
+  'Vorheriger',              //sc_prior
+  'N'#228'chster',           //sc_next
+  'Letzter',                 //sc_last
+  'Anf'#252'gen',            //sc_append
+  'L'#246'schen',            //sc_delete
+  'Bearbeiten',              //sc_edit
+  'Eintragen',               //sc_post
+  'Verwerfen',               //sc_cancel
+  'Auffrischen',             //sc_refresh
+  'Filter bearbeiten',        //sc_filter_filter
+  'Filter Minimum bearbeiten',//sc_edit_filter_min
+  'Filter Maximum bearbeiten',//sc_filter_edit_max
+  'Filter ein',               //sc_filter_on
+  'Suchen',                   //sc_search
+  'Einfügen',                 //sc_insert
+  'Filter aus'                //sc_filter_off
 );
     
 initialization

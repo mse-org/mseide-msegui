@@ -60,7 +60,7 @@ const
   #1053#1077#1074#1072#1078#1085#1086	          //mr_ignore => Nevazhno
   );
 
- ru_stockcaption: stockcaptionty = (
+ ru_stockcaption: stockcaptionaty = (
   '',                                             //sc_none
   '- '#1085#1077#1074#1077#1088#1085#1086 ,       //sc_is_invalid => - neverno
   #1053#1077#1089#1086#1086#1090#1074#1077#1090#1089#1090#1074#1080#1077' '+
@@ -139,7 +139,24 @@ const
                                                 //sc_Confirmation
   #1059#1076#1072#1083#1080#1090#1100' '#1079#1072#1087#1080#1089#1100'?',
                                                 //sc_Delete_record
-  'Close page'          //sc_close_page
+  'Close page',         //sc_close_page
+  'First',              //sc_first
+  'Prior',              //sc_prior
+  'Next',               //sc_next
+  'Last',               //sc_last
+  'Append',             //sc_append
+  'Delete',             //sc_delete
+  'Edit',               //sc_edit
+  'Post',               //sc_post
+  'Cancel',             //sc_cancel
+  'Refresh',            //sc_refresh
+  'Edit filter',        //sc_filter_filter
+  'Edit filter minimum',//sc_edit_filter_min
+  'Edit filter maximum',//sc_filter_edit_max
+  'Filter on',          //sc_filter_on
+  'Search',             //sc_search
+  'Insert',             //sc_insert
+  'Filter off'         //sc_filter_off
   );
     
 initialization

@@ -64,7 +64,7 @@ type
   stg_dot,stg_dotsmall
                  );
 
- stockcaptionsty = (sc_none,sc_is_invalid,sc_Format_error,sc_Value_is_required,
+ stockcaptionty = (sc_none,sc_is_invalid,sc_Format_error,sc_Value_is_required,
                     sc_Error,sc_Min,sc_Max,sc_Range_error,
                     sc_Undo,sc_copy,sc_cut,sc_paste,
                     sc_Dir,sc_Up,sc_New_dir,sc_Name,
@@ -78,7 +78,11 @@ type
                     sc_XPM_Image,sc_PNM_Image,sc_TARGA_image,
                     sc_All,
                     sc_Confirmation,sc_Delete_record,
-                    sc_close_page
+                    sc_close_page,
+                    sc_first,sc_prior,sc_next,sc_last,
+                    sc_append,sc_delete,sc_edit,sc_post,sc_cancel,sc_refresh,
+                    sc_edit_filter,sc_edit_filter_min,sc_edit_filter_max,
+                    sc_filter_on,sc_search,sc_insert,sc_filter_off
                     );
  
  tstockobjects = class
@@ -96,7 +100,7 @@ type
    function getglyphs: timagelist;
    procedure fontchanged(const sender: tobject);
    function getmseicon: tmaskedbitmap;
-   function getcaptions(index: stockcaptionsty): msestring;
+   function getcaptions(index: stockcaptionty): msestring;
   public
    constructor create;
    destructor destroy; override;
@@ -108,7 +112,7 @@ type
    property fonts[index: stockfontty]: twidgetfont read getfonts;
    property modalresulttext[index: modalresultty]: msestring read getmodalresulttext;
    property modalresulttextnoshortcut[index: modalresultty]: msestring read getmodalresulttextnoshortcut;
-   property captions[index: stockcaptionsty]: msestring read getcaptions;
+   property captions[index: stockcaptionty]: msestring read getcaptions;
    property glyphs: timagelist read getglyphs;
    property mseicon: tmaskedbitmap read getmseicon;
  end;
@@ -416,7 +420,7 @@ begin
 // result:= fmodalresulttextnoshortcut[index];
 end;
 
-function tstockobjects.getcaptions(index: stockcaptionsty): msestring;
+function tstockobjects.getcaptions(index: stockcaptionty): msestring;
 begin
  result:= stockcaptions(index);
 end;
