@@ -1508,24 +1508,14 @@ begin
  end;
 end;
 
-procedure docheckbrowsemode(const adataset: tdataset);
-begin
- with adataset do begin
-  checkbrowsemode;
-  if state <> dsbrowse then begin
-   databaseerror('Dataset not in browse mode.',adataset);
-  end;
- end;
-end;
-
 function locaterecord(const adataset: tdataset; const key: integer;
                        const field: tfield;
                        const options: locateoptionsty = []): locateresultty;
 var
  bm: string;
 begin
- docheckbrowsemode(adataset);
  with adataset do begin
+  checkbrowsemode;
   result:= loc_notfound;
   bm:= bookmark;
   disablecontrols;
@@ -1623,8 +1613,8 @@ var
  
 begin
  ismsestringfield:= field is tmsestringfield;
- docheckbrowsemode(adataset);
  with adataset do begin
+  checkbrowsemode;
   result:= loc_notfound;
   bm:= bookmark;
   caseinsensitive:= loo_caseinsensitive in options;

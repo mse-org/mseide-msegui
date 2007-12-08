@@ -3627,6 +3627,9 @@ var
  int1: integer;
  field1: tfield;
 begin
+ if (event = decheckbrowsemode) and (state = dsfilter) then begin
+  databaseerror('Database is in dsFilter state.',self);
+ end;
  if event in [deupdaterecord,dedatasetchange] then begin
   exclude(fbstate,bs_visiblerecordcountvalid);
  end;
