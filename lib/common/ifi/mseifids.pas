@@ -128,6 +128,8 @@ type
    function findrecord(arecordpo: pintrecordty): integer;
                          //returns index, -1 if not found
    function getfiltereditkind: filtereditkindty;
+   procedure beginfilteredit(const akind: filtereditkindty);
+   procedure endfilteredit;
    
   protected
    ffielddefsequence: sequencety;
@@ -1811,6 +1813,16 @@ end;
 function tifidataset.getfiltereditkind: filtereditkindty;
 begin
  result:= fek_filter;
+end;
+
+procedure tifidataset.beginfilteredit(const akind: filtereditkindty);
+begin
+ //dummy
+end;
+
+procedure tifidataset.endfilteredit;
+begin
+ //dummy
 end;
 
 { trxdataset }

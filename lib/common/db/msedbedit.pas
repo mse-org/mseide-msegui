@@ -23,14 +23,17 @@ uses
 type
 
  dbnavigbuttonty = (dbnb_first,dbnb_prior,dbnb_next,dbnb_last,dbnb_insert,
-           dbnb_delete,dbnb_edit,dbnb_post,dbnb_cancel,dbnb_refresh);
+           dbnb_delete,dbnb_edit,dbnb_post,dbnb_cancel,dbnb_refresh,
+           dbnb_filter,dbnb_filtermin,dbnb_filtermax,dbnb_filteronoff,dbnb_find);
  dbnavigbuttonsty = set of dbnavigbuttonty;
  
 const
- alldbnavigbuttons = [dbnb_first,dbnb_prior,dbnb_next,dbnb_last,dbnb_insert,
+ defaultvisibledbnavigbuttons = 
+          [dbnb_first,dbnb_prior,dbnb_next,dbnb_last,dbnb_insert,
            dbnb_delete,dbnb_edit,dbnb_post,dbnb_cancel,dbnb_refresh];
+ filterdbnavigbuttons = [dbnb_filter,dbnb_filtermin,dbnb_filtermax,dbnb_find];
  defaultdbnavigatorheight = 24;
- defaultdbnavigatorwidth = (ord(high(dbnavigbuttonty))+1)*defaultdbnavigatorheight;
+ defaultdbnavigatorwidth = (ord(dbnb_refresh)+1)*defaultdbnavigatorheight;
  
 type
 
@@ -43,7 +46,8 @@ const
  
 type  
  idbnaviglink = interface(inullinterface)
-  procedure setactivebuttons(const abuttons: dbnavigbuttonsty);
+  procedure setactivebuttons(const abuttons: dbnavigbuttonsty;
+               const afiltered: boolean);
   function getwidget: twidget;
   function getnavigoptions: dbnavigatoroptionsty;
  end;
@@ -79,7 +83,8 @@ type
    procedure doshortcut(var info: keyeventinfoty; const sender: twidget); override;
    procedure doasyncevent(var atag: integer); override;
    //idbnaviglink
-   procedure setactivebuttons(const abuttons: dbnavigbuttonsty);
+   procedure setactivebuttons(const abuttons: dbnavigbuttonsty;
+                             const afiltered: boolean);
    function getnavigoptions: dbnavigatoroptionsty;
   public
    constructor create(aowner: tcomponent); override;
@@ -87,7 +92,7 @@ type
   published
    property datasource: tdatasource read getdatasource write setdatasource;
    property visiblebuttons: dbnavigbuttonsty read fvisiblebuttons 
-                 write setvisiblebuttons default alldbnavigbuttons;
+                 write setvisiblebuttons default defaultvisibledbnavigbuttons;
    property colorglyph: colorty read getcolorglyph write setcolorglyph default cl_glyph;
    property bounds_cx default defaultdbnavigatorwidth;
    property bounds_cy default defaultdbnavigatorheight;
@@ -1756,16 +1761,19 @@ begin
  fintf:= intf;
  inherited create;
  visualcontrol:= true;
- fintf.setactivebuttons([]);
+ fintf.setactivebuttons([],false);
 end;
 
 procedure tnavigdatalink.updatebuttonstate;
 var
  bu1: dbnavigbuttonsty;
+ bo1: boolean;
 begin
  bu1:= [];
- if active and (dataset.state <> dsfilter) then begin
-  bu1:= [dbnb_first,dbnb_prior,dbnb_next,dbnb_last];
+ bo1:= false;
+ if active then begin
+  bu1:= [dbnb_first,dbnb_prior,dbnb_next,dbnb_last]+
+                 filterdbnavigbuttons;
   if bof then begin
    bu1:= bu1 - [dbnb_first,dbnb_prior];
   end;
@@ -1773,11 +1781,20 @@ begin
    bu1:= bu1 - [dbnb_next,dbnb_last];
   end;
   case datasource.state of
+   dsfilter: begin
+    case filtereditkind of
+     fek_filter: bu1:= [dbnb_filter];
+     fek_filtermin: bu1:= [dbnb_filtermin];
+     fek_filtermax: bu1:= [dbnb_filtermax];
+     fek_find: bu1:= [dbnb_find];
+    end;
+   end;
    dsedit,dsinsert: begin
     bu1:= bu1 + [dbnb_post,dbnb_cancel,dbnb_refresh,dbnb_insert,dbnb_delete];
    end;
    else begin
-    bu1:= bu1 + [dbnb_refresh,dbnb_insert,dbnb_delete,dbnb_edit];
+    bu1:= bu1 + [dbnb_refresh,dbnb_insert,dbnb_delete,dbnb_edit,
+                 dbnb_filteronoff];
    end;
   end;
   if bof and eof then begin
@@ -1789,8 +1806,9 @@ begin
   if csdesigning in dataset.componentstate then begin
    bu1:= bu1 * designdbnavigbuttons;
   end;
+  bo1:= datasource.dataset.filtered;
  end;
- fintf.setactivebuttons(bu1);
+ fintf.setactivebuttons(bu1,bo1);
 end;
  
 procedure tnavigdatalink.activechanged;
@@ -1850,11 +1868,6 @@ begin
      else begin
       insert;
      end;
-    {
-     if state <> dsinsert then begin
-      insert;
-     end;
-    }
     end;
     dbnb_delete: begin
      if not (dno_confirmdelete in fintf.getnavigoptions) or 
@@ -1866,6 +1879,20 @@ begin
     dbnb_post: post;
     dbnb_cancel: cancel;
     dbnb_refresh: refresh;
+    dbnb_filteronoff: filtered:= not filtered;
+   end;
+   if fdscontroller <> nil then begin
+    if state = dsfilter then begin
+     fdscontroller.endfilteredit;
+    end
+    else begin
+     case abutton of
+      dbnb_filter: fdscontroller.beginfilteredit(fek_filter);
+      dbnb_filtermin: fdscontroller.beginfilteredit(fek_filtermin);
+      dbnb_filtermax: fdscontroller.beginfilteredit(fek_filtermax);
+      dbnb_find: fdscontroller.beginfilteredit(fek_find);
+     end;
+    end;
    end;
   end;
  end;
@@ -1878,7 +1905,7 @@ var
  int1: integer;
 begin
  foptions:= defaultdbnavigatoroptions;
- fvisiblebuttons:= alldbnavigbuttons;
+// fvisiblebuttons:= defaultvisibledbnavigbuttons;
  fshortcuts[dbnb_first]:= key_modctrl + ord(key_pageup);
  fshortcuts[dbnb_prior]:= ord(key_pageup);
  fshortcuts[dbnb_next]:= ord(key_pagedown);
@@ -1897,6 +1924,7 @@ begin
   end;
  end;
  fdatalink:= tnavigdatalink.Create(idbnaviglink(self));
+ visiblebuttons:= defaultvisibledbnavigbuttons;
 end;
 
 destructor tdbnavigator.destroy;
@@ -1915,13 +1943,21 @@ begin
  end;
 end;
 
-procedure tdbnavigator.setactivebuttons(const abuttons: dbnavigbuttonsty);
+procedure tdbnavigator.setactivebuttons(const abuttons: dbnavigbuttonsty;
+                                        const afiltered: boolean);
 var
  bu1: dbnavigbuttonty;
-
 begin
  beginupdate;
  try
+  with buttons[ord(dbnb_filteronoff)] do begin
+   if afiltered then begin
+    imagenr:= ord(stg_dbfilteroff);
+   end
+   else begin
+    imagenr:= ord(stg_dbfilteron);
+   end;
+  end;
   for bu1:= low(dbnavigbuttonty) to high(dbnavigbuttonty) do begin
    with buttons[ord(bu1)] do begin
     if bu1 in abuttons then begin

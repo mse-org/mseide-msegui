@@ -33,6 +33,8 @@ type
    function getfloatdate: boolean;
    function getint64currency: boolean;
    function getfiltereditkind: filtereditkindty;
+   procedure beginfilteredit(const akind: filtereditkindty);
+   procedure endfilteredit;
   protected
    procedure setactive (value : boolean);{ override;}
    function getactive: boolean;
@@ -237,6 +239,16 @@ end;
 function tmsememdataset.getfiltereditkind: filtereditkindty;
 begin
  result:= fek_filter;
+end;
+
+procedure tmsememdataset.beginfilteredit(const akind: filtereditkindty);
+begin
+ //dummy
+end;
+
+procedure tmsememdataset.endfilteredit;
+begin
+ //dummy
 end;
 
 end.

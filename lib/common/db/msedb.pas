@@ -729,6 +729,8 @@ type
   function getfloatdate: boolean;
   function getint64currency: boolean;
   function getfiltereditkind: filtereditkindty;
+  procedure beginfilteredit(const akind:filtereditkindty);
+  procedure endfilteredit;
  end;
 
  igetdscontroller = interface(inullinterface)
@@ -787,6 +789,8 @@ type
                  const options: locateoptionsty = []): locateresultty; overload;
    procedure appendrecord(const values: array of const);
    procedure getfieldclass(const fieldtype: tfieldtype; out result: tfieldclass);
+   procedure beginfilteredit(const akind: filtereditkindty);
+   procedure endfilteredit;
    
    procedure dataevent(const event: tdataevent; info: ptrint);
    procedure cancel;
@@ -4334,6 +4338,16 @@ end;
 function tdscontroller.filtereditkind: filtereditkindty;
 begin
  result:= fintf.getfiltereditkind;
+end;
+
+procedure tdscontroller.beginfilteredit(const akind: filtereditkindty);
+begin
+ fintf.beginfilteredit(akind);
+end;
+
+procedure tdscontroller.endfilteredit;
+begin
+ fintf.endfilteredit;
 end;
 
 { tmsedatasource }

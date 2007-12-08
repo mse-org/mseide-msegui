@@ -34,6 +34,8 @@ type
    function getfloatdate: boolean;
    function getint64currency: boolean;
    function getfiltereditkind: filtereditkindty;
+   procedure beginfilteredit(const akind: filtereditkindty);
+   procedure endfilteredit;
   protected
    procedure setactive (value : boolean);
    function getactive: boolean;
@@ -256,6 +258,16 @@ end;
 function tmsesqlite3dataset.getfiltereditkind: filtereditkindty;
 begin
  result:= fek_filter;
+end;
+
+procedure tmsesqlite3dataset.beginfilteredit(const akind: filtereditkindty);
+begin
+ //dummy
+end;
+
+procedure tmsesqlite3dataset.endfilteredit;
+begin
+ //dumy
 end;
 
 end.

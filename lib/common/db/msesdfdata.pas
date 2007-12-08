@@ -36,6 +36,8 @@ type
    function getfloatdate: boolean;
    function getint64currency: boolean;
    function getfiltereditkind: filtereditkindty;
+   procedure beginfilteredit(const akind: filtereditkindty);
+   procedure endfilteredit;
   protected
    procedure setactive (value : boolean);{ override;}
    function getactive: boolean;
@@ -86,6 +88,8 @@ type
    function getfloatdate: boolean;
    function getint64currency: boolean;
    function getfiltereditkind: filtereditkindty;
+   procedure beginfilteredit(const akind: filtereditkindty);
+   procedure endfilteredit;
   protected
    procedure setactive (value : boolean);{ override;}
    function getactive: boolean;
@@ -310,6 +314,16 @@ begin
  result:= fek_filter;
 end;
 
+procedure tmsefixedformatdataset.beginfilteredit(const akind: filtereditkindty);
+begin
+ //dummy
+end;
+
+procedure tmsefixedformatdataset.endfilteredit;
+begin
+ //dummy
+end;
+
 { tmsesdfdataset }
 
 constructor tmsesdfdataset.create(aowner: tcomponent);
@@ -500,6 +514,16 @@ end;
 function tmsesdfdataset.getfiltereditkind: filtereditkindty;
 begin
  result:= fek_filter;
+end;
+
+procedure tmsesdfdataset.beginfilteredit(const akind: filtereditkindty);
+begin
+ //dummy
+end;
+
+procedure tmsesdfdataset.endfilteredit;
+begin
+ //dummy
 end;
 
 end.

@@ -13,7 +13,8 @@ unit msestockobjects;
 
 interface
 uses
- msegraphics,mseglob,msegui,msebitmap,msegraphutils,mseclasses,msestrings,msedatamodules;
+ msegraphics,mseglob,msegui,msebitmap,msegraphutils,mseclasses,msestrings,
+ msedatamodules;
 
 const
  boxsize = 11;
@@ -55,9 +56,11 @@ type
   stg_dbfirst,stg_dbprior,stg_dbnext,stg_dblast,stg_dbinsert,
  //     23          24        25         26         27
   stg_dbdelete,stg_dbedit,stg_dbpost,stg_dbcancel,stg_dbrefresh,
- //     28            29              30
-  stg_dbindbrowse,stg_dbindedit,stg_dbindinsert,
- //     31      32
+ //     28            29              30            31          32
+  stg_dbfilter,stg_dbfiltermin,stg_dbfiltermax,stg_dbfilteron,stg_dbfind,
+ //     33              34              35            36
+  stg_dbfilteroff,stg_dbindbrowse,stg_dbindedit,stg_dbindinsert,
+ //  37        38
   stg_dot,stg_dotsmall
                  );
 

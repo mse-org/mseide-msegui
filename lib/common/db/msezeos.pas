@@ -26,6 +26,8 @@ type
    function getfloatdate: boolean;
    function getint64currency: boolean;
    function getfiltereditkind: filtereditkindty;
+   procedure beginfilteredit(const akind: filtereditkindty);
+   procedure endfilteredit;
   protected
    procedure setactive (value : boolean);{ override;}
    function getactive: boolean;
@@ -74,6 +76,8 @@ type
    function getfloatdate: boolean;
    function getint64currency: boolean;
    function getfiltereditkind: filtereditkindty;
+   procedure beginfilteredit(const akind: filtereditkindty);
+   procedure endfilteredit;
   protected
    procedure setactive (value : boolean);{ override;}
    function getactive: boolean;
@@ -120,6 +124,8 @@ type
    function getfloatdate: boolean;
    function getint64currency: boolean;
    function getfiltereditkind: filtereditkindty;
+   procedure beginfilteredit(const akind: filtereditkindty);
+   procedure endfilteredit;
   protected
    procedure setactive (value : boolean);{ override;}
    function getactive: boolean;
@@ -166,6 +172,8 @@ type
    function getfloatdate: boolean;
    function getint64currency: boolean;
    function getfiltereditkind: filtereditkindty;
+   procedure beginfilteredit(const akind: filtereditkindty);
+   procedure endfilteredit;
   protected
    procedure setactive (value : boolean);{ override;}
    function getactive: boolean;
@@ -374,6 +382,16 @@ begin
  result:= fek_filter;
 end;
 
+procedure tmsezreadonlyquery.beginfilteredit(const akind: filtereditkindty);
+begin
+ //dummy
+end;
+
+procedure tmsezreadonlyquery.endfilteredit;
+begin
+ //dummy
+end;
+
 { tmsezquery }
 
 constructor tmsezquery.create(aowner: tcomponent);
@@ -554,6 +572,16 @@ begin
  result:= fek_filter;
 end;
 
+procedure tmsezquery.beginfilteredit(const akind: filtereditkindty);
+begin
+ //dummy
+end;
+
+procedure tmsezquery.endfilteredit;
+begin
+ //dummy
+end;
+
 { tmseztable }
 
 constructor tmseztable.create(aowner: tcomponent);
@@ -729,6 +757,16 @@ begin
  result:= fek_filter;
 end;
 
+procedure tmseztable.beginfilteredit(const akind: filtereditkindty);
+begin
+ //dummy
+end;
+
+procedure tmseztable.endfilteredit;
+begin
+ //dummy
+end;
+
 { tmsezstoredproc }
 
 constructor tmsezstoredproc.create(aowner: tcomponent);
@@ -902,6 +940,16 @@ end;
 function tmsezstoredproc.getfiltereditkind: filtereditkindty;
 begin
  result:= fek_filter;
+end;
+
+procedure tmsezstoredproc.beginfilteredit(const akind: filtereditkindty);
+begin
+ //dummy
+end;
+
+procedure tmsezstoredproc.endfilteredit;
+begin
+//dummy
 end;
 
 end.
