@@ -4935,17 +4935,26 @@ begin
    end
    else begin
     if int1 >= fbrecordcount - 1 then begin
-     goto endlab;
+     if partialstring and (int1 > 0) and (int1 = fbrecordcount - 1) then begin
+      result:= compare(po1,ind[int1],lastind,true) = 0;
+     end;
+     if not result then begin
+      goto endlab;
+     end;
     end;     
-    if compare(po1,ind[int1+1],lastind,false) = 0 then begin
-     result:= true;
-     inc(int1);
+    if not result then begin
+     if compare(po1,ind[int1+1],lastind,false) = 0 then begin
+      result:= true;
+      inc(int1);
+     end;
     end;
    end;
-   if (int1 >= 0) and (int1 < fbrecordcount) then begin
-    if partialstring then begin
-     if not result then begin
-      result:= compare(po1,ind[int1],lastind,true) = 0;
+   if (int1 >= -1) and (int1 < fbrecordcount) then begin
+    if not result then begin
+     if partialstring then begin
+      if int1 >= 0 then begin
+       result:= compare(po1,ind[int1],lastind,true) = 0;
+      end;
       if not result then begin
        inc(int1);
        if (int1 >= fbrecordcount) or 
@@ -4970,6 +4979,11 @@ begin
         result:= true;
        end;
       end;         
+     end
+     else begin
+      if int1 < 0 then begin
+       goto endlab;
+      end;
      end;
     end;          
     abookmark.recno:= int1;
