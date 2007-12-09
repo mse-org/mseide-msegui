@@ -5816,7 +5816,9 @@ begin
    int1:= rowtorecnonullbased(cell.row);
    if not (finserting and not finsertingbefore) then begin
     int3:= recnonullbased;
-    ds1.checkbrowsemode;
+    if ds1.state <> dsfilter then begin
+     ds1.checkbrowsemode;
+    end;
     int4:= recnonullbased;
     if (int1 < int3) and (int1 >= int4) then begin
      inc(int1);
@@ -5828,7 +5830,7 @@ begin
     end;
    end;
    int2:= ds1.recordcount;
-   if (int1 >= 0) and (int1 < int2) then begin
+   if (int1 >= 0) and (int1 < int2) and (ds1.state <> dsfilter) then begin
     dataset.moveby(int1-recnonullbased);
    end;
    cell.row:= activerecord;

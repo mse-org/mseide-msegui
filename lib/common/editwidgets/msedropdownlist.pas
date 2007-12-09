@@ -1126,10 +1126,12 @@ begin
   fcols.fitemindex:= Value;
  end;
  if fcols.fitemindex < 0 then begin
+  fcols.fkeyvalue:= '';
   setdropdowntext('',false,false,key_none);
  end
  else begin
-  setdropdowntext(valuelist[fcols.fitemindex],false,false,key_none);
+  fcols.fkeyvalue:= valuelist[fcols.fitemindex];
+  setdropdowntext(fcols.fkeyvalue,false,false,key_none);
  end;
 end;
 

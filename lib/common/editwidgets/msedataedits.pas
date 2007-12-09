@@ -492,6 +492,7 @@ type
    procedure setvalue(const avalue: msestring);
    function createdropdowncontroller: tcustomdropdowncontroller; override;
    procedure texttovalue(var accept: boolean; const quiet: boolean); override;
+   procedure setnullvalue; override; //for dbedits
    function datatotext(const data): msestring; override;
    procedure texttodata(const atext: msestring; var data); override;
    function getdefaultvalue: pointer; override;
@@ -2762,6 +2763,14 @@ begin
  if accept then begin
   value:= mstr1;
  end;
+ if int1 < 0 then begin
+  text:= ''; //for setnullvalue
+ end;
+end;
+
+procedure tcustomkeystringedit.setnullvalue;
+begin
+ dropdown.itemindex:= -1;
 end;
 
 function tcustomkeystringedit.datatotext(const data): msestring;
