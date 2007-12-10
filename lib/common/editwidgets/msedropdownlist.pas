@@ -239,6 +239,7 @@ type
   private
    fdataselected: boolean;
    fselectkey: keyty;
+   fcolor: colorty;
   protected
    fintf: idropdown;
    foptions: dropdowneditoptionsty;
@@ -274,6 +275,8 @@ type
    procedure updatereadonlystate;
    property options: dropdowneditoptionsty read foptions write setoptions
                  default defaultdropdownoptionsedit;
+  published
+   property color: colorty read fcolor write fcolor default cl_default;
  end;
 
  tdropdowncontroller = class(tcustomdropdowncontroller)
@@ -666,6 +669,7 @@ constructor tcustomdropdowncontroller.create(const intf: idropdown);
 begin
  fintf:= intf;
  foptions:= defaultdropdownoptionsedit;
+ fcolor:= cl_default;
  inherited create;
  createframe;
 end;
@@ -691,13 +695,6 @@ begin
  if twidget1(widget).fframe = nil then begin
   getbuttonframeclass.create(iscrollframe(widget),ibutton(self));
  end;
-{
- with tcustomdropdownbuttonframe(twidget1(widget).fframe) do begin
-  fbuttonintf:= ibutton(self);
-  buttons.count:= 1;
-  setactivebutton(0);
- end;
-}
  updatereadonlystate;
 end;
 
@@ -795,7 +792,8 @@ begin
  fintf.setdropdowntext('',true,false,akey);
 end;
 
-procedure tcustomdropdowncontroller.editnotification(var info: editnotificationinfoty);
+procedure tcustomdropdowncontroller.editnotification(
+                                          var info: editnotificationinfoty);
 begin
  case info.action of
   ea_textedited: begin
@@ -804,7 +802,8 @@ begin
   ea_textentered: begin
    if (deo_selectonly in foptions) and not fdataselected and 
            fintf.edited then begin
-    if not (deo_forceselect in foptions) and (fintf.geteditor.text = '') then begin
+    if not (deo_forceselect in foptions) and 
+                                     (fintf.geteditor.text = '') then begin
      info.action:= ea_none;
      selectnone(key_return);
     end
@@ -1288,6 +1287,8 @@ constructor tdropdownlist.create(const acontroller: tcustomdropdownlistcontrolle
                        acols : tdropdowncols);
 var
  aparent: twidget;
+ widget1: twidget;
+ col1: colorty;
 begin
  fcontroller:= acontroller;
  aparent:= fcontroller.getwidget;
@@ -1299,7 +1300,21 @@ begin
   datarowlinecolor:= acontroller.fdatarowlinecolor;
   exclude(foptionsgrid,og_focuscellonenter);
   ffocusedcell.col:= 0;
-  color:= cl_background;
+  if fcontroller.color = cl_default then begin
+   widget1:= aparent;
+   repeat
+    col1:= widget1.actualcolor;
+    widget1:= widget1.parentwidget;
+   until (col1 <> cl_transparent) or (widget1 = nil);
+   if col1 = cl_transparent then begin
+    col1:= cl_background;
+   end;
+   color:= col1;
+  end
+  else begin
+   color:= fcontroller.color;
+  end;
+//  color:= cl_background;
   fdatacols.options:= fdatacols.options + [co_focusselect,co_readonly];
   font:= twidget1(aparent).getfont;
   frame.levelo:= 0;
