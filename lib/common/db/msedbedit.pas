@@ -935,9 +935,13 @@ type
  griddatalinkoptionsty = set of griddatalinkoptionty;
  updaterowdataeventty = procedure(const sender: tcustomgrid; 
                         const arow: integer; const adataset: tdataset)of object;
-
+ igriddatalink = interface(inullinterface)
+  function getdbindicatorcol: integer;
+ end;
+ 
  tgriddatalink = class(tfielddatalink,ievent,idbeditinfo)
   private
+   fintf: igriddatalink;
    fgrid: tcustomgrid;
    factiverecordbefore: integer;
    fzebraoffset: integer;
@@ -991,6 +995,7 @@ type
    procedure updatedata; override;
    procedure focuscell(var cell: gridcoordty);
    procedure cellevent(var info: celleventinfoty);
+   procedure invalidateindicator;
    function scrollevent(sender: tcustomscrollbar; event: scrolleventty): boolean;
              //true if processed
    procedure doinsertrow;
@@ -1004,7 +1009,7 @@ type
    function arecord: integer;
    function hasdata: boolean;
   public
-   constructor create(const aowner: tcustomgrid);
+   constructor create(const aowner: tcustomgrid; const aintf: igriddatalink);
    destructor destroy; override;
    property firstrecord: integer read getfirstrecord;
    function getdummystringbuffer: pstring;
@@ -1043,9 +1048,10 @@ type
    procedure recordchanged(afield: tfield); override;
  end;
  
- tdbdropdownlist = class(tdropdownlist)
+ tdbdropdownlist = class(tdropdownlist,igriddatalink)
   private
    fdatalink: tdropdownlistdatalink;
+   function getdbindicatorcol: integer;
   protected
    procedure internalcreateframe; override;
    procedure createdatacol(const index: integer; out item: tdatacol); override;
@@ -1190,6 +1196,7 @@ type
    fdbindicatorcol: integer;
    fdatalink: tgriddatalink;
    procedure setdbindicatorcol(const Value: integer);
+   function getdbindicatorcol: integer;
   protected
    procedure createitem(const index: integer; var item: tpersistent); override;
    procedure setcount1(acount: integer; doinit: boolean); override;
@@ -1197,7 +1204,8 @@ type
    constructor create(const aowner: tcustomwidgetgrid;
                        const adatalink: tgriddatalink);
   published
-   property dbindicatorcol: integer read fdbindicatorcol write setdbindicatorcol default 0;
+   property dbindicatorcol: integer read getdbindicatorcol 
+                    write setdbindicatorcol default -1;
  end;
 
 const
@@ -1226,13 +1234,16 @@ type
                              const autoscrollintf: iautoscrollframe);
  end;
  
- tcustomdbwidgetgrid = class(tcustomwidgetgrid)
+ tcustomdbwidgetgrid = class(tcustomwidgetgrid,igriddatalink)
   private
    fdatalink: tgriddatalink;
    function getdatasource: tdatasource;
    procedure setdatasource(const Value: tdatasource);
    procedure setdatalink(const avalue: tgriddatalink);
+   function getfixcols: tdbwidgetfixcols;
+   procedure setfixcols(const avalue: tdbwidgetfixcols);
   protected
+   function getdbindicatorcol: integer;
    function getgriddatalink: pointer; override;
    procedure setoptionsgrid(const avalue: optionsgridty); override;
    procedure internalcreateframe; override;
@@ -1268,6 +1279,7 @@ type
    property datasource: tdatasource read getdatasource write setdatasource;
    property datalink: tgriddatalink read fdatalink write setdatalink;
    property zebra_step default 0;
+   property fixcols: tdbwidgetfixcols read getfixcols write setfixcols;
  end;
 
  tdbwidgetgrid = class(tcustomdbwidgetgrid)
@@ -1394,6 +1406,7 @@ type
    fdbindicatorcol: integer;
    fdatalink: tgriddatalink;
    procedure setdbindicatorcol(const Value: integer);
+   function getdbindicatorcol: integer;
   protected
    procedure createitem(const index: integer; var item: tpersistent); override;
    procedure setcount1(acount: integer; doinit: boolean); override;
@@ -1401,7 +1414,8 @@ type
    constructor create(const aowner: tcustomgrid;
                        const adatalink: tgriddatalink);
   published
-   property dbindicatorcol: integer read fdbindicatorcol write setdbindicatorcol default 0;
+   property dbindicatorcol: integer read getdbindicatorcol 
+                                 write setdbindicatorcol default -1;
  end;
 
  dbstringgridoptionty = (dsgo_autofields);
@@ -1416,7 +1430,7 @@ const
  maxautodisplaywidth = 20;
  
 type
- tcustomdbstringgrid = class(tcustomstringgrid,iwidgetgrid)
+ tcustomdbstringgrid = class(tcustomstringgrid,iwidgetgrid,igriddatalink)
   private
    fdatalink: tstringgriddatalink;
    foptions: dbstringgridoptionsty;
@@ -1444,7 +1458,10 @@ type
    procedure checkautofields;
    procedure setfieldnamedisplayfixrow(const avalue: integer);
    procedure setdatalink(const avalue: tstringgriddatalink);
+   function getfixcols: tdbstringfixcols;
+   procedure setfixcols(const avalue: tdbstringfixcols);
   protected
+   function getdbindicatorcol: integer;
    procedure updatelayout; override;
    procedure editnotification(var info: editnotificationinfoty); override;
    procedure setoptionsgrid(const avalue: optionsgridty); override;
@@ -1491,6 +1508,7 @@ type
                     setfieldnamedisplayfixrow default -1; 
                     //negative rowindex, 0-> none
    property zebra_step default 0;
+   property fixcols: tdbstringfixcols read getfixcols write setfixcols;
  end;
  
  tdbstringgrid = class(tcustomdbstringgrid)
@@ -4474,7 +4492,7 @@ constructor tdbdropdownlist.create(const acontroller: tdbdropdownlistcontroller;
 var
  int1: integer;
 begin
- fdatalink:= tdropdownlistdatalink.create(self);
+ fdatalink:= tdropdownlistdatalink.create(self,igriddatalink(self));
  inherited;
  include(fstate,gs_isdb);
  fzebra_step:= 0;
@@ -4579,6 +4597,11 @@ procedure tdbdropdownlist.dopaint(const acanvas: tcanvas);
 begin
  inherited;
  fdatalink.painted;
+end;
+
+function tdbdropdownlist.getdbindicatorcol: integer;
+begin
+ result:= 0; //none
 end;
 
 { tdbdropdownlistcontroller }
@@ -5007,8 +5030,9 @@ end;
 
 { tgriddatalink }
 
-constructor tgriddatalink.create(const aowner: tcustomgrid);
+constructor tgriddatalink.create(const aowner: tcustomgrid; const aintf: igriddatalink);
 begin
+ fintf:= aintf;
  fgrid:= aowner;
  include(tcustomgrid1(fgrid).fstate,gs_isdb);
  inherited create;
@@ -5494,6 +5518,17 @@ begin
  end;
 end;
 
+procedure tgriddatalink.invalidateindicator;
+var
+ int1,int2: integer;
+begin
+ int1:= fintf.getdbindicatorcol;
+ int2:= activerecord;
+ if (int1 < 0) and (int2 >= 0) then begin
+  fgrid.invalidatecell(makegridcoord(int1,int2));
+ end;
+end;
+
 function tgriddatalink.scrollevent(sender: tcustomscrollbar;
                           event: scrolleventty): boolean;
              //true if processed
@@ -5690,6 +5725,7 @@ end;
 
 function tgriddatalink.moveby(distance: integer): integer;
 begin
+ invalidateindicator; //grid can be defocused
  result:= 0;
  if fnullchecking = 0 then begin
   beginnullchecking;
@@ -5831,6 +5867,7 @@ begin
    end;
    int2:= ds1.recordcount;
    if (int1 >= 0) and (int1 < int2) and (ds1.state <> dsfilter) then begin
+    invalidateindicator; //grid can be defocused
     dataset.moveby(int1-recnonullbased);
    end;
    cell.row:= activerecord;
@@ -5894,6 +5931,9 @@ begin
  if (acount <= 0) and not (csdestroying in fgrid.componentstate) then begin
   acount:= 1;
  end;
+ if fdbindicatorcol >= acount then begin
+  fdbindicatorcol:= acount - 1;
+ end;
  inherited;
 end;
 
@@ -5901,7 +5941,7 @@ procedure tdbwidgetfixcols.setdbindicatorcol(const Value: integer);
 var
  int1,int2: integer;
 begin
- int1:= value;
+ int1:= -1 - value;
  if int1 < 0 then begin
   int1:= 0;
  end;
@@ -5913,6 +5953,11 @@ begin
   move(int2,int1);
   fdbindicatorcol := int1;
  end;
+end;
+
+function tdbwidgetfixcols.getdbindicatorcol: integer;
+begin
+ result:= -1-fdbindicatorcol;
 end;
 
 { tdbscrollbar }
@@ -5964,7 +6009,7 @@ end;
 
 constructor tcustomdbwidgetgrid.create(aowner: tcomponent);
 begin
- fdatalink:= tgriddatalink.create(self);
+ fdatalink:= tgriddatalink.create(self,igriddatalink(self));
  inherited;
  fzebra_step:= 0;
  ffixcols.count:= 1;
@@ -6122,6 +6167,21 @@ function tcustomdbwidgetgrid.focuscell(cell: gridcoordty;
 begin
  fdatalink.focuscell(cell);
  result:= inherited focuscell(cell,selectaction,selectmode);
+end;
+
+function tcustomdbwidgetgrid.getdbindicatorcol: integer;
+begin
+ result:= fixcols.dbindicatorcol;
+end;
+
+function tcustomdbwidgetgrid.getfixcols: tdbwidgetfixcols;
+begin
+ result:= tdbwidgetfixcols(inherited fixcols);
+end;
+
+procedure tcustomdbwidgetgrid.setfixcols(const avalue: tdbwidgetfixcols);
+begin
+ inherited
 end;
 
 { tstringcoldatalink }
@@ -6400,6 +6460,9 @@ begin
  if (acount <= 0) and not (csdestroying in fgrid.componentstate) then begin
   acount:= 1;
  end;
+ if fdbindicatorcol >= acount then begin
+  fdbindicatorcol:= acount - 1;
+ end;
  inherited;
 end;
 
@@ -6407,7 +6470,7 @@ procedure tdbstringfixcols.setdbindicatorcol(const Value: integer);
 var
  int1,int2: integer;
 begin
- int1:= value;
+ int1:= -1 - value;
  if int1 < 0 then begin
   int1:= 0;
  end;
@@ -6419,6 +6482,11 @@ begin
   move(int2,int1);
   fdbindicatorcol := int1;
  end;
+end;
+
+function tdbstringfixcols.getdbindicatorcol: integer;
+begin
+ result:= -1-fdbindicatorcol;
 end;
 
 { tstringgriddatalink }
@@ -6436,7 +6504,7 @@ end;
 constructor tcustomdbstringgrid.create(aowner: tcomponent);
 begin
  ffieldnamedisplayfixrow:= -1;
- fdatalink:= tstringgriddatalink.create(self);
+ fdatalink:= tstringgriddatalink.create(self,igriddatalink(self));
  inherited;
  fzebra_step:= 0;
  ffixcols.count:= 1;
@@ -6791,6 +6859,21 @@ function tcustomdbstringgrid.focuscell(cell: gridcoordty;
 begin
  fdatalink.focuscell(cell);
  result:= inherited focuscell(cell,selectaction,selectmode);
+end;
+
+function tcustomdbstringgrid.getfixcols: tdbstringfixcols;
+begin
+ result:= tdbstringfixcols(inherited fixcols);
+end;
+
+procedure tcustomdbstringgrid.setfixcols(const avalue: tdbstringfixcols);
+begin
+ inherited;
+end;
+
+function tcustomdbstringgrid.getdbindicatorcol: integer;
+begin
+ result:= fixcols.dbindicatorcol;
 end;
 
 { tlbdropdowncol }
