@@ -789,6 +789,7 @@ type
    procedure cellchanged(const col: integer); virtual;
    procedure changed; override;
    procedure updatelayout; override;
+   procedure updatemergedcells;
    function step(getscrollable: boolean = true): integer; override;
    procedure paint(const info: rowpaintinfoty); virtual;
    procedure drawcell(const canvas: tcanvas);{ virtual;}
@@ -1050,6 +1051,7 @@ end;
   protected
    function getclientsize: integer; override;
    procedure updatelayout; override;
+   procedure updatemergedcells;
    function rowatpos(const y: integer): integer; //-count..-1, 0 if invalid
    procedure paint(const info: rowspaintinfoty);
    procedure movecol(const curindex,newindex: integer);
@@ -3190,15 +3192,15 @@ begin
   canvas.save;
   canvas.intersectcliprect(makerect(nullpoint,fcellrect.size));
   drawcellbackground(canvas,frame1,face1);
-  if fnumstep <> 0 then begin
-   ftextinfo.text.text:= inttostr(fnumstart+fnumstep*cell.col);
-   drawtext(canvas,ftextinfo);
+  if (int1 >= 0) and (int1 < headers1.count) then begin
+   with tcolheader(headers1.fitems[int1]) do begin
+    drawtext(canvas,caption,ftextinfo.dest,textflags,getfont);
+   end;
   end
   else begin
-   if (int1 >= 0) and (int1 < headers1.count) then begin
-    with tcolheader(headers1.fitems[int1]) do begin
-     drawtext(canvas,caption,ftextinfo.dest,textflags,getfont);
-    end;
+   if (fnumstep <> 0) and (cell.col >= 0) then begin
+    ftextinfo.text.text:= inttostr(fnumstart+fnumstep*cell.col);
+    drawtext(canvas,ftextinfo);
    end;
   end;
   canvas.restore;
@@ -3340,8 +3342,8 @@ end;
 
 procedure tfixrow.updatelayout;
 begin
- fcaptionsfix.updatelayout(fgrid.ffixcols);
- fcaptions.updatelayout(fgrid.fdatacols);
+// fcaptionsfix.updatelayout(fgrid.ffixcols);
+// fcaptions.updatelayout(fgrid.fdatacols);
  fcellrect.size.cy:= fheight;
  if fcellinfo.cell.row <= tgridarrayprop(prop).ffirstopposite then begin
   flinepos:= -((flinewidth+1) div 2);
@@ -3352,6 +3354,12 @@ begin
   fcellrect.y:= 0;
  end;
  inherited;
+end;
+
+procedure tfixrow.updatemergedcells;
+begin
+ fcaptionsfix.updatelayout(fgrid.ffixcols);
+ fcaptions.updatelayout(fgrid.fdatacols);
 end;
 
 procedure tfixrow.changed;
@@ -4722,13 +4730,13 @@ begin
  inherited;
  with cellinfoty(canvas.drawinfopo^) do begin
   if not notext then begin
-   if fnumstep <> 0 then begin
-    ftextinfo.text.text:= inttostr(fgrid.fnumoffset+fnumstart+fnumstep*cell.row);
+   if cell.row < fcaptions.count then begin
+    ftextinfo.text.text:= fcaptions[cell.row];
     drawtext(canvas,ftextinfo);
    end
    else begin
-    if cell.row < fcaptions.count then begin
-     ftextinfo.text.text:= fcaptions[cell.row];
+    if fnumstep <> 0 then begin
+     ftextinfo.text.text:= inttostr(fgrid.fnumoffset+fnumstart+fnumstep*cell.row);
      drawtext(canvas,ftextinfo);
     end;
    end;
@@ -5754,6 +5762,15 @@ begin
  end;
 end;
 
+procedure tfixrows.updatemergedcells;
+var
+ int1: integer;
+begin
+ for int1:= 0 to count - 1 do begin
+  tfixrow(items[int1]).updatemergedcells;
+ end;
+end;
+
 procedure tfixrows.paint(const info: rowspaintinfoty);
 var
  po1,po2: pointty;
@@ -6203,6 +6220,7 @@ begin
    end;
   end;
   fdatacols.updatelayout;
+  ffixrows.updatemergedcells;
   tgridframe(fframe).updatestate;
   inc(int2);
  until (frame.state * scrollbarframestates = scrollstate * scrollbarframestates) or
