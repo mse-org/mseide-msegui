@@ -815,16 +815,18 @@ var
  int1: integer;
  po1: plistitem;
 begin
- normalizering;
- po1:= plistitem(fdatapo);
- for int1:= 0 to count - 1 do begin
-  po1^.objectevent(sender,event);
-  inc(po1);
- end;
- if sender = fimagelist then begin
-  case event of
-//   oe_destroyed: imagelist:= nil;
-   oe_changed: invalidate;
+ if event <> oe_connect then begin
+  normalizering;
+  po1:= plistitem(fdatapo);
+  for int1:= 0 to count - 1 do begin
+   po1^.objectevent(sender,event);
+   inc(po1);
+  end;
+  if sender = fimagelist then begin
+   case event of
+ //   oe_destroyed: imagelist:= nil;
+    oe_changed: invalidate;
+   end;
   end;
  end;
 end;
