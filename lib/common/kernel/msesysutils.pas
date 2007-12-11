@@ -14,7 +14,7 @@ unit msesysutils;
 
 interface
 uses
- SysUtils;
+ classes,sysutils;
 
 type
  eoserror = class(exception)
@@ -42,6 +42,8 @@ procedure writestderr(value: string; newline: boolean = false);
 procedure errorhalt(errortext: string; exitcode: integer = 1);
 procedure debugwrite(const value: string);
 procedure debugwriteln(const value: string);
+procedure debugout(const sender: tcomponent; const atext: ansistring); overload;
+procedure debugout(const sender: tobject; const atext: ansistring); overload;
 
 function getlasterror: integer;
 function getlasterrortext: string;
@@ -256,6 +258,16 @@ end;
 procedure debugwriteln(const value: string);
 begin
  writestderr(value,true);
+end;
+
+procedure debugout(const sender: tcomponent; const atext: ansistring);
+begin
+ debugwriteln(sender.classname+':'+sender.name+' '+atext);
+end;
+
+procedure debugout(const sender: tobject; const atext: ansistring);
+begin
+ debugwriteln(sender.classname+' '+atext);
 end;
 
 procedure errorhalt(errortext: string; exitcode: integer = 1);

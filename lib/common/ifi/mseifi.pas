@@ -224,7 +224,9 @@ type
  }
  tcustomiochannel = class;
  iochanneleventty = procedure(const sender: tcustomiochannel) of object;
-  
+ optioniochty = (oic_releaseondisconnect);
+ optionsiochty = set of optioniochty;
+   
  tcustomiochannel = class(tmsecomponent)
   private
    frxdata: string;
@@ -234,6 +236,7 @@ type
    fonafterconnect: iochanneleventty;
    fonbeforedisconnect: iochanneleventty;
    fonafterdisconnect: iochanneleventty;
+   foptionsio: optionsiochty;
    procedure setactive(const avalue: boolean);
   protected
    fsynchronizer: tiosynchronizer;
@@ -248,6 +251,7 @@ type
    procedure doafterconnect; virtual;
    procedure connect;
    procedure disconnect;
+   procedure disconnected;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -259,6 +263,7 @@ type
    property active: boolean read factive write setactive;
    property rxdata: string read frxdata write frxdata;
   published
+   property optionsio: optionsiochty read foptionsio write foptionsio;
    property onbeforeconnect: iochanneleventty read fonbeforeconnect 
                                               write fonbeforeconnect;
    property onafterconnect: iochanneleventty read fonafterconnect 
@@ -724,7 +729,7 @@ end;
 destructor tcustomiochannel.destroy;
 begin
  fsynchronizer.free;
- disconnect;
+ active:= false;
  inherited;
 end;
 
@@ -811,20 +816,41 @@ end;
 
 procedure tcustomiochannel.connect;
 begin
+{$ifdef mse_debugsockets}
+ debugout(self,'connect');
+{$endif}
  dobeforeconnect;
  internalconnect;
  doafterconnect;
+{$ifdef mse_debugsockets}
+ debugout(self,'connected');
+{$endif}
+end;
+
+procedure tcustomiochannel.disconnected;
+begin
+{$ifdef mse_debugsockets}
+ debugout(self,'disconnected');
+{$endif}
+ if canevent(tmethod(fonafterdisconnect)) then begin
+  fonafterdisconnect(self);
+ end;
+ if (oic_releaseondisconnect in foptionsio) and 
+  not (csdesigning in componentstate) and (owner is tactcomponent) then begin
+  tactcomponent(owner).release;
+ end;
 end;
 
 procedure tcustomiochannel.disconnect;
 begin
+{$ifdef mse_debugsockets}
+ debugout(self,'disconnect');
+{$endif}
  if canevent(tmethod(fonbeforedisconnect)) then begin
   fonbeforedisconnect(self);
  end;
  internaldisconnect;
- if canevent(tmethod(fonafterdisconnect)) then begin
-  fonafterdisconnect(self);
- end;
+ disconnected;
 end;
 
 function tcustomiochannel.canconnect: boolean;

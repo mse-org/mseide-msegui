@@ -879,11 +879,17 @@ var
  err: syserrorty;
  cryptioinfo: cryptioinfoty;
 begin
+{$ifdef mse_debugsockets}
+ debugout(self,'execthread');
+{$endif}
  result:= 0;
  addr.kind:= fkind;
  addr.size:= sizeof(addr.platformdata);
  while not thread.terminated do begin
   err:= soc_accept(fhandle,true,conn,addr,0);
+{$ifdef mse_debugsockets}
+ debugout(self,'accept error:' + inttostr(ord(err)));
+{$endif}
   if not thread.terminated then begin
    if err = sye_ok then begin
     try
@@ -950,6 +956,9 @@ procedure tcustomsocketserver.internaldisconnect;
 var
  int1: integer;
 begin
+{$ifdef mse_debugsockets}
+ debugout(self,'internaldisconnect');
+{$endif}
  if fthread <> nil then begin
   fthread.terminate;
  end;
