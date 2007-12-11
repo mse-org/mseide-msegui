@@ -874,7 +874,9 @@ var
  str1,str2: string;
  po2,po3: pchar;
 begin
-debugwriteln('requestmodule '+aname);
+ {$ifdef mse_debugifi}
+ debugout(self,'requestmodule '+aname);
+ {$endif}
  mo1:= ttxlinkmodule(fmodulestx.finditem(aname));
  if (mo1 <> nil) and (mo1.fmoduleclassname <> '') then begin
   po1:= findmoduledata(mo1.fmoduleclassname,str2);
