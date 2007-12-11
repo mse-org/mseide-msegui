@@ -100,8 +100,11 @@ type
  ttxlinkmodule = class(tlinkmodule)
   private
    fmoduleclassname: string;
+   fmoduleparentclassname: string;
   published
    property moduleclassname: string read fmoduleclassname write fmoduleclassname;
+   property moduleparentclassname: string read fmoduleparentclassname 
+                            write fmoduleparentclassname;
  end;
   
  ttxlinkmodules = class(tmodulelinkarrayprop)
@@ -880,10 +883,12 @@ begin
  mo1:= ttxlinkmodule(fmodulestx.finditem(aname));
  if (mo1 <> nil) and (mo1.fmoduleclassname <> '') then begin
   po1:= findmoduledata(mo1.fmoduleclassname,str2);
+  if mo1.moduleparentclassname <> '' then begin
+   str2:= mo1.moduleparentclassname;
+  end;
   if po1 <> nil then begin
    mo1.inititemheader(str1,ik_moduledata,asequence,length(str2)+po1^.size,po2);
    with pmoduledatadataty(po2)^ do begin
-//    sequence:= asequence;
     po3:= @parentclass;
     inc(po3,stringtoifiname(str2,pifinamety(po3)));
     setifibytes(@po1^.data,po1^.size,pifibytesty(po3));

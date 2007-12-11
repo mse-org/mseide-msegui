@@ -36,7 +36,7 @@ begin
   try
    beginloadtmpmodule;
    try
-    create(application);
+    create(nil); //destoyed by modulelist
     exclude(fmsecomponentstate,cs_noload);
     aobjdata.readcomponent(result);
     addtmpmodule(result);
@@ -78,7 +78,7 @@ begin
 end;
 
 initialization
- ftmpmodules:= tmodulelist.create(false);
+ ftmpmodules:= tmodulelist.create(true);
  ftmpmodules.lock;
  registerfindglobalcomponentproc({$ifdef FPC}@{$endif}findtmpmodulebyname);
 finalization
