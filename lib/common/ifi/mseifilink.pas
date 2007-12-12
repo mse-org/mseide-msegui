@@ -101,6 +101,8 @@ type
   private
    fmoduleclassname: string;
    fmoduleparentclassname: string;
+  public
+   procedure sendmodule;
   published
    property moduleclassname: string read fmoduleclassname write fmoduleclassname;
    property moduleparentclassname: string read fmoduleparentclassname 
@@ -909,7 +911,12 @@ var
  int1: integer;
  comp2: tcomponent;
 begin
- mo1:= fmodulesrx.finditem(asequence);
+ if asequence <> 0 then begin
+  mo1:= fmodulesrx.finditem(asequence);
+ end
+ else begin
+  mo1:= trxlinkmodule(fmodulesrx.finditem(aname));
+ end;
  if mo1 <> nil then begin
   po1:= @adata^.parentclass;
   inc(po1,ifinametostring(pifinamety(po1),str1));
@@ -992,6 +999,13 @@ end;
 procedure tcustommodulelink.setvalues(const avalue: tvaluelinks);
 begin
  fvalues.assign(avalue);
+end;
+
+{ ttxlinkmodule }
+
+procedure ttxlinkmodule.sendmodule;
+begin
+ tcustommodulelink(fowner).requestmodulereceived(tag,name,0);
 end;
 
 end.
