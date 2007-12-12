@@ -27,7 +27,7 @@ type
  arraychangeeventty = procedure(const sender: tarrayprop; const index: integer) of object;
  arraysizechangeeventty = procedure(sender: tarrayprop) of object;
 
- arraypropstatety = (aps_linking,aps_destroying,aps_needsindexing);
+ arraypropstatety = (aps_linking,aps_destroying,aps_needsindexing,aps_moved);
  arraypropsstatesty = set of arraypropstatety;
 
  tarrayprop = class(tpersistent)
@@ -430,6 +430,9 @@ var
 
 begin
  if acount <> fcountbefore then begin
+  if acount = 0 then begin
+   fstate:= fstate - [aps_needsindexing,aps_moved];
+  end;
   count2:= fcountbefore;
   if acount > fcountbefore then begin
 //   fillchar(getitemspo(fcountbefore)^,(acount-fcountbefore)*getsize,#0);
@@ -438,7 +441,9 @@ begin
    end;
   end
   else begin
-   include(fstate,aps_needsindexing);
+   if aps_moved in fstate then begin
+    include(fstate,aps_needsindexing);
+   end;
   end;
   fcountbefore:= acount;
   if not (aps_linking in fstate) then begin
@@ -578,6 +583,7 @@ begin
  if curindex <> newindex then begin
   checkindex(curindex);
   checkindex(newindex);
+  include(fstate,aps_moved);
   size:= getsize;
   count1:= getcount;
   postart:= getitemspo(0);
@@ -604,6 +610,7 @@ var
  int1: integer;
 begin
  if sourceorder <> nil then begin
+  include(fstate,aps_moved);
   int1:= getcount;
   if int1 <> length(sourceorder) then begin
    raise exception.create('tarrayprop: Wrong length of neworder');
@@ -624,6 +631,7 @@ begin
   raise exception.create('tarrayprop: Wrong length of neworder');
  end;
  if int1 > 0 then begin
+  include(fstate,aps_moved);
   reorderarray(destorder,getdatapo^,getsize);
  end;
  change(-1);
@@ -642,6 +650,7 @@ end;
 
 procedure tarrayprop.internalinsert(const index: integer; const init: boolean);
 begin
+ include(fstate,aps_moved);
  beginupdate;
  try
   setcount1(count + 1,init);
