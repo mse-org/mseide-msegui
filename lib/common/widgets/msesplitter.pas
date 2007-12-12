@@ -53,6 +53,7 @@ type
    fnotified: integer;
    fregionchangedcount: integer;
    fregionchangedmark: integer;
+   frefrect: rectty;
    procedure setstatfile(const avalue: tstatfile);
    procedure setlinkbottom(const avalue: twidget);
    procedure setlinkleft(const avalue: twidget);
@@ -173,6 +174,10 @@ begin
  foptions:= defaultsplitteroptions;
  fcolorgrip:= defaultsplittercolorgrip;
  fgrip:= defaultsplittergrip;
+ frefrect.x:= -bigint;
+ frefrect.y:= -bigint;
+ frefrect.cx:= -bigint;
+ frefrect.cy:= -bigint;
  inherited;
  color:= defaultsplittercolor;
  optionswidget:= defaultoptionswidgetnofocus;
@@ -474,15 +479,21 @@ begin
  inherited;
  if (fparentwidget <> nil) then begin
   if not (csloading in componentstate) and (fpropsetting = 0) then begin
-   fhprop:= 0;
-   fvprop:= 0;
-   int1:= fparentwidget.clientsize.cx;
-   if (int1 > 0) then begin
-    fhprop:= parentclientpos.x / {$ifdef FPC} real({$endif}int1{$ifdef FPC}){$endif};
+   if fwidgetrect.x <> frefrect.x then begin
+    frefrect.x:= fwidgetrect.x;
+    fhprop:= 0;
+    int1:= fparentwidget.clientsize.cx;
+    if (int1 > 0) then begin
+     fhprop:= parentclientpos.x / {$ifdef FPC} real({$endif}int1{$ifdef FPC}){$endif};
+    end;
    end;
-   int1:= fparentwidget.clientsize.cy;
-   if (int1 > 0) then begin
-    fvprop:= parentclientpos.y / {$ifdef FPC} real({$endif}int1{$ifdef FPC}){$endif};
+   if fwidgetrect.y <> frefrect.y then begin
+    frefrect.y:= fwidgetrect.y;
+    fvprop:= 0;
+    int1:= fparentwidget.clientsize.cy;
+    if (int1 > 0) then begin
+     fvprop:= parentclientpos.y / {$ifdef FPC} real({$endif}int1{$ifdef FPC}){$endif};
+    end;
    end;
   end;
  end;
@@ -495,15 +506,21 @@ begin
  inherited;
  if (fparentwidget <> nil) then begin
   if not (csloading in componentstate) and (fpropsetting = 0) then begin
-   fhsizeprop:= 0;
-   fvsizeprop:= 0;
-   int1:= fparentwidget.clientsize.cx;
-   if (int1 > 0) then begin
-    fhsizeprop:= fwidgetrect.cx / {$ifdef FPC} real({$endif}int1{$ifdef FPC}){$endif};
+   if fwidgetrect.cx <> frefrect.cx then begin
+    frefrect.cx:= fwidgetrect.cx;
+    fhsizeprop:= 0;
+    int1:= fparentwidget.clientsize.cx;
+    if (int1 > 0) then begin
+     fhsizeprop:= fwidgetrect.cx / {$ifdef FPC} real({$endif}int1{$ifdef FPC}){$endif};
+    end;
    end;
-   int1:= fparentwidget.clientsize.cy;
-   if (int1 > 0) then begin
-    fvsizeprop:= fwidgetrect.cy / {$ifdef FPC} real({$endif}int1{$ifdef FPC}){$endif};
+   if fwidgetrect.cy <> frefrect.cy then begin
+    frefrect.cy:= fwidgetrect.cy;
+    fvsizeprop:= 0;
+    int1:= fparentwidget.clientsize.cy;
+    if (int1 > 0) then begin
+     fvsizeprop:= fwidgetrect.cy / {$ifdef FPC} real({$endif}int1{$ifdef FPC}){$endif};
+    end;
    end;
   end;
  end;
@@ -563,8 +580,9 @@ begin //doasyncevent
      else begin
       inc(fpropsetting);
       try
-       setclippedpickoffset(pt2);
        size:= size2;
+       setclippedpickoffset(pt2);
+       frefrect:= fwidgetrect;
       finally
        dec(fpropsetting);
       end;
