@@ -2001,7 +2001,7 @@ procedure tcustomwidgetgrid.dofocus;
 begin
  inherited;
  if (factivewidget <> nil) and factivewidget.canfocus then begin
-  factivewidget.setfocus;
+  factivewidget.setfocus(false);
  end;
 end;
 

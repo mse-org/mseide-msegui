@@ -2540,7 +2540,7 @@ begin
     bringtofront; //needed in design mode where all widgets are visible
     visible:= true;
     if self.entered and canfocus then begin
-     setfocus;
+     setfocus(false);
     end;
    end;
   end
