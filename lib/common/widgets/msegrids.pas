@@ -6375,6 +6375,12 @@ begin
       else begin
        int3:= fscrollrect.x + ffixcols.ffirstsize;
       end;
+      if int2 > paintrect.cx then begin
+       int2:= paintrect.cx;
+      end;
+      if int3 < 0 then begin
+       int3:= 0;
+      end;
       if length(lines) > 0 then begin //draw horz lines datacols
        for int1:= 0 to high(lines) do begin
         with lines[int1] do begin
