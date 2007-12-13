@@ -1,5 +1,6 @@
 MSEide+MSEgui version history
-
+2007-12-13
+ tapplication.wakeupguithread -> wakeupmainthread.
 2007-12-08
  optionsedit oe_autoapply moved to optiondb oed_autoapply.
 2007-12-07

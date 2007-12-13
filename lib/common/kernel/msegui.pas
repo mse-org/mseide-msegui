@@ -12353,9 +12353,9 @@ end;
 procedure tguiapplication.invalidated;
 begin
  if not (aps_invalidated in fstate) then begin
-  wakeupguithread;
+  include(fstate,aps_invalidated);
+  wakeupmainthread;
  end;
- include(fstate,aps_invalidated);
 end;
 
 procedure tguiapplication.showexception(e: exception; const leadingtext: string = '');

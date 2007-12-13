@@ -33,6 +33,7 @@ type
    fonloaded: notifyeventty;
    fonasyncevent: asynceventeventty;
    foneventloopstart: notifyeventty;
+   fonevent: eventeventty;
    procedure writesize(writer: twriter);
    procedure readsize(reader: treader);
    procedure setstatfile(const avalue: tstatfile);
@@ -61,6 +62,7 @@ type
                                    write foneventloopstart;
    property ondestroy: notifyeventty read fondestroy write fondestroy;
    property ondestroyed: notifyeventty read fondestroyed write fondestroyed;
+   property onevent: eventeventty read fonevent write fonevent;
    property onasyncevent: asynceventeventty read fonasyncevent write fonasyncevent;
  end;
  datamoduleclassty = class of tmsedatamodule;
@@ -212,6 +214,9 @@ end;
 
 procedure tmsedatamodule.receiveevent(const event: tobjectevent);
 begin
+ if canevent(tmethod(fonevent)) then begin
+  fonevent(self,event);
+ end;
  inherited;
  if event.kind = ek_loaded then begin
   doeventloopstart;

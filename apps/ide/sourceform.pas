@@ -509,7 +509,7 @@ begin
   with items[int1] do begin
    if (cardinal(info.tag) = filetag) and canchangenotify(info) then begin
     filechanged:= true;
-    application.wakeupguithread;
+    application.wakeupmainthread;
    end;
   end;
  end;

@@ -229,7 +229,7 @@ type
    procedure synchronize(proc: objectprocty);
    function ismainthread: boolean;
    procedure waitforthread(athread: tmsethread); //does unlock-relock before waiting
-   procedure wakeupguithread;
+   procedure wakeupmainthread;
    procedure langchanged; virtual;
    procedure beginwait; virtual;
    procedure endwait; virtual;
@@ -885,13 +885,13 @@ begin
   lock;
   include(fstate,aps_terminated);
   if not ismainthread then begin
-   wakeupguithread;
+   wakeupmainthread;
   end;
   unlock;
  end;
 end;
 
-procedure tcustomapplication.wakeupguithread;
+procedure tcustomapplication.wakeupmainthread;
 begin
  if aps_running in fstate then begin
   postevent(tevent.create(ek_wakeup));
