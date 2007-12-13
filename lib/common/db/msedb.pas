@@ -17,7 +17,7 @@ interface
 
 uses
  classes,db,mseclasses,mseglob,msestrings,msetypes,msearrayprops,mseapplication,
- msestockobjects,sysutils,msebintree;
+ sysutils,msebintree;
  
 type
  fieldtypearty = array of tfieldtype;
@@ -1027,11 +1027,14 @@ function encodesqlfloat(const avalue: real): msestring;
 function encodesqlcurrency(const avalue: currency): msestring;
 function encodesqlboolean(const avalue: boolean): msestring;
 
+procedure regfieldclass(const atype: fieldclasstypety; const aclass: fieldclassty);
+
 implementation
 uses
  rtlconsts,msefileutils,typinfo,dbconst,msedatalist,mseformatstr,
- msereal,variants,msebits,msedate,msedbgraphics{$ifdef unix},cwstring{$endif};
-const
+ msereal,variants,msebits,msedate{,msedbgraphics}{$ifdef unix},cwstring{$endif};
+
+var
  msefieldtypeclasses: array[fieldclasstypety] of fieldclassty = 
           (tmsefield,tmsestringfield,tmsenumericfield,
            tmselongintfield,tmselargeintfield,tmsesmallintfield,
@@ -1039,7 +1042,7 @@ const
            tmsebooleanfield,
            tmsedatetimefield,tmsedatefield,tmsetimefield,
            tmsebinaryfield,tmsebytesfield,tmsevarbytesfield,
-           tmsebcdfield,tmseblobfield,tmsememofield,tmsegraphicfield);
+           tmsebcdfield,tmseblobfield,tmsememofield,nil{tmsegraphicfield});
            
 type
  {$ifdef mse_FPC_2_2}
@@ -1056,6 +1059,11 @@ type
     FSize : Word;
 end;
  tdataset1 = class(tdataset);
+
+procedure regfieldclass(const atype: fieldclasstypety; const aclass: fieldclassty);
+begin
+ msefieldtypeclasses[atype]:= aclass;
+end;
  
 function getmsefieldclass(const afieldtype: tfieldtype): tfieldclass;
 begin

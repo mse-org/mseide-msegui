@@ -252,6 +252,29 @@ type
                        default defaultifidstimeout;
    property remotedatachange: notifyeventty read fremotedatachange 
                                               write fremotedatachange;
+   property BeforeOpen;
+   property AfterOpen;
+   property BeforeClose;
+   property AfterClose;
+   property BeforeInsert;
+   property AfterInsert;
+   property BeforeEdit;
+   property AfterEdit;
+   property BeforePost;
+   property AfterPost;
+   property BeforeCancel;
+   property AfterCancel;
+   property BeforeDelete;
+   property AfterDelete;
+   property BeforeScroll;
+   property AfterScroll;
+   property OnCalcFields;
+   property OnDeleteError;
+   property OnEditError;
+   property OnFilterRecord;
+   property OnNewRecord;
+   property OnPostError;
+   property AutoCalcFields;
  end;
  
  trxdataset = class(tifidataset)

@@ -471,4 +471,6 @@ begin
  result:= find(ffindnode,tavlnode(anode));
 end;
 
+initialization
+ regfieldclass(ft_graphic,tmsegraphicfield);
 end.
