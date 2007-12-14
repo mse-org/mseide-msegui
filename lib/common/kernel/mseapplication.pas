@@ -174,10 +174,11 @@ type
    function getevents: integer; virtual; abstract;
     //application must be locked
     //returns count of queued events
-   procedure doeventloop; virtual; abstract;
+   procedure doeventloop(const once: boolean); virtual; abstract;
    procedure incidlecount;
    procedure dobeforerun; virtual;
    procedure doafterrun; virtual;
+   procedure dowakeup(sender: tobject);
    property eventlist: tobjectqueue read feventlist;
   public
    constructor create(aowner: tcomponent); override;
@@ -185,6 +186,7 @@ type
    procedure createdatamodule(instanceclass: msecomponentclassty; var reference);
    procedure run;
    function running: boolean; //true if eventloop entered
+   procedure processmessages; virtual; //handle with care!
    property applicationname: msestring read fapplicationname write fapplicationname;
    
    procedure postevent(event: tevent);
@@ -667,6 +669,9 @@ begin
  fonidlelist:= tonidlelist.create;
  sys_mutexcreate(fmutex);
  sys_mutexcreate(feventlock);
+ {$ifdef FPC}
+ classes.wakemainthread:= @dowakeup;
+ {$endif}
 end;
 
 destructor tcustomapplication.destroy;
@@ -956,7 +961,7 @@ begin
  fthread:= sys_getcurrentthread;
  include(fstate,aps_running);
  try
-  doeventloop;
+  doeventloop(false);
   fonterminatedlist.notify(application);
  finally
   fthread:= threadbefore;
@@ -968,6 +973,14 @@ end;
 function tcustomapplication.running: boolean;
 begin
  result:= aps_running in fstate;
+end;
+
+procedure tcustomapplication.processmessages;
+begin
+ if not ismainthread then begin
+  raise exception.create('processmessages must be called from main thread.');
+ end;
+ doeventloop(true);
 end;
 
 procedure tcustomapplication.dobeforerun;
@@ -1018,6 +1031,11 @@ procedure tcustomapplication.setlinkedvar(const source: tlinkedpersistent;
                var dest: tlinkedpersistent; const linkintf: iobjectlink = nil);
 begin
  inherited;
+end;
+
+procedure tcustomapplication.dowakeup(sender: tobject);
+begin
+ wakeupmainthread;
 end;
 
 initialization

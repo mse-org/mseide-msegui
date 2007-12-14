@@ -36,7 +36,7 @@ type
                 ek_keypress,ek_keyrelease,ek_timer,ek_wakeup,
                 ek_release,ek_childscaled,ek_resize,
                 ek_dropdown,ek_async,ek_execute,ek_component,
-                ek_dbedit,ek_dbupdaterowdata,
+                ek_dbedit,ek_dbupdaterowdata,ek_data,ek_objectdata,
                 ek_user);
 const
  mouseregionevents = [ek_mousepark,ek_mouseenter,ek_mouseleave,
@@ -88,7 +88,15 @@ type
  eventarty = array of tevent;
  eventaty = array[0..0] of tevent;
  peventaty = ^eventaty;
- 
+
+ tstringevent = class(tevent)
+  private
+   fdata: ansistring;
+  public
+   constructor create(const adata: string);
+   property data: ansistring read fdata write fdata;
+ end;
+  
  tobjectevent = class;
 
  ievent = interface(iobjectlink)
@@ -109,6 +117,14 @@ type
    destructor destroy; override;
  end;
 
+ tstringobjectevent = class(tobjectevent)
+  private
+   fdata: ansistring;
+  public
+   constructor create(const adata: ansistring; const dest: ievent);
+   property data: ansistring read fdata write fdata;
+ end;
+ 
  tuserevent = class(tobjectevent)
    ftag: integer;
   public
@@ -140,6 +156,14 @@ uses
 constructor tevent.create(const akind: eventkindty);
 begin
  fkind:= akind;
+end;
+
+{ tstringevent }
+
+constructor tstringevent.create(const adata: string);
+begin
+ fdata:= adata;
+ inherited create(ek_data);
 end;
 
 { tobjectevent }
@@ -189,6 +213,14 @@ end;
 procedure tobjectevent.unlink(const source,dest: iobjectlink; valuepo: pointer = nil);
 begin
  //dummy
+end;
+
+{ tstringobjectevent }
+
+constructor tstringobjectevent.create(const adata: ansistring; const dest: ievent);
+begin
+ fdata:= adata;
+ inherited create(ek_objectdata,dest);
 end;
 
 { tuserevent }

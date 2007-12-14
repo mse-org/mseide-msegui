@@ -5,7 +5,7 @@ unit mseifids;
 interface
 uses
  classes,db,mseifi,mseclasses,mseglob,mseevent,msedb,msetypes,msebufdataset,
- msestrings;
+ msestrings,mseifilink;
 
 //single record dataset
 
@@ -68,10 +68,16 @@ type
 //                 |<-field offsets are in ffieldinfos[].offset      |
 //                 |<-calcfield offsets are in fcalcfieldbufpositions|
 
- ifidsstatety = (ids_openpending,ids_fielddefsreceived,ids_remotedata,ids_append);
+ ifidsstatety = (ids_openpending,ids_fielddefsreceived,ids_remotedata,
+                 ids_updating,ids_append);
  ifidsstatesty = set of ifidsstatety;
- 
- tifidataset = class(tdataset,ievent,idscontroller,igetdscontroller)
+ ifidsoptionty = (idso_useclientchannel); 
+ ifidsoptionsty = set of ifidsoptionty;
+const 
+ defaultifidsoptions = [idso_useclientchannel];
+type  
+ tifidataset = class(tdataset,ievent,idscontroller,igetdscontroller,
+                     iifimodulelink)
   private
    fchannel: tcustomiochannel;
    fobjectlinker: tobjectlinker;
@@ -97,6 +103,8 @@ type
    fopen: boolean;
 
    fremotedatachange: notifyeventty;
+   foptions: ifidsoptionsty;
+   fupdating: integer;
    procedure initmodifiedfields;   
    procedure setchannel(const avalue: tcustomiochannel);
    procedure setcontroller(const avalue: tdscontroller);
@@ -144,13 +152,15 @@ type
                                  const adata: pfielddefsdatadataty); virtual;
    procedure fieldrecdatareceived(const adata: pfieldrecdataty); virtual;
    procedure doremotedatachange;
+   {
    procedure waitforanswer(const asequence: sequencety; waitus: integer = 0);
                       //0 -> defaulttimeout
-   
-   function senddata(const adata: ansistring): sequencety;
+   }
+   function senddata(const adata: ansistring;
+                      const asequence: sequencety = 0): sequencety;
                 //returns sequence number
    function senddataandwait(const adata: ansistring; out asequence: sequencety;
-                                  atimeoutus: integer = 0): boolean;
+                            atimeoutus: integer = 0): boolean;
    procedure inititemheader(out arec: string; const akind: ifireckindty; 
                     const asequence: sequencety; const datasize: integer;
                     out datapo: pchar);
@@ -168,9 +178,11 @@ type
    procedure unlink(const source,dest: iobjectlink; valuepo: pointer = nil);
    procedure objevent(const sender: iobjectlink; const event: objecteventty);
    function getinstance: tobject;
-     //ievent
+   //ievent
    procedure receiveevent(const event: tobjectevent); virtual;
-   
+   //iifimodulelink
+   procedure connectmodule(const sender: tcustommodulelink);
+      
    procedure bindfields(const bind: boolean);
    function AllocRecordBuffer: PChar; override;
    procedure FreeRecordBuffer(var Buffer: PChar); override;
@@ -233,6 +245,9 @@ type
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
+   procedure beginupdate;
+   procedure endupdate;
+   
    procedure Append;
    function locate(const key: integer; const field: tfield;
                    const options: locateoptionsty = []): locateresultty;
@@ -252,6 +267,9 @@ type
                        default defaultifidstimeout;
    property remotedatachange: notifyeventty read fremotedatachange 
                                               write fremotedatachange;
+   property options: ifidsoptionsty read foptions write foptions 
+                                       default defaultifidsoptions;
+   
    property BeforeOpen;
    property AfterOpen;
    property BeforeClose;
@@ -377,6 +395,7 @@ end;
 
 constructor tifidataset.create(aowner: tcomponent);
 begin
+ foptions:= defaultifidsoptions;
  frecno:= -1;
  fdefaulttimeout:= defaultifidstimeout;
  fobjectlinker:= tobjectlinker.create(ievent(self),
@@ -887,7 +906,7 @@ begin
   end;
 
   move(header,fcurrentbuf^.header,frecordsize); //get new field values
-  if not (ids_remotedata in fistate) then begin
+  if fistate * [ids_remotedata,ids_updating] = [] then begin
    if state = dsinsert then begin
     postrecord(frk_insert);
    end
@@ -1225,7 +1244,7 @@ begin
  intfreerecord(fcurrentbuf);
  dec(fbrecordcount);
  move(fbufs[frecno+1],fbufs[frecno],(fbrecordcount-frecno)*sizeof(pointer));
- if not (ids_remotedata in fistate) then begin
+ if fistate * [ids_remotedata,ids_updating] = [] then begin
   postrecord(frk_delete);
  end;
 end;
@@ -1344,12 +1363,16 @@ begin
  mseifi.inititemheader(tag,fifiname,arec,akind,asequence,datasize,datapo);
 end;
 
-function tifidataset.senddata(const adata: ansistring): sequencety;
+function tifidataset.senddata(const adata: ansistring; 
+                         const asequence: sequencety = 0): sequencety;
 begin
  if fchannel = nil then begin
   raise exception.create(name+': No IO channel assigned.');
  end;
- result:= fchannel.sequence;
+ result:= asequence;
+ if result = 0 then begin
+  result:= fchannel.sequence;
+ end;
  with pifirecty(adata)^.header do begin
   sequence:= result;
  end;
@@ -1357,13 +1380,20 @@ begin
 end;
 
 function tifidataset.senddataandwait(const adata: ansistring;
-                    out asequence: sequencety; atimeoutus: integer): boolean;
+            out asequence: sequencety; atimeoutus: integer = 0): boolean;
+var
+ client1: twaitingclient;
 begin
- asequence:= senddata(adata);
+ if fchannel = nil then begin
+  raise exception.create(name+': No IO channel assigned.');
+ end;             
+ asequence:= fchannel.sequence;
+ client1:= fchannel.synchronizer.preparewait(asequence);
+ senddata(adata,asequence);
  if atimeoutus = 0 then begin
   atimeoutus:= timeoutus;
  end;
- result:= fchannel.waitforanswer(asequence,atimeoutus);
+ result:= fchannel.synchronizer.waitforanswer(client1,atimeoutus);
 end;
 
 procedure tifidataset.processdata(const adata: pifirecty);
@@ -1398,6 +1428,9 @@ begin
      end;
     end;
    end;
+   if header.answersequence <> 0 then begin
+    channel.synchronizer.answerreceived(header.answersequence);
+   end;
   end;
  end;
 end;
@@ -1423,7 +1456,7 @@ procedure tifidataset.dsdatareceived(const asequence: sequencety;
 begin
  //dummy
 end;
-
+{
 procedure tifidataset.waitforanswer(const asequence: sequencety; 
                                                  waitus: integer = 0);
 begin
@@ -1432,7 +1465,7 @@ begin
  end;
  fchannel.waitforanswer(asequence,fdefaulttimeout);
 end;
-
+}
 function encodefielddata(const ainfo: fieldinfoty; const headersize: integer): string;
 begin
  with ainfo do begin
@@ -1659,7 +1692,8 @@ end;
 procedure tifidataset.inheriteddataevent(const event: tdataevent;
                const info: ptrint);
 begin
- if (event = defieldchange) and not (ids_remotedata in fistate) then begin
+ if (event = defieldchange) and 
+               (fistate * [ids_remotedata,ids_updating] = []) then begin
   if TField(Info).FieldKind in [fkData,fkInternalCalc] then begin
    SetModified(True);
   end;
@@ -1848,6 +1882,27 @@ begin
  //dummy
 end;
 
+procedure tifidataset.connectmodule(const sender: tcustommodulelink);
+begin
+ if idso_useclientchannel in options then begin
+  channel:= sender.channel;
+ end;
+end;
+
+procedure tifidataset.beginupdate;
+begin
+ inc(fupdating);
+ include(fistate,ids_updating);
+end;
+
+procedure tifidataset.endupdate;
+begin
+ dec(fupdating);
+ if fupdating = 0 then begin
+  exclude(fistate,ids_updating);
+ end;
+end;
+
 { trxdataset }
 
 procedure trxdataset.fielddefsdatareceived(const asequence: sequencety; 
@@ -1893,15 +1948,22 @@ var
  str1: ansistring;
  po1: pointer;
 begin
- inititemheader(str1,ik_requestopends,0,0,po1);
- include(fistate,ids_openpending);
- if senddataandwait(str1,ffielddefsequence) and 
-            (ids_fielddefsreceived in fistate) then begin
-//  inherited;
+ if (channel <> nil) or 
+   not ((csdesigning in componentstate) and 
+        (idso_useclientchannel in foptions)) then begin
+  inititemheader(str1,ik_requestopends,0,0,po1);
+  include(fistate,ids_openpending);
+  if senddataandwait(str1,ffielddefsequence) and 
+             (ids_fielddefsreceived in fistate) then begin
+ //  inherited;
+  end
+  else begin
+   sysutils.abort;
+   //error
+  end;
  end
  else begin
-  sysutils.abort;
-  //error
+  inherited;
  end;
 end;
 

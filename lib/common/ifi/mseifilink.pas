@@ -216,7 +216,12 @@ const
  defaultformlinkoptions = [flo_useclientchannel];
 type 
 
- tcustommodulelink = class(tifiiolinkcomponent,iifiserver)
+ iifimodulelink = interface(inullinterface)
+                          ['{90279F1E-E80F-4657-9531-3C3A2CF151BD}']
+  procedure connectmodule(const sender: tcustommodulelink);
+ end;
+ 
+ tcustommodulelink = class(tifiiolinkcomponent,iifiserver,iifimodulelink)
   private
    factionsrx: trxlinkactions;
    factionstx: ttxlinkactions;
@@ -239,6 +244,7 @@ type
                                     const asequence: sequencety);
    procedure moduledatareceived(const atag: integer; const aname: string;
                    const asequence: sequencety; const adata: pmoduledatadataty);
+   procedure moduleloaded(const sender: tmsecomponent);
    procedure propertychangereceived(const atag: integer; const aname: string;
                       const apropertyname: string; const adata: pifidataty);
    procedure objectevent(const sender: tobject; const event: objecteventty); override;
@@ -247,8 +253,11 @@ type
    procedure processdata(const adata: pifirecty);
    function senddata(const adata: ansistring): sequencety;
                 //returns sequence number
+   procedure receiveevent(const event: tobjectevent); override;
    //iifiserver
    procedure valuechanged(const sender: iifiwidget); virtual;
+   //imodulelink
+   procedure connectmodule(const sender: tcustommodulelink);
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -278,7 +287,7 @@ type
  
 implementation
 uses
- sysutils,msestream,msesysutils,msetmpmodules;
+ sysutils,msestream,msesysutils,msetmpmodules,mseapplication;
  
 { tmodulelinkprop }
 
@@ -788,7 +797,12 @@ begin
     po1:= pifirecty(rxdata);
     with po1^.header do begin
      if size = length(rxdata) then begin
-      processdata(po1);
+      if kind in mainloopifikinds then begin
+       application.postevent(tstringobjectevent.create(rxdata,ievent(self)));
+      end
+      else begin
+       processdata(po1);
+      end;
      end;
     end;
    end;
@@ -846,7 +860,20 @@ begin
     str1:= ar1[1];
    end;
    processdataitem(adata,po1,tag1,str1);
+   if header.answersequence <> 0 then begin
+    channel.synchronizer.answerreceived(header.answersequence);
+   end;
   end;
+ end;
+end;
+
+procedure tcustommodulelink.receiveevent(const event: tobjectevent);
+begin
+ if event.kind = ek_objectdata then begin
+  processdata(pifirecty(tstringobjectevent(event).data));
+ end
+ else begin
+  inherited;
  end;
 end;
 
@@ -900,6 +927,28 @@ begin
  end;
 end;
 
+procedure tcustommodulelink.connectmodule(const sender: tcustommodulelink);
+begin
+ if flo_useclientchannel in options then begin
+  channel:= sender.channel;
+ end;
+end;
+
+procedure tcustommodulelink.moduleloaded(const sender: tmsecomponent);
+var
+ int1: integer;
+ intf1: iifimodulelink;
+begin
+ with sender do begin
+  for int1:= 0 to componentcount - 1 do begin
+   if mseclasses.getcorbainterface(components[int1],typeinfo(iifimodulelink),
+                                                     intf1) then begin
+    intf1.connectmodule(self);
+   end;
+  end;
+ end;
+end;
+
 procedure tcustommodulelink.moduledatareceived(const atag: integer;
  const aname: string; const asequence: sequencety; const adata: pmoduledatadataty);
 var
@@ -908,8 +957,6 @@ var
  stream1: tmemorycopystream;
  str1: string;
  po1: pchar;
- int1: integer;
- comp2: tcomponent;
 begin
  if asequence <> 0 then begin
   mo1:= fmodulesrx.finditem(asequence);
@@ -925,19 +972,7 @@ begin
    with pifibytesty(po1)^ do begin
     stream1:= tmemorycopystream.create(@data,length);
     try
-     fmodule:= createtmpmodule(str1,stream1);
-     with fmodule do begin
-      for int1:= 0 to componentcount - 1 do begin
-       comp2:= components[int1];
-       if comp2 is tcustommodulelink then begin
-        with tcustommodulelink(comp2) do begin
-         if flo_useclientchannel in options then begin
-          channel:= self.channel;
-         end;
-        end;
-       end; 
-      end;
-     end;
+     fmodule:= createtmpmodule(str1,stream1,@moduleloaded);
     finally
      stream1.free;
     end;

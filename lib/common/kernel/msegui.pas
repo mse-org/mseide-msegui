@@ -1639,7 +1639,7 @@ type
    procedure dowaitidle(var again: boolean);
   protected  
    procedure dopostevent(const aevent: tevent); override;
-   procedure eventloop(const once: boolean = false); 
+   procedure eventloop(const once: boolean = false);
                         //used in win32 wm_queryendsession and wm_entersizemove
    procedure exitloop;  //used in win32 cancelshutdown
    procedure receiveevent(const event: tobjectevent); override;
@@ -1656,7 +1656,7 @@ type
    procedure createform(instanceclass: widgetclassty; var reference);
    procedure invalidate; //invalidates all registered forms
    
-   procedure processmessages; //handle with care!
+   procedure processmessages; override; //handle with care!
 
    procedure beginwait; override;
    procedure endwait; override;
@@ -1958,7 +1958,7 @@ type
    procedure doterminate(const shutdown: boolean);
    procedure checkshortcut(const sender: twindow; const awidget: twidget;
                      var info: keyeventinfoty);
-   procedure doeventloop; override;
+   procedure doeventloop(const once: boolean); override;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -12342,12 +12342,9 @@ end;
 
 procedure tguiapplication.processmessages;
 begin
- if not ismainthread then begin
-  raise exception.create('processmessages must be called from main thread.');
- end;
  gui_flushgdi;
  sys_sched_yield;
- eventloop(true);
+ inherited;
 end;
 
 procedure tguiapplication.invalidated;
@@ -12901,9 +12898,9 @@ begin
  gui_postevent(aevent);
 end;
 
-procedure tinternalapplication.doeventloop;
+procedure tinternalapplication.doeventloop(const once: boolean);
 begin
- eventloop(nil);
+ eventloop(nil,once);
 end;
 
 procedure tguiapplication.beginwait;

@@ -4,7 +4,7 @@ interface
 uses
  classes,mseapplication,mseclasses,msearrayprops,mseact,msestrings,msetypes,mseevent,
  mseglob,msestream,msepipestream,{msegui,}mseifiglob,typinfo,msebintree,
- msesys,msesockets,msecryptio;
+ msesys,msesockets,msecryptio,msethread;
 type
  
  sequencety = longword;
@@ -13,6 +13,12 @@ type
                  ik_widgetcommand,ik_widgetproperties,ik_requestmodule,ik_moduledata,
                  ik_requestfielddefs,ik_fielddefsdata,ik_fieldrec,
                  ik_requestopends,ik_dsdata);
+const
+ ifiitemkinds = [ik_actionfired,ik_propertychanged,ik_widgetcommand,
+                 ik_widgetproperties,ik_requestmodule,ik_moduledata];
+ mainloopifikinds = [ik_moduledata]; 
+ 
+type 
  ifinamety = array[0..0] of char; //null terminated
  pifinamety = ^ifinamety;
 
@@ -136,10 +142,6 @@ type
   recdata: recdataty;
  end;
  
-const
- ifiitemkinds = [ik_actionfired,ik_propertychanged,ik_widgetcommand,
-                 ik_widgetproperties,ik_requestmodule,ik_moduledata];
- 
 type 
  ifiheaderty = record
   size: integer;  //overall size
@@ -199,29 +201,30 @@ type
  end;
 
  tiosynchronizer = class;
- datasynchronizeprocty = procedure(const sender: tiosynchronizer; var adata: string);
- 
- tiosynchronizer = class
+// datasynchronizeprocty = procedure(const sender: tiosynchronizer;
+//                               var adata: string) of object;
+ stringdataprocty = procedure(var adata: string) of object;
+  
+ tiosynchronizer = class(teventthread)
   private
    fwaitingclients: tintegeravltree;   
-   fonsynchronize: datasynchronizeprocty;
+   fondatareceived: stringdataprocty;
+//   fonsynchronize: datasynchronizeprocty;
   protected
-   procedure datareceived(var adata: string);
-   procedure answerreceived(const asequence: sequencety);
-   function waitforanswer(const asequence: sequencety; 
-                   const waitus: integer): boolean; //false on timeout
+   procedure datareceived(const adata: string);
+   procedure eventloop;
+   function execute(thread: tmsethread): integer; override;
   public
-   constructor create;
+   constructor create(const aondatareceived: stringdataprocty);
    destructor destroy; override;
-   property onsynchronize: datasynchronizeprocty read fonsynchronize 
-                                                          write fonsynchronize;
+   procedure answerreceived(const asequence: sequencety);
+   function preparewait(const asequence: sequencety): twaitingclient;
+   function waitforanswer(const aclient: twaitingclient; 
+                   const waitus: integer): boolean; //false on timeout
+//   property onsynchronize: datasynchronizeprocty read fonsynchronize 
+//                                                          write fonsynchronize;
  end;
-{ 
- tifisynchronizer = class(tiosynchronizer)
-  protected
-   procedure datareceived(var adata: string); override;
- end;
- }
+
  tcustomiochannel = class;
  iochanneleventty = procedure(const sender: tcustomiochannel) of object;
  optioniochty = (oic_releaseondisconnect);
@@ -241,7 +244,8 @@ type
   protected
    fsynchronizer: tiosynchronizer;
    function canconnect: boolean; virtual;
-   procedure datareceived(const adata: ansistring);
+//   procedure receiveevent(const event: tobjectevent); override;
+   procedure datareceived(var adata: ansistring);
    procedure internalconnect; virtual; abstract;
    procedure internaldisconnect; virtual; abstract;
    function commio: boolean; virtual; abstract;
@@ -258,8 +262,7 @@ type
    function checkconnection: boolean;
    procedure senddata(const adata: ansistring);   
    function sequence: sequencety;
-   function waitforanswer(const asequence: sequencety; 
-                                     const atimeoutus: integer): boolean;
+   property synchronizer: tiosynchronizer read fsynchronizer;
    property active: boolean read factive write setactive;
    property rxdata: string read frxdata write frxdata;
   published
@@ -691,7 +694,7 @@ begin
  dest:= pchar(source);
  result:= length(dest) + 1;
 end;
-
+{
 procedure ifidatasynchronize(const sender: tiosynchronizer; var adata: string);
 begin
  if length(adata) >= sizeof(ifiheaderty) then begin
@@ -702,7 +705,7 @@ begin
   end;
  end;
 end;
-
+}
 procedure inititemheader(const atag: integer; const aname: string; 
        out arec: string; const akind: ifireckindty;  const asequence: sequencety;
        const datasize: integer; out datapo: pchar);
@@ -722,7 +725,7 @@ end;
 
 constructor tcustomiochannel.create(aowner: tcomponent);
 begin
- fsynchronizer:= tiosynchronizer.create;
+ fsynchronizer:= tiosynchronizer.create(@datareceived);
  inherited;
 end;
 
@@ -759,13 +762,17 @@ begin
  internalsenddata(adata);
 end;
 
-procedure tcustomiochannel.datareceived(const adata: ansistring);
+procedure tcustomiochannel.datareceived(var adata: ansistring);
+var
+ str1: string;
 begin
+ str1:= frxdata;
  frxdata:= adata;
- sendchangeevent(oe_dataready);
-// if fsynchronizer <> nil then begin
- fsynchronizer.datareceived(frxdata);
-// end;
+ try
+  sendchangeevent(oe_dataready);
+ finally
+  frxdata:= str1;
+ end;
 end;
 
 procedure tcustomiochannel.setactive(const avalue: boolean);
@@ -789,15 +796,6 @@ begin
  if factive and not (csdesigning in componentstate) then begin
   connect;
  end;
-end;
-
-function tcustomiochannel.waitforanswer(const asequence: sequencety;
-               const atimeoutus: integer): boolean;
-begin
-// result:= false;
-// if fsynchronizer <> nil then begin
- result:= fsynchronizer.waitforanswer(asequence,atimeoutus);
-// end;
 end;
 
 procedure tcustomiochannel.dobeforeconnect;
@@ -884,7 +882,7 @@ begin
      str1:= copy(fbuffer,int2+3,int1); //next frame
      setlength(fbuffer,int2);
      try
-      datareceived(unstuff(fbuffer));
+      fsynchronizer.datareceived(unstuff(fbuffer));
      except
       application.handleexception(self);
      end;
@@ -1058,9 +1056,11 @@ end;
 }
 { tiosynchronizer }
 
-constructor tiosynchronizer.create;
+constructor tiosynchronizer.create(const aondatareceived: stringdataprocty);
 begin
+ fondatareceived:= aondatareceived;
  fwaitingclients:= tintegeravltree.create;
+ inherited create;
 end;
 
 destructor tiosynchronizer.destroy;
@@ -1078,29 +1078,59 @@ begin
  end;
 end;
 
-function tiosynchronizer.waitforanswer(const asequence: sequencety;
+function tiosynchronizer.preparewait(const asequence: sequencety): twaitingclient;
+begin
+ if getcurrentthreadid = id then begin
+  raise exception.create('Deadlock in tiosynchrionizer.waitforanswer.');
+ end;
+ result:= twaitingclient.create(asequence);
+ fwaitingclients.addnode(result);
+end;
+
+function tiosynchronizer.waitforanswer(const aclient: twaitingclient;
                const waitus: integer): boolean;
 var
- client1: twaitingclient;
  int1: integer;
 begin
- client1:= twaitingclient.create(asequence);
- fwaitingclients.addnode(client1);
  int1:= application.unlockall;
  try
-  result:= client1.wait(waitus);
+  result:= aclient.wait(waitus);
  finally
   application.relockall(int1);
  end;
- fwaitingclients.removenode(client1);
- client1.free;
+ fwaitingclients.removenode(aclient);
+ aclient.free;
 end;
 
-procedure tiosynchronizer.datareceived(var adata: string);
+procedure tiosynchronizer.datareceived(const adata: string);
 begin
- if assigned(fonsynchronize) then begin
-  fonsynchronize(self,adata);
+ postevent(tstringevent.create(adata));
+end;
+
+procedure tiosynchronizer.eventloop;
+var
+ str1: string;
+ event: tstringevent;
+begin
+ while not terminated do begin
+  event:= tstringevent(waitevent);
+  if event <> nil then begin
+   str1:= event.data;
+   event.free;
+   application.lock;
+   try
+    fondatareceived(str1);
+   except
+    application.handleexception(self);
+   end;
+   application.unlock;   
+  end;
  end;
+end;
+
+function tiosynchronizer.execute(thread: tmsethread): integer;
+begin
+ eventloop;
 end;
 
 { twaitingclient }
@@ -1124,6 +1154,7 @@ end;
 function twaitingclient.wait(const awaitus: integer): boolean;
 begin
  result:= sys_semwait(fsem,awaitus) = sye_ok;
+ application.processmessages;
 end;
 
 { tifisocketclient }
@@ -1273,7 +1304,7 @@ end;
 procedure tifiiolinkcomponent.setchannel(const avalue: tcustomiochannel);
 begin
  setlinkedvar(avalue,fchannel);
- avalue.fsynchronizer.onsynchronize:= @ifidatasynchronize;
+// avalue.fsynchronizer.onsynchronize:= @ifidatasynchronize;
 end;
 
 { tsocketserverifichannel }

@@ -18,7 +18,7 @@ type
    feventsem: semty;
   protected
    procedure dopostevent(const aevent: tevent); override;
-   procedure doeventloop; override;
+   procedure doeventloop(const once: boolean); override;
    function nextevent: tevent;
    procedure dobeforerun; override;
    procedure doafterrun; override;
@@ -83,7 +83,7 @@ begin
  nogui_settimer(us);
 end;
 
-procedure tnoguiapplication.doeventloop;
+procedure tnoguiapplication.doeventloop(const once: boolean);
 var
  event1: tevent;
 begin
@@ -95,6 +95,9 @@ begin
      doidle;
     except
      handleexception(self);
+    end;
+    if once then begin
+     break;
     end;
    end;
    event1:= nextevent;

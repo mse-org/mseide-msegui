@@ -39,7 +39,7 @@ type
    function execute(thread: tmsethread): integer; virtual;
   public
    constructor create; overload;
-   constructor create(athreadproc: threadprocty); overload;
+   constructor create(athreadproc: threadprocty); virtual; overload;
    destructor destroy; override;
    function waitfor: integer; virtual;
    procedure terminate; virtual;
@@ -53,7 +53,7 @@ type
   private
    fmutex: mutexty;
   public
-   constructor create(athreadproc: threadprocty);
+   constructor create(athreadproc: threadprocty); override; overload;
    destructor destroy; override;
    function lock: boolean; //true if ok
    procedure unlock;
@@ -63,7 +63,7 @@ type
   private
    fsem: semty;
   public
-   constructor create(athreadproc: threadprocty);
+   constructor create(athreadproc: threadprocty); override; overload;
    destructor destroy; override;
    function semwait: boolean; //true if not destroyed
    function sempost: boolean; //true if not destroyed
@@ -75,7 +75,7 @@ type
   private
    feventlist: teventqueue;
   public
-   constructor create(athreadproc: threadprocty);
+   constructor create(athreadproc: threadprocty); override; overload;
    destructor destroy; override;
    procedure terminate; override;
    procedure postevent(event: tevent);

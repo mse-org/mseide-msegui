@@ -339,6 +339,7 @@ type
    property helpcontext: msestring read gethelpcontext write fhelpcontext;
  end;
 
+ msecomponenteventty = procedure(const sender: tmsecomponent) of object;
  msecomponentclassty = class of tmsecomponent;
  msecomponentarty = array of tmsecomponent;
 

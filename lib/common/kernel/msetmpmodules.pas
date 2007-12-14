@@ -9,7 +9,8 @@ procedure endloadtmpmodule;
 procedure addtmpmodule(const amodule: tmsecomponent);
 
 function createtmpmodule(const aclassname: string;
-                               const aobjdata: tstream): tmsecomponent;
+                         const aobjdata: tstream; 
+                         const onloaded: msecomponenteventty = nil): tmsecomponent;
 
 implementation
 uses
@@ -21,7 +22,8 @@ var
  ftmpmodules: tmodulelist;
 
 function createtmpmodule(const aclassname: string;
-                               const aobjdata: tstream): tmsecomponent;
+                         const aobjdata: tstream;
+                         const onloaded: msecomponenteventty = nil): tmsecomponent;
 var
  class1: tpersistentclass;
 begin
@@ -39,6 +41,9 @@ begin
     create(nil); //destoyed by modulelist
     exclude(fmsecomponentstate,cs_noload);
     aobjdata.readcomponent(result);
+    if assigned(onloaded) then begin
+     onloaded(result);
+    end;
     addtmpmodule(result);
    finally
     endloadtmpmodule;
