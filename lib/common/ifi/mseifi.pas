@@ -1154,7 +1154,7 @@ end;
 function twaitingclient.wait(const awaitus: integer): boolean;
 begin
  result:= sys_semwait(fsem,awaitus) = sye_ok;
- application.processmessages;
+// application.processmessages;
 end;
 
 { tifisocketclient }

@@ -338,6 +338,7 @@ type
  
  fdefitemty = record
   datatype: tfieldtype;
+  size: integer;
   name: ifinamety;
  end; 
  pfdefitemty = ^fdefitemty;
@@ -364,6 +365,7 @@ begin
  for int1:= 0 to fielddefs.count - 1 do begin
   with fielddefs[int1] do begin
    pfdefitemty(po1)^.datatype:= datatype;
+   pfdefitemty(po1)^.size:= size;
    po1:= @pfdefitemty(po1)^.name;
    inc(po1,stringtoifiname(name,pifinamety(po1)));
   end;
@@ -378,14 +380,16 @@ var
  int1: integer;
  str1: string;
  datatype1: tfieldtype;
+ size1: integer;
 begin
  fielddefs.clear;
  po1:= @adata^.items;
  for int1:= 0 to adata^.count - 1 do begin
   datatype1:= pfdefitemty(po1)^.datatype;
+  size1:= pfdefitemty(po1)^.size;
   po1:= @pfdefitemty(po1)^.name;
   inc(po1,ifinametostring(pifinamety(po1),str1));
-  tfielddef.create(fielddefs,str1,datatype1,0,false,int1+1);
+  tfielddef.create(fielddefs,str1,datatype1,size1,false,int1+1);
  end;
  asize:= pointer(po1) - pointer(adata);
  result:= true;
