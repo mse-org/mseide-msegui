@@ -848,11 +848,10 @@ begin
  with stockobjects do begin
   if stringenter(mstr1,captions[sc_name1],
                captions[sc_create_new_directory]) = mr_ok then begin
-// if stringenter(mstr1,'Name','Create new directory') = mr_ok then begin
    mstr1:= filepath(listview.directory,mstr1,fk_file);
    msefileutils.createdir(mstr1);
    changedir(mstr1);
-//  listview.readlist;
+   filename.setfocus;
   end;
  end;
 end;
