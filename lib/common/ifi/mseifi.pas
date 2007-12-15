@@ -230,7 +230,7 @@ type
  optioniochty = (oic_releaseondisconnect);
  optionsiochty = set of optioniochty;
    
- tcustomiochannel = class(tmsecomponent)
+ tcustomiochannel = class(tactcomponent)
   private
    frxdata: string;
    factive: boolean;
@@ -256,6 +256,8 @@ type
    procedure connect;
    procedure disconnect;
    procedure disconnected;
+   procedure doactivated; override;
+   procedure dodeactivated; override;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -309,12 +311,13 @@ type
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
-  published
    property active;
  end;
 
  tpipeiochannel = class(tcustompipeiochannel)
   published
+   property active;
+   property activator;
    property serverapp: string read fserverapp write fserverapp;
             //stdin, stdout if ''
  end;
@@ -331,35 +334,27 @@ type
   public
    constructor create(aowner: tcomponent); override;
   published
+   property active;   
+   property activator;
    property cryptio: tcryptio read fcryptio write setcryptio;
    property cryptiokindt: cryptiokindty read fcryptioinfo.kind
                                write fcryptioinfo.kind;
  end;
 
-{ 
- tpipeifichannel = class(tpipeiochannel)
-  public
-   constructor create(aowner: tcomponent); override;
+ tifisocketclient = class(tcustomsocketclient)
   published
-   property serverapp;
+   property pipes;
+   property cryptio;   
+
+   property kind;
+   property url;
+   property port;
  end;
-}
-{ 
- tifisocketclientpipes = class(tclientsocketpipes)
-  published
-   property overloadsleepus;
- end;
-} 
-{
- tifisocketclient = class(tsocketclient)
-  public
-   constructor create(aowner: tcomponent); override;
- end;
-}
+ 
  tsocketclientiochannel = class(tstuffediochannel)
   private
-   fsocket: tsocketclient;
-   procedure setsocket(const avalue: tsocketclient);
+   fsocket: tifisocketclient;
+   procedure setsocket(const avalue: tifisocketclient);
   protected
    procedure internalconnect; override;
    procedure internaldisconnect; override;   
@@ -371,7 +366,9 @@ type
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
   published
-   property socket: tsocketclient read fsocket write setsocket;
+   property active;
+   property activator;
+   property socket: tifisocketclient read fsocket write setsocket;
  end;
 
  tcustomsocketserveriochannel = class(tstuffediochannel)
@@ -396,30 +393,6 @@ type
    procedure link(const apipes: tcustomsocketpipes);
  end;
  
-{
- tsocketserverstdiochannel = class(tsocketserveriochannel)
-  public
-   constructor create(aowner: tcomponent); override;
- end;
-}  
-{
- tsocketclientifichannel = class(tsocketclientiochannel)
-  public
-   constructor create(aowner: tcomponent); override;
- end;
-}
-{
- tsocketserverifichannel = class(tsocketserveriochannel)
-  public
-   constructor create(aowner: tcomponent); override;
- end;
-}
-{   
- tsocketserverstdifichannel = class(tsocketserverstdiochannel)
-  public
-   constructor create(aowner: tcomponent); override;
- end;
-}
  tifiiolinkcomponent = class(tmsecomponent)
   private
    procedure setchannel(const avalue: tcustomiochannel);
@@ -758,8 +731,9 @@ end;
 
 procedure tcustomiochannel.senddata(const adata: ansistring);
 begin
- checkconnection;
- internalsenddata(adata);
+ if checkconnection then begin
+  internalsenddata(adata);
+ end;
 end;
 
 procedure tcustomiochannel.datareceived(var adata: ansistring);
@@ -854,6 +828,19 @@ end;
 function tcustomiochannel.canconnect: boolean;
 begin
  result:= true;
+end;
+
+procedure tcustomiochannel.doactivated;
+begin
+ active:= true;
+// if factive then begin
+//  connect;
+// end;
+end;
+
+procedure tcustomiochannel.dodeactivated;
+begin
+ active:= false;
 end;
 
 { tstuffediochannel }
@@ -1169,7 +1156,7 @@ end;
 
 constructor tsocketclientiochannel.create(aowner: tcomponent);
 begin
- fsocket:= tsocketclient.create(nil);
+ fsocket:= tifisocketclient.create(nil);
  fsocket.setsubcomponent(true);
  fsocket.pipes.rx.oninputavailable:= @doinputavailable;
  fsocket.pipes.onbeforedisconnect:= @dobeforedisconnect;
@@ -1207,7 +1194,7 @@ begin
  addata(sender.readdatastring);
 end;
 
-procedure tsocketclientiochannel.setsocket(const avalue: tsocketclient);
+procedure tsocketclientiochannel.setsocket(const avalue: tifisocketclient);
 begin
  fsocket.assign(avalue);
 end;

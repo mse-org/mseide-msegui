@@ -300,7 +300,7 @@ end;
 procedure tactcomponent.loaded;
 begin
  inherited;
- if (factivator = nil) or factivator.activated then begin
+ if (factivator <> nil) and factivator.activated then begin
   doactivated;
  end;
 end;
@@ -728,6 +728,10 @@ begin
  else begin
   result:= false;
  end;
+ {$ifdef mse_debug_lock}
+ debugout(self,'lock, count: '+inttostr(flockcount) + ' thread: '+
+                    inttostr(flockthread));
+ {$endif}
 end;
 
 function tcustomapplication.lock: boolean;
@@ -758,6 +762,10 @@ begin
    sys_mutexunlock(fmutex);
   end;
  end;
+ {$ifdef mse_debug_lock}
+ debugout(self,'unlock, count: '+inttostr(flockcount) + ' thread: '+
+                    inttostr(flockthread));
+ {$endif}
 end;
 
 function tcustomapplication.unlock: boolean;
@@ -783,7 +791,9 @@ begin
   dec(count);
   while count > 0 do begin
    sys_mutexlock(fmutex);
+   dec(count);
   end;
+  inc(flockcount,count);
   if ismainthread then begin
    dec(fcheckoverloadlock);
   end;

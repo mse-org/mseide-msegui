@@ -44,7 +44,7 @@ type
    property timeoutms: integer read ftimeoutms write settimeoutms;
  end;
  
- tsocketcomp = class;
+ tcustomsocketcomp = class;
  
  socketpipesstatety = (sops_open,sops_closing,sops_detached);
  socketpipesstatesty = set of socketpipesstatety;
@@ -55,7 +55,7 @@ type
    ftx: tsocketwriter;
    foninputavailable: socketpipeseventty;
    fonsocketbroken: socketpipeseventty;
-   fowner: tsocketcomp;
+   fowner: tcustomsocketcomp;
    fonbeforeconnect: socketpipeseventty;
    fonafterconnect: socketpipeseventty;
    fonbeforedisconnect: socketpipeseventty;
@@ -84,7 +84,8 @@ type
    procedure receiveevent(const event: tobjectevent);
    property onsocketbroken: socketpipeseventty read fonsocketbroken write fonsocketbroken;
   public
-   constructor create(const aowner: tsocketcomp; const acryptkind: cryptiokindty);
+   constructor create(const aowner: tcustomsocketcomp;
+                                 const acryptkind: cryptiokindty);
    destructor destroy; override;
    procedure close;
    {
@@ -113,7 +114,7 @@ type
    property oninputavailable: socketpipeseventty read foninputavailable write setoninputavailable;
  end;
 
- tsocketclient = class;
+ tcustomsocketclient = class;
  
  tsocketpipes = class(tcustomsocketpipes)
   published
@@ -137,9 +138,9 @@ type
  socketpipesarty = array of tsocketpipes;
  tcustomsocketserver = class;
 
- socketeventty = procedure(sender: tsocketcomp) of object;  
+ socketeventty = procedure(sender: tcustomsocketcomp) of object;  
  
- tsocketcomp = class(tactcomponent)
+ tcustomsocketcomp = class(tactcomponent)
   private
    fhandle: integer;
    factive: boolean;
@@ -160,12 +161,11 @@ type
    procedure disconnect;
    procedure checkinactive;
    procedure doafterconnect(const sender: tcustomsocketpipes);
+   procedure loaded; override;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
-  published
    property active: boolean read factive write setactive;
-   property activator;
    property cryptio: tcryptio read fcryptio write setcryptio;
    
    property onbeforeconnect: socketeventty read fonbeforeconnect 
@@ -178,7 +178,18 @@ type
                                                 write fonafterdisconnect;
  end;
 
- tcustomurlsocketcomp = class(tsocketcomp)
+ tsocketcomp = class(tcustomsocketcomp)
+  published
+   property active;
+   property activator;
+   property cryptio;   
+   property onbeforeconnect;
+   property onafterconnect;
+   property onbeforedisconnect;
+   property onafterdisconnect;
+ end;
+ 
+ tcustomurlsocketcomp = class(tcustomsocketcomp)
   private
    fkind: socketkindty;
    furl: msestring;
@@ -193,12 +204,20 @@ type
 
  turlsocketcomp = class(tcustomurlsocketcomp)
   published
+   property active;
+   property activator;
+   property cryptio;   
+   property onbeforeconnect;
+   property onafterconnect;
+   property onbeforedisconnect;
+   property onafterdisconnect;
+
    property kind;
    property url;
    property port;
  end;
   
- tsocketclient = class(turlsocketcomp)
+ tcustomsocketclient = class(tcustomurlsocketcomp)
   private
    procedure setpipes(const avalue: tsocketpipes);
   protected
@@ -210,15 +229,30 @@ type
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
-  published
    property pipes: tsocketpipes read fpipes write setpipes;
  end;
 
+ tsocketclient = class(tcustomsocketclient)
+  published
+   property pipes;
+   property active;
+   property activator;
+   property cryptio;   
+   property onbeforeconnect;
+   property onafterconnect;
+   property onbeforedisconnect;
+   property onafterdisconnect;
+
+   property kind;
+   property url;
+   property port;
+ end;
+ 
  tsocketstdio = class(tsocketcomp)
   private
    procedure setpipes(const avalue: tsocketpipes);
-   function getcryptokind: cryptiokindty;
-   procedure setcryptokind(const avalue: cryptiokindty);
+   function getcryptiokind: cryptiokindty;
+   procedure setcryptiokind(const avalue: cryptiokindty);
   protected
    fpipes: tsocketpipes;
    procedure internalconnect; override;
@@ -230,7 +264,7 @@ type
    destructor destroy; override;
   published
    property pipes: tsocketpipes read fpipes write setpipes;
-   property cryptokind: cryptiokindty read getcryptokind write setcryptokind
+   property cryptiokind: cryptiokindty read getcryptiokind write setcryptiokind
                              default cyk_none;
  end;
  
@@ -306,6 +340,14 @@ type
   protected
    procedure internalconnect; override;
   published
+   property active;
+   property activator;
+   property cryptio;   
+   property onbeforeconnect;
+   property onafterconnect;
+   property onbeforedisconnect;
+   property onafterdisconnect;
+
    property kind;
    property url;
    property port;
@@ -387,7 +429,7 @@ end;
 
 { tcustomsocketpipes }
 
-constructor tcustomsocketpipes.create(const aowner: tsocketcomp; 
+constructor tcustomsocketpipes.create(const aowner: tcustomsocketcomp; 
                                               const acryptkind: cryptiokindty);
 begin
  fowner:= aowner;
@@ -572,45 +614,46 @@ begin
  execmse1(commandline,@rxha,@txha);
 end;
 }
-{ tsocketcomp }
+{ tcustomsocketcomp }
 
-constructor tsocketcomp.create(aowner: tcomponent);
+constructor tcustomsocketcomp.create(aowner: tcomponent);
 begin
  fhandle:= invalidfilehandle;
  inherited;
 end;
 
-destructor tsocketcomp.destroy;
+destructor tcustomsocketcomp.destroy;
 begin
  inherited;
 end;
 
-procedure tsocketcomp.doactivated;
+procedure tcustomsocketcomp.doactivated;
 begin
- if factive then begin
-  connect;
- end;
+ active:= true;
+// if factive then begin
+//  connect;
+// end;
 end;
 
-procedure tsocketcomp.dodeactivated;
+procedure tcustomsocketcomp.dodeactivated;
 begin
  active:= false;
 end;
 
-procedure tsocketcomp.internaldisconnect;
+procedure tcustomsocketcomp.internaldisconnect;
 begin
  fhandle:= invalidfilehandle;
  factive:= false;
 end;
 
-procedure tsocketcomp.checkinactive;
+procedure tcustomsocketcomp.checkinactive;
 begin
  if not (csloading in componentstate) and active then begin
   raise exception.create('Socket must be inactive.');
  end;
 end;
 
-procedure tsocketcomp.setactive(const avalue: boolean);
+procedure tcustomsocketcomp.setactive(const avalue: boolean);
 begin
  if factive <> avalue then begin
   if not (csloading in componentstate) then begin
@@ -627,7 +670,7 @@ begin
  end;
 end;
 
-procedure tsocketcomp.doafterconnect(const sender: tcustomsocketpipes);
+procedure tcustomsocketcomp.doafterconnect(const sender: tcustomsocketpipes);
 begin
  if canevent(tmethod(fonafterconnect)) then begin
   application.lock;
@@ -639,7 +682,7 @@ begin
  end; 
 end;
 
-procedure tsocketcomp.connect;
+procedure tcustomsocketcomp.connect;
 begin
  if canevent(tmethod(fonbeforeconnect)) then begin
   fonbeforeconnect(self);
@@ -647,7 +690,7 @@ begin
  internalconnect;
 end;
 
-procedure tsocketcomp.disconnect;
+procedure tcustomsocketcomp.disconnect;
 begin
  if canevent(tmethod(fonbeforedisconnect)) then begin
   fonbeforedisconnect(self);
@@ -658,9 +701,17 @@ begin
  end; 
 end;
 
-procedure tsocketcomp.setcryptio(const avalue: tcryptio);
+procedure tcustomsocketcomp.setcryptio(const avalue: tcryptio);
 begin
  setlinkedvar(avalue,fcryptio);
+end;
+
+procedure tcustomsocketcomp.loaded;
+begin
+ inherited;
+ if factive then begin
+  connect;
+ end;
 end;
 
 { tcustomurlsocketcomp}
@@ -735,12 +786,12 @@ begin
  end;
 end;
 
-function tsocketstdio.getcryptokind: cryptiokindty;
+function tsocketstdio.getcryptiokind: cryptiokindty;
 begin
  result:= fpipes.fcryptioinfo.kind;
 end;
 
-procedure tsocketstdio.setcryptokind(const avalue: cryptiokindty);
+procedure tsocketstdio.setcryptiokind(const avalue: cryptiokindty);
 begin
  fpipes.fcryptioinfo.kind:= avalue;
 end;
@@ -758,9 +809,9 @@ begin
  inherited;
 end;
 }
-{ tsocketclient }
+{ tcustomsocketclient }
 
-constructor tsocketclient.create(aowner: tcomponent);
+constructor tcustomsocketclient.create(aowner: tcomponent);
 begin
  if fpipes = nil then begin
   fpipes:= tsocketpipes.create(self,cyk_client);
@@ -768,18 +819,18 @@ begin
  inherited;
 end;
 
-destructor tsocketclient.destroy;
+destructor tcustomsocketclient.destroy;
 begin
  fpipes.free;
  inherited;
 end;
 
-procedure tsocketclient.setpipes(const avalue: tsocketpipes);
+procedure tcustomsocketclient.setpipes(const avalue: tsocketpipes);
 begin
  fpipes.assign(avalue);
 end;
 
-procedure tsocketclient.internalconnect;
+procedure tcustomsocketclient.internalconnect;
 begin
  socketerror(soc_open(fkind,true,fhandle));
  try
@@ -800,13 +851,13 @@ begin
  factive:= true;
 end;
 
-procedure tsocketclient.internaldisconnect;
+procedure tcustomsocketclient.internaldisconnect;
 begin
  fpipes.handle:= invalidfilehandle;
  inherited
 end;
 
-procedure tsocketclient.closepipes(const sender: tcustomsocketpipes);
+procedure tcustomsocketclient.closepipes(const sender: tcustomsocketpipes);
 begin
  if (csdestroying in componentstate) and application.ismainthread then begin
   disconnect;
@@ -816,7 +867,7 @@ begin
  end;
 end;
 
-procedure tsocketclient.doasyncevent(var atag: integer);
+procedure tcustomsocketclient.doasyncevent(var atag: integer);
 begin
  if atag = closepipestag then begin
   disconnect;
@@ -1065,9 +1116,10 @@ begin
    internaldisconnect;
    raise;
   end;
+  factive:= true;
+  fthread:= tmsethread.create(@execthread);
  end;
  factive:= true;
- fthread:= tmsethread.create(@execthread);
 end;
 
 { tsocketserverstdio }
