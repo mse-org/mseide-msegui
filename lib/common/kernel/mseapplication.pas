@@ -669,9 +669,7 @@ begin
  fonidlelist:= tonidlelist.create;
  sys_mutexcreate(fmutex);
  sys_mutexcreate(feventlock);
- {$ifdef FPC}
- classes.wakemainthread:= @dowakeup;
- {$endif}
+ classes.wakemainthread:= {$ifdef FPC}@{$endif}dowakeup;
 end;
 
 destructor tcustomapplication.destroy;
