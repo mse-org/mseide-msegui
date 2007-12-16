@@ -24,6 +24,11 @@ var                         //!!!!todo: link with correct location
  __malloc_initialized : longint;cvar;
  h_errno : longint;cvar;
 {$endif}
+{$ifdef mse_debug_mutex}
+var
+ mutexcount: integer;
+ appmutexcount: integer;
+{$endif}
 
 {$include ../msesysintf.inc}
 
@@ -206,7 +211,8 @@ procedure setcloexec(const fd: integer);
 
 implementation
 uses
- sysutils,msesysutils,msefileutils{$ifdef FPC},dateutils{$else},DateUtils{$endif};
+ sysutils,msesysutils,msefileutils{$ifdef FPC},dateutils{$else},DateUtils{$endif}
+ {$ifdef mse_debug_mutex},mseapplication{$endif};
 {$ifdef FPC}
 const
  recursive = PTHREAD_MUTEX_RECURSIVE;
@@ -487,6 +493,14 @@ procedure destroymutex(var mutex: pthread_mutex_t);
 begin
  while pthread_mutex_destroy(mutex) = ebusy do begin
   pthread_mutex_unlock(mutex);
+  {$ifdef mse_debug_mutex}
+  interlockeddecrement(mutexcount);
+  if application.getmutexaddr = @mutex then begin
+   interlockeddecrement(appmutexcount);
+//   debugwriteln('sys_destroymutex count: '+inttostr(application.getmutexcount)+
+//              ' mutexcount: '+inttostr(appmutexcount));
+  end;
+  {$endif}
  end;
 end;
 
@@ -647,6 +661,14 @@ function sys_mutexlock(var mutex: mutexty): syserrorty;
 begin
  if pthread_mutex_lock(linuxmutexty(mutex).mutex) = 0 then begin
   result:= sye_ok;
+  {$ifdef mse_debug_mutex}
+  interlockedincrement(mutexcount);
+  if application.getmutexaddr = @mutex then begin
+   interlockedincrement(appmutexcount);
+//   debugwriteln('sys_mutexlock count: '+inttostr(application.getmutexcount)+
+//              ' mutexcount: '+inttostr(appmutexcount));
+  end;
+  {$endif}
  end
  else begin
   result:= sye_mutex;
@@ -658,6 +680,14 @@ var
  int1: integer;
 begin
  int1:= pthread_mutex_trylock(linuxmutexty(mutex).mutex);
+ {$ifdef mse_debug_mutex}
+ if int1 = 0 then begin
+  interlockedincrement(mutexcount);
+  if application.getmutexaddr = @mutex then begin
+   interlockedincrement(appmutexcount);
+  end;
+ end;
+ {$endif}
  case int1 of
   0: result:= sye_ok;
   ebusy: result:= sye_busy;
@@ -668,6 +698,12 @@ end;
 function sys_mutexunlock(var mutex: mutexty): syserrorty;
 begin
  if pthread_mutex_unlock(linuxmutexty(mutex).mutex) = 0 then begin
+  {$ifdef mse_debug_mutex}
+  interlockeddecrement(mutexcount);
+  if application.getmutexaddr = @mutex then begin
+   interlockeddecrement(appmutexcount);
+  end;
+  {$endif}
   result:= sye_ok;
  end
  else begin

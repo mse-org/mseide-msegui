@@ -46,7 +46,7 @@ type
  
  tcustomsocketcomp = class;
  
- socketpipesstatety = (sops_open,sops_closing,sops_detached);
+ socketpipesstatety = (sops_open,sops_closing,sops_detached,sops_releasing);
  socketpipesstatesty = set of socketpipesstatety;
  
  tcustomsocketpipes = class(tlinkedpersistent,ievent)
@@ -88,6 +88,7 @@ type
                                  const acryptkind: cryptiokindty);
    destructor destroy; override;
    procedure close;
+   procedure release;
    {
    procedure runhandlerapp(const commandline: filenamety);
                    //connects to input/output
@@ -450,6 +451,14 @@ begin
  ftx.free;
 end;
 
+procedure tcustomsocketpipes.release;
+begin
+ if not (sops_releasing in fstate) then begin
+  application.postevent(tobjectevent.create(ek_release,ievent(self)));
+  include(fstate,sops_releasing);
+ end;
+end;
+
 function tcustomsocketpipes.gethandle: integer;
 begin
  result:= ftx.handle;
@@ -539,6 +548,11 @@ begin
   else begin
    close;
   end;
+ end
+ else begin
+  if event.kind = ek_release then begin
+   free;
+  end;
  end;
 end;
 
@@ -599,6 +613,7 @@ procedure tcustomsocketpipes.settxtimeoutms(const avalue: integer);
 begin
  ftx.timeoutms:= avalue;
 end;
+
 {
 procedure tcustomsocketpipes.runhandlerapp(const commandline: filenamety);
 var
@@ -1040,7 +1055,7 @@ begin
  for int1:= 0 to high(fpipes) do begin
   if (fpipes[int1] <> nil) and 
               (fpipes[int1].tx.handle = invalidfilehandle) then begin
-   freeandnil(fpipes[int1]);
+   fpipes[int1].release;
   end;
  end;
 end;

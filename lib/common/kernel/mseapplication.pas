@@ -181,6 +181,11 @@ type
    procedure dowakeup(sender: tobject);
    property eventlist: tobjectqueue read feventlist;
   public
+   {$ifdef mse_debug_mutex}
+   function getmutexaddr: pointer;
+   function getmutexcount: integer;
+   procedure checklockcount;
+   {$endif}
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
    procedure createdatamodule(instanceclass: msecomponentclassty; var reference);
@@ -655,6 +660,24 @@ end;
 
 { tcustomapplication }
 
+{$ifdef mse_debug_mutex}
+function tcustomapplication.getmutexaddr: pointer;
+begin
+ result:= @fmutex;
+end;
+function tcustomapplication.getmutexcount: integer;
+begin
+ result:= flockcount;
+end;
+procedure tcustomapplication.checklockcount;
+begin
+ if appmutexcount <> flockcount then begin
+  debugout(self,'appmutexerror, lockcount: '+inttostr(flockcount)+
+                ' mutexcount: '+inttostr(appmutexcount));
+ end;
+end;
+{$endif}
+
 constructor tcustomapplication.create(aowner: tcomponent);
 begin
  if appinst <> nil then begin
@@ -729,6 +752,7 @@ begin
  {$ifdef mse_debug_lock}
  debugout(self,'lock, count: '+inttostr(flockcount) + ' thread: '+
                     inttostr(flockthread));
+ checklockcount;
  {$endif}
 end;
 
@@ -741,6 +765,11 @@ end;
 function tcustomapplication.trylock: boolean;
 begin
  result:= sys_mutextrylock(fmutex) = sye_ok;
+ {$ifdef mse_debug_lock}
+ debugout(self,'trylock, result: '+booltostr(result)+' count: '+
+                  inttostr(flockcount) + ' thread: '+
+                    inttostr(flockthread));
+ {$endif}
  if result then begin
   dolock;
  end;
@@ -750,6 +779,9 @@ function tcustomapplication.internalunlock(count: integer): boolean;
 begin
  result:= sys_issamethread(flockthread,sys_getcurrentthread);
  if result then begin
+  if count > flockcount then begin
+   raise exception.create('tcustomapplication.internalunlock lock count error.');
+  end;
   flusheventbuffer;
   while count > 0 do begin
    dec(count);
@@ -759,11 +791,13 @@ begin
    end;
    sys_mutexunlock(fmutex);
   end;
+  {$ifdef mse_debug_lock}
+  debugout(self,'unlock, result: '+booltostr(result)+
+                     ' count: '+inttostr(flockcount) + ' thread: '+
+                     inttostr(flockthread));
+  checklockcount;
+  {$endif}
  end;
- {$ifdef mse_debug_lock}
- debugout(self,'unlock, count: '+inttostr(flockcount) + ' thread: '+
-                    inttostr(flockthread));
- {$endif}
 end;
 
 function tcustomapplication.unlock: boolean;
