@@ -1293,6 +1293,7 @@ var
      inc(level);
      for int1:= integer(ca1)-1 downto 0 do begin
       if scanchildren(pwinidaty(children)^[int1]) then begin
+       result:= true;
        break;
       end;
      end;

@@ -1828,6 +1828,7 @@ function needswidgetnamewriting(const ar: widgetarty): boolean;
 procedure designeventloop;
 procedure freedesigncomponent(const acomponent: tcomponent);
 
+function getprocesswindow(const procid: integer): winidty;
 function activateprocesswindow(const procid: integer; 
                     const araise: boolean = true): boolean;
          //true if ok
@@ -2068,16 +2069,22 @@ begin
  translatewidgetpoint1(result,source,dest);
 end;
 
+function getprocesswindow(const procid: integer): winidty;
+var
+ ar1: integerarty;
+begin
+ ar1:= getallprocesschildren(procid);
+ result:= gui_pidtowinid(ar1);
+end;
+
 function activateprocesswindow(const procid: integer; 
                     const araise: boolean = true): boolean;
          //true if ok
 var
  winid: winidty;
- ar1: integerarty;
 begin
  result:= false;
- ar1:= getallprocesschildren(procid);
- winid:= gui_pidtowinid(ar1);
+ winid:= getprocesswindow(procid);
  if winid <> 0 then begin
   if gui_showwindow(winid) = gue_ok then begin
    if araise and (gui_raisewindow(winid) <> gue_ok) then begin

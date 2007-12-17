@@ -214,6 +214,13 @@ type
  end;
 
  tscrollframe = class(tcustomscrollframe)
+  private
+   procedure setsbhorz(const avalue: tscrollbar);
+   function getsbhorz: tscrollbar;
+   procedure setsbvert(const avalue: tscrollbar);
+   function getsbvert: tscrollbar;
+  protected
+   function getscrollbarclass(vert: boolean): framescrollbarclassty; override;
   published
    property options;
    property levelo;
@@ -244,8 +251,8 @@ type
    property frameimage_offsetactivemouse;
    property frameimage_offsetactiveclicked;
 
-   property sbhorz; 
-   property sbvert;
+   property sbhorz: tscrollbar read getsbhorz write setsbhorz;
+   property sbvert: tscrollbar read getsbvert write setsbvert;
    property colorclient;
    property caption;
    property captionpos;
@@ -279,6 +286,10 @@ type
    procedure setclientwidth(const Value: integer);
    procedure calcclientrect(var aclientrect: rectty);
    function getwidget: twidget;
+   procedure setsbhorz(const avalue: tscrollboxscrollbar);
+   function getsbhorz: tscrollboxscrollbar;
+   procedure setsbvert(const avalue: tscrollboxscrollbar);
+   function getsbvert: tscrollboxscrollbar;
   protected
    procedure initinnerframe; virtual;
    function getscrollbarclass(vert: boolean): framescrollbarclassty; override;
@@ -300,6 +311,8 @@ type
    property framei_top default 2;
    property framei_right default 2;
    property framei_bottom default 2;
+   property sbhorz: tscrollboxscrollbar read getsbhorz write setsbhorz;
+   property sbvert: tscrollboxscrollbar read getsbvert write setsbvert;
  end;
 
  tscrollboxframe = class(tcustomscrollboxframe)
@@ -2006,7 +2019,7 @@ end;
 
 function tcustomscrollframe.getscrollbarclass(vert: boolean): framescrollbarclassty;
 begin
- result:= tscrollbar;
+ result:= tcustomscrollbar;
 end;
 
 procedure tcustomscrollframe.getpaintframe(var frame: framety);
@@ -3018,6 +3031,26 @@ begin
  result:= tscrollboxscrollbar;
 end;
 
+procedure tcustomscrollboxframe.setsbhorz(const avalue: tscrollboxscrollbar);
+begin
+ inherited;
+end;
+
+function tcustomscrollboxframe.getsbhorz: tscrollboxscrollbar;
+begin
+ result:= tscrollboxscrollbar(inherited sbhorz);
+end;
+
+procedure tcustomscrollboxframe.setsbvert(const avalue: tscrollboxscrollbar);
+begin
+ inherited;
+end;
+
+function tcustomscrollboxframe.getsbvert: tscrollboxscrollbar;
+begin
+ result:= tscrollboxscrollbar(inherited sbvert);
+end;
+
 { tcustomautoscrollframe }
 
 constructor tcustomautoscrollframe.create(const intf: iscrollframe; const owner: twidget;
@@ -3875,6 +3908,33 @@ end;
 function tcustomthumbtrackscrollframe.getscrollbarclass(vert: boolean): framescrollbarclassty;
 begin
  result:= tthumbtrackscrollbar;
+end;
+
+{ tscrollframe }
+
+function tscrollframe.getscrollbarclass(vert: boolean): framescrollbarclassty;
+begin
+ result:= tscrollbar;
+end;
+
+procedure tscrollframe.setsbhorz(const avalue: tscrollbar);
+begin
+ inherited;
+end;
+
+function tscrollframe.getsbhorz: tscrollbar;
+begin
+ result:= tscrollbar(inherited sbhorz);
+end;
+
+procedure tscrollframe.setsbvert(const avalue: tscrollbar);
+begin
+ inherited;
+end;
+
+function tscrollframe.getsbvert: tscrollbar;
+begin
+ result:= tscrollbar(inherited sbvert);
 end;
 
 end.

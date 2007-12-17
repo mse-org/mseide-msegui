@@ -432,7 +432,7 @@ type
    procedure setactivepage(const value: twidget);
    procedure updatesize(const page: twidget);
    function getoptions: tabbaroptionsty;
-   procedure setoptions(const Value: tabbaroptionsty);
+   procedure setoptions(const avalue: tabbaroptionsty);
    function gettab_color: colorty;
    procedure settab_color(const avalue: colorty);
    function gettab_frame: tstepboxframe;
@@ -2190,6 +2190,7 @@ begin
  inherited;
  foptionswidget:= defaulttaboptionswidget;
  ftabs:= tcustomtabbar.create(self);
+ ftabs.anchors:= [an_left,an_top,an_right];
  ftab_size:= ftabs.size.cy;
  ftabs.SetSubComponent(true);
  ftabs.tabs.oncreatetab:= {$ifdef FPC}@{$endif}createpagetab;
@@ -2937,15 +2938,21 @@ begin
  result:= ftabs.options;
 end;
 
-procedure tcustomtabwidget.setoptions(const Value: tabbaroptionsty);
+procedure tcustomtabwidget.setoptions(const avalue: tabbaroptionsty);
 var
  optionsbefore: tabbaroptionsty;
 begin
  optionsbefore:= ftabs.options;
- ftabs.options:= value;
+ ftabs.options:= avalue;
  if (tabbaroptionsty({$ifdef FPC}longword{$else}word{$endif}(optionsbefore) xor
             {$ifdef FPC}longword{$else}word{$endif}(ftabs.options)) *
     [tabo_vertical,tabo_opposite] <> []) then begin
+  if tabo_vertical in avalue then begin
+   ftabs.anchors:= [an_left,an_top,an_bottom];
+  end
+  else begin
+   ftabs.anchors:= [an_left,an_top,an_right];
+  end;
   updatesize(nil);
  end;
 end;
