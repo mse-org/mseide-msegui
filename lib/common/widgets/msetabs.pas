@@ -2190,7 +2190,7 @@ begin
  inherited;
  foptionswidget:= defaulttaboptionswidget;
  ftabs:= tcustomtabbar.create(self);
- ftabs.anchors:= [an_left,an_top,an_right];
+ ftabs.fanchors:= [an_left,an_top,an_right];
  ftab_size:= ftabs.size.cy;
  ftabs.SetSubComponent(true);
  ftabs.tabs.oncreatetab:= {$ifdef FPC}@{$endif}createpagetab;

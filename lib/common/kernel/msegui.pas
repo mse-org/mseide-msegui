@@ -5095,7 +5095,9 @@ begin
   fwidgetrect.pos:= newpos;
   if fparentwidget <> nil then begin
    fparentwidget.registerchildwidget(self);
-   parentclientrectchanged;
+   if not (ws_loadlock in fwidgetstate) then begin
+    parentclientrectchanged;
+   end;
   end
   else begin
    if visible and not (ws_destroying in fwidgetstate) and 
