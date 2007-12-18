@@ -354,43 +354,10 @@ function updatemouseshapestate(var infos: shapeinfoarty;
 var
  int1,int2: integer;
 begin
-if mouseevent.eventkind = ek_buttonrelease then begin
- writeln('***********');
- for int1:= 0 to high(infos) do begin
-  if ss_checked in infos[int1].state then begin
-   writeln(inttostr(int1)+' checked');
-  end
-  else begin
-   writeln(inttostr(int1));
-  end;
- end;
- writeln('***********');
-end;
  result:= false;
  for int1:= 0 to high(infos) do begin
   result:= updatemouseshapestate(infos[int1],mouseevent,widget,@infos) or result;
-if mouseevent.eventkind = ek_buttonrelease then begin
- for int2:= 0 to high(infos) do begin
-  if ss_checked in infos[int2].state then begin
-   writeln(inttostr(int2)+' checked');
-  end
-  else begin
-   writeln(inttostr(int2));
-  end;
  end;
-end;
- end;
-if mouseevent.eventkind = ek_buttonrelease then begin
- writeln('++++++++++');
- for int1:= 0 to high(infos) do begin
-  if ss_checked in infos[int1].state then begin
-   writeln(inttostr(int1)+' checked');
-  end
-  else begin
-   writeln(inttostr(int1));
-  end;
- end;
-end;
 end;
 
 function getmouseshape(const infos: shapeinfoarty): integer;

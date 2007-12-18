@@ -737,7 +737,7 @@ begin
       color:= fcoloractive;
      end;
      face:= tabs.ffaceactive;
-     state:= state + [ss_checked,ss_radiobutton];
+////////////     state:= state + [ss_checked,ss_radiobutton];
     end
     else begin
      if fcolor = cl_default then begin
@@ -747,7 +747,7 @@ begin
       color:= fcolor;
      end;
      face:= tabs.face;
-     state:= state + [ss_radiobutton];
+/////////////     state:= state + [ss_radiobutton];
     end;
     if bo1 or (ts_disabled in fstate) then begin
      include(state,ss_disabled);
