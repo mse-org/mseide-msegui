@@ -129,6 +129,7 @@ type
   protected
    procedure createitem(const index: integer; var item: tpersistent); override;
    procedure dochange(const index: integer); override;
+   procedure objectchanged(const sender: tobject);
   public
    constructor create(const aowner: tcustomtoolbar); reintroduce;
    destructor destroy; override;
@@ -194,7 +195,7 @@ type
    procedure showhint(var info: hintinfoty); override;
    procedure dostep(const event: stepkindty); override;
    procedure doshortcut(var info: keyeventinfoty; const sender: twidget); override;
-
+   procedure objectchanged(const sender: tobject); override;
    //istatfile
    procedure dostatread(const reader: tstatreader);
    procedure dostatwrite(const writer: tstatwriter);
@@ -679,6 +680,13 @@ begin
  tcustomtoolbar(fowner).setoptionalobject(avalue,fface,
                                {$ifdef FPC}@{$endif}createface);
  tcustomtoolbar(fowner).invalidate;
+end;
+
+procedure ttoolbuttons.objectchanged(const sender: tobject);
+begin
+ if fface <> nil then begin
+  fface.checktemplate(sender);
+ end;
 end;
 
 { tcustomtoolbar }
@@ -1286,6 +1294,12 @@ end;
 procedure tcustomtoolbar.setdragcontroller(const Value: tdragcontroller);
 begin
  fdragcontroller.Assign(Value);
+end;
+
+procedure tcustomtoolbar.objectchanged(const sender: tobject);
+begin
+ inherited;
+ flayout.buttons.objectchanged(sender);
 end;
 
 { tdocktoolbar }
