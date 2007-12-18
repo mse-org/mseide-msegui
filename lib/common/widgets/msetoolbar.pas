@@ -880,7 +880,7 @@ begin
         color:= cl_parent;
         actioninfotoshapeinfo(buttons[int1].finfo,cells[int1]);
         include(state,ss_flat);
-        if ss_checkbox in state then begin
+        if state * [ss_checkbox,ss_radiobutton] <> [] then begin
          include(state,ss_checkbutton);
         end;
         doexecute:= {$ifdef FPC}@{$endif}buttons[int1].doexecute;
@@ -1002,10 +1002,16 @@ var
  button1: ttoolbutton;
  bo1: boolean;
 begin
- if canevent(tmethod(fonbuttonchanged)) then begin
-  fonbuttonchanged(self,sender);
- end;
  with flayout do begin
+  if sender.checked and (mao_radiobutton in sender.options) then begin
+   for int1:= 0 to buttons.count -1 do begin
+    button1:= buttons[int1];
+    if (button1 <> sender) and (button1.checked) and 
+         (button1.group = sender.group) then begin
+     button1.checked:= false;
+    end;
+   end; 
+  end;
   for int1:= 0 to buttons.count - 1 do begin
    button1:= buttons[int1];
    if int1 >= length(cells) then begin
@@ -1013,7 +1019,10 @@ begin
    end;
    if button1 = sender then begin
     with cells[int1] do begin
-     bo1:= (ss_invisible in state) xor (as_invisible in button1.finfo.state);
+     bo1:= (ss_invisible in state) xor (as_invisible in button1.finfo.state) or 
+         ((ss_separator in state) xor (mao_separator in button1.options)) or
+         ((ss_checkbox in state) xor (mao_checkbox in button1.options)) or
+         ((ss_radiobutton in state) xor (mao_radiobutton in button1.options));
      actionstatestoshapestates(button1.finfo,state);
      imagenr:= buttons[int1].finfo.imagenr;
      colorglyph:= buttons[int1].finfo.colorglyph;
@@ -1028,6 +1037,9 @@ begin
     break;
    end;
   end;
+ end;
+ if canevent(tmethod(fonbuttonchanged)) then begin
+  fonbuttonchanged(self,sender);
  end;
 end;
 

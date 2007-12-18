@@ -97,7 +97,7 @@ var
  
 implementation
 uses
- classes,msedrawtext,msestockobjects,msebits;
+ classes,msedrawtext,msestockobjects,msebits,sysutils;
 type
  twidget1 = class(twidget);
 var
@@ -169,6 +169,7 @@ begin
   shapeinfo.colorglyph:= colorglyph;
   shapeinfo.color:= color;
   shapeinfo.imagecheckedoffset:= imagecheckedoffset;
+  shapeinfo.group:= group;
  end;
 end;
 
@@ -298,7 +299,6 @@ begin
          setchecked(info,false,widget);
         end
         else begin
-         setchecked(info,true,widget);
          if (infoarpo <> nil) then begin
           for int1:= 0 to high(infoarpo^) do begin
            po1:= @infoarpo^[int1];
@@ -307,6 +307,7 @@ begin
             setchecked(po1^,false,widget);
            end;
           end;
+          setchecked(info,true,widget);
          end;
         end;
        end;
@@ -351,12 +352,45 @@ function updatemouseshapestate(var infos: shapeinfoarty;
                  const mouseevent: mouseeventinfoty;
                  const widget: twidget): boolean;
 var
- int1: integer;
+ int1,int2: integer;
 begin
+if mouseevent.eventkind = ek_buttonrelease then begin
+ writeln('***********');
+ for int1:= 0 to high(infos) do begin
+  if ss_checked in infos[int1].state then begin
+   writeln(inttostr(int1)+' checked');
+  end
+  else begin
+   writeln(inttostr(int1));
+  end;
+ end;
+ writeln('***********');
+end;
  result:= false;
  for int1:= 0 to high(infos) do begin
   result:= updatemouseshapestate(infos[int1],mouseevent,widget,@infos) or result;
+if mouseevent.eventkind = ek_buttonrelease then begin
+ for int2:= 0 to high(infos) do begin
+  if ss_checked in infos[int2].state then begin
+   writeln(inttostr(int2)+' checked');
+  end
+  else begin
+   writeln(inttostr(int2));
+  end;
  end;
+end;
+ end;
+if mouseevent.eventkind = ek_buttonrelease then begin
+ writeln('++++++++++');
+ for int1:= 0 to high(infos) do begin
+  if ss_checked in infos[int1].state then begin
+   writeln(inttostr(int1)+' checked');
+  end
+  else begin
+   writeln(inttostr(int1));
+  end;
+ end;
+end;
 end;
 
 function getmouseshape(const infos: shapeinfoarty): integer;
@@ -770,7 +804,7 @@ var
  align1: alignmentsty;
  int1: integer;
 begin
- result:= ss_checkbox in info.state;
+ result:= [ss_checkbox,ss_radiobutton] * info.state <> [];
  if result then begin
   rect1:= arect;
   rect1.cx:= menucheckboxwidth;

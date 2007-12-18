@@ -424,14 +424,14 @@ begin
     
      if not (ss_invisible in state) then begin
       hassubmenu:= hassubmenu or (ss_menuarrow in state);
-      hascheckbox:= hascheckbox or (ss_checkbox in state);
+      hascheckbox:= hascheckbox or ([ss_checkbox,ss_radiobutton] * state <> []);
       with dim do begin
        if mlo_horz in layout.options then begin                //horizonzal
         if ss_separator in state then begin
          cx:= 2;
         end
         else begin
-         if ss_checkbox in state then begin
+         if [ss_checkbox,ss_radiobutton] * state <> [] then begin
           inc(atextsize.cx,menucheckboxwidth);
           dec(tabpos,menucheckboxwidth);
          end;
@@ -1067,6 +1067,7 @@ begin
        include(info.eventstate,es_processed);
 //       int1:= activeitem;
        selectmenu(false);
+       include(state,ss_mouse);
 //       if (activeitem < 0) and (application.mousecapturewidget = nil) and 
 //                 (int1 <= high(cells)) then begin
 //        activeitem:= int1; //restore mouseactivating
@@ -1803,7 +1804,8 @@ begin
  inherited;
  if (event = oe_changed) and (sender = fmenucomp) and
                                   not (csloading in componentstate) then begin
-  assigntemplate(fmenucomp.template);                                  
+  assigntemplate(fmenucomp.template);
+  invalidate;                            
  end; 
 end;
 

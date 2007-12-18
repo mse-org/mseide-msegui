@@ -834,12 +834,12 @@ end;
 function tmenuitem.internalexecute(async: boolean): boolean;
 begin
 
- if mao_checkbox in finfo.options then begin
-  if mao_radiobutton in finfo.options then begin
-   checked:= true;
+ if [mao_checkbox,mao_radiobutton] * finfo.options <> [] then begin
+  if mao_checkbox in finfo.options then begin
+   checked:= not checked;
   end
   else begin
-   checked:= not checked;
+   checked:= true;
   end;
  end;
 
@@ -1019,7 +1019,7 @@ begin
    for int1:= 0 to fparentmenu.count-1 do begin
     item1:= fparentmenu[int1];
     with item1 do begin
-     if (finfo.options * [mao_checkbox,mao_radiobutton] = [mao_checkbox,mao_radiobutton]) and
+     if (finfo.options * [{mao_checkbox,}mao_radiobutton] = [{mao_checkbox,}mao_radiobutton]) and
              (fgroup = self.fgroup) then begin
       setactionchecked(iactionlink(item1),false);
      end;
