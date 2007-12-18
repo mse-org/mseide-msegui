@@ -5616,19 +5616,17 @@ begin
     pt1:= getmintopleft;
     anch:= fanchors * [an_left,an_right];
     if anch = [an_right] then begin
-//     int2:= cx + indent.left;
      int2:= fparentclientsize.cx - fwidgetrect.x + indent.left + clientorig.x;
     end
     else begin
      if anch = [] then begin
-      int2:= fminsize.cx{ + indent.left + indent.right};
+      int2:= fminsize.cx;
      end
      else begin
       if anch = [an_left,an_right] then begin
-//       int2:= clientorig.x + x + fminsize.cx;
        int2:= fparentclientsize.cx - cx + fminsize.cx;
       end
-      else begin //[an_left
+      else begin //[an_left]
        int2:= clientorig.x + pt1.x + cx + indent.right;
       end;
      end;
@@ -5639,16 +5637,14 @@ begin
 
     anch:= fanchors * [an_top,an_bottom];
     if anch = [an_bottom] then begin
-//     int2:= cy + indent.top;
      int2:= fparentclientsize.cy - fwidgetrect.y + indent.top + clientorig.y;
     end
     else begin
      if anch = [] then begin
-      int2:= fminsize.cy{ + indent.top + indent.bottom};
+      int2:= fminsize.cy;
      end
      else begin
       if anch = [an_top,an_bottom] then begin
-//       int2:= clientorig.y + y + fminsize.cy;
        int2:= fparentclientsize.cy - cy + fminsize.cy;
       end
       else begin //[an_top]

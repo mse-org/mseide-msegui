@@ -717,9 +717,19 @@ begin
  result:= fwidgetrect.pos;
  if flinkleft <> nil then begin
   result.x:= result.x - flinkleft.bounds_cx + flinkleft.bounds_cxmin;
+ end
+ else begin
+  if spo_hprop in foptions then begin
+   result.x:= 0;
+  end;
  end;
  if flinktop <> nil then begin
   result.y:= result.y - flinktop.bounds_cy + flinktop.bounds_cymin;
+ end
+ else begin
+  if spo_vprop in foptions then begin
+   result.y:= 0;
+  end;
  end;
 end;
 
