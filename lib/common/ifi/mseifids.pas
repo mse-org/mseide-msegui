@@ -5,7 +5,7 @@ unit mseifids;
 interface
 uses
  classes,db,mseifi,mseclasses,mseglob,mseevent,msedb,msetypes,msebufdataset,
- msestrings,mseifilink;
+ msestrings,mseifilink,msesqldb;
 
 //single record dataset
 
@@ -130,8 +130,8 @@ type
                                               write fremotedatachange;
  end;
  
- tifidataset = class(tdataset{,ievent},idscontroller,igetdscontroller,
-                     {iifimodulelink,}iifidscontroller)
+ tifidataset = class(tdataset,idscontroller,igetdscontroller,
+                                       iifidscontroller)
   private
    fstrings: integerarty;
    fmsestrings: integerarty;
@@ -194,6 +194,7 @@ type
    fbindings: integerarty;
    procedure checkrecno(const avalue: integer);
 
+   //iifidscontroller
    procedure requestfielddefsreceived(const asequence: sequencety); virtual;
    procedure requestopendsreceived(const asequence: sequencety); virtual;
    procedure fielddefsdatareceived( const asequence: sequencety; 
@@ -335,7 +336,26 @@ type
   published
    property fielddefs;
  end;
-  
+
+ ttxsqlquery = class(tmsesqlquery,iifidscontroller)
+  private
+   fificontroller: tifidscontroller;
+   procedure setificountroller(const avalue: tifidscontroller);
+  protected
+   procedure requestfielddefsreceived(const asequence: sequencety);
+   procedure requestopendsreceived(const asequence: sequencety);
+   procedure fielddefsdatareceived( const asequence: sequencety; 
+                                 const adata: pfielddefsdatadataty);
+   procedure dsdatareceived( const asequence: sequencety; 
+                                 const adata: pfielddefsdatadataty);
+   procedure fieldrecdatareceived(const adata: pfieldrecdataty);
+  public
+   constructor create(aowner: tcomponent); override;
+   destructor destroy; override;
+  published
+   property ifi: tifidscontroller read fificontroller write setificountroller;
+ end;
+ 
 implementation
 uses
  sysutils,msedatalist,dbconst;
@@ -2075,6 +2095,48 @@ begin
   move(str3[1],(@data+length(str2))^,length(str3));
  end;
  fificontroller.senddata(str1);
+end;
+
+{ ttxsqlquery }
+
+constructor ttxsqlquery.create(aowner: tcomponent);
+begin
+ fificontroller:= tifidscontroller.create(self,iifidscontroller(self));
+ inherited;
+end;
+
+destructor ttxsqlquery.destroy;
+begin
+ inherited;
+ fificontroller.free;
+end;
+
+
+procedure ttxsqlquery.setificountroller(const avalue: tifidscontroller);
+begin
+ fificontroller.assign(avalue);
+end;
+
+procedure ttxsqlquery.requestfielddefsreceived(const asequence: sequencety);
+begin
+end;
+
+procedure ttxsqlquery.requestopendsreceived(const asequence: sequencety);
+begin
+end;
+
+procedure ttxsqlquery.fielddefsdatareceived(const asequence: sequencety;
+               const adata: pfielddefsdatadataty);
+begin
+end;
+
+procedure ttxsqlquery.dsdatareceived(const asequence: sequencety;
+               const adata: pfielddefsdatadataty);
+begin
+end;
+
+procedure ttxsqlquery.fieldrecdatareceived(const adata: pfieldrecdataty);
+begin
 end;
 
 end.

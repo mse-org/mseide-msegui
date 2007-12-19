@@ -51,7 +51,7 @@ begin
  registercomponents('Ifi',[tmodulelink,tformlink,
                      {tpipeifichannel,tsocketpipeifichannel,
                      tsocketclientifichannel,tsocketserverifichannel,}
-                     ttxdataset,trxdataset,
+                     ttxdataset,trxdataset,ttxsqlquery,
                      tpipeiochannel,tsocketstdiochannel,
                      tsocketclientiochannel,tsocketserveriochannel,
                      tsocketstdio,tsocketclient,
