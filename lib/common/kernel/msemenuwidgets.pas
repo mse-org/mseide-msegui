@@ -207,7 +207,7 @@ begin
 //  tmenuitem1(menu).ftransientfor:= transientfor;
   tpopupmenuwidget.create(@widget,menu,transientfor.window,nil,menucomp);
   try
-   widget.color:= transientfor.actualcolor;
+   widget.color:= transientfor.window.owner.actualcolor;
    result:= widget.showmenu(pos,dir,true);
   finally
    widget.Free;
@@ -968,7 +968,7 @@ begin
  end;
  if fprevpopup <> nil then begin
   transientforwindow:= fprevpopup.window;
-  color:= fprevpopup.actualcolor;
+  color:= transientforwindow.owner.actualcolor;
  end
  else begin
   transientforwindow:= application.activewindow;
