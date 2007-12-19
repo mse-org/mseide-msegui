@@ -95,11 +95,13 @@ type
    foptions: ifidsoptionsty;
    fdefaulttimeout: integer;
    ftag: integer;
+   fremotedatachange: notifyeventty;
    procedure setchannel(const avalue: tcustomiochannel);
   protected
    procedure objectevent(const sender: tobject; const event: objecteventty);
                override;   
    procedure processdata(const adata: pifirecty);    
+   procedure doremotedatachange;
    //iifimodulelink
    procedure connectmodule(const sender: tcustommodulelink);
   public
@@ -111,6 +113,11 @@ type
    procedure inititemheader(out arec: string;
                const akind: ifireckindty; const asequence: sequencety; 
                 const datasize: integer; out datapo: pchar);
+   function encoderecord(const afieldinfos: fieldinfoarty;
+                  const aindex: integer; const recpo: pintrecordty): string;
+   function encoderecords(const arecordcount: integer;
+             const abindings: integerarty; const afieldinfos: fieldinfoarty;
+             const abufs: pointerarty): string;
   published
    property channel: tcustomiochannel read fchannel write setchannel;
    property linkname: string read flinkname write flinkname;
@@ -119,20 +126,18 @@ type
                                        default defaultifidsoptions;
    property timeoutus: integer read fdefaulttimeout write fdefaulttimeout 
                        default defaultifidstimeout;
+   property remotedatachange: notifyeventty read fremotedatachange 
+                                              write fremotedatachange;
  end;
  
  tifidataset = class(tdataset{,ievent},idscontroller,igetdscontroller,
                      {iifimodulelink,}iifidscontroller)
   private
-//   fchannel: tcustomiochannel;
-//   fobjectlinker: tobjectlinker;
    fstrings: integerarty;
    fmsestrings: integerarty;
-//   fifiname: string;
    fcontroller: tdscontroller;
    fificontroller: tifidscontroller;
    fistate: ifidsstatesty;
-//   fdefaulttimeout: integer;
    fmsestringpositions: integerarty;
    fansistringpositions: integerarty;
    Ffieldinfos: fieldinfoarty;
@@ -141,7 +146,6 @@ type
    fnullmasksize: integer;
    fmodifiedfields: string; //same layout as nullmask
    
-//   fintbuffer: pintrecordty;
    frecno: integer;
    fbrecordcount: integer; //always 1 if open
    fcurrentbuf: pintrecordty;
@@ -152,7 +156,6 @@ type
    foptions: ifidsoptionsty;
    fupdating: integer;
    procedure initmodifiedfields;   
-//   procedure setchannel(const avalue: tcustomiochannel);
    procedure setcontroller(const avalue: tdscontroller);
    function getcontroller: tdscontroller;
        //idscontroller
@@ -190,7 +193,7 @@ type
    ffielddefsequence: sequencety;
    fbindings: integerarty;
    procedure checkrecno(const avalue: integer);
-//   procedure processdata(const adata: pifirecty);
+
    procedure requestfielddefsreceived(const asequence: sequencety); virtual;
    procedure requestopendsreceived(const asequence: sequencety); virtual;
    procedure fielddefsdatareceived( const asequence: sequencety; 
@@ -198,37 +201,13 @@ type
    procedure dsdatareceived( const asequence: sequencety; 
                                  const adata: pfielddefsdatadataty); virtual;
    procedure fieldrecdatareceived(const adata: pfieldrecdataty); virtual;
-   procedure doremotedatachange;
-   {
-   procedure waitforanswer(const asequence: sequencety; waitus: integer = 0);
-                      //0 -> defaulttimeout
-   }
-//   function senddata(const adata: ansistring;
-//                      const asequence: sequencety = 0): sequencety;
-                //returns sequence number
-//   function senddataandwait(const adata: ansistring; out asequence: sequencety;
-//                            atimeoutus: integer = 0): boolean;
-//   procedure inititemheader(out arec: string; const akind: ifireckindty; 
-//                    const asequence: sequencety; const datasize: integer;
-//                    out datapo: pchar);
    procedure postrecord(const akind: fieldreckindty);
-   function encoderecords: string;
-   function encoderecord(const aindex: integer; const recpo: pintrecordty): string;
+//   function encoderecords: string;
+//   function encoderecord(const aindex: integer; const recpo: pintrecordty): string;
    procedure decoderecord(var adata: pointer; const dest: pintrecordty);
    function decoderecords(const adata: precdataty; out asize: integer): boolean;
    
    procedure notimplemented(const atext: string);
-//   procedure objectevent(const sender: tobject; const event: objecteventty); virtual;   
-    //iobjectlink
-//   procedure link(const source,dest: iobjectlink; valuepo: pointer = nil;
-//               ainterfacetype: pointer = nil; once: boolean = false);
-//   procedure unlink(const source,dest: iobjectlink; valuepo: pointer = nil);
-//   procedure objevent(const sender: iobjectlink; const event: objecteventty);
-//   function getinstance: tobject;
-   //ievent
-//   procedure receiveevent(const event: tobjectevent); virtual;
-   //iifimodulelink
-//   procedure connectmodule(const sender: tcustommodulelink);
       
    procedure bindfields(const bind: boolean);
    function AllocRecordBuffer: PChar; override;
@@ -308,10 +287,6 @@ type
   published
    property controller: tdscontroller read fcontroller write setcontroller;
    property Active: boolean read getactive write setactive;
-//   property channel: tcustomiochannel read fchannel write setchannel;
-//   property ifiname: string read fifiname write fifiname;
-   property remotedatachange: notifyeventty read fremotedatachange 
-                                              write fremotedatachange;
    property ifi: tifidscontroller read fificontroller write setificountroller;
    
    property BeforeOpen;
@@ -491,6 +466,13 @@ begin
  end;
 end;
 
+procedure tifidscontroller.doremotedatachange;
+begin
+ if checkcanevent(fowner,tmethod(fremotedatachange)) then begin
+  fremotedatachange(fowner);
+ end;
+end;
+
 procedure tifidscontroller.inititemheader(out arec: string;
                const akind: ifireckindty; const asequence: sequencety; 
                 const datasize: integer; out datapo: pchar);
@@ -559,6 +541,82 @@ begin
    end;
   end;
  end;
+end;
+
+function tifidscontroller.encoderecord(const afieldinfos: fieldinfoarty;
+                  const aindex: integer; const recpo: pintrecordty): string;
+begin
+ if getfieldisnull(pbyte(@recpo^.header.fielddata.nullmask),aindex) then begin
+  result:= encodeifinull;
+ end
+ else begin
+  with afieldinfos[aindex] do begin
+   case fieldtype of
+    ftinteger: begin
+     result:= encodeifidata(pinteger(pointer(recpo)+offset)^);
+    end;
+    ftlargeint: begin
+     result:= encodeifidata(plargeint(pointer(recpo)+offset)^);
+    end;
+    ftfloat: begin
+     result:= encodeifidata(pdouble(pointer(recpo)+offset)^);
+    end;
+    ftbcd: begin
+     result:= encodeifidata(pcurrency(pointer(recpo)+offset)^);
+    end;
+    ftblob,ftgraphic: begin
+     result:= encodeifidata(pstring(pointer(recpo)+offset)^);
+    end;
+    ftstring: begin
+     result:= encodeifidata(pmsestring(pointer(recpo)+offset)^);
+    end;
+    else begin
+     result:='';
+     exit;
+    end;
+   end;
+  end;
+ end;
+end;
+
+function tifidscontroller.encoderecords(const arecordcount: integer;
+             const abindings: integerarty; const afieldinfos: fieldinfoarty;
+             const abufs: pointerarty): string;
+            //todo: optimize
+var
+ ind1: integer;
+
+ procedure put(const avalue: string; const alength: integer);
+ begin
+  if ind1 + alength > length(result) then begin
+   setlength(result,length(result)*2);
+  end;
+  move(avalue,result[ind1],alength);
+  inc(ind1,alength);
+ end;
+ 
+var
+ int1,int2: integer;
+ str1: string;
+  
+begin
+ setlength(result,16);
+ ind1:= 1;
+ move(arecordcount,result[1],sizeof(arecordcount));
+ inc(ind1,sizeof(arecordcount));
+ for int1:= 0 to arecordcount - 1 do begin
+  for int2:= 0 to high(abindings) do begin
+   if abindings[int2] >= 0 then begin
+    str1:= encoderecord(afieldinfos,int2,abufs[int1]);
+    if ind1 + length(str1) > length(result) then begin
+     setlength(result,length(result)*2+length(str1));
+    end;
+    move(str1[1],result[ind1],length(str1));
+    inc(ind1,length(str1));
+   end;
+  end;
+ end;
+ setlength(result,ind1 - 1);
 end;
 
 { tifidataset }
@@ -1596,41 +1654,6 @@ begin
  end;
 end;
 
-function tifidataset.encoderecord(const aindex: integer; const recpo: pintrecordty): string;
-begin
- if getfieldisnull(pbyte(@recpo^.header.fielddata.nullmask),aindex) then begin
-  result:= encodeifinull;
- end
- else begin
-  with ffieldinfos[aindex] do begin
-   case fieldtype of
-    ftinteger: begin
-     result:= encodeifidata(pinteger(pointer(recpo)+offset)^);
-    end;
-    ftlargeint: begin
-     result:= encodeifidata(plargeint(pointer(recpo)+offset)^);
-    end;
-    ftfloat: begin
-     result:= encodeifidata(pdouble(pointer(recpo)+offset)^);
-    end;
-    ftbcd: begin
-     result:= encodeifidata(pcurrency(pointer(recpo)+offset)^);
-    end;
-    ftblob,ftgraphic: begin
-     result:= encodeifidata(pstring(pointer(recpo)+offset)^);
-    end;
-    ftstring: begin
-     result:= encodeifidata(pmsestring(pointer(recpo)+offset)^);
-    end;
-    else begin
-     result:='';
-     exit;
-    end;
-   end;
-  end;
- end;
-end;
-
 procedure tifidataset.postrecord(const akind: fieldreckindty);
 
  function encodefdat(const ainfo: fieldinfoty): string;
@@ -1764,7 +1787,7 @@ begin
     end;
     post;
    end;
-   doremotedatachange;
+   fificontroller.doremotedatachange;
    try
     bookmark:= bm;
    except
@@ -1773,13 +1796,6 @@ begin
    exclude(fistate,ids_remotedata);  
    enablecontrols;
   end;
- end;
-end;
-
-procedure tifidataset.doremotedatachange;
-begin
- if checkcanevent(self,tmethod(fremotedatachange)) then begin
-  fremotedatachange(self);
  end;
 end;
 
@@ -1855,44 +1871,6 @@ end;
 function tifidataset.GetRecordCount: Longint;
 begin
  result:= fbrecordcount;
-end;
-
-function tifidataset.encoderecords: string;
-            //todo: optimize
-var
- ind1: integer;
-
- procedure put(const avalue: string; const alength: integer);
- begin
-  if ind1 + alength > length(result) then begin
-   setlength(result,length(result)*2);
-  end;
-  move(avalue,result[ind1],alength);
-  inc(ind1,alength);
- end;
- 
-var
- int1,int2: integer;
- str1: string;
-  
-begin
- setlength(result,16);
- ind1:= 1;
- move(fbrecordcount,result[1],sizeof(fbrecordcount));
- inc(ind1,sizeof(fbrecordcount));
- for int1:= 0 to fbrecordcount - 1 do begin
-  for int2:= 0 to high(fbindings) do begin
-   if fbindings[int2] >= 0 then begin
-    str1:= encoderecord(int2,fbufs[int1]);
-    if ind1 + length(str1) > length(result) then begin
-     setlength(result,length(result)*2+length(str1));
-    end;
-    move(str1[1],result[ind1],length(str1));
-    inc(ind1,length(str1));
-   end;
-  end;
- end;
- setlength(result,ind1 - 1);
 end;
 
 procedure tifidataset.decoderecord(var adata: pointer; const dest: pintrecordty);
@@ -2088,7 +2066,7 @@ var
  po1: pchar;
 begin
  str2:= encodefielddefs(fielddefs);
- str3:= encoderecords;
+ str3:= fificontroller.encoderecords(fbrecordcount,fbindings,ffieldinfos,fbufs);
  fificontroller.inititemheader(str1,ik_dsdata,asequence,
                                      length(str2)+length(str3),po1); 
  with pfielddefsdatadataty(po1)^ do begin
