@@ -76,17 +76,63 @@ type
 const 
  defaultifidsoptions = [idso_useclientchannel];
 type  
- tifidataset = class(tdataset,ievent,idscontroller,igetdscontroller,
-                     iifimodulelink)
+ iifidscontroller = interface(inullinterface)
+   procedure requestfielddefsreceived(const asequence: sequencety);
+   procedure requestopendsreceived(const asequence: sequencety);
+   procedure fielddefsdatareceived( const asequence: sequencety; 
+                                 const adata: pfielddefsdatadataty);
+   procedure dsdatareceived( const asequence: sequencety; 
+                                 const adata: pfielddefsdatadataty);
+   procedure fieldrecdatareceived(const adata: pfieldrecdataty);
+ end;
+
+ tifidscontroller = class(teventpersistent,iifimodulelink)
   private
+   fowner: tcomponent;
+   fintf: iifidscontroller;
    fchannel: tcustomiochannel;
-   fobjectlinker: tobjectlinker;
+   flinkname: string;
+   foptions: ifidsoptionsty;
+   fdefaulttimeout: integer;
+   ftag: integer;
+   procedure setchannel(const avalue: tcustomiochannel);
+  protected
+   procedure objectevent(const sender: tobject; const event: objecteventty);
+               override;   
+   procedure processdata(const adata: pifirecty);    
+   //iifimodulelink
+   procedure connectmodule(const sender: tcustommodulelink);
+  public
+   constructor create(const aowner: tcomponent; const aintf: iifidscontroller);
+   function senddata(const adata: ansistring; 
+                         const asequence: sequencety = 0): sequencety;
+   function senddataandwait(const adata: ansistring;
+            out asequence: sequencety; atimeoutus: integer = 0): boolean;
+   procedure inititemheader(out arec: string;
+               const akind: ifireckindty; const asequence: sequencety; 
+                const datasize: integer; out datapo: pchar);
+  published
+   property channel: tcustomiochannel read fchannel write setchannel;
+   property linkname: string read flinkname write flinkname;
+   property tag: integer read ftag write ftag;
+   property options: ifidsoptionsty read foptions write foptions 
+                                       default defaultifidsoptions;
+   property timeoutus: integer read fdefaulttimeout write fdefaulttimeout 
+                       default defaultifidstimeout;
+ end;
+ 
+ tifidataset = class(tdataset{,ievent},idscontroller,igetdscontroller,
+                     {iifimodulelink,}iifidscontroller)
+  private
+//   fchannel: tcustomiochannel;
+//   fobjectlinker: tobjectlinker;
    fstrings: integerarty;
    fmsestrings: integerarty;
-   fifiname: string;
+//   fifiname: string;
    fcontroller: tdscontroller;
+   fificontroller: tifidscontroller;
    fistate: ifidsstatesty;
-   fdefaulttimeout: integer;
+//   fdefaulttimeout: integer;
    fmsestringpositions: integerarty;
    fansistringpositions: integerarty;
    Ffieldinfos: fieldinfoarty;
@@ -106,7 +152,7 @@ type
    foptions: ifidsoptionsty;
    fupdating: integer;
    procedure initmodifiedfields;   
-   procedure setchannel(const avalue: tcustomiochannel);
+//   procedure setchannel(const avalue: tcustomiochannel);
    procedure setcontroller(const avalue: tdscontroller);
    function getcontroller: tdscontroller;
        //idscontroller
@@ -139,11 +185,12 @@ type
    procedure beginfilteredit(const akind: filtereditkindty);
    procedure endfilteredit;
    
+   procedure setificountroller(const avalue: tifidscontroller);
   protected
    ffielddefsequence: sequencety;
    fbindings: integerarty;
    procedure checkrecno(const avalue: integer);
-   procedure processdata(const adata: pifirecty);
+//   procedure processdata(const adata: pifirecty);
    procedure requestfielddefsreceived(const asequence: sequencety); virtual;
    procedure requestopendsreceived(const asequence: sequencety); virtual;
    procedure fielddefsdatareceived( const asequence: sequencety; 
@@ -156,14 +203,14 @@ type
    procedure waitforanswer(const asequence: sequencety; waitus: integer = 0);
                       //0 -> defaulttimeout
    }
-   function senddata(const adata: ansistring;
-                      const asequence: sequencety = 0): sequencety;
+//   function senddata(const adata: ansistring;
+//                      const asequence: sequencety = 0): sequencety;
                 //returns sequence number
-   function senddataandwait(const adata: ansistring; out asequence: sequencety;
-                            atimeoutus: integer = 0): boolean;
-   procedure inititemheader(out arec: string; const akind: ifireckindty; 
-                    const asequence: sequencety; const datasize: integer;
-                    out datapo: pchar);
+//   function senddataandwait(const adata: ansistring; out asequence: sequencety;
+//                            atimeoutus: integer = 0): boolean;
+//   procedure inititemheader(out arec: string; const akind: ifireckindty; 
+//                    const asequence: sequencety; const datasize: integer;
+//                    out datapo: pchar);
    procedure postrecord(const akind: fieldreckindty);
    function encoderecords: string;
    function encoderecord(const aindex: integer; const recpo: pintrecordty): string;
@@ -171,17 +218,17 @@ type
    function decoderecords(const adata: precdataty; out asize: integer): boolean;
    
    procedure notimplemented(const atext: string);
-   procedure objectevent(const sender: tobject; const event: objecteventty); virtual;   
+//   procedure objectevent(const sender: tobject; const event: objecteventty); virtual;   
     //iobjectlink
-   procedure link(const source,dest: iobjectlink; valuepo: pointer = nil;
-               ainterfacetype: pointer = nil; once: boolean = false);
-   procedure unlink(const source,dest: iobjectlink; valuepo: pointer = nil);
-   procedure objevent(const sender: iobjectlink; const event: objecteventty);
-   function getinstance: tobject;
+//   procedure link(const source,dest: iobjectlink; valuepo: pointer = nil;
+//               ainterfacetype: pointer = nil; once: boolean = false);
+//   procedure unlink(const source,dest: iobjectlink; valuepo: pointer = nil);
+//   procedure objevent(const sender: iobjectlink; const event: objecteventty);
+//   function getinstance: tobject;
    //ievent
-   procedure receiveevent(const event: tobjectevent); virtual;
+//   procedure receiveevent(const event: tobjectevent); virtual;
    //iifimodulelink
-   procedure connectmodule(const sender: tcustommodulelink);
+//   procedure connectmodule(const sender: tcustommodulelink);
       
    procedure bindfields(const bind: boolean);
    function AllocRecordBuffer: PChar; override;
@@ -261,14 +308,11 @@ type
   published
    property controller: tdscontroller read fcontroller write setcontroller;
    property Active: boolean read getactive write setactive;
-   property channel: tcustomiochannel read fchannel write setchannel;
-   property ifiname: string read fifiname write fifiname;
-   property timeoutus: integer read fdefaulttimeout write fdefaulttimeout 
-                       default defaultifidstimeout;
+//   property channel: tcustomiochannel read fchannel write setchannel;
+//   property ifiname: string read fifiname write fifiname;
    property remotedatachange: notifyeventty read fremotedatachange 
                                               write fremotedatachange;
-   property options: ifidsoptionsty read foptions write foptions 
-                                       default defaultifidsoptions;
+   property ifi: tifidscontroller read fificontroller write setificountroller;
    
    property BeforeOpen;
    property AfterOpen;
@@ -395,26 +439,150 @@ begin
  result:= true;
 end;
  
+{ tifidscontroller }
+
+constructor tifidscontroller.create(const aowner: tcomponent;
+                    const aintf: iifidscontroller);
+begin
+ fowner:= aowner;
+ fintf:= aintf;
+ foptions:= defaultifidsoptions;
+ fdefaulttimeout:= defaultifidstimeout;
+ inherited create;
+end;
+
+function tifidscontroller.senddata(const adata: ansistring; 
+                         const asequence: sequencety = 0): sequencety;
+begin
+ if fchannel = nil then begin
+  raise exception.create(fowner.name+': No IO channel assigned.');
+ end;
+ result:= asequence;
+ if result = 0 then begin
+  result:= fchannel.sequence;
+ end;
+ with pifirecty(adata)^.header do begin
+  sequence:= result;
+ end;
+ fchannel.senddata(adata);
+end;
+
+function tifidscontroller.senddataandwait(const adata: ansistring;
+            out asequence: sequencety; atimeoutus: integer = 0): boolean;
+var
+ client1: twaitingclient;
+begin
+ if fchannel = nil then begin
+  raise exception.create(fowner.name+': No IO channel assigned.');
+ end;             
+ asequence:= fchannel.sequence;
+ client1:= fchannel.synchronizer.preparewait(asequence);
+ senddata(adata,asequence);
+ if atimeoutus = 0 then begin
+  atimeoutus:= timeoutus;
+ end;
+ result:= fchannel.synchronizer.waitforanswer(client1,atimeoutus);
+end;
+
+procedure tifidscontroller.connectmodule(const sender: tcustommodulelink);
+begin
+ if idso_useclientchannel in options then begin
+  channel:= sender.channel;
+ end;
+end;
+
+procedure tifidscontroller.inititemheader(out arec: string;
+               const akind: ifireckindty; const asequence: sequencety; 
+                const datasize: integer; out datapo: pchar);
+begin
+ mseifi.inititemheader(tag,flinkname,arec,akind,asequence,datasize,datapo);
+end;
+
+procedure tifidscontroller.setchannel(const avalue: tcustomiochannel);
+begin
+ setlinkedvar(avalue,fchannel);
+end;
+
+procedure tifidscontroller.processdata(const adata: pifirecty);
+var 
+ tag1: integer;
+ str1: string;
+ po1: pchar;
+begin
+ with adata^ do begin
+  if header.kind in ifidskinds then begin
+   with itemheader do begin 
+    tag1:= tag;
+    po1:= @name;
+   end;
+   inc(po1,ifinametostring(pifinamety(po1),str1));
+   if str1 = flinkname then begin
+    case header.kind of
+     ik_requestfielddefs: begin
+      fintf.requestfielddefsreceived(header.sequence);
+     end;
+     ik_requestopends: begin
+      fintf.requestopendsreceived(header.sequence);
+     end;
+     ik_fielddefsdata: begin
+      fintf.fielddefsdatareceived(header.answersequence,pfielddefsdatadataty(po1));
+     end;
+     ik_dsdata: begin
+      fintf.dsdatareceived(header.answersequence,pfielddefsdatadataty(po1));
+     end;
+     ik_fieldrec: begin
+      fintf.fieldrecdatareceived(pfieldrecdataty(po1));
+     end;
+    end;
+   end;
+   if header.answersequence <> 0 then begin
+    channel.synchronizer.answerreceived(header.answersequence);
+   end;
+  end;
+ end;
+end;
+
+procedure tifidscontroller.objectevent(const sender: tobject;
+               const event: objecteventty);
+var
+ po1: pifirecty;
+begin
+ if (event = oe_dataready) and (sender = fchannel) then begin
+  if (length(fchannel.rxdata) >= sizeof(ifiheaderty)) then begin
+   with fchannel do begin
+    po1:= pifirecty(rxdata);
+    with po1^.header do begin
+     if size = length(rxdata) then begin
+      processdata(po1);
+     end;
+    end;
+   end;
+  end;
+ end;
+end;
+
 { tifidataset }
 
 constructor tifidataset.create(aowner: tcomponent);
 begin
  foptions:= defaultifidsoptions;
  frecno:= -1;
- fdefaulttimeout:= defaultifidstimeout;
- fobjectlinker:= tobjectlinker.create(ievent(self),
-                           {$ifdef FPC}@{$endif}objectevent);
+// fdefaulttimeout:= defaultifidstimeout;
+// fobjectlinker:= tobjectlinker.create(ievent(self),
+//                           {$ifdef FPC}@{$endif}objectevent);
 // setunidirectional(true);
  inherited;
  bookmarksize := sizeof(bufbookmarkty);
  fcontroller:= tdscontroller.create(self,idscontroller(self),-1,false);
+ fificontroller:= tifidscontroller.create(self,iifidscontroller(self));
 end;
 
 destructor tifidataset.destroy;
 begin
  fcontroller.free;
  inherited;
- fobjectlinker.free;
+ fificontroller.free;
+// fobjectlinker.free;
 end;
 
 function tifidataset.intallocrecord: pintrecordty;
@@ -1306,7 +1474,7 @@ function tifidataset.getint64currency: boolean;
 begin
  result:= false;
 end;
-
+{
 procedure tifidataset.setchannel(const avalue: tcustomiochannel);
 begin
  fobjectlinker.setlinkedvar(ievent(self),avalue,fchannel);
@@ -1359,86 +1527,7 @@ procedure tifidataset.receiveevent(const event: tobjectevent);
 begin
  //dummy
 end;
-
-procedure tifidataset.inititemheader(out arec: string;
-               const akind: ifireckindty; const asequence: sequencety; 
-                const datasize: integer; out datapo: pchar);
-begin
- mseifi.inititemheader(tag,fifiname,arec,akind,asequence,datasize,datapo);
-end;
-
-function tifidataset.senddata(const adata: ansistring; 
-                         const asequence: sequencety = 0): sequencety;
-begin
- if fchannel = nil then begin
-  raise exception.create(name+': No IO channel assigned.');
- end;
- result:= asequence;
- if result = 0 then begin
-  result:= fchannel.sequence;
- end;
- with pifirecty(adata)^.header do begin
-  sequence:= result;
- end;
- fchannel.senddata(adata);
-end;
-
-function tifidataset.senddataandwait(const adata: ansistring;
-            out asequence: sequencety; atimeoutus: integer = 0): boolean;
-var
- client1: twaitingclient;
-begin
- if fchannel = nil then begin
-  raise exception.create(name+': No IO channel assigned.');
- end;             
- asequence:= fchannel.sequence;
- client1:= fchannel.synchronizer.preparewait(asequence);
- senddata(adata,asequence);
- if atimeoutus = 0 then begin
-  atimeoutus:= timeoutus;
- end;
- result:= fchannel.synchronizer.waitforanswer(client1,atimeoutus);
-end;
-
-procedure tifidataset.processdata(const adata: pifirecty);
-var 
- tag1: integer;
- str1: string;
- po1: pchar;
-begin
- with adata^ do begin
-  if header.kind in ifidskinds then begin
-   with itemheader do begin 
-    tag1:= tag;
-    po1:= @name;
-   end;
-   inc(po1,ifinametostring(pifinamety(po1),str1));
-   if str1 = fifiname then begin
-    case header.kind of
-     ik_requestfielddefs: begin
-      requestfielddefsreceived(header.sequence);
-     end;
-     ik_requestopends: begin
-      requestopendsreceived(header.sequence);
-     end;
-     ik_fielddefsdata: begin
-      fielddefsdatareceived(header.answersequence,pfielddefsdatadataty(po1));
-     end;
-     ik_dsdata: begin
-      dsdatareceived(header.answersequence,pfielddefsdatadataty(po1));
-     end;
-     ik_fieldrec: begin
-      fieldrecdatareceived(pfieldrecdataty(po1));
-     end;
-    end;
-   end;
-   if header.answersequence <> 0 then begin
-    channel.synchronizer.answerreceived(header.answersequence);
-   end;
-  end;
- end;
-end;
-
+}
 procedure tifidataset.requestfielddefsreceived(const asequence: sequencety);
 begin
  //dummy
@@ -1578,7 +1667,8 @@ begin                 //postrecord
    int3:= int3 + length(ar1[int1]);
   end;
  end;
- inititemheader(str1,ik_fieldrec,0,int3+sizeof(fieldrecdataty),pchar(po1));
+ fificontroller.inititemheader(str1,ik_fieldrec,0,int3+sizeof(fieldrecdataty),
+                                     pchar(po1));
  po1^.kind:= akind;
  po1^.recno:= recno;
  po1^.count:= int2;
@@ -1588,7 +1678,7 @@ begin                 //postrecord
   move(ar1[int1][1],po2^,int3);
   inc(po2,int3);
  end;
- senddata(str1);
+ fificontroller.senddata(str1);
 end;
 
 procedure tifidataset.fieldrecdatareceived(const adata: pfieldrecdataty);
@@ -1886,13 +1976,6 @@ begin
  //dummy
 end;
 
-procedure tifidataset.connectmodule(const sender: tcustommodulelink);
-begin
- if idso_useclientchannel in options then begin
-  channel:= sender.channel;
- end;
-end;
-
 procedure tifidataset.beginupdate;
 begin
  inc(fupdating);
@@ -1905,6 +1988,11 @@ begin
  if fupdating = 0 then begin
   exclude(fistate,ids_updating);
  end;
+end;
+
+procedure tifidataset.setificountroller(const avalue: tifidscontroller);
+begin
+ fificontroller.assign(avalue);
 end;
 
 { trxdataset }
@@ -1952,22 +2040,24 @@ var
  str1: ansistring;
  po1: pointer;
 begin
- if (channel <> nil) or 
-   not ((csdesigning in componentstate) and 
-        (idso_useclientchannel in foptions)) then begin
-  inititemheader(str1,ik_requestopends,0,0,po1);
-  include(fistate,ids_openpending);
-  if senddataandwait(str1,ffielddefsequence) and 
-             (ids_fielddefsreceived in fistate) then begin
- //  inherited;
+ with fificontroller do begin
+  if (channel <> nil) or 
+    not ((csdesigning in componentstate) and 
+         (idso_useclientchannel in foptions)) then begin
+   inititemheader(str1,ik_requestopends,0,0,po1);
+   include(fistate,ids_openpending);
+   if senddataandwait(str1,ffielddefsequence) and 
+              (ids_fielddefsreceived in fistate) then begin
+  //  inherited;
+   end
+   else begin
+    sysutils.abort;
+    //error
+   end;
   end
   else begin
-   sysutils.abort;
-   //error
+   inherited;
   end;
- end
- else begin
-  inherited;
  end;
 end;
 
@@ -1984,12 +2074,12 @@ var
  po1: pchar;
 begin
  str2:= encodefielddefs(fielddefs);
- inititemheader(str1,ik_fielddefsdata,asequence,length(str2),po1); 
+ fificontroller.inititemheader(str1,ik_fielddefsdata,asequence,length(str2),po1); 
  with pfielddefsdatadataty(po1)^ do begin
 //  sequence:= asequence;
   move(str2[1],data,length(str2));
  end;
- senddata(str1);
+ fificontroller.senddata(str1);
 end;
 
 procedure ttxdataset.requestopendsreceived(const asequence: sequencety);
@@ -1999,13 +2089,14 @@ var
 begin
  str2:= encodefielddefs(fielddefs);
  str3:= encoderecords;
- inititemheader(str1,ik_dsdata,asequence,length(str2)+length(str3),po1); 
+ fificontroller.inititemheader(str1,ik_dsdata,asequence,
+                                     length(str2)+length(str3),po1); 
  with pfielddefsdatadataty(po1)^ do begin
 //  sequence:= asequence;
   move(str2[1],data,length(str2));
   move(str3[1],(@data+length(str2))^,length(str3));
  end;
- senddata(str1);
+ fificontroller.senddata(str1);
 end;
 
 end.
