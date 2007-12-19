@@ -39,6 +39,7 @@ type
   font: tfont;
   group: integer;
   color: colorty;
+  coloractive: colorty;
   colorglyph: colorty;
   imagenr: integer;
   imagenrdisabled: integer;       //-2 -> grayed
@@ -568,6 +569,7 @@ function drawbuttonframe(const canvas: tcanvas; const info: shapeinfoty;
         out clientrect: rectty): boolean; //true if clientrect > 0
 var
  level: integer;
+ col1: colorty;
 begin
  result:= false;
  with canvas,info do begin
@@ -601,8 +603,12 @@ begin
    inflaterect1(clientrect,-abs(level));
    if (clientrect.cx > 0) and (clientrect.cy > 0) then begin
     result:= true;
-    if color <> cl_transparent then begin
-     fillrect(clientrect,color);
+    col1:= color;
+    if ss_active in state then begin
+     col1:= coloractive;
+    end;
+    if col1 <> cl_transparent then begin
+     fillrect(clientrect,col1);
     end;
     if face <> nil then begin
      face.paint(canvas,clientrect);

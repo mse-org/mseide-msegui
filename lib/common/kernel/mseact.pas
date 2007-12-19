@@ -25,7 +25,7 @@ type
  shapestatety = (ss_disabled,ss_invisible,ss_checked,ss_default, //actionstatesty
                  ss_separator,ss_checkbox,ss_radiobutton,        //menuactionoptionty
 
-                 ss_clicked,ss_mouse,ss_moveclick,ss_focused,
+                 ss_clicked,ss_mouse,ss_moveclick,ss_focused,ss_active,
                  ss_horz,ss_vert,ss_opposite,
                  ss_widgetorg,ss_showfocusrect,ss_showdefaultrect,
                  ss_flat,ss_noanimation,

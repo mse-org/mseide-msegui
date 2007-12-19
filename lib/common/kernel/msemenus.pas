@@ -80,6 +80,7 @@ type
    fsource: ievent;
    ffont: tmenufont;
    ffontactive: tmenufontactive;
+   fcoloractive: colorty;
    function getsubmenu: tmenuitems;
    procedure setsubmenu(const Value: tmenuitems);
    procedure setcaption(const Value: captionty);
@@ -109,11 +110,13 @@ type
    procedure setvisible(const avalue: boolean);
    function getimagelist: timagelist;
    procedure setimagelist(const avalue: timagelist);
-   function isimageliststored: Boolean;
+   function isimageliststored: boolean;
    procedure setimagenr(const avalue: integer);
-   function isimagenrstored: Boolean;
+   function isimagenrstored: boolean;
    procedure setimagenrdisabled(const avalue: integer);
-   function isimagenrdisabledstored: Boolean;
+   function isimagenrdisabledstored: boolean;
+   procedure setcolor(const avalue: colorty);
+   function iscolorstored: boolean;
 
    function getfont: tmenufont;
    function getfontactive: tmenufontactive;
@@ -126,6 +129,7 @@ type
    procedure dofontchanged(const sender: tobject);
    procedure sethint(const avalue: msestring);
    function ishintstored: boolean;
+   procedure setcoloractive(const avalue: colorty);
   protected
    finfo: actioninfoty;
    fowner: tcustommenu;
@@ -153,6 +157,8 @@ type
    procedure doshortcut(var info: keyeventinfoty);
    function count: integer;
    function parentmenu: tmenuitem;
+   function actualcolor: colorty;
+   function actualcoloractive: colorty;
    property owner: tcustommenu read fowner; //can be nil
    function execute: boolean; //true if onexecute fired
    function asyncexecute: boolean;
@@ -186,8 +192,13 @@ type
                      stored isimageliststored;
    property imagenr: integer read finfo.imagenr write setimagenr
                             stored isimagenrstored default -1;
-   property imagenrdisabled: integer read finfo.imagenrdisabled write setimagenrdisabled
+   property imagenrdisabled: integer read finfo.imagenrdisabled 
+                            write setimagenrdisabled
                             stored isimagenrdisabledstored default -2;
+   property color: colorty read finfo.color write setcolor 
+                          stored iscolorstored default cl_default;
+   property coloractive: colorty read fcoloractive write setcoloractive 
+                          default cl_parent;
    property font: tmenufont read getfont write setfont stored isfontstored;
    property fontactive: tmenufontactive read getfontactive write setfontactive
                             stored isfontactivestored;
@@ -657,6 +668,8 @@ begin
   fowner:= aowner;
  end;
  initactioninfo(finfo,defaultmenuactoptions);
+ finfo.color:= cl_default;
+ fcoloractive:= cl_parent;
  inherited create;
 end;
 
@@ -780,6 +793,14 @@ end;
 function tmenuitem.isonexecutestored: Boolean;
 begin
  result:= isactiononexecutestored(finfo);
+end;
+
+procedure tmenuitem.setcoloractive(const avalue: colorty);
+begin
+ if avalue <> fcoloractive then begin
+  fcoloractive:= avalue;
+  actionchanged;
+ end;
 end;
 
 procedure tmenuitem.actionchanged;
@@ -1095,6 +1116,16 @@ begin
  result:= isactionimagenrdisabledstored(finfo);
 end;
 
+procedure tmenuitem.setcolor(const avalue: colorty);
+begin
+ setactioncolor(iactionlink(self),avalue);
+end;
+
+function tmenuitem.iscolorstored: Boolean;
+begin
+ result:= isactioncolorstored(finfo);
+end;
+
 function tmenuitem.isfontstored: boolean;
 begin
  result:= ffont <> nil;
@@ -1213,6 +1244,37 @@ begin
  mseactions.calccaptiontext(finfo,shortcutseparator);
  for int1:= 0 to count - 1 do begin
   fsubmenu[int1].updatecaption;
+ end;
+end;
+
+function tmenuitem.actualcolor: colorty;
+begin
+ result:= finfo.color;
+ if result = cl_default then begin
+  if fparentmenu = nil then begin
+   result:= cl_transparent;
+  end
+  else begin
+   result:= fparentmenu.actualcolor;
+  end;
+ end;
+end;
+
+function tmenuitem.actualcoloractive: colorty;
+begin
+ result:= fcoloractive;
+ if result = cl_parent then begin
+  if fparentmenu = nil then begin
+   result:= actualcolor;
+  end
+  else begin
+   result:= fparentmenu.actualcoloractive;
+  end;
+ end
+ else begin
+  if result = cl_default then begin
+   result:= actualcolor;
+  end;
  end;
 end;
 

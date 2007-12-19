@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2006 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2007 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -22,6 +22,7 @@ type
   dimouter: rectty;
   fontinactive: tfont;
   fontactive: tfont;
+ // coloractive: colorty;
  end;
  menucellinfoarty = array of menucellinfoty;
 
@@ -312,6 +313,8 @@ var
  ar1: richstringarty;
  commonwidth: boolean;
  needsmenuarrow: boolean;
+ parentcolor: colorty;
+ parentcoloractive: colorty;
  
 begin
  ar1:= nil; //compiler warning
@@ -354,6 +357,8 @@ begin
   shortcutwidth:= 0;
   hassubmenu:= false;
   hascheckbox:= false;
+  parentcolor:= actualcolor;
+  parentcoloractive:= actualcoloractive;
   for int1:= 0 to count - 1 do begin
    item1:= tmenuitem1(fsubmenu[int1]);
    with cells[int1] do begin
@@ -414,7 +419,23 @@ begin
      imagenr:= item1.finfo.imagenr;
      imagenrdisabled:= item1.finfo.imagenrdisabled;
      actionstatestoshapestates(item1.finfo,state);
-     color:= cl_transparent;
+     if item1.color = cl_default then begin
+      color:= parentcolor;
+     end
+     else begin
+      color:= item1.color;
+     end;
+     if item1.coloractive = cl_parent then begin
+      coloractive:= parentcoloractive;
+     end
+     else begin
+      if item1.coloractive = cl_default then begin
+       coloractive:= color;
+      end
+      else begin
+       coloractive:= item1.coloractive;
+      end;
+     end;
      include(state,ss_flat);
      if (owner <> nil) and (mo_noanim in owner.options) then begin
       include(state,ss_noanimation) 
@@ -623,6 +644,7 @@ begin
      end;
      buttoninfo.face:= itemfaceactive;
      buttoninfo.font:= fontactive;
+     include(buttoninfo.state,ss_active);
      drawmenubutton(canvas,buttoninfo,po2);
     end
     else begin
@@ -631,6 +653,7 @@ begin
      end;
      buttoninfo.face:= itemface;
      buttoninfo.font:= fontinactive;
+     exclude(buttoninfo.state,ss_active);
      drawmenubutton(canvas,buttoninfo,po1);
     end;
    end;
