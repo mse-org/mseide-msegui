@@ -378,6 +378,7 @@ type
    frowfontoffsetselect: integer;
    frowcoloroffset: integer;
    fonbeforedrawcell: beforedrawcelleventty;
+   fonafterdrawcell: drawcelleventty;
    frowcoloroffsetselect: integer;
    function getcolindex: integer;
    procedure setfocusrectdist(const avalue: integer);
@@ -454,6 +455,8 @@ type
                      setfontselect stored isfontselectstored;
    property onbeforedrawcell: beforedrawcelleventty read fonbeforedrawcell
                                 write fonbeforedrawcell;
+   property onafterdrawcell: drawcelleventty read fonafterdrawcell
+                                write fonafterdrawcell;
  end;
 
  tdatacol = class;
@@ -2418,24 +2421,18 @@ var
  linewidthbefore: integer;
  font1: tfont;
  canbeforedrawcell: boolean;
+ canafterdrawcell: boolean;
 
 begin
  if not (co_invisible in foptions) or (csdesigning in fgrid.ComponentState) then begin
   canbeforedrawcell:= fgrid.canevent(tmethod(fonbeforedrawcell));
+  canafterdrawcell:= fgrid.canevent(tmethod(fonafterdrawcell));
   with info do begin
    fcellinfo.font:= nil;
    bo1:= (fcellinfo.cell.col = fgrid.ffocusedcell.col) and
        (gs_cellentered in fgrid.fstate);
    canvas.drawinfopo:= @fcellinfo;
    canvas.move(makepoint(fcellrect.x,fcellrect.y + ystep * startrow));
-{
-   if fcolorselect <> cl_default then begin
-    selectedcolor1:= fcolorselect;
-   end
-   else begin
-    selectedcolor1:= defaultselectedcellcolor;
-   end;
-}
    for int1:= startrow to endrow do begin
     font1:= rowfont(int1);
     if font1 <> fcellinfo.font then begin
@@ -2448,22 +2445,6 @@ begin
     fcellinfo.ismousecell:= (fgrid.fmousecell.col = fcellinfo.cell.col) and 
                               (fgrid.fmousecell.row = int1);
     saveindex:= canvas.save;
-    {
-    if fcellinfo.selected then begin
-     if (selectedcolor1 <> cl_none) then begin
-      fcellinfo.color:= selectedcolor1;
-     end
-     else begin
-      fcellinfo.color:= rowcolor(int1);
-     end;
-     if ffontselect <> nil then begin
-      canvas.font:= ffontselect;
-     end;
-    end
-    else begin
-     fcellinfo.color:= rowcolor(int1);
-    end;
-    }
     fcellinfo.color:= rowcolor(int1);
     canvas.intersectcliprect(makerect(nullpoint,fcellrect.size));
     bo2:= false;
@@ -2477,6 +2458,9 @@ begin
       else begin
        drawcell(canvas);
       end;
+    end;
+    if canafterdrawcell then begin
+     fonafterdrawcell(self,canvas,fcellinfo);
     end;
     canvas.restore(saveindex);
     if not bo2 then begin

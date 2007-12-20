@@ -251,7 +251,7 @@ type
    property face: tface read fface write setface;
  end;
 
- trealgraphdataedit = class(tgraphdataedit)
+ tcustomrealgraphdataedit = class(tgraphdataedit)
   private
    fonsetvalue: setrealeventty;
    fdirection: graphicdirectionty;
@@ -279,12 +279,19 @@ type
    property gridvalue[const index: integer]: realty
         read getgridvalue write setgridvalue; default;
    property gridvalues: realarty read getgridvalues write setgridvalues;
-  published
-   property bounds_cx default defaultsliderwidth;
-   property bounds_cy default defaultsliderheight;
    property value: realty read fvalue write setvalue;
    property onsetvalue: setrealeventty read fonsetvalue write fonsetvalue;
    property direction: graphicdirectionty read fdirection write setdirection default gd_right;
+  published
+   property bounds_cx default defaultsliderwidth;
+   property bounds_cy default defaultsliderheight;
+ end;
+
+ trealgraphdataedit = class(tcustomrealgraphdataedit)
+  published
+   property value;
+   property onsetvalue;
+   property direction;
  end;
  
  tslider = class(trealgraphdataedit,iscrollbar)
@@ -333,7 +340,7 @@ type
    constructor create(const aowner: tcustomprogressbar);
  end;
 
- tcustomprogressbar = class(trealgraphdataedit,iface)
+ tcustomprogressbar = class(tcustomrealgraphdataedit,iface)
   private
    fbar_face: tbarface;
    fbar_frame: tbarframe;
@@ -377,6 +384,9 @@ type
    property value: realty read fvalue write setvalue;
           //threadsave, range 0 .. 1.0
   published
+   property onsetvalue;
+   property direction;
+
    property optionswidget default defaultoptionswidgetnofocus;
    property bar_face: tbarface read fbar_face write setbar_face;
    property bar_frame: tbarframe read fbar_frame write setbar_frame;
@@ -804,15 +814,15 @@ begin
  inherited;
 end;
 
-{ trealgraphdataedit }
+{ tcustomrealgraphdataedit }
 
-constructor trealgraphdataedit.create(aowner: tcomponent);
+constructor tcustomrealgraphdataedit.create(aowner: tcomponent);
 begin
  inherited;
  size:= makesize(defaultsliderwidth,defaultsliderheight);
 end;
 
-procedure trealgraphdataedit.setvalue(const avalue: realty);
+procedure tcustomrealgraphdataedit.setvalue(const avalue: realty);
 begin
  if fvalue <> avalue then begin
   if isemptyreal(avalue) then begin
@@ -825,17 +835,17 @@ begin
  end;
 end;
 
-function trealgraphdataedit.createdatalist(const sender: twidgetcol): tdatalist;
+function tcustomrealgraphdataedit.createdatalist(const sender: twidgetcol): tdatalist;
 begin
  result:= trealdatalist.create;
 end;
 
-function trealgraphdataedit.getdatatyp: datatypty;
+function tcustomrealgraphdataedit.getdatatyp: datatypty;
 begin
  result:= dl_real;
 end;
 
-procedure trealgraphdataedit.internalcheckvalue(var avalue; var accept: boolean);
+procedure tcustomrealgraphdataedit.internalcheckvalue(var avalue; var accept: boolean);
 begin
  if canevent(tmethod(fonsetvalue)) then begin
   fonsetvalue(self,realty(avalue),accept);
@@ -845,71 +855,71 @@ begin
  end;
 end;
 
-procedure trealgraphdataedit.valuetogrid(const arow: integer);
+procedure tcustomrealgraphdataedit.valuetogrid(const arow: integer);
 begin
  fgridintf.setdata(arow,fvalue);
 end;
 
-procedure trealgraphdataedit.gridtovalue(const arow: integer);
+procedure tcustomrealgraphdataedit.gridtovalue(const arow: integer);
 begin
  fgridintf.getdata(arow,fvalue);
  inherited;
 end;
 
-procedure trealgraphdataedit.readstatvalue(const reader: tstatreader);
+procedure tcustomrealgraphdataedit.readstatvalue(const reader: tstatreader);
 begin
  value:= reader.readreal(valuevarname,fvalue);
 end;
 
-procedure trealgraphdataedit.writestatvalue(const writer: tstatwriter);
+procedure tcustomrealgraphdataedit.writestatvalue(const writer: tstatwriter);
 begin
  writer.writereal(valuevarname,fvalue);
 end;
 
-procedure trealgraphdataedit.setdirection(const avalue: graphicdirectionty);
+procedure tcustomrealgraphdataedit.setdirection(const avalue: graphicdirectionty);
 begin
  if fdirection <> avalue then begin
   changedirection(avalue,fdirection);
  end;
 end;
 
-function trealgraphdataedit.getgridvalue(const index: integer): realty;
+function tcustomrealgraphdataedit.getgridvalue(const index: integer): realty;
 begin
  internalgetgridvalue(index,result);
 end;
 
-procedure trealgraphdataedit.setgridvalue(const index: integer;
+procedure tcustomrealgraphdataedit.setgridvalue(const index: integer;
                const avalue: realty);
 begin
  internalsetgridvalue(index,avalue);
 end;
 
-function trealgraphdataedit.getgridvalues: realarty;
+function tcustomrealgraphdataedit.getgridvalues: realarty;
 begin
  result:= trealdatalist(fgridintf.getcol.datalist).asarray;
 end;
 
-procedure trealgraphdataedit.setgridvalues(const avalue: realarty);
+procedure tcustomrealgraphdataedit.setgridvalues(const avalue: realarty);
 begin
  trealdatalist(fgridintf.getcol.datalist).asarray:= avalue;
 end;
 
-procedure trealgraphdataedit.fillcol(const value: realty);
+procedure tcustomrealgraphdataedit.fillcol(const value: realty);
 begin
  internalfillcol(value);
 end;
 
-procedure trealgraphdataedit.assigncol(const avalue: trealdatalist);
+procedure tcustomrealgraphdataedit.assigncol(const avalue: trealdatalist);
 begin
  internalassigncol(avalue);
 end;
 
-function trealgraphdataedit.isnull: boolean;
+function tcustomrealgraphdataedit.isnull: boolean;
 begin
  result:= isemptyreal(value);
 end;
 
-procedure trealgraphdataedit.setnullvalue;
+procedure tcustomrealgraphdataedit.setnullvalue;
 begin
  value:= emptyreal;
 end;
