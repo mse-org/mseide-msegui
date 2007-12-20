@@ -28,8 +28,8 @@ type
                 co_drawfocus,co_mousemovefocus,co_leftbuttonfocusonly,
          //     lvo_focusselect,lvo_mouseselect,lvo_keyselect,
                 co_focusselect, co_mouseselect, co_keyselect,
-         //     lvo_multiselect,lvo_resetselectonexit
-                co_multiselect, co_resetselectonexit, co_rowselect,
+         //     lvo_multiselect,lvo_resetselectonexit,lvo_noresetselect
+                co_multiselect, co_resetselectonexit, co_noresetselect, co_rowselect,
 
                 co_fixwidth,co_fixpos,co_fill,co_proportional,co_nohscroll,
                 co_savevalue,co_savestate,
@@ -7404,7 +7404,14 @@ var
    case selectaction of
     fca_entergrid,fca_focusin,fca_focusinrepeater,fca_focusinforce,fca_setfocusedcell: begin
      if (selectaction <> fca_entergrid) then begin
-      fdatacols.selected[invalidcell]:= false;
+      for int1:= 0 to fdatacols.count - 1 do begin
+       with tdatacol(fdatacols.fitems[int1]) do begin
+        if not (co_noresetselect in foptions) then begin
+         selected[-1]:= false;
+        end;
+       end;
+      end;
+//      fdatacols.selected[invalidcell]:= false;
      end;
      startanchors;
      if isdatacell(cell) and (co_focusselect in fdatacols[cell.col].foptions) then begin
