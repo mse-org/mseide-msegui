@@ -38,6 +38,7 @@ type
    function getfiltereditkind: filtereditkindty;
    procedure beginfilteredit(const akind: filtereditkindty);
    procedure endfilteredit;
+   procedure doidleapplyupdates;
   protected
    procedure setactive (value : boolean);{ override;}
    function getactive: boolean;
@@ -90,6 +91,7 @@ type
    function getfiltereditkind: filtereditkindty;
    procedure beginfilteredit(const akind: filtereditkindty);
    procedure endfilteredit;
+   procedure doidleapplyupdates;
   protected
    procedure setactive (value : boolean);{ override;}
    function getactive: boolean;
@@ -324,6 +326,11 @@ begin
  //dummy
 end;
 
+procedure tmsefixedformatdataset.doidleapplyupdates;
+begin
+ //dummy
+end;
+
 { tmsesdfdataset }
 
 constructor tmsesdfdataset.create(aowner: tcomponent);
@@ -522,6 +529,11 @@ begin
 end;
 
 procedure tmsesdfdataset.endfilteredit;
+begin
+ //dummy
+end;
+
+procedure tmsesdfdataset.doidleapplyupdates;
 begin
  //dummy
 end;

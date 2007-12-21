@@ -36,6 +36,7 @@ type
    function getfiltereditkind: filtereditkindty;
    procedure beginfilteredit(const akind: filtereditkindty);
    procedure endfilteredit;
+   procedure doidleapplyupdates;
   protected
    procedure setactive (value : boolean);
    function getactive: boolean;
@@ -268,6 +269,11 @@ end;
 procedure tmsesqlite3dataset.endfilteredit;
 begin
  //dumy
+end;
+
+procedure tmsesqlite3dataset.doidleapplyupdates;
+begin
+ //dummy
 end;
 
 end.

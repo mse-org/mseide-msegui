@@ -192,6 +192,7 @@ type
    procedure run;
    function running: boolean; //true if eventloop entered
    procedure processmessages; virtual; //handle with care!
+   function idle: boolean; virtual;
    property applicationname: msestring read fapplicationname write fapplicationname;
    
    procedure postevent(event: tevent);
@@ -212,7 +213,7 @@ type
    procedure registeronidle(const method: idleeventty);
    procedure unregisteronidle(const method: idleeventty);
    procedure settimer(const us: integer); virtual; abstract;
-
+{
    procedure setlinkedvar(const source: tmsecomponent; var dest: tmsecomponent;
               const linkintf: iobjectlink = nil); overload;
    procedure setlinkedvar(const source: tlinkedobject; var dest: tlinkedobject;
@@ -220,7 +221,7 @@ type
    procedure setlinkedvar(const source: tlinkedpersistent;
               var dest: tlinkedpersistent;
               const linkintf: iobjectlink = nil); overload;
-
+}
    function trylock: boolean;
    function lock: boolean;
     //synchronizes calling thread with main event loop (mutex),
@@ -1056,7 +1057,7 @@ procedure tcustomapplication.createdatamodule(instanceclass: msecomponentclassty
 begin
  mseclasses.createmodule(self,instanceclass,reference);
 end;
-
+{
 procedure tcustomapplication.setlinkedvar(const source: tmsecomponent;
                var dest: tmsecomponent; const linkintf: iobjectlink = nil);
 begin
@@ -1074,10 +1075,15 @@ procedure tcustomapplication.setlinkedvar(const source: tlinkedpersistent;
 begin
  inherited;
 end;
-
+}
 procedure tcustomapplication.dowakeup(sender: tobject);
 begin
  wakeupmainthread;
+end;
+
+function tcustomapplication.idle: boolean;
+begin
+ result:= (high(fpostedevents) < 0) and (feventlist.count = 0);
 end;
 
 initialization

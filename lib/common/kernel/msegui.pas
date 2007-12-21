@@ -1657,7 +1657,8 @@ type
    procedure invalidate; //invalidates all registered forms
    
    procedure processmessages; override; //handle with care!
-
+   function idle: boolean; override;
+   
    procedure beginwait; override;
    procedure endwait; override;
    function waiting: boolean;
@@ -13191,6 +13192,11 @@ procedure tguiapplication.doafterrun;
 begin
  destroyforms; //zeos lib unloads libraries -> 
                //forms must be destroyed before unit finalization
+end;
+
+function tguiapplication.idle: boolean;
+begin
+ result:= inherited idle and not gui_hasevent;
 end;
 
 { tasyncmessageevent }

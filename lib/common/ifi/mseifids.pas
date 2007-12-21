@@ -77,7 +77,7 @@ const
  defaultifidsoptions = [idso_useclientchannel];
 type  
  iifidscontroller = interface(inullinterface)
-   procedure requestfielddefsreceived(const asequence: sequencety);
+   function getfielddefs: tfielddefs;
    procedure requestopendsreceived(const asequence: sequencety);
    procedure fielddefsdatareceived( const asequence: sequencety; 
                                  const adata: pfielddefsdatadataty);
@@ -100,6 +100,7 @@ type
   protected
    procedure objectevent(const sender: tobject; const event: objecteventty);
                override;   
+   procedure requestfielddefsreceived(const asequence: sequencety);
    procedure processdata(const adata: pifirecty);    
    procedure doremotedatachange;
    //iifimodulelink
@@ -187,6 +188,7 @@ type
    function getfiltereditkind: filtereditkindty;
    procedure beginfilteredit(const akind: filtereditkindty);
    procedure endfilteredit;
+   procedure doidleapplyupdates;
    
    procedure setificountroller(const avalue: tifidscontroller);
   protected
@@ -195,6 +197,7 @@ type
    procedure checkrecno(const avalue: integer);
 
    //iifidscontroller
+   function getfielddefs: tfielddefs;
    procedure requestfielddefsreceived(const asequence: sequencety); virtual;
    procedure requestopendsreceived(const asequence: sequencety); virtual;
    procedure fielddefsdatareceived( const asequence: sequencety; 
@@ -330,9 +333,8 @@ type
  ttxdataset = class(tifidataset)
   private
   protected
-   procedure requestfielddefsreceived(const asequence: sequencety); override;
    procedure requestopendsreceived(const asequence: sequencety); override;
-   procedure inheritedinternalopen; override;
+//   procedure inheritedinternalopen; override;
   published
    property fielddefs;
  end;
@@ -342,7 +344,10 @@ type
    fificontroller: tifidscontroller;
    procedure setificountroller(const avalue: tifidscontroller);
   protected
-   procedure requestfielddefsreceived(const asequence: sequencety);
+   fbindings: integerarty;
+   procedure internalopen; override;
+   //iifids
+   function getfielddefs: tfielddefs;
    procedure requestopendsreceived(const asequence: sequencety);
    procedure fielddefsdatareceived( const asequence: sequencety; 
                                  const adata: pfielddefsdatadataty);
@@ -505,6 +510,19 @@ begin
  setlinkedvar(avalue,fchannel);
 end;
 
+procedure tifidscontroller.requestfielddefsreceived(const asequence: sequencety);
+var
+ str1,str2: ansistring;
+ po1: pchar;
+begin
+ str2:= encodefielddefs(fintf.getfielddefs);
+ inititemheader(str1,ik_fielddefsdata,asequence,length(str2),po1); 
+ with pfielddefsdatadataty(po1)^ do begin
+  move(str2[1],data,length(str2));
+ end;
+ senddata(str1);
+end;
+
 procedure tifidscontroller.processdata(const adata: pifirecty);
 var 
  tag1: integer;
@@ -521,7 +539,7 @@ begin
    if str1 = flinkname then begin
     case header.kind of
      ik_requestfielddefs: begin
-      fintf.requestfielddefsreceived(header.sequence);
+      requestfielddefsreceived(header.sequence);
      end;
      ik_requestopends: begin
       fintf.requestopendsreceived(header.sequence);
@@ -1993,6 +2011,16 @@ begin
  fificontroller.assign(avalue);
 end;
 
+function tifidataset.getfielddefs: tfielddefs;
+begin
+ result:= fielddefs;
+end;
+
+procedure tifidataset.doidleapplyupdates;
+begin
+ //dummy
+end;
+
 { trxdataset }
 
 procedure trxdataset.fielddefsdatareceived(const asequence: sequencety; 
@@ -2060,26 +2088,12 @@ begin
 end;
 
 { ttxdataset }
-
+{
 procedure ttxdataset.inheritedinternalopen;
 begin
  inherited;
 end;
-
-procedure ttxdataset.requestfielddefsreceived(const asequence: sequencety);
-var
- str1,str2: ansistring;
- po1: pchar;
-begin
- str2:= encodefielddefs(fielddefs);
- fificontroller.inititemheader(str1,ik_fielddefsdata,asequence,length(str2),po1); 
- with pfielddefsdatadataty(po1)^ do begin
-//  sequence:= asequence;
-  move(str2[1],data,length(str2));
- end;
- fificontroller.senddata(str1);
-end;
-
+}
 procedure ttxdataset.requestopendsreceived(const asequence: sequencety);
 var
  str1,str2,str3: ansistring;
@@ -2117,12 +2131,22 @@ begin
  fificontroller.assign(avalue);
 end;
 
-procedure ttxsqlquery.requestfielddefsreceived(const asequence: sequencety);
-begin
-end;
-
 procedure ttxsqlquery.requestopendsreceived(const asequence: sequencety);
+var
+ str1,str2,str3: ansistring;
+ po1: pchar;
 begin
+ str2:= encodefielddefs(fielddefs);
+ str3:= fificontroller.encoderecords(fbrecordcount,fbindings,ffieldinfos,
+           factindexpo^.ind);
+ fificontroller.inititemheader(str1,ik_dsdata,asequence,
+                                     length(str2)+length(str3),po1); 
+ with pfielddefsdatadataty(po1)^ do begin
+//  sequence:= asequence;
+  move(str2[1],data,length(str2));
+  move(str3[1],(@data+length(str2))^,length(str3));
+ end;
+ fificontroller.senddata(str1);
 end;
 
 procedure ttxsqlquery.fielddefsdatareceived(const asequence: sequencety;
@@ -2137,6 +2161,29 @@ end;
 
 procedure ttxsqlquery.fieldrecdatareceived(const adata: pfieldrecdataty);
 begin
+end;
+
+function ttxsqlquery.getfielddefs: tfielddefs;
+begin
+ result:= fielddefs;
+end;
+
+procedure ttxsqlquery.internalopen;
+var
+ int1: integer;
+ field1: tfield;
+begin
+ inherited;
+ setlength(fbindings,fielddefs.count);
+ for int1:= 0 to high(fbindings) do begin
+  field1:= findfield(fielddefs[int1].name);
+  if field1 <> nil then begin
+   fbindings[int1]:= field1.index;
+  end
+  else begin
+   fbindings[int1]:= -1;
+  end;
+ end;
 end;
 
 end.

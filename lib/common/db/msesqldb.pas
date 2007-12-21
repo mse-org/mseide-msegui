@@ -49,9 +49,8 @@ type
    fcontroller: tdscontroller;
    fmstate: sqlquerystatesty;
    fonapplyrecupdate: applyrecupdateeventty;
-//   fwantedreadonly: boolean;
    procedure setcontroller(const avalue: tdscontroller);
-   procedure setactive(value : boolean); {override;}
+   procedure setactive1(value : boolean);
    function getactive: boolean;
    procedure setonapplyrecupdate(const avalue: applyrecupdateeventty);
    function getcontroller: tdscontroller;
@@ -59,9 +58,11 @@ type
    procedure setindexdefs(const avalue: TIndexDefs);
    function getetstatementtype: TStatementType;
    procedure setstatementtype(const avalue: TStatementType);
-   procedure afterapply; override;
    procedure checkcanupdate;
+   procedure checkpendingupdates;
   protected
+   procedure setactive(avalue: boolean); override;
+   procedure afterapply; override;
    procedure updateindexdefs; override;
    procedure sqlonchange(const sender: tobject);
    procedure loaded; override;
@@ -82,7 +83,8 @@ type
    procedure inheritedinternaldelete;
    procedure inheritedinternalopen;
    procedure inheritedinternalclose;
-   
+   procedure doidleapplyupdates;
+
    procedure DoAfterDelete; override;
    procedure dataevent(event: tdataevent; info: ptrint); override;
    function wantblobfetch: boolean; override;
@@ -103,11 +105,9 @@ type
   published
    property FieldDefs;
    property controller: tdscontroller read fcontroller write setcontroller;
-   property Active: boolean read getactive write setactive;
+   property Active: boolean read getactive write setactive1;
    property onapplyrecupdate: applyrecupdateeventty read fonapplyrecupdate
                                   write setonapplyrecupdate;
-//   property ParseSQL: boolean read getparsesql write setparsesql default true;
-//   property ReadOnly: boolean read getreadonly write setreadonly default false;
    property UpdateMode default upWhereKeyOnly;
    property UsePrimaryKeyAsKey default true;
    property IndexDefs : TIndexDefs read getindexdefs write setindexdefs;
@@ -330,10 +330,10 @@ begin
  fcontroller.assign(avalue);
 end;
 
-procedure tmsesqlquery.setactive(value: boolean);
+procedure tmsesqlquery.setactive1(value: boolean);
 begin
  if fcontroller.setactive(value) then begin
-  inherited;
+  setactive(value);
  end;
 end;
 
@@ -433,7 +433,9 @@ end;
 
 procedure tmsesqlquery.post;
 begin
- if fcontroller.post and (dso_autoapply in fcontroller.options) then begin
+ if fcontroller.post and 
+       ([dso_autoapply,dso_applyonidle] * fcontroller.options =
+                               [dso_autoapply]) then begin
   try
    applyupdates;
   except
@@ -450,18 +452,6 @@ begin
  if dso_autocommit in fcontroller.options then begin
   writetransaction.commit;
  end;
-{
- if (dso_autocommitret in fcontroller.options) and 
-                (writetransaction <> nil) then begin
-  if transactionwrite = nil then begin
-   writetransaction.commitretaining;
-             //common transaction
-  end
-  else begin
-   writetransaction.commit;
-  end;
- end;
- }
  if dso_refreshafterapply in fcontroller.options then begin
   refresh;
  end;
@@ -489,6 +479,37 @@ begin
  end;
 end;
 
+procedure tmsesqlquery.doidleapplyupdates;
+begin
+ if changecount > 0 then begin
+  application.beginwait;
+  include(fbstate,bs_idle);
+  try
+   applyupdates;
+  finally
+   exclude(fbstate,bs_idle);
+   application.endwait;
+  end;
+ end;
+end;
+
+procedure tmsesqlquery.checkpendingupdates;
+begin
+ if (state <> dsinactive) and 
+        (fcontroller.options * [dso_autoapply,dso_applyonidle] = 
+              [dso_autoapply,dso_applyonidle]) and (changecount > 0) then begin
+  applyupdates;
+ end;
+end;
+
+procedure tmsesqlquery.setactive(avalue: boolean);
+begin
+ if not avalue then begin
+  checkpendingupdates;
+ end;
+ inherited;
+end;
+
 procedure tmsesqlquery.applyupdates(const maxerrors: integer = 0);
 begin
  applyupdates(maxerrors,fcontroller.options *
@@ -501,42 +522,7 @@ begin
  inherited applyupdate(fcontroller.options *
       [dso_cancelupdateonerror,dso_cancelupdatesonerror] <> []);
 end;
-{
-function tmsesqlquery.getreadonly: boolean;
-begin
- result:= inherited readonly;
-end;
 
-function tmsesqlquery.getparsesql: boolean;
-begin
- result:= inherited parsesql;
-end;
-}
-{
-procedure tmsesqlquery.setreadonly(const avalue: boolean);
-begin
- checkinactive;
- fwantedreadonly:= avalue;
-// if not avalue then begin
-//  if not (inherited parsesql or assigned(fonapplyrecupdate)) then begin
-//   databaseerrorfmt(snoparsesql,['Updating ']);
-//  end;
- end;
- freadonly:= avalue;
-end;
-}
-{
-procedure tmsesqlquery.setparsesql(const avalue: boolean);
-var
- bo1: boolean;
-begin
- bo1:= inherited readonly;
- inherited parsesql:= avalue;
- if not bo1 and assigned(fonapplyrecupdate) then begin
-  freadonly:= false;
- end;
-end;
-}
 function tmsesqlquery.getfieldclass(fieldtype: tfieldtype): tfieldclass;
 begin
  fcontroller.getfieldclass(fieldtype,result);

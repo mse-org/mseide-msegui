@@ -38,6 +38,7 @@ type
    function getfiltereditkind: filtereditkindty;
    procedure beginfilteredit(const akind: filtereditkindty);
    procedure endfilteredit;
+   procedure doidleapplyupdates;
   protected
    procedure setactive (value : boolean); {override;}
    function getactive: boolean;
@@ -268,6 +269,11 @@ begin
 end;
 
 procedure tmsedbf.endfilteredit;
+begin
+ //dummy
+end;
+
+procedure tmsedbf.doidleapplyupdates;
 begin
  //dummy
 end;

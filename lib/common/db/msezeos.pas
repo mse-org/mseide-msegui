@@ -28,6 +28,7 @@ type
    function getfiltereditkind: filtereditkindty;
    procedure beginfilteredit(const akind: filtereditkindty);
    procedure endfilteredit;
+   procedure doidleapplyupdates;
   protected
    procedure setactive (value : boolean);{ override;}
    function getactive: boolean;
@@ -78,6 +79,7 @@ type
    function getfiltereditkind: filtereditkindty;
    procedure beginfilteredit(const akind: filtereditkindty);
    procedure endfilteredit;
+   procedure doidleapplyupdates;
   protected
    procedure setactive (value : boolean);{ override;}
    function getactive: boolean;
@@ -126,6 +128,7 @@ type
    function getfiltereditkind: filtereditkindty;
    procedure beginfilteredit(const akind: filtereditkindty);
    procedure endfilteredit;
+   procedure doidleapplyupdates;
   protected
    procedure setactive (value : boolean);{ override;}
    function getactive: boolean;
@@ -174,6 +177,7 @@ type
    function getfiltereditkind: filtereditkindty;
    procedure beginfilteredit(const akind: filtereditkindty);
    procedure endfilteredit;
+   procedure doidleapplyupdates;
   protected
    procedure setactive (value : boolean);{ override;}
    function getactive: boolean;
@@ -392,6 +396,11 @@ begin
  //dummy
 end;
 
+procedure tmsezreadonlyquery.doidleapplyupdates;
+begin
+ //dummy
+end;
+
 { tmsezquery }
 
 constructor tmsezquery.create(aowner: tcomponent);
@@ -582,6 +591,11 @@ begin
  //dummy
 end;
 
+procedure tmsezquery.doidleapplyupdates;
+begin
+ //dummy
+end;
+
 { tmseztable }
 
 constructor tmseztable.create(aowner: tcomponent);
@@ -763,6 +777,11 @@ begin
 end;
 
 procedure tmseztable.endfilteredit;
+begin
+ //dummy
+end;
+
+procedure tmseztable.doidleapplyupdates;
 begin
  //dummy
 end;
@@ -950,6 +969,11 @@ end;
 procedure tmsezstoredproc.endfilteredit;
 begin
 //dummy
+end;
+
+procedure tmsezstoredproc.doidleapplyupdates;
+begin
+ //dummy
 end;
 
 end.

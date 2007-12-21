@@ -369,7 +369,7 @@ type
                       bs_editing,bs_append,bs_internalcalc,bs_startedit,
                       bs_utf8,
                       bs_hasfilter,bs_visiblerecordcountvalid,
-                      bs_refreshing        //used by tsqlquery
+                      bs_refreshing,bs_idle        //used by tsqlquery
                       );
  bufdatasetstatesty = set of bufdatasetstatety;
 
@@ -387,7 +387,6 @@ type
                              const akind: filtereditkindty) of object;
  tmsebufdataset = class(tmdbdataset,iblobchache)
   private
-   fbrecordcount: integer;
    fpacketrecords: integer;
    fopen: boolean;
    fupdatebuffer: recupdatebufferarty;
@@ -397,7 +396,6 @@ type
    fnullmasksize: integer;
    fcalcfieldcount: integer;
    finternalcalcfieldcount: integer;
-   ffieldinfos: fieldinfoarty;
    fstringpositions: integerarty;
    
    fcalcrecordsize: integer;
@@ -414,7 +412,6 @@ type
    fcheckfilterbuffer: pdsrecordty;
    fnewvaluebuffer: pdsrecordty; //buffer for applyupdates
    
-   factindexpo: pindexty;    
    findexlocal: tlocalindexes;
    factindex: integer;
    foninternalcalcfields: internalcalcfieldseventty;
@@ -486,6 +483,9 @@ type
    procedure logrecbuffer(const awriter: tbufstreamwriter; 
                          const akind: tupdatekind; const abuffer: pintrecordty);
   protected
+   fbrecordcount: integer;
+   ffieldinfos: fieldinfoarty;
+   factindexpo: pindexty;    
    fbstate: bufdatasetstatesty;
    fallpacketsfetched : boolean;
    fapplyindex: integer; //take care about canceled updates while applying
@@ -690,7 +690,7 @@ procedure alignfieldpos(var avalue: integer);
 implementation
 uses
  rtlconsts,dbconst,msedatalist,sysutils,mseformatstr,msereal,msestream,msesys,
- msefileutils;
+ msefileutils,mseapplication;
 {$ifdef mse_FPC_2_2}
 const
  snotineditstate = 
@@ -2434,8 +2434,11 @@ begin
       internalapplyupdate(maxerrors,cancelonerror,response);
      end;
      inc(fapplyindex);
+     if (bs_idle in fbstate) and not application.idle then begin
+      break;
+     end;
     end;
-    if ffailedcount = 0 then begin
+    if (ffailedcount = 0) and (fapplyindex > high(fupdatebuffer)) then begin
      fupdatebuffer:= nil;
     end;
    finally 

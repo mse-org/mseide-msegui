@@ -707,7 +707,8 @@ type
  datasetoptionty = (dso_utf8,dso_numboolean,dso_initinternalcalc,
                          dso_refreshtransaction,
                          dso_cancelupdateonerror,dso_cancelupdatesonerror,                         
-                         dso_autoapply,dso_autocommitret,dso_autocommit,
+                         dso_autoapply,dso_applyonidle,
+                         dso_autocommitret,dso_autocommit,
                          dso_refreshafterapply,
                          dso_cacheblobs,
                          dso_offline, //disconnect database after open
@@ -731,6 +732,7 @@ type
   function getfiltereditkind: filtereditkindty;
   procedure beginfilteredit(const akind:filtereditkindty);
   procedure endfilteredit;
+  procedure doidleapplyupdates;
  end;
 
  igetdscontroller = interface(inullinterface)
@@ -744,7 +746,7 @@ const
  
 type
  fieldlinkarty = array of ifieldcomponent;
- dscontrollerstatety = (dscs_posting);
+ dscontrollerstatety = (dscs_posting,dscs_onidleregistered);
  dscontrollerstatesty = set of dscontrollerstatety;
  
  tdscontroller = class(tactivatorcontroller,idsfieldcontroller)
@@ -770,11 +772,13 @@ type
    procedure setrecnonullbased(const avalue: integer);
    function getrecno: integer;
    procedure setrecno(const avalue: integer);
+   procedure unregisteronidle;
   protected
    procedure setoptions(const avalue: datasetoptionsty); virtual;
    procedure modified;
    procedure setowneractive(const avalue: boolean); override;
    procedure fielddestroyed(const sender: ifieldcomponent);
+   procedure doonidle(var again: boolean);
   public
    constructor create(const aowner: tdataset; const aintf: idscontroller;
                       const arecnooffset: integer = 0;
@@ -1057,7 +1061,7 @@ type
     FPrecision : Longint;
     FRequired : Boolean;
     FSize : Word;
-end;
+ end;
  tdataset1 = class(tdataset);
 
 procedure regfieldclass(const atype: fieldclasstypety; const aclass: fieldclassty);
@@ -3815,6 +3819,7 @@ var
  int1: integer;
  field1: tfield;
 begin
+ unregisteronidle;
  tdataset(fowner).active:= false; //avoid later calls from fowner
  for int1:= 0 to high(flinkedfields) do begin
   flinkedfields[int1].setdsintf(nil);
@@ -4127,6 +4132,24 @@ begin
   end;
   updatelinkedfields; //second check
  end;
+ if foptions * [dso_autoapply,dso_applyonidle] = 
+            [dso_autoapply,dso_applyonidle] then begin
+  application.registeronidle(@doonidle);
+  include(fstate,dscs_onidleregistered);
+ end;
+end;
+
+procedure tdscontroller.doonidle(var again: boolean);
+begin
+ fintf.doidleapplyupdates;
+end;
+
+procedure tdscontroller.unregisteronidle;
+begin
+ if dscs_onidleregistered in fstate then begin
+  application.unregisteronidle(@doonidle);
+  exclude(fstate,dscs_onidleregistered);
+ end;
 end;
 
 procedure tdscontroller.internalclose;
@@ -4134,6 +4157,7 @@ var
  int1: integer;
  field1: tfield;
 begin
+ unregisteronidle;
  fintf.inheritedinternalclose;
  with tdataset(fowner) do begin
   for int1:= 0 to fields.count - 1 do begin
