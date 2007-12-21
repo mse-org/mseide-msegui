@@ -4132,8 +4132,7 @@ begin
   end;
   updatelinkedfields; //second check
  end;
- if foptions * [dso_autoapply,dso_applyonidle] = 
-            [dso_autoapply,dso_applyonidle] then begin
+ if dso_applyonidle in foptions then begin
   application.registeronidle(@doonidle);
   include(fstate,dscs_onidleregistered);
  end;

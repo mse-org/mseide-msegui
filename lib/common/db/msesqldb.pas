@@ -434,10 +434,9 @@ end;
 procedure tmsesqlquery.post;
 begin
  if fcontroller.post and 
-       ([dso_autoapply,dso_applyonidle] * fcontroller.options =
-                               [dso_autoapply]) then begin
+       (dso_autoapply in fcontroller.options) then begin
   try
-   applyupdates;
+   applyupdate;
   except
    application.handleexception(self);
   end;
@@ -496,8 +495,7 @@ end;
 procedure tmsesqlquery.checkpendingupdates;
 begin
  if (state <> dsinactive) and 
-        (fcontroller.options * [dso_autoapply,dso_applyonidle] = 
-              [dso_autoapply,dso_applyonidle]) and (changecount > 0) then begin
+  (dso_applyonidle in fcontroller.options) and (changecount > 0) then begin
   applyupdates;
  end;
 end;
