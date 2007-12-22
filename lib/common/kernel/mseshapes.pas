@@ -123,15 +123,21 @@ begin
  if (info.eventkind in [ek_buttonpress,ek_buttonrelease]) then begin
   if hintedbutton >= 0 then begin
    application.hidehint;
+   hintedbutton:= -(hintedbutton+3);
+  end
+  else begin
+   if int1 >= 0 then begin
+    hintedbutton:= -(int1+3);
+   end;
   end;
-  hintedbutton:= -(int1+3);
   exit;
  end;
  if (info.eventkind in [ek_mousemove,ek_mousepark]) then begin
   if (int1 >= 0) then begin
    if (int1 <> hintedbutton) and (-(int1+3) <> hintedbutton) then begin
-    if twidget1(awidget).getshowhint and (info.eventkind = ek_mousepark) or 
-                (application.activehintedwidget = awidget) then begin
+    if twidget1(awidget).getshowhint and ((info.eventkind = ek_mousepark) or 
+               (hintedbutton >= 0))
+                {(application.activehintedwidget = awidget)} then begin
      if cells[int1].state * [ss_separator,ss_clicked] = [] then begin
       hintedbutton:= int1;
       mstr1:= getbuttonhint(int1);

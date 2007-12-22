@@ -43,7 +43,7 @@ Uses
   unix,
   unixtype,
 //  sysutils,
-  initc;
+  initc, msedatalist;
 
 Const
 {$ifndef useiconv}
@@ -318,7 +318,7 @@ procedure Ansi2UCS4Move(source:pchar;var dest:UCS4String;len:SizeInt);
     setlength(dest,length(dest)-outleft div 4);
   end;
 
-
+{
 function CompareWideString(const s1, s2 : WideString) : PtrInt;
   var
     hs1,hs2 : UCS4String;
@@ -333,7 +333,63 @@ function CompareTextWideString(const s1, s2 : WideString): PtrInt;
   begin
     result:=CompareWideString(UpperWideString(s1),UpperWideString(s2));
   end;
+}
 
+function CompareWideString(const s1, s2 : WideString) : PtrInt;
+var                   //no surrogate pair handling
+ w1,w2: ucs4string;
+ int1: integer;
+ po1: pwidechar;
+ po2: pucs4char;
+begin
+ allocuninitedarray(length(s1)+1,sizeof(ucs4char),w1);
+ allocuninitedarray(length(s2)+1,sizeof(ucs4char),w2);
+ po1:= pwidechar(s1);
+ po2:= pointer(w1);
+ while po1^ <> #0 do begin
+  po2^:= word(po1^);
+  inc(po1);
+  inc(po2);
+ end;
+ po2^:= 0;
+ po1:= pwidechar(s2);
+ po2:= pointer(w2);
+ while po1^ <> #0 do begin
+  po2^:= word(po1^);
+  inc(po1);
+  inc(po2);
+ end;
+ po2^:= 0;
+ result:= wcscoll(pwchar_t(w1),pwchar_t(w2));
+end;
+
+function CompareTextWideString(const s1, s2 : WideString): PtrInt;
+var                   //no surrogate pair handling
+ w1,w2: ucs4string;
+ int1: integer;
+ po1: pwidechar;
+ po2: pucs4char;
+begin
+ allocuninitedarray(length(s1)+1,sizeof(ucs4char),w1);
+ allocuninitedarray(length(s2)+1,sizeof(ucs4char),w2);
+ po1:= pwidechar(s1);
+ po2:= pointer(w1);
+ while po1^ <> #0 do begin
+  po2^:= towupper(wint_t(po1^));
+  inc(po1);
+  inc(po2);
+ end;
+ po2^:= 0;
+ po1:= pwidechar(s2);
+ po2:= pointer(w2);
+ while po1^ <> #0 do begin
+  po2^:= towupper(wint_t(po1^));
+  inc(po1);
+  inc(po2);
+ end;
+ po2^:= 0;
+ result:= wcscoll(pwchar_t(w1),pwchar_t(w2));
+end;
 
 function StrCompAnsi(s1,s2 : PChar): PtrInt;
   begin

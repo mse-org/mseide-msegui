@@ -885,6 +885,9 @@ begin
     end;
 
     // add FieldDef
+    if not(fieldtype in varsizefields) then begin
+     fieldsize:= 0;
+    end;
     fd:= TFieldDef.Create(FieldDefs, ColName, FieldType, FieldSize, False, i);
     {$ifndef mse_FPC_2_2} 
     fd.displayname:= colname;

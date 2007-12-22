@@ -469,6 +469,9 @@ begin
     ft1:= ftunknown;
     size1:= 0;
    end;
+   if not(ft1 in varsizefields) then begin
+    size1:= 0;
+   end;
    fd:= tfielddef.create(nil,str1,ft1,size1,false,int1+1);
    {$ifndef mse_FPC_2_2} 
    fd.displayname:= str1;

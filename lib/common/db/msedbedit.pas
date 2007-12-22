@@ -992,6 +992,7 @@ type
    procedure updaterowcount;
    procedure datasetscrolled(distance: integer); override;
    procedure activechanged; override;
+   procedure editingchanged; override;
    procedure updatedata; override;
    procedure focuscell(var cell: gridcoordty);
    procedure cellevent(var info: celleventinfoty);
@@ -5873,6 +5874,12 @@ begin
    cell.row:= activerecord;
   end;   
  end;
+end;
+
+procedure tgriddatalink.editingchanged;
+begin
+ invalidateindicator;
+ inherited;
 end;
 
 { tdbwidgetindicatorcol }

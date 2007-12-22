@@ -547,6 +547,9 @@ begin
    end;
    if MySQLDataType(field^,DFT,DFS) then begin
     str1:= field^.name;
+    if not(dft in varsizefields) then begin
+     dfs:= 0;
+    end;
     fd:= TFieldDef.Create(nil,str1,DFT,DFS,False,TF);
     {$ifndef mse_FPC_2_2} 
     fd.displayname:= str1;

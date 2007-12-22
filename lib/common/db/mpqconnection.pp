@@ -661,6 +661,9 @@ begin
     end;
    end;
    str1:= PQfname(Res,i);
+   if not(fieldtype in varsizefields) then begin
+    size:= 0;
+   end;
    fd:= TFieldDef.Create(nil,str1,fieldtype,size,False,(i+1));
    {$ifndef mse_FPC_2_2} 
    fd.displayname:= str1;

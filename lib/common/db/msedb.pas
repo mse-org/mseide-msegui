@@ -36,7 +36,8 @@ const
                 realfields + datetimefields;
  blobfields = [ftblob,ftmemo,ftgraphic{,ftstring}];
  defaultproviderflags = [pfInUpdate,pfInWhere];
- 
+
+ varsizefields = [ftstring,ftbytes,ftvarbytes,ftwidestring];
 type
  isqlpropertyeditor = interface(inullinterface)
                             ['{001C24B7-548C-4A4D-A42D-6FBAFBAA7A57}']
@@ -500,6 +501,7 @@ type
   {$endif}
    function HasParent: Boolean; override;
    procedure setasfloat(avalue: double); override;
+   class procedure checktypesize(avalue: longint); override;
   public
    procedure Clear; override;
    function assql: string;
@@ -3074,6 +3076,13 @@ begin
  else begin
   inherited;
  end;
+end;
+
+class procedure tmsebcdfield.checktypesize(avalue: longint);
+begin
+ if (avalue < 0) or (avalue > 8) then begin
+  databaseerrorfmt(sinvalidfieldsize,[avalue]);
+ end; 
 end;
 
 { tmseblobfield }

@@ -42,7 +42,7 @@ type
           const acursor: tsqlcursor; const afielddef: tfielddef); reintroduce;
    property datatype: tfieldtype read fdatatype;
    property fieldname: ansistring read ffieldname;
-   property datasize: integer read fdatasize;
+   property size: integer read fdatasize;
 
    property asvariant: variant read getasvariant;
               //empty variant returned for null fields
@@ -476,7 +476,7 @@ begin
  fuppername:= uppercase(ffieldname);
  fdatatype:= afielddef.datatype;
  ffieldnum:= afielddef.fieldno-1;
- fdatasize:= afielddef.size;
+ fdatasize:= afielddef.size; //used for stringcol
  futf8:= asqlresult.isutf8;
  inherited create;
 end;

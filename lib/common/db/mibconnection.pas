@@ -913,6 +913,9 @@ begin
        translen:= int1;
       end;
      end;
+     if not(transtype in varsizefields) then begin
+      translen:= 0;
+     end;
      FD:= TFieldDef.Create(nil,AliasName,TransType,
                 TransLen,False,(x + 1));
      if TransType = ftBCD then begin

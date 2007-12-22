@@ -2399,6 +2399,7 @@ begin
     if response = rrapply then begin
      deleteitem(fupdatebuffer,typeinfo(recupdatebufferarty),int1);
      fcurrentupdatebuffer:= bigint; //invalid
+     resync([]);
      afterapply;
     end;
    end;
