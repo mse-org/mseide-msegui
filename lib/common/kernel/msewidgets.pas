@@ -3033,7 +3033,7 @@ end;
 
 procedure tcustomscrollboxframe.setsbhorz(const avalue: tscrollboxscrollbar);
 begin
- inherited;
+ inherited setsbhorz(avalue);
 end;
 
 function tcustomscrollboxframe.getsbhorz: tscrollboxscrollbar;
@@ -3043,7 +3043,7 @@ end;
 
 procedure tcustomscrollboxframe.setsbvert(const avalue: tscrollboxscrollbar);
 begin
- inherited;
+ inherited setsbvert(avalue);
 end;
 
 function tcustomscrollboxframe.getsbvert: tscrollboxscrollbar;
@@ -3919,7 +3919,7 @@ end;
 
 procedure tscrollframe.setsbhorz(const avalue: tscrollbar);
 begin
- inherited;
+ inherited setsbhorz(avalue);
 end;
 
 function tscrollframe.getsbhorz: tscrollbar;
@@ -3929,7 +3929,7 @@ end;
 
 procedure tscrollframe.setsbvert(const avalue: tscrollbar);
 begin
- inherited;
+ inherited setsbvert(avalue);
 end;
 
 function tscrollframe.getsbvert: tscrollbar;
