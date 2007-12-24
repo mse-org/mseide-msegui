@@ -1702,7 +1702,8 @@ type
                 //returns helpcontext of mouse widget, '' if none;
    function active: boolean;
    function screensize: sizety;
-   function workarea(awindow: twindow): rectty;
+   function workarea(const awindow: twindow = nil): rectty;
+                          //nil -> current active window
    function activewindow: twindow;
    function regularactivewindow: twindow;
    function unreleasedactivewindow: twindow;
@@ -12399,7 +12400,7 @@ begin
  result:= gui_getscreensize;
 end;
 
-function tguiapplication.workarea(awindow: twindow): rectty;
+function tguiapplication.workarea(const awindow: twindow = nil): rectty;
 var
  id: winidty;
 begin
