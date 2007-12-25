@@ -462,12 +462,6 @@ type
    procedure setactindex(const avalue: integer);
    procedure checkindex(const force: boolean);
    
-   function getfieldbuffer(const afield: tfield;
-             out buffer: pointer; out datasize: integer): boolean; overload; 
-             //read, true if not null
-   function getfieldbuffer(const afield: tfield;
-             const isnull: boolean; out datasize: integer): pointer; overload;
-             //write
    function getmsestringdata(const sender: tmsestringfield; 
                                out avalue: msestring): boolean;
    procedure setmsestringdata(const sender: tmsestringfield; const avalue: msestring);
@@ -496,6 +490,12 @@ type
    fblobcount: integer;
    fcurrentbuf: pintrecordty;
 
+   function getfieldbuffer(const afield: tfield;
+             out buffer: pointer; out datasize: integer): boolean; overload; 
+             //read, true if not null
+   function getfieldbuffer(const afield: tfield;
+             const isnull: boolean; out datasize: integer): pointer; virtual; overload;
+             //write
    function getfiltereditkind: filtereditkindty;
    function blobsarefetched: boolean;
    function getblobcache: blobcacheinfoarty;
@@ -609,6 +609,7 @@ type
                 const buffer: pointer;
                     var bufsize: integer): boolean; virtual; abstract;
            //if bufsize < 0 -> buffer was to small, should be -bufsize
+   property nullmasksize: integer read fnullmasksize;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;

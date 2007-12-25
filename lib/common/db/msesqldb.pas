@@ -79,8 +79,8 @@ type
    procedure inheritedcancel;
    procedure inheritedpost;
    function inheritedmoveby(const distance: integer): integer;  
-   procedure inheritedinternalinsert;
-   procedure inheritedinternaldelete;
+   procedure inheritedinternalinsert; virtual;
+   procedure inheritedinternaldelete; virtual;
    procedure inheritedinternalopen;
    procedure inheritedinternalclose;
    procedure doidleapplyupdates;
