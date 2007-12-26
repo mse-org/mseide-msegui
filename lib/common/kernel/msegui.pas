@@ -1677,6 +1677,7 @@ type
    function waitterminated: boolean;   
 
    procedure showexception(e: exception; const leadingtext: string = ''); override;
+   procedure errormessage(const amessage: msestring); override;
    procedure inithintinfo(var info: hintinfoty; const ahintedwidget: twidget);
    procedure showhint(const sender: twidget; const hint: msestring;
               const aposrect: rectty; const aplacement: captionposty = cp_bottomleft;
@@ -12362,7 +12363,8 @@ begin
  end;
 end;
 
-procedure tguiapplication.showexception(e: exception; const leadingtext: string = '');
+procedure tguiapplication.showexception(e: exception; 
+                                  const leadingtext: string = '');
 var
  str1: ansistring;
 begin
@@ -12373,6 +12375,11 @@ begin
  else begin
   showmessage(str1,'Exception');
  end;
+end;
+
+procedure tguiapplication.errormessage(const amessage: msestring);
+begin
+ showerror(amessage);
 end;
 
 function tguiapplication.active: boolean;

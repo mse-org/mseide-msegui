@@ -206,6 +206,7 @@ type
    procedure handleexception(sender: tobject; const leadingtext: string = '');
    procedure showexception(e: exception; const leadingtext: string = '');
                                   virtual; abstract;
+   procedure errormessage(const amessage: msestring); virtual; abstract;
    procedure registeronterminated(const method: notifyeventty);
    procedure unregisteronterminated(const method: notifyeventty);
    procedure registeronterminate(const method: terminatequeryeventty);

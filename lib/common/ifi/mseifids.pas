@@ -68,7 +68,7 @@ type
 //                 |<-calcfield offsets are in fcalcfieldbufpositions|
 
  ifidsstatety = (ids_openpending,ids_fielddefsreceived,ids_remotedata,
-                 ids_updating,ids_append);
+                 ids_updating,ids_append,ids_sendpostresult,ids_postpending);
  ifidsstatesty = set of ifidsstatety;
  ifidsoptionty = (idso_useclientchannel); 
  ifidsoptionsty = set of ifidsoptionty;
@@ -84,6 +84,7 @@ type
    procedure dsdatareceived( const asequence: sequencety; 
                                  const adata: pfielddefsdatadataty);
    procedure fieldrecdatareceived(const adata: pfieldrecdataty);
+   procedure cancelconnection;
    function getbindings: integerarty;
    function getmodifiedfields: pbyte;
    procedure initmodifiedfields;
@@ -99,13 +100,17 @@ type
    fdefaulttimeout: integer;
    ftag: integer;
    fremotedatachange: notifyeventty;
+   fpostsequence: sequencety;
+   fpostcode: postresultcodety;
+   fpostmessage: msestring;
    procedure setchannel(const avalue: tcustomiochannel);
   protected
    fistate: ifidsstatesty;
    procedure objectevent(const sender: tobject; const event: objecteventty);
                override;   
    procedure requestfielddefsreceived(const asequence: sequencety);
-   procedure processfieldrecdata(const adata: pfieldrecdataty);
+   procedure processfieldrecdata(const asequence: sequencety;
+                                       const adata: pfieldrecdataty);
    procedure processdata(const adata: pifirecty);    
    procedure doremotedatachange;
    procedure postrecord1(const akind: fieldreckindty);
@@ -124,6 +129,8 @@ type
                     const recpo: pintrecordty): string;
    function encoderecords(const arecordcount: integer;
                         const abufs: pointerarty): string;
+   procedure sendpostresult(const asequence: sequencety;
+                    const acode: postresultcodety; const amessage: msestring);
    procedure post;
    procedure delete;
   published
@@ -256,6 +263,7 @@ type
 
    procedure InternalCancel; override;
    procedure internaledit; override;
+   procedure InternalRefresh; override;
 
    procedure InternalAddRecord(Buffer: Pointer; AAppend: Boolean); override;
    procedure InternalClose; override;
@@ -345,6 +353,8 @@ type
   protected
    procedure requestopendsreceived(const asequence: sequencety); override;
 //   procedure inheritedinternalopen; override;
+  public
+   constructor create(aowner: tcomponent); override;
   published
    property fielddefs;
  end;
@@ -372,6 +382,7 @@ type
    procedure fieldrecdatareceived(const adata: pfieldrecdataty);
    function getbindings: integerarty;
    function getmodifiedfields: pbyte;
+   procedure cancelconnection;
    procedure internaledit; override;
    procedure inheritedinternalinsert; override;
    procedure inheritedinternaldelete; override;
@@ -384,7 +395,7 @@ type
  
 implementation
 uses
- sysutils,msedatalist,dbconst;
+ sysutils,msedatalist,dbconst,mseapplication;
 type
  tmsestringfield1 = class(tmsestringfield);
  
@@ -396,7 +407,7 @@ const
 {$endif}
 
  ifidskinds = [ik_requestfielddefs,ik_requestopends,ik_fielddefsdata,
-               ik_fieldrec,ik_dsdata];
+               ik_fieldrec,ik_dsdata,ik_postresult];
  openflags = [ids_openpending,ids_fielddefsreceived,ids_append];
  
 type
@@ -459,7 +470,21 @@ begin
  asize:= pointer(po1) - pointer(adata);
  result:= true;
 end;
- 
+
+function decodepostresult(const adata: ppostresultdataty; 
+                           out acode: postresultcodety;
+                           out amessage: msestring): boolean;
+var
+ str1: string;
+begin
+ result:= true;
+ with adata^ do begin
+  acode:= code;
+  ifinametostring(@message,str1);
+  amessage:= utf8tostring(str1);
+ end;
+end;
+
 function encodefielddata(const ainfo: fieldinfoty; const headersize: integer): string;
 begin
  with ainfo do begin
@@ -593,7 +618,27 @@ begin                 //postrecord
   move(ar1[int1][1],po2^,int3);
   inc(po2,int3);
  end;
- senddata(str1);
+ if not (ids_sendpostresult in fistate) then begin
+  include(fistate,ids_postpending);
+  fpostsequence:= 0;
+  fpostcode:= pc_none;
+  if not senddataandwait(str1,fpostsequence) then begin
+   exclude(fistate,ids_postpending);
+   application.errormessage('Timeout.');
+   fintf.cancelconnection;
+  end
+  else begin
+   if (fpostcode <> pc_ok) then begin
+    exclude(fistate,ids_postpending);
+    application.errormessage(fpostmessage);
+    fowner.refresh; //todo: optimize
+   end;
+  end;
+  exclude(fistate,ids_postpending);
+ end
+ else begin
+  senddata(str1);
+ end;
 end;
 
 procedure tifidscontroller.post;
@@ -657,7 +702,8 @@ begin
  senddata(str1);
 end;
 
-procedure tifidscontroller.processfieldrecdata(const adata: pfieldrecdataty);
+procedure tifidscontroller.processfieldrecdata(const asequence: sequencety;
+                                                   const adata: pfieldrecdataty);
 var
  int1: integer;
  index1: integer;
@@ -674,83 +720,98 @@ var
 begin
  with fowner do begin
   if active then begin
-   checkbrowsemode;
-   disablecontrols;
-//   include(fistate,ids_remotedata);
-   bm:= bookmark;
-   include(fistate,ids_remotedata);
    try
-    bindings1:= fintf.getbindings;
-    if adata^.kind = frk_delete then begin
-     recno:= adata^.recno;
-     delete;
-    end
-    else begin
-     bo1:= adata^.kind = frk_insert;
-     if bo1 then begin
-      if adata^.recno >= recordcount then begin
-       append;
+    checkbrowsemode;
+//    disablecontrols;
+    bm:= bookmark;
+    include(fistate,ids_remotedata);
+    try
+     bindings1:= fintf.getbindings;
+     if adata^.kind = frk_delete then begin
+      recno:= adata^.recno;
+      delete;
+     end
+     else begin
+      bo1:= adata^.kind = frk_insert;
+      if bo1 then begin
+       if adata^.recno >= recordcount then begin
+        append;
+       end
+       else begin
+        recno:= adata^.recno;
+        insert;
+       end;
       end
       else begin
        recno:= adata^.recno;
-       insert;
+       edit;
       end;
-     end
-     else begin
-      recno:= adata^.recno;
-      edit;
-     end;
-     po1:= @adata^.data;
-     for int1:= 0 to adata^.count - 1 do begin
-      index1:= pfielddataty(po1)^.header.index;
-      if (index1 >= 0) and (index1 <= high(bindings1)) and 
-                                          (bindings1[index1] >= 0) then begin
-       field1:= fields[bindings1[index1]];
-       inc(po1,sizeof(mseifi.fielddataty.header));
-       case pifidataty(po1)^.header.kind of
-        idk_null: begin
-         field1.clear;
-         inc(po1,sizeof(ifidataty));
-        end;
-        idk_int64: begin
-         inc(po1,decodeifidata(pifidataty(po1),int641));
-         field1.aslargeint:= int641;
-        end;
-        idk_real: begin
-         inc(po1,decodeifidata(pifidataty(po1),rea1));
-         field1.asfloat:= rea1;
-        end;
-        idk_currency: begin
-         inc(po1,decodeifidata(pifidataty(po1),cu1));
-         field1.ascurrency:= cu1;
-        end;
-        idk_bytes: begin
-         inc(po1,decodeifidata(pifidataty(po1),str1));
-         field1.asstring:= str1;
-        end;
-        idk_msestring: begin
-         inc(po1,decodeifidata(pifidataty(po1),mstr1));
-         if field1 is tmsestringfield then begin
-          tmsestringfield(field1).asmsestring:= mstr1;
-         end
-         else begin
-          field1.asstring:= mstr1;
+      po1:= @adata^.data;
+      for int1:= 0 to adata^.count - 1 do begin
+       index1:= pfielddataty(po1)^.header.index;
+       if (index1 >= 0) and (index1 <= high(bindings1)) and 
+                                           (bindings1[index1] >= 0) then begin
+        field1:= fields[bindings1[index1]];
+        inc(po1,sizeof(mseifi.fielddataty.header));
+        case pifidataty(po1)^.header.kind of
+         idk_null: begin
+          field1.clear;
+          inc(po1,sizeof(ifidataty));
+         end;
+         idk_int64: begin
+          inc(po1,decodeifidata(pifidataty(po1),int641));
+          field1.aslargeint:= int641;
+         end;
+         idk_real: begin
+          inc(po1,decodeifidata(pifidataty(po1),rea1));
+          field1.asfloat:= rea1;
+         end;
+         idk_currency: begin
+          inc(po1,decodeifidata(pifidataty(po1),cu1));
+          field1.ascurrency:= cu1;
+         end;
+         idk_bytes: begin
+          inc(po1,decodeifidata(pifidataty(po1),str1));
+          field1.asstring:= str1;
+         end;
+         idk_msestring: begin
+          inc(po1,decodeifidata(pifidataty(po1),mstr1));
+          if field1 is tmsestringfield then begin
+           tmsestringfield(field1).asmsestring:= mstr1;
+          end
+          else begin
+           field1.asstring:= mstr1;
+          end;
          end;
         end;
        end;
+       setfieldisnull(fintf.getmodifiedfields,index1); //reset changeflag
       end;
-      setfieldisnull(fintf.getmodifiedfields,index1); //reset changeflag
+      post;
      end;
-     post;
+     doremotedatachange;
+    finally
+     try
+      bookmark:= bm;
+     except
+     end;
+     exclude(fistate,ids_remotedata);  
+//     enablecontrols;
     end;
-    doremotedatachange;
-    try
-     bookmark:= bm;
-    except
+    if ids_sendpostresult in fistate then begin
+     sendpostresult(asequence,pc_ok,'');
     end;
-   finally
-    exclude(fistate,ids_remotedata);  
-    enablecontrols;
+   except
+    on e: exception do begin
+     if ids_sendpostresult in fistate then begin
+      sendpostresult(asequence,pc_error,e.message);
+     end;
+    end;
+   end;
+  end
+  else begin
+   if ids_sendpostresult in fistate then begin
+    sendpostresult(asequence,pc_error,'Dataset inactive.');
    end;
   end;
  end;
@@ -763,6 +824,8 @@ var
  tag1: integer;
  str1: string;
  po1: pchar;
+ int1: integer;
+ mstr1: msestring;
 begin
  with adata^ do begin
   if header.kind in ifidskinds then begin
@@ -785,8 +848,14 @@ begin
      ik_dsdata: begin
       fintf.dsdatareceived(header.answersequence,pfielddefsdatadataty(po1));
      end;
+     ik_postresult: begin
+      if (ids_postpending in fistate) and 
+           (header.answersequence = fpostsequence) then begin
+       decodepostresult(ppostresultdataty(po1),fpostcode,fpostmessage);
+      end;
+     end;
      ik_fieldrec: begin
-      processfieldrecdata(pfieldrecdataty(po1));
+      processfieldrecdata(header.sequence,pfieldrecdataty(po1));
      end;
     end;
    end;
@@ -890,6 +959,22 @@ begin
   end;
  end;
  setlength(result,ind1 - 1);
+end;
+
+procedure tifidscontroller.sendpostresult(const asequence: sequencety;
+                    const acode: postresultcodety; const amessage: msestring);
+var
+ str1,str2: string;
+ po1: pointer;
+begin
+ str2:= stringtoutf8(amessage);
+ inititemheader(str1,ik_postresult,asequence,
+                                     length(str2),po1); 
+ with ppostresultdataty(po1)^ do begin
+  code:= acode;
+  stringtoifiname(str2,@message);
+ end;
+ senddata(str1);
 end;
 
 { tifidataset }
@@ -1871,6 +1956,7 @@ procedure tifidataset.dsdatareceived(const asequence: sequencety;
 begin
  //dummy
 end;
+
 {
 procedure tifidataset.waitforanswer(const asequence: sequencety; 
                                                  waitus: integer = 0);
@@ -2175,6 +2261,12 @@ begin
  result:= ffieldinfos;
 end;
 
+procedure tifidataset.InternalRefresh;
+begin
+ active:= false;
+ active:= true;
+end;
+
 { trxdataset }
 
 procedure trxdataset.fielddefsdatareceived(const asequence: sequencety; 
@@ -2242,6 +2334,13 @@ begin
 end;
 
 { ttxdataset }
+
+constructor ttxdataset.create(aowner: tcomponent);
+begin
+ inherited;
+ include(fificontroller.fistate,ids_sendpostresult);
+end;
+
 {
 procedure ttxdataset.inheritedinternalopen;
 begin
@@ -2270,6 +2369,7 @@ end;
 constructor ttxsqlquery.create(aowner: tcomponent);
 begin
  fificontroller:= tifidscontroller.create(self,iifidscontroller(self));
+ include(fificontroller.fistate,ids_sendpostresult);
  inherited;
 end;
 
@@ -2398,6 +2498,11 @@ begin
  if int1 >= 0 then begin //datafield
   unsetfieldisnull(pointer(fmodifiedfields),int1); //modified
  end;
+end;
+
+procedure ttxsqlquery.cancelconnection;
+begin
+ //dummy
 end;
 
 end.

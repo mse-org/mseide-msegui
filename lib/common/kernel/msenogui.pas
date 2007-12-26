@@ -29,6 +29,7 @@ type
    destructor destroy; override;
    procedure showexception(e: exception; const leadingtext: string = '');
                                   override;
+   procedure errormessage(const amessage: msestring); override;
    procedure settimer(const us: integer); override;
  end;
  
@@ -76,6 +77,12 @@ procedure tnoguiapplication.showexception(e: exception;
 begin
  writestderr('EXCEPTION:');
  writestderr(leadingtext+e.message,true);
+end;
+
+procedure tnoguiapplication.errormessage(const amessage: msestring);
+begin
+ writestderr('ERROR:');
+ writestderr(amessage,true);
 end;
 
 procedure tnoguiapplication.settimer(const us: integer);
