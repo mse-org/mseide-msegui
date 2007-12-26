@@ -141,6 +141,7 @@ type
    function candragdest(const apos: pointty; var row: integer): boolean;
    procedure rereadprops;
    procedure callrereadprops;
+   procedure showmethodsource(const aeditor: tmethodpropertyeditor);
   protected
    procedure updatedefaultstate(const aindex: integer);
    procedure doasyncevent(var atag: integer); override;
@@ -543,6 +544,11 @@ begin
  node:= tpropertyvalue.create(sender);
 end;
 
+procedure tobjectinspectorfo.showmethodsource(const aeditor: tmethodpropertyeditor);
+begin
+ sourcefo.showsourcepos(sourceupdater.findmethodpos(aeditor.method,true),true);
+end;
+
 procedure tobjectinspectorfo.valuesonmouseevent(const sender: twidget; 
               var info: mouseeventinfoty);
 begin
@@ -550,9 +556,7 @@ begin
   with tpropertyitem(props.item) do begin
    if feditor is tmethodpropertyeditor then begin
     if not values.edited or values.checkvalue then begin
-     with tmethodpropertyeditor(feditor) do begin
-      sourcefo.showsourcepos(sourceupdater.findmethodpos(method,true),true);
-     end;
+     showmethodsource(tmethodpropertyeditor(feditor));
     end;
    end;
   end;
@@ -1296,10 +1300,15 @@ procedure tobjectinspectorfo.valueskeydown(const sender: twidget;
 begin
  if (info.key = key_return) and (info.shiftstate = []) and
                             not values.edited then begin
-  with tpropertyvalue(values.item).feditor do begin
+  with tpropertyvalue(values.item),feditor do begin
    if ps_dialog in state then begin
     include(info.eventstate,es_processed);
     edit;
+   end
+   else begin
+    if feditor is tmethodpropertyeditor then begin
+     showmethodsource(tmethodpropertyeditor(feditor));
+    end;
    end;
   end;
  end;

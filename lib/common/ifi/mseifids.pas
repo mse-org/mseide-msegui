@@ -2290,8 +2290,12 @@ var
  po1: pchar;
 begin
  str2:= encodefielddefs(fielddefs);
- str3:= fificontroller.encoderecords(fbrecordcount,
-           factindexpo^.ind);
+ if factindexpo = nil then begin  
+  str3:= fificontroller.encoderecords(fbrecordcount,nil);
+ end
+ else begin
+  str3:= fificontroller.encoderecords(fbrecordcount,factindexpo^.ind);
+ end;
  fificontroller.inititemheader(str1,ik_dsdata,asequence,
                                      length(str2)+length(str3),po1); 
  with pfielddefsdatadataty(po1)^ do begin
