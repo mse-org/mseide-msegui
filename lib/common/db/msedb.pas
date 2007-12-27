@@ -745,7 +745,8 @@ type
 const
  defaultdscontrolleroptions = [];
  de_modified = ord(high(tdataevent))+1;
- 
+ allfieldkinds = [fkData,fkCalculated,fkLookup,fkInternalCalc];
+  
 type
  fieldlinkarty = array of ifieldcomponent;
  dscontrollerstatety = (dscs_posting,dscs_onidleregistered);
@@ -787,6 +788,7 @@ type
                       const acancelresync: boolean = true);
    destructor destroy; override;
    function isutf8: boolean;
+   function getfieldar(const afieldkinds: tfieldkinds = allfieldkinds): fieldarty;
    function filtereditkind: filtereditkindty;
    function locate(const key: integer; const field: tfield;
                        const options: locateoptionsty = []): locateresultty;
@@ -4388,6 +4390,24 @@ end;
 procedure tdscontroller.endfilteredit;
 begin
  fintf.endfilteredit;
+end;
+
+function tdscontroller.getfieldar(
+                   const afieldkinds: tfieldkinds = allfieldkinds): fieldarty;
+var
+ int1,int2: integer;
+begin
+ with tdataset(fowner).fields do begin
+  setlength(result,count);
+  int2:= 0;
+  for int1:= 0 to high(result) do begin
+   result[int2]:= fields[int1];
+   if result[int2].fieldkind in afieldkinds then begin
+    inc(int2);
+   end;
+  end;
+  setlength(result,int2);
+ end;
 end;
 
 { tmsedatasource }
