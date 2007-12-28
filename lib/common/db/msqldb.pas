@@ -115,9 +115,6 @@ type
   private
    fdatabasename: filenamety;
    fintf: idbcontroller;
-   fonbeforeconnect: databaseeventty;
-   fonconnecterror: databaseerroreventty;
-   fonafterconnect: databaseeventty;
    foptions: databaseoptionsty;
    procedure setoptions(const avalue: databaseoptionsty);
   protected
@@ -128,12 +125,6 @@ type
    procedure setdatabasename(const avalue: filenamety);
   published
    property options: databaseoptionsty read foptions write setoptions;
-   property onbeforeconnect: databaseeventty read fonbeforeconnect 
-                                   write fonbeforeconnect;  
-   property onafterconnect: databaseeventty read fonafterconnect 
-                                   write fonafterconnect;  
-   property onconnecterror: databaseerroreventty read fonconnecterror 
-                                   write fonconnecterror; 
  end;
 
  tmsesqlscript = class;
@@ -161,14 +152,16 @@ type
    procedure closeds;
    procedure reopends;
   protected
-    FConnOptions: sqlconnoptionsty;
+   FConnOptions: sqlconnoptionsty;
    fcontroller: tdbcontroller;
    procedure finalizetransaction(const atransaction: tsqlhandle); virtual; 
-   procedure setconnected(const avalue: boolean);
+//   procedure setconnected(const avalue: boolean);
    procedure notification(acomponent: tcomponent; operation: toperation); override;
    
     function StrToStatementType(s : string) : TStatementType; virtual;
     procedure DoInternalConnect; override;
+    procedure doafterinternalconnect; override;
+    procedure dobeforeinternaldisconnect; override;
     procedure DoInternalDisconnect; override;
     function GetAsSQLText(const Field : TField) : string; overload; virtual;
     function GetAsSQLText(const Param : TParam) : string; overload; virtual;
@@ -295,11 +288,11 @@ type
     Property Role;
     property DatabaseName;
     property KeepConnection;
-    property LoginPrompt;
+//    property LoginPrompt;
     property Params;
     property afterconnect;
     property beforedisconnect;
-    property OnLogin;
+//    property OnLogin;
  end;
  
   TCommitRollbackAction = (caNone, caCommit, caCommitRetaining, caRollback,
@@ -956,6 +949,8 @@ procedure tdbcontroller.setowneractive(const avalue: boolean);
 var
  bo1: boolean;
 begin
+ fintf.setinheritedconnected(avalue);
+ {
  if avalue then begin
   with tmdatabase(fowner) do begin
    if checkcanevent(fowner,tmethod(fonbeforeconnect)) then begin
@@ -983,6 +978,7 @@ begin
   fintf.setinheritedconnected(avalue);
 //  tmdatabase(fowner).connected:= avalue;
  end;
+ }
 end;
 
 function tdbcontroller.getdatabasename: filenamety;
@@ -1324,60 +1320,94 @@ begin
  result:= inherited connected;
 end;
 
-procedure tcustomsqlconnection.setconnected(const avalue: boolean);
+procedure tcustomsqlconnection.doafterinternalconnect;
+begin
+ if fafterconnect <> nil then begin
+  fconnected:= true; //avoid recursion
+  fafterconnect.execute(self);
+ end;
+end;
+
+procedure tcustomsqlconnection.dobeforeinternaldisconnect;
 var
  int1: integer;
 begin
-// with tdatabasecracker(self) do begin
-  If aValue <> FConnected then begin
-   If aValue then begin
-    if csReading in ComponentState then begin
-     FOpenAfterRead:= true;
-     exit;
-    end
-    else begin
-     DoInternalConnect;
-     if fafterconnect <> nil then begin
-      fconnected:= true; //avoid recursion
-//      fafterconnect.execute(self,ftransaction);
-      fafterconnect.execute(self);
-     end;
-    end;
+ if fbeforedisconnect <> nil then begin
+  fbeforedisconnect.execute(self);
+ end;
+ for int1:= datasetcount - 1 downto 0 do begin
+  with tsqlquery(datasets[int1]) do begin
+   if (transaction = nil) or (transaction.active) then begin
+    close; //not disconnected
+   end;
+  end;
+ end;
+end;
+{
+procedure tcustomsqlconnection.setconnected(const avalue: boolean);
+var
+ int1: integer;
+ bo1: boolean;
+begin
+ if avalue <> fconnected then begin
+  if avalue then begin
+   if csreading in componentstate then begin
+    fopenafterread:= true;
+    exit;
    end
    else begin
-//    Closedatasets;
-    if fbeforedisconnect <> nil then begin
-//     fbeforedisconnect.execute(self,ftransaction);
-     fbeforedisconnect.execute(self);
-//     ftransaction.commit;
+    if assigned(onbeforeconnect) then begin
+     onbeforeconnect(self);
     end;
-    for int1:= datasetcount - 1 downto 0 do begin
-     with tsqlquery(datasets[int1]) do begin
-      if (transaction = nil) or (transaction.active) then begin
-       close; //not disconnected
+    try
+     dointernalconnect;
+     doafterinternalconnect;
+     if assigned(onafterconnect) then begin
+       onafterconnect(self);
+     end;
+    except
+     on e: exception do begin
+      if assigned(onconnecterror) then begin
+       bo1:= false;
+       onconnecterror(self,e,bo1);
+       if not bo1 then begin
+        raise;
+       end
+       else begin
+        if not connected then begin
+         abort;
+        end;
+       end;
+      end
+      else begin
+       raise;
       end;
      end;
-    end;
-    Closetransactions;
-    {
-    for int1:= 0 to transactioncount - 1 do begin
-     with tsqltransaction(transactions[int1]) do begin
-      if ftrans <> nil then begin
-       finalizetransaction(ftrans);
-      end;
-     end;
-    end;
-    }
-    DoInternalDisConnect;
-    if csloading in ComponentState then begin
-     FOpenAfterRead := false;
     end;
    end;
-   FConnected:= aValue;
+  end
+  else begin
+   if assigned(onbeforedisconnect) then begin
+    onbeforedisconnect(self);
+   end;
+   dobeforeinternaldisconnect;
+   for int1:= datasetcount - 1 downto 0 do begin
+    with tsqlquery(datasets[int1]) do begin
+     if (transaction = nil) or (transaction.active) then begin
+      close; //not disconnected
+     end;
+    end;
+   end;
+   closetransactions;
+   dointernaldisconnect;
+   if csloading in componentstate then begin
+    fopenafterread := false;
+   end;
   end;
-// end;
+  fconnected:= avalue;
+ end;
 end;
-
+}
 procedure tcustomsqlconnection.setafteconnect(const avalue: tmsesqlscript);
 begin
  if fafterconnect <> nil then begin
@@ -1662,7 +1692,7 @@ begin
  if not Db.Connected then begin
   Db.Open;
  end;
- if int1 <> fstartcount then begin
+ if (int1 <> fstartcount) or not db.connected then begin
   exit;
  end;
  if not assigned(FTrans) then begin

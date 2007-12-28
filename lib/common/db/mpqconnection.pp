@@ -159,9 +159,9 @@ type
   published
     property DatabaseName;
     property KeepConnection;
-    property LoginPrompt;
+//    property LoginPrompt;
     property Params;
-    property OnLogin;
+//    property OnLogin;
     property eventinterval: integer read geteventinterval 
                      write seteventinterval default defaultdbeventinterval;
   end;

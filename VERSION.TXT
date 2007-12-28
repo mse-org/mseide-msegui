@@ -1,4 +1,7 @@
 MSEide+MSEgui version history
+2007-12-28
+ tdbcontroller.onbeforeconnect,onconnecterror and onafterconnect moved to
+ tmdatabase.
 2007-12-13
  tapplication.wakeupguithread -> wakeupmainthread.
 2007-12-08

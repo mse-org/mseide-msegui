@@ -194,9 +194,9 @@ type
     property options: ibconnectionoptionsty read foptions write foptions;
     property DatabaseName;
     property KeepConnection;
-    property LoginPrompt;
+//    property LoginPrompt;
     property Params;
-    property OnLogin;
+//    property OnLogin;
   end;
 
 function clientversion: string;

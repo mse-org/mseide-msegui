@@ -98,8 +98,8 @@ type
 //    FAfterDisconnect: TNotifyEvent;
 //    FBeforeConnect: TNotifyEvent;
 //    FBeforeDisconnect: TNotifyEvent;
-    FLoginPrompt: Boolean;
-    FOnLogin: TLoginEvent;
+//    FLoginPrompt: Boolean;
+//    FOnLogin: TLoginEvent;
     FStreamedConnected: Boolean;
 //    procedure SetAfterConnect(const AValue: TNotifyEvent);
 //    procedure SetAfterDisconnect(const AValue: TNotifyEvent);
@@ -113,7 +113,7 @@ type
     Function GetDataSetCount : Longint; virtual;
     procedure InternalHandleException; virtual;
     procedure Loaded; override;
-    procedure SetConnected (Value : boolean); virtual;
+    procedure SetConnected (const avalue : boolean); virtual;
   public
     procedure Close;
     destructor Destroy; override;
@@ -122,14 +122,14 @@ type
     property DataSets[Index: Longint]: TDataSet read GetDataSet;
   published
     property Connected: Boolean read GetConnected write SetConnected;
-    property LoginPrompt: Boolean read FLoginPrompt write FLoginPrompt;
+//    property LoginPrompt: Boolean read FLoginPrompt write FLoginPrompt;
 //    property Streamedconnected: Boolean read FStreamedConnected write FStreamedConnected;
 
 //    property AfterConnect : TNotifyEvent read FAfterConnect write fafterconnect;
 //    property AfterDisconnect : TNotifyEvent read FAfterDisconnect write fAfterDisconnect;
 //    property BeforeConnect : TNotifyEvent read FBeforeConnect write fBeforeConnect;
 //    property BeforeDisconnect : TNotifyEvent read FBeforeDisconnect write fBeforeDisconnect;
-    property OnLogin: TLoginEvent read FOnLogin write FOnLogin;
+//    property OnLogin: TLoginEvent read FOnLogin write FOnLogin;
   end;
 
  databaseeventty = procedure(const sender: tmdatabase) of object;
@@ -147,6 +147,11 @@ type
    FKeepConnection : Boolean;
    FParams : TStrings;
    FSQLBased : Boolean;
+   fonbeforeconnect: databaseeventty;
+   fonconnecterror: databaseerroreventty;
+   fonafterconnect: databaseeventty;
+   fonbeforedisconnect: databaseeventty;
+   fonafterdisconnect: databaseeventty;
    Function GetTransactionCount : Longint;
    Function GetTransaction(Index : longint) : tmdbtransaction;
 //    procedure RegisterDataset (DS : tmdbdataset);
@@ -156,13 +161,17 @@ type
    procedure UnRegisterTransaction(TA : tmdbtransaction);
    procedure RemoveDataSets;
    procedure RemoveTransactions;
+   procedure setparams(const avalue: tstrings);
   protected
    FConnected : Boolean;
    FOpenAfterRead : boolean;
+   procedure setconnected(const avalue: boolean); override;
    Procedure CheckConnected;
    Procedure CheckDisConnected;
    procedure DoConnect; override;
    procedure DoDisconnect; override;
+   procedure doafterinternalconnect; virtual;
+   procedure dobeforeinternaldisconnect; virtual;
    function GetConnected : boolean; override;
    Function GetDataset(Index : longint) : TDataset; override;
 //    Function GetDataSetCount : Longint; override;
@@ -180,11 +189,22 @@ type
    property Transactions[Index: Longint]: tmdbtransaction read GetTransaction;
    property Directory: string read FDirectory write FDirectory;
    property IsSQLBased: Boolean read FSQLBased;
+
   published
    property Connected: Boolean read FConnected write SetConnected;
    property DatabaseName: string read FDatabaseName write FDatabaseName;
    property KeepConnection: Boolean read FKeepConnection write FKeepConnection;
-   property Params : TStrings read FParams Write FParams;
+   property Params : TStrings read FParams Write setparams;
+   property onbeforeconnect: databaseeventty read fonbeforeconnect 
+                                   write fonbeforeconnect;  
+   property onafterconnect: databaseeventty read fonafterconnect 
+                                   write fonafterconnect;  
+   property onconnecterror: databaseerroreventty read fonconnecterror 
+                                   write fonconnecterror; 
+   property onbeforedisconnect: databaseeventty read fonbeforedisconnect 
+                                   write fonbeforedisconnect; 
+   property onafterdisconnect: databaseeventty read fonafterdisconnect 
+                                   write fonafterdisconnect; 
   end;
 
   tmdbdatasetClass = Class of tmdbdataset;
@@ -299,6 +319,117 @@ end;
 
 { tmdatabase }
 
+procedure tmdatabase.doafterinternalconnect;
+begin
+ //dummy
+end;
+
+procedure tmdatabase.dobeforeinternaldisconnect;
+begin
+ //dummy
+end;
+
+procedure tmdatabase.setconnected(const avalue: boolean);
+var
+ int1: integer;
+ bo1: boolean;
+begin
+ if avalue <> fconnected then begin
+  if avalue then begin
+   if csreading in componentstate then begin
+    fopenafterread:= true;
+    exit;
+   end
+   else begin
+    if assigned(onbeforeconnect) then begin
+     onbeforeconnect(self);
+    end;
+    try
+     dointernalconnect;
+     doafterinternalconnect;
+     if assigned(onafterconnect) then begin
+       onafterconnect(self);
+     end;
+    except
+     on e: exception do begin
+      if assigned(onconnecterror) then begin
+       bo1:= false;
+       onconnecterror(self,e,bo1);
+       if not bo1 then begin
+        raise;
+       end
+       else begin
+        if not connected then begin
+         abort;
+        end;
+       end;
+      end
+      else begin
+       raise;
+      end;
+     end;
+    end;
+   end;
+  end
+  else begin
+   if assigned(onbeforedisconnect) then begin
+    onbeforedisconnect(self);
+   end;
+   dobeforeinternaldisconnect;
+   closetransactions;
+   dointernaldisconnect;
+   if csloading in componentstate then begin
+    fopenafterread := false;
+   end;
+  end;
+  fconnected:= avalue;
+ end;
+end;
+
+{procedure tmdatabase.setconnected(avalue: boolean);
+var
+ bo1: boolean;
+begin
+ if avalue <> connected then begin
+  if avalue then begin
+   if csreading in componentstate then begin
+    fstreamedconnected := true;
+    exit;
+   end
+   else begin
+    if assigned(fonbeforeconnect) then begin
+      fonbeforeconnect(self);
+    end;
+    try
+     doconnect;
+     if assigned(fonafterconnect) then begin
+       fonafterconnect(self);
+     end;
+    except
+     on e: exception do begin
+      if assigned(fonconnecterror) then begin
+       bo1:= false;
+       fonconnecterror(self,e,bo1);
+       if not bo1 then begin
+        raise;
+       end;
+      end;
+     end;
+    end;
+   end;
+  end
+  else begin
+   if assigned(fonbeforedisconnect) then begin
+     fonbeforedisconnect(self);
+   end;
+   dodisconnect;
+   if assigned(fonafterdisconnect) then begin
+     fonafterdisconnect(self);
+   end;
+  end;
+ end;
+end;
+}
 Procedure tmdatabase.CheckConnected;
 
 begin
@@ -481,6 +612,11 @@ begin
     FTransactions.Delete(I)
   else
     DatabaseErrorFmt(SNoTransactionRegistered,[TA.Name]);
+end;
+
+procedure tmdatabase.setparams(const avalue: tstrings);
+begin
+ fparams.assign(avalue);
 end;
 
 { tmdbdataset }
@@ -765,11 +901,11 @@ begin
   FBeforeConnect:=AValue;
 end;
 }
-procedure TCustomConnection.SetConnected(Value: boolean);
+procedure TCustomConnection.SetConnected(const avalue: boolean);
 begin
-  If Value<>Connected then
+  If aValue<>Connected then
     begin
-    If Value then
+    If aValue then
       begin
       if csReading in ComponentState then
         begin
@@ -780,8 +916,8 @@ begin
         begin
 //        if Assigned(BeforeConnect) then
 //          BeforeConnect(self);
-        if FLoginPrompt then if assigned(FOnLogin) then
-          FOnLogin(self,'','');
+//        if FLoginPrompt then if assigned(FOnLogin) then
+//          FOnLogin(self,'','');
         DoConnect;
 //        if Assigned(AfterConnect) then
 //          AfterConnect(self);

@@ -170,9 +170,9 @@ Type
     property DatabaseName;
     property HostName;
     property KeepConnection;
-    property LoginPrompt;
+//    property LoginPrompt;
     property Params;
-    property OnLogin;
+//    property OnLogin;
   end;
 
 //  EMySQLError = Class(Exception);

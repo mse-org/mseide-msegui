@@ -131,9 +131,9 @@ type
     property Role;
     property DatabaseName; // will be passed as DSN connection parameter
     property KeepConnection;
-    property LoginPrompt;  // if true, ODBC drivers might prompt for more details that are not in the connection string
+//    property LoginPrompt;  // if true, ODBC drivers might prompt for more details that are not in the connection string
     property Params;       // will be added to connection string
-    property OnLogin;
+//    property OnLogin;
   end;
 
   EODBCException = class(Exception)
