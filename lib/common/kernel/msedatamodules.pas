@@ -34,10 +34,14 @@ type
    fonasyncevent: asynceventeventty;
    foneventloopstart: notifyeventty;
    fonevent: eventeventty;
+   fonterminatequery: terminatequeryeventty;
+   fonterminated: notifyeventty;
    procedure writesize(writer: twriter);
    procedure readsize(reader: treader);
    procedure setstatfile(const avalue: tstatfile);
   protected
+   procedure doterminated(const sender: tobject);
+   procedure doterminatequery(var terminate: boolean);
    procedure getchildren(proc: tgetchildproc; root: tcomponent); override;
    class function getmoduleclassname: string; override;
    procedure defineproperties(filer: tfiler); override;
@@ -64,6 +68,10 @@ type
    property ondestroyed: notifyeventty read fondestroyed write fondestroyed;
    property onevent: eventeventty read fonevent write fonevent;
    property onasyncevent: asynceventeventty read fonasyncevent write fonasyncevent;
+   property onterminatequery: terminatequeryeventty read fonterminatequery 
+                 write fonterminatequery;
+   property onterminated: notifyeventty read fonterminated 
+                 write fonterminated;
  end;
  datamoduleclassty = class of tmsedatamodule;
  
@@ -94,6 +102,8 @@ begin
  include(fmsecomponentstate,cs_ismodule);
  designinfo:= 100+(100 shl 16);
  inherited create(aowner);
+ application.registeronterminated({$ifdef FPC}@{$endif}doterminated);
+ application.registeronterminate({$ifdef FPC}@{$endif}doterminatequery);
  if load and not (csdesigning in componentstate) then begin
   loadmsemodule(self,tmsedatamodule);
   if (fstatfile <> nil) and (dmo_autoreadstat in foptions) then begin
@@ -107,6 +117,8 @@ destructor tmsedatamodule.destroy;
 var
  bo1: boolean;
 begin
+ application.unregisteronterminated({$ifdef FPC}@{$endif}doterminated);
+ application.unregisteronterminate({$ifdef FPC}@{$endif}doterminatequery);
  bo1:= csdesigning in componentstate;
  inherited; //csdesigningflag is removed
  if not bo1 and candestroyevent(tmethod(fondestroyed)) then begin
@@ -222,6 +234,21 @@ begin
   doeventloopstart;
  end;
 end;
+
+procedure tmsedatamodule.doterminated(const sender: tobject);
+begin
+ if canevent(tmethod(fonterminated)) then begin
+  fonterminated(sender);
+ end;
+end;
+
+procedure tmsedatamodule.doterminatequery(var terminate: boolean);
+begin
+ if canevent(tmethod(fonterminatequery)) then begin
+  fonterminatequery(terminate);
+ end;
+end;
+
 initialization
  registerclass(tmsedatamodule);
 end.

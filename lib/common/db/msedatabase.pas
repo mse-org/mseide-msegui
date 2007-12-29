@@ -372,17 +372,23 @@ begin
    end;
   end
   else begin
-   if assigned(onbeforedisconnect) then begin
-    onbeforedisconnect(self);
-   end;
-   dobeforeinternaldisconnect;
-   closetransactions;
-   dointernaldisconnect;
    if csloading in componentstate then begin
     fopenafterread := false;
+    fconnected:= avalue;
+   end
+   else begin
+    if assigned(onbeforedisconnect) then begin
+     onbeforedisconnect(self);
+    end;
+    dobeforeinternaldisconnect;
+    closetransactions;
+    dointernaldisconnect;
+    fconnected:= avalue;
+    if assigned(onafterdisconnect) then begin
+     onafterdisconnect(self);
+    end;
    end;
   end;
-  fconnected:= avalue;
  end;
 end;
 
