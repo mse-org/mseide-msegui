@@ -483,8 +483,8 @@ type
             aeditorclass: propertyeditorclassty;
             const adesigner: idesigner;
             const aobjectinspector: iobjectinspector;
-            const aprops: propinstancearty; atypinfo: ptypeinfo);
-                                                         virtual; reintroduce;
+            const aprops: propinstancearty; atypinfo: ptypeinfo); reintroduce;
+                                                         virtual;
    destructor destroy; override;
    procedure setvalue(const value: msestring); override;
    function getvalue: msestring; override;
@@ -1788,8 +1788,13 @@ end;
 
 function tsetpropertyeditor.getvalue: msestring;
 begin
+ {$ifdef FPC}
  result:= '['+concatstrings(settostrings(tintegerset(cardinal(getordvalue)),
       typedata^.comptype),',')+']';
+ {$else}
+ result:= '['+concatstrings(settostrings(tintegerset(cardinal(getordvalue)),
+      typedata^.comptype^),',')+']';
+ {$endif}
 (*
 {$ifdef FPC}
  result:= '['+concatstrings(settostrings(tintegerset(cardinal(getordvalue)),
@@ -1815,7 +1820,11 @@ begin
  end;
  ar1:= nil;
  splitstring(str1,ar1,',',true);
+ {$ifdef FPC}
  setordvalue(longword(stringstoset(ar1,typedata^.comptype)));
+ {$else}
+ setordvalue(longword(stringstoset(ar1,typedata^.comptype^)));
+ {$endif}
 // setordvalue(longword(stringstoset(ar1,fprops[0].propinfo^.proptype{$ifndef FPC}^{$endif})));
 end;
 

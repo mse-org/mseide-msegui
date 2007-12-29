@@ -1140,7 +1140,7 @@ begin
  fitems[index]:= treader1(reader).driver.readset(
              gettypedata(ftypeinfo)^.comptype{$ifndef fpc}^{$endif});
  {$else}
- fitems[index]:= integer(reader.readset(ftypeinfo)));
+ fitems[index]:= integer(treader1(reader).readset(ftypeinfo));
  {$endif}
 end;
 {
