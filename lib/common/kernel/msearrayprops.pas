@@ -182,26 +182,27 @@ type
    constructor create(typeinfo: ptypeinfo); reintroduce;
  end;
 
- tsetarrayprop = class(tarrayprop)
+ tsetarrayprop = class(tintegerarrayprop)
   private
-   fsize: integer;
+//   fsize: integer;
    function getitems(const index: integer): tintegerset;
   protected
    ftypeinfo: ptypeinfo;
-   fitems: array of tintegerset;
+//   fitems: array of tintegerset;
    procedure setitems(const index: integer; const Value: tintegerset); virtual;
-   function getcount: integer; override;
-   procedure setcount1(acount: integer; doinit: boolean); override;
+//   function getcount: integer; override;
+//   procedure setcount1(acount: integer; doinit: boolean); override;
    procedure writeitem(const index: integer; writer: twriter); override;
    procedure readitem(const index: integer; reader: treader); override;
-   function getsize: integer; override;
-   function getdatapo: pointer; override;
-   function getitemspo(const index: integer): pointer; override;
+//   function getsize: integer; override;
+//   function getdatapo: pointer; override;
+//   function getitemspo(const index: integer): pointer; override;
   public
    constructor create(typeinfo: ptypeinfo); reintroduce;
+   property typeinfo: ptypeinfo read ftypeinfo;
    property items[const index: integer]: tintegerset read getitems write setitems; default;
-   procedure getset(const index: integer; out value);
-   procedure setset(const index: integer; const value);
+//   procedure getset(const index: integer; out value);
+//   procedure setset(const index: integer; const value);
  end;
 
  tpersistentarrayprop = class(tarrayprop,iobjectlink)
@@ -1058,27 +1059,28 @@ begin
  ftypeinfo:= typeinfo;
  typedatapo:= gettypedata(ftypeinfo);
  typedatapo:= gettypedata(typedatapo^.comptype{$ifndef FPC}^{$endif});
- fsize:= (typedatapo^.maxvalue - typedatapo^.minvalue) div 8 + 1;
- if fsize > sizeof(tintegerset) then begin
+// fsize:= (typedatapo^.maxvalue - typedatapo^.minvalue) div 8 + 1;
+ if (typedatapo^.maxvalue - typedatapo^.minvalue) div 8 + 1 > 
+                   sizeof(tintegerset) then begin
   raise earrayproperror.Create('set muss <= 32 sein!');
  end;
- {$ifdef FPC}
- fsize:= sizeof(longword);
- {$endif}
+// {$ifdef FPC}
+// fsize:= sizeof(longword);
+// {$endif}
  inherited create;
 end;
-
+{
 function tsetarrayprop.getcount: integer;
 begin
  result:= length(fitems);
 end;
-
+}
 function tsetarrayprop.getitems(const index: integer): tintegerset;
 begin
  checkindex(index);
- result:= fitems[index];
+ result:= tintegerset(fitems[index]);
 end;
-
+{
 function tsetarrayprop.getitemspo(const index: integer): pointer;
 begin
  result:= @fitems[index];
@@ -1100,11 +1102,11 @@ begin
  setlength(fitems,acount);    //immer zuerst!
  inherited;
 end;
-
+}
 procedure tsetarrayprop.setitems(const index: integer; const Value: tintegerset);
 begin
  checkindex(index);
- fitems[index]:= value;
+ fitems[index]:= integer(value);
  change(index);
 end;
 
@@ -1114,8 +1116,8 @@ var
  BaseType: PTypeInfo;
  value: tintegerset;
 begin
- value:= fitems[index];
- BaseType := GetTypeData(ftypeinfo)^.CompType{$ifndef FPC}^{$endif};
+ value:= tintegerset(fitems[index]);
+ basetype := gettypedata(ftypeinfo)^.comptype{$ifndef fpc}^{$endif};
  with twriter1(writer) do begin
  {$ifdef FPC}
   driver.writeset(longint(value),basetype);
@@ -1133,10 +1135,15 @@ end;
 
 procedure tsetarrayprop.readitem(const index: integer; reader: treader);
 begin
- fitems[index]:=
-  tintegerset(treader1(reader).{$ifdef FPC}driver.{$endif}readset(ftypeinfo));
+ {$ifdef FPC}
+ reader.checkvalue(vaset);
+ fitems[index]:= treader1(reader).driver.readset(
+             gettypedata(ftypeinfo)^.comptype{$ifndef fpc}^{$endif});
+ {$else}
+ fitems[index]:= integer(reader.readset(ftypeinfo)));
+ {$endif}
 end;
-
+{
 procedure tsetarrayprop.getset(const index: integer; out value);
 begin
  checkindex(index);
@@ -1149,7 +1156,7 @@ begin
  fillchar(fitems[index],sizeof(tintegerset),0);
  system.move(value,fitems[index],fsize);
 end;
-
+}
 { tpersistentarrayprop }
 
 constructor tpersistentarrayprop.create(itemclasstype: virtualpersistentclassty);

@@ -1453,6 +1453,8 @@ begin
                                tpersistentarraypropertyeditor);
  registerpropertyeditor(tintegerarrayprop.classinfo,nil,'',
                                tintegerarraypropertyeditor);
+ registerpropertyeditor(tsetarrayprop.classinfo,nil,'',
+                               tsetarraypropertyeditor);
  registerpropertyeditor(tcolorarrayprop.classinfo,nil,'',
                                tcolorarraypropertyeditor);
  registerpropertyeditor(trealarrayprop.classinfo,nil,'',

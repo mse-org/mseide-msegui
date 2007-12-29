@@ -54,7 +54,7 @@ type
   function getordvalue(const index: integer = 0): integer;
   procedure setordvalue(const value: longword); overload;
   procedure setordvalue(const index: integer; const value: longword); overload;
-  procedure setbitvalue(const value: boolean; const index: integer);
+  procedure setbitvalue(const value: boolean; const bitindex: integer);
   function getfloatvalue(const index: integer = 0): extended;
   procedure setfloatvalue(const value: extended);
   function getcurrencyvalue(const index: integer = 0): currency;
@@ -94,7 +94,7 @@ type
    function getordvalue(const index: integer = 0): integer;
    procedure setordvalue(const value: longword); overload;
    procedure setordvalue(const index: integer; const value: longword); overload;
-   procedure setbitvalue(const value: boolean; const index: integer);
+   procedure setbitvalue(const value: boolean; const bitindex: integer);
    function getfloatvalue(const index: integer = 0): extended;
    procedure setfloatvalue(const value: extended);
    function getcurrencyvalue(const index: integer = 0): currency;
@@ -469,6 +469,7 @@ type
    function getordvalue(const index: integer = 0): integer;
    procedure setordvalue(const value: longword); overload;
    procedure setordvalue(const index: integer; const value: longword); overload;
+   procedure setbitvalue(const value: boolean; const bitindex: integer);
    function getfloatvalue(const index: integer = 0): extended;
    procedure setfloatvalue(const value: extended);
    function getstringvalue(const index: integer = 0): string;
@@ -482,7 +483,8 @@ type
             aeditorclass: propertyeditorclassty;
             const adesigner: idesigner;
             const aobjectinspector: iobjectinspector;
-            const aprops: propinstancearty; atypinfo: ptypeinfo); reintroduce;
+            const aprops: propinstancearty; atypinfo: ptypeinfo);
+                                                         virtual; reintroduce;
    destructor destroy; override;
    procedure setvalue(const value: msestring); override;
    function getvalue: msestring; override;
@@ -623,6 +625,26 @@ type
  
  tintegerarraypropertyeditor = class(tarraypropertyeditor)
   protected
+   function geteditorclass: propertyeditorclassty; override;
+ end;
+
+ tsetarrayelementeditor = class(tarrayelementeditor)
+  public
+   constructor create(aindex: integer; aparenteditor: tarraypropertyeditor;
+            aeditorclass: propertyeditorclassty;
+            const adesigner: idesigner;
+            const aobjectinspector: iobjectinspector;
+            const aprops: propinstancearty; atypinfo: ptypeinfo); override;
+ end;
+{
+ tsetarrayelementpropertyeditor = class(tsetpropertyeditor)
+  public
+   function subproperties: propertyeditorarty; override;
+ end;
+}
+ tsetarraypropertyeditor = class(tarraypropertyeditor)
+  protected
+   function getelementeditorclass: elementeditorclassty; override;
    function geteditorclass: propertyeditorclassty; override;
  end;
 
@@ -1196,19 +1218,19 @@ begin
  end;
 end;
 
-procedure tpropertyeditor.setbitvalue(const value: boolean; const index: integer);
+procedure tpropertyeditor.setbitvalue(const value: boolean; const bitindex: integer);
 var
  int1: integer;
  wo1: longword;
 begin
  if fremote <> nil then begin
-  fremote.setbitvalue(value,index);
+  fremote.setbitvalue(value,bitindex);
  end
  else begin
   for int1:= 0 to high(fprops) do begin
    with fprops[int1] do begin
     wo1:= getordprop(instance,propinfo);
-    updatebit(wo1,index,value);
+    updatebit(wo1,bitindex,value);
     setordprop(instance,propinfo,wo1);
    end;
   end;
@@ -1766,6 +1788,9 @@ end;
 
 function tsetpropertyeditor.getvalue: msestring;
 begin
+ result:= '['+concatstrings(settostrings(tintegerset(cardinal(getordvalue)),
+      typedata^.comptype),',')+']';
+(*
 {$ifdef FPC}
  result:= '['+concatstrings(settostrings(tintegerset(cardinal(getordvalue)),
       gettypedata(fprops[0].propinfo^.proptype)^.comptype),',')+']';
@@ -1773,6 +1798,7 @@ begin
  result:= '['+concatstrings(settostrings(tintegerset(cardinal(getordvalue)),
       gettypedata(fprops[0].propinfo^.proptype^)^.comptype^),',')+']';
 {$endif}
+*)
 end;
 
 procedure tsetpropertyeditor.setvalue(const value: msestring);
@@ -1789,7 +1815,8 @@ begin
  end;
  ar1:= nil;
  splitstring(str1,ar1,',',true);
- setordvalue(longword(stringstoset(ar1,fprops[0].propinfo^.proptype{$ifndef FPC}^{$endif})));
+ setordvalue(longword(stringstoset(ar1,typedata^.comptype)));
+// setordvalue(longword(stringstoset(ar1,fprops[0].propinfo^.proptype{$ifndef FPC}^{$endif})));
 end;
 
 function tsetpropertyeditor.subproperties: propertyeditorarty;
@@ -1816,6 +1843,7 @@ begin
  findex:= aindex;
  fparenteditor:= aparent;
  inherited create(adesigner,amodule,acomponent,aobjectinspector,aprops,atypeinfo);
+ fremote:= aparent.fremote;
 end;
 
 function tsetelementeditor.getdefaultstate: propertystatesty;
@@ -2505,6 +2533,22 @@ begin
  modified;
 end;
 
+procedure tarrayelementeditor.setbitvalue(const value: boolean;
+               const bitindex: integer);
+var
+ int1: integer;
+ wo1: longword;
+begin
+ for int1:= 0 to high(fprops) do begin
+  with fprops[int1] do begin
+   wo1:= longword(tsetarrayprop(GetOrdProp1(instance,propinfo))[findex]);
+   updatebit(wo1,bitindex,value);
+   tsetarrayprop(GetOrdProp1(instance,propinfo))[findex]:= tintegerset(wo1);
+  end;
+ end;
+ modified;
+end;
+
 function tarrayelementeditor.getfloatvalue(const index: integer = 0): extended;
 begin
  with fprops[index] do begin
@@ -2770,6 +2814,30 @@ end;
 function tintegerarraypropertyeditor.geteditorclass: propertyeditorclassty;
 begin
  result:= tordinalpropertyeditor;
+end;
+
+{ tsetarrayelementeditor }
+
+constructor tsetarrayelementeditor.create(aindex: integer;
+               aparenteditor: tarraypropertyeditor;
+               aeditorclass: propertyeditorclassty; const adesigner: idesigner;
+               const aobjectinspector: iobjectinspector;
+               const aprops: propinstancearty; atypinfo: ptypeinfo);
+begin
+ inherited;
+ feditor.ftypeinfo:= tsetarrayprop(aparenteditor.getordvalue).typeinfo;
+end;
+
+{ tsetarraypropertyeditor }
+
+function tsetarraypropertyeditor.geteditorclass: propertyeditorclassty;
+begin
+ result:= tsetpropertyeditor;
+end;
+
+function tsetarraypropertyeditor.getelementeditorclass: elementeditorclassty;
+begin
+ result:= tsetarrayelementeditor;
 end;
 
 { trealarraypropertyeditor}

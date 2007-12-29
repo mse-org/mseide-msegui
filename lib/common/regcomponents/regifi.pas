@@ -5,7 +5,7 @@ implementation
 uses
  classes,mseifi,msedesignintf,msepropertyeditors,msestrings,msedesigner,
  mseclasses,mseifids,mseifiglob,msegui,typinfo,msesockets,mseifigui,
- mseifilink,msessl;
+ mseifilink,msessl,db;
  
 type
  tmodulelinkitemeditor = class(tclasselementeditor)
@@ -45,7 +45,19 @@ type
   protected
    function geteditorclass: propertyeditorclassty; override;
  end;
-  
+
+ tififieldoptoinselementeditor = class(tsetarrayelementeditor)
+  public
+   function name: msestring; override;
+ end;
+ 
+ tififieldoptionseditor = class(tsetarraypropertyeditor)
+  protected
+   function getelementeditorclass: elementeditorclassty; override;   
+  public 
+   procedure setvalue(const value: msestring); override;
+ end;
+   
 procedure register;
 begin
  registercomponents('Ifi',[tmodulelink,tformlink,
@@ -63,6 +75,8 @@ begin
  registerpropertyeditor(typeinfo(tlinkactions),nil,'',tmodulelinkactionseditor);
  registerpropertyeditor(typeinfo(tvaluewidgetlinks),nil,'',tvaluewidgetlinkseditor);
  registerpropertyeditor(typeinfo(twidget),tvaluewidgetlink,'widget',tifidatawidgeteditor);
+// registerpropertyeditor(typeinfo(tififieldoptions),tifidscontroller,'',
+//                        tififieldoptionseditor);
 end;
 
 { tmodulelinkitemeditor }
@@ -163,6 +177,33 @@ begin
    name:= avalue.name;
   end;
  end; 
+end;
+
+{ tififieldoptionseditor }
+
+function tififieldoptionseditor.getelementeditorclass: elementeditorclassty;
+begin
+ result:= tififieldoptoinselementeditor;
+end;
+
+procedure tififieldoptionseditor.setvalue(const value: msestring);
+begin
+ //readonly
+end;
+
+{ tififieldoptoinselementeditor }
+
+function tififieldoptoinselementeditor.name: msestring;
+var
+ field1: tfield;
+begin
+ field1:= tifidscontroller(fprops[0].instance).getfield(findex);
+ if field1 <> nil then begin
+  result:= field1.fieldname;
+ end
+ else begin
+  result:= inherited name;
+ end;
 end;
 
 initialization
