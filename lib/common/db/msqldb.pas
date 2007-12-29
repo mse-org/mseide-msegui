@@ -1322,8 +1322,8 @@ end;
 
 procedure tcustomsqlconnection.doafterinternalconnect;
 begin
+ inherited;
  if fafterconnect <> nil then begin
-  fconnected:= true; //avoid recursion
   fafterconnect.execute(self);
  end;
 end;

@@ -359,6 +359,8 @@ type
    procedure internalconnect; override;
   public
    constructor create(aowner: tcomponent); override;  
+  published
+   property active;
  end;
      
 procedure checksyserror(const aresult: integer);

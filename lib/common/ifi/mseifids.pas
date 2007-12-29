@@ -146,8 +146,12 @@ type
  end;
  
  tifidataset = class(tdataset,idscontroller,igetdscontroller,
-                                       iifidscontroller)
+                                       iifidscontroller,iifimodulelink)
   private
+//   fifimodulelink: iifimodulelink;
+//   property ifimodulelink: iifimodulelink read fifimodulelink 
+//                                   implements iifimodulelink;
+         //compiler crash
    fstrings: integerarty;
    fmsestrings: integerarty;
    fcontroller: tdscontroller;
@@ -290,6 +294,8 @@ type
    function  getfieldclass(fieldtype: tfieldtype): tfieldclass; override;
    procedure openlocal;
    procedure internalinsert; override;
+   //iifimodulelink
+   procedure connectmodule(const sender: tcustommodulelink);
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -991,6 +997,7 @@ begin
  bookmarksize := sizeof(bufbookmarkty);
  fcontroller:= tdscontroller.create(self,idscontroller(self),-1,false);
  fificontroller:= tifidscontroller.create(self,iifidscontroller(self));
+// fifimoduleink:= iifimodulelink(fificontroller);
 end;
 
 destructor tifidataset.destroy;
@@ -999,6 +1006,11 @@ begin
  inherited;
  fificontroller.free;
 // fobjectlinker.free;
+end;
+
+procedure tifidataset.connectmodule(const sender: tcustommodulelink);
+begin
+ fificontroller.connectmodule(sender);
 end;
 
 function tifidataset.intallocrecord: pintrecordty;

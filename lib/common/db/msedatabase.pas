@@ -321,7 +321,7 @@ end;
 
 procedure tmdatabase.doafterinternalconnect;
 begin
- //dummy
+ fconnected:= true;
 end;
 
 procedure tmdatabase.dobeforeinternaldisconnect;
@@ -374,7 +374,6 @@ begin
   else begin
    if csloading in componentstate then begin
     fopenafterread := false;
-    fconnected:= avalue;
    end
    else begin
     if assigned(onbeforedisconnect) then begin
