@@ -85,9 +85,9 @@ type
                                  const adata: pfielddefsdatadataty);
    procedure dsdatareceived( const asequence: sequencety; 
                                  const adata: pfielddefsdatadataty);
-   procedure fieldrecdatareceived(const adata: pfieldrecdataty);
+//   procedure fieldrecdatareceived(const adata: pfieldrecdataty);
    procedure cancelconnection;
-   function getbindings: integerarty;
+//   function getbindings: integerarty;
    function getmodifiedfields: pbyte;
    procedure initmodifiedfields;
  end;
@@ -108,6 +108,8 @@ type
    fpostsequence: sequencety;
    fpostcode: postresultcodety;
    fpostmessage: msestring;
+   fbindings: integerarty;
+   ffielddefindex: integerarty;
 //   ffieldoptions: tififieldoptions;
    procedure setchannel(const avalue: tcustomiochannel);
 //   procedure setfieldoptions(const avalue: tififieldoptions);
@@ -120,6 +122,7 @@ type
                                        const adata: pfieldrecdataty);
    procedure processdata(const adata: pifirecty);    
    procedure doremotedatachange;
+   function encodefielddefs(const fielddefs: tfielddefs): string;
    procedure postrecord1(const akind: fieldreckindty);
    //iifimodulelink
    procedure connectmodule(const sender: tcustommodulelink);
@@ -223,7 +226,6 @@ type
    function getifistate: ifidsstatesty;
   protected
    ffielddefsequence: sequencety;
-   fbindings: integerarty;
    procedure checkrecno(const avalue: integer);
 
    //iifidscontroller
@@ -235,8 +237,8 @@ type
                                  const adata: pfielddefsdatadataty); virtual;
    procedure dsdatareceived( const asequence: sequencety; 
                                  const adata: pfielddefsdatadataty); virtual;
-   procedure fieldrecdatareceived(const adata: pfieldrecdataty); virtual;
-   function getbindings: integerarty;
+//   procedure fieldrecdatareceived(const adata: pfieldrecdataty); virtual;
+//   function getbindings: integerarty;
    function getmodifiedfields: pbyte;
 
 //   function encoderecords: string;
@@ -384,7 +386,6 @@ type
    procedure setificontroller(const avalue: tifidscontroller);
    procedure initmodifiedfields;   
   protected
-   fbindings: integerarty;
    procedure internalopen; override;
    procedure InternalPost; override;
    function getfieldbuffer(const afield: tfield;
@@ -397,8 +398,8 @@ type
                                  const adata: pfielddefsdatadataty);
    procedure dsdatareceived( const asequence: sequencety; 
                                  const adata: pfielddefsdatadataty);
-   procedure fieldrecdatareceived(const adata: pfieldrecdataty);
-   function getbindings: integerarty;
+//   procedure fieldrecdatareceived(const adata: pfieldrecdataty);
+//   function getbindings: integerarty;
    function getmodifiedfields: pbyte;
    procedure cancelconnection;
    procedure internaledit; override;
@@ -442,37 +443,6 @@ type
  end;
  pfdefdataty = ^fdefdataty;
  
-function encodefielddefs(const fielddefs: tfielddefs; const abindings: integerarty): string;
-var
- int1,int2,int3: integer;
- po1: pchar;
-begin
- int2:= 0;
- int3:= 0;
- for int1:= 0 to fielddefs.count - 1 do begin
-  if abindings[int1] >= 0 then begin
-   int2:= int2 + length(fielddefs[int1].name);
-   inc(int3);
-  end;
- end;
- setlength(result,sizeof(fdefdataty)+int3*sizeof(fdefitemty)+int2*6);
- with pfdefdataty(result)^ do begin
-  count:= int3;
-  po1:= @items;
- end;
- for int1:= 0 to fielddefs.count - 1 do begin
-  if abindings[int1] >= 0 then begin
-   with fielddefs[int1] do begin
-    pfdefitemty(po1)^.datatype:= datatype;
-    pfdefitemty(po1)^.size:= size;
-    po1:= @pfdefitemty(po1)^.name;
-    inc(po1,stringtoifiname(name,pifinamety(po1)));
-   end;
-  end;
- end;
- setlength(result,pointer(po1)-pointer(result));
-end;
-
 function decodefielddefs(const adata: pfdefdataty;
                   const fielddefs: tfielddefs; out asize: integer): boolean;
 var
@@ -598,14 +568,39 @@ begin
  result:= fchannel.synchronizer.waitforanswer(client1,atimeoutus);
 end;
 
-procedure tifidscontroller.postrecord1(const akind: fieldreckindty);
+function tifidscontroller.encodefielddefs(const fielddefs: tfielddefs): string;
+var
+ int1,int2: integer;
+ po1: pchar;
+begin
+ int2:= 0;
+ for int1:= 0 to high(ffielddefindex) do begin
+  int2:= int2 + length(fielddefs[ffielddefindex[int1]].name);
+ end;
+ setlength(result,sizeof(fdefdataty)+length(ffielddefindex)*sizeof(fdefitemty)+
+                              int2*6);
+ with pfdefdataty(result)^ do begin
+  count:= length(ffielddefindex);
+  po1:= @items;
+ end;
+ for int1:= 0 to high(ffielddefindex) do begin
+  with fielddefs[ffielddefindex[int1]] do begin
+   pfdefitemty(po1)^.datatype:= datatype;
+   pfdefitemty(po1)^.size:= size;
+   po1:= @pfdefitemty(po1)^.name;
+   inc(po1,stringtoifiname(name,pifinamety(po1)));
+  end;
+ end;
+ setlength(result,pointer(po1)-pointer(result));
+end;
 
- function encodefdat(const ainfo: fieldinfoty): string;
+procedure tifidscontroller.postrecord1(const akind: fieldreckindty);
+ function encodefdat(const ainfo: fieldinfoty; const aindex: integer): string;
  begin
   result:= encodefielddata(ainfo,sizeof(fielddataheaderty));
   if result <> '' then begin
    with pfielddataty(result)^ do begin
-    header.index:= ainfo.field.fieldno-1;
+    header.index:= aindex;
    end;
   end;   
  end;
@@ -618,6 +613,7 @@ var
  po2: pchar;
  modifiedfields: pbyte;
  fieldinfos1: fieldinfoarty;
+ index1: integer;
  
 begin                 //postrecord
  fieldinfos1:= fintf.getfieldinfos;
@@ -626,9 +622,10 @@ begin                 //postrecord
  int3:= 0;
  if akind <> frk_delete then begin
   modifiedfields:= fintf.getmodifiedfields;
-  for int1:= 0 to high(fieldinfos1) do begin
-   if not getfieldisnull(modifiedfields,int1) then begin
-    ar1[int2]:= encodefdat(fieldinfos1[int1]);
+  for int1:= 0 to high(ffielddefindex) do begin
+   index1:= ffielddefindex[int1];
+   if not getfieldisnull(modifiedfields,index1) then begin
+    ar1[int2]:= encodefdat(fieldinfos1[index1],int1);
     if ar1[int2] <> '' then begin
      inc(int2);
     end;
@@ -725,7 +722,7 @@ var
  str1,str2: ansistring;
  po1: pchar;
 begin
- str2:= encodefielddefs(fintf.getfielddefs,fintf.getbindings);
+ str2:= encodefielddefs(fintf.getfielddefs);
  inititemheader(str1,ik_fielddefsdata,asequence,length(str2),po1); 
  with pfielddefsdatadataty(po1)^ do begin
   move(str2[1],data,length(str2));
@@ -747,7 +744,6 @@ var
  field1: tfield;
  bo1: boolean;
  bm: string;
- bindings1: integerarty; 
 begin
  with fowner do begin
   if active then begin
@@ -757,7 +753,6 @@ begin
     bm:= bookmark;
     include(fistate,ids_remotedata);
     try
-     bindings1:= fintf.getbindings;
      if adata^.kind = frk_delete then begin
       recno:= adata^.recno;
       delete;
@@ -780,9 +775,8 @@ begin
       po1:= @adata^.data;
       for int1:= 0 to adata^.count - 1 do begin
        index1:= pfielddataty(po1)^.header.index;
-       if (index1 >= 0) and (index1 <= high(bindings1)) and 
-                                           (bindings1[index1] >= 0) then begin
-        field1:= fields[bindings1[index1]];
+       if (index1 >= 0) and (index1 <= high(fbindings)) then begin
+        field1:= fields[fbindings[index1]];
         inc(po1,sizeof(mseifi.fielddataty.header));
         case pifidataty(po1)^.header.kind of
          idk_null: begin
@@ -815,8 +809,9 @@ begin
           end;
          end;
         end;
+        setfieldisnull(fintf.getmodifiedfields,ffielddefindex[index1]);
+                     //reset changeflag
        end;
-       setfieldisnull(fintf.getmodifiedfields,index1); //reset changeflag
       end;
       post;
      end;
@@ -970,23 +965,19 @@ var
 var
  int1,int2: integer;
  str1: string;
- bindings1: integerarty;
 begin
- bindings1:= fintf.getbindings;
  setlength(result,16);
  ind1:= 1;
  move(arecordcount,result[1],sizeof(arecordcount));
  inc(ind1,sizeof(arecordcount));
  for int1:= 0 to arecordcount - 1 do begin
-  for int2:= 0 to high(bindings1) do begin
-   if bindings1[int2] >= 0 then begin
-    str1:= encoderecord(int2,abufs[int1]);
-    if ind1 + length(str1) > length(result) then begin
-     setlength(result,length(result)*2+length(str1));
-    end;
-    move(str1[1],result[ind1],length(str1));
-    inc(ind1,length(str1));
+  for int2:= 0 to high(fbindings) do begin
+   str1:= encoderecord(ffielddefindex[int2],abufs[int1]);
+   if ind1 + length(str1) > length(result) then begin
+    setlength(result,length(result)*2+length(str1));
    end;
+   move(str1[1],result[ind1],length(str1));
+   inc(ind1,length(str1));
   end;
  end;
  setlength(result,ind1 - 1);
@@ -1025,8 +1016,28 @@ begin
 end;
 
 procedure tifidscontroller.opened;
+var
+ int1,int2: integer;
+ field1: tfield;
 begin
-// ffieldoptions.count:= fowner.fields.count;
+ with fowner do begin
+  setlength(fbindings,fielddefs.count);
+  setlength(ffielddefindex,fielddefs.count);
+  int2:= 0;
+  for int1:= 0 to high(fbindings) do begin
+   field1:= findfield(fielddefs[int1].name);
+   if (field1 <> nil) and not (pfhidden in field1.providerflags) then begin
+    fbindings[int2]:= field1.index;
+    ffielddefindex[int2]:= int1;
+    inc(int2);
+   end;
+//   else begin
+//    abindings[int2]:= -1;
+//   end;
+  end;
+  setlength(fbindings,int2);
+  setlength(ffielddefindex,int2);
+ end;
 end;
 
 { tifidataset }
@@ -1836,29 +1847,14 @@ begin
 end;
 
 procedure tifidataset.inheritedinternalopen;
-var
- int1: integer;
- field1: tfield;
 begin
  if defaultfields then begin
   createfields;
  end;
  bindfields(true);
  calcrecordsize;
- setlength(fbindings,fielddefs.count);
- for int1:= 0 to high(fbindings) do begin
-  field1:= findfield(fielddefs[int1].name);
-  if (field1 <> nil) and not (pfhidden in field1.providerflags) then begin
-   fbindings[int1]:= field1.index;
-  end
-  else begin
-   fbindings[int1]:= -1;
-  end;
- end;
  fopen:= true;
  fificontroller.opened;
-// fintbuffer:= intallocrecord;
-// fbrecordcount:= 1;
 end;
 
 procedure tifidataset.internalopen;
@@ -2026,6 +2022,7 @@ begin
  fchannel.waitforanswer(asequence,fdefaulttimeout);
 end;
 }
+{
 procedure tifidataset.fieldrecdatareceived(const adata: pfieldrecdataty);
 var
  int1: integer;
@@ -2120,7 +2117,7 @@ begin
   end;
  end;
 end;
-
+}
 procedure tifidataset.inheriteddataevent(const event: tdataevent;
                const info: ptrint);
 begin
@@ -2199,36 +2196,36 @@ var
  str1: string; 
  int1: integer;
 begin
- for int1:= 0 to high(fbindings) do begin
-  if fbindings[int1] >= 0 then begin
-   if pifidataty(adata)^.header.kind <> idk_null then begin
-    unsetfieldisnull(pbyte(@dest^.header.fielddata.nullmask),fbindings[int1]);
-    with ffieldinfos[fbindings[int1]] do begin
-     case fieldtype of 
-      ftinteger: begin
-       inc(adata,decodeifidata(pifidataty(adata),int641));
-       pinteger(pointer(dest)+offset)^:= int641;
-      end;
-      ftlargeint: begin
-       inc(adata,decodeifidata(pifidataty(adata),int641));
-       plargeint(pointer(dest)+offset)^:= int641;
-      end;
-      ftfloat: begin
-       inc(adata,decodeifidata(pifidataty(adata),double1));
-       pdouble(pointer(dest)+offset)^:= double1;
-      end;
-      ftbcd: begin
-       inc(adata,decodeifidata(pifidataty(adata),cur1));
-       pcurrency(pointer(dest)+offset)^:= cur1;
-      end;
-      ftblob,ftgraphic: begin
-       inc(adata,decodeifidata(pifidataty(adata),str1));
-       pstring(pointer(dest)+offset)^:= str1;
-      end;
-      ftstring: begin
-       inc(adata,decodeifidata(pifidataty(adata),mstr1));
-       pmsestring(pointer(dest)+offset)^:= mstr1;
-      end;
+ for int1:= 0 to high(fificontroller.fbindings) do begin
+//  if fificontroller.fbindings[int1] >= 0 then begin
+  if pifidataty(adata)^.header.kind <> idk_null then begin
+   unsetfieldisnull(pbyte(@dest^.header.fielddata.nullmask),
+                                    fificontroller.ffielddefindex[int1]);
+   with ffieldinfos[fificontroller.ffielddefindex[int1]] do begin
+    case fieldtype of 
+     ftinteger: begin
+      inc(adata,decodeifidata(pifidataty(adata),int641));
+      pinteger(pointer(dest)+offset)^:= int641;
+     end;
+     ftlargeint: begin
+      inc(adata,decodeifidata(pifidataty(adata),int641));
+      plargeint(pointer(dest)+offset)^:= int641;
+     end;
+     ftfloat: begin
+      inc(adata,decodeifidata(pifidataty(adata),double1));
+      pdouble(pointer(dest)+offset)^:= double1;
+     end;
+     ftbcd: begin
+      inc(adata,decodeifidata(pifidataty(adata),cur1));
+      pcurrency(pointer(dest)+offset)^:= cur1;
+     end;
+     ftblob,ftgraphic: begin
+      inc(adata,decodeifidata(pifidataty(adata),str1));
+      pstring(pointer(dest)+offset)^:= str1;
+     end;
+     ftstring: begin
+      inc(adata,decodeifidata(pifidataty(adata),mstr1));
+      pmsestring(pointer(dest)+offset)^:= mstr1;
      end;
     end;
    end;
@@ -2299,12 +2296,12 @@ procedure tifidataset.doidleapplyupdates;
 begin
  //dummy
 end;
-
+{
 function tifidataset.getbindings: integerarty;
 begin
  result:= fbindings;
 end;
-
+}
 function tifidataset.getmodifiedfields: pbyte;
 begin
  result:= pointer(fmodifiedfields);
@@ -2411,7 +2408,7 @@ var
  str1,str2,str3: ansistring;
  po1: pchar;
 begin
- str2:= encodefielddefs(fielddefs,fbindings);
+ str2:= fificontroller.encodefielddefs(fielddefs);
  str3:= fificontroller.encoderecords(fbrecordcount,fbufs);
  fificontroller.inititemheader(str1,ik_dsdata,asequence,
                                      length(str2)+length(str3),po1); 
@@ -2448,7 +2445,7 @@ var
  str1,str2,str3: ansistring;
  po1: pchar;
 begin
- str2:= encodefielddefs(fielddefs,fbindings);
+ str2:= fificontroller.encodefielddefs(fielddefs);
  if factindexpo = nil then begin  
   str3:= fificontroller.encoderecords(fbrecordcount,nil);
  end
@@ -2474,11 +2471,11 @@ procedure ttxsqlquery.dsdatareceived(const asequence: sequencety;
                const adata: pfielddefsdatadataty);
 begin
 end;
-
+{
 procedure ttxsqlquery.fieldrecdatareceived(const adata: pfieldrecdataty);
 begin
 end;
-
+}
 function ttxsqlquery.getfielddefs: tfielddefs;
 begin
  result:= fielddefs;
@@ -2490,24 +2487,14 @@ var
  field1: tfield;
 begin
  inherited;
- setlength(fbindings,fielddefs.count);
- for int1:= 0 to high(fbindings) do begin
-  field1:= findfield(fielddefs[int1].name);
-  if (field1 <> nil) and not (pfhidden in field1.providerflags) then begin
-   fbindings[int1]:= field1.index;
-  end
-  else begin
-   fbindings[int1]:= -1;
-  end;
- end;
  fificontroller.opened;
 end;
-
+{
 function ttxsqlquery.getbindings: integerarty;
 begin
  result:= fbindings;
 end;
-
+}
 function ttxsqlquery.getmodifiedfields: pbyte;
 begin
  result:= pointer(fmodifiedfields);
