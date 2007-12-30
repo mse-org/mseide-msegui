@@ -173,7 +173,7 @@ type
    property imagenrdisabled: integer read finfo.imagenrdisabled 
                       write setimagenrdisabled default -2;
    property colorglyph: colorty read finfo.colorglyph write setcolorglyph default cl_glyph;
-   property color: colorty read finfo.color write setcolor default cl_transparent;
+   property color: colorty read finfo.color write setcolor default cl_default;
    property imagecheckedoffset: integer read finfo.imagecheckedoffset write setimagecheckedoffset default 0;
    property hint: msestring read finfo.hint write sethint;
    property tagaction: integer read finfo.tag write settag default 0;
@@ -337,7 +337,7 @@ begin
   imagenrdisabled:= -2;
   options:= aoptions;
   colorglyph:= cl_glyph;
-  color:= cl_transparent;
+  color:= cl_default;
  end;
 end;
 

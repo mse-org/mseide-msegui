@@ -1820,12 +1820,7 @@ begin
  end;
  ar1:= nil;
  splitstring(str1,ar1,',',true);
- {$ifdef FPC}
- setordvalue(longword(stringstoset(ar1,typedata^.comptype)));
- {$else}
- setordvalue(longword(stringstoset(ar1,typedata^.comptype^)));
- {$endif}
-// setordvalue(longword(stringstoset(ar1,fprops[0].propinfo^.proptype{$ifndef FPC}^{$endif})));
+ setordvalue(longword(stringstoset(ar1,ftypeinfo)));
 end;
 
 function tsetpropertyeditor.subproperties: propertyeditorarty;
