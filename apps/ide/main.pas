@@ -520,12 +520,20 @@ begin
      if result = mr_yes then begin
       if projectfilename = '' then begin
        result:= projectfiledialog(str1,true);
+       if result <> mr_ok then begin
+        result:= mr_cancel;
+       end;
       end
       else begin
        str1:= projectfilename;
       end;
       if result <> mr_cancel then begin
        saveproject(str1);
+      end;
+     end
+     else begin
+      if result <> mr_no then begin
+       result:= mr_cancel;
       end;
      end;
      savechecked:= true;
