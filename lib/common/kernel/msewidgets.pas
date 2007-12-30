@@ -905,7 +905,7 @@ function askyesnocancel(const atext: msestring; const caption: msestring = '';
                      const defaultbutton: modalresultty = mr_yes;  
                      const minwidth: integer = 0): modalresultty;
 function confirmsavechangedfile(const filename: filenamety;
-               var modalresult: modalresultty; multiple: boolean = false): boolean;
+               out modalresult: modalresultty; multiple: boolean = false): boolean;
 
 
 procedure copytoclipboard(const value: msestring);
@@ -997,7 +997,7 @@ begin
 end;
 
 function confirmsavechangedfile(const filename: filenamety;
-         var modalresult: modalresultty; multiple: boolean = false): boolean;
+         out modalresult: modalresultty; multiple: boolean = false): boolean;
 begin
  if multiple then begin
   modalresult:= showmessage('File '+filename+' is modified. Save?','Confirmation',
@@ -1006,6 +1006,9 @@ begin
  else begin
   modalresult:= showmessage('File '+filename+' is modified. Save?','Confirmation',
                   [mr_yes,mr_no,mr_cancel],mr_yes);
+ end;
+ if modalresult = mr_windowclosed then begin
+  modalresult:= mr_cancel;
  end;
  result:= modalresult in [mr_yes,mr_all];
 end;
