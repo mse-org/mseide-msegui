@@ -12,10 +12,11 @@ type
  ifireckindty = (ik_none,ik_data,ik_itemheader,ik_actionfired,ik_propertychanged,
                  ik_widgetcommand,ik_widgetproperties,ik_requestmodule,ik_moduledata,
                  ik_requestfielddefs,ik_fielddefsdata,ik_fieldrec,
-                 ik_requestopends,ik_dsdata,ik_postresult);
+                 ik_requestopends,ik_dsdata,ik_postresult,ik_modulecommand);
 const
  ifiitemkinds = [ik_actionfired,ik_propertychanged,ik_widgetcommand,
-                 ik_widgetproperties,ik_requestmodule,ik_moduledata];
+                 ik_widgetproperties,ik_requestmodule,ik_moduledata,
+                 ik_modulecommand];
  mainloopifikinds = [ik_moduledata]; 
  
 type 
@@ -48,7 +49,17 @@ type
   name: ifinamety;
  end;
  pitemheaderty = ^itemheaderty;
-  
+
+ modulecommanddataty = record
+  command: ificommandcodety;
+ end;  
+ pmodulecommanddataty = ^modulecommanddataty;
+ modulecommandty = record
+  header: itemheaderty;
+  data: modulecommanddataty;
+ end;
+ pmodulecommandty = ^modulecommandty;
+ 
  actionfiredty = record
   header: itemheaderty;
  end;
@@ -202,6 +213,9 @@ type
    );
    ik_postresult: (
     postresult: postresultty;
+   );
+   ik_modulecommand: (
+    modulecommand: modulecommandty;
    );
  end;
  pifirecty = ^ifirecty;
@@ -487,7 +501,8 @@ const
   sizeof(ifiheaderty)+sizeof(fieldrecty),        //ik_fieldrec
   sizeof(ifiheaderty)+sizeof(requestopendsty),   //ik_requestopends
   sizeof(ifiheaderty)+sizeof(dsdataty),          //ik_dsdata
-  sizeof(ifiheaderty)+sizeof(postresultty)       //ik_postresult
+  sizeof(ifiheaderty)+sizeof(postresultty),      //ik_postresult
+  sizeof(ifiheaderty)+sizeof(modulecommandty)    //ik_modulecommand
  );
 
  stuffchar = c_dle;

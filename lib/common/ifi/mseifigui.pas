@@ -40,12 +40,12 @@ type
    function getvaluewidgets: tvaluewidgetlinks;
    procedure setvaluewidgets(const avalue: tvaluewidgetlinks);
   protected
-   procedure widgetcommandreceived(const atag: integer; const aname: string;
-                      const acommand: ifiwidgetcommandty);
-   procedure widgetpropertiesreceived(const atag: integer; const aname: string;
-                      const adata: pifibytesty);
-   procedure processdataitem(const adata: pifirecty; var adatapo: pchar;
-                  const atag: integer; const aname: string); override;
+   function widgetcommandreceived(const atag: integer; const aname: string;
+                      const acommand: ifiwidgetcommandty): boolean;
+   function widgetpropertiesreceived(const atag: integer; const aname: string;
+                      const adata: pifibytesty): boolean;
+   function processdataitem(const adata: pifirecty; var adatapo: pchar;
+                  const atag: integer; const aname: string): boolean; override;
    procedure valuechanged(const sender: iifiwidget);
   public
    constructor create(aowner: tcomponent); override;
@@ -211,8 +211,8 @@ begin
  fvalues.assign(avalue);
 end;
 
-procedure tformlink.processdataitem(const adata: pifirecty; 
-           var adatapo: pchar; const atag: integer; const aname: string);
+function tformlink.processdataitem(const adata: pifirecty; 
+           var adatapo: pchar; const atag: integer; const aname: string): boolean;
 var
  command1: ifiwidgetcommandty;
  str2: string;
@@ -221,25 +221,26 @@ begin
   case header.kind of
    ik_widgetcommand: begin
     command1:= pifiwidgetcommandty(adatapo)^;
-    widgetcommandreceived(atag,aname,command1);
+    result:= widgetcommandreceived(atag,aname,command1);
    end;
    ik_widgetproperties: begin
-    widgetpropertiesreceived(atag,aname,pifibytesty(adatapo));     
+    result:= widgetpropertiesreceived(atag,aname,pifibytesty(adatapo));     
    end;
    else begin
-    inherited;
+    result:= inherited processdataitem(adata,adatapo,atag,aname);
    end;
   end;
  end;
 end;
 
-procedure tformlink.widgetcommandreceived(const atag: integer;
-             const aname: string; const acommand: ifiwidgetcommandty);
+function tformlink.widgetcommandreceived(const atag: integer;
+             const aname: string; const acommand: ifiwidgetcommandty): boolean;
 var
  wi1: tvaluewidgetlink;
 begin
  wi1:= tvaluewidgetlink(fvalues.finditem(aname));
- if (wi1 <> nil) and (wi1.fwidget <> nil) then begin
+ result:= wi1 <> nil;
+ if result and (wi1.fwidget <> nil) then begin
   with wi1.widget do begin
    case acommand of
     iwc_enable: begin
@@ -259,14 +260,15 @@ begin
  end;    
 end;
 
-procedure tformlink.widgetpropertiesreceived(const atag: integer;
-                     const aname: string; const adata: pifibytesty);
+function tformlink.widgetpropertiesreceived(const atag: integer;
+                     const aname: string; const adata: pifibytesty): boolean;
 var
  wi1: tvaluewidgetlink;
  stream1: tmemorystream;
 begin
  wi1:= tvaluewidgetlink(fvalues.finditem(aname));
- if (wi1 <> nil) and (wi1.fwidget <> nil) then begin
+ result:= wi1 <> nil;
+ if result and (wi1.fwidget <> nil) then begin
   stream1:= tmemorycopystream.create(@adata^.data,adata^.length);
   try
    stream1.readcomponent(wi1.fwidget);

@@ -14,7 +14,7 @@ unit mseclasses;
 interface
 uses
  classes,mseglob,mseevent,msetypes,msestrings,sysutils,typinfo,mselist,
- msegraphutils;
+ msegraphutils{$ifdef mse_with_ifi},mseifiglob{$endif};
 
 { $define debugobjectlink}
 
@@ -252,7 +252,8 @@ type
 
  createprocty = procedure of object;
 
- tmsecomponent = class(tcomponent,ievent)
+ tmsecomponent = class(tcomponent,ievent
+                  {$ifdef mse_with_ifi},iificommand{$endif})
   private
    procedure readmoduleclassname(reader: treader);
    procedure writemoduleclassname(writer: twriter);
@@ -298,7 +299,10 @@ type
    procedure componentevent(const event: tcomponentevent); virtual;
    procedure doasyncevent(var atag: integer); virtual;
    procedure doafterload; virtual;
-
+   {$ifdef mse_with_ifi}
+   //iificommand
+   procedure executeificommand(var acommand: ificommandcodety); virtual;
+   {$endif}
   public
    destructor destroy; override;
    function loading: boolean;
@@ -2898,6 +2902,13 @@ procedure tmsecomponent.doafterload;
 begin
  //dummy
 end;
+
+{$ifdef mse_with_ifi}
+procedure tmsecomponent.executeificommand(var acommand: ificommandcodety);
+begin
+ //dummy
+end;
+{$endif}
 
 { tlinkedqueue }
 

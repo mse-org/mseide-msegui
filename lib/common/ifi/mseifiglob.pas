@@ -15,6 +15,10 @@ type
   procedure setifiserverintf(const aintf: iifiserver);
   function getifiserverintf: iifiserver;
  end;
- 
+ ificommandcodety = (icc_none,icc_close,icc_release);
+ iificommand = interface(inullinterface)
+                         ['{693DEACE-508E-465F-826A-801C3979C39E}'] 
+  procedure executeificommand(var acommand: ificommandcodety);
+ end;
 implementation
 end.

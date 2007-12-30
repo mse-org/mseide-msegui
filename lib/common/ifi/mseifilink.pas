@@ -103,6 +103,7 @@ type
    fmoduleparentclassname: string;
   public
    procedure sendmodule;
+   procedure close;
   published
    property moduleclassname: string read fmoduleclassname write fmoduleclassname;
    property moduleparentclassname: string read fmoduleparentclassname 
@@ -126,6 +127,7 @@ type
  trxlinkmodule = class(tlinkaction)
   private
    fmodule: tmsecomponent;
+   fcommandintf: iificommand;
    fonmodulereceived: rxlinkmoduleeventty;
    fsequence: sequencety;
   protected
@@ -237,20 +239,29 @@ type
   protected
    fvalues: tvaluelinks;
    function hasconnection: boolean;
+   function encodemodulecommand(const acommand: ificommandcodety;
+               const atag: integer; const aname: string): string;
+   procedure closemodule(const atag: integer; const aname: string);
    function encodeactionfired(const atag: integer; const aname: string): string;
    procedure actionfired(const sender: tlinkaction); virtual;
-   procedure actionreceived(const atag: integer; const aname: string);
-   procedure requestmodulereceived(const atag: integer; const aname: string;
-                                    const asequence: sequencety);
-   procedure moduledatareceived(const atag: integer; const aname: string;
-                   const asequence: sequencety; const adata: pmoduledatadataty);
+   function actionreceived(const atag: integer; const aname: string):boolean;
+   function requestmodulereceived(const atag: integer; const aname: string;
+                                    const asequence: sequencety): boolean;
+   function modulecommandreceived(const atag: integer; const aname: string;
+                   const adata: pmodulecommanddataty): boolean;
+   function moduledatareceived(const atag: integer; const aname: string;
+                   const asequence: sequencety;
+                   const adata: pmoduledatadataty): boolean;
    procedure moduleloaded(const sender: tmsecomponent);
-   procedure propertychangereceived(const atag: integer; const aname: string;
-                      const apropertyname: string; const adata: pifidataty);
+   function propertychangereceived(const atag: integer; const aname: string;
+                      const apropertyname: string; const adata: pifidataty): boolean;
+
    procedure objectevent(const sender: tobject; const event: objecteventty); override;
-   procedure processdataitem(const adata: pifirecty; var adatapo: pchar;
-                  const atag: integer; const aname: string); virtual;
-   procedure processdata(const adata: pifirecty);
+   function processdataitem(const adata: pifirecty; var adatapo: pchar;
+                  const atag: integer; const aname: string): boolean; virtual;
+                  //true if handled
+   function processdata(const adata: pifirecty): boolean;
+             //true if handled
    function senddata(const adata: ansistring): sequencety;
                 //returns sequence number
    procedure receiveevent(const event: tobjectevent); override;
@@ -767,6 +778,31 @@ begin
  end;
 end;
 
+function tcustommodulelink.encodemodulecommand(const acommand: ificommandcodety;
+               const atag: integer; const aname: string): string;
+var
+ po1: pchar;
+begin
+ initifirec(result,ik_modulecommand,0,length(aname),po1);
+ with pmodulecommandty(po1)^ do begin
+  with header do begin
+   tag:= atag;
+   po1:= @name;
+   inc(po1,stringtoifiname(aname,@name));
+  end;
+ end;
+ with pmodulecommanddataty(po1)^ do begin
+  command:= acommand;
+ end;
+end;
+
+procedure tcustommodulelink.closemodule(const atag: integer; const aname: string);
+begin
+ if fchannel <> nil then begin
+  fchannel.senddata(encodemodulecommand(icc_close,atag,aname));
+ end;
+end;
+
 procedure tcustommodulelink.actionfired(const sender: tlinkaction);
 begin
  if fchannel <> nil then begin
@@ -790,6 +826,7 @@ procedure tcustommodulelink.objectevent(const sender: tobject;
                const event: objecteventty);
 var
  po1: pifirecty;
+ str1: string;
 begin
  if (event = oe_dataready) and (sender = fchannel) then begin
   if (length(fchannel.rxdata) >= sizeof(ifiheaderty)) then begin
@@ -798,10 +835,14 @@ begin
     with po1^.header do begin
      if size = length(rxdata) then begin
       if kind in mainloopifikinds then begin
-       application.postevent(tstringobjectevent.create(rxdata,ievent(self)));
+       str1:= rxdata;
+       rxdata:= '';
+       application.postevent(tstringobjectevent.create(str1,ievent(self)));
       end
       else begin
-       processdata(po1);
+       if processdata(po1) then begin
+        rxdata:= '';
+       end;
       end;
      end;
     end;
@@ -810,34 +851,37 @@ begin
  end;
 end;
 
-procedure tcustommodulelink.processdataitem(const adata: pifirecty; 
-           var adatapo: pchar; const atag: integer; const aname: string);
+function tcustommodulelink.processdataitem(const adata: pifirecty; 
+           var adatapo: pchar; const atag: integer; const aname: string): boolean;
 var
  str2: string;
 begin
  with adata^ do begin
   case header.kind of
    ik_actionfired: begin
-    actionreceived(atag,aname);
+    result:= actionreceived(atag,aname);
    end;
    ik_propertychanged: begin
     with propertychanged.header do begin
      inc(adatapo,ifinametostring(pifinamety(adatapo),str2));
-     propertychangereceived(atag,aname,str2,pifidataty(adatapo));
+     result:= propertychangereceived(atag,aname,str2,pifidataty(adatapo));
     end;
    end;
    ik_requestmodule: begin
-    requestmodulereceived(atag,aname,adata^.header.sequence);          
+    result:= requestmodulereceived(atag,aname,adata^.header.sequence);          
    end;
    ik_moduledata: begin
-    moduledatareceived(atag,aname,header.answersequence,
+    result:= moduledatareceived(atag,aname,header.answersequence,
                            pmoduledatadataty(adatapo));
+   end;
+   ik_modulecommand: begin
+    result:= modulecommandreceived(atag,aname,pmodulecommanddataty(adatapo));
    end;
   end;
  end;
 end;
 
-procedure tcustommodulelink.processdata(const adata: pifirecty);
+function tcustommodulelink.processdata(const adata: pifirecty): boolean;
          //todo: optimize link name check
 var 
  tag1: integer;
@@ -845,6 +889,7 @@ var
  po1: pchar;
  ar1: stringarty;
 begin 
+ result:= false;
  with adata^ do begin
   if header.kind in ifiitemkinds then begin
    with itemheader do begin 
@@ -859,8 +904,8 @@ begin
     end;
     str1:= ar1[1];
    end;
-   processdataitem(adata,po1,tag1,str1);
-   if header.answersequence <> 0 then begin
+   result:= processdataitem(adata,po1,tag1,str1);
+   if result and (header.answersequence <> 0) then begin
     channel.synchronizer.answerreceived(header.answersequence);
    end;
   end;
@@ -877,15 +922,17 @@ begin
  end;
 end;
 
-procedure tcustommodulelink.actionreceived(const atag: integer;
-               const aname: string);
+function tcustommodulelink.actionreceived(const atag: integer;
+               const aname: string): boolean;
 var
  act1: trxlinkaction;
  int1: integer;
 begin
+ result:= false;
  with factionsrx do begin
   act1:= trxlinkaction(finditem(aname));
   if act1 <> nil then begin
+   result:= true;
    if assigned(fonexecute) then begin
     fonexecute(act1,atag);
    end;
@@ -898,8 +945,8 @@ begin
  end;
 end;
 
-procedure tcustommodulelink.requestmodulereceived(const atag: integer;
-            const aname: string; const asequence: sequencety);
+function tcustommodulelink.requestmodulereceived(const atag: integer;
+            const aname: string; const asequence: sequencety): boolean;
 var
  mo1: ttxlinkmodule;
  po1: pobjectdataty;
@@ -910,7 +957,8 @@ begin
  debugout(self,'requestmodule '+aname);
  {$endif}
  mo1:= ttxlinkmodule(fmodulestx.finditem(aname));
- if (mo1 <> nil) and (mo1.fmoduleclassname <> '') then begin
+ result:= mo1 <> nil;
+ if result and (mo1.fmoduleclassname <> '') then begin
   po1:= findmoduledata(mo1.fmoduleclassname,str2);
   if mo1.moduleparentclassname <> '' then begin
    str2:= mo1.moduleparentclassname;
@@ -949,8 +997,27 @@ begin
  end;
 end;
 
-procedure tcustommodulelink.moduledatareceived(const atag: integer;
- const aname: string; const asequence: sequencety; const adata: pmoduledatadataty);
+function tcustommodulelink.modulecommandreceived(const atag: integer; 
+                  const aname: string; const adata: pmodulecommanddataty): boolean;
+var
+ mo1: trxlinkmodule;
+begin
+ mo1:= trxlinkmodule(fmodulesrx.finditem(aname));
+ result:= mo1 <> nil;
+ if result then begin
+  with mo1 do begin
+   if fmodule <> nil then begin
+    if fcommandintf <> nil then begin
+     fcommandintf.executeificommand(adata^.command);
+    end;
+   end;
+  end;
+ end;
+end;
+
+function tcustommodulelink.moduledatareceived(const atag: integer;
+ const aname: string; const asequence: sequencety;
+          const adata: pmoduledatadataty): boolean;
 var
  mo1: trxlinkmodule;
  comp1: tmsecomponent;
@@ -964,7 +1031,8 @@ begin
  else begin
   mo1:= trxlinkmodule(fmodulesrx.finditem(aname));
  end;
- if mo1 <> nil then begin
+ result:= mo1 <> nil;
+ if result then begin
   po1:= @adata^.parentclass;
   inc(po1,ifinametostring(pifinamety(po1),str1));
   with mo1 do begin
@@ -973,6 +1041,7 @@ begin
     stream1:= tmemorycopystream.create(@data,length);
     try
      fmodule:= createtmpmodule(str1,stream1,@moduleloaded);
+     fmodule.getcorbainterface(typeinfo(iificommand),fcommandintf);
     finally
      stream1.free;
     end;
@@ -982,14 +1051,15 @@ begin
  end;
 end;
 
-procedure tcustommodulelink.propertychangereceived(const atag: integer;
+function tcustommodulelink.propertychangereceived(const atag: integer;
                      const aname: string; const apropertyname: string;
-                     const adata: pifidataty);
+                     const adata: pifidataty): boolean;
 var
  wi1: tvaluelink;
 begin
  wi1:= tvaluelink(fvalues.finditem(aname));
- if wi1 <> nil then begin
+ result:= wi1 <> nil;
+ if result then begin
   with wi1 do begin
    setdata(adata);
    if assigned(fonpropertychanged) then begin
@@ -1041,6 +1111,11 @@ end;
 procedure ttxlinkmodule.sendmodule;
 begin
  tcustommodulelink(fowner).requestmodulereceived(tag,name,0);
+end;
+
+procedure ttxlinkmodule.close;
+begin
+ tcustommodulelink(fowner).closemodule(tag,name);
 end;
 
 end.

@@ -16,7 +16,7 @@ uses
  msewidgets,msemenus,msegraphics,mseapplication,msegui,msegraphutils,mseevent,
  msetypes,msestrings,mseglob,mseguiglob,
  msemenuwidgets,msestat,msestatfile,mseclasses,Classes,msedock,
- msebitmap;
+ msebitmap{$ifdef mse_with_ifi},mseifiglob{$endif};
 
 type
  formoptionty = (fo_main,fo_terminateonclose,fo_freeonclose,
@@ -164,6 +164,10 @@ type
    function getplacementrect: rectty;
    function getminimizedsize(out apos: captionposty): sizety;
    procedure doafterload; override;
+   //iificommand
+   {$ifdef mse_with_ifi}
+   procedure executeificommand(var acommand: ificommandcodety); override;
+   {$endif}
   public
    constructor create(aowner: tcomponent); overload; override;
    constructor create(aowner: tcomponent; load: boolean); reintroduce; overload;  virtual;
@@ -616,27 +620,6 @@ begin
  end;
 end;
 
-procedure tcustommseform.registerhandlers;
-begin
- application.registeronterminated({$ifdef FPC}@{$endif}doterminated);
- application.registeronterminate({$ifdef FPC}@{$endif}doterminatequery);
- application.registeronidle({$ifdef FPC}@{$endif}doidle);
- application.registeronactivechanged({$ifdef FPC}@{$endif}dowindowactivechanged);
- application.registeronwindowdestroyed({$ifdef FPC}@{$endif}dowindowdestroyed);
- application.registeronapplicationactivechanged(
-       {$ifdef FPC}@{$endif}doapplicationactivechanged);
-end;
- 
-
-procedure tcustommseform.doafterload;
-begin
- if (fstatfile <> nil) and (fo_autoreadstat in foptions) then begin
-  fstatfile.readstat;
- end;
- registerhandlers;
- doonloaded;
-end;
-
 constructor tcustommseform.create(aowner: tcomponent);
 begin
  create(aowner,not (cs_noload in fmsecomponentstate));
@@ -672,6 +655,39 @@ begin
   fondestroy(self);
  end;
 end;
+
+procedure tcustommseform.registerhandlers;
+begin
+ application.registeronterminated({$ifdef FPC}@{$endif}doterminated);
+ application.registeronterminate({$ifdef FPC}@{$endif}doterminatequery);
+ application.registeronidle({$ifdef FPC}@{$endif}doidle);
+ application.registeronactivechanged({$ifdef FPC}@{$endif}dowindowactivechanged);
+ application.registeronwindowdestroyed({$ifdef FPC}@{$endif}dowindowdestroyed);
+ application.registeronapplicationactivechanged(
+       {$ifdef FPC}@{$endif}doapplicationactivechanged);
+end;
+ 
+
+procedure tcustommseform.doafterload;
+begin
+ if (fstatfile <> nil) and (fo_autoreadstat in foptions) then begin
+  fstatfile.readstat;
+ end;
+ registerhandlers;
+ doonloaded;
+end;
+
+{$ifdef mse_with_ifi}
+procedure tcustommseform.executeificommand(var acommand: ificommandcodety);
+begin
+ inherited;
+ case acommand of
+  icc_close: begin
+   close;
+  end;
+ end;
+end;
+{$endif}
 
 function tcustommseform.canclose(const newfocus: twidget): boolean;
 var

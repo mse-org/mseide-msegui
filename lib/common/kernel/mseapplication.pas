@@ -12,7 +12,8 @@ unit mseapplication;
 interface
 uses
  classes,mseclasses,mseevent,mseglob,sysutils,msetypes,mselist,
-     msethread,msesys,mseguithread,msestrings;
+     msethread,msesys,mseguithread,msestrings
+     {$ifdef mse_with_ifi},mseifiglob{$endif};
  
 type
  activatoroptionty = (avo_activateonloaded,avo_activatedelayed,
@@ -53,6 +54,9 @@ type
    procedure objectevent(const sender: tobject;
                           const event: objecteventty); override;
    procedure receiveevent(const event: tobjectevent); override;
+   {$ifdef mse_with_ifi}
+   procedure executeificommand(var acommand: ificommandcodety); override;
+   {$endif}
   public
    procedure release; virtual;
    function releasing: boolean;
@@ -360,6 +364,17 @@ begin
   end;
  end;
 end;
+{$ifdef mse_with_ifi}
+procedure tactcomponent.executeificommand(var acommand: ificommandcodety);
+begin
+ inherited;
+ case acommand of 
+  icc_release: begin
+   release;
+  end;
+ end;
+end;
+{$endif}
 
 { tactivator }
 
