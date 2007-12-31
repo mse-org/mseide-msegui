@@ -36,7 +36,7 @@ type
                 ek_keypress,ek_keyrelease,ek_timer,ek_wakeup,
                 ek_release,ek_childscaled,ek_resize,
                 ek_dropdown,ek_async,ek_execute,ek_component,
-                ek_dbedit,ek_dbupdaterowdata,ek_data,ek_objectdata,
+                ek_dbedit,ek_dbupdaterowdata,ek_data,ek_objectdata,ek_mse,
                 ek_user);
 const
  mouseregionevents = [ek_mousepark,ek_mouseenter,ek_mouseleave,

@@ -271,6 +271,7 @@ function startsstr(const substring,s: string): boolean; overload;
 function msestartsstr(substring,s: pmsechar): boolean; overload;
 function msestartsstr(const substring,s: msestring): boolean; overload;
 
+function isnullstring(const s: ansistring): boolean;
 function isemptystring(const s: pchar): boolean; overload;
 function isemptystring(const s: pmsechar): boolean; overload;
 function isnamechar(achar: char): boolean; overload;
@@ -3482,6 +3483,19 @@ begin
  end
  else begin
   result:= smallint(wo1);
+ end;
+end;
+
+function isnullstring(const s: ansistring): boolean;
+var
+ int1: integer;
+begin
+ result:= true;
+ for int1:= 1 to length(s) do begin
+  if s[int1] <> #0 then begin
+   result:= false;
+   break;
+  end;
  end;
 end;
 

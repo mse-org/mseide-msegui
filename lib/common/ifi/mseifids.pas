@@ -72,7 +72,7 @@ type
  ifidsstatety = (ids_openpending,ids_fielddefsreceived,ids_remotedata,
                  ids_updating,ids_append,ids_sendpostresult,ids_postpending);
  ifidsstatesty = set of ifidsstatety;
- ifidsoptionty = (idso_useclientchannel); 
+ ifidsoptionty = (idso_useclientchannel,idso_postecho); 
  ifidsoptionsty = set of ifidsoptionty;
 const 
  defaultifidsoptions = [idso_useclientchannel];
@@ -85,16 +85,23 @@ type
                                  const adata: pfielddefsdatadataty);
    procedure dsdatareceived( const asequence: sequencety; 
                                  const adata: pfielddefsdatadataty);
-//   procedure fieldrecdatareceived(const adata: pfieldrecdataty);
    procedure cancelconnection;
-//   function getbindings: integerarty;
-   function getmodifiedfields: pbyte;
+   function getmodifiedfields: string;
    procedure initmodifiedfields;
  end;
 
  tififieldoptions = class(tsetarrayprop)
  end;
- 
+
+ tpostechoevent = class(tobjectevent)
+  private
+   fmodifiedfields: string;
+   fbookmark: string;
+  public
+   constructor create(const amodifiedfields: string; const abookmark:string;
+                      const dest: ievent);
+ end;
+  
  tifidscontroller = class(teventpersistent,iifimodulelink)
   private
    fowner: tdataset;
@@ -123,7 +130,9 @@ type
    procedure processdata(const adata: pifirecty);    
    procedure doremotedatachange;
    function encodefielddefs(const fielddefs: tfielddefs): string;
-   procedure postrecord1(const akind: fieldreckindty);
+   procedure postrecord1(const akind: fieldreckindty;
+                                   const amodifiedfields: ansistring);
+   procedure receiveevent(const event: tobjectevent); override;
    //iifimodulelink
    procedure connectmodule(const sender: tcustommodulelink);
   public
@@ -237,12 +246,8 @@ type
                                  const adata: pfielddefsdatadataty); virtual;
    procedure dsdatareceived( const asequence: sequencety; 
                                  const adata: pfielddefsdatadataty); virtual;
-//   procedure fieldrecdatareceived(const adata: pfieldrecdataty); virtual;
-//   function getbindings: integerarty;
-   function getmodifiedfields: pbyte;
+   function getmodifiedfields: string;
 
-//   function encoderecords: string;
-//   function encoderecord(const aindex: integer; const recpo: pintrecordty): string;
    procedure decoderecord(var adata: pointer; const dest: pintrecordty);
    function decoderecords(const adata: precdataty; out asize: integer): boolean;
    
@@ -253,7 +258,6 @@ type
    procedure FreeRecordBuffer(var Buffer: PChar); override;
    procedure GetBookmarkData(Buffer: PChar; Data: Pointer); override;
    function GetBookmarkFlag(Buffer: PChar): TBookmarkFlag; override;
-//   function GetDataSource: TDataSource; override;
    function GetRecord(Buffer: PChar; GetMode: TGetMode;
                                 DoCheck: Boolean): TGetResult; override;
    function GetRecordSize: Word; override;
@@ -398,9 +402,7 @@ type
                                  const adata: pfielddefsdatadataty);
    procedure dsdatareceived( const asequence: sequencety; 
                                  const adata: pfielddefsdatadataty);
-//   procedure fieldrecdatareceived(const adata: pfieldrecdataty);
-//   function getbindings: integerarty;
-   function getmodifiedfields: pbyte;
+   function getmodifiedfields: string;
    procedure cancelconnection;
    procedure internaledit; override;
    procedure inheritedinternalinsert; override;
@@ -516,6 +518,16 @@ begin
  end;
 end;
 
+{ tpostechoevent }
+
+constructor tpostechoevent.create(const amodifiedfields: string;
+               const abookmark: string; const dest: ievent);
+begin
+ fmodifiedfields:= amodifiedfields;
+ fbookmark:= abookmark;
+ inherited create(ek_mse,dest);
+end;
+
 { tifidscontroller }
 
 constructor tifidscontroller.create(const aowner: tdataset;
@@ -594,7 +606,8 @@ begin
  setlength(result,pointer(po1)-pointer(result));
 end;
 
-procedure tifidscontroller.postrecord1(const akind: fieldreckindty);
+procedure tifidscontroller.postrecord1(const akind: fieldreckindty;
+                                       const amodifiedfields: ansistring);
  function encodefdat(const ainfo: fieldinfoty; const aindex: integer): string;
  begin
   result:= encodefielddata(ainfo,sizeof(fielddataheaderty));
@@ -621,7 +634,7 @@ begin                 //postrecord
  int2:= 0;
  int3:= 0;
  if akind <> frk_delete then begin
-  modifiedfields:= fintf.getmodifiedfields;
+  modifiedfields:= pbyte(amodifiedfields);
   for int1:= 0 to high(ffielddefindex) do begin
    index1:= ffielddefindex[int1];
    if not getfieldisnull(modifiedfields,index1) then begin
@@ -673,10 +686,10 @@ procedure tifidscontroller.post;
 begin
  if fistate * [ids_remotedata,ids_updating] = [] then begin
   if fowner.state = dsinsert then begin
-   postrecord1(frk_insert);
+   postrecord1(frk_insert,fintf.getmodifiedfields);
   end
   else begin
-   postrecord1(frk_edit);
+   postrecord1(frk_edit,fintf.getmodifiedfields);
   end;
   exclude(fistate,ids_append);
   fintf.initmodifiedfields;
@@ -686,7 +699,7 @@ end;
 procedure tifidscontroller.delete;
 begin
  if fistate * [ids_remotedata,ids_updating] = [] then begin
-  postrecord1(frk_delete);
+  postrecord1(frk_delete,'');
   fintf.initmodifiedfields;
  end;
 end;
@@ -730,6 +743,23 @@ begin
  senddata(str1);
 end;
 
+procedure tifidscontroller.receiveevent(const event: tobjectevent);
+var
+ bm1: ansistring;
+begin
+ if (event.kind = ek_mse) and (event is tpostechoevent) then begin
+  with fowner,tpostechoevent(event) do begin
+   bm1:= bookmark;
+   try
+    bookmark:= fbookmark;
+    postrecord1(frk_edit,fmodifiedfields);
+   except
+   end;
+   bookmark:= bm1; 
+  end;
+ end;
+end;
+
 procedure tifidscontroller.processfieldrecdata(const asequence: sequencety;
                                                    const adata: pfieldrecdataty);
 var
@@ -743,7 +773,7 @@ var
  str1: string; 
  field1: tfield;
  bo1: boolean;
- bm: string;
+ bm: ansistring;
 begin
  with fowner do begin
   if active then begin
@@ -809,11 +839,20 @@ begin
           end;
          end;
         end;
-        setfieldisnull(fintf.getmodifiedfields,ffielddefindex[index1]);
+        setfieldisnull(pbyte(fintf.getmodifiedfields),ffielddefindex[index1]);
                      //reset changeflag
        end;
       end;
+      fintf.initmodifiedfields; //init for postecho
       post;
+     end;
+     if (idso_postecho in foptions) and 
+            (adata^.kind in [frk_insert,frk_edit]) then begin
+      str1:= fintf.getmodifiedfields;
+      if not isnullstring(str1) then begin
+       application.postevent(tpostechoevent.create(str1,bookmark,
+                                    ievent(self)));      
+      end;
      end;
      doremotedatachange;
     finally
@@ -841,8 +880,6 @@ begin
    end;
   end;
  end;
- 
-// fintf.fieldrecdatareceived(adata);
 end;
 
 procedure tifidscontroller.processdata(const adata: pifirecty);
@@ -2302,9 +2339,9 @@ begin
  result:= fbindings;
 end;
 }
-function tifidataset.getmodifiedfields: pbyte;
+function tifidataset.getmodifiedfields: string;
 begin
- result:= pointer(fmodifiedfields);
+ result:= fmodifiedfields;
 end;
 
 function tifidataset.getifistate: ifidsstatesty;
@@ -2489,15 +2526,10 @@ begin
  inherited;
  fificontroller.opened;
 end;
-{
-function ttxsqlquery.getbindings: integerarty;
+
+function ttxsqlquery.getmodifiedfields: string;
 begin
- result:= fbindings;
-end;
-}
-function ttxsqlquery.getmodifiedfields: pbyte;
-begin
- result:= pointer(fmodifiedfields);
+ result:= fmodifiedfields;
 end;
 
 procedure ttxsqlquery.initmodifiedfields;
