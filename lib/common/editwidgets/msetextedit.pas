@@ -111,7 +111,7 @@ type
    procedure setupeditor; override;
    procedure dofontheightdelta(var delta: integer); override;
 
-    //igridwidget
+   //igridwidget
    procedure setfirstclick;
    function createdatalist(const sender: twidgetcol): tdatalist; virtual;
    function getdatatyp: datatypty; virtual;
@@ -131,7 +131,7 @@ type
    procedure statdataread; virtual;
    procedure griddatasourcechanged;
 
-    //istatfile
+   //istatfile
    procedure dostatread(const reader: tstatreader);
    procedure dostatwrite(const writer: tstatwriter);
    procedure statreading;
@@ -1242,8 +1242,13 @@ begin
      if dir = gd_left then begin
       if editpos.row > 0 then begin
        int1:= length(flines[editpos.row-1]);
-       if eas_delete in state then begin
-        deletetext(makegridcoord(0,editpos.row),makegridcoord(int1,editpos.row-1));
+       if (eas_delete in state) then begin
+        if hasselection then begin 
+         deleteselection
+        end
+        else begin
+         deletetext(makegridcoord(0,editpos.row),makegridcoord(int1,editpos.row-1));
+        end;
        end
        else begin
         seteditpos(makegridcoord(int1,editpos.row - 1),state = [eas_shift]);
