@@ -247,6 +247,7 @@ type
    function isutf8: boolean;
    procedure next;
    procedure refresh;
+   function rowsreturned: integer; //-1 if not supported
 //   procedure asvariant(out avalue: variant); overload; //internal compiler error
    function asvariant: variant; 
           //value of first field of first row, empty variant returned for null fields
@@ -1200,6 +1201,16 @@ begin
    next;
   end;
   setlength(result,int2);
+ end;
+end;
+
+function tsqlresult.rowsreturned: integer;
+begin
+ if active then begin
+  result:= fcursor.frowsreturned;
+ end
+ else begin
+  result:= -1
  end;
 end;
 
