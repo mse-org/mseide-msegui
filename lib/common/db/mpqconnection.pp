@@ -1,6 +1,6 @@
 {
     Copyright (c) 2004 by Joost van der Sluis
-    Modified 2006-2007 by Martin Schreiber
+    Modified 2006-2008 by Martin Schreiber
     
     See the file COPYING.FPC, included in this distribution,
     for details about the copyright.
@@ -555,7 +555,7 @@ procedure TPQConnection.FreeFldBuffers(cursor : TSQLCursor);
 begin
 // Do nothing
 end;
-
+var testvar: pchar;
 procedure TPQConnection.Execute(const cursor: TSQLCursor; 
            const atransaction: tsqltransaction; const AParams : TmseParams);
 
@@ -568,6 +568,8 @@ var
 
 begin
  with TPQCursor(cursor) do begin
+  frowsreturned:= -1;
+  frowsaffected:= -1;
   if FStatementType in [stInsert,stUpdate,stDelete,stSelect] then begin
    if Assigned(AParams) and (AParams.count > 0) then begin
     setlength(ar,Aparams.count);
@@ -604,7 +606,7 @@ begin
     end;
    end
    else begin
-    res := PQexecPrepared(tr.fconn,pchar('prepst'+nr),0,nil,nil,nil,1);
+    res:= PQexecPrepared(tr.fconn,pchar('prepst'+nr),0,nil,nil,nil,1);
    end;
   end
   else begin
@@ -618,6 +620,8 @@ begin
    res:= pqexec(tr.fconn,pchar(s));
   end;
   checkerror(tr.fconn,res,'Execution of query failed');
+  frowsreturned:= pqntuples(res);
+  frowsaffected:= strtointdef(pqcmdtuples(res),-1);
   fopen:= true;
  end;
 end;

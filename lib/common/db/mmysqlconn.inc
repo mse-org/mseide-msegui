@@ -1,4 +1,4 @@
-{Modified 2006-2007 by Martin Schreiber}
+{Modified 2006-2008 by Martin Schreiber}
 
 {$ifdef VER2_1_5} {$define mse_FPC_2_2} {$endif}
 {$ifdef VER2_2} {$define mse_FPC_2_2} {$endif}
@@ -63,7 +63,7 @@ Type
     FNeedData : Boolean;
     fstatementm: msestring;
     Row : MYSQL_ROW;
-    RowsAffected : QWord;
+//    RowsAffected : QWord;
     LastInsertID : QWord;
     ParamBinding : TParamBinding;
     ParamReplaceString : String;
@@ -435,6 +435,8 @@ var
  par1: tparam;
 begin
   C:= TCursorName(cursor);
+  c.frowsaffected:= -1;
+  c.frowsreturned:= -1;
   freeresultbuffer(c);
   if Assigned(AParams) and (aparams.count > 0) then begin
    str1:= todbstring(aparams.expandvalues(c.fstatementm,
@@ -447,10 +449,14 @@ begin
    checkerror(Format(SErrExecuting,[StrPas(mysql_error(FMySQL))]))
   end
   else begin
-   C.RowsAffected := mysql_affected_rows(FMYSQL);
+   C.fRowsAffected := mysql_affected_rows(FMYSQL);
    C.LastInsertID := mysql_insert_id(FMYSQL);
    if C.FNeedData then begin
     C.FRes:= mysql_store_result(FMySQL);
+    c.frowsreturned:= mysql_num_rows(c.fres);
+   end
+   else begin
+    c.frowsreturned:= 0;
    end;
   end;
 end;

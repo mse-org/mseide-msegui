@@ -1,6 +1,6 @@
 {
     Copyright (c) 2004 by Joost van der Sluis
-    Modified 2006-2007 by Martin Schreiber
+    Modified 2006-2008 by Martin Schreiber
     
     See the file COPYING.FPC, included in this distribution,
     for details about the copyright.

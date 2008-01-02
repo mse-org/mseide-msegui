@@ -1,6 +1,6 @@
 {
     Copyright (c) 2004 by Joost van der Sluis
-    Modified 2006-2007 by Martin Schreiber
+    Modified 2006-2008 by Martin Schreiber
 
     SQL database & dataset
 
@@ -73,6 +73,8 @@ type
     FStatementType : TStatementType;
     ftrans: pointer;
     fname: ansistring;
+    frowsaffected: integer;
+    frowsreturned: integer;
 //    property query: tsqlquery read fquery;
     constructor create(const aowner: icursorclient; const aname: ansistring);
                    //aowner can be nil
@@ -201,9 +203,9 @@ type
     function identquotechar: ansistring; virtual;
     procedure beginupdate; virtual;
     procedure endupdate; virtual;
-    Procedure internalExecuteDirect(const aSQL: mseString;
+    function internalExecuteDirect(const aSQL: mseString;
           ATransaction: TSQLTransaction;
-          const aparams: tmseparams; aparamvars: array of variant);
+          const aparams: tmseparams; aparamvars: array of variant): integer;
    //idbcontroller
    procedure setinheritedconnected(const avalue: boolean);
    function readsequence(const sequencename: string): string; virtual;
@@ -244,13 +246,14 @@ type
     procedure StartTransaction; override;
     procedure EndTransaction; override;
     property ConnOptions: sqlconnoptionsty read FConnOptions;
-    procedure executedirect(const asql: msestring); overload;
-    procedure executedirect(const asql: msestring;
+    function executedirect(const asql: msestring): integer; overload;
+               //returns rowsaffected or -1 if not supported
+    function executedirect(const asql: msestring;
          atransaction: tsqltransaction;
-         const aparams: tmseparams = nil); overload;
-    Procedure ExecuteDirect(const aSQL: mseString;
+         const aparams: tmseparams = nil): integer; overload;
+    function ExecuteDirect(const aSQL: mseString;
           ATransaction: TSQLTransaction;
-          const aparams: array of variant); overload;
+          const aparams: array of variant): integer; overload;
     procedure GetTableNames(List : TStrings; SystemTables : Boolean = false); virtual;
     procedure GetProcedureNames(List : TStrings); virtual;
     procedure GetFieldNames(const TableName : string; List :  TStrings); virtual;
@@ -593,7 +596,8 @@ type
     procedure Prepare; virtual;
     procedure UnPrepare; virtual;
     procedure ExecSQL; virtual;
-    procedure executedirect(const asql: string); //uses transaction of tsqlquery
+    function rowsreturned: integer; //-1 if not supported
+    function executedirect(const asql: string): integer; //uses transaction of tsqlquery
     procedure SetSchemaInfo( SchemaType : TSchemaType; SchemaObjectName, SchemaPattern : string); virtual;
     function CreateBlobStream(Field: TField; Mode: TBlobStreamMode): TStream; override;
     property Prepared : boolean read IsPrepared;
@@ -1126,14 +1130,14 @@ begin
     Transaction.EndTransaction;
 end;
 
-procedure tcustomsqlconnection.executedirect(const asql: msestring);
+function tcustomsqlconnection.executedirect(const asql: msestring): integer;
 begin
- executedirect(asql,ftransaction);
+ result:= executedirect(asql,ftransaction);
 end;
 
-Procedure tcustomsqlconnection.internalExecuteDirect(const aSQL: mseString;
+function tcustomsqlconnection.internalExecuteDirect(const aSQL: mseString;
           ATransaction: TSQLTransaction;
-          const aparams: tmseparams; aparamvars: array of variant);
+          const aparams: tmseparams; aparamvars: array of variant): integer;
 var 
  Cursor: TSQLCursor;
  params1: tmseparams;
@@ -1173,6 +1177,7 @@ begin
    cursor.ftrans:= atransaction.handle;
    try    
     execute(cursor,atransaction,params1);
+    result:= cursor.frowsaffected;
    finally
     UnPrepareStatement(Cursor);
    end;
@@ -1186,18 +1191,18 @@ begin
  end;
 end;
 
-Procedure tcustomsqlconnection.ExecuteDirect(const aSQL: mseString;
+function tcustomsqlconnection.ExecuteDirect(const aSQL: mseString;
           ATransaction: TSQLTransaction;
-          const aparams: tmseparams = nil);
+          const aparams: tmseparams = nil): integer;
 begin
- internalexecutedirect(asql,atransaction,aparams,[]);
+ result:= internalexecutedirect(asql,atransaction,aparams,[]);
 end;
 
-Procedure tcustomsqlconnection.ExecuteDirect(const aSQL: mseString;
+function tcustomsqlconnection.ExecuteDirect(const aSQL: mseString;
           ATransaction: TSQLTransaction;
-          const aparams: array of variant);
+          const aparams: array of variant): integer;
 begin
- internalexecutedirect(asql,atransaction,nil,aparams);
+ result:= internalexecutedirect(asql,atransaction,nil,aparams);
 end;
 
 procedure tcustomsqlconnection.GetDBInfo(const SchemaType : TSchemaType; 
@@ -3148,10 +3153,10 @@ begin
  end;
 end;
 }
-procedure TSQLQuery.executedirect(const asql: string);
+function TSQLQuery.executedirect(const asql: string): integer;
 begin
  checkdatabase(name,fdatabase);
- database.executedirect(asql,tsqltransaction(transaction)); 
+ result:= database.executedirect(asql,tsqltransaction(transaction)); 
 end;
 
 procedure TSQLQuery.setparams(const avalue: TmseParams);
@@ -3296,12 +3301,24 @@ begin
  end;
 end;
 
+function TSQLQuery.rowsreturned: integer;
+begin
+ if active then begin
+  result:= fcursor.frowsreturned;
+ end
+ else begin
+  result:= -1;
+ end;
+end;
+
 { TSQLCursor }
 
 constructor TSQLCursor.create(const aowner: icursorclient; const aname: ansistring);
 begin
  fowner:= aowner;
  fname:= aname;
+ frowsaffected:= -1;
+ frowsreturned:= -1; 
  inherited create;
 end;
 

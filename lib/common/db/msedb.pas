@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 2004-2007 by Martin Schreiber
+{ MSEgui Copyright (c) 2004-2008 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -839,7 +839,7 @@ type
   function readsequence(const sequencename: string): string;
   function writesequence(const sequencename: string;
                     const avalue: largeint): string;
-  procedure ExecuteDirect(const SQL : mseString);
+  function ExecuteDirect(const SQL : mseString): integer;
   procedure updateutf8(var autf8: boolean);
  end;
    

@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 2007 by Martin Schreiber
+{ MSEgui Copyright (c) 2007-2008 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -497,6 +497,8 @@ var
  wo1: word;
 begin
  with tsqlite3cursor(cursor) do begin
+  frowsaffected:= -1;
+  frowsreturned:= -1;
   if aparams <> nil then begin
    for int1:= 0 to high(fparambinding) do begin
     with aparams[fparambinding[int1]] do begin
@@ -551,9 +553,10 @@ begin
    fstate:= sqliteerrormax; //first row
    fopen:= true;
   end
-  else begin
+  else begin   
    resetstatement(fstatement);
   end;
+  frowsaffected:= sqlite3_changes(fhandle);
  end;
 end;
 
