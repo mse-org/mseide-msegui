@@ -2158,8 +2158,8 @@ end;
 
 procedure titemedit.clientrectchanged;
 begin
- inherited;
  updatelayout;
+ inherited;
 end;
 
 procedure titemedit.doitembuttonpress(var info: mouseeventinfoty);
