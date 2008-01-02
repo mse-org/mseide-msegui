@@ -464,6 +464,8 @@ type
    procedure unprepare;
    procedure execute; overload;
    procedure execute(const aparams: array of variant); overload;
+   function rowsaffected: integer;
+                  //-1 if not supported
   published
    property statementtype : tstatementtype read fstatementtype write fstatementtype;
  end;
@@ -3737,6 +3739,16 @@ begin
   fparams[int1].value:= aparams[int1];
  end;
  execute;
+end;
+
+function tsqlstatement.rowsaffected: integer;
+begin
+ if fcursor = nil then begin
+  result:= -1;
+ end
+ else begin
+  result:= fcursor.frowsaffected;
+ end;
 end;
 
 { tmsemasterparamsdatalink }
