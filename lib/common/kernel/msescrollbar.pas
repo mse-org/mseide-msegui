@@ -34,7 +34,9 @@ const
 
 type
  scrollbaroptionty = (sbo_thumbtrack,sbo_moveauto,sbo_showauto,sbo_show,
-                      sbo_opposite,sbo_valuekeys,sbo_flat,sbo_noanim);
+                      sbo_opposite,sbo_valuekeys,sbo_noarrowkeys,sbo_nopagekeys,
+                      sbo_noreflectedclick,
+                      sbo_flat,sbo_noanim);
                        //sbo_valuekeys -> pageup = valueincrement
  scrollbaroptionsty = set of scrollbaroptionty;
 
@@ -158,7 +160,8 @@ type
               ondimchanged: objectprocty = nil); reintroduce; virtual;
    destructor destroy; override;
    procedure checktemplate(const sender: tobject);
-   procedure paint(const canvas: tcanvas); virtual;
+   procedure paint(const canvas: tcanvas; const acolor: colorty = cl_none); virtual;
+                       //color <> cl_none -> flat paint for grid cell
    function wantmouseevent(const apos: pointty): boolean;
    procedure mouseevent(var info: mouseeventinfoty);
    procedure keydown(var info: keyeventinfoty);
@@ -582,17 +585,24 @@ begin
  canvas.subcliprect(fdrawinfo.scrollrect); //!!!!todo transparent colors
 end;
 }
-procedure tcustomscrollbar.paint(const canvas: tcanvas);
+procedure tcustomscrollbar.paint(const canvas: tcanvas; 
+                                           const acolor: colorty = cl_none);
 var
-// bu1: scrollbarareaty;
  col1: colorty;
+ statebefore: shapestatesty;
 begin
  with canvas,self.fdrawinfo do begin
   save;
   areas[sbbu_up].face:= ffaceendbutton;
   areas[sbbu_down].face:= ffaceendbutton;
   areas[sbbu_move].face:= ffacebutton;
-  col1:= fintf.translatecolor(fcolor);
+  if acolor = cl_none then begin
+   col1:= fcolor;
+  end
+  else begin
+   col1:= acolor;
+  end;
+  col1:= fintf.translatecolor(col1);
   color:= col1;
   fpaintedbutton:= firstbutton;
   while fpaintedbutton <= lastbutton do begin
@@ -619,7 +629,16 @@ begin
      end;
     end;
    end;    
+   if acolor <> cl_none then begin
+    with areas[fpaintedbutton] do begin
+     statebefore:= state;
+     state:= state - [ss_mouse,ss_clicked];     
+    end; 
+   end;
    drawtoolbutton(canvas,areas[fpaintedbutton]);
+   if acolor <> cl_none then begin
+    areas[fpaintedbutton].state:= statebefore;
+   end;
    case fpaintedbutton of
     sbbu_down: begin
      if fframeendbutton1 <> nil then begin
@@ -840,7 +859,6 @@ procedure tcustomscrollbar.mouseevent(var info: mouseeventinfoty);
 
 var
  ar1: scrollbarareaty;
-
 begin
  if info.eventkind in mouseposevents then begin
   ar1:= findarea(info.pos);
@@ -867,7 +885,9 @@ begin
     end;
    end;
    ek_buttonpress: begin
-    if info.button = mb_left then begin
+    if (info.button = mb_left) and 
+     (not(sbo_noreflectedclick in foptions) or 
+                          not (es_reflected in info.eventstate)) then begin
      fclickedarea:= ar1;
      if clickedareaisvalid then begin
       include(fdrawinfo.areas[fclickedarea].state,ss_clicked);
@@ -917,69 +937,78 @@ procedure tcustomscrollbar.keydown(var info: keyeventinfoty);
 var
  bo1: boolean;
 begin
- if not (es_processed in info.eventstate) then begin
-  bo1:= true;
-  if sbo_valuekeys in foptions then begin
-   case info.key of
-    key_pageup: pageup;
-    key_pagedown: pagedown;
-    key_up: stepup;
-    key_down: stepdown;
+ with info do begin
+  if not (es_processed in eventstate) then begin
+   if (not (sbo_noarrowkeys in foptions) or 
+        (key <> key_left) and (key <> key_right) and
+        (key <> key_up) and (key <> key_down)) and
+      (not (sbo_nopagekeys in foptions) or
+        (key <> key_pageup) and (key <> key_pagedown)) then begin
+    bo1:= true;
+    if sbo_valuekeys in foptions then begin
+     case info.key of
+      key_pageup: pageup;
+      key_pagedown: pagedown;
+      key_up: stepup;
+      key_down: stepdown;
+      else begin
+       bo1:= false;
+      end;
+     end; 
+    end
     else begin
-     bo1:= false;
-    end;
-   end; 
-  end
-  else begin
-   case fdirection of
-    gd_right: begin
-     case info.key of
-      key_right: stepup;
-      key_left: stepdown;
-      key_pageup: pagedown;
-      key_pagedown: pageup;
-      else begin
-       bo1:= false;
+     case fdirection of
+      gd_right: begin
+       case info.key of
+        key_right: stepup;
+        key_left: stepdown;
+        key_pageup: pagedown;
+        key_pagedown: pageup;
+        else begin
+         bo1:= false;
+        end;
+       end;
+      end;
+      gd_up: begin
+       case info.key of
+        key_up: stepdown;
+        key_down: stepup;
+        key_pageup: pageup;
+        key_pagedown: pagedown;
+        else begin
+         bo1:= false;
+        end;
+       end;
+      end;
+      gd_left: begin
+       case info.key of
+        key_right: stepdown;
+        key_left: stepup;
+        key_pageup: pageup;
+        key_pagedown: pagedown;
+        else begin
+         bo1:= false;
+        end;
+       end;
+      end;
+      gd_down: begin
+       case info.key of
+        key_down: stepup;
+        key_up: stepdown;
+        key_pageup: pagedown;
+        key_pagedown: pageup;
+        else begin
+         bo1:= false;
+        end;
+       end;
       end;
      end;
     end;
-    gd_up: begin
-     case info.key of
-      key_up: stepdown;
-      key_down: stepup;
-      key_pageup: pageup;
-      key_pagedown: pagedown;
-      else begin
-       bo1:= false;
-      end;
-     end;
-    end;
-    gd_left: begin
-     case info.key of
-      key_right: stepdown;
-      key_left: stepup;
-      key_pageup: pageup;
-      key_pagedown: pagedown;
-      else begin
-       bo1:= false;
-      end;
-     end;
-    end;
-    gd_down: begin
-     case info.key of
-      key_down: stepup;
-      key_up: stepdown;
-      key_pageup: pagedown;
-      key_pagedown: pageup;
-      else begin
-       bo1:= false;
-      end;
-     end;
+    if bo1 then begin
+     include(eventstate,es_processed);
     end;
    end;
   end;
-  updatebit({$ifdef FPC}longword{$else}byte{$endif}(info.eventstate),
-                 ord(es_processed),bo1);
  end;
 end;
 

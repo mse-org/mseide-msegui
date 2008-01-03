@@ -229,7 +229,7 @@ type
    constructor create(intf: iscrollbar; org: originty = org_client;
               ondimchanged: objectprocty = nil); override;
    destructor destroy; override;
-   procedure paint(const canvas: tcanvas); override;
+   procedure paint(const canvas: tcanvas; const acolor: colorty = cl_none); override;
   published
    property options default defaultsliderscrollbaroptions;
 //   property width;
@@ -297,12 +297,11 @@ type
  tslider = class(trealgraphdataedit,iscrollbar)
   private
    fscrollbar: tsliderscrollbar;
-   fupdating: boolean;
+   fupdating: integer;
    procedure setscrollbar(const avalue: tsliderscrollbar);
   protected
    procedure objectchanged(const sender: tobject); override;
    procedure clientrectchanged; override;
-   procedure dopaint(const acanvas: tcanvas); override;
    procedure clientmouseevent(var info: mouseeventinfoty); override;
    procedure dokeydown(var info: keyeventinfoty); override;
    procedure doenter; override;
@@ -313,6 +312,7 @@ type
    procedure dochange; override;
    procedure paintglyph(const canvas: tcanvas; 
                   const avalue; const arect: rectty); override;
+   procedure initgridwidget; override;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -808,7 +808,8 @@ begin
  result:= fintf.translatecolor(acolor);
 end;
 
-procedure tsliderscrollbar.paint(const canvas: tcanvas);
+procedure tsliderscrollbar.paint(const canvas: tcanvas;
+                                          const acolor: colorty = cl_none);
 begin
  fface.paint(canvas,fdrawinfo.scrollrect);
  inherited;
@@ -941,9 +942,32 @@ begin
 end;
 
 procedure tslider.paintglyph(const canvas: tcanvas; const avalue;
-                                   const arect: rectty);
+                                                      const arect: rectty);
+var
+ rea1: realty;
+ col1: colorty;
 begin
- //dummy
+ if @avalue = nil then begin
+  rea1:= fvalue;
+  col1:= cl_none;
+ end
+ else begin
+  rea1:= realty(avalue); //cell
+  with cellinfoty(canvas.drawinfopo^) do begin
+   col1:= color;
+   canvas.move(innerrect.pos);
+  end;
+ end;
+ if isemptyreal(rea1) then begin
+  rea1:= 0;
+ end; 
+ inc(fupdating);
+ fscrollbar.value:= rea1;
+ fscrollbar.paint(canvas,col1);
+ if @avalue <> nil then begin
+  canvas.remove(cellinfoty(canvas.drawinfopo^).innerrect.pos);
+ end;
+ dec(fupdating);
 end;
 
 procedure tslider.changedirection(const avalue: graphicdirectionty;
@@ -957,12 +981,6 @@ procedure tslider.clientrectchanged;
 begin
  inherited;
  fscrollbar.dim:= innerclientrect;
-end;
-
-procedure tslider.dopaint(const acanvas: tcanvas);
-begin
- inherited;
- fscrollbar.paint(acanvas);
 end;
 
 procedure tslider.clientmouseevent(var info: mouseeventinfoty);
@@ -989,8 +1007,8 @@ var
 begin
  case event of
   sbe_valuechanged: begin
-   if not fupdating then begin
-    fupdating:= true;
+   if fupdating = 0 then begin
+    inc(fupdating);
     rea1:= sender.value;
     if not docheckvalue(rea1) then begin
      sender.value:= value;
@@ -998,7 +1016,7 @@ begin
     else begin
      sender.value:= rea1;
     end;
-    fupdating:= false;
+    dec(fupdating);
    end;
   end;
  end;
@@ -1037,6 +1055,14 @@ procedure tslider.objectchanged(const sender: tobject);
 begin
  inherited;
  fscrollbar.checktemplate(sender);
+end;
+
+procedure tslider.initgridwidget;
+begin
+ inherited;
+ fscrollbar.options:= fscrollbar.options + 
+                       [sbo_noarrowkeys,sbo_nopagekeys,sbo_noreflectedclick];
+ color:= cl_parent;
 end;
 
 { tgraphdataedit }

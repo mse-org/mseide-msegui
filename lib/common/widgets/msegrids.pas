@@ -216,6 +216,7 @@ type
   cell: gridcoordty;
   rect: rectty;
   innerrect: rectty; //origin rect.pos
+  frameinnerrect: rectty; //innerrect of cell frame or rect if nil
   color: colorty;
   colorline: colorty;
   font: tfont;
@@ -2165,11 +2166,13 @@ begin
    fcellinfo.innerrect.pos:= pointty(topleft);
    fcellinfo.innerrect.cx:= fcellinfo.rect.cx - left - right;
    fcellinfo.innerrect.cy:= fcellinfo.rect.cy - top - bottom;
+   fcellinfo.frameinnerrect:= fcellinfo.innerrect;
   end;
  end
  else begin
   fcellinfo.innerrect:= deflaterect(makerect(nullpoint,fcellinfo.rect.size),
                                   getinnerframe);
+  fcellinfo.frameinnerrect:= fcellinfo.rect;
  end;
 end;
 
