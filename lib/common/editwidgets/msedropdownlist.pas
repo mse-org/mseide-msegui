@@ -777,7 +777,7 @@ end;
 procedure tcustomdropdowncontroller.dokeydown(var info: keyeventinfoty);
 begin
  with info do begin
-  if (key = key_down) and (shiftstate = [ss_shift]) and
+  if (key = key_down) and (shiftstate = [ss_alt]) and
        (deo_keydropdown in foptions) and fintf.geteditor.canedit then begin
    exclude(eventstate,es_processed);
    dropdown;
