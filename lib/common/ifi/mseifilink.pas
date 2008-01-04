@@ -299,6 +299,16 @@ type
 implementation
 uses
  sysutils,msestream,msesysutils,msetmpmodules,mseapplication;
+
+type
+ tmoduledataevent = class(tstringobjectevent)
+  protected
+   fmodulelink: trxlinkmodule;
+   fmoduledata: pmoduledatadataty;
+  public
+   constructor create(const adata: ansistring; const dest: ievent;
+        const amodulelink: trxlinkmodule; const amoduledata: pmoduledatadataty);
+ end;
  
 { tmodulelinkprop }
 
@@ -834,15 +844,8 @@ begin
     po1:= pifirecty(rxdata);
     with po1^.header do begin
      if size = length(rxdata) then begin
-      if kind in mainloopifikinds then begin
-       str1:= rxdata;
+      if processdata(po1) then begin
        rxdata:= '';
-       application.postevent(tstringobjectevent.create(str1,ievent(self)));
-      end
-      else begin
-       if processdata(po1) then begin
-        rxdata:= '';
-       end;
       end;
      end;
     end;
@@ -913,9 +916,32 @@ begin
 end;
 
 procedure tcustommodulelink.receiveevent(const event: tobjectevent);
+var
+ comp1: tmsecomponent;
+ stream1: tmemorycopystream;
+ po1: pchar;
+ str1: string;
 begin
  if event.kind = ek_objectdata then begin
-  processdata(pifirecty(tstringobjectevent(event).data));
+  if event is tmoduledataevent then begin
+   with tmoduledataevent(event) do begin    
+    po1:= @fmoduledata^.parentclass;
+    inc(po1,ifinametostring(pifinamety(po1),str1));
+    with fmodulelink do begin
+     freeandnil(fmodule);
+     with pifibytesty(po1)^ do begin
+      stream1:= tmemorycopystream.create(@data,length);
+      try
+       fmodule:= createtmpmodule(str1,stream1,@moduleloaded);
+       fmodule.getcorbainterface(typeinfo(iificommand),fcommandintf);
+      finally
+       stream1.free;
+      end;
+     end;
+     setlinkedvar(fmodule,fmodule);
+    end;
+   end;
+  end;
  end
  else begin
   inherited;
@@ -1020,10 +1046,6 @@ function tcustommodulelink.moduledatareceived(const atag: integer;
           const adata: pmoduledatadataty): boolean;
 var
  mo1: trxlinkmodule;
- comp1: tmsecomponent;
- stream1: tmemorycopystream;
- str1: string;
- po1: pchar;
 begin
  if asequence <> 0 then begin
   mo1:= fmodulesrx.finditem(asequence);
@@ -1033,21 +1055,8 @@ begin
  end;
  result:= mo1 <> nil;
  if result then begin
-  po1:= @adata^.parentclass;
-  inc(po1,ifinametostring(pifinamety(po1),str1));
-  with mo1 do begin
-   freeandnil(fmodule);
-   with pifibytesty(po1)^ do begin
-    stream1:= tmemorycopystream.create(@data,length);
-    try
-     fmodule:= createtmpmodule(str1,stream1,@moduleloaded);
-     fmodule.getcorbainterface(typeinfo(iificommand),fcommandintf);
-    finally
-     stream1.free;
-    end;
-   end;
-   setlinkedvar(fmodule,fmodule);
-  end;
+  application.postevent(tmoduledataevent.create(fchannel.rxdata,ievent(self),
+                       mo1,adata));
  end;
 end;
 
@@ -1116,6 +1125,17 @@ end;
 procedure ttxlinkmodule.close;
 begin
  tcustommodulelink(fowner).closemodule(tag,name);
+end;
+
+{ tmoduledataevent }
+
+constructor tmoduledataevent.create(const adata: ansistring; const dest: ievent;
+               const amodulelink: trxlinkmodule;
+               const amoduledata: pmoduledatadataty);
+begin
+ fmodulelink:= amodulelink;
+ fmoduledata:= amoduledata;
+ inherited create(adata,dest);
 end;
 
 end.

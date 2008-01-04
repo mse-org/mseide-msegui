@@ -17,7 +17,7 @@ const
  ifiitemkinds = [ik_actionfired,ik_propertychanged,ik_widgetcommand,
                  ik_widgetproperties,ik_requestmodule,ik_moduledata,
                  ik_modulecommand];
- mainloopifikinds = [ik_moduledata]; 
+// mainloopifikinds = [ik_moduledata]; 
  
 type 
  ifinamety = array[0..0] of char; //null terminated

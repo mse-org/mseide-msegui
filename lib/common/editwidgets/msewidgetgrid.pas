@@ -917,6 +917,7 @@ begin
   fintf.setgridintf(nil);
  end;
  if awidget <> nil then begin
+  awidget.visible:= false;
   awidget.getcorbainterface(typeinfo(igridwidget),fintf);
 //  awidget.getcorbainterface(igridwidget,fintf);
   fdata:= fintf.createdatalist(self);
@@ -941,7 +942,6 @@ begin
   if gs_isdb in tcustomgrid1(fgrid).fstate then begin
    datasourcechanged;
   end;
-  awidget.visible:= false;
   tcustomgrid1(fgrid).layoutchanged;
  end
  else begin
