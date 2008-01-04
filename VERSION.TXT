@@ -1,4 +1,6 @@
 MSEide+MSEgui version history
+2008-01-04
+ tcustomdatabutton visible and enabled no more published.
 2007-12-28
  tdbcontroller.onbeforeconnect,onconnecterror and onafterconnect moved to
  tmdatabase.
