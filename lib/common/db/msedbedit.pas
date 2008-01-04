@@ -560,22 +560,31 @@ type
    property optionswidget;
    property valuefaces;
    property font;
+
+
+   property action;
    property caption;
+   property shortcut;
    property captionpos;
+   property captiondist;
    property imagelist;
    property imagenr;
    property imagenrdisabled;
-   property imageoffset;
-   property imageoffsetdisabled;
-   property imagenums;
+   property imagedist;
+   property colorglyph;
    property options;
    property focusrectdist;
    property onexecute;
+
+   property imageoffset;
+   property imageoffsetdisabled;
+   property imagenums;
    property onsetvalue;
-   property value;
+//   property value;
    property valuedefault;
    property min; 
    property max;
+
  end;
  
  tdbbooleaneditradio = class(tcustombooleaneditradio,idbeditfieldlink,idbeditinfo,ireccontrol)

@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2007 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2008 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -16,7 +16,7 @@ uses
  {$ifdef FPC}classes{$else}Classes{$endif},msegui,
  mseglob,mseguiglob,msescrollbar,msegraphutils,msegraphics,mseevent,
  msewidgets,mseeditglob,msestockobjects,msestat,msestatfile,
- mseclasses,msesimplewidgets,msemenus,
+ mseclasses,msesimplewidgets,msemenus,mseact,
  msegrids,msewidgetgrid,msedatalist,msebitmap,msetypes,msestrings,msearrayprops,
  msedrawtext,mseshapes{$ifdef mse_with_ifi},mseifi,mseifiglob{$endif};
 
@@ -72,7 +72,7 @@ type
    property template;
  end;
 
- tgraphdataedit = class(tpublishedwidget,igridwidget,istatfile
+ tgraphdataedit = class(tactionpublishedwidget,igridwidget,istatfile
                   {$ifdef mse_with_ifi},iifiwidget{$endif})
   private
    fonchange: notifyeventty;
@@ -214,6 +214,8 @@ type
         read getgridvalue write setgridvalue; default;
    property gridvalues: pointerarty read getgridvalues write setgridvalues;
   published
+   property visible;
+   property enabled;
    property onpaintglyph: paintpointerglypheventty read fonpaintglyph write fonpaintglyph;
  end;
  
@@ -283,6 +285,8 @@ type
    property onsetvalue: setrealeventty read fonsetvalue write fonsetvalue;
    property direction: graphicdirectionty read fdirection write setdirection default gd_right;
   published
+   property visible;
+   property enabled;
    property bounds_cx default defaultsliderwidth;
    property bounds_cy default defaultsliderheight;
  end;
@@ -495,6 +499,9 @@ type
    property bounds_cy default defaultboxsize;
    property onsetvalue: setbooleaneventty read fonsetvalue write fonsetvalue;
    property group: integer read fgroup write fgroup default 0;
+  published
+   property visible;
+   property enabled;
  end;
 
  tbooleanedit = class(tcustombooleanedit)
@@ -586,28 +593,52 @@ type
    property items[const index: integer]: tface read getitems; default;
  end;
  
- tcustomdatabutton = class(tcustomintegergraphdataedit)
+ tcustomdatabutton = class(tcustomintegergraphdataedit,iactionlink)
   private
    fonexecute: notifyeventty;
    fvaluefaces: tvaluefacearrayprop;
-   fcaption: captionty;
+//   fcaption: captionty;
    fimageoffset: integer;
    fimagenums: tintegerarrayprop;
    fimagenr: integer;
    fimagenrdisabled: integer;
    fimageoffsetdisabled: integer;
    procedure setcolorglyph(const avalue: colorty);
+   function iscolorglyphstored: boolean;
    procedure setvaluefaces(const avalue: tvaluefacearrayprop);
    procedure setcaption(const avalue: captionty);
-   procedure setcaptionpos(const avalue: captionposty);
+   function iscaptionstored: boolean;
+   function getimagelist: timagelist;
    procedure setimagelist(const avalue: timagelist);
+   function isimageliststored: Boolean;
+   procedure setcaptiondist(const avalue: integer);
+   procedure setcaptionpos(const avalue: captionposty);
    procedure setimagenr(const avalue: integer);
+   function isimagenrstored: boolean;
    procedure setimageoffset(const avalue: integer);
    procedure setimagenums(const avalue: tintegerarrayprop);
-   procedure setimagenrdisable(const avalue: integer);
+   procedure setimagenrdisabled(const avalue: integer);
+   function isimagenrdisabledstored: Boolean;
    procedure setimageoffsetdisabled(const avalue: integer);
+   procedure setimagedist(const avalue: integer);
+   procedure setshortcut(const avalue: shortcutty);
+   function isshortcutstored: boolean;
+   procedure setonexecute(const avalue: notifyeventty);
+   function isonexecutestored: boolean;
+   procedure setstate(const avalue: actionstatesty);
+   function isstatestored: boolean;
+
+   procedure setaction(const avalue: tcustomaction);
   protected
    finfo: shapeinfoty;
+   factioninfo: actioninfoty;
+   //iactionlink
+   function getactioninfopo: pactioninfoty;
+   function shortcutseparator: msechar;
+   procedure calccaptiontext(var ainfo: actioninfoty);
+   procedure actionchanged;
+
+   procedure setenabled(const avalue: boolean); override;
    procedure setnullvalue;
    procedure doexecute; virtual;
    procedure togglevalue; override;
@@ -636,15 +667,30 @@ type
    property optionswidget default defaultoptionswidget - [ow_mousefocus];
    property valuefaces: tvaluefacearrayprop read fvaluefaces write setvaluefaces;
    property font: twidgetfont read getfont write setfont stored isfontstored;
-   property caption: captionty read fcaption write setcaption;
+   property action: tcustomaction read factioninfo.action write setaction;
+   property caption: captionty read factioninfo.captiontext write setcaption stored iscaptionstored;
    property captionpos: captionposty read finfo.captionpos write setcaptionpos
                               default cp_center;
-   property imagelist: timagelist read finfo.imagelist write setimagelist;
-   property imagenr: integer read fimagenr 
-                                         write setimagenr default -1;
-   property imagenrdisabled: integer read fimagenrdisabled
-                                         write setimagenrdisable default -2;
+   property captiondist: integer read finfo.captiondist write setcaptiondist
+                            default defaultshapecaptiondist;
+   property imagelist: timagelist read getimagelist write setimagelist
+                    stored isimageliststored;
+   property imagenr: integer read factioninfo.imagenr write setimagenr
+                            stored isimagenrstored default -1;
+   property imagenrdisabled: integer read factioninfo.imagenrdisabled
+                              write setimagenrdisabled
+                            stored isimagenrdisabledstored default -2;
                       //-1 = none, -2 = grayed, -3 = imageoffsetdisabled
+   property imagedist: integer read finfo.imagedist write setimagedist;
+   property colorglyph: colorty read factioninfo.colorglyph write setcolorglyph
+                      stored iscolorglyphstored default cl_glyph;
+   property shortcut: shortcutty read factioninfo.shortcut write setshortcut
+                            stored isshortcutstored;
+   property onexecute: notifyeventty read factioninfo.onexecute
+                            write setonexecute stored isonexecutestored;
+
+
+
    property imageoffset: integer read fimageoffset write setimageoffset default 0;
    property imageoffsetdisabled: integer read fimageoffsetdisabled
                                  write setimageoffsetdisabled default 0;
@@ -653,12 +699,14 @@ type
    property options;
    property focusrectdist: integer read finfo.focusrectdist write finfo.focusrectdist 
                    default defaultshapefocusrectdist;
-   property onexecute: notifyeventty read fonexecute write fonexecute;
    property onsetvalue;
    property value default -1;
    property valuedefault default -1;
    property min default -1; 
    property max default 0;
+  published
+   property state: actionstatesty read factioninfo.state write setstate 
+                             stored isstatestored;
  end;
 
  tdatabutton = class(tcustomdatabutton)
@@ -666,17 +714,24 @@ type
    property optionswidget;
    property valuefaces;
    property font;
+
+   property action;
    property caption;
+   property shortcut;
    property captionpos;
+   property captiondist;
    property imagelist;
    property imagenr;
    property imagenrdisabled;
-   property imageoffset;
-   property imageoffsetdisabled;
-   property imagenums;
+   property imagedist;
+   property colorglyph;
    property options;
    property focusrectdist;
    property onexecute;
+
+   property imageoffset;
+   property imageoffsetdisabled;
+   property imagenums;
    property onsetvalue;
    property value;
    property valuedefault;
@@ -691,6 +746,8 @@ type
   public
    constructor create(aowner: tcomponent); override;
   published
+   property action;
+   
    property glyph: stockglyphty read fglyph write setglyph default stg_none;
    property imagenums;
    property optionswidget;
@@ -698,6 +755,7 @@ type
    property font;
    property caption;
    property captionpos;
+   property captiondist;
    property options;
    property focusrectdist;
    property onexecute;
@@ -734,6 +792,9 @@ type
    property imagenums: tintegerarrayprop read fimagenums write setimagenums;
    property valuedefault default -1;
    property value default -1;
+  published
+   property visible;
+   property enabled;
  end;
  
  tdataicon = class(tcustomdataicon)
@@ -751,7 +812,7 @@ type
 implementation
 uses
  SysUtils,msekeyboard,msebits,msereal,msedispwidgets,mseformatstr,mserichstring,
- mseact;
+ mseactions;
 
 type
  tcustomframe1 = class(tcustomframe);
@@ -2180,6 +2241,7 @@ end;
 constructor tcustomdatabutton.create(aowner: tcomponent);
 begin
  foptions:= defaultbuttonoptions;
+ initactioninfo(factioninfo);
  inherited;
  fimagenums:= tintegerarrayprop.create;
  fimagenr:= -1;
@@ -2241,9 +2303,10 @@ end;
 
 procedure tcustomdatabutton.doexecute;
 begin
- if canevent(tmethod(fonexecute)) then begin
-  fonexecute(self);
- end;
+ doactionexecute(self,factioninfo);
+// if canevent(tmethod(fonexecute)) then begin
+//  fonexecute(self);
+// end;
 end;
 
 procedure tcustomdatabutton.mouseevent(var info: mouseeventinfoty);
@@ -2294,10 +2357,12 @@ end;
 
 procedure tcustomdatabutton.setcolorglyph(const avalue: colorty);
 begin
- if finfo.colorglyph <> avalue then begin
-  finfo.colorglyph := avalue;
-  formatchanged;
- end;
+ setactioncolorglyph(iactionlink(self),avalue);
+end;
+
+function tcustomdatabutton.iscolorglyphstored: boolean;
+begin
+ result:= isactioncolorglyphstored(factioninfo);
 end;
 
 procedure tcustomdatabutton.setactualimagenr(const avalue: integer);
@@ -2395,9 +2460,22 @@ end;
 
 procedure tcustomdatabutton.setcaption(const avalue: captionty);
 begin
- fcaption:= avalue;
- captiontorichstring(fcaption,finfo.caption);
+ setactioncaption(iactionlink(self),avalue);
  formatchanged;
+end;
+
+function tcustomdatabutton.iscaptionstored: boolean;
+begin
+ result:= isactioncaptionstored(factioninfo);
+end;
+
+procedure tcustomdatabutton.setcaptiondist(const avalue: integer);
+begin
+ if avalue <> finfo.captiondist then begin
+  finfo.captiondist:= avalue;
+  formatchanged;
+  checkautosize;
+ end;
 end;
 
 procedure tcustomdatabutton.setcaptionpos(const avalue: captionposty);
@@ -2405,29 +2483,45 @@ begin
  if avalue <> finfo.captionpos then begin
   finfo.captionpos:= avalue;
   formatchanged;
+  checkautosize;
  end;
+end;
+
+function tcustomdatabutton.getimagelist: timagelist;
+begin
+ result:= timagelist(factioninfo.imagelist);
 end;
 
 procedure tcustomdatabutton.setimagelist(const avalue: timagelist);
 begin
- setlinkedvar(avalue,tmsecomponent(finfo.imagelist));
- formatchanged;
+ setactionimagelist(iactionlink(self),avalue);
+end;
+
+function tcustomdatabutton.isimageliststored: Boolean;
+begin
+ result:= isactionimageliststored(factioninfo);
 end;
 
 procedure tcustomdatabutton.setimagenr(const avalue: integer);
 begin
- if avalue <> fimagenr then begin
-  fimagenr:= avalue;
-  formatchanged;
- end;
+ fimagenr:= avalue;
+ setactionimagenr(iactionlink(self),avalue);
 end;
 
-procedure tcustomdatabutton.setimagenrdisable(const avalue: integer);
+function tcustomdatabutton.isimagenrstored: Boolean;
 begin
- if avalue <> fimagenrdisabled then begin
-  fimagenrdisabled:= avalue;
-  formatchanged;
- end;
+ result:= isactionimagenrstored(factioninfo);
+end;
+
+procedure tcustomdatabutton.setimagenrdisabled(const avalue: integer);
+begin
+ fimagenrdisabled:= avalue;
+ setactionimagenrdisabled(iactionlink(self),avalue);
+end;
+
+function tcustomdatabutton.isimagenrdisabledstored: Boolean;
+begin
+ result:= isactionimagenrdisabledstored(factioninfo);
 end;
 
 procedure tcustomdatabutton.setnullvalue;
@@ -2471,6 +2565,35 @@ begin
  end;
 end;
 
+procedure tcustomdatabutton.setshortcut(const avalue: shortcutty);
+begin
+ setactionshortcut(iactionlink(self),avalue);
+end;
+
+function tcustomdatabutton.isshortcutstored: boolean;
+begin
+ result:= isactionshortcutstored(factioninfo);
+end;
+
+procedure tcustomdatabutton.setonexecute(const avalue: notifyeventty);
+begin
+ setactiononexecute(iactionlink(self),avalue,csloading in componentstate);
+end;
+
+function tcustomdatabutton.isonexecutestored: boolean;
+begin
+ result:= isactiononexecutestored(factioninfo);
+end;
+
+procedure tcustomdatabutton.setimagedist(const avalue: integer);
+begin
+ if avalue <> finfo.imagedist then begin
+  finfo.imagedist:= avalue;
+  formatchanged;
+  checkautosize;
+ end;
+end;
+
 procedure tcustomdatabutton.setimagenums(const avalue: tintegerarrayprop);
 begin
  fimagenums.assign(avalue);
@@ -2485,18 +2608,59 @@ begin
  end;
 end;
 
-{
-procedure tcustomdatabutton.setoptionswidget(const avalue: optionswidgetty);
+function tcustomdatabutton.getactioninfopo: pactioninfoty;
 begin
- if ow_nofocusrect in avalue then begin
-  exclude(finfo.state,ss_showfocusrect);
+ result:= @factioninfo;
+end;
+
+function tcustomdatabutton.shortcutseparator: msechar;
+begin
+ result:= ' ';
+end;
+
+procedure tcustomdatabutton.calccaptiontext(var ainfo: actioninfoty);
+begin
+ mseactions.calccaptiontext(ainfo,shortcutseparator);
+end;
+
+procedure tcustomdatabutton.actionchanged;
+begin
+ actioninfotoshapeinfo(self,factioninfo,finfo);
+ if csdesigning in componentstate then begin
+  exclude(finfo.state,ss_invisible);
+ end;
+ formatchanged;
+ checkautosize;
+end;
+
+procedure tcustomdatabutton.setaction(const avalue: tcustomaction);
+begin
+ linktoaction(iactionlink(self),avalue,factioninfo);
+end;
+
+procedure tcustomdatabutton.setstate(const avalue: actionstatesty);
+begin
+ setactionstate(iactionlink(self),avalue);
+ visible:= not (as_invisible in factioninfo.state);
+ enabled:= not (as_disabled in factioninfo.state);
+end;
+
+procedure tcustomdatabutton.setenabled(const avalue: boolean);
+begin
+ if avalue then begin
+  exclude(factioninfo.state,as_disabled);
  end
  else begin
-  include(finfo.state,ss_showfocusrect);
+  include(factioninfo.state,as_disabled);
  end;
  inherited;
 end;
-}
+
+function tcustomdatabutton.isstatestored: boolean;
+begin
+ result:= isactionstatestored(factioninfo);
+end;
+
 { tstockglyphdatabutton }
 
 constructor tstockglyphdatabutton.create(aowner: tcomponent);

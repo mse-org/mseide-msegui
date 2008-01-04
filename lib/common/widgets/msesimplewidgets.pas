@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2007 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2008 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -94,8 +94,8 @@ type
    procedure setframe(const Value: tframe);
    function getcaption: captionty;
    procedure setonexecute(const value: notifyeventty);
-   procedure setaction(const value: tcustomaction); virtual;
    function isonexecutestored: boolean;
+   procedure setaction(const value: tcustomaction); virtual;
    function iscaptionstored: boolean;
    function getstate: actionstatesty;
    procedure setstate(const value: actionstatesty); virtual;
@@ -104,7 +104,7 @@ type
    procedure setimagelist(const Value: timagelist);
    function isimageliststored: Boolean;
    procedure setimagenr(const Value: integer);
-   function isimagenrstored: Boolean;
+   function isimagenrstored: boolean;
    procedure setimagenrdisabled(const avalue: integer);
    function isimagenrdisabledstored: Boolean;
    procedure setcolorglyph(const avalue: colorty);
@@ -121,18 +121,17 @@ type
    function getactioninfopo: pactioninfoty;
    function shortcutseparator: msechar;
    procedure calccaptiontext(var ainfo: actioninfoty);
+   procedure actionchanged;
    
    procedure setoptions(const avalue: buttonoptionsty); override;
    function gethint: msestring; override;
    procedure sethint(const Value: msestring); override;
    function ishintstored: boolean; override;
 
-   procedure actionchanged;
    procedure setenabled(const avalue: boolean); override;
+//   procedure enabledchanged; override;
    procedure readstate(reader: treader); override;
    procedure loaded; override;
-   procedure enabledchanged; override;
-   procedure visiblechanged; override;
    procedure clientrectchanged; override;
    procedure doexecute; override;
    procedure doenter; override;
@@ -143,7 +142,6 @@ type
    procedure getautopaintsize(var asize: sizety); override;
    procedure objectevent(const sender: tobject;
                                      const event: objecteventty); override;
-
   public
    constructor create(aowner: tcomponent); override;
    procedure synctofontheight; override;
@@ -151,7 +149,10 @@ type
    property bounds_cx default defaultbuttonwidth;
    property bounds_cy default defaultbuttonheight;
    property frame: tframe read getframe write setframe;
-   property action: tcustomaction read factioninfo.action write setaction;
+   property font: twidgetfont read getfont write setfont stored isfontstored;
+   property modalresult: modalresultty read fmodalresult write fmodalresult
+                                default mr_none;
+   property action: tcustomaction read factioninfo.action write setaction;   
    property caption: captionty read getcaption write setcaption stored iscaptionstored;
    property captionpos: captionposty read finfo.captionpos write setcaptionpos
                               default cp_center;
@@ -167,9 +168,6 @@ type
    property imagedist: integer read finfo.imagedist write setimagedist;
    property colorglyph: colorty read factioninfo.colorglyph write setcolorglyph
                       stored iscolorglyphstored default cl_glyph;
-   property font: twidgetfont read getfont write setfont stored isfontstored;
-   property modalresult: modalresultty read fmodalresult write fmodalresult
-                                default mr_none;
    property shortcut: shortcutty read factioninfo.shortcut write setshortcut
                             stored isshortcutstored;
    property onexecute: notifyeventty read factioninfo.onexecute
@@ -574,34 +572,13 @@ procedure tcustombutton.setframe(const Value: tframe);
 begin
  fframe.Assign(value);
 end;
-
+{
 procedure tcustombutton.enabledchanged;
 begin
  inherited;
- {
- if enabled then begin
-  state:= state - [as_disabled];
- end
- else begin
-  state:= state + [as_disabled];
- end;
- }
  invalidate;
 end;
-
-procedure tcustombutton.visiblechanged;
-begin
- inherited;
- {
- if visible then begin
-  state:= state - [as_invisible];
- end
- else begin
-  state:= state + [as_invisible];
- end;
- }
-end;
-
+}
 procedure tcustombutton.actionchanged;
 begin
  actioninfotoshapeinfo(self,factioninfo,finfo);
