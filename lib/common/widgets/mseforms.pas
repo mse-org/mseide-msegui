@@ -20,7 +20,7 @@ uses
 
 type
  formoptionty = (fo_main,fo_terminateonclose,fo_freeonclose,
-               fo_defaultpos,fo_screencentered,
+               fo_defaultpos,fo_screencentered,fo_modal,
                fo_minimized,fo_maximized,fo_fullscreen,
                fo_closeonesc,fo_cancelonesc,fo_closeonenter,fo_closeonf10,
                fo_globalshortcuts,fo_localshortcuts,
@@ -851,6 +851,10 @@ begin
  inherited;
  if event.kind = ek_loaded then begin
   doeventloopstart;
+  if (fo_modal in foptions) and not (csloading in componentstate) and 
+                          showing  then begin
+   show(true);
+  end;
  end;
 end;
 
