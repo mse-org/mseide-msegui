@@ -23,7 +23,7 @@ type
  ifinamety = array[0..0] of char; //null terminated
  pifinamety = ^ifinamety;
 
- ifidatakindty = (idk_none,idk_null,idk_int64,idk_currency,idk_real,
+ ifidatakindty = (idk_none,idk_null,idk_integer,idk_int64,idk_currency,idk_real,
                   idk_msestring,{idk_ansistring,}idk_bytes);
  
  datarecty = record //dummy
@@ -459,10 +459,15 @@ function encodeifidata(const avalue: ansistring;
 function skipifidata(const source: pifidataty): integer;
 function decodeifidata(const source: pifidataty; out dest: msestring): integer;
 function decodeifidata(const source: pifidataty; out dest: string): integer;
+function decodeifidata(const source: pifidataty; out dest: integer): integer;
 function decodeifidata(const source: pifidataty; out dest: int64): integer;
 function decodeifidata(const source: pifidataty; out dest: real): integer;
 function decodeifidata(const source: pifidataty; out dest: currency): integer;
+function decodeifidata(const source: pifidataty; out dest: variant): integer;
 
+procedure addifiintegervalue(var adata: ansistring; var adatapo: pchar; 
+                                     const avalue: integer);
+function readifivariant(const adata: pifirecty; var adatapo: pchar): variant;
 function setifibytes(const source: pointer; const size: integer;
                  const dest: pifibytesty): integer; overload;
 
@@ -470,17 +475,19 @@ const
  datarecsizes: array[ifidatakindty] of integer = (
   sizeof(ifidataty),                             //idk_none
   sizeof(ifidataty),                             //idk_null
+  sizeof(ifidataty)+sizeof(integer),             //idk_integer
   sizeof(ifidataty)+sizeof(int64),               //idk_int64
   sizeof(ifidataty)+sizeof(currency),            //idk_currency
   sizeof(ifidataty)+sizeof(double),              //idk_real
   sizeof(ifidataty)+sizeof(ifinamety),           //idk_msestring
-//  sizeof(ifidataty)+sizeof(ifinamety),           //idk_ansistring
+//  sizeof(ifidataty)+sizeof(ifinamety),         //idk_ansistring
   sizeof(ifidataty)+sizeof(ifibytesty)           //idk_bytes
 
  );
 implementation
 uses
- sysutils,msedatalist,mseprocutils,msesysintf,{mseforms,}msetmpmodules,msesysutils;
+ sysutils,msedatalist,mseprocutils,msesysintf,{mseforms,}msetmpmodules,
+ msesysutils,variants;
 type
  tsocketreader1 = class(tsocketreader);
  tsocketwriter1 = class(tsocketwriter);
@@ -547,7 +554,8 @@ end;
 function encodeifidata(const avalue: integer; 
                        const headersize: integer = 0): string; overload;
 begin
- result:= encodeifidata(int64(avalue),headersize);
+ pinteger(initdataheader(headersize,idk_integer,0,result))^:= avalue;
+// result:= encodeifidata(int64(avalue),headersize);
 end;
 
 function encodeifidata(const avalue: int64; 
@@ -583,6 +591,41 @@ function encodeifidata(const avalue: ansistring;
 begin
  setifibytes(avalue,pifibytesty(
         initdataheader(headersize,idk_bytes,length(avalue),result))); 
+end;
+
+procedure addifiintegervalue(var adata: ansistring; var adatapo: pchar;
+                                           const avalue: integer);
+begin
+ setlength(adata,adatapo-pointer(adata));
+ adata:= adata + encodeifidata(avalue);
+ pifirecty(adata)^.header.size:= length(adata);
+ adatapo:= pointer(adata) + length(adata);
+end;
+
+function readifivariant(const adata: pifirecty; var adatapo: pchar): variant;
+type
+ variantarty = array of variant;
+var
+ ar1: variantarty;
+ po1: pchar;
+ int1: integer;
+begin
+ po1:= pchar(adata)+adata^.header.size;
+ while adatapo < po1 do begin
+  setlength(ar1,high(ar1)+2);
+  inc(adatapo,decodeifidata(pifidataty(adatapo),ar1[high(ar1)]));
+ end;
+ case high(ar1) of
+  -1: begin
+   result:= null;
+  end;
+  0: begin
+   result:= ar1[0];
+  end;
+  else begin
+   dynarraytovariant(result,pointer(ar1),typeinfo(variantarty));
+  end;
+ end;
 end;
 
 procedure datakinderror;
@@ -635,6 +678,15 @@ begin
  end;
 end;
 
+function decodeifidata(const source: pifidataty; out dest: integer): integer;
+begin
+ if source^.header.kind <> idk_integer then begin
+  datakinderror;
+ end;
+ dest:= pinteger(@source^.data)^;
+ result:= datarecsizes[idk_integer];
+end;
+
 function decodeifidata(const source: pifidataty; out dest: int64): integer;
 begin
  if source^.header.kind <> idk_int64 then begin
@@ -660,6 +712,50 @@ begin
  end;
  dest:= pcurrency(@source^.data)^;
  result:= datarecsizes[idk_currency];
+end;
+
+function decodeifidata(const source: pifidataty; out dest: variant): integer;
+var
+ integer1: integer;
+ int641: int64;
+ currency1: currency;
+ real1: real;
+ msestring1: msestring;
+ ansistring1: ansistring;
+begin
+ case source^.header.kind of
+  idk_null: begin
+   dest:= null;
+   result:= sizeof(ifidataty);   
+  end;
+  idk_integer: begin
+   result:= decodeifidata(source,integer1);
+   dest:= integer1;
+  end;
+  idk_int64: begin
+   result:= decodeifidata(source,int641);
+   dest:= int641;
+  end;
+  idk_currency: begin
+   result:= decodeifidata(source,currency1);
+   dest:= currency1;
+  end;
+  idk_real: begin
+   result:= decodeifidata(source,real1);
+   dest:= real1;
+  end;
+  idk_msestring: begin
+   result:= decodeifidata(source,msestring1);
+   dest:= msestring1;
+  end;
+  idk_bytes: begin
+   result:= decodeifidata(source,ansistring1);
+   dest:= ansistring1;
+  end;
+  else begin
+   raise exception.create('Invalid IfI data');
+  end;
+ end;
 end;
 
 procedure initifirec(out arec: string; const akind: ifireckindty;

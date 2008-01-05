@@ -170,7 +170,7 @@ type
  end;
  
  tifidataset = class(tdataset,idscontroller,igetdscontroller,
-                                       iifidscontroller,iifimodulelink)
+                     iifidscontroller,iifimodulelink)
   private
 //   fifimodulelink: iifimodulelink;
 //   property ifimodulelink: iifimodulelink read fifimodulelink 
@@ -360,10 +360,11 @@ type
    property AutoCalcFields;
  end;
  
- trxdataset = class(tifidataset)
+ trxdataset = class(tifidataset,iifitxaction)
   private
    procedure inheritedinternalopen; override;
   protected
+   procedure txactionfired(var adata: ansistring; var adatapo: pchar);
    procedure fielddefsdatareceived(const asequence: sequencety; 
                                   const adata: pfielddefsdatadataty); override;
    procedure dsdatareceived(const asequence: sequencety; 
@@ -390,6 +391,7 @@ type
    procedure setificontroller(const avalue: tifidscontroller);
    procedure initmodifiedfields;   
   protected
+   
    procedure internalopen; override;
    procedure InternalPost; override;
    function getfieldbuffer(const afield: tfield;
@@ -489,7 +491,10 @@ begin
   end
   else begin
    case fieldtype of
-    ftlargeint,ftinteger: begin
+    ftinteger: begin
+     result:= encodeifidata(field.asinteger,headersize);
+    end;
+    ftlargeint: begin
      result:= encodeifidata(field.aslargeint,headersize);
     end;
     ftfloat: begin
@@ -767,6 +772,7 @@ var
  index1: integer;
  po1: pchar;
  mstr1: msestring;
+ integer1: integer;
  int641: int64;
  rea1: real;
  cu1: currency;
@@ -812,6 +818,10 @@ begin
          idk_null: begin
           field1.clear;
           inc(po1,sizeof(ifidataty));
+         end;
+         idk_integer: begin
+          inc(po1,decodeifidata(pifidataty(po1),integer1));
+          field1.asinteger:= integer1;
          end;
          idk_int64: begin
           inc(po1,decodeifidata(pifidataty(po1),int641));
@@ -2226,6 +2236,7 @@ end;
 
 procedure tifidataset.decoderecord(var adata: pointer; const dest: pintrecordty);
 var
+ integer1: integer;
  int641: int64;
  double1: double;
  cur1: currency;
@@ -2241,8 +2252,8 @@ begin
    with ffieldinfos[fificontroller.ffielddefindex[int1]] do begin
     case fieldtype of 
      ftinteger: begin
-      inc(adata,decodeifidata(pifidataty(adata),int641));
-      pinteger(pointer(dest)+offset)^:= int641;
+      inc(adata,decodeifidata(pifidataty(adata),integer1));
+      pinteger(pointer(dest)+offset)^:= integer1;
      end;
      ftlargeint: begin
       inc(adata,decodeifidata(pifidataty(adata),int641));
@@ -2424,6 +2435,14 @@ begin
    inherited;
   end;
  end;
+end;
+
+procedure trxdataset.txactionfired(var adata: ansistring; var adatapo: pchar);
+begin
+ if active then begin
+  checkbrowsemode;
+ end;
+ addifiintegervalue(adata,adatapo,recno);
 end;
 
 { ttxdataset }

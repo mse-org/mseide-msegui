@@ -51,15 +51,37 @@ type
   published
    property action: tcustomaction read faction write setaction;
  end;
- 
+
+ trxlinkaction = class;
+  
+ ifiexecuteeventty = procedure(const sender: trxlinkaction; const atag: integer;
+                                 const aparams: variant) of object;
+                                 
  trxlinkaction = class(tlinkaction)
+  private
+   fonexecute: ifiexecuteeventty;
+  published
+   property onexecute: ifiexecuteeventty read fonexecute write fonexecute;
+               //sender = item, avalue = tx tag
  end;
+
+ iifitxaction = interface(inullinterface)
+                          ['{70ECD758-7388-4205-BA70-7DC95B660C5F}']
+  procedure txactionfired(var adata: ansistring; var adatapo: pchar);
+ end; 
+
  ttxlinkaction = class(tlinkaction)
+  private
+   fificomp: tcomponent;
+   fificompintf: iifitxaction;
+   procedure setificomp(const avalue: tcomponent);
   protected
    procedure objectevent(const sender: tobject;
                                   const event: objecteventty); override;
   public
    procedure execute;
+  published
+   property ificomp: tcomponent read fificomp write setificomp;
  end;
  
  tlinkactions = class(tmodulelinkarrayprop)
@@ -70,7 +92,7 @@ type
 
  trxlinkactions = class(tlinkactions)
   private
-   fonexecute: integerchangedeventty;
+   fonexecute: ifiexecuteeventty;
    function getitems(const index: integer): trxlinkaction;
   protected
    function getitemclass: modulelinkpropclassty; override;  
@@ -79,17 +101,31 @@ type
    function byname(const aname: string): trxlinkaction;
    property items[const index: integer]: trxlinkaction read getitems; default;
   published
-   property onexecute: integerchangedeventty read fonexecute write fonexecute;
+   property onexecute: ifiexecuteeventty read fonexecute write fonexecute;
                //sender = item, avalue = tx tag
  end;
+
+ ttxlinkactions = class;
  
+ ttxactiondestroyhandler = class(tcomponent)
+  private
+   fowner: ttxlinkactions;
+  protected
+   procedure notification(acomponent: tcomponent;
+                           operation: toperation); override;
+  public
+   constructor create(aowner: ttxlinkactions); reintroduce;
+ end;
+  
  ttxlinkactions = class(tlinkactions)
   private
+   fdestroyhandler: ttxactiondestroyhandler;
    function getitems(const index: integer): ttxlinkaction;
   protected
    function getitemclass: modulelinkpropclassty; override;  
   public
    constructor create(const aowner: tcustommodulelink);
+   destructor destroy; override;
    function byname(const aname: string): ttxlinkaction;
    property items[const index: integer]: ttxlinkaction read getitems; default;
  end;
@@ -222,7 +258,6 @@ type
                           ['{90279F1E-E80F-4657-9531-3C3A2CF151BD}']
   procedure connectmodule(const sender: tcustommodulelink);
  end;
- 
  tcustommodulelink = class(tifiiolinkcomponent,iifiserver,iifimodulelink)
   private
    factionsrx: trxlinkactions;
@@ -242,9 +277,12 @@ type
    function encodemodulecommand(const acommand: ificommandcodety;
                const atag: integer; const aname: string): string;
    procedure closemodule(const atag: integer; const aname: string);
-   function encodeactionfired(const atag: integer; const aname: string): string;
-   procedure actionfired(const sender: tlinkaction); virtual;
-   function actionreceived(const atag: integer; const aname: string):boolean;
+   function encodeactionfired(const atag: integer; const aname: string;
+                                  out adatapo: pchar): string;
+   procedure actionfired(const sender: tlinkaction; 
+                          const acompintf: iifitxaction); virtual;
+   function actionreceived(const adata: pifirecty; var adatapo: pchar;
+                  const atag: integer; const aname: string):boolean;
    function requestmodulereceived(const atag: integer; const aname: string;
                                     const asequence: sequencety): boolean;
    function modulecommandreceived(const atag: integer; const aname: string;
@@ -295,7 +333,7 @@ type
    property channel;
    property options;
  end;
- 
+
 implementation
 uses
  sysutils,msestream,msesysutils,msetmpmodules,mseapplication;
@@ -338,7 +376,7 @@ end;
  
 procedure ttxlinkaction.execute;
 begin
- tcustommodulelink(fowner).actionfired(self);
+ tcustommodulelink(fowner).actionfired(self,fificompintf);
 end;
 
 procedure ttxlinkaction.objectevent(const sender: tobject;
@@ -346,6 +384,21 @@ procedure ttxlinkaction.objectevent(const sender: tobject;
 begin
  if (event = oe_fired) and (sender = faction) then begin
   execute;
+ end;
+end;
+
+procedure ttxlinkaction.setificomp(const avalue: tcomponent);
+begin
+ if fificomp <> nil then begin
+  ttxlinkactions(prop).fdestroyhandler.removefreenotification(fificomp);
+ end;
+ fificomp:= avalue;
+ if fificomp <> nil then begin
+  ttxlinkactions(prop).fdestroyhandler.freenotification(fificomp);
+  mseclasses.getcorbainterface(fificomp,typeinfo(iifitxaction),fificompintf);
+ end
+ else begin
+  fificompintf:= nil;
  end;
 end;
 
@@ -406,11 +459,46 @@ begin
  result:= trxlinkaction;
 end;
 
+{ ttxactiondestroyhandler }
+
+constructor ttxactiondestroyhandler.create(aowner: ttxlinkactions);
+begin
+ fowner:= aowner;
+ inherited create(nil);
+end;
+
+procedure ttxactiondestroyhandler.notification(acomponent: tcomponent;
+               operation: toperation);
+var
+ int1: integer;
+begin
+ inherited;
+ if operation = opremove then begin
+  with fowner do begin
+   for int1:= 0 to high(fitems) do begin
+    with ttxlinkaction(fitems[int1]) do begin
+     if acomponent = fificomp then begin
+      fificomp:= nil;
+      fificompintf:= nil;
+     end;
+    end;
+   end;    
+  end;
+ end;
+end;
+
 { ttxlinkactions }
 
 constructor ttxlinkactions.create(const aowner: tcustommodulelink);
 begin
+ fdestroyhandler:= ttxactiondestroyhandler.create(self);
  inherited create(aowner);
+end;
+
+destructor ttxlinkactions.destroy;
+begin
+ inherited;
+ fdestroyhandler.destroy;
 end;
 
 function ttxlinkactions.getitems(const index: integer): ttxlinkaction;
@@ -813,22 +901,31 @@ begin
  end;
 end;
 
-procedure tcustommodulelink.actionfired(const sender: tlinkaction);
+procedure tcustommodulelink.actionfired(const sender: tlinkaction;
+                                     const acompintf: iifitxaction);
+var
+ str1: string;
+ po1: pchar;
 begin
  if fchannel <> nil then begin
-  fchannel.senddata(encodeactionfired(sender.tag,sender.name));
+  str1:= encodeactionfired(sender.tag,sender.name,po1);
+  if acompintf <> nil then begin
+   acompintf.txactionfired(str1,po1);
+  end;
+  fchannel.senddata(str1);
  end;
 end;
 
 function tcustommodulelink.encodeactionfired(const atag: integer;
-               const aname: string): string;
+               const aname: string; out adatapo: pchar): string;
 var
  po1: pchar;
 begin
  initifirec(result,ik_actionfired,0,length(aname),po1);
  with pifirecty(result)^.actionfired.header do begin
   tag:= atag;
-  stringtoifiname(aname,@name);
+  adatapo:= @name;
+  inc(adatapo,stringtoifiname(aname,pifinamety(adatapo)));
  end;
 end;
 
@@ -862,7 +959,7 @@ begin
  with adata^ do begin
   case header.kind of
    ik_actionfired: begin
-    result:= actionreceived(atag,aname);
+    result:= actionreceived(adata,adatapo,atag,aname);
    end;
    ik_propertychanged: begin
     with propertychanged.header do begin
@@ -948,19 +1045,29 @@ begin
  end;
 end;
 
-function tcustommodulelink.actionreceived(const atag: integer;
-               const aname: string): boolean;
+function tcustommodulelink.actionreceived(const adata: pifirecty;
+        var adatapo: pchar; const atag: integer; const aname: string): boolean;
 var
  act1: trxlinkaction;
  int1: integer;
+ var1: variant;
 begin
  result:= false;
  with factionsrx do begin
   act1:= trxlinkaction(finditem(aname));
   if act1 <> nil then begin
    result:= true;
+   if adatapo^ <> #0 then begin
+    var1:= readifivariant(adata,adatapo);
+   end
+   else begin //end of string
+    var1:= null;
+   end;
+   if assigned(act1.fonexecute) then begin
+    act1.fonexecute(act1,atag,var1);
+   end;
    if assigned(fonexecute) then begin
-    fonexecute(act1,atag);
+    fonexecute(act1,atag,var1);
    end;
    with act1 do begin
     if (faction <> nil) and faction.enabled then begin

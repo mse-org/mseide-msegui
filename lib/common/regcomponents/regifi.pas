@@ -57,6 +57,11 @@ type
   public 
    procedure setvalue(const value: msestring); override;
  end;
+ 
+ tifitxactioncompeditor = class(tcomponentpropertyeditor)
+  protected
+   function filtercomponent(const acomponent: tcomponent): boolean; override;
+ end;
    
 procedure register;
 begin
@@ -75,6 +80,8 @@ begin
  registerpropertyeditor(typeinfo(tlinkactions),nil,'',tmodulelinkactionseditor);
  registerpropertyeditor(typeinfo(tvaluewidgetlinks),nil,'',tvaluewidgetlinkseditor);
  registerpropertyeditor(typeinfo(twidget),tvaluewidgetlink,'widget',tifidatawidgeteditor);
+ registerpropertyeditor(typeinfo(tcomponent),ttxlinkaction,'ificomp',
+                 tifitxactioncompeditor);
 // registerpropertyeditor(typeinfo(tififieldoptions),tifidscontroller,'',
 //                        tififieldoptionseditor);
 end;
@@ -204,6 +211,15 @@ begin
  else begin
   result:= inherited name;
  end;
+end;
+
+{ tifitxactioncompeditor }
+
+function tifitxactioncompeditor.filtercomponent(const acomponent: tcomponent): boolean;
+var
+ intf1: iifitxaction;
+begin
+ result:= mseclasses.getcorbainterface(acomponent,typeinfo(iifitxaction),intf1);
 end;
 
 initialization
