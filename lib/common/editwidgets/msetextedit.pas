@@ -293,6 +293,8 @@ type
                   setmaxundosize default defaultundobuffermaxsize;
  end;
 
+procedure normalizetextrect(const po1,po2: gridcoordty; out start,stop: gridcoordty);
+
 implementation
 uses
  msefileutils,sysutils,msesysutils,msesys,mseguiglob,msewidgets,

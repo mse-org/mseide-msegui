@@ -828,13 +828,14 @@ begin
 end;
  
 procedure tsourcepage.find;
-
+var
+ pt1: gridcoordty;
 begin
  with projectoptions.findreplaceinfo.find do begin
   if selectedonly then begin
    if edit.hasselection then begin
-    ffindpos:= edit.selectstart;
-    if not edit.find(text,options,ffindpos,edit.selectend,true) then begin
+    normalizetextrect(edit.selectstart,edit.selectend,ffindpos,pt1);
+    if not edit.find(text,options,ffindpos,pt1,true) then begin
      textnotfound;
     end
     else begin
@@ -878,8 +879,7 @@ begin
      exit;
     end
     else begin
-     ffindpos:= edit.selectstart;
-     pos1:= edit.selectend;
+     normalizetextrect(edit.selectstart,edit.selectend,ffindpos,pos1);
     end;
    end
    else begin
