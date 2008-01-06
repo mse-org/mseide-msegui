@@ -13,6 +13,7 @@ type
                  ik_widgetcommand,ik_widgetproperties,ik_requestmodule,ik_moduledata,
                  ik_requestfielddefs,ik_fielddefsdata,ik_fieldrec,
                  ik_requestopends,ik_dsdata,ik_postresult,ik_modulecommand);
+ ifireckindsty = set of ifireckindty;
 const
  ifiitemkinds = [ik_actionfired,ik_propertychanged,ik_widgetcommand,
                  ik_widgetproperties,ik_requestmodule,ik_moduledata,

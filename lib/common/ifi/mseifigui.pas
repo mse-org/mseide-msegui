@@ -61,8 +61,13 @@ type
    property channel;
    property options;
  end;
-
+{
+ tifiwidgetgridcontroller = class(tifirxcontroller)
+ end;
  
+ trxwidgetgrid = class(twidgetgrid)
+ end;
+} 
 implementation
 uses
  sysutils,msestream,msesysutils,msetmpmodules;

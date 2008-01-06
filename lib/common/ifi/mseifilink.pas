@@ -334,6 +334,48 @@ type
    property options;
  end;
 
+ ifirxoptionty = (irxo_useclientchannel,irxo_postecho); 
+ ifirxoptionsty = set of ifirxoptionty;
+const 
+ defaultifirxoptions = [irxo_useclientchannel];
+ defaultifirxtimeout = 10000000; //10 second
+type 
+ tifirxcontroller = class(teventpersistent,iifimodulelink)
+  private
+   fchannel: tcustomiochannel;
+   flinkname: string;
+   ftag: integer;
+   fdefaulttimeout: integer;
+   procedure setchannel(const avalue: tcustomiochannel);
+  protected
+   fowner: tcomponent;
+   foptions: ifirxoptionsty;
+   procedure objectevent(const sender: tobject; const event: objecteventty);
+                                                        override;   
+   function senddata(const adata: ansistring; 
+                         const asequence: sequencety = 0): sequencety;
+   function senddataandwait(const adata: ansistring;
+            out asequence: sequencety; atimeoutus: integer = 0): boolean;
+   procedure inititemheader(out arec: string;
+               const akind: ifireckindty; const asequence: sequencety; 
+                const datasize: integer; out datapo: pchar);
+   procedure processdata(const adata: pifirecty; var adatapo: pchar); 
+                                    virtual; abstract;
+   function getifireckinds: ifireckindsty; virtual; abstract;
+   //iifimodulelink
+   procedure connectmodule(const sender: tcustommodulelink);
+  public
+   constructor create(const aowner: tcomponent);
+  published
+   property channel: tcustomiochannel read fchannel write setchannel;
+   property linkname: string read flinkname write flinkname;
+   property tag: integer read ftag write ftag;
+   property options: ifirxoptionsty read foptions write foptions 
+                                       default defaultifirxoptions;
+   property timeoutus: integer read fdefaulttimeout write fdefaulttimeout 
+                       default defaultifirxtimeout;
+ end;
+ 
 implementation
 uses
  sysutils,msestream,msesysutils,msetmpmodules,mseapplication;
@@ -1268,6 +1310,102 @@ begin
  fmodulelink:= amodulelink;
  fmoduledata:= amoduledata;
  inherited create(adata,dest);
+end;
+
+{ tifirxcontroller }
+
+constructor tifirxcontroller.create(const aowner: tcomponent);
+begin
+ fowner:= aowner;
+ foptions:= defaultifirxoptions;
+ fdefaulttimeout:= defaultifirxtimeout;
+ inherited create;
+end;
+
+procedure tifirxcontroller.connectmodule(const sender: tcustommodulelink);
+begin
+ if irxo_useclientchannel in options then begin
+  channel:= sender.channel;
+ end;
+end;
+
+procedure tifirxcontroller.inititemheader(out arec: string;
+               const akind: ifireckindty; const asequence: sequencety; 
+                const datasize: integer; out datapo: pchar);
+begin
+ mseifi.inititemheader(tag,flinkname,arec,akind,asequence,datasize,datapo);
+end;
+
+procedure tifirxcontroller.setchannel(const avalue: tcustomiochannel);
+begin
+ setlinkedvar(avalue,fchannel);
+end;
+
+function tifirxcontroller.senddata(const adata: ansistring; 
+                         const asequence: sequencety = 0): sequencety;
+begin
+ if fchannel = nil then begin
+  raise exception.create(fowner.name+': No IO channel assigned.');
+ end;
+ result:= asequence;
+ if result = 0 then begin
+  result:= fchannel.sequence;
+ end;
+ with pifirecty(adata)^.header do begin
+  sequence:= result;
+ end;
+ fchannel.senddata(adata);
+end;
+
+function tifirxcontroller.senddataandwait(const adata: ansistring;
+            out asequence: sequencety; atimeoutus: integer = 0): boolean;
+var
+ client1: twaitingclient;
+begin
+ if fchannel = nil then begin
+  raise exception.create(fowner.name+': No IO channel assigned.');
+ end;             
+ asequence:= fchannel.sequence;
+ client1:= fchannel.synchronizer.preparewait(asequence);
+ senddata(adata,asequence);
+ if atimeoutus = 0 then begin
+  atimeoutus:= timeoutus;
+ end;
+ result:= fchannel.synchronizer.waitforanswer(client1,atimeoutus);
+end;
+
+procedure tifirxcontroller.objectevent(const sender: tobject;
+               const event: objecteventty);
+var
+ po1: pifirecty;
+ tag1: integer;
+ str1: string;
+ po2: pchar;
+ int1: integer;
+ mstr1: msestring;
+begin
+ if (event = oe_dataready) and (sender = fchannel) then begin
+  if (length(fchannel.rxdata) >= sizeof(ifiheaderty)) then begin
+   with fchannel do begin
+    po1:= pifirecty(rxdata);
+    with po1^,header do begin
+     if (size = length(rxdata)) and (kind in getifireckinds) then begin
+      with itemheader do begin 
+       tag1:= tag;
+       po2:= @name;
+      end;
+      inc(po2,ifinametostring(pifinamety(po2),str1));
+      if str1 = flinkname then begin
+       processdata(po1,po2);
+       if answersequence <> 0 then begin
+        channel.synchronizer.answerreceived(answersequence);
+       end;
+      end;
+     end;
+    end;
+   end;
+  end;
+ end;
 end;
 
 end.

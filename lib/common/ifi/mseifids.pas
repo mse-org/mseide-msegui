@@ -7,8 +7,6 @@ uses
  classes,db,mseifi,mseclasses,mseglob,mseevent,msedb,msetypes,msebufdataset,
  msestrings,mseifilink,msesqldb,msearrayprops;
 
-const
- defaultifidstimeout = 10000000; //10 second
 
 type
  ififieldoptionty = (ifo_local);
@@ -72,10 +70,6 @@ type
  ifidsstatety = (ids_openpending,ids_fielddefsreceived,ids_remotedata,
                  ids_updating,ids_append,ids_sendpostresult,ids_postpending);
  ifidsstatesty = set of ifidsstatety;
- ifidsoptionty = (idso_useclientchannel,idso_postecho); 
- ifidsoptionsty = set of ifidsoptionty;
-const 
- defaultifidsoptions = [idso_useclientchannel];
 type  
  iifidscontroller = interface(inullinterface)
    function getfielddefs: tfielddefs;
@@ -102,15 +96,9 @@ type
                       const dest: ievent);
  end;
   
- tifidscontroller = class(teventpersistent,iifimodulelink)
+ tifidscontroller = class(tifirxcontroller)
   private
-   fowner: tdataset;
    fintf: iifidscontroller;
-   fchannel: tcustomiochannel;
-   flinkname: string;
-   foptions: ifidsoptionsty;
-   fdefaulttimeout: integer;
-   ftag: integer;
    fremotedatachange: notifyeventty;
    fpostsequence: sequencety;
    fpostcode: postresultcodety;
@@ -118,34 +106,24 @@ type
    fbindings: integerarty;
    ffielddefindex: integerarty;
 //   ffieldoptions: tififieldoptions;
-   procedure setchannel(const avalue: tcustomiochannel);
 //   procedure setfieldoptions(const avalue: tififieldoptions);
   protected
    fistate: ifidsstatesty;
-   procedure objectevent(const sender: tobject; const event: objecteventty);
-               override;   
    procedure requestfielddefsreceived(const asequence: sequencety);
    procedure processfieldrecdata(const asequence: sequencety;
                                        const adata: pfieldrecdataty);
-   procedure processdata(const adata: pifirecty);    
+   procedure processdata(const adata: pifirecty; var adatapo: pchar); 
+                                    override;
+   function getifireckinds: ifireckindsty; override;
    procedure doremotedatachange;
    function encodefielddefs(const fielddefs: tfielddefs): string;
    procedure postrecord1(const akind: fieldreckindty;
                                    const amodifiedfields: ansistring);
    procedure receiveevent(const event: tobjectevent); override;
-   //iifimodulelink
-   procedure connectmodule(const sender: tcustommodulelink);
   public
    constructor create(const aowner: tdataset; const aintf: iifidscontroller);
    destructor destroy; override;
    function getfield(const aindex: integer): tfield;
-   function senddata(const adata: ansistring; 
-                         const asequence: sequencety = 0): sequencety;
-   function senddataandwait(const adata: ansistring;
-            out asequence: sequencety; atimeoutus: integer = 0): boolean;
-   procedure inititemheader(out arec: string;
-               const akind: ifireckindty; const asequence: sequencety; 
-                const datasize: integer; out datapo: pchar);
    function encoderecord(const aindex: integer;
                     const recpo: pintrecordty): string;
    function encoderecords(const arecordcount: integer;
@@ -156,13 +134,6 @@ type
    procedure delete;
    procedure opened;
   published
-   property channel: tcustomiochannel read fchannel write setchannel;
-   property linkname: string read flinkname write flinkname;
-   property tag: integer read ftag write ftag;
-   property options: ifidsoptionsty read foptions write foptions 
-                                       default defaultifidsoptions;
-   property timeoutus: integer read fdefaulttimeout write fdefaulttimeout 
-                       default defaultifidstimeout;
    property remotedatachange: notifyeventty read fremotedatachange 
                                               write fremotedatachange;
 //   property fieldoptions: tififieldoptions read ffieldoptions 
@@ -195,7 +166,7 @@ type
    fopen: boolean;
 
    fremotedatachange: notifyeventty;
-   foptions: ifidsoptionsty;
+//   foptions: ifirxoptionsty;
    fupdating: integer;
    procedure initmodifiedfields;   
    procedure setcontroller(const avalue: tdscontroller);
@@ -538,51 +509,15 @@ end;
 constructor tifidscontroller.create(const aowner: tdataset;
                     const aintf: iifidscontroller);
 begin
- fowner:= aowner;
  fintf:= aintf;
- foptions:= defaultifidsoptions;
- fdefaulttimeout:= defaultifidstimeout;
 // ffieldoptions:= tififieldoptions.create(typeinfo(ififieldoptionsty));
- inherited create;
+ inherited create(aowner);
 end;
 
 destructor tifidscontroller.destroy;
 begin
  inherited;
 // ffieldoptions.free;
-end;
-
-function tifidscontroller.senddata(const adata: ansistring; 
-                         const asequence: sequencety = 0): sequencety;
-begin
- if fchannel = nil then begin
-  raise exception.create(fowner.name+': No IO channel assigned.');
- end;
- result:= asequence;
- if result = 0 then begin
-  result:= fchannel.sequence;
- end;
- with pifirecty(adata)^.header do begin
-  sequence:= result;
- end;
- fchannel.senddata(adata);
-end;
-
-function tifidscontroller.senddataandwait(const adata: ansistring;
-            out asequence: sequencety; atimeoutus: integer = 0): boolean;
-var
- client1: twaitingclient;
-begin
- if fchannel = nil then begin
-  raise exception.create(fowner.name+': No IO channel assigned.');
- end;             
- asequence:= fchannel.sequence;
- client1:= fchannel.synchronizer.preparewait(asequence);
- senddata(adata,asequence);
- if atimeoutus = 0 then begin
-  atimeoutus:= timeoutus;
- end;
- result:= fchannel.synchronizer.waitforanswer(client1,atimeoutus);
 end;
 
 function tifidscontroller.encodefielddefs(const fielddefs: tfielddefs): string;
@@ -656,7 +591,7 @@ begin                 //postrecord
  inititemheader(str1,ik_fieldrec,0,int3+sizeof(fieldrecdataty),
                                      pchar(po1));
  po1^.kind:= akind;
- po1^.recno:= fowner.recno;
+ po1^.recno:= tdataset(fowner).recno;
  po1^.count:= int2;
  po2:= @po1^.data;
  for int1:= 0 to int2 - 1 do begin
@@ -677,7 +612,7 @@ begin                 //postrecord
    if (fpostcode <> pc_ok) then begin
     exclude(fistate,ids_postpending);
     application.errormessage(fpostmessage);
-    fowner.refresh; //todo: optimize
+    tdataset(fowner).refresh; //todo: optimize
    end;
   end;
   exclude(fistate,ids_postpending);
@@ -690,7 +625,7 @@ end;
 procedure tifidscontroller.post;
 begin
  if fistate * [ids_remotedata,ids_updating] = [] then begin
-  if fowner.state = dsinsert then begin
+  if tdataset(fowner).state = dsinsert then begin
    postrecord1(frk_insert,fintf.getmodifiedfields);
   end
   else begin
@@ -709,30 +644,11 @@ begin
  end;
 end;
 
-procedure tifidscontroller.connectmodule(const sender: tcustommodulelink);
-begin
- if idso_useclientchannel in options then begin
-  channel:= sender.channel;
- end;
-end;
-
 procedure tifidscontroller.doremotedatachange;
 begin
  if checkcanevent(fowner,tmethod(fremotedatachange)) then begin
   fremotedatachange(fowner);
  end;
-end;
-
-procedure tifidscontroller.inititemheader(out arec: string;
-               const akind: ifireckindty; const asequence: sequencety; 
-                const datasize: integer; out datapo: pchar);
-begin
- mseifi.inititemheader(tag,flinkname,arec,akind,asequence,datasize,datapo);
-end;
-
-procedure tifidscontroller.setchannel(const avalue: tcustomiochannel);
-begin
- setlinkedvar(avalue,fchannel);
 end;
 
 procedure tifidscontroller.requestfielddefsreceived(const asequence: sequencety);
@@ -753,7 +669,7 @@ var
  bm1: ansistring;
 begin
  if (event.kind = ek_mse) and (event is tpostechoevent) then begin
-  with fowner,tpostechoevent(event) do begin
+  with tdataset(fowner),tpostechoevent(event) do begin
    bm1:= bookmark;
    try
     bookmark:= fbookmark;
@@ -781,7 +697,7 @@ var
  bo1: boolean;
  bm: ansistring;
 begin
- with fowner do begin
+ with tdataset(fowner) do begin
   if active then begin
    try
     checkbrowsemode;
@@ -856,7 +772,7 @@ begin
       fintf.initmodifiedfields; //init for postecho
       post;
      end;
-     if (idso_postecho in foptions) and 
+     if (irxo_postecho in foptions) and 
             (adata^.kind in [frk_insert,frk_edit]) then begin
       str1:= fintf.getmodifiedfields;
       if not isnullstring(str1) then begin
@@ -892,67 +808,31 @@ begin
  end;
 end;
 
-procedure tifidscontroller.processdata(const adata: pifirecty);
-var 
- tag1: integer;
- str1: string;
- po1: pchar;
- int1: integer;
- mstr1: msestring;
+procedure tifidscontroller.processdata(const adata: pifirecty; var adatapo: pchar);
 begin
  with adata^ do begin
-  if header.kind in ifidskinds then begin
-   with itemheader do begin 
-    tag1:= tag;
-    po1:= @name;
+  case header.kind of
+   ik_requestfielddefs: begin
+    requestfielddefsreceived(header.sequence);
    end;
-   inc(po1,ifinametostring(pifinamety(po1),str1));
-   if str1 = flinkname then begin
-    case header.kind of
-     ik_requestfielddefs: begin
-      requestfielddefsreceived(header.sequence);
-     end;
-     ik_requestopends: begin
-      fintf.requestopendsreceived(header.sequence);
-     end;
-     ik_fielddefsdata: begin
-      fintf.fielddefsdatareceived(header.answersequence,pfielddefsdatadataty(po1));
-     end;
-     ik_dsdata: begin
-      fintf.dsdatareceived(header.answersequence,pfielddefsdatadataty(po1));
-     end;
-     ik_postresult: begin
-      if (ids_postpending in fistate) and 
-           (header.answersequence = fpostsequence) then begin
-       decodepostresult(ppostresultdataty(po1),fpostcode,fpostmessage);
-      end;
-     end;
-     ik_fieldrec: begin
-      processfieldrecdata(header.sequence,pfieldrecdataty(po1));
-     end;
+   ik_requestopends: begin
+    fintf.requestopendsreceived(header.sequence);
+   end;
+   ik_fielddefsdata: begin
+    fintf.fielddefsdatareceived(header.answersequence,
+              pfielddefsdatadataty(adatapo));
+   end;
+   ik_dsdata: begin
+    fintf.dsdatareceived(header.answersequence,pfielddefsdatadataty(adatapo));
+   end;
+   ik_postresult: begin
+    if (ids_postpending in fistate) and 
+         (header.answersequence = fpostsequence) then begin
+     decodepostresult(ppostresultdataty(adatapo),fpostcode,fpostmessage);
     end;
    end;
-   if header.answersequence <> 0 then begin
-    channel.synchronizer.answerreceived(header.answersequence);
-   end;
-  end;
- end;
-end;
-
-procedure tifidscontroller.objectevent(const sender: tobject;
-               const event: objecteventty);
-var
- po1: pifirecty;
-begin
- if (event = oe_dataready) and (sender = fchannel) then begin
-  if (length(fchannel.rxdata) >= sizeof(ifiheaderty)) then begin
-   with fchannel do begin
-    po1:= pifirecty(rxdata);
-    with po1^.header do begin
-     if size = length(rxdata) then begin
-      processdata(po1);
-     end;
-    end;
+   ik_fieldrec: begin
+    processfieldrecdata(header.sequence,pfieldrecdataty(adatapo));
    end;
   end;
  end;
@@ -1067,7 +947,7 @@ var
  int1,int2: integer;
  field1: tfield;
 begin
- with fowner do begin
+ with tdataset(fowner) do begin
   setlength(fbindings,fielddefs.count);
   setlength(ffielddefindex,fielddefs.count);
   int2:= 0;
@@ -1087,11 +967,16 @@ begin
  end;
 end;
 
+function tifidscontroller.getifireckinds: ifireckindsty;
+begin
+ result:= ifidskinds;
+end;
+
 { tifidataset }
 
 constructor tifidataset.create(aowner: tcomponent);
 begin
- foptions:= defaultifidsoptions;
+// foptions:= defaultifidsoptions;
  frecno:= -1;
 // fdefaulttimeout:= defaultifidstimeout;
 // fobjectlinker:= tobjectlinker.create(ievent(self),
@@ -2419,7 +2304,7 @@ begin
  with fificontroller do begin
   if (channel <> nil) or 
     not ((csdesigning in componentstate) and 
-         (idso_useclientchannel in foptions)) then begin
+         (irxo_useclientchannel in foptions)) then begin
    inititemheader(str1,ik_requestopends,0,0,po1);
    include(fistate,ids_openpending);
    if senddataandwait(str1,ffielddefsequence) and 
