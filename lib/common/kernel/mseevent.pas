@@ -119,8 +119,8 @@ type
 
  tstringobjectevent = class(tobjectevent)
   private
-   fdata: ansistring;
   public
+   fdata: ansistring;
    constructor create(const adata: ansistring; const dest: ievent);
    property data: ansistring read fdata write fdata;
  end;

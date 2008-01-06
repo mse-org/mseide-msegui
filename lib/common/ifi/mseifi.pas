@@ -17,6 +17,7 @@ const
  ifiitemkinds = [ik_actionfired,ik_propertychanged,ik_widgetcommand,
                  ik_widgetproperties,ik_requestmodule,ik_moduledata,
                  ik_modulecommand];
+ ifiasynckinds = [ik_moduledata];
 // mainloopifikinds = [ik_moduledata]; 
  
 type 
@@ -167,11 +168,14 @@ type
  end;
  
 type 
+ ifirecstatety = (irs_async);
+ ifirecstatesty = set of ifirecstatety;
  ifiheaderty = record
   size: integer;  //overall size
   sequence: sequencety;
   answersequence: sequencety;
   kind: ifireckindty;
+  state: ifirecstatesty;
  end;
  pifiheaderty = ^ifiheaderty;
  
@@ -288,12 +292,14 @@ type
    procedure disconnected;
    procedure doactivated; override;
    procedure dodeactivated; override;
+   procedure receiveevent(const event: tobjectevent); override;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
    function checkconnection: boolean;
    procedure senddata(const adata: ansistring);   
    function sequence: sequencety;
+   procedure asyncrx; //posts current rxdata to application queue
    property synchronizer: tiosynchronizer read fsynchronizer;
    property active: boolean read factive write setactive;
    property rxdata: string read frxdata write frxdata;
@@ -875,6 +881,25 @@ begin
  finally
   frxdata:= str1;
  end;
+end;
+
+procedure tcustomiochannel.receiveevent(const event: tobjectevent);
+begin
+ if (event.kind = ek_objectdata) and (event is tstringobjectevent) then begin
+  datareceived(tstringobjectevent(event).fdata);
+ end
+ else begin
+  inherited;
+ end;
+end;
+
+procedure tcustomiochannel.asyncrx; //posts current rxdata to application queue
+var
+ str1: ansistring;
+begin
+ str1:= frxdata;
+ frxdata:= '';
+ application.postevent(tstringobjectevent.create(str1,ievent(self)));
 end;
 
 procedure tcustomiochannel.setactive(const avalue: boolean);

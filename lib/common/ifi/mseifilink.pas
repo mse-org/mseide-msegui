@@ -941,8 +941,14 @@ begin
     po1:= pifirecty(rxdata);
     with po1^.header do begin
      if size = length(rxdata) then begin
-      if processdata(po1) then begin
-       rxdata:= '';
+      if (kind in ifiasynckinds) and not (irs_async in state) then begin
+       include(state,irs_async);
+       asyncrx;
+      end
+      else begin
+       if processdata(po1) then begin
+        rxdata:= '';
+       end;
       end;
      end;
     end;
@@ -1153,6 +1159,10 @@ function tcustommodulelink.moduledatareceived(const atag: integer;
           const adata: pmoduledatadataty): boolean;
 var
  mo1: trxlinkmodule;
+ comp1: tmsecomponent;
+ stream1: tmemorycopystream;
+ po1: pchar;
+ str1: string;
 begin
  if asequence <> 0 then begin
   mo1:= fmodulesrx.finditem(asequence);
@@ -1162,8 +1172,23 @@ begin
  end;
  result:= mo1 <> nil;
  if result then begin
-  application.postevent(tmoduledataevent.create(fchannel.rxdata,ievent(self),
-                       mo1,adata));
+  with mo1 do begin
+   po1:= adata^.parentclass;
+   inc(po1,ifinametostring(pifinamety(po1),str1));
+   freeandnil(fmodule);
+   with pifibytesty(po1)^ do begin
+    stream1:= tmemorycopystream.create(@data,length);
+    try
+     fmodule:= createtmpmodule(str1,stream1,@moduleloaded);
+     fmodule.getcorbainterface(typeinfo(iificommand),fcommandintf);
+    finally
+     stream1.free;
+    end;
+   end;
+   setlinkedvar(fmodule,fmodule);
+  end;
+//  application.postevent(tmoduledataevent.create(fchannel.rxdata,ievent(self),
+//                       mo1,adata));
  end;
 end;
 
