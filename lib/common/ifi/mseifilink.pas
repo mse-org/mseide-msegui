@@ -361,7 +361,7 @@ type
                 const datasize: integer; out datapo: pchar);
    procedure processdata(const adata: pifirecty; var adatapo: pchar); 
                                     virtual; abstract;
-   function getifireckinds: ifireckindsty; virtual; abstract;
+   function getifireckinds: ifireckindsty; virtual;
    //iifimodulelink
    procedure connectmodule(const sender: tcustommodulelink);
   public
@@ -1406,6 +1406,11 @@ begin
    end;
   end;
  end;
+end;
+
+function tifirxcontroller.getifireckinds: ifireckindsty;
+begin
+ result:= [];
 end;
 
 end.

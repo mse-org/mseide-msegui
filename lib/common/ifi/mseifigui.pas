@@ -3,7 +3,7 @@ unit mseifigui;
 interface
 uses
  classes,mseclasses,mseifiglob,mseifi,mseact,msegui,typinfo,msestrings,
- msearrayprops,mseglob,msetypes,mseifilink;
+ msearrayprops,mseglob,msetypes,mseifilink,msewidgetgrid;
  
 type
 
@@ -61,13 +61,25 @@ type
    property channel;
    property options;
  end;
-{
+
+ trxwidgetgrid = class;
+ 
  tifiwidgetgridcontroller = class(tifirxcontroller)
+  public
+   constructor create(const aowner: trxwidgetgrid);
  end;
  
  trxwidgetgrid = class(twidgetgrid)
+  private
+   fifi: tifiwidgetgridcontroller;
+   procedure setifi(const avalue: tifiwidgetgridcontroller);
+  public
+   constructor create(aowner: tcomponent); override;
+   destructor destroy; override;
+  published
+   property ifi: tifiwidgetgridcontroller read fifi write setifi;
  end;
-} 
+ 
 implementation
 uses
  sysutils,msestream,msesysutils,msetmpmodules;
@@ -301,6 +313,32 @@ begin
    end;
   end;
  end;
+end;
+
+{ tifiwidgetgridcontroller }
+
+constructor tifiwidgetgridcontroller.create(const aowner: trxwidgetgrid);
+begin
+ inherited create(aowner);
+end;
+
+{ trxwidgetgrid }
+
+constructor trxwidgetgrid.create(aowner: tcomponent);
+begin
+ fifi:= tifiwidgetgridcontroller.create(self);
+ inherited;
+end;
+
+destructor trxwidgetgrid.destroy;
+begin
+ inherited;
+ fifi.free;
+end;
+
+procedure trxwidgetgrid.setifi(const avalue: tifiwidgetgridcontroller);
+begin
+ fifi.assign(avalue);
 end;
 
 end.
