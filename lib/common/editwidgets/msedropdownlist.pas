@@ -1303,7 +1303,7 @@ begin
   if fcontroller.color = cl_default then begin
    widget1:= aparent;
    repeat
-    col1:= widget1.actualcolor;
+    col1:= widget1.parentcolor;
     widget1:= widget1.parentwidget;
    until (col1 <> cl_transparent) or (widget1 = nil);
    if col1 = cl_transparent then begin
