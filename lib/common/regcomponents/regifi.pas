@@ -66,7 +66,7 @@ type
 procedure register;
 begin
  registercomponents('Ifi',[tmodulelink,tformlink,
-                     trxwidgetgrid,
+                     trxwidgetgrid,ttxdatagrid,
                      {tpipeifichannel,tsocketpipeifichannel,
                      tsocketclientifichannel,tsocketserverifichannel,}
                      ttxdataset,trxdataset,ttxsqlquery,

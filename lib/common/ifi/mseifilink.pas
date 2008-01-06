@@ -3,7 +3,7 @@ unit mseifilink;
 interface
 uses
  classes,mseclasses,mseifiglob,mseifi,msearrayprops,mseact,mseevent,mseglob,
- msestrings,msetypes;
+ msestrings,msetypes,msedatalist;
  
 type
  tmodulelinkarrayprop = class;
@@ -340,7 +340,7 @@ const
  defaultifirxoptions = [irxo_useclientchannel];
  defaultifirxtimeout = 10000000; //10 second
 type 
- tifirxcontroller = class(teventpersistent,iifimodulelink)
+ tificontroller = class(teventpersistent,iifimodulelink)
   private
    fchannel: tcustomiochannel;
    flinkname: string;
@@ -375,7 +375,47 @@ type
    property timeoutus: integer read fdefaulttimeout write fdefaulttimeout 
                        default defaultifirxtimeout;
  end;
+
+ tifirxcontroller = class(tificontroller)
+ end;
+ tifitxcontroller = class(tificontroller)
+ end;
+
+ tifidatacol = class(townedpersistent)
+  private
+   fdatalist: tdatalist;
+   fdatakind: ifidatakindty;
+   procedure setdatakind(const avalue: ifidatakindty);
+  protected
+   procedure freedatalist;
+   procedure checkdatalist;
+  public
+   destructor destroy; override;
+  published
+   property datakind: ifidatakindty read fdatakind write setdatakind;
+ end;
+  
+ ttxdatagrid = class;
  
+ tifidatacols = class(townedpersistentarrayprop)
+  public 
+   constructor create(const aowner: ttxdatagrid);
+ end;
+ 
+ ttxdatagrid = class(tmsecomponent)
+  private
+   fifi: tifitxcontroller;
+   fdatacols: tifidatacols;
+   procedure setifi(const avalue: tifitxcontroller);
+   procedure setdatacols(const avalue: tifidatacols);
+  public
+   constructor create(aowner: tcomponent); override;
+   destructor destroy; override;
+  published
+   property ifi: tifitxcontroller read fifi write setifi;
+   property datacols: tifidatacols read fdatacols write setdatacols;
+ end;
+   
 implementation
 uses
  sysutils,msestream,msesysutils,msetmpmodules,mseapplication;
@@ -1312,9 +1352,9 @@ begin
  inherited create(adata,dest);
 end;
 
-{ tifirxcontroller }
+{ tificontroller }
 
-constructor tifirxcontroller.create(const aowner: tcomponent);
+constructor tificontroller.create(const aowner: tcomponent);
 begin
  fowner:= aowner;
  foptions:= defaultifirxoptions;
@@ -1322,26 +1362,26 @@ begin
  inherited create;
 end;
 
-procedure tifirxcontroller.connectmodule(const sender: tcustommodulelink);
+procedure tificontroller.connectmodule(const sender: tcustommodulelink);
 begin
  if irxo_useclientchannel in options then begin
   channel:= sender.channel;
  end;
 end;
 
-procedure tifirxcontroller.inititemheader(out arec: string;
+procedure tificontroller.inititemheader(out arec: string;
                const akind: ifireckindty; const asequence: sequencety; 
                 const datasize: integer; out datapo: pchar);
 begin
  mseifi.inititemheader(tag,flinkname,arec,akind,asequence,datasize,datapo);
 end;
 
-procedure tifirxcontroller.setchannel(const avalue: tcustomiochannel);
+procedure tificontroller.setchannel(const avalue: tcustomiochannel);
 begin
  setlinkedvar(avalue,fchannel);
 end;
 
-function tifirxcontroller.senddata(const adata: ansistring; 
+function tificontroller.senddata(const adata: ansistring; 
                          const asequence: sequencety = 0): sequencety;
 begin
  if fchannel = nil then begin
@@ -1357,7 +1397,7 @@ begin
  fchannel.senddata(adata);
 end;
 
-function tifirxcontroller.senddataandwait(const adata: ansistring;
+function tificontroller.senddataandwait(const adata: ansistring;
             out asequence: sequencety; atimeoutus: integer = 0): boolean;
 var
  client1: twaitingclient;
@@ -1374,7 +1414,7 @@ begin
  result:= fchannel.synchronizer.waitforanswer(client1,atimeoutus);
 end;
 
-procedure tifirxcontroller.objectevent(const sender: tobject;
+procedure tificontroller.objectevent(const sender: tobject;
                const event: objecteventty);
 var
  po1: pifirecty;
@@ -1408,9 +1448,67 @@ begin
  end;
 end;
 
-function tifirxcontroller.getifireckinds: ifireckindsty;
+function tificontroller.getifireckinds: ifireckindsty;
 begin
  result:= [];
+end;
+
+{ ttxdatagrid }
+
+constructor ttxdatagrid.create(aowner: tcomponent);
+begin
+ fifi:= tifitxcontroller.create(self);
+ inherited;
+ fdatacols:= tifidatacols.create(self);
+end;
+
+destructor ttxdatagrid.destroy;
+begin
+ inherited;
+ fifi.free;
+end;
+
+procedure ttxdatagrid.setifi(const avalue: tifitxcontroller);
+begin
+ fifi.assign(avalue);
+end;
+
+procedure ttxdatagrid.setdatacols(const avalue: tifidatacols);
+begin
+ fdatacols.assign(avalue);
+end;
+
+{ tifidatacols }
+
+constructor tifidatacols.create(const aowner: ttxdatagrid);
+begin
+ inherited create(aowner,tifidatacol);
+end;
+
+{ tifidatacol }
+
+destructor tifidatacol.destroy;
+begin
+ freedatalist;
+ inherited;
+end;
+
+procedure tifidatacol.freedatalist;
+begin
+ fdatalist.free;
+end;
+
+procedure tifidatacol.setdatakind(const avalue: ifidatakindty);
+begin
+ if fdatakind <> avalue then begin
+  freedatalist;
+  fdatakind:= avalue;
+ end;
+end;
+
+procedure tifidatacol.checkdatalist;
+begin
+
 end;
 
 end.
