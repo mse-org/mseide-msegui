@@ -159,7 +159,8 @@ type
 
 implementation
 uses
- msesqldb,msebufdataset,dbconst,sysutils,typinfo,dateutils,msesysintf,msedate;
+ msesqldb,msebufdataset,dbconst,sysutils,typinfo,dateutils,msesysintf,msedate,
+ msefileutils;
 type
  tmsebufdataset1 = class(tmsebufdataset);
  
@@ -775,15 +776,13 @@ end;
 
 procedure tsqlite3connection.DoInternalConnect;
 var
- mstr1: msestring;
  str1: string;
 begin
- mstr1:= fcontroller.getdatabasename;
- if (mstr1 = '') then begin
+ if (inherited databasename = '') then begin
   DatabaseError(SErrNoDatabaseName,self);
  end;
  initialisesqlite3;
- str1:= stringtoutf8(mstr1);
+ str1:= stringtoutf8(inherited databasename);
  checkerror(sqlite3_open(pchar(str1),@fhandle));
  checkbusytimeout;
 end;
