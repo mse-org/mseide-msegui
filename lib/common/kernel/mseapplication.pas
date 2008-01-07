@@ -120,6 +120,27 @@ type
                             write fonafterdeactivate;
    property activator;
  end;
+ 
+ tactivatorcontroller = class(tlinkedpersistent)
+  private
+   factive: boolean;
+   floaded: boolean;
+   factivator: tactivator;
+   procedure setactivator(const avalue: tactivator);
+  protected
+   fowner: tcomponent;
+   function getinstance: tobject; override;
+   procedure objectevent(const sender: tobject;
+                          const event: objecteventty); override;
+   procedure setowneractive(const avalue: boolean); virtual; abstract;
+  public
+   constructor create(const aowner: tcomponent); reintroduce;
+   function setactive (const value : boolean): boolean;
+   procedure loaded;
+  published 
+   property activator: tactivator read factivator write setactivator;
+ end;
+ 
 
  exceptioneventty = procedure (sender: tobject; e: exception) of object;
  terminatequeryeventty = procedure (var terminate: boolean) of object;
@@ -1100,6 +1121,68 @@ end;
 function tcustomapplication.idle: boolean;
 begin
  result:= (high(fpostedevents) < 0) and (feventlist.count = 0);
+end;
+
+{ tactivatorcontroller }
+
+constructor tactivatorcontroller.create(const aowner: tcomponent);
+begin
+ fowner:= aowner;
+ inherited create;
+end;
+
+function tactivatorcontroller.setactive(const value: boolean): boolean;
+begin
+ factive:= value;
+ result:= floaded or not (csloading in fowner.componentstate);
+end;
+
+procedure tactivatorcontroller.loaded;
+begin
+ floaded:= true;
+ if (factivator = nil) or factivator.activated then begin
+  if factivator <> nil then begin
+   factive:= true; //activated
+  end;
+  if csdesigning in fowner.componentstate then begin
+   try
+    setowneractive(factive);
+   except
+    application.handleexception(fowner);
+   end;
+  end
+  else begin
+   setowneractive(factive);
+  end;
+ end;
+end;
+
+procedure tactivatorcontroller.setactivator(const avalue: tactivator);
+begin
+ tactivator.addclient(avalue,iobjectlink(self),factivator);
+end;
+
+procedure tactivatorcontroller.objectevent(const sender: tobject;
+                     const event: objecteventty);
+begin
+ if (sender = factivator) then begin
+  case event of
+   oe_activate: begin
+    floaded:= true;
+    factive:= true;
+    setowneractive(factive);
+   end;
+   oe_deactivate: begin
+    factive:= false;
+    setowneractive(factive);
+   end;
+  end;
+ end;
+end;
+
+function tactivatorcontroller.getinstance: tobject;
+begin
+ result:= fowner;
 end;
 
 initialization

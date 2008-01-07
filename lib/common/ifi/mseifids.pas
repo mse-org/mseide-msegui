@@ -96,7 +96,7 @@ type
                       const dest: ievent);
  end;
   
- tifidscontroller = class(tifirxcontroller)
+ tifidscontroller = class(tifirxcontroller,ievent)
   private
    fintf: iifidscontroller;
    fremotedatachange: notifyeventty;
@@ -119,7 +119,7 @@ type
    function encodefielddefs(const fielddefs: tfielddefs): string;
    procedure postrecord1(const akind: fieldreckindty;
                                    const amodifiedfields: ansistring);
-   procedure receiveevent(const event: tobjectevent); override;
+   procedure receiveevent(const event: tobjectevent);
   public
    constructor create(const aowner: tdataset; const aintf: iifidscontroller);
    destructor destroy; override;
@@ -400,7 +400,7 @@ const
             //name changed in FPC 2_2
 {$endif}
 
- ifidskinds = [ik_requestfielddefs,ik_requestopends,ik_fielddefsdata,
+ ifidskinds = [ik_requestfielddefs,ik_requestopen,ik_fielddefsdata,
                ik_fieldrec,ik_dsdata,ik_postresult];
  openflags = [ids_openpending,ids_fielddefsreceived,ids_append];
  
@@ -815,7 +815,7 @@ begin
    ik_requestfielddefs: begin
     requestfielddefsreceived(header.sequence);
    end;
-   ik_requestopends: begin
+   ik_requestopen: begin
     fintf.requestopendsreceived(header.sequence);
    end;
    ik_fielddefsdata: begin
@@ -2305,7 +2305,7 @@ begin
   if (channel <> nil) or 
     not ((csdesigning in componentstate) and 
          (irxo_useclientchannel in foptions)) then begin
-   inititemheader(str1,ik_requestopends,0,0,po1);
+   inititemheader(str1,ik_requestopen,0,0,po1);
    include(fistate,ids_openpending);
    if senddataandwait(str1,ffielddefsequence) and 
               (ids_fielddefsreceived in fistate) then begin

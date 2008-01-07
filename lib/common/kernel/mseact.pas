@@ -211,7 +211,7 @@ type
    property onchange;
    property onasyncevent;
  end;
- 
+
 procedure linktoaction(const sender: iactionlink; const aaction: tcustomaction;
                       var info: actioninfoty);
                   //remove existing link, copy action to instance

@@ -6,7 +6,6 @@ uses
  msearrayprops,mseglob,msetypes,mseifilink,msewidgetgrid;
  
 type
-
  
  tvaluewidgetlink = class(tvaluelink)
   private
@@ -65,19 +64,32 @@ type
  trxwidgetgrid = class;
  
  tifiwidgetgridcontroller = class(tifirxcontroller)
+  protected
+   procedure setowneractive(const avalue: boolean); override;
   public
    constructor create(const aowner: trxwidgetgrid);
  end;
- 
+
+ rxwidgetstatety = (rws_openpending,rws_datareceived); 
+ rxwidgetstatesty = set of rxwidgetstatety;
  trxwidgetgrid = class(twidgetgrid)
   private
    fifi: tifiwidgetgridcontroller;
+   factive: boolean;
+   fistate: rxwidgetstatesty;
+   fdatasequence: sequencety;
    procedure setifi(const avalue: tifiwidgetgridcontroller);
+   procedure setactive(const avalue: boolean);
+  protected
+   procedure loaded; override;
+   procedure internalopen;
+   procedure internalclose;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
   published
    property ifi: tifiwidgetgridcontroller read fifi write setifi;
+   property active: boolean read factive write setactive default false;
  end;
  
 implementation
@@ -322,6 +334,11 @@ begin
  inherited create(aowner);
 end;
 
+procedure tifiwidgetgridcontroller.setowneractive(const avalue: boolean);
+begin
+ trxwidgetgrid(fowner).active:= avalue;
+end;
+
 { trxwidgetgrid }
 
 constructor trxwidgetgrid.create(aowner: tcomponent);
@@ -339,6 +356,67 @@ end;
 procedure trxwidgetgrid.setifi(const avalue: tifiwidgetgridcontroller);
 begin
  fifi.assign(avalue);
+end;
+
+procedure trxwidgetgrid.setactive(const avalue: boolean);
+begin
+ if avalue <> factive then begin
+  if avalue then begin
+   if csloading in componentstate then begin
+    include(fistate,rws_openpending);
+   end
+   else begin
+    try
+     internalopen;
+    except
+     active:= false;
+     raise;
+    end;
+    factive:= true;
+   end;
+  end
+  else begin
+   exclude(fistate,rws_openpending);
+   internalclose;
+   factive:= false;
+  end;
+ end;
+end;
+
+procedure trxwidgetgrid.loaded;
+begin
+ inherited;
+ if rws_openpending in fistate then begin
+  exclude(fistate,rws_openpending);
+  active:= true;
+ end;
+ fifi.loaded;
+end;
+
+procedure trxwidgetgrid.internalopen;
+var
+ str1: string;
+ po1: pchar;
+begin
+ with fifi do begin
+  if (channel <> nil) or 
+    not ((csdesigning in componentstate) and 
+         (irxo_useclientchannel in foptions)) then begin
+   inititemheader(str1,ik_requestopen,0,0,po1);
+   include(fistate,rws_openpending);
+   if senddataandwait(str1,fdatasequence) and 
+              (rws_datareceived in fistate) then begin
+   end
+   else begin
+    sysutils.abort;
+   end;
+  end;
+ end;
+end;
+
+procedure trxwidgetgrid.internalclose;
+begin
+ rowcount:= 0;
 end;
 
 end.

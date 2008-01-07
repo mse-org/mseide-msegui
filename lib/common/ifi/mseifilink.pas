@@ -2,8 +2,8 @@ unit mseifilink;
 {$ifdef FPC}{$mode objfpc}{$h+}{$INTERFACES CORBA}{$endif}
 interface
 uses
- classes,mseclasses,mseifiglob,mseifi,msearrayprops,mseact,mseevent,mseglob,
- msestrings,msetypes,msedatalist;
+ classes,mseclasses,mseifiglob,mseifi,msearrayprops,mseapplication,mseact,
+ mseevent,mseglob,msestrings,msetypes,msedatalist;
  
 type
  tmodulelinkarrayprop = class;
@@ -340,7 +340,7 @@ const
  defaultifirxoptions = [irxo_useclientchannel];
  defaultifirxtimeout = 10000000; //10 second
 type 
- tificontroller = class(teventpersistent,iifimodulelink)
+ tificontroller = class(tactivatorcontroller,iifimodulelink)
   private
    fchannel: tcustomiochannel;
    flinkname: string;
@@ -348,7 +348,6 @@ type
    fdefaulttimeout: integer;
    procedure setchannel(const avalue: tcustomiochannel);
   protected
-   fowner: tcomponent;
    foptions: ifirxoptionsty;
    procedure objectevent(const sender: tobject; const event: objecteventty);
                                                         override;   
@@ -385,6 +384,7 @@ type
   private
    fdatalist: tdatalist;
    fdatakind: ifidatakindty;
+   fname: ansistring;
    procedure setdatakind(const avalue: ifidatakindty);
   protected
    procedure freedatalist;
@@ -392,7 +392,9 @@ type
   public
    destructor destroy; override;
   published
-   property datakind: ifidatakindty read fdatakind write setdatakind;
+   property datakind: ifidatakindty read fdatakind write setdatakind 
+                         default idk_none;
+   property name: ansistring read fname write fname;
  end;
   
  ttxdatagrid = class;
@@ -402,23 +404,36 @@ type
    constructor create(const aowner: ttxdatagrid);
  end;
  
+ ttxdatagridcontroller = class(tifitxcontroller)
+  protected
+   function getifireckinds: ifireckindsty; override;
+   procedure setowneractive(const avalue: boolean); override;
+   procedure processdata(const adata: pifirecty; var adatapo: pchar); 
+                                    override;
+  public
+   constructor create(const aowner: ttxdatagrid);
+ end;
+  
  ttxdatagrid = class(tmsecomponent)
   private
-   fifi: tifitxcontroller;
+   fifi: ttxdatagridcontroller;
    fdatacols: tifidatacols;
-   procedure setifi(const avalue: tifitxcontroller);
+   frowcount: integer;
+   procedure setifi(const avalue: ttxdatagridcontroller);
    procedure setdatacols(const avalue: tifidatacols);
+   procedure setrowcount(const avalue: integer);
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
   published
-   property ifi: tifitxcontroller read fifi write setifi;
+   property ifi: ttxdatagridcontroller read fifi write setifi;
    property datacols: tifidatacols read fdatacols write setdatacols;
+   property rowcount: integer read frowcount write setrowcount;
  end;
    
 implementation
 uses
- sysutils,msestream,msesysutils,msetmpmodules,mseapplication;
+ sysutils,msestream,msesysutils,msetmpmodules;
 
 type
  tmoduledataevent = class(tstringobjectevent)
@@ -1356,10 +1371,9 @@ end;
 
 constructor tificontroller.create(const aowner: tcomponent);
 begin
- fowner:= aowner;
  foptions:= defaultifirxoptions;
  fdefaulttimeout:= defaultifirxtimeout;
- inherited create;
+ inherited create(aowner);
 end;
 
 procedure tificontroller.connectmodule(const sender: tcustommodulelink);
@@ -1440,49 +1454,21 @@ begin
        if answersequence <> 0 then begin
         channel.synchronizer.answerreceived(answersequence);
        end;
+       rxdata:= '';
       end;
      end;
     end;
    end;
   end;
+ end
+ else begin
+  inherited;
  end;
 end;
 
 function tificontroller.getifireckinds: ifireckindsty;
 begin
  result:= [];
-end;
-
-{ ttxdatagrid }
-
-constructor ttxdatagrid.create(aowner: tcomponent);
-begin
- fifi:= tifitxcontroller.create(self);
- inherited;
- fdatacols:= tifidatacols.create(self);
-end;
-
-destructor ttxdatagrid.destroy;
-begin
- inherited;
- fifi.free;
-end;
-
-procedure ttxdatagrid.setifi(const avalue: tifitxcontroller);
-begin
- fifi.assign(avalue);
-end;
-
-procedure ttxdatagrid.setdatacols(const avalue: tifidatacols);
-begin
- fdatacols.assign(avalue);
-end;
-
-{ tifidatacols }
-
-constructor tifidatacols.create(const aowner: ttxdatagrid);
-begin
- inherited create(aowner,tifidatacol);
 end;
 
 { tifidatacol }
@@ -1509,6 +1495,84 @@ end;
 procedure tifidatacol.checkdatalist;
 begin
 
+end;
+
+{ tifidatacols }
+
+constructor tifidatacols.create(const aowner: ttxdatagrid);
+begin
+ inherited create(aowner,tifidatacol);
+end;
+
+{ ttxdatagrid }
+
+constructor ttxdatagrid.create(aowner: tcomponent);
+begin
+ fifi:= ttxdatagridcontroller.create(self);
+ inherited;
+ fdatacols:= tifidatacols.create(self);
+end;
+
+destructor ttxdatagrid.destroy;
+begin
+ fdatacols.free;
+ inherited;
+ fifi.free;
+end;
+
+procedure ttxdatagrid.setifi(const avalue: ttxdatagridcontroller);
+begin
+ fifi.assign(avalue);
+end;
+
+procedure ttxdatagrid.setdatacols(const avalue: tifidatacols);
+begin
+ fdatacols.assign(avalue);
+end;
+
+procedure ttxdatagrid.setrowcount(const avalue: integer);
+var
+ int1: integer;
+begin
+ if frowcount <> avalue then begin
+  frowcount:= avalue;
+  with fdatacols do begin
+   for int1:= 0 to high(fitems) do begin
+    with tifidatacol(fitems[int1]) do begin
+     if fdatalist <> nil then begin
+      fdatalist.count:= avalue;
+     end;
+    end;
+   end;
+  end;
+ end;
+end;
+
+{ ttxdatagridcontroller }
+
+constructor ttxdatagridcontroller.create(const aowner: ttxdatagrid);
+begin
+ inherited create(aowner);
+end;
+
+procedure ttxdatagridcontroller.processdata(const adata: pifirecty;
+               var adatapo: pchar);
+begin
+ case adata^.header.kind of
+  ik_requestopen: begin
+   
+  end;
+ end;
+end;
+
+procedure ttxdatagridcontroller.setowneractive(const avalue: boolean);
+begin
+ //dummy
+end;
+
+function ttxdatagridcontroller.getifireckinds: ifireckindsty;
+begin
+ result:= [ik_requestopen];
 end;
 
 end.

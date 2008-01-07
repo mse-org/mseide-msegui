@@ -18,7 +18,8 @@ unit msedatabase;
 {$ifdef FPC}{$mode objfpc}{$h+}{$INTERFACES CORBA}{$endif}
 interface
 uses
- classes,db,sysutils,msedb,msestrings,mseclasses,mseglob,mseguiglob,msetypes;
+ classes,db,sysutils,msedb,msestrings,mseclasses,mseglob,mseguiglob,msetypes,
+ mseapplication;
  
 type
  databaseoptionty = (dbo_utf8,dbo_noutf8);

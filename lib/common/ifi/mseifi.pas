@@ -12,7 +12,7 @@ type
  ifireckindty = (ik_none,ik_data,ik_itemheader,ik_actionfired,ik_propertychanged,
                  ik_widgetcommand,ik_widgetproperties,ik_requestmodule,ik_moduledata,
                  ik_requestfielddefs,ik_fielddefsdata,ik_fieldrec,
-                 ik_requestopends,ik_dsdata,ik_postresult,ik_modulecommand);
+                 ik_requestopen,ik_dsdata,ik_postresult,ik_modulecommand);
  ifireckindsty = set of ifireckindty;
 const
  ifiitemkinds = [ik_actionfired,ik_propertychanged,ik_widgetcommand,
@@ -138,7 +138,7 @@ type
  end;
  pfielddataty = ^fielddataty;
 
- requestopendsty = record
+ requestopenty = record
   header: itemheaderty;
  end;   
  fieldreckindty = (frk_edit,frk_insert,frk_delete);  
@@ -213,8 +213,8 @@ type
    ik_fieldrec: (
     fieldrec: fieldrecty;
    );
-   ik_requestopends: (
-    requestopends: requestopendsty;
+   ik_requestopen: (
+    requestopends: requestopenty;
    );
    ik_postresult: (
     postresult: postresultty;
@@ -513,7 +513,7 @@ const
   sizeof(ifiheaderty)+sizeof(requestfielddefsty),//ik_requestfielddefs
   sizeof(ifiheaderty)+sizeof(fielddefsdataty),   //ik_fielddefsdata
   sizeof(ifiheaderty)+sizeof(fieldrecty),        //ik_fieldrec
-  sizeof(ifiheaderty)+sizeof(requestopendsty),   //ik_requestopends
+  sizeof(ifiheaderty)+sizeof(requestopenty),     //ik_requestopen
   sizeof(ifiheaderty)+sizeof(dsdataty),          //ik_dsdata
   sizeof(ifiheaderty)+sizeof(postresultty),      //ik_postresult
   sizeof(ifiheaderty)+sizeof(modulecommandty)    //ik_modulecommand

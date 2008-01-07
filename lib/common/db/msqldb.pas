@@ -26,7 +26,7 @@ interface
 
 uses 
  sysutils,classes,db,msebufdataset,msetypes,msedb,mseclasses,msedatabase,
- msestrings,msedatalist;
+ msestrings,msedatalist,mseapplication;
 
 type 
  TSchemaType = (stNoSchema,stTables,stSysTables,stProcedures,stColumns,
@@ -667,7 +667,7 @@ procedure dosetsqldatabase(const sender: isqlclient; const avalue: tmdatabase;
 
 implementation
 uses 
- dbconst,strutils,msereal,msestream,mseapplication,msebits,msefileutils;
+ dbconst,strutils,msereal,msestream,msebits,msefileutils;
 type
  tdataset1 = class(tdataset);
  tmdatabase1 = class(tmdatabase);
