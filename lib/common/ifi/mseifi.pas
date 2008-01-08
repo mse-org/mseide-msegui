@@ -12,6 +12,7 @@ type
  ifireckindty = (ik_none,ik_data,ik_itemheader,ik_actionfired,ik_propertychanged,
                  ik_widgetcommand,ik_widgetproperties,ik_requestmodule,ik_moduledata,
                  ik_requestfielddefs,ik_fielddefsdata,ik_fieldrec,
+                 ik_griddata,
                  ik_requestopen,ik_dsdata,ik_postresult,ik_modulecommand);
  ifireckindsty = set of ifireckindty;
 const
@@ -27,7 +28,8 @@ type
 
  ifidatakindty = (idk_none,idk_null,idk_integer,idk_int64,idk_currency,idk_real,
                   idk_msestring,{idk_ansistring,}idk_bytes);
- 
+ pifidatakindty = ^ifidatakindty;
+  
  datarecty = record //dummy
  end;
 
@@ -155,6 +157,22 @@ type
   data: fieldrecdataty;
  end;
 
+ coldataty = record
+  kind: ifidatakindty;
+  name: ifinamety;
+  data: datarecty; //array[0..rows-1] of datatype
+ end;
+ griddatadataty = record
+  cols: integer;
+  rows: integer;
+  data: datarecty; //array[0..cols-1] of coldataty
+ end;
+ pgriddatadataty = ^griddatadataty;
+ griddataty = record
+  header: itemheaderty;
+  data: griddatadataty;
+ end;
+ 
  recdataty = record
   count: integer; //recordcount
   data: datarecty; //dummy, array[count] of 
@@ -212,6 +230,9 @@ type
    );
    ik_fieldrec: (
     fieldrec: fieldrecty;
+   );
+   ik_griddata: (
+    griddata: griddataty;
    );
    ik_requestopen: (
     requestopends: requestopenty;
@@ -513,6 +534,7 @@ const
   sizeof(ifiheaderty)+sizeof(requestfielddefsty),//ik_requestfielddefs
   sizeof(ifiheaderty)+sizeof(fielddefsdataty),   //ik_fielddefsdata
   sizeof(ifiheaderty)+sizeof(fieldrecty),        //ik_fieldrec
+  sizeof(ifiheaderty)+sizeof(griddataty),        //ik_griddata
   sizeof(ifiheaderty)+sizeof(requestopenty),     //ik_requestopen
   sizeof(ifiheaderty)+sizeof(dsdataty),          //ik_dsdata
   sizeof(ifiheaderty)+sizeof(postresultty),      //ik_postresult

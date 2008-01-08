@@ -65,7 +65,11 @@ type
  
  tifiwidgetgridcontroller = class(tifirxcontroller)
   protected
+   fdatasequence: sequencety;
+   procedure processdata(const adata: pifirecty; var adatapo: pchar); 
+                                    override;
    procedure setowneractive(const avalue: boolean); override;
+   function getifireckinds: ifireckindsty; override;
   public
    constructor create(const aowner: trxwidgetgrid);
  end;
@@ -77,7 +81,6 @@ type
    fifi: tifiwidgetgridcontroller;
    factive: boolean;
    fistate: rxwidgetstatesty;
-   fdatasequence: sequencety;
    procedure setifi(const avalue: tifiwidgetgridcontroller);
    procedure setactive(const avalue: boolean);
   protected
@@ -337,6 +340,31 @@ end;
 procedure tifiwidgetgridcontroller.setowneractive(const avalue: boolean);
 begin
  trxwidgetgrid(fowner).active:= avalue;
+end;
+
+procedure tifiwidgetgridcontroller.processdata(const adata: pifirecty;
+               var adatapo: pchar);
+var
+ int1: integer;
+begin
+ with adata^.header do begin
+  case kind of
+   ik_griddata: begin
+    if answersequence = fdatasequence then begin
+     with pgriddatadataty(adatapo)^,trxwidgetgrid(fowner) do begin
+      rowcount:= rows;
+      for int1:= 0 to cols - 1 do begin
+      end;
+     end;
+    end;
+   end;
+  end;
+ end;
+end;
+
+function tifiwidgetgridcontroller.getifireckinds: ifireckindsty;
+begin
+ result:= [ik_griddata];
 end;
 
 { trxwidgetgrid }

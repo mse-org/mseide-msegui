@@ -386,11 +386,13 @@ type
    fdatakind: ifidatakindty;
    fname: ansistring;
    procedure setdatakind(const avalue: ifidatakindty);
+   function getdatalist: tdatalist;
   protected
    procedure freedatalist;
    procedure checkdatalist;
   public
    destructor destroy; override;
+   property datalist: tdatalist read getdatalist;
   published
    property datakind: ifidatakindty read fdatakind write setdatakind 
                          default idk_none;
@@ -400,8 +402,13 @@ type
  ttxdatagrid = class;
  
  tifidatacols = class(townedpersistentarrayprop)
+  private
+   function getcols(const index: integer): tifidatacol;
+   procedure setcols(const index: integer; const avalue: tifidatacol);
   public 
    constructor create(const aowner: ttxdatagrid);
+   property cols[const index: integer]: tifidatacol read getcols write setcols;
+                                                 default;
  end;
  
  ttxdatagridcontroller = class(tifitxcontroller)
@@ -410,6 +417,7 @@ type
    procedure setowneractive(const avalue: boolean); override;
    procedure processdata(const adata: pifirecty; var adatapo: pchar); 
                                     override;
+   function encodegriddata(const asequence: sequencety): ansistring;
   public
    constructor create(const aowner: ttxdatagrid);
  end;
@@ -1494,7 +1502,40 @@ end;
 
 procedure tifidatacol.checkdatalist;
 begin
+ if fdatalist = nil then begin
+  case datakind of
+   idk_integer: begin
+    fdatalist:= tintegerdatalist.create;
+   end;
+   {
+   idk_int64: begin
+    fdatalist:= tint64datalist.create;
+   end;
+   idk_currency: begin
+    fdatalist:= tcurrencydatalist.create;
+   end;
+   }
+   idk_real: begin
+    fdatalist:= trealdatalist.create;
+   end;
+   idk_msestring: begin
+    fdatalist:= tmsestringdatalist.create;
+   end;
+   idk_bytes: begin
+    fdatalist:= tansistringdatalist.create;
+   end;
+   else begin
+    raise exception.create('Invalid ifidatakind.');
+   end;
+  end;
+ end;
+ fdatalist.count:= ttxdatagrid(fowner).rowcount;
+end;
 
+function tifidatacol.getdatalist: tdatalist;
+begin
+ checkdatalist;
+ result:= fdatalist;
 end;
 
 { tifidatacols }
@@ -1502,6 +1543,16 @@ end;
 constructor tifidatacols.create(const aowner: ttxdatagrid);
 begin
  inherited create(aowner,tifidatacol);
+end;
+
+function tifidatacols.getcols(const index: integer): tifidatacol;
+begin
+ result:= tifidatacol(inherited getitems(index));
+end;
+
+procedure tifidatacols.setcols(const index: integer; const avalue: tifidatacol);
+begin
+ tifidatacol(inherited getitems(index)).assign(avalue);
 end;
 
 { ttxdatagrid }
@@ -1558,9 +1609,11 @@ end;
 procedure ttxdatagridcontroller.processdata(const adata: pifirecty;
                var adatapo: pchar);
 begin
- case adata^.header.kind of
-  ik_requestopen: begin
-   
+ with adata^.header do begin
+  case kind of
+   ik_requestopen: begin
+    senddata(encodegriddata(sequence));
+   end;
   end;
  end;
 end;
@@ -1573,6 +1626,114 @@ end;
 function ttxdatagridcontroller.getifireckinds: ifireckindsty;
 begin
  result:= [ik_requestopen];
+end;
+
+function ttxdatagridcontroller.encodegriddata(
+                     const asequence: sequencety): ansistring;
+var
+ po1,po4: pchar;
+ int1,int2,int3,int4: integer;
+ po2: pmsestring;
+ po3: pansistring;
+begin
+ inititemheader(result,ik_griddata,asequence,0,po1);
+ with pgriddatadataty(po1)^,ttxdatagrid(fowner) do begin
+  rows:= rowcount;
+  cols:= datacols.count;
+  int2:= cols * (sizeof(ifidatakindty)+1); //terminating name null
+  for int1:= 0 to cols - 1 do begin
+   with datacols[int1] do begin
+    int2:= int2 + length(name);
+    case datakind of
+     idk_integer: begin
+      int2:= int2 + rows * sizeof(integer);
+     end;
+     idk_int64: begin
+      int2:= int2 + rows * sizeof(int64);
+     end;
+     idk_currency: begin
+      int2:= int2 + rows * sizeof(currency);
+     end;
+     idk_real: begin
+      int2:= int2 + rows * sizeof(double);
+     end;
+     idk_msestring: begin
+      po2:= fdatalist.datapo;
+      int4:= 0;
+      for int3:= 0 to rows - 1 do begin
+       int4:= int4 + length(po2[int3]);
+      end;
+      int2:= int2 + rows * sizeof(integer) + int4 * sizeof(msechar);
+     end;
+     idk_bytes: begin
+      po3:= fdatalist.datapo;
+      int2:= int2 + rows * sizeof(integer); //length
+      for int3:= 0 to rows - 1 do begin
+       int2:= int2 + length(po3[int3]);
+      end;
+     end;
+     else begin
+      raise exception.create('Invalid ifidatakind.');
+     end;
+    end;
+   end;
+  end;
+  int1:= po1-pchar(result); //offset
+  setlength(result,length(result)+int2);
+  po1:= pointer(result)+int1;
+  for int1:= 0 to cols - 1 do begin
+   with datacols[int1] do begin
+    pifidatakindty(po1)^:= datakind;
+    int2:= length(name)+1; //terminating null
+    move(pchar(name)^,po1^,int2);
+    inc(po1,int2);
+    po4:= datalist.datapo;
+    case datakind of
+     idk_integer: begin
+      int2:= rows * sizeof(integer);
+      move(po4^,po1^,int2);
+      inc(po1,int2);
+     end;
+     idk_int64: begin
+      int2:= rows * sizeof(int64);
+      move(po4^,po1^,int2);
+      inc(po1,int2);
+     end;
+     idk_currency: begin
+      int2:= rows * sizeof(currency);
+      move(po4^,po1^,int2);
+      inc(po1,int2);
+     end;
+     idk_real: begin
+      int2:= rows * sizeof(real);
+      move(po4^,po1^,int2);
+      inc(po1,int2);
+     end;
+     idk_msestring: begin
+      po2:= fdatalist.datapo;
+      for int3:= 0 to rows - 1 do begin
+       int2:= length(po2[int3]);
+       move(int2,po1^,sizeof(integer));
+       int2:= int2 * sizeof(msechar);
+       inc(po1,sizeof(integer));
+       move(pointer(po2[int3])^,po1,int2);
+       inc(po1,int2);
+      end;
+     end;
+     idk_bytes: begin
+      po2:= fdatalist.datapo;
+      for int3:= 0 to rows - 1 do begin
+       int2:= length(po2[int3]);
+       move(int2,po1^,sizeof(integer));
+       inc(po1,sizeof(integer));
+       move(pointer(po2[int3])^,po1,int2);
+       inc(po1,int2);
+      end;
+     end;
+    end;
+   end;
+  end;
+ end;
 end;
 
 end.

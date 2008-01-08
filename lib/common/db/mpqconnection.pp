@@ -619,9 +619,9 @@ begin
    end;
    res:= pqexec(tr.fconn,pchar(s));
   end;
+  frowsaffected:= strtointdef(pqcmdtuples(res),-1);
   checkerror(tr.fconn,res,'Execution of query failed');
   frowsreturned:= pqntuples(res);
-  frowsaffected:= strtointdef(pqcmdtuples(res),-1);
   fopen:= true;
  end;
 end;
