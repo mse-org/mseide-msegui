@@ -275,7 +275,7 @@ type
    procedure change(const item: tlistitem); reintroduce; overload;
    procedure nodenotification(const sender: tlistitem;
                   var action: nodeactionty); virtual;
-   procedure doitemchange(index: integer); override;
+   procedure doitemchange(const index: integer); override;
    procedure invalidate; virtual;
    procedure updatelayout; virtual;
    procedure docreateobject(var instance: tobject); override;
@@ -775,7 +775,7 @@ begin
  end;
 end;
 
-procedure tcustomitemlist.doitemchange(index: integer);
+procedure tcustomitemlist.doitemchange(const index: integer);
 var
  int1: integer;
  po1: ^tlistitem;

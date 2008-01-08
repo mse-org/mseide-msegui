@@ -64,6 +64,8 @@ type
  plongwordarty = ^longwordarty;
  integerarty = array of integer;
  pintegerarty = ^integerarty;
+ int64arty = array of int64;
+ pint64arty = ^int64arty;
  cardinalarty = array of cardinal;
  pcardinalarty = ^cardinalarty;
  pointerarty = array of pointer;
@@ -72,6 +74,8 @@ type
  pobjectarty = ^objectarty;
  realarty = array of realty;
  prealarty = ^realarty;
+ currencyarty = array of currency;
+ pcurrencyarty = ^currencyarty;
  datetimearty = array of tdatetime;
  pdatetimearty = ^datetimearty;
  ptrintarty = array of ptrint;

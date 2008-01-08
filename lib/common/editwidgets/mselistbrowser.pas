@@ -98,7 +98,7 @@ type
    procedure setoncreateitem(const Value: createlistitemeventty);
   protected
    flayoutinfo: listitemlayoutinfoty;
-   procedure doitemchange(index: integer); override;
+   procedure doitemchange(const index: integer); override;
    procedure updatelayout; override;
    procedure invalidate; override;
 
@@ -325,7 +325,7 @@ type
    fonitemnotification: nodenotificationeventty;
    procedure setcolorglyph(const Value: colorty);
   protected
-   procedure doitemchange(index: integer); override;
+   procedure doitemchange(const index: integer); override;
    procedure nodenotification(const sender: tlistitem; var action: nodeactionty);
                    override;
    procedure compare(const l,r; var result: integer); override;
@@ -648,7 +648,7 @@ begin
  flistview.layoutchanged;
 end;
 
-procedure titemviewlist.doitemchange(index: integer);
+procedure titemviewlist.doitemchange(const index: integer);
 begin
  inherited;
  flistview.doitemchange(index);
@@ -1914,7 +1914,7 @@ begin
  end;
 end;
 
-procedure tcustomitemeditlist.doitemchange(index: integer);
+procedure tcustomitemeditlist.doitemchange(const index: integer);
 begin
  fowner.itemchanged(index);
  inherited;

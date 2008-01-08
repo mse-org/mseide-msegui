@@ -18,7 +18,7 @@ uses
  mseclasses,mselist;
 
 type
- datatypty = (dl_none,dl_integer,dl_real,dl_datetime,
+ datatypty = (dl_none,dl_integer,dl_int64,dl_currency,dl_real,dl_datetime,
     dl_ansistring,dl_msestring,dl_doublemsestring,dl_complex,dl_custom);
 
  doublestringty = record
@@ -82,7 +82,7 @@ type
 
    procedure internalgetdata(index: integer; out ziel);
    procedure internalsetdata(index: integer; const quelle);
-   procedure internalfill(anzahl: integer; const wert);
+   procedure internalfill(const anzahl: integer; const wert);
    procedure getdefaultdata(var dest);
    procedure getdata(index: integer; var dest);
    procedure setdata(index: integer; const source);
@@ -96,7 +96,8 @@ type
    function popbottomdata(var ziel): boolean; //bottom of stack, false if empty
    procedure pushdata(const quelle);
    procedure checkbuffersize(increment: integer); //fuer ringpuffer
-   procedure internalinsertdata(index: integer; const quelle; docopy: boolean);
+   procedure internalinsertdata(index: integer; const quelle;
+                      const docopy: boolean);
    procedure insertdata(const index: integer; const quelle);
    procedure defineproperties(filer: tfiler); override;
    procedure freedata(var data); virtual;      //gibt daten frei
@@ -107,13 +108,16 @@ type
    procedure compare(const l,r; var result: integer); virtual;
    function getdefault: pointer; virtual; //nil fuer null
    procedure normalizering; //macht ringpointer = null
-   procedure blockcopymovedata(fromindex,toindex,count: integer; mode: blockcopymodety);
-   procedure initdata1(const afree: boolean; index: integer; const acount: integer);
+   procedure blockcopymovedata(fromindex,toindex: integer;
+                  const count: integer; const mode: blockcopymodety);
+   procedure initdata1(const afree: boolean; index: integer;
+                                const acount: integer);
                 //initialisiert mit defaultwert
-   procedure forall(startindex,count: integer; proc: dataprocty);
-   procedure assigntob(dest: tdatalist); virtual;
+   procedure forall(startindex: integer; const count: integer;
+                           const proc: dataprocty);
+   procedure assigntob(const dest: tdatalist); virtual;
              //assign auf 2. spalte falls vorhanden, sonst exception
-   procedure doitemchange(index: integer); virtual;
+   procedure doitemchange(const index: integer); virtual;
    procedure dochange; virtual;
    procedure internaldeletedata(index: integer; dofree: boolean);
   public
@@ -124,9 +128,9 @@ type
              //do not use in copyinstance,initinstance,freedata
    function getitempo(index: integer): pointer;
              //invalid after capacity change
-   procedure assignb(source: tdatalist); virtual;
+   procedure assignb(const source: tdatalist); virtual;
              //assign auf 2. spalte falls vorhanden, sonst exception
-   procedure change(index: integer); virtual;
+   procedure change(const index: integer); virtual;
                    //index -1 -> undefined
    function datatyp: datatypty; virtual;
    procedure checkindex(var index: integer); //bringt absolute zeilennummer in ringpuffer
@@ -135,19 +139,19 @@ type
    procedure decupdate;
    function updating: boolean;
    procedure clear; virtual;//loescht daten
-   procedure initdata(index,anzahl: integer);
+   procedure initdata(const index,anzahl: integer);
                 //anzahl -> count, initialisiert mit defaultwert
    procedure cleardata(index: integer);
    function deleting: boolean;
 
-   procedure rearange(arangelist: tintegerdatalist);
-   procedure movedata(fromindex,toindex: integer);
+   procedure rearange(const arangelist: tintegerdatalist);
+   procedure movedata(const fromindex,toindex: integer);
    procedure blockmovedata(const fromindex,toindex,count: integer);
    procedure blockcopydata(const fromindex,toindex,count: integer);
    procedure deletedata(const index: integer);
    procedure deleteitems(index,acount: integer);
    procedure insertitems(index,acount: integer);
-   function empty(index: integer): boolean; virtual;         //true wenn leer
+   function empty(const index: integer): boolean; virtual;         //true wenn leer
    function sort(const arangelist: tintegerdatalist; dorearange: boolean): boolean; overload;
    function sort: boolean; overload; //true if changed
 
@@ -164,7 +168,7 @@ type
  tintegerdatalist = class(tdatalist)
   private
    function Getitems(index: integer): integer;
-   procedure Setitems(index: integer; const Value: integer);
+   procedure Setitems(const index: integer; const Value: integer);
    procedure setasarray(const value: integerarty);
    function getasarray: integerarty;
   protected
@@ -179,17 +183,69 @@ type
    constructor create; override;
    function datatyp: datatypty; override;
    procedure assign(source: tpersistent); override;
-   function empty(index: integer): boolean; override;   //true wenn leer
+   function empty(const index: integer): boolean; override;   //true wenn leer
    function add(const value: integer): integer;
-   procedure insert(index: integer; const item: integer);
-   procedure number(start,step: integer); //numeriert daten
+   procedure insert(const index: integer; const item: integer);
+   procedure number(const start,step: integer); //numeriert daten
    function find(value: integer): integer;  //bringt index, -1 wenn nicht gefunden
    procedure fill(acount: integer; const defaultvalue: integer);
 
    property asarray: integerarty read getasarray write setasarray;
    property items[index: integer]: integer read Getitems write Setitems; default;
  end;
+
+ tint64datalist = class(tdatalist)
+  private
+   function Getitems(index: integer): int64;
+   procedure Setitems(index: integer; const avalue: int64);
+   procedure setasarray(const value: int64arty);
+   function getasarray: int64arty;
+  protected
+   procedure readitem(const reader: treader; var value); override;
+   procedure writeitem(const writer: twriter; var value); override;
+   procedure compare(const l,r; var result: integer); override;
+   procedure setstatdata(const index: integer; const value: msestring); override;
+   function getstatdata(const index: integer): msestring; override;
+  public
+   constructor create; override;
+   function datatyp: datatypty; override;
+   procedure assign(source: tpersistent); override;
+   function empty(const index: integer): boolean; override;   //true wenn leer
+   function add(const avalue: int64): integer;
+   procedure insert(const index: integer; const avalue: int64);
+   function find(const avalue: int64): integer;  //bringt index, -1 wenn nicht gefunden
+   procedure fill(const acount: integer; const defaultvalue: int64);
+
+   property asarray: int64arty read getasarray write setasarray;
+   property items[index: integer]: int64 read Getitems write Setitems; default;
+ end;
  
+ tcurrencydatalist = class(tdatalist)
+  private
+   function Getitems(index: integer): currency;
+   procedure Setitems(index: integer; const avalue: currency);
+   procedure setasarray(const value: currencyarty);
+   function getasarray: currencyarty;
+  protected
+   procedure readitem(const reader: treader; var value); override;
+   procedure writeitem(const writer: twriter; var value); override;
+   procedure compare(const l,r; var result: integer); override;
+   procedure setstatdata(const index: integer; const value: msestring); override;
+   function getstatdata(const index: integer): msestring; override;
+  public
+   constructor create; override;
+   function datatyp: datatypty; override;
+   procedure assign(source: tpersistent); override;
+   function empty(const index: integer): boolean; override;   //true wenn leer
+   function add(const avalue: currency): integer;
+   procedure insert(const index: integer; const avalue: currency);
+   function find(const avalue: currency): integer;  //bringt index, -1 wenn nicht gefunden
+   procedure fill(const acount: integer; const defaultvalue: currency);
+
+   property asarray: currencyarty read getasarray write setasarray;
+   property items[index: integer]: currency read Getitems write Setitems; default;
+ end;
+  
  datalistarty = array of tdatalist;
 
  tenumdatalist = class(tintegerdatalist)
@@ -200,7 +256,7 @@ type
    function getdefault: pointer; override;
   public
    constructor create(agetdefault: getintegereventty); reintroduce;
-   function empty(index: integer): boolean; override;   //true wenn leer
+   function empty(const index: integer): boolean; override;   //true wenn leer
  end;
 
  tcomplexdatalist = class;
@@ -228,7 +284,7 @@ type
    procedure assign(source: tpersistent); override;
    procedure assignre(source: tcomplexdatalist);
    procedure assignim(source: tcomplexdatalist);
-   function empty(index: integer): boolean; override;
+   function empty(const index: integer): boolean; override;
    function add(const value: real): integer;
    procedure insert(index: integer; const item: realty);
    procedure number(start,step: real);
@@ -244,7 +300,7 @@ type
    function getdefault: pointer; override;
   public
    function datatyp: datatypty; override;
-   function empty(index: integer): boolean; override;   //true wenn leer
+   function empty(const index: integer): boolean; override;   //true wenn leer
    procedure fill(acount: integer; const defaultvalue: tdatetime);
  end;
 
@@ -253,26 +309,26 @@ type
    fdefaultzero: boolean;
    fdefaultval: complexty;
    function Getitems(index: integer): complexty;
-   procedure Setitems(index: integer; const Value: complexty);
+   procedure Setitems(const index: integer; const Value: complexty);
    procedure setasarray(const data: complexarty);
    function getasarray: complexarty;
   protected
    procedure readitem(const reader: treader; var value); override;
    procedure writeitem(const writer: twriter; var value); override;
    function getdefault: pointer; override;
-   procedure assigntob(dest: tdatalist); override;
+   procedure assigntob(const dest: tdatalist); override;
    procedure assignto(dest: tpersistent); override;
   public
    function datatyp: datatypty; override;
    constructor create; override;
    procedure assign(source: tpersistent); override;
-   procedure assignb(source: tdatalist); override;
-   procedure assignre(source: trealdatalist);
-   procedure assignim(source: trealdatalist);
+   procedure assignb(const source: tdatalist); override;
+   procedure assignre(const source: trealdatalist);
+   procedure assignim(const source: trealdatalist);
    function add(const value: complexty): integer;
-   procedure insert(index: integer; const item: complexty);
-   function empty(index: integer): boolean; override;   //true wenn leer
-   procedure fill(acount: integer; const defaultvalue: complexty);
+   procedure insert(const index: integer; const item: complexty);
+   function empty(const index: integer): boolean; override;   //true wenn leer
+   procedure fill(const acount: integer; const defaultvalue: complexty);
 
    property asarray: complexarty read getasarray write setasarray;
    property items[index: integer]: complexty read Getitems write Setitems; default;
@@ -331,7 +387,7 @@ type
    function add(const value: ansistring): integer; overload;
    function addtext(const value: ansistring): integer;
                 //returns added linecount
-   function empty(index: integer): boolean; override;   //true wenn leer
+   function empty(const index: integer): boolean; override;   //true wenn leer
    procedure fill(acount: integer; const defaultvalue: ansistring);
    property items[index: integer]: ansistring read Getitems write 
                         setitems; default;
@@ -364,13 +420,14 @@ type
    procedure assignarray(const data: array of msestring); overload;
    procedure assignarray(const data: stringarty); overload;
    procedure assignarray(const data: msestringarty); overload;
-   procedure insert(index: integer; const item: msestring); virtual; abstract;
+   procedure insert(const index: integer; const item: msestring); virtual; abstract;
    function add(const value: tmsestringdatalist): integer; overload;
    function add(const value: msestring): integer; overload; virtual; abstract;
-   function addchars(const value: msestring; processeditchars: boolean = true): integer;
+   function addchars(const value: msestring; 
+                            const processeditchars: boolean = true): integer;
           //haengt zeichen an letzten eintrag an, bringt index
    function indexof(const value: msestring): integer;
-   function empty(index: integer): boolean; override;   //true wenn leer
+   function empty(const index: integer): boolean; override;   //true wenn leer
    function concatstring(const delim: msestring = '';
                             const separator: msestring = ''): msestring;
    procedure loadfromfile(const filename: string);
@@ -392,7 +449,7 @@ type
   public
    function datatyp: datatypty; override;
    function add(const value: msestring): integer; override;
-   procedure insert(index: integer; const item: msestring); override;
+   procedure insert(const index: integer; const item: msestring); override;
    procedure fill(acount: integer; const defaultvalue: msestring);
  end;
 
@@ -417,14 +474,14 @@ type
   public
    constructor create; override;
    procedure assign(source: tpersistent); override;
-   procedure assignb(source: tdatalist); override;
-   procedure assigntob(dest: tdatalist); override;
+   procedure assignb(const source: tdatalist); override;
+   procedure assigntob(const dest: tdatalist); override;
 
    function datatyp: datatypty; override;
    function add(const valuea: msestring; const valueb: msestring = ''): integer; overload;
    function add(const value: doublemsestringty): integer; overload;
-   procedure insert(index: integer; const item: msestring); override;
-   procedure fill(acount: integer; const defaultvalue: msestring);
+   procedure insert(const index: integer; const item: msestring); override;
+   procedure fill(const acount: integer; const defaultvalue: msestring);
 
    property asarray: doublemsestringarty read getasarray write setasarray;
    property asarraya: msestringarty read getasarraya write setasarraya;
@@ -460,8 +517,10 @@ type
  
 const
  datalistclasses: array[datatypty] of datalistclassty = 
-//dl_none,dl_integer,       dl_real,        dl_datetime,
- (nil,tintegerdatalist,trealdatalist,trealdatalist,
+//dl_none,dl_integer, dl_int64,       dl_currency,       dl_real,      
+ (nil,tintegerdatalist,tint64datalist,tcurrencydatalist,trealdatalist,
+//dl_datetime,
+ trealdatalist,
 //dl_ansistring,              dl_msestring,           dl_doublemsestring,
   tansistringdatalist,tmsestringdatalist,tdoublemsestringdatalist,
 //dl_complex,          dl_custom);
@@ -2296,7 +2355,8 @@ begin
  adddata(quelle);
 end;
 
-procedure tdatalist.internalinsertdata(index: integer; const quelle; docopy: boolean);
+procedure tdatalist.internalinsertdata(index: integer; const quelle;
+                                           const docopy: boolean);
 var
  int1: integer;
 begin
@@ -2561,7 +2621,7 @@ begin
  end;
 end;
 
-procedure tdatalist.internalfill(anzahl: integer; const wert);
+procedure tdatalist.internalfill(const anzahl: integer; const wert);
   //initialisiert mit wert
 var
  int1: integer;
@@ -2602,7 +2662,7 @@ begin
  end;
 end;
 
-procedure tdatalist.movedata(fromindex, toindex: integer);
+procedure tdatalist.movedata(const fromindex, toindex: integer);
 var
  po1: pointer;
 begin
@@ -2621,8 +2681,8 @@ begin
 // change(-1);
 end;
 
-procedure tdatalist.blockcopymovedata(fromindex, toindex, count: integer;
-                                    mode: blockcopymodety);
+procedure tdatalist.blockcopymovedata(fromindex, toindex: integer; 
+                            const count: integer; const mode: blockcopymodety);
 var
  ueberlappung,freestart,freecount,initstart: integer;
  int1,int2: integer;
@@ -2844,7 +2904,7 @@ begin
  end;
 end;
 
-procedure tdatalist.doitemchange(index: integer);
+procedure tdatalist.doitemchange(const index: integer);
 begin
  if assigned(fonitemchange) then begin
   fonitemchange(self,index);
@@ -2858,7 +2918,7 @@ begin
  end;
 end;
 
-procedure tdatalist.change(index: integer);
+procedure tdatalist.change(const index: integer);
 begin
  fsortio:= false;
  if fnochange = 0 then begin
@@ -2898,7 +2958,7 @@ begin
  result:= fnochange > 0;
 end;
 
-procedure tdatalist.rearange(arangelist: tintegerdatalist);
+procedure tdatalist.rearange(const arangelist: tintegerdatalist);
 var
  datapo1: pchar;
  po1: pinteger;
@@ -2921,7 +2981,7 @@ begin
  end;
 end;
 
-function tdatalist.empty(index: integer): boolean;
+function tdatalist.empty(const index: integer): boolean;
 var
  int1: integer;
  po1: pbyte;
@@ -2987,12 +3047,13 @@ begin
  end;
 end;
 
-procedure tdatalist.initdata(index, anzahl: integer);
+procedure tdatalist.initdata(const index, anzahl: integer);
 begin
  initdata1(true,index,anzahl);
 end;
 
-procedure tdatalist.forall(startindex, count: integer; proc: dataprocty);
+procedure tdatalist.forall(startindex: integer; const count: integer;
+             const proc: dataprocty);
 var
  int1: integer;
  po1: pchar;
@@ -3053,12 +3114,12 @@ begin
 end;
 }
 
-procedure tdatalist.assignb(source: tdatalist);
+procedure tdatalist.assignb(const source: tdatalist);
 begin
  source.assigntob(self);
 end;
 
-procedure tdatalist.assigntob(dest: tdatalist);
+procedure tdatalist.assigntob(const dest: tdatalist);
 begin
  raise exception.Create('Can not assigntob.');
 end;
@@ -3085,7 +3146,7 @@ begin
  max:= maxint;
 end;
 
-procedure tintegerdatalist.number(start,step: integer);
+procedure tintegerdatalist.number(const start,step: integer);
 var
  int1,int2: integer;
 begin
@@ -3124,12 +3185,12 @@ begin
  internalgetdata(index,result);
 end;
 
-procedure tintegerdatalist.insert(index: integer; const item: integer);
+procedure tintegerdatalist.insert(const index: integer; const item: integer);
 begin
  insertdata(index,item);
 end;
 
-procedure tintegerdatalist.Setitems(index: integer; const Value: integer);
+procedure tintegerdatalist.Setitems(const index: integer; const Value: integer);
 begin
  internalsetdata(index,value);
 end;
@@ -3139,7 +3200,7 @@ begin
  result:= dl_integer;
 end;
 
-function tintegerdatalist.empty(index: integer): boolean;
+function tintegerdatalist.empty(const index: integer): boolean;
 var
  po1: pointer;
 begin
@@ -3156,18 +3217,7 @@ procedure tintegerdatalist.compare(const l, r; var result: integer);
 begin
  result:= integer(l)-integer(r);
 end;
-{
-function tintegerdatalist.Getasvarrec(index: integer): tvarrec;
-begin
- result.vtype:= vtinteger;
- result.vinteger:= items[index];
-end;
 
-procedure tintegerdatalist.Setasvarrec(index: integer; const Value: tvarrec);
-begin
- items[index]:= value.vinteger;
-end;
-}
 function tintegerdatalist.find(value: integer): integer;
 var
  int1: integer;
@@ -3228,6 +3278,255 @@ begin
  writer.writeinteger(integer(value))
 end;
 
+{ tint64datalist }
+
+constructor tint64datalist.create;
+begin
+ inherited;
+ fsize:= sizeof(int64);
+// min:= minint;
+// max:= maxint;
+end;
+
+function tint64datalist.datatyp: datatypty;
+begin
+ result:= dl_int64;
+end;
+
+procedure tint64datalist.assign(source: tpersistent);
+begin
+ if source = self then begin
+  exit;
+ end;
+ if source is tint64datalist then begin
+  assigndata(tdatalist(source));
+ end
+ else begin
+  inherited;
+ end;
+end;
+
+function tint64datalist.Getitems(index: integer): int64;
+begin
+ internalgetdata(index,result);
+end;
+
+procedure tint64datalist.Setitems(index: integer; const avalue: int64);
+begin
+ internalsetdata(index,avalue);
+end;
+
+procedure tint64datalist.setasarray(const value: int64arty);
+begin
+ internalsetasarray(length(value),pointer(value));
+end;
+
+function tint64datalist.getasarray: int64arty;
+begin
+ setlength(result,fcount);
+ internalgetasarray(pointer(result));
+end;
+
+procedure tint64datalist.readitem(const reader: treader; var value);
+begin
+ int64(value):= reader.ReadInt64;
+end;
+
+procedure tint64datalist.writeitem(const writer: twriter; var value);
+begin
+ writer.writeinteger(int64(value))
+end;
+
+procedure tint64datalist.compare(const l; const r; var result: integer);
+begin
+ result:= int64(l)-int64(r);
+end;
+
+procedure tint64datalist.setstatdata(const index: integer;
+               const value: msestring);
+var
+ int1: int64;
+begin
+ int1:= strtoint64(value);
+ setdata(index,int1);
+end;
+
+function tint64datalist.getstatdata(const index: integer): msestring;
+begin
+ result:= inttostr(items[index]);
+end;
+
+function tint64datalist.empty(const index: integer): boolean;
+var
+ po1: pointer;
+begin
+ po1:= getdefault;
+ if po1 = nil then begin
+  result:= pint64(getitempo(index))^ = 0;
+ end
+ else begin
+  result:= pint64(getitempo(index))^ = pinteger(po1)^;
+ end;
+end;
+
+function tint64datalist.add(const avalue: int64): integer;
+begin
+ result:= adddata(avalue);
+end;
+
+procedure tint64datalist.insert(const index: integer; const avalue: int64);
+begin
+ insertdata(index,avalue);
+end;
+
+function tint64datalist.find(const avalue: int64): integer;
+var
+ int1: integer;
+begin
+ result:= -1;
+ for int1:= 0 to fcount-1 do begin
+  if int64(pointer(fdatapo+int1*fsize)^) = avalue then begin
+   result:= int1;
+   break;
+  end;
+ end;
+end;
+
+procedure tint64datalist.fill(const acount: integer; const defaultvalue: int64);
+begin
+ internalfill(count,defaultvalue);
+end;
+
+{ tcurrencydatalist }
+
+constructor tcurrencydatalist.create;
+begin
+ inherited;
+ fsize:= sizeof(currency);
+// min:= minint;
+// max:= maxint;
+end;
+
+function tcurrencydatalist.datatyp: datatypty;
+begin
+ result:= dl_currency;
+end;
+
+procedure tcurrencydatalist.assign(source: tpersistent);
+begin
+ if source = self then begin
+  exit;
+ end;
+ if source is tcurrencydatalist then begin
+  assigndata(tdatalist(source));
+ end
+ else begin
+  inherited;
+ end;
+end;
+
+function tcurrencydatalist.Getitems(index: integer): currency;
+begin
+ internalgetdata(index,result);
+end;
+
+procedure tcurrencydatalist.Setitems(index: integer; const avalue: currency);
+begin
+ internalsetdata(index,avalue);
+end;
+
+procedure tcurrencydatalist.setasarray(const value: currencyarty);
+begin
+ internalsetasarray(length(value),pointer(value));
+end;
+
+function tcurrencydatalist.getasarray: currencyarty;
+begin
+ setlength(result,fcount);
+ internalgetasarray(pointer(result));
+end;
+
+procedure tcurrencydatalist.readitem(const reader: treader; var value);
+begin
+ currency(value):= reader.Readcurrency;
+end;
+
+procedure tcurrencydatalist.writeitem(const writer: twriter; var value);
+begin
+ writer.writecurrency(currency(value))
+end;
+
+procedure tcurrencydatalist.compare(const l; const r; var result: integer);
+var
+ cur1: currency;
+begin
+ result:= 0;
+ cur1:= currency(l)-currency(r);
+ if cur1 < 0 then begin
+  result:= -1;
+ end
+ else begin
+  if cur1 > 0 then begin
+   result:= 1;
+  end;
+ end;
+end;
+
+procedure tcurrencydatalist.setstatdata(const index: integer;
+               const value: msestring);
+var
+ int1: currency;
+begin
+ int1:= strtocurr(value);
+ setdata(index,int1);
+end;
+
+function tcurrencydatalist.getstatdata(const index: integer): msestring;
+begin
+ result:= currtostr(items[index]);
+end;
+
+function tcurrencydatalist.empty(const index: integer): boolean;
+var
+ po1: pointer;
+begin
+ po1:= getdefault;
+ if po1 = nil then begin
+  result:= pcurrency(getitempo(index))^ = 0;
+ end
+ else begin
+  result:= pcurrency(getitempo(index))^ = pinteger(po1)^;
+ end;
+end;
+
+function tcurrencydatalist.add(const avalue: currency): integer;
+begin
+ result:= adddata(avalue);
+end;
+
+procedure tcurrencydatalist.insert(const index: integer; const avalue: currency);
+begin
+ insertdata(index,avalue);
+end;
+
+function tcurrencydatalist.find(const avalue: currency): integer;
+var
+ int1: integer;
+begin
+ result:= -1;
+ for int1:= 0 to fcount-1 do begin
+  if currency(pointer(fdatapo+int1*fsize)^) = avalue then begin
+   result:= int1;
+   break;
+  end;
+ end;
+end;
+
+procedure tcurrencydatalist.fill(const acount: integer; const defaultvalue: currency);
+begin
+ internalfill(count,defaultvalue);
+end;
+
 { tenumdatalist }
 
 constructor tenumdatalist.create(agetdefault: getintegereventty);
@@ -3236,7 +3535,7 @@ begin
  fgetdefault:= agetdefault;
 end;
 
-function tenumdatalist.empty(index: integer): boolean;
+function tenumdatalist.empty(const index: integer): boolean;
 begin
  result:= integer(getitempo(index)^) = fgetdefault();
 end;
@@ -3364,7 +3663,7 @@ begin
  result:= dl_real;
 end;
 
-function trealdatalist.empty(index: integer): boolean;
+function trealdatalist.empty(const index: integer): boolean;
 var
  po1: preal;
 begin
@@ -3440,7 +3739,7 @@ begin
  result:= dl_datetime;
 end;
 
-function tdatetimedatalist.empty(index: integer): boolean;
+function tdatetimedatalist.empty(const index: integer): boolean;
 begin
  result:= preal(getitempo(index))^ = 0;
 end;
@@ -3487,7 +3786,7 @@ begin
  end;
 end;
 
-procedure tcomplexdatalist.assignb(source: tdatalist);
+procedure tcomplexdatalist.assignb(const source: tdatalist);
 var
  int1: integer;
  po1,po2: pcomplexty;
@@ -3519,7 +3818,7 @@ begin
  end;
 end;
 
-procedure tcomplexdatalist.assignre(source: trealdatalist);
+procedure tcomplexdatalist.assignre(const source: trealdatalist);
 var
  int1: integer;
  po1: pcomplexty;
@@ -3541,7 +3840,7 @@ begin
  endupdate;
 end;
 
-procedure tcomplexdatalist.assignim(source: trealdatalist);
+procedure tcomplexdatalist.assignim(const source: trealdatalist);
 var
  int1: integer;
  po1: pcomplexty;
@@ -3563,7 +3862,7 @@ begin
  endupdate;
 end;
 
-procedure tcomplexdatalist.assigntob(dest: tdatalist);
+procedure tcomplexdatalist.assigntob(const dest: tdatalist);
 var
  int1: integer;
  po1: pcomplexty;
@@ -3622,12 +3921,12 @@ begin
  internalgetdata(index,result);
 end;
 
-procedure tcomplexdatalist.insert(index: integer; const item: complexty);
+procedure tcomplexdatalist.insert(const index: integer; const item: complexty);
 begin
  insertdata(index,item);
 end;
 
-procedure tcomplexdatalist.Setitems(index: integer; const Value: complexty);
+procedure tcomplexdatalist.Setitems(const index: integer; const Value: complexty);
 begin
  internalsetdata(index,value);
 end;
@@ -3637,7 +3936,7 @@ begin
  result:= dl_complex;
 end;
 
-function tcomplexdatalist.empty(index: integer): boolean;
+function tcomplexdatalist.empty(const index: integer): boolean;
 var
  po1: pcomplexty;
 begin
@@ -3671,7 +3970,7 @@ begin
  internalsetasarray(length(data),pointer(data));
 end;
 
-procedure tcomplexdatalist.fill(acount: integer;
+procedure tcomplexdatalist.fill(const acount: integer;
   const defaultvalue: complexty);
 begin
  internalfill(count,defaultvalue);
@@ -3895,7 +4194,7 @@ begin
  result:= dl_ansistring;
 end;
 
-function tansistringdatalist.empty(index: integer): boolean;
+function tansistringdatalist.empty(const index: integer): boolean;
 begin
  result:=  pansistring(getitempo(index))^ = '';
 end;
@@ -4104,7 +4403,7 @@ begin
 end;
 
 function tpoorstringdatalist.addchars(const value: msestring;
-                    processeditchars: boolean = true): integer;		
+                    const processeditchars: boolean = true): integer;		
 var
  int1,int2: integer;
  po1: pmsestring;
@@ -4212,7 +4511,12 @@ begin
  change(int1);
 end;
 
-function tpoorstringdatalist.empty(index: integer): boolean;
+function tpoorstringdatalist.empty(const index: integer): boolean;
+begin
+ result:=  pmsestring(getitempo(index))^ = '';
+end;
+{
+function tpoorstringdatalist.empty(const index: integer): boolean;
 var
  po1: pmsestring;
 begin
@@ -4220,7 +4524,7 @@ begin
  po1:= pointer(fdatapo+index*fsize);
  result:=  po1^ = '';
 end;
-
+}
 procedure tpoorstringdatalist.freedata(var data);
 begin
  msestring(data):= '';
@@ -4520,7 +4824,7 @@ begin
  result:= adddata(value);
 end;
 
-procedure tmsestringdatalist.insert(index: integer; const item: msestring);
+procedure tmsestringdatalist.insert(const index: integer; const item: msestring);
 begin
  insertdata(index,item);
 end;
@@ -4569,7 +4873,7 @@ begin
  result:= dl_doublemsestring;
 end;
 
-procedure tdoublemsestringdatalist.fill(acount: integer;
+procedure tdoublemsestringdatalist.fill(const acount: integer;
   const defaultvalue: msestring);
 var
  dstr1: doublemsestringty;
@@ -4607,7 +4911,7 @@ begin
  pdoublemsestringty(getitempo(index))^:= value;
 end;
 
-procedure tdoublemsestringdatalist.insert(index: integer;
+procedure tdoublemsestringdatalist.insert(const index: integer;
   const item: msestring);
 var
  dstr1: doublemsestringty;
@@ -4660,7 +4964,7 @@ begin
  end;
 end;
 
-procedure tdoublemsestringdatalist.assignb(source: tdatalist);
+procedure tdoublemsestringdatalist.assignb(const source: tdatalist);
 var
  int1: integer;
  po1,po2: pdoublemsestringty;
@@ -4705,7 +5009,7 @@ begin
  end;
 end;
 
-procedure tdoublemsestringdatalist.assigntob(dest: tdatalist);
+procedure tdoublemsestringdatalist.assigntob(const dest: tdatalist);
 var
  int1: integer;
  po1: pdoublemsestringty;

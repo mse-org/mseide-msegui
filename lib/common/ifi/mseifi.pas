@@ -4,7 +4,7 @@ interface
 uses
  classes,mseapplication,mseclasses,msearrayprops,mseact,msestrings,msetypes,mseevent,
  mseglob,msestream,msepipestream,{msegui,}mseifiglob,typinfo,msebintree,
- msesys,msesockets,msecryptio,msethread;
+ msesys,msesockets,msecryptio,msethread,msedatalist;
 type
  
  sequencety = longword;
@@ -158,10 +158,11 @@ type
  end;
 
  coldataty = record
-  kind: ifidatakindty;
+  kind: datatypty;
   name: ifinamety;
   data: datarecty; //array[0..rows-1] of datatype
  end;
+ pcoldataty = ^coldataty;
  griddatadataty = record
   cols: integer;
   rows: integer;
@@ -514,7 +515,7 @@ const
  );
 implementation
 uses
- sysutils,msedatalist,mseprocutils,msesysintf,{mseforms,}msetmpmodules,
+ sysutils,mseprocutils,msesysintf,{mseforms,}msetmpmodules,
  msesysutils,variants;
 type
  tsocketreader1 = class(tsocketreader);

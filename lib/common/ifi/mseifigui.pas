@@ -70,6 +70,7 @@ type
                                     override;
    procedure setowneractive(const avalue: boolean); override;
    function getifireckinds: ifireckindsty; override;
+   function encodegriddata(const asequence: sequencety): ansistring;
   public
    constructor create(const aowner: trxwidgetgrid);
  end;
@@ -90,6 +91,7 @@ type
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
+   procedure post;
   published
    property ifi: tifiwidgetgridcontroller read fifi write setifi;
    property active: boolean read factive write setactive default false;
@@ -97,7 +99,7 @@ type
  
 implementation
 uses
- sysutils,msestream,msesysutils,msetmpmodules;
+ sysutils,msestream,msesysutils,msetmpmodules,msedatalist,msegrids;
 type
  tcustommodulelink1 = class(tcustommodulelink);
 // tlinkdata1 = class(tlinkdata);
@@ -342,18 +344,92 @@ begin
  trxwidgetgrid(fowner).active:= avalue;
 end;
 
+function tifiwidgetgridcontroller.encodegriddata(
+                     const asequence: sequencety): ansistring;
+var
+ po1,po4: pchar;
+ int1,int2,int3,int4: integer;
+ po2: pmsestring;
+ po3: pansistring;
+ ar1: booleanarty;
+begin
+ with trxwidgetgrid(fowner) do begin
+  setlength(ar1,datacols.count);
+  int2:= 0;
+  for int1:= 0 to datacols.count - 1 do begin
+   with datacols[int1] do begin
+    ar1[int1]:= (name <> '') and (datalist <> nil) and 
+                               (datalist.datatyp in ifidatatypes);
+    if ar1[int1] then begin
+     int2:= int2 + (sizeof(datatypty)+1) + length(name) + 
+                       datalisttoifidata(datalist);
+    end;
+   end;
+  end;
+  inititemheader(result,ik_griddata,asequence,int2,po1);
+  with pgriddatadataty(po1)^ do begin
+   rows:= rowcount;
+   cols:= datacols.count;
+   po1:= @data;
+   for int1:= 0 to high(ar1) do begin
+    if ar1[int1] then begin
+     with datacols[int1] do begin
+      with pcoldataty(po1)^ do begin
+       kind:= datalist.datatyp;
+       po1:= @name;   
+      end;
+      inc(po1,stringtoifiname(name,pifinamety(po1)));
+      datalisttoifidata(datalist,po1);
+     end;
+    end;
+   end;
+  end;
+ end;
+end;
+
 procedure tifiwidgetgridcontroller.processdata(const adata: pifirecty;
                var adatapo: pchar);
 var
  int1: integer;
+ rows1,cols1: integer;
+ kind1: datatypty;
+ po1: pchar;
+ str1: ansistring;
+ po2: pointer;
+ col1: tdatacol;
+ list1: tdatalist;
 begin
  with adata^.header do begin
   case kind of
    ik_griddata: begin
     if answersequence = fdatasequence then begin
-     with pgriddatadataty(adatapo)^,trxwidgetgrid(fowner) do begin
-      rowcount:= rows;
-      for int1:= 0 to cols - 1 do begin
+     with trxwidgetgrid(fowner) do begin
+      beginupdate;
+      try
+       with pgriddatadataty(adatapo)^ do begin
+        rows1:= rows;
+        rowcount:= rows1;
+        cols1:= cols;
+        po1:= @data;
+       end;
+       for int1:= 0 to cols1 - 1 do begin
+        with pcoldataty(po1)^ do begin
+         kind1:= kind;
+         po1:= @name;
+         inc(po1,ifinametostring(pifinamety(po1),str1));
+         col1:= datacols.colbyname(str1);
+         if col1 <> nil then begin
+          list1:= col1.datalist;
+         end
+         else begin
+          list1:= nil;
+         end;
+         inc(po1,ifidatatodatalist(kind1,rows1,po1,list1));
+        end;
+       end;
+       include(fistate,rws_datareceived);
+      finally
+       endupdate;
       end;
      end;
     end;
@@ -438,6 +514,17 @@ begin
    else begin
     sysutils.abort;
    end;
+  end;
+ end;
+end;
+
+procedure trxwidgetgrid.post;
+begin
+ with fifi do begin
+  if (channel <> nil) or 
+    not ((csdesigning in componentstate) and 
+         (irxo_useclientchannel in foptions)) then begin
+   senddata(encodegriddata(0));
   end;
  end;
 end;

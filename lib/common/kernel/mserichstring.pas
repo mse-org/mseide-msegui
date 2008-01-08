@@ -86,7 +86,7 @@ type
   public
    constructor create; override;
    procedure assign(source: tpersistent); override;
-   procedure insert(index: integer; const item: msestring); override;
+   procedure insert(const index: integer; const item: msestring); override;
    function add(const value: msestring): integer; override;
    function nextword(out value: lmsestringty): boolean;
               //true bei new line
@@ -960,7 +960,7 @@ begin
  result:= adddata(ristr1);
 end;
 
-procedure trichstringdatalist.insert(index: integer; const item: msestring);
+procedure trichstringdatalist.insert(const index: integer; const item: msestring);
 var
  ristr1: richstringty;
 begin
