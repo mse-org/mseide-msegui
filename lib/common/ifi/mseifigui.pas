@@ -3,7 +3,8 @@ unit mseifigui;
 interface
 uses
  classes,mseclasses,mseifiglob,mseifi,mseact,msegui,typinfo,msestrings,
- msearrayprops,mseglob,msetypes,mseifilink,msewidgetgrid;
+ msearrayprops,mseglob,msetypes,mseifilink,msewidgetgrid,msemenus,
+ mseevent,msegrids;
  
 type
  
@@ -99,7 +100,7 @@ type
  
 implementation
 uses
- sysutils,msestream,msesysutils,msetmpmodules,msedatalist,msegrids;
+ sysutils,msestream,msesysutils,msetmpmodules,msedatalist;
 type
  tcustommodulelink1 = class(tcustommodulelink);
 // tlinkdata1 = class(tlinkdata);

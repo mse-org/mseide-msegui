@@ -20,7 +20,7 @@ type
  tfiledialogres = class(tmsedatamodule)
   images: timagelist;
  public
-  procedure getfileicon(const aimage: filedialogiconty; out imagelist: timagelist;
+  procedure getfileicon(const aimage: filedialogiconty; var imagelist: timagelist;
                    out imagenr: integer);
  end;
 
@@ -41,9 +41,11 @@ end;
 { tfiledialogres }
 
 procedure tfiledialogres.getfileicon(const aimage: filedialogiconty;
-  out imagelist: timagelist; out imagenr: integer);
+  var imagelist: timagelist; out imagenr: integer);
 begin
- imagelist:= images;
+ if imagelist = nil then begin
+  imagelist:= images;
+ end;
  imagenr:= ord(aimage);
 end;
 

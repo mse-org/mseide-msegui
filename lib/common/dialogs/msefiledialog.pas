@@ -36,6 +36,9 @@ type
    procedure createitem(var item: tlistitem); override;
  end;
 
+ getfileiconeventty = procedure(const sender: tobject; const ainfo: fileinfoty;
+              var imagelist: timagelist; var imagenr: integer) of object;
+ 
  tfilelistview = class(tlistview)
   private
    ffilelist: tfiledatalist;
@@ -46,6 +49,7 @@ type
    fincludeattrib,fexcludeattrib: fileattributesty;
    fonlistread: notifyeventty;
    ffocusmoved: boolean;
+   fongetfileicon: getfileiconeventty;
    procedure filelistchanged(const sender: tobject);
    procedure setfilelist(const Value: tfiledatalist);
    function getpath: msestring;
@@ -79,6 +83,8 @@ type
                   default defaultfilelistviewoptions;
    property filelist: tfiledatalist read ffilelist write setfilelist;
    property onlistread: notifyeventty read fonlistread write fonlistread;
+   property ongetfileicon: getfileiconeventty read fongetfileicon 
+                                              write fongetfileicon;
  end;
 
 const
@@ -103,7 +109,7 @@ type
  filedialogafterexecuteeventty = procedure(const sender: tfiledialogcontroller;
               var aresult: modalresultty) of object;
 
- tfiledialogcontroller = class(tnullinterfacedpersistent)
+ tfiledialogcontroller = class(tlinkedpersistent)
   private
    fowner: tmsecomponent;
    fgroup: integer;
@@ -122,6 +128,8 @@ type
    fonbeforeexecute: filedialogbeforeexecuteeventty;
    fonafterexecute: filedialogafterexecuteeventty;
    fongetfilename: setstringeventty;
+   fongetfileicon: getfileiconeventty;
+   fimagelist: timagelist;
    procedure setfilterlist(const Value: tdoublemsestringdatalist);
    procedure sethistorymaxcount(const Value: integer);
    function getfilename: filenamety;
@@ -131,6 +139,7 @@ type
    procedure setoptions(Value: filedialogoptionsty);
    procedure checklink;
    procedure setlastdir(const avalue: filenamety);
+   procedure setimagelist(const avalue: timagelist);
   protected
    flastdir: filenamety;
    fdefaultext: filenamety;
@@ -174,7 +183,10 @@ type
    property captionopen: msestring read fcaptionopen write fcaptionopen;
    property captionsave: msestring read fcaptionsave write fcaptionsave;
    property group: integer read fgroup write fgroup default 0;
+   property imagelist: timagelist read fimagelist write setimagelist;
    property ongetfilename: setstringeventty read fongetfilename write fongetfilename;
+   property ongetfileicon: getfileiconeventty read fongetfileicon 
+                                              write fongetfileicon;
    property onbeforeexecute: filedialogbeforeexecuteeventty
                   read fonbeforeexecute write fonbeforeexecute;
    property onafterexecute: filedialogafterexecuteeventty
@@ -322,8 +334,10 @@ function filedialog(var afilenames: filenamearty;
            const includeattrib: fileattributesty = [fa_all];
            const excludeattrib: fileattributesty = [fa_hidden];
            const history: pmsestringarty = nil;
-           const historymaxcount: integer = defaulthistorymaxcount
-           ): modalresultty; overload;
+           const historymaxcount: integer = defaulthistorymaxcount;
+           const imagelist: timagelist = nil;
+           const ongetfileicon: getfileiconeventty = nil
+                      ): modalresultty; overload;
 
 function filedialog(var afilename: filenamety;
            const aoptions: filedialogoptionsty;
@@ -337,10 +351,12 @@ function filedialog(var afilename: filenamety;
            const includeattrib: fileattributesty = [fa_all];
            const excludeattrib: fileattributesty = [fa_hidden];
            const history: pmsestringarty = nil;
-           const historymaxcount: integer = defaulthistorymaxcount
+           const historymaxcount: integer = defaulthistorymaxcount;
+           const imagelist: timagelist = nil;
+           const ongetfileicon: getfileiconeventty = nil
            ): modalresultty; overload;
 
-procedure getfileicon(const info: fileinfoty; out imagelist: timagelist;
+procedure getfileicon(const info: fileinfoty; var imagelist: timagelist;
                             out imagenr: integer);
 procedure updatefileinfo(const item: tlistitem; const info: fileinfoty;
                    withicon: boolean);
@@ -351,10 +367,10 @@ uses
  msestringenter,msedirtree,msefiledialogres,msekeyboard,
  msestockobjects;
 
-procedure getfileicon(const info: fileinfoty; out imagelist: timagelist; out imagenr: integer);
+procedure getfileicon(const info: fileinfoty; var imagelist: timagelist; out imagenr: integer);
 begin
  with info do begin
-  imagelist:= nil;
+//  imagelist:= nil;
   imagenr:= -1;
   if fis_extinfo1valid in state then begin
    case extinfo1.filetype of
@@ -380,6 +396,7 @@ var
  aimagelist: timagelist;
  aimagenr: integer;
 begin
+ aimagelist:= item.imagelist;
  item.caption:= info.name;
  if withicon then begin
   getfileicon(info,aimagelist,aimagenr);
@@ -402,7 +419,9 @@ function filedialog1(dialog: tfiledialogfo; var afilenames: filenamearty;
            const historymaxcount: integer = defaulthistorymaxcount;
            const acaption: msestring = '';
            const aoptions: filedialogoptionsty = [];
-           const adefaultext: filenamety = ''
+           const adefaultext: filenamety = '';
+           const imagelist: timagelist = nil;
+           const ongetfileicon: getfileiconeventty = nil
            ): modalresultty;
 var
  int1: integer;
@@ -413,6 +432,11 @@ begin
   caption:= acaption;
   listview.includeattrib:= includeattrib;
   listview.excludeattrib:= excludeattrib;
+  listview.itemlist.imagelist:= imagelist;
+  if imagelist <> nil then begin
+   listview.itemlist.imagesize:= imagelist.size;
+  end;
+  listview.ongetfileicon:= ongetfileicon;
   filter.dropdown.cols[0].count:= high(filtermask) + 1;
   for int1:= 0 to high(filtermask) do begin
    if (int1 <= high(filterdesc)) and (filterdesc[int1] <> '') then begin
@@ -495,7 +519,9 @@ function filedialog(var afilenames: filenamearty;
            const includeattrib: fileattributesty = [fa_all];
            const excludeattrib: fileattributesty = [fa_hidden];
            const history: pmsestringarty = nil;
-           const historymaxcount: integer = defaulthistorymaxcount
+           const historymaxcount: integer = defaulthistorymaxcount;
+           const imagelist: timagelist = nil;
+           const ongetfileicon: getfileiconeventty = nil
            ): modalresultty;
 var
  dialog: tfiledialogfo;
@@ -519,7 +545,7 @@ begin
   result:= filedialog1(dialog,afilenames,filterdesc,filtermask,
            filterindex,filter,colwidth,
            includeattrib,excludeattrib,history,historymaxcount,str1,aoptions,
-           adefaultext);
+           adefaultext,imagelist,ongetfileicon);
 
  finally
   dialog.Free;
@@ -538,7 +564,9 @@ function filedialog(var afilename: filenamety;
            const includeattrib: fileattributesty = [fa_all];
            const excludeattrib: fileattributesty = [fa_hidden];
            const history: pmsestringarty = nil;
-           const historymaxcount: integer = defaulthistorymaxcount
+           const historymaxcount: integer = defaulthistorymaxcount;
+           const imagelist: timagelist = nil;
+           const ongetfileicon: getfileiconeventty = nil
            ): modalresultty;
 var
  ar1: filenamearty;
@@ -547,7 +575,8 @@ begin
  ar1[0]:= afilename;
  result:= filedialog(ar1,aoptions,acaption,filterdesc,filtermask,adefaultext,
            filterindex,
-           filter,colwidth,includeattrib,excludeattrib,history,historymaxcount);
+           filter,colwidth,includeattrib,excludeattrib,history,historymaxcount,
+           imagelist,ongetfileicon);
  if result = mr_ok then begin
   if (high(ar1) > 0) or (fdo_quotesingle in aoptions) then begin 
    afilename:= quotefilename(ar1);
@@ -642,6 +671,8 @@ var
  int1: integer;
  po1: pfilelistitem;
  po2: pfileinfoty;
+ imlist1: timagelist;
+ imnr1: integer;
 begin
  options:= options - [lvo_focusselect];
  ffocusmoved:= false;
@@ -655,6 +686,13 @@ begin
    po2:= pfileinfoty(datapo);
    for int1:= 0 to count - 1 do begin
     updatefileinfo(po1^,po2^,true);
+    if assigned(fongetfileicon) then begin
+     imlist1:= po1^.imagelist;
+     imnr1:= po1^.imagenr;
+     fongetfileicon(self,po2^,imlist1,imnr1);
+     po1^.imagelist:= imlist1;
+     po1^.imagenr:= imnr1;
+    end;
     inc(po1);
     inc(po2);
    end;
@@ -1298,7 +1336,8 @@ begin
   end;
   result:= filedialog1(fo,ffilenames,ara,arb,
         @ffilterindex,@ffilter,@fcolwidth,finclude,
-            fexclude,po1,fhistorymaxcount,acaption,aoptions,fdefaultext);
+            fexclude,po1,fhistorymaxcount,acaption,aoptions,fdefaultext,
+            fimagelist,fongetfileicon);
   if assigned(fonafterexecute) then begin
    fonafterexecute(self,result);
   end;
@@ -1497,6 +1536,11 @@ procedure tfiledialogcontroller.setlastdir(const avalue: filenamety);
 begin
  flastdir:= avalue;
  checklink;
+end;
+
+procedure tfiledialogcontroller.setimagelist(const avalue: timagelist);
+begin
+ setlinkedvar(avalue,fimagelist);
 end;
 
 { tfiledialog }

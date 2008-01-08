@@ -259,6 +259,7 @@ type
    procedure setlevelstep(const Value: integer);
    procedure setimageheight(const Value: integer);
    procedure setimagewidth(const Value: integer);
+   procedure setimagesize(const avalue: sizety);
   protected
    fdefaultnodestate: nodestatesty;
    fimagelist: timagelist;
@@ -318,6 +319,7 @@ type
    property imagelist: timagelist read fimagelist write setimagelist;
    property imagewidth: integer read fimagesize.cx write setimagewidth default 0;
    property imageheight: integer read fimagesize.cy write setimageheight default 0;
+   property imagesize: sizety read fimagesize write setimagesize;
    property options: nodeoptionsty read foptions write setoptions default [];
    property captionpos: captionposty read fcaptionpos write setcaptionpos default cp_right;
    property levelstep: integer read flevelstep write setlevelstep default defaultlevelstep;
@@ -851,6 +853,14 @@ begin
   fimagesize.cx := Value;
   updatelayout;
 //  invalidate;
+ end;
+end;
+
+procedure tcustomitemlist.setimagesize(const avalue: sizety);
+begin
+ if (fimagesize.cx <> avalue.cx) or (fimagesize.cy <> avalue.cy) then begin
+  fimagesize:= avalue;
+  updatelayout;
  end;
 end;
 
