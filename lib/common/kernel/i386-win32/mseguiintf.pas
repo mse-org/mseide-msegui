@@ -3967,6 +3967,11 @@ begin
   wm_keyup,wm_syskeyup: begin
    shiftstate:= winkeystatetoshiftstate(lparam);
    key1:= winkeytokey(wparam,shiftstate);
+   if charbuffer <> '' then begin
+    eventlist.add(tkeyevent.create(ahwnd,false,key_none,key_none,shiftstate,
+                                    charbuffer));
+    charbuffer:= '';
+   end;
    eventlist.add(tkeyevent.create(ahwnd,true,key1,key1,shiftstate,''));
   end;
  end;

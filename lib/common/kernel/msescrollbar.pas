@@ -726,9 +726,9 @@ const
  mask: scrollbaroptionsty = [sbo_showauto,sbo_show];
 begin
  aoptions:= scrollbaroptionsty(setsinglebit(
-        {$ifdef FPC}longword{$else}byte{$endif}(avalue),
-        {$ifdef FPC}longword{$else}byte{$endif}(foptions),
-         {$ifdef FPC}longword{$else}byte{$endif}(mask)));
+        {$ifdef FPC}longword{$else}word{$endif}(avalue),
+        {$ifdef FPC}longword{$else}word{$endif}(foptions),
+         {$ifdef FPC}longword{$else}word{$endif}(mask)));
  if aoptions <> foptions then begin
   foptions:= aoptions;
   dodimchanged;

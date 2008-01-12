@@ -167,7 +167,7 @@ type
 
  tintegerdatalist = class(tdatalist)
   private
-   function Getitems(index: integer): integer;
+   function Getitems(const index: integer): integer;
    procedure Setitems(const index: integer; const Value: integer);
    procedure setasarray(const value: integerarty);
    function getasarray: integerarty;
@@ -191,7 +191,7 @@ type
    procedure fill(acount: integer; const defaultvalue: integer);
 
    property asarray: integerarty read getasarray write setasarray;
-   property items[index: integer]: integer read Getitems write Setitems; default;
+   property items[const index: integer]: integer read Getitems write Setitems; default;
  end;
 
  tint64datalist = class(tdatalist)
@@ -308,7 +308,7 @@ type
   private
    fdefaultzero: boolean;
    fdefaultval: complexty;
-   function Getitems(index: integer): complexty;
+   function Getitems(const index: integer): complexty;
    procedure Setitems(const index: integer; const Value: complexty);
    procedure setasarray(const data: complexarty);
    function getasarray: complexarty;
@@ -331,7 +331,7 @@ type
    procedure fill(const acount: integer; const defaultvalue: complexty);
 
    property asarray: complexarty read getasarray write setasarray;
-   property items[index: integer]: complexty read Getitems write Setitems; default;
+   property items[const index: integer]: complexty read Getitems write Setitems; default;
    property defaultzero: boolean read fdefaultzero write fdefaultzero default false;
  end;
 
@@ -3180,7 +3180,7 @@ begin
  end;
 end;
 
-function tintegerdatalist.Getitems(index: integer): integer;
+function tintegerdatalist.Getitems(const index: integer): integer;
 begin
  internalgetdata(index,result);
 end;
@@ -3916,7 +3916,7 @@ begin
  end;
 end;
 
-function tcomplexdatalist.Getitems(index: integer): complexty;
+function tcomplexdatalist.Getitems(const index: integer): complexty;
 begin
  internalgetdata(index,result);
 end;

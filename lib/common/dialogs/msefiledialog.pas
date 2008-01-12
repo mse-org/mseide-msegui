@@ -1540,7 +1540,7 @@ end;
 
 procedure tfiledialogcontroller.setimagelist(const avalue: timagelist);
 begin
- setlinkedvar(avalue,fimagelist);
+ setlinkedvar(avalue,tmsecomponent(fimagelist));
 end;
 
 { tfiledialog }
