@@ -898,16 +898,21 @@ end;
 function getenumnames(const atypeinfo: ptypeinfo): msestringarty;
 var
  typedata1: ptypedata;
- int1,int2: integer;
+ int1{,int2}: integer;
 begin
  typedata1:= gettypedata(atypeinfo);
  with typedata1^ do begin
   setlength(result,maxvalue-minvalue+1);
+  for int1:= 0 to high(result) do begin
+   result[int1]:= getenumname(atypeinfo,int1);
+  end;
+  {
   int2:= 0;
   for int1:= MinValue to MaxValue do begin
    result[int2]:= getenumname(atypeinfo,int1);
    inc(int2);
   end;
+  }
  end;
 end;
 
