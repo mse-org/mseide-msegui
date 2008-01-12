@@ -636,11 +636,21 @@ begin
 end;
 
 procedure tcustomdropdownbuttonframe.setreadonly(const Value: boolean);
+var
+ int1: integer;
 begin
+ if (freadonly <> value) then begin
+  freadonly:= Value;
+  for int1:= 0 to buttons.count - 1 do begin
+   buttons[int1].enabled:= not value;
+  end;
+ end;
+{
  if (freadonly <> value) and (factivebutton < buttons.count) then begin
   freadonly:= Value;
   buttons[factivebutton].enabled:= not value;
  end;
+}
 end;
 
 function tcustomdropdownbuttonframe.getbutton: tdropdownbutton;

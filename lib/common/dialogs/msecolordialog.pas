@@ -66,7 +66,7 @@ type
    property buttonellipse: tdropdownbutton read getbuttonellipse write setbuttonellipse;
  end;
                           
- tcoloredit = class(tcustomenumedit)
+ tcustomcoloredit = class(tcustomenumedit)
   private
    function getvalue: colorty;
    procedure setvalue(avalue: colorty);
@@ -80,6 +80,8 @@ type
    function getframe: tellipsedropdownbuttonframe;
    procedure setframe(const avalue: tellipsedropdownbuttonframe);
   protected
+   function internaldatatotext(
+                 const avalue: integer): msestring; virtual;
    function datatotext(const data): msestring; override;
    function createdropdowncontroller: tcustomdropdowncontroller; override;
    procedure texttovalue(var accept: boolean; const quiet: boolean); override;
@@ -87,16 +89,23 @@ type
                     const buttonindex: integer); override;
   public
    constructor create(aowner: tcomponent); override;
-  published
    property value: colorty read getvalue write setvalue default cl_none;
    property valuedefault: colorty read getvaluedefault 
                      write setvaluedefault default cl_none;
-//   property buttonellipse: tdropdownbutton read getbuttonellipse write setbuttonellipse;
    property dropdown;
    property onsetvalue: setcoloreventty read getonsetvalue write setonsetvalue;
    property frame: tellipsedropdownbuttonframe read getframe write setframe;
  end;
- 
+
+ tcoloredit = class(tcustomcoloredit)
+  published
+   property value;
+   property valuedefault;
+   property dropdown;
+   property onsetvalue;
+   property frame;
+ end;
+  
  tcolordropdowncontroller = class(tnocolsdropdownlistcontroller)
   protected
    function getbuttonframeclass: dropdownbuttonframeclassty; override;
@@ -120,8 +129,12 @@ var
 begin
  fo:= tcolordialogfo.create(nil);
  try
-  fo.colorareabefore.frame.colorclient:= acolor;
-  col1:= colortorgb(acolor);
+  try
+   col1:= colortorgb(acolor);
+  except
+   fillchar(col1,sizeof(col1),0);
+  end;
+  fo.colorareabefore.frame.colorclient:= colorty(col1);
   fo.red.value:= col1.red;
   fo.green.value:= col1.green;
   fo.blue.value:= col1.blue;
@@ -183,9 +196,9 @@ begin
  result:= tellipsedropdownbuttonframe;
 end;
 
-{ tcoloredit }
+{ tcustomcoloredit }
 
-constructor tcoloredit.create(aowner: tcomponent);
+constructor tcustomcoloredit.create(aowner: tcomponent);
 begin
  inherited;
  enums:= integerarty(getcolorvalues);
@@ -195,12 +208,12 @@ begin
  value:= valuedefault;
 end;
 
-function tcoloredit.createdropdowncontroller: tcustomdropdowncontroller;
+function tcustomcoloredit.createdropdowncontroller: tcustomdropdowncontroller;
 begin
  result:= tcolordropdowncontroller.create(idropdownlist(self));
 end;
 
-procedure tcoloredit.texttovalue(var accept: boolean; const quiet: boolean);
+procedure tcustomcoloredit.texttovalue(var accept: boolean; const quiet: boolean);
 var
  co1: colorty;
  int1: integer;
@@ -232,7 +245,7 @@ begin
  end;
 end;
 
-procedure tcoloredit.buttonaction(var action: buttonactionty;
+procedure tcustomcoloredit.buttonaction(var action: buttonactionty;
             const buttonindex: integer);
 var
  co1: colorty;
@@ -247,7 +260,12 @@ begin
  end;
 end;
 
-function tcoloredit.datatotext(const data): msestring;
+function tcustomcoloredit.internaldatatotext(const avalue: integer): msestring;
+begin
+ result:= colortostring(avalue);
+end;
+
+function tcustomcoloredit.datatotext(const data): msestring;
 var
  int1: integer;
 begin
@@ -257,15 +275,15 @@ begin
  else begin
   int1:= integer(data);
  end;
- result:= colortostring(int1);
+ result:= internaldatatotext(int1);
 end;
 
-function tcoloredit.getvalue: colorty;
+function tcustomcoloredit.getvalue: colorty;
 begin
  result:= inherited value;
 end;
 
-procedure tcoloredit.setvalue(avalue: colorty);
+procedure tcustomcoloredit.setvalue(avalue: colorty);
 begin
  if avalue = cl_invalid then begin
   avalue:= cl_none;
@@ -273,12 +291,12 @@ begin
  inherited value:= avalue;
 end;
 
-function tcoloredit.getvaluedefault: colorty;
+function tcustomcoloredit.getvaluedefault: colorty;
 begin
  result:= inherited valuedefault;
 end;
 
-procedure tcoloredit.setvaluedefault(avalue: colorty);
+procedure tcustomcoloredit.setvaluedefault(avalue: colorty);
 begin
  if avalue = cl_invalid then begin
   avalue:= cl_none;
@@ -286,36 +304,36 @@ begin
  inherited valuedefault:= avalue;
 end;
 {
-function tcoloredit.getbuttonellipse: tdropdownbutton;
+function tcustomcoloredit.getbuttonellipse: tdropdownbutton;
 begin
  with tdropdownbuttonframe(fframe) do begin
   result:= tdropdownbutton(buttons[0]);
  end;
 end;
 
-procedure tcoloredit.setbuttonellipse(const avalue: tdropdownbutton);
+procedure tcustomcoloredit.setbuttonellipse(const avalue: tdropdownbutton);
 begin
  with tdropdownbuttonframe(fframe) do begin
   tdropdownbutton(buttons[0]).assign(avalue);
  end;
 end;
 }
-function tcoloredit.getonsetvalue: setcoloreventty;
+function tcustomcoloredit.getonsetvalue: setcoloreventty;
 begin
  result:= setcoloreventty(inherited onsetvalue);
 end;
 
-procedure tcoloredit.setonsetvalue(const avalue: setcoloreventty);
+procedure tcustomcoloredit.setonsetvalue(const avalue: setcoloreventty);
 begin
  inherited onsetvalue:= setintegereventty(avalue);
 end;
 
-function tcoloredit.getframe: tellipsedropdownbuttonframe;
+function tcustomcoloredit.getframe: tellipsedropdownbuttonframe;
 begin
  result:= tellipsedropdownbuttonframe(inherited frame);
 end;
 
-procedure tcoloredit.setframe(const avalue: tellipsedropdownbuttonframe);
+procedure tcustomcoloredit.setframe(const avalue: tellipsedropdownbuttonframe);
 begin
   inherited frame:= avalue;
 end;

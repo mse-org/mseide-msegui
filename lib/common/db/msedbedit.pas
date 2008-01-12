@@ -163,12 +163,12 @@ type
    procedure activechanged; override;
    procedure editingchanged; override;
    procedure focuscontrol(afield: tfieldref); override;
-   procedure recordchanged(afield: tfield); override;
    procedure updatedata; override;
-   procedure setwidgetdatasource(const avalue: tdatasource);
-   function nullcheckneeded: boolean;
   public
    constructor create(const intf: idbeditfieldlink);
+   procedure recordchanged(afield: tfield); override;
+   function nullcheckneeded: boolean;
+   procedure setwidgetdatasource(const avalue: tdatasource);
    procedure griddatasourcechanged;
    function edit: Boolean;
    procedure modified;
@@ -670,6 +670,54 @@ type
    property formatdisp;
    property valuescale;
    property onsetvalue;
+ end;
+
+ tdbslider = class(tcustomslider,idbeditfieldlink,idbeditinfo,ireccontrol)
+  private
+   fdatalink: teditwidgetdatalink;
+   fvaluescale: real;
+   function getdatafield: string;
+   procedure setdatafield(const avalue: string);
+   function getdatasource: tdatasource; overload;
+   function getdatasource(const aindex: integer): tdatasource; overload;
+   procedure setdatasource(const avalue: tdatasource);
+  protected
+
+   procedure griddatasourcechanged; override;
+   function getgriddatasource: tdatasource;
+   function createdatalist(const sender: twidgetcol): tdatalist; override;
+   function getoptionsedit: optionseditty; override;
+
+   function docheckvalue(var avalue): boolean; override;
+   function getrowdatapo(const info: cellinfoty): pointer; override;
+   //idbeditfieldlink
+   procedure valuetofield;
+   procedure fieldtovalue;
+   //idbeditinfo
+   procedure getfieldtypes(out propertynames: stringarty;
+                          out fieldtypes: fieldtypesarty);
+   //ireccontrol
+   procedure recchanged;
+  public
+   constructor create(aowner: tcomponent); override;
+   destructor destroy; override;
+   function checkvalue(const quiet: boolean = false): boolean; reintroduce;
+   property datalink: teditwidgetdatalink read fdatalink;
+  published
+   property valuescale: real read fvaluescale write fvaluescale;
+   property datafield: string read getdatafield write setdatafield;
+   property datasource: tdatasource read getdatasource write setdatasource;
+   property scrollbar;
+   property onsetvalue;
+   property direction;
+   property optionsdb;
+
+//   property min stored false;
+//   property max stored false;
+//   property formatedit;
+//   property formatdisp;
+//   property valuescale;
+//   property onsetvalue;
  end;
 
  tdbprogressbar = class(tcustomprogressbar,idbeditfieldlink,idbeditinfo,ireccontrol)
@@ -3721,11 +3769,144 @@ begin
  fdatalink.recordchanged(nil);
 end;
 
+{ tdbslider }
+
+constructor tdbslider.create(aowner: tcomponent);
+begin
+ fisdb:= true;
+ fvaluescale:= 1;
+ fdatalink:= teditwidgetdatalink.create(idbeditfieldlink(self));
+ inherited;
+end;
+
+destructor tdbslider.destroy;
+begin
+ inherited;
+ fdatalink.free;
+end;
+
+function tdbslider.getdatafield: string;
+begin
+ result:= fdatalink.fieldname;
+end;
+
+procedure tdbslider.setdatafield(const avalue: string);
+begin
+ fdatalink.fieldname:= avalue;
+end;
+
+function tdbslider.getdatasource: tdatasource;
+begin
+ result:= fdatalink.datasource;
+end;
+
+procedure tdbslider.setdatasource(const avalue: tdatasource);
+begin
+ fdatalink.setwidgetdatasource(avalue);
+end;
+
+function tdbslider.checkvalue(const quiet: boolean = false): boolean;
+begin
+ result:= false;
+ //dummy
+end;
+
+function tdbslider.getoptionsedit: optionseditty;
+begin
+ result:= inherited getoptionsedit;
+ fdatalink.updateoptionsedit(result);
+end;
+
+function tdbslider.docheckvalue(var avalue): boolean;
+begin
+ result:= inherited docheckvalue(avalue);
+ if result then begin
+  fdatalink.modified;
+  result:= fdatalink.dataentered;
+ end;
+end;
+
+procedure tdbslider.valuetofield;
+var
+ rea1: real;
+begin
+ if isemptyreal(value) then begin
+  fdatalink.field.clear;
+ end
+ else begin
+  if valuescale <> 0 then begin
+   rea1:= value / valuescale;
+  end
+  else begin
+   rea1:= value;
+  end;
+  fdatalink.field.asfloat:= rea1;
+ end;
+end;
+
+procedure tdbslider.fieldtovalue;
+begin
+ if fdatalink.field.isnull then begin
+  value:= emptyreal;
+ end
+ else begin
+  value:= fdatalink.field.asfloat * valuescale;
+ end;
+end;
+
+function tdbslider.getrowdatapo(const info: cellinfoty): pointer;
+begin
+ with info do begin
+  if griddatalink <> nil then begin
+   result:= tgriddatalink(griddatalink).getrealtybuffer(fdatalink.field,cell.row);
+   if result <> nil then begin
+    preal(result)^:= preal(result)^ * valuescale;
+   end;
+  end
+  else begin
+   result:= nil;
+  end;
+ end;
+end;
+
+function tdbslider.createdatalist(const sender: twidgetcol): tdatalist;
+begin
+ result:= nil;
+end;
+
+procedure tdbslider.griddatasourcechanged;
+begin
+ fdatalink.griddatasourcechanged;
+end;
+
+function tdbslider.getgriddatasource: tdatasource;
+begin
+ result:= tcustomdbwidgetgrid(fgridintf.getcol.grid).datasource;
+end;
+
+procedure tdbslider.getfieldtypes(out propertynames: stringarty; 
+                    out fieldtypes: fieldtypesarty);
+begin
+ propertynames:= nil;
+ setlength(fieldtypes,1);
+ fieldtypes[0]:= realfields + integerfields;
+end;
+
+function tdbslider.getdatasource(const aindex: integer): tdatasource;
+begin
+ result:= datasource;
+end;
+
+procedure tdbslider.recchanged;
+begin
+ fdatalink.recordchanged(nil);
+end;
+
 { tdbprogressbar }
 
 constructor tdbprogressbar.create(aowner: tcomponent);
 begin
-// fisdb:= true;
+ fisdb:= true;
  fdatalink:= teditwidgetdatalink.Create(idbeditfieldlink(self));
  inherited;
 end;
@@ -3741,6 +3922,9 @@ begin
  with info do begin
   if griddatalink <> nil then begin
    result:= tgriddatalink(griddatalink).getrealtybuffer(fdatalink.field,cell.row);
+   if result <> nil then begin
+    preal(result)^:= preal(result)^ * valuescale;
+   end;
   end
   else begin
    result:= nil;
@@ -3749,12 +3933,20 @@ begin
 end;
 
 procedure tdbprogressbar.valuetofield;
+var
+ rea1: real;
 begin
  if isemptyreal(value) then begin
   fdatalink.field.clear;
  end
  else begin
-  fdatalink.field.asfloat:= value;
+  if valuescale <> 0 then begin
+   rea1:= value / valuescale;
+  end
+  else begin
+   rea1:= value;
+  end;
+  fdatalink.field.asfloat:= rea1;
  end;
 end;
 
@@ -3764,7 +3956,7 @@ begin
   value:= emptyreal;
  end
  else begin
-  value:= fdatalink.field.asfloat;
+  value:= fdatalink.field.asfloat * valuescale;
  end;
 end;
 

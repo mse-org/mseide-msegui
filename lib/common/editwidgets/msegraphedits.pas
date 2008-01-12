@@ -265,6 +265,7 @@ type
    procedure setgridvalues(const avalue: realarty);
   protected
    fvalue: realty;
+   fisdb: boolean;
    function createdatalist(const sender: twidgetcol): tdatalist; override;
    function getdatatyp: datatypty; override;
    procedure valuetogrid(const arow: integer); override;
@@ -298,7 +299,7 @@ type
    property direction;
  end;
  
- tslider = class(trealgraphdataedit,iscrollbar)
+ tcustomslider = class(tcustomrealgraphdataedit,iscrollbar)
   private
    fscrollbar: tsliderscrollbar;
    fupdating: integer;
@@ -322,10 +323,17 @@ type
    destructor destroy; override;
    procedure changedirection(const avalue: graphicdirectionty;
                                             var dest: graphicdirectionty); override;
-  published
    property scrollbar: tsliderscrollbar read fscrollbar write setscrollbar;
  end;
 
+ tslider = class(tcustomslider)
+  published
+   property value;
+   property scrollbar;
+   property onsetvalue;
+   property direction;
+ end;
+ 
 const
  defaultbarcolor = cl_ltblue;
  
@@ -887,7 +895,7 @@ end;
 procedure tcustomrealgraphdataedit.setvalue(const avalue: realty);
 begin
  if fvalue <> avalue then begin
-  if isemptyreal(avalue) then begin
+  if not fisdb and isemptyreal(avalue) then begin
    fvalue:= 0;
   end
   else begin
@@ -986,9 +994,9 @@ begin
  value:= emptyreal;
 end;
 
-{ tslider }
+{ tcustomslider }
 
-constructor tslider.create(aowner: tcomponent);
+constructor tcustomslider.create(aowner: tcomponent);
 begin
  fscrollbar:= tsliderscrollbar.create(iscrollbar(self));
 // fscrollbar.options:= [sbo_moveauto];
@@ -996,13 +1004,13 @@ begin
  size:= makesize(defaultsliderwidth,defaultsliderheight);
 end;
 
-destructor tslider.destroy;
+destructor tcustomslider.destroy;
 begin
  fscrollbar.Free;
  inherited;
 end;
 
-procedure tslider.paintglyph(const canvas: tcanvas; const avalue;
+procedure tcustomslider.paintglyph(const canvas: tcanvas; const avalue;
                                                       const arect: rectty);
 var
  rea1: realty;
@@ -1031,20 +1039,20 @@ begin
  dec(fupdating);
 end;
 
-procedure tslider.changedirection(const avalue: graphicdirectionty;
+procedure tcustomslider.changedirection(const avalue: graphicdirectionty;
                                             var dest: graphicdirectionty);
 begin
  fscrollbar.direction:= avalue;
  inherited;
 end;
 
-procedure tslider.clientrectchanged;
+procedure tcustomslider.clientrectchanged;
 begin
  inherited;
  fscrollbar.dim:= innerclientrect;
 end;
 
-procedure tslider.clientmouseevent(var info: mouseeventinfoty);
+procedure tcustomslider.clientmouseevent(var info: mouseeventinfoty);
 begin
  if not (es_processed in info.eventstate) and not (csdesigning in componentstate) and
         not (oe_readonly in getoptionsedit) then begin
@@ -1053,7 +1061,7 @@ begin
  inherited;
 end;
 
-procedure tslider.dokeydown(var info: keyeventinfoty);
+procedure tcustomslider.dokeydown(var info: keyeventinfoty);
 begin
  if not (es_processed in info.eventstate) and not (csdesigning in componentstate) and
     not (oe_readonly in getoptionsedit) then begin
@@ -1062,7 +1070,7 @@ begin
  inherited;
 end;
 
-procedure tslider.scrollevent(sender: tcustomscrollbar; event: scrolleventty);
+procedure tcustomslider.scrollevent(sender: tcustomscrollbar; event: scrolleventty);
 var
  rea1: realty;
 begin
@@ -1083,42 +1091,44 @@ begin
  end;
 end;
 
-procedure tslider.doenter;
+procedure tcustomslider.doenter;
 begin
  fscrollbar.enter;
  inherited;
 end;
 
-procedure tslider.doexit;
+procedure tcustomslider.doexit;
 begin
  fscrollbar.exit;
  inherited;
 end;
 
-procedure tslider.activechanged;
+procedure tcustomslider.activechanged;
 begin
  fscrollbar.activechanged;
  inherited;
 end;
 
-procedure tslider.setscrollbar(const avalue: tsliderscrollbar);
+procedure tcustomslider.setscrollbar(const avalue: tsliderscrollbar);
 begin
  fscrollbar.assign(avalue);
 end;
 
-procedure tslider.dochange;
+procedure tcustomslider.dochange;
 begin
+ inc(fupdating);
  fscrollbar.value:= fvalue;
+ dec(fupdating);
  inherited;
 end;
 
-procedure tslider.objectchanged(const sender: tobject);
+procedure tcustomslider.objectchanged(const sender: tobject);
 begin
  inherited;
  fscrollbar.checktemplate(sender);
 end;
 
-procedure tslider.initgridwidget;
+procedure tcustomslider.initgridwidget;
 begin
  inherited;
  fscrollbar.options:= fscrollbar.options + 

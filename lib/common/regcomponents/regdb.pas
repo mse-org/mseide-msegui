@@ -238,9 +238,10 @@ begin
       tdbbooleantextedit,
       tdbkeystringedit,tdbkeystringeditdb,tdbkeystringeditlb,
       tdbintegeredit,tdbenumedit,tdbenumeditdb,tdbenumeditlb,
-      tdbdataicon,tdbdataimage,tdbdatabutton,tdbrealedit,tdbprogressbar,
+      tdbdataicon,tdbdataimage,tdbdatabutton,tdbrealedit,
+      tdbprogressbar,tdbslider,
       tdbdatetimeedit,
-      tdbcalendardatetimeedit,tdbfilenameedit,
+      tdbcalendardatetimeedit,tdbfilenameedit,tdbcoloredit,
       tdbbooleanedit,tdbbooleaneditradio
       ]);
  registercomponenttabhints(['DBe'],['Data edit Components']);
