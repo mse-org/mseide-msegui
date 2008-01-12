@@ -3201,6 +3201,9 @@ begin
   if not (frl_colorframe in flocalprops) then begin
    colorframe:= ainfo.colorframe;
   end;
+  if not (frl_colorframeactive in flocalprops) then begin
+   colorframeactive:= ainfo.colorframeactive;
+  end;
   with framecolors do begin
    if not (frl_colordkshadow in flocalprops) then begin
     shadow.effectcolor:= ainfo.framecolors.shadow.effectcolor;
