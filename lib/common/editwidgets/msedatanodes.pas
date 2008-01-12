@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2007 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2008 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -88,7 +88,7 @@ type
    fimagenr: integer;
    fcaption: msestring;
    fowner: tcustomitemlist;
-   procedure setcaption(const Value: msestring); virtual;
+   procedure setcaption(const avalue: msestring); virtual;
    function checkaction(aaction: nodeactionty): boolean;
    procedure actionnotification(var action: nodeactionty); virtual;
    function getactimagenr: integer; virtual;
@@ -96,7 +96,7 @@ type
    procedure setowner(const aowner: tcustomitemlist); virtual;
   public
    tag: integer;
-   constructor create(const owner: tcustomitemlist);
+   constructor create(const aowner: tcustomitemlist);
    destructor destroy; override;
    class procedure calcitemlayout(const asize: sizety; const ainnerframe: framety;
                            const list: tcustomitemlist;
@@ -160,7 +160,7 @@ type
    fcount: integer;
    ftreelevel: integer;
    procedure checksort;
-   procedure setcaption(const Value: msestring); override;
+   procedure setcaption(const avalue: msestring); override;
    procedure setowner(const aowner: tcustomitemlist); override;
    procedure checkindex(const aindex: integer);
    procedure settreelevel(const value: integer);
@@ -185,6 +185,7 @@ type
    function treelevel: integer;
    function levelshift: integer;
    function treeheight: integer; //total hight of children
+   function isroot: boolean;
 
    function finditembycaption(const acaption: msestring;
             casesensitive: boolean = false): ttreelistitem;
@@ -374,10 +375,10 @@ uses
 
 { tlistitem }
 
-constructor tlistitem.create(const owner: tcustomitemlist);
+constructor tlistitem.create(const aowner: tcustomitemlist);
 begin
- if owner <> nil then begin
-  setowner(owner);
+ if aowner <> nil then begin
+  setowner(aowner);
  end;
  if (fowner <> nil) then begin
   fstate:= fowner.fdefaultnodestate;
@@ -544,9 +545,9 @@ begin
  end;
 end;
 
-procedure tlistitem.setcaption(const Value: msestring);
+procedure tlistitem.setcaption(const avalue: msestring);
 begin
- fcaption := Value;
+ fcaption:= avalue;
  change;
 end;
 
@@ -1072,6 +1073,7 @@ end;
 function tcustomitemlist.add(const aitem: tlistitem): integer;
 begin
  result:= inherited add(aitem);
+ aitem.setowner(self);
 end;
 
 procedure tcustomitemlist.add(const aitems: msestringarty);
@@ -1445,7 +1447,7 @@ begin
  end;
 end;
 
-procedure ttreelistitem.setcaption(const Value: msestring);
+procedure ttreelistitem.setcaption(const avalue: msestring);
 begin
  inherited;
  if fparent <> nil then begin
@@ -1594,17 +1596,19 @@ var
  rect1,rect2: rectty;
  int1: integer;
 begin
- str1:= fcaption;            //!!!!todo fpcerror 3197
- with fowner.fintf.getlayoutinfo^ do begin
-  rect1:= captionrect;
-  rect2:= captioninnerrect;
+ if fowner <> nil then begin
+  str1:= fcaption;            //!!!!todo fpcerror 3197
+  with fowner.fintf.getlayoutinfo^ do begin
+   rect1:= captionrect;
+   rect2:= captioninnerrect;
+  end;
+  int1:= levelshift;
+  inc(rect1.x,int1);
+  dec(rect1.cx,int1);
+  inc(rect2.x,int1);
+  dec(rect2.cx,int1);
+  editor.setup(str1,editor.curindex,false,rect2,rect1,nil,nil,font);
  end;
- int1:= levelshift;
- inc(rect1.x,int1);
- dec(rect1.cx,int1);
- inc(rect2.x,int1);
- dec(rect2.cx,int1);
- editor.setup(str1,editor.curindex,false,rect2,rect1,nil,nil,font);
 end;
 
 class procedure ttreelistitem.calcitemlayout(const asize: sizety; const ainnerframe: framety;
@@ -1748,6 +1752,11 @@ end;
 function ttreelistitem.parent: ttreelistitem;
 begin
  result:= fparent;
+end;
+
+function ttreelistitem.isroot: boolean;
+begin
+ result:= fparent = nil;
 end;
 
 function ttreelistitem.parentindex: integer;

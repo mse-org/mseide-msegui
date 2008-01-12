@@ -25,7 +25,8 @@ uses
 {$ifdef FPC}{$ifdef linux}
   cthreads,
 {$endif}{$endif}
-  msegui,msegraphics,actionsmodule,sourceform,debuggerform,componentpaletteform,
+  msegui,msegraphics,actionsmodule,sourceform,debuggerform,
+  componentpaletteform,componentstore,
   messageform,watchform,objectinspector,breakpointsform,watchpointsform,
   stackform,projecttreeform,findinfileform,cpuform,disassform,threadsform,
   targetconsole,main,mseguiintf,msestockobjects,regunitgroups;
@@ -36,6 +37,7 @@ begin
  application.createform(tsourcefo, sourcefo);
  application.createform(tdebuggerfo,debuggerfo);
  application.createform(tcomponentpalettefo,componentpalettefo);
+ application.createform(tcomponentstorefo,componentstorefo);
  application.createform(tmessagefo,messagefo);
  application.createform(twatchfo, watchfo);
  application.createform(tobjectinspectorfo, objectinspectorfo);

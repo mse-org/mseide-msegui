@@ -384,10 +384,13 @@ type
    ffiltertext: msestring;
    fstate: itemeditstatesty;
 
+   fediting: boolean;
    function getitemlist: titemeditlist;
    procedure setitemlist(const Value: titemeditlist);
    function getitems(const index: integer): tlistitem;
    procedure setitems(const index: integer; const Value: tlistitem);
+   procedure updatefilterselect;
+   procedure setediting(const avalue: boolean);
   protected
    flayoutinfo: listitemlayoutinfoty;
    fvalue: tlistitem;
@@ -433,6 +436,9 @@ type
 
 //   procedure dostatread(const reader: tstatreader); override;
 //   procedure dostatwrite(const writer: tstatwriter); override;
+   function islocating: boolean;
+   function getoptionsedit: optionseditty; override;
+   property editing: boolean read fediting write setediting;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -606,10 +612,10 @@ type
   public
    constructor create(aowner: tcomponent); override;
    function item: ttreelistitem;
-   property itemlist: ttreeitemeditlist read getitemlist write setitemlist;
    property items[const index: integer]: ttreelistitem read getitems write setitems; default;
    function candragsource(const apos: pointty): boolean;
   published
+   property itemlist: ttreeitemeditlist read getitemlist write setitemlist;
    property fieldedit: trecordfieldedit read ffieldedit write setfieldedit;
    property options: treeitemeditoptionsty read foptions write foptions default [];
    property oncheckrowmove: checkmoveeventty read foncheckrowmove write foncheckrowmove;
@@ -1971,6 +1977,7 @@ end;
 
 constructor titemedit.create(aowner: tcomponent);
 begin
+ fediting:= true;
  if fitemlist = nil then begin
   fitemlist:=  titemeditlist.create(iitemlist(self),self);
  end;
@@ -2288,7 +2295,24 @@ begin
   fonkeydown(self,info);
  end;
  with info do begin
-  if foptionsedit * [oe_readonly,oe_locate] = [oe_readonly,oe_locate] then begin
+  if (oe_locate in foptionsedit) and (key = key_return) and 
+                      (shiftstate = []) then begin
+   if not editing then begin
+    editing:= (item <> nil) and not (ns_readonly in item.state) and 
+                 not (oe_readonly in foptionsedit);
+    if editing then begin
+     include(eventstate,es_processed);
+    end;
+   end
+   else begin
+    inherited;
+    editing:= false;
+    include(eventstate,es_processed);
+   end;
+  end;
+  
+  if not(es_processed in eventstate) and islocating then begin
+//      (foptionsedit * [oe_readonly,oe_locate] = [oe_readonly,oe_locate]) then begin
    if (key = key_backspace) and (shiftstate = []) then begin
     filtertext:= copy(ffiltertext,1,length(ffiltertext)-1);
    end
@@ -2389,6 +2413,11 @@ begin
  }
 end;
 
+function titemedit.islocating: boolean;
+begin
+ result:= not editing and (oe_locate in foptionsedit)
+end;
+
 procedure titemedit.setfiltertext(const value: msestring);
 var
  int1: integer;
@@ -2414,10 +2443,7 @@ begin
    ffiltertext:= value;
   end;
  end;
- if foptionsedit * [oe_readonly,oe_locate] = [oe_readonly,oe_locate] then begin
-  feditor.selstart:= 0;
-  feditor.sellength:= length(ffiltertext);
- end;
+ updatefilterselect;
 end;
 
 function titemedit.getcolorglyph: colorty;
@@ -2441,7 +2467,11 @@ begin
     end;
    end;
   end;
-  if (info.eventkind = cek_enter) or (info.eventkind = cek_exit) then begin
+  if (info.eventkind = cek_enter) or 
+                    (info.eventkind = cek_exit) then begin
+   if oe_locate in foptionsedit then begin
+    editing:= false;
+   end;
    factiverow:= info.newcell.row;
    if fvalue <> nil then begin
     if info.eventkind = cek_enter then begin
@@ -2457,6 +2487,38 @@ begin
    foncellevent(self,info);
  end;
  inherited;
+end;
+
+procedure titemedit.updatefilterselect;
+begin
+ if islocating then begin
+  feditor.selstart:= 0;
+  feditor.sellength:= length(ffiltertext);
+ end;
+end;
+
+procedure titemedit.setediting(const avalue: boolean);
+begin
+ if avalue or (oe_locate in foptionsedit) then begin
+  if fediting <> avalue then begin
+   fediting:= avalue;
+   setupeditor;
+   if fediting then begin
+    feditor.selectall;
+   end
+   else begin
+    updatefilterselect;
+   end;
+  end;
+ end;
+end;
+
+function titemedit.getoptionsedit: optionseditty;
+begin
+ result:= inherited getoptionsedit;
+ if not editing then begin
+  include(result,oe_readonly);
+ end;
 end;
 
 {
@@ -2943,14 +3005,16 @@ begin
    na_countchange: begin
     if not updating then begin
      with ttreelistitem1(sender) do begin
-      if (findex < self.fcount-1) and (ns_expanded in fstate)  then begin
-       int1:= findex+1;
-       po1:= getitempo(int1);
-       while (int1 < self.fcount) and (po1^.ftreelevel > ftreelevel) do begin
-        inc(int1);
-        inc(po1);
+      if ns_expanded in fstate then begin
+       if (findex < self.fcount-1)  then begin
+        int1:= findex+1;
+        po1:= getitempo(int1);
+        while (int1 < self.fcount) and (po1^.ftreelevel > ftreelevel) do begin
+         inc(int1);
+         inc(po1);
+        end;
+        self.fowner.fgridintf.getcol.grid.deleterow(findex+1,int1-findex-1);
        end;
-       self.fowner.fgridintf.getcol.grid.deleterow(findex+1,int1-findex-1);
        expand;
       end;
      end;
@@ -3164,7 +3228,7 @@ begin
    end;
   end;
  end;
- if foptionsedit * [oe_readonly,oe_locate] = [oe_readonly,oe_locate] then begin
+ if islocating then begin
   feditor.selstart:= 0;
   feditor.sellength:= length(ffiltertext);
  end;
@@ -3352,7 +3416,7 @@ begin
      atreelevel:= treelevel;
      equallevelindex:= -1;
      cellbefore:= ffocusedcell;
-     if teo_treecolnavig in self.foptions then begin
+     if (teo_treecolnavig in self.foptions) and not editing then begin
       include(eventstate,es_processed);
       case key of
        key_right: begin

@@ -128,6 +128,7 @@ type
    procedure saveprojectcopyexecute(const sender: TObject);
    procedure newprojectfromprogramexe(const sender: TObject);
    procedure newemptyprojectexe(const sender: TObject);
+   procedure viewcomponentstoreonexecute(const sender: TObject);
   private
    fstartcommand: startcommandty;
    fnoremakecheck: boolean;
@@ -261,7 +262,8 @@ uses
  findinfileform,formdesigner,sourceupdate,actionsmodule,programparametersform,
  objectinspector,msesysutils,msestream,msesys,cpuform,disassform,
  panelform,watchpointsform,threadsform,targetconsole,
- debuggerform,componentpaletteform,messageform,msesettings,mseintegerenter
+ debuggerform,componentpaletteform,componentstore,
+ messageform,msesettings,mseintegerenter
  {$ifdef linux} ,libc {$endif},mseprocutils
  {$ifdef mse_dumpunitgroups},dumpunitgroups{$endif};
 
@@ -1273,6 +1275,12 @@ procedure tmainfo.viewcomponentpaletteonexecute(const sender: TObject);
 begin
  componentpalettefo.window.bringtofront;
  componentpalettefo.show;
+end;
+
+procedure tmainfo.viewcomponentstoreonexecute(const sender: TObject);
+begin
+ componentstorefo.window.bringtofront;
+ componentstorefo.show;
 end;
 
 procedure tmainfo.viewdebuggertoolbaronexecute(const sender: TObject);

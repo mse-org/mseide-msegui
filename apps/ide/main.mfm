@@ -25,7 +25,6 @@ object mainfo: tmainfo
   options = [fo_main, fo_terminateonclose, fo_globalshortcuts, fo_savepos, fo_savestate]
   statfile = projectstatfile
   caption = 'MSEide'
-  icon.transparency = -2147483648
   oncreate = mainfooncreate
   oneventloopstart = mainonloaded
   ondestroy = mainfoondestroy
@@ -46,7 +45,6 @@ object mainfo: tmainfo
     anchors = [an_left, an_top, an_right, an_bottom]
     dragdock.optionsdock = [od_acceptsdock, od_splitvert, od_splithorz, od_tabed, od_proportional, od_fixsize, od_background]
     statfile = projectstatfile
-    icon.transparency = -2147483648
   end
   object statdisp: tstringdisp
     optionswidget = [ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
@@ -57,7 +55,6 @@ object mainfo: tmainfo
     frame.dummy = 0
     anchors = [an_top]
     taborder = 1
-    font.colorshadow = -2147483648
     font.name = 'stf_default'
     font.xscale =  1.0000000000000000E+0000
     font.dummy = 0
@@ -77,6 +74,8 @@ object mainfo: tmainfo
     top = 24
   end
   object mainmenu1: tmainmenu
+    options = [mo_shortcutright, mo_activate]
+    onupdate = mainmenuonupdate
     menu.submenu.count = 7
     menu.submenu.items = <    
       item
@@ -347,7 +346,7 @@ object mainfo: tmainfo
         submenu.count = 20
         submenu.items = <        
           item
-            submenu.count = 2
+            submenu.count = 3
             submenu.items = <            
               item
                 caption = '&Component Palette'
@@ -355,6 +354,12 @@ object mainfo: tmainfo
                 imagelist = vievmenuicons
                 imagenr = 1
                 onexecute = viewcomponentpaletteonexecute
+              end            
+              item
+                caption = 'Component &Store'
+                state = [as_localcaption, as_localimagelist, as_localonexecute]
+                imagelist = vievmenuicons
+                onexecute = viewcomponentstoreonexecute
               end            
               item
                 caption = '&Debugger'
@@ -641,8 +646,6 @@ object mainfo: tmainfo
         state = [as_localcaption, as_localonexecute]
         onexecute = aboutonexecute
       end>
-    options = [mo_shortcutright, mo_activate]
-    onupdate = mainmenuonupdate
     left = 247
     top = 60
   end
@@ -665,7 +668,6 @@ object mainfo: tmainfo
     top = 80
   end
   object vievmenuicons: timagelist
-    transparentcolor = -2147483648
     count = 16
     left = 287
     top = 28
@@ -869,7 +871,6 @@ object mainfo: tmainfo
   end
   object dummyimagelist: timagelist
     width = 24
-    transparentcolor = -2147483648
     left = 128
     top = 72
   end

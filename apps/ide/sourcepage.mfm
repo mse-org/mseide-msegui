@@ -14,7 +14,6 @@ object sourcepage: tsourcepage
   container.bounds_cy = 228
   container.frame.dummy = 0
   icon.transparentcolor = -2147483648
-  icon.transparency = -2147483648
   oncreate = sourcefooncreate
   oneventloopstart = sourcefoonloaded
   ondestroy = sourcefoondestroy
@@ -64,8 +63,8 @@ object sourcepage: tsourcepage
       bounds_cx = 15
       bounds_cy = 16
       taborder = 3
-      visible = False
       optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_eatreturn, oe_resetselectonexit, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_savestate]
+      visible = False
       valuedefault = -2147483648
       min = -1
       max = 2
@@ -96,11 +95,11 @@ object sourcepage: tsourcepage
       taborder = 1
       visible = False
       font.name = 'mseide_source'
+      font.xscale =  1.0000000000000000E+0000
       font.dummy = 0
       optionsedit = [oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_linebreak, oe_eatreturn, oe_keyexecute, oe_savestate]
       onkeydown = editonkeydown
-      marginlinecolor = -2147483648
-      tabulators.ppmm = 3
+      tabulators.ppmm =  3.0000000000000000E+0000
       onfontchanged = editonfontchanged
       onmodifiedchanged = editonmodifiedchanged
       ontextmouseevent = editontextmouseevent

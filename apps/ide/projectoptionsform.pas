@@ -415,7 +415,8 @@ uses
  selecteditpageform,programparametersform,sourceupdate,mseedit,
  msedesigner,panelform,watchpointsform,commandlineform,msestream,
  componentpaletteform,mserichstring,msesettings,formdesigner,
- msestringlisteditor,msetexteditor,msepropertyeditors,mseshapes,mseactions
+ msestringlisteditor,msetexteditor,msepropertyeditors,mseshapes,mseactions,
+ componentstore
  {$ifdef FPC}{$ifndef mse_withoutdb},msedbfieldeditor{$endif}{$endif};
 
 type
@@ -1108,6 +1109,7 @@ begin
   breakpointsfo.updatestat(statfiler);
   panelform.updatestat(statfiler);
   projecttree.updatestat(statfiler);
+  componentstorefo.updatestat(statfiler);
 
   setsection('layout');
   mainfo.projectstatfile.updatestat('windowlayout',statfiler);

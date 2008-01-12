@@ -20,9 +20,8 @@ object componentpalettefo: tcomponentpalettefo
   dragdock.optionsdock = [od_savepos, od_canmove, od_canfloat, od_candock, od_proportional, od_propsize]
   options = [fo_savepos, fo_savestate]
   statfile = mainfo.projectstatfile
-  icon.transparentcolor = -2147483648
+  icon.transparentcolor = -2147483642
   icon.options = [bmo_masked]
-  icon.transparency = -2147483648
   icon.image = {
     0000000002000000180000001800000074020000000000000000000000000000
     0000000000000000000000000000000000000000804CF021F8FCF80980808001

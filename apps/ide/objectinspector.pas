@@ -946,7 +946,7 @@ begin
  ar1[0]:= comp;
  readprops(module,ar1);
 end;
-
+var testvar: pointer;
 function tobjectinspectorfo.editorstoprops(const editors: propertyeditorarty): treelistitemarty;
 var
  int1: integer;

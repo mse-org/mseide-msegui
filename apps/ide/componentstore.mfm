@@ -1,0 +1,208 @@
+object componentstorefo: tcomponentstorefo
+  optionswidget = [ow_arrowfocus, ow_subfocus, ow_destroywidgets, ow_hinton, ow_autoscale]
+  bounds_x = 100
+  bounds_y = 100
+  bounds_cx = 445
+  bounds_cy = 354
+  frame.grip_size = 10
+  frame.grip_options = [go_closebutton, go_fixsizebutton, go_topbutton]
+  frame.dummy = 0
+  taborder = 1
+  visible = False
+  container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_subfocus, ow_mousetransparent, ow_destroywidgets, ow_autoscale]
+  container.bounds_x = 0
+  container.bounds_y = 0
+  container.bounds_cx = 435
+  container.bounds_cy = 354
+  container.frame.dummy = 0
+  dragdock.caption = 'Component Store'
+  dragdock.optionsdock = [od_savepos, od_canfloat, od_candock, od_proportional, od_propsize]
+  statfile = mainfo.projectstatfile
+  oncreate = docreate
+  moduleclassname = 'tdockform'
+  object grid: twidgetgrid
+    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_focusbackonesc, ow_mousewheel, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+    bounds_x = 0
+    bounds_y = 0
+    bounds_cx = 435
+    bounds_cy = 354
+    frame.dummy = 0
+    anchors = []
+    popupmenu = tpopupmenu1
+    optionsgrid = [og_colsizing, og_focuscellonenter, og_colchangeontabkey, og_autopopup, og_mousescrollcol]
+    fixrows.count = 1
+    fixrows.items = <    
+      item
+        height = 16
+        captions.count = 3
+        captions.items = <        
+          item
+            caption = 'Name'
+          end        
+          item
+            caption = 'File'
+          end        
+          item
+            caption = 'Description'
+          end>
+      end>
+    datacols.count = 3
+    datacols.options = [co_proportional, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_mousescrollrow]
+    datacols.items = <    
+      item
+        width = 111
+        options = [co_drawfocus, co_proportional, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_mousescrollrow]
+        widgetname = 'node'
+      end    
+      item
+        width = 160
+        options = [co_proportional, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_mousescrollrow]
+        widgetname = 'filepath'
+      end    
+      item
+        width = 157
+        options = [co_fill, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_mousescrollrow]
+        widgetname = 'compdesc'
+      end>
+    datarowheight = 16
+    statfile = mainfo.projectstatfile
+    oncellevent = docellevent
+    reffontheight = 14
+    object node: ttreeitemedit
+      optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight]
+      bounds_x = 0
+      bounds_y = 0
+      bounds_cx = 111
+      bounds_cy = 16
+      frame.levelo = 0
+      frame.colorclient = -2147483645
+      frame.localprops = [frl_levelo, frl_leveli, frl_colorclient]
+      frame.dummy = 0
+      taborder = 1
+      visible = False
+      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_endonenter, oe_hintclippedtext, oe_locate, oe_keyexecute, oe_savestate]
+      itemlist.imnr_expanded = 1
+      itemlist.imagelist = filedialogres.images
+      itemlist.imagewidth = 16
+      itemlist.imageheight = 16
+      itemlist.onstatreaditem = dostatreaditem
+      onsetvalue = compnamesetva
+      onupdaterowvalues = doupdaterowvalues
+      options = [teo_treecolnavig, teo_keyrowmoving]
+      reffontheight = 14
+    end
+    object filepath: tfilenameedit
+      optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight]
+      bounds_x = 112
+      bounds_y = 0
+      bounds_cx = 160
+      bounds_cy = 16
+      frame.levelo = 0
+      frame.colorclient = -2147483645
+      frame.localprops = [frl_levelo, frl_leveli, frl_colorclient]
+      frame.button.color = -1879048187
+      frame.button.imagenr = 17
+      frame.dummy = 0
+      taborder = 2
+      visible = False
+      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_hintclippedtext, oe_autopopupmenu, oe_keyexecute, oe_savestate]
+      onsetvalue = filenamesetva
+      reffontheight = 14
+    end
+    object compdesc: tstringedit
+      optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight]
+      bounds_x = 273
+      bounds_y = 0
+      bounds_cx = 157
+      bounds_cy = 16
+      frame.levelo = 0
+      frame.colorclient = -2147483645
+      frame.localprops = [frl_levelo, frl_leveli, frl_colorclient]
+      frame.dummy = 0
+      taborder = 3
+      visible = False
+      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_hintclippedtext, oe_autopopupmenu, oe_keyexecute, oe_savestate]
+      onsetvalue = compdescsetva
+      reffontheight = 14
+    end
+  end
+  object copycompact: taction
+    shortcut = 16451
+    caption = '&Copy Component'
+    options = [ao_localshortcut]
+    onexecute = docopycomponent
+    onupdate = copyupda
+    left = 176
+    top = 64
+  end
+  object pastecompact: taction
+    shortcut = 16470
+    caption = '&Paste Component(s)'
+    options = [ao_localshortcut]
+    onexecute = dopastecomponent
+    onupdate = pasteupda
+    left = 176
+    top = 88
+  end
+  object tpopupmenu1: tpopupmenu
+    onupdate = popupupdate
+    menu.submenu.count = 7
+    menu.submenu.items = <    
+      item
+        action = copycompact
+      end    
+      item
+        action = pastecompact
+      end    
+      item
+        caption = 'New  Node'
+        name = 'addnode'
+        state = [as_localcaption, as_localonexecute]
+        onexecute = donewnode
+      end    
+      item
+        options = [mao_separator, mao_shortcutcaption]
+      end    
+      item
+        caption = 'New Store'
+        state = [as_localcaption, as_localonexecute]
+        onexecute = newstoreex
+      end    
+      item
+        caption = 'Add Store'
+        state = [as_localcaption, as_localonexecute]
+        onexecute = addstoreex
+      end    
+      item
+        caption = 'Remove Store'
+        name = 'removestore'
+        state = [as_localcaption, as_localonexecute]
+        onexecute = removestoreex
+      end>
+    left = 40
+    top = 88
+  end
+  object storefile: tstatfile
+    filename = 'store.sta'
+    onstatread = dostatread
+    onstatwrite = dostatwrite
+    left = 296
+    top = 88
+  end
+  object storefiledialog: tfiledialog
+    statfile = mainfo.projectstatfile
+    controller.filterlist.data = (
+      (
+        'Component Stores'
+        '*.sto'
+      )
+    )
+    controller.defaultext = 'sto'
+    controller.options = [fdo_checkexist, fdo_savelastdir]
+    controller.captionopen = 'Load Component Store'
+    controller.captionsave = 'New Component Store'
+    dialogkind = fdk_none
+    left = 40
+    top = 136
+  end
+end

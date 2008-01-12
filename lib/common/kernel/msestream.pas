@@ -26,6 +26,7 @@ type
   private
    ffilename: filenamety;
    function getmemory: pointer;
+   procedure checkmemorystream;
   protected
    fmemorystream: tmemorystream;
    procedure sethandle(value: integer); virtual;
@@ -48,6 +49,7 @@ type
    procedure close;
 
    procedure SetSize(const NewSize: Int64); override;
+   procedure clear;        //only for memorystream
    property memory: pointer read getmemory;     //only for memorystream
  end;
 
@@ -840,6 +842,19 @@ end;
 function tmsefilestream.getmemory: pointer;
 begin
  result:= fmemorystream.memory;
+end;
+
+procedure tmsefilestream.checkmemorystream;
+begin
+ if fmemorystream = nil then begin
+  raise exception.create('Must be memory stream.');
+ end;
+end;
+
+procedure tmsefilestream.clear;
+begin
+ checkmemorystream;
+ fmemorystream.clear; 
 end;
 
 { tresourcefilestream}
