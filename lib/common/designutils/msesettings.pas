@@ -2,28 +2,29 @@ unit msesettings;
 {$ifdef FPC}{$mode objfpc}{$h+}{$INTERFACES CORBA}{$endif}
 interface
 uses
- mseglob,mseguiglob,msegui,mseclasses,mseforms,msestat,
- msestatfile,msesimplewidgets,msefiledialog,
- msestrings,msesysenv,msedataedits;
+ mseglob,mseguiglob,msegui,mseclasses,mseforms,msestat,msestatfile,
+ msesimplewidgets,msefiledialog,msestrings,msesysenv,msedataedits,msebitmap,
+ msedatanodes,mseedit,mseevent,msegraphutils,msegrids,mselistbrowser,msemenus,
+ msesys,msetypes;
 
 type
  settingsmacroty = (sma_fpcdir,sma_fpclibdir,sma_msedir,sma_mselibdir,
-                   sma_syntaxdefdir,sma_templatedir,
+                   sma_syntaxdefdir,sma_templatedir,sma_compstoredir,
                    sma_compiler,sma_debugger,sma_exeext,sma_target);
 const
  statdirname = '~/.mseide';
  settingsmacronames: array[settingsmacroty] of msestring = (
                      'fpcdir','fpclibdir','msedir','mselibdir','syntaxdefdir',
-                     'templatedir','compiler','debugger','exeext','target');
+                     'templatedir','compstoredir','compiler','debugger','exeext','target');
  {$ifdef mswindows}
  defaultsettingmacros: array[settingsmacroty] of msestring = (
                 '','','','${MSEDIR}lib/common/','${MSEDIR}apps/ide/syntaxdefs/',
-                '${MSEDIR}apps/ide/templates/',
+                '${MSEDIR}apps/ide/templates/','${MSEDIR}apps/ide/compstore/',
                 'ppc386.exe','gdb.exe','.exe','i386-win32');
  {$else}
  defaultsettingmacros: array[settingsmacroty] of msestring = (
                 '','','','${MSEDIR}lib/common/','${MSEDIR}apps/ide/syntaxdefs/',
-                '${MSEDIR}apps/ide/templates/',
+                '${MSEDIR}apps/ide/templates/','${MSEDIR}apps/ide/compstore/',
                 'ppc386','gdb','','i386-linux');
  {$endif}
                 
@@ -49,6 +50,7 @@ type
    exeext: tstringedit;
    target: tstringedit;
    printcomm: tstringedit;
+   compstoredir: tfilenameedit;
    procedure epandfilenamemacro(const sender: TObject; var avalue: msestring;
                      var accept: Boolean);
    procedure formoncreate(const sender: TObject);
@@ -162,6 +164,7 @@ begin
   mselibdir.value:= macros[sma_mselibdir];
   syntaxdefdir.value:= macros[sma_syntaxdefdir];
   templatedir.value:= macros[sma_templatedir];
+  compstoredir.value:= macros[sma_compstoredir];
   compiler.value:= macros[sma_compiler];
   debugger.value:= macros[sma_debugger];
   exeext.value:= macros[sma_exeext];
@@ -178,6 +181,7 @@ begin
  result[sma_mselibdir]:= mselibdir.value;
  result[sma_syntaxdefdir]:= syntaxdefdir.value;
  result[sma_templatedir]:= templatedir.value;
+ result[sma_compstoredir]:= compstoredir.value;
  result[sma_compiler]:= compiler.value;
  result[sma_debugger]:= debugger.value;
  result[sma_exeext]:= exeext.value;

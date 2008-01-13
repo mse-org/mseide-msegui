@@ -38,6 +38,7 @@ type
  end;
 var
  storedcomponentinfodialogfo: tstoredcomponentinfodialogfo;
+ 
 implementation
 uses
  storedcomponentinfodialog_mfm;

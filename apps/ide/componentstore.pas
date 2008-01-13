@@ -244,6 +244,7 @@ begin
    except
     exit;        //invalid
    end;
+   info.compname:= info.compclass;
    if tstoredcomponentinfodialogfo.create(info).show(true) = mr_ok then begin
     stream3:= ttextstream.create(info.filepath,fm_create);
     node1:= tstoredcomponent.create(false);
