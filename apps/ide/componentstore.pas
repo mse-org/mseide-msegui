@@ -94,6 +94,7 @@ type
   private
 //   frootnode: tstoredcomponent;
    far1: storedcomponentarty;
+   fstoredir: msestring;
    procedure initcomponentinfo(out ainfo: storedcomponentinfoty);
    function isnode: boolean;
    function dogetstorerec(const index: integer): msestring;
@@ -109,7 +110,7 @@ var
 implementation
 uses
  componentstore_mfm,msestream,storedcomponentinfodialog,msedatalist,msefileutils,
- sysutils;
+ sysutils,projectoptionsform;
  
 type
  treader1 = class(treader);
@@ -346,6 +347,7 @@ begin
    end;
    with tstatwriter(afiler) do begin
     writesection('componentstore');
+    writemsestring('storedir',expandprmacros('${COMPSTOREDIR}'));
     writerecordarray('stores',length(far1),{$ifdef FPC}@{$endif}dogetstorerec);
    end;
    try
@@ -367,6 +369,7 @@ begin
   grid.clear;
   with tstatreader(afiler) do begin
    setsection('componentstore'); 
+   fstoredir:= readmsestring('storedir','');
    readrecordarray('stores',{$ifdef FPC}@{$endif}dosetstorescount,
                   {$ifdef FPC}@{$endif}dosetstorerec);
    for int1:= 0 to high(far1) do begin
