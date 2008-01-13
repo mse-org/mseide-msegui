@@ -30,6 +30,7 @@ type
   compname: msestring;
   compdesc: msestring;
   filepath: filenamety;
+  storedir: filenamety;
  end;
  pstoredcomponentinfoty = ^storedcomponentinfoty;
  
@@ -40,6 +41,7 @@ type
    procedure setinfo(const avalue: storedcomponentinfoty);
    procedure setcompname(const avalue: msestring);
    procedure checkisnode;
+   procedure setfilepath(const avalue: filenamety);
   protected
    procedure setcaption(const avalue: msestring); override;
   public
@@ -50,8 +52,10 @@ type
                            finfo.componentname;
    property compname: msestring read finfo.compname write setcompname;
    property compdesc: msestring read finfo.compdesc write finfo.compdesc;
-   property filepath: msestring read finfo.filepath write finfo.filepath;
+   property filepath: msestring read finfo.filepath write setfilepath;
+   property storedir: msestring read finfo.storedir write finfo.storedir;
 
+   procedure updatestoredir;
    procedure dostatread(const reader: tstatreader); override;
    procedure dostatwrite(const writer: tstatwriter); override;
  end;
@@ -142,7 +146,8 @@ begin
    compname:= readmsestring('compname',compname);
    compclass:= readmsestring('compclass',compclass);
    compdesc:= readmsestring('compdesc',compdesc);
-   filepath:= readmsestring('filepath',filepath);
+   finfo.filepath:= readmsestring('filepath',filepath);
+   finfo.storedir:= readmsestring('storedir',storedir);
   end;
  end;
  checkisnode;
@@ -157,6 +162,7 @@ begin
   writemsestring('compclass',compclass);
   writemsestring('compdesc',compdesc);
   writemsestring('filepath',filepath);
+  writemsestring('storedir',storedir);
  end;
 end;
 
@@ -183,6 +189,17 @@ begin
   end;
   fimagenr:= 0;
  end;
+end;
+
+procedure tstoredcomponent.updatestoredir;
+begin
+ finfo.storedir:= expandprmacros('${COMPSTOREDIR}');
+end;
+
+procedure tstoredcomponent.setfilepath(const avalue: filenamety);
+begin
+ finfo.filepath:= avalue;
+ updatestoredir;
 end;
 
 { tcomponentstorefo }
@@ -323,7 +340,7 @@ begin
  else begin
   with far1[index] do begin
    compname:= mstr1;
-   filepath:= mstr2;
+   finfo.filepath:= mstr2;
    compdesc:= mstr3;
   end;
  end;
