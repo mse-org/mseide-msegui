@@ -883,6 +883,9 @@ end;
    procedure setoptions(const Value: coloptionsty);
    procedure setfocusrectdist(const avalue: integer);
   protected
+   fdataupdating: integer;
+   procedure begindataupdate; virtual;
+   procedure enddataupdate; virtual;
    function getclientsize: integer; override;
    procedure paint(const info: colpaintinfoty; const scrollables: boolean = true);
    function totwidth: integer;
@@ -942,6 +945,8 @@ end;
    procedure setsortcol(const avalue: integer);
    procedure setnewrowcol(const avalue: integer);
   protected
+   procedure begindataupdate; override;
+   procedure enddataupdate; override;
    procedure dosizechanged; override;
    procedure rearange(const list: tintegerdatalist); override;
    procedure setcount1(acount: integer; doinit: boolean); override;
@@ -4970,8 +4975,13 @@ procedure tcols.moverow(const curindex,newindex: integer; const acount: integer)
 var
  int1: integer;
 begin
- for int1:= 0 to self.count - 1 do begin
-  tcol(items[int1]).moverow(curindex,newindex,acount);
+ begindataupdate;
+ try
+  for int1:= 0 to self.count - 1 do begin
+   tcol(items[int1]).moverow(curindex,newindex,acount);
+  end;
+ finally
+  enddataupdate;
  end;
 end;
 
@@ -5000,6 +5010,16 @@ begin
  for int1:= 0 to count - 1 do begin
   cols[int1].rearange(list);
  end;
+end;
+
+procedure tcols.begindataupdate;
+begin
+ inc(fdataupdating);
+end;
+
+procedure tcols.enddataupdate;
+begin
+ dec(fdataupdating);
 end;
 
 { tdatacols }
@@ -5562,6 +5582,42 @@ begin
   if tdatacol(fitems[int1]).fname = aname then begin
    result:= tdatacol(fitems[int1]);
    break;
+  end;
+ end;
+end;
+
+procedure tdatacols.begindataupdate;
+var
+ int1: integer;
+begin
+ if fdataupdating = 0 then begin
+  for int1:= 0 to count - 1 do begin
+   with tdatacol(fitems[int1]) do begin
+    if fdata <> nil then begin
+     fdata.beginupdate;
+    end;
+   end;
+  end;
+ end;
+ inherited;
+end;
+
+procedure tdatacols.enddataupdate;
+var
+ int1: integer;
+begin
+ inherited;
+ if fdataupdating = 0 then begin
+  for int1:= 0 to count - 1 do begin
+   try
+    with tdatacol(fitems[int1]) do begin
+     if fdata <> nil then begin
+      fdata.endupdate;
+     end;
+    end;
+   except
+    application.handleexception(fgrid);
+   end;
   end;
  end;
 end;

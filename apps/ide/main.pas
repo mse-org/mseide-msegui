@@ -74,7 +74,7 @@ type
 
    procedure mainfooncreate(const sender: tobject);
    procedure mainfoondestroy(const sender: tobject);
-   procedure mainfoonclosequery(const sender: tcustommseform; var modalresult: modalresultty);
+//   procedure mainfoonclosequery(const sender: tcustommseform; var modalresult: modalresultty);
    procedure mainstatfileonupdatestat(const sender: tobject; const filer: tstatfiler);
    procedure mainfoonterminate(var terminate: Boolean);
    procedure mainonloaded(const sender: TObject);
@@ -1690,7 +1690,7 @@ begin
   end;
  end;
 end;
-
+{
 procedure tmainfo.mainfoonclosequery(const sender: tcustommseform; 
             var modalresult: modalresultty);
 begin
@@ -1702,16 +1702,26 @@ begin
   mainstatfile.writestat;
  end;
 end;
-
+}
 procedure tmainfo.mainfoonterminate(var terminate: Boolean);
 var
  modres: modalresultty;
 begin
- modres:= mr_windowclosed;
- mainfoonclosequery(nil,modres);
- if modres <> mr_windowclosed then begin
+ if checksave = mr_cancel then begin
   terminate:= false;
+ end
+ else begin
+  sourcefo.filechangenotifyer.clear;
+  mainstatfile.writestat;
  end;
+ {
+  modres:= mr_windowclosed;
+  mainfoonclosequery(nil,modres);
+  if modres <> mr_windowclosed then begin
+   terminate:= false;
+  end;
+ end;
+ }
 end;
 
 procedure tmainfo.setprojectname(const aname: filenamety);
