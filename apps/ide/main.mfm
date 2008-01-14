@@ -28,7 +28,6 @@ object mainfo: tmainfo
   oncreate = mainfooncreate
   oneventloopstart = mainonloaded
   ondestroy = mainfoondestroy
-  onclosequery = mainfoonclosequery
   onwindowactivechanged = mainonactivewindowchanged
   onwindowdestroyed = mainonwindowdestroyed
   onterminatequery = mainfoonterminate
