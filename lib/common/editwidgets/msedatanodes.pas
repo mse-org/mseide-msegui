@@ -33,7 +33,9 @@ type
                           //without invalidate, no statsave
 
  nodestatesty = set of nodestatty;
-
+ nodestate1ty = (ns1_statechanged,ns1_rootchange);
+ nodestates1ty = set of nodestate1ty;
+ 
  nodeoptionty = (no_drawemptybox);
  nodeoptionsty = set of nodeoptionty;
 
@@ -154,11 +156,13 @@ type
    procedure setdestroying;
    function inccount: integer; //returns itemindex
   protected
+   fstate1: nodestates1ty;
    fparent: ttreelistitem;
    fparentindex: integer;
    fitems: treelistitemarty;
    fcount: integer;
    ftreelevel: integer;
+   procedure statechanged;
    procedure checksort;
    procedure setcaption(const avalue: msestring); override;
    procedure setowner(const aowner: tcustomitemlist); override;
@@ -186,6 +190,7 @@ type
    function levelshift: integer;
    function treeheight: integer; //total hight of children
    function isroot: boolean;
+   function isstatechanged: boolean;
 
    function finditembycaption(const acaption: msestring;
             casesensitive: boolean = false): ttreelistitem;
@@ -200,7 +205,8 @@ type
    procedure drawimage(const acanvas: tcanvas); override;
    procedure addchildren(const aitem: ttreelistitem);
                    //transfers children
-   procedure add(const aitem: ttreelistitem); overload; //nil ignored
+   function add(const aitem: ttreelistitem): integer; overload; 
+                   //returns index, nil ignored
    procedure add(const aitems: treelistitemarty); overload;
    procedure add(const acount: integer; itemclass: treelistitemclassty = nil); overload;
    procedure clear;
@@ -1237,9 +1243,10 @@ begin
  inc(fcount)
 end;
 
-procedure ttreelistitem.add(const aitem: ttreelistitem);
+function ttreelistitem.add(const aitem: ttreelistitem): integer;
 begin
  if aitem <> nil then begin
+  result:= fcount;
   setitems(inccount,aitem);
   countchange;
  end;
@@ -1663,12 +1670,21 @@ begin
  result:= ns_expanded in fstate;
 end;
 
+procedure ttreelistitem.statechanged;
+begin
+ include(fstate1,ns1_statechanged);
+ if ns1_rootchange in fstate1 then begin
+  include(rootnode.fstate1,ns1_statechanged);
+ end;
+end;
+
 procedure ttreelistitem.setexpanded(const Value: boolean);
 begin
  if value then begin
   if not (ns_expanded in fstate) then begin
    if checkaction(na_expand) then begin
     include(fstate,ns_expanded);
+    statechanged;
    end;
   end;
  end
@@ -1676,6 +1692,7 @@ begin
   if ns_expanded in fstate then begin
    if checkaction(na_collapse) then begin
     exclude(fstate,ns_expanded);
+    statechanged;
    end;
   end;
  end;
@@ -1860,6 +1877,7 @@ begin
    countchange;
   end;
  end;
+ exclude(fstate1,ns1_statechanged);
 end;
 
 procedure ttreelistitem.dostatwrite(const writer: tstatwriter);
@@ -1875,6 +1893,11 @@ begin
    writer.endlist;
   end;
  end;
+end;
+
+function ttreelistitem.isstatechanged: boolean;
+begin
+ result:= ns1_statechanged in fstate1;
 end;
 
 { trecordfielditem }

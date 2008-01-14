@@ -146,7 +146,7 @@ object componentstorefo: tcomponentstorefo
   end
   object tpopupmenu1: tpopupmenu
     onupdate = popupupdate
-    menu.submenu.count = 7
+    menu.submenu.count = 8
     menu.submenu.items = <    
       item
         action = copycompact
@@ -159,6 +159,12 @@ object componentstorefo: tcomponentstorefo
         name = 'addnode'
         state = [as_localcaption, as_localonexecute]
         onexecute = donewnode
+      end    
+      item
+        caption = 'Remove Node'
+        name = 'removenode'
+        state = [as_localcaption, as_localonexecute]
+        onexecute = delnode
       end    
       item
         options = [mao_separator, mao_shortcutcaption]

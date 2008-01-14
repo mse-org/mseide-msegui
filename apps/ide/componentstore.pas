@@ -42,6 +42,8 @@ type
    procedure setcompname(const avalue: msestring);
    procedure checkisnode;
    procedure setfilepath(const avalue: filenamety);
+   function getfilepath: msestring;
+   procedure setcompdesc(const avalue: msestring);
   protected
    procedure setcaption(const avalue: msestring); override;
   public
@@ -51,8 +53,8 @@ type
    property componentname: ansistring read finfo.componentname write 
                            finfo.componentname;
    property compname: msestring read finfo.compname write setcompname;
-   property compdesc: msestring read finfo.compdesc write finfo.compdesc;
-   property filepath: msestring read finfo.filepath write setfilepath;
+   property compdesc: msestring read finfo.compdesc write setcompdesc;
+   property filepath: msestring read getfilepath write setfilepath;
    property storedir: msestring read finfo.storedir write finfo.storedir;
 
    procedure updatestoredir;
@@ -95,6 +97,7 @@ type
                    var accept: Boolean);
    procedure compnamesetva(const sender: TObject; var avalue: msestring;
                    var accept: Boolean);
+   procedure delnode(const sender: TObject);
   private
 //   frootnode: tstoredcomponent;
    far1: storedcomponentarty;
@@ -119,10 +122,16 @@ uses
 type
  treader1 = class(treader);
  
+function getstoredir: filenamety;
+begin
+ result:= expandprmacros('${COMPSTOREDIR}');
+end;
+
 { tstoredcomponent }
 
 constructor tstoredcomponent.create(const isnode: boolean);
 begin
+ include(fstate1,ns1_rootchange);
  fisnode:= isnode;
  inherited create;
  checkisnode;
@@ -161,7 +170,7 @@ begin
   writemsestring('compname',compname);
   writemsestring('compclass',compclass);
   writemsestring('compdesc',compdesc);
-  writemsestring('filepath',filepath);
+  writemsestring('filepath',finfo.filepath);
   writemsestring('storedir',storedir);
  end;
 end;
@@ -193,13 +202,26 @@ end;
 
 procedure tstoredcomponent.updatestoredir;
 begin
- finfo.storedir:= expandprmacros('${COMPSTOREDIR}');
+ finfo.storedir:= getstoredir;
 end;
 
 procedure tstoredcomponent.setfilepath(const avalue: filenamety);
 begin
  finfo.filepath:= avalue;
+ statechanged;
  updatestoredir;
+end;
+
+function tstoredcomponent.getfilepath: msestring;
+begin
+ relocatepath(finfo.storedir,getstoredir,finfo.filepath);
+ result:= finfo.filepath;
+end;
+
+procedure tstoredcomponent.setcompdesc(const avalue: msestring);
+begin
+ finfo.compdesc:= avalue;
+ statechanged;
 end;
 
 { tcomponentstorefo }
@@ -268,6 +290,7 @@ begin
     node1:= tstoredcomponent.create(false);
     node1.info:= info;
     node.item.add(node1);    
+    node1.statechanged;
     stream3.writedatastring(str1);
    end;
   end;
@@ -353,7 +376,9 @@ var
  ar2: msestringarty;
  writer1: tstatwriter;
  reader1: tstatreader;
+ storedir1: filenamety;
 begin
+ storedir1:= getstoredir;
  if afiler.iswriter then begin
   with node do begin
    for int1:= 0 to itemlist.count - 1 do begin
@@ -364,18 +389,22 @@ begin
    end;
    with tstatwriter(afiler) do begin
     writesection('componentstore');
-    writemsestring('storedir',expandprmacros('${COMPSTOREDIR}'));
+    writemsestring('storedir',storedir1);
     writerecordarray('stores',length(far1),{$ifdef FPC}@{$endif}dogetstorerec);
    end;
    try
     for int1:= 0 to high(far1) do begin
-     writer1:= tstatwriter.create(far1[int1].filepath);
-     try
-      writer1.writesection('store'); 
-      far1[int1].dostatwrite(writer1);
-     finally
-      writer1.free;
-     end;
+     with far1[int1] do begin
+      if isstatechanged then begin
+       writer1:= tstatwriter.create(finfo.filepath);
+       try
+        writer1.writesection('store'); 
+        far1[int1].dostatwrite(writer1);
+       finally
+        writer1.free;
+       end;
+      end;
+     end; 
     end;
    except
     application.handleexception(self);
@@ -396,13 +425,18 @@ begin
    end;
    try
     for int1:= 0 to high(far1) do begin
-     if far1[int1] <> nil then begin
-      reader1:= tstatreader.create(far1[int1].filepath);
-      try
-       reader1.setsection('store'); 
-       far1[int1].dostatread(reader1);
-      finally
-       reader1.free;
+     item1:= far1[int1];
+     if item1 <> nil then begin
+      with item1 do begin
+       if relocatepath(fstoredir,storedir1,finfo.filepath) then begin
+        reader1:= tstatreader.create(finfo.filepath);
+        try
+         reader1.setsection('store'); 
+         far1[int1].dostatread(reader1);
+        finally
+         reader1.free;
+        end;
+       end;
       end;
      end;
     end;
@@ -442,8 +476,15 @@ begin
 end;
 
 procedure tcomponentstorefo.donewnode(const sender: TObject);
+var
+ int1: integer;
 begin
- node.item.add(tstoredcomponent.create(true));
+ with node.item do begin
+  int1:= add(tstoredcomponent.create(true));
+  expanded:= true;
+ end;
+ grid.row:= grid.row + int1 + 1;
+ node.beginedit;
 end;
 
 function tcomponentstorefo.isnode: boolean;
@@ -456,6 +497,8 @@ begin
  sender.menu.submenu.itembyname('addnode').enabled:= isnode;
  sender.menu.submenu.itembyname('removestore').enabled:= isnode and 
                                       node.item.isroot;
+ sender.menu.submenu.itembyname('removenode').enabled:= isnode and 
+                                      not node.item.isroot;
 end;
 
 procedure tcomponentstorefo.copyupda(const sender: tcustomaction);
@@ -530,6 +573,15 @@ begin
   if askyesno('Do you want to remove "'+compname+'"?') then begin
    tstoredcomponent(node.item).free;
   end;
+ end;
+end;
+
+procedure tcomponentstorefo.delnode(const sender: TObject);
+begin
+ with tstoredcomponent(node.item).finfo do begin
+  if askyesno('Do you want to remove "'+compname+'" branch?') then begin
+   tstoredcomponent(node.item).free;
+  end; 
  end;
 end;
 

@@ -445,6 +445,8 @@ type
    function getvaluetext: msestring;
    procedure setvaluetext(var avalue: msestring);
    function item: tlistitem;
+   procedure beginedit;
+   procedure endedit;
    property items[const index: integer]: tlistitem read getitems write setitems; default;
    property activerow: integer read factiverow;
    property filtertext: msestring read ffiltertext write setfiltertext;
@@ -2519,6 +2521,16 @@ begin
  if not editing then begin
   include(result,oe_readonly);
  end;
+end;
+
+procedure titemedit.beginedit;
+begin
+ editing:= true;
+end;
+
+procedure titemedit.endedit;
+begin
+ editing:= false;
 end;
 
 {

@@ -93,6 +93,10 @@ function filepath(const path: filenamety;
 function relativepath(const path: filenamety; const root: filenamety = '';
                         const kind: filekindty = fk_default): filenamety;
        //root = '' -> currentdir
+function relocatepath(const olddir,newdir: filenamety; 
+                                       var apath: filenamety): boolean;
+//searches file in newdir relative to olddir if apath not found, updates
+//apath to the new location if found
 function isrelativepath(const path: filenamety): boolean;
 function isrootdir(const path: filenamety): boolean;
 function removelastpathsection(path: filenamety): filenamety;
@@ -1079,6 +1083,23 @@ begin
   result:= '.';
  end;
  syncpathdelim(str1,result,kind);
+end;
+
+function relocatepath(const olddir,newdir: filenamety; 
+                                       var apath: filenamety): boolean;
+//searches file in newdir relative to olddir if apath not found, updates
+//apath to the new location if found
+var
+ mstr1: filenamety;
+begin
+ result:= true;
+ if not findfile(apath) then begin
+  mstr1:= filepath(newdir,relativepath(apath,olddir));
+  result:= findfile(mstr1);
+  if result then begin
+   apath:= mstr1;
+  end;
+ end;
 end;
 
 procedure splitfilepath(const path: filenamety;
