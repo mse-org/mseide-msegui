@@ -1,0 +1,55 @@
+object msememodialogfo: tmsememodialogfo
+  bounds_x = 110
+  bounds_y = 237
+  bounds_cx = 386
+  bounds_cy = 291
+  taborder = 1
+  visible = False
+  container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_subfocus, ow_mousetransparent, ow_mousewheel, ow_destroywidgets, ow_autoscale]
+  container.bounds_x = 0
+  container.bounds_y = 0
+  container.bounds_cx = 386
+  container.bounds_cy = 291
+  container.frame.dummy = 0
+  options = [fo_screencentered, fo_closeonesc, fo_autoreadstat, fo_autowritestat, fo_savepos, fo_savestate]
+  statfile = tstatfile1
+  caption = 'Enter Memo Text'
+  moduleclassname = 'tmseform'
+  object memo: tmemoedit
+    bounds_x = 0
+    bounds_y = 0
+    bounds_cx = 386
+    bounds_cy = 257
+    frame.localprops = [frl_colorclient]
+    frame.dummy = 0
+    anchors = [an_top, an_bottom]
+  end
+  object tbutton1: tbutton
+    bounds_x = 264
+    bounds_y = 264
+    bounds_cx = 50
+    bounds_cy = 20
+    anchors = [an_right, an_bottom]
+    taborder = 1
+    state = [as_localdefault, as_localcaption]
+    caption = '&OK'
+    modalresult = mr_ok
+  end
+  object tbutton2: tbutton
+    bounds_x = 328
+    bounds_y = 264
+    bounds_cx = 50
+    bounds_cy = 20
+    anchors = [an_right, an_bottom]
+    taborder = 2
+    state = [as_localcaption]
+    caption = '&Cancel'
+    modalresult = mr_cancel
+  end
+  object tstatfile1: tstatfile
+    filename = 'memodialog.sta'
+    options = [sfo_memory, sfo_activatorread, sfo_activatorwrite]
+    left = 64
+    top = 104
+  end
+end

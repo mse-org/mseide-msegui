@@ -15,13 +15,14 @@ interface
 
 implementation
 uses
- Classes,msefiledialog,msedesignintf,regdialogs_bmp,msecolordialog;
+ Classes,msefiledialog,msedesignintf,regdialogs_bmp,msecolordialog,
+ msememodialog;
 
 procedure Register;
 begin
  registercomponents('Dialog',[tfilelistview,tfiledialog,
                      tfilenameedit,{thistoryfilenameedit,}
-                     tdirdropdownedit,tcoloredit]);
+                     tdirdropdownedit,tcoloredit,tmemodialogedit]);
  registercomponenttabhints(['Dialog'],['User Dialogs']);
 end;
 

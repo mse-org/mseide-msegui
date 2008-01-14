@@ -21,7 +21,8 @@ uses
  classes,mseglob,mseguiglob,mseapplication,msestat,msemenus,msegui,msegraphics,
  msegraphutils,mseevent,mseclasses,mseforms,msedock,mseact,mseactions,
  msestrings,msedataedits,mseedit,msegrids,msetypes,msewidgetgrid,msedatanodes,
- mselistbrowser,msewidgets,msestatfile,msebitmap,msefiledialog,msesys,msedialog;
+ mselistbrowser,msewidgets,msestatfile,msebitmap,msefiledialog,msesys,msedialog,
+ msememodialog;
 
 type
  storedcomponentinfoty = record
@@ -72,7 +73,7 @@ type
    tpopupmenu1: tpopupmenu;
    storefile: tstatfile;
    filepath: tfilenameedit;
-   compdesc: tstringedit;
+   compdesc: tmemodialogedit;
    storefiledialog: tfiledialog;
    procedure docreate(const sender: TObject);
    procedure dopastecomponent(const sender: TObject);

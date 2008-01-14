@@ -179,6 +179,7 @@ type
   protected
    function getdefaultstate: propertystatesty; override;
   public
+   procedure edit; override;
    function allequal: boolean; override;
    procedure setvalue(const value: msestring); override;
    function getvalue: msestring; override;
@@ -727,7 +728,7 @@ uses
  mseactions,msehash,msegraphutils,
  msestringlisteditor,msedoublestringlisteditor,msereallisteditor,
  mseintegerlisteditor,mseact,
- msecolordialog,
+ msecolordialog,msememodialog,
  mseshapes,msestockobjects,msetexteditor,
  msegraphicstream,
  mseformatbmpico{$ifdef FPC},mseformatjpg,mseformatpng,
@@ -2314,7 +2315,7 @@ end;
 
 function tmsestringpropertyeditor.getdefaultstate: propertystatesty;
 begin
- result:= inherited getdefaultstate + [ps_isordprop];
+ result:= inherited getdefaultstate + [ps_isordprop,ps_dialog];
 end;
 
 function tmsestringpropertyeditor.allequal: boolean;
@@ -2343,6 +2344,16 @@ end;
 procedure tmsestringpropertyeditor.setvalue(const value: msestring);
 begin
  setmsestringvalue(value);
+end;
+
+procedure tmsestringpropertyeditor.edit;
+var
+ mstr1: msestring;
+begin
+ mstr1:= encodemsestring(getmsestringvalue(0));
+ if memodialog(mstr1) = mr_ok then begin
+  setmsestringvalue(decodemsestring(mstr1));
+ end;
 end;
 
 { tarraypropertyeditor }

@@ -109,7 +109,7 @@ object componentstorefo: tcomponentstorefo
       onsetvalue = filenamesetva
       reffontheight = 14
     end
-    object compdesc: tstringedit
+    object compdesc: tmemodialogedit
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight]
       bounds_x = 273
       bounds_y = 0
@@ -118,6 +118,7 @@ object componentstorefo: tcomponentstorefo
       frame.levelo = 0
       frame.colorclient = -2147483645
       frame.localprops = [frl_levelo, frl_leveli, frl_colorclient]
+      frame.button.imagenr = 17
       frame.dummy = 0
       taborder = 3
       visible = False
