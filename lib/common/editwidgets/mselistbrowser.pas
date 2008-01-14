@@ -2506,6 +2506,7 @@ begin
    fediting:= avalue;
    setupeditor;
    if fediting then begin
+    ffiltertext:= '';
     feditor.selectall;
    end
    else begin
@@ -3502,18 +3503,38 @@ begin
      if (teo_keyrowmoving in foptions) and (shiftstate = [ss_ctrl]) and
       ((key = key_up) or (key = key_down)) then begin
       include(eventstate,es_processed);
-      if (ftreelevel > 0) and ((count = 0) or not expanded) then begin
-       int1:= parentindex;
-       if key = key_up then begin
-        if (int1 > 0) and checkrowmove(row,row-1) then begin
-         ttreelistitem1(fparent).swap(int1,int1-1);
-         moverow(row,row-1,1);
+      if ((count = 0) or not expanded) then begin
+       if ftreelevel > 0 then begin
+        int1:= parentindex;
+        if key = key_up then begin
+         if (int1 > 0) and checkrowmove(row,row-1) then begin
+          ttreelistitem1(fparent).swap(int1,int1-1);
+          moverow(row,row-1,1);
+         end;
+        end
+        else begin //key_down
+         if (int1 < fparent.count-1) and checkrowmove(row,row+1) then begin
+          ttreelistitem1(fparent).swap(int1,int1+1);
+          moverow(row,row+1,1);
+         end;
         end;
        end
-       else begin //key_down
-        if (int1 < fparent.count-1) and checkrowmove(row,row+1) then begin
-         ttreelistitem1(fparent).swap(int1,int1+1);
-         moverow(row,row+1,1);
+       else begin
+        if key = key_up then begin
+         if (row > 0) then begin
+          if ttreelistitem(itemlist[row-1]).issinglerootrow and 
+                                             checkrowmove(row,row-1) then begin
+           moverow(row,row-1,1);
+          end;
+         end;
+        end
+        else begin //key_down
+         if (row < rowhigh) then begin
+          if ttreelistitem(itemlist[row+1]).issinglerootrow and 
+                                             checkrowmove(row,row+1) then begin
+           moverow(row,row+1,1);
+          end;
+         end;
         end;
        end;
       end;

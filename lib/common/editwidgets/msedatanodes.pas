@@ -190,6 +190,7 @@ type
    function levelshift: integer;
    function treeheight: integer; //total hight of children
    function isroot: boolean;
+   function issinglerootrow: boolean; //keyrowmove can be used
    function isstatechanged: boolean;
 
    function finditembycaption(const acaption: msestring;
@@ -1775,6 +1776,11 @@ function ttreelistitem.isroot: boolean;
 begin
  result:= fparent = nil;
 end;
+
+function ttreelistitem.issinglerootrow: boolean;
+begin
+ result:= (treelevel = 0) and (not expanded or (count = 0));
+end; 
 
 function ttreelistitem.parentindex: integer;
 begin
