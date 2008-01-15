@@ -39,6 +39,7 @@ type
   private
    finfo: storedcomponentinfoty;
    fisnode: boolean;
+   fpasting: boolean;
    procedure setinfo(const avalue: storedcomponentinfoty);
    procedure setcompname(const avalue: msestring);
    procedure checkisnode;
@@ -99,6 +100,8 @@ type
    procedure compnamesetva(const sender: TObject; var avalue: msestring;
                    var accept: Boolean);
    procedure delnode(const sender: TObject);
+   procedure copynodeex(const sender: TObject);
+   procedure pastenodeex(const sender: TObject);
   private
 //   frootnode: tstoredcomponent;
    far1: storedcomponentarty;
@@ -147,7 +150,7 @@ end;
 procedure tstoredcomponent.dostatread(const reader: tstatreader);
 begin
  inherited;
- if isroot then begin
+ if not fpasting and isroot then begin
   caption:= compname; //restore
  end
  else begin
@@ -494,12 +497,17 @@ begin
 end;
 
 procedure tcomponentstorefo.popupupdate(const sender: tcustommenu);
+var
+ bo1: boolean;
 begin
- sender.menu.submenu.itembyname('addnode').enabled:= isnode;
+ bo1:= isnode;
+ sender.menu.submenu.itembyname('addnode').enabled:= bo1;
+ sender.menu.submenu.itembyname('pastenode').enabled:= bo1;
  sender.menu.submenu.itembyname('removestore').enabled:= isnode and 
                                       node.item.isroot;
- sender.menu.submenu.itembyname('removenode').enabled:= isnode and 
-                                      not node.item.isroot;
+ bo1:= isnode and not node.item.isroot;
+ sender.menu.submenu.itembyname('removenode').enabled:= bo1;
+ sender.menu.submenu.itembyname('copynode').enabled:= bo1;
 end;
 
 procedure tcomponentstorefo.copyupda(const sender: tcustomaction);
@@ -583,6 +591,61 @@ begin
   if askyesno('Do you want to remove "'+compname+'" branch?') then begin
    tstoredcomponent(node.item).free;
   end; 
+ end;
+end;
+
+const
+ nodecopysig = '{DEA80549-4F45-4117-B182-A0EF49C4A097}';
+procedure tcomponentstorefo.copynodeex(const sender: TObject);
+var
+ stream1: ttextstream;
+ writer1: tstatwriter;
+begin
+ stream1:= ttextstream.create; //memory stream
+ writer1:= tstatwriter.create(stream1);
+ stream1.encoding:= ce_utf8n;
+ try
+  writer1.writesection('nodecopy');
+  writer1.writemsestring('signature',nodecopysig);
+  node.item.dostatwrite(writer1);
+  stream1.position:= 0;
+  copytoclipboard(utf8tostring(stream1.readdatastring));
+ finally
+  writer1.free;
+  stream1.free;
+ end;
+end;
+
+procedure tcomponentstorefo.pastenodeex(const sender: TObject);
+var
+ reader1: tstatreader;
+ stream1: ttextstream;
+ node1: tstoredcomponent;
+ mstr1: msestring;
+begin
+ if pastefromclipboard(mstr1) then begin
+  reader1:= nil;
+  stream1:= nil;
+  try
+   stream1:= ttextstream.createdata(stringtoutf8(mstr1));
+   stream1.encoding:= ce_utf8n;
+   reader1:= tstatreader.create(stream1);
+   if reader1.findsection('nodecopy') and 
+        (reader1.readmsestring('signature','') = nodecopysig) then begin
+    node1:= tstoredcomponent.create(true);
+    node1.fpasting:= true;
+    node1.dostatread(reader1);   
+    node1.fpasting:= false;
+    with node.item do begin
+     expanded:= true;
+     add(node1);
+     grid.row:= grid.row + count;
+    end;
+   end;
+  finally
+   reader1.free;
+   stream1.free;
+  end;
  end;
 end;
 

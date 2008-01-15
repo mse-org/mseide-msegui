@@ -147,13 +147,16 @@ object componentstorefo: tcomponentstorefo
   end
   object tpopupmenu1: tpopupmenu
     onupdate = popupupdate
-    menu.submenu.count = 8
+    menu.submenu.count = 11
     menu.submenu.items = <    
       item
         action = copycompact
       end    
       item
         action = pastecompact
+      end    
+      item
+        options = [mao_separator, mao_shortcutcaption]
       end    
       item
         caption = 'New  Node'
@@ -166,6 +169,18 @@ object componentstorefo: tcomponentstorefo
         name = 'removenode'
         state = [as_localcaption, as_localonexecute]
         onexecute = delnode
+      end    
+      item
+        caption = 'Copy Node'
+        name = 'copynode'
+        state = [as_localcaption, as_localonexecute]
+        onexecute = copynodeex
+      end    
+      item
+        caption = 'Paste Node'
+        name = 'pastenode'
+        state = [as_localcaption, as_localonexecute]
+        onexecute = pastenodeex
       end    
       item
         options = [mao_separator, mao_shortcutcaption]

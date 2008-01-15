@@ -887,6 +887,7 @@ constructor ttextstream.createdata(const adata: string);
 begin
  create;
  writedatastring(adata);
+ position:= 0;
 end;
 
 function ttextstream.Read(var Buffer; Count: Integer): Longint;
