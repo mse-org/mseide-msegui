@@ -342,35 +342,8 @@ object mainfo: tmainfo
         state = [as_localcaption]
       end    
       item
-        submenu.count = 20
+        submenu.count = 24
         submenu.items = <        
-          item
-            submenu.count = 3
-            submenu.items = <            
-              item
-                caption = '&Component Palette'
-                state = [as_checked, as_localchecked, as_localcaption, as_localimagelist, as_localimagenr, as_localonexecute]
-                imagelist = vievmenuicons
-                imagenr = 1
-                onexecute = viewcomponentpaletteonexecute
-              end            
-              item
-                caption = 'Component &Store'
-                state = [as_localcaption, as_localimagelist, as_localonexecute]
-                imagelist = vievmenuicons
-                onexecute = viewcomponentstoreonexecute
-              end            
-              item
-                caption = '&Debugger'
-                state = [as_localcaption, as_localimagelist, as_localimagenr, as_localonexecute]
-                imagelist = vievmenuicons
-                imagenr = 2
-                onexecute = viewdebuggertoolbaronexecute
-              end>
-            caption = 'T&oolbars'
-            state = [as_localcaption, as_localimagelist]
-            imagelist = vievmenuicons
-          end        
           item
             submenu.count = 2
             submenu.items = <            
@@ -382,34 +355,27 @@ object mainfo: tmainfo
                 state = [as_localcaption, as_localonexecute]
                 onexecute = newpanelonexecute
               end>
-            caption = '&Panels'
+            caption = 'Pan&els'
             name = 'panels'
             state = [as_localcaption, as_localimagelist, as_localimagenr]
             imagelist = vievmenuicons
             imagenr = 0
           end        
           item
-            caption = '&Messages'
-            state = [as_localcaption, as_localimagelist, as_localimagenr, as_localonexecute]
-            options = [mao_shortcutcaption, mao_asyncexecute]
-            imagelist = vievmenuicons
-            imagenr = 4
-            onexecute = viewmessagesonexecute
+            options = [mao_separator, mao_shortcutcaption]
           end        
           item
-            caption = 'So&urce'
+            caption = 'Component &Palette'
             state = [as_localcaption, as_localimagelist, as_localimagenr, as_localonexecute]
-            options = [mao_shortcutcaption, mao_asyncexecute]
             imagelist = vievmenuicons
-            imagenr = 5
-            onexecute = viewsourceonexecute
+            imagenr = 1
+            onexecute = viewcomponentpaletteonexecute
           end        
           item
-            caption = '&Find Results'
-            state = [as_localcaption, as_localimagelist, as_localimagenr, as_localonexecute]
+            caption = 'Component Sto&re'
+            state = [as_localcaption, as_localimagelist, as_localonexecute]
             imagelist = vievmenuicons
-            imagenr = 15
-            onexecute = viewfindresults
+            onexecute = viewcomponentstoreonexecute
           end        
           item
             caption = 'Object &Inspector'
@@ -420,6 +386,39 @@ object mainfo: tmainfo
           end        
           item
             options = [mao_separator, mao_shortcutcaption]
+          end        
+          item
+            caption = 'So&urce'
+            state = [as_localcaption, as_localimagelist, as_localimagenr, as_localonexecute]
+            options = [mao_shortcutcaption, mao_asyncexecute]
+            imagelist = vievmenuicons
+            imagenr = 5
+            onexecute = viewsourceonexecute
+          end        
+          item
+            caption = '&Messages'
+            state = [as_localcaption, as_localimagelist, as_localimagenr, as_localonexecute]
+            options = [mao_shortcutcaption, mao_asyncexecute]
+            imagelist = vievmenuicons
+            imagenr = 4
+            onexecute = viewmessagesonexecute
+          end        
+          item
+            caption = '&Find Results'
+            state = [as_localcaption, as_localimagelist, as_localimagenr, as_localonexecute]
+            imagelist = vievmenuicons
+            imagenr = 15
+            onexecute = viewfindresults
+          end        
+          item
+            options = [mao_separator, mao_shortcutcaption]
+          end        
+          item
+            caption = '&Debugger'
+            state = [as_localcaption, as_localimagelist, as_localimagenr, as_localonexecute]
+            imagelist = vievmenuicons
+            imagenr = 2
+            onexecute = viewdebuggertoolbaronexecute
           end        
           item
             caption = '&Watches'
@@ -438,7 +437,7 @@ object mainfo: tmainfo
             onexecute = viewstackonexecute
           end        
           item
-            caption = '&Threads'
+            caption = 'T&hreads'
             state = [as_localcaption, as_localimagelist, as_localimagenr, as_localonexecute]
             imagelist = vievmenuicons
             imagenr = 10

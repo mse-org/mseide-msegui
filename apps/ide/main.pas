@@ -106,6 +106,7 @@ type
    procedure viewobjectinspectoronexecute(const sender: TObject);
    procedure toggleobjectinspectoronexecute(const sender: tobject);
    procedure viewcomponentpaletteonexecute(const sender: TObject);
+   procedure viewcomponentstoreonexecute(const sender: TObject);
    procedure viewdebuggertoolbaronexecute(const sender: TObject);
    procedure viewwatchpointsonexecute(const sender: TObject);
    procedure viewprojectsourceonexecute(const sender: TObject);
@@ -128,7 +129,6 @@ type
    procedure saveprojectcopyexecute(const sender: TObject);
    procedure newprojectfromprogramexe(const sender: TObject);
    procedure newemptyprojectexe(const sender: TObject);
-   procedure viewcomponentstoreonexecute(const sender: TObject);
   private
    fstartcommand: startcommandty;
    fnoremakecheck: boolean;
@@ -1279,8 +1279,7 @@ end;
 
 procedure tmainfo.viewcomponentstoreonexecute(const sender: TObject);
 begin
- componentstorefo.window.bringtofront;
- componentstorefo.show;
+ componentstorefo.activate;
 end;
 
 procedure tmainfo.viewdebuggertoolbaronexecute(const sender: TObject);
