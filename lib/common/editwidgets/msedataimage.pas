@@ -149,7 +149,12 @@ end;
 
 function tcustomdataimage.getcellframe: framety;
 begin
- result:= getinnerstframe;
+ if fframe <> nil then begin
+  result:= fframe.cellframe;
+ end
+ else begin
+  result:= nullframe;
+ end;
 end;
 
 procedure tcustomdataimage.loadcellbmp(const acanvas: tcanvas;

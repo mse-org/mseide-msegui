@@ -338,6 +338,7 @@ type
    function outerframe: framety;
    function paintframe: framety;     
    function innerframe: framety;     
+   function cellframe: framety; //innerframe without painframedelta
    function pointincaption(const point: pointty): boolean; virtual;
                                      //origin = widgetrect
    procedure initgridframe; virtual;
@@ -947,7 +948,7 @@ type
    procedure setframe(const avalue: tcustomframe);
    function getface: tcustomface;
    procedure setface(const avalue: tcustomface);
-   function getinnerstframe: framety; virtual;
+//   function getinnerstframe: framety; virtual;
 
    procedure createwindow; virtual;
    procedure objectchanged(const sender: tobject); virtual;
@@ -3578,6 +3579,14 @@ end;
 procedure tcustomframe.fontcanvaschanged;
 begin
  //dummy
+end;
+
+function tcustomframe.cellframe: framety;
+begin
+ result.left:= finnerframe.left - fpaintframedelta.left;
+ result.top:= finnerframe.top - fpaintframedelta.top;
+ result.right:= finnerframe.right - fpaintframedelta.right;
+ result.bottom:= finnerframe.bottom - fpaintframedelta.bottom;
 end;
 
 { tframetemplate }
@@ -9210,7 +9219,7 @@ begin
  end;
  invalidate;
 end;
-
+{
 function twidget.getinnerstframe: framety;
 begin
  if fframe <> nil then begin
@@ -9225,7 +9234,7 @@ begin
   result:= nullframe;
  end;
 end;
-
+}
 function twidget.getcomponentstate: tcomponentstate;
 begin
  result:= componentstate;

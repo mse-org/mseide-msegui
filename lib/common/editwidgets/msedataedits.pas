@@ -1189,7 +1189,7 @@ end;
 function tdataedit.getcellframe: framety;
 begin
  if fframe <> nil then begin
-  result:= getinnerstframe;
+  result:= frame.cellframe;
  end
  else begin
   result:= minimalframe;
@@ -2262,7 +2262,7 @@ end;
 
 function tcustomdropdownedit.getcellframe: framety;
 begin
- result:= subframe(getinnerstframe,tcustombuttonframe(fframe).buttonframe);
+ result:= fframe.cellframe;
 end;
 
 function tcustomdropdownedit.getframe: tdropdownbuttonframe;
@@ -3900,7 +3900,7 @@ end;
 
 function tcustomcalendardatetimeedit.getcellframe: framety;
 begin
- result:= subframe(getinnerstframe,tdropdownbuttonframe(fframe).buttonframe);
+ result:= fframe.cellframe;
 end;
 
 end.

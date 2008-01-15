@@ -106,6 +106,7 @@ object componentstorefo: tcomponentstorefo
       taborder = 2
       visible = False
       optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_hintclippedtext, oe_autopopupmenu, oe_keyexecute, oe_savestate]
+      textflags = [tf_ycentered, tf_noselect, tf_ellipseleft]
       onsetvalue = filenamesetva
       reffontheight = 14
     end
