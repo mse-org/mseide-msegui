@@ -111,6 +111,7 @@ type
    function dogetstorerec(const index: integer): msestring;
    procedure dosetstorescount(const count: integer);
    procedure dosetstorerec(const index: integer; const avalue: msestring);
+   procedure readstore(const aitem: tstoredcomponent);
   public
    procedure updatestat(afiler: tstatfiler);
  end;
@@ -373,13 +374,27 @@ begin
  end;
 end;
 
+procedure tcomponentstorefo.readstore(const aitem: tstoredcomponent);
+var
+ reader1: tstatreader;
+begin
+ with aitem do begin
+  reader1:= tstatreader.create(finfo.filepath);
+  try
+   reader1.setsection('store'); 
+   aitem.dostatread(reader1);
+  finally
+   reader1.free;
+  end;
+ end;
+end;
+
 procedure tcomponentstorefo.updatestat(afiler: tstatfiler);
 var
  int1: integer;
  item1: tstoredcomponent;
  ar2: msestringarty;
  writer1: tstatwriter;
- reader1: tstatreader;
  storedir1: filenamety;
 begin
  storedir1:= getstoredir;
@@ -422,30 +437,24 @@ begin
    fstoredir:= readmsestring('storedir','');
    readrecordarray('stores',{$ifdef FPC}@{$endif}dosetstorescount,
                   {$ifdef FPC}@{$endif}dosetstorerec);
-   for int1:= 0 to high(far1) do begin
-    if far1[int1] <> nil then begin
-     node.itemlist.add(far1[int1]);
-    end;
-   end;
    try
     for int1:= 0 to high(far1) do begin
      item1:= far1[int1];
      if item1 <> nil then begin
       with item1 do begin
        if relocatepath(fstoredir,storedir1,finfo.filepath) then begin
-        reader1:= tstatreader.create(finfo.filepath);
-        try
-         reader1.setsection('store'); 
-         far1[int1].dostatread(reader1);
-        finally
-         reader1.free;
-        end;
+        readstore(item1);
        end;
       end;
      end;
     end;
    except
     application.handleexception(self);
+   end;
+   for int1:= 0 to high(far1) do begin
+    if far1[int1] <> nil then begin
+     node.itemlist.add(far1[int1]);
+    end;
    end;
   end;
  end;
@@ -567,10 +576,12 @@ begin
   if execute(fdk_open) = mr_ok then begin
    node1:= tstoredcomponent.create(true);
    with node1.finfo do begin
+    storedir:= getstoredir;
     filepath:= controller.filename;
     compname:= removefileext(filename(filepath));
     node1.caption:= compname;
    end;
+   readstore(node1);
    node.itemlist.add(node1);
   end;
  end;
