@@ -800,7 +800,7 @@ end;
 
 procedure tcustomscrollbar.mouseevent(var info: mouseeventinfoty);
 
- procedure releasebutton;
+ procedure releasebutton(const cancel: boolean);
  begin
   if scs_mousecaptured in fstate then begin
    exclude(fstate,scs_mousecaptured);
@@ -811,7 +811,7 @@ procedure tcustomscrollbar.mouseevent(var info: mouseeventinfoty);
    exclude(fdrawinfo.areas[fclickedarea].state,ss_clicked);
    invalidateclickedarea;
   end;
-  if fclickedarea = sbbu_move then begin
+  if (fclickedarea = sbbu_move) and not cancel then begin
    thumbtrack(info.pos);
    fintf.scrollevent(self,sbe_thumbposition);
   end;
@@ -825,7 +825,7 @@ procedure tcustomscrollbar.mouseevent(var info: mouseeventinfoty);
   application.cursorshape:= cr_arrow;
   if clickedareaisvalid then begin
    if (ar1 <> fclickedarea) and (fclickedarea <> sbbu_move) then begin
-    releasebutton;
+    releasebutton(false);
     fclickedarea:= scrollbarareaty(scrollbarclicked);
    end;
    if (fclickedarea = sbbu_move) then begin
@@ -874,6 +874,7 @@ begin
  end;
  if (info.eventkind = ek_clientmouseleave) and (forg = org_client) or
     (info.eventkind = ek_mouseleave) and (forg = org_widget) then begin
+  releasebutton(true);
   mousemove(scrollbarareaty(-1));
  end
  else begin
@@ -926,7 +927,7 @@ begin
    end;
    ek_buttonrelease: begin
     if info.button = mb_left then begin
-     releasebutton;
+     releasebutton(false);
     end;
    end;
   end;
