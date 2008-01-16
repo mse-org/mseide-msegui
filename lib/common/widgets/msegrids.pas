@@ -372,7 +372,7 @@ type
  drawcelleventty = procedure(const sender: tcol; const canvas: tcanvas;
                           const cellinfo: cellinfoty) of object;
  beforedrawcelleventty = procedure(const sender: tcol; const canvas: tcanvas;
-                          var cellinfo: cellinfoty; var handled: boolean) of object;
+                          var cellinfo: cellinfoty; var processed: boolean) of object;
  tcol = class(tgridprop)
   private
    frowfontoffset: integer;
@@ -489,6 +489,10 @@ type
    fdata: tdatalist;
    fname: string;
    fonchange: notifyeventty;
+   procedure beforedragevent(var ainfo: draginfoty; const arow: integer;
+                                     var processed: boolean); virtual;
+   procedure afterdragevent(var ainfo: draginfoty; const arow: integer;
+                                     var processed: boolean); virtual;
    procedure setselected(const row: integer; value: boolean); virtual;
    function getselected(const row: integer): boolean; override;
    procedure setoptions(const Value: coloptionsty); override;
@@ -4397,6 +4401,18 @@ begin
  else begin
   options:= options - [co_readonly];
  end;
+end;
+
+procedure tdatacol.beforedragevent(var ainfo: draginfoty; const arow: integer;
+                                           var processed: boolean);
+begin
+ //dummy
+end;
+
+procedure tdatacol.afterdragevent(var ainfo: draginfoty; const arow: integer;
+                                           var processed: boolean);
+begin
+ //dummy
 end;
 
 { tdrawcol }
@@ -9881,11 +9897,30 @@ begin
 end;
 
 procedure tcustomgrid.dragevent(var info: draginfoty);
+var
+ bo1,bo2: boolean;
+ cell1: gridcoordty;
 begin
+ cell1:= cellatpos(info.pos);
+ bo2:= isdatacell(cell1);
  if not fdragcontroller.beforedragevent(info) then begin
-  inherited;
+  if bo2 then begin
+   bo1:= false;
+   datacols[cell1.col].beforedragevent(info,cell1.row,bo1);
+   if not bo1 then begin
+    inherited;
+   end;
+  end
+  else begin
+   inherited;
+  end;
  end;
- fdragcontroller.afterdragevent(info);
+ if not fdragcontroller.afterdragevent(info) then begin
+  bo1:= false;
+  if bo2 then begin
+   datacols[cell1.col].afterdragevent(info,cell1.row,bo1);
+  end;
+ end;
 end;
 
 function tcustomgrid.getdisprect: rectty;

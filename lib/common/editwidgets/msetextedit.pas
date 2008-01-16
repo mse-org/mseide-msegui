@@ -121,6 +121,10 @@ type
    procedure setgridintf(const intf: iwidgetgrid);
    function getcellframe: framety; virtual;
    procedure drawcell(const canvas: tcanvas);
+   procedure beforecelldragevent(var ainfo: draginfoty; const arow: integer;
+                               var handled: boolean); virtual;
+   procedure aftercelldragevent(var ainfo: draginfoty; const arow: integer;
+                               var handled: boolean); virtual;
    procedure initgridwidget;
    procedure valuetogrid(const row: integer);
    procedure gridtovalue(const row: integer);
@@ -1873,6 +1877,18 @@ procedure tcustomtextedit.inserttext(const atext: msestring;
                selected: boolean = false);
 begin
  inserttext(editpos,atext,selected);
+end;
+
+procedure tcustomtextedit.beforecelldragevent(var ainfo: draginfoty;
+               const arow: integer; var handled: boolean);
+begin
+ //dummy
+end;
+
+procedure tcustomtextedit.aftercelldragevent(var ainfo: draginfoty;
+               const arow: integer; var handled: boolean);
+begin
+ //dummy
 end;
 
 { tundotextedit }

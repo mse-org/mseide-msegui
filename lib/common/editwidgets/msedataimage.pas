@@ -41,6 +41,10 @@ type
    function getcellframe: framety;
    procedure loadcellbmp(const acanvas: tcanvas; const abmp: tmaskedbitmap); virtual;
    procedure drawcell(const canvas: tcanvas);
+   procedure beforecelldragevent(var ainfo: draginfoty; const arow: integer;
+                               var handled: boolean); virtual;
+   procedure aftercelldragevent(var ainfo: draginfoty; const arow: integer;
+                               var handled: boolean); virtual;
    procedure valuetogrid(const row: integer); virtual;
    procedure gridtovalue(const row: integer); virtual;
    procedure docellevent(const ownedcol: boolean; var info: celleventinfoty); virtual;
@@ -279,6 +283,18 @@ end;
 function tcustomdataimage.getgridintf: iwidgetgrid;
 begin
  result:= fgridintf;
+end;
+
+procedure tcustomdataimage.beforecelldragevent(var ainfo: draginfoty;
+               const arow: integer; var handled: boolean);
+begin
+ //dummy
+end;
+
+procedure tcustomdataimage.aftercelldragevent(var ainfo: draginfoty;
+               const arow: integer; var handled: boolean);
+begin
+ //dummy
 end;
 
 end.

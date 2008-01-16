@@ -68,12 +68,15 @@ type
    function getactiveindex: integer;
   public
    constructor create(const aowner: tcustomitemlist = nil;
-              const aparent: ttreelistitem = nil);
+              const aparent: ttreelistitem = nil); override;
    procedure assign(source: ttreeitemeditlist); overload;
        //source remains owner of items, parent of items is unchanged
    procedure add(const aitem: ttreelistedititem); overload; //nil ignored
    procedure add(const aitems: treelistedititemarty); overload;
-   procedure add(const acount: integer; itemclass: treelistedititemclassty = nil); overload;
+   procedure add(const acount: integer; 
+               const itemclass: treelistedititemclassty = nil); overload;
+   procedure add(const captions: array of msestring; 
+               const itemclass: treelistedititemclassty = nil); overload;
    property activeindex: integer read getactiveindex;
  end;
 
@@ -83,7 +86,7 @@ type
    procedure setfieldtext(const fieldindex: integer; var avalue: msestring);
   public
    constructor create(const aowner: tcustomitemlist = nil;
-              const aparent: ttreelistitem = nil);
+              const aparent: ttreelistitem = nil); override;
  end;
 
  createlistitemeventty = procedure(const sender: tcustomitemlist; var item: tlistedititem) of object;
@@ -521,12 +524,36 @@ type
 
  ttreeitemedit = class;
 
+ ttreeitemdragobject = class(tdragobject)
+  private
+   fitem: ttreelistitem;
+  public
+   constructor create(const asender: tobject; var instance: tdragobject;
+                          const apickpos: pointty; const aitem: ttreelistitem);
+   property item: ttreelistitem read fitem;
+ end;
+ 
+ treeitemdragbegineventty = procedure(const sender: ttreeitemedit;
+                    const aitem: ttreelistitem;
+                    var candrag: boolean; var dragobject: ttreeitemdragobject;
+                    var processed: boolean) of object;
+ treeitemdragovereventty = procedure(const sender: ttreeitemedit;
+            const source,dest: ttreelistitem;
+            var dragobject: ttreeitemdragobject; var accept: boolean;
+            var processed: boolean) of object;
+ treeitemdragdropeventty = procedure(const sender: ttreeitemedit;
+            const source,dest: ttreelistitem;
+            var dragobject: ttreeitemdragobject; var processed: boolean) of object;
+
  ttreeitemeditlist = class(tcustomitemeditlist)
   private
    fchangingnode: ttreelistitem;
    finsertcount: integer;
    finsertindex: integer;
    fcolorline: colorty;
+   fondragbegin: treeitemdragbegineventty;
+   fondragover: treeitemdragovereventty;
+   fondragdrop: treeitemdragdropeventty;
    procedure setoncreateitem(const value: createtreelistitemeventty);
    function getoncreateitem: createtreelistitemeventty;
    procedure setcolorline(const value: colorty);
@@ -543,6 +570,10 @@ type
                     var aitem: tlistitem); override;
    procedure readstate(const reader; const acount: integer); override;
    procedure writestate(const writer; const name: msestring); override;
+   procedure beforedragevent(var ainfo: draginfoty; const arow: integer;
+                               var processed: boolean);
+   procedure afterdragevent(var ainfo: draginfoty; const arow: integer;
+                               var processed: boolean);
   public
    constructor create(const intf: iitemlist; const aowner: ttreeitemedit);
    procedure endupdate; override;
@@ -572,6 +603,12 @@ type
                       write setoncreateitem;
    property onstatreaditem: statreadtreeitemeventty read getonstatreaditem
                       write setonstatreaditem;
+   property ondragbegin: treeitemdragbegineventty read fondragbegin 
+                                          write fondragbegin;
+   property ondragover: treeitemdragovereventty read fondragover
+                                          write fondragover;
+   property ondragdrop: treeitemdragdropeventty read fondragdrop
+                                          write fondragdrop;
    property levelstep;
  end;
 
@@ -587,19 +624,60 @@ type
    procedure dosetvalue(var avalue: msestring; var accept: boolean); override;
    function getoptionsedit: optionseditty; override;
  end;
-
- ttreeitemedit = class(titemedit)
+ 
+(*                    
+ ttreeitemdragcontroller = class(tcustomdragcontroller)
+{
+   private
+   fonbefore,fonafter: drageventsty;
+   function dodragevent(const events: drageventsty; var info: draginfoty): boolean;
+}
+  private
+   fowner: ttreeitemedit;
+   fondragbegin: treeitemdragbegineventty;
+  protected
+   function beforedragevent(var info: draginfoty): boolean; override;
+    //true if processed
+   function afterdragevent(var info: draginfoty): boolean; override;
+    //true if processed
+  public
+   constructor create(const aowner: ttreeitemedit);
+  published
+   property ondragbegin: treeitemdragbegineventty read fondragbegin 
+                                          write fondragbegin;
+{
+  published
+   property onbeforedragbegin: drageventty read fonbefore.dragbegin 
+                                  write fonbefore.dragbegin;
+   property onbeforedragover: dragovereventty read fonbefore.dragover 
+                                  write fonbefore.dragover;
+   property onbeforedragdrop: drageventty read fonbefore.dragdrop 
+                                  write fonbefore.dragdrop;
+   property onafterdragbegin: drageventty read fonafter.dragbegin 
+                                  write fonafter.dragbegin;
+   property onafterdragover: dragovereventty read fonafter.dragover 
+                                  write fonafter.dragover;
+   property onafterdragdrop: drageventty read fonafter.dragdrop 
+                                  write fonafter.dragdrop;
+}
+ end;
+ *)
+ ttreeitemedit = class(titemedit,idragcontroller)
   private
    foptions: treeitemeditoptionsty;
    foncheckrowmove: checkmoveeventty;
    ffieldedit: trecordfieldedit;
+//   fdragcontroller: ttreeitemdragcontroller;
    function getitemlist: ttreeitemeditlist;
    procedure setitemlist(const Value: ttreeitemeditlist);
    function getitems(const index: integer): ttreelistitem;
    procedure setitems(const index: integer; const Value: ttreelistitem);
    procedure expandedchanged(const avalue: boolean);
    procedure setfieldedit(const avalue: trecordfieldedit);
+//   procedure setdrag(const avalue: ttreeitemdragcontroller);
   protected
+   procedure clientmouseevent(var info: mouseeventinfoty); override;
+//   procedure dragevent(var info: draginfoty); override;
    procedure doitembuttonpress(var info: mouseeventinfoty); override;
    procedure setfiltertext(const value: msestring); override;
    function getkeystring1(const aindex: integer): msestring;
@@ -611,8 +689,13 @@ type
    function checkrowmove(const curindex,newindex: integer): boolean;
    procedure updateitemvalues(const index: integer; const count: integer); override;
    function fieldcanedit: boolean;
+   procedure beforecelldragevent(var ainfo: draginfoty; const arow: integer;
+                               var processed: boolean); override;
+   procedure aftercelldragevent(var ainfo: draginfoty; const arow: integer;
+                               var processed: boolean); override;
   public
    constructor create(aowner: tcomponent); override;
+   destructor destroy; override;
    function item: ttreelistitem;
    property items[const index: integer]: ttreelistitem read getitems write setitems; default;
    function candragsource(const apos: pointty): boolean;
@@ -620,6 +703,7 @@ type
    property itemlist: ttreeitemeditlist read getitemlist write setitemlist;
    property fieldedit: trecordfieldedit read ffieldedit write setfieldedit;
    property options: treeitemeditoptionsty read foptions write foptions default [];
+//   property drag: ttreeitemdragcontroller read fdragcontroller write setdrag;
    property oncheckrowmove: checkmoveeventty read foncheckrowmove write foncheckrowmove;
    property cursor default cr_default;
  end;
@@ -1630,13 +1714,13 @@ begin
    if item <> nil then begin
     case eventkind of
      dek_begin: begin
-      tlistitemdragobject.create(self,dragobject^,fdragcontroller.pickpos,item);
+      tlistitemdragobject.create(self,dragobjectpo^,fdragcontroller.pickpos,item);
      end;
      dek_check: begin
       accept:= item <> focuseditem;
      end;
      dek_drop: begin
-      moveitem(tlistitemdragobject(dragobject^).item,item,true);
+      moveitem(tlistitemdragobject(dragobjectpo^).item,item,true);
      end;
     end;
    end;
@@ -2722,9 +2806,23 @@ begin
  inherited add(treelistitemarty(aitems));
 end;
 
-procedure ttreelistedititem.add(const acount: integer; itemclass: treelistedititemclassty = nil);
+procedure ttreelistedititem.add(const acount: integer;
+                   const itemclass: treelistedititemclassty = nil);
 begin
  inherited add(acount,itemclass);
+end;
+
+procedure ttreelistedititem.add(const captions: array of msestring; 
+               const itemclass: treelistedititemclassty = nil);
+var
+ countbefore: integer;
+ int1: integer;
+begin
+ countbefore:= count;
+ inherited add(length(captions),itemclass);
+ for int1:= countbefore to count-1 do begin
+  ttreelistedititem(fitems[int1]).caption:= captions[int1-countbefore];
+ end;
 end;
 
 function ttreelistedititem.getactiveindex: integer;
@@ -3124,6 +3222,64 @@ begin
  statreadtreeitem(reader,nil,ttreelistitem(aitem));
 end;
 
+function istreeitemdrag(const ainfo: draginfoty): boolean;
+begin
+ result:= (ainfo.dragobjectpo <> nil) and 
+                       (ainfo.dragobjectpo^ is ttreeitemdragobject);
+end;
+
+procedure ttreeitemeditlist.beforedragevent(var ainfo: draginfoty;
+               const arow: integer; var processed: boolean);
+var
+ bo1: boolean;
+ item1: ttreelistitem;
+begin
+ item1:= ttreelistitem(items[arow]);
+ case ainfo.eventkind of
+  dek_begin: begin
+   bo1:= item1.candrag;
+   if assigned(fondragbegin) then begin
+    fondragbegin(ttreeitemedit(fowner),item1,bo1,
+                    ttreeitemdragobject(ainfo.dragobjectpo^),processed);
+   end;
+   if not processed and bo1 and (ainfo.dragobjectpo^ = nil) then begin
+    ttreeitemdragobject.create(ttreeitemedit(fowner),ainfo.dragobjectpo^,
+                    ainfo.pickpos,item1);
+    processed:= true;
+   end;
+  end;
+  dek_check: begin
+   if istreeitemdrag(ainfo) then begin
+    with ttreeitemdragobject(ainfo.dragobjectpo^) do begin
+     if item <> item1 then begin
+      bo1:= item1.candrop(item);
+      if assigned(fondragover) then begin
+       fondragover(ttreeitemedit(fowner),item,item1,
+                      ttreeitemdragobject(ainfo.dragobjectpo^),bo1,processed);
+       ainfo.accept:= bo1;
+      end;
+     end;
+    end;
+   end;
+  end;
+  dek_drop: begin
+   if istreeitemdrag(ainfo) then begin
+    with ttreeitemdragobject(ainfo.dragobjectpo^) do begin
+     if (item.owner = self) and assigned(fondragdrop) then begin
+      fondragdrop(ttreeitemedit(fowner),item,item1,
+                     ttreeitemdragobject(ainfo.dragobjectpo^),processed);
+     end;
+    end;
+   end;
+  end;
+ end;
+end;
+
+procedure ttreeitemeditlist.afterdragevent(var ainfo: draginfoty;
+               const arow: integer; var processed: boolean);
+begin
+end;
+
 { trecordfieldedit }
 
 function trecordfieldedit.getoptionsedit: optionseditty;
@@ -3147,11 +3303,18 @@ end;
 
 constructor ttreeitemedit.create(aowner: tcomponent);
 begin
+// fdragcontroller:= ttreeitemdragcontroller.create(self);
  if fitemlist = nil then begin
   fitemlist:=  ttreeitemeditlist.create(iitemlist(self),self);
  end;
  inherited;
  cursor:= cr_default;
+end;
+
+destructor ttreeitemedit.destroy;
+begin
+// fdragcontroller.free;
+ inherited;
 end;
 
 function ttreeitemedit.candragsource(const apos: pointty): boolean;
@@ -3575,6 +3738,85 @@ begin
    end;
   end;
  end;
+end;
+{
+procedure ttreeitemedit.setdrag(const avalue: ttreeitemdragcontroller);
+begin
+ fdragcontroller.assign(avalue);
+end;
+}
+procedure ttreeitemedit.clientmouseevent(var info: mouseeventinfoty);
+begin
+ inherited;
+ {
+ if not (es_processed in info.eventstate) then begin
+  fdragcontroller.clientmouseevent(info);
+ end;
+ }
+end;
+{
+procedure ttreeitemedit.dragevent(var info: draginfoty);
+begin
+ if not fdragcontroller.beforedragevent(info) then begin
+  inherited;
+ end;
+ fdragcontroller.afterdragevent(info);
+end;
+}
+procedure ttreeitemedit.beforecelldragevent(var ainfo: draginfoty;
+               const arow: integer; var processed: boolean);
+begin
+ ttreeitemeditlist(fitemlist).beforedragevent(ainfo,arow,processed);
+end;
+
+procedure ttreeitemedit.aftercelldragevent(var ainfo: draginfoty;
+               const arow: integer; var processed: boolean);
+begin
+ ttreeitemeditlist(fitemlist).afterdragevent(ainfo,arow,processed);
+end;
+(*
+{ ttreeitemdragcontroller }
+
+constructor ttreeitemdragcontroller.create(const aowner: ttreeitemedit);
+begin
+ fowner:= aowner;
+ inherited create(idragcontroller(aowner));
+end;
+
+function ttreeitemdragcontroller.beforedragevent(var info: draginfoty): boolean;
+var
+ bo1: boolean;
+ item1: ttreelistitem;
+begin
+ result:= false;
+ item1:= fowner.item;
+ case info.eventkind of
+  dek_begin: begin
+   bo1:= item1.candrag;
+   if assigned(fondragbegin) then begin
+    fondragbegin(fowner,item1,bo1,ttreeitemdragobject(info.dragobjectpo^),result);
+   end;
+   if not result and bo1 and (info.dragobjectpo^ = nil) then begin
+    ttreeitemdragobject.create(fowner,info.dragobjectpo^,info.pickpos,item1);
+    result:= true;
+   end;
+  end;
+ end;
+end;
+
+function ttreeitemdragcontroller.afterdragevent(var info: draginfoty): boolean;
+begin
+ result:= false;
+end;
+*)
+{ ttreeitemdragobject }
+
+constructor ttreeitemdragobject.create(const asender: tobject;
+               var instance: tdragobject; const apickpos: pointty;
+               const aitem: ttreelistitem);
+begin
+ fitem:= aitem;
+ inherited create(asender,instance,apickpos);
 end;
 
 end.

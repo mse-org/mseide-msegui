@@ -102,6 +102,8 @@ type
    procedure delnode(const sender: TObject);
    procedure copynodeex(const sender: TObject);
    procedure pastenodeex(const sender: TObject);
+   procedure beforedrag(const sender: TObject; const apos: pointty;
+                   var dragobject: tdragobject; var processed: Boolean);
   private
 //   frootnode: tstoredcomponent;
    far1: storedcomponentarty;
@@ -658,6 +660,14 @@ begin
    stream1.free;
   end;
  end;
+end;
+
+procedure tcomponentstorefo.beforedrag(const sender: TObject;
+               const apos: pointty; var dragobject: tdragobject;
+               var processed: Boolean);
+var
+ widget1: twidget;
+begin
 end;
 
 end.

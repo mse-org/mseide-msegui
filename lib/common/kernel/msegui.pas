@@ -801,7 +801,7 @@ type
   eventkind: drageventkindty;
   pos: pointty;     //origin = clientrect.pos
   pickpos: pointty; //origin = screenorigin
-  dragobject: pdragobject;
+  dragobjectpo: pdragobject;
   accept: boolean;
  end;
 

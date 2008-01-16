@@ -25,7 +25,7 @@ type
    procedure updateinfo;
   public
    constructor create(const aowner: tcustomitemlist = nil;
-              const aparent: ttreelistitem = nil);
+              const aparent: ttreelistitem = nil); override;
    procedure setentries(const list: tcustomfiledatalist);
    function findsubdir(const aname: filenamety): tdirlistitem;
    function getpath: filenamety;

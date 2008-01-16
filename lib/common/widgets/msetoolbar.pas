@@ -1203,10 +1203,10 @@ var
  function candest: boolean;
  begin
   with info do begin
-   if (tbo_dragdest in foptions) and (dragobject^.sender = self) and
-     (dragobject^ is tobjectdragobject) then begin
+   if (tbo_dragdest in foptions) and (dragobjectpo^.sender = self) and
+     (dragobjectpo^ is tobjectdragobject) then begin
     button1:= buttonatpos(pos,tbo_dragdestenabledonly in foptions);
-    result:= (button1 <> nil) and (tobjectdragobject(dragobject).data <> button1);
+    result:= (button1 <> nil) and (tobjectdragobject(dragobjectpo).data <> button1);
    end
    else begin
     result:= false;
@@ -1219,10 +1219,10 @@ begin
   with info do begin
    case eventkind of
     dek_begin: begin
-     if (dragobject^ = nil) and (tbo_dragsource in foptions) then begin
+     if (dragobjectpo^ = nil) and (tbo_dragsource in foptions) then begin
       button1:= buttonatpos(pos,tbo_dragsourceenabledonly in foptions);
       if button1 <> nil then begin
-       tobjectdragobject.create(self,dragobject^,fdragcontroller.pickpos,button1);
+       tobjectdragobject.create(self,dragobjectpo^,fdragcontroller.pickpos,button1);
       end;
      end;
     end;
@@ -1236,7 +1236,7 @@ begin
     end;
     dek_drop: begin
      if candest then begin
-      buttons.move(ttoolbutton(tobjectdragobject(dragobject^).data).index,button1.index);
+      buttons.move(ttoolbutton(tobjectdragobject(dragobjectpo^).data).index,button1.index);
      end
      else begin
       inherited;

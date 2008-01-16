@@ -1659,11 +1659,11 @@ var
  function candest: boolean;
  begin
   with info do begin
-   if (dragobject^ is ttagdragobject) and (dragobject^.sender = self) and
+   if (dragobjectpo^ is ttagdragobject) and (dragobjectpo^.sender = self) and
     ((tabo_dragdest in foptions) or (csdesigning in componentstate)) then begin
     int1:= tabatpos(pos,(tabo_dragdestenabledonly in foptions) and 
                             not(csdesigning in componentstate));
-    result:= (ttagdragobject(dragobject^).tag <> int1) and
+    result:= (ttagdragobject(dragobjectpo^).tag <> int1) and
                 ((int1 >= 0) {or (csdesigning in componentstate)});
    end
    else begin
@@ -1677,12 +1677,12 @@ begin
   with info do begin
    case eventkind of
     dek_begin: begin
-     if (dragobject^ = nil) and not (tabo_sorted in foptions) and
+     if (dragobjectpo^ = nil) and not (tabo_sorted in foptions) and
       ((tabo_dragsource in foptions) or (csdesigning in componentstate)) then begin
       int1:= tabatpos(pos,(tabo_dragsourceenabledonly in foptions) and
                   not (csdesigning in componentstate));
       if int1 >= 0 then begin
-       ttagdragobject.create(self,dragobject^,fdragcontroller.pickpos,int1);
+       ttagdragobject.create(self,dragobjectpo^,fdragcontroller.pickpos,int1);
       end;
      end;
     end;
@@ -1693,7 +1693,7 @@ begin
     end;
     dek_drop: begin
      if candest then begin
-      movetab(ttagdragobject(dragobject^).tag,int1);
+      movetab(ttagdragobject(dragobjectpo^).tag,int1);
      end;
     end;
    end;

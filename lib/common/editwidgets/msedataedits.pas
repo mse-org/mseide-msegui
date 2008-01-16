@@ -75,6 +75,10 @@ type
    procedure setgridintf(const intf: iwidgetgrid); virtual;
    function getcellframe: framety; virtual;
    procedure drawcell(const canvas: tcanvas); virtual;
+   procedure beforecelldragevent(var ainfo: draginfoty; const arow: integer;
+                               var handled: boolean); virtual;
+   procedure aftercelldragevent(var ainfo: draginfoty; const arow: integer;
+                               var handled: boolean); virtual;
    procedure valuetogrid(const row: integer); virtual; abstract;
    procedure gridtovalue(const row: integer); virtual;
    procedure docellevent(const ownedcol: boolean; var info: celleventinfoty); virtual;
@@ -1606,6 +1610,18 @@ begin
  result:= focused;
 end;
 
+procedure tdataedit.beforecelldragevent(var ainfo: draginfoty; const arow: integer;
+               var handled: boolean);
+begin
+ //dummy
+end;
+
+procedure tdataedit.aftercelldragevent(var ainfo: draginfoty; const arow: integer;
+               var handled: boolean);
+begin
+ //dummy
+end;
+
 { tcustomstringedit }
 
 function tcustomstringedit.datatotext(const data): msestring;
@@ -1731,11 +1747,11 @@ begin
   case eventkind of
    dek_check: begin
     inherited;
-    accept:= accept or (dragobject^ is tstringdragobject);
+    accept:= accept or (dragobjectpo^ is tstringdragobject);
    end;
    dek_drop: begin
-    if dragobject^ is tstringdragobject then begin
-     value:= tstringdragobject(dragobject^).data;
+    if dragobjectpo^ is tstringdragobject then begin
+     value:= tstringdragobject(dragobjectpo^).data;
     end
     else begin
      inherited;

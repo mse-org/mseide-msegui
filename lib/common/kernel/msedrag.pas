@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2006 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2008 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -66,39 +66,48 @@ type
  dragstatety = (ds_clicked,ds_beginchecked,ds_cursorshapechanged);
  dragstatesty = set of dragstatety;
 
- const
-  dragstates = [ds_clicked,ds_beginchecked];
- type
+const
+ dragstates = [ds_clicked,ds_beginchecked];
+type
  drageventsty = record
   dragbegin: drageventty;
   dragover: dragovereventty;
   dragdrop: drageventty;
  end;
 
- tdragcontroller = class(tlinkedpersistent)
+ tcustomdragcontroller = class(tlinkedpersistent)
   private
-   fonbefore,fonafter: drageventsty;
    procedure dokeypress(const sender: twidget; var info: keyeventinfoty);
    procedure initdraginfo(var info: draginfoty; const eventkind: drageventkindty; const pos: pointty);
    function checkcandragdrop(const pos: pointty): twidget;
-   function dodragevent(const events: drageventsty; var info: draginfoty): boolean;
   protected
    fpickpos: pointty;
    fdragobject: tdragobject;
    fstate: dragstatesty;
    fintf: idragcontroller;
   public
-   constructor create(aintf: idragcontroller); reintroduce;
+   constructor create(const aintf: idragcontroller); reintroduce;
    destructor destroy; override;
    function active: boolean;
    procedure enddrag; virtual;
    procedure mouseevent(var info: mouseeventinfoty);
    procedure clientmouseevent(var info: mouseeventinfoty); virtual;
-   function beforedragevent(var info: draginfoty): boolean; virtual;
+   function beforedragevent(var info: draginfoty): boolean; virtual; abstract;
     //true if processed
-   function afterdragevent(var info: draginfoty): boolean; virtual;
+   function afterdragevent(var info: draginfoty): boolean; virtual; abstract;
     //true if processed
    property pickpos: pointty read fpickpos; //clientorigin
+ end;
+
+ tdragcontroller = class(tcustomdragcontroller)
+  private
+   fonbefore,fonafter: drageventsty;
+   function dodragevent(const events: drageventsty; var info: draginfoty): boolean;
+  protected
+   function beforedragevent(var info: draginfoty): boolean; override;
+    //true if processed
+   function afterdragevent(var info: draginfoty): boolean; override;
+    //true if processed
   published
    property onbeforedragbegin: drageventty read fonbefore.dragbegin 
                                   write fonbefore.dragbegin;
@@ -113,7 +122,7 @@ type
    property onafterdragdrop: drageventty read fonafter.dragdrop 
                                   write fonafter.dragdrop;
  end;
-
+ 
 function isobjectdrag(const dragobject: tdragobject; objectclass: tclass): boolean;
 
 implementation
@@ -126,25 +135,25 @@ begin
          (tobjectdragobject(dragobject).fdata is objectclass);
 end;
 
-{ tdragcontroller }
+{ tcustomdragcontroller }
 
-constructor tdragcontroller.create(aintf: idragcontroller);
+constructor tcustomdragcontroller.create(const aintf: idragcontroller);
 begin
  fintf:= aintf;
 end;
 
-destructor tdragcontroller.destroy;
+destructor tcustomdragcontroller.destroy;
 begin
  enddrag;
  inherited;
 end;
 
-function tdragcontroller.active: boolean;
+function tcustomdragcontroller.active: boolean;
 begin
  result:= ds_clicked in fstate;
 end;
 
-procedure tdragcontroller.enddrag;
+procedure tcustomdragcontroller.enddrag;
 begin
  if fdragobject <> nil then begin
   fdragobject.free;
@@ -154,7 +163,7 @@ begin
  fstate:= fstate - dragstates;
 end;
 
-procedure tdragcontroller.dokeypress(const sender: twidget; var info: keyeventinfoty);
+procedure tcustomdragcontroller.dokeypress(const sender: twidget; var info: keyeventinfoty);
 begin
  if active and (info.key = key_escape) then begin
   enddrag;
@@ -162,7 +171,7 @@ begin
  end;
 end;
 
-function tdragcontroller.checkcandragdrop(const pos: pointty): twidget;
+function tcustomdragcontroller.checkcandragdrop(const pos: pointty): twidget;
 var
  window: twindow;
  po1: pointty;
@@ -184,17 +193,17 @@ begin
  end;
 end;
 
-procedure tdragcontroller.initdraginfo(var info: draginfoty;
+procedure tcustomdragcontroller.initdraginfo(var info: draginfoty;
                     const eventkind: drageventkindty; const pos: pointty);
 begin
  fillchar(info,sizeof(info),0);
  info.eventkind:= eventkind;
  info.pos:= pos;
  info.pickpos:= translateclientpoint(fpickpos,fintf.getwidget,nil);
- info.dragobject:= @fdragobject;
+ info.dragobjectpo:= @fdragobject;
 end;
 
-procedure tdragcontroller.clientmouseevent(var info: mouseeventinfoty);
+procedure tcustomdragcontroller.clientmouseevent(var info: mouseeventinfoty);
 var
  owner: twidget;
  widget1: twidget;
@@ -253,7 +262,7 @@ begin
  end;
 end;
 
-procedure tdragcontroller.mouseevent(var info: mouseeventinfoty);
+procedure tcustomdragcontroller.mouseevent(var info: mouseeventinfoty);
 var
  po1: pointty;
 begin
@@ -263,6 +272,8 @@ begin
  addpoint1(info.pos,po1);
 end;
 
+{ tdragcontroller }
+
 function tdragcontroller.dodragevent(const events: drageventsty;
            var info: draginfoty): boolean;
 begin
@@ -271,17 +282,17 @@ begin
   case eventkind of
    dek_begin: begin
     if assigned(dragbegin) then begin
-     dragbegin(fintf.getwidget,pos,dragobject^,result);
+     dragbegin(fintf.getwidget,pos,dragobjectpo^,result);
     end;
    end;
    dek_check: begin
     if assigned(dragover) then begin
-     dragover(fintf.getwidget,pos,dragobject^,accept,result);
+     dragover(fintf.getwidget,pos,dragobjectpo^,accept,result);
     end;
    end;
    dek_drop: begin
     if assigned(dragdrop) then begin
-     dragdrop(fintf.getwidget,pos,dragobject^,result);
+     dragdrop(fintf.getwidget,pos,dragobjectpo^,result);
     end;
    end;
   end;

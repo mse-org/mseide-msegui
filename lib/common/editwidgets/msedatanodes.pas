@@ -33,7 +33,7 @@ type
                           //without invalidate, no statsave
 
  nodestatesty = set of nodestatty;
- nodestate1ty = (ns1_statechanged,ns1_rootchange);
+ nodestate1ty = (ns1_statechanged,ns1_rootchange,ns1_candrag);
  nodestates1ty = set of nodestate1ty;
  
  nodeoptionty = (no_drawemptybox);
@@ -175,7 +175,7 @@ type
    procedure statreadsubnode(const reader: tstatreader; var anode: ttreelistitem); virtual;
   public
    constructor create(const aowner: tcustomitemlist = nil;
-              const aparent: ttreelistitem = nil);
+              const aparent: ttreelistitem = nil); virtual;
    destructor destroy; override;
    class procedure calcitemlayout(const asize: sizety; const ainnerframe: framety;
                            const list: tcustomitemlist;
@@ -192,6 +192,8 @@ type
    function isroot: boolean;
    function issinglerootrow: boolean; //keyrowmove can be used
    function isstatechanged: boolean;
+   function candrag: boolean; virtual;
+   function candrop(const source: ttreelistitem): boolean; virtual;
 
    function finditembycaption(const acaption: msestring;
             casesensitive: boolean = false): ttreelistitem;
@@ -1904,6 +1906,16 @@ end;
 function ttreelistitem.isstatechanged: boolean;
 begin
  result:= ns1_statechanged in fstate1;
+end;
+
+function ttreelistitem.candrag: boolean;
+begin
+ result:= ns1_candrag in fstate1;
+end;
+
+function ttreelistitem.candrop(const source: ttreelistitem): boolean;
+begin
+ result:= false;
 end;
 
 { trecordfielditem }

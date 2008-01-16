@@ -130,6 +130,10 @@ type
    procedure setgridintf(const intf: iwidgetgrid); virtual;
    function getcellframe: framety; virtual;
    procedure drawcell(const canvas: tcanvas);
+   procedure beforecelldragevent(var ainfo: draginfoty; const arow: integer;
+                               var handled: boolean); virtual;
+   procedure aftercelldragevent(var ainfo: draginfoty; const arow: integer;
+                               var handled: boolean); virtual;
    procedure valuetogrid(const row: integer); virtual; abstract;
    procedure gridtovalue(const row: integer); virtual;
    procedure docellevent(const ownedcol: boolean; var info: celleventinfoty); virtual;
@@ -1613,6 +1617,18 @@ begin
  else begin
   optionsedit:= optionsedit - [oe_readonly];
  end;  
+end;
+
+procedure tgraphdataedit.beforecelldragevent(var ainfo: draginfoty;
+               const arow: integer; var handled: boolean);
+begin
+ //dummy
+end;
+
+procedure tgraphdataedit.aftercelldragevent(var ainfo: draginfoty;
+               const arow: integer; var handled: boolean);
+begin
+ //dummy
 end;
 
 {$ifdef mse_with_ifi}

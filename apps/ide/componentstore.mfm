@@ -67,6 +67,7 @@ object componentstorefo: tcomponentstorefo
     datarowheight = 16
     statfile = mainfo.projectstatfile
     oncellevent = docellevent
+    drag.onbeforedragbegin = beforedrag
     reffontheight = 14
     object node: ttreeitemedit
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight]

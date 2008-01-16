@@ -50,6 +50,10 @@ type
   function getoptionsedit: optionseditty;
   procedure setgridintf(const intf: iwidgetgrid);
   procedure drawcell(const canvas: tcanvas);
+  procedure beforecelldragevent(var ainfo: draginfoty; const arow: integer;
+                               var processed: boolean);
+  procedure aftercelldragevent(var ainfo: draginfoty; const arow: integer;
+                               var processed: boolean);
   procedure initgridwidget;
   procedure gridtovalue(const row: integer);  //row = -1 -> focused row, -2 -> default value
   procedure valuetogrid(const row: integer);  //row = -1 -> focused row
@@ -107,6 +111,10 @@ type
    procedure setoptions(const avalue: coloptionsty); override;
    function getcursor: cursorshapety; override;
    procedure datasourcechanged;
+   procedure beforedragevent(var ainfo: draginfoty; const arow: integer;
+                                var processed: boolean); override;
+   procedure afterdragevent(var ainfo: draginfoty; const arow: integer;
+                                var processed: boolean); override;
   public
    constructor create(const agrid: tcustomgrid;
                      const aowner: tgridarrayprop); override;
@@ -1274,6 +1282,22 @@ end;
 function twidgetcol.getgrid: tcustomwidgetgrid;
 begin
  result:= tcustomwidgetgrid(fgrid);
+end;
+
+procedure twidgetcol.beforedragevent(var ainfo: draginfoty; const arow: integer;
+                                      var processed: boolean);
+begin
+ if fintf <> nil then begin
+  fintf.beforecelldragevent(ainfo,arow,processed);
+ end;
+end;
+
+procedure twidgetcol.afterdragevent(var ainfo: draginfoty; const arow: integer;
+                                      var processed: boolean);
+begin
+ if fintf <> nil then begin
+  fintf.aftercelldragevent(ainfo,arow,processed);
+ end;
 end;
 
 { twidgetcols }

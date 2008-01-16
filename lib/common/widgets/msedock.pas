@@ -1568,10 +1568,11 @@ var
   intf1: idocktarget;
   widget2: twidget;
  begin
-  result:= (od_acceptsdock in foptionsdock)  and (info.dragobject^ is tdockdragobject);
+  result:= (od_acceptsdock in foptionsdock)  and 
+           (info.dragobjectpo^ is tdockdragobject);
   if result and not mouseinhandle and (od_dockparent in foptionsdock) and 
      not widget1.checkdescendent(
-          tdockdragobject(info.dragobject^).fdock.fintf.getwidget) then begin    
+          tdockdragobject(info.dragobjectpo^).fdock.fintf.getwidget) then begin    
    widget2:= widget1.parentwidget;
    while widget2 <> nil do begin
     if widget2.getcorbainterface(typeinfo(idocktarget),intf1) and 
@@ -1600,7 +1601,7 @@ begin
      if mouseinhandle then begin
       if (widget1.parentwidget <> nil)  then  begin
        if od_canmove in foptionsdock then begin
-        tdockdragobject.create(self,widget1,dragobject^,fpickpos);
+        tdockdragobject.create(self,widget1,dragobjectpo^,fpickpos);
         result:= true;
        end
        else begin
@@ -1612,8 +1613,8 @@ begin
       end
       else begin
        if (od_candock in foptionsdock) and (widget1.parentwidget = nil) and
-              (dragobject^ = nil) then  begin
-        tdockdragobject.create(self,widget1,dragobject^,fpickpos);
+              (dragobjectpo^ = nil) then  begin
+        tdockdragobject.create(self,widget1,dragobjectpo^,fpickpos);
         result:= true;
        end;
       end;
@@ -1621,7 +1622,7 @@ begin
     end;
     dek_check: begin
      if checkaccept then begin
-      with tdockdragobject(dragobject^) do begin
+      with tdockdragobject(dragobjectpo^) do begin
        if (fcheckeddockcontroller <> self) then begin
         if fcheckeddockcontroller <> nil then begin
          fcheckeddockcontroller.fasplitdir:= sd_none;
@@ -1738,9 +1739,9 @@ begin
     end;
     dek_drop: begin
      if checkaccept then begin
-      with tdockdragobject(dragobject^) do begin
+      with tdockdragobject(dragobjectpo^) do begin
        if container1 = fxorwidget then begin
-        with tdockdragobject(dragobject^).fdock do begin
+        with tdockdragobject(dragobjectpo^).fdock do begin
          if fmdistate = mds_floating then begin
           fmdistate:= mds_normal;
          end
@@ -1751,7 +1752,7 @@ begin
           end;
          end;
         end;
-        calclayout(tdockdragobject(dragobject^),false);
+        calclayout(tdockdragobject(dragobjectpo^),false);
         dochilddock(widget);
         result:= true;
        end;
@@ -1899,7 +1900,7 @@ begin
  widget1:= twidget1(fintf.getwidget);
  if widget1.canevent(tmethod(foncheckdock)) then begin
   result:= false;
-  foncheckdock(widget1,info.pos,tdockdragobject(info.dragobject^),result);
+  foncheckdock(widget1,info.pos,tdockdragobject(info.dragobjectpo^),result);
  end
  else begin
   result:= true;
