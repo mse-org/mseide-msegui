@@ -441,6 +441,7 @@ type
    function actualcolor: colorty;
    function actualfont: tfont; virtual;
    property colindex: integer read getcolindex;
+   function translatetocell(const arow: integer; const apos: pointty): pointty;
   published
    property width: integer read fwidth write setwidth 
                  {stored iswidthstored} default griddefaultcolwidth;
@@ -2701,6 +2702,12 @@ begin
   ffontselect:= tcolselectfont.create;
   ffontselect.onchange:= {$ifdef FPC}@{$endif}fontchanged;
  end;
+end;
+
+function tcol.translatetocell(const arow: integer;
+               const apos: pointty): pointty;
+begin
+ result:= subpoint(apos,fgrid.cellrect(makegridcoord(colindex,arow)).pos);
 end;
 
 { tcolheaderfont }

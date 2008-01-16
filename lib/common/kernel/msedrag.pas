@@ -199,6 +199,7 @@ begin
  fillchar(info,sizeof(info),0);
  info.eventkind:= eventkind;
  info.pos:= pos;
+ info.clientpickpos:= fpickpos;
  info.pickpos:= translateclientpoint(fpickpos,fintf.getwidget,nil);
  info.dragobjectpo:= @fdragobject;
 end;

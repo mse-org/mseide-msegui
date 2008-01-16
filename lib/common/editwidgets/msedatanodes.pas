@@ -191,6 +191,10 @@ type
    function treeheight: integer; //total hight of children
    function isroot: boolean;
    function issinglerootrow: boolean; //keyrowmove can be used
+   function checkdescendent(node: ttreelistitem): boolean;
+                    //true if node is descendent or self
+   function checkancestor(node: ttreelistitem): boolean;
+                    //true if node is ancestor or self
    function isstatechanged: boolean;
    function candrag: boolean; virtual;
    function candrop(const source: ttreelistitem): boolean; virtual;
@@ -1783,6 +1787,25 @@ function ttreelistitem.issinglerootrow: boolean;
 begin
  result:= (treelevel = 0) and (not expanded or (count = 0));
 end; 
+
+function ttreelistitem.checkdescendent(node: ttreelistitem): boolean;
+                    //true if node is descendent or self
+begin
+ result:= false;
+ while node <> nil do begin
+  if node = self then begin
+   result:= true;
+   break;
+  end;
+  node:= node.parent;
+ end;
+end;
+
+function ttreelistitem.checkancestor(node: ttreelistitem): boolean;
+                    //true if node is ancestor or self
+begin
+ result:= (node <> nil) and node.checkdescendent(self);
+end;
 
 function ttreelistitem.parentindex: integer;
 begin

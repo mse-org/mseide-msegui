@@ -87,6 +87,7 @@ object componentstorefo: tcomponentstorefo
       itemlist.imagewidth = 16
       itemlist.imageheight = 16
       itemlist.onstatreaditem = dostatreaditem
+      itemlist.ondragover = drago
       onsetvalue = compnamesetva
       onupdaterowvalues = doupdaterowvalues
       options = [teo_treecolnavig, teo_keyrowmoving]

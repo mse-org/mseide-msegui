@@ -49,7 +49,9 @@ type
   protected
    procedure setcaption(const avalue: msestring); override;
   public
-   constructor create(const isnode: boolean);
+   constructor create(const aowner: tcustomitemlist = nil;
+              const aparent: ttreelistitem = nil); override; overload;
+   constructor create(const isnode: boolean); overload;
    property info: storedcomponentinfoty read finfo write setinfo;
    property compclass: ansistring read finfo.compclass write finfo.compclass;
    property componentname: ansistring read finfo.componentname write 
@@ -104,6 +106,10 @@ type
    procedure pastenodeex(const sender: TObject);
    procedure beforedrag(const sender: TObject; const apos: pointty;
                    var dragobject: tdragobject; var processed: Boolean);
+   procedure drago(const sender: ttreeitemedit; const source: ttreelistitem;
+                   const dest: ttreelistitem;
+                   var dragobject: ttreeitemdragobject; var accept: Boolean;
+                   var processed: Boolean);
   private
 //   frootnode: tstoredcomponent;
    far1: storedcomponentarty;
@@ -136,11 +142,18 @@ end;
 
 { tstoredcomponent }
 
+constructor tstoredcomponent.create(const aowner: tcustomitemlist = nil;
+               const aparent: ttreelistitem = nil);
+begin
+ inherited;
+ include(fstate1,ns1_candrag);
+end;
+
 constructor tstoredcomponent.create(const isnode: boolean);
 begin
  include(fstate1,ns1_rootchange);
  fisnode:= isnode;
- inherited create;
+ create(nil,nil);
  checkisnode;
 end;
 
@@ -668,6 +681,14 @@ procedure tcomponentstorefo.beforedrag(const sender: TObject;
 var
  widget1: twidget;
 begin
+end;
+
+procedure tcomponentstorefo.drago(const sender: ttreeitemedit;
+               const source: ttreelistitem; const dest: ttreelistitem;
+               var dragobject: ttreeitemdragobject; var accept: Boolean;
+               var processed: Boolean);
+begin
+ accept:= not dest.checkancestor(source);
 end;
 
 end.

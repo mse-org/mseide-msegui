@@ -3233,19 +3233,26 @@ procedure ttreeitemeditlist.beforedragevent(var ainfo: draginfoty;
 var
  bo1: boolean;
  item1: ttreelistitem;
+ zone1: cellzonety;
+ rect1: rectty;
 begin
  item1:= ttreelistitem(items[arow]);
  case ainfo.eventkind of
   dek_begin: begin
-   bo1:= item1.candrag;
-   if assigned(fondragbegin) then begin
-    fondragbegin(ttreeitemedit(fowner),item1,bo1,
-                    ttreeitemdragobject(ainfo.dragobjectpo^),processed);
-   end;
-   if not processed and bo1 and (ainfo.dragobjectpo^ = nil) then begin
-    ttreeitemdragobject.create(ttreeitemedit(fowner),ainfo.dragobjectpo^,
-                    ainfo.pickpos,item1);
-    processed:= true;
+   zone1:= cz_none;
+   item1.updatecellzone(fowner.fgridintf.getcol.translatetocell(arow,
+                              ainfo.clientpickpos),zone1);
+   if zone1 = cz_caption then begin
+    bo1:= item1.candrag;
+    if assigned(fondragbegin) then begin
+     fondragbegin(ttreeitemedit(fowner),item1,bo1,
+                     ttreeitemdragobject(ainfo.dragobjectpo^),processed);
+    end;
+    if not processed and bo1 and (ainfo.dragobjectpo^ = nil) then begin
+     ttreeitemdragobject.create(ttreeitemedit(fowner),ainfo.dragobjectpo^,
+                     ainfo.pickpos,item1);
+     processed:= true;
+    end;
    end;
   end;
   dek_check: begin
