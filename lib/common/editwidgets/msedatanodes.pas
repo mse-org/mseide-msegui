@@ -61,6 +61,13 @@ type
  plistitemlayoutinfoty = ^listitemlayoutinfoty;
 
  nodeactionty = (na_none,na_change,na_expand,na_collapse,na_countchange,na_destroying);
+ nodeactioninfoty = record
+  case action: nodeactionty of
+   na_countchange: (
+    treeheightbefore: integer;
+   );
+ end;
+  
  tlistitem = class;
 
  iitemlist = interface
@@ -92,7 +99,7 @@ type
    fowner: tcustomitemlist;
    procedure setcaption(const avalue: msestring); virtual;
    function checkaction(aaction: nodeactionty): boolean;
-   procedure actionnotification(var action: nodeactionty); virtual;
+   procedure actionnotification(var ainfo: nodeactioninfoty); virtual;
    function getactimagenr: integer; virtual;
    procedure objectevent(const sender: tobject; const event: objecteventty); virtual;
    procedure setowner(const aowner: tcustomitemlist); virtual;
@@ -168,7 +175,7 @@ type
    procedure setowner(const aowner: tcustomitemlist); override;
    procedure checkindex(const aindex: integer);
    procedure settreelevel(const value: integer);
-   procedure countchange;
+   procedure countchange(const atreeheightbefore: integer);
    procedure objectevent(const sender: tobject; const event: objecteventty); override;
    function createsubnode: ttreelistitem; virtual;
    procedure swap(const a,b: integer);
@@ -245,7 +252,8 @@ type
 
  ptreelistitem = ^ttreelistitem;
 
- itemliststatety = (ils_destroying,ils_subnodecountinvalid,ils_subnodecountupdating);
+ itemliststatety = (ils_destroying,ils_subnodecountinvalid,ils_subnodecountupdating,
+                    ils_freelock);
  itemliststatesty = set of itemliststatety;
  statreaditemeventty = procedure(const sender: tobject; const reader: tstatreader;
                           var aitem: tlistitem) of object;
@@ -289,7 +297,7 @@ type
    procedure freedata(var data); override;
    procedure change(const item: tlistitem); reintroduce; overload;
    procedure nodenotification(const sender: tlistitem;
-                  var action: nodeactionty); virtual;
+                  var ainfo: nodeactioninfoty); virtual;
    procedure doitemchange(const index: integer); override;
    procedure invalidate; virtual;
    procedure updatelayout; virtual;
@@ -550,10 +558,10 @@ end;
 
 procedure tlistitem.change;
 var
- action: nodeactionty;
+ action: nodeactioninfoty;
 begin
  if fowner <> nil {and (fowner.fnochange = 0)} then begin
-  action:= na_change;
+  action.action:= na_change;
   fowner.nodenotification(self,action);
  end;
 end;
@@ -605,17 +613,17 @@ end;
 
 function tlistitem.checkaction(aaction: nodeactionty): boolean;
 var
- action: nodeactionty;
+ action: nodeactioninfoty;
 begin
- action:= aaction;
+ action.action:= aaction;
  actionnotification(action);
- result:= action = aaction;
+ result:= action.action = aaction;
 end;
 
-procedure tlistitem.actionnotification(var action: nodeactionty);
+procedure tlistitem.actionnotification(var ainfo: nodeactioninfoty);
 begin
  if fowner <> nil then begin
-  fowner.nodenotification(self,action);
+  fowner.nodenotification(self,ainfo);
  end;
 end;
 
@@ -1041,9 +1049,9 @@ begin
 end;
 
 procedure tcustomitemlist.nodenotification(const sender: tlistitem;
-                     var action: nodeactionty);
+                     var ainfo: nodeactioninfoty);
 begin
- if (action = na_change) then begin
+ if (ainfo.action = na_change) then begin
   change(sender);
  end;
 end;
@@ -1198,13 +1206,14 @@ begin
  inherited;
 end;
 
-procedure ttreelistitem.countchange;
+procedure ttreelistitem.countchange(const atreeheightbefore: integer);
 var
- action: nodeactionty;
+ info1: nodeactioninfoty;
 begin
  if (fowner <> nil) then begin
-  action:= na_countchange;
-  fowner.nodenotification(self,action);
+  info1.action:= na_countchange;
+  info1.treeheightbefore:= atreeheightbefore;
+  fowner.nodenotification(self,info1);
  end;
  if fcount > 0 then begin
   state:= fstate + [ns_subitems];
@@ -1225,9 +1234,9 @@ procedure ttreelistitem.setitems(const aindex: integer; const value: ttreelistit
 begin
  fitems[aindex]:= value;
  value.fparentindex:= aindex;
- value.setowner(fowner);
  value.fparent:= self;
  value.settreelevel(ftreelevel+1);
+ value.setowner(fowner);
  checksort;
 end;
 
@@ -1251,19 +1260,26 @@ begin
 end;
 
 function ttreelistitem.add(const aitem: ttreelistitem): integer;
+var
+ int1: integer;
 begin
  if aitem <> nil then begin
+  if aitem.fparent <> nil then begin
+   aitem.fparent.remove(aitem.fparentindex);
+  end;
+  int1:= treeheight;
   result:= fcount;
   setitems(inccount,aitem);
-  countchange;
+  countchange(int1);
  end;
 end;
 
 procedure ttreelistitem.add(const aitems: treelistitemarty);
 var
- int1: integer;
+ int1,int2: integer;
 begin
  if length(aitems) > 0 then begin
+  int2:= treeheight;
   if fcount + length(aitems) >= length(fitems) then begin
    setlength(fitems,fcount + length(aitems));
   end;
@@ -1271,7 +1287,7 @@ begin
    setitems(fcount,aitems[int1]);
    inc(fcount);
   end;
-  countchange;
+  countchange(int2);
  end;
 end;
 
@@ -1303,8 +1319,9 @@ end;
 
 procedure ttreelistitem.add(const acount: integer; itemclass: treelistitemclassty = nil);
 var
- int1: integer;
+ int1,int2: integer;
 begin
+ int2:= treeheight;
  if length(fitems) < fcount + acount then begin
   setlength(fitems,fcount + acount);
  end;
@@ -1320,7 +1337,7 @@ begin
    inc(fcount);
   end;
  end;
- countchange;
+ countchange(int2);
 end;
 
 procedure ttreelistitem.setdestroying;
@@ -1335,13 +1352,14 @@ end;
 
 procedure ttreelistitem.clear;
 var
- int1: integer;
+ int1,int2: integer;
  acount: integer;
  aitems: treelistitemarty;
  adestroying: boolean;
 begin
  aitems:= nil; //compilerwarning
  if fcount > 0 then begin
+  int2:= treeheight;
   adestroying:= ns_destroying in fstate;
   if not (ns_noowner in fstate) then begin
    setdestroying;
@@ -1350,7 +1368,7 @@ begin
   fitems:= nil;
   acount:= fcount;
   fcount:= 0;
-  countchange;
+  countchange(int2);
   if not (ns_noowner in fstate) then begin
    for int1:= 0 to acount-1 do begin
     aitems[int1].Free;
@@ -1403,16 +1421,20 @@ begin
 end;
 
 procedure ttreelistitem.checkitems(const checkdelete: checktreelistitemprocty);
+var
+ int1: integer;
 begin
+ int1:= treeheight;
  internalcheckitems(checkdelete);
- countchange;
+ countchange(int1);
 end;
 
 function ttreelistitem.remove(const aindex: integer): ttreelistitem;
 var
- int1: integer;
+ int1,int2: integer;
 begin
  checkindex(aindex);
+ int2:= treeheight;
  result:= fitems[aindex];
  unsetitem(aindex);
  int1:= (fcount-aindex-1)*sizeof(pointer);
@@ -1423,6 +1445,7 @@ begin
  for int1:= aindex to fcount-1 do begin
   fitems[int1].fparentindex:= int1;
  end;
+ countchange(int2);
 end;
 
 function comparetreelistitemcasesensitive(const l,r): integer;
@@ -1878,7 +1901,7 @@ end;
 
 procedure ttreelistitem.dostatread(const reader: tstatreader);
 var
- int1: integer;
+ int1,int2: integer;
  node1: ttreelistitem;
  bo1: boolean;
 begin
@@ -1905,7 +1928,7 @@ begin
     include(fstate,ns_sorted);
     checksort;
    end;
-   countchange;
+   countchange(0);
   end;
  end;
  exclude(fstate1,ns1_statechanged);

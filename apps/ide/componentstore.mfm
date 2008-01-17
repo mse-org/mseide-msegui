@@ -88,6 +88,7 @@ object componentstorefo: tcomponentstorefo
       itemlist.imageheight = 16
       itemlist.onstatreaditem = dostatreaditem
       itemlist.ondragover = drago
+      itemlist.ondragdrop = dragdro
       onsetvalue = compnamesetva
       onupdaterowvalues = doupdaterowvalues
       options = [teo_treecolnavig, teo_keyrowmoving]
@@ -150,13 +151,21 @@ object componentstorefo: tcomponentstorefo
   end
   object tpopupmenu1: tpopupmenu
     onupdate = popupupdate
-    menu.submenu.count = 11
+    menu.submenu.count = 12
     menu.submenu.items = <    
       item
         action = copycompact
+        caption = '&Copy Component(s)'
+        state = [as_localcaption]
       end    
       item
         action = pastecompact
+      end    
+      item
+        caption = 'Remove Component(s)'
+        name = 'removecomp'
+        state = [as_localcaption, as_localonexecute]
+        onexecute = removecomp
       end    
       item
         options = [mao_separator, mao_shortcutcaption]

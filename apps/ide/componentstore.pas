@@ -110,12 +110,17 @@ type
                    const dest: ttreelistitem;
                    var dragobject: ttreeitemdragobject; var accept: Boolean;
                    var processed: Boolean);
+   procedure dragdro(const sender: ttreeitemedit; const source: ttreelistitem;
+                   const dest: ttreelistitem;
+                   var dragobject: ttreeitemdragobject; var processed: Boolean);
+   procedure removecomp(const sender: TObject);
   private
 //   frootnode: tstoredcomponent;
    far1: storedcomponentarty;
    fstoredir: msestring;
    procedure initcomponentinfo(out ainfo: storedcomponentinfoty);
    function isnode: boolean;
+   function iscomp: boolean;
    function dogetstorerec(const index: integer): msestring;
    procedure dosetstorescount(const count: integer);
    procedure dosetstorerec(const index: integer; const avalue: msestring);
@@ -520,6 +525,11 @@ begin
  result:= (node.item <> nil) and (tstoredcomponent(node.item).fisnode);
 end;
 
+function tcomponentstorefo.iscomp: boolean;
+begin
+ result:= (node.item <> nil) and not(tstoredcomponent(node.item).fisnode);
+end;
+
 procedure tcomponentstorefo.popupupdate(const sender: tcustommenu);
 var
  bo1: boolean;
@@ -529,6 +539,7 @@ begin
  sender.menu.submenu.itembyname('pastenode').enabled:= bo1;
  sender.menu.submenu.itembyname('removestore').enabled:= isnode and 
                                       node.item.isroot;
+ sender.menu.submenu.itembyname('removecomp').enabled:= iscomp;
  bo1:= isnode and not node.item.isroot;
  sender.menu.submenu.itembyname('removenode').enabled:= bo1;
  sender.menu.submenu.itembyname('copynode').enabled:= bo1;
@@ -620,6 +631,15 @@ begin
  end;
 end;
 
+procedure tcomponentstorefo.removecomp(const sender: TObject);
+begin
+ with tstoredcomponent(node.item).finfo do begin
+  if askyesno('Do you want to remove "'+compname+'"?') then begin
+   tstoredcomponent(node.item).free;
+  end; 
+ end;
+end;
+
 const
  nodecopysig = '{DEA80549-4F45-4117-B182-A0EF49C4A097}';
 procedure tcomponentstorefo.copynodeex(const sender: TObject);
@@ -689,6 +709,13 @@ procedure tcomponentstorefo.drago(const sender: ttreeitemedit;
                var processed: Boolean);
 begin
  accept:= not dest.checkancestor(source);
+end;
+
+procedure tcomponentstorefo.dragdro(const sender: ttreeitemedit;
+               const source: ttreelistitem; const dest: ttreelistitem;
+               var dragobject: ttreeitemdragobject; var processed: Boolean);
+begin
+ dest.add(source);
 end;
 
 end.

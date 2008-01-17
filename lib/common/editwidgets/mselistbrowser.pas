@@ -329,7 +329,7 @@ type
    procedure setcolorglyph(const Value: colorty);
   protected
    procedure doitemchange(const index: integer); override;
-   procedure nodenotification(const sender: tlistitem; var action: nodeactionty);
+   procedure nodenotification(const sender: tlistitem; var ainfo: nodeactioninfoty);
                    override;
    procedure compare(const l,r; var result: integer); override;
   public
@@ -564,7 +564,7 @@ type
    procedure docreateobject(var instance: tobject); override;
    procedure createitem(var item: tlistitem); override;
    procedure nodenotification(const sender: tlistitem;
-                  var action: nodeactionty); override;
+                  var ainfo: nodeactioninfoty); override;
    procedure compare(const l,r; var result: integer); override;
    procedure statreaditem(const reader: tstatreader;
                     var aitem: tlistitem); override;
@@ -2013,11 +2013,11 @@ begin
 end;
 
 procedure tcustomitemeditlist.nodenotification(const sender: tlistitem;
-  var action: nodeactionty);
+                     var ainfo: nodeactioninfoty);
 var
  grid: tcustomgrid;
 begin
- if action = na_destroying then begin
+ if ainfo.action = na_destroying then begin
   tlistitem1(sender).setowner(nil);
   if not deleting then begin
    grid:= fowner.fgridintf.getcol.grid;
@@ -2028,10 +2028,10 @@ begin
  end
  else begin
   if fowner.canevent(tmethod(fonitemnotification)) then begin
-   fonitemnotification(sender,action);
+   fonitemnotification(sender,ainfo.action);
   end;
   inherited;
-  if action in [na_expand,na_collapse] then begin
+  if ainfo.action in [na_expand,na_collapse] then begin
    change(sender);
   end;
  end;
@@ -2919,23 +2919,25 @@ var
  int1: integer;
  po1: ptreelistitem;
 begin
- if pointer(data) <> nil then begin
-  with ttreelistitem1(data) do begin
-   if fowner <> nil then begin
-    ttreelistitem1(data).setowner(nil);
-   end;
-   if fparent = nil then begin
-    for int1:= findex + 1 to self.fcount - 1 do begin
-     po1:= ptreelistitem(getitempo(int1));
-     if ttreelistitem1(po1^).ftreelevel = 0 then begin
-      break;
+ if not (ils_freelock in fstate) then begin
+  if pointer(data) <> nil then begin
+   with ttreelistitem1(data) do begin
+    if fowner <> nil then begin
+     ttreelistitem1(data).setowner(nil);
+    end;
+    if fparent = nil then begin
+     for int1:= findex + 1 to self.fcount - 1 do begin
+      po1:= ptreelistitem(getitempo(int1));
+      if ttreelistitem1(po1^).ftreelevel = 0 then begin
+       break;
+      end;
+      po1^:= nil;
      end;
-     po1^:= nil;
-    end;
-    if not (ils_subnodecountupdating in self.fstate) then begin
-     inherited; //free node
-    end;
-   end
+     if not (ils_subnodecountupdating in self.fstate) then begin
+      inherited; //free node
+     end;
+    end
+   end;
   end;
  end;
 end;
@@ -3062,11 +3064,12 @@ begin
 end;
 
 procedure ttreeitemeditlist.nodenotification(const sender: tlistitem;
-  var action: nodeactionty);
+  var ainfo: nodeactioninfoty);
 
  procedure expand;
  var
   int1,int2: integer;
+  grid1: tcustomgrid;
  begin
   with ttreeitemedit(fowner) do begin
    if ttreelistitem1(sender).fcount > 0 then begin
@@ -3077,7 +3080,10 @@ procedure ttreeitemeditlist.nodenotification(const sender: tlistitem;
     int1:= ttreelistitem(sender).treeheight;
     try
      include(fstate,ies_updating);
-     fgridintf.getcol.grid.insertrow(finsertcount,int1);
+     grid1:= fgridintf.getcol.grid;
+     beginupdate;
+     grid1.insertrow(finsertcount,int1);      
+     decupdate;
      exclude(fstate,ies_updating);
      fintf.updateitemvalues(int2,int1);
     finally
@@ -3093,12 +3099,13 @@ procedure ttreeitemeditlist.nodenotification(const sender: tlistitem;
 
 var
  po1: ^ttreelistitem1;
- int1: integer;
+ int1,int2: integer;
 
 begin
- if action = na_destroying then begin
+ if ainfo.action = na_destroying then begin
+  int2:= sender.index;
   tlistitem1(sender).setowner(nil);
-  if not deleting then begin
+  if not deleting and (ttreelistitem(sender).parent = nil) then begin
    with ttreelistitem(sender) do begin
     if expanded then begin
      int1:= treeheight+1;
@@ -3107,17 +3114,22 @@ begin
      int1:= 1;
     end;
    end;
-   fowner.fgridintf.getcol.grid.deleterow(sender.index,int1);
+   beginupdate;
+   fowner.fgridintf.getcol.grid.deleterow(int2,int1);
+   decupdate;
   end;
  end
  else begin
   inherited;
-  case action of
+  case ainfo.action of
    na_countchange: begin
     if not updating then begin
      with ttreelistitem1(sender) do begin
       if ns_expanded in fstate then begin
+       int1:= findex+1;
        if (findex < self.fcount-1)  then begin
+       {
+        po1:= getitempo(int1);
         int1:= findex+1;
         po1:= getitempo(int1);
         while (int1 < self.fcount) and (po1^.ftreelevel > ftreelevel) do begin
@@ -3125,8 +3137,25 @@ begin
          inc(po1);
         end;
         self.fowner.fgridintf.getcol.grid.deleterow(findex+1,int1-findex-1);
+        }
+        int2:= ainfo.treeheightbefore;
+        if int2 > 0 then begin
+         include(self.fstate,ils_freelock);
+         try
+          self.fowner.fgridintf.getcol.grid.deleterow(int1,int2);
+         finally
+          exclude(self.fstate,ils_freelock);
+         end;
+        end;
        end;
        expand;
+       {
+       po1:= getitempo(int1);
+       for int1:= int1 to self.fcount-1 do begin
+        po1^.findex:= int1;
+        inc(po1);
+       end;
+       }
       end;
      end;
     end

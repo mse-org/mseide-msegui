@@ -555,7 +555,7 @@ procedure TPQConnection.FreeFldBuffers(cursor : TSQLCursor);
 begin
 // Do nothing
 end;
-var testvar: pchar;
+
 procedure TPQConnection.Execute(const cursor: TSQLCursor; 
            const atransaction: tsqltransaction; const AParams : TmseParams);
 
