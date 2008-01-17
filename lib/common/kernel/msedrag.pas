@@ -15,9 +15,6 @@ interface
 uses
  msegui,msegraphutils,mseevent,classes,mseclasses,mseglob,mseguiglob;
 
-const
- mindragdist = 4;
-
 type
  drageventty = procedure(const sender: tobject; const apos: pointty;
                     var dragobject: tdragobject; var processed: boolean) of object;
@@ -61,6 +58,7 @@ type
 
  idragcontroller = interface(inullinterface)
   function getwidget: twidget;
+  function getdragrect(const apos: pointty): rectty;
  end;
 
  dragstatety = (ds_clicked,ds_beginchecked,ds_cursorshapechanged);
@@ -82,6 +80,7 @@ type
    function checkcandragdrop(const pos: pointty): twidget;
   protected
    fpickpos: pointty;
+   fpickrect: rectty;
    fdragobject: tdragobject;
    fstate: dragstatesty;
    fintf: idragcontroller;
@@ -215,6 +214,7 @@ begin
   ek_buttonpress: begin
    if info.shiftstate = [ss_left] then begin
     fpickpos:= info.pos;
+    fpickrect:= fintf.getdragrect(fpickpos);
     include(fstate,ds_clicked);
    end;
   end;
@@ -232,7 +232,8 @@ begin
   ek_mousemove,ek_mousepark: begin
    if (info.shiftstate = [ss_left]) then begin
     if (fstate * [ds_clicked,ds_beginchecked] = [ds_clicked]) and
-      (fdragobject = nil) and (distance(info.pos,fpickpos) > mindragdist) then begin
+      (fdragobject = nil) and not pointinrect(info.pos,fpickrect)
+      {(distance(info.pos,fpickpos) > mindragdist)} then begin
      include(fstate,ds_beginchecked);
      application.registeronkeypress({$ifdef FPC}@{$endif}dokeypress);
      initdraginfo(draginfo,dek_begin,fpickpos);

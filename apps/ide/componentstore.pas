@@ -60,6 +60,7 @@ type
    property compdesc: msestring read finfo.compdesc write setcompdesc;
    property filepath: msestring read getfilepath write setfilepath;
    property storedir: msestring read finfo.storedir write finfo.storedir;
+   property isnode: boolean read fisnode;
 
    procedure updatestoredir;
    procedure dostatread(const reader: tstatreader); override;
@@ -708,7 +709,10 @@ procedure tcomponentstorefo.drago(const sender: ttreeitemedit;
                var dragobject: ttreeitemdragobject; var accept: Boolean;
                var processed: Boolean);
 begin
- accept:= not dest.checkancestor(source);
+ accept:= not dest.checkancestor(source) and 
+             not ((source.parent = nil) and (dest.parent <> nil)) and 
+             not (tstoredcomponent(source).isnode and 
+                  not tstoredcomponent(dest).isnode);
 end;
 
 procedure tcomponentstorefo.dragdro(const sender: ttreeitemedit;

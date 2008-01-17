@@ -29,6 +29,7 @@ const
  defaulthintshowtime = 3000000; //us
  mouseparktime = 500000; //us
  defaultdblclicktime = 400000; //us
+ mindragdist = 4;
 
  mousebuttons = [ss_left,ss_right,ss_middle];
 
@@ -931,6 +932,8 @@ type
    function updateopaque(const children: boolean): boolean;
                    //true if widgetregionchanged called
 
+   //idragcontroller
+   function getdragrect(const apos: pointty): rectty; virtual;
    //iface
    //iframe
    procedure setframeinstance(instance: tcustomframe); virtual;
@@ -9505,6 +9508,16 @@ end;
 function twidget.getactface: tcustomface;
 begin
  result:= fface;
+end;
+
+function twidget.getdragrect(const apos: pointty): rectty;
+begin
+ with result do begin
+  x:= apos.x - mindragdist;
+  y:= apos.y - mindragdist;
+  cx:= 2 * mindragdist;
+  cy:= 2 * mindragdist;
+ end;
 end;
 
 { twindow }

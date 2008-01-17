@@ -1372,6 +1372,8 @@ end;
    procedure beforefocuscell(const cell: gridcoordty;
                              const selectaction: focuscellactionty); virtual;
 
+   //idragcontroller
+   function getdragrect(const apos: pointty): rectty; override;
    //iscrollbar
    procedure scrollevent(sender: tcustomscrollbar; event: scrolleventty); virtual;
 
@@ -10448,6 +10450,19 @@ begin
   if not entered then begin
    setfocus;
   end;
+ end;
+end;
+
+function tcustomgrid.getdragrect(const apos: pointty): rectty;
+var
+ cell1: gridcoordty;
+begin
+ cell1:= cellatpos(apos);
+ if isdatacell(cell1) then begin
+  result:= cellrect(cell1);
+ end
+ else begin
+  result:= inherited getdragrect(apos);
  end;
 end;
 
