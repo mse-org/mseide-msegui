@@ -179,6 +179,7 @@ type
    procedure objectevent(const sender: tobject; const event: objecteventty); override;
    function createsubnode: ttreelistitem; virtual;
    procedure swap(const a,b: integer);
+   procedure move(const source,dest: integer);
    procedure statreadsubnode(const reader: tstatreader; var anode: ttreelistitem); virtual;
   public
    constructor create(const aowner: tcustomitemlist = nil;
@@ -1317,6 +1318,25 @@ begin
  fitems[b]:= item1;
 end;
 
+procedure ttreelistitem.move(const source,dest: integer);
+var
+ int1: integer;
+begin
+ checkindex(source);
+ checkindex(dest);
+ moveitem(pointerarty(fitems),source,dest);
+ if source < dest then begin
+  for int1:= source to dest do begin
+   fitems[int1].fparentindex:= int1;
+  end;
+ end
+ else begin
+  for int1:= dest to source do begin
+   fitems[int1].fparentindex:= int1;
+  end;
+ end;
+end;
+
 procedure ttreelistitem.add(const acount: integer; itemclass: treelistitemclassty = nil);
 var
  int1,int2: integer;
@@ -1439,7 +1459,7 @@ begin
  unsetitem(aindex);
  int1:= (fcount-aindex-1)*sizeof(pointer);
  if int1 > 0 then begin
-  move(fitems[aindex+1],fitems[aindex],int1);
+  system.move(fitems[aindex+1],fitems[aindex],int1);
  end;
  dec(fcount);
  for int1:= aindex to fcount-1 do begin

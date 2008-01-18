@@ -156,7 +156,7 @@ type
  
 function getstoredir: filenamety;
 begin
- result:= expandprmacros('${COMPSTOREDIR}');
+ result:= filepath(expandprmacros('${COMPSTOREDIR}'),fk_dir);
 end;
 
 { tstoredcomponent }
@@ -277,6 +277,7 @@ end;
 procedure tcomponentstorefo.initcomponentinfo(out ainfo: storedcomponentinfoty);
 begin
  fillchar(ainfo,sizeof(ainfo),0);
+ ainfo.filepath:= storefiledialog.controller.lastdir;
 end;
 
 procedure tcomponentstorefo.dopastecomponent(const sender: TObject);
@@ -331,6 +332,7 @@ begin
     node.item.add(node1);    
     node1.statechanged;
     stream3.writedatastring(str1);
+    storechanged;
    end;
   end;
  finally
@@ -429,10 +431,10 @@ var
  int1: integer;
  writer1,writer2: tstatwriter;
 begin
- fgroupfilename:= afilename;
+ fgroupfilename:= msefileutils.filepath(afilename);
  writer2:= nil;
  try
-  writer2:= tstatwriter.create(afilename);
+  writer2:= tstatwriter.create(fgroupfilename);
   with writer2,node do begin
    for int1:= 0 to itemlist.count - 1 do begin
     item1:= tstoredcomponent(items[int1]);
@@ -478,9 +480,9 @@ begin
  grid.clear;
  reader2:= nil;
  try
-  fgroupfilename:= afilename;
+  fgroupfilename:= msefileutils.filepath(afilename);
   storedir1:= getstoredir;
-  reader2:= tstatreader.create(afilename);
+  reader2:= tstatreader.create(fgroupfilename);
   with reader2,node do begin
    setsection('componentstore');
    readrecordarray('stores',{$ifdef FPC}@{$endif}dosetstorescount,
@@ -525,8 +527,10 @@ begin
  else begin
   with tstatreader(afiler) do begin
    setsection('componentstore'); 
-   fstoredir:= readmsestring('storedir','');
-   fgroupfilename:= readmsestring('filename','default.stg');
+   fstoredir:= readmsestring('storedir',getstoredir);
+   storefiledialog.controller.filename:= fstoredir;
+   groupfiledialog.controller.filename:= fstoredir;
+   fgroupfilename:= readmsestring('filename',fstoredir+'default.stg');
    readstoregroup(fgroupfilename);
   end;
  end;
@@ -598,7 +602,7 @@ end;
 
 procedure tcomponentstorefo.copyupda(const sender: tcustomaction);
 begin
- sender.enabled:= not isnode;
+ sender.enabled:= iscomp;
 end;
 
 procedure tcomponentstorefo.pasteupda(const sender: tcustomaction);
@@ -640,9 +644,11 @@ begin
     node1.caption:= compname;
    end;
    node.itemlist.add(node1);
+   storechanged;
   end;
  end;
 end;
+
 //todo: check duplicates
 procedure tcomponentstorefo.addstoreex(const sender: TObject);
 var
@@ -775,7 +781,12 @@ procedure tcomponentstorefo.dragdro(const sender: ttreeitemedit;
                const source: ttreelistitem; const dest: ttreelistitem;
                var dragobject: ttreeitemdragobject; var processed: Boolean);
 begin
- dest.add(source);
+ if tstoredcomponent(dest).isnode then begin
+  dest.add(source);
+ end
+ else begin
+  sender.itemlist.moverow(dest.index,source.index);
+ end;
  storechanged;
 end;
 
@@ -806,11 +817,11 @@ end;
 function tcomponentstorefo.saveall(const quiet: boolean): modalresultty;
 begin
  result:= mr_none;
- if fchanged then begin
-  if quiet or confirmsavechangedfile(fgroupfilename,result) then begin
+// if fchanged then begin
+  if not fchanged or quiet or confirmsavechangedfile(fgroupfilename,result) then begin
    writestoregroup(fgroupfilename);
   end;
- end;
+// end;
 end;
 
 procedure tcomponentstorefo.opengroup(const sender: TObject);

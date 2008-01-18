@@ -40,10 +40,10 @@ object componentstorefo: tcomponentstorefo
             caption = 'Name'
           end        
           item
-            caption = 'File'
+            caption = 'Description'
           end        
           item
-            caption = 'Description'
+            caption = 'File'
           end>
       end>
     datacols.count = 3
@@ -55,14 +55,14 @@ object componentstorefo: tcomponentstorefo
         widgetname = 'node'
       end    
       item
-        width = 160
-        options = [co_proportional, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_mousescrollrow]
-        widgetname = 'filepath'
-      end    
-      item
         width = 157
         options = [co_fill, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_mousescrollrow]
         widgetname = 'compdesc'
+      end    
+      item
+        width = 160
+        options = [co_proportional, co_savestate, co_rowfont, co_rowcolor, co_zebracolor, co_mousescrollrow]
+        widgetname = 'filepath'
       end>
     datarowheight = 16
     statfile = mainfo.projectstatfile
@@ -97,7 +97,7 @@ object componentstorefo: tcomponentstorefo
     end
     object filepath: tfilenameedit
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight]
-      bounds_x = 112
+      bounds_x = 270
       bounds_y = 0
       bounds_cx = 160
       bounds_cy = 16
@@ -117,7 +117,7 @@ object componentstorefo: tcomponentstorefo
     end
     object compdesc: tmemodialogedit
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight]
-      bounds_x = 273
+      bounds_x = 112
       bounds_y = 0
       bounds_cx = 157
       bounds_cy = 16

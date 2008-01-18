@@ -583,6 +583,8 @@ type
                  //adds toplevel node
    procedure add(const anodes: treelistedititemarty); overload;
    function toplevelnodes: treelistedititemarty;
+   procedure moverow(const source,dest: integer);
+    //source and dest must belong to the same parent, ignored otherwise
 
   published
    property imnr_base;
@@ -3314,6 +3316,23 @@ end;
 procedure ttreeitemeditlist.afterdragevent(var ainfo: draginfoty;
                const arow: integer; var processed: boolean);
 begin
+ //dummy
+end;
+
+procedure ttreeitemeditlist.moverow(const source: integer; const dest: integer);
+var
+ so,de: ttreelistitem1;
+begin
+ so:= ttreelistitem1(items[source]);
+ de:= ttreelistitem1(items[dest]);
+ if so.parent = de.parent then begin
+  if so.parent <> nil then begin
+   ttreelistitem1(so.parent).move(so.parentindex,de.parentindex);
+  end;
+  fowner.fgridintf.getcol.grid.moverow(so.index,de.index);
+  de.findex:= source;
+  so.findex:= dest;
+ end;
 end;
 
 { trecordfieldedit }

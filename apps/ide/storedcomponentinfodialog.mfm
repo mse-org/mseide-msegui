@@ -52,6 +52,7 @@ object storedcomponentinfodialogfo: tstoredcomponentinfodialogfo
     anchors = [an_left, an_right, an_bottom]
     taborder = 2
     optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_notnull, oe_autopopupmenu, oe_keyexecute, oe_savevalue, oe_savestate]
+    textflags = [tf_ycentered, tf_noselect, tf_ellipseleft]
     controller.filterlist.data = (
       (
         'Stored components'
