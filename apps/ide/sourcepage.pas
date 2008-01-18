@@ -781,7 +781,8 @@ function tsourcepage.checksave(noconfirm,multiple: boolean): modalresultty;
 begin
  result:= mr_none;
  if not sourcefo.allsaved then begin
-  if edit.modified and (noconfirm or confirmsavechangedfile(edit.filename,result,multiple)) then begin
+  if edit.modified and (noconfirm or 
+              confirmsavechangedfile(edit.filename,result,multiple)) then begin
    save('');
   end;
  end;

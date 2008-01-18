@@ -82,6 +82,7 @@ object componentstorefo: tcomponentstorefo
       taborder = 1
       visible = False
       optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_endonenter, oe_hintclippedtext, oe_locate, oe_keyexecute, oe_savestate]
+      ondataentered = datent
       itemlist.imnr_expanded = 1
       itemlist.imagelist = filedialogres.images
       itemlist.imagewidth = 16
@@ -110,6 +111,7 @@ object componentstorefo: tcomponentstorefo
       visible = False
       optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_hintclippedtext, oe_autopopupmenu, oe_keyexecute, oe_savestate]
       textflags = [tf_ycentered, tf_noselect, tf_ellipseleft]
+      ondataentered = datent
       onsetvalue = filenamesetva
       reffontheight = 14
     end
@@ -127,6 +129,7 @@ object componentstorefo: tcomponentstorefo
       taborder = 3
       visible = False
       optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_hintclippedtext, oe_autopopupmenu, oe_keyexecute, oe_savestate]
+      ondataentered = datent
       onsetvalue = compdescsetva
       reffontheight = 14
     end
@@ -151,7 +154,7 @@ object componentstorefo: tcomponentstorefo
   end
   object tpopupmenu1: tpopupmenu
     onupdate = popupupdate
-    menu.submenu.count = 12
+    menu.submenu.count = 16
     menu.submenu.items = <    
       item
         action = copycompact
@@ -212,6 +215,24 @@ object componentstorefo: tcomponentstorefo
         name = 'removestore'
         state = [as_localcaption, as_localonexecute]
         onexecute = removestoreex
+      end    
+      item
+        options = [mao_separator, mao_shortcutcaption]
+      end    
+      item
+        caption = 'Open Store Group'
+        state = [as_localcaption, as_localonexecute]
+        onexecute = opengroup
+      end    
+      item
+        caption = 'Save Store Group'
+        state = [as_localcaption, as_localonexecute]
+        onexecute = savegroup
+      end    
+      item
+        caption = 'Save Store Group as'
+        state = [as_localcaption, as_localonexecute]
+        onexecute = savegroupas
       end>
     left = 40
     top = 88
@@ -238,5 +259,20 @@ object componentstorefo: tcomponentstorefo
     dialogkind = fdk_none
     left = 40
     top = 136
+  end
+  object groupfiledialog: tfiledialog
+    statfile = mainfo.projectstatfile
+    controller.filterlist.data = (
+      (
+        'Store Groups'
+        '*.stg'
+      )
+    )
+    controller.defaultext = 'stg'
+    controller.captionopen = 'Open Store Group'
+    controller.captionsave = 'Save Store Group'
+    dialogkind = fdk_none
+    left = 40
+    top = 168
   end
 end

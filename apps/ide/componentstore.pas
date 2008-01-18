@@ -22,7 +22,7 @@ uses
  msegraphutils,mseevent,mseclasses,mseforms,msedock,mseact,mseactions,
  msestrings,msedataedits,mseedit,msegrids,msetypes,msewidgetgrid,msedatanodes,
  mselistbrowser,msewidgets,msestatfile,msebitmap,msefiledialog,msesys,msedialog,
- msememodialog;
+ msememodialog,msesimplewidgets;
 
 type
  storedcomponentinfoty = record
@@ -79,6 +79,7 @@ type
    filepath: tfilenameedit;
    compdesc: tmemodialogedit;
    storefiledialog: tfiledialog;
+   groupfiledialog: tfiledialog;
    procedure docreate(const sender: TObject);
    procedure dopastecomponent(const sender: TObject);
    procedure dostatread(const sender: TObject; const reader: tstatreader);
@@ -115,10 +116,16 @@ type
                    const dest: ttreelistitem;
                    var dragobject: ttreeitemdragobject; var processed: Boolean);
    procedure removecomp(const sender: TObject);
+   procedure datent(const sender: TObject);
+   procedure opengroup(const sender: TObject);
+   procedure savegroupas(const sender: TObject);
+   procedure savegroup(const sender: TObject);
   private
 //   frootnode: tstoredcomponent;
    far1: storedcomponentarty;
    fstoredir: msestring;
+   fchanged: boolean;
+   fgroupfilename: filenamety;
    procedure initcomponentinfo(out ainfo: storedcomponentinfoty);
    function isnode: boolean;
    function iscomp: boolean;
@@ -126,8 +133,13 @@ type
    procedure dosetstorescount(const count: integer);
    procedure dosetstorerec(const index: integer; const avalue: msestring);
    procedure readstore(const aitem: tstoredcomponent);
+   procedure checkchanged;
+   procedure storechanged;
+   procedure writestoregroup(const afilename: filenamety);
+   procedure readstoregroup(const afilename: filenamety);
   public
    procedure updatestat(afiler: tstatfiler);
+   function saveall(const quiet: boolean): modalresultty;
  end;
 
 var
@@ -137,7 +149,8 @@ implementation
 uses
  componentstore_mfm,msestream,storedcomponentinfodialog,msedatalist,msefileutils,
  sysutils,projectoptionsform;
- 
+const
+ storecaption = 'Component Store';
 type
  treader1 = class(treader);
  
@@ -410,28 +423,25 @@ begin
  end;
 end;
 
-procedure tcomponentstorefo.updatestat(afiler: tstatfiler);
+procedure tcomponentstorefo.writestoregroup(const afilename: filenamety);
 var
- int1: integer;
  item1: tstoredcomponent;
- ar2: msestringarty;
- writer1: tstatwriter;
- storedir1: filenamety;
+ int1: integer;
+ writer1,writer2: tstatwriter;
 begin
- storedir1:= getstoredir;
- if afiler.iswriter then begin
-  with node do begin
+ fgroupfilename:= afilename;
+ writer2:= nil;
+ try
+  writer2:= tstatwriter.create(afilename);
+  with writer2,node do begin
    for int1:= 0 to itemlist.count - 1 do begin
     item1:= tstoredcomponent(items[int1]);
     if item1.isroot then begin
      additem(pointerarty(far1),item1);
     end;
    end;
-   with tstatwriter(afiler) do begin
-    writesection('componentstore');
-    writemsestring('storedir',storedir1);
-    writerecordarray('stores',length(far1),{$ifdef FPC}@{$endif}dogetstorerec);
-   end;
+   writesection('componentstore');
+   writerecordarray('stores',length(far1),{$ifdef FPC}@{$endif}dogetstorerec);
    try
     for int1:= 0 to high(far1) do begin
      with far1[int1] do begin
@@ -450,12 +460,29 @@ begin
     application.handleexception(self);
    end;
   end;
- end
- else begin
-  grid.clear;
-  with tstatreader(afiler) do begin
-   setsection('componentstore'); 
-   fstoredir:= readmsestring('storedir','');
+ except
+ end;
+ far1:= nil;
+ writer2.free;
+ fchanged:= false;
+ checkchanged;
+end;
+
+procedure tcomponentstorefo.readstoregroup(const afilename: filenamety);
+var
+ int1: integer;
+ reader1,reader2: tstatreader;
+ item1: tstoredcomponent;
+ storedir1: filenamety;
+begin
+ grid.clear;
+ reader2:= nil;
+ try
+  fgroupfilename:= afilename;
+  storedir1:= getstoredir;
+  reader2:= tstatreader.create(afilename);
+  with reader2,node do begin
+   setsection('componentstore');
    readrecordarray('stores',{$ifdef FPC}@{$endif}dosetstorescount,
                   {$ifdef FPC}@{$endif}dosetstorerec);
    try
@@ -478,8 +505,31 @@ begin
     end;
    end;
   end;
+ except
  end;
  far1:= nil;
+ reader2.free;
+ fchanged:= false;
+ checkchanged;
+end;
+
+procedure tcomponentstorefo.updatestat(afiler: tstatfiler);
+begin
+ if afiler.iswriter then begin
+  with tstatwriter(afiler) do begin
+   writesection('componentstore');
+   writemsestring('storedir',getstoredir);
+   writemsestring('filename',fgroupfilename);
+  end;
+ end
+ else begin
+  with tstatreader(afiler) do begin
+   setsection('componentstore'); 
+   fstoredir:= readmsestring('storedir','');
+   fgroupfilename:= readmsestring('filename','default.stg');
+   readstoregroup(fgroupfilename);
+  end;
+ end;
 end;
 
 procedure tcomponentstorefo.doupdaterowvalues(const sender: TObject;
@@ -610,6 +660,7 @@ begin
    end;
    readstore(node1);
    node.itemlist.add(node1);
+   storechanged;
   end;
  end;
 end;
@@ -619,6 +670,7 @@ begin
  with tstoredcomponent(node.item).finfo do begin
   if askyesno('Do you want to remove "'+compname+'"?') then begin
    tstoredcomponent(node.item).free;
+   storechanged;
   end;
  end;
 end;
@@ -628,6 +680,7 @@ begin
  with tstoredcomponent(node.item).finfo do begin
   if askyesno('Do you want to remove "'+compname+'" branch?') then begin
    tstoredcomponent(node.item).free;
+   storechanged;
   end; 
  end;
 end;
@@ -637,12 +690,14 @@ begin
  with tstoredcomponent(node.item).finfo do begin
   if askyesno('Do you want to remove "'+compname+'"?') then begin
    tstoredcomponent(node.item).free;
+   storechanged;
   end; 
  end;
 end;
 
 const
  nodecopysig = '{DEA80549-4F45-4117-B182-A0EF49C4A097}';
+ 
 procedure tcomponentstorefo.copynodeex(const sender: TObject);
 var
  stream1: ttextstream;
@@ -688,6 +743,7 @@ begin
      add(node1);
      grid.row:= grid.row + count;
     end;
+    storechanged;
    end;
   finally
    reader1.free;
@@ -720,6 +776,80 @@ procedure tcomponentstorefo.dragdro(const sender: ttreeitemedit;
                var dragobject: ttreeitemdragobject; var processed: Boolean);
 begin
  dest.add(source);
+ storechanged;
+end;
+
+procedure tcomponentstorefo.datent(const sender: TObject);
+begin
+ storechanged;
+end;
+
+procedure tcomponentstorefo.checkchanged;
+var
+ mstr1: msestring;
+begin
+ if fchanged then begin
+  mstr1:= '*';
+ end
+ else begin
+  mstr1:= '';
+ end;
+ dragdock.caption:= mstr1+storecaption+' ('+filename(fgroupfilename)+')';
+end;
+
+procedure tcomponentstorefo.storechanged;
+begin
+ fchanged:= true;
+ checkchanged;
+end;
+
+function tcomponentstorefo.saveall(const quiet: boolean): modalresultty;
+begin
+ result:= mr_none;
+ if fchanged then begin
+  if quiet or confirmsavechangedfile(fgroupfilename,result) then begin
+   writestoregroup(fgroupfilename);
+  end;
+ end;
+end;
+
+procedure tcomponentstorefo.opengroup(const sender: TObject);
+begin
+ if canclose(nil) and (saveall(false) <> mr_cancel) then begin
+  with groupfiledialog,controller do begin
+   filename:= fgroupfilename;
+   if execute(fdk_open) = mr_ok then begin
+    if not findfile(filename) then begin
+     if askyesno('File '+filename+
+                 ' does not exist, do you want to create it?') then begin
+      writestoregroup(filename);
+     end;
+    end
+    else begin
+     readstoregroup(filename);
+    end; 
+   end;
+  end;
+ end;
+end;
+
+procedure tcomponentstorefo.savegroup(const sender: TObject);
+begin
+ if canclose(nil) then begin
+  writestoregroup(fgroupfilename);
+ end;
+end;
+
+procedure tcomponentstorefo.savegroupas(const sender: TObject);
+begin
+ if canclose(nil) then begin
+  with groupfiledialog,controller do begin
+   filename:= fgroupfilename;
+   if execute(fdk_save,'',[fdo_checkexist]) = mr_ok then begin
+    writestoregroup(filename);
+   end;
+  end;
+ end;
 end;
 
 end.

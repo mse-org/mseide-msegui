@@ -515,37 +515,41 @@ begin
  if result <> mr_cancel then begin
   result:= designer.saveall(result = mr_all,true);
   if result <> mr_cancel then begin
-   with projectoptions,texp do begin
-    if modified and not savechecked then begin
-     result:= showmessage('Project '+fprojectname+' is modified. Save?','Confirmation',
-                    [mr_yes,mr_no,mr_cancel],mr_yes);
-     if result = mr_yes then begin
-      if projectfilename = '' then begin
-       result:= projectfiledialog(str1,true);
-       if result <> mr_ok then begin
-        result:= mr_cancel;
+   result:= componentstorefo.saveall(false);
+   if result <> mr_cancel then begin
+    with projectoptions,texp do begin
+     if modified and not savechecked then begin
+      result:= showmessage('Project '+fprojectname+' is modified. Save?','Confirmation',
+                     [mr_yes,mr_no,mr_cancel],mr_yes);
+      if result = mr_yes then begin
+       if projectfilename = '' then begin
+        result:= projectfiledialog(str1,true);
+        if result <> mr_ok then begin
+         result:= mr_cancel;
+        end;
+       end
+       else begin
+        str1:= projectfilename;
+       end;
+       if result <> mr_cancel then begin
+        saveproject(str1);
        end;
       end
       else begin
-       str1:= projectfilename;
+       if result <> mr_no then begin
+        result:= mr_cancel;
+       end;
       end;
-      if result <> mr_cancel then begin
-       saveproject(str1);
-      end;
+      savechecked:= true;
      end
      else begin
-      if result <> mr_no then begin
-       result:= mr_cancel;
-      end;
+      saveproject(projectfilename);
      end;
-     savechecked:= true;
-    end
-    else begin
-     saveproject(projectfilename);
     end;
    end;
   end;
  end;
+  
  checksavecancel(result);
 end;
 

@@ -142,7 +142,7 @@ uses
  main,make,actionsmodule_mfm,msemenus,sourceform,msedesigner,msetypes,msefiledialog,
  projectoptionsform,findinfileform,breakpointsform,watchform,selecteditpageform,
  msewidgets,disassform,printform,msegdbutils,mseintegerenter,msesettings,
- mseguiglob;
+ mseguiglob,componentstore;
 
 procedure configureide;
 begin
@@ -215,6 +215,7 @@ begin
  with mainfo do begin
   sourcefo.saveall(true);
   designer.saveall(true,true);
+  componentstorefo.saveall(true);
   saveprojectoptions;
   updatemodifiedforms;
  end;

@@ -156,12 +156,14 @@ type
    procedure writestatoptions(const writer: tstatwriter);
    function execute(dialogkind: filedialogkindty = fdk_none): modalresultty; overload;
                            //fdk_none -> use options fdo_save
-   function execute(dialogkind: filedialogkindty;
+   function execute(dialogkind: filedialogkindty; const acaption: msestring;
+              aoptions: filedialogoptionsty): modalresultty; overload;
+   function execute(const dialogkind: filedialogkindty;
                          const acaption: msestring): modalresultty; overload;
    function execute(var avalue: filenamety;
                   dialogkind: filedialogkindty = fdk_none): boolean; overload;
-   function execute(var avalue: filenamety;
-                  dialogkind: filedialogkindty; acaption: msestring): boolean; overload;
+   function execute(var avalue: filenamety; const  dialogkind: filedialogkindty;
+                  const acaption: msestring): boolean; overload;
    procedure clear;
    procedure componentevent(const event: tcomponentevent);
    property history: msestringarty read fhistory write fhistory;
@@ -1291,13 +1293,12 @@ begin
 end;
 
 function tfiledialogcontroller.execute(dialogkind: filedialogkindty;
-                         const acaption: msestring): modalresultty;
+                         const acaption: msestring;
+                         aoptions: filedialogoptionsty): modalresultty;
 var
  po1: pmsestringarty;
  fo: tfiledialogfo;
  ara,arb: msestringarty;
- aoptions: filedialogoptionsty;
-
 begin
  ara:= nil; //compiler warning
  arb:= nil; //compiler warning
@@ -1319,7 +1320,6 @@ begin
  {$ifdef FPC} {$checkpointer off} {$endif}    //todo!!!!! bug 3348
   ara:= ffilterlist.asarraya;
   arb:= ffilterlist.asarrayb;
-  aoptions:= foptions;
   if dialogkind <> fdk_none then begin
    if dialogkind = fdk_save then begin
     system.include(aoptions,fdo_save);
@@ -1353,6 +1353,12 @@ begin
  finally
   fo.Free;
  end;
+end;
+
+function tfiledialogcontroller.execute(const dialogkind: filedialogkindty;
+                         const acaption: msestring): modalresultty;
+begin
+ result:= execute(dialogkind,acaption,foptions);
 end;
 
 function tfiledialogcontroller.execute(
@@ -1400,7 +1406,8 @@ begin
 end;
 
 function tfiledialogcontroller.execute(var avalue: filenamety;
-                  dialogkind: filedialogkindty; acaption: msestring): boolean;
+                  const dialogkind: filedialogkindty;
+                  const acaption: msestring): boolean;
 var
  wstr1: filenamety;
 begin
