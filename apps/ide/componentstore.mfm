@@ -18,6 +18,29 @@ object componentstorefo: tcomponentstorefo
   dragdock.caption = 'Component Store'
   dragdock.optionsdock = [od_savepos, od_canfloat, od_candock, od_proportional, od_propsize]
   statfile = mainfo.projectstatfile
+  icon.options = [bmo_masked]
+  icon.image = {
+    00000000020000001800000018000000E4010000000000000000000000000000
+    0000000000000000000000000000000000000000FF00FF1B79797912FF00FF06
+    79797901E4E4E41079797901FF00FF0679797901E4E4E4030000FF01E4E4E408
+    FF000001E4E4E40379797901FF00FF0679797901E4E4E4020000FF03E4E4E402
+    00000002E4E4E402FF000003E4E4E40279797901FF00FF0679797901E4E4E401
+    0000FF05E4E4E40100000002E4E4E401FF000005E4E4E40179797901FF00FF06
+    79797901E4E4E41079797901FF00FF0679797901E4E4E41079797901FF00FF06
+    79797912FF00FF0679797901E4E4E41079797901FF00FF0679797901E4E4E410
+    79797901FF00FF0679797901E4E4E4010000FF05E4E4E40100000002E4E4E401
+    FF000005E4E4E40179797901FF00FF0679797901E4E4E4020000FF03E4E4E402
+    00000002E4E4E402FF000003E4E4E40279797901FF00FF0679797901E4E4E403
+    0000FF01E4E4E408FF000001E4E4E40379797901FF00FF0679797901E4E4E410
+    79797901FF00FF0679797912FF00FF0679797901E4E4E41079797901FF00FF06
+    79797901E4E4E41079797901FF00FF0679797901E4E4E40100FFFF05E4E4E401
+    00000002E4E4E40100FF0005E4E4E40179797901FF00FF0679797901E4E4E407
+    00000002E4E4E40779797901FF00FF0679797901E4E4E41079797901FF00FF06
+    79797901E4E4E41079797901FF00FF0679797912FF00FF1B00000008F8FF1F08
+    F8FF1FBFF8FF1F08F8FF1F00F8FF1F08F8FF1F03F8FF1FC0F8FF1F00F8FF1F08
+    F8FF1FBFF8FF1F08F8FF1F08F8FF1F08F8FF1FBFF8FF1F08F8FF1F00F8FF1F03
+    F8FF1F40F8FF1F00F8FF1F00F8FF1FBFF8FF1F0000000008
+  }
   oncreate = docreate
   moduleclassname = 'tdockform'
   object grid: twidgetgrid
@@ -95,6 +118,24 @@ object componentstorefo: tcomponentstorefo
       options = [teo_treecolnavig, teo_keyrowmoving]
       reffontheight = 14
     end
+    object compdesc: tmemodialogedit
+      optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight]
+      bounds_x = 112
+      bounds_y = 0
+      bounds_cx = 157
+      bounds_cy = 16
+      frame.levelo = 0
+      frame.colorclient = -2147483645
+      frame.localprops = [frl_levelo, frl_leveli, frl_colorclient]
+      frame.button.imagenr = 17
+      frame.dummy = 0
+      taborder = 2
+      visible = False
+      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_hintclippedtext, oe_autopopupmenu, oe_keyexecute, oe_savestate]
+      ondataentered = datent
+      onsetvalue = compdescsetva
+      reffontheight = 14
+    end
     object filepath: tfilenameedit
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight]
       bounds_x = 270
@@ -107,30 +148,12 @@ object componentstorefo: tcomponentstorefo
       frame.button.color = -1879048187
       frame.button.imagenr = 17
       frame.dummy = 0
-      taborder = 2
+      taborder = 3
       visible = False
       optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_hintclippedtext, oe_autopopupmenu, oe_keyexecute, oe_savestate]
       textflags = [tf_ycentered, tf_noselect, tf_ellipseleft]
       ondataentered = datent
       onsetvalue = filenamesetva
-      reffontheight = 14
-    end
-    object compdesc: tmemodialogedit
-      optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight]
-      bounds_x = 112
-      bounds_y = 0
-      bounds_cx = 157
-      bounds_cy = 16
-      frame.levelo = 0
-      frame.colorclient = -2147483645
-      frame.localprops = [frl_levelo, frl_leveli, frl_colorclient]
-      frame.button.imagenr = 17
-      frame.dummy = 0
-      taborder = 3
-      visible = False
-      optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_hintclippedtext, oe_autopopupmenu, oe_keyexecute, oe_savestate]
-      ondataentered = datent
-      onsetvalue = compdescsetva
       reffontheight = 14
     end
   end
