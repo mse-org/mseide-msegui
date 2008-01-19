@@ -275,8 +275,6 @@ type
    function getobjectlinker: tobjectlinker;
    procedure objectevent(const sender: tobject; const event: objecteventty);
    procedure setimagelist(const Value: timagelist);
-   function getitems(const index: integer): tlistitem;
-   procedure setitems(const index: integer; const Value: tlistitem);
    procedure setoptions(const Value: nodeoptionsty);
    procedure setcaptionpos(const Value: captionposty);
    procedure setlevelstep(const Value: integer);
@@ -295,6 +293,8 @@ type
    foptions: nodeoptionsty;
    fcaptionpos: captionposty;
    fstate: itemliststatesty;
+   function getitems(const index: integer): tlistitem;
+   procedure setitems(const index: integer; const Value: tlistitem);
    procedure freedata(var data); override;
    procedure change(const item: tlistitem); reintroduce; overload;
    procedure nodenotification(const sender: tlistitem;

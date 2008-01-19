@@ -559,6 +559,8 @@ type
    procedure setcolorline(const value: colorty);
    function getonstatreaditem: statreadtreeitemeventty;
    procedure setonstatreaditem(const avalue: statreadtreeitemeventty);
+   function getitems(const index: integer): ttreelistedititem;
+   procedure setitems(const index: integer; const avalue: ttreelistedititem);
   protected
    procedure freedata(var data); override;
    procedure docreateobject(var instance: tobject); override;
@@ -585,6 +587,8 @@ type
    function toplevelnodes: treelistedititemarty;
    procedure moverow(const source,dest: integer);
     //source and dest must belong to the same parent, ignored otherwise
+   property items[const index: integer]: ttreelistedititem read getitems 
+                                          write setitems; default;
 
   published
    property imnr_base;
@@ -3329,10 +3333,21 @@ begin
   if so.parent <> nil then begin
    ttreelistitem1(so.parent).move(so.parentindex,de.parentindex);
   end;
-  fowner.fgridintf.getcol.grid.moverow(so.index,de.index);
+  fowner.fgridintf.getcol.grid.moverow(so.index,de.index,so.treeheight+1);
   de.findex:= source;
   so.findex:= dest;
  end;
+end;
+
+function ttreeitemeditlist.getitems(const index: integer): ttreelistedititem;
+begin
+ result:= ttreelistedititem(inherited getitems(index));
+end;
+
+procedure ttreeitemeditlist.setitems(const index: integer;
+               const avalue: ttreelistedititem);
+begin
+ inherited;
 end;
 
 { trecordfieldedit }
@@ -3725,13 +3740,16 @@ begin
        if ftreelevel > 0 then begin
         int1:= parentindex;
         if key = key_up then begin
-         if (int1 > 0) and checkrowmove(row,row-1) then begin
+         if (int1 > 0) and (itemlist[row].parent = itemlist[row-1].parent) and 
+                    checkrowmove(row,row-1) then begin
           ttreelistitem1(fparent).swap(int1,int1-1);
           moverow(row,row-1,1);
          end;
         end
         else begin //key_down
-         if (int1 < fparent.count-1) and checkrowmove(row,row+1) then begin
+         if (int1 < fparent.count-1) and 
+              (itemlist[row].parent = itemlist[row+1].parent) and
+               checkrowmove(row,row+1) then begin
           ttreelistitem1(fparent).swap(int1,int1+1);
           moverow(row,row+1,1);
          end;
