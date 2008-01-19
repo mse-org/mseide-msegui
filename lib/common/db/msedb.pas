@@ -689,7 +689,7 @@ type
  datasetoptionty = (dso_utf8,dso_numboolean,dso_initinternalcalc,
                          dso_refreshtransaction,
                          dso_cancelupdateonerror,dso_cancelupdatesonerror,                         
-                         dso_autoapply,dso_applyonidle,
+                         dso_autoapply,{dso_applyonidle,}
                          dso_autocommitret,dso_autocommit,
                          dso_refreshafterapply,
                          dso_cacheblobs,
@@ -748,6 +748,7 @@ type
    flinkedfields: fieldlinkarty;
    foptions: datasetoptionsty;
    fstate: dscontrollerstatesty;
+   fdelayedapplycount: integer;
    procedure setfields(const avalue: tpersistentfields);
    function getcontroller: tdscontroller;
    procedure updatelinkedfields;
@@ -811,6 +812,9 @@ type
    property fields: tpersistentfields read ffields write setfields;
    property options: datasetoptionsty read foptions write setoptions 
                    default defaultdscontrolleroptions;
+   property delayedapplycount: integer read fdelayedapplycount 
+                                       write fdelayedapplycount;
+               //0 -> no autoapply
  end;
  
  idbcontroller = interface(inullinterface)
@@ -4061,7 +4065,8 @@ begin
   end;
   updatelinkedfields; //second check
  end;
- if dso_applyonidle in foptions then begin
+ if fdelayedapplycount > 0 then begin
+// if dso_applyonidle in foptions then begin
   application.registeronidle(@doonidle);
   include(fstate,dscs_onidleregistered);
  end;

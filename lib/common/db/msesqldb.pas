@@ -480,7 +480,7 @@ end;
 
 procedure tmsesqlquery.doidleapplyupdates;
 begin
- if changecount > 0 then begin
+ if (changecount > 0) and (changecount >= fcontroller.delayedapplycount) then begin
   application.beginwait;
   include(fbstate,bs_idle);
   try
@@ -494,8 +494,9 @@ end;
 
 procedure tmsesqlquery.checkpendingupdates;
 begin
- if (state <> dsinactive) and 
-  (dso_applyonidle in fcontroller.options) and (changecount > 0) then begin
+ if (state <> dsinactive) and (fcontroller.delayedapplycount > 0) and 
+                                  (changecount > 0) then begin
+//  (dso_applyonidle in fcontroller.options) and (changecount > 0) then begin
   applyupdates;
  end;
 end;
