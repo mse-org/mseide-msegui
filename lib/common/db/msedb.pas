@@ -756,7 +756,9 @@ type
    procedure setrecnonullbased(const avalue: integer);
    function getrecno: integer;
    procedure setrecno(const avalue: integer);
+   procedure registeronidle;
    procedure unregisteronidle;
+   procedure setdelayedapplycount(const avalue: integer);
   protected
    procedure setoptions(const avalue: datasetoptionsty); virtual;
    procedure modified;
@@ -813,7 +815,7 @@ type
    property options: datasetoptionsty read foptions write setoptions 
                    default defaultdscontrolleroptions;
    property delayedapplycount: integer read fdelayedapplycount 
-                                       write fdelayedapplycount;
+                                       write setdelayedapplycount;
                //0 -> no autoapply
  end;
  
@@ -4066,15 +4068,21 @@ begin
   updatelinkedfields; //second check
  end;
  if fdelayedapplycount > 0 then begin
-// if dso_applyonidle in foptions then begin
-  application.registeronidle(@doonidle);
-  include(fstate,dscs_onidleregistered);
+  registeronidle;
  end;
 end;
 
 procedure tdscontroller.doonidle(var again: boolean);
 begin
  fintf.doidleapplyupdates;
+end;
+
+procedure tdscontroller.registeronidle;
+begin
+ if not(dscs_onidleregistered in fstate) then begin
+  application.registeronidle(@doonidle);
+  include(fstate,dscs_onidleregistered);
+ end;
 end;
 
 procedure tdscontroller.unregisteronidle;
@@ -4331,6 +4339,28 @@ begin
   end;
   setlength(result,int2);
  end;
+end;
+
+procedure tdscontroller.setdelayedapplycount(const avalue: integer);
+begin
+ if fdelayedapplycount <> avalue then begin
+  if tdataset(fowner).active and not (csloading in fowner.componentstate) then begin
+   if fdelayedapplycount > 0 then begin
+    fdelayedapplycount:= 1;
+    fintf.doidleapplyupdates; //apply pending updates.
+   end;
+   fdelayedapplycount:= avalue;
+   if avalue > 0 then begin
+    registeronidle;
+   end
+   else begin
+    unregisteronidle;
+   end;
+  end
+  else begin
+   fdelayedapplycount:= avalue;
+  end;
+ end;   
 end;
 
 { tmsedatasource }
