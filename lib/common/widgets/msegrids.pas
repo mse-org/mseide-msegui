@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2007 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2008 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -48,6 +48,7 @@ const
  fixcoloptionsshift = ord(co_rowfont)-ord(fco_rowfont);
  fixcoloptionsmask:coloptionsty = [co_rowfont,co_rowcolor,co_zebracolor];
  defaultfixcoloptions = [];
+ rowstatemask = $7f;
  
 type
  optiongridty = (og_colsizing,og_colmoving,og_keycolmoving,
@@ -140,7 +141,7 @@ type
  gridstatety = (
       gs_layoutvalid,gs_layoutupdating,gs_updatelocked,{gs_mousefocuslocked,}
       gs_sortvalid,gs_cellentered,gs_cellclicked,gs_emptyrowremoved,
-      gs_rowcountinvalid,
+      gs_rowcountinvalid,gs_rowreadonly,
       gs_scrollup,gs_scrolldown,gs_scrollleft,gs_scrollright,
       gs_selectionchanged,gs_rowdatachanged,gs_invalidated,{gs_rowappended,}
       gs_mouseentered,gs_childmousecaptured,gs_child,
@@ -524,6 +525,7 @@ type
 
    procedure cellchanged(const row: integer); override;
    function canfocus(const abutton: mousebuttonty): boolean; virtual;
+   function isreadonly: boolean; //col readonly or row readonly
    procedure updatecellzone(const pos: pointty; var result: cellzonety); virtual;
    property datalist: tdatalist read fdata;
    procedure dostatread(const reader: tstatreader); override;
@@ -564,11 +566,6 @@ type
    procedure settextflags(const avalue: textflagsty);
    function getdatalist: tmsestringdatalist;
    procedure setdatalist(const value: tmsestringdatalist);
-{
-   function istextflagsstored: boolean;
-   function istextflagsactivestored: boolean;
-   function isoptionseditstored: boolean;
-}
    procedure settextflagsactive(const avalue: textflagsty);
    procedure setoptionsedit(const avalue: stringcoleditoptionsty);
   protected
@@ -719,10 +716,6 @@ type
    procedure invalidate;
    procedure invalidatewidget;
    procedure invalidaterect(const rect: rectty; org: originty = org_client);
-//   function getframefont: tfont;
-//   function getcanvas(aorigin: originty = org_client): tcanvas;
-//   function canfocus: boolean;
-//   function setfocus(aactivate: boolean = true): boolean;
    function getframeclicked: boolean;
    function getframemouse: boolean;
    function getframeactive: boolean;
@@ -779,7 +772,6 @@ type
    fnumstep: integer;
    fcaptions: tcolheaders;
    fcaptionsfix: tfixcolheaders;
-//   fhints: tmsestringarrayprop;
    foptionsfix: fixrowoptionsty;
    procedure setheight(const Value: integer);
    function getrowindex: integer;
@@ -789,7 +781,6 @@ type
    procedure settextflags(const Value: textflagsty);
    procedure setcaptions(const Value: tcolheaders);
    procedure setcaptionsfix(const Value: tfixcolheaders);
-//   procedure sethints(const avalue: tmsestringarrayprop);
    procedure setoptionsfix(const avalue: fixrowoptionsty);
    function getvisible: boolean;
    procedure setvisible(const avalue: boolean);
@@ -820,7 +811,6 @@ type
    property numstep: integer read fnumstep write setnumstep default 0;
    property captions: tcolheaders read fcaptions write setcaptions;
    property captionsfix: tfixcolheaders read fcaptionsfix write setcaptionsfix;
-//   property hints: tmsestringarrayprop read fhints write sethints;
    property font;
    property linecolor default defaultfixlinecolor;
    property options: fixrowoptionsty read foptionsfix write setoptionsfix;
@@ -1153,7 +1143,8 @@ end;
  gridsorteventty = procedure(sender: tcustomgrid;
                        const index1,index2: integer; var aresult: integer) of object;
 
- rowstatenumty = -1..254;
+ rowstatenumty = -1..126; //msb = row readonly flag for rowfontstate,
+                          //reserved for rowcolorstate
  
  tcustomgrid = class(tpublishedwidget,iautoscrollframe,iobjectpicker,iscrollbar,
                     idragcontroller,istatfile)
@@ -1243,6 +1234,8 @@ end;
    procedure setzebra_start(const avalue: integer);
    procedure setzebra_height(const avalue: integer);
    procedure setzebra_step(const avalue: integer);
+   function getrowreadonlystate(index: integer): boolean;
+   procedure setrowreadonlystate(const index: integer; const avalue: boolean);
   protected
    ffocuscount: integer;
    fpropcolwidthref: integer;
@@ -1275,6 +1268,7 @@ end;
    fnocheckvalue: integer;
    fappendcount: integer;
    procedure setoptionsgrid(const avalue: optionsgridty); virtual;
+   procedure checkrowreadonlystate; virtual;
 
    procedure doinsertrow(const sender: tobject); virtual;
    procedure doappendrow(const sender: tobject); virtual;
@@ -1530,6 +1524,8 @@ end;
    property rowfonts: trowfontarrayprop read frowfonts write setrowfonts;
    property rowfontstate[index: integer]: rowstatenumty read getrowfontstate 
                         write setrowfontstate;  //default = -1
+   property rowreadonlystate[index: integer]: boolean read getrowreadonlystate 
+                        write setrowreadonlystate;
    property zebra_color: colorty read fzebra_color write setzebra_color default cl_infobackground;
    property zebra_start: integer read fzebra_start write setzebra_start default 0;
    property zebra_height: integer read fzebra_height write setzebra_height default 0;
@@ -1657,6 +1653,7 @@ end;
    function hasselection: boolean;
 
    procedure focusedcellchanged; override;
+   procedure checkrowreadonlystate; override;
      //interface to inplaceedit
    procedure dokeydown(var info: keyeventinfoty); override;
    procedure clientmouseevent(var info: mouseeventinfoty); override;
@@ -1678,13 +1675,11 @@ end;
    function pasteselection: boolean; override;
    property items[const cell: gridcoordty]: msestring read getitems write setitems;
    property datacols: tstringcols read getdatacols write setdatacols;
-//   property datarowlinewidth default 0;
    property caretwidth: integer read getcaretwidth write setcaretwidth default defaultcaretwidth;
  end;
 
  tstringgrid = class(tcustomstringgrid)
   published
-//   property defaultcoloptions; //first!
    property optionsgrid;
    property datacols;
    property fixcols;
@@ -1862,7 +1857,8 @@ begin
  result:= (a.col = b.col) and (a.row = b.row);
 end;
 
-procedure stringcoltooptionsedit(const source: stringcoleditoptionsty; var dest: optionseditty);
+procedure stringcoltooptionsedit(const source: stringcoleditoptionsty; 
+                                    var dest: optionseditty);
 begin
  if scoe_undoonesc in source then begin
   include(dest,oe_undoonesc);
@@ -4424,6 +4420,11 @@ begin
  //dummy
 end;
 
+function tdatacol.isreadonly: boolean;
+begin
+ result:= (gs_rowreadonly in fgrid.fstate) or (co_readonly in foptions);
+end;
+
 { tdrawcol }
 
 procedure tdrawcol.drawcell(const canvas: tcanvas);
@@ -4482,7 +4483,7 @@ end;
 
 function tcustomstringcol.getcursor: cursorshapety;
 begin
- if not (co_readonly in foptions) then begin
+ if not isreadonly{(co_readonly in foptions)} then begin
   result:= cr_ibeam;
  end
  else begin
@@ -5733,7 +5734,8 @@ begin
    for int1:= 0 to count - 1 do begin
     tstringcol(items[int1]).optionsedit:= stringcoleditoptionsty(
                    replacebits({$ifdef FPC}longword{$else}word{$endif}(avalue),
-                   {$ifdef FPC}longword{$else}word{$endif}(tstringcol(items[int1]).optionsedit),mask));
+    {$ifdef FPC}longword{$else}word{$endif}
+                               (tstringcol(items[int1]).optionsedit),mask));
    end;
   end;
  end;
@@ -7745,6 +7747,7 @@ begin     //focuscell
     showcell(cell);
    end;
    if isdatacell(cell) then begin
+    checkrowreadonlystate;
     coord2:= cell;
     fdatacols[cell.col].internaldoentercell(coord1,cell,selectaction);
     if ffocuscount <> focuscount then begin
@@ -10228,24 +10231,59 @@ end;
 
 function tcustomgrid.getrowcolorstate(index: integer): rowstatenumty;
 begin
- result:= fdatacols.frowstate.getitempo(index)^.color - 1;
+ result:= (fdatacols.frowstate.getitempo(index)^.color and rowstatemask) - 1;
 end;
 
 procedure tcustomgrid.setrowcolorstate(index: integer; const Value: rowstatenumty);
 begin
- fdatacols.frowstate.getitempo(index)^.color:= value + 1;
+ with fdatacols.frowstate.getitempo(index)^ do begin
+  color:= replacebits(value + 1,color,rowstatemask);
+ end;
  rowchanged(index);
 end;
 
 function tcustomgrid.getrowfontstate(index: integer): rowstatenumty;
 begin
- result:= fdatacols.frowstate.getitempo(index)^.font - 1;
+ result:= (fdatacols.frowstate.getitempo(index)^.font and rowstatemask) - 1;
 end;
 
 procedure tcustomgrid.setrowfontstate(index: integer; const Value: rowstatenumty);
 begin
- fdatacols.frowstate.getitempo(index)^.font:= value + 1;
+ with fdatacols.frowstate.getitempo(index)^ do begin
+  font:= replacebits(value + 1,font,rowstatemask);
+ end;
  rowchanged(index);
+end;
+
+function tcustomgrid.getrowreadonlystate(index: integer): boolean;
+begin
+ result:= fdatacols.frowstate.getitempo(index)^.font and $80 <> 0;
+end;
+
+procedure tcustomgrid.setrowreadonlystate(const index: integer;
+               const avalue: boolean);
+begin
+ with fdatacols.frowstate.getitempo(index)^ do begin
+  if avalue then begin
+   font:= font or $80;
+  end
+  else begin
+   font:= font and not $80;
+  end;
+  if index = row then begin
+   checkrowreadonlystate;
+  end;
+ end;
+end;
+
+procedure tcustomgrid.checkrowreadonlystate;
+begin
+ if (row >= 0) and rowreadonlystate[row] then begin
+  include(fstate,gs_rowreadonly);
+ end
+ else begin
+  exclude(fstate,gs_rowreadonly);
+ end;
 end;
 
 procedure tcustomgrid.setdragcontroller(const avalue: tdragcontroller);
@@ -10505,7 +10543,6 @@ end;
 constructor tcustomstringgrid.create(aowner: tcomponent);
 begin
  inherited;
-// datarowlinewidth:= 0;
  feditor:= tinplaceedit.create(self,iedit(self));
 end;
 
@@ -10562,7 +10599,8 @@ end;
 procedure tcustomstringgrid.setupeditor(const acell: gridcoordty);
 begin
  feditor.setup(items[acell],0,false,cellrect(acell,cil_inner),
-                    cellrect(acell,cil_paint),nil,nil,fdatacols[acell.col].rowfont(acell.row));
+                    cellrect(acell,cil_paint),nil,nil,
+                    fdatacols[acell.col].rowfont(acell.row));
  feditor.textflags:= tstringcol(fdatacols[acell.col]).textflags;
  feditor.textflagsactive:= tstringcol(fdatacols[acell.col]).ftextflagsactive;
  feditor.dofocus;
@@ -10576,6 +10614,14 @@ begin
  setupeditor(ffocusedcell);
 end;
 
+procedure tcustomstringgrid.checkrowreadonlystate;
+begin
+ inherited;
+ if isdatacell(ffocusedcell) then begin
+  setupeditor(ffocusedcell);
+ end;
+end;
+
 procedure tcustomstringgrid.docellevent(var info: celleventinfoty);
 begin
  inherited;
@@ -10585,11 +10631,6 @@ begin
     setupeditor(newcell);
    end;
    cek_exit: begin
-   {
-    if (sco_edited in fdatacols[cellbefore.col]) and not (oe_readonly in feditor.optionsedit) then begin
-     items[cellbefore]:= feditor.text;
-    end;
-   }
     feditor.dodefocus;
    end;
   end;
@@ -10842,7 +10883,8 @@ var
  mstr1: msestring;
  strcol: tcustomstringcol;
 begin
- if  isdatacell(ffocusedcell) and not (oe_readonly in feditor.optionsedit) then begin
+ if  isdatacell(ffocusedcell) 
+                  and not (oe_readonly in feditor.optionsedit) then begin
   strcol:= datacols[ffocusedcell.col];
   if cos_edited in strcol.fstate then begin
    mstr1:= feditor.text;
@@ -10889,7 +10931,7 @@ function tcustomstringgrid.getoptionsedit: optionseditty;
 begin
  result:= [oe_exitoncursor];
  with tstringcol(fdatacols[ffocusedcell.col]) do begin
-  if (ffocusedcell.col < 0) or (co_readonly in foptions) then begin
+  if (ffocusedcell.col < 0) or isreadonly{(co_readonly in foptions)} then begin
    include(result,oe_readonly);
   end;
   stringcoltooptionsedit(foptionsedit,result);

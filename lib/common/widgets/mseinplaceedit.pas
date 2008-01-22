@@ -126,9 +126,10 @@ type
    constructor create(aowner: twidget; editintf: iedit; istextedit: boolean = false);
    destructor destroy; override;
    procedure setup(const text: msestring; cursorindex: integer; shift: boolean;
-              const atextrect,aclientrect: rectty; const format: formatinfoarty = nil;
-              const tabulators: tcustomtabulators = nil; const font: tfont = nil;
-              noinvalidate: boolean = false);
+              const atextrect,aclientrect: rectty;
+              const format: formatinfoarty = nil;
+              const tabulators: tcustomtabulators = nil;
+              const font: tfont = nil; noinvalidate: boolean = false);
    procedure updatepos(const atextrect,aclientrect: rectty);
    procedure setscrollvalue(const avalue: real; const horz: boolean);
    property font: tfont read finfo.font write setfont;
