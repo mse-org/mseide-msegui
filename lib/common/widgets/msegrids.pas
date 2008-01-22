@@ -1234,7 +1234,7 @@ end;
    procedure setzebra_start(const avalue: integer);
    procedure setzebra_height(const avalue: integer);
    procedure setzebra_step(const avalue: integer);
-   function getrowreadonlystate(index: integer): boolean;
+   function getrowreadonlystate(const index: integer): boolean;
    procedure setrowreadonlystate(const index: integer; const avalue: boolean);
   protected
    ffocuscount: integer;
@@ -1524,7 +1524,7 @@ end;
    property rowfonts: trowfontarrayprop read frowfonts write setrowfonts;
    property rowfontstate[index: integer]: rowstatenumty read getrowfontstate 
                         write setrowfontstate;  //default = -1
-   property rowreadonlystate[index: integer]: boolean read getrowreadonlystate 
+   property rowreadonlystate[const index: integer]: boolean read getrowreadonlystate
                         write setrowreadonlystate;
    property zebra_color: colorty read fzebra_color write setzebra_color default cl_infobackground;
    property zebra_start: integer read fzebra_start write setzebra_start default 0;
@@ -10255,7 +10255,7 @@ begin
  rowchanged(index);
 end;
 
-function tcustomgrid.getrowreadonlystate(index: integer): boolean;
+function tcustomgrid.getrowreadonlystate(const index: integer): boolean;
 begin
  result:= fdatacols.frowstate.getitempo(index)^.font and $80 <> 0;
 end;

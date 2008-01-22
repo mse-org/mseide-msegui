@@ -50,7 +50,7 @@ type
    procedure setcaption(const avalue: msestring); override;
   public
    constructor create(const aowner: tcustomitemlist = nil;
-              const aparent: ttreelistitem = nil); override; overload;
+              const aparent: ttreelistitem = nil); overload; override;
    constructor create(const isnode: boolean); overload;
    property info: storedcomponentinfoty read finfo write setinfo;
    property compclass: ansistring read finfo.compclass write finfo.compclass;

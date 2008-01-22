@@ -3347,7 +3347,7 @@ end;
 procedure ttreeitemeditlist.setitems(const index: integer;
                const avalue: ttreelistedititem);
 begin
- inherited;
+ inherited setitems(index,avalue);
 end;
 
 { trecordfieldedit }
