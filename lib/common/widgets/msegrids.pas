@@ -359,7 +359,8 @@ type
   rowrange: cellaxisrangety;
  end;
 
- colstatety = ({cos_hasselection,}cos_selected,cos_noinvalidate,cos_edited);
+ colstatety = ({cos_hasselection,}cos_selected,cos_noinvalidate,cos_edited,
+                cos_readonlyupdating);
  colstatesty = set of colstatety;
 
  tcolselectfont = class(tparentfont)
@@ -518,6 +519,7 @@ type
    procedure docellevent(var info: celleventinfoty); virtual;
    function getcursor: cursorshapety; virtual;
    function getdatastatname: msestring;
+   procedure coloptionstoeditoptions(var dest: optionseditty);
   public
    constructor create(const agrid: tcustomgrid;
                      const aowner: tgridarrayprop); override;
@@ -4324,6 +4326,12 @@ begin
  else begin
   result:= gridvaluevarname + inttostr(ident);
  end;
+end;
+
+procedure tdatacol.coloptionstoeditoptions(var dest: optionseditty);
+begin
+ updatebit(cardinal(dest),ord(oe_readonly),isreadonly);
+ updatebit(cardinal(dest),ord(oe_savevalue),co_savevalue in foptions);
 end;
 
 procedure tdatacol.dostatread(const reader: tstatreader);

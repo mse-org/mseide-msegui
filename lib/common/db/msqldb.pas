@@ -552,7 +552,9 @@ type
   protected
    FTableName: string;
    FReadOnly: boolean;
-   fprimarykeyfield: tfield;      
+   fprimarykeyfield: tfield;                   
+   procedure settransactionwrite(const avalue: tmdbtransaction); override;
+   procedure checkpendingupdates; virtual;
    procedure notification(acomponent: tcomponent; operation: toperation); override;   
    // abstract & virtual methods of TBufDataset
    function Fetch : boolean; override;
@@ -1674,8 +1676,8 @@ begin
  if not bo1 then begin
   closedatasets; //close disconnected
  end;
- FreeAndNil(FParams);
  inherited Destroy;
+ FreeAndNil(FParams);
  freeandnil(ftrans);
 end;
 
@@ -3266,6 +3268,14 @@ begin
  result:= tsqltransaction(inherited transactionwrite);
 end;
 
+procedure TSQLQuery.settransactionwrite(const avalue: tmdbtransaction);
+begin
+ if avalue <> ftransactionwrite then begin
+  checkpendingupdates;
+ end;
+ inherited;
+end;
+
 procedure TSQLQuery.setsqltransactionwrite(const avalue: tsqltransaction);
 begin
  inherited transactionwrite:= avalue;
@@ -3311,6 +3321,11 @@ begin
  else begin
   result:= -1;
  end;
+end;
+
+procedure TSQLQuery.checkpendingupdates;
+begin
+ //dummy
 end;
 
 { TSQLCursor }

@@ -1546,6 +1546,7 @@ type
    procedure dodeleterow(const sender: tobject); override;
    procedure beforefocuscell(const cell: gridcoordty;
                              const selectaction: focuscellactionty); override;
+   procedure coloptionstoeditoptions(var dest: optionseditty);
 
   public
    constructor create(aowner: tcomponent); override;
@@ -5271,11 +5272,13 @@ procedure tgriddatalink.doupdaterowdata(const row: integer);
   if field.isnull then begin
    fgrid.rowcolorstate[arow]:= -1;
    fgrid.rowfontstate[arow]:= -1;
+   fgrid.rowreadonlystate[arow]:= false;
   end
   else begin
    int1:= field.asinteger;
-   fgrid.rowcolorstate[arow]:= rowstatenumty(int1 and $ff);
-   fgrid.rowfontstate[arow]:= rowstatenumty((int1 shr 8) and $ff);
+   fgrid.rowcolorstate[arow]:= rowstatenumty(int1 and $7f);
+   fgrid.rowreadonlystate[arow]:= rowstatenumty(int1 and $80) <> 0;
+   fgrid.rowfontstate[arow]:= rowstatenumty((int1 shr 8) and $7f);
   end;
  end;
  
@@ -7082,6 +7085,11 @@ end;
 function tcustomdbstringgrid.getdbindicatorcol: integer;
 begin
  result:= fixcols.dbindicatorcol;
+end;
+
+procedure tcustomdbstringgrid.coloptionstoeditoptions(var dest: optionseditty);
+begin
+ //dummy
 end;
 
 { tlbdropdowncol }

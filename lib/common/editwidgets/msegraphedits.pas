@@ -1562,7 +1562,7 @@ end;
 
 procedure tgraphdataedit.updatecoloptions(var aoptions: coloptionsty);
 begin
- coloptionstoeditoptions(aoptions,foptionsedit);
+ fgridintf.coloptionstoeditoptions(foptionsedit);
 end;
 
 procedure tgraphdataedit.statdataread;

@@ -33,6 +33,7 @@ type
    function getoptionsedit: optionseditty;
    function getoptionsdb: optionseditdbty;
    procedure setfirstclick;
+   procedure setreadonly(const avalue: boolean);
    function createdatalist(const sender: twidgetcol): tdatalist; virtual;
    function getdatatyp: datatypty;
    function getdefaultvalue: pointer;
@@ -293,6 +294,11 @@ end;
 
 procedure tcustomdataimage.aftercelldragevent(var ainfo: draginfoty;
                const arow: integer; var handled: boolean);
+begin
+ //dummy
+end;
+
+procedure tcustomdataimage.setreadonly(const avalue: boolean);
 begin
  //dummy
 end;

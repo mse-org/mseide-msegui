@@ -31,6 +31,7 @@ type
   procedure changed;
   function empty(index: integer): boolean;
   procedure updateeditoptions(var aoptions: optionseditty);
+  procedure coloptionstoeditoptions(var dest: optionseditty);
   function showcaretrect(const arect: rectty; const aframe: tcustomframe): pointty;
   procedure widgetpainted(const canvas: tcanvas);
   function nullcheckneeded(const newfocus: twidget): boolean;
@@ -63,6 +64,7 @@ type
   procedure updatecoloptions(var aoptions: coloptionsty);
   procedure statdataread;
   procedure griddatasourcechanged;
+  procedure setreadonly(const avalue: boolean);
  end;
 
  twidgetcol = class(tdatacol,iwidgetgrid)
@@ -233,6 +235,7 @@ type
    procedure clientmouseevent(var info: mouseeventinfoty); override;
    procedure dokeydown(var info: keyeventinfoty); override;
    procedure doexit; override;
+   procedure checkrowreadonlystate; override;
 
    function getcontainer: twidget; override;
    function getchildwidgets(const index: integer): twidget; override;
@@ -346,7 +349,7 @@ type
    constructor create(owner: twidgetcol); reintroduce;
  end;
 
-procedure coloptionstoeditoptions(const source: coloptionsty; var dest: optionseditty);
+//procedure coloptionstoeditoptions(const source: coloptionsty; var dest: optionseditty);
 procedure gridwidgetfontheightdelta(const sender: twidget; const gridintf: iwidgetgrid;
                         const delta: integer);
 
@@ -1075,17 +1078,12 @@ begin
  end;
 end;
 
-procedure coloptionstoeditoptions(const source: coloptionsty; var dest: optionseditty);
-begin
- updatebit(cardinal(dest),ord(oe_readonly),co_readonly in source);
- updatebit(cardinal(dest),ord(oe_savevalue),co_savevalue in source);
-end;
-
 procedure twidgetcol.updateeditoptions(var aoptions: optionseditty);
 begin
-// exclude(aoptions,oe_linebreak); //not sure about
- updatebit(cardinal(foptions),ord(co_readonly),oe_readonly in aoptions);
- updatebit(cardinal(foptions),ord(co_savevalue),oe_savevalue in aoptions);
+ if not (cos_readonlyupdating in fstate) then begin
+  updatebit(cardinal(foptions),ord(co_readonly),oe_readonly in aoptions);
+  updatebit(cardinal(foptions),ord(co_savevalue),oe_savevalue in aoptions);
+ end;
 end;
 
 function twidgetcol.showcaretrect(const arect: rectty;
@@ -2460,6 +2458,20 @@ procedure tcustomwidgetgrid.doexit;
 begin
  if canclose(nil) then begin
   inherited;
+ end;
+end;
+
+procedure tcustomwidgetgrid.checkrowreadonlystate;
+begin
+ inherited;
+ if isdatacell(ffocusedcell) then begin
+  with datacols[ffocusedcell.col] do begin
+   if fintf <> nil then begin
+    include(fstate,cos_readonlyupdating);
+    fintf.setreadonly(isreadonly);
+    exclude(fstate,cos_readonlyupdating);
+   end;
+  end;
  end;
 end;
 

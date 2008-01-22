@@ -1202,7 +1202,7 @@ end;
 
 procedure tdataedit.updatecoloptions(var aoptions: coloptionsty);
 begin
- coloptionstoeditoptions(aoptions,foptionsedit);
+ fgridintf.coloptionstoeditoptions(foptionsedit);
 end;
 
 procedure tdataedit.setoptionsedit(const avalue: optionseditty);
@@ -1580,12 +1580,15 @@ end;
 
 procedure tdataedit.setreadonly(const avalue: boolean);
 begin
- if avalue then begin
-  optionsedit:= optionsedit + [oe_readonly];
- end
- else begin
-  optionsedit:= optionsedit - [oe_readonly];
- end;  
+ if avalue <> (oe_readonly in foptionsedit) then begin
+  if avalue then begin
+   optionsedit:= optionsedit + [oe_readonly];
+  end
+  else begin
+   optionsedit:= optionsedit - [oe_readonly];
+  end;  
+  setupeditor;
+ end;
 end;
 
 function tdataedit.seteditfocus: boolean;

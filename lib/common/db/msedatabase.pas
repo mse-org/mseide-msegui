@@ -792,8 +792,9 @@ end;
 Destructor tmdbtransaction.Destroy;
 
 begin
-  Database:=Nil;
+  active:= false;
   RemoveDatasets;
+  Database:=Nil;
 //  FDatasets.Free;
   Inherited;
 end;
@@ -802,11 +803,11 @@ procedure tmdbtransaction.RemoveDataSets;
 var 
  int1: integer;
 begin
- for int1:= high(fdatasets) downto 0 do begin
-  fdatasets[int1].settransaction(nil);
- end;
  for int1:= high(fwritedatasets) downto 0 do begin
   fwritedatasets[int1].settransactionwrite(nil);
+ end;
+ for int1:= high(fdatasets) downto 0 do begin
+  fdatasets[int1].settransaction(nil);
  end;
 end;
 {

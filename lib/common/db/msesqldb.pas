@@ -59,8 +59,8 @@ type
    function getetstatementtype: TStatementType;
    procedure setstatementtype(const avalue: TStatementType);
    procedure checkcanupdate;
-   procedure checkpendingupdates;
   protected
+   procedure checkpendingupdates; override;
    procedure setactive(avalue: boolean); override;
    procedure afterapply; override;
    procedure updateindexdefs; override;
@@ -248,8 +248,8 @@ end;
 
 destructor tmsesqltransaction.destroy;
 begin
- fcontroller.free;
  inherited;
+ fcontroller.free;
 end;
 
 function tmsesqltransaction.getactive: boolean;

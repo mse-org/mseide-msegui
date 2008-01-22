@@ -80,6 +80,7 @@ type
    procedure colchanged;
    function gettabulators: ttabulators;
    procedure settabulators(const Value: ttabulators);
+   procedure setreadonly(const avalue: boolean);
   protected
    fgridintf: iwidgetgrid;
    fupdating: integer;
@@ -524,7 +525,7 @@ end;
 
 procedure tcustomtextedit.updatecoloptions(var aoptions: coloptionsty);
 begin
- coloptionstoeditoptions(aoptions,foptionsedit);
+ fgridintf.coloptionstoeditoptions(foptionsedit);
 end;
 
 procedure tcustomtextedit.statdataread;
@@ -1889,6 +1890,16 @@ procedure tcustomtextedit.aftercelldragevent(var ainfo: draginfoty;
                const arow: integer; var handled: boolean);
 begin
  //dummy
+end;
+
+procedure tcustomtextedit.setreadonly(const avalue: boolean);
+begin
+ if avalue then begin
+  optionsedit:= optionsedit + [oe_readonly];
+ end
+ else begin
+  optionsedit:= optionsedit - [oe_readonly];
+ end;  
 end;
 
 { tundotextedit }
