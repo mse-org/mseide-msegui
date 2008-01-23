@@ -36,6 +36,12 @@ type
    procedure edit; override;
  end;
  
+ tzcatalogpropertyeditor = class(tstringpropertyeditor)
+  protected
+   function getdefaultstate: propertystatesty; override;
+   function getvalues: msestringarty; override;
+ end;
+
 procedure Register;
 begin
  registercomponents('Zeos',[TZConnection, tmsezreadonlyquery, tmsezquery,
@@ -61,6 +67,10 @@ begin
                       tsqlpropertyeditor);
  registerpropertyeditor(typeinfo(tstrings),TZSqlProcessor,'RefreshSQL',
                       tsqlpropertyeditor);
+ registerpropertyeditor(typeinfo(string),TZConnection,'Catalog',
+                      tzcatalogpropertyeditor);
+ registerpropertyeditor(typeinfo(boolean),TZConnection,'Connected',
+                      tvolatilebooleanpropertyeditor);
 end;
 
 { tzquerysqlpropertyeditor }
@@ -136,6 +146,33 @@ begin
  list1:= tstringlist.create;
  try
   tzconnection(fprops[0].instance).getprotocolnames(list1);
+  setlength(result,list1.count);
+  for int1:= 0 to high(result) do begin
+   result[int1]:= list1[int1];
+  end;
+ finally
+  list1.free;
+ end;
+end;
+
+{ tzcatalogpropertyeditor }
+
+function tzcatalogpropertyeditor.getdefaultstate: propertystatesty;
+begin
+ result:= inherited getdefaultstate;
+ if tzconnection(fprops[0].instance).connected then begin
+  result:= result + [ps_valuelist,ps_sortlist];
+ end;
+end;
+
+function tzcatalogpropertyeditor.getvalues: msestringarty;
+var
+ list1: tstringlist;
+ int1: integer;
+begin
+ list1:= tstringlist.create;
+ try
+  tzconnection(fprops[0].instance).getcatalognames(list1);
   setlength(result,list1.count);
   for int1:= 0 to high(result) do begin
    result[int1]:= list1[int1];

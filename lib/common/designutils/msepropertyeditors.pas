@@ -214,6 +214,11 @@ type
    function getvalue: msestring; override;
    function getvalues: msestringarty; override;
  end;
+ 
+ tvolatilebooleanpropertyeditor = class(tbooleanpropertyeditor)
+  protected
+   function getdefaultstate: propertystatesty; override;
+ end;
 
  trealpropertyeditor = class(tpropertyeditor)
   public
@@ -4080,6 +4085,13 @@ end;
 function trefreshstringpropertyeditor.getdefaultstate: propertystatesty;
 begin
  result:= inherited getdefaultstate + [ps_refresh];
+end;
+
+{ tvolatilebooleanpropertyeditor }
+
+function tvolatilebooleanpropertyeditor.getdefaultstate: propertystatesty;
+begin
+ result:= inherited getdefaultstate + [ps_volatile];
 end;
 
 initialization
