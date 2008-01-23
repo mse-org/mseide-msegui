@@ -43,7 +43,8 @@ type
                    ow_noparentshortcut, //do not react to shortcuts from parent
                    ow_canclosenil,      //canclose calls canclose(nil)
                    ow_mousetransparent,ow_mousewheel,ow_noscroll,ow_destroywidgets,
-                   ow_hinton,ow_hintoff,ow_multiplehint,ow_timedhint,
+                   ow_hinton,ow_hintoff,ow_disabledhint,ow_multiplehint,
+                   ow_timedhint,
                    ow_fontglyphheight, 
                    //track font.glyphheight, 
                    //create fonthighdelta and childscaled events
@@ -1608,6 +1609,7 @@ type
    fcaret: tcaret;
    fmousecapturewidget: twidget;
    fmousewidget: twidget;
+   fmousehintwidget: twidget;
    fkeyboardcapturewidget: twidget;
    fclientmousewidget: twidget;
    fhintedwidget: twidget;
@@ -11245,6 +11247,12 @@ begin
    end;
    if not (hfl_custom in fhintinfo.flags) then begin
     widget1:= fmousewidget;
+//    widget1:= fmousehintwidget;
+//    widget1:= window.owner.widgetatpos(info.pos);
+//    while (widget1 <> nil) and not (widget1.enabled{ or 
+//                (ow_disabledhint in widget1.foptionswidget)}) do begin
+//     widget1:= widget1.parentwidget;
+//    end;
     if widget1 <> nil then begin
      if widget1.fframe <> nil then begin
       with widget1.fframe do begin
@@ -12152,6 +12160,9 @@ begin
  if fmousewidget = widget then begin
   setmousewidget(nil);
  end;
+ if fmousehintwidget = widget then begin
+  fmousehintwidget:= nil;
+ end;
  if fhintforwidget = widget then begin
   deactivatehint;
  end;
@@ -12683,15 +12694,10 @@ procedure tguiapplication.showhint(const sender: twidget; const hint: msestring;
                       );
 begin
  deactivatehint;
-// if (sender = nil) or not sender.focused then begin
-//  fhintedwidget:= nil;
-// end
-// else begin
-  fhintedwidget:= sender;
-// end;
+ fhintedwidget:= sender;
  with fhintinfo do begin
   mouserefpos:= fmouse.pos;
-  flags:= {[hfl_custom] +} aflags;
+  flags:= aflags;
   caption:= hint;
   if ashowtime < 0 then begin
    if ow_timedhint in sender.foptionswidget then begin

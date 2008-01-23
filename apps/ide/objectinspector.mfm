@@ -22,9 +22,8 @@ object objectinspectorfo: tobjectinspectorfo
   options = [fo_savepos, fo_savestate]
   statfile = mainfo.projectstatfile
   caption = 'Object Inspector'
-  icon.transparentcolor = -2147483648
+  icon.transparentcolor = -2147483642
   icon.options = [bmo_masked]
-  icon.transparency = -2147483648
   icon.image = {
     00000000020000001800000018000000CC000000000000000000000000000000
     0000000000000000000000000000000000000000C0C0C03400FCF804C0C0C013
@@ -74,8 +73,6 @@ object objectinspectorfo: tobjectinspectorfo
     taborder = 1
     popupmenu = tpopupmenu1
     optionsgrid = [og_colsizing, og_colmoving, og_focuscellonenter, og_colchangeontabkey]
-    fixcols.coloractive = -2147483648
-    fixrows.coloractive = -2147483648
     rowcolors.count = 1
     rowcolors.items = (
       16777202
@@ -83,53 +80,45 @@ object objectinspectorfo: tobjectinspectorfo
     rowfonts.count = 6
     rowfonts.items = <    
       item
-        colorshadow = -2147483648
         name = 'stf_default'
         xscale =  1.0000000000000000E+0000
         dummy = 0
       end    
       item
         color = 32768
-        colorshadow = -2147483648
         name = 'stf_default'
         xscale =  1.0000000000000000E+0000
         dummy = 0
       end    
       item
         color = 32768
-        colorshadow = -2147483648
         name = 'stf_default'
         xscale =  1.0000000000000000E+0000
         dummy = 0
       end    
       item
         color = -1610612723
-        colorshadow = -2147483648
         name = 'stf_default'
         xscale =  1.0000000000000000E+0000
         dummy = 0
       end    
       item
-        colorshadow = -2147483648
         style = [fs_bold]
         name = 'stf_default'
         xscale =  1.0000000000000000E+0000
         dummy = 0
       end    
       item
-        colorshadow = -2147483648
         style = [fs_bold]
         name = 'stf_default'
         xscale =  1.0000000000000000E+0000
         dummy = 0
       end>
     datacols.count = 2
-    datacols.coloractive = -2147483648
     datacols.items = <    
       item
         linecolor = -1610612731
         linecolorfix = -1610612733
-        coloractive = -2147483648
         width = 90
         options = [co_readonly, co_drawfocus, co_proportional, co_savestate, co_rowfont, co_rowcolor, co_zebracolor]
         onshowhint = col0onshowhint
@@ -137,7 +126,6 @@ object objectinspectorfo: tobjectinspectorfo
       end    
       item
         linecolorfix = -1610612733
-        coloractive = -2147483648
         width = 148
         rowfontoffset = 4
         options = [co_fill, co_savestate, co_rowfont, co_zebracolor]
@@ -185,13 +173,11 @@ object objectinspectorfo: tobjectinspectorfo
       frame.localprops = [frl_levelo, frl_colorclient]
       frame.button.width = 15
       frame.button.color = -1879048187
-      frame.button.options = [fbo_invisible]
       frame.buttons.count = 2
       frame.buttons.items = <      
         item
           width = 15
           color = -1879048187
-          options = [fbo_invisible]
         end      
         item
           width = 15
@@ -202,7 +188,6 @@ object objectinspectorfo: tobjectinspectorfo
       taborder = 2
       visible = False
       optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_forcereturncheckvalue, oe_eatreturn, oe_resetselectonexit, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_savestate]
-      font.colorshadow = -2147483648
       font.name = 'stf_default'
       font.xscale =  1.0000000000000000E+0000
       font.dummy = 0
@@ -228,7 +213,8 @@ object objectinspectorfo: tobjectinspectorfo
     bounds_cx = 19
     bounds_cy = 18
     anchors = [an_top, an_right]
-    state = [as_disabled, as_localdisabled, as_localcaption, as_localonexecute]
+    hint = 'Show component editor.'
+    state = [as_disabled, as_localdisabled, as_localcaption, as_localhint, as_localonexecute]
     caption = 'ED'
     onexecute = compeditonexecute
     reffontheight = 14

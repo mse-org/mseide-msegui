@@ -1391,7 +1391,10 @@ begin
   countchange(int2);
   if not (ns_noowner in fstate) then begin
    for int1:= 0 to acount-1 do begin
-    aitems[int1].Free;
+    with aitems[int1] do begin
+     fowner:= nil;
+     Free;
+    end;
    end;
   end;
   if not adestroying then begin
