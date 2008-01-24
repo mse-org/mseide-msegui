@@ -20,7 +20,7 @@ unit msebufdataset;
  
 {$ifdef VER2_1_5} {$define mse_FPC_2_2} {$endif}
 {$ifdef VER2_2} {$define mse_FPC_2_2} {$endif}
-{$ifdef FPC}{$mode objfpc}{$h+}{$INTERFACES CORBA}{$endif}
+{$ifdef FPC}{$mode objfpc}{$h+}{$GOTO ON}{$INTERFACES CORBA}{$endif}
 
 interface 
 
