@@ -1392,7 +1392,9 @@ begin
   if not (ns_noowner in fstate) then begin
    for int1:= 0 to acount-1 do begin
     with aitems[int1] do begin
-     fowner:= nil;
+     if not adestroying then begin
+      setowner(nil);
+     end;
      Free;
     end;
    end;

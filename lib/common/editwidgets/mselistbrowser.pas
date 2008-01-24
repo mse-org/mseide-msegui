@@ -2935,7 +2935,7 @@ begin
      for int1:= findex + 1 to self.fcount - 1 do begin
       po1:= ptreelistitem(getitempo(int1));
       if ttreelistitem1(po1^).ftreelevel = 0 then begin
-       break;
+       break; //next root node
       end;
       po1^:= nil;
      end;
@@ -3076,6 +3076,7 @@ procedure ttreeitemeditlist.nodenotification(const sender: tlistitem;
  var
   int1,int2: integer;
   grid1: tcustomgrid;
+  po1: ptreelistedititematy;
  begin
   with ttreeitemedit(fowner) do begin
    if ttreelistitem1(sender).fcount > 0 then begin
@@ -3092,6 +3093,13 @@ procedure ttreeitemeditlist.nodenotification(const sender: tlistitem;
      decupdate;
      exclude(fstate,ies_updating);
      fintf.updateitemvalues(int2,int1);
+     int1:= int2+int1;
+     if int2 < fcount then begin
+      po1:= datapo;
+      for int1:= int1 to fcount - 1 do begin
+       po1^[int1].findex:= int1;
+      end;
+     end;
     finally
      exclude(fstate,ies_updating);
      fchangingnode:= nil;
