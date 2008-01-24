@@ -269,7 +269,8 @@ type
  
  tdirdropdownedit = class(tdropdownwidgetedit)
   protected
-   function createdropdownwidget(const atext: msestring): twidget; override;
+   procedure createdropdownwidget(const atext: msestring;
+                                     out awidget: twidget); override;
    function getdropdowntext(const awidget: twidget): msestring; override;
    procedure pathchanged(const sender: tobject);
    procedure doafterclosedropdown; override;
@@ -1751,10 +1752,11 @@ end;
 
 { tdirdropdownedit }
 
-function tdirdropdownedit.createdropdownwidget(const atext: msestring): twidget;
+procedure tdirdropdownedit.createdropdownwidget(const atext: msestring;
+                    out awidget: twidget);
 begin
- result:= tdirtreefo.create(nil);
- with tdirtreefo(result) do begin
+ awidget:= tdirtreefo.create(nil);
+ with tdirtreefo(awidget) do begin
   path:= atext;
   onpathchanged:= {$ifdef FPC}@{$endif}pathchanged;
   text:= path;

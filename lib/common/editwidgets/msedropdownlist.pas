@@ -125,7 +125,7 @@ type
  end;
 
  idropdownwidget = interface(idropdown)
-  function createdropdownwidget(const atext: msestring): twidget;
+  procedure createdropdownwidget(const atext: msestring; out awidget: twidget);
   function getdropdowntext(const awidget: twidget): msestring;
  end;
 
@@ -921,15 +921,21 @@ begin
 end;
 
 procedure tdropdownwidgetcontroller.internaldropdown;
+var
+ widget1: twidget;
 begin
  inherited;
  if fdropdownwidget = nil then begin
-  setlinkedvar(idropdownwidget(fintf).createdropdownwidget(fintf.geteditor.text),
-                  tmsecomponent(fdropdownwidget));
-   
-//  setlinkedcomponent(ievent(self),
-//   idropdownwidget(fintf).createdropdownwidget(fintf.geteditor.text),
-//            tmsecomponent(fdropdownwidget));
+  widget1:= nil;
+  try
+   idropdownwidget(fintf).createdropdownwidget(fintf.geteditor.text,widget1);
+   setlinkedvar(widget1,tmsecomponent(fdropdownwidget));
+  except
+   if widget1 <> nil then begin
+    widget1.release;
+   end;
+   raise;
+  end;
  end;
 end;
 

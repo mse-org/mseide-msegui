@@ -314,7 +314,8 @@ type
   protected
    function createdropdowncontroller: tcustomdropdowncontroller; override;
    //idropdownwidget
-   function createdropdownwidget(const atext: msestring): twidget; virtual; abstract;
+   procedure createdropdownwidget(const atext: msestring;
+                        out awidget: twidget); virtual; abstract;
    function getdropdowntext(const awidget: twidget): msestring; virtual; abstract;
   public
    property dropdown: tdropdownwidgetcontroller read getdropdown write setdropdown;
@@ -825,7 +826,7 @@ type
    procedure buttonaction(var action: buttonactionty; const buttonindex: integer);
    procedure dobeforedropdown;
    procedure doafterclosedropdown;
-   function createdropdownwidget(const atext: msestring): twidget;
+   procedure createdropdownwidget(const atext: msestring; out awidget: twidget);
    function getdropdowntext(const awidget: twidget): msestring;
   public
    constructor create(aowner: tcomponent); override;
@@ -3881,11 +3882,12 @@ begin
  //dummy
 end;
 
-function tcustomcalendardatetimeedit.createdropdownwidget(const atext: msestring): twidget;
+procedure tcustomcalendardatetimeedit.createdropdownwidget(
+         const atext: msestring; out awidget: twidget);
 var
  dat1: tdatetime;
 begin
- result:= tpopupcalendarfo.create(nil,fdropdown);
+ awidget:= tpopupcalendarfo.create(nil,fdropdown);
  dat1:= now;
  if trim(atext) <> '' then begin
   try
@@ -3893,7 +3895,7 @@ begin
   except
   end;
  end;
- tpopupcalendarfo(result).value:= dat1;
+ tpopupcalendarfo(awidget).value:= dat1;
 end;
 
 function tcustomcalendardatetimeedit.getdropdowntext(const awidget: twidget): msestring;
