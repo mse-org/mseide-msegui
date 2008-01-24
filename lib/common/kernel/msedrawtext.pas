@@ -794,7 +794,7 @@ var
  last: boolean;
  count: integer;
  defaultcolor,defaultcolorbackground: colorty;
- afontstyle,fontstylebefore: fontstylesty;
+ afontstyle,fontstylebefore,overridefontstyle: fontstylesty;
  grayed: boolean;
  formatactive: boolean;
  endindex: integer;
@@ -873,7 +873,7 @@ var
    if newinfos * fontstylemask <> [] then begin
     afontstyle:= afontstyle * fontstylesty(
           not {$ifdef FPC}longword{$else}byte{$endif}(newinfos)) + style.fontstyle;
-    font.style:= afontstyle;
+    font.style:= afontstyle + overridefontstyle;
    end;
    if (ni_selected in newinfos) then begin
     if (fs_selected in style.fontstyle) and not (tf_noselect in flags) then begin
@@ -952,6 +952,7 @@ begin                  //drawtext
    defaultcolorbackground:= font.colorbackground;
    fontstylebefore:= font.style;
    afontstyle:= fontstylebefore;
+   overridefontstyle:= afontstyle * [fs_bold,fs_italic,fs_underline];
    grayed:= tf_grayed in flags;
    with layoutinfo do begin
     underline:= descent div 2 + 1;
