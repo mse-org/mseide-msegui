@@ -1114,7 +1114,7 @@ type
                       //true if valid toplevelwindow with assigned winid
    function updaterect: rectty; //invalidated area, origin = clientpos
 
-   function canclose(const newfocus: twidget): boolean; virtual;
+   function canclose(const newfocus: twidget = nil): boolean; virtual;
    function canparentclose(const newfocus: twidget): boolean; overload;
                    //window.focusedwidget is first checked of it is descendant
    function canparentclose: boolean; overload;
@@ -1684,6 +1684,8 @@ type
    function waitterminated: boolean;   
 
    procedure showexception(e: exception; const leadingtext: string = ''); override;
+   procedure showasyncexception(e: exception; const leadingtext: string = '');
+                //messege posted in queue
    procedure errormessage(const amessage: msestring); override;
    procedure inithintinfo(var info: hintinfoty; const ahintedwidget: twidget);
    procedure showhint(const sender: twidget; const hint: msestring;
@@ -8832,7 +8834,7 @@ begin
  end;
 end;
 
-function twidget.canclose(const newfocus: twidget): boolean;
+function twidget.canclose(const newfocus: twidget = nil): boolean;
 var
  int1: integer;
 begin
@@ -11274,11 +11276,14 @@ begin
    if not (hfl_custom in fhintinfo.flags) then begin
     widget1:= fmousewidget;
 //    widget1:= fmousehintwidget;
-//    widget1:= window.owner.widgetatpos(info.pos);
-//    while (widget1 <> nil) and not (widget1.enabled{ or 
-//                (ow_disabledhint in widget1.foptionswidget)}) do begin
-//     widget1:= widget1.parentwidget;
-//    end;
+    if widget1 <> nil then begin
+     widget1:= widget1.widgetatpos(info.pos);
+             //search diabled child
+    end;
+    while (widget1 <> nil) and not (widget1.enabled or 
+                (ow_disabledhint in widget1.foptionswidget)) do begin
+     widget1:= widget1.parentwidget;
+    end;
     if widget1 <> nil then begin
      if widget1.fframe <> nil then begin
       with widget1.fframe do begin
@@ -12432,16 +12437,25 @@ begin
  end;
 end;
 
-procedure tguiapplication.showexception(e: exception; 
+procedure tguiapplication.showasyncexception(e: exception; 
                                   const leadingtext: string = '');
 var
  str1: ansistring;
 begin
  str1:= leadingtext + e.Message;
+ postevent(tasyncmessageevent.create(str1,'Exception'));
+end;
+
+procedure tguiapplication.showexception(e: exception; 
+                                  const leadingtext: string = '');
+var
+ str1: ansistring;
+begin
  if not ismainthread then begin
-  postevent(tasyncmessageevent.create(str1,'Exception'));
+  showasyncexception(e,leadingtext);
  end
  else begin
+  str1:= leadingtext + e.Message;
   showmessage(str1,'Exception');
  end;
 end;

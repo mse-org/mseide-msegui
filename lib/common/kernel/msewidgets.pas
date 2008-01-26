@@ -2076,10 +2076,10 @@ begin
     include(eventstate,es_processed);
     case wheel of
      mw_up: begin
-      scrollbar.pagedown;
+      scrollbar.wheeldown;
      end;
      mw_down: begin
-      scrollbar.pageup;
+      scrollbar.wheelup;
      end;
     end;
    end;

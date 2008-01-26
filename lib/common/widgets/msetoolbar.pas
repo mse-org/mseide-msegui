@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2006 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2008 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -1139,7 +1139,6 @@ begin
                             (ws1_designactive in fwidgetstate1) then begin
   with flayout do begin
    if updatemouseshapestate(cells,info,self) then begin
-//    shapeinfotobuttons;
    end;
    checkbuttonhint(self,info,fhintedbutton,flayout.cells,
           {$ifdef FPC}@{$endif}getbuttonhint,{$ifdef FPC}@{$endif}gethintpos);

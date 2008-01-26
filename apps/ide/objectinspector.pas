@@ -913,6 +913,14 @@ var
  acol: integer;
  int1: integer;
 begin
+ try
+  grid.canclose; //save pending edits
+ except
+  on e: exception do begin
+   grid.rowcount:= 0;
+   raise;
+  end;
+ end;
  acol:= grid.col;
  if acol < 0 then begin
   acol:= 1;

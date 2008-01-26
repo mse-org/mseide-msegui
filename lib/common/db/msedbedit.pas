@@ -1126,6 +1126,8 @@ type
    procedure rowdown(const action: focuscellactionty = fca_focusin); override;
    procedure pageup(const action: focuscellactionty = fca_focusin); override;
    procedure pagedown(const action: focuscellactionty = fca_focusin); override;
+   procedure wheelup(const action: focuscellactionty = fca_focusin); override;
+   procedure wheeldown(const action: focuscellactionty = fca_focusin);  override;
  end;
 
  idbdropdownlist = interface(idropdownlist)
@@ -1332,6 +1334,8 @@ type
    procedure rowdown(const action: focuscellactionty = fca_focusin); override;
    procedure pageup(const action: focuscellactionty = fca_focusin); override;
    procedure pagedown(const action: focuscellactionty = fca_focusin); override;
+   procedure wheelup(const action: focuscellactionty = fca_focusin); override;
+   procedure wheeldown(const action: focuscellactionty = fca_focusin);  override;
    procedure lastrow(const action: focuscellactionty = fca_focusin); override;
    procedure firstrow(const action: focuscellactionty = fca_focusin); override;
    property datasource: tdatasource read getdatasource write setdatasource;
@@ -1556,6 +1560,8 @@ type
    procedure rowdown(const action: focuscellactionty = fca_focusin); override;
    procedure pageup(const action: focuscellactionty = fca_focusin); override;
    procedure pagedown(const action: focuscellactionty = fca_focusin); override;
+   procedure wheelup(const action: focuscellactionty = fca_focusin); override;
+   procedure wheeldown(const action: focuscellactionty = fca_focusin); override;
    procedure lastrow(const action: focuscellactionty = fca_focusin); override;
    procedure firstrow(const action: focuscellactionty = fca_focusin); override;
    property datasource: tdatasource read getdatasource write setdatasource;
@@ -1666,6 +1672,8 @@ type
    procedure rowdown(const action: focuscellactionty = fca_focusin); override;
    procedure pageup(const action: focuscellactionty = fca_focusin); override;
    procedure pagedown(const action: focuscellactionty = fca_focusin); override;
+   procedure wheelup(const action: focuscellactionty = fca_focusin); override;
+   procedure wheeldown(const action: focuscellactionty = fca_focusin);  override;
  end;
   
  ilbdropdownlist = interface(idropdownlist)
@@ -4724,6 +4732,16 @@ begin
  fdatalink.MoveBy(-rowcount+1);
 end;
 
+procedure tdbdropdownlist.wheeldown(const action: focuscellactionty = fca_focusin);
+begin
+ fdatalink.MoveBy(wheelheight);
+end;
+
+procedure tdbdropdownlist.wheelup(const action: focuscellactionty = fca_focusin);
+begin
+ fdatalink.MoveBy(-wheelheight);
+end;
+
 procedure tdbdropdownlist.rowdown(const action: focuscellactionty = fca_focusin);
 begin
  fdatalink.MoveBy(1);
@@ -5748,6 +5766,8 @@ begin
     sbe_stepdown: rowup(fca_focusin);
     sbe_pageup: pagedown(fca_focusin);
     sbe_pagedown: pageup(fca_focusin);
+    sbe_wheelup: wheeldown(fca_focusin);
+    sbe_wheeldown: wheelup(fca_focusin);
     {sbe_thumbtrack,}sbe_valuechanged: begin end;
     sbe_thumbtrack,sbe_thumbposition: begin
      if (event <> sbe_thumbtrack) or (gdo_thumbtrack in foptions) then begin
@@ -6307,6 +6327,16 @@ end;
 procedure tcustomdbwidgetgrid.pageup(const action: focuscellactionty = fca_focusin);
 begin
  fdatalink.MoveBy(-rowcount+1);
+end;
+
+procedure tcustomdbwidgetgrid.wheeldown(const action: focuscellactionty = fca_focusin);
+begin
+ fdatalink.MoveBy(wheelheight);
+end;
+
+procedure tcustomdbwidgetgrid.wheelup(const action: focuscellactionty = fca_focusin);
+begin
+ fdatalink.MoveBy(-wheelheight);
 end;
 
 procedure tcustomdbwidgetgrid.rowdown(const action: focuscellactionty = fca_focusin);
@@ -6901,6 +6931,16 @@ end;
 procedure tcustomdbstringgrid.pageup(const action: focuscellactionty = fca_focusin);
 begin
  fdatalink.MoveBy(-rowcount+1);
+end;
+
+procedure tcustomdbstringgrid.wheeldown(const action: focuscellactionty = fca_focusin);
+begin
+ fdatalink.MoveBy(wheelheight);
+end;
+
+procedure tcustomdbstringgrid.wheelup(const action: focuscellactionty = fca_focusin);
+begin
+ fdatalink.MoveBy(-wheelheight);
 end;
 
 procedure tcustomdbstringgrid.rowdown(const action: focuscellactionty = fca_focusin);
@@ -7831,6 +7871,16 @@ end;
 procedure tlbdropdownlist.pageup(const action: focuscellactionty = fca_focusin);
 begin
  moveby(-rowcount+1);
+end;
+
+procedure tlbdropdownlist.wheeldown(const action: focuscellactionty = fca_focusin);
+begin
+ MoveBy(wheelheight);
+end;
+
+procedure tlbdropdownlist.wheelup(const action: focuscellactionty = fca_focusin);
+begin
+ MoveBy(-wheelheight);
 end;
 
 procedure tlbdropdownlist.rowdown(const action: focuscellactionty = fca_focusin);

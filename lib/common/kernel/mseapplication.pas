@@ -228,7 +228,8 @@ type
                    const caption: msestring = '';
                    const acancelaction: notifyeventty = nil;
                    const aexecuteaction: notifyeventty = nil): boolean; virtual;
-   procedure handleexception(sender: tobject; const leadingtext: string = '');
+   procedure handleexception(sender: tobject = nil; 
+                                       const leadingtext: string = '');
    procedure showexception(e: exception; const leadingtext: string = '');
                                   virtual; abstract;
    procedure errormessage(const amessage: msestring); virtual; abstract;

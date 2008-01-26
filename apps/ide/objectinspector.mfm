@@ -207,7 +207,7 @@ object objectinspectorfo: tobjectinspectorfo
     end
   end
   object compedit: tbutton
-    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_disabledhint, ow_timedhint, ow_fontglyphheight, ow_autoscale]
     bounds_x = 223
     bounds_y = 2
     bounds_cx = 19

@@ -70,14 +70,14 @@ object sourcefo: tsourcefo
     tab_sizemin = 60
     reffontheight = 14
     object tstockglyphbutton1: tstockglyphbutton
-      optionswidget = [ow_destroywidgets]
+      optionswidget = [ow_destroywidgets, ow_disabledhint, ow_timedhint]
       bounds_x = 383
       bounds_y = 0
       bounds_cx = 20
       bounds_cy = 20
       anchors = [an_top, an_right]
       taborder = 2
-      hint = 'Back in code navigation.'
+      hint = 'Step back in code navigation (Ctrl+LeftClick).'
       state = [as_disabled, as_localimagelist, as_localimagenr, as_localcolorglyph, as_localhint, as_localonexecute]
       glyph = stg_arrowleft
       action = navigbackact
@@ -85,7 +85,7 @@ object sourcefo: tsourcefo
       onexecute = navigback
     end
     object tstockglyphbutton2: tstockglyphbutton
-      optionswidget = [ow_destroywidgets]
+      optionswidget = [ow_destroywidgets, ow_disabledhint, ow_timedhint]
       bounds_x = 403
       bounds_y = 0
       bounds_cx = 20

@@ -1196,6 +1196,7 @@ end;
 
    fmouserefpos: pointty;
 
+   fwheelscrollheight: integer;
    procedure setframe(const avalue: tgridframe);
    function getframe: tgridframe;
    procedure setstatfile(const Value: tstatfile);
@@ -1367,7 +1368,8 @@ end;
                    //store edited value to grid
    procedure beforefocuscell(const cell: gridcoordty;
                              const selectaction: focuscellactionty); virtual;
-
+   function wheelheight: integer;
+   
    //idragcontroller
    function getdragrect(const apos: pointty): rectty; override;
    //iscrollbar
@@ -1419,6 +1421,8 @@ end;
    procedure rowdown(const action: focuscellactionty = fca_focusin); virtual;
    procedure pageup(const action: focuscellactionty = fca_focusin); virtual;
    procedure pagedown(const action: focuscellactionty = fca_focusin); virtual;
+   procedure wheelup(const action: focuscellactionty = fca_focusin); virtual;
+   procedure wheeldown(const action: focuscellactionty = fca_focusin); virtual;
    procedure lastrow(const action: focuscellactionty = fca_focusin); virtual;
    procedure firstrow(const action: focuscellactionty = fca_focusin); virtual;
 
@@ -1571,6 +1575,8 @@ end;
    property frame: tgridframe read getframe write setframe;
    property font: twidgetfont read getfont write setfont stored isfontstored;
    property onkeydown: keyeventty read fonkeydown write fonkeydown;
+   property wheelscrollheight: integer read fwheelscrollheight write
+                    fwheelscrollheight;
  end;
 
  tcellgrid = class(tcustomgrid)
@@ -6651,6 +6657,14 @@ begin
  end;
 end;
 
+function tcustomgrid.wheelheight: integer;
+begin
+ result:= rowsperpage-1;
+ if (fwheelscrollheight > 0) and (fwheelscrollheight < result) then begin
+  result:= fwheelscrollheight;
+ end;
+end;
+
 procedure tcustomgrid.scrollevent(sender: tcustomscrollbar; event: scrolleventty);
 begin
  if sender.tag = 1 then begin
@@ -6659,14 +6673,16 @@ begin
    sbe_stepdown: scrollrows(1);
    sbe_pageup: scrollrows(-(rowsperpage-1));
    sbe_pagedown: scrollrows(rowsperpage-1);
+   sbe_wheelup: scrollrows(-wheelheight);
+   sbe_wheeldown: scrollrows(wheelheight);
   end;
  end
  else begin
   case event of
    sbe_stepup: scrollleft;
    sbe_stepdown: scrollright;
-   sbe_pageup: scrollpageleft;
-   sbe_pagedown: scrollpageright;
+   sbe_pageup,sbe_wheelup: scrollpageleft;
+   sbe_pagedown,sbe_wheeldown: scrollpageright;
   end;
  end;
 end;
@@ -8476,6 +8492,34 @@ begin
  end;
  if int1 >= 0 then begin
   scrollrows(-(rowsperpage - 1));
+  focuscell(makegridcoord(ffocusedcell.col,int1),action);
+ end;
+end;
+
+procedure tcustomgrid.wheelup(const action: focuscellactionty = fca_focusin);
+var
+ int1: integer;
+begin
+ int1:= ffocusedcell.row - wheelheight;
+ if int1 < 0 then begin
+  int1:= 0;
+ end;
+ if int1 < frowcount then begin
+  scrollrows(wheelheight);
+  focuscell(makegridcoord(ffocusedcell.col,int1),action);
+ end;
+end;
+
+procedure tcustomgrid.wheeldown(const action: focuscellactionty = fca_focusin);
+var
+ int1: integer;
+begin
+ int1:= ffocusedcell.row + wheelheight;
+ if int1 > frowcount - 1 then begin
+  int1:= frowcount -1;
+ end;
+ if int1 >= 0 then begin
+  scrollrows(-wheelheight);
   focuscell(makegridcoord(ffocusedcell.col,int1),action);
  end;
 end;

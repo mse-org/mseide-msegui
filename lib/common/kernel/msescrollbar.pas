@@ -48,8 +48,9 @@ const
 type
  tcustomscrollbar = class;
 
- scrolleventty =  (sbe_valuechanged,sbe_stepup,sbe_stepdown,sbe_pageup,sbe_pagedown,
-                       sbe_thumbposition,sbe_thumbtrack);
+ scrolleventty =  (sbe_valuechanged,sbe_stepup,sbe_stepdown,
+                   sbe_pageup,sbe_pagedown,sbe_wheelup,sbe_wheeldown,
+                   sbe_thumbposition,sbe_thumbtrack);
 
  iscrollbar = interface
   function getwidget: twidget;
@@ -174,6 +175,8 @@ type
    procedure stepdown;
    procedure pageup;
    procedure pagedown;
+   procedure wheelup;
+   procedure wheeldown;
 
    property direction: graphicdirectionty read fdirection write setdirection
                                 default gd_right;
@@ -1027,6 +1030,22 @@ begin
   value:= fvalue + pagesize;
  end;
  fintf.scrollevent(self,sbe_pageup);
+end;
+
+procedure tcustomscrollbar.wheeldown;
+begin
+ if sbo_moveauto in foptions then begin
+  value:= fvalue - pagesize;
+ end;
+ fintf.scrollevent(self,sbe_wheeldown);
+end;
+
+procedure tcustomscrollbar.wheelup;
+begin
+ if sbo_moveauto in foptions then begin
+  value:= fvalue + pagesize;
+ end;
+ fintf.scrollevent(self,sbe_wheelup);
 end;
 
 procedure tcustomscrollbar.stepdown;
