@@ -2694,7 +2694,7 @@ begin
   componentevent(event);
  finally
   if destroyevent then begin
-   event.Free;
+   event.Free1;
   end;
  end;
 end;
@@ -2715,7 +2715,7 @@ begin
   end;
  finally
   if destroyevent then begin
-   event.Free;
+   event.Free1;
   end;
  end;
 end;

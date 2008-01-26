@@ -2365,7 +2365,7 @@ begin
   with xev.xclient do begin
    if (xtype = clientmessage) and (display = appdisp) and
            (message_type = mseclientmessageatom) then begin
-    tevent(data.l[0]).free;
+    tevent(data.l[0]).free1;
    end;
   end;
  end;

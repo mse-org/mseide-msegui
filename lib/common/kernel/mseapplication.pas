@@ -260,8 +260,11 @@ type
     //release mutex recursive if calling thread holds the mutex,
     //returns count for relockall
    procedure relockall(count: integer);
-   procedure synchronize(proc: objectprocty);
+   function synchronize(const proc: objectprocty;
+                       const quite: boolean = false): boolean;
+     //true if not aborted, quiet -> show no exceptions
    function ismainthread: boolean;
+   function islockthread: boolean;
    procedure waitforthread(athread: tmsethread); //does unlock-relock before waiting
    procedure wakeupmainthread;
    procedure langchanged; virtual;
@@ -285,6 +288,14 @@ var
 implementation
 uses
  msedatalist,msebits,msesysintf,msesysutils,msefileutils;
+
+type
+ tappsynchronizeevent = class(tsynchronizeevent)
+  private
+   fproc: objectprocty; 
+  protected
+   procedure execute; override;
+ end;
 
 var
  appinst: tcustomapplication;
@@ -859,30 +870,39 @@ begin
  if count > 0 then begin
   lock;
   dec(count);
+  inc(flockcount,count);
   while count > 0 do begin
    sys_mutexlock(fmutex);
    dec(count);
   end;
-  inc(flockcount,count);
   if ismainthread then begin
    dec(fcheckoverloadlock);
   end;
  end;
 end;
 
-procedure tcustomapplication.synchronize(proc: objectprocty);
+function tcustomapplication.synchronize(const proc: objectprocty;
+                                     const quite: boolean = false): boolean;
+var
+ event: tappsynchronizeevent;
 begin
- lock;
+ event:= tappsynchronizeevent.create(quite);
  try
-  proc;
+  event.fproc:= proc;
+  result:= synchronizeevent(event);
  finally
-  unlock;
+  event.free;
  end;
 end;
 
 function tcustomapplication.ismainthread: boolean;
 begin
  result:= sys_getcurrentthread = fthread;
+end;
+
+function tcustomapplication.islockthread: boolean;
+begin
+ result:= sys_getcurrentthread = flockthread;
 end;
 
 procedure tcustomapplication.waitforthread(athread: tmsethread);
@@ -918,7 +938,7 @@ end;
 procedure tcustomapplication.postevent(event: tevent);
 begin
  if csdestroying in componentstate then begin
-  event.free;
+  event.free1;
  end
  else begin
   if trylock then begin
@@ -926,7 +946,7 @@ begin
     flusheventbuffer;
     dopostevent(event);
    except
-    event.free;
+    event.free1;
     unlock;
     raise;
    end;
@@ -1086,7 +1106,9 @@ begin
    break;
   end;
  end;
- checksynchronize;
+ if ismainthread then begin
+  checksynchronize;
+ end;
 end;
 
 procedure tcustomapplication.createdatamodule(instanceclass: msecomponentclassty;
@@ -1183,6 +1205,13 @@ end;
 function tactivatorcontroller.getinstance: tobject;
 begin
  result:= fowner;
+end;
+
+{ tappsynchronizeevent }
+
+procedure tappsynchronizeevent.execute;
+begin
+ fproc;
 end;
 
 initialization

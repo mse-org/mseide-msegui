@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2006 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2008 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -26,6 +26,7 @@ type
 
 function integerenter(var avalue: integer; const amin,amax: integer;
          const text: msestring = ''; const acaption: msestring = ''): modalresultty;
+//threadsave
 implementation
 uses
  mseintegerenter_mfm;
@@ -35,21 +36,26 @@ function integerenter(var avalue: integer; const amin,amax: integer; const text:
 var
  fo: tintegerenterfo;
 begin
- fo:= tintegerenterfo.create(nil);
+ application.lock;
  try
-  with fo do begin
-   value.value:= avalue;
-   value.min:= amin;
-   value.max:= amax;
-   caption:= acaption;
-   lab.caption:= text;
-   result:= fo.show(true,nil);
-   if result = mr_ok then begin
-    avalue:= value.value;
+  fo:= tintegerenterfo.create(nil);
+  try
+   with fo do begin
+    value.value:= avalue;
+    value.min:= amin;
+    value.max:= amax;
+    caption:= acaption;
+    lab.caption:= text;
+    result:= fo.show(true,nil);
+    if result = mr_ok then begin
+     avalue:= value.value;
+    end;
    end;
+  finally
+   fo.Free;
   end;
  finally
-  fo.Free;
+  application.unlock;
  end;
 end;
 

@@ -14,7 +14,6 @@ object integerenterfo: tintegerenterfo
   container.bounds_cy = 88
   container.frame.dummy = 0
   options = [fo_screencentered, fo_closeonesc, fo_localshortcuts, fo_autoreadstat, fo_autowritestat]
-  icon.transparency = -2147483648
   moduleclassname = 'tmseform'
   object lab: tlabel
     optionswidget = [ow_mousewheel, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
@@ -28,7 +27,7 @@ object integerenterfo: tintegerenterfo
     reffontheight = 14
   end
   object ok: tbutton
-    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+    optionswidget = [ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
     bounds_x = 120
     bounds_y = 62
     bounds_cx = 50
@@ -42,7 +41,7 @@ object integerenterfo: tintegerenterfo
     reffontheight = 14
   end
   object cancel: tbutton
-    optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+    optionswidget = [ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
     bounds_x = 176
     bounds_y = 62
     bounds_cx = 50

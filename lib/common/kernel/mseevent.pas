@@ -35,7 +35,7 @@ type
                 ek_activate,ek_loaded,
                 ek_keypress,ek_keyrelease,ek_timer,ek_wakeup,
                 ek_release,ek_childscaled,ek_resize,
-                ek_dropdown,ek_async,ek_execute,ek_component,
+                ek_dropdown,ek_async,ek_execute,ek_component,ek_synchronize,
                 ek_dbedit,ek_dbupdaterowdata,ek_data,ek_objectdata,ek_mse,
                 ek_user);
 const
@@ -78,11 +78,13 @@ type
  pkeyeventinfoty = ^keyeventinfoty;
 
  tevent = class(tnullinterfacedobject)
+  private
   protected
    fkind: eventkindty;
   public
    constructor create(const akind: eventkindty);
    property kind: eventkindty read fkind;
+   procedure free1; virtual; //do nothing for ownedevents
  end;
 
  eventarty = array of tevent;
@@ -156,6 +158,11 @@ uses
 constructor tevent.create(const akind: eventkindty);
 begin
  fkind:= akind;
+end;
+
+procedure tevent.free1;
+begin
+ free;
 end;
 
 { tstringevent }

@@ -341,7 +341,7 @@ function filedialog(var afilenames: filenamearty;
            const imagelist: timagelist = nil;
            const ongetfileicon: getfileiconeventty = nil
                       ): modalresultty; overload;
-
+//theadsave
 function filedialog(var afilename: filenamety;
            const aoptions: filedialogoptionsty;
            const acaption: msestring;
@@ -358,6 +358,7 @@ function filedialog(var afilename: filenamety;
            const imagelist: timagelist = nil;
            const ongetfileicon: getfileiconeventty = nil
            ): modalresultty; overload;
+//theadsave
 
 procedure getfileicon(const info: fileinfoty; var imagelist: timagelist;
                             out imagenr: integer);
@@ -530,28 +531,33 @@ var
  dialog: tfiledialogfo;
  str1: msestring;
 begin
- dialog:= tfiledialogfo.create(nil);
- if acaption = '' then begin
-  with stockobjects do begin
-   if fdo_save in aoptions then begin
-    str1:= captions[sc_save];
-   end
-   else begin
-    str1:= captions[sc_open];
-   end;
-  end;
- end
- else begin
-  str1:= acaption;
- end;
+ application.lock;
  try
-  result:= filedialog1(dialog,afilenames,filterdesc,filtermask,
-           filterindex,filter,colwidth,
-           includeattrib,excludeattrib,history,historymaxcount,str1,aoptions,
-           adefaultext,imagelist,ongetfileicon);
-
+  dialog:= tfiledialogfo.create(nil);
+  if acaption = '' then begin
+   with stockobjects do begin
+    if fdo_save in aoptions then begin
+     str1:= captions[sc_save];
+    end
+    else begin
+     str1:= captions[sc_open];
+    end;
+   end;
+  end
+  else begin
+   str1:= acaption;
+  end;
+  try
+   result:= filedialog1(dialog,afilenames,filterdesc,filtermask,
+            filterindex,filter,colwidth,
+            includeattrib,excludeattrib,history,historymaxcount,str1,aoptions,
+            adefaultext,imagelist,ongetfileicon);
+ 
+  finally
+   dialog.Free;
+  end;
  finally
-  dialog.Free;
+  application.unlock;
  end;
 end;
 

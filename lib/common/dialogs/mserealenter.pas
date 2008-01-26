@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2006 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2008 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -26,6 +26,7 @@ type
 
 function realenter(var avalue: realty; const amin,amax: realty; const text: msestring = '';
                      const acaption: msestring = ''): modalresultty;
+//threadsave
 implementation
 uses
  mserealenter_mfm;
@@ -35,21 +36,26 @@ function realenter(var avalue: realty; const amin,amax: realty; const text: mses
 var
  fo: trealenterfo;
 begin
- fo:= trealenterfo.create(nil);
+ application.lock;
  try
-  with fo do begin
-   value.min:= amin;
-   value.max:= amax;
-   value.value:= avalue;
-   caption:= acaption;
-   lab.caption:= text;
-   result:= fo.show(true,nil);
-   if result = mr_ok then begin
-    avalue:= value.value;
+  fo:= trealenterfo.create(nil);
+  try
+   with fo do begin
+    value.min:= amin;
+    value.max:= amax;
+    value.value:= avalue;
+    caption:= acaption;
+    lab.caption:= text;
+    result:= fo.show(true,nil);
+    if result = mr_ok then begin
+     avalue:= value.value;
+    end;
    end;
+  finally
+   fo.Free;
   end;
  finally
-  fo.Free;
+  application.unlock;
  end;
 end;
 

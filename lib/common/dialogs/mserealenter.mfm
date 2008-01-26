@@ -14,7 +14,6 @@ object realenterfo: trealenterfo
   container.bounds_cy = 88
   container.frame.dummy = 0
   options = [fo_screencentered, fo_closeonesc, fo_localshortcuts, fo_autoreadstat, fo_autowritestat]
-  icon.transparency = -2147483648
   moduleclassname = 'tmseform'
   object lab: tlabel
     optionswidget = [ow_mousewheel, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]

@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2007 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2008 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -1866,6 +1866,16 @@ type
    fcaption: msestring;
   public
    constructor create(const amessage: msestring; const acaption: msestring);
+ end;
+ 
+ twidgetshowevent = class(tsynchronizeevent)
+  private
+   fwidget: twidget;
+   fmodalresult: modalresultty;
+   fmodal: boolean;
+   ftransientfor: twindow;
+  protected
+   procedure execute; override;
  end;
  
  tonkeyeventlist = class(tmethodlist)
@@ -5828,7 +5838,7 @@ begin
  try
   widgetevent(event);
  finally
-  event.Free;
+  event.Free1;
  end;
 end;
 
@@ -7690,8 +7700,24 @@ end;
 
 function twidget.show(const modal: boolean = false;
               const transientfor: twindow = nil): modalresultty;
+var
+ event: twidgetshowevent;
 begin
- result:= internalshow(modal,transientfor,false);
+ if not application.ismainthread then begin
+  event:= twidgetshowevent.create(false);
+  event.fwidget:= self;
+  event.fmodal:= modal;
+  event.ftransientfor:= transientfor;
+  try
+   synchronizeevent(event);
+   result:= event.fmodalresult;
+  finally
+   event.free;
+  end;  
+ end
+ else begin
+  result:= internalshow(modal,transientfor,false);
+ end;
 end;
 
 procedure twidget.clampinview(const arect: rectty; const bottomright: boolean);
@@ -9996,7 +10022,7 @@ begin
     try 
      appinst.processmouseevent(event1); //simulate mousemove
     finally
-     event1.free;
+     event1.free1;
     end;
    end;
   end;
@@ -10360,7 +10386,7 @@ begin
              (event.fwinid = fwindow.id) then begin
     invalidaterect(event.frect);
     appinst.eventlist[int1]:= nil;
-    event.free;
+    event.free1;
    end;
   end;
   internalupdate;
@@ -11381,7 +11407,7 @@ begin
  for int1:= 0 to eventlist.count - 1 do begin
   event:= tevent(eventlist[int1]);
   if (event <> nil) and (event.kind = ek_mousemove) then begin
-   event.free;
+   event.free1;
    eventlist[int1]:= nil;
   end;
  end;
@@ -11403,7 +11429,7 @@ begin
      ek_focusout: tcaret1(fcaret).remove;
     end;
     }
-    event.Free;
+    event.Free1;
     eventlist[int1]:= nil;
    end;
   end;
@@ -11627,6 +11653,9 @@ begin       //eventloop
    amodalwindow.internalactivate(false,true);
   end;
  
+  if not ismainthread then begin
+   raise exception.create('Eventloop must be in main thread.');
+  end;
  
   while not modalinfo.modalend and not terminated and 
                  not (aps_exitloop in fstate) do begin //main eventloop
@@ -11815,6 +11844,9 @@ begin       //eventloop
         ek_keypress,ek_keyrelease: begin
          processkeyevent(tkeyevent(event));
         end;
+        ek_synchronize: begin
+         tsynchronizeevent(event).deliver;
+        end;
         else begin
          if event is tobjectevent then begin
           with tobjectevent(event) do begin
@@ -11824,7 +11856,7 @@ begin       //eventloop
         end;
        end;
       finally
-       event.free;
+       event.free1;
       end;
      except
       handleexception(self);
@@ -13256,6 +13288,13 @@ constructor tmouseenterevent.create(const winid: winidty; const pos: pointty;
 begin
  inherited create(winid,false,mb_none,mw_none,pos,shiftstate,atimestamp);
  fkind:= ek_enterwindow;
+end;
+
+{ twidgetshowevent }
+
+procedure twidgetshowevent.execute;
+begin
+ fmodalresult:= fwidget.show(fmodal,ftransientfor);
 end;
 
 initialization

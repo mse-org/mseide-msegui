@@ -1295,7 +1295,7 @@ var
   if event is tcommevent then begin
    with tcommevent(event) do begin
     if not fpersistent then begin
-     free;
+     free1;
     end
     else begin
      if abort1 then begin
@@ -1306,7 +1306,7 @@ var
    end;
   end
   else begin
-   event.Free;
+   event.Free1;
   end;
  end;
 
@@ -1334,13 +1334,13 @@ begin
       process(self,bo1);
      finally
       if bo2 then begin
-       event.free;
+       event.free1;
       end;
      end;
     end;
    end
    else begin
-    event.Free;
+    event.Free1;
    end;
   end;
  until terminated;
@@ -1806,7 +1806,7 @@ begin
    answer:= '';
   end;
  finally
-  ev.Free;
+  ev.Free1;
  end;
 end;
 

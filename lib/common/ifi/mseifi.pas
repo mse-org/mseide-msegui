@@ -1280,7 +1280,7 @@ begin
   event:= tstringevent(waitevent);
   if event <> nil then begin
    str1:= event.data;
-   event.free;
+   event.free1;
    application.lock;
    try
     fondatareceived(str1);

@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2006 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2008 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -24,6 +24,7 @@ type
    cancel: tbutton;
  end;
 
+//functions below are threadsave
 function stringenter(var avalue: msestring; const text: msestring = '';
                                const acaption: msestring = ''): modalresultty;
 
@@ -39,19 +40,24 @@ function stringenter(var avalue: msestring; const text: msestring = '';
 var
  fo: tstringenterfo;
 begin
- fo:= tstringenterfo.create(nil);
+ application.lock;
  try
-  with fo do begin
-   value.value:= avalue;
-   caption:= acaption;
-   lab.caption:= text;
-   result:= fo.show(true,nil);
-   if result = mr_ok then begin
-    avalue:= value.value;
+  fo:= tstringenterfo.create(nil);
+  try
+   with fo do begin
+    value.value:= avalue;
+    caption:= acaption;
+    lab.caption:= text;
+    result:= fo.show(true,nil);
+    if result = mr_ok then begin
+     avalue:= value.value;
+    end;
    end;
+  finally
+   fo.Free;
   end;
  finally
-  fo.Free;
+  application.unlock;
  end;
 end;
 
@@ -59,21 +65,26 @@ function checkpassword(const password: msestring; var modalresult: modalresultty
 var
  fo: tstringenterfo;
 begin
- fo:= tstringenterfo.create(nil);
+ application.lock;
  try
-  with fo do begin
-   caption:= 'PASSWORD';
-   lab.caption:= 'Enter password:';
-   value.passwordchar:= '*';
-   value.value:= '';
-   modalresult:= fo.show(true,nil);
-   result:= (modalresult = mr_ok) and (password = value.value);
-   if not result and (modalresult = mr_ok) then begin
-    showerror('Invalid password!');
+  fo:= tstringenterfo.create(nil);
+  try
+   with fo do begin
+    caption:= 'PASSWORD';
+    lab.caption:= 'Enter password:';
+    value.passwordchar:= '*';
+    value.value:= '';
+    modalresult:= fo.show(true,nil);
+    result:= (modalresult = mr_ok) and (password = value.value);
+    if not result and (modalresult = mr_ok) then begin
+     showerror('Invalid password!');
+    end;
    end;
+  finally
+   fo.Free;
   end;
  finally
-  fo.Free;
+  application.unlock;
  end;
 end;
 

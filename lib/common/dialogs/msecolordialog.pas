@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2006 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2008 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -115,6 +115,7 @@ type
  end;
  
 function colordialog(var acolor: colorty): modalresultty;
+//threadsave
 
 implementation
 uses
@@ -127,23 +128,28 @@ var
  fo: tcolordialogfo;
  col1: rgbtriplety;
 begin
- fo:= tcolordialogfo.create(nil);
+ application.lock;
  try
+  fo:= tcolordialogfo.create(nil);
   try
-   col1:= colortorgb(acolor);
-  except
-   fillchar(col1,sizeof(col1),0);
-  end;
-  fo.colorareabefore.frame.colorclient:= colorty(col1);
-  fo.red.value:= col1.red;
-  fo.green.value:= col1.green;
-  fo.blue.value:= col1.blue;
-  result:= fo.show(true);
-  if result = mr_ok then begin
-   acolor:= rgbtocolor(fo.red.value,fo.green.value,fo.blue.value);
+   try
+    col1:= colortorgb(acolor);
+   except
+    fillchar(col1,sizeof(col1),0);
+   end;
+   fo.colorareabefore.frame.colorclient:= colorty(col1);
+   fo.red.value:= col1.red;
+   fo.green.value:= col1.green;
+   fo.blue.value:= col1.blue;
+   result:= fo.show(true);
+   if result = mr_ok then begin
+    acolor:= rgbtocolor(fo.red.value,fo.green.value,fo.blue.value);
+   end;
+  finally
+   fo.free;
   end;
  finally
-  fo.free;
+  application.unlock;
  end;
 end;
 

@@ -15,7 +15,7 @@ unit msethread;
 interface
 uses
  {$ifdef FPC}{$ifdef UNIX}cthreads,{$endif}classes{$else}Classes{$endif},
- mseclasses,mselist,mseevent,msesys,msetypes;
+ mseclasses,mselist,mseevent,msesys,msetypes,sysutils;
 
 type
  tmsethread = class;
@@ -83,16 +83,100 @@ type
    function eventcount: integer;
  end;
 
-//procedure createthread(var info: threadinfoty);
+ tsynchronizeevent = class(tevent)
+  private
+   fsem: semty;
+   fsuccess: boolean;
+   fexceptionclass: exceptclass;
+   fexceptionmessage: string;
+   fquiet: boolean;
+  protected
+   procedure execute; virtual; abstract;
+  public
+   constructor create(const aquiet: boolean);
+         //quiet -> show no exceptions
+   destructor destroy; override; 
+   procedure free1; override; //do nothing
+   procedure deliver;
+   function waitfor: boolean;
+   property success: boolean read fsuccess;
+   property exeptionclass: exceptclass read fexceptionclass;
+   property exceptionmessage: string read fexceptionmessage;
+ end;
+
+function synchronizeevent(const aevent: tsynchronizeevent): boolean;
+          //true if not aborted
 
 implementation
 
 uses
- msesysintf,mseapplication,SysUtils;
+ msesysintf,mseapplication;
+ 
+function synchronizeevent(const aevent: tsynchronizeevent): boolean;
+          //true if not aborted
+var
+ int1: integer;
+begin
+ result:= false;
+ if not application.terminated then begin
+  int1:= application.unlockall;
+  try
+   application.postevent(aevent);
+   result:= aevent.waitfor and aevent.success;
+  finally
+   application.relockall(int1);
+  end;
+ end;
+end;
 
 procedure createthread(var info: threadinfoty);
 begin
  syserror(sys_threadcreate(info));
+end;
+
+{ tsynchronizeevent }
+
+constructor tsynchronizeevent.create(const aquiet: boolean);
+begin
+ fquiet:= aquiet;
+ sys_semcreate(fsem,0);
+ inherited create(ek_synchronize);
+end;
+
+destructor tsynchronizeevent.destroy;
+begin
+ sys_semdestroy(fsem);
+ inherited;
+end;
+
+procedure tsynchronizeevent.deliver;
+begin
+ try
+  execute;
+  fsuccess:= true;
+ except
+  on e: exception do begin
+   fexceptionclass:= exceptclass(e.classinfo);
+   fexceptionmessage:= e.message;
+   if not fquiet then begin
+    sys_sempost(fsem);
+    raise;
+   end;
+  end;
+ end;
+ sys_sempost(fsem);
+end;
+
+function tsynchronizeevent.waitfor: boolean;
+begin
+ result:= sys_semwait(fsem,0) = sye_ok;
+end;
+
+procedure tsynchronizeevent.free1;
+begin
+ if application.terminated then begin
+  sys_sempost(fsem);
+ end;
 end;
 
 { tmsethread }
