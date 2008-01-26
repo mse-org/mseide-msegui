@@ -1027,7 +1027,7 @@ begin
  //dummy
 end;
 
-procedure tcustomapplication.handleexception(sender: tobject;
+procedure tcustomapplication.handleexception(sender: tobject = nil;
                               const leadingtext: string = '');
 begin
  if fexceptionactive = 0 then begin //do not handle subsequent exceptions
