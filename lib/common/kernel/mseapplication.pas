@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2007 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2008 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -240,15 +240,6 @@ type
    procedure registeronidle(const method: idleeventty);
    procedure unregisteronidle(const method: idleeventty);
    procedure settimer(const us: integer); virtual; abstract;
-{
-   procedure setlinkedvar(const source: tmsecomponent; var dest: tmsecomponent;
-              const linkintf: iobjectlink = nil); overload;
-   procedure setlinkedvar(const source: tlinkedobject; var dest: tlinkedobject;
-              const linkintf: iobjectlink = nil); overload;
-   procedure setlinkedvar(const source: tlinkedpersistent;
-              var dest: tlinkedpersistent;
-              const linkintf: iobjectlink = nil); overload;
-}
    function trylock: boolean;
    function lock: boolean;
     //synchronizes calling thread with main event loop (mutex),

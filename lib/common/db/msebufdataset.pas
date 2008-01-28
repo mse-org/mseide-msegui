@@ -2436,9 +2436,10 @@ begin
       internalapplyupdate(maxerrors,cancelonerror,response);
      end;
      inc(fapplyindex);
-     if (bs_idle in fbstate) and not application.idle then begin
-      break;
-     end;
+//     if (bs_idle in fbstate) and not application.idle then begin
+//      break;
+//     end;
+               //win98 is not idle after applyupdate ???
     end;
     if (ffailedcount = 0) and (fapplyindex > high(fupdatebuffer)) then begin
      fupdatebuffer:= nil;
