@@ -437,6 +437,7 @@ function sys_poll(const handle: integer; const kind: pollkindsty;
 begin
  result:= sye_notimplemented;
 end;
+
 function sys_copyfile(const oldfile,newfile: msestring): syserrorty;
 var
  str1,str2: string;
@@ -457,12 +458,27 @@ var
 begin
  str1:= winfilepath(oldname,'');
  str2:= winfilepath(newname,'');
- if windows.movefileex(pchar(str1),pchar(str2),movefile_replace_existing) then begin
-  result:= sye_ok;
+ if iswin95 then begin
+  if windows.copyfile(pchar(str1),pchar(str2),false) then begin
+   if windows.deletefile(pchar(str1)) then begin
+    result:= sye_ok;
+   end
+   else begin
+    result:= syelasterror;
+   end;
+  end
+  else begin
+   result:= syelasterror;
+  end;
  end
  else begin
-  result:= syelasterror;
- end;  
+  if windows.movefileex(pchar(str1),pchar(str2),movefile_replace_existing) then begin
+   result:= sye_ok;
+  end
+  else begin
+   result:= syelasterror;
+  end;  
+ end;
 end;
 
 function sys_deletefile(const filename: filenamety): syserrorty;
