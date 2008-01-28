@@ -477,6 +477,8 @@ type
    procedure setframewidth(const Value: integer);
    procedure setextraspace(const avalue: integer);
    procedure setimagedist(const avalue: integer);
+   procedure setimagedisttop(const avalue: integer);
+   procedure setimagedistbottom(const avalue: integer);
    procedure setleveli(const Value: integer);
    procedure setlevelo(const Value: integer);
 
@@ -496,6 +498,8 @@ type
    fi: frameinfoty;
    fextraspace: integer;
    fimagedist: integer;
+   fimagedisttop: integer;
+   fimagedistbottom: integer;
    procedure doassignto(dest: tpersistent); override;
    function getinfosize: integer; override;
    function getinfoad: pointer; override;
@@ -555,6 +559,10 @@ type
                         write setextraspace default 0;
    property imagedist: integer read fimagedist
                         write setimagedist default 0;
+   property imagedisttop: integer read fimagedisttop
+                        write setimagedisttop default 0;
+   property imagedistbottom: integer read fimagedistbottom
+                        write setimagedistbottom default 0;
    property colorclient: colorty read fi.colorclient write setcolorclient 
                                             default cl_transparent;
    property colordkshadow: colorty read fi.framecolors.shadow.effectcolor
@@ -3709,6 +3717,18 @@ end;
 procedure tframetemplate.setimagedist(const avalue: integer);
 begin
  fimagedist := avalue;
+ changed;
+end;
+
+procedure tframetemplate.setimagedisttop(const avalue: integer);
+begin
+ fimagedisttop := avalue;
+ changed;
+end;
+
+procedure tframetemplate.setimagedistbottom(const avalue: integer);
+begin
+ fimagedistbottom := avalue;
  changed;
 end;
 

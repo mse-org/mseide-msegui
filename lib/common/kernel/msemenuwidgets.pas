@@ -310,6 +310,8 @@ var
  framewidth1: integer;
  extrasp: integer;
  imagedi: integer;
+ imageditop: integer;
+ imagedibottom: integer;
  ar1: richstringarty;
  commonwidth: boolean;
  needsmenuarrow: boolean;
@@ -340,12 +342,16 @@ begin
     frame1:= fi.innerframe;
     extrasp:= fextraspace;
     imagedi:= fimagedist;
+    imageditop:= fimagedisttop;
+    imagedibottom:= fimagedistbottom;
    end;
   end
   else begin
    frame1:= nullframe;
    extrasp:= 0;
    imagedi:= 0;
+   imageditop:= 0;
+   imagedibottom:= 0;
   end; 
   framewidth1:= framehalfwidth * 2;
   framewidth1:= framewidth1 + extrasp;
@@ -376,8 +382,9 @@ begin
      if imagelist <> nil then begin
       tabpos:= -(imagelist.width+imagedi);
       atextsize.cx:= atextsize.cx - tabpos;
-      if atextsize.cy < imagelist.height then begin
-       atextsize.cy:= imagelist.height;
+      int2:= imagelist.height + imageditop + imagedibottom;
+      if atextsize.cy < int2 then begin
+       atextsize.cy:= int2;
       end;
      end
      else begin
@@ -590,6 +597,8 @@ begin
   for int1:= 0 to count - 1 do begin
    with cells[int1],buttoninfo do begin
     dimouter:= inflaterect(dim,framehalfwidth);
+    imagedisttop:= imageditop;
+    imagedistbottom:= imagedibottom;
    end;
   end;
  end;

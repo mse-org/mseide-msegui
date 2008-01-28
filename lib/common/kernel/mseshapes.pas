@@ -46,6 +46,8 @@ type
   imagecheckedoffset: integer;
   imagelist: timagelist;
   imagedist: integer;
+  imagedisttop: integer;
+  imagedistbottom: integer;
   face: tcustomface;
   tag: integer;
   doexecute: tagmouseprocty;
@@ -630,23 +632,29 @@ var
  align1: alignmentsty;
  rect1: rectty;
  int1: integer;
+ reg1: regionty;
 begin
  with canvas,info do begin
   if (imagelist <> nil) then begin
+   reg1:= canvas.copyclipregion;
+   canvas.intersectcliprect(arect);
    result:= true;
    rect1:= arect;
+   inc(rect1.y,imagedisttop + 
+    (rect1.cy - imagedisttop - imagedistbottom - imagelist.height) div 2);
+   rect1.cy:= imagelist.height;
    case pos of
     cp_right: begin
-     align1:= [al_right,al_ycentered];
+     align1:= [al_right{,al_ycentered}];
      dec(rect1.cx,imagedist);
     end;
     cp_left: begin
-     align1:= [al_ycentered];
+     align1:= [{al_ycentered}];
      inc(rect1.x,imagedist);
      dec(rect1.cx,imagedist);
     end
     else begin
-     align1:= [al_xcentered,al_ycentered];
+     align1:= [al_xcentered{,al_ycentered}];
     end;
    end;
    if ss_disabled in state then begin
@@ -665,6 +673,7 @@ begin
    if colorglyph <> cl_none then begin
     imagelist.paint(canvas,int1,rect1,align1,colorglyph);
    end;
+   canvas.clipregion:= reg1;
    int1:= imagelist.width + imagedist;
    case pos of
     cp_right: begin
