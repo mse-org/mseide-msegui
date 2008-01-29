@@ -2684,7 +2684,7 @@ end;
 
 function tmsedatetimefield.getasdatetime: tdatetime;
 begin
- if not getdata(@result) then begin
+ if not getdata(@result,false) then begin
   result:= emptydatetime;
  end
  else begin
