@@ -92,11 +92,11 @@ type
    fquiet: boolean;
   protected
    procedure execute; virtual; abstract;
+   procedure internalfree1; override;
   public
    constructor create(const aquiet: boolean);
          //quiet -> show no exceptions
    destructor destroy; override; 
-   procedure free1; override; //do nothing
    procedure deliver;
    function waitfor: boolean;
    property success: boolean read fsuccess;
@@ -172,7 +172,7 @@ begin
  result:= sys_semwait(fsem,0) = sye_ok;
 end;
 
-procedure tsynchronizeevent.free1;
+procedure tsynchronizeevent.internalfree1;
 begin
  if application.terminated then begin
   sys_sempost(fsem);

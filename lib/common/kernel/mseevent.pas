@@ -81,10 +81,11 @@ type
   private
   protected
    fkind: eventkindty;
+   procedure internalfree1; virtual;
   public
    constructor create(const akind: eventkindty);
    property kind: eventkindty read fkind;
-   procedure free1; virtual; //do nothing for ownedevents
+   procedure free1; //do nothing for ownedevents
  end;
 
  eventarty = array of tevent;
@@ -162,7 +163,14 @@ end;
 
 procedure tevent.free1;
 begin
- free;
+ if (self <> nil) then begin
+  internalfree1;
+ end;
+end;
+
+procedure tevent.internalfree1;
+begin
+ self.destroy;
 end;
 
 { tstringevent }

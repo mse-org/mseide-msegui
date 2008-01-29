@@ -96,6 +96,7 @@ type
  commbaudratety = (cbr_50,cbr_75,cbr_110,cbr_134,cbr_150,cbr_200,cbr_300,cbr_600,
                    cbr_1200,cbr_1800,cbr_2400,cbr_4800,cbr_9600,cbr_19200,
                    cbr_38400,cbr_57600,cbr_115200);
+ commdatabitsty = (cdb_5,cdb_6,cdb_7,cdb_8);
  commstopbitty = (csb_1,csb_2);
  commparityty = (cpa_none,cpa_odd,cpa_even);
 
@@ -116,6 +117,7 @@ const
                      (B50,B75,B110,B134,B150,B200,B300,B600,
                       B1200,B1800,B2400,B4800,B9600,B19200,
                       B38400,B57600,B115200);
+ commdatabitflags: array[commdatabitsty] of integer = (cs5,cs6,cs7,cs8);
  {$else}
  commname: array[commnrty] of string = ('COM1','COM2','COM3','COM4','COM5',
                                         'COM6','COM7','COM8','COM9');  
@@ -150,6 +152,7 @@ type
    timer: tmmtimermse;
 //   txemptoverlapped: toverlapped;
    {$endif}
+   fdatabits: commdatabitsty;
    procedure updatebyteinfo;
    procedure Setbaud(const Value: commbaudratety);
    procedure Setcommnr(const Value: commnrty);
@@ -161,6 +164,7 @@ type
    {$ifdef mswindows}
    procedure eotevent(sender: tobject);
    {$endif}
+   procedure setdatabits(const avalue: commdatabitsty);
   public
    constructor create(aoncheckabort: checkeventty = nil);
    destructor destroy; override;
@@ -184,6 +188,7 @@ type
    property handle: cardinal read fhandle;
    property commnr:commnrty read Fcommnr write Setcommnr;
    property baud: commbaudratety read Fbaud write Setbaud;
+   property databits: commdatabitsty read fdatabits write setdatabits;
    property stopbit: commstopbitty read Fstopbit write Setstopbit;
    property parity: commparityty read Faparity write Setparity;
    property halfduplex: boolean read fhalfduplex write fhalfduplex;
@@ -272,6 +277,8 @@ type
 //   function waitfordata(const event: tcomevent): comstatety;
 //   function getpriority: tthreadprioritymse;
 //   procedure setpriority(const Value: tthreadprioritymse);
+   function getdatabits: commdatabitsty;
+   procedure setdatabits(const avalue: commdatabitsty);
   protected
    ftimeout: integer;
    procedure portchanged; virtual;
@@ -315,6 +322,7 @@ type
    property baudrate: commbaudratety read getbaudrate write Setbaudrate default cbr_9600;
    property stopbit: commstopbitty read getstopbit write Setstopbit default csb_1;
    property parity: commparityty read getparity write Setparity default cpa_none;
+   property databits: commdatabitsty read getdatabits write setdatabits default cdb_8;
    property rtstimevor: integer read getrtstimevor write setrtstimevor default 0;
    property rtstimenach: integer read getrtstimenach write setrtstimenach default 0;
    property timeout: integer read ftimeout write ftimeout default 200000;
@@ -411,6 +419,8 @@ const
  asciipufferlaenge = 255;
 
  t_nichtoffen = 'not open';
+ databitcounts: array[commdatabitsty] of integer = (5,6,7,8);
+
  {$ifdef mswindows}
 const           // fuer tdcb.flags
     fBinary =           $0001;  // binary mode, no EOF check
@@ -636,6 +646,7 @@ constructor trs232.create(aoncheckabort: checkeventty = nil);
 begin
  fhandle:= invalidfilehandle;
  fbaud:= cbr_9600;
+ fdatabits:= cdb_8;
  fstopbit:= csb_1;
  faparity:= cpa_none;
  foncheckabort:= aoncheckabort;
@@ -657,7 +668,7 @@ begin
  if openedvorher then begin
   close;
  end;
- int1:= 1+8+1; //start + 8 daten + stop
+ int1:= 1 + databitcounts[fdatabits] + 1; //start + N daten + stop
  if fstopbit = csb_2 then begin
   inc(int1);
  end;
@@ -698,6 +709,14 @@ procedure trs232.Setparity(const Value: commparityty);
 begin
  if faparity <> value then begin
   Faparity := Value;
+  updatebyteinfo;
+ end;
+end;
+
+procedure trs232.setdatabits(const avalue: commdatabitsty);
+begin
+ if fdatabits <> avalue then begin
+  fdatabits:= avalue;
   updatebyteinfo;
  end;
 end;
@@ -866,7 +885,7 @@ begin       //open
   info.c_cc[VMIN]:= #0;
   info.c_cc[VTIME]:= #0;
 
-  info.c_cflag:= info.c_cflag {or baudflags[fbaud]} or CS8;
+  info.c_cflag:= info.c_cflag or commdatabitflags[fdatabits];
   cfsetispeed(info,commbaudflags[fbaud]);
   cfsetospeed(info,commbaudflags[fbaud]);
   if msetcsetattr(fhandle,TCSANOW,info) <> 0 then begin
@@ -876,9 +895,6 @@ begin       //open
  end;
  {$else}
  overlapped.hevent:= createevent(nil,true,false,nil);
- if halfduplex then begin
-//  txemptoverlapped.hevent:= createevent(nil,true,false,nil);
- end;
  int1:= 0;
  repeat
   fhandle:= createfile(pchar(commname[fcommnr]), GENERIC_READ or GENERIC_WRITE, 0, nil,
@@ -901,25 +917,11 @@ begin       //open
    timer:= tmmtimermse.create;
   end;
   dcb.baudrate:= commbaudrates[fbaud];
-  {
-  case fbaud of
-   cbr_1200: dcb.baudrate:= 1200;
-   cbr_2400: dcb.baudrate:= 2400;
-   cbr_4800: dcb.baudrate:= 4800;
-   cbr_9600: dcb.baudrate:= 9600;
-   cbr_19200: dcb.baudrate:= 19200;
-  end;
-  }
-//  bitzeit:= 1/dcb.BaudRate;
-//  int1:= 10; //minimale anzahl bit
-  if self.faparity <> cpa_none then begin
-//   inc(int1);
-  end;
+  dcb.bytesize:= databitcounts[fdatabits];
   case fstopbit of
    csb_1: dcb.stopbits:= onestopbit;
    csb_2: begin
     dcb.stopbits:= twostopbits;
-//    inc(int1);
    end;
   end;
   case self.faparity of
@@ -1580,6 +1582,16 @@ end;
 procedure tcommport.Setbaudrate(const Value: commbaudratety);
 begin
  fthread.fport.baud:= value;
+end;
+
+function tcommport.getdatabits: commdatabitsty;
+begin
+ result:= fthread.fport.databits;
+end;
+
+procedure tcommport.setdatabits(const avalue: commdatabitsty);
+begin
+ fthread.fport.databits:= avalue;
 end;
 
 function tcommport.extracterrortext(error: integer;
