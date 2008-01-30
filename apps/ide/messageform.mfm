@@ -19,7 +19,6 @@ object messagefo: tmessagefo
   dragdock.optionsdock = [od_savepos, od_canmove, od_canfloat, od_candock, od_propsize]
   options = [fo_savepos, fo_savestate]
   statfile = mainfo.projectstatfile
-  icon.transparency = -2147483648
   moduleclassname = 'tdockform'
   object messages: tstringgrid
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_focusbackonesc, ow_mousewheel, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
@@ -32,10 +31,11 @@ object messagefo: tmessagefo
     popupmenu = tpopupmenu1
     font.name = 'stf_default'
     font.options = [foo_antialiased]
+    font.xscale =  1.0000000000000000E+0000
     font.dummy = 0
     datacols.count = 1
     datacols.linewidth = 0
-    datacols.items = <
+    datacols.items = <    
       item
         linecolorfix = -1610612733
         colorselect = 16777088
@@ -43,22 +43,21 @@ object messagefo: tmessagefo
         options = [co_readonly, co_focusselect]
         optionsedit = []
       end>
-    rowcount = 0
     rowcountmax = 5000
     datarowlinewidth = 0
-    datarowheight = 13
+    datarowheight = 14
     oncellevent = messagesoncellevent
-    reffontheight = 13
+    reffontheight = 14
   end
   object tpopupmenu1: tpopupmenu
     menu.submenu.count = 1
-    menu.submenu.items = <
+    menu.submenu.items = <    
       item
         caption = 'Copy to clipboard'
         state = [as_localcaption, as_localonexecute]
         onexecute = copyexe
       end>
-    Left = 88
-    Top = 72
+    left = 88
+    top = 72
   end
 end

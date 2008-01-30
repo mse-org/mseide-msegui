@@ -21,7 +21,7 @@ uses
  msedesignintf,msepropertyeditors,msemenus,msegui,msepipestream,sysutils,
  msegraphutils,regkernel_bmp,msegraphics,msestrings,msepostscriptprinter,
  mseprinter,msetypes,msedatalist,msedatamodules,mseclasses,formdesigner,
- mseapplication,mseglob,mseguiglob;
+ mseapplication,mseglob,mseguiglob,mseskin;
 
 type
  twidget1 = class(twidget);
@@ -75,7 +75,8 @@ begin
  registercomponents('NoGui',[tstatfile,tnoguiaction,tactivator,
                              ttimer,tthreadcomp,tpipereadercomp]);
  registercomponenttabhints(['NoGui'],['Components without GUI Dependence']);
- registercomponents('Gui',[tmainmenu,tpopupmenu,tfacecomp,tframecomp,
+ registercomponents('Gui',[tmainmenu,tpopupmenu,
+                    tfacecomp,tframecomp,tskincontroller,
                     tbitmapcomp,timagelist,taction]);
  registercomponenttabhints(['Gui'],['Non visual Components with GUI Dependence']);
  registercomponents('Dialog',[tpagesizeselector,tpageorientationselector]);

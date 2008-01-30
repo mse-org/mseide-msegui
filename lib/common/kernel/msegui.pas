@@ -917,6 +917,7 @@ type
 
    procedure defineproperties(filer: tfiler); override;
    function gethelpcontext: msestring; override;
+   class function classskininfo: skininfoty; override;
 
    function navigstartrect: rectty; virtual; //org = clientpos
    function navigrect: rectty; virtual;      //org = clientpos
@@ -4637,6 +4638,7 @@ begin
  fwidgetrect.cy:= defaultwidgetheight;
  fcolor:= defaultwidgetcolor;
  inherited;
+ include(fmsecomponentstate,cs_hasskin);
 {$ifdef FPC}
 // fnoinvalidate:= 0;
         //afterconstruction does not work with newinstance
@@ -9485,6 +9487,12 @@ begin
    end;
   end;
  end;
+end;
+
+class function twidget.classskininfo: skininfoty;
+begin
+ result:= inherited classskininfo;
+ result.objectkind:= sok_widget;
 end;
 
 procedure twidget.getautopaintsize(var asize: sizety);

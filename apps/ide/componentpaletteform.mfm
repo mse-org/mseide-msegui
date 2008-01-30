@@ -59,6 +59,8 @@ object componentpalettefo: tcomponentpalettefo
     bounds_cx = 728
     bounds_cy = 30
     frame.dummy = 0
+    face.template = guitemplatesmo.fadehorzconvex
+    face.dummy = 0
     anchors = [an_top, an_bottom]
     taborder = 1
     buttons.width = 26
@@ -77,6 +79,8 @@ object componentpalettefo: tcomponentpalettefo
     bounds_cy = 18
     bounds_cymin = 15
     frame.dummy = 0
+    face.template = guitemplatesmo.fadevertkonvex
+    face.dummy = 0
     anchors = [an_top]
     statfile = mainfo.projectstatfile
     onactivetabchange = componentpagesactivetabchange

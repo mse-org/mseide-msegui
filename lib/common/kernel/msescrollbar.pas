@@ -123,16 +123,11 @@ type
    procedure setfacebutton(const avalue: tface);
    function getfaceendbutton: tface;
    procedure setfaceendbutton(const avalue: tface);
-   procedure createfacebutton;
-   procedure createfaceendbutton;
    procedure setbuttonendlength(const avalue: integer);
-   procedure createframebutton;
    function getframebutton: tframe;
    procedure setframebutton(const avalue: tframe);
-   procedure createframeendbutton1;
    function getframeendbutton1: tframe;
    procedure setframeendbutton1(const avalue: tframe);
-   procedure createframeendbutton2;
    function getframeendbutton2: tframe;
    procedure setframeendbutton2(const avalue: tframe);
    //iframe
@@ -160,6 +155,11 @@ type
    constructor create(intf: iscrollbar; org: originty = org_client;
               ondimchanged: objectprocty = nil); reintroduce; virtual;
    destructor destroy; override;
+   procedure createfacebutton;
+   procedure createfaceendbutton;
+   procedure createframebutton;
+   procedure createframeendbutton1;
+   procedure createframeendbutton2;
    procedure checktemplate(const sender: tobject);
    procedure paint(const canvas: tcanvas; const acolor: colorty = cl_none); virtual;
                        //color <> cl_none -> flat paint for grid cell
@@ -1104,7 +1104,9 @@ end;
 
 procedure tcustomscrollbar.createfacebutton;
 begin
- ffacebutton:= tface.create(iface(fintf.getwidget));
+ if ffacebutton = nil then begin
+  ffacebutton:= tface.create(iface(fintf.getwidget));
+ end;
 end;
 
 function tcustomscrollbar.getfacebutton: tface;
@@ -1123,7 +1125,9 @@ end;
 
 procedure tcustomscrollbar.createfaceendbutton;
 begin
- ffaceendbutton:= tface.create(iface(fintf.getwidget));
+ if ffaceendbutton = nil then begin
+  ffaceendbutton:= tface.create(iface(fintf.getwidget));
+ end;
 end;
 
 function tcustomscrollbar.getfaceendbutton: tface;
@@ -1142,7 +1146,9 @@ end;
 
 procedure tcustomscrollbar.createframebutton;
 begin
- fframebutton:= tframe.create(iframe(self));
+ if fframebutton = nil then begin
+  fframebutton:= tframe.create(iframe(self));
+ end;
 end;
 
 function tcustomscrollbar.getframebutton: tframe;
@@ -1161,7 +1167,9 @@ end;
 
 procedure tcustomscrollbar.createframeendbutton1;
 begin
- fframeendbutton1:= tframe.create(iframe(self));
+ if fframeendbutton1 = nil then begin
+  fframeendbutton1:= tframe.create(iframe(self));
+ end;
 end;
 
 function tcustomscrollbar.getframeendbutton1: tframe;
@@ -1180,7 +1188,9 @@ end;
 
 procedure tcustomscrollbar.createframeendbutton2;
 begin
- fframeendbutton2:= tframe.create(iframe(self));
+ if fframeendbutton2 = nil then begin
+  fframeendbutton2:= tframe.create(iframe(self));
+ end;
 end;
 
 function tcustomscrollbar.getframeendbutton2: tframe;

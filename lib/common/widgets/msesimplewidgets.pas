@@ -582,6 +582,8 @@ end;
 procedure tcustombutton.actionchanged;
 begin
  actioninfotoshapeinfo(self,factioninfo,finfo);
+ color:= finfo.color;
+ finfo.color:= cl_transparent;
  if csdesigning in componentstate then begin
   exclude(finfo.state,ss_invisible);
  end;

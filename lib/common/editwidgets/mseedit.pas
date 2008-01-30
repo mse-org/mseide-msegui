@@ -169,8 +169,6 @@ type
    procedure setcolorglyph(const avalue: colorty);
    procedure setimagelist(const Value: timagelist);
    procedure setimagenr(const Value: integer);
-   procedure createface;
-   procedure createframe;
    function getface: tface;
    procedure setface(const avalue: tface);
    function getframe: tframe;
@@ -200,6 +198,8 @@ type
   public
    constructor create(aowner: tobject); override;
    destructor destroy; override;
+   procedure createface;
+   procedure createframe;
    procedure checktemplate(const sender: tobject);
    procedure updatewidgetstate(const awidget: twidget);
    procedure assign(source: tpersistent); override;
@@ -598,12 +598,16 @@ end;
 
 procedure tframebutton.createface;
 begin
- finfo.face:= tface.create(iface(tcustombuttonframe(fowner).fintf.getwidget));
+ if finfo.face = nil then begin
+  finfo.face:= tface.create(iface(tcustombuttonframe(fowner).fintf.getwidget));
+ end;
 end;
 
 procedure tframebutton.createframe;
 begin
- tframe.create(iframe(self));
+ if fframe = nil then begin
+  tframe.create(iframe(self));
+ end;
 end;
 
 function tframebutton.getface: tface;

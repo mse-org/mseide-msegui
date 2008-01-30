@@ -29,10 +29,12 @@ uses
   componentpaletteform,componentstore,
   messageform,watchform,objectinspector,breakpointsform,watchpointsform,
   stackform,projecttreeform,findinfileform,cpuform,disassform,threadsform,
-  targetconsole,main,mseguiintf,msestockobjects,regunitgroups;
+  targetconsole,main,mseguiintf,msestockobjects,regunitgroups,guitemplates,
+  msegraphutils;
 begin
  registerfontalias('mseide_source',gui_getdefaultfontnames[stf_courier],
                     fam_fixnooverwrite,16);
+ application.createdatamodule(tguitemplatesmo,guitemplatesmo);
  application.createdatamodule(tactionsmo,actionsmo);
  application.createform(tsourcefo, sourcefo);
  application.createform(tdebuggerfo,debuggerfo);

@@ -834,6 +834,7 @@ type
    procedure setcolorglyph(const value: colorty);
   protected
    finfo: shapeinfoty;
+   class function classskininfo: skininfoty; override;
    procedure setoptions(const avalue: buttonoptionsty); virtual;
    procedure internalexecute;
    procedure doshapeexecute(const atag: integer; const info: mouseeventinfoty);
@@ -1229,10 +1230,8 @@ begin
    end;
    inc(widget.info.dest.x,textoffset div 2);
    dec(widget.info.dest.cx,textoffset);
+   widget.updateskin(true);
    result:= widget.show(true,transientfor);
- //  if result = mr_windowclosed then begin
- //   result:= mr_cancel;
- //  end;
   finally
    widget1.free;
    widget.Free;
@@ -1453,6 +1452,12 @@ begin
   finfo.colorglyph := value;
   invalidate;
  end;
+end;
+
+class function tactionsimplebutton.classskininfo: skininfoty;
+begin
+ result:= inherited classskininfo;
+ result.objectkind:= sok_simplebutton;
 end;
 
 procedure tactionsimplebutton.setoptions(const avalue: buttonoptionsty);

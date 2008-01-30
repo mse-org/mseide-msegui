@@ -1386,7 +1386,7 @@ begin
                                                               mseguiintf.pixel1;
  gui_initcolormap;
 end;
-
+var testvar: pcolorty;
 procedure setcolormapvalue(index: colorty; const red,green,blue: integer);
 var
  map: colormapsty;
@@ -1401,6 +1401,7 @@ begin
        hextostr(cardinal(index)+cardinal(map) shl speccolorshift,8));
  end;
  colormaps[map][cardinal(index)]:= gui_rgbtopixel(rgbtocolor(red,green,blue));
+testvar:= @colormaps[map][cardinal(index)];
 end;
 
 procedure setcolormapvalue(const index: colorty; const acolor: colorty);

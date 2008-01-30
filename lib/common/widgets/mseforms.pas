@@ -819,6 +819,7 @@ end;
 
 procedure tcustommseform.loaded;
 begin
+ fscrollbox.updateskin;
  exclude(fscrollbox.fwidgetstate,ws_loadlock);
  if fmainmenuwidget <> nil then begin
   fmainmenuwidget.loaded;

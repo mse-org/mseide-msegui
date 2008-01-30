@@ -1080,6 +1080,7 @@ begin
     fdropdownitems:= fcols;
    end;
    setlinkedcomponent(ievent(self),createdropdownlist,tmsecomponent(fdropdownlist));
+   fdropdownlist.updateskin;
    try
     with fdropdownlist.frame.sbvert do begin
      buttonminlength:= fbuttonminlength;

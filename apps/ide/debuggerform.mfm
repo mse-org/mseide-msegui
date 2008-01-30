@@ -1,7 +1,7 @@
 object debuggerfo: tdebuggerfo
   optionswidget = [ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_destroywidgets, ow_hinton, ow_autoscale]
-  bounds_x = 123
-  bounds_y = 118
+  bounds_x = 122
+  bounds_y = 130
   bounds_cx = 441
   bounds_cy = 100
   color = -2147483647
@@ -20,7 +20,6 @@ object debuggerfo: tdebuggerfo
   dragdock.optionsdock = [od_savepos, od_canmove, od_canfloat, od_candock, od_proportional, od_propsize]
   options = [fo_savepos, fo_savestate]
   statfile = mainfo.projectstatfile
-  icon.transparency = -2147483648
   moduleclassname = 'tdockform'
   object gdbtoolbar: ttoolbar
     optionswidget = [ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_timedhint]
@@ -28,7 +27,10 @@ object debuggerfo: tdebuggerfo
     bounds_y = 0
     bounds_cx = 431
     bounds_cy = 100
+    color = -2147483645
     frame.dummy = 0
+    face.template = guitemplatesmo.fadehorzconvex
+    face.dummy = 0
     anchors = []
     buttons.count = 13
     buttons.width = 24

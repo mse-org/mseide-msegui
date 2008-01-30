@@ -1,7 +1,7 @@
 object mainfo: tmainfo
   optionswidget = [ow_arrowfocus, ow_subfocus, ow_destroywidgets, ow_hinton, ow_autoscale]
-  bounds_x = 208
-  bounds_y = 238
+  bounds_x = 75
+  bounds_y = 119
   bounds_cx = 429
   bounds_cy = 138
   taborder = 1
@@ -75,6 +75,7 @@ object mainfo: tmainfo
   object mainmenu1: tmainmenu
     options = [mo_shortcutright, mo_activate]
     onupdate = mainmenuonupdate
+    facetemplate = guitemplatesmo.fadevertkonvex
     menu.submenu.count = 7
     menu.submenu.items = <    
       item

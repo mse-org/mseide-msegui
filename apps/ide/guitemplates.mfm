@@ -1,0 +1,79 @@
+object guitemplatesmo: tguitemplatesmo
+  left = 100
+  top = 100
+  moduleclassname = 'tmsedatamodule'
+  size = (
+    355
+    132
+  )
+  object fadevertkonvex: tfacecomp
+    template.fade_pos.count = 2
+    template.fade_pos.items = (
+       0.0000000000000000E+0000
+       1.0000000000000000E+0000
+    )
+    template.fade_color.count = 2
+    template.fade_color.items = (
+      14408667
+      13158600
+    )
+    template.fade_direction = gd_down
+    left = 24
+    top = 16
+  end
+  object fadehorzconvex: tfacecomp
+    template.fade_pos.count = 2
+    template.fade_pos.items = (
+       0.0000000000000000E+0000
+       1.0000000000000000E+0000
+    )
+    template.fade_color.count = 2
+    template.fade_color.items = (
+      14408667
+      13158600
+    )
+    left = 24
+    top = 40
+  end
+  object fadehorzconcave: tfacecomp
+    template.fade_pos.count = 2
+    template.fade_pos.items = (
+       0.0000000000000000E+0000
+       1.0000000000000000E+0000
+    )
+    template.fade_color.count = 2
+    template.fade_color.items = (
+      14408667
+      13158600
+    )
+    template.fade_direction = gd_left
+    left = 144
+    top = 40
+  end
+  object fadevertconcave: tfacecomp
+    template.fade_pos.count = 2
+    template.fade_pos.items = (
+       0.0000000000000000E+0000
+       1.0000000000000000E+0000
+    )
+    template.fade_color.count = 2
+    template.fade_color.items = (
+      14408667
+      13158600
+    )
+    template.fade_direction = gd_up
+    left = 144
+    top = 16
+  end
+  object tskincontroller1: tskincontroller
+    active = True
+    sb_horz_facebutton = fadevertconcave
+    sb_horz_faceendbutton = fadevertconcave
+    sb_vert_facebutton = fadehorzconcave
+    sb_vert_faceendbutton = fadehorzconcave
+    button_face = fadevertkonvex
+    framebutton_face = fadehorzconvex
+    left = 24
+    top = 72
+  end
+end

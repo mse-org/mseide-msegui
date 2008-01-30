@@ -265,6 +265,7 @@ constructor ttoolbutton.create(const aowner: tobject;
          const aprop: tindexpersistentarrayprop);
 begin
  initactioninfo(finfo);
+ finfo.color:= ttoolbuttons(aprop).color;
  inherited;
 end;
 

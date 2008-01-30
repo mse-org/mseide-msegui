@@ -247,10 +247,16 @@ type
    property sender: tobject read fsender;
  end;
 
- msecomponentstatety = (cs_ismodule,cs_endreadproc,cs_loadedproc,cs_noload);
+ msecomponentstatety = (cs_ismodule,cs_endreadproc,cs_loadedproc,cs_noload,
+                        cs_hasskin,cs_localskin);
  msecomponentstatesty = set of msecomponentstatety;
 
  createprocty = procedure of object;
+
+ skinobjectkindty = (sok_component,sok_widget,sok_simplebutton,sok_user); 
+ skininfoty = record
+  objectkind: skinobjectkindty;
+ end;
 
  tmsecomponent = class(tcomponent,ievent
                   {$ifdef mse_with_ifi},iificommand{$endif})
@@ -275,6 +281,9 @@ type
    function candestroyevent(const event: tmethod): boolean;
    function gethelpcontext: msestring; virtual;
 
+   class function classskininfo: skininfoty; virtual;
+   function skininfo: skininfoty; virtual;
+   
     //iobjectlink
    procedure link(const source,dest: iobjectlink; valuepo: pointer = nil;
                ainterfacetype: pointer = nil; once: boolean = false);
@@ -305,6 +314,7 @@ type
    {$endif}
   public
    destructor destroy; override;
+   procedure updateskin(const recursive: boolean = false);
    function loading: boolean;
    {$ifdef FPC}
    procedure setinline(value: boolean);
@@ -582,7 +592,12 @@ procedure objectbinarytotextmse(input, output: tstream);
 
 function setloading(const acomponent: tcomponent; const avalue: boolean): boolean;
            //returns old value
-
+type
+ skinobjecteventty = procedure(const instance: tobject; 
+                                       const ainfo: skininfoty) of object;
+var
+ oninitskinobject: skinobjecteventty;
+ 
 implementation
 uses
 {$ifdef debugobjectlink}
@@ -682,7 +697,7 @@ type
   protected
    procedure notification(acomponent: tcomponent; operation: toperation); override;
  end;
- 
+
 var
  objectdatalist: tobjectdatainfolist;
  fmodules: tmodulelist;
@@ -2736,6 +2751,9 @@ end;
 
 procedure tmsecomponent.loaded;
 begin
+ if cs_hasskin in fmsecomponentstate then begin
+  updateskin;
+ end;
  inherited;
  include(fmsecomponentstate,cs_loadedproc);
  try
@@ -2884,6 +2902,17 @@ begin
  result:= fhelpcontext;
 end;
 
+class function tmsecomponent.classskininfo: skininfoty;
+begin
+ fillchar(result,sizeof(result),0);
+ result.objectkind:= sok_component;
+end;
+
+function tmsecomponent.skininfo: skininfoty;
+begin
+ result:= classskininfo;
+end;
+
 function tmsecomponent.linkedobjects: objectarty;
 begin
  result:= objectarty(getlinkedcomponents(self));
@@ -2906,6 +2935,26 @@ end;
 procedure tmsecomponent.doafterload;
 begin
  //dummy
+end;
+
+procedure tmsecomponent.updateskin(const recursive: boolean = false);
+var
+ int1: integer;
+ comp1: tcomponent;
+begin
+ if assigned(oninitskinobject) and not (csdesigning in componentstate) then begin
+  if recursive then begin
+   for int1:= 0 to componentcount - 1 do begin
+    comp1:= components[int1];
+    if comp1 is tmsecomponent then begin
+     tmsecomponent(comp1).updateskin(true);
+    end;
+   end;
+  end;
+  if not (cs_localskin in fmsecomponentstate) then begin
+   oninitskinobject(self,skininfo);
+  end;
+ end;
 end;
 
 {$ifdef mse_with_ifi}
