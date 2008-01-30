@@ -1734,7 +1734,11 @@ begin
  for int1:= 0 to colgrid.rowhigh do begin
   if usercolors[int1] <> 0 then begin
    str1:= str1 + ' setcolormapvalue('+colortostring(cl_user+cardinal(int1))+','+
-               colortostring(usercolors[int1])+');'+lineend;
+               colortostring(usercolors[int1])+');';
+   if usercolorcomment[int1] <> '' then begin
+    str1:= str1 + ' //'+usercolorcomment[int1];
+   end;
+   str1:= str1+lineend;
   end;
  end;
  copytoclipboard(str1);
