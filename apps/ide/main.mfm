@@ -8,13 +8,23 @@ object mainfo: tmainfo
   visible = False
   container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_subfocus, ow_mousetransparent, ow_destroywidgets, ow_autoscale]
   container.bounds_x = 0
-  container.bounds_y = 16
+  container.bounds_y = 15
   container.bounds_cx = 429
-  container.bounds_cy = 122
+  container.bounds_cy = 123
   container.frame.framei_left = 0
   container.frame.framei_top = 0
   container.frame.framei_right = 0
   container.frame.framei_bottom = 0
+  container.frame.frameimage_left = 0
+  container.frame.frameimage_top = 0
+  container.frame.frameimage_right = 0
+  container.frame.frameimage_bottom = 0
+  container.frame.frameimage_offset = 0
+  container.frame.frameimage_offsetmouse = 0
+  container.frame.frameimage_offsetclicked = 0
+  container.frame.frameimage_offsetactive = 0
+  container.frame.frameimage_offsetactivemouse = 0
+  container.frame.frameimage_offsetactiveclicked = 0
   container.frame.localprops = [frl_fileft, frl_fitop, frl_firight, frl_fibottom]
   container.frame.sbhorz.options = [sbo_moveauto, sbo_showauto]
   container.frame.sbvert.options = [sbo_moveauto, sbo_showauto]
@@ -32,8 +42,8 @@ object mainfo: tmainfo
   onwindowdestroyed = mainonwindowdestroyed
   onterminatequery = mainfoonterminate
   onchildscaled = onscale
-  left = 8
-  top = 80
+  Left = 8
+  Top = 80
   moduleclassname = 'tmseform'
   object basedock: tdockpanel
     optionswidget = [ow_background, ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_subfocus, ow_destroywidgets, ow_autoscale]
@@ -42,6 +52,8 @@ object mainfo: tmainfo
     bounds_cx = 429
     bounds_cy = 99
     anchors = [an_left, an_top, an_right, an_bottom]
+    optionsscale = []
+    dragdock.tab_size = 0
     dragdock.optionsdock = [od_acceptsdock, od_splitvert, od_splithorz, od_tabed, od_proportional, od_fixsize, od_background]
     statfile = projectstatfile
   end
@@ -50,84 +62,95 @@ object mainfo: tmainfo
     bounds_x = 0
     bounds_y = 1
     bounds_cx = 429
-    bounds_cy = 18
+    bounds_cy = 17
+    frame.options = []
+    frame.frameimage_left = 0
+    frame.frameimage_top = 0
+    frame.frameimage_right = 0
+    frame.frameimage_bottom = 0
+    frame.frameimage_offset = 0
+    frame.frameimage_offsetmouse = 0
+    frame.frameimage_offsetclicked = 0
+    frame.frameimage_offsetactive = 0
+    frame.frameimage_offsetactivemouse = 0
+    frame.frameimage_offsetactiveclicked = 0
     frame.dummy = 0
     anchors = [an_top]
     taborder = 1
     font.name = 'stf_default'
-    font.xscale =  1.0000000000000000E+0000
+    font.xscale = 1.000000000000000000
     font.dummy = 0
     options = [dwo_hintclippedtext]
-    reffontheight = 14
+    reffontheight = 13
   end
   object gdb: tgdbmi
     onevent = gdbonevent
-    left = 232
-    top = 32
+    Left = 232
+    Top = 32
   end
   object mainstatfile: tstatfile
     filename = 'mseide.sta'
     filedir = '"~/.mseide"'
     onstatupdate = mainstatfileonupdatestat
-    left = 32
-    top = 24
+    Left = 32
+    Top = 24
   end
   object mainmenu1: tmainmenu
     options = [mo_shortcutright, mo_activate]
     onupdate = mainmenuonupdate
     facetemplate = guitemplatesmo.fadevertkonvex
     menu.submenu.count = 7
-    menu.submenu.items = <    
+    menu.submenu.items = <
       item
         submenu.count = 10
-        submenu.items = <        
+        submenu.items = <
           item
             submenu.count = 4
-            submenu.items = <            
+            submenu.items = <
               item
                 submenu.count = 8
-                submenu.items = <                
+                submenu.items = <
                   item
                     caption = '&Mainform'
                     state = [as_localcaption, as_localonexecute]
                     onexecute = newformonexecute
-                  end                
+                  end
                   item
                     caption = '&Simple Form'
                     state = [as_localcaption, as_localtag, as_localonexecute]
                     options = [mao_shortcutcaption, mao_asyncexecute]
                     tag = 1
                     onexecute = newformonexecute
-                  end                
+                  end
                   item
                     caption = '&Docking Form'
                     state = [as_localcaption, as_localtag, as_localonexecute]
                     options = [mao_shortcutcaption, mao_asyncexecute]
                     tag = 2
                     onexecute = newformonexecute
-                  end                
+                  end
                   item
                     caption = 'D&atamodule'
                     state = [as_localcaption, as_localtag, as_localonexecute]
                     options = [mao_shortcutcaption, mao_asyncexecute]
                     tag = 3
                     onexecute = newformonexecute
-                  end                
+                  end
                   item
                     caption = 'S&ubform'
                     state = [as_localcaption, as_localtag, as_localonexecute]
                     tag = 4
                     onexecute = newformonexecute
-                  end                
+                  end
                   item
                     caption = '&Report'
                     state = [as_localcaption, as_localtag, as_localonexecute]
                     tag = 5
                     onexecute = newformonexecute
-                  end                
+                  end
                   item
                     options = [mao_separator, mao_shortcutcaption]
-                  end                
+                  end
                   item
                     caption = '&Inherited'
                     state = [as_localcaption, as_localtag, as_localonexecute]
@@ -136,17 +159,17 @@ object mainfo: tmainfo
                   end>
                 caption = '&Form'
                 state = [as_localcaption]
-              end            
+              end
               item
                 caption = '&Unit'
                 state = [as_localcaption, as_localonexecute]
                 onexecute = newunitonexecute
-              end            
+              end
               item
                 caption = '&Program'
                 state = [as_localcaption, as_localonexecute]
                 onexecute = newprogramonexecute
-              end            
+              end
               item
                 caption = '&Textfile'
                 state = [as_localcaption, as_localonexecute]
@@ -155,31 +178,31 @@ object mainfo: tmainfo
               end>
             caption = '&New'
             state = [as_localcaption]
-          end        
+          end
           item
             action = actionsmo.opensource
-          end        
+          end
           item
             action = actionsmo.save
-          end        
+          end
           item
             action = actionsmo.saveas
-          end        
+          end
           item
             action = actionsmo.saveall
-          end        
+          end
           item
             action = actionsmo.close
-          end        
+          end
           item
             action = actionsmo.closeall
-          end        
+          end
           item
             options = [mao_separator, mao_shortcutcaption]
-          end        
+          end
           item
             action = actionsmo.print
-          end        
+          end
           item
             caption = 'E&xit'
             state = [as_localcaption, as_localonexecute]
@@ -189,150 +212,150 @@ object mainfo: tmainfo
         caption = '&File'
         name = 'file'
         state = [as_localcaption]
-      end    
+      end
       item
         submenu.count = 5
-        submenu.items = <        
+        submenu.items = <
           item
             action = actionsmo.line
-          end        
+          end
           item
             action = actionsmo.find
-          end        
+          end
           item
             action = actionsmo.repeatfind
-          end        
+          end
           item
             action = actionsmo.replace
-          end        
+          end
           item
             action = actionsmo.findinfile
           end>
         caption = '&Search'
         name = 'search'
         state = [as_localcaption]
-      end    
+      end
       item
         submenu.count = 12
-        submenu.items = <        
+        submenu.items = <
           item
             action = actionsmo.undo
-          end        
+          end
           item
             action = actionsmo.redo
-          end        
+          end
           item
             options = [mao_separator, mao_shortcutcaption]
-          end        
+          end
           item
             action = actionsmo.copy
-          end        
+          end
           item
             action = actionsmo.cut
-          end        
+          end
           item
             action = actionsmo.paste
-          end        
+          end
           item
             action = actionsmo.delete
-          end        
+          end
           item
             options = [mao_separator, mao_shortcutcaption]
-          end        
+          end
           item
             action = actionsmo.indent
-          end        
+          end
           item
             action = actionsmo.unindent
-          end        
+          end
           item
             options = [mao_separator, mao_shortcutcaption]
-          end        
+          end
           item
             action = actionsmo.selecteditpage
           end>
         caption = '&Edit'
         name = 'edit'
         state = [as_localcaption]
-      end    
+      end
       item
         submenu.count = 20
-        submenu.items = <        
+        submenu.items = <
           item
             caption = 'En&vironment'
             state = [as_localcaption, as_localimagelist, as_localonexecute]
             imagelist = dummyimagelist
             onexecute = parametersonexecute
-          end        
+          end
           item
             caption = 'Restart Debugger'
             state = [as_localcaption, as_localimagelist, as_localonexecute]
             imagelist = dummyimagelist
             onexecute = startgdbonexecute
-          end        
+          end
           item
             action = actionsmo.attachprocess
             state = [as_localimagelist]
             imagelist = dummyimagelist
-          end        
+          end
           item
             action = actionsmo.detachtarget
             state = [as_localimagelist]
             imagelist = dummyimagelist
-          end        
+          end
           item
             options = [mao_separator, mao_shortcutcaption]
-          end        
+          end
           item
             action = actionsmo.continue
-          end        
+          end
           item
             action = actionsmo.reset
-          end        
+          end
           item
             action = actionsmo.interrupt
-          end        
+          end
           item
             action = actionsmo.step
-          end        
+          end
           item
             action = actionsmo.stepi
-          end        
+          end
           item
             action = actionsmo.next
-          end        
+          end
           item
             action = actionsmo.nexti
-          end        
+          end
           item
             action = actionsmo.finish
-          end        
+          end
           item
             options = [mao_separator, mao_shortcutcaption]
-          end        
+          end
           item
             action = actionsmo.bkptsonact
             state = [as_checked]
             options = [mao_checkbox, mao_shortcutcaption]
-          end        
+          end
           item
             action = actionsmo.togglebkpt
             state = [as_localimagelist]
             imagelist = dummyimagelist
-          end        
+          end
           item
             action = actionsmo.togglebkptenable
             state = [as_localimagelist]
             imagelist = dummyimagelist
-          end        
+          end
           item
             options = [mao_separator, mao_shortcutcaption]
-          end        
+          end
           item
             action = actionsmo.watchesonact
             state = [as_checked]
             options = [mao_checkbox, mao_shortcutcaption]
-          end        
+          end
           item
             action = actionsmo.bluedotsonact
             state = [as_checked]
@@ -341,16 +364,16 @@ object mainfo: tmainfo
         caption = '&Target'
         name = 'target'
         state = [as_localcaption]
-      end    
+      end
       item
         submenu.count = 24
-        submenu.items = <        
+        submenu.items = <
           item
             submenu.count = 2
-            submenu.items = <            
+            submenu.items = <
               item
                 options = [mao_separator, mao_shortcutcaption]
-              end            
+              end
               item
                 caption = '&New Panel'
                 state = [as_localcaption, as_localonexecute]
@@ -361,34 +384,34 @@ object mainfo: tmainfo
             state = [as_localcaption, as_localimagelist, as_localimagenr]
             imagelist = vievmenuicons
             imagenr = 0
-          end        
+          end
           item
             options = [mao_separator, mao_shortcutcaption]
-          end        
+          end
           item
             caption = 'Component &Palette'
             state = [as_localcaption, as_localimagelist, as_localimagenr, as_localonexecute]
             imagelist = vievmenuicons
             imagenr = 1
             onexecute = viewcomponentpaletteonexecute
-          end        
+          end
           item
             caption = 'Component Sto&re'
             state = [as_localcaption, as_localimagelist, as_localimagenr, as_localonexecute]
             imagelist = vievmenuicons
             imagenr = 16
             onexecute = viewcomponentstoreonexecute
-          end        
+          end
           item
             caption = 'Object &Inspector'
             state = [as_localcaption, as_localimagelist, as_localimagenr, as_localonexecute]
             imagelist = vievmenuicons
             imagenr = 14
             onexecute = viewobjectinspectoronexecute
-          end        
+          end
           item
             options = [mao_separator, mao_shortcutcaption]
-          end        
+          end
           item
             caption = 'So&urce'
             state = [as_localcaption, as_localimagelist, as_localimagenr, as_localonexecute]
@@ -396,7 +419,7 @@ object mainfo: tmainfo
             imagelist = vievmenuicons
             imagenr = 5
             onexecute = viewsourceonexecute
-          end        
+          end
           item
             caption = '&Messages'
             state = [as_localcaption, as_localimagelist, as_localimagenr, as_localonexecute]
@@ -404,24 +427,24 @@ object mainfo: tmainfo
             imagelist = vievmenuicons
             imagenr = 4
             onexecute = viewmessagesonexecute
-          end        
+          end
           item
             caption = '&Find Results'
             state = [as_localcaption, as_localimagelist, as_localimagenr, as_localonexecute]
             imagelist = vievmenuicons
             imagenr = 15
             onexecute = viewfindresults
-          end        
+          end
           item
             options = [mao_separator, mao_shortcutcaption]
-          end        
+          end
           item
             caption = '&Debugger'
             state = [as_localcaption, as_localimagelist, as_localimagenr, as_localonexecute]
             imagelist = vievmenuicons
             imagenr = 2
             onexecute = viewdebuggertoolbaronexecute
-          end        
+          end
           item
             caption = '&Watches'
             state = [as_localcaption, as_localimagelist, as_localimagenr, as_localonexecute]
@@ -429,7 +452,7 @@ object mainfo: tmainfo
             imagelist = vievmenuicons
             imagenr = 8
             onexecute = viewwatchesonexecute
-          end        
+          end
           item
             caption = '&Stack'
             state = [as_localcaption, as_localimagelist, as_localimagenr, as_localonexecute]
@@ -437,38 +460,38 @@ object mainfo: tmainfo
             imagelist = vievmenuicons
             imagenr = 9
             onexecute = viewstackonexecute
-          end        
+          end
           item
             caption = 'T&hreads'
             state = [as_localcaption, as_localimagelist, as_localimagenr, as_localonexecute]
             imagelist = vievmenuicons
             imagenr = 10
             onexecute = viewthreadsonexecute
-          end        
+          end
           item
             caption = '&CPU'
             state = [as_localcaption, as_localimagelist, as_localimagenr, as_localonexecute]
             imagelist = vievmenuicons
             imagenr = 11
             onexecute = viewcpuonexecute
-          end        
+          end
           item
             caption = '&Assembler'
             state = [as_localcaption, as_localimagelist, as_localimagenr, as_localonexecute]
             imagelist = vievmenuicons
             imagenr = 12
             onexecute = viewassembleronexecute
-          end        
+          end
           item
             caption = 'Console'
             state = [as_localcaption, as_localimagelist, as_localimagenr, as_localonexecute]
             imagelist = vievmenuicons
             imagenr = 13
             onexecute = viewconsoleonexecute
-          end        
+          end
           item
             options = [mao_separator, mao_shortcutcaption]
-          end        
+          end
           item
             caption = '&Breakpoints'
             state = [as_localcaption, as_localimagelist, as_localimagenr, as_localonexecute]
@@ -476,17 +499,17 @@ object mainfo: tmainfo
             imagelist = vievmenuicons
             imagenr = 6
             onexecute = viewbreakpointsonexecute
-          end        
+          end
           item
             caption = 'Wa&tchpoints'
             state = [as_localcaption, as_localimagelist, as_localimagenr, as_localonexecute]
             imagelist = vievmenuicons
             imagenr = 7
             onexecute = viewwatchpointsonexecute
-          end        
+          end
           item
             options = [mao_separator, mao_shortcutcaption]
-          end        
+          end
           item
             caption = 'Toggle Form/Inspector'
             state = [as_localcaption, as_localimagelist, as_localshortcut, as_localonexecute]
@@ -494,14 +517,14 @@ object mainfo: tmainfo
             shortcut = 4154
             imagelist = vievmenuicons
             onexecute = toggleobjectinspectoronexecute
-          end        
+          end
           item
             action = actionsmo.toggleformunit
             caption = 'Toggle Form/Unit'
             state = [as_localcaption, as_localimagelist]
             options = [mao_shortcutcaption, mao_asyncexecute]
             imagelist = vievmenuicons
-          end        
+          end
           item
             name = 'formmenuitemstart'
             options = [mao_separator, mao_shortcutcaption]
@@ -509,82 +532,82 @@ object mainfo: tmainfo
         caption = '&View'
         name = 'view'
         state = [as_localcaption]
-      end    
+      end
       item
         submenu.count = 19
-        submenu.items = <        
+        submenu.items = <
           item
             action = actionsmo.makeact
             state = [as_localtag]
             tag = 1
-          end        
+          end
           item
             action = actionsmo.makeact
             caption = '&Build'
             state = [as_localcaption, as_localtag]
             tag = 2
-          end        
+          end
           item
             action = actionsmo.makeact
             caption = 'Make &1'
             state = [as_localcaption, as_localtag]
             tag = 4
-          end        
+          end
           item
             action = actionsmo.makeact
             caption = 'Make &2'
             state = [as_localcaption, as_localtag]
             tag = 8
-          end        
+          end
           item
             action = actionsmo.makeact
             caption = 'Make &3'
             state = [as_localcaption, as_localtag]
             tag = 16
-          end        
+          end
           item
             action = actionsmo.makeact
             caption = 'Make &4'
             state = [as_localcaption, as_localtag]
             tag = 32
-          end        
+          end
           item
             action = actionsmo.abortmake
-          end        
+          end
           item
             options = [mao_separator, mao_shortcutcaption]
-          end        
+          end
           item
             caption = '&Options'
             state = [as_localcaption, as_localonexecute]
             onexecute = projectoptionsonexecute
-          end        
+          end
           item
             caption = '&Tree'
             state = [as_localcaption, as_localonexecute]
             onexecute = viewprojectonexecute
-          end        
+          end
           item
             caption = '&Source'
             state = [as_localcaption, as_localonexecute]
             onexecute = viewprojectsourceonexecute
-          end        
+          end
           item
             options = [mao_separator, mao_shortcutcaption]
-          end        
+          end
           item
             submenu.count = 3
-            submenu.items = <            
+            submenu.items = <
               item
                 caption = 'From &Template'
                 state = [as_localcaption, as_localonexecute]
                 onexecute = newprojectonexecute
-              end            
+              end
               item
                 caption = 'From &Program'
                 state = [as_localcaption, as_localonexecute]
                 onexecute = newprojectfromprogramexe
-              end            
+              end
               item
                 caption = '&Empty'
                 state = [as_localcaption, as_localonexecute]
@@ -592,32 +615,32 @@ object mainfo: tmainfo
               end>
             caption = 'New'
             state = [as_localcaption]
-          end        
+          end
           item
             caption = 'Open'
             state = [as_localcaption, as_localonexecute]
             onexecute = openprojectonexecute
-          end        
+          end
           item
             caption = 'Open copy'
             state = [as_localcaption, as_localonexecute]
             onexecute = openprojectcopyexecute
-          end        
+          end
           item
             caption = 'Save'
             state = [as_localcaption, as_localonexecute]
             onexecute = projectsaveonexecute
-          end        
+          end
           item
             caption = 'Save as'
             state = [as_localcaption, as_localonexecute]
             onexecute = saveprojectasonexecute
-          end        
+          end
           item
             caption = 'Save as copy'
             state = [as_localcaption, as_localonexecute]
             onexecute = saveprojectcopyexecute
-          end        
+          end
           item
             caption = 'Close'
             name = 'close'
@@ -627,15 +650,15 @@ object mainfo: tmainfo
         caption = '&Project'
         name = 'project'
         state = [as_localcaption]
-      end    
+      end
       item
         submenu.count = 2
-        submenu.items = <        
+        submenu.items = <
           item
             caption = '&About'
             state = [as_localcaption, as_localonexecute]
             onexecute = aboutonexecute
-          end        
+          end
           item
             caption = '&Configure MSEide'
             state = [as_localcaption, as_localonexecute]
@@ -646,8 +669,9 @@ object mainfo: tmainfo
         state = [as_localcaption, as_localonexecute]
         onexecute = aboutonexecute
       end>
-    left = 247
-    top = 60
+    menu.coloractive = -1879048187
+    Left = 247
+    Top = 60
   end
   object openfile: tfiledialog
     statfile = projectstatfile
@@ -655,22 +679,22 @@ object mainfo: tmainfo
     controller.captionopen = 'Open file'
     controller.captionsave = 'Save file as'
     dialogkind = fdk_none
-    left = 144
-    top = 28
+    Left = 144
+    Top = 28
   end
   object projectstatfile: tstatfile
     filename = 'status.sta'
-    left = 16
-    top = 56
+    Left = 16
+    Top = 56
   end
   object sysenv: tsysenvmanager
-    left = 16
-    top = 80
+    Left = 16
+    Top = 80
   end
   object vievmenuicons: timagelist
     count = 17
-    left = 287
-    top = 28
+    Left = 287
+    Top = 28
     image = {
       00000000020000005000000050000000141F0000000000000000000000000000
       00000000000000000000000000000000000000004B605D0146615E010000FF03
@@ -952,12 +976,11 @@ object mainfo: tmainfo
       FFFFFFFFFFFF1E08FFFFFFFFFFFFFFFFFFFFA8BFFFFFFFFFFFFFFFFFFFFF8308
       FFFFFFFFFFFFFFFFFFFF0000FFFFFFFFFFFFFFFFFFFF1E08FFFFFFFFFFFFFFFF
       FFFFA8BFFFFFFFFFFFFFFFFFFFFF0003FFFFFFFFFFFFFFFFFFFF0000FFFFFFFF
-      FFFFFFFFFFFF1E08
-    }
+      FFFFFFFFFFFF1E08}
   end
   object dummyimagelist: timagelist
     width = 24
-    left = 128
-    top = 72
+    Left = 128
+    Top = 72
   end
 end

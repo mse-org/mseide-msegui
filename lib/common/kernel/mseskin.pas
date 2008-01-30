@@ -131,6 +131,10 @@ begin
 end;
 
 procedure tcustomskincontroller.setactive(const avalue: boolean);
+{$ifndef FPC}
+var
+ meth1: skinobjecteventty;
+{$endif}
 begin
  factive:= avalue;
  if not (csdesigning in componentstate) then begin
@@ -138,7 +142,13 @@ begin
    oninitskinobject:= {$ifdef FPC}@{$endif}updateskin;
   end
   else begin
-   if oninitskinobject = {$ifdef FPC}@{$endif}updateskin then begin
+  {$ifdef FPC}
+   if oninitskinobject = @updateskin then begin
+   {$else}
+   meth1:= updateskin;
+   if (tmethod(oninitskinobject).code = tmethod(meth1).code) and
+                 (tmethod(oninitskinobject).code = tmethod(meth1).code) then begin
+   {$endif}
     oninitskinobject:= nil;
    end;
   end;
@@ -240,72 +250,72 @@ end;
 
 procedure tskincontroller.setsb_vert_facebutton(const avalue: tfacecomp);
 begin
- setlinkedvar(avalue,fsb_vert.facebu);
+ setlinkedvar(avalue,tmsecomponent(fsb_vert.facebu));
 end;
 
 procedure tskincontroller.setsb_vert_faceendbutton(const avalue: tfacecomp);
 begin
- setlinkedvar(avalue,fsb_vert.faceendbu);
+ setlinkedvar(avalue,tmsecomponent(fsb_vert.faceendbu));
 end;
 
 procedure tskincontroller.setsb_vert_framebutton(const avalue: tframecomp);
 begin
- setlinkedvar(avalue,fsb_vert.framebu);
+ setlinkedvar(avalue,tmsecomponent(fsb_vert.framebu));
 end;
 
 procedure tskincontroller.setsb_vert_frameendbutton1(const avalue: tframecomp);
 begin
- setlinkedvar(avalue,fsb_vert.frameendbu1);
+ setlinkedvar(avalue,tmsecomponent(fsb_vert.frameendbu1));
 end;
 
 procedure tskincontroller.setsb_vert_frameendbutton2(const avalue: tframecomp);
 begin
- setlinkedvar(avalue,fsb_vert.frameendbu2);
+ setlinkedvar(avalue,tmsecomponent(fsb_vert.frameendbu2));
 end;
 
 procedure tskincontroller.setsb_horz_facebutton(const avalue: tfacecomp);
 begin
- setlinkedvar(avalue,fsb_horz.facebu);
+ setlinkedvar(avalue,tmsecomponent(fsb_horz.facebu));
 end;
 
 procedure tskincontroller.setsb_horz_faceendbutton(const avalue: tfacecomp);
 begin
- setlinkedvar(avalue,fsb_horz.faceendbu);
+ setlinkedvar(avalue,tmsecomponent(fsb_horz.faceendbu));
 end;
 
 procedure tskincontroller.setsb_horz_framebutton(const avalue: tframecomp);
 begin
- setlinkedvar(avalue,fsb_horz.framebu);
+ setlinkedvar(avalue,tmsecomponent(fsb_horz.framebu));
 end;
 
 procedure tskincontroller.setsb_horz_frameendbutton1(const avalue: tframecomp);
 begin
- setlinkedvar(avalue,fsb_horz.frameendbu1);
+ setlinkedvar(avalue,tmsecomponent(fsb_horz.frameendbu1));
 end;
 
 procedure tskincontroller.setsb_horz_frameendbutton2(const avalue: tframecomp);
 begin
- setlinkedvar(avalue,fsb_horz.frameendbu2);
+ setlinkedvar(avalue,tmsecomponent(fsb_horz.frameendbu2));
 end;
 
 procedure tskincontroller.setbutton_face(const avalue: tfacecomp);
 begin
- setlinkedvar(avalue,fbutton.wi.fa);
+ setlinkedvar(avalue,tmsecomponent(fbutton.wi.fa));
 end;
 
 procedure tskincontroller.setbutton_frame(const avalue: tframecomp);
 begin
- setlinkedvar(avalue,fbutton.wi.fra);
+ setlinkedvar(avalue,tmsecomponent(fbutton.wi.fra));
 end;
 
 procedure tskincontroller.setframebutton_face(const avalue: tfacecomp);
 begin
- setlinkedvar(avalue,fframebutton.fa);
+ setlinkedvar(avalue,tmsecomponent(fframebutton.fa));
 end;
 
 procedure tskincontroller.setframebutton_frame(const avalue: tframecomp);
 begin
- setlinkedvar(avalue,fframebutton.fra);
+ setlinkedvar(avalue,tmsecomponent(fframebutton.fra));
 end;
 
 procedure tskincontroller.handlewidget(const sender: twidget;
