@@ -78,4 +78,18 @@ object guitemplatesmo: tguitemplatesmo
     left = 24
     top = 72
   end
+  object fadecontainer: tfacecomp
+    template.fade_pos.count = 2
+    template.fade_pos.items = (
+       0.0000000000000000E+0000
+       1.0000000000000000E+0000
+    )
+    template.fade_color.count = 2
+    template.fade_color.items = (
+      -1610612731
+      13421772
+    )
+    left = 144
+    top = 72
+  end
 end

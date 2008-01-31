@@ -11,6 +11,7 @@ type
    fadehorzconcave: tfacecomp;
    fadevertconcave: tfacecomp;
    tskincontroller1: tskincontroller;
+   fadecontainer: tfacecomp;
  end;
 var
  guitemplatesmo: tguitemplatesmo;

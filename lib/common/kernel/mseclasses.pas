@@ -256,7 +256,8 @@ type
  skinoptionty = (sko_container);
  skinoptionsty = set of skinoptionty;
  
- skinobjectkindty = (sok_component,sok_widget,sok_simplebutton,sok_user); 
+ skinobjectkindty = (sok_component,sok_widget,sok_simplebutton,sok_tabbar,
+                     sok_user); 
  skininfoty = record
   objectkind: skinobjectkindty;
   userkind: integer;
@@ -2947,7 +2948,8 @@ var
  int1: integer;
  comp1: tcomponent;
 begin
- if assigned(oninitskinobject) and not (csdesigning in componentstate) then begin
+ if assigned(oninitskinobject) and 
+                (componentstate*[csdesigning] = []) then begin
   if recursive then begin
    for int1:= 0 to componentcount - 1 do begin
     comp1:= components[int1];

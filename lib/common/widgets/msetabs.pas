@@ -42,7 +42,6 @@ type
    fident: integer;
    fimagelist: timagelist;
    fimagenr: integer;
-//   fimagenractive: integer;
    fimagenrdisabled: integer;
    function getcaption: captionty;
    procedure setcaption(const Value: captionty);
@@ -54,7 +53,6 @@ type
    procedure setactive(const Value: boolean);
    procedure setimagelist(const avalue: timagelist);
    procedure setimagenr(const avalue: integer);
-//   procedure setimagenractive(const avalue: integer);
    procedure setimagenrdisabled(const avalue: integer);
   protected
    ftag: integer;
@@ -75,8 +73,6 @@ type
                  write setcoloractive default cl_default;
    property imagelist: timagelist read fimagelist write setimagelist;
    property imagenr: integer read fimagenr write setimagenr default -1;
-//   property imagenractive: integer read fimagenractive 
-//                                           write setimagenractive default -2;
    property imagenrdisabled: integer read fimagenrdisabled 
                                            write setimagenrdisabled default -2;
                 //-2 -> same as imagenr
@@ -118,6 +114,7 @@ type
    procedure setimagedist(const avalue: integer);
   protected
    procedure createitem(const index: integer; var item: tpersistent); override;
+   procedure dosizechanged; override;
    procedure checktemplate(const sender: tobject);
   public
    constructor create(const aowner: tcustomtabbar; aclasstype: indexpersistentclassty);
@@ -187,6 +184,7 @@ type
    procedure setoptions(const avalue: tabbaroptionsty);
    function gethintpos(const aindex: integer): rectty;
    function getbuttonhint(const aindex: integer): msestring;
+   class function classskininfo: skininfoty; override;
   protected
    foptions: tabbaroptionsty;
    procedure dostep(const event: stepkindty); override;
@@ -1202,6 +1200,15 @@ begin
  end;
 end;
 
+procedure ttabs.dosizechanged;
+begin
+ inherited;
+ if (count > 0) and 
+            not (csloading in tcustomtabbar(fowner).componentstate) then begin
+  tcustomtabbar(fowner).updateskin;
+ end;
+end;
+
 { tcustomtabbar }
 
 constructor tcustomtabbar.create(aowner: tcomponent);
@@ -1727,6 +1734,12 @@ begin
  if not (ws_loadedproc in fwidgetstate) then begin
   layoutchanged;
  end;
+end;
+
+class function tcustomtabbar.classskininfo: skininfoty;
+begin
+ result:= inherited classskininfo;
+ result.objectkind:= sok_tabbar;
 end;
 
 { ttabbar }

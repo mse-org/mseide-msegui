@@ -11,7 +11,8 @@ unit mseskin;
 {$ifdef FPC}{$mode objfpc}{$h+}{$INTERFACES CORBA}{$endif}
 interface
 uses
- classes,mseclasses,msegui,msescrollbar,mseedit,msegraphics,msegraphutils;
+ classes,mseclasses,msegui,msescrollbar,mseedit,msegraphics,msegraphutils,
+ msetabs;
 type
  beforeskinupdateeventty = procedure(const sender: tobject; 
                 const ainfo: skininfoty; var handled: boolean) of object;
@@ -35,6 +36,15 @@ type
   fa: tfacecomp;
   fra: tframecomp;
  end;
+ tabsskininfoty = record
+  color: colorty;
+  coloractive: colorty;
+ end;
+ tabbarskininfoty = record
+  wi: widgetskininfoty;
+  ta: tabsskininfoty;
+ end;
+  
  tcustomskincontroller = class(tmsecomponent)
   private
    fonbeforeupdate: beforeskinupdateeventty;
@@ -51,6 +61,8 @@ type
                 const asbinfo: scrollbarskininfoty);
    procedure setframebuttonskin(const instance: tframebutton;
                 const afbuinfo: framebuttonskininfoty);
+   procedure settabsskin(const instance: ttabs; 
+            const ainfo: tabsskininfoty);
    procedure handlewidget(const sender: twidget; 
                 const ainfo: skininfoty); virtual;
    procedure handlecontainer(const sender: twidget; 
@@ -59,6 +71,8 @@ type
                 const ainfo: skininfoty); virtual;
    procedure handleuserobject(const sender: tobject;
                 const ainfo: skininfoty); virtual;
+   procedure handletabbar(const sender: tcustomtabbar;
+                           const ainfo: skininfoty); virtual;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -79,6 +93,7 @@ type
    fframebutton: framebuttonskininfoty;
    fcontainer_face: tfacecomp;
    fwidget_color: colorty;
+   ftabbar: tabbarskininfoty;
    procedure setsb_vert_facebutton(const avalue: tfacecomp);
    procedure setsb_vert_faceendbutton(const avalue: tfacecomp);
    procedure setsb_vert_framebutton(const avalue: tframecomp);
@@ -96,6 +111,8 @@ type
    procedure setframebutton_face(const avalue: tfacecomp);
    procedure setframebutton_frame(const avalue: tframecomp);
    procedure setcontainer_face(const avalue: tfacecomp);
+   procedure settabbar_face(const avalue: tfacecomp);
+   procedure settabbar_frame(const avalue: tframecomp);
   protected
    procedure handlewidget(const sender: twidget; 
                                   const ainfo: skininfoty); override;
@@ -103,9 +120,12 @@ type
                                   const ainfo: skininfoty); override;
    procedure handlesimplebutton(const sender: twidget; 
                                   const ainfo: skininfoty); override;
+   procedure handletabbar(const sender: tcustomtabbar;
+                                  const ainfo: skininfoty); override;
   public
-   procedure createbutton_font;
    constructor create(aowner: tcomponent); override;
+   destructor destroy; override;
+   procedure createbutton_font;
   published
    property sb_horz_facebutton: tfacecomp read fsb_horz.facebu 
                         write setsb_horz_facebutton;
@@ -138,6 +158,12 @@ type
                                               write setframebutton_face;
    property framebutton_frame: tframecomp read fframebutton.fra 
                                               write setframebutton_frame;
+   property tabbar_face: tfacecomp read ftabbar.wi.fa write settabbar_face;
+   property tabbar_frame: tframecomp read ftabbar.wi.fra write settabbar_frame;
+   property tabbar_tab_color: colorty read ftabbar.ta.color 
+                                               write ftabbar.ta.color;
+   property tabbar_tab_coloractive: colorty read ftabbar.ta.coloractive 
+                                               write ftabbar.ta.coloractive;
  end;
   
 implementation
@@ -205,6 +231,9 @@ begin
     sok_simplebutton: begin
      handlesimplebutton(tactionsimplebutton(instance),ainfo);
     end;
+    sok_tabbar: begin
+     handletabbar(tcustomtabbar(instance),ainfo);
+    end;
     sok_user: begin
      handleuserobject(instance,ainfo);
     end;
@@ -261,6 +290,14 @@ begin
  end;
 end;
 
+procedure tcustomskincontroller.setwidgetcolor(const instance: twidget;
+               const acolor: colorty);
+begin
+ if (acolor <> cl_default) and (instance.color = cl_default) then begin
+  instance.color:= acolor;
+ end;
+end;
+
 procedure tcustomskincontroller.setframebuttonskin(const instance: tframebutton;
                const afbuinfo: framebuttonskininfoty);
 begin
@@ -303,6 +340,31 @@ begin
  end;
 end;
 
+procedure tcustomskincontroller.settabsskin(const instance: ttabs;
+               const ainfo: tabsskininfoty);
+var
+ int1: integer;
+begin
+ with instance do begin
+  beginupdate;
+  try
+   for int1:= 0 to count - 1 do begin
+    with items[int1] do begin
+     if (ainfo.color <> cl_default) and (color = cl_default) then begin
+      color:= ainfo.color;
+     end;
+     if (ainfo.coloractive <> cl_default) and 
+                                     (coloractive = cl_default) then begin
+      coloractive:= ainfo.coloractive;
+     end;
+    end;
+   end;
+  finally
+   endupdate;
+  end;
+ end;
+end;
+
 procedure tcustomskincontroller.handlesimplebutton(const sender: twidget;
                const ainfo: skininfoty);
 begin
@@ -321,12 +383,10 @@ begin
  //dummy
 end;
 
-procedure tcustomskincontroller.setwidgetcolor(const instance: twidget;
-               const acolor: colorty);
+procedure tcustomskincontroller.handletabbar(const sender: tcustomtabbar;
+               const ainfo: skininfoty);
 begin
- if (acolor <> cl_default) and (instance.color = cl_default) then begin
-  instance.color:= acolor;
- end;
+ //dummy
 end;
 
 { tskincontroller }
@@ -334,7 +394,15 @@ end;
 constructor tskincontroller.create(aowner: tcomponent);
 begin
  fwidget_color:= cl_default;
+ ftabbar.ta.color:= cl_default;
+ ftabbar.ta.coloractive:= cl_default;
  inherited;
+end;
+
+destructor tskincontroller.destroy;
+begin
+ inherited;
+ fbutton.font.free;
 end;
 
 procedure tskincontroller.setcontainer_face(const avalue: tfacecomp);
@@ -412,6 +480,16 @@ begin
  setlinkedvar(avalue,tmsecomponent(fframebutton.fra));
 end;
 
+procedure tskincontroller.settabbar_face(const avalue: tfacecomp);
+begin
+ setlinkedvar(avalue,tmsecomponent(ftabbar.wi.fa));
+end;
+
+procedure tskincontroller.settabbar_frame(const avalue: tframecomp);
+begin
+ setlinkedvar(avalue,tmsecomponent(ftabbar.wi.fra));
+end;
+
 procedure tskincontroller.handlewidget(const sender: twidget;
                const ainfo: skininfoty);
 var
@@ -464,6 +542,13 @@ function tskincontroller.getbutton_font: toptionalfont;
 begin
  getoptionalobject(fbutton.font,{$ifdef FPC}@{$endif}createbutton_font);
  result:= fbutton.font;
+end;
+
+procedure tskincontroller.handletabbar(const sender: tcustomtabbar;
+               const ainfo: skininfoty);
+begin
+ setwidgetskin(sender,ftabbar.wi);
+ settabsskin(sender.tabs,ftabbar.ta);
 end;
 
 end.

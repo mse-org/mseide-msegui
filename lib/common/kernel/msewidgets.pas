@@ -666,6 +666,8 @@ type
    constructor create(aowner: tcomponent); override;
    property visible default false;
    property optionswidget default defaultoptionstoplevelwidget;
+  published
+   property optionsskin default defaultcontainerskinoptions;
  end;
 
  tcaptionwidget = class(ttoplevelwidget)
@@ -3562,6 +3564,7 @@ begin
  inherited;
  visible:= false;
  optionswidget:= defaultoptionstoplevelwidget;
+ optionsskin:= defaultcontainerskinoptions;
 // fcolor:= cl_background;
 end;
 
