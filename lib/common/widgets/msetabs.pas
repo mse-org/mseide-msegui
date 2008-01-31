@@ -24,6 +24,7 @@ const
  defaultcaptiondist = 1;
  defaultimagedist = 0;
  defaultcaptionpos = cp_right;
+ defaulttabpageskinoptions = defaultcontainerskinoptions;
 
 type
 
@@ -265,7 +266,6 @@ type
   function getcoloractivetab: colorty;
   function getimagelist: timagelist;
   function getimagenr: integer;
-//  function getimagenractive: integer;
   function getimagenrdisabled: integer;
   procedure doselect;
   procedure dodeselect;
@@ -278,7 +278,6 @@ type
    ftabhint: msestring;
    fimagelist: timagelist;
    fimagenr: integer;
-//   fimagenractive: integer;
    fimagenrdisabled: integer;
    fcolortab,fcoloractivetab: colorty;
    fonselect: notifyeventty;
@@ -299,8 +298,6 @@ type
    procedure setimagelist(const avalue: timagelist);
    function getimagenr: integer;
    procedure setimagenr(const avalue: integer);
-//   function getimagenractive: integer;
-//   procedure setimagenractive(const avalue: integer);
    function getimagenrdisabled: integer;
    procedure setimagenrdisabled(const avalue: integer);
   protected
@@ -328,8 +325,6 @@ type
                   write setcoloractivetab default cl_default;
    property imagelist: timagelist read getimagelist write setimagelist;
    property imagenr: integer read getimagenr write setimagenr default -1;
-//   property imagenractive: integer read getimagenractive 
-//                                           write setimagenractive default -2;
    property imagenrdisabled: integer read getimagenrdisabled 
                                            write setimagenrdisabled default -2;
                 //-2 -> same as imagenr
@@ -341,6 +336,7 @@ type
    property onselect: notifyeventty read fonselect write fonselect;
    property ondeselect: notifyeventty read fondeselect write fondeselect;
    property visible default false;
+   property optionsskin default defaulttabpageskinoptions;
  end;
 
  ttabform = class(tmseform,itabpage)
@@ -1783,6 +1779,7 @@ begin
 // fimagenractive:= -2;
  fimagenrdisabled:= -2;
  foptionswidget:= defaulttaboptionswidget;
+ optionsskin:= defaulttabpageskinoptions;
  exclude(fwidgetstate,ws_visible);
 end;
 

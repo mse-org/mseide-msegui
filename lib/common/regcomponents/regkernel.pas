@@ -94,6 +94,8 @@ begin
  registerpropertyeditor(typeinfo(tcustomframe),nil,'',tframepropertyeditor);
  registerpropertyeditor(typeinfo(tcustomface),nil,'',
                              toptionalclasspropertyeditor);
+ registerpropertyeditor(typeinfo(toptionalfont),nil,'',
+                             toptionalclasspropertyeditor);
  registerpropertyeditor(typeinfo(tparentfont),nil,'',
                              tparentfontpropertyeditor);
  registerpropertyeditor(typeinfo(integer),twidget,'bounds_x',tbounds_xeditor);

@@ -57,6 +57,9 @@ type
                    );
  optionswidgetty = set of optionwidgetty;
 
+ optionskinty = (osk_noskin,osk_container);
+ optionsskinty = set of optionskinty;
+ 
  anchorty = (an_left,an_top,an_right,an_bottom);
  anchorsty = set of anchorty;
 
@@ -121,6 +124,9 @@ const
  defaultoptionswidgetmousewheel = defaultoptionswidget + [ow_mousewheel];
  defaultoptionswidgetnofocus = defaultoptionswidget -
              [ow_mousefocus,ow_tabfocus,ow_arrowfocus];
+ defaultoptionsskin = [];
+ defaultcontainerskinoptions = defaultoptionsskin + [osk_container];
+ 
  defaultwidgetwidth = 50;
  defaultwidgetheight = 50;
  defaultanchors = [an_left,an_top];
@@ -834,6 +840,7 @@ type
    ffontheight: integer;
    fsetwidgetrectcount: integer; //for recursive setpos
 
+   foptionsskin: optionsskinty;
    procedure invalidateparentminclientsize;
    function minclientsize: sizety;
    function getwidgets(const index: integer): twidget;
@@ -897,6 +904,7 @@ type
 
    procedure checkwidgetsize(var size: sizety);
               //check size constraints
+   procedure setoptionsskin(const avalue: optionsskinty);
   protected
    fwidgets: widgetarty;
    fnoinvalidate: integer;
@@ -918,6 +926,7 @@ type
    procedure defineproperties(filer: tfiler); override;
    function gethelpcontext: msestring; override;
    class function classskininfo: skininfoty; override;
+   function skininfo: skininfoty; override;
 
    function navigstartrect: rectty; virtual; //org = clientpos
    function navigrect: rectty; virtual;      //org = clientpos
@@ -1355,8 +1364,10 @@ type
                         const awidgets: array of twidget): integer;
                         //returns reference point
 
-   property optionswidget: optionswidgetty read foptionswidget write setoptionswidget
-                    default defaultoptionswidget;
+   property optionswidget: optionswidgetty read foptionswidget 
+                 write setoptionswidget default defaultoptionswidget;
+   property optionsskin: optionsskinty read foptionsskin 
+                                            write setoptionsskin default [];
    property cursor: cursorshapety read fcursor write setcursor default cr_default;
    property color: colorty read fcolor write setcolor default defaultwidgetcolor;
    property visible: boolean read getvisible write setvisible default true;
@@ -4632,6 +4643,7 @@ constructor twidget.create(aowner: tcomponent);
 begin
  fnoinvalidate:= 1;
  fwidgetstate:= defaultwidgetstates;
+ foptionsskin:= defaultoptionsskin;
  fanchors:= defaultanchors;
  foptionswidget:= defaultoptionswidget;
  fwidgetrect.cx:= defaultwidgetwidth;
@@ -4639,10 +4651,6 @@ begin
  fcolor:= defaultwidgetcolor;
  inherited;
  include(fmsecomponentstate,cs_hasskin);
-{$ifdef FPC}
-// fnoinvalidate:= 0;
-        //afterconstruction does not work with newinstance
-{$endif}
 end;
 
 procedure twidget.afterconstruction;
@@ -9575,6 +9583,25 @@ begin
   y:= apos.y - mindragdist;
   cx:= 2 * mindragdist;
   cy:= 2 * mindragdist;
+ end;
+end;
+
+procedure twidget.setoptionsskin(const avalue: optionsskinty);
+begin
+ foptionsskin:= avalue;
+ if osk_noskin in avalue then begin
+  include(fmsecomponentstate,cs_noskin);
+ end
+ else begin
+  exclude(fmsecomponentstate,cs_noskin);
+ end;
+end;
+
+function twidget.skininfo: skininfoty;
+begin
+ result:= inherited skininfo;
+ if osk_container in foptionsskin then begin
+  include(result.options,sko_container);
  end;
 end;
 

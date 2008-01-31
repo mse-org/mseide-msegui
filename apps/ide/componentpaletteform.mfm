@@ -54,13 +54,12 @@ object componentpalettefo: tcomponentpalettefo
   moduleclassname = 'tdockform'
   object componentpalette: ttoolbar
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_hinton]
+    optionsskin = [osk_container]
     bounds_x = 0
     bounds_y = 26
     bounds_cx = 728
     bounds_cy = 30
     frame.dummy = 0
-    face.template = guitemplatesmo.fadehorzconvex
-    face.dummy = 0
     anchors = [an_top, an_bottom]
     taborder = 1
     buttons.width = 26

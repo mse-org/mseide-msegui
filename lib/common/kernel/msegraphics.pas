@@ -420,7 +420,10 @@ type
  end;
  pfont = ^tfont;
  fontarty = array of tfont;
-
+ 
+ toptionalfont = class(tfont)
+ end;
+ 
  tparentfont = class(tfont)
   public
    class function getinstancepo(owner: tobject): pfont; virtual; abstract;

@@ -11,7 +11,7 @@ unit mseskin;
 {$ifdef FPC}{$mode objfpc}{$h+}{$INTERFACES CORBA}{$endif}
 interface
 uses
- classes,mseclasses,msegui,msescrollbar,mseedit;
+ classes,mseclasses,msegui,msescrollbar,mseedit,msegraphics,msegraphutils;
 type
  beforeskinupdateeventty = procedure(const sender: tobject; 
                 const ainfo: skininfoty; var handled: boolean) of object;
@@ -29,6 +29,7 @@ type
  end;
  buttonskininfoty = record
   wi: widgetskininfoty;
+  font: toptionalfont;
  end;  
  framebuttonskininfoty = record
   fa: tfacecomp;
@@ -41,14 +42,23 @@ type
    factive: boolean;
    procedure setactive(const avalue: boolean);
   protected
+   procedure setwidgetface(const instance: twidget; const aface: tfacecomp);
    procedure setwidgetskin(const instance: twidget;
                                             const awsinfo: widgetskininfoty);
+   procedure setwidgetfont(const instance: twidget; const afont: tfont);
+   procedure setwidgetcolor(const instance: twidget; const acolor: colorty);
    procedure setscrollbarskin(const instance: tcustomscrollbar; 
                 const asbinfo: scrollbarskininfoty);
    procedure setframebuttonskin(const instance: tframebutton;
                 const afbuinfo: framebuttonskininfoty);
-   procedure handlewidget(const sender: twidget; const ainfo: skininfoty); virtual;
-   procedure handlesimplebutton(const sender: twidget; const ainfo: skininfoty); virtual;
+   procedure handlewidget(const sender: twidget; 
+                const ainfo: skininfoty); virtual;
+   procedure handlecontainer(const sender: twidget; 
+                const ainfo: skininfoty); virtual;
+   procedure handlesimplebutton(const sender: twidget;
+                const ainfo: skininfoty); virtual;
+   procedure handleuserobject(const sender: tobject;
+                const ainfo: skininfoty); virtual;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -67,6 +77,8 @@ type
    fsb_vert: scrollbarskininfoty;
    fbutton: buttonskininfoty;
    fframebutton: framebuttonskininfoty;
+   fcontainer_face: tfacecomp;
+   fwidget_color: colorty;
    procedure setsb_vert_facebutton(const avalue: tfacecomp);
    procedure setsb_vert_faceendbutton(const avalue: tfacecomp);
    procedure setsb_vert_framebutton(const avalue: tframecomp);
@@ -79,11 +91,21 @@ type
    procedure setsb_horz_frameendbutton2(const avalue: tframecomp);
    procedure setbutton_face(const avalue: tfacecomp);
    procedure setbutton_frame(const avalue: tframecomp);
+   function getbutton_font: toptionalfont;
+   procedure setbutton_font(const avalue: toptionalfont);
    procedure setframebutton_face(const avalue: tfacecomp);
    procedure setframebutton_frame(const avalue: tframecomp);
+   procedure setcontainer_face(const avalue: tfacecomp);
   protected
-   procedure handlewidget(const sender: twidget; const ainfo: skininfoty); override;
-   procedure handlesimplebutton(const sender: twidget; const ainfo: skininfoty); override;
+   procedure handlewidget(const sender: twidget; 
+                                  const ainfo: skininfoty); override;
+   procedure handlecontainer(const sender: twidget; 
+                                  const ainfo: skininfoty); override;
+   procedure handlesimplebutton(const sender: twidget; 
+                                  const ainfo: skininfoty); override;
+  public
+   procedure createbutton_font;
+   constructor create(aowner: tcomponent); override;
   published
    property sb_horz_facebutton: tfacecomp read fsb_horz.facebu 
                         write setsb_horz_facebutton;
@@ -105,8 +127,13 @@ type
                         write setsb_vert_frameendbutton1;
    property sb_vert_frameendbutton2: tframecomp read fsb_vert.frameendbu2 
                         write setsb_vert_frameendbutton2;
+   property widget_color: colorty read fwidget_color 
+                        write fwidget_color default cl_default;
+   property container_face: tfacecomp read fcontainer_face 
+                                              write setcontainer_face;
    property button_face: tfacecomp read fbutton.wi.fa write setbutton_face;
    property button_frame: tframecomp read fbutton.wi.fra write setbutton_frame;
+   property button_font: toptionalfont read getbutton_font write setbutton_font;
    property framebutton_face: tfacecomp read fframebutton.fa 
                                               write setframebutton_face;
    property framebutton_frame: tframecomp read fframebutton.fra 
@@ -116,7 +143,9 @@ type
 implementation
 uses
  msewidgets;
- 
+type
+ twidget1 = class(twidget);
+  
 { tcustomskincontroller }
 
 constructor tcustomskincontroller.create(aowner: tcomponent);
@@ -167,8 +196,18 @@ begin
   end;
   if not bo1 then begin
    case ainfo.objectkind of 
-    sok_widget: handlewidget(twidget(instance),ainfo);
-    sok_simplebutton: handlesimplebutton(tactionsimplebutton(instance),ainfo);
+    sok_widget: begin
+     handlewidget(twidget(instance),ainfo);
+     if sko_container in ainfo.options then begin
+      handlecontainer(twidget(instance),ainfo);
+     end;
+    end;
+    sok_simplebutton: begin
+     handlesimplebutton(tactionsimplebutton(instance),ainfo);
+    end;
+    sok_user: begin
+     handleuserobject(instance,ainfo);
+    end;
    end;
   end;
   if assigned(fonafterupdate) then begin
@@ -183,6 +222,17 @@ begin
  //dummy
 end;
 
+procedure tcustomskincontroller.setwidgetface(const instance: twidget;
+               const aface: tfacecomp);
+begin
+ with instance do begin
+  if (aface <> nil) and (face = nil) then begin
+   createface;
+   face.template:= aface;
+  end;
+ end;
+end;
+
 procedure tcustomskincontroller.setwidgetskin(const instance: twidget;
                const awsinfo: widgetskininfoty);
 begin
@@ -194,6 +244,19 @@ begin
   if (fra <> nil) and (frame = nil) then begin
    createframe;
    frame.template:= fra;
+  end;
+ end;
+end;
+
+procedure tcustomskincontroller.setwidgetfont(const instance: twidget;
+                                            const afont: tfont);
+begin
+ if afont <> nil then begin
+  with twidget1(instance) do begin
+   if ffont = nil then begin
+    createfont;
+    ffont.assign(afont);
+   end;
   end;
  end;
 end;
@@ -246,7 +309,38 @@ begin
  //dummy
 end;
 
+procedure tcustomskincontroller.handleuserobject(const sender: tobject;
+               const ainfo: skininfoty);
+begin
+ //dummy
+end;
+
+procedure tcustomskincontroller.handlecontainer(const sender: twidget;
+               const ainfo: skininfoty);
+begin
+ //dummy
+end;
+
+procedure tcustomskincontroller.setwidgetcolor(const instance: twidget;
+               const acolor: colorty);
+begin
+ if (acolor <> cl_default) and (instance.color = cl_default) then begin
+  instance.color:= acolor;
+ end;
+end;
+
 { tskincontroller }
+
+constructor tskincontroller.create(aowner: tcomponent);
+begin
+ fwidget_color:= cl_default;
+ inherited;
+end;
+
+procedure tskincontroller.setcontainer_face(const avalue: tfacecomp);
+begin
+ setlinkedvar(avalue,tmsecomponent(fcontainer_face));
+end;
 
 procedure tskincontroller.setsb_vert_facebutton(const avalue: tfacecomp);
 begin
@@ -338,12 +432,38 @@ begin
    end;
   end; 
  end;
+ setwidgetcolor(sender,fwidget_color);
 end;
 
 procedure tskincontroller.handlesimplebutton(const sender: twidget;
                const ainfo: skininfoty);
 begin
- setwidgetskin(sender,fbutton.wi)
+ setwidgetskin(sender,fbutton.wi);
+ setwidgetfont(sender,fbutton.font);
+end;
+
+procedure tskincontroller.handlecontainer(const sender: twidget;
+               const ainfo: skininfoty);
+begin
+ setwidgetface(sender,fcontainer_face);
+end;
+
+procedure tskincontroller.createbutton_font;
+begin
+ if fbutton.font = nil then begin
+  fbutton.font:= toptionalfont.create;
+ end;
+end;
+
+procedure tskincontroller.setbutton_font(const avalue: toptionalfont);
+begin
+ setoptionalobject(avalue,fbutton.font,{$ifdef FPC}@{$endif}createbutton_font);
+end;
+
+function tskincontroller.getbutton_font: toptionalfont;
+begin
+ getoptionalobject(fbutton.font,{$ifdef FPC}@{$endif}createbutton_font);
+ result:= fbutton.font;
 end;
 
 end.

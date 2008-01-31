@@ -529,6 +529,7 @@ type
  tactionpublishedwidget = class(tactionwidget)
   published
    property optionswidget;
+   property optionsskin;
    property bounds_x;
    property bounds_y;
    property bounds_cx;
@@ -773,6 +774,7 @@ type
   published
    property frame: tscrollboxframe read getframe write setframe;
    property optionswidget default defaultoptionswidgetmousewheel;
+   property optionsskin default defaultcontainerskinoptions;
  end;
 
  tpopupwidget = class(ttoplevelwidget)
@@ -3599,6 +3601,7 @@ constructor tscrollingwidget.create(aowner: tcomponent);
 begin
  inherited;
  foptionswidget:= defaultoptionswidgetmousewheel;
+ optionsskin:= defaultcontainerskinoptions;
  internalcreateframe;
  setstaticframe(true);
 end;

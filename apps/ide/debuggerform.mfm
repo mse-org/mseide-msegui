@@ -29,8 +29,6 @@ object debuggerfo: tdebuggerfo
     bounds_cy = 100
     color = -2147483645
     frame.dummy = 0
-    face.template = guitemplatesmo.fadehorzconvex
-    face.dummy = 0
     anchors = []
     buttons.count = 13
     buttons.width = 24

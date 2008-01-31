@@ -248,14 +248,19 @@ type
  end;
 
  msecomponentstatety = (cs_ismodule,cs_endreadproc,cs_loadedproc,cs_noload,
-                        cs_hasskin,cs_localskin);
+                        cs_hasskin,cs_noskin);
  msecomponentstatesty = set of msecomponentstatety;
 
  createprocty = procedure of object;
-
+ 
+ skinoptionty = (sko_container);
+ skinoptionsty = set of skinoptionty;
+ 
  skinobjectkindty = (sok_component,sok_widget,sok_simplebutton,sok_user); 
  skininfoty = record
   objectkind: skinobjectkindty;
+  userkind: integer;
+  options: skinoptionsty;
  end;
 
  tmsecomponent = class(tcomponent,ievent
@@ -2951,7 +2956,7 @@ begin
     end;
    end;
   end;
-  if not (cs_localskin in fmsecomponentstate) then begin
+  if not (cs_noskin in fmsecomponentstate) then begin
    oninitskinobject(self,skininfo);
   end;
  end;
