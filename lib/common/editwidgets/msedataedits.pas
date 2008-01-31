@@ -62,6 +62,7 @@ type
    procedure fontchanged; override;
    procedure dofontheightdelta(var delta: integer); override;
    function geteditfont: tfont; override;
+   class function classskininfo: skininfoty; override;
 
    function setdropdowntext(const avalue: msestring; const docheckvalue: boolean;
                 const canceled: boolean; const akey: keyty): boolean;
@@ -116,6 +117,7 @@ type
   public
    procedure initgridwidget; virtual;
    procedure synctofontheight; override;
+   function hasgridparent: boolean; override;
    function actualcolor: colorty; override;
    function widgetcol: twidgetcol;
    function gridrow: integer;
@@ -1147,6 +1149,12 @@ begin
  end;
 end;
 
+class function tdataedit.classskininfo: skininfoty;
+begin
+ result:= inherited classskininfo;
+ result.objectkind:= sok_dataedit;
+end;
+
 function tdataedit.setdropdowntext(const avalue: msestring;
                 const docheckvalue: boolean; const canceled: boolean;
                 const akey: keyty): boolean;
@@ -1624,6 +1632,11 @@ procedure tdataedit.aftercelldragevent(var ainfo: draginfoty; const arow: intege
                var handled: boolean);
 begin
  //dummy
+end;
+
+function tdataedit.hasgridparent: boolean;
+begin
+ result:= fgridintf <> nil;
 end;
 
 { tcustomstringedit }

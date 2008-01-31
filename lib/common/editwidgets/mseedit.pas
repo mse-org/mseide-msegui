@@ -323,6 +323,7 @@ type
    procedure fontchanged; override;
    procedure enabledchanged; override;
 
+   class function classskininfo: skininfoty; override;
    function getoptionsedit: optionseditty; virtual;//iedit
    function getoptionsdb: optionseditdbty;
    function hasselection: boolean; virtual;
@@ -350,6 +351,7 @@ type
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
+   function hasgridparent: boolean; virtual;
    procedure initnewcomponent(const ascale: real); override;
    procedure changed;
    procedure initfocus;
@@ -1059,6 +1061,12 @@ begin
  end;
 end;
 
+class function tcustomedit.classskininfo: skininfoty;
+begin
+ result:= inherited classskininfo;
+ result.objectkind:= sok_edit;
+end;
+
 function tcustomedit.getoptionsedit: optionseditty;
 begin
  result:= foptionsedit;
@@ -1373,6 +1381,11 @@ begin
   info.caption:= text;
  end;
  inherited;
+end;
+
+function tcustomedit.hasgridparent: boolean;
+begin
+ result:= false;
 end;
 
 {$ifdef mse_with_ifi}

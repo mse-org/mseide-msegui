@@ -152,6 +152,7 @@ type
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
+   function hasgridparent: boolean; override;
    procedure createtabulators;
    function actualcolor: colorty; override;
    procedure synctofontheight; override;
@@ -1900,6 +1901,11 @@ begin
  else begin
   optionsedit:= optionsedit - [oe_readonly];
  end;  
+end;
+
+function tcustomtextedit.hasgridparent: boolean;
+begin
+ result:= fgridintf <> nil;
 end;
 
 { tundotextedit }

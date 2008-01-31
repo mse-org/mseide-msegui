@@ -12,7 +12,7 @@ unit mseskin;
 interface
 uses
  classes,mseclasses,msegui,msescrollbar,mseedit,msegraphics,msegraphutils,
- msetabs;
+ msetabs,msedataedits;
 type
  beforeskinupdateeventty = procedure(const sender: tobject; 
                 const ainfo: skininfoty; var handled: boolean) of object;
@@ -73,6 +73,10 @@ type
                 const ainfo: skininfoty); virtual;
    procedure handletabbar(const sender: tcustomtabbar;
                            const ainfo: skininfoty); virtual;
+   procedure handleedit(const sender: tedit;
+                           const ainfo: skininfoty); virtual;
+   procedure handledataedit(const sender: tdataedit;
+                           const ainfo: skininfoty); virtual;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -122,6 +126,10 @@ type
                                   const ainfo: skininfoty); override;
    procedure handletabbar(const sender: tcustomtabbar;
                                   const ainfo: skininfoty); override;
+   procedure handleedit(const sender: tedit;
+                           const ainfo: skininfoty); override;
+   procedure handledataedit(const sender: tdataedit;
+                           const ainfo: skininfoty); override;
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
@@ -161,9 +169,9 @@ type
    property tabbar_face: tfacecomp read ftabbar.wi.fa write settabbar_face;
    property tabbar_frame: tframecomp read ftabbar.wi.fra write settabbar_frame;
    property tabbar_tab_color: colorty read ftabbar.ta.color 
-                                               write ftabbar.ta.color;
+                               write ftabbar.ta.color default cl_default;
    property tabbar_tab_coloractive: colorty read ftabbar.ta.coloractive 
-                                               write ftabbar.ta.coloractive;
+                               write ftabbar.ta.coloractive default cl_default;
  end;
   
 implementation
@@ -389,6 +397,18 @@ begin
  //dummy
 end;
 
+procedure tcustomskincontroller.handleedit(const sender: tedit;
+               const ainfo: skininfoty);
+begin
+ //dummy
+end;
+
+procedure tcustomskincontroller.handledataedit(const sender: tdataedit;
+               const ainfo: skininfoty);
+begin
+ //dummy
+end;
+
 { tskincontroller }
 
 constructor tskincontroller.create(aowner: tcomponent);
@@ -549,6 +569,22 @@ procedure tskincontroller.handletabbar(const sender: tcustomtabbar;
 begin
  setwidgetskin(sender,ftabbar.wi);
  settabsskin(sender.tabs,ftabbar.ta);
+end;
+
+procedure tskincontroller.handleedit(const sender: tedit;
+               const ainfo: skininfoty);
+begin
+ if not sender.hasgridparent then begin
+  handlewidget(sender,ainfo);
+ end;
+end;
+
+procedure tskincontroller.handledataedit(const sender: tdataedit;
+               const ainfo: skininfoty);
+begin
+ if not sender.hasgridparent then begin
+  handlewidget(sender,ainfo);
+ end;
 end;
 
 end.

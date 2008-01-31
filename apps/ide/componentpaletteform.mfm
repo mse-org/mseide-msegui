@@ -78,8 +78,6 @@ object componentpalettefo: tcomponentpalettefo
     bounds_cy = 18
     bounds_cymin = 15
     frame.dummy = 0
-    face.template = guitemplatesmo.fadevertkonvex
-    face.dummy = 0
     anchors = [an_top]
     statfile = mainfo.projectstatfile
     onactivetabchange = componentpagesactivetabchange
