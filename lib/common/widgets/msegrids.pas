@@ -2313,7 +2313,7 @@ function tcol.actualcolor: colorty;
 begin
  if fcolor <> cl_default then begin
   if fcolor = cl_parent then begin
-   result:= fgrid.actualcolor;
+   result:= fgrid.actualopaquecolor;
   end
   else begin
    result:= fcolor;
@@ -3169,7 +3169,6 @@ begin
   else begin
    headers1:= fcaptionsfix;
    int1:= -cell.col-1;
-//   int1:= headers1.count+cell.col;
   end;
  
   frame1:= fframe;
@@ -3183,7 +3182,6 @@ begin
     if fcolor <> cl_parent then begin
      fcellinfo.color:= fcolor;
     end;
-//    inc(fcellrect.x,fmergedx);
     inc(fcellrect.cx,fmergedcx);
     po1.x:= fmergedx;
     canvas.move(po1);
@@ -3214,11 +3212,6 @@ begin
   end;
   canvas.restore;
   drawcelloverlay(canvas,frame1);
-  {
-  if (frame1 <> nil) and (frame1.frameimage_list <> nil) then begin
-   frame1.paintoverlay(canvas,fcellrect);
-  end;
-  }
   if flinewidth > 0 then begin
    linewidthbefore:= canvas.linewidth;
    if flinewidth = 1 then begin
@@ -3230,7 +3223,6 @@ begin
    canvas.drawline(makepoint(fcellrect.x,flinepos),
                      makepoint(fcellrect.x+fcellrect.cx{-1},flinepos),colorline);
    canvas.linewidth:= linewidthbefore;
-//   canvas.linewidth:= linewidthbefore;
   end;
   canvas.remove(po1);
  end;
@@ -3242,7 +3234,6 @@ var
 
 var
  linewidthbefore: integer;
-// linecolor1: colorty;
  color1: colorty;
  
  procedure paintcols(const range: rangety);
@@ -3295,9 +3286,7 @@ var
       end;
      end;
      canvas.origin:= po2;
-//     int2:= canvas.save;
      drawcell(canvas);
-//     canvas.restore(int2);
     end;
    end;
   end;
@@ -3318,17 +3307,15 @@ begin
     color1:= fcolor;
    end
    else begin
-    color1:= fgrid.actualcolor;
+    color1:= fgrid.actualopaquecolor;
    end;
    po1:= canvas.origin;
    linewidthbefore:= canvas.linewidth;
    if fix then begin
     fcellinfo.colorline:= flinecolorfix;
-//    linecolor1:= flinecolorfix;
    end
    else begin
     fcellinfo.colorline:= flinecolor;
-//    linecolor1:= flinecolor;
    end;
    po2.y:= po1.y+fcellrect.y;
    paintcols(colrange.range1);

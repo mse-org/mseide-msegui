@@ -1150,6 +1150,7 @@ type
 
    function parentcolor: colorty;
    function actualcolor: colorty; virtual;
+   function actualopaquecolor: colorty;
    function backgroundcolor: colorty;
    function translatecolor(const acolor: colorty): colorty;
 
@@ -8326,6 +8327,22 @@ begin
  else begin
   if fparentwidget <> nil then begin
    result:= fparentwidget.actualcolor;
+  end
+  else begin
+   result:= cl_background;
+  end;
+ end;
+end;
+
+function twidget.actualopaquecolor: colorty;
+begin
+ if (fcolor <> cl_parent) and (fcolor <> cl_default) and 
+                                       (fcolor <> cl_transparent)then begin
+  result:= fcolor;
+ end
+ else begin
+  if fparentwidget <> nil then begin
+   result:= fparentwidget.actualopaquecolor;
   end
   else begin
    result:= cl_background;

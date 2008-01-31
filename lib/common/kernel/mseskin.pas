@@ -296,6 +296,12 @@ begin
       handlecontainer(twidget(instance),ainfo);
      end;
     end;
+    sok_edit: begin
+     handleedit(tedit(instance),ainfo);
+    end;
+    sok_dataedit: begin
+     handledataedit(tdataedit(instance),ainfo);
+    end;
     sok_simplebutton: begin
      handlesimplebutton(tactionsimplebutton(instance),ainfo);
     end;
