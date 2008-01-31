@@ -76,8 +76,7 @@ object guitemplatesmo: tguitemplatesmo
     button_face = fadevertkonvex
     framebutton_face = fadehorzconvex
     tabbar_face = fadevertkonvex
-    tabbar_tab_color = -2147483647
-    tabbar_tab_coloractive = -2147483647
+    mainmenu_face = fadevertkonvex
     left = 24
     top = 72
   end

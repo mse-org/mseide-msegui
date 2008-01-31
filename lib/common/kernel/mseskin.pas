@@ -12,7 +12,7 @@ unit mseskin;
 interface
 uses
  classes,mseclasses,msegui,msescrollbar,mseedit,msegraphics,msegraphutils,
- msetabs,msedataedits;
+ msetabs,msedataedits,msemenus;
 type
  beforeskinupdateeventty = procedure(const sender: tobject; 
                 const ainfo: skininfoty; var handled: boolean) of object;
@@ -44,7 +44,17 @@ type
   wi: widgetskininfoty;
   ta: tabsskininfoty;
  end;
-  
+ menuskininfoty = record
+  face: tfacecomp;
+  frame: tframecomp;
+  itemface: tfacecomp;
+  itemframe: tframecomp;
+  itemfaceactive: tfacecomp;
+  itemframeactive: tframecomp;
+ end;  
+ mainmenuskininfoty = record
+  ma: menuskininfoty;
+ end;
  tcustomskincontroller = class(tmsecomponent)
   private
    fonbeforeupdate: beforeskinupdateeventty;
@@ -63,6 +73,10 @@ type
                 const afbuinfo: framebuttonskininfoty);
    procedure settabsskin(const instance: ttabs; 
             const ainfo: tabsskininfoty);
+   procedure setpopupmenuskin(const instance: tpopupmenu;
+                                    const ainfo: menuskininfoty);
+   procedure setmainmenuskin(const instance: tcustommainmenu;
+         const ainfo: mainmenuskininfoty; const apopupinfo: menuskininfoty);
    procedure handlewidget(const sender: twidget; 
                 const ainfo: skininfoty); virtual;
    procedure handlecontainer(const sender: twidget; 
@@ -76,6 +90,10 @@ type
    procedure handleedit(const sender: tedit;
                            const ainfo: skininfoty); virtual;
    procedure handledataedit(const sender: tdataedit;
+                           const ainfo: skininfoty); virtual;
+   procedure handlemainmenu(const sender: tcustommainmenu;
+                           const ainfo: skininfoty); virtual;
+   procedure handlepopupmenu(const sender: tpopupmenu;
                            const ainfo: skininfoty); virtual;
   public
    constructor create(aowner: tcomponent); override;
@@ -98,6 +116,8 @@ type
    fcontainer_face: tfacecomp;
    fwidget_color: colorty;
    ftabbar: tabbarskininfoty;
+   fpopupmenu: menuskininfoty;
+   fmainmenu: mainmenuskininfoty;
    procedure setsb_vert_facebutton(const avalue: tfacecomp);
    procedure setsb_vert_faceendbutton(const avalue: tfacecomp);
    procedure setsb_vert_framebutton(const avalue: tframecomp);
@@ -117,6 +137,18 @@ type
    procedure setcontainer_face(const avalue: tfacecomp);
    procedure settabbar_face(const avalue: tfacecomp);
    procedure settabbar_frame(const avalue: tframecomp);
+   procedure setpopupmenu_face(const avalue: tfacecomp);
+   procedure setpopupmenu_frame(const avalue: tframecomp);
+   procedure setpopupmenu_itemface(const avalue: tfacecomp);
+   procedure setpopupmenu_itemframe(const avalue: tframecomp);
+   procedure setpopupmenu_itemfaceactive(const avalue: tfacecomp);
+   procedure setpopupmenu_itemframeactive(const avalue: tframecomp);
+   procedure setmainmenu_face(const avalue: tfacecomp);
+   procedure setmainmenu_frame(const avalue: tframecomp);
+   procedure setmainmenu_itemface(const avalue: tfacecomp);
+   procedure setmainmenu_itemframe(const avalue: tframecomp);
+   procedure setmainmenu_itemfaceactive(const avalue: tfacecomp);
+   procedure setmainmenu_itemframeactive(const avalue: tframecomp);
   protected
    procedure handlewidget(const sender: twidget; 
                                   const ainfo: skininfoty); override;
@@ -129,6 +161,10 @@ type
    procedure handleedit(const sender: tedit;
                            const ainfo: skininfoty); override;
    procedure handledataedit(const sender: tdataedit;
+                           const ainfo: skininfoty); override;
+   procedure handlemainmenu(const sender: tcustommainmenu;
+                           const ainfo: skininfoty); override;
+   procedure handlepopupmenu(const sender: tpopupmenu;
                            const ainfo: skininfoty); override;
   public
    constructor create(aowner: tcomponent); override;
@@ -172,6 +208,30 @@ type
                                write ftabbar.ta.color default cl_default;
    property tabbar_tab_coloractive: colorty read ftabbar.ta.coloractive 
                                write ftabbar.ta.coloractive default cl_default;
+   property popupmenu_face: tfacecomp read fpopupmenu.face 
+                               write setpopupmenu_face;
+   property popupmenu_frame: tframecomp read fpopupmenu.frame 
+                                      write setpopupmenu_frame;
+   property popupmenu_itemface: tfacecomp read fpopupmenu.itemface 
+                                      write setpopupmenu_itemface;
+   property popupmenu_itemframe: tframecomp read fpopupmenu.itemframe 
+                                      write setpopupmenu_itemframe;
+   property popupmenu_itemfaceactive: tfacecomp read fpopupmenu.itemfaceactive 
+                                      write setpopupmenu_itemfaceactive;
+   property popupmenu_itemframeactive: tframecomp 
+            read fpopupmenu.itemframeactive write setpopupmenu_itemframeactive;
+   property mainmenu_face: tfacecomp read fmainmenu.ma.face 
+                                 write setmainmenu_face;
+   property mainmenu_frame: tframecomp read fmainmenu.ma.frame 
+                                 write setmainmenu_frame;
+   property mainmenu_itemface: tfacecomp read fmainmenu.ma.itemface 
+                                 write setmainmenu_itemface;
+   property mainmenu_itemframe: tframecomp read fmainmenu.ma.itemframe 
+                                 write setmainmenu_itemframe;
+   property mainmenu_itemfaceactive: tfacecomp read fmainmenu.ma.itemfaceactive
+                                 write setmainmenu_itemfaceactive;
+   property mainmenu_itemframeactive: tframecomp read fmainmenu.ma.itemframeactive 
+                                 write setmainmenu_itemframeactive;
  end;
   
 implementation
@@ -241,6 +301,12 @@ begin
     end;
     sok_tabbar: begin
      handletabbar(tcustomtabbar(instance),ainfo);
+    end;
+    sok_mainmenu: begin
+     handlemainmenu(tcustommainmenu(instance),ainfo);
+    end;
+    sok_popupmenu: begin
+     handlepopupmenu(tpopupmenu(instance),ainfo);
     end;
     sok_user: begin
      handleuserobject(instance,ainfo);
@@ -373,6 +439,61 @@ begin
  end;
 end;
 
+procedure tcustomskincontroller.setpopupmenuskin(const instance: tpopupmenu;
+               const ainfo: menuskininfoty);
+begin
+ with instance do begin
+  if (ainfo.face <> nil) and (facetemplate = nil) then begin
+   facetemplate:= ainfo.face;
+  end;
+  if (ainfo.frame <> nil) and (frametemplate = nil) then begin
+   frametemplate:= ainfo.frame;
+  end;
+  if (ainfo.itemface <> nil) and (itemfacetemplate = nil) then begin
+   itemfacetemplate:= ainfo.itemface;
+  end;
+  if (ainfo.itemframe <> nil) and (itemframetemplate = nil) then begin
+   itemframetemplate:= ainfo.itemframe;
+  end;
+  if (ainfo.itemfaceactive <> nil) and 
+                 (itemfacetemplateactive = nil) then begin
+   itemfacetemplateactive:= ainfo.itemfaceactive;
+  end;
+  if (ainfo.itemframeactive <> nil) and
+             (itemframetemplateactive = nil) then begin
+   itemframetemplateactive:= ainfo.itemframeactive;
+  end;
+ end;
+end;
+
+procedure tcustomskincontroller.setmainmenuskin(const instance: tcustommainmenu;
+           const ainfo: mainmenuskininfoty; const apopupinfo: menuskininfoty);
+begin
+ setpopupmenuskin(tpopupmenu(instance),ainfo.ma);
+ with instance do begin
+  if (apopupinfo.face <> nil) and (popupfacetemplate = nil) then begin
+   popupfacetemplate:= apopupinfo.face;
+  end;
+  if (apopupinfo.frame <> nil) and (popupframetemplate = nil) then begin
+   popupframetemplate:= apopupinfo.frame;
+  end;
+  if (apopupinfo.itemface <> nil) and (popupitemfacetemplate = nil) then begin
+   popupitemfacetemplate:= apopupinfo.itemface;
+  end;
+  if (apopupinfo.itemframe <> nil) and (popupitemframetemplate = nil) then begin
+   popupitemframetemplate:= apopupinfo.itemframe;
+  end;
+  if (apopupinfo.itemfaceactive <> nil) and 
+                 (popupitemfacetemplateactive = nil) then begin
+   popupitemfacetemplateactive:= apopupinfo.itemfaceactive;
+  end;
+  if (apopupinfo.itemframeactive <> nil) and
+             (popupitemframetemplateactive = nil) then begin
+   popupitemframetemplateactive:= apopupinfo.itemframeactive;
+  end;
+ end;
+end;
+
 procedure tcustomskincontroller.handlesimplebutton(const sender: twidget;
                const ainfo: skininfoty);
 begin
@@ -404,6 +525,18 @@ begin
 end;
 
 procedure tcustomskincontroller.handledataedit(const sender: tdataedit;
+               const ainfo: skininfoty);
+begin
+ //dummy
+end;
+
+procedure tcustomskincontroller.handlemainmenu(const sender: tcustommainmenu;
+               const ainfo: skininfoty);
+begin
+ //dummy
+end;
+
+procedure tcustomskincontroller.handlepopupmenu(const sender: tpopupmenu;
                const ainfo: skininfoty);
 begin
  //dummy
@@ -510,6 +643,66 @@ begin
  setlinkedvar(avalue,tmsecomponent(ftabbar.wi.fra));
 end;
 
+procedure tskincontroller.setpopupmenu_face(const avalue: tfacecomp);
+begin
+ setlinkedvar(avalue,tmsecomponent(fpopupmenu.face));
+end;
+
+procedure tskincontroller.setpopupmenu_frame(const avalue: tframecomp);
+begin
+ setlinkedvar(avalue,tmsecomponent(fpopupmenu.frame));
+end;
+
+procedure tskincontroller.setpopupmenu_itemface(const avalue: tfacecomp);
+begin
+ setlinkedvar(avalue,tmsecomponent(fpopupmenu.itemface));
+end;
+
+procedure tskincontroller.setpopupmenu_itemframe(const avalue: tframecomp);
+begin
+ setlinkedvar(avalue,tmsecomponent(fpopupmenu.itemframe));
+end;
+
+procedure tskincontroller.setpopupmenu_itemfaceactive(const avalue: tfacecomp);
+begin
+ setlinkedvar(avalue,tmsecomponent(fpopupmenu.itemfaceactive));
+end;
+
+procedure tskincontroller.setpopupmenu_itemframeactive(const avalue: tframecomp);
+begin
+ setlinkedvar(avalue,tmsecomponent(fpopupmenu.itemframeactive));
+end;
+
+procedure tskincontroller.setmainmenu_face(const avalue: tfacecomp);
+begin
+ setlinkedvar(avalue,tmsecomponent(fmainmenu.ma.face));
+end;
+
+procedure tskincontroller.setmainmenu_frame(const avalue: tframecomp);
+begin
+ setlinkedvar(avalue,tmsecomponent(fmainmenu.ma.frame));
+end;
+
+procedure tskincontroller.setmainmenu_itemface(const avalue: tfacecomp);
+begin
+ setlinkedvar(avalue,tmsecomponent(fmainmenu.ma.itemface));
+end;
+
+procedure tskincontroller.setmainmenu_itemframe(const avalue: tframecomp);
+begin
+ setlinkedvar(avalue,tmsecomponent(fmainmenu.ma.itemframe));
+end;
+
+procedure tskincontroller.setmainmenu_itemfaceactive(const avalue: tfacecomp);
+begin
+ setlinkedvar(avalue,tmsecomponent(fmainmenu.ma.itemfaceactive));
+end;
+
+procedure tskincontroller.setmainmenu_itemframeactive(const avalue: tframecomp);
+begin
+ setlinkedvar(avalue,tmsecomponent(fmainmenu.ma.itemframeactive));
+end;
+
 procedure tskincontroller.handlewidget(const sender: twidget;
                const ainfo: skininfoty);
 var
@@ -585,6 +778,18 @@ begin
  if not sender.hasgridparent then begin
   handlewidget(sender,ainfo);
  end;
+end;
+
+procedure tskincontroller.handlemainmenu(const sender: tcustommainmenu;
+               const ainfo: skininfoty);
+begin
+ setmainmenuskin(sender,fmainmenu,fpopupmenu);
+end;
+
+procedure tskincontroller.handlepopupmenu(const sender: tpopupmenu;
+               const ainfo: skininfoty);
+begin
+ setpopupmenuskin(sender,fpopupmenu);
 end;
 
 end.

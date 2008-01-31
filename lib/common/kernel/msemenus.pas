@@ -297,6 +297,8 @@ type
 
  tpopupmenu = class(tmenu)
   private
+   protected
+    class function classskininfo: skininfoty; override;
   public
    function show(const atransientfor: twidget;
          const pos: graphicdirectionty): tmenuitem; overload;
@@ -330,6 +332,7 @@ type
    procedure setpopupitemframetemplateactive(const avalue: tframecomp);
    procedure setpopupitemfacetemplateactive(const avalue: tfacecomp);
   protected
+   class function classskininfo: skininfoty; override;
    procedure doidle(var again: boolean);
    procedure menuchanged(const sender: tmenuitem);
   public
@@ -419,6 +422,7 @@ constructor tcustommenu.create(aowner: tcomponent);
 begin
  foptions:= defaultmenuoptions;
  inherited;
+ include(fmsecomponentstate,cs_hasskin);
  fmenu:= tmenuitem.create(nil,self);
 end;
 
@@ -1486,6 +1490,12 @@ end;
 
 { tpopupmenu }
 
+class function tpopupmenu.classskininfo: skininfoty;
+begin
+ result:= inherited classskininfo;
+ result.objectkind:= sok_popupmenu;
+end;
+
 function tpopupmenu.show(const atransientfor: twidget;
          const pos: graphicdirectionty): tmenuitem;
 begin
@@ -1637,6 +1647,12 @@ begin
  if avalue <> fpopuptemplate.itemfaceactive then begin
   setlinkedvar(avalue,tmsecomponent(fpopuptemplate.itemfaceactive));
  end;
+end;
+
+class function tcustommainmenu.classskininfo: skininfoty;
+begin
+ result:= inherited classskininfo;
+ result.objectkind:= sok_mainmenu;
 end;
 
 procedure tcustommainmenu.doidle(var again: boolean);
