@@ -107,6 +107,9 @@ type
    procedure loaded; override;
    
    procedure setwidgetface(const instance: twidget; const aface: tfacecomp);
+   procedure setwidgetframe(const instance: twidget; const aframe: tframecomp);
+   procedure setwidgetframetemplate(const instance: twidget;
+                            const aframe: tframecomp); //no fram nil check
    procedure setwidgetskin(const instance: twidget;
                                             const ainfo: widgetskininfoty);
    procedure setdataeditskin(const instance: tdataedit;
@@ -520,9 +523,49 @@ procedure tcustomskincontroller.setwidgetface(const instance: twidget;
                const aface: tfacecomp);
 begin
  with instance do begin
-  if (aface <> nil) and (face = nil) then begin
+  if (aface <> nil) and not (osk_framebuttononly in optionsskin) and
+                        (face = nil) then begin
    createface;
    face.template:= aface;
+  end;
+ end;
+end;
+
+procedure tcustomskincontroller.setwidgetframe(const instance: twidget;
+               const aframe: tframecomp);
+var
+ size1: sizety;
+ col1: colorty;
+begin
+ with instance do begin
+  if (aframe <> nil) and (frame = nil) and 
+                 not (osk_framebuttononly in optionsskin) then begin
+   createframe;
+   col1:= frame.colorclient;
+   size1:= clientsize;
+   frame.template:= aframe;
+   frame.colorclient:= col1;
+   clientsize:= size1;
+  end;
+ end;
+end;
+
+procedure tcustomskincontroller.setwidgetframetemplate(const instance: twidget;
+               const aframe: tframecomp); //no frame nil check
+var
+ size1: sizety;
+ col1: colorty;
+begin
+ with instance do begin
+  if (aframe <> nil) and not (osk_framebuttononly in optionsskin) then begin
+   createframe;
+   if  frame.template = nil then begin
+    col1:= frame.colorclient;
+    size1:= clientsize;
+    frame.template:= aframe;
+    frame.colorclient:= col1;
+    clientsize:= size1;
+   end;
   end;
  end;
 end;
@@ -530,30 +573,17 @@ end;
 procedure tcustomskincontroller.setwidgetskin(const instance: twidget;
                const ainfo: widgetskininfoty);
 begin
- with instance,ainfo do begin
-  if (fa <> nil) and (face = nil) then begin
-   createface;
-   face.template:= fa;
-  end;
-  if (fra <> nil) and (frame = nil) then begin
-   createframe;
-   frame.template:= fra;
-  end;
- end;
+ setwidgetface(instance,ainfo.fa);
+ setwidgetframe(instance,ainfo.fra);
 end;
 
 procedure tcustomskincontroller.setdataeditskin(const instance: tdataedit;
                                             const ainfo: dataeditskininfoty);
+var
+ col1: colorty;
 begin
  setwidgetface(instance,ainfo.face);
- with instance do begin
-  if ainfo.frame <> nil then begin
-   createframe;  
-   if frame.template = nil then begin
-    frame.template:= ainfo.frame;
-   end;
-  end;
- end;
+ setwidgetframetemplate(instance,ainfo.frame);
 end;
 
 procedure tcustomskincontroller.setwidgetfont(const instance: twidget;
@@ -572,7 +602,9 @@ end;
 procedure tcustomskincontroller.setwidgetcolor(const instance: twidget;
                const acolor: colorty);
 begin
- if (acolor <> cl_default) and (instance.color = cl_default) then begin
+ if (acolor <> cl_default) and 
+       not (osk_framebuttononly in instance.optionsskin) and
+           (instance.color = cl_default) then begin
   instance.color:= acolor;
  end;
 end;
@@ -1020,9 +1052,7 @@ begin
    end;
   end; 
  end;
- if not (osk_framebuttononly in sender.optionsskin) then begin
-  setwidgetcolor(sender,fwidget_color);
- end;
+ setwidgetcolor(sender,fwidget_color);
 end;
 
 procedure tskincontroller.handlesimplebutton(const sender: twidget;

@@ -971,7 +971,6 @@ type
    procedure setframe(const avalue: tcustomframe);
    function getface: tcustomface;
    procedure setface(const avalue: tcustomface);
-//   function getinnerstframe: framety; virtual;
 
    procedure createwindow; virtual;
    procedure objectchanged(const sender: tobject); virtual;
@@ -1195,7 +1194,6 @@ type
    procedure invalidateframestaterect(const rect: rectty; 
                                         const org: originty = org_client);   
    function hasoverlappingsiblings(arect: rectty): boolean; //origin = pos
-//   procedure invalidatesiblings(arect: rectty); //origin = pos
 
 
    function window: twindow;
