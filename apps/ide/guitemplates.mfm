@@ -3,7 +3,7 @@ object guitemplatesmo: tguitemplatesmo
   top = 100
   moduleclassname = 'tmsedatamodule'
   size = (
-    355
+    483
     132
   )
   object fadevertkonvex: tfacecomp
@@ -96,5 +96,9 @@ object guitemplatesmo: tguitemplatesmo
     )
     left = 144
     top = 72
+  end
+  object nullface: tfacecomp
+    left = 272
+    top = 16
   end
 end
