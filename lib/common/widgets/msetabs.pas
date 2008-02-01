@@ -102,8 +102,6 @@ type
    procedure setface(const avalue: tface);
    function getfaceactive: tface;
    procedure setfaceactive(const avalue: tface);
-   procedure createface;
-   procedure createfaceactive;
    procedure setcolor(const avalue: colorty);
    procedure setcoloractive(const avalue: colorty);
    procedure setcaptionpos(const avalue: captionposty);
@@ -120,6 +118,8 @@ type
    constructor create(const aowner: tcustomtabbar; aclasstype: indexpersistentclassty);
                                          reintroduce;
    destructor destroy; override;
+   procedure createface;
+   procedure createfaceactive;
    procedure add(const item: ttab);
    procedure insert(const item: ttab; const aindex: integer);
    procedure additems(const aitems: msestringarty);
@@ -1022,12 +1022,16 @@ end;
 
 procedure ttabs.createface;
 begin
- fface:= tface.create(iface(tcustomtabbar(fowner)));
+ if fface = nil then begin
+  fface:= tface.create(iface(tcustomtabbar(fowner)));
+ end;
 end;
 
 procedure ttabs.createfaceactive;
 begin
- ffaceactive:= tface.create(iface(tcustomtabbar(fowner)));
+ if faceactive = nil then begin
+  ffaceactive:= tface.create(iface(tcustomtabbar(fowner)));
+ end;
 end;
 
 function ttabs.getface: tface;

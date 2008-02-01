@@ -42,10 +42,14 @@ type
  tabsskininfoty = record
   color: colorty;
   coloractive: colorty;
+  face: tfacecomp;
+  faceactive: tfacecomp;
  end;
  tabbarskininfoty = record
-  wi: widgetskininfoty;
-  ta: tabsskininfoty;
+  wihorz: widgetskininfoty;
+  wivert: widgetskininfoty;
+  tahorz: tabsskininfoty;
+  tavert: tabsskininfoty;
  end;
  menuskininfoty = record
   face: tfacecomp;
@@ -106,12 +110,13 @@ type
                 const asbinfo: scrollbarskininfoty);
    procedure setframebuttonskin(const instance: tframebutton;
                 const afbuinfo: framebuttonskininfoty);
-   procedure settabsskin(const instance: ttabs; 
-            const ainfo: tabsskininfoty);
+   procedure settabsskin(const instance: tcustomtabbar;
+                                        const ainfo: tabsskininfoty);
    procedure setpopupmenuskin(const instance: tpopupmenu;
                                     const ainfo: menuskininfoty);
    procedure setmainmenuskin(const instance: tcustommainmenu;
          const ainfo: mainmenuskininfoty);
+
    procedure handlewidget(const sender: twidget; 
                 const ainfo: skininfoty); virtual;
    procedure handlecontainer(const sender: twidget; 
@@ -173,8 +178,16 @@ type
    procedure setframebutton_face(const avalue: tfacecomp);
    procedure setframebutton_frame(const avalue: tframecomp);
    procedure setcontainer_face(const avalue: tfacecomp);
-   procedure settabbar_face(const avalue: tfacecomp);
-   procedure settabbar_frame(const avalue: tframecomp);
+
+   procedure settabbar_horz_face(const avalue: tfacecomp);
+   procedure settabbar_horz_frame(const avalue: tframecomp);
+   procedure settabbar_horz_tab_face(const avalue: tfacecomp);
+   procedure settabbar_horz_tab_faceactive(const avalue: tfacecomp);
+   procedure settabbar_vert_face(const avalue: tfacecomp);
+   procedure settabbar_vert_frame(const avalue: tframecomp);
+   procedure settabbar_vert_tab_face(const avalue: tfacecomp);
+   procedure settabbar_vert_tab_faceactive(const avalue: tfacecomp);
+
    procedure setpopupmenu_face(const avalue: tfacecomp);
    procedure setpopupmenu_frame(const avalue: tframecomp);
    procedure setpopupmenu_itemface(const avalue: tfacecomp);
@@ -247,12 +260,27 @@ type
                                               write setframebutton_face;
    property framebutton_frame: tframecomp read fframebutton.fra 
                                               write setframebutton_frame;
-   property tabbar_face: tfacecomp read ftabbar.wi.fa write settabbar_face;
-   property tabbar_frame: tframecomp read ftabbar.wi.fra write settabbar_frame;
-   property tabbar_tab_color: colorty read ftabbar.ta.color 
-                               write ftabbar.ta.color default cl_default;
-   property tabbar_tab_coloractive: colorty read ftabbar.ta.coloractive 
-                               write ftabbar.ta.coloractive default cl_default;
+
+   property tabbar_horz_face: tfacecomp read ftabbar.wihorz.fa write settabbar_horz_face;
+   property tabbar_horz_frame: tframecomp read ftabbar.wihorz.fra write settabbar_horz_frame;
+   property tabbar_horz_tab_color: colorty read ftabbar.tahorz.color 
+                               write ftabbar.tahorz.color default cl_default;
+   property tabbar_horz_tab_coloractive: colorty read ftabbar.tahorz.coloractive 
+                               write ftabbar.tahorz.coloractive default cl_default;
+   property tabbar_horz_tab_face: tfacecomp read ftabbar.tahorz.face
+                               write settabbar_horz_tab_face;
+   property tabbar_horz_tab_faceactive: tfacecomp read ftabbar.tahorz.faceactive
+                               write settabbar_horz_tab_faceactive;
+   property tabbar_vert_face: tfacecomp read ftabbar.wivert.fa write settabbar_vert_face;
+   property tabbar_vert_frame: tframecomp read ftabbar.wivert.fra write settabbar_vert_frame;
+   property tabbar_vert_tab_color: colorty read ftabbar.tavert.color 
+                               write ftabbar.tavert.color default cl_default;
+   property tabbar_vert_tab_coloractive: colorty read ftabbar.tavert.coloractive 
+                               write ftabbar.tavert.coloractive default cl_default;
+   property tabbar_vert_tab_face: tfacecomp read ftabbar.tavert.face
+                               write settabbar_vert_tab_face;
+   property tabbar_vert_tab_faceactive: tfacecomp read ftabbar.tavert.faceactive
+                               write settabbar_vert_tab_faceactive;
 
    property popupmenu_options: skinmenuoptionsty read fpopupmenu.options
                 write fpopupmenu.options default [];         
@@ -299,7 +327,7 @@ type
   
 implementation
 uses
- msewidgets;
+ msewidgets,msetabsglob;
 type
  twidget1 = class(twidget);
   
@@ -555,14 +583,22 @@ begin
  end;
 end;
 
-procedure tcustomskincontroller.settabsskin(const instance: ttabs;
-               const ainfo: tabsskininfoty);
+procedure tcustomskincontroller.settabsskin(const instance: tcustomtabbar;
+                                             const ainfo: tabsskininfoty);
 var
  int1: integer;
 begin
- with instance do begin
+ with instance.tabs do begin
   beginupdate;
   try
+   if (face = nil) and (ainfo.face <> nil) then begin
+    createface;
+    face.template:= ainfo.face;
+   end;
+   if (faceactive = nil) and (ainfo.faceactive <> nil) then begin
+    createfaceactive;
+    faceactive.template:= ainfo.faceactive;
+   end;
    for int1:= 0 to count - 1 do begin
     with items[int1] do begin
      if (ainfo.color <> cl_default) and (color = cl_default) then begin
@@ -699,8 +735,10 @@ end;
 constructor tskincontroller.create(aowner: tcomponent);
 begin
  fwidget_color:= cl_default;
- ftabbar.ta.color:= cl_default;
- ftabbar.ta.coloractive:= cl_default;
+ ftabbar.tahorz.color:= cl_default;
+ ftabbar.tahorz.coloractive:= cl_default;
+ ftabbar.tavert.color:= cl_default;
+ ftabbar.tavert.coloractive:= cl_default;
  inherited;
 end;
 
@@ -785,14 +823,44 @@ begin
  setlinkedvar(avalue,tmsecomponent(fframebutton.fra));
 end;
 
-procedure tskincontroller.settabbar_face(const avalue: tfacecomp);
+procedure tskincontroller.settabbar_horz_face(const avalue: tfacecomp);
 begin
- setlinkedvar(avalue,tmsecomponent(ftabbar.wi.fa));
+ setlinkedvar(avalue,tmsecomponent(ftabbar.wihorz.fa));
 end;
 
-procedure tskincontroller.settabbar_frame(const avalue: tframecomp);
+procedure tskincontroller.settabbar_horz_frame(const avalue: tframecomp);
 begin
- setlinkedvar(avalue,tmsecomponent(ftabbar.wi.fra));
+ setlinkedvar(avalue,tmsecomponent(ftabbar.wihorz.fra));
+end;
+
+procedure tskincontroller.settabbar_horz_tab_face(const avalue: tfacecomp);
+begin
+ setlinkedvar(avalue,tmsecomponent(ftabbar.tahorz.face));
+end;
+
+procedure tskincontroller.settabbar_horz_tab_faceactive(const avalue: tfacecomp);
+begin
+ setlinkedvar(avalue,tmsecomponent(ftabbar.tahorz.faceactive));
+end;
+
+procedure tskincontroller.settabbar_vert_face(const avalue: tfacecomp);
+begin
+ setlinkedvar(avalue,tmsecomponent(ftabbar.wivert.fa));
+end;
+
+procedure tskincontroller.settabbar_vert_frame(const avalue: tframecomp);
+begin
+ setlinkedvar(avalue,tmsecomponent(ftabbar.wivert.fra));
+end;
+
+procedure tskincontroller.settabbar_vert_tab_face(const avalue: tfacecomp);
+begin
+ setlinkedvar(avalue,tmsecomponent(ftabbar.tavert.face));
+end;
+
+procedure tskincontroller.settabbar_vert_tab_faceactive(const avalue: tfacecomp);
+begin
+ setlinkedvar(avalue,tmsecomponent(ftabbar.tavert.faceactive));
 end;
 
 procedure tskincontroller.setpopupmenu_face(const avalue: tfacecomp);
@@ -944,8 +1012,14 @@ end;
 procedure tskincontroller.handletabbar(const sender: tcustomtabbar;
                const ainfo: skininfoty);
 begin
- setwidgetskin(sender,ftabbar.wi);
- settabsskin(sender.tabs,ftabbar.ta);
+ if tabo_vertical in sender.options then begin
+  setwidgetskin(sender,ftabbar.wivert);
+  settabsskin(sender,ftabbar.tavert);
+ end
+ else begin
+  setwidgetskin(sender,ftabbar.wihorz);
+  settabsskin(sender,ftabbar.tahorz);
+ end;
 end;
 
 procedure tskincontroller.handleedit(const sender: tedit;

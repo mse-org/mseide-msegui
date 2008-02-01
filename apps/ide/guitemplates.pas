@@ -18,4 +18,5 @@ var
 implementation
 uses
  guitemplates_mfm;
+
 end.

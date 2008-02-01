@@ -75,7 +75,10 @@ object guitemplatesmo: tguitemplatesmo
     container_face = fadehorzconvex
     button_face = fadevertkonvex
     framebutton_face = fadehorzconvex
-    tabbar_face = fadevertkonvex
+    tabbar_horz_face = fadevertconcave
+    tabbar_horz_tab_face = fadevertkonvex
+    tabbar_vert_face = fadehorzconcave
+    tabbar_vert_tab_face = fadevertkonvex
     mainmenu_face = fadevertkonvex
     left = 24
     top = 72

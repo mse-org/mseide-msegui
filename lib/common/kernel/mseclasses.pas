@@ -268,6 +268,8 @@ type
  tmsecomponent = class(tcomponent,ievent
                   {$ifdef mse_with_ifi},iificommand{$endif})
   private
+   fonbeforeupdateskin: notifyeventty;
+   fonafterupdateskin: notifyeventty;
    procedure readmoduleclassname(reader: treader);
    procedure writemoduleclassname(writer: twriter);
    procedure endread;
@@ -358,6 +360,10 @@ type
    property msecomponentstate: msecomponentstatesty read fmsecomponentstate;
   published
    property helpcontext: msestring read gethelpcontext write fhelpcontext;
+   property onbeforeupdateskin: notifyeventty read fonbeforeupdateskin 
+                                   write fonbeforeupdateskin;
+   property onafterupdateskin: notifyeventty read fonafterupdateskin 
+                                   write fonafterupdateskin;
  end;
 
  msecomponenteventty = procedure(const sender: tmsecomponent) of object;
@@ -2960,7 +2966,13 @@ begin
    end;
   end;
   if not (cs_noskin in fmsecomponentstate) then begin
+   if assigned(fonbeforeupdateskin) then begin
+    fonbeforeupdateskin(tobject(tmethod(oninitskinobject).data));
+   end;
    oninitskinobject(self,skininfo);
+   if assigned(fonbeforeupdateskin) then begin
+    fonafterupdateskin(tobject(tmethod(oninitskinobject).data));
+   end;   
   end;
  end;
 end;
