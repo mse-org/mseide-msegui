@@ -64,7 +64,12 @@ type
   ma: menuskininfoty;
   pop: menuskininfoty;
  end;
-
+ dataeditskininfoty = record
+  color: colorty;
+  face: tfacecomp;
+  frame: tframecomp;
+ end;
+ 
  tskincolor = class(tvirtualpersistent)
   private
    fcolor: colorty;
@@ -103,13 +108,15 @@ type
    
    procedure setwidgetface(const instance: twidget; const aface: tfacecomp);
    procedure setwidgetskin(const instance: twidget;
-                                            const awsinfo: widgetskininfoty);
+                                            const ainfo: widgetskininfoty);
+   procedure setdataeditskin(const instance: tdataedit;
+                                            const ainfo: dataeditskininfoty);
    procedure setwidgetfont(const instance: twidget; const afont: tfont);
    procedure setwidgetcolor(const instance: twidget; const acolor: colorty);
    procedure setscrollbarskin(const instance: tcustomscrollbar; 
-                const asbinfo: scrollbarskininfoty);
+                const ainfo: scrollbarskininfoty);
    procedure setframebuttonskin(const instance: tframebutton;
-                const afbuinfo: framebuttonskininfoty);
+                const ainfo: framebuttonskininfoty);
    procedure settabsskin(const instance: tcustomtabbar;
                                         const ainfo: tabsskininfoty);
    procedure setpopupmenuskin(const instance: tpopupmenu;
@@ -161,6 +168,8 @@ type
    ftabbar: tabbarskininfoty;
    fpopupmenu: menuskininfoty;
    fmainmenu: mainmenuskininfoty;
+   fdataedit: dataeditskininfoty;
+   
    procedure setsb_vert_facebutton(const avalue: tfacecomp);
    procedure setsb_vert_faceendbutton(const avalue: tfacecomp);
    procedure setsb_vert_framebutton(const avalue: tframecomp);
@@ -177,6 +186,10 @@ type
    procedure setbutton_font(const avalue: toptionalfont);
    procedure setframebutton_face(const avalue: tfacecomp);
    procedure setframebutton_frame(const avalue: tframecomp);
+
+   procedure setdataedit_face(const avalue: tfacecomp);
+   procedure setdataedit_frame(const avalue: tframecomp);
+
    procedure setcontainer_face(const avalue: tfacecomp);
 
    procedure settabbar_horz_face(const avalue: tfacecomp);
@@ -249,13 +262,22 @@ type
                         write setsb_vert_frameendbutton1;
    property sb_vert_frameendbutton2: tframecomp read fsb_vert.frameendbu2 
                         write setsb_vert_frameendbutton2;
+
    property widget_color: colorty read fwidget_color 
                         write fwidget_color default cl_default;
+
+   property dataedit_color: colorty read fdataedit.color 
+                        write fdataedit.color default cl_default;
+   property dataedit_face: tfacecomp read fdataedit.face write setdataedit_face;
+   property dataedit_frame: tframecomp read fdataedit.frame 
+                        write setdataedit_frame;
+                        
    property container_face: tfacecomp read fcontainer_face 
                                               write setcontainer_face;
    property button_face: tfacecomp read fbutton.wi.fa write setbutton_face;
    property button_frame: tframecomp read fbutton.wi.fra write setbutton_frame;
    property button_font: toptionalfont read getbutton_font write setbutton_font;
+
    property framebutton_face: tfacecomp read fframebutton.fa 
                                               write setframebutton_face;
    property framebutton_frame: tframecomp read fframebutton.fra 
@@ -506,9 +528,9 @@ begin
 end;
 
 procedure tcustomskincontroller.setwidgetskin(const instance: twidget;
-               const awsinfo: widgetskininfoty);
+               const ainfo: widgetskininfoty);
 begin
- with instance,awsinfo do begin
+ with instance,ainfo do begin
   if (fa <> nil) and (face = nil) then begin
    createface;
    face.template:= fa;
@@ -516,6 +538,21 @@ begin
   if (fra <> nil) and (frame = nil) then begin
    createframe;
    frame.template:= fra;
+  end;
+ end;
+end;
+
+procedure tcustomskincontroller.setdataeditskin(const instance: tdataedit;
+                                            const ainfo: dataeditskininfoty);
+begin
+ setwidgetcolor(instance,ainfo.color);
+ setwidgetface(instance,ainfo.face);
+ with instance do begin
+  if ainfo.frame <> nil then begin
+   createframe;  
+   if frame.template = nil then begin
+    frame.template:= ainfo.frame;
+   end;
   end;
  end;
 end;
@@ -542,9 +579,9 @@ begin
 end;
 
 procedure tcustomskincontroller.setframebuttonskin(const instance: tframebutton;
-               const afbuinfo: framebuttonskininfoty);
+               const ainfo: framebuttonskininfoty);
 begin
- with instance,afbuinfo do begin
+ with instance,ainfo do begin
   if (fa <> nil) and (face = nil) then begin
    createface;
    face.template:= fa;
@@ -557,9 +594,9 @@ begin
 end;
 
 procedure tcustomskincontroller.setscrollbarskin(const instance: tcustomscrollbar;
-               const asbinfo: scrollbarskininfoty);
+               const ainfo: scrollbarskininfoty);
 begin
- with instance,asbinfo do begin
+ with instance,ainfo do begin
   if (facebu <> nil) and (facebutton = nil) then begin
    createfacebutton;
    facebutton.template:= facebu;
@@ -739,6 +776,7 @@ begin
  ftabbar.tahorz.coloractive:= cl_default;
  ftabbar.tavert.color:= cl_default;
  ftabbar.tavert.coloractive:= cl_default;
+ fdataedit.color:= cl_default;
  inherited;
 end;
 
@@ -746,6 +784,16 @@ destructor tskincontroller.destroy;
 begin
  inherited;
  fbutton.font.free;
+end;
+
+procedure tskincontroller.setdataedit_face(const avalue: tfacecomp);
+begin
+ setlinkedvar(avalue,tmsecomponent(fdataedit.face));
+end;
+
+procedure tskincontroller.setdataedit_frame(const avalue: tframecomp);
+begin
+ setlinkedvar(avalue,tmsecomponent(fdataedit.frame));
 end;
 
 procedure tskincontroller.setcontainer_face(const avalue: tfacecomp);
@@ -1031,7 +1079,7 @@ end;
 procedure tskincontroller.handledataedit(const sender: tdataedit;
                const ainfo: skininfoty);
 begin
- handlewidget(sender,ainfo);
+ setdataeditskin(sender,fdataedit);
 end;
 
 procedure tskincontroller.handlemainmenu(const sender: tcustommainmenu;
