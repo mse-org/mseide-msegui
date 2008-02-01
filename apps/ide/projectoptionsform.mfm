@@ -90,6 +90,7 @@ object projectoptionsfo: tprojectoptionsfo
         reffontheight = 14
         object fontdisp: ttextedit
           optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+          optionsskin = [osk_framebuttononly]
           bounds_x = 0
           bounds_y = 0
           bounds_cx = 607
@@ -768,7 +769,7 @@ object projectoptionsfo: tprojectoptionsfo
         bounds_cy = 337
         anchors = [an_left, an_top, an_right, an_bottom]
         taborder = 7
-        activepageindex = 0
+        activepageindex = 3
         tab_frame.dummy = 0
         tab_size = 18
         statfile = statfile1
@@ -782,7 +783,6 @@ object projectoptionsfo: tprojectoptionsfo
           frame.dummy = 0
           anchors = [an_left, an_top, an_right, an_bottom]
           taborder = 4
-          visible = True
           caption = 'Source &directories'
           reffontheight = 14
           object sourcedirgrid: twidgetgrid
@@ -811,6 +811,7 @@ object projectoptionsfo: tprojectoptionsfo
             reffontheight = 14
             object sourcedirs: tfilenameedit
               optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+              optionsskin = [osk_framebuttononly]
               bounds_x = 0
               bounds_y = 0
               bounds_cx = 622
@@ -884,6 +885,7 @@ object projectoptionsfo: tprojectoptionsfo
             reffontheight = 14
             object defon: tbooleanedit
               optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_mousewheel, ow_destroywidgets]
+              optionsskin = [osk_framebuttononly]
               bounds_x = 0
               bounds_y = 0
               bounds_cx = 22
@@ -898,6 +900,7 @@ object projectoptionsfo: tprojectoptionsfo
             end
             object def: tstringedit
               optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_mousewheel, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+              optionsskin = [osk_framebuttononly]
               bounds_x = 23
               bounds_y = 0
               bounds_cx = 599
@@ -988,6 +991,7 @@ object projectoptionsfo: tprojectoptionsfo
             datarowheight = 16
             reffontheight = 14
             object sigstop: tbooleanedit
+              optionsskin = [osk_framebuttononly]
               bounds_x = 0
               bounds_y = 0
               bounds_cx = 32
@@ -999,6 +1003,7 @@ object projectoptionsfo: tprojectoptionsfo
               valuedefault = True
             end
             object sighandle: tbooleanedit
+              optionsskin = [osk_framebuttononly]
               bounds_x = 33
               bounds_y = 0
               bounds_cx = 43
@@ -1009,6 +1014,7 @@ object projectoptionsfo: tprojectoptionsfo
             end
             object signum: tintegeredit
               optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+              optionsskin = [osk_framebuttononly]
               bounds_x = 77
               bounds_y = 0
               bounds_cx = 50
@@ -1021,6 +1027,7 @@ object projectoptionsfo: tprojectoptionsfo
             end
             object signumto: tintegeredit
               optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
+              optionsskin = [osk_framebuttononly]
               bounds_x = 128
               bounds_y = 0
               bounds_cx = 39
@@ -1032,6 +1039,7 @@ object projectoptionsfo: tprojectoptionsfo
             end
             object signame: tselector
               optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
+              optionsskin = [osk_framebuttononly]
               bounds_x = 168
               bounds_y = 0
               bounds_cx = 454
@@ -1066,6 +1074,7 @@ object projectoptionsfo: tprojectoptionsfo
           frame.dummy = 0
           anchors = [an_left, an_top, an_right, an_bottom]
           taborder = 2
+          visible = True
           caption = '&Exceptions'
           reffontheight = 14
           object exceptionsgrid: twidgetgrid
@@ -1107,6 +1116,7 @@ object projectoptionsfo: tprojectoptionsfo
             statfile = statfile1
             reffontheight = 14
             object exceptignore: tbooleanedit
+              optionsskin = [osk_framebuttononly]
               bounds_x = 0
               bounds_y = 0
               bounds_cx = 47
@@ -1121,6 +1131,7 @@ object projectoptionsfo: tprojectoptionsfo
             end
             object exceptclassnames: tstringedit
               optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight]
+              optionsskin = [osk_framebuttononly]
               bounds_x = 48
               bounds_y = 0
               bounds_cx = 574
@@ -1509,6 +1520,7 @@ object projectoptionsfo: tprojectoptionsfo
             reffontheight = 14
             object makeon: tbooleanedit
               Tag = 1
+              optionsskin = [osk_framebuttononly]
               bounds_x = 0
               bounds_y = 0
               bounds_cy = 16
@@ -1519,6 +1531,7 @@ object projectoptionsfo: tprojectoptionsfo
             end
             object buildon: tbooleanedit
               Tag = 2
+              optionsskin = [osk_framebuttononly]
               bounds_x = 14
               bounds_y = 0
               bounds_cy = 16
@@ -1529,6 +1542,7 @@ object projectoptionsfo: tprojectoptionsfo
             end
             object make1on: tbooleanedit
               Tag = 4
+              optionsskin = [osk_framebuttononly]
               bounds_x = 28
               bounds_y = 0
               bounds_cy = 16
@@ -1539,6 +1553,7 @@ object projectoptionsfo: tprojectoptionsfo
             end
             object make2on: tbooleanedit
               Tag = 8
+              optionsskin = [osk_framebuttononly]
               bounds_x = 42
               bounds_y = 0
               bounds_cy = 16
@@ -1549,6 +1564,7 @@ object projectoptionsfo: tprojectoptionsfo
             end
             object make3on: tbooleanedit
               Tag = 16
+              optionsskin = [osk_framebuttononly]
               bounds_x = 56
               bounds_y = 0
               bounds_cy = 16
@@ -1559,6 +1575,7 @@ object projectoptionsfo: tprojectoptionsfo
             end
             object make4on: tbooleanedit
               Tag = 32
+              optionsskin = [osk_framebuttononly]
               bounds_x = 70
               bounds_y = 0
               bounds_cy = 16
@@ -1569,6 +1586,7 @@ object projectoptionsfo: tprojectoptionsfo
             end
             object makeoptions: tstringedit
               optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+              optionsskin = [osk_framebuttononly]
               bounds_x = 84
               bounds_y = 0
               bounds_cx = 538
@@ -1728,6 +1746,7 @@ object projectoptionsfo: tprojectoptionsfo
             reffontheight = 14
             object dmakeon: tbooleanedit
               Tag = 1
+              optionsskin = [osk_framebuttononly]
               bounds_x = 0
               bounds_y = 0
               bounds_cy = 16
@@ -1738,6 +1757,7 @@ object projectoptionsfo: tprojectoptionsfo
             end
             object dbuildon: tbooleanedit
               Tag = 2
+              optionsskin = [osk_framebuttononly]
               bounds_x = 14
               bounds_y = 0
               bounds_cy = 16
@@ -1748,6 +1768,7 @@ object projectoptionsfo: tprojectoptionsfo
             end
             object dmake1on: tbooleanedit
               Tag = 4
+              optionsskin = [osk_framebuttononly]
               bounds_x = 28
               bounds_y = 0
               bounds_cy = 16
@@ -1758,6 +1779,7 @@ object projectoptionsfo: tprojectoptionsfo
             end
             object dmake2on: tbooleanedit
               Tag = 8
+              optionsskin = [osk_framebuttononly]
               bounds_x = 42
               bounds_y = 0
               bounds_cy = 16
@@ -1768,6 +1790,7 @@ object projectoptionsfo: tprojectoptionsfo
             end
             object dmake3on: tbooleanedit
               Tag = 16
+              optionsskin = [osk_framebuttononly]
               bounds_x = 56
               bounds_y = 0
               bounds_cy = 16
@@ -1778,6 +1801,7 @@ object projectoptionsfo: tprojectoptionsfo
             end
             object dmake4on: tbooleanedit
               Tag = 32
+              optionsskin = [osk_framebuttononly]
               bounds_x = 70
               bounds_y = 0
               bounds_cy = 16
@@ -1788,6 +1812,7 @@ object projectoptionsfo: tprojectoptionsfo
             end
             object duniton: tbooleanedit
               Tag = 65536
+              optionsskin = [osk_framebuttononly]
               bounds_x = 85
               bounds_y = 0
               bounds_cy = 16
@@ -1798,6 +1823,7 @@ object projectoptionsfo: tprojectoptionsfo
             end
             object dincludeon: tbooleanedit
               Tag = 131072
+              optionsskin = [osk_framebuttononly]
               bounds_x = 99
               bounds_y = 0
               bounds_cy = 16
@@ -1808,6 +1834,7 @@ object projectoptionsfo: tprojectoptionsfo
             end
             object dlibon: tbooleanedit
               Tag = 262144
+              optionsskin = [osk_framebuttononly]
               bounds_x = 113
               bounds_y = 0
               bounds_cy = 16
@@ -1818,6 +1845,7 @@ object projectoptionsfo: tprojectoptionsfo
             end
             object dobjon: tbooleanedit
               Tag = 524288
+              optionsskin = [osk_framebuttononly]
               bounds_x = 127
               bounds_y = 0
               bounds_cy = 16
@@ -1832,6 +1860,7 @@ object projectoptionsfo: tprojectoptionsfo
             end
             object unitdirs: tfilenameedit
               optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+              optionsskin = [osk_framebuttononly]
               bounds_x = 141
               bounds_y = 0
               bounds_cx = 481
@@ -2069,6 +2098,7 @@ object projectoptionsfo: tprojectoptionsfo
         reffontheight = 14
         object e0: tbooleanedit
           Tag = 1
+          optionsskin = [osk_framebuttononly]
           bounds_x = 0
           bounds_y = 0
           bounds_cy = 16
@@ -2080,6 +2110,7 @@ object projectoptionsfo: tprojectoptionsfo
         end
         object e1: tbooleanedit
           Tag = 2
+          optionsskin = [osk_framebuttononly]
           bounds_x = 14
           bounds_y = 0
           bounds_cy = 16
@@ -2091,6 +2122,7 @@ object projectoptionsfo: tprojectoptionsfo
         end
         object e2: tbooleanedit
           Tag = 4
+          optionsskin = [osk_framebuttononly]
           bounds_x = 28
           bounds_y = 0
           bounds_cy = 16
@@ -2102,6 +2134,7 @@ object projectoptionsfo: tprojectoptionsfo
         end
         object e3: tbooleanedit
           Tag = 8
+          optionsskin = [osk_framebuttononly]
           bounds_x = 42
           bounds_y = 0
           bounds_cy = 16
@@ -2113,6 +2146,7 @@ object projectoptionsfo: tprojectoptionsfo
         end
         object e4: tbooleanedit
           Tag = 16
+          optionsskin = [osk_framebuttononly]
           bounds_x = 56
           bounds_y = 0
           bounds_cy = 16
@@ -2124,6 +2158,7 @@ object projectoptionsfo: tprojectoptionsfo
         end
         object e5: tbooleanedit
           Tag = 32
+          optionsskin = [osk_framebuttononly]
           bounds_x = 70
           bounds_y = 0
           bounds_cy = 16
@@ -2135,6 +2170,7 @@ object projectoptionsfo: tprojectoptionsfo
         end
         object macronames: tstringedit
           optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+          optionsskin = [osk_framebuttononly]
           bounds_x = 84
           bounds_y = 0
           bounds_cx = 146
@@ -2146,6 +2182,7 @@ object projectoptionsfo: tprojectoptionsfo
         end
         object macrovalues: tstringedit
           optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight]
+          optionsskin = [osk_framebuttononly]
           bounds_x = 231
           bounds_y = 0
           bounds_cx = 391
@@ -2221,6 +2258,7 @@ object projectoptionsfo: tprojectoptionsfo
         onrowsmoved = selectactiveonrowsmoved
         reffontheight = 14
         object activemacroselect: tbooleaneditradio
+          optionsskin = [osk_framebuttononly]
           bounds_x = 0
           bounds_y = 0
           bounds_cx = 14
@@ -2232,6 +2270,7 @@ object projectoptionsfo: tprojectoptionsfo
         end
         object groupcomment: tstringedit
           optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+          optionsskin = [osk_framebuttononly]
           bounds_x = 15
           bounds_y = 0
           bounds_cx = 578
@@ -2312,6 +2351,7 @@ object projectoptionsfo: tprojectoptionsfo
         reffontheight = 14
         object fontalias: tstringedit
           optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+          optionsskin = [osk_framebuttononly]
           bounds_x = 0
           bounds_y = 0
           bounds_cx = 98
@@ -2322,6 +2362,7 @@ object projectoptionsfo: tprojectoptionsfo
         end
         object fontname: tstringedit
           optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight]
+          optionsskin = [osk_framebuttononly]
           bounds_x = 99
           bounds_y = 0
           bounds_cx = 476
@@ -2333,6 +2374,7 @@ object projectoptionsfo: tprojectoptionsfo
         end
         object fontheight: tintegeredit
           optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+          optionsskin = [osk_framebuttononly]
           bounds_x = 576
           bounds_y = 0
           bounds_cx = 46
@@ -2468,6 +2510,7 @@ object projectoptionsfo: tprojectoptionsfo
         reffontheight = 14
         object coldi: tpointeredit
           optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets]
+          optionsskin = [osk_framebuttononly]
           bounds_x = 0
           bounds_y = 0
           bounds_cx = 22
@@ -2479,6 +2522,7 @@ object projectoptionsfo: tprojectoptionsfo
         end
         object usercolors: tcoloredit
           optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight]
+          optionsskin = [osk_framebuttononly]
           bounds_x = 23
           bounds_y = 0
           bounds_cx = 97
@@ -2498,6 +2542,7 @@ object projectoptionsfo: tprojectoptionsfo
         end
         object usercolorcomment: tstringedit
           optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight]
+          optionsskin = [osk_framebuttononly]
           bounds_x = 121
           bounds_y = 0
           bounds_cx = 420
@@ -2618,6 +2663,7 @@ object projectoptionsfo: tprojectoptionsfo
             datarowheight = 16
             reffontheight = 14
             object loadprojectfile: tbooleanedit
+              optionsskin = [osk_framebuttononly]
               bounds_x = 0
               bounds_y = 0
               bounds_cx = 18
@@ -2631,6 +2677,7 @@ object projectoptionsfo: tprojectoptionsfo
               visible = False
             end
             object expandprojectfilemacros: tbooleanedit
+              optionsskin = [osk_framebuttononly]
               bounds_x = 19
               bounds_y = 0
               bounds_cx = 18
@@ -2645,6 +2692,7 @@ object projectoptionsfo: tprojectoptionsfo
             end
             object newprojectfiles: tfilenameedit
               optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+              optionsskin = [osk_framebuttononly]
               bounds_x = 38
               bounds_y = 0
               bounds_cx = 312
@@ -2662,6 +2710,7 @@ object projectoptionsfo: tprojectoptionsfo
             end
             object newprojectfilesdest: tstringedit
               optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight]
+              optionsskin = [osk_framebuttononly]
               bounds_x = 351
               bounds_y = 0
               bounds_cx = 271
@@ -3253,6 +3302,7 @@ object projectoptionsfo: tprojectoptionsfo
         reffontheight = 14
         object toolsave: tbooleanedit
           optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets]
+          optionsskin = [osk_framebuttononly]
           bounds_x = 0
           bounds_y = 0
           bounds_cy = 16
@@ -3266,6 +3316,7 @@ object projectoptionsfo: tprojectoptionsfo
         end
         object toolparse: tbooleanedit
           optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets]
+          optionsskin = [osk_framebuttononly]
           bounds_x = 14
           bounds_y = 0
           bounds_cy = 16
@@ -3279,6 +3330,7 @@ object projectoptionsfo: tprojectoptionsfo
         end
         object toolhide: tbooleanedit
           optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets]
+          optionsskin = [osk_framebuttononly]
           bounds_x = 28
           bounds_y = 0
           bounds_cy = 16
@@ -3292,6 +3344,7 @@ object projectoptionsfo: tprojectoptionsfo
         end
         object toolmenu: tstringedit
           optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight]
+          optionsskin = [osk_framebuttononly]
           bounds_x = 42
           bounds_y = 0
           bounds_cx = 107
@@ -3307,6 +3360,7 @@ object projectoptionsfo: tprojectoptionsfo
         end
         object toolfile: tfilenameedit
           optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight]
+          optionsskin = [osk_framebuttononly]
           bounds_x = 150
           bounds_y = 0
           bounds_cx = 209
@@ -3325,6 +3379,7 @@ object projectoptionsfo: tprojectoptionsfo
         end
         object toolparam: tstringedit
           optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_destroywidgets, ow_fontglyphheight]
+          optionsskin = [osk_framebuttononly]
           bounds_x = 360
           bounds_y = 0
           bounds_cx = 243

@@ -2,7 +2,7 @@ object breakpointsfo: tbreakpointsfo
   optionswidget = [ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_destroywidgets, ow_hinton, ow_autoscale]
   bounds_x = 107
   bounds_y = 404
-  bounds_cx = 477
+  bounds_cx = 636
   bounds_cy = 128
   frame.grip_size = 10
   frame.grip_options = [go_closebutton, go_fixsizebutton, go_topbutton]
@@ -12,7 +12,7 @@ object breakpointsfo: tbreakpointsfo
   container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_mousetransparent, ow_destroywidgets, ow_autoscale]
   container.bounds_x = 0
   container.bounds_y = 0
-  container.bounds_cx = 467
+  container.bounds_cx = 626
   container.bounds_cy = 128
   container.frame.dummy = 0
   dragdock.splitter_size = 0
@@ -20,9 +20,8 @@ object breakpointsfo: tbreakpointsfo
   options = [fo_savepos, fo_savestate]
   statfile = mainfo.projectstatfile
   caption = 'Breakpoints'
-  icon.transparentcolor = -2147483648
+  icon.transparentcolor = -2147483642
   icon.options = [bmo_masked]
-  icon.transparency = -2147483648
   icon.image = {
     00000000020000001800000018000000B4000000000000000000000000000000
     0000000000000000000000000000000000000000E0E0E0B1C0C4E0016060F001
@@ -42,7 +41,7 @@ object breakpointsfo: tbreakpointsfo
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_focusbackonesc, ow_mousewheel, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
     bounds_x = 0
     bounds_y = 24
-    bounds_cx = 467
+    bounds_cx = 626
     bounds_cy = 104
     frame.dummy = 0
     anchors = [an_top, an_bottom]
@@ -140,7 +139,7 @@ object breakpointsfo: tbreakpointsfo
       end    
       item
         linecolorfix = -1610612733
-        width = 200
+        width = 201
         options = [co_fill, co_savevalue, co_savestate]
         widthmin = 200
         widgetname = 'condition'
@@ -155,19 +154,21 @@ object breakpointsfo: tbreakpointsfo
     oncellevent = gridoncellevent
     reffontheight = 14
     object bkpton: tbooleanedit
+      optionsskin = [osk_framebuttononly]
       bounds_x = 0
       bounds_y = 0
       bounds_cx = 16
       bounds_cy = 16
       taborder = 1
-      visible = False
       optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_eatreturn, oe_resetselectonexit, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_savestate]
       ondataentered = ondataentered
+      visible = False
       onsetvalue = ononsetvalue
       valuedefault = True
     end
     object filename: tstringedit
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+      optionsskin = [osk_framebuttononly]
       bounds_x = 17
       bounds_y = 0
       bounds_cx = 158
@@ -180,6 +181,7 @@ object breakpointsfo: tbreakpointsfo
     end
     object path: tstringedit
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+      optionsskin = [osk_framebuttononly]
       bounds_x = 176
       bounds_y = 0
       bounds_cx = 50
@@ -190,6 +192,7 @@ object breakpointsfo: tbreakpointsfo
     end
     object line: tintegeredit
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+      optionsskin = [osk_framebuttononly]
       bounds_x = 227
       bounds_y = 0
       bounds_cx = 50
@@ -203,6 +206,7 @@ object breakpointsfo: tbreakpointsfo
     end
     object bkptno: tintegeredit
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+      optionsskin = [osk_framebuttononly]
       bounds_x = 278
       bounds_y = 0
       bounds_cx = 19
@@ -213,6 +217,7 @@ object breakpointsfo: tbreakpointsfo
     end
     object count: tintegeredit
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+      optionsskin = [osk_framebuttononly]
       bounds_x = 298
       bounds_y = 0
       bounds_cx = 31
@@ -224,6 +229,7 @@ object breakpointsfo: tbreakpointsfo
     end
     object ignore: tintegeredit
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+      optionsskin = [osk_framebuttononly]
       bounds_x = 330
       bounds_y = 0
       bounds_cx = 30
@@ -235,21 +241,23 @@ object breakpointsfo: tbreakpointsfo
       reffontheight = 14
     end
     object conderr: tdataicon
+      optionsskin = [osk_framebuttononly]
       bounds_x = 361
       bounds_y = 0
       bounds_cx = 7
       bounds_cy = 16
       taborder = 8
-      visible = False
       optionsedit = [oe_readonly, oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_exitoncursor, oe_eatreturn, oe_resetselectonexit, oe_autoselect, oe_autoselectonfirstclick, oe_autopopupmenu, oe_savestate]
+      visible = False
       imagelist = actionsmo.buttonicons
       imageoffset = 10
     end
     object condition: tstringedit
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
+      optionsskin = [osk_framebuttononly]
       bounds_x = 369
       bounds_y = 0
-      bounds_cx = 200
+      bounds_cx = 201
       bounds_cy = 16
       taborder = 9
       visible = False
@@ -260,7 +268,8 @@ object breakpointsfo: tbreakpointsfo
     end
     object flags: tintegeredit
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_fontglyphheight, ow_autoscale]
-      bounds_x = 570
+      optionsskin = [osk_framebuttononly]
+      bounds_x = 571
       bounds_y = 0
       bounds_cx = 50
       bounds_cy = 16

@@ -351,7 +351,6 @@ type
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
-   function hasgridparent: boolean; virtual;
    procedure initnewcomponent(const ascale: real); override;
    procedure changed;
    procedure initfocus;
@@ -1381,11 +1380,6 @@ begin
   info.caption:= text;
  end;
  inherited;
-end;
-
-function tcustomedit.hasgridparent: boolean;
-begin
- result:= false;
 end;
 
 {$ifdef mse_with_ifi}

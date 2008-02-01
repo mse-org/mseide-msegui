@@ -68,8 +68,6 @@ object sourcefo: tsourcefo
     tab_frame.buttonslast = True
     tab_frame.buttonsvisible = [sk_right, sk_up, sk_left, sk_down, sk_first, sk_last]
     tab_frame.dummy = 0
-    tab_face.template = guitemplatesmo.fadehorzconcave
-    tab_face.dummy = 0
     tab_facetab.template = guitemplatesmo.fadevertkonvex
     tab_facetab.dummy = 0
     tab_size = 104

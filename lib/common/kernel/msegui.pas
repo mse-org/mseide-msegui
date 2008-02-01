@@ -57,7 +57,7 @@ type
                    );
  optionswidgetty = set of optionwidgetty;
 
- optionskinty = (osk_noskin,osk_container);
+ optionskinty = (osk_noskin,osk_framebuttononly,osk_container);
  optionsskinty = set of optionskinty;
  
  anchorty = (an_left,an_top,an_right,an_bottom);

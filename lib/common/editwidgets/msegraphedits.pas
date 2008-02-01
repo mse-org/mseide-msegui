@@ -184,6 +184,7 @@ type
    property statvarname: msestring read getstatvarname write fstatvarname;
    property optionsedit: optionseditty read getoptionsedit write setoptionsedit
                               default defaultoptionsedit;
+   property optionsskin;
    property onchange: notifyeventty read fonchange write fonchange;
    property ondataentered: notifyeventty read fondataentered write fondataentered;
 //   property onmouseevent: mouseeventty read fonmouseevent write fonmouseevent;
@@ -1239,6 +1240,7 @@ begin
  end;
  fgridintf.getcol.options:= fgridintf.getcol.options + [co_drawfocus];
  optionswidget:= optionswidget - [ow_autoscale];
+ optionsskin:= optionsskin + defaultgridskinoptions;
 end;
 
 function tgraphdataedit.docheckvalue(var avalue): boolean;

@@ -152,7 +152,6 @@ type
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
-   function hasgridparent: boolean; override;
    procedure createtabulators;
    function actualcolor: colorty; override;
    procedure synctofontheight; override;
@@ -512,6 +511,7 @@ begin
  with fgridintf.grid do begin
   optionsgrid:= optionsgrid + [og_autofirstrow];
  end;
+ optionsskin:= optionsskin + defaultgridskinoptions;
 end;
 
 procedure tcustomtextedit.sortfunc(const l, r; var result: integer);
@@ -1901,11 +1901,6 @@ begin
  else begin
   optionsedit:= optionsedit - [oe_readonly];
  end;  
-end;
-
-function tcustomtextedit.hasgridparent: boolean;
-begin
- result:= fgridintf <> nil;
 end;
 
 { tundotextedit }

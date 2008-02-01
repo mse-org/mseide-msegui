@@ -49,6 +49,7 @@ const
  fixcoloptionsmask:coloptionsty = [co_rowfont,co_rowcolor,co_zebracolor];
  defaultfixcoloptions = [];
  rowstatemask = $7f;
+ defaultgridskinoptions = [osk_framebuttononly];
  
 type
  optiongridty = (og_colsizing,og_colmoving,og_keycolmoving,

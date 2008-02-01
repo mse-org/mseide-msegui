@@ -117,7 +117,6 @@ type
   public
    procedure initgridwidget; virtual;
    procedure synctofontheight; override;
-   function hasgridparent: boolean; override;
    function actualcolor: colorty; override;
    function widgetcol: twidgetcol;
    function gridrow: integer;
@@ -1026,6 +1025,7 @@ end;
 procedure tdataedit.initgridwidget;
 begin
  optionswidget:= optionswidget - [ow_autoscale];
+ optionsskin:= optionsskin + defaultgridskinoptions;
  if fframe <> nil then begin
   fframe.initgridframe;
  end;
@@ -1632,11 +1632,6 @@ procedure tdataedit.aftercelldragevent(var ainfo: draginfoty; const arow: intege
                var handled: boolean);
 begin
  //dummy
-end;
-
-function tdataedit.hasgridparent: boolean;
-begin
- result:= fgridintf <> nil;
 end;
 
 { tcustomstringedit }
