@@ -545,7 +545,6 @@ end;
 procedure tcustomskincontroller.setdataeditskin(const instance: tdataedit;
                                             const ainfo: dataeditskininfoty);
 begin
- setwidgetcolor(instance,ainfo.color);
  setwidgetface(instance,ainfo.face);
  with instance do begin
   if ainfo.frame <> nil then begin
@@ -1079,6 +1078,7 @@ end;
 procedure tskincontroller.handledataedit(const sender: tdataedit;
                const ainfo: skininfoty);
 begin
+ handlewidget(sender,ainfo);
  setdataeditskin(sender,fdataedit);
 end;
 
