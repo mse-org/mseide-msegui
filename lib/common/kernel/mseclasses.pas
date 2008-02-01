@@ -257,7 +257,8 @@ type
  skinoptionsty = set of skinoptionty;
  
  skinobjectkindty = (sok_component,sok_widget,sok_simplebutton,sok_tabbar,
-                     sok_edit,sok_dataedit,sok_mainmenu,sok_popupmenu,
+                     sok_edit,sok_dataedit,sok_booleanedit,
+                     sok_mainmenu,sok_popupmenu,
                      sok_user); 
  skininfoty = record
   objectkind: skinobjectkindty;

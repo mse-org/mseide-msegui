@@ -12,7 +12,7 @@ unit mseskin;
 interface
 uses
  classes,mseclasses,msegui,msescrollbar,mseedit,msegraphics,msegraphutils,
- msetabs,msedataedits,msemenus,msearrayprops;
+ msetabs,msedataedits,msemenus,msearrayprops,msegraphedits;
 type
  beforeskinupdateeventty = procedure(const sender: tobject; 
                 const ainfo: skininfoty; var handled: boolean) of object;
@@ -114,6 +114,8 @@ type
                                             const ainfo: widgetskininfoty);
    procedure setdataeditskin(const instance: tdataedit;
                                             const ainfo: dataeditskininfoty);
+   procedure setgraphdataeditskin(const instance: tgraphdataedit;
+                                            const ainfo: dataeditskininfoty);
    procedure setwidgetfont(const instance: twidget; const afont: tfont);
    procedure setwidgetcolor(const instance: twidget; const acolor: colorty);
    procedure setscrollbarskin(const instance: tcustomscrollbar; 
@@ -140,6 +142,8 @@ type
    procedure handleedit(const sender: tedit;
                            const ainfo: skininfoty); virtual;
    procedure handledataedit(const sender: tdataedit;
+                           const ainfo: skininfoty); virtual;
+   procedure handlebooleanedit(const sender: tgraphdataedit;
                            const ainfo: skininfoty); virtual;
    procedure handlemainmenu(const sender: tcustommainmenu;
                            const ainfo: skininfoty); virtual;
@@ -172,6 +176,7 @@ type
    fpopupmenu: menuskininfoty;
    fmainmenu: mainmenuskininfoty;
    fdataedit: dataeditskininfoty;
+   fbooleanedit: dataeditskininfoty;
    
    procedure setsb_vert_facebutton(const avalue: tfacecomp);
    procedure setsb_vert_faceendbutton(const avalue: tfacecomp);
@@ -192,6 +197,9 @@ type
 
    procedure setdataedit_face(const avalue: tfacecomp);
    procedure setdataedit_frame(const avalue: tframecomp);
+
+   procedure setbooleanedit_face(const avalue: tfacecomp);
+   procedure setbooleanedit_frame(const avalue: tframecomp);
 
    procedure setcontainer_face(const avalue: tfacecomp);
 
@@ -236,6 +244,8 @@ type
                            const ainfo: skininfoty); override;
    procedure handledataedit(const sender: tdataedit;
                            const ainfo: skininfoty); override;
+   procedure handlebooleanedit(const sender: tgraphdataedit;
+                           const ainfo: skininfoty); override;
    procedure handlemainmenu(const sender: tcustommainmenu;
                            const ainfo: skininfoty); override;
    procedure handlepopupmenu(const sender: tpopupmenu;
@@ -275,6 +285,12 @@ type
    property dataedit_frame: tframecomp read fdataedit.frame 
                         write setdataedit_frame;
                         
+   property booleanedit_color: colorty read fbooleanedit.color 
+                        write fbooleanedit.color default cl_default;
+   property booleanedit_face: tfacecomp read fbooleanedit.face write setbooleanedit_face;
+   property booleanedit_frame: tframecomp read fbooleanedit.frame 
+                        write setbooleanedit_frame;
+
    property container_face: tfacecomp read fcontainer_face 
                                               write setcontainer_face;
    property button_face: tfacecomp read fbutton.wi.fa write setbutton_face;
@@ -490,6 +506,9 @@ begin
     sok_dataedit: begin
      handledataedit(tdataedit(instance),ainfo);
     end;
+    sok_booleanedit: begin
+     handlebooleanedit(tgraphdataedit(instance),ainfo);
+    end;
     sok_simplebutton: begin
      handlesimplebutton(tactionsimplebutton(instance),ainfo);
     end;
@@ -579,8 +598,13 @@ end;
 
 procedure tcustomskincontroller.setdataeditskin(const instance: tdataedit;
                                             const ainfo: dataeditskininfoty);
-var
- col1: colorty;
+begin
+ setwidgetface(instance,ainfo.face);
+ setwidgetframetemplate(instance,ainfo.frame);
+end;
+
+procedure tcustomskincontroller.setgraphdataeditskin(
+           const instance: tgraphdataedit; const ainfo: dataeditskininfoty);
 begin
  setwidgetface(instance,ainfo.face);
  setwidgetframetemplate(instance,ainfo.frame);
@@ -786,6 +810,12 @@ begin
  //dummy
 end;
 
+procedure tcustomskincontroller.handlebooleanedit(const sender: tgraphdataedit;
+               const ainfo: skininfoty);
+begin
+ //dummy
+end;
+
 procedure tcustomskincontroller.handlemainmenu(const sender: tcustommainmenu;
                const ainfo: skininfoty);
 begin
@@ -808,6 +838,7 @@ begin
  ftabbar.tavert.color:= cl_default;
  ftabbar.tavert.coloractive:= cl_default;
  fdataedit.color:= cl_default;
+ fbooleanedit.color:= cl_default;
  inherited;
 end;
 
@@ -825,6 +856,16 @@ end;
 procedure tskincontroller.setdataedit_frame(const avalue: tframecomp);
 begin
  setlinkedvar(avalue,tmsecomponent(fdataedit.frame));
+end;
+
+procedure tskincontroller.setbooleanedit_face(const avalue: tfacecomp);
+begin
+ setlinkedvar(avalue,tmsecomponent(fbooleanedit.face));
+end;
+
+procedure tskincontroller.setbooleanedit_frame(const avalue: tframecomp);
+begin
+ setlinkedvar(avalue,tmsecomponent(fbooleanedit.frame));
 end;
 
 procedure tskincontroller.setcontainer_face(const avalue: tfacecomp);
@@ -1110,6 +1151,13 @@ procedure tskincontroller.handledataedit(const sender: tdataedit;
 begin
  handlewidget(sender,ainfo);
  setdataeditskin(sender,fdataedit);
+end;
+
+procedure tskincontroller.handlebooleanedit(const sender: tgraphdataedit;
+               const ainfo: skininfoty);
+begin
+ handlewidget(sender,ainfo);
+ setgraphdataeditskin(sender,fbooleanedit);
 end;
 
 procedure tskincontroller.handlemainmenu(const sender: tcustommainmenu;

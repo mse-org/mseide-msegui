@@ -461,6 +461,7 @@ type
    function getvaluedefault: boolean;
    procedure setvaluedefault(const Value: boolean);
   protected
+   class function classskininfo: skininfoty; override;
    procedure setnullvalue;
    function getdefaultvalue: pointer; override;
    procedure valuetogrid(const arow: integer); override;
@@ -1774,6 +1775,12 @@ end;
 function tcustombooleanedit.getdefaultvalue: pointer;
 begin
  result:= @fvaluedefault;
+end;
+
+class function tcustombooleanedit.classskininfo: skininfoty;
+begin
+ result:= inherited classskininfo;
+ result.objectkind:= sok_booleanedit;
 end;
 
 procedure tcustombooleanedit.setnullvalue;
