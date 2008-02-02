@@ -2322,6 +2322,13 @@ end;
 procedure tcustomdatabutton.clientrectchanged;
 begin
  inherited;
+ frameskinoptionstoshapestate(fframe,finfo.state);
+ if ss_flat in finfo.state then begin
+  exclude(fwidgetstate1,ws1_nodesignframe);
+ end
+ else begin
+  include(fwidgetstate1,ws1_nodesignframe);
+ end;
  finfo.dim:= innerclientrect;
 end;
 
@@ -2643,7 +2650,7 @@ procedure tcustomdatabutton.setoptions(const avalue: buttonoptionsty);
 begin
  if foptions <> avalue then begin
   foptions:= avalue - [bo_shortcutcaption];
-  buttonoptionstoshapestate(foptions,finfo.state);
+//  buttonoptionstoshapestate(foptions,finfo.state);
   invalidate;
  end;
 end;

@@ -90,6 +90,9 @@ procedure actioninfotoshapeinfo(var actioninfo: actioninfoty;
             var shapeinfo: shapeinfoty); overload;
 procedure actioninfotoshapeinfo(const sender: twidget; var actioninfo: actioninfoty;
                                     var shapeinfo: shapeinfoty); overload;
+procedure frameskinoptionstoshapestate(const aframe: tcustomframe;
+                                    var dest: shapestatesty);
+
 procedure checkbuttonhint(const awidget: twidget; info: mouseeventinfoty;
     var hintedbutton: integer; const cells: shapeinfoarty;
      const getbuttonhint: getbuttonhintty; 
@@ -105,6 +108,23 @@ type
  twidget1 = class(twidget);
 var
  buttontab: tcustomtabulators;
+
+procedure frameskinoptionstoshapestate(const aframe: tcustomframe;
+                                    var dest: shapestatesty);
+begin
+ if aframe <> nil then begin
+  updatebit(longword(dest),ord(ss_flat),fso_flat in aframe.optionsskin);
+  updatebit(longword(dest),ord(ss_noanimation),fso_noanim in aframe.optionsskin);
+  updatebit(longword(dest),ord(ss_showfocusrect),
+                              not(fso_nofocusrect in aframe.optionsskin));
+  updatebit(longword(dest),ord(ss_showdefaultrect),
+                              not (fso_nodefaultrect in aframe.optionsskin));
+ end
+ else begin
+  dest:= (dest - [ss_flat,ss_noanimation]) + 
+                              [ss_showfocusrect,ss_showdefaultrect];
+ end; 
+end;
 
 procedure checkbuttonhint(const awidget: twidget; info: mouseeventinfoty;
                    var hintedbutton: integer; const cells: shapeinfoarty;

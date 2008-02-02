@@ -71,6 +71,8 @@ type
    property frameimage_offsetactive;
    property frameimage_offsetactivemouse;
    property frameimage_offsetactiveclicked;
+   
+   property optionsskin;
 
    property colorclient;
    property caption;

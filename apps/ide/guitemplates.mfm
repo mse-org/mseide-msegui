@@ -72,7 +72,6 @@ object guitemplatesmo: tguitemplatesmo
     sb_vert_facebutton = fadehorzconcave
     sb_vert_faceendbutton = fadehorzconcave
     widget_color = -2147483645
-    dataedit_color = -2147483645
     container_face = fadehorzconvex
     button_face = fadevertkonvex
     framebutton_face = fadehorzconvex

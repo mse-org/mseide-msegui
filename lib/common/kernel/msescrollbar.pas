@@ -35,8 +35,8 @@ const
 type
  scrollbaroptionty = (sbo_thumbtrack,sbo_moveauto,sbo_showauto,sbo_show,
                       sbo_opposite,sbo_valuekeys,sbo_noarrowkeys,sbo_nopagekeys,
-                      sbo_noreflectedclick,
-                      sbo_flat,sbo_noanim);
+                      sbo_noreflectedclick{,
+                      sbo_flat,sbo_noanim});
                        //sbo_valuekeys -> pageup = valueincrement
  scrollbaroptionsty = set of scrollbaroptionty;
 
@@ -438,18 +438,23 @@ begin
   if fframeendbutton1 <> nil then begin
    deflaterect1(areas[sbbu_down].dim,fframeendbutton1.innerframe);
   end;
+  frameskinoptionstoshapestate(fframeendbutton1,areas[sbbu_down].state);
   buttonareas[bbu_move]:= areas[sbbu_move].dim;
   if fframebutton <> nil then begin
    deflaterect1(areas[sbbu_move].dim,fframebutton.innerframe);
   end;
+  frameskinoptionstoshapestate(fframebutton,areas[sbbu_move].state);
   buttonareas[bbu_up]:= areas[sbbu_up].dim;
   if fframeendbutton2 <> nil then begin
    deflaterect1(areas[sbbu_up].dim,fframeendbutton2.innerframe);
   end;
+  frameskinoptionstoshapestate(fframeendbutton2,areas[sbbu_up].state);
+  {
   for bu1:= firstbutton to lastbutton do begin
    updatebit(longword(areas[bu1].state),ord(ss_flat),sbo_flat in foptions);
    updatebit(longword(areas[bu1].state),ord(ss_noanimation),sbo_noanim in foptions);
   end;
+  }
  end;
 end;
 

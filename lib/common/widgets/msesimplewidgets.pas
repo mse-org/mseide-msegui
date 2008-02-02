@@ -434,6 +434,8 @@ type
    property frameimage_offsetactive;
    property frameimage_offsetactivemouse;
    property frameimage_offsetactiveclicked;
+   
+   property optionsskin;
 
    property caption;
    property captionpos;
@@ -499,12 +501,14 @@ end;
 procedure tcustombutton.setoptions(const avalue: buttonoptionsty);
 begin
  inherited;
+ {
  if bo_flat in avalue then begin
   exclude(fwidgetstate1,ws1_nodesignframe);
  end
  else begin
   include(fwidgetstate1,ws1_nodesignframe);
  end;
+ }
  if bo_shortcutcaption in avalue then begin
   setactionoptions(iactionlink(self),factioninfo.options + [mao_shortcutcaption]);
  end

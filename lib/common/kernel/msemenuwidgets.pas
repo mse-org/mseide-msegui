@@ -317,6 +317,7 @@ var
  needsmenuarrow: boolean;
  parentcolor: colorty;
  parentcoloractive: colorty;
+ noanim1: boolean;
  
 begin
  ar1:= nil; //compiler warning
@@ -332,6 +333,8 @@ begin
    with tframetemplate1(itemframetemplateactive) do begin
     framehalfwidth:= (abs(levelo) + abs(leveli) + framewidth);
    end;
+  end
+  else begin
   end;
   if itemframetemplate <> nil then begin
    with tframetemplate1(itemframetemplate) do begin
@@ -344,6 +347,7 @@ begin
     imagedi:= fimagedist;
     imageditop:= fimagedisttop;
     imagedibottom:= fimagedistbottom;
+    noanim1:= fso_noanim in optionsskin;
    end;
   end
   else begin
@@ -352,6 +356,7 @@ begin
    imagedi:= 0;
    imageditop:= 0;
    imagedibottom:= 0;
+   noanim1:= false;
   end; 
   framewidth1:= framehalfwidth * 2;
   framewidth1:= framewidth1 + extrasp;
@@ -444,7 +449,7 @@ begin
       end;
      end;
      include(state,ss_flat);
-     if (owner <> nil) and (mo_noanim in owner.options) then begin
+     if noanim1 then begin
       include(state,ss_noanimation) 
      end
      else begin

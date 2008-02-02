@@ -34,6 +34,9 @@ const
  mousebuttons = [ss_left,ss_right,ss_middle];
 
 type
+ frameskinoptionty = (fso_flat,fso_noanim,fso_nofocusrect,fso_nodefaultrect);
+ frameskinoptionsty = set of frameskinoptionty;
+ 
  optionwidgetty = (ow_background,ow_top,ow_noautosizing,{ow_nofocusrect,}
                    ow_mousefocus,ow_tabfocus,ow_parenttabfocus,ow_arrowfocus,
                    ow_arrowfocusin,ow_arrowfocusout,
@@ -146,6 +149,7 @@ type
                      frl_frameimageoffsetclicked,frl_frameimageoffsetactive,
                      frl_frameimageoffsetactivemouse,
                      frl_frameimageoffsetactiveclicked,
+                     frl_optionsskin,
                      frl_colorclient,
                      frl_nodisable);
  framelocalpropsty = set of framelocalpropty;
@@ -160,7 +164,9 @@ const
                      frl_frameimageoffsetclicked,frl_frameimageoffsetactive,
                      frl_frameimageoffsetactivemouse,
                      frl_frameimageoffsetactiveclicked,
-                     frl_colorclient];
+                     frl_optionsskin,
+                     frl_colorclient,
+                     frl_nodisable];
 type
  facelocalpropty = (fal_options,fal_fadirection,fal_image,fal_fapos,fal_facolor,
                     fal_fatransparency,fal_frameimagelist,fal_frameimageoffset);
@@ -226,7 +232,8 @@ type
   frameimage_offsetactiveclicked: integer;
 
   frameimage_list: timagelist; //last!
-
+  
+  optionsskin: frameskinoptionsty;
  end;
 
  tframecomp = class;
@@ -291,7 +298,10 @@ type
    function isframeimage_offsetactivemousestored: boolean;
    procedure setframeimage_offsetactiveclicked(const avalue: integer);
    function isframeimage_offsetactiveclickedstored: boolean;
-  
+
+   procedure setoptionsskin(const avalue: frameskinoptionsty);
+   function isoptionsskinstored: boolean;
+   
    procedure setcolorclient(const Value: colorty);
    function iscolorclientstored: boolean;
    procedure settemplate(const avalue: tframecomp);
@@ -424,6 +434,8 @@ type
                     write setframeimage_offsetactiveclicked
                     stored isframeimage_offsetactiveclickedstored;
 
+   property optionsskin: frameskinoptionsty read fi.optionsskin 
+                    write setoptionsskin stored isoptionsskinstored;
    property colorclient: colorty read fi.colorclient write setcolorclient
                      stored iscolorclientstored default cl_transparent;
    property localprops: framelocalpropsty read flocalprops write setlocalprops default []; 
@@ -452,6 +464,8 @@ type
    property frameimage_offsetactive;
    property frameimage_offsetactivemouse;
    property frameimage_offsetactiveclicked;
+   
+   property optionsskin;
 
    property colorclient;
    property colordkshadow;
@@ -499,7 +513,8 @@ type
    procedure setframeimage_offsetactive(const avalue: integer);
    procedure setframeimage_offsetactivemouse(const avalue: integer);
    procedure setframeimage_offsetactiveclicked(const avalue: integer);
-
+   
+   procedure setoptionsskin(const avalue: frameskinoptionsty);
   protected
    fi: frameinfoty;
    fextraspace: integer;
@@ -572,17 +587,19 @@ type
    property colorclient: colorty read fi.colorclient write setcolorclient 
                                             default cl_transparent;
    property colordkshadow: colorty read fi.framecolors.shadow.effectcolor
-                     write setcolordkshadow default cl_default;
+                      write setcolordkshadow default cl_default;
    property colorshadow: colorty read fi.framecolors.shadow.color
-                       write setcolorshadow default cl_default;
+                      write setcolorshadow default cl_default;
    property colorlight: colorty read fi.framecolors.light.color
-                        write setcolorlight default cl_default;
+                      write setcolorlight default cl_default;
    property colorhighlight: colorty read fi.framecolors.light.effectcolor
-                    write setcolorhighlight default cl_default;
+                      write setcolorhighlight default cl_default;
    property colordkwidth: integer read fi.framecolors.shadow.effectwidth
                       write setcolordkwidth default -1;
    property colorhlwidth: integer read fi.framecolors.light.effectwidth
                       write setcolorhlwidth default -1;
+   property optionsskin: frameskinoptionsty read fi.optionsskin 
+                      write setoptionsskin default [];
  end;
 
  tframecomp = class(ttemplatecontainer)
@@ -3127,6 +3144,15 @@ begin
  end;
 end;
 
+procedure tcustomframe.setoptionsskin(const avalue: frameskinoptionsty);
+begin
+ include(flocalprops,frl_optionsskin);
+ if fi.optionsskin <> avalue then begin
+  fi.optionsskin:= avalue;
+  internalupdatestate;
+ end;
+end;
+
 procedure tcustomframe.setcolorclient(const value: colorty);
 begin
  include(flocalprops,frl_colorclient);
@@ -3310,6 +3336,10 @@ begin
    frameimage_offsetactiveclicked:= ainfo.frameimage_offsetactiveclicked;
   end;
 
+  if not (frl_optionsskin in flocalprops) then begin
+   optionsskin:= ainfo.optionsskin;
+  end;
+  
   if not (frl_colorclient in flocalprops) then begin
    colorclient:= ainfo.colorclient;
   end;
@@ -3572,6 +3602,11 @@ begin
  result:= (ftemplate = nil) or (frl_frameimageoffsetactiveclicked in flocalprops);
 end;
 
+function tcustomframe.isoptionsskinstored: boolean;
+begin
+ result:= (ftemplate = nil) or (frl_optionsskin in flocalprops);
+end;
+
 function tcustomframe.iscolorclientstored: boolean;
 begin
  result:= (ftemplate = nil) or (frl_colorclient in flocalprops);
@@ -3818,6 +3853,12 @@ end;
 procedure tframetemplate.setframeimage_offsetactiveclicked(const avalue: integer);
 begin
  fi.frameimage_offsetactiveclicked:= avalue;
+ changed;
+end;
+
+procedure tframetemplate.setoptionsskin(const avalue: frameskinoptionsty);
+begin
+ fi.optionsskin:= avalue;
  changed;
 end;
 

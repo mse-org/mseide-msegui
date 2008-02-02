@@ -17,8 +17,8 @@ type
  beforeskinupdateeventty = procedure(const sender: tobject; 
                 const ainfo: skininfoty; var handled: boolean) of object;
 
- skinmenuoptionty = (smo_noanim);
- skinmenuoptionsty = set of skinmenuoptionty;
+// skinmenuoptionty = (smo_noanim);
+// skinmenuoptionsty = set of skinmenuoptionty;
  
  scrollbarskininfoty = record
   facebu: tfacecomp;
@@ -58,14 +58,14 @@ type
   itemframe: tframecomp;
   itemfaceactive: tfacecomp;
   itemframeactive: tframecomp;
-  options: skinmenuoptionsty;
+//  options: skinmenuoptionsty;
  end;  
  mainmenuskininfoty = record
   ma: menuskininfoty;
   pop: menuskininfoty;
  end;
  dataeditskininfoty = record
-  color: colorty;
+//  color: colorty;
   face: tfacecomp;
   frame: tframecomp;
  end;
@@ -279,14 +279,14 @@ type
    property widget_color: colorty read fwidget_color 
                         write fwidget_color default cl_default;
 
-   property dataedit_color: colorty read fdataedit.color 
-                        write fdataedit.color default cl_default;
+//   property dataedit_color: colorty read fdataedit.color 
+//                        write fdataedit.color default cl_default;
    property dataedit_face: tfacecomp read fdataedit.face write setdataedit_face;
    property dataedit_frame: tframecomp read fdataedit.frame 
                         write setdataedit_frame;
                         
-   property booleanedit_color: colorty read fbooleanedit.color 
-                        write fbooleanedit.color default cl_default;
+//   property booleanedit_color: colorty read fbooleanedit.color 
+//                        write fbooleanedit.color default cl_default;
    property booleanedit_face: tfacecomp read fbooleanedit.face write setbooleanedit_face;
    property booleanedit_frame: tframecomp read fbooleanedit.frame 
                         write setbooleanedit_frame;
@@ -322,9 +322,10 @@ type
                                write settabbar_vert_tab_face;
    property tabbar_vert_tab_faceactive: tfacecomp read ftabbar.tavert.faceactive
                                write settabbar_vert_tab_faceactive;
-
+{
    property popupmenu_options: skinmenuoptionsty read fpopupmenu.options
                 write fpopupmenu.options default [];         
+}
    property popupmenu_face: tfacecomp read fpopupmenu.face 
                                write setpopupmenu_face;
    property popupmenu_frame: tframecomp read fpopupmenu.frame 
@@ -337,9 +338,10 @@ type
                                       write setpopupmenu_itemfaceactive;
    property popupmenu_itemframeactive: tframecomp 
             read fpopupmenu.itemframeactive write setpopupmenu_itemframeactive;
-            
+{            
    property mainmenu_options: skinmenuoptionsty read fmainmenu.ma.options
                 write fmainmenu.ma.options default [];         
+}
    property mainmenu_face: tfacecomp read fmainmenu.ma.face 
                                  write setmainmenu_face;
    property mainmenu_frame: tframecomp read fmainmenu.ma.frame 
@@ -712,12 +714,14 @@ procedure tcustomskincontroller.setpopupmenuskin(const instance: tpopupmenu;
                const ainfo: menuskininfoty);
 begin
  with instance do begin
+ {
   if smo_noanim in ainfo.options then begin
    options:= options + [mo_noanim];
   end
   else begin
    options:= options - [mo_noanim];
   end;
+  }
   if (ainfo.face <> nil) and (facetemplate = nil) then begin
    facetemplate:= ainfo.face;
   end;
@@ -837,8 +841,8 @@ begin
  ftabbar.tahorz.coloractive:= cl_default;
  ftabbar.tavert.color:= cl_default;
  ftabbar.tavert.coloractive:= cl_default;
- fdataedit.color:= cl_default;
- fbooleanedit.color:= cl_default;
+// fdataedit.color:= cl_default;
+// fbooleanedit.color:= cl_default;
  inherited;
 end;
 

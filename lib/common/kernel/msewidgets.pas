@@ -121,6 +121,8 @@ type
    property frameimage_offsetactive;
    property frameimage_offsetactivemouse;
    property frameimage_offsetactiveclicked;
+   
+   property optionsskin;
 
    property colorclient;
    property caption;
@@ -250,6 +252,8 @@ type
    property frameimage_offsetactive;
    property frameimage_offsetactivemouse;
    property frameimage_offsetactiveclicked;
+   
+   property optionsskin;
 
    property sbhorz: tscrollbar read getsbhorz write setsbhorz;
    property sbvert: tscrollbar read getsbvert write setsbvert;
@@ -347,6 +351,8 @@ type
    property frameimage_offsetactive;
    property frameimage_offsetactivemouse;
    property frameimage_offsetactiveclicked;
+   
+   property optionsskin;
 
    property caption;
    property captionpos;
@@ -465,6 +471,8 @@ type
    property frameimage_offsetactive;
    property frameimage_offsetactivemouse;
    property frameimage_offsetactiveclicked;
+   
+   property optionsskin;
  
    property caption;
    property captionpos;
@@ -823,7 +831,7 @@ destructor destroy; override;
                    bo_asyncexecute,
                    bo_focusonshortcut, //for tcustombutton
                    bo_shortcutcaption,
-                   bo_flat,bo_noanim,bo_nofocusrect,bo_nodefaultrect,
+                   {bo_flat,bo_noanim,bo_nofocusrect,bo_nodefaultrect,}
                    bo_nodefaultframeactive
                    );
  buttonoptionsty = set of buttonoptionty;
@@ -927,10 +935,10 @@ function placepopuprect(const awindow: twindow; const adest: rectty; //screenori
 function placepopuprect(const awidget: twidget; const adest: rectty; //clientorig
                  const placement: captionposty; const asize: sizety): rectty; overload;
 procedure getwindowicon(const abitmap: tmaskedbitmap; out aicon,amask: pixmapty);
-
+{
 procedure buttonoptionstoshapestate(avalue: buttonoptionsty;
                                               var astate: shapestatesty);
-
+}
 implementation
 
 uses
@@ -960,7 +968,7 @@ type
    procedure dopaint(const canvas: tcanvas); override;
    procedure dokeydown(var ainfo: keyeventinfoty); override;
 end;
-
+{
 procedure buttonoptionstoshapestate(avalue: buttonoptionsty; var astate: shapestatesty);
 begin
  if bo_flat in avalue then begin
@@ -988,7 +996,7 @@ begin
   include(astate,ss_showdefaultrect);
  end;
 end;
-
+}
 procedure copytoclipboard(const value: msestring);
 begin
  gui_copytoclipboard(value);
@@ -1369,6 +1377,13 @@ procedure tactionsimplebutton.clientrectchanged;
 begin
  inherited;
  finfo.dim:= innerclientrect;
+ frameskinoptionstoshapestate(fframe,finfo.state);
+ if ss_flat in finfo.state then begin
+  exclude(fwidgetstate1,ws1_nodesignframe);
+ end
+ else begin
+  include(fwidgetstate1,ws1_nodesignframe);
+ end;
 end;
 
 procedure tactionsimplebutton.doexecute;
@@ -1468,7 +1483,7 @@ procedure tactionsimplebutton.setoptions(const avalue: buttonoptionsty);
 begin
  if foptions <> avalue then begin
   foptions:= avalue;
-  buttonoptionstoshapestate(avalue,finfo.state);
+//  buttonoptionstoshapestate(avalue,finfo.state);
   invalidate;
  end;
 end;
