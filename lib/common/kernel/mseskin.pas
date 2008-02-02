@@ -12,7 +12,8 @@ unit mseskin;
 interface
 uses
  classes,mseclasses,msegui,msescrollbar,mseedit,msegraphics,msegraphutils,
- msetabs,msedataedits,msemenus,msearrayprops,msegraphedits;
+ msetabs,msedataedits,msemenus,msearrayprops,msegraphedits,msesimplewidgets,
+ msegrids;
 type
  beforeskinupdateeventty = procedure(const sender: tobject; 
                 const ainfo: skininfoty; var handled: boolean) of object;
@@ -31,6 +32,21 @@ type
   fa: tfacecomp;
   fra: tframecomp;
  end;
+ groupboxskininfoty = record
+  face: tfacecomp;
+  frame: tframecomp;
+ end;  
+ gridpropskininfoty = record
+  face: tfacecomp;
+  frame: tframecomp;
+ end;
+ gridskininfoty = record
+  face: tfacecomp;
+  frame: tframecomp;
+  fixrows: gridpropskininfoty;
+  fixcols: gridpropskininfoty;
+  datacols: gridpropskininfoty;
+ end;  
  buttonskininfoty = record
   wi: widgetskininfoty;
   font: toptionalfont;
@@ -105,13 +121,22 @@ type
    procedure doactivate; virtual;
    procedure dodeactivate; virtual;
    procedure loaded; override;
-   
+
+   procedure setfacetemplate(const face: tfacecomp; const dest: tcustomface);   
+   procedure setframetemplate(const frame: tframecomp; const dest: tcustomframe);   
+
    procedure setwidgetface(const instance: twidget; const aface: tfacecomp);
    procedure setwidgetframe(const instance: twidget; const aframe: tframecomp);
    procedure setwidgetframetemplate(const instance: twidget;
                             const aframe: tframecomp); //no fram nil check
    procedure setwidgetskin(const instance: twidget;
                                             const ainfo: widgetskininfoty);
+   procedure setgroupboxskin(const instance: tgroupbox;
+                                            const ainfo: groupboxskininfoty);
+   procedure setgridpropskin(const instance: tgridprop;
+                               const ainfo: gridpropskininfoty);
+   procedure setgridskin(const instance: tcustomgrid;
+                                            const ainfo: gridskininfoty);
    procedure setdataeditskin(const instance: tdataedit;
                                             const ainfo: dataeditskininfoty);
    procedure setgraphdataeditskin(const instance: tgraphdataedit;
@@ -133,6 +158,8 @@ type
                 const ainfo: skininfoty); virtual;
    procedure handlecontainer(const sender: twidget; 
                 const ainfo: skininfoty); virtual;
+   procedure handlegroupbox(const sender: tgroupbox;
+                const ainfo: skininfoty); virtual;
    procedure handlesimplebutton(const sender: twidget;
                 const ainfo: skininfoty); virtual;
    procedure handleuserobject(const sender: tobject;
@@ -148,6 +175,8 @@ type
    procedure handlemainmenu(const sender: tcustommainmenu;
                            const ainfo: skininfoty); virtual;
    procedure handlepopupmenu(const sender: tpopupmenu;
+                           const ainfo: skininfoty); virtual;
+   procedure handlegrid(const sender: tcustomgrid;
                            const ainfo: skininfoty); virtual;
   public
    constructor create(aowner: tcomponent); override;
@@ -168,6 +197,8 @@ type
   private
    fsb_horz: scrollbarskininfoty;
    fsb_vert: scrollbarskininfoty;
+   fgroupbox: groupboxskininfoty;
+   fgrid: gridskininfoty;
    fbutton: buttonskininfoty;
    fframebutton: framebuttonskininfoty;
    fcontainer_face: tfacecomp;
@@ -188,6 +219,19 @@ type
    procedure setsb_horz_framebutton(const avalue: tframecomp);
    procedure setsb_horz_frameendbutton1(const avalue: tframecomp);
    procedure setsb_horz_frameendbutton2(const avalue: tframecomp);
+
+   procedure setgroupbox_face(const avalue: tfacecomp);
+   procedure setgroupbox_frame(const avalue: tframecomp);
+
+   procedure setgrid_face(const avalue: tfacecomp);
+   procedure setgrid_frame(const avalue: tframecomp);
+   procedure setgrid_fixrows_face(const avalue: tfacecomp);
+   procedure setgrid_fixrows_frame(const avalue: tframecomp);
+   procedure setgrid_fixcols_face(const avalue: tfacecomp);
+   procedure setgrid_fixcols_frame(const avalue: tframecomp);
+   procedure setgrid_datacols_face(const avalue: tfacecomp);
+   procedure setgrid_datacols_frame(const avalue: tframecomp);
+
    procedure setbutton_face(const avalue: tfacecomp);
    procedure setbutton_frame(const avalue: tframecomp);
    function getbutton_font: toptionalfont;
@@ -236,6 +280,8 @@ type
                                   const ainfo: skininfoty); override;
    procedure handlecontainer(const sender: twidget; 
                                   const ainfo: skininfoty); override;
+   procedure handlegroupbox(const sender: tgroupbox; 
+                                  const ainfo: skininfoty); override;
    procedure handlesimplebutton(const sender: twidget; 
                                   const ainfo: skininfoty); override;
    procedure handletabbar(const sender: tcustomtabbar;
@@ -249,6 +295,8 @@ type
    procedure handlemainmenu(const sender: tcustommainmenu;
                            const ainfo: skininfoty); override;
    procedure handlepopupmenu(const sender: tpopupmenu;
+                           const ainfo: skininfoty); override;
+   procedure handlegrid(const sender: tcustomgrid;
                            const ainfo: skininfoty); override;
   public
    constructor create(aowner: tcomponent); override;
@@ -293,6 +341,24 @@ type
 
    property container_face: tfacecomp read fcontainer_face 
                                               write setcontainer_face;
+   property groupbox_face: tfacecomp read fgroupbox.face write setgroupbox_face;
+   property groupbox_frame: tframecomp read fgroupbox.frame write setgroupbox_frame;
+
+   property grid_face: tfacecomp read fgrid.face write setgrid_face;
+   property grid_frame: tframecomp read fgrid.frame write setgrid_frame;
+   property grid_fixrows_face: tfacecomp read fgrid.fixrows.face 
+                            write setgrid_fixrows_face;
+   property grid_fixrows_frame: tframecomp read fgrid.fixrows.frame
+                            write setgrid_fixrows_frame;
+   property grid_fixcols_face: tfacecomp read fgrid.fixcols.face 
+                            write setgrid_fixcols_face;
+   property grid_fixcols_frame: tframecomp read fgrid.fixcols.frame
+                            write setgrid_fixcols_frame;
+   property grid_datacols_face: tfacecomp read fgrid.datacols.face 
+                            write setgrid_datacols_face;
+   property grid_datacols_frame: tframecomp read fgrid.datacols.frame
+                            write setgrid_datacols_frame;
+
    property button_face: tfacecomp read fbutton.wi.fa write setbutton_face;
    property button_frame: tframecomp read fbutton.wi.fra write setbutton_frame;
    property button_font: toptionalfont read getbutton_font write setbutton_font;
@@ -511,6 +577,9 @@ begin
     sok_booleanedit: begin
      handlebooleanedit(tgraphdataedit(instance),ainfo);
     end;
+    sok_groupbox: begin
+     handlegroupbox(tgroupbox(instance),ainfo);
+    end;
     sok_simplebutton: begin
      handlesimplebutton(tactionsimplebutton(instance),ainfo);
     end;
@@ -522,6 +591,9 @@ begin
     end;
     sok_popupmenu: begin
      handlepopupmenu(tpopupmenu(instance),ainfo);
+    end;
+    sok_grid: begin
+     handlegrid(tcustomgrid(instance),ainfo);
     end;
     sok_user: begin
      handleuserobject(instance,ainfo);
@@ -538,6 +610,22 @@ procedure tcustomskincontroller.handlewidget(const sender: twidget;
                const ainfo: skininfoty);
 begin
  //dummy
+end;
+
+procedure tcustomskincontroller.setfacetemplate(const face: tfacecomp;
+                  const dest: tcustomface);   
+begin
+ if (face <> nil) and (dest.template = nil) then begin
+  dest.template:= face;
+ end;
+end;
+
+procedure tcustomskincontroller.setframetemplate(const frame: tframecomp;
+                  const dest: tcustomframe);   
+begin
+ if (frame <> nil) and (dest.template = nil) then begin
+  dest.template:= frame;
+ end;
 end;
 
 procedure tcustomskincontroller.setwidgetface(const instance: twidget;
@@ -596,6 +684,50 @@ procedure tcustomskincontroller.setwidgetskin(const instance: twidget;
 begin
  setwidgetface(instance,ainfo.fa);
  setwidgetframe(instance,ainfo.fra);
+end;
+
+procedure tcustomskincontroller.setgroupboxskin(const instance: tgroupbox;
+                                            const ainfo: groupboxskininfoty);
+begin
+ setwidgetface(instance,ainfo.face);
+ setwidgetframetemplate(instance,ainfo.frame);
+end;
+
+procedure tcustomskincontroller.setgridpropskin(const instance: tgridprop;
+                                   const  ainfo: gridpropskininfoty);
+begin
+ if ainfo.face <> nil then begin
+  with instance do begin
+   createface;
+   setfacetemplate(ainfo.face,face);
+  end;
+ end;
+ if ainfo.frame <> nil then begin
+  with instance do begin
+   createframe;
+   setframetemplate(ainfo.frame,frame);
+  end;
+ end;
+end;
+
+procedure tcustomskincontroller.setgridskin(const instance: tcustomgrid;
+                                            const ainfo: gridskininfoty);
+var
+ int1,int2: integer;
+begin
+ setwidgetface(instance,ainfo.face);
+ setwidgetframetemplate(instance,ainfo.frame);
+ with ainfo do begin
+  for int1:= -1 downto -instance.fixrows.count do begin
+   setgridpropskin(instance.fixrows[int1],ainfo.fixrows);
+  end;
+  for int1:= -1 downto -instance.fixcols.count do begin
+   setgridpropskin(instance.fixcols[int1],ainfo.fixcols);
+  end;
+  for int1:= 0 to instance.datacols.count - 1 do begin
+   setgridpropskin(instance.datacols[int1],ainfo.datacols);
+  end;
+ end;
 end;
 
 procedure tcustomskincontroller.setdataeditskin(const instance: tdataedit;
@@ -778,6 +910,12 @@ begin
  fcolors.assign(avalue);
 end;
 
+procedure tcustomskincontroller.handlegroupbox(const sender: tgroupbox;
+               const ainfo: skininfoty);
+begin
+ //dummy
+end;
+
 procedure tcustomskincontroller.handlesimplebutton(const sender: twidget;
                const ainfo: skininfoty);
 begin
@@ -827,6 +965,12 @@ begin
 end;
 
 procedure tcustomskincontroller.handlepopupmenu(const sender: tpopupmenu;
+               const ainfo: skininfoty);
+begin
+ //dummy
+end;
+
+procedure tcustomskincontroller.handlegrid(const sender: tcustomgrid;
                const ainfo: skininfoty);
 begin
  //dummy
@@ -925,6 +1069,56 @@ end;
 procedure tskincontroller.setsb_horz_frameendbutton2(const avalue: tframecomp);
 begin
  setlinkedvar(avalue,tmsecomponent(fsb_horz.frameendbu2));
+end;
+
+procedure tskincontroller.setgroupbox_face(const avalue: tfacecomp);
+begin
+ setlinkedvar(avalue,tmsecomponent(fgroupbox.face));
+end;
+
+procedure tskincontroller.setgroupbox_frame(const avalue: tframecomp);
+begin
+ setlinkedvar(avalue,tmsecomponent(fgroupbox.frame));
+end;
+
+procedure tskincontroller.setgrid_face(const avalue: tfacecomp);
+begin
+ setlinkedvar(avalue,tmsecomponent(fgrid.face));
+end;
+
+procedure tskincontroller.setgrid_frame(const avalue: tframecomp);
+begin
+ setlinkedvar(avalue,tmsecomponent(fgrid.frame));
+end;
+
+procedure tskincontroller.setgrid_fixrows_face(const avalue: tfacecomp);
+begin
+ setlinkedvar(avalue,tmsecomponent(fgrid.fixrows.face));
+end;
+
+procedure tskincontroller.setgrid_fixrows_frame(const avalue: tframecomp);
+begin
+ setlinkedvar(avalue,tmsecomponent(fgrid.fixrows.frame));
+end;
+
+procedure tskincontroller.setgrid_fixcols_face(const avalue: tfacecomp);
+begin
+ setlinkedvar(avalue,tmsecomponent(fgrid.fixcols.face));
+end;
+
+procedure tskincontroller.setgrid_fixcols_frame(const avalue: tframecomp);
+begin
+ setlinkedvar(avalue,tmsecomponent(fgrid.fixcols.frame));
+end;
+
+procedure tskincontroller.setgrid_datacols_face(const avalue: tfacecomp);
+begin
+ setlinkedvar(avalue,tmsecomponent(fgrid.datacols.face));
+end;
+
+procedure tskincontroller.setgrid_datacols_frame(const avalue: tframecomp);
+begin
+ setlinkedvar(avalue,tmsecomponent(fgrid.datacols.frame));
 end;
 
 procedure tskincontroller.setbutton_face(const avalue: tfacecomp);
@@ -1100,6 +1294,13 @@ begin
  setwidgetcolor(sender,fwidget_color);
 end;
 
+procedure tskincontroller.handlegroupbox(const sender: tgroupbox;
+               const ainfo: skininfoty);
+begin
+ handlewidget(sender,ainfo);
+ setgroupboxskin(sender,fgroupbox);
+end;
+
 procedure tskincontroller.handlesimplebutton(const sender: twidget;
                const ainfo: skininfoty);
 begin
@@ -1174,6 +1375,13 @@ procedure tskincontroller.handlepopupmenu(const sender: tpopupmenu;
                const ainfo: skininfoty);
 begin
  setpopupmenuskin(sender,fpopupmenu);
+end;
+
+procedure tskincontroller.handlegrid(const sender: tcustomgrid;
+               const ainfo: skininfoty);
+begin
+ handlewidget(sender,ainfo);
+ setgridskin(sender,fgrid);
 end;
 
 end.

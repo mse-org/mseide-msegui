@@ -375,6 +375,7 @@ type
   protected
    procedure internalcreateframe; override;
    procedure dofocuschanged(const oldwidget,newwidget: twidget); override;
+   class function classskininfo: skininfoty; override;
   public
    constructor create(aowner: tcomponent); override;
    procedure initnewcomponent(const ascale: real); override;
@@ -1410,6 +1411,12 @@ begin
   (checkdescendent(oldwidget) or checkdescendent(newwidget)) then begin
   fonfocusedwidgetchanged(oldwidget,newwidget);
  end; 
+end;
+
+class function tgroupbox.classskininfo: skininfoty;
+begin
+ result:= inherited classskininfo;
+ result.objectkind:= sok_groupbox;
 end;
 
 { tscrollbox }

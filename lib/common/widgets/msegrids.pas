@@ -280,8 +280,6 @@ type
    procedure updatecellrect(const aframe: tcustomframe);
    function getinnerframe: framety; virtual;
    function step(getscrollable: boolean = true): integer; virtual; abstract;
-   procedure createframe;
-   procedure createface;
     //iframe
    function getwidget: twidget;
    procedure setframeinstance(instance: tcustomframe);
@@ -312,6 +310,8 @@ type
    constructor create(const agrid: tcustomgrid; 
                const aowner: tgridarrayprop); reintroduce; virtual;
    destructor destroy; override;
+   procedure createframe;
+   procedure createface;
    procedure drawcellbackground(const acanvas: tcanvas;
                  const aframe: tcustomframe; const aface: tcustomface);
    procedure drawcelloverlay(const acanvas: tcanvas; const aframe: tcustomframe);
@@ -1273,6 +1273,8 @@ end;
    fnonullcheck: integer;
    fnocheckvalue: integer;
    fappendcount: integer;
+   class function classskininfo: skininfoty; override;
+   
    procedure setoptionsgrid(const avalue: optionsgridty); virtual;
    procedure checkrowreadonlystate; virtual;
 
@@ -9929,6 +9931,12 @@ begin
  if canevent(tmethod(fonrowsdeleted)) then begin
   fonrowsdeleted(self,index,count);
  end;
+end;
+
+class function tcustomgrid.classskininfo: skininfoty;
+begin
+ result:= inherited classskininfo;
+ result.objectkind:= sok_grid;
 end;
 
 procedure tcustomgrid.setoptionsgrid(const avalue: optionsgridty);
