@@ -818,7 +818,8 @@ function tcomponentstorefo.saveall(const quiet: boolean): modalresultty;
 begin
  result:= mr_none;
 // if fchanged then begin
-  if not fchanged or quiet or confirmsavechangedfile(fgroupfilename,result) then begin
+  if (fgroupfilename <> '') and
+   (not fchanged or quiet or confirmsavechangedfile(fgroupfilename,result)) then begin
    writestoregroup(fgroupfilename);
   end;
 // end;

@@ -1,69 +1,64 @@
 object guitemplatesmo: tguitemplatesmo
-  left = 100
-  top = 100
+  Left = 100
+  Top = 100
   moduleclassname = 'tmsedatamodule'
   size = (
     483
-    132
-  )
+    132)
   object fadevertkonvex: tfacecomp
     template.fade_pos.count = 2
     template.fade_pos.items = (
-       0.0000000000000000E+0000
-       1.0000000000000000E+0000
-    )
+      0.000000000000000000
+      1.000000000000000000)
     template.fade_color.count = 2
     template.fade_color.items = (
       14408667
-      13158600
-    )
+      13158600)
     template.fade_direction = gd_down
-    left = 24
-    top = 16
+    template.frameimage_offset = 0
+    Left = 24
+    Top = 16
   end
   object fadehorzconvex: tfacecomp
     template.fade_pos.count = 2
     template.fade_pos.items = (
-       0.0000000000000000E+0000
-       1.0000000000000000E+0000
-    )
+      0.000000000000000000
+      1.000000000000000000)
     template.fade_color.count = 2
     template.fade_color.items = (
       14408667
-      13158600
-    )
-    left = 24
-    top = 40
+      13158600)
+    template.frameimage_offset = 0
+    Left = 24
+    Top = 40
   end
   object fadehorzconcave: tfacecomp
     template.fade_pos.count = 2
     template.fade_pos.items = (
-       0.0000000000000000E+0000
-       1.0000000000000000E+0000
-    )
+      0.000000000000000000
+      1.000000000000000000)
     template.fade_color.count = 2
     template.fade_color.items = (
       14408667
-      13158600
-    )
+      13158600)
     template.fade_direction = gd_left
-    left = 144
-    top = 40
+    template.frameimage_offset = 0
+    Left = 144
+    Top = 40
   end
   object fadevertconcave: tfacecomp
     template.fade_pos.count = 2
     template.fade_pos.items = (
-       0.0000000000000000E+0000
-       1.0000000000000000E+0000
-    )
+      0.000000000000000000
+      1.000000000000000000)
     template.fade_color.count = 2
     template.fade_color.items = (
       14408667
-      13158600
-    )
+      13158600)
     template.fade_direction = gd_up
-    left = 144
-    top = 16
+    template.frameimage_offset = 0
+    Left = 144
+    Top = 16
   end
   object tskincontroller1: tskincontroller
     active = True
@@ -81,25 +76,25 @@ object guitemplatesmo: tguitemplatesmo
     tabbar_vert_face = fadehorzconcave
     tabbar_vert_tab_face = fadevertkonvex
     mainmenu_face = fadevertconcave
-    left = 24
-    top = 72
+    Left = 24
+    Top = 72
   end
   object fadecontainer: tfacecomp
     template.fade_pos.count = 2
     template.fade_pos.items = (
-       0.0000000000000000E+0000
-       1.0000000000000000E+0000
-    )
+      0.000000000000000000
+      1.000000000000000000)
     template.fade_color.count = 2
     template.fade_color.items = (
       -1610612731
-      13421772
-    )
-    left = 144
-    top = 72
+      13421772)
+    template.frameimage_offset = 0
+    Left = 144
+    Top = 72
   end
   object nullface: tfacecomp
-    left = 272
-    top = 16
+    template.frameimage_offset = 0
+    Left = 272
+    Top = 16
   end
 end

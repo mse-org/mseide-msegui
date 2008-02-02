@@ -1,4 +1,4 @@
-{ MSEide Copyright (c) 1999-2006 by Martin Schreiber
+{ MSEide Copyright (c) 1999-2008 by Martin Schreiber
    
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -727,11 +727,9 @@ begin
  result:= false;
  if fpagedestroying = 0 then begin
   for int1:= 0 to count - 1 do begin
-   with items[int1] do begin
-    if modified then begin
-     result:= true;
-     break;
-    end;
+   if items[int1].modified then begin
+    result:= true;
+    break;
    end;
   end;
  end;
@@ -788,7 +786,7 @@ begin
  end;
 end;
 
-function tsourcefo.closepage(const apage: tsourcepage; 
+function tsourcefo.closepage(const apage: tsourcepage;
                         noclosecheck: boolean = false): boolean;
 var
  str1: filenamety;

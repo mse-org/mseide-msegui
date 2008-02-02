@@ -1034,7 +1034,7 @@ begin
   makeact.enabled:= not making;
   abortmake.enabled:= making;
   saveall.enabled:= sourcefo.modified or designer.modified or projectoptions.modified;
-  actionsmo.toggleformunit.enabled:= (flastform <> nil) or 
+  actionsmo.toggleformunit.enabled:= (flastform <> nil) or
                                             (designer.modules.count > 0);
   if (sourcefo.activepage <> nil) and sourcefo.activepage.activeentered then begin
    print.enabled:= true;

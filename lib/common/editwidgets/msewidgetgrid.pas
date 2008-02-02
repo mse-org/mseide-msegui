@@ -713,6 +713,9 @@ begin
    freedesigncomponent(ffixrowwidgets[int1]);
   end;
  end;
+{$ifndef FPC}
+ pointer(fintf):= nil; //workaround for com decref
+{$endif}
  inherited;
 end;
 

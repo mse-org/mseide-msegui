@@ -721,7 +721,7 @@ var
      end;
     end
     else begin
-     str1:= copy(str1,2,maxint);
+     str1:= copy(str1,length(arguments[int1].name)+1,maxint);
      checkarguments;
     end;
    end;
