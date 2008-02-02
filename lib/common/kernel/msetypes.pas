@@ -161,7 +161,11 @@ function emptydatetime: tdatetime;
 implementation
 
 const
+{$ifdef FPC_DOUBLE_HILO_SWAPPED}
+ co1: array[0..7] of byte = (0,0,$f0,$ff,$0,0,0,0);      //- inf
+{$else}
  co1: array[0..7] of byte = ($0,0,0,0,0,0,$f0,$ff);      //- inf
+{$endif}
  
 function emptydatetime: tdatetime;
 begin

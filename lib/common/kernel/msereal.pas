@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2006 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2008 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -43,7 +43,11 @@ uses
  sysutils;
 
 const
+{$ifdef FPC_DOUBLE_HILO_SWAPPED}
+ co1: array[0..7] of byte = (0,0,$f0,$ff,$0,0,0,0);      //- inf
+{$else}
  co1: array[0..7] of byte = ($0,0,0,0,0,0,$f0,$ff);      //- inf
+{$endif}
 
 function addrealty(const a,b: realty): realty; //result = a - b
 begin
