@@ -91,10 +91,11 @@ type
    fcolor: colorty;
    frgb: colorty;
    frgbbefore: colorty;
+   procedure setcolor(const avalue: colorty);
   public
    constructor create; override;
   published
-   property color: colorty read fcolor write fcolor default cl_none;
+   property color: colorty read fcolor write setcolor default cl_none;
    property rgb: colorty read frgb write frgb;
  end;
  
@@ -464,7 +465,7 @@ type
   
 implementation
 uses
- msewidgets,msetabsglob;
+ msewidgets,msetabsglob,sysutils;
 type
  twidget1 = class(twidget);
   
@@ -473,6 +474,14 @@ type
 constructor tskincolor.create;
 begin
  fcolor:= cl_none;
+end;
+
+procedure tskincolor.setcolor(const avalue: colorty);
+begin
+ if not isvalidmapcolor(avalue) then begin
+  raise exception.create('Invalid map color.');
+ end;
+ fcolor:= avalue;
 end;
 
 { tskincolors }

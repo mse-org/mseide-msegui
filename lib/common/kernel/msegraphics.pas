@@ -874,7 +874,8 @@ function rgbtocolor(const red,green,blue: integer): colorty;
 procedure setcolormapvalue(index: colorty; const red,green,blue: integer); overload;
                     //RGB values 0..255
 procedure setcolormapvalue(const index: colorty; const acolor: colorty); overload;
-  
+function isvalidmapcolor(index: colorty): boolean;
+
 var
  flushgdi: boolean;
 
@@ -1388,6 +1389,21 @@ begin
  colormaps[cm_namedrgb,integer(cardinal(cl_1)-cardinal(cl_namedrgb))]:= 
                                                               mseguiintf.pixel1;
  gui_initcolormap;
+end;
+
+function isvalidmapcolor(index: colorty): boolean;
+var
+ map: colormapsty;
+begin
+ result:= true;
+ application.initialize; //colormap must be valid
+ map:= colormapsty((cardinal(index) shr speccolorshift));
+ index:= colorty(cardinal(index) and not speccolormask);
+ dec(map,7);
+ if (map <= cm_rgb) or (map > high(map)) or
+       (cardinal(index) >= cardinal(mapcolorcounts[map])) then begin
+  result:= false;
+ end;
 end;
 
 procedure setcolormapvalue(index: colorty; const red,green,blue: integer);
