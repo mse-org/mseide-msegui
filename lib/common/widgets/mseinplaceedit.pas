@@ -847,7 +847,7 @@ begin
   if shiftstate = [ss_ctrl] then begin
    finished:= false;
    case key of
-    key_c: begin
+    key_c{,key_insert}: begin
      if (fsellength > 0) or fintf.hasselection then begin
       copytoclipboard;
       finished:= true;

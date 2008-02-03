@@ -1381,7 +1381,7 @@ begin
     if shiftstate = [ss_ctrl] then begin
      include(eventstate,es_processed);
      case key of
-      key_c: begin
+      key_c{,key_insert}: begin
        docopy(false);
       end;
       key_x: begin

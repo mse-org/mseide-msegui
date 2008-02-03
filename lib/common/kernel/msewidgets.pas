@@ -1535,7 +1535,8 @@ end;
 
 procedure tshowmessagewidget.dokeydown(var ainfo: keyeventinfoty);
 begin
- if (ainfo.key = key_c) and (ainfo.shiftstate = [ss_ctrl]) then begin
+ if (ainfo.shiftstate = [ss_ctrl]) and 
+      ((ainfo.key = key_c) {or (ainfo.key = key_insert)})  then begin
   copytoclipboard(info.text.text);
  end;
  inherited;

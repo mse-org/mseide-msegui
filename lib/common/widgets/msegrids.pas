@@ -8833,10 +8833,12 @@ begin
     key_insert: begin
      if og_rowinserting in foptionsgrid then begin
       if (ss_shift in info.shiftstate) then begin
-       doinsertrow(nil);
+       doappendrow(nil);
+//       doinsertrow(nil);
       end
       else begin
-       doappendrow(nil);
+       doinsertrow(nil);
+//       doappendrow(nil);
       end;
      end
      else begin
@@ -8860,7 +8862,7 @@ begin
   end;
   if not (es_processed in info.eventstate) and (info.shiftstate = [ss_ctrl]) then begin
    case info.key of
-    key_c: begin
+    key_c{,key_insert}: begin
      if copyselection then begin
       include(info.eventstate,es_processed);
      end;
