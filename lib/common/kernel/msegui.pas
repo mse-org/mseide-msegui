@@ -878,7 +878,6 @@ type
    procedure setmaxsize(const avalue: sizety);
 
    procedure setcursor(const Value: cursorshapety);
-   procedure setcolor(const Value: colorty);
    function getsize: sizety;
 
    procedure widgetregioninvalid;
@@ -950,6 +949,7 @@ type
    procedure navigrequest(var info: naviginfoty);
    function navigdistance(var info: naviginfoty): integer; virtual;
 
+   procedure setcolor(const avalue: colorty); virtual;
    function gethint: msestring; virtual;
    procedure sethint(const Value: msestring); virtual;
    function ishintstored: boolean; virtual;
@@ -5140,15 +5140,12 @@ begin
  end;
 end;
 
-procedure twidget.setcolor(const Value: colorty);
+procedure twidget.setcolor(const avalue: colorty);
 begin
- if fcolor <> value then begin
+ if fcolor <> avalue then begin
+  fcolor:= avalue;
   if not (csloading in componentstate) then begin
-   fcolor := Value;
    colorchanged;
-  end
-  else begin
-   fcolor := Value;
   end;
  end;
 end;

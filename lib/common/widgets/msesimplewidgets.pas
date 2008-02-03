@@ -117,6 +117,7 @@ type
    procedure setshortcut(const avalue: shortcutty);
    function isshortcutstored: boolean;
   protected
+   procedure setcolor(const avalue: colorty); override;
    //iactionlink
    function getactioninfopo: pactioninfoty;
    function shortcutseparator: msechar;
@@ -587,12 +588,17 @@ end;
 procedure tcustombutton.actionchanged;
 begin
  actioninfotoshapeinfo(self,factioninfo,finfo);
- color:= finfo.color;
+ inherited setcolor(finfo.color); 
  finfo.color:= cl_transparent;
  if csdesigning in componentstate then begin
   exclude(finfo.state,ss_invisible);
  end;
  checkautosize;
+end;
+
+procedure tcustombutton.setcolor(const avalue: colorty);
+begin
+ setactioncolor(iactionlink(self),avalue);
 end;
 
 function tcustombutton.getactioninfopo: pactioninfoty;
