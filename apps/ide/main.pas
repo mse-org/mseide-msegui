@@ -29,13 +29,6 @@ uses
 const
  versiontext = '1.7 unstable';
  idecaption = 'MSEide';
-type
- envvarty = (env_vargroup,env_np,env_filename);
-const
- sysenvvalues: array[envvarty] of argumentdefty =
-  ((kind: ak_pararg; name: '-macrogroup'; anames: nil; flags: [arf_integer]),
-   (kind: ak_par; name: 'np'; anames: nil; flags: []),
-   (kind: ak_arg; name: ''; anames: nil; flags: []));
 
 type
  filekindty = (fk_none,fk_source,fk_unit);
@@ -63,7 +56,6 @@ type
 
    openfile: tfiledialog;
 
-   sysenv: tsysenvmanager;
    dummyimagelist: timagelist;
    vievmenuicons: timagelist;
 
@@ -256,7 +248,7 @@ uses
 {$endif}
 
  main_mfm,sourceform,watchform,breakpointsform,stackform,
-       projectoptionsform,make,msewidgets,msepropertyeditors,
+ guitemplates,projectoptionsform,make,msewidgets,msepropertyeditors,
  skeletons,msedatamodules,mseact,
  mseformdatatools,mseshapes,msefileutils,projecttreeform,mseeditglob,
  findinfileform,formdesigner,sourceupdate,actionsmodule,programparametersform,
@@ -285,7 +277,6 @@ procedure tmainfo.mainfooncreate(const sender: tobject);
 begin
  designer.ongetmodulenamefile:= {$ifdef FPC}@{$endif}dofindmodulebyname;
  designer.ongetmoduletypefile:= {$ifdef FPC}@{$endif}dofindmodulebytype;
- sysenv.init(sysenvvalues);
  designer.objformat:= of_fp;
  componentpalettefo.updatecomponentpalette(true);
  designnotifications.Registernotification(idesignnotification(self));
@@ -2016,8 +2007,8 @@ begin
  filer.updatevalue('projectname',mstr1);
  filer.updatevalue('projecthistory',projecthistory);
  if not filer.iswriter then begin
-  if sysenv.defined[ord(env_filename)] then begin
-   ar1:= sysenv.values[ord(env_filename)];
+  if guitemplatesmo.sysenv.defined[ord(env_filename)] then begin
+   ar1:= guitemplatesmo.sysenv.values[ord(env_filename)];
    if (high(ar1) = 0) and (fileext(ar1[0]) = 'prj') then begin
     mstr1:= filepath(ar1[0]);
    end
@@ -2031,7 +2022,8 @@ begin
    end;
   end;
  end;
- if not filer.iswriter and (mstr1 <> '') and not sysenv.defined[ord(env_np)] then begin
+ if not filer.iswriter and (mstr1 <> '') and 
+           not guitemplatesmo.sysenv.defined[ord(env_np)] then begin
   openproject(mstr1);
  end;
 end;

@@ -410,7 +410,7 @@ var
 implementation
 uses
  projectoptionsform_mfm,breakpointsform,sourceform,mseact,
- objectinspector,msebits,msefileutils,msedesignintf,
+ objectinspector,msebits,msefileutils,msedesignintf,guitemplates,
  watchform,stackform,main,projecttreeform,findinfileform,
  selecteditpageform,programparametersform,sourceupdate,mseedit,
  msedesigner,panelform,watchpointsform,commandlineform,msestream,
@@ -1097,7 +1097,7 @@ begin
   updatevalue('newinheritedform',newinheritedform);
   
   if not iswriter then begin
-   if mainfo.sysenv.getintegervalue(int1,ord(env_vargroup),1,6) then begin
+   if guitemplatesmo.sysenv.getintegervalue(int1,ord(env_vargroup),1,6) then begin
     macrogroup:= int1-1;
    end;
    expandprojectmacros;

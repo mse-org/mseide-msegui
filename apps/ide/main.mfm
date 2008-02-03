@@ -664,10 +664,6 @@ object mainfo: tmainfo
     left = 16
     top = 56
   end
-  object sysenv: tsysenvmanager
-    left = 16
-    top = 80
-  end
   object vievmenuicons: timagelist
     count = 17
     left = 287
