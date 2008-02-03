@@ -104,7 +104,32 @@ type
    procedure setcolors;
    procedure restorecolors;
  end;
-  
+
+ tskinfontalias = class(tvirtualpersistent)
+  private
+   fname: string;
+   falias: string;
+   fmode: fontaliasmodety;
+   fheight: integer;
+   fwidth: integer;
+   foptions: fontoptionsty;
+  public
+   constructor create; override;
+  published
+   property name: string read fname write fname;
+   property alias: string read falias write falias;
+   property mode: fontaliasmodety read fmode write fmode default fam_fixnooverwrite;
+   property height: integer read fheight write fheight;
+   property width: integer read fwidth write fwidth;
+   property options: fontoptionsty read foptions write foptions default [];
+ end;
+
+ tskinfontaliass = class(tpersistentarrayprop)   
+  public
+   constructor create;
+   procedure setfontalias;
+ end;
+ 
 //todo: controller chain for custom components
 
  tcustomskincontroller = class(tmsecomponent)
@@ -115,8 +140,10 @@ type
    fonactivate: notifyeventty;
    fondeactivate: notifyeventty;
    fcolors: tskincolors;
+   ffontalias: tskinfontaliass;
    procedure setactive(const avalue: boolean);
    procedure setcolors(const avalue: tskincolors);
+   procedure setfontalias(const avalue: tskinfontaliass);
   protected
    procedure doactivate; virtual;
    procedure dodeactivate; virtual;
@@ -191,6 +218,7 @@ type
    property onactivate: notifyeventty read fonactivate write fonactivate;
    property ondeactivate: notifyeventty read fondeactivate write fondeactivate;
    property colors: tskincolors read fcolors write setcolors;
+   property fontalias: tskinfontaliass read ffontalias write setfontalias;
  end;
 
  tskincontroller = class(tcustomskincontroller)
@@ -477,11 +505,30 @@ begin
  end;
 end;
 
+{ tskinfontaliass }
+
+constructor tskinfontaliass.create;
+begin
+ inherited create(tskinfontalias);
+end;
+
+procedure tskinfontaliass.setfontalias;
+var
+ int1: integer;
+begin
+ for int1:= 0 to high(fitems) do begin
+  with tskinfontalias(fitems[int1]) do begin
+   registerfontalias(alias,name,mode,height,width,options);
+  end;
+ end;
+end;
+
 { tcustomskincontroller }
 
 constructor tcustomskincontroller.create(aowner: tcomponent);
 begin
  fcolors:= tskincolors.create;
+ ffontalias:= tskinfontaliass.create;
  inherited;
 end;
 
@@ -490,11 +537,13 @@ begin
  active:= false;
  inherited;
  fcolors.free;
+ ffontalias.free;
 end;
 
 procedure tcustomskincontroller.doactivate;
 begin
  fcolors.setcolors;
+ ffontalias.setfontalias;
  if canevent(tmethod(fonactivate)) then begin
   fonactivate(self);   
  end;
@@ -908,6 +957,11 @@ end;
 procedure tcustomskincontroller.setcolors(const avalue: tskincolors);
 begin
  fcolors.assign(avalue);
+end;
+
+procedure tcustomskincontroller.setfontalias(const avalue: tskinfontaliass);
+begin
+ ffontalias.assign(avalue);
 end;
 
 procedure tcustomskincontroller.handlegroupbox(const sender: tgroupbox;
@@ -1382,6 +1436,14 @@ procedure tskincontroller.handlegrid(const sender: tcustomgrid;
 begin
  handlewidget(sender,ainfo);
  setgridskin(sender,fgrid);
+end;
+
+{ tskinfontalias }
+
+constructor tskinfontalias.create;
+begin
+ fmode:= fam_fixnooverwrite;
+ inherited;
 end;
 
 end.
