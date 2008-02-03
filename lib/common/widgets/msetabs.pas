@@ -1029,7 +1029,7 @@ end;
 
 procedure ttabs.createfaceactive;
 begin
- if faceactive = nil then begin
+ if ffaceactive = nil then begin
   ffaceactive:= tface.create(iface(tcustomtabbar(fowner)));
  end;
 end;

@@ -11,8 +11,8 @@ unit mseactions;
 {$ifdef FPC}{$mode objfpc}{$h+}{$INTERFACES CORBA}{$endif}
 interface
 uses
- mseact,mseglob,mseguiglob,msegui,mseevent,mseclasses,msebitmap,msekeyboard,
- msetypes,msestrings;
+ classes,mseact,mseglob,mseguiglob,msegui,mseevent,mseclasses,msebitmap,msekeyboard,
+ msetypes,msestrings,msearrayprops,msestatfile,msestat;
 type
  taction = class(tcustomaction)
   private
@@ -50,6 +50,44 @@ type
    property onasyncevent;
  end;
 
+ tshortcutaction = class(townedpersistent)
+  private
+   faction: taction;
+   procedure setaction(const avalue: taction);
+  published
+   property action: taction read faction write setaction;
+ end;
+
+ tshortcutcontroller = class; 
+ tshortcutactions = class(townedpersistentarrayprop)
+  public
+   constructor create(const aowner: tshortcutcontroller);
+ end;
+  
+ tshortcutcontroller = class(tmsecomponent,istatfile)
+  private
+   factions: tshortcutactions;
+   fstatfile: tstatfile;
+   fstatvarname: msestring;
+   procedure setactions(const avalue: tshortcutactions);
+   procedure setstatfile(const avalue: tstatfile);
+   function getactionrecord(const index: integer): msestring;
+  protected
+   //istatfile
+   procedure dostatread(const reader: tstatreader); virtual;
+   procedure dostatwrite(const writer: tstatwriter); virtual;
+   procedure statreading;
+   procedure statread;
+   function getstatvarname: msestring;
+  public
+   constructor create(aowner: tcomponent); override;
+   destructor destroy; override;
+  published
+   property actions: tshortcutactions read factions write setactions;
+   property statfile: tstatfile read fstatfile write setstatfile;
+   property statvarname: msestring read getstatvarname write fstatvarname;
+ end;
+
 procedure setactionshortcut(const sender: iactionlink; const value: shortcutty);
 function isactionshortcutstored(const info: actioninfoty): boolean;
 procedure setactionimagelist(const sender: iactionlink; const value: timagelist);
@@ -64,7 +102,7 @@ procedure calccaptiontext(var info: actioninfoty; const aseparator: msechar);
 
 implementation
 uses
- sysutils,mserichstring;
+ sysutils,mserichstring,msestream;
  
 const
  letterkeycount = ord('z') - ord('a') + 1;
@@ -359,6 +397,79 @@ end;
 procedure taction.doafterunlink;
 begin
  imagelist:= nil;
+end;
+
+{ tshortcutactions }
+
+constructor tshortcutactions.create(const aowner: tshortcutcontroller);
+begin
+ inherited create(aowner,tshortcutaction);
+end;
+
+{ tshortcutcontroller }
+
+constructor tshortcutcontroller.create(aowner: tcomponent);
+begin
+ factions:= tshortcutactions.create(self);
+ inherited;
+end;
+
+destructor tshortcutcontroller.destroy;
+begin
+ inherited;
+ factions.free;
+end;
+
+procedure tshortcutcontroller.setactions(const avalue: tshortcutactions);
+begin
+ factions.assign(avalue);
+end;
+
+procedure tshortcutcontroller.setstatfile(const avalue: tstatfile);
+begin
+ setstatfilevar(istatfile(self),avalue,fstatfile);
+end;
+
+procedure tshortcutcontroller.dostatread(const reader: tstatreader);
+begin
+end;
+
+procedure tshortcutcontroller.dostatwrite(const writer: tstatwriter);
+begin
+ writer.writerecordarray('shortcuts',factions.count,
+                               {$ifdef FPC}@{$endif}getactionrecord);
+end;
+
+procedure tshortcutcontroller.statreading;
+begin
+end;
+
+procedure tshortcutcontroller.statread;
+begin
+end;
+
+function tshortcutcontroller.getstatvarname: msestring;
+begin
+ result:= fstatvarname;
+end;
+
+function tshortcutcontroller.getactionrecord(const index: integer): msestring;
+begin
+ with tshortcutaction(factions[index]) do begin
+  if action <> nil then begin
+   result:= encoderecord([ownernamepath(action),integer(action.shortcut)]);
+  end
+  else begin
+   result:= '';
+  end;
+ end;
+end;
+
+{ tshortcutaction }
+
+procedure tshortcutaction.setaction(const avalue: taction);
+begin
+ tshortcutcontroller(fowner).setlinkedvar(avalue,faction);
 end;
 
 end.

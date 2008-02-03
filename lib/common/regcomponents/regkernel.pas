@@ -21,7 +21,7 @@ uses
  msedesignintf,msepropertyeditors,msemenus,msegui,msepipestream,sysutils,
  msegraphutils,regkernel_bmp,msegraphics,msestrings,msepostscriptprinter,
  mseprinter,msetypes,msedatalist,msedatamodules,mseclasses,formdesigner,
- mseapplication,mseglob,mseguiglob,mseskin;
+ mseapplication,mseglob,mseguiglob,mseskin,msedesigner;
 
 type
  twidget1 = class(twidget);
@@ -31,7 +31,17 @@ type
   protected
    function getdefaultstate: propertystatesty; override;
  end;
-
+ 
+ tshortcutactionpropertyeditor = class(tclasselementeditor)
+  protected
+   function getvalue: msestring; override;
+ end;
+ 
+ tshortcutactionspropertyeditor = class(tpersistentarraypropertyeditor)
+  protected
+   function geteditorclass: propertyeditorclassty; override;
+ end;
+  
  tshapestatespropertyeditor = class(tsetpropertyeditor)
   protected
    function getdefaultstate: propertystatesty; override;
@@ -77,12 +87,14 @@ begin
  registercomponenttabhints(['NoGui'],['Components without GUI Dependence']);
  registercomponents('Gui',[tmainmenu,tpopupmenu,
                     tfacecomp,tframecomp,tskincontroller,
-                    tbitmapcomp,timagelist,taction]);
+                    tbitmapcomp,timagelist,taction,tshortcutcontroller]);
  registercomponenttabhints(['Gui'],['Non visual Components with GUI Dependence']);
  registercomponents('Dialog',[tpagesizeselector,tpageorientationselector]);
 
 // registerpropertyeditor(typeinfo(twidget),nil,'',tcomponentpropertyeditor);
  registerpropertyeditor(typeinfo(tcustomaction),nil,'',tactionpropertyeditor);
+ registerpropertyeditor(typeinfo(tshortcutactions),nil,'',
+                           tshortcutactionspropertyeditor);
  registerpropertyeditor(typeinfo(string),tfont,'name',tfontnamepropertyeditor);
  registerpropertyeditor(typeinfo(actionstatesty),nil,'',tshapestatespropertyeditor);
  registerpropertyeditor(typeinfo(shortcutty),nil,'',tshortcutpropertyeditor);
@@ -230,6 +242,32 @@ end;
 function tactivatorclientspropertyeditor.allequal: boolean;
 begin
  result:= false;
+end;
+
+{ tshortcutactionpropertyeditor }
+
+function tshortcutactionpropertyeditor.getvalue: msestring;
+var
+ item1: tshortcutaction;
+begin
+ item1:= tshortcutaction(getordvalue);
+ if item1.action = nil then begin
+  result:= '<>';
+ end
+ else begin
+  result:= '<';
+  if item1.action.owner <> module then begin
+   result:= result+module.name+'.';
+  end;
+  result:= result+designer.getcomponentdispname(item1.action)+'>';
+ end;
+end;
+
+{ tshortcutactionspropertyeditor }
+
+function tshortcutactionspropertyeditor.geteditorclass: propertyeditorclassty;
+begin
+ result:= tshortcutactionpropertyeditor;
 end;
 
 initialization
