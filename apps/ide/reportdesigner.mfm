@@ -3,7 +3,6 @@ inherited reportdesignerfo: treportdesignerfo
   bounds_y = 127
   bounds_cx = 205
   bounds_cy = 459
-  color = -2147483647
   container.bounds_cx = 205
   container.bounds_cy = 459
   container.color = -1879048185
@@ -11,8 +10,6 @@ inherited reportdesignerfo: treportdesignerfo
   container.onchildscaled = repchildscaled
   container.oncalcminscrollsize = nil
   container.onchildmouseevent = reportchildmouseevent
-  icon.transparentcolor = -2147483648
-  icon.transparency = -2147483648
   icon.image = {
     0000000002000000180000001800000078010000000000000000000000000000
     0000000000000000000000000000000000000000804CF019F8FCF816804CF002
@@ -38,7 +35,7 @@ inherited reportdesignerfo: treportdesignerfo
   moduleclassname = 'Tformdesignerfo'
   object dialh: tdial[0]
     bounds_x = 7
-    bounds_y = 18
+    bounds_y = 19
     bounds_cx = 194
     bounds_cy = 7
     color = -1879048185
@@ -78,7 +75,7 @@ inherited reportdesignerfo: treportdesignerfo
     bounds_x = 120
     bounds_y = 0
     bounds_cx = 83
-    bounds_cy = 18
+    bounds_cy = 19
     color = -1879048187
     frame.dummy = 0
     anchors = [an_left, an_top, an_right]
@@ -86,13 +83,14 @@ inherited reportdesignerfo: treportdesignerfo
     ontabmoving = tabmo
     onclientmouseevent = tabmouse
     options = [tabo_dragsource, tabo_dragdest]
-    reffontheight = 14
+    reffontheight = 15
   end
   object reportcontainer: tscrollbox[2]
     bounds_x = 7
-    bounds_y = 25
+    bounds_y = 26
     bounds_cx = 198
-    bounds_cy = 434
+    bounds_cy = 433
+    color = -1879048187
     frame.colorclient = -1610612730
     frame.localprops = [frl_colorclient]
     frame.dummy = 0
@@ -103,7 +101,7 @@ inherited reportdesignerfo: treportdesignerfo
   end
   object tspacer1: tspacer[3]
     bounds_x = 144
-    bounds_y = 18
+    bounds_y = 19
     bounds_cx = 50
     bounds_cy = 5
     taborder = 2
@@ -113,9 +111,9 @@ inherited reportdesignerfo: treportdesignerfo
   end
   object dialv: tdial[4]
     bounds_x = 0
-    bounds_y = 25
+    bounds_y = 26
     bounds_cx = 7
-    bounds_cy = 431
+    bounds_cy = 430
     color = -1879048185
     anchors = [an_left, an_top, an_bottom]
     taborder = 3
@@ -149,7 +147,7 @@ inherited reportdesignerfo: treportdesignerfo
   end
   object tspacer2: tspacer[5]
     bounds_x = 144
-    bounds_y = 25
+    bounds_y = 26
     bounds_cx = 50
     bounds_cy = 5
     taborder = 5
@@ -171,28 +169,28 @@ inherited reportdesignerfo: treportdesignerfo
     bounds_x = 52
     bounds_y = 0
     bounds_cx = 68
-    bounds_cy = 18
+    bounds_cy = 19
     color = -1879048187
     frame.dummy = 0
     taborder = 7
     textflags = [tf_ycentered]
     format = '0.0mm'
-    reffontheight = 14
+    reffontheight = 15
   end
   object ydisp: trealdisp[8]
     bounds_x = 0
     bounds_y = 0
     bounds_cx = 52
-    bounds_cy = 18
+    bounds_cy = 19
     color = -1879048187
     frame.dummy = 0
     taborder = 8
     format = '0.0'
-    reffontheight = 14
+    reffontheight = 15
   end
   object tspacer4: tspacer[9]
     bounds_x = 16
-    bounds_y = 25
+    bounds_y = 26
     bounds_cx = 50
     bounds_cy = 5
     taborder = 9
@@ -201,6 +199,7 @@ inherited reportdesignerfo: treportdesignerfo
     dist_bottom = -5
   end
   inherited popupme: tpopupmenu
+    onupdate = popupupda
     menu.submenu.count = 24
     menu.submenu.items = <    
       item
@@ -261,6 +260,5 @@ inherited reportdesignerfo: treportdesignerfo
         options = [mao_shortcutcaption, mao_asyncexecute]
         onexecute = deletepage
       end>
-    onupdate = popupupda
   end
 end
