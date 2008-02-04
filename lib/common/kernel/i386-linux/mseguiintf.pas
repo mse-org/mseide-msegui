@@ -699,7 +699,8 @@ var
  {$endif}
  
 type
- netatomty = (net_supported,net_workarea,
+ netatomty = 
+      (net_supported,net_workarea,
        net_wm_state,
        net_wm_state_maximized_vert,net_wm_state_maximized_horz,
        net_wm_state_fullscreen,
@@ -707,7 +708,8 @@ type
        net_none);
  netwmstateoperationty = (nso_remove,nso_add,nso_toggle);
 const
- netatomnames: array[netatomty] of string = ('_NET_SUPPORTED','_NET_WORKAREA',
+ netatomnames: array[netatomty] of string = 
+      ('_NET_SUPPORTED','_NET_WORKAREA',
        '_NET_WM_STATE',
        '_NET_WM_STATE_MAXIMIZED_VERT','_NET_WM_STATE_MAXIMIZED_HORZ',
        '_NET_WM_STATE_FULLSCREEN', //not needed
@@ -717,6 +719,7 @@ const
 var
  netatoms: array[netatomty] of atom;
  netsupported: boolean;
+ canfullscreen: boolean;
  netsupportedatom: atom;
 
  sigtimerbefore: sighandler_t;
@@ -1169,33 +1172,38 @@ begin
  end;
 end;
 
-function gui_setwindowstate(id: winidty; size: windowsizety; visible: boolean): guierrorty;
+function gui_setwindowstate(id: winidty; size: windowsizety;
+                                        visible: boolean): guierrorty;
+ procedure fullscreen;
+ begin
+  gui_reposwindow(id,gui_getworkarea(id));
+ end;
+
 begin
  result:= gue_ok;
  if visible then begin
   xmapwindow(appdisp,id);
-//  waitfordecoration(id,false);
  end;
  if size = wsi_fullscreen then begin
-  changenetwmstate(id,nso_add,
-                  net_wm_state_fullscreen);
+  if not canfullscreen or not changenetwmstate(id,nso_add,net_wm_state_fullscreen) then begin
+   fullscreen; //no windowmanager
+  end;
  end
  else begin
   changenetwmstate(id,nso_remove,
                   net_wm_state_fullscreen);
   case size of
    wsi_minimized: begin
-//    if visible then begin
-//     xmapwindow(appdisp,id);
-//    end;
     if xiconifywindow(appdisp,id,0) = 0 then begin
      result:= gue_show;
     end;
     exit;
    end;
    wsi_maximized: begin
-    changenetwmstate(id,nso_add,
-                  net_wm_state_maximized_horz,net_wm_state_maximized_vert);
+    if not changenetwmstate(id,nso_add,
+           net_wm_state_maximized_horz,net_wm_state_maximized_vert) then begin
+     fullscreen;
+    end;
    end
    else begin
     changenetwmstate(id,nso_remove,
@@ -5563,6 +5571,8 @@ var
  int1,int2: integer;
  ar1: stringarty;
  po1: pchar;
+ atomar: atomarty;
+ rect1: rectty;
 {$ifdef hassm}
  smcb: smccallbacks;
  clientid: pchar;
@@ -5779,13 +5789,30 @@ begin
    break;
   end;
  end;
+ canfullscreen:= netsupported;
  if netsupported and (netatoms[net_wm_state_fullscreen] = 0) then begin
   netatoms[net_wm_state_fullscreen]:= xinternatom(appdisp,
           @netatomnames[net_wm_state_fullscreen],
            {$ifdef FPC}false{$else}0{$endif});
            //fake
+  canfullscreen:= false;
+ end; 
+ if canfullscreen then begin
+  canfullscreen:= false;
+  if readatomproperty(rootid,netsupportedatom,atomar) then begin
+   for int1:= 0 to high(atomar) do begin
+    if atomar[int1] = netatoms[net_wm_state_fullscreen] then begin
+     canfullscreen:= true;
+     break;
+    end;
+   end;
+  end;
  end;
- 
+ if netsupported then begin
+  if not readlongproperty(rootid,netatoms[net_workarea],4,rect1) then begin
+   netsupported:= false;
+  end;
+ end;
  result:= gue_ok;
  {$ifdef mse_flushgdi}
  xsynchronize(appdisp,{$ifdef FPC}true{$else}1{$endif});
