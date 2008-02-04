@@ -437,6 +437,7 @@ begin
  ftransient:= true;
  ftransientfor:= atransientfor;
  fmouseinfopo:= amouseinfopo;
+ updateskin;
 end;
 
 destructor tcustommenu.destroy;
