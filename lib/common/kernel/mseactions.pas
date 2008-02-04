@@ -68,7 +68,14 @@ type
    property action: taction read faction write setaction;
  end;
 
- tshortcutcontroller = class; 
+ type
+  shortcutrecarty = array of 
+                     record 
+                      name: string;
+                      value: integer;
+                     end;
+
+ tshortcutcontroller = class;
  tshortcutactions = class(townedpersistentarrayprop)
   private
   protected
@@ -80,12 +87,6 @@ type
                                                    default;
  end;
 
- type
-  shortcutrecarty = array of 
-                     record 
-                      name: string;
-                      value: integer;
-                     end;
  tsysshortcuts = class(tintegerarrayprop)
   private
    fowner: tcomponent;
@@ -657,7 +658,7 @@ end;
 procedure tshortcutaction.setaction(const avalue: taction);
 begin
  with tshortcutcontroller(fowner) do begin
-  setlinkedvar(avalue,faction);
+  setlinkedvar(avalue,tmsecomponent(faction));
   if avalue <> nil then begin
    updateaction(avalue);
   end;
